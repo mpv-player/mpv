@@ -3,12 +3,16 @@ Welcome to MPlayer, the Unix movie player. MPlayer can play most standard video
 formats out of the box and almost all others with the help of external codecs.
 MPlayer currently works best from the command line, but visual feedback for
 many functions is available from its onscreen status display (OSD), which is
-also used for displaying subtitles. A GUI with skin support is in the alpha
-development stage, but not completely finished yet.
+also used for displaying subtitles. MPlayer also has a GUI with skin support and
+several unofficial alternative graphical frontends are available.
+
+MEncoder is a command line video encoder for advanced users that can be built
+from the MPlayer source tree. An unofficial graphical frontend exists but is
+not included.
 
 This document is for getting you started in a few minutes. It cannot answer all
 of your questions. If you have problems, please read the documentation in
-DOCS/documentation.html, which should help you solve most of your problems.
+DOCS/en/documentation.html, which should help you solve most of your problems.
 Also read the man page to learn how to use MPlayer.
 
 
@@ -19,7 +23,7 @@ Requirements:
 
 
 Before you start...
-Unless you know what are you doing, consult DOCS/video.html to see which driver
+Unless you know what are you doing, consult DOCS/en/video.html to see which driver
 to use with your video card to get the best quality and performance. Most cards
 require special drivers not included with XFree86 to drive their 2-D video
 acceleration features like YUV and scaling.
@@ -30,7 +34,7 @@ A quick and incomplete list of recommendations:
 - 3dfx Voodoo3/Banshee: Get XFree86 4.2.0+ for Xv or use the tdfxfb driver.
 - nVidia cards: Get the X11 driver from www.nvidia.com for Xv support.
 - NeoMagic cards: Get an Xv capable driver from our homepage as described in
-  DOCS/video.html.
+  DOCS/en/video.html.
 
 Without accelerated video even an 800MHz P3 may be too slow to play DVDs.
 
@@ -40,18 +44,20 @@ STEP0: Getting MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Official releases, prereleases and CVS snapshots, as well as fonts for the
-OSD, Win32 codecs and a number of different skins for the GUI are available
+OSD, codec packages and a number of different skins for the GUI are available
 from the download section of our homepage at
 
   http://www.mplayerhq.hu/homepage/dload.html
 
 A set of fonts is necessary for the OSD and subtitles, the GUI needs at least
-one skin and Win32 codecs add support for some more video and audio formats.
+one skin and codec packages add support for some more video and audio formats.
 MPlayer does not come with any of these by default, you have to download and
-install them separately.
+install them separately. A wide range of codec packages can be downloaded at
 
-MPlayer is also available via anonymous CVS. Issue the following commands to
-get the latest sources:
+  http://www.mplayerhq.hu/MPlayer/releases/codecs/
+
+You can also get MPlayer via anonymous CVS. Issue the following commands to get
+the latest sources:
 
   cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
   cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co main
@@ -69,9 +75,9 @@ STEP1: Installing FFmpeg libavcodec
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are using an official (pre)release, skip this step, since official
-releases include libavcodec. CVS sources and CVS snapshots do not include
-libavcodec. To verify if you do have libavcodec or not, check if the libavcodec
-subdirectory in the MPlayer source tree is empty or not.
+releases include libavcodec. CVS sources and thus CVS snapshots do not include
+libavcodec. To verify if you do have libavcodec or not, check if a subdirectory
+named 'libavcodec' exists in the MPlayer source tree.
 
 The FFmpeg project provides libavcodec, a very portable codec collection (among
 the supported formats is MPEG4/DivX) with excellent quality and speed, that is
@@ -84,12 +90,9 @@ outside the MPlayer source directory:
 cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
 cvs -z3 -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg/libavcodec
 
-When asked for a password, you can just hit enter.
-
-Now, replace the empty libavcodec directory in the MPlayer source tree with the
-FFmpeg libavcodec source by removing the libavcodec subdirectory in the MPlayer
-source tree and then copying (symbolic linking does NOT suffice) the freshly
-downloaded FFmpeg libavcodec directory back into the MPlayer source tree.
+When asked for a password, you can just hit enter. A directory named 'ffmpeg'
+with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
+linking does NOT suffice) this subdirectory into the MPlayer source tree.
 
 
 ______________________________
@@ -97,13 +100,13 @@ STEP2: Installing Win32 Codecs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MPlayer and libavcodec have builtin support for the most common audio and video
-formats, but some others are playable only with the Win32 DLLs or the XAnim
-binary plugins. Examples include WMV8 video, DivX with WMA audio (not normal
-DivX files) and Indeo. This step is not mandatory, but recommended for getting
-MPlayer to play more different file types. Note that Win32 codecs only work on
-Intel x86 compatible PCs.
+formats, but some formats require external codecs. Examples include Real, Indeo
+and Sorenson3 (newer Quicktime) formats. Support for Windows Media formats
+except WMV9 exists but still has some bugs, your mileage may vary. This step is
+not mandatory, but recommended for getting MPlayer to play a broader range of
+formats. Please note that most codecs only work on Intel x86 compatible PCs.
 
-Unpack the codecs archive and put the contents in a directory where MPlayer
+Unpack the codecs archives and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/lib/win32/ but you can change
 that to something else by using the '--with-win32libdir=DIR' option when you
 run './configure'.
@@ -113,7 +116,7 @@ __________________________
 STEP3: Configuring MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MPlayer has a lot of options that get selected in this phase. Run
+MPlayer can be adapted to all kinds of needs and hardware environments. Run
 
   ./configure
 
@@ -177,8 +180,8 @@ STEP6: Installing a GUI skin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unpack the archive and put the contents in /usr/local/share/mplayer/Skin/ or
-~/.mplayer/Skin/. MPlayer will use the skin in the default/ subdirectory of
-/usr/local/share/mplayer/Skin/ or ~/.mplayer/Skin/ unless told otherwise via
+~/.mplayer/Skin/. MPlayer will use the skin in the subdirectory named default
+of /usr/local/share/mplayer/Skin/ or ~/.mplayer/Skin/ unless told otherwise via
 the '-skin' switch. You should therefore rename your skin subdirectory or make
 a suitable symbolic link.
 
@@ -216,5 +219,5 @@ files smoothly on a Celeron 366. Slower systems may need the '-framedrop'
 option.
 
 Questions you may have are probably answered in the rest of the documentation.
-The places to start reading are the man page, DOCS/documentation.html and
-DOCS/faq.html. If you find a bug, read DOCS/bugreports.html first!
+The places to start reading are the man page, DOCS/en/documentation.html and
+DOCS/en/faq.html. If you find a bug, read DOCS/en/bugreports.html first!
