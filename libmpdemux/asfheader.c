@@ -129,6 +129,8 @@ extern void print_video_header(BITMAPINFOHEADER *h);
 
 int read_asf_header(demuxer_t *demuxer){
   static unsigned char buffer[1024];
+  int audio_streams=0;
+  int video_streams=0;
   
 #if 1
   //printf("ASF file! (subchunks: %d)\n",asfh.cno);
@@ -162,6 +164,7 @@ while(!stream_eof(demuxer->stream)){
       switch(ASF_LOAD_GUID_PREFIX(streamh.type)){
       case ASF_GUID_PREFIX_audio_stream: {
         sh_audio_t* sh_audio=new_sh_audio(demuxer,streamh.stream_no & 0x7F);
+	++audio_streams;
         sh_audio->wf=calloc((streamh.type_size<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):streamh.type_size,1);
         memcpy(sh_audio->wf,buffer,streamh.type_size);
 	le2me_WAVEFORMATEX(sh_audio->wf);
@@ -182,6 +185,7 @@ while(!stream_eof(demuxer->stream)){
       case ASF_GUID_PREFIX_video_stream: {
         sh_video_t* sh_video=new_sh_video(demuxer,streamh.stream_no & 0x7F);
         int len=streamh.type_size-(4+4+1+2);
+	++video_streams;
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
         memcpy(sh_video->bih,&buffer[4+4+1+2],len);
@@ -306,6 +310,16 @@ while(!stream_eof(demuxer->stream)){
 
   if(!stream_seek(demuxer->stream,endpos)) break;
 } // while EOF
+
+mp_msg(MSGT_HEADER,MSGL_V,"ASF: %d audio and %d video streams found\n",audio_streams,video_streams);
+if(!audio_streams) demuxer->audio->id=-2;  // nosound
+if(!video_streams){
+    if(!audio_streams){
+	mp_msg(MSGT_HEADER,MSGL_ERR,"ASF: no audio or video headers found - broken file?\n");
+	return 0; 
+    }
+    demuxer->video->id=-2; // audio-only
+}
 
 #if 0
 if(verbose){
