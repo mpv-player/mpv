@@ -106,7 +106,7 @@ codecs_t *vfw_codec = NULL;
 **************************************************************************/
 vo_vaa_t vo_vaa;
 int vo_doublebuffering;
-int vaa_use_dr;
+int vo_directrendering;
 
 //--------------------------
 
@@ -475,7 +475,8 @@ unsigned int timer_start;
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
-  mp_msg_init(MSGL_STATUS);
+  mp_msg_init();
+  mp_msg_set_level(MSGL_STATUS);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
 // check codec.conf
@@ -535,7 +536,7 @@ divx4_param.rc_reaction_ratio  = 20;
 	mencoder_exit(1,NULL);
   }
 
-  mp_msg_init(verbose+MSGL_STATUS);
+  mp_msg_set_level(verbose+MSGL_STATUS);
 
   stream=open_stream(filename,vcd_track,&file_format);
 
