@@ -53,6 +53,9 @@ extern "C" {
 using namespace LIBMATROSKA_NAMESPACE;
 using namespace std;
 
+// for e.g. "-slang ger"
+extern char *dvdsub_lang;
+
 // default values for Matroska elements
 #define MKVD_TIMECODESCALE 1000000 // 1000000 = 1ms
 
@@ -127,8 +130,9 @@ typedef struct mkv_track {
   
   char *codec_id;
   int ms_compat;
+  char *language;
 
-  char type; // 'v' = video, 'a' = audio, 't' = text subs
+  char type; // 'v' = video, 'a' = audio, 's' = subs
   
   char v_fourcc[5];
   uint32_t v_width, v_height;
@@ -176,6 +180,7 @@ typedef struct mkv_demuxer {
   int num_cluster_pos;
 
   int skip_to_keyframe;
+  int64_t skip_to_timecode;
 } mkv_demuxer_t;
 
 static uint16_t get_uint16(const void *buf) {
@@ -282,6 +287,7 @@ static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
     t->default_track = 1;
     t->a_sfreq = 8000.0;
     t->a_channels = 1;
+    t->language = strdup("eng");
   }
   
   return t;
@@ -294,6 +300,20 @@ static mkv_track_t *find_track_by_num(mkv_demuxer_t *d, uint32_t n,
   for (i = 0; i < d->num_tracks; i++)
     if ((d->tracks[i] != NULL) && (d->tracks[i]->tnum == n) &&
         (d->tracks[i] != c))
+      return d->tracks[i];
+  
+  return NULL;
+}
+
+static mkv_track_t *find_track_by_language(mkv_demuxer_t *d, char *language,
+                                           mkv_track_t *c, char type = 's') {
+  int i;
+  
+  for (i = 0; i < d->num_tracks; i++)
+    if ((d->tracks[i] != NULL) && (d->tracks[i] != c) &&
+        (d->tracks[i]->language != NULL) &&
+        !strcmp(d->tracks[i]->language, language) &&
+        (d->tracks[i]->type == type))
       return d->tracks[i];
   
   return NULL;
@@ -533,6 +553,8 @@ static void free_mkv_demuxer(mkv_demuxer_t *d) {
     if (d->tracks[i] != NULL) {
       if (d->tracks[i]->private_data != NULL)
         free(d->tracks[i]->private_data);
+      if (d->tracks[i]->language != NULL)
+        free(d->tracks[i]->language);
       free(d->tracks[i]);
     }
 
@@ -1158,6 +1180,17 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default flag: %u\n",
                        track->default_track);
 
+              } else if (EbmlId(*l3) ==
+                         KaxTrackLanguage::ClassInfos.GlobalId) {
+                KaxTrackLanguage &language =
+                  *static_cast<KaxTrackLanguage *>(l3);
+                language.ReadData(es->I_O());
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Language: %s\n",
+                        string(language).c_str());
+                if (track->language != NULL)
+                  free(track->language);
+                track->language = strdup(string(language).c_str());
+
               } else if ((!(EbmlId(*l3) ==
                             KaxTrackFlagLacing::ClassInfos.GlobalId)) &&
                          (!(EbmlId(*l3) ==
@@ -1487,27 +1520,28 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
   // DO NOT automatically select a subtitle track and behave like DVD
   // playback: only show subtitles if the user explicitely wants them.
-  if (demuxer->sub->id >= 0) {
+  if (dvdsub_lang != NULL)
+    track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
+  else if (demuxer->sub->id >= 0)
     track = find_track_by_num(mkv_d, demuxer->sub->id, NULL);
-    if (track) {
-      if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
-          strcmp(track->codec_id, MKV_S_TEXTUTF8))
-        mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
-               "supported. Track will not be displayed.\n", track->codec_id);
-      else {
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will display subtitle track %u\n",
-               track->tnum);
-        mkv_d->subs_track = track;
-        if (!mkv_d->subs.text[0]) {
-          for (i = 0; i < SUB_MAX_TEXT; i++)
-            mkv_d->subs.text[i] = (char *)malloc(256);
+  if (track) {
+    if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
+        strcmp(track->codec_id, MKV_S_TEXTUTF8))
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
+             "supported. Track will not be displayed.\n", track->codec_id);
+    else {
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will display subtitle track %u\n",
+             track->tnum);
+      mkv_d->subs_track = track;
+      if (!mkv_d->subs.text[0]) {
+        for (i = 0; i < SUB_MAX_TEXT; i++)
+          mkv_d->subs.text[i] = (char *)malloc(256);
 
-          if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
-            sub_utf8 = 1;       // Force UTF-8 conversion.
-        } else
-          mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] File does not contain a "
-                 "subtitle track with the id %u.\n", demuxer->sub->id);
-      }
+        if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
+          sub_utf8 = 1;       // Force UTF-8 conversion.
+      } else
+        mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] File does not contain a "
+               "subtitle track with the id %u.\n", demuxer->sub->id);
     }
   }
 
@@ -1530,7 +1564,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   mkv_demuxer_t *mkv_d;
   int upper_lvl_el, exit_loop, found_data, i, delete_element, elements_found;
   // Elements for different levels
-  EbmlElement *l0 = NULL, *l1 = NULL, *l2 = NULL, *l3 = NULL, *l4 = NULL;
+  EbmlElement *l0 = NULL, *l1 = NULL, *l2 = NULL, *l3 = NULL;
   EbmlStream *es;
   KaxBlock *block;
   int64_t block_duration, block_ref1, block_ref2;
@@ -1572,7 +1606,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
           if (upper_lvl_el != 0)
             break;
 
-          // Handle at at least one data packets in one call to
+          // Handle at least one data packets in one call to
           // demux_mkv_fill_buffer - but abort if we have found that.
           if (found_data >= 1) {
             mkv_d->saved_l2 = l2;
@@ -1632,20 +1666,12 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
               }
 
-              if (upper_lvl_el > 0) {		// we're coming from l4
-                upper_lvl_el--;
+              l3->SkipData(static_cast<EbmlStream &>(*es),
+                           l3->Generic().Context);
+              if (delete_element)
                 delete l3;
-                l3 = l4;
-                if (upper_lvl_el > 0)
-                  break;
-              } else {
-                l3->SkipData(static_cast<EbmlStream &>(*es),
-                             l3->Generic().Context);
-                if (delete_element)
-                  delete l3;
-                l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
-                                         0xFFFFFFFFL, true, 1);
-              }
+              l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
+                                       0xFFFFFFFFL, true, 1);
             } // while (l3 != NULL)
 
             if (block != NULL) {
@@ -1671,7 +1697,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                   (((elements_found & 4) == 0) && // It's a key frame.
                    (ds != NULL) &&                // Corresponding track found
                    (ds == d->video))) {           // track is our video track
-                if (ds != NULL) {
+                if ((ds != NULL) && ((block->GlobalTimecode() / 1000000) >=
+                                     (uint64_t)mkv_d->skip_to_timecode)) {
                   for (i = 0; i < (int)block->NumberFrames(); i++) {
                     DataBuffer &data = block->GetBuffer(i);
                     dp = new_demux_packet(data.Size());
@@ -1680,8 +1707,9 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                     dp->flags = 0;
                     ds_add_packet(ds, dp);
                     found_data++;
-                    mkv_d->skip_to_keyframe = 0;
                   }
+                  mkv_d->skip_to_keyframe = 0;
+                  mkv_d->skip_to_timecode = 0;
                 } else if ((mkv_d->subs_track != NULL) &&
                            (mkv_d->subs_track->tnum == block->TrackNum()))
                   handle_subtitles(d, block, block_duration);
@@ -1732,7 +1760,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
         delete l1;
         l1 = es->FindNextElement(l0->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
-        if (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId)
+        if ((l1 != NULL) && (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId))
           add_cluster_position(mkv_d, l1->GetElementPosition());
       }
     } // while (l1 != NULL)
@@ -1850,7 +1878,8 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
       target_filepos = (int64_t)(target_timecode * mkv_d->last_filepos /
         (mkv_d->last_pts * 1000.0));
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] No index entry found. Calculated "
-             "filepos %lld.\n", target_filepos);
+             "filepos %lld. Old timecode %lld.\n", target_filepos,
+             (int64_t)(mkv_d->last_pts * 1000.0));
       // Let's find the nearest cluster so that libebml does not have to
       // do so much work.
       cluster_pos = 0;
@@ -1867,33 +1896,34 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
           min_diff = abs(diff);
         }
       }
-      if (min_diff != 0x0FFFFFFFL)
+      if (min_diff != 0x0FFFFFFFL) {
         target_filepos = cluster_pos;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] New target_filepos because of "
+               "cluster: %lld.\n", target_filepos);
+      }
       if (target_filepos >= demuxer->movi_end)
         return;
-      mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] New target_filepos because of cluster:"
-             " %lld.\n", target_filepos);
       mkv_d->in->setFilePointer(target_filepos);
       upper_lvl_el = 0;
       mkv_d->saved_l1 =
         mkv_d->es->FindNextElement(mkv_d->segment->Generic().Context,
-                                   upper_lvl_el, 0xFFFFFFFFL, false, 1);
+                                   upper_lvl_el, 0xFFFFFFFFL, true, 1);
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek result: target_timecode %lld, "
              "did not find an entry. Calculated target_filspos: %lld\n",
              target_timecode, target_filepos);
-      if ((mkv_d->saved_l1 != NULL) &&
-          (EbmlId(*mkv_d->saved_l1) == KaxSegment::ClassInfos.GlobalId))
-        mkv_d->saved_l1 =
-          mkv_d->es->FindNextElement(mkv_d->saved_l1->Generic().Context,
-                                     upper_lvl_el, 0xFFFFFFFFL, true, 1);
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek found %p (%s).\n",
              mkv_d->saved_l1, mkv_d->saved_l1 == NULL ? "null" :
              typeid(*mkv_d->saved_l1).name());
     }
 
-    mkv_d->skip_to_keyframe = 1;
+    if (mkv_d->video != NULL)
+      mkv_d->skip_to_keyframe = 1;
+    if (rel_seek_secs > 0.0)
+      mkv_d->skip_to_timecode = target_timecode;
 
     demux_mkv_fill_buffer(demuxer);
+    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] New timecode: %lld\n",
+           (int64_t)(mkv_d->last_pts * 1000.0));
 
     mkv_d->subs.lines = 0;
     vo_sub = &mkv_d->subs;
