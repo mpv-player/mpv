@@ -43,6 +43,8 @@ typedef struct {
   unsigned int control_start;	/* index of start of control data */
   unsigned int palette[4];
   unsigned int alpha[4];
+  unsigned int cuspal[4];
+  unsigned int custom;
   unsigned int now_pts;
   unsigned int start_pts, end_pts;
   unsigned int start_col, end_col;
@@ -122,6 +124,11 @@ static void spudec_process_data(spudec_handle_t *this)
     alpha[i] = mkalpha(this->alpha[i]);
     if (alpha[i] == 0)
       cmap[i] = 0;
+    else if (this->custom){
+      cmap[i] = ((this->cuspal[i] >> 16) & 0xff);
+      if (cmap[i] + alpha[i] > 255)
+	cmap[i] = 256 - alpha[i];
+    }
     else {
       cmap[i] = ((this->global_palette[this->palette[i]] >> 16) & 0xff);
       if (cmap[i] + alpha[i] > 255)
@@ -692,6 +699,27 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
   return this;
 }
 
+/* get palette custom color, width, height from .idx file */
+void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsigned int custom, unsigned int frame_width, unsigned int frame_height)
+{
+  spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
+  if (this){
+    if (palette){
+      memcpy(this->global_palette, palette, sizeof(this->global_palette));
+      memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
+    }
+    //(fprintf(stderr,"VobSub Custom Palette: %d,%d,%d,%d", this->cuspal[0], this->cuspal[1], this->cuspal[2],this->cuspal[3]);
+    this->packet = NULL;
+    this->image = NULL;
+    this->scaled_image = NULL;
+    this->orig_frame_width = frame_width;
+    this->orig_frame_height = frame_height;
+    this->custom = custom;
+  }
+  else
+    perror("FATAL: spudec_init: calloc");
+  return this;
+}
 void *spudec_new(unsigned int *palette)
 {
     return spudec_new_scaled(palette, 0, 0);
