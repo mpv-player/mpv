@@ -181,7 +181,6 @@ void ChangeSkin( char * name )
    mainVisible=1;
    return;
   }
-
  if ( appMPlayer.menuBase.Bitmap.Image )
   {
    if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
@@ -189,6 +188,7 @@ void ChangeSkin( char * name )
     { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
    wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
+   wsVisibleWindow( &appMPlayer.menuWindow,wsHideWindow );
   }
 
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );

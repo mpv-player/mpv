@@ -6,8 +6,6 @@
 
 #define wsosbrackets '['
 #define wscsbrackets ']'
-#define wsomore      '<'
-#define wscmore      '>'
 
 #define wsq 'q'
 #define wsa 'a'
@@ -75,6 +73,12 @@
 #define ws9 '9'
 
 #define wsSpace ' '
+#define wsMinus '-'
+#define wsPlus  '+'
+#define wsMul   '*'
+#define wsDiv   '/'
+#define wsLess  '<'
+#define wsMore  '>'
 
 #define wsUp            0x52 + 256
 #define wsDown          0x54 + 256
@@ -137,7 +141,7 @@
 #define wsXF86Next        0x17 + 256
 #define wsXF86Media       0x32 + 256
 
-#define wsKeyNumber 124
+#define wsKeyNumber 128
 
 typedef struct
 {

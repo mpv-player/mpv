@@ -87,14 +87,11 @@
 #define wsPVisible   5
 #define wsRolled     6
 
-#define wsWMWMW      0
-#define wsWMUnknown  1
-#define wsWMNetWM    2
-#define wsWMKDE      3
-#define wsWMIceWM    4
-#define wsWMBlackBox 5
-#define wsWMGnome    6
-#define wsWMWMaker   7
+#define wsWMUnknown  0
+#define wsWMNetWM    1
+#define wsWMKDE      2
+#define wsWMIceWM    3
+#define wsWMWMaker   4
 
 #define wsParamDisplay Display *dpy,Window w
 

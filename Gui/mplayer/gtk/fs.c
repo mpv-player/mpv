@@ -40,7 +40,7 @@ int             fsType    = 0;
 
 #define fsNumberOfVideoFilterNames 9
 char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
-         { { "MPEG files (*.mpg)",                                	"*.mpg" },
+         { { "MPEG files (*.mpg,*.mpeg)",                               "*.mpg,*.mpeg" },
            { "VOB files (*.vob)",  				  	"*.vob" },
            { "AVI files (*.avi)",  				  	"*.avi" },
            { "QT files (*.mov)",   				  	"*.mov" },
@@ -48,7 +48,7 @@ char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
            { "VIVO files (*.viv)", 				  	"*.viv" },
 	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
 	   { "Audio files (*.mp2,*.mp3,*.wma)",			  	"*.mp2,*.mp3,*.wma" },
-	   { "Video files (*.mpg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv)", "*.mpg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv" },
+	   { "Video files (*.mpg,*.mpeg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv)", "*.mpg,*.mpeg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv" },
            { "All files (*)",      "*"     } };
 
 #define fsNumberOfSubtitleFilterNames 9

@@ -156,6 +156,7 @@ int wsWindowManagerType( void )
  int             wm = wsWMUnknown;
 
 // --- gnome
+/*
  type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
@@ -163,7 +164,7 @@ int wsWindowManagerType( void )
    XFree( args );
    return wsWMGnome;
   }
-
+*/
 // --- net wm
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
@@ -198,12 +199,15 @@ int wsWindowManagerType( void )
      XFree( name );
     }
  } while( c++ < 25 );
+ XUnmapWindow( wsDisplay,win );
  XDestroyWindow( wsDisplay,win );
 #ifdef MP_DEBUG
  if ( wm == wsWMUnknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Unknown wm type...\n" );
 #endif
  return wsWMUnknown;
 }
+
+extern int vo_wm_type;
 
 void wsXInit( void* mDisplay )
 {
@@ -256,7 +260,8 @@ if(mDisplay){
  wsMaxX=DisplayWidth( wsDisplay,wsScreen );
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
 
- wsWMType=wsWindowManagerType();
+ if ( vo_wm_type != -1 ) wsWMType=vo_wm_type;
+   else wsWMType=wsWindowManagerType();
 
  wsGetDepthOnScreen();
 #ifdef DEBUG
@@ -533,7 +538,6 @@ inline int wsSearch( Window win )
 
 Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
 {
- KeySym        keySym;
  unsigned long i = 0;
  int           l;
  int           x,y;
@@ -613,6 +617,7 @@ keypressed:
         if ( Event->xkey.state & ControlMask ) wsWindowList[l]->Control=1;
         if ( Event->xkey.state & ShiftMask ) wsWindowList[l]->Shift=1;
         if ( Event->xkey.state & LockMask ) wsWindowList[l]->CapsLock=1;
+#if 0
         keySym=XKeycodeToKeysym( wsDisplay,Event->xkey.keycode,0 );
         if ( keySym != NoSymbol )
          {
@@ -621,6 +626,19 @@ keypressed:
           if ( wsWindowList[l]->KeyHandler )
             wsWindowList[l]->KeyHandler( Event->xkey.state,i,keySym );
          }
+#else
+	{
+        	int    		key;
+		char   		buf[100];
+		KeySym 		keySym;
+	 static XComposeStatus  stat;
+
+	 XLookupString( &Event->xkey,buf,sizeof(buf),&keySym,&stat );
+	 key=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
+	 wsKeyTable[ key ]=i;
+	 if ( wsWindowList[l]->KeyHandler ) wsWindowList[l]->KeyHandler( Event->xkey.state,i,key );
+	}
+#endif
         break;
 
    case MotionNotify:  i=wsMoveMouse;                 goto buttonreleased;

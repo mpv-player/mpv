@@ -68,7 +68,7 @@ int mLocalDisplay;
 /* output window id */
 int WinID=-1;
 int vo_mouse_autohide = 0;
-int vo_wm_type = vo_wm_Unknown;
+int vo_wm_type = -1;
 
 #ifdef HAVE_XINERAMA
 int xinerama_screen = 0;
@@ -232,6 +232,7 @@ int vo_wm_detect( void )
     }
  } while( c++ < 25 );
  if ( name ) XFree( name );
+ XUnmapWindow( mDisplay,win );
  XDestroyWindow( mDisplay,win );
 #ifdef MP_DEBUG
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
