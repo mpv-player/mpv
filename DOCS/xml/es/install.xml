@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -302,8 +302,10 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida.
   reproducción de vídeo. Si no posee una placa GeForce2 (o más nueva), es poco probable que
   funcione sin problemas. <emphasis role="bold">El controlador incorporado de nVidia para XFree86
   no soporta aceleración YUV por hardware en todas las placas nVidia.</emphasis> Debe descargar
-  los controladores de código cerrado de nvidia.com. Vea la sección sobre <link linkend="nvidia">
-  controlador de Xv de nVidia</link> si desea usar la salida para TV.
+  los controladores de código cerrado de <ulink url="http://nvidia.com">nVidia.com</ulink>.
+  Vea la sección sobre <link linkend="nvidia">controlador de Xv de nVidia</link> para detalles.
+  Por favor, compruebe también la <link linkend="tvout-nvidia">sección de salida-TV de nVidia</link>
+  si desea usar una TV.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">3DLabs GLINT R3 y Permedia3</emphasis>: se provee un controlador
