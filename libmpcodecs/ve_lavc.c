@@ -802,6 +802,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
             if(!fvstats) {
                 perror("fopen");
                 lavc_param_psnr=0; // disable block
+                mp_msg(MSGT_MENCODER,MSGL_ERR,"Can't open %s for writing. Check your permissions.\n",filename);
+                return 0; 
                 /*exit(1);*/
             }
         }
