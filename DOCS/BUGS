@@ -1,0 +1,68 @@
+Known bugs:
+~~~~~~~~~~~
+
+Special system/cpu-specific bugs/problems:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. SIGILL (signal 4) in draw_frame, on P3 (mostly 2.2.x kernels):
+  Problem: movups is crashing in libvo/fastmemcpy.h
+  Workaround:  ./configure --disable-fastmemcpy
+
+2. No image (black image) in RGB 16bpp (x11,dga,fbdev,svga) playing
+   MPEG files on SMP machine:
+  Problem: bug(?) in MMX YV12->RGB16 converter code
+  Workaround: ./configure --disable-mmx
+
+3. SIGILL or other fault at loading l3codeca.acm:
+  Problem: shared libs are loaded to 0x00100000 instead of 0x40000000
+  Workaround: mplayer -afm 1 ...
+
+Please contact me if you experienced any of the above problems. We need
+people to test fixes and send us as many system details information as
+possible (kernel+libc+gcc+binutils version, test results, /proc/cpuinfo etc)
+because they are system-dependent problems and aren't reproducable here.
+Please tell me if you can fix them or you are only user.
+Unfortunately we can't reproduce these here, so it's very hard to fix.
+
+Various A-V sync and other audio problems:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+General audio delay or jerky sound (exists with all or many files):
+- bad select() in audio driver (including ALSA's OSS emulation)
+  Workaround: ./configure --disable-select
+- audio buffer problems
+  Workaround:  mplayer -abs option
+- slow machine (cpu or vga)
+  try with -vo null, if it plays well, then you has slow VGA card/driver:
+  Workaround: buy a faster card or read DOCS/VIDEOCARDS about how to speed up
+
+Audio delay specific to one or a few files:
+- bad file (pleae upload the file, so we can check & fix)
+  Workaround: -ni and/or -bps options
+              -delay option or +/- keys at runtime to adjuts delay
+- your soundcard doesn't support 48khz playback
+  Workaround: buy a better soundcard...
+- file has VBR mp3 audio
+  Workaround: mplayer -mc 0
+
+After many > or ^ (fast forward) audio vs. video is going out of sync (ASF/AVI)
+- bug in mplayer code (a-v sync probs after seek... not really bug but
+  my avi/asf seeking code is not perfect yet)
+
+Signal 11 in decode_audio:
+- mp3lib doesn't handle (yet) well bad/broken audio streams
+  Workaround: -afm 4
+- if it's still bad, try with -nosound  [and report the bug, see BUGREPORTS]
+
+No sound at all:
+- your file uses a not supported codec
+  Workaround: read DOCS/CODECS, and help us adding support for it
+
+Video-out problems:
+~~~~~~~~~~~~~~~~~~~
+First note: options -fs -vm and -zoom are just recommendations, not (yet)
+supported by all drivers. So it isn't a bug if it doesn't work.
+Only a few driver supports scaling/zooming, don't except this from x11 or dga.
+
+[TODO: known libvo bugs]
+
+
+A'rpi / Astral & ESP-team
