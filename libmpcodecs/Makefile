@@ -3,7 +3,7 @@ include ../config.mak
 
 LIBNAME = libmpcodecs.a
 
-SRCS=vd.c vd_null.c vd_cinepak.c dec_video.c
+SRCS=dec_video.c vd.c vd_null.c vd_cinepak.c vd_qtrpza.c
 
 OBJS=$(SRCS:.c=.o)
 

@@ -23,10 +23,12 @@
 
 extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_cinepak;
+extern vd_functions_t mpcodecs_vd_qtrpza;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
         &mpcodecs_vd_cinepak,
+        &mpcodecs_vd_qtrpza,
 	NULL
 };
 
