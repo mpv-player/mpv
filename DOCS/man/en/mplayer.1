@@ -310,6 +310,9 @@ change channel list
 Every 'flag' option has a 'noflag' counterpart, e.g.\& the opposite of the
 \-fs option is \-nofs.
 .PP
+If an option is marked as (XXX only), it will only work in combination with
+the XXX option or if XXX is compiled in.
+.PP
 You can put all of the options in a configuration file which will be read
 every time MPlayer is run.
 The system-wide configuration file 'mplayer.conf' is in your configuration
@@ -504,7 +507,7 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .PD 1
 .
 .TP
-.B \-lircconf <file>
+.B \-lircconf <file> (LIRC only)
 Specifies a configuration file for LIRC (Linux Infrared Remote Control, see
 http://www.lirc.org) if you don't like the default ~/\:.lircrc.
 .TP
@@ -515,13 +518,13 @@ Prints out all the available options.
 Loops movie playback <number> times.
 0 means forever.
 .TP
-.B \-menu (BETA CODE)
+.B \-menu (OSD menu only)
 Turn on OSD menu support.
 .TP
-.B \-menu-cfg <file> (BETA CODE)
+.B \-menu-cfg <file> (OSD menu only)
 Use an alternative menu.conf.
 .TP
-.B \-menu-root <value> (BETA CODE)
+.B \-menu-root <value> (OSD menu only)
 Specify the main menu.
 .TP
 .B \-nojoystick
@@ -531,11 +534,11 @@ Default is on, if compiled in.
 .B \-nolirc
 Turns off LIRC support.
 .TP
-.B \-nomouseinput
+.B \-nomouseinput (X11 only)
 Disable mouse button press/release input (mozplayerxp's context menu relies
 on this option).
 .TP
-.B \-nortc \ \ 
+.B \-nortc (RTC only)
 Turns off usage of the Linux RTC (real-time clock \- /dev/\:rtc) as timing
 mechanism.
 .TP
@@ -611,7 +614,7 @@ MPlayer prints the available IDs when running in verbose (\-v) mode.
 When playing an MPEG-TS stream, MPlayer/Mencoder will use the first program 
 (if present) with the chosen audio stream.
 .TP
-.B \-alang <two letter\ country\ code> (also see \-aid option)
+.B \-alang <two letter\ country\ code> (also see \-aid option) (DVD only)
 Works only for DVD playback.
 It selects the DVD audio language and always tries to play audio streams whose
 language matches the given code.
@@ -640,7 +643,7 @@ movie.
 Enables caching for the stream used by \-audiofile, using the specified
 amount of memory.
 .TP
-.B \-bandwidth <value>
+.B \-bandwidth <value> (network only)
 Specify the maximum bandwidth for network streaming (for servers that are
 able to send content in different bitrates).
 Useful if you want to watch live streamed media behind a slow connection.
@@ -653,7 +656,7 @@ This option specifies how much memory (in kBytes) to use when precaching a
 file/\:URL.
 Especially useful on slow media (default is \-nocache).
 .TP
-.B \-cdda <option1:option2>
+.B \-cdda <option1:option2> (CDDA only)
 This option can be used to tune the CD Audio reading feature of MPlayer.
 
 Available options are:
@@ -722,15 +725,15 @@ full 5.1
 .PD 1
 .
 .TP
-.B \-chapter <chapter\ id>[\-<end\ chapter\ id>]
+.B \-chapter <chapter\ id>[\-<end\ chapter\ id>] (DVD only)
 Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
 Examples can be found below.
 .TP
-.B \-cookies
+.B \-cookies (network only)
 Send cookies when making HTTP requests.
 .TP
-.B \-cookies-file <filename>
+.B \-cookies-file <filename> (network only)
 Read HTTP cookies from this file.
 The file is assumed to be in Netscape format.
 If you use this option, MPlayer will not look for cookies in ~/.netscape/
@@ -755,7 +758,7 @@ Useful when ripping from DVD or network.
 .B \-dumpvideo (MPLAYER only)
 Dump raw compressed video stream to ./\:stream.dump (not very usable).
 .TP
-.B \-dvbin <options>
+.B \-dvbin <options> (DVB only)
 Pass the following parameters to the DVB input module, in order to override
 the default ones:
 
@@ -771,10 +774,10 @@ or ~/.mplayer/channels.conf as a last resort.
 .PD 1
 .
 .TP
-.B \-dvd-device <path\ to\ device>
+.B \-dvd-device <path\ to\ device> (DVD only)
 Override default DVD device name /dev/\:dvd.
 .TP
-.B \-dvdangle <angle\ id>
+.B \-dvdangle <angle\ id> (DVD only)
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
 Examples can be found below.
@@ -812,7 +815,7 @@ Useful with broken/\:incomplete downloads, or badly created AVIs.
 You can only use this option if the underlying media supports seeking
 (i.e.\& not with stdin, pipe, etc).
 .TP
-.B \-ipv4-only-proxy
+.B \-ipv4-only-proxy (network only)
 Skip the proxy for IPv6 addresses.
 It will still be used for IPv4 connections.
 .TP
@@ -863,14 +866,14 @@ By default, when file type (demuxer) cannot be detected reliably
 extension is used to select demuxer.  It always falls back to content-based
 demuxer selection.
 .TP
-.B \-passwd <password> (see \-user option too)
+.B \-passwd <password> (see \-user option too) (network only)
 Specify password for http authentication.
 .TP
-.B \-prefer-ipv4
+.B \-prefer-ipv4 (network only)
 Use IPv4 on network connections.
 Falls back to IPv6 automatically.
 .TP
-.B \-prefer-ipv6
+.B \-prefer-ipv6 (IPv6 network only)
 Use IPv6 on network connections.
 Falls back to IPv4 automatically.
 .TP
@@ -925,7 +928,7 @@ frame size in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp
+.B \-rtsp-stream-over-tcp (live.com only)
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken Internet connection that does
@@ -977,7 +980,7 @@ bytes in the stream you want MPlayer to search for the desired
 audio and video pids.
 .
 .TP
-.B \-tv <option1:option2:...>
+.B \-tv <option1:option2:...> (TV only)
 This option tunes various properties of the TV capture module.
 For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' 
 or even 'tv://<channel_name> (see option channels for channel_name below)
@@ -1111,7 +1114,7 @@ choose the quality of the jpeg compression
 .RE
 .
 .TP
-.B \-user <user name> (see \-passwd option too)
+.B \-user <user name> (see \-passwd option too) (network only)
 Specify user name for http authentication.
 .TP
 .B \-user-agent <string>
@@ -1159,7 +1162,7 @@ Creates a dumpsub.srt file in the current directory.
 Dumps the subtitle substream from VOB streams.
 See \-dump*sub and \-vobsubout* options too.
 .TP
-.B \-ffactor <number>
+.B \-ffactor <number> (OSD only)
 Resample alphamap of the font.
 Can be:
 .
@@ -1177,10 +1180,10 @@ bold black outline
 .PD 1
 .
 .TP
-.B \-flip-hebrew
+.B \-flip-hebrew (FriBiDi only)
 Turns on flipping subtitles using FriBiDi.
 .TP
-.B \-font <path\ to\ font.desc\ file>
+.B \-font <path\ to\ font.desc\ file> (OSD only)
 Search for the OSD/\:SUB fonts in an alternative directory (default for normal
 fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 ~/.mplayer/\:subfont.ttf).
@@ -1202,14 +1205,14 @@ With Fontconfig, this option determines the fontconfig font name.
 .PD 1
 .
 .TP
-.B \-fontconfig
+.B \-fontconfig (fontconfig only)
 Enables the usage of fontconfig managed fonts.
 .TP
 .B \-forcedsubsonly
 Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 \-slang.
 .TP
-.B \-fribidi-charset <charset\ name>
+.B \-fribidi-charset <charset\ name> (FriBiDi only)
 Specifies the charset that will be passed to FriBiDi when decoding a non-UTF8
 subtitles (default: ISO8859-8).
 .TP
@@ -1266,7 +1269,7 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .PD 1
 .
 .TP
-.B \-spuaa <mode>
+.B \-spuaa <mode> (OSD only)
 Antialiasing/scaling mode for DVD/VobSub.
 A value of 16 may be added to mode in order to force scaling even
 when original and scaled frame size already match, for example to
@@ -1288,12 +1291,12 @@ uses swscaler gaussian blur (looks very good)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2>
+.B \-spualign <-1\-2> (OSD only)
 Specify how spu (DVD/VobSub) subtitles should be aligned.
 Values are the same as for \-subalign, with the extra choice -1 for original
 position.
 .TP
-.B \-spugauss <0.0\-3.0>
+.B \-spugauss <0.0\-3.0> (OSD only)
 Variance parameter of gaussian used by \-spuaa 4.
 Higher means more blur.
 The default is 1.0.
@@ -1336,8 +1339,8 @@ load all subs in the current directory
 Disables any kind of text post processing done after loading the subtitles.
 Used for debug purposes.
 .TP
-.B \-subalign <0\-2>
-Specify how subtitles should be aligned with subpos.
+.B \-subalign <0\-2> (OSD only)
+Specify how subtitles should be aligned with \-subpos.
 0 means align at top (original/default behavior), 1 means align at center, and
 2 means align at bottom.
 .TP
@@ -1347,7 +1350,7 @@ These are NOT the VOB subtitles, these are special ASCII subtitles for the
 hearing impaired encoded in the VOB userdata stream on most region 1 DVDs.
 CC subtitles have not been spotted on DVDs from other regions so far.
 .TP
-.B \-subcp <codepage>
+.B \-subcp <codepage> (iconv only)
 If your system supports iconv(3), you can use this option to
 specify codepage of the subtitle.
 
@@ -1416,11 +1419,11 @@ default: the same fps as the movie.
 .I NOTE:
 ONLY for frame-based SUB files, i.e.\& NOT MicroDVD format.
 .TP
-.B \-subpos <0\-100> (useful with \-vf expand)
+.B \-subpos <0\-100> (useful with \-vf expand) (OSD only)
 Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
 .TP
-.B \-subwidth <10\-100>
+.B \-subwidth <10\-100> (OSD only)
 Specify the maximum width of subtitles on the screen.
 Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
@@ -1577,7 +1580,7 @@ Works in similar manner as brightness.
 .B \-dfbopts <value> (\-vo directfb only)
 Specify a parameter list for the directfb driver.
 .TP
-.B \-display <name>
+.B \-display <name> (X11 only)
 Specify the hostname and display number of the X server you want to display
 on.
 
@@ -1712,7 +1715,7 @@ See also \-zoom.
 .B \-fsmode-dontuse <0\-31> (OBSOLETE) (use \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
-.B \-fstype <type1,type2,...>
+.B \-fstype <type1,type2,...> (X11 only)
 Specify a priority list of fullscreen layer setting modes to be
 used.
 The available types are:
@@ -1783,7 +1786,7 @@ Places the window at the bottom right corner of the screen.
 .PD 1
 .
 .TP
-.B \-guiwid <window\ id>
+.B \-guiwid <window\ id> (GUI only)
 This tells the GUI to also use an X11 window and stick itself to the bottom
 of the video, which is useful to embed a mini-GUI in a browser (with the
 MPlayer plugin for instance).
@@ -1841,7 +1844,7 @@ See also \-aspect for movie aspect.
 Do not grab mouse pointer after VidMode change (\-vm), useful for multihead
 setup.
 .TP
-.B \-nokeepaspect
+.B \-nokeepaspect (X11 only)
 Do not keep window aspect ratio when resizing X11 windows (Works currently only
 with \-vo x11, xv, xmga and xvidix and your window manager needs to understand
 window aspect hints.).
@@ -1865,7 +1868,7 @@ The range controls how much of the image is cropped.
 Set the monitor refreshrate in Hz.
 Currently only supported by \-vo directx combined with the \-vm option.
 .TP
-.B \-rootwin
+.B \-rootwin (X11 only)
 Play movie in the root window (desktop background) instead of opening
 a new one.
 Works only with x11, xv, xmga and xvidix drivers.
@@ -1879,7 +1882,7 @@ If you use an output driver which can't know the resolution of the screen
 (fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
 vertical resolution.
 .TP
-.B \-stop-xscreensaver
+.B \-stop-xscreensaver (X11 only)
 Turns off xscreensaver at startup and turns it on again on exit.
 .TP
 .B \-vm \ \ \ 
@@ -1892,7 +1895,7 @@ the new display mode.
 .B \-vsync \ \ 
 Enables VBI for vesa.
 .TP
-.B \-wid <window\ id>
+.B \-wid <window\ id> (X11 only)
 This tells MPlayer to use a X11 window, which is useful to embed MPlayer in a
 browser (with the plugger extension for instance).
 .TP
@@ -1900,8 +1903,8 @@ browser (with the plugger extension for instance).
 In Xinerama configurations (i.e.\& a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display movie on.
 .TP
-.B \-z <0\-9>
-Specifies compression level for PNG output (\-vo png)
+.B \-z <0\-9> (-vo png only)
+Specifies compression level for PNG output.
 .
 .PD 0
 .RSs
@@ -2252,7 +2255,7 @@ Do not play/\:encode sound.
 .B \-novideo
 Do not play/\:encode video.
 .TP
-.B \-oldpp <quality> (OBSOLETE)
+.B \-oldpp <quality> (OBSOLETE) (OpenDivX only)
 Use the opendivx postprocessing code instead of the internal one.
 Superseded by \-pp, the internal postprocessing offers better
 quality and performance.
