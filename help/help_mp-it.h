@@ -83,7 +83,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Impossibile trovare i codec audio per la famiglia dei driver richiesta, torno agli altri driver.\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prova ad aggiornare %s da etc/codecs.conf\n*** Se non va ancora bene, allora leggi DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prova ad aggiornare %s da etc/codecs.conf\n*** Se non va ancora bene, allora leggi DOCS/it/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Impossibile inizializzare il codec audio! -> nessun suono\n"
 #define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d ...\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X !\n"
@@ -98,15 +98,15 @@ static char help_text[]=
 "         ***************************************************************\n"\
 "!!! Possibili cause, problemi, soluzioni: \n"\
 "- Nella maggior parte dei casi: driver audio corrotto/bacato. Soluzione: prova -ao sdl o usa\n"\
-"  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/sound.html per ulteriori suggerimenti!\n"\
+"  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/it/sound.html per ulteriori suggerimenti!\n"\
 " Puoi anche provare con -autosync 30 o altri valori.\n"\
 "- Output video lento. Prova un differente -vo driver (per la lista completa: -vo help) o prova\n"\
-"  con -framedrop !  Leggi DOCS/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
+"  con -framedrop !  Leggi DOCS/it/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
 "- Cpu lenta. Non provare a riprodurre grossi dvd/divx su cpu lente! Prova -hardframedrop\n"\
 "- File corrotto. Prova varie combinazioni di: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Per riprodurre da dispositivi lenti (dischi nfs/smb, dvd, vcd etc) prova -cache 8192\n"\
 "- Stai usando -cache per riprodurre un file AVI senza interleave? Prova con -nocache.\n"\
-"Se il problema non è in nessuno di questi casi, allora leggi DOCS/bugreports.html !\n\n"
+"Se il problema non è in nessuno di questi casi, allora leggi DOCS/it/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
 #define MSGTR_GuiNeedsX "LA GUI di MPlayer richiede X11!\n"
@@ -139,7 +139,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Potrebbe essere un errore nel codice di rilevazione del tipo di processore...\n"\
-"  leggi DOCS/bugreports.html\n"
+"  leggi DOCS/it/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Solitamente questo avviene quando si esegue il programma su un processore\n"\
@@ -147,11 +147,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer è stato interrotto per un errore nell'uso della CPU/FPU/RAM.\n"\
 "  Ricompila MPlayer con --enable-debug e crea un baktrace ed un disassemblato\n"\
-"  con 'gdb'. Per i dettagli, leggi DOCS/bugreports.html#crash\n"
+"  con 'gdb'. Per i dettagli, leggi DOCS/it/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
 "  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\
-"  versione di gcc. Se ritieni sia colpa di MPlayer, leggi DOCS/bugreports.html\n"\
+"  versione di gcc. Se ritieni sia colpa di MPlayer, leggi DOCS/it/bugreports.html\n"\
 "  e segui le istruzioni. Non possiamo aiutarti, e non lo faremo, se non\n"\
 "  fornisci queste informazioni quando segnali un possibile problema.\n"
 
@@ -281,7 +281,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi! (richiesto un indice, prova con l\'opzione -idx !)  \n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
-#define MSGTR_EncryptedVOB "File VOB criptato (non compilato con il supporto delle libcss)! Leggi il file DOCS/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "File VOB criptato (non compilato con il supporto delle libcss)! Leggi il file DOCS/it/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Flusso criptato di cui non è stata chiesta l\'autenticazione!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Intestazioni compresse non (ancora) supportate!\n"
