@@ -165,7 +165,7 @@ csp_again:
 	out_fmt=sh->codec->outfmt[i];
 	if(out_fmt==(signed int)0xFFFFFFFF) continue;
 	flags=vf->query_format(vf,out_fmt);
-	mp_msg(MSGT_CPLAYER,MSGL_V,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),flags,i);
+	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),flags,i);
 	if((flags&2) || (flags && j<0)){
 	    // check (query) if codec really support this outfmt...
 	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE)
@@ -185,6 +185,7 @@ csp_again:
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"VDec: using %s as output csp (no %d)\n",vo_format_name(out_fmt),j);
     sh->outfmtidx=j;
     sh->vfilter=vf;
 
