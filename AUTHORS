@@ -2,8 +2,10 @@
                                     AUTHORS
                    *****************************************
                    
-                   NOTE: Do NOT send bug reports, help and
-                   feature requests directly to the authors!
+NOTE: NEVER send bug reports, help and feature requests directly to the
+authors, but you're free to write mails about donating!
+
+For donation request visit http://www.mplayerhq.hu/homepage/donations.html!
 
 ___________________
 The MPlayer project
@@ -177,7 +179,7 @@ Alban Bedel <albeu@free.fr>
 Artur Zaprzala <zybi@fanthom.irc.pl>
     * Complete font generator prog + OSD font (TOOLS/subfont-c)
 
-lanzz@lanzz.org
+Mihail Milushev <lanzz@lanzz.org>
     * GIMP font generator plugin (TOOLS/subfont-gimp)
 
 Adam Tla/lka <atlka@pg.gda.pl>
