@@ -298,7 +298,7 @@ static mp_cmd_t* ar_cmd = NULL;
 static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 
 static int use_joystick = 1, use_lirc = 1;
-static char* config_file = "input.conf";
+static char* config_file = CONFDIR"/input.conf";
 
 static char* js_dev = NULL;
 

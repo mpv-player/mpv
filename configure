@@ -4002,10 +4002,11 @@ cat > config.mak << EOF
 
 LANG = C
 TARGET_OS = $system_name
-prefix = $_prefix
-DATADIR = $_datadir
-CONFDIR = $_confdir
-LIBDIR = $_libdir
+DESTDIR =
+prefix = \$(DESTDIR)$_prefix
+DATADIR = \$(DESTDIR)$_datadir
+CONFDIR = \$(DESTDIR)$_confdir
+LIBDIR = \$(DESTDIR)$_libdir
 #AR = ar
 CC = $_cc
 AWK = $_awk

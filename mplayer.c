@@ -421,7 +421,7 @@ void parse_cfgfiles( m_config_t* conf )
 {
 char *conffile;
 int conffile_fd;
-if (m_config_parse_config_file(conf, "/etc/mplayer.conf") < 0)
+if (m_config_parse_config_file(conf, CONFDIR"/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
