@@ -1165,8 +1165,8 @@ else
  _gui='#undef HAVE_GUI'
 fi
 
-if [ $_alsaver != 'not found' ]; then
- [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; $_alsa='#define HAVE_ALSA5'; } 
+if [ "$_alsaver" != "not found" ]; then
+[ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; $_alsa='#define HAVE_ALSA5'; } 
 # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; }
 else
  _alsa=' '
