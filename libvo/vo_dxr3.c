@@ -171,10 +171,12 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	ioval = EM8300_SUBDEVICE_AUDIO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	fsync(fd_video);
-	ioval = 0x900;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-	ioval = 0;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
+	if (!noprebuf) {
+		ioval = 0x900;
+		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+		ioval = 0;
+		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
+	}
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
@@ -299,12 +301,16 @@ static void draw_osd(void)
 
 static uint32_t draw_frame(uint8_t * src[])
 {
-	ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+	if (!noprebuf) {
+		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+	}
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
 		if (p->id == 0x20) {
-			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
+			if (!noprebuf) {
+				ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
+			}
 			write(fd_spu, p->data, p->size);
 		} else {
 			write(fd_video, p->data, p->size);
@@ -334,7 +340,9 @@ static void flip_page(void)
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
-		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+		if (!noprebuf) {
+			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+		}
 		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
