@@ -1,0 +1,89 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><I>In medias res</I></B></P>
+
+<P>There are two major topic which always causes huge dispute and flame on the
+<A HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">mplayer-users</A>
+mailing list. Number one is of course the topic of the</P>
+
+<P><B><I>GCC 2.96 series</I></B></P>
+
+<P>The <I>facts</I> : <B>MPlayer</B>'s compile process needs the
+<CODE>--disable-gcc-checking</CODE> to proceed upon detecting a GCC version
+of 2.96 (apparently it needs this option on <B>egcs</B> too. It's because we
+don't test <B>MPlayer</B> on egcs. Pardon us, but we rather develop <B>MPlayer</B>).
+If you know <B>MPlayer</B>, you should know that it has great speed. It
+achieves this by having overoptimized MMX/SSE/3DNow/etc codes, fastmemcpy, and
+lots of other features.
+
+<P>The <I>background</I> : there were/are the GCC <B>2.95</B> series. The
+best of them was 2.95.3 . Please note the style of the version numbering.
+This is how the GCC team numbers their compilers. The 2.95 series are good.
+Noone ever saw anything that was miscompiled because of the 2.95's faultiness.</P>
+
+<P>The <I>action</I> : <B>RedHat</B> started to include a GCC version of <B>2.96</B>
+with their distributions. Note the version numbering. This should be the GCC
+team's versioning. They patched GCC 2.95.3 . They patched it very deep.
+They patched it <B>bad</B>. RedHat saw it was bad, but decided to ship it
+anyways (even with his "<I>Enterprise-ready</I>" distributions). After all, more
+users try it, the more bugreports they get, thus bugfixing and development
+goes faster. Development? GCC 2.95 was good enough, where did they want to
+develop more? Develop GCC in parallel with the GCC team ? (the GCC team was
+meanwhile testing their new <B>GCC 3.0</B>)</P>
+
+<P>The <I>result</I> : the first RedHat GCC 2.96's were so flawed, that nothing
+above <I>hello_world.c</I> compiled. RedHat immediately began making
+Service Packs - ups, so they immediately began patching the bugs. They
+could have backed out to 2.95 if they wanted. Meanwhile major Linux programs'
+like <B>DRI</B>, <B>avifile</B>, <B>Wine</B> and the <B>Linux kernel</B>
+developers began wondering why do they receive these new interesting
+bugreports. They obviously didn't consider it a good thing, they'd have
+better things to do.</P>
+
+<P>The <I>statements</I> : most developers around the world begun having
+bad feelings about RedHat's GCC 2.96 , and told their RedHat users to
+compile with other compiler than 2.96 . RedHat users' disappointment slowly
+went into anger. Some guy called Bero even put up a page that describes
+that GCC 2.96 is not incompatible, but 2.95 was incompatible ! If we
+assume this is the case, we should greet RedHat for upgrading our GCC, and
+flame all who opposes. But I wonder : why didn't they help the GCC team
+<B>to fix</B> their "incompatibilities", why did they instead fork, and
+did it on their own? Why couldn't they wait for GCC 3.0 ? What was all good
+for, apart from giving headaches to developers, putting oil on anti-RedHat
+flame, confusing users? The answer, I do not know.</P>
+
+<P><I>Present age, present time</I> : RedHat says that GCC 2.96-85 and above
+is fixed, and works properly. Note the versioning. They should have started
+with something like this. What about GCC 2.95.3-85 ? It doesn't matter now.
+Whether they still use kgcc for kernels, I have no information. I don't search,
+but I still see bugs with 2.96 . It doesn't matter now, hopefully now <B>RedHat
+will forget about 2.96</B> and turn towards <B>3.0</B>.</P>
+
+<P><I>What I don't understand</I> is why are we hated by RedHat users for
+putting warning messages, and stay-away documents in <B>MPlayer</B> .
+Why are we called "brain damaged", "total asshole", "childish" by
+<B>RedHat users</B>, on our mailing list, and even on the <B>redhat-devel</B> .
+They even considered forking <B>MPlayer</B> for themselves. RedHat users.
+Why? It's RedHat that made the compiler, why do <U>you</U> have to hate us?
+Are you <U>that</U> fellow RedHat worshippers? Please stop it. We don't hold
+a grudge against users, doesn't matter how loud you advertise its contrary.
+Please go flame Linus Torvalds, the DRI developers (oh, now I know why
+there were laid off by VA!), the Wine, avifile. Even if we are arrogant,
+are we not the same as the previously listed ones? Why do <B>we</B> have
+to suffer from your unrightful wrath?</P>
+
+<P>I'm closing this topic. Think over it please. I (Gabucino) personally begun
+with <A HREF="http://www.redhat.com">RedHat</A>, then used Mandrake (sorry I
+don't know their URL), now I have <A
+HREF="http://www.linuxfromscratch.com">LFS</A>. Never held a grudge against
+RedHat or RedHat users, and I still don't. Hate is only comfortable. It
+won't bring you anywhere.</P>
+
+<P><B><I>Binary distribution of MPlayer</I></B></P>
+
+<P>I'm too moody now for this.</P>
+
+</HTML>
