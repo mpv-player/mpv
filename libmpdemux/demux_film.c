@@ -1,9 +1,13 @@
 /*
-	FILM file parser for the MPlayer program
-	by Mike Melanson
+    FILM file parser for the MPlayer program
+      by Mike Melanson
 
-        Details of the FILM file format can be found at:
-          http://www.pcisys.net/~melanson/codecs/
+    This demuxer handles FILM (a.k.a. CPK) files commonly found on
+    Sega Saturn CD-ROM games. FILM files have also been found on 3DO
+    games.
+
+    Details of the FILM file format can be found at:
+      http://www.pcisys.net/~melanson/codecs/
 */
 
 #include <stdio.h>
@@ -39,6 +43,7 @@ typedef struct _film_data_t
   unsigned int current_chunk;
   film_chunk_t *chunks;
   unsigned int chunks_per_second;
+  unsigned int film_version;
 } film_data_t;
 
 void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, int flags)
@@ -88,6 +93,8 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
   sh_audio_t *sh_audio = demuxer->audio->sh;
   film_data_t *film_data = (film_data_t *)demuxer->priv;
   film_chunk_t film_chunk;
+  int length_fix_bytes;
+  demux_packet_t* dp;
 
   // see if the end has been reached
   if (film_data->current_chunk >= film_data->total_chunks)
@@ -103,7 +110,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
   // (all ones in syncinfo1 indicates an audio chunk)
   if (film_chunk.syncinfo1 == 0xFFFFFFFF)
   {
-    demux_packet_t* dp=new_demux_packet(film_chunk.chunk_size);
+    dp = new_demux_packet(film_chunk.chunk_size);
     if (stream_read(demuxer->stream, dp->buffer, film_chunk.chunk_size) !=
       film_chunk.chunk_size)
       return 0;
@@ -134,23 +141,30 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
     // if the demuxer is dealing with CVID data, deal with it a special way
     if (sh_video->format == mmioFOURCC('c', 'v', 'i', 'd'))
     {
-      // account for 2 extra bytes
-      demux_packet_t* dp=new_demux_packet(film_chunk.chunk_size - 2);
+      if (film_data->film_version)
+        length_fix_bytes = 2;
+      else
+        length_fix_bytes = 6;
 
-      // these CVID data chunks appear to have 2 extra bytes; skip them
+      // account for the fix bytes when allocating the buffer
+      dp = new_demux_packet(film_chunk.chunk_size - length_fix_bytes);
+
+      // these CVID data chunks have a few extra bytes; skip them
       if (stream_read(demuxer->stream, dp->buffer, 10) != 10)
         return 0;
-      stream_skip(demuxer->stream, 2);
+      stream_skip(demuxer->stream, length_fix_bytes);
+
       if (stream_read(demuxer->stream, dp->buffer + 10, 
-        film_chunk.chunk_size - 12) != (film_chunk.chunk_size - 12))
+        film_chunk.chunk_size - (10 + length_fix_bytes)) != 
+        (film_chunk.chunk_size - (10 + length_fix_bytes)))
         return 0;
+
       dp->pts = film_chunk.pts;
       dp->pos = film_chunk.chunk_offset;
       dp->flags = (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0;
 
-      // fix the CVID chunk size by adding 6
-      cvid_size = (dp->buffer[1] << 16) | (dp->buffer[2] << 8) | dp->buffer[3];
-      cvid_size += 6;
+      // fix the CVID chunk size
+      cvid_size = film_chunk.chunk_size - length_fix_bytes;
       dp->buffer[1] = (cvid_size >> 16) & 0xFF;
       dp->buffer[2] = (cvid_size >>  8) & 0xFF;
       dp->buffer[3] = (cvid_size >>  0) & 0xFF;
@@ -183,7 +197,6 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
   unsigned int i;
   unsigned int video_format;
   int audio_channels;
-  unsigned int film_version;
   int counting_chunks;
   unsigned int total_audio_bytes = 0;
 
@@ -209,12 +222,13 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
   // get the header size, which implicitly points past the header and
   // to the start of the data
   header_size = stream_read_dword(demuxer->stream);
-  film_version = stream_read_fourcc(demuxer->stream);
+  film_data->film_version = stream_read_fourcc(demuxer->stream);
   demuxer->movi_start = header_size;
   demuxer->movi_end = demuxer->stream->end_pos;
   header_size -= 16;
 
-  mp_msg(MSGT_DEMUX, MSGL_HINT, "FILM version %.4s\n", &film_version);
+  mp_msg(MSGT_DEMUX, MSGL_HINT, "FILM version %.4s\n",
+    &film_data->film_version);
 
   // skip to where the next chunk should be
   stream_skip(demuxer->stream, 4);
@@ -244,18 +258,56 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         sh_video->format = video_format;
         sh_video->disp_h = stream_read_dword(demuxer->stream);
         sh_video->disp_w = stream_read_dword(demuxer->stream);
-        stream_skip(demuxer->stream, 1);  // unknown byte
         mp_msg(MSGT_DECVIDEO, MSGL_V,
           "  FILM video: %d x %d\n", sh_video->disp_w,
           sh_video->disp_h);
       }
       else
-        stream_skip(demuxer->stream, 9);
+        // skip height and width if no video
+        stream_skip(demuxer->stream, 8);
+
+      // skip over unknown byte, but only if file had non-NULL version
+      if (film_data->film_version)
+        stream_skip(demuxer->stream, 1);
 
       // fetch the audio channels to see if there's any audio
-      audio_channels = stream_read_char(demuxer->stream);
-      if (audio_channels > 0)
+      // don't do this if the file is a quirky file with NULL version
+      if (film_data->film_version)
       {
+        audio_channels = stream_read_char(demuxer->stream);
+        if (audio_channels > 0)
+        {
+          // create and initialize the audio stream header
+          sh_audio = new_sh_audio(demuxer, 0);
+          demuxer->audio->sh = sh_audio;
+          sh_audio->ds = demuxer->audio;
+
+          sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+
+          // uncompressed PCM format
+          sh_audio->wf->wFormatTag = 1;
+          sh_audio->format = 1;
+          sh_audio->wf->nChannels = audio_channels;
+          sh_audio->wf->wBitsPerSample = stream_read_char(demuxer->stream);
+          stream_skip(demuxer->stream, 1);  // skip unknown byte
+          sh_audio->wf->nSamplesPerSec = stream_read_word(demuxer->stream);
+          sh_audio->wf->nAvgBytesPerSec = 
+            sh_audio->wf->nSamplesPerSec * sh_audio->wf->wBitsPerSample 
+            * sh_audio->wf->nChannels / 8;
+          stream_skip(demuxer->stream, 6);  // skip the rest of the unknown
+
+          mp_msg(MSGT_DECVIDEO, MSGL_V,
+            "  FILM audio: %d channels, %d bits, %d Hz\n",
+            sh_audio->wf->nChannels, 8 * sh_audio->wf->wBitsPerSample, 
+            sh_audio->wf->nSamplesPerSec);
+        }
+        else
+          stream_skip(demuxer->stream, 10);
+      }
+      else
+      {
+        // otherwise, make some assumptions about the audio
+
         // create and initialize the audio stream header
         sh_audio = new_sh_audio(demuxer, 0);
         demuxer->audio->sh = sh_audio;
@@ -266,22 +318,18 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         // uncompressed PCM format
         sh_audio->wf->wFormatTag = 1;
         sh_audio->format = 1;
-        sh_audio->wf->nChannels = audio_channels;
-        sh_audio->wf->wBitsPerSample = stream_read_char(demuxer->stream);
-        stream_skip(demuxer->stream, 1);  // skip unknown byte
-        sh_audio->wf->nSamplesPerSec = stream_read_word(demuxer->stream);
+        sh_audio->wf->nChannels = 1;
+        sh_audio->wf->wBitsPerSample = 8;
+        sh_audio->wf->nSamplesPerSec = 22050;
         sh_audio->wf->nAvgBytesPerSec = 
           sh_audio->wf->nSamplesPerSec * sh_audio->wf->wBitsPerSample 
           * sh_audio->wf->nChannels / 8;
-        stream_skip(demuxer->stream, 6);  // skip the rest of the unknown
 
         mp_msg(MSGT_DECVIDEO, MSGL_V,
           "  FILM audio: %d channels, %d bits, %d Hz\n",
-          sh_audio->wf->nChannels, 8 * sh_audio->wf->wBitsPerSample, 
+          sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample, 
           sh_audio->wf->nSamplesPerSec);
       }
-      else
-        stream_skip(demuxer->stream, 10);
       break;
 
     case CHUNK_STAB:
