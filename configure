@@ -802,6 +802,11 @@ if [ $_png = yes ]; then
    _libpng='-lpng -lz'
 fi
 
+# Checking for CFLAGS
+if test "$CFLAGS" = ""; then
+ CFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
+fi
+
 echo
 echo "Creating $MCONF"
 cat > $MCONF << EOF
@@ -812,7 +817,7 @@ AR=ar
 CC=$_cc
 X11DIR=$_x11libdir
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
+OPTFLAGS=$CFLAGS
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
 X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
 TERMCAP_LIB=$_libtermcap
