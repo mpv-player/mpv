@@ -32,6 +32,8 @@ m_option_t lameopts_conf[]={
 	{"br", &lame_param_br, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
 	{"ratio", &lame_param_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"vol", &lame_param_scale, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10, NULL},
+	{"lowpassfreq",&lame_param_lowpassfreq, CONF_TYPE_INT, CONF_RANGE, -1, 48000,0},
+	{"highpassfreq",&lame_param_highpassfreq, CONF_TYPE_INT, CONF_RANGE, -1, 48000,0},
 #if HAVE_MP3LAME >= 392
 	{"fast", &lame_param_fast, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"preset", &lame_param_preset, CONF_TYPE_STRING, 0, 0, 0, NULL},

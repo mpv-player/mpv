@@ -216,6 +216,9 @@ int lame_param_padding=-1; // unset
 int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
 float lame_param_scale=-1; // unset
+int lame_param_lowpassfreq = 0; //auto
+int lame_param_highpassfreq = 0; //auto
+
 #if HAVE_MP3LAME >= 392
 int lame_param_fast=0; // unset
 static char* lame_param_preset=NULL; // unset
@@ -996,6 +999,8 @@ if(lame_param_scale>0) {
     printf("Setting audio input gain to %f\n", lame_param_scale);
     lame_set_scale(lame,lame_param_scale);
 }
+if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
+if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
 #if HAVE_MP3LAME >= 392
 if(lame_param_preset != NULL){
   printf ("\npreset=%s\n\n",lame_param_preset);
