@@ -7637,7 +7637,7 @@ This isn't recommended and wastes bitrate as scenecuts encoded as P-frames
 are just as big as I-frames, but don't reset the "keyint counter".
 .
 .TP
-.B frameref=<1\-15>
+.B frameref=<1\-16>
 Number of previous frames used as predictors in a P-frame (default: 1).
 This is effective in Anime, but seems to make little difference in
 live-action source material.
@@ -7869,6 +7869,17 @@ candidate macroblock types, before selecting the best type.
 .REss
 In the above, "all candidates" doesn't exactly mean all enabled types:
 4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
+.
+.TP
+.B (no)chroma_me
+Takes into account chroma information during subpixel motion search
+(default: enabled).
+Requires subq=5.
+.
+.TP
+.B chroma_qp_offset=<-12\-12>
+Use a different quantizer for chroma as compared to luma.
+Useful values are in the range <-2\-2>. (default: 0)
 .
 .TP
 .B level_idc=<10\-51>

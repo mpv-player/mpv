@@ -78,6 +78,8 @@ static int p8x8mv = 1;
 static int b8x8mv = 1;
 static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static int weight_b = 0;
+static int chroma_me = 1;
+static int chroma_qp_offset = 0;
 static float ip_factor = 1.4;
 static float pb_factor = 1.3;
 static int rc_buffer_size = -1;
@@ -99,7 +101,7 @@ static int log_level = 2;
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
     {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
-    {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 15, NULL},
+    {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
     {"keyint", &keyint_max, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"keyint_min", &keyint_min, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"scenecut", &scenecut_threshold, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
@@ -125,6 +127,9 @@ m_option_t x264encopts_conf[] = {
     {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"weight_b", &weight_b, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"chroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nochroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"chroma_qp_offset", &chroma_qp_offset, CONF_TYPE_INT, CONF_RANGE, -12, 12, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -232,6 +237,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
     mod->param.analyse.i_direct_mv_pred = direct_pred;
     mod->param.analyse.b_weighted_bipred = weight_b;
+    mod->param.analyse.i_chroma_qp_offset = chroma_qp_offset;
+    mod->param.analyse.b_chroma_me = chroma_me;
 
     mod->param.i_width = width;
     mod->param.i_height = height;
@@ -314,9 +321,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     case IMGFMT_RGB:
     case IMGFMT_BGR:
     case IMGFMT_BGR32:
-        /* 2004/08/05: There seems to be some, but not complete,
-           support for these colorspaces in X264. Better to stay
-           on the safe side for now. */
+        /* These colorspaces are supported, but they'll just have
+         * to be converted to I420 internally */
         return 0; /* VFCAP_CSP_SUPPORTED */
     }
     return 0;
@@ -370,7 +376,6 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
 
 static void uninit(struct vf_instance_s *vf)
 {
-    // FIXME: flush delayed frames
     h264_module_t *mod=(h264_module_t*)vf->priv;
     x264_encoder_close(mod->x264);
 }
