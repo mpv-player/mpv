@@ -51,6 +51,8 @@ int version=0;
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
 
+desc->fpath="";
+
 f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); return NULL;}
 
 // set up some defaults, and erase table
