@@ -1,0 +1,877 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=iso-8859-2">
+<title>MPlayer skin formátum</title>
+<style type="text/css">
+em.note {color: green}
+em.warn {color: red}
+</style>
+</head>
+
+<body bgcolor=white text=black>
+
+<h1 align="center">MPlayer skin formátum</h1>
+
+<hr>
+
+<h2>Tartalom</h2>
+
+<ul type=disc>
+<li><a href="#intro">1. Bevezető</a></li>
+<li><a href="#overview">2. Áttekintés</a></li>
+  <ul type=circle>
+  <li><a href="#dirs">2.1. Könyvtárak</a></li>
+  <li><a href="#images">2.2. Képformátumok</a></li>
+  <li><a href="#parts">2.3. A skin részei</a></li>
+  <li><a href="#files">2.4. Fájlok</a></li>
+  </ul>
+<li><a href="#skin">3. A <code>skin</code> fájl</a></li>
+  <ul type=circle>
+  <li><a href="#mainwin">3.1. Főablak</a></li>
+  <li><a href="#subwindow">3.2. Lejátszóablak</a></li>
+  <li><a href="#skinmenu">3.3. Skin menü</a></li>
+  </ul>
+<li><a href="#fonts">4. Fontok</a></li>
+  <ul type=circle>
+  <li><a href="#symbols">4.1. Szimbólumok</a></li>
+  </ul>
+<li><a href="#guimsg">A. függelék: GUI üzenetek</a></li>
+</ul>
+
+<hr>
+
+<div align=center>
+Utolsó módosítás: 2001. szeptember 9.
+</div>
+
+<hr>
+
+<h2><a name="intro">1. Bevezető</a></h2>
+
+Ez a kis leírás arról szól, hogy milyen is egy MPlayer skin formátuma.
+Nincs rá garancia, hogy minden úgy van, ahogy itt leírtam, egyrészt mert
+nem én írtam a GUI-t, másrészt mert a GUI még nincs kész, harmadrészt pedig
+azért, mert én is tévedhetek. Szóval ne lepődj meg, ha valami nem úgy van,
+ahogy itt szerepel.
+
+<p>
+Köszönet <em>Ponekker Zoltánnak</em> a segítségéért.
+
+<p>
+<em>Mohari András &lt;mayday@freemail.hu&gt;</em>
+
+
+<h2><a name="overview">2. Áttekintés</a></h2>
+
+Nem tartozik szorosan a témához, de nem árt tudni, hogy
+<em>az MPlayernek <b>nincs</b> beépített skinje, ezért <b>legalább
+egy skint telepíteni kell</b> a GUI használatához.
+</em>
+
+<h3><a name="dirs">2.1. Könyvtárak</a></h3>
+
+<p>
+A skineket a következő könyvtárakban (és a megadott sorrendben)
+keresi a program:
+<pre>
+    /usr/local/share/mplayer/Skin/
+    ~/.mplayer/Skin/
+</pre>
+
+<p>
+Az első könyvtár más is lehet, attól függően, hogy hogyan volt konfigurálva
+az MPlayer (lásd a <code>configure</code> script <code>--datadir</code>
+kapcsolóját).
+
+<p>
+Az előbbi könyvtárak alatt minden skin a saját könyvtárába kerül, például:
+<pre>
+    /usr/local/share/mplayer/Skin/default/
+</pre>
+
+
+<h3><a name="images">2.2. Képformátumok</a></h3>
+
+A skinhez használt képek trucolor (24 vagy 32 bit/pixel) BMP, TGA vagy PNG
+formátumban lehetnek (a TGA-nak tömörítetlennek kell lennie).
+<em>Jó tömörítési hatásfoka miatt a PNG javasolt.</em>
+
+<p>
+A főablakban (lásd alább) teljesen "átlátszó" részeket tartalmazó képeket
+is lehet használni: az átlátszónak szánt területeket az #FF00FF
+(<font color="#FF00FF">lila</font>) színnel kell megjelölni. Ez azt jelenti,
+hogy a főablak akár "formára vágott" is lehet, ha az X szervereden van
+XShape támogatás.
+
+
+<h3><a name="parts">2.3. A skin részei</a></h3>
+
+A skin felépítése meglehetősen szabad (ellentétben például a Winamp/XMMS
+fix felépítésű skinjével), így csak rajtad múlik, hogy mit hozol ki belőle.
+
+<p>
+Jelenleg három "bőrözhető" ablak van: a <a href="#mainwin">főablak</a>,
+a <a href="#subwindow">lejátszóablak</a> és a <a href="#skinmenu">skin menü</a>
+(utóbbi a jobb gomb lenyomásával jeleníthető meg).
+
+<ul>
+<li>
+Az MPlayert a <b>főablakból</b> lehet irányítani. Az ablak alapját egy
+kép adja, erre lesznek rárajzolva a különféle elemek:
+<em>gombok</em>, <em>potméterek</em> és <em>címkék</em>.
+Természetesen minden elemhez tartozik egy kép, aminek kirajzolásához meg
+kell adni a méretét és az ablakon belüli helyét.
+
+<p>
+Egy <b>gombnak</b> három állapota van (lenyomott, felengedett, letiltott),
+így a gomb képe ennek megfelelően három egymás alatti részből áll.
+Részletekért lásd a <a href="#main.button">button</a> elem leírását.
+<p>
+Egy <b>potméter</b> (ez főleg pozícionáláshoz és hangerő/balansz állításhoz
+használatos) képe több különböző fázisból állhat, így a potméterhez
+készített kép szintén egymás alatti részekből áll.
+Részletekért lásd a <a href="#main.hpotmeter">hpotmeter</a> és a
+<a href="#main.potmeter">potmeter</a> elemet.
+
+<p>
+A <b>címkék</b> némileg különlegesek, ugyanis a kirajzolásukhoz szükséges
+karakterek egy képről származnak, amin belül az egyes karakterek helyét
+és méretét egy szöveges <a href="#fonts">fontleíró fájl</a> segítségével kell
+megadni. A címkékről részletesen a <a href="#main.dlabel">dlabel</a> és
+<a href="#main.slabel">slabel</a> elemnél olvashatsz.
+
+<p>
+<em class=note>
+<b>Megjegyzés:</b> a főablak rajzolásához használt képek tartalmazhatnak
+teljesen átlátszó részeket, ahogy arról a
+<a href="#images">képformátumoknál</a> már szó volt.
+</em>
+</li>
+
+<li>
+A <b>lejátszóablakban</b> lesz lejátszva a film. Ha nincs
+betöltve film, akkor meg lehet jeleníteni benne egy előre megadott képet
+(hogy ne legyen olyan üres :-)).
+<em class=note>
+<b>Megjegyzés:</b> ezen a képen az átlátszóság nincs megengedve.
+</em>
+</li>
+
+<li>
+A <b>skin menü</b> egy újabb módja az MPlayer irányításának, csak éppen
+menüpontok segítségével. Kirajzolásához két képre van szükség:
+az egyik a normál, a másik pedig a kijelölt menüpontokból felépített menüt
+adja. Amikor a menü
+megjelenik, akkor az első kép lesz kirajzolva. Ha az egeret egy menüpont fölé
+viszed, akkor annak az egy menüpontnak a kijelölt képe a második képről rá
+lesz másolva az ablakban levő képre.
+(A lényeg tehát az, hogy a második kép sohasem
+jelenik meg teljes egészében, hanem mindig csak egy menüpontja lesz
+kirajzolva.)
+<p>
+A menüpontokat a képeken belüli helyükkel és méretükkel kell definiálni
+(lásd a <a href="#skinmenu">skin menüről</a> szóló részt).
+</li>
+</ul>
+
+<p>
+Egy fontos dologról még nem esett szó: a gombok, potméterek és menüpontok
+működéséhez az MPlayernek tudnia kell, hogy mit is csináljon, ha rájuk
+kattintasz. Ez <a href="#guimsg">üzenetek</a> (események) segítségével
+valósul meg. Az előbb említett elemekhez mindig meg kell adni azt az üzenetet,
+amit majd a kattintásra generálnak.
+
+
+<h3><a name="files">2.4. Fájlok</a></h3>
+
+A fentiek ismeretében egy skinhez az alábbi fájlok szükségesek.
+<ul>
+<li>
+A skin összerakása a <a href="#skin">skin</a> nevű konfigurációs fájl
+segítségével történik. Ez adja meg az MPlayernek, hogy miként állítsa elő az
+egyes részekből a képernyőn az ablak képét, illetve hogy mit csináljon,
+ha kattintasz valahová az ablakban.
+</li>
+<li>A főablak hátterének képe.</li>
+<li>
+A főablak egyes elemeinek képei, beleértve a címkék rajzolásához szükséges
+fontleíró fájlokat is.
+</li>
+<li>A lejátszóablakban megjelenített kép (nem kötelező).</li>
+<li>A menühöz tartozó két kép (nem kötelezőek, ha nem készítesz menüt).</li>
+</ul>
+
+A <code>skin</code> fájl kivételével az összes fájlt úgy nevezed el,
+ahogy csak akarod (de a fontleíró fájloknak .fnt kiterjesztésűeknek kell
+lenniük).
+
+<h2><a name="skin">3. A <code><b>skin</b></code> fájl</a></h2>
+
+Amint fentebb írtam, ez a skin konfigurációs fájl.
+A fájl sor-orientált; megjegyzéseket a "<code>;</code>" karakterrel lehet
+kezdeni a sor elején (legfeljebb szóközök és tab karakterek lehetnek
+a "<code>;</code>" előtt).
+
+<p>
+A fájl egy vagy több szekcióból áll, ahol minden szekció egy alkalmazás
+leírására szolgál, és a következőképpen néz ki:
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+section = <i>szekciónév</i>
+.
+.
+.
+end
+</pre></td></tr></table>
+
+<p>
+Jelenleg csak egyetlen alkalmazás van, így csak egy szekciót kell megadni:
+ennek neve <b>movieplayer</b>.
+
+<p>
+Ezen a szekción belül az MPlayer minden egyes ablakához az alábbi formájú
+leíró blokkok tartoznak:
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+window = <i>ablaknév</i>
+.
+.
+.
+end
+</pre></tr></td></table>
+Az <i>ablaknév</i> a következők valamelyike lehet:
+<ul>
+<li><b>main</b> - a főablak</li>
+<li><b>sub</b> - a lejátszóablak</li>
+<li><b>menu</b> - a skin menü</li>
+</ul>
+
+<p>
+(A lejátszóablak és a menü blokkja el is hagyható, ha nincs szükséged
+rájuk.)
+
+<p>
+A blokkon belül az ablak minden egyes elemét ilyen sorok adják meg:
+
+<blockquote>
+<pre>
+elem = paraméter
+</pre>
+</blockquote>
+
+<p>
+Az <i>elem</i> egy rögzített név,
+a <i>paraméter</i> pedig egy numerikus vagy szöveges érték (vagy vesszőkkel
+elválasztott értéklista).
+
+<p>
+A fentiek együtt valahogy így néznek ki:
+
+<p>
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+section = movieplayer
+  window = main
+  ; ... a főablak elemei ...
+  end
+  
+  window = sub
+  ; ... a lejátszóablak elemei ...
+  end
+  
+  window = menu
+  ; ... a skin menü elemei ...
+  end
+end
+</pre></tr></td></table>
+
+<p>
+Végezetül néhány szó az elemekhez rendelt képek megadásáról.
+<br>
+A fájlok nevét könyvtárak nélkül kell megadni, ugyanis a képeket a skin
+könyvtárában keresi az MPlayer. A fájlok kiterjesztése elhagyható.
+Ha a megadott
+fájl nem létezik, akkor az MPlayer megpróbálja betölteni a
+<i>&lt;fájlnév&gt;.&lt;kit&gt;</i> nevű fájlt, ahol a <i>&lt;kit&gt;</i>
+helyére a <i>tga</i>, <i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i>
+és <i>PNG</i> végződést helyezi (a megadott sorrendben). Az első létező fájlt
+fogja betölteni.
+
+<p>
+
+<table border=1 cellpadding=5 width="100%"><tr bgcolor="#ffffcc"><td>
+Itt egy példa, hogy mindez világosabb legyen. Tegyük fel, hogy a
+<i>main.png</i> lesz a főablak háttere, amit így adsz meg:
+<blockquote>
+<pre>
+    base = main, -2, -2
+</pre>
+</blockquote>
+
+Ennek hatására az MPlayer megpróbálja betölteni a <i>main</i>, <i>main.tga</i>,
+<i>main.TGA</i>, <i>main.bmp</i> stb. fájlt, így végül megtalálja a
+<i>main.png</i>-t.
+<br>
+Ha (mondjuk tévedésből) ezt írnád:
+<blockquote>
+<pre>
+    base = main.bmp, -2, -2
+</pre>
+</blockquote>
+akkor az MPlayer a <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
+<i>main.bmp.bmp</i> stb. betöltésével próbálkozna, majd végül feladná a dolgot,
+hiszen a könyvtárban <i>main.png</i> van, nem pedig <i>main.bmp</i>.
+</td></tr></table>
+
+
+<h3><a name="mainwin">3.1. A főablak</a></h3>
+
+Az alábbiakban a "<code>window = main</code>" .&nbsp;.&nbsp;.
+"<code>end</code>" blokkban használható elemek leírása következik.
+
+<dl>
+<dt><a name="main.base">
+<b>base = <i>kép, x, y</i></b>
+</a></dt>
+<dd>
+Ezzel kell megadni a főablak hátteréül szolgáló képet. Az
+<i>x</i>,<i>y</i> az ablak helyét adja meg a képernyőn
+(0,0 a képernyő bal felső
+sarka). Értékük igazításra is használható: a -1 középre, a
+-2 pedig jobbra (x) illetve alulra (y) igazítást jelent.
+<p>
+<em class=warn>
+<b>Figyelem:</b> a képen az átlátszónak megjelölt területek (#FF00FF színűek)
+feketék lesznek az XShape támogatás nélküli X szervereken.
+</em>
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.button">
+<b>button = <i>kép, x, y, szél, mag, üzenet</i></b></a></dt>
+<dd>
+Egy <i>szél</i> * <i>mag</i> pixel méretű nyomógombot helyez az ablak
+<i>x</i>,<i>y</i> pozíciójába. A gomb lenyomáskor a megadott
+<i>üzenet</i>et generálja.
+A <i>kép</i> paraméterrel megadott képnek három egymás alatti részből kell
+állnia a gomb három lehetséges állapotának megfelelően, valahogy így:
+<div align=center><table><tr><td><pre><small>
++---------------+
+|   lenyomott   |
++---------------+
+|  felengedett  |
++---------------+
+|   letiltott   |
++---------------+
+</small></pre></td></tr></table></div>
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.decoration">
+<b>decoration = enable|disable</b>
+</a></dt>
+<dd>
+Engedélyezi (<b>enable</b>) vagy tiltja (<b>disable</b>) az ablakkezelőnek
+a főablak dekorációját. Alapértelmezés szerint a dekoráció le van tiltva.
+</dd>
+</dl>
+
+<dl>
+<dt>
+<a name="main.hpotmeter">
+<b>
+hpotmeter = <i>gomb, gsz, gm, fáziskép, fázisok, alap, x, y, sz, m, üzenet</i>
+</b>
+</a>
+</dt>
+<dd>
+Egy <i>sz</i> * <i>m</i> pixel méretű vízszintes potmétert
+("csúszkát") helyez az ablak <i>x</i>,<i>y</i> pozíciójába.
+A potméter képe több fázisból állhat (például a hangerő potmétere lehet egy
+zöldből vörösbe tartó színátmenet, ahogy a potmétert minimumról maximumra
+húzzák). A potméternek van egy gombja is, amit végig lehet húzni a potméter
+hossza mentén.
+A paraméterek jelentése:
+<ul>
+<li><i>gomb</i> - a hpotmeter gombjának képe
+(ugyanúgy három egymás alatti részből kell állnia, mint a
+<a href="#main.button">button</a> elem képének)</li>
+<li><i>gsz</i>, <i>gm</i> - a gomb szélessége és magassága</li>
+<li><i>fáziskép</i> - A hpotmeter egyes fázisait tartalmazó kép, ami
+a <i>fázisok</i> paraméter által adott számú egymás alatti részből áll
+(lásd lent).
+Ha nincs szükséged fázisképre, akkor azt a <kbd>NULL</kbd> érték megadásával
+jelezheted.
+</li>
+<li><i>fázisok</i> - a fázisok száma a <i>fáziskép</i> által adott
+képen</li>
+<li><i>alap</i> - a hpotmeter kezdőértéke (0-tól 100-ig)</li>
+<li><i>x</i>, <i>y</i> - a hpotmeter pozíciója az ablakban</li>
+<li><i>sz</i>, <i>m</i> - a hpotmeter szélessége és magassága</li>
+<li><i>üzenet</i> - a hpotmeter értékének megváltozásakor generált
+üzenet</li>
+</ul>
+Az egyes fázisokat tartalmazó képnek valahogy így kell kinéznie:
+<div align=center><table border=0><tr><td><pre><small>
++-----------------+
+|  1. fázis képe  |
++-----------------+
+|  2. fázis képe  |
++-----------------+
+.                 .
++-----------------+
+|  n. fázis képe  |
++-----------------+
+</small></pre></td></tr></table></div>
+<em class=note>
+<b>Megjegyzés:</b> a hpotmeter-nek lesz párja is (vpotmeter), de az jelenleg
+még nincs kész.
+</em>
+</dd>	
+</dl>
+
+<dl>
+<dt><a name="main.potmeter">
+<b>potmeter = <i>fáziskép, fázisok, alap, x, y, sz, m, üzenet</i></b>
+</a></dt>
+<dd>
+Ez egy gomb nélküli potméter. (Azt hiszem, forgatható akar
+lenni, de jelenleg csak a vízszintes irányú húzásra reagál.) 
+A paraméterek jelentését lásd a
+<a href="#main.hpotmeter">hpotmeter-nél</a>.
+A <i>fáziskép</i> itt is lehet <code>NULL</code>, de elég furcsán
+mutat, ha nem látod a potméter állását (hiszen gombja nincs)...
+
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.font">
+<b>font = <i>fontfájl, fontazon</i></b>
+</a></dt>
+<dd>
+Egy fontot definiál. A <i>fontfájl</i> egy <code>.fnt</code> kiterjesztésű
+szöveges fontleíró fájl neve (a kiterjesztést itt <b>nem kell</b> megadni).
+A <i>fontazon</i> a későbbiekben a font azonosítására szolgál
+(lásd a <a href="#main.dlabel">dlabel</a> és
+<a href="#main.slabel">slabel</a> elemet).
+Maximum 25 font definiálható.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.dlabel">
+<b>dlabel = <i>x, y, hossz, igazítás, fontazon, "szöveg"</i></b>
+</a></dt>
+<dd>
+Egy dinamikus címkét helyez az <i>x</i>,<i>y</i> pozícióba.
+A címke attól dinamikus, hogy a tartalma periodikusan frissítve van.
+A <i>hossz</i> a címke maximális hosszát adja pixelben (magassága
+egy karakternyi). Ha a címke szövege hosszabb ennél,
+akkor az adott területen belül folyamatosan görgetve lesz. Ha rövidebb, akkor
+az <i>igazítás</i> paraméter értéke szerint lesz igazítva a területen
+belül: 0 esetén jobbra, 1 esetén középre, 2 esetén balra.
+<br>
+A <i>szöveg</i> paraméter adja a címke szövegét, amit kötelező dupla
+idézőjelek (<code>"</code>) közé írni (ám jelenleg a <code>"</code> nem
+lehet része a szövegnek). A megjelenítés a <i>fontazon</i> által
+azonosított fonttal történik. A címke szövegében az alább 
+felsorolt változók is használhatók.
+<div align=center>
+<table valign=top border=1>
+<tr align=center><th>Változó</th><th align=left>Jelentése</th></tr>
+<tr><td align=center><kbd>$1</kbd></td>
+    <td>lejátszás ideje <em>hh:mm:ss</em> formában</td></tr>
+<tr><td align=center><kbd>$2</kbd></td>
+    <td>lejátszás ideje <em>mmmm:ss</em> formában</td></tr>
+<tr><td align=center><kbd>$3</kbd></td>
+    <td>lejátszás ideje <em>hh</em> formában (órák)</td></tr>
+<tr><td align=center><kbd>$4</kbd></td>
+    <td>lejátszás ideje <em>mm</em> formában (percek)</td></tr>
+<tr><td align=center><kbd>$5</kbd></td>
+    <td>lejátszás ideje <em>ss</em> formában (másodpercek)</td></tr>
+<tr><td align=center><kbd>$6</kbd></td>
+    <td>film hossza <em>hh:mm:ss</em> formában</td></tr>
+<tr><td align=center><kbd>$7</kbd></td>
+    <td>film hossza <em>mmmm:ss</em> formában</td></tr>
+<tr><td align=center><kbd>$8</kbd></td>
+    <td>lejátszás ideje <em>h:mm:ss</em> formában</td></tr>
+<tr><td align=center><kbd>$v</kbd></td>
+    <td>hangerő <em>xxx.xx%</em> formában</td></tr>
+<tr><td align=center><kbd>$V</kbd></td>
+    <td>hangerő <em>xxx.x</em> formában</td></tr>
+<tr><td align=center><kbd>$b</kbd></td>
+    <td>balansz <em>xxx.xx%</em> formában</td></tr>
+<tr><td align=center><kbd>$B</kbd></td>
+    <td>balansz <em>xxx.x</em> formában</td></tr>
+<tr><td align=center><kbd>$$</kbd></td>
+    <td>a <kbd>$</kbd> karakter</td></tr>
+<tr><td align=center><kbd>$a</kbd></td>
+    <td>egy karakter a hang fajtájának megfelelően (nincs: <code>n</code>,
+    mono: <code>m</code>, sztereó: <code>t</code>)</td></tr>
+<tr><td align=center><kbd>$t</kbd></td>
+    <td>track száma (a lejátszólistában)</td></tr>
+<tr><td align=center><kbd>$o</kbd></td>
+    <td>fájlnév</td></tr>
+<tr><td align=center><kbd>$f</kbd></td>
+    <td>fájlnév csupa kisbetűvel</td></tr>
+<tr><td align=center><kbd>$F</kbd></td>
+    <td>fájlnév csupa nagybetűvel</td></tr>
+<tr><td align=center><kbd>$T</kbd></td>
+    <td>egy karakter a stream típusának megfelelően (fájl: <code>f</code>,
+    video CD: <code>v</code>, DVD: <code>d</code>, URL: <code>u</code>)
+    </td></tr>
+<tr><td align=center><kbd>$p</kbd></td>
+    <td>a "p" karakter, ha a lejátszás folyamatban van, és a
+    font tartalmazza a "p" karaktert</td></tr>
+<tr><td align=center><kbd>$s</kbd></td>
+    <td>az "s" karakter, ha a lejátszás le van állítva, és a
+    font tartalmazza az "s" karaktert</td></tr>
+<tr><td align=center><kbd>$e</kbd></td>
+    <td>az "e" karakter, ha a lejátszás szünetel, és a font
+    tartalmazza az "e" karaktert</td></tr>
+</table></div>
+<p>
+<b>Megjegyzés:</b> a <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
+és <kbd>$e</kbd> változók lehetővé teszik, hogy az általuk visszaadott
+karakterekkel különleges szimbólumokat jeleníts meg (például az "e"
+karakterrel a szünet jelét, ami többnyire valami ilyesmi: <code>||</code>).
+Ezeknek a szimbólumoknak célszerű külön fontot készíteni. Lásd a
+<a href="#symbols">szimbólumokról</a> szóló részt.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.slabel">
+<b>slabel = <i>x, y, fontazon, "szöveg"</i></b>
+</a></dt>
+<dd>
+Egy állandó szövegű címkét jelenít meg az <i>x</i>,<i>y</i>
+pozícióban. A <i>szöveg</i> egy "sima" szöveg
+($x formájú változók itt nem működnek), amit dupla idézőjelek közé kell írni
+(jelenleg a <code>"</code> nem lehet a szöveg része).
+A címke a <i>fontazon</i> által azonosított fonttal lesz megjelenítve.
+</dd>
+</dl>
+
+
+<h3><a name="subwindow">3.2. Lejátszóablak</a></h3>
+
+A "<code>window = sub</code>" .&nbsp;.&nbsp;. "<code>end</code>" blokkban
+az alább felsorolt elemek használhatók.
+
+<dl>
+<dt><a name="sub.base">
+<b>base = <i>kép, x, y, szélesség, magasság</i></b>
+</a></dt>
+<dd>
+Ezzel tudod megadni az ablakban megjelenítendő képet. Az 
+<i>x</i> és <i>y</i> paraméter az ablak pozícióját adja a képernyőn
+(0,0 a bal felső sarok). Értéke igazításra is használható: a -1 középre
+igazít, a -2 pedig jobbra (x) illetve alulra (y).
+A <i>szélesség</i> és <i>magasság</i> az ablak méretét adja; akár el
+is hagyhatók (ilyenkor az ablak mérete megegyezik a kép méretével).
+</dd>
+</dl>
+
+<dl>
+<dt><a name="sub.background">
+<b>background = <i>r, g, b</i></b>
+</a></dt>
+<dd>
+Ezzel tudod beállítani az ablak háttérszínét. Akkor hasznos, ha az ablak
+nagyobb a megjelenített képnél.
+Az <i>r</i>, <i>g</i>, <i>b</i> a szín vörös, zöld, kék
+összetevőjét adja meg (mindegyik egy decimális szám 0-tól 255-ig).
+</dd>
+</dl>
+
+
+<h3><a name="skinmenu">3.3. Skin menü</a></h3>
+
+Amint arról már szó volt, a menü két kép segítségével van kirajzolva.
+A menü alapját a <i>base</i> elem képe adja, míg a kijelölt menüpont a
+<i>selected</i> elem képéről lesz a háttérre rajzolva. Egy menüpont
+képen belüli pozícióját és méretét a <i>menu</i> elem adja meg.
+
+<p>
+A "<code>window = menu</code>" .&nbsp;.&nbsp;. "<code>end</code>" blokkban
+az alább felsorolt elemek használhatók.
+
+<dl>
+<dt><a name="menu.base">
+<b>base = <i>kép</i></b>
+</a></dt>
+<dd>
+A normál menü képe.
+</dl>
+</dd>
+
+<dl>
+<dt><a name="menu.selected">
+<b>selected = <i>kép</i></b>
+</a></dt>
+<dd>
+A kép, amin az összes menüpont kijelölt állapotban van.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="menu.menu">
+<b>menu = <i>x, y, szélesség, magasság, üzenet</i></b>
+</a></dt>
+<dd>
+Megadja egy menüpont képen belüli <i>x</i>,<i>y</i> pozícióját
+és méretét. Ha az egérgombot felengeded a menüpont felett, akkor az
+<i>üzenet</i> paraméterben megadott üzenetet generálja.
+</dd>
+</dl>
+
+
+<h2><a name="fonts">4. Fontok</a></h2>
+
+A skin részeiről szóló pontban már említettem, hogy egy font az egyes
+karakterek
+előre megrajzolt képéből és egy szöveges leíró fájlból áll. A képen belül
+a karakterek bárhol lehetnek, a lényeg az, hogy a leíró fájlban pontosan add
+meg minden karakter helyét és méretét.
+
+<p>
+A fájl .fnt kirejesztésű; lehetnek benne megjegyzések, ezeket a sor elejére
+írt "<code>;</code>" karakterrel kell kezdeni.
+Az alábbi sornak feltétlenül szerepelnie kell valahol (célszerűen a fájl
+elején):
+<blockquote>
+<pre>
+image = <i>kép</i>
+</pre>
+</blockquote>
+
+<p>
+A <i>kép</i> a karakterek képét tartalmazó fájl neve
+(a kiterjesztés itt is elhagyható).
+Ezt a sort az egyes karaktereket definiáló sorok követik, amiknek
+így kell kinézniük:
+
+<blockquote>
+<pre>
+"<i>kar</i>" = <i>x, y, sz, m</i>
+</pre>
+</blockquote>
+
+<p>
+Itt <i>x</i> és <i>y</i> a <i>kar</i> karakter képen
+belüli pozíciója (0,0 a kép bal felső sarka), az
+<i>sz</i> és <i>m</i> pedig a karakter szélessége és magassága
+pixelben.
+
+<p>
+Az alábbi példa a font.png képen egymás után rajzolt A, B és C karaktert
+definiálja.
+<table width="100%" border=1><tr bgcolor=silver><td><pre>
+; "font.png" helyett akár "font" is lehet
+image = font.png
+
+; Három karakter legfeljebb csak példának elég. :-)
+"A" =  0,0, 7,13
+"B" =  7,0, 7,13
+"C" = 14,0, 7,13
+</pre></td></tr></table>
+
+
+<h3><a name="symbols">4.1. Szimbólumok</a></h3>
+
+A <a href="#main.dlabel">dlabel</a> elem bizonyos változói olyan karaktereket
+adnak vissza, amikhez célszerű külön fontot készíteni, hogy így különféle
+szimbólumokat, jeleket lehessen megjeleníteni az adott karakterek helyett.
+(Például a DVD streamet jelentő "d" karakterhez rajzolhatsz egy szép
+kis "DVD" feliratot.)
+
+<p>
+Az alábbi táblázatban láthatók azok a karakterek, amik szimbólumok
+megjelenítésére használhatók, és amikhez érdemes külön fontot készíteni.
+
+<div align=center>
+<table>
+<tr><th align=center>Karakter</th><th align=left>Szimbólum</th></tr>
+<tr><td align=center><kbd>p</kbd></td>
+    <td align=left>lejátszás (play)</td></tr>
+<tr><td align=center><kbd>s</kbd></td>
+    <td align=left>leállítás (stop)</td></tr>
+<tr><td align=center><kbd>e</kbd></td>
+    <td align=left>szünet (pause)</td></tr>
+<tr><td align=center><kbd>n</kbd></td>
+    <td align=left>nincs hang</td></tr>
+<tr><td align=center><kbd>m</kbd></td>
+    <td align=left>mono hang</td></tr>
+<tr><td align=center><kbd>t</kbd></td>
+    <td align=left>sztereó hang</td></tr>
+<tr><td align=center><kbd>f</kbd></td>
+    <td align=left>a stream egy fájl</td></tr>
+<tr><td align=center><kbd>v</kbd></td>
+    <td align=left>a stream egy video CD</td></tr>
+<tr><td align=center><kbd>d</kbd></td>
+    <td align=left>a stream egy DVD</td></tr>
+<tr><td align=center><kbd>u</kbd></td>
+    <td align=left>a stream egy URL</td></tr>
+</table>
+</div>
+
+<p>
+<b>Megjegyzés:</b> jelenleg csak a "p", "s", "e", "n", "m" és "t"
+szimbólum használható.
+</p>
+
+<h2><a name="guimsg">A. függelék: GUI üzenetek</a></h2>
+
+A gombok, potméterek és menüpontok az alább felsorolt üzeneteket generálhatják.
+
+<p>
+<em class=note><b>Megjegyzés:</b> jelenleg még nem mindegyik üzenet működik
+(vagy legalábbis nem megfelelően). Amint tudod, a GUI még fejlesztés alatt áll.
+</em>
+
+<p>
+<i>Lejátszás:</i>
+<blockquote>
+<dl>
+<dt><b>evNext</b>
+<dd>A következő számra ugrik a lejátszólistában.
+
+<dt><b>evPause</b>
+<dd>Szünetelteti a lejátszást.
+
+<dt><b>evPauseSwitchToPlay</b>
+<dd>Az <i>evPlaySwitchToPause</i> üzenettel együtt egy kapcsolót alkot, ami
+egy (látszólag) közös lejátszás/szünet gomb használatát teszi lehetővé.
+Mindkét üzenetet egy-egy gombhoz célszerű hozzárendelni, és a gombokat azonos
+pozícióba kell rakni. Ennek az üzenetnek a hatására a lejátszás szünetel, és
+az <i>evPlaySwitchToPause</i> gomb képe lesz kirajzolva
+(jelezve hogy lenyomhatod a
+gombot a lejátszás folytatásához).
+
+<dt><b>evPlay</b>
+<dd>Megkezdi a lejátszást.
+
+<dt><b>evPlaySwitchToPause</b>
+<dd>Az <i>evPauseSwitchToPlay</i> párja. Az üzenet hatására a megkezdődik a
+lejátszás,
+és az <i>evPauseSwitchToPlay</i> gomb képe lesz kirajzolva (jelezve hogy
+lenyomhatod a gombot a lejátszás szüneteltetéséhez).
+
+<dt><b>evPrev</b>
+<dd>Az előző számra ugrik a lejátszólistában.
+
+<dt><b>evStop</b>
+<dd>Megállítja a lejátszást.
+</dl>
+</blockquote>
+
+<p>
+<i>Pozícionálás:</i>
+<blockquote>
+<dl>
+<dt><b>evBackward10sec</b>
+<dt><b>evBackward1min</b>
+<dt><b>evBackward10min</b>
+<dd>10 másodpercet / 1 percet / 10 percet ugrik vissza a lejátszásban.
+
+<dt><b>evForward10sec</b>
+<dt><b>evForward1min</b>
+<dt><b>evForward10min</b>
+<dd>10 másodpercet / 1 percet / 10 percet ugrik előre a lejátszásban.
+
+<dt><b>evSetMoviePosition</b>
+<dd>A megadott pozícióra ugrik (potméternél használatos, a potméter
+relatív értékét (0-100%) használja).
+</dl>
+</blockquote>
+  
+<p>
+<i>Videoval kapcsolatos üzenetek:</i>
+<blockquote>
+<dl>
+<dt><b>evDoubleSize</b>
+<dd>Dupla méretűre állítja a lejátszóablakot.
+
+<dt><b>evFullScreen</b>
+<dd>Váltás ablakos és teljes képernyős mód között (oda-vissza működik).
+
+<dt><b>evNormalSize</b>
+<dd>Normál méretűre állítja a lejátszóablakot.
+</dl>
+</blockquote>
+
+<p>
+<i>Hanggal kapcsolatos üzenetek:</i>
+<blockquote>
+<dl>
+<dt><b>evDecAudioBufDelay</b>
+<dd>Csökkenti a hang késleltetését.
+
+<dt><b>evDecBalance</b>
+<dd>Csökkenti a balanszot.
+
+<dt><b>evDecVolume</b>
+<dd>Csökkenti a hangerőt.
+
+<dt><b>evIncAudioBufDelay</b>
+<dd>Növeli a hang késleltetését.
+
+<dt><b>evIncBalance</b>
+<dd>Növeli a balanszot.
+
+<dt><b>evIncVolume</b>
+<dd>Növeli a hangerőt.
+
+<dt><b>evMute</b>
+<dd>Kikapcsolja/bekapcsolja a hangot.
+
+<dt><b>evSetBalance</b>
+<dd>Adott értékre állítja a balanszot (potméterrel használatos, a potméter
+relatív értékét (0-100%) használja).
+
+<dt><b>evSetVolume</b>
+<dd>Adott értékre állítja a hangerőt (potméterrel használatos, a potméter
+relatív értékét (0-100%) használja).
+</dl>
+</blockquote>
+
+<p>
+<i>Egyéb üzenetek:</i>
+<blockquote>
+<dl>
+<dt><b>evAbout</b>
+<dd>Megjeleníti a program információs ablakát.
+
+<dt><b>evEqualeaser</b>
+<dd>Bekapcsolja/kikapcsolja az equalizert.
+
+<dt><b>evExit</b>
+<dd>Kilép a programból.
+
+<dt><b>evIconify</b>
+<dd>Ikonizálja az ablakot.
+
+<dt><b>evLoad</b>
+<dd>Betölt egy fájlt (amit egy fájlválasztó ablakban jelölhetsz ki).
+
+<dt><b>evLoadPlay</b>
+<dd>Ugyanaz mint az <i>evLoad</i>, de betöltés után automatikusan megkezdi
+a lejátszást.
+
+<dt><b>evNone</b>
+<dd>Üres üzenet, nincs hatása. (Legfeljebb csak a CVS verzióban. :-))
+
+<dt><b>evPlayList</b>
+<dd>Megnyitja/bezárja a lejátszólista ablakot.
+
+<dt><b>evPreferences</b>
+<dd>Megnyitja a beállítások ablakot.
+
+<dt><b>evSkinBrowser</b>
+<dd>Megnyitja a skinböngésző ablakot.
+</dl>
+</blockquote>
+
+</body>
+</html>
