@@ -1,11 +1,11 @@
 /*
     VIDIX accelerated overlay in a X window
     
-    (C) Alex Beregszaszi & Nick Kurshev
+    (C) Alex Beregszaszi & Zoltan Ponekker & Nick Kurshev
     
     WS window manager by Pontscho/Fresh!
 
-    Based on vo_gl.c and vo_vesa.c
+    Based on vo_gl.c and vo_vesa.c and vo_xmga.c (.so mastah! ;))
 */
 
 #include <stdio.h>
@@ -22,11 +22,16 @@
 #include <X11/Xutil.h>
 //#include <X11/keysym.h>
 
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
+
 #include "x11_common.h"
 #include "aspect.h"
 #include "mp_msg.h"
 
 #include "vosub_vidix.h"
+#include "../vidix/vidixlib.h"
 
 LIBVO_EXTERN(xvidix)
 
@@ -39,8 +44,13 @@ static vo_info_t vo_info =
 };
 
 /* X11 related variables */
-static Window mywindow;
+static Window mWindow;
 static int X_already_started = 0;
+
+static GC mGC;
+static XGCValues mGCV;
+
+static uint32_t	fgColor;
 
 /* VIDIX related stuff */
 static const char *vidix_name = (char *)(-1);
@@ -61,18 +71,90 @@ static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight, mFullscreen;
 
-static void resize(int x, int y)
+#ifdef HAVE_NEW_GUI
+static uint32_t	mdwidth, mdheight;
+#endif
+
+static vidix_grkey_t gr_key;
+
+static void mDrawColorKey(void)
 {
-    XGetGeometry(mDisplay, mywindow, &mRoot, &drwX, &drwY, &drwWidth,
+    XSetForeground(mDisplay, mGC, fgColor);
+    XFillRectangle(mDisplay, mWindow, mGC, drwX, drwY, drwWidth,
+	(mFullscreen ? drwHeight - 1 : drwHeight));
+    XFlush(mDisplay);
+}
+
+static void set_window(int force_update)
+{
+#ifdef HAVE_NEW_GUI
+    if (vo_window != None)
+    {
+	mFullscreen = 0;
+	dwidth = mdwidth;
+	dheight = mdheight;
+	if ((vo_dwidth == vo_screenwidth) && (vo_dheight == vo_screenheight))
+	{
+	    mFullscreen = 1;
+	    dwidth = vo_screenwidth;
+	    dheight = vo_screenwidth * mdheight / mdwidth;
+	}
+    }
+#endif
+
+    XGetGeometry(mDisplay, mWindow, &mRoot, &drwX, &drwY, &drwWidth,
 	&drwHeight, &drwBorderWidth, &drwDepth);
     drwX = drwY = 0;
-    XTranslateCoordinates(mDisplay, mywindow, mRoot, 0, 0, &drwcX, &drwcY, &mRoot);
+    XTranslateCoordinates(mDisplay, mWindow, mRoot, 0, 0,
+	&drwcX, &drwcY, &mRoot);
 
     mp_msg(MSGT_VO, MSGL_DBG2, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
 	drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
 
-    if ((window_x != drwcX) || (window_y != drwcY) ||
-	(window_width != drwWidth) || (window_height != drwHeight))
+    /* following stuff copied from vo_xmga.c */
+    aspect(&dwidth, &dheight, A_NOZOOM);
+#if X11_FULLSCREEN
+    if (mFullscreen)
+    {
+	aspect(&dwidth, &dheight, A_ZOOM);
+	drwX = (vo_screenwidth - (dwidth > vo_screenwidth ? vo_screenwidth : dwidth)) / 2;
+	drwcX += drwX;
+	drwY = (vo_screenheight - (dheight > vo_screenheight ? vo_screenheight : dheight)) / 2;
+	drwcY += drwY;
+	drwWidth = (dwidth > vo_screenwidth ? vo_screenwidth : dwidth);
+	drwHeight = (dheight > vo_screenheight ? vo_screenheight : dheight);
+	mp_msg(MSGT_VO, MSGL_DBG2, "[xvidix-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
+	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
+    }
+#endif
+
+    mDrawColorKey();
+
+#ifdef HAVE_XINERAMA
+    if (XineramaIsActive(mDisplay))
+    {
+	XineramaScreenInfo *screens;
+	int num_screens;
+	int i = 0;
+	
+	screens = XineramaQueryScreens(mDisplay, &num_screens);
+	
+	/* find the screen we are on */
+	while ((screens[i].x_org <= drwcX) || (screens[i].y_org <= drwcY) ||
+		(screens[i].x_org + screens[i].width >= drwcX) ||
+		(screens[i].y_org + screens[i].height >= drwcY))
+	    i++;
+
+	/* set drwcX and drwcY to the right values */
+	drwcX = drwcX - screens[i].x_org;
+	drwcY = drwcY - screens[i].y_org;
+	XFree(screens);
+    }
+#endif
+
+    /* set new values in VIDIX */
+    if (force_update || ((window_x != drwcX) || (window_y != drwcY) ||
+	(window_width != drwWidth) || (window_height != drwHeight)))
     {
 	window_x = drwcX;
 	window_y = drwcY;
@@ -91,8 +173,6 @@ static void resize(int x, int y)
     	    exit(1); /* !!! */
 	}
 	vidix_start();
-        x = window_width;
-        y = window_height;
     }
     
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
@@ -160,32 +240,61 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     if (!vo_init())
         return(-1);
 
-    aspect_save_orig(width,height);
-    aspect_save_prescale(d_width,d_height);
-    aspect_save_screenres(vo_screenwidth,vo_screenheight);
+    aspect_save_orig(width, height);
+    aspect_save_prescale(d_width, d_height);
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
 
-    X_already_started++;
+    window_x = 0;
+    window_y = 0;
+    window_width = d_width;
+    window_height = d_height;
 
-    aspect(&d_width, &d_height, A_NOZOOM);
-#ifdef X11_FULLSCREEN
-    if (flags & 0x01) /* fullscreen */
-      if(flags & 0x04)	aspect(&d_width, &d_height, A_ZOOM);
-      else
-      {
-	d_width = vo_screenwidth;
-	d_height = vo_screenheight;
-      }
+#ifdef HAVE_NEW_GUI
+    mdwidth = width;
+    mdheight = height;
 #endif
 
-    hint.x = 0;
-    hint.y = 0;
-    hint.width = d_width;
-    hint.height = d_height;
-    hint.flags = PPosition | PSize;
+    mFullscreen = flags&0x01;
 
-    /* Get some colors */
-    bg = WhitePixel(mDisplay, mScreen);
-    fg = BlackPixel(mDisplay, mScreen);
+    X_already_started++;
+    
+    /* from xmga.c */
+    switch(vo_depthonscreen)
+    {
+	case 32:
+	case 24:
+	    fgColor = 0x00ff00ffL;
+	    break;
+	case 16:
+	    fgColor = 0xf81fL;
+	    break;
+	case 15:
+	    fgColor = 0x7c1fL;
+	    break;
+	default:
+	    mp_msg(MSGT_VO, MSGL_ERR, "Sorry, this (%d) color depth is not supported\n",
+		vo_depthonscreen);
+    }
+
+    aspect(&d_width, &d_height, A_NOZOOM);
+
+#ifdef HAVE_NEW_GUI
+if (vo_window == None)
+{
+#endif
+
+#ifdef X11_FULLSCREEN
+    if (mFullscreen) /* fullscreen */
+        if (flags & 0x04)
+        {
+    	    aspect(&d_width, &d_height, A_ZOOM);
+        }
+    	else
+    	{
+	    d_width = vo_screenwidth;
+	    d_height = vo_screenheight;
+    	}
+#endif
 
     /* Make the window */
     XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
@@ -197,67 +306,87 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
         window_depth = 24;
     XMatchVisualInfo(mDisplay, mScreen, window_depth, TrueColor, &vinfo);
 
-    xswa.background_pixel = 0;
-    xswa.border_pixel     = 1;
+    xswa.background_pixel = BlackPixel(mDisplay, mScreen);
+    xswa.border_pixel     = 0;
     xswa.colormap         = XCreateColormap(mDisplay, RootWindow(mDisplay, mScreen),
 					    vinfo.visual, AllocNone);
-    xswamask = CWBackPixel | CWBorderPixel | CWColormap;
-//    xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask | CWCursor | CWOverrideRedirect | CWSaveUnder | CWX | CWY | CWWidth | CWHeight;
+    xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask;
+    xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if (WinID >= 0)
     {
-	mywindow = WinID ? ((Window)WinID) : RootWindow(mDisplay, mScreen);
-	XUnmapWindow(mDisplay, mywindow);
-	XChangeWindowAttributes(mDisplay, mywindow, xswamask, &xswa);
+	mWindow = WinID ? ((Window)WinID) : RootWindow(mDisplay, mScreen);
+	XUnmapWindow(mDisplay, mWindow);
+	XChangeWindowAttributes(mDisplay, mWindow, xswamask, &xswa);
     }
     else
-	mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
+	mWindow = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
 	    hint.x, hint.y, hint.width, hint.height, xswa.border_pixel,
-	    vinfo.depth, CopyFromParent, vinfo.visual, xswamask, &xswa);
+	    vinfo.depth, InputOutput, vinfo.visual, xswamask, &xswa);
 
-    vo_x11_classhint(mDisplay, mywindow, "xvidix");
-    vo_hidecursor(mDisplay, mywindow);
+    vo_x11_classhint(mDisplay, mWindow, "xvidix");
+    vo_hidecursor(mDisplay, mWindow);
 
-    if (flags & 0x01) /* fullscreen */
-	vo_x11_decoration(mDisplay, mywindow, 0);
+#ifdef X11_FULLSCREEN
+    if (mFullscreen) /* fullscreen */
+	vo_x11_decoration(mDisplay, mWindow, 0);
+#endif
 
-    XSelectInput(mDisplay, mywindow, StructureNotifyMask);
-
-    /* Tell other applications about this window */
-    XSetStandardProperties(mDisplay, mywindow, title, title, None, NULL, 0, &hint);
-
+    XGetNormalHints(mDisplay, mWindow, &hint);
+    hint.x = window_x;
+    hint.y = window_y;
+    hint.base_width = hint.width = window_width;
+    hint.base_height = hint.height = window_height;
+    hint.flags = USPosition | USSize;
+    XSetNormalHints(mDisplay, mWindow, &hint);
+    
+    XStoreName(mDisplay, mWindow, title);
     /* Map window. */
-    XMapWindow(mDisplay, mywindow);
-#if 0
+
+    XMapWindow(mDisplay, mWindow);
 #ifdef HAVE_XINERAMA
-    vo_x11_xinerama_move(mDisplay, mywindow);
+    vo_x11_xinerama_move(mDisplay, mWindow);
 #endif
+
+    mGC = XCreateGC(mDisplay, mWindow, GCForeground, &mGCV);
+
+#ifdef HAVE_NEW_GUI
+}
+else
+{
+    mWindow = vo_window;
+    mGC = vo_gc;
+}
 #endif
 
-    /* Wait for map. */
-    do 
-    {
-    	XNextEvent(mDisplay, &xev);
-    }
-    while ((xev.type != MapNotify) || (xev.xmap.event != mywindow));
+    vidix_grkey_get(&gr_key);
+    gr_key.key_op = KEYS_PUT;
+    gr_key.ckey.op = CKEY_TRUE;
+    gr_key.ckey.red = 255;
+    gr_key.ckey.green = 0;
+    gr_key.ckey.blue = 255;
+    vidix_grkey_set(&gr_key);
 
-    XSelectInput(mDisplay, mywindow, NoEventMask);
+    set_window(1);
 
-    XGetGeometry(mDisplay, mywindow, &mRoot, &drwX, &drwY, &drwWidth,
+#if 0
+    XGetGeometry(mDisplay, mWindow, &mRoot, &drwX, &drwY, &drwWidth,
 	&drwHeight, &drwBorderWidth, &drwDepth);
     drwX = drwY = 0;
-    XTranslateCoordinates(mDisplay, mywindow, mRoot, 0, 0, &drwcX, &drwcY, &mRoot);
+    XTranslateCoordinates(mDisplay, mWindow, mRoot, 0, 0, &drwcX, &drwcY, &mRoot);
 
     window_x = drwcX;
     window_y = drwcY;
     window_width = drwWidth;
     window_height = drwHeight;
+#endif
     
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] image properties: %dx%d depth: %d\n",
 	image_width, image_height, image_depth);
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	window_x, window_y, window_width, window_height);
 
+#if 0
     if (vidix_init(image_width, image_height, window_x, window_y, window_width,
 	window_height, format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
     {
@@ -266,12 +395,19 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	vidix_term();
 	return(-1);
     }
+#endif
 
+#ifdef HAVE_NEW_GUI
+if (vo_window == None)
+#endif
+{
     XFlush(mDisplay);
     XSync(mDisplay, False);
+}
 
-    XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask );
-
+#ifdef HAVE_NEW_GUI
+    if (vo_window == None);
+#endif
     saver_off(mDisplay); /* turning off screen saver */
 
     return(0);
@@ -282,11 +418,12 @@ static const vo_info_t *get_info(void)
     return(&vo_info);
 }
 
+/* i think this is obsoleted.... -- alex */
 static void Terminate_Display_Process(void) 
 {
     getchar();	/* wait for enter to remove window */
     vidix_term();
-    XDestroyWindow(mDisplay, mywindow);
+    XDestroyWindow(mDisplay, mWindow);
     XCloseDisplay(mDisplay);
     X_already_started = 0;
 
@@ -298,7 +435,11 @@ static void check_events(void)
     const int event = vo_x11_check_events(mDisplay);
 
     if (event & VO_EVENT_RESIZE)
-	resize(vo_dwidth, vo_dheight);
+	set_window(0);
+    else
+    if (event & VO_EVENT_EXPOSE)
+	mDrawColorKey();
+
     return;
 }
 
@@ -352,19 +493,20 @@ static uint32_t query_format(uint32_t format)
 	return(0);
     }
   }    
-  return pre_init_err ? 0 : vidix_query_fourcc(format);
+  return(pre_init_err ? 0 : vidix_query_fourcc(format));
 }
 
 
 static void uninit(void)
 {
+    vidix_term();
 #ifdef HAVE_NEW_GUI
     if (vo_window == None)
 #endif
     {
-	vidix_term();
 	saver_on(mDisplay); /* screen saver back on */
-	XDestroyWindow(mDisplay, mywindow);
+	if (!(WinID > 0)) /* don't destory window if -wid specified */
+	    XDestroyWindow(mDisplay, mWindow);
 //	XCloseDisplay(mDisplay);
     }
 }
