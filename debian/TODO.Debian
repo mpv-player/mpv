@@ -8,3 +8,5 @@
 or figure out some other way of satisfying other dependencies
 like *.dlls and fonts.
 In other words - automate win32dll.zip installation.
+
+- create package with odivx and make this one depend/recommend it
