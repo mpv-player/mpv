@@ -22,7 +22,7 @@ contains these drivers:</P>
 <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) driver</TD></TR>
 <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>native ALSA 0.5 driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (works, but has problems -> use OSS) (supports hardware AC3 passthrough)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (supports hardware AC3 passthrough)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio driver (<CODE>/dev/audio</CODE>) for BSD and Solaris8 users</TD></TR>
 <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>native ARTS driver (mostly for KDE users)</TD></TR>
 
@@ -43,7 +43,7 @@ a message like this:<BR>
 <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
 <LI>If you have ALSA version 0.9 you may choose between <CODE>-ao oss</CODE> and
 <CODE>-ao sdl</CODE>. You can also use <CODE>-ao alsa9</CODE>. It works, but
-there are problems like lost sync and disappearing audio.</LI>
+there may be problems like lost sync and disappearing audio.</LI>
 </UL>
 
 <P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the

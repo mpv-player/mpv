@@ -430,7 +430,7 @@ also help. Thanks!</P>
 
 <P><B><A NAME=2.3.1.4>2.3.1.4. SDL</A></B></P>
 
-<P>SDL (Simple Directmedia Layer) is basically an unified video/audio
+<P>SDL (Simple Directmedia Layer) is basically a unified video/audio
   interface. Programs that use it know only about SDL, and not about what video
   or audio driver does SDL actually use. For example a Doom port using SDL can
   run on svgalib, aalib, X, fbdev, and others, you only have to specify the
@@ -687,9 +687,9 @@ See <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourcefo
 
 <P><B><A NAME=2.3.1.12>2.3.1.12.  VESA - output to VESA BIOS</A></B></P>
 <P>
-This driver was designed and introduced as <B>generic driver</B> for any video
-card which has VESA VBE 2.0 compatible BIOS. But exists still one reason of
-developing of this driver - it's multiple troubles with displaying movie on TV.<BR>
+This driver was designed and introduced as a <B>generic driver</B> for any video
+card which has VESA VBE 2.0 compatible BIOS. Another advantage of this
+driver is that it tries to force TV output on.<BR>
 <B>VESA BIOS EXTENSION (VBE) Version 3.0 Date: September 16, 1998</B> (Page 70)
 says:
 </P>
@@ -724,19 +724,15 @@ at least.)
  - This driver calls <B>int 10h</B> handler thus it's not an emulator - it
 calls <B>real</B> things of <B>real</B> BIOS in <B>real</B>-mode. (Finely -
 in vm86 mode).<BR>
- - Most important :) You can watch <B>DVD at 320x200</B> if you don't have a powerful CPU.<BR>
+ - You can use Vidix with it, thus getting accelerated video display
+<B>AND</B> TV output at the same time! (recommended for ATI cards)
 </P>
 
 <P>
 <B>What are minuses:</B><BR>
  - It works only on <B>x86 systems</B>.<BR>
- - <B>It's the slowest driver</B> from all the available ones for MPlayer.<BR>
-   (But only if your card doesn't support <B>DGA mode</B> - otherwise this
-   driver is comparable by speed with <B>-vo dga</B> and <B>-vo fbdev</B> ones.<BR>
-
  - It can be used only by <B>ROOT</B>.<BR>
  - Currently it's available only for <B>Linux</B>.<BR>
- - It <B>doesn't use</B> any <B>hardware accelerations</B> (like YUV overlay or hw scaling).<BR>
 </P>
 
 <P>Don't use this driver with <B>GCC 2.96</B> ! It won't work !</P>
@@ -799,48 +795,23 @@ drivers can't use low pixelclocks that are needed for low resolution
 video modes.</P>
 
 
-<P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
-
-<P>This section is OBSOLETED ! Use Vidix !</P>
-
-
-<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+<P><B><A NAME=2.3.1.15>2.3.1.15. Vidix</A></B></P>
 
 <P><B>WHAT IS VIDIX?</B></P>
 
 <P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for
   *ni<B>X</B>.<BR>
   VIDIX was designed and introduced as an interface for fast user-space drivers
-  providing <B>DGA</B> everywhere where it's possible (<B>unlike X11</B>). I
-  hope that these drivers will be as portable as X11 (<B>not only on
-  *nix</B>).<BR>
-  What it is:</P>
-
-<UL>
-  <LI>It's a portable successor of mga_vid technology, but it's located in
-    user-space.</LI>
-  <LI>Unlike X11 it provides DGA everywhere it's possible</LI>
-  <LI>Unlike v4l it provides interface for video playback</LI>
-  <LI>Unlike linux's drivers it uses mathematics library</LI>
-</UL>
-
-<P>I can tell you in bold capital letters :<BR>
-  <B>VIDIX PROVIDES DIRECT GRAPHICS ACCESS TO BES YUV MEMORY.</B>
-</P>
-
-<P><I>Well (it's in my todo) - implement DGA to MPEG2 decoder.</I></P>
+  providing such video performance as mga_vid does for Matrox cards. It's
+  also very portable.</P>
 
 <P>This interface was designed as an attempt to fit existing video acceleration
-  interfaces (known as mga_vid, mga_yuv, radeon_vid) into a fixed scheme. It
+  interfaces (known as mga_vid, rage128_vid, radeon_vid, pm3_vid) into a fixed scheme. It
   provides highlevel interface to chips which are known as BES (BackEnd
   scalers) or OV (Video Overlays). It doesn't provide lowlevel interface to
   things which are known as graphics servers. (I don't want to compete with X11
   team in graphics mode switching). I.e. main goal of this interface is to
-  provide maximal speed of video playback but not putting video signal on
-  screen of your TV or on tape of your VCR. Although these things are also very
-  significant - it's perfectly other task. (However I guess that it would be
-  possible to implement something like mini-X (don't mix it with Minix ;) in
-  the future, if some number of volunteers will be found.
+  maximize the speed of video playback.
 </P>
 
 <P><B>USAGE</B></P>
@@ -851,7 +822,7 @@ video modes.</P>
     requires XServer and can work only under XServer.</LI>
   <LI>You can use VIDIX subdevice which was applied to several video output
     drivers, such as:<BR>
-    <CODE>-vo vesa:vidix</CODE> and <CODE>-vo fbdev:vidix</CODE></LI>
+    <CODE>-vo vesa:vidix</CODE> (<B>LINUX ONLY</B>) and <CODE>-vo fbdev:vidix</CODE></LI>
 </UL>
 Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
@@ -1064,80 +1035,28 @@ Some remarks:
 <P><B><A NAME=2.3.1.A.2>2.3.1.A.2. ATI cards</A></B></P>
 
 <P>
-<B>A few word about ATI's TV-out:</B><BR>
-Currently ATI doesn't want to support any of its TV-out chips under Linux.
-Below is official answer from ATI Inc.:
+<B><U>PREAMBLE</U></B><BR>
+Currently ATI doesn't want to support any of its TV-out chips under Linux,
+because their licensed Macrovision technology.</P>
 
-<P>
-<code>
-<I>
-<BR>&gt; Hello!
-<BR>&gt;
-<BR>&gt; On your pages you wrote that you support linux developers.
-<BR>&gt; Currently I participate with mplayer project (www.mplayerhq.hu)
-<BR>&gt; I'm interesting with enabling TV-out on Radeon VE chips during
-<BR>&gt; movie playback. I would be glad to add this feature to radeonfb driver
-<BR>&gt; (which can be found in CVS tree of mplayer project at main/drivers/radeon).
-<BR>&gt; Do I have a chance to get any official technical documenation?
-</I>
-<BR>We will not provide TV out related documents due to macrovision concerns.
-<BR>Also mpeg2 decoding is something that we MAY consider in the future but not
-<BR>at this current time. This is again due to proprietary and 3rd party
-<BR>information.
-</code>
-</P>
+<P><B><U>ATI CARDS TV-OUT STATUS ON LINUX</U></B></P>
 
-<P>Pity isn't?</P>
-
-<P>
-<code>
-<B>Q:What is Macrovision?</B><BR>
-A:It's copy protection mechanism.</code>
-</P>
-
-<P>It means that if they open any TV-out related information then
-hackers will be able to disable copy protection on their chips. Therefore
-we have no chance to get working TV-out on ATI.</P>
-
-What's status of ATI's tv-out chips under Linux:
 <UL>
-<LI><B>ATI Mach64</B> has <I>ImpacTV</I> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.</LI>
-<LI><B>ASIC Radeon VIVO</B> has <I>Rage Theatre</I> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.</LI>
-<LI><B>Radeon VE</B> and <B>Rage PRO LT</B> have <I>ImpacTV2+</I> which is not supported under Linux.
-But with <B>MPlayer</B> you get <B>full hardware acceleration</B> and <B>TV out</B>
-for Radeons !
-Check <a href="#2.3.1.12">VESA driver</a> and <A HREF="#2.3.1.14">Radeon
-acceleration</A> sections.</LI>
+<LI><B>ATI Mach64</B>: supported by <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+<LI><B>ASIC Radeon VIVO</B>: supported by <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+<LI><B>Radeon</B> and <B>Rage128</B>: supported by <B>MPlayer</B>!
+Check <a href="#2.3.1.12">VESA driver</a> and <A HREF="#2.3.1.15">Vidix</A>
+sections.</LI>
 </UL>
 
 <P>
-Fortunately, owners of fast enough CPUs (Duron, Celeron2 and better) <B>can watch
-movies on their TV</B> through <a href="#2.3.1.12">VESA drivers</a>.
+  On other cards, just use the <a href="#2.3.1.12">VESA driver</a>, without
+  Vidix. Powerful CPU is needed, though.
 </P>
 
-<P>
-I should say good words to ATI Inc. too:<BR>
-<B>they produce top quality BIOSes.</B>
-</P>
-
-<P>
-<B>VESA drivers</B> don't use any hardware acceleration but it simulates
-<B>DGA</B> through 64K window, which is configured through 32-bit mode
-functions of BIOS. ATI cards have enough <B>fast video memory</B> (DIMM or DDR
-chips with 64 - 128-bit access) so it's not bottleneck for them. There are no
-limitations on which video mode can be displayed on your TV (like on other
-cards) so you can use <B>any video mode</B> on your <B>TV</B> (from
-<B>320x200</B> up to <B>1024x768</B>).<BR>
-From other side (it's known at least for <B>Radeons</B>) there is <B>DGA</B>
-mode which is detected automatically and in this case you'll get comparable
-with <B>-vo dga</B> and <B>-vo fbdev</B> drivers speed.<BR>
-Only thing you need to do - <B>have TV connector plugged in before booting your
-PC</B> since video BIOS initializes itself only once during POST procedure.
-</P>
-
-<P>
-For detail see <a href="video.html#2.3.1.12">VESA</a> sections of this
-documentation.
+<P>Only thing you need to do - <B>have TV connector plugged in before
+  booting your PC</B> since video BIOS initializes itself only once during
+  POST procedure.
 </P>
 
 

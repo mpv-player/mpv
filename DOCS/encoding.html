@@ -18,7 +18,7 @@ designed to encode MPlayer-playable movies
 (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other MPlayer-playable
 formats (see below). It can encode with various codecs, like <B>DivX4</B> (1 or
 2 passes), libavcodec, <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audio. Also has
-stream copying and video resizing abilities.</P>
+powerful plugin system for video manipulation.</P>
 
 <P><B><A NAME=2.4.2>2.4.2.  Compiling</A></B></P>
 
@@ -29,8 +29,8 @@ stream copying and video resizing abilities.</P>
     and have them PROPERLY installed. You need them if you want DivX4
     (1/2 pass) encoding.</LI>
   <LI><B>OPTIONAL</B> - <A HREF="codecs.html#2.2.1.9">download and install
-    <B>XViD</B></A>. Very useful on non-Linux boxes, and/or when you need
-    faster encoding than DivX4, with approximately the same quality.</LI>
+    <B>XViD</B></A>. Not very useful, libavcodec's <I>mpeg4</I> codec
+    can encode with much better speed AND quality than XViD or DivX4/5.</LI>
   <LI><B>OPTIONAL</B> - for libavcodec support, install libavcodec as
     described in the <A HREF="codecs.html#2.2.1.2">libavcodec section</A>.</LI>
   <LI><B>OPTIONAL</B> - download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>

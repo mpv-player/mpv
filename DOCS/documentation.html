@@ -79,6 +79,7 @@
               <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
               <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
               <LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.10">2.2.1.10 Sorenson</A></LI>
             </UL>
           </LI>
           <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A>
@@ -138,7 +139,7 @@
               <LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - text mode displaying</A></LI>
               <LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - output to VESA BIOS</A></LI>
               <LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-              <LI><A HREF="video.html#2.3.1.15">2.3.1.14 Rage128 / Radeon video overlay (OBSOLETED - link to Vidix!)</A></LI>
+              <LI><A HREF="video.html#2.3.1.15">2.3.1.14 (non-existant section)</A></LI>
               <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
               <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (for some MJPEG capture/playback boards)</A></LI>
               <LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A>
@@ -308,7 +309,7 @@ Developer Cries
   Chris Phillips from the <B>mplayer-users</B> mailing list:</P>
 
 <P><I>"I said a while ago that there is such a difference between a newbie and
-  a dumbass. No matter what you actaully know about a system (linux, cars,
+  a dumbass. No matter what you actually know about a system (linux, cars,
   girls :D) you should ALWAYS be able to take a step back and be objective,
   otherwise, you're just dumb IMHO. A girl i live with assumed the vacuum
   cleaner was broken because it didn't suck things up. never thought to change
@@ -326,13 +327,15 @@ Developer Cries
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
 AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ
-files, supported by many native, XAnim, and
+files, supported by many native, XAnim, RealPlayer, and
 Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
-<B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
+<B>3ivx</B>, <B>RealMedia</B>, and <B>DivX</B> movies too (and you don't need
+the avifile
 library at all!). The another big feature of mplayer is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
-and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too! Most
+and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
+Mach64, Permedia3) too! Most
 of them supports software or hardware scaling, so you can enjoy movies in
 fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
 decoder boards, such as the <B><A HREF="DVB">DVB</A></B> and <B> <A
@@ -343,10 +346,10 @@ display (OSD)?</P>
 
 <P><B>MPlayer</B> is under GPL v2 license.</P>
 
-<P>My player is rock solid playing damaged MPEG files (useful for some VCDs),
+<P>The player is rock solid playing damaged MPEG files (useful for some VCDs),
 and it plays bad AVI files which are unplayable with the famous
 windows media player. Even AVI files without index chunk are playable, and
-you can temporarily rebuild their indexes with the -idx option, or
+you can temporarily rebuild their indexes with the <CODE>-idx</CODE> option, or
 permanently with <B>MEncoder</B>, thus enabling seeking!
 As you see, stability and quality are the most important things,
 but the speed is also amazing.</P>
@@ -397,7 +400,7 @@ too. So I've decided to write/modify one...</P>
     MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak, ADPCM codecs,
     and support for XAnim's binary codecs; DVD subtitles support, first
     release of MEncoder, TV grabbing, cache, liba52, countless fixes.</LI>
-<LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
+<LI><B>MPlayer 0.90 "?"</B> Jul? ??, 2002<BR>
     </LI>
 </UL>
 
@@ -480,7 +483,9 @@ package! However, you can use our codecs package with avifile. Features:<BR>
 <UL>
   <LI>you need this if you want to play or encode for example movies recorded
   with various hardware compressors, like tuner cards, digital cameras (example: DV, ATI VCR, MJPEG)</LI>
-  <LI>needed if you want to play <B>WMV movies</B> or older (MP41/MP42) ASF's</LI>
+  <LI>needed if you want to play <B>WMV8 movies</B>. Not needed for old
+  ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
+  files - it's done by the Win32 codec), or WMV7.</LI>
 </UL>
 </LI>
 
@@ -519,7 +524,7 @@ movies are best played with <B>MPlayer</B>'s own Cinepak decoder !</LI>
   (this is a nightly updated tarball of vorbis CVS).</LI>
 
 <LI><B>MPlayer</B> can use the libraries of RealPlayer 8 or RealONE to play
-  <B>RealVideo 2.0 and 3.0</B> files. See
+  files with <B>RealVideo 2.0 and 3.0</B> video, and Sipro/Cook audio. See
   <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section for
   installation instructions and more information!</LI>
 
@@ -539,7 +544,7 @@ their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
 you get a nice and very fast fullscreen playing.</P>
 
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 cards</B> : although a
+<LI><B>Matrox G200/G400/G450/G550 cards</B>: although a
   <A HREF="video.html#2.3.1.9">Vidix driver</A> is provided, it is recommended
   to use the old mga_vid kernel module instead, for it works much better.
   Please see the <A HREF="video.html#2.3.1.7">mga_vid</A> section about its
@@ -549,7 +554,7 @@ you get a nice and very fast fullscreen playing.</P>
   <U><B>If you are non-Linux user</B></U>, your only possibility is the Vidix
   driver: read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee cards</B> : please see the
+<LI><B>3Dfx Voodoo3/Banshee cards</B>: please see the
   <A HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big
   speedup. It is important to do these steps <I>before</I> compiling
   <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
@@ -557,20 +562,20 @@ you get a nice and very fast fullscreen playing.</P>
   least 4.2.0, as 3dfx Xv driver was broken in 4.1.0, and earlier
   releases!</LI>
 
-<LI><B>ATI cards</B> : <A HREF="video.html#2.3.1.14">Vidix driver</A> is
+<LI><B>ATI cards</B>: <A HREF="video.html#2.3.1.14">Vidix driver</A> is
   provided for the following cards:
   <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
   Also see the <A HREF="video.html#2.3.1.A.2">ATI cards
   section</A> of the TV-out documentation, to know if you card's TV-out is
   supported under Linux/MPlayer.</LI>
 
-<LI><B>S3 cards</B> : the Savage and Virge/DX chips have hardware acceleration. Use as
+<LI><B>S3 cards</B>: the Savage and Virge/DX chips have hardware acceleration. Use as
 new XFree86 version as possible, older drivers are buggy. Savage chips
 have problems with YV12 display, see <A HREF="video.html#2.3.1.2.2">S3 Xv
 section</A> for details. Older, Trio cards have no, or slow hardware
 support.</LI>
 
-<LI><B>Nvidia cards</B> : very bad choice for video playing (NVidia has
+<LI><B>Nvidia cards</B>: very bad choice for video playing (NVidia has
 <A HREF="users_against_developers.html#nvidia">different opinion</A>!).
 Nvidia's cards have very cheap and bad
 quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
@@ -578,11 +583,11 @@ contain support for hardware YUV acceleration for all NVidia cards !</U>
 You have to download Nvidia's closed-source drivers from nvidia.com. See
 details in <A HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
 
-<LI><B>3DLabs GLINT R3 and Permedia3</B> : a Vidix driver is provided
+<LI><B>3DLabs GLINT R3 and Permedia3</B>: a Vidix driver is provided
   (pm3_vid). Please see the <A HREF="video.html#2.3.1.15">Vidix
   instructions</A>.</LI>
 
-<LI><B>other cards</B> : none of the above?
+<LI><B>other cards</B>: none of the above?
   <UL>
     <LI>Try if the XFree86 driver (and your card) supports hardware
       acceleration. See the <A HREF="video.html#2.3.1.2">Xv section</A> for
@@ -1559,10 +1564,10 @@ Proxy usage can also be forced :</P>
 
 <P><B>MPlayer</B> can read from stdin (NOT named pipes). This can be for example
 used to play from FTP:</P>
-<P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+<P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
 <P>Note: it's also recommended to enable CACHE when playback from network:</P>
-<P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</CODE></P>
+<P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</CODE></P>
 
 
 <P><B><A NAME=4></A>4. <A HREF="faq.html">FAQ section</A></B></P>
@@ -1585,23 +1590,23 @@ and cd into programs directory:</P>
 </PRE>
 
 <P>(... mplayer detects hardware/software, builds itself and.. )
-dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
+dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
 
 <P>And now just become root, and:</P>
 
 <PRE>
-    dpkg -i ../mplayer_0.18-1_i386.deb as root.
+    dpkg -i ../mplayer_0.90-1_i386.deb as root.
 </PRE>
 
 <P>Here's how it looks like:</P>
 
 <PRE>
-	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb
+	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.90-1_i386.deb
 	Password:
 	(Reading database ... 26946 files and directories currently installed.)
-	Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
+	Preparing to replace mplayer 0.50-1 (using ../mplayer_0.90-1_i386.deb)
 	Unpacking replacement mplayer ...
-	Setting up mplayer (0.18-1) ...
+	Setting up mplayer (0.90-1) ...
 </PRE>
 
 

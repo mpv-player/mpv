@@ -61,8 +61,8 @@ in case you run into problems.
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>No, since there have been/are issues with these compilers as well.<BR>
-Use the 2.95.x series for reliability (not <A HREF="users_against_developers.html#gcc">2.96</A>).
-Use the latest gcc 3.x (starting at 3.0.4) if you want to use a 3.x version.
+To check the status of current compilers' MPlayer support, see the
+<A HREF="documentation.html#1.3">Installation</A> section.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I tried to compile MPlayer, but I got this output:
@@ -236,9 +236,12 @@ Most of them are for debug purposes and will be removed soon.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Why is video_out cpu usage zero (0%) for some files?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>It's not zero, but it's called from the codec and thus cannot be measured
+</B></TD><TR><TD></TD><TD VALIGN=top>A1:</TD><TD>It's not zero, but it's called from the codec and thus cannot be measured
 separately. You should try to play the file using <CODE>-vo null</CODE> and then
 <CODE>-vo ...</CODE> and check the difference to see the video_out speed.
+</TD><TR><TD></TD><TD VALIGN=top>A2:</TD><TD>You are using Direct Rendering,
+where the codec renders to the video memory itself. In this case, the
+decoding percentage contains the display percentage too.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>There are error messages about file not found <CODE>/usr/lib/win32/</CODE> ...
@@ -334,7 +337,7 @@ If something works with aviplay it doesn't mean that <B>MPlayer</B> will work
 and vice versa.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Audio goes out of sync playing a .avi file.
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Audio goes out of sync playing an AVI file.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Try the <CODE>-bps</CODE> or <CODE>-nobps</CODE> option. If it does not improve,
 read <A HREF="bugreports.html">this</A> and upload the file to FTP.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -359,8 +362,11 @@ performance.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Try running <B>MPlayer</B> on the machine you compiled on. Or recompile. Don't
-use <B>MPlayer</B> on a CPU different from the one it was compiled on.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Try running <B>MPlayer</B> on the machine you compiled on. Or recompile
+with runtime CPU detection
+(<CODE>./configure --enable-runtime-cpudetection</CODE>). Don't
+use <B>MPlayer</B> on a CPU different from the one it was compiled on,
+without using the feature mentioned just now.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11 modes ...
@@ -542,7 +548,8 @@ While playing a DVD, I encountered this error:<BR>
 sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
 This is a known libdvdread 0.9.1/0.9.2 bug.
-Use libmpdvdkit.
+Use <B>libmpdvdkit</B>, which is present in MPlayer source, and used by
+default.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
@@ -550,7 +557,8 @@ Can I compile libdvdread and libdvdcss on my sweet SPARC under Solaris?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
 Who knows ... It's said to work, so please test it and send feedback. Refer to
 the documentation of libdvdread and its homepage as well. We're not the authors
-of libdvdread.
+of libdvdread. Use <B>libmpdvdkit</B>, which is present in MPlayer source, and used by
+default.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
@@ -576,7 +584,9 @@ the proper rights on the DVD device entry (in <CODE>/dev/</CODE>).
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
 Where can I get libdvdread and libdvdcss packages?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
-From the
+You don't need to. Use <B>libmpdvdkit</B>, which is present in MPlayer source, and used by
+default.
+Anyway, the packages mentioned can be get from the
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle site</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -606,218 +616,8 @@ implement it, and send a patch. Don't ask for it.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>  Where is the Windows version?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>  It's not released, and won't be. Look around the Windows scene (open source
   ASF parsers, open source ASF encoders, etc) and you'll know why. We don't
-  want to go to jail.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>What card do you suggest me to buy?
-</B></TD><TR><TD></TD><TD VALIGN=top>A0:</TD><TD>It's for your information only but our criteria are:
-</TD><TR><TD></TD><TD VALIGN=top>A1:</TD><TD>Speed:<BR>
-This parameter can be computed easily:
-<OL>
-  <LI>Which movies do you plan to watch?
-    <UL>
-      <LI><B>MPEG1:</B> 320x200@32=256000<BR>
-        You need only 256*25fps=6.4MB/sec of bandwidth (This format can be played
-        in real-time on any PC since the times of Pentium-100 + S3Virge).</LI>
-      <LI><B>MPEG4:</B> 640x480@32=1228800<BR>
-        You need a video bandwidth of 1.2*25fps=30MB/sec. To watch such a movie
-        in real-time you need a PC equivalent to a Celeron-450 and a DIMM based
-        video card.</LI>
-      <LI><B>MPEG2 (aka DVD or SDTV):</B> 1024x768@32=3145728<BR>
-        You need a video bandwidth of 3*30fps=90MB/sec. In extreme cases (if your
-        video card supports IDCT decoding) the hardware requirements are the same
-        as for MPEG4.</LI>
-      <LI><B>HDTV (High Definition TeleVision):</B> 2000x2000@32=16000000<BR>
-        You need a video bandwidth of 16*30fps=480MB/sec. You also need at least
-        32MB of video memory to watch this stream: 16MB for the RGB area and 16MB
-        for the YUV area.</LI>
-    </UL>
-  </LI>
-  <LI>The bandwidth of PCI slots is: 33MHz*32Bit=133MB/sec. PCI2.1 has
-    66MHz*32Bit=266MB/sec which is more than enough for playing any movie (except
-    HDTV streams which really require an AGP bus).</LI>
-  <LI>What memory type should be installed on the video card:
-    <UL>
-      <LI><B>SIMM</B> - Avoid that.</LI>
-      <LI><B>DIMM</B> - Good if your video card has 128-bit memory access.</LI>
-      <LI><B>DDR</B> - Is fast enough for all types.</LI>
-    </UL>
-  </LI>
-</OL>
-Note: DGA comparison shows that there is no visible difference between video
-cards which have the same type of video memory installed.<BR>
-<B>Conclusion:</B> If you have enough CPU power (Celeron-450 or K6-2-500) it
-should be enough to buy any video card which has at least 8MB of DIMM or DDR
-memory.
-</TD><TR><TD></TD><TD VALIGN=top>A2:</TD><TD>Quality:<BR>
-This question was investigated in depth at:
-<BR><A HREF="http://www.anandtech.com/showdoc.html?i=1332&amp;rndr=04132002115140">
-AnandTech</a> - Video Card Roundup - DVD Quality, Features &amp; Performance
-(October 2000)
-</TD><TR><TD></TD><TD VALIGN=top>A3:</TD><TD><B>Working</B> features under Linux:<BR>
-If you are a Win32 user then probably you have support (from driver and DirectX8
-side) for any feature your chip has.<BR>
-But for <B>Linux</B> users there are currently only a few vendors which have more
-or less advanced driver support:<BR><BR>
-
-<TABLE BORDER=1 WIDTH="100%">
-<TR>
-<TD>&nbsp;</TD>
-
-<TD>
-<CENTER>Matrox Gxxx</CENTER>
-</TD>
-
-<TD>
-<CENTER>ATI m64/r128/radeon</CENTER>
-</TD>
-
-<TD>
-<CENTER>nVidia tnt/geforce</CENTER>
-</TD>
-
-<TD>
-<CENTER>S3 Virge/Savage</CENTER>
-</TD>
-</TR>
-
-<TR>
-<TD>Driver's provider</TD>
-
-<TD>OEM and enthusiasts</TD>
-
-<TD>OEM and enthusiasts</TD>
-
-<TD>OEM or enthusiasts</TD>
-
-<TD>enthusiasts</TD>
-</TR>
-
-<TR>
-<TD>Driver's quality</TD>
-
-<TD>best (X11,kernel)</TD>
-
-<TD>best (X11,GATOS,kernel)</TD>
-
-<TD>buggy/unstable (X11 only)</TD>
-
-<TD>slow (X11 only)</TD>
-</TR>
-
-<TR>
-<TD>VIDEO OVERLAY</TD>
-
-<TD></TD>
-
-<TD></TD>
-
-<TD></TD>
-
-<TD></TD>
-</TR>
-
-<TR>
-<TD>BES and YV2RGB</TD>
-
-<TD>YES</TD>
-
-<TD>YES</TD>
-
-<TD>YES</TD>
-
-<TD>YES</TD>
-</TR>
-
-<TR>
-<TD>scaling filters</TD>
-
-<TD>N/A</TD>
-
-<TD>YES</TD>
-
-<TD>N/A</TD>
-
-<TD>N/A</TD>
-</TR>
-
-<TR>
-<TD>adaptive deinterlace</TD>
-
-<TD>N/A</TD>
-
-<TD>YES</TD>
-
-<TD>N/A</TD>
-
-<TD>N/A</TD>
-</TR>
-
-<TR>
-<TD>Video equalizer (hue, contrast, saturation, color correction)</TD>
-
-<TD>YES</TD>
-
-<TD>YES</TD>
-
-<TD>GeForce only</TD>
-
-<TD>N/A</TD>
-</TR>
-
-<TR>
-<TD>Alpha blending, color and video keys</TD>
-
-<TD>PARTIAL</TD>
-
-<TD>PARTIAL (under development)</TD>
-
-<TD>N/A</TD>
-
-<TD>N/A</TD>
-</TR>
-
-<TR>
-<TD>Video capture</TD>
-
-<TD>YES (Marvel)</TD>
-
-<TD>YES (GATOS)</TD>
-
-<TD>N/A</TD>
-
-<TD>N/A</TD>
-</TR>
-
-<TR>
-<TD>TV-out</TD>
-
-<TD>G400 only</TD>
-
-<TD>YES</TD>
-
-<TD>N/A</TD>
-
-<TD>N/A</TD>
-</TR>
-</TABLE>
-
-<P>It's a very rough overview of video cards. We should pay attention to video
-card models. If for example Matrox G400 drivers support TV-out then G450 and
-G550 do not necessarily have this feature.<BR>
-Another example: Adaptive deinterlacing exists only for the Rage128 chip and
-isn't present on Mach64+ ones. The same goes for 3D features. They are different
-from Mach64 to the Radeon 8500 with TRUFORM technology.</P>
-
-<P><B>ANYWAY - THE MPLAYER TEAM DOESN'T ACCEPT ANY CLAIMS IF AFTER READING THIS
-MATERIAL YOU BUY A CARD WHICH IS UNSATISFACTORY FOR YOU!!! THIS IS ONLY OUR
-POINT OF VIEW.</B></P>
-
-<P><B>Q:</B> If a PCI slot is fast enough for most types of movies then why is
-the S3 Virge too slow for them?<BR>
-<B>A:</B> Due to its SIMM memory.</P>
-
+  want to go to jail. BTW you can compile it yourself, under
+  <A HREF="documentation.html#6.8">Cygwin</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
