@@ -392,9 +392,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    	default:  draw_alpha_fnc=draw_alpha_null;
   }
 
-  /* we avoid unnecessary allocating the swsContext here as it is allocated during draw_slice if zoom is on */
-  if(!zoomFlag)
-	swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
+  /* always allocate swsContext as size could change between frames */
+  swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
