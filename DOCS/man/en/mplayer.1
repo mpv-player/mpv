@@ -2595,7 +2595,7 @@ Same as \-af (see \-af option).
 .B \-afm <driver1,driver2,...>
 Specify a priority list of audio drivers to be used, according to their driver
 name in codecs.conf.
-It falls back to default if none is ok.
+It falls back to default if none is OK.
 .br
 .I NOTE:
 See \-afm help for a full list of available drivers.
@@ -2604,7 +2604,7 @@ See \-afm help for a full list of available drivers.
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-try FFmpeg's libavcodec (mp1/\:2/\:3) codecs first
+Try FFmpeg's libavcodec (mp1/\:2/\:3) codecs first.
 .IPs "\-afm acm,dshow"
 try Win32 codecs first
 .RE
@@ -2700,7 +2700,7 @@ debug:
 .br
 0x0400: error resilience
 .br
-0x0800: memory management control operations (H264)
+0x0800: memory management control operations (H.264)
 .br
 0x1000: bugs
 .REss
@@ -2880,13 +2880,13 @@ If the list has a trailing ',' it will fallback to codecs not listed.
 .PD 0
 .RSs
 .IPs "\-vc divx"
-force Win32/\:VFW DivX codec, no fallback
+Force Win32/\:VFW DivX codec, no fallback.
 .IPs "\-vc divx4,"
-try divx4linux codec first, then fallback to others
+Try divx4linux codec first, then fall back to others.
 .IPs "\-vc -divxds,-divx,"
-try other codecs except Win32 DivX codecs
+Try other codecs except Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
-try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
+Try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others.
 .RE
 .PD 1
 .
@@ -2894,7 +2894,7 @@ try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
 .B \-vfm <driver1,driver2,...>
 Specify a priority list of video codecs to be used, according to their
 names in codecs.conf.
-It falls back to default if none is ok.
+It falls back to default if none is OK.
 .br
 .I NOTE:
 If libdivxdecore support was compiled in, then odivx and divx4 now contains
@@ -2908,10 +2908,10 @@ See \-vfm help for a full list of available drivers.
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-try the libavcodec, then Directshow, then VFW codecs and fallback to the
-others, if still none is ok
+Try the libavcodec, then Directshow, then VFW codecs and fall back
+to the others, if still none is OK.
 .IPs "\-vfm xanim"
-try XAnim codecs first
+Try XAnim codecs first.
 .RE
 .PD 1
 .
@@ -3623,7 +3623,7 @@ If a field has no match, it is deinterlaced with simple linear
 approximation.
 If the source is MPEG-2, and this must be the first filter to allow
 access to the field-flags set by the MPEG-2 decoder.
-Depending on the source mpeg, you may be fine ignoring this advice, as
+Depending on the source MPEG, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
 With no options it does normal inverse telecine, and should be used
 together with mencoder \-fps 29.97 \-ofps 23.976.
@@ -3656,7 +3656,7 @@ this option to override auto-detection.
 The larger n will speed up the filter at the expense of accuracy.
 The default value is n=3.
 If n is odd, a frame immediately following a frame marked with the
-REPEAT_FIRST_FIELD mpeg flag is assumed to be progressive, thus filter
+REPEAT_FIRST_FIELD MPEG flag is assumed to be progressive, thus filter
 will not spend any time on soft-telecined MPEG-2 content.
 This is the only effect of this flag if MMX2 or 3DNow! is available.
 Without MMX2 and 3DNow, if n=0 or 1, the same calculations will be used
@@ -4207,9 +4207,9 @@ Use \-of help to get a list of available formats.
 .PD 0
 .RSs
 .IPs "\-of avi"
-encode to avi (default)
+Encode to AVI (default).
 .IPs "\-of mpeg"
-encode to mpeg
+Encode to MPEG.
 .IPs "\-of rawvideo"
 raw video stream (no muxing - video only, one stream only)
 .RE
@@ -4219,7 +4219,7 @@ raw video stream (no muxing - video only, one stream only)
 .B \-ofps <fps>
 The output file will have different frame/\:sec than the source.
 You MUST set it for variable fps (asf, some mov) and progressive
-(29.97fps telecined mpeg) files.
+(29.97fps telecined MPEG) files.
 .TP
 .B \-ovc <codec name>
 Encode with the given video codec.
@@ -4507,7 +4507,7 @@ Maximum number of threads to use (default: 1).
 .RE
 .TP
 .B vcodec=<value>
-use the specified codec (default: mpeg4):
+Use the specified codec (default: mpeg4):
 .PD 0
 .RSs
 .IPs mjpeg
@@ -4515,9 +4515,9 @@ Motion JPEG
 .IPs ljpeg
 Lossless JPEG
 .IPs h263\ 
-H263
+H.263
 .IPs h263p
-H263 Plus
+H.263+
 .IPs mpeg4
 DivX 4/\:5
 .IPs msmpeg4
@@ -4644,13 +4644,12 @@ Same as mbd=1, kept for compatibility reasons.
 .TP
 .B v4mv\ \ \ 
 Allow 4 motion vectors per macroblock (slightly better quality).
-(default: disabled)
 .TP
 .B obmc\ \ \ 
-overlapped block motion compensation (H263+)
+overlapped block motion compensation (H.263+)
 .TP
 .B loop\ \ \ 
-loop filter (H263+)
+loop filter (H.263+)
 note, this is broken
 .TP
 .B inter_threshold <-1000\-1000>
@@ -4684,7 +4683,7 @@ avoid B frames in high motion scenes (will cause bitrate misprediction)
 .TP
 .B vpass=<1\-2>
 Activates internal two pass mode, only specify if you wish to use two pass
-encoding (default: disabled).
+encoding.
 .PD 0
 .RSs
 .IPs 1
@@ -4936,7 +4935,7 @@ strict standard compliance
 .IPs 0
 disabled (default)
 .IPs 1
-only recommended if you want to feed the output into the mpeg4 reference
+only recommended if you want to feed the output into the MPEG4 reference
 decoder
 .IPs -1
 allows non-standard YV12 huffyuv encoding (20% smaller files, but cannot be
@@ -4978,10 +4977,10 @@ good choice
 .RE
 .TP
 .B ss\ \ \ \ \ 
-slice structured mode for H263+
+slice structured mode for H.263+
 .TP
 .B gray\ \ \ 
-grayscale only encoding (faster) (default: disabled)
+grayscale only encoding (faster)
 .TP
 .B vfdct=<0\-10>
 dct algorithm:
@@ -5322,13 +5321,12 @@ and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
 .TP
 .B mpeg_quant
-use MPEG quantizers instead of H.263.
-(default: disabled) (i.e.\& use H.263 quantizers)
+Use MPEG quantizers instead of H.263 (i.e.\& use H.263 quantizers).
 .TP
 .B aic\ \ \ \ 
 ac prediction (=advanced intra prediction for H.263+)
 .I NOTE:
-vqmin should be 8 or larger for AIC H263+.
+vqmin should be 8 or larger for AIC H.263+.
 .TP
 .B aiv\ \ \ \ 
 alternatice inter vlc for H.263+
@@ -5340,24 +5338,24 @@ Allow encoding of abritarily long MVs.
 .B ibias=<-256\-256>
 intra quantizer bias (256 == 1.0)
 .br
-mpeg style quantizer default: 96
+MPEG style quantizer default: 96
 .br
-h263 style quantizer default: 0
+H.263 style quantizer default: 0
 .br
 .I NOTE:
-The h263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
-the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2).
+The H.263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
+the MPEG MMX quantizer cannot handle negative biases (set vfdct=1or2).
 .TP
 .B pbias=<-256\-256>
 inter quantizer bias (256 == 1.0)
 .br
-mpeg style quantizer default: 0
+MPEG style quantizer default: 0
 .br
-h263 style quantizer default: -64
+H.263 style quantizer default: -64
 .br
 .I NOTE:
-The h263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
-the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2).
+The H.263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
+the MPEG MMX quantizer cannot handle negative biases (set vfdct=1or2).
 .br
 Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
 .TP
@@ -5477,7 +5475,7 @@ Turn this option on for interlaced content.
 .TP
 .B 4mv\ \ \ \ 
 Use 4 motion vectors per macroblock.
-This might give better compression but slows down encoding.
+This might give better compression, but slows down encoding.
 .br
 .I WARNING:
 This option doesn't exist in XviD-1.0.x.
@@ -5581,8 +5579,8 @@ is worth activating.
 .B gmc\ \ \ \ 
 Enable Global Motion Compensation, which makes XviD generate special
 frames (GMC-frames) which are well suited for Pan/Zoom/Rotating images.
-The decision whether to activate this option or not to save bits
-depends highly on the video material.
+Whether or not the use of this option will save bits is highly
+dependent on the source material.
 .TP
 .B trellis
 Trellis Quantization is a kind of adaptive quantization method that
