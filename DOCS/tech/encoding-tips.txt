@@ -499,8 +499,8 @@ typically very "noisy", which doesn't help at all. Anyway :
 > -ss 2:00 -endpos 0:30 -vf scale -zoom -xy 640 -o movie.avi                   
 
 1) keyint=48 is way too low. The  default value is 250, this is in *frames*
-not seconds. Key frames are significantly larger than P or B frames, so the
-less key frames you have, better the overall movie will be. (huh, like Yoda
+not seconds. Keyframes are significantly larger than P or B frames, so the
+less keyframes you have, better the overall movie will be. (huh, like Yoda
 I  speak ;).  Try keyint=300  or  350. Don't  go  beyond that  if you  want
 relatively precise seeking.
 

@@ -457,7 +457,7 @@ Usage
 <para>
 With this feature of
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-you are able to set custom inter (I-frames/key frames) and intra
+you are able to set custom inter (I-frames/keyframes) and intra
 (P-frames/predicted frames) matrices. It is supported by many of the codecs:
 <systemitem>mpeg1video</systemitem> and <systemitem>mpeg2video</systemitem>
 are reported as working.
