@@ -1,4 +1,5 @@
 #ifdef MAIN_CONF /* this will be included in conf[] */
+
 // ------------------------- stream options --------------------
 
 #ifdef USE_STREAM_CACHE
@@ -38,49 +39,68 @@
 	{"csslib", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
+// ------------------------- demuxer options --------------------
+
+	// number of frames to play/convert
+	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+
+	// seek to byte/seconds position
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
 
-// ------------------------- demuxer options --------------------
-
-	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-
+	// AVI specific: force non-interleaved mode
 	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
+	// AVI and OGG only: (re)build index at startup
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
 
+	// select audio/videosubtitle stream
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-	{"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
+        {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
+#ifdef USE_TV
+	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#else
+	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#endif
+	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 // ------------------------- a-v sync options --------------------
 
-	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	// AVI specific: A-V sync mode (bps vs. interleaving)
+	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
+	// set A-V sync correction speed (0=disables it):
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10, NULL},
+	
+	// force video/audio rate:
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
 
-// ------------------------- codec/pp options --------------------
+// ------------------------- codec/vfilter options --------------------
 
-        {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
-	
+	// MP3-only: select stereo/left/right
 #ifdef USE_FAKE_MONO
 	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 #endif
+
+	// disable audio
 	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
+	// select audio/video codec (by name) or codec family (by number):
 	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 16, NULL}, // keep ranges in sync
 	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 14, NULL}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	// postprocessing:
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"pp", readPPOpt, CONF_TYPE_FUNC_PARAM, 0, 0, 0, (cfg_default_func_t)&revertPPOpt},
@@ -90,24 +110,20 @@
 #else
         {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
-	{"ssf", scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
-#ifdef USE_TV
-	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#else
-	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
+	// scaling:
+	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
+	{"ssf", scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
         {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
-        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+
+        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
+        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 
 // ------------------------- subtitles options --------------------
 
@@ -123,11 +139,13 @@
 	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
- 	{"subpos",&sub_pos,  CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	// specify IFO file for VOBSUB subtitle
+	{"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 #ifdef USE_OSD
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0, NULL},
+ 	{"subpos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 #endif
 
 #else

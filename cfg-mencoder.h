@@ -92,26 +92,25 @@ static config_t mencoder_opts[]={
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
 
 	{"endpos", parse_end_at, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
-	
+
+	// set output framerate - recommended for variable fps (.asf etc) files
+	// and for 29.97fps progressive mpeg2 streams
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	// limit number of skippable frames after a non-skipped one
 	{"skiplimit", &skip_limit, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"noskiplimit", &skip_limit, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"noskip", &skip_limit, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 
 	{"x", "This option is obsolete, use -vop scale=w:h for scaling\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-
 	{"xsize", "This option is obsolete, use -vop crop=w:h:x0:y0 for cropping\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
-	{"mp3file", &mp3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"ac3file", &ac3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
-
-//	{"oac", &out_audio_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
-//	{"ovc", &out_video_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	// outut audio/video codec selection
 	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
+	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
 
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
