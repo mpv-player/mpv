@@ -2,10 +2,10 @@
 #ifndef X11_COMMON_H
 #define X11_COMMON_H
 
-#ifdef X11_FULLSCREEN
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+
+#ifdef X11_FULLSCREEN
 
 #define vo_wm_LAYER 1
 #define vo_wm_FULLSCREEN 2
