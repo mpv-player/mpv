@@ -1376,6 +1376,7 @@ void vo_vm_close(Display *dpy)
            XF86VidModeSwitchToMode(dpy,screen,vidmodes[i]);
            XF86VidModeSwitchToMode(dpy,screen,vidmodes[i]);
            free(vidmodes);
+           vidmodes = NULL;
          }
 }
 #endif
