@@ -1150,7 +1150,7 @@ if x86 && linux ; then
     echo "WARNING! If you want to run mplayer on this system, get prepared for problems!"
     echo "2.2.x has limited SSE support. Upgrade kernel or use --disable-sse if you"
     echo "experience crashes. MPlayer tries to autodetect if your kernel correctly supports"
-    echo "SSE, but you have been warned! If you are using kernel older then 2.2.x you must"
+    echo "SSE, but you have been warned! If you are using kernel older than 2.2.x you must"
     echo "upgrade it to get SSE support!"
 #    die "old kernel for this cpu" # works fine on some 2.2.x so don't die (later check will test)
   else
