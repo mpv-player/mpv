@@ -34,7 +34,7 @@ stream copying and video resizing abilities.</P>
   <LI><B>OPTIONAL</B> - for libavcodec support, install libavcodec as
     described in the <A HREF="codecs.html#2.2.1.2">libavcodec section</A>.</LI>
   <LI><B>OPTIONAL</B> - download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>
-    <B>WARNING: DO NOT COMPILE LAME WITH <U>GCC 2.96</U>! It won't
+    <B>WARNING: DO NOT COMPILE LAME &lt; 3.90 WITH <U>GCC 2.96</U>! It won't
     work properly!</B><BR>
     This
     is needed for CBR/VBR MP3 audio encoding ability. Note that a single
@@ -44,7 +44,7 @@ stream copying and video resizing abilities.</P>
     is over. The resulting number should be less than <B>30</B>. Don't
     panic if it's <B>400</B> or so, you shouldn't heard any audible
     quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
-    Well, delete that <B>GCC 2.96</B>.</LI>
+    Well, delete that <B>GCC 2.96</B> or upgrade lame to at least <B>3.90</B>.</LI>
   <LI><B>OPTIONAL</B> - <CODE>libjpeg</CODE> and <CODE>libpng</CODE> -
     as described in the <A HREF="documentation.html#1.3">Installation</A>
     section</LI>
