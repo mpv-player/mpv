@@ -2690,6 +2690,7 @@ if test "$_x11" = yes && test "$_vm" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
+#include <X11/XF86keysym.h>
 int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
