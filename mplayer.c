@@ -657,8 +657,9 @@ if(vcd_track){
       stream=new_stream(f,STREAMTYPE_STREAM);
   } else {
 #ifdef STREAMING
-      url = set_url(filename);
+      url = url_new(filename);
       if(url==NULL) {
+       // failed to create a new URL, so it's not an URL (or a malformed URL)
 #endif
        f=open(filename,O_RDONLY);
        if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
@@ -667,18 +668,15 @@ if(vcd_track){
        stream->end_pos=len;
 #ifdef STREAMING
       } else {
-        if(url->port==0) {
-          if( (!strcasecmp(url->protocol, "mms")) || 
-              (!strcasecmp(url->protocol, "http")) ){
-            url->port=80;
-          }
-        }
-        f=connect2Server(url->hostname, url->port);
-        if( f<0 ) { 
+        int streaming_protocol;
+        streaming_protocol=autodetectProtocol( url, &f );
+        if( streaming_protocol==STREAMING_TYPE_UNKNOWN ) { 
           printf("Unable to open URL: %s\n", filename);
-          free_url(url);
+          url_free(url);
           return 1; 
         } else {
+          f=streaming_start( &url, f, streaming_protocol );
+          if(f<0){ printf("Unable to open URL: %s\n", url->url); return 1; }
           printf("Connected to server: %s\n", url->hostname );
         }
         stream=new_stream(f,STREAMTYPE_STREAM);
