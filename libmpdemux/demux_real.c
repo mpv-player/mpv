@@ -1078,11 +1078,59 @@ void demux_open_real(demuxer_t* demuxer)
 		    int flavor;
 		    int coded_frame_size;
 		    int codecdata_length;
+		    int i;
+		    char *buft;
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);
 //		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
+                   if (version == 3) {
+                    stream_skip(demuxer->stream, 2);
+                    stream_skip(demuxer->stream, 10);
+                    stream_skip(demuxer->stream, 4);
+                    // Name, author, (c) are also in CONT tag
+                    if ((i = stream_read_char(demuxer->stream)) != 0) {
+                      buft = malloc(i+1);
+                      stream_read(demuxer->stream, buft, i);
+                      buft[i] = 0;
+                      demux_info_add(demuxer, "Name", buft);
+                      free(buft);
+                    }
+                    if ((i = stream_read_char(demuxer->stream)) != 0) {
+                      buft = malloc(i+1);
+                      stream_read(demuxer->stream, buft, i);
+                      buft[i] = 0;
+                      demux_info_add(demuxer, "Author", buft);
+                      free(buft);
+                    }
+                    if ((i = stream_read_char(demuxer->stream)) != 0) {
+                      buft = malloc(i+1);
+                      stream_read(demuxer->stream, buft, i);
+                      buft[i] = 0;
+                      demux_info_add(demuxer, "Copyright", buft);
+                      free(buft);
+                    }
+                    if ((i = stream_read_char(demuxer->stream)) != 0)
+                      mp_msg(MSGT_DEMUX,MSGL_WARN,"Last header byte is not zero!\n");
+                    stream_skip(demuxer->stream, 1);
+                    i = stream_read_char(demuxer->stream);
+                    sh->format = stream_read_dword_le(demuxer->stream);
+                    if (i != 4) {
+                      mp_msg(MSGT_DEMUX,MSGL_WARN,"Audio FourCC size is not 4 (%d), please report to "
+                             "MPlayer developers\n", i);
+                      stream_skip(demuxer->stream, i - 4);
+                    }
+                    if (sh->format != mmioFOURCC('l','p','c','J')) {
+                      mp_msg(MSGT_DEMUX,MSGL_WARN,"Version 3 audio with FourCC %8x, please report to "
+                             "MPlayer developers\n", sh->format);
+                    }
+                    sh->channels = 1;
+                    sh->samplesize = 16;
+                    sh->samplerate = 8000;
+                    frame_size = 240;
+                    strcpy(buf, "14_4");
+                   } else {
 		    stream_skip(demuxer->stream, 2); // 00 00
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
 		    stream_skip(demuxer->stream, 4); // ???
@@ -1126,6 +1174,7 @@ void demux_open_real(demuxer_t* demuxer)
 			/* Desc #2 */
 			get_str(1, demuxer, buf, sizeof(buf));
 		    }
+                   }
 
 		    /* Emulate WAVEFORMATEX struct: */
 		    sh->wf = malloc(sizeof(WAVEFORMATEX));
@@ -1164,6 +1213,15 @@ void demux_open_real(demuxer_t* demuxer)
 //			    sh->format = 0x2000;
 			    break;
 			case MKTAG('1', '4', '_', '4'):
+                            sh->wf->cbSize = 10;
+                            sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
+                            ((short*)(sh->wf+1))[0]=0;
+                            ((short*)(sh->wf+1))[1]=240;
+                            ((short*)(sh->wf+1))[2]=0;
+                            ((short*)(sh->wf+1))[3]=0x14;
+                            ((short*)(sh->wf+1))[4]=0;
+                            break;
+
 			case MKTAG('2', '8', '_', '8'):
 			case MKTAG('s', 'i', 'p', 'r'):
 #if 0
