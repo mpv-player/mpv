@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-#include <mmsystem.h>
+#define DIRECTSOUND_VERSION 0x0600
 #include <dsound.h>
 
 #include "afmt.h"
@@ -108,12 +108,11 @@ static const int channel_mask[] = {
 
 static HINSTANCE hdsound_dll = NULL;      ///handle to the dll
 static LPDIRECTSOUND hds = NULL;          ///direct sound object 
-static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///direct sound buffer
+static LPDIRECTSOUNDBUFFER hdspribuf = NULL; ///primary direct sound buffer
+static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stream buffer)
 static int buffer_size = 0;               ///size in bytes of the direct sound buffer   
 static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
 static int min_free_space = 4096;         ///if the free space is below this value get_space() will return 0
-
-#define BUFFERSIZE 32767		          /// in samples - at 48khz 0.6 sec buffer, gets multiplied with nBlockAlign
 
 /***************************************************************************************/
 
@@ -234,6 +233,10 @@ static void DestroyBuffer(void)
 		IDirectSoundBuffer_Release(hdsbuf);
 		hdsbuf = NULL;
 	}
+	if (hdspribuf) {
+		IDirectSoundBuffer_Release(hdspribuf);
+		hdspribuf = NULL;
+	}
 }
 
 /**
@@ -249,6 +252,15 @@ static int write_buffer(unsigned char *data, int len)
   DWORD dwBytes1; 
   LPVOID lpvPtr2; 
   DWORD dwBytes2; 
+	
+  DWORD play_offset;
+  int space;
+  
+  // make sure we have enough space to write data
+  IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
+  space=buffer_size-(write_offset-play_offset);                                             
+  if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
+  if(space < len) len = space;
 	
   // Lock the buffer
   res = IDirectSoundBuffer_Lock(hdsbuf,write_offset, len, &lpvPtr1, &dwBytes1, &lpvPtr2, &dwBytes2, 0); 
@@ -266,7 +278,7 @@ static int write_buffer(unsigned char *data, int len)
 	memcpy(lpvPtr1,data,dwBytes1);
     if (NULL != lpvPtr2 )memcpy(lpvPtr2,data+dwBytes1,dwBytes2);
 	write_offset+=dwBytes1+dwBytes2;
-    if(write_offset>=buffer_size)write_offset-=buffer_size;
+    if(write_offset>=buffer_size)write_offset=dwBytes2;
 	
    // Release the data back to DirectSound. 
     res = IDirectSoundBuffer_Unlock(hdsbuf,lpvPtr1,dwBytes1,lpvPtr2,dwBytes2);
@@ -328,8 +340,9 @@ static int init(int rate, int channels, int format, int flags)
     int res;
 	if (!InitDirectSound()) return 0;
 
-	// ok, now create the primary buffer
+	// ok, now create the buffers
 	WAVEFORMATEXTENSIBLE wformat;
+	DSBUFFERDESC dsbpridesc;
 	DSBUFFERDESC dsbdesc;
 
 	//fill global ao_data
@@ -337,18 +350,13 @@ static int init(int rate, int channels, int format, int flags)
 	ao_data.samplerate = rate;
 	ao_data.format = format;
 	ao_data.bps = channels * rate * (audio_out_format_bits(format)>>3);
-	if(ao_data.buffersize==-1)
-	{
-		ao_data.buffersize = audio_out_format_bits(format) >> 3;
-		ao_data.buffersize *= channels;
-		ao_data.buffersize *= BUFFERSIZE;
-	}
+	if(ao_data.buffersize==-1) ao_data.buffersize = ao_data.bps; // space for 1 sec
 	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate, channels, audio_out_format_name(format));
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Buffersize:%d bytes (%d msec)\n", ao_data.buffersize, BUFFERSIZE * 1000 / rate);
+	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Buffersize:%d bytes (%d msec)\n", ao_data.buffersize, ao_data.buffersize / ao_data.bps * 1000);
 
 	//fill waveformatex
 	ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
-	wformat.Format.cbSize          = (channels > 2) ? sizeof(WAVEFORMATEXTENSIBLE) : 0;
+	wformat.Format.cbSize          = (channels > 2) ? sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX) : 0;
 	wformat.Format.nChannels       = channels;
 	wformat.Format.nSamplesPerSec  = rate;
 	if (format == AFMT_AC3) {
@@ -361,7 +369,15 @@ static int init(int rate, int channels, int format, int flags)
 		wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
 	}
 
-    // fill in the direct sound buffer descriptor
+	// fill in primary sound buffer descriptor
+	memset(&dsbpridesc, 0, sizeof(DSBUFFERDESC));
+	dsbpridesc.dwSize = sizeof(DSBUFFERDESC);
+	dsbpridesc.dwFlags       = DSBCAPS_PRIMARYBUFFER;
+	dsbpridesc.dwBufferBytes = 0;
+	dsbpridesc.lpwfxFormat   = NULL;
+
+
+	// fill in the secondary sound buffer (=stream buffer) descriptor
 	memset(&dsbdesc, 0, sizeof(DSBUFFERDESC));
 	dsbdesc.dwSize = sizeof(DSBUFFERDESC);
 	dsbdesc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 /** Better position accuracy */
@@ -371,18 +387,29 @@ static int init(int rate, int channels, int format, int flags)
 	if (channels > 2) {
 		wformat.dwChannelMask = channel_mask[channels - 3];
 		wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-		wformat.Samples.wValidBitsPerSample = audio_out_format_bits(format);
+		wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
 		// Needed for 5.1 on emu101k - shit soundblaster
 		dsbdesc.dwFlags |= DSBCAPS_LOCHARDWARE;
 	}
 	wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
 
-	dsbdesc.dwBufferBytes = wformat.Format.nBlockAlign * BUFFERSIZE;
+	dsbdesc.dwBufferBytes = ao_data.buffersize;
 	dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
 	buffer_size = dsbdesc.dwBufferBytes;
 	ao_data.outburst = wformat.Format.nBlockAlign * 512;
 
-	// now create the sound buffer
+	// create primary buffer and set its format
+    
+	res = IDirectSound_CreateSoundBuffer( hds, &dsbpridesc, &hdspribuf, NULL );
+	if ( res != DS_OK ) {
+		UninitDirectSound();
+		mp_msg(MSGT_AO, MSGL_ERR,"ao_dsound: cannot create primary buffer (%s)\n", dserr2str(res));
+		return 0;
+	}
+	res = IDirectSoundBuffer_SetFormat( hdspribuf, (WAVEFORMATEX *)&wformat );
+	if ( res != DS_OK ) mp_msg(MSGT_AO, MSGL_WARN,"ao_dsound: cannot set primary buffer format (%s), using standard setting (bad quality)", dserr2str(res));
+
+	// now create the stream buffer
 
 	res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
 	if (res != DS_OK) {
@@ -393,11 +420,11 @@ static int init(int rate, int channels, int format, int flags)
 		}
 		if (res != DS_OK) {
 			UninitDirectSound();
-			mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot create secondary buffer (%s)\n", dserr2str(res));
+			mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot create secondary (stream)buffer (%s)\n", dserr2str(res));
 			return 0;
 		}
 	}
-	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary buffer created\n");
+	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary (stream)buffer created\n");
 	return 1;
 }
 
