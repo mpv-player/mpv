@@ -71,7 +71,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - optional JPEG decoder, used by the <option>-mf</option>
-  option and some QT MOV files.  Useful for both MPlayer and MEncoder if
+  option and some QT MOV files.  Useful for both <application>MPlayer</application>
+  and <application>MEncoder</application> if
   you plan to work with jpeg files.
   </para></listitem>
 <listitem><para>
@@ -83,6 +84,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">lame</emphasis> - recommended, needed for encoding MP3 audio with
   <application>MEncoder</application>, suggested version is
   <emphasis>always the newest</emphasis> (at least 3.90).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">zlib</emphasis> - recommended, necessary for compressed
+  MOV header and PNG support.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libogg</emphasis> - optional, needed for playing OGG file format.
