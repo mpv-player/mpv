@@ -19,13 +19,14 @@ Homepage:
     * Contents: Gabucino
 
 English documentation:
-    * user docs: Gabucino
+    * user docs: Gabucino, Diego Biurrun
     * review, grammar & html fixes: Diego Biurrun, Nilmoni Deb, András Mohari
     * input layer, lirc, slave mode docs: Albeu
     * man page: Jonas Jermann <jjermann@gmx.net>
     * tech/* docs: A'rpi
 
 Documentation translations:
+    * Help Messages: Johannes Feigl
     * Hungarian: Gabucino
     * German: Jonas Jermann <jjermann@gmx.net>
     * French: Stephane Marteau <smarteau@eso.org> (outdated)
@@ -35,12 +36,12 @@ Documentation translations:
     * Italian: Matteo Balduzzi
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
-    * DEBIAN packaging: Dariusz Pietrzak
+    * Debian packaging: Dariusz Pietrzak
     * RedHat/RPM packaging: Dominik Mierzejewski
     * FreeBSD support: Vladimir Kushnir, Nexus
     * BSD/OS support: Steven Schultz
     * NetBSD support: Bernd Ernesti
-    * OpenBSD support: Bjorn Sandell
+    * OpenBSD support: Björn Sandell
     * Solaris 8 support: Jürgen Keil, pl
     * MIPS support: Oliver Schoenbrunner
     * Win32/Cygwin support: Atmosfear
