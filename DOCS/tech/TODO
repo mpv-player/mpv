@@ -21,6 +21,9 @@ FOR THE NEXT PRE_RELEASE:
    - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
    - Dec 28: [BUG] nice little bug somewhere (config/playtree)
      (It's in new-conf. I can provide shell access...:)
+   - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
+     (vo_svga is unusably broken. On my Cirrus, and Geforce2, confirmed)
+   - Dec 31: [BUG] sig11 in subreader.c
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
