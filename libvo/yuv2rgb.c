@@ -402,7 +402,7 @@ static void yuv2rgb_c_init (int bpp, int mode)
 
     default:
 	printf ("%ibpp not supported by yuv2rgb\n", bpp);
-	exit (1);
+	//exit (1);
     }
 
     for (i = 0; i < 256; i++) {

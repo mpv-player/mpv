@@ -376,7 +376,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 		printf("using palette yuv422\n");
 	} else {
 		printf("no supported palette found\n");
-		exit(1);
+		return -1;
 	}
 
 	// config.src_palette= VIDEO_PALETTE_YUV422;
