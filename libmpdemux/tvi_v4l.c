@@ -1160,7 +1160,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    if (req_chan >= priv->capability.channels)
 	    {
 		mp_msg(MSGT_TV, MSGL_ERR, "Invalid input requested: %d, valid: 0-%d\n",
-		    req_chan, priv->capability.channels);
+		    req_chan, priv->capability.channels - 1);
 		return(TVI_CONTROL_FALSE);
 	    }
 
