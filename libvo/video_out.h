@@ -91,6 +91,8 @@ typedef struct vo_functions_s
 } vo_functions_t;
 
 char *vo_format_name(int format);
+int vo_init(void);
+
 // NULL terminated array of all drivers
 extern vo_functions_t* video_out_drivers[];
 
