@@ -1,7 +1,7 @@
 
 .\" This manpage was/is done by Gabucino
 .\" 
-.TH "MPlayer" "1" "2002-04-13"
+.TH "MPlayer" "1" "2002-04-18"
 
 .SH "NAME"
 mplayer \- Movie Player for Linux
@@ -17,23 +17,26 @@ mplayer \- Movie Player for Linux
 .RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]\ ...
 .br
 .B mplayer
-.RB [dvd|vcd|tv]://[id|options]
+.RB [dvd|vcd|tv]://[title]\ [options]
+.br
+.B mplayer
+.RB [mms|http]://URL[:port]\ [options]
 
 .SH "DESCRIPTION"
 .B mplayer
 is a movie player for LINUX (runs on many other Unices, and non\-x86
 CPUs, see section 6). It plays most MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI,
 RM, NuppelVideo, yuv4mpeg, FILM, RoQ files, supported by many native, XAnim, and
-Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx, and even DivX movies too
+Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 and even WMV movies too
 (and you don't need the avifile library at all!).
 
 Another big feature of mplayer is the wide range of supported output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, but you can use
 GGI and SDL (and this way all their drivers) and some lowlevel card-specific drivers
-(for Matrox, 3Dfx and Radeon) too!
+(for Matrox G-series, 3Dfx Banshee/Voodoo3 and ATI cards) too!
 .br
 Most of them supports software or hardware scaling, so you can enjoy movies in fullscreen.
-MPlayer supports displaying through some hardware MPEG decoder boards, such as the DVB and
+MPlayer supports displaying through some hardware MPEG decoder boards, such as the Siemens DVB and
 DXR3/Hollywood+!
 
 Nice big antialiased shaded subtitles with european/ISO 8859-1,2 (hungarian, english, czech, 
@@ -44,6 +47,9 @@ own: MPsub).
 .SH "GUI OPTIONS"
 .I NOTE:
 The GUI code has to be compiled in *explicitly* (see documentation).
+.br
+.I NOTE:
+The GUI code is STILL exterimental, it is under heavy development, parts of it (for example: playlist) not yet implemented.
 .TP 
 .B \-gui
 Start MPlayer in GUI mode.
@@ -67,7 +73,7 @@ parameter, and always tries to play back audio streams those language
 matches the given code. For example: \-alang hu,en will always try to play
 hungarian or if it's non\-existant then english audio streams if there are any.
 .TP 
-.B \-chapter\ <chapter\ id>
+.B \-chapter\ <chapter\ id>[-<end chapter id>]
 Specify which chapter to start playing at. Optionally specify which chapter to
 end playing at. Examples can be found below.
 .TP 
@@ -134,7 +140,7 @@ autodetected on AVI files. Examples:
     \-aspect 16:9 or \-aspect 1.7777
 .TP 
 .B \-audiofile\ <filename>
-Play audio from an external file (MP3, AC3, Vorbis, etc)
+Play audio from an external file (WAV, MP3 or Vorbis)
 .TP 
 .B \-autoq\ <quality>
 Dynamically changes the level of postprocess, depending on spare CPU time
@@ -143,7 +149,8 @@ can use some big number. You may not use together with \-pp but it's ok with
 \-npp!
 .TP 
 .B \-benchmark
-Used in combination with \-nosound and \-vo null for benchmarking.
+Prints some statistics on CPU usage and dropped frames at the end.
+Used in combination with \-nosound and \-vo null for benchmarking only video codec.
 .TP 
 .B \-cdrom\-device\ <path\ to\ device>
 Override default CDROM drive name /dev/cdrom
@@ -189,7 +196,7 @@ Specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the 
 Loops movie playback <num> times. 0 means forever.
 .TP
 .B \-mf\ <multifile\ options>
-Used when decoding from multiple JPEG files. The sub\-options are separated by ":"
+Used when decoding from multiple PNG or JPEG files. The sub\-options are separated by ":"
 (see documentation). They are:
 
     on            turns on multifile support
@@ -246,7 +253,7 @@ Specify frame/sec rate of subtitle file (float number)
 (default: the same fps as the movie)
 .TP 
 .B \-subpos <0 \- 100>
-Specify the position of subtitles
+Specify the position of subtitles on screen
 .TP 
 .B \-sws\ <software\ scaler\ type>
 This option sets the quality (and speed, respectively) of the software scaler,
@@ -304,14 +311,11 @@ Specify the VobSub subtitle id. Valid values range from 0 to 31.
 
 .SH "ADVANCED OPTIONS"
 .I NOTE:
-These options can help you solve your particular problem (see documentation too!).
+These options can help you solve your particular problem (see documentation too!) or help in fine-tuning codec/driver parameters.
 .TP
 .B \-aa*
 Used for \-vo aa. You can get a list and an explanation of available options executing
 .I mplayer \-aahelp
-.TP 
-.B \-abs\ <bytes>
-Sound card audio buffer size (in bytes, default: measuring)
 .TP 
 .B \-ac <name>
 Force usage of a specific audio codec, according to its name in codecs.conf,
@@ -411,6 +415,9 @@ VESA framebuffer doesn't support mode changing.
 Use this config file instead of the default /etc/fb.modes.
 Only valid for the fbdev driver.
 .TP 
+.B \-flip
+Flip image upside-down.
+.TP 
 .B \-forceidx
 Force rebuilding of INDEX. Useful for files with broken index (desyncs, etc).
 Seeking will be possible. You can fix the index permanently with
@@ -423,7 +430,7 @@ Force using XVideo
 Force frame rate (if value is wrong in the header) (float number)
 .TP 
 .B \-framedrop (see \-hardframedrop option too!)
-Frame dropping: decode all frames, video may skip
+Frame dropping: decode all (except B) frames, video may skip. Usefull for playback on slow VGA card/bus.
 .TP 
 .B \-frames\ <number>
 MPlayer plays <number> frames, then quits.
@@ -481,8 +488,8 @@ This option can be used to configure certain parts of the input system.
 .I NOTE:
 Autorepeat is currently only supported by joysticks.
 .TP 
-.B \-mc\ <seconds/5frame>
-Maximum sync correction per 5 frames (in seconds)
+.B \-mc\ <seconds/frame>
+Maximum A-V sync correction per frame (in seconds)
 .TP 
 .B \-monitor_dotclock <dotclock\ (or\ pixelclock) range>  (FBdev only)
 Look into etc/example.conf for further information and in DOCS/video.html.
@@ -496,24 +503,12 @@ Force usage of non\-interleaved AVI parser (fixes playing
 of some bad AVI files).
 .TP 
 .B \-nobps
-Don't use avg. byte/sec value for A\-V sync (AVI).
+Don't use avg. byte/sec value for A\-V sync (AVI). Helps with some AVI files with broken header.
 .TP 
 .B \-double
 enables doublebuffering. Fixes flicker by storing two frames in memory, and
 displaying one while decoding another. Can effect OSD. Needs twice the memory
 than a single buffer, so it won't work on cards with very few video memory.
-.TP 
-.B \-nodshow
-Disables usage of DirectShow video codecs
-.TP 
-.B \-noframedrop
-No frame dropping: every frame is played, audio and video may be out of
-sync (default)
-.TP 
-.B \-noidx
-Disregards INDEX of the AVI. Useful for files with broken index (desyncs, etc).
-Seeking will NOT be possible. You can fix the index permanently
-with MEncoder (see documentation).
 .TP 
 .B \-nojoystick
 Turns off joystick support. Default is on, if compiled in.
@@ -522,16 +517,13 @@ Turns off joystick support. Default is on, if compiled in.
 Turns off lirc support.
 .TP
 .B \-nortc
-Turns off rtc
+Turns off usage of /dev/rtc (real-time clock)
 .TP
 .B \-noslices
 Disable the use of draw_slice by codecs.
 .TP
-.B \-nowaveheader
+.B \-nowaveheader  (-ao pcm only)
 Don't include wave header. Used for RAW PCM.
-.TP 
-.B \-noxv (SDL only)
-Disable XVideo hardware acceleration
 .TP 
 .B \-npp\ <options>
 This option allows to give more litterate options for postprocessing, 
@@ -586,16 +578,11 @@ Adjust saturation of video output (default 0). You can get grayscale output
 with this option.
 .TP 
 .B \-sb\ <byte\ position> (see \-ss option too!)
-Seek to byte position
+Seek to byte position. Useful for playback from cdrom images / vob files with junk at the beginning.
 .TP 
-.B \-screenh\ <pixels>
+.B \-screenw\ <pixels> \-screenh\ <pixels>
 If you use an output driver which can't know the resolution of the screen
-(fbdev/x11 and/or TVout) this is where you can specify the vertical
-resolution.
-.TP 
-.B \-screenw\ <pixels>
-If you use an output driver which can't know the resolution of the screen
-(fbdev/x11 and/or TVout) this is where you can specify the horizontal
+(fbdev/x11 and/or TVout) this is where you can specify the horizontal and vertical
 resolution.
 .TP 
 .B \-slave
@@ -646,7 +633,10 @@ for example:
 See '\-vc help' for FULL list!
 .TP 
 .B \-vid\ <id>
-Select video channel [MPG: 0\-15  AVI:  \-\- ]
+Select video channel [MPG: 0\-15  ASF:  0\-255 ]
+.TP 
+.B \-vop <filter>
+Activate video filters (see documentation at DOCS/tech/vop.txt !).
 .TP
 .B \-vsync
 Enables VBI for vesa
@@ -659,8 +649,20 @@ browser (with the plugger extension for instance)
 In Xinerama configurations (i.e. a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display movie on. Range 0 \- ...
 .TP 
+.B \-x\ <x>
+Scale image to x width (if sw/hw scaling available)
+.TP 
+.B \-xy\ <factor>
+Scale image by <factor>
+.TP 
+.B \-y\ <y>
+Scale image to y height (if sw/hw scaling available)
+.TP 
+.B \-zoom
+Allow software scaling, where available. Could be used to force scaling with -vop scale
+.TP 
 .B \-z\ <0\-9>
-Specifies compression level for PNG output
+Specifies compression level for PNG output (-vo png)
           0 : no compression
           9 : max compression
 .TP
@@ -674,11 +676,8 @@ These are included in this manpage just for completeness! These may or may NOT
 work! If you don't know what are these, you DON'T need these! In either case,
 double\-check the documentation!
 .TP 
-.B \-dapsync
-Use alternative A/V sync method.
-.TP 
 .B \-dumpvideo
-Dump video stream to ./stream.dump (only with MPEG\-PS) (not very usable)
+Dump raw compressed video stream to ./stream.dump (not very usable)
 .TP 
 .B \-ssf <mode>
 .TP 
@@ -686,12 +685,10 @@ Dump video stream to ./stream.dump (only with MPEG\-PS) (not very usable)
 Force subtitle demuxer type for \-subfile.
 .TP 
 .B \-subfile <filename>
-Currently unuseful. Same as \-audiofile, but for subtitle streams. (OggDS?)
+Currently useless. Same as \-audiofile, but for subtitle streams. (OggDS?)
 .TP 
 .B \-vivo <sub\-options>
-.TP 
-.B \-vop <filter>
-Activate video filters (see documentation!!).
+Force audio parameters for the .vivo demuxer (for debugging purposes)
 
 .SH "OBSOLETE OPTIONS"
 .I NOTE:
@@ -710,12 +707,8 @@ Force usage of a specific audio format. For example:
 
 See \-ac help for FULL list!
 .TP 
-.B \-flip
-Flip image (useful for example for old Indeo codecs). Supported only(?)
-by the 'sdl' and 'x11' outputs.
-.TP 
-.B \-master
-Use Software audio mixer plugin instead (see documentation).
+.B \-dapsync
+Use alternative A/V sync method.
 .TP 
 .B \-vfm <1\-12>
 Force usage of a specific codec FAMILY, and FALLBACK to default if failed.
@@ -737,19 +730,6 @@ If libdivxdecore support was compiled in, then type 3 and 7 now contains
 just the same DivX4 codec, but different APIs to reach it. For difference
 between them and when to use which, check the DivX4 section in the
 documentation.
-.TP 
-.B \-x\ <x>
-Scale image to x width (if driver suppports)
-.TP 
-.B \-xy\ <factor>
-Scale image by <factor>
-.TP 
-.B \-y\ <y>
-Scale image to y height (if driver supports)
-.TP 
-.B \-zoom
-Use software scaling, where available (use with \-nofs). svga, x11, vesa
-output drivers support it.
 
 .SH "KEYBOARD CONTROL"
 .I NOTE:
