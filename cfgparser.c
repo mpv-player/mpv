@@ -267,12 +267,13 @@ int parse_config_file(struct config *conf, char *conffile)
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
+		if (!verbose) printf("Reading config file: %s", conffile);
 		printf(": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
 	}
-	printf("\n");
+	if (verbose) printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		line_num++;
