@@ -1498,7 +1498,8 @@ static int get_video_framesize(priv_t *priv)
     return priv->format.fmt.pix.sizeimage;
 }
 
-/*
+//#define DOUBLESPEED
+#ifdef DOUBLESPEED
 // for testing purposes only
 static void read_doublespeed(priv_t *priv)
 {
@@ -1518,7 +1519,7 @@ static void read_doublespeed(priv_t *priv)
     }
     
 }
-*/
+#endif
 
 static void *audio_grabber(void *data)
 {
@@ -1537,10 +1538,12 @@ static void *audio_grabber(void *data)
 
     for (; !priv->shutdown;)
     {
-//	read_doublespeed(priv);
+#ifdef DOUBLESPEED
+	read_doublespeed(priv);
+#else
 	if (audio_in_read_chunk(&priv->audio_in, priv->audio_ringbuffer+priv->audio_tail*priv->audio_in.blocksize) < 0)
 	    continue;
-
+#endif
 	pthread_mutex_lock(&priv->skew_mutex);
 	if (priv->first_frame == 0) {
 	    // there is no first frame yet (unlikely to happen)
@@ -1558,31 +1561,37 @@ static void *audio_grabber(void *data)
 //	fprintf(stderr, "spb = %lf, bs = %d, skew = %lf\n", priv->audio_secs_per_block, priv->audio_in.blocksize,
 //		(double)(current_time - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total)/1e6);
 
+	// put the current skew into the ring buffer
 	priv->audio_skew_total -= priv->audio_skew_buffer[audio_skew_ptr];
 	priv->audio_skew_buffer[audio_skew_ptr] = current_time
 	    - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
 	priv->audio_skew_total += priv->audio_skew_buffer[audio_skew_ptr];
 
 	pthread_mutex_lock(&priv->skew_mutex);
-	// linear interpolation - here we interpolate current skew value
-	// from the moving average, which we expect to be in the middle
-	// of the interval
+
+	// skew calculation
+
+	// compute the sliding average of the skews
 	if (priv->audio_recv_blocks_total > priv->aud_skew_cnt) {
 	    priv->audio_skew = priv->audio_skew_total/priv->aud_skew_cnt;
-//	    priv->audio_skew += (priv->audio_skew*priv->aud_skew_cnt)/(2*priv->audio_recv_blocks_total-priv->aud_skew_cnt);
 	} else {
-	    // this smoothens the evolution of audio_skew at startup a bit
-	    priv->audio_skew = ((priv->aud_skew_cnt+priv->audio_recv_blocks_total)*priv->audio_skew_total)/(priv->aud_skew_cnt*priv->audio_recv_blocks_total);
+	    priv->audio_skew = priv->audio_skew_total/priv->audio_recv_blocks_total;
 	}
 
+	// put the current skew change (skew-prev_skew) into the ring buffer
 	priv->audio_skew_delta_total -= priv->audio_skew_delta_buffer[audio_skew_ptr];
 	priv->audio_skew_delta_buffer[audio_skew_ptr] = priv->audio_skew - prev_skew_uncorr;
 	priv->audio_skew_delta_total += priv->audio_skew_delta_buffer[audio_skew_ptr];
-	prev_skew_uncorr = priv->audio_skew;
+	prev_skew_uncorr = priv->audio_skew; // remember the _uncorrected_ average value
 
-	audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
+	audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt; // rotate the buffer pointer
 
+	// sliding average approximates the value in the middle of the interval
+	// so interpolate the skew value further to the current time
 	priv->audio_skew += priv->audio_skew_delta_total/2;
+
+	// now finally, priv->audio_skew contains fairly good approximation
+	// of the current value 
 
 //	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 	// current skew factor (assuming linearity)
