@@ -1366,6 +1366,15 @@ switch(file_format){
 #endif
 } // switch(file_format)
 pts_from_bps=0; // !!!
+if ((sh_video=demuxer->video->sh) && sh_video->bih)
+  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    (char *)&sh_video->bih->biCompression,
+    sh_video->bih->biWidth,
+    sh_video->bih->biHeight,
+    sh_video->bih->biBitCount,
+    sh_video->fps,
+    sh_video->i_bps*0.008f,
+    sh_video->i_bps/1024.0f );
 return demuxer;
 }
 
