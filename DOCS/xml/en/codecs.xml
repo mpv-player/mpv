@@ -738,8 +738,9 @@ make
 make install
 </screen>
 Binaries are not available from audiocoding.com, but you can (apt-)get Debian
-packages from <ulink url="http://marillat.free.fr">Christian Marillat's homepage</ulink>
-and Mandrake RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>.
+packages from <ulink url="http://marillat.free.fr">Christian Marillat's homepage</ulink>,
+Mandrake RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink> and RedHat RPMs
+from <ulink url="http://www.piorunek.pl/~dominik/">Dominik Mierzejewski's homepage</ulink>.
 </para>
 </sect3>
 
