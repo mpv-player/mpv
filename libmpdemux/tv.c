@@ -307,8 +307,10 @@ tvi_handle_t *tv_begin(void)
 {
     if (!strcmp(tv_param_driver, "dummy"))
 	return (tvi_handle_t *)tvi_init_dummy(tv_param_device);
+#ifdef HAVE_TV_V4L
     if (!strcmp(tv_param_driver, "v4l"))
 	return (tvi_handle_t *)tvi_init_v4l(tv_param_device);
+#endif
 
     mp_msg(MSGT_TV, MSGL_ERR, "No such driver: %s\n", tv_param_driver); 
     return(NULL);
