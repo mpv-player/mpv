@@ -22,6 +22,13 @@ OBJS += dct36_3dnow.o dct64_3dnow.o
 SRCS += dct36_k7.s dct64_k7.c
 OBJS += dct36_k7.o dct64_k7.o
 endif
+ifeq ($(TARGET_ARCH_POWERPC),yes)
+ifeq ($(TARGET_ALTIVEC),yes)
+SRCS += dct64_altivec.c
+OBJS += dct64_altivec.o
+CFLAGS += -faltivec
+endif
+endif
 
 .SUFFIXES: .c .o
 

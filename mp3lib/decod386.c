@@ -158,6 +158,13 @@ int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
     return 0;
 } 
 #endif
+
+#ifdef HAVE_ALTIVEC
+#define dct64_base(a,b,c) if(gCpuCaps.hasAltiVec) dct64_altivec(a,b,c); else dct64(a,b,c)
+#else /* HAVE_ALTIVEC */
+#define dct64_base(a,b,c) dct64(a,b,c)
+#endif /* HAVE_ALTIVEC */
+ 
 static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 {
   static real buffs[2][2][0x110];
@@ -192,12 +199,12 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   if(bo & 0x1) {
     b0 = buf[0];
     bo1 = bo;
-    dct64(buf[1]+((bo+1)&0xf),buf[0]+bo,bandPtr);
+    dct64_base(buf[1]+((bo+1)&0xf),buf[0]+bo,bandPtr);
   }
   else {
     b0 = buf[1];
     bo1 = bo+1;
-    dct64(buf[0]+bo,buf[1]+bo+1,bandPtr);
+    dct64_base(buf[0]+bo,buf[1]+bo+1,bandPtr);
   }
 
   {
