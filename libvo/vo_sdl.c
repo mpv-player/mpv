@@ -94,11 +94,6 @@
 /* define to force software-surface (video surface stored in system memory)*/
 #undef SDL_NOHWSURFACE
 
-/* if defined, don't use depth/colorspace-conversions for rgb/bgr
- * also no scaling done then, much faster (~2 times)!
- */
-#undef SDL_DIRECT_BLIT
-
 //#define BUGGY_SDL //defined by configure
 
 /* MONITOR_ASPECT MUST BE FLOAT */
@@ -258,7 +253,9 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         	case IMGFMT_UYVY:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0)+1,2*priv->width);
 		break;
-#ifdef SDL_DIRECT_BLIT		
+		default:
+		if((priv->format&0xFF) == priv->bpp)		
+		switch(priv->format) {
 		case IMGFMT_RGB15:
 		case IMGFMT_BGR15:
     			vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+2*(y0*priv->width+x0),2*priv->width);
@@ -275,7 +272,9 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 		case IMGFMT_BGR32:
     			vo_draw_alpha_rgb32(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+4*(y0*priv->width+x0),4*priv->width);
 		break;
-#else		
+		}
+		else
+		switch(priv->format) {		
 		case IMGFMT_RGB15:
 		case IMGFMT_BGR15:
     			vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) priv->rgbsurface->pixels)+2*(y0*priv->width+x0),2*priv->width);
@@ -292,7 +291,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 		case IMGFMT_BGR32:
     			vo_draw_alpha_rgb32(w,h,src,srca,stride,((uint8_t *) priv->rgbsurface->pixels)+4*(y0*priv->width+x0),4*priv->width);
 		break;
-#endif		
+		}		
   	}	
 }
 
@@ -363,19 +362,19 @@ static int sdl_open (void *plugin, void *name)
 	/* other default values */
 	#ifdef SDL_NOHWSURFACE
 		if(verbose) printf("SDL: using software-surface\n");
-		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT;
-		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT;
+		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_ANYFORMAT;
+		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_ANYFORMAT;
 	#else	
-		if((strcmp(priv->driver, "dga") == 0) && (priv->mode)) {
+		/*if((strcmp(priv->driver, "dga") == 0) && (priv->mode)) {
 			if(verbose) printf("SDL: using software-surface\n");
-			priv->sdlflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL;
-			priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL;
+			priv->sdlflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_ANYFORMAT;
+			priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_ANYFORMAT;
 		}	
-		else {	
+		else {	*/
 			if(verbose) printf("SDL: using hardware-surface\n");
-			priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL;
-			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_HWACCEL;
-		}	
+			priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_ANYFORMAT;
+			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_HWACCEL|SDL_ANYFORMAT;
+		//}	
 	#endif	
 	
 	/* Setup Keyrepeats (500/30 are defaults) */
@@ -712,9 +711,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&FS) {
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		printf("SDL: Info - please use -vm (unscaled) or -zoom (scaled) for best fullscreen experience\n");
-		if (priv->surface)
-		    SDL_FreeSurface(priv->surface);
-          	priv->surface = NULL;
 		priv->fulltype = FS;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
@@ -723,9 +719,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&VM) {
 	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -zoom switch to scale video\n");
-		if (priv->surface)
-		    SDL_FreeSurface(priv->surface);
-          	priv->surface = NULL;
 		priv->fulltype = VM;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
@@ -734,9 +727,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&ZOOM) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
-		if (priv->surface)
-		    SDL_FreeSurface(priv->surface);
-          	priv->surface = NULL;
 		priv->fulltype = ZOOM;
 		set_fullmode(priv->fullmode);
 	} 
@@ -752,9 +742,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 			printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
-			if (priv->surface)
-			    SDL_FreeSurface(priv->surface);
-			priv->surface = NULL;
 			priv->fulltype = ZOOM;
 			set_fullmode(priv->fullmode);
 		}	
@@ -775,64 +762,48 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		// 15 bit: r:111110000000000b g:000001111100000b b:000000000011111b
 		// FIXME: colorkey detect based on bpp, FIXME static bpp value, FIXME alpha value correct?
 	    case IMGFMT_RGB15:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31, 992, 31744, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR15:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31744, 992, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB16:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 31, 2016, 63488, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR16:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 63488, 2016, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB24:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR24:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB32:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR32:
-		if (priv->rgbsurface)
-			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
@@ -840,8 +811,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	    break;	
 	    default:
 		/* Initialize and create the YUV Overlay used for video out */
-		if (priv->overlay)
-			SDL_FreeYUVOverlay(priv->overlay);
 		if (!(priv->overlay = SDL_CreateYUVOverlay (width, height, sdl_format, priv->surface))) {
 			printf ("SDL: Couldn't create a YUV overlay: %s\n", SDL_GetError());
 			return -1;
@@ -855,9 +824,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 	
 	if(priv->mode) {
-#ifdef SDL_DIRECT_BLIT
-	if(verbose) printf("SDL: using direct surface blitting, no depth/colorspace-conversion/scaling possible.\n");
-#endif		
+		if((priv->format&0xFF) != priv->bpp) printf("SDL: using depth/colorspace conversion, this will slow things down (%ibpp -> %ibpp).\n", priv->format&0xFF, priv->bpp);
 		priv->framePlaneRGB = width * height * priv->rgbsurface->format->BytesPerPixel;
 		priv->stridePlaneRGB = width * priv->rgbsurface->format->BytesPerPixel;
 	}	
@@ -925,45 +892,45 @@ static uint32_t draw_frame(uint8_t *src[])
 	case IMGFMT_BGR24:	
 	case IMGFMT_RGB32:
 	case IMGFMT_BGR32:
-#ifdef SDL_DIRECT_BLIT		
-		/*if(SDL_MUSTLOCK(priv->surface)) {
-	    		if (SDL_LockSurface (priv->surface)) {
-				if(verbose) printf("SDL: Couldn't lock RGB surface\n");
-				return -1;
-	    		}
-		}*/
-		dst = (uint8_t *) priv->surface->pixels;
-	    	if(priv->flip) {
-	    		mysrc+=priv->framePlaneRGB;
-			for(i = 0; i < priv->height; i++) {
-				mysrc-=priv->stridePlaneRGB;
-				memcpy (dst, mysrc, priv->stridePlaneRGB);
-				dst+=priv->stridePlaneRGB;
+		if((priv->format&0xFF) == priv->bpp) {
+			/*if(SDL_MUSTLOCK(priv->surface)) {
+				if (SDL_LockSurface (priv->surface)) {
+					if(verbose) printf("SDL: Couldn't lock RGB surface\n");
+					return -1;
+				}
+			}*/
+			dst = (uint8_t *) priv->surface->pixels;
+			if(priv->flip) {
+				mysrc+=priv->framePlaneRGB;
+				for(i = 0; i < priv->height; i++) {
+					mysrc-=priv->stridePlaneRGB;
+					memcpy (dst, mysrc, priv->stridePlaneRGB);
+					dst+=priv->stridePlaneRGB;
+				}
 			}
-		}
-		else memcpy (dst, src[0], priv->framePlaneRGB);
-		/*if(SDL_MUSTLOCK(priv->surface)) 
-			SDL_UnlockSurface (priv->surface);*/
-#else			
-		/*if(SDL_MUSTLOCK(priv->rgbsurface)) {
-	    		if (SDL_LockSurface (priv->rgbsurface)) {
-				if(verbose) printf("SDL: Couldn't lock RGB surface\n");
-				return -1;
-	    		}
-		}*/
-		dst = (uint8_t *) priv->rgbsurface->pixels;
-	    	if(priv->flip) {
-	    		mysrc+=priv->framePlaneRGB;
-			for(i = 0; i < priv->height; i++) {
-				mysrc-=priv->stridePlaneRGB;
-				memcpy (dst, mysrc, priv->stridePlaneRGB);
-				dst+=priv->stridePlaneRGB;
+			else memcpy (dst, src[0], priv->framePlaneRGB);
+			/*if(SDL_MUSTLOCK(priv->surface)) 
+				SDL_UnlockSurface (priv->surface);*/
+		} else {
+			/*if(SDL_MUSTLOCK(priv->rgbsurface)) {
+				if (SDL_LockSurface (priv->rgbsurface)) {
+					if(verbose) printf("SDL: Couldn't lock RGB surface\n");
+					return -1;
+				}
+			}*/
+			dst = (uint8_t *) priv->rgbsurface->pixels;
+			if(priv->flip) {
+				mysrc+=priv->framePlaneRGB;
+				for(i = 0; i < priv->height; i++) {
+					mysrc-=priv->stridePlaneRGB;
+					memcpy (dst, mysrc, priv->stridePlaneRGB);
+					dst+=priv->stridePlaneRGB;
+				}
 			}
+			else memcpy (dst, src[0], priv->framePlaneRGB);
+			/*if(SDL_MUSTLOCK(priv->rgbsurface)) 
+				SDL_UnlockSurface (priv->rgbsurface);*/
 		}
-		else memcpy (dst, src[0], priv->framePlaneRGB);
-		/*if(SDL_MUSTLOCK(priv->rgbsurface)) 
-			SDL_UnlockSurface (priv->rgbsurface);*/
-#endif			
 		break;
 
         }
@@ -1172,7 +1139,6 @@ static void check_events (void)
 static void flip_page (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-	SDL_Surface *blitconv; // temporary conversion surface
 
 	/* update osd/subtitles */
 	vo_draw_text(priv->width,priv->height,draw_alpha);	
@@ -1189,13 +1155,11 @@ static void flip_page (void)
 	    case IMGFMT_BGR24:	
 	    case IMGFMT_RGB32:
 	    case IMGFMT_BGR32:
-#ifndef SDL_DIRECT_BLIT	    
-	    	/* blit to the RGB surface */
-		blitconv = SDL_DisplayFormat(priv->rgbsurface);	
-		if(SDL_BlitSurface (blitconv, NULL, priv->surface, NULL))
-			printf("SDL: Blit failed: %s\n", SDL_GetError());
-		SDL_FreeSurface(blitconv);	
-#endif		
+		if((priv->format&0xFF) != priv->bpp) {
+		  	/* blit to the RGB surface */
+			if(SDL_BlitSurface (priv->rgbsurface, NULL, priv->surface, NULL))
+				printf("SDL: Blit failed: %s\n", SDL_GetError());
+		}
 
 		/* update screen */
 		//SDL_UpdateRect(priv->surface, 0, 0, priv->surface->clip_rect.w, priv->surface->clip_rect.h);
