@@ -484,7 +484,7 @@ if [ "$proc" = "k7" ]; then
 fi
 if [ "$proc" = "athlon" ]; then
 #	echo -n "trying athlon  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k6
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
 fi
 if [ "$proc" = "k6" ]; then
 #	echo -n "trying k6  "
