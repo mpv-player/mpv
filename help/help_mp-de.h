@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.146
+// In synch with rev 1.150
 
 // ========================= MPlayer help ===========================
 
@@ -399,6 +399,25 @@ static char help_text[]=
 #define MSGTR_AudioVideoCodecTotals "%d Audio- & %d Videocodecs\n"
 #define MSGTR_CodecDefinitionIncorrect "Codec ist nicht korrekt definiert."
 #define MSGTR_OutdatedCodecsConf "Diese codecs.conf ist zu alt und nicht kompatibel mit dieser Version von Mplayer!"
+
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "Kein Speicher mehr verfügbar!"
+#define MSGTR_OverridingTooLowBitrate "Angegebene Bitrate ist zu niedrig für diesen Clip.\n"\
+"Minimal mögliche Bitrate für den Clip ist %.0f kbps. Hebe\n"\
+"den vom Benutzer angegebenen Wert auf.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Kann PIPE nicht anlegen!\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Zu alte Speicherstelle gefunden von lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "Die Option %s kann in Konfigurationsdateien nicht verwendet werden.\n"
+#define MSGTR_InvalidCmdlineOption "Die Option %s kann auf der Kommandozeile nicht verwendet werden.\n"
+#define MSGTR_InvalidSuboption "Fehler: Option '%s' hat keine Unteroption '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Fehler: Unteroption '%s' von '%s' benötigt einen Parameter!\n"
+#define MSGTR_MissingOptionParameter "Fehler: Option '%s' benötigt einen Parameter!\n"
+#define MSGTR_OptionListHeader "\n Name                 Typ             Min        Max      Global  CL    Cfg\n\n"
+#define MSGTR_TotalOptions "\nInsgesamt: %d Optionen\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-Laufwerk '%s' nicht gefunden.\n"
