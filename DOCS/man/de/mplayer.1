@@ -3172,129 +3172,6 @@ Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .PD 1
 .
 .TP
-.B \-af <Filter1[=Parameter1:Parameter2:...],Filter2,...>
-Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
-Optionen.
-Siehe auch die Sektion Audiofilter der (englischen) Dokumentation.
-.br
-.I ANMERKUNG:
-Für eine vollständige Liste der verfügbaren Audiofilter, siehe \-af help.
-.sp 1
-Die verfügbaren Filter lauten:
-.RSs
-.IPs resample[=srate[:salopp][:Typ]]
-Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
-Unterstützt nur das 16-bit Little-Endian-Format.
-In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
-.IPs lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
-Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
-Unterstützt nur das 16-bit Little-Endian-Format.
-In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
-.RSss
-srate: die Samplerate der Ausgabe
-.br
-Länge: Länge des Filters hinsichtlich der niedrigeren Samplerate
-Standard: 16
-.br
-linear: Falls 1 werden die Filter zwischen Polyphase-Einträgen linear
-interpoliert.
-.br
-Zähler: log2 der Anzahl der Polyphase-Einträge
-(..., 10->1024, 11->2048, 12->4096, ...)
-Standard: 10->1024
-.br
-Abschluss: Abschlussfrequenz (0.0-1.0), Standardwert wird abhängig von
-der Filterlänge gesetzt.
-.REss
-.IPs sweep[=Geschwindigkeit]
-Sinus des Durchlaufs
-.IPs hrtf
-.br
-"Head-related transfer function": Konvertiert mehrkanäliges
-Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
-Klangs.
-.IPs channels[=nch]
-Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
-Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
-Eingangskanäle,
-so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
-der Monokanal auf beiden Ausgabekanälen wiederholt).
-Ist die Anzahl der Ausgabekanäle kleiner als die Anzahl der Eingangskanäle,
-so werden die überschüssigen Kanäle verworfen.
-.IPs format[=bps,f]
-Wählt das Format f und die Anzahl der Bytes pro Sample, bps, für die Ausgabe
-der Filterschicht.
-Die Option bps ist eine ganze Zahl und gibt Bytes pro Sample an.
-Das Format f ist eine Zeichenkette, die das Format beschreibt und folgende
-Optionen aneinandergehängt enthalten kann:
-.br
-alaw, mulaw oder imaadpcm
-.br
-float oder int
-.br
-unsigned oder signed
-.br
-le oder be (Little- oder Big-Endian)
-.br
-.IPs "volume[=v:sc]"
-Wählt das Lautstärkelevel der Ausgabe.
-Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
-nur einmal pro Audiostream aufgerufen werden.
-.RSss
-v: Setzt die gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
-Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
-Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
-entspricht.
-.br
-sc: Aktiviert "Soft-Clipping".
-.REss
-.IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
-Mischt Kanäle beliebig.
-Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:audio.html.
-.RSss
-n: Anzahl der Eingabekanäle (1\-6).
-.br
-lij: gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
-.REss
-.IPs sub[=fc:ch]
-Fügt einen Subwoofer-Kanal hinzu.
-.RSss
-fc: ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
-(Standard: 60Hz).
-.br
-ch: Kanalnummer für die Sub-Kanäle.
-.REss
-.IPs surround[=d]
-Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
-Zweikanaldateien.
-.RSss
-d: Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
-(Standard: 15ms).
-.REss
-.IPs delay[=Kanal1:Kanal2:...]
-Verzögert die Soundausgabe.
-Gib für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
-(Fließkommazahl zwischen 0 und 1000).
-.IPs export[=mmapped_Datei[:nsamples]]
-Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
-(mmap()).
-.RSss
-mmapped_Datei: Datei, zur der die Daten exportiert werden sollen
-(Standard: ~/\:.mplayer/\:mplayer-af_export).
-.br
-nsamples: Anzahl der Samples pro Kanal (Standard: 512)
-.REss
-.IPs extrastereo[=mul]
-Erhöht den Unterschied zwischen linken und rechten Kanälen, um der Wiedergabe
-eine Art "Live"-Effekt hinzuzufügen.
-.RSss
-mul: Differenz-Koeffizient (Standard: 2.5)
-.REss
-.IPs volnorm
-Maximiert die Lautstärke, ohne den Klang zu verzerren.
-.RE
-.
-.TP
 .B \-af-adv <force=(0\-3):list=(Filter)> (siehe auch \-af)
 Gibt erweiterte Audiofilteroptionen an:
 .RSs
@@ -3752,6 +3629,180 @@ Kann benutzt werden, um Skalierung mit \-vf scale zu erzwingen.
 .I ANMERKUNG:
 \-vf scale ignoriert die Optionen \-x / \-y / \-xy / \-fs / \-aspect, wenn
 \-zoom nicht angegeben wird.
+.
+.
+.
+.SH "AUDIOFILTER"
+Audiofilter erlauben dir, den Audiostream und seine Eigenschaften zu verändern.
+Der Syntax ist folgender:
+.
+.TP
+.B \-af <Filter1[=Parameter1:Parameter2:...],Filter2,...>
+Aktiviert eine Kette von Audiofiltern.
+Siehe auch die Sektion Audiofilter der (englischen) Dokumentation.
+.PP
+.I ANMERKUNG:
+Für eine vollständige Liste der verfügbaren Audiofilter, siehe \-af help.
+.PP
+Die verfügbaren Filter lauten:
+.
+.TP
+.B resample[=srate[:salopp][:Typ]]
+Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
+Unterstützt nur das 16-bit Little-Endian-Format.
+In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
+.
+.TP
+.B lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
+Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
+Unterstützt nur das 16-bit Little-Endian-Format.
+In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
+.PD 0
+.RSs
+.IPs srate
+die Samplerate der Ausgabe
+.IPs Länge
+Länge: Länge des Filters hinsichtlich der niedrigeren Samplerate (Standard: 16)
+.IPs linear
+Falls 1 werden die Filter zwischen Polyphase-Einträgen linear interpoliert.
+.IPs Zähler
+log2 der Anzahl der Polyphase-Einträge
+(..., 10->1024, 11->2048, 12->4096, ...)
+(Standard: 10->1024)
+.IPs Abschluss
+Abschlussfrequenz (0.0-1.0), Standardwert wird abhängig von der Filterlänge
+gesetzt.
+.RE
+.PD 1
+.
+.TP
+.B sweep[=Geschwindigkeit]
+Sinus des Durchlaufs
+.
+.TP
+.B hrtf\ \ \ 
+Die "head-related transfer function": Konvertiert mehrkanäliges
+Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
+Klangs.
+.
+.TP
+.B channels[=nch]
+Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
+Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
+Eingangskanäle,
+so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
+der Monokanal auf beiden Ausgabekanälen wiederholt).
+Ist die Anzahl der Ausgabekanäle kleiner als die Anzahl der Eingangskanäle,
+so werden die überschüssigen Kanäle verworfen.
+.
+.TP
+.B format[=bps,f]
+Wählt das Format f und die Anzahl der Bytes pro Sample, bps, für die Ausgabe
+der Filterschicht.
+Die Option bps ist eine ganze Zahl und gibt Bytes pro Sample an.
+Das Format f ist eine Zeichenkette, die das Format beschreibt und folgende
+Optionen aneinandergehängt enthalten kann:
+.br
+alaw, mulaw oder imaadpcm
+.br
+float oder int
+.br
+unsigned oder signed
+.br
+le oder be (little- oder big-endian)
+.br
+.
+.TP
+.B volume[=v:sc]
+Wählt das Lautstärkelevel der Ausgabe.
+Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
+nur einmal pro Audiostream aufgerufen werden.
+.PD 0
+.RSs
+.IPs v
+Setzt die gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
+Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
+Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
+entspricht.
+.IPs sc
+Aktiviert "Soft-Clipping".
+.RE
+.PD 1
+.
+.TP
+.B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+Mischt Kanäle beliebig.
+Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:audio.html.
+.PD 0
+.RSs
+.IPs n
+Anzahl der Eingabekanäle (1\-6).
+.IPs lij
+Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
+.RE
+.PD 1
+.
+.TP
+.B sub[=fc:ch]
+Fügt einen Subwoofer-Kanal hinzu.
+.PD 0
+.RSs
+.IPs fc
+Ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
+(Standard: 60Hz).
+.IPs ch
+Kanalnummer für die Sub-Kanäle.
+.RE
+.PD 1
+.
+.TP
+.B surround[=d]
+Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
+Zweikanaldateien.
+.PD 0
+.RSs
+.IPs d
+Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
+(Standard: 15ms).
+.RE
+.PD 1
+.
+.TP
+.B delay[=ch1:ch2:...]
+Verzögert die Soundausgabe.
+Gib für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
+(Fließkommazahl zwischen 0 und 1000).
+.
+.TP
+.B export[=mmapped_Datei[:nsamples]]
+Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
+(mmap()).
+.PD 0
+.RSs
+.IPs mmapped_file
+Datei, zur der die Daten exportiert werden sollen
+(Standard: ~/\:.mplayer/\:mplayer-af_export).
+.IPs nsamples
+Anzahl der Samples pro Kanal (Standard: 512)
+.RE
+.PD 1
+.
+.TP
+.B extrastereo[=mul]
+Erhöht den Unterschied zwischen linken und rechten Kanälen, um der Wiedergabe
+eine Art "Live"-Effekt hinzuzufügen.
+.PD 0
+.RSs
+.IPs mul\ \ 
+Differenz-Koeffizient (Standard: 2.5)
+.RE
+.PD 1
+.
+.TP
+.B volnorm
+Maximiert die Lautstärke, ohne den Klang zu verzerren.
+.RE
+.PD 1
 .
 .
 .
