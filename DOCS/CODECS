@@ -35,6 +35,8 @@ Fully functional Win32 VfW/DShow codecs:
   mcmjpg32.dll: works, YUV supported
 - Windows Media Video 7 (WMV1)
   wmvds32.ax: works, YUV supported
+- I263:  (I263)
+  i263_32.drv: works
 
 Problems:
 
@@ -48,8 +50,6 @@ Problems:
   asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
-- I263:  (I263)
-  i263_32.drv: segfault
 - TrueMotion 2.0:  (TM20)
   tm20dec.ax: segfault
 
