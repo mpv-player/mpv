@@ -6219,14 +6219,14 @@ werden können).
 .B vdpart\ 
 Datenpartitionierung.
 Fügt zwei Bytes pro Videopaket hinzu und erhöht die Fehlerresistenz beim
-Transfer über unzuverlässige Kanäle (z.B.\& Streaming über's Internet).
+Transfer über unzuverlässige Kanäle (z.B.\& Streaming über das Internet).
 Jedes Videopaket wird in drei separate Partitionen aufgeteilt:
 .PD 0
 .RSs
 .IPs "1. MVs"
 Bewegungen
 .IPs "2. DC-Koeffizienten"
-niedrig aufgelöstet Bild
+niedrig aufgelöstes Bild
 .IPs "3. AC-Koeffizienten"
 Details
 .RE
@@ -6242,71 +6242,132 @@ solche würde ein Fehler AC/\:DC/\:MV in gleichem Umfang zerstören.
 .RE
 .
 .TP
-.\" manpage is synced from top down to this option.
 .B vpsize=<0\-10000> (siehe auch vdpart)
-Videopaketgröße, erhöht die Fehlerresistenz (siehe auch \-vdpart):
-.RSss
-0: deaktiviert (Standard)
+Videopaketgröße, erhöht die Fehlerresistenz.
+.PD 0
+.RSs
+.IPs 0\ \ \ \ 
+deaktiviert (Standard)
+.IPs 100\-1000
+gute Wahl
+.RE
+.PD 1
+.
+.TP
+.B ss\ \ \ \ \ 
+slice-structured- (anteilig strukturierter) Modus für H.263+
+.
+.TP
+.B gray\ \ \ 
+Encodierung zu Graustufenbildern (schneller)
+.
+.TP
+.B vfdct=<0\-10>
+DCT-Algorithmus (diskrete Cosinustransformation)
+.PD 0
+.RSs
+.IPs 0
+automatische Wahl (Standard)
+.IPs 1
+schneller Integer-Algorithmus
+.IPs 2
+genauer Integer-Algorithmus
+.IPs 3
+MMX
+.IPs 4
+mlib
+.IPs 5
+AltiVec
+.IPs 6
+Fließkomma-AAN
+.RE
+.PD 1
+.
+.TP
+.B idct=<0\-99>
+IDCT-Algorithmus (inverse diskrete Cosinustransformation)
 .br
-100-1000: gute Wahl
-.REss
-.IPs gray
-Encodierung zu Graustufenbildern (schneller) (Standard: deaktiviert)
-.IPs vfdct=<0\-10>
-DCT-Algorithmus (diskrete Cosinustransformation):
-.RSss
-0: automatische Wahl (Standard)
+.I ANMERKUNG:
+All diese IDCT-Algorithmen bestehen die IEEE1180-Tests.
+.PD 0
+.RSs
+.IPs 0
+automatische Wahl (Standard)
+.IPs 1
+JPEG-Referenzalgorithmus (Integer)
+.IPs 2
+simple
+.IPs 3
+simplemmx
+.IPs 4
+libmpeg2mmx (ungenau, benutze ihn nicht mit einem keyint > 100)
+.IPs 5
+ps2
+.IPs 6
+mlib
+.IPs 7
+arm
+.IPs 8
+AltiVec
+.IPs 9
+sh4
+.RE
+.PD 1
+.
+.TP
+.B lumi_mask=<0.0\-1.0>
+Helligkeitsmaskierung ist eine 'psychosensorische' Einstellung, die die
+Tatsache nutzen soll, dass das menschliche Auge dazu neigt, in sehr hellen
+Teilen eines Bildes weniger Details zu erkennen.
+Helligkeitsmaskierung komprimiert sehr helle Stellen stärker als
+durchschnittlich helle, so dass ein paar Bits eingespart werden, die dann auf
+andere Frames verwendet werden können, was die subjektive Qualität im Ganzen
+erhöht und den PSNR-Wert möglicherweise reduziert.
 .br
-1: schneller Integeralgorithmus
+.I WARNUNG:
+Sei vorsichtig! Zu große Werte können katastrophale Ergebnisse liefern.
 .br
-2: genauer Integeralgorithmus
+.I WARNUNG:
+Große Werte mögen auf einigen Monitoren gut aussehen, können auf anderen aber
+auch schrecklich aussehen.
+.PD 0
+.RSs
+.IPs 0.0\ \ 
+deaktiviert (Standard)
+.IPs 0.0\-0.3
+sinnvoller Bereich
+.RE
+.PD 1
+.
+.TP
+.B dark_mask=<0.0\-1.0>
+Dunkelheitsmaskierung ist eine 'psychosensorische' Einstellung, die die
+Tatsache nutzen soll, dass das menschliche Auge dazu neigt, in sehr dunklen
+Teilen eines Bildes weniger Details zu erkennen.
+Dunkelheitsmaskierung komprimiert sehr dunkle Stellen stärker als
+durchschnittlich dunkle, so dass ein paar Bits eingespart werden, die dann auf
+andere Frames verwendet werden können, was die subjektive Qualität im Ganzen
+erhöht und den PSNR-Wert möglicherweise reduziert.
 .br
-3: mmx
+.I WARNUNG:
+Sei vorsichtig! Zu große Werte können katastrophale Ergebnisse liefern.
 .br
-4: mlib
-.REss
-.IPs idct=<0\-99>
-IDCT-Algorithmus (inverse diskrete Cosinustransformation).
-Anmerkung: All diese IDCT-Algorithmen bestehen die IEEE1180\-Tests:
-.RSss
-0: automatische Wahl (Standard)
-.br
-1: JPEG\-Referenzalgorithmus (Integer)
-.br
-2: simple
-.br
-3: simplemmx
-.br
-4: libmpeg2mmx (ungenau, benutze ihn NICHT mit einem keyint > 100)
-.br
-5: ps2
-.br
-6: mlib
-.br
-7: arm
-.REss
-.IPs lumi_mask=<0.0\-1.0>
-Helligkeitsmaskierung.
-Warnung: Sei vorsichtig! Zu große Werte können desaströse Ergebnisse liefern.
-Warnung2: Große Werte mögen auf einigen Monitoren gut aussehen, können aber
-auch schrecklich auf anderen aussehen.
-.RSss
-0.0: deaktiviert (Standard)
-.br
-0.0\-0.3: sinnvoller Bereich
-.REss
-.IPs dark_mask=<0.0\-1.0>
-Dunkelheitsmaskierung.
-Warnung: Sei vorsichtig! Zu große Werte können desaströse Ergebnisse liefern.
-Warnung2: Große Werte mögen auf einigen Monitoren gut aussehen, können aber
-auch schrecklich auf anderen Monitoren / Fernsehern / TFTs aussehen.
-.RSss
-0.0: deaktiviert (Standard)
-.br
-0.0\-0.3: sinnvoller Bereich
-.REss
-.IPs tcplx_mask=<0.0\-1.0>
-Maskierung der zeitlichen Komplexität (Standardwert: 0.0 (deaktiviert))
+.I WARNUNG:
+Große Werte mögen auf einigen Monitoren gut aussehen, können auf anderen
+Monitoren/dem Fernseher/\:TFTs aber auch schrecklich aussehen.
+.PD 0
+.RSs
+.IPs 0.0\ \ 
+deaktiviert (Standard)
+.IPs 0.0\-0.3
+sinnvoller Bereich
+.RE
+.PD 1
+.
+.TP
+.\" man page is synced from top down to this option.
+.B tcplx_mask=<0.0\-1.0>
+Maskierung der zeitlichen Komplexität (Standard: 0.0 (deaktiviert)).
 .IPs scplx_mask=<0.0\-1.0>
 Maskierung der räumlichen Komplexität.
 Größere Werte helfen bei Blockartefakten, falls bei der Decodierung kein
