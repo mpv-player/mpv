@@ -47,7 +47,7 @@ extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags
 extern int avcodec_inited;
 
 /* video options */
-static char *lavc_param_vcodec = NULL;
+static char *lavc_param_vcodec = "mpeg4";
 static int lavc_param_vbitrate = -1;
 static int lavc_param_vrate_tolerance = 1000*8;
 static int lavc_param_vhq = 0; /* default is realtime encoding */
