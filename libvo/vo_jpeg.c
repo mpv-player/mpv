@@ -208,10 +208,11 @@ static uint32_t query_format(uint32_t format)
    case IMGFMT_IYUV:
    case IMGFMT_I420:
    case IMGFMT_YV12:
-   case IMGFMT_RGB|24:
    case IMGFMT_BGR|24:
    case IMGFMT_BGR|32:
-        return 1;
+        return VFCAP_CSP_SUPPORTED;
+   case IMGFMT_RGB|24:
+        return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD;
   }
  return 0;
 }
