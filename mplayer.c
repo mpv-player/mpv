@@ -1125,7 +1125,7 @@ if(sh_audio){
 }
 
   sh_video->timer=0;
-  if(sh_audio) sh_audio->timer=0;
+  if(sh_audio) sh_audio->timer=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
