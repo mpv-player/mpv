@@ -89,6 +89,46 @@ switch(d_video->demuxer->file_format){
    if (!demux_is_mpeg_rtp_stream(d_video->demuxer)) break;
    // otherwise fall through to...
 #endif
+ case DEMUXER_TYPE_MPEG4_ES: {
+   videobuf_len=0; videobuf_code_len=0;
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Start code... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i<=0x11F) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
+   if(!videobuffer) videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE);
+   if(!videobuffer){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+     return 0;
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Layer Start code... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      printf("0x%X\n",i);
+      if(i>=0x120 && i<=0x12F) break; // found it!
+      if(!i || !read_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\nSearching for Video Object Plane Start code... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i==0x1B6) break; // found it!
+      if(!i || !read_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
+   sh_video->format=0x10000004;
+   break;
+ }
  case DEMUXER_TYPE_PVA:
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
@@ -315,6 +355,16 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode,sh_video->fps);
 	    telecine=1;
 	}
+
+  } else if(demuxer->file_format==DEMUXER_TYPE_MPEG4_ES){
+      //
+        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
+          int i=sync_video_packet(d_video);
+          if(!read_video_packet(d_video)) return -1; // EOF
+	  if(i==0x1B6) break;
+        }
+	*start=videobuffer; in_size=videobuf_len;
+	videobuf_len=0;
 
   } else {
       // frame-based file formats: (AVI,ASF,MOV)

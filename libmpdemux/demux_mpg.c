@@ -247,6 +247,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
 int num_elementary_packets100=0;
 int num_elementary_packets101=0;
+int num_elementary_packets12x=0;
 int num_elementary_packets1B6=0;
 int num_elementary_packetsPES=0;
 int num_mp3audio_packets=0;
@@ -314,7 +315,8 @@ do{
   } else {
     if(head>=0x100 && head<0x1B0){
       if(head==0x100) ++num_elementary_packets100; else
-      if(head==0x101) ++num_elementary_packets101;
+      if(head==0x101) ++num_elementary_packets101; else
+      if(head>=0x120 && head<=0x12F) ++num_elementary_packets12x;
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
     } else
     if((head>=0x1C0 && head<0x1F0) || head==0x1BD){

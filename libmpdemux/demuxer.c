@@ -292,6 +292,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
     case DEMUXER_TYPE_BMP: return demux_bmp_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
+    case DEMUXER_TYPE_MPEG4_ES:
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_PS: return demux_mpg_fill_buffer(demux);
     case DEMUXER_TYPE_AVI: return demux_avi_fill_buffer(demux);
@@ -502,6 +503,7 @@ extern int num_elementary_packets100; // for MPEG-ES fileformat detection
 extern int num_elementary_packets101;
 extern int num_elementary_packetsPES;
 extern int num_elementary_packets1B6;
+extern int num_elementary_packets12x;
 extern int num_mp3audio_packets;
 
 // commandline options, flags:
@@ -813,6 +815,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   num_elementary_packets100=0;
   num_elementary_packets101=0;
   num_elementary_packets1B6=0;
+  num_elementary_packets12x=0;
   num_elementary_packetsPES=0;
   num_mp3audio_packets=0;
 
@@ -823,8 +826,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-PS");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
-    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
-	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES,num_mp3audio_packets);
+    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d PES: %d  MP3: %d \n",
+	num_elementary_packets100,num_elementary_packets101,
+	num_elementary_packets1B6,num_elementary_packets12x,
+	num_elementary_packetsPES,num_mp3audio_packets);
 //MPEG packet stats: p100: 458  p101: 458  PES: 0  MP3: 1103  (.m2v)
     if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100
 	&& abs(num_elementary_packets100-num_elementary_packets101)>2)
@@ -836,7 +841,16 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
         --pes;continue; // tricky...
       }
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
-    } else {
+    } else 
+#if 0
+    // fuzzy mpeg4-es detection. do NOT enable without heavy testing of mpeg formats detection!
+    if(num_elementary_packets1B6>3 && num_elementary_packets12x>=1 &&
+       num_elementary_packetsPES==0 && num_elementary_packets100<=num_elementary_packets12x &&
+       demuxer->synced<2){
+      file_format=DEMUXER_TYPE_MPEG4_ES;
+    } else
+#endif
+    {
       if(demuxer->synced==2)
         mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
       else
@@ -849,15 +863,15 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  }
 }
 //=============== Try to open as MPEG-ES file: =================
-if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id,dvdsub_id);
+if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG4_ES){ // little hack, see above!
+  demuxer=new_demuxer(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!ds_fill_buffer(demuxer->video)){
     mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_InvalidMPEGES);
     file_format=DEMUXER_TYPE_UNKNOWN;
     free_demuxer(demuxer);
     demuxer = NULL;
   } else {
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-ES");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,(file_format==DEMUXER_TYPE_MPEG_ES)?"MPEG-ES":"MPEG4-ES");
   }
 }
 #ifdef HAVE_LIBDV095
@@ -1044,6 +1058,7 @@ switch(file_format){
   }
   break;
  }
+ case DEMUXER_TYPE_MPEG4_ES:
  case DEMUXER_TYPE_MPEG_ES: {
    sh_audio=NULL;   // ES streams has no audio channel
    d_video->sh=new_sh_video(demuxer,0); // create dummy video stream header, id=0
@@ -1207,6 +1222,7 @@ switch(demuxer->file_format){
   case DEMUXER_TYPE_ASF:
       demux_seek_asf(demuxer,rel_seek_secs,flags);  break;
   
+  case DEMUXER_TYPE_MPEG4_ES:
   case DEMUXER_TYPE_MPEG_ES:
   case DEMUXER_TYPE_MPEG_PS:
       demux_seek_mpg(demuxer,rel_seek_secs,flags);  break;
@@ -1312,6 +1328,7 @@ extern int demux_xmms_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
+	case DEMUXER_TYPE_MPEG4_ES:
 	case DEMUXER_TYPE_MPEG_ES:
 	case DEMUXER_TYPE_MPEG_PS:
 	    return demux_mpg_control(demuxer,cmd,arg);
