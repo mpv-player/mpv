@@ -145,7 +145,7 @@ static int downsample(af_data_t* c,af_data_t* l, af_resample_t* s)
   uint32_t		up    = s->up;
   uint32_t		dn    = s->dn;
 
-  register uint32_t	i     = 0;
+  register int32_t	i     = 0;
   register uint32_t	wi    = 0;
   register uint32_t	xi    = 0;
   
@@ -162,7 +162,7 @@ static int downsample(af_data_t* c,af_data_t* l, af_resample_t* s)
 
       ADDQUE(xi,x,in);
       in+=nch;
-      if(!--i){
+      if((--i)<=0){
 	// Run the FIR filter
 	FIR((&x[xi]),(&s->w[wi*L]),out);
 	len++;	out+=nch;
