@@ -61,7 +61,7 @@ it's sound card (driver) problem.
 <itemizedlist>
 <listitem><para>
 samplerate problems - maybe your card doesn't support the samplerate used in your
-files - try the resampling plugin (<option>-af resample=...</option>)
+files - try the resampling filter (<option>-af resample=...</option>)
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
@@ -105,7 +105,7 @@ If none of these help, please upload the file, we'll check (and fix).
 <listitem>
 <para>your sound card doesn't support 48kHz playback</para>
 <para>Workaround: buy a better sound card... or try to decrease fps by 10% (use
-<option>-fps 27</option> for a 30fps movie) or use the resample plugin</para>
+<option>-fps 27</option> for a 30fps movie) or use the resample filter</para>
 </listitem>
 <listitem>
 <para>slow machine(if A-V is not around 0, and the last number in the status
