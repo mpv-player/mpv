@@ -311,6 +311,13 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 sh_video->our_out_buffer=NULL;
 
 switch(sh_video->codec->driver){
+ case VFM_CINEPAK: {
+   int bpp=((out_fmt&255)+7)/8;
+   sh_video->our_out_buffer = 
+     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp);
+   sh_video->context = decode_cinepak_init();
+   break;
+ }
  case VFM_XANIM: {
 #ifdef USE_XANIM
 	   int ret=xacodec_init_video(sh_video,out_fmt);
@@ -555,6 +562,11 @@ unsigned int t2;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
+ case VFM_CINEPAK:
+   decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
+      sh_video->disp_w, sh_video->disp_h, out_fmt&255);
+   blit_frame = 3;
+   break;
 #ifdef USE_XANIM
   case VFM_XANIM: {
     xacodec_image_t* image=xacodec_decode_frame(start,in_size,drop_frame?1:0);

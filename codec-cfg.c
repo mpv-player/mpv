@@ -231,6 +231,7 @@ static short get_driver(char *s,int audioflag)
 		"xanim",
 		"msvidc",
 		"fli",
+		"cinepak",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;
