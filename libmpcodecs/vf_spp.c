@@ -23,7 +23,6 @@
  * (http://citeseer.nj.nec.com/nosratinia99embedded.html)
  */
 
-#ifdef USE_LIBAVCODEC
  
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +31,9 @@
 #include <math.h>
 
 #include "../config.h"
+
+#ifdef USE_LIBAVCODEC
+
 #include "../mp_msg.h"
 #include "../cpudetect.h"
 #include "../libavcodec/avcodec.h"
