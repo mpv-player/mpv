@@ -195,6 +195,10 @@ Dolbeau, Romain <romain@dolbeau.org>
     * vo_quartz YUV support & fixes
     * endianess fixes
 
+Dönmez, Ismail (cartman) <ismail.donmez@boun.edu.tr>
+    * Compile fix for mga_vid to compile with Linux 2.5/2.6 kernels
+    * Small fixes all around
+
 Ernesti, Bernd <mplayer@lists.veego.de>
     * NetBSD support patches
 
