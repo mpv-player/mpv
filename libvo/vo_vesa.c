@@ -985,11 +985,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	else
 	{
             clear_screen();	/* Clear screen for stupid BIOSes */
-	    if(verbose>1) paintBkGnd();
+	    if(verbose>1)
 	    {
 	        int x;
 	        x = (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2;
 	        if(x < 0) x = 0;
+	        paintBkGnd();
 	        vbeWriteString(x,0,7,title);
 	    }
 	}
