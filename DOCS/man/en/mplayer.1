@@ -1363,7 +1363,8 @@ specify codepage of the subtitle.
 You can specify your language using a two letter language code to
 make ENCA detect the codepage automatically.
 If unsure, enter anything and watch mplayer -v output for available
-languages. Fallback codepage specifies the codepage to use, when the
+languages.
+Fallback codepage specifies the codepage to use, when the
 autodetection fails.
 .sp 1
 .I EXAMPLE:
@@ -1540,7 +1541,7 @@ Options for OSS include
 .B vol, pcm, line.
 For a complete list of options look for SOUND_DEVICE_NAMES in
 /usr/include/linux/soundcard.h.
-For ALSA you can use the names e.g. alsamixer displays, like
+For ALSA you can use the names e.g.\& alsamixer displays, like
 .B Master, Line, PCM.
 .TP
 .B \-nowaveheader (\-ao pcm only)
@@ -1641,9 +1642,8 @@ Native Sun audio output driver.
 .B win32 (Windows only)
 Native Windows waveout audio output driver.
 .TP
-.B dxr2 (DXR2 only)
+.B dxr2 (also see \-dxr2) (DXR2 only)
 Creative DXR2 specific output driver.
-Also see the \-dxr2 option.
 .TP
 .B mpegpes (DVB only)
 DVB specific output driver.
@@ -2206,7 +2206,7 @@ Try this option if you have display problems.
 .B quartz (Mac OS X only)
 Mac OS X Quartz output driver.
 Under some circumstances, it might be more efficient to force a
-packed YUV output format, with e.g. \-vf format=yuy2
+packed YUV output format, with e.g.\& \-vf format=yuy2
 .PD 0
 .RSs
 .IPs device_id=<number>
@@ -2335,7 +2335,7 @@ Will set the TV norm of the Matrox card without the need
 for modifying /etc/\:directfbrc (default: disabled).
 Valid norms are pal = PAL, ntsc = NTSC.
 Special norm is auto (auto-adjust using PAL/NTSC) because it decides
-which norm to use by looking at the frame rate of the movie.
+which norm to use by looking at the framerate of the movie.
 .RE
 .PD 1
 .TP
@@ -2367,9 +2367,8 @@ FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 Works in conjunction with a kernel module.
 FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
-.B dxr2 (DXR2 only)
+.B dxr2 (also see \-dxr2) (DXR2 only)
 Creative DXR2 specific output driver.
-Also see the \-dxr2 option.
 .PD 0
 .RSs
 .IPs x11
@@ -2414,9 +2413,8 @@ Specifies the device number to use if you have more than one em8300 card.
 .B mpegpes (DVB only)
 DVB specific output driver.
 .TP
-.B zr\ \ \ \ \ 
+.B zr (also see \-zr* and \-zrhelp)
 Output driver for a number of MJPEG capture/playback cards.
-Also see the -zr* options and -zrhelp.
 .TP
 .B zr2\ \ \ \ 
 Output driver for a number of MJPEG capture/playback cards, second generation.
@@ -3083,7 +3081,7 @@ portrait and not landscape.
 .TP
 .B scale[=w:h[:interlaced[:chr_drop[:param[:presize]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
-colorspace conversion (also see \-sws option).
+colorspace conversion (also see \-sws).
 .RSs
 .IPs w,h\ \ 
 scaled width/height (default: original width/height)
@@ -3321,8 +3319,8 @@ mix random noise with a (semi)regular pattern
 .B denoise3d[=luma:chroma:time]
 This filter aims to reduce image noise producing smooth images and making still
 images really still (This should enhance compressibility.).
-It can be given from 0 to 3 parameters.  If you omit a parameter, a reasonable
-value will be inferred.
+It can be given from 0 to 3 parameters.
+If you omit a parameter, a reasonable value will be inferred.
 .PD 0
 .RSs
 .IPs luma\ 
@@ -3598,9 +3596,9 @@ cause an excessive number of frames to be dropped during high motion
 sequences.
 .I NOTE:
 Always follow pullup with the softskip filter when encoding to ensure
-that pullup is able to see each frame. Failure to do so will lead to
-incorrect output and will usually crash, due to design limitations in
-the codec/filter layer.
+that pullup is able to see each frame.
+Failure to do so will lead to incorrect output and will usually crash,
+due to design limitations in the codec/filter layer.
 .TP
 .B filmdint[=options]
 Inverse telecine filter, similar to the pullup filter above.
@@ -3631,7 +3629,7 @@ This usually means that x and y must be even.
 For each ifps input frames the filter will output ofps frames.
 The ratio of ifps/ofps should match the \-fps/\-ofps ratio.
 This could be used to filter movies that are broadcast on TV at a frame
-rate different from their original frame rate.
+rate different from their original framerate.
 .IPs luma_only=n
 If n is nonzero, the chroma plane is copied unchanged.
 This is useful for YV12 sampled TV, which discards one of the chroma
@@ -3689,7 +3687,7 @@ If 3:2-pulldown telecined video has lost one of the fields or is deinterlaced
 using a method that keeps one field and interpolates the other, the result is
 a juddering video that has every fourth frame duplicated.
 This filter is intended to find and drop those duplicates and restore the
-original film frame rate.
+original film framerate.
 When using this filter, you must specify \-ofps that is 4/5 of the fps of the
 input file (23.976 if the input is 29.97fps).
 The options are:
@@ -3800,9 +3798,10 @@ pattern to start (0\-3).
 .TP
 .B tinterlace[=mode]
 Temporal field interlacing \- merge pairs of frames into an interlaced
-frame, halving the framerate. Even frames are moved into the upper
-field, odd frames to the lower field. This can be used to fully reverse
-the effect of the tfields filter (in mode 0). Available modes are:
+frame, halving the framerate.
+Even frames are moved into the upper field, odd frames to the lower field.
+This can be used to fully reverse the effect of the tfields filter (in mode 0).
+Available modes are:
 .PD 0
 .RSs
 .IPs 0
@@ -4003,7 +4002,8 @@ printed.
 .B tile=xtile:ytile:output:start:delta
 Tile a series of images into a single, bigger image.
 If you omit a parameter or use a value less than 0, then the default
-value is used. You can also stop when you're OK (... \-vf tile=10:5 ...)
+value is used.
+You can also stop when you're OK (... \-vf tile=10:5 ...).
 .
 It is probably a good idea to put the scale filter before the tile :-)
 .br
@@ -4030,9 +4030,9 @@ pixel between 2 tiles, (x/y) (default: 4)
 .TP
 .B delogo[=x:y:w:h:t]
 Suppresses a TV station logo by a simple interpolation of the
-surrounding pixels. Just set a rectangle covering the logo and watch
-it disappear (and sometimes something even uglier appear \- your
-mileage may vary).
+surrounding pixels.
+Just set a rectangle covering the logo and watch it disappear (and
+sometimes something even uglier appear \- your mileage may vary).
 .PD 0
 .RSs
 .IPs x,y
@@ -4040,9 +4040,9 @@ Position of the top left corner of the logo.
 .IPs w,h
 Width and height of the cleared rectangle.
 .IPs t
-Thickness of the fuzzy edge of the rectangle (added to w and h). When
-set to -1, a green rectangle is drawn on the screen to simplify finding
-the right x,y,w,h parameters.
+Thickness of the fuzzy edge of the rectangle (added to w and h).
+When set to -1, a green rectangle is drawn on the screen to
+simplify finding the right x,y,w,h parameters.
 .RE
 .PD 1
 .TP
@@ -4544,19 +4544,19 @@ resulting in lower quality and some decoders will not be able to decode it).
 .IPs 2
 Recommended for normal mpeg4/mpeg1video encoding (default).
 .IPs 3
-Recommended for h263(p)/msmpeg4.  The reason for preferring 3 over 2 is that
-2 could lead to overflows (this will be fixed for h263(p) by changing the
-quantizer per MB in the future, msmpeg4 cannot be fixed as it does not support
-that).
+Recommended for h263(p)/msmpeg4.
+The reason for preferring 3 over 2 is that 2 could lead to overflows
+(this will be fixed for h263(p) by changing the quantizer per MB in
+the future, msmpeg4 cannot be fixed as it does not support that).
 .RE
 .TP
 .B lmin=<0.01\-255.0>
 Minimum lagrange multiplier for ratecontrol, you probably want it to be
-equal to or lower than vqmin. (default: 2.0)
+equal to or lower than vqmin (default: 2.0).
 .RE
 .TP
 .B lmax=<0.01\-255.0>
-Maximum lagrange multiplier for ratecontrol. (default: 31.0)
+maximum lagrange multiplier for ratecontrol (default: 31.0).
 .RE
 .TP
 .B vqscale=<1\-31>
@@ -4717,7 +4717,8 @@ into account all the adjustments (crop/expand/scale/etc.) made in the
 filter chain.
 .TP
 .B vbitrate=<value>
-specify bitrate (pass\ 1/\:2).  Warning: 1kBit = 1000 Bits.
+Specify bitrate (pass\ 1/\:2).
+Warning: 1kBit = 1000 Bits.
 .RSs
 .IPs 4\-16000
 (in kbit)
@@ -4728,7 +4729,8 @@ default
 .RE
 .TP
 .B vratetol=<value>
-approximated filesize tolerance in kBit. 1000\-100000 is a sane range.
+approximated filesize tolerance in kBit.
+1000\-100000 is a sane range.
 (warning: 1kBit = 1000 Bits)
 (default: 8000)
 .TP
@@ -5371,10 +5373,12 @@ try all
 .PD 1
 .TP
 .B inter_matrix=<comma separated matrix>
-Use custom inter matrix. It needs a comma separated string of 64 integers.
+Use custom inter matrix.
+It needs a comma separated string of 64 integers.
 .TP
 .B intra_matrix=<comma separated matrix>
-Use custom intra matrix. It needs a comma separated string of 64 integers.
+Use custom intra matrix.
+It needs a comma separated string of 64 integers.
 .TP
 .B vqmod_amp
 experimental quantizer modulation
