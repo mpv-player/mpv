@@ -5,6 +5,9 @@
 */
 
 #include <windows.h>
+#include <ddk/ntddk.h>
+#include "../dhahelperwin/dhahelper.h"
+
 /*
   This is the request structure that applications use
   to request services from the MAPDEV VxD.
@@ -32,9 +35,20 @@ typedef struct _MapDevRequest
 #define CTL_CODE( DeviceType, Function, Method, Access ) ( \
     ((DeviceType)<<16) | ((Access)<<14) | ((Function)<<2) | (Method) )
 
+    
+int IsWinNT(){
+  OSVERSIONINFO OSVersionInfo;
+  OSVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+  GetVersionEx(&OSVersionInfo);
+  return OSVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT;
+}  
+
+static HANDLE hDriver = INVALID_HANDLE_VALUE;  
+    
+    
 /* Memory Map a piece of Real Memory */
 void *map_phys_mem(unsigned long base, unsigned long size) {
-
+  if(!IsWinNT()){
   HANDLE hDevice ;
   PVOID inBuf[1] ;		/* buffer for struct pointer to VxD */
   DWORD RetInfo[2] ;		/* buffer to receive data from VxD */
@@ -63,6 +77,26 @@ void *map_phys_mem(unsigned long base, unsigned long size) {
     fprintf(stderr, "Failed to map device\n") ; exit(1) ; }
 
   return (void*)req.mdr_LinearAddress ;
+  }
+  else{
+    dhahelper_t dhahelper_priv;
+    DWORD dwBytesReturned;
+    dhahelper_priv.size = size;
+    dhahelper_priv.base = base;
+    if(hDriver==INVALID_HANDLE_VALUE)hDriver = CreateFile("\\\\.\\DHAHELPER",GENERIC_READ | GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+    if (!DeviceIoControl(hDriver, IOCTL_DHAHELPER_MAPPHYSTOLIN, &dhahelper_priv,sizeof(dhahelper_t), &dhahelper_priv, sizeof(dhahelper_t),&dwBytesReturned, NULL)){
+      printf("unable to map thre requested memory region\n");
+      return NULL;
+    }
+    else return dhahelper_priv.ptr;
+  }
 }
 
-void unmap_phys_mem(void *ptr, unsigned long size) { }
+void unmap_phys_mem(void *ptr, unsigned long size) {
+  if(IsWinNT()){
+    dhahelper_t dhahelper_priv;
+    DWORD dwBytesReturned;
+    dhahelper_priv.ptr = ptr;
+    DeviceIoControl(hDriver, IOCTL_DHAHELPER_UNMAPPHYSADDR, &dhahelper_priv,sizeof(dhahelper_t), NULL, 0, &dwBytesReturned, NULL);
+  }
+}
