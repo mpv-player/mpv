@@ -236,7 +236,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
     s->size+=len;
     if((unsigned int)len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
-    muxer->file_end += len + 8;
+    muxer->file_end += len + len&1 + 8;
 }
 
 static void write_avi_list(FILE *f,unsigned int id,int len){
