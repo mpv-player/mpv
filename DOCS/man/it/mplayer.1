@@ -1,4 +1,4 @@
-.\" synced with 1.573
+.\" synced with 1.587
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -92,7 +92,7 @@ mencoder \- Codificatore di film per Linux
 .B mplayer
 'in +\n[.k]u
 .I mf://mascherafile
-[opzioni]
+[-mf opzioni] [opzioni]
 .br
 .in
 .B mplayer
@@ -121,7 +121,7 @@ mencoder \- Codificatore di film per Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvb://canale
+.I dvb://[numero_scheda@]canale
 [opzioni]
 .br
 .in
@@ -143,7 +143,7 @@ mencoder \- Codificatore di film per Linux
 .SH DESCRIZIONE
 .B mplayer
 e' un visualizzatore di film per LINUX (gira su molti altri Unix e su CPU
-non\-x86, controlla la documentazione).
+non-x86, controlla la documentazione).
 Visualizza la maggior parte dei file del tipo MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV,
 RM, QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM e RoQ,
 supportato da molti codec nativi, altri provenienti da XAnim oppure attraverso
@@ -322,6 +322,9 @@ cambia la lista dei canali
 .SH "USO"
 Ogni opzione 'flag' ha una controparte 'noflag', e.g.\& l' opposto dell'
 opzione \-fs e' \-nofs.
+.PP
+Se una opzione e' marcata come (solo XXX) allora funzionera' solo in combinazione
+con l' opzione XXX oppure se XXX e' compilato dentro.
 .PP
 Puoi mettere tutte le opzioni in un file di configurazione che verra' letto
 ogni volta che MPlayer viene lanciato.
@@ -527,7 +530,7 @@ cosi' puoi dare molti 'echo "seek 10" > mp_pipe' e la pipe rimarra' valida.
 .PD 1
 .
 .TP
-.B \-lircconf <file>
+.B \-lircconf <file> (solo LIRC)
 Specifica un file di configurazione per LIRC (Linux Infrared Remote Control,
 Controllo Remoto ad Infrarossi per Linux, see http://www.lirc.org) se non
 ti piace il default ~/\:.lircrc.
@@ -539,13 +542,13 @@ Stampa tutte le opzioni disponibili.
 Ripete la riproduzione del film <numero> volte.
 0 significa per sempre.
 .TP
-.B \-menu (CODICE BETA)
+.B \-menu (solo menu OSD)
 Attiva il supporto per il menu su OSD.
 .TP
-.B \-menu-cfg <file> (CODICE BETA)
+.B \-menu-cfg <file> (solo menu OSD)
 Usa un file alternativo per menu.conf.
 .TP
-.B \-menu-root <valore> (CODICE BETA)
+.B \-menu-root <valore> (solo menu OSD)
 Specifica il menu principale.
 .TP
 .B \-nojoystick
@@ -555,11 +558,11 @@ Per default e' abilitato se compilato nel programma.
 .B \-nolirc
 Disabilita il supporto per LIRC.
 .TP
-.B \-nomouseinput
+.B \-nomouseinput (solo X11)
 Disabilita la gestione dell' ingresso della pressione / rilascio dei bottoni
 del mouse (i menu del contesto di mozplayerxp si basano su questa opzione).
 .TP
-.B \-nortc \ \ 
+.B \-nortc (solo RTC)
 Disabilita l' utilizzo di Linux RTC (real-time clock, orologio in tempo reale \- /dev/\:rtc)
 per la gestione delle temporizzazioni.
 .TP
@@ -624,6 +627,15 @@ di questa opzione.
 .
 .SH "OPZIONI DEMUXER/STREAM"
 .TP
+.B \-a52drc <livello>
+Seleziona il livello di Rapporto di Compressione Dinamica (Dynamic Range Compression) per
+il flusso audio AC3.
+<livello> e' un valore in floating point da 0 a 1, dove 0 indica nessuna compressione
+e 1 (che e' il default) indica compressione completa (rende i passaggi forti / rumorosi piu'
+silenziosi e viceversa)
+Questa opzione ha effetto solo se il flusso AC3 contiene le informazioni
+di compressione necessarie.
+.TP
 .B \-aid <id> (vedi anche l' opzione \-alang)
 Seleziona il canale audio [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190].
@@ -632,7 +644,7 @@ verbosa ((\-v).
 Quando si riproduce un flusso MPEG-TS, MPlayer/Mencoder useranno il primo
 programma (se presente) con il flusso audio scelto.
 .TP
-.B \-alang <codice a due lettere del paese> (vedi anche l' opzione \-aid)
+.B \-alang <codice a due lettere del paese> (vedi anche l' opzione \-aid) (solo DVD)
 Funziona solo per la riproduzione di DVD.
 Seleziona la lingua audio e cerca sempre di suonare il flusso audio della
 lingua corrispondente al codice dato.
@@ -661,7 +673,7 @@ visualizza un filmato.
 Abilita il caching per lo stream usato da \-audiofile, utilizzando la quantita' di
 memoria specificata.
 .TP
-.B \-bandwidth <valore>
+.B \-bandwidth <valore> (solo rete)
 Specifica la massima larghezza di banda (bandwidth) per lo streaming attraverso
 una rete (per quei server che sono capaci di inviare contenuti, normalmente
 filmati, a diversi bitrate).
@@ -675,7 +687,7 @@ Questa opzione specifica quanta memoria (in kBytes) deve essere usata quando si
 precarica un file/\:URL.
 Utile specialmente con media molto lenti (il default e' \-nocache).
 .TP
-.B \-cdda <opzione1:opzione2>
+.B \-cdda <opzione1:opzione2> (solo CDDA)
 Questa opzione puo' essere usata per regolare la lettura di CD Audio da parte di MPlayer.
 
 Le opzioni disponibili sono:
@@ -747,16 +759,16 @@ surround
 .PD 1
 .
 .TP
-.B \-chapter <id\ capitolo>[\-<id\ capitolo\ finale>]
+.B \-chapter <id\ capitolo>[\-<id\ capitolo\ finale>] (solo DVD)
 Specifica da quale capitolo deve iniziare la riproduzione.
 Si puo', opzionalmente, specificare anche a quale capitolo deve
 fermarsi la riproduzione (default: 1).
 Esempi posso essere trovati sotto.
 .TP
-.B \-cookies
+.B \-cookies (solo rete)
 Manda cookie quando vengono fatte richieste HTTP.
 .TP
-.B \-cookies-file <nomefile>
+.B \-cookies-file <nomefile> (solo rete)
 Legge i cookie HTTP da questo file.
 Il file viene considerato in formato NetScape.
 Se si utilizza questa opzione, MPlayer non cerchera' i cookie in ~/.netscape/
@@ -781,7 +793,7 @@ Utile quando si codifica / copia ('rippa') da DVD oppure da una rete.
 .B \-dumpvideo (solo MPLAYER)
 Scrive il flusso video compresso grezzo su ./\:stream.dump (non molto usabile).
 .TP
-.B \-dvbin <options>
+.B \-dvbin <options> (solo DVB)
 Passa i parametri successivi al modulo DVB (Digital Video Board, Scheda Video
 Digitale) di ingresso, per poter sovrascrivere i valori di default:
 
@@ -798,10 +810,10 @@ ultima risorsa.
 .PD 1
 .
 .TP
-.B \-dvd-device <percorso\ del\ dispositivo>
+.B \-dvd-device <percorso\ del\ dispositivo> (solo DVD)
 Sovrascrive il nome di default del dispositivo DVD /dev/\:dvd.
 .TP
-.B \-dvdangle <id\ angolo>
+.B \-dvdangle <id\ angolo> (solo DVD)
 Alcuni dischi DVD contengono scene che possono essere visualizzate
 da angoli multipli.
 Qui' puoi dire a MPlayer quale angolo usare (default: 1)
@@ -843,7 +855,7 @@ creati in modo non corretto.
 Puoi usare questa opzione solo se il mezzo di trasporto sottostante supporta il
 posizionamento (i.e.\& non con stdin, pipe, etc).
 .TP
-.B \-ipv4-only-proxy
+.B \-ipv4-only-proxy (solo rete)
 Ignora il proxy per gli indirizzi IPv6.
 Viene comunque usato per connessioni IPv4.
 .TP
@@ -898,16 +910,16 @@ permette un riconoscimento sufficientemente sicuro)
 l' estensione del file viene usata per selezionare il demuxer.
 Viene sempre utilizzata la selezione basata sul contenuto del file da riprodurre.
 .TP
-.B \-passwd <password> (vedi anche l' opzione \-user)
+.B \-passwd <password> (vedi anche l' opzione \-user) (solo rete)
 Specifica l' opzione per l' autentificazione http.
 .TP
-.B \-prefer-ipv4
+.B \-prefer-ipv4 (solo rete)
 Utilizza IPv4 per le connessioni di rete.
-Passa a IPv6 automaticamente.
+Passa se necessario a IPv6 automaticamente.
 .TP
-.B \-prefer-ipv6
+.B \-prefer-ipv6 (solo rete IPv6)
 Utilizza IPv6 per le connessioni di rete.
-Passa a IPv4 automaticamente.
+Passa se necessario a IPv4 automaticamente.
 .TP
 .B \-rawaudio <option1:option2:...>
 Questa opzione ti permette di suonare file audio grezzi.
@@ -926,6 +938,8 @@ numero di canali
 campionamento in valori per secondo
 .IPs samplesize=<valore>
 dimensione in byte di un campionamento
+.IPs bitrate=<valore>
+bitrate per il file grezzo
 .IPs format=<valore>
 fourcc (codice del formato) in esadecimale
 .RE
@@ -959,7 +973,7 @@ dimensione di un fotogramma in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp
+.B \-rtsp-stream-over-tcp (solo live.com)
 Utilizzato con URL del tipo 'rtsp://' per specificare che i pacchetti RTP o RTCP
 devono essere fatti passare su TCP (utilizzando la stessa connessione di RTSP).
 Questa opzione puo' essere utile se hai una connessione internet che non gestisce
@@ -1014,7 +1028,7 @@ Nella riproduzione di un flusso MPEG-TS questa opzione ti permette di
 specificare in quanti bytes vuoi che MPlayer cerchi i pid audio e video desiderati.
 .
 .TP
-.B \-tv <opzione1:opzione2:...>
+.B \-tv <opzione1:opzione2:...> (solo TV)
 Questa opzione regola varike proprieta' del modulo di cattura TV.
 Per guardare la TV con MPlayer usa 'tv://' o 'tv://<numero_canale>'
 o anche 'tv://<nome_canale> (vedi l' opzione channels sotto per nome_canale)
@@ -1153,7 +1167,7 @@ Seleziona la qualita' della compressione jpeg
 .RE
 .
 .TP
-.B \-user <user name> (vedi anche l' opzione \-passwd)
+.B \-user <user name> (vedi anche l' opzione \-passwd) (solo rete)
 Specifica il nome utente per l' autentificazione http.
 .TP
 .B \-user-agent <string>
@@ -1201,8 +1215,8 @@ Crea un file dumpsub.srt nella directory corrente.
 Estrae il flusso dei sottotitoli dal file VOB.
 Vedi anche le opzioni \-dump*sub e \-vobsubout* .
 .TP
-.B \-ffactor <numero>
-Mappatura alpha si campionamento del font.
+.B \-ffactor <numero> (solo OSD)
+Mappatura alpha di campionamento del font.
 Puo' essere:
 .
 .PD 0
@@ -1219,10 +1233,10 @@ font outline neri in grassetto
 .PD 1
 .
 .TP
-.B \-flip-hebrew
+.B \-flip-hebrew (solo FriBiDi)
 Attiva il flipping dei sottotitoli utilizzando FriBiDi.
 .TP
-.B \-font <path\ to\ font.desc\ file>
+.B \-font <path\ to\ font.desc\ file> (solo OSD)
 Cerca i font per OSD/\:SUB in una directory alternativa (default per i
 font normali: ~/\:.mplayer/\:font/\:font.desc, default per i font FreeType:
 ~/.mplayer/\:subfont.ttf).
@@ -1230,7 +1244,7 @@ font normali: ~/\:.mplayer/\:font/\:font.desc, default per i font FreeType:
 .I NOTA:
 Con FreeType, questa opzione determina il percorso del file del font di testo.
 .br
-Con Fontconfig, questa opzione determina il nome del font fontconfig.
+Con fontconfig, questa opzione determina il nome del font fontconfig.
 
 .I ESEMPIO:
 .PD 0
@@ -1244,14 +1258,14 @@ Con Fontconfig, questa opzione determina il nome del font fontconfig.
 .PD 1
 .
 .TP
-.B \-fontconfig
+.B \-fontconfig (solo fontconfig)
 Abilita l' utilizzo dei font gestiti da fontconfig.
 .TP
 .B \-forcedsubsonly
 Visualizza solo i sottotitoli forzati (forced subtitles) per il flusso dei
 sottotitoli del DVD specificato ad esempio con \-slang.
 .TP
-.B \-fribidi-charset <charset\ name>
+.B \-fribidi-charset <charset\ name> (solo FriBiDi)
 Specifica il charset che sara' passato a FriBiDi quando si decodifica un
 sottotitolo non-UTF8 (default: ISO8859-8).
 .TP
@@ -1309,7 +1323,7 @@ Seleziona Ungherese e passa all' Inglese se l' Ungherese non e' disponibile.
 .PD 1
 .
 .TP
-.B \-spuaa <mode>
+.B \-spuaa <mode> (solo OSD)
 Modalita' di antialias/scalatura per DVD/BovSub.
 Il valore 16 puo' essere aggiunto al modo per forzare la scalatura
 anche quando il fotogramma originale e quello scalato corrispondono,
@@ -1331,12 +1345,12 @@ utilizza la sfocatura gaussiana di swscaler (appare molto bene)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2>
+.B \-spualign <-1\-2> (solo OSD)
 Specifica come i sottotitoli spu (DVD/VobSub) devono essere allineati.
 I valori sono gli stessi di \-subalign, con la possibilita' extra di poter
 usare -1 per avere la posizione originale.
 .TP
-.B \-spugauss <0.0\-3.0>
+.B \-spugauss <0.0\-3.0> (solo OSD)
 Parametro di varianza della sfocatura gaussiana usata da \-spuaa 4.
 Un valore piu' alto significa maggior sfocatura.
 Il default e' 1.0.
@@ -1382,7 +1396,7 @@ Disabilita ogni tipo di post elaborazione sui testi fatto dopo il caricamento
 dei sottotitoli.
 Usato a scopo di debug.
 .TP
-.B \-subalign <0\-2>
+.B \-subalign <0\-2> (solo OSD)
 Specifica come i sottotitoli devono essere allineati con subpos.
 0 indica di allinearsi sull' alto (comportamento originale/default),
 1 indica di allinearsi al centro e 2 indica di allinearsi al basso.
@@ -1395,7 +1409,7 @@ molti DVD della regione 1.
 Fino ad ora non sono ancora stati trovati dei sottotitoli CC in DVD
 di altre regioni.
 .TP
-.B \-subcp <codepage>
+.B \-subcp <codepage> (solo iconv)
 Se il tuo sistema supporta iconv(3) puoi usare questa opzione per
 specificare la pagina codici (codepage) dei sottotitoli.
 
@@ -1464,11 +1478,11 @@ default: stessi valore di fps del filmato.
 .I NOTA:
 Solo per file dei sottotitoli basati sui fotogramma, i.e.\& NON per il formato MicroDVD.
 .TP
-.B \-subpos <0\-100> (useful with \-vf expand)
+.B \-subpos <0\-100> (utile con \-vf expand) (solo OSD)
 Specifica la posizione dei sottotitoli sullo schermo.
 Il valore e' la posizione verticale dei sottotitoli in % sull' altezza dello schermo.
 .TP
-.B \-subwidth <10\-100>
+.B \-subwidth <10\-100> (solo OSD)
 Specifica la larghezza massima dei sottotitoli sullo schermo.
 Utile per l' uscita TV.
 Il valore e' l' ampiezza dei sottotitoli in % sulla larghezza dello schermo.
@@ -1608,7 +1622,7 @@ Puoi avere una lista ed una spiegazione delle opzioni disponibili
 eseguendo
 .I mplayer \-aahelp
 .TP
-.B \-adapter <valore> (solo \-vo directx)
+.B \-adapter <valore>
 Seleziona la scheda grafica che ricevera' l' immagine.
 Serve anche l' opzione \-vm per funzionare.
 Puoi avere una lista delle schede disponibili se utilizzi questa
@@ -1631,7 +1645,7 @@ Lavora in maniera simile alla luminosita' (brightness).
 .B \-dfbopts <valore> (solo \-vo directfb)
 Specifica una lista di parametri per il driver directfb.
 .TP
-.B \-display <name>
+.B \-display <name> (solo X11)
 Specifica il nome (hostname) ed il numero del display del server X dove
 vuoi visualizzare il filmato.
 
@@ -1768,7 +1782,7 @@ Vedi anche \-zoom.
 Prova questa opzione se hai ancora problemi con i filmati a
 schermo intero.
 .TP
-.B \-fstype <type1,type2,...>
+.B \-fstype <type1,type2,...> (solo X11)
 Specifica una lista di priorita' dello modalita' di attivazione
 a schermo intero da usare.
 I tipi disponibili sono:
@@ -1840,7 +1854,7 @@ Posiziona la finestra nell' angolo in basso a destra dello schermo
 .PD 1
 .
 .TP
-.B \-guiwid <window\ id>
+.B \-guiwid <window\ id> (solo X11)
 Questo indica alla GUI di usare anche una finestra X11 e di collegarsi
 alla parte inferiore del video, che e' utile per inserire una mini-GUI in
 un browser (ad esempio con il plugin MPlayer).
@@ -1900,9 +1914,10 @@ Non acquisire il puntatore del mouse dopo un cambio di modo video (\-vm),
 utile nel caso di configurazioni con piu' monitor.
 .TP
 .B \-nokeepaspect
-Non mantenere il rapporto di aspetto quando si ridimensiona una finestra X11
-(attualmente funziona solo con le uscite video x11, xv, xmga e xvidix ed
-il tuo gestore delle finestre deve capire l' hint dell' aspetto finestra).
+Non mantenere il rapporto di aspetto quando si ridimensionano le finestre
+(attualmente funziona solo con \-vo x11, xv, xmga, xvidix, directx
+e con X11 il tuo gestore delle finestre deve capire gli hint dell' aspetto
+finestra).
 .TP
 .B \-noxv (solo SDL)
 Disabilita il driver XVideo di SDL.
@@ -1926,7 +1941,7 @@ Attiva la frequenza di rinfresco del monitor in Hz.
 Attualmente e' supportato solo dal driver \-vo directx combinato con
 l' opzione \-vm.
 .TP
-.B \-rootwin
+.B \-rootwin (solo X11)
 Visualizza il filmato nella finestra root (lo sfondo del desktop) invece
 che aprire una nuova finestra.
 Funziona solo con i driver x11, xv, xmga e xvidix.
@@ -1940,7 +1955,7 @@ Se utilizza un driver di uscita che non conosce la risoluzione dello
 schermo (fbdev/\:x11 and/\:or TVout) con queste opzioni puoi specificare
 la risoluzione orizzontale e verticale.
 .TP
-.B \-stop-xscreensaver
+.B \-stop-xscreensaver (solo X11)
 Disattiva il salvaschermo x alla partenza e lo riattiva all' uscita.
 .TP
 .B \-vm \ \ \ 
@@ -1953,7 +1968,7 @@ le caratteristiche del modo di visualizzazione.
 .B \-vsync \ \ 
 Abilita il VBI per vesa.
 .TP
-.B \-wid <window\ id>
+.B \-wid <window\ id> (solo X11)
 Dice ad MPlayer di usare una finestra X11, cosa utile per incastrare MPlayer
 in un browser (ad esempio con l' estensione plugger).
 .TP
@@ -1962,8 +1977,8 @@ In configurazioni con Xinerama (i.e.\& un singolo desktop che si espande su
 monitor multipli) questa opzione indica a MPlayer su quale schermo deve visualizzare
 il filmato.
 .TP
-.B \-z <0\-9>
-Specifica il livello di compressione per l' uscita PNG (\-vo png)
+.B \-z <0\-9> (solo -vo png)
+Specifica il livello di compressione per l' uscita PNG.
 .
 .PD 0
 .RSs
@@ -2326,7 +2341,7 @@ Non riprodurre/\:codificare il suono.
 .B \-novideo
 Non riprodurre/\:codificare il video.
 .TP
-.B \-oldpp <quality> (OBSOLETE)
+.B \-oldpp <quality> (OBSOLETO) (solo OpenDivX)
 Usa il codice di post elaborazione di opendivx invece di quello interno.
 Soppiantato da \-pp, le routine di post elaborazione interne offrono
 miglior qualita' e prestazioni.
@@ -2983,6 +2998,26 @@ Per default viene usata la modalita' ad interpolazione lineare (modo 1).
 Il modo 0 utilizza il campionamento con il pixel piu' vicino, che e' piu' veloce ma non corretto.
 
 .TP
+.B harddup
+Utile solo con MEncoder.
+Se utilizzato nella codifica, i fotogrammi duplicati vengono comunque
+codificati in modo forzato sull' uscita.
+Questo utilizza leggermente piu' spazio ma e' necessario se si scrivono
+file MPEG oppure se hai intenzione di dividere (demux) e rimettere
+insieme (remux) i flussi video dopo la codifica.
+Dovrebbe essere messo alla fine o vicino alla fine della catena dei
+filtri a meno che tu non abbia delle buone ragioni per fare altrimenti.
+.TP
+.B softskip
+Utile solo con MEncoder.
+Softskip sposta il passo di eliminazione dei fotogrammi (dropping) della codifica da
+prima della catena dei filtri a qualche punto nella catena dei filtri stessa.
+Questo permette a filtri che necessitano di controllare tutti i fotogrammi
+(telecine inversa, eliminazione temporale del rumore, ...) di funzionare correttamente
+Dovrebbe essere inserito dopo il filtro che necessita di vedere tutti i
+fotogrammi e prima di ogni filtro seguente che ha bisogno di molto tempo di
+cpu.
+.TP
 .B decimate[=max:hi:lo:frac]
 Elimina fotogrammi che non sono molto diversi dal precedente per poter
 ridurre la velocita' in fotogrammi (framerate).
@@ -3098,14 +3133,20 @@ L' argomento opzionale n specifica se estrarre il field pari o dispari
 (a seconda che n sia pari o dispari).
 .TP
 .B detc[=var1=value2:var2=value2:...]
-Prova a invertire il processo di 'telecine' per ottenere un filmato
-'pulito', non interlacciato ad un framerate da film.
-Questo filtro e' ancora sperimentale ma sembra usabile.
-Per cortesia tieni presente che non c'e' assolutamente nessun
-utilizzo di questo filtro se non vedi effetti di interlacciamento
-mentre riproduci il filmato.
+Prova a invertire il processo di 'telecine' per ottenere un filmato 'pulito', 
+non interlacciato ad un framerate da film.
+Questo e' il primo e piu' primitivo filtro per il processo di telecine
+inversa ad essere stato aggiunto a MPlayer/MEncoder.
+Funziona bloccandosi sul modello 3:2 del processo di telecine e seguendolo
+finche' e' possibile.
+Questo lo rende adatto per materiale a cui il processo di telecine e'
+stato applicato in modo perfetto, anche in presenza di un certo livello
+di rumore, ma genera risultati errati in presenza di modifiche complesse
+applicate dopo il processo di telecine stesso.
+Lo sviluppo di questo filtro non ha piu' luogo in quanto ivtc, pullup e
+filmdint sono migliori per molte applicazioni.
 I parametri successivi (vedi la sintassi sotto) possono essere usati
-per controllare il comportamento del filtro:
+per controllare il comportamento del filtro detc:
 .RSs
 .IPs dr
 Seleziona la modalita' di eliminazione dei fotogrammi.
@@ -3116,7 +3157,7 @@ o miscelazioni dovute al telecine negli ultimi 5 fotogrammi.
 2 indica di mantenere sempre un rapporto 5:4 tra il frame rate
 di ingresso ed uscita.
 .I NOTA:
-Utilizza il modo 1 con MEncoder.
+Utilizza il modo 1 oppure 2 con MEncoder.
 .IPs am
 Modo di analisi.
 I valori disponibili sono 0 (modello fisso con numero di fotogramma
@@ -3147,24 +3188,27 @@ Il parametro opzionale (ivtc=1) corrisponde all' opzione dr=1 del filtro
 detc e dovrebbe essere usato con MEncoder ma non con MPlayer.
 Cosi' come con detc, quando lo usi con MEncoder devi specificare il
 corretto framerate di uscita (\-ofps 23,9876).
+Lo sviluppo del filtro ivtc e' attualmente bloccato in quanto i filtri
+pullup e filmdint sembrano multo piu' accurati.
 .TP
 .B pullup\ 
 Filtro di inversione del telecine di terza generazione, capace
 di gestire materiale misto con telecine, progressivo a 24
 fotogrammi al secondo e progressivo a 30 fps.
 Il filtro pullup e' progettato per essere molto piu' robusto
-dei filtri detc e ivtc, ma e' ancora sotto sviluppo.
+dei filtri detc e ivtc, utilizzando la possibilita' di guardare
+il contesto futuro per prendere le proprie decisioni.
+Come ivtc, pullup e' 'stateless' nel senso che non si blocca su un modello
+da seguire ma invece guarda avanti ai field successivi in modo da identificare
+delle corrispondenze e ricreare i fotogrammi progressivi.
+E' ancora sotto sviluppo ma si crede che sia completamente preciso.
 Nessuna opzione di configurazione e' ancora disponibile.
-Visto che il motore che effettua l' inversione del processo di telecine
-e' progettato per avvantaggiarsi dalle nuove caratteristiche
-in MPlayer G2, l' implementazione corrente in G1 e' intesa per
-servire principalmente come banco di prova.
 .I NOTA:
-Attualmente il filtro pullup manca della possibilita' di adattarsi
-al framerate di uscita, percio' durante sequenze progressive a 30
-fps oppure durante sequenze fisse verranno generate piu' di 24 fps,
-percio' potrai averi problemi se lo usi con l' opzione \-ofps 23.976
-di MEncoder.
+Precedi sempre il filtro pullup con il filtro softskip quando codifichi
+per assicurarti che pullup sia capace di vedere tutti i fotogrammi.
+Non farlo portera' ad avere un filmato non corretto e normalmente portera'
+a dei bloccaggi, dovuti alle limitazioni di progetto del livello dei
+codec / filtri.
 .TP
 .B filmdint[=options]
 Filtro di inversione del telecine, simile al filtro pullup sopra.
@@ -3201,10 +3245,10 @@ Puo' essere usato per filtrare filmati che sono trasmessi alla TV ad un
 framerate differente da quello originale.
 .IPs luma_only=n
 Se n e' diverso da 0 il piano croma e' copiato cosi com' e'.
-E' utile per materiale con campionamento YV12, dove si ignora one dei
+E' utile per materiale dalla TV con campionamento YV12, dove si ignora uno dei
 field del croma.
 .IPs mmx2=n
-Nel caso di x86, se n-1 utilizza funzioni ottimizzate per MMX2,
+Nel caso di x86, se n=1 utilizza funzioni ottimizzate per MMX2,
 se n=2 usa funzioni ottimizzate per 3DNow!, altrimenti usa C semplice.
 Se questa opzione non e' specificata l' utilizzo di MMX2 o 3DNow! e' automatico,
 utilizza questa opzione per modificare la ricerca automatica.
@@ -3756,6 +3800,8 @@ Prova questa opzione se hai problemi di visualizzazione.
 .TP
 .B quartz (solo Mac OS X)
 Driver di uscita per Quartz su Mac OS X.
+In certi casi potrebbe essere piu' efficiente forzare un formato di
+uscita YUV packed, con ad esempio \-vf format=yuy2
 .TP
 .B fbdev (solo Linux)
 Utilizza il framebuffer del kernel per l' uscita video.
@@ -4065,19 +4111,19 @@ Le opzioni disponibili sono:
 .IPs help\ 
 visualizza questa descrizione
 .IPs name=<valore>
-titolo del soggetto del filmato
+titolo del lavoro
 .IPs artist=<valore>
-artista od autore del soggetto originale del filmato
+artista od autore del lavoro
 .IPs genre=<valore>
-categoria originale del lavoro.
+categoria originale del lavoro
 .IPs subject=<valore>
-soggetto (contenuto) del file
+soggetto (contenuto) del lavoro
 .IPs copyright=<valore>
-informazioni sul copyright del filmato
+informazioni sul copyright
 .IPs srcform=<valore>
-formato originale del materiale che e' stato digitalizzato
+formato originale del materiale digitalizzato
 .IPs comment=<valore>
-commento generale sul filmato o sul soggetto del file.
+commento generale sul lavoro
 .RE
 
 .TP
@@ -4086,6 +4132,9 @@ Non inserisce automaticamente il filtro expand nella catena dei filtri di
 MEncoder.
 Utile per controllare in quale punto della catena dei filtri vengono generati
 i sottotitoli quando vengono piazzati brutalmente nel filmato.
+.TP
+.B \-noodml (solo \-of avi)
+Non scrive l' indice OpenDML per file > 1GB.
 .TP
 .B \-noskip
 Non saltare dei fotogrammi.
