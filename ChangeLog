@@ -698,7 +698,8 @@ mplayer v0.09: Dec  5  2000
   - version changed in the files
   - docs updated  
   
-mplayer v0.09-pre3:  bugfix test-release, X11 support testing
+mplayer v0.09-pre3: Dec  3  2000
+  bugfix test-release, X11 support testing
   - fixed the  if [ -z $pparam ]  bug in ./configure  [Christian Birchinger]
   - many changes in AVI seek code, resulting near-perfect seeking now!
     current method calc absolute audio position, so with VBR audio it
@@ -707,14 +708,16 @@ mplayer v0.09-pre3:  bugfix test-release, X11 support testing
   - avip: X11 support (24 & 32 bpp only, BGR format)
     I need a very fast 15->16bpp converter for 16bpp support... anyone helps?
 
-mplayer v0.09-pre2:  bugfix test-release 
+mplayer v0.09-pre2:
+  bugfix test-release 
   - removed unnecessary code from libmpeg2/header.c
     Walken told me that standard mpg/vob streams must NOT use framerate
     and bitrate extension... and the ext. id check is done by the caller.
   - CRC support to mp3lib's mpeg audio layer-2 decoder
     thanks for bugreport & testfile to Samson
 
-mplayer v0.09-pre1:  bugfix test-release
+mplayer v0.09-pre1: Dec  1  2000
+  bugfix test-release
   - imported new libmpeg2 files (under testing...)
   - GL renderer flickering bug fixed (MMX missing emms() between yuv2rgb and
     glTexSubImage(), bug triggered by new Utah-GLX code)
@@ -754,14 +757,19 @@ mplayer v0.06: Nov 20  2000
   - DOCS/INSTALL updated
   - DOCS/SPEED updated, DivX benchmarks added
 
-mplayer v0.05:  Nov 18  2000
+mplayer v0.05: Nov 18  2000
   Merged with MPEGplayer 0.90pre6, first public release of AVI player
   - code merged with mpegplayer, new Makefile, some small modifications
   - docs updated and moved to DOCS
 
-mplayer v0.04: YUV support, some code cleanup, preview-release
+mplayer v0.04: Nov 17  2000
+  YUV (yuy2) support with divx 3.11 dll, some code cleanup, preview-release
 
-mplayer v0.01: first version based on new MPEGplayer's codebase.
+mplayer v0.03: Nov 14  2000
+
+mplayer v0.01: Nov 11  2000
+  first preview version based on new MPEGplayer's codebase.
+  it contains the win32 loader from avifile, and can decode divx 3.11 video.
 
 mpg12play v0.9-v0.95pre5: Oct 21-Nov 2, 2000
        Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel
