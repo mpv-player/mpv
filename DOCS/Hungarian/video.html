@@ -774,7 +774,7 @@ van !</P>
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
 <P>
-A <B>radeon_vid</B> támogatást nyújt az ATI <B>Radeon</B> és <B>Rage128 (Pro)</B> kártyákon található
+A <B>radeon_vid</B> és <B>rage128_vid</B> támogatást nyújt az ATI <B>Radeon</B> és <B>Rage128 (Pro)</B> kártyákon található
 <B>BackEnd Scaler</B>-hez. A mûködési elve ugyanaz mint az
 <A HREF="video.html#2.3.1.7">mga_vid</A> meghajtónak, és hasonlóképp is
 használható!<BR>
@@ -797,10 +797,13 @@ kiadása a meghajtónak.</P>
   <LI>
     <CODE>cd drivers/radeon<BR>
     make</CODE><BR></LI>
-  <LI>másold a <CODE>radeon_vid.o</CODE> modult a kernelmoduljaidhoz a megfelelõ helyre</LI>
-  <LI>írd be a következõt : <CODE>mknod /dev/radeon_vid c 178 0</CODE></LI>
-  <LI>írd a következõt az <CODE>/etc/modules.conf</CODE> file végére :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE>
+  <LI>másold a <CODE>radeon_vid.o</CODE> és/vagy a <CODE>rage128_vid.o</CODE> modult a kernelmoduljaidhoz a megfelelõ helyre</LI>
+  <LI>írd be az egyiket a következõk közül :<BR>
+    <CODE>mknod /dev/radeon_vid c 178 0</CODE><BR>
+    <CODE>mknod /dev/rage128_vid c 178 0</CODE></LI>
+  <LI>írd az egyiket a következõk közül az <CODE>/etc/modules.conf</CODE> file végére :<BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
   <LI>futtasd : <CODE>depmod -a</CODE></LI>
 </UL>
 </P>
@@ -809,6 +812,9 @@ kiadása a meghajtónak.</P>
 <br><b>Használat:</b><BR>
 &nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;opcióid&gt; filenév</CODE>
 </P>
+
+<P>További opciók (pl. hardveres deinterlace) találhatóak
+  <A HREF="../../drivers/radeon/README">itt</A>.</P>
 
 <P><B>Megj</B>.: ne használj semmilyen framebuffert és ezt a meghajtót
 egyidõben ! Csak szöveges konzolról futtasd !</P>

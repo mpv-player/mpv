@@ -784,7 +784,7 @@ SDL driver's software output+scaler, it has worse image quality !</P>
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
 <P>
-<b>radeon_vid</b> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> and Rage128 (Pro) chipsets.
+<b>radeon_vid</b> and <B>rage128_vid</B> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> and Rage128 (Pro) chipsets.
 It was designed and introduced as analog of <a href="video.html#2.3.1.7">mga_vid</a> driver, so you can use it in the same way!<br>
 But main goal of this driver usage is <a href="video.html#2.3.1.12">VESA</a> driver.<br>
 Simply because VESA enables TV-out on ATI's card but Backend scaler is used after
@@ -805,10 +805,13 @@ driver.</P>
   <LI>
     <CODE>cd drivers/radeon<BR>
     make</CODE><BR></LI>
-  <LI>install the <CODE>radeon_vid.o</CODE> module to your kernelmodules</LI>
-  <LI>execute the following : <CODE>mknod /dev/radeon_vid c 178 0</CODE></LI>
-  <LI>add the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE>
+  <LI>install the <CODE>radeon_vid.o</CODE> and/or <CODE>rage128_vid.o</CODE> module to your kernelmodules</LI>
+  <LI>execute one of the following :<BR>
+    <CODE>mknod /dev/radeon_vid c 178 0</CODE><BR>
+    <CODE>mknod /dev/rage128_vid c 178 0</CODE></LI>
+  <LI>add one of the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
   <LI>run <CODE>depmod -a</CODE></LI>
 </UL>
 </P>
@@ -817,6 +820,9 @@ driver.</P>
 <br><b>Usage:</b><BR>
 &nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;your options&gt; filename</CODE>
 </P>
+
+<P>More examples (for hardware deinterlacing, etc) can be found
+  <A HREF="../drivers/radeon/README">here</A>.</P>
 
 <P><B>NOTE</B>: don't use any framebuffers when you plan to use this driver ! Use
 it only from textmode console.</P>
