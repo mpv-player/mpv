@@ -453,7 +453,13 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 			"%[^\n\r]", &nothing,
 			&hour1, &min1, &sec1, &hunsec1, 
 			&hour2, &min2, &sec2, &hunsec2,
-			line3) < 9);
+			line3) < 9
+		 &&
+		 sscanf (line, "Dialogue: %d,%d:%d:%d.%d,%d:%d:%d.%d,"
+			 "%[^\n\r]", &nothing,
+			 &hour1, &min1, &sec1, &hunsec1, 
+			 &hour2, &min2, &sec2, &hunsec2,
+			 line3) < 9	    );
 
         line2=strchr(line3, ',');
 
@@ -903,6 +909,8 @@ int sub_autodetect (FILE *fd, int *uses_time) {
 		{*uses_time=1;return SUB_RT;}
 
 	if (!memcmp(line, "Dialogue: Marked", 16))
+		{*uses_time=1; return SUB_SSA;}
+	if (!memcmp(line, "Dialogue: ", 10))
 		{*uses_time=1; return SUB_SSA;}
 	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
 		{*uses_time=0;return SUB_DUNNOWHAT;}
@@ -1605,7 +1613,7 @@ char** sub_filenames(char* path, char *fname)
     char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;
  
     int len, pos, found, i, j;
-    char * sub_exts[] = {  "utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", NULL};
+    char * sub_exts[] = {  "utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "ass", NULL};
     subfn *result;
     char **result2;
     
