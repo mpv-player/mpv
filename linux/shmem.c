@@ -20,6 +20,8 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
+#include "../mp_msg.h"
+
 #ifdef AIX
 #include <sys/select.h>
 #endif
@@ -27,8 +29,7 @@
 #ifdef HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
-
-extern int errno;
+#endif
 
 #if defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
 #define MAP_ANON MAP_ANONYMOUS
@@ -45,37 +46,44 @@ while(1){
 #ifdef MAP_ANON
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_ANON|MAP_SHARED,-1,0);
     if(p==MAP_FAILED) break; // failed
-//    printf("shmem: %d bytes allocated using mmap anon (%X)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using mmap anon (%p)\n",size,p);
     return p;
 #else
 // system does not support MAP_ANON at all (e.g. solaris 2.5.1/2.6), just fail
-    break;
+    mp_dbg(MSGT_OSDEP, MSGL_DBG3, "shmem: using mmap anon failed\n");
 #endif
+    break;
   case 1:  // ========= MAP_SHARED + /dev/zero ==========
     if (devzero == -1 && (devzero = open("/dev/zero", O_RDWR, 0)) == -1) break;
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,devzero,0);
     if(p==MAP_FAILED) break; // failed
-//    printf("shmem: %d bytes allocated using mmap /dev/zero (%X)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using mmap /dev/zero (%p)\n",size,p);
     return p;
+#ifdef HAVE_SHM
   case 2: { // ========= shmget() ==========
     struct shmid_ds shmemds;
     int shmemid;
     if ((shmemid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0600)) == -1) break;
     if ((int)(p = shmat(shmemid, 0, 0)) == -1){
-      perror ("shmat()");
+      mp_msg(MSGT_OSDEP, MSGL_ERR, "shmem: shmat() failed: %s\n", strerror(errno));
       shmctl (shmemid, IPC_RMID, &shmemds);
       break;
     }
     if (shmctl(shmemid, IPC_RMID, &shmemds) == -1) {
-      perror ("shmctl()");
+      mp_msg(MSGT_OSDEP, MSGL_ERR, "shmem: shmctl() failed: %s\n", strerror(errno));
       if (shmdt(p) == -1) perror ("shmdt()");
       break;
     }
-//    printf("shmem: %d bytes allocated using shmget() & shmat() (%X)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using SHM (%p)\n",size,p);
     return p;
+#else
+    mp_msg(MSGT_OSDEP, MSGL_FATAL, "shmem: no SHM support was compiled in!\n");
+    return(NULL);
+#endif
 	}
   default:
-    printf("FATAL: Cannot allocate %d bytes of shared memory :(\n",size);
+    mp_msg(MSGT_OSDEP, MSGL_FATAL,
+	"FATAL: Cannot allocate %d bytes of shared memory :(\n",size);
     return NULL;
   }
   ++shmem_type;
@@ -85,19 +93,13 @@ while(1){
 void shmem_free(void* p){
   switch(shmem_type){
     case 2:
-	    if (shmdt(p) == -1) perror ("shmdt()");
+#ifdef HAVE_SHM
+	    if (shmdt(p) == -1)
+		mp_msg(MSGT_OSDEP, MSGL_ERR, "shmfree: shmdt() failed: %s\n",
+		    strerror(errno));
+#else
+	    mp_msg(MSGT_OSDEP, MSGL_ERR, "shmfree: no SHM support was compiled in!\n");
+#endif
       break;
   }
 }
-#else /* HAVE_SHM */
-void *shmem_alloc(int size)
-{
-    printf("FATAL: no SHM support was compiled in!\n");
-    return(NULL);
-}
-
-void shmem_free(void *p)
-{
-    printf("FATAL: no SHM support was compiled in!\n");    
-}
-#endif /* HAVE_SHM */
