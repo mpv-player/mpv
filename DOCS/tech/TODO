@@ -27,9 +27,6 @@ demuxer:
 FUTURE:
 ~~~~~~~
 
-decoders:
-- getting mss1 (Windows Screen Video) DLL codec working... - kabi
-
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_ and Real
