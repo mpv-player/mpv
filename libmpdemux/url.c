@@ -3,8 +3,6 @@
  * by Bertrand Baudet <bertrand_baudet@yahoo.com>
  * (C) 2001, MPlayer team.
  *
- * TODO: 
- * 	Extract the username/password if present
  */
 
 #include <string.h>
@@ -47,17 +45,55 @@ url_new(char* url) {
 	pos1 = ptr1-url;
 	Curl->protocol = (char*)malloc(pos1+1);
 	strncpy(Curl->protocol, url, pos1);
+	if( Curl->protocol==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+		return NULL;
+	}
 	Curl->protocol[pos1] = '\0';
 
+	// jump the "://"
+	ptr1 += 3;
+	pos1 += 3;
+
+	// check if a username:password is given
+	ptr2 = strstr(ptr1, "@");
+	if( ptr2!=NULL ) {
+		// We got something, at least a username...
+		int len = ptr2-ptr1;
+		Curl->username = (char*)malloc(len+1);
+		if( Curl->username==NULL ) {
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+			return NULL;
+		}
+		strncpy(Curl->username, ptr1, len);
+		Curl->username[len] = '\0';
+
+		ptr3 = strstr(ptr1, ":");
+		if( ptr3!=NULL && ptr3<ptr2 ) {
+			// We also have a password
+			int len2 = ptr2-ptr3-1;
+			Curl->username[ptr3-ptr1]='\0';
+			Curl->password = (char*)malloc(len2+1);
+			if( Curl->password==NULL ) {
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+				return NULL;
+			}
+			strncpy( Curl->password, ptr3+1, len2);
+			Curl->password[len2]='\0';
+		}
+		ptr1 = ptr2+1;
+		pos1 = ptr1-url;
+	}
+	
 	// look if the port is given
-	ptr2 = strstr(ptr1+3, ":");
+	ptr2 = strstr(ptr1, ":");
 	// If the : is after the first / it isn't the port
-	ptr3 = strstr(ptr1+3, "/");
+	ptr3 = strstr(ptr1, "/");
 	if(ptr3 && ptr3 - ptr2 < 0) ptr2 = NULL;
 	if( ptr2==NULL ) {
 		// No port is given
 		// Look if a path is given
-		ptr2 = strstr(ptr1+3, "/");
+		ptr2 = strstr(ptr1, "/");
 		if( ptr2==NULL ) {
 			// No path/filename
 			// So we have an URL like http://www.hostname.com
@@ -73,16 +109,16 @@ url_new(char* url) {
 		pos2 = ptr2-url;
 	}
 	// copy the hostname in the URL container
-	Curl->hostname = (char*)malloc(pos2-pos1-3+1);
+	Curl->hostname = (char*)malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 		return NULL;
 	}
-	strncpy(Curl->hostname, ptr1+3, pos2-pos1-3);
-	Curl->hostname[pos2-pos1-3] = '\0';
+	strncpy(Curl->hostname, ptr1, pos2-pos1);
+	Curl->hostname[pos2-pos1] = '\0';
 
 	// Look if a path is given
-	ptr2 = strstr(ptr1+3, "/");
+	ptr2 = strstr(ptr1, "/");
 	if( ptr2!=NULL ) {
 		// A path/filename is given
 		// check if it's not a trailing '/'
