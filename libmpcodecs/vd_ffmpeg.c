@@ -199,38 +199,10 @@ static void draw_slice(struct AVCodecContext *s,
 
 }
 
-// decode a frame
-static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
-    int got_picture=0;
-    int ret;
-    AVPicture lavc_picture;
+static int init_vo(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
-    mp_image_t* mpi=NULL;
 
-    if(len<=0) return NULL; // skipped frame
-    
-    avctx->draw_horiz_band=NULL;
-    if(ctx->vo_inited && !ctx->convert && !(flags&3)){
-	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
-	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
-	    sh->disp_w, sh->disp_h);
-	if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
-	    // vd core likes slices!
-	    avctx->draw_horiz_band=draw_slice;
-	    avctx->opaque=sh;
-	}
-    }
-
-#if LIBAVCODEC_BUILD > 4603
-    avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
-#endif
-
-    ret = avcodec_decode_video(avctx, &lavc_picture,
-	     &got_picture, data, len);
-    if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
-    if(!got_picture) return NULL;	// skipped image
-                                    
     if (avctx->aspect_ratio_info != ctx->last_aspect ||
 	avctx->width != sh->disp_w ||
 	avctx->height != sh->disp_h ||
@@ -260,10 +232,99 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #endif
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,
 	    ctx->yuy2_support ? IMGFMT_YUY2 : IMGFMT_YV12))
-    		return NULL;
+    		return -1;
 	ctx->convert=(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_YUY2);
     }
+    return 0;
+}
+
+#if LIBAVCODEC_BUILD > 4615
+static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
+    sh_video_t * sh = avctx->opaque;
+    mp_image_t* mpi=NULL;
+//    int flags= MP_IMGFLAG_ALIGNED_STRIDE;
+    int flags= MP_IMGFLAG_ACCEPT_STRIDE;
     
+    if(init_vo(sh)<0){
+        printf("init_vo failed\n");
+        return;
+    }
+
+    if(pict_type==B_TYPE)
+        flags|= 0; //FIXME slice, framedrop?
+    else
+        flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
+
+    mpi= mpcodecs_get_image(sh,MP_IMGTYPE_IPB, flags,
+// MN: arpi, is the next line ok? (i doubt it), its needed for height%16!=0 files
+			(width+15)&(~15), (height+15)&(~15));
+
+    // ok, lets see what did we get:
+    if(  mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
+       !(mpi->flags&MP_IMGFLAG_DIRECT)){
+	// nice, filter/vo likes draw_callback :)
+	avctx->draw_horiz_band= draw_slice;
+    } else
+	avctx->draw_horiz_band= NULL;
+    avctx->dr_buffer[0]= mpi->planes[0];
+    avctx->dr_buffer[1]= mpi->planes[1];
+    avctx->dr_buffer[2]= mpi->planes[2];
+    avctx->dr_stride   = mpi->stride[0]; //FIXME check if it didnt change & check uv strides
+    avctx->dr_opaque_frame = mpi;
+//    printf("get_buffer: %X %d %d %d %d\n", (int)avctx->dr_buffer[0], width, height, avctx->width, avctx->height);
+}
+#endif
+
+// decode a frame
+static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
+    int got_picture=0;
+    int ret;
+    AVPicture lavc_picture;
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
+    mp_image_t* mpi=NULL;
+    int dr1=0;
+    
+    //FIXME check if lavc codec supports dr1
+
+    if(len<=0) return NULL; // skipped frame
+    
+    avctx->draw_horiz_band=NULL;
+    avctx->opaque=sh;
+    if(ctx->vo_inited && !ctx->convert && !(flags&3) && !dr1){
+	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
+	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
+	    sh->disp_w, sh->disp_h);
+	if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
+	    // vd core likes slices!
+	    avctx->draw_horiz_band=draw_slice;
+	}
+    }
+
+#if LIBAVCODEC_BUILD > 4615
+    if(dr1){
+        avctx->flags|= CODEC_FLAG_EMU_EDGE | CODEC_FLAG_DR1;
+        avctx->get_buffer_callback= get_buffer;
+    }
+#endif
+
+#if LIBAVCODEC_BUILD > 4603
+    avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
+#endif
+
+    ret = avcodec_decode_video(avctx, &lavc_picture,
+	     &got_picture, data, len);
+    if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
+    if(!got_picture) return NULL;	// skipped image
+    
+    if(init_vo(sh)<0) return NULL;
+
+#if LIBAVCODEC_BUILD > 4615
+    if(dr1 && avctx->dr_opaque_frame){
+        mpi= (mp_image_t*)avctx->dr_opaque_frame;
+    }
+#endif
+        
     if(!mpi && ctx->convert){
 	// do yuv422p -> yuy2 conversion:
         mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
@@ -283,12 +344,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	return NULL;
     }
     
-    mpi->planes[0]=lavc_picture.data[0];
-    mpi->planes[1]=lavc_picture.data[1];
-    mpi->planes[2]=lavc_picture.data[2];
-    mpi->stride[0]=lavc_picture.linesize[0];
-    mpi->stride[1]=lavc_picture.linesize[1];
-    mpi->stride[2]=lavc_picture.linesize[2];
+    if(!dr1){
+        mpi->planes[0]=lavc_picture.data[0];
+        mpi->planes[1]=lavc_picture.data[1];
+        mpi->planes[2]=lavc_picture.data[2];
+        mpi->stride[0]=lavc_picture.linesize[0];
+        mpi->stride[1]=lavc_picture.linesize[1];
+        mpi->stride[2]=lavc_picture.linesize[2];
+    }
 
     if(avctx->pix_fmt==PIX_FMT_YUV422P){
 	// we have 422p but user wants yv12 (420p)
