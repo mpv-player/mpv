@@ -941,7 +941,7 @@
 
 <UL>
   <LI>download ready-to-use font packages from MPlayer site.
-    Note: currently available fonts are limited for iso 8859-1/2 support,
+    Note: Currently available fonts are limited for iso 8859-1/2 support,
     but there are some other (including Korean, Russian, 8859-8 etc) fonts
     at contrib/font section of FTP, made by users.<BR>
     <BR>
@@ -1750,27 +1750,24 @@ end
 
 <H2><A NAME="cygwin">6.7 Cygwin</A></H2>
 
-<P>The Cygwin port is still in its infancy and could use some love,
-  <A HREF="tech/patches.txt">patches</A> are always welcome. You should also
-  check out the
+<P>The Cygwin port is still in its infancy. Currently there is no support for
+  Win32 DLLs, VCDs or OpenGL. SDL is known to distort sound and image or crash
+  on some systems. <A HREF="tech/patches.txt">Patches</A> are always welcome.
+  Best results are achieved with the native DirectX video output driver
+  (<CODE>-vo directx</CODE>) and the native Windows waveout audio driver
+  (<CODE>-ao win32</CODE>). You should also check out the
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   mailing list for help and latest information.</P>
 
-<P>To get native DirectX video (<CODE>-vo directx</CODE>), extract the
-  <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>
-  into <CODE>/usr/include/<CODE> or <CODE>/usr/local/include/<CODE> and
-  recompile. This, together with <CODE>-ao win32</CODE> should give you best
-  results. If the image is distorted, try turning off hardware acceleration with
-  <CODE>-vo directx:noaccel</CODE>.</P>
+<P>You have to copy or symlink <CODE>etc/cygwin_inttypes.h</CODE> from the
+  MPlayer source directory to <CODE>/usr/include/inttypes.h</CODE> in order to
+  make MPlayer compile.</P>
 
-<P>You will have to go to the MPlayer directory, and copy or symlink
-  <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
-  make MPlayer compile. Otherwise it will complain about missing
-  <CODE>inttypes.h</CODE>.</P>
-
-<P>Since there is no support for Win32 DLLs under Cygwin and OpenGL and mpdvdkit
-  do not work/compile, you should disable them in configure with
-  <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>.</P>
+<P>To get native DirectX video, download
+  <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>,
+  extract them to <CODE>/usr/include/</CODE> or <CODE>/usr/local/include/</CODE>
+  and recompile. If the image is distorted, try turning off hardware
+  acceleration with <CODE>-vo directx:noaccel</CODE>.</P>
 
 <P>Instructions and files for making SDL run under Cygwin can be found on the
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</A>.</P>

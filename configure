@@ -214,7 +214,7 @@ Audio output:
   --disable-esd          disable esd sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
-  --disable-win32waveout disable windows waveout sound support [autodetect]
+  --disable-win32waveout disable Windows waveout sound support [autodetect]
   --disable-select       disable using select() on audio device [enable]
 
 Miscellaneous options:
@@ -2548,6 +2548,7 @@ fi
 
 
 echocheck "OpenGL"
+cygwin && _gl=no
 #Note: this test is run even with --enable-gl since we autodetect $_ld_gl
 if test "$_x11" = yes && test "$_gl" != no ; then
   cat > $TMPC << EOF
@@ -3007,7 +3008,7 @@ else
   echores "no"
 fi
 
-echocheck "windows waveout"
+echocheck "Windows waveout"
 if test "$_win32waveout" = auto ; then
   cat > $TMPC << EOF
 #include <windows.h>
@@ -3737,6 +3738,7 @@ echores "$_faad"
 
 echocheck "Win32 DLL support"
 qnx && _win32=no
+cygwin && _win32="Win32 DLLs not supported under Cygwin"
 if test "$_win32" = auto ; then
   _win32=no
   if x86 ; then
@@ -3764,7 +3766,7 @@ else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
   _dshow=no
-  echores "no"
+  echores "$_win32"
 fi
 
 
@@ -5398,12 +5400,12 @@ Use --enable-sdl to force usage of libSDL.
 EOF
 fi
 
-if x86 ; then
+if x86 && ! cygwin; then
   if test "$_win32" = no ; then
     if test "$_win32libdir" ; then
       cat <<EOF
-Failed to find a WIN32 codecs dir at $_win32libdir!
-Create it and copy the DLL files there! (You can get them from your windows
+Failed to find a Win32 codecs dir at $_win32libdir!
+Create it and copy the DLL files there! (You can get them from your Windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.tar.bz2
 
@@ -5415,7 +5417,7 @@ EOF
       :
     else
       cat <<EOF
-Failed to find a WIN32 codecs directory!
+Failed to find a Win32 codecs directory!
 Create it and copy the DLL files there! (You can get them from your Windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.tar.bz2
@@ -5425,9 +5427,10 @@ EOF
   fi
 else
   cat <<EOF
-NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch).
+NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
+operating system ($system_name). Why don't you help us port it?
 You may encounter a few AVI files that cannot be played due to missing
-open source video/audio codec support.
+Open Source video/audio codec support.
 
 EOF
 fi
@@ -5435,8 +5438,8 @@ fi
 
 cat <<EOF
 
-Check $TMPLOG if you wonder why an autodetection failed (check whether the
-development headers/packages are installed).
+Check $TMPLOG if you wonder why an autodetection failed (check whether
+the development headers/packages are installed).
 
 If you suspect a bug, please read DOCS/bugreports.html.
 
