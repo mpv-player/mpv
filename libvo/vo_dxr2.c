@@ -17,6 +17,7 @@
 #include "video_out_internal.h"
 #include "mp_msg.h"
 #include "cfgparser.h"
+#include "sub.h"
 
 #ifdef X11_FULLSCREEN
 #include "x11_common.h"
@@ -45,6 +46,7 @@ static int sub_x,sub_y,sub_w,sub_h;
 static int sub_x_off,sub_y_off;
 static int sub_config_count;
 static int aspect;
+static int sub_vo_win = 0;
 
 static int use_ol = 1;
 static int ol_ratio = 1000;
@@ -60,6 +62,9 @@ static int iec958_mode = DXR2_IEC958_DECODED;
 static int mute_mode = DXR2_AUDIO_MUTE_OFF;
 static int ignore_cache = 0;
 static int update_cache = 0;
+static int olw_cor = 0, olh_cor = 0,olx_cor = 0, oly_cor = 0;
+static int ol_osd = 0;
+
 
 config_t dxr2_opts[] = {
   { "overlay", &use_ol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -93,6 +98,14 @@ config_t dxr2_opts[] = {
 
   { "ignore-cache",&ignore_cache,CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "update-cache",&update_cache,CONF_TYPE_FLAG, 0, 0, 1, NULL},
+
+  { "olh-cor", &olh_cor, CONF_TYPE_INT, CONF_RANGE, -20, 20, NULL},
+  { "olw-cor", &olw_cor, CONF_TYPE_INT, CONF_RANGE, -20, 20, NULL},
+  { "olx-cor", &olx_cor, CONF_TYPE_INT, CONF_RANGE, -20, 20, NULL},
+  { "oly-cor", &oly_cor, CONF_TYPE_INT, CONF_RANGE, -20, 20, NULL},
+
+  { "ol-osd", &ol_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+  { "nool-osd", &ol_osd, CONF_TYPE_FLAG, 0, 1, 0, NULL},
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -413,6 +426,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
     // First we need a white screen
     uint8_t* img = malloc(vo_screenwidth*vo_screenheight*3);
     uint8_t* src[] = { img, NULL, NULL };
+    int stride[] = { vo_screenwidth * 3 , 0, 0 };
     int cc = vo_config_count;
    
     memset(img,255,vo_screenwidth*vo_screenheight*3);
@@ -426,7 +440,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
       vo_config_count = cc;
       return 0;
     }
-    sub_vo->draw_frame(src);
+    sub_vo->draw_slice(src,stride,vo_screenwidth,vo_screenheight,0,0);
     sub_vo->flip_page();
     free(img);
     sub_config_count++;
@@ -475,7 +489,7 @@ static int dxr2_save_vga_params(dxr2_vgaParams_t* vga,char* name) {
     return 0;
   }
 
-  ret = fprintf(fd,"%d %d %d %d %d %d %d %d %d %d %d\n",
+  ret = fprintf(fd,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
 		vga->hOffWinKey,
 		vga->vOffWinKey,
 		vga->xScreen,
@@ -486,10 +500,14 @@ static int dxr2_save_vga_params(dxr2_vgaParams_t* vga,char* name) {
 		vga->blankWidth,
 		vga->hOffset,
 		vga->vOffset,
-		vga->ratio);
+		vga->ratio,
+		olx_cor,
+		oly_cor,
+		olw_cor,
+		olh_cor);
 
   fclose(fd);
-  return ret == 11 ? 1 : 0;
+  return ret >= 11 ? 1 : 0;
 }
 
 static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
@@ -507,7 +525,7 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
     mp_msg(MSGT_VO,MSGL_ERR,"VO: [dxr2] Unable to open cache file %s for reading (%s)\n",cache_path,strerror(errno));
     return 0;
   }
-  ret = fscanf(fd, "%d %d %d %d %d %d %d %d %d %d %d\n",
+  ret = fscanf(fd, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
 	       &vga->hOffWinKey,
 	       &vga->vOffWinKey,
 	       &vga->xScreen,
@@ -518,10 +536,14 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
 	       &vga->blankWidth,
 	       &vga->hOffset,
 	       &vga->vOffset,
-	       &vga->ratio);
+	       &vga->ratio,
+	       &olx_cor,
+	       &oly_cor,
+	       &olw_cor,
+	       &olh_cor);
 
   fclose(fd);
-  return ret == 11 ? 1 : 0;
+  return ret >= 11 ? 1 : 0;
 }
 
 static int dxr2_setup_vga_params(void) {
@@ -538,13 +560,31 @@ static int dxr2_setup_vga_params(void) {
 
 static void dxr2_set_overlay_window(void) {
   uint8_t* src[] = { sub_img, NULL, NULL };
+  int stride[] = { movie_w * 3 , 0, 0 };
   dxr2_twoArg_t win;
   int redisp = 0;
   int cc = vo_config_count;
   vo_config_count = sub_config_count;
-  sub_vo->draw_frame(src);
+  sub_vo->draw_slice(src,stride,movie_w,movie_h,0,0);
   sub_vo->flip_page();
   vo_config_count = cc;
+
+
+  mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] setting overlay with correction x=%d y=%d w=%d h=%d\n",olx_cor,oly_cor,	olw_cor,olh_cor);
+
+  // Sub vo isn't a windowed one, fill in the needed stuff
+  if(!sub_vo_win) {
+    if(vo_fs) {
+      vo_dwidth = vo_screenwidth;
+      vo_dheight = vo_screenheight;
+      vo_dx = vo_dy = 0;
+    } else {
+      vo_dwidth = movie_w;
+      vo_dheight = movie_h;
+      vo_dx = (vo_screenwidth - vo_dwidth) / 2;
+      vo_dy = (vo_screenheight - vo_dheight) / 2;
+    }      
+  }
 
   if(sub_w != vo_dwidth || sub_h != vo_dheight) {
     int new_aspect = ((1<<16)*vo_dwidth + vo_dheight/2)/vo_dheight;
@@ -554,6 +594,8 @@ static void dxr2_set_overlay_window(void) {
       sub_w = (sub_h*aspect + (1<<15))>>16;
     else
       sub_h = ((sub_w<<16) + (aspect>>1)) /aspect;
+    sub_w += olw_cor;
+    sub_h += olh_cor;
     sub_x_off = (vo_dwidth-sub_w) / 2;
     sub_y_off = (vo_dheight-sub_h) / 2;
     sub_x = -vo_dx; // Be sure to also replace the overlay
@@ -564,10 +606,10 @@ static void dxr2_set_overlay_window(void) {
   }
   
   if(vo_dx != sub_x || vo_dy != sub_y) {
-    sub_x = vo_dx;
-    sub_y = vo_dy;
-    win.arg1 = (sub_x > 0 ? sub_x : 0) + sub_x_off;
-    win.arg2 = (sub_y > 0 ? sub_y : 0) + sub_y_off;
+    sub_x = vo_dx + olx_cor + sub_x_off;
+    sub_y = vo_dy + oly_cor + sub_y_off;
+    win.arg1 = (sub_x > 0 ? sub_x : 0);
+    win.arg2 = (sub_y > 0 ? sub_y : 0);
     mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] set pos x=%d y=%d \n",win.arg1,win.arg2);
     ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
   }
@@ -703,21 +745,32 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
   arg = mute_mode;
   ioctl(dxr2_fd, DXR2_IOC_AUDIO_MUTE, &arg);
 
+  movie_w = width;
+  movie_h = height;
+  vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
   // Overlay
   while(use_ol) {
     dxr2_twoArg_t win;
     dxr2_oneArg_t om;
     int cc = vo_config_count;
     vo_config_count = sub_config_count;
+    // Load or detect the overlay stuff
     if(!dxr2_setup_vga_params()) {
       sub_vo->uninit();
       sub_vo = NULL;
       vo_config_count = cc;
       break;
     }
-    if(strcmp(sub_vo->get_info()->short_name,"x11") != 0) {
+    // Does the sub vo support the x11 stuff
+    // Fix me : test the other x11 vo's and enable them
+    if(strcmp(sub_vo->get_info()->short_name,"x11") == 0)
+      sub_vo_win = 1;
+    else
+      sub_vo_win = 0;
+
+    // No window and no osd => we don't need any subdriver
+    if(!sub_vo_win && !ol_osd) {
       sub_vo->uninit();
-      vo_config_count = cc;
       sub_vo = NULL;
     } 
  
@@ -768,9 +821,6 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
     }
     break;
   }
-  vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
-  movie_w = width;
-  movie_h = height;
 
   // start playing
   if(ioctl(dxr2_fd, DXR2_IOC_PLAY, NULL) == 0) {
@@ -785,8 +835,19 @@ static const vo_info_t* get_info(void)
   return &vo_info;
 }
 
+static void clear_alpha(int x0,int y0, int w,int h) {
+  uint8_t* src[] = { sub_img , NULL, NULL };
+  int stride[] = { movie_w * 3, 0, 0 };
+
+  sub_vo->draw_slice(src,stride,w,h,x0,y0);
+}
+
 static void draw_osd(void)
 {
+  if(sub_vo && ol_osd) {
+    vo_remove_text(movie_w,movie_h,clear_alpha);
+    sub_vo->draw_osd();
+  }
 }
 
 static uint32_t draw_frame(uint8_t * src[])
@@ -801,6 +862,8 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page (void)
 {
+  if(sub_vo && ol_osd)
+    sub_vo->flip_page();
 }
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
@@ -849,7 +912,7 @@ static void check_events(void)
   // I'd like to have this done in an x11 independent way
   // It's because of this that we are limited to vo_x11 for windowed overlay :-(
 #ifdef X11_FULLSCREEN
-  if(sub_vo) {
+  if(sub_vo && sub_vo_win) {
     int e=vo_x11_check_events(mDisplay);
     if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
     XSetBackground(mDisplay, vo_gc, 0);
@@ -970,9 +1033,12 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_FULLSCREEN:
     if(!use_ol)
       return VO_NOTIMPL;
-    else if(sub_vo) 
-      return sub_vo->control(VOCTRL_FULLSCREEN,0);
-    else {
+    else if(sub_vo) {
+      int r = sub_vo->control(VOCTRL_FULLSCREEN,0);
+      if(r == VO_TRUE && !sub_vo_win)
+	dxr2_set_overlay_window();
+      return r;
+    } else {
       dxr2_twoArg_t win;
       vo_fs = !vo_fs;
       win.arg1 = vo_fs ? vo_screenwidth : movie_w;
