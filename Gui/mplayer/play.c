@@ -91,7 +91,8 @@ printf("%%%%%% PAUSE  \n");
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
 
-printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
+//printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
+	vo_setwindowsize( width,height );
         vo_resize=1;
 
 }
