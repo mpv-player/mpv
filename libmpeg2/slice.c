@@ -1420,6 +1420,9 @@ do {								\
 
 #define NEXT_MACROBLOCK							\
 do {									\
+    if(decoder->quant_store)						\
+	decoder->quant_store[decoder->quant_stride*(decoder->v_offset>>4) \
+		    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
     decoder->offset += 16;						\
     if (decoder->offset == decoder->width) {				\
 	do { /* just so we can use the break statement */		\

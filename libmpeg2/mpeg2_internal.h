@@ -135,6 +135,10 @@ struct decoder_s {
     int second_field;
 
     int mpeg1;
+
+    /* for MPlayer: */
+    char* quant_store;
+    int   quant_stride;
 };
 
 typedef struct {
