@@ -54,11 +54,88 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
     return;
 }
 
+#ifdef HAVE_MMX
+static const unsigned long long mask24lh  __attribute__((aligned(8))) = 0xFFFF000000000000ULL;
+static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FFFFFFFFFFFFULL;
+#endif
 void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
     for(y=0;y<h;y++){
         register unsigned char *dst = dstbase;
         register int x;
+#ifdef ARCH_X86
+#ifdef HAVE_MMX
+    asm volatile(
+	PREFETCHW" %0\n\t"
+	PREFETCH" %1\n\t"
+	PREFETCH" %2\n\t"
+	"pxor %%mm7, %%mm7\n\t"
+	"pcmpeqb %%mm6, %%mm6\n\t" // F..F
+	::"m"(*dst),"m"(*srca),"m"(*src):"memory");
+    for(x=0;x<w;x+=2){
+	asm volatile(
+		PREFETCHW" 32%0\n\t"
+		PREFETCH" 32%1\n\t"
+		PREFETCH" 32%2\n\t"
+		"movq	%0, %%mm0\n\t" // dstbase
+		"movq	%%mm0, %%mm1\n\t"
+		"movq	%%mm0, %%mm5\n\t"
+		"punpcklbw %%mm7, %%mm0\n\t"
+		"punpckhbw %%mm7, %%mm1\n\t"
+		"movd	%1, %%mm2\n\t" // srca ABCD0000
+		"paddb	%%mm6, %%mm2\n\t"
+		"punpcklbw %%mm2, %%mm2\n\t" // srca AABBCCDD
+		"punpcklbw %%mm2, %%mm2\n\t" // srca AAAABBBB
+		"movq	%%mm2, %%mm3\n\t"
+		"punpcklbw %%mm7, %%mm2\n\t" // srca 0A0A0A0A
+		"punpckhbw %%mm7, %%mm3\n\t" // srca 0B0B0B0B
+		"pmullw	%%mm2, %%mm0\n\t"
+		"pmullw	%%mm3, %%mm1\n\t"
+		"psrlw	$8, %%mm0\n\t"
+		"psrlw	$8, %%mm1\n\t"
+		"packuswb %%mm1, %%mm0\n\t"
+		"movd %2, %%mm2	\n\t" // src ABCD0000
+		"punpcklbw %%mm2, %%mm2\n\t" // src AABBCCDD
+		"punpcklbw %%mm2, %%mm2\n\t" // src AAAABBBB
+		"paddb	%%mm2, %%mm0\n\t"
+		"pand	%4, %%mm5\n\t"
+		"pand	%3, %%mm0\n\t"
+		"por	%%mm0, %%mm5\n\t"
+		"movq	%%mm5, %0\n\t"
+		:: "m" (dst[0]), "m" (srca[x]), "m" (src[x]), "m"(mask24hl), "m"(mask24lh));
+		dst += 6;
+	}
+#else /* HAVE_MMX */
+    for(x=0;x<w;x++){
+        if(srca[x]){
+	    asm volatile(
+		"movzbl (%0), %%ecx\n\t"
+		"movzbl 1(%0), %%eax\n\t"
+		"movzbl 2(%0), %%edx\n\t"
+
+		"imull %1, %%ecx\n\t"
+		"imull %1, %%eax\n\t"
+		"imull %1, %%edx\n\t"
+
+ 		"addl %2, %%ecx\n\t"
+		"addl %2, %%eax\n\t"
+		"addl %2, %%edx\n\t"
+
+		"movb %%ch, (%0)\n\t"
+		"movb %%ah, 1(%0)\n\t"
+		"movb %%dh, 2(%0)\n\t"
+
+		:
+		:"r" (dst),
+		 "r" ((unsigned)srca[x]),
+		 "r" (((unsigned)src[x])<<8)
+		:"%eax", "%ecx", "%edx"
+		);
+            }
+	    dst += 3;
+        }
+#endif /* HAVE_MMX */
+#else /*non x86 arch*/
         for(x=0;x<w;x++){
             if(srca[x]){
 #ifdef FAST_OSD
@@ -71,10 +148,14 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
             }
             dst+=3; // 24bpp
         }
+#endif /* arch_x86 */
         src+=srcstride;
         srca+=srcstride;
         dstbase+=dststride;
     }
+#ifdef HAVE_MMX
+	asm volatile(EMMS:::"memory");
+#endif
     return;
 }
 
@@ -91,7 +172,7 @@ PROFILE_START();
 	PREFETCH" %2\n\t"
 	"pxor %%mm7, %%mm7\n\t"
 	"pcmpeqb %%mm6, %%mm6\n\t" // F..F
-	::"m"(dstbase),"m"(srca),"m"(src):"memory");
+	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=2){
 	asm volatile(
 		PREFETCHW" 32%0\n\t"
@@ -120,7 +201,7 @@ PROFILE_START();
 		"movq	%%mm0, %0\n\t"
 		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]));
 	}
-#else /* 0 HAVE_MMX2*/
+#else /* HAVE_MMX */
     for(x=0;x<w;x++){
         if(srca[x]){
 	    asm volatile(
@@ -148,7 +229,7 @@ PROFILE_START();
 		);
             }
         }
-#endif /* 0 HAVE_MMX*/
+#endif /* HAVE_MMX */
 #else /*non x86 arch*/
         for(x=0;x<w;x++){
             if(srca[x]){
