@@ -229,10 +229,6 @@ m_option_t mplayer_opts[]={
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#else
-#ifdef HAVE_DIRECTFB
-	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
 #endif
 #ifdef HAVE_DIRECTFB
 #if DIRECTFBVERSION > 912
