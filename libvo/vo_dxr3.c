@@ -296,10 +296,12 @@ static void draw_osd(void)
 
 static uint32_t draw_frame(uint8_t * src[])
 {
+	ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
 		if (p->id == 0x20) {
+			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 			write(fd_spu, p->data, p->size);
 		} else {
 			write(fd_video, p->data, p->size);
@@ -326,11 +328,14 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
-	ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
+	if (!vo_pts) {
+		ioval = (90000.0 / vo_fps);
+		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
+		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
