@@ -236,7 +236,21 @@ A: Es?
 Q: Akkor az aviplay sokkal jobb !
 A: Hasznald azt, ugyis van szep GUI-ja, meg amugyis jo kis C++ :)
 
+Q: MPEG file-ok lejatszasanal ezt kapom: Can't find codec for video format
+   0x10000001
+A: Regi a codecs.conf-od az ~/.mplayer konyvtarban. Frissitsd a DOCS-bol.
+
+Q: Miutan elinditom a lejatszast KDE(1/2) alatt, csak sotet kepet kapok, es
+   egy perc mulva elindul a lejatszas.
+A: A KDE arts sound daemon lefoglalja a hangkartyat, vagy kivarod ezt az idot,
+   vagy kikapcsolod az arts-daemon-t a control centerben.
+
 Q: Szepek a feliratok, a legszebbek amiket valaha lattam, viszont lelassitjak
    a lejatszast! Tudom hogy ez valoszinutlen, de...
 A: Miutan ./configure lefutott, szerkeszd at a config.h-t, es #undef FAST_OSD
    helyett ird be : #define FAST_OSD . Forditsd ujra.
+
+Q: Az OSD villog!
+A: Olyan vo drivert hasznalsz ami egyszeres bufferelest hasznal (x11,xv).
+   Xv eseten meg tudod valtoztatni a bufferek szamat a libvo/xv_xv.c-ben :
+   Noveld ezt : #define NUM_BUFFERS 1
