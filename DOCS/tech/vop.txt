@@ -184,3 +184,15 @@ Current plugins:
             amount < 0 = blur, amount > 0 = sharpen
             usually you will use something between -1.5 and 1.5
     MPI: DR (if possible) or TEMP, accepts stride
+
+-vop swapuv
+    swap U & V plane
+    MPI: EXPORT
+    
+-vop il=[d|i][s][c]
+    (de)interleaves lines
+    d deinterleave
+    i interleave
+    c chroma too (otherwise only luma is modified if the format is planar YUV)
+    s swap fields (exchange even & odd lines)
+    MPI: TEMP, accepts stride
