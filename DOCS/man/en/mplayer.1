@@ -4064,6 +4064,12 @@ Audio bitrate in kBit (default 224).
 .B atag=<value>
 Use the specified Windows audio format tag (e.g.\& atag=0x55).
 .TP
+.B bit_exact
+Use only bit exact algorithms (except (i)dct).   
+This also suppresses the user_data header in MPEG-4 streams
+(that section causes some players such as Apple's
+Quicktime player to declare the stream corrupt).
+.TP
 .B vcodec=<value>
 use the specified codec (default: mpeg4):
 .PD 0
