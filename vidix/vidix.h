@@ -25,8 +25,14 @@ extern "C" {
 			/* returns driver version */
 extern unsigned vixGetVersion( void );
 
-			/* Probes video hw. Returns 0 if ok else errno */
-extern int	vixProbe( int verbose );
+#define PROBE_NORMAL	0 /* normal probing */
+#define PROBE_FORCE	1 /* ignore device_id but recognize device if it's known */
+			/* Probes video hw.
+			   verbose - specifies verbose level.
+			   force   - specifies force mode - driver should ignore
+			             device_id (danger but useful for new devices)
+			   Returns 0 if ok else errno */
+extern int	vixProbe( int verbose, int force );
 			/* Initializes driver. Returns 0 if ok else errno */
 extern int	vixInit( void );
 			/* Destroys driver */
@@ -35,15 +41,12 @@ extern void	vixDestroy( void );
 typedef struct vidix_capability_s
 {
 	char	name[32];	/* Driver name */
-#define TYPE_OUTPUT	0x00000000	/* Is a video capture device */
-#define TYPE_CAPTURE	0x00000001	/* Is a CODEC device */
-#define TYPE_CODEC	0x00000002	/* Is a video output device */
+#define TYPE_OUTPUT	0x00000000	/* Is a video playback device */
+#define TYPE_CAPTURE	0x00000001	/* Is a capture device */
+#define TYPE_CODEC	0x00000002	/* Device supports hw (de)coding */
 #define TYPE_FX		0x00000004	/* Is a video effects device */
 	int	type;		/* Device type, see below */
-	int	inputs;		/* Num video inputs */
-	int	outputs;	/* Num video outputs */
-	int	in_audios;	/* Num audio inputs */
-	int	out_audios;	/* Num audio outputs */
+	unsigned reserved0[4];
 	int	maxwidth;
 	int	maxheight;
 	int	minwidth;
@@ -51,10 +54,11 @@ typedef struct vidix_capability_s
 	int	maxframerate;   /* -1 if unlimited */
 #define FLAG_NONE		0x00000000 /* No flags defined */
 #define FLAG_DMA		0x00000001 /* Card can use DMA */
+#define FLAG_EQ_DMA		0x00000002 /* Card can use DMA only if src pitch == dest pitch */
 #define FLAG_UPSCALER		0x00000010 /* Card supports hw upscaling */
 #define FLAG_DOWNSCALER		0x00000020 /* Card supports hw downscaling */
 #define FLAG_SUBPIC		0x00001000 /* Card supports DVD subpictures */
-	unsigned flags;		/* Feature flags, see below */
+	unsigned flags;		/* Feature flags, see above */
 	unsigned short vendor_id;
 	unsigned short device_id;
 	unsigned reserved[4];
@@ -139,7 +143,7 @@ typedef struct vidix_playback_s
 	vidix_rect_t	dest;           /* app -> driver: destinition movie size. driver->app dest_pitch */
 	/* memory model */
 	unsigned	frame_size;		/* driver -> app; destinition frame size */
-	unsigned	num_frames;		/* app -> driver; after call: driver -> app */
+	unsigned	num_frames;		/* app -> driver: after call: driver -> app */
 #define LVO_MAXFRAMES 32
 	unsigned	offsets[LVO_MAXFRAMES];	/* driver -> app */
 	vidix_yuv_t	offset;			/* driver -> app: relative offsets within frame for yuv planes */
@@ -186,6 +190,10 @@ typedef struct vidix_video_eq_s
 	int		red_intense;	/* -1000 : +1000 */
 	int		green_intense;  /* -1000 : +1000 */
 	int		blue_intense;   /* -1000 : +1000 */
+#define VEQ_FLG_ITU_R_BT_601	0x00000000 /* ITU-R BT.601 colour space (default) */
+#define VEQ_FLG_ITU_R_BT_709	0x00000001 /* ITU-R BT.709 colour space */
+#define VEQ_FLG_ITU_MASK	0x0000000f
+	int		flags;		/* currently specifies ITU YCrCb color space to use */
 }vidix_video_eq_t;
 
 			/* Returns 0 if ok else errno */
@@ -193,6 +201,24 @@ extern int 	vixPlaybackGetEq( vidix_video_eq_t * );
 
 			/* Returns 0 if ok else errno */
 extern int 	vixPlaybackSetEq( const vidix_video_eq_t * );
+
+typedef struct vidix_deinterlace_s
+{
+#define CFG_NON_INTERLACED		0x00000000 /* stream is not interlaced */
+#define CFG_INTERLACED			0x00000001 /* stream is interlaced */
+#define CFG_EVEN_ODD_INTERLACING	0x00000002 /* first frame contains even fields but second - odd */
+#define CFG_ODD_EVEN_INTERLACING	0x00000004 /* first frame contains odd fields but second - even */
+#define CFG_UNIQUE_INTERLACING		0x00000008 /* field deinterlace_pattern is valid */
+#define CFG_UNKNOWN_INTERLACING		0x0000000f /* unknown deinterlacing - use adaptive if it's possible */
+	unsigned	flags;
+	unsigned	deinterlace_pattern;	/* app -> driver: deinterlace pattern if flag CFG_UNIQUE_INTERLACING is set */
+}vidix_deinterlace_t;
+
+			/* Returns 0 if ok else errno */
+extern int 	vixPlaybackGetDeint( vidix_deinterlace_t * );
+
+			/* Returns 0 if ok else errno */
+extern int 	vixPlaybackSetDeint( const vidix_deinterlace_t * );
 
 typedef struct vidix_slice_s
 {
@@ -212,6 +238,37 @@ typedef struct vidix_dma_s
 
 			/* Returns 0 if ok else errno */
 extern int 	vixPlaybackCopyFrame( const vidix_dma_t * );
+
+/*
+   This structure is introdused to support OEM effects like:
+   - sharpness
+   - exposure
+   - (auto)gain
+   - H(V)flip
+   - black level
+   - white balance
+   and many other
+*/
+typedef struct vidix_oem_fx_s
+{
+#define FX_TYPE_BOOLEAN		0x00000000
+#define FX_TYPE_INTEGER		0x00000001
+	int		type;			/* type of effects */
+	int		num;			/* app -> driver: effect number. From 0 to max number of effects */
+	int		minvalue;		/* min value of effect. 0 - for boolean */
+	int		maxvalue;		/* max value of effect. 1 - for boolean */
+	int		value;			/* current value of effect on 'get'; required on set */
+	char *		name[80];		/* effect name to display */
+}vidix_oem_fx_t;
+
+			/* Returns 0 if ok else errno */
+extern int	vixQueryNumOemEffects( unsigned * number );
+
+			/* Returns 0 if ok else errno */
+extern int	vixGetOemEffect( vidix_oem_fx_t * );
+
+			/* Returns 0 if ok else errno */
+extern int	vixSetOemEffect( const vidix_oem_fx_t * );
 
 #ifdef __cplusplus
 }

@@ -219,10 +219,7 @@ static vidix_capability_t mga_cap =
 {
     "Matrox MGA G200/G400 YUV Video",
     TYPE_OUTPUT,
-    0,
-    1,
-    0,
-    0,
+    { 0, 0, 0, 0 },
     1024,
     768,
     4,
@@ -1636,7 +1633,7 @@ static int mga_vid_release(/*struct inode *inode, struct file *file*/)
 	return 0;
 }
 
-int vixProbe(int verbose)
+int vixProbe(int verbose,int force)
 {
 	pciinfo_t lst[MAX_PCI_DEVICES];
 	unsigned int i, num_pci;

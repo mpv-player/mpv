@@ -42,9 +42,14 @@ typedef struct vdl_stream_s
 	int 	(*frame_sel)( unsigned frame_idx );
 	int 	(*get_eq)( vidix_video_eq_t * );
 	int 	(*set_eq)( const vidix_video_eq_t * );
+	int 	(*get_deint)( vidix_deinterlace_t * );
+	int 	(*set_deint)( const vidix_deinterlace_t * );
 	int 	(*copy_frame)( const vidix_dma_t * );
 	int 	(*get_gkey)( vidix_grkey_t * );
 	int 	(*set_gkey)( const vidix_grkey_t * );
+	int 	(*get_num_fx)( unsigned * );
+	int 	(*get_fx)( vidix_oem_fx_t * );
+	int 	(*set_fx)( const vidix_oem_fx_t * );
 }vdl_stream_t;
 
 #define t_vdl(p) (((vdl_stream_t *)p))
@@ -68,13 +73,18 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   t_vdl(stream)->set_eq	= dlsym(t_vdl(stream)->handle,"vixPlaybackSetEq");
   t_vdl(stream)->get_gkey	= dlsym(t_vdl(stream)->handle,"vixGetGrKeys");
   t_vdl(stream)->set_gkey	= dlsym(t_vdl(stream)->handle,"vixSetGrKeys");
+  t_vdl(stream)->get_deint	= dlsym(t_vdl(stream)->handle,"vixPlaybackGetDeint");
+  t_vdl(stream)->set_deint	= dlsym(t_vdl(stream)->handle,"vixPlaybackSetDeint");
   t_vdl(stream)->copy_frame	= dlsym(t_vdl(stream)->handle,"vixPlaybackCopyFrame");
+  t_vdl(stream)->get_num_fx	= dlsym(t_vdl(stream)->handle,"vixQueryNumOemEffects");
+  t_vdl(stream)->get_fx		= dlsym(t_vdl(stream)->handle,"vixGetOemEffect");
+  t_vdl(stream)->set_fx		= dlsym(t_vdl(stream)->handle,"vixSetOemEffect");
   /* check driver viability */
   if(!( t_vdl(stream)->get_caps && t_vdl(stream)->query_fourcc &&
 	t_vdl(stream)->config_playback && t_vdl(stream)->playback_on &&
 	t_vdl(stream)->playback_off))
   {
-    printf("vidixlib: some features are missed in driver\n");
+    printf("vidixlib: Incomplete driver: some features are missed in it.\n");
     return 0;
   }
   return 1;
@@ -84,7 +94,7 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
 {
   vidix_capability_t vid_cap;
   unsigned (*_ver)(void);
-  int      (*_probe)(int);
+  int      (*_probe)(int,int);
   int      (*_cap)(vidix_capability_t*);
   strcpy(drv_name,path);
   strcat(drv_name,name);
@@ -114,7 +124,7 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
     if(verbose) printf("vidixlib: %s has no function definition\n",drv_name);
     goto err;
   }
-  if(_probe) { if((*_probe)(verbose) != 0) goto err; }
+  if(_probe) { if((*_probe)(verbose,PROBE_NORMAL) != 0) goto err; }
   else goto fatal_err;
   if(_cap) { if((*_cap)(&vid_cap) != 0) goto err; }
   else goto fatal_err;
@@ -156,7 +166,7 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
   if(name)
   {
     unsigned (*ver)(void);
-    int (*probe)(int);
+    int (*probe)(int,int);
     unsigned version = 0;
     strcpy(drv_name,path);
     strcat(drv_name,name);
@@ -175,7 +185,7 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
       goto err;
     }
     probe = dlsym(t_vdl(stream)->handle,"vixProbe");
-    if(probe) { if((*probe)(verbose)!=0) goto drv_err; }
+    if(probe) { if((*probe)(verbose,PROBE_FORCE)!=0) goto drv_err; }
     else goto drv_err;
     fill:
     if(!vdl_fill_driver(stream)) goto drv_err;
@@ -263,4 +273,29 @@ int 	  vdlGetGrKeys(VDL_HANDLE handle, vidix_grkey_t * k)
 int 	  vdlSetGrKeys(VDL_HANDLE handle, const vidix_grkey_t * k)
 {
   return t_vdl(handle)->set_gkey ? t_vdl(handle)->set_gkey(k) : ENOSYS;
+}
+
+int	  vdlPlaybackGetDeint(VDL_HANDLE handle, vidix_deinterlace_t * d)
+{
+  return t_vdl(handle)->get_deint ? t_vdl(handle)->get_deint(d) : ENOSYS;
+}
+
+int 	  vdlPlaybackSetDeint(VDL_HANDLE handle, const vidix_deinterlace_t * d)
+{
+  return t_vdl(handle)->set_deint ? t_vdl(handle)->set_deint(d) : ENOSYS;
+}
+
+int	  vdlQueryNumOemEffects(VDL_HANDLE handle, unsigned * number )
+{
+  return t_vdl(handle)->get_num_fx ? t_vdl(handle)->get_num_fx(number) : ENOSYS;
+}
+
+int	  vdlGetOemEffect(VDL_HANDLE handle, vidix_oem_fx_t * f)
+{
+  return t_vdl(handle)->get_fx ? t_vdl(handle)->get_fx(f) : ENOSYS;
+}
+
+int	  vdlSetOemEffect(VDL_HANDLE handle, const vidix_oem_fx_t * f)
+{
+  return t_vdl(handle)->set_fx ? t_vdl(handle)->set_fx(f) : ENOSYS;
 }

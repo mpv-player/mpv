@@ -73,6 +73,22 @@ extern int 	  vdlPlaybackGetEq(VDL_HANDLE, vidix_video_eq_t * );
 extern int 	  vdlPlaybackSetEq(VDL_HANDLE, const vidix_video_eq_t * );
 
 			/* Returns 0 if ok else errno */
+extern int	  vdlPlaybackGetDeint(VDL_HANDLE, vidix_deinterlace_t * );
+
+			/* Returns 0 if ok else errno */
+extern int 	  vdlPlaybackSetDeint(VDL_HANDLE, const vidix_deinterlace_t * );
+
+			/* Returns 0 if ok else errno */
+extern int	  vdlQueryNumOemEffects(VDL_HANDLE, unsigned * number );
+
+			/* Returns 0 if ok else errno */
+extern int	  vdlGetOemEffect(VDL_HANDLE, vidix_oem_fx_t * );
+
+			/* Returns 0 if ok else errno */
+extern int	  vdlSetOemEffect(VDL_HANDLE, const vidix_oem_fx_t * );
+
+
+			/* Returns 0 if ok else errno */
 extern int	  vdlPlaybackCopyFrame(VDL_HANDLE, const vidix_dma_t * );
 
 #ifdef __cplusplus

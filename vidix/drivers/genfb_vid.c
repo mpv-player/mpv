@@ -11,6 +11,8 @@
 #include "../../libdha/libdha.h"
 #include "../../libdha/pci_ids.h"
 
+#define DEMO_DRIVER 1
+
 static int fd;
 
 static void *mmio_base = 0;
@@ -26,10 +28,7 @@ static vidix_capability_t genfb_cap =
 {
     "General Framebuffer",
     TYPE_OUTPUT,
-    0,
-    1,
-    0,
-    0,
+    { 0, 0, 0, 0 },
     1024,
     768,
     4,
@@ -46,9 +45,12 @@ unsigned int vixGetVersion(void)
     return(VIDIX_VERSION);
 }
 
-int vixProbe(int verbose)
+int vixProbe(int verbose,int force)
 {
     int err = 0;
+#ifdef DEMO_DRIVER
+    err = ENOSYS;
+#endif
     
     printf("[genfb] probe\n");
 

@@ -596,10 +596,7 @@ vidix_capability_t def_cap =
     "BES driver for radeon cards",
 #endif
     TYPE_OUTPUT | TYPE_FX,
-    0,
-    1,
-    0,
-    0,
+    { 0, 0, 0, 0 },
     1024,
     768,
     4,
@@ -612,7 +609,7 @@ vidix_capability_t def_cap =
 };
 
 
-int vixProbe( int verbose )
+int vixProbe( int verbose,int force )
 {
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
@@ -632,15 +629,19 @@ int vixProbe( int verbose )
       if(lst[i].vendor == VENDOR_ATI)
       {
         int idx;
+	const char *dname;
 	idx = find_chip(lst[i].device);
-	if(idx == -1) continue;
-	printf(RADEON_MSG" Found chip: %s\n",pci_device_name(VENDOR_ATI,ati_card_ids[idx]));
+	if(idx == -1 && force == PROBE_NORMAL) continue;
+	dname = pci_device_name(VENDOR_ATI,lst[i].device);
+	dname = dname ? dname : "Unknown chip";
+	printf(RADEON_MSG" Found chip: %s\n",dname);
 #ifndef RAGE128	
-	if(ati_card_ids[idx] == DEVICE_ATI_RADEON_QL || 
-	   ati_card_ids[idx] == DEVICE_ATI_RADEON_8500_DV || 
-	   ati_card_ids[idx] == DEVICE_ATI_RADEON_QW) IsR200 = 1;
+	if(idx != -1)
+	    if(ati_card_ids[idx] == DEVICE_ATI_RADEON_QL || 
+		ati_card_ids[idx] == DEVICE_ATI_RADEON_8500_DV || 
+		ati_card_ids[idx] == DEVICE_ATI_RADEON_QW) IsR200 = 1;
 #endif
-	def_cap.device_id = ati_card_ids[idx];
+	def_cap.device_id = lst[i].device;
 	err = 0;
 	memcpy(&pci_info,&lst[i],sizeof(pciinfo_t));
 	probed=1;
@@ -1049,7 +1050,7 @@ int vixPlaybackFrameSelect(unsigned frame)
     return 0;
 }
 
-vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0 };
+vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
 {

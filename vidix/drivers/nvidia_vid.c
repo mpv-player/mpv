@@ -24,7 +24,7 @@ static uint32_t ram_size = 0;
 struct nv_card_id_s
 {
     const unsigned int id ;
-    const char name[17];
+    const char name[32];
     const int core;
     const int flags;
 };
@@ -33,7 +33,7 @@ static const struct nv_card_id_s nv_card_ids[]=
 {
     { DEVICE_NVIDIA_RIVA_TNT2_NV5, "nVidia TNT2 (NV5) ", 5, CARD_FLAGS_NOTSUPPORTED},
     { DEVICE_NVIDIA_VANTA_NV6, "nVidia Vanta (NV6.1)", 6, CARD_FLAGS_NOTSUPPORTED},
-    { DEVICE_NVIDIA_VANTA_NV62, "nVidia Vanta (NV6.2)", 6, CARD_FLAGS_NOTSUPPORTED},
+    { DEVICE_NVIDIA_VANTA_NV62, "nVidia Vanta (NV6.2)", 6, CARD_FLAGS_NOTSUPPORTED}
 };
 
 static int find_chip(unsigned int chip_id)
@@ -55,10 +55,7 @@ static vidix_capability_t nvidia_cap =
 {
     "NVIDIA driver for VIDIX",
     TYPE_OUTPUT,
-    0,
-    1,
-    0,
-    0,
+    { 0, 0, 0, 0 },
     1024,
     768,
     4,
@@ -75,7 +72,7 @@ unsigned int vixGetVersion(void)
     return(VIDIX_VERSION);
 }
 
-int vixProbe(int verbose)
+int vixProbe(int verbose,int force)
 {
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned int i, num_pci;
