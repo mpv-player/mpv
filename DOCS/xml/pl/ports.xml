@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.29 -->
+<!-- synced with 1.31 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -407,6 +407,40 @@ ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
 Możesz pobrać Aqua GUI dla <application>MPlayera</application> razem z
 jego skompilowanymi binariami dla Mac OS X ze strony projektu
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+</para>
+</sect1>
+
+<sect1 id="hpux">
+<title>HP UX</title>
+<para>
+Martin Gansser opiekuje się cennymi 
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">
+dokumentem HOWTO</ulink> ("Jak to zrobić.." - przypisek tłumacza)
+na temat budowania <application>MPlayera</application> na HP-UX. Ma nawet dział
+FAQ!
+</para>
+
+<para>
+W każdym bądź razie, nasze "surowe" źródła <application>MPlayera</application>
+kompilowały się na HP-UX bez żadnych problemów.
+</para>
+</sect1>
+
+<sect1 id="amiga">
+<title>Amiga/MorphOS (zabawki dla zapaleńców)</title>
+<para>
+Nicholas Det at Genesi stworzył potężny port <application>MPlayera
+</application> dla MorphOS. Niestety oparty jest on o serię 0.90.
+</para>
+
+<para>
+Pobierz go z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
+pakiet binarny <application>MPlayer</application> 0.91</ulink>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
+źródła <application>MPlayera</application> 0.91</ulink>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
+pakiet binarny <application>MEncodera</application> 0.91</ulink>
 </para>
 </sect1>
 
