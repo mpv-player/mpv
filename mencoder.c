@@ -18,6 +18,9 @@ static char* banner_text=
 "MEncoder " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS!)\n"
 "\n";
 
+#include "cpudetect.h"
+
+
 #include "codec-cfg.h"
 
 #include "stream.h"
@@ -287,6 +290,16 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     exit(0);
   }
 }
+
+  /* Test for cpu capabilities (and corresponding OS support) for optimizing */
+#ifdef ARCH_X86
+  GetCpuCaps(&gCpuCaps);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags: Type: %d MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
+      gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
+      gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
+      gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
+#endif
+
 
 // set some defaults, before parsing configfile/commandline:
 divx4_param.min_quantizer = 2;
