@@ -1957,6 +1957,9 @@ read_input:
 #ifdef HAVE_NEW_GUI
       if(use_gui) mplShMem->Playing=2;
 #endif
+      if (video_out && sh_video)
+	 video_out->control(VOCTRL_PAUSE, NULL);
+
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 
@@ -2005,6 +2008,8 @@ read_input:
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
+      if (video_out && sh_video)
+        video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
       if(use_gui && !gui_pause_flag) mplShMem->Playing=1; // play from keyboard

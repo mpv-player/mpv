@@ -21,7 +21,7 @@
 #define VOCTRL_QUERY_VAA 1
 /* takes a pointer to uint32_t fourcc */
 #define VOCTRL_QUERY_FORMAT 2
-/* signal a device reset (seek/pause) */
+/* signal a device reset seek */
 #define VOCTRL_RESET 3
 /* true if vo driver can use GUI created windows */
 #define VOCTRL_GUISUPPORT 4
@@ -29,6 +29,10 @@
 #define VOCTRL_FULLSCREEN 5
 /* user wants to have screen shot. (currently without args)*/
 #define VOCTRL_SCREENSHOT 6
+/* signal a device pause */
+#define VOCTRL_PAUSE 7
+/* start/resume playback */
+#define VOCTRL_RESUME 8
 
 #define VO_TRUE		1
 #define VO_FALSE	0

@@ -74,10 +74,9 @@
 static AVCodec *avc_codec = NULL;
 static AVCodecContext *avc_context = NULL;
 static AVPicture avc_picture;
-char *picture_buf = NULL;
-char *avc_outbuf = NULL;
 int avc_outbuf_size = 100000;
 #endif
+char *picture_buf = NULL;
 
 #ifdef HAVE_MMX
 #include "mmx.h"
@@ -104,6 +103,8 @@ static char fdv_name[80];
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
+static int ptsdiff = 0;
+static int writesize = 0;
 
 static vo_info_t vo_info = 
 {
@@ -117,6 +118,22 @@ uint32_t control(uint32_t request, void *data, ...)
 {
 	uint32_t flag = 0;
 	switch (request) {
+	case VOCTRL_RESUME:
+		if (!noprebuf) {
+			ioval = EM8300_PLAYMODE_PLAY;
+			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
+				printf("VO: [dxr3] Unable to set playmode!\n");
+			}
+		}
+		return VO_TRUE;
+	case VOCTRL_PAUSE:
+		if (!noprebuf) {
+			ioval = EM8300_PLAYMODE_PAUSED;
+			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
+				printf("VO: [dxr3] Unable to set playmode!\n");
+			}
+		}
+		return VO_TRUE;
 	case VOCTRL_RESET:
 		if (!noprebuf) {
 			close(fd_video);
@@ -156,7 +173,7 @@ uint32_t control(uint32_t request, void *data, ...)
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
-	int tmp1, tmp2;
+	int tmp1, tmp2, size;
 	em8300_register_t reg;
     
 	/* Softzoom turned on, downscale */
@@ -226,10 +243,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
     
+	size = s_width * s_height;
+	picture_buf = malloc((size * 3) / 2);
+	
 	if (format != IMGFMT_MPEGPES) {
 #ifdef USE_LIBAVCODEC
-		int size;
-		
 		avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
 		if (!avc_codec) {
 			printf("VO: [dxr3] Unable to find mpeg1video codec\n");
@@ -243,11 +261,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 		if (ioval == EM8300_VIDEOMODE_NTSC) {
 			avc_context->gop_size = 18;
-			avc_context->frame_rate = 29.97 * FRAME_RATE_BASE;
 		} else {
 			avc_context->gop_size = 15;
-			avc_context->frame_rate = 25 * FRAME_RATE_BASE;
 		}
+		avc_context->frame_rate = vo_fps * FRAME_RATE_BASE;
 		avc_context->bit_rate = 8e6;
 		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
 		avc_context->quality = 2;
@@ -291,10 +308,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		avc_picture.linesize[0] = s_width;
 		avc_picture.linesize[1] = s_width / 2;
 		avc_picture.linesize[2] = s_width / 2;
-		avc_outbuf = malloc(avc_outbuf_size);
-
-		size = s_width * s_height;
-		picture_buf = malloc((size * 3) / 2);
+		
 		avc_picture.data[0] = picture_buf;
 		avc_picture.data[1] = avc_picture.data[0] + size;
 		avc_picture.data[2] = avc_picture.data[1] + size / 4;
@@ -350,16 +364,16 @@ static uint32_t draw_frame(uint8_t * src[])
 			}
 			write(fd_spu, p->data, p->size);
 		} else {
-			write(fd_video, p->data, p->size);
+			writesize = p->size;
+			memcpy(picture_buf, p->data, p->size);
 		}
 		return 0;
 #ifdef USE_LIBAVCODEC
 	} else {
-		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
+		int srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
 		sws->swScale(sws, src, &srcStride, 0, v_height, avc_picture.data, avc_picture.linesize);
 		draw_osd();
-		size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
-		write(fd_video, avc_outbuf, size);
+		writesize = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
 		return 0;
 #endif
 	}
@@ -370,13 +384,14 @@ static void flip_page(void)
 {
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
+		writesize = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
 		if (!noprebuf) {
 			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 		}
-		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
+	write(fd_video, picture_buf, writesize);
+	writesize = 0;
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
@@ -400,10 +415,10 @@ static void uninit(void)
 	if (avc_context) {
 		avcodec_close(avc_context);
 	}
+#endif
 	if (picture_buf) {
 		free(picture_buf);
 	}
-#endif
 	if (fd_video) {
 		close(fd_video);
 	}
