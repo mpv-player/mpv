@@ -3096,7 +3096,7 @@ Muss größer oder gleich 1 sein (Standard: 1000).
 .PD 1
 .
 .TP
-.B png\ \ 
+.B png\ \ \ \ 
 Gibt jeden Frame in eine PNG-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
@@ -4411,8 +4411,8 @@ Pixeln, der zweite Wert (Standard: 0.15) gibt an, wieviel des Bildes als
 interlaced erkannt werden muss, damit das Bild verworfen wird.
 .
 .TP
-.B lavcdeint
-Deinterlace-Filter von libavcodec.
+.B lavcdeint (VERALTET)
+Deinterlace-Filter von libavcodec, gleichbedeutend mit \-vf pp=fd
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
