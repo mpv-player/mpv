@@ -64,8 +64,11 @@ cat /dev/radeon_vid
 
 List of parameters:
 ~~~~~~~~~~~~~~~~~~~
+if you have rage128 chip:
 brightness=decval          (-64:+63) doesn't work on radeons
 saturation=decval          (0:+31) doesn't work on radeons
+endif
+
 double_buff=on/off         enables/disables double buffering
 deinterlace=on/off         enables/disables adaprive deinterlacing
 deinterlace_pattern=hexval defines deinterlacing pattern

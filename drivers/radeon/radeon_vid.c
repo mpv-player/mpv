@@ -17,7 +17,7 @@
  * Rage128(pro) stuff of this driver.
  */
 
-#define RADEON_VID_VERSION "1.1.0"
+#define RADEON_VID_VERSION "1.1.1"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -221,7 +221,11 @@ static video_registers_t vregs[] =
   DECLARE_VREG(OV0_FOUR_TAP_COEF_3),
   DECLARE_VREG(OV0_FOUR_TAP_COEF_4),
   DECLARE_VREG(OV0_FLAG_CNTL),
+#ifdef RAGE128
   DECLARE_VREG(OV0_COLOUR_CNTL),
+#else
+  DECLARE_VREG(OV0_SLICE_CNTL),
+#endif
   DECLARE_VREG(OV0_VID_KEY_CLR),
   DECLARE_VREG(OV0_VID_KEY_MSK),
   DECLARE_VREG(OV0_GRAPHICS_KEY_CLR),
@@ -382,11 +386,11 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
 
     OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
-
+#ifdef RAGE128
     OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
 			    (besr.saturation << 8) |
 			    (besr.saturation << 16));
-
+#endif
     if(besr.ckey_on)
     {
 	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
@@ -663,7 +667,9 @@ static void radeon_vid_frame_sel(int frame)
 
 static void radeon_vid_make_default(void)
 {
+#ifdef RAGE128
   OUTREG(OV0_COLOUR_CNTL,0x00101000UL); /* Default brihgtness and saturation for Rage128 */
+#endif
   besr.deinterlace_pattern = 0x900AAAAA;
   OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
   besr.deinterlace_on=1;
@@ -673,10 +679,12 @@ static void radeon_vid_make_default(void)
 
 static void radeon_vid_preset(void)
 {
+#ifdef RAGE128
   unsigned tmp;
   tmp = INREG(OV0_COLOUR_CNTL);
   besr.saturation = (tmp>>8)&0x1f;
   besr.brightness = tmp & 0x7f;
+#endif
   besr.graphics_key_clr = INREG(OV0_GRAPHICS_KEY_CLR);
   besr.deinterlace_pattern = INREG(OV0_DEINTERLACE_PATTERN);
 }
@@ -914,8 +922,10 @@ static void radeon_param_buff_fill( void )
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
     len += sprintf(&radeon_param_buff[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
+#ifdef RAGE128
     len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",(int)brightness);
     len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
+#endif
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
     radeon_param_buff_len = len;
@@ -935,6 +945,7 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
 
 static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
+#ifdef RAGE128
     if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
     {
       long brightness;
@@ -958,6 +969,7 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
 				(saturation << 16));
     }
     else
+#endif
     if(memcmp(buf,PARAM_DOUBLE_BUFF,min(count,strlen(PARAM_DOUBLE_BUFF))) == 0)
     {
       if(memcmp(&buf[strlen(PARAM_DOUBLE_BUFF)],"on",2) == 0) besr.double_buff = 1;

@@ -138,6 +138,14 @@
 #	define AGP_4X_MODE			0x04
 #	define AGP_MODE_MASK			0x07
 #define	AGP_COMMAND				0x0F60
+
+/* Video muxer unit */
+#define VIDEOMUX_CNTL				0x0190
+#define VIPPAD_MASK				0x0198
+#define VIPPAD1_A				0x01AC
+#define VIPPAD1_EN				0x01B0
+#define VIPPAD1_Y				0x01B4
+
 #define	AIC_CTRL				0x01D0
 #define	AIC_STAT				0x01D4
 #define	AIC_PT_BASE				0x01D8
@@ -496,7 +504,9 @@
 
 #define	GRPH_BUFFER_CNTL			0x02F0
 #define	VGA_BUFFER_CNTL				0x02F4
-/* first overlay unit (there is	only one) */
+
+/* first overlay unit (there is only one) */
+
 #define	OV0_Y_X_START				0x0400
 #define	OV0_Y_X_END				0x0404
 #define	OV0_PIPELINE_CNTL			0x0408
@@ -642,13 +652,30 @@
   value	0x8 ???
   value	0xffffffff doesn't make	any visible effects
 */
+
+/*
+   Top quality 4x4-tap filtered vertical and horizontal scaler.
+   It allows up to 64:1 upscaling and downscaling without
+   performance or quality degradation.
+*/
 #define	OV0_FOUR_TAP_COEF_0			0x04B0
 #define	OV0_FOUR_TAP_COEF_1			0x04B4
 #define	OV0_FOUR_TAP_COEF_2			0x04B8
 #define	OV0_FOUR_TAP_COEF_3			0x04BC
 #define	OV0_FOUR_TAP_COEF_4			0x04C0
-#define	OV0_FLAG_CNTL				0x04DC	/* probably wronly defined for radeons */
-#define	OV0_COLOUR_CNTL				0x04E0	/* probably wronly defined for radeons */
+
+#define	OV0_FLAG_CNTL				0x04DC
+#ifdef RAGE128
+#define	OV0_COLOUR_CNTL				0x04E0
+#	define COLOUR_CNTL_BRIGHTNESS		0x0000007F
+#	define COLOUR_CNTL_SATURATION		0x001F1F00
+#else
+/* NB: radeons have no COLOUR_CNTL register */
+#define	OV0_SLICE_CNTL				0x04E0
+#	define SLICE_CNTL_DISABLE		0x40000000
+#endif
+/* Video and graphics keys allow alpha blending, color correction
+   and many other video effects */
 #define	OV0_VID_KEY_CLR				0x04E4
 #define	OV0_VID_KEY_MSK				0x04E8
 #define	OV0_GRAPHICS_KEY_CLR			0x04EC
@@ -681,8 +708,22 @@
 #define	OV0_GAMMA_380_3BF			0x0D50
 #define	OV0_GAMMA_3C0_3FF			0x0D54
 
-/* subpicture unit */
+/*
+ IDCT ENGINE:
+ It's MPEG-2 hardware decoder which incorporates run-level decode, de-zigzag
+ and IDCT into an IDCT engine to complement the motion compensation engine.
+*/
+#define IDCT_RUNS				0x1F80
+#define IDCT_LEVELS				0x1F84
+#define IDCT_AUTH_CONTROL			0x1F88
+#define IDCT_AUTH				0x1F8C
+#define IDCT_CONTROL				0x1FBC
 
+/*
+   SUBPICTURE UNIT:
+   Decompressing, scaling and alpha blending the compressed bitmap on the fly.
+   Provide optimal DVD subpicture qualtity.
+*/
 #define	SUBPIC_CNTL				0x0540
 #define	SUBPIC_DEFCOLCON			0x0544
 #define	SUBPIC_Y_X_START			0x054C
@@ -702,6 +743,38 @@
 #define	SUBPIC_H_ACCUM_INIT			0x0584
 #define	SUBPIC_V_ACCUM_INIT			0x0588
 
+#define CP_RB_BASE				0x0700
+#define CP_RB_CNTL				0x0704
+#define CP_RB_RPTR_ADDR				0x070C
+#define CP_RB_RPTR				0x0710
+#define CP_RB_WPTR				0x0714
+#define CP_RB_WPTR_DELAY			0x0718
+#define CP_IB_BASE				0x0738
+#define CP_IB_BUFSZ				0x073C
+#define CP_CSQ_CNTL				0x0740
+#define SCRATCH_UMSK				0x0770
+#define SCRATCH_ADDR				0x0774
+#define DMA_GUI_TABLE_ADDR			0x0780
+#define DMA_GUI_SRC_ADDR			0x0784
+#define DMA_GUI_DST_ADDR			0x0788
+#define DMA_GUI_COMMAND				0x078C
+#define DMA_GUI_STATUS				0x0790
+#define DMA_GUI_ACT_DSCRPTR			0x0794
+#define DMA_VID_TABLE_ADDR			0x07A0
+#define DMA_VID_SRC_ADDR			0x07A4
+#define DMA_VID_DST_ADDR			0x07A8
+#define DMA_VID_COMMAND				0x07AC
+#define DMA_VID_STATUS				0x07B0
+#define DMA_VID_ACT_DSCRPTR			0x07B4
+#define CP_ME_CNTL				0x07D0
+#define CP_ME_RAM_ADDR				0x07D4
+#define CP_ME_RAM_RADDR				0x07D8
+#define CP_ME_RAM_DATAH				0x07DC
+#define CP_ME_RAM_DATAL				0x07E0
+#define CP_CSQ_ADDR				0x07F0
+#define CP_CSQ_DATA				0x07F4
+#define CP_CSQ_STAT				0x07F8
+
 #define	DISP_MISC_CNTL				0x0D00
 #	define SOFT_RESET_GRPH_PP		(1 << 0)
 #define	DAC_MACRO_CNTL				0x0D04
@@ -713,6 +786,10 @@
 
 /* first capture unit */
 
+#define	VID_BUFFER_CONTROL			0x0900
+#define CAP_INT_CNTL				0x0908
+#define CAP_INT_STATUS				0x090C
+#define FCP_CNTL				0x0910
 #define	CAP0_BUF0_OFFSET			0x0920
 #define	CAP0_BUF1_OFFSET			0x0924
 #define	CAP0_BUF0_EVEN_OFFSET			0x0928
@@ -778,7 +855,6 @@
 #define	CAP0_VBI3_OFFSET			0x0984
 #define	CAP0_ANC2_OFFSET			0x0988
 #define	CAP0_ANC3_OFFSET			0x098C
-#define	VID_BUFFER_CONTROL			0x0900
 
 /* second capture unit */
 
@@ -872,6 +948,8 @@
 #define	SRC_PITCH_OFFSET			0x1428
 #define	SRC_X					0x1414
 #define	SRC_Y					0x1418
+#define DST_WIDTH_X				0x1588
+#define DST_HEIGHT_WIDTH_8			0x158C
 #define	SRC_X_Y					0x1590
 #define	SRC_Y_X					0x1434
 #define	DST_Y_X					0x1438
@@ -1133,6 +1211,23 @@
 #define	SOFT_RESET_DISPENG_XCLK			0x00000800
 						
 /* RAGE	THEATER	REGISTERS */
+
+#define DMA_VIPH0_COMMAND			0x0A00
+#define DMA_VIPH1_COMMAND			0x0A04
+#define DMA_VIPH2_COMMAND			0x0A08
+#define DMA_VIPH3_COMMAND			0x0A0C
+#define DMA_VIPH_STATUS				0x0A10
+#define DMA_VIPH_CHUNK_0			0x0A18
+#define DMA_VIPH_CHUNK_1_VAL			0x0A1C
+#define DMA_VIP0_TABLE_ADDR			0x0A20
+#define DMA_VIPH0_ACTIVE			0x0A24
+#define DMA_VIP1_TABLE_ADDR			0x0A30
+#define DMA_VIPH1_ACTIVE			0x0A34
+#define DMA_VIP2_TABLE_ADDR			0x0A40
+#define DMA_VIPH2_ACTIVE			0x0A44
+#define DMA_VIP3_TABLE_ADDR			0x0A50
+#define DMA_VIPH3_ACTIVE			0x0A54
+#define DMA_VIPH_ABORT				0x0A88
 
 #define	VIPH_CH0_DATA				0x0c00
 #define	VIPH_CH1_DATA				0x0c04
