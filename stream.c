@@ -192,6 +192,7 @@ stream_t* new_stream(int fd,int type){
   stream_t *s=malloc(sizeof(stream_t));
   s->fd=fd;
   s->type=type;
+  s->buf_pos=s->buf_len=0;
   stream_reset(s);
   return s;
 }
