@@ -180,6 +180,7 @@ else
 fi
 
 _skip_cc_check=no
+_skip_as_check=no
 _sdlconfig='sdl-config'
 
 for ac_option
@@ -190,6 +191,9 @@ do
         ;;
   --disable-gcc-checking)
         _skip_cc_check=yes
+	;;
+  --disable-as-checking)
+        _skip_as_check=yes
 	;;
   --with-x11libdir=*)
         _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
@@ -221,8 +225,7 @@ if ! test -z "$cc_verc_fail"; then
 echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
 exit
 fi
-fi
-if test "$_skip_cc_check" = "yes"; then
+else
 echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
 fi
 # ---
@@ -519,6 +522,8 @@ $_cc $TMPC -o $TMPO -lpng -lz&> /dev/null && _png=yes
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
 
+# echo binutils: $_binutils
+
 # ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
 
 if [ $_x11 = auto ]; then
@@ -578,18 +583,19 @@ cat > $TMPC << EOF
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==5)return 1; return 0; }
 EOF
 
-_alsaver='not found'
+_alsaver='notfound'
 $_cc -o $TMPO -lasound $TMPC &> /dev/null || _alsa=no
+
 [ $_alsa == "yes" ] && $TMPO && { _alsaver='0.5.x'; }
 
-if [ $_alsaver == 'not found' ]; then
+if [ $_alsaver = 'notfound' ]; then
 cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <soundcard.h>
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==9)return 1; return 0; }
 EOF
 
-_alsaver='not found'
+_alsaver='notfound'
 $_cc -o $TMPO -lasound $TMPC &> /dev/null || _alsa=no
 [ $_alsa == "yes" ] && $TMPO && { _alsaver='0.9.x'; }
 fi
@@ -766,7 +772,7 @@ do
   	_gui=no
 	;;
   --disable-alsa)
-	_alsaver='not found'
+	_alsaver='notfound'
         _alsa=no
 	;;
   --with-win32libdir=*)
@@ -799,34 +805,41 @@ done
 
 # Checking as compatibility...
 echo -n "Checking assembler (as) ... "
-cat > astest.S <<EOF
-filds -2(%ebp)
-EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+
+### this test disabled, see _binutils test above!  --A'rpi
+# cat > astest.S <<EOF
+# filds -2(%ebp)
+# EOF
+# as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+
 if [ $_mmx = 'yes' ]; then
 cat > astest.S <<EOF
 emms
 EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 fi
+
 if [ $_3dnow = 'yes' ]; then
 cat >> astest.S <<EOF
 femms
 EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 fi
+
 if [ $_3dnowex = 'yes' ]; then
 cat >> astest.S <<EOF
 pswapd %mm0, %mm0
 EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 fi
+
 if [ $_mmx2 = 'yes' ]; then
 cat >> astest.S <<EOF
 movntq	%mm0, (%eax)
 EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 fi
+
 if [ $_sse = 'yes' ]; then
 cat >> astest.S <<EOF
 xorps %xmm0, %xmm0
@@ -834,6 +847,7 @@ EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 rm -f astest.S astest.o
 fi
+
 if test "$as_verc_fail" != "yes"; then
   echo "ok"
 else
@@ -1165,7 +1179,7 @@ else
  _gui='#undef HAVE_GUI'
 fi
 
-if [ "$_alsaver" != "not found" ]; then
+if [ "$_alsaver" != "notfound" ]; then
 [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; $_alsa='#define HAVE_ALSA5'; } 
 # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; }
 else
@@ -1345,7 +1359,7 @@ _downmixo='downmix/downmix.o'
 cat << EOF
 
 !!! Warning! fallback to slow downmix.c due the old binutils.
-!!! Upgrade for better audio decoding performance.
+!!! Upgrade it for better AC3 audio decoding performance!
 
 EOF
 fi
