@@ -30,7 +30,7 @@ static int init(sh_audio_t *sh_audio)
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
 /*    case 0x2000: sh_audio->sample_format=AFMT_AC3; */
-    default: sh_audio->sample_format=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
+    default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AFMT_U8;
   }
   return 1;
 }
@@ -64,7 +64,11 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   int len=sh_audio->channels*sh_audio->samplesize-1;
   len=(minlen+len)&(~len); // sample align
   len=demux_read_data(sh_audio->ds,buf,len);
+#ifdef WORDS_BIGENDIAN
+  if(sh_audio->format!=0x736F7774){
+#else
   if(sh_audio->format==0x736F7774){ // "twos" is swapped byteorder
+#endif
     int j;
     for(j=0;j<len;j+=2){
       char x=buf[j];
