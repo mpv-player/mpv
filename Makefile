@@ -5,6 +5,11 @@
 
 include config.mak
 
+#install...
+OWNER = root
+GROUP = root
+PERM = 755
+
 PRG = mplayer
 PRG_AVIP = aviparse
 PRG_TV = tvision
@@ -60,8 +65,7 @@ $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 install: $(PRG)
-	strip $(PRG)
-	cp $(PRG) $(BINDIR)
+	install -g $(GROUP) -o $(OWNER) -m $(PERM) -s $(PRG) $(BINDIR)
 	install -D -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
 
 clean:
