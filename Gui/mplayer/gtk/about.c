@@ -105,7 +105,6 @@ GtkWidget * create_About( void )
 	"     * Bertrand Baudet\n" 
 	"     * Derek J Witt\n"
 	"     * Artur Zaprzala\n" 
-	"     * lanzz@lanzz.org\n"
 	"     * Adam Tla/lka\n"
 	"     * Folke Ashberg\n"
 	"     * Kamil Toman\n"
