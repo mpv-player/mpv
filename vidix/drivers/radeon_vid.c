@@ -6,6 +6,7 @@
 */
 
 #include "../../libdha/pci_ids.h"
+#include "../../libdha/pci_names.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -501,13 +502,7 @@ static void radeon_vid_make_default(void)
 
 unsigned vixGetVersion( void ) { return VIDIX_VERSION; }
 
-struct ati_card_id_s
-{
-  const unsigned id;
-  const char name[17];
-};
-
-const struct ati_card_id_s ati_card_ids[]=
+static unsigned short ati_card_ids[] = 
 {
 #ifdef RAGE128
  /*
@@ -521,74 +516,71 @@ const struct ati_card_id_s ati_card_ids[]=
     fourccs (422 and 420 formats only).
   */
 /* Rage128 Pro GL */
- { PCI_DEVICE_ID_ATI_Rage128_PA, "R128Pro PA" },
- { PCI_DEVICE_ID_ATI_Rage128_PB, "R128Pro PB" },
- { PCI_DEVICE_ID_ATI_Rage128_PC, "R128Pro PC" },
- { PCI_DEVICE_ID_ATI_Rage128_PD, "R128Pro PD" },
- { PCI_DEVICE_ID_ATI_Rage128_PE, "R128Pro PE" },
- { PCI_DEVICE_ID_ATI_RAGE128_PF, "R128Pro PF" },
+ DEVICE_ATI_RAGE_128_PA_PRO,
+ DEVICE_ATI_RAGE_128_PB_PRO,
+ DEVICE_ATI_RAGE_128_PC_PRO,
+ DEVICE_ATI_RAGE_128_PD_PRO,
+ DEVICE_ATI_RAGE_128_PE_PRO,
+ DEVICE_ATI_RAGE_128_PF_PRO,
 /* Rage128 Pro VR */
- { PCI_DEVICE_ID_ATI_RAGE128_PG, "R128Pro PG" },
- { PCI_DEVICE_ID_ATI_RAGE128_PH, "R128Pro PH" },
- { PCI_DEVICE_ID_ATI_RAGE128_PI, "R128Pro PI" },
- { PCI_DEVICE_ID_ATI_RAGE128_PJ, "R128Pro PJ" },
- { PCI_DEVICE_ID_ATI_RAGE128_PK, "R128Pro PK" },
- { PCI_DEVICE_ID_ATI_RAGE128_PL, "R128Pro PL" },
- { PCI_DEVICE_ID_ATI_RAGE128_PM, "R128Pro PM" },
- { PCI_DEVICE_ID_ATI_RAGE128_PN, "R128Pro PN" },
- { PCI_DEVICE_ID_ATI_RAGE128_PO, "R128Pro PO" },
- { PCI_DEVICE_ID_ATI_RAGE128_PP, "R128Pro PP" },
- { PCI_DEVICE_ID_ATI_RAGE128_PQ, "R128Pro PQ" },
- { PCI_DEVICE_ID_ATI_RAGE128_PR, "R128Pro PR" },
- { PCI_DEVICE_ID_ATI_RAGE128_TR, "R128Pro TR" },
- { PCI_DEVICE_ID_ATI_RAGE128_PS, "R128Pro PS" },
- { PCI_DEVICE_ID_ATI_RAGE128_PT, "R128Pro PT" },
- { PCI_DEVICE_ID_ATI_RAGE128_PU, "R128Pro PU" },
- { PCI_DEVICE_ID_ATI_RAGE128_PV, "R128Pro PV" },
- { PCI_DEVICE_ID_ATI_RAGE128_PW, "R128Pro PW" },
- { PCI_DEVICE_ID_ATI_RAGE128_PX, "R128Pro PX" },
+ DEVICE_ATI_RAGE_128_PG_PRO,
+ DEVICE_ATI_RAGE_128_PH_PRO,
+ DEVICE_ATI_RAGE_128_PI_PRO,
+ DEVICE_ATI_RAGE_128_PJ_PRO,
+ DEVICE_ATI_RAGE_128_PK_PRO,
+ DEVICE_ATI_RAGE_128_PL_PRO,
+ DEVICE_ATI_RAGE_128_PM_PRO,
+ DEVICE_ATI_RAGE_128_PN_PRO,
+ DEVICE_ATI_RAGE_128_PO_PRO,
+ DEVICE_ATI_RAGE_128_PP_PRO,
+ DEVICE_ATI_RAGE_128_PQ_PRO,
+ DEVICE_ATI_RAGE_128_PR_PRO,
+ DEVICE_ATI_RAGE_128_PS_PRO,
+ DEVICE_ATI_RAGE_128_PT_PRO,
+ DEVICE_ATI_RAGE_128_PU_PRO,
+ DEVICE_ATI_RAGE_128_PV_PRO,
+ DEVICE_ATI_RAGE_128_PW_PRO,
+ DEVICE_ATI_RAGE_128_PX_PRO,
 /* Rage128 GL */
- { PCI_DEVICE_ID_ATI_RAGE128_RE, "R128 RE" },
- { PCI_DEVICE_ID_ATI_RAGE128_RF, "R128 RF" },
- { PCI_DEVICE_ID_ATI_RAGE128_RG, "R128 RG" },
- { PCI_DEVICE_ID_ATI_RAGE128_RH, "R128 RH" },
- { PCI_DEVICE_ID_ATI_RAGE128_RI, "R128 RI" },
-/* Rage128 VR */
- { PCI_DEVICE_ID_ATI_RAGE128_RK, "R128 RK" },
- { PCI_DEVICE_ID_ATI_RAGE128_RL, "R128 RL" },
- { PCI_DEVICE_ID_ATI_RAGE128_RM, "R128 RM" },
- { PCI_DEVICE_ID_ATI_RAGE128_RN, "R128 RN" },
- { PCI_DEVICE_ID_ATI_RAGE128_RO, "R128 RO" },
-/* Rage128 M3 */
- { PCI_DEVICE_ID_ATI_RAGE128_LE, "R128 M3 LE" },
- { PCI_DEVICE_ID_ATI_RAGE128_LF, "R128 M3 LF" },
-/* Rage128 Pro Ultra */
- { PCI_DEVICE_ID_ATI_RAGE128_U1, "R128Pro U1" },
- { PCI_DEVICE_ID_ATI_RAGE128_U2, "R128Pro U2" },
- { PCI_DEVICE_ID_ATI_RAGE128_U3, "R128Pro U3" }
+ DEVICE_ATI_RAGE_128_RE_SG,
+ DEVICE_ATI_RAGE_128_RF_SG,
+ DEVICE_ATI_RAGE_128_RG,
+ DEVICE_ATI_RAGE_128_RK_VR,
+ DEVICE_ATI_RAGE_128_RL_VR,
+ DEVICE_ATI_RAGE_128_SE_4X,
+ DEVICE_ATI_RAGE_128_SF_4X,
+ DEVICE_ATI_RAGE_128_SG_4X,
+ DEVICE_ATI_RAGE_128_4X,
+ DEVICE_ATI_RAGE_128_SK_4X,
+ DEVICE_ATI_RAGE_128_SL_4X,
+ DEVICE_ATI_RAGE_128_SM_4X,
+ DEVICE_ATI_RAGE_128_4X2,
+ DEVICE_ATI_RAGE_128_PRO,
+ DEVICE_ATI_RAGE_128_PRO2,
+ DEVICE_ATI_RAGE_128_PRO3
 #else
 /* Radeons (indeed: Rage 256 Pro ;) */
- { PCI_DEVICE_ID_RADEON_QD, "Radeon QD " },
- { PCI_DEVICE_ID_RADEON_QE, "Radeon QE " },
- { PCI_DEVICE_ID_RADEON_QF, "Radeon QF " },
- { PCI_DEVICE_ID_RADEON_QG, "Radeon QG " },
- { PCI_DEVICE_ID_RADEON_QY, "Radeon VE QY " },
- { PCI_DEVICE_ID_RADEON_QZ, "Radeon VE QZ " },
- { PCI_DEVICE_ID_RADEON_LY, "Radeon M6 LY " },
- { PCI_DEVICE_ID_RADEON_LZ, "Radeon M6 LZ " },
- { PCI_DEVICE_ID_RADEON_LW, "Radeon M7 LW " },
- { PCI_DEVICE_ID_R200_QL,   "Radeon2 8500 QL " },
- { PCI_DEVICE_ID_R200_BB,   "Radeon2 8500 AIW" },
- { PCI_DEVICE_ID_RV200_QW,  "Radeon2 7500 QW " }
+ DEVICE_ATI_RADEON_8500_DV,
+ DEVICE_ATI_RADEON_MOBILITY_M6,
+ DEVICE_ATI_RADEON_MOBILITY_M62,
+ DEVICE_ATI_RADEON_MOBILITY_M63,
+ DEVICE_ATI_RADEON_QD,
+ DEVICE_ATI_RADEON_QE,
+ DEVICE_ATI_RADEON_QF,
+ DEVICE_ATI_RADEON_QG,
+ DEVICE_ATI_RADEON_QL,
+ DEVICE_ATI_RADEON_QW,
+ DEVICE_ATI_RADEON_VE_QY,
+ DEVICE_ATI_RADEON_VE_QZ
 #endif
 };
 
 static int find_chip(unsigned chip_id)
 {
   unsigned i;
-  for(i = 0;i < sizeof(ati_card_ids)/sizeof(struct ati_card_id_s);i++)
+  for(i = 0;i < sizeof(ati_card_ids)/sizeof(unsigned short);i++)
   {
-    if(chip_id == ati_card_ids[i].id) return i;
+    if(chip_id == ati_card_ids[i]) return i;
   }
   return -1;
 }
@@ -637,18 +629,18 @@ int vixProbe( int verbose )
     err = ENXIO;
     for(i=0;i<num_pci;i++)
     {
-      if(lst[i].vendor == PCI_VENDOR_ID_ATI)
+      if(lst[i].vendor == VENDOR_ATI)
       {
         int idx;
 	idx = find_chip(lst[i].device);
 	if(idx == -1) continue;
-	printf(RADEON_MSG" Found chip: %s\n",ati_card_ids[idx].name);
+	printf(RADEON_MSG" Found chip: %s\n",pci_device_name(VENDOR_ATI,ati_card_ids[idx]));
 #ifndef RAGE128	
-	if(ati_card_ids[idx].id == PCI_DEVICE_ID_R200_QL || 
-	   ati_card_ids[idx].id == PCI_DEVICE_ID_R200_BB || 
-	   ati_card_ids[idx].id == PCI_DEVICE_ID_RV200_QW) IsR200 = 1;
+	if(ati_card_ids[idx] == DEVICE_ATI_RADEON_QL || 
+	   ati_card_ids[idx] == DEVICE_ATI_RADEON_8500_DV || 
+	   ati_card_ids[idx] == DEVICE_ATI_RADEON_QW) IsR200 = 1;
 #endif
-	def_cap.device_id = ati_card_ids[idx].id;
+	def_cap.device_id = ati_card_ids[idx];
 	err = 0;
 	memcpy(&pci_info,&lst[i],sizeof(pciinfo_t));
 	probed=1;
