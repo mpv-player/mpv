@@ -41,20 +41,23 @@ int             fsType    = 0;
 int gtkVFileSelect = 0;
 
 char * fsVideoFilterNames[][2] =
-         { { "MPEG files (*.mpg,*.mpeg)",                               "*.mpg,*.mpeg" },
+         { { "MPEG files (*.mpg,*.mpeg,*.m1v)",                         "*.mpg,*.mpeg,*.m1v" },
            { "VOB files (*.vob)",  				  	"*.vob" },
            { "AVI files (*.avi)",  				  	"*.avi" },
 	   { "DiVX files (*.divx)",					"*.divx" },
-           { "QT files (*.mov)",   				  	"*.mov" },
+           { "QuickTime files (*.mov,*.qt)",			  	"*.mov,*.qt" },
            { "ASF files (*.asf)",  				  	"*.asf" },
            { "VIVO files (*.viv)", 				  	"*.viv" },
 	   { "RealVideo files (*.rm)",					"*.rm"  },
 	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
+	   { "OGG Media files (*.ogm)",			  		"*.ogm" },
+	   { "Autodesk animations (*.fli,*.flc)",			"*.fli,*.flc" },
+	   { "NuppelVideo files (*.nuv)",				"*.nuv" },
 	   { "MP3 files (*.mp3,mp2)",					"*.mp3,*.mp2" },
 	   { "Wave files (*.wav)",					"*.wav" },
 	   { "WMA files (*.wma)",					"*.wma" },
-	   { "Audio files (*.wav,*.mp2,*.mp3,*.wma)",			"*.wav,*.mp2,*.mp3,*.wma" },
-	   { "All video files", 					"*.mpg,*.mpeg,*.vob,*.avi,*.divx,*.mov,*.asf,*.viv,*.rm,*.wmv" },
+	   { "Audio files (*.wav,*.ogg,*.mp2,*.mp3,*.wma)",		"*.wav,*.ogg,*.mp2,*.mp3,*.wma" },
+	   { "All video files", 					"*.mpg,*.mpeg,*.m1v,*.vob,*.avi,*.divx,*.mov,*.qt,*.asf,*.viv,*.rm,*.wmv,*.ogm,*.fli,*.flc,*.nuv" },
            { "All files (*)",      					"*" },
 	   { NULL,NULL }
 	 };
@@ -83,7 +86,8 @@ char * fsAudioFileNames[][2] =
 	 { 
 	   { "WAV files (*.wav)",					   "*.wav" },
 	   { "MP3 files (*.mp2, *.mp3)",				   "*.mp2,*.mp3" },
-	   { "Audio files (*.wav,*.mp2,*.mp3)",				   "*.wav,*.mp2,*.mp3" },
+	   { "OGG Vorbis files (*.ogg)",				   "*.ogg" },
+	   { "Audio files (*.wav,*.mp2,*.mp3,*.ogg)",			   "*.wav,*.mp2,*.mp3,*.ogg" },
 	   { "All files ( * )",						   "*" },
 	   { NULL, NULL }
 	 };
