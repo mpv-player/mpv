@@ -629,7 +629,7 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
-#define WIN_LAYER_ONTOP                  6
+#define WIN_LAYER_ONTOP                  10
 
 void vo_x11_setlayer( int layer )
 {
@@ -655,6 +655,30 @@ void vo_x11_setlayer( int layer )
    return;
   }
 
+ type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
+  {
+   XClientMessageEvent  xev;
+   
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Gnome style stay on top ( layer %d ).\n",layer );
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.window=vo_window;
+   xev.message_type=XInternAtom( mDisplay,"_WIN_LAYER",False );
+   xev.format=32;
+   switch ( layer ) 
+    {
+     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
+     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
+     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
+    }
+   
+   if ( layer ) XRaiseWindow( mDisplay,vo_window );
+   XSendEvent( mDisplay,mRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
+								              
+   XFree( args );
+   return;
+  }
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
   {
@@ -677,29 +701,6 @@ void vo_x11_setlayer( int layer )
 
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
 								   
-   XFree( args );
-   return;
-  }
- type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
-  {
-   XClientMessageEvent  xev;
-   
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Gnome style stay on top ( layer %d ).\n",layer );
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.window=vo_window;
-   xev.message_type=XInternAtom( mDisplay,"_WIN_LAYER",False );
-   xev.format=32;
-   switch ( layer ) 
-    {
-     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
-     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
-     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
-    }
-   XSendEvent( mDisplay,mRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
-   if ( layer ) XRaiseWindow( mDisplay,vo_window );
-								              
    XFree( args );
    return;
   }
