@@ -40,14 +40,15 @@ LIBVO_EXTERN(cvidix)
 /* VIDIX related */
 static char *vidix_name;
 static uint32_t swidth,sheight,sformat;
-
+/// center video only when screenw & height are set
+static uint32_t center=0;
 static vidix_grkey_t gr_key;
 
 
 static uint32_t setup_vidix(){
   int x=vo_dx,y=vo_dy;
   aspect(&vo_dwidth,&vo_dheight,vo_fs ? A_ZOOM : A_NOZOOM);  
-  if(vo_fs){
+  if(vo_fs || center){
     if(vo_dwidth <= vo_screenwidth)x = (vo_screenwidth - vo_dwidth)/2;
     else x=0;
     if(vo_dheight <= vo_screenheight)y = (vo_screenheight - vo_dheight)/2;
@@ -76,6 +77,10 @@ static uint32_t setup_vidix(){
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_height, uint32_t flags, char *title, uint32_t format){
   vo_fs = flags & 0x01;
+  if(!vo_config_count){
+    if(vo_screenwidth && vo_screenheight)center=1;
+    else mp_msg(MSGT_VO, MSGL_WARN, "vo_cvidix: warn: screenwidth and height not set assuming 640x480\n");
+  }
   if(!vo_screenwidth)vo_screenwidth=640;
   if(!vo_screenheight)vo_screenheight=480;
   swidth = width;
