@@ -905,8 +905,8 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 	  mad_stream_sync(&mad_stream);
 	  mad_postprocess_buffer(sh_audio, &mad_stream);
 	  break;
-        }
 #endif	
+        }
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio){
