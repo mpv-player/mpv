@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.32 -->
+<!-- synced with 1.33 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -162,8 +162,8 @@ assemblera Sun <filename>/usr/ccs/bin/as</filename>.
 
 <para>Skrypt <filename>configure</filename> stara się określić, jaki assembler
 wywoływany jest przez komendę &quot;gcc&quot; (jeżeli próba zakończy się fiaskiem,
-użyj opcji <option>--as=/gdziekolwiek/zainstalowałeś/gnu-as</option>, żeby określić
-gdzie skrypt <filename>configure</filename> może znaleźć GNU "as" w Twoim
+użyj opcji <option>--as=<replaceable>/gdziekolwiek/zainstalowałeś/gnu-as</replaceable></option>,
+żeby określić gdzie skrypt <filename>configure</filename> może znaleźć GNU "as" w Twoim
 systemie).
 </para>
 
@@ -237,7 +237,8 @@ przestrzeni kolorów w sterownikach wyjściowych video.
 <para>
 Możesz albo spróbować zainstalować program GNU install i (jeżeli nie
 umieściłeś go w globalnej ścieżce) wskazać go przez:
-<screen>./configure --with-install=/ścieżka/i/nazwa/programu/instalacyjnego</screen>
+<screen>./configure --with-install=
+<replaceable>/ścieżka/i/nazwa/programu/instalacyjnego</replaceable></screen>
 </para>
 
 <para>
