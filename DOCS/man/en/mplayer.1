@@ -66,7 +66,7 @@ mencoder \- movie encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[title | [start_title]-end_title ]
+.I dvd://[title | [start_title]\-end_title ]
 [options]
 .br
 .in
@@ -2507,7 +2507,7 @@ Available filters are:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
 Changes the sample rate of the audio stream to an integer srate (Hz).
-It only supports the 16 bit little endian format.
+It only supports the 16 bit little-endian format.
 .IPs channels[=nch]
 Change the number of channels to nch output channels.
 If the number of output channels is bigger than the number of input channels
@@ -2527,7 +2527,7 @@ float or int
 .br
 unsigned or signed
 .br
-le or be (little or big endian)
+le or be (little- or big-endian)
 .br
 .IPs volume[=v:sc]
 Select the output volume level.
@@ -4708,9 +4708,9 @@ huffyuv:
 .PD 0
 .RSs
 .IPs "pass 1"
-saves statistics
+Saves statistics.
 .IPs "pass 2"
-encodes with an optimal Huffman table based upon pass 1 statistics.
+Encodes with an optimal Huffman table based upon pass 1 statistics.
 .RE
 .PD 1
 .TP
@@ -5063,7 +5063,7 @@ sane range
 darkness masking
 .br
 .I WARNING:
-Be careful, too large values can cause disasterous things.
+Be careful, too large values can cause disastrous things.
 .br
 .I WARNING:
 Large values might look good on some monitors but may look horrible
