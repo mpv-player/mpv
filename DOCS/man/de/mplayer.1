@@ -14,22 +14,22 @@
 .
 .\" Standardeinrückung ist 7, nicht ändern!
 .nr IN 7
-.\" Einrückung für Unteroptionen
+.\" Einrückung für Suboptionen
 .nr SS 5
-.\" neue Unteroption hinzufügen
+.\" neue Suboption hinzufügen
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" Beginn des ersten Unteroptionen-Levels, endet mit .RE
+.\" Beginn des ersten Suboptionen-Levels, endet mit .RE
 .de RSs
 .RS \n(IN+3
 ..
-.\" Beginn des zweiten Unteroptionen-Levels
+.\" Beginn des zweiten Suboptionen-Levels
 .de RSss
 .PD 0
 .RS \n(SS+3
 ..
-.\" Ende des zweiten Levels von Unteroptionen
+.\" Ende des zweiten Levels von Suboptionen
 .de REss
 .RE
 .PD 1
@@ -347,7 +347,7 @@ einem '#' kommt, wird als Kommentar verstanden und nicht ausgewertet.
 Optionen, die keine Werte benötigen, können aktiviert werden, wenn
 du ihnen den Wert 'yes' oder '1' oder 'true' zuweist. Deaktiviert werden sie 
 mit \'no' oder '0'.
-Selbst Unteroptionen können in dieser Art angegeben werden.
+Selbst Suboptionen können in dieser Art angegeben werden.
 .PP
 .I BEISPIEL:
 .nf
@@ -1757,12 +1757,12 @@ Gesamtweite (Standard: 3).
 Audioausgabetreiber sind Schnittstellen zu verschiedenen Ausgabeeinrichtungen.
 Die Syntax ist folgende:
 .TP
-.B \-ao <Treiber1[:Unteroption[=Wert]:...],Treiber2,...[,]>
+.B \-ao <Treiber1[:Suboption[=Wert]:...],Treiber2,...[,]>
 Gibt eine Prioritätenliste der zu benutzenden Audiotreiber an.
 .PP
 Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
 Kommandozeile aufgeführte Treiber benutzt.
-Unteroptionen sind optional und können meistens weggelassen werden.
+Suboptionen sind optional und können meistens weggelassen werden.
 .br
 .I ANMERKUNG:
 Eine Liste der eincompilierten Audiotreiber erhälst du mit \-ao help.
@@ -1778,7 +1778,7 @@ viertes Gerät.
 .RE
 .PD 1
 .sp 1
-FIXME: Unteroptionen für sdl, arts, esd, jack, nas, macosx, sgi, sun,
+FIXME: Suboptionen für sdl, arts, esd, jack, nas, macosx, sgi, sun,
 dxr2, mpegpes, null, pcm, plugin.
 .sp 1
 Verfügbare Audioausgabetreiber sind folgende:
@@ -2351,12 +2351,12 @@ Videoausgabe-Einrichtungen.
 .
 Die Syntax ist folgende:
 .TP
-.B \-vo <Treiber1[:Unteroption1[=Wert]:...],Treiber2,...[,]>
+.B \-vo <Treiber1[:Suboption1[=Wert]:...],Treiber2,...[,]>
 Gibt eine Prioritätenliste der zu verwendenden Videoausgabetreiber an.
 .PP
 Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
 Kommandozeile aufgeführte Treiber benutzt.
-Unteroptionen sind optional und können meistens weggelassen werden.
+Suboptionen sind optional und können meistens weggelassen werden.
 .br
 .I ANMERKUNG:
 Eine Liste der eincompilierten Videotreiber erhälst du mit \-vo help.
@@ -2371,7 +2371,7 @@ Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
 .RE
 .PD 1
 .sp 1
-FIXME: Dokumentiere die Unteroptionen für x11, xover, dga, sdl, vidix, xvidix,
+FIXME: Dokumentiere die Suboptionen für x11, xover, dga, sdl, vidix, xvidix,
 fbdev, fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid, tdfxfb,
 dxr2, dxr3, mpegpes, zr, zr2.
 .sp 1
@@ -2875,7 +2875,7 @@ Das resultierende Bild ist (Breite) * (Höhe * 1.5) des Originalbildes groß.
 An den Koordinaten 0,0 für Breite,Höhe ist die Y-Ebene, an den
 Koordinaten 0,Höhe bei Breite/2,Höhe/2 ist die U-Ebene und an den Koordinaten
 Breite/2,Höhe bei Breite/2,Höhe/2 ist die V-Ebene.
-Es gibt keine Unteroptionen.
+Es gibt keine Suboptionen.
 .
 .TP
 .B png\ \ \ \ 
@@ -2883,7 +2883,7 @@ Gibt jeden Frame in eine PNG-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
 Unterstützt die RGB- und BGR-Formate mit 24 bpp.
-Es gibt zwar keine Unteroptionen, du kannst die Kompressionsstufe jedoch mit
+Es gibt zwar keine Suboptionen, du kannst die Kompressionsstufe jedoch mit
 der Option \-z angeben, die Werte von 0 (keine Kompression) bis 9 (maximale
 Kompression) entgegennimmt.
 .
@@ -2895,7 +2895,7 @@ Name.
 Der Zweck dieses Videoausgabetreibers ist das Schreiben von verlustfreien
 Bildern, die mit jeder externen Bibliothek verwendet werden können.
 Unterstützt werden BGR[A]-Farbformate mit 15, 24 und 32 bpp.
-Es gibt keine Unteroptionen.
+Es gibt keine Suboptionen.
 Ein bestimmtes Format kann erzwungen werden durch Benutzung des
 format-Videofilters.
 .sp 1
@@ -3664,19 +3664,78 @@ spal:    768x576 (PAL mit quadratischen Pixeln)
 .RE
 .
 .TP
-.IPs yuy2
+.B dsize={Aspekt|b:h}
+Ändert die beabsichtigte Displaygröße/\:den Aspekt an einer frei wählbaren
+Position der Filterkette.
+Der Aspekt kann als Bruch (4/\:3) oder Fließkommazahl (1.33) angegeben werden.
+Alternativ können exakte Wiedergabebreite und -höhe wie gewünscht angegeben
+werden.
+Beachte, dass dieser Filter selbst
+.B keine
+Skalierung vornimmt; er beeinflusst nur, was spätere Skalierer (Software oder
+Hardware) beim automatischen Skalieren tun werden, um den Aspekt zu
+korrigieren.
+.
+.TP
+.B yuy2\ \ \ 
 Erzwingt YV12/\:I420 oder 422P zu YUY2 Konvertierung in Software.
-.IPs rgb2bgr[=swap]
-Farbraumkonvertierung RGB 24/\:32 <\-> BGR 24/\:32 mit optionaler Vertauschung
-von R und B.
-.IPs palette
+Nützlich bei Videokarten/\:Treibern mit langsamer YV12- aber
+schneller YUY2-Unterstützung.
+.
+.TP
+B yvu9\ \ \ 
+Erzwingt eine Software-Farbraumkonvertierung von YVU9 nach YV12.
+Zu Gunsten des Softwareskalierers abgelehnt.
+.
+.TP
+.B yuvcsp\ 
+Zieht die YUV-Farbwerte auf den CCIR 601-Bereich zusammen, ohne eine
+wirkliche Konvertierung vorzunehmen.
+.
+.TP
+.B rgb2bgr[=swap]
+Farbraumkonvertierung RGB 24/\:32 <\-> BGR 24/\:32
+.PD 0
+.RSs
+.IPs swap\ 
+Führe auch eine R <-> B-Vertauschung durch.
+.RE
+.PD 1
+.
+.TP
+.B palette
 Farbraumkonvertierung RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp unter Verwendung
 einer Farbpalette.
-.IPs format[=fourcc]
-Beschränkt den Farbraum des nächsten Filters. Führt keine Farbraumkonvertierung
-durch. Benutze ihn zusammen mit dem scale-Filter, um tatsächlich eine
-Konvertierung durchzuführen.
-.IPs pp[=Filter1[:Option1[:Option2...]]/[-]Filter2...] (siehe \-pphelp)
+.
+.TP
+.B format[=fourcc]
+Beschränkt den Farbraum des nächsten Filters ohne wirkliche Konvertierung.
+Benutze ihn zusammen mit dem scale-Filter, um tatsächlich eine Konvertierung
+durchzuführen.
+Für eine Liste der verfügbaren Formate siehe format=fmt=help.
+.PD 0
+.RSs
+.IPs fourcc
+Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yuy2)
+.RE
+.PD 1
+.
+.TP
+.B noformat[=fourcc]
+Beschränkt den Farbraum des nächsten Filters ohne wirkliche Konvertierung.
+Anders als der format-Filter erlaubt dieser jeden Farbraum
+.B außer
+dem von dir angegebenen.
+Für eine Liste der verfügbaren Formate siehe noformat=fmt=help.
+.PD 0
+.RSs
+.IPs fourcc
+Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yv12)
+.RE
+.PD 1
+.
+.TP
+.B pp[=Filter1[:Option1[:Option2...]]/[-]Filter2...] (siehe \-pphelp)
 Diese Option aktiviert die Benutzung von MPlayers internen
 Postprocessing-Filter. Außerdem ist dieses die Schnittstelle, um an die
 Filter Parameter zu übergeben.
