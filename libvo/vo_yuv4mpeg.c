@@ -27,7 +27,10 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <sys/wait.h>
+
+#ifndef __FreeBSD__
 #include <linux/videodev.h>
+#endif
 
 
 LIBVO_EXTERN (yuv4mpeg)
