@@ -447,11 +447,12 @@ esac
 echo "$cc_version"
 if test "$cc_verc_fail" ; then
 cat <<EOF
-Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version!
+Please downgrade/upgrade gcc compiler to gcc-2.95.x or gcc-3.x version!
 
 Note: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only in RedHat,
 Mandrake sites or distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
 UNSUPPORTED by us. *** For details please read DOCS/gcc-2.96-3.0.html ***
+
 EOF
 die "Bad gcc version"
 fi
