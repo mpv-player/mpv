@@ -34,7 +34,7 @@ static struct {
 	int demuxer_type;
 } mime_type_table[] = {
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
-	{ "audio/mpeg", DEMUXER_TYPE_MPEG_PS },
+	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming
 	{ "video/mpeg", DEMUXER_TYPE_MPEG_PS },
 	// AVI ??? => video/x-msvideo
@@ -68,6 +68,8 @@ static struct {
 	{ "viv", DEMUXER_TYPE_VIVO },
 	{ "rm", DEMUXER_TYPE_REAL },
 	{ "y4m", DEMUXER_TYPE_Y4M },
+	{ "mp3", DEMUXER_TYPE_AUDIO },
+	{ "wav", DEMUXER_TYPE_AUDIO },
 };
 
 streaming_ctrl_t *
@@ -400,7 +402,7 @@ extension=NULL;
 			// Check if the response is an ICY status_code reason_phrase
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {
 				// Ok, we have detected an mp3 streaming
-				*file_format = DEMUXER_TYPE_MPEG_PS;
+				*file_format = DEMUXER_TYPE_AUDIO;
 				return 0;
 			}
 			
@@ -658,7 +660,7 @@ rtp_streaming_start( stream_t *stream ) {
 }
 
 int
-streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
+streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	int ret;
 	if( stream==NULL ) return -1;
 
@@ -667,7 +669,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 		return -1;
 	}
 	stream->streaming_ctrl->url = check4proxies( url );
-	ret = autodetectProtocol( stream->streaming_ctrl, &stream->fd, &demuxer_type );
+	ret = autodetectProtocol( stream->streaming_ctrl, &stream->fd, demuxer_type );
 	if( ret<0 ) {
 		return -1;
 	}
@@ -683,7 +685,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 		ret = rtp_streaming_start( stream );
 	} else
 	// For connection-oriented streams, we can usually determine the streaming type.
-	switch( demuxer_type ) {
+	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
 			// Send the appropriate HTTP request
 			// Need to filter the network stream.
@@ -693,10 +695,17 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 				printf("asf_streaming_start failed\n");
 			}
 			break;
-		case DEMUXER_TYPE_AVI:
-		case DEMUXER_TYPE_MOV:
 		case DEMUXER_TYPE_MPEG_ES:
 		case DEMUXER_TYPE_MPEG_PS:
+		case DEMUXER_TYPE_AVI:
+		case DEMUXER_TYPE_MOV:
+		case DEMUXER_TYPE_VIVO:
+		case DEMUXER_TYPE_FLI:
+		case DEMUXER_TYPE_REAL:
+		case DEMUXER_TYPE_Y4M:
+		case DEMUXER_TYPE_FILM:
+		case DEMUXER_TYPE_ROQ:
+		case DEMUXER_TYPE_AUDIO:
 		case DEMUXER_TYPE_UNKNOWN:
 			// Generic start, doesn't need to filter
 			// the network stream, it's a raw stream

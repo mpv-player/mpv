@@ -410,7 +410,7 @@ tv_err:
   url = url_new(filename);
   if(url) {
         stream=new_stream(f,STREAMTYPE_STREAM);
-	if( streaming_start( stream, *file_format, url )<0){
+	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
 	  url_free(url);
 	  return NULL;

@@ -38,7 +38,7 @@ typedef struct streaming_control {
 	void *data;
 } streaming_ctrl_t;
 
-//int streaming_start( stream_t *stream, int demuxer_type, URL_t *url );
+//int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url );
 
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
