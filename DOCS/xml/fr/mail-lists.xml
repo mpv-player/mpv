@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <appendix id="mailinglists">
 <title>Listes de diffusion</title>
 <para>
@@ -22,11 +22,18 @@ nouvelles fonctionalités.
 <listitem><para>
 Liste des développeurs de MPlayer:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
-Cette liste est à propos du développement de MPlayer! Parler des changements
+Cette liste concerne le développement de MPlayer ! Parler des changements
 d'interface/API, des nouvelles librairies, des optimisations de code, des changements
 de configuration est à-propos ici. Envoyez des patches mais PAS de rapports de bogue,
 de questions d'utilisateur, de suggestions ou d'insultes ici, pour garder un trafic
 raisonnable.
+</para></listitem>
+<listitem><para>
+Liste MPlayer DOCS:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
+Cette liste concerne les discussions relatives à la documentation et
+aux traductions. Les logs CVS de Documentation et homepage sont également
+envoyés là.
 </para></listitem>
 <listitem><para>
 Liste des utilisateurs de MPlayer:

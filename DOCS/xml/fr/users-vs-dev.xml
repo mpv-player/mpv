@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.9 -->
 <appendix id="users-vs-dev">
 <title>Lamentations du développeur</title>
 
@@ -29,10 +29,8 @@ L'équipe GCC a nié tout lien avec GCC 2.96 et a publié une
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">réponse officielle</ulink>
 à GCC 2.96. De nombreux développeurs à travers le monde ont commencé à avoir des
 problèmes avec GCC 2.96, et ont commencé à recommander d'autres compilateurs. Par Exemple
-<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
-et
-<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink> et
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
 D'autres liens intéressants sont
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</ulink>
@@ -46,13 +44,12 @@ contournements peuvent impliquer une pénalité sur les performances.
 </formalpara>
 
 <para>
-Vous pouvez lire un autre point de vue sur cette histoire
-<ulink url="http://www.bero.org/gcc296.html">sur ce site</ulink>. GCC 2.96 n'autorise
-pas les caractères <literal>|</literal> (pipe) dans les commentaires assembleur parce
-qu'il supporte aussi bien la syntaxe Intel que la syntaxe AT&amp;T et que le caractère
-<literal>|</literal> est un symbole dans la variété Intel. Le problème est qu'il ignore
-<emphasis role="bold">silencieusement</emphasis> le bloc assembleur entier. Cela est
-théoriquement fixé maintenant, GCC affichant un warning au lieu de sauter le bloc.
+GCC 2.96 n'autorise pas les caractères <literal>|</literal> (pipe) dans les
+commentaires assembleur parce qu'il supporte aussi bien la syntaxe Intel que la
+syntaxe AT&amp;T et que le caractère <literal>|</literal> est un symbole dans la
+variante Intel. Le problème est qu'il ignore <emphasis role="bold">silencieusement</emphasis>
+le bloc assembleur entier. Cela est théoriquement fixé maintenant, GCC affichant
+un warning au lieu de sauter le bloc.
 </para>
 
 <formalpara>
@@ -73,7 +70,7 @@ nous en avons plus qu'assez des empoignes sur GCC 2.96. S'il vous plaît, restons
 Si vous avez des problèmes avec GCC 2.96, vous pouvez obtenir les paquetages 2.96-85
 sur le <ulink url="ftp://updates.redhat.com">serveur ftp</ulink> de Red Hat, ou
 d'utiliser les paquetages 3.0.4 offerts avec la version 7.2 et supérieur. Vous pouvez
-également obtenir les <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">paquets gcc-3.2-10</ulink>
+également obtenir les <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-11/">paquets gcc-3.2-11</ulink>
 (non officiels, mais fonctionnant bien) et vous pouvez les installer avec le GCC 2.96
 que vous avez déjà. Mplayer les détectera et utilisera 3.2 au lieu de 2.96. Si vous ne
 voulez pas ou ne pouvez pas utiliser les paquetages binaires, voici comment vous pouvez
@@ -133,9 +130,9 @@ en avez l'utilité.
 
 <para>
 D'autres impératifs pour la redistribution étaient les optimisations de compilation
-pour l'architecture binaire. <application>MPlayer</application>  supporte maintenant
-la détection CPU (spécifiez l'option <option>--enable-runtime-cpudetection</option>
-à la configuration). Elle est désactivée par défaut parce quelle implique un petit
+pour l'architecture binaire. <application>MPlayer</application> supporte maintenant
+la détection CPU (passez l'option <option>--enable-runtime-cpudetection</option>
+à <command>configure</command>). Elle est désactivée par défaut parce quelle implique un petit
 sacrifice de vitesse, mais il est maintenant possible de créer des binaires qui
 fonctionneront sur les différents membres de la famille de CPU Intel.
 </para>
@@ -151,8 +148,7 @@ fournisse que des pilotes binaires (à utiliser avec XFree86), qui sont souvent b
 Nous avons eu de nombreux rapports sur
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 à propos de problèmes relatif à ces pilotes closed-source et à leur piètre qualité,
-leur instabilité et le piètre support utilisateur et expert. Voici un exemple tiré du
-<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">Forum nVidia Linux</ulink>.
+leur instabilité et le piètre support utilisateur et expert.
 Beaucoup de ces problèmes continuent de ce répéter. Nous avons contacté nVidia
 récemment, et ils nous ont dit que ces bogues n'existaient pas, que l'instabilité
 était causée par de mauvais chips AGP, et qu'ils n'avaient pas reçu de rapports de
@@ -170,17 +166,15 @@ trop peu de pouvoir pour améliorer les choses.
 <title>Joe Barr</title>
 
 <para>
-Joe Barr est devenu tristement célèbre pour avoir écrit une moins-que-favorable
-<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
-critique de <application>MPlayer</application></ulink>. Il a trouvé <application>MPlayer</application>
-difficile à installer, mais là encore ce n'est pas un passionné de la
-<ulink url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">lecture de documentation</ulink>.
-Il a également conclu que les développeurs n'étaient pas amicaux et que la documentation
-était incomplète et insultante. Vous êtes seul juge. Il à ensuite mentionné négativement
-<application>MPlayer</application> dans ses
-<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 prédictions Linux pour 2002</ulink>.
-Puis dans une
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">critique de xine</ulink>
+Joe Barr est devenu tristement célèbre en décembre 2001 pour avoir écrit une
+moins-que-favorable critique de <application>MPlayer</application> appelée
+<ulink url="http://www.linuxworld.com/story/32880.htm">MPlayer: The project from hell</ulink>.
+Il a trouvé <application>MPlayer</application> difficile à installer, et en a conclu
+que les développeurs n'étaient pas amicaux et que la documentation était incomplète et
+insultante. Vous êtes seul juge. Il à ensuite mentionné négativement Arpi dans ses
+<ulink url="http://www.linuxworld.com/story/32887.htm">10 prédictions Linux pour 2002</ulink>.
+Puis dans une critique de xine appelée
+<ulink url="http://www.linuxworld.com/story/32716.htm">A streaming media player for the rest of us</ulink>
 il a continué d'alimenter la controverse. Ironiquement à la fin de cet article il cite
 son échange avec Günter Bartsch, l'auteur original de <application>xine</application>,
 qui résume parfaitement la situation:
@@ -190,46 +184,34 @@ Toutefois, il a ajouté qu'il avait été "surpris" par mon papier à propos de <app
 et pensait que c'était déloyal, me rappelant que c'est un projet de logiciel libre.
 "Si vous ne l'aimez pas," à dit Bartsch, "vous êtes libre de ne pas l'utiliser."
 </para></blockquote>
-</para>
 
-<para>
-Il ne réponds pas à nos courriers. Son éditeur ne réponds pas à nos courriers. Voici
-quelques citations de différentes personnes à propos de Joe Barr, pour que vous
-puissiez vous faire votre propre opinion:
-</para>
-
-<para>
-Marc Rassbach a
-<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">quelque chose à dire</ulink>
-à propos de cet homme.
+Presque deux ans après, en octobre 2003, il a écrit un autre article appelé
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited</ulink>.
+Dans celui-ci il arrive aux conclusions suivantes:
 
 <blockquote><para>
-Vous devriez tous vous rappeler la LinuxWorld 2000, quand il prétendait que Linus T
-avait dit que 'FreeBSD n'est qu'une poignée de programmeurs'. Linus n'a RIEN dit de tel.
-Quand Joe à été contacté là-dessus, sa réaction a été de traiter les supporters de BSD
-de trous du cul et de connards.
+Je dois dire qu'il y a eu des améliorations dans le nombre de fonctions, au
+niveau des performances, et dans la documentation. Ce n'est toujours pas
+l'installation la plus facile au monde, spécialement pour les débutants,
+mais c'est un petit peut mieux qu'avant.
 </para></blockquote>
-</para>
 
-<para>
-Une <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">citation</ulink>
-de Robert Munro sur la liste de diffusion
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+et
 
-<blockquote>
-<para>
-Il est intéressant, mais pas très bon pour éviter, um... la controverse. Joe Barr était
-un des habitués du forum Canopus de Will Zachmann sur Compuserve, il y a des années de
-ça. C'était alors un défenseur d'OS/2 (dont j'étais fan moi aussi).
-</para>
+<blockquote><para>
+Mais plus important, je n'ai pas remarqué de récents commentaires à propos
+des abus des utilisateurs. Je suppose que je mérite de la reconnaissance pour
+cela, même si j'en fait partie moi-même. Arpi et le reste de l'équipe du projet
+doivent ressentir cela aussi, car ils ont pris soin de me le rappeler dans une
+section spéciale de la documentation incluse dans l'archive. Comme je l'ai dit
+au début, certaines choses n'ont pas changées du tout.
+</para></blockquote>
 
-<para>
-Il avait l'habitude d'exagérer, d'insulter les gens, et je suppose qu'il a dû avoir des
-moments difficiles, alors. Il en à tiré une certaine maturité, à en juger par ces
-derniers papiers. L'humour modérément subtil n'était pas son fort à cette époque, mais
-alors pas du tout.
-</para>
-</blockquote>
+Nous n'aurions pas pu résumer mieux nos sentiments à l'égard de Joe Barr:
+&quot;Ce n'est toujours pas l'article le plus honnête ou le plus recherché au monde,
+mais c'est meilleurs qu'avant.&quot; Espérons que la prochaine fois nous répondrons
+mutuellement à nos attentes. De toute façon, le chemin de la maturité passe
+uniquement par l'âge, et peut-être en faisant fi des empoignades.
 </para>
 
 </sect1>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.30 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -743,7 +743,7 @@ est endommagé en 44kHz: <option>-srate 22050</option>.
 
 <para>
 Vous pouvez activer l'OSD et les sous-titres uniquement avec le filtre
-<systemitem>expand</systemitem>, voir la page de man pour les paramètres exacts.
+<option>expand</option>, voir la page de man pour les paramètres exacts.
 
 </para>
 </sect4>
@@ -1917,8 +1917,8 @@ bilinéaire rapide. La ligne de commande est
 </para>
 
 <para>
-Le découpage peut être fait avec le filtre <systemitem>crop</systemitem> et par ce
-pilote lui-même. Supposons qu'un film est trop large pour s'afficher sur votre Buz et
+Le découpage peut être fait avec le filtre <option>crop</option> et par ce
+pilote lui-même. Supposons qu'un film soit trop large pour s'afficher sur votre Buz et
 que vous vouliez utiliser <option>-zrcrop</option> pour rendre le film moins large,
 alors vous taperez la commande suivante
 <screen>mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi</screen>
@@ -2205,7 +2205,7 @@ de cette documentation.
 </para>
 
 <para>
-Après que l'accélération XFree86, XVideo, et 3D fonctionne correctement, éditez la
+Après que l'accélération XFree86, XVideo, et 3D fonctionnent correctement, éditez la
 section Device de votre carte dans le fichier <filename>XF86Config</filename>, selon
 l'exemple suivant (adaptez à votre carte/TV):
 
@@ -2232,6 +2232,26 @@ EndSection
 
 <para>
 Bien sûr l'élément le plus important est la partie TwinView.
+</para>
+</sect4>
+
+<sect4 id="tvout-neomagic">
+<title>Neomagic</title>
+<para>
+Testé sur un Toshiba Tecra 8000. Son chip de sortie TV est de très mauvaise qualité.
+À éviter si possible.
+</para>
+<para>
+Vous devez utiliser <option>-vo vesa</option>. Le chipt testé n'était capable
+d'afficher que l'aspect ratio 1.333333, donc assurez-vous d'utiliser les options
+<option>-x</option>, <option>-y</option> et/ou les filtres
+<option>-vf scale,crop,expand</option> si la machine ne vous laisse pas activer
+la sortie TV. La résolution maximum était 720*576 à 16bpp.
+</para>
+<para>
+Problèmes connus: VESA-uniquement, limitation 1.33333, l'image n'est pas toujours
+centrée, le film passe en 4bpp toutes les 10 minutes, et reste comme ça. bloquages
+matériels fréquents, problèmes d'affichage LCD.
 </para>
 </sect4>
 </sect3>
