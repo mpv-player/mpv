@@ -529,7 +529,10 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 	cddb_data->xmcd_file = NULL;
 
 	cddb_create_hello(cddb_data);
-	cddb_get_proto_level(cddb_data);
+	if( cddb_get_proto_level(cddb_data)<0 ) {
+		printf("Failed to get the protocol level\n");
+		return -1;
+	}
 
 	//cddb_get_freedb_sites(&cddb_data);
 
