@@ -555,8 +555,8 @@ if(stream->type==STREAMTYPE_DVD){
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
   if(!demuxer){
-        mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
-	mp_msg(MSGT_DEMUXER, MSGL_ERR, MSGTR_CannotOpenDemuxer); //correct target/level? FIXME?
+    mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_FormatNotRecognized);
+    mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }
 
