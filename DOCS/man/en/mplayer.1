@@ -2911,28 +2911,32 @@ Specify libavcodec decoding parameters.
 Available options are:
 .RE
 .RSs
-.IPs ec\ \ \ 
-error concealment:
+.IPs bug=<value>
+Manually work around encoder bugs:
 .RSss
-1: Use strong deblock filter for damaged MBs.
+0: nothing
 .br
-2: iterative motion vector (MV) search (slow)
+1: autodetect bugs (default)
 .br
-3: all (default)
-.REss
-.IPs er=<value>
-error resilience:
-.RSss
+2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetection)
 .br
-0: disabled
+4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX)
 .br
-1: careful (Should work with broken encoders.)
+8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
 .br
-2: normal (default) (Works with compliant encoders.)
+16 (mpeg4): padding bug (autodetected)
 .br
-3: aggressive (More checks, but might cause problems even for valid bitstreams.)
+32 (mpeg4): illegal vlc bug (autodetected per fourcc)
 .br
-4: very aggressive
+64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/\:version)
+.br
+128 (mpeg4): old standard qpel (autodetected per fourcc/\:version)
+.br
+256 (mpeg4): another qpel bug (autodetected per fourcc/\:version)
+.br
+512 (mpeg4): direct-qpel-blocksize bug (autodetected per fourcc/\:version)
+.br
+1024 (mpeg4): edge padding bug (autodetected per fourcc/\:version)
 .REss
 .IPs debug=<value>
 debug:
@@ -2966,6 +2970,38 @@ debug:
 .br
 0x1000: bugs
 .REss
+.IPs ec\ \ \ 
+error concealment:
+.RSss
+1: Use strong deblock filter for damaged MBs.
+.br
+2: iterative motion vector (MV) search (slow)
+.br
+3: all (default)
+.REss
+.IPs er=<value>
+error resilience:
+.RSss
+.br
+0: disabled
+.br
+1: careful (Should work with broken encoders.)
+.br
+2: normal (default) (Works with compliant encoders.)
+.br
+3: aggressive (More checks, but might cause problems even for valid bitstreams.)
+.br
+4: very aggressive
+.REss
+.IPs gray\ 
+grayscale only decoding (a bit faster than with color)
+.IPs "idct=<0\-99> (see \-lavcopts)"
+For best decoding quality use the same idct algorithm for decoding and encoding.
+This may come at a price in accuracy, though.
+.IPs "sb=<number> (MPEG2 only)"
+Skip the given number of macroblock rows at the bottom.
+.IPs "st=<number> (MPEG2 only)"
+Skip the given number of macroblock rows at the top.
 .IPs vismv=<value>
 vismv:
 .RSss
@@ -2978,42 +3014,6 @@ vismv:
 .br
 4: visualize backward predicted MVs of B frames
 .REss
-.IPs bug=<value>
-Manually work around encoder bugs:
-.RSss
-0: nothing
-.br
-1: autodetect bugs (default)
-.br
-2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetection)
-.br
-4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX)
-.br
-8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
-.br
-16 (mpeg4): padding bug (autodetected)
-.br
-32 (mpeg4): illegal vlc bug (autodetected per fourcc)
-.br
-64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/\:version)
-.br
-128 (mpeg4): old standard qpel (autodetected per fourcc/\:version)
-.br
-256 (mpeg4): another qpel bug (autodetected per fourcc/\:version)
-.br
-512 (mpeg4): direct-qpel-blocksize bug (autodetected per fourcc/\:version)
-.br
-1024 (mpeg4): edge padding bug (autodetected per fourcc/\:version)
-.REss
-.IPs "idct=<0\-99> (see \-lavcopts)"
-For best decoding quality use the same idct algorithm for decoding and encoding.
-This may come at a price in accuracy, though.
-.IPs gray\ 
-grayscale only decoding (a bit faster than with color)
-.IPs "sb=<number> (MPEG2 only)"
-Skip the given number of macroblock rows at the bottom.
-.IPs "st=<number> (MPEG2 only)"
-Skip the given number of macroblock rows at the top.
 .IPs vstats
 Prints some statistics and stores them in ./vstats_*.log.
 .RE
