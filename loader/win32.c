@@ -2707,6 +2707,14 @@ void WINAPI expInitCommonControls()
     return;
 }
 
+HRESULT WINAPI expCoCreateFreeThreadedMarshaler(void *pUnkOuter, void **ppUnkInner)
+{
+    printf("CoCreateFreeThreadedMarshaler(%p, %p) called!\n",
+	pUnkOuter, ppUnkInner);
+    return E_FAIL;
+//    return S_OK;
+}
+
 struct exports
 {
     char name[64];
@@ -2915,6 +2923,7 @@ FF(CoTaskMemAlloc, -1)
 FF(CoTaskMemFree, -1)
 FF(CoCreateInstance, -1)
 FF(StringFromGUID2, -1)
+FF(CoCreateFreeThreadedMarshaler,-1)
 };
 struct exports exp_crtdll[]={
 FF(memcpy, -1)
@@ -2923,7 +2932,6 @@ struct exports exp_comctl32[]={
 FF(StringFromGUID2, -1)
 FF(InitCommonControls, 17)
 };
-
 #define LL(X) \
 {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
