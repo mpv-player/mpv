@@ -90,42 +90,38 @@ static char* replace_path(char* title , char* dir) {
 
 typedef int (*kill_warn)(const void*, const void*);
 
+static int mylstat(char *dir, char *file,struct stat* st) {
+  int l = strlen(dir) + strlen(file);
+  char s[l+1];
+  sprintf(s,"%s/%s",dir,file);
+  return lstat(s,st);
+}
+
+static int compare(char **a, char **b){
+  int la,lb;
+  la = strlen(*a);
+  lb = strlen(*b);
+  if((*a)[strlen(*a) - 1] == '/') {
+    if((*b)[strlen(*b) - 1] == '/')
+      return strcmp(*b, *a) ;
+    else
+      return 1;
+  } else {
+    if((*b)[strlen(*b) - 1] == '/')
+      return -1;
+    else
+      return strcmp(*b, *a);
+  }
+}
+
 static int open_dir(menu_t* menu,char* args) {
-  struct dirent **namelist;
+  char **namelist, **tp;
+  struct dirent *dp;
   struct stat st;
   int n;
   char* p = NULL;
   list_entry_t* e;
-
-  int mylstat(char *dir, char *file,struct stat* st) {
-    int l = strlen(dir) + strlen(file);
-    char s[l+1];
-    sprintf(s,"%s%s",args,file);
-    return lstat(s,st);
-  }
-
-  int compare(struct dirent **a,struct dirent **b) {
-    struct stat as,bs;
-    mylstat(args,(*a)->d_name,&as);
-    mylstat(args,(*b)->d_name,&bs);
-    if(S_ISDIR(as.st_mode)) {
-      if(S_ISDIR(bs.st_mode))
-	return alphasort(b,a);
-      else 
-	return 1;
-    } else {
-      if(S_ISDIR(bs.st_mode))
-	return -1;
-      else
-	return alphasort(b,a);
-    }
-  }
-
-  int select_f(const struct dirent *d) {
-    if(d->d_name[0] != '.' || strcmp(d->d_name,"..") == 0)
-      return 1;
-    return 0;
-  }
+  DIR* dirp;
 
   menu_list_init(menu);
 
@@ -138,27 +134,51 @@ static int open_dir(menu_t* menu,char* args) {
 
   mpriv->p.title = replace_path(mpriv->title,mpriv->dir);
 
-  n = scandir(mpriv->dir, &namelist, select_f, (kill_warn)compare);
+  if ((dirp = opendir (mpriv->dir)) == NULL){
+    printf("opendir error: %s", strerror(errno));
+    return 0;
+  }
+
+  namelist = (char **) malloc(sizeof(char *));
+
+  n=0;
+  while ((dp = readdir(dirp)) != NULL) {
+    if(dp->d_name[0] == '.' && strcmp(dp->d_name,"..") != 0)
+      continue;
+    if(n%20 == 0){ // Get some more mem
+      if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
+         == NULL) {
+        printf("realloc error: %s", strerror(errno));
+        goto bailout;
+      } 
+      namelist=tp;
+    }
+
+    namelist[n] = (char *) malloc(strlen(dp->d_name) + 2);
+    if(namelist[n] == NULL){
+      printf("malloc error: %s", strerror(errno));
+      goto bailout;
+    }
+     
+    strcpy(namelist[n], dp->d_name);
+    mylstat(args,namelist[n],&st); 
+    if(S_ISDIR(st.st_mode))
+      strcat(namelist[n], "/");
+    n++;
+  }
+  qsort(namelist, n, sizeof(char *), (kill_warn)compare);
+
+bailout:
   if (n < 0) {
     printf("scandir error: %s\n",strerror(errno));
     return 0;
   }
   while(n--) {
     e = calloc(1,sizeof(list_entry_t));
-    mylstat(args,namelist[n]->d_name,&st);
-
-    if(S_ISDIR(st.st_mode)) {
-      int sl =strlen(namelist[n]->d_name);
-      e->p.txt = malloc(sl + 2);
-      strncpy(e->p.txt,namelist[n]->d_name,sl);
-      e->p.txt[sl] = '/';
-      e->p.txt[sl+1] = '\0';
+    e->p.txt = strdup(namelist[n]);
+    if(strchr(namelist[n], '/') != NULL)
       e->d = 1;
-      menu_list_add_entry(menu,e);
-    } else if(strcmp(namelist[n]->d_name,"..") == 0 || namelist[n]->d_name[0] != '.') {
-      e->p.txt = strdup(namelist[n]->d_name);
-      menu_list_add_entry(menu,e);
-    }
+    menu_list_add_entry(menu,e);
     free(namelist[n]);
   }
   free(namelist);
