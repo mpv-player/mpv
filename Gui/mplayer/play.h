@@ -6,6 +6,8 @@
 
 #include "./mplayer.h"
 
+extern int mplGotoTheNext;
+
 extern void mplEnd( void );
 extern void mplFullScreen( void );
 extern void mplPlay( void );

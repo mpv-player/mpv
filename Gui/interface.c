@@ -1145,6 +1145,7 @@ int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* confi
   }
 
   mplCurr(); // Update filename
+  mplGotoTheNext=1;
 
   if (!enqueue)
     filename=guiIntfStruct.Filename; // Backward compatibility; if file is specified on commandline,

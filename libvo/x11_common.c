@@ -783,7 +783,7 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
   {
     XClientMessageEvent xev;
     
-    if (layer) orig_layer=vo_x11_get_gnome_layer( mDisplay, vo_window );
+    if (!orig_layer) orig_layer=vo_x11_get_gnome_layer( mDisplay, vo_window );
 
     memset(&xev, 0, sizeof(xev));
     xev.type = ClientMessage;

@@ -32,7 +32,7 @@
 extern float rel_seek_secs;
 extern int abs_seek_pos;
 
-static int mplGotoTheNext = 1;
+int mplGotoTheNext = 1;
 
 void mplFullScreen( void )
 {
@@ -57,7 +57,7 @@ void mplFullScreen( void )
   if ( guiIntfStruct.Playing || gtkShowVideoWindow ) wsFullScreen( &appMPlayer.subWindow );
   fullscreen=vo_fs=appMPlayer.subWindow.isFullScreen;
   wsSetLayer( wsDisplay,appMPlayer.mainWindow.WindowID,appMPlayer.subWindow.isFullScreen );
-  wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,appMPlayer.subWindow.isFullScreen );
+  if ( appMPlayer.menuIsPresent ) wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,appMPlayer.subWindow.isFullScreen );
 
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
