@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.156
+// In synch with rev 1.157
 
 // ========================= MPlayer help ===========================
 
@@ -493,8 +493,8 @@ static char help_text[]=
 #define MSGTR_NotSystemStream "Kein MPEG System Stream... (vielleicht ein Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Ungültiger MPEG-ES Stream??? Kontaktiere den Autor, das könnte ein Bug sein :(\n"
 #define MSGTR_FormatNotRecognized "========= Sorry, dieses Dateiformat wird nicht erkannt/unterstützt ============\n"\
-				  "============== Sollte dies ein AVI, ASF oder MPEG Stream sein, ===============\n"\
-				  "================== dann kontaktiere bitte den Autor. ========================\n"
+                                  "============== Sollte dies ein AVI, ASF oder MPEG Stream sein, ===============\n"\
+                                  "================== dann kontaktiere bitte den Autor. ========================\n"
 #define MSGTR_MissingVideoStream "Kein Videostream gefunden.\n"
 #define MSGTR_MissingAudioStream "Kein Audiostream gefunden. -> kein Ton.\n"
 #define MSGTR_MissingVideoStreamBug "Fehlender Videostream!? Kontaktiere den Autor, dies könnte ein Bug sein :(\n"
@@ -530,7 +530,7 @@ static char help_text[]=
 
 #define MSGTR_LeaveTelecineMode "demux_mpg: 30fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
 #define MSGTR_EnterTelecineMode "demux_mpg: 24fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
-				  
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
 #define MSGTR_CantCloseCodec "Konnte Codec nicht schließen.\n"
@@ -677,6 +677,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Nächster Stream"
 #define MSGTR_MENU_PrevStream "Vorheriger Stream"
 #define MSGTR_MENU_Size "Größe"
+#define MSGTR_MENU_HalfSize   "Halbe Größe"
 #define MSGTR_MENU_NormalSize "Normale Größe"
 #define MSGTR_MENU_DoubleSize "Doppelte Größe"
 #define MSGTR_MENU_FullScreen "Vollbild"
