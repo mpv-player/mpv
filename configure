@@ -1166,8 +1166,10 @@ else
 fi
 
 if [ $_alsaver != 'not found' ]; then
- [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; } 
+ [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; $_alsa='#define HAVE_ALSA5'; } 
 # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; }
+else
+ _alsa=' '
 fi
 
 cat > $CCONF << EOF
@@ -1237,6 +1239,9 @@ $_fastmemcpy
 /* gui support, please do not edit this option */
 $_gui
 #define PREFIX "$_prefix"
+
+/* ALSA support */
+$_alsa
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD
