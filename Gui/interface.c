@@ -79,11 +79,18 @@ void gset( char ** str,char * what )
 void guiInit( void )
 {
  memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );
+ guiIntfStruct.Balance=50.0f;
+ guiIntfStruct.StreamType=-1;
+
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
  gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
  gtkAOOSSDevice=strdup( PATH_DEV_DSP );
-// cfg_read(); // !!! moved to Gui/mplayer/mplayer.c::mplInit() after gtkInit()
+   
+ gtkInit();
+    
+ cfg_read(); 
  appInit( (void*)mDisplay );
+       
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name );
 #if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();

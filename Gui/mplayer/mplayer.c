@@ -45,6 +45,7 @@ void mplInit( void * disp )
 {
  int i;
 
+#if 0
  // init fields of this struct to default values
  guiIntfStruct.Balance=50.0f;
  guiIntfStruct.StreamType=-1;
@@ -53,6 +54,7 @@ void mplInit( void * disp )
 
  // read gui.conf, gui.pl
  cfg_read();
+#endif 
 
  // opens X display, checks for extensions (XShape, DGA etc)
  wsXInit( disp );
@@ -113,7 +115,7 @@ void mplInit( void * disp )
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
  
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
-#if 0
+#if 1
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 
  {

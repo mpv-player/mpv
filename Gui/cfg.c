@@ -8,10 +8,6 @@
 #include "../mplayer.h"
 #include "../cfgparser.h"
 
-#ifdef USE_I18N
-#include <locale.h>
-#endif
-
 #include "../../libvo/video_out.h"
 
 #include "cfg.h"
@@ -165,10 +161,6 @@ int cfg_write( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
  int    i;
-
-#ifdef USE_I18N
- setlocale( LC_ALL,"" );
-#endif
 
 // -- save configuration 
  if ( (f=fopen( cfg,"wt+" )) )

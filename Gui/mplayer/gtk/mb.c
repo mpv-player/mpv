@@ -16,9 +16,8 @@ int gtkVMessageBox = 0;
 
 void ShowMessageBox( char * msg )
 {
- if ( gtkVMessageBox ) gtkActive( MessageBox );
-   else MessageBox=create_MessageBox( 0 );
- gtkSetLayer( MessageBox );
+ if ( gtkVMessageBox ) { gtk_widget_hide( MessageBox ); gtk_widget_destroy( MessageBox ); }
+ MessageBox=create_MessageBox( 0 );
  if ( strlen( msg ) < 20 ) gtk_widget_set_usize( MessageBox,196,-1 );
  gtkIncVisible();
 }

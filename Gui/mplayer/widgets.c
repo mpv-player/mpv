@@ -148,6 +148,7 @@ void gtkMessageBox( int type,gchar * str )
   }
  gtk_widget_show( MessageBox );
  gtkSetLayer( MessageBox );
+ gtkActive( MessageBox );
  if ( type == GTK_MB_FATAL )
   while ( gtkVMessageBox ) gtk_main_iteration_do( 0 );
 }
