@@ -256,8 +256,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XVisualInfo *vinfo;
 	XEvent xev;
 
-	vo_dwidth = d_width;
-	vo_dheight = d_height;
+	vo_fs = VO_FALSE;
 
 	hint.x = 0;
 	hint.y = 0;

@@ -73,7 +73,8 @@ static unsigned char *ImageData=NULL;
 //static int texture_id=1;
 
 #ifndef GL_WIN32
-    static GLXContext wsGLXContext;
+    static XVisualInfo *gl_vinfo = NULL;
+    static GLXContext gl_context = 0;
 #endif
 
 static uint32_t image_width;
@@ -670,6 +671,8 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 }
 
 static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
+  if ( vo_window == None ) 
+  {
 	XSizeHints hint;
 	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
@@ -692,8 +695,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
     return -1;
   }
 
-  if ( vo_window == None ) 
-   {
     vo_fs = VO_FALSE;
     vo_window = vo_x11_create_smooth_window(mDisplay, RootWindow(mDisplay,mScreen), 
 		                            vinfo->visual, hint.x, hint.y, hint.width, hint.height, vinfo->depth, vo_x11_create_colormap(vinfo));
@@ -718,49 +719,30 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 		XNextEvent(mDisplay, &xev);
 	}
 	while (xev.type != MapNotify || xev.xmap.event != vo_window);
-   }
-   else {
-   	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
-   	// for changing from fullscreen to fullscreen we do fullscreen to
-   	// window and back to fullscreen, so that vo_x11_fullscreen saves
-   	// the correct size for _this_ video (and doesn't take the values from
-   	// the previous one)
-   	if (vo_fs)
-   	 vo_x11_fullscreen ();
-   	XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
-   }
-
-  // these would normally be set by the event handler, but here we have to
-  // do it manually
-  vo_dwidth = d_width;
-  vo_dheight = d_height;
-
-  if (flags & VOFLAG_FULLSCREEN)
-   vo_x11_fullscreen();
 
   vo_x11_classhint( mDisplay,vo_window,"gl2" );
   vo_hidecursor(mDisplay,vo_window);
   
-  if ( vo_config_count ) glXDestroyContext( mDisplay,wsGLXContext );
-
-  wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
-
-        glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
-
 	XSync(mDisplay, False);
 
 	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
         vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
 		 | ButtonPressMask | ButtonReleaseMask | ExposureMask
         );
+  }
+  vo_x11_nofs_sizepos(0, 0, d_width, d_height);
+  if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
+    vo_x11_fullscreen();
 
-  if(glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz)!=0) 
+  setGlWindow(&gl_vinfo, &gl_context, vo_window);
+
+  if(glXGetConfig(mDisplay,gl_vinfo,GLX_RED_SIZE, &r_sz)!=0) 
 	  r_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_GREEN_SIZE, &g_sz)!=0) 
+  if(glXGetConfig(mDisplay,gl_vinfo,GLX_GREEN_SIZE, &g_sz)!=0) 
 	  g_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_BLUE_SIZE, &b_sz)!=0) 
+  if(glXGetConfig(mDisplay,gl_vinfo,GLX_BLUE_SIZE, &b_sz)!=0) 
 	  b_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_ALPHA_SIZE, &a_sz)!=0) 
+  if(glXGetConfig(mDisplay,gl_vinfo,GLX_ALPHA_SIZE, &a_sz)!=0) 
 	  a_sz=0;
 
         return 0;
@@ -768,31 +750,15 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
 #ifdef HAVE_NEW_GUI
 static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
-  XWindowAttributes xw_attr;
-  XVisualInfo *vinfo, vinfo_template;
-  int tmp;
   vo_dwidth = d_width;
   vo_dheight = d_height;
   guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
-  XGetWindowAttributes(mDisplay, vo_window, &xw_attr);
-  vinfo_template.visualid=XVisualIDFromVisual(xw_attr.visual);
-  vinfo = XGetVisualInfo(mDisplay, VisualIDMask, &vinfo_template, &tmp);
+  setGlWindow(&gl_vinfo, &gl_context, vo_window);
 
-  if ( vo_config_count ) glXDestroyContext( mDisplay,wsGLXContext );
-  wsGLXContext = glXCreateContext( mDisplay,vinfo,NULL,True );
-  if (wsGLXContext == NULL) {
-    mp_msg(MSGT_VO, MSGL_FATAL, "[gl2] Could not create GLX context!\n");
-    XFree(vinfo);
-    return -1;
-  }
-  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
-  XSync(mDisplay, False);
-
-  if (glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
-  if (glXGetConfig(mDisplay,vinfo,GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
-  if (glXGetConfig(mDisplay,vinfo,GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
-  if (glXGetConfig(mDisplay,vinfo,GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
-  XFree(vinfo);
+  if (glXGetConfig(mDisplay,gl_vinfo,GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
+  if (glXGetConfig(mDisplay,gl_vinfo,GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
+  if (glXGetConfig(mDisplay,gl_vinfo,GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
+  if (glXGetConfig(mDisplay,gl_vinfo,GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
   return 0;
 }
 #endif
@@ -1170,6 +1136,7 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
+  releaseGlContext(&gl_vinfo, &gl_context);
   if (texgrid) {
     free(texgrid);
     texgrid = NULL;

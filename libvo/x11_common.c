@@ -1145,7 +1145,11 @@ void vo_x11_nofs_sizepos(int x, int y, int width, int height)
     vo_old_height = height;
   }
   else
+  {
+   vo_dwidth = width;
+   vo_dheight = height;
    XMoveResizeWindow(mDisplay, vo_window, x, y, width, height);
+  }
 }
 
 void vo_x11_sizehint(int x, int y, int width, int height, int max)
