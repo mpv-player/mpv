@@ -5020,9 +5020,8 @@ echores "$_zlib"
 
 
 echocheck "RTC"
-if linux ; then
-  if test "$_rtc" = auto ; then
-    cat > $TMPC << EOF
+if test "$_rtc" = auto ; then
+  cat > $TMPC << EOF
 #include <sys/ioctl.h>
 #ifdef __linux__
 #include <linux/rtc.h>
@@ -5032,19 +5031,15 @@ if linux ; then
 #endif
 int main(void) { return RTC_PIE_ON; }
 EOF
-    _rtc=no
-    cc_check && _rtc=yes
-  fi
-  echores "$_rtc"
-else
   _rtc=no
-  echores "no"
+  cc_check && _rtc=yes
 fi
 if test "$_rtc" = yes ; then
   _def_rtc='#define HAVE_RTC 1'
 else
   _def_rtc='#undef HAVE_RTC'
 fi
+echores "$_rtc"
 
 
 echocheck "external liblzo support"
