@@ -27,7 +27,11 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(divx4)
 
+#ifdef HAVE_DIVX4_H
+#include <divx4.h>
+#else
 #include <decore.h>
+#endif
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){

@@ -263,6 +263,7 @@ static short get_driver(char *s,int audioflag)
 		"mpegpes",
 		"realvid",
 		"svq1",
+		"xvid",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

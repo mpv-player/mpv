@@ -76,6 +76,7 @@
 #define VFM_MPEGPES 25
 #define VFM_REAL 26
 #define VFM_SVQ1 27
+#define VFM_XVID 28
 
 #ifndef GUID_TYPE
 #define GUID_TYPE
