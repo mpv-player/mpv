@@ -68,7 +68,7 @@
             <UL>
               <LI><A HREF="formats.html#mp3">2.1.2.1 MP3 files</A></LI>
               <LI><A HREF="formats.html#wav">2.1.2.2 WAV files</A></LI>
-              <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG files (Vorbis)</A></LI>
+              <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG/OGM files (Vorbis)</A></LI>
               <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF files</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 files</A></LI>
             </UL>
@@ -242,13 +242,16 @@
   <LI><A HREF="#ports">6. Ports</A>
     <UL>
       <LI><A HREF="#debian">6.1 Debian packaging</A></LI>
-      <LI><A HREF="#freebsd">6.2 FreeBSD</A></LI>
+      <LI><A HREF="#bsd">6.2 *BSD</A></LI>
+        <UL>
+          <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
+          <LI><A HREF="#openbsd">6.2.2 OpenBSD</A></LI>
+        </UL>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
       <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
       <LI><A HREF="#sgi">6.5 Silicon Graphics / Irix</A></LI>
       <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#openbsd">6.7 OpenBSD</A></LI>
-      <LI><A HREF="#cygwin">6.8 Cygwin</A></LI>
+      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Appendix A - Mailing lists</A></LI>
@@ -841,7 +844,7 @@ The command line options differ slightly for the different formats:
     <UL>
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts</LI>
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users</LI>
-      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts &amp; RAW plugin</LI>
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer/">http://realtime.ssu.ac.kr/~lethean/mplayer/</A> - Korean fonts &amp; RAW plugin</LI>
     </UL>
   </LI>
   <LI>use the font generator tool at TOOLS/subfont-c
@@ -1180,7 +1183,7 @@ ENTER pt_step 1 1
   doesn't tell you anything about LIRC there's no support compiled in. That's
   it :-)</P>
 
-<P>The application name for MPlayer is - oh wonder - 'mplayer'.
+<P>The application name for MPlayer is - oh wonder - <CODE>mplayer</CODE>.
   You can use any mplayer commands and even pass more than one command by
   separating them with \n. Don't forget to enable the repeat flag in .lircrc
   when it make sense (seek, volume, etc). Here's an excerpt from my
@@ -1289,20 +1292,31 @@ end
 </PRE>
 
 
-<H2><A NAME="freebsd">6.2 FreeBSD</A></H2>
+<H2><A NAME="bsd">6.2 *BSD</A></H2>
 
-<P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake),
-  native BSD make will not work.</P>
+<P>Mplayer runs on FreeBSD, OpenBSD, NetBSD, BSD/OS and Darwin. To build MPlayer
+  you will need GNU make (gmake - native BSD make will not work) and a recent
+  version of binutils.</P>
 
-<P>To run MPlayer you will need to re-compile the kernel with
-  "options USER_LDT" (unless you are running -CURRENT, where this is default).
-  If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
-  (FreeBSD-STABLE required, or use kernel patches).</P>
+<P>If MPlayer complains about not finding <CODE>/dev/cdrom</CODE> or
+  <CODE>/dev/dvd</CODE>, create an appropiate symbolic link:<BR>
+  <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE>.</P>
 
-<P>If MPlayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a
-  symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
+<P>To use Win32 DLLs with MPlayer you will need to re-compile the kernel with
+  "<CODE>option USER_LDT</CODE>" (unless you run FreeBSD -CURRENT, where this
+  is the default).</P>
 
-<P>There's no DVD support for FreeBSD yet.</P>
+<H3><A NAME="freebsd">6.2.1 FreeBSD</A></H3>
+
+<P>If your CPU has SSE, recompile your kernel with "options CPU_ENABLE_SSE" to
+  use it (FreeBSD-STABLE or kernel patches required).</P>
+
+<H3><A NAME="openbsd">6.2.2 OpenBSD</A></H3>
+
+<P>Due to limitations in different versions of gas (relocation vs MMX), you will
+  need to compile in two steps: First make sure that the non-native as is first
+  in your <CODE>$PATH</CODE> and do a <CODE>gmake -k</CODE>, then make sure that
+  the native version is used and do <CODE>gmake</CODE>.</P>
 
 
 <H2><A NAME="solaris">6.3 Solaris</A></H2>
@@ -1426,34 +1440,57 @@ end
   QNX has only X <I>emulation</I> which is VERY slow. Use SDL.</P>
 
 
-<H2><A NAME="openbsd">6.7 OpenBSD</A></H2> 
-    
-<P>To build the package you will need GNU make (gmake,
-  /usr/ports/devel/gmake), native BSD make will not work, and a recent
-  binutils (including objcopy).</P>
+<H2><A NAME="cygwin">6.7 Cygwin</A></H2>
 
-<P>Due to limitations in different versions of gas (relocation vs mmx), you'll
-  need to compile in two steps: First make sure that the non-native as is first
-  in PATH and do a '<CODE>gmake -k</CODE>', then make sure that the native
-  version is used and do '<CODE>gmake</CODE>'.</P>
+<P>The Cygwin port is still in its infancy and could use some love,
+  <A HREF="tech/patches.txt">patches</A> are always welcome. You should also
+  check out the
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
+  mailing list for help and latest information.</P>
 
-<P>To use Win32 DLLs with MPlayer you will need to re-compile the
-  kernel with "<CODE>option USER_LDT</CODE>".</P>
+<P>To get native DirectX video (<CODE>-vo directx</CODE>), install
+  <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>
+  and recompile. This, together with <CODE>-ao win32</CODE> should give you best
+  results.</P>
 
-<P>If MPlayer complains about not finding '/dev/cdrom' or
-  '/dev/dvd' make a symbolic link, e.g. <CODE>ln -s
-  /dev/rcd0c /dev/dvd</CODE></P>
-
-<P>The not so hardcore hackers amongst us might want to use the ports
-  version (/usr/ports/x11/mplayer).</P>
-
-
-<H2><A NAME="cygwin">6.8. Cygwin</A></H2>
- 
 <P>You will have to go to the MPlayer directory, and copy or symlink
   <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
   make MPlayer compile. Otherwise it will complain about missing
   <CODE>intypes.h</CODE>.</P>
+
+<P>Since there is no support for Win32 DLLs under Cygwin and OpenGL and mpdvdkit
+  do not work/compile, you should disable them in configure with
+  <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>.</P>
+
+<P>SDL has also been reported to work after some tweaking:<BR>
+  There are several changes that need to be made to the <CODE>config.mak</CODE>
+  file after running <CODE>configure</CODE>. These changes, like any change to
+  <CODE>config.mak</CODE> after the <CODE>configure</CODE> run are <B>not</B>
+  supported, so please do <B>not</B> report bugs!</P>
+
+<P>Find the line that reads</P>
+
+<PRE>
+  SDL_LIB = -L/usr/local/lib -lmingw32 -lSDLmain -lSDL -mwindows -mno-cygwin
+</PRE>
+
+<P>and change it to:</P>
+
+<PRE>
+  SDL_LIB = -L/usr/local/lib -lSDL -mcygwin
+</PRE>
+
+<P>and replace</P>
+
+<PRE>
+  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Dmain=SDL_main -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin
+</PRE>
+
+<P>with</P>
+
+<PRE>
+  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Uunix -mcygwin
+</PRE>
 
 
 
