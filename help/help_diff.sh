@@ -9,8 +9,8 @@
 curr=""
 
 while read -r line; do
-	if echo -E "$line" | grep -q '^#define'; then
-		curr=`echo -E "$line" | cut -d ' ' -f 2`
+	if echo "$line" | grep -q '^#define'; then
+		curr=`echo "$line" | cut -d ' ' -f 2`
 		if grep -q "^#define $curr " $1; then
 			curr=""
 		fi
@@ -21,7 +21,7 @@ while read -r line; do
 	fi
 
 	if [ -n "$curr" ]; then
-		echo -E "$line"
+		echo "$line"
 	fi
 done
 
