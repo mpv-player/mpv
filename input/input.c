@@ -94,6 +94,14 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_DVDNAV_EVENT, "dvdnav_event", 1, { { MP_CMD_ARG_VOID, {0}}, {-1, {0}} } },
 #endif
+
+#ifdef HAVE_MENU
+  { MP_CMD_MENU, "menu",1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
+  { MP_CMD_SET_MENU, "set_menu",1,  { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
+  { MP_CMD_CHELP, "help", 0, { {-1,{0}} } },
+  { MP_CMD_CEXIT, "exit", 0, { {-1,{0}} } },
+  { MP_CMD_CHIDE, "hide", 0, { {MP_CMD_ARG_INT,{3000}}, {-1,{0}} } },
+#endif
   
   { 0, NULL, 0, {} }
 };
@@ -290,8 +298,20 @@ typedef struct mp_input_fd {
   int pos,size;
 } mp_input_fd_t;
 
+typedef struct mp_cmd_filter_st mp_cmd_filter_t;
+
+struct mp_cmd_filter_st {
+  mp_input_cmd_filter filter;
+  void* ctx;
+  mp_cmd_filter_t* next;
+};
+
 // These are the user defined binds
 static mp_cmd_bind_t* cmd_binds = NULL;
+static mp_cmd_filter_t* cmd_filters = NULL;
+
+// Callback to allow the menu filter to grab the incoming keys
+void (*mp_input_key_cb)(int code) = NULL;
 
 static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
 static unsigned int num_key_fd = 0;
@@ -381,6 +401,8 @@ mp_input_rm_cmd_fd(int fd) {
     return;
   if(cmd_fds[i].close_func)
     cmd_fds[i].close_func(cmd_fds[i].fd);
+  if(cmd_fds[i].buffer)
+    free(cmd_fds[i].buffer);
 
   if(i + 1 < num_cmd_fd)
     memmove(&cmd_fds[i],&cmd_fds[i+1],(num_cmd_fd - i - 1)*sizeof(mp_input_fd_t));
@@ -425,7 +447,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 
 
 
-static mp_cmd_t*
+mp_cmd_t*
 mp_input_parse_cmd(char* str) {
   int i,l;
   char *ptr,*e;
@@ -639,6 +661,18 @@ mp_input_default_cmd_func(int fd,char* buf, int l) {
 
 }
 
+
+void
+mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
+  mp_cmd_filter_t* filter = malloc(sizeof(mp_cmd_filter_t)), *prev;
+
+  filter->filter = func;
+  filter->ctx = ctx;
+  filter->next = cmd_filters;
+  cmd_filters = filter;
+}
+  
+
 static char*
 mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
   int j;
@@ -700,16 +734,15 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   return ret;
 }
 
-static mp_cmd_t*
-mp_input_read_keys(int time,int paused) {
+int
+mp_input_read_key_code(int time) {
   fd_set fds;
   struct timeval tv,*time_val;
   int i,n=0,max_fd = 0;
-  mp_cmd_t* ret;
   static int last_loop = 0;
 
   if(num_key_fd == 0)
-    return NULL;
+    return MP_INPUT_NOTHING;
 
   FD_ZERO(&fds);
   // Remove fd marked as dead and build the fd_set
@@ -726,8 +759,8 @@ mp_input_read_keys(int time,int paused) {
     n++;
   }
 
-  if(num_key_fd == 0)
-    return NULL;
+  if(n == 0 || num_key_fd == 0)
+    return MP_INPUT_NOTHING;
 
   if(time >= 0 ) {
     tv.tv_sec=time/1000; 
@@ -747,7 +780,6 @@ mp_input_read_keys(int time,int paused) {
     
   for(i = last_loop + 1 ; i != last_loop ; i++) {
     int code = -1;
-    unsigned int j;
     // This is to check all fd in turn
     if((unsigned int)i >= num_key_fd) {
       i = -1;
@@ -765,15 +797,37 @@ mp_input_read_keys(int time,int paused) {
     }
     else
       code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
-    if(code < 0) {
-      if(code == MP_INPUT_ERROR)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error on key input fd %d\n",key_fds[i].fd);
-      else if(code == MP_INPUT_DEAD) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Dead key input on fd %d\n",key_fds[i].fd);
-	key_fds[i].flags |= MP_FD_DEAD;
-      }
-      continue;
+
+    if(code >= 0)
+      return code;
+
+    if(code == MP_INPUT_ERROR)
+      mp_msg(MSGT_INPUT,MSGL_ERR,"Error on key input fd %d\n",key_fds[i].fd);
+    else if(code == MP_INPUT_DEAD) {
+      mp_msg(MSGT_INPUT,MSGL_ERR,"Dead key input on fd %d\n",key_fds[i].fd);
+      key_fds[i].flags |= MP_FD_DEAD;
     }
+  }
+  return MP_INPUT_NOTHING;
+}
+    
+
+static mp_cmd_t*
+mp_input_read_keys(int time,int paused) {
+  int code = mp_input_read_key_code(time);
+  unsigned int j;
+  mp_cmd_t* ret;
+
+  if(mp_input_key_cb) {
+    for( ; code >= 0 ;   code = mp_input_read_key_code(0) ) {
+      if(code & MP_KEY_DOWN) continue;
+      code &= ~(MP_KEY_DOWN|MP_NO_REPEAT_KEY);
+      mp_input_key_cb(code);
+    }
+    return NULL;
+  }
+
+  for( ; code >= 0 ;   code = mp_input_read_key_code(0) ) {
     // key pushed
     if(code & MP_KEY_DOWN) {
       if(num_key_down > MP_MAX_KEY_DOWN) {
@@ -825,8 +879,6 @@ mp_input_read_keys(int time,int paused) {
     if(ret)
       return ret;
   }
-
-  last_loop = 0;
 
   // No input : autorepeat ?
   if(ar_rate > 0 && ar_state >=0 && num_key_down > 0 && ! (key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
@@ -960,17 +1012,25 @@ mp_input_get_queued_cmd(void) {
 
 mp_cmd_t*
 mp_input_get_cmd(int time, int paused) {
-  mp_cmd_t* ret;
+  mp_cmd_t* ret = NULL;
+  mp_cmd_filter_t* cf;
 
-  ret = mp_input_get_queued_cmd();
-  if(ret)
-    return ret;
+  while(1) {
+    ret = mp_input_get_queued_cmd();
+    if(ret) break;
+    ret = mp_input_read_keys(time,paused);
+    if(ret) break;
+    ret = mp_input_read_cmds(time);
+    break;
+  }
+  if(!ret) return NULL;
 
-  ret = mp_input_read_keys(time,paused);
-  if(ret)
-    return ret;
+  for(cf = cmd_filters ; cf ; cf = cf->next) {
+    if(cf->filter(ret,paused,cf->ctx))
+      return NULL;
+  }
 
-  return mp_input_read_cmds(time);
+  return ret;
 }
 
 void
