@@ -74,9 +74,9 @@ static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *inpu
   ICINFO icinfo;
 
   ret = ICGetInfo(encoder_hic, &icinfo, sizeof(ICINFO));
-  printf("%d - %d - %d\n", ret, icinfo.dwSize, sizeof(ICINFO));
-printf("Compressor type: %.4x\n", icinfo.fccType);
-printf("Compressor subtype: %.4x\n", icinfo.fccHandler);
+  printf("%ld - %ld - %d\n", ret, icinfo.dwSize, sizeof(ICINFO));
+printf("Compressor type: %.4lx\n", icinfo.fccType);
+printf("Compressor subtype: %.4lx\n", icinfo.fccHandler);
 printf("Compressor flags: %lu, version %lu, ICM version: %lu\n",
     icinfo.dwFlags, icinfo.dwVersion, icinfo.dwVersionICM);
 //printf("Compressor name: %s\n", icinfo.szName);
@@ -130,21 +130,21 @@ static int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *outp
 //  if(verbose) {
     printf("Starting compression:\n");
     printf(" Input format:\n");
-	printf("  biSize %ld\n", input_bih->biSize);
-	printf("  biWidth %ld\n", input_bih->biWidth);
-	printf("  biHeight %ld\n", input_bih->biHeight);
+	printf("  biSize %d\n", input_bih->biSize);
+	printf("  biWidth %d\n", input_bih->biWidth);
+	printf("  biHeight %d\n", input_bih->biHeight);
 	printf("  biPlanes %d\n", input_bih->biPlanes);
 	printf("  biBitCount %d\n", input_bih->biBitCount);
-	printf("  biCompression 0x%lx ('%.4s')\n", input_bih->biCompression, (char *)&input_bih->biCompression);
-	printf("  biSizeImage %ld\n", input_bih->biSizeImage);
+	printf("  biCompression 0x%x ('%.4s')\n", input_bih->biCompression, (char *)&input_bih->biCompression);
+	printf("  biSizeImage %d\n", input_bih->biSizeImage);
     printf(" Output format:\n");
-	printf("  biSize %ld\n", output_bih->biSize);
-	printf("  biWidth %ld\n", output_bih->biWidth);
-	printf("  biHeight %ld\n", output_bih->biHeight);
+	printf("  biSize %d\n", output_bih->biSize);
+	printf("  biWidth %d\n", output_bih->biWidth);
+	printf("  biHeight %d\n", output_bih->biHeight);
 	printf("  biPlanes %d\n", output_bih->biPlanes);
 	printf("  biBitCount %d\n", output_bih->biBitCount);
-	printf("  biCompression 0x%lx ('%.4s')\n", output_bih->biCompression, (char *)&output_bih->biCompression);
-	printf("  biSizeImage %ld\n", output_bih->biSizeImage);
+	printf("  biCompression 0x%x ('%.4s')\n", output_bih->biCompression, (char *)&output_bih->biCompression);
+	printf("  biSizeImage %d\n", output_bih->biSizeImage);
 //  }
 
   output_bih->biWidth=input_bih->biWidth;
@@ -165,13 +165,13 @@ static int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *outp
   mp_msg(MSGT_WIN32,MSGL_V,"ICCompressBegin OK\n");
 
     printf(" Output format after query/begin:\n");
-	printf("  biSize %ld\n", output_bih->biSize);
-	printf("  biWidth %ld\n", output_bih->biWidth);
-	printf("  biHeight %ld\n", output_bih->biHeight);
+	printf("  biSize %d\n", output_bih->biSize);
+	printf("  biWidth %d\n", output_bih->biWidth);
+	printf("  biHeight %d\n", output_bih->biHeight);
 	printf("  biPlanes %d\n", output_bih->biPlanes);
 	printf("  biBitCount %d\n", output_bih->biBitCount);
-	printf("  biCompression 0x%lx ('%.4s')\n", output_bih->biCompression, (char *)&output_bih->biCompression);
-	printf("  biSizeImage %ld\n", output_bih->biSizeImage);
+	printf("  biCompression 0x%x ('%.4s')\n", output_bih->biCompression, (char *)&output_bih->biCompression);
+	printf("  biSizeImage %d\n", output_bih->biSizeImage);
   
   encoder_buf_size=input_bih->biSizeImage;
   encoder_buf=malloc(encoder_buf_size);

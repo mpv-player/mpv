@@ -15,6 +15,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "sub.h"
 
 LIBVO_EXTERN(gl2)
 
@@ -61,14 +62,6 @@ static unsigned char *ImageData=NULL;
 //static int texture_id=1;
 
 static GLXContext wsGLXContext;
-static int                  wsGLXAttrib[] = { GLX_RGBA,
-                                       GLX_RED_SIZE,1,
-                                       GLX_GREEN_SIZE,1,
-                                       GLX_BLUE_SIZE,1,
-                                       GLX_ALPHA_SIZE,0,
-                                       GLX_DOUBLEBUFFER,
-                                       None };
-
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -606,7 +599,7 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 	template.screen = scr;
 	vi_list = XGetVisualInfo(dpy, VisualScreenMask, &template, &vi_num);
 	if (!vi_list) return -1;
-	best_weight = 1000000;
+	best_weight = 1000000; best_i=0;
 	for (i = 0; i < vi_num; i++) {
 		int val, res, w = 0;
 		/* of course, the visual must support OpenGL rendering... */

@@ -22,6 +22,7 @@
 #ifdef STREAMING
 #include "url.h"
 #include "network.h"
+extern int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url);
 #ifdef STREAMING_LIVE_DOT_COM
 #include "demux_rtp.h"
 int isSDPFile = 0;
@@ -531,7 +532,7 @@ if(dvd_title){
 int dvd_parse_chapter_range(struct config *conf, const char *range){
   const char *s;
   char *t;
-  conf; /* prevent warning from GCC */
+/*  conf; prevent warning from GCC */
   s = range;
   dvd_chapter = 1;
   dvd_last_chapter = 0;

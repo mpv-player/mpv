@@ -232,7 +232,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 	      unsigned int rlen;
 	      //
               int len;
-              unsigned int time2;
+              unsigned int time2=0;
 	      int keyframe=0;
 
               if(p>=p_end) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! invalid packet 1, sig11 coming soon...\n");
@@ -343,6 +343,9 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 }
 
 #include "stheader.h"
+
+extern void resync_audio_stream(sh_audio_t *sh_audio);
+extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;

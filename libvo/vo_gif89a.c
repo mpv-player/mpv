@@ -120,6 +120,9 @@ static const vo_info_t* get_info(void)
     return &vo_info;
 }
 
+/* forward declaration */
+int gif_reduce(int width, int height, unsigned char *source, unsigned char *destination, unsigned char *palette);
+
 static uint32_t draw_frame(uint8_t * src[])
 {
   uint8_t *use_data;

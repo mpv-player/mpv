@@ -522,6 +522,7 @@ extern int y4m_check_file(demuxer_t *demuxer);
 extern void demux_open_y4m(demuxer_t *demuxer);
 extern int roq_check_file(demuxer_t *demuxer);
 extern int pva_check_file(demuxer_t * demuxer);
+extern demuxer_t * demux_open_pva(demuxer_t * demuxer);
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
 extern int nuv_check_file(demuxer_t *demuxer);
@@ -531,6 +532,7 @@ extern int demux_ogg_open(demuxer_t* demuxer);
 extern int demux_rawaudio_open(demuxer_t* demuxer);
 extern int smjpeg_check_file(demuxer_t *demuxer);
 extern int demux_open_smjpeg(demuxer_t* demuxer);
+extern int bmp_check_file(demuxer_t *demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 

@@ -177,7 +177,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
-	char *pos, *max;
 	int e;
 
 	vf->config=config;

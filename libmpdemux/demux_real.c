@@ -660,6 +660,8 @@ got_video:
   }//    goto loop;
 }
 
+extern void print_wave_header(WAVEFORMATEX *h);
+
 void demux_open_real(demuxer_t* demuxer)
 {
     real_priv_t* priv = demuxer->priv;

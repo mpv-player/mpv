@@ -129,6 +129,8 @@ static int max_framesize=0;
 #include "libmpcodecs/dec_video.h"
 //#include "libmpcodecs/vf.h"
 
+extern void vf_list_plugins();
+
 //**************************************************************************//
 //**************************************************************************//
 
@@ -380,6 +382,10 @@ static void uninit_player(unsigned int mask){
 
   current_module=NULL;
 }
+
+#ifdef X11_FULLSCREEN
+extern void vo_uninit( void );
+#endif
 
 void exit_player(char* how){
 

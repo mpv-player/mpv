@@ -269,7 +269,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
     /* if the CACHE is enabled, extract some unique disc ID */
     if(dvdcss_cache_dir){
 	char* disc_id=NULL;
-	char title_name[64];
+	/*char title_name[64];*/
 	char sector[DVDCSS_BLOCK_SIZE];
 	// 32768+40  -> disc title (32 uppercase chars)
 	// 32768+813 -> disc manufacturing date + serial no (16 digit number)
@@ -289,14 +289,14 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 	        for ( i=0;i<16;i++ )
 		    if ( ( title_name[i] < '0' )||( title_name[i] > '9' ) ){
 		        disc_id=malloc(16+4);
-	                sprintf( disc_id,"%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
+	                sprintf( disc_id,"%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
 			break;
 		    }
 		if(!disc_id) disc_id=strdup(title_name);
 	    }
 	    if(disc_id){
 		// yeah, we have a disc name/id, let's set up cache path:
-		char* dir;
+		/*char* dir;*/
 		dvdcss->psz_cache = malloc(strlen(dvdcss_cache_dir)+strlen(disc_id)+4);
 		sprintf(dvdcss->psz_cache,"%s/%s",dvdcss_cache_dir,disc_id);
 		mkdir( dvdcss->psz_cache,493 );

@@ -440,6 +440,9 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
   
 }
 
+extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_video_header(BITMAPINFOHEADER *h);
+
 /// Open an ogg physical stream
 int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
@@ -868,6 +871,8 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   return demuxer;
 
 }
+
+extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   ogg_demuxer_t* ogg_d = demuxer->priv;

@@ -246,9 +246,6 @@ static int       vo_dga_src_height;      // height of video in pixels
 static int       vo_dga_src_offset=0;    // offset in src
 static int       vo_dga_vp_offset=0;     // offset in dest
 static int       vo_dga_bytes_per_line;  // bytes per line to copy
-static int       vo_dga_src_skip;        // bytes to skip after copying one 
-                                         // line 
-                                         // (not supported yet) in src
 static int       vo_dga_vp_skip;         // dto. for dest 
 static int       vo_dga_lines;           // num of lines to copy                                
 static int       vo_dga_hw_mode = 0;     // index in mode list that is actually
@@ -333,7 +330,6 @@ static void fillblock(char *strt, int yoff, int lines, int val){
 static uint32_t draw_frame( uint8_t *src[] ){
 
   int vp_skip = vo_dga_vp_skip;
-  int lpl = vo_dga_bytes_per_line >> 2; 
   int numlines = vo_dga_lines;     
 
   char *s, *d;
@@ -366,7 +362,6 @@ static uint32_t draw_frame( uint8_t *src[] ){
   case VDM_CONV_15TO16:
         {
 	  int i;
-	  char *e;
 	  for(i=0; i< vo_dga_lines; i++){
             rgb15to16( s, d, vo_dga_bytes_per_line);
 	    d+=vo_dga_bytes_per_line;
@@ -400,7 +395,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
 
 static void check_events(void)
 {
-  int e=vo_x11_check_events(mDisplay);
+  vo_x11_check_events(mDisplay);
 }
 
 //---------------------------------------------------------

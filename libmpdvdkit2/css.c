@@ -301,7 +301,7 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
     if(dvdcss->psz_cache){
 	int fd;
 	key_file=malloc(strlen(dvdcss->psz_cache)+12+4);
-	sprintf(key_file,"%s/%0.10x",dvdcss->psz_cache,i_block);
+	sprintf(key_file,"%s/%.10x",dvdcss->psz_cache,i_block);
 	if ( (fd=open( key_file,O_RDONLY ) ) > 0 ){
 	    if(read(fd, p_title_key, 5)==5){
 		// success!

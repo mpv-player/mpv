@@ -777,7 +777,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     	return(EFAULT);
     }
     mga_src_base &= (~0xFFFF); /* 64k boundary */
-    if (mga_verbose > 1) printf("[mga] YUV buffer base: %p\n", mga_src_base);
+    if (mga_verbose > 1) printf("[mga] YUV buffer base: %#x\n", mga_src_base);
 
     config->dga_addr = mga_mem_base + mga_src_base;
 
@@ -1325,7 +1325,7 @@ int vixInit(void)
 	}
     }
 
-    if (mga_verbose > 1) printf("[mga] hardware addresses: mmio: %p, framebuffer: %p\n",
+    if (mga_verbose > 1) printf("[mga] hardware addresses: mmio: %#x, framebuffer: %#x\n",
         pci_info.base1, pci_info.base0);
 
     mga_mmio_base = map_phys_mem(pci_info.base1,0x4000);

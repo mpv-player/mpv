@@ -202,6 +202,8 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
     return 0;
 }
 
+extern char *get_path(char *filename);
+
 int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,char** video_fm_list){
 char* vc_l_default[2]={"",(char*)NULL};
 // hack:

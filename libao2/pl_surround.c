@@ -173,7 +173,7 @@ static double steering_matrix[][12] = {
 };
 
 // Experimental moving average dominances
-static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
+//static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
 
 // processes 'ao_plugin_data.len' bytes of 'data'
 // called for every block of data

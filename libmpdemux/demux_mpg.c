@@ -345,6 +345,9 @@ do{
   return 1;
 }
 
+extern void resync_audio_stream(sh_audio_t *sh_audio);
+extern void skip_audio_frame(sh_audio_t *sh_audio);
+
 void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;

@@ -28,6 +28,7 @@ typedef struct da_priv {
 
 extern void free_sh_audio(sh_audio_t* sh);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
+extern void print_wave_header(WAVEFORMATEX *h);
 
 int hr_mp3_seek = 0;
 

@@ -1139,8 +1139,6 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	uint8_t *dst;
-	uint8_t *src;
-        int i;
 
     SDL_OVR_LOCK(-1)
 
@@ -1195,7 +1193,6 @@ static void check_events (void)
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Event event;
 	SDLKey keypressed = 0;
-	static int modifiers = 0;
 	
 	/* Poll the waiting SDL Events */
 	while ( SDL_PollEvent(&event) ) {

@@ -108,6 +108,10 @@ int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     return 1;
 }
 
+ /* forward declarations */
+int tv_set_freq(tvi_handle_t *tvh, unsigned long freq);
+int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq);
+
 static int open_tv(tvi_handle_t *tvh)
 {
     int i;

@@ -2,7 +2,9 @@
 
 #include "geometry.h"
 #include "../mp_msg.h"
+// #include "../mplayer.h" /* exit_player() */
 #include <string.h>
+#include <stdlib.h> /* strtol */
 
 /* A string of the form xpos[%]:ypos[%] */
 char *vo_geometry = NULL;
@@ -53,7 +55,7 @@ int geometry(int *xpos, int *ypos, int scrw, int scrh, int vidw, int vidh, int f
 			return geometry_error();
 	}
 
-	if(*colpos != '\0')
+	if(*colpos != '\0') {
 		if(vo_geometry[glen - 1] == '%') {
 			if(!get_num(colpos + 1, &yper, vo_geometry + glen - 1))
 				return geometry_error();
@@ -61,6 +63,7 @@ int geometry(int *xpos, int *ypos, int scrw, int scrh, int vidw, int vidh, int f
 			if(!get_num(colpos + 1, ypos, vo_geometry + glen))
 				return geometry_error();
 		}
+	}
 
 	if(xper)
 		*xpos = (scrw - vidw) * ((float)xper / 100.0);

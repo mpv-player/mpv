@@ -39,11 +39,13 @@ static int init(sh_audio_t *sh_audio)
   return 1;
 }
 
+extern void print_wave_header(WAVEFORMATEX *h);
+
 static int preinit(sh_audio_t *sh_audio)
 {
     HRESULT ret;
     WAVEFORMATEX *in_fmt = sh_audio->wf;
-    unsigned int srcsize = 0;
+    DWORD srcsize = 0;
     acm_context_t *priv;
     
     priv = malloc(sizeof(acm_context_t));

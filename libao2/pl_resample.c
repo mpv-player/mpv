@@ -160,6 +160,10 @@ static void uninit(){
 static void reset(){
 }
 
+/* forward declarations */
+int upsample();
+int downsample();
+
 // processes 'ao_plugin_data.len' bytes of 'data'
 // called for every block of data
 // FIXME: this routine needs to be optimized (it is probably possible to do a lot here)

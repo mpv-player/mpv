@@ -195,7 +195,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     XVisualInfo vinfo;
-    XSizeHints hint;
+//    XSizeHints hint;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
     XWindowAttributes attribs;

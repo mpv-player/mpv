@@ -566,6 +566,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 }
 
 //extern float initial_pts_delay;
+extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
     avi_priv_t *priv=demuxer->priv;

@@ -12,6 +12,7 @@ CpuCaps gCpuCaps;
 #ifdef ARCH_X86
 
 #include <stdio.h>
+#include <string.h>
 
 #ifdef __FreeBSD__
 #include <sys/types.h>

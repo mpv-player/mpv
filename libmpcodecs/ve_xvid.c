@@ -50,6 +50,7 @@ static int const divx4_general_presets[7] = {
 };
 
 extern char* passtmpfile;
+extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
 
 static int xvidenc_pass = 0;
 static int xvidenc_quality = sizeof(divx4_motion_presets) / sizeof(divx4_motion_presets[0]) - 1; /* best quality */
@@ -136,7 +137,10 @@ config(struct vf_instance_s* vf,
     enc_param.rc_buffer = xvidenc_rc_buffer;
     enc_param.min_quantizer = xvidenc_min_quantizer;
     enc_param.max_quantizer = xvidenc_max_quantizer;
-    enc_param.max_key_interval = xvidenc_max_key_interval;
+    if( xvidenc_max_key_interval > 0 )
+	enc_param.max_key_interval = xvidenc_max_key_interval;
+    else
+	enc_param.max_key_interval = 10 * enc_param.fbase / enc_param.fincr;
     switch (xvid_encore(NULL, XVID_ENC_CREATE, &enc_param, NULL)) {
     case XVID_ERR_FAIL:
 	mp_msg(MSGT_MENCODER,MSGL_ERR, "xvid: encoder creation failed\n");

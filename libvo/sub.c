@@ -4,6 +4,10 @@
 #include <string.h>
 
 #include "config.h"
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #include "mp_msg.h"
 #include "video_out.h"
 #include "font_load.h"
@@ -434,7 +438,6 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 inline static void vo_update_spudec_sub(mp_osd_obj_t* obj, int dxs, int dys)
 {
   unsigned int bbox[4];
-  int i;
   spudec_calc_bbox(vo_spudec, dxs, dys, bbox);
   obj->bbox.x1 = bbox[0];
   obj->bbox.x2 = bbox[1];

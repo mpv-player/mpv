@@ -98,10 +98,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
     static int init_done = 0;
     int r;
-    int cb = 1;
-    int cr = 2;
     mp_image_t* mpi;
-    int w, h;
+    int w;
     lzo_context_t *priv = sh->context;
 
     if (len <= 0) {

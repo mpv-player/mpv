@@ -118,7 +118,7 @@ static void reset(){
 // open & setup audio device
 // return: 1=success 0=fail
 static int init(){
-  int   c,k   = 0;
+  int   k   = 0;
   float F[KM] = CF;
   
   // Check input format

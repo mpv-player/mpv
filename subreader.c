@@ -243,7 +243,7 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
 		char *curptr=current->text[i]=(char *)malloc (len+1);
 		if (!current->text[i]) return ERR;
 		//strncpy (current->text[i], line, len); current->text[i][len]='\0';
-                for(j; j<len; j++) {
+                for(; j<len; j++) {
 		    /* let's filter html tags ::atmos */
 		    if(line[j]=='>') {
 			skip=0;

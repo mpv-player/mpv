@@ -130,7 +130,6 @@ void qt_decode_rpza(char *encoded, int encoded_size, char *decoded, int width,
 										int height, int bytes_per_pixel)
 {
 
-	int i;
 	int stream_ptr = 0;
 	int chunk_size;
 	unsigned char opcode;
@@ -145,7 +144,6 @@ void qt_decode_rpza(char *encoded, int encoded_size, char *decoded, int width,
 	int pixel_ptr = 0;
 	int pixel_x, pixel_y;
 	int row_inc = bytes_per_pixel * (width - 4);
-	int max_height = row_inc * height;
 	int block_x_inc = bytes_per_pixel * 4;
 	int block_y_inc = bytes_per_pixel * width;
 	int block_ptr;

@@ -130,7 +130,6 @@ void Super2xSaI_ex(uint8 *src, uint32 src_pitch,
 		   uint8 *dst, uint32 dst_pitch,
 		   uint32 width, uint32 height, int sbpp) {
 
-	int j;
 	unsigned int x, y;
 	unsigned long color[16];
 

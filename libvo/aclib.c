@@ -9,6 +9,7 @@
 */
 #include <stddef.h>
 #include "../cpudetect.h"
+#include "fastmemcpy.h"
 
 #define BLOCK_SIZE 4096
 #define CONFUSION_FACTOR 0
@@ -177,6 +178,7 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
 #endif
 
 #endif //!RUNTIME_CPUDETECT
+	return to;
 }
 
 #endif /* use fastmemcpy */

@@ -192,11 +192,11 @@ static int preinit(sh_audio_t *sh){
     WantedBufferSize=OutputFormatInfo.numChannels*OutputFormatInfo.sampleRate*2;
     error = SoundConverterGetBufferSizes(myConverter,
 	WantedBufferSize,&FramesToGet,&InputBufferSize,&OutputBufferSize);
-    printf("SoundConverterGetBufferSizes:%i\n");
-    printf("WantedBufferSize = %i\n",WantedBufferSize);
-    printf("InputBufferSize  = %i\n",InputBufferSize);
-    printf("OutputBufferSize = %i\n",OutputBufferSize);
-    printf("FramesToGet = %i\n",FramesToGet);
+    printf("SoundConverterGetBufferSizes:%i\n",error);
+    printf("WantedBufferSize = %li\n",WantedBufferSize);
+    printf("InputBufferSize  = %li\n",InputBufferSize);
+    printf("OutputBufferSize = %li\n",OutputBufferSize);
+    printf("FramesToGet = %li\n",FramesToGet);
     
     InFrameSize=InputBufferSize/FramesToGet;
     OutFrameSize=OutputBufferSize/FramesToGet;
@@ -256,7 +256,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
     InputBufferSize=FramesToGet*InFrameSize;
 
-    printf("FramesToGet = %i  (%i -> %i bytes)\n",FramesToGet,
+    printf("FramesToGet = %li  (%li -> %li bytes)\n",FramesToGet,
 	InputBufferSize, FramesToGet*OutFrameSize);
 
     if(InputBufferSize>sh->a_in_buffer_len){
@@ -270,8 +270,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     error = SoundConverterConvertBuffer(myConverter,sh->a_in_buffer,
 	FramesToGet,buf,&ConvertedFrames,&ConvertedBytes);
     printf("SoundConverterConvertBuffer:%i\n",error);
-    printf("ConvertedFrames = %i\n",ConvertedFrames);
-    printf("ConvertedBytes = %i\n",ConvertedBytes);
+    printf("ConvertedFrames = %li\n",ConvertedFrames);
+    printf("ConvertedBytes = %li\n",ConvertedBytes);
     
     InputBufferSize=(ConvertedBytes/OutFrameSize)*InFrameSize; // FIXME!!
     sh->a_in_buffer_len-=InputBufferSize;

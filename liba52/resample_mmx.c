@@ -13,7 +13,6 @@ static uint64_t __attribute__((aligned(8))) wm0101= 0x0000FFFF0000FFFFLL;
 static uint64_t __attribute__((aligned(8))) wm1100= 0xFFFFFFFF00000000LL;
 
 static int a52_resample_MONO_to_5_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-512, %%esi		\n\t"
@@ -51,7 +50,6 @@ static int a52_resample_MONO_to_5_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_STEREO_to_2_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 /* benchmark scores are 0.3% better with SSE but we would need to set bias=0 and premultiply it
 #ifdef HAVE_SSE
@@ -100,7 +98,6 @@ static int a52_resample_STEREO_to_2_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_3F_to_5_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -156,7 +153,6 @@ static int a52_resample_3F_to_5_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_2F_2R_to_4_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -208,7 +204,6 @@ static int a52_resample_2F_2R_to_4_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_3F_2R_to_5_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -268,7 +263,6 @@ static int a52_resample_3F_2R_to_5_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_MONO_LFE_to_6_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -309,7 +303,6 @@ static int a52_resample_MONO_LFE_to_6_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_STEREO_LFE_to_6_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -348,7 +341,6 @@ static int a52_resample_STEREO_LFE_to_6_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_3F_LFE_to_6_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -389,7 +381,6 @@ static int a52_resample_3F_LFE_to_6_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_2F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
@@ -436,7 +427,6 @@ static int a52_resample_2F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
 }
 
 static int a52_resample_3F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
-    int i;
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"

@@ -16,7 +16,10 @@ static mga_vid_config_t mga_vid_config;
 static uint8_t *vid_data, *frames[4];
 static int f = -1;
 
-static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
+static uint32_t               drwX,drwY,drwWidth,drwHeight;
+#ifdef VO_XMGA
+static uint32_t               drwBorderWidth,drwDepth;
+#endif
 static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -324,7 +327,7 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) // || ( !vo_fs && vo_panscan_amount ) )
        {
-        int old_y = vo_panscan_y;
+//        int old_y = vo_panscan_y;
 	panscan_calc();
 //        if ( old_y != vo_panscan_y ) 
 	set_window();

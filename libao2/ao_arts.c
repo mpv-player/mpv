@@ -44,7 +44,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	int err;
 	int frag_spec;
 
-	if(err=arts_init()) {
+	if( (err=arts_init()) ) {
 		mp_msg(MSGT_AO, MSGL_ERR, "AO: [arts] %s\n", arts_error_text(err));
 		return 0;
 	}

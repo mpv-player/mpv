@@ -43,6 +43,7 @@
 #include "video_out_internal.h"
 #include "drivers/3dfx.h"
 #include "aspect.h"
+#include "sub.h"
 
 LIBVO_EXTERN(tdfxfb)
 

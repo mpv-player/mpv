@@ -64,7 +64,7 @@ void print_wave_header(WAVEFORMATEX *h){
   if(h->wFormatTag==0x55 && h->cbSize>=12){
       MPEGLAYER3WAVEFORMAT* h2=(MPEGLAYER3WAVEFORMAT *)h;
       printf("mp3.wID=%d\n",h2->wID);
-      printf("mp3.fdwFlags=0x%X\n",h2->fdwFlags);
+      printf("mp3.fdwFlags=0x%lX\n",h2->fdwFlags);
       printf("mp3.nBlockSize=%d\n",h2->nBlockSize);
       printf("mp3.nFramesPerBlock=%d\n",h2->nFramesPerBlock);
       printf("mp3.nCodecDelay=%d\n",h2->nCodecDelay);
@@ -83,13 +83,13 @@ void print_wave_header(WAVEFORMATEX *h){
 
 void print_video_header(BITMAPINFOHEADER *h){
   printf("======= VIDEO Format ======\n");
-	printf("  biSize %ld\n", h->biSize);
-	printf("  biWidth %ld\n", h->biWidth);
-	printf("  biHeight %ld\n", h->biHeight);
+	printf("  biSize %d\n", h->biSize);
+	printf("  biWidth %d\n", h->biWidth);
+	printf("  biHeight %d\n", h->biHeight);
 	printf("  biPlanes %d\n", h->biPlanes);
 	printf("  biBitCount %d\n", h->biBitCount);
-	printf("  biCompression %ld='%.4s'\n", h->biCompression, (char *)&h->biCompression);
-	printf("  biSizeImage %ld\n", h->biSizeImage);
+	printf("  biCompression %d='%.4s'\n", h->biCompression, (char *)&h->biCompression);
+	printf("  biSizeImage %d\n", h->biSizeImage);
   printf("===========================\n");
 }
 

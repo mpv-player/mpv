@@ -732,7 +732,7 @@ static FT_ULong decode_char(iconv_t *cd, char c) {
     int inbytesleft = 1;
     int outbytesleft = sizeof(FT_ULong);
 
-    size_t count = iconv(*cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    iconv(*cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
 
     /* convert unicode BigEndian -> MachineEndian */
     o = be2me_32(o);
@@ -785,7 +785,9 @@ static int prepare_charset(char *charmap, char *encoding, FT_ULong *charset, FT_
 }
 
 static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *charcodes) {
+#ifdef HAVE_FREETYPE21
     FT_ULong  charcode;
+#endif
     FT_UInt   gindex;
     int i,j;
 

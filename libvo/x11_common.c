@@ -1103,6 +1103,7 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
 	else if (!strcasecmp(name, "contrast")) *value = vo_contrast;
 	else if (!strcasecmp(name, "gamma")) *value = vo_gamma;
 	else return VO_NOTIMPL;
+	return VO_TRUE;
 }
 
 

@@ -49,7 +49,7 @@ struct vf_priv_s {
 
 /***************************************************************************/
 
-static int interleave(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, int interleave, int swap){
+static void interleave(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, int interleave, int swap){
 	const int a= swap;
 	const int b= 1-a;
 	const int m= h>>1;
@@ -124,7 +124,6 @@ static void parse(FilterParam *fp, char* args){
 }
 
 static int open(vf_instance_t *vf, char* args){
-	char *pos, *max;
 
 	vf->put_image=put_image;
 //	vf->get_image=get_image;

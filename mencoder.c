@@ -289,6 +289,7 @@ void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags){
     aviwrite_write_chunk(muxer,s,muxer_f,len,flags);
 }
 
+extern void print_wave_header(WAVEFORMATEX *h);
 
 int main(int argc,char* argv[]){
 
@@ -684,7 +685,7 @@ case ACODEC_COPY:
 	mux_a->h.dwScale=mux_a->h.dwSampleSize;
 	mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     }
-    printf("audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d bps=%d sample=%d)\n",
+    printf("audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample=%ld)\n",
 	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
 	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
     break;
@@ -1194,7 +1195,7 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     mux_a->h.dwScale=1;
     mux_a->wf->nBlockAlign=1;
-    printf("\n\nCBR audio: %d bytes/sec, %d bytes/block\n",
+    printf("\n\nCBR audio: %ld bytes/sec, %d bytes/block\n",
 	    mux_a->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize);
 }
 #endif
