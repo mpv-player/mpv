@@ -2085,7 +2085,7 @@ try other codecs except FFmpeg's MP3 decoder
 .PD 1
 .
 .TP
-.B \-af <plugin1[=options],plugin2,...>
+.B \-af <filter1[=option1:option2:...],filter2,...>
 Activate a comma separated list of audio filters and their options.
 .br
 Available filters are:
@@ -2121,8 +2121,8 @@ This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
 .RSss
 v: desired gain in dB for all channels in the stream.
-The gain can be set from -200dB to +40dB (where -200dB mutes the sound
-completely and +40dB equals a gain of 1000).
+The gain can be set from -200dB to +60dB (where -200dB mutes the sound
+completely and +60dB equals a gain of 1000).
 .br
 sc: enable soft clipping.
 .REss
