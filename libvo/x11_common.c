@@ -155,6 +155,9 @@ int vo_wm_detect( void )
  int             format;
  unsigned long   nitems, bytesafter;
  Atom          * args = NULL;
+ int             icewm_hack = 0;
+ int             metacity_hack = 0;
+ char          * name;
  
  if ( WinID >= 0 ) return vo_wm_Unknown;
  
@@ -164,12 +167,19 @@ int vo_wm_detect( void )
   {
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
    for (i = 0; i < nitems; i++)
-     if (!strcmp( XGetAtomName (mDisplay, args[i]), "_WIN_LAYER"))
-     {
-       XFree( args );
-       return vo_wm_Layered;
-     }
+   {
+     name = XGetAtomName (mDisplay, args[i]);
+     if (!strncmp( name, "_WIN_LAYER", 10))
+       wm = vo_wm_Layered;
+     if (!strncmp( name, "_ICEWM_TRAY", 11))
+       icewm_hack = 1;
+     if (!strncmp( name, "_WIN_HINTS", 10))
+       // metacity is the only manager which supports _WIN_LAYER but not _WIN_HINTS
+       metacity_hack = 1;
+   }
    XFree( args );
+   if (wm && !icewm_hack && metacity_hack)
+     return wm;
   }
 
 // --- netwm 
@@ -177,6 +187,7 @@ int vo_wm_detect( void )
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
   {
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is of class NetWM.\n" );
+   net_wm_support = 0;
    for (i = 0; i < nitems; i++)
      net_wm_support |= net_wm_support_state_test (XGetAtomName (mDisplay, args[i]));
    XFree( args );
@@ -184,7 +195,7 @@ int vo_wm_detect( void )
    {
      // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
      // (in their implementation it only changes internal state of window, nothing more!!!)
-     if (vo_wm_NetWM == SUPPORT_FULLSCREEN)
+     if (net_wm_support & SUPPORT_FULLSCREEN)
      {
         type=XInternAtom( mDisplay,"_BLACKBOX_PID",False );
 	if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
@@ -197,9 +208,20 @@ int vo_wm_detect( void )
 	XFree (args);
      }
      return vo_wm_NetWM;
+   } else
+   if (icewm_hack) {
+     // Next ugly hack for new IceWM (1.2.x). It supports FULLSCREEN state but doesn't say a word
+     // about it. What's more it doesn't accept regular resising, so we have to us _NET_WM_STATE_FULLSCREEN
+     mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is a broken IceWM.\n" );
+     net_wm_support |= SUPPORT_FULLSCREEN;
+     return vo_wm_NetWM;
    }
   }
 
+ // this is old good IceWM, treat it right
+ if (icewm_hack)
+   return vo_wm_Layered;
+ 
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
  return wm;
 }    
