@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.57 -->
+<!-- synced with 1.58 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -321,7 +321,7 @@ Készíts egy linket a nyers eszközről a DVD eszközre.
 </para>
 
 <screen>
-# ln -s /dev/rdsk/c<replaceable>&lt;SCSI busz hivatkozás&gt;</replaceable>t<replaceable>&lt;SCSI cél ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;eszköz&lt;</replaceable>
+# ln -s /dev/rdsk/c<replaceable>&lt;SCSI busz hivatkozás&gt;</replaceable>t<replaceable>&lt;SCSI cél ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;eszköz&gt;</replaceable>
 </screen>
 
 <para>
@@ -362,7 +362,7 @@ Megoldás: Használd a legújabb Mesa depot fájlt.
 </para>
 
 <para>
-Megoldás: Használd a configure extralib opcióját
+Megoldás: Használd a configure extralibdir opcióját
 <option>--with-extralibdir="/usr/lib -lrt"</option>
 </para>
 </listitem>
