@@ -89,7 +89,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   f=open(p->device,O_RDONLY);
   if(f<0){ 
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,p->device);
-    close(f);
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
