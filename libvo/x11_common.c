@@ -171,7 +171,8 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
 	    event->error_code, event->request_code, event->minor_code);
     }
     
-    exit_player("X11 error");
+    abort();
+    //exit_player("X11 error");
 #undef MSGLEN
 }
 
@@ -517,7 +518,7 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 }
 
 Window     vo_window = None;
-GC         vo_gc;
+GC         vo_gc = NULL;
 XSizeHints vo_hint;
 
 #ifdef HAVE_NEW_GUI
@@ -526,27 +527,29 @@ XSizeHints vo_hint;
  }
 #endif
 
-int vo_x11_uninit(Display *display, Window window)
+void vo_x11_uninit()
 {
-    vo_showcursor( display,window );
+    if(vo_window!=None) vo_showcursor( mDisplay,vo_window );
 
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
     if ( !use_gui )
 #endif
     {
-	XSetBackground( mDisplay,vo_gc,0 );
-	XClearWindow( mDisplay,vo_window );
-  
-	/* and -wid is set */
-	if (WinID < 0)
-	 {
-	  XUnmapWindow( display,window );
-	  XDestroyWindow(display, window);
-	 }
+	if(vo_gc){
+	  XSetBackground( mDisplay,vo_gc,0 );
+	  vo_gc=NULL;
+	}
+	if(vo_window!=None){
+	  XClearWindow( mDisplay,vo_window );
+	  if (WinID < 0){
+	    XUnmapWindow( mDisplay,vo_window );
+	    XDestroyWindow(mDisplay, vo_window);
+	  }
+	  vo_window=None;
+	}
 	vo_fs=0;
     }
-    return(1);
 }
 
        int vo_mouse_timer_const = 30;
@@ -562,7 +565,7 @@ int vo_x11_check_events(Display *mydisplay){
 // unsigned long  vo_KeyTable[512];
 
  if ( ( vo_mouse_autohide )&&( --vo_mouse_counter == 0 ) ) vo_hidecursor( mydisplay,vo_window );
- 
+
  while ( XPending( mydisplay ) )
   {
    XNextEvent( mydisplay,&Event );
@@ -573,6 +576,7 @@ int vo_x11_check_events(Display *mydisplay){
       if ( vo_window != Event.xany.window ) continue;
      }
    #endif
+//       printf("\rEvent.type=%X  \n",Event.type);
     switch( Event.type )
      {
       case Expose:

@@ -56,8 +56,7 @@ static unsigned char *ImageDataLocal=NULL;
 static unsigned char *ImageData=NULL;
 
 /* X11 related variables */
-static Window mywindow;
-static int X_already_started = 0;
+//static Window vo_window;
 
 //static int texture_id=1;
 
@@ -623,7 +622,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_width = width;
 	image_format = format;
   
-	if (X_already_started) return -1;
 	if(!vo_init()) return -1;
 
 	aspect_save_orig(width,height);
@@ -631,8 +629,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 	aspect(&d_width,&d_height,A_NOZOOM);
-
-	X_already_started++;
 
         if( flags&0x01 )
         {
@@ -673,46 +669,46 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
-  mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
+  vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
     hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
 
-  vo_x11_classhint( mDisplay,mywindow,"gl2" );
-  vo_hidecursor(mDisplay,mywindow);
+  vo_x11_classhint( mDisplay,vo_window,"gl2" );
+  vo_hidecursor(mDisplay,vo_window);
 
   wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
 
-  if ( flags&0x01 ) vo_x11_decoration( mDisplay,mywindow,0 );
+  if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
 
-	XSelectInput(mDisplay, mywindow, StructureNotifyMask);
+	XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 
 	/* Tell other applications about this window */
 
-	XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
+	XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
 
 	/* Map window. */
 
-	XMapWindow(mDisplay, mywindow);
+	XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
-	vo_x11_xinerama_move(mDisplay,mywindow);
+	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-        XClearWindow(mDisplay,mywindow);
+        XClearWindow(mDisplay,vo_window);
 
 	/* Wait for map. */
 	do 
 	{
 		XNextEvent(mDisplay, &xev);
 	}
-	while (xev.type != MapNotify || xev.xmap.event != mywindow);
+	while (xev.type != MapNotify || xev.xmap.event != vo_window);
 
-	XSelectInput(mDisplay, mywindow, NoEventMask);
+	XSelectInput(mDisplay, vo_window, NoEventMask);
 
-  glXMakeCurrent( mDisplay,mywindow,wsGLXContext );
+  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
 	XFlush(mDisplay);
 	XSync(mDisplay, False);
 
-	//XSelectInput(mDisplay, mywindow, StructureNotifyMask); // !!!!
-        XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask | PointerMotionMask
+	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
+        XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		 | ButtonPressMask | ButtonReleaseMask
 #endif
@@ -1009,7 +1005,7 @@ flip_page(void)
 
 //  glFlush();
   glFinish();
-  glXSwapBuffers( mDisplay,mywindow );
+  glXSwapBuffers( mDisplay,vo_window );
   
   if(!used_info_done)
   {
@@ -1096,9 +1092,9 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+  if ( !vo_config_count ) return;
   saver_on(mDisplay); // screen saver back on
-
-  vo_x11_uninit(mDisplay, mywindow);
+  vo_x11_uninit();
 }
 
 static uint32_t preinit(const char *arg)

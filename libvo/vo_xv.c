@@ -794,7 +794,7 @@ static void uninit(void)
 #ifdef HAVE_XF86VM
  vo_vm_close(mDisplay);
 #endif
- if(vo_config_count) vo_x11_uninit(mDisplay, vo_window);
+ if(vo_config_count) vo_x11_uninit();
 
 #else
 
@@ -804,7 +804,7 @@ static void uninit(void)
 #ifdef HAVE_XF86VM
  vo_vm_close(mDisplay);
 #endif
- vo_x11_uninit(mDisplay, vo_window);
+ vo_x11_uninit();
 
 #endif
 }

@@ -601,7 +601,7 @@ uninit(void)
 #endif
 
  zoomFlag=0;
- vo_x11_uninit(mDisplay, vo_window);
+ vo_x11_uninit();
 
  freeSwsContext(swsContext);
 }

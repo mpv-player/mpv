@@ -77,8 +77,6 @@ static XImage               * myximage;
 
 static uint32_t               mDepth, bpp, mode;
 static XWindowAttributes      attribs;
-static uint32_t               X_already_started=0;
-
 static uint32_t               fgColor;
 
 static uint32_t               mvHeight;
@@ -195,7 +193,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  unsigned long          xswamask;
 
- if ( X_already_started ) return -1;
  if (!vo_init()) return -1;
 
  width+=width&1;
@@ -337,7 +334,7 @@ uninit(void)
  inited=0;
  mga_uninit();
  saver_on(mDisplay);
- vo_x11_uninit(mDisplay, vo_window);
+ vo_x11_uninit();
  printf("vo: uninit!\n");
 }
 

@@ -52,13 +52,11 @@ static unsigned char *ImageData=NULL;
 
 /* X11 related variables */
 //static Display *mydisplay;
-static Window mywindow;
+//static Window vo_window;
 //static GC mygc;
 //static XImage *myximage;
 //static int depth,mode;
 //static XWindowAttributes attribs;
-static int X_already_started = 0;
-
 //static int texture_id=1;
 
 static GLXContext wsGLXContext;
@@ -115,20 +113,17 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_width = width;
 	image_format = format;
   
-	if (X_already_started) return -1;
 	if(!vo_init()) return -1;
 
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
-	X_already_started++;
-
 	aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef X11_FULLSCREEN
-        if( flags&0x01 ){ // (-fs)
-          aspect(&d_width,&d_height,A_ZOOM);
-        }
+//        if( flags&0x01 ){ // (-fs)
+//          aspect(&d_width,&d_height,A_ZOOM);
+//        }
 #endif
 	hint.x = 0;
 	hint.y = 0;
@@ -160,30 +155,31 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 //  xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask | CWCursor | CWOverrideRedirect | CWSaveUnder | CWX | CWY | CWWidth | CWHeight;
 
-  mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
+  vo_window = XCreateWindow(mDisplay, mRootWin,
     hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
 
-  vo_x11_classhint( mDisplay,mywindow,"gl" );
-  vo_hidecursor(mDisplay,mywindow);
+  vo_x11_classhint( mDisplay,vo_window,"gl" );
+  vo_hidecursor(mDisplay,vo_window);
 
   wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
 //  XStoreName( wsDisplay,wsMyWin,wsSysName );
 
 //  printf("GLXcontext ok\n");
 
-  if ( flags&0x01 ) vo_x11_decoration( mDisplay,mywindow,0 );
+//  if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
 
-	XSelectInput(mDisplay, mywindow, StructureNotifyMask);
+	XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 
 	/* Tell other applications about this window */
 
-	XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
+	XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
 
 	/* Map window. */
 
-	XMapWindow(mDisplay, mywindow);
+	XMapWindow(mDisplay, vo_window);
+	if ( flags&1 ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
-	vo_x11_xinerama_move(mDisplay,mywindow);
+	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
 
 	/* Wait for map. */
@@ -191,24 +187,24 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	{
 		XNextEvent(mDisplay, &xev);
 	}
-	while (xev.type != MapNotify || xev.xmap.event != mywindow);
+	while (xev.type != MapNotify || xev.xmap.event != vo_window);
 
-	XSelectInput(mDisplay, mywindow, NoEventMask);
+	XSelectInput(mDisplay, vo_window, NoEventMask);
 
-  glXMakeCurrent( mDisplay,mywindow,wsGLXContext );
+  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
 	XFlush(mDisplay);
 	XSync(mDisplay, False);
 
-//	mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
+//	mygc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
 
-//		myximage = XGetImage(mDisplay, mywindow, 0, 0,
+//		myximage = XGetImage(mDisplay, vo_window, 0, 0,
 //		width, image_height, AllPlanes, ZPixmap);
 //		ImageData = myximage->data;
 //	bpp = myximage->bits_per_pixel;
 
-	//XSelectInput(mDisplay, mywindow, StructureNotifyMask); // !!!!
-        XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask | PointerMotionMask
+	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
+        XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		     | ButtonPressMask | ButtonReleaseMask
 #endif
@@ -325,8 +321,8 @@ flip_page(void)
 
 //  glFlush();
   glFinish();
-  glXSwapBuffers( mDisplay,mywindow );
-  
+  glXSwapBuffers( mDisplay,vo_window );
+ 
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -469,9 +465,9 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+  if ( !vo_config_count ) return;
   saver_on(mDisplay); // screen saver back on
-
-  vo_x11_uninit(mDisplay, mywindow);
+  vo_x11_uninit();
 }
 
 static uint32_t preinit(const char *arg)
@@ -489,6 +485,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

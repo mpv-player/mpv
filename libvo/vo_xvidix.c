@@ -50,8 +50,6 @@ static vo_info_t vo_info =
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
 /* X11 related variables */
-static int X_already_started = 0;
-
 /* Colorkey handling */
 static XGCValues mGCV;
 static uint32_t	fgColor;
@@ -72,12 +70,12 @@ static uint32_t image_depth;
 static uint32_t window_width, window_height;
 
 /* used by XGetGeometry & XTranslateCoordinates for moving/resizing window */
-static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
 static void set_window(int force_update,const vo_tune_info_t *info)
 {
+    Window mRoot;
     if ( WinID )
      {
       XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &drwWidth,
@@ -417,7 +415,7 @@ static void uninit(void)
     vidix_term();
 
     saver_on(mDisplay); /* screen saver back on */
-    vo_x11_uninit(mDisplay, vo_window);
+    vo_x11_uninit();
 }
 
 static uint32_t preinit(const char *arg)
