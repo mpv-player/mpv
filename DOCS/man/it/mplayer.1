@@ -1,4 +1,4 @@
-.\" synced with 1.624
+.\" synced with 1.630
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -162,7 +162,7 @@ MPlayer ha un display su schermo (On Screen Display, OSD) per fornire informazio
 sullo stato, grandi e bei sottotitoli sfumati con antialias ed un riscontro visuale
 dei comandi da tastiera.
 Sono supportati font europei/\:ISO 8859-1,2 (Ungherese, Inglese, Ceco, etc),
-Cirillici e Coreani insieme a 14 formati di sottotitoli (MicroDVD, SubRip,
+Cirillici e Coreani insieme a 12 formati di sottotitoli (MicroDVD, SubRip,
 OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS ad il nostro: MPsub)
 oltre ai sottotitoli dei DVD (flussi SPU, VOBsub e Closed Captions).
 .PP
@@ -1609,7 +1609,7 @@ Per una lista completa delle opzioni dai un' occhiata a
 SOUND_DEVICE_NAMES in /usr/include/linux/soundcard.h.
 Per ALSA puoi usare i nomi che vengono visualizzati da alsamixer,
 ad esempio 
-+ .B Master, Line, PCM.
+.B Master, Line, PCM.
 .TP
 .B \-nowaveheader (solo \-ao pcm)
 Non includere l' intestazione wave.
@@ -1636,7 +1636,7 @@ Vedi \-ao help per una lista dei driver compilati internamente.
 .RSs
 .IPs "\-ao alsa,oss,"
 Prova il driver ALSA, pei il driver OSS, poi gli altri.
-.IPs "\-ao alsa:mmap:noblock:device=hw#0.3"
+.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
 Attiva la modalita' non bloccante, la modalita' mmap e il nome del dispositivo
 come prima scheda, quarto dispositivo.
 .RE
@@ -1659,7 +1659,7 @@ Attiva la modalita' mmap sperimentale (non funziona per piu' di 2 canali)
 Seleziona la modalita' noblock (non bloccante)
 .IPs device=<dispositivo)
 Seleziona il nome del dispositivo.
-Sostituisci ogni ',' con '.' ed ogni ':' con '#' nel nome del dispositivo ALSA.
+Sostituisci ogni ',' con '.' ed ogni ':' con '=' nel nome del dispositivo ALSA.
 .RE
 .PD 1
 .TP
@@ -1742,6 +1742,7 @@ Seleziona la scheda grafica che ricevera' l' immagine.
 Serve anche l' opzione \-vm per funzionare.
 Puoi avere una lista delle schede disponibili se utilizzi questa
 opzione insieme a \-v.
+Attualmente funziona solo con \-vo directx.
 .TP
 .B \-bpp <depth>
 Una una differente profondita' di colore rispetto a quella trovata
@@ -2001,13 +2002,14 @@ Directory dove salvare i file JPEG.
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <dotclock\ (o\ pixelclock) range> (solo fbdev e vesa)
-Dai un' occhiata in etc/\:example.conf per maggiori informazioni ed in
-DOCS/\:HTML/\:en/\:devices.html#video-dev.
+.B \-monitor-dotclock <range[,range,...]> (solo fbdev e vesa)
+Specifica la gamma del dotclock o pixelclock del monitor.
 .TP
-.B \-monitor-hfreq <horizontal frequency range> (solo fbdev e vesa)
+.B \-monitor-hfreq <range[,range,...]> (solo fbdev e vesa)
+Specifica la gamma di frequenze orizzontali del monitor.
 .TP
-.B \-monitor-vfreq <vertical frequency range> (solo fbdev e vesa)
+.B \-monitor-vfreq <range[,range,...]> (solo fbdev e vesa)
+Specifica la gamma di frequenze verticali del monitor.
 .TP
 .B \-monitoraspect <ratio>
 Seleziona il rapporto di aspetto (aspect ratio) del tuo monitor
@@ -5933,12 +5935,4 @@ La traduzione in italiano e' mantenuta da Daniele Forghieri
 .PP
 Per favore spedisci qualsiasi messaggio riguardante questa documentazione
 alla mailing list MPlayer-DOCS.
-.
-.
-.SH "RINUNCIA STANDARD"
-Usalo solo a tuo rischio e pericolo!
-Potrebbero esserci errori ed inaccuratezze che potrebbero danneggiare
-qualsiasi cosa, dal tuo sistema ai tuoi occhi.
-Muoviti con cautela, e anche se e' altamente improbabile che succeda qualcosa,
-gli autori non prenderanno nessuna responsabilita'.
 .\" end of file
