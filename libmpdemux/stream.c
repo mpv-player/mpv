@@ -248,6 +248,7 @@ void stream_reset(stream_t *s){
 
 stream_t* new_memory_stream(unsigned char* data,int len){
   stream_t *s=malloc(sizeof(stream_t)+len);
+  memset(s,0,sizeof(stream_t));
   s->fd=-1;
   s->type=STREAMTYPE_MEMORY;
   s->buf_pos=0; s->buf_len=len;
