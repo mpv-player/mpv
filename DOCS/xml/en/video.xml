@@ -473,7 +473,7 @@ the original resolution of the video as close as possible. It deliberately
 ignores the <option>-vm</option> and <option>-fs</option> options
 (enabling of video mode switching and fullscreen) - it always tries to
 cover as much area of your screen as possible by switching the video mode,
-thus refraining to use a single additional cycle of your CPU to scale the
+thus refraining from using additional cycles of your CPU to scale the
 image. If you don't like the mode it chooses you may force it to choose
 the mode matching closest the resolution you specify by <option>-x</option>
 and <option>-y</option>. By providing the <option>-v</option> option, the
