@@ -1,114 +1,18 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1. Video output devices</A></B></P>
-
-<TABLE BORDER=0>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>General:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 with optional SHM
-  extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11 using overlays with the Xvideo extension
-  (hardware YUV & scaling)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>OpenGL renderer, so far works only with:
-<UL><LI>all cards with Utah-GLX
-<LI>Matrox cards with X/DRI >=4.0.3
-<LI>Radeon with X/DRI CVS</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl2</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>OpenGL renderer, multiple textures version</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11 DGA extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to general framebuffers</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to SVGAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>
-&nbsp;&nbsp;<CODE>1.1.7:</CODE> supports software scaling<BR>
-&nbsp;&nbsp;<CODE>1.1.8:</CODE> supports Xvideo (hardware scaling/fullscreen)<BR>
-&nbsp;&nbsp;<CODE>1.2.0:</CODE> supports AAlib (-vo aa is very recommended, see below!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana,
-  Arial, Helvetica, sans-serif" size=2>similar to SDL</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>textmode rendering with AAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>vidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>VIDeo Interface for *niX (this entry is not a
-  real driver, but an explanation of VIDIX)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>xvidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>VIDIX in X window</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>directfb</TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Card specific:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 hardware
-  YUV overlay via the mga_vid device</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Matrox G200/G400 overlay (mga_vid) in X11
-  window<BR>
-(<I>Xv emulation on X 3.3.x!</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>Matrox G400 YUV support on framebuffer (obsoleted, use
-  mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) support (not yet tested, maybe
-  broken)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV support on tdfx
-  framebuffer (works!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.16>zr</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Displaying on ZR360[56]7 based 
-  MJPEG boards (DC10(+), LML33, Buz)</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Special:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>PNG files output (use -z switch to set
-  compression)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>PGM files output (for testing purposes or ffmpeg encoding)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>MD5sum output (for MPEG conformance tests)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Null output (for speed tests/benchmarking)</TD><TR>
-</TABLE>
-
-<P>NOTE: <I>check the following subsections for details and requirements!</I></P>
 
 
 <P><B><A NAME=2.3.1.1>2.3.1.1.  Setting up MTRR</A></B></P>
@@ -537,19 +441,19 @@ also help. Thanks!</P>
 
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>There are several commandline switches for SDL:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-ao sdl:name</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifies sdl audio driver to use (ie. dsp,
+<TD COLSPAN=4><P><B><FONT CLASS="text">There are several commandline switches for SDL:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-ao sdl:name</TD><TD></TD><TD><FONT CLASS="text">specifies sdl audio driver to use (ie. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-noxv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>disables Xvideo hardware acceleration</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-forcexv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tries to force Xvideo acceleration</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">disables Xvideo hardware acceleration</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">tries to force Xvideo acceleration</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL Keys:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">SDL Keys:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>F</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggles fullscreen/windowed mode</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>cycles available fullscreen modes</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>W/S</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mappings for * and / (mixer control)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">toggles fullscreen/windowed mode</TD><TR>
+<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">cycles available fullscreen modes</TD><TR>
+<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">mappings for * and / (mixer control)</TD><TR>
 
 </TABLE></P>
 
@@ -584,13 +488,13 @@ whatever.  And don't forget to register your UniVBE ;))</P>
 <P>The FBdev output takes some additional parameters above the others:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify the framebuffer device to use (/dev/fb0)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mode name to use (according to /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>	config file of modes (default /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>IMPORTANT values, see example.conf</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_vfreq</TD><TD></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_dotclock</TD><TD></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">specify the framebuffer device to use (/dev/fb0)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">mode name to use (according to /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">	config file of modes (default /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">IMPORTANT values, see example.conf</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
 <P>If you want to change to a specific mode, then use</P>
@@ -700,29 +604,29 @@ Quake, etc. MPlayer contains a very usable driver for it.
 If ./configure detects aalib installed, the aalib libvo driver will be built.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease contrast</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase contrast</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease brightness</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase brightness</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>switch fast rendering on/off</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>invert image</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggles between aa and mplayer control)</TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">decrease contrast</TD><TR>
+<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">increase contrast</TD><TR>
+<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">decrease brightness</TD><TR>
+<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">increase brightness</TD><TR>
+<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">switch fast rendering on/off</TD><TR>
+<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">invert image</TD><TR>
+<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">toggles between aa and mplayer control)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>The following command line options can be used:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">The following command line options can be used:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaosdcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change osd color</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aasubcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change subtitle color</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">change osd color</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">change subtitle color</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>AAlib itselves provides a large sum of options.
+<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib itselves provides a large sum of options.
 Here are some important:</P></B></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aadriver</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set recommended aa driver (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaextended</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use all 256 characters</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaeight</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use eight bit ascii</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aahelp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>prints out all aalib options</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">set recommended aa driver (X11, curses, linux)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">use all 256 characters</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">use eight bit ascii</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">prints out all aalib options</TD><TR>
 </TABLE></P>
 
 <P>NOTE: the rendering is very CPU intensive, especially when using AA-on-X
@@ -799,14 +703,14 @@ in vm86 mode).<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>These switches of command line currently are available for VESA:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opts</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>force userdefined mode</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enables userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales image to fullscreen</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales userdefined prescaling to fullscreen</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-double</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">These switches of command line currently are available for VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo vesa:opts</TD><TD></TD><TD><FONT CLASS="text">currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT CLASS="text">force userdefined mode</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-x, -y</TD><TD></TD><TD><FONT CLASS="text">set userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-zoom</TD><TD></TD><TD><FONT CLASS="text">enables userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs</TD><TD></TD><TD><FONT CLASS="text">scales image to fullscreen</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD><TD></TD><TD><FONT CLASS="text">scales userdefined prescaling to fullscreen</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-double</TD><TD></TD><TD><FONT CLASS="text">enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
 </TABLE>
 </P>
 

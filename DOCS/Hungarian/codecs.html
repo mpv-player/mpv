@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.2>2.2.  Támogatott codec-ek</A></B></P>
 
@@ -70,12 +79,12 @@ nagyon hasonlít az OpenDivX-éhez), az OpenDivX kód kikapcsolásra kerül,
 használatára:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a DivX4 codec használata, mint az OpenDivX új verziója.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">a DivX4 codec használata, mint az OpenDivX új verziója.
 Ebben az esetben YV12 képeket produkál a saját bufferében,
 és az <B>MPlayer</B> (libvo) konverziót végez.</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a DivX4 codec csinál konverziót.
+<TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT CLASS="text">a DivX4 codec csinál konverziót.
 Ebben az esetben használhatsz YUY2/UYVY módokat is.</TD></TR>
 </TABLE></P>
 
@@ -89,12 +98,12 @@ talán a használt bpp-tol függõen változhat.</P>
 opcióval kapcsolható be), de az értékei furcsák :</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nincs</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normal (mint a 2-es szint a DirectShow-os DivX codeccel)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">0</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">nincs</TD><TR>
+<TD></TD><TD><FONT CLASS="text">10 .. 20</TD>
+<TD></TD><TD><FONT CLASS="text">postprocessing, normal (mint a 2-es szint a DirectShow-os DivX codeccel)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">30 .. 60</TD>
+<TD></TD><TD><FONT CLASS="text">hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
 </TABLE></P>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2.  ffmpeg DivX/libavcodec</A></B></P>
@@ -277,8 +286,8 @@ a legújabb ALSA CVS-ben is van hozzá támogatás).</P>
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
 meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
 SB Live! és a C-Media kártyák). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
-és használd az -ac hwac3 opciót. Akár mûködhet is. Jelenleg csak C-Media-val
-mûködik (ha mûködik...)..</P>
+és használd az -ac hwac3 opciót. Jelenleg a C-Media kártyákkal és az
+SB Live! kártyákkal mûködik, utóbbinál csak az ALSA meghajtóval.</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  libmad támogatás</A></B></P>

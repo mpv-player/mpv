@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.2>2.2.  Supported codecs</A></B></P>
 
@@ -67,12 +76,12 @@ driver calls this library too.</P>
 this codec:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec as a new version of OpenDivX.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">using divx4 codec as a new version of OpenDivX.
 in this case it produces YV12 image in its own buffer,
 and <B>MPlayer</B> (libvo) does colorspace conversion. (<B>RECOMMENDED!</B>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec's colorspace conversion.
+<TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT CLASS="text">using divx4 codec's colorspace conversion.
 in this mode, you can use YUY2/UYVY too.</TD></TR>
 </TABLE></P>
 
@@ -86,12 +95,12 @@ differ according to the current bpp.</P>
 enable using it), but range of values is strange: </P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no postproc</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normal (like level 2 with divxds)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">0</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">no postproc</TD><TR>
+<TD></TD><TD><FONT CLASS="text">10 .. 20</TD>
+<TD></TD><TD><FONT CLASS="text">postprocessing, normal (like level 2 with divxds)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">30 .. 60</TD>
+<TD></TD><TD><FONT CLASS="text">hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
 </TABLE></P>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. ffmpeg's DivX/libavcodec</A></B></P>
@@ -272,8 +281,9 @@ August 2001 should be suitable (I heard newest ALSA CVS supports this too).</P>
 <P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
 card's driver must support the AFMT_AC3 format (like SB Live! or C-Media does).
 Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
-option. It may or may not work (experimental). (probably will only work
-with C-Media cards currently, feel free to fix it with SB Live)</P>
+option. It may or may not work (experimental). It will work with C-Media
+cards, and with SB Live! + ALSA driver. It won't work with Live!'s OSS
+driver.</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  libmad support</A></B></P>

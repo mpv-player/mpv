@@ -1,112 +1,18 @@
 <HTML>
 
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1.  Video kimeneti eszközök</A></B></P>
-
-<TABLE BORDER=0>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Általános:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11, opcionálisan az SHM kiterjesztéssel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>X11 az XVideo kiterjesztés overlay-eivel (hardveres támogatás)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>OpenGL renderelõ, egyelõre csak ezekkel megy:
-<UL><LI>bármely kártyával, Utah-GLX-szel
-<LI>Matrox kártyák + X/DRI >=4.0.3
-<LI>Radeon + X/DRI CVS</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl2</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>OpenGL renderelõ - több textúrát használó verzió
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>X11 a DGA kiterjesztéssel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>Megjelenítés általános framebuffereken</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Megjelenítés SVGAlib-bel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>
-&nbsp;&nbsp;<CODE>1.1.7:</CODE> szoftveres skálázás<BR>
-&nbsp;&nbsp;<CODE>1.1.8:</CODE> támogatja a hardveres gyorsítást XVideo-n keresztül<BR>
-&nbsp;&nbsp;<CODE>1.2.0:</CODE> aalib támogatás (használd inkább a -vo aa opciót!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>SDL-hez hasonló</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>szöveges módú megjelenítés AAlib-bel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial
-  Helvetica, sans-serif" size=2>Kimenet VESA BIOS-ok segítségével.</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>vidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial
-  Helvetica, sans-serif" size=2>VIDeo Interface for *niX (ez nem egy valós
-  meghajtó, hanem a VIDIX leírása)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>xvidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial
-  Helvetica, sans-serif" size=2>VIDIX, X ablakban</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>directfb</a></TD><TD></TD><TD><FONT face="Verdana, Arial
-  Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kártyaspecifikus:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Matrox G200/G400 hardveres YUV overlay az
-  mga_vid-en keresztül</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Matrox G200/G400 overlay (mga_vid) X11 ablakban<BR>
-(<I>(Xv emuláció 3.3.x-es X-szel!)</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>Matrox G400 YUV támogatás framebufferen (régi, használj
-  mga/xmga-t)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) támogatás (nincs
-  tesztelve!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>Voodoo3/Banshee hardware YUV támogatás tdfx framebufferen
-  (mûködik!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.16>zr</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>ZR360[56]7 alapú hardveres MJPEG capture/megjelenítõ kártyák
-  támogatása (DC10(+), LML33, Buz)</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Egyéb:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>kimenet PNG file-okba (-z kapcsoló a tömörítés
-  mértékét állítja)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>kimenet PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>MD5sum támogatás (MPEG konformancia tesztekhez)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>odivx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>OpenDivX AVI file output (-br a bitrate-et állítja) (NEM
-  TUDSZ vele hangot tömöríteni!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>kimenet a nagy semmibe (sebességtesztekhez)</TD><TR>
-</TABLE>
 
 
 <P><B><A NAME=2.3.1.1>2.3.1.1.  MTRR</A></B></P>
@@ -533,19 +439,19 @@ HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
 <P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Van néhány parancssori opciója:</B></P></TD></TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo sdl:név</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-ao sdl:név</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
+<TD COLSPAN=4><P><B><FONT CLASS="text">Van néhány parancssori opciója:</B></P></TD></TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:név</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
+<TD></TD><TD><FONT CLASS="text">-ao sdl:név</TD><TD></TD><TD><FONT CLASS="text">megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-noxv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kikapcsolja az XVideo hardveres gyorsítást</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-forcexv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megerõsíti a hardveres gyorsítás használatát</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">kikapcsolja az XVideo hardveres gyorsítást</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">megerõsíti a hardveres gyorsítás használatát</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL billentyûk:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">SDL billentyûk:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>F</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>teljesképernyõs/ablakos mód között vált</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a rendelkezésre álló videomódok között vált</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>W/S</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a * és / alteregói (hangerõ)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">teljesképernyõs/ablakos mód között vált</TD><TR>
+<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">a rendelkezésre álló videomódok között vált</TD><TR>
+<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">a * és / alteregói (hangerõ)</TD><TR>
 
 </TABLE></P>
 
@@ -583,13 +489,13 @@ esd, arts)</TD><TR>
 <P>Az FBdev meghajtónak van néhány saját opciója is :</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a framebuffer egység megadása (/dev/fb0)</TD><TR> 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FONTOS ! lásd example.conf</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_vfreq</TD><TD></TD><TR>           
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_dotclock</TD><TD></TD><TR>        
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">a framebuffer egység megadása (/dev/fb0)</TD><TR> 
+<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">FONTOS ! lásd example.conf</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>           
+<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>        
 </TABLE></P>
 
 <P>Ha egy specifikus videomódba akarsz váltani, azt így teheted :</P>
@@ -693,29 +599,29 @@ hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
   meghajtó.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Az AA ablakban használhatsz néhány extra billentyût:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kontraszt csökkentése</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kontraszt növelése</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fényerõ csökkentése</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fényerõ növelése</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>gyors megjelenítés be/ki</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ditherelési módok (nincs, error distribution, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kép invertálása</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>AA és MPlayer billentyûk között vált)</TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">Az AA ablakban használhatsz néhány extra billentyût:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">kontraszt csökkentése</TD><TR>
+<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">kontraszt növelése</TD><TR>
+<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">fényerõ csökkentése</TD><TR>
+<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">fényerõ növelése</TD><TR>
+<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">gyors megjelenítés be/ki</TD><TR>
+<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">ditherelési módok (nincs, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">kép invertálása</TD><TR>
+<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">AA és MPlayer billentyûk között vált)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A következõ parancssori opciók állnak rendelkezésre:</B></P></TD></TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">A következõ parancssori opciók állnak rendelkezésre:</B></P></TD></TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaosdcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSD szín megváltoztatása</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aasubcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>feliratok színének megváltoztatása</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz, 5/special)</P></TD></TR>
+<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">OSD szín megváltoztatása</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">feliratok színének megváltoztatása</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz, 5/special)</P></TD></TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>AAlib itselves provides a large sum of options.
+<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib itselves provides a large sum of options.
 Here are some important:</P></B></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aadriver</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aa meghajtó beállítása (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaextended</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>az összes 256 karakter használata</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaeight</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>8 bites ascii használata</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aahelp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>az összes aalib opció kiírása</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">aa meghajtó beállítása (X11, curses, linux)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">az összes 256 karakter használata</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">8 bites ascii használata</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">az összes aalib opció kiírása</TD><TR>
 </TABLE></P>
 
 <P>Megj: a renderelés nagyon CPU igényes, különösen ha AA-on-X-et
@@ -792,23 +698,23 @@ overlay, vagy hardveres skálázás)<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>-vo vesa:opciók</TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>jelenleg a következõk: <b>dga</b> a DGA módot
+<TD COLSPAN=4><P><B><FONT CLASS="text">Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
+  -vo vesa:opciók</TD><TD></TD><TD><FONT CLASS="text">
+  jelenleg a következõk: <b>dga</b> a DGA módot
   kényszeríti, a <b>nodga</b> pedig megtiltja. Megj.: a paraméterek elhagyása a
   DGA mód autodetektálását eredményezi. (A közeljövõben lehetséges lesz itt
   megadni a mód paramétereit mint például képfrissítés, váltottsor, doublescan,
   stb)</TD><TR>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>felhasználó által megadott videomód használata</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás használata</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skálázás bekapcsolása</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>teljesképernyõs módra nagyítás</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás teljesképernyõs módra</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>-double</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>dupla bufferelés bekapcsolása. (Csak DGA módban). Lassabb
+<FONT CLASS="text">hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT CLASS="text">felhasználó által megadott videomód használata</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-x, -y</TD><TD></TD><TD><FONT CLASS="text">megadott skálázás használata</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-zoom</TD><TD></TD><TD><FONT CLASS="text">skálázás bekapcsolása</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs</TD><TD></TD><TD><FONT CLASS="text">teljesképernyõs módra nagyítás</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD><TD></TD><TD><FONT CLASS="text">megadott skálázás teljesképernyõs módra</TD><TR>
+<TD></TD><TD><FONT CLASS="text">
+  -double</TD><TD></TD><TD><FONT CLASS="text">
+  dupla bufferelés bekapcsolása. (Csak DGA módban). Lassabb
   mint a síma bufferelés, de kizárja a villogást.</TD><TR>
 </TABLE>
 </P>

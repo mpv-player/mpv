@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Encoding with MEncoder</A></B></P>
 
@@ -100,16 +109,16 @@ commands are needed :<BR>
 <P>
   <TABLE>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B>remove conflicting temporary file</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
         frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>First pass</U> : an audio-only avi file will be created, containing
       ONLY the requested audio stream. Don't forget <CODE>-lameopts</CODE>, if
       you need to set it. If you were encoding a long movie, MEncoder prints
@@ -117,19 +126,19 @@ commands are needed :<BR>
       sizes, after this pass finishes.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Second pass</U> : alias the first pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of the
       previous pass.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Third pass</U> : alias the second pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of the
       previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will be
@@ -294,44 +303,44 @@ unsupported). You can encode to the following codecs :</P>
 
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ss</I> time</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     start encoding from the given time (can start only from keyframes !)
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-endpos</I> time</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     stop encoding at the given time. See the manpage for examples !
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-o</I> filename</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     specify output filename
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-x</I> width in pixels</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     rescale output video to given pixels width
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-y</I> height in pixels</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     rescale output video to given pixels height
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-sws</I> 0-2</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     type of scaling method<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
     &nbsp;&nbsp;1 - bilinear<BR>
@@ -339,9 +348,9 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ovc</I> codecname</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
     &nbsp;&nbsp;<B>null</B> - do not create a video stream in the output AVI<BR>
@@ -354,9 +363,9 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-oac</I> codecname</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
     &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
@@ -365,9 +374,9 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-mf</I> multifile options</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Used when encoding from multiple JPEG files. Its sub-options are:<BR>
     &nbsp;&nbsp;<B>on</B> - turns on multifile support<BR>
     &nbsp;&nbsp;<B>w</B>=&lt;value&gt; - width of the output file<BR>
@@ -378,9 +387,9 @@ unsupported). You can encode to the following codecs :</P>
 </TR>
 
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-divx4opts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     If encoding to DivX4, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Common options: <B>(for full list, check the manpage!)</B><BR>
@@ -391,9 +400,9 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lavcopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     If encoding with libavcodec, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Common options: <B>(for full list, check the manpage!)</B><BR>
@@ -405,9 +414,9 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lameopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
