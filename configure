@@ -5337,7 +5337,6 @@ else
     echores "no"
   fi
 fi
-echores "$_flac"
 
 echocheck "inet6"
 if test "$_inet6" = auto ; then
