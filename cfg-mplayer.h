@@ -40,6 +40,8 @@ extern int ao_pcm_waveheader;
 extern char *mDisplayName;
 #endif
 
+extern int force_vcodec;
+
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
@@ -55,6 +57,7 @@ struct config conf[]={
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
+	{"vcodec", &force_vcodec, CONF_TYPE_INT, CONF_RANGE, 1, 5 },
 #ifdef HAVE_LIBCSS
         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},
         {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},

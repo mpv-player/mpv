@@ -317,6 +317,8 @@ int has_audio=1;
 //int has_video=1;
 int audio_format=0; // override
 
+int force_vcodec=-1;
+
 #ifdef USE_DIRECTSHOW
 int allow_dshow=1;
 #else
@@ -1164,10 +1166,17 @@ if(has_audio){
 
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
+if (force_vcodec!=-1) printf("Trying to use forced video codec driver %d ...\n",force_vcodec);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
+    if(force_vcodec!=-1) {
+      sh_video->codec=NULL; /* re-search */
+      printf("Can't find video codec for forced driver %d, defaulting to other drivers.\n",force_vcodec);
+      force_vcodec=-1;
+      continue;      
+    }
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
       printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
       printf("*** If it's still not OK, then read DOCS/CODECS!\n");
@@ -1181,6 +1190,8 @@ while(1){
     #endif
     exit(1);
   }
+  if(sh_video->codec->driver==force_vcodec) break;  /* OK, we find our codec */
+  if(force_vcodec!=-1&&sh_video->codec->driver!=force_vcodec) continue;
   if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
   break;
 }
