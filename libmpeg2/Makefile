@@ -5,7 +5,7 @@ include ../config.mak
 
 SRCS	= header.c idct.c idct_mmx.c motion_comp.c motion_comp_mmx.c slice.c stats.c decode.c
 OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I. -I../libvo -I..
+INCLUDE = -I. -I../libvo -I.. $(EXTRA_INC)
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
 .SUFFIXES: .c .o

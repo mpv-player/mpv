@@ -4,7 +4,7 @@ include config.mak
 SRCS = sr1.c d_cpu.s decode_i586.s $(OPTIONAL_SRCS)
 OBJS = sr1.o d_cpu.o decode_i586.o $(OPTIONAL_OBJS)
 # OBJS = $(SRCS:.c,.s=.o)
-CFLAGS  = $(OPTFLAGS)
+CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
 
 .SUFFIXES: .c .o
 

@@ -8,8 +8,8 @@ OBJS = $(SRCS:.cpp=.o)
 
 # OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
 
-INCLUDE = -I. -I.. -I../wine
-CFLAGS  = $(INCLUDE) $(OPTFLAGS) -fexceptions 
+INCLUDE = -I. -I.. -I../wine $(EXTRA_INC)
+CFLAGS  = $(OPTFLAGS) $(INCLUDE) -fexceptions 
 
 .SUFFIXES: .cpp .o
 
