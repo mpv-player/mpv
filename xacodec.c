@@ -148,7 +148,8 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
 
     if (mod_hdr->api_rev > XAVID_API_REV)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported api revision in %s\n", filename);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported api revision (%d) in %s\n",
+	    mod_hdr->api_rev, filename);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
@@ -222,7 +223,11 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     
     xacodec_driver = realloc(xacodec_driver, sizeof(struct xacodec_driver));
     if (xacodec_driver == NULL)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: memory allocation error: %s\n",
+	    strerror(errno));
 	return(0);
+    }
 
     xacodec_driver->iq_func = NULL;
     xacodec_driver->dec_func = NULL;
@@ -297,6 +302,12 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 //    free(codec_hdr.anim_hdr);
 
     xacodec_driver->decinfo = malloc(sizeof(XA_DEC_INFO));
+    if (xacodec_driver->decinfo == NULL)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: memory allocation error: %s\n",
+	    strerror(errno));
+	return(0);
+    }
     xacodec_driver->decinfo->cmd = 0;
     xacodec_driver->decinfo->skip_flag = 0;
     xacodec_driver->decinfo->imagex = xacodec_driver->decinfo->xe = codec_hdr.x;
@@ -308,24 +319,24 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->decinfo->xs = xacodec_driver->decinfo->ys = 0;
     xacodec_driver->decinfo->special = 0;
     xacodec_driver->decinfo->extra = codec_hdr.extra;
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "decinfo->extra, filled by codec: 0x%08x [%s]\n",
+	&xacodec_driver->decinfo->extra, xacodec_driver->decinfo->extra);
 
 //    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
 //    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * codec_hdr.depth);
-    xacodec_driver->image.out_fmt=out_format;
-    xacodec_driver->image.bpp=codec_hdr.depth;
-    xacodec_driver->image.width=codec_hdr.x;
-    xacodec_driver->image.height=codec_hdr.y;
-    xacodec_driver->image.mem=malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
+    xacodec_driver->image.out_fmt = out_format;
+    xacodec_driver->image.bpp = codec_hdr.depth;
+    xacodec_driver->image.width = codec_hdr.x;
+    xacodec_driver->image.height = codec_hdr.y;
+    xacodec_driver->image.mem = malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
 
     if (xacodec_driver->image.mem == NULL)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_ERR, "cannot allocate memory for output: %s",
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: memory allocation error: %s\n",
 	    strerror(errno));
 	return(0);
     }
 
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "extra: %08x - %dx%d %dbit\n", codec_hdr.extra,
-	codec_hdr.x, codec_hdr.y, codec_hdr.depth);
     return(1);
 }
 
