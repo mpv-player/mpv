@@ -16,12 +16,16 @@
 #ifdef USE_IOCTL
 #include <sys/ioctl.h>
 #endif
+#ifdef HAVE_TERMIOS
 #include <sys/termios.h>
+#endif
 #include <unistd.h>
 
 #include "keycodes.h"
 
+#ifdef HAVE_TERMIOS
 static struct termios tio_orig;
+#endif
 static int getch2_len=0;
 static char getch2_buf[BUF_LEN];
 
@@ -202,6 +206,7 @@ found:
 static int getch2_status=0;
 
 void getch2_enable(){
+#ifdef HAVE_TERMIOS
 struct termios tio_new;
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcgetattr(0,&tio_orig);
@@ -221,17 +226,20 @@ struct termios tio_new;
 #else
     ioctl(0,TCSETS,&tio_new);
 #endif
+#endif
     getch2_status=1;
 }
 
 void getch2_disable(){
     if(!getch2_status) return; // already disabled / never enabled
+#ifdef HAVE_TERMIOS
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcsetattr(0,TCSANOW,&tio_orig);
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
     ioctl(0,TIOCSETA,&tio_orig);
 #else
     ioctl(0,TCSETS,&tio_orig);
+#endif
 #endif
     getch2_status=0;
 }
