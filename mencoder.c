@@ -1740,6 +1740,8 @@ if (!interrupted && filelist[++curfile].name != 0) {
 	prevwidth = mux_v->bih->biWidth;
 	prevhieght = mux_v->bih->biHeight;
 	
+	at_eof = 0;
+	
 	m_config_pop(mconfig);
 	goto play_next_file;
 }
