@@ -248,6 +248,17 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   glEnable(GL_TEXTURE_2D);
 
+  // set alignment as default is 4 which will break some files
+  if ((image_width * image_bytes) % 8 == 0)
+    gl_alignment=8;
+  else if ((image_width * image_bytes) % 4 == 0)
+    gl_alignment=4;
+  else if ((image_width * image_bytes) % 2 == 0)
+    gl_alignment=2;
+  else
+    gl_alignment=1;
+  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment);
+
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",texture_width,texture_height);
 
 #if 1

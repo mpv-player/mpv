@@ -819,12 +819,13 @@ static int initGl(uint32_t d_width, uint32_t d_height)
 
   /**
    * may give a little speed up for a kinda burst read ..
+   * Also, the default of 4 will break some files.
    */
-  if( (image_width*image_bpp)%8 == 0 )
+  if( (image_width*image_bytes)%8 == 0 )
   	gl_alignment=8;
-  else if( (image_width*image_bpp)%4 == 0 )
+  else if( (image_width*image_bytes)%4 == 0 )
   	gl_alignment=4;
-  else if( (image_width*image_bpp)%2 == 0 )
+  else if( (image_width*image_bytes)%2 == 0 )
   	gl_alignment=2;
   else
   	gl_alignment=1;
