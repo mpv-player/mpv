@@ -1002,7 +1002,7 @@ FARPROC MODULE_GetProcAddress(
 	fprintf(stderr,"theQuickTimeDispatcher catched -> %p\n",retproc);
       report_entry = report_func;
       report_ret   = report_func_ret;
-      wrapper_target=retproc;
+      wrapper_target=(void(*)(void))retproc;
       retproc=(FARPROC)wrapper;
     }
 

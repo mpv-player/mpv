@@ -863,7 +863,7 @@ static void* WINAPI expWaitForMultipleObjects(int count, const void** objects,
     
     for (i = 0; i < count; i++)
     {
-	object = objects[i];
+	object = (void *)objects[i];
 	ret = expWaitForSingleObject(object, duration);
 	if (WaitAll)
 	    dbgprintf("WaitAll flag not yet supported...\n");
@@ -1943,7 +1943,7 @@ static DWORD WINAPI expRegQueryInfoKeyA( HKEY hkey, LPSTR class, LPDWORD class_l
                                          LPDWORD values, LPDWORD max_value, LPDWORD max_data,
                                          LPDWORD security, FILETIME *modif )
 {
-    return;
+    return ERROR_SUCCESS;
 }
 
 /*
@@ -3645,7 +3645,7 @@ static DWORD WINAPI expGetFullPathNameA
     if (strrchr(lpFileName, '\\'))
 	lpFilePart = strrchr(lpFileName, '\\');
     else
-	lpFilePart = lpFileName;
+	lpFilePart = (LPTSTR)lpFileName;
 #endif
     strcpy(lpBuffer, lpFileName);
 //    strncpy(lpBuffer, lpFileName, rindex(lpFileName, '\\')-lpFileName);
