@@ -210,7 +210,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
             printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
             have_vm=1;
         } else
-            printf("XF86VidMode Extenstion not available.\n");
+            printf("XF86VidMode Extension not available.\n");
 
     if (have_vm) {
       if (vidmodes==NULL)
@@ -420,7 +420,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 #endif
   {
     mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_BGR : MODE_RGB;
-//   printf( "No support fon non-native XImage byte order!\n" );
+//   printf( "No support for non-native XImage byte order!\n" );
 //   return -1;
   }
 
