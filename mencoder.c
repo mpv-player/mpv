@@ -1,5 +1,6 @@
 
 #define VCODEC_DIVX4 1
+#define ACODEC_VBRMP3 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,6 +133,8 @@ ENC_FRAME enc_frame;
 ENC_RESULT enc_result;
 void* enc_handle=NULL;
 
+float audio_preload=0.3;
+
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
@@ -146,8 +149,8 @@ void* enc_handle=NULL;
   if(argc>1)
     stream=open_stream(argv[1],0,&file_format);
   else
-    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
-//    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
+//    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
+    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
 //    stream=open_stream("/dev/cdrom",2,&file_format); // VCD track 2
 
   if(!stream){
@@ -233,6 +236,46 @@ if(!init_video(sh_video)){
      exit(1);
 }
 
+
+
+if(sh_audio){
+  // Go through the codec.conf and find the best codec...
+  sh_audio->codec=NULL;
+  if(audio_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
+  while(1){
+    sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
+    if(!sh_audio->codec){
+      if(audio_family!=-1) {
+        sh_audio->codec=NULL; /* re-search */
+        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
+        audio_family=-1;
+        continue;      
+      }
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
+      mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+      sh_audio=d_audio->sh=NULL;
+      break;
+    }
+    if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
+    else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    break;
+  }
+}
+
+if(sh_audio){
+  mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
+  if(!init_audio(sh_audio)){
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
+    sh_audio=d_audio->sh=NULL;
+  } else {
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
+        sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
+  }
+}
+
+
+
 // set up video encoder:
 video_out.draw_slice=draw_slice;
 video_out.draw_frame=draw_frame;
@@ -240,6 +283,9 @@ video_out.draw_frame=draw_frame;
 // set up output file:
 muxer_f=fopen("test.avi","wb");
 muxer=aviwrite_new_muxer();
+
+// ============= VIDEO ===============
+
 mux_v=aviwrite_new_stream(muxer,AVIWRITE_TYPE_VIDEO);
 
 mux_v->buffer_size=0x200000;
@@ -269,6 +315,41 @@ case VCODEC_DIVX4:
     break;
 }
 
+// ============= AUDIO ===============
+if(sh_audio){
+
+mux_a=aviwrite_new_stream(muxer,AVIWRITE_TYPE_AUDIO);
+
+mux_a->buffer_size=0x100000; //16384;
+mux_a->buffer=malloc(mux_a->buffer_size);
+
+mux_a->source=sh_audio;
+
+//mux_a->codec=ACODEC_VBRMP3; // 0=streamcopy
+
+switch(mux_a->codec){
+case 0:
+    mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
+    mux_a->h.dwScale=sh_audio->audio.dwScale;
+    mux_a->h.dwRate=sh_audio->audio.dwRate;
+    mux_a->wf=sh_audio->wf;
+    break;
+case ACODEC_VBRMP3:
+    mux_a->h.dwSampleSize=0; // VBR
+    mux_a->h.dwScale=4608;
+    mux_a->h.dwRate=sh_audio->samplerate;
+    mux_a->wf=malloc(sizeof(WAVEFORMATEX));
+    mux_a->wf->wFormatTag=0x55; // MP3
+    mux_a->wf->nChannels=sh_audio->channels;
+    mux_a->wf->nSamplesPerSec=sh_audio->samplerate;
+    mux_a->wf->nAvgBytesPerSec=0;
+    mux_a->wf->nBlockAlign=1;
+    mux_a->wf->wBitsPerSample=16;
+    mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
+    break;
+}
+}
+
 aviwrite_write_header(muxer,muxer_f);
 
 switch(mux_v->codec){
@@ -296,11 +377,9 @@ case VCODEC_DIVX4:
     break;
 }
 
-
 signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 signal(SIGQUIT,exit_sighandler); // Quit from keyboard
 signal(SIGTERM,exit_sighandler); // kill
-
 
 while(!eof){
 
@@ -311,11 +390,30 @@ while(!eof){
     unsigned char* start=NULL;
     int in_size;
 
-	// get it!
-//	current_module="video_read_frame";
-        in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
-	if(in_size<0){ eof=1; break; }
-//	if(in_size>max_framesize) max_framesize=in_size; // stats
+if(sh_audio){
+    // get audio:
+    if(mux_a->timer-audio_preload<mux_v->timer){
+	// copy 0.5 sec of audio
+	int len;
+	if(mux_a->h.dwSampleSize){
+	    // CBR
+	    len=sh_audio->i_bps/2;
+	    len/=mux_a->h.dwSampleSize;if(len<1) len=1;
+	    len*=mux_a->h.dwSampleSize;
+//	    printf("%d -> ",len);
+	    len=demux_read_data(sh_audio->ds,mux_a->buffer,len);
+//	    printf("%d  \n",len);
+	} else {
+	    // VBR
+	    printf("not yet implemented!\n");
+	}
+	if(len>0) aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
+    }
+}
+
+    // get video frame!
+    in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
+    if(in_size<0){ eof=1; break; }
 
     sh_video->timer+=frame_time;
 
