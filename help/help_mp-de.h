@@ -380,7 +380,7 @@ static char help_text[]=
 #define MSGTR_Preferences "Einstellungen"
 #define MSGTR_OSSPreferences "OSS-Treibereinstellungen"
 #define MSGTR_SDLPreferences "SDL-Treibereinstellungen"
-#define MSGTR_NoMediaOpened "nichts geffnet"
+#define MSGTR_NoMediaOpened "nichts geöffnet"
 #define MSGTR_VCDTrack "VCD-Titel %d"
 #define MSGTR_NoChapter "kein Kapitel"
 #define MSGTR_Chapter "Kapitel %d"
