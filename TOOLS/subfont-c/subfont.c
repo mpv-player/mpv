@@ -61,6 +61,7 @@ unsigned	charset_size = 0;
 
 ////
 char		*command;
+char		*encoding_name;
 char		*font_path;
 //char		*font_metrics;
 int		append_mode = 0;
@@ -117,14 +118,14 @@ void write_bitmap() {
     int const max_name = 128;
     char name[max_name];
 
-    snprintf(name, max_name, "%s-b.raw", encoding);
+    snprintf(name, max_name, "%s-b.raw", encoding_name);
     f = fopen(name, "wb");
     if (f==NULL) ERROR("fopen failed.");
     write_header(f);
     fwrite(buffer, 1, width*height, f);
     fclose(f);
 
-    snprintf(name, max_name, "%s-a.raw", encoding);
+    snprintf(name, max_name, "%s-a.raw", encoding_name);
     f = fopen(name, "wb");
     if (f==NULL) ERROR("fopen failed.");
     write_header(f);
@@ -233,7 +234,7 @@ void render() {
     /* print font.desc header */
     if (append_mode) {
 	fprintf(f, "\n\n# Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i\n",
-		encoding,
+		encoding_name,
 		face->family_name,
 		face->style_name ? " ":"", face->style_name ? face->style_name:"",
 		ppem);
@@ -241,7 +242,7 @@ void render() {
 	fprintf(f, "# This file was generated with subfont for Mplayer.\n# Subfont by Artur Zaprzala <zybi@fanthom.irc.pl>.\n\n");
 	fprintf(f, "[info]\n");
 	fprintf(f, "name 'Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i'\n",
-		encoding,
+		encoding_name,
 		face->family_name,
 		face->style_name ? " ":"", face->style_name ? face->style_name:"",
 		ppem);
@@ -251,8 +252,8 @@ void render() {
 	fprintf(f, "height %i\n",		f266toInt(face->size->metrics.height));
     }
     fprintf(f, "\n[files]\n");
-    fprintf(f, "alpha %s-a.raw\n",	encoding);
-    fprintf(f, "bitmap %s-b.raw\n",	encoding);
+    fprintf(f, "alpha %s-a.raw\n",	encoding_name);
+    fprintf(f, "bitmap %s-b.raw\n",	encoding_name);
     fprintf(f, "\n[characters]\n");
 
 
@@ -377,7 +378,8 @@ FT_ULong decode_char(char c) {
     int outbytesleft = sizeof(FT_ULong);
 
     size_t count = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-    if (count==-1) o = 0;
+//    if (count==-1) o = 0; // not OK, at least my iconv() returns E2BIG for all
+    if (outbytesleft!=0) o = 0;
 
     /* convert unicode BE -> LE */
     o = ((o>>24)&0xff)
@@ -435,7 +437,7 @@ void prepare_charset() {
 	    ++charset_size;
 	}
 	fclose(f);
-	encoding = basename(encoding);
+//	encoding = basename(encoding);
     }
     if (charset_size==0) ERROR("No characters to render!");
 }
@@ -661,6 +663,10 @@ void parse_args(int argc, char **argv) {
 
     if (argv[a][0]!=0)
 	encoding = argv[a];
+    encoding_name = strrchr(encoding, '/');
+    if (!encoding_name) encoding_name=encoding;
+    else ++encoding_name;
+    
     ++a; --argc;
 
     i = atoi(argv[a]);
