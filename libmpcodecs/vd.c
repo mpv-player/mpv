@@ -51,6 +51,7 @@ extern vd_functions_t mpcodecs_vd_huffyuv;
 extern vd_functions_t mpcodecs_vd_zlib;
 extern vd_functions_t mpcodecs_vd_mpegpes;
 extern vd_functions_t mpcodecs_vd_real;
+extern vd_functions_t mpcodecs_vd_svq1;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -99,6 +100,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_real,
 #endif
+	&mpcodecs_vd_svq1,
 	NULL
 };
 
