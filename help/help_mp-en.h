@@ -141,23 +141,23 @@ static char help_text[]=
 #define MSGTR_Paused "\n================= PAUSED =================\r"
 #define MSGTR_PlaylistLoadUnable "\nUnable to load playlist %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer crashed by 'Illegal Instruction'.\n"\
-"  It may be a bug in our new runtime cpu-detection code...\n"\
-"  please read DOCS/bugreports.html\n"
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  It may be a bug in our new runtime CPU-detection code...\n"\
+"  Please read DOCS/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer crashed by 'Illegal Instruction'.\n"\
-"  It usually happens when you run it on different CPU than it was\n"\
-"  compiled/optimized for.\n Verify this!\n"
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  It usually happens when you run it on a CPU different than the one it was\n"\
+"  compiled/optimized for.\n  Verify this!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/bugreports.html section 5.b.\n"
+"  disassembly. For details, see DOCS/bugreports.html#crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc\n"\
 "  version. If you think it's MPlayer's fault, please read DOCS/bugreports.html\n"\
-"  and follow instructions there. We can't and won't help unless you provide\n"\
-"  these informations when reporting a possible bug.\n"
+"  and follow the instructions there. We can't and won't help unless you provide\n"\
+"  this information when reporting a possible bug.\n"
 
 
 // mencoder.c:
@@ -406,7 +406,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" not found ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] warning in skin config file on line %d: this subsection not supported this widget (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] warning in skin config file on line %d: this subsection not supported by this widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file not found ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp read error ( %s )\n"
@@ -582,7 +582,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_PlayBar "Enable playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-Rom device:"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM device:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD device:"
 
 // --- messagebox
