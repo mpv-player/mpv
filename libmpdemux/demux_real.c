@@ -49,8 +49,15 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #define MAX_STREAMS 10
 
 typedef struct {
-    int		data_chunk_offset; /* i think for seeking */
+    /* for seeking */
+    int		index_chunk_offset;
+    int		*index_table[MAX_STREAMS];
+    int		index_table_size[MAX_STREAMS];
+    int		data_chunk_offset;
     int		num_of_packets;
+    int		current_packet;
+    
+    /* stream id table */
     int		last_a_stream;
     int 	a_streams[MAX_STREAMS];
     int		last_v_stream;
@@ -66,15 +73,12 @@ static void get_str(int isbyte, demuxer_t *demuxer, char *buf, int buf_size)
 	len = stream_read_char(demuxer->stream);
     else
 	len = stream_read_word(demuxer->stream);
-#if 1
-    q = buf;
-    for (i = 0; i < len; i++)
-	if (i < (buf_size - 1))
-	    *q++ = stream_read_char(demuxer->stream);
-    *q = 0;
-#else
-    stream_read(demuxer->stream, buf, buf_size);
-#endif
+
+    stream_read(demuxer->stream, buf, (len > buf_size) ? buf_size : len);
+    if (len > buf_size)
+	stream_skip(demuxer->stream, len-buf_size);
+
+    printf("read_str: %d bytes read\n", len);
 }
 
 static void skip_str(int isbyte, demuxer_t *demuxer)
@@ -89,6 +93,62 @@ static void skip_str(int isbyte, demuxer_t *demuxer)
     stream_skip(demuxer->stream, len);    
 
     printf("skip_str: %d bytes skipped\n", len);
+}
+
+static void parse_index_chunk(demuxer_t *demuxer)
+{
+    real_priv_t *priv = demuxer->priv;
+    int origpos = stream_tell(demuxer->stream);
+    int i, entries;
+    int stream_id = 0;
+
+    printf("Building index table from index chunk (%d)\n",
+	priv->index_chunk_offset);
+    
+    stream_seek(demuxer->stream, priv->index_chunk_offset);
+
+    stream_skip(demuxer->stream, 4); /* INDX */
+
+read_index:
+    if (stream_id > MAX_STREAMS)
+	goto end;
+
+    stream_skip(demuxer->stream, 8); /* unknown */
+    entries = stream_read_word(demuxer->stream);
+    printf("entries: %d\n", entries);
+    if (entries <= 0)
+	goto end;
+    stream_skip(demuxer->stream, 12); /* unknown */
+
+//    stream_skip(demuxer->stream, 22); /* unknown bytes */
+
+    priv->index_table_size[stream_id] = entries;
+    priv->index_table[stream_id] = malloc(priv->index_table_size[stream_id] * sizeof(int));
+    
+    for (i = 0; i < entries; i++)
+    {
+	priv->index_table[stream_id][i] = stream_read_dword(demuxer->stream);
+	stream_skip(demuxer->stream, 10); /* unknown bytes */
+	/* [position(dword)][unk1(word)][unused(dword)][unk2(word)] */
+	printf("Index table: Stream#%d: entry: %d: pos: %d\n",
+	    stream_id, i, priv->index_table[stream_id][i]);
+    }
+    demuxer->seekable = 1; /* got index, we're able to seek */
+
+//    stream_seek(demuxer->stream, stream_tell(demuxer->stream)-7);
+    /* search next index table for other stream */
+    i = stream_read_word(demuxer->stream);
+    printf("pos: %d, next tag: %.4s\n", stream_tell(demuxer->stream), &i);
+    if (i == MKTAG('I', 'N', 'D', 'X'))
+    {
+	stream_id++;
+	goto read_index;
+    }
+
+end:
+    if (entries == -256)
+	stream_reset(demuxer->stream);
+    stream_seek(demuxer->stream, origpos);
 }
 
 int real_check_file(demuxer_t* demuxer)
@@ -127,7 +187,9 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 //    printf("num_of_packets: %d\n", priv->num_of_packets);
 
 loop:
-    if (priv->num_of_packets == 0)
+    if ((priv->num_of_packets == 0) && (priv->num_of_packets != -10))
+	return 0; /* EOF */
+    if (priv->current_packet > priv->num_of_packets)
 	return 0; /* EOF */
     stream_skip(demuxer->stream, 2); /* version */
     len = stream_read_word(demuxer->stream);
@@ -147,10 +209,12 @@ loop:
     /* flags:		*/
     /* 	0x2 - keyframe	*/
 
-//    printf("packet#%d: len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
-//	priv->num_of_packets, len, stream_id, timestamp, flags);
+//    printf("packet#%d: pos: %d, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
+//	priv->current_packet, stream_tell(demuxer->stream)-12, len, stream_id, timestamp, flags);
 
-    priv->num_of_packets--;
+//    if (priv->num_of_packets != -10)
+//	priv->num_of_packets--;
+    priv->current_packet++;
     len -= 12;    
 
     /* check if stream_id is audio stream */
@@ -228,7 +292,9 @@ void demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* nb packets */
 		stream_skip(demuxer->stream, 4); /* duration */
 		stream_skip(demuxer->stream, 4); /* preroll */
-		stream_skip(demuxer->stream, 4); /* index offset */
+//		stream_skip(demuxer->stream, 4); /* index offset */
+		priv->index_chunk_offset = stream_read_dword(demuxer->stream);
+		printf("Index chunk offset: 0x%x\n", priv->index_chunk_offset);
 //		stream_skip(demuxer->stream, 4); /* data offset */
 		priv->data_chunk_offset = stream_read_dword(demuxer->stream)+10;
 		printf("Data chunk offset: 0x%x\n", priv->data_chunk_offset);
@@ -270,6 +336,7 @@ void demux_open_real(demuxer_t* demuxer)
 		{
 		    buf = malloc(len+1);
 		    stream_read(demuxer->stream, buf, len);
+		    buf[len] = 0;
 		    demux_info_add(demuxer, "author", buf);
 		    free(buf);
 		}
@@ -279,6 +346,7 @@ void demux_open_real(demuxer_t* demuxer)
 		{
 		    buf = malloc(len+1);
 		    stream_read(demuxer->stream, buf, len);
+		    buf[len] = 0;
 		    demux_info_add(demuxer, "copyright", buf);
 		    free(buf);
 		}
@@ -288,6 +356,7 @@ void demux_open_real(demuxer_t* demuxer)
 		{
 		    buf = malloc(len+1);
 	    	    stream_read(demuxer->stream, buf, len);
+		    buf[len] = 0;
 		    demux_info_add(demuxer, "comment", buf);
 		    free(buf);
 		}
@@ -330,9 +399,12 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
 		    char buf[128]; /* for codec name */
 		    int frame_size;
+		    int version;
 
 		    printf("Found audio stream!\n");
-		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
+		    version = stream_read_word(demuxer->stream);
+		    printf("version: %d\n", version);
+//		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 2);
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
 		    stream_skip(demuxer->stream, 4);
@@ -348,23 +420,32 @@ void demux_open_real(demuxer_t* demuxer)
 		    frame_size = stream_read_word(demuxer->stream);
 		    printf("frame_size: %d\n", frame_size);
 		    stream_skip(demuxer->stream, 4);
+		    
+		    if (version == 5)
+			stream_skip(demuxer->stream, 6);
 
 		    sh->samplerate = stream_read_word(demuxer->stream);
 		    stream_skip(demuxer->stream, 4);
 		    sh->channels = stream_read_word(demuxer->stream);
 		    printf("samplerate: %d, channels: %d\n",
 			sh->samplerate, sh->channels);
-		
-		    /* Desc #1 */
-		    skip_str(1, demuxer);
-		    /* Desc #2 */
-		    get_str(1, demuxer, buf, sizeof(buf));
+
+		    if (version == 5)
+		    {
+			stream_skip(demuxer->stream, 4);
+			stream_read(demuxer->stream, buf, 4);
+		    }
+		    else
+		    {		
+			/* Desc #1 */
+			skip_str(1, demuxer);
+			/* Desc #2 */
+			get_str(1, demuxer, buf, sizeof(buf));
+		    }
 
 		    tmp = 1; /* supported audio codec */
 		    switch (MKTAG(buf[0], buf[1], buf[2], buf[3]))
 		    {
-			case MKTAG('a', 't', 'r', 'c'):
-			    break;
 			case MKTAG('d', 'n', 'e', 't'):
 			    printf("Audio: DNET -> AC3\n");
 			    sh->format = 0x2000;
@@ -377,6 +458,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    printf("Audio: Real's GeneralCooker (unsupported)\n");
 			    tmp = 0;
 			    break;
+			case MKTAG('a', 't', 'r', 'c'):
 			default:
 			    printf("Audio: Unknown (%s)\n", buf);
 			    tmp = 0;
@@ -445,6 +527,7 @@ void demux_open_real(demuxer_t* demuxer)
 
 		    /* h263 hack */
 		    tmp = stream_read_dword(demuxer->stream);
+		    printf("H.263 ID: %x\n", tmp);
 		    switch (tmp)
 		    {
 			case 0x10000000:
@@ -500,8 +583,14 @@ header_end:
 
     printf("Packets in file: %d\n", priv->num_of_packets);
 
+    if (priv->num_of_packets == 0)
+	priv->num_of_packets = -10;
+
     /* disable seeking */
     demuxer->seekable = 0;
+
+    if (priv->index_chunk_offset && (index_mode == 1) || (index_mode == 2))
+	parse_index_chunk(demuxer);
 
 fail:
     return;
@@ -516,3 +605,40 @@ void demux_close_real(demuxer_t *demuxer)
 
     return;
 }
+
+#if 0
+/* will complete it later - please upload RV10 samples WITH INDEX CHUNK */
+int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
+{
+    real_priv_t *priv = demuxer->priv;
+    demux_stream_t *d_audio = demuxer->audio;
+    demux_stream_t *d_video = demuxer->video;
+    sh_audio_t *sh_audio = d_audio->sh;
+    sh_video_t *sh_video = d_video->sh;
+    int rel_seek_frames = sh->fps*rel_seek_secs;
+    int video_chunk_pos = d_video->pos;
+    int stream_id = 0;
+
+#if 0
+    if (flags & 1)
+	/* seek absolute */
+	video_chunk_pos = 0;
+
+    if (flags & 2)
+    {
+	int total = sh_video->video.dwLength;
+	
+	rel_seek_frames 
+    }
+#endif
+
+    if (rel_seek_frames > 0)
+    {
+	/* seek forward */
+	for (i = 0; i < index_table_size[stream_id]; i++)
+	{
+	    if (index_table[stream_id][i] 
+	}
+    }
+}
+#endif
