@@ -195,9 +195,11 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   /// Send the packet
   dp = new_demux_packet(pack->bytes-(data-pack->packet));
   memcpy(dp->buffer,data,pack->bytes-(data-pack->packet));
-  ds->pts = pts;
-  ds->flags = flags;
+  dp->pts = pts;
+  dp->flags = flags;
   ds_add_packet(ds,dp);
+  if(verbose>1)printf("New dp: %p  ds=%p  pts=%5.3f  len=%d  flag=%d  \n",
+      dp, ds, pts, dp->len, flags);
   return 1;
 }
 
@@ -295,7 +297,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_v->fps;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is video\n",ogg_d->num_sub);
-
+	if(verbose) print_video_header(sh_v->bih);
 	// Old audio header
       } else if(*(int32_t*)pack.packet+96 == 0x05589F81) {
 	unsigned int extra_size;
@@ -316,6 +318,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio\n",ogg_d->num_sub);
+	if(verbose) print_wave_header(sh_a->wf);
       } else
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG stream %d contain an old header but the header type is unknow\n",ogg_d->num_sub);
 
@@ -339,6 +342,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate= sh_v->fps;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is video\n",ogg_d->num_sub);
+	if(verbose) print_video_header(sh_v->bih);
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
@@ -361,6 +365,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio\n",ogg_d->num_sub);
+	if(verbose) print_wave_header(sh_a->wf);
 
 	/// Check for text (subtitles) header
       } else if(strncmp(st->streamtype,"text",4) == 0) {
@@ -380,6 +385,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  demuxer->audio->id = ogg_d->num_sub;
 	  demuxer->audio->sh = sh_a;
 	  sh_a->ds = demuxer->audio;
+//	  if(sh_a->wf) print_wave_header(sh_a->wf);
 	}
 	/// Is it the stream we want
 	if(demuxer->audio->id == ogg_d->num_sub)
@@ -391,6 +397,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  demuxer->video->id = ogg_d->num_sub;
 	  demuxer->video->sh = sh_v;
 	  sh_v->ds = demuxer->video;
+//	  if(sh_v->bih) print_video_header(sh_v->bih);
 	}
 	if(demuxer->video->id == ogg_d->num_sub)
 	  ds = demuxer->video;
