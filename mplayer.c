@@ -1367,7 +1367,7 @@ if (!sh_video && !sh_audio)
     goto goto_next_file;
 
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
-if(force_fps){
+if(force_fps && sh_video){
   vo_fps = sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,sh_video->fps,sh_video->frametime);
@@ -1970,7 +1970,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		}
 	  
 #ifdef USE_OSD
-      if(osd_level){
+      if(osd_level && sh_video){
 	osd_visible=sh_video->fps; // 1 sec
 	vo_osd_progbar_type=OSD_VOLUME;
 	vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
@@ -2212,7 +2212,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_panscan = res > 1 ? 1 : res < 0 ? 0 : res;
         video_out->control( VOCTRL_SET_PANSCAN,NULL );
 #ifdef USE_OSD
-        if(osd_level){
+        if(osd_level && sh_video){
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_PANSCAN;
 	  vo_osd_progbar_value=vo_panscan*256;
