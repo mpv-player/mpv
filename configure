@@ -2307,19 +2307,46 @@ fi
 echores "$_iconv"
 
 
-echocheck "FFmpeg codec"
-if test "$_libavcodec" = auto ; then
+echocheck "FFmpeg libavcodec (static)"
+if test "$_libavcodec" != no ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
-  test -d libavcodec && test -f libavcodec/Makefile && _libavcodec=yes
-fi
-if test "$_libavcodecso" = auto ; then
-  _libavcodecso=no
   cat > $TMPC << EOF
-#include <libffmpeg/avcodec.h>
+#define FF_POSTPROCESS 1
+#include "libavcodec/avcodec.h"
+int quant_store[MBR+1][MBC+1];
 int main(void) { return 0; }
 EOF
-  cc_check  -lffmpeg -lm && _libavcodecso=yes
+  if test -d libavcodec && test -f libavcodec/Makefile ; then
+    if cc_check -I. -lm ; then
+      _libavcodec=yes
+      echores "yes"
+    else
+      echores "no: see DOC/codecs.html"
+    fi
+  else
+    echores "no: see DOC/codecs.html"
+  fi
+else
+  echores "no"
+fi
+echocheck "FFmpeg libavcodec (dynamic)"
+if test "$_libavcodec" != yes && test "$_libavcodecso" = auto ; then
+  _libavcodecso=no
+  cat > $TMPC << EOF
+#define FF_POSTPROCESS 1 
+#include <libffmpeg/avcodec.h>
+int quant_store[MBR+1][MBC+1];
+int main(void) { return 0; }
+EOF
+  if cc_check -lffmpeg -lm ; then
+    _libavcodecso=yes
+    echores "yes: using libffmpeg.so"
+  else
+    echores "no: libffmpeg.so is broken/obsolete"
+  fi
+else
+  echores "no"
 fi
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodecso='#undef USE_LIBAVCODEC_SO'
@@ -2330,16 +2357,13 @@ if test "$_libavcodec" = yes ; then
   _dep_libavcodec='libavcodec/libavcodec.a'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec $_codecmodules"
-  echores "static libavcodec"
 elif test "$_libavcodecso" = yes ; then
   _def_libavcodecso='#define USE_LIBAVCODEC_SO 1'
   _ld_libavcodec='-lffmpeg'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec.so $_codecmodules"
-  echores "dynamic libffmpeg.so"
-else
-  echores "not found"
 fi
+# FIXME : check for avcodec_find_encoder_by_name() for mencoder
 
 
 # FIXME : variables don't have a "standard" name so check this one day
