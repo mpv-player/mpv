@@ -38,17 +38,19 @@ generált listához!!!</P>
 tenned, hogy támogassuk a codeced!</P>
 
 
-<P><B><A NAME=2.2.1.1>2.2.1.1.  DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1.  DivX4/DivX5</A></B></P>
 
-<P>Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 codec-érõl tartalmaz információkat.
-Az elsõ hozzáférhetõ alfa verzió az OpenDivX alpha 47 és 48 volt. A
-támogatás ezekhez benne volt/van az <B>MPlayer</B>-ben, és alapállapotban
-bele is fordul. Régebben a postprocessing kódját használjuk, hogy javítsunk az
-MPEG1/2 filmek képminõségén. Most már saját minõségjavító kódunk van.</P>
+<P>Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 és
+DivX5 codec-érõl tartalmaz információkat. Az elsõ hozzáférhetõ alfa verzió az
+OpenDivX alpha 47 és 48 volt. A támogatás ezekhez benne volt/van az
+<B>MPlayer</B>-ben, és alapállapotban bele is fordul. Régebben a postprocessing
+kódját használjuk, hogy javítsunk az MPEG1/2 filmek képminõségén. Most már
+saját minõségjavító kódunk van.</P>
 
 <P>Ezen codec új generációja le tudja játszani a hírhedt DivX codec-kel
 készült filmeket is! És ez még nem minden, SOKKAL gyorsabb mint a
-Win32-es DivX DLL (viszont a libavcodec még ENNÉL IS gyorsabb:).
+Win32-es DivX DLL (viszont a libavcodec még ENNÉL IS gyorsabb, így eme codec
+használata <B>NEM AJÁNLOTT</B> - kivéve enkódoláshoz).
 A beállítást lásd lent. A codec egyetlen hátránya, hogy jelenleg zárt
 forráskódú. :(</P>
 
@@ -80,11 +82,11 @@ használatára:</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">a DivX4 codec használata, mint az OpenDivX új verziója.
+<TD><FONT CLASS="text">a codec használata, mint az OpenDivX új verziója.
 Ebben az esetben YV12 képeket produkál a saját bufferében,
 és az <B>MPlayer</B> (libvo) konverziót végez.</TD><TR>
 <TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT CLASS="text">a DivX4 codec csinál konverziót.
+<TD><FONT CLASS="text">a codec csinál konverziót.
 Ebben az esetben használhatsz YUY2/UYVY módokat is.</TD></TR>
 </TABLE></P>
 
@@ -106,13 +108,16 @@ opcióval kapcsolható be), de az értékei furcsák :</P>
 <TD></TD><TD><FONT CLASS="text">hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
 </TABLE></P>
 
+
 <P><B><A NAME=2.2.1.2>2.2.1.2.  ffmpeg DivX/libavcodec</A></B></P>
 
-<P>A 0.4.2-es verzióval kezdve az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott forráskódú</B>
-DivX codec-et, amely kompatibilis a hagyományossal. Az <B>MPlayer</B>
-támogatja ezt a codec-et, lehetõvé téve hogy <B>DivX/DivX4 filmeket nézzünk nem-x86
-platformokon</B>, méghozzá sokkal gyorsabb dekódolással mint amit a Win32
-codec-ek, és az eredeti DivX4 lehetõvé tesz!</P>
+<P>A 0.4.2-es verzióval kezdve az
+<A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott
+forráskódú</B> DivX codec-et, amely kompatibilis a hagyományossal. Az
+<B>MPlayer</B> támogatja ezt a codec-et, lehetõvé téve hogy
+<B>DivX/DivX4/DivX5</B> filmeket nézzünk nem-x86 platformokon</B>, méghozzá
+sokkal gyorsabb dekódolással mint amit a Win32 codec-ek, és az eredeti DivX4
+lehetõvé tesz!</P>
 
 <P>Ezekenkívül még tartalmaz jónéhány más érdekes codec-et, pl: RealVideo 1.0,
 MJPEG, h263, h263+, stb.</P>
@@ -153,8 +158,8 @@ manpage vagy az example.conf mondja (a -vfm opció).</P>
 részt a codecs.conf file-ból (a libmpeg2 kétszer gyorsabb ennél a codecnél),
 és betenni a konfigurációs file-ba a <CODE>vfm=5</CODE> opciót.
 Ekkor az <B>MPlayer</B> az <B>ffdivx/ffodivx</B> codec-eket használja
-a <B>DivX/DivX4</B> file-ok, és a libmpeg2-t az MPEG1/2 file-ok dekódolásához.
-Ezzel és egy Matrox G400-zal még a legnagyobb felbontású DivX/DivX4 filmeket
+a <B>DivX</B> file-ok, és a libmpeg2-t az MPEG1/2 file-ok dekódolásához.
+Ezzel és egy Matrox G400-zal még a legnagyobb felbontású DivX filmeket
 is meg lehet nézni képkockavesztés nélkül, egy régi K6/2 500-ason.</P>
 
 

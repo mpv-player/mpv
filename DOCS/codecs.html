@@ -37,7 +37,7 @@ daily generated list!!!</P>
 HREF="#2.2.3">codec importing</A> to get info about how to help us adding support
 for it!</P>
 
-<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4/DivX5</A></B></P>
 
 <P>This section contains information about the DivX4 codec of
 <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
@@ -47,9 +47,10 @@ quality of MPEG1/2 movies. Now we use our own.</P>
 
 <P>The new generation of this codec can even decode movies made with the
 infamous DivX codec! And it's not everything, it's MUCH faster than the
-traditional Win32 DivX DLL's (note that libavcodec's decoder is EVEN FASTER :).
-See below for configuration. The only disadvantage of this codec is that it's
-currently closed-source. :(</P>
+traditional Win32 DivX DLL's (note that libavcodec's decoder is EVEN FASTER,
+so the usage of this codec is <B>DISCOURAGED</B> - you need it only for
+encoding). See below for configuration. The only disadvantage of this codec is
+that it's currently closed-source. :(</P>
 
 <P>The codec can be downloaded from the following URL:</P>
 
@@ -64,9 +65,9 @@ currently closed-source. :(</P>
 <P>Note: do NOT forget to add <CODE>/usr/local/lib</CODE> to your
 <CODE>/etc/ld.so.conf</CODE> and running <CODE>ldconfig</CODE> !</P>
 
-<P><B>MPlayer</B> autodetects if DivX4 is (properly) installed, just compile
-as usual. If it doesn't detect it, you didn't install it exactly as above,
-and/or has messed up config (see last question of 5.1 section).</P>
+<P><B>MPlayer</B> autodetects if DivX4/DivX5 is (properly) installed, just
+compile as usual. If it doesn't detect it, you didn't install it exactly as
+above, and/or has messed up config (see last question of 5.1 section).</P>
 
 <P>Using it is a bit tricky. As it conflicts with the old OpenDivX (its API is
 very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
@@ -77,11 +78,11 @@ this codec:</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">using divx4 codec as a new version of OpenDivX.
+<TD><FONT CLASS="text">using the codec as a new version of OpenDivX.
 in this case it produces YV12 image in its own buffer,
 and <B>MPlayer</B> (libvo) does colorspace conversion. (<B>RECOMMENDED!</B>)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT CLASS="text">using divx4 codec's colorspace conversion.
+<TD><FONT CLASS="text">using the codec's colorspace conversion.
 in this mode, you can use YUY2/UYVY too.</TD></TR>
 </TABLE></P>
 
@@ -105,11 +106,13 @@ enable using it), but range of values is strange: </P>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. ffmpeg's DivX/libavcodec</A></B></P>
 
-<P>Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
-which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
-and this makes it possible to <B>watch DivX/DivX4 movies on non-x86 platforms</B>,
-and gain much faster <B>DivX/DivX4</B> decoding speed than the Win32 codecs and
-the original DivX4 library has!</P>
+<P>Beginning with version 0.4.2 ,
+<A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an
+<B>opensource</B> DivX codec, which is compatible with the traditional DivX.
+<B>MPlayer</B> supports this codec, and this makes it possible to <B>watch
+DivX/DivX4/DivX5 movies on non-x86 platforms</B>, and gain much faster
+<B>DivX/DivX4/DivX5</B> decoding speed than the Win32 codecs and the original
+DivX4 library has!</P>
 
 <P>It also contains lots of nice codecs, such as RealVideo 1.0, MJPEG, h263,
 h263+, etc.</P>
@@ -151,8 +154,9 @@ or the example.conf says (the -vfm option).</P>
 <CODE>ffmpeg12</CODE> section from codecs.conf (this codec isn't optimized, and
 libmpeg2 is twice as fast), and place <CODE>vfm=5</CODE> in my config file.
 Then <B>MPlayer</B> always uses <B>ffdivx/ffodivx</B> to decode
-<B>DivX/DivX4</B> files, and libmpeg2 for MPEG1/2 . With this and my Matrox G400, I can view even the
-highest resolution DivX/DivX4 movies on my K6/2 500, without framedrop.</P>
+<B>DivX</B> files, and libmpeg2 for MPEG1/2 . With this and my
+Matrox G400, I can view even the highest resolution DivX movies on my
+K6/2 500, without framedrop.</P>
 
 
 <P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codecs</A></B></P>
