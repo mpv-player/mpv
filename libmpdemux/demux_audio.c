@@ -175,7 +175,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     if (l > 0) {
     w->cbSize = stream_read_word_le(s);
     l -= 2;
-    if (w->cbSize > 0)
+     if (w->cbSize > 0) {
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
 	l,w->cbSize);
@@ -185,6 +185,7 @@ int demux_audio_open(demuxer_t* demuxer) {
         stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
         l -= w->cbSize;
       }
+     }
     }
 
     if(verbose>0) print_wave_header(w);
