@@ -25,7 +25,7 @@ LIBVO_EXTERN (dxr2)
 extern float monitor_aspect;
 extern float movie_aspect;
 
-static int dxr2_fd = -1;
+int dxr2_fd = -1;
 
 static int movie_w,movie_h;
 static int fs = 0;
@@ -176,7 +176,7 @@ void dxr2_send_packet(unsigned char* data,int len,int id,int timestamp)
   int ptslen=5;
 
   if(dxr2_fd < 0) {
-    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 isn't ready\n");
+    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 fd is not valid\n");
     return;
   }
 
@@ -228,28 +228,14 @@ void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int times
   int ptslen=5;
 
   if(dxr2_fd < 0) {
-    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 isn't ready\n");
+    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 fd is not valid\n");
     return;
   }    
 
   if(last_freq_id != freq_id) {
-    switch (freq_id) {
-    case 0: arg=DXR2_AUDIO_FREQ_48; break;
-    case 1: arg=DXR2_AUDIO_FREQ_96; break;
-    case 2: arg=DXR2_AUDIO_FREQ_441; break;
-    case 3: arg=DXR2_AUDIO_FREQ_32; break;
-    case 4: arg=DXR2_AUDIO_FREQ_2205; break;
-#if 0
-      // This is not is the dxr2 driver, but in a Tobias Diedrich patch 
-    case 5: arg=DXR2_AUDIO_FREQ_24; break;
-    case 6:  arg=DXR2_AUDIO_FREQ_64; break;
-    case 7: arg=DXR2_AUDIO_FREQ_882; break;
-#endif
-    }
-    ioctl(dxr2_fd, DXR2_IOC_SET_AUDIO_SAMPLE_FREQUENCY, &arg);
+    ioctl(dxr2_fd, DXR2_IOC_SET_AUDIO_SAMPLE_FREQUENCY, &freq_id);
     last_freq_id = freq_id;
   }
-  freq_id=0;
 
   if (((int) timestamp)<0)
     timestamp=0;
@@ -316,7 +302,7 @@ void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int times
     //	   audio sampling frequency (48khz = 0, 96khz = 1)        2 bit
     //	   reserved                                               1 bit
     //	   number of audio channels - 1 (e.g. stereo = 1)         3 bit
-    pack[ptslen+14]=1|(freq_id<<4);
+    pack[ptslen+14]=1;
 
     //	   dynamic range control (0x80 if off)
     pack[ptslen+15]=0x80;
@@ -326,7 +312,6 @@ void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int times
 
     len-=payload_size; data+=payload_size;
     timestamp+=90000/4*payload_size/48000;
-    //		ptslen=0; // store PTS only once, at first packet!
   }
 }
 
@@ -508,7 +493,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t query_format(uint32_t format)
 {
   if (format==IMGFMT_MPEGPES)
-    return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_TIMER;
+    return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_TIMER|VFCAP_SPU;
   return 0;
 }
 

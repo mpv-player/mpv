@@ -1,8 +1,9 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
-
+#include <dxr2ioctl.h>
 #include "../config.h"
 #include "mp_msg.h"
 #include "bswap.h"
@@ -23,8 +24,40 @@ static ao_info_t info =
 
 LIBAO_EXTERN(dxr2)
 
+static int volume=19;
+extern int dxr2_fd;
+
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
+  switch(cmd){
+  case AOCONTROL_GET_VOLUME:
+    if(dxr2_fd > 0) {
+      ao_control_vol_t* vol = (ao_control_vol_t*)arg;
+      vol->left = vol->right = volume * 19.0 / 100.0;
+      return CONTROL_OK;
+    }
+    return CONTROL_ERROR;
+  case AOCONTROL_SET_VOLUME:
+    if(dxr2_fd > 0) {
+      dxr2_oneArg_t v;
+      float diff;
+      ao_control_vol_t* vol = (ao_control_vol_t*)arg;
+      // We need this trick because the volume stepping is often too small
+      diff = ((vol->left+vol->right) / 2 - (volume*19.0/100.0)) * 19.0 / 100.0;
+      v.arg = volume + (diff > 0 ? ceil(diff) : floor(diff)); 
+      if(v.arg > 19) v.arg = 19;
+      if(v.arg < 0) v.arg = 0;
+      if(v.arg != volume) {
+	volume = v.arg;
+	if( ioctl(dxr2_fd,DXR2_IOC_SET_AUDIO_VOLUME,&v) < 0) {
+	  mp_msg(MSGT_AO,MSGL_ERR,"DXR2 : Setting volume to %d failed\n",volume);
+	  return CONTROL_ERROR;
+	}
+      }
+      return CONTROL_OK;
+    }
+    return CONTROL_ERROR;
+  }
   return CONTROL_UNKNOWN;
 }
 
@@ -45,29 +78,32 @@ static int init(int rate,int channels,int format,int flags){
 
 	switch(rate){
 	case 48000:
-		freq_id=0;
+		freq_id=DXR2_AUDIO_FREQ_48;
 		break;
 	case 96000:
-		freq_id=1;
+		freq_id=DXR2_AUDIO_FREQ_96;
 		break;
 	case 44100:
-		freq_id=2;
+		freq_id=DXR2_AUDIO_FREQ_441;
 		break;
 	case 32000:
-		freq_id=3;
+		freq_id=DXR2_AUDIO_FREQ_32;
 		break;
 	case 22050:
-		freq_id=4;
+		freq_id=DXR2_AUDIO_FREQ_2205;
 		break;
-#if 0
+#ifdef DXR2_AUDIO_FREQ_24
+	// This is not yet in the dxr2 driver CVS
+	// you can get the patch at
+	// http://www.ranmachan.dyndns.org/~ranma/patches/dxr2.pcm1723.20020513
 	case 24000:
-		freq_id=5;
+		freq_id=DXR2_AUDIO_FREQ_24;
 		break;
 	case 64000:
-		freq_id=6;
+		freq_id=DXR2_AUDIO_FREQ_64;
 		break;
 	case 88200:
-		freq_id=7;
+		freq_id=DXR2_AUDIO_FREQ_882;
 		break;
 #endif
 	default:
@@ -128,7 +164,7 @@ static int play(void* data,int len,int flags){
 	//unsigned short *s=data;
 	uint16_t *s=data;
 #ifndef WORDS_BIGENDIAN
-	for(i=0;i<len/2;i++) s[i] = bswap_16(s[i]); // (s[i]>>8)|(s[i]<<8); // le<->be bswap_16(s[i]);
+	for(i=0;i<len/2;i++) s[i] = bswap_16(s[i]);
 #endif
 	dxr2_send_lpcm_packet(data,len,0xA0,ao_data.pts-10000,freq_id);
     }
