@@ -275,6 +275,9 @@ static int init(int rate_hz, int channels, int format, int flags)
       case AFMT_S32_BE:
 	alsa_format = SND_PCM_FORMAT_S32_BE;
 	break;
+      case AFMT_FLOAT:
+	alsa_format = SND_PCM_FORMAT_FLOAT_LE;
+	break;
 
       default:
 	alsa_format = SND_PCM_FORMAT_MPEG; //? default should be -1
@@ -285,12 +288,17 @@ static int init(int rate_hz, int channels, int format, int flags)
     //u16_le so 32bit is probably obsolet. 
     switch(alsa_format)
       {
+      case SND_PCM_FORMAT_S8:
+      case SND_PCM_FORMAT_U8:
+	ao_data.bps *= 1;
+	break;
       case SND_PCM_FORMAT_S16_LE:
       case SND_PCM_FORMAT_U16_LE:
 	ao_data.bps *= 2;
 	break;
       case SND_PCM_FORMAT_S32_LE:
       case SND_PCM_FORMAT_S32_BE:
+      case SND_PCM_FORMAT_FLOAT_LE:
 	ao_data.bps *= 4;
 	break;
       case -1:
@@ -364,12 +372,19 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: setup for 1/2 channel(s)\n");
 	  break;
 	case 4:
-	  strcpy(devstr, "surround40");
+	    if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+		// hack - use the converter plugin
+		strcpy(devstr, "plug:surround40");
+	    else
+		strcpy(devstr, "surround40");
 	  alsa_device = devstr;
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround40\n");
 	  break;
 	case 6:
-	  strcpy(devstr, "surround51");
+	    if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+		strcpy(devstr, "plug:surround51");
+	    else
+		strcpy(devstr, "surround51");
 	  alsa_device = devstr;
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround51\n");
 	  break;
