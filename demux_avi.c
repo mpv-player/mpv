@@ -497,8 +497,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	int total=sh_video->video.dwLength;
 	if(total<=1){
 	    // bad video header, try to get it from audio
-	    total=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
-	    if(total<1){
+	    if(sh_audio) total=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
+	    if(total<=1){
               mp_msg(MSGT_SEEK,MSGL_WARN,"Couldn't determine number of frames (for absoulte seek)  \n");
 	      total=0;
 	    }
