@@ -4838,7 +4838,7 @@ EOF
   fi
 fi
 
-if test "$_inet6" = yes ; then
+if test "$_gethostbyname2" = yes ; then
   _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
 else
   _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
