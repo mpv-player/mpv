@@ -273,7 +273,7 @@ switch(fr->lay){
     fr->framesize /= MP3_samplerate;
     MP3_framesize  = ((fr->framesize+fr->padding)<<2);
     fr->framesize  = MP3_framesize-4;
-    printf("framesize=%d\n",fr->framesize);
+//    printf("framesize=%d\n",fr->framesize);
     break;
   default:
     MP3_framesize=fr->framesize=0;
