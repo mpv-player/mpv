@@ -412,8 +412,7 @@
   <LI>creating files from external audio stream</LI>
   <LI>1, 2 or 3 pass encoding</LI>
   <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE:</B> VBR MP3 audio doesn't
-    always play nicely on Windows players! On the other hand, currently
-    MEncoder's CBR encoding is totally broken on Win32 players :)</LI>
+    always play nicely on Windows players!</LI>
   <LI>PCM audio</LI>
   <LI>stream copying</LI>
   <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
@@ -510,7 +509,7 @@
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
-  <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B>, <B>2.95.4</B> and <B>3.1</B>.
+  <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B> (maybe <B>2.95.4</B>) and <B>3.2+</B>.
     <B>NEVER</B> use 2.96 or 3.0.x! They generate faulty code for MPlayer.
     If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
     just because it's newer! Early releases of 3.0.x were even more buggy than
@@ -819,8 +818,8 @@
 
 <H2><A NAME="gui">1.3 What about the GUI?</A></H2>
 
-<P>The GUI needs GTK (it isn't GTK, but the panels are). The skins are stored
-  in PNG format, so gtk, libpng (and their devel stuff) has to be installed. 
+<P>The GUI needs GTK 1.2.x (it isn't fully GTK, but the panels are). The skins are stored
+  in PNG format, so gtk, libpng (and their devel stuff, usually called gtk-dev and libpng-dev) has to be installed. 
   You can build it by specifying <CODE>--enable-gui</CODE> during
   <CODE>./configure</CODE>. Then, to turn on GUI mode, you either</P>
   <UL>
