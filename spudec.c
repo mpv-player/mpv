@@ -42,15 +42,24 @@
 
 #define MIN(a, b)	((a)<(b)?(a):(b))
 
+typedef struct packet_t packet_t;
+struct packet_t {
+  unsigned char *data;
+  unsigned int process_pts;   /* When to process the packet */
+  size_t reserve;             /* size of the memory pointed to by packet */
+  unsigned int offset;        /* end of the currently assembled fragment */
+  unsigned int size;          /* size of the packet once all fragments are assembled */
+  unsigned int fragment_pts;  /* PTS of the last fragment for this packet */
+  unsigned int control_start; /* index of start of control data */
+  packet_t *next;
+};
+
 typedef struct {
+  packet_t *packets;       /* Linked list of packets sorted by process_pts */
+  packet_t *last_packet;   /* Last packet in linked list */
+
   unsigned int global_palette[16];
   unsigned int orig_frame_width, orig_frame_height;
-  unsigned char* packet;
-  size_t packet_reserve;	/* size of the memory pointed to by packet */
-  unsigned int packet_offset;	/* end of the currently assembled fragment */
-  unsigned int packet_size;	/* size of the packet once all fragments are assembled */
-  unsigned int packet_pts;	/* PTS for this packet */
-  unsigned int control_start;	/* index of start of control data */
   unsigned int palette[4];
   unsigned int alpha[4];
   unsigned int cuspal[4];
@@ -79,6 +88,48 @@ typedef struct {
   int spu_changed;
 } spudec_handle_t;
 
+/* Add packet to end of list */
+static void spudec_append_packet (spudec_handle_t *this, packet_t *packet)
+{
+  packet->next = NULL;
+  if (this->last_packet == NULL)
+    this->packets = packet;
+  else
+    this->last_packet->next = packet;
+
+  this->last_packet = packet;
+}
+
+/* Add a new packet to end of the list */
+static void spudec_append_new_packet (spudec_handle_t *this)
+{
+  packet_t *new_packet = calloc (1, sizeof (packet_t));
+
+  /* Do not process packet yet, so set process time way into the future */
+  new_packet->process_pts = -1L;
+
+  spudec_append_packet (this, new_packet);
+}
+
+/* Remove top-most packet and free the memory it used */
+static void spudec_pop_packet (spudec_handle_t *this)
+{
+  packet_t *temp;
+
+  if (this->packets != NULL)
+    {
+      temp = this->packets;
+      this->packets = temp->next;
+      if (temp->data != NULL)
+        free (temp->data);
+      free (temp);
+
+      /* Null last packet pointer if there are no packets in the queue */
+      if (this->packets == NULL)
+        this->last_packet = NULL;
+    }
+}
+
 static inline unsigned int get_be16(const unsigned char *p)
 {
   return (p[0] << 8) + p[1];
@@ -96,15 +147,15 @@ static void next_line(spudec_handle_t *this)
   this->deinterlace_oddness = (this->deinterlace_oddness + 1) % 2;
 }
 
-static inline unsigned char get_nibble(spudec_handle_t *this)
+static inline unsigned char get_nibble(spudec_handle_t *this, packet_t *packet)
 {
   unsigned char nib;
   unsigned int *nibblep = this->current_nibble + this->deinterlace_oddness;
-  if (*nibblep / 2 >= this->control_start) {
+  if (*nibblep / 2 >= packet->control_start) {
     mp_msg(MSGT_SPUDEC,MSGL_WARN, "SPUdec: ERROR: get_nibble past end of packet\n");
     return 0;
   }
-  nib = this->packet[*nibblep / 2];
+  nib = packet->data[*nibblep / 2];
   if (*nibblep % 2)
     nib &= 0xf;
   else
@@ -169,11 +220,12 @@ static inline void spudec_cut_image(spudec_handle_t *this)
   }
 }
 
-static void spudec_process_data(spudec_handle_t *this)
+static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 {
   unsigned int cmap[4], alpha[4];
   unsigned int i, x, y;
 
+  this->deinterlace_oddness = 0;
   this->scaled_frame_width = 0;
   this->scaled_frame_height = 0;
   for (i = 0; i < 4; ++i) {
@@ -218,17 +270,17 @@ static void spudec_process_data(spudec_handle_t *this)
   x = 0;
   y = 0;
   while (this->current_nibble[0] < i
-	 && this->current_nibble[1] / 2 < this->control_start
+	 && this->current_nibble[1] / 2 < packet->control_start
 	 && y < this->height) {
     unsigned int len, color;
     unsigned int rle = 0;
-    rle = get_nibble(this);
+    rle = get_nibble(this, packet);
     if (rle < 0x04) {
-      rle = (rle << 4) | get_nibble(this);
+      rle = (rle << 4) | get_nibble(this, packet);
       if (rle < 0x10) {
-	rle = (rle << 4) | get_nibble(this);
+	rle = (rle << 4) | get_nibble(this, packet);
 	if (rle < 0x040) {
-	  rle = (rle << 4) | get_nibble(this);
+	  rle = (rle << 4) | get_nibble(this, packet);
 	  if (rle < 0x0004)
 	    rle |= ((this->width - x) << 2);
 	}
@@ -288,23 +340,24 @@ static void compute_palette(spudec_handle_t *this)
   }
 }
 
-static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
+static void spudec_process_control(spudec_handle_t *this, packet_t *packet)
 {
   int a,b; /* Temporary vars */
   unsigned int date, type;
   unsigned int off;
   unsigned int start_off = 0;
   unsigned int next_off;
+  unsigned int pts100 = packet->process_pts;
 
-  this->control_start = get_be16(this->packet + 2);
-  next_off = this->control_start;
+  packet->control_start = get_be16(packet->data + 2);
+  next_off = packet->control_start;
   while (start_off != next_off) {
     start_off = next_off;
-    date = get_be16(this->packet + start_off) * 1024;
-    next_off = get_be16(this->packet + start_off + 2);
+    date = get_be16(packet->data + start_off) * 1024;
+    next_off = get_be16(packet->data + start_off + 2);
     mp_msg(MSGT_SPUDEC,MSGL_DBG2, "date=%d\n", date);
     off = start_off + 4;
-    for (type = this->packet[off++]; type != 0xff; type = this->packet[off++]) {
+    for (type = packet->data[off++]; type != 0xff; type = packet->data[off++]) {
       mp_msg(MSGT_SPUDEC,MSGL_DBG2, "cmd=%d  ",type);
       switch(type) {
       case 0x00:
@@ -327,20 +380,20 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	break;
       case 0x03:
 	/* Palette */
-	this->palette[0] = this->packet[off] >> 4;
-	this->palette[1] = this->packet[off] & 0xf;
-	this->palette[2] = this->packet[off + 1] >> 4;
-	this->palette[3] = this->packet[off + 1] & 0xf;
+	this->palette[0] = packet->data[off] >> 4;
+	this->palette[1] = packet->data[off] & 0xf;
+	this->palette[2] = packet->data[off + 1] >> 4;
+	this->palette[3] = packet->data[off + 1] & 0xf;
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Palette %d, %d, %d, %d\n",
 	       this->palette[0], this->palette[1], this->palette[2], this->palette[3]);
 	off+=2;
 	break;
       case 0x04:
 	/* Alpha */
-	this->alpha[0] = this->packet[off] >> 4;
-	this->alpha[1] = this->packet[off] & 0xf;
-	this->alpha[2] = this->packet[off + 1] >> 4;
-	this->alpha[3] = this->packet[off + 1] & 0xf;
+	this->alpha[0] = packet->data[off] >> 4;
+	this->alpha[1] = packet->data[off] & 0xf;
+	this->alpha[2] = packet->data[off + 1] >> 4;
+	this->alpha[3] = packet->data[off + 1] & 0xf;
 	if (this->auto_palette) { 
 	  compute_palette(this);
 	  this->auto_palette = 0;
@@ -351,8 +404,8 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	break;
       case 0x05:
 	/* Co-ords */
-	a = get_be24(this->packet + off);
-	b = get_be24(this->packet + off + 3);
+	a = get_be24(packet->data + off);
+	b = get_be24(packet->data + off + 3);
 	this->start_col = a >> 12;
 	this->end_col = a & 0xfff;
 	this->width = (this->end_col < this->start_col) ? 0 : this->end_col - this->start_col + 1;
@@ -367,8 +420,8 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	break;
       case 0x06:
 	/* Graphic lines */
-	this->current_nibble[0] = 2 * get_be16(this->packet + off);
-	this->current_nibble[1] = 2 * get_be16(this->packet + off + 2);
+	this->current_nibble[0] = 2 * get_be16(packet->data + off);
+	this->current_nibble[1] = 2 * get_be16(packet->data + off + 2);
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Graphic offset 1: %d  offset 2: %d\n",
 	       this->current_nibble[0] / 2, this->current_nibble[1] / 2);
 	off+=4;
@@ -389,18 +442,18 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
   }
 }
 
-static void spudec_decode(spudec_handle_t *this, unsigned int pts100)
+static void spudec_decode(spudec_handle_t *this, packet_t *queued_packet)
 {
   if(this->hw_spu) {
     static vo_mpegpes_t packet = { NULL, 0, 0x20, 0 };
     static vo_mpegpes_t *pkg=&packet;
-    packet.data = this->packet;
-    packet.size = this->packet_size;
-    packet.timestamp = pts100;
+    packet.data = queued_packet->data;
+    packet.size = queued_packet->size;
+    packet.timestamp = queued_packet->process_pts;
     this->hw_spu->draw_frame((uint8_t**)&pkg);
   } else {
-    spudec_process_control(this, pts100);
-    spudec_process_data(this);
+    spudec_process_control(this, queued_packet);
+    spudec_process_data(this, queued_packet);
   }
   this->spu_changed = 1;
 }
@@ -411,80 +464,87 @@ int spudec_changed(void * this)
     return (spu->spu_changed || spu->now_pts > spu->end_pts);
 }
 
-void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsigned int pts100)
+void spudec_assemble(void *this, unsigned char *packet_bytes, unsigned int len, unsigned int pts100)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
+  packet_t *last_packet;
+
+  /* Create a new packet if one doesn't exist in the queue */
+  if (spu->last_packet == NULL)
+    spudec_append_new_packet (spu);
+
+  last_packet = spu->last_packet;
+
 //  spudec_heartbeat(this, pts100);
   if (len < 2) {
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
       return;
   }
-  if ((spu->packet_pts + 10000) < pts100) {
+  if ((last_packet->fragment_pts + 10000) < pts100) {
     // [cb] too long since last fragment: force new packet
-    spu->packet_offset = 0;
+    last_packet->offset = 0;
   }
-  spu->packet_pts = pts100;
-  if (spu->packet_offset == 0) {
-    unsigned int len2 = get_be16(packet);
+  last_packet->fragment_pts = pts100;
+  if (last_packet->offset == 0) {
+    unsigned int len2 = get_be16(packet_bytes);
     // Start new fragment
-    if (spu->packet_reserve < len2) {
-      if (spu->packet != NULL)
-	free(spu->packet);
-      spu->packet = malloc(len2);
-      spu->packet_reserve = spu->packet != NULL ? len2 : 0;
+    if (last_packet->reserve < len2) {
+      if (last_packet->data != NULL)
+	free(last_packet->data);
+      last_packet->data = malloc(len2);
+      last_packet->reserve = last_packet->data != NULL ? len2 : 0;
     }
-    if (spu->packet != NULL) {
-      spu->deinterlace_oddness = 0;
-      spu->packet_size = len2;
+    if (last_packet->data != NULL) {
+      last_packet->size = len2;
       if (len > len2) {
 	mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: invalid frag len / len2: %d / %d \n", len, len2);
 	return;
       }
-      memcpy(spu->packet, packet, len);
-      spu->packet_offset = len;
-      spu->packet_pts = pts100;
+      memcpy(last_packet->data, packet_bytes, len);
+      last_packet->offset = len;
     }
   } else {
     // Continue current fragment
-    if (spu->packet_size < spu->packet_offset + len){
+    if (last_packet->size < last_packet->offset + len){
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: invalid fragment\n");
-      spu->packet_size = spu->packet_offset = 0;
+      last_packet->size = last_packet->offset = 0;
     } else {
-      memcpy(spu->packet + spu->packet_offset, packet, len);
-      spu->packet_offset += len;
+      memcpy(last_packet->data + last_packet->offset, packet_bytes, len);
+      last_packet->offset += len;
     }
   }
 #if 1
   // check if we have a complete packet (unfortunatelly packet_size is bad
   // for some disks)
   // [cb] packet_size is padded to be even -> may be one byte too long
-  if ((spu->packet_offset == spu->packet_size) ||
-      ((spu->packet_offset + 1) == spu->packet_size)){
+  if ((last_packet->offset == last_packet->size) ||
+      ((last_packet->offset + 1) == last_packet->size)){
     unsigned int x=0,y;
-    while(x+4<=spu->packet_offset){
-      y=get_be16(spu->packet+x+2); // next control pointer
-      mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUtest: x=%d y=%d off=%d size=%d\n",x,y,spu->packet_offset,spu->packet_size);
+    while(x+4<=last_packet->offset) {
+      y=get_be16(last_packet->data+x+2); // next control pointer
+      mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUtest: x=%d y=%d off=%d size=%d\n",x,y,last_packet->offset,last_packet->size);
       if(x>=4 && x==y){		// if it points to self - we're done!
         // we got it!
-	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUgot: off=%d  size=%d \n",spu->packet_offset,spu->packet_size);
-	spudec_decode(spu, pts100);
-	spu->packet_offset = 0;
-	break;
-      }
-      if(y<=x || y>=spu->packet_size){ // invalid?
-	mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUtest: broken packet!!!!! y=%d < x=%d\n",y,x);
-        spu->packet_size = spu->packet_offset = 0;
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUgot: off=%d  size=%d \n",last_packet->offset,last_packet->size);
         break;
+      }
+      if(y<=x || y>=last_packet->size){ // invalid?
+	mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUtest: broken packet!!!!! y=%d < x=%d\n",y,x);
+        last_packet->size = last_packet->offset = 0;
+        return;
       }
       x=y;
     }
-    // [cb] packet is done; start new packet
-    spu->packet_offset = 0;
+
+    /* Packet is done.  Schedule time to process it and start a new one. */
+    last_packet->process_pts = last_packet->fragment_pts;
+    spudec_append_new_packet (spu);
   }
 #else
   if (spu->packet_offset == spu->packet_size) {
-    spudec_decode(spu, pts100);
-    spu->packet_offset = 0;
+    /* Packet is done.  Schedule time to process it and start a new one. */
+    last_packet->process_pts = last_packet->fragment_pts;
+    spudec_append_new_packet (spu);
   }
 #endif
 }
@@ -493,12 +553,21 @@ void spudec_reset(void *this)	// called after seek
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
   spu->now_pts = 0;
-  spu->packet_size = spu->packet_offset = 0;
+  while (spu->packets != NULL)
+    spudec_pop_packet (spu);
 }
 
 void spudec_heartbeat(void *this, unsigned int pts100)
 {
-  ((spudec_handle_t *)this)->now_pts = pts100;
+  spudec_handle_t *spu = (spudec_handle_t*) this;
+  spu->now_pts = pts100;
+
+  /* Process queued instructions for the current beat */
+  while (spu->packets != NULL && pts100 >= spu->packets->process_pts)
+    {
+      spudec_decode (spu, spu->packets);
+      spudec_pop_packet (spu);
+    }
 }
 
 int spudec_visible(void *this){
@@ -941,7 +1010,7 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this){
     //(fprintf(stderr,"VobSub Custom Palette: %d,%d,%d,%d", this->cuspal[0], this->cuspal[1], this->cuspal[2],this->cuspal[3]);
-    this->packet = NULL;
+    this->packets = NULL;
     this->image = NULL;
     this->scaled_image = NULL;
     /* XXX Although the video frame is some size, the SPU frame is
@@ -975,8 +1044,8 @@ void spudec_free(void *this)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
   if (spu) {
-    if (spu->packet)
-      free(spu->packet);
+    while (spu->packets != NULL)
+      spudec_pop_packet (this);
     if (spu->scaled_image)
 	free(spu->scaled_image);
     if (spu->image)
