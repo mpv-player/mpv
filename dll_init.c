@@ -146,6 +146,7 @@ int init_video_codec(){
   case IMGFMT_I420:
   case IMGFMT_IYUV:
       sh_video->o_bih.biBitCount=12;
+      break;
 
 /* packed format */
   case IMGFMT_YUY2:
@@ -188,11 +189,8 @@ int init_video_codec(){
       sh_video->o_bih.biHeight=-sh_video->bih->biHeight; // flip image!
   }
 
-  // this looks suspicious :-)
-  if(!(outfmt == IMGFMT_YUY2 && (sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
-     && (outfmt & IMGFMT_RGB_MASK) != IMGFMT_RGB  && (outfmt & IMGFMT_BGR_MASK ) != IMGFMT_BGR) {
+  if(!(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
 	 sh_video->o_bih.biCompression = outfmt;
-  }
 
   if(verbose) {
     printf("Starting decompression, format:\n");
@@ -246,7 +244,7 @@ int init_video_codec(){
     return 0;
   }
 
-  if(outfmt==IMGFMT_YUY2 && (sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_YUVHACK))
+  if(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK)
     sh_video->o_bih.biCompression = mmioFOURCC('Y','U','Y','2');
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!
