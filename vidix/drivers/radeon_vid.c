@@ -996,11 +996,11 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
-/*
+
 	  tmp = besr.vid_buf1_base_adrs;
 	  besr.vid_buf1_base_adrs = besr.vid_buf2_base_adrs;
 	  besr.vid_buf2_base_adrs = tmp;
-*/
+
 	  tmp = config->offset.u;
 	  config->offset.u = config->offset.v;
 	  config->offset.v = tmp;
