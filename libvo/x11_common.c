@@ -840,7 +840,35 @@ void saver_off(Display *mDisplay) {
 		    // turning off screensaver
 }
 
+static XErrorHandler old_handler = NULL;
+static int selectinput_err = 0;
+static int x11_selectinput_errorhandler(Display *display, XErrorEvent *event)
+{
+	if (event->error_code == BadAccess) {
+		selectinput_err = 1;
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : BadAccess during XSelectInput Call\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : The 'ButtonPressMask' mask of specified window has probably already used by another appication(see man XSelectInput) \n");
+		/* If you think mplayer should shutdown with this error, comments out following line */
+		return 0;
+	}
+	if (old_handler != NULL) old_handler(display, event);
+	else x11_errorhandler(display, event);
+	return 0;
+}
 
+void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask)
+{
+	XSync(display, False);
+	old_handler = XSetErrorHandler(x11_selectinput_errorhandler);
+	selectinput_err = 0;
+	XSelectInput(display, w, event_mask);
+	XSync(display, False);
+	XSetErrorHandler(old_handler);
+	if (selectinput_err) {
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : Mplayer discards mouse control and retry XSelectInput...\n");
+		XSelectInput(display, w, event_mask & (~(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
+	}
+}
 
 #ifdef HAVE_XINERAMA
 void vo_x11_xinerama_move(Display *dsp, Window w)

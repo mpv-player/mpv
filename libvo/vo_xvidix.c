@@ -292,7 +292,7 @@ else
 	 {
 	  XUnmapWindow(mDisplay, vo_window);
 	  XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-	  XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+	  vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
 	 } else XSelectInput( mDisplay,vo_window,ExposureMask );
     }
     else

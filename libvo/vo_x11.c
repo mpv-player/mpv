@@ -332,7 +332,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
        {
         XUnmapWindow( mDisplay,vo_window );
         XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
-	XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+	vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
 	XMapWindow( mDisplay,vo_window );
        } else XSelectInput( mDisplay,vo_window,ExposureMask );
     }
@@ -362,7 +362,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSync( mDisplay,False );
 
     // we cannot grab mouse events on root window :(
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | ExposureMask |
+    vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | ExposureMask |
 	((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
 
 #ifdef HAVE_XF86VM

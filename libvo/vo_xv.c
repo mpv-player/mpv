@@ -383,7 +383,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        {
         XUnmapWindow( mDisplay,vo_window );
         XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
-	XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+	vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
         XMapWindow( mDisplay,vo_window );
        } else { drwX=vo_dx; drwY=vo_dy; }
     } else 
@@ -395,7 +395,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
         vo_x11_classhint( mDisplay,vo_window,"xv" );
         vo_hidecursor(mDisplay,vo_window);
 
-        XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
+        vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
 	((WinID==0) ? 0 : (PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		| ButtonPressMask | ButtonReleaseMask

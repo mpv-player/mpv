@@ -33,6 +33,7 @@ extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
 extern void vo_x11_classhint( Display * display,Window window,char *name );
 extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
 extern int vo_x11_check_events(Display *mydisplay);
+extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 extern void vo_x11_fullscreen( void );
 extern void vo_x11_uninit();
 

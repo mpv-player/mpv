@@ -293,7 +293,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
        {
         XUnmapWindow( mDisplay,vo_window );
         XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xWAttribs);
-        XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+        vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
        } else XSelectInput( mDisplay,vo_window,ExposureMask );
        
     } else 
