@@ -53,7 +53,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
 	if (!fgets (line, 1000, fd)) return NULL;
     } while (*line=='\n' || *line == '\r' || !*line);
     
-    if (sscanf (line, "{%d}{%d}%s", &(current->start), &(current->end),line2) <2) {return ERR;}
+    if (sscanf (line, "{%ld}{%ld}%s", &(current->start), &(current->end),line2) <2) {return ERR;}
 
     p=line;
     while (*p++!='}');

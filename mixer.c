@@ -4,6 +4,7 @@
 #include <sys/soundcard.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "mixer.h"
 

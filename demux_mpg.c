@@ -36,6 +36,9 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
 //static char dvdaudio_table[256];
 //static unsigned int packet_start_pos=0;
 
+extern void *new_sh_audio(int id);
+extern void *new_sh_video(int id);
+
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
   int len;
