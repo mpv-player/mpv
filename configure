@@ -31,7 +31,7 @@ cc_check() {
   cat "$TMPC" >> "$TMPLOG"
   echo >> "$TMPLOG"
   echo "$_cc $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
-  > "$TMPO"
+  rm -f "$TMPO"
   ( "$_cc" $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
