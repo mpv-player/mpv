@@ -521,7 +521,7 @@ sh_video=d_video->sh;
 
   if(sh_audio && out_audio_codec<0){
     if(audio_id==-2)
-	mp_msg(MSGT_MENCODER,MSGL_ERROR,"This demuxer doesn't support -nosound yet.\n");
+	mp_msg(MSGT_MENCODER,MSGL_ERR,"This demuxer doesn't support -nosound yet.\n");
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioEncoderSelected);
     mencoder_exit(1,NULL);
   }
