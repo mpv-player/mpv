@@ -604,7 +604,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  palette_map = (unsigned char *)sh->bih + 40;
 
 		  // load default palette
-		  if (flag & 0x08)
+		  if (flag == 0xFFFF)
 		  {
 		    if (palette_count == 4)
 		      memcpy(palette_map, qt_default_palette_4, 4 * 4);
