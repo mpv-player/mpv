@@ -230,7 +230,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	}
     }
 */
-    
+    /* 1. iteration */
     for(i = 0; i < 128; i += 2) {
 	tmp_a_r = buf[i].real;
 	tmp_a_i = buf[i].imag;
@@ -242,6 +242,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	buf[i+1].imag =  tmp_a_i - tmp_b_i;
     }
         
+    /* 2. iteration */
 	// Note w[1]={{1,0}, {0,-1}}
     for(i = 0; i < 128; i += 4) {
 	tmp_a_r = buf[i].real;
@@ -262,6 +263,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	buf[i+3].imag =  tmp_a_i + tmp_b_i;
     }
 
+    /* 3. iteration */
     for(i = 0; i < 128; i += 8) {
 		tmp_a_r = buf[i].real;
 		tmp_a_i = buf[i].imag;
@@ -297,6 +299,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		buf[i+7].imag =  tmp_a_i - tmp_b_i;
      }
     
+    /* 4-7. iterations */
     for (m=3; m < 7; m++) {
         two_m = (1 << m);
 
@@ -376,7 +379,8 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     sample_t *window_ptr;
 	
     /* 512 IMDCT with source and dest data in 'data' */
-	
+    /* see the c version (dct_do_512()), its allmost identical, just in C */ 
+
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     /* Bit reversed shuffling */
 	asm volatile(
@@ -437,6 +441,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     }
 */
     
+    /* 1. iteration */
 	// Note w[0][0]={1,0}
 	asm volatile(
 		"xorps %%xmm1, %%xmm1	\n\t"
@@ -458,6 +463,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		: "%esi"
 	);
         
+    /* 2. iteration */
 	// Note w[1]={{1,0}, {0,-1}}
 	asm volatile(
 		"movaps ps111_1, %%xmm7		\n\t" // 1,1,1,-1
@@ -480,6 +486,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		: "%esi"
 	);
 
+    /* 3. iteration */
 /*
  Note sseW2+0={1,1,sqrt(2),sqrt(2))
  Note sseW2+16={0,0,sqrt(2),-sqrt(2))
@@ -525,6 +532,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		: "%esi"
 	);
 
+    /* 4-7. iterations */
     for (m=3; m < 7; m++) {
 	two_m = (1 << m);
 	two_m_plus_one = two_m<<1;
@@ -559,6 +567,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	);
     }
 
+    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
 	asm volatile(
 		"movl $-1024, %%esi				\n\t"
 		".balign 16				\n\t"
