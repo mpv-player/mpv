@@ -14,6 +14,7 @@ Note: If you've sent patches not applied in pre22, please send them again!
 
 v0.11-pre26-CVS:
   - updated libmpeg2 source to libmpeg2-0.2.0 version
+  - updated OpenDivX encore/decore to 4.0 alpha48
 
 v0.11-pre25:  yeah, we moved to SourceForge CVS!
   - DOCS updated (email address changed from arpi@* -> maillist)
