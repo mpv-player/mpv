@@ -633,6 +633,11 @@ subtitle* sub_read_file (char *filename) {
     if (sub_errs) printf (", %i bad line(s).\n", sub_errs);
     else 	  printf (".\n");
 
+    if(sub_num<=0){
+	free(first);
+	return NULL;
+    }
+
     return first;
 }
 
