@@ -398,6 +398,8 @@ int v_cont=50;
 int v_hue=50;
 int v_saturation=50;
 
+int vo_flags=0;
+
 //float a_frame=0;    // Audio
 
 int i;
@@ -899,16 +901,16 @@ while(1){
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
-    int ret;
+//    int ret;
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==0xFFFFFFFF) continue;
 #ifdef USE_LIBVO2
-    ret=vo2_query_format(video_out);
+    vo_flags=vo2_query_format(video_out);
 #else
-    ret=video_out->query_format(out_fmt);
+    vo_flags=video_out->query_format(out_fmt);
 #endif
-    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),ret);
-    if(ret) break;
+    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
+    if(vo_flags) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
@@ -1142,10 +1144,15 @@ while(!eof){
       if(play_n_frames<0) exit_player(MSGTR_Exit_frames);
     }
 
+  vo_pts=sh_video->timer*90000.0;
+
 /*========================== PLAY AUDIO ============================*/
 while(sh_audio){
   unsigned int t;
-  int playsize=audio_out->get_space();
+  int playsize;
+  
+  ao_pts=sh_audio->timer*90000.0;
+  playsize=audio_out->get_space();
   
   if(!playsize) break; // buffer is full, do not block here!!!
   
@@ -1294,7 +1301,8 @@ if(1)
 	EventHandling();
       }
 #endif
-      
+
+if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
       while(time_frame>0.005){
           if(time_frame<=0.020)
 //             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
@@ -1308,6 +1316,7 @@ if(1)
 #endif
           time_frame-=GetRelativeTime();
       }
+}
 
         current_module="flip_page";
 #ifdef USE_LIBVO2
