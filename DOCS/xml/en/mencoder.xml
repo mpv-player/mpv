@@ -521,7 +521,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Making a high quality MPEG-4 (&quot;DivX&quot;) rip of a DVD movie</title>
 
 <para>
-  One frequently asked question is "How do I make highest quality rip for
+  One frequently asked question is "How do I make the highest quality rip for
   a given size?". Another question is "How do I make the highest quality DVD
   rip possible? I don't care about file size, I just want the best quality."
 </para>
@@ -552,8 +552,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   If this seems to be too much for you, you should probably use one of the
-  many fine front-ends that are listed on our
-  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html">related projects page</ulink>.
+  many fine frontends that are listed in the
+  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html#mencoder_frontends">MEncoder section</ulink>
+  of our related projects page.
   That way, you should be able to achieve high quality rips without too much
   thinking, because most of those tools are designed to take clever decisions
   for you.
@@ -592,8 +593,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   low enough bitrate that <systemitem class="library">libavcodec</systemitem>
   is forced to use a higher quantizer, then you're almost certainly ruining
   the quality of your video.
-  In order to avoid that, you should probably down scale your video, according
-  to the method which will be gone over later on that guide.
+  In order to avoid that, you should probably downscale your video, according
+  to the method described later on in this guide.
   In general, you should avoid CBR altogether if you care about quality.
 </para>
 
@@ -660,7 +661,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   those</link> first.
   You can compute the bitrate with the following equation:
   bitrate = (target_size_in_Mbytes - sound_size_in_Mbytes) * 1024 * 1024 / length_in_secs * 8 / 1000
-  For instance, to squeeze a two-hour movie into a 702Mbytes CD, with 60Mbytes
+  For instance, to squeeze a two-hour movie onto a 702MB CD, with 60MB
   of audio track, the video bitrate will have to be
   (702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000 = 740kbps.
 </para>
@@ -751,20 +752,20 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   there's a limited total number of bits that you can spend; therefore it's
   necessary to find a good tradeoff between compressibility and quality.
   The CQ depends both on the bitrate and the movie resolution.
-  In order to raise the CQ, typically you'd down scale the movie given that the
+  In order to raise the CQ, typically you'd downscale the movie given that the
   bitrate is computed in function of the target size and the length of the
   movie, which are constant.
   A CQ below 0.18 usually ends up in a very blocky picture, because there
   aren't enough bits to code the information of each macroblock (MPEG4, like
   many other codecs, groups pixels by blocks of several pixels to compress the
-  image; if there aren't enough bits, the edge of those blocks are
+  image; if there aren't enough bits, the edges of those blocks are
   visible).
   It's therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
   and  0.26-0.28 for 2 CDs.
   Please thake note that the CQ is just an indicative figure, as depending on
   the encoded content, a CQ of 0.18 may look just fine for a Bergman, contrary
   to a movie such as The Matrix, which contains many high-motion scenes.
-  On the other hand, it's worthless to raise CQ as higher than 0.30 as you'd
+  On the other hand, it's worthless to raise CQ higher than 0.30 as you'd
   be wasting bits without any noticeable quality gain.
 </para>
 
@@ -777,7 +778,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Audio is a much simpler problem to solve: if you care about quality, just
   leave it as is.
   Even AC3 5.1 streams are at most 448Kbit/s, and they're worth every bit.
-  You might be tempted to transcode the audio to high quality Ogg Vorbis, but
+  You might be tempted to transcode the audio to high quality Vorbis, but
   just because you don't have an A/V receiver for AC3 pass-through today
   doesn't mean you won't have one tomorrow. Future-proof your DVD rips by
   preserving the AC3 stream.
@@ -788,13 +789,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <screen>mplayer source_file.vob -aid 129 -dumpaudio -dumpfile sound.ac3</screen>
   will dump into the file sound.ac3 the audio track number 129 from the file
   source_file.vob (NB: DVD VOB files usually use a different audio numbering,
-  which means that the VOB audio track 128 is the 2nd audio track of the file).
+  which means that the VOB audio track 129 is the 2nd audio track of the file).
 </para>
 
 <para>
   But sometimes you truly have no choice but to further compress the
   sound so that more bits can be spent on the video.
-  Most people choose to compress audio with either MP3 or Ogg Vorbis audio
+  Most people choose to compress audio with either MP3 or Vorbis audio
   codecs.
   While the latter is a very space-efficient codec, MP3 is better supported
   by hardware players, although this trend is changing.
@@ -813,13 +814,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   which is available in most distributions.
   If you're using Windows, a tool such as <application>BeSweet</application>
   can do the same job.
-  You will compress in either Ogg Vorbis or MP3.
+  You will compress in either Vorbis or MP3.
   For example:
   <screen>oggenc -q1 destination_sound.wav</screen>
   will encode destination_sound.wav with the encoding quality 1, which is
   roughly equivalent to 80Kb/s, and is the minimum quality at which you
   should encode if you care about quality.
-  Please note that MEncoder currently can't currently mux Ogg Vorbis files
+  Please note that MEncoder currently cannot mux Ogg Vorbis files
   into a video stream because it can only create AVI and MPEG files.
   Don't worry, this document will show you how you can do that with third
   party programs.
@@ -921,14 +922,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Ideally, you'd probably want to be able to just tell the encoder to switch
   into "high quality" mode and move on.
   That would probably be nice, but unfortunately hard to implement as different
-  encoding options yield different qualities depending on the source material.
+  encoding options yield different quality results depending on the source material.
   That's because compression depends on the visual properties of the video
   in question.
   For example, anime and live action have very different properties and
   thus require different options to obtain optimum encoding.
   The good news is that some options should never be left out, like
   <option>mbd=2</option>, <option>trell</option>, and <option>v4mv</option>.
-  See below a for detailed description of common encoding options. 
+  See below for a detailed description of common encoding options.
 </para>
 
 
@@ -1018,25 +1019,25 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   when the change in a block is less than the threshold you specify, and in
   such a case, to just  encode the block as "no change".
   This saves bits and perhaps speeds up encoding. vlelim=-4 and vcelim=9
-  seem to be good for live movies, but seem not to help in with anime;
+  seem to be good for live movies, but seem not to help with anime;
   when encoding animation, you should probably leave them unchanged.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">qpel</emphasis>: Quarter pixel motion estimation.
-  MPEG-4 uses a half pixel precision for its motion search by default,
+  MPEG-4 uses half pixel precision for its motion search by default,
   therefore this option comes with an overhead as more information will be
   stored in the encoded file.
   The compression gain/loss depends on the movie, but it's usually not very
   effective on anime.
-  qpel always incurs a significant cost in CPU time needed to decode (+20% in
+  qpel always incurs a significant cost in CPU decode time (+20% in
   practice).
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">psnr</emphasis>: doesn't affect the actual encoding,
   but writes a log file giving the type/size/quality of each frame, and
-  prints a sumary of PSNR (Peak Signal to Noise Ratio) at the end.
+  prints a summary of PSNR (Peak Signal to Noise Ratio) at the end.
 </para></listitem>
 
 </itemizedlist>
