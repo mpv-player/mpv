@@ -1,46 +1,12 @@
-#define DISP
-
 /*
- * $Id$
- * 
- * video_out_dga.c, X11 interface
  *
+ * X11 DGA Interface
  *
  * Copyright ( C ) 2001, Andreas Ackermann. All Rights Reserved.
  *
  * <acki@acki-netz.de>
  *
  * Sourceforge username: acki2
- * 
- * note well: 
- *   
- * - covers only common video card formats i.e. 
- *      BGR_16_15_555
- *      BGR_16_16_565
- *      BGR_24_24_888
- *      BGR_32_24_888
- *
- * 
- * 30/02/2001
- *
- * o query_format(): with DGA 2.0 it returns all depths it supports
- *   (even 16 when running 32 and vice versa)
- *   Checks for (hopefully!) compatible RGBmasks in 15/16 bit modes
- * o added some more criterions for resolution switching
- * o cleanup
- * o with DGA2.0 present, ONLY DGA2.0 functions are used
- * o for 15/16 modes ONLY RGB 555 is supported, since the divx-codec
- *   happens to map the data this way. If your graphics card supports
- *   this, you're well off and may use these modes; for mpeg 
- *   movies things could be different, but I was too lazy to implement 
- *   it ...
- * o you may define VO_DGA_FORCE_DEPTH to the depth you desire 
- *   if you don't like the choice the driver makes
- *   Beware: unless you can use DGA2.0 this has to be your X Servers
- *           depth!!!
- * o Added double buffering :-))
- * o included VidMode switching support for DGA1.0, written by  Michael Graffam
- *    mgraffam@idsi.net
  * 
  */
 
@@ -57,8 +23,10 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "../postproc/swscale.h"
-#include "../postproc/rgb2rgb.h"
 #include "aspect.h"
+#include "x11_common.h"
+#include "fastmemcpy.h"
+#include "../mp_msg.h"
 
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
@@ -66,12 +34,6 @@
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
-
-#include "x11_common.h"
-#include "../postproc/rgb2rgb.h"
-#include "fastmemcpy.h"
-
-#include "../mp_msg.h"
 
 static vo_info_t info =
 {
@@ -434,24 +396,6 @@ static void flip_page( void )
 static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
-  if (scale_srcW) {
-    uint8_t *dst[3] =
-    {
-	    CURRENT_VIDEO_BUFFER.data + vo_dga_vp_offset,
-	    0,
-	    0
-    };
-    SwScale_YV12slice(src,stride,y,h,
-          dst,
-          /*scale_dstW*/ vo_dga_width * HW_MODE.vdm_bytespp, HW_MODE.vdm_bitspp,
-		      scale_srcW, scale_srcH, scale_dstW, scale_dstH);
-  } else {
-    yuv2rgb(CURRENT_VIDEO_BUFFER.data + vo_dga_vp_offset + 
-          (vo_dga_width * y +x) * HW_MODE.vdm_bytespp,
-           src[0], src[1], src[2],
-           w,h, vo_dga_width * HW_MODE.vdm_bytespp,
-           stride[0],stride[1] );
-  }
   return 0;
 };
 
@@ -460,8 +404,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
 static uint32_t query_format( uint32_t format )
 {
 
- if( format==IMGFMT_YV12 ) return VFCAP_CSP_SUPPORTED;
- 
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
      vd_ModeValid(format&0xff))
  {
@@ -664,24 +606,13 @@ static uint32_t config( uint32_t width,  uint32_t height,
   if(!wanted_width)  wanted_width = width;
 
   if( !vo_dbpp ){
- 
-    if (format == IMGFMT_YV12){
-      vo_dga_src_mode = vo_dga_XServer_mode;
-    }else if((format & IMGFMT_BGR_MASK) == IMGFMT_BGR){
+     if((format & IMGFMT_BGR_MASK) == IMGFMT_BGR){
       vo_dga_src_mode = vd_ModeValid( format & 0xff );
     }
   }else{
     vo_dga_src_mode = vd_ModeValid(vo_dbpp);
   }
   vo_dga_hw_mode = SRC_MODE.vdm_hw_mode;
-
-  if( format == IMGFMT_YV12 && vo_dga_src_mode != vo_dga_hw_mode ){
-    mp_msg(MSGT_VO, MSGL_ERR, 
-    "vo_dga: YV12 supports native modes only. Using %d instead of selected %d.\n",
-       HW_MODE.vdm_mplayer_depth,
-       SRC_MODE.vdm_mplayer_depth );
-    vo_dga_src_mode = vo_dga_hw_mode;
-  }
 
   if(!vo_dga_src_mode){ 
     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: unsupported video format!\n");
@@ -907,12 +838,6 @@ static uint32_t config( uint32_t width,  uint32_t height,
   }
 
   // do some more checkings here ...
-
-  if( format==IMGFMT_YV12 ){ 
-    yuv2rgb_init( vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth , MODE_RGB );
-    mp_msg(MSGT_VO,  MSGL_V, "vo_dga: Using mplayer depth %d for YV12\n", 
-               vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth);
-  }
 
   mp_msg(MSGT_VO, MSGL_V, "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n", 
           vo_dga_width, vo_dga_vp_width, 
