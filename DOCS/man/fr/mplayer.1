@@ -3182,6 +3182,14 @@ fichier_nmappé: fichier où mapper les données
 .br
 nsamples: nombre d'échantillons par canal (par défaut\ : 512)
 .REss
+.IPs extrastereo[=mul]
+Augmente la différence entre les canaux de gauche et de droite pour qu'à
+la lecture on ait un effet "live".
+.RSss
+mul: coefficient de différence (par défaut\ : 2.5)
+.REss
+.IPs volnorm
+Maximalise le volume sans introduire de distortions sonores.
 .RE
 .
 .TP
@@ -6299,23 +6307,23 @@ actuellement
 .TP
 .B ildctcmp=<0\-2000>
 Choisit la fonction de comparaison pour la décision dct entrelacé
-(voir mpcmp pour les fonctions de comparaison disponibles).
+(voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
 .B precmp=<0\-2000>
 Choisit la fonction de comparaison pour la pré-passe de l'estimation de
 mouvement
-(voir mpcmp pour les fonctions de comparaison disponibles).
+(voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
 .B cmp=<0\-2000>
 Choisit la fonction de comparaison pour l'estimation de mouvement full pel
-(voir mpcmp pour les fonctions de comparaison disponibles).
+(voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
 .B subcmp=<0\-2000>
 Choisit la fonction de comparaison pour l'estimation de mouvement sub pel
-(voir mpcmp pour les fonctions de comparaison disponibles).
+(voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
 .B nssew=<0\-100>
@@ -7081,8 +7089,8 @@ plus optimale.
 Avec une valeur trop grande, il sera choisi plus de trames-I, ce qui
 gâche des bits.
 -1 désactive la détection des changements de scène, ainsi les trames-I ne
-seront insérées que toutes les keyint trames, même en cas de changement
-de scène.
+seront insérées que toutes les keyint trames, même s'il vient d'y avoir
+un changement de scène.
 Cela n'est guère recommandé et gâche des bits puisque les changements de
 scène encodés par des trames-P sont aussi volumineuses que les trames-I,
 mais ne remet pas à zéro le "compteur keyint".
