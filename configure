@@ -144,6 +144,8 @@ Optional features:
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
   --disable-runtime-cpudetection    disable runtime CPU detection [enable]
+  --disable-dvdnav       Disable dvdnav support [autodetect]
+  
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -782,7 +784,7 @@ _mad=auto
 _vorbis=auto
 _faad=auto
 _css=auto
-_dvdnav=no
+_dvdnav=yes
 _dvdread=auto
 _xanim=auto
 _xinerama=auto
@@ -893,6 +895,8 @@ for ac_option do
   --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
+  --enable-dvdnav)	_dvdnav=yes	;;
+  --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
   --disable-xanim)	_xanim=no	;;
   --enable-xinerama)	_xinerama=yes	;;
@@ -2504,13 +2508,18 @@ if test "$_dvdnav" = yes ; then
 int main(void) { dvdnav_t *dvd=0; return 0; }
 EOF
   _dvdnav=no
-  cc_check $_inc_extra -I$_dvdnavdir $_ld_css -L$_dvdnavdir/.libs -ldvdnav && _dvdnav=yes
+  if test -n "$_dvdnavdir" ; then 
+   _legal_dvdnavdir=-L$_dvdnavdir/.libs
+  fi
+  cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_ld_css $_ld_dl && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_css="$_ld_css -L$_dvdnavdir/.libs -ldvdnav"
-  _inc_extra="$_inc_extra -I$_dvdnavdir"
+  _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
+  if test -n "$_dvdnavdir" ; then
+   _inc_extra="$_inc_extra -I$_dvdnavdir"
+  fi
   _inputmodules="dvdnav $_inputmodules"
   echores "yes"
 else
