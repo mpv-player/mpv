@@ -101,7 +101,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - optional, from
-  <ulink url="http://www.directfb.org"/>
+  <ulink url="http://www.directfb.org"/>. At least 0.9.13 is required.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, for CDDA support
