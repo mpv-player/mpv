@@ -79,6 +79,76 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
     int y;
     for(y=0;y<h;y++){
         register int x;
+//	printf("%d, %d, %d\n", (int)src&31, (int)srca%31, (int)dstbase&31);
+#ifdef HAVE_MMXFIXME
+/*	asm(
+		"pxor %%mm7, %%mm7		\n\t"
+		"xorl %%eax, %%eax		\n\t"
+		"pcmpeqb %%mm6, %%mm6		\n\t" // F..F
+		"1:				\n\t"
+		"movq (%0, %%eax, 4), %%mm0	\n\t" // dstbase
+		"movq %%mm0, %%mm1		\n\t"
+		"punpcklbw %%mm7, %%mm0		\n\t"
+		"punpckhbw %%mm7, %%mm1		\n\t"
+		"movd (%1, %%eax), %%mm2	\n\t" // srca ABCD0000
+		"paddb %%mm6, %%mm2		\n\t"
+		"punpcklbw %%mm2, %%mm2		\n\t" // srca AABBCCDD
+		"punpcklbw %%mm2, %%mm2		\n\t" // srca AAAABBBB
+		"movq %%mm2, %%mm3		\n\t"
+		"punpcklbw %%mm7, %%mm2		\n\t" // srca 0A0A0A0A
+		"punpckhbw %%mm7, %%mm3		\n\t" // srca 0B0B0B0B
+		"pmullw %%mm2, %%mm0		\n\t"
+		"pmullw %%mm3, %%mm1		\n\t"
+		"psrlw $8, %%mm0		\n\t"
+		"psrlw $8, %%mm1		\n\t"
+		"packuswb %%mm1, %%mm0		\n\t"
+		"movd (%2, %%eax), %%mm2	\n\t" // src ABCD0000
+		"punpcklbw %%mm2, %%mm2		\n\t" // src AABBCCDD
+		"punpcklbw %%mm2, %%mm2		\n\t" // src AAAABBBB
+		"paddb %%mm2, %%mm0		\n\t"
+		"movq %%mm0, (%0, %%eax, 4)	\n\t"
+		"addl $2, %%eax			\n\t"
+		"cmpl %3, %%eax			\n\t"
+		" jb 1b				\n\t"
+
+		:: "r" (dstbase), "r" (srca), "r" (src), "r" (w)
+		: "%eax"
+		);*/
+	asm(
+		"xorl %%eax, %%eax		\n\t"
+		"xorl %%ebx, %%ebx		\n\t"
+		"xorl %%edx, %%edx		\n\t"
+		"1:				\n\t"
+		"movb (%1, %%eax), %%bl		\n\t"
+		"cmpb $0, %%bl			\n\t"
+		" jz 2f				\n\t"
+		"movzxb (%2, %%eax), %%edx	\n\t"
+		"shll $8, %%edx			\n\t"
+		"decb %%bl			\n\t"
+		"movzxb (%0, %%eax, 4), %%ecx	\n\t"
+		"imull %%ebx, %%ecx		\n\t"
+		"addl %%edx, %%ecx		\n\t"
+		"movb %%ch, (%0, %%eax, 4)	\n\t"
+
+		"movzxb 1(%0, %%eax, 4), %%ecx	\n\t"
+		"imull %%ebx, %%ecx		\n\t"
+		"addl %%edx, %%ecx		\n\t"
+		"movb %%ch, 1(%0, %%eax, 4)	\n\t"
+
+		"movzxb 2(%0, %%eax, 4), %%ecx	\n\t"
+		"imull %%ebx, %%ecx		\n\t"
+		"addl %%edx, %%ecx		\n\t"
+		"movb %%ch, 2(%0, %%eax, 4)	\n\t"
+
+		"2:				\n\t"
+		"addl $1, %%eax			\n\t"
+		"cmpl %3, %%eax			\n\t"
+		" jb 1b				\n\t"
+
+		:: "r" (dstbase), "r" (srca), "r" (src), "m" (w)
+		: "%eax", "%ebx", "%ecx", "%edx"
+		);
+#else //HAVE_MMX
         for(x=0;x<w;x++){
             if(srca[x]){
 #ifdef FAST_OSD
@@ -90,10 +160,17 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 #endif
             }
         }
+#endif // !HAVE_MMX
         src+=srcstride;
         srca+=srcstride;
         dstbase+=dststride;
     }
+#ifdef HAVE_3DNOW
+	asm("femms\n\t");
+#elif defined (HAVE_MMX)
+	asm("emms\n\t");
+#endif
+
     return;
 }
 
