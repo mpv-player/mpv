@@ -12,8 +12,8 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <stdlib.h>
-//#include <unistd.h>
-//#include <string.h>
+#include <math.h>
+#include <string.h>
 
 #include "../config.h"
 
@@ -48,24 +48,27 @@ static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 static char *alsa_device;
 
-static int alsa_fragsize = OUTBURST; /* possible 4096, original 8192, OUTBURST is set statically to 512 in config.h but now its not used cause chunksize is allocated dynamically. */
+/* possible 4096, original 8192, OUTBURST is set statically to 512 in config.h */
+static int alsa_fragsize = 4096; //OUTBURST
 static int alsa_fragcount = 8;
 
 static int chunk_size = -1;
-static int buffer_size = 0;
-static int start_delay = 0;
-static int stop_delay = 0;
 static size_t bits_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
+int ao_mmap = 0;
+int ao_noblock = 0;
+
+static int open_mode;
+static int set_block_mode;
+
 #define ALSA_DEVICE_SIZE 48
 
-#define BUFFERTIME /* last undef */
-#undef SET_PERIOD /* only function now is to set chunksize staticaly, last defined */
-#define SW_PARAMS /* last undef */
-
+#undef BUFFERTIME
+#define SET_CHUNKSIZE
 
 snd_pcm_t *
+
 spdif_init(int acard, int adevice)
 {
 	//char *pcm_name = "hw:0,2"; /* first card second device */
@@ -149,8 +152,8 @@ spdif_init(int acard, int adevice)
              fprintf(stderr, "Broken configuration for this PCM: no configurations available");                                                                        
 	     return NULL;
 	  }
-	  err = snd_pcm_hw_params_set_access(handler, params,
-	  				    SND_PCM_ACCESS_RW_INTERLEAVED);
+
+	  err = snd_pcm_hw_params_set_access(handler, params,SND_PCM_ACCESS_RW_INTERLEAVED);
 	  if (err < 0) {
 	    fprintf(stderr, "Access tyep not available");
 	    return NULL;
@@ -186,7 +189,105 @@ spdif_init(int acard, int adevice)
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
 {
-    return(CONTROL_UNKNOWN);
+  switch(cmd) {
+  case AOCONTROL_QUERY_FORMAT:
+    return CONTROL_TRUE;
+  case AOCONTROL_GET_VOLUME:
+  case AOCONTROL_SET_VOLUME:
+    {
+      ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+
+      int err;
+      snd_mixer_t *handle;
+      snd_mixer_elem_t *elem;
+      snd_mixer_selem_id_t *sid;
+
+      const char *mix_name = "PCM";
+      char *card = "default";
+
+      long pmin, pmax;
+      long get_vol, set_vol;
+      float calc_vol, diff, f_multi;
+
+      if(ao_data.format == AFMT_AC3)
+	return CONTROL_TRUE;
+
+      //allocate simple id
+      snd_mixer_selem_id_alloca(&sid);
+	
+      //sets simple-mixer index and name
+      snd_mixer_selem_id_set_index(sid, 0);
+      snd_mixer_selem_id_set_name(sid, mix_name);
+
+      if ((err = snd_mixer_open(&handle, 0)) < 0) {
+	printf("alsa-control: mixer open error: %s\n", snd_strerror(err));
+	return CONTROL_ERROR;
+      }
+
+      if ((err = snd_mixer_attach(handle, card)) < 0) {
+	printf("alsa-control: mixer attach %s error: %s", card, snd_strerror(err));
+	snd_mixer_close(handle);
+	return CONTROL_ERROR;
+      }
+
+      if ((err = snd_mixer_selem_register(handle, NULL, NULL)) < 0) {
+	printf("alsa-control: mixer register error: %s", snd_strerror(err));
+	snd_mixer_close(handle);
+	return CONTROL_ERROR;
+      }
+      err = snd_mixer_load(handle);
+      if (err < 0) {
+	printf("alsa-control: mixer load error: %s", snd_strerror(err));
+	snd_mixer_close(handle);
+	return CONTROL_ERROR;
+      }
+
+      elem = snd_mixer_find_selem(handle, sid);
+      if (!elem) {
+	printf("alsa-control: unable to find simple control '%s',%i\n", snd_mixer_selem_id_get_name(sid), snd_mixer_selem_id_get_index(sid));
+	snd_mixer_close(handle);
+	return CONTROL_ERROR;
+	}
+
+      snd_mixer_selem_get_playback_volume_range(elem,&pmin,&pmax);
+      f_multi = (100 / (float)pmax);
+
+      if (cmd == AOCONTROL_SET_VOLUME) {
+
+	diff = (vol->left+vol->right) / 2;
+	set_vol = rint(diff / f_multi);
+	
+	if (set_vol < 0)
+	  set_vol = 0;
+	else if (set_vol > pmax)
+	  set_vol = pmax;
+
+	//setting channels
+	if ((err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol)) < 0) {
+	  printf("alsa-control: error setting left channel, %s",snd_strerror(err));
+	  return CONTROL_ERROR;
+	}
+	if ((err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol)) < 0) {
+	  printf("alsa-control: error setting right channel, %s",snd_strerror(err));
+	  return CONTROL_ERROR;
+	}
+
+	//printf("diff=%f, set_vol=%i, pmax=%i, mult=%f\n", diff, set_vol, pmax, f_multi);
+      }
+      else {
+	snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
+	calc_vol = get_vol;
+	calc_vol = rintf(calc_vol * f_multi);
+
+	vol->left = vol->right = (int)calc_vol;
+
+	//printf("get_vol = %i, calc=%i\n",get_vol, calc_vol);
+      }
+      snd_mixer_close(handle);
+      return CONTROL_OK;
+    }
+  }
+  return(CONTROL_UNKNOWN);
 }
 
 
@@ -198,11 +299,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
     int cards = -1;
+    int period_val;
     snd_pcm_info_t *alsa_info;
+    char *str_block_mode;
     
-    size_t xfer_align; //new
-    snd_pcm_uframes_t start_threshold, stop_threshold; //new
-
     printf("alsa-init: testing and bugreports are welcome.\n");    
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
@@ -223,7 +323,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_data.format = format;
     ao_data.channels = channels;
     ao_data.outburst = OUTBURST;
-    ao_data.buffersize = 16384;
+    ao_data.buffersize = MAX_OUTBURST; // was 16384
 
     switch (format)
     {
@@ -267,11 +367,49 @@ static int init(int rate_hz, int channels, int format, int flags)
 		audio_out_format_name(format));
 	    return(0);
 	default:
-	    break;
+	    break;	    
     }
     
-    if (ao_subdevice != NULL) // ?? makes no sense
-	alsa_device = ao_subdevice;
+    if (ao_subdevice) {
+      //start parsing ao_subdevice, ugly and not thread safe!
+      //maybe there's a better way?
+      int i2 = 1;
+      int i3 = 0;
+      char *sub_str;
+
+      char *token_str[3];
+      char* test_str = strdup(ao_subdevice);
+
+      //printf("subd=%s, test=%s\n", ao_subdevice,test_str);
+
+      if ((strcspn(ao_subdevice, ":")) > 0) {
+
+	sub_str = strtok(test_str, ":");
+	*(token_str) = sub_str;
+
+	while (((sub_str = strtok(NULL, ":")) != NULL) && (i2 <= 3)) {
+	  *(token_str+i2) = sub_str;
+	  //printf("token %i: %s\n", i2, *(token_str+i2));
+	  i2 += 1;
+	}
+
+	for (i3=0; i3 <= i2-1; i3++) {
+	  //printf("test %i, %s\n", i3, *(token_str+i3));
+	  if (strcmp(*(token_str + i3), "mmap") == 0) {
+	    ao_mmap = 1;
+	  }
+	  else if (strcmp(*(token_str+i3), "noblock") == 0) {
+	    ao_noblock = 1;
+	  }
+	  else if (strcmp(*(token_str+i3), "hw") == 0) {
+	    alsa_device = *(token_str+i3);
+	  }
+	  else if (!alsa_device || !ao_mmap || !ao_noblock) {
+	    alsa_device = *(token_str+i3);
+	  }
+	}
+      }
+    } //end parsing ao_subdevice
 
     if (alsa_device == NULL)
       {
@@ -319,14 +457,46 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    // Try to initialize the SPDIF interface
 	    alsa_handler = spdif_init(0, 2);
     }	    
-   
+
+    //setting modes for block or nonblock-mode
+    if (ao_noblock) {
+      open_mode = SND_PCM_NONBLOCK;
+      set_block_mode = 1;
+      str_block_mode = "nonblock-mode";
+    }
+    else {
+      open_mode = 0;
+      set_block_mode = 0;
+      str_block_mode = "block-mode";
+    }
+      
+
+    //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
     if (!alsa_handler) {
-	    if ((err = snd_pcm_open(&alsa_handler,alsa_device,SND_PCM_STREAM_PLAYBACK,0)) < 0)
-	    {
-		    printf("alsa-init: playback open error: %s\n", snd_strerror(err));
-		    return(0);
+      if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, open_mode)) < 0)
+	{
+	  if (ao_noblock) {
+	    printf("alsa-init: open in nonblock-mode failed, trying to open in block-mode\n");
+	    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+	      printf("alsa-init: playback open error: %s\n", snd_strerror(err));
+	      return(0);
+	    } else {
+	      set_block_mode = 0;
+	      str_block_mode = "block-mode";
 	    }
-    }	    
+	  } else {
+	    printf("alsa-init: playback open error: %s\n", snd_strerror(err));
+	    return(0);
+	  }
+	}
+    }
+
+    if ((err = snd_pcm_nonblock(alsa_handler, set_block_mode)) < 0) {
+      printf("alsa-init: error set block-mode %s\n", snd_strerror(err));
+    }
+    else if (verbose) {
+      printf("alsa-init: pcm opend in %s\n", str_block_mode);
+    }
 
     snd_pcm_hw_params_alloca(&alsa_hwparams);
     snd_pcm_sw_params_alloca(&alsa_swparams);
@@ -339,12 +509,21 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
     
-    if ((err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
-	SND_PCM_ACCESS_RW_INTERLEAVED)) < 0)
-    {
-	printf("alsa-init: unable to set access type: %s\n",
-	    snd_strerror(err));
-	return(0);
+    if (ao_mmap) {
+      snd_pcm_access_mask_t *mask = alloca(snd_pcm_access_mask_sizeof());
+      snd_pcm_access_mask_none(mask);
+      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_INTERLEAVED);
+      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_NONINTERLEAVED);
+      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_COMPLEX);
+      err = snd_pcm_hw_params_set_access_mask(alsa_handler, alsa_hwparams, mask);
+      printf("alsa-init: mmap set\n");
+    } else {
+      err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,SND_PCM_ACCESS_RW_INTERLEAVED);
+      printf("alsa-init: interleave set\n");
+    }
+    if (err < 0) {
+      printf("alsa-init: unable to set access type: %s\n", snd_strerror(err));
+      return (0);
     }
     
     if ((err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams,
@@ -367,20 +546,8 @@ static int init(int rate_hz, int channels, int format, int flags)
         {
     	printf("alsa-init: unable to set samplerate-2: %s\n",
     	    snd_strerror(err));
-	//snd_pcm_hw_params_dump(alsa_hwparams, errlog); jp
     	return(0);
         }
-
-
-#ifdef SET_PERIOD
-    {
-	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, alsa_fragsize, 0)) < 0)
-	{
-	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
-	    return(0);
-	}
-    }
-#endif
 
 #ifdef BUFFERTIME
     {
@@ -406,36 +573,33 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 #endif
 
-    /* get chunk-size */
-    if ((err = snd_pcm_hw_params_get_period_size(alsa_hwparams, 0)) < 0)
+#ifdef SET_CHUNKSIZE
+ {
+    //set chunksize
+    chunk_size = alsa_fragsize / 4;
+
+    if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
       {
-	printf("alsa-init: unable to get chunk-size in hw-params: %s\n", snd_strerror(err));
+	printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
 	return(0);
-      } else
-	{
-	  chunk_size = err;
-	  if (verbose) {printf("alsa-init: got chunksize %i\n", chunk_size);}
+      }
+    else if (verbose) {
+      printf("alsa-init: chunksize set to %i\n", chunk_size);
+    }
+
+    //set period_count
+    if ((period_val = snd_pcm_hw_params_get_periods_max(alsa_hwparams, 0)) < alsa_fragcount) {
+			alsa_fragcount = period_val;			
 	}
 
-    /* get buffer size */
-    if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
-    {
-      printf("alsa-init: unable to get buffersize in hw-params: %s\n", snd_strerror(err));
-      return(0);
-    } else
-      {
-      ao_data.buffersize = err;
-      if (verbose) {printf("alsa-init: got buffersize %i\n", ao_data.buffersize);}
-      }
-    
-    if (MAX_OUTBURST > ao_data.buffersize) { //warning if MAX_OUTBURST is bigger than buffersize
-      printf("alsa-init: WARNING! MAX_OUTBURST exceeds your available buffersize.\nalsa-init: MAX_OUTBURST=%i, buffersize=%i\n",MAX_OUTBURST,ao_data.buffersize);}
+    if (verbose)
+      printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
 
-    if (chunk_size == ao_data.buffersize)
-      {
-      printf("alsa-init: Can't use period equal to buffer size (%u == %lu)", chunk_size, (long)buffer_size);
-      return(0);
-      }
+    if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
+      printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
+    }
+ }
+#endif
 
     /* finally install hardware parameters */
     if ((err = snd_pcm_hw_params(alsa_handler, alsa_hwparams)) < 0)
@@ -446,34 +610,22 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
     // end setting hw-params
 
-#ifdef SW_PARAMS
+
+    // gets buffersize for control
+    if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
+      {
+	printf("alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
+	return(0);
+      }
+    else {
+      ao_data.buffersize = err;
+      if (verbose)
+	printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
+    }
+
+    // setting sw-params (only avail-min) if noblocking mode was choosed
+    if (ao_noblock)
     {
-      size_t n;
-      xfer_align = snd_pcm_sw_params_get_xfer_align(alsa_swparams);
-      if (xfer_align == 0)
-	xfer_align = 4;
-      n = (ao_data.buffersize / xfer_align) * xfer_align;
-
-      if (start_delay <= 0) {
-	start_threshold = n + (double) ao_data.samplerate * start_delay / 1000000;
-      } else {
-	start_threshold = (double) ao_data.samplerate * start_delay / 1000000;
-      }
-      if (start_threshold < 1)
-	start_threshold = 1;
-      if (start_threshold > n)
-	start_threshold = n;
-
-      if (stop_delay <= 0) {
-	stop_threshold = ao_data.buffersize + (double) ao_data.samplerate * stop_delay / 1000000;
-      } else {
-	stop_threshold = (double) ao_data.samplerate * stop_delay / 1000000;
-      }
-
-      if (verbose) {
-	printf("alsa-init: start_threshold=%lu, stop_threshold=%lu\n",start_threshold,stop_threshold);
-	printf("alsa-init: n=%i\n", n);
-      }
 
     if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
       {
@@ -482,28 +634,10 @@ static int init(int rate_hz, int channels, int format, int flags)
       }
 
     //set min available frames to consider pcm ready (4)
-    if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, 4)) < 0)
+    //increased for nonblock-mode should be set dynamically later
+    if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, chunk_size)) < 0)
       {
 	printf("alsa-init: unable to set avail_min %s\n",snd_strerror(err));
-	return(0);
-      }
-	
-    if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, start_threshold)) < 0)
-      {
-	printf("alsa-init: unable to set start_threshold %s\n",snd_strerror(err));
-	return(0);
-      }
-
-    if ((err = snd_pcm_sw_params_set_stop_threshold(alsa_handler, alsa_swparams, stop_threshold)) < 0)
-      {
-	printf("alsa-init: unable to set stop_threshold %s\n",snd_strerror(err));
-	return(0);
-      }
-
-    //transfers stream aligned to 4 in nonblocking-mode it would be 1
-    if ((err = snd_pcm_sw_params_set_xfer_align(alsa_handler, alsa_swparams, 4)) < 0)
-      {
-	printf("alsa-init: unable to set xfer_align: %s\n",snd_strerror(err));
 	return(0);
       }
 
@@ -519,9 +653,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if (verbose) {
       printf("alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
-    }
 
-#endif //end swparams
+    }//end swparams
 
     if ((err = snd_pcm_prepare(alsa_handler)) < 0)
     {
@@ -539,48 +672,52 @@ static int init(int rate_hz, int channels, int format, int flags)
 /* close audio device */
 static void uninit()
 {
+
+  if (alsa_handler) {
     int err;
 
-    //if (alsa_device != NULL)
-    //free(alsa_device);
-
-    //snd_pcm_hw_params_free(alsa_hwparams);
-
-    if ((err = snd_pcm_drain(alsa_handler)) < 0)
-    {
-	printf("alsa-uninit: pcm drain error: %s\n", snd_strerror(err));
-	return;
+    if (!ao_noblock) {
+      if ((err = snd_pcm_drain(alsa_handler)) < 0)
+	{
+	  printf("alsa-uninit: pcm drain error: %s\n", snd_strerror(err));
+	  return;
+	}
     }
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
-    {
+      {
 	printf("alsa-uninit: pcm close error: %s\n", snd_strerror(err));
 	return;
-    }
+      }
     else {
       alsa_handler = NULL;
       alsa_device = NULL;
       printf("alsa-uninit: pcm closed\n");
     }
+  }
+  else {
+    printf("alsa-uninit: no handler defined!\n");
+  }
 }
 
 static void audio_pause()
 {
     int err;
 
-    if ((err = snd_pcm_drain(alsa_handler)) < 0)
-    {
-	printf("alsa-pause: pcm drain error: %s\n", snd_strerror(err));
-	return;
+    if (!ao_noblock) {
+      //drain causes error in nonblock-mode!
+      if ((err = snd_pcm_drain(alsa_handler)) < 0)
+	{
+	  printf("alsa-pause: pcm drain error: %s\n", snd_strerror(err));
+	  return;
+	}
     }
+    else {
+      if (verbose)
+	printf("alsa-pause: paused nonblock\n");
 
-#ifdef reset
-    if ((err = snd_pcm_reset(alsa_handler)) < 0)
-    {
-	printf("alsa-pause: pcm reset error: %s\n", snd_strerror(err));
-	return;
+      return;
     }
-#endif
 }
 
 static void audio_resume()
@@ -599,18 +736,24 @@ static void reset()
 {
     int err;
 
-    if ((err = snd_pcm_drain(alsa_handler)) < 0)
-    {
-	printf("alsa-reset: pcm drain error: %s\n", snd_strerror(err));
-	return;
-    }
+    if (!ao_noblock) {
+      //drain causes error in nonblock-mode!
+      if ((err = snd_pcm_drain(alsa_handler)) < 0)
+	{
+	  printf("alsa-pause: pcm drain error: %s\n", snd_strerror(err));
+	  return;
+	}
 
-    if ((err = snd_pcm_prepare(alsa_handler)) < 0)
-    {
-	printf("alsa-reset: pcm prepare error: %s\n", snd_strerror(err));
-	return;
+      if ((err = snd_pcm_prepare(alsa_handler)) < 0)
+	{
+	  printf("alsa-reset: pcm prepare error: %s\n", snd_strerror(err));
+	  return;
+	}
+    } else {
+      if (verbose)
+	printf("alsa-reset: reset nonblocked");
+      return;
     }
-
 }
 
 #ifndef timersub
@@ -625,61 +768,96 @@ do { \
 } while (0)
 #endif
 
+/* I/O error handler */
+static int xrun(u_char *str_mode)
+{
+  int err;
+  snd_pcm_status_t *status;
+
+  snd_pcm_status_alloca(&status);
+  
+  if ((err = snd_pcm_status(alsa_handler, status))<0) {
+    printf("status error: %s", snd_strerror(err));
+    return(0);
+  }
+
+  if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
+    struct timeval now, diff, tstamp;
+    gettimeofday(&now, 0);
+    snd_pcm_status_get_trigger_tstamp(status, &tstamp);
+    timersub(&now, &tstamp, &diff);
+    printf("alsa-%s: xrun of at least %.3f msecs. resetting stream\n",
+	   str_mode,
+	   diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
+  }
+
+  if ((err = snd_pcm_prepare(alsa_handler))<0) {
+    printf("xrun: prepare error: %s", snd_strerror(err));
+    return(0);
+  }
+
+  return(1); /* ok, data should be accepted again */
+}
+
 /*
     plays 'len' bytes of 'data'
     returns: number of bytes played
-    modified last at 26.06.02 by jp
+    modified last at 29.06.02 by jp
+    thanxs for marius <marius@rospot.com> for giving us the light ;)
 */
 
 static int play(void* data, int len, int flags)
 {
 
-  snd_pcm_status_t *status;
-
-  int num_frames=len/ao_data.bps;
+  //ao_data.bps is always 4 cause its set to channels * 2 by alsa_format??
+  int num_frames = len / ao_data.bps;
   signed short *output_samples=data;
   snd_pcm_sframes_t res = 0;
+
+  //printf("alsa-play: frames=%i, len=%i",num_frames,len);
 
   if (!alsa_handler) {
     printf("alsa-play: device configuration error");
     return 0;
   }
 
-  do {
-    if (res == -EPIPE) {  /* underrun */
-      snd_pcm_status_alloca(&status);
-      if ((res = snd_pcm_status(alsa_handler, status))<0) {
-	printf("alsa-play: buffer underrun. can't determine length");
-      } else {
-	if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
-	  struct timeval now, diff, tstamp;
-	  gettimeofday(&now, 0);
-	  snd_pcm_status_get_trigger_tstamp(status, &tstamp);
-	  timersub(&now, &tstamp, &diff);
-	  printf("alsa-play: xrun of at least %.3f msecs. resetting stream",
-		 diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
-	} else 
-	  printf("alsa-play: xrun. can't determine length");
-      }	
-      res = snd_pcm_prepare(alsa_handler);
-    }
-    else if (res == -ESTRPIPE) {	/* suspend */
-      printf("alsa-play: pcm in suspend mode. trying to resume");
-      while ((res = snd_pcm_resume(alsa_handler)) == -EAGAIN)
-	sleep(1);
-      if (res < 0)
-	res = snd_pcm_prepare(alsa_handler);
-    }
-    
-    if (res >= 0)
-      res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
-    
-    if (res > 0) {
-      output_samples += ao_data.channels * res;
-      num_frames -= res;
-    }
+  while (num_frames > 0) {
 
-  } while (res == -EPIPE || num_frames > 0);
+      if (ao_mmap) {
+	res = snd_pcm_mmap_writei(alsa_handler, (void *)output_samples, num_frames);
+      } else {
+	res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
+      }
+
+      if (res == -EAGAIN) {
+	snd_pcm_wait(alsa_handler, 1000);
+      }
+      else if (res == -EPIPE) {  /* underrun */
+	if (xrun("play") <= 0) {
+	  printf("alsa-play: xrun reset error");
+	  return(0);
+	}
+      }
+      else if (res == -ESTRPIPE) {	/* suspend */
+	printf("alsa-play: pcm in suspend mode. trying to resume\n");
+	while ((res = snd_pcm_resume(alsa_handler)) == -EAGAIN)
+	  sleep(1);
+      }
+      else if (res < 0) {
+	printf("alsa-play: unknown status, trying to reset soundcard\n");
+	if ((res = snd_pcm_prepare(alsa_handler)) < 0) {
+	  printf("alsa-play: snd prepare error");
+	  return(0);
+	  break;
+	}
+      }
+
+      if (res > 0) {
+	output_samples += ao_data.channels * res;
+	num_frames -= res;
+      }
+
+  } //end while
 
   if (res < 0) {
     printf("alsa-play: write error %s", snd_strerror(res));
@@ -688,12 +866,14 @@ static int play(void* data, int len, int flags)
   return res < 0 ? (int)res : len;
 }
 
-
 /* how many byes are free in the buffer */
 static int get_space()
 {
     snd_pcm_status_t *status;
     int ret;
+    char *str_status;
+
+    //snd_pcm_sframes_t avail_frames = 0;
     
     if ((ret = snd_pcm_status_malloc(&status)) < 0)
     {
@@ -709,26 +889,50 @@ static int get_space()
     
     switch(snd_pcm_status_get_state(status))
     {
-	case SND_PCM_STATE_OPEN:
-	case SND_PCM_STATE_PREPARED:
-	case SND_PCM_STATE_RUNNING:
-	    ret = snd_pcm_status_get_avail(status) * ao_data.bps;
-	    break;
-	default:
-	    ret = 0;
+    case SND_PCM_STATE_OPEN:
+      str_status = "open";
+    case SND_PCM_STATE_PREPARED:
+      if (str_status != "open")
+	str_status = "prepared";
+    case SND_PCM_STATE_RUNNING:
+      ret = snd_pcm_status_get_avail(status) * ao_data.bps;
+      //avail_frames = snd_pcm_avail_update(alsa_handler) * ao_data.bps;
+      if (str_status != "open" && str_status != "prepared")
+	str_status = "running";
+      break;
+    case SND_PCM_STATE_PAUSED:
+      if (verbose) printf("alsa-space: paused");
+      str_status = "paused";
+      ret = 0;
+      break;
+    case SND_PCM_STATE_XRUN:
+      xrun("space");
+      str_status = "xrun";
+      ret = 0;
+      break;
+    default:
+      str_status = "undefined";
+      ret = 0;
     }
-    
+
+    if (verbose && str_status != "running")
+      printf("alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
     snd_pcm_status_free(status);
     
-    if (ret < 0)
+    if (ret < 0) {
+      printf("negative value!!\n");
       ret = 0;
-    //printf("alsa-space: free space = %i",ret);
+    }
+ 
     return(ret);
 }
 
 /* delay in seconds between first and last sample in buffer */
 static float get_delay()
 {
+
+  if (alsa_handler) {
+
     snd_pcm_status_t *status;
     float ret;
     
@@ -760,4 +964,8 @@ static float get_delay()
     if (ret < 0)
       ret = 0;
     return(ret);
+    
+  } else {
+    return(0);
+  }
 }
