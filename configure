@@ -153,7 +153,7 @@ params:
         --enable-x11            build with X11 render support [autodetect]
 	--enable-fbdev		build with FBDev render support [_not_ autodetected]
 	--enable-mlib		build with MLIB support ( only Solaris )
-	--enable-oggvorbis	build with OggVorbis support [autodetect]
+	--enable-vorbis		build with OggVorbis support [autodetect]
 
 	--enable-termcap	use termcap database for key codes
 	--enable-xmmp	        use XMMP audio drivers
