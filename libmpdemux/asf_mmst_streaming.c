@@ -107,13 +107,12 @@ static void string_utf16(char *dest, char *src, int len)
 {
   int i;
 
-  memset (dest, 0, 1000);
-
   for (i=0; i<len; i++) {
     dest[i*2] = src[i];
     dest[i*2+1] = 0;
   }
 
+  /* trailing zeroes */
   dest[i*2] = 0;
   dest[i*2+1] = 0;
 }
