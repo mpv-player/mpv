@@ -30,7 +30,7 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(qtaudio)
 
-#ifdef USE_QTX_CODECS
+#if defined(USE_QTX_CODECS) && !defined(MACOSX)
 typedef struct OpaqueSoundConverter*    SoundConverter;
 typedef unsigned long                   OSType;
 typedef unsigned long                   UnsignedFixed;

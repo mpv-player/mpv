@@ -32,7 +32,7 @@ LIBVD_EXTERN(qtvideo)
 #include "qtx/qtxsdk/components.h"
 #endif
 
-#ifdef USE_QTX_CODECS
+#if defined(USE_QTX_CODECS) && !defined(MACOSX)
 //#include "wine/windef.h"
 
 HMODULE   WINAPI LoadLibraryA(LPCSTR);
@@ -55,7 +55,7 @@ static ImageDescriptionHandle framedescHandle;
 //static HINSTANCE qtml_dll;
 static HMODULE handler;
 
-#ifdef USE_QTX_CODECS
+#if defined(USE_QTX_CODECS) && !defined(MACOSX)
 static    Component (*FindNextComponent)(Component prev,ComponentDescription* desc);
 static    OSErr (*GetComponentInfo)(Component prev,ComponentDescription* desc,Handle h1,Handle h2,Handle h3);
 static    long (*CountComponents)(ComponentDescription* desc);
