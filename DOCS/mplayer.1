@@ -377,7 +377,8 @@ Force usage of a specific audio codec, according to its codec name in
 codecs.conf.
 
 .I EXAMPLE:
-    \-ac mp3     use libmp3 MP3 codec
+    \-ac mp3     use mp3lib
+    \-ac mad     use libmad
     \-ac mp3acm  use l3codeca.acm MP3 codec
     \-ac ac3     use AC3 codec
     \-ac hwac3   enable hardware AC3 passthrough
@@ -392,11 +393,10 @@ Force usage of a specific audio codec family, according to its driver name
 in codecs.conf and fall back to default if it failed.
 
 .I EXAMPLE:
-    \-afm mp3lib     use libmp3 (mp2/3, but not mp1)
-    \-afm libmad     use libmad (mp1/2/3, slow)
-    \-afm ffmpeg     use ffmpeg's decoder (mp1/2/3)
-    \-afm liba52     use liba52 (ac3)
-    \-afm libvorbis  use libvorbis
+    \-afm ffmpeg     use ffmpeg's libavcodec (mp1/2/3)
+    \-afm acm        use a matching Win32 codec
+
+See \-afm help for a full list of available drivers.
 .TP
 .B \-aspect <ratio>
 Override aspect ratio of movies. It's autodetected on MPEG files, but can't be
@@ -539,7 +539,7 @@ Force usage of a specific video codec, according to its codec name in codecs.con
     \-vc ffmpeg12  use libavcodec's MPEG1/2 codec
     \-vc divx4     use Project Mayo's DivX codec
 
-See '\-vc help' for FULL list!
+See \-vc help for a full list of available codecs.
 .TP
 .B \-vfm <driver name>
 Force usage of a specific video codec family, according to its driver name
@@ -556,10 +556,12 @@ in codecs.conf and fall back to default if it failed.
     \-vfm xanim   use XAnim codecs
 
 .I NOTE:
-If libdivxdecore support was compiled in, then type 3 and 7 now contains
+If libdivxdecore support was compiled in, then odivx and divx4 now contains
 just the same DivX4 codec, but different APIs to reach it. For difference
 between them and when to use which, check the DivX4 section in the
 documentation.
+
+See \-vfm help for a full list of available drivers.
 .TP
 .B \-vop <...,plugin3[=options],plugin2,plugin1>
 Activate a comma separated list of video filters.
