@@ -472,7 +472,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
   }
 
   if(iter->config && iter->entry_pushed > 0) {
-    iter->entry_pushed=1;
+    iter->entry_pushed = 0;
     m_config_pop(iter->config);
   }
 
@@ -534,7 +534,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
   if(iter->config) {
     play_tree_iter_push_params(iter);
-    iter->entry_pushed=0;
+    iter->entry_pushed = 1;
   }
 
   return PLAY_TREE_ITER_ENTRY;
