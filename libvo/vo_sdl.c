@@ -1,9 +1,20 @@
 /*
  *  vo_sdl.c
  *
- *  (was video_out_sdl.c from OMS project)
+ *  (was video_out_sdl.c from OMS project/mpeg2dec -> http://linuxvideo.org)
  *
  *  Copyright (C) Ryan C. Gordon <icculus@lokigames.com> - April 22, 2000.
+ *
+ *  Current maintainer for MPlayer project (report bugs to that address):
+ *    Felix Buenemann <atmosfear@users.sourceforge.net>
+ *
+ *  This file is a video out driver using the SDL library (http://libsdl.org/),
+ *  to be used with MPlayer, the Linux Multimedia Player project, further info
+ *  from http://mplayer.sourceforge.net.
+ *
+ *  Current license is not decided yet, but we're heading for GPL.
+ *
+ *  -- old disclaimer --
  *
  *  A mpeg2dec display driver that does output through the
  *  Simple DirectMedia Layer (SDL) library. This effectively gives us all
@@ -25,7 +36,9 @@
  *   
  *  You should have received a copy of the GNU General Public License
  *  along with GNU Make; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 
+ *  the Free Software Foundation.
+ *
+ *  -- end old disclaimer -- 
  *
  *  Changes:
  *    Dominik Schnitzer <dominik@schnitzer.at> - November 08, 2000.
@@ -42,14 +55,14 @@
  *    - Better error handling
  *    Bruno Barreyra <barreyra@ufl.edu> - December 10, 2000.
  *    - Eliminated memcpy's for entire frames
- *    Felix Buenemann <Felix.Buenemann@ePost.de> - March 11, 2001
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 11, 2001
  *    - Added aspect-ratio awareness for fullscreen
- *    Felix Buenemann <Felix.Buenemann@gmx.de> - March 11, 2001
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 11, 2001
  *    - Fixed aspect-ratio awareness, did only vertical scaling (black bars above
  *       and below), now also does horizontal scaling (black bars left and right),
  *       so you get the biggest possible picture with correct aspect-ratio.
  *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 12, 2001
- *    - Minor bugfix to aspect-ratio vor non-4:3-resolutions (like 1280x1024)
+ *    - Minor bugfix to aspect-ratio for non-4:3-resolutions (like 1280x1024)
  *    - Bugfix to check_events() to reveal mouse cursor after 'q'-quit in
  *       fullscreen-mode
  *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 10, 2001
@@ -70,7 +83,10 @@
  *    - added some defines to modify some sdl-out internas (see comments)
  *
  *    Felix Buenemann: further changes will be visible through cvs log, don't want
- *     to update this all the time.
+ *     to update this all the time (CVS info on http://mplayer.sourceforge.net)
+ *
+ *    KNOWN BUGS:
+ *    - Crashes with aalib (not resolved yet)
  */
 
 /* define if you want to force Xv SDL output? */
