@@ -2137,7 +2137,7 @@ fi
 
 echocheck "X11 headers presence"
 if test -z "$_inc_x11" ; then
-  for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
+  for I in /usr/include /usr/include/X11R6 /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
     if test -d "$I/X11" && test -f "$I/X11/Xlib.h" ; then
       _inc_x11="-I$I"
       echores "yes (using $I)"
@@ -2158,7 +2158,7 @@ fi
 
 echocheck "X11 libs presence"
 if test -z "$_ld_x11" ; then
-  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
+  for I in /usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
     if test -d "$I" && ( test -f "$I/libX11.so" || test -f "$I/libX11.a" ) ; then
       _ld_x11="-L$I"
       echores "yes (using $I)"
