@@ -341,6 +341,7 @@ autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_form
 	unsigned int i;
 	int fd=-1;
 	int redirect;
+	int auth_retry=0;
 	char *extension;
 	char *content_type;
 	char *next_url;
@@ -497,29 +498,38 @@ extension=NULL;
 					{
 					char username[50], password[50];
 					char *aut;
+					if( auth_retry>3 ) {
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
+						return -1;
+					}
 					aut = http_get_field(http_hdr, "WWW-Authenticate");
 					if( aut!=NULL ) {
 						char *aut_space;
 						aut_space = strstr(aut, "realm=");
 						if( aut_space!=NULL ) aut_space += 6;
-						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authorization required for %s, please enter:\n", aut_space);
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s, please enter:\n", aut_space);
 					} else {
-						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authorization required, please enter:\n");
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required, please enter:\n");
 					}
-					mp_msg(MSGT_NETWORK,MSGL_ERR,"username: ");
-					// FIXME
-					scanf("%s", username);
-					printf("%s\n", username);
-					mp_msg(MSGT_NETWORK,MSGL_ERR,"password: ");
+					if( url->username==NULL ) {
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"username: ");
+						// FIXME
+						scanf("%s", username);
+						printf("%s\n", username);
+
+						url->username = (char*)malloc(strlen(username)+1);
+						if( url->username==NULL ) {
+							mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+							return -1;
+						}
+						strcpy(url->username, username);
+					} else {
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"%s ", url->username );
+					}
+					mp_msg(MSGT_NETWORK,MSGL_INFO,"password: ");
 					// FIXME
 					scanf("%s", password);
 					printf("%s\n", password);
-					url->username = (char*)malloc(strlen(username)+1);
-					if( url->username==NULL ) {
-						mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-						return -1;
-					}
-					strcpy(url->username, username);
 					url->password = (char*)malloc(strlen(password)+1);
 					if( url->password==NULL ) {
 						mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
@@ -527,6 +537,7 @@ extension=NULL;
 					}
 					strcpy(url->password, password);
 					redirect = 1;
+					auth_retry++;
 					break;
 					}
 				default:
