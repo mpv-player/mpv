@@ -23,7 +23,7 @@ TVDAC - controls Composite Video and Super Video output ports
 		TV scaler & sync unit
 		TV format convertor (PAL/NTSC)
 TVCAP - controls Video-In port
-MPP   - Miscellaneous peripheral port. (includes ImpactTV(2+) - copy
+MPP   - Miscellaneous peripheral port. (includes macrovision's filter - copy
 	protection mechanism)
 OV    - Video overlay (YUV BES) (include subpictures, gamma correction and
         adaptive deinterlacing)
@@ -44,8 +44,8 @@ RAM memory:   [ App ]    Copies YUV image to overlay memory
 overlay memory:[ OV ]    performs scaling and YUVtoRGB convertion
                 /\
 RGB memory:   /    \
-            /    [ ImpactTV ]  performs copy protection filtering
-          /            \       (unneeded but presented by default thing;)
+            /  [ macrovision ]  performs copy protection filtering
+          /            \        (unneeded but presented by default thing;)
  [ CRTC/LCD/DFP DAC ] [ TV DAC ] convert RGB memory to CRTC and NTSC/PAL signals
           |                |
  [CRTC/LCD/DFP Monitor] [TV-screen]
