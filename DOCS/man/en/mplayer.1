@@ -815,8 +815,10 @@ Specify the CD-ROM device (default: /dev/\:cdrom).
 .B \-channels <number>
 Change the number of playback channels (default: 2).
 If the number of output channels is bigger than the number of input channels
-empty channels are inserted (unless mixing from mono to stereo, then the mono
-channel is repeated in both output channels).
+empty channels are inserted with the help of the channels audio filter (unless
+mixing from mono to stereo, then the mono channel is repeated in both
+output channels).
+The routing will be the default routing for the channels filter.
 If the number of output channels is smaller than the number of input channels,
 results depend on the audio decoder (\-afm).
 MPlayer asks the decoder to decode the audio into as many channels as
@@ -829,8 +831,8 @@ In that case liba52 does the decoding by default and correctly downmixes the
 audio into the requested number of channels.
 .br
 .I NOTE:
-This option is honored by codecs (AC3 only), filters (surround) and ao drivers
-(OSS at least).
+This option is honored by codecs (AC3 only), filters (surround) and audio
+output drivers (OSS at least).
 .sp 1
 Available options are:
 .sp 1
@@ -1095,9 +1097,14 @@ Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .
 .TP
 .B \-srate <Hz>
-Selects the given output sampling rate, resampling if necessary.
+Selects the sample rate to be used by the sound card
+(of course sound cards have limits on this).
+If the sample frequency of your sound card is different from that
+of the current media, the resample audio filter will be inserted
+into the audio filter layer to compensate for the difference.
 The type of resampling can be controlled by the \-af-adv option.
 The default is fast resampling that may cause distortion.
+.br
 MEncoder passes this value to LAME for resampling.
 .
 .TP
