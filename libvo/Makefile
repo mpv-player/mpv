@@ -10,7 +10,7 @@ ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += rgb15to16mmx.c yuv2rgb_mmx.c
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) -DMPG12PLAY
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) -DMPG12PLAY #-Wall
 # -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o
