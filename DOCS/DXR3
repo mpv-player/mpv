@@ -1,6 +1,11 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
+2001-11-27: -ao dxr3 now works, still a few bugs though
+            you might have to reload the em8300 modules
+	    after a playback or you might get static the
+	    next time you use the dxr3 audio interface.
+	    
 1. Introduction
 
 The DXR3 and Hollywood+ are two not too different mpeg-(1/2) and ac3
@@ -64,8 +69,7 @@ These days, you have two uses for this card:
 
 After installation you will have two new outdevices in mplayer:
     -vo dxr3	For video output
-    -ao dxr3	For audio output (due to an unresolved bug
-				  this is not recommended/useful!)
+    -ao dxr3	For audio output 
 
 MPEG-1, MPEG-2, VCD and DVD Notes
 There are some notes to take into account here for optimum playback.
@@ -83,22 +87,17 @@ When playing divx's add "-vc odivx", if you get any other divx codec
 to run faster tell me which one because I'll be interested in how it
 could possibly be any faster than OpenDivX4Linux...
 
-Unsupported Codecs:
-If you ever get a codec unsupported message, lookup the codec in the
-codecs.conf file (search for "videocodec <codecname>"), copy the entire
-codec section and send it to me and I'll make sure it works with the
-next patch (or the next after that if I have a thousand things to take
-care of first ;) my e-mail is at the bottom of this page.
-
-4. Todo
-
- * Scale video played using windows codecs			(High)
- * Make the osd use the subpic feature of the dxr3 (almost done)(High)
- * Driver options (probably not until libvo2)			(Medium)
+Other codecs:
+Currently they don't work. I'm working on implementing libvo2 which
+will be a much more convenient and faster way of working with
+vo<->codec interaction. If libvo2 takes longer to develop than I
+have estimated perhaps I'll add more codec support to libvo. Otherwise
+you'll just have to wait for libvo2. (there is an implementation
+for other codecs, but I think it's pretty broken currently ;)
 
 
  
-5. Contacting me
+4. Contacting me
 
 You can contact me either by e-mailing me, <dholm@iname.com> or by using
 icq: 798427

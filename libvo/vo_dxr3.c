@@ -381,7 +381,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         /* open it */
         if (avcodec_open(&codec_context, codec) < 0) 
 	{
-            printf(stderr, "VO: [dxr3] Could not open codec\n");
+            printf( "VO: [dxr3] Could not open codec\n" );
             return -1;
         }
 
@@ -424,7 +424,6 @@ static void draw_osd(void)
 
 static uint32_t draw_frame(uint8_t * src[])
 {
-    int pts = 0;
     if( img_format == IMGFMT_MPEGPES )
     {
         int data_left;
@@ -432,8 +431,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	unsigned char *data = p->data;
 
 	data_left = p->size;
-	pts = p->timestamp;
-	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
 	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
 	while( data_left )
 	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
@@ -516,8 +514,7 @@ static uint32_t draw_frame(uint8_t * src[])
 #undef ONE_HALF
 #undef FIX(x)
 	//End of ffmpeg code, see ffmpeg.sourceforge.net for terms of license
-	pts = vo_pts;
-	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
 	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
 	while( out_size )
@@ -535,8 +532,8 @@ static uint32_t draw_frame(uint8_t * src[])
 	    {
 	    }
 	}
-	pts = vo_pts;
-	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
 	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
         while( out_size )
