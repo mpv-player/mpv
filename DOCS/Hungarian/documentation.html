@@ -199,8 +199,8 @@
       <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>    
       <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI> 
-      <LI><A HREF=#2.6.12>2.6.12 VO</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>  
+      <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>  
+      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>  
     </UL>
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
@@ -1054,7 +1054,13 @@ Szabványos V4L-rõl bemenet<BR>
 
 <A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
 
-<P>Hmm, segfaulted. :)</P>
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Runtime MPEG1 enkóder (DVB és DXR3 kártyákhoz).</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
 
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
@@ -1114,8 +1120,14 @@ Szabványos V4L-rõl bemenet<BR>
 
 <A NAME=2.6.10><P><B><I>2.6.10.  Rotate</I></B></P>
 
-<P>genyo</P>
+<P><B><U>Leírás</U></B>:</P>
 
+<P>Kép elforgatása (tükrözése). 'x' paraméter (lehetséges értékei: 0-3) a
+  horizontális és vertikális tükrözést szabályozzák.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 <A NAME=2.6.11><P><B><I>2.6.11.  Scale</I></B></P>
 
@@ -1138,11 +1150,7 @@ Szabványos V4L-rõl bemenet<BR>
 <P><CODE>&nbsp;&nbsp;-vop scale[=szélesség:magasság]</CODE></P>
 
 
-<A NAME=2.6.12><P><B><I>2.6.12.  VO</I></B></P>
-
-<P>WTF</P>
-
-<A NAME=2.6.13><P><B><I>2.6.13.  YUY2</I></B></P>
+<A NAME=2.6.12><P><B><I>2.6.12.  YUY2</I></B></P>
 
 <P><B><U>Leírás</U></B>:</P>
 
@@ -1151,6 +1159,17 @@ Szabványos V4L-rõl bemenet<BR>
 <P><B><U>Használat</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
+
+
+<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Runtime MPEG1 enkóder (DVB és DXR3 kártyákhoz).</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
 <P><B><A NAME=3>3.  Használat</A></B></P>
