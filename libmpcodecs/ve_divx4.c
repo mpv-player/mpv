@@ -27,6 +27,10 @@ extern char* passtmpfile;
 
 #include <encore2.h>
 
+#ifndef ENCORE_MAJOR_VERSION
+#define ENCORE_MAJOR_VERSION 4000
+#endif
+
 ENC_PARAM divx4_param;
 int divx4_crispness;
 
@@ -43,6 +47,20 @@ struct config divx4opts_conf[]={
 	{"deinterlace", &divx4_param.deinterlace, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"q", &divx4_param.quality, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
 	{"crispness", &divx4_crispness, CONF_TYPE_INT, CONF_RANGE,0,100, NULL},
+#if ENCORE_MAJOR_VERSION >= 5010
+	{"bidirect", &divx4_param.extensions.use_bidirect, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"obmc", &divx4_param.extensions.obmc, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"data_partitioning", &divx4_param.extensions.data_partitioning, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"qpel", &divx4_param.extensions.quarter_pel, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"intra_frame_threshold", &divx4_param.extensions.intra_frame_threshold, CONF_TYPE_INT, CONF_RANGE,1,100, NULL},
+	{"psychovisual", &divx4_param.extensions.psychovisual, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"testing_param", &divx4_param.extensions.testing_param, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"gmc", &divx4_param.extensions.use_gmc, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"interlace_mode", &divx4_param.extensions.interlace_mode, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
+	{"temporal", &divx4_param.extensions.temporal_enable, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"spatial", &divx4_param.extensions.spatial_passes, CONF_TYPE_INT, 0,0,1, NULL},
+	{"mv_file", &divx4_param.extensions.mv_file, CONF_TYPE_STRING, 0,0,1, NULL},
+#endif
 	{"help", "TODO: divx4opts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -185,7 +203,11 @@ static int vf_open(vf_instance_t *vf, char* args){
     mux_v->bih->biHeight=0;
     mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
+#if ENCORE_MAJOR_VERSION >= 5010
+    mux_v->bih->biCompression=mmioFOURCC('D','X','5','0');
+#else
     mux_v->bih->biCompression=mmioFOURCC('d','i','v','x');
+#endif
 
     return 1;
 }
