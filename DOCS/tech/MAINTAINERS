@@ -64,7 +64,7 @@ MPlayer code:
     * DVB support: Nico Sabbi
     * GUI: Zoltan Ponekker
     * GUI skins: Diego Biurrun
-    * filers: Richard Felker, Michael Niedermayer
+    * filters: Richard Felker, Michael Niedermayer
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
@@ -75,13 +75,16 @@ Imported libs/projects:
     * libmpeg2: None
     * libmpdvdkit2: None
     * libfaad2: Alex Beregszaszi
+    * realrtsp: Roberto Togni
 
 demuxers:
+    * demux_fli.c - Roberto Togni
     * demux_gif.c - Joey Parrish
     * demux_lavf.c - Michael Niedermayer
     * demux_mkv.c - Moritz Bunkus
     * demux_nsv.c - Reza Jelveh, Roberto Togni
     * demux_ogg.c - Moritz Bunkus
+    * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
 
 filters:
