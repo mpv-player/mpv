@@ -1093,15 +1093,11 @@ fi
 echores "$_dl"
 
 
-echocheck "dynamic linking"
+#echocheck "dynamic linking"
+_ld_dl_dynamic=''
+bsd && _ld_dl_dynamic='-rdynamic'
 # FIXME !! make this dynamic detection to work
 # also gcc flags are different, but ld flags aren't (-Bdynamic/-Bstatic/-Bsymbolic)
-_ld_dl_dynamic=''
-if qnx ; then
-  _ld_dl_dynamic=''
-else
-  _ld_dl_dynamic='-rdynamic'
-fi
 #cat > $TMPC << EOF
 #int main(void) { return 0; }
 #EOF
@@ -1112,7 +1108,7 @@ fi
 #elif cc_check ; then
 #  _ld_dl_dynamic=''
 #fi
-echores "using $_ld_dl_dynamic"
+#echores "using $_ld_dl_dynamic"
 
 
 echocheck "pthread"
@@ -2363,7 +2359,6 @@ else
 fi
 
 _ld_arch="${_ld_arch} $_ld_pthread $_ld_dl $_ld_dl_dynamic"
-#bsd && _ld_arch="-rdynamic $_ld_arch"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 
 _def_debug='#undef MP_DEBUG'
