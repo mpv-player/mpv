@@ -11,6 +11,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <signal.h>
+#include <setjmp.h>
+
+
 #include "config.h"
 
 #include "video_out.h"
@@ -275,6 +279,11 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
     return is_frame_done;
 }
 
+static jmp_buf mpeg2_jmp_buf;
+
+static void mpeg2_sighandler(int sig){
+    longjmp(mpeg2_jmp_buf,1);
+}
 
 int mpeg2_decode_data (vo_functions_t *output, uint8_t *current, uint8_t *end)
 {
@@ -286,6 +295,14 @@ int mpeg2_decode_data (vo_functions_t *output, uint8_t *current, uint8_t *end)
   uint8_t *pos=NULL;
   uint8_t *start=current;
   int ret = 0;
+  void* old_sigh;
+
+  if(setjmp(mpeg2_jmp_buf)!=0){
+      printf("@@@ FATAL!!!??? libmpeg2 returned from sig11 before the actual decoding! @@@\n");
+      return 0;
+  }
+
+  old_sigh=signal(SIGSEGV,mpeg2_sighandler);
 
 //  printf("RCVD %d bytes\n",end-current);
 
@@ -305,11 +322,17 @@ while(current<end){
   if(pos){
     //if((code&0x100)!=0x100) printf("libmpeg2: FATAL! code=%X\n",code);
     //printf("pos=%d  chunk %3X  size=%d  next-code=%X\n",pos-start,code,current-pos,head|c);
-    ret+=parse_chunk(output, code&0xFF, pos);
+    if(setjmp(mpeg2_jmp_buf)==0){
+      ret+=parse_chunk(output, code&0xFF, pos);
+    } else {
+      printf("@@@ libmpeg2 returned from sig11... @@@\n");
+    }
   }
   //--------------------
   pos=current;code=head|c;
 }
+
+  signal(SIGSEGV,old_sigh); // restore sighandler
 
   if(code==0x1FF) ret+=parse_chunk(output, 0xFF, NULL); // send 'end of frame'
 

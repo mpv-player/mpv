@@ -130,6 +130,8 @@ char* encode_index_name=NULL;
 int encode_bitrate=0;
 
 //**************************************************************************//
+//             Input media streaming & demultiplexer:
+//**************************************************************************//
 
 #include "stream.c"
 #include "demuxer.c"
@@ -142,6 +144,10 @@ demux_stream_t *d_video=NULL;
 
 // MPEG video stream parser:
 #include "parse_es.c"
+
+//**************************************************************************//
+//             Audio codecs:
+//**************************************************************************//
 
 //int mp3_read(char *buf,int size){
 int mplayer_audio_read(char *buf,int size){
@@ -163,14 +169,17 @@ static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
 
 #include "xa/xa_gsm.h"
 
+//**************************************************************************//
+//             The OpenDivX stuff:
+//**************************************************************************//
+
 unsigned char *opendivx_src[3];
 int opendivx_stride[3];
 
+// callback, the opendivx decoder calls this for each frame:
 void convert_linux(unsigned char *puc_y, int stride_y,
 	unsigned char *puc_u, unsigned char *puc_v, int stride_uv,
 	unsigned char *bmp, int width_y, int height_y){
-
-//    vo_functions_t *video_out=(vo_functions_t *) bmp;
 
 //    printf("convert_yuv called  %dx%d  stride: %d,%d\n",width_y,height_y,stride_y,stride_uv);
 
@@ -982,6 +991,7 @@ if(has_video==1){
    //================== init mpeg codec ===================
    mpeg2_allocate_image_buffers (picture);
    if(verbose) printf("INFO: mpeg2_init_video() OK!\n");
+#ifdef HAVE_CODECCTRL
    // ====== Init MPEG codec process ============
    make_pipe(&control_fifo,&control_fifo2);
    make_pipe(&data_fifo2,&data_fifo);
@@ -989,6 +999,7 @@ if(has_video==1){
    if((child_pid=fork())==0)
      mpeg_codec_controller(video_out); // this one is running in a new process!!!!
    signal(SIGPIPE,SIG_IGN);  // Ignore "Broken pipe" signal (codec restarts)
+#endif
 }
 
 //================== MAIN: ==========================
@@ -1482,6 +1493,70 @@ switch(has_video){
     break;
   }
   case 1: {
+#ifndef HAVE_CODECCTRL
+
+        int in_frame=0;
+        videobuf_len=0;
+        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
+          int i=sync_video_packet(d_video);
+          if(in_frame){
+            if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
+              // send END OF FRAME code:
+#if 1
+              videobuffer[videobuf_len+0]=0;
+              videobuffer[videobuf_len+1]=0;
+              videobuffer[videobuf_len+2]=1;
+              videobuffer[videobuf_len+3]=0xFF;
+              videobuf_len+=4;
+#endif
+              if(!i) eof=1; // EOF
+              break;
+            }
+          } else {
+            //if(i==0x100) in_frame=1; // picture startcode
+            if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
+            else if(!i){ eof=1; break;} // EOF
+          }
+	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
+          if(!read_video_packet(d_video)){ eof=1; break;} // EOF
+          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
+        }
+        
+        if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
+        //printf("--- SEND %d bytes\n",videobuf_len);
+	if(grab_frames==1){
+	      FILE *f=fopen("grab.mpg","ab");
+	      fwrite(videobuffer,videobuf_len-4,1,f);
+	      fclose(f);
+	}
+        ++dbg_es_sent;
+        //if(videobuf_len>4) 
+        //my_write(data_fifo,(char*) &videobuf_len,4);
+        
+        { int t=0;
+          int x;
+          float l;
+          t-=GetTimer();
+          mpeg2_decode_data(video_out, videobuffer, videobuffer+videobuf_len);
+          t+=GetTimer();
+          //*** CMD=0 : Frame completed ***
+          //send_cmd(control_fifo2,0); // FRAME_COMPLETED command
+          x=frameratecode2framerate[picture->frame_rate_code]; //fps
+          ++dbg_es_rcvd;
+          l=(100+picture->repeat_count)*0.01f;
+          num_frames+=l;
+          picture->repeat_count=0;
+          video_time_usage+=t*0.000001;
+          if(x && !force_fps) default_fps=x*0.0001f;
+          if(!force_redraw){
+            // increase video timers:
+            v_frame+=l/default_fps;
+            v_pts+=l/default_fps;
+          }
+        }
+        //if(eof) break;
+
+#else
     while(1){
       int x;
       while(1){
@@ -1566,6 +1641,7 @@ switch(has_video){
       } else
         printf("invalid cmd: 0x%X\n",x);
     }
+#endif
     break;
   }
 } // switch
