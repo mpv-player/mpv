@@ -5,98 +5,6 @@
     
     Based on FFmpeg's libav/rm.c.
 
-    TODO: fix the whole syncing mechanism
-    
-    $Log$
-    Revision 1.30  2002/11/04 00:23:53  arpi
-    - realaudio ATRC (sony atrac3) codec support
-    - fixed passing of codecdata from demuxer to codec
-    patch by Fabian Franz <FabianFranz@gmx.de>
-
-    Revision 1.29  2002/11/01 17:46:43  arpi
-    verbose can be negative
-
-    Revision 1.28  2002/10/10 23:24:15  arpi
-    stream selection cleanup, fixed -nosound
-
-    Revision 1.27  2002/10/01 20:01:04  michael
-    rv10 cleanup
-
-    Revision 1.26  2002/09/22 02:33:26  arpi
-    tons of warning fixes, also some 10l bugfixes, including Dominik's PVA bug
-
-    Revision 1.25  2002/08/27 23:01:54  arpi
-    - added matrix cracking/debugging code - disabled
-    - use real codec headers for sipr
-
-    Revision 1.24  2002/08/25 00:07:15  arpi
-    some files has some shit before teh audio/video headers...
-
-    Revision 1.23  2002/08/24 23:07:34  arpi
-    10l - fixed chunktab size calculation
-
-    Revision 1.22  2002/08/24 22:39:27  arpi
-    - changed re-muxed packet structure (see struct dp_hdr_t)
-      now the packets can be encapsulated into avi or other file formats
-    - skip redundant/resent fragments (bit 0x20 set of first byte of frag)
-
-    Revision 1.21  2002/08/14 09:15:31  arpi
-    RV20 A-V desync fixed - use timestamp hack only for RV30
-
-    Revision 1.20  2002/08/12 00:04:37  arpi
-    RV40 support
-
-    Revision 1.19  2002/08/05 03:13:45  arpi
-    fixed 'eof at 66s' bug
-
-    Revision 1.18  2002/06/14 00:49:56  arpi
-    fixed playback speed and a-v sync issues
-
-    Revision 1.17  2002/06/13 13:31:45  arpi
-    fix fps/frametime parsing - patch by Florian Schneider <flo-mplayer-dev@gmx.net>
-
-    Revision 1.16  2002/06/13 00:14:28  atmos4
-    Implement Nilmoni's and Bernd Ernesti's patches for:
-    Better real codec dir detection and NetBSD real support.
-    Fix Nilmonis code, so it's working like expected.
-    Move a debug printf to mp_msg and some fixes in demux_real.c.
-    Some cosmetics :) -> RealPlayer 8 to RealPlayer, as RealOne (aka RealPlayer 9 works, too)
-
-    Revision 1.15  2002/06/10 13:55:56  arpi
-    export subpacket-size and matrix w*h to the codec (cook)
-
-    Revision 1.14  2002/06/10 02:27:31  arpi
-    export extra data for cook codec, some debug stuff
-
-    Revision 1.13  2002/06/09 01:07:22  arpi
-    - multiple audio/video stream support fixed
-    - aid/vid autodetection (asf style - use id of first packet received)
-    - rv20 sub-packets support
-    - exporting codec id and sub-id to the codec, in bitmapinfoheader
-
-    Revision 1.12  2002/06/08 20:46:14  arpi
-    sub-packet demuxer for rv20/rv30, patch by Florian Schneider <flo-mplayer-dev@gmx.net>
-    (little cleanup and fprintf->mp_msg by me)
-
-    Revision 1.11  2002/04/30 23:29:38  alex
-    completed real seeking - working very well with audio only files
-
-    Revision 1.10  2002/04/24 15:36:06  albeu
-    Added demuxer uninit
-
-    Revision 1.9  2002/03/15 15:51:37  alex
-    added PRE-ALPHA seeking ability and index table generator (like avi's one)
-
-    Revision 1.8  2002/01/23 19:41:01  alex
-    fixed num_of_packets and current_packet handling, bug found by Mike Melanson
-
-    Revision 1.7  2002/01/18 11:02:52  alex
-    fix dnet support
-
-    Revision 1.6  2002/01/04 19:32:58  alex
-    updated/extended some parts, based on RMFF (also initial ATRAC3 hackings and notes)
-
-
 Audio codecs: (supported by RealPlayer8 for Linux)
     DNET - RealAudio 3.0, really it's AC3 in swapped-byteorder
     SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
@@ -108,8 +16,7 @@ Audio codecs: (supported by RealPlayer8 for Linux)
 
 Video codecs: (supported by RealPlayer8 for Linux)
     RV10 - H.263 based, working with libavcodec's decoder
-    RV20
-    RV30
+    RV20-RV40 - using RealPlayer's codec plugins
 */
 
 #include <stdio.h>
@@ -500,6 +407,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     /* check stream_id: */
 
     if(demuxer->audio->id==stream_id){
+got_audio:
 	ds=demuxer->audio;
 	mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is audio (id: %d)\n", stream_id);
 
@@ -552,6 +460,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     }
     
     if(demuxer->video->id==stream_id){
+got_video:
 	ds=demuxer->video;
 	mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is video (id: %d)\n", stream_id);
 	
@@ -728,6 +637,24 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 	return 1;
     }
 
+    if(demuxer->audio->id==-1 && demuxer->a_streams[stream_id]){
+	sh_audio_t *sh = demuxer->a_streams[stream_id];
+	demuxer->audio->id=stream_id;
+	sh->ds=demuxer->audio;
+	demuxer->audio->sh=sh;
+        mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM audio ID = %d\n",stream_id);
+	goto got_audio;
+    }
+
+    if(demuxer->video->id==-1 && demuxer->v_streams[stream_id]){
+	sh_video_t *sh = demuxer->v_streams[stream_id];
+	demuxer->video->id=stream_id;
+	sh->ds=demuxer->video;
+	demuxer->video->sh=sh;
+        mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM video ID = %d\n",stream_id);
+	goto got_video;
+    }
+
     mp_msg(MSGT_DEMUX,MSGL_DBG2, "unknown stream id (%d)\n", stream_id);
     stream_skip(demuxer->stream, len);
   }//    goto loop;
@@ -737,6 +664,8 @@ void demux_open_real(demuxer_t* demuxer)
 {
     real_priv_t* priv = demuxer->priv;
     int num_of_headers;
+    int a_streams=0;
+    int v_streams=0;
     int i;
 
     stream_skip(demuxer->stream, 4); /* header size */
@@ -1049,11 +978,14 @@ void demux_open_real(demuxer_t* demuxer)
 		    
 		    print_wave_header(sh->wf);
 
-		    if(demuxer->audio->id==-1 || demuxer->audio->id==stream_id){
+		    if(demuxer->audio->id==stream_id){
 			demuxer->audio->id=stream_id;
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
 		    }
+		    
+		    ++a_streams;
+
 #ifdef stream_skip
 #undef stream_skip
 #endif
@@ -1134,11 +1066,13 @@ void demux_open_real(demuxer_t* demuxer)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"unknown id: %x\n", tmp);
 		    }
 		    
-		    if(demuxer->video->id==-1 || demuxer->video->id==stream_id){
+		    if(demuxer->video->id==stream_id){
 			demuxer->video->id=stream_id;
 			sh->ds=demuxer->video;
 			demuxer->video->sh=sh;
 		    }
+		    
+		    ++v_streams;
 
 		}
 		else {
@@ -1189,6 +1123,20 @@ header_end:
 	generate_index(demuxer);
     else if (priv->index_chunk_offset && (index_mode == 1))
 	parse_index_chunk(demuxer);
+
+    // detect streams:
+    if(demuxer->video->id==-1 && v_streams>0){
+	// find the valid video stream:
+	if(!ds_fill_buffer(demuxer->video)){
+          mp_msg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingVideoStream);
+	}
+    }
+    if(demuxer->audio->id==-1 && a_streams>0){
+	// find the valid audio stream:
+	if(!ds_fill_buffer(demuxer->audio)){
+          mp_msg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingAudioStream);
+	}
+    }
 
 }
 
