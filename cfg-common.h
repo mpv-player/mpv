@@ -53,6 +53,8 @@
 
 // ------------------------- a-v sync options --------------------
 
+	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0},
+
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000},

@@ -148,7 +148,6 @@ struct config conf[]={
 
 	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 
-	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1},
 	
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},

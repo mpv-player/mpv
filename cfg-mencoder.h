@@ -19,6 +19,7 @@ struct config divx4opts_conf[]={
 	{"key", &divx4_param.max_key_interval, CONF_TYPE_INT, CONF_MIN,0,0},
 	{"deinterlace", &divx4_param.deinterlace, CONF_TYPE_FLAG, 0,0,1},
 	{"q", &divx4_param.quality, CONF_TYPE_INT, CONF_RANGE, 1, 5},
+	{"crispness", &divx4_crispness, CONF_TYPE_INT, CONF_RANGE,0,100},
 	{"help", "TODO: divx4opts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
@@ -46,6 +47,8 @@ struct config conf[]={
 
 	{"oac", &out_audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"ovc", &out_video_codec, CONF_TYPE_STRING, 0, 0, 0},
+
+	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
 	
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},

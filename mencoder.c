@@ -26,6 +26,7 @@
 #include "dec_video.h"
 
 #include <encore2.h>
+#include "divx4_vbr.h"
 
 #include <lame/lame.h>
 
@@ -77,6 +78,11 @@ char* out_filename="test.avi";
 char* mp3_filename=NULL;
 char* ac3_filename=NULL;
 
+static int pass=0;
+static char* passtmpfile="divx2pass.log";
+
+static int play_n_frames=-1;
+
 char *out_audio_codec=NULL; // override audio codec
 char *out_video_codec=NULL; // override video codec
 
@@ -84,6 +90,7 @@ char *out_video_codec=NULL; // override video codec
 //#include "libmpeg2/mpeg2_internal.h"
 
 ENC_PARAM divx4_param;
+int divx4_crispness=100;
 
 int lame_param_quality=0; // best
 int lame_param_vbr=vbr_default;
@@ -250,6 +257,14 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     exit(0);
   }
 }
+
+// set some defaults, before parsing configfile/commandline:
+divx4_param.min_quantizer = 2;
+divx4_param.max_quantizer = 31;
+divx4_param.rc_period = 2000;
+divx4_param.rc_reaction_period = 10;
+divx4_param.rc_reaction_ratio  = 20;
+
 
   num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
   if(num_filenames<0) exit(1); // error parsing cmdline
@@ -496,6 +511,30 @@ case VCODEC_DIVX4:
     divx4_param.handle=NULL;
     encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
     enc_handle=divx4_param.handle;
+    switch(out_fmt){
+    case IMGFMT_YV12:	enc_frame.colorspace=ENC_CSP_YV12; break;
+    case IMGFMT_IYUV:
+    case IMGFMT_I420:	enc_frame.colorspace=ENC_CSP_I420; break;
+    case IMGFMT_YUY2:	enc_frame.colorspace=ENC_CSP_YUY2; break;
+    case IMGFMT_UYVY:	enc_frame.colorspace=ENC_CSP_UYVY; break;
+    case IMGFMT_RGB24:
+    case IMGFMT_BGR24:
+    	enc_frame.colorspace=ENC_CSP_RGB24; break;
+    default:
+	mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported out_fmt!\n");
+    }
+    switch(pass){
+    case 1:
+	VbrControl_init_2pass_vbr_analysis(passtmpfile, divx4_param.quality);
+	break;
+    case 2:
+        VbrControl_init_2pass_vbr_encoding(passtmpfile,
+					 divx4_param.bitrate,
+					 divx4_param.framerate,
+					 divx4_crispness,
+					 divx4_param.quality);
+	break;
+    }
     break;
 }
 
@@ -541,6 +580,11 @@ while(!eof){
     unsigned char* start=NULL;
     int in_size;
     int skip_flag=0; // 1=skip  -1=duplicate
+
+    if(play_n_frames>=0){
+      --play_n_frames;
+      if(play_n_frames<0) break;
+    }
 
 if(sh_audio){
     // get audio:
@@ -650,21 +694,28 @@ case VCODEC_DIVX4:
     enc_frame.image=vo_image_ptr;
     enc_frame.bitstream=mux_v->buffer;
     enc_frame.length=mux_v->buffer_size;
-    switch(out_fmt){
-    case IMGFMT_YV12:	enc_frame.colorspace=ENC_CSP_YV12; break;
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:	enc_frame.colorspace=ENC_CSP_I420; break;
-    case IMGFMT_YUY2:	enc_frame.colorspace=ENC_CSP_YUY2; break;
-    case IMGFMT_UYVY:	enc_frame.colorspace=ENC_CSP_UYVY; break;
-    case IMGFMT_RGB24:
-    case IMGFMT_BGR24:
-    	enc_frame.colorspace=ENC_CSP_RGB24; break;
-    }
+    enc_frame.mvs=NULL;
     enc_frame.quant=0;
     enc_frame.intra=0;
-    enc_frame.mvs=NULL;
+    if(pass==2){	// handle 2-pass:
+	enc_frame.quant = VbrControl_get_quant();
+	enc_frame.intra = VbrControl_get_intra();
+	encore(enc_handle,ENC_OPT_ENCODE_VBR,&enc_frame,&enc_result);
+        VbrControl_update_2pass_vbr_encoding(enc_result.motion_bits,
+					    enc_result.texture_bits,
+					    enc_result.total_bits);
+    } else {
+	encore(enc_handle,ENC_OPT_ENCODE,&enc_frame,&enc_result);
+	if(pass==1){
+	  VbrControl_update_2pass_vbr_analysis(enc_result.is_key_frame, 
+					       enc_result.motion_bits, 
+					       enc_result.texture_bits, 
+					       enc_result.total_bits, 
+					       enc_result.quantizer);
+	}
+    }
+    
 //    printf("encoding...\n");
-    encore(enc_handle,ENC_OPT_ENCODE,&enc_frame,&enc_result);
 //    printf("  len=%d  key:%d  qualt:%d  \n",enc_frame.length,enc_result.is_key_frame,enc_result.quantizer);
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
