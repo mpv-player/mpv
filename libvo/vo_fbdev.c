@@ -171,7 +171,6 @@ static int fb_init(void)
 		printf("fb_init: Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
 		return 1;
 	}
-	close(fb_dev_fd);
 
 	printf("fb_init: framebuffer @ %p\n", frame_buffer);
 	printf("fb_init: framebuffer size: %d bytes\n", fb_size);
@@ -274,9 +273,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 			dst = next_frame + (in_width * (y0 + y) + x0) * (fb_bpp / 8);
 			for (x = 0; x < w; x++) {
 				if (srca[x]) {
-					dst[0] = (dst[0]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-					dst[1] = (dst[1]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-					dst[2] = (dst[2]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+					dst[0]=((dst[0]*srca[x])>>8)+src[x];
+					dst[1]=((dst[1]*srca[x])>>8)+src[x];
+					dst[2]=((dst[2]*srca[x])>>8)+src[x];
 				}
 				dst += fb_bpp / 8;
 			}
@@ -340,6 +339,7 @@ static void uninit(void)
 	fb_var_info.yres_virtual = fb_yres_virtual;
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info))
 		printf("vo_fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
+	close(fb_dev_fd);
 	memset(next_frame, '\0', in_height * in_width * (fb_bpp / 8));
 	put_frame();
 	if (vt_active >= 0)
