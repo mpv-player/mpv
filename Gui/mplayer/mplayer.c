@@ -47,7 +47,8 @@ void mplInit( void * disp )
  int i;
 
  // init fields of this struct to default values
- mplMPlayerInit();
+ guiIntfStruct.Balance=50.0f;
+ guiIntfStruct.StreamType=-1;
 
  // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit();

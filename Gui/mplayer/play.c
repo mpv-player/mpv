@@ -138,12 +138,6 @@ void mplState( void )
    }
 }
 
-void mplMPlayerInit( void )
-{
- guiIntfStruct.Balance=50.0f;
- guiIntfStruct.StreamType=-1;
-}
-
 float mplGetPosition( void )
 { // return 0.0 ... 100.0
  return guiIntfStruct.Position;
