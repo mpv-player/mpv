@@ -679,6 +679,7 @@ int vixProbe( int verbose,int force )
 
 int vixInit( void )
 {
+  int err;
   if(!probed) 
   {
     printf(RADEON_MSG" Driver was not probed but is being initializing\n");
@@ -692,6 +693,8 @@ int vixInit( void )
   memset(&besr,0,sizeof(bes_registers_t));
   radeon_vid_make_default();
   printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
+  err = mtrr_set_type(pci_info.base0,radeon_ram_size,MTRR_TYPE_WRCOMB);
+  if(!err) printf(RADEON_MSG" Set write-combining type of video memory\n");
   return 0;  
 }
 
