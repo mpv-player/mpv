@@ -309,6 +309,19 @@ static uint32_t radeon_get_yres( void )
   return yres + 1;
 }
 
+/* get flat panel x resolution*/
+static uint32_t radeon_get_fp_xres( void ){
+  uint32_t xres=(INREG(FP_HORZ_STRETCH)&0x00fff000)>>16;
+  xres=(xres+1)*8;
+  return xres;
+}
+
+/* get flat panel y resolution*/
+static uint32_t radeon_get_fp_yres( void ){
+  uint32_t yres=(INREG(FP_VERT_STRETCH)&0x00fff000)>>12;
+  return yres+1;
+}
+
 static void radeon_wait_vsync(void)
 {
     int i;
@@ -1292,6 +1305,7 @@ static void radeon_vid_dump_regs( void )
   printf(RADEON_MSG"radeon_overlay_off=%08X\n",radeon_overlay_off);
   printf(RADEON_MSG"radeon_ram_size=%08X\n",radeon_ram_size);
   printf(RADEON_MSG"video mode: %ux%u@%u\n",radeon_get_xres(),radeon_get_yres(),radeon_vid_get_dbpp());
+  printf(RADEON_MSG"flatpanel size: %ux%u\n",radeon_get_fp_xres(),radeon_get_fp_yres());
   printf(RADEON_MSG"*** Begin of OV0 registers dump ***\n");
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
 	printf(RADEON_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
@@ -1569,7 +1583,12 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     if(radeon_is_dbl_scan()) dest_h *= 2;
     besr.dest_bpp = radeon_vid_get_dbpp();
     besr.fourcc = config->fourcc;
-    besr.v_inc = (src_h << 20) / dest_h;
+
+    /* flat panel */
+    if(INREG(FP_VERT_STRETCH)&VERT_STRETCH_ENABLE){
+      besr.v_inc = (src_h * radeon_get_yres() / radeon_get_fp_yres() << 20) / dest_h;
+    }
+    else besr.v_inc = (src_h << 20) / dest_h;
     if(radeon_is_interlace()) besr.v_inc *= 2;
     h_inc = (src_w << 12) / dest_w;
 
