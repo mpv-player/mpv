@@ -2,16 +2,20 @@
 TODO:
 =====
 
+FOR THE NEXT PRE_RELEASE:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+- fix -vop expand=-50 + ffdivx
+- fix the commandline/configfile parser bug (-nosound vs vfm=...)
+
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 - finish audio filter layer
 - new demuxer layer - at least modularized...
 - fix AVI index offset base position handling ('no video stream found' bug)
-
+- review and implement draw_slice() support in video filters
 - fix locale problems (add common float parser / mp_sscanf())
-- fix the XineramaIsActive bug
-- better libwine build support / or fix loader to handle QT dll
 - NEWSTRUCT DVB driver support
+- apply the delayed patches
 
 
 FOR THE v1.00 RELEASE:
@@ -46,10 +50,6 @@ demuxer:
 decoders:
 - fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, pim1,
   rricm
-
-decoders:
-- qtx support?
-- WMO (wmv9) support?
 
 other:
 - dvd server
