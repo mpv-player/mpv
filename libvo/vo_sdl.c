@@ -1308,10 +1308,8 @@ static void check_events (void)
                                 case SDLK_RIGHT:
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
-				case SDLK_w:
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
-                                case SDLK_s:
 				break;
 #else				
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
@@ -1322,10 +1320,8 @@ static void check_events (void)
                                 case SDLK_GREATER: mplayer_put_key('>'); break;
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
-				case SDLK_w: mplayer_put_key('*');break;
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
-                                case SDLK_s: mplayer_put_key('/');break;
 #endif				
 				default:
 					//printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
