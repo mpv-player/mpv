@@ -150,7 +150,7 @@ typedef struct vidix_playback_s
 	/* memory model */
 	unsigned	frame_size;		/* driver -> app: destinition frame size */
 	unsigned	num_frames;		/* app -> driver: after call: driver -> app */
-#define VID_PLAY_MAXFRAMES 32
+#define VID_PLAY_MAXFRAMES 64		/* reasonable limitation for decoding ahead */
 	unsigned	offsets[VID_PLAY_MAXFRAMES];	/* driver -> app */
 	vidix_yuv_t	offset;			/* driver -> app: relative offsets within frame for yuv planes */
 	void*		dga_addr;		/* driver -> app: linear address */

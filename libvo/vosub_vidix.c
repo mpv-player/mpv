@@ -29,7 +29,7 @@
 #include "osd.h"
 #include "video_out.h"
 
-#define NUM_FRAMES 10 /* Temporary: driver will overwrite it */
+#define NUM_FRAMES VID_PLAY_MAXFRAMES /* Temporary: driver will overwrite it */
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
 static VDL_HANDLE vidix_handler = NULL;
@@ -571,7 +571,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	vidix_play.dest.y = y_org;
 	vidix_play.dest.w = dst_width;
 	vidix_play.dest.h = dst_height;
-	vidix_play.num_frames=vo_doublebuffering?NUM_FRAMES:1;
+	vidix_play.num_frames=vo_doublebuffering?NUM_FRAMES-1:1;
 	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
 	if(info)
 	{
