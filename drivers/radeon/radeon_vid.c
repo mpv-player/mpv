@@ -82,6 +82,7 @@ typedef struct bes_registers_s
   uint32_t v_inc;
   uint32_t p1_blank_lines_at_top;
   uint32_t vid_buf_pitch0_value;
+  uint32_t vid_buf_pitch1_value;
   uint32_t p1_x_start_end;
   uint32_t p2_x_start_end;
   uint32_t p3_x_start_end;
@@ -124,6 +125,7 @@ static video_registers_t vregs[] =
   { OV0_V_INC, 0 },
   { OV0_P1_BLANK_LINES_AT_TOP, 0 },
   { OV0_VID_BUF_PITCH0_VALUE, 0 },
+  { OV0_VID_BUF_PITCH1_VALUE, 0 },
   { OV0_P1_X_START_END, 0 },
   { OV0_P2_X_START_END, 0 },
   { OV0_P3_X_START_END, 0 },
@@ -151,7 +153,7 @@ static uint32_t radeon_vid_in_use = 0;
 
 static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
-#define RADEON_SRC_BASE 2000000ULL /* this driver uses all video memory */
+#define RADEON_SRC_BASE 8000000ULL /* this driver uses all video memory */
 
 static uint32_t radeon_ram_size = 0;
 
@@ -230,6 +232,7 @@ RTRACE("radeon_vid: OV0: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x
     OUTREG(OV0_V_INC,			besr.v_inc);
     OUTREG(OV0_P1_BLANK_LINES_AT_TOP,	besr.p1_blank_lines_at_top);
     OUTREG(OV0_VID_BUF_PITCH0_VALUE,	besr.vid_buf_pitch0_value);
+    OUTREG(OV0_VID_BUF_PITCH1_VALUE,	besr.vid_buf_pitch1_value);
     OUTREG(OV0_P1_X_START_END,		besr.p1_x_start_end);
     OUTREG(OV0_P2_X_START_END,		besr.p2_x_start_end);
     OUTREG(OV0_P3_X_START_END,		besr.p3_x_start_end);
@@ -290,15 +293,15 @@ static void radeon_vid_start_video( void )
 #define XXX_SRC_X 0
 #define XXX_SRC_Y 0
 
-#define XXX_WIDTH   config->dest_width
-#define XXX_HEIGHT  config->dest_height
+#define XXX_WIDTH   config->src_width
+#define XXX_HEIGHT  config->src_height
 
 #define XXX_DRW_W (config->dest_width)
 #define XXX_DRW_H (config->dest_height)
 
 static int radeon_vid_init_video( mga_vid_config_t *config )
 {
-    uint32_t tmp,left,src_w,pitch;
+    uint32_t tmp,left,src_w,pitch,h_inc,step_by;
 
 RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%xx%x:%x) frame_size=%x num_frames=%x\n"
 	,(uint32_t)config->version
@@ -341,12 +344,12 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
     besr.fourcc = config->format;
 
     besr.v_inc = (config->src_height << 20) / XXX_DRW_H;
-    besr.h_inc = (config->src_width  << 12) / XXX_DRW_W;
-    besr.step_by = 1;
+    h_inc = (config->src_width  << 12) / XXX_DRW_W;
+    step_by = 1;
 
-    while(besr.h_inc >= (2 << 12)) {
-	besr.step_by++;
-	besr.h_inc >>= 1;
+    while(h_inc >= (2 << 12)) {
+	step_by++;
+	h_inc >>= 1;
     }
 
     /* keep everything in 16.16 */
@@ -359,11 +362,11 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
     besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
     besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
 
-    tmp = (XXX_SRC_X & 0x0003ffff) + 0x00028000 + (besr.h_inc << 3);
+    tmp = (XXX_SRC_X & 0x0003ffff) + 0x00028000 + (h_inc << 3);
     besr.p1_h_accum_init = ((tmp <<  4) & 0x000f8000) |
 			    ((tmp << 12) & 0xf0000000);
 
-    tmp = ((XXX_SRC_X >> 1) & 0x0001ffff) + 0x00028000 + (besr.h_inc << 2);
+    tmp = ((XXX_SRC_X >> 1) & 0x0001ffff) + 0x00028000 + (h_inc << 2);
     besr.p23_h_accum_init = ((tmp <<  4) & 0x000f8000) |
 			     ((tmp << 12) & 0x70000000);
 
@@ -371,12 +374,13 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
     besr.p1_v_accum_init = ((tmp << 4) & 0x03ff8000) | 0x00000001;
 
     left = (XXX_SRC_X >> 16) & 7;
-    besr.h_inc |= ((besr.h_inc >> 1) << 16);
-    besr.step_by |= (besr.step_by << 8);
-    besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
+    besr.h_inc = h_inc | ((h_inc >> 1) << 16);
+    besr.step_by = step_by | (step_by << 8);
+    besr.y_x_start = (config->x_org) | (config->y_org << 16);
     besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = 0x00000fff | ((config->src_height - 1) << 16);
     besr.vid_buf_pitch0_value = pitch;
+    besr.vid_buf_pitch1_value = pitch;
 RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
 RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
 RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
