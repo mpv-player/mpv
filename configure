@@ -4485,9 +4485,11 @@ LIVE_LIBS += \$(LIVE_LIB_DIR)/UsageEnvironment/libUsageEnvironment.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
 LIVE_LIBS += -lstdc++"
   _ld_live='$(LIVE_LIBS)'
+ _inputmodules="live.com $_inputmodules"
 else
   echores "no"
   _def_live='#undef STREAMING_LIVE_DOT_COM'
+  _noinputmodules="live.com $_noinputmodules"
 fi
 
 
