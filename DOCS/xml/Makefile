@@ -25,7 +25,7 @@ help:
 	@echo "distclean         : Remove ALL generated files."
 
 .PHONY: build-html-chunked
-build-html-chunked: xsltproc.sh
+build-html-chunked: xsltproc.sh xmllint.sh
 	test -d $(HTML_CHUNKED) || mkdir $(HTML_CHUNKED)
 	for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
@@ -34,7 +34,7 @@ build-html-chunked: xsltproc.sh
 	done
 
 .PHONY: build-html-single
-build-html-single: xsltproc.sh
+build-html-single: xsltproc.sh xmllint.sh
 	test -d $(HTML_SINGLE) || mkdir $(HTML_SINGLE)
 	for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
@@ -58,7 +58,7 @@ distclean: clean-html-chunked clean-html-single
 	done
 	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
-xsltproc.sh: configure
-	./configure
+xsltproc.sh xmllint.sh:
+	sh configure
 
 clean: clean-html-chunked clean-html-single

@@ -74,8 +74,8 @@ $(HTMLFILE): documentation.xml $(XSL_DEPS)
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
 	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
 
-#../html-single.xsl:
-#	cd .. && sh configure
+../html-chunk.xsl ../html-single.xsl:
+	cd .. && sh configure
 
 distclean:
 	if test "$(USE_SYMLINKS)" = "yes" ; then \
