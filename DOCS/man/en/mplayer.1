@@ -5597,10 +5597,10 @@ For a strict MPEG-1/2/4 compliance this would have to be <=132.
 .TP
 .B sc_threshold=<-1000000\-1000000>
 Threshold for scene change detection.
-Libavcodec inserts a keyframe when it detects a scene change.
+A keyframe is inserted by libavcodec when it detects a scene change.
 You can specify the sensitivity of the detection with this option.
 -1000000 means there is a scene change detected at every frame, 1000000 means
-no scene changes are detected (default 0).
+no scene changes are detected (default: 0).
 .
 .TP
 .B vb_strategy=<0\-1>
@@ -5975,7 +5975,7 @@ Video packet size, improves error-resistance.
 .RSs
 .IPs 0\ \ \ \ 
 disabled (default)
-.IPs 100-1000
+.IPs 100\-1000
 good choice
 .RE
 .PD 1
@@ -6451,12 +6451,12 @@ vqmin should be 8 or larger for H.263+ AIC.
 .
 .TP
 .B aiv\ \ \ \ 
-alternatice inter vlc for H.263+
+alternative inter vlc for H.263+
 .
 .TP
 .B umv\ \ \ \ 
 unlimited MVs (H.263+ only)
-Allows encoding of abritarily long MVs.
+Allows encoding of arbitrarily long MVs.
 .
 .TP
 .B ibias=<-256\-256>
@@ -6827,7 +6827,9 @@ frame types and motion vectors for flat looking cartoons.
 Sets the type of quantizer to use.
 For high bitrates, you will find that MPEG quantization preserves more detail.
 For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG quantization must be used.
+When using custom matrices, MPEG quantization
+.B must
+be used.
 .
 .TP
 .B (no)chroma_me
@@ -6970,7 +6972,7 @@ to be exceeded.
 XviD allows users to set the amount of overhead per frame the
 container generates (give only an average per frame).
 0 has a special meaning, it lets XviD use its own default values
-(default: 24 - AVI average overhead).
+(default: 24 \- AVI average overhead).
 .
 .TP
 .B par=<mode>
