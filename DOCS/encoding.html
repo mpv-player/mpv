@@ -74,6 +74,7 @@ powerful plugin system for video manipulation.</P>
   <LI>using our very powerful plugin system (crop, expand, flip, postprocess,
     rotate, scale, rgb/yuv conversion)</LI>
   <LI>can encode DVD/VOBsub <B>AND</B> text subtitles into the output file</LI>
+  <LI>can rip DVD subtitles to Vobsub format</LI>
 </UL>
 
 <B>Planned features:</B>
@@ -288,6 +289,40 @@ unsupported). You can encode to the following codecs:</P>
 <P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</CODE></P>
 
 
+<P><B><A NAME=2.4.3.7>2.4.3.7.  Extracting DVD subtitles to Vobsub file</A></B></P>
+
+<P><B>MEncoder</B> is capable of extracting subtitles from DVD into
+Vobsub fomat files.  They consist of a pair of files ending in .idx
+and .sub and are usually packaged in a single .rar archive.  MPlayer
+can play these with the <I>-vobsub</I> and <I>-vobsubid</I> options.</P>
+
+<P>You specify the basename (i.e without the .idx or .sub extension)
+of the output files with <I>-vobsubout</I> and the index for this
+subtitle in the resulting files with <I>-vobsuboutindex</I>.</P>
+
+<P>If the input is not from a DVD you should use <I>-ifo</I> to
+indicate the .ifo file needed to construct the resulting .idx file
+</P>
+
+<P>If the input is not from a DVD and you don't have the .ifo file
+you'll need to use the <I>-vobsubid</I> option to let it know what
+language id to put in the .idx file.</P>
+
+<P>Each run will append the running subtitle if the .idx and .sub
+files already exist.  So you should remove any before starting.
+
+<P><B>Example</B></P>
+
+<P><I>Copying two subtitles from a DVD while doing 3-pass encoding</I><BR>
+&nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutindex 1 -sid 5</CODE></P>
+
+<P><I>Copying a french subtitle from an MPEG file</I><BR>
+&nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+&nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
+
 <P><B><A NAME=2.4.5>2.4.5.  Available options</A></B></P>
 
 <P>NOTE: for all available options, <B>read the man page!</B></P>
@@ -389,6 +424,18 @@ unsupported). You can encode to the following codecs:</P>
     &nbsp;&nbsp;<B>q</B>=&lt;value&gt; - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
     &nbsp;&nbsp;<B>vbr</B>=&lt;value&gt; - VBR sub-mode (3-ABR, best quality/speed) (this is for <B>VBR</B> only!)<BR>
   </TD>
+</TR>
+<TR>
+  <TD>    <I>-vobsubout</I> basename</TD>
+  <TD>    Specify the basename for the output .idx and .sub files.  This turns off subtitle rendering on the encoded movie.</TD>
+</TR>
+<TR>
+  <TD>    <I>-vobsuboutindex</I> index</TD>
+  <TD>    Specify the index of this subtitles in the output files.  Defaults to 0</TD>
+</TR>
+<TR>
+  <TD>    <I>-vobsuboutid</I> langid</TD>
+  <TD>    Specify the language two letter code for this subtitle.  This overrides what is read from the DVD or the .ifo file.</TD>
 </TR>
 </TABLE>
 
