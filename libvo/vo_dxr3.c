@@ -67,8 +67,8 @@ static vo_info_t vo_info =
 #ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
-/*    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
-	    printf( "VO: [dxr3] Unable to set pts\n" );*/
+    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );
     write( fd_video, data, size );
 }
 #endif
@@ -186,7 +186,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    pixel_format = RTE_YUV420;
         if( !rte_set_video_parameters( mp1e_context, pixel_format, mp1e_context->width,
 					mp1e_context->height, frame_rate,
-					3e6, "IPP" ) )
+					3e6, "I" ) )
         {
             printf( "VO: [dxr3] Unable to set mp1e context!\n" );
 	    rte_context_destroy( mp1e_context );
@@ -292,8 +292,8 @@ static uint32_t draw_frame(uint8_t * src[])
         int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
 
-/*	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&p->timestamp) < 0)
-	    printf( "VO: [dxr3] Unable to set pts\n" );*/
+	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );
 	data_left = p->size;
 	while( data_left )
 	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
@@ -401,11 +401,11 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
+    if(format==IMGFMT_MPEGPES) return 0x2|0x4|256;
 #ifdef USE_MP1E
-    if(format==IMGFMT_YV12) return 0x1|0x4;
-    if(format==IMGFMT_YUY2) return 0x1|0x4;
-    if(format==IMGFMT_BGR24) return 0x1|0x4;
+    if(format==IMGFMT_YV12) return 0x1|0x4|256;
+    if(format==IMGFMT_YUY2) return 0x1|0x4|256;
+    if(format==IMGFMT_BGR24) return 0x1|0x4|256;
     else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
 #else
     else printf( "VO: [dxr3] You have disabled libmp1e support, you won't be able to play this format!\n" );
