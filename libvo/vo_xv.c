@@ -381,6 +381,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	hint.y=(vo_screenheight-modeline_height)/2;
 	hint.width=modeline_width;
 	hint.height=modeline_height;
+	aspect_save_screenres(modeline_width,modeline_height);
       }
     else
 #endif
