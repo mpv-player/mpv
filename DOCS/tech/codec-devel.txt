@@ -2,6 +2,8 @@ A Guide To Developing MPlayer Codecs
 by Mike Melanson (melanson at pcisys dot net)
 updated to libmpcodecs arch by A'rpi
 
+SEE ALSO: libmpcodecs.txt !!!
+
 Introduction
 ------------
 I've developed a number of open source decoders for the MPlayer project,

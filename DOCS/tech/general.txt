@@ -212,6 +212,7 @@ Now, go on:
    vf_*.c - video filter  (see option -vop)
 
    On this topic, see also:
+   libmpcodecs.txt - The structure of the codec-filter path, with explanation
    dr-methods.txt - Direct rendering, MPI buffer management for video codecs
    codecs.conf.txt - How to write/edit codec configuration file (codecs.conf)
    codec-devel.txt - Mike's hints about codec development - a bit OUTDATED

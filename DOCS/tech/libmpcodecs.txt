@@ -1,7 +1,7 @@
 The libMPcodecs API details, hints - by A'rpi
 ==================================
 
-See also: colorspaces.txt, codec-devel.txt, dr-methods.txt
+See also: colorspaces.txt, codec-devel.txt, dr-methods.txt, codecs.conf.txt
 
 The VIDEO path:
 ===============
