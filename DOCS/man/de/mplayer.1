@@ -5637,69 +5637,137 @@ IMA Adaptive PCM (4 Bits pro Sample, 4:1-Kompression)
 .RE
 .PD 1
 .
-.\" manpage is synced from top down to this option.
 .TP
 .B abitrate=<Wert>
 Audiobitrate in kbps (Standard: 224)
 .
 .TP
-.B threads=<1\-8>
-Maximale Anzahl benutzter Threads (Standardwert: 1).
-.RE
+.B atag=<Wert>
+Benutze die angegebene Windows-Audioformatkennung (z.B.\& atag=0x55).
+.
 .TP
-.IPs vcodec=<Wert>
-benutzt den angegeben Codec (kein Standardwert, du musst einen angeben):
-.RSss
-mjpeg: Motion JPEG
-.br
-h263: H263
-.br
-h263p: H263 Plus
-.br
-mpeg4: DivX 4/\:5
-.br
-msmpeg4: DivX 3
-.br
-rv10: ein alter RealVideo\-Codec
-.br
-mpeg1video: MPEG-1-Video :)
-.REss
-.IPs vqmin=<2\-31>
-minimaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 2)
-.IPs vqscale=<2\-31>
-konstate Quantizer (wählt einen Modus mit fest vorgegebenen Quantizern)
-(Standardwert: 0 (ausgeschaltet))
-.IPs vqmax=<1\-31>
-maximaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 31)
-.IPs mbqmin=<1\-31>
-minimale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 2)
-.IPs mbqmax=<1\-31>
-maximale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 31)
-.IPs vqdiff=<1\-31>
-maximale Differenz der Quantizer zwischen I\- oder P\-Bildern (bei
-Durchgang 1/\:2) (Standardwert: 3)
-.IPs vmax_b_frames=<0\-4>
-maximale Anzahl von B\-Frames zwischen Nicht\-B\-Frames:
-.RSss
-0: keine B\-Frames (Standard)
-.br
-0\-2: sinnvolle Werte
-.REss
-.IPs vme=<0\-5>
-Modus der Bewegungsvoraussage:
-.RSss
-0: keine (sehr niedrige Qualität)
-.br
-1: voll (langsam)
-.br
-2: log (lq)
-.br
-3: phods (lq)
-.br
-4: EPZS (Standard)
-.br
-5: X1 (experimentell)
-.REss
+.B bit_exact
+Benutze nur bitgenaue Algorithmen (außer (I)DCT).
+Zusätzlich deaktiviert bit_exact mehrere Optimierungen und sollte daher
+nur für rückläufige Tests verwendet werden, die binär identische Dateien
+benötigen, selbst wenn sich die Version des Encoders ändert.
+Dies unterdrückt in MPEG-4-Streams außerdem den user_data-Header.
+Benutze diese Option nicht, wenn du nicht genau weißt, was du tust.
+.
+.TP
+.B threads=<1\-8>
+Maximale Anzahl der zu benutzenden Threads (Standard: 1).
+Kann einen leicht negativen Effekt auf die Bewegungsabschätzung haben.
+.RE
+.
+.TP
+.B vcodec=<Wert>
+Verwende den angegebenen Codec (Standard: mpeg4).
+.PD 0
+.RSs
+.IPs mjpeg
+Motion-JPEG
+.IPs ljpeg
+Verlustfreies (lossless) JPEG
+.IPs h263\ 
+H.263
+.IPs h263p
+H.263+
+.IPs mpeg4
+MPEG-4 (DivX 4/5)
+.IPs msmpeg4
+DivX 3
+.IPs msmpeg4v2
+MS MPEG4v2
+.IPs wmv1\ 
+Windows Media Video, Version 1 (WMV7)
+.IPs wmv2\ 
+Windows Media Video, Version 2 (WMV8)
+.IPs rv10\ 
+ein alter RealVideo-Codec
+.IPs mpeg1video
+MPEG-1-Video
+.IPs mpeg2video
+MPEG-2-Video
+.IPs huffyuv
+HuffYUV
+.IPs asv1\ 
+ASUS Video v1
+.IPs asv2\ 
+ASUS Video v2
+.IPs ffv1\ 
+FFmpegs verlustfreier Videocodec
+.RE
+.PD 1
+.
+.TP
+.B vqmin=<1\-31>
+minimaler Quantisierungsparameter (Durchlauf 1/\:2)
+.RSs
+.IPs 1
+Nicht empfohlen (viel größere Datei, geringer Qualitätsunterschied und
+seltsame Seiteneffekte: Msmpeg4 und h263 werden eine sehr geringe Qualität
+liefern und die Bitratenkontrolle wird verwirrt sein, was auch eine geringere
+Qualität zur Folge hat; manche Decoder werden es nicht abspielen können).
+.IPs 2
+Empfohlen für normales Encodieren mit mpeg4/\:mpeg1video (Standard).
+.IPs 3
+Empfohlen für h263(p)/\:msmpeg4.
+Der Grund dafür, 3 dem Wert 2 vorzuziehen ist, dass 2 zu Overflows führen kann.
+(Dies wird zukünftig für h263(p) korrigiert werden, indem der
+Quantisierungsparameter pro Macro-Block geändert wird; msmpeg4 kann nicht
+korrigiert werden, da es dies nicht unterstützt.)
+.RE
+.
+.TP
+.B lmin=<0.01\-255.0>
+Minimaler Lagrange-Multiplikator für die Bitratenkontrolle, du möchtest
+wahrscheinlich einen Wert, der kleiner oder gleich vqmin ist (Standard: 2.0).
+.RE
+.
+.TP
+.B lmax=<0.01\-255.0>
+Maximaler Lagrange-Multiplikator für die Bitratenkontrolle (Standard: 31.0)
+.RE
+.
+.TP
+.B vqscale=<1\-31>
+Encodierung mit konstantem Quantisierungsparameter bzw.\& konstanter Qualität
+(wählt den 'fixed quantizer'-Modus).
+Ein kleinerer Wert bedeutet bessere Qualität bei größeren Dateien (Standard: 0
+(deaktiviert)).
+Der Wert 1 wird nicht empfohlen (siehe vqmin für Details).
+.
+.TP
+.B vqmax=<1\-31>
+Maximaler Quantisierungsparameter (Durchlauf 1/\:2), Werte im Bereich 10\-31
+sollten vernünftig sein (Standard: 31).
+.
+.TP
+.B mbqmin=<1\-31>
+veraltet, benutze vqmin
+.
+.TP
+.B mbqmax=<1\-31>
+veraltet, benutze vqmax
+.
+.TP
+.B vqdiff=<1\-31>
+maximaler Unterschied der Quantisierungsparameter zwischen
+aufeinanderfolgenden Intra- und P-Frames (Durchlauf 1/\:2) (Standard: 3)
+.
+.TP
+.B vmax_b_frames=<0\-4>
+maximale Anzahl der B-Frames zwischen nicht-B-Frames
+.PD 0
+.RSs
+.IPs 0
+keine B-Frames (Standard)
+.IPs 0\-2
+vernünftiger Bereich für MPEG-4
+.RE
+.PD 1
+.
 .IPs vhq\ \ 
 Modus für hohe Qualität. Encodiert jeden Makroblock in allen Modi und
 wählt dann das kleinste Ergebnis (langsam) (Standard: hohe Qualität
