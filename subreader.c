@@ -1699,7 +1699,7 @@ char** sub_filenames(char* path, char *fname)
 		    }
 
 		    if (prio) {
-			sprintf(tmpresult, "%s%s", f_dir, de->d_name);
+			sprintf(tmpresult, "%s%s", j == 0 ? f_dir : path, de->d_name);
 //			fprintf(stderr, "%s priority %d\n", tmpresult, prio);
 			if ((f = fopen(tmpresult, "rt"))) {
 			    fclose(f);
