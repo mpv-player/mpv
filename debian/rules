@@ -53,7 +53,7 @@ install: build
 #	$(MAKE) prefix=`pwd`/debian/`dh_listpackages`/usr install
 #	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
 #	install -d $(CURDIR)/debian/tmp/usr/bin
-	install -m 755 -s mplayer $(CURDIR)/debian/tmp/usr/bin/mplayer
+	install -m 755 -s mplayer $(CURDIR)/debian/`dh_listpackages`/usr/bin/mplayer
 #Do we really need this?:	
 #	       install -o root -g root -m 4755 fibmap_mplayer usr/bin/fibmap_mplayer
 	       
