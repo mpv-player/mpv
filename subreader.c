@@ -454,7 +454,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	so=de=line2;
 	while (*so) {
 		if(*so == '{') {
-			for (; *so && *so!='}'; *so++);
+			for (; *so && *so!='}'; so++);
 			if(*so) so++;
 		}
 		if(*so) {
