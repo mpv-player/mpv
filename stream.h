@@ -7,6 +7,7 @@
 #define STREAMTYPE_VCD  1
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for stdin)
 #define STREAMTYPE_DVD  3
+#define STREAMTYPE_MEMORY  4
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -26,8 +27,8 @@ typedef struct {
   int type; // 0=file 1=VCD
   unsigned int buf_pos,buf_len;
   off_t start_pos,end_pos;
-  unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
   void* priv; // used for DVD
+  unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
@@ -135,6 +136,6 @@ inline static int stream_skip(stream_t *s,int len){
 void stream_reset(stream_t *s);
 stream_t* new_stream(int fd,int type);
 void free_stream(stream_t *s);
-
+stream_t* new_memory_stream(unsigned char* data,int len);
 
 #endif // __STREAM_H

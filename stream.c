@@ -65,7 +65,7 @@ int stream_fill_buffer(stream_t *s){
 int stream_seek_long(stream_t *s,off_t pos){
 off_t newpos;
 
-//  if(verbose>=3) printf("seek to 0x%X\n",(unsigned int)pos);
+//  if(verbose>=3) printf("seek_long to 0x%X\n",(unsigned int)pos);
 
   s->buf_pos=s->buf_len=0;
 
@@ -155,6 +155,18 @@ void stream_reset(stream_t *s){
     s->eof=0;
   }
   //stream_seek(s,0);
+}
+
+stream_t* new_memory_stream(unsigned char* data,int len){
+  stream_t *s=malloc(sizeof(stream_t)+len);
+  s->fd=-1;
+  s->type=STREAMTYPE_MEMORY;
+  s->buf_pos=0; s->buf_len=len;
+  s->start_pos=0; s->end_pos=len;
+  stream_reset(s);
+  s->pos=len;
+  memcpy(s->buffer,data,len);
+  return s;
 }
 
 stream_t* new_stream(int fd,int type){
