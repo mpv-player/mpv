@@ -321,10 +321,9 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 		if (-l > max_r) max_r = -l;
 	}
 	/* Don't get tripped up when differences are mostly quant error */
-	if (max_l + max_r < 256) return;
+	if (max_l + max_r < 128) return;
 	if (max_l > 4*max_r) f1->breaks |= BREAK_LEFT;
 	if (max_r > 4*max_l) f2->breaks |= BREAK_RIGHT;
-	//printf("max_l=%d max_r=%d\n", max_l, max_r);
 }
 
 static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
@@ -338,9 +337,9 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 		if (l > max_l) max_l = l;
 		if (-l > max_r) max_r = -l;
 	}
-	if (max_l + max_r < 256) return;
-	if (max_r > 3*max_l) f->affinity = -1;
-	else if (max_l > 3*max_r) f->affinity = 1;
+	if (max_l + max_r < 128) return;
+	if (max_r > 2*max_l) f->affinity = -1;
+	else if (max_l > 2*max_r) f->affinity = 1;
 	else if (max_l + max_r > 2048) {
 		l = t = 0;
 		for (i = 0; i < c->metric_len; i++) {
@@ -349,7 +348,6 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 		}
 		if (-l*4 > t) f->affinity = -1;
 		else if (l*4 > t) f->affinity = 1;
-		//printf("affinity from avg: %d\n", f->affinity);
 	}
 }
 
@@ -396,6 +394,7 @@ static int decide_frame_length(struct pullup_context *c)
 		else if (f1->affinity == -1) return 2;
 		else if (f2->affinity == 1) return 2;
 		else if (f0->affinity == 1 && f2->affinity == -1) return 3;
+		else if (f2->affinity == -1) return 1;
 		else if (f2->affinity == 0 && f3->affinity == 1) return 3;
 		else return 2;
 	}
@@ -435,8 +434,10 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 	if (!n) return 0;
 	if (fr->lock) return 0;
 
-	print_aff_and_breaks(c, c->first);
-	printf("duration: %d    \n", n);
+	if (c->verbose) {
+		print_aff_and_breaks(c, c->first);
+		printf("duration: %d    \n", n);
+	}
 
 	fr->lock++;
 	fr->length = n;
@@ -569,7 +570,17 @@ void pullup_init_context(struct pullup_context *c)
 
 void pullup_free_context(struct pullup_context *c)
 {
-	/* FIXME: free! */
+	struct pullup_field *f;
+	free(c->buffers);
+	f = c->head;
+	do {
+		free(f->diffs);
+		free(f->licomb);
+		f = f->next;
+		free(f->prev);
+	} while (f != c->head);
+	free(c->frame);
+	free(c);
 }
 
 

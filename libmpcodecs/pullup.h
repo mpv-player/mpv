@@ -47,6 +47,7 @@ struct pullup_context
 	int *bpp, *w, *h, *stride, *background;
 	unsigned int cpu;
 	int junk_left, junk_right, junk_top, junk_bottom;
+	int verbose;
 	/* Internal data */
 	struct pullup_field *first, *last, *head;
 	struct pullup_buffer *buffers;

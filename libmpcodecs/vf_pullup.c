@@ -55,6 +55,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
+	c->verbose = 1;
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
