@@ -492,6 +492,9 @@ Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
     * support for vplayer subtitle format
     * preliminary support for .RT subtitle format
 
+Plourde, Nicolas <nicolas.plourde@sympatico.ca>
+    * libvo: adding quartz driver for Mac OS X
+
 Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
     * GUI system

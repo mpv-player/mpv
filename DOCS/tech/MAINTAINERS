@@ -100,6 +100,7 @@ libvo drivers:
     * vo_null.c - None
     * vo_pgm.c - None
     * vo_png.c - Felix Bünemann
+    * vo_quartz.c - Nicolas Plourde
     * vo_sdl.c - Felix Bünemann
     * vo_svga.c - None
     * vo_tdfxfb.c - Alban Bedel
