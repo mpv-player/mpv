@@ -216,6 +216,19 @@ Affiche quelques statistiques sur l'utilisation CPU et les trames sautées
 à la fin. A utiliser avec \-nosound et \-vo null pour mesurer les performances
 du codec Video.
 .TP
+.B \-edl <nomfichier>
+Active l'édition de la liste de décision durant la lecture. La vidéo sera
+sautée et le son coupé et remis suivant les entrées du fichier indiqué. 
+Voir DOCS/edl.html pour les détails sur comment l'utiliser.
+.TP
+.B \-edlout <nomfichier>
+Créé un nouveau fichier et écrit les enregistrement d'édition de la liste de 
+décision dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i', une
+entrée à sauter après les deux dernières secondes de la lecture est écrite dans
+ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur peut
+régler plus finement les entrées EDL plus tard. Voir DOCS/edl.html pour les 
+détails.
+.TP
 .B \-framedrop (voir aussi \-hardframedrop)
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
 systèmes lents.
@@ -2133,7 +2146,9 @@ méthode variable bitrate
 .IPs abr\ \
 bitrate moyen
 .IPs cbr\ \
-constant bitrate
+constant bitrate.
+.br
+Force également l'encodage en mode CBR sur les modes ABR séléctionnés suivant
 .IPs br=<0\-1024>
 spécifie le bitrate en kBit (CBR et ABR uniquement)
 .IPs q=<0\-9>
@@ -2163,7 +2178,42 @@ fixer le gain d'entrée audio
 .br
 2: ajuste
 .REss
+.IPs fast
+passe au mode VBR préselectionné suivant, plus rapide que l'actuel, qualité
+légerement inférieure et bitrates plus hauts.
+.IPs preset
+fournit les paramètres pour la plus haute qualité possible.
+.RSss
+medium: encodage VBR, bonne qualité, interval bitrate 150\-180 kbps.
+.br
+standard: encodage VBR, haute qualité, interval bitrate 170\-210 kbps.
+.br
+extreme: encodage VBR, très haute qualité, interval bitrate 200\-240 kbps.
+.br
+insane: encodage CBR, plus haute qualité preselectionnée, bitrate 320 kbps.
+.br
+<8-320>: encodage ABR au bitrate moyen indiqué.
+.br
+.REss
 .RE
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-lameopts fast:preset=standard"
+pour la plupart des gens et la plupart des musiques et déjà de
+très haute qualité.
+.IPs "\-lameopts  cbr:preset=192"
+encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
+.IPs "\-lameopts      preset=172"
+encode avec les présélections ABR à un bitrate moyen de 172 kbps.
+.IPs "\-lameopts      preset=extreme"
+pour les gens avec une oreille extrémement bonne et un équipement en rapport.
+.IPs "\-lameopts preset=help"
+affiche les options supplémentaires et des informations sur les
+paramètres présélectionnés.
+.RE
+.PD 1
 .
 .TP
 .B \-lavcopts <option1:option2:...>
