@@ -309,7 +309,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->image.bpp=codec_hdr.depth;
     xacodec_driver->image.width=codec_hdr.x;
     xacodec_driver->image.height=codec_hdr.y;
-    xacodec_driver->image.mem=malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
+    xacodec_driver->image.mem=malloc(codec_hdr.y * ((codec_hdr.x+3)&(~3)) * ((codec_hdr.depth+7)/8));
 
 //    printf("out_buf size: %d\n", codec_hdr.y * codec_hdr.x * codec_hdr.depth);
 
@@ -342,11 +342,27 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 {
     unsigned int ret;
     int i;
+    xacodec_image_t *image=&xacodec_driver->image;
 
     if (skip_flag > 0)
 	printf("frame will be dropped..\n");
 
     xacodec_driver->decinfo->skip_flag = skip_flag;
+
+    image->planes[0]=image->mem;
+    image->stride[0]=image->width;
+    image->stride[1]=image->stride[2]=image->width/2;
+    switch(image->out_fmt){
+    case IMGFMT_YV12:
+	image->planes[2]=image->planes[0]+image->width*image->height;
+	image->planes[1]=image->planes[2]+image->width*image->height/4;
+	break;
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+	image->planes[1]=image->planes[0]+image->width*image->height;
+	image->planes[2]=image->planes[1]+image->width*image->height/4;
+	break;
+    }
 
 //    printf("frame: %08x (size: %d) - dest: %08x\n", frame, frame_size, dest);
 
@@ -481,22 +497,30 @@ typedef struct
  *ip++ = (CAST)(c2x2map1->clr2_0); \
  *ip   = (CAST)(c2x2map1->clr3_0); }
 
-void XA_2x2_OUT_1BLK_clr8(unsigned char *image, unsigned int x, unsigned int y,
+void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
     unsigned int imagex, XA_2x2_Color *cmap2x2)
 {
-    unsigned int row_inc = imagex - 3;
-    unsigned char *ip = (unsigned char *)(image + 4*(y * imagex + x));
+    //unsigned int row_inc = imagex - 3;
+    xacodec_image_t *image=(xacodec_image_t*)image_p;
 
 //    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
 //	image, x, y, imagex, cmap2x2);
     //ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
     
     // simplified yv12->rgb32bpp converter (Y only)
-    ip[0]=ip[1]=ip[2]=cmap2x2->clr0_0;
-    ip[4]=ip[5]=ip[6]=cmap2x2->clr1_0;
-    ip+=4*imagex;
-    ip[0]=ip[1]=ip[2]=cmap2x2->clr2_0;
-    ip[4]=ip[5]=ip[6]=cmap2x2->clr3_0;
+//    ip[0]=ip[1]=ip[2]=cmap2x2->clr0_0;
+//    ip[4]=ip[5]=ip[6]=cmap2x2->clr1_0;
+//    ip+=4*imagex;
+//    ip[0]=ip[1]=ip[2]=cmap2x2->clr2_0;
+//    ip[4]=ip[5]=ip[6]=cmap2x2->clr3_0;
+
+    image->planes[0][(x+0)+(y+0)*image->stride[0]]=cmap2x2->clr0_0;
+    image->planes[0][(x+1)+(y+0)*image->stride[0]]=cmap2x2->clr1_0;
+    image->planes[0][(x+0)+(y+1)*image->stride[0]]=cmap2x2->clr2_0;
+    image->planes[0][(x+1)+(y+1)*image->stride[0]]=cmap2x2->clr3_0;
+
+    image->planes[1][(x>>1)+(y>>1)*image->stride[1]]=cmap2x2->clr0_1;
+    image->planes[2][(x>>1)+(y>>1)*image->stride[2]]=cmap2x2->clr0_2;
     
 }
 
@@ -748,9 +772,7 @@ if(imagex==image->width && imagey==image->height){
 } else {
     int y;
     printf("partial YV12 not implemented!!!!!!\n");
-//    image->planes[0]=image->mem;
-//    image->planes[1]=image->planes[0]+image->width*image->height;
-//    image->planes[2]=image->planes[1]+image->width*image->height/4;
+
 }
 
 //    memcpy(image,yuv->Ybuf,imagex*imagey);
