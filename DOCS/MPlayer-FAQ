@@ -225,6 +225,11 @@ A: Known problem, icewm sucks.
 Q: I got this playing mpeg files: Can't find codec for video format 0x10000001 !
 A: You have old version of codecs.conf at ~/.mplayer/. Upgrade it from DOCS/
 
+Q: After starting mplayer under KDE(1/2) I just get a black screen and nothing 
+   happens, after about one minute the video starts playing.
+A: The KDE arts sound daemon is blocking the sound device, either wait the time
+   until video starts or you disable the arts-daemon in kontrollcenter.
+
 Q: But it works with avifile !
 A: So what?
 
