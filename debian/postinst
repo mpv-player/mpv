@@ -38,7 +38,7 @@ $dcarea .= "\n";
 $mcfg->setconfarea($dcarea);
 
 if ($didupgrade) {
-  $interfaces->setotherarea_DANGEROUS(@savedolddata);
+  $mcfg->setotherarea_DANGEROUS(@savedolddata);
 }
 
 #%###################################
