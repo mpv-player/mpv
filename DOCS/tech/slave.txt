@@ -76,5 +76,9 @@ tv_set_channel channel
 	Set the current TV channel.
 tv_last_channel
 	Set the current TV channel to the last one.
+tv_set_freq <frequency in MHz>
+	Set the tv tuner frequency.
+tv_set_norm <norm>
+	Set the tv tuner norm. PAL, SECAM, NTSC and so on..
 gui_[loadsubtitle|about|play|stop]
 	GUI actions

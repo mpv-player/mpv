@@ -177,6 +177,11 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel);
 int tv_step_norm(tvi_handle_t *tvh);
 int tv_step_chanlist(tvi_handle_t *tvh);
 
+int tv_set_freq(tvi_handle_t *tvh, unsigned long freq);
+int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq);
+
+int tv_set_norm(tvi_handle_t *tvh, char* norm);
+
 #define TV_NORM_PAL		1
 #define TV_NORM_NTSC		2
 #define TV_NORM_SECAM		3

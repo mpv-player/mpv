@@ -2777,6 +2777,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	frame_dropping = v > 2 ? 2 : v;
     } break;
 #ifdef USE_TV
+    case MP_CMD_TV_SET_FREQ :  {
+      if (file_format == DEMUXER_TYPE_TV)
+        tv_set_freq((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.f * 16.0);
+    } break;
+    case MP_CMD_TV_SET_NORM :  {
+      if (file_format == DEMUXER_TYPE_TV)
+        tv_set_norm((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
+    } break;
     case MP_CMD_TV_STEP_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	int v = cmd->args[0].v.i;
