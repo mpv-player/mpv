@@ -57,6 +57,7 @@ typedef struct vf_seteq_s
 #define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
 #define VFCTRL_GET_EQUALIZER 8 /* gset color options (brightness,contrast etc) */
 #define VFCTRL_DRAW_OSD 7
+#define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
 
 #include "vfcap.h"
 
