@@ -370,7 +370,7 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
-char *dsp=NULL;
+/*DSP!!char *dsp=NULL;*/
 
 float rel_seek_secs=0;
 
@@ -627,7 +627,7 @@ if(!filename){
     fprintf(stderr,"Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
     return 0;
   }
-  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);
+/*DSP!!  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);*/
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
@@ -806,6 +806,18 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     printf("Detected MPEG-ES file format!\n");
   }
 }
+#ifdef MOV
+//=============== Try to open as MOV file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
+  stream_reset(stream);
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
+//  stream_seek(demuxer->stream,seek_to_byte);
+  if(mov_check_file(demuxer)){
+      printf("Detected MOV file format!\n");
+      file_format=DEMUXER_TYPE_MOV;
+  }
+}
+#endif
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   fprintf(stderr,"============= Sorry, this file format not recognized/supported ===============\n");

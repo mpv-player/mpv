@@ -46,7 +46,8 @@ struct config conf[]={
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
-	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
+//	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0},
+	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 #ifdef HAVE_X11
@@ -181,4 +182,3 @@ struct config conf[]={
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
-
