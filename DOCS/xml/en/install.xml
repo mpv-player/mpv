@@ -298,8 +298,8 @@ zooming), thus fullscreen is nice and very fast.
   If you do not have a GeForce2 (or newer) card, it's not likely to work without bugs.
   <emphasis role="bold">the built-in nVidia driver in XFree86 does not support
   hardware YUV acceleration on all nVidia cards.</emphasis> You have
-  to download nVidia's closed-source drivers from nVidia.com. See the <link
-  linkend="nvidia">nVidia Xv driver</link> section for details. Please also check
+  to download nVidia's closed-source drivers from <ulink url="http://nvidia.com">nVidia.com</ulink>. 
+  See the <link linkend="nvidia">nVidia Xv driver</link> section for details. Please also check
   the <link linkend="tvout-nvidia">nVidia TV-out section</link> if you wish to
   use a TV.
   </para></listitem>
