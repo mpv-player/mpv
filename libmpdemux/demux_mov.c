@@ -402,6 +402,11 @@ int mov_check_file(demuxer_t* demuxer){
 	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie data: start: %x end: %x\n",
 	    priv->mdat_start, priv->mdat_end);
 	  flags|=2;
+	  if(flags==3){
+	    // if we're over the headers, then we can stop parsing here!
+	    demuxer->priv=priv;
+	    return 1;
+	  }
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
 	case MOV_FOURCC('s','k','i','p'):
