@@ -15,6 +15,9 @@ extern "C" int STDCALL LoadLibraryA(const char*);
 extern "C" STDCALL void* GetProcAddress(int, const char*);
 extern "C" int STDCALL FreeLibrary(int);
 
+extern "C" void Setup_LDT_Keeper();
+extern "C" void setup_FS_Segment();
+
 DS_Filter::DS_Filter()
     :m_iHandle(0), m_pFilter(0), m_pInputPin(0),
 	m_pOutputPin(0), m_pSrcFilter(0), 
@@ -25,6 +28,9 @@ DS_Filter::DS_Filter()
 
 void DS_Filter::Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt)
 {
+
+    Setup_LDT_Keeper();
+
     try
     {
 	string _fullname=def_path;
@@ -42,9 +48,11 @@ void DS_Filter::Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM
 	result=func(id, &IID_IClassFactory, (void**)&factory);
 	if(result || (!factory)) throw FATAL("No such class object");;
         
-            printf("# factory = %X\n",(unsigned int)factory);
-            printf("# factory->vt = %X\n",(unsigned int)factory->vt);
-            printf("# factory->vt->CreateInstance = %X\n",(unsigned int)factory->vt->CreateInstance);
+//            printf("# factory = %X\n",(unsigned int)factory);
+//            printf("# factory->vt = %X\n",(unsigned int)factory->vt);
+//            printf("# factory->vt->CreateInstance = %X\n",(unsigned int)factory->vt->CreateInstance);
+
+             setup_FS_Segment();
 
             printf("Calling factory->vt->CreateInstance()\n");
             result=factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void**)&object);
