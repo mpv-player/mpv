@@ -29,17 +29,20 @@ LIBVD_EXTERN(libmpeg2)
 
 #include "../cpudetect.h"
 
-mpeg2_convert_t mpeg2convert_uyvy;
-
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     mpeg2dec_t * mpeg2dec = sh->context;
+    const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
 
     switch(cmd) {
     case VDCTRL_QUERY_FORMAT:
-	if ( (*((int*)arg)) == IMGFMT_YV12 && mpeg2dec->convert == NULL)
+        if (info->sequence->width >> 1 == info->sequence->chroma_width &&
+	    info->sequence->height >> 1 == info->sequence->chroma_height &&
+	    (*((int*)arg)) == IMGFMT_YV12)
 	    return CONTROL_TRUE;
-	if ( (*((int*)arg)) == IMGFMT_UYVY && mpeg2dec->convert == mpeg2convert_uyvy)
+	if (info->sequence->width >> 1 == info->sequence->chroma_width &&
+		info->sequence->height == info->sequence->chroma_height &&
+	    (*((int*)arg)) == IMGFMT_422P)
 	    return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
@@ -85,10 +88,8 @@ static int init(sh_video_t *sh){
 static void uninit(sh_video_t *sh){
     mpeg2dec_t * mpeg2dec = sh->context;
     if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
-    if (mpeg2dec->convert == NULL) {
-	mpeg2dec->decoder.convert=NULL;
-	mpeg2dec->decoder.convert_id=NULL;
-    }
+    mpeg2dec->decoder.convert=NULL;
+    mpeg2dec->decoder.convert_id=NULL;
     mpeg2_close (mpeg2dec);
 }
 
@@ -117,10 +118,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int drop_frame, framedrop=flags&3;
 
     // MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
-    if (mpeg2dec->convert == NULL) {
-	mpeg2dec->decoder.convert=NULL;
-	mpeg2dec->decoder.convert_id=NULL;
-    }
+    mpeg2dec->decoder.convert=NULL;
+    mpeg2dec->decoder.convert_id=NULL;
     
     if(len<=0) return NULL; // skipped null frame
     
@@ -162,10 +161,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 				       info->sequence->height, IMGFMT_YV12)) return 0;
 	    } else if (info->sequence->width >> 1 == info->sequence->chroma_width &&
 		info->sequence->height == info->sequence->chroma_height) {
-		if (mpeg2_convert(mpeg2dec, mpeg2convert_uyvy, NULL)) return 0;
 		if(!mpcodecs_config_vo(sh,
 				       info->sequence->width,
-				       info->sequence->height, IMGFMT_UYVY)) return 0;
+				       info->sequence->height, IMGFMT_422P)) return 0;
 	    } else return 0;
 	    break;
 	case STATE_PICTURE:
@@ -180,17 +178,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    }
             mpeg2_skip(mpeg2dec, 0); //mpeg2skip skips frames until set again to 0
 
-	    if (mpeg2dec->convert == NULL) {
-		use_callback = (!framedrop && vd_use_slices &&
-				(info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
-		    MP_IMGFLAG_DRAW_CALLBACK:0;
-	    } else {
-		use_callback = 0;
-	    }
+	    use_callback = (!framedrop && vd_use_slices &&
+	    		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
+			    MP_IMGFLAG_DRAW_CALLBACK:0;
 
 	    // get_buffer "callback":
 	    mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
-				       (type==PIC_FLAG_CODING_TYPE_B) ? use_callback : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
+				       (type==PIC_FLAG_CODING_TYPE_B) ?
+					use_callback : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
 				       (info->sequence->picture_width+15)&(~15),
 				       (info->sequence->picture_height+15)&(~15) );
 
@@ -215,16 +210,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpi_new->qscale_type= 1;
 #endif
 
-	    if (mpeg2dec->convert == NULL) {
-		if (mpi_new->flags&MP_IMGFLAG_DRAW_CALLBACK
-		    && !(mpi_new->flags&MP_IMGFLAG_DIRECT)) {
-		    // nice, filter/vo likes draw_callback :)
-		    mpeg2dec->decoder.convert=draw_slice;
-		    mpeg2dec->decoder.convert_id=sh;
-		} else {
-		    mpeg2dec->decoder.convert=NULL;
-		    mpeg2dec->decoder.convert_id=NULL;
-		}
+	    if (mpi_new->flags&MP_IMGFLAG_DRAW_CALLBACK
+	        && !(mpi_new->flags&MP_IMGFLAG_DIRECT)) {
+		// nice, filter/vo likes draw_callback :)
+		mpeg2dec->decoder.convert=draw_slice;
+		mpeg2dec->decoder.convert_id=sh;
+	    } else {
+	        mpeg2dec->decoder.convert=NULL;
+	        mpeg2dec->decoder.convert_id=NULL;
 	    }
 	    
 	    break;
