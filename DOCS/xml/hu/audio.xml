@@ -1,62 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.28 -->
 <sect1 id="audio">
 <title>Audió kimeneti eszközök</title>
 <sect2 id="sync">
 <title>Audió/Videó szinkronizáció</title>
-
-<para>
-Az <application>MPlayer</application> audió interfészét
-<emphasis>libao2</emphasis>-nek hívják. Jelenleg a következő vezérlőket
-tartalmazza:
-</para>
-
-<informaltable>
-<tgroup cols="2">
-<thead>
-  <row><entry>Vezérlő</entry><entry>Megjegyzés</entry></row>
-</thead>
-<tbody>
-<row><entry>oss</entry><entry>
-  OSS (ioctl) vezérlő (támogatja a hardveres AC3 áteresztést)
-  </entry></row>
-<row><entry>sdl</entry><entry>
-  SDL vezérlő (támogatja a hang démonokat, mint pl. az <emphasis role="bold">ESD</emphasis>
-  és az <emphasis role="bold">ARTS</emphasis>)
-  </entry></row>
-<row><entry>nas</entry><entry>
-  NAS (Network Audio System) vezérlő
-  </entry></row>
-<row><entry>alsa5</entry><entry>
-  natív ALSA 0.5 vezérlő
-  </entry></row>
-<row><entry>alsa</entry><entry>
-  natív ALSA 0.9/1.0 vezérlő (támogatja a hardveres AC3 áteresztést)
-  </entry></row>
-<row><entry>sun</entry><entry>
-  SUN audió vezérlő (<filename>/dev/audio</filename>) BSD és Solaris8 használóknak
-  </entry></row>
-<row><entry>macosx</entry><entry>
-  natív Mac OS X vezérlő
-  </entry></row>
-<row><entry>win32</entry><entry>
-  natív Win32 vezérlő
-  </entry></row>
-<row><entry>arts</entry><entry>
-  natív ARTS vezérlő (leginkább KDE-t használóknak)
-  </entry></row>
-<row><entry>esd</entry><entry>
-  natív ESD vezérlő (leginkább GNOME-ot használóknak)
-  </entry></row>
-<row><entry>jack</entry><entry>
-  JACK (Jack Audio Connection Kit) vezérlő
-  </entry></row>
-<row><entry>polyp</entry><entry>
-  polypaudio vezérlő
-  </entry></row>
-</tbody>
-</tgroup>
-</informaltable>
 
 <para>
 A Linux hangkártya vezérlői kompatibilítási problémákkal küzdenek. Ez azért van,
@@ -336,18 +283,19 @@ hogy hogyan működött együtt az <application>MPlayer</application> és a hang kárt
 </para>
 </sect2>
 
-<sect2 id="af">
+</sect1>
+
+<sect1 id="af">
 <title>Audio szűrők</title>
 <para>
-  A régi audió plugin-eket az új audió szűrő réteg váltotta fel. Az audió szűrők
-  a hang adatok megváltoztatására használhatóak, még mielőtt a hang ki lenne küldve
-  a hangkártyára. A szűrők be és kikapcsolása alapértelmezésben automatikus, de ez
-  felülbírálható. A szűrők akkor aktiválódnak, ha az audió adat tulajdonságai
-  különböznek attól, amit a hangkártya igényel és ha nem szükségesek, deaktiválhatóak.
-  A <option>-af szuro1,szuro2,...</option> kapcsolót használhatod a szűrők automatikus
-  bekapcsolásának felülbírálásához vagy az automatikusan nem elindított szűrők
-  aktiválásához. A szűrők olyan sorrendben lesznek lefuttatva, ahogy a vesszővel
-  elválasztott sorban szerepelnek.
+  Az audió szűrők segítségével a hang adatok tulajdonságai megváltoztathatóak, még
+  mielőtt a hang ki lenne küldve a hangkártyára. A szűrők be és kikapcsolása
+  alapértelmezésben automatikus, de ez felülbírálható. A szűrők akkor aktiválódnak, ha
+  az audió adat tulajdonságai különböznek attól, amit a hangkártya igényel és ha nem
+  szükségesek, deaktiválhatóak. A <option>-af szuro1,szuro2,...</option> kapcsolót
+  használhatod a szűrők automatikus bekapcsolásának felülbírálásához vagy az
+  automatikusan nem elindított szűrők aktiválásához. A szűrők olyan sorrendben lesznek
+  lefuttatva, ahogy a vesszővel elválasztott sorban szerepelnek.
 </para>
 
 <para>
@@ -492,7 +440,7 @@ egy formátum szűrő (lásd lejebb) beillesztődik, hogy kiigazítsa a különbséget.
 </varlistentry>
 </variablelist>
 
-<sect3 id="af_resample">
+<sect2 id="af_resample">
 <title>Up/Downsampling</title>
 
 <para>
@@ -545,9 +493,9 @@ de explicit módon is engedélyezheted a parancssorban. Három kapcsolója van:
 resample szűrő kimeneti mintavételezési frekvenciáját 44100Hz-re állítja, exakt kimeneti
 frekvenciát használ és lineáris interpolációt.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_channels">
+<sect2 id="af_channels">
 <title>Csatornák számának megváltoztatása</title>
 <para>
 A <option>channels</option> szűrő csatornák hozzáadásához vagy elvételéhez használható,
@@ -609,9 +557,9 @@ elnémul, de a 0-ás és az 1-es marad felcserélve.
 beállítja a csatornák számát 6-ra és 4 útvonalat ad meg, ami a 0. csatornát
 átmásolja a 0. és 3. csatornára. A 4-es és 5-ös csatorna el lesz némítva.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_format">
+<sect2 id="af_format">
 <title>Minta formátum konvertáló</title>
 <para>
 A <option>format</option> szűrő különböző minta formátumok között konvertál.
@@ -646,9 +594,9 @@ Példa:
 <screen>mplayer -af format=4:float <replaceable>media.avi</replaceable></screen>
 beállítja a kimeneti formátumot mintánkénti 4 bájtos lebegőpontos adatra.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_delay">
+<sect2 id="af_delay">
 <title>Késleltetés</title>
 <para>
 A <option>delay</option> szűrő késlelteti a hangot a hangszóróknál, így különböző
@@ -694,9 +642,9 @@ a bal és jobb első hangszórót 10.5ms-sel, a két hátsó és a mély csatornát 0ms-se
 középső csatornát pedig 7ms-sel késlelteti.
 </para>
 
-</sect3>
+</sect2>
 
-<sect3 id="af_volume">
+<sect2 id="af_volume">
 <title>Szoftveres hangerő szabályozás</title>
 <para>A szoftveres hangerő szabályozást a <option>volume</option> audió szűrő
 valósítja meg. Óvatosan használd ezt a szűrőt, mivel lecsökkentheti a jel erősségét
@@ -743,9 +691,9 @@ kilép. Ez a hangerő becslés használható a hangerő szint beállítására az
 <application>MEncoder</application>ben úgy, hogy a maximum dinamikus intervallumot
 használd.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_equalizer">
+<sect2 id="af_equalizer">
 <title>Equalizer</title>
 <para>
 Az <option>equalizer</option> szűrő egy 10 oktáv széles grafikus equalizert
@@ -805,9 +753,9 @@ Például:
 erősíteni fogja a hangot a felső és az alső frekvencia tartományokban, míg
 majdnem teljesen kikapcsolja azt 1 kHz környékén.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_panning">
+<sect2 id="af_panning">
 <title>Pan szűrő</title>
 <para>
 A <option>pan</option> szűrőt csatornák önkényes összekeverésére használhatod.
@@ -862,9 +810,9 @@ Lemixel sztereóból mono-ba.
 3 csatornás kimenetet ad, a 0. és 1. csatornát érintetlenül hagyja, és belemixeli
 a 2. kimeneti csatornába (amit például a mélynyomóra küld ki).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_sub">
+<sect2 id="af_sub">
 <title>Sub-woofer</title>
 <para>
 A <option>sub</option> szűrő egy mélynyomó csatornát ad az audió folyamhoz.
@@ -906,9 +854,9 @@ Példa:
 <screen>mplayer -af sub=100:4 -channels 5 <replaceable>media.avi</replaceable></screen>
 létrehoz egy mélynyomó csatornát 100 Hz-es vágási frekvenciával a 4. kimeneti csatornán.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_surround">
+<sect2 id="af_surround">
 <title>Surround-sound dekódoló</title>
 <para>
 A mátrix kódolású térhatású hang dekódolható a <option>surround</option>
@@ -939,9 +887,9 @@ Példa:
 bekapcsolja a térhatású hang dekódolását a hátsó hangszórók hangjához képest 15
 ms-os késleltetéssel.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_export">
+<sect2 id="af_export">
 <title>Audio Exporter</title>
 <para>
 Az audió szűrők exportálják a bejövő jeleket más processzeknek a memória map-olás segítségével
@@ -979,9 +927,9 @@ példa:
 <screen>mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>media.avi</replaceable></screen>
 exportál 1024 mintát csatornánként a <filename>/tmp/mplayer-af_export</filename> fájlba.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_extrastereo">
+<sect2 id="af_extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1010,9 +958,9 @@ mplayer -af extrastereo <replaceable>media.avi</replaceable>
 mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
 --></screen>
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_volnorm">
+<sect2 id="af_volnorm">
 <title>Hangerő normalizáló</title>
 
 <para>
@@ -1023,211 +971,6 @@ Ez az audió szűrő maximalizálja a hangerőt a hang torzítása nélkül.
 Használat:
 <screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
 </para>
-</sect3>
-
 </sect2>
 
-<sect2 id="audio-plugins">
-<title>Audió plugin-ek (elhanyagolt)</title>
-<note><para><emphasis role="bold">Az audió plugin-eket már nem fejlesztjük,
-az audió szűrők felváltották őket, és hamarosan el is lesznek távolítva.
-</emphasis></para></note>
-
-<para>
-Az <application>MPlayer</application> támogat audio plugin-eket. Az audió
-plugin-ek meg tudják változtatni az audió adat tulajdonságait, mielőtt az
-eljutnának a hangkártyához. Az <option>-aop</option> kapcsolóval tudod
-engedélyezni őket, aminek egy <option>list=plugin1,plugin2,...</option>
-argumentuma van. A <option>list</option> argumentum szükséges, és
-meghatározza, hogy mely plugin-eket kell használni és azokat milyen
-sorrendben kell futtatni. Például:
-
-<screen>mplayer <replaceable>media.avi</replaceable> -aop list=resample,format</screen>
-
-átfuttatja a hangot a resampling majd a format plugin-en.
-</para>
-
-<para>
-A plugin-eknek szintén lehetnek kapcsolóik, amikkel megváltoztatható a
-működésük. Ezek a kapcsolók bővebben a következő részben lesznek leírva.
-Ha egy plugin-nek nem adsz meg kapcsolókat, akkor az alapértelmezett
-kapcsolókkal fog lefutni. Itt egy példa, hogy hogyan használhatóak a
-plugin-ek plugin specifikus kapcsolókkal együtt:
-
-<screen>mplayer <replaceable>media.avi</replaceable> -aop list=resample,format:fout=44100:format=0x8</screen>
-
-beállítja a resample plugin kimeneti frekvenciáját 44100 Hz-re és a
-formátum plugin kimeneti formátumát AFMT_U8-ra.
-</para>
-
-<para>
-Jelenleg az audió plugin-ek nem használhatóak a
-<application>MEncoder</application>ben.
-</para>
-
-
-<sect3 id="updn-sampling">
-<title>Up/Downsampling</title>
-
-<para>
-Az <application>MPlayer</application> teljes mértékben támogatja a hang
-up/downsampling-elését. Ezt a plugint akkor használhatod, ha fix frekvenciájú
-hangkártyád van vagy régi, ami csak maximum 44.1 kHz-et tud. A hardverek
-korlátai nem lesznek automatikusan detektálva, így a mintavételezési
-frekvenciát pontosan meg kell adnod. Ez a plugin egy kapcsolóval rendelkezik:
-<option>fout</option>, amivel a kívánt kimeneti mintavételezési frekvencia
-állítható be. Az alapértelmezett értéke 48 kHz, Hz-ben kell megadni.
-</para>
-
-<para>
-Használat:
-
-<screen>
-mplayer <replaceable>media.avi</replaceable> -aop list=resample:fout=<replaceable>freq</replaceable></screen>
-
-ahol a <literal><replaceable>freq</replaceable></literal> a frekvencia
-Hz-ben, mint pl. <literal>44100</literal>.
-</para>
-
-<note>
-<para>
-A kimeneti frekvenciát nem tanácsos az alapértelmezett érték fölé
-vinni. Túl nagy értéknél az audió és a videó folyamok lassan lesznek
-lejátszva, ráadásul a hang is torzulni fog.
-</para>
-</note>
-</sect3>
-
-
-<sect3 id="surround-decode">
-<title>Térhatású hang dekódolás</title>
-
-<para>
-Az <application>MPlayer</application> rendelkezik egy audió plugin-nel, ami
-a mátrix kódolású térhatású hangot tudja dekódolni. A Dolby Surround például
-egy mátrix kódolású formátum. Sok két csatornás hanggal rendelkező fájl
-tulajdonképpen mátrix kódolású térhatású hangot tartalmaz. Ezen képesség
-kihasználásához legalább 4 csatornát támogató hangkártya szükséges.
-</para>
-
-<para>
-Használat:
-<screen>mplayer <replaceable>media.avi</replaceable> -aop list=surround</screen>
-</para>
-</sect3>
-
-
-<sect3 id="sample-format-conv">
-<title>Minta formátum konvertáló</title>
-
-<para>
-Ha a hangkártya vezérlőd nem támogatja az előjeles 16 bites egész adattípust,
-ennek a plugin-nek a segítségével megváltoztathatod a formátumot egy olyanra,
-amit a hangkártyád megért. Egy kapcsolója van, a <option>format</option>, aminek
-az értéke a <filename>libao2/afmt.h</filename> fájlban található számok valamelyike
-lehet. Ez a plugin csak ritkán kell, és haladó felhasználóknak lett tervezve.
-Figyelj rá, hogy ez a plugin csak a minta formátumát változtatja meg, nem a
-minta frekvenciáját vagy a csatornák számát.
-</para>
-
-<para>
-Használat:
-
-<screen>
-mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceable>outfmt</replaceable></screen>
-
-ahol az <literal><replaceable>outfmt</replaceable></literal> a kért
-kimeneti formátum.
-</para>
-</sect3>
-
-
-<sect3 id="audio-delay">
-<title>Késleltetés</title>
-<para>
-Ez a plugin késlelteti a hangot és egyben példa arra, hogy hogyan fejlessz
-új plugin-eket. Semmi hasznos dolgot nem tud a felhasználó szemszögéből, és
-csak a teljesség miatt kerül megemlítésre. Ne használd ezt a plugint, hacsak
-nem vagy fejlesztő.
-</para>
-</sect3>
-
-
-<sect3 id="sw-volume">
-<title>Szoftveres hangerő vezérlés</title>
-
-<para>
-Ez a plugin egy szoftveres megvalósítása a hangerő szabályozásnak,
-olyan gépeken haszos, ahol a keverő eszköz sérült. Akkor is jól jön, ha
-valaki az <application>MPlayer</application> kimeneti hangerejét akarja
-megváltoztatni a PCM hangerő keverőn történő állítása nélkül. Egy kapcsolója
-van, a <option>volume</option>, amivel a kezdeti hangerő értéke adható meg.
-A kezdeti hangerő szintje 0 és 255 között lehet, alapértelmezésként 101, ami
-0 dB-s erősítésnek felel meg. Óvatosan használd ezt a plugin-t, mert a jelet
-le tudja csökkenteni a hang zajszintjére. Legtöbb esetben a legjobb, ha a
-PCM hangerőt maximumra állítod, kihagyod ezt a plugin-t, és a hangszóróid
-hangerejét a keverő mester hangerő vezérlőjével állítod be. Ha van külső
-erősítő kötve a számítógéphez (ez van a legtöbb esetben), akkor a zajszint
-minimalizálható a mester hangerő és az erősítőn lévő hangerő állító gomb
-állítgatásával, amíg a sistergő zaj el nem tűnik a háttérből.
-</para>
-
-<para>
-Használat:
-<screen>
-mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceable>0-255</replaceable></screen>
-</para>
-
-<para>
-Ez a plugin tartalmaz egy tömörítőt vagy "soft-clipping" képességet is.
-A tömörítést akkor használhatod, ha a hang dinamikus tartománya nagyon
-nagy vagy hangszórók dinamikus tartománya nagyon kicsi. Vigyázz, ez a
-képesség torzulást okoz és csak végső esetben használandó.
-</para>
-
-<para>
-Használat:
-<screen>
-mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
-</para>
-</sect3>
-
-<sect3 id="extrastereo">
-<title>Extrastereo</title>
-
-<para>
-Ez a plugin (lineárisan) növeli a különbséget a bal és a jobb csatorna között
-(mint az <application>XMMS</application> extrastereo plugin-je), ami egy kis
-"élő" hatást ad a lejátszáshoz.
-</para>
-
-<para>
-Használat:
-<screen>
-mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo
-mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--
---></screen>
-
-Az együttható (<option>mul</option>) egy lebegőpontos szám, aminek az 
-alapértelmezett értéke 2.5. Ha <literal>0.0</literal>-ra állítod, mono hangot
-kapsz (az összes csatorna átlaga). Ha <literal>1.0</literal>-ra, akkor a hang
-változatlan marad, ha <literal>-1.0</literal>-re, akkor a bal és a jobb
-csatorna felcserélődik.
-</para>
-</sect3>
-
-
-<sect3 id="volnorm">
-<title>Hangerő normalizáló</title>
-
-<para>
-Ez a plugin maximalizálja a hangerőt a hang torzítása nélkül.
-</para>
-
-<para>
-Használat:
-<screen>mplayer <replaceable>media.avi</replaceable> -aop list=volnorm</screen>
-</para>
-</sect3>
-</sect2>
 </sect1>
