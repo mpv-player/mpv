@@ -64,6 +64,7 @@ typedef struct
   roq_v2_codebook v2[MAX_ROQ_CODEBOOK_SIZE];
   roq_v4_codebook v4[MAX_ROQ_CODEBOOK_SIZE];
   mp_image_t *prev_frame;
+  uint32_t numframe;
 } roqvideo_info;
 
 
@@ -232,6 +233,7 @@ void *roq_decode_video_init(void)
     (roqvideo_info *)calloc(sizeof(roqvideo_info), 1);
 
   info->prev_frame = NULL;
+  info->numframe=0;
 
   return info;
 }
@@ -386,9 +388,11 @@ void roq_decode_video(void *context, unsigned char *encoded,
     mean_motion_y = encoded[stream_ptr++];
     mean_motion_x = encoded[stream_ptr++];
 
-    // start by copying entire previous frame
-    if (info->prev_frame)
+    //RoQ reuses its buffers so a transparent block keeps content 
+    //from 2 frames ago. The only exception is 2'd frame (#1)
+    if(info->numframe==1)
     {
+      CHECK_PREV_FRAME();
       memcpy(mpi->planes[0], info->prev_frame->planes[0],
         mpi->width * mpi->height);
       memcpy(mpi->planes[1], info->prev_frame->planes[1],
@@ -606,6 +610,7 @@ void roq_decode_video(void *context, unsigned char *encoded,
   }
 
   // save the current frame as the previous frame for the next iteration
+  info->numframe++;
   info->prev_frame = mpi;
 }
 
