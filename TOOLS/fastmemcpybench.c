@@ -21,7 +21,6 @@
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
 
-
 #ifdef HAVE_MGA
 
 #include "../drivers/mga_vid.h"
@@ -107,9 +106,9 @@ int main( void )
   mga_init();
   marr1 = &frame[3];
 #else
-  marr1 = &arr1[0];
+  marr1 = &arr1[3];
 #endif
-  marr2 = &arr2[0];
+  marr2 = &arr2[9];
 
   for(i=0; i<ARR_SIZE; i++) marr1[i] = marr2[i] = i;
 
