@@ -69,6 +69,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-dvdangle\ angleid]
 .RB [ \-dvdkey\ key]
 .RB [ \-skin\ skin]
+.RB [ \-aspect\ ratio ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -200,10 +201,19 @@ display less output, status messages.
 used in combination with -nosound and -vo null for benchmarking.
 .TP
 .B \-skin skin directory
-load skin from this directory. For example '-skin fittyfene' tries these :
+load skin from this directory (WITHOUT path name!). For example '-skin fittyfene' tries these :
 
     /usr/local/share/mplayer/Skin/fittyfene
     ~/.mplayer/Skin/fittyfene
+.TP
+.B \-aspect ratio
+set aspect ratio of movies. It's autodetected on MPEG files, and can't be
+autodetected on AVI files. Examples:
+
+    -aspect 4:3
+    -aspect 1.2
+
+(has -noaspect pair)
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
