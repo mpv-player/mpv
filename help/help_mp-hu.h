@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.165 (2005. 03. 15.)
+// Sync'ed with help_mp-en.h 1.167 (2005. 03. 22.)
 
 // ========================= MPlayer help ===========================
 
@@ -217,7 +217,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása vagy színtere különbözik az elõzõétõl.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAz összes videó fájlnak azonos fps-sel, felbontással, és codec-kel kell rendelkeznie az -ovc copy-hoz.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAz összes fájlnak azonos audió codec-kel és formátummal kell rendelkeznie az -oac copy-hoz.\n"
-#define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\nA KÓDOLÁSOD HIBÁS LEHET!\n"
+#define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\nA kódolásod hibás lehet!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
 #define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
@@ -526,8 +526,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "%s demuxer info már jelen van!\n"
 #define MSGTR_ClipInfo "Klipp info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC formátumot találtam, frameráta váltás.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progresszív NTSC formátumot találtam, frameráta váltás.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC formátumot találtam, frameráta váltás.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progresszív NTSC formátumot találtam, frameráta váltás.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nem tudom megnyitni a kodeket.\n"
