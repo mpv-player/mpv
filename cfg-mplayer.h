@@ -142,6 +142,8 @@ struct config conf[]={
 #endif
 #endif
 //	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31},
 #ifdef USE_SUB
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef USE_ICONV
