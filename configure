@@ -1082,7 +1082,7 @@ done
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_confdir" && _confdir="$_datadir"
-test -z "$_libdir" && _libdir="$_prefix/lib/mplayer"
+test -z "$_libdir" && _libdir="$_prefix/lib"
 test -z "$_mlibdir" && _mlibdir="$MLIBHOME"
 
 if x86 ; then
@@ -3564,6 +3564,7 @@ LIRC_LIB = $_ld_lirc
 CSS_USE = $_css
 CSS_LIB = $_ld_css
 DVDKIT = $_dvdkit
+DVDKIT_SHARED = no
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
