@@ -29,6 +29,7 @@
  */
 
 //It's entirely possible this major conflicts with something else
+//use the 'major' parameter to override the default major number (178)
 /* mknod /dev/mga_vid c 178 0 */
 
 #include <linux/config.h>
@@ -68,7 +69,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MGA_VID_MAJOR 178
+#define DEFAULT_MGA_VID_MAJOR 178
 
 //#define MGA_VIDMEM_SIZE mga_ram_size
 
@@ -270,6 +271,7 @@ static uint32_t mga_top_reserved = 0;	// reserved space for console font (matrox
 static int mga_brightness = 0;	// initial brightness
 static int mga_contrast = 0;	// initial contrast
 static int mga_number = 0; // which device/card is taken
+static int major = DEFAULT_MGA_VID_MAJOR;
 
 //static int mga_force_memsize = 0;
 
@@ -279,6 +281,7 @@ MODULE_PARM(mga_brightness, "i");
 MODULE_PARM(mga_contrast, "i");
 MODULE_PARM(mga_number, "i");
 MODULE_PARM_DESC(mga_number, "selects matrox device/card (0=first)");
+MODULE_PARM(major, "i");
 
 static struct pci_dev *pci_dev;
 
@@ -1630,17 +1633,17 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 	if ((dev_handle = devfs_register(
 					NULL,
 					"mga_vid", DEVFS_FL_NONE,
-					MGA_VID_MAJOR, 0,
+					major, 0,
 					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
 					&mga_vid_fops, NULL)) == NULL)
 	{
-		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs) => fallback to non-devfs mode\n", MGA_VID_MAJOR);
+		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs) => fallback to non-devfs mode\n", major);
 //		return -EIO;
 	}
 #endif		
-	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
+	if(register_chrdev(major, "mga_vid", &mga_vid_fops))
 	{
-		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
+		printk(KERN_ERR "mga_vid: unable to get major: %d\n", major);
 		return -EIO;
 	}
 
@@ -1650,7 +1653,7 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 #ifdef CONFIG_DEVFS_FS
 		if(dev_handle) devfs_unregister(dev_handle);
 #endif
-		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
+		unregister_chrdev(major, "mga_vid");
 		return -EINVAL;
 	}
 	mga_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
@@ -1682,6 +1685,6 @@ void cleanup_module(void)
 #ifdef CONFIG_DEVFS_FS
 	if(dev_handle) devfs_unregister(dev_handle);
 #endif
-	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
+	unregister_chrdev(major, "mga_vid");
 }
 
