@@ -107,6 +107,11 @@ static int lavc_param_prediction_method= FF_PRED_LEFT;
 static char *lavc_param_format="YV12";
 static int lavc_param_debug= 0;
 static int lavc_param_psnr= 0;
+static int lavc_param_me_cmp= 0;
+static int lavc_param_me_sub_cmp= 0;
+static int lavc_param_mb_cmp= 0;
+static int lavc_param_dia_size= 0;
+static int lavc_param_qpel= 0;
 
 #include "cfgparser.h"
 
@@ -170,6 +175,11 @@ struct config lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4643
         {"psnr", &lavc_param_psnr, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PSNR, NULL},
 #endif 
+        {"cmp", &lavc_param_me_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"subcmp", &lavc_param_me_sub_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"mbcmp", &lavc_param_mb_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -316,12 +326,14 @@ static int config(struct vf_instance_s* vf,
     else
 	lavc_venc_context->flags = 0;
 
-     /* 4mv is currently buggy with B frames */
-    if (lavc_param_vmax_b_frames > 0 && lavc_param_v4mv) {
-        printf("4MV with B-Frames not yet supported -> 4MV disabled\n");
-        lavc_param_v4mv = 0;
-    }
-
+#if LIBAVCODEC_BUILD >= 4647
+    lavc_venc_context->me_cmp= lavc_param_me_cmp;
+    lavc_venc_context->me_sub_cmp= lavc_param_me_sub_cmp;
+    lavc_venc_context->mb_cmp= lavc_param_mb_cmp;
+    lavc_venc_context->dia_size= lavc_param_dia_size;
+    lavc_venc_context->flags|= lavc_param_qpel;
+#endif 
+        
     lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
@@ -549,6 +561,12 @@ static int vf_open(vf_instance_t *vf, char* args){
 	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+1000);
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+1000;
     }
+    else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "wmv2"))
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+4);
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+4);
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+4;
+    }
     else
     {
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
@@ -581,6 +599,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', '2');
     else if (!strcasecmp(lavc_param_vcodec, "wmv1"))
 	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '1');
+    else if (!strcasecmp(lavc_param_vcodec, "wmv2"))
+	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '2');
     else if (!strcasecmp(lavc_param_vcodec, "huffyuv"))
 	mux_v->bih->biCompression = mmioFOURCC('H', 'F', 'Y', 'U');
     else
