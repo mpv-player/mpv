@@ -3,10 +3,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include "../config.h"
 
 int usec_sleep(int usec_delay)
 {
-#if	1
+#ifdef HAVE_NANOSLEEP
     struct timespec ts;
     ts.tv_sec  =  usec_delay / 1000000;
     ts.tv_nsec = (usec_delay % 1000000) * 1000;
