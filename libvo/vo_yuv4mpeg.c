@@ -29,6 +29,7 @@
 #include <fcntl.h>
 
 #include "config.h"
+#include "subopt-helper.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -492,45 +493,36 @@ static void check_events(void)
 {
 }
 
-
 static uint32_t preinit(const char *arg)
 {
-    if(arg) 
-    {
-	int parse_err = 0;
-	unsigned int parse_pos = 0;
+  int il, il_bf;
+  strarg_t file;
+  opt_t subopts[] = {
+    {"interlaced",    OPT_ARG_BOOL, &il,    NULL},
+    {"interlaced_bf", OPT_ARG_BOOL, &il_bf, NULL},
+    {"file",          OPT_ARG_STR,  &file,  NULL},
+    {NULL}
+  };
 
-	while (arg[parse_pos] && !parse_err) {
-	    if (strncmp (&arg[parse_pos], "interlaced", 10) == 0) {
-		parse_pos += 10;
-		config_interlace = Y4M_ILACE_TOP_FIRST;
-	    }
-	    else if (strncmp (&arg[parse_pos], "interlaced_bf", 13) == 0) {
-		parse_pos += 13;
-		config_interlace = Y4M_ILACE_BOTTOM_FIRST;
-	    }
-	    else if (strncmp (&arg[parse_pos], "file=", 5) == 0) {
-		int file_len;
-		parse_pos += 5;
-		file_len = strcspn (&arg[parse_pos], ":");
-		if (file_len < 0) {
-		    parse_err = 1;
-		    break;
-		}
-		yuv_filename = malloc (file_len + 1);
-		memcpy (yuv_filename, &arg[parse_pos], file_len);
-		yuv_filename[file_len] = 0;
-		parse_pos += file_len;
-	    }
-	    if (arg[parse_pos] == ':') parse_pos++;
-	    else if (arg[parse_pos]) parse_err = 1;
-	}
-	if (parse_err) { 
-	    mp_msg(MSGT_VO,MSGL_FATAL, 
-		    MSGTR_VO_YUV4MPEG_UnknownSubDev,arg); 
-	    return -1;
-	}
-    }
+  il = 0;
+  il_bf = 0;
+  file.len = 0;
+  if (subopt_parse(arg, subopts) != 0) {
+    mp_msg(MSGT_VO, MSGL_FATAL, MSGTR_VO_YUV4MPEG_UnknownSubDev, arg); 
+    return -1;
+  }
+
+  config_interlace = Y4M_ILACE_NONE;
+  if (il)
+    config_interlace = Y4M_ILACE_TOP_FIRST;
+  if (il_bf)
+    config_interlace = Y4M_ILACE_BOTTOM_FIRST;
+  yuv_filename = NULL;
+  if (file.len > 0) {
+    yuv_filename = malloc(file.len + 1);
+    memcpy(yuv_filename, file.str, file.len);
+    yuv_filename[file.len] = 0;
+  }
 
     /* Inform user which output mode is used */
     switch (config_interlace)
