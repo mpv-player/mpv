@@ -161,6 +161,8 @@ Optional features:
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
+  --disable-vm           disable support X video mode extensions [autodetect]
+  --disable-xf86keysym   disable support for 'multimedia' keys [autodetect]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video4Linux TV Interface support [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV Interface support [autodetect]
@@ -1341,6 +1343,7 @@ _xinerama=auto
 _mga=auto
 _xmga=auto
 _vm=auto
+_xf86keysym=auto
 _mlib=auto
 _sgiaudio=auto
 _sunaudio=auto
@@ -1547,6 +1550,8 @@ for ac_option do
   --disable-xmga)	_xmga=no	;;
   --enable-vm)		_vm=yes		;;
   --disable-vm)		_vm=no		;;
+  --enable-xf86keysym)	_xf86keysym=yes	;;
+  --disable-xf86keysym)	_xf86keysym=no	;;
   --enable-mlib)	_mlib=yes	;;
   --disable-mlib)	_mlib=no	;;
   --enable-sunaudio)	_sunaudio=yes	;;
@@ -3546,17 +3551,14 @@ echores "$_xinerama"
 # This check may be useful for future mplayer versions (to change resolution)
 # If you run into problems, remove '-lXxf86vm'.
 echocheck "Xxf86vm"
-if test "$_x11" = yes && test "$_vm" != no ; then
+if test "$_x11" = yes && test "$_vm" = auto ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
-#include <X11/XF86keysym.h>
 int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
   cc_check $_inc_x11 -lXxf86vm $_ld_x11 && _vm=yes
-else
-  _vm=no
 fi
 if test "$_vm" = yes ; then
   _def_vm='#define HAVE_XF86VM 1'
@@ -3566,6 +3568,28 @@ else
 fi
 echores "$_vm"
 
+# Check for the presence of special keycodes, like audio control buttons
+# that XFree86 might have.  Used to be bundled with the xf86vm check, but
+# has nothing to do with xf86vm and XFree 3.x has xf86vm but does NOT
+# have these new keycodes.
+echocheck "XF86keysym"
+if test "$_xf86keysym" = auto; then
+  _xf86keysym=no
+  if test "$_x11" = yes ; then
+    cat > $TMPC <<EOF
+#include <X11/Xlib.h>
+#include <X11/XF86keysym.h>
+int main(void) { return XF86XK_AudioPause; }
+EOF
+    cc_check $_inc_x11 $_ld_x11 && _xf86keysym=yes
+  fi
+fi
+if test "$_xf86keysym" = yes ; then
+  _def_xf86keysym='#define HAVE_XF86XK 1'
+else
+  _def_xf86keysym='#undef HAVE_XF86XK'
+fi
+echores "$_xf86keysym"
 
 echocheck "DGA"
 # Version 2 is preferred to version 1 if available
@@ -7393,6 +7417,7 @@ $_def_x11
 $_def_xv
 $_def_xvmc
 $_def_vm
+$_def_xf86keysym
 $_def_xinerama
 $_def_gl
 $_def_gl_win32

@@ -37,6 +37,9 @@
 
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
+#endif
+
+#ifdef HAVE_XF86XK
 #include <X11/XF86keysym.h>
 #endif
 
