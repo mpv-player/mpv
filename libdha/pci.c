@@ -87,7 +87,7 @@
 #include "sysdep/pci_isc.c"
 #elif defined (__EMX__)
 #include "sysdep/pci_os2.c"
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined(__CYGWIN__)
 #include "sysdep/pci_win32.c"
 #endif
 
