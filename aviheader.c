@@ -105,6 +105,7 @@ while(1){
 	case mmioFOURCC('m', 'p', '4', '3'):
 	case mmioFOURCC('M', 'P', '4', '2'):
 	case mmioFOURCC('m', 'p', '4', '2'):
+	case mmioFOURCC('D', 'I', 'V', '2'):
         case mmioFOURCC('A', 'P', '4', '1'):
           idxfix_divx=1; // we can fix keyframes only for divx coded files!
         }
