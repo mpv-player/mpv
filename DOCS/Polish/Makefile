@@ -6,7 +6,7 @@
 # COMMAND=sgml2
 
 # new single command approach
-COMMAND=linuxdoc --backend=
+COMMAND=linuxdoc --charset=latin --language=pl --split=0 --backend=
 
 SOURCE=documentation.sgml
 
