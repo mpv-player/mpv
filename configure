@@ -2360,14 +2360,15 @@ EOF
   echores "$_divx4linux_decore"
   test "$_divx4linux_decore" = yes && _divx4linux=yes
 fi
-_def_decore='#undef NEW_DECORE'
-_ld_decore='-Lopendivx -ldecore'
 if test "$_divx4linux_decore" = yes ; then
   _def_decore='#define NEW_DECORE 1'
   _ld_decore='-ldivxdecore opendivx/postprocess.o'
   _codecmodules="divx4linux $_codecmodules"
+else
+  _ld_decore='-Lopendivx -ldecore'
+  _def_decore='#undef NEW_DECORE'
+  _codecmodules="opendivx $_codecmodules"
 fi
-
 
 # mencoder requires those libs: libmp3lame and divx4linux encore
 if test "$_mencoder" != no ; then
@@ -3022,6 +3023,8 @@ EOF
 
 #############################################################################
 
+if test -d "libvo2" ; then
+
 echo "Creating libvo2/config.mak"
 _vo2obj=`echo $_vo2src | sed -e 's/\.c/\.o/g'`
 cat > libvo2/config.mak << EOF
@@ -3029,6 +3032,8 @@ include ../config.mak
 OPTIONAL_SRCS = $_vo2src
 OPTIONAL_OBJS = $_vo2obj
 EOF
+
+fi
 
 #############################################################################
 
