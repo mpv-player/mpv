@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -84,6 +84,10 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - рекомендуется, необходимо для кодирования MP3 аудио c Mencoder,
 рекомендуемая версия - это <emphasis role="bold"> всегда новейшая</emphasis> (как минимум 3.90).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">zlib</emphasis> - рекомендуется, необходима для сжатых
+  MOV заголовков и поддержки PNG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libogg</emphasis> - необязательно, необходимо для проигрывания файлов формата OGG.
