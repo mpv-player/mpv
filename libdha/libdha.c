@@ -63,6 +63,9 @@ void libdha_exit(const char *message, int level)
 #endif
 
 #ifdef CONFIG_DHAHELPER
+
+#include "kernelhelper/dhahelper.h"
+
 static int mem=-1;
 void *map_phys_mem(unsigned base, unsigned size)
 {
