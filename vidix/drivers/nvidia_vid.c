@@ -5,7 +5,7 @@
    Licence: GPL
    WARNING: THIS DRIVER IS IN BETTA STAGE
    
-   multi buffer support, TNT2 fixes and experimental yv12 support by Dmitry Baryshkov
+   multi buffer support and TNT2 fixes by Dmitry Baryshkov
 */
 
 
@@ -226,7 +226,8 @@ struct rivatv_chip {
 typedef struct rivatv_chip rivatv_chip;
 
 
-struct rivatv_info {    
+struct rivatv_info {
+    unsigned int use_colorkey;    
     unsigned int colorkey; /* saved xv colorkey*/
     unsigned int vidixcolorkey; /*currently used colorkey*/
     unsigned int depth; 
@@ -371,7 +372,7 @@ void rivatv_overlay_stop (struct rivatv_info *info) {
 		/* NV_PVIDEO_BUFFER */
 		VID_AND32 (info->chip.PVIDEO, 0x700, ~0x11);
 		/* NV_PVIDEO_INTR_EN_BUFFER */
-		VID_AND32 (info->chip.PVIDEO, 0x140, ~0x11);
+//		VID_AND32 (info->chip.PVIDEO, 0x140, ~0x11);
 		break;
 	case NV_ARCH_03:
 	case NV_ARCH_04:
@@ -380,7 +381,7 @@ void rivatv_overlay_stop (struct rivatv_info *info) {
 		/* NV_PVIDEO_OVERLAY_VIDEO_OFF */
 		VID_AND32 (info->chip.PVIDEO, 0x244, ~0x01);
 		/* NV_PVIDEO_INTR_EN_0_NOTIFY */
-		VID_AND32 (info->chip.PVIDEO, 0x140, ~0x01);
+//		VID_AND32 (info->chip.PVIDEO, 0x140, ~0x01);
 		/* NV_PVIDEO_OE_STATE */
 		VID_WR32 (info->chip.PVIDEO, 0x224, 0);
 		/* NV_PVIDEO_SU_STATE */
@@ -426,6 +427,7 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 		key = chromakey;
 		break;
 	}
+    if(!info->use_colorkey)return;
     switch (info->chip.arch) {
 	  case NV_ARCH_10:
 	  case NV_ARCH_20:
@@ -473,6 +475,7 @@ static void nv_getscreenproperties(struct rivatv_info *info){
 /* Start overlay video. */
 void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t base, size, offset, xscale, yscale, pan;
+    uint32_t value;
 	int x=8, y=8;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
@@ -556,15 +559,18 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		//VID_WR32 (info->chip.PVIDEO, 0x950 + 4, (height << 16) | width);
 
 		/* NV_PVIDEO_FORMAT */
-		VID_WR32 (info->chip.PVIDEO, 0x958 + 0, (info->pitch << 0) | 0x00100000|(((info->format==IMGFMT_YV12)?1:0))<<16);
-		//VID_WR32 (info->chip.PVIDEO, 0x958 + 4, (pitch << 1) | 0x00100000);
+        value = info->pitch;       
+	    if(info->use_colorkey)value |= 1 << 20; 
+        if(info->format == IMGFMT_YUY2)value |= 1 << 16;
+        VID_WR32 (info->chip.PVIDEO, 0x958 + 0, value);
+	    //VID_WR32 (info->chip.PVIDEO, 0x958 + 4, (pitch << 1) | 0x00100000);
 
 		/* NV_PVIDEO_INTR_EN_BUFFER */
-		VID_OR32 (info->chip.PVIDEO, 0x140, 0x01/*0x11*/);
+//		VID_OR32 (info->chip.PVIDEO, 0x140, 0x01/*0x11*/);
 		/* NV_PVIDEO_STOP */
-		VID_AND32 (info->chip.PVIDEO, 0x704, 0xFFFFFFEE);
+		VID_WR32 (info->chip.PVIDEO, 0x704,0x0);
 		/* NV_PVIDEO_BUFFER */
-		VID_OR32 (info->chip.PVIDEO, 0x700, 0x01/*0x11*/);
+		VID_WR32 (info->chip.PVIDEO, 0x700, 0x01/*0x11*/);
 		break;
 
 	case NV_ARCH_03:
@@ -606,7 +612,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		/* NV_PVIDEO_CONTROL_Y (BLUR_ON, LINE_HALF) */
 		VID_WR32 (info->chip.PVIDEO, 0x204, 0x001);
 		/* NV_PVIDEO_CONTROL_X (WEIGHT_HEAVY, SHARPENING_ON, SMOOTHING_ON) */
-		VID_WR32 (info->chip.PVIDEO, 0x208, 0x111);     /*rivatv 0x110 */
+		VID_WR32 (info->chip.PVIDEO, 0x208, 0x111);     /*directx overlay 0x110 */
 
 		/* NV_PVIDEO_FIFO_BURST_LENGTH */
 		VID_WR32 (info->chip.PVIDEO, 0x23C, 0x03);
@@ -617,14 +623,15 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		VID_WR32 (info->chip.PVIDEO, 0x21C + 0, 0);
 		VID_WR32 (info->chip.PVIDEO, 0x21C + 4, 0);
 
-
-
-
 		/* NV_PVIDEO_INTR_EN_0_NOTIFY_ENABLED */
 //		VID_OR32 (info->chip.PVIDEO, 0x140, 0x01);                                 
+
 		/* NV_PVIDEO_OVERLAY (KEY_ON, VIDEO_ON, FORMAT_CCIR) */
-                 
-        VID_WR32 (info->chip.PVIDEO, 0x244, (info->format==IMGFMT_YUY2)?0x111:0x011);
+        value = 0x1; /*video on*/
+        if(info->format==IMGFMT_YUY2)value |= 0x100;
+        if(info->use_colorkey)value |=0x10;       
+        VID_WR32 (info->chip.PVIDEO, 0x244, value);
+
 		/* NV_PVIDEO_SU_STATE */
 		VID_XOR32 (info->chip.PVIDEO, 0x228, 1 << 16);
 		break;
@@ -719,6 +726,7 @@ int vixInit(void){
    
   rivatv_enable_PMEDIA(info);
   info->next_frame = 0;
+  info->use_colorkey = 1;
   return 0;
 }
 
@@ -735,9 +743,7 @@ int vixGetCapability(vidix_capability_t *to){
 
 inline static int is_supported_fourcc(uint32_t fourcc)
 {
-	if	(fourcc == IMGFMT_UYVY ||
-		(fourcc == IMGFMT_YUY2 && info->chip.arch <=  NV_ARCH_04) ||
-		(fourcc == IMGFMT_YV12 && info->chip.arch >=  NV_ARCH_10))
+	if	(fourcc == IMGFMT_UYVY || fourcc == IMGFMT_YUY2)
 		return 1;
 	else
 		return 0;
@@ -783,7 +789,7 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
 	    case IMGFMT_YUY2:
 	    case IMGFMT_UYVY:
 
-		    vinfo->dest.pitch.y = 2;
+		    vinfo->dest.pitch.y = 16;
 		    vinfo->dest.pitch.u = 0;
 		    vinfo->dest.pitch.v = 0;
 
