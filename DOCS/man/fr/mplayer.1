@@ -7832,6 +7832,15 @@ plus jolis.
 direct_pred=0 est généralement lent et de qualité moindre.
 .
 .TP
+.B (no)weight_b
+Utilise des prédictions pondérées dans les trames-B.
+Sans cette option, les macro-blocs prédits bidirectionnellement voient
+leurs trames de référence pondérés de la même valeur.
+Avec cette option, les pondérations sont déterminées par la position
+temporelle de la trame-B par rapport à celles de référence.
+Requière bframes > 1.
+.
+.TP
 .B (no)b8x8mv
 Utilise en plus les types de macro-blocs b16x8, b8x16, b8x8
 (par défaut\: activé).
