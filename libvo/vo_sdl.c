@@ -603,5 +603,3 @@ uninit(void)
 sdl_close();
 }
 
-
-

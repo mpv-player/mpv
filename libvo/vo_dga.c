@@ -34,6 +34,7 @@ LIBVO_EXTERN( dga )
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 
+#include "x11_common.h"
 
 static vo_info_t vo_info =
 {
@@ -43,27 +44,25 @@ static vo_info_t vo_info =
         ""
 };
 
-int       vo_dga_width;           // bytes per line in framebuffer
-int       vo_dga_vp_width;        // visible pixels per line in framebuffer
-int       vo_dga_vp_height;       // visible lines in framebuffer
-int       vo_dga_is_running = 0; 
-int       vo_dga_src_width;       // width of video in pixels
-int       vo_dga_src_height;      // height of video in pixels
-int       vo_dga_bpp;             // bytes per pixel in framebuffer
-int       vo_dga_src_offset=0;    // offset in src
-int       vo_dga_vp_offset=0;   // offset in dest
-int       vo_dga_bytes_per_line;  // longwords per line to copy
-int       vo_dga_src_skip;        // bytes to skip after copying one line 
+static int       vo_dga_width;           // bytes per line in framebuffer
+static int       vo_dga_vp_width;        // visible pixels per line in framebuffer
+static int       vo_dga_vp_height;       // visible lines in framebuffer
+static int       vo_dga_is_running = 0; 
+static int       vo_dga_src_width;       // width of video in pixels
+static int       vo_dga_src_height;      // height of video in pixels
+static int       vo_dga_bpp;             // bytes per pixel in framebuffer
+static int       vo_dga_src_offset=0;    // offset in src
+static int       vo_dga_vp_offset=0;   // offset in dest
+static int       vo_dga_bytes_per_line;  // longwords per line to copy
+static int       vo_dga_src_skip;        // bytes to skip after copying one line 
                                   // (not supported yet) in src
-int       vo_dga_vp_skip;       // dto. for dest 
-int       vo_dga_lines;         // num of lines to copy
-int       vo_dga_src_format;                                 
+static int       vo_dga_vp_skip;       // dto. for dest 
+static int       vo_dga_lines;         // num of lines to copy
+static int       vo_dga_src_format;                                 
 
-unsigned char     *vo_dga_base;
-Display  *vo_dga_dpy;
+static unsigned char     *vo_dga_base;
+static Display  *vo_dga_dpy;
 
-
-extern void vo_decoration( Display * vo_Display,Window w,int d );
 
 #include "mmx.h"
 
@@ -170,8 +169,13 @@ static uint32_t draw_frame( uint8_t *src[] ){
   return 0;
 }
 
+static void check_events(void)
+{
+    int e=vo_x11_check_events(vo_dga_dpy);
+}
+
 static void flip_page( void ){
- 
+    check_events(); 
   //  printf("vo_dga: In flippage\n");
 
 }
@@ -314,7 +318,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   return 0;
 }
 
-
+#if 0
 int vo_dga_query_event(void){
 
   XEvent  myevent;
@@ -366,6 +370,7 @@ int vo_dga_query_event(void){
   }
   return retval;
 }
+#endif
 
 
 

@@ -43,6 +43,8 @@ LIBVO_EXTERN( xmga )
 #include <X11/Xutil.h>
 #include <errno.h>
 
+#include "x11_common.h"
+
 static vo_info_t vo_info =
 {
  "X11 (Matrox G200/G400 overlay in window using /dev/mga_vid)",
@@ -88,6 +90,7 @@ static XSetWindowAttributes   xWAttribs;
 #include "mga_common.c"
 
 
+
 static void mDrawColorKey( void )
 {
  XClearWindow( mDisplay,mWindow );
@@ -96,20 +99,11 @@ static void mDrawColorKey( void )
  XFlush( mDisplay );
 }
 
-static Bool mEvents( Display * display,XEvent * Event,XPointer arg )
+static void check_events(void)
 {
- int            i;
- char           buf[100];
- KeySym         keySym;
- XComposeStatus stat;
- unsigned long  vo_KeyTable[512];
+    int e=vo_x11_check_events(mDisplay);
 
- switch( Event->type )
-  {
-   case Expose:
-         mDrawColorKey();
-         break;
-   case ConfigureNotify:
+    if(e&VO_EVENT_RESIZE){
          XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          drwX=0; drwY=0;
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
@@ -134,18 +128,18 @@ static Bool mEvents( Display * display,XEvent * Event,XPointer arg )
          if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
           {
            fprintf( stderr,"Error in mga_vid_config ioctl" );
-           exit( 0 );
+//           exit( 0 );
           }
-         break;
-   case KeyPress:
-         XLookupString( &Event->xkey,buf,sizeof(buf),&keySym,&stat );
-         vo_keyboard( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-         break;
-  }
- return 0;
+
+    } else
+    if(e&VO_EVENT_EXPOSE) mDrawColorKey();
+
 }
 
-static XEvent mEvent;
+static void flip_page(void){
+    check_events();
+    vo_mga_flip_page();
+}
 
 static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format )
 {
@@ -229,7 +223,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    InputOutput,
    vinfo.visual,xswamask,&xWAttribs );
 
- if ( fullscreen ) vo_decoration( mDisplay,mWindow,0 );
+ if ( fullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
 
  XGetNormalHints( mDisplay,mWindow,&hint );
  hint.x=wndX; hint.y=wndY;
@@ -295,11 +289,6 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
 // vo_initthread( mThread );
 
- if((vo_eventhandler_pid=fork())==0){
-   XIfEvent( mDisplay,&mEvent,mEvents,NULL ); 
-   exit(0);
- }
-
  return 0;
 }
 
@@ -312,7 +301,6 @@ uninit(void)
 {
  ioctl( f,MGA_VID_OFF,0 );
 printf("vo: uninit!\n");
-vo_kill_eventhandler();
 }
 
 

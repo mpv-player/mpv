@@ -31,6 +31,8 @@ LIBVO_EXTERN(xv)
 #include <errno.h>
 #include "yuv2rgb.h"
 
+#include "x11_common.h"
+
 static vo_info_t vo_info = 
 {
 	"X11/Xv",
@@ -59,7 +61,7 @@ static XWindowAttributes attribs;
 static void allocate_xvimage(int);
 static unsigned int ver,rel,req,ev,err;
 static unsigned int formats, adaptors,i,xv_port,xv_format;
-static int win_width,win_height;
+//static int vo_dwidth,vo_dheight;
 static XvAdaptorInfo        *ai;
 static XvImageFormatValues  *fo;
 static XvImage *xvimage[1];
@@ -91,8 +93,6 @@ static int get_depth(){
     printf("X11 Display color depth = %d\n",depth);
     return depth;
 }
-
-extern void vo_decoration( Display * vo_Display,Window w,int d );
 
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -191,7 +191,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
 
-        if ( fullscreen ) vo_decoration( mydisplay,mywindow,0 );
+        if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
 
 	/* Map window. */
 
@@ -256,8 +256,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			/* catch window resizes */
                         XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask);
 //			XSelectInput(mydisplay, mywindow, StructureNotifyMask);
-			win_width  = image_width;
-			win_height = image_height;
+			vo_dwidth  = image_width;
+			vo_dheight = image_height;
                         // resize:
             XMoveResizeWindow(mydisplay,mywindow,0,0,d_width,d_height);
 
@@ -299,56 +299,20 @@ allocate_xvimage(int foo)
 	return;
 }
 
-#if 0
-static void
-check_events(void)
+static void check_events(void)
 {
-	Window root;
-	XEvent event;
-	int x, y;
-	unsigned int w, h, b, d;
+    int e=vo_x11_check_events(mydisplay);
 
-	if (XCheckWindowEvent(mydisplay, mywindow, StructureNotifyMask, &event))
-	{
-		XGetGeometry(mydisplay, mywindow, &root, &x, &y, &w, &h, &b, &d);
-		win_width  = w;
-		win_height = h;
-	}
 }
-#endif
 
 static void
 flip_page(void)
 {
- int            i;
- XEvent         Event;
- char           buf[100];
- KeySym         keySym;
- XComposeStatus stat;
- unsigned long  vo_KeyTable[512];
-
- while ( XPending( mydisplay ) )
-  {
-   XNextEvent( mydisplay,&Event );
-   switch( Event.type )
-    {
-       case ConfigureNotify:
-             win_width = Event.xconfigure.width;
-             win_height = Event.xconfigure.height;
-             break;
-       case KeyPress:
-             XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
-             vo_keyboard( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-             break;
-    }
-  }
-
-//	check_events();
-
+	check_events();
 #ifdef DISP
 	XvShmPutImage(mydisplay, xv_port, mywindow, mygc, xvimage[0],
 		0, 0,  image_width, image_height,
-		0, 0,  win_width, win_height,
+		0, 0,  vo_dwidth, vo_dheight,
 		False);
 	XFlush(mydisplay);
 #endif
@@ -407,8 +371,6 @@ draw_frame(uint8_t *src[])
 {
 	int foo;
 
-//	check_events();
-
         if(xv_format==IMGFMT_YUY2){
           // YUY2 packed, flipped
 #if 0
@@ -450,7 +412,6 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-vo_kill_eventhandler();
 }
 
 

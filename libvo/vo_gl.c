@@ -32,6 +32,8 @@ LIBVO_EXTERN(gl)
 
 #include <GL/gl.h>
 
+#include "x11_common.h"
+
 static vo_info_t vo_info = 
 {
 	"X11 (OpenGL)",
@@ -88,8 +90,6 @@ static resize(int x,int y){
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
-
-extern void vo_decoration( Display * vo_Display,Window w,int d );
 
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -189,7 +189,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 //  printf("GLXcontext ok\n");
 
-  if ( fullscreen ) vo_decoration( mydisplay,mywindow,0 );
+  if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
 
 	XSelectInput(mydisplay, mywindow, StructureNotifyMask);
 
@@ -317,30 +317,19 @@ Terminate_Display_Process(void)
 	X_already_started = 0;
 }
 
-static void 
-FlipImage()
-{
- int            i;
- XEvent         Event;
- char           buf[100];
- KeySym         keySym;
- XComposeStatus stat;
- unsigned long  vo_KeyTable[512];
 
- while ( XPending( mydisplay ) )
-  {
-   XNextEvent( mydisplay,&Event );
-   switch( Event.type )
-    {
-       case ConfigureNotify:
-             resize( Event.xconfigure.width,Event.xconfigure.height );
-             break;
-       case KeyPress:
-             XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
-             vo_keyboard( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-             break;
-    }
-  }
+static void check_events(void)
+{
+    int e=vo_x11_check_events(mydisplay);
+    if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
+}
+
+
+static void
+flip_page(void)
+{
+
+    check_events();
 
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -357,12 +346,6 @@ FlipImage()
   glFinish();
   glXSwapBuffers( mydisplay,mywindow );
   
-}
-
-static void
-flip_page(void)
-{
-  FlipImage();
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -418,7 +401,6 @@ int i;
     }
 
 //	Display_Image(ImageData);
-//  FlipImage();
 	return 0; 
 }
 
@@ -452,7 +434,6 @@ uint8_t *de=&ImageData[3*image_width];
     }
 
 //	Display_Image(ImageData);
-//  FlipImage();
 	return 0; 
 }
 
@@ -476,7 +457,6 @@ uint8_t *ImageData=src[0];
     }
 
 //	Display_Image(ImageData);
-//  FlipImage();
 	return 0; 
 }
 
@@ -509,7 +489,5 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-vo_kill_eventhandler();
 }
-
 

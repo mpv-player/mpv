@@ -31,6 +31,8 @@ LIBVO_EXTERN( x11 )
 #include <errno.h>
 #include "yuv2rgb.h"
 
+#include "x11_common.h"
+
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",
@@ -57,7 +59,7 @@ static int depth,bpp,mode;
 static XWindowAttributes attribs;
 static int X_already_started=0;
 
-static int windowwidth,windowheight;
+//static int vo_dwidth,vo_dheight;
 
 #define SH_MEM
 
@@ -95,31 +97,9 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
 
-extern void vo_decoration( Display * vo_Display,Window w,int d );
-
-static Bool mEvents( Display * display,XEvent * Event,XPointer arg )
-{
- int            i;
- char           buf[100];
- KeySym         keySym;
- XComposeStatus stat;
- unsigned long  vo_KeyTable[512];
-
- switch( Event->type )
-  {
-   case ConfigureNotify:
-         windowwidth=Event->xconfigure.width;
-         windowheight=Event->xconfigure.height;
-         break;
-   case KeyPress:
-         XLookupString( &Event->xkey,buf,sizeof(buf),&keySym,&stat );
-         vo_keyboard( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-         break;
-  }
- return 0;
+static void check_events(){
+  int e=vo_x11_check_events(mDisplay);
 }
-
-static XEvent mEvent;
 
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t fullscreen,char *title,uint32_t format )
 {
@@ -163,8 +143,8 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    hint.width=vo_screenwidth;
    hint.height=vo_screenheight;
   }
- windowwidth=hint.width;
- windowheight=hint.height;
+ vo_dwidth=hint.width;
+ vo_dheight=hint.height;
  hint.flags=PPosition | PSize;
 
  bg=WhitePixel( mDisplay,screen );
@@ -189,7 +169,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
 
- if ( fullscreen ) vo_decoration( mDisplay,mywindow,0 );
+ if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
  XSelectInput( mDisplay,mywindow,StructureNotifyMask );
  XSetStandardProperties( mDisplay,mywindow,hello,hello,None,NULL,0,&hint );
  XMapWindow( mDisplay,mywindow );
@@ -302,11 +282,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
 // vo_initthread( mThread );
 
- if((vo_eventhandler_pid=fork())==0){
-   XIfEvent( mDisplay,&mEvent,mEvents,NULL ); 
-   exit(0);
- }
-
  return 0;
 }
 
@@ -337,7 +312,7 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
   {
    XShmPutImage( mDisplay,mywindow,mygc,myximage,
                  0,0,
-                 ( windowwidth - myximage->width ) / 2,( windowheight - myximage->height ) / 2,
+                 ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
                  myximage->width,myximage->height,True );
    XFlush( mDisplay );
   }
@@ -346,15 +321,17 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
    {
     XPutImage( mDisplay,mywindow,mygc,myximage,
                0,0,
-               ( windowwidth - myximage->width ) / 2,( windowheight - myximage->height ) / 2,
+               ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
                myximage->width,myximage->height );
     XFlush( mDisplay );
   }
 #endif
 }
 
-static void flip_page( void )
-{ Display_Image( myximage,ImageData ); }
+static void flip_page( void ){
+    check_events();
+    Display_Image( myximage,ImageData );
+}
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
@@ -469,7 +446,6 @@ static void
 uninit(void)
 {
 printf("vo: uninit!\n");
-vo_kill_eventhandler();
 }
 
 

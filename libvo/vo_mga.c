@@ -124,4 +124,15 @@ printf("vo: uninit!\n");
 }
 
 
+static void flip_page(void)
+{
+    vo_mga_flip_page();
+}
+
+
+static void check_events(void)
+{
+}
+
+
 

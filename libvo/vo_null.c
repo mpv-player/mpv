@@ -82,4 +82,9 @@ uninit(void)
 }
 
 
+static void check_events(void)
+{
+}
+
+
 

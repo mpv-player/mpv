@@ -152,7 +152,7 @@ draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 }
 
 static void
-flip_page(void)
+vo_mga_flip_page(void)
 {
 #if 0
 	ioctl(f,MGA_VID_FSEL,&next_frame);
