@@ -111,8 +111,8 @@ static void hide_terminal_output( void )
   my_stderr = fopen(ttyname(fileno(stderr)),"w");
   __set_cursor_type(stdout,0);
 /*if(isatty(fileno(stdin ))) stdin =freopen("/dev/null","r",stdin );*/
-  if(isatty(fileno(stdout))) stdout=freopen("/dev/null","w",stdout);
-  if(isatty(fileno(stderr))) stderr=freopen("/dev/null","w",stderr);
+  if(isatty(fileno(stdout))) freopen("/dev/null","w",stdout);
+  if(isatty(fileno(stderr))) freopen("/dev/null","w",stderr);
 }
 
 static unsigned hh_int_10_seg;
