@@ -410,9 +410,9 @@ case AFM_VORBIS: {
   }
   printf("OggVorbis: Pageout: successfull.\n");
   /* commenting out pagein to leave data (hopefully) to the decoder - atmos */
-  //ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og); /* we can ignore any errors here
-  //					 as they'll also become apparent
-  //					 at packetout */
+  ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og); /* we can ignore any errors here
+  					 as they'll also become apparent
+  					 at packetout */
 
   /* Get the serial number and set up the rest of decode. */
   /* serialno first; use it to set up a logical stream */
@@ -463,33 +463,37 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	float **pcm;
         ogg_int16_t convbuffer[4096];
         int convsize;
-        minlen=4096; // XXX hack, not neccessarily needed - atmos
-        convsize=minlen/sh_audio->ov->vi.channels;
-        while((ret = ogg_sync_pageout(&sh_audio->ov->oy,&sh_audio->ov->og))!=1) {
-          if(ret == -1)
-            printf("OggVorbis: Pageout: not properly synced, had to skip some bytes.\n");
-          else
-          if(ret == 0) {
-            //printf("OggVorbis: Pageout: need more data to verify page, reading more data.\n");
-            /* submit a minlen k block to libvorbis' Ogg layer */
-            buffer=ogg_sync_buffer(&sh_audio->ov->oy,minlen);
-            bytes=demux_read_data(sh_audio->ds,buffer,minlen);
-            ogg_sync_wrote(&sh_audio->ov->oy,bytes);
-            if(bytes==0)
-              printf("OggVorbis: 0Bytes written, possible End of Stream\n");
-          }
-        }
-        //printf("OggVorbis: Pageout: successfull, pagin in.\n");
-        if(ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og)<0)
-          printf("OggVorbis: Pagein failed!\n");
+        int readlen=4096;
+        len=0;
+        convsize=readlen/sh_audio->ov->vi.channels;
 
+        while(len < minlen) { /* double loop allows for break in inner loop */
+        while(len < minlen) { /* without aborting the outer loop - atmos    */
         ret=ogg_stream_packetout(&sh_audio->ov->os,&sh_audio->ov->op);
-        if(ret==0)
-          printf("OggVorbis: Packetout: need more data, FIXME!\n");
-        else
-        if(ret<0)
+        if(ret==0) {
+          //printf("OggVorbis: Packetout: need more data, paging!\n");
+          while((ret = ogg_sync_pageout(&sh_audio->ov->oy,&sh_audio->ov->og))!=1) {
+            if(ret == -1)
+              printf("OggVorbis: Pageout: not properly synced, had to skip some bytes.\n");
+            else
+            if(ret == 0) {
+              //printf("OggVorbis: Pageout: need more data to verify page, reading more data.\n");
+              /* submit a readlen k block to libvorbis' Ogg layer */
+              buffer=ogg_sync_buffer(&sh_audio->ov->oy,readlen);
+              bytes=demux_read_data(sh_audio->ds,buffer,readlen);
+              ogg_sync_wrote(&sh_audio->ov->oy,bytes);
+              if(bytes==0)
+                printf("OggVorbis: 0Bytes written, possible End of Stream\n");
+            }
+          }
+          //printf("OggVorbis: Pageout: successfull, pagin in.\n");
+          if(ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og)<0)
+            printf("OggVorbis: Pagein failed!\n");
+          break;
+        } else if(ret<0) {
           printf("OggVorbis: Packetout: missing or corrupt data, skipping packet!\n");
-        else {
+          break;
+        } else {
 
         /* we have a packet.  Decode it */
 	      
@@ -535,17 +539,19 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	    printf("Clipping in frame %ld\n",(long)(sh_audio->ov->vd.sequence));
 	
 	  //fwrite(convbuffer,2*sh_audio->ov->vi.channels,bout,stderr); //dump pcm to file for debugging
-          len=2*sh_audio->ov->vi.channels*bout;
-	  memcpy(buf,convbuffer,len);
+	  memcpy(buf+len,convbuffer,2*sh_audio->ov->vi.channels*bout);
+          len+=2*sh_audio->ov->vi.channels*bout;
 		
 	  vorbis_synthesis_read(&sh_audio->ov->vd,bout); /* tell libvorbis how
 							    many samples we
 							    actually consumed */
         }
+        } // from else, packetout ok
+        } // while len
+        } // outer while len
 	if(ogg_page_eos(&sh_audio->ov->og))
           printf("OggVorbis: End of Stream reached!\n"); // FIXME clearup decoder, notify mplayer - atmos
 
-        } // from else, packetout ok
 
         break;
       }
