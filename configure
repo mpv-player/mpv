@@ -587,7 +587,7 @@ case "$host_arch" in
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-  if test "_$runtime_cpudetection" = "no" ; then
+  if test "$_runtime_cpudetection" = no ; then
     if test "$proc" = "k7" ; then
       cc_check -march=$proc -mcpu=$proc || proc=athlon
     fi
