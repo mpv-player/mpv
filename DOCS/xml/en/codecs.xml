@@ -574,6 +574,9 @@ decoders.
   alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
   audio codecs
   </simpara></listitem>
+<listitem><simpara>
+  AAC
+  </simpara></listitem>
 </itemizedlist>
 
 
@@ -700,6 +703,31 @@ libraries. For installation instructions please see the
 <link linkend="sorenson">Sorenson video codec</link> section.
 </para>
 </sect3>
+
+<sect3 id="aac">
+<title>AAC codec</title>
+<para>
+AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
+files. An open source decoder called FAAD is available from
+<ulink url="http://www.audiocoding.com"/>. You can download the second
+generation codec FAAD2 at their <ulink url="http://www.audiocoding.com/download.php">
+download page</ulink>. Unfortunately FAAD2 1.1 does not compile under Linux, so you
+will have to use the CVS version. Here's how:
+<screen>
+cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login
+cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2
+cd faad2/
+chmod +x bootstrap
+./bootstrap
+make
+make install
+</screen>
+Binaries are not available from audiocoding.com, but you can (apt-)get Debian
+packages from <ulink url="http://marillat.free.fr">Christian Marillat's homepage</ulink>
+and Mandrake RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>.
+</para>
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
