@@ -1,15 +1,36 @@
-.\" MPlayer (C) 2000-2002 Arpad Gereoffy <sendmail@to.mplayer-users>
-.\" This man page was/is done by Gabucino <sendmail@to.mplayer-users>
-.\" (Patches done by Jonas Jermann <sendmail@to.mplayer-users>)
+.\" MPlayer (C) 2000-2002 Arpad Gereoffy
+.\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" 
-.TH "MPlayer" "1" "2002-08-28"
-
-.SH "NAME"
+.\" Run groff -m man -Thtml mplayer.1 > manpage.html for a html version
+.\" 
+.
+.\" --------------------------------------------------------------------------
+.\" Macro definitions
+.\" --------------------------------------------------------------------------
+.
+.de RSx
+.RS +12
+..
+.de RSy
+.RS +10
+..
+.
+.\" --------------------------------------------------------------------------
+.\" Title
+.\" --------------------------------------------------------------------------
+.
+.TH MPlayer 1 "2002-09-01"
+.
+.SH NAME
 mplayer  \- Movie Player for Linux
 .br
 mencoder \- Movie Encoder for Linux
 
-.SH "SYNOPSIS"
+.\" --------------------------------------------------------------------------
+.\" Synopsis
+.\" --------------------------------------------------------------------------
+.
+.SH SYNOPSIS
 .B mplayer
 .RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ ]
 .br
@@ -31,7 +52,11 @@ mencoder \- Movie Encoder for Linux
 .B gmplayer
 .RB [options]\ [\-skin\ skin]
 
-.SH "DESCRIPTION"
+.\" --------------------------------------------------------------------------
+.\" Description
+.\" --------------------------------------------------------------------------
+.
+.SH DESCRIPTION
 .B mplayer
 is a movie player for LINUX (runs on many other Unices, and non\-x86
 CPUs, see the documentation). It plays most MPEG/VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
@@ -66,15 +91,19 @@ PCM/MP3/VBRMP3 audio. It also has stream copying abilities, a powerful plugin sy
 is MPlayer with a graphical user interface.
 It has the same options as MPlayer.
 
+
+.\" --------------------------------------------------------------------------
+.\" Options
+.\" --------------------------------------------------------------------------
+.
 .SH GENERAL NOTES
 .B Check the HTML documentation, too!
-.br
+
 Every "flag" option has a "noflag" counterpart, e.g.  the opposite of the \-fs
 option is \-nofs.
 .br
 You can put all of the options in a config file which will be read every time
-.B mplayer
-is run. The system-wide config file 'mplayer.conf' is in your configuration
+mplayer is run. The system-wide config file 'mplayer.conf' is in your configuration
 directory (e.g. /etc/mplayer or /usr/local/etc/mplayer), the user specific
 one is '~/.mplayer/config'. User specific options override system-wide options
 and options given on the command line override either. The syntax of the config
@@ -84,7 +113,7 @@ and disabled by setting them to 'no' or '0'. Even suboptions can be specified
 in this way.
 
 .I EXAMPLE:
-.br
+
 # Use Matrox driver by default.
 .br
 vo=xmga
@@ -407,8 +436,8 @@ autodetected on most AVI files.
     \-aspect 4:3  or \-aspect 1.3333
     \-aspect 16:9 or \-aspect 1.7777
 .TP
-.B \-flip
-Flip image upside-down.
+.B \-flip \ 
+Flip image upside\-down.
 .TP
 .B \-lavdopts <option1:option2:...> (DEBUG CODE)
 If decoding with a codec from libavcodec, you can specify its parameters here.
@@ -702,7 +731,7 @@ Specify additional parameters when decoding with XviD.
 .B \-y <y> (MPLAYER only)
 Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
 .TP
-.B \-zoom
+.B \-zoom \ 
 Allow software scaling, where available. Could be used to force scaling with -vop scale
 .br
 .I NOTE:
@@ -711,7 +740,7 @@ Allow software scaling, where available. Could be used to force scaling with -vo
 
 .SH "OSD/SUB OPTIONS"
 .I NOTE:
-See -vop expand too.
+See \-vop expand too.
 .TP
 .B \-dumpmpsub (MPLAYER only)
 Convert the given subtitle (specified with the \-sub switch) to MPlayer's
@@ -737,47 +766,44 @@ Resample alphamap of the font. Can be:
 .B \-font <path\ to\ font.desc\ file>
 Search for the OSD/SUB fonts in an alternative directory (default:
 ~/.mplayer/font/font.desc).
+.br
+.I NOTE:
+With FreeType, this option determines path to the text font file,
+.br
+.I NOTE:
+The \-subfont-* options are available only with FreeType support compiled in.
 
 .I EXAMPLE:
     \-font ~/.mplayer/arial\-14/font.desc
-
-.I NOTE:
-    With FreeType, this option determines path to the text font file,
-eg.
-
-    -font ~/.mplayer/my_cool_font.ttf
+    \-font ~/.mplayer/my_cool_font.ttf
 .TP
-.I NOTE:
-The -subfont-* options are available only with FreeType support
-compiled in.
-.TP
-.B \-subfont-encoding
+.B \-subfont-encoding <value>
 Sets the font encoding. When set to "unicode", all the glyphs from the
 font file will be rendered and unicode will be used. This is also the
 default setting.
 .TP
-.B \-subfont-text-scale
+.B \-subfont-text-scale <0\-100>
 Sets the subtitle text autoscale coefficient (percentage of the
 screen size).
 .TP
-.B \-subfont-osd-scale
+.B \-subfont-osd-scale <0\-100> 
 Sets the osd elements autoscale coefficient.
 .TP
-.B \-subfont-blur
+.B \-subfont-blur <0\-8>
 Sets the font blur radius.
 .TP
-.B \-subfont-outline
+.B \-subfont-outline <0\-8>
 Sets the font outline thickness.
 .TP
-.B \-subfont-autoscale <0-3>
-Sets the autoscale mode. Can be
+.B \-subfont-autoscale <0\-3>
+Sets the autoscale mode. Can be:
+
     0  no autoscale
     1  proportional to movie width
     2  proportional to movie height
-    3  proportional to movie diagonal
+    3  proportional to movie diagonal (default)
 
-Default is 3 (diagonal). Zero means that text-scale and osd-scale are
-font heights in points.
+Zero means that text-scale and osd-scale are font heights in points.
 .TP
 .B \-noautosub
 Turns off automatic subtitles.
@@ -803,7 +829,7 @@ list of available subtitles, use with the \-v switch and look at the output.
 .B \-sub <subtitle\ file>
 Use/display this subtitle file.
 .TP
-.B \-subcc
+.B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles. These are NOT the VOB subtitles,
 these are special ASCII subtitles for the hearing impaired encoded in the VOB
 userdata stream on most region 1 DVDs. CC subtitles have not been spotted on
@@ -840,7 +866,7 @@ position of the subtitle in % of the screen height.
 .B \-unicode
 Tells MPlayer to handle the subtitle file as UNICODE.
 .TP
-.B \-utf8
+.B \-utf8 \ \ 
 Tells MPlayer to handle the subtitle file as UTF8.
 .TP
 .B \-vobsub <vobsub\ file\ without\ extension>
@@ -916,8 +942,8 @@ Don't include wave header. Used for RAW PCM.
 
 .SH "VIDEO OUTPUT OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-aa*
-Used for \-vo aa. You can get a list and an explanation of available options executing
+.B \-aa* (\-vo aa only)
+You can get a list and an explanation of available options executing
 .I mplayer \-aahelp
 .TP
 .B \-bpp <depth>
@@ -943,7 +969,7 @@ Enables doublebuffering. Fixes flicker by storing two frames in memory, and
 displaying one while decoding another. Can effect OSD. Needs twice the memory
 than a single buffer, so it won't work on cards with very few video memory.
 .TP
-.B \-dr
+.B \-dr \ \ \ 
 Turns on direct rendering (not supported by all codecs and video outputs)
 (default is off).
 .TP
@@ -982,7 +1008,7 @@ Only valid for the fbdev driver.
 .B \-forcexv (SDL only)
 Force using XVideo.
 .TP
-.B \-fs
+.B \-fs \ \ \ 
 Fullscreen playing (centers movie, and makes black
 bands around it). Toggle it with the 'f' key (not all video
 outputs support it).
@@ -1053,7 +1079,7 @@ If you use an output driver which can't know the resolution of the screen
 (fbdev/x11 and/or TVout) this is where you can specify the horizontal and vertical
 resolution.
 .TP
-.B \-vm
+.B \-vm \ \ \ 
 Try to change to a better video mode. dga, x11/xv (XF86VidMode) and sdl
 output drivers support it.
 .TP
@@ -1068,7 +1094,7 @@ SDL and GGI too, it means subdriver then.
 You can get the list of available drivers executing
 .I mplayer \-vo help
 .TP
-.B \-vsync
+.B \-vsync \ \ 
 Enables VBI for vesa.
 .TP
 .B \-wid <window\ id>
@@ -1084,40 +1110,10 @@ Specifies compression level for PNG output (-vo png)
     0  no compression
     9  max compression
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr only)
-If the movie is smaller than the TV screen, these options control the position
-of the movie relative to the upper left corner of the screen. The movie
-is centered by default.
-.TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr only)
-Vertical/horizontal decimation: Ask the driver to send only every 2nd or 4th
-line/pixel of the input image to the MJPEG card and use the scaler of the
-MJPEG card to strech the image to its original size.
-.TP
-.B \-zrfd (\-vo zr only)
-Force decimation: Decimation, as specified by \-zrhdec and \-zrvdec, only happens
-if the hardware scaler can stretch the image to its original size. Use this
-option to force decimation.
-.TP
 .B \-zrbw (\-vo zr only)
 Display in black and white (for optimal performance, this option can be
 combined with the 'decode only in black and white' option for codecs
 belonging to the FFmpeg family).
-.TP
-.B \-zrquality <1\-20> (\-vo zr only)
-A number from 1 to 20 representing the jpeg encoding quality. 1 gives the best
-quality and 20 gives very bad quality.
-.TP
-.B \-zrdev <device> (\-vo zr only)
-Specify the device special file that belongs to your MJPEG card, by default
-this driver takes the first v4l device it can find.
-.TP
-.B \-zrnorm <norm> (\-vo zr only)
-Specify norm PAL/NTSC, the default is 'no change'.
-.TP
-.B \-zrhelp (\-vo zr only)
-Display a list of all -zr* options, their default values and an example of
-cinerama mode.
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
 Select a part of the input image for display, multiple occurences of this
@@ -1126,6 +1122,36 @@ over more than one TV (or beamer) to create a larger screen. Options appearing
 after the n\-th \-zrcrop apply to the n\-th MJPEG card, each card should at least
 have a \-zrdev in addition to the \-zrcrop. For examples, see the output of
 \-zrhelp and the Zr section of the documentation.
+.TP
+.B \-zrdev <device> (\-vo zr only)
+Specify the device special file that belongs to your MJPEG card, by default
+this driver takes the first v4l device it can find.
+.TP
+.B \-zrfd (\-vo zr only)
+Force decimation: Decimation, as specified by \-zrhdec and \-zrvdec, only happens
+if the hardware scaler can stretch the image to its original size. Use this
+option to force decimation.
+.TP
+.B \-zrhelp (\-vo zr only)
+Display a list of all -zr* options, their default values and an example of
+cinerama mode.
+.TP
+.B \-zrnorm <norm> (\-vo zr only)
+Specify norm PAL/NTSC, the default is 'no change'.
+.TP
+.B \-zrquality <1\-20> (\-vo zr only)
+A number from 1 to 20 representing the jpeg encoding quality. 1 gives the best
+quality and 20 gives very bad quality.
+.TP
+.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr only)
+Vertical/horizontal decimation: Ask the driver to send only every 2nd or 4th
+line/pixel of the input image to the MJPEG card and use the scaler of the
+MJPEG card to strech the image to its original size.
+.TP
+.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr only)
+If the movie is smaller than the TV screen, these options control the position
+of the movie relative to the upper left corner of the screen. The movie
+is centered by default.
 
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
@@ -1188,13 +1214,13 @@ Turns off joystick support. Default is on, if compiled in.
 .B \-nolirc
 Turns off lirc support.
 .TP
-.B \-nortc
+.B \-nortc \ \ 
 Turns off usage of /dev/rtc (real-time clock).
 .TP
 .B \-playlist <file>
 Play files according to this file list (1 file/row or Winamp or asx format).
 .TP
-.B \-quiet
+.B \-quiet \ \ 
 Display less output, status messages.
 .TP
 .B \-skin <skin\ directory> (BETA CODE)
@@ -1205,7 +1231,7 @@ Load skin from this directory (WITHOUT path name!).
                         /usr/local/share/mplayer/Skin/fittyfene
                         ~/.mplayer/Skin/fittyfene
 .TP
-.B \-slave
+.B \-slave \ \ 
 This option switches on slave mode. This is intended for use
 of MPlayer as a backend to other programs. Instead of intercepting keyboard
 events, MPlayer will read simplistic command lines from its stdin.
@@ -1543,6 +1569,10 @@ Specify the language two letter code for the subtitles.  This
 overrides what is read from the DVD or the .ifo file.
 
 
+.\" --------------------------------------------------------------------------
+.\" Keyboard control
+.\" --------------------------------------------------------------------------
+.
 .SH "KEYBOARD CONTROL"
 .I NOTE:
 MPlayer has a fully configurable, command driven, control layer
@@ -1639,6 +1669,10 @@ M               jump to main menu
 S               select
 
 
+.\" --------------------------------------------------------------------------
+.\" Slave mode protocol
+.\" --------------------------------------------------------------------------
+.
 .SH "SLAVE MODE PROTOCOL"
 If the \-slave switch is given, playback is controlled by a 
 line\-based protocol. Each line must contain one command
@@ -1723,6 +1757,11 @@ gui_play
 gui_stop
                 GUI actions
 
+
+.\" --------------------------------------------------------------------------
+.\" Files
+.\" --------------------------------------------------------------------------
+.
 .SH FILES
 .TP
 /etc/mplayer/mplayer.conf
@@ -1756,7 +1795,11 @@ are searched for in this priority (for example /mnt/movie/movie.avi):
   ~/.mplayer/default.sub
 
 
-.SH "EXAMPLES"
+.\" --------------------------------------------------------------------------
+.\" Examples
+.\" --------------------------------------------------------------------------
+.
+.SH EXAMPLES
 .TP
 .B Quickstart DVD playing
 mplayer \-dvd 1
@@ -1813,26 +1856,32 @@ rar p test-SVCD.rar | mencoder -ovc divx4 -divx4opts br=800 -ofps 24 -pass 1 -- 
 cat *.vob | mencoder <options> -
 
 
-.SH "BUGS"
+.\" --------------------------------------------------------------------------
+.\" Bugs, authors, standard disclaimer
+.\" --------------------------------------------------------------------------
+.
+.SH BUGS
 Probably. PLEASE, double-check the documentation (especially bugreports.html),
 the FAQ and the mail archive before!
-
+.br
 Send your complete bug reports to the MPlayer-users mailing list at
 <mplayer-users@mplayerhq.hu>. We love complete bug reports :)
 
 
-.SH "AUTHORS"
+.SH AUTHORS
 Check documentation!
-
+.TP 4
 MPlayer is (C) 2000\-2002
-.I Arpad Gereoffy <sendmail@to.mplayer\-users>
-
+.B Arpad Gereoffy
+.TP 4
 This man page is written and maintained by
-.I Gabucino <sendmail@to.mplayer\-users>.
-
-(Patches done by
-.I Jonas Jermann <sendmail@to.mplayer\-users>
-)
+.B Gabucino
+.br
+.B Diego Biurrun
+.br
+.B Jonas Jermann
+.PP
+Please send mails about it to the MPlayer-users mailing list.
 
 
 .SH "STANDARD DISCLAIMER"
