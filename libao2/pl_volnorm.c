@@ -23,6 +23,12 @@
 #include "audio_plugin_internal.h"
 #include "afmt.h"
 
+#ifdef __FreeBSD__
+#include "machine/limits.h"
+#define INT16_MAX INT_MAX
+#define INT16_MIN INT_MIN
+#endif
+
 static ao_info_t info = {
         "Volume normalizer",
         "volnorm",
