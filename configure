@@ -149,6 +149,7 @@ Optional features:
   --disable-css          Disable old-style libcss DVD support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --enable-freetype      Enable freetype2 font rendering support [disabled]
+  --disable-unrarlib     Disable Unique RAR File Library [enabled]
 
 Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
@@ -965,6 +966,7 @@ _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
+_unrarlib=yes
 _win32=auto
 _dshow=yes
 _select=yes
@@ -1159,6 +1161,8 @@ for ac_option do
   --disable-big-endian) _big_endian=no  ;;
   --enable-freetype)    _freetype=yes   ;;
   --disable-freetype)   _freetype=no    ;;
+  --enable-unralib)	_unrarlib=yes	;;
+  --disable-unrarlib)	_unrarlib=no	;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
@@ -3960,6 +3964,13 @@ else
 fi
 echores "$_fastmemcpy"
 
+echocheck "UniquE RAR File Library"
+if test "$_unrarlib" = yes ; then
+    _def_unrarlib='#define USE_UNRARLIB 1'
+else
+    _def_unrarlib='#undef USE_UNRARLIB'
+fi
+echores "$_unrarlib"
 
 echocheck "TV interface"
 if test "$_tv" = yes ; then
@@ -4343,6 +4354,8 @@ VIDIX = $_vidix
 
 OPENDIVX = $_opendivx
 
+UNRARLIB = $_unrarlib
+
 PNG = $_mkf_png
 JPEG = $_mkf_jpg
 GIF = $_mkf_gif
@@ -4658,6 +4671,9 @@ $_def_live
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy
+
+/* Use unrarlib for Vobsubs */
+$_def_unrarlib
 
 /* gui support, please do not edit this option */
 $_def_gui

@@ -2,10 +2,10 @@
  * Some code freely inspired from VobSub <URL:http://vobsub.edensrising.com>,
  * with kind permission from Gabest <gabest@freemail.hu>
  */
-/* #define HAVE_GETLINE */
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +21,9 @@
 #include "libvo/video_out.h"
 #include "spudec.h"
 #include "mp_msg.h"
+#ifdef USE_UNRARLIB
+#include "unrarlib.h"
+#endif
 
 #define MIN(a, b)	((a)<(b)?(a):(b))
 #define MAX(a, b)	((a)>(b)?(a):(b))
@@ -29,13 +32,172 @@ extern int vobsub_id;
 
 extern int verbose;
 
-#ifdef HAVE_GETLINE
-extern ssize_t getline(char **, size_t *, FILE *);
+/**********************************************************************
+ * RAR stream handling
+ * The RAR file must have the same basename as the file to open
+ * See <URL:http://www.unrarlib.org/>
+ **********************************************************************/
+#ifdef USE_UNRARLIB
+typedef struct {
+    FILE *file;
+    unsigned char *data;
+    unsigned long size;
+    unsigned long pos;
+} rar_stream_t;
+static rar_stream_t *
+rar_open(const char *const filename, const char *const mode)
+{
+    rar_stream_t *stream;
+    /* unrarlib can only read */
+    if (strcmp("r", mode) && strcmp("rb", mode)) {
+	errno = EINVAL;
+	return NULL;
+    }
+    stream = malloc(sizeof(rar_stream_t));
+    if (stream == NULL)
+	return NULL;
+    /* first try normal access */
+    stream->file = fopen(filename, mode);
+    if (stream->file == NULL) {
+	char *rar_filename;
+	char *p;
+	int rc;
+	/* Guess the RAR archive filename */
+	rar_filename = NULL;
+	p = strrchr(filename, '.');
+	if (p) {
+	    ptrdiff_t l = p - filename;
+	    rar_filename = malloc(l + 5);
+	    if (rar_filename == NULL) {
+		free(stream);
+		return NULL;
+	    }
+	    strncpy(rar_filename, filename, l);
+	    strcpy(rar_filename + l, ".rar");
+	}
+	else {
+	    rar_filename = malloc(strlen(filename) + 5);
+	    if (rar_filename == NULL) {
+		free(stream);
+		return NULL;
+	    }
+	    strcpy(rar_filename, filename);
+	    strcat(rar_filename, ".rar");
+	}
+	rc = urarlib_get(&stream->data, &stream->size, (char*) filename, rar_filename, "");
+	free(rar_filename);
+	if (!rc) {
+	    free(stream);
+	    return NULL;
+	}
+	stream->pos = 0;
+    }
+    return stream;
+}
+
+static int
+rar_close(rar_stream_t *stream)
+{
+    if (stream->file)
+	return fclose(stream->file);
+    free(stream->data);
+    return 0;
+}
+
+static int
+rar_eof(rar_stream_t *stream)
+{
+    if (stream->file)
+	return feof(stream->file);
+    return stream->pos >= stream->size;
+}
+
+static long
+rar_tell(rar_stream_t *stream)
+{
+    if (stream->file)
+	return ftell(stream->file);
+    return stream->pos;
+}
+
+static int
+rar_seek(rar_stream_t *stream, long offset, int whence)
+{
+    if (stream->file)
+	return fseek(stream->file, offset, whence);
+    switch (whence) {
+    case SEEK_SET:
+	if (offset < 0) {
+	    errno = EINVAL;
+	    return -1;
+	}
+	stream->pos = offset;
+	break;
+    case SEEK_CUR:
+	if (offset < 0 && stream->pos < (unsigned long) -offset) {
+	    errno = EINVAL;
+	    return -1;
+	}
+	stream->pos += offset;
+	break;
+    case SEEK_END:
+	if (offset < 0 && stream->size < (unsigned long) -offset) {
+	    errno = EINVAL;
+	    return -1;
+	}
+	stream->pos = stream->size + offset;
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+    return 0;
+}
+
+static int
+rar_getc(rar_stream_t *stream)
+{
+    if (stream->file)
+	return getc(stream->file);
+    if (rar_eof(stream))
+	return EOF;
+    return stream->data[stream->pos++];
+}
+
+static size_t
+rar_read(void *ptr, size_t size, size_t nmemb, rar_stream_t *stream)
+{
+    size_t res;
+    unsigned long remain;
+    if (stream->file)
+	return fread(ptr, size, nmemb, stream->file);
+    if (rar_eof(stream))
+	return 0;
+    res = size * nmemb;
+    remain = stream->size - stream->pos;
+    if (res > remain)
+	res = remain / size * size;
+    memcpy(ptr, stream->data + stream->pos, res);
+    stream->pos += res;
+    res /= size;
+    return res;
+}
+
 #else
-/* FIXME This should go into a general purpose library or even a
-   separate file. */
+typedef FILE rar_stream_t;
+#define rar_open	fopen
+#define rar_close	fclose
+#define rar_eof		feof
+#define rar_tell	ftell
+#define rar_seek	fseek
+#define rar_getc	getc
+#define rar_read	fread
+#endif
+
+/**********************************************************************/
+
 static ssize_t
-getline (char **lineptr, size_t *n, FILE *stream)
+getline(char **lineptr, size_t *n, rar_stream_t *stream)
 {
     size_t res = 0;
     int c;
@@ -54,7 +216,7 @@ getline (char **lineptr, size_t *n, FILE *stream)
     if (*lineptr == NULL || *n == 0)
 	return -1;
 
-    for (c = fgetc(stream); c != EOF; c = fgetc(stream)) {
+    for (c = rar_getc(stream); c != EOF; c = rar_getc(stream)) {
 	if (res + 1 >= *n) {
 	    char *tmp = realloc(*lineptr, *n * 2);
 	    if (tmp == NULL)
@@ -73,14 +235,13 @@ getline (char **lineptr, size_t *n, FILE *stream)
     (*lineptr)[res] = 0;
     return res;
 }
-#endif
 
 /**********************************************************************
  * MPEG parsing
  **********************************************************************/
 
 typedef struct {
-    FILE *stream;
+    rar_stream_t *stream;
     unsigned int pts;
     int aid;
     unsigned char *packet;
@@ -99,7 +260,7 @@ mpeg_open(const char *filename)
 	res->packet = NULL;
 	res->packet_size = 0;
 	res->packet_reserve = 0;
-	res->stream = fopen(filename, "r");
+	res->stream = rar_open(filename, "r");
 	err = res->stream == NULL;
 	if (err)
 	    perror("fopen Vobsub file failed");
@@ -115,20 +276,20 @@ mpeg_free(mpeg_t *mpeg)
     if (mpeg->packet)
 	free(mpeg->packet);
     if (mpeg->stream)
-	fclose(mpeg->stream);
+	rar_close(mpeg->stream);
     free(mpeg);
 }
 
 static int
 mpeg_eof(mpeg_t *mpeg)
 {
-    return feof(mpeg->stream);
+    return rar_eof(mpeg->stream);
 }
 
 static off_t
 mpeg_tell(mpeg_t *mpeg)
 {
-    return ftell(mpeg->stream);
+    return rar_tell(mpeg->stream);
 }
 
 static int
@@ -142,10 +303,10 @@ mpeg_run(mpeg_t *mpeg)
 
     mpeg->aid = -1;
     mpeg->packet_size = 0;
-    if (fread(buf, 4, 1, mpeg->stream) != 1)
+    if (rar_read(buf, 4, 1, mpeg->stream) != 1)
 	return -1;
     while (memcmp(buf, wanted, sizeof(wanted)) != 0) {
-	c = getc(mpeg->stream);
+	c = rar_getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	memmove(buf, buf + 1, 3);
@@ -155,7 +316,7 @@ mpeg_run(mpeg_t *mpeg)
     case 0xb9:			/* System End Code */
 	break;
     case 0xba:			/* Packet start code */
-	c = getc(mpeg->stream);
+	c = rar_getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	if ((c & 0xc0) == 0x40)
@@ -167,28 +328,28 @@ mpeg_run(mpeg_t *mpeg)
 	    return -1;
 	}
 	if (version == 4) {
-	    if (fseek(mpeg->stream, 9, SEEK_CUR))
+	    if (rar_seek(mpeg->stream, 9, SEEK_CUR))
 		return -1;
 	}
 	else if (version == 2) {
-	    if (fseek(mpeg->stream, 7, SEEK_CUR))
+	    if (rar_seek(mpeg->stream, 7, SEEK_CUR))
 		return -1;
 	}
 	else
 	    abort();
 	break;
     case 0xbd:			/* packet */
-	if (fread(buf, 2, 1, mpeg->stream) != 1)
+	if (rar_read(buf, 2, 1, mpeg->stream) != 1)
 	    return -1;
 	len = buf[0] << 8 | buf[1];
 	idx = mpeg_tell(mpeg);
-	c = getc(mpeg->stream);
+	c = rar_getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	if ((c & 0xC0) == 0x40) { /* skip STD scale & size */
-	    if (getc(mpeg->stream) < 0)
+	    if (rar_getc(mpeg->stream) < 0)
 		return -1;
-	    c = getc(mpeg->stream);
+	    c = rar_getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	}
@@ -202,11 +363,11 @@ mpeg_run(mpeg_t *mpeg)
 	}
 	else if ((c & 0xc0) == 0x80) { /* System-2 (.VOB) stream */
 	    unsigned int pts_flags, hdrlen, dataidx;
-	    c = getc(mpeg->stream);
+	    c = rar_getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	    pts_flags = c;
-	    c = getc(mpeg->stream);
+	    c = rar_getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	    hdrlen = c;
@@ -217,7 +378,7 @@ mpeg_run(mpeg_t *mpeg)
 		return -1;
 	    }
 	    if ((pts_flags & 0xc0) == 0x80) {
-		if (fread(buf, 5, 1, mpeg->stream) != 1)
+		if (rar_read(buf, 5, 1, mpeg->stream) != 1)
 		    return -1;
 		if (!(((buf[0] & 0xf0) == 0x20) && (buf[0] & 1) && (buf[2] & 1) &&  (buf[4] & 1))) {
 		    mp_msg(MSGT_VOBSUB,MSGL_ERR, "vobsub PTS error: 0x%02x %02x%02x %02x%02x \n",
@@ -232,8 +393,8 @@ mpeg_run(mpeg_t *mpeg)
 		/* what's this? */
 		/* abort(); */
 	    }
-	    fseek(mpeg->stream, dataidx, SEEK_SET);
-	    mpeg->aid = getc(mpeg->stream);
+	    rar_seek(mpeg->stream, dataidx, SEEK_SET);
+	    mpeg->aid = rar_getc(mpeg->stream);
 	    if (mpeg->aid < 0) {
 		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Bogus aid %d\n", mpeg->aid);
 		return -1;
@@ -252,7 +413,7 @@ mpeg_run(mpeg_t *mpeg)
 		mpeg->packet_size = 0;
 		return -1;
 	    }
-	    if (fread(mpeg->packet, mpeg->packet_size, 1, mpeg->stream) != 1) {
+	    if (rar_read(mpeg->packet, mpeg->packet_size, 1, mpeg->stream) != 1) {
 		mp_msg(MSGT_VOBSUB,MSGL_ERR,"fread failure");
 		mpeg->packet_size = 0;
 		return -1;
@@ -261,19 +422,19 @@ mpeg_run(mpeg_t *mpeg)
 	}
 	break;
     case 0xbe:			/* Padding */
-	if (fread(buf, 2, 1, mpeg->stream) != 1)
+	if (rar_read(buf, 2, 1, mpeg->stream) != 1)
 	    return -1;
 	len = buf[0] << 8 | buf[1];
-	if (len > 0 && fseek(mpeg->stream, len, SEEK_CUR))
+	if (len > 0 && rar_seek(mpeg->stream, len, SEEK_CUR))
 	    return -1;
 	break;
     default:
 	if (0xc0 <= buf[3] && buf[3] < 0xf0) {
 	    /* MPEG audio or video */
-	    if (fread(buf, 2, 1, mpeg->stream) != 1)
+	    if (rar_read(buf, 2, 1, mpeg->stream) != 1)
 		return -1;
 	    len = buf[0] << 8 | buf[1];
-	    if (len > 0 && fseek(mpeg->stream, len, SEEK_CUR))
+	    if (len > 0 && rar_seek(mpeg->stream, len, SEEK_CUR))
 		return -1;
 		
 	}
@@ -725,7 +886,7 @@ vobsub_set_lang(const char *line)
 }
 
 static int
-vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
+vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 {
     ssize_t line_size;
     int res = -1;
@@ -775,7 +936,7 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 {
     vobsub_t *vob = (vobsub_t*)this;
     int res = -1;
-    FILE *fd = fopen(name, "rb");
+    rar_stream_t *fd = rar_open(name, "rb");
     if (fd == NULL) {
         if (force)
 	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't open IFO file");
@@ -783,7 +944,7 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 	// parse IFO header
 	unsigned char block[0x800];
 	const char *const ifo_magic = "DVDVIDEO-VTS";
-	if (fread(block, sizeof(block), 1, fd) != 1) {
+	if (rar_read(block, sizeof(block), 1, fd) != 1) {
 	    if (force)
 		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO header");
 	} else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
@@ -818,8 +979,8 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 		langid[1] = tmp[1];
 		langid[2] = 0;
 	    }
-	    if (fseek(fd, pgci_sector * sizeof(block), SEEK_SET)
-		|| fread(block, sizeof(block), 1, fd) != 1)
+	    if (rar_seek(fd, pgci_sector * sizeof(block), SEEK_SET)
+		|| rar_read(block, sizeof(block), 1, fd) != 1)
 		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO PGCI");
 	    else {
 		unsigned long idx;
@@ -834,7 +995,7 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 		res = 0;
 	    }
 	}
-	fclose(fd);
+	rar_close(fd);
     }
     return res;
 }
@@ -857,7 +1018,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	vob->delay = 0;
 	buf = malloc((strlen(name) + 5) * sizeof(char));
 	if (buf) {
-	    FILE *fd;
+	    rar_stream_t *fd;
 	    mpeg_t *mpg;
 	    /* read in the info file */
 	    if(!ifo) {
@@ -869,7 +1030,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	    /* read in the index */
 	    strcpy(buf, name);
 	    strcat(buf, ".idx");
-	    fd = fopen(buf, "rb");
+	    fd = rar_open(buf, "rb");
 	    if (fd == NULL) {
 		if(force)
 		  mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open IDX file");
@@ -881,7 +1042,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	    } else {
 		while (vobsub_parse_one_line(vob, fd) >= 0)
 		    /* NOOP */ ;
-		fclose(fd);
+		rar_close(fd);
 	    }
 	    /* if no palette in .idx then use custom colors */
 	    if ((vob->custom == 0)&&(vob->have_palette!=1))

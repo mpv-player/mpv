@@ -55,6 +55,10 @@ ifeq ($(GUI),yes)
 PARTS += Gui
 endif
 
+ifeq ($(UNRARLIB),yes)
+SRCS_COMMON += unrarlib.c
+endif
+
 ifneq ($(W32_LIB),)
 PARTS += loader loader/dshow
 endif
