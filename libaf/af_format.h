@@ -30,3 +30,6 @@
 #define AF_FORMAT_AC3		(4<<3) // Dolby Digital AC3
 #define AF_FORMAT_IMA_ADPCM	AF_FORMAT_LE|AF_FORMAT_SI // Same as 16 bit signed int 
 #define AF_FORMAT_SPECIAL_MASK	(7<<3)
+
+extern char* fmt2str(int format, char* str, size_t size);
+

@@ -88,7 +88,7 @@ static int str2fmt(char* str)
 
 /* Convert format to str input str is a buffer for the 
    converted string, size is the size of the buffer */
-static char* fmt2str(int format, char* str, size_t size)
+char* fmt2str(int format, char* str, size_t size)
 {
   int i=0;
   // Print endinaness
