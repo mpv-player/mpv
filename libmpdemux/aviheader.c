@@ -65,8 +65,8 @@ while(1){
       if(demuxer->stream->end_pos>demuxer->movi_end) demuxer->movi_end=demuxer->stream->end_pos;
       if(index_mode==-2 || index_mode==2 || index_mode==0)
         break; // reading from non-seekable source (stdin) or forced index or no index forced
-      len=(len+1)&(~1);
-      stream_skip(demuxer->stream,len);
+      if(list_end>0) stream_seek(demuxer->stream,list_end); // skip movi
+      list_end=0;
     }
     continue;
   }
@@ -248,9 +248,10 @@ while(1){
     if(index_mode){
       int i;
       priv->idx_size=size2>>4;
-      mp_msg(MSGT_HEADER,MSGL_V,"Reading INDEX block, %d chunks for %ld frames\n",
-        priv->idx_size,avih.dwTotalFrames);
+      mp_msg(MSGT_HEADER,MSGL_V,"Reading INDEX block, %d chunks for %ld frames (fpos=%p)\n",
+        priv->idx_size,avih.dwTotalFrames, stream_tell(demuxer->stream));
       priv->idx=malloc(priv->idx_size<<4);
+//      printf("\nindex to %p !!!!! (priv=%p)\n",priv->idx,priv);
       stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
       for (i = 0; i < priv->idx_size; i++)	// swap index to machine endian
 	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)priv->idx + i);
@@ -379,6 +380,7 @@ skip_chunk:
   }
   priv->idx_size=priv->idx_pos;
   mp_msg(MSGT_HEADER,MSGL_INFO,"AVI: Generated index table for %d chunks!\n",priv->idx_size);
+  if(verbose>=2) print_index(priv->idx,priv->idx_size);
 }
 
 }
