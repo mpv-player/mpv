@@ -267,6 +267,8 @@ int abs_seek_pos=0;
 extern char *vo_subdevice;
 extern char *ao_subdevice;
 
+static stream_t* stream=NULL;
+
 static char* current_module=NULL; // for debugging
 
 static unsigned int inited_flags=0;
@@ -276,6 +278,7 @@ static unsigned int inited_flags=0;
 #define INITED_GETCH2 8
 #define INITED_LIRC 16
 #define INITED_ENCODE 32
+#define INITED_STREAM 64
 #define INITED_ALL 0xFFFF
 
 void uninit_player(unsigned int mask){
@@ -315,6 +318,13 @@ void uninit_player(unsigned int mask){
     inited_flags&=~INITED_ENCODE;
     current_module="uninit_encode";
     avi_fixate();
+  }
+
+  if(mask&INITED_STREAM){
+    inited_flags&=~INITED_STREAM;
+    current_module="uninit_stream";
+    if(stream) free_stream(stream);
+    stream=NULL;
   }
 
 #ifdef HAVE_LIRC
@@ -442,7 +452,6 @@ int num_filenames=0;
 int curr_filename=0;
 
 char* filename=NULL; //"MI2-Trailer.avi";
-stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 //
 int delay_corrected=1;
@@ -745,7 +754,10 @@ play_next_file:
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) goto goto_next_file;//  exit_player(MSGTR_Exit_error); // error...
+  inited_flags|=INITED_STREAM;
   stream->start_pos+=seek_to_byte;
+
+  stream_enable_cache(stream,2048*1024);
 
   use_stdin=filename && (!strcmp(filename,"-"));
 
