@@ -4066,9 +4066,34 @@ Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
 Tip: a more positive bias (-32 - -16 instead of -64) seems to improve the PSNR
 .RE
 
+.SS nuv (-nuvopts)
+
+Nuppel video is based on rtjpeg and lzo.
+By default frames are first encoded with rtjpeg and then compressed with lzo.
+But both passes can be enabled or not.
+So you can in fact output raw i420, lzo compressed i420, rtjpeg, or the
+default lzo compressed rtjpeg.
+.br
+Note: The nuvrec documentation contains some advice and examples about the
+settings to use for the most common TV encodings.
+.TP
+.B c=<0\-20>
+chrominance threshold
+.TP
+.B l=<0\-20>
+luminance threshold
+.TP
+.B nolzo
+disable the lzo compression
+.TP
+.B q=<3\-255>
+set the quality level
+.TP
+.B raw
+disable rtjpeg encoding
 
 .SS xvidenc (-xvidencopts)
-.br
+
 There are three modes available: constant bitrate (CBR), fixed quantizer and
 2pass.
 .TP
