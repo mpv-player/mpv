@@ -540,12 +540,12 @@ static void ecButtonReleased( GtkButton * button,gpointer user_data )
 {
  if ( (int)user_data )
  { // if you pressed Ok
-  if ( gtkEquChannel1) free( gtkEquChannel1 ); gtkEquChannel1=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel1 ) ) );
-  if ( gtkEquChannel2) free( gtkEquChannel2 ); gtkEquChannel2=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel2 ) ) );
-  if ( gtkEquChannel3) free( gtkEquChannel3 ); gtkEquChannel3=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel3 ) ) );
-  if ( gtkEquChannel4) free( gtkEquChannel4 ); gtkEquChannel4=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel4 ) ) );
-  if ( gtkEquChannel5) free( gtkEquChannel5 ); gtkEquChannel5=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel5 ) ) );
-  if ( gtkEquChannel6) free( gtkEquChannel6 ); gtkEquChannel6=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel6 ) ) );
+  gfree( (void **)&gtkEquChannel1 ); gtkEquChannel1=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel1 ) ) );
+  gfree( (void **)&gtkEquChannel2 ); gtkEquChannel2=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel2 ) ) );
+  gfree( (void **)&gtkEquChannel3 ); gtkEquChannel3=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel3 ) ) );
+  gfree( (void **)&gtkEquChannel4 ); gtkEquChannel4=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel4 ) ) );
+  gfree( (void **)&gtkEquChannel5 ); gtkEquChannel5=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel5 ) ) );
+  gfree( (void **)&gtkEquChannel6 ); gtkEquChannel6=gstrdup( gtk_entry_get_text( GTK_ENTRY( CEChannel6 ) ) );
   eqSetChannelNames();
  }
  HideEquConfig();
@@ -584,27 +584,27 @@ GtkWidget * create_EquConfig( void )
   gtk_table_set_col_spacings( GTK_TABLE( table1 ),4 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 1:",NULL ),
+    AddLabel( MSGTR_EQU_Channel1,NULL ),
     0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 2:",NULL ),
+    AddLabel( MSGTR_EQU_Channel2,NULL ),
     0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 3:",NULL ),
+    AddLabel( MSGTR_EQU_Channel3,NULL ),
     0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 4:",NULL ),
+    AddLabel( MSGTR_EQU_Channel4,NULL ),
     0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 5:",NULL ),
+    AddLabel( MSGTR_EQU_Channel5,NULL ),
     0,1,4,5,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   gtk_table_attach( GTK_TABLE( table1 ),
-    AddLabel( "Channel 6:",NULL ),
+    AddLabel( MSGTR_EQU_Channel6,NULL ),
     0,1,5,6,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   CBChannel1=AddComboBox( NULL );

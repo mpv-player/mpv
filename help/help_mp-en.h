@@ -483,6 +483,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Center"
 #define MSGTR_EQU_Bass "Bass"
 #define MSGTR_EQU_All "All"
+#define MSGTR_EQU_Channel1 "Channel 1:"
+#define MSGTR_EQU_Channel2 "Channel 2:"
+#define MSGTR_EQU_Channel3 "Channel 3:"
+#define MSGTR_EQU_Channel4 "Channel 4:"
+#define MSGTR_EQU_Channel5 "Channel 5:"
+#define MSGTR_EQU_Channel6 "Channel 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Path"
@@ -494,6 +500,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtitle & OSD"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "None"
@@ -523,7 +530,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "Convert the given subtitle to the time based SubViewer (SRT) format"
 #define MSGTR_PREFERENCES_SUB_Overlap "Toggle subtitle overlapping"
 #define MSGTR_PREFERENCES_Font "Font:"
-#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Enable postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Auto quality: "
@@ -576,8 +582,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Text scale:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD scale:"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
-#define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
 #define MSGTR_PREFERENCES_CacheSize "Cache size: "
+#define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Enable playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
