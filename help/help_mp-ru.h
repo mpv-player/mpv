@@ -37,10 +37,10 @@ static char help_text[]=
 " -framedrop      включить отбрасывание кадров (для медленных машин)\n"
 "\n"
 "Основные кнопки: (полный список в странице man, также смотри input.conf)\n"
-" <-  или ->      перемещение вперед/назад на 10 секунд\n"
-" up или down     перемещение вперед/назад на  1 минуту\n"
-" pgup or pgdown  перемещение вперед/назад на 10 минут\n"
-" < или >         перемещение вперед/назад в playlist'е\n"
+" <-  или ->      перемещение вперёд/назад на 10 секунд\n"
+" up или down     перемещение вперёд/назад на  1 минуту\n"
+" pgup or pgdown  перемещение вперёд/назад на 10 минут\n"
+" < или >         перемещение вперёд/назад в playlist'е\n"
 " p или ПРОБЕЛ    приостановить фильм (любая клавиша - продолжить)\n"
 " q или ESC       остановить воспроизведение и выход\n"
 " + или -         регулировать задержку звука по +/- 0.1 секунде\n"
@@ -71,7 +71,7 @@ static char help_text[]=
 #define MSGTR_CantLoadFont "Не могу загрузить шрифт: %s\n"
 #define MSGTR_CantLoadSub "Не могу загрузить субтитры: %s\n"
 #define MSGTR_ErrorDVDkey "Ошибка обработки DVD КЛЮЧА.\n"
-#define MSGTR_CmdlineDVDkey "Для дешифрования используется затребованный DVD ключ.\n"
+#define MSGTR_CmdlineDVDkey "Для расшифровки используется затребованный DVD ключ.\n"
 #define MSGTR_DVDauthOk "Авторизация DVD выглядит OK.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: выбранный поток потерян!\n"
 #define MSGTR_CantOpenDumpfile "Не могу открыть файл для дампирования!!!\n"
@@ -81,12 +81,12 @@ static char help_text[]=
 #define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов, переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Попытайтесь обновить %s из etc/codecs.conf\n*** Если не помогло - читайте DOCS/codecs.html!\n"
-#define MSGTR_CouldntInitAudioCodec "Не смог проинициализировать аудио кодек! -> без звука\n"
+#define MSGTR_CouldntInitAudioCodec "Не смог инициализировать аудио кодек! -> без звука\n"
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видео кодеков %s ...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для видео формата 0x%X !\n"
 #define MSGTR_VOincompCodec "Sorry, выбранное video_out устройство не совместимо с этим кодеком.\n"
-#define MSGTR_CannotInitVO "FATAL: Не могу проинициализировать видео драйвер!\n"
-#define MSGTR_CannotInitAO "не могу открыть/проинициализировать аудио устройство -> БЕЗ ЗВУКА\n"
+#define MSGTR_CannotInitVO "FATAL: Не могу инициализировать видео драйвер!\n"
+#define MSGTR_CannotInitAO "не могу открыть/инициализировать аудио устройство -> БЕЗ ЗВУКА\n"
 #define MSGTR_StartPlaying "Начало воcпроизведения...\n"
 #define MSGTR_SystemTooSlow "\n\n"\
 "         *****************************************************************\n"\
@@ -104,7 +104,7 @@ static char help_text[]=
 "  - Попытайтесь различные комбинации: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Медленный носитель (смонтированные NFS/SMB, DVD, VCD и т. п.)\n"\
 "  - Используйте -cache 8192.\n"\
-"- Используете ли Вы -cache для проигрывания не-'слоеных'[non-interleaved] AVI файлов?\n"\
+"- Используете ли Вы -cache для проигрывания не-'слоёных'[non-interleaved] AVI файлов?\n"\
 "  - Используйте -nocache.\n"\
 "Читайте DOCS/video.html и DOCS/sound.html для советов по подстройке/ускорению.\n"\
 "Если ничего не помогло, тогда читайте DOCS/bugreports.html !\n\n"
@@ -121,8 +121,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Доступные драйвера вывода звука:\n"
 #define MSGTR_AvailableAudioCodecs "Доступные аудио кодеки:\n"
 #define MSGTR_AvailableVideoCodecs "Доступные видео кодеки:\n"
-#define MSGTR_AvailableAudioFm "\nДоступные (вкомпилированные) семейства/драйверы аудио кодеков:\n"
-#define MSGTR_AvailableVideoFm "\nДоступные (вкомпилированные) семейства/драйверы видео кодеков:\n"
+#define MSGTR_AvailableAudioFm "\nДоступные (скомпилированные) семейства/драйверы аудио кодеков:\n"
+#define MSGTR_AvailableVideoFm "\nДоступные (скомпилированные) семейства/драйверы видео кодеков:\n"
 #define MSGTR_AvailableFsType "Доступные режимы изменения полноэкранного слоя:\n"
 #define MSGTR_UsingRTCTiming "Используется аппаратная Linux RTC синхронизация (%ldHz).\n"
 #define MSGTR_CannotReadVideoProperties "Видео: Не могу прочитать свойства.\n"
@@ -190,7 +190,7 @@ static char help_text[]=
 "                3: abr\n"\
 "                4: mtrh\n"\
 "\n"\
-" abr           усредненный битпоток\n"\
+" abr           усреднённый битпоток\n"\
 "\n"\
 " cbr           постоянный битпоток\n"\
 "               Также форсирует CBR режим кодирования в некоторых предустановленных ABR режимах\n"\
@@ -207,7 +207,7 @@ static char help_text[]=
 "\n"\
 " mode=<0-3>    (по-умолчанию: автоматический)\n"\
 "                0: стерео\n"\
-"                1: объединенное стерео[joint-stereo]\n"\
+"                1: объединённое стерео[joint-stereo]\n"\
 "                2: двухканальный\n"\
 "                3: моно\n"\
 "\n"\
@@ -240,7 +240,7 @@ static char help_text[]=
 #define MSGTR_ConnToServer "Соединение с сервером: %s\n"
 #define MSGTR_FileNotFound "Файл не найден: '%s'\n"
 
-#define MSGTR_SMBInitError "Не могу проинициализировать библиотеку libsmbclient: %d\n"
+#define MSGTR_SMBInitError "Не могу инициализировать библиотеку libsmbclient: %d\n"
 #define MSGTR_SMBFileNotFound "Не могу открыть по сети: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer не был скомпилирован с поддержкой чтения SMB\n"
 
@@ -257,13 +257,13 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD успешно открыт!\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Предупреждение! Заголовок аудио потока %d переопределен!\n"
-#define MSGTR_VideoStreamRedefined "Предупреждение! Заголовок видео потока %d переопределен!\n"
+#define MSGTR_AudioStreamRedefined "Предупреждение! Заголовок аудио потока %d переопределён!\n"
+#define MSGTR_VideoStreamRedefined "Предупреждение! Заголовок видео потока %d переопределён!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Слишком много (%d в %d байтах) аудио пакетов в буфере!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Слишком много (%d в %d байтах) видео пакетов в буфере!\n"
-#define MSGTR_MaybeNI "Возможно Вы проигрываете не 'слоеный' поток/файл или неудачный кодек?\n" \
-                     "Для AVI файлов попробуйте форсировать 'неслоеный' режим опцией -ni.\n"
-#define MSGTR_SwitchToNi "\nОбнаружен плохо 'слоеный' AVI файл - переключаюсь в -ni режим...\n"
+#define MSGTR_MaybeNI "Возможно Вы проигрываете не 'слоёный' поток/файл или неудачный кодек?\n" \
+                     "Для AVI файлов попробуйте форсировать 'неслоёный' режим опцией -ni.\n"
+#define MSGTR_SwitchToNi "\nОбнаружен плохо 'слоёный' AVI файл - переключаюсь в -ni режим...\n"
 #define MSGTR_Detected_XXX_FileFormat "Обнаружен %s формат файла!\n"
 #define MSGTR_DetectedAudiofile "Обнаружен аудио файл.\n"
 #define MSGTR_NotSystemStream "Не MPEG System Stream формат... (возможно Transport Stream?)\n"
@@ -278,9 +278,9 @@ static char help_text[]=
 
 #define MSGTR_NI_Forced "Форсирован"
 #define MSGTR_NI_Detected "Обнаружен"
-#define MSGTR_NI_Message "%s 'НЕСЛОЕНЫЙ' формат AVI файла!\n"
+#define MSGTR_NI_Message "%s 'НЕСЛОЁНЫЙ' формат AVI файла!\n"
 
-#define MSGTR_UsingNINI "Использование 'НЕСЛОЕНОГО' испорченного формата AVI файла!\n"
+#define MSGTR_UsingNINI "Использование 'НЕСЛОЁНОГО' испорченного формата AVI файла!\n"
 #define MSGTR_CouldntDetFNo "Не смог определить число кадров (для абсолютного перемещения)\n"
 #define MSGTR_CantSeekRawAVI "Не могу переместиться в сыром потоке AVI! (требуется индекс, попробуйте с ключом -idx!)\n"
 #define MSGTR_CantSeekFile "Не могу перемещаться в этом файле!\n"
@@ -291,8 +291,8 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Сжатые заголовки (пока) не поддерживаются!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Предупреждение! Обнаружен переменный FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Предупреждение! слишком много треков!"
-#define MSGTR_FoundAudioStream "==> Нашел аудио поток: %d\n"
-#define MSGTR_FoundVideoStream "==> Нашел видео поток: %d\n"
+#define MSGTR_FoundAudioStream "==> Нашёл аудио поток: %d\n"
+#define MSGTR_FoundVideoStream "==> Нашёл видео поток: %d\n"
 #define MSGTR_DetectedTV "Найден TV! ;-)\n"
 #define MSGTR_ErrorOpeningOGGDemuxer "Не могу открыть ogg демуксер[demuxer].\n"
 #define MSGTR_ASFSearchingForAudioStream "ASF: Ищу аудио поток (id:%d).\n"
@@ -312,7 +312,7 @@ static char help_text[]=
 #define MSGTR_CantCloseCodec "Не смог закрыть кодек\n"
 
 #define MSGTR_MissingDLLcodec "ОШИБКА: Не смог открыть требующийся DirectShow кодек: %s\n"
-#define MSGTR_ACMiniterror "Не смог загрузить/проинициализировать Win32/ACM AUDIO кодек (потерян DLL файл?)\n"
+#define MSGTR_ACMiniterror "Не смог загрузить/инициализировать Win32/ACM AUDIO кодек (потерян DLL файл?)\n"
 #define MSGTR_MissingLAVCcodec "Не могу найти кодек '%s' в libavcodec...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: КОНЕЦ ФАЙЛА при поиске последовательности заголовков\n"
@@ -335,9 +335,9 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDecoder "Открываю декодер аудио: [%s] %s\n"
 #define MSGTR_UninitVideoStr "деинициализация видео: %s\n"
 #define MSGTR_UninitAudioStr "деинициализация аудио: %s\n"
-#define MSGTR_VDecoderInitFailed "Ошибка инициализации ВидеоДекодера :(\n"
-#define MSGTR_ADecoderInitFailed "Ошибка инициализации АудиоДекодера :(\n"
-#define MSGTR_ADecoderPreinitFailed "Ошибка преинициализации АудиоДекодера :(\n"
+#define MSGTR_VDecoderInitFailed "Ошибка инициализации Декодера Видео :(\n"
+#define MSGTR_ADecoderInitFailed "Ошибка инициализации Декодера Аудио :(\n"
+#define MSGTR_ADecoderPreinitFailed "Ошибка преинициализации Декодера Аудио :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Захватываю %d байт(а/ов) для входного буфера\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Захватываю %d + %d = %d байт(а/ов) для буфера вывода\n"
 
@@ -358,7 +358,7 @@ static char help_text[]=
 #define MSGTR_VoConfigRequest "VDec: vo config запросил - %d x %d (предпочитаемый csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Не могу найти подходящее цветовое пространство - попытаюсь с -vop scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect - %.2f:1 - премасштабирую для коррекции соотношения сторон фильма.\n"
-#define MSGTR_MovieAspectUndefined "Movie-Aspect не определен - премасштабирование не применяется.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect не определён - премасштабирование не применяется.\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -397,9 +397,9 @@ static char help_text[]=
 
 
 // --- error messages ---
-#define MSGTR_NEMDB "Sorry, не хватает памяти для отрисовки буфера."
+#define MSGTR_NEMDB "Sorry, не хватает памяти для прорисовки буфера."
 #define MSGTR_NEMFMR "Sorry, не хватает памяти для отображения меню."
-#define MSGTR_IDFGCVD "Sorry, не нашел совместимый с GUI драйвер видео вывода."
+#define MSGTR_IDFGCVD "Sorry, не нашёл совместимый с GUI драйвер видео вывода."
 #define MSGTR_NEEDLAVCFAME "Sorry, Вы не можете проигрывать не-MPEG файлы на Вашем DXR3/H+ устройстве без перекодирования.\nПожалуйста, включите lavc или fame при конфигурации DXR3/H+."
 
 
@@ -535,7 +535,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontFactor "Коэффициент шрифта:"
 #define MSGTR_PREFERENCES_PostProcess "Включить постобработку"
 #define MSGTR_PREFERENCES_AutoQuality "Авто качество: "
-#define MSGTR_PREFERENCES_NI "Использовать 'неслоеный' AVI парсер"
+#define MSGTR_PREFERENCES_NI "Использовать 'неслоёный' AVI парсер"
 #define MSGTR_PREFERENCES_IDX "Если требуется, создавать индексную таблицу"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Семейство видео кодеков:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Семейство аудио кодеков:"
@@ -556,7 +556,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Западноевропейские языки (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Западноевропейские языки с Евро (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Славянские/Центральноевропейские языки (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Славянские/Центрально-европейские языки (ISO-8859-2)"
 #define MSGTR_PREFERENCES_FontEncoding5 "Эсперанто, Galician, Мальтийский, Турецкий (ISO-8859-3)"
 #define MSGTR_PREFERENCES_FontEncoding6 "Старая Балтийская кодировка (ISO-8859-4)"
 #define MSGTR_PREFERENCES_FontEncoding7 "Кириллица (ISO-8859-5)"
@@ -568,7 +568,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding13 "Еврейские кодировки (ISO-8859-8)"
 #define MSGTR_PREFERENCES_FontEncoding14 "Русская (KOI8-R)"
 #define MSGTR_PREFERENCES_FontEncoding15 "Украинская, Белорусская (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Упрощенная Китайская кодировка (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding16 "Упрощённая Китайская кодировка (CP936)"
 #define MSGTR_PREFERENCES_FontEncoding17 "Традиционная Китайская кодировка (BIG5)"
 #define MSGTR_PREFERENCES_FontEncoding18 "Японские кодировки (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Корейская кодировка (CP949)"
@@ -579,7 +579,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontPropHeight "Пропорционально высоте фильма"
 #define MSGTR_PREFERENCES_FontPropDiagonal "Пропорционально диагонали фильма"
 #define MSGTR_PREFERENCES_FontEncoding "Кодировка:"
-#define MSGTR_PREFERENCES_FontBlur "Нечеткость:"
+#define MSGTR_PREFERENCES_FontBlur "Нечёткость:"
 #define MSGTR_PREFERENCES_FontOutLine "Контуры:"
 #define MSGTR_PREFERENCES_FontTextScale "Масштаб текста:"
 #define MSGTR_PREFERENCES_FontOSDScale "Масштаб OSD:"
