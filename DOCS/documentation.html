@@ -1012,8 +1012,8 @@ General audio delay or jerky sound (exists with all or many files):<BR>
 Audio delay/de-sync specific to one or a few files:<BR>
 <UL>
 <LI>bad file (please upload the file, so we can check & fix)<BR>
-  Workaround: -ni or -bps option   (for non-interlaced or bad files)<BR>
-              -mc 0   (required for files with VBR audio)<BR>
+  Workaround: -ni or -nobps option   (for non-interleaved or bad files)<BR>
+              -mc 0   (required for files with badly interleaved VBR audio)<BR>
               -delay option or +/- keys at runtime to adjust delay</LI>
 <LI>your soundcard doesn't support 48Khz playback<BR>
   Workaround: buy a better soundcard...  or try to decrease fps by 10% (use -fps 27 for a 30fps movie)</LI>

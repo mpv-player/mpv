@@ -69,10 +69,10 @@ megkeresni. Erre van 3 módszer :</P>
 <P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
 (--) SVGA: Linear framebuffer at 0xD8000000</CODE></P>
 <LI>a /proc/pci-bõl (használd az lspci -v parancsot):
-<P><TABLE>
-<TD VALIGN=top><CODE>01:00.0</CODE></TD><TD><CODE>VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE></TD><TR>
-<TD></TD><TD><CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></TD><TR>   
-</TABLE></P></CODE>
+
+<P><CODE>01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE><BR>
+<CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></P>
+
 <LI>from mga_vid kernel driver messages (use dmesg):
 <P><CODE>mga_mem_base = d8000000</CODE></P>
 </UL></P>
