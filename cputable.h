@@ -121,8 +121,7 @@ static const char *cpuname
 			/* F extended family (P4/new IA-64)*/ {
 				/* 0 */ "Pentium 4 Willamette",
 				/* 1 */ "Pentium 4 Xeon Foster", /*?*/
-				/* XXX 0.13µm P4 Northwood ??? */
-				/* 2 */ N_UNKNOWN, 
+				/* 2 */ "Pentium 4 Northwood",
 				/* 3 */ N_UNKNOWN, 
 				/* 4 */ N_UNKNOWN, 
 				/* 5 */ N_UNKNOWN, 
