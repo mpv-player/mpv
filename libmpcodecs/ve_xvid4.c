@@ -105,7 +105,7 @@ static int xvidenc_vbr_curve_compression_low = 0;
 static int xvidenc_vbr_max_overflow_improvement = 0;
 static int xvidenc_vbr_max_overflow_degradation = 0;
 static int xvidenc_vbr_kfreduction = 0;
-static int xvidenc_vbr_min_key_interval = 0;
+static int xvidenc_vbr_kfthreshold = 0;
 static int xvidenc_vbr_container_frame_overhead = 0;
 
 static char *xvidenc_par = NULL;
@@ -165,7 +165,7 @@ m_option_t xvidencopts_conf[] =
 	{"max_overflow_improvement", &xvidenc_vbr_max_overflow_improvement, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"max_overflow_degradation", &xvidenc_vbr_max_overflow_degradation, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"kfreduction", &xvidenc_vbr_kfreduction, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"min_key_interval", &xvidenc_vbr_min_key_interval, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"kfthreshold", &xvidenc_vbr_kfthreshold, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"container_frame_overhead", &xvidenc_vbr_container_frame_overhead, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
 	/* Section Aspect Ratio */
@@ -399,7 +399,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	/* If size is == 0, we're done with that frame */
 	if(size == 0) return(FINE);
 
-	/* Did xvidcore returned stats about an ecoded frame ? (asynchrone) */
+	/* Did xvidcore returned stats about an encoded frame ? (asynchronous) */
 	if(xvidenc_stats && stats.type > 0) {
 		mod->frames++;
 		mod->sse_y += stats.sse_y;
@@ -591,7 +591,7 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	pass2->max_overflow_improvement = xvidenc_vbr_max_overflow_improvement;
 	pass2->max_overflow_degradation = xvidenc_vbr_max_overflow_degradation;
 	pass2->kfreduction = xvidenc_vbr_kfreduction;
-	pass2->min_key_interval = xvidenc_vbr_min_key_interval;
+	pass2->kfthreshold = xvidenc_vbr_kfthreshold;
 	pass2->container_frame_overhead = xvidenc_vbr_container_frame_overhead;
 
 	/* -------------------------------------------------------------------
