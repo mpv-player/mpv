@@ -236,7 +236,7 @@ static int read_option(char *opt, char *param)
 			printf("%s", (char *) config[i].p);
 			exit(1);
 		default:
-			printf("picsaba\n");
+			printf("Unknown config type specified in conf-mplayer.h!\n");
 			break;
 	}
 out:
@@ -445,6 +445,7 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 	int f_nr = 0;
 	int tmp;
 	char *opt;
+	int no_more_opts = 0;
 
 #ifdef DEBUG
 	assert(argv != NULL);
@@ -459,33 +460,49 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 	++recursion_depth;
 
 	for (i = 1; i < argc; i++) {
+next:
 		opt = argv[i];
-		if (*opt != '-')
-			goto filename;
+		if ((*opt == '-') && (*(opt+1) == '-'))
+		{
+			no_more_opts = 1;
+//			printf("no more opts! %d\n",i);
+			i++;
+			goto next;
+		}
+			
+		if ((no_more_opts == 0) && (*opt == '-')) /* option */
+		{
+		    /* remove trailing '-' */
+		    opt++;
+//		    printf("this_opt = option: %s\n", opt);
 
-		/* remove trailing '-' */
-		opt++;
+		    tmp = read_option(opt, argv[i + 1]);
 
-		tmp = read_option(opt, argv[i + 1]);
-
-		switch (tmp) {
-		case ERR_NOT_AN_OPTION:
-filename:
-			/* opt is not an option -> treat it as a filename */
-			if (!(f = (char **) realloc(f, sizeof(*f) * (f_nr + 2))))
-				goto err_out_mem;
-
-			f[f_nr++] = argv[i];
-			break;
-		case ERR_MISSING_PARAM:
-		case ERR_OUT_OF_RANGE:
-		case ERR_FUNC_ERR:
+		    switch (tmp) {
+		    case ERR_NOT_AN_OPTION:
+		    case ERR_MISSING_PARAM:
+		    case ERR_OUT_OF_RANGE:
+		    case ERR_FUNC_ERR:
+			printf("Error %d while parsing option: '%s'!\n",
+			    tmp, opt);
 			goto err_out;
 			/* break; */
-		default:
+		    default:
 			i += tmp;
+			break;
+		    }
+		}
+		else /* filename */
+		{
+//		    printf("this_opt = filename: %s\n", opt);
+		    /* opt is not an option -> treat it as a filename */
+		    if (!(f = (char **) realloc(f, sizeof(*f) * (f_nr + 2))))
+			goto err_out_mem;
+
+		    f[f_nr++] = argv[i];
 		}
 	}
+
 	if (f)
 		f[f_nr] = NULL;
 	if (filenames)
