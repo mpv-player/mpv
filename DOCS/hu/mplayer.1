@@ -1482,19 +1482,11 @@ Lásd még az \-aspect opciót.
 .B \-nograbpointer
 Ne fogja meg az egérpointert VidMode váltás után (\-vm), többkártyás
 kimenetnél hasznos.
-
 .TP
 .B \-nokeepaspect
 Ne tartsa meg az ablak képarányát X11 ablakok átméretezésekor (jelenleg csak a
 \-vo x11, xv, xmga és xvidix kimenetekkel mûködik, az ablakkezelõdnek pedig
 támogatnia kell.).
-
-.TP
-.B \-noslices
-Video ablak 16 pixel magas slice/\:band-onkénti kirajzolásának kikapcsolása,
-képkocka kirajzolása egy menetben.
-Gyorsulhat vagy lassulhat, a kártya/\:cache függvényében.
-Csak libmpeg2 és libavcodec codec-eknél van hatása.
 .TP
 .B \-panscan <0.0\-1.0>
 Pan & Scan funkció bekapcsolása, ami annyit tesz, hogy egy 16:9 képarányú
@@ -1748,6 +1740,12 @@ szürkeskálás dekódolás (kicsit gyorsabb mint a szines)
 .TP
 .B \-noaspect
 Képarány figyelembevételének kikapcsolása.
+.TP
+.B \-noslices
+Video ablak 16 pixel magas slice/\:band-onkénti kirajzolásának kikapcsolása,
+képkocka kirajzolása egy menetben.
+Gyorsulhat vagy lassulhat, a kártya/\:cache függvényében.
+Csak libmpeg2 és libavcodec codec-eknél van hatása.
 .TP
 .B \-nosound
 Hang lejátszásának/\:enkódolásának kikapcsolása.
