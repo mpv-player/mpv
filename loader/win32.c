@@ -584,15 +584,19 @@ void* WINAPI expResetEvent(void* event)
 void* WINAPI expWaitForSingleObject(void* object, int duration)
 {
     mutex_list *ml = (mutex_list *)object;
-    int ret=0x12345678; // fixed by Zdenek Kabelac
+    int ret=WAIT_FAILED; // fixed by Zdenek Kabelac
     mutex_list* pp=mlist;
 //    dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
-    do {
-	if (pp == NULL) dbgprintf("WaitForSingleObject: NotFound\n");
-	if((pp->pm, mlist->pm)==0)
-		break;;
-     }while((pp=pp->prev));
-    
+    // loop below was slightly fixed - its used just for checking if
+    // this object really exists in our list
+    if (!ml)
+        return (void*) ret;
+    while (pp && (pp->pm != ml->pm))
+        pp = pp->prev;
+    if (!pp) {
+        //dbgprintf("WaitForSingleObject: NotFound\n");
+        return (void*)ret;
+    }
 
     pthread_mutex_lock(ml->pm);
 
