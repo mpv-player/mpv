@@ -503,7 +503,11 @@ if(dvd_title){
 	mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
 	f=0; // 0=stdin
     } else {
+#ifndef __CYGWIN__
        f=open(filename,O_RDONLY);
+#else
+       f=open(filename,O_RDONLY|O_BINARY);
+#endif
        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
     }
 
