@@ -3198,9 +3198,22 @@ if test "$_ossaudio" = yes ; then
     _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dsp"'
     _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/sound/mixer"'
   else
-     if netbsd || openbsd ; then
+     cat > $TMPC << EOF
+#include <sys/ioctl.h>
+$_inc_soundcard
+#ifdef OPEN_SOUND_SYSTEM
+int main(void) { return 0; }
+#else
+#error Not the real thing
+#endif
+EOF
+     _real_ossaudio=no
+     cc_check && _real_ossaudio=yes
+     if test "$_real_ossaudio" = yes; then
+       _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
+     elif netbsd || openbsd ; then
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
-       openbsd && _ld_arch="$_ld_arch -lossaudio"
+       _ld_arch="$_ld_arch -lossaudio"
      else
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      fi
@@ -4681,7 +4694,6 @@ test "$_real" = yes && _ld_dl_dynamic='-rdynamic'
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 if netbsd ; then
-  _ld_arch="$_ld_arch -lossaudio"
   x86 && _ld_arch="$_ld_arch -li386"
 fi
 
