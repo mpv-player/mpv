@@ -208,7 +208,15 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
     }
 
     alloc_buf(obj);
-
+    
+    {
+	int minw = vo_font->width[OSD_PB_START]+vo_font->width[OSD_PB_END]+vo_font->width[OSD_PB_0];
+	if (vo_osd_progbar_type>0 && vo_font->font[vo_osd_progbar_type]>=0){
+	    minw += vo_font->width[vo_osd_progbar_type]+vo_font->charspace+vo_font->spacewidth;
+	}
+	if (obj->bbox.x2 - obj->bbox.x1 < minw) return; // space too small, don't render anything
+    }
+    
     // render it:
     {	unsigned char *s;
    	unsigned char *sa;
