@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "config.h"
 #include "bswap.h"
 #include "mp_msg.h"
