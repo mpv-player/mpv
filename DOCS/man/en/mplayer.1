@@ -5627,6 +5627,13 @@ This setting toggles the use of chroma planes for motion estimation.
 .TP
 .B chroma_opt
 Enable a chroma optimizer prefilter.
+It will do some extra magic on color information to minimize the
+stepped-stairs effect on edges.
+It will improve quality at the cost of encoding speed.
+It reduces PSNR by nature, as the mathematical deviation to the original
+picture will get bigger, but the subjective image quality will raise.
+Since it works with color information, you might want to turn it off when
+encoding in greyscale.
 .TP
 .B reduced
 Enable encoding reduced-resolution frames.
