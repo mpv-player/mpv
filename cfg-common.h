@@ -91,6 +91,7 @@
 
 	// demuxer.c - select audio/sub file/demuxer
 	{ "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
+	{ "audiofile-cache", &audio_stream_cache, CONF_TYPE_INT, CONF_RANGE, 50, 65536, NULL},
 	{ "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
 	{ "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
 	{ "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
@@ -323,6 +324,7 @@ struct config tvopts_conf[]={
 extern struct config dvbin_opts_conf[];
 #endif
 
+extern int audio_stream_cache;
 
 extern int sws_chr_vshift;
 extern int sws_chr_hshift;
