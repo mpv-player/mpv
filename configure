@@ -672,7 +672,7 @@ for ac_option do
   --cc=*) ;;
   --as=*) ;;
   --disable-gcc-checking) ;;
-  --enable-static) ;;
+  --enable-static*) ;;
   --disable-static*) ;;
   --with-extraincdir=*) ;;
   --with-extralibdir=*) ;;
