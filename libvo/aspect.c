@@ -29,16 +29,25 @@ static struct {
 } aspdat;
 
 void aspect_save_orig(int orgw, int orgh){
+#ifdef ASPECT_DEBUG
+  printf("aspect_save_orig %dx%d \n",orgw,orgh);
+#endif
   aspdat.orgw = orgw;
   aspdat.orgh = orgh;
 }
 
 void aspect_save_prescale(int prew, int preh){
+#ifdef ASPECT_DEBUG
+  printf("aspect_save_prescale %dx%d \n",prew,preh);
+#endif
   aspdat.prew = prew;
   aspdat.preh = preh;
 }
 
 void aspect_save_screenres(int scrw, int scrh){
+#ifdef ASPECT_DEBUG
+  printf("aspect_save_screenres %dx%d \n",scrw,scrh);
+#endif
   aspdat.scrw = scrw;
   aspdat.scrh = scrh;
 }
@@ -51,7 +60,8 @@ void aspect(int *srcw, int *srch, int zoom){
   int tmpw;
 
 #ifdef ASPECT_DEBUG
-  printf("aspect(0) fitin: %dx%d zoom: %d \n",aspdat.scrw,aspdat.scrh,zoom);
+  printf("aspect(0) fitin: %dx%d zoom: %d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,
+      zoom,monitor_aspect);
   printf("aspect(1) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
   if(zoom){
