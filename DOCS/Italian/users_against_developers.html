@@ -10,15 +10,15 @@
 <BODY>
 
 
-<P><B><I>Appendice E - Lamentele degli sviluppatori</I></B></P>
+<H1>Appendice E - Lamentele degli sviluppatori</H1>
 
 <P>Ci sono due argomenti principali che causano sempre grandi dispute e flame sulla mailing list degli
-<A HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">utenti-mplayer</A>.
-Il numero uno è naturalmente l'argomento</P>
+<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>.
+Il numero uno è naturalmente il</P>
 
-<A NAME="gcc"><P><B><I>GCC 2.96</I></B></P>
+<H2><A NAME="gcc">GCC 2.96</A></H2>
 
-<P>Il <I>retroscena</I> : C'erano/ci sono le serie GCC <B>2.95</B>. Il migliore
+<P><B>Il retroscena</B> : C'erano/ci sono le serie GCC <B>2.95</B>. Il migliore
 era il 2.95.3 . Per favore nota lo stile di numerazione delle versioni.
 Così è come il team GCC numera i loro compilatori. Quelli della serie 2.95 sono buoni.
 Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.3.</P>
@@ -27,22 +27,20 @@ Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.3.</P>
 <A HREF="http://gcc.gnu.org/gcc-2.96.html">risposta ufficiale</A> riguardante il GCC 2.96.
 Molti sviluppatori nel mondo hanno cominciato a riscontrare problemi col GCC 2.96, e
 hanno cominciato a raccomandare altri compilatori. Esempi sono
-<A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>,
 <A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>,
 <A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> e
 <A HREF="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</A>.
 Altri link interessanti sono
-<A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>,
 <A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</A> e
 <A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>.
-Anche <B>MPlayer</B> ha sofferto di problemi intermittenti che si sono tutti risolti
+Anche MPlayer ha sofferto di problemi intermittenti che si sono tutti risolti
 cambiando versione di GCC. Alcuni progetti hanno cominciato a implementare metodi
 per aggirare alcuni dei problemi del 2.96, ma noi ci siamo rifiutati di correggere i bug di altri,
 specialmente perchè alcuni di questi metodi implicano un calo delle prestazioni.</P>
 
 <P>Puoi leggere l'altro lato della storia
-<A HREF="http://www.bero.org/gcc296.html">qui</A>.
+<A HREF="http://web.archive.org/web/20011024212120/http://www.bero.org/gcc296.html">qui</A>.
 GCC 2.96 non permette i caratteri | (pipe) nei commenti in assembler
 perchè supporta sia la sintassi Intel che AT&amp;T e il carattere |
 è un simbolo nella variante Intel. Il problema è che ignora <B>silenziosamente</B>
@@ -60,60 +58,64 @@ abbiamo avuto già abbastanza flame sul GCC 2.96.</P>
 
 <P>Se hai problemi col GCC 2.96, puoi prendere i pacchetti 2.96-85 dal
 <A HREF="ftp://updates.redhat.com">server ftp</A> della RedHat, usa i pacchetti
-3.04 offerti per la versione 7.2 e successive. Puoi anche prendere i pacchetti del gcc-3.1
+3.04 offerti per la versione 7.2 e successive. Puoi anche prendere i pacchetti del gcc-3.2-10
 (non ufficiali, ma funzionano bene)
-<A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">qui</A> e puoi
+<A HREF="ftp://people.redhat.com/jakub/gcc/3.2-10/">qui</A> e puoi
 installarli insieme al gcc-2.96 che già hai. MPlayer lo riconoscerà e userà
-il 3.1 invece del 2.96. Se non vuoi o non puoi usare
-i pacchetti binari, ecco come compilare il GCC 3.1 dai sorgenti:</P>
+il 3.2 invece del 2.96. Se non vuoi o non puoi usare
+i pacchetti binari, ecco come compilare l'ultimo GCC dai sorgenti:</P>
 
 <UL>
   <LI>Vai alla pagina dei<A HREF="http://gcc.gnu.org/mirrors.html">mirror di GCC</A>
-    e scarica <CODE>gcc-core-3.1.tar.gz</CODE>.  Questo include il completo
-    compilatore C ed è sufficente per <B>MPlayer</B>. Se vuoi anche
-    C++, Java o altre caratteristiche avanzate di GCC
-    <CODE>gcc-3.1.tar.gz</CODE> potrebbe soddisfare meglio le tue esigenze.</LI>
+    e scarica <CODE>gcc-core-XXX.tar.gz</CODE>, dove <CODE>XXX</CODE> è il numero di versione.
+   Questo include il completo compilatore C ed è sufficente per MPlayer. Se vuoi anche
+    C++, Java o altre caratteristiche avanzate di GCC il pacchetto
+    <CODE>gcc-XXX.tar.gz</CODE> potrebbe soddisfare meglio le tue esigenze.</LI>
   <LI>Estrai l'archivio con<BR>
-    <CODE>tar -xvzf gcc-core-3.1.tar.gz</CODE></LI>
+    <CODE>tar -xvzf gcc-core-XXX.tar.gz</CODE></LI>
   <LI>GCC non viene compilato all'interno della directory dei sorgenti come la maggior parte dei programmi,
     ma necessita una directory esterna.  Quindi bisogna crearla con<BR>
     <CODE>mkdir gcc-build</CODE></LI>
   <LI>Quindi si può procedere a configurare gcc in questa directory, ma devi usare il
     configure dei sorgenti:<BR>
     <CODE>cd gcc-build<BR>
-    ../gcc-3.1/configure</CODE></LI>
+    ../gcc-XXX/configure</CODE></LI>
   <LI>Compila GCC passando questo comando:<BR>
     <CODE>make bootstrap</CODE></LI>
   <LI>Ora puoi installare GCC (da root) facendo<BR>
     <CODE>make install</CODE></LI>
 </UL>
 
-<P><A NAME="binary"><B>Distribuzione binaria di MPlayer</B></A></P>
+<H2><A NAME="binary">Distribuzione binaria di MPlayer</A></H2>
 
 
-<P>Questo era il secondo grande problema, ma è stato risolto dalla versione
-0.90-pre1. <B>MPlayer</B> in precedenza conteneva dei sorgenti del progetto OpenDivX,
-che non permetteva la ridistribuzione binaria. Questo codice è stato rimosso e ora
-puoi creare pacchetti binari se vuoi.</P>
+<P>MPlayer in precedenza conteneva dei sorgenti del progetto OpenDivX,
+che non permetteva la ridistribuzione binaria. Questo codice è stato rimosso nella versione
+0.90-pre1 e il rimanente file <CODE>divx_vbr.c</CODE> derivato dai sorgenti di
+OpenDivX è stato rilasciato sotto licenza GPL dai suoi autori dalla versione
+0.90pre9. Ora puoi creare pacchetti binari se vuoi.</P>
 
 <P>Un altro impedimento alla distribuzione binaria erano le ottimizzazioni di compilazione
-per l'architettura della CPU.  <B>MPlayer</B> ora supporta il riconoscimento della CPU a runtime
-(specifica l'opzione <CODE>--enable-runtime-cpudetection</CODE> al momento della compilazione).
+per l'architettura della CPU.  MPlayer ora supporta il riconoscimento della CPU a runtime
+(specifica l'opzione <CODE>--enable-runtime-cpudetection</CODE> al momento della configurazione).
 E' disabilitato di default perchè implica un piccolo sacrificio di velocità,
 ora è possibile creare file binari che possono essere eseguiti su diversi membri
 della famiglia di CPU della Intel.</P>
 
-<A NAME="nvidia"><P><B><I>NVidia</I></B></P>
+<H2><A NAME="nvidia">nVidia</A></H2>
 
 <P>Non ci piacciono i driver binari di nvidia, la loro qualità, instabilità,
 l'inesistente supporto all'utente, la regolare comparsa di nuovi bug. E la maggior parte degli utenti fa
-lo stesso. Ultimamente siamo stati contattati da NVidia, e loro hanno detto che questi bug non
+lo stesso. Alcuni esempi si possono trovare sul
+<A HREF="http://www.nvnews.net/vbulletin/forumdisplay.php?s=6d83dc289805c37caef49b77857a0b7e&daysprune=&forumid=27">
+forum Linux di nVidia</A>.
+Ultimamente siamo stati contattati da NVidia, e loro hanno detto che questi bug non
 esistono, l'instabilità è causata da pessimi chip AGP, e che non hanno ricevuto nessuna segnalazione
 di bug del driver (la linea viola, per esempio). Quindi: se hai problemi con
 la tua NVidia, aggiorna il driver nvidia e/o compra una nuova
 scheda madre.</P>
 
-<A NAME="barr"><P><B><I>Joe Barr</I></B></P>
+<H2><A NAME="barr">Joe Barr</A></H2>
 
 <P>Non risponde alle nostre mail. Il suo editore non risponde alle nostre mail.
 La rete è piena delle sue false dichiarazioni e accuse (apparentemente non

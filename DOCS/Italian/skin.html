@@ -58,7 +58,7 @@ Ultima modifica: 2002/05/24
 
 <h2><a name="intro">1 Introduzione</a></h2>
 
-Il proposito di questo documento è di descrivere il formato delle skin di <b>MPlayer</b>.
+Il proposito di questo documento è di descrivere il formato delle skin di MPlayer.
 Le informazioni qui contenute possono essere errate, in quanto <em>a)</em> non sono stato io
 a scrivere la GUI, <em>b)</em> la GUI non è finita, <em>c)</em> posso
 sbagliarmi. Quindi non sorprenderti se qualcosa non funziona come descritto qui.
@@ -73,7 +73,7 @@ Grazie a <em>Zoltán Ponekker</em> per il suo aiuto.
 <h2><a name="overview">2 Generale</a></h2>
 
 Non ha niente a che fare col formato delle skin, ma dovresti sapere
-che <b>MPlayer</b> <b>non</b> include una skin, quindi <b>devi installare almeno
+che MPlayer <b>non</b> include una skin, quindi <b>devi installare almeno
 una skin per poter usare la GUI.</b>
 
 
@@ -87,7 +87,7 @@ Le directory in cui si cerca per le skin sono (in ordine):
 </pre>
 
 <p>
-Nota che il primo path può variare a seconda di come è stato configurato <b>MPlayer</b>
+Nota che il primo path può variare a seconda di come è stato configurato MPlayer
 (vedi gli argomenti <code>--datadir</code> e <code>--prefix</code> dello script <code>configure</code>).
 </p>
 
@@ -100,14 +100,12 @@ elencate sopra, per esempio:
 
 <h3><a name="images">2.2 Formati delle immagini</a></h3>
 
-Le immagini devono essere in truecolor (24 o 32 bpp) e possono essere in formato
-BMP, PNG e TGA (nota che le immagini TGA devono essere non compresse).
-<em>Il formato preferito è PNG perchè si comprime molto bene.</em>
+Le immagini devono essere PNG in truecolor (24 o 32 bpp).
 
 <p>
 Nella finestra principale (vedi sotto) puoi usare immagini con `trasparenze':
 regioni riempite col colore #FF00FF (<font color="#FF00FF">magenta</font>)
-sono del tutto trasparenti quando viste con <b>MPlayer</b>. Questo significa che puoi anche ottenere
+sono del tutto trasparenti quando viste con MPlayer. Questo significa che puoi anche ottenere
 finestre con una certa forma se il tuo server X ha l'estensione XShape.
 </p>
 
@@ -125,7 +123,7 @@ destro).
 
 <ul>
 <li>
-La <b>finestra principale</b> è dove puoi controllare <b>MPlayer</b>. Lo sfondo della
+La <b>finestra principale</b> è dove puoi controllare MPlayer. Lo sfondo della
 finestra è un'immagine. Vari oggetti possono (e devono) essere
 piazzati nella finestra: <em>bottoni</em>, <em>slider</em> e <em>etichette</em>.
 Per ogni oggetto, devi
@@ -171,7 +169,7 @@ se non c'è nessun video caricato (è noioso avere una finestra vuota
 </li>
 
 <li>
-Il <b>menu della skin</b> è solo un modo per controllare <b>MPlayer</b> per mezzo delle voci
+Il <b>menu della skin</b> è solo un modo per controllare MPlayer per mezzo delle voci
 del menu. Sono necessarie due immagini per il menu: una è l'immagine di base
 che mostra il menu nel suo stato normale, l'altra è usata per mostrare
 le voci selezionate. Quando attivi il menu, viene mostrata la prima immagine.
@@ -187,7 +185,7 @@ sezione sul <a href="#skinmenu">menu della skin</a> per dettagli).
 
 <p>
 C'è una cosa importante non ancora menzionata: per far funzionare bottoni, slider e
-voci del menu, <b>MPlayer</b> deve sapere cosa fare se sono cliccati.
+voci del menu, MPlayer deve sapere cosa fare se sono cliccati.
 Questo è fatto tramite <a href="#guimsg">messaggi</a> (eventi). Per questi oggetti
 devi definire i messaggi che devono essere generati quando vengono attivati.
 </p>
@@ -196,7 +194,7 @@ devi definire i messaggi che devono essere generati quando vengono attivati.
 Devi avere i seguenti file per fare una skin:
 <ul>
 <li>
-Il file di configurazione chiamato <a href="#skin">skin</a> dice a <b>MPlayer</b> come
+Il file di configurazione chiamato <a href="#skin">skin</a> dice a MPlayer come
 mettere insieme le diverse parti della skin e cosa fare se si clicca
 da qualche parte nella finestra.
 </li>
@@ -294,7 +292,7 @@ section = movieplayer
   end
   
   window = menu
-  ; ... oggetti del menu della skin ...
+  ; ... oggetti del menu ...
   end
 end
 </pre></td></tr></table>
@@ -302,9 +300,9 @@ end
 <p>
 Il nome di un file immagine deve essere dato senza il percorso---
 le immagini vengono cercate nella directory della skin. Puoi (ma non è necessario)
-specificare l'estensione del file. Se il file non esiste, <b>MPlayer</b> cerca di
-caricare il file <i>&lt;nomefile&gt;.&lt;est&gt;</i>, dove <i>tga</i>,
-<i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i> e <i>PNG</i> sono provati
+specificare l'estensione del file. Se il file non esiste, MPlayer cerca di
+caricare il file <i>&lt;nomefile&gt;.&lt;est&gt;</i>, dove
+<i>png</i> e <i>PNG</i> sono provati
 al posto di <i>&lt;est&gt;</i> (in questo ordine). Il primo file corrispondente sarà usato.
 
 <p>
@@ -335,18 +333,9 @@ Ecco un esempio per rendere le cose chiare. Supponi di avere un'immagine chiamat
 </pre>
 </blockquote>
 
-<b>MPlayer</b> cerca di caricare <i>main</i>, <i>main.tga</i>, <i>main.TGA</i>,
-<i>main.bmp</i> ecc, quindi verrà trovata <i>main.png</i>.
+MPlayer cerca di caricare <i>main</i>, <i>main.png</i>, <i>main.PNG</i>,
+quindi verrà trovata <i>main.png</i>.
 <br>
-Se (per sbaglio) scrivi
-<blockquote>
-<pre>
-    base = main.bmp, -1, -1
-</pre>
-</blockquote>
-allora saranno cercati <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
-<i>main.bmp.bmp</i> e <b>MPlayer</b> alla fine rinuncerà
-perchè non c'è nessun <i>main.bmp</i> nella directory, ma <i>main.png</i>.
 </td></tr></table>
 
 
@@ -367,7 +356,8 @@ e -2 per destra (x) e in basso (y). La finestra sarà larga quanto l'immagine.
 <p>
 <em class=warn>
 <b>Avvertimento:</b> le zone trasparenti dell' immagine (colore #FF00FF) appaiono
-nere se il server X non supporta l'estensione XShape.
+nere se il server X non supporta l'estensione XShape. La larghezza dell'immagine deve essere
+divisibile per 8.
 </em>
 </div>
 </dd>
@@ -549,6 +539,15 @@ Puoi usare le seguenti variabili nel testo.
     <td>il carattere "e" (se il filmato è in pausa e il font ha il carattere
     "e")
     </td></tr>
+<tr><td align=center><kbd>$x</kbd></td>
+    <td>larghezza del filmato
+    </td></tr>
+<tr><td align=center><kbd>$y</kbd></td>
+    <td>altezza del filmato
+    </td></tr> 
+<tr><td align=center><kbd>$C</kbd></td>
+    <td>nome del codec utilizzato
+    </td></tr> 
 </table></div>
 <p>
 <b>Nota:</b> Le variabili <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
@@ -734,9 +733,6 @@ simboli (e quindi richiedono un font differente).
 </table>
 </div>
 
-<p>
-<b>Nota:</b> attualmente sono usati solo 'p', 's', 'e', 'n', 'm' e 't'.
-</p>
 
 <h2><a name="guimsg">Appendice A: messaggi della GUI</a></h2>
 
@@ -858,6 +854,9 @@ relativo (0-100%) dello slider).
 <dt><b>evAbout</b>
 <dd>Apre la finestra "about".
 
+<dt><b>evDropSubtitle</b>
+<dd>Disabilita il sottotitolo attualmente in uso.
+
 <dt><b>evEqualizer</b>
 <dd>Accende/spegne l'equalizzatore.
 
@@ -875,14 +874,32 @@ un file).
 <dd>Fa la stessa cosa di <i>evLoad</i>, ma inizia automaticamente la riproduzione
 dopo il caricamento del file.
 
+<dt><b>evLoadSubtitle</b>
+<dd>Carica un file di sottotitolo (con il fileselector)
+
+<dt><b>evLoadAudioFile</b>
+<dd>Carica un file audio (con il fileselector)
+
 <dt><b>evNone</b>
 <dd>Messaggio vuoto, non ha nessun effetto. (Eccetto forse nella versione CVS. :-))
 
 <dt><b>evPlayList</b>
 <dd>Apre/chiude la finestra della playlist.
 
+<dt><b>evPlayDVD</b>
+<dd>Prova a leggere il disco nel drive DVD-ROM dato.
+
+<dt><b>evPlayVCD</b>
+<dd>Prova a leggere il disco nel drive CD-ROM dato.
+
 <dt><b>evPreferences</b>
 <dd>Apre la finestra delle preferenze.
+
+<dt><b>evSetAspect</b>
+<dd>Imposta le proporzioni dell'immagine mostrata.
+
+<dt><b>evSetURL</b>
+<dd>Mostra la finestra di dialogo dell' URL.
 
 <dt><b>evSkinBrowser</b>
 <dd>Apre la finestra dello skin browser.

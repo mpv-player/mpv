@@ -9,17 +9,37 @@
 <BODY>
 
 
-<P><B><A NAME=C>Appendice B - Come segnalare i bug</A></B></P>
+<H1><A NAME="B">Appendice B - Come segnalare i bug</A></H1>
 
-<P><B>Come si segnalano i bug?</B></P>
+<P>Buoni bug-report sono sempre un valido contributo nello sviluppo di qualsiasi
+  progetto software. Ma proprio come lo scrivere del buon software, anche il fare
+  una buona segnalazione di un problema include del lavoro.
+  Per favore, considerate che la maggior parte degli sviluppatori è molto occupata
+  e riceve una quantita' oscena di email. Quindi sebbene il vostro feedback sia
+  importantissimo per migliorare MPlayer e molto apprezzato, dovete capire che
+  ci dovete fornire <B>tutte</B> le informazioni che richiediamo e seguire esattamente
+  le istruzioni in questo documento.</P>
+
+
+<H2>Come risolvere i bug</H2>
+
+<P>Se pensate di avere le capacita' necessarie siete invitati a provare a risolvere
+   voi stessi il bug. O forse lo avete gia' fatto?  Leggete
+  <A HREF="../tech/patches.txt">questo breve testo</A> (in inglese) per scoprire come
+  avere il proprio codice incluso in MPlayer. Le persone sulla mailing list
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+  vi potranno aiutare se avete dei problemi.</P>
+
+
+<H2>Come segnalare i bug</H2>
 
 <P>Prima, prova l'ultima versione CVS di mplayer, forse il tuo bug è già stato corretto. Le istruzioni per scaricare tramite CVS
 si trovano in fondo a <A HREF="http://www.mplayerhq.hu/homepage/dload.html">questa pagina</A>.</P>
 
-<P>Se questo non è d'aiuto fai riferimento all' <A HREF="documentation.html#D">Appendice D</A>, e al resto della documentazione. Se il tuo problema
+<P>Se questo non è d'aiuto fai riferimento all' <A HREF="documentation.html#known_bugs">Appendice C</A>, e al resto della documentazione. Se il tuo problema
 non è conosciuto o non si risolve con le nostre istruzioni, allora per favore segnala il bug:</P>
 
-<P><B>Dove segnalare i bug?</B></P>
+<H3>Dove si segnalano i bug?</H3>
 
 <P>Iscriviti alla mailing list mplayer-users:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -37,9 +57,9 @@ La lingua di questa lista è l' <strong>Inglese</strong></P>
 <P>Per favore descrivi il tuo problema in dettaglio, con esempi ecc, e non dimenticare di includere
 queste importanti informazioni:</P>
 
-<P><B>Cosa segnalare?</B></P>
+<H3>Cosa segnalare?</H3>
 
-<P><B>1. Informazioni sul sistema</B></P>
+<H4>1. Informazioni sul sistema</H4>
 
 <UL>
 <LI>La tua distribuzione Linux o il tuo sistema operativo es.:<BR>
@@ -74,7 +94,7 @@ queste importanti informazioni:</P>
 </LI>
 </UL>
 
-<P><B>2. Hardware &amp; driver:</B></P>
+<H4>2. Hardware &amp; driver:</H4>
 
 <UL>
 <LI>informazioni sulla CPU (questo funziona solo su Linux):<BR>
@@ -103,9 +123,9 @@ queste importanti informazioni:</P>
 <LI>se non sei sicuro manda l'output di lspci -v</LI>
 </UL>
 
-<P><B>Per problemi/errori di compilazione</B></P>
+<H4>Per problemi/errori di compilazione</H4>
 
-<P><B>Per favore includi questi file:</B></P>
+<P>Per favore includi questi file:</P>
 <UL>
 <LI>configure.log</LI>
 <LI>config.h</LI>
@@ -113,13 +133,13 @@ queste importanti informazioni:</P>
 <LI>libvo/config.mak</LI>
 </UL>
 
-<P><B>Per problemi di riproduzione:</B></P>
+<H4>Per problemi di riproduzione:</H4>
 
 <P>Per favore includi l'output di mplayer al livello di verbosità 1 ma ricordati di
 <B>non tagliare l'output</B> quando lo incolli nella tua mail. Gli sviluppatori hanno
 bisogno di tutti i messaggi per scoprire il problema. Puoi ridirezionare l'output
 in un file in questo modo:</P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [opzioni] nomefile &amp;&gt; mplayer.log</CODE></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [opzioni] [nomefile] &gt; mplayer.log 2&gt;&amp;1</CODE></P>
   
 <P><B><I>Se il problema è specifico ad uno o più file,
   allora per favore mandaci il file a:</I></B></P>
@@ -137,49 +157,44 @@ in un file in questo modo:</P>
   Se il file è presente sulla rete allora è sufficiente mandare l' URL
   <strong>esatta</strong>.
 
-<P><B>Per i crash</B></P>
+<H4>Per i crash</H4>
 
 <P>Se hai il coredump del crash continua a leggere il prossimo paragrafo, altrimenti saltalo:</P>
 
-<P><B>Come estrarre informazioni significative da un core dump.</B></P>
+<H4>Come estrarre informazioni significative da un core dump.</H4>
 
 <P>Per favore crea il seguente file di comandi:</P>
 
-<P><CODE>disass $eip-32 $eip+32<BR>
-printf "eax=%08lX\n",$eax<BR>
-printf "ebx=%08lX\n",$ebx<BR>
-printf "ecx=%08lX\n",$ecx<BR>
-printf "edx=%08lX\n",$edx<BR>
-printf "esp=%08lX\n",$esp<BR>
-printf "ebp=%08lX\n",$ebp<BR>
-printf "edi=%08lX\n",$edi<BR>
-printf "esi=%08lX\n",$esi<BR>
-</CODE></P>
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
 
 <P>Quindi semplicemente esegui la seguente linea di comando:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=file_comandi &gt; mplayer.bug</CODE></P>
 
-<P><B>Come conservare informazioni su un crash riproducibile</B></P>
-<P>Ri-compila mplayer col codice di debug abilitato:<BR>
-./configure --enable-debug=3<BR>
+<H4>Come conservare informazioni su un crash riproducibile</H4>
+<P>Ri-compila mplayer col codice di debug abilitato:</P>
+<P><CODE>./configure --enable-debug=3<BR>
 make
-</P>
-<P>quindi esegui mplayer all'interno di gdb, in questo modo:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
-Ora sei all'interno di gdb. Scrivi:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [opzioni-per-mplayer] nomefile</CODE><BR>
-e riproduci il tuo crash. Appena fatto, gdb ti rimanderà al prompt, dove devi scrivere<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
-e mandaci l'output completo.
+</CODE></P>
+<P>quindi esegui mplayer all'interno di gdb, in questo modo:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE></P>
+<P>Ora sei all'interno di gdb. Scrivi:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [opzioni-per-mplayer] nomefile</CODE></P>
+<P>e riproduci il tuo crash. Appena fatto, gdb ti rimanderà al prompt, dove devi scrivere</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
+<P>e mandaci l'output completo.
 </P>
 
-<P><B>Nota generale:</B></P>
+<H3>Nota generale:</H3>
 
 <P>Se qualcosa è proprio grande (i log per esempio) allora è meglio caricarlo sull' ftp
-in formato compresso (gzip e bzip2 sono preferiti), e includere solo il percorso/nomefile nella segnalazione di bug.</P>
+in formato compresso (gzip e bzip2 sono preferiti), e includere solo il percorso/nomefile 
+nella segnalazione di bug. Le nostre mailing list hanno un limite massimo per la lunghezza 
+del messaggio di 80k, se hai qualcosa di più grande dovrai comprimerlo oppure fare l'upload
+via ftp.</P>
 
-<P><B>So quello che sto facendo...</B></P>
+<H2>So quello che sto facendo...</H2>
 
 <P>Se hai fatto un appropriata segnalazione seguendo i passi sopra, e sei sicuro
 che sia un bug di mplayer, non un problema del compilatore o un file danneggiato, hai già

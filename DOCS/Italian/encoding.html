@@ -9,86 +9,12 @@
 <BODY>
 
 
-<P><B><A NAME="encoding">2.4.  Codificare con MEncoder</A></B></P>
+<H2><A NAME="encoding">2.4.  Codificare con MEncoder</A></H2>
 
-<P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder, Codificatore Filmati di MPlayer) è un semplice encoder,
-studiato per codificare i filmati leggibili da MPlayer
-(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) in altri formati leggibili da MPlayer
-(vedi sotto). Può usare vari codec, come <B>DivX4</B> (1 o
-2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche un
-potente sistema di plugin per la manipolazione video.</P>
+<P>Per la lista completa delle opzioni disponibili per Mencoder e gli esempi, vedi
+  la pagina di man.</P>
 
-<P><B><A NAME="compilation">2.4.1.  Compilazione</B></P>
-
-<P>
-  <UL>
-    <LI><B>OPZIONALE</B> - leggi le istruzioni di compilazione di <B>MPlayer</B>.
-    <LI><B>OPZIONALE (SOLO PER LINUX)</B> - scarica le librerie <B>DivX4linux</B> più recenti
-      da <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
-      e installale CORRETTAMENTE. Ti servono se vuoi codificare in DivX4
-      (1/2 passaggi).</LI>
-    <LI><B>OPTIONALE</B> - <A HREF="codecs.html#xvid">scarica e installa
-      <B>XViD</B></A>. Non molto utile, il codec <I>mpeg4</I> di libavcodec
-      può codificare più velocemente e con una migliore qualità di XViD o DivX4/5.</LI>
-      di una codifica più veloce del DivX4, con approssimativamente la stessa qualità.</LI>
-    <LI><B>OPZIONALE</B> - per il supporto libavcodec, installa libavcodec come
-      descritto nella <A HREF="codecs.html#libavcodec">sezione libavcodec</A>.</LI>
-    <LI><B>OPZIONALE</B> - scarica e compila <B>libmp3lame</B> (da lame 3.89beta o lame CVS).<BR>
-      <B>ATTENZIONE : NON COMPILARE LAME &lt; 3.90 CON <U>GCC 2.96</U> ! Non funzionerà
-      correttamente !</B><BR>
-      Questo
-      è necessario per la possibilità di codificare audio CBR/VBR MP3. Nota che il singolo binario di
-      <CODE>lame</CODE> non è sufficiente. Comunque: meno ottimizzazione usi
-      per lame, migliore sarà la qualità. Puoi testare la
-      qualità eseguendo <CODE>make test</CODE> dopo aver finito il processo di compilazione di
-      lame. Il numero risultante dovrebbe essere minore di <B>30</B>. Non ti spaventare
-      se è <B>400</B> o comunque alto, non dovresti sentire una diminuzione di
-      qualità. Oh, e se il tuo compilatore non esegue nemmeno <CODE>make test</CODE> ...
-      Bhe, cancella quel <B>GCC 2.96</B> o aggiorna lame almeno all versione <B>3.90</B>.</LI>
-      <LI><B>OPZIONALE</B> - <CODE>libjpeg</CODE> e <CODE>libpng</CODE> -
-      come descritto nella sezione <A HREF="documentation.html#installation">Installazione</A>
-      </LI>
-  </UL>
-</P>
-
-<P>Sei pronto. Come forse saprai, altri strumenti per la codifica necessitano installata
-la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
-
-<P><B><A NAME="features">2.4.2.  Caratteristiche di MEncoder</B></P>
-
-<P>
-  <UL>
-    <LI>codifica dall'ampia scelta di formati file e decoder di <B>MPlayer</B></LI>
-    <LI>codifica in tutti i codec del
-      <A HREF=codecs.html#libavcodec>libavcodec</A> di ffmpeg</LI>
-    <LI>codifica video da <B>sintonizzatori TV compatibili con V4L</B></LI>
-    <LI>codifica/multiplexing a file AVI intervallati con un indice corretto</LI>
-    <LI>creazione di file da flusso audio esterno</LI>
-    <LI>codifica a 1, 2 o 3 passaggi</LI>
-    <LI>Audio MP3 <B>VBR</B> - <B>NOTA IMPORTANTE</B> : l'audio MP3 VBR non sempre
-      viene letto bene da i lettori di windows! D'altra parte, attualmente
-      la codifica CBR di <B>MEncoder</B> non funziona coi lettori win32 :)</LI>
-    <LI>Audio PCM</LI>
-    <LI>copia da stream</LI>
-    <LI>sincronizzazione dell'input A/V (basata su PTS, può essere disabilitata con l'opzione -mc 0)</LI>
-    <LI>correzione FPS con l'opzione <CODE>-ofps</CODE> (utile quando si codifica
-    un VOB a 29.97fps in un AVI a 24fps)</LI>
-    <LI>usa il nostro potente sistema a plugin (taglia, espandi, capovolgi, post-processa,
-      ruota, ridimensiona, conversione rgb/yuv)</LI>
-    <LI>può codificare DVD/VOBsub <B>E</B> il testo dei sottotitoli nel file di output</LI>
-    <LI>può catturare i sottotitoli dei DVD in formato Vobsub</LI>
-  </UL>
-</P>
-
-<P><B><I>Caratteristiche programmate</I></B> :
-  <UL>
-    <LI>ancora più ampia scelta disponibile di formati/codec di (de)codifica
-    (creare file VOB con flussi DivX4/Indeo5/VIVO :)</LI>
-    <LI>codifica audio da v4l</LI>
-  </UL>
-</P>
-
-<P><B><A NAME="2pass">2.4.2.1.  Codificare DivX4 in 2 o 3 passaggi</B></P>
+<H3><A NAME="2pass">2.4.1.  Codificare DivX4 in 2 o 3 passaggi</H3>
 
 <P><U><B>codifica a 2 passaggi :</B></U> il nome deriva dal fatto che questo metodo codifica il file <I>due volte</I>.
 La prima codifica (<I>passaggio</I> doppiato) crea dei file temporanei (*.log) con una grandezza
@@ -99,57 +25,43 @@ dovresti consultare alcune guide disponibili in rete.</P>
 
 <P>Questo esempio mostra come codificare un DVD in un AVI DivX4 a 2 passaggi. Bisogna dare solo
 due comandi :<BR>
+
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file che può essere rimasto
   da una precedente codifica a 3 passaggi (interferisce col processo attuale)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:altre_opzioni
--o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:altre_opzioni -o movie.avi -pass 2</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+    vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+    vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>codifica a 3 passaggi :</B></U> questa è un' estensione della codifica a 2 passaggi,
   dove la codifica audio avviene in un passaggio separato. Questo metodo abilita la
   stima del bitrate video raccomandato per far stare il file risultante in un CD. In più,
   l'audio è codificato solo una volta, diversamente dalla modalità in 2 passaggi. Schema :</P>
 
-<P>
-  <TABLE>
-  <TR>
-    <TD>
-      <CODE>rm frameno.avi</CODE></TD>
-    <TD>
-      <B>rimuovi il file temporaneo che va in conflitto</B></TD>
-  </TR>
-  <TR>
-    <TD>
-      <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
-        frameno.avi</CODE></TD>
-    <TD>
-      <B><U>Primo passaggio</U> : sarà creato un file avi di solo audio, contenente SOLO
+<OL>
+  <LI>Rimuovi il file temporaneo che va in conflitto:
+    <P><CODE>rm frameno.avi</CODE></P></LI>
+  <LI>Primo passaggio:
+    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</CODE></P>
+    <P>Sarà creato un file avi di solo audio, contenente SOLO
       il flusso audio richiesto. Non dimenticare <CODE>-lameopts</CODE>, se ne
       hai bisogno. Se stai codificando un filmato lungo, MEncoder da
       i valori di bitrate consigliati per dimensioni di destinazione di 650Mb, 700Mb, e 800Mb,
-      dopo la fine di questo passaggio.</B></TD>
-  </TR>
-  <TR>
-    <TD>
-      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD>
-      <B><U>Secondo passaggio</U> : cioè il primo passaggio della codifica del video DivX4.
+      dopo la fine di questo passaggio.</P></LI>
+  <LI>Secondo passaggio:
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
+      -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=&lt;bitrate&gt;</CODE></P>
+    <P>Cioè il primo passaggio della codifica del video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
-      passaggio.</B></TD>
-  </TR>
-  <TR>
-    <TD>
-      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD>
-      <B><U>Terzo passaggio</U> : cioè il secondo passaggio della codifica video DivX4.
+      passaggio.</P></LI>
+  <LI>Terzo passaggio:
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
+      -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=&lt;bitrate&gt;</CODE></P>
+    <P>Cioè il secondo passaggio della codifica video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
       passaggio. In questo passaggio, l'audio da <CODE>frameno.avi</CODE> sarà inserito
-      nel file di destinazione.. ed è tutto pronto!</B></TD>
-  </TR>
-  </TABLE>
-</P>
+      nel file di destinazione.. ed è tutto pronto!</P></LI>
+</OL>
 
 <P><B>Esempio di codifica a 3 passaggi :</B></P>
 
@@ -157,51 +69,33 @@ due comandi :<BR>
   che può essere rimasto da una precedente codifica a 3 passaggi (interferisce con quella attuale)<BR>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-  -o frameno.avi<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -lavcopts vcodec=mpeg4:altre_opzioni -oac copy -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -lavcopts vcodec=mpeg4:altre_opzioni -oac copy -o movie.avi -pass 2</CODE>
-</P>
+  -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+    -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+    -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
-<P><U><B>Codifica a 2 o 3 passaggi usando il controller interno di libavcodec</B></U> :
-Opzionalmente puoi usare la modalità interna a 2 o 3 passaggi di libavcodec, può risultare
-una migliore accuratezza del frame rate rispetto al controller esterno.<BR>
-<UL>
-<B>codifica a 2 passaggi</B> :<BR>
-<CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (opzioni audio) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (opzioni audio) -o movie.avi</CODE><BR>
-<BR>
-<B>codifica a 3 passaggi</B> :<BR>
-<CODE>rm -f frameno.avi lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc frameno (opzioni audio) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE><BR>
-</UL>
-</P>
+<H3><A NAME="rescaling">2.4.2.  Ridimensionare i filmati</A></H3
 
-<P><B><A NAME="rescaling">2.4.2.2.  Ridimensionare i filmati</B></P>
-
-<P>Spesso emerge l'esigenza di ridimensionare le immagini del filmato. Le ragioni possono essere molte,
-  come diminuire la grandezza del file di output, codificare SVCD in DivX. I DVD "rippati"
-  sono spesso da ridimensionare, per esempio un DVD in scala 4:3 dovrebbe essere in 640x480, specialmente se vuoi
-  che entri in 1 CD, e avere una buona qualità allo stesso tempo.
-  Gli SVCD hanno dimensione di 480x480, e la loro intestazione contiene le proporzioni
-  che il lettore dovrebbe usare (Es.: 480x480 + 4:3 = 640x480). Però quando codifichi
-  un file AVI (DivX), devi fare attenzione che l'intestazione dell'AVI non includa
-  questo valore. Quindi, l'unica soluzione è ridimensionare.</P>
+<P>Spesso emerge l'esigenza di ridimensionare le immagini del filmato. Le ragioni possono
+  essere molte: diminuire la dimensione del file, la larghezza di banda della rete, ecc. Molte persone
+  usano il ridimensionamento anche quando convertono DVD o SVCD in AVI DivX. <B>Questo è male.</B>
+  Invece di fare così, leggete la sezione <A HREF="#aspect">Conservare
+  le proporzioni</A>.</P>
 
 <P>Il processo di ridimensionamento è gestito dal filtro video <I>'scale'</I>:
-  <CODE>-vop scale=X:Y</CODE>. La qualità può essere impostata tramite l'opzione
+  <CODE>-vop scale=larghezza:altezza</CODE>. La qualità può essere impostata tramite l'opzione
   <CODE>-sws</CODE>. Se non specificata, <B>MEncoder</B> userà il valore 0 :
   bilineare veloce.</P>
 
 <P>Utilizzo :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder esempio-svcd.mpg -lavcopts vcodec=mpeg4:altre_opzioni -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder input.mpg -ovc lavc -lavcopts
+  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
+  output.avi</CODE></P>
 
 
-<P><B><A NAME="copying">2.4.2.3.  Copia da stream</B></P>
+<H3><A NAME="copying">2.4.3.  Copia da stream</A></H3>
 
 <P><B>MEncoder</B> può gestire i flussi in entrata in due modi : <B>codificandoli</B> o
   <B>copiandoli</B>. Questa sezione tratta la <B>copia</B>.</P>
@@ -223,9 +117,9 @@ mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi<
 </P>
 
 
-<P><B><A NAME="fixing">2.4.2.4.  Correggere gli AVI con indice o intervallo malformati</B></P>
+<H3><A NAME="fixing">2.4.4.  Correggere gli AVI con indice o intervallo malformati</A></H3>
 
-<P>La cosa più semplice. Copiamo semplicemente i flussi audio e video, e
+<P>E' semplicissimo. Copiamo semplicemente i flussi audio e video, e
 <B>MEncoder</B> genera l'indice. Naturalmente questo non può correggere possibili bug
 nei flussi video e/o audio. Corregge anche i file mal intervallati,
 così non sarà più necessaria l'opzione <CODE>-ni</CODE> per leggerli.</P>
@@ -233,7 +127,7 @@ così non sarà più necessaria l'opzione <CODE>-ni</CODE> per leggerli.</P>
 <P>Comando : <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<P><B><A NAME="libavcodec">2.4.2.5.  Codificare con le famiglia di codec <I>libavcodec</I></B></P>
+<H3><A NAME="libavcodec">2.4.5.  Codificare con le famiglia di codec libavcodec</A></H3>
 
 <P><A HREF="codecs.html#libavcodec">Libavcodec</A> fornisce una semplice codifica in
 molti interessanti formati video e audio (al momento i suoi codec audio non sono
@@ -256,12 +150,13 @@ supportati). Puoi codificare i seguenti codec :</P>
   <CODE>vcodec</CODE>, come : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Un esempio, con la compressione MJPEG :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc 
+  -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<P><B><A NAME="image_files">2.4.2.6.  Codificare da file di immagine multipli (JPEG o PNG)</B></P>
+<H3><A NAME="image_files">2.4.6.  Codificare da file di immagine multipli (JPEG, PNG o TGA)</A></H3>
 
-<P><B>MEncoder</B> è in grado di creare filmati a partire da uno o più file JPEG o PNG.
+<P><B>MEncoder</B> è in grado di creare filmati a partire da uno o più file JPEG, PNG o TGA.
   Con un semplice framecopy può creare file MJPEG (Motion JPEG) o MPNG
   (Motion PNG).</P>
 
@@ -282,20 +177,20 @@ supportati). Puoi codificare i seguenti codec :</P>
   delle <A HREF="#options">Opzioni</A> generali e nella pagina di man.</P>
 
 <P><I>Creare un file DivX4 da tutti i file JPEG presenti nella directory attuale :</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 
+  -o output.avi</CODE></P>
 
 <P><I>Creare un file DivX4 da alcuni dei file JPEG presenti nella directory attuale :</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 
+  -ovc divx4 -o output.avi</CODE></P>
 
 <P><I>Creare un file Motion JPEG (MJPEG) da tutti i file JPEG presenti nella directory attuale :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
   -o output.avi</CODE></P>
 
 <P><I>Creare un file non compresso da tutti i file PNG presenti nella directory attuale :</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw 
+  -o output.avi</CODE></P>
 
 <P><I>Creare un file Motion PNG (MPNG) da tutti i file PNG presenti nella directory attuale :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
@@ -305,7 +200,7 @@ supportati). Puoi codificare i seguenti codec :</P>
   &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
   -o output.avi</CODE></P>
 
-<P><B><A NAME="vobsub">2.4.2.7.  Estrarre i sottotitoli dei DVD in un file Vobsub</A></B></P>
+<H3><A NAME="vobsub">2.4.7.  Estrarre i sottotitoli dei DVD in un file Vobsub</A></H3>
 
 <P><B>MEncoder</B> è in grado di estrarre i sottotitoli dei DVD e codificarli nel formato file Vobsub.  
 Questi consistono in un paio di file con estensione .idx  e .sub e sono generalmente impacchettati in un unico archivio .rar. MPlayer può leggerli usando le opzioni <I>-vobsub</I> e <I>-vobsubid</I>.</P>
@@ -326,17 +221,44 @@ Quindi dovresti rimuoverli prima di ogni nuova esecuzione.</P>
 
 <P><I>Copiare due sottotitoli da un DVD usando la codifica a tre passaggi</I><BR>   
 &nbsp;&nbsp;<CODE>rm sottotitoli.idx sottotitoli.sub</CODE><BR>    
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout sottotitoli -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE>   
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout sottotitoli -vobsuboutindex 1 -sid 5</CODE></P>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout sottotitoli -vobsuboutindex 0 
+-sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
+    subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copiare un sottotitolo francese da un file MPEG</I><BR>
 &nbsp;&nbsp;<CODE>rm sottotitoli.idx sottotitoli.sub</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<P><B><A NAME="options">2.4.3.  Opzioni disponibili</B></P>
+<H3><A NAME="aspect">2.4.8 Conservare le proporzioni</A></H3>
 
-<P>Per tutte le opzioni disponibili e gli esempi, leggi la pagina di man</P>
+<P>I file dei DVD e dei SVCD (cioè MPEG1/2) contengono un valore di proporzione,
+  che descrive come il lettore dovrebbe ridimensionare il flusso video, così che
+  le persone non abbiano teste a uovo (es.: 480x480 + 4:3 = 640x480). Comunque quando
+  si codificano file AVI (DivX), bisogna considerare che le intestazioni degli AVI non salvano
+  questo valore. Ridimensionare il filmato è disgustoso e spreca tempo, deve esserci
+  un modo migliore!</P>
+
+<P>C'è.</P>
+
+<P>L'MPEG4 ha una caratteristica unica: il flusso video può contenere
+  le proporzioni che gli servono. Si, proprio come i file MPEG1/2 (DVD, SVCD).
+  Purtroppo, <U>non<U> ci sono lettori video la fuori che supportino questa
+  possibilità. Eccetto MPlayer.</P>
+
+<P>Si può usare questa caratteristica solo con il codec <CODE>mpeg4</CODE> di <B>libavcodec</B>.
+  Ricorda: anche se MPlayer riproducerà correttamente il file creato,
+  gli altri lettori useranno le proporzioni sbagliate.</P>
+
+<P>Dovresti considerare seriamente la possibilità di tagliare le bande nere sopra e sotto al filmato.
+  Vedi la pagina di man per l'utilizzo dei filtri <CODE>cropdetect</CODE> e
+  <CODE>crop</CODE>.</P>
+
+<H5>Utilizzo:</H5>
+
+<P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
+  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 </BODY>
 </HTML>
