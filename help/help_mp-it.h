@@ -44,9 +44,9 @@ static char help_text[]=
 " o               modalità OSD: niente / barra ricerca / barra ricerca + tempo\n"
 " * o /           incrementa o decrementa il volume pcm\n"
 " z o x           regola il ritardo dei sottotitoli di +/- 0.1 secondi\n"
-" r o t           posizione alto/basso dei sottotitoli, vedi anche -vop expand\n"
+" r o t           posizione alto/basso dei sottotitoli, vedi anche -vf expand\n"
 "\n"
-" * * * VEDI PAGINA MAN PER DETTAGLI, ULTERIORI OPZIONI AVANZATE E TASTI ! * * *\n"
+" * * * VEDI PAGINA MAN PER DETTAGLI, ULTERIORI OPZIONI AVANZATE E TASTI! * * *\n"
 "\n";
 #endif
 
@@ -74,14 +74,14 @@ static char help_text[]=
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: manca il flusso selezionato!\n"
 #define MSGTR_CantOpenDumpfile "Impossibile aprire il file di dump!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
-#define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell\'intestazione! Usa l\'opzione -fps !\n"
-#define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d ...\n"
+#define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell\'intestazione! Usa l\'opzione -fps!\n"
+#define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d...\n"
 #define MSGTR_CantFindAfmtFallback "Impossibile trovare i codec audio per la famiglia dei driver richiesta, torno agli altri driver.\n"
-#define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X !\n"
+#define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X!\n"
 #define MSGTR_RTFMCodecs "Leggi DOCS/it/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Impossibile inizializzare il codec audio! -> nessun suono\n"
-#define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d ...\n"
-#define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X !\n"
+#define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d...\n"
+#define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X!\n"
 #define MSGTR_VOincompCodec "Mi dispiace, il dispositivo di video_out selezionato è incompatibile con questo codec.\n"
 #define MSGTR_CannotInitVO "FATAL: Impossibile inizializzare il driver video!\n"
 #define MSGTR_CannotInitAO "Impossibile aprire/inizializzare il dispositivo audio -> NESSUN SUONO\n"
@@ -96,12 +96,12 @@ static char help_text[]=
 "  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/it/sound.html per ulteriori suggerimenti!\n"\
 " Puoi anche provare con -autosync 30 o altri valori.\n"\
 "- Output video lento. Prova un differente -vo driver (per la lista completa: -vo help) o prova\n"\
-"  con -framedrop !  Leggi DOCS/it/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
+"  con -framedrop!  Leggi DOCS/it/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
 "- Cpu lenta. Non provare a riprodurre grossi dvd/divx su cpu lente! Prova -hardframedrop\n"\
 "- File corrotto. Prova varie combinazioni di: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Per riprodurre da dispositivi lenti (dischi nfs/smb, dvd, vcd etc) prova -cache 8192\n"\
 "- Stai usando -cache per riprodurre un file AVI senza interleave? Prova con -nocache.\n"\
-"Se il problema non è in nessuno di questi casi, allora leggi DOCS/it/bugreports.html !\n\n"
+"Se il problema non è in nessuno di questi casi, allora leggi DOCS/it/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
 #define MSGTR_GuiNeedsX "LA GUI di MPlayer richiede X11!\n"
@@ -128,7 +128,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Descrizione: %s\nAO: Autore: %s\n"
 #define MSGTR_AOComment "AO: Commento: %s\n"
 #define MSGTR_Video_NoVideo "Video: no video!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: Impossibile inizializzare i filtri video (-vop) o l'output video (-vo)!\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: Impossibile inizializzare i filtri video (-vf) o l'output video (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nImpossibile caricare la playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -273,7 +273,7 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Uso di formato file AVI NON-INTERLEAVED corrotto!\n"
 #define MSGTR_CouldntDetFNo "Impossibile determinare il numero di fotogrammi (per lo spostamento in valore assoluto)  \n"
-#define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi! (richiesto un indice, prova con l\'opzione -idx !)  \n"
+#define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi! (richiesto un indice, prova con l\'opzione -idx!)  \n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
 #define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/it/cd-dvd.html\n"
@@ -303,7 +303,7 @@ static char help_text[]=
 #define MSGTR_CantCloseCodec "impossibile chiudere il codec\n"
 
 #define MSGTR_MissingDLLcodec "ERRORE: Impossibile aprire il codec DirectShow richiesto: %s\n"
-#define MSGTR_ACMiniterror "Impossibile caricare/inizializzare il codec audio Win32/ACM (manca il file DLL ?)\n"
+#define MSGTR_ACMiniterror "Impossibile caricare/inizializzare il codec audio Win32/ACM (manca il file DLL?)\n"
 #define MSGTR_MissingLAVCcodec "Impossibile trovare il codec '%s' in libavcodec...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF mentre cercavo la sequenza di intestazione\n"
@@ -336,7 +336,7 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Configurazione del supporto per lirc...\n"
 #define MSGTR_LIRCdisabled "Non potrai usare il tuo telecomando\n"
 #define MSGTR_LIRCopenfailed "Apertura del supporto per lirc fallita!\n"
-#define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s !\n"
+#define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s!\n"
 
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Impossibile trovare il filtro video '%s'\n"
@@ -347,7 +347,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: il codec non ha impostato sh->disp_w and sh->disp_h, tento di aggirare il problema!\n"
 #define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (csp preferito: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Impossibile trovare un colorspace adatto - riprovo con -vop scale...\n"
+#define MSGTR_CouldNotFindColorspace "Impossibile trovare un colorspace adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
 
@@ -357,15 +357,15 @@ static char help_text[]=
 
 // --- labels ---
 #define MSGTR_About "Informazioni su"
-#define MSGTR_FileSelect "Seleziona il file ..."
-#define MSGTR_SubtitleSelect "Seleziona il sottotitolo ..."
-#define MSGTR_OtherSelect "Seleziona ..."
-#define MSGTR_AudioFileSelect "Seleziona canale audio esterno ..."
-#define MSGTR_FontSelect "Seleziona il carattere ..."
+#define MSGTR_FileSelect "Seleziona il file..."
+#define MSGTR_SubtitleSelect "Seleziona il sottotitolo..."
+#define MSGTR_OtherSelect "Seleziona..."
+#define MSGTR_AudioFileSelect "Seleziona canale audio esterno..."
+#define MSGTR_FontSelect "Seleziona il carattere..."
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizzatore"			 
 #define MSGTR_SkinBrowser "Gestore Skin"
-#define MSGTR_Network "Flusso dati dalla rete ..."
+#define MSGTR_Network "Flusso dati dalla rete..."
 #define MSGTR_Preferences "Preferenze"
 #define MSGTR_OSSPreferences "Configurazione driver OSS"
 #define MSGTR_SDLPreferences "Configurazione driver SDL"
@@ -393,39 +393,39 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] errore nel file di configurazione della skin nella riga %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] avvertimento nel file di configurazione della skin nella riga %d: widget trovato ma non trovato prima di \"section\" ( %s )"
+#define MSGTR_SKIN_WARNING1 "[skin] avvertimento nel file di configurazione della skin nella riga %d: widget trovato ma non trovato prima di \"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[skin] avvertimento nel file di configurazione della skin nella riga %d: widget trovato ma non trovato prima di \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[skin] avvertimento nel file di configurazione della skin nella riga %d: questa sottosezione non è supportata da questo widget (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "bitmap con profondità di 16 bit o inferiore non supportata ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "file non trovato ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "bmp, errore di lettura ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "tga, errore di lettura ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "png, errore di lettura ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed tga non supportato ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "tipo di file sconosciuto ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "errore nella conversione da 24 bit a 32 bit ( %s )\n"
+#define MSGTR_SKIN_BITMAP_16bit  "bitmap con profondità di 16 bit o inferiore non supportata (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "file non trovato (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP, errore di lettura (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA, errore di lettura (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG, errore di lettura (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA non supportato (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "tipo di file sconosciuto (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "errore nella conversione da 24 bit a 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "messaggio sconosciuto: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "memoria insufficiente\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "dichiarati troppi font\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "file dei font non trovato\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "file delle immagini dei font non trovato\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "identificatore del font inesistente ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "parametro sconosciuto  ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "identificatore del font inesistente (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "parametro sconosciuto  (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] memoria insufficiente.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trovata ( %s ).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Errore nella lettura del file di configurazione della skin ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trovata (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Errore nella lettura del file di configurazione della skin (%s).\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Informazione su MPlayer"
-#define MSGTR_MENU_Open "Apri ..."
-#define MSGTR_MENU_PlayFile "Riproduci il file ..."
-#define MSGTR_MENU_PlayVCD "Riproduci il VCD ..."
-#define MSGTR_MENU_PlayDVD "Riproduci il DVD ..."
-#define MSGTR_MENU_PlayURL "Riproduci la URL ..."
-#define MSGTR_MENU_LoadSubtitle "Carica i sottotitoli ..."
-#define MSGTR_MENU_DropSubtitle "Elimina i sototitoli ..."
-#define MSGTR_MENU_LoadExternAudioFile "Carica file audio esterni ..."
+#define MSGTR_MENU_Open "Apri..."
+#define MSGTR_MENU_PlayFile "Riproduci il file..."
+#define MSGTR_MENU_PlayVCD "Riproduci il VCD..."
+#define MSGTR_MENU_PlayDVD "Riproduci il DVD..."
+#define MSGTR_MENU_PlayURL "Riproduci la URL..."
+#define MSGTR_MENU_LoadSubtitle "Carica i sottotitoli..."
+#define MSGTR_MENU_DropSubtitle "Elimina i sototitoli..."
+#define MSGTR_MENU_LoadExternAudioFile "Carica file audio esterni..."
 #define MSGTR_MENU_Playing "Riproduzione"
 #define MSGTR_MENU_Play "Riproduci"
 #define MSGTR_MENU_Pause "Pausa"
@@ -450,7 +450,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Skin browser"
 #define MSGTR_MENU_Preferences "Preferenze"
-#define MSGTR_MENU_Exit "Uscita ..."
+#define MSGTR_MENU_Exit "Uscita..."
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Originale"
 #define MSGTR_MENU_AspectRatio "Aspetto"
@@ -536,7 +536,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SDL_Driver "Driver:"
 #define MSGTR_PREFERENCES_Message "Ricorda che devi riavviare la riproduzione affinché alcune opzioni abbiano effetto!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Usa LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Usa LAVC (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Usa FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"

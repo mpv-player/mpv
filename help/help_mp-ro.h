@@ -40,7 +40,7 @@ static char help_text[]=
 " * sau /          creºte sau scade volumul (apãsaþi 'm' pentru principal/wav)\n"
 " z sau x          ajusteazã decalajul subtitrãrii cu +/- 0.1 secunde\n"
 "\n"
-" * * * VEDEÞI MANUALUL PENTRU DETALII,(ALTE) OPÞIUNI AVANSATE ªI TASTE ! * * *\n"
+" * * * VEDEÞI MANUALUL PENTRU DETALII,(ALTE) OPÞIUNI AVANSATE ªI TASTE! * * *\n"
 "\n";
 #endif
 
@@ -68,19 +68,19 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nu pot deschide fiºierul (dump)!!!\n"
 #define MSGTR_CoreDumped "core aruncat :)\n"
 #define MSGTR_FPSnotspecified "FPS nespecificat (sau invalid) în antet! Folosiþi opþiunea -fps!\n"
-#define MSGTR_TryForceAudioFmt "Încerc sã forþez utilizarea unui codec audio din familia %d ...\n"
+#define MSGTR_TryForceAudioFmt "Încerc sã forþez utilizarea unui codec audio din familia %d...\n"
 #define MSGTR_CantFindAfmtFallback "Nu pot sã gãsesc un codec audio pentru familia forþatã, revin la alte drivere.\n"
-#define MSGTR_CantFindAudioCodec "Nu gãsesc un codec audio pentru formatul 0x%X !\n"
+#define MSGTR_CantFindAudioCodec "Nu gãsesc un codec audio pentru formatul 0x%X!\n"
 #define MSGTR_CouldntInitAudioCodec "Nu pot sã iniþializez codec-ul audio! -> fãrã sunet\n"
-#define MSGTR_TryForceVideoFmt "Încerc sã forþez utilizarea unui codec video din familia %d ...\n"
-#define MSGTR_CantFindVideoCodec "Nu gãsesc un codec video pentru formatul 0x%X !\n"
+#define MSGTR_TryForceVideoFmt "Încerc sã forþez utilizarea unui codec video din familia %d...\n"
+#define MSGTR_CantFindVideoCodec "Nu gãsesc un codec video pentru formatul 0x%X!\n"
 #define MSGTR_VOincompCodec "Îmi pare rãu, ieºirea video selectatã este incompatibilã cu acest codec.\n"
 #define MSGTR_CouldntInitVideoCodec "FATALÃ: Nu pot iniþializa codec-ul video :(\n"
 #define MSGTR_CannotInitVO "FATALÃ: Nu pot iniþializa diver-ul video!\n"
 #define MSGTR_CannotInitAO "nu pot deschide/iniþializa dispozitivul audio -> fãrã sunet\n"
 #define MSGTR_StartPlaying "Încep afiºarea...\n"
 #define MSGTR_SystemTooSlow "\n*******************************************************************************"\
-			    "\n** Sistemul dumneavoastrã este prea LENT ! încercaþi cu -framedrop sau RTFM! **"\
+			    "\n** Sistemul dumneavoastrã este prea LENT! încercaþi cu -framedrop sau RTFM! **"\
 			    "\n*******************************************************************************\n"
 
 #define MSGTR_NoGui "MPlayer a fost compilat fãrã interfaþã graficã!\n"
@@ -164,7 +164,7 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Setez suportul pentru LIRC...\n"
 #define MSGTR_LIRCdisabled "Nu veþi putea utiliza telecomanda\n"
 #define MSGTR_LIRCopenfailed "Nu pot deschide suportul pentru LIRC!\n"
-#define MSGTR_LIRCcfgerr "Nu pot citi fiºierul de configurare LIRC %s !\n"
+#define MSGTR_LIRCcfgerr "Nu pot citi fiºierul de configurare LIRC %s!\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -189,23 +189,23 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[tematicã] eroare în fiºierul de tematicã la linia %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[tematicã] eroare în fiºierul de tematicã la linia %d: componentã gasitã dar înainte \"section\" negãsitã ( %s )"
+#define MSGTR_SKIN_WARNING1 "[tematicã] eroare în fiºierul de tematicã la linia %d: componentã gasitã dar înainte \"section\" negãsitã (%s)"
 #define MSGTR_SKIN_WARNING2 "[tematicã] eroare în fiºierul de tematicã la linia %d: componentã gasitã dar înainte \"subsection\" negãsitã (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "adâncimea de culoare de 16 biþi sau mai puþin pentru imagini nesuportatã ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "fiºier negãsit ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "eroare la citire bmp ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "eroare la citire tga ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "eroare la citire png ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "imagini tga împachetate RLE nesuportate ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "tip fiºier necunoscut ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "eroare la conversia de la 24 biþi la 32 biþi ( %s )\n"
+#define MSGTR_SKIN_BITMAP_16bit  "adâncimea de culoare de 16 biþi sau mai puþin pentru imagini nesuportatã (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "fiºier negãsit (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "eroare la citire BMP (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "eroare la citire TGA (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "eroare la citire PNG (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "imagini TGA împachetate RLE nesuportate (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "tip fiºier necunoscut (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "eroare la conversia de la 24 biþi la 32 biþi (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "mesaj necunoscut: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "memorie insuficientã\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "prea multe font-uri declarate\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "fiºier cu font negºsit\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "fiºier imagine font negãsit\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "identificator font inexistent ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "parametru necunoscut ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "identificator font inexistent (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "parametru necunoscut (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[Navigator tematici] memorie insuficientã.\n"
 
 #endif

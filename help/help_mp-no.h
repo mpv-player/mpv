@@ -72,12 +72,12 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Kan ikke åpne dump fil!!!\n"
 #define MSGTR_CoreDumped "core dumpet :)\n"
 #define MSGTR_FPSnotspecified "FPS ikke spesifisert (eller ugyldig) i headeren! Bruk -fps valget!\n"
-#define MSGTR_TryForceAudioFmt "Prøver å tvinge lyd-codec driver familie %d ...\n"
+#define MSGTR_TryForceAudioFmt "Prøver å tvinge lyd-codec driver familie %d...\n"
 #define MSGTR_CantFindAfmtFallback "Kan ikke finne lyd-codec for tvunget driver familie, faller tilbake til andre drivere.\n"
-#define MSGTR_CantFindAudioCodec "Kan ikke finne codec for lydformat 0x%X !\n"
+#define MSGTR_CantFindAudioCodec "Kan ikke finne codec for lydformat 0x%X!\n"
 #define MSGTR_CouldntInitAudioCodec "Greide ikke å initialisere lyd-codec! -> nosound\n"
-#define MSGTR_TryForceVideoFmt "Prøver å tvingte video-codec driver familie %d ...\n"
-#define MSGTR_CantFindVideoCodec "Kan ikke finne codec for videoformat 0x%X !\n"
+#define MSGTR_TryForceVideoFmt "Prøver å tvingte video-codec driver familie %d...\n"
+#define MSGTR_CantFindVideoCodec "Kan ikke finne codec for videoformat 0x%X!\n"
 #define MSGTR_VOincompCodec "Desverre, valgt video_out enhet er inkompatibel med denne codec'en.\n"
 #define MSGTR_CannotInitVO "FATALT: Kan ikke initialisere video driver!\n"
 #define MSGTR_CannotInitAO "kunne ikke åpne/initialisere lyd-enhet -> NOSOUND\n"
@@ -97,7 +97,7 @@ static char help_text[]=
 "  forsøk -hardframedrop\n"\
 "- Feil på filen. forsøk forskjellige kombinasjoner av disse:\n"\
 "  -nobps  -ni  -mc 0  -forceidx\n"\
-"Dersom dette ikke hjelper, les DOCS/HTML/en/bugreports.html !\n\n"
+"Dersom dette ikke hjelper, les DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer er kompilert uten GUI-støtte!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI trenger X11!\n"
@@ -180,7 +180,7 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Setter opp lirc støtte...\n"
 #define MSGTR_LIRCdisabled "Du vil ikke kunne bruke fjernkontrollen din\n"
 #define MSGTR_LIRCopenfailed "Feil under åpning av lirc!\n"
-#define MSGTR_LIRCcfgerr "Feil under lesing av lirc konfigurasjonsfil %s !\n"
+#define MSGTR_LIRCcfgerr "Feil under lesing av lirc konfigurasjonsfil %s!\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -190,8 +190,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "Om"
 #define MSGTR_FileSelect "Åpne fil..."
-#define MSGTR_SubtitleSelect "Velg teksting ..."
-#define MSGTR_OtherSelect "Velg ..."
+#define MSGTR_SubtitleSelect "Velg teksting..."
+#define MSGTR_OtherSelect "Velg..."
 #define MSGTR_PlayList "Spilleliste"
 #define MSGTR_SkinBrowser "Velg skin"
 
@@ -207,37 +207,37 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] feil i skin konfigurasjonsfil linje %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] advarsel i skin konfigurasjonsfil linje %d: widget funnet, men før \"section\" ikke funnet  %s )"
+#define MSGTR_SKIN_WARNING1 "[skin] advarsel i skin konfigurasjonsfil linje %d: widget funnet, men før \"section\" ikke funnet  %s)"
 #define MSGTR_SKIN_WARNING2 "[skin] advarsel i skin konfigurasjonsfil linje %d: widget funnet, men før \"subsection\" ikke funnet (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16 bits eller minde bitmap ikke støttet ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "finner ikke filen ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "bmp lesefeil ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "tga lesefeil ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "png lesefeil ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed tga ikke støttet ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "ukjent filtype ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit til 32 bit konverteringsfeil ( %s )\n"
+#define MSGTR_SKIN_BITMAP_16bit  "16 bits eller minde bitmap ikke støttet (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "finner ikke filen (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP lesefeil (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA lesefeil (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG lesefeil (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA ikke støttet (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "ukjent filtype (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "24 bit til 32 bit konverteringsfeil (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "ukjent beskjed: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "ikke nok minne\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "for mange skrifttyper deklarert\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "skrifttypefil ikke funnet\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "skrifttype image fil ikke funnet\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "ikke-ekstisterende skrifttype identifikasjon ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "ukjent parameter ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "ikke-ekstisterende skrifttype identifikasjon (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "ukjent parameter (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] ikke nok minne.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin ikke funnet ( %s ).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin konfigurasjonfil lesefeil ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin ikke funnet (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin konfigurasjonfil lesefeil (%s).\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Om MPlayer"
-#define MSGTR_MENU_Open "Åpne ..."
-#define MSGTR_MENU_PlayFile "Spill file ..."
-#define MSGTR_MENU_PlayVCD "Spill VCD ..."
-#define MSGTR_MENU_PlayDVD "Spill DVD ..."
-#define MSGTR_MENU_PlayURL "Spill URL ..."
-#define MSGTR_MENU_LoadSubtitle "Last tekst ..."
+#define MSGTR_MENU_Open "Åpne..."
+#define MSGTR_MENU_PlayFile "Spill file..."
+#define MSGTR_MENU_PlayVCD "Spill VCD..."
+#define MSGTR_MENU_PlayDVD "Spill DVD..."
+#define MSGTR_MENU_PlayURL "Spill URL..."
+#define MSGTR_MENU_LoadSubtitle "Last tekst..."
 #define MSGTR_MENU_Playing "Spiller"
 #define MSGTR_MENU_Play "Spill"
 #define MSGTR_MENU_Pause "Pause"
@@ -250,7 +250,7 @@ static char help_text[]=
 #define MSGTR_MENU_FullScreen "Fullskjerm"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Spill Plate ..."
+#define MSGTR_MENU_PlayDisc "Spill Plate..."
 #define MSGTR_MENU_ShowDVDMenu "Vis DVD meny"
 #define MSGTR_MENU_Titles "Titler"
 #define MSGTR_MENU_Title "Titel %2d"
@@ -262,11 +262,11 @@ static char help_text[]=
 #define MSGTR_MENU_PlayList "Spilleliste"
 #define MSGTR_MENU_SkinBrowser "Skin velger"
 #define MSGTR_MENU_Preferences "Preferanser"
-#define MSGTR_MENU_Exit "Avslutt ..."
+#define MSGTR_MENU_Exit "Avslutt..."
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "fatal feil ..."
-#define MSGTR_MSGBOX_LABEL_Error "fail ..."
-#define MSGTR_MSGBOX_LABEL_Warning "advarsel ..."
+#define MSGTR_MSGBOX_LABEL_FatalError "fatal feil..."
+#define MSGTR_MSGBOX_LABEL_Error "fail..."
+#define MSGTR_MSGBOX_LABEL_Warning "advarsel..."
 
 #endif

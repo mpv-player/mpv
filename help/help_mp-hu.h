@@ -1,6 +1,6 @@
 // Translated by: Gabucino the Almighty! <gabucino@mplayerhq.hu>
 // Send me money/hw/babes!
-// ... Okay enough of the hw, now send the other two!
+//... Okay enough of the hw, now send the other two!
 // Sync'ed with help_mp-en.h 1.105
 
 // ========================= MPlayer help ===========================
@@ -44,9 +44,9 @@ static char help_text[]=
 " o               OSD-mód váltása:  nincs / keresõsáv / keresõsáv+idõ\n"
 " * vagy /        hangerõ fel/le\n"
 " z vagy x        felirat késleltetése +/- 0.1 másodperccel\n"
-" r vagy t        felirat pozíciójának megváltoztatása, lásd -vop expand-ot is!\n"
+" r vagy t        felirat pozíciójának megváltoztatása, lásd -vf expand-ot is!\n"
 "\n"
-" * * * A MANPAGE TOVÁBBI RÉSZLETEKET, OPCIÓKAT, BILLENTYÛKET TARTALMAZ ! * * *\n"
+" * * * A MANPAGE TOVÁBBI RÉSZLETEKET, OPCIÓKAT, BILLENTYÛKET TARTALMAZ! * * *\n"
 "\n";
 #endif
 
@@ -75,12 +75,12 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nem tudom megnyitni a dump file-t!\n"
 #define MSGTR_CoreDumped "Kinyomattam a cuccost, jól.\n"
 #define MSGTR_FPSnotspecified "Az FPS (képkocka/mp) érték nincs megadva, vagy hibás! Használd az -fps opciót!\n"
-#define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %s audio codec-családot használni ...\n"
+#define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %s audio codec-családot használni...\n"
 #define MSGTR_CantFindAfmtFallback "A megadott audio codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
-#define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz !\n"
+#define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz!\n"
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
-#define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %s video codec-családot használni ...\n"
-#define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"
+#define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %s video codec-családot használni...\n"
+#define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz!\n"
 #define MSGTR_VOincompCodec "A kiválasztott video_out meghajtó inkompatibilis ezzel a codec-kel.\n"
 #define MSGTR_CannotInitVO "VÉGZETES HIBA: Nem tudom elindítani a video-meghajtót!\n"
 #define MSGTR_CannotInitAO "nem tudom megnyitni az audio-egységet -> NOSOUND\n"
@@ -99,7 +99,7 @@ static char help_text[]=
 "    -vo help), és/vagy használd a -framedrop opciót!\n"\
 "- Lassú CPU\n"\
 "  - Nagy felbontású DivX/DVD lejátszásával nem érdemes gyenge processzoron\n"\
-"    próbálkozni! Esetleg -hardframedrop ?\n"\
+"    próbálkozni! Esetleg -hardframedrop?\n"\
 "- Hibás file\n"\
 "  - A -nobps -ni -forceidx -mc opciók kombinációval érdemes szórakozni.\n"\
 "- Lassú média (NFS/SMB, DVD, VCD, stb)\n"\
@@ -134,7 +134,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Leírás: %s\nAO: Készítõ: %s\n"
 #define MSGTR_AOComment "AO: Komment: %s\n"
 #define MSGTR_Video_NoVideo "Video: nincs video!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nHIBA: Nem sikerült a video filterek (-vop) vagy a video kimenet (-vo) inicializálása!\n"
+#define MSGTR_NotInitializeVOPorVO "\nHIBA: Nem sikerült a video filterek (-vf) vagy a video kimenet (-vo) inicializálása!\n"
 #define MSGTR_Paused "\n  =====  SZÜNET  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nLejátszási lista (%s) betöltése sikertelen\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -354,7 +354,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: a codec nem állította be az sh->disp_w és az sh_disp_h izéket, megpróbálom workaroundolni!\n"
 #define MSGTR_VoConfigRequest "VDec: vo config kérés - %d x %d (preferált csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Nem találok egyezõ colorspace-t - újra próbálom a -vop scale filterrel...\n"
+#define MSGTR_CouldNotFindColorspace "Nem találok egyezõ colorspace-t - újra próbálom a -vf scale filterrel...\n"
 #define MSGTR_MovieAspectIsSet "A film aspect értéke %.2f:1 - aspect arány javítása.\n"
 #define MSGTR_MovieAspectUndefined "A film aspect értéke nem definiált - nincs arányjavítás.\n"
 
@@ -364,15 +364,15 @@ static char help_text[]=
 
 // --- labels ---
 #define MSGTR_About "Az MPlayer - röl"
-#define MSGTR_FileSelect "File kiválasztása ..."
-#define MSGTR_SubtitleSelect "Felirat kiválasztása ..."
-#define MSGTR_OtherSelect "File kiválasztása ..."
-#define MSGTR_AudioFileSelect "Külsõ audio csatorna választása ..."
-#define MSGTR_FontSelect "Betûtipus kiválasztása ..."
+#define MSGTR_FileSelect "File kiválasztása..."
+#define MSGTR_SubtitleSelect "Felirat kiválasztása..."
+#define MSGTR_OtherSelect "File kiválasztása..."
+#define MSGTR_AudioFileSelect "Külsõ audio csatorna választása..."
+#define MSGTR_FontSelect "Betûtipus kiválasztása..."
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin böngészõ"
-#define MSGTR_Network "Lejátszás WEB - röl ..."
+#define MSGTR_Network "Lejátszás WEB - röl..."
 #define MSGTR_Preferences "Beállítások"
 #define MSGTR_OSSPreferences "OSS meghajtó beállítások"
 #define MSGTR_SDLPreferences "SDL meghajtó beállítások"
@@ -400,39 +400,39 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] hiba a skin konfigurációs file-jának %d. sorában: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: widget megvan, de nincs elõtte \"section\" ( %s )"
-#define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: widget megvan, de nincs elõtte \"subsection\" ( %s )"
-#define MSGTR_SKIN_WARNING3 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: ez az elem nem használható ebben az alrészben ( %s )"
-#define MSGTR_SKIN_BITMAP_16bit  "16 vagy kevesebb bites bitmap nem támogatott ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "file nem található ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "bmp olvasási hiba ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "tga olvasási hiba ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "png olvasási hiba ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE tömörített tga-k nincsenek támogatva ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "ismeretlen tipusú file ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "hiba a 24-rõl 32bitre konvertálás közben ( %s )\n"
+#define MSGTR_SKIN_WARNING1 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: widget megvan, de nincs elõtte \"section\" (%s)"
+#define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: widget megvan, de nincs elõtte \"subsection\" (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] figyelmeztetés a skin konfigurációs file-jának %d. sorában: ez az elem nem használható ebben az alrészben (%s)"
+#define MSGTR_SKIN_BITMAP_16bit  "16 vagy kevesebb bites bitmap nem támogatott (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "file nem található (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP olvasási hiba (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA olvasási hiba (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG olvasási hiba (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE tömörített TGA-k nincsenek támogatva (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "ismeretlen tipusú file (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "hiba a 24-rõl 32bitre konvertálás közben (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "ismeretlen üzenet: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "nincs elég memória\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "túl sok betûtipus van deklarálva\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "nem találom a betûtipus file-t\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "nem találom a betûtipus képfile-t"
-#define MSGTR_SKIN_FONT_NonExistentFontID "nemlétezõ betûtipus azonosító ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "ismeretlen paraméter ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "nemlétezõ betûtipus azonosító (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "ismeretlen paraméter (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinböngészõ] nincs elég memória.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin nem található ( %s ).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin configfile olvasási hiba ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin nem található (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin configfile olvasási hiba (%s).\n"
 #define MSGTR_SKIN_LABEL "Skin-ek:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Az MPlayer-rõl"
-#define MSGTR_MENU_Open "Megnyitás ..."
-#define MSGTR_MENU_PlayFile "File lejátszás ..."
-#define MSGTR_MENU_PlayVCD "VCD lejátszás ..."  
-#define MSGTR_MENU_PlayDVD "DVD lejátszás ..."  
-#define MSGTR_MENU_PlayURL "URL lejátszás ..."  
-#define MSGTR_MENU_LoadSubtitle "Felirat betöltése ..."
-#define MSGTR_MENU_DropSubtitle "Felirat eldobása ..."
-#define MSGTR_MENU_LoadExternAudioFile "Külsõ hang betöltése ..."
+#define MSGTR_MENU_Open "Megnyitás..."
+#define MSGTR_MENU_PlayFile "File lejátszás..."
+#define MSGTR_MENU_PlayVCD "VCD lejátszás..."  
+#define MSGTR_MENU_PlayDVD "DVD lejátszás..."  
+#define MSGTR_MENU_PlayURL "URL lejátszás..."  
+#define MSGTR_MENU_LoadSubtitle "Felirat betöltése..."
+#define MSGTR_MENU_DropSubtitle "Felirat eldobása..."
+#define MSGTR_MENU_LoadExternAudioFile "Külsõ hang betöltése..."
 #define MSGTR_MENU_Playing "Lejátszás"
 #define MSGTR_MENU_Play "Lejátszás"
 #define MSGTR_MENU_Pause "Pillanatállj"
@@ -445,7 +445,7 @@ static char help_text[]=
 #define MSGTR_MENU_FullScreen "Teljesképernyõ" 
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Lemez megnyitása ..."
+#define MSGTR_MENU_PlayDisc "Lemez megnyitása..."
 #define MSGTR_MENU_ShowDVDMenu "DVD menû"
 #define MSGTR_MENU_Titles "Sávok"
 #define MSGTR_MENU_Title "%2d. sáv"
@@ -457,7 +457,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayList "Lejátszási lista"
 #define MSGTR_MENU_SkinBrowser "Skin böngészõ"
 #define MSGTR_MENU_Preferences "Beállítások" 
-#define MSGTR_MENU_Exit "Kilépés ..."
+#define MSGTR_MENU_Exit "Kilépés..."
 #define MSGTR_MENU_Mute "Néma"
 #define MSGTR_MENU_Original "Eredeti"
 #define MSGTR_MENU_AspectRatio "Képarány"
@@ -523,7 +523,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_AutoLoad "Felirat automatikus betöltésének tiltása"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode felirat"
 #define MSGTR_PREFERENCES_SUB_MPSUB "A film feliratának konvertálása MPlayer felirat formátumba"
-#define MSGTR_PREFERENCES_SUB_SRT "A film feliratának konvertálása SubViewer ( SRT ) formátumba"
+#define MSGTR_PREFERENCES_SUB_SRT "A film feliratának konvertálása SubViewer (SRT) formátumba"
 #define MSGTR_PREFERENCES_SUB_Overlap "Felirat átlapolás"
 #define MSGTR_PREFERENCES_Font "Betûk:"
 #define MSGTR_PREFERENCES_FontFactor "Betû együttható:"
@@ -545,7 +545,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SDL_Driver "Meghajtó:"
 #define MSGTR_PREFERENCES_Message "Kérlek emlékezz, néhány opció igényli a lejátszás újraindítását."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video kódoló:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC használata (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC használata (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "FAME használata"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Nyugat-Európai karakterkészlet (ISO-8859-1)"

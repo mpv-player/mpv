@@ -30,7 +30,7 @@ static char help_text[]=
 " -fs -vm -zoom   Опции за цял екран (пусни на цял екран, смяна на режима,\n" 
 "                                       програмно разпъване на картината)\n"
 " -x <x> -y <y>   Задава големината на екрана (при смяна на режима или\n" 
-"                                        програмно разпъване на картината )\n"
+"                                        програмно разпъване на картината)\n"
 " -sub <file>     Указва файла със субтитрите(виж и -subfps, -subdelay)\n"
 " -playlist <file> Указва файл със списък за просвирване playlist\n"
 " -vid x -aid y   Опции за избор на видео (x) и аудио (y) поток (при повече потоци)\n"
@@ -51,9 +51,9 @@ static char help_text[]=
 " * or /          увеличава или намалява звука (pcm volume)\n"
 " z or x          настройка закъснение на субтитрите с +/- 0.1 секунда\n"
 " r or t          настройка позицията на субтитрите нагоре/надолу,\n"
-"                                            погледни -vop expand !\n"
+"                                            погледни -vf expand!\n"
 "\n"
-" * * ПРОВЕРИ MANPAGE ЗА ПОДРОБНОСТИ, ПОВЕЧЕ (И ПО-СЛОЖНИ) ОПЦИИ И КЛАВИШИ ! * *\n"
+" * * ПРОВЕРИ MANPAGE ЗА ПОДРОБНОСТИ, ПОВЕЧЕ (И ПО-СЛОЖНИ) ОПЦИИ И КЛАВИШИ! * *\n"
 "\n";
 #endif
 
@@ -81,13 +81,13 @@ static char help_text[]=
 #define MSGTR_DumpSelectedStreamMissing "dump: ФАТАЛНО: избраният поток липсва!\n"
 #define MSGTR_CantOpenDumpfile "dump: Не мога да създам файл за извличане!!\n"
 #define MSGTR_CoreDumped "dump: Данните извлечени :)\n"
-#define MSGTR_FPSnotspecified "FPS (Кадри В Секунда) е с неизвестна или невалидна стойност! Използвайте опция -fps !\n"
-#define MSGTR_TryForceAudioFmtStr "Опитвам да наложа аудио декодер от указаната фамилия %s ...\n"
+#define MSGTR_FPSnotspecified "FPS (Кадри В Секунда) е с неизвестна или невалидна стойност! Използвайте опция -fps!\n"
+#define MSGTR_TryForceAudioFmtStr "Опитвам да наложа аудио декодер от указаната фамилия %s...\n"
 #define MSGTR_CantFindAfmtFallback "Не мога да намеря аудио декодер от указаната фамилия, връщам се на другите.\n"
-#define MSGTR_CantFindAudioCodec "Не мога да намеря декодер за аудио формат 0x%X !\n"
+#define MSGTR_CantFindAudioCodec "Не мога да намеря декодер за аудио формат 0x%X!\n"
 #define MSGTR_CouldntInitAudioCodec "Не успях да пусна аудио декодера! -> изключвам звука\n"
-#define MSGTR_TryForceVideoFmtStr "Опитвам да използвам видео декодер от фамилия %s ...\n"
-#define MSGTR_CantFindVideoCodec "Не мога да намеря декодер който да работи с този видео драйвер и видео тип 0x%X !\n"
+#define MSGTR_TryForceVideoFmtStr "Опитвам да използвам видео декодер от фамилия %s...\n"
+#define MSGTR_CantFindVideoCodec "Не мога да намеря декодер който да работи с този видео драйвер и видео тип 0x%X!\n"
 #define MSGTR_VOincompCodec "Съжалявам, избраният видео драйвер е несъвместим с този декодер.\n"
 #define MSGTR_CannotInitVO "ФАТАЛНО: Не мога да пусна видео драйвера!\n"
 #define MSGTR_CannotInitAO "не мога да отворя/пусна аудио устройство -> ИЗКЛЮЧВАМ ЗВУКА\n"
@@ -103,7 +103,7 @@ static char help_text[]=
 "  - Експериментирай с различни стойности на опцията -autosync 30\n"\
 "- Бавен видео изход.\n"\
 "  - Пробвай с различни -vo драйвери (за пълен списък: -vo help)\n"\
-"    или пробвай с опция -framedrop !\n"\
+"    или пробвай с опция -framedrop!\n"\
 "- Бавен процесор.\n"\
 "  - Не се опитвай да пускаш DVD/DivX с голям размер на кадрите\n"\
 "    на бавен процесор! Последно спасение -hardframedrop\n"\
@@ -115,10 +115,10 @@ static char help_text[]=
 "- Използваш опция -cache при неправилно структуриран файл (non-interleaved)? \n"\
 "  - Опитай с -nocache\n"\
 "Прочети DOCS/HTML/en/devices.html за съвети и настойки\n"\
-"Ако нищо не помогне, прочети DOCS/HTML/en/bugreports.html !\n\n"
+"Ако нищо не помогне, прочети DOCS/HTML/en/bugreports.html!\n\n"
 
-#define MSGTR_NoGui "MPlayer е компилиран БЕЗ Графичен Потребителски Интерфейс (GUI) !\n"
-#define MSGTR_GuiNeedsX "MPlayer с GUI изисква графична среда X11 !\n"
+#define MSGTR_NoGui "MPlayer е компилиран БЕЗ Графичен Потребителски Интерфейс (GUI)!\n"
+#define MSGTR_GuiNeedsX "MPlayer с GUI изисква графична среда X11!\n"
 #define MSGTR_Playing "Playing %s\n"
 #define MSGTR_NoSound "Аудио: без звук!!!\n"
 #define MSGTR_FPSforced "Видеото е застопорено на %5.3f кадъра в секунда (ftime: %5.3f)\n"
@@ -136,13 +136,13 @@ static char help_text[]=
 #define MSGTR_CannotReadVideoProperties "Видео: не мога да прочета параметрите на видео потока\n"
 #define MSGTR_NoStreamFound "Потокът не е намерен\n"
 #define MSGTR_InitializingAudioCodec "Пускам аудио декодер...\n"
-#define MSGTR_ErrorInitializingVODevice "Грешка при отваряне/пускане на видео драйвера (-vo) !\n"
+#define MSGTR_ErrorInitializingVODevice "Грешка при отваряне/пускане на видео драйвера (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Наложен видео декодер: %s\n"
 #define MSGTR_ForcedAudioCodec "Наложен аудио декодер: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Описание: %s\nAO: Автор: %s\n"
 #define MSGTR_AOComment "AO: Коментар: %s\n"
-#define MSGTR_Video_NoVideo "Видео: няма видео! ! !\n"
-#define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Не мога да пусна видео филтрите (-vop) или видео изхода (-vo) !\n"
+#define MSGTR_Video_NoVideo "Видео: няма видео!!!\n"
+#define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Не мога да пусна видео филтрите (-vf) или видео изхода (-vo)!\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nНе мога да заредя списъка playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -171,8 +171,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "Не мога да отворя файл/устройство\n"
 #define MSGTR_ErrorDVDAuth "Грешка при DVD auth...\n"
 #define MSGTR_CannotOpenDemuxer "Не мога да отворя demuxer (разпределител)\n"
-#define MSGTR_NoAudioEncoderSelected "\nНе е посочен аудио енкодер (-oac)! Изберете един или използвайте -nosound.\nВижте -oac help !\n"
-#define MSGTR_NoVideoEncoderSelected "\nНе е посочен видео енкодер (-ovc)! Изберете един, Вижте -ovc help !\n"
+#define MSGTR_NoAudioEncoderSelected "\nНе е посочен аудио енкодер (-oac)! Изберете един или използвайте -nosound.\nВижте -oac help!\n"
+#define MSGTR_NoVideoEncoderSelected "\nНе е посочен видео енкодер (-ovc)! Изберете един, Вижте -ovc help!\n"
 // #define MSGTR_InitializingAudioCodec "Инициализирам аудио codec...\n"
 #define MSGTR_CannotOpenOutputFile "Не мога да отворя изходящия файл '%s'\n"
 #define MSGTR_EncoderOpenFailed "Не успях да отворя енкодер\n"
@@ -222,10 +222,10 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(може би пускате неправилно структуриран (non-interleaved) поток/файл или\n"\
                       " декодерът се дъни)?\n" \
 		      "При .AVI файл, опитай да наложиш non-interleaved режим с опция -ni\n"
-#define MSGTR_SwitchToNi "\nОткрит е неправилно структуриран .AVI - автоматично включвам опция -ni !\n"
+#define MSGTR_SwitchToNi "\nОткрит е неправилно структуриран .AVI - автоматично включвам опция -ni!\n"
 #define MSGTR_Detected_XXX_FileFormat "Засечен файлов формат %s!\n"
 #define MSGTR_DetectedAudiofile "Засечен аудио файл!\n"
-#define MSGTR_NotSystemStream "Форматът не е MPEG System Stream ... (може би е Transport Stream ?)\n"
+#define MSGTR_NotSystemStream "Форматът не е MPEG System Stream... (може би е Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Невалиден MPEG-ES поток??? Свържете се с автора, може да е бъг :(\n"
 #define MSGTR_FormatNotRecognized \
 "============= Съжалявам, този файлов формат не е разпознат/поддържан ===============\n"\
@@ -242,7 +242,7 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Използвам НЕПРАВИЛНО СТРУКТУРИРАН - Развален AVI файлов формат!\n"
 #define MSGTR_CouldntDetFNo "Не мога да определя броя на кадрите (за процентно превъртане)\n"
-#define MSGTR_CantSeekRawAVI "Не мога да превъртам при `сурови` .AVI потоци! (необходим е индекс, опитай с опция -idx !)\n"
+#define MSGTR_CantSeekRawAVI "Не мога да превъртам при `сурови` .AVI потоци! (необходим е индекс, опитай с опция -idx!)\n"
 #define MSGTR_CantSeekFile "Не мога превъртам в този файл!\n"
 
 #define MSGTR_EncryptedVOB "Кодиран VOB файл (компилирано е без libcss дешифратор)! Прочети DOCS/HTML/en/dvd.html\n"
@@ -260,7 +260,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenSubtitlesStream "Не мога да отворя поток със субтитри: %s\n"
 #define MSGTR_OpeningAudioDemuxerFailed "Не успях да отворя аудио demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Не успях да отворя demuxer за субтитрите: %s\n"
-#define MSGTR_TVInputNotSeekable "Не може да се превърта при TV ! (боже би ще се използва за смяна на каналите ;)\n"
+#define MSGTR_TVInputNotSeekable "Не може да се превърта при TV! (боже би ще се използва за смяна на каналите ;)\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Информацията на demuxer-а %s е вече известна!\n"
 #define MSGTR_ClipInfo "Информация за парчето: \n"
 
@@ -306,7 +306,7 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Установяване на LIRC поддръжка...\n"
 #define MSGTR_LIRCdisabled "Вие няма да можете да използвате вашето дистанционно управление\n"
 #define MSGTR_LIRCopenfailed "Провал при пускането на LIRC поддръжката!\n"
-#define MSGTR_LIRCcfgerr "Провал при четене конфигурацията на LIRC от %s !\n"
+#define MSGTR_LIRCcfgerr "Провал при четене конфигурацията на LIRC от %s!\n"
 
 // vf.c 
 #define MSGTR_CouldNotFindVideoFilter "Не мога да намеря видео филтър '%s'\n"
@@ -317,7 +317,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: декодерът не е установил sh->disp_w и sh->disp_h, опитвам се да позная!\n"
 #define MSGTR_VoConfigRequest "VDec: vo config изисква - %d x %d (цветови режим - csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Не мога да намеря общ цветови режим - опитвам пак с -vop scale...\n"
+#define MSGTR_CouldNotFindColorspace "Не мога да намеря общ цветови режим - опитвам пак с -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect е %.2f:1 - оразмерявам до правилното съотношение.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect е недефиниран - запазвам съотношението.\n"
 
@@ -326,16 +326,16 @@ static char help_text[]=
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "За MPlayer ..."
-#define MSGTR_FileSelect "Файл ..."
-#define MSGTR_SubtitleSelect "Субтитри ..."
-#define MSGTR_OtherSelect "Избор ..."
-#define MSGTR_AudioFileSelect "Външен аудио файл ..."
-#define MSGTR_FontSelect "Шрифт ..."
+#define MSGTR_About "За MPlayer..."
+#define MSGTR_FileSelect "Файл..."
+#define MSGTR_SubtitleSelect "Субтитри..."
+#define MSGTR_OtherSelect "Избор..."
+#define MSGTR_AudioFileSelect "Външен аудио файл..."
+#define MSGTR_FontSelect "Шрифт..."
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Еквилайзер"
 #define MSGTR_SkinBrowser "Избор на Кожи"
-#define MSGTR_Network "Поточно видео ..."
+#define MSGTR_Network "Поточно видео..."
 #define MSGTR_Preferences "Настройки"
 #define MSGTR_OSSPreferences "Конфигурация на OSS драйвера"
 #define MSGTR_SDLPreferences "Конфигурация на SDL драйвера"
@@ -363,39 +363,39 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] грешка в конфигурационния файл на кожата в ред %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"section\" - ( %s )"
-#define MSGTR_SKIN_WARNING2 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"subsection\" - ( %s )"
+#define MSGTR_SKIN_WARNING1 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"section\" - (%s)"
+#define MSGTR_SKIN_WARNING2 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"subsection\" - (%s)"
 #define MSGTR_SKIN_WARNING3 "[skin] предупреждение в конфигурационния файл на кожата в ред %d: даденият subsection не се поддържа от този widget (%s)"
-#define MSGTR_SKIN_BITMAP_16bit "Bitmap с 16 и по-малко бита за цвят не се поддържа ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound "файлът липсва ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "bmp грешка при четене ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "tga грешка при четене ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "png грешка при четене ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "TGA с RLE компресия не се поддържа ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "неизвестен тип на файла ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "Грешка при прерисуване от 24 бита към 32 бита ( %s )\n"
+#define MSGTR_SKIN_BITMAP_16bit "Bitmap с 16 и по-малко бита за цвят не се поддържа (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound "файлът липсва (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP грешка при четене (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA грешка при четене (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG грешка при четене (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "TGA с RLE компресия не се поддържа (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "неизвестен тип на файла (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "Грешка при прерисуване от 24 бита към 32 бита (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "Неизвестно съобщение: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "Няма достатъчно памет\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Декларирани са твърде много шрифтове\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "Файлът на шрифта не е намерен\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "Файлът с изображението на шрифта не е намерен\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "Несъществуващ идентификатор на шрифт ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "Неизвестен параметър ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "Несъществуващ идентификатор на шрифт (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "Неизвестен параметър (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] Недостиг на памет.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Не намирам Кожата ( %s ).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Грешка при четене на конфигурационния файл на Кожата ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Не намирам Кожата (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Грешка при четене на конфигурационния файл на Кожата (%s).\n"
 #define MSGTR_SKIN_LABEL "Кожи:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "За MPlayer"
-#define MSGTR_MENU_Open "Отвори ..."
-#define MSGTR_MENU_PlayFile "Файл ..."
-#define MSGTR_MENU_PlayVCD "VCD ..."
-#define MSGTR_MENU_PlayDVD "DVD ..."
-#define MSGTR_MENU_PlayURL "URL ..."
-#define MSGTR_MENU_LoadSubtitle "Субтитри ..."
+#define MSGTR_MENU_Open "Отвори..."
+#define MSGTR_MENU_PlayFile "Файл..."
+#define MSGTR_MENU_PlayVCD "VCD..."
+#define MSGTR_MENU_PlayDVD "DVD..."
+#define MSGTR_MENU_PlayURL "URL..."
+#define MSGTR_MENU_LoadSubtitle "Субтитри..."
 #define MSGTR_MENU_DropSubtitle "Празни субтитри"
-#define MSGTR_MENU_LoadExternAudioFile "Външен аудио файл ..."
+#define MSGTR_MENU_LoadExternAudioFile "Външен аудио файл..."
 #define MSGTR_MENU_Playing "Контроли"
 #define MSGTR_MENU_Play "Старт"
 #define MSGTR_MENU_Pause "Пауза"
@@ -408,7 +408,7 @@ static char help_text[]=
 #define MSGTR_MENU_FullScreen "Цял екран"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Пусни диск ..."
+#define MSGTR_MENU_PlayDisc "Пусни диск..."
 #define MSGTR_MENU_ShowDVDMenu "Покажи DVD меню"
 #define MSGTR_MENU_Titles "Заглавие"
 #define MSGTR_MENU_Title "Заглавие %2d"
@@ -420,7 +420,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Избор на кожа"
 #define MSGTR_MENU_Preferences "Настройки"
-#define MSGTR_MENU_Exit "Изход ..."
+#define MSGTR_MENU_Exit "Изход..."
 #define MSGTR_MENU_Mute "Замълчи"
 #define MSGTR_MENU_Original "Непроменено"
 #define MSGTR_MENU_AspectRatio "Съотношение"
@@ -473,7 +473,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoubleBuffer "Включи двойно буфериране"
 #define MSGTR_PREFERENCES_DirectRender "Включи директно чертане"
 #define MSGTR_PREFERENCES_FrameDrop "Включи пропускане на кадри"
-#define MSGTR_PREFERENCES_HFrameDrop "Включи СИЛНО пропускане на кадри( опасно )"
+#define MSGTR_PREFERENCES_HFrameDrop "Включи СИЛНО пропускане на кадри(опасно)"
 #define MSGTR_PREFERENCES_Flip "Обърни изображението отгоре-надолу"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Часовник и контроли"
@@ -486,14 +486,14 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_AutoLoad "Забрани автоматично търсене на субтитри"
 #define MSGTR_PREFERENCES_SUB_Unicode "Буквите са в Unicode кодировка"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Преобразувай субтитрите в собствен MPlayer формат"
-#define MSGTR_PREFERENCES_SUB_SRT "Преобразувай субтитрите в SubViewer( SRT ) формат"
+#define MSGTR_PREFERENCES_SUB_SRT "Преобразувай субтитрите в SubViewer(SRT) формат"
 #define MSGTR_PREFERENCES_SUB_Overlap "Позволи застъпващи се субтитри"
 #define MSGTR_PREFERENCES_Font "Шрифт:"
 #define MSGTR_PREFERENCES_Codecs "Декодери и разпределители"
 #define MSGTR_PREFERENCES_FontFactor "Дебелина на сянката:"
 #define MSGTR_PREFERENCES_PostProcess "Включи допълнителна обработка на картината (postprocess)"
 #define MSGTR_PREFERENCES_AutoQuality "Автоматично регулиране на качеството(max): "
-#define MSGTR_PREFERENCES_NI "Третирай всички AVI като неправилно структурирани ( -ni )"
+#define MSGTR_PREFERENCES_NI "Третирай всички AVI като неправилно структурирани (-ni)"
 #define MSGTR_PREFERENCES_IDX "Създай нова индексна таблица (index table) при необходимост (-idx)"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Предпочитана фамилия за видео декодер:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Предпочитана фамилия на аудио декодер:"
@@ -509,7 +509,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SDL_Driver "Устройство:"
 #define MSGTR_PREFERENCES_Message "Не забравяйте, че някои опции остават в сила до следващия филм."
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
@@ -561,8 +561,8 @@ static char help_text[]=
 #define MSGTR_ABOUT_MainTesters "   Main testers:\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Фатална грешка ..."
-#define MSGTR_MSGBOX_LABEL_Error "Грешка ..."
-#define MSGTR_MSGBOX_LABEL_Warning "Внимание ..." 
+#define MSGTR_MSGBOX_LABEL_FatalError "Фатална грешка..."
+#define MSGTR_MSGBOX_LABEL_Error "Грешка..."
+#define MSGTR_MSGBOX_LABEL_Warning "Внимание..." 
 
 #endif

@@ -46,9 +46,9 @@ static char help_text[]=
 " o               цикл╕чний переб╕р OSD режим╕в:  нема / нав╕гац╕я / нав╕гац╕я+таймер\n"
 " * або /         додати або зменшити гучн╕сть (натискання 'm' вибира╓ master/pcm)\n"
 " z або x         регулювати затримку субтитр╕в по +/- 0.1 секунд╕\n"
-" r or t          зм╕нити положення субтитр╕в вгору/вниз, також див. -vop expand\n"
+" r or t          зм╕нити положення субтитр╕в вгору/вниз, також див. -vf expand\n"
 "\n"
-" * * * ДЕТАЛЬН╤ШЕ ДИВ. ДОКУМЕНТАЦ╤Ю, ПРО ДОДАТКОВ╤ ОПЦ╤╥ ╤ КЛЮЧ╤ ! * * *\n"
+" * * * ДЕТАЛЬН╤ШЕ ДИВ. ДОКУМЕНТАЦ╤Ю, ПРО ДОДАТКОВ╤ ОПЦ╤╥ ╤ КЛЮЧ╤! * * *\n"
 "\n";
 #endif
 
@@ -77,12 +77,12 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Не можу в╕дкрити файл дампу!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "К╕льк╕сть кадр╕в на секунду не вказано (або неприпустиме значення) у заголовку! Використовуйте ключ -fps!\n"
-#define MSGTR_TryForceAudioFmt "Спроба примусово використати с╕мейство ауд╕о кодек╕в %d ...\n"
+#define MSGTR_TryForceAudioFmt "Спроба примусово використати с╕мейство ауд╕о кодек╕в %d...\n"
 #define MSGTR_CantFindAfmtFallback "Не можу знайти ауд╕о кодек для вказаного с╕мейства, перех╕д на ╕нш╕ драйвери.\n"
-#define MSGTR_CantFindAudioCodec "Не можу знайти кодек для ауд╕о формату 0x%X !\n"
+#define MSGTR_CantFindAudioCodec "Не можу знайти кодек для ауд╕о формату 0x%X!\n"
 #define MSGTR_CouldntInitAudioCodec "Не зм╕г ╕н╕ц╕ал╕зувати ауд╕о кодек! -> граю без звуку\n"
-#define MSGTR_TryForceVideoFmt "Спроба примусово використати с╕мейство в╕део кодек╕в %d ...\n"
-#define MSGTR_CantFindVideoCodec "Не можу знайти кодек для в╕део формату 0x%X !\n"
+#define MSGTR_TryForceVideoFmt "Спроба примусово використати с╕мейство в╕део кодек╕в %d...\n"
+#define MSGTR_CantFindVideoCodec "Не можу знайти кодек для в╕део формату 0x%X!\n"
 #define MSGTR_VOincompCodec "Вибачте, обраний video_out пристр╕й не сум╕сний з цим кодеком.\n"
 #define MSGTR_CannotInitVO "FATAL: Не можу ╕н╕ц╕ал╕зувати в╕део драйвер!\n"
 #define MSGTR_CannotInitAO "не можу в╕дкрити/╕н╕ц╕ал╕зувати ауд╕о пристр╕й -> ГРАЮ БЕЗ ЗВУКУ\n"
@@ -97,7 +97,7 @@ static char help_text[]=
 "  - спробуйте -ao sdl або використовуйте ALSA 0.5 або емуляц╕ю oss на ALSA 0.9.\n"\
 "  - Experiment with different values for -autosync, 30 is a good start.\n"\
 "- Пов╕льний в╕део вив╕д.\n"\
-"  - спробуйте ╕нший -vo драйвер (список: -vo help) або спробуйте з -framedrop !\n"\
+"  - спробуйте ╕нший -vo драйвер (список: -vo help) або спробуйте з -framedrop!\n"\
 "- Пов╕льний ЦП. Не намагайтеся в╕дтворювати велик╕ dvd/divx на пов╕льних\n"\
 "  процесорах! спробуйте -hardframedrop\n"\
 "- Битий файл. Спробуйте р╕зн╕ комб╕нац╕╖: -nobps  -ni  -mc 0  -forceidx\n"\
@@ -105,7 +105,7 @@ static char help_text[]=
 "- Ви використову╓те -cache для програвання неперемеженого AVI файлу?\n"\
 "  - спробуйте -nocache.\n"\
 "Читайте поради в файлах DOCS/HTML/en/devices.html .\n"\
-"Якщо н╕чого не допомогло, тод╕ читайте DOCS/HTML/en/bugreports.html !\n\n"
+"Якщо н╕чого не допомогло, тод╕ читайте DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer був скомп╕льований БЕЗ п╕дтримки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI вимага╓ X11!\n"
@@ -132,7 +132,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Опис: %s\nAO: Автор: %s\n"
 #define MSGTR_AOComment "AO: Коментар╕й: %s\n"
 #define MSGTR_Video_NoVideo "В╕део: без в╕део\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: Неможливо ╕н╕ц╕ал╕зувати в╕део ф╕льтри (-vop) або в╕део вив╕д (-vo).\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: Неможливо ╕н╕ц╕ал╕зувати в╕део ф╕льтри (-vf) або в╕део вив╕д (-vo).\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nНеможливо завантажити playlist %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -334,7 +334,7 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Встановлення п╕дтримки lirc...\n"
 #define MSGTR_LIRCdisabled "Ви не зможете використовувати ваше в╕ддалене керування\n"
 #define MSGTR_LIRCopenfailed "Невдале в╕дкриття п╕дтримки lirc!\n"
-#define MSGTR_LIRCcfgerr "Невдале читання файлу конф╕гурац╕╖ LIRC %s !\n"
+#define MSGTR_LIRCcfgerr "Невдале читання файлу конф╕гурац╕╖ LIRC %s!\n"
 
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Неможливо знайти в╕део ф╕льтр '%s'\n"
@@ -346,7 +346,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не встановив sh->disp_w та sh->disp_h, спробую об╕йти це.\n"
 #define MSGTR_VoConfigRequest "VDec: vo config запит - %d x %d (preferred csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Не можу п╕д╕брати п╕дходящу схему кольор╕в - повтор з -vop scale...\n"
+#define MSGTR_CouldNotFindColorspace "Не можу п╕д╕брати п╕дходящу схему кольор╕в - повтор з -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "В╕дношення стор╕н %.2f:1 - масштабую аби скоректувати.\n"
 #define MSGTR_MovieAspectUndefined "В╕дношення стор╕н не вказано - масштабування не використову╓ться.\n"
 
@@ -356,15 +356,15 @@ static char help_text[]=
 
 // --- labels ---
 #define MSGTR_About "Про програму"
-#define MSGTR_FileSelect "Вибрати файл ..."
-#define MSGTR_SubtitleSelect "Вибрати субтитри ..."
-#define MSGTR_OtherSelect "Виб╕р ..."
-#define MSGTR_AudioFileSelect "Вибрати зовн╕шн╕й ауд╕о канал ..."
-#define MSGTR_FontSelect "Вибрати шрифт ..."
+#define MSGTR_FileSelect "Вибрати файл..."
+#define MSGTR_SubtitleSelect "Вибрати субтитри..."
+#define MSGTR_OtherSelect "Виб╕р..."
+#define MSGTR_AudioFileSelect "Вибрати зовн╕шн╕й ауд╕о канал..."
+#define MSGTR_FontSelect "Вибрати шрифт..."
 #define MSGTR_PlayList "Список програвання"
 #define MSGTR_Equalizer "Еквалайзер"
 #define MSGTR_SkinBrowser "Переглядач жупан╕в"
-#define MSGTR_Network "Програвання з мереж╕ ..."
+#define MSGTR_Network "Програвання з мереж╕..."
 #define MSGTR_Preferences "Налаштування"
 #define MSGTR_OSSPreferences "Конф╕гурац╕я драйверу OSS"
 #define MSGTR_SDLPreferences "Конф╕гурац╕я драйверу SDL"
@@ -392,39 +392,39 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[жупан] помилка у файл╕ конф╕гурац╕╖ жупана, рядок %d  : %s" 
-#define MSGTR_SKIN_WARNING1 "[жупан] попередження: у файл╕ конф╕гурац╕╖ жупана, рядок %d: widget знайдений але до цього не знайдено \"section\" ( %s )"
+#define MSGTR_SKIN_WARNING1 "[жупан] попередження: у файл╕ конф╕гурац╕╖ жупана, рядок %d: widget знайдений але до цього не знайдено \"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[жупан] попередження: у файл╕ конф╕гурац╕╖ жупана, рядок %d: widget знайдений але до цього не знайдено \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[жупан] попередження: у файл╕ конф╕гурац╕╖ жупана, рядок %d: цей widget (%s) не п╕дтриму╓ цю subsection"
-#define MSGTR_SKIN_BITMAP_16bit  "Глибина кольору б╕тово╖ карти у 16 б╕т ╕ менше не п╕дтриму╓ться ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "файл не знайдений ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "помилка читання bmp ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "помилка читання tga ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "помилка читання png ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE запакований tga не п╕дтриму╓ться ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "нев╕домий тип файлу ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "помилка перетворення 24-б╕т у 32-б╕т ( %s )\n"
+#define MSGTR_SKIN_BITMAP_16bit  "Глибина кольору б╕тово╖ карти у 16 б╕т ╕ менше не п╕дтриму╓ться (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "файл не знайдений (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "помилка читання BMP (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "помилка читання TGA (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "помилка читання PNG (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE запакований TGA не п╕дтриму╓ться (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "нев╕домий тип файлу (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "помилка перетворення 24-б╕т у 32-б╕т (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "нев╕доме пов╕домлення: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "не вистача╓ пам'ят╕\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "оголошено надто багато шрифт╕в\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "файл шрифту не знайдений\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "файл образ╕в шрифту не знайдений\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "не╕снуючий ╕дентиф╕катор шрифту ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "нев╕домий параметр ( %s )\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "не╕снуючий ╕дентиф╕катор шрифту (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "нев╕домий параметр (%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[переглядач жупан╕в] не вистача╓ пам'ят╕.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Жупан не знайдено ( %s ).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Помилка читання файла конф╕гурац╕╖ жупана ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Жупан не знайдено (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Помилка читання файла конф╕гурац╕╖ жупана (%s).\n"
 #define MSGTR_SKIN_LABEL "Жупани:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Про програму"
-#define MSGTR_MENU_Open "В╕дкрити ..."
-#define MSGTR_MENU_PlayFile "Грати файл ..."
-#define MSGTR_MENU_PlayVCD "Грати VCD ..."
-#define MSGTR_MENU_PlayDVD "Грати DVD ..."
-#define MSGTR_MENU_PlayURL "Грати URL ..."
-#define MSGTR_MENU_LoadSubtitle "Завантажити субтитри ..."
-#define MSGTR_MENU_DropSubtitle "Викинути субтитри ..."
-#define MSGTR_MENU_LoadExternAudioFile "Завантажити зовн╕шн╕й ауд╕о файл ..."
+#define MSGTR_MENU_Open "В╕дкрити..."
+#define MSGTR_MENU_PlayFile "Грати файл..."
+#define MSGTR_MENU_PlayVCD "Грати VCD..."
+#define MSGTR_MENU_PlayDVD "Грати DVD..."
+#define MSGTR_MENU_PlayURL "Грати URL..."
+#define MSGTR_MENU_LoadSubtitle "Завантажити субтитри..."
+#define MSGTR_MENU_DropSubtitle "Викинути субтитри..."
+#define MSGTR_MENU_LoadExternAudioFile "Завантажити зовн╕шн╕й ауд╕о файл..."
 #define MSGTR_MENU_Playing "В╕дтворення"
 #define MSGTR_MENU_Play "Грати"
 #define MSGTR_MENU_Pause "Пауза"
@@ -437,7 +437,7 @@ static char help_text[]=
 #define MSGTR_MENU_FullScreen "Повний екран"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Грати диск ..."
+#define MSGTR_MENU_PlayDisc "Грати диск..."
 #define MSGTR_MENU_ShowDVDMenu "Показати DVD меню"
 #define MSGTR_MENU_Titles "Титри"
 #define MSGTR_MENU_Title "Титр %2d"
@@ -449,7 +449,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayList "Список програвання"
 #define MSGTR_MENU_SkinBrowser "Переглядач жупан╕в"
 #define MSGTR_MENU_Preferences "Налаштування"
-#define MSGTR_MENU_Exit "Вих╕д ..."
+#define MSGTR_MENU_Exit "Вих╕д..."
 #define MSGTR_MENU_Mute "Тиша"
 #define MSGTR_MENU_Original "Вих╕дний"
 #define MSGTR_MENU_AspectRatio "В╕дношення стор╕н"
@@ -537,7 +537,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SDL_Driver "Драйвер:"
 #define MSGTR_PREFERENCES_Message "Не забудьте, що вам треба перезапустити програвання для набуття чинност╕ деяких параметр╕в!"
 #define MSGTR_PREFERENCES_DXR3_VENC "В╕део кодек:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Використовувати FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
@@ -589,8 +589,8 @@ static char help_text[]=
 #define MSGTR_ABOUT_MainTesters "   Головн╕ тестувач╕:\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "фатальна помилка ..."
-#define MSGTR_MSGBOX_LABEL_Error "помилка ..."
-#define MSGTR_MSGBOX_LABEL_Warning "попередження ..." 
+#define MSGTR_MSGBOX_LABEL_FatalError "фатальна помилка..."
+#define MSGTR_MSGBOX_LABEL_Error "помилка..."
+#define MSGTR_MSGBOX_LABEL_Warning "попередження..." 
 
 #endif
