@@ -43,6 +43,9 @@ mplayer \- Movie Player for Linux
 .RB [ \-dumpaudio ]
 .RB [ \-dumpvideo ]
 .RB [ \-dumpsub ]
+.RB [ \-noframedrop ]
+.RB [ \-framedrop ]
+.RB [ \-hardframedrop ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -210,6 +213,16 @@ force using XVideo (SDL!)
 .B \-dumpaudio
 writes audio stream of the file to ./stream.dump (mostly usable
 with mpeg/ac3)
+.TP
+.B \-noframedrop
+no frame dropping : every frame is played, audio may skip (default)
+.TP
+.B \-framedrop
+frame dropping : decode all frames, video may skip
+.TP
+.B \-hardframe
+hard frame dropping : skip even decoding (when using with DivX also
+specify -nodshow !!!) (also can be turned on/off with the 'd' key runtime)
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -230,7 +243,7 @@ Specifies the output OpenDivX file. Won't overwrite.
 dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
 .TP
 .B \-dumpsub
-dumps subtitle from VOB to file (not very usable)
+dumps subtitles from VOB to file (not very usable)
 .IP
 .SH KEYBOARD CONTROL
 .TP
@@ -252,6 +265,8 @@ q or ESC        stop playing and quit program
 o               toggle OSD: none / seek / seek+timer
 
 m               toggle using master/pcm volume
+
+d               toggle hard frame dropping
 .IP
 .SH FILES AND DIRECTORIES
 .TP
@@ -266,7 +281,7 @@ file, and files with .RAW extension.
 .TP
 .I SUBTITLE FILES
 Sub files are searched in $HOME/.mplayer/sub, and in the directory
-of the movie.
+of the movie. (TODO)
 .IP
 .SH "EXAMPLES"
 Just launch it! :)
