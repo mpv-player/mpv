@@ -2112,9 +2112,9 @@ EOF
 _hpux_scsi_h=no
 cc_check && _hpux_scsi_h=yes
 if test "$_hpux_scsi_h" = yes ; then
-  _def_hpux_scsi_h='#define HPUX_SCTL 1'
+  _def_hpux_scsi_h='#define HPUX_SCTL_IO 1'
 else
-  _def_hpux_scsi_h='#undef HPUX_SCTL'
+  _def_hpux_scsi_h='#undef HPUX_SCTL_IO'
 fi
 echores "$_hpux_scsi_h"
 
