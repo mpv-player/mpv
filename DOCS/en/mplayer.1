@@ -4104,6 +4104,8 @@ sum of squared errors of the quantization
 .TP
 .B cbp\ \ \ \ 
 Rate distorted optimal coded block pattern
+will select the coded block pattern which minimizes distortion + lambda*rate
+this can only be used together with trellis quantization
 .TP
 .B last_pred=<0\-99>
 Amount of motion predictors from the previous frame
