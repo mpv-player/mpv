@@ -619,6 +619,8 @@ i420)
 width of the output window
 .IPs height=<value>
 height of the output window
+.IPs buffersize=<value>
+capture buffer size in megabytes (default is half of the physical memory)
 .IPs norm=<value>
 available: PAL, SECAM, NTSC
 .IPs channel=<value>
@@ -627,6 +629,8 @@ Set tuner to <value> channel.
 available: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs audiorate=<value>
 set audio capture bitrate
+.IPs forceaudio
+capture audio even if there are no audio sources reported by v4l
 .IPs alsa
 capture from ALSA
 .IPs amode=<0\-3>
