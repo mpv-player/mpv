@@ -390,7 +390,7 @@ static int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 	mjpeg_picture_header(j->s);
 
-	j->s->header_bits = get_bit_count(&j->s->pb);
+	j->s->header_bits = put_bits_count(&j->s->pb);
 
 	j->s->last_dc[0] = 128; 
 	j->s->last_dc[1] = 128; 
