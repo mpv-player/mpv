@@ -698,7 +698,7 @@ static uint32_t get_image(mp_image_t *mpi){
 
 static uint32_t query_format(uint32_t format)
 {
-    int flag=3|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD; // FIXME! check for DOWN
+    int flag=3|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD|VFCAP_ACCEPT_STRIDE; // FIXME! check for DOWN
    /* check image formats */
      if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag&=~2;flag|=VFCAP_FLIP;} // conversion!
      for(i = 0; i < formats; i++){

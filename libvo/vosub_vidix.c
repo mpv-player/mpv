@@ -353,7 +353,7 @@ uint32_t vidix_query_fourcc(uint32_t format)
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
   if (vidix_fourcc.depth == VID_DEPTH_NONE)
     return 0;
-  return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD;
+  return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
 }
 
 int vidix_grkey_support(void)

@@ -189,7 +189,7 @@ query_format(uint32_t format)
     case IMGFMT_IYUV:
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
-        return 3 | VFCAP_OSD|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
+        return 3 | VFCAP_OSD|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_ACCEPT_STRIDE;
     }
     return 0;
 }
