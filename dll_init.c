@@ -219,16 +219,8 @@ int init_video_codec(sh_video_t *sh_video){
       return 0;
   }
 
-  printf("XXX w=%d  h=%d  b=%d\n",
-        sh_video->o_bih.biWidth,
-        sh_video->o_bih.biHeight,
-        sh_video->o_bih.biBitCount/8
-  );
-
   sh_video->o_bih.biSizeImage = sh_video->o_bih.biWidth * sh_video->o_bih.biHeight * (sh_video->o_bih.biBitCount/8);
   
-  printf("XXX size=%d\n",sh_video->o_bih.biSizeImage);
-
   if(!(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_FLIP)) {
       sh_video->o_bih.biHeight=-sh_video->bih->biHeight; // flip image!
   }
@@ -262,15 +254,11 @@ int init_video_codec(sh_video_t *sh_video){
   }
   if(verbose) printf("ICDecompressQuery OK\n");
 
-  printf("XXX size=%d\n",sh_video->o_bih.biSizeImage);
-  
   ret = ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressBegin failed: Error %d\n", (int)ret);
     return 0;
   }
-
-  printf("XXX size=%d\n",sh_video->o_bih.biSizeImage);
 
 #if 0
 
