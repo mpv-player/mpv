@@ -23,7 +23,7 @@ extern int asf_packetsize; // for seeking
 
 extern float avi_audio_pts;
 extern float avi_video_pts;
-extern float avi_video_ftime;
+//extern float avi_video_ftime;
 extern int skip_video_frames;
 extern float initial_pts_delay;
 extern int seek_to_byte;
@@ -38,7 +38,6 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
-    int skip_audio_bytes=0;
     float skip_audio_secs=0;
 
 if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
@@ -75,7 +74,7 @@ switch(demuxer->file_format){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((--rel_seek_frames)<0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            ++skip_audio_bytes;
+//            ++skip_audio_bytes;
           }
           ++video_chunk_pos;
         }
@@ -85,7 +84,7 @@ switch(demuxer->file_format){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((++rel_seek_frames)>0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            --skip_audio_bytes;
+//            --skip_audio_bytes;
           }
           --video_chunk_pos;
         }
@@ -107,6 +106,7 @@ switch(demuxer->file_format){
         int apos=0;
         int last=0;
         int len=0;
+	int skip_audio_bytes=0;
 
         // calc new audio position in audio stream: (using avg.bps value)
         curr_audio_pos=(avi_video_pts) * sh_audio->wf->nAvgBytesPerSec;
@@ -170,12 +170,17 @@ switch(demuxer->file_format){
           }
           // requires for correct audio pts calculation (demuxer):
           avi_video_pts-=skip_video_frames*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-          
-      }
 
-      if(verbose) printf("SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
-        demuxer->idx_pos,audio_chunk_pos,video_chunk_pos,
-        skip_video_frames,skip_audio_bytes,skip_audio_secs);
+          if(verbose) printf("SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
+            demuxer->idx_pos,audio_chunk_pos,video_chunk_pos,
+            skip_video_frames,skip_audio_bytes,skip_audio_secs);
+
+          if(skip_audio_bytes){
+            demux_read_data(d_audio,NULL,skip_audio_bytes);
+            //d_audio->pts=0; // PTS is outdated because of the raw data skipping
+          }
+	  resync_audio_stream(sh_audio);
+      }
 
   }
   break;
@@ -195,13 +200,19 @@ switch(demuxer->file_format){
     stream_seek(demuxer->stream,newpos);
 
     ds_fill_buffer(d_video);
-    if(sh_audio) ds_fill_buffer(d_audio);
+    if(sh_audio){
+      ds_fill_buffer(d_audio);
+      resync_audio_stream(sh_audio);
+    }
     
     while(1){
-	if(sh_audio){
+	if(sh_audio && !d_audio->eof){
+	  float a_pts=d_audio->pts;
+          a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 	  // sync audio:
-          if (d_video->pts > d_audio->pts){
-	      if(!ds_fill_buffer(d_audio)) sh_audio=NULL; // skip audio. EOF?
+          if (d_video->pts > a_pts){
+	      skip_audio_frame(sh_audio);
+//	      if(!ds_fill_buffer(d_audio)) sh_audio=NULL; // skip audio. EOF?
 	      continue;
 	  }
 	}
@@ -224,13 +235,31 @@ switch(demuxer->file_format){
         if(newpos<seek_to_byte) newpos=seek_to_byte;
         newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
         stream_seek(demuxer->stream,newpos);
+
         // re-sync video:
         videobuf_code_len=0; // reset ES stream buffer
-        while(1){
-          int i=sync_video_packet(d_video);
+
+	ds_fill_buffer(d_video);
+	if(sh_audio){
+	  ds_fill_buffer(d_audio);
+	  resync_audio_stream(sh_audio);
+	}
+
+	while(1){
+	  int i;
+          if(sh_audio && !d_audio->eof && d_video->pts && d_audio->pts){
+	    float a_pts=d_audio->pts;
+            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+	    if(d_video->pts>a_pts){
+	      skip_audio_frame(sh_audio);  // sync audio
+	      continue;
+	    }
+          }
+          i=sync_video_packet(d_video);
           if(i==0x1B3 || i==0x1B8) break; // found it!
           if(!i || !skip_video_packet(d_video)) break; // EOF?
         }
+
   }
   break;
 
@@ -238,27 +267,11 @@ switch(demuxer->file_format){
 
       //====================== re-sync audio: =====================
       if(sh_audio){
-
-        if(skip_audio_bytes){
-          demux_read_data(d_audio,NULL,skip_audio_bytes);
-          //d_audio->pts=0; // PTS is outdated because of the raw data skipping
-        }
-        
-        current_module="resync_audio";
-	resync_audio_stream(sh_audio);
-
-        // re-sync PTS (MPEG-PS only!!!)
-        if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS)
-        if(d_video->pts && d_audio->pts){
-          if (d_video->pts < d_audio->pts){
-          
-          } else {
-            while(d_video->pts > d_audio->pts){
-	      skip_audio_frame(sh_audio);
-            }
-          }
-        }
-
+	if(verbose){
+	    float a_pts=d_audio->pts;
+            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+	    printf("SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
+	}
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
       } else {
         printf("A: ---   V:%6.1f   \r",d_video->pts);

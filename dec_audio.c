@@ -372,28 +372,47 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 
 void resync_audio_stream(sh_audio_t *sh_audio){
         switch(sh_audio->codec->driver){
-        case 1:
+        case 1:  // MPEG
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           break;
-        case 3:
+        case 3:  // AC3
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
     //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
           sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
-        case 4:
-        case 7:
+        case 4:  // ACM
+        case 7:  // DShow
           sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
           break;
         }
+	
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio){
               switch(sh_audio->codec->driver){
                 case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
                 case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+		case 4:
+		case 7: {
+		    int skip=sh_audio->wf->nBlockAlign;
+		    if(skip<16){
+		      skip=(sh_audio->wf->nAvgBytesPerSec/16)&(~7);
+		      if(skip<16) skip=16;
+		    }
+		    demux_read_data(sh_audio->ds,NULL,skip);
+		    break;
+		}
+		case 2:  // AVI PCM
+		case 8:  // DVD PCM
+		case 5: {// aLaw
+		    int skip=sh_audio->i_bps/16;
+		    skip=skip&(~3);
+		    demux_read_data(sh_audio->ds,NULL,skip);
+		    break;
+		}
                 default: ds_fill_buffer(sh_audio->ds);  // skip PCM frame
               }
 }
