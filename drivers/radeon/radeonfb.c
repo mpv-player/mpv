@@ -802,7 +802,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		case PCI_DEVICE_ID_R200_QL:
 			rinfo->hasCRTC2 = 1;
 			rinfo->isR200 = 1;
-			strcpy(rinfo->name, "Radeon2 8500 LW ");
+			strcpy(rinfo->name, "Radeon2 8500 QL ");
 			break;
 		case PCI_DEVICE_ID_RV200_QW:
 			rinfo->hasCRTC2 = 1;
