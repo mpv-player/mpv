@@ -328,10 +328,6 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	if (!vo_pts) {
-		ioval = (90000.0 / vo_fps);
-		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
@@ -393,9 +389,6 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
-	/* Set the default playback speed to 0x900 */
-	ioval = 0x900;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
 #ifdef USE_LIBAVCODEC
 	if (avc_context) {
 		avcodec_close(avc_context);
