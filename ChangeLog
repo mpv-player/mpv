@@ -13,6 +13,7 @@ MPlayer (1.0)
     * small additions, corrections, updates all over the place
     * audio output driver section added to the man page
     * several bug fixes and improvements in the MEncoder documentation
+    * DVD ripping guide extended and improved
     * -vo winvidix documented
     * AUTHORS file massively extended
     * German man page partially updated
@@ -42,7 +43,6 @@ MPlayer (1.0)
     * merged ao_alsa9 and ao_alsa1x drivers into ao_alsa
     * NeoMagic TV-out support through VESA
     * JACK audio output driver
-    * mga_vid ported to 2.6 kernels
     * vo_sdl fixes (wrong flags)
     * vo_directx fixes
 
