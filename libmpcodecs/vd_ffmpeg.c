@@ -160,6 +160,9 @@ static int init(sh_video_t *sh){
 #if LIBAVCODEC_BUILD >= 4614
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
 #endif
+#if LIBAVCODEC_BUILD >= 4628
+    avctx->fourcc= sh->format;
+#endif
     
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
