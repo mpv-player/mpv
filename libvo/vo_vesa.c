@@ -212,16 +212,17 @@ static void __vbeCopyBlockSwap(unsigned long offset,uint8_t *image,unsigned long
 */
 static void __vbeCopyData(uint8_t *image)
 {
-   unsigned long i,image_offset,offset;
+   unsigned long i,j,image_offset,offset,limit;
    unsigned pixel_size,image_line_size,screen_line_size,x_shift;
    pixel_size = (video_mode_info.BitsPerPixel+7)/8;
    screen_line_size = video_mode_info.XResolution*pixel_size;
    image_line_size = image_width*pixel_size;
    x_shift = x_offset*pixel_size;
-   for(i=y_offset;i<image_height;i++)
+   limit = image_height+y_offset;
+   for(j=0,i=y_offset;i<limit;i++,j++)
    {
      offset = i*screen_line_size+x_shift;
-     image_offset = i*image_line_size;
+     image_offset = j*image_line_size;
      __vbeCopyBlock(offset,&image[image_offset],image_line_size);
    }
 }
@@ -290,6 +291,23 @@ static uint32_t query_format(uint32_t format)
 			retval = 0;
 	}
 	return retval;
+}
+
+static void vesa_aspect(uint32_t width,uint32_t height,  
+		    	uint32_t xres,uint32_t yres,
+			uint32_t *image_width,uint32_t *image_height)
+{
+  float factor;
+  factor = (float)width / height;
+  *image_width = xres;
+  *image_height = xres / factor;
+  if(verbose) printf("vo_vesa: aspect factor = %f(%ux%u) *image=%ux%u screen=%ux%u\n",factor,width,height,*image_width,*image_height,xres,yres);
+  if((*image_height) > yres)
+  {
+    *image_height = yres;
+    *image_width = yres * factor;
+    if(verbose) printf("vo_vesa: Y > X tehrefore *image=%ux%u\n",*image_width,*image_height);
+  }
 }
 
 static char *model2str(unsigned char type)
@@ -459,8 +477,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  if( format==IMGFMT_YV12 )
 		  {
 		      /* software scale */
-		      image_width = video_mode_info.XResolution;
-		      image_height = video_mode_info.YResolution;
+		      vesa_aspect(width,height,  
+		    		  video_mode_info.XResolution,video_mode_info.YResolution,
+				  &image_width,&image_height);
+/*		      image_width = video_mode_info.XResolution;
+		      image_height = video_mode_info.YResolution; */
 		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
 	    	      scale_yinc=(height << 16) / image_height + 2;
 		      SwScale_Init();
@@ -490,6 +511,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		win.high= video_mode_info.WinSize*1024;
 		x_offset = (video_mode_info.XResolution - image_width) / 2;
 		y_offset = (video_mode_info.YResolution - image_height) / 2;
+		if(verbose)
+		  printf("vo_vesa: image: %ux%u screen = %ux%u x_offset = %u y_offset = %u\n"
+			,image_width,image_height
+			,video_mode_info.XResolution,video_mode_info.YResolution
+			,x_offset,y_offset);
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
