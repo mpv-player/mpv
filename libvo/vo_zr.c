@@ -15,7 +15,7 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/videodev.h>
-#include "zoran.h"
+#include "videodev_mjpeg.h"
 
 #include "config.h"
 
@@ -71,9 +71,9 @@ static jpeg_enc_t *j;
 
 int vdes;  /* the file descriptor of the video device */
 int frame = 0, synco = 0, queue = 0; /* buffer management */
-struct zoran_params zp;
-struct zoran_requestbuffers zrq;
-struct zoran_sync zs;
+struct mjpeg_params zp;
+struct mjpeg_requestbuffers zrq;
+struct mjpeg_sync zs;
 struct video_capability vc;
 #define MJPEG_NBUFFERS	2
 #define MJPEG_SIZE	1024*256
@@ -91,7 +91,7 @@ int zoran_getcap() {
 	/* before we can ask for the maximum resolution, we must set 
 	 * the correct tv norm */
 
-	if (ioctl(vdes, BUZIOC_G_PARAMS, &zp) < 0) {
+	if (ioctl(vdes, MJPIOC_G_PARAMS, &zp) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "device at %s is probably not a DC10(+)/buz/lml33\n", dev);
 		return 1;
 	}
@@ -99,12 +99,12 @@ int zoran_getcap() {
 	if (zp.norm != norm && norm != VIDEO_MODE_AUTO) {
 		/* attempt to set requested norm */
 		zp.norm = norm;
-		if (ioctl(vdes, BUZIOC_S_PARAMS, &zp) < 0) {
+		if (ioctl(vdes, MJPIOC_S_PARAMS, &zp) < 0) {
 			mp_msg(MSGT_VO, MSGL_ERR,
 				"unable to change video norm, use another program to change it (XawTV)\n");
 			return 1;
 		}
-		ioctl(vdes, BUZIOC_G_PARAMS, &zp);
+		ioctl(vdes, MJPIOC_G_PARAMS, &zp);
 		if (norm != zp.norm) {
 			mp_msg(MSGT_VO, MSGL_ERR,
 				"unable to change video norm, use another program to change it (XawTV)\n");
@@ -152,7 +152,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 	zp.img_height = zp.VerDcm*image_height/fields;
 	mp_msg(MSGT_VO, MSGL_V, "zr: geometry (after 'scaling'): %dx%d+%d+%d fields=%d, w=%d, h=%d\n", zp.img_width, (3-fields)*zp.img_height, zp.img_x, zp.img_y, fields, image_width/hdec, image_height);
 
-	if (ioctl(vdes, BUZIOC_S_PARAMS, &zp) < 0) {
+	if (ioctl(vdes, MJPIOC_S_PARAMS, &zp) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "error setting display parameters\n");
 		return 1;
 	}
@@ -160,7 +160,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 	zrq.count = MJPEG_NBUFFERS;
 	zrq.size = MJPEG_SIZE;
 
-	if (ioctl(vdes, BUZIOC_REQBUFS, &zrq)) {
+	if (ioctl(vdes, MJPIOC_REQBUFS, &zrq)) {
 		mp_msg(MSGT_VO, MSGL_ERR, "error requesting %d buffers of size %d\n", zrq.count, zrq.size);
 		return 1;
 	}
@@ -181,13 +181,13 @@ void uninit_zoran(void) {
 		image=NULL;
 	}
 	while (queue > synco + 1) {
-		if (ioctl(vdes, BUZIOC_SYNC, &zs) < 0) 
+		if (ioctl(vdes, MJPIOC_SYNC, &zs) < 0) 
 			mp_msg(MSGT_VO, MSGL_ERR, "error waiting for buffers to become free"); 
 		synco++;
 	}
 	/* stop streaming */
 	frame = -1;
-	if (ioctl(vdes, BUZIOC_QBUF_PLAY, &frame) < 0) 
+	if (ioctl(vdes, MJPIOC_QBUF_PLAY, &frame) < 0) 
 		mp_msg(MSGT_VO, MSGL_ERR, "error stopping playback of last frame");
 	close(vdes);
 }
@@ -406,7 +406,7 @@ static void flip_page (void) {
 	if (queue-synco < zrq.count) {
 		frame = queue;
 	} else {
-		if (ioctl(vdes, BUZIOC_SYNC, &zs) < 0) 
+		if (ioctl(vdes, MJPIOC_SYNC, &zs) < 0) 
 			mp_msg(MSGT_VO, MSGL_ERR, "error waiting for buffers to become free"); 
 		frame = zs.frame;
 		synco++;
@@ -428,7 +428,7 @@ static void flip_page (void) {
 	fread(buf+frame*zrq.size, 1, 2126, fp);
 	fclose(fp);*/
 	
-	if (ioctl(vdes, BUZIOC_QBUF_PLAY, &frame) < 0) 
+	if (ioctl(vdes, MJPIOC_QBUF_PLAY, &frame) < 0) 
 		mp_msg(MSGT_VO, MSGL_ERR,
 				"error queueing buffer for playback");
 	queue++;
