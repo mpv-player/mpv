@@ -67,6 +67,8 @@
 #include "vf.h"
 #include "img_format.h"
 
+#include "../mp_msg.h"
+
 #include "../libvo/fastmemcpy.h"
 
 #define IS_RAWIMG	0x100
@@ -92,7 +94,7 @@
 #define rgb2u(R,G,B)  ( -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128 )
 #define rgb2v(R,G,B)  (  (0.439 * R) - (0.368 * G) - (0.071 * B) + 128 )
 
-#define DBG(a) (printf("DEBUG: %d\n", a))
+#define DBG(a) (mp_msg(MSGT_VFILTER, MSGL_DBG2, "DEBUG: %d\n", a))
 
 struct vf_priv_s {
     int w, h, x1, y1, x2, y2;
@@ -126,8 +128,8 @@ config(struct vf_instance_s* vf,
 		  vf->priv->bitmap.v &&
 		  vf->priv->bitmap.a &&
 		  vf->priv->bitmap.oa )) {
-		fprintf(stderr, "vf_bmovl: Could not allocate memory for bitmap buffer: %s\n", strerror(errno) );
-		exit(10);
+		mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Could not allocate memory for bitmap buffer: %s\n", strerror(errno) );
+		return FALSE;
 	}
 
 	// Set default to black...
@@ -221,10 +223,10 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			unsigned char *buffer = NULL;
 
 			if(! _read_cmd( vf->priv->stream_fd, cmd, args) ) {
-				fprintf(stderr, "\nvf_bmovl: Error reading commands: %s\n\n", strerror(errno));
-				exit(10);
+				mp_msg(MSGT_VFILTER, MSGL_ERR, "\nvf_bmovl: Error reading commands: %s\n\n", strerror(errno));
+				return FALSE;
 			}
-			printf("\nDEBUG: Got: %s+%s\n", cmd, args);
+			mp_msg(MSGT_VFILTER, MSGL_DBG2, "\nDEBUG: Got: %s+%s\n", cmd, args);
 
 			command=NONE;
 			if     ( strncmp(cmd,"RGBA32",6)==0 ) { pxsz=4; command = IMG_RGBA32; }
@@ -238,13 +240,13 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			else if( strncmp(cmd,"HIDE",  4)==0 ) vf->priv->hidden=TRUE;
 			else if( strncmp(cmd,"FLUSH" ,5)==0 ) return vf_next_put_image(vf, dmpi);
 			else {
-			    fprintf(stderr, "\nvf_bmovl: Unknown command: '%s'. Ignoring.\n", cmd);
+			    mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Unknown command: '%s'. Ignoring.\n", cmd);
 			    return vf_next_put_image(vf, dmpi);
 			}
 
 			if(command == CMD_ALPHA) {
 				sscanf( args, "%d %d %d %d %d", &imgw, &imgh, &imgx, &imgy, &imgalpha);
-				printf("\nDEBUG: ALPHA: %d %d %d %d %d\n\n",
+				mp_msg(MSGT_VFILTER, MSGL_DBG2, "\nDEBUG: ALPHA: %d %d %d %d %d\n\n",
 					imgw, imgh, imgx, imgy, imgalpha);
 				if(imgw==0 && imgh==0) vf->priv->opaque=FALSE;
 			}
@@ -252,15 +254,15 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			if(command & IS_RAWIMG) {
 				sscanf( args, "%d %d %d %d %d %d",
 					&imgw, &imgh, &imgx, &imgy, &imgalpha, &clear);
-				printf("\nDEBUG: RAWIMG: %d %d %d %d %d %d\n\n",
+				mp_msg(MSGT_VFILTER, MSGL_DBG2, "\nDEBUG: RAWIMG: %d %d %d %d %d %d\n\n",
 					imgw, imgh, imgx, imgy, imgalpha, clear);
 
 			    buffer = malloc(imgw*imgh*pxsz);
 			    if(!buffer) {
-			    	fprintf(stderr, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
+			    	mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
 					return vf_next_put_image(vf, dmpi);
 			    }
-			    printf("Got %d bytes...\n", read( vf->priv->stream_fd, buffer, (imgw*imgh*pxsz) ) );
+			    mp_msg(MSGT_VFILTER, MSGL_DBG2, "Got %d bytes...\n", read( vf->priv->stream_fd, buffer, (imgw*imgh*pxsz) ) );
 
 				if(clear) {
 					memset( vf->priv->bitmap.y,   0, vf->priv->w*vf->priv->h );
@@ -281,7 +283,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			
 			if( command == CMD_CLEAR ) {
 				sscanf( args, "%d %d %d %d", &imgw, &imgh, &imgx, &imgy);
-				printf("\nDEBUG: CLEAR: %d %d %d %d\n\n", imgw, imgh, imgx, imgy);
+				mp_msg(MSGT_VFILTER, MSGL_DBG2, "\nDEBUG: CLEAR: %d %d %d %d\n\n", imgw, imgh, imgx, imgy);
 
 				for( ypos=imgy ; (ypos < (imgy+imgh)) && (ypos < vf->priv->y2) ; ypos++ ) {
 					memset( vf->priv->bitmap.y  + (ypos*vf->priv->w) + imgx, 0, imgw );
@@ -341,8 +343,8 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 							vf->priv->bitmap.a[pos] = INRANGE((vf->priv->bitmap.oa[pos]+imgalpha),0,255);
 							break;
 						default:
-					   		fprintf(stderr, "vf_bmovl: Internal error!\n");
-							exit( 10 );
+					   		mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Internal error!\n");
+							return FALSE;
 					}
 					if( command & IS_RAWIMG ) {
 						vf->priv->bitmap.y[pos]  = rgb2y(red,green,blue);
@@ -357,7 +359,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 				} // for buf_x
 			} // for buf_y
 			free (buffer);
-		} else if(errno) fprintf(stderr, "\nvf_bmovl: Error %d in fifo: %s\n\n", errno, strerror(errno));
+		} else if(errno) mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Error %d in fifo: %s\n\n", errno, strerror(errno));
     }
 
 	if(vf->priv->hidden) return vf_next_put_image(vf, dmpi);
@@ -419,17 +421,17 @@ vf_open(vf_instance_t* vf, char* args)
     vf->priv = malloc(sizeof(struct vf_priv_s));
 
 	if( sscanf(args, "%d:%d:%s", &vf->priv->hidden, &vf->priv->opaque, filename) < 3 ) {
-        fprintf(stderr, "vf_bmovl: Bad arguments!\n");
-		fprintf(stderr, "vf_bmovl: Arguments are 'bool hidden:bool opaque:string fifo'\n");
-		exit(5);
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Bad arguments!\n");
+		mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Arguments are 'bool hidden:bool opaque:string fifo'\n");
+		return FALSE;
     }
 
     vf->priv->stream_fd = open(filename, O_RDWR);
     if(vf->priv->stream_fd >= 0) {
 		FD_ZERO( &vf->priv->stream_fdset );
-		printf("vf_bmovl: Opened fifo %s as FD %d\n", filename, vf->priv->stream_fd);
+		mp_msg(MSGT_VFILTER, MSGL_INFO, "vf_bmovl: Opened fifo %s as FD %d\n", filename, vf->priv->stream_fd);
 	} else {
-		fprintf(stderr, "vf_bmovl: Error! Couldn't open FIFO %s: %s\n", filename, strerror(errno));
+		mp_msg(MSGT_VFILTER, MSGL_WARN, "vf_bmovl: Error! Couldn't open FIFO %s: %s\n", filename, strerror(errno));
 		vf->priv->stream_fd = -1;
     }
 
