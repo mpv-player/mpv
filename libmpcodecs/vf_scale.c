@@ -20,6 +20,7 @@ struct vf_priv_s {
     unsigned int fmt;
     SwsContext *ctx;
     unsigned char* palette;
+    mp_image_t *dmpi;
 };
 
 extern int opt_screen_size_x;
@@ -199,14 +200,42 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    mp_image_t *dmpi;
+static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+//    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
+    if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
+    // they want slices!!! allocate the buffer.
+    mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,vf->priv->fmt,
+//	mpi->type, mpi->flags & (~MP_IMGFLAG_DRAW_CALLBACK),
+	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+	vf->priv->w, vf->priv->h);
+}
 
+static void draw_slice(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y){
+    mp_image_t *dmpi=vf->priv->dmpi;
+    if(!dmpi){
+	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_scale: draw_slice() called with dmpi=NULL (no get_image??)\n");
+	return;
+    }
+//    printf("vf_scale::draw_slice() y=%d h=%d\n",y,h);
+    vf->priv->ctx->swScale(vf->priv->ctx,src,stride,y,h,dmpi->planes,dmpi->stride);
+}
+
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    mp_image_t *dmpi=mpi->priv;
+
+//    printf("vf_scale::put_image(): processing whole frame! dmpi=%p flag=%d\n",
+//	dmpi, (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK));
+    
+  if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK && dmpi)){
+  
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	vf->priv->w, vf->priv->h);
     vf->priv->ctx->swScale(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
+
+  }
 
     if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
 	// just conversion, no scaling -> keep postprocessing data
@@ -314,6 +343,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
+    vf->start_slice=start_slice;
+    vf->draw_slice=draw_slice;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->control= control;
