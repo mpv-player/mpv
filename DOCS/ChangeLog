@@ -4,19 +4,15 @@ ChangeLog:
 v0.12-pre1:  [ not yet released ]
   - ffmpeg included into source tree
 
-===========================================================================
-Note: If you've sent patches not applied in pre22, please send them again!
-/|\   (I've got tons of mails last weeks, and can't re-read all of them)
-/~\   Please include in the Subject: MPLAYER-PATCH
-===========================================================================
+*** 0.11 release is coming soon ***
 
-*** 0.11 release is coming SOON!!! ***
-
-v0.11-pre26-CVS:
+v0.11-CVS:
+  - added config file parser
+  - new timing code (in mplayerHQ)
+  - Spanish translation of DOCS
   - updated libmpeg2 source to libmpeg2-0.2.0 version
   - updated OpenDivX encore/decore to 4.0 alpha48
-
-v0.11-pre25:  yeah, we moved to SourceForge CVS!
+  - added fsdga driver : fullscreen scaling+dga driver
   - DOCS updated (email address changed from arpi@* -> maillist)
   - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
   - stream.c: unsigned int fixes, required for some strange .asf files
