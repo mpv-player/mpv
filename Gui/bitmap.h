@@ -11,9 +11,6 @@ typedef struct _txSample
  char *        Image;
 } txSample;
 
-#include "png/png.h"
-#include "../../mp_msg.h"
-
 extern int bpRead( char * fname, txSample * bf );
 extern int conv24to32( txSample * bf );
 extern void Convert32to1( txSample * in,txSample * out,int adaptivlimit );
