@@ -690,10 +690,12 @@ It has effect only with libmpeg2 and libavcodec codecs.
 .TP
 .B \-panscan <range>
 Enables Pan & Scan functionality, i.e. in order to display a 16:9 movie
-on a 4:3 display, sides of the movie are cropped, so we get a 4:3 image
-which fits perfectly. This function works only with xv, (x)mga, and vidix.
+on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
+which fits the screen. This function works only with xv, (x)mga and vidix
+drivers.
 
-The range varies between 0 and 1.
+The range varies between 0.0 and 1.0 and controls how much of the image is
+cropped.
 .TP
 .B \-red_intensity <\-1000\ \-\ 1000>
 Adjust intensity of red component of video signal (default 0).
@@ -704,7 +706,7 @@ with this option.
 .TP
 .B \-rootwin
 Play movie in the root window (desktop background) instead of opening
-a new one. Works only with x11, xv, xmga, xvidix drivers.
+a new one. Works only with x11, xv, xmga and xvidix drivers.
 .TP
 .B \-screenw <pixels> \-screenh <pixels>
 If you use an output driver which can't know the resolution of the screen
