@@ -71,7 +71,7 @@ other:
 - dvd server
 - mga_vid crtc2 fix
 - make nvidia_vid ;)
-
+- X11 Render support into DGA for OSD (from the DOCS;)
 
 
 DOCUMENTATION TODO:
