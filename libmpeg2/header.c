@@ -177,10 +177,10 @@ static int header_process_quant_matrix_extension (picture_t * picture,
 static int header_process_picture_coding_extension (picture_t * picture, uint8_t * buffer)
 {
     /* pre subtract 1 for use later in compute_motion_vector */
-    picture->f_code[0][0] = (buffer[0] & 15) - 1;
-    picture->f_code[0][1] = (buffer[1] >> 4) - 1;
-    picture->f_code[1][0] = (buffer[1] & 15) - 1;
-    picture->f_code[1][1] = (buffer[2] >> 4) - 1;
+    picture->f_motion.f_code[0] = (buffer[0] & 15) - 1;
+    picture->f_motion.f_code[1] = (buffer[1] >> 4) - 1;
+    picture->b_motion.f_code[0] = (buffer[1] & 15) - 1;
+    picture->b_motion.f_code[1] = (buffer[2] >> 4) - 1;
 
     picture->intra_dc_precision = (buffer[2] >> 2) & 3;
     picture->picture_structure = buffer[2] & 3;
@@ -237,11 +237,11 @@ int header_process_picture_header (picture_t *picture, uint8_t * buffer)
     picture->picture_coding_type = (buffer [1] >> 3) & 7;
 
     /* forward_f_code and backward_f_code - used in mpeg1 only */
-    picture->f_code[0][1] = (buffer[3] >> 2) & 1;
-    picture->f_code[0][0] =
+    picture->f_motion.f_code[1] = (buffer[3] >> 2) & 1;
+    picture->f_motion.f_code[0] =
 	(((buffer[3] << 1) | (buffer[4] >> 7)) & 7) - 1;
-    picture->f_code[1][1] = (buffer[4] >> 6) & 1;
-    picture->f_code[1][0] = ((buffer[4] >> 3) & 7) - 1;
+    picture->b_motion.f_code[1] = (buffer[4] >> 6) & 1;
+    picture->b_motion.f_code[0] = ((buffer[4] >> 3) & 7) - 1;
 
     /* move in header_process_picture_header */
         picture->second_field =

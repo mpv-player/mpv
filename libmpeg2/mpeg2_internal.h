@@ -84,6 +84,7 @@ typedef struct picture_s {
 
     int quantizer_scale;	/* remove */
     int current_field;		/* remove */
+    int v_offset;		/* remove */
 
 
     /* now non-slice-specific information */
@@ -103,8 +104,6 @@ typedef struct picture_s {
 	
     /* picture coding extension stuff */
 	
-    /* quantization factor for motion vectors */
-    int f_code[2][2];
     /* quantization factor for intra dc coefficients */
     int intra_dc_precision;
     /* top/bottom/both fields */
