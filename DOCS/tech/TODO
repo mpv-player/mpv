@@ -1,4 +1,3 @@
-
 TODO:
 =====
 
@@ -31,6 +30,7 @@ Post-0.90 / CVS CLEANUP work:
   maybe use Albeu's new filter args parser hack in all filters, remove sscanf()
 - new demuxer layer - at least modularized...
 - review and implement draw_slice() support in video filters
+- apply Sascha Sommer's Cygwin loader/ patches (al3x)
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
