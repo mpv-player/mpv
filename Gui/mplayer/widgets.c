@@ -29,6 +29,7 @@
 
 #include "../../config.h"
 #include "../../help_mp.h"
+#include "../../mp_msg.h"
 
 GtkWidget     * PopUpMenu = NULL;
 

@@ -29,6 +29,14 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#ifdef USE_ICONV
+ #ifdef __FreeBSD__
+  #include <giconv.h>
+ #else
+  #include <iconv.h>
+ #endif
+#endif
+
 #include "../libmpdemux/stream.h"
 #include "../libmpdemux/demuxer.h"
 
@@ -76,6 +84,49 @@ void gset( char ** str,char * what )
    else gstrcat( str,what );
 }
 
+#ifdef USE_ICONV
+char * gconvert_uri_to_filename( char * str )
+{
+ iconv_t   d;
+ char    * out = strdup( str );
+ char	 * tmp = NULL;
+ char    * ize;
+ size_t    inb,outb;
+ char    * charset = "ISO8859-1";
+ char    * cs;
+
+ if ( !strchr( str,'%' ) ) return str;
+	     
+ {
+  char * t = calloc( 1,strlen( out ) );
+  int    i,c = 0;
+  for ( i=0;i < (int)strlen( out );i++ )
+   if ( out[i] != '%' ) t[c++]=out[i];
+    else
+     {
+      char tmp[4] = "0xXX"; 
+//	  if ( out[++i] == '%' ) { t[c++]='%'; continue; };
+      tmp[2]=out[++i]; tmp[3]=out[++i]; 
+      t[c++]=(char)strtol( tmp,(char **)NULL,0 );
+     }
+  free( out );
+  out=t;
+ }
+
+ if ( (cs=getenv( "CHARSET" )) && *cs ) charset=cs;
+
+ inb=outb=strlen( out );
+ tmp=calloc( 1,outb + 1 );
+ ize=tmp;
+ d=iconv_open( charset,"UTF-8" );
+ if ( (iconv_t)(-1) == d ) return str;
+ iconv( d,&out,&inb,&tmp,&outb ); 
+ iconv_close( d ); 
+ free( out );
+ return ize;
+}
+#endif
+							    
 void guiInit( void )
 {
  memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );

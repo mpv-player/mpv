@@ -107,9 +107,11 @@ void mplEnd( void )
      guiIntfStruct.TimeSec=0;
      guiIntfStruct.Position=0;
      guiIntfStruct.AudioType=0;
+#ifdef USE_DVDREAD
      guiIntfStruct.DVD.current_title=1;
      guiIntfStruct.DVD.current_chapter=1;
      guiIntfStruct.DVD.current_angle=1;
+#endif
 
      if ( !appMPlayer.subWindow.isFullScreen )
       {
