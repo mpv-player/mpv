@@ -44,6 +44,9 @@ extern ao_functions_t audio_out_sgi;
 #ifdef HAVE_WIN32WAVEOUT
 extern ao_functions_t audio_out_win32;
 #endif
+#ifdef MACOSX
+extern ao_functions_t audio_out_macosx;
+#endif
 #ifdef HAVE_DXR2
 extern ao_functions_t audio_out_dxr2;
 #endif
@@ -62,6 +65,9 @@ ao_functions_t* audio_out_drivers[] =
 // native:
 #ifdef HAVE_WIN32WAVEOUT
         &audio_out_win32,
+#endif
+#ifdef MACOSX
+	&audio_out_macosx,
 #endif
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
