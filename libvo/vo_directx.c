@@ -70,6 +70,7 @@ static GUID selected_guid;
 static GUID *selected_guid_ptr = NULL;
 static RECT monitor_rect;	                        //monitor coordinates 
 static float window_aspect;
+static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
@@ -379,8 +380,12 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
             selected_guid_ptr = &selected_guid;
         }
         mi.cbSize = sizeof(mi);
-        if (GetMonitorInfo(hm, &mi)) {
+        if(myGetMonitorInfo){
+        if (myGetMonitorInfo(hm, &mi)) {
 			monitor_rect = mi.rcMonitor;
+        }
+        }else{
+            mp_msg(MSGT_VO, MSGL_ERR, "-adapter is not supported on Win95\n");
         }
         mp_msg(MSGT_VO, MSGL_INFO ,"\t\t<--");
     }
@@ -397,6 +402,11 @@ static uint32_t Directx_InitDirectDraw()
  	LPDIRECTDRAW lpDDraw;
 	DDSURFACEDESC2 ddsd;
 	LPDIRECTDRAWENUMERATEEX OurDirectDrawEnumerateEx;
+	HINSTANCE user32dll=LoadLibrary("user32.dll");
+	
+	if(user32dll){
+		myGetMonitorInfo=GetProcAddress(user32dll,"GetMonitorInfo");
+	}
 	
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>Initing DirectDraw\n" );
 
@@ -424,6 +434,7 @@ static uint32_t Directx_InitDirectDraw()
         if(vo_adapter_num >= adapter_count)
             mp_msg(MSGT_VO, MSGL_ERR,"Selected adapter (%d) doesn't exist: Default Display Adapter selected\n",vo_adapter_num);
     }
+    FreeLibrary(user32dll);
 
 	OurDirectDrawCreateEx = (void *)GetProcAddress(hddraw_dll, "DirectDrawCreateEx");
     if ( OurDirectDrawCreateEx == NULL )
