@@ -292,6 +292,7 @@ static char help_text[]=
 #define MSGTR_MENU_DoubleSize "Dvojnásobná velikost"
 #define MSGTR_MENU_FullScreen "Celá obrazovka"
 #define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_VCD "VCD"
 #define MSGTR_MENU_PlayDisc "Pøehrát disk ..."
 #define MSGTR_MENU_ShowDVDMenu "Zobrazit DVD menu"
 #define MSGTR_MENU_Titles "Tituly"

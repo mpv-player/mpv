@@ -35,6 +35,11 @@ inline void TranslateFilename( int c,char * tmp )
             else strcat( tmp,"no chapter" );
           break;
 #endif
+#ifdef HAVE_VCD
+   case STREAMTYPE_VCD:
+        sprintf( tmp,"VCD track %d",guiIntfStruct.Track );
+	break;
+#endif
    default: strcpy( tmp,"no media opened" );
   }
  if ( c )
@@ -102,7 +107,9 @@ calclengthmmmmss:
            switch ( guiIntfStruct.StreamType )
             {
              case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
+#ifdef HAVE_VCD
              case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
+#endif
              case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
 #ifdef USE_DVDREAD
              case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
@@ -200,6 +207,8 @@ extern void exit_player(char* how);
 extern int audio_id;
 extern int dvdsub_id;
 extern char * dvd_device;
+extern int vcd_track;
+extern char * cdrom_device;
 
 void mplEventHandling( int msg,float param )
 {
@@ -212,6 +221,13 @@ void mplEventHandling( int msg,float param )
         exit_player( "Exit" );
         break;
 
+#ifdef HAVE_VCD
+   case evSetVCDTrack:
+        guiIntfStruct.Track=(int)param;
+   case evPlayVCD:
+	guiIntfStruct.StreamType=STREAMTYPE_VCD;
+	goto play;
+#endif
 #ifdef USE_DVDREAD
    case evPlayDVD:
         guiIntfStruct.DVD.current_title=1;
@@ -222,18 +238,41 @@ play_dvd_2:
 #endif
    case evPlay:
    case evPlaySwitchToPause:
+play:
         mplMainAutoPlay=0;
         if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
 
+	vcd_track=0;
+	dvd_title=0;
+
         switch ( guiIntfStruct.StreamType )
          {
-          case STREAMTYPE_STREAM:
+	  case STREAMTYPE_FILE:
+	       guiGetEvent( guiClearStruct,guiALL );
+	       break;
+#ifdef HAVE_VCD
           case STREAMTYPE_VCD:
-          case STREAMTYPE_FILE:
-               dvd_title=0;
-               break;
+	       guiGetEvent( guiClearStruct,guiALL - guiVCD );
+	       if ( !cdrom_device )
+	        {
+		 cdrom_device=DEFAULT_CDROM_DEVICE;
+		 guiSetFilename( guiIntfStruct.Filename,cdrom_device );
+		}
+	       if ( guiIntfStruct.Playing != 2 )
+	        {
+		 if ( !guiIntfStruct.Track )
+		  {
+		   if ( guiIntfStruct.VCDTracks == 1 ) guiIntfStruct.Track=1;
+		    else guiIntfStruct.Track=2;
+		  }
+		 vcd_track=guiIntfStruct.Track;
+                 guiIntfStruct.DiskChanged=1;
+		}
+	       break;
+#endif
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
+	       guiGetEvent( guiClearStruct,guiALL - guiDVD );
 	       if ( !dvd_device ) 
 	        {
 	         dvd_device=DEFAULT_DVD_DEVICE;
@@ -244,7 +283,7 @@ play_dvd_2:
 	         dvd_title=guiIntfStruct.DVD.current_title;
 	         dvd_angle=guiIntfStruct.DVD.current_angle;
                  dvd_chapter=guiIntfStruct.DVD.current_chapter;
-                 guiIntfStruct.DVDChanged=1;
+                 guiIntfStruct.DiskChanged=1;
 		} 
                break;
 #endif
@@ -287,6 +326,7 @@ NoPause:
 
    case evLoadPlay:
         mplMainAutoPlay=1;
+//	guiIntfStruct.StreamType=STREAMTYPE_FILE;
    case evLoad:
         mplMainRender=1;
         gtkShow( evLoad,NULL );

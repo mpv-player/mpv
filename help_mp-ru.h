@@ -290,6 +290,7 @@ static char help_text[]=
 #define MSGTR_MENU_DoubleSize "Двойной размер"
 #define MSGTR_MENU_FullScreen "Полный экран"
 #define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_VCD "VCD"
 #define MSGTR_MENU_PlayDisc "Играть диск ..."
 #define MSGTR_MENU_ShowDVDMenu "Показать DVD меню"
 #define MSGTR_MENU_Titles "Титры"

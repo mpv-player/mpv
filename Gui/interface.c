@@ -1,4 +1,4 @@
-
+ 
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,6 +15,9 @@
 #include "../libvo/x11_common.h"
 #include "../libvo/video_out.h"
 #include "../input/input.h"
+
+#include <inttypes.h>
+#include <sys/types.h>
 
 #include "../libmpdemux/stream.h"
 #include "../libmpdemux/demuxer.h"
@@ -64,6 +67,7 @@ typedef struct
 
 void guiGetEvent( int type,char * arg )
 {
+ stream_t * stream = (stream_t *) arg;
 #ifdef USE_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
 #endif 
@@ -122,6 +126,28 @@ void guiGetEvent( int type,char * arg )
         guiIntfStruct.Track=dvd_title + 1;
         break;
 #endif
+   case guiSetStream:
+	guiIntfStruct.StreamType=stream->type;
+	switch( stream->type )
+	 {
+	  case STREAMTYPE_DVD: 
+	       guiGetEvent( guiSetDVD,(char *)stream->priv );
+	       break;
+#ifdef HAVE_VCD
+	  case STREAMTYPE_VCD: 
+	       {
+	        int i;
+		for ( i=1;i < 100;i++ )
+		  if ( vcd_seek_to_track( stream->fd,i ) < 0 ) break;
+		vcd_seek_to_track( stream->fd,vcd_track );
+		guiIntfStruct.VCDTracks=--i;
+		mp_msg( MSGT_GPLAYER,MSGL_INFO,"[interface] vcd tracks: %d\n",guiIntfStruct.VCDTracks );
+		guiIntfStruct.Track=vcd_track;
+	        break;
+	       }
+#endif
+	 }
+	break;
 #ifdef HAVE_NEW_INPUT
    case guiIEvent:
         printf( "cmd: %d\n",(int)arg );
@@ -138,6 +164,14 @@ void guiGetEvent( int type,char * arg )
 	 }
 	break;
 #endif
+   case guiClearStruct:
+#ifdef USE_DVDREAD
+	if ( (unsigned int)arg & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
+#endif
+#ifdef HAVE_VCD
+	if ( (unsigned int)arg & guiVCD ) guiIntfStruct.VCDTracks=0;
+#endif
+	break;
   }
 }
 

@@ -293,6 +293,7 @@ static char help_text[]=
 #define MSGTR_MENU_DoubleSize "Dobbel størrelse"
 #define MSGTR_MENU_FullScreen "Fullskjerm"
 #define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_VCD "VCD"
 #define MSGTR_MENU_PlayDisc "Spill Plate ..."
 #define MSGTR_MENU_ShowDVDMenu "Vis DVD meny"
 #define MSGTR_MENU_Titles "Titler"

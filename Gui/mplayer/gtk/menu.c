@@ -254,6 +254,9 @@ GtkWidget * DVDChapterMenu;
 GtkWidget * DVDAudioLanguageMenu;
 GtkWidget * DVDSubtitleLanguageMenu;
 
+GtkWidget * VCDSubMenu;
+GtkWidget * VCDTitleMenu;
+
 GtkWidget * create_PopUpMenu( void )
 {
  GtkWidget * Menu = NULL;
@@ -266,7 +269,9 @@ GtkWidget * create_PopUpMenu( void )
   AddSeparator( Menu );
    SubMenu=AddSubMenu( Menu,MSGTR_MENU_Open );
     AddMenuItem( SubMenu,MSGTR_MENU_PlayFile"    ", evLoadPlay );
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayVCD, evNone );
+#ifdef HAVE_VCD
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayVCD, evPlayVCD );
+#endif
 #ifdef USE_DVDREAD
     AddMenuItem( SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
 #endif
@@ -287,6 +292,26 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( SubMenu,MSGTR_MENU_NormalSize"      ", evNormalSize );
     AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
     AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
+#ifdef HAVE_VCD
+   VCDSubMenu=AddSubMenu( Menu,MSGTR_MENU_VCD );
+    AddMenuItem( VCDSubMenu,MSGTR_MENU_PlayDisc,evPlayVCD );
+    AddSeparator( VCDSubMenu );
+    VCDTitleMenu=AddSubMenu( VCDSubMenu,MSGTR_MENU_Titles );
+    if ( guiIntfStruct.VCDTracks ) 
+     {
+      char tmp[32]; int i;
+      for ( i=0;i < guiIntfStruct.VCDTracks;i++ )
+       {
+        sprintf( tmp,MSGTR_MENU_Title,i+1 );
+	AddMenuItem( VCDTitleMenu,tmp,( (i+1) << 16 ) + evSetVCDTrack );
+       }
+     }
+     else
+      {
+       MenuItem=AddMenuItem( VCDTitleMenu,MSGTR_MENU_None,evNone );
+       gtk_widget_set_sensitive( MenuItem,FALSE );
+      }
+#endif
 #ifdef USE_DVDREAD
    DVDSubMenu=AddSubMenu( Menu,MSGTR_MENU_DVD );
     AddMenuItem( DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );

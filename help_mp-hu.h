@@ -288,6 +288,7 @@ static char help_text[]=
 #define MSGTR_MENU_DoubleSize "Dupla méret"
 #define MSGTR_MENU_FullScreen "Teljesképernyõ" 
 #define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_VCD "VCD"
 #define MSGTR_MENU_PlayDisc "Lemez lejátszása ..."
 #define MSGTR_MENU_ShowDVDMenu "DVD menû"
 #define MSGTR_MENU_Titles "Sávok"

@@ -206,7 +206,7 @@ int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
-static int vcd_track=0;
+int vcd_track=0;
 
 // cache2:
 static int stream_cache_size=0;
@@ -813,12 +813,17 @@ if(!use_stdin && !slave_mode){
 #endif
        } 
 
-#ifdef USE_DVDREAD 
-     if ( guiIntfStruct.DVDChanged )
+#if defined( HAVE_VCD ) && defined( USE_DVDREAD )
+     if ( guiIntfStruct.DiskChanged )
       {
-       guiIntfStruct.DVDChanged=0;
+#ifdef USE_DVDREAD 
+       switch ( guiIntfStruct.StreamType )
+        {
+         case STREAMTYPE_DVD: filename=DEFAULT_DVD_DEVICE; break;
+	}
+#endif
+       guiIntfStruct.DiskChanged=0;
        guiGetEvent( guiCEvent,(char *)guiSetPlay );
-       filename=DEFAULT_DVD_DEVICE;
       }
 #endif
 
@@ -1383,12 +1388,9 @@ fflush(stdout);
    if ( use_gui )
     {
      guiGetEvent( guiSetFileName,filename );
-     guiIntfStruct.StreamType=stream->type;
+     guiGetEvent( guiSetStream,(char *)stream );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,1 ); else guiGetEvent( guiSetAudioOnly,0 );
-#ifdef USE_DVDREAD
-     if ( stream->type == STREAMTYPE_DVD ) guiGetEvent( guiSetDVD,(char *)stream->priv );
-#endif
     }
 #endif
 
@@ -2881,8 +2883,8 @@ if(rel_seek_secs || abs_seek_pos){
 #endif
 	 } 
 	guiIntfStruct.Volume=(float)mixer_getbothvolume();
+        if ( guiIntfStruct.DiskChanged ) goto goto_next_file;
 #ifdef USE_DVDREAD
-        if ( guiIntfStruct.DVDChanged ) goto goto_next_file;
         if ( stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = stream->priv;
@@ -3061,7 +3063,7 @@ while(playtree_iter != NULL) {
  if( use_gui && !playtree_iter ) 
   {
 #ifdef USE_DVDREAD
-   if ( !guiIntfStruct.DVDChanged ) 
+   if ( !guiIntfStruct.DiskChanged ) 
 #endif
    mplStop();
   }	

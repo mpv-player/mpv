@@ -230,31 +230,38 @@ void mplSetFileName( char * fname )
 void mplPrev( void )
 {
  int stop = 0;
+ 
+ if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
   {
-//   case STREAMTYPE_FILE:
 #ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
-	if ( guiIntfStruct.Playing == 2 ) break;
 	if ( --guiIntfStruct.DVD.current_chapter == 0 )
 	 {
 	  guiIntfStruct.DVD.current_chapter=1;
 	  if ( --guiIntfStruct.DVD.current_title <= 0 ) { guiIntfStruct.DVD.current_title=1; stop=1; }
 	 }
 	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
-	if ( stop ) mplEventHandling( evStop,0 );
-	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 	break;
 #endif
+#ifdef HAVE_VCD
+   case STREAMTYPE_VCD:
+	if ( --guiIntfStruct.Track == 0 ) { guiIntfStruct.Track=1; stop=1; }
+	break;
+#endif
+   default: return;
   }
+ if ( stop ) mplEventHandling( evStop,0 );
+ if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 }
 
 void mplNext( void )
 {
  int stop = 0;
+
+ if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
   {
-//   case STREAMTYPE_FILE:
 #ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
 	if ( guiIntfStruct.DVD.current_chapter++ == guiIntfStruct.DVD.chapters )
@@ -263,9 +270,15 @@ void mplNext( void )
 	  if ( ++guiIntfStruct.DVD.current_title > guiIntfStruct.DVD.titles ) { guiIntfStruct.DVD.current_title=guiIntfStruct.DVD.titles; stop=1; }
 	 }
 	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
-	if ( stop ) mplEventHandling( evStop,0 );
-	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 	break;
 #endif
+#ifdef HAVE_VCD
+   case STREAMTYPE_VCD:
+	if ( ++guiIntfStruct.Track > guiIntfStruct.VCDTracks ) { guiIntfStruct.Track=guiIntfStruct.VCDTracks; stop=1; }
+	break;
+#endif
+   default: return;
   }
+ if ( stop ) mplEventHandling( evStop,0 );
+ if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 }

@@ -56,9 +56,15 @@ typedef struct
    guiResizeStruct      resize;
    guiVideoStruct       videodata;
    guiUnknowErrorStruct error;
+
+   int                  DiskChanged;
+
 #ifdef USE_DVDREAD
    guiDVDStruct         DVD;
-   int                  DVDChanged;
+#endif
+
+#ifdef HAVE_VCD
+   int    VCDTracks;
 #endif
 
    int    Playing;
@@ -103,10 +109,16 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetAudioOnly     6
 #define guiReDrawSubWindow  7
 #define guiSetShVideo       8
+#define guiSetStream        9
+#define guiClearStruct      10
 
 #define guiSetStop  0
 #define guiSetPlay  1
 #define guiSetPause 2
+
+#define guiDVD      	1
+#define guiVCD		2
+#define guiALL		0xffffffff
 
 extern char *get_path(char *filename); 
 
