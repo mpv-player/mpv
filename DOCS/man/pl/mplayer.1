@@ -1,4 +1,4 @@
-.\" synced with 1.859
+.\" synced with 1.860
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -389,7 +389,7 @@ vf=eq2=1.0:-0.8
 Mo¿esz te¿ napisaæ zbiór konfiguracyjny dla konkretnego pliku.
 Je¶li zamierzasz mieæ zbiór konfiguracyjny dla pliku o nazwie "film.avi",
 utwórz "film.avi.conf" z zawartymi w nim opcjami i umie¶æ go
-w ~/.mplayer lub w tym samym katalogu, co film.
+w ~/.mplayer/ lub w tym samym katalogu, co film.
 .
 .
 .
@@ -3107,9 +3107,8 @@ Próbuje najpierw kodeki Win32.
 .
 .TP
 .B \-aspect <stosunek> (patrz te¿ \-zoom)
-Zmienia proporcje filmu.
-Proporcje s± automatycznie wykrywane w MPEG, ale nie stosuje siê to
-do wiêkszo¶ci zbiorów AVI.
+Zmienia proporcje filmu, w przypadku gdy nie ma ich w odtwarzanym pliku lub s±
+podane nieprawid³owe.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -4285,7 +4284,7 @@ jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
 .
 .TP
 .B lavcdeint (PRZESTARZA£E)
-filtr usuwaj±cy przeplot z libavcodec, to samo co \-vf pp=fd
+filtr usuwaj±cy przeplot z FFmpeg, to samo co \-vf pp=fd
 .
 .TP
 .B kerndeint[=próg[:mapa[:kolejno¶æ[:ostr[:dwustr]]]]]
@@ -7524,7 +7523,7 @@ napisów w nastêpuj±cej kolejno¶ci:
 .\" Przyk³ady
 .\" --------------------------------------------------------------------------
 .
-.SH PRZYK£ADY
+.SH PRZYK£ADY U¯YCIA MPLAYERA
 .
 .TP
 .B Szybki start odtwarzania DVD:
@@ -7589,6 +7588,12 @@ mplayer \-vo zr \-vf scale=352:288 plik.avi
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .
 .TP
+.B Odtwarzaj d¼wiêk 6-kana³owy w formacie AAC tylko na dwóch g³o¶nikach:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+.
+.SH PRZYK£ADY U¯YCIA MENCODERA
+.
+.TP
 .B Kodowanie tytu³u #2 DVD, tylko wybrane rozdzia³y:
 mencoder dvd://2 \-chapter 10-15 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
@@ -7622,10 +7627,6 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Kodowanie z potoku:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
-.
-.TP
-.B Odtwarzaj d¼wiêk 6-kana³owy w formacie AAC tylko na dwóch g³o¶nikach:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .
 .\" --------------------------------------------------------------------------
