@@ -216,6 +216,12 @@
           <LI><A HREF="#tv_examples">2.5.2 Exemples</A></LI>
         </UL>
       </LI>
+      <LI><A HREF="#edl">2.6 Listes d'Edition de Décision (EDL)</A>
+        <UL>
+          <LI><A HREF="#edl_using">2.6.1 Utiliser un fichier EDL</A></LI>
+          <LI><A HREF="#edl_making">2.6.2 Faire un fichier EDL</A></LI>
+        </UL>
+      </LI>
     </UL>
   </LI>
   <LI><A HREF="#usage">3. Utilisation</A>
@@ -388,7 +394,6 @@
 <UL>
   <LI>variété encore plus importante de formats/codecs disponibles
     (création de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)</LI>
-  <LI>encodage audio à partir de v4l (FAIT pour FreeBSD ?)</LI>
 </UL>
 
 <P>MPlayer et MEncoder peuvent être distribués selon les termes de la GNU General
@@ -423,28 +428,35 @@
     bas&eacute; sur le chargeur de DLL Win32 de avifile.</LI>
   <LI><B>MPlayer v0.10:</B> 1er Jan 2001<BR>
     Les lecteurs MPEG et AVI dans un seul binaire !</LI>
-<LI><B>MPlayer v0.11:</B><BR>
+  <LI><B>MPlayer v0.11:</B><BR>
     De nouveaux d&eacute;veloppeurs ont joint le projet et depuis la version 0.11 le projet
     mplayer est un travail d'&eacute;quipe ! Ajout&eacute; le support des fichiers .ASF, et
     de l'encodage/d&eacute;codage OpenDivX (c.f. <A HREF="http://www.projectmayo.com">ProjectMayo</A>).</LI>
-<LI><B>MPlayer v0.17 &quot;The IdegCounter&quot;</B> 27 Avr 2001<BR>
+  <LI><B>MPlayer v0.17 &quot;The IdegCounter&quot;</B> 27 Avr 2001<BR>
     La finalisation de la version 0.11pre apr&egrave;s 4 mois de d&eacute;veloppement intensif !
     Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalit&eacute;s...
     et bien 	s&ucirc;r le code existant a &eacute;t&eacute; am&eacute;lior&eacute;,
     les bogues fix&eacute;s, etc...</LI>
-<LI><B>MPlayer 0.18 &quot;The BugCounter&quot;</B> 9 Juillet 2001<BR>
+  <LI><B>MPlayer 0.18 &quot;The BugCounter&quot;</B> 9 Juillet 2001<BR>
     Deux mois apr&egrave;s la 0.17, une nouvelle parution.. Compl&eacute;t&eacute; le support ASF,
     plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour l'audio),
     encore plus stable et performant.... C'est un MUST !</LI>
-<LI><B>MPlayer 0.50 &quot;The Faszom(C)ounter&quot;</B> 8 Oct 2001<BR>
+  <LI><B>MPlayer 0.50 &quot;The Faszom(C)ounter&quot;</B> 8 Oct 2001<BR>
     Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version
-	b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao,port&eacute;
-	sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
-	encore... Essayez le !</LI>
+    b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao,port&eacute;
+    sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
+    encore... Essayez le !</LI>
   <LI><B>MPlayer 0.60 "The RTFMCounter"</B> 3 Jan 2002<BR>
     Support des formats de fichier MOV/VIVO/RM/FLI/NUV, CRAM natif, Cinepak, 
     codecs ADPCM, et support des codecs XAnim binaires; support des sous-titres DVD,
     première sortie de MEncoder, capture TV, cache, liba52, réparations innombrables.</LI>
+  <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> 11 Nov 2002<BR>
+    Bien que ce ne soit pas une version officielle, Je la mentionne parce qu'elle est sortie 2 ans
+    après MPlayer v0.01. Joyeux anniversaire, MPlayer!</LI>
+  <LI><B>MPlayer 0.90rc1 "The CodecCounter"</B> 7 Dec 2002<BR>
+    Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime) 
+    et Windows Media 9, MPlayer est le premier lecteur de film au monde qui supporte
+    tous les formats vidéos connus!</LI>
   <LI><B>MPlayer 0.90 "?"</B> Date encore inconnue</LI>
 </UL>
 
@@ -824,18 +836,20 @@
 <P>Les sous-titres VobSub consistent en un gros (plusieurs mégaoctets) fichier .SUB, et d'éventuels
   fichiers .IDX et/ou .IFO.<BR>
   Utilisation: si vous avez des fichiers tels que <CODE>sample.sub</CODE>,
-  <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> - vous devrez passer les options
-  <CODE>-vobsub sample -vobsubid
-  &lt;id&gt;</CODE> (éventuellement avec le chemin, bien sûr). L'option
-  <CODE>-vobsubid</CODE> est comme l'option <CODE>-sid</CODE> pour les DVDs, vous pouvez
-  choisir les pistes de sous-titres (langues) avec.</P>
+  <CODE>sample.ifo</CODE>(optionnel), <CODE>sample.idx</CODE> - vous devrez passer les options
+  <CODE>-vobsub sample [-vobsubid &lt;id&gt;]</CODE> (éventuellement avec le chemin complet). 
+  L'option   <CODE>-vobsubid</CODE> est comme l'option <CODE>-sid</CODE> pour les DVDs, vous pouvez
+  choisir les pistes de sous-titres (langues) avec. Au cas où <CODE>-vobsubid</CODE>  est ommis, 
+  MPlayer essaira d'utiliser les langues indiqués par l'option <CODE>-slang</CODE> et se rabattra
+  sur l'objet <CODE>langidx<CODE> du fichier .IDX pour définir la langue de sous-titres. Si cela
+  échoue, il n'y aura pas de sous-titres.</P>
 
 <H4>Autres sous-titres</H4>
 
 <P>Les autres formats consistent en un seul fichier texte contenant le timing,
   l'emplacement et autres infos du texte.<BR>
   Utilisation: si vous avez un fichier tel que <CODE>sample.txt</CODE>,vous devrez passer l'option
-  <CODE>-sub sample.txt</CODE> (éventuellement avec le chemin, bien sûr).</P>
+  <CODE>-sub sample.txt</CODE> (éventuellement avec le chemin complet).</P>
 
 <H4>Réglage du timing et de l'emplacement des sous-titres:</H4>
 
@@ -859,6 +873,11 @@
   convertir manuellement la vitesse. Il y a un petit script perl dans le répertoire
   <CODE>contrib</CODE> du serveur FTP de MPlayer qui fera la conversion pour vous.</P>
 
+<P>MPlayer essaira de deviner les fichiers de sous-titres que vous voulez utiliser pour lire un 
+  film. Si, comme dans la plupart des cas, le fichier de sous-titres et celui du film ont le 
+  même nom et sont au même endroit, vous n'avez pas besoin de définir les options de sous-titres.
+  Jouez simplement le film, MPlayer gérera les sous-titres automatiquement.</P>
+  
 <P>A propos des sous-titres DVD, voir la <A HREF="cd-dvd.html#dvd">section DVD</A>.</P>
 
 
@@ -1160,7 +1179,57 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   limitation matérielle.</P>
 
 
+<H2><A NAME="edl">2.6 Listes d'Edition de Décision (EDL)</A></H2>
 
+<P>Le système de liste d'édition de décision (EDL) vous permet de sauter ou rendre muet
+  des sections de videos pendant la lecture, basé sur un fichier de configuration EDL
+  spécifique au film.</P>
+
+<P>Ceci est utile pour ceux qui veulent voir un film en mode "tout public". 
+  Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
+  suivant vos propres préférences personnelles. A part ça, il y a d'autres utilisations, comme 
+  sauter automatiquement les pubs dans les fichiers vidéos que vous regardez.</P>
+
+<P>Le format de fichier EDL est plutôt rudimentaire. Une fois que le système EDL aura atteinds
+  un certain niveau de maturité, un format de fichier basé sur XML sera problablement implémenté
+  (en gardant une compatiblité descendante avec les précédents formats EDL).</P>
+  
+<P>Le nombre maximum d'entrées EDL pour l'incarnation actuelle de EDL est 1000.
+  Si vous avez besoin de plus, changez le <CODE>#define MAX_EDL_ENTRIES</CODE>
+  dans le fichier <CODE>edl.h</CODE>.</P>
+  
+<H3><A NAME="edl_using">2.6.1 Utiliser un fichier EDL</A></H3>
+
+<P>Incluez l'option <CODE>-edl &lt;nomfichier&gt;</CODE> quand vous lancez MPlayer,
+  avec le nom du fichier EDL que vous voulez appliquer à la video.</P>
+
+<H3><A NAME="edl_making">2.6.1 Faire un fichier EDL</A></H3>
+
+<P>Le format de fichier actuel EDL est:</P>
+
+<CODE>[seconde de départ] [seconde de fin] [action]</CODE>
+
+<P>Où les secondes sont des nombres à virgule et l'action est soit
+  <CODE>0</CODE> pour sauter,  soit <CODE>1</CODE> pour couper le son. Exemple:</P>
+
+<PRE>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</PRE>
+
+<P>Cela va sauter de la seconde 5.3 à la seconde 7.1 de la vidéo, puis va couper le son à
+  15 secondes, le remettre à 16.7 secondes et sauter de la seconde 420 à la seconde
+  422 de la vidéo. Ces actions seront appliqués quand le temps de lecture atteind le temps
+  induqyé dans le fichier.</P>
+  
+<P>Pour créer un fichier EDL à partir duquel travailler, utilisez l'option
+  <CODE>-edlout &lt;nomfichier&gt;</CODE>. Durant la lecture, quand vous voulez marquer
+  les deux secondes précédentes à sauter, tapez <CODE>i</CODE>. Une entrée correspondante
+  sera écrite dans le fichier. Vous pouvez ensuite revenir et affiner le fichier EDL généré.</P>
+  
+  
+  
 <H1><A NAME="usage">3. Utilisation</A></H1>
 
 
@@ -1332,6 +1401,8 @@ ENTER pt_step 1 1
     <P>Bascule l'affichage des sous-titres.</P></LI>
   <LI><B>sub_pos</B> (int) val
     <P>Ajuste la position des sous-titres.</P></LI>
+  <LI><B>vobsub_lang</B>
+    <P>Change la langue des sous-titres VobSub.</P></LI>   
   <LI><B>vo_fullscreen</B>
     <P>Active le plein-écran.</P></LI>
   <LI><B>tv_step_channel</B> (entier) dir
@@ -1653,8 +1724,8 @@ end
 
 <P>Vous devrez aller dans le répertoire MPlayer, et copier ou lier
   <CODE>etc/cygwin_inttypes.h</CODE> vers <CODE>/usr/include/inttypes.h</CODE> pour
-  que MPlayer compile. Sinon il se pleindra à propose d'un
-  <CODE>intypes.h</CODE> manquant.</P>
+  que MPlayer compile. Sinon il se pleindra à propos d'un
+  <CODE>inttypes.h</CODE> manquant.</P>
 
 <P>Puisqu'il n'y a pas de support pour les DLLs Win32 sous Cygwin et qu'OpenGL et mpdvdkit
   ne fonctionnent/compilent pas, vous devriez les désactiver dans configure avec
@@ -1682,7 +1753,7 @@ end
 <UL>
   <LI>Liste d'annonces de MPlayer:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-announce">http://mplayerhq.hu/mailman/listinfo/mplayer-announce</A><BR>
-    Liste pour les annonces MPlayer! inscrivez-vous si vous voulez obtenir les annonces
+    Liste pour les annonces MPlayer. Inscrivez-vous si vous voulez obtenir les annonces
     de nouvelles fonctionalités.</LI>
   <LI>Liste des développeurs de MPlayer:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
