@@ -34,7 +34,7 @@ extern char *info_comment;
 #define ODML_NOTKEYFRAME 0x80000000U
 #define MOVIALIGN        0x00001000
 
-float avi_prp_aspect = -1.0;
+extern int avi_use_vprp_aspect;
 
 struct avi_odmlidx_entry {
 	uint64_t ofs;
@@ -227,6 +227,9 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
 
 static unsigned int avi_aspect(float aspect)
 {
+    if (aspect <= 0.0) {
+    	aspect = 4.0/3.0;
+    }
     if (aspect >= 3.99/3.0 &&
         aspect <= 4.01/3.0) return MAKE_AVI_ASPECT(4,3);
     if (aspect >= 15.99/9.0 &&
@@ -313,7 +316,7 @@ static void avifile_write_header(muxer_t *muxer){
       switch(muxer->streams[i]->type){
       case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
-	  if (avi_prp_aspect > 0) {
+	  if (avi_use_vprp_aspect) {
 	      hdrsize+=8+4*(9+8*1); // vprp
 	  }
 	  break;
@@ -348,13 +351,14 @@ static void avifile_write_header(muxer_t *muxer){
           s->h.fccHandler = s->bih->biCompression;
           s->h.rcFrame.right = s->bih->biWidth;
           s->h.rcFrame.bottom = s->bih->biHeight;
-	  if (avi_prp_aspect > 0) {
+	  if (avi_use_vprp_aspect) {
+	      sh_video_t *sh_video = s->source;
 	      // fill out vprp info
 	      memset(&vprp, 0, sizeof(vprp));
 	      vprp.dwVerticalRefreshRate = (s->h.dwRate+s->h.dwScale-1)/s->h.dwScale;
 	      vprp.dwHTotalInT = muxer->avih.dwWidth;
 	      vprp.dwVTotalInLines = muxer->avih.dwHeight;
-	      vprp.dwFrameAspectRatio = avi_aspect(avi_prp_aspect);
+	      vprp.dwFrameAspectRatio = avi_aspect(sh_video->aspect);
 	      vprp.dwFrameWidthInPixels = muxer->avih.dwWidth;
 	      vprp.dwFrameHeightInLines = muxer->avih.dwHeight;
 	      vprp.nbFieldPerFrame = 1;
@@ -382,15 +386,17 @@ static void avifile_write_header(muxer_t *muxer){
           int biSize=s->bih->biSize;
           le2me_BITMAPINFOHEADER(s->bih);
           write_avi_chunk(f,ckidSTREAMFORMAT,biSize,s->bih); /* BITMAPINFOHEADER */
-	  if (avi_prp_aspect > 0) {
-	      le2me_BITMAPINFOHEADER(s->bih);
+          le2me_BITMAPINFOHEADER(s->bih);
+
+	  if (avi_use_vprp_aspect) {
+	      int fields = vprp.nbFieldPerFrame;
 	      le2me_VideoPropHeader(&vprp);
 	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[0]);
 	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[1]);
 	      write_avi_chunk(f,mmioFOURCC('v','p','r','p'),
-			      sizeof(VideoPropHeader) -
-			      sizeof(VIDEO_FIELD_DESC)*(2-vprp.nbFieldPerFrame),
-			      &vprp); /* Video Properties Header */
+	                      sizeof(VideoPropHeader) -
+	                      sizeof(VIDEO_FIELD_DESC)*(2-fields),
+	                      &vprp); /* Video Properties Header */
 	  }
 }
 	  break;
