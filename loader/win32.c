@@ -3304,6 +3304,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 	return FILE_HANDLE_quicktimeqts;
     }
 #endif
+    printf("\n### FindFirstFileA('%s')...\n",s);
     dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => 0\n", s, s, lpfd);
     strcpy(lpfd->cFileName, "msms001.vwp");
     strcpy(lpfd->cAlternateFileName, "msms001.vwp");
