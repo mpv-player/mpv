@@ -94,7 +94,9 @@ char * fsAudioFileNames[][2] =
 char * fsFontFileNames[][2] =
          {
 #ifdef HAVE_FREETYPE
-	   { "font files (*.ttf)",					   "*.ttf" },
+	   { "True Type fonts (*.ttf)",					   "*.ttf" },
+	   { "Type1 fonts (*.pfb)",					   "*.pfb" },
+	   { "All fonts",						   "*.ttf,*.pfb" },
 #else
 	   { "font files (*.desc)",					   "*.desc" },
 #endif
@@ -309,8 +311,11 @@ void ShowFileSelect( int type,int modal )
   char * hist;
   int  i, c = 1;
   
-  for ( i=0;i < fsPersistant_MaxPos;i++ )
-   if ( fsHistory[i] ) { fsTopList_items=g_list_append( fsTopList_items,fsHistory[i] ); c=0; }
+  if ( fsType == fsVideoSelector )
+   {
+    for ( i=0;i < fsPersistant_MaxPos;i++ )
+     if ( fsHistory[i] ) { fsTopList_items=g_list_append( fsTopList_items,fsHistory[i] ); c=0; }
+   }
   if ( c ) fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
  }
  if ( getenv( "HOME" ) ) fsTopList_items=g_list_append( fsTopList_items,getenv( "HOME" ) );
