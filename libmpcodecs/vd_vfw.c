@@ -71,7 +71,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int ret;
     if(len<=0) return NULL; // skipped frame
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_IP, MP_IMGFLAG_ACCEPT_WIDTH, 
+    mpi=mpcodecs_get_image(sh, 
+	(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_STATIC) ?
+	MP_IMGTYPE_STATIC : MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_WIDTH, 
 	sh->disp_w, sh->disp_h);
     if(!mpi){	// temporary!
 	printf("couldn't allocate image for cinepak codec\n");
