@@ -42,6 +42,7 @@
 #include <sys/param.h>
 #ifdef __NetBSD__
 #include <dev/ic/bt8xx.h>
+#include <sys/audioio.h>
 #elif __FreeBSD_version >= 502100
 #include <dev/bktr/ioctl_meteor.h>
 #include <dev/bktr/ioctl_bt848.h>
@@ -789,14 +790,27 @@ return(priv->dspbytesread * 1.0 / priv->dsprate);
 static int get_audio_framesize(priv_t *priv)
 {
 int bytesavail;
+#ifdef __NetBSD__
+struct audio_info auinf;
+#endif
 
 if(priv->dspready == FALSE) return 0;
 
+#ifdef __NetBSD__
+if(ioctl(priv->dspfd, AUDIO_GETINFO, &auinf) < 0) 
+    {
+    perror("AUDIO_GETINFO");
+    return(TVI_CONTROL_FALSE);
+    }
+else
+    bytesavail = auinf.record.seek; /* *priv->dspsamplesize; */
+#else
 if(ioctl(priv->dspfd, FIONREAD, &bytesavail) < 0) 
     {
     perror("FIONREAD");
     return(TVI_CONTROL_FALSE);
     }
+#endif
 
 /* When mencoder wants audio data, it wants data..
    it won't go do anything else until it gets it :( */
