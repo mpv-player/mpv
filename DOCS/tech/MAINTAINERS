@@ -60,6 +60,8 @@ MPlayer code:
     * playtree, input layer: Albeu
     * postproc, colorspace converters: Michael Niedermayer
     * DVB support: Nico Sabbi
+    * GUI: Pontscho
+    * GUI skins: Pontscho, Gabucino, Diego Biurrun
 
 Imported libs/projects:
     * libavcodec: Michael Niedermayer, Fabrice Bellard @ FFmpeg
@@ -73,10 +75,11 @@ Imported libs/projects:
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
     * vo_aa.c - Alban Bedel
+    * vo_caca.c - Howell Tam (Pigeon)
     * vo_bl.c - Rik Snel
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - ? (Acki (outdated))
-    * vo_dfbmga.c - Ville Syrjala
+    * vo_dfbmga.c - Ville Syrjälä
     * vo_directfb[2].c - Jiri Svoboda
     * vo_directx.c - Sascha Sommer
     * vo_dxr2.c - Albeu
