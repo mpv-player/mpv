@@ -2409,10 +2409,10 @@ Video filter are plugins that allow you to modify the video stream and its
 properties.
 The syntax is:
 .TP
-.B \-vf <filter1[=options],filter2,...>
+.B \-vf <filter1[=parameters],filter2,...>
 Setup a chain of video filters.
 .TP
-.B \-vop <...,filter3[=options],filter2,filter1> (OBSOLETE)
+.B \-vop <...,filter3[=parameters],filter2,filter1> (OBSOLETE)
 Setup a chain of video filters, to be applied in
 .B reverse
 order.
@@ -2423,6 +2423,8 @@ values.
 Use '-1' to keep the default value.
 Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
+.br
+.I NOTE:
 To get a full list of available filters, see \-vf help.
 
 Filters are managed in lists.
@@ -2441,6 +2443,16 @@ list (-1 is the last).
 .TP
 .B \-vf-clr
 Completely empties the filter list.
+.PP
+With filters that support it, you can access parameters by their name.
+.TP
+.B \-vf <filter>=help
+Prints the parameter names and parameter value ranges for a particular
+filter.
+.TP
+.B \-vf <filter=named_parameter1=value1[:named_parameter2=value2:...]>
+Sets a named parameter to the given value.
+Use on and off or yes and no to set flag parameters.
 .PP
 Available filters are:
 .
