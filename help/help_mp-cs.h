@@ -385,6 +385,9 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "Ztlumit"
 #define MSGTR_MENU_Original "Pùvodní"
 #define MSGTR_MENU_AspectRatio "Pomìr stran"
+#define MSGTR_MENU_AudioTrack "Audio stopa"
+#define MSGTR_MENU_Track "Stopa %d"
+#define MSGTR_MENU_VideoTrack "Video stopa"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Zvuk"
@@ -488,6 +491,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Misc "Ostatní"
 #define MSGTR_PREFERENCES_Cache "Vyrovnávací pamì» zap/vyp"
 #define MSGTR_PREFERENCES_LoadFullscreen "Startovat pøes celou obrazovku"
+#define MSGTR_PREFERENCES_CacheSize "Velikost vyrovnávací pamìti: "
+#define MSGTR_PREFERENCES_XSCREENSAVER "Zastavit XScreenSaver"
+#define MSGTR_PREFERENCES_AutoSync "Automatická synchronizace zap/vyp"
+#define MSGTR_PREFERENCES_AutoSyncValue "Automatická synchronizace: "
+#define MSGTR_PREFERENCES_Misc "Ostatní"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba ..."
