@@ -1,4 +1,4 @@
-.\" synced with 1.821
+.\" synced with 1.823
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "30 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "17 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3035,6 +3035,8 @@ et les stocke dans un fichier (par défaut\ : ./stream.yuv).
 Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
 vous être utile si vous comptez retraiter cette vidéo avec cette suite.
 Ne gère que les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
+Vous pouvez la combiner avec l'option \-fixed-vo pour concaténer des fichiers
+ayant les mêmes dimensions et le même nombre de trames par seconde.
 .PD 0
 .RSs
 .IPs interlaced
