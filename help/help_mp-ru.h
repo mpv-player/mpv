@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <mitya@school.ioffe.ru>
-   Was synced with help_mp-en.h: rev 1.121
+   Was synced with help_mp-en.h: rev 1.123
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -362,7 +362,9 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Не могу отослать событие EWMH 'на весь экран'!\n"
 
-#define MSGTR_NeedAfVolume "Микшер: Этому драйверу вывода аудио для изменения громкости звука\n необходимо указывать \"-af volume\".\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Отсутствует аппаратный микшер, вставляю вильтр volume.\n"
+#define MSGTR_NoVolume "[Mixer] Контроль за громкостью звука не доступен.\n"
+
 
 // ====================== GUI messages/buttons ========================
 
@@ -380,8 +382,7 @@ static char help_text[]=
 #define MSGTR_SkinBrowser "Просмотрщик скинов"
 #define MSGTR_Network "Сетевые потоки..."
 #define MSGTR_Preferences "Настройки"
-#define MSGTR_OSSPreferences "конфигурация OSS драйвера"
-#define MSGTR_SDLPreferences "конфигурация SDL драйвера"
+#define MSGTR_AudioPreferences "конфигурация аудиодрайвера"
 #define MSGTR_NoMediaOpened "Носитель не открыт."
 #define MSGTR_VCDTrack "VCD дорожка %d"
 #define MSGTR_NoChapter "Нет главы"
@@ -509,6 +510,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Разное"
 
 #define MSGTR_PREFERENCES_None "Нет"
+#define MSGTR_PREFERENCES_DriverDefault "драйвер по умолчанию"
 #define MSGTR_PREFERENCES_AvailableDrivers "Доступные драйверы:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Не проигрывать звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Нормализовать звук"
@@ -549,9 +551,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек & демуксер[demuxer]"
 #define MSGTR_PREFERENCES_FRAME_Cache "Кэш"
 #define MSGTR_PREFERENCES_FRAME_Misc "Разное"
-#define MSGTR_PREFERENCES_OSS_Device "Устройство:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Микшер:"
-#define MSGTR_PREFERENCES_SDL_Driver "Драйвер:"
+#define MSGTR_PREFERENCES_Audio_Device "Устройство:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Микшер:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Канал микшера:"
 #define MSGTR_PREFERENCES_Message "Пожалуйста, запомните, что Вам нужно перезапустить проигрывание, чтобы некоторые изменения вступили в силу!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео кодировщик:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Использовать LAVC (FFmpeg)"
