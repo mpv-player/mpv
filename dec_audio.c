@@ -37,6 +37,7 @@ extern int verbose; // defined in mplayer.c
 static sample_t * a52_samples;
 static a52_state_t a52_state;
 static uint32_t a52_accel=0;
+static uint32_t a52_flags=0;
 
 #ifdef USE_G72X
 #include "g72x/g72x.h"
@@ -537,6 +538,8 @@ if(gCpuCaps.has3DNow){
   break;
 }
 case AFM_A52: {
+  sample_t level=1, bias=384;
+  int flags=0;
   // Dolby AC3 audio:
   if(gCpuCaps.hasSSE) a52_accel|=MM_ACCEL_X86_SSE;
   if(gCpuCaps.hasMMX) a52_accel|=MM_ACCEL_X86_MMX;
@@ -558,7 +561,30 @@ case AFM_A52: {
   sh_audio->channels=a52_printinfo(sh_audio);
   if(audio_output_channels<sh_audio->channels)
       sh_audio->channels=audio_output_channels;
-  
+  // channels setup:
+  switch(sh_audio->channels){
+	    case 1: a52_flags=A52_MONO; break;
+//	    case 2: a52_flags=A52_STEREO; break;
+	    case 2: a52_flags=A52_DOLBY; break;
+//	    case 3: a52_flags=A52_3F; break;
+	    case 3: a52_flags=A52_2F1R; break;
+	    case 4: a52_flags=A52_2F2R; break; // 2+2
+	    case 5: a52_flags=A52_3F2R; break;
+	    case 6: a52_flags=A52_3F2R|A52_LFE; break; // 5.1
+  }
+  // test:
+  flags=a52_flags|A52_ADJUST_LEVEL;
+  mp_msg(MSGT_DECAUDIO,MSGL_V,"A52 flags before a52_frame: 0x%X\n",flags);
+  if (a52_frame (&a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: error decoding frame -> nosound\n");
+    driver=0;break;
+  }
+  mp_msg(MSGT_DECAUDIO,MSGL_V,"A52 flags after a52_frame: 0x%X\n",flags);
+  // frame decoded, let's init resampler:
+  if(!a52_resample_init(a52_accel,flags,sh_audio->channels)){
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: no resampler. try different channel setup!\n");
+    driver=0;break;
+  }
   break;
 }
 case AFM_HWAC3: {
@@ -1119,23 +1145,11 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         break;
 #endif
       case AFM_A52: { // AC3 decoder
-        int flags=0;
-	int i;
 	sample_t level=1, bias=384;
+        int flags=a52_flags|A52_ADJUST_LEVEL;
+	int i;
         if(!sh_audio->a_in_buffer_len) 
 	    if(a52_fillbuff(sh_audio)<0) break; // EOF
-	    
-	switch(sh_audio->channels){
-	    case 1: flags=A52_MONO; break;
-//	    case 2: flags=A52_STEREO; break;
-	    case 2: flags=A52_DOLBY; break;
-//	    case 3: flags=A52_3F; break;
-	    case 3: flags=A52_2F1R; break;
-	    case 4: flags=A52_2F2R; break; // 2+2
-	    case 5: flags=A52_3F2R; break;
-	    case 6: flags=A52_3F2R|A52_LFE; break; // 5.1
-	}
-	flags|=A52_ADJUST_LEVEL;
 	sh_audio->a_in_buffer_len=0;
 	if (a52_frame (&a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
 	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error decoding frame\n");
@@ -1144,7 +1158,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	// a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
 
 	// frame decoded, let's resample:
-	a52_resample_init(a52_accel,flags,sh_audio->channels);
+	//a52_resample_init(a52_accel,flags,sh_audio->channels);
 	len=0;
 	for (i = 0; i < 6; i++) {
 	    if (a52_block (&a52_state, a52_samples)){
