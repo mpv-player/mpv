@@ -162,7 +162,6 @@ static int init(int rate,int channels,int format,int flags)
 		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: unable to open wave mapper device\n");
 		return 0;
     }
-    //save volume
 	//allocate buffer memory as one big block
 	buffer = malloc(totalBufferSize);
 	memset(buffer,0x0,totalBufferSize);
