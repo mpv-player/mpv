@@ -1,7 +1,14 @@
 <HTML>
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
@@ -9,6 +16,7 @@
 <A HREF="../Hungarian/documentation.html">[ Wêgierski ]</A>
 <A HREF="../German/documentation.html">[ Niemiecki ]</A>
 <A HREF="../French/documentation.html">[ Francuski ]</A>
+<A HREF="../Italian/documentation.html">[ W³oski ]</A>
 [ Polski ]
 </CENTER></P>
 
@@ -53,7 +61,7 @@
     <UL>
       <LI><A HREF="codecs.html#2.2.1">2.2.1 Obraz</A></LI>
       <UL>
-        <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4/DivX5</A></LI>
         <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 DivX/libavcodec w ffmpeg</A></LI>
         <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 Kodeki XAnim</A></LI>
         <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 Obraz VIVO</A></LI>
@@ -61,6 +69,7 @@
         <LI><A HREF="codecs.html#2.2.1.6">2.2.1.6 MS Video1</A></LI>
         <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
 	<LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
+	<LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.2">2.2.2 D¼wiêk</A></LI>
       <UL>
@@ -114,7 +123,7 @@
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - wy¶wietlanie w trybie tekstowym</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - wyj¶cie do BIOSu VESA </A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon - nak³adkowanie obrazu</A></LI>
+	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon - nak³adkowanie obrazu (PRZESTARZA£E - podepnij to do Vidix!)</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
 	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (dla niektórych kart
 	¶ci±gaj±cych/odgrywaj±cych MJPEG)</A></LI>
@@ -138,6 +147,9 @@
 	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Konwerter formatu
 	    próbek</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Opó¼nienie</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Programowe sterowanie g³o¶no¶ci±</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Normalizator g³o¶no¶ci</A></LI>
 	  </UL>  
       </UL>
     </UL>
@@ -154,6 +166,7 @@
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Naprawa plików AVI z uszkodzonym indeksem</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Kodowanie za pomoc±  rodziny kodeków libavcodec</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6  Kodowanie z wielowej¶ciowych obrazów (MJPEG/MPNG)</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Sk³adnia</A></LI>
         <LI><A HREF="encoding.html#2.4.5">2.4.5 Dostêpne opcje</A></LI>
@@ -276,21 +289,18 @@ jest aktualnie niemo¿liwe, zarówno ze wzglêdów <B>technicznych</B>, jak i
 zalecane, w drugiej czê¶ci <A HREF="users_against_developers.html#binary">tego
 pliku</A>.</P>
 
-<P>Nie napisa³em ¿adnych kodeków, tylko kilka odgrywarek. Spêdzi³em wiele czasu
-poszukuj±c najlepszego sposobu, aby rozkodowaæ z³e, uszkodzone pliki wej¶ciowe
-(zarówno MPEG jak i AVI) oraz by zrobiæ perfekcyjn± synchronizacjê A-V z
-mo¿liwo¶ci± przeszukiwania. Moja odgrywarka jest wybitnie dobra w odgrywaniu
-uszkodzonych plików MPEG (co jest u¿yteczne w pewnych VCD), a tak¿e odgrywa z³e
-pliki AVI, których nie potrafi odtworzyæ s³ynny windows media player. Nawet
-pliki AVI bez indeksowania s± odgrywane i mo¿esz tymczasowo przebudowaæ ich
-indeksy za pomoc± opcji -idx, albo na sta³e, za pomoc± <B>MEncoder</B>, co
-umo¿lliwia przeszukiwanie.  Jak widzisz, stabilno¶æ i jako¶æ, to rzeczy dla
-mnie najwa¿niejsze, ale prêdko¶æ jest równie¿ zadziwiaj±ca.</P>
+<P>Moja odgrywarka jest wybitnie dobra w odgrywaniu uszkodzonych plików MPEG
+(co jest u¿yteczne w pewnych VCD), a tak¿e odgrywa z³e pliki AVI, które s± nie
+do odtworzenia przy u¿yciu s³ynnego windows media player. Nawet pliki AVI bez
+indeksowania s± odgrywane i mo¿esz tymczasowo przebudowaæ ich indeksy za pomoc±
+opcji -idx, albo na sta³e, za pomoc± <B>MEncoder</B>, co umo¿lliwia
+przeszukiwanie.  Jak widzisz, stabilno¶æ i jako¶æ, to rzeczy najwa¿niejsze, ale
+prêdko¶æ jest równie¿ zadziwiaj±ca.</P>
 
 <P><B><A NAME=1.2>1.2. Historia</A></B></P>
 
-<P>Wszystko zaczê³o siê rok temu... Próbowa³em wielu odgrywarek pod linuxa
-(mtv, xmps, dvdview, livid/oms, VideoLAN, xine, xanim, avifile, xmmp), ale
+<P>Wszystko zaczê³o siê rok temu... Ja, A'rpi, próbowa³em wielu odgrywarek pod
+linuxa (mtv,xmps,dvdview,livid/oms,videolan, xine, xanim, avifile, xmmp), ale
 wszystkie mia³y jakie¶ wady, g³ównie dotycz±ce odtwarzania plików specjalnych
 oraz synchronizacji obrazu i d¼wiêku. Wiêkszo¶æ z nich nie potrafi odgrywaæ
 plików w obu formatach MPEG1/2 i AVI (DivX). Wiele z nich mia³o równie¿
@@ -298,43 +308,43 @@ problemy z jako¶ci± obrazu lub prêdko¶ci±. Postanowi³em wiêc napisaæ nowy lub
 zmodyfikowaæ jeden z tych programów...</P>
 
 <P><UL>
-<LI><B>mpg12play v0.1-v0.3:</B><BR>
+<LI><B>mpg12play v0.1-v0.3:</B> Sep 22-25, 2000<BR>
     Pierwsza próba, wszystko zakodowane w pó³ godziny!
     U¿y³em libmpeg3 z www.heroinewarrior.com a¿ do wersji 0.3,
     ale by³y z tym problemy z jako¶ci± obrazu i szybko¶ci±.</LI>
-<LI><B>mpg12play v0.5-v0.87:</B><BR>
+<LI><B>mpg12play v0.5-v0.87:</B> Sep 28-Oct 20, 2000<BR>
     Kodek Mpeg zast±piony kodekiem DVDview przez Dirka Farina, to by³a wielka
     sprawa, ale to by³o wolne i napisane w C++ (nie znoszê C++!!!)</LI>
-<LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
+<LI><B>mpg12play v0.9-v0.95pre5:</B> Oct 21-Nov 2, 2000<BR>
     Kodek Mpeg by³ libmpeg2 (mpeg2dec) wykonany przez Aaron Holtzman & Michel
     Lespinasse.
     To wspania³e, zoptymalizowany, bardzo szybki kod C z doskona³± jako¶ci±k
     obrazu i 100% zgodno¶ci± ze standardem MPEG.</LI>
-<LI><B>MPlayer v0.3-v0.9:</B><BR>
-    Paczka sk³adaj±ca siê z dwóch programów: mpg12playv0.95pre6 oraz mojej
-    nowej, prostej odgrywarki AVI 'avip' opartej na programie ³aduj±cym Win32
-    DLL z avifile.</LI>
-<LI><B>MPlayer v0.10:</B><BR>
+<LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
+    To by³a paczka sk³adaj±ca siê z dwóch programów: mpg12play v0.95pre6 oraz
+    mojej nowej, prostej odgrywarki AVI 'avip' opartej na programie ³aduj±cym
+    Win32 DLL z avifile.</LI>
+<LI><B>MPlayer v0.10:</B> Jan 1, 2001<BR>
     Oddzielne binaria dla odgrywarki MPEG i AVI!</LI>
-<LI><B>MPlayer v0.11:</B><BR>
+<LI><B>MPlayer v0.11pre series::</B><BR>
     Kilku nowych developerów do³±czy³o i od 0.11 projekt mplayer jest prac±
     zespo³ow±!
     Dodano wsparcie dla plików .ASF i kodowania/dekodowania OpenDivX (zobacz
     www.projectmayo.com).</LI>
-<LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
+<LI><B>MPlayer v0.17a "The IdegCounter"</B> Apr 27, 2001<BR>
     Wersja 0.11pre wydana po 4 miesi±cach wzmo¿onego rozwoju!
     Wypróbuj tego, i dziw siê! Dodano tysi±ce nowych w³a¶ciwo¶ci ... i
     oczywi¶cie naprawiono stary kod tak¿e, usuniêto b³êdy itp.</LI>
-<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 miesi±ce odk±d pojawi³o siê 0.17 i proszê, oto nowe wydanie ... Ukoñczona
     obs³uga ASF, wiêcej formatów napisów, wprowadzenie libao (podobnej do libvo
     ale dla d¼wiêku) i bardziej stabilne, ni¿ kiedykolwiek i tak dalej. To jest
     prze³om!</LI>
-<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Oct 8, 2001<BR>
     Hmm. Nastêpne wydanie. Tony nowych w³a¶ciwo¶ci, wersja beta GUI, poprawione
     b³êdy, nowe sterowniki vo i ao, przeniesione na wiele systemów, w³±czaj±c
     kodeki opensource DivX i wiele innych. Wypróbuj to!</LI>
-<LI><B>MPlayer 0.60 "The RTFMCounter"</B><BR>
+<LI><B>MPlayer 0.60 "The RTFMCounter"</B> Jan 3, 2002<BR>
     Obs³uga formatów plików MOV/VIVO/RM/FLI/NUV, w³asne kodeki CRAM, Cinepak i
     ADPCM i wsparcie dla binarnych kodeków XAnim; obs³uga napisów DVD, pierwsze
     wydanie MEncodera, odbioru telewizji, cache, liba52, niezliczone
@@ -358,46 +368,54 @@ ale warto to zrobiæ.</P>
 <UL>
   <LI><B>binutils</B> - sugerowana wersja, to <B>2.11.x</B>. Ten program jest
 odpowiedzialny za generowanie bardzo istotnych instrukcji MMX/3DNow!/itp.</LI>
-  <LI><B>gcc</B> - sugerowana wersja od <B>2.95.2</B> do <B>2.95.4</B>.
-    <B>NIGDY</B> nie u¿ywaj 2.96 lub 3.x.x !!! One generuj± b³êdny kod. Je¶li
-    zdecydujesz siê zmieniæ gcc z 2.96, wtedy nie wybieraj odga³êzieñ 3.0,
-    tylko dlatego, ¿ê s± nowsze! W pewnych wzglêdach, to jest wersja nawet
-    gorsza ni¿ 2.96. Tak wiêc zejd¼ do 2.95.x (zejd¼ tak¿e do ni¿szej wersji
-    libstdc++!), albo nie zmieniaj nic w ogóle (ale w tym wypadku b±d¼
-    przygotowany na czasoch³onne problemy). Szczegó³owe informacje o b³êdach
-    gcc 2.96 (które nadal nie s± naprawione, a które s± rozpracowywane w
-    Mplayerze) mo¿na znale¼æ <A
-    HREF="users_against_developers.html"><B><I>tu</I></B></A> oraz w <A
-    HREF="faq.html">FAQ</A>!</I></B></LI>.
-  <LI><B>XFree86</B> - sugerowana wersja, to <B>wersja najnowsza (4.1.0)</B>.
-Normalnie ka¿dy chce tej wersji, gdy¿, poczynaj±c od XFree86 4.0.2, zawiera
-ona rozszerzenie <A HREF="video.html#2.3.1.2">XVideo</A> (gdzie¶ okre¶lane jako
-<B>Xv</B>), które jest konieczne, aby w³±czyæ akceleracjê sprzêtow± YUV
-(szybkie wy¶wietlanie obrazów) w kartach, które to obs³uguj±. Wiêcej informacji
-na ten temat jest dostêpnych <A HREF="video.html#2.3.1.2">tutaj</A><BR>.
-Upewnij siê, ¿e <B>pakiet rozwojowy (development pkg)</B> jest równie¿
-zainstalowany, w przeciwnym razie to nie zadzia³a.<BR> W pewnych kartach
-graficznych nie korzysta siê z XFree86. Zobacz listê poni¿ej.</LI>
+  <LI><B>gcc</B> - sugerowana wersja od <B>2.95.3</B> do <B>2.95.4</B>.
+  <B>NIGDY</B> nie u¿ywaj 2.96 lub 3.x.x !!! One generuj± b³êdny kod. Je¶li
+  zdecydujesz siê zmieniæ gcc z 2.96, wtedy nie wybieraj odga³êzieñ 3.0, tylko
+  dlatego, ¿ê s± nowsze! W pewnych wzglêdach, to jest wersja nawet gorsza ni¿
+  2.96. Tak wiêc zejd¼ do 2.95.x (zejd¼ tak¿e do ni¿szej wersji libstdc++!),
+  albo nie zmieniaj nic w ogóle (ale w tym wypadku b±d¼ przygotowany na
+  czasoch³onne problemy). Je¶li jeste¶ zwolennikiem 3.x, spróbuj ostatniej
+  wersji. Wczesne wydania maj± ró¿ne b³êdy, wiêc upewnij siê, ¿e u¿ywasz
+  przynajmniej 3.0.3 albo 3.1.  Szczegó³owe informacje o b³êdach gcc 2.96
+  (które nadal nie s± naprawione, a które s± rozpracowywane w Mplayerze) mo¿na
+  znale¼æ <A HREF="users_against_developers.html"><B><I>tu</I></B></A> oraz w
+  <A HREF="faq.html">FAQ</A>!</I></B></LI>.
+  <LI><B>XFree86</B> - sugerowana wersja, to <B>wersja najnowsza (4.2.0)</B>.
+  Normalnie ka¿dy chce tej wersji, gdy¿, poczynaj±c od XFree86 4.0.2, zawiera
+  ona rozszerzenie <A HREF="video.html#2.3.1.2">XVideo</A> (gdzie¶ okre¶lane
+  jako <B>Xv</B>), które jest konieczne, aby w³±czyæ akceleracjê sprzêtow± YUV
+  (szybkie wy¶wietlanie obrazów) w kartach, które to obs³uguj±. Wiêcej
+  informacji na ten temat jest dostêpnych <A
+  HREF="video.html#2.3.1.2">tutaj</A><BR>.  Upewnij siê, ¿e <B>pakiet rozwojowy
+  (development pkg)</B> jest równie¿ zainstalowany, w przeciwnym razie to nie
+  zadzia³a.<BR> W pewnych kartach graficznych nie korzysta siê z XFree86.
+  Zobacz listê poni¿ej.</LI>
   <LI><B>make</B> - sugerowana wersja, to <B>wersja najnowsza</B> (nie starsza
-ni¿ 3.79.x). Jest to zazwyczaj ma³o istotne.</LI>
+  ni¿ 3.79.x). Jest to zazwyczaj ma³o istotne.</LI>
   <LI><B>SDL</B> - nie jest to niezbêdne, ale mo¿e pomóc w niektórych
-przypadkach (z³y d¼wiêk, karty graficzne, które maj± dziwne opó¼nienia podczas
-u¿ywania sterownika xv). Zawsze u¿ywaj najnowszej wersji (pocz±wszy od
-1.2.x).</LI>
+  przypadkach (z³y d¼wiêk, karty graficzne, które maj± dziwne opó¼nienia
+  podczas u¿ywania sterownika xv). Zawsze u¿ywaj najnowszej wersji (pocz±wszy
+  od 1.2.x). SDL potrafi równie¿ <B>wy¶wietlaæ napisy pod filmem, na czarnym
+  pasku</B>.</LI>
+  <LI><B>libjpeg</B> -  opcjonalny dekoder JPEG, przez -mf i niektóre pliki mov
+  w qt. U¿yteczny zarówno dla <B>MPlayera</B> jak i dla <B>MEncodera</B>,
+  je¶li masz zamiar pracowaæ z plikami jpeg.</LI>
+  <LI><B>libpng</B> - rekomendowany i domy¶lny dekoder (M)PNG. Wymagany dla GUI.
+  U¿yteczny zarówno dla <B>MPlayera</B> jak i dla <B>MEncodera</B>.</LI>  
 </UL>
 
 <P><B><I>KODEKI</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B>: je¿eli chcesz u¿ywaæ kodeka DivX3/DivX4/itp., zobacz
-przed kompilacj± sekcjê <A HREF="codecs.html#2.2.1.2">2.2.1.2</A>.
+<LI><B>libavcodec</B>: Je¿eli chcesz u¿ywaæ tego kodeka DivX3/DivX4/DivX5/itp.,
+zobacz przed kompilacj± sekcjê <A HREF="codecs.html#2.2.1.2">2.2.1.2</A>.
 W³a¶ciwo¶ci:<BR>
 <UL>
-  <LI>mo¿esz <B>osi±gn±æ odgrywanie <I>DivX/DivX4</I> na maszynach
-nie-x86</B></LI>
+  <LI>mo¿esz <B>odgrywaæ <I>DivX/DivX4/DivX5</I> na maszynach nie-x86</B></LI>
   <LI>odgrywanie i kodowanie RealVideo 1.0/VIVO/MJPEG/h263/i innych</LI>
-  <LI>ten kodek posiada <B>najlepsz± prêdko¶æ dekodowania</B> filmów DivX i
-DivX4 (wiêksz± nawet ni¿ oryginalna biblioteka DivX4)! Rekomendowany!</LI>
+  <LI>ten kodek osi±ga <B>najwiêksz± prêdko¶æ dekodowania</B> filmów DivX i
+  DivX4/DivX5 (wiêksz± nawet, ni¿ oryginalna biblioteka DivX4)!
+  Rekomendowany!</LI>
 </UL>
 </LI>
 
@@ -408,31 +426,42 @@ pakiet kodeków, ale one siê ró¿ni± od naszych, wiêc je¶li chcesz u¿ywaæ
 wszystkich wspieranych kodeków, wówczas stosuj nasz pakiet! Jednak¿e mo¿esz
 u¿ywaæ naszego pakietu kodeków z avifile. W³a¶ciwo¶ci:<BR>
 <UL>
-  <LI>potrzebne, je¿eli chcesz odgrywaæ, b±d¼ kodowaæ np. filmy
-nagrane za pomoc± cyfrowych kamer (np.: DV)</LI>
-  <LI>potrzebne, je¿eli chcesz odgrywaæ filmy <B>WMV</B>, albo starsze ASF'y</LI>
+  <LI>potrzebne, je¿eli chcesz odgrywaæ, b±d¼ kodowaæ np. filmy nagrane za
+  pomoc± ró¿nych sprzêtowych kompresorów, takich jak tunery, kamery cyfrowe
+  (np.: DV, ATI VCR, MJPEG)</LI>
+  <LI>potrzebne, je¿eli chcesz odgrywaæ filmy <B>WMV</B>, albo starsze
+  (MP42) ASF'y</LI>
 </UL>
 </LI>
 
-<LI><B>DivX4</B>: informacje na temat tego kodeka mo¿na uzyskaæ w sekcji <A
-HREF="codecs.html#2.2.1.1">2.2.1.1</A>. Je¿eli nie chcesz u¿ywaæ
-<B>MEncodera</B>, nie bêdziesz chcia³ te¿ u¿ywaæ tego kodeka, gdy¿
-<B>libavcodec</B> (zobacz powy¿ej) jest znacznie od niego szybszy.<BR>
-W³a¶ciwo¶ci :<UL>
-  <LI>jedno lub dwupasmowe kodowanie z <A HREF="encoding.html">MEncoderem</A></LI>
+<LI><B>DivX4/DivX5</B>: informacje na temat tego kodeka mo¿na uzyskaæ w sekcji
+ <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>. Je¿eli nie chcesz u¿ywaæ
+ <B>MEncodera</B>, nie bêdziesz chcia³ te¿ u¿ywaæ tego kodeka, gdy¿
+ <B>libavcodec</B> (zobacz powy¿ej) jest znacznie od niego szybszy.<BR>
+ W³a¶ciwo¶ci:
+ <UL>
+  <LI>jedno lub dwupasmowe kodowanie z <A
+  HREF="encoding.html">MEncoderem</A></LI>
   <LI>potrafi odgrywaæ stare filmy <B>DivX3</B> znacznie szybciej ni¿ Win32
-DLL, ale wolniej ni¿ <B>libavcodec</B>!</LI>
+  DLL, ale wolniej ni¿ <B>libavcodec</B>!</LI>
   <LI>jest closed-source i dostêpna jest tylko wersja na x86.</LI>
+ </UL>
+ </LI>
+
+<LI><B>XviD</B> : Alternatywa opensource kodowania Divx4Linux<BR>
+W³a¶ciwo¶ci:
+<UL>
+  <LI>1 i 2 pasmowe kodowanie z <A HREF="encoding.html">MEncoderem</A></LI>
+  <LI>to jest open-source, wiêc nie tylko wersja na x86 jest dostêpna</LI>
+  <LI>oko³o 2 razy szybszy, ni¿ divx4 w czasie kodowania - przy tej samej
+  jako¶ci</LI>
 </UL>
 </LI>
-
-<LI>Je¶li chcesz odgrywaæ filmy <B>3ivx</B>, sprawd¼ sekcjê <A
-HREF=codecs.html#2.2.1.3>kodeków XAnim</A>.</LI>
 
 <LI><A HREF=codecs.html#2.2.1.3>Kodeki XAnim</A> s± najlepsze (pe³ny ekran,
-sprzêtowy zoom YUV) do dekodowania starych filmów, takich jak Indeo 3/4/5 oraz
-kilka innych. Te kodeki s± wieloplatformowe, wiêc to jedyny sposób, aby
-odgrywaæ Indeo na platformach nie-x86 (có¿, niezale¿nie od samego u¿ywania
+sprzêtowy zoom YUV) do dekodowania filmów <B>3ivx</B> i Indeo 3/4/5 oraz
+kilka starych formatów. Te kodeki s± wieloplatformowe, wiêc to jedyny sposób,
+aby odgrywaæ Indeo na platformach nie-x86 (có¿, niezale¿nie od samego u¿ywania
 XAnim:). Na przyk³ad filmy Cinepak s± najlepiej odgrywane z w³asnym dekoderem
 Cinepak Mplayera</LI>
 
@@ -440,9 +469,9 @@ Cinepak Mplayera</LI>
 
 <P><B><I>KARTY GRAFICZNE</I></B></P>
 
-<P>Generelnie istniej± dwa rodzaje kart graficznych. Karty posiadaj±ce obs³ugê
-<B>sprzêtowej akceleracji YUV</B> (nowsze) oraz pozosta³e karty, nie posiadaj±ce
-tego.</P>
+<P>Ogólnie istniej± dwa rodzaje kart graficznych. Jeden rodzaj,
+to karty (nowsze) posiadaj±ce obs³ugê <B>sprzêtowej akceleracji skalowania i
+YUV</B>, czego nie posiadaj± pozosta³e karty.</P>
 
 <P>
 <B><I>KARTY YUV</I></B></P>
@@ -464,21 +493,24 @@ Zobacz równie¿ sekcjê <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>.
 prêdko¶ci, zobacz sekcjê <A HREF="video.html#2.3.1.9">2.3.1.9</A>. Wa¿ne jest,
 aby wykonaæ te kroki <I>zanim</I> skompilujesz <B>MPlayera</B>, w przeciwnym
 razie ¿adne wsparcie dla 3Dfx nie zostanie zbudowane. Zobacz równie¿ sekcjê <A
-HREF="video.html#2.3.1.A.3">3dfx TV-out</A>.</LI>
+HREF="video.html#2.3.1.A.3">3dfx TV out</A>. Je¶li u¿ywasz X-ów, u¿ywaj
+przynajmniej 4.2.0, poniewa¿ sterownik 3dfx Xv by³ popsuty w 4.1.0 i
+wcze¶niejszych wydaniach!</LI>
 
 <LI><B>Karty ATI</B>: zobacz sekcjê <A HREF="video.html#2.3.1.A.2">karty
 ATI</A> z dokukmentacji TV-out, aby siê dowiedzieæ, jakie w³a¶ciwo¶ci twojej
-karty s± obs³ugiwane pod Linuksem/MPlayerem. Je¿eli masz kartê <B>Radeon</B>
-lub <B>Rage128</B>, mamy dla ciebie sterownik <B>XXX_vid</B>, z wyj¶ciem TV!
-Sprawd¼ <A HREF="video.html#2.3.1.14">t±</A> sekcjê!</LI>
-<U><B>Je¿eli nie jeste¶ u¿ytkownikiem Linuksa</B></U>, przeczytaj dokumentacjê
-<A HREF="video.html#2.3.1.15">Vidix</A>!</LI>
+karty s± obs³ugiwane pod Linuksem/MPlayerem. Je¿eli masz kartê <B>Radeon</B>,
+<B>Rage128</B>, albo <B>Mach64</B> (Rage XL/Mobility, Xpert98), mamy dla ciebie
+sterownik <B>XXX_vid</B>, z wyj¶ciem TV!  Sprawd¼ <A
+HREF="video.html#2.3.1.14">t±</A> sekcjê!</LI> <U><B>Je¿eli nie jeste¶
+u¿ytkownikiem Linuksa</B></U>, przeczytaj dokumentacjê <A
+HREF="video.html#2.3.1.15">Vidix</A>!</LI>
 
-<LI><B>Karty S3</B>: chipy Savage posiadaj± akceleracjê sprzêtow±. U¿ywaj tak
-nowej wersji XFree86, jak to tylko mo¿liwe. Starsze sterowniki zawieraj± b³êdy.
-Chipy Savage maj± k³opoty z wyswietlaniem YV12. Zobacz sekcjê 
+<LI><B>Karty S3</B>: chipy Savage i Virge/DX posiadaj± akceleracjê sprzêtow±.
+U¿ywaj tak nowej wersji XFree86, jak to tylko mo¿liwe. Starsze sterowniki
+zawieraj± b³êdy.  Chipy Savage maj± k³opoty z wyswietlaniem YV12. Zobacz sekcjê
 <A HREF="video.html#2.3.1.2.2">S3 Xv</A>, aby dowiedzieæ siê wiêcej szczegó³ów.
-Starsze, karty - nie Savage, nie zawieraj±, b±d¼ maj± bardzo wolne wsparcie
+Starsze, karty Trio, nie zawieraj±, b±d¼ maj± bardzo wolne wsparcie
 sprzêtowe.</LI>
 
 <LI><B>Karty Nvidia</B>: to bardzo z³y wybór je¶li chodzi o odtwarzanie
@@ -494,7 +526,14 @@ HREF="video.html#2.3.1.2.3"> Sterowniki Nvidia Xv</LI>.
     <LI>Sprawd¼ czy sterownik XFree86 (i twoja karta) obs³uguje akceleracjê
 sprzêtow±. Szczegó³y znajdziesz w sekcji <A HREF="video.html#2.3.1.2">Xv</A>.
 </LI>
-    <LI>Je¶li nie, twojej karty nale¿y szukaæ tutaj:</LI>
+    <LI>Je¶li nie, wobec tego w³a¶ciwo¶ci twojej karty nie s± obs³ugiwane przez
+    twój OS: (<BR> 
+    Je¶li wykonuje ona skalowanie sprzêtowe pod Windows, to wcale nie znaczy,
+    ¿e bêdzie robi³a to samo pod Linuksem, b±d¼ innym systemem, wszystko zale¿y
+    od sterowników! Wiêkszo¶æ producentów nie robi sterowników dla Linuksa, ani
+    nie udostêpnia specyfikacji chipów - a wiêc masz pecha, ¿e u¿ywasz ich
+    karty. Zobacz nastêpn± sekcjê:
+    </LI>
   </UL>
 </LI>
 
@@ -504,16 +543,17 @@ sprzêtow±. Szczegó³y znajdziesz w sekcji <A HREF="video.html#2.3.1.2">Xv</A>.
 <P>
 <B><I>Karty bez YUV</I></B></P>
 
-<P> Pe³noekranowe odgrywanie mo¿e byæ osi±gniête albo przez zooming (<B>sprzêtowy</B> jest
-zbyt wolny), albo przez zmianê, na mniejszy, trybu video (videomode), np.
-na 352x288. Je¶li nie masz akceleracji YUV, to rekomendowana jest ta druga metoda.
-Za pomoc± <B>MPlayera</B>, <U>mo¿na to w³±czyæ za
-pomoc± opcji <CODE>-vm</CODE></U> z nastêpuj±cymi sterownikami:
+<P> Pe³noekranowe odgrywanie mo¿e byæ osi±gniête albo przez zooming
+<B>programowy</B> (uzyj opcji -zoom, ale ostrzegam ciê: to jest zbyt wooolne!),
+albo przez zmianê, na mniejszy, trybu video (videomode), np.  na 352x288. Je¶li
+nie masz akceleracji YUV, to rekomendowana jest ta druga metoda.  Za pomoc±
+<B>MPlayera</B>, <U>mo¿na to w³±czyæ za pomoc± opcji <CODE>-vm</CODE></U> z
+nastêpuj±cymi sterownikami:
 <UL>
   <LI><B>using</B> XFree86: zobacz szczegó³y w sekcji:
     <A HREF="video.html#2.3.1.3">sterownik DGA</A> oraz
-    <A HREF="video.html#2.3.1.13">sterownik X11</A>. DGA jest
-rekomendowany!</LI>
+    <A HREF="video.html#2.3.1.13">sterownik X11</A>. DGA jest rekomendowany!
+    Spróbuj równie¿ DGA via SDL, czasem to jest lepsze.</LI>
   <LI><B>nie u¿ywaj±c</B> XFree86: spróbuj kolejno tych sterowników:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
@@ -528,7 +568,8 @@ rekomendowany!</LI>
 
 <LI><B>Soundblaster Live!</B>: z t± kart± mo¿esz u¿ywaæ 4 lub 6 (<B>5.1</B>)
 kana³ów dekodowania AC3, zamiast, jak dot±d, dwóch. Przeczytaj sekcjê <A
-HREF="codecs.html#2.2.2.1">Programowe dekodowanie AC3</A>.</LI>
+HREF="codecs.html#2.2.2.1">Programowe dekodowanie AC3</A>. Dla sprzêtowego
+przepuszczania AC3 MUSISZ u¿yæ emulacji oss za pomoc± Alsy 0.9.</LI>
 
 <LI><B>C-Media z wyj¶ciem SP/DIF</B> : sprzêtowe przej¶cie AC3 jest z tymi
 kartami mo¿liwe, zobacz sekcjê: <A HREF="codecs.html#2.2.2.2">Sprzêtowe
@@ -557,15 +598,15 @@ koder), zobacz sekcjê <A HREF="encoding.html#2.4">MEncoder</A>.</LI>
 kodowaæ filmy za pomoc± <B>MPlayera</B>, przeczytaj sekcjê <A HREF=#2.5>wej¶cie
 TV</A>.</LI>
 
-<LI>S± trzy kody zegara w <B>MPlayerze</B>. Aby u¿yæ starej metody, nie musisz
-robiæ nic. Stosuje ona <CODE>usleep()</CODE>, aby dostroiæ A/V sync, z
+<LI>S± trzy metody taktowania w <B>MPlayerze</B>. Aby u¿yæ starej metody, nie
+musisz robiæ nic. Stosuje ona <CODE>usleep()</CODE>, aby dostroiæ A/V sync, z
 dok³adno¶ci± +/- 10ms. Jakkolwiek, czasami synchronizacja musi byæ dostrojona
 nawet lepiej. Nowy kod zegara w tym celu RTC (Real Time Clock) komputera,
 poniewa¿ ma on precyzyjno¶æ tak±, jak zegary 1ms. Wymaga to uprawnieñ roota
 (ew. <I>setuid root</I>) dla binariów <B>MPlayera</B> (lub drobnych zmian w
 j±drze, ale to jest odradzane). Mo¿esz zobaczyæ wydajno¶æ nowego zegaraa w lini
 statusu. Trzeci kod zegara jest w³±czany za pomoc± opcji
-<CODE>-softsleep</CODE>. Ma on wydajno¶æ RTC, ale nie wymaga uprawnieñ roota.
+<CODE>-softsleep</CODE>. Ma on wydajno¶æ RTC, ale nie u¿ywa RTC.
 Z drugiej strony, zu¿ywa on wiêcej CPU. Uwaga: <B>NIGDY nie instaluj binariów
 MPlayera, jako setuid w systemie wielu u¿ytkowników!</B> To prosta droga dla
 ka¿dego, by zdobyæ uprawnienia roota.</LI>
@@ -581,7 +622,9 @@ ka¿dego, by zdobyæ uprawnienia roota.</LI>
 <CODE>/usr/local/share/mplayer</CODE> zawiera plik <CODE>codecs.conf</CODE>,
 który jest u¿ywany, aby poinformowaæ program o wszystkich kodekach i ich
 mo¿liwo¶ciach. Ten plik powinien byæ zawsze uaktualniany wraz z bibliotek±
-main!</P>
+main!<BR> Sprawd¼ czy masz codecs.conf w katalogu domowym
+(~/.mplayer/codecs.conf) pozosta³y po starych wersjach MPlayera i usuñ go!
+</P>
 
 <P><B>U¿ytkownicy Debiana</B> mog± samodzielnie budowaæ pakiety .deb, to bardzo
 proste. Po prostu wywo³aj <CODE>fakeroot debian/rules binary</CODE> w g³ównym
@@ -591,7 +634,10 @@ HREF="documentation.html#6.1">tu</A>.</P>
 <P><B><I>ZAWSZE przegl±daj komunikaty z ./configure</I></B> oraz zawarto¶æ
 pliku <CODE>configure.log</CODE>, mo¿esz tam znale¼æ informacje o tym, co
 zostanie zbudowane, a co nie. Mo¿esz równie¿ przejrzeæ pliki config.h i
-config.mak.</P>
+config.mak.<BR> Je¶li masz jakie¶ biblioteki zainstalowane, ale nie zosta³y one
+wykryte podczas ./configure, wówczas sprawd¼, czy masz równie¿ odpowiednie
+pliki nag³ówkowe (zazwyczaj pakiety -dev) i czy zgadzaj± siê ich wersje. W
+pliku configure.log znajdziesz informacjê o tym, czego brakuje.  </P>
 
 <P>Choæ to nie jest niezbêdne, fonty powinny byæ zainstalowane, aby mo¿na by³o
 osi±gn±æ funkcjonalno¶æ OSD i napisy. ¦ci±gnij mp-arial-iso-8859-*.zip i/lub
@@ -638,7 +684,8 @@ napisów mo¿e byæ u¿ywanych przez kod subreadera. Informacje o formatach
 napisów znajdziesz w pliku subreader.c, w okolicach linii 30.</P>
 
 <P><B>MPlayer</B> obs³uguje napisy VobSub. Napisy VobSub zawieraj± du¿y
-(kilkumegabajtowy) plik .SUB, plik .IDX oraz plik .IFO. Sposób u¿ycia: je¶li
+(kilkumegabajtowy) plik .SUB i opcjonalnie pliki .IDX oraz/lub .IFO. 
+Sposób u¿ycia: je¶li
 masz pliki w rodzaju: <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
 <CODE>sample.idx</CODE> - musisz podaæ opcje: <CODE>-vobsub sample
 -vobsubid0</CODE> (opcjonalnie ze ¶cie¿k± dopliku, oczywi¶cie). Opcja
@@ -686,9 +733,10 @@ przeszukiwania itp.</P>
 w³a¶ciwo¶ci OSD/SUB. Jest wiele sposobów, aby je zdobyæ:
 <UL>
 
-<LI>¦ci±gnij gotowy-do-u¿ycia pakiet z fontami ze strony <B>MPlayera</B>.
-Uwaga: obecnie dostêpne fonty ograniczaj± siê do obs³ugi iso 8859-1/2 oraz
-istnieje nowa specjalna wersja dla kodowania koreañskiego, rosyjskiego itp.
+<LI>¦ci±gnij gotowy do u¿ycia pakiet z fontami ze strony <B>MPlayera</B>.
+Uwaga: obecnie dostêpne fonty ograniczaj± siê do obs³ugi iso 8859-1/2, ale
+istniej± jeszcze inne (koreañskie, rosyjskie, 8859-8 itp.) fonty w
+sekcji contrib/font na FTP, stworzone przez u¿ytkowników.
 Font powinien mieæ w³a¶ciwy plik font.desc, który mapuje pozycje fontu unicode
 do aktualnej strony kodowej tekstu napisów. Inne rozwi±zanie to posiadanie
 napisów zakodowanych w kodowaniu utf8 i u¿ywanie opcji -utf8, albo po prostu
@@ -742,7 +790,8 @@ w pliku konfiguracyjnym.</P>
 HREF="sound.html">d¼wiêku</A>.</P>
 
 
-<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - wielozadaniowy koder</P>
+<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - uniwersalny
+koder</A></P>
 
 
 <P><A NAME=2.5><B>2.5. Wej¶cie TV</B></P>
@@ -775,97 +824,110 @@ zastosuj opcjê <CODE>-vo sdl</CODE>). Mo¿esz to wyspecyfikowaæ za pomoc± opcji
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>on</I></TD>
+  <TD><FONT CLASS="text"><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>u¿yj wej¶cia TV</TD>
+  <TD><FONT CLASS="text">u¿yj wej¶cia TV</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>driver</I></TD>
+  <TD><FONT CLASS="text"><I>noaudio</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT CLASS="text">dziêki, ¿adnego d¼wiêku</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT CLASS="text"><I>driver</I></TD>
   <TD></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-    <B>dummy</B> - wej¶cie TV jest NULL :) U¿ywane tylko do testów,  generuje
+  <TD><FONT CLASS="text">
+    <B>dummy</B> - wej¶cie TV jest NULL :) U¿ywane tylko do testów, generuje
     wej¶cie dummy.<BR>
     <B>v4l</B> - zgrywa obrazki ze standardowego interfejsu V4L (domy¶lnie
     <CODE>/dev/video0</CODE>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>device</I></TD>
+  <TD><FONT CLASS="text"><I>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>okre¶l inne ni¿ domy¶lne <CODE>/dev/video0</CODE> urz±dzenie</TD>
+  <TD><FONT CLASS="text">okre¶l inne ni¿ domy¶lne <CODE>/dev/video0</CODE>
+  urz±dzenie</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
+  <TD><FONT CLASS="text"><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>podaj, z
-  jakiego wej¶cia tunera TV chcesz odbieraæ (np.<B>television</B>,
+  <TD><FONT CLASS="text">podaj, z jakiego wej¶cia tunera TV chcesz odbieraæ
+  (np.<B>television</B>,
   <B>s-video</B>, <B>composite</B>, ...)<BR>
     Dostêpne wej¶cia s± wypisywane przy inicjalizacji.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
+  <TD><FONT CLASS="text"><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>okre¶l czêstotliwo¶æ,
-  aby ustawiæ tuner (np. <B>511.250</B>)</TD>
+  <TD><FONT CLASS="text">okre¶l czêstotliwo¶æ, aby ustawiæ tuner (np.
+  <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
+  <TD><FONT CLASS="text"><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>w jakim
-  formacie wyj¶ciowym tuner powinien przetransportowaæ obrazy do nas
-  (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (dla i420
-  musisz podaæ opcjê <CODE>-vc rawi420</CODE>, z powodu konfliktu fourcc))</TD>
+  <TD><FONT CLASS="text">w jakim formacie wyj¶ciowym tuner powinien
+  przetransportowaæ obrazy do nas (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
+  <B>uyvy</B>, <B>i420</B> (dla i420 musisz podaæ opcjê <CODE>-vc
+  rawi420</CODE>, z powodu konfliktu fourcc))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
+  <TD><FONT CLASS="text">width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  szeroko¶æ w pikselach okna wyj¶ciowego</TD>
+  <TD><FONT CLASS="text">szeroko¶æ w pikselach okna wyj¶ciowego</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
+  <TD><FONT CLASS="text"><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  wysoko¶æ w pikselach okna wyj¶ciowego</TD>
+  <TD><FONT CLASS="text">wysoko¶æ w pikselach okna wyj¶ciowego</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>norm</I></TD>
+  <TD><FONT CLASS="text"><I>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  dostêpne: PAL, SECAM, NTSC</TD>
+  <TD><FONT CLASS="text">dostêpne: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>channel</I></TD>
+  <TD><FONT CLASS="text"><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  ustaw tuner na podany kana³</TD>
+  <TD><FONT CLASS="text">ustaw tuner na podany kana³</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>chanlist</I></TD>
+  <TD><FONT CLASS="text"><I>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  dostêpne: <CODE>us-bcast, us-cable, europe-west, europe-east, itp.</CODE></TD>
+  <TD><FONT CLASS="text">dostêpne: <CODE>us-bcast, us-cable, europe-west,
+  europe-east, itp.</CODE></TD>
 </TR>
 </TABLE>
 </P>
 
 <A NAME=2.5.4><P><B><I>2.5.4. Sterowanie z klawiatury</I></B></P>
 
-<TABLE BORDER=0> <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-Helvetica, sans-serif" size=2>h lub l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-face="Verdana, Arial, Helvetica, sans-serif" size=2>prze³±cz poprzedni/nastêpny
-kana³</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zmieñ normê</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zmieñ listê kana³ów</TD><TR>
+<TABLE BORDER=0> 
+<TD>&nbsp;&nbsp;</TD>
+<TD> <FONT CLASS="text">h lub l</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD> <FONT CLASS="text">prze³±cz poprzedni/nastêpny kana³</TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">n</TD>
+<TD></TD>
+<TD> <FONT CLASS="text">zmieñ normê</TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">b</TD>
+<TD></TD>
+<TD> <FONT CLASS="text">zmieñ listê kana³ów</TD>
+<TR>
 </TABLE>
 
 <A NAME=2.5.5><P><B><I>2.5.5. Przyk³ady</I></B></P>
@@ -880,146 +942,256 @@ Wej¶cie ze standardowego V4L<BR>
 
 
 <P><B><A NAME=3>3. Sposób u¿ycia</A></B></P>
-<P><B><A NAME=3.1>3.1.  Linia poleceñ</A></B></P>
+<P><B><A NAME=3.1>3.1. Linia poleceñ</A></B></P>
 
-<P><B>MPlayer</B> u¿ywa complex playtree. Zawiera ono "domy¶lne" opcje zapisane
+<P><B>MPlayer</B> u¿ywa complex playtree. Zawiera ono globalne opcje zapisane
 jako pierwsze (np.: <CODE>mplayer -vfm 5</CODE>) jak i opcje zapisane za
 nazwami plików, które s± stosowane tylko do podanych plików/URL/czegokolwiek
-(np.: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
+(np.: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR> Mo¿esz
+pogrupowaæ nazwy plików / adresy URL u¿ywaj±c { i }. To jest u¿yteczne wraz z
+opcj± -loop: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> odtworzy
+pliki w kolejno¶ci: 1 1 2 1 1 2 1 1 2<BR>
+</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opcje] [path/]filename</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>mplayer [default opcje] [path/]filename1 [opcje dla
-filename1] filename2 filename3 [opcje dla filename3]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>mplayer [opcje] -vcd trackno /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>mplayer [opcje] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>mplayer [opcje] http://site.com/file.[mpg|avi] (tu równie¿
-mo¿e byæ u¿yte playtree)</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD>file</TD>
+<TD> <FONT CLASS="text">
+<TD>&nbsp;&nbsp;</TD>
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] [path/]filename</CODE></TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">files</TD>
+<TD></TD>
+<TD><CODE> <FONT CLASS="text">mplayer [default opcje] [path/]filename1 [opcje
+dla filename1] filename2 [opcje dla filename2] ...</CODE></TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">VCD</TD>
+<TD></TD>
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] -vcd trackno
+/dev/cdrom</CODE></TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">DVD</TD>
+<TD></TD>
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] -dvd titleno
+[-dvd-device /dev/dvd]</CODE></TD>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">net</TD>
+<TD></TD>
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] http://site.com/file.asf 
+(tu równie¿ mo¿e byæ u¿yta playlista)</CODE></TD>
+<TR>
 </TABLE></P>
 
+<P>Najnowsze wersje MPlayera równie¿ akceptuje ¶cie¿ki VCD i DVD w stylu URL,
+tak, jak to robi Xine: <CODE>mplayer dvd://1</CODE> albo <CODE>mplayer
+vcd://1</CODE></P>
+
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2 /dev/cdrom
+  mplayer -vcd 2 
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 /dev/dvd
+  mplayer -dvd 1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
 <P><B><A NAME=3.2>3.2. Sterowanie za pomoc± kalwiatury</A></B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>&lt;- lub -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-Helvetica, sans-serif" size=2>poszukiwanie wstecz/naprzód o 10 sekund</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>strza³ka w górê
-lub w dó³</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>poszukiwanie wstecz/naprzód o 1 minutê</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;
-lub &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>poszukiwanie wstecz/naprzód po playli¶cie</TD><TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p lub 
-spacja</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q lub 
-ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>zakoñczenie odgrywania i wyj¶cie z programu</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ lub
--</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ lub 
-*</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>zmniejsz/zwiêksz g³o¶no¶æ</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek poszukiwania +
-zegar</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z lub 
-x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD></TR>
-
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> (nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz opcji
-<CODE>-vo xv</CODE>)</I></P></TD></TR>
-
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1
-lub 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dostosuj kontrast</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3
-lub 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dostosuj jasno¶æ</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5
-lub 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dostosuj odcieñ</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7
-lub 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>dostosuj nasycenie</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD>
+<TD> <FONT CLASS="text">&lt;- lub -&gt;</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 sekund</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">strza³ka w górê lub w dó³</TD>
+<TD></TD>
+<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 1 minutê</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">pgup/pgdown</TD>
+<TD></TD>
+<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">&lt; lub &gt;</TD>
+<TD></TD>
+<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód po playli¶cie</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">p lub spacja</TD>
+<TD></TD>
+<TD> <FONT CLASS="text">zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD> <FONT CLASS="text">q lub ESC</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zakoñczenie odgrywania i wyj¶cie z programu</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">+ lub -</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">/ lub *</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zmniejsz/zwiêksz g³o¶no¶æ</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">o</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek
+poszukiwania + zegar</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">m</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">z lub x</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD>
+</TR>
+<TR>
+<TD COLSPAN=4>
+<P>
+<I><FONT CLASS="text">(nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz
+opcji <CODE>-vo xv</CODE>)</I>
+</P>
+</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">1 lub 2</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dostosuj kontrast</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">3 lub 4</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dostosuj jasno¶æ</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">5 lub 6</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dostosuj odcieñ</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">7 lub 8</TD>
+<TD></TD>
+<TD><FONT CLASS="text">dostosuj nasycenie</TD></TR>
 
 <P><B>Obs³uga GUI z klawiatury</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>, i .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-Helvetica, sans-serif" size=2> poprzedni / nastêpny plik</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>szary
-- lub +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> zmniejsz / zwiêksz g³o¶no¶æ</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> rozpocznij odgrywanie</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>spacja</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> pauza</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> stop</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> informacje o programie</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> wczytaj plik</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> przegl±darka skórek</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> w³±cz/wy³±cz equalizer</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> w³±cz wy³±cz listê odtwarzania</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> w³±cz/wy³±cz pe³ny ekran</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> w³±cz/wy³±cz wyciszenie d¼wiêku</TD>
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">, i .</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">poprzedni / nastêpny plik</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">szary - lub +</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zmniejsz / zwiêksz g³o¶no¶æ</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">enter</TD>
+<TD></TD>
+<TD><FONT CLASS="text">rozpocznij odgrywanie</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">spacja</TD>
+<TD></TD>
+<TD><FONT CLASS="text">pauza</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">s</TD>
+<TD></TD>
+<TD><FONT CLASS="text">stop</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">a</TD>
+<TD></TD>
+<TD><FONT CLASS="text">informacje o programie</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">l</TD>
+<TD></TD>
+<TD><FONT CLASS="text">wczytaj plik</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">b</TD>
+<TD></TD>
+<TD><FONT CLASS="text">przegl±darka skórek</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">e</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz/wy³±cz equalizer</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">p</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz wy³±cz listê odtwarzania</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">f</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz/wy³±cz pe³ny ekran</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">m</TD>
+<TD></TD>
+<TD><FONT CLASS="text">w³±cz/wy³±cz wyciszenie d¼wiêku</TD>
 </TABLE></P>
 
 <P><B>Sterowanie wej¶ciem TV</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>h lub l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-Helvetica, sans-serif" size=2> wybierz porzedni / nastêpny kana³</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> zmieñ normê</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> zmieñ listê kana³ów</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">h lub l</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">wybierz porzedni / nastêpny kana³</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">n</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zmieñ normê</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">b</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zmieñ listê kana³ów</TD>
+</TR>
 
 </TABLE></P>
 
@@ -1042,37 +1214,56 @@ LIRC nie zosta³a wkompilowana. To tyle :-)</P>
 Rozumie ona nastêpuj±ce polecenia:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-Helvetica, sans-serif" size=2> - zatrzymuje odgrywanie (pauza). Naci¶niêcie
-dowolnego klawisza powoduje wznowienie odgrywania;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> - wyj¶cie z MPlayer;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> - 10 sek wstecz;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> - 60 sek wstecz;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> - 10 secs naprzód;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> - 60 sek naprzód;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> - zwiêkszenie g³o¶no¶ci o 1%;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> - zmniejszenie g³o¶no¶ci o 1%;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2> - u¿yj g³ównego kana³u miksera;</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> - u¿yj kana³u pcm miksera;</TD><TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">PAUSE</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">zatrzymuje odgrywanie (pauza); naci¶niêcie
+dowolnego klawisza powoduje wznowienie odgrywania</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">QUIT</TD>
+<TD></TD>
+<TD><FONT CLASS="text">wyj¶cie z MPlayera</TD><TR>
+<TD></TD>
+<TD><FONT CLASS="text">RWND</TD>
+<TD></TD>
+<TD><FONT CLASS="text">10 sekund wstecz</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">FRWND</TD>
+<TD></TD>
+<TD><FONT CLASS="text">60 sekund wstecz;</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">FWD</TD>
+<TD></TD>
+<TD><FONT CLASS="text">10 sekund naprzód</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">FFWD</TD>
+<TD></TD>
+<TD><FONT CLASS="text">60 sekund naprzód</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">INCVOL</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zwiêkszenie g³o¶no¶ci o 1%</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">DECVOL</TD>
+<TD></TD>
+<TD><FONT CLASS="text">zmniejszenie g³o¶no¶ci o 1%</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">MASTER</TD>
+<TD></TD>
+<TD><FONT CLASS="text">u¿ycie g³ównego kana³u miksera</TD>
+<TR>
+<TD></TD>
+<TD><FONT CLASS="text">PCM</TD>
+<TD></TD>
+<TD><FONT CLASS="text">u¿ycie kana³u pcm miksera</TD>
+<TR>
 </TABLE></P>
 
 <P>Nie zapomnij ustawiæ flagi powtarzania dla RWND/FWD w .lircrc. Oto
@@ -1098,21 +1289,25 @@ u¿yj prze³±cznika -lircconf &lt;nazwa_pliku&gt;, aby podaæ inny plik.</P>
 
 <P><B><A NAME=3.4>3.4. Przesy³anie przez sieæ, b±d¼ za pomoc± pipe</A></B></P>
 
-<P><B>MPlayer</B> potrafi odgrywaæ pliki przesy³ane przez sieæ, za pomoc± protoko³u HTTP.
-Skonfigurowanie go jest proste, przekompiluj tylko <B>MPlayera</B> z opcj±:</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+<P><B>MPlayer</B> potrafi odgrywaæ pliki przesy³ane przez sieæ, za pomoc±
+protoko³u HTTP lub MMS.</P>
 
 <P>Odtwarzanie  uruchamia siê przez zwyczajne podanie adresu URL w linii
 poleceñ. <B>MPlayer</B> honoruje równie¿ zmienn± ¶rodowiskow±  HTTP_PROXY i
 u¿ywa proxy je¶li jest ono dostêpne. Proxy mo¿e byæ równie¿ wymyszone:</P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer
-http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
+<P><CODE>
+mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf
+</CODE></P>
 
-<P><B>MPlayer</B> potrafi czytaæ ze standardowego wej¶cia (NIE z nazwanych potoków (pipes)). 
+<P><B>MPlayer</B> potrafi czytaæ ze standardowego wej¶cia (NIE z nazwanych
+potoków (pipes)). 
 Mo¿na to zastosowaæ do odgrywania z FTP:</P>
+<P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+<P>Uwaga:rekomendowane jest w³±czenie CACHE podczas odgrywania przez sieæ:</P>
+<P><CODE>
+wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -
+</CODE></P>
 
 <P><B><A NAME=4>4. <A HREF="faq.html">sekcja FAQ</A></A></B></P>
 
@@ -1306,7 +1501,7 @@ u¿ytkowników Mplayera</P>
   <LI>obs³uga DivX4Linux (ProjectMayo) (przeczytaj documentacjê)</LI>
   <LI>Nowa obs³uga DVD z u¿yciem libdvdread</LI>
   <LI>obs³uga DVB</LI>
-  <LI>wyj¶cie MPEG PES</LI>
+  <LI>wyj¶cie MPEG PES i obs³uga kart DVB</LI>
   <LI>wszystko pozosta³e, co nie jest nigdzie wymienione</LI>
 </UL></LI>
 
@@ -1399,7 +1594,7 @@ u¿ytkowników Mplayera</P>
   <LI>obs³uga DGA w libvo</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:atmosfear@users.sourceforge.net">Felix Bünemann
+<LI><B><A HREF="mailto:atmosfear@users.sourceforge.net">Felix B&uuml;nemann
 (Atmos)</A></B>
 <UL>
   <LI>maintainer sterownika SDL</LI>
@@ -1412,7 +1607,9 @@ u¿ytkowników Mplayera</P>
   <LI>obs³uga d¼wiêku OggVorbis</LI>
   <LI>kod ró¿nego rodzaju</LI>
   <LI>port Win32</LI>
-  <LI>znacz±ce wsparcie w codecs.conf</LI>
+  <LI>pierwszorzêdne wsparcie w codecs.conf (nigdy nie zastosowany ;)</LI>
+  <LI>obs³uga DivX5Linux</LI>
+  <LI>wsparcie dla dekodowania AAC via libfaad2</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO</A></B>
@@ -1577,7 +1774,13 @@ u¿ytkowników Mplayera</P>
 <UL>
   <LI>implementacja open source kodeka MS Video1</LI>
   <LI>demukser dekoder FLI</LI>
-  <LI>dekoder Generic ADPCM (obs³uguje równie¿ stereo IMA4)</LI>
+  <LI>zunifikowany dekoder ADPCM (obs³uguje IMA/DVI, MS ADPCM i kilka
+  innych)</LI>
+  <LI>demukser plików FILM (.cpk)</LI>
+  <LI>demukser plików RoQ</LI>
+  <LI>dekoder RoQ Audio/Video</LI>
+  <LI>dekoder QT SMC</LI>
+  <LI>dekoder QT RLE</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
@@ -1624,17 +1827,23 @@ u¿ytkowników Mplayera</P>
 </LI>
 <LI><B><A HREF="mailto:ajh@atri.curtin.edu.au">Anders Johansson</A></B>
 <UL>
-  <LI> system wtyczek audio</LI>
+  <LI> system wtyczek audio, pewne efekty d¼wiêkowe</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:rtogni@freemail.it">Roberto Togni</A></B>
 <UL>
   <LI>Dekoder open source QT RPZA</LI>
+  <LI>Dekoder open source HuffYUV</LI>
 </UL></LI>  
 <LI><B><A HREF="mailto:wojtekka@bydg.pdi.net">Wojtek Kaniewski</A></B>
 <UL>
   <LI>Obs³uga kó³ka myszki</LI>
 </UL></LI>
 
+<LI><B><A HREF="mailto:freku045@student.liu.se">Fredrik Kuivinen</A></B>
+ <UL>
+  <LI>OSD/napisy na zewn±trz filmu - dla SDL</LI>
+ </UL>
+</LI>  
 </UL></P>
 
 <P>G³ówni testerzy:</P>
@@ -1691,6 +1900,9 @@ mp3lib]
 </LI><LI>Jake Janovetz:
 <UL><LI>autor remez.c [u¿ywany do obliczeñ wspó³czynników filtracji d¼wiêku]
 </LI></UL>
+</LI><LI>Vivien Chappelier, Damien Vincent:
+<UL><LI>autorzy libFAME [szybkiego kodera mpeg-1,  uzywanego poprzez
+-vo mpegpes/-vo dxr3]</LI></UL>
 </LI></UL></P>
 
 <P>Ich kod nie jest u¿ywany w obecnej wersji odgrywarki, ale otrzymujê pewne
@@ -1721,8 +1933,8 @@ MPlayera</A></B></P>
 </UL></P>
 <P>Dokumentacja w jêzyku angielskim
 <UL>
-  <LI><B>tech-hun.txt</B>: A'rpi
-  <LI><B>wszystkie pozosta³e</B>: Gabucino
+  <LI><B>dokumentacja u¿ytkownika</B>: Gabucino
+  <LI><B>dokumentacja tech/*</B>: A'rpi
   <LI><B>HTMLization</B>: LGB
 </UL></P>
 <P>T³umaczenia dokumentacji
@@ -1744,15 +1956,20 @@ MPlayera</A></B></P>
 </UL></P>
 <P>Kod MPlayera:
 <UL>
-  <LI><B>wykrywanie formatów plików, demuxers</B>: A'rpi
-  <LI><B>obs³uga DVD</B>: (werjsa alfa by³a: LGB) teraz: A'rpi
-  <LI><B>odtwarzanie z sieci</B>: Bertrand BAUDET
   <LI><B>synchronizacja A-V</B>: A'rpi
-  <LI><B>parser/czytnik plików z napisami</B>: Lez (wiêkszo¶æ z nich)
-  <LI><B>pliki konfiguracyjne i parser linii poleceñ</B>: Szabi
-  <LI><B>fastmemcpy</B>: Nick Kurshev
-  <LI><B>obs³uga LIRC</B>: Acki
+  <LI><B>libmpdemux, libmpcodecs</B>: A'rpi
+  <LI><B>wej¶cie TV</B>: Alex
+  <LI><B>obs³uga DVD (nowe - dvdread/dvdcss)</B>: A'rpi
+  <LI><B>obs³uga DVD (stare - libcss)</B>: LGB
+  <LI><B>przesy³anie przez sieæ </B>: Bertrand BAUDET
+  <LI><B>parser/reader/writer plików z napisami ascii</B>: Lez 
+  <LI><B>napisy DVD/VOB</B>: Kim Minh Kaplan
   <LI><B>renderer SUB/OSD</B>: Adam Tla/lka
+  <LI><B>pliki konfiguracyjne i parser linii poleceñ</B>: Szabi
+  <LI><B>playtree, input</B>: Albeu
+  <LI><B>postproc, konwertery colorspace</B>: Michael Niedermayer
+  <LI><B>obs³uga LIRC</B>: Acki
+  <LI><B>VIDIX core, libdha</B>: Nick Kurshev
 </UL></P>
 <P>Sterowniki libvo:
 <UL>
@@ -1762,8 +1979,8 @@ MPlayera</A></B></P>
   <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri
   Svoboda</A>
   <LI><B>vo_dga.c</B> - Acki
+  <LI><B>vo_dxr3.c</B> - David Holm
   <LI><B>vo_fbdev.c</B> - Szabi
-  <LI><B>vo_fsdga.c</B> - PRZESTARZA£E, u¿yj w zamian dga
   <LI><B>vo_ggi.c</B> - al3x
   <LI><B>vo_gl.c</B> - A'rpi
   <LI><B>vo_gl2.c</B> - <A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A>
@@ -1771,7 +1988,6 @@ MPlayera</A></B></P>
   <LI><B>vo_mga.c</B> - A'rpi
   <LI><B>vo_mpegpes.c</B> - A'rpi
   <LI><B>vo_null.c</B> - A'rpi
-  <LI><B>vo_odivx.c</B> - A'rpi
   <LI><B>vo_pgm.c</B> - A'rpi
   <LI><B>vo_png.c</B> - Atmos
   <LI><B>vo_sdl.c</B> - Atmos
@@ -1781,8 +1997,18 @@ MPlayera</A></B></P>
   <LI><B>vo_x11.c</B> - Pontscho
   <LI><B>vo_xmga.c</B> - Pontscho
   <LI><B>vo_xv.c</B> - Pontscho
+  <LI><B>vo_xvidix.c</B> - al3x
   <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A>
 </UL></P>
+<P>Sterowniki VIDIX:
+<UL>
+  <LI><B>genfb_vid</B> - al3x
+  <LI><B>mach64_vid</B> - Michael Niedermayer
+  <LI><B>mga_vid</B> - al3x ?
+  <LI><B>nvidia_vid</B> - al3x (development stopped - don't expect it)
+  <LI><B>radeon_vid</B> - Nick Kurshev
+  <LI><B>rage128_vid</B> - Nick Kurshev
+</UL></P>  
 <P>Sterowniki libao2:
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x
@@ -1806,13 +2032,6 @@ MPlayera</A></B></P>
   <LI><B>others</B> - A'rpi
 </UL>
 </P>
-<P>Pozosta³e:
-<UL>
-  <LI><B>vbelib.*</B> - Nick Kurshev
-  <LI><B>lrmi.*</B> - skopiowany przez Nick Kurshev (oryginalnie przez Josh
-  Vanderhoof)
-</UL></P>
-
 
 <P><B><A NAME=B>Dodatek B - Listy dyskusyjne</A></B></P>
 
@@ -1847,7 +2066,8 @@ HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerh
 <P>
   <UL>
     <LI>jêzykiem listy jest wêgierski</LI>
-    <LI>Temat? Zobaczymy co da siê z tym zrobiæ...</LI>
+    <LI>Temat? Zobaczymy co da siê z tym zrobiæ...jak dot±d przewa¿nie trafiaj±
+    tam wstydliwe i RTFM pytania :( </LI>
   </UL>
 </P>
 
@@ -1865,7 +2085,7 @@ HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.s
 </LI><LI>Lista u¿ytkowników MPlayera, posiadaj±cych karty DVB:<BR>
 <A
 HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Sprawy zwi±zane ze sprzêtowo dekoduj±c± kart± DVB.<UL>
+<P>Sprawy zwi±zane ze sprzêtowo dekoduj±c± kart± DVB. (Nie jest to dxr3!)<UL>
 </P>
 
 </LI>
@@ -1873,7 +2093,8 @@ HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mail
 <A
 HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
 <P>Wysy³aj tu pytania zwi±zane tylko ze zmianami w CVS (je¶li np. nie
-rozumiesz, dlaczego zmiana jest wymagana, albo je¶li masz lepsz± poprawkê).
+rozumiesz, dlaczego zmiana jest wymagana, albo je¶li masz lepsz± poprawkê, albo
+te¿, je¶li zauwa¿y³e¶ problem/b³±dn w ³acie).
 B±d¼ pewien, ¿e developer zajmuj±cy siê zagadnieniem, o które pytasz, czyta t±
 listê!</P>
 </LI>
@@ -1895,24 +2116,6 @@ b³êdy</A></B></P>
 
 <P>B³êdy/problemy zwi±zane z konkretnym systemem/procesorem:</P>
 <UL>
-<LI> SIGILL (signal 4) w draw_frame, na P3 (przewa¿nie z j±drami 2.2.x):<BR>
- ¬ród³o problemu: movups siê wykrzacza w libvo/fastmemcpy.h<BR>
- Ominiêcie problemu: ./configure --disable-fastmemcpy<BR>
- Rozwi±zanie problemu: wy³±czenie kodu SSE we fastmemcpy.h ;(</LI>
-
-<LI>Brak obrazu (czarny obraz) w czasie odtwarzania RGB 15/16bpp
-(x11,dga,fbdev,svga) plików MPEG lub OpenDivX:<BR>
- ¬ród³o problemu: b³±d gcc 2.96, przeczytaj <A
- HREF="gcc-2.96-3.0.html">to</A><BR>
- Ominiêcie problemu: ./configure --disable-mmx, albo u¿yj gcc 2.95.x<BR>
- Rozwi±zanie problemu: kod zosta³ poprawiony</LI>
-
-<LI>SIGILL (signal 4) albo inny b³±d podczas ³adowania l3codeca.acm:<BR>
- ¬ród³o problemu: biblioteki wspó³dzielone s± ³adowane do 0x00xxxxxx zamiast do
- 0x40xxxxxx<BR>
- Obej¶cie problemu: mplayer -afm 1 ...<BR>
- Rozwi±zanie problemu: u¿ywasz pewnych ³at ochronnych na j±dro, jak OpenWall
- itp.</LI>
 
 <LI>SIGILL (signal 4) na P3 i j±drach 2.2.x:<BR>
   ¬ród³o problemu: j±dra 2.2.x nie maj± w³a¶ciwej (dzia³aj±cej) obs³ugi SSE<BR>
@@ -1920,16 +2123,25 @@ b³êdy</A></B></P>
   Obej¶cie problemu: ./configure --disable-sse</LI>
 
 <LI>General SIGILL (signal 4):<BR>
- ¬ród³o problemu: skompilowa³e¶ Mplayera na innej maszynie, ni¿ uruchamiasz
- (np. skompilowany na P3 a uruchomiony na celeronie)<BR>
- Rozwi±zanie: skompiluj MPlayera na tej maszynie, na której chcesz go
- u¿ywaæ!<BR>
- Obej¶cie problemu: ./configure --disable-sse itp. opcje<LI>
+  ¬ród³o problemu: skompilowa³e¶ Mplayera na innej maszynie, ni¿ uruchamiasz
+  (np. skompilowany na P3 a uruchomiony na celeronie)<BR> Rozwi±zanie:
+  skompiluj MPlayera na tej maszynie, na której chcesz go u¿ywaæ!<BR> Obej¶cie
+  problemu: ./configure --disable-sse itp. opcje<LI>
+  
 <LI>"Internal buffer inconsistency" w czasie pracy MEncodera:<BR>
- ¬ród³o problemu: znany b³±d gcc 2.96, nie ma do tego poprawek jak dot±d.
- Je¶li masz gcc 2.95, musisz mieæ zatem bibliotekê libmp3lame skompilowan± z
- gcc 2.96 (czy przypadkiem nie zainstalowan± z pakietu deb/rpm?). 
- Sprawd¼, któr± bibliotekê znalaz³ MEncoder: ldd mencoder.</LI>
+  ¬ród³o problemu: znany b³±d gcc 2.96, nie ma do tego poprawek jak dot±d.
+  Je¶li masz gcc 2.95, musisz mieæ zatem bibliotekê libmp3lame skompilowan± z
+  gcc 2.96 (czy przypadkiem nie zainstalowan± z pakietu deb/rpm?).  Sprawd¼,
+  któr± bibliotekê znalaz³ MEncoder: ldd mencoder.</LI>
+
+<LI>Za¶miecony d¼wiêk MP2/MP3 na PPC:<BR>
+  ¬ród³o problemu: znany b³±d w kompilacji GCC na platformach PPC, nadal nie
+  poprwiony.<BR>
+  Obej¶cie problemu:  u¿yj  dekoderów FFmpeg MP1/MP2/MP3 (które s± wolne)
+  (<CODE>-ac ffmpeg</CODE>)</LI>
+ 
+<LI>sig11 w libmpeg2 podczas jednoczesnego skalowania i kodowania:<BR>
+  ¬ród³o problemu: znan b³±d  GCC 2.95.2 MMX, zrób upgrade do 2.95.3.</LI>
 </UL>
 
 <P>Ró¿ne problemy z synchronizacj± A-V d¼wiêku:</P>
@@ -1937,20 +2149,27 @@ b³êdy</A></B></P>
 Ogólnie, opó¼nienia d¼wiêku albo szarpany d¼wiêk (pojawiaj±ce siê w wielu, b±d¼
 wszystkich plikach):<BR>
 <UL>
+<LI>najbardziej popularne: pe³ne b³êdów sterowniki d¼wiêku! - spróbuj uzyæ
+innych sterowników, spróbuj emulacji ALSA 0.9 OSS z -ao oss, a tak¿e spróbuj
+-ao sdl,czasem to pomaga. Je¶li tówj plik odtwarzany jest dobrze z -nosound,
+wówcza mo¿esz byæ pewien , ze to sterownik d¼wiêku dla twojej karty jest
+problemem.</LI>
 <LI>problemy z buforem d¼wiêku (¼le wykryty rozmiar bufora)<BR>
   Obej¶cie problemu: opcja: mplayer -abs</LI>
+<LI>problemy z samplerate (czêstotliwo¶ci± próbkowania) - byæ mo¿e twoja karta
+  nie obs³uguje samplerate u¿ywanej w twoich plikach - wypróbuj ten plugin
+  zmieniaj±cy czêstotliwo¶æ próbkowania.(-aop)</LI>  
 <LI>wolna maszyna (cpu albo vga)<BR>
   wypróbuj -vo null, je¶li z tym bêdzie dzia³a³o dobrze, oznacza to, ¿e masz
   woln± kartê/sterownik VGA<BR>
   Obej¶cie problemu: kup szybsz± kartê, albo przeczytaj t± dokumentcjê o tym,
   jak przy¶pieszyæ odgrywanie<BR>
-  Rozwi±zanei problemu: spróbuj -framedrop</LI>
-<LI>sterownik d¼wiêku zawieraj±cy b³êdy</LI>
+  Spróbuj równie¿ -framedrop</LI>
 </UL><BR>
 
 Z³a synchronizacja/opó¼nianie przy jednym lub kilku plikach:<BR>
 <UL>
-<LI>z³y plik (wy¶lij ten plik, by¶my mogli sprawdxiæ i naprawiæ)<BR>
+<LI>z³y plik<BR>
   Obej¶cie problemu:
   <UL>
     <LI>opcje: -ni albo -nobps (dla plików z³ych albo bez przeplootu)</LI>
@@ -1959,10 +2178,12 @@ oraz/lub
 oraz/lub
     <LI>opcja -delay albo klawisze +/- keys podczas dzia³ania, aby dostosowaæ
     opó¼nienie</LI>
+    Je¶li nic nie pomog³o, wy¶lij nam plik, a my go sprawdzimy (i naprawimy).
   </UL>
 <LI>twoja karta d¼wiêkowa nie obs³uguje odgrywania w czêstotliwo¶ci 48Khz<BR>
 Obej¶cie problemu: kup lepsz± kartê d¼wiêkow±... albo spróbuj zmniejszyæ ilo¶æ
-fps do 10% (u¿yj -fps 27 dla filmu o 30fps)</LI>
+fps do 10% (u¿yj -fps 27 dla filmu o 30fps) albo u¿yj pluginu zmieniaj±cego
+czêstotliwo¶æ próbkowania</LI>
 <LI>wolna maszyna<BR>
  (je¶li A-V nie jest w okolicach 0, a ostatni numer w linii stanu zwiêksza
  siê)<BR>
@@ -1971,11 +2192,20 @@ fps do 10% (u¿yj -fps 27 dla filmu o 30fps)</LI>
 
 Kompletny brak d¼wiêku:<BR>
 <UL>
-<LI>twój plik u¿ywa nieobs³ugiwanego kodeka<BR>
+<LI>twój plik u¿ywa nieobs³ugiwanego kodeka d¼wieku<BR>
   Obej¶cie problemu: przeczytaj dokumentacjê i pomó¿ nam dodaæ obs³ugê tego
   kodeka</LI>
 </UL>
-
+Brak obrazu (po prostu zwyk³e szare/zielone okno):<BR>
+<UL>
+  <LI>twój plik u¿ywa nieobs³ugiwanego kodeka obrazu<BR>
+   Obej¶cie problemu:  przeczytaj dokumentacjê i pomó¿ nam dodaæ obs³ugê tego
+   kodeka</LI>
+  <LI>automatycznie wybrany kodek nie potrafi dekodowaæ tego pliku, spróbuj
+  zmieniæ kodek za pomoc± opcji -vc albo -vfm</LI>   
+  <LI>próbujesz odtworzyæ plik DivX 3.x z u¿yciem dekodera opendivx albo XviD
+  (-vc odivx) - zainstaluj Divx4Linux i przekompiluj playera</LI>
+</UL>  
 <P>Problemy z wyj¶ciem wideo:</P>
 
 <P>Pierwsza uwaga: opcje: -fs -vm i -zoom s± tylko zalecane, nie s± jak dot±d
@@ -1986,6 +2216,11 @@ dzia³aj±. Tylko kilka sterowników wspiera skalowanie/zooming
 <P>Migotanie OSD/napisów:<BR>
 - sterownik x11: przykro mi, ale na razie nie mo¿e to zostaæ naprawione<BR>
 - sterownik xv: u¿yj opcji -double</P>
+
+<P>Zielony obraz podczas u¿ywania mga_vid (-vo mga / -vo xmga):<BR>
+- mga_vid ¼le wykryta ilo¶æ pamiêci RAM w twojej karcie, prze³aduj to u¿ywaj±c
+  opcji  mga_ram_size<BR>
+</P>
 
 </BODY>
 </HTML>
