@@ -1,5 +1,7 @@
 /*
  * command line and config file parser
+ * by Szabolcs Berecz <szabi@inf.elte.hu>
+ * (C) 2001
  */
 
 //#define DEBUG
@@ -10,6 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <errno.h>
 
 #define ERR_NOT_AN_OPTION	-1
 #define ERR_MISSING_PARAM	-2
@@ -248,7 +251,7 @@ int parse_config_file(struct config *conf, char *conffile)
 		return -1;
 	}		
 
-	printf("Reading config file: %s\n", conffile);
+	printf("Reading config file: %s", conffile);
 
 	if (init_conf(conf, CONFIG_FILE) == -1) {
 		ret = -1;
@@ -256,17 +259,18 @@ int parse_config_file(struct config *conf, char *conffile)
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		perror("parse_config_file: can't get memory for 'line'");
+		perror("\ncan't get memory for 'line'");
 		ret = -1;
 		goto out;
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
-		perror("parse_config_file: can't open filename");
+		printf(": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
 	}
+	printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		line_num++;
@@ -426,7 +430,6 @@ not_an_option:
 			} else {
 				found_filename = 1;
 				*filename = argv[i];
-				printf("parse_command_line: found filename: %s\n", *filename);
 				continue;	/* next option */
 			}
 			break;
