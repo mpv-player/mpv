@@ -126,8 +126,27 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: 备注: %s\n"
 #define MSGTR_Video_NoVideo "视频: no video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命错误: 无法初始化视频插件(-vop)或视频输出(-vo) !\n"
-#define MSGTR_Paused "\n------ 暂停 -------\r"
+#define MSGTR_Paused "\n================= 暂停 =================\r"
 #define MSGTR_PlaylistLoadUnable "\n无法装载播放列表 %s\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- “非法指令”导致MPlayer崩溃。\n"\
+"  这可能是我们新的运行时cpu检测代码的一个bug...\n"\
+"  请阅读DOCS/bugreports.html\n"
+#define MSGTR_Exit_SIGILL \
+"- “非法指令”导致MPlayer崩溃。\n"\
+"  这通常发生在你在与编译/优化MPlayer不同的CPU上使用\n"\
+"  MPlayer造成的\n 检察一下!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- 过度使用CPU/FPU/RAM导致MPlayer崩溃.\n"\
+"  使用--enable-debug重新编译MPlayer用“gdb”backtrace和\n"\
+"  反汇编。具体细节看DOCS/bugreports.html section 5.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer崩溃了。这不应该发生。\n"\
+"  这可能是MPlayer代码中的 _或者_ 你的驱动中的 _or_ 你的gcc的\n"\
+"  一个bug。如果你觉得这是MPlayer的错，请阅读DOCS/bugreports.html\n"\
+"  并遵循上面的步骤。我们不能也不会帮助你除非你在报告一个可能bug的时候\n"\
+"  提供所需要的信息。\n"
+
 
 // mencoder.c:
 
@@ -152,6 +171,55 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
 #define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs\n"
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     变比特率方式\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(默认)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           平均比特率\n"\
+"\n"\
+" cbr           常比特率\n"\
+"               会在后继ABR预置模式中强制使用CBR模式\n"\
+"\n"\
+" br=<0-1024>   以kBit为单位指定比特率 (仅用于CBR和ABR)\n"\
+"\n"\
+" q=<0-9>       编码质量 (0-最高, 9-最低) (仅用于VBR)\n"\
+"\n"\
+" aq=<0-9>      算法质量 (0-最好/最慢, 9-最低/最快)\n"\
+"\n"\
+" ratio=<1-100> 压缩率\n"\
+"\n"\
+" vol=<0-10>    设置音频输入增益\n"\
+"\n"\
+" mode=<0-3>    (默认: 自动)\n"\
+"                0: 立体声\n"\
+"                1: 联合立体声\n"\
+"                2: 双声道\n"\
+"                3: 单声道\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: 无\n"\
+"                1: 所有\n"\
+"                2: 调整\n"\
+"\n"\
+" fast          启动更快的后继VBR预置模式编码，\n"\
+"               稍微降低质量并提高比特率。\n"\
+"\n"\
+" preset=<value> 提供最高的可能的质量设置。\n"\
+"                 medium: VBR编码，质量：好\n"\
+"                 (150-180 kbps比特率范围)\n"\
+"                 standard:  VBR编码, 质量：高\n"\
+"                 (170-210 kbps比特率范围)\n"\
+"                 extreme: VBR编码，质量：非常高\n"\
+"                 (200-240 kbps比特率范围)\n"\
+"                 insane:  CBR编码，质量：最高\n"\
+"                 (320 kbps bitrate)\n"\
+"                 <8-320>: 以所给比特率为平均比特率的ABR编码。\n\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "找不到CD-ROM设备 '%s' !\n"
@@ -428,6 +496,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Panscan "图像切割: "
 #define MSGTR_PREFERENCES_OSDTimer "显示计时器和指示器"
 #define MSGTR_PREFERENCES_OSDProgress "只显示进度条"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "计时器, 百分比和总时间"
 #define MSGTR_PREFERENCES_Subtitle "字幕:"
 #define MSGTR_PREFERENCES_SUB_Delay "延迟: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -495,6 +564,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_XSCREENSAVER "停用XScreenSaver"
 #define MSGTR_PREFERENCES_AutoSync "自同步 打开/关闭"
 #define MSGTR_PREFERENCES_AutoSyncValue "自同步: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-Rom设备:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD设备:"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
