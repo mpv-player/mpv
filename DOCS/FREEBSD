@@ -1,0 +1,19 @@
+Notes for FreeBSD users
+=======================
+
+1. To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
+native BSD make will not work.
+
+2. Configure script is different for FreeBSD; use configure.FreeBSD instead.
+
+3. To run mplayer you will need to re-compile the kernel with 
+"options USER_LDT" (unless you are running -CURRENT, where this is default).
+
+4. There's no VCD (well, it is not finished) or DVD support for FreeBSD yet. 
+Feel free to add them :-)
+
+Enjoy (as do I)!
+
+--
+Vladimir Kushnir
+

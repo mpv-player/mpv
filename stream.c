@@ -9,13 +9,23 @@
 //#include <sys/stat.h>
 //#include <fcntl.h>
 
+#ifdef __FreeBSD__
+#include <sys/cdio.h>
+#include <sys/cdrio.h>
+#else
 #include <linux/cdrom.h>
+#endif
 
 #include "stream.h"
 
 extern int verbose; // defined in mplayer.c
 
+#ifdef __FreeBSD__
+#warning "VCD support under FreeBSD not implemented yet"
+#include "vcd_read_fbsd.c" 
+#else
 #include "vcd_read.c"
+#endif
 
 //=================== STREAMER =========================
 

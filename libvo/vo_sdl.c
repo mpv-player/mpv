@@ -136,7 +136,11 @@ static vo_info_t vo_info =
 	""
 };
 
+#ifdef __FreeBSD__
+#include <SDL11/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #define FS 0x01
 #define VM 0x02

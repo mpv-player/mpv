@@ -22,7 +22,7 @@ $(LIBNAME):	.depend $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:   test.c $(LIBNAME)
-	$(CC) test.c -Wall $(CFLAGS) -o test -L. -lDS_Filter -L.. -lloader -ldl -lpthread -lstdc++
+	$(CC) test.c -Wall $(CFLAGS) -o test -L. -lDS_Filter -L.. -lloader $(ARCH_LIBS) -lstdc++
 
 all:	$(LIBNAME)
 

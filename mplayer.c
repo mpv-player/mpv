@@ -17,7 +17,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/soundcard.h>
+#ifdef __FreeBSD__
+#include <sys/cdio.h>
+#else
 #include <linux/cdrom.h>
+#endif
 
 #include "version.h"
 #include "config.h"
@@ -444,7 +448,7 @@ int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
 // movie info:
 int out_fmt=0;
-char *dsp="/dev/dsp";
+char *dsp=NULL;
 int force_ni=0;
 char *conffile;
 int conffile_fd;
@@ -575,7 +579,8 @@ if(!filename){
   }
 
 // check audio_out
-//audio_out=audio_out_drivers[0];
+audio_out=audio_out_drivers[0];
+if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,dsp);
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){

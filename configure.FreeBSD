@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # MPlayer configurator.   (C) 2000 Pontscho/fresh!mindworkz
@@ -190,15 +190,12 @@ done
 
 # ---
 
-pname=`cat /proc/cpuinfo | grep 'model name' | cut -d ':' -f 2`
-pparam=`cat /proc/cpuinfo | grep 'features' | cut -d ':' -f 2`
-if [ -z "$pparam" ]; then
-  pparam=`cat /proc/cpuinfo | grep 'flags' | cut -d ':' -f 2`
-fi
-pvendor=`cat /proc/cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
-pfamily=`cat /proc/cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pmodel=`cat /proc/cpuinfo |grep -v 'model name'| grep "model" | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+pname=`sysctl -n hw.model`
+pparam=`cat /var/run/dmesg.boot | grep Features | cut -d '<' -f 2 | cut -d '>' -f 1 | sed 's/,/ /g'`
+pvendor=`cat /var/run/dmesg.boot | grep Origin | cut -d '"' -f 2 | cut -d '"' -f 1`
+pfamily=`cat /var/run/dmesg.boot | grep Origin | cut -d '0x' -f 2 | cut -c 2`
+pmodel=`cat /var/run/dmesg.boot | grep Origin | cut -d '0x' -f 2 | cut -c 3`
+pstepping=`cat /var/run/dmesg.boot | grep Stepping | cut -d 'Stepping' -f 2 | cut -c 11`
 
 _mmx=no
 _mmx2=no
@@ -221,7 +218,7 @@ _xmga=no
 _dga=no
 _dga2=no
 _svga=no
-_fbdev=yes
+_fbdev=no
 _lirc=no
 _css=no
 _dshow=yes
@@ -242,36 +239,26 @@ _gui=no;
 for i in `echo $pparam`; do
 
  case "$i" in
-  3dnow)
+  3DNow!)
         _3dnow=yes
         _mpg123=yes
         ;;
-  3dnowext)
+  DSP)
         _3dnow=yes
         _3dnowex=yes
         _mpg123=yes
         ;;
-  mmx)
+  MMX)
         _mmx=yes
         ;;
-  mmxext)
-        _mmx2=yes
-        ;;
-  mtrr)
+  MTRR)
         _mtrr=yes
         ;;
-  k6_mtrr)
-        _mtrr=yes
-        ;;
-  xmm)
+  SSE)
         _sse=yes
         _mmx2=yes
         ;;
-  sse)
-        _sse=yes
-        _mmx2=yes
-        ;;
-  kni)
+  SSE2)
         _sse=yes
         _mmx2=yes
         ;;
@@ -390,39 +377,39 @@ EOF
 #echo -n "Checking your GCC CPU optimalization abilities: "
 if [ "$proc" = "k7" ]; then
 #	echo -n "trying k7  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=athlon
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=athlon
 fi
 if [ "$proc" = "athlon" ]; then
 #	echo -n "trying athlon  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k6
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=k6
 fi
 if [ "$proc" = "k6" ]; then
 #	echo -n "trying k6  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k5
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=k5
 fi
 if [ "$proc" = "k5" ]; then
 #	echo -n "trying k5  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=pentium
 fi
 if [ "$proc" = "i686" ]; then
 #	echo -n "trying i686  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentiumpro
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=pentiumpro
 fi
 if [ "$proc" = "pentiumpro" ]; then
 #	echo -n "trying pentiumpro  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=pentium
 fi
 if [ "$proc" = "pentium" ]; then
 #	echo -n "trying pentium  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i486
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=i486
 fi
 if [ "$proc" = "i486" ]; then
 #	echo -n "trying i486  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i386
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=i386
 fi
 if [ "$proc" = "i386" ]; then
 #	echo -n "trying i386  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=error
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null || proc=error
 fi
 if [ "$proc" = "error" ]; then
 	echo
@@ -433,16 +420,16 @@ fi
 #echo "DONE (${proc})."
 
 
-$_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -lvgagl -lvga > /dev/null && _svga=yes
 
-$_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
+$_cc $TMPC -o $TMPO -pthread > /dev/null || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO ; exit 1; }
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if $_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/null ; then
-	if test `sdl-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
-		if test `sdl-config --version | sed s/[=[:punct:]=]//g` -lt 121 ; then
+if $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL-1.1 -pthread > /dev/null ; then
+	if test `sdl11-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
+		if test `sdl11-config --version | sed s/[=[:punct:]=]//g` -lt 121 ; then
 			_sdlbuggy='#define BUGGY_SDL'
 		else	
 			_sdlbuggy='#undef BUGGY_SDL'
@@ -472,35 +459,43 @@ else
 fi
 	
 _termcap=no
-$_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -ltermcap > /dev/null && _termcap=yes
 
 _png=no
-$_cc $TMPC -o $TMPO -lpng -lz&> /dev/null && _png=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -lpng -lz> /dev/null && _png=yes
 
 _binutils=no
-as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
+as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null && _binutils=yes
 
 # ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
 
 if [ $_x11 = auto ]; then
   _x11=no
-  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
+  $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext > /dev/null && _x11=yes
 fi
 
 if [ $_x11 = yes ]; then
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv &> /dev/null && _xv=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm &> /dev/null && _vm=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms > /dev/null && _xdpms=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv > /dev/null && _xv=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm > /dev/null && _vm=yes
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null && _gl=yes
+if $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL > /dev/null; then
+_gl=yes
+elif $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread > /dev/null; then
+_gl=yes
+fi
 
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null || \
- { _gl=no; echo "GL includes not found!";}
+
+if $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL > /dev/null; then
+elif $_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread > /dev/null;then 
+else 
+_gl=no; echo "GL includes not found!"
+fi
 
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -509,7 +504,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm > /dev/null && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -525,7 +520,7 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0;}
 EOF
 
 _dga2=no
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga2=yes
+$_cc -I/usr/local/include -I/usr/X11R6/include -L/usr/local/lib $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm > /dev/null && _dga2=yes
 
 fi
 
@@ -772,7 +767,11 @@ echo "Checking for fastmemcpy ... $_fastmemcpy"
 # write conf files.
 
 if [ $_gl = yes ]; then
-   _gllib='-lGL'
+   if [ -f /usr/X11R6/bin/XFree86 ]; then
+     _gllib='-lGL -pthread'
+   else
+     _gllib='-lGL'
+   fi
 fi
 
 if [ $_css = yes ]; then
@@ -822,7 +821,7 @@ if [ $_xv = yes ]; then
 fi
 
 if [ $_sdl = yes ]; then
-  _sdllib='-lSDL -lpthread' 
+  _sdllib='-L/usr/local/lib -lSDL-1.1 -pthread' 
 fi
 
 if [ $_dga = yes ]; then
@@ -861,15 +860,15 @@ else
 fi
 
 if [ $_png = yes ]; then
-   _libpng='-lpng -lz'
+   _libpng='-L/usr/local/lib -lpng -lz'
 fi
 
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
- CFLAGS="-O2 -march=$proc -mcpu=$proc $_debug $_profile"
+ CFLAGS="-O2 -D_THREAD_SAFE -march=$proc -mcpu=$proc $_debug $_profile"
 else
 if test -z "$CFLAGS"; then
- CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
+ CFLAGS="-O4 -D_THREAD_SAFE -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
 fi
 fi
 echo
@@ -878,11 +877,12 @@ cat > $MCONF << EOF
 
 # -------- Generated by ./configure -----------
 
+ARCH=FREEBSD
 AR=ar
 CC=$_cc
 X11DIR=$_x11libdir
-# OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS=$CFLAGS
+# OPTFLAGS=-O4 -D_THREAD_SAFE $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
+OPTFLAGS=$CFLAGS -I/usr/local/include -I/usr/X11R6/include
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
 X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
 TERMCAP_LIB=$_libtermcap
@@ -894,7 +894,7 @@ WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
 DS_DEP = $_dshowdep
 DS_LIB = $_dshowlib
 prefix = $_prefix
-ARCH_LIBS = -ldl -lpthread
+ARCH_LIBS = -rdynamic -pthread
 
 EOF
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak
@@ -1119,10 +1119,6 @@ $_fastmemcpy
 /* gui support, please do not edit this option */
 $_gui
 
-/* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
-#undef FAST_OSD
-#undef FAST_OSD_TABLE
-
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 /* #define WORDS_BIGENDIAN */
@@ -1263,7 +1259,7 @@ install with  'make install'. Good luck!
 EOF
 
 if [ $_mtrr = yes ]; then
- echo "Please check mtrr settings at /proc/mtrr (see DOCS/MTRR)"
+ echo "Please check mtrr settings at /compat/linux/proc/mtrr (see DOCS/MTRR)"
  echo
 fi
 
