@@ -224,6 +224,7 @@ static void freeMyXImage()
   {
    XDestroyImage( myximage );
   }
+  myximage=NULL;
 }
 
 static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format,const vo_tune_info_t *info)
@@ -592,6 +593,8 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
+ if(!myximage) return;
+ 
  freeMyXImage();
  saver_on(mDisplay); // screen saver back on
 
