@@ -12,7 +12,7 @@ are set up properly, because they can give a big performance boost.
 </para>
 
 <para>
-Do a <command>/proc/mtrr</command>:
+Do a <command>cat /proc/mtrr</command>:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
@@ -80,8 +80,8 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 
 <para>
 Not all CPUs support MTRRs. For example older K6-2's (around 266MHz,
-stepping 0) doesn't support MTRR, but stepping 12's do (<command>cat /proc/cpuinfo
-</command> to check it).
+stepping 0) doesn't support MTRR, but stepping 12's do
+(<command>cat /proc/cpuinfo</command> to check it).
 </para>
 </sect3>
 
@@ -92,8 +92,8 @@ stepping 0) doesn't support MTRR, but stepping 12's do (<command>cat /proc/cpuin
 
 <para>
 Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
-using the XVideo extension. This is what the option '<option>-vo
-xv</option>' uses. Also, this is driver supports adjusting
+using the XVideo extension. This is what the option
+'<option>-vo xv</option>' uses. Also, this driver supports adjusting
 brightness/contrast/hue/etc (unless you use the old, slow DirectShow DivX
 codec, which supports it everywhere), see the man page.
 </para>
@@ -2027,8 +2027,8 @@ if you want to use the <option>crop</option> filter, you would do
 Extra occurrences of <option>-zrcrop</option> invoke <emphasis>cinerama</emphasis>
 mode, i.e. you can distribute the movie over several TV's or beamers to create a
 larger screen. Suppose you have two beamers. The left one is connected to your
-Buz at <systemitem>/dev/video1</systemitem> and the right one is connected to
-your DC10+ at <systemitem>/dev/video0</systemitem>. The movie has a resolution
+Buz at <filename>/dev/video1</filename> and the right one is connected to
+your DC10+ at <filename>/dev/video0</filename>. The movie has a resolution
 of 704x288. Suppose also that you want the right beamer in black and white and
 that the left beamer should have JPEG frames at quality 10, then you would
 issue the following command
