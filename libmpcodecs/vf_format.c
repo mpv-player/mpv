@@ -28,6 +28,9 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
 
     if(args){
+	if(!strcasecmp(args,"444p")) vf->priv->fmt=IMGFMT_444P; else
+	if(!strcasecmp(args,"422p")) vf->priv->fmt=IMGFMT_422P; else
+	if(!strcasecmp(args,"411p")) vf->priv->fmt=IMGFMT_411P; else
 	if(!strcasecmp(args,"yuy2")) vf->priv->fmt=IMGFMT_YUY2; else
 	if(!strcasecmp(args,"yv12")) vf->priv->fmt=IMGFMT_YV12; else
 	if(!strcasecmp(args,"i420")) vf->priv->fmt=IMGFMT_I420; else
