@@ -1,4 +1,4 @@
-.\" synced with 1.664
+.\" synced with 1.667
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -233,7 +233,7 @@ prze³±cza zostañ-na-wierzchu
 Obs³ugiwane przez sterowniki wyj¶cia video u¿ywaj±ce X11, poza SDL, ale
 dodatkowo przez directx i gl2 pod Windows.
 .IPs "w i e"
-zmniejsza/\:zwiêksza zakres panscan
+zmniejsza/\:zwiêksza zakres trybu panoramicznego
 .IPs o\ \ \ \ 
 prze³±cza tryby OSD: ¿aden / czas / czas+timer
 .IPs d\ \ \ \ 
@@ -500,7 +500,7 @@ Lista wszystkich klawiszy, które mog± byæ przypisane do komend.
 .IPs cmdlist
 Lista wszystkich komendy, które mog± byæ przypisane do klawiszy.
 .IPs js-dev
-Wybiera u¿ywany joystick (domy¶lnie jest to /dev/\:input/\:js0).
+Wybiera u¿ywany joystick (domy¶lnie: /dev/\:input/\:js0).
 .IPs plik\ 
 Czyta polecenia z podanego zbioru.
 Opcja g³ównie przydatny przy kolejce fifo.
@@ -592,6 +592,8 @@ Ta opcja prze³±cza MPlayera w tryb slave, w którym mo¿na go u¿ywaæ jako koñcówki
 (backend) dla innych programów.
 Zamiast przechwytywania wci¶niêtych klawiszy, MPlayer bêdzie czyta³ proste
 polecenia ze standardowego wej¶cia.
+.br
+.I INFORMACJA:
 Lista poleceñ znajduje siê w DOCS/tech/slave.txt i \-input cmdlist.
 .TP
 .B \-softsleep
@@ -1394,7 +1396,7 @@ kodow± napisów.
 .B \-subcp enca:<jêzyk>:<strona powrotna> (tylko ENCA)
 Okre¶la jêzyk stosuj±c dwuliterowy kod, by ENCA mog³a wykryæ
 stronê kodow± automatycznie.
-Je¿eli nie jeste¶ pewien, podaj cokolwiek i przejrzyj wyj¶cie mplayer -v
+Je¿eli nie jeste¶ pewien, podaj cokolwiek i przejrzyj wyj¶cie mplayer \-v
 pod k±tem dostêpnych jêzyków.
 Powrotna strona kodowa okre¶la jak± stronê stosowaæ,
 jesli autodetekcja zawiedzie.
@@ -1495,7 +1497,7 @@ Okre¶la ID napisów VOBsub.
 Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 .TP
 .B \-aofile <nazwa\ zbioru>
-Nadpisuje domy¶ln± nazwê zbioru dla \-ao pcm.
+Zmienia domy¶ln± nazwê zbioru dla \-ao pcm.
 .TP
 .B \-aop <list=wtyczka1,wtyczka2...:opcja1=warto¶æ1:opcja2=warto¶æ2...>
 Okre¶l wtyczki audio i ich opcje (patrz te¿ dokumentacja).
@@ -1522,7 +1524,7 @@ w³±cza kompresjê / "miêkkie obcinanie (soft-clipping)" (tylko wtyczka volume)
 .
 .TP
 .B \-delay <sekundy>
-Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna warto¶æ rzeczywista).
+Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna liczba rzeczywista).
 .TP
 .B \-format <0\-8192>
 Wybiera format u¿ywany przez wyj¶cie warstwy filtruj±cej
@@ -1683,7 +1685,7 @@ Specyficzny sterownik DVB.
 Nie przekazuje d¼wiêku, ale utrzymuje prêdko¶æ odtwarzania video.
 Do testów wydajno¶ciowych u¿yj \-nosound.
 .TP
-.B pcm (sprawd¼ równie¿ -aofile)
+.B pcm (sprawd¼ równie¿ \-aofile)
 Sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/wave.
 Zapisuje d¼wiêk do ./audiodump.wav.
 .TP
@@ -1704,20 +1706,19 @@ Listê dostêpnych kart otrzymasz stosuj±c tê opcjê z \-v.
 Obecnie dzia³a tylko z \-vo directx.
 .TP
 .B \-bpp <g³êbia>
-U¿ywa innej g³êbi kolorów ni¿ wykryta.
-Nie wszystkie sterowniki \-vo to obs³uguj± (fbdev, dga2, svga, vesa).
+Wymusza inn± g³êbiê kolorów ni¿ wykryta.
+Obs³ugiwane tylko przez sterowniki wyj¶cia video fbdev, dga, svga i vesa.
 .TP
 .B \-brightness <-100\-100>
-Modyfikuje jasno¶æ wyj¶cia video (domy¶lnie 0).
-Zmienia to intensywno¶æ sk³adników RGB sygna³u video od czerni do
-bia³ego ekranu.
+Modyfikuje jasno¶æ wyj¶cia video (domy¶lnie: 0).
+Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .TP
 .B \-contrast <-100\-100>
-Modyfikuje kontrast wyj¶cia video (domy¶lnie 0).
-Dzia³a w podobny sposób jak jasno¶æ.
+Modyfikuje kontrast wyj¶cia video (domy¶lnie: 0).
+Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .TP
 .B \-dfbopts <warto¶æ> (tylko \-vo directfb2)
-Okre¶la listê parametrów dla sterownika directfb.
+Okre¶la listê parametrów dla sterownika wyj¶cia video directfb.
 .TP
 .B \-display <nazwa> (tylko X11)
 Podaje nazwê komputera i numer wy¶wietlacza serwera X, na którym chcesz
@@ -1735,7 +1736,7 @@ wy¶wietlaæ.
 W³±cz podwójne buforowanie.
 Eliminuje migotanie dziêki przechowywaniu dwóch ramek w pamiêci i wy¶wietlaniu
 jednej, podczas gdy druga jest dekodowana.
-Mo¿e mieæ wp³yw na wy¶wietlanie OSD.
+Mo¿e mieæ negatywny wp³yw na OSD, ale czêsto usuwa jego migotanie.
 Potrzebuje dwukrotnie wiêcej pamiêci, ni¿ pojedynczy bufor, wiêc nie
 bêdzie dzia³aæ na kartach z bardzo ma³± pamiêci± video.
 .TP
@@ -1747,15 +1748,15 @@ wyj¶cia video)
 Mo¿e powodowaæ popsucie OSD/\:SUB!
 .TP
 .B \-dxr2 <opcja1:opcja2:...>
-Ta opcja jest u¿ywana do kontroli sterownika dxr2.
+Ta opcja jest u¿ywana do kontroli sterownika wyj¶cia video dxr2.
 .
 .RSs
 .IPs ar-mode=<warto¶æ>
-tryb proporcji (aspect ratio) (0 = normalny, 1 = pan scan, 2 = letterbox (domy¶lnie))
+tryb proporcji (aspect ratio) (0 = normalny, 1 = panoramiczny, 2 = letterbox (domy¶lnie))
 .IPs iec958-encoded
-tryb wyj¶cia iec958
+Ustawia tryb wyj¶cia iec958 na zakodowany.
 .IPs iec958-decoded
-ustawia wyj¶cie iec958 w tryb zdekodowany (domy¶lne)
+Ustawia tryb wyj¶cia iec958 na zdekodowany (domy¶lne).
 .IPs macrovision=<warto¶æ>
 tryb macrovision (0 = wy³±czone (domy¶lnie), 1 = agc, 2 = agc 2 colorstripe
 3 = agc 4 colorstripe)
@@ -1768,7 +1769,7 @@ wy³±cza wyciszenie d¼wiêku
 .RE
 .RS
 .sp 1
-.I Wyj¶cie TV
+.I wyj¶cie TV
 .RE
 .RSs
 .IPs 75ire
@@ -1792,40 +1793,40 @@ ustawia tryb ccir601 piksela
 .RE
 .RS
 .sp 1
-.I Nak³adka (Overlay)
+.I nak³adka (Overlay)
 .RE
 .RSs
 .IPs cr-left=<0\-500>
-ustawia warto¶æ obcinania z lewej (domy¶lnie 50)
+Ustawia warto¶æ obcinania z lewej (domy¶lnie: 50).
 .IPs cr-right=<0\-500>
-ustawia warto¶æ obcinania z prawej (domy¶lnie 300)
+Ustawia warto¶æ obcinania z prawej (domy¶lnie: 300).
 .IPs cr-top=<0\-500>
-ustawia warto¶æ obcinania z góry (domy¶lnie 0)
+Ustawia warto¶æ obcinania z góry (domy¶lnie: 0).
 .IPs cr-bottom=<0\-500>
-ustawia warto¶æ obcinania z do³u (domy¶lnie 0)
+Ustawia warto¶æ obcinania z do³u (domy¶lnie: 0).
 .IPs ck-[r|g|b]=<0\-255>
-ustawia czerwony (r), zielony (g) lub niebieski (b) kolor klucza nak³adki
+Ustawia czerwony (r), zielony (g) lub niebieski (b) kolor klucza nak³adki.
 .IPs ck-[r|g|b]min=<0\-255>
 minimalna warto¶æ odpowiedniego klucza koloru
 .IPs ck-[r|g|b]max=<0\-255>
 maksymalna warto¶æ odpowiedniego klucza koloru
 .IPs ignore-cache
-nie u¿ywa zapamiêtanych ustawieñ nak³adki
+Nie u¿ywa zapamiêtanych ustawieñ nak³adki.
 .IPs update-cache
-uaktualnia zapisane ustawienia nak³adki
+Uaktualnia zapisane ustawienia nak³adki.
 .IPs ol-osd
-w³±cza osd w nak³adce
+W³±cza osd w nak³adce.
 .IPs nool-osd
-wy³±cza osd w nak³adce (domy¶lne)
+Wy³±cza osd w nak³adce (domy¶lne).
 .IPs ol[h|w|x|y]-cor=<-20\-20>
-modyfikuje rozmiar (h,w) i pozycjê (x,y) nak³adki w przypadku gdy nie pasuje
-ona do okna (domy¶lnie: 0)
+Modyfikuje rozmiar (h,w) i pozycjê (x,y) nak³adki w przypadku gdy nie pasuje
+ona do okna (domy¶lnie: 0).
 .IPs overlay
-w³±cza overlay (domy¶lne)
+W³±cza nak³adkê (domy¶lne)
 .IPs nooverlay
-w³±cza TVout
+W³±cza TVout.
 .IPs overlay-ratio=<1\-2500>
-ustawia overlay (domy¶lnie 1000)
+Dostosowuje nak³adkê (domy¶lnie 1000).
 .RE
 .
 .TP
@@ -1839,23 +1840,29 @@ Zmienia tryb video na opisany etykiet± <nazwa trybu> w /etc/fb.modes.
 .I INFORMACJA:
 Bufor ramek VESA nie obs³uguje zmieniania trybu.
 .TP
-.B \-fbmodeconfig <nazwa zbioru> (tylko fbdev)
-U¿ywa podanego zbioru konfiguracyjnego zamiast domy¶lnego /etc/\:fb.modes.
-Poprawne tylko dla sterowników fbdev.
+.B \-fbmodeconfig <nazwa zbioru> (tylko \-vo fbdev)
+U¿ywa podanego zbioru konfiguracyjnego (domy¶lnie: /etc/\:fb.modes).
 .TP
-.B \-forcexv (tylko SDL)
-Wymusza u¿ywanie XVideo
+.B \-forcexv (tylko \-vo sdl)
+Wymusza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
 .TP
-.B \-fs \ \ \ 
+.B \-fs (patrz te¿ \-zoom)
 Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego).
-Prze³±cz go klawiszem "f" (nie wszystkie wyj¶cia video to obs³uguj±).
-Zobacz tak¿e \-zoom.
+Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .TP
-.B \-fsmode-dontuse <0\-31> (PRZESTARZA£, u¿ywaj opcji \-fs)
+.B \-fsmode-dontuse <0\-31> (PRZESTARZA£E, u¿ywaj opcji \-fs)
 Wypróbuj tê opcjê, je¿eli masz problemy z trybem pe³noekranowym.
 .TP
 .B \-fstype <typ1,typ2,...>
 Okre¶la priorytetow± listê trybów ustawieñ u¿ywanej warstwy pe³noekranowej.
+Mo¿esz wy³±czyæ tryb poprzedzaj±c go "\-".
+.br
+Je¶li masz k³opoty typu okno pe³noekranowe jest przykryte przez inne okna
+wypróbuj inn± kolejno¶æ.
+.br
+.I INFORMACJA:
+\-fstype help wy¶wietla pe³n± listê dostêpnych trybów.
+.sp 1
 Dostêpne s± typy:
 .sp 1
 .PD 0
@@ -1876,24 +1883,20 @@ Wymusza styl NETWM.
 Nie u¿ywa warstwy pe³noekranowej.
 .IPs stays_on_top
 U¿ywa zalecenia _NETWM_STATE_STAYS_ON_TOP je¶li jest to mo¿liwe.
-.RE
-.PD 1
+.REss
+.\" Hack, ¿eby przyk³ad te¿ by³ wciêty. Do usuniêcia (kiedy¶)...
 .TP
 .B \ 
-Mo¿liwe jest zanegowanie trybów poprzez poprzedzenie ich "-".
-.br
-Domy¶lnym porz±dkiem jest layer,stays_on_top,above,fullscreen.
-Bêdzie u¿yte jako inne rozwi±zanie w przypadku podania niepoprawnych lub
-nieobs³ugiwanych trybów.
-.br
-U¿ytkownicy OpenBox 1.x musz± u¿yæ \-fstype \-fullscreen by dzia³a³o
-prze³±czanie pe³nego ekranu.
-.br
-Je¿eli masz problemy z trybem pe³noekranowym, kiedy inne okno zakrywa okno
-z filmem, u¿yj innej kolejno¶ci typów.
-.br
-.I INFORMACJA:
-U¿yj \-fstype help by uzyskaæ pe³n± listê dostêpnych trybów.
+.I PRZYK£AD:
+.PD 0
+.RSs
+.ISs layer,stays_on_top,above,fullscreen
+Domy¶lna kolejno¶æ, bêdzie u¿yta w przypadku podania nieprawid³owych lub
+nieobs³ugiwanych typów.
+.IPs \-fullscreen
+Naprawia prze³±czanie pe³nego ekrany na OpenBox 1.x.
+.RE
+.PD 1
 .TP
 .B \-geometry x[%][:y[%]] lub [WxH][+x+y]
 Ustawia gdzie na ekranie ma siê pocz±tkowo znajdowaæ wyj¶cie.
@@ -1901,12 +1904,11 @@ Wielko¶ci x i y mierzone s± w pikselach od lewego górnego rogu ekranu do
 lewego górnego rogu wy¶wietlanego obrazu, je¿eli jednak po argumencie podany
 jest procent, to jest on traktowany jak procent wielko¶ci ekranu w danym
 kierunku.
-Obs³uguje to tak¿e standardowy format opcji \-geometry z X.
-Podawane warto¶ci musz± byæ liczbami ca³kowitymi.
+Obs³uguje to tak¿e standardowy format opcji \-geometry z X11.
 .br
 .I INFORMACJA:
-Ta opcja jest obs³ugiwana tylko przez vo: x11, xmga, xv, xvmc, xvidix,
-directx i tdfxfb.
+Ta opcja jest obs³ugiwana tylko przez sterowniki wyj¶cia video x11, xmga, xv,
+xvmc, xvidix, directx i tdfxfb.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1923,7 +1925,7 @@ Umieszcza okno w prawym dolnym rogu ekranu
 .PD 1
 .
 .TP
-.B \-guiwid <id\ okna> (tylko z GUI)
+.B \-guiwid <id\ okna> (patrz te¿ \-wid) (tylko z GUI)
 Przekazuje do GUI, ¿e ma ono równie¿ u¿ywaæ okna X11 i przykleiæ je na dole
 ekranu video, co jest przydatne by osadziæ mini-GUI w przegl±darce
 (u¿ywaj±cej na przyk³ad wtyczki MPlayer).
@@ -1931,9 +1933,10 @@ ekranu video, co jest przydatne by osadziæ mini-GUI w przegl±darce
 .B \-hue <-100\-100>
 Modyfikuje barwê sygna³u video (domy¶lnie 0).
 Dziêki tej opcji mo¿esz otrzymaæ kolorowy negatyw obrazu.
+Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .TP
 .B \-jpeg <opcja1:opcja2:...> (tylko \-vo jpeg)
-Podaje opcje dla danych wyj¶ciowych JPEG.
+Podaje opcje dla sterownika wyj¶cia video jpeg.
 .br
 Dostêpne s± opcje:
 .sp 1
@@ -1944,29 +1947,28 @@ Wybiera miêdzy standardowym lub progresywnym JPEG.
 .IPs [no]baseline
 Wybiera, czy ma u¿ywaæ baseline czy nie.
 .IPs optimize=<warto¶æ>
-Wspó³czynnik optymalizacji [0\-100]
+wspó³czynnik optymalizacji [0\-100]
 .IPs smooth=<warto¶æ>
-Wspó³czynnik wyg³adzania [0\-100]
+wspó³czynnik wyg³adzania [0\-100]
 .IPs quality=<warto¶æ>
-Wspó³czynnik jako¶ci [0\-100]
+wspó³czynnik jako¶ci [0\-100]
 .IPs outdir=<warto¶æ>
-Katalog, gdzie zapisywane bêd± zbiory JPEG
+katalog, gdzie zapisywane bêd± zbiory JPEG
 .RE
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <zakres[,zakres,...]> (tylko fbdev i vesa)
+.B \-monitor-dotclock <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres dotclock lub pixelclock monitora.
 .TP
-.B \-monitor-hfreq <zakres[,zakres,...]> (tylko fbdev i vesa)
+.B \-monitor-hfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres czêstotliwo¶ci poziomej monitora.
 .TP
-.B \-monitor-vfreq <zakres[,zakres,...]> (tylko fbdev i vesa)
+.B \-monitor-vfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres czêstotliwo¶ci pionowej monitora.
 .TP
-.B \-monitoraspect <stosunek>
+.B \-monitoraspect <stosunek> (patrz te¿ \-aspect)
 Ustawia proporcje Twojego monitora lub ekranu TV.
-Patrz te¿ \-aspect je¶li chcesz podaæ proporcje filmu
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1979,82 +1981,77 @@ Patrz te¿ \-aspect je¶li chcesz podaæ proporcje filmu
 .
 .TP
 .B \-nograbpointer
-Nie przechwytuje kursora muszki po zmianie VidMode (\-vm), przydatne do
-ustawieñ wieloekranowych.
+Nie przechwytuje kursora muszki po zmianie trybu video (\-vm).
+Przydatne przy ustawieniach wieloekranowych.
 .TP
 .B \-nokeepaspect
-Nie utrzymuje proporcji, gdy zmieniany jest rozmiar okna (Dzia³a obecnie tylko
-z \-vo x11, xv, xmga, xvidix oraz directx i Twój manager okien X11 musi
-rozumieæ zalecenia proporcji okna.).
+Nie utrzymuje proporcji, gdy zmieniany jest rozmiar okna.
+Dzia³a obecnie tylko ze sterownikami wyj¶cia video x11, xv, xmga, xvidix oraz
+directx.
+Dodatkowo, pod X11 Twój manager okien musi rozumieæ zalecenia proporcji okna.
 .TP
-.B \-noxv (tylko SDL)
-Wy³±cza sterownik SDL XVideo.
+.B \-noxv (tylko \-vo sdl)
+Wy³±cza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
 .TP
 .B \-ontop
 Sprawia, ¿e okno zostaje nad innymi oknami.
 Obs³ugiwane przez sterowniki u¿ywaj±ce X11, poza SDL, oraz directx i gl2 pod Windows.
 .TP
 .B \-panscan <0.0\-1.0>
-W³±cza funkcjê Pan & Scan tj.\& w celu wy¶wietlenia filmu 16:9 na ekranie 4:3
-boki filmu zostan± przyciête tak, aby otrzymany obraz pasowa³ do ekranu.
-Ta opcja dzia³a tylko ze sterownikami xv, xmga, mga i xvidix.
-.br
+W³±cza tryb panoramiczny (obcina boki filmu np.\& 16:9 tak, by pasowa³ na
+ekran 4:3 bez czarnych pasków).
 Zasiêg kontroluje jak du¿a czê¶æ obrazu bêdzie przyciêta.
+Dzia³a tylko ze sterownikami wyj¶cia video xv, xmga, mga i xvidix.
 .TP
 .B \-refreshrate <Hz>
 Ustawia czêstotliwo¶æ od¶wie¿ania monitora.
 Obecnie opcja ta jest obs³ugiwana tylko przez \-vo directx razem z \-vm.
 .TP
 .B \-rootwin (tylko X11)
-Odtwarza film w g³ównym oknie (t³o pulpitu) zamiast otwierania nowego okna.
-Dzia³a tylko ze sterownikami x11, xv, xmga, xvidix i quartz.
+Odtwarza film w g³ównym oknie (t³o pulpitu).
+Jednak obrazki t³a na pulpicie mog± przes³aniaæ okno filmu.
+Dzia³a tylko ze sterownikami wyj¶cia video x11, xv, xmga, xvidix i quartz.
 .TP
 .B \-saturation <-100\-100>
-Modyfikuje nasycenie wyj¶cia video (domy¶lnie: 0).
+Modyfikuje nasycenie sygna³u wyj¶cia video (domy¶lnie: 0).
 Dziêki tej opcji mo¿na uzyskaæ obraz w skali szaro¶ci.
+Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .TP
-.B \-screenw <piksele> \-screenh <piksele>
-Je¿eli u¿ywasz sterowników wyj¶cia, które nie mog± rozpoznaæ rozdzielczo¶ci
-ekranu (fbdev/\:x11 i/\:lub TVout) tutaj mo¿esz podaæ pionow± i poziom±
-rozdzielczo¶æ.
+.B \-screenh <piksele>
+Podaje pionow± rozdzielczo¶æ ekranu dla sterowników wyj¶cia video które nie
+znaj± rozdzielczo¶ci ekranu, jak fbdev, x11 i TVout.
+.TP
+.B \-screenw <piksele>
+Podaje poziom± rozdzielczo¶æ ekranu dla sterowników wyj¶cia video które nie
+znaj± rozdzielczo¶ci ekranu, jak fbdev, x11 i TVout.
 .TP
 .B \-stop-xscreensaver (tylko X11)
 Wy³±cza wygaszacz ekranu przy starcie i w³±cza go ponownie podczas wychodzenia.
 .TP
 .B \-vm \ \ \ 
-Próbuje zmieniæ na lepszy tryb video.
-Obs³uguj± to sterowniki wyj¶cia dga, x11/\:xv (XF86VidMode) i sdl.
-Je¿eli jest ona u¿yta z directx, opcje \-screenw,
+Próbuje zmieniæ na inny tryb video.
+Obs³ugiwane przez sterowniki wyj¶cia video dga, x11/\:xv (XF86VidMode) i sdl.
+Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 \-screenh, \-bpp i \-refreshrate mog± ustawiæ nowy tryb wy¶wietlania.
 .TP
 .B \-vsync \ \ 
-W³±cza VBI dla vesa.
+W³±cza VBI dla sterowników wyj¶cia video vesa, dbfmga i svga.
 .TP
 .B \-wid <id\ okna>] (tylko X11)
-Przekazuje MPlayerowi, które okno X11 ma byæ u¿yte, co jest przydatne, by
-osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
+Przekazuje MPlayerow, bt do³±czy³ siê do instniej±cego okna X11.
+Przydatne, by osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
 .TP
 .B \-xineramascreen <0\-...>
 W konfiguracjach Xinerama (tj.\& pojedynczy pulpit obejmuj±cy wiele ekranów)
 opcja ta przeka¿e MPlayerowi na którym ekranie ma wy¶wietlaæ film.
 .TP
-.B \-z <0\-9> (tylko -vo png)
-Wybiera poziom kompresji dla wyj¶cia PNG (\-vo png)
-.
-.PD 0
-.RSs
-.IPs 0
-bez kompresji
-.IPs 9
-maksymalna kompresja
-.RE
-.PD 1
-.
+.B \-z <0\-9> (tylko \-vo png)
+Podaje poziom kompresji dla sterownika wyj¶cia video png.
+0 to brak kompresji, 9 to maksymalna kompresja.
 .TP
 .B \-zrbw (tylko \-vo zr)
-Wy¶wietla czarno-bia³y obraz (dla optymalnego dzia³ania opcja ta mo¿e byæ
-³±czona z opcj± "decode only in black and white" dla kodeków z rodziny
-FFmpeg).
+Wy¶wietla czarno-bia³y obraz.
+Dla optymalnego dzia³ania opcja ta mo¿e byæ ³±czona z "\-lavdopts gray".
 .TP
 .B \-zrcrop <[szeroko¶æ]x[wyskoko¶æ]+[x offset]+[y offset]> (tylko \-vo zr)
 Wybiera partie obrazu wej¶ciowego do odtwarzania, wielokrotne wyst±pienie tej
@@ -2075,27 +2072,33 @@ i \-zrvdec, nastêpuje tylko, gdy sprzêt skaluj±cy potrafi rozci±gn±æ obraz do
 jego oryginalnych rozmiarów.
 Ta opcja wymusza dziesi±tkowania.
 .TP
+.B \-zrhdec <1,2,4> (tylko \-vo zr)
+Poziome dziesi±tkowanie (decimation): Informuje sterownik by przekazywa³ tylko
+co 2-g± lub 4-t± liniê/\:piksel obrazu do karty MJPEG i u¿y³ urz±dzenia
+skaluj±cego karty do rozci±gniêcia obrazu do jego oryginalnych rozmiarów.
+.TP
 .B \-zrhelp (tylko \-vo zr)
 Wy¶wietla listê wszystkich opcji \-zr*, ich domy¶ln± warto¶æ oraz przyk³ad
 trybu cinerama.
 .TP
 .B \-zrnorm <norma> (tylko \-vo zr)
-Wybiera normê PAL/\:NTSC, domy¶ln± jest "no change".
+Wybiera normê TV PAL lub NTSC (domy¶lnie: nie zmieniaæ).
 .TP
 .B \-zrquality <1\-20> (tylko \-vo zr)
-Liczba od 1 do 20 okre¶la jako¶æ kodowania jpeg.
-1 daje najlepsz± jako¶æ, a 20 bardzo s³ab±.
+Liczba od 1 (najlepsza) do 20 (najgorsza) okre¶laj±ca jako¶æ kodowania JPEG.
 .TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (tylko \-vo zr)
-Pionowe/\:poziome dziesi±tkowanie (decimation): Informuje sterownik by
-przekazywa³ tylko co 2-g± lub 4-t± liniê/\:piksel obrazu wej¶ciowego do karty
-MJPEG i u¿y³ urz±dzenia skaluj±cego karty MJPEG do rozci±gniêcia obrazu do jego
-oryginalnych rozmiarów.
+.B \-zrvdec <1,2,4> (tylko \-vo zr)
+Pionowe dziesi±tkowanie (decimation): Informuje sterownik by przekazywa³ tylko
+co 2-g± lub 4-t± liniê/\:piksel obrazu do karty MJPEG i u¿y³ urz±dzenia
+skaluj±cego karty do rozci±gniêcia obrazu do jego oryginalnych rozmiarów.
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (tylko \-vo zr)
-Je¿eli film jest mniejszy ni¿ ekran TV, te opcje okre¶laj± po³o¿enie filmu
-wzglêdem lewego górnego rogu ekranu.
-Domy¶lnie film jest wycentrowany.
+.B \-zrxdoff <przesuniêcie w osi x> (tylko \-vo zr)
+Je¶li film jest mniejszy ni¿ ekran opcja ta okre¶la przesuniêcie w poziomie
+od lewego górnego rogu ekranu (domy¶lnie: obraz wycentrowany).
+.TP
+.B \-zrydoff <przesuniêcie w osi y> (tylko \-vo zr)
+Je¶li film jest mniejszy ni¿ ekran opcja ta okre¶la przesuniêcie w pionie
+od lewego górnego rogu ekranu (domy¶lnie: obraz wycentrowany).
 .
 .
 .SH "STEROWNIKI WYJ¦CIA VIDEO (TYLKO MPLAYER)"
@@ -2629,8 +2632,8 @@ Tak samo jak \-af (zobacz opcja \-af).
 .
 .TP
 .B \-afm <sterownik1,sterownik2,...>
-Ustala priorytetow± listê sterowników audio (zgodnie z ich nazwami w
-codecs.conf).
+Ustala priorytetow± listê rodzin kodeków audio, zgodnie z ich nazwami
+w codecs.conf.
 Powraca do domy¶lnego, je¿eli ¿aden nie bêdzie dzia³a³.
 .br
 .I INFORMACJA:
@@ -2938,7 +2941,7 @@ Próbuj kodeki libavcodec MPEG1/\:2, pó¼niej libmpeg2, potem inne.
 .
 .TP
 .B \-vfm <sterownik1,sterownik2,...>
-Ustala priorytetow± listê u¿ywanych kodeków video, wed³ug ich nazw
+Ustala priorytetow± listê u¿ywanych rodzin kodeków video, zgodnie z ich nazwami
 w codecs.conf.
 Powraca do domy¶lnych je¶li ¿aden z nich nie jest prawid³owy.
 .br
@@ -5856,10 +5859,10 @@ mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Odtwarzanie na karcie Zoran (w starym stylu, odradzane)
-mplayer -vo zr -vf scale=352:288 plik.avi
+mplayer \-vo zr \-vf scale=352:288 plik.avi
 .TP
 .B Odtwarzanie na karcie Zoran (w nowym stylu)
-mplayer -vo zr2 -vf scale=352:288,zrmjpeg plik.avi
+mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .TP
 .B Kodowanie tytu³u #2 DVD, tylko wybrane rozdzia³y
 mencoder dvd://2 \-chapter 10-15 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
