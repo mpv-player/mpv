@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.64 -->
+<!-- synced with 1.65 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -1289,7 +1289,7 @@ Jest szansa, że będziesz mógł oglądać filmy
   </simpara></listitem>
 <listitem><simpara>
 Nie ma potrzeby instalowania jakichkolwiek rzeczy związanych z grafiką 
-(takich jak X11 (aka XFree86), fbdev i tak dalej) na Twoim Linuksie. 
+(takich jak X11 (AKA XFree86), fbdev i tak dalej) na Twoim Linuksie. 
 Ten sterownik można uruchamiać z <emphasis role="bold">trybu tekstowego</emphasis>.
   </simpara></listitem>
 <listitem><simpara>
