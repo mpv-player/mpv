@@ -950,8 +950,8 @@ Input from standard V4L<BR>
 
 <P>This sets up a filter pipeline (you can use any number of filters). Their
   parameters are optional and if omitted, some of them are set to default
-  values, like <I>x and y</I> are both set to 0, and <I>w and h</I> will be
-  set to the movie's width and height.</P>
+  values, like <I>x and y</I> are both set to 0, and <I>width and height</I>
+  will be set to the movie's width and height.</P>
 
 <P>Filters are queued starting from libvo, so <CODE>filter1</CODE> will be the
   last called filter (after that libvo comes, or when using <B>MEncoder</B>,
@@ -1022,7 +1022,7 @@ Input from standard V4L<BR>
 
 <P>This is our good old postprocess, juts converted to the filter layer.
   Performs image quality enhancement, deinterlacing, etc, see
-  <CODE>-npp help</CODE> for available options.
+  <CODE>-npp help</CODE> for available options.</P>
 
 <P><B><U>Usage</U></B>:</P>
 
