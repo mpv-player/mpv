@@ -13,7 +13,7 @@
 
 void ActivateMenuItem( int Item )
 {
-// fprintf( stderr,"[menu] item: %d\n",Item );
+// fprintf( stderr,"[menu] item: %d.%d\n",Item&0xffff,Item>>16 );
  gtkShMem->popupmenu=Item & 0x0000ffff;
  gtkShMem->popupmenuparam=Item >> 16;
  gtkShMem->visiblepopupmenu=0;

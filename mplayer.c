@@ -188,7 +188,7 @@ int allow_dshow=0;
 // streaming:
 int audio_id=-1;
 int video_id=-1;
-static int dvdsub_id=-1;
+int dvdsub_id=-1;
 static int vcd_track=0;
 
 // cache2:
@@ -628,7 +628,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	printf("Using %s timing\n",softsleep?"software":"usleep()");
 
 #ifdef USE_TERMCAP
-  load_termcap(NULL); // load key-codes
+  if ( !use_gui ) load_termcap(NULL); // load key-codes
 #endif
 
 // ========== Init keyboard FIFO (connection to libvo) ============
@@ -657,12 +657,25 @@ play_next_file:
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
+
+#ifdef USE_DVDREAD 
+     if ( mplShMem->DVDChanged ) 
+      {
+       mplShMem->DVDChanged=0;
+       mplShMem->Playing=1;
+       filename="/dev/dvd";
+       goto play_dvd;
+      }
+#endif
+    
       if(filename && !mplShMem->FilenameChanged) strcpy( mplShMem->Filename,filename );
 //      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
       while(mplShMem->Playing!=1){
 	usleep(20000);
 	EventHandling();
       }
+
+play_dvd:
 
 #ifdef USE_SUB
       if ( mplShMem->SubtitleChanged || !mplShMem->FilenameChanged )
@@ -2095,6 +2108,7 @@ if(rel_seek_secs || abs_seek_pos){
 	 } 
 	mplShMem->Volume=(float)mixer_getbothvolume();
 #ifdef USE_DVDREAD
+        if ( mplShMem->DVDChanged ) goto goto_next_file;
         if ( stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = stream->priv;
@@ -2164,6 +2178,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 }
 
+goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
 if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
@@ -2172,16 +2187,21 @@ if(curr_filename+1<num_filenames || use_gui){
 
 }
 
-goto_next_file:  // don't jump here after ao/vo/getch initialization!
-
 #ifdef HAVE_NEW_GUI
       if(use_gui) 
        {
-        mplStop();
+#ifdef USE_DVDREAD
+        if ( !mplShMem->DVDChanged ) 
+#endif
+	mplStop();
        }	
 #endif
 
-if(use_gui || ++curr_filename<num_filenames){
+if(use_gui || ++curr_filename<num_filenames
+#if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
+ || mplShMem->DVDChanged 
+#endif 
+){
 
   current_module="uninit_vcodec";
   if(sh_video) uninit_video(sh_video);

@@ -58,6 +58,7 @@ typedef struct
    mplUnknowErrorStruct error;
 #ifdef USE_DVDREAD
    mplDVDStruct         DVD;
+   int                  DVDChanged;
 #endif
 
    int    Playing;

@@ -197,6 +197,8 @@ drawrenderedtext:
 #define IZE(x) printf("@@@ " x " @@@\n");
 
 extern void exit_player(char* how);
+extern int audio_id;
+extern int dvdsub_id;
 
 void mplMsgHandle( int msg,float param )
 {
@@ -212,16 +214,19 @@ void mplMsgHandle( int msg,float param )
 
 #ifdef USE_DVDREAD
    case evPlayDVD:
+        dvd_title=1;
+        dvd_chapter=1;
+        dvd_angle=1;
+play_dvd_2:
         mplShMem->StreamType=STREAMTYPE_DVD;
 #endif
-	
    case evPlay:
    case evPlaySwitchToPause:
         btnModify( evPlaySwitchToPause,btnDisabled );
         btnModify( evPauseSwitchToPlay,btnReleased );
         if ( ( msg == evPlaySwitchToPause )&( mplShMem->Playing == 1 ) ) goto NoPause;
         mplMainRender=1;
-	
+
         switch ( mplShMem->StreamType )
          {
           case STREAMTYPE_STREAM: 
@@ -231,9 +236,6 @@ void mplMsgHandle( int msg,float param )
 	       break;
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:    
-	       dvd_title=1; 
-	       dvd_chapter=1; 
-	       dvd_angle=1; 
 	       strcpy( mplShMem->Filename,"/dev/dvd" );
 	       break;
 #endif
@@ -241,30 +243,48 @@ void mplMsgHandle( int msg,float param )
         mplPlay();
         break;
    case evSetDVDSubtitle:
+#ifdef USE_DVDREAD
+        dvdsub_id=(int)param;
+	dvd_title=mplShMem->DVD.current_title;
+	dvd_angle=mplShMem->DVD.current_angle;
+        dvd_chapter=mplShMem->DVD.current_chapter;
+        mplShMem->DVDChanged=1;
+	goto play_dvd_2;
+#endif
         break;
    case evSetDVDAudio:
+#ifdef USE_DVDREAD
+        audio_id=(int)param;
+	dvd_title=mplShMem->DVD.current_title;
+	dvd_angle=mplShMem->DVD.current_angle;
+        dvd_chapter=mplShMem->DVD.current_chapter;
+        mplShMem->DVDChanged=1;
+	goto play_dvd_2;
+#endif
         break;
    case evSetDVDChapter:
-	mplStop();
-	dvd_title=mplShMem->DVD.current_title - 1;
-	dvd_angle=mplShMem->DVD.current_angle - 1;
+#ifdef USE_DVDREAD
+	dvd_title=mplShMem->DVD.current_title;
+	dvd_angle=mplShMem->DVD.current_angle;
         dvd_chapter=(int)param;
-        strcpy( mplShMem->Filename,"/dev/dvd" );
-	mplPlay();
+        mplShMem->DVDChanged=1;
+	goto play_dvd_2;
+#endif
         break;
    case evSetDVDTitle:
-	mplStop();
+#ifdef USE_DVDREAD
         dvd_title=(int)param;
 	dvd_chapter=1;
 	dvd_angle=1;
-        strcpy( mplShMem->Filename,"/dev/dvd" );
-	mplPlay();
+        mplShMem->DVDChanged=1;
+	goto play_dvd_2;
+#endif
         break;
 
    case evPause:
    case evPauseSwitchToPlay:
-        btnModify( evPlaySwitchToPause,btnReleased );
-        btnModify( evPauseSwitchToPlay,btnDisabled );
+//        btnModify( evPlaySwitchToPause,btnReleased );
+//        btnModify( evPauseSwitchToPlay,btnDisabled );
 NoPause:
         mplMainRender=1;
         mplPause();
