@@ -30,12 +30,8 @@ mplayer (0.90)
     * mplayer exit codes cleanup (0 for quit/eof, 1 for error)
     * -ao win32 sync problems solved, -autosync 100 is still recommended
     * -vo gif89a uninit sig11 fixed
-    * GUI: correct widget destroy event handler
-    * GUI: new font render engine
+    * GUI: correct GTK widget destroy event handler
     * GUI: sync with x11_common
-    * GUI: added persistant history patch from Pavel Rousar
-    * GUI: SDL Audio configure window from Filip Kalinski
-    * GUI: add overlapping to preferences
     * the usual compiler warning fixes :)
     * use -pphelp instead of -vop pp=help
     * various bigendian fixes
@@ -65,7 +61,10 @@ mplayer (0.90)
     * libavcodec: motion estimation pre pass, qpel encoding, trellis quantization
     * libavcodec: Altivec optimizations
     * keep window's aspect ratio at resizing (x11, xv), requires WM support
-    * GUI: SDL audio config panel, persistant history path, new settings
+    * GUI: new font render engine
+    * GUI: added persistant history patch from Pavel Rousar
+    * GUI: SDL Audio configure window from Filip Kalinski
+    * GUI: add overlapping to preferences
     * -geometry option accepts X11 syntax too
     * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
     * postprocess: YUV 411/422/444 support, stride fixes
