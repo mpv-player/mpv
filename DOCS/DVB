@@ -13,9 +13,6 @@ Requirements:
 How to enable?
 ~~~~~~~~~~~~~~
 
-1. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOCS for details)
-
-2. Compile mplayer:
     ./configure should detect it. If didn't, force with ./configure --enable-dvb
         If you have ost headers at non-standard path, set it with:
 	--with-extraincdir=<your DVB source dir>/ost/include
@@ -25,35 +22,42 @@ How to enable?
 
 How to use?
 ~~~~~~~~~~~
-To play standard mpeg 1/2 files:  (hardware decoding)
+Hardware decoding: (play standard mpeg 1/2 files)
 
   mplayer -ao mpegpes -vo mpegpes file.mpg|vob
 
-To play non-standard mpeg files:  (software decoding)
+Software decoding/transcoding anything to mpeg1:
 
-  mplayer -ao mpegpes -vo mpegpes -vc mpeg12 file.mpg|vob
-
-To play divx files:
-
-  mplayer -ao mpegpes -vo mpegpes file.avi|asf|mov...
+  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
   
-To play non-25fps movies, or with slow CPU, add option:  -framedrop
+  Note: the DVB card only supports height 288 and 576 for PAL,
+  240 and 480 for NTSC. For other heights, you MUST rescale it,
+  by adding 'scale=w:h' to the -vop option, where w:h are width:height
+  you want. Note, that DVB card accepts various widths, like 720, 704, 640,
+  512, 480, 352 etc, so you don't need to scale horizontally in most cases!
+  (the card will do hardware scaling in horizontal direction!)
+  For example, for a 512x384 (aspect 4:3) divx try:
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
 
-Image size:
-~~~~~~~~~~~
-DVB card allows only 2 vertical resolutions: 288 and 576.
-If your video height differs, you have to clip it or extend by adding
-black bands. It's done by mplayer, just specify image size using the
--x and -y options. You must use either -y 288 or -y 576.
+  If you have widescreen movie, and you don't want to scale it to full
+  height, you can use the 'expand=w:h' plugin to add black bands.
+  For example, to view a 640x384 divx, try:
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
 
-To force pan&scan (16:9 at 4:3 TV), add options:  -x 352 -y 288
+  If you have slow cpu to view 720x576 divx in full size, try to downscale:
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+  Or if still slow, try to downscale vertically too:
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
 
-If you have powerfull CPU, you can also scale image up, using the
-swscale filter. For example, to watch a 640x288 video fullscreen,
-use -vop scale=640:400
-Note that you don't have to scale horizontally, the card will do it
-by hardware, but you have to scale vertically keeping the aspect ratio.
+  Do you want osd, and subtitles? Use the expand plugin's osd feature!
+  So, instead of expand=w:h or expand=w:h:x:y, use expand=w:h:x:y:1
+  (the 5th parameter :1 at the end will enable osd rendering)
+  You may want to move image up a bit to get bigger black zone for subtitles.
+  And you may want to move subtitles up, if they're out of your TV screen,
+  use the -subpos <0-100> switch (-subpos 80 is perfect for me).
 
+To play non-25fps movies on PAL TV, or with slow CPU, add option:  -framedrop
 
 Mailing list:
 ~~~~~~~~~~~~~
@@ -69,4 +73,3 @@ Future plans/TODO:
 - display OSD and subtitles using DVB card's OSD feature
 - better (more fluent) playback of non-25fps movies
 - realtime transcoding between mpeg2 <-> mpeg4 (partial decompression)
-- better quality for lowres mpeg1
