@@ -30,6 +30,8 @@
 
 #include "cfgparser.h"
 
+extern int verbose;
+
 static struct config *config;
 static int nr_options;		/* number of options in 'conf' */
 static int parser_mode;		/* COMMAND_LINE or CONFIG_FILE */
@@ -251,7 +253,7 @@ int parse_config_file(struct config *conf, char *conffile)
 		return -1;
 	}		
 
-	printf("Reading config file: %s", conffile);
+	if (verbose) printf("Reading config file: %s", conffile);
 
 	if (init_conf(conf, CONFIG_FILE) == -1) {
 		ret = -1;
