@@ -2,6 +2,7 @@
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
 #define VCODEC_RAW 3
+#define VCODEC_LIBAVCODEC 4
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -402,6 +403,7 @@ mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==0xFFFFFFFF) continue;
+    if(IMGFMT_IS_RGB(out_fmt) || IMGFMT_IS_BGR(out_fmt)) break;
     if(out_fmt==IMGFMT_YV12) break;
     if(out_fmt==IMGFMT_I420) break;
     if(out_fmt==IMGFMT_IYUV) break;
@@ -431,6 +433,12 @@ if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
     vo_image=malloc(vo_w*vo_h*3/2);
     vo_image_ptr=vo_image;
 }
+
+if (IMGFMT_IS_BGR(out_fmt))
+    vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_BGR_DEPTH(out_fmt)/8);
+
+if (IMGFMT_IS_RGB(out_fmt))
+    vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_RGB_DEPTH(out_fmt)/8);
 
 if(!init_video(sh_video)){
      mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
