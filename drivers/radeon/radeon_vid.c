@@ -24,7 +24,7 @@
   mknod /dev/radeon_vid c 178 0
   or
   mknod /dev/rage128_vid c 178 0
-  for Rage128/Rage128Pro chips (althrough it doesn't matter)
+  for Rage128/Rage128Pro chips (although it doesn't matter)
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   TESTED and WORKING formats: YUY2, UYVY, IYUV, I420, YV12
   -----------------------------------------------------------
@@ -331,6 +331,10 @@ static int radeon_is_dbl_scan( void )
   return (INREG(CRTC_GEN_CNTL))&CRTC_DBL_SCAN_EN;
 }
 
+static int radeon_is_interlace( void )
+{
+  return (INREG(CRTC_GEN_CNTL))&CRTC_INTERLACE_EN;
+}
 
 static void __init radeon_vid_save_state( void )
 {
@@ -496,8 +500,6 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
     radeon_vid_stop_video();
     left = XXX_SRC_X << 16;
     top = XXX_SRC_Y << 16;
-/* FIXME !!! interlace? */
-    if(radeon_is_dbl_scan()) config->dest_height *= 2;
     src_h = config->src_height;
     src_w = config->src_width;
     switch(config->format)
@@ -551,7 +553,9 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: pitch = ((src_w*4) + 15) & ~15; break;
     }
-    
+    if(radeon_is_dbl_scan()) config->dest_height *= 2;
+    else
+    if(radeon_is_interlace()) config->dest_height /= 2;
     besr.dest_bpp = radeon_vid_get_dbpp();
     besr.fourcc = config->format;
     besr.v_inc = (src_h << 20) / config->dest_height;
