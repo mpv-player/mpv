@@ -471,6 +471,7 @@ float default_max_pts_correction=-1;//0.01f;
 int delay_corrected=1;
 float force_fps=0;
 float audio_delay=0;
+float initial_pts_delay=0;
 int vcd_track=0;
 #ifdef VCD_CACHE
 int vcd_cache_size=128;
@@ -1980,6 +1981,7 @@ switch(sh_video->codec->driver){
         float x=d_audio->pts-d_video->pts-(delay+audio_delay);
         float y=-(delay+audio_delay);
         printf("Initial PTS delay: %5.3f sec  (calculated: %5.3f)\n",x,y);
+	initial_pts_delay+=x;
         audio_delay+=x;
         delay_corrected=1;
         if(verbose)
@@ -1992,7 +1994,7 @@ switch(sh_video->codec->driver){
       v_pts=d_video->pts-frame_time;
     }
 
-    if(verbose)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
+    if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
     if(frame_corr_num==1){
       float x=frame_correction;
@@ -2274,6 +2276,7 @@ switch(file_format){
           // update stream position:
           d_audio->pos=audio_chunk_pos;
           d_audio->dpos=apos;
+	  d_audio->pts=initial_pts_delay+(float)apos/(float)sh_audio->wf->nAvgBytesPerSec;
           demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=audio_chunk_pos;
 
           if(!(sh_audio->codec->flags&CODECS_FLAG_SEEKABLE)){
