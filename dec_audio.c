@@ -931,7 +931,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	    }
 	    len+=2*a52_resample(a52_samples,&buf[len]);
 	}
-	printf("len = %d      \n",len);
+	// printf("len = %d      \n",len); // 6144 on all vobs I tried so far... (5.1 and 2.0) ::atmos
 	break;
       }
       case AFM_HWAC3: // AC3 through SPDIF
