@@ -11,10 +11,10 @@
 enkóder, az MPlayer által lejátszható formátumok
 (<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) más - MPlayerrel lejátszható -
 formátumokba kódolására.
-Jelenleg béta verzió, és csak <B>DivX4</B> (1 vagy 2 menet) videoba, és
-<B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audioba tud kódolni. Rendelkezik továbbá
-stream másoló képességgel. A közeljövõben tervezzük vágó, átméretezõ filterek
-beépítését, és hasonlókat.</P>
+Sokféle codec-kel tud enkódolni, például <B>DivX4</B>-gyel (1 vagy 2 menetes),
+a libavcodec-et alkotó codec-ekkel, audiot tekintve pedig
+<B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> a választék. Rendelkezik továbbá stream
+másoló, és video átméretezõ képességgel.</P>
 
 <P><B><A NAME=2.4.2>2.4.2.  Fordítás</B></P>
 
@@ -56,7 +56,7 @@ beépítését, és hasonlókat.</P>
       is</LI>
     <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
     <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
-    <LI>1 vagy 2 menetes <B>DivX4</B> video</LI>
+    <LI>1, 2 vagy 3 menetes <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>FONTOS</B> : a VBR-es mp3-ak nem minden
       körülmények között lejátszhatóak windows rendszereken! Ha windows-on
       (is) lejátszandó AVI-t akarsz létrehozni, csinálj CBR-es mp3-at!</LI>
@@ -80,21 +80,90 @@ beépítését, és hasonlókat.</P>
   </UL>
 </P>
 
-<P><B><A NAME=2.4.3.1>2.4.3.1.  2 menetes DivX4 enkódolása</B></P>
+<P><B><A NAME=2.4.3.1>2.4.3.1.  2, 3 menetes DivX4 enkódolása</B></P>
 
-<P>Az elnevezés onnan jön, hogy ezzel a módszerrel a file <I>kétszer</I> lesz
-enkódolva. Az elsõ menet néhány pár Mb-os ideiglenes (*.log) file-t hoz létre,
-amiket egyelõre nem szabad törölni (az AVI törölhetõ, ugyanolyan mintha -pass
-opciók nélkül keletkezett volna). A második menetben keletkezik a tényleges
-2 menetes DivX, az ideiglenes file-ok adataibõl. A keletkezõ file az
-egy menetesekhez képest sokkal jobb minõséggel és kisebb mérettel bír. Ha most
-hallassz errõl elõször, jobb ha keresel a neten egy útmutatót.</P>
+<P><U><B>2 menetes enkódolás :</B></U> az elnevezés onnan jön, hogy ezzel a
+  módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
+  Mb-os ideiglenes (*.log) file-t hoz létre, amiket egyelõre nem szabad törölni
+  (az AVI törölhetõ, ugyanolyan mintha -pass opciók nélkül keletkezett volna).
+  A második menetben keletkezik a tényleges 2 menetes DivX, az ideiglenes
+  file-ok adataibõl. A keletkezõ file az egy menetesekhez képest sokkal jobb
+  minõséggel és kisebb mérettel bír. Ha most hallassz errõl elõször, jobb ha
+  keresel a neten egy útmutatót.</P>
 
 <P>A következõ példa egy DVD 2 menetes DivX4 AVI-ba történõ enkódolását
 mutatja be. Csak két parancs szükséges :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100
--o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - töröld ezt a file-t,
+  ami egy esetleges elõzõ 3 menetes enkódolásból származhat<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
+  -o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 
+  -o movie.avi -pass 2</CODE></P>
+
+<P><U><B>3 menetes enkódolás :</B></U> ez egyfajta bõvített kétmenetes
+  enkódolás. A különbség abban áll hogy itt az audio enkódolása külön
+  menetben történik, ezáltal lehetõvé válik annak megbecslése hogy az adott
+  filmet milyen bitrátával kell tömöríteni hogy ráférjen egy 650, 700 vagy
+  800Mb-os CD-re, és ezt a <B>MEncoder</B> ki is számolja. Továbbá, ilyenkor
+  az audio csak egyszer kerül enkódolásra, ellentétben a 2 menetes móddal.
+  A használata a következõ :</P>
+
+<P>
+  <TABLE>
+  <TR>   
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>rm frameno.avi</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B>egy esetleges elõzõ 3 menetes enkódolásból származó file törlése,
+      mely konfliktolhat a most következõvel</B></TD>
+  </TR>
+  <TR> 
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
+        frameno.avi</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Elsõ menet</U> : egy csak audiot tartalmazó AVI file jön létre,
+      ami a kért formátumban tartalmazza az audio streamet. Ha akarod
+      használhatod a <CODE>-lameopts</CODE> opciót. Ha ez egy hosszabb film,
+      e menet végén a MEncoder kiírja hogy mekkora bitrate-tel tömöríts
+      a következõ menetekben hogy a film ráférjen egy 650, 700 vagy 800Mb-os
+      CD-re.</B></TD>
+  </TR>
+  <TR> 
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
+        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Második menet</U> : alias a DivX4 video enkódolás elsõ menete.
+      Opcionálisan megadhatod azt a bitrate-et amit a MEncoder az elõzõ
+      menet végén kiírt, lásd feljebb.</B></TD>
+  </TR>
+  <TR> 
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
+        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Harmadik menet</U> : alias a DivX4 video enkódolás második menete.
+      Opcionálisan megadhatod azt a bitrate-et amit a MEncoder az elõzõ
+      menet végén kiírt, lásd feljebb. Ebben a menetben a
+      <CODE>frameno.avi</CODE>-ban levõ audio belekerül a célfileba..
+      és kész is az egész!</B></TD>
+  </TR>
+  </TABLE>
+</P>
+
+<P><B>Példa a 3 menetes enkódolásra :</B></P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - esetlegesen egy elõzõ
+  enkódolásbol származó file törlése (bezavar a most következõnek)<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  -o frameno.avi<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+  -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts
+  br=1100 -oac copy -o movie.avi -pass 2</CODE>
+</P>
+
 
 <P><B><A NAME=2.4.3.2>2.4.3.2.  Átméretezés</B></P>
 
