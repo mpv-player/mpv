@@ -76,11 +76,11 @@ static int choose_chunk_len(unsigned int len1,unsigned int len2){
     return (len1<len2)? len1 : len2;
 }
 
-static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos,int flags){
+static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned int id,unsigned int len,int idxpos,int flags){
   avi_priv_t *priv=demux->priv;
   int skip;
   float pts=0;
-  demux_stream_t *ds=demux_avi_select_stream(demux,id);
+//  demux_stream_t *ds=demux_avi_select_stream(demux,id);
   
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"demux_avi.read_packet: %X\n",id);
 
@@ -161,8 +161,9 @@ int demux_avi_fill_buffer(demuxer_t *demux){
 avi_priv_t *priv=demux->priv;
 unsigned int id=0;
 unsigned int len;
-int max_packs=128;
+//int max_packs=128;
 int ret=0;
+demux_stream_t *ds;
 
 do{
   int flags=0;
@@ -242,7 +243,27 @@ do{
       continue;
     }
   }
-  ret=demux_avi_read_packet(demux,id,len,priv->idx_pos-1,flags);
+
+  ds=demux_avi_select_stream(demux,id);
+  if(ds)
+    if(ds->packs+1>=MAX_PACKS || ds->bytes+len>=MAX_PACK_BYTES){
+	// this packet will cause a buffer overflow, switch to -ni mode!!!
+	mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_SwitchToNi);
+	if(priv->idx_size>0){
+	    // has index
+	    demux->type=DEMUXER_TYPE_AVI_NI;
+	    --priv->idx_pos; // hack
+	} else {
+	    // no index
+	    demux->type=DEMUXER_TYPE_AVI_NINI;
+	    priv->idx_pos=demux->filepos; // hack
+	}
+	priv->idx_pos_v=priv->idx_pos_a=priv->idx_pos;
+	// quit now, we can't even (no enough buffer memory) read this packet :(
+	return -1;
+    }
+  
+  ret=demux_avi_read_packet(demux,ds,id,len,priv->idx_pos-1,flags);
 //      if(!ret && priv->skip_video_frames<=0)
 //        if(--max_packs==0){
 //          demux->stream->eof=1;
@@ -261,7 +282,7 @@ int demux_avi_fill_buffer_ni(demuxer_t *demux,demux_stream_t* ds){
 avi_priv_t *priv=demux->priv;
 unsigned int id=0;
 unsigned int len;
-int max_packs=128;
+//int max_packs=128;
 int ret=0;
 
 do{
@@ -321,7 +342,7 @@ do{
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else return 0;
-  ret=demux_avi_read_packet(demux,id,len,idx_pos,flags);
+  ret=demux_avi_read_packet(demux,demux_avi_select_stream(demux,id),id,len,idx_pos,flags);
 //      if(!ret && priv->skip_video_frames<=0)
 //        if(--max_packs==0){
 //          demux->stream->eof=1;
@@ -353,27 +374,30 @@ do{
 
   demux->filepos=stream_tell(demux->stream);
   if(demux->filepos>=demux->movi_end && (demux->movi_end>demux->movi_start)){
-          demux->stream->eof=1;
+          //demux->stream->eof=1;
+	  ds->eof=1;
           return 0;
   }
-  if(stream_eof(demux->stream)) return 0;
 
   id=stream_read_dword_le(demux->stream);
   len=stream_read_dword_le(demux->stream);
+
+  if(stream_eof(demux->stream)) return 0;
+  
   if(id==mmioFOURCC('L','I','S','T')){
       id=stream_read_dword_le(demux->stream);      // list type
       continue;
   }
   
   if(id==mmioFOURCC('R','I','F','F')){
-      printf("additional RIFF header...\n");
+      mp_msg(MSGT_DEMUX,MSGL_V,"additional RIFF header...\n");
       id=stream_read_dword_le(demux->stream);      // "AVIX"
       continue;
   }
   
   if(ds==demux_avi_select_stream(demux,id)){
     // read it!
-    ret=demux_avi_read_packet(demux,id,len,priv->idx_pos-1,0);
+    ret=demux_avi_read_packet(demux,ds,id,len,priv->idx_pos-1,0);
   } else {
     // skip it!
     int skip=(len+1)&(~1); // total bytes in this chunk
