@@ -1183,6 +1183,13 @@ if(has_audio){
   r=MP3_samplerate; if(ioctl (audio_fd, SNDCTL_DSP_SPEED, &r)==-1)
       printf("audio_setup: your card doesn't support %d Hz samplerate\n",r);
 
+#if 0
+//  r = (64 << 16) + 1024;
+  r = (65536 << 16) + 512;
+    if(ioctl (audio_fd, SNDCTL_DSP_SETFRAGMENT, &r)==-1)
+      printf("audio_setup: your card doesn't support setting fragments\n",r);
+#endif
+
   if(audio_buffer_size==-1){
     // Measuring buffer size:
     audio_buffer_size=0;
@@ -1219,7 +1226,7 @@ if(has_audio){
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   if(a_buffer) free(a_buffer);
-  alsa=1; MP3_samplerate=44100;MP3_bps=MP3_channels=2; // fake, required for timer
+  alsa=1; MP3_samplerate=76800;MP3_bps=MP3_channels=2; // fake, required for timer
 }
 
   current_module=NULL;
@@ -1378,8 +1385,20 @@ while(has_audio){
       time_frame=0;
     } else {
 //      if(time_frame>0.01) usleep(1000000*(time_frame-0.01)); // sleeping
-      if(time_frame>0.001) usleep(1000000*(time_frame)); // sleeping
-    }
+//      if(time_frame>0.019) usleep(1000000*(time_frame-0.019)); // sleeping
+//      if(time_frame>0.001) usleep(1000000*(time_frame)); // sleeping
+//      if(time_frame>0.02) usleep(1000000*(time_frame)); // sleeping if >20ms
+        while(time_frame>0.007){
+//            printf("TIMER  %8.3f -> ",time_frame*1000);
+//            if(time_frame>0.021)
+//                usleep(time_frame-0.12);
+//            else
+                usleep(1000);
+            time_frame-=GetRelativeTime();
+//            printf("%8.3f    \n",time_frame*1000);
+        }
+      }
+
   }
 
 
