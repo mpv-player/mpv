@@ -2530,6 +2530,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
       break;
 #endif
+    case MP_CMD_SWITCH_RATIO : {
+      if (cmd->nargs == 0)
+	movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
+      else
+	movie_aspect = cmd->args[0].v.f;
+      mpcodecs_config_vo (sh_video, sh_video->disp_w, sh_video->disp_h, 0);
+    } break;
     case MP_CMD_AUDIO_DELAY : {
       float v = cmd->args[0].v.f;
       audio_delay += v;
