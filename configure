@@ -612,12 +612,12 @@ EOF
     return 1
   }
 
-  extcheck $_mmx "mmx" "emms" && _mmx=yes
-  extcheck $_3dnow "3dnow" "femms" && _3dnow=yes
-  extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" && _3dnowex=yes
-  extcheck $_mmx2 "mmx2" "sfence" && _mmx2=yes
-  extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" && _sse=yes
-  extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" && _sse2=yes
+  extcheck $_mmx "mmx" "emms" || _mmx=no
+  extcheck $_3dnow "3dnow" "femms" || _3dnow=no
+  extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" || _3dnowex=no
+  extcheck $_mmx2 "mmx2" "sfence" || _mmx2=no
+  extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no
+  extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no
   echocheck "mtrr support"
   echores "$_mtrr"
 
