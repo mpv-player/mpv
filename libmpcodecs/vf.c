@@ -57,6 +57,7 @@ extern vf_info_t vf_info_field;
 extern vf_info_t vf_info_denoise3d;
 extern vf_info_t vf_info_hqdn3d;
 extern vf_info_t vf_info_detc;
+extern vf_info_t vf_info_telecine;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -107,6 +108,7 @@ static vf_info_t* filter_list[]={
     &vf_info_denoise3d,
     &vf_info_hqdn3d,
     &vf_info_detc,
+    &vf_info_telecine,
     NULL
 };
 
