@@ -131,14 +131,15 @@ int init_audio(sh_audio_t *sh_audio)
 
 void uninit_audio(sh_audio_t *sh_audio)
 {
+    if(sh_audio->inited){
+	mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
+	mpadec->uninit(sh_audio);
+	sh_audio->inited=0;
+    }
     if(sh_audio->a_buffer) free(sh_audio->a_buffer);
     sh_audio->a_buffer=NULL;
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
     sh_audio->a_in_buffer=NULL;
-    if(!sh_audio->inited) return;
-    mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
-    mpadec->uninit(sh_audio);
-    sh_audio->inited=0;
 }
 
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
