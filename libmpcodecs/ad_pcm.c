@@ -23,13 +23,23 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->channels=h->nChannels;
   sh_audio->samplerate=h->nSamplesPerSec;
   sh_audio->samplesize=(h->wBitsPerSample+7)/8;
+  sh_audio->sample_format=AFMT_S16_LE; // default
   switch(sh_audio->format){ /* hardware formats: */
+    case 0x1: // Microsoft PCM
+       switch (sh_audio->samplesize) {
+         case 1: sh_audio->sample_format=AFMT_U8; break;
+         case 2: sh_audio->sample_format=AFMT_S16_LE; break;
+         case 4: sh_audio->sample_format=AFMT_S32_LE; break;
+       }
+       break;
     case 0x6:  sh_audio->sample_format=AFMT_A_LAW;break;
     case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
 /*    case 0x2000: sh_audio->sample_format=AFMT_AC3; */
     case 0x736F7774: // 'twos'
+       sh_audio->sample_format=AFMT_S16_BE;
+       // intended fall-through
     case 0x74776F73: // 'swot'
        if(sh_audio->samplesize==1) sh_audio->sample_format=AFMT_S8;
 // Uncomment this if twos audio is broken for you
@@ -74,17 +84,5 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   int len=sh_audio->channels*sh_audio->samplesize-1;
   len=(minlen+len)&(~len); // sample align
   len=demux_read_data(sh_audio->ds,buf,len);
-#ifdef WORDS_BIGENDIAN
-  if(sh_audio->format!=0x736F7774){
-#else
-  if(sh_audio->format==0x736F7774){ // "twos" is swapped byteorder
-#endif
-    int j;
-    for(j=0;j<len;j+=2){
-      char x=buf[j];
-      buf[j]=buf[j+1];
-      buf[j+1]=x;
-    }
-  }
   return len;
 }
