@@ -896,10 +896,16 @@ else
   cc_check $_x11libdir -lX11 -lXext -lGL -lm $_socklib && _gl=yes
 fi
 
+if freebsd ; then
+  _iconv_tmp='#include <giconv.h>'
+else
+  _iconv_tmp='#include <iconv.h>'
+fi
+
 cat > $TMPC << EOF
 #include <stdio.h>
 #include <unistd.h>
-#include <iconv.h>
+$_iconv_tmp
 
 #define INBUFSIZE 1024
 #define OUTBUFSIZE 4096
@@ -930,7 +936,10 @@ main()
 
 EOF
 _iconv=yes
-if freebsd || bsdos ; then
+if freebsd ; then
+  cc_check $_extraincdir $_extralibdir -lm -lgiconv >/dev/null 2>&1 || \
+ { _iconv=no ; echo "iconv(3) function not detected!" ;}
+elif bsdos ; then
   cc_check $_extraincdir $_extralibdir -lm -liconv >/dev/null 2>&1 || \
  { _iconv=no ; echo "iconv(3) function not detected!" ;}
 else
@@ -1878,7 +1887,9 @@ fi
 
 if test "$_iconv" = yes ; then
  _iconv='#define USE_ICONV'
- if freebsd || bsdos ; then
+ if freebsd ; then
+  _iconvlib="-lgiconv"
+ elif bsdos ; then
   _iconvlib="-liconv"
  fi
 else

@@ -18,7 +18,11 @@
 #define ERR (void *)-1
 
 #ifdef USE_ICONV
+#ifdef __FreeBSD__
+#include <giconv.h>
+#else
 #include <iconv.h>
+#endif
 char *sub_cp=NULL;
 #endif
 
