@@ -1010,6 +1010,8 @@ current_module="demux_open";
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
 if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
 
+current_module="demux_open2";
+
 //file_format=demuxer->file_format;
 
 d_audio=demuxer->audio;
@@ -1167,58 +1169,6 @@ if(sh_audio){
 if(!sh_video)
    goto main;
 
-current_module="select_video_codec";
-
-// Go through the codec.conf and find the best codec...
-sh_video->codec=NULL;
-if(video_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
-{ /* local vars */
-short bestprio=-1;
-struct codecs_st *bestcodec=NULL;
-while(1){
-  sh_video->codec=find_codec(sh_video->format,
-    sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
-  if(!sh_video->codec/* && bestprio==-1*/){
-    if(video_family!=-1) {
-      //sh_video->codec=NULL; /* re-search */
-      mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CantFindVfmtFallback);
-      video_family=-1;
-      continue;      
-    }
-		if(bestprio==-1 || !video_codec) {
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    if(!sh_audio)
-      goto goto_next_file;
-    sh_video = d_video->sh = NULL;
-    goto main; // exit_player(MSGTR_Exit_error);
-    }
-  } else {
-    // is next line needed anymore? - atmos ::
-    if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
-    else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
-    else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
-	  else if(video_family==-1 && !video_codec && sh_video->codec->priority) {
-	    if(sh_video->codec->priority > bestprio) {
-        //printf("\n\n!!! setting bestprio from %d to %d for %s!!!\n\n", bestprio, sh_video->codec->priority, sh_video->codec->name);
-        bestprio=sh_video->codec->priority;
-        bestcodec=sh_video->codec;
-      }
-      continue;
-    }
-  } /* sh_video->codec */
-  break;
-}
-if(bestprio!=-1) {
-  //printf("chose codec %s by priority.\n", bestcodec->name);
-  sh_video->codec=bestcodec;
-}
-
-} /* end local vars */
-
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
-
 current_module="preinit_libvo";
 
 if((i=video_out->preinit(vo_subdevice))!=0){
@@ -1230,12 +1180,36 @@ inited_flags|=INITED_VO;
 
 current_module="init_video_codec";
 
-// init codec:
-//if(!init_video(sh_video,&vtune.pitch[0])){
-if(!init_video(sh_video,NULL)){
-     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
-     goto goto_next_file; // exit_player(MSGTR_Exit_error);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+
+// Go through the codec.conf and find the best codec...
+sh_video->inited=0;
+if(video_codec){
+    // forced codec by name:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
+    init_video(sh_video,video_codec,-1,-1);
+} else {
+    int status;
+    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
+    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
+	if(video_family>=0) // try first the preferred codec family:
+	    if(init_video(sh_video,NULL,video_family,status)) break;
+	if(init_video(sh_video,NULL,-1,status)) break;
+    }
 }
+if(!sh_video->inited){
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    if(!sh_audio) goto goto_next_file;
+    sh_video = d_video->sh = NULL;
+    goto main; // exit_player(MSGTR_Exit_error);
+}
+
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(auto_quality>0){
     // Auto quality option enabled
@@ -2444,7 +2418,7 @@ if(step_sec>0) {
      if ( use_gui ) guiGetEvent( guiIEvent,(char *)MP_CMD_GUI_FULLSCREEN );
       else
 #endif
-	video_out->control(VOCTRL_FULLSCREEN, 0);
+	if(video_out) video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
     case MP_CMD_SUB_POS:
     {
