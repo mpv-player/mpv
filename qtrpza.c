@@ -7,6 +7,8 @@
  *
  * Some code comes from qtsmc.c by Mike Melanson
  *
+ * A description of the decoding algorithm can be found here:
+ *   http://www.pcisys.net/~melanson/codecs/
  */
 
 #include "config.h"

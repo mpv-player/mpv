@@ -1,6 +1,8 @@
 /*
     Apple Graphics (SMC) Decoder for MPlayer
     by Mike Melanson
+    Special thanks for Roberto Togni <rtogni@bresciaonline.it> for
+    tracking down the final, nagging bugs.
 
     The description of the decoding algorithm can be found here:
       http://www.pcisys.net/~melanson/codecs/
@@ -59,9 +61,8 @@ int qt_init_decode_smc(void)
 #define ADVANCE_BLOCK() \
 { \
   pixel_ptr += block_x_inc; \
-  if (pixel_ptr >= (width * bytes_per_pixel)) \
+  if (pixel_ptr >= byte_width) \
   { \
-counter++; \
     pixel_ptr = 0; \
     row_ptr += block_y_inc * 4; \
   } \
@@ -77,8 +78,8 @@ void qt_decode_smc(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
-  int width,
-  int height,
+  int pixel_width,
+  int pixel_height,
   unsigned char *palette_map,
   int bytes_per_pixel)
 {
@@ -92,13 +93,14 @@ void qt_decode_smc(
   unsigned int color_flags_b;
   unsigned int flag_mask;
 
+  int byte_width = pixel_width * bytes_per_pixel;  // width of a row in bytes
+  int byte_height = pixel_height * byte_width;  // max image size, basically
   int row_ptr = 0;
   int pixel_ptr = 0;
   int pixel_x, pixel_y;
-  int row_inc = bytes_per_pixel * (width - 4);
-  int max_height = row_inc * height;
+  int row_inc = bytes_per_pixel * (pixel_width - 4);
   int block_x_inc = bytes_per_pixel * 4;
-  int block_y_inc = bytes_per_pixel * width;
+  int block_y_inc = bytes_per_pixel * pixel_width;
   int block_ptr;
   int prev_block_ptr;
   int prev_block_ptr1, prev_block_ptr2;
@@ -106,11 +108,6 @@ void qt_decode_smc(
   int total_blocks;
   int color_table_index;  // indexes to color pair, quad, or octet tables
   int color_index;  // indexes into palette map
-
-static int counter;
-
-//printf ("opcode count = %d\n", counter);
-counter = 0;
 
   if (!smc_initialized)
     return;
@@ -126,7 +123,7 @@ counter = 0;
     mp_msg(MSGT_DECVIDEO, MSGL_WARN, "MOV chunk size != encoded chunk size; using MOV chunk size\n");
 
   chunk_size = encoded_size;
-  total_blocks = (width * height) / (4 * 4);
+  total_blocks = (pixel_width * pixel_height) / (4 * 4);
 
   // traverse through the blocks
   while (total_blocks)
@@ -141,17 +138,15 @@ counter = 0;
       return;
     }
     // make sure the row pointer hasn't gone wild
-    if (row_ptr >= max_height)
+    if (row_ptr >= byte_height)
     {
       mp_msg(MSGT_DECVIDEO, MSGL_ERR, 
         "SMC decoder just went out of bounds (row ptr = %d, height = %d)\n",
-        row_ptr, max_height);
+        row_ptr, byte_height);
       return;
     }
 
     opcode = encoded[stream_ptr++];
-//if (counter < 3)
-//printf ("%d: opcode %02X\n", counter, opcode);
     switch (opcode & 0xF0)
     {
     // skip n blocks
@@ -177,10 +172,11 @@ counter = 0;
       }
 
       // figure out where the previous block started
-      if (row_ptr == 0)
-        prev_block_ptr1 = (row_ptr - block_y_inc * 4) + width - 4;
+      if (pixel_ptr == 0)
+        prev_block_ptr1 = (row_ptr - block_y_inc * 4) + 
+          byte_width - block_x_inc;
       else
-        prev_block_ptr1 = row_ptr + pixel_ptr - 4;
+        prev_block_ptr1 = row_ptr + pixel_ptr - block_x_inc;
 
       while (n_blocks--)
       {
@@ -194,7 +190,10 @@ counter = 0;
             decoded[block_ptr++] = decoded[prev_block_ptr++];
             decoded[block_ptr++] = decoded[prev_block_ptr++];
             if (bytes_per_pixel == 4) /* 32bpp */
+            {
               block_ptr++;
+              prev_block_ptr++;
+            }
           }
           block_ptr += row_inc;
           prev_block_ptr += row_inc;
@@ -219,20 +218,20 @@ counter = 0;
       }
 
       // figure out where the previous 2 blocks started
-      if (row_ptr == 0)
+      if (pixel_ptr == 0)
         prev_block_ptr1 = (row_ptr - block_y_inc * 4) + 
-          ((width - 4) * bytes_per_pixel);
+          byte_width - block_x_inc * 2;
+      else if (pixel_ptr == block_x_inc)
+        prev_block_ptr1 = (row_ptr - block_y_inc * 4) + 
+          byte_width - block_x_inc;
       else
-        prev_block_ptr1 = row_ptr + pixel_ptr - block_x_inc;
+        prev_block_ptr1 = row_ptr + pixel_ptr - block_x_inc * 2;
 
-      if (row_ptr == 0)
+      if (pixel_ptr == 0)
         prev_block_ptr2 = (row_ptr - block_y_inc * 4) + 
-          ((width - 8) * bytes_per_pixel);
-      else if (row_ptr == block_x_inc)
-        prev_block_ptr2 = (row_ptr - block_y_inc * 4) + 
-          ((width - 4) * bytes_per_pixel);
+          (byte_width - block_x_inc);
       else
-        prev_block_ptr2 = row_ptr + pixel_ptr - (block_x_inc * 2);
+        prev_block_ptr2 = row_ptr + pixel_ptr - block_x_inc;
 
       prev_block_flag = 0;
       while (n_blocks--)
@@ -252,7 +251,10 @@ counter = 0;
             decoded[block_ptr++] = decoded[prev_block_ptr++];
             decoded[block_ptr++] = decoded[prev_block_ptr++];
             if (bytes_per_pixel == 4) /* 32bpp */
+            {
               block_ptr++;
+              prev_block_ptr++;
+            }
           }
           block_ptr += row_inc;
           prev_block_ptr += row_inc;
@@ -265,7 +267,6 @@ counter = 0;
     case 0x60:
     case 0x70:
       n_blocks = GET_BLOCK_COUNT;
-//printf ("1-color encoding for %d blocks\n", n_blocks);
       color_index = encoded[stream_ptr++] * 4;
 
       while (n_blocks--)
@@ -346,16 +347,13 @@ counter = 0;
     // 4-color block encoding
     case 0xA0:
     case 0xB0:
-//for(i = 0; i < 16; i++)
-//  printf (" %02X", encoded[stream_ptr - 1 + i]);
-//printf ("\n");
       n_blocks = (opcode & 0x0F) + 1;
 
       // figure out which color quad to use to paint the 4-color block
       if ((opcode & 0xF0) == 0xA0)
       {
         // fetch the next 4 colors from bytestream and store in next
-        // available entry in the color pair table
+        // available entry in the color quad table
         for (i = 0; i < CQUAD; i++)
         {
           color_index = encoded[stream_ptr++] * BYTES_PER_COLOR;
@@ -410,7 +408,7 @@ counter = 0;
       if ((opcode & 0xF0) == 0xC0)
       {
         // fetch the next 8 colors from bytestream and store in next
-        // available entry in the color pair table
+        // available entry in the color octet table
         for (i = 0; i < COCTET; i++)
         {
           color_index = encoded[stream_ptr++] * BYTES_PER_COLOR;
@@ -461,7 +459,10 @@ counter = 0;
         {
           // reload flags at third row (iteration pixel_y == 2)
           if (pixel_y == 2)
+          {
             color_flags = color_flags_b;
+            flag_mask = 21;
+          }
           for (pixel_x = 0; pixel_x < 4; pixel_x++)
           {
             color_index = color_table_index + (BYTES_PER_COLOR * 
