@@ -125,9 +125,11 @@ void vlvo_term( void )
 
 uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
+#if 0
+/* original vo_mga stuff */
     uint8_t *src;
     uint8_t *dest;
-    uint32_t bespitch,bespitch2;
+    uint32_t bespitch,bespitch2,srcpitch;
     int i;
 
     bespitch = (mga_vid_config.src_width + (WIDTH_ALIGN-1)) & ~(WIDTH_ALIGN-1);
@@ -160,7 +162,47 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
         src+=stride[2];
         dest += bespitch2;
     }
+#else
+/* vo_xv stuff: slightly better for YV12 on radeon_vid */
+ uint8_t *src;
+ uint8_t *dst;
+ int i;
 
+ dst = lvo_mem + image_width * y + x;
+ src = image[0];
+ if(w==stride[0] && w==image_width) memcpy(dst,src,w*h);
+   else
+    for(i=0;i<h;i++)
+     {
+      memcpy(dst,src,w);
+      src+=stride[0];
+      dst+=image_width;
+     }
+
+ x/=2;y/=2;w/=2;h/=2;
+
+ dst = lvo_mem + image_width * image_height + image_width/2 * y + x;
+ src = image[2];
+ if(w==stride[2] && w==image_width/2) memcpy(dst,src,w*h);
+  else
+   for(i=0;i<h;i++)
+    {
+     memcpy(dst,src,w);
+     src+=stride[2];
+     dst+=image_width/2;
+   }
+ dst = lvo_mem + image_width * image_height * 5 / 4 + image_width/2 * y + x;
+ src = image[1];
+ if(w==stride[1] && w==image_width/2) memcpy(dst,src,w*h);
+  else
+   for(i=0;i<h;i++)
+    {
+     memcpy(dst,src,w);
+     src+=stride[1];
+     dst+=image_width/2;
+    }
+#endif
+ return 0;
 }
 
 uint32_t vlvo_draw_frame(uint8_t *src[])
