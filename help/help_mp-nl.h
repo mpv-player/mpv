@@ -345,7 +345,7 @@ static char help_text[]=
 #define MSGTR_DMOInitOK "INFO: Win32/DMO video codec initialisatie OK.\n"
 
 // x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: Kon de "EWMH fullscreen Event!" niet versturen\n"
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Kon de \"EWMH fullscreen Event!\" niet versturen\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Geen hardware mixing, een volume filter wordt gebruikt.\n"
 #define MSGTR_NoVolume "[Mixer] Geen geluidsvolume controle beschikbaar.\n"
