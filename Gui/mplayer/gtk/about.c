@@ -72,77 +72,85 @@ GtkWidget * create_About( void )
   gtk_widget_show( AboutText );
   gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),AboutText );
   gtk_text_insert( GTK_TEXT( AboutText ),NULL,NULL,NULL,
-  	"\n" \
-  	"GUI development sponsored by UHU Linux\n" \
-	"             (http://www.uhulinux.hu/)\n" \
-	"\n" \
-	"   MPlayer core team:\n" \
-	"\n" \
-	"     * Arpad Gereoffy (A'rpi/ESP-team)\n" \
-	"     * Zoltan Ponekker (Pontscho/Fresh!mindworkz)\n" \
-	"     * Gabor Berczi (Gabucino)\n" \
-	"     * Alex Beregszaszi (al3x)\n" \
-	"     * Gabor Lenart (LGB)\n" \
-	"     * Felix Buenemann (Atmos)\n" \
-	"     * Alban Bedel (Albeu)\n" \
-	"     * pl\n" \
-	"     * Michael Niedermayer\n" \
-	"\n" \
-	"   Additional codes:\n" \
-	"\n" \
-	"     * Szabolcs Berecz (Szabi)\n" \
-	"     * Laszlo Megyer (Lez, Laaz)\n" \
-	"     * Gyula Laszlo (Chass, Tegla)\n" \
-	"     * Zoltan Mark Vician (Se7en)\n" \
-	"     * Andreas Ackermann (Acki)\n" \
-	"     * TeLeNiEkO\n" \
-	"     * Michael Graffam\n" \
-	"     * Jens Hoffmann\n" \
-	"     * German Gomez Garcia\n" \
-	"     * Dariusz Pietrzak (Eyck)\n" \
-	"     * Marcus Comstedt\n" \
-	"     * Juergen Keil\n" \
-	"     * Vladimir Kushnir\n" \
-	"     * Bertrand BAUDET\n" \
-	"     * Derek J Witt\n" \
-	"     * Artur Zaprzala\n" \
-	"     * lanzz@lanzz.org\n" \
-	"     * Adam Tla/lka\n" \
-	"     * Folke Ashberg\n" \
-	"     * Kamil Toman\n" \
-	"     * Ivan Kalvatchev\n" \
-	"     * Sven Goethel\n" \
-	"     * joy_ping\n" \
-	"     * Eric Anholt\n" \
-	"     * Jiri Svoboda\n" \
-	"     * Oliver Schoenbrunner\n" \
-	"     * Jeroen Dobbelaere\n" \
-	"     * David Holm\n" \
-	"     * Panagiotis Issaris\n" \
-	"     * Mike Melanson\n" \
-	"     * Tobias Diedrich\n" \
-	"     * Kilian A. Foth\n" \
-	"     * Tim Ferguson\n" \
-	"     * Sam Lin\n" \
-	"     * Johannes Feigl\n" \
-	"     * Kim Minh Kaplan\n" \
-	"     * Brian Kuschak\n" \
-	"     * Stephen Davies\n" \
-	"     * Rik Snel\n" \
-	"     * Anders Johansson\n" \
-	"     * Roberto Togni\n" \
-	"     * Wojtek Kaniewski\n" \
-	"     * Fredrik Kuivinen\n" \
-	"\n" \
-	"   Main testers:\n" \
-	"\n" \
-	"     * Tibor Balazs (Tibcu)\n" \
-	"     * Peter Sasi (SaPe)\n" \
-	"     * Christoph H. Lampert\n" \
-	"     * Attila Kinali\n" \
-	"     * Dirk Vornheder\n" \
-	"     * Bohdan Horst (Nexus)\n" \
-	"\n",1481 );
+  	"\n" 
+	MSGTR_ABOUT_UHU 
+	"             (http://www.uhulinux.hu/)\n" 
+	"\n" 
+	MSGTR_ABOUT_CoreTeam 
+	"\n"
+	"     * Arpad Gereoffy (A'rpi/ESP-team)\n"
+	"     * Zoltan Ponekker (Pontscho/fresh!mindworkz)\n"
+	"     * Gabor Berczi (Gabucino)\n"
+	"     * Alex Beregszaszi (al3x)\n" 
+	"     * Gabor Lenart (LGB)\n" 
+	"     * Felix Buenemann (Atmos)\n" 
+	"     * Alban Bedel (Albeu)\n" 
+	"     * pl\n" 
+	"     * Michael Niedermayer\n" 
+	"\n" 
+	MSGTR_ABOUT_AdditionalCoders 
+	"\n"
+	"     * Szabolcs Berecz (Szabi)\n"
+	"     * Laszlo Megyer (Lez, Laaz)\n"
+	"     * Gyula Laszlo (Chass, Tegla)\n" 
+	"     * Zoltan Mark Vician (Se7en)\n" 
+	"     * Andreas Ackermann (Acki)\n" 
+	"     * Michael Graffam\n"
+	"     * Jens Hoffmann\n"
+	"     * German Gomez Garcia\n" 
+	"     * Dariusz Pietrzak (Eyck)\n" 
+	"     * Marcus Comstedt\n"
+	"     * Juergen Keil\n"
+	"     * Vladimir Kushnir\n" 
+	"     * Bertrand Baudet\n" 
+	"     * Derek J Witt\n"
+	"     * Artur Zaprzala\n" 
+	"     * lanzz@lanzz.org\n"
+	"     * Adam Tla/lka\n"
+	"     * Folke Ashberg\n"
+	"     * Kamil Toman\n"
+	"     * Ivan Kalvatchev\n"
+	"     * Sven Goethel\n" 
+	"     * joy_ping\n"
+	"     * Eric Anholt\n"
+	"     * Jiri Svoboda\n"
+	"     * Oliver Schoenbrunner\n" 
+	"     * Jeroen Dobbelaere\n" 
+	"     * David Holm\n"
+	"     * Panagiotis Issaris\n"
+	"     * Mike Melanson\n" 
+	"     * Tobias Diedrich\n"
+	"     * Kilian A. Foth\n"
+	"     * Tim Ferguson\n" 
+	"     * Sam Lin\n"
+	"     * Johannes Feigl\n"
+	"     * Kim Minh Kaplan\n"
+	"     * Brian Kuschak\n" 
+	"     * Stephen Davies\n"
+	"     * Rik Snel\n"
+	"     * Anders Johansson\n" 
+	"     * Roberto Togni\n"
+	"     * Wojtek Kaniewski\n"
+	"     * Fredrik Kuivinen\n"
+	"     * Diego Biurrun\n"
+	"     * Sascha Sommer\n"
+	"     * Jindrich Makovicka\n" 
+	"     * D Richard Felker III\n"
+	"     * Moritz Bunkus\n" 
+	"     * Colin Leroy\n" 
+	"     * Joey Parrish\n"
+	"     * Dominik Mierzejewski\n" 
+	"     * Florian Schneider\n" 
+	"\n"
+	MSGTR_ABOUT_MainTesters 
+	"\n" 
+	"     * Tibor Balazs (Tibcu)\n" 
+	"     * Peter Sasi (SaPe)\n"
+	"     * Christoph H. Lampert\n"
+	"     * Attila Kinali\n" 
+	"     * Dirk Vornheder\n" 
+	"     * Bohdan Horst (Nexus)\n" 
+	"\n",-1 );
 
   AddHSeparator( vbox );
   Ok=AddButton( MSGTR_Ok,AddHButtonBox( vbox ) );

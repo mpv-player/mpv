@@ -480,6 +480,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache be/ki"
 #define MSGTR_PREFERENCES_LoadFullscreen "Indítás teljes képernyõn"
 
+#define MSGTR_ABOUT_UHU "GUI fejlesztést az UHU Linux támogatta\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer csapat:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   További kóderek:\n"
+#define MSGTR_ABOUT_MainTesters "   Teszterek:\n"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "végzetes hiba ..."
 #define MSGTR_MSGBOX_LABEL_Error "hiba ..."

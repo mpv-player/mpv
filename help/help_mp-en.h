@@ -586,6 +586,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "DVD device:"
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
 
+#define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer core team:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Additional coders:\n"
+#define MSGTR_ABOUT_MainTesters "   Main testers:\n"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
 #define MSGTR_MSGBOX_LABEL_Error "Error!"
