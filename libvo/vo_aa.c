@@ -327,7 +327,11 @@ query_format(uint32_t format) {
 	case IMGFMT_RGB24:
 	case IMGFMT_Y8:
 	case IMGFMT_Y800:
-	    return 1;
+	    return VFCAP_CSP_SUPPORTED
+#ifdef USE_OSD
+	    | VFCAP_OSD
+#endif
+	    ;
     }
     return 0;
 }
