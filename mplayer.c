@@ -3197,6 +3197,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_GET_PERCENT_POS : {
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
     } break;
+#ifdef HAVE_MENU
+    case MP_CMD_CRUN : {
+#ifndef __MINGW32__
+        if(!fork()) {
+          execl("/bin/sh","sh","-c",cmd->args[0].v.s,NULL);
+          exit(0);
+        }
+#endif
+    } break;
+#endif
 
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV_EVENT: {
