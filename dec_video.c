@@ -250,7 +250,8 @@ switch(sh_video->codec->driver){
    int ret=xacodec_init_video(sh_video,out_fmt);
    if(!ret) return 0;
 #else
-   mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_NoXAnimSupport);
+//   mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_NoXAnimSupport);
+   mp_msg(MSGT_DECVIDEO, MSGL_ERR, "MPlayer was compiled WIHTOUT XAnim support!\n");
    return 0;
 #endif
    break;
