@@ -19,11 +19,23 @@ LIBAD_EXTERN(dvdpcm)
 static int init(sh_audio_t *sh)
 {
 /* DVD PCM Audio:*/
-    sh->channels=2;
-    sh->samplerate=48000;
-    sh->i_bps=2*2*48000;
-/*    sh_audio->pcm_bswap=1;*/
-  return 1;
+    if(sh->codecdata_len==3){
+	// we have LPCM header:
+	unsigned char h=sh->codecdata[1];
+	sh->channels=1+(h&7);
+	switch((h>>4)&3){
+	case 0: sh->samplerate=48000;break;
+	case 1: sh->samplerate=96000;break;
+	case 2: sh->samplerate=44100;break;
+	case 3: sh->samplerate=32000;break;
+	}
+    } else {
+	// use defaults:
+	sh->channels=2;
+	sh->samplerate=48000;
+    }
+    sh->i_bps=2*sh->channels*sh->samplerate;
+    return 1;
 }
 
 static int preinit(sh_audio_t *sh)
