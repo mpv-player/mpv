@@ -1651,8 +1651,9 @@ switch(sh_video->codec->driver){
 //      sh_video->bih->biWidth = 1280;
 //      sh_video->o_bih.biWidth = 1280;
 	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
-      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME |
-                        ( (drop_frame==2)?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
+      ret = ICDecompress(sh_video->hic, 
+	  ( (d_video->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
+	  ( (drop_frame==2 && !(d_video->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
                          sh_video->bih,   start,
                         &sh_video->o_bih,
                         drop_frame ? 0 : sh_video->our_out_buffer);
