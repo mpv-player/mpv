@@ -201,6 +201,7 @@ static short get_driver(char *s,int audioflag)
 		"alaw",
 		"msgsm",
 		"dshow",
+		"dvdpcm",
 		NULL
 	};
 	static char *videodrv[] = {

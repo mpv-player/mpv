@@ -5,7 +5,7 @@ int driver=sh_audio->codec->driver;
 
 sh_audio->samplesize=2;
 sh_audio->samplerate=0;
-sh_audio->pcm_bswap=0;
+//sh_audio->pcm_bswap=0;
 
 sh_audio->a_buffer_size=16384;  // default size, maybe not enough for Win32/ACM
 sh_audio->a_buffer=NULL;
@@ -63,18 +63,18 @@ case 4: {
     break;
 }
 case 2: {
-//  if(file_format==DEMUXER_TYPE_AVI){    // FIXME!!!!!!!
     // AVI PCM Audio:
     WAVEFORMATEX *h=&sh_audio->wf;
     sh_audio->channels=h->nChannels;
     sh_audio->samplerate=h->nSamplesPerSec;
     sh_audio->samplesize=(h->wBitsPerSample+7)/8;
-//  } else {
-//    // DVD PCM audio:
-//    sh_audio->channels=2;
-//    sh_audio->samplerate=48000;
+    break;
+}
+case 8: {
+    // DVD PCM Audio:
+    sh_audio->channels=2;
+    sh_audio->samplerate=48000;
 //    sh_audio->pcm_bswap=1;
-//  }
     break;
 }
 case 3: {
@@ -149,17 +149,19 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen){
         len=MP3_DecodeFrame(buf,-1);
         sh_audio->channels=2; // hack
         break;
-      case 2: // PCM
+      case 2: // AVI PCM
       { len=demux_read_data(sh_audio->ds,buf,OUTBURST);
-        if(sh_audio->pcm_bswap){
-          int j;
+        break;
+      }
+      case 8: // DVD PCM
+      { int j;
+        len=demux_read_data(sh_audio->ds,buf,OUTBURST);
           //if(i&1){ printf("Warning! pcm_audio_size&1 !=0  (%d)\n",i);i&=~1; }
           for(j=0;j<len;j+=2){
             char x=buf[j];
             buf[j]=buf[j+1];
             buf[j+1]=x;
           }
-        }
         break;
       }
       case 5:  // aLaw decoder
