@@ -46,7 +46,7 @@
        played as non-interleaved otherwise you get a-v desync or buffer overflow.
 
     MPlayer supports 2 kind of timing for AVI files:
-    - bps-based: it is baed on bitrate/samplerate of video/audio steram.
+    - bps-based: it is based on bitrate/samplerate of video/audio steram.
       this method is used by most players, including avifile and wmp.
       files with broken headers, and files created with VBR audio but not
       vbr-compliant encoder will result a-v desync with this method.
@@ -61,7 +61,7 @@
     they have an INDEX block at the end of the file. It's optional, but
     most files has such block, because it REQUIRES for seeking.
     Btw usually it can be rebuild from file content, mplayer does it with
-    the -idx switch. Mplayer can fix broken index blocks using -forceidx.
+    the -idx switch. Mplayer can recreate broken index blocks using -forceidx.
     As AVI files needs index for random access, broken files with no index
     are usually unplayable.
     Of course, cutting/joining AVI files needs special programs.
@@ -90,7 +90,7 @@
     
     Codecs: video is mostly microsoft's mpeg4 variants: MP42, MP43 (aka DivX),
             WMV1 and WMV2. but any codecs allowed.
-            audio is usually wma or voxware, but any codecs allowed.
+            audio is usually wma or voxware, sometimes mp3, but any codecs allowed.
 
     FPS: no fixed fps, every video frame has an exact timestamp instead.
     I've got stream with up to 3 sec frame display times.
@@ -98,7 +98,7 @@
   - QuickTime / MOV files:
     They come from Mac users, usually with .mov or .qt extension, but as
     MPEG Group choose quicktime as recommended file format for MPEG4,
-    sometimes you meet quicktime files with .mpg extension.
+    sometimes you meet quicktime files with .mpg or .mp4 extension.
   
     At first look, it's a mixture of ASF and AVI.
     It requires INDEX block for random access and seeking, and even for
@@ -110,9 +110,9 @@
     Broken files are only playable if they have header at the beginning!
     
     Codecs: any codecs allowed, both CBR and VBR.
-    Note: most new mov files use Sorenson video and audio, they are
-    patented, closed, secret, (TM)-ed etc formats, only Apple's quicktime
-    player is able to playback these files (on win/mac only).
+    Note: most new mov files use Sorenson video and QDesign Music audio,
+    they are patented, closed, secret, (TM)-ed etc formats, only Apple's
+    quicktime player is able to playback these files (on win/mac only).
 
   - VIVO files:
     They are funny streams. They have a human-readable ascii header at
