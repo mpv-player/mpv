@@ -343,7 +343,7 @@ static char *model2str(unsigned char type)
  * bit 0 (0x01) means fullscreen (-fs)
  * bit 1 (0x02) means mode switching (-vm)
  * bit 2 (0x04) enables software scaling (-zoom)
- * bit 3 (0x08) enables flipping (-flip)
+ * bit 3 (0x08) enables flipping (-flip) (NK: and for what?)
  */
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
@@ -362,7 +362,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("vo_vesa: switch -flip is not supported\n");
 	}
 	if(flags & 0x04) vesa_zoom = 1;
-	if(flags & 0x01) vesa_zoom = 2;
+	if(flags & 0x01 && vesa_zoom) vesa_zoom = 2;
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
 	if((err=vbeGetControllerInfo(&vib)) != VBE_OK)
@@ -434,8 +434,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("\nvo_vesa: Modes in detail:\n");
 	}
 	mode_ptr = vib.VideoModePtr;
-	w = vo_screenwidth ? vo_screenwidth : width;
-	h = vo_screenheight ? vo_screenheight : height;
+	if(vesa_zoom)
+	{
+	    image_width = d_width;
+	    image_height= d_height;
+	}
+	if(vo_screenwidth) w = vo_screenwidth;
+	else w = max(image_width,width);
+	if(vo_screenheight) h = vo_screenheight;
+	else h = max(image_height,height);
         for(i=0;i < num_modes;i++)
 	{
 		if((err=vbeGetModeInfo(mode_ptr[i],&vmib)) != VBE_OK)
@@ -497,14 +504,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  {
 		      /* software scale */
 		      if(vesa_zoom > 1)
-		      {
-			image_width = video_mode_info.XResolution;
-			image_height = video_mode_info.YResolution;
-		      }
-		      else
-		      vesa_aspect(width,height,  
+		      vesa_aspect(image_width,image_height,  
 		    		  video_mode_info.XResolution,video_mode_info.YResolution,
 				  &image_width,&image_height);
+/*			image_width = video_mode_info.XResolution;
+			image_height = video_mode_info.YResolution;*/
 		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
 	    	      scale_yinc=(height << 16) / image_height + 2;
 		      SwScale_Init();
@@ -553,6 +557,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			PRINT_VBE_ERR("vbeSaveState",err);
 			return -1;
 		}
+/* Below 'return -1' is impossible */
 		if((err=vbeSetMode(video_mode,NULL)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSetMode",err);
