@@ -94,6 +94,11 @@
 /* define to force software-surface (video surface stored in system memory)*/
 #undef SDL_NOHWSURFACE
 
+/* if defined, don't use depth/colorspace-conversions for rgb/bgr
+ * also no scaling done then, much faster (~2 times)!
+ */
+#undef SDL_DIRECT_BLIT
+
 //#define BUGGY_SDL //defined by configure
 
 /* MONITOR_ASPECT MUST BE FLOAT */
@@ -228,6 +233,24 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         	case IMGFMT_UYVY:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0)+1,2*priv->width);
 		break;
+#ifdef SDL_DIRECT_BLIT		
+		case IMGFMT_RGB15:
+		case IMGFMT_BGR15:
+    			vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+2*(y0*priv->width+x0),2*priv->width);
+		break;
+		case IMGFMT_RGB16:
+		case IMGFMT_BGR16:
+    			vo_draw_alpha_rgb16(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+2*(y0*priv->width+x0),2*priv->width);
+		break;
+		case IMGFMT_RGB24:
+		case IMGFMT_BGR24:
+    			vo_draw_alpha_rgb24(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+3*(y0*priv->width+x0),3*priv->width);
+		break;
+		case IMGFMT_RGB32:
+		case IMGFMT_BGR32:
+    			vo_draw_alpha_rgb32(w,h,src,srca,stride,((uint8_t *) priv->surface->pixels)+4*(y0*priv->width+x0),4*priv->width);
+		break;
+#else		
 		case IMGFMT_RGB15:
 		case IMGFMT_BGR15:
     			vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) priv->rgbsurface->pixels)+2*(y0*priv->width+x0),2*priv->width);
@@ -244,6 +267,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 		case IMGFMT_BGR32:
     			vo_draw_alpha_rgb32(w,h,src,srca,stride,((uint8_t *) priv->rgbsurface->pixels)+4*(y0*priv->width+x0),4*priv->width);
 		break;
+#endif		
   	}	
 }
 
@@ -778,6 +802,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 	
 	if(priv->mode) {
+#ifdef SDL_DIRECT_BLIT
+	if(verbose) printf("SDL: using direct surface blitting, no depth/colorspace-conversion/scaling possible.\n");
+#endif		
 		priv->framePlaneRGB = width * height * priv->rgbsurface->format->BytesPerPixel;
 		priv->stridePlaneRGB = width * priv->rgbsurface->format->BytesPerPixel;
 	}	
@@ -845,6 +872,26 @@ static uint32_t draw_frame(uint8_t *src[])
 	case IMGFMT_BGR24:	
 	case IMGFMT_RGB32:
 	case IMGFMT_BGR32:
+#ifdef SDL_DIRECT_BLIT		
+		/*if(SDL_MUSTLOCK(priv->surface)) {
+	    		if (SDL_LockSurface (priv->surface)) {
+				if(verbose) printf("SDL: Couldn't lock RGB surface\n");
+				return -1;
+	    		}
+		}*/
+		dst = (uint8_t *) priv->surface->pixels;
+	    	if(priv->flip) {
+	    		mysrc+=priv->framePlaneRGB;
+			for(i = 0; i < priv->height; i++) {
+				mysrc-=priv->stridePlaneRGB;
+				memcpy (dst, mysrc, priv->stridePlaneRGB);
+				dst+=priv->stridePlaneRGB;
+			}
+		}
+		else memcpy (dst, src[0], priv->framePlaneRGB);
+		/*if(SDL_MUSTLOCK(priv->surface)) 
+			SDL_UnlockSurface (priv->surface);*/
+#else			
 		/*if(SDL_MUSTLOCK(priv->rgbsurface)) {
 	    		if (SDL_LockSurface (priv->rgbsurface)) {
 				if(verbose) printf("SDL: Couldn't lock RGB surface\n");
@@ -863,6 +910,7 @@ static uint32_t draw_frame(uint8_t *src[])
 		else memcpy (dst, src[0], priv->framePlaneRGB);
 		/*if(SDL_MUSTLOCK(priv->rgbsurface)) 
 			SDL_UnlockSurface (priv->rgbsurface);*/
+#endif			
 		break;
 
         }
@@ -1087,11 +1135,13 @@ static void flip_page (void)
 	    case IMGFMT_BGR24:	
 	    case IMGFMT_RGB32:
 	    case IMGFMT_BGR32:
+#ifndef SDL_DIRECT_BLIT	    
 	    	/* blit to the RGB surface */
 		blitconv = SDL_DisplayFormat(priv->rgbsurface);	
 		if(SDL_BlitSurface (blitconv, NULL, priv->surface, NULL))
 			printf("SDL: Blit failed: %s\n", SDL_GetError());
 		SDL_FreeSurface(blitconv);	
+#endif		
 
 		/* update screen */
 		//SDL_UpdateRect(priv->surface, 0, 0, priv->surface->clip_rect.w, priv->surface->clip_rect.h);
