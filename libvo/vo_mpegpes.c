@@ -100,29 +100,40 @@ config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uin
 
 static uint32_t preinit(const char *arg){
 #ifdef HAVE_DVB
+    int card = 0;
+    char vo_file[30], ao_file[30], *tmp;
+    
+    if(arg != NULL){
+	if((tmp = strstr(arg, "card=")) != NULL) {
+	    card = atoi(&tmp[5]);
+	    if((card < 1) || (card > 4)) {
+		mp_msg(MSGT_VO, MSGL_ERR, "DVB card number must be between 1 and 4\n");
+		return -1;
+	    }
+	    card--;
+	    arg = NULL;
+	}
+    }
+    
     if(!arg){
     //|O_NONBLOCK
 #ifndef HAVE_DVB_HEAD
-	printf("Opening /dev/ost/video+audio\n");
-	if((vo_mpegpes_fd = open("/dev/ost/video",O_RDWR)) < 0){
-		perror("DVB VIDEO DEVICE: ");
-		return -1;
-	}
-	if((vo_mpegpes_fd2 = open("/dev/ost/audio",O_RDWR|O_NONBLOCK)) < 0){
-		perror("DVB AUDIO DEVICE: ");
-		return -1;
-	}
+	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/ost/video+audio\n");
+	sprintf(vo_file, "/dev/ost/video");
+	sprintf(ao_file, "/dev/ost/audio");
 #else
-	printf("Opening /dev/dvb/adapter0/video0+audio0\n");
-	if((vo_mpegpes_fd = open("/dev/dvb/adapter0/video0",O_RDWR)) < 0){
+	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/dvb/adapter%d/video0+audio0\n", card);
+	sprintf(vo_file, "/dev/dvb/adapter%d/video0", card);
+	sprintf(ao_file, "/dev/dvb/adapter%d/audio0", card);
+#endif
+	if((vo_mpegpes_fd = open(vo_file,O_RDWR)) < 0){
         	perror("DVB VIDEO DEVICE: ");
         	return -1;
 	}
-	if((vo_mpegpes_fd2 = open("/dev/dvb/adapter0/audio0",O_RDWR|O_NONBLOCK)) < 0){
+	if((vo_mpegpes_fd2 = open(ao_file,O_RDWR|O_NONBLOCK)) < 0){
         	perror("DVB AUDIO DEVICE: ");
         	return -1;
 	}
-#endif
 	if ( (ioctl(vo_mpegpes_fd,VIDEO_SET_BLANK, false) < 0)){
 		perror("DVB VIDEO SET BLANK: ");
 		return -1;
@@ -162,7 +173,9 @@ static uint32_t preinit(const char *arg){
 	return 0;
     }
 #endif
-    vo_mpegpes_fd=open(arg ? arg : "grab.mpg",O_WRONLY|O_CREAT,0666);
+    arg = (arg ? arg : "grab.mpg");
+    mp_msg(MSGT_VO,MSGL_INFO, "Saving PES stream to %s\n", arg);
+    vo_mpegpes_fd=open(arg,O_WRONLY|O_CREAT,0666);
     if(vo_mpegpes_fd<0){	
 	perror("vo_mpegpes");
 	return -1;
