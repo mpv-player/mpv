@@ -56,21 +56,8 @@
   movies made with the infamous DivX codec! In addition it is much faster than
   the native Win32 DivX DLLs but slower than libavcodec.  Hence its usage as a
   decoder is <B>DISCOURAGED</B>. However, it is useful for encoding. One
-  disadvantage of this codec is that it is currently closed source.</P>
-
-<P>The codec can be downloaded from one of the following URLs:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A><BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
-
-<P>Unpack it, and run <CODE>./install.sh</CODE> as root.</P>
-
-<P><B>Note:</B> Do <B>not</B> forget adding <CODE>/usr/local/lib</CODE> to your
-  <CODE>/etc/ld.so.conf</CODE> and running <CODE>ldconfig</CODE>!</P>
-
-<P>MPlayer autodetects DivX4/DivX5 if it is properly installed, just
-  compile as usual. If it does not detect it, you did not install or configure
-  it correctly.</P>
+  disadvantage of this codec is that it is not available under an Open Source
+  license.</P>
 
 <P>DivX4Linux works in two modes:</P>
 
@@ -93,6 +80,48 @@
 
 <P><B>Note:</B> If your <CODE>-vo</CODE> driver supports direct rendering, then
   <CODE>-vc divx4</CODE> may be faster or even the fastest solution.</P>
+
+<P>The codec can be downloaded from
+  <A HREF="http://avifile.sourceforge.net">avifile</A>.
+  Unpack it, run <CODE>./install.sh</CODE> as root and do not forget adding
+  <CODE>/usr/local/lib</CODE> to your <CODE>/etc/ld.so.conf</CODE> and running
+  <CODE>ldconfig</CODE>.</P>
+
+<P>Get the CVS version of the core library like this:</P>
+
+<OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</CODE></LI>
+  <LI>This core library is split into a decore and encore library that have to
+    be compiled separately. For the decore Library, simply type
+    <PRE>
+    cd divxcore/decore/build/linux
+    make
+    cp libdivxdecore.so /usr/local/lib 
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0 
+    cp ../../src/decore.h /usr/local/include
+    </PRE>
+    </LI>
+  <LI>Alas, for the encore library there is no Linux Makefile available, and the
+    MMX optimized code only works on Windows. You can still compile it, though,
+    by using this
+    <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>.
+    <PRE>
+    cd ../../../encore/build
+    mkdir linux
+    cd linux
+    cp path/Makefile .
+    make
+    cp libdivxencore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+    cp ../../src/encore.h /usr/local/include
+    </PRE>
+    </LI>
+</OL>
+
+<P>MPlayer autodetects DivX4/DivX5 if it is properly installed, just
+  compile as usual. If it does not detect it, you did not install or configure
+  it correctly.</P>
 
 
 <H4><A NAME="libavcodec">2.2.1.2 FFmpeg DivX/libavcodec</A></H4>
