@@ -1445,6 +1445,13 @@ Signed 32-bit (Big-Endian)
 .B \-mixer <egység>
 /dev/\:mixer helyett más egység használata.
 .TP
+.B \-mixer-channel <mixer csatorna> (csak -ao oss)
+Ezzel az opcióval megadható hogy a hangerõállító funkció az alapértelmezett PCM
+csatorna helyett más csatornára vonatkozzon. Néhány példa:
+.B vol, pcm, line.
+Az opciók teljes listáját lásd a SOUND_DEVICE_NAMES változóban a
+/usr/include/linux/soundcard.h file-ban.
+.TP
 .B \-nowaveheader (csak -ao pcm)
 Ne írjon wave fejlécet.
 Csak RAW PCM-hez.
