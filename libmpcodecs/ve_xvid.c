@@ -99,6 +99,7 @@ static int xvidenc_qpel = 0;
 static int xvidenc_max_bframes = 0;
 static int xvidenc_bquant_ratio = 150;
 static int xvidenc_bquant_offset = 100;
+static int xvidenc_bf_threshold = 0;
 static int xvidenc_gmc = 0;
 static int xvidenc_chroma_me = 0;
 static int xvidenc_chroma_opt = 0;
@@ -139,6 +140,7 @@ struct config xvidencopts_conf[] = {
     { "max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
     { "bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
     { "bquant_offset", &xvidenc_bquant_offset, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+    { "bf_threshold", &xvidenc_bf_threshold, CONF_TYPE_INT, CONF_RANGE, -255, 255, NULL},
     { "reduced", &xvidenc_reduced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "chroma_me", &xvidenc_chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -272,6 +274,7 @@ config(struct vf_instance_s* vf,
     if (xvidenc_interlacing)
 	fp->enc_frame.general |= XVID_INTERLACING;
 #ifdef XVID_API_UNSTABLE
+    fp->enc_frame.bframe_threshold = xvidenc_bf_threshold;
     if (xvidenc_lumi_mask)
 	fp->enc_frame.general |= XVID_LUMIMASKING;
     if (xvidenc_qpel) {
