@@ -462,8 +462,7 @@ video_out)</para></listitem>
 <listitem><para>current level of image postprocessing (when using
 <option>-autoq</option>)</para></listitem>
 <listitem><para>current cache size used (around 50% is normal)</para></listitem>
-<listitem><para>playback speed as a factor to the original 
-speed</para></listitem>
+<listitem><para>playback speed as a factor of original speed</para></listitem>
 </itemizedlist>
 Most of them are for debug purposes and will be removed at some point.
 </para></answer>
