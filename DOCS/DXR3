@@ -20,23 +20,37 @@ harddisk.
 
 2. Usage
 
-    -vo dxr3:<devicenum>		For video output :<devicenum> is not needed unless
-					you have more than one em8300 device in your computer
-    -vo dxr3:noprebuf			Turn of prebuffering. This is only needed if you are
-					having sync issues with normal playback, this will
-					make playback appear less smooth and will not use all
-					available cpu power when playing non-mpeg content.
-					Note: With prebuffering A-V: should be negative, if
-					      it's nonnegative your computer is too slow to
-					      properly play the video and you should disble
-					      prebuffering if you have sync issues.
-					      Without prebuffering this value should stay as
-					      close to 0 at all times.
+     -vo dxr3:<devicenum>		For video output :<devicenum> is not needed unless
+ 					you have more than one em8300 device in your computer
+     -vo dxr3:noprebuf			Turn of prebuffering. This is only needed if you are
+ 					having sync issues with normal playback, this will
+ 					make playback appear less smooth and will not use all
+ 					available cpu power when playing non-mpeg content.
+ 					Note: With prebuffering A-V: should be negative, if
+ 					      it's nonnegative your computer is too slow to
+ 					      properly play the video and you should disble
+ 					      prebuffering if you have sync issues.
+ 					      Without prebuffering this value should stay
+ 					      close to 0 at all times.
+ 					Note2: Some very fast computers seems to have issues
+ 					       with prebuffering. Blame Sigma for that ;).
+ 					       You can safely use :noprebuf since your machines
+ 					       are fast enough to give you smooth playback anyway.
     -ao oss:<devicefile>		For audio output
     -ac hwac3				For digital audio output instead of
 					analog
     -vc mpegpes				For mpeg playback
+    -scalefactor <float>		Set the scale factor for libavcodec.
+					1.0 = Normal res
+					2.0 = Double res
+					0.5 = Half res
+					You get the drift, anyway, this is useful for those of you
+					on slower machines who would want to watch that brand new
+					divx file, just set this to a value as close to 1.0 as
+					possible where you still get decent playback speed.
     -aop list=resample:fout=48000	If samplerate is below 44100Hz
+ 					This does not work with digital audio output
+ 					(-ac hwac3)
     <devicenum>				Number of device to use for playback
 				        (if you	have more than one card.).
 					This can usually be left out (-vo dxr3).
