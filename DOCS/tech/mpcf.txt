@@ -109,6 +109,7 @@ stream_header:
 	for(;;){
 		codec_specific_data_type	v
 		if(codec_specific_data_type==0) break;
+		codec_specific_data_size	v
 		codec_specific_data		b
 	}
 
