@@ -124,8 +124,6 @@ typedef struct
  int                  CapsLock;
 // --- Misc -------------------------------------------------------------------------------------
 
- int		      OFocused;
-
  Atom                 AtomDeleteWindow;
  Atom                 AtomTakeFocus;
  Atom                 AtomRolle;
