@@ -1902,6 +1902,21 @@ fi
 echores "$_bsdi_dvd"
 
 
+echocheck "HPUX SCSI header"
+cat > $TMPC << EOF
+#include <sys/scsi.h>
+int main(void) { return 0; }
+EOF
+_hpux_scsi_h=no
+cc_check && _hpux_scsi_h=yes
+if test "$_hpux_scsi_h" = yes ; then
+  _def_hpux_scsi_h='#define HPUX_SCTL 1'
+else
+  _def_hpux_scsi_h='#undef HPUX_SCTL'
+fi
+echores "$_hpux_scsi_h"
+
+
 echocheck "userspace SCSI headers (Solaris)"
 cat > $TMPC << EOF
 #   include <unistd.h>
@@ -4459,6 +4474,7 @@ $_def_dvd_bsd
 $_def_dvd_linux
 $_dev_dvd_openbsd
 $_def_sol_scsi_h
+$_def_hpux_scsi_h
 $_def_stddef
 
 /* Common data directory (for fonts, etc) */

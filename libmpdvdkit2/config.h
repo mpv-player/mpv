@@ -31,6 +31,9 @@
 /* Define if <extras/BSDI_dvdioctl/dvd.h> defines DVD_STRUCT. */
 #undef DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H
 
+/* HPUX SCSI headers. */
+#undef HPUX_SCTL
+
 /* Have userspace SCSI headers. */
 #undef SOLARIS_USCSI
 
