@@ -1177,7 +1177,7 @@ Use the <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
 
 <qandaentry>
 <question><para>
-Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play a DVD?
+Do I need to be (setuid) root to be able to play a DVD?
 </para></question>
 <answer><para>
 No. However you must have the proper rights
