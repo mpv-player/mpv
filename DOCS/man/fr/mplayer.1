@@ -9,7 +9,7 @@
 .
 .\" l'indentation par défaut est 7, ne pas changer!
 .nr IN 7
-.\" défini l'indentation pour les sous-options
+.\" Définit l'indentation pour les sous-options
 .nr SS 4
 .\"
 .de IPs
@@ -369,7 +369,7 @@ fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
 .SH "OPTIONS GÉNÉRALES"
 .TP
 .B \-codecs-file <nomfichier>
-Défini le fichier de codecs au lieu de celui du système ou de celui inclus
+Définit le fichier de codecs au lieu de celui du système ou de celui inclus
 dans mplayer.
 Voir aussi \-afm, \-ac, \-vfm et \-vc.
 .TP
@@ -826,7 +826,7 @@ type de carte) ou ~/.mplayer/channels.conf en dernier recours.
 .
 .TP
 .B \-dvd-device <périph> (DVD uniquement)
-Défini le nom du périphérique DVD (par défaut\ : /dev/\:dvd).
+Définit le nom du périphérique DVD (par défaut\ : /dev/\:dvd).
 .TP
 .B \-dvdangle <id\ angle> (DVD uniquement)
 Certains DVD contiennent des scènes qui peuvent être vues sous différents
@@ -973,7 +973,7 @@ utilise le démultiplexeur vidéo brut
 .IPs fps=<valeur>
 débit en trames par seconde (par défaut\ : 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
-défini la taille d'image standard
+définit la taille d'image standard
 .IPs w=<valeur>
 largeur de l'image en pixels
 .IPs h=<valeur>
@@ -1071,7 +1071,7 @@ disponible: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
 Spécifie un autre périphérique que celui par défaut /dev/\:video0.
 .IPs input=<valeur>
-Défini une autre entrée que celle par défaut 0 (Télévision) (voir
+Définit une autre entrée que celle par défaut 0 (Télévision) (voir
 la sortie console pour en obtenir la liste)
 .IPs freq=<valeur>
 Spécifie sur quelle fréquence régler le tuner (par exemple \& 511.250).
@@ -1100,7 +1100,7 @@ Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
-Défini des noms pour les canaux. 
+Définit des noms pour les canaux. 
 Utilisez _ pour les espaces dans les noms (ou jouez avec les guillemets ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
@@ -1118,7 +1118,7 @@ tv_set_channel TV1, etc.
 Initialise les paramètres de couleur de la carte. 
 Correspondent à [luminosité|contraste|tonalité|saturation]
 .IPs audiorate=<valeur>
-Défini le débit binaire de capture audio.
+Définit le débit binaire de capture audio.
 .IPs forceaudio
 Capture l'audio même si il n'y a pas de sources audio signalées par v4l.
 .IPs alsa
@@ -1289,7 +1289,7 @@ N'affiche que les sous-titres forcés des sous-titres DVD sélectionnés,
 par ex.\& avec \-slang.
 .TP
 .B \-fribidi-charset <nom\ charset>
-Défini le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
+Définit le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
 (par défaut\ : ISO8859-8).
 .TP
 .B \-ifo <fichier ifo VOBsub>
@@ -1300,7 +1300,7 @@ des sous-titres VOBSUB.
 Désactive le chargement automatique du fichier de sous-titres.
 .TP
 .B \-osdlevel <0\-3> (MPlayer uniquement)
-Défini dans quel mode OSD démarrer.
+Définit dans quel mode OSD démarrer.
 .
 .PD 0
 .RSs
@@ -1327,7 +1327,7 @@ MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
 mode verbeux (\-v).
 .TP
 .B \-slang <code-pays\ à\ deux\ lettres> (voir aussi l'option \-sid)
-Défini la langue du sous-titre.
+Définit la langue du sous-titre.
 MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
 mode verbeux (\-v).
 .br
@@ -1366,7 +1366,7 @@ utilise le flou gaussien swscaler (très joli)
 .
 .TP
 .B \-spualign <-1\-2> (OSD uniquement)
-Défini l'alignement des sous-titres SPU (DVD/VobSub).
+Définit l'alignement des sous-titres SPU (DVD/VobSub).
 .PD 0
 .RSs
 .IPs -1
@@ -1390,7 +1390,7 @@ Utilise/\:affiche ces sous-titres.
 Un seul fichier peut être affiché à la fois et 'j' permet d'alterner entre eux.
 .TP
 .B \-sub-bg-alpha <0\-255>
-Défini la valeur du canal de transparence alpha pour le fond des sous-titres
+Définit la valeur du canal de transparence alpha pour le fond des sous-titres
 et de l'OSD.
 De grandes valeurs signifient plus transparent.
 La valeur 0 est une exception et signifie complètement transparent.
@@ -1424,7 +1424,7 @@ Désactive tout post-traitement du texte après avoir chargé les sous-titres.
 Utilisé pour débogage.
 .TP
 .B \-subalign <0\-2> (OSD uniquement)
-Défini l'alignement des sous-titres alignés avec \-subpos.
+Définit l'alignement des sous-titres alignés avec \-subpos.
 .PD 0
 .RSs
 .IPs 0
@@ -1528,7 +1528,7 @@ Fixe le coefficient de mise à l'échelle automatique (en pourcentage de la
 taille de l'écran) (par défaut\ : 5).
 .TP
 .B \-subfps <flottant>
-Défini le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
+Définit le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
 que celui du film)
 .br
 .I NOTE:
@@ -1537,12 +1537,12 @@ Uniquement pour les fichiers de sous-titres basés sur des trames,
 c'est-à-dire pas le format MicroDVD.
 .TP
 .B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
-Défini la position des sous-titres sur l'écran.
+Définit la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .TP
 .B \-subwidth <10\-100> (OSD uniquement)
-Défini la largeur maximum des sous-titres sur l'écran. 
+Définit la largeur maximum des sous-titres sur l'écran. 
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .TP
@@ -1553,12 +1553,12 @@ Indique à MPlayer de traiter le fichier de sous-titre au format unicode.
 Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .TP
 .B \-vobsub <fichier\ VOBsub\ sans\ extension>
-Défini le fichier VOBsub qui sera utilisé pour les sous-titres.
+Définit le fichier VOBsub qui sera utilisé pour les sous-titres.
 Indiquez le chemin complet sans extensions, c'est-à-dire sans '.idx', \
 '.ifo' ou '.sub'.
 .TP
 .B \-vobsubid <0\-31>
-Défini le numéro de sous-titre du fichier VOBsub.
+Définit le numéro de sous-titre du fichier VOBsub.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -1572,7 +1572,7 @@ Outrepasse le nom de fichier par défaut utilisé par \-ao pcm.
 .TP
 .TP
 .B \-aop <list=plugin1,plugin2...:option1=valeur1:opt2=val2...>
-Défini le(s) plugin(s) et leurs options (voir également la
+Définit le(s) plugin(s) et leurs options (voir également la
 documentation).
 .sp 1
 Les options disponibles sont:
@@ -1655,7 +1655,7 @@ Ne pas inclure l'entête wave.
 Utilisé avec PCM brut (raw).
 .TP
 .B \-volstep <0\-100>
-Défini l'incrément de volume du mixeur en pourcentage du volume maximum
+Définit l'incrément de volume du mixeur en pourcentage du volume maximum
 (par défaut\ : 3).
 .
 .
@@ -1665,7 +1665,7 @@ architectures de sortie audio.
 La syntaxe est\ :
 .TP
 .B \-ao <driver1[:sous-option1[=valeur]:...],driver2,...[,]>
-Défini une liste de priorité des drivers de sortie audio à utiliser.
+Définit une liste de priorité des drivers de sortie audio à utiliser.
 .PP
 Si la liste finit par ',', les autres pilotes seront essayés en cas d'échec.
 Les sous-options sont optionnelles et peuvent, la plupart du temps,
@@ -1702,7 +1702,7 @@ deux canaux)
 .IPs noblock
 Active le mode non-bloquant.
 .IPs device=<device>
-Défini le nom de périphérique.
+Définit le nom de périphérique.
 Remplacez les ',' par '.' et ':' par '=' dans les noms de périphérique ALSA.
 .RE
 .PD 1
@@ -1723,7 +1723,7 @@ Pilote de sortie audio OSS.
 .PD 0
 .RSs
 .IPs dsp-device
-Défini le périphérique audio d'entrée (/dev/dsp par defaut).
+Définit le périphérique audio d'entrée (/dev/dsp par defaut).
 .RE
 .PD 1
 .TP
@@ -1782,7 +1782,7 @@ en exécutant
 .I mplayer \-aahelp
 .TP
 .B \-adapter <valeur>
-Défini la carte graphique qui recevra l'image
+Définit la carte graphique qui recevra l'image
 Nécessite l'option \-vm.
 Vous pouvez obtenir une liste des cartes disponibles si cette option est
 combinée à l'option \-v.
@@ -1801,7 +1801,7 @@ Ajuste le contraste du signal vidéo (par défaut\ : 0).
 N'est pas géré par tous les pilotes de sortie vidéo.
 .TP
 .B \-dfbopts <valeur> (\-vo directfb2 uniquement)
-Défini une liste de paramètres pour le pilote de sortie vidéo directfb.
+Définit une liste de paramètres pour le pilote de sortie vidéo directfb.
 .TP
 .B \-display <nom> (X11 uniquement)
 Spécifier le nom d'hôte et le numéro d'affichage du serveur X sur lequel vous
@@ -1835,7 +1835,8 @@ Cette option est utilisée pour contrôler le pilote de sortie vidéo dxr2.
 .
 .RSs
 .IPs ar-mode=<valeur>
-mode ratio d'aspect (0 = normal, 1 = pan et scan, 2 = letterbox (par défault))
+mode de rapport hauteur/\:largeur (0 = normal, 1 = pan et scan, 2 = letterbox
+(par défault))
 .IPs iec958-encoded
 Met le mode de sortie iec958 à "encodé".
 .IPs iec958-decoded
@@ -1910,12 +1911,13 @@ Active l'affichage superposé (overlay) (par défaut).
 .IPs nooverlay
 Active la sortie TV.
 .IPs overlay-ratio=<1\-2500>
-Règle l'overlay (par défaut\ : 1000).
+Règle l'affichage superposé (overlay) (par défaut\ : 1000).
 .RE
 .
 .TP
-.B \-fb <périphérique> (fbdev ou DirectFB uniquement) (OBSOLÈTE)
-Défini un périphérique framebuffer à utiliser (par défaut\ : /dev/\:fb0).
+.B \-fb <périphérique> (\-vo fbdev ou directfb uniquement) (OBSOLÈTE)
+Définit le périphérique framebuffer (tampon de trame) à utiliser
+(par défaut\ : /dev/\:fb0).
 .TP
 .B \-fbmode <nommode> (\-vo fbdev uniquement)
 Se place dans le mode vidéo <nommode> tel qu'indiqué dans
@@ -1925,27 +1927,26 @@ Se place dans le mode vidéo <nommode> tel qu'indiqué dans
 Le framebuffer VESA ne permet pas le changement de mode.
 .TP
 .B \-fbmodeconfig <nomfichier> (\-vo fbdev uniquement)
-Outrepasse la configuration du framebuffer (par défaut\ : défini dans
-/etc/\:fb.modes).
+Outrepasse le fichier de configuration du mode du framebuffer
+(par défaut\ : /etc/\:fb.modes).
 .TP
 .B \-forcexv (\-vo sdl uniquement)
 Force l'utilisation de XVideo à travers le pilote de sortie viéo sdl.
 .TP
 .B \-fs (voir aussi \-zoom)
-Affichage plein-écran (centre le film, et place les bandes noires autour).
-Basculer avec la touche 'f' (les modes de sortie vidéo ne le permettent pas
-tous).
+Affichage plein-écran (centre le film, et dessine des bandes noires autour).
+Tous les pilotes de sortie vidéo ne le permettent pas.
 Voir aussi \-zoom.
 .TP
 .B \-fsmode-dontuse <0\-31> (OBSOLÈTE, utilisez l'option \-fs)
 Essayez cette option si vous avez encore des problèmes en plein écran.
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
-Défini une liste de liste classé par ordre de priorité des mode plein-écran
+Définit une liste de classé par ordre de priorité des mode plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
 .br
-Si vous avez des problèmes d'affichage où votre vidéo en plein écran est
+Si vous avez des problèmes d'affichage, comme votre vidéo en plein écran est
 cachée par d'autres fenêtres, essayez de ré-ordonner cette liste.
 .br
 .I NOTE:
@@ -1955,25 +1956,26 @@ Les types disponibles sont:
 .sp 1
 .PD 0
 .RSs
-.IPs "above"
+.IPs above
 Utilise l'astuce _NETWM_STATE_ABOVE si disponible.
-.IPs "below"
+.IPs below
 Utilise l'astuce _NETWM_STATE_BELOW si disponible.
-.IPs "fullscreen"
+.IPs fullscreen
 Utilise l'astuce _NETWM_STATE_FULLSCREEN si disponible.
-.IPs "layer"
+.IPs layer
 Utilise l'astuce _WIN_LAYER avec la couche par défaut.
-.IPs "layer=<0..15>"
+.IPs layer=<0..15>
 Utilise l'astuce _WIN_LAYER avec le numéro de couche.
-.IPs "netwm"
+.IPs netwm
 Force le style NETWM.
-.IPs "none"
+.IPs none
 N'initialise pas la couche plein-écran de la fenêtre.
-.IPs "stays_on_top"
+.IPs stays_on_top
 Utilise l'astuce _NETWM_STATE_STAYS_ON_TOP si disponible.
 .REss
 .\" Ceci est un hack pour garder EXAMPLE indenté. Sera corrigé un jour...
-.B \
+.TP
+.B \ 
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -2013,7 +2015,8 @@ Place la fenêtre en bas à gauche de l'écran
 .
 .TP
 .B \-guiwid <id\ fenêtre> (voir aussi \-wid) (GUI uniquement)
-Indique à la GUI d'utiliser également une fenêtre X11 et de se fixer au bas de
+Indique à la GUI (Graphical User Interface\ : interface homme-machine
+graphique) d'utiliser également une fenêtre X11 et de se fixer au bas de
 la vidéo, ce qui est utile pour embarquer une mini-GUI dans un navigateur (avec
 mplayerplug-in par exemple).
 .TP
@@ -2026,38 +2029,39 @@ Non géné par tous les pilotes de sortie vidéo.
 Spécifie les option du pilote de sortie vidéo jpeg.
 .br
 Les options disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs [no]progressive
 Fichiers JPEG standards ou progressifs.
 .IPs [no]baseline
-Utilisation de la baseline ou pas.
-.IPs optimize=<valeur>
-facteur d'optimisation (0\-100)
-.IPs smooth=<valeur>
-facteur de douceur (0\-100)
-.IPs quality=<valeur>
-facteur de qualité (0\-100)
+Utilisation de baseline ou pas.
+.IPs optimize=<0\-100>
+facteur d'optimisation
+.IPs smooth=<0\-100>
+facteur d'adoucissement
+.IPs quality=<0\-100>
+facteur de qualité
 .IPs outdir=<valeur>
 répertoire où sauver les fichiers JPEG
 .RE
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <dotclock\ (ou\ pixelclock) range> (\-vo fbdev et vesa \
+.B \-monitor-dotclock <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Regardez dans etc/\:example.conf pour plus d'info, ainsi que dans
-DOCS/\:HTML/\:fr/\:devices.html#video-dev.
+Définit les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
 .TP
-.B \-monitor-hfreq <intervalle de fréquence horizontal> (\-vo fbdev et vesa \
+.B \-monitor-hfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
+Définit l'intervalle de rafraichissement horizontal du moniteur.
 .TP
-.B \-monitor-vfreq <intervalle de fréquence vertical> (\-vo fbdev et vesa \
+.B \-monitor-vfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
+Définit l'intervalle de rafraichissement vertical du moniteur.
 .TP
 .B \-monitoraspect <rapport> (Voir aussi \-aspect)
-Fixe le rapport hauteur/largeur de votre moniteur ou de votre TV.
+Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -2070,23 +2074,23 @@ Fixe le rapport hauteur/largeur de votre moniteur ou de votre TV.
 .
 .TP
 .B \-nograbpointer
-Ne capture pas le pointeur de la sourie après une changement de mode vidéo
+Ne capture pas le pointeur de la souris après une changement de mode vidéo
 (\-vm).
 Utile pour les configurations multi-écrans.
 .TP
 .B \-nokeepaspect
-Ne garde pas l'aspect ratio de la fenêtre lors d'un redimensionnant de fenêtre
-X11.
+Ne garde pas le rapport hauteur/\:largeur de la fenêtre lors d'un
+redimensionnement de fenêtre X11.
 Ne fonctionne actuellement qu'avec les pilotes de sortie vidéo x11, xv, xmga
 et xvidix.
-De plus, votre gestionnaire de fenêtres doit comprendre les astuces d'aspect
-de fenêtres.
+De plus, votre gestionnaire de fenêtres doit comprendre les astuces de rapport
+hauteur/\:largeur de fenêtres.
 .TP
 .B \-noxv (\-vo sdl uniquement)
 Désactive l'utilisation de XVideo au travers du pilote de sortie vidéo SDL.
 .TP
 .B \-ontop
-Rends le lecteur toujours visible
+Rends le lecteur toujours visible.
 Permise par les pilotes qui utilisent X11, excepté SDL, aussi bien que directx
 et gl2 sous Windows.
 .TP
@@ -2097,6 +2101,10 @@ L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga
 et xvidix.
 .TP
+.B \-refreshrate <Hz>
+Définit la fréquence de rafraichissement en Hz.
+N'est géré actuellement que par \-vo directx combinée avec l'option \-vm.
+.TP
 .B \-rootwin
 Joue le film dans la fenêtre root (le fond du bureau).
 Les images en fond d'écran peuvent néanmoins cacher le film.
@@ -2105,30 +2113,31 @@ xvidix, quartz et directx.
 .TP
 .B \-saturation <-100\-100>
 Ajuste la saturation du signal vidéo (par défaut\ : 0).
-Vous pouvez obtenir une sortie noir&blanc avec cette option.
+Vous pouvez obtenir une sortie en noir et blanc avec cette option.
 N'est pas génré par tous les pilotes de sortie vidéo.
 .TP
-.B \-screenw <pixels>
-Défini la résolution horizontale de votre écran pour des pilotes de
-sortie vidéo qui ne connaîssent pas la résolution de l'écran, comme
-fbdev, x11 et TVout
-.TP
 .B \-screenh <pixels>
-Défini la résolution verticale de votre écran pour des pilotes de
-sortie vidéo qui ne connaîssent pas la résolution de l'écran, comme
+Définit la résolution verticale de votre écran pour des pilotes de
+sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .TP
-.B \-stop-xscreensaver
-Désactive xscreensaver au lancement et le réactive à la sortie.
+.B \-screenw <pixels>
+Définit la résolution horizontale de votre écran pour des pilotes de
+sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
+fbdev, x11 et TVout
 .TP
-.B \-vm \ \ \
+.B \-stop-xscreensaver (X11 uniquement)
+Désactive xscreensaver (le reposeur d'écran) au lancement et le réactive
+à la sortie.
+.TP
+.B \-vm \ \ \ 
 Essaie de changer vers autre mode vidéo.
 Les pilotes de sortie vidéo dga, x11, xv, sdl et directx le permettent.
-Si utilisée avec le pilote de sortie vidéo directx, les options \-screenw,
+Si utilisé avec le pilote de sortie vidéo directx, les options \-screenw,
 \-screenh, \-bpp et \-refreshrate peuvent être utilisées pour paramétrer ce
-nouveau mode vidéo.
+nouveau mode d'affichage vidéo.
 .TP
-.B \-vsync \ \
+.B \-vsync \ \ 
 Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .TP
 .B \-wid <window\ id> (voir aussi \-guiwid) (X11 uniquement)
@@ -2141,13 +2150,12 @@ Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
 .TP
 .B \-z <0\-9> (\-vo png uniquement)
-Défini le taux de compression du pilote de sortie vidéo PNG 
+Définit le taux de compression du pilote de sortie vidéo png 
 0 équivaut à pas de compression et 9 à la compression maximale.
 .TP
 .B \-zrbw (\-vo zr uniquement)
-Affiche en noir et blanc (pour des performances optimales, cette option
-peut être combinée avec l'option 'décoder uniquement en noir et blanc' des
-codecs appartenant à la famille FFmpeg).
+Affiche en noir et blanc.
+Pour des performances optimales, cette option '\-lavdopts gray'.
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr uniquement)
 Sélectionne une une partie de l'image pour affichage, de multiples occurrences
@@ -2179,7 +2187,7 @@ Affiche la liste de toutes les options \-zr*, leur valeur par défaut et un
 exemple de mode cinérama.
 .TP
 .B \-zrnorm <norm> (\-vo zr uniquement)
-Défini la norme TV à PAL ou NTSC (par défaut\ : 'no change').
+Définit la norme TV à PAL ou NTSC (par défaut\ : 'no change').
 .TP
 .B \-zrquality <1\-20> (\-vo zr uniquement)
 Un nombre de 1 (meilleur) à 20 (pire) représentant la qualité de l'encodage
@@ -2328,7 +2336,7 @@ Identique à \-af (voir cette option).
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Défini une liste de priorité des familles de codecs audio à utiliser,
+Définit une liste de priorité des familles de codecs audio à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -2347,7 +2355,7 @@ essaie les codecs Win32 en premier
 .
 .TP
 .B \-aspect <ratio>
-Force l'aspect ratio des films.
+Force le rapport hauteur/\:largeur des films.
 C'est autodétecté dans les fichiers MPEG, mais ne peut l'être dans la plupart
 des fichiers AVI.
 
@@ -2493,7 +2501,7 @@ décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .
 .TP
 .B \-noaspect
-Désactive la compensation automatique de l'aspect ratio.
+Désactive la compensation automatique du rapport hauteur/\:largeur.
 .TP
 .B \-noslices
 Désactive l'affichage de la vidéo par tranches/\:bandes de 16 pixels, affiche
@@ -2635,7 +2643,7 @@ essaie le codec MPEG1/\:2 de libavcodec, puis libmpeg2, puis les autres
 .
 .TP
 .B \-vfm <pilote1,pilote2,...>
-Défini une liste de priorité des familles de codecs vidéo à utiliser,
+Définit une liste de priorité des familles de codecs vidéo à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -2661,7 +2669,7 @@ essaie les codecs XAnim en premier
 .TP
 .B \-x <x> (MPLAYER uniquement)
 Zoome l'image à la largeur x (si le zoom sw/\:hw est disponible).
-Désactive les calculs d'aspect.
+Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
@@ -2683,15 +2691,15 @@ Désactive la méthode 2 de rendu direct.
 .IPs valeur<=8
 Zoome l'image d'un facteur <x>.
 .IPs valeur>8
-Initialiser la largeur à valeur et calculer la hauteur pour garder l'aspect
-ratio.
+Initialiser la largeur à <valeur> et calculer la hauteur pour garder le
+rapport hauteur/\:largeur.
 .RE
 .PD 1
 .
 .TP
 .B \-y <y> (MPLAYER uniquement)
 Zoome l'image à la hauteur y (si le zoom sw/\:hw est disponible).
-Désactive les calculs d'aspect.
+Désactive les calculs de rapport hauteur/\:largeur.
 .TP
 .B \-zoom \
 Permet le zoom logiciel, si disponible.
@@ -2842,10 +2850,11 @@ d_width/\:d_height !
 .br
 -1:   largeur/\:hauteur originales
 .br
--2:   Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio
-redimensionné.
+-2:   Calcule l/\:h en utilisant l'autre dimension et le rapport
+hauteur/\:largeur redimensionné.
 .br
--3: Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio original.
+-3: Calcule l/\:h en utilisant l'autre dimension et le rapport hauteur/\:largeur
+original.
 .REss
 .IPs interlaced
 Bascule le redimmensionnement entrelacé.
@@ -2888,15 +2897,15 @@ spal:    768x576 (PAL à pixels carrés)
 .RE
 .TP
 .B dsize={aspect|l:h}
-Change la taille/l'aspect de l'affichage à un point arbitraire de la chaine de
-fitres.
+Change la taille/le rapport hauteur/\:largeur de l'affichage à un point
+arbitraire de la chaine de fitres.
 Aspect peut être indiqué en tant que fraction (4/3) ou en tant que nombre à
 virgule (1.33).
 Vous pouvez également spécifier les largeurs et hauteurs exactes d'affichage
 désirées.
 Notez que ce filtre ne fait AUCUN redimmensionnement lui-même; il affecte juste
 ce que feront les prochains redimmensionnements (logiciels ou matériels) feront
-en corrigeant l'aspect.
+en corrigeant le rapport hauteur/\:largeur.
 .TP
 .B yuy2
 Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
@@ -3036,13 +3045,14 @@ DVB/\:DXR3.
 .B dvbscale[=aspect]
 Fixe le zoom optimum pour les cartes DVB, en redimmensionnant sur l'axe X de
 façon matérielle et en calculant le redimmensionnement sur l'axe Y de façon
-logicielle pour conserver l'aspect.
+logicielle pour conserver le rapport hauteur/\:largeur.
 Utile uniquement avec expand+scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
-contrôle l'aspect ratio, calculé comme ceci: DVB_HAUTEUR*ASPECTRATIO,
-par défaut\ : 576*4/3=768, fixez-le à 576*(16/9)=1024 pour une télé 16:9.
+contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci:
+DVB_HAUTEUR*ASPECTRATIO, par défaut\ : 576*4/3=768, fixez-le à
+576*(16/9)=1024 pour une télé 16:9.
 .RE
 .TP
 .B "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
@@ -3512,7 +3522,7 @@ conversion bitmap 1bpp vers YUV/BGR 8/15/16/32
 .B down3dright[=lignes]
 Repositionne et redimmensionne les images stéréoscopiques.
 Extrait les deux champs et les place côte à côte, les redimmensionnant pour
-garder l'aspect du film.
+garder le rapport hauteur/\:largeur du film.
 .PD 0
 .RSs
 .IPs lignes
@@ -3739,7 +3749,7 @@ Sélectionne un port XVideo spécifique.
 .PD 1
 .TP
 .B x11 (X11 uniquement)
-Pilote de sortie en mémoire partagée sans accélération matérielle qui
+Pilote de sortie vidéo en mémoire partagée sans accélération matérielle qui
 fonctionne dès que X11 est présent.
 .TP
 .B xover (X11 uniquement)
@@ -3752,7 +3762,7 @@ Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de
 XFree86 4.x.
 .TP
 .B dga (X11 uniquement)
-Sortie vidéo par l'extension Direct Graphics Access de XFree86.
+Joue la vidéo par l'intermédiaire de l'extension Direct Graphics Access de XFree86.
 Considéré comme obsolète.
 .TP
 .B sdl\ \ \ \ 
@@ -3761,8 +3771,17 @@ Layer).
 .TP
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) est une interface pour les fonctionnalités
-d'accélération vido des différentes cartes graphiques.
+d'accélération vidéo de différentes cartes graphiques.
 Pilote de sortie vidéo très rapide sur les cartes le gérant.
+.PD 0
+.RSs
+.IPs <sous-périphérique>
+Choisi explicitement le sous-périphérique à utiliser.
+Les pilotes de sous-périphérique existant sont cyberblade_vid,
+mach64_vid, mga_crtc2_vid, mga_vid, nvidia_vid, pm3_vid, radeon_vid,
+rage128_vid et sis_vid.
+.RE
+.PD 1
 .TP
 .B xvidix (X11 uniquement)
 VIDIX tournant sous X11.
@@ -3774,7 +3793,7 @@ VIDIX tournant dans une console.
 Version Windows du pilote VIDIX.
 .TP
 .B directx (Windows uniquement)
-Pilote de sortie qui utilise l'interface DirectX.
+Pilote de sortie vidéo utilisant l'interface DirectX.
 .PD 0
 .RSs
 .IPs noaccel
@@ -3784,9 +3803,9 @@ Essayez cette option si vous avez des problèmes d'affichage.
 .PD 1
 .TP
 .B quartz (Mac OS X uniquement)
-Pilote de sortie Quartz pour Mac OS X.
+Pilote de sortie vidéo Quartz pour Mac OS X.
 Dans certain cas, il est préférable de forcer le format YUV
-avec e.g. \-vf format=yuy2
+avec par ex.\& \-vf format=yuy2
 .PD 0
 .RSs
 .IPs device_id=<numéro>
@@ -3795,14 +3814,14 @@ Choisir le moniteur à utiliser en plein écran.
 .PD 1
 .TP
 .B fbdev (Linux uniquement)
-Utilise le framebuffer du noyau pour la sortie vidéo.
+Utilise le framebuffer du noyau pour afficher la vidéo.
 .TP
 .B fbdev2 (Linux uniquement)
-Utilise le framebuffer du noyau pour la sortie vidéo,
+Utilise le framebuffer du noyau pour afficher la vidéo,
 implémentation différente.
 .TP
 .B vesa\ \ \ 
-Pilote de sortie générique qui devrait fonctionner sur n'imorte quelle
+Pilote de sortie vidéo générique qui devrait fonctionner sur n'imorte quelle
 carte compatible VESA VBE 2.0.
 .PD 0
 .RSs
@@ -3818,11 +3837,11 @@ FIXME: documenter cela
 .PD 1
 .TP
 .B svga\ \ \ 
-Sortie vidéo en utilisant la librairie SVGA.
+Affiche la vidéo en utilisant la librairie SVGA.
 .PD 0
 .RSs
 .IPs "<mode vidéo>"
-Défini le mode vidéo à utiliser.
+Définit le mode vidéo à utiliser.
 Ce mode peut être donné au format <largeur>x<hauteur>x<couleurs>,
 ex.\& 640x480x16M ou d'après leur numéro de mode graphique, ex.\& 84.
 .IPs bbosd
@@ -3843,20 +3862,40 @@ Utilise svga avec VIDIX.
 .PD 1
 .TP
 .B gl\ \ \ \ \ 
-Pilote de sortie OpenGL.
+Pilote de sortie vidéo OpenGL.
+Version très dépouillée, sans gestion de l'OSD et nécessitant que la taille
+de la vidéo soit plus petite que la taille maximale d'un texture permise par
+votre implémentation d'OpenGL.
+Faite pour fonctionner même avec l'implémentation la plus simple l'OpenGL.
+.PD 0
+.RSs
+.IPs manyfmts
+Active la gestion de plus de formats de couleurs (RGB and BGR).
+Nécessite une version d'OpenGL >= 1.2, ne FONCTIONNE PAS encore correctement.
+.IPs slice-height=<0\-...>
+Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
+0 pour l'image entière.
+.RE
+.PD 1
 .TP
 .B gl2\ \ \ \ 
-Pilote de sortie OpenGL, seconde génération.
+Pilote de sortie vidéo OpenGL, seconde génération.
+Gère l'OSD et les vidéo de taille supérieure à la taille maximum d'une
+texture.
 .TP
 .B null\ \ \ 
 Pas de sortie vidéo.
 Utile pour les benchmarks.
 .TP
 .B aa\ \ \ \ \ 
-Pilote de sortie art ASCII qui fonctionne dans une console texte.
+Pilote de sortie vidéo art ASCII fonctionnant dans une console texte.
+.TP
+.B caca\ \ \ 
+Pilote de sortie vidéo art ASCII en couleur fonctionnant dans une console
+texte.
 .TP
 .B bl\ \ \ \ \ 
-Lecture vidéo en utilisant le protocole UDP  Blinkenlights.
+Lecture vidéo en utilisant le protocole UDP Blinkenlights.
 Ce pilote est hautement spécifique à certains matériels.
 .TP
 .B ggi\ \ \ \ 
@@ -3875,18 +3914,18 @@ Selectionne une couche.
 Joue la vidéo en utilisant la librairie DirectFB, seconde génération.
 .TP
 .B dfbmga\ 
-Pilote de sortie spécifique Matrox G400/G450/G550 utilisant la librairie 
-DirectFB.
-Active CRTC2 (seconde tête), affichant la vidéo indépendemment de la première
-tête. 
+Pilote de sortie vidéo spécifique aux Matrox G400/\:G450/\:G550 utilisant
+la librairie DirectFB pour exploiter des fonctions câblées spéciales.
+Active CRTC2 (bi-écran), affichant la vidéo indépendemment dé l'autre écran. 
 .TP
 .B mga (Linux uniquement)
-Pilote de sortie spécifique Matrox qui utilise le YUV back end scaler sur les 
-cartes Gxxx au moyen d'un module noyau.
+Pilote de sortie vidéo spécifique aux cartes Matrox utilisant le mécanisme
+de changement de taille (scaling) en espace de couleur YUV sur les cartes
+Gxxx au moyen d'un module noyau.
 Si vous avez une carte Matrox, c'est l'option la plus rapide.
 .TP
 .B xmga (Linux, X11 uniquement)
-Le pilote de sortie MGA, tournant dans une fenêtre X11.
+Le pilote de sortie vidéo MGA, tournant dans une fenêtre X11.
 .TP
 .B syncfb\ 
 Pilote de sortie vidéo du module noyau SyncFB, qui permet de gérer
@@ -3895,15 +3934,21 @@ matériel, ou le redimensionnement et la synchronisation de votre sortie vidéo
 avec la fréquence de rafraichissement verticale de votre moniteur. 
 .TP
 .B 3dfx (Linux uniquement)
+Pilote de sortie vidéo spécifique aux cartes 3Dfx.
+FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
+.TP
+.B tdfxfb (Linux uniquement)
 Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
 accélération YUV.
+FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
 .TP
 .B tdfx_vid (Linux uniquement)
-Pilote de sortie spécifique 3Dfx.
+Pilote de sortie vidéo spécifique aux cartes 3Dfx.
 Fonctionne en conjonction avec un module noyau.
+FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
 .TP
 .B dxr2\ \ \ 
-Pilote de sortie spécifique DXR2.
+Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
 Voir aussi l'option -dxr2.
 .PD 0
 .RSs
@@ -3915,8 +3960,8 @@ Active l'overlay.
 .PD 1
 .TP
 .B dxr3\ \ \ 
-Pilote de sortie spécifique pour le chipset de décodage MPEG Sigma Designs 
-em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
+Pilote de sortie vidéo spécifique pour le chipset de décodage MPEG
+Sigma Designs em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
 Voir aussi le filtre vidéo lavc.
 .PD 0
 .RSs
@@ -3947,15 +3992,16 @@ Spécifie le numéro de périphérique à utiliser si vous avez plus d'une carte em83
 .PD 1
 .TP
 .B mpegpes
-Pilote de sortie spécifique DVB. 
+Pilote de sortie vidéo spécifique DVB. 
 .TP
 .B zr\ \ \ \ \ 
-Pilote de sortie pour un certain nombre de cartes de capture/lecture MJPEG.
+Pilote de sortie vidéo pour un certain nombre de cartes de capture/lecture
+MJPEG.
 Voir également les options -zr* et -zrhelp.
 .TP
 .B zr2\ \ \ \ 
-Pilote de sortie pour un certain nombre de cartes de capture/lecture MJPEG,
-seconde génération.
+Pilote de sortie vidéo pour un certain nombre de cartes de capture/lecture
+MJPEG, seconde génération.
 Voir aussi le filtre vidéo zrmjpeg.
 .TP
 .B md5\ \ \ \ 
@@ -4625,12 +4671,14 @@ encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
 .PD 1
 .TP
 .B aspect=<x/y>
-Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
+Stocke le rapport hauteur/\:largeur du film en interne, tout comme les fichiers
+MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
 n'en est pas diminuée.
-Seul MPlayer sera capable de relire ces fichiers correctement, les autres
-lecteurs l'afficheront avec un mauvais aspect.
-Le paramètre d'aspect peut être donné en tant que ratio ou nombre à virgule.
+Probablement seul MPlayer sera capable de relire ces fichiers correctement,
+les autres lecteurs l'afficheront avec un mauvais rapport hauteur/\:largeur.
+Le paramètre le rapport hauteur/\:largeur peut être donné en tant que ratio ou
+nombre flottant.
 
 .RS
 .I EXEMPLE:
@@ -4642,9 +4690,9 @@ Le paramètre d'aspect peut être donné en tant que ratio ou nombre à virgule.
 .RE
 .TP
 .B autoaspect
-Même chose que l'option aspect, mais calcule automatiquement l'aspect, en
-prenant en compte tous les ajustements (crop/expand/scale/etc.) faits dans la
-chaine de filtres.
+Même chose que l'option aspect, mais calcule automatiquement le rapport
+hauteur/\:largeur, en prenant en compte tous les ajustements
+(crop/expand/scale/etc.) faits dans la chaine de filtres.
 .TP
 .B vbitrate=<valeur>
 spécifie le bitrate (passe 1/\:2).  Attention: 1kBit = 1000 Bits.
@@ -5357,7 +5405,7 @@ Il y a trois modes disponibles: débit binaire constant (CBR), quantificateur
 fixe et 2passes.
 .TP
 .B pass=<1|2>
-Défini la passe en mode 2passes.
+Définit la passe en mode 2passes.
 .TP
 .B bitrate=<valeur>
 Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde si <16000 ou
@@ -5368,7 +5416,7 @@ Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
 désirée pour la vidéo.  (CBR ou mode 2passes, défaut\ : 687 kbits/s)
 .TP
 .B fixed_quant=<1\-31>
-Passe en mode quantificateur fixe et défini le quantificateur à utiliser.
+Passe en mode quantificateur fixe et définit le quantificateur à utiliser.
 .TP
 .B me_quality=<0\-6>
 Contrôle la qualité de détection de mouvement.
@@ -5389,7 +5437,7 @@ Peut améliorer la compressibilité mais ralenti l'encodage.
 Cette option n'existe plus avec XviD 1.0.x
 .TP
 .B rc_reaction_delay_factor=<valeur>
-Défini avec quelle rapidité le contrôleur de débit binaire CBR réagira à un
+Définit avec quelle rapidité le contrôleur de débit binaire CBR réagira à un
 changement de débit binaire et s'efforcera de le compenser pour obtenir un
 débit binaire constant sur cet ensemble de trames.
 .TP
@@ -5570,16 +5618,18 @@ recherche large
 .PD 1
 .TP
 .B aspect=<x/y | f (nombre flottant)>
-Stocke le rapport d'aspect du film en interne, tout comme les fichiers MPEG.
+Stocke le rapport hauteur/\:largeur du film en interne, tout comme les fichiers
+MPEG.
 C'est une meilleure solution que le redimensionnement, parce que la qualité
 n'est pas alterée.
 MPlayer et quelques autres lecteurs liront ces fichiers correctement, les 
-autres l'afficheront avec un mauvais rapport d'aspect.
+autres l'afficheront avec un mauvais rapport hauteur/\:largeur.
 Le paramètre aspect peut être donné en ratio ou en nombre flottant.
 .TP
 .B autoaspect
 Même chose que l'option aspect mais calcule automatiquement le rapport
-d'aspect, en prenant en compte les ajustements faits par la chaîne de filtres
+hauteur/\:largeur, en prenant en compte les ajustements faits par la chaîne de
+filtres
 (découpage/expansion/redimensionnement/etc...).
 .TP
 .B psnr
@@ -5681,7 +5731,7 @@ mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
 mencoder dvd://2 \-vf scale=640:480 \-o titre2.avi \-oac copy \-ovc divx4
 .TP
 .B Encodage du titre #2 d'un DVD, redimensionnement en 512xHHH (garder
-l'aspect ratio)
+le rapport hauteur/\:largeur)
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titre2.avi \-oac copy
 \-ovc divx4
 .TP
