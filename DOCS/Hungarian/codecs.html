@@ -55,8 +55,8 @@ tenned, hogy támogassuk a codeced!</P>
 <P>Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 codec-érõl tartalmaz információkat.
 Az elsõ hozzáférhetõ alfa verzió az OpenDivX alpha 47 és 48 volt. A
 támogatás ezekhez benne volt/van az <B>MPlayer</B>-ben, és alapállapotban
-bele is fordul. A postprocessing kódját használjuk, hogy javítsunk az
-MPEG1/2 filmek képminõségén.</P>
+bele is fordul. Régebben a postprocessing kódját használjuk, hogy javítsunk az
+MPEG1/2 filmek képminõségén. Most már saját minõségjavító kódunk van.</P>
 
 <P>Ezen codec új generációja le tudja játszani a hírhedt DivX codec-kel
 készült filmeket is! És ez még nem minden, SOKKAL gyorsabb mint a
@@ -108,7 +108,7 @@ igényel a buszon. Packed YUV módokhoz (YUY2, UYVY) használd a 'divx4'
 módszert. RGB módoknál szabadonválasztott, a sebességük megegyezik,
 talán a használt bpp-tol függõen változhat.</P>
 
-<P>Megj: támogat postprocessinget is, de az értékei furcsák:</P>
+<P>Megj: támogat postprocessinget is, de az értékei furcsák: (TODO UPDATE)</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
@@ -141,9 +141,7 @@ fát:</P>
 
 <P>Link létrehozása NEM elég, másolni vagy mozgatni kell.</P>
 
-<P>./configure detektálja, ha minden rendben. Jelenleg nem támogat
-postprocessinget, és optimalizálás alatt van (gyorsabb mint a DirectShow-os
-DivX codec).</P>
+<P>./configure detektálja, ha minden rendben. Támogat <B>postprocess-t</B>!</P>
 
 <P>A használatához frissítsd a codecs.conf file-odat, és tégy úgy ahogy a
 manpage vagy az example.conf mondja (a -vfm opció).</P>

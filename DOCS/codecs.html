@@ -55,8 +55,8 @@ for it!</P>
 <P>This section contains information about the DivX4 codec of
 <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
 alpha 47 and 48. Support for this was/is included in <B>MPlayer</B>, and built by
-default. We even used its postprocessing code to optionally enhance visual
-quality of MPEG1/2 movies.</P>
+default. We used to use its postprocessing code to optionally enhance visual
+quality of MPEG1/2 movies. Now we use our own.</P>
 
 <P>The new generation of this codec can even decode movies made with the
 infamous DivX codec! And it's not everything, it's MUCH faster than the
@@ -105,7 +105,7 @@ bandwidth on the bus. For packed YUV modes (YUY2, UYVY) use the 'divx4'
 method. For RGB modes you can choose freely, their speed is same, maybe
 differ according to the current bpp.</P>
 
-<P>Note: it supports postprocessing too, but range of values is strange:</P>
+<P>Note: it supports postprocessing too, but range of values is strange: (TODO UPDATE)</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
@@ -140,15 +140,15 @@ like this:</P>
 
 <P>Symlinking is NOT enough, you have to copy/move it!!!</P>
 
-<P>./configure detects if it can be built. At the moment it doesn't support
-postprocessing, and is under optimization (it's faster than the DS/VfW DivX
-codec).</P>
+<P>./configure detects if it can be built. The codec also <B>supports
+postprocessing!</B></P>
 
 <P>In order to use it, refresh your codecs.conf file, and do as the manpage,
 or the example.conf says (the -vfm option).</P>
 
-<P>Note: libavcodec contains other codecs as well, but at the moment we mostly
-focus on ffdivx, and it's unlikely that this will change.</P>
+<P>Note: libavcodec contains other codecs as well (for example ffmpeg12), but
+at the moment we mostly focus on ffdivx, and it's unlikely that this will
+change.</P>
 
 
 <P><B><A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A></B></P>

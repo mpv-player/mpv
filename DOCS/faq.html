@@ -189,10 +189,11 @@ Read the CD/DVD section .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
--xy option doesn't work with x11 driver (-vo x11)
+-xy or -fs option doesn't work with x11 driver (-vo x11)
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-x11 driver doesn't support scaling, but XF86VidMode support is now
-used: you must specify the -vm and the -fs switch, and you're done.
+It does, but you have to explicitly specify software scaling (it's SLOW!) with
+the <CODE>-zoom</CODE> option. You better use XF86VidMode support:
+you must specify the -vm and the -fs switch, and you're done.
 Make sure you have the right Modelines in your XF86Config file, and
 try if the DGA driver (and SDL's DGA driver, see RTFM) works for you.
 It's much faster. If SDL's DGA works too, use that, it'll be EVEN faster!
@@ -275,6 +276,13 @@ of CVS code ;)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+And what is "Faszom(C)ounter" ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+"Fasz" is a hungarian word you don't want to know, the others are in
+connection with the pervert minds of the MPlayer developers.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 LIRC doesn't work, because ...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Are you sure you use "mplayer_lirc" instead of "mplayer"?
@@ -284,7 +292,7 @@ Are you sure you use "mplayer_lirc" instead of "mplayer"?
 Subtitles are very nice, the most beautiful I've ever seen, but they slow
 down the playing! I know it's unlikely...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-After running ./configure , edit config.h and replace #undef FAST_OSD with
+After running ./configure , edit config.h and replace #undef <CODE>FAST_OSD</CODE> with
 <CODE>#define FAST_OSD</CODE>. Then recompile.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -298,13 +306,7 @@ use -double option.
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What exactly is this libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-It's from Gerard Lantau's ffmpeg package (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
-It has C language DivX ;-) and OpenDivX alpha 47 codec.  Some benchmarks
-showed that its DivX seems to be even faster than DirectShow codec without
-preprocessing, and only a few percent slower than ProjectMayo's DivX4
-decoder. It uses YV12 pixel format, so old Voodoo users can use it for YUV.
-Also, open the possibility to play DivX on virtually every computer that
-has a C compiler. Kinda great stuff, isn't it?
+See the <A HREF="codecs.html#2.1.2.2">2.1.2.2 section</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -408,7 +410,9 @@ Then use avifile, it has nice GUI and nice C++ code :)
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 I got this playing mpeg files: Can't find codec for video format 0x10000001!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-You have old version of codecs.conf at ~/.mplayer/. Upgrade it from etc/
+You have old version of codecs.conf at ~/.mplayer/. Upgrade it from etc/<BR>
+<B>OR</B> you have the <CODE>vc=</CODE> option or similar, in your
+config file(s).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -459,16 +463,16 @@ Another solution is making mplayer SUID root, but its NOT RECOMMENDED!<BR>
 This is a *BIG* security risk! *NEVER* do this on a server or on a computer
 can be accessed by more people than only you because they can gain root
 privilegies through suid root mplayer!!!<BR>
-!!!! SO YOU HAVE BEEN WARNED ... !!!!
+<B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 When using Xvideo, my Voodoo 3/Banshee says:<BR>
-X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
+<CODE>X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
 &nbsp;&nbsp;Major opcode of failed request:  147 (MIT-SHM)<BR>
 &nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
 &nbsp;&nbsp;Serial number of failed request:  26<BR>
-&nbsp;&nbsp;Current serial number in output stream:27<BR>
+&nbsp;&nbsp;Current serial number in output stream:27</CODE><BR>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Your driver is old, update it. Either download (at least) DRI version 0.6
 from <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>,
@@ -479,12 +483,12 @@ or use the DRI cvs.
 When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee!
 It says:<BR>
 ...<BR>
-Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR>
+<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
+Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
 ...
-</B></TD><TR><TD></TD><TD VALIGN=top>A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 See the previous answer.
-</TD><TR><TD></TD><TD VALIGN=top>A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Since 0.18pre4 we support libavcodec from the ffmpeg package. It contains
 a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
 for output, thus it should work for you. Compile in libavcodec support.

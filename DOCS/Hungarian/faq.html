@@ -153,14 +153,15 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Az -xy opció nem mûkodik az x11 outputtal (-vo x11)
+Az -xy opció nem mûkodik az x11 kimenettel (-vo x11)
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Az x11 output nem támogatja a scalinget, de már van hozzá XF86VidMode
-     támogatás: használd a -vm és a -fs opciókat, és már meg is vagy!
-     Bizonyosodj meg róla, hogy a megfelelõ Modeline-ok benne vannak az
-     XF86Config file-ban, és próbáld ki, hátha a DGA driver (és az SDL 
-     DGA drivere, lásd RTFM) mûködik nálad. Sokkal gyorsabb. Ha  
-     az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!
+De mûködik, viszont ehhez külön engedélyezned kell a szoftveres skálázást
+a <CODE>-zoom</CODE> opcióval (LASSÚ!). Inkább használd az XF86VidMode
+támogatást: használd a -vm és a -fs opciókat, és már meg is vagy!
+Bizonyosodj meg róla, hogy a megfelelõ Modeline-ok benne vannak az
+XF86Config file-ban, és próbáld ki, hátha a DGA driver (és az SDL 
+DGA drivere, lásd RTFM) mûködik nálad. Sokkal gyorsabb. Ha  
+az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -247,7 +248,7 @@ Akkor használd a -quiet opciót, és olvasd el a manpage-t.
  Szépek a feliratok, a legszebbek, amiket valaha lattam, viszont lelassítják
      a lejátszást! Tudom, hogy ez valószínûtlen, de...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Miután ./configure lefutott, szerkesztd át a config.h-t, és #undef FAST_OSD
+ Miután ./configure lefutott, szerkesztd át a config.h-t, és #undef <CODE>FAST_OSD</CODE>
      helyett írd be : #define FAST_OSD . Fordítsd újra!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -259,15 +260,9 @@ Akkor használd a -quiet opciót, és olvasd el a manpage-t.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Pontosan mi is ez a libavcodec?
+Pontosan mi is ez a libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Gerard Lantau ffmpeg programjábol van (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
-     C nyelvû DivX ;-) és OpenDivX codec-et tartalmaz. A tesztek szerint gyorsabb
-     mint a DirectShow codec (preprocessing nélkül), és csak pár százalékkal
-     lassabb mint a ProjectMayo OpenDivX dekódere. YV12-es pixelformátumot   
-     használ, így a régi Voodoo tulajdonosok is használhatják YUV-ra. Továbbá
-     lehetõséget ad arra hogy minden gépen amin van C compiler, lehessen DivX-et
-     lejátszani. Egész jó kis cucc, nem?
+Lásd a <A HREF="codecs.html#2.1.2.2">2.1.2.2-es fejezetet</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -371,10 +366,12 @@ Jah fiam, hát lassú a géped. Ez van.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
-     0x10000001
+MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
+0x10000001
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a main/etc-bõl!
+Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a main/etc-bõl!<BR>
+<B>VAGY</B>, a <CODE>vc=</CODE> opciót bennefelejtetted az egyik konfigurációs
+fileodban.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -444,18 +441,20 @@ Ennek több oka is lehet.<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
-     Voodoo 3/Banshee-mmel !
-     Azt mondja:<PRE>
-      ...
-      Xvideo image format: 0x32315659 (YV12) planar
-      Xvideo image format: 0x30323449 (I420) planar 
-      ...</PRE>
-</B>A1: Lásd az elõzõ választ.<BR>
-  A2: A 0.18pre4 verzió óta az MPlayer támogatja a libavcodec-et az ffmpeg
-      programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
-      A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
-      Fordítsd be a libavcodec-et.
+Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
+Voodoo 3/Banshee-mmel !
+Azt mondja:<BR>
+...<BR>
+<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
+Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
+...
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Lásd az elõzõ választ.
+</TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+A 0.18pre4 verzió óta az MPlayer támogatja a libavcodec-et az ffmpeg
+programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
+A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
+Fordítsd be a libavcodec-et.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
