@@ -14,9 +14,7 @@ extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
 extern vf_info_t vf_info_scale;
-#ifdef USE_LIBFAME
 extern vf_info_t vf_info_fame;
-#endif
 extern vf_info_t vf_info_format;
 extern vf_info_t vf_info_yuy2;
 extern vf_info_t vf_info_flip;
@@ -35,9 +33,7 @@ static vf_info_t* filter_list[]={
     &vf_info_scale,
 //    &vf_info_osd,
     &vf_info_vo,
-#ifdef USE_LIBFAME
     &vf_info_fame,
-#endif
     &vf_info_format,
     &vf_info_yuy2,
     &vf_info_flip,
@@ -291,16 +287,17 @@ void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
 
 vf_instance_t* append_filters(vf_instance_t* last){
     vf_instance_t* vf;
+    char** plugin_args = vo_plugin_args;
     if(!vo_plugin_args) return last;
-    while(*vo_plugin_args){
-	char* name=strdup(*vo_plugin_args);
+    while(*plugin_args){
+	char* name=strdup(*plugin_args);
 	char* args=strchr(name,'=');
 	if(args){args[0]=0;++args;}
 	mp_msg(MSGT_VFILTER,MSGL_INFO,"Opening video filter '%s' with args '%s'...\n",name,args);
 	vf=vf_open_filter(last,name,args);
 	if(vf) last=vf;
 	free(name);
-	++vo_plugin_args;
+	++plugin_args;
     }
     return last;
 }
