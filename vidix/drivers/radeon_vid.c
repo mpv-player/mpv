@@ -1123,7 +1123,11 @@ static void radeon_vid_stop_video( void )
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
     OUTREG(OV0_FILTER_CNTL, FILTER_HARDCODED_COEF);
+#ifdef RADEON
+    OUTREG(OV0_KEY_CNTL, rage_ckey_model ? GRAPHIC_KEY_FN_NE : GRAPHIC_KEY_FN_EQ);
+#else
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
+#endif
     OUTREG(OV0_TEST, 0);
 }
 
