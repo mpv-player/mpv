@@ -8,7 +8,7 @@ Aureal Vortex 2:
 			Max kHz : 48
 			Driver	: aureal.sourceforge.net
 	Driver2 : http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2
-	(rozmiar bufora zwiêkszony do 64k)
+	(rozmiar bufora zwiêkszony do 32k)
 
 GUS PnP:
 			OSS/Free: no driver
