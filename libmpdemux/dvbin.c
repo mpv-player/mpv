@@ -197,9 +197,10 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			ptr->tone = -1;
 			ptr->inv = INVERSION_AUTO;
 			ptr->cr = FEC_AUTO;
-			if((ptr->diseqc > 4) || (ptr->diseqc < 1))
+			if((ptr->diseqc > 4) || (ptr->diseqc < 0))
 			    continue;
-			ptr->diseqc--;
+			if(ptr->diseqc > 0)
+			    ptr->diseqc--;
 			mp_msg(MSGT_DEMUX, MSGL_V,
 				"NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, TONE: %d, VPID: %d, APID1: %d, APID2: %d, TPID: %d, PROGID: %d\n",
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc, ptr->tone, ptr->vpid, ptr->apid1, ptr->apid2, ptr->tpid, ptr->progid);
