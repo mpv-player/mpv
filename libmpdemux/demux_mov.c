@@ -865,7 +865,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->wf->wBitsPerSample=(trak->stdata[18]<<8)+trak->stdata[19];
 		// sh->wf->nSamplesPerSec=trak->timescale;
 		sh->wf->nSamplesPerSec=(trak->stdata[24]<<8)+trak->stdata[25];
-		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
+		if(trak->stdata_len >= 44 && trak->stdata[9]>=1){
+		//Audio header: samp/pack=4096 bytes/pack=743 bytes/frame=1486 bytes/samp=2
+		  sh->wf->nAvgBytesPerSec=(sh->wf->nChannels*sh->wf->nSamplesPerSec*
+		      char2int(trak->stdata,32)+char2int(trak->stdata,28)/2)
+		      /char2int(trak->stdata,28);
+		  sh->wf->nBlockAlign=char2int(trak->stdata,36);
+		} else {
+		  sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
+		}
 		// Selection:
 		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
 		    // (auto)selected audio track:
