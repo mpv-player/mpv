@@ -144,7 +144,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 	out_fmt=sh->codec->outfmt[i];
 	if(out_fmt==(signed int)0xFFFFFFFF) continue;
 	vo_flags=vf->query_format(vf,out_fmt);
-	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),vo_flags,i);
+	mp_msg(MSGT_CPLAYER,MSGL_V,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),vo_flags,i);
 	if((vo_flags&2) || (vo_flags && j<0)){
 	    // check (query) if codec really support this outfmt...
 	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE)
