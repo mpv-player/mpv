@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.63 -->
+<!-- synced with 1.64 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -671,7 +671,7 @@ Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pask
   <term><option>-ao sdl:<replaceable>nazwa</replaceable></option></term>
   <listitem><simpara>
   określa sterownik audio którego ma użyć SDL (np. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>arts</literal>)
+    <literal>esd</literal>, <literal>artsc</literal>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -2583,7 +2583,7 @@ Oczywiście najważniejsza jest część TwinView.
 <sect4 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
-Układ Neomagic Można znaleźć w rożnych laptopach, niektóre wyposażone są w
+Układ NeoMagic Można znaleźć w rożnych laptopach, niektóre wyposażone są w
 prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
 <itemizedlist>
 <listitem><simpara>
