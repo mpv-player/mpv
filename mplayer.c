@@ -692,21 +692,31 @@ switch(file_format){
 	  pts_from_bps=1; // force BPS sync!
       }
   }
-  
   if(!ds_fill_buffer(d_video)){
     printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
-  sh_video->format=sh_video->bih.biCompression;
   if(has_audio){
-    if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
+    if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      printf("AVI: No Audio stream found...  ->nosound\n");
+      printf("ASF: No Audio stream found...  ->nosound\n");
       has_audio=0;
-    }
+    } else sh_audio->format=sh_audio->wf.wFormatTag;
   }
-  if(has_audio) sh_audio->format=sh_audio->wf.wFormatTag;
+  // calculating video bitrate:
   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+  avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
+  if(sh_audio) avi_header.bitrate-=sh_audio->audio.dwLength;
+  if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
+  avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)*default_fps;
+  printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    &sh_video->bih.biCompression,
+    sh_video->bih.biWidth,
+    sh_video->bih.biHeight,
+    sh_video->bih.biBitCount,
+    default_fps,
+    avi_header.bitrate*0.008f,
+    avi_header.bitrate/1024.0f );
   break;
  }
  case DEMUXER_TYPE_ASF: {
@@ -720,32 +730,22 @@ switch(file_format){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
-  sh_video->format=sh_video->bih.biCompression;
   if(has_audio){
     if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       printf("ASF: No Audio stream found...  ->nosound\n");
       has_audio=0;
-    }
+    } else sh_audio->format=sh_audio->wf.wFormatTag;
   }
-  if(has_audio) sh_audio->format=sh_audio->wf.wFormatTag;
+  printf("VIDEO:  [%.4s]  %dx%d  %dbpp\n",
+    &sh_video->bih.biCompression,
+    sh_video->bih.biWidth,
+    sh_video->bih.biHeight,
+    sh_video->bih.biBitCount);
   break;
  }
  case DEMUXER_TYPE_MPEG_ES: {
    demuxer->audio->type=0;
-   // Find sequence_header first:
-   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
-   while(1){
-      int i=sync_video_packet(d_video);
-      if(i==0x1B3) break; // found it!
-      if(!i || !skip_video_packet(d_video)){
-        if(verbose)  printf("NONE :(\n");
-        printf("MPEG: FATAL: EOF while searching for sequence header\n");
-        exit(1);
-      }
-   }
-   if(verbose) printf("OK!\n");
-   sh_video->format=1; // mpeg video
    has_audio=0; // ES streams has no audio channel
    break;
  }
@@ -756,13 +756,29 @@ switch(file_format){
     has_audio=0;
   } else {
     switch(d_audio->type){
+      if(verbose) printf("detected MPG-PS audio format: %d\n",d_audio->type);
       case 1: sh_audio->format=0x50;break; // mpeg
       case 2: sh_audio->format=0x2;break;  // pcm
       case 3: sh_audio->format=0x2000;break; // ac3
       default: has_audio=0; // unknown type
     }
   }
-  if(has_audio) if(verbose) printf("detected MPG-PS audio format: %d\n",sh_audio->format);
+  break;
+ }
+} // switch(file_format)
+
+// Determine image properties:
+switch(file_format){
+ case DEMUXER_TYPE_AVI:
+ case DEMUXER_TYPE_ASF: {
+  // display info:
+  sh_video->format=sh_video->bih.biCompression;
+  movie_size_x=sh_video->bih.biWidth;
+  movie_size_y=abs(sh_video->bih.biHeight);
+  break;
+ }
+ case DEMUXER_TYPE_MPEG_ES:
+ case DEMUXER_TYPE_MPEG_PS: {
    // Find sequence_header first:
    if(verbose) printf("Searching for sequence header... ");fflush(stdout);
    while(1){
@@ -776,6 +792,35 @@ switch(file_format){
    }
    if(verbose) printf("OK!\n");
    sh_video->format=1; // mpeg video
+   mpeg2_init();
+   // ========= Read & process sequence header & extension ============
+   videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
+   if(!videobuffer){ printf("Cannot allocate shared memory\n");exit(0);}
+   videobuf_len=0;
+   if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header!\n");exit(1);}
+   if(header_process_sequence_header (picture, &videobuffer[4])) {
+     printf ("bad sequence header!\n"); exit(1);
+   }
+   if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
+    videobuf_len=0;
+    if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header extension!\n");exit(1);}
+    if(header_process_extension (picture, &videobuffer[4])) {
+      printf ("bad sequence header extension!\n");  exit(1);
+    }
+   }
+   // display info:
+   default_fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
+   movie_size_x=picture->display_picture_width;
+   movie_size_y=picture->display_picture_height;
+   // info:
+   if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
+   printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    picture->mpeg1?"MPEG1":"MPEG2",
+    movie_size_x,movie_size_y,
+    picture->aspect_ratio_information,
+    default_fps,
+    picture->bitrate*0.5f,
+    picture->bitrate/16.0f );
   break;
  }
 } // switch(file_format)
@@ -833,27 +878,6 @@ switch(has_video){
  case 2: {
    if(!init_video_codec(out_fmt)) exit(1);
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
-   //if(out_fmt==(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|15; // fix bpp  FIXME!
-   
-   // calculating video bitrate:
-   avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
-   if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
-                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
-//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &sh_video->bih.biCompression,
-    sh_video->bih.biWidth,
-    sh_video->bih.biHeight,
-    sh_video->bih.biBitCount,
-    default_fps,
-    avi_header.bitrate*0.008f,
-    avi_header.bitrate/1024.0f );
-
-   // display info:
-   movie_size_x=sh_video->o_bih.biWidth;
-   movie_size_y=abs(sh_video->o_bih.biHeight);
    break;
  }
  case 4: { // Win32/DirectShow
@@ -882,26 +906,6 @@ switch(has_video){
 //   printf("DivX setting result = %d\n", DS_SetValue_DivX("Brightness",60) );
    
    if(verbose) printf("INFO: Win32/DShow video codec init OK!\n");
-   
-   // calculating video bitrate:
-   avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
-   if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
-                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
-//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &sh_video->bih.biCompression,
-    sh_video->bih.biWidth,
-    sh_video->bih.biHeight,
-    sh_video->bih.biBitCount,
-    default_fps,
-    avi_header.bitrate*0.008f,
-    avi_header.bitrate/1024.0f );
-
-   // display info:
-   movie_size_x=sh_video->bih.biWidth;
-   movie_size_y=abs(sh_video->bih.biHeight);
    break;
 #endif
  }
@@ -917,34 +921,10 @@ switch(has_video){
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
    }
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
-   
-   // calculating video bitrate:
-   avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
-   if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
-                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
-//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &sh_video->bih.biCompression,
-    sh_video->bih.biWidth,
-    sh_video->bih.biHeight,
-    sh_video->bih.biBitCount,
-    default_fps,
-    avi_header.bitrate*0.008f,
-    avi_header.bitrate/1024.0f );
-
-   // display info:
-   movie_size_x=sh_video->bih.biWidth;
-   movie_size_y=abs(sh_video->bih.biHeight);
    break;
  }
  case 1: {
-   // allocate some shared memory for the video packet buffer:
-   videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
-   if(!videobuffer){ printf("Cannot allocate shared memory\n");exit(0);}
    // init libmpeg2:
-   mpeg2_init();
 #ifdef MPEG12_POSTPROC
    picture->pp_options=divx_quality;
 #else
@@ -954,32 +934,7 @@ switch(has_video){
        printf("         #define MPEG12_POSTPROC in config.h, and recompile libmpeg2!\n");
    }
 #endif
-   if(verbose)  printf("mpeg2_init() ok\n");
-   // ========= Read & process sequence header & extension ============
-   videobuf_len=0;
-   if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header!\n");return 1;}
-   if(header_process_sequence_header (picture, &videobuffer[4])) {
-     printf ("bad sequence header!\n"); return 1;
-   }
-   if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
-    videobuf_len=0;
-    if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header extension!\n");return 1;}
-    if(header_process_extension (picture, &videobuffer[4])) {
-      printf ("bad sequence header extension!\n"); return 1;
-    }
-   }
-   default_fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-   if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
-   printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    picture->mpeg1?"MPEG1":"MPEG2",
-    picture->display_picture_width,picture->display_picture_height,
-    picture->aspect_ratio_information,
-    default_fps,
-    picture->bitrate*0.5f,
-    picture->bitrate/16.0f );
-   // display info:
-   movie_size_x=picture->display_picture_width;
-   movie_size_y=picture->display_picture_height;
+   mpeg2_allocate_image_buffers (picture);
    break;
  }
 }
@@ -1075,22 +1030,6 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
    fflush(stdout);
    
-  
-if(has_video==1){
-   //================== init mpeg codec ===================
-   mpeg2_allocate_image_buffers (picture);
-   if(verbose) printf("INFO: mpeg2_init_video() OK!\n");
-#ifdef HAVE_CODECCTRL
-   // ====== Init MPEG codec process ============
-   make_pipe(&control_fifo,&control_fifo2);
-   make_pipe(&data_fifo2,&data_fifo);
-   // ====== Let's FORK() !!! ===================
-   if((child_pid=fork())==0)
-     mpeg_codec_controller(video_out); // this one is running in a new process!!!!
-   signal(SIGPIPE,SIG_IGN);  // Ignore "Broken pipe" signal (codec restarts)
-#endif
-}
-
 //================== MAIN: ==========================
 {
 int audio_fd=-1;
