@@ -25,6 +25,7 @@ static struct vf_priv_s {
     unsigned int fmt;
     struct SwsContext *ctx;
     unsigned char* palette;
+    int query_format_cache[64];
 } vf_priv_dflt = {
   -1,-1,
   0,
@@ -77,14 +78,24 @@ static unsigned int outfmt_list[]={
 
 static unsigned int find_best_out(vf_instance_t *vf){
     unsigned int best=0;
-    unsigned int* p=outfmt_list;
+    int i;
+
     // find the best outfmt:
-    while(*p){
-	int ret=vf_next_query_format(vf,*p);
-	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(*p),ret&3);
-	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){ best=*p; break;} // no conversion -> bingo!
-	if(ret&VFCAP_CSP_SUPPORTED && !best) best=*p; // best with conversion
-	++p;
+    for(i=0; i<sizeof(outfmt_list)/sizeof(int)-1; i++){
+        const int format= outfmt_list[i];
+        int ret= vf->priv->query_format_cache[i]-1;
+        if(ret == -1){
+            ret= vf_next_query_format(vf, outfmt_list[i]);
+            vf->priv->query_format_cache[i]= ret+1;
+        }
+        
+	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(format),ret&3);
+	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){
+            best=format; // no conversion -> bingo!
+            break;
+        } 
+	if(ret&VFCAP_CSP_SUPPORTED && !best) 
+            best=format; // best with conversion
     }
     return best;
 }
@@ -437,7 +448,7 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 	src_filter= sws_getDefaultFilter(
 		sws_lum_gblur, sws_chr_gblur,
 		sws_lum_sharpen, sws_chr_sharpen,
-		sws_chr_vshift, sws_chr_hshift, verbose>1);
+		sws_chr_hshift, sws_chr_vshift, verbose>1);
         
 	switch(sws_flags)
 	{
