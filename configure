@@ -1430,6 +1430,19 @@ else
 fi
 echores "$_runtime_cpudetection"
 
+echocheck "restrict keyword"
+for restrict_keyword in restrict __restrict __restrict__ ; do
+  echo "void foo(char * $restrict_keyword p); int main(){}" > $TMPC
+  if cc_check; then
+    _def_restrict_keyword=$restrict_keyword
+    break;
+  fi
+done
+if [ -n "$_def_restrict_keyword" ]; then
+  echores "$_def_restrict_keyword"
+else
+  echores "none"
+fi
 
 echocheck "kstat"
 cat > $TMPC << EOF
@@ -4130,6 +4143,9 @@ $_def_i18n
 
 /* Runtime Cpudetection */
 $_def_runtime_cpudetection
+
+/* "restrict" keyword */
+#define restrict $_def_restrict_keyword
 
 #define PREFIX "$_prefix"
 
