@@ -1,4 +1,4 @@
-.\" synced with 1.825
+.\" synced with 1.830
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -492,8 +492,8 @@ secondo, infiniti).
 .B \-colorkey <number>
 Cambia colorkey ad una valore RGB di tua scelta.
 0x000000 e' nero e 0xffffff e' bianco.
-Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix e
-xover.
+Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
+xover e directx.
 .
 .TP
 .B \-nocolorkey
@@ -2244,6 +2244,9 @@ comunque se viene aggiunto il segno di percentuale ad un argomento
 il valore viene convertito in una percentuale della dimensione
 dello schermo in quella direzione.
 Supporta anche il formato dell'opzione standard di X \-geometry.
+Se viene specificata una finestra esterna utilizzando l'opzione \-wid
+allora le coordinate x ed y sono relative all'angolo in alto a sinistra
+della finestra stessa piuttosto che allo schermo.
 .br
 .I NOTA:
 Questa opzione e' supportata dai driver di uscita video x11, xmga, xv, xvmc,
@@ -2388,9 +2391,9 @@ le caratteristiche del modo di visualizzazione.
 Abilita il VBI per i driver di uscita video vesa, dfbmga e svga.
 .
 .TP
-.B \-wid <window\ ID> (vedi anche \guiwd) (solo X11)
-Dice ad MPlayer di collegarsi ad una finestra gia' esistente di X11, cosa
-utile per incastrare MPlayer in un browser (ad esempio con l'estensione
+.B \-wid <window\ ID> (vedi anche \guiwd) (solo X11 e DirectX)
+Dice ad MPlayer di collegarsi ad una finestra gia' esistente.
+Uile per 'incastrare' MPlayer in un browser (ad esempio con l'estensione
 plugger).
 .
 .TP
@@ -3196,123 +3199,6 @@ Salta (ignora) il decoder MP3 di FFmpeg.
 .PD 1
 .
 .TP
-.B \-af <filtro1[=parametro1:parametro2:...],filtro2,...>
-Attiva una lista separata da virgola di filtri audio con le proprie opzioni.
-Vedi anche la sezione della documentazione che parla dei filtri audio.
-.br
-.I NOTA:
-Per avere una lista completa dei filtri audio disponibili vedi \-af help.
-.sp 1
-I filtri disponibili sono:
-.RSs
-.IPs resample[=srate[:sloppy][:type]]
-Cambia la frequenza di campionamento del flusso audio ad un valore intero di Hz.
-Supporta solo il formato a 16-bit little-endian.
-Con MEncoder si deve usare anche \-srate <srate>
-.IPs lavcresample[=frequenza[:lunghezza[:lineare[:conteggio[:taglio]]]]]
-Cambia la frequenza di campionamento del flusso audio ad un valore intero di Hz.
-Supporta solo il formato a 16-bit little-endian.
-Con MEncoder si deve usare anche \-srate <srate>
-Cambia la frequenza di campionamento del 
-.RSss
-frequenza: frequenza di campionamento di uscita.
-.br
-lunghezza: lunghezza del filtro in rapporto alla frequenza piu' bassa
-(default: 16)
-.br
-lineare: se ad 1 allora il filtro verra' interpolato linearmente tra i valori
-delle polifasi.
-.br
-counteggio: log2 del numero di valori delle polifasi
-(..., 10->1024, 11->2048, 12->4096, ...)
-(default: 10->1024)
-.br
-taglio: frequenza di taglio (0.0-1.0), il valore di default dipende dalla
-lunghezza del filtro
-.REss
-.IPs sweep[=velocita']
-'sweep' sinosuidale (???)
-.IPs hrtf
-.br
-Funzione di trasferimento riferita alla testa: Converte l'audio multicanale
-in una uscita a due canali per le cuffie, preservando la spazialita' del
-suono.
-.IPs channels[=nch]
-Cambia il numero di canali a nch canali di uscita.
-Se il numero di canali di uscita e' maggiore del numero di canali di ingresso
-vengono inseriti dei canali vuoti (eccetto nel caso da mono a stereo dove
-il canale mono viene ripetuto su entrambi i canali di uscita).
-Se il numero di canali di uscita e' minore del numero di canali di ingresso i
-canali in eccesso sono troncati.
-.IPs format[=bps:f]
-Seleziona il numero di byte per campionamento ed il formato usato per l'uscita
-dalla gestione dei filtri
-L'opzione bps e' un intero ed indica i byte per campionamento.
-Il formato f e' una stringa che contiene un insieme di:
-.br
-alaw, mulaw o imaadpcm
-.br
-float o int
-.br
-unsigned o signed (senza segno, con segno)
-.br
-le or be (little- o big- endian)
-.br
-.IPs volume[=v:sc]
-Seleziona il livello del volume di uscita.
-Questo filtro non e' rientrante e percio' puo' essere usato solo una volta
-per ogni flusso audio.
-.RSss
-v: Setta il guadagno desiderato in dB per tutti i canali del flusso da -200dB
-a +60dB (dove -200dB ammutoliscono
-completamente il suono e +60dB corrisponde ad un guadagno di 1000 volte).
-.br
-sc: Abilita soft clipping.
-.REss
-.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
-Miscela i canali arbitrariamente, guarda DOCS/\:HTML/\:en/\:audio.html
-per dettagli.
-.RSss
-n: numero di canali d'ingresso (1\-6).
-.br
-lij: Quanto del canale di ingresso j viene miscelato nel canale di uscita i.
-.REss
-.IPs sub[=fc:ch]
-Aggiungi il canale del subwoofer.
-.RSss
-fc: Frequenza di taglio del filtro passa basso (da 20Hz a 300Hz) (default: 60Hz).
-.br
-ch: Numero del canale per il sotto-canale.
-.REss
-.IPs surround[=d]
-Decodificatore per il suono surround codificato a matrice (matrix encoded
-surround sound), funziona sulla maggior parte dei file a 2 canali.
-.RSss
-d: tempo di ritardo in ms per l'altoparlante posteriore (da 0ms a 1000ms) (default: 15ms).
-.REss
-.IPs delay[=ch1:ch2:...]
-Ritardi dell'uscita del suono.
-Specifica il ritardo separatamente per ogni canale in millisecondi (numero
-in virgola mobile da 0 a 1000).
-.IPs export[=mmapped_file[:nsamples]]
-Esporta il segnale in arrivo ad un altro processo usando la mappatura
-della memoria (mmap()).
-.RSss
-mmapped_file: file su cui mappare i dati (default: ~/.mplayer/\:mplayer-af_export).
-.br
-nsamples: numero di campionamenti per canale (default: 512)
-.REss
-.IPs extrastereo[=mul]
-Incrementa la differenza tra i canali sinistro e destro per aggiungere una
-specie di effetto "live" alla riproduzione.
-.RSss
-mul: coefficiente di differenza (default: 2.5)
-.REss
-.IPs volnorm
-Massimizza il volume senza distorcere il suono.
-.RE
-.
-.TP
 .B \-af-adv <force=(0\-3):list=(filters)> (vedi anche \-af)
 Specifica le opzioni avanzate dei filtri audio:
 .RSs
@@ -3389,7 +3275,7 @@ Le opzioni disponibili:
 .RE
 .RSs
 .IPs bug=<valore>
-Lavora manualmente alla risoluzione degli errori del codificatore:
+Lavora manualmente alla risoluzione degli errori del codificatore.
 .RSss
 0: niente
 .br
@@ -3416,7 +3302,7 @@ Lavora manualmente alla risoluzione degli errori del codificatore:
 1024 (mpeg4): bug di edge padding (rilevato automaticamente per fourcc/\:versione)
 .REss
 .IPs debug=<valore>
-debug:
+Visualizza informazioni di debug.
 .RSss
 .br
 0: disabilitato
@@ -3448,7 +3334,7 @@ debug:
 0x1000: bugs
 .REss
 .IPs ec\ \ \ 
-occultamento degli errori:
+Seleziona la strategia di occultamento degli errori.
 .RSss
 1: Usa un filtro molto forte di eliminazione degli effetti di blocco per MB danneggiati
 .br
@@ -3457,7 +3343,7 @@ occultamento degli errori:
 3: tutto (default)
 .REss
 .IPs er=<valore>
-recupero degli errori:
+Seleziona la strategia di recupero degli errori.
 .RSss
 .br
 0: disabilitato
@@ -3507,7 +3393,7 @@ Salta il numero indicato di righe di macroblocchi in basso.
 .IPs "st=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in alto.
 .IPs vismv=<valore>
-vismv:
+Visualizza i vettori di movimento.
 .RSss
 .br
 0: disabilitato
@@ -3760,6 +3646,176 @@ Puo' essere usato per forzare la scalatura con \-vf scale.
 .I NOTA:
 \-vf scale ignorera' le opzioni \-x / \-y / \-xy / \-fs / \-aspect senza
 \-zoom.
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Filtri Audio
+.\" --------------------------------------------------------------------------
+.
+.SH "FILTRI AUDIO"
+I filtri audio ti permettono di modificare il flusso video e le sue
+proprieta'.
+La sintassi e':
+.
+.TP
+.B \-af <filtro1[=parametro1:parametro2:...],filtro2,...>
+Attiva una catena di filtri audio.
+.PP
+.I NOTA:
+Per avere una lista completa dei filtri audio disponibili vedi \-af help.
+.PP
+I filtri disponibili sono:
+.
+.TP
+.B resample[=srate[:sloppy][:type]]
+Cambia la frequenza di campionamento del flusso audio ad un valore intero di Hz.
+Supporta solo il formato a 16-bit little-endian.
+Con MEncoder si deve usare anche \-srate <srate>
+.
+.TP
+.B lavcresample[=frequenza[:lunghezza[:lineare[:conteggio[:taglio]]]]]
+Cambia la frequenza di campionamento del flusso audio ad un valore intero di Hz.
+Supporta solo il formato a 16-bit little-endian.
+Con MEncoder si deve usare anche \-srate <srate>
+.PD 0
+.RSs
+.IPs frequenza
+frequenza di campionamento di uscita.
+.IPs lunghezza
+lunghezza del filtro in rapporto alla frequenza piu' bassa (default: 16)
+.IPs lineare
+se ad 1 allora il filtro verra' interpolato linearmente tra i valori
+delle polifasi.
+.IPs conteggio
+log2 del numero di valori delle polifasi (..., 10->1024, 11->2048, 12->4096,
+...) (default: 10->1024)
+.IPs taglio
+frequenza di taglio (0.0-1.0), il valore di default dipende dalla
+lunghezza del filtro
+.RE
+.PD 1
+.
+.TP
+.B sweep[=velocita']
+\'sweep' sinosuidale (??? cosa significa ???)
+.
+.TP
+.B hrtf\ \ \ 
+Funzione di trasferimento riferita alla testa: Converte l'audio multicanale
+in una uscita a due canali per le cuffie, preservando la spazialita' del
+suono.
+.
+.TP
+.B channels[=nch]
+Cambia il numero di canali a nch canali di uscita.
+Se il numero di canali di uscita e' maggiore del numero di canali di ingresso
+vengono inseriti dei canali vuoti (eccetto nel caso da mono a stereo dove
+il canale mono viene ripetuto su entrambi i canali di uscita).
+Se il numero di canali di uscita e' minore del numero di canali di ingresso i
+canali in eccesso sono troncati.
+.
+.TP
+.B format[=bps:f]
+Seleziona il numero di byte per campionamento ed il formato usato per l'uscita
+dalla gestione dei filtri
+L'opzione bps e' un intero ed indica i byte per campionamento.
+Il formato f e' una stringa che contiene un insieme di:
+.br
+alaw, mulaw o imaadpcm
+.br
+float o int
+.br
+unsigned o signed (senza segno, con segno)
+.br
+le or be (little- o big- endian)
+.br
+.
+.TP
+.B volume[=v:sc]
+Seleziona il livello del volume di uscita.
+Questo filtro non e' rientrante e percio' puo' essere usato solo una volta
+per ogni flusso audio.
+.PD 0
+.RSs
+.IPs v\ \ \ \ \ \ 
+Setta il guadagno desiderato in dB per tutti i canali del flusso da -200dB
+a +60dB (dove -200dB ammutoliscono
+completamente il suono mentre +60dB corrispondono ad un guadagno di 1000 volte).
+.IPs sc\ \ \ \ \ 
+Abilita il soft clipping.
+.RE
+.PD 1
+.
+.TP
+.B pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
+Miscela i canali arbitrariamente, guarda DOCS/\:HTML/\:en/\:audio.html
+per dettagli.
+.PD 0
+.RSs
+.IPs n\ \ \ \ \ \ 
+numero di canali d'ingresso (1\-6).
+.IPs lij\ \ \ \ 
+Quanto del canale di ingresso j viene miscelato nel canale di uscita i.
+.RE
+.PD 1
+.
+.TP
+.B sub[=fc:ch]
+Aggiungi il canale del subwoofer.
+.PD 0
+.RSs
+.IPs fc\ \ \ \ \ 
+Frequenza di taglio del filtro passa basso (da 20Hz a 300Hz) (default: 60Hz).
+.IPs ch\ \ \ \ \ 
+Numero del canale per il sotto-canale.
+.RE
+.PD 1
+.
+.TP
+.B surround[=d]
+Decodificatore per il suono surround codificato a matrice (matrix encoded
+surround sound), funziona sulla maggior parte dei file a 2 canali.
+.PD 0
+.RSs
+.IPs d\ \ \ \ \ \ 
+tempo di ritardo in ms per l'altoparlante posteriore (da 0ms a 1000ms) (default: 15ms).
+.RE
+.PD 1
+.
+.TP
+.B delay[=ch1:ch2:...]
+Ritardi dell'uscita del suono.
+Specifica il ritardo separatamente per ogni canale in millisecondi (numero
+in virgola mobile da 0 a 1000).
+.
+.TP
+.B export[=mmapped_file[:nsamples]]
+Esporta il segnale in arrivo ad un altro processo usando la mappatura
+della memoria (mmap()).
+.PD 0
+.RSs
+.IPs mmapped_file
+file su cui mappare i dati (default: ~/.mplayer/\:mplayer-af_export).
+.IPs nsamples
+numero di campionamenti per canale (default: 512)
+.RE
+.PD 1
+.
+.TP
+.B extrastereo[=mul]
+Incrementa la differenza tra i canali sinistro e destro per aggiungere una
+specie di effetto "live" alla riproduzione.
+.PD 0
+.RSs
+.IPs mul\ \ \ \ 
+coefficiente di differenza (default: 2.5)
+.RE
+.PD 1
+.
+.TP
+.B volnorm
+Massimizza il volume senza distorcere il suono.
+.P
 .
 .
 .\" --------------------------------------------------------------------------
