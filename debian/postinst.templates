@@ -29,5 +29,3 @@ Description: Create your ~/.mplayer/conf file.
 	machine it's installed to. And it also it means that it will use
 	your setup very effectively. Look at /usr/share/doc/mplayer
   end
-
-

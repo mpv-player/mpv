@@ -41,7 +41,7 @@ db_input high mplayer/overwrite || true
 db_go
 db_get mplayer/overwrite
  else
-$RET="true"
+RET="true"
 fi
 
 	if [ "$RET" = "true" ]; then
