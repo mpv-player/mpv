@@ -2,9 +2,9 @@
 // Reworked by Klaus Umbach <klaus.umbach@gmx.net>
 // Moritz Bunkus <moritz@bunkus.org>
 // Alexander Strasser <eclipse7@gmx.net>
-// Sebastian Krämer <mail@skraemer.de>
+// Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.128
+// In synch with rev 1.130
 
 // ========================= MPlayer help ===========================
 
