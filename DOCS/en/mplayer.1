@@ -2723,6 +2723,21 @@ detc filter, and should be used with MEncoder but not with MPlayer.
 As with detc, you must specify the correct output framerate (-ofps
 23.976) when using MEncoder.
 .TP
+.B "pullup"
+Third-generation pulldown reversal (inverse telecine) filter,
+capable of handling mixed hard-telecine, 24 fps progressive, and 30
+fps progressive content.
+The pullup filter is designed to be much more robust than detc or
+ivtc, but it is still under development.
+No configuration options are available yet.
+As the underlying pulldown reversal engine is designed to take
+advantage of the new features in MPlayer G2, the current
+implementation in G1 is meant to serve mainly as a testbed.
+Note: presently pullup lacks any way to cap the output framerate, so
+during 30 fps progressive sequences or stills, it will output more
+than 24 fps, meaning you'll have trouble if you use it with mencoder
+-ofps 23.976.
+.TP
 .B "softpulldown"
 This filter works only correct with MEncoder and acts on the MPEG2 flags
 used for soft 3:2 pulldown (soft telecine).
