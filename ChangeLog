@@ -3,9 +3,10 @@ mplayer (0.90)
 
   rc3:
     DOCS:
-    * english manpage & html docs updates
+    * english man page & HTML docs updates
+    * audio filter documentation
     * help_diff.sh doesn't depend on BASH any more
-    * hungarian, french, polish(?) docs synced
+    * Hungarian, French, Italian, Polish(?) docs synced
 
     Fixes:
     * mp3lib CPU detection part cleanup, 'decwin' linker problem fixed
@@ -20,6 +21,8 @@ mplayer (0.90)
     * mplayer exit codes cleanup (0 for quit/eof, 1 for error)
     * X11 fullscreen switching (yes, again...) fixes, code cleanup
     * OGM/Ogg seeking (broken frames) fixed
+    * -ao win32 sync problems solved
+    * -vo directx crashes and garbled picture with some files fixed
 
     Features:
     * -ao esd: new EsounD audio driver
@@ -34,7 +37,7 @@ mplayer (0.90)
     * Subtitles background bounding-box support (optional grey-level & opacity)
     * libaf: 3 new filters: panning, compressor/limiter and a noise gate
     * per-mediafile config file support (for file-specific options)
-    * iconv (codepage conversion) supoprt for OGM (Ogg) subtitles
+    * iconv (codepage conversion) support for OGM (Ogg) subtitles
     * v4l: user friendly channel tuning
     * Freetype & old-style RAW font support usable (compilable) at the same time
     * vo_directfb2, vo_dfbmga: DirectFB 0.9.16 support
