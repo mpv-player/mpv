@@ -735,9 +735,13 @@ static void uninit(void)
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
 		overlay_release(overlay_data);
 		
+#ifdef HAVE_NEW_GUI
 		if (!use_gui) {
+#endif
 			vo_x11_uninit();
+#ifdef HAVE_NEW_GUI
 		}
+#endif
 	}
 #endif
 	if (fd_video) {
@@ -896,12 +900,16 @@ static uint32_t preinit(const char *arg)
 		
 		/* Initialize overlay and X11 */
 		overlay_data = overlay_init(fd_control);
+#ifdef HAVE_NEW_GUI
 		if (!use_gui) {
+#endif
 			if (!vo_init()) {
 				printf("VO: [dxr3] Unable to init x11!\n");
 				return -1;
 			}
+#ifdef HAVE_NEW_GUI
 		}
+#endif
 	}
 #endif
 
