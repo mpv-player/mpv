@@ -786,7 +786,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		        case VK_HOME:
 					{mplayer_put_key(KEY_HOME);break;}
 		        case VK_END:
-					{mplayer_put_key(VK_END);break;}
+					{mplayer_put_key(KEY_END);break;}
 		        case VK_PRIOR:
 			        {mplayer_put_key(KEY_PAGE_UP);break;}
 		        case VK_NEXT:
