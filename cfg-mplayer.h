@@ -84,10 +84,11 @@ extern int fs_layer;
 extern int stop_xscreensaver;
 extern char **vo_fstype_list;
 extern int vo_nomouse_input;
+extern int WinID;
 #endif
 
-#if defined(HAVE_X11) || defined(MACOSX)
-extern int WinID;
+#ifdef MACOSX
+extern int vo_rootwin;
 #endif
 
 #ifdef HAVE_AA
@@ -301,10 +302,11 @@ m_option_t mplayer_opts[]={
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
+	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 #endif
 
-#if defined(HAVE_X11) || defined(MACOSX)
-	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
+#ifdef MACOSX
+	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA
