@@ -1,7 +1,7 @@
 /* Valid values for ANTIALIASING_ALGORITHM:
   -1: bilinear (similiar to vobsub, fast and good quality)
    0: none (fastest, most ugly)
-   1: aproximate
+   1: approximate
    2: full (slowest, best looking)
  */
 #define ANTIALIASING_ALGORITHM -1
@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #if ANTIALIASING_ALGORITHM == 2
 #include <math.h>
 #endif
@@ -134,6 +135,10 @@ static inline void spudec_cut_image(spudec_handle_t *this)
   unsigned char *image;
   unsigned char *aimage;
 
+  if (this->stride == 0 || this->height == 0) {
+    return;
+  }
+
   for (fy = 0; fy < this->image_size && !this->aimage[fy]; fy++);
   for (ly = this->stride * this->height-1; ly && !this->aimage[ly]; ly--);
   first_y = fy / this->stride;
@@ -149,6 +154,7 @@ static inline void spudec_cut_image(spudec_handle_t *this)
   }
   
   //printf("new h %d new start %d (sz %d st %d)---\n\n", this->height, this->start_row, this->image_size, this->stride);
+
   image = malloc(2 * this->stride * this->height);
   if(image){
     this->image_size = this->stride * this->height;
@@ -159,10 +165,7 @@ static inline void spudec_cut_image(spudec_handle_t *this)
     this->image = image;
     this->aimage = aimage;
   } else {
-    // We'll get NULL if 0 byte is requested and it's not an error
-    if (this->stride && this->height ) {
-      fprintf(stderr,"Fatal: update_spu: malloc requested %d bytes\n", 2 * this->stride * this->height);
-    }
+    mp_msg(MSGT_SPUDEC, MSGL_FATAL, "Fatal: update_spu: malloc requested %d bytes\n", 2 * this->stride * this->height);
   }
 }
 
@@ -539,13 +542,18 @@ typedef struct {
 }scale_pixel;
 
 
-static int scale_table(unsigned int start_src, unsigned int start_tar, unsigned int end_src, unsigned int end_tar, scale_pixel * table)
+#if ANTIALIASING_ALGORITHM == -1
+static void scale_table(unsigned int start_src, unsigned int start_tar, unsigned int end_src, unsigned int end_tar, scale_pixel * table)
 {
   unsigned int t;
   unsigned int delta_src = end_src - start_src;
   unsigned int delta_tar = end_tar - start_tar;
   int src = 0;
-  int src_step = (delta_src << 16) / delta_tar >>1;
+  int src_step;
+  if (delta_src == 0 || delta_tar == 0) {
+    return;
+  }
+  src_step = (delta_src << 16) / delta_tar >>1;
   for (t = 0; t<=delta_tar; src += (src_step << 1), t++){
     table[t].position= MIN(src >> 16, end_src - 1);
     table[t].right_down = src & 0xffff;
@@ -554,9 +562,8 @@ static int scale_table(unsigned int start_src, unsigned int start_tar, unsigned 
 }
 
 /* bilinear scale, similar to vobsub's code */
-static int scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y, spudec_handle_t * spu)
+static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y, spudec_handle_t * spu)
 {
-  int i;
   int alpha[4];
   int color[4];
   unsigned int scale[4];
@@ -582,6 +589,7 @@ static int scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y,
       spu->scaled_image[scaled] = 256 - spu->scaled_aimage[scaled];
   }
 }
+#endif
 
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
@@ -630,18 +638,22 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      memset(spu->scaled_image + y * spu->scaled_stride + spu->scaled_width, 0,
 		     spu->scaled_stride - spu->scaled_width);
 	    }
+	  if (spu->scaled_width <= 1 || spu->scaled_height <= 1) {
+	    goto nothing_to_do;
+	  }
 #if ANTIALIASING_ALGORITHM == -1
 	  table_x = calloc(spu->scaled_width, sizeof(scale_pixel));
 	  table_y = calloc(spu->scaled_height, sizeof(scale_pixel));
+	  if (!table_x || !table_y) {
+	    mp_msg(MSGT_SPUDEC, MSGL_FATAL, "Fatal: spudec_draw_scaled: calloc failed\n");
+	  }
 	  scale_table(0, 0, spu->width - 1, spu->scaled_width - 1, table_x);
 	  scale_table(0, 0, spu->height - 1, spu->scaled_height - 1, table_y);
 	  for (y = 0; y < spu->scaled_height; y++)
 	    for (x = 0; x < spu->scaled_width; x++)
 	      scale_image(x, y, table_x, table_y, spu);
-	  if(table_x)
-	    free(table_x);
-	  if(table_y)
-	    free(table_y);
+	  free(table_x);
+	  free(table_y);
 #elif ANTIALIASING_ALGORITHM == 0
 	  /* no antialiasing */
 	  for (y = 0; y < spu->scaled_height; ++y) {
@@ -860,6 +872,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	    }
 	  }
 #endif
+nothing_to_do:
 	  spu->scaled_frame_width = dxs;
 	  spu->scaled_frame_height = dys;
 	}
