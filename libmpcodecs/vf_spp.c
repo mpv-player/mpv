@@ -95,6 +95,7 @@ static const uint8_t offset[127][2]= {
 struct vf_priv_s {
 	int log2_count;
 	int qp;
+	int mode;
 	int mpeg2;
 	unsigned int outfmt;
 	int temp_stride;
@@ -106,7 +107,7 @@ struct vf_priv_s {
 
 #define SHIFT 22
 
-static void requantize_c(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
+static void hardthresh_c(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
 	int i; 
 	int bias= 0; //FIXME
 	unsigned int threshold1, threshold2;
@@ -126,8 +127,31 @@ static void requantize_c(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *perm
 	}
 }
 
+static void softthresh_c(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
+	int i; 
+	int bias= 0; //FIXME
+	unsigned int threshold1, threshold2;
+	
+	threshold1= qp*((1<<4) - bias) - 1;
+	threshold2= (threshold1<<1);
+        
+	memset(dst, 0, 64*sizeof(DCTELEM));
+	dst[0]= (src[0] + 4)>>3;
+
+        for(i=1; i<64; i++){
+		int level= src[i];
+		if(((unsigned)(level+threshold1))>threshold2){
+			const int j= permutation[i];
+			if(level>0)
+				dst[j]= (level - threshold1 + 4)>>3;
+			else
+				dst[j]= (level + threshold1 + 4)>>3;
+		}
+	}
+}
+
 #ifdef HAVE_MMX
-static void requantize_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
+static void hardthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
 	int bias= 0; //FIXME
 	unsigned int threshold1;
 	
@@ -274,7 +298,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_
 
 static void (*store_slice)(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale)= store_slice_c;
 
-static void (*requantize)(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation)= requantize_c;
+static void (*requantize)(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation)= hardthresh_c;
 
 static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stride, int src_stride, int width, int height, uint8_t *qp_store, int qp_stride, int is_luma){
 	int x, y, i;
@@ -478,17 +502,25 @@ static int open(vf_instance_t *vf, char* args){
 
     vf->priv->avctx= avcodec_alloc_context();
     dsputil_init(&vf->priv->dsp, vf->priv->avctx);
-#ifdef HAVE_MMX
-    if(gCpuCaps.hasMMX){
-	store_slice= store_slice_mmx;
-	requantize= requantize_mmx;
-    }
-#endif
     
     vf->priv->log2_count= 3;
     
-    if (args) sscanf(args, "%d:%d", &vf->priv->log2_count, &vf->priv->qp);
-	
+    if (args) sscanf(args, "%d:%d:%d", &vf->priv->log2_count, &vf->priv->qp, &vf->priv->mode);
+    switch(vf->priv->mode){
+	case 0: requantize= hardthresh_c; break;
+	case 1: requantize= softthresh_c; break;
+    }
+
+#ifdef HAVE_MMX
+    if(gCpuCaps.hasMMX){
+	store_slice= store_slice_mmx;
+	switch(vf->priv->mode){
+	    case 0: requantize= hardthresh_mmx; break;
+	    //case 1: requantize= softthresh_mmx; break;
+	}
+    }
+#endif
+    
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt)

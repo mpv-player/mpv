@@ -2729,13 +2729,17 @@ off automatically depending on available CPU time.
 .RE
 .PD 1
 .TP
-.B spp[=quality[:qp]]
+.B spp[=quality[:qp[:mode]]]
 simple postprocessing filter
 .RSs
 .IPs quality
-0\-6 
+0\-6 (default: 3)
 .IPs qp\ \ \ 
-force quantization parameter
+force quantization parameter (default: 0, use qp from video)
+.IPs mode\ \ \ 
+0: hard thresholding (default)
+.br
+1: soft thresholding (better deringing, but blurrier)
 .RE
 .TP
 .B qp=equation
