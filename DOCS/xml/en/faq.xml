@@ -587,6 +587,26 @@ Use:
 
 <qandaentry>
 <question><para>
+I cannot pinpoint the cause of some strange playback problem.
+</para></question>
+<answer><para>
+Do you have a stray <filename>codecs.conf</filename> file in
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> or a similar location? Remove it,
+outdated <filename>codecs.conf</filename> files can cause obscure problems
+and is intended for use only by developers.
+For instance, the FourCC for Vobis has been changed recently.
+If you have an old <filename>codecs.conf</filename> lying around somewhere
+then it doesn't contain this new FourCC.
+Therefore no playback.
+Unless you intend to get involved in developing <application>MPlayer</application>,
+it cannot do you any good and should be deleted.
+<application>MPlayer</application> will use its built-in one instead.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 How can I select audio/subtitle tracks from a DVD, OGM, Matroska or NUT file?
 </para></question>
 <answer><para>
@@ -664,19 +684,6 @@ section again. If you are using TrueType fonts, verify that you have the
 <systemitem class="library">FreeType</systemitem> library installed.
 Other things include checking your subtitles in a text editor or with other
 players. Also try converting them to another format.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I cannot pinpoint the cause of some strange playback problem.
-</para></question>
-<answer><para>
-Do you have a stray <filename>codecs.conf</filename> file in
-<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> or a similar location? Remove it,
-outdated <filename>codecs.conf</filename> files can cause obscure
-problems. <application>MPlayer</application> will use its built-in one instead.
 </para></answer>
 </qandaentry>
 
@@ -833,25 +840,6 @@ You have an old version of <filename>codecs.conf</filename> in
 it's not needed anymore.
 <emphasis role="bold">OR</emphasis> you have the <option>vc=</option> option or
 something similar in your config file(s).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>I got this playing a file containing an Ogg/Vorbis file:
-Cannot find codec for audio format 0x73627276. Older MPlayer version are OK.
-</para></question>
-<answer><para>
-Similar to the problem above, you have an old version of
-<filename>codecs.conf</filename> in
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/etc/mplayer</filename>,
-<filename class="directory">/usr/local/etc/</filename> or similar. Remove it,
-it's not needed anymore.
-Newer Mplayer versions can't work with an old codecs.conf file because the
-FourCC for Vobis has been changed recently. If you have an old codecs.conf
-lying around somewhere then it doesn't contain this new FourCC.
-Therefore no playback.
 </para></answer>
 </qandaentry>
 
