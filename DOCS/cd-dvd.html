@@ -1,3 +1,4 @@
+
 <HTML>
 <BODY BGCOLOR=white>
 
@@ -131,7 +132,8 @@ machine.</P>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;title_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enables DVD support and selects title.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter (default: play from chapter 1)</TD><TR>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter(s) to play (default: play from chapter 1).
+  Example : <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects camera angle (default: 1)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-alang &lt;country code&gt;&nbsp;</TD>
@@ -179,6 +181,7 @@ machine.</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en /dev/dvd -chapter 20-25</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang sp -chapter 5 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
@@ -245,6 +248,13 @@ Where can I get libdvdread and libdvdcss packages from?
 From the site of Ogle:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Is it possible to play/encode only selected chapters ?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Yes, see the <CODE>-chapter</CODE> option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 </TABLE>
 
 </BODY>

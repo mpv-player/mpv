@@ -123,7 +123,8 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;cím_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD támogatás bekapcsolása, és cím kiválasztása.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;fejezet_id&gt;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD fejezet kiválasztása (alap: elsõ fejezettõl kezdve)</TD><TR>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD fejezet(ek) kiválasztása (alap: elsõ fejezettõl kezdve).
+  Például : <CODE>-chapter 5-7</CODE>, vagy <CODE>-chapter -9</CODE></TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;szög_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kamera szög kiválasztása (alap: 1)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-alang &lt;ország kód&gt;&nbsp;</TD>
@@ -171,6 +172,7 @@ változtathatod meg (fordításkor), van megadhatod filenévnek:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5-9 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
 
@@ -235,6 +237,12 @@ Hol lehet letölteni a libdvdread-et és a libdvdcss-t?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Innen:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Lehetséges csak bizonyos fejezeteket lejátszani/enkódolni ?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Igen, lásd fent a <CODE>-chapter</CODE> opciót.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>

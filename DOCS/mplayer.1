@@ -150,7 +150,8 @@ tell MPlayer which movies (marked with titleid) to play. For example
 sometimes '1' are trailers, and '2' is the real movie.
 .TP
 .B \-chapter\ <chapter\ id>
-specify which chapter to start playing at. Examples can be found below.
+specify which chapter to start playing at. Optionally specify which chapter to
+end playing at. Examples can be found below.
 .TP
 .B \-dvdangle\ <angle\ id>
 some DVD discs contain scenes that can be viewed from multiple angles.
@@ -767,6 +768,9 @@ Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
 .SH "EXAMPLES"
 .B Quickstart DVD playing
 mplayer -dvd 1
+.TP
+.B Play only chapters 5, 6, 7
+mplayer -dvd 1 -chapter 5-7
 .TP
 .B Multiangle DVD playing
 mplayer -dvd 1 -dvdangle 2

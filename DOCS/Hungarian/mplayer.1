@@ -155,8 +155,8 @@ Bekapcsolja a DVD feliratok megjelenítését. Szükséges egy DVD feliratazonosító
 az együttes használata során lesz olvasható a kimenetben.
 .TP
 .B \-chapter\ <fejezet>
-megadja hogy melyik fejezetnél kezdõdjön a lejátszás. Példákat
-lásd lent.
+megadja hogy melyik fejezetnél kezdõdjön a lejátszás. Meg lehet azt is adni,
+hogy melyiknél fejezõdjön be. Példákat lásd lent.
 .TP
 .B \-dvdangle\ <szög>
 néhány DVD lemez olyan jeleneteket tartalmaz, amelyeket más kameraállásból
@@ -697,6 +697,9 @@ A fileokat ebben a sorrendben keresi : (például /mnt/cdrom/movie.avi)
 .SH "PÉLDÁK"
 .B DVD lejátszás
 mplayer -dvd 1
+.TP
+.B DVD lejátszás, csak 5, 6 és 7-es fejezeteket
+mplayer -dvd 1 -chapter 5-7
 .TP
 .B DVD lejátszás más kameraállásból
 mplayer -dvd 1 -dvdangle 2

@@ -248,6 +248,9 @@ div3 will have the output file contain "div3" as video fourcc.
 .B Encoding DVD title #2
 mencoder -dvd 2 -o title2.avi
 .TP
+.B Encoding DVD title #2, only selected chapters
+mencoder -dvd 2 -chapter 10-15 -o title2.avi
+.TP
 .B The same, but with libavcodec family, MJPEG compression
 mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg
 .TP
