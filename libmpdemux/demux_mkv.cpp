@@ -31,7 +31,7 @@ extern "C" {
 #include <ebml/EbmlVersion.h>
 #include <ebml/StdIOCallback.h>
 
-#include <matroska/KaxAttachements.h>
+#include <matroska/KaxAttachments.h>
 #include <matroska/KaxBlock.h>
 #include <matroska/KaxBlockData.h>
 #include <matroska/KaxChapters.h>
@@ -1524,8 +1524,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                         "KaxTracks" :
                         (id == KaxCues::ClassInfos.GlobalId) ?
                         "KaxCues" :
-                        (id == KaxAttachements::ClassInfos.GlobalId) ?
-                        "KaxAttachements" :
+                        (id == KaxAttachments::ClassInfos.GlobalId) ?
+                        "KaxAttachments" :
                         (id == KaxChapters::ClassInfos.GlobalId) ?
                         "KaxChapters" :
                         "unknown");
