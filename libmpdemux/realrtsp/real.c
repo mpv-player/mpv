@@ -593,9 +593,11 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
   uint8_t header[8];
   rmff_pheader_t ph;
   int size;
-  int flags1;
+  int flags1, flags2;
   int unknown1;
   uint32_t ts;
+  static uint32_t prev_ts = -1;
+  static int prev_stream_number = -1;
 
   n=rtsp_read_data(rtsp_session, header, 8);
   if (n<8) return 0;
@@ -625,13 +627,15 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
     flags1=header[4];
     size-=9;
   }
+  flags2=header[7];
+  // header[5..6] == frame number in stream
   unknown1=(header[5]<<12)+(header[6]<<8)+(header[7]);
   n=rtsp_read_data(rtsp_session, header, 6);
   if (n<6) return 0;
   ts=BE_32(header);
   
 #ifdef LOG
-  printf("ts: %u size: %u, flags: 0x%02x, unknown values: %u 0x%02x 0x%02x\n", 
+  printf("ts: %u, size: %u, flags: 0x%02x, unknown values: 0x%06x 0x%02x 0x%02x\n", 
           ts, size, flags1, unknown1, header[4], header[5]);
 #endif
   size+=2;
@@ -641,7 +645,14 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
   ph.stream_number=(flags1>>1)&1;
   ph.timestamp=ts;
   ph.reserved=0;
-  ph.flags=0;      /* TODO: determine keyframe flag and insert here? */
+  if ((flags2&1) == 0 && (prev_ts != ts || prev_stream_number != ph.stream_number))
+  {
+    prev_ts = ts;
+    prev_stream_number = ph.stream_number;
+    ph.flags=2;
+  }
+  else
+    ph.flags=0;
   rmff_dump_pheader(&ph, buffer);
   size-=12;
   n=rtsp_read_data(rtsp_session, buffer+12, size);
