@@ -1517,6 +1517,7 @@ if(1)
         videobuf_len=0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
+	  void* buffer=&videobuffer[videobuf_len+4];
           if(in_frame){
             if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
 #if 1
@@ -1538,6 +1539,13 @@ if(1)
 	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
           if(!read_video_packet(d_video)){ eof=1; break;} // EOF
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
+	  if(sh_video->codec->driver!=1){
+	    // not libmpeg2:
+	    switch(i){
+	      case 0x1B3: header_process_sequence_header (picture, buffer);break;
+	      case 0x1B5: header_process_extension (picture, buffer);break;
+	    }
+	  }
         }
         
         if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
