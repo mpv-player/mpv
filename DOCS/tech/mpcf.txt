@@ -151,10 +151,6 @@ audio_stream_header:
 
  
 frame
-	if(next_byte == 'N'){
-		FIXME short startcode
-		frame_startcode			f(64)
-	}
 	frame_code				f(8)
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
@@ -212,8 +208,13 @@ file
 		while(next_packet != main_header){
 			if(next_packet == info_packet)
 				info_packet
-			else
+			else{
+				if(next_byte == 'N'){
+					FIXME short startcode
+					frame_startcode
+				}
 				frame
+			}
 		}
 //FIXME index
 	}
