@@ -19,9 +19,16 @@ I. TECH SIDE:
   export CVS_RSH=ssh
   cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co main
   
+  NOTE: cvs -d:pserver: mode doesn't allow writting, even with password!
+  
 3. Commiting changes:
 
   cvs -z3 commit -m "comment - what and why did you change" filename(s)
+  
+  Do not use such comments: "bugfix." or "files changed" or "dunno"
+  You don't have to include filename in comment, as comments are linked
+  to files. If you have different comments for files, commit them separated,
+  not at same time.
   
 4. Adding new files/dirs:
 
@@ -36,14 +43,19 @@ I. TECH SIDE:
   
   cvs -z3 diff -u filename(s)
   
+  it's recommended to check changes first, before commit. especially if you
+  forget what did you change :)
+  and this way you will see if your patch has debug stuff or indenting change,
+  and you can fix it before commiting and triggering me to use cvs-backup.
+  
 7. Check changelog:
 
   cvs -z3 log filename(s)
   
 8. Rename/move files:
 
-  you can't do that. ask CVS server admin (A'rpi) to do it.
-  (do not remove & re-add file - it will kill changelog!)
+  you can NOT do that. ask CVS server admin (A'rpi) to do it!
+  do NOT remove & re-add file - it will kill changelog!!!!
 
 If you have any tech problems with cvs server, contact me:
 A'rpi <arpi@thot.banki.hu>
@@ -86,6 +98,7 @@ II. POLICY / RULES:
 8. I've developed something called CVS-Backup. It archives CVS
    repository after each commit - so I can reverse your commits
    (without messing up changelog) if they are bad.
-   
+   If you think your bugfix or other change was bad and unneeded,
+   ask me to reverse it instead of commiting previous version!
    
 I think our rules aren't too hard. If you have comments, contact me.
