@@ -65,6 +65,10 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 #include <decore.h>
 #endif
 
+#ifdef USE_XANIM
+#include "xacodec.h"
+#endif
+
 void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
     unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
 
@@ -226,6 +230,13 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 sh_video->our_out_buffer=NULL;
 
 switch(sh_video->codec->driver){
+#ifdef USE_XANIM
+ case VFM_XANIM: {
+   int ret=xacodec_init_video(sh_video,out_fmt);
+   if(!ret) return 0;
+   break;
+ }
+#endif
 #ifdef USE_WIN32DLL
  case VFM_VFW: {
    if(!init_vfw_video_codec(sh_video,0)) {
@@ -438,6 +449,13 @@ unsigned int t2;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
+#ifdef USE_XANIM
+  case VFM_XANIM: {
+    int ret=xacodec_decode_frame(start,in_size,sh_video->our_out_buffer,drop_frame?1:0);
+    if(ret) blit_frame=3;
+    break;
+  }
+#endif
   case VFM_ODIVX: {
     // OpenDivX
     DEC_FRAME dec_frame;
