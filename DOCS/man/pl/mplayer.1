@@ -198,6 +198,9 @@ szum, konwersja rgb/\:yuv) i inne.
 to MPlayer z graficznym interfejsem u¿ytkownika.
 Ma te same opcje co MPlayer.
 .PP
+Przyk³ady jak korzystaæ z programu znajdziesz na koñcu tej strony
+podrêcznika man.
+.PP
 .B Sprawd¼ równie¿ dokumentacjê w formacie HTML!
 .
 .
@@ -371,7 +374,7 @@ U¿ywa podanego pliku zamiast dostêpnego w systemie lub wbudowanego codecs.conf.
 Okre¶la plik z ustawieniami, który bêdzie parsowany po tych domy¶lnych.
 .
 .TP
-.B \-quiet \ \ 
+.B \-quiet\ \ 
 Sprawia, ¿e wyj¶cie na konsolê jest mniej gadatliwe; w szczególno¶ci zapobiegnie
 to wy¶wietleniu wiersza stanu (tzn.\& A:   0.7 V:   0.6 A-V:  0.068 ...).
 Szczególnie przydatne na wolnych terminalach lub na takich, które nie obs³uguj±
@@ -1409,11 +1412,11 @@ Ustala jak powinny byæ wyrównane napisy SPU (DVD/\:VOBsub).
 .IPs -1
 oryginalna pozycja
 .IPs 0
-wyrównaj na górze (oryginalne/\:domy¶lne zachowanie)
+Wyrównaj na górze (oryginalne/\:domy¶lne zachowanie).
 .IPs 1
-wyrównaj na ¶rodku
+Wyrównaj na ¶rodku.
 .IPs 2
-wyrównaj na dole
+Wyrównaj na dole.
 .RE
 .PD 1
 .
@@ -2820,7 +2823,7 @@ Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
 .
 .TP
 .B md5sum\ 
-Oblicza sumê md5 ka¿dej klatki i zapisuje je wszystkie do pliku.
+Oblicza sumy MD5 ka¿dej klatki i zapisuje je do pliku.
 Obs³uguje przestrzenie kolorów RGB24 i YV12.
 Przydatne przy debugowaniu.
 .PD 0
@@ -2897,7 +2900,7 @@ wspó³czynnik jako¶ci (domy¶lnie: 75)
 .IPs outdir=<nazwa\ katalogu>
 Okre¶la katalog, w którym bêd± zapisywane pliki JPEG (domy¶lnie: ./).
 .IPs subdirs=<warto¶æ>
-Je¶li podane, MPlayer stworzy poszeregowane podkatalogi z okre¶lnonym prefiksem.
+Je¶li podane, MPlayer stworzy ponumerowane podkatalogi z okre¶lnonym prefiksem.
 Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
 pliki JPEG bêd± zapisane do tego samego katalogu.
 .IPs maxfiles=<warto¶æ>
@@ -2911,11 +2914,8 @@ Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
 .B pnm\ \ \ \ 
 Zapisuje ka¿d± ramkê do pliku PNM w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
-Obs³uguje pliki PPM, PGM i PGMYUV w trybie surowym (raw) i ASCII. Zobacz równie¿ 
-.BR pnm (5),
-.BR ppm (5)
-i
-.BR pgm (5).
+Obs³uguje pliki PPM, PGM i PGMYUV w trybie surowym (raw) i ASCII.
+Zobacz równie¿ pnm(5),ppm (5) i pgm(5).
 .PD 0
 .RSs
 .IPs ppm
@@ -2932,10 +2932,9 @@ Zapisuje pliki PNM w trybie surowym (raw) (domy¶lnie).
 Zapisuje pliki PNM w trybie ASCII.
 .IPs outdir=<nazwa\ katalogu>
 Okre¶la katalog, w którym bêd± zachowane pliki PNM (domy¶lnie: ./).
-.IPs subdirs=<warto¶æ>
-MPlayer utworzy ponumerowane podkatalogi z podanym prefiksem.
-Domy¶lnie ¿adne podkatalogi nie zostan± stworzone
-a wszystkie pliki PNM zostan± zapisane w tym samym katalogu.
+.IPs subdirs=<prefiks>
+Tworzy ponumerowane podkatalogi z okre¶lonym prefiksem, gdzie zachowa
+pliki zamiast zapisywaæ je bie¿±cego katalogu.
 .IPs maxfiles=<warto¶æ> (tylko z subdirs)
 Maksymalna ilo¶æ plików PNM jakie bêd± zachowane w ka¿dym podkatalogu.
 Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
@@ -3222,7 +3221,7 @@ informacje debugowania:
 .IPs ec=<warto¶æ> 
 ukrywanie b³êdów:
 .RSss
-1: U¿ywa silnego filtru deblokuj±cego (deblock) dla uszkodzonych
+1: U¿ywa silnego filtru odblokowywuj±cego (deblock) dla uszkodzonych
 makrobloków (MB).
 .br
 2: iteracyjne szukanie wektorów ruchu (MV) (wolne)
@@ -3255,6 +3254,21 @@ dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 idct do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
+.IPs lowres=<numer> 
+Dekoduje w niskiej rozdzielczo¶ci.
+Dekodowanie w niskiej rozdzielczo¶ci nie jest obs³ugiwane przez wszystkie
+kodeki i czêsto powoduje pojawienie siê okropnych zniekszta³ceñ. Nie jest
+to ¿aden b³±d, a jedynie efekty uboczny niedekodowania w pe³nej rozdzielczo¶ci.
+.RSss
+.br
+0: wy³±czone
+.br
+1: 1/2 rozdzielczo¶ci
+.br
+2: 1/4 rozdzielczo¶ci
+.br
+3: 1/8 rozdzielczo¶ci
+.REss
 .IPs "sb=<number> (tylko MPEG2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
 .IPs "st=<number> (tylko MPEG2)"
@@ -3830,7 +3844,7 @@ prosty filtr postprocessingu
 .IPs jako¶æ
 0\-6 (domy¶lnie: 3)
 .IPs qp\ \ 
-wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video)
+Wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video).
 .IPs tryb\ \ \ 
 0: twardy próg (domy¶lne)
 .br
@@ -4442,17 +4456,17 @@ Dostêpne s± tryby:
 .PD 0
 .RSs
 .IPs 0
-nieparzyste klatki w górne pole, parzyste w dolne, tworzy ramkê pe³nej wysoko¶ci
-przy po³owie prêdko¶ci klatek
+Przesunie nieparzyste klatki w górne pole, parzyste w dolne, tworz±c ramkê pe³nej
+wysoko¶ci przy po³owie prêdko¶ci klatek.
 .IPs 1
-opuszcza klatki parzyste, na wyj¶cie przekazuje tylko nieparzyste, wysoko¶æ
-pozostaje niezmieniona
+Opuszcza klatki parzyste, na wyj¶cie przekazuje tylko nieparzyste, wysoko¶æ
+pozostaje niezmieniona.
 .IPs 2
-opuszcza klatki nieparzyste, na wyj¶cie przekazuje tylko parzyste, wysoko¶æ
-pozostaje niezmieniona
+Opuszcza klatki nieparzyste, na wyj¶cie przekazuje tylko parzyste, wysoko¶æ
+pozostaje niezmieniona.
 .IPs 3
-poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno,
-szybko¶æ klatek pozostaje niezmieniona
+Poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno;
+szybko¶æ klatek pozostaje niezmieniona.
 .RE
 .PD 1
 .
@@ -4467,14 +4481,14 @@ Dostêpne tryby:
 .PD 0
 .RSs
 .IPs 0
-pozostawia pola niezmienione (zaobserwujesz przeskoki/\:migotanie)
+Pozostawia pola niezmienione. (Zaobserwujesz przeskoki/\:migotanie.)
 .IPs 1
-interpoluje brakuj±ce linie (stosowany algorytm mo¿e nie byæ zbyt dobry)
+Interpoluje brakuj±ce linie (stosowany algorytm mo¿e nie byæ zbyt dobry).
 .IPs 2
-przesuñ pola o 1/\:4 piksela z wykorzystaniem interpolacji liniowej
-(nie bêdzie przeskoków)
+Przesunie pola o 1/4 piksela z wykorzystaniem interpolacji liniowej
+(bez przeskoków).
 .IPs 4
-przesuñ pola o 1/\:4 piksela z wykorzystaniem filtru 4tap (wysoka jako¶æ)
+Przesunie pola o 1/4 piksela z wykorzystaniem filtru 4tap (wysoka jako¶æ).
 .RE
 .PD 1
 .
@@ -4495,26 +4509,26 @@ Jak czêsto filtr powinien byæ wykorzystywany.
 adaptatywne rozmycie figur
 .PD 0
 .RSs
-.IPs pro\ \ \ 
+.IPs <pro>
 si³a filtru rozmycia (~0.1\-4.0) (wolniejsze je¿eli wiêksze)
-.IPs pf\ \ \ 
+.IPs <pf>\
 si³a prefiltru (~0.1\-2.0)
-.IPs ró¿nKol
-Jak ró¿ne piksele bêd± rozpatrywane.
-(~0.1\-100.0)
+.IPs <ró¿nKol>
+Maksymalna ró¿nic± miêdzy pikselami, która bêdzie jeszcze rozpatrywana
+(~0.1\-100.0).
 .RE
 .PD 1
 .
 .TP
-.B smartblur=pro:si³a:zakres[:pro:si³a:zakres]
+.B smartblur=promieñ:si³a:zakres[:promieñ:si³a:zakres]
 eleganckie rozmycie
 .PD 0
 .RSs
-.IPs pro\ \ 
+.IPs <promieñ> 
 si³a filtru rozmycia (~0.1\-5.0) (wolniejsze je¿eli wiêksze)
-.IPs si³a\ 
+.IPs <si³a>
 rozmycie (0.0\-1.0) lub wyostrzenie (-1.0\-0.0)
-.IPs zakres
+.IPs <zakres>
 filtruj wszystko (0), filtruj p³askie obszary (0\-30)
 lub filtruj krawêdzie (-30\-0)
 .RE
@@ -4522,7 +4536,7 @@ lub filtruj krawêdzie (-30\-0)
 .
 .TP
 .B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
-korekcja perspektywy
+Popraw perspektywê w filmach, niekrêconych prostopadle do obrzu.
 .PD 0
 .RSs
 .IPs x0,y0,...
@@ -4534,8 +4548,8 @@ liniowy (0) lub sze¶cienny resampling (1)
 .
 .TP
 .B 2xsai\ \ 
-Wykorzystuje podwójne skalowanie i interpolacjê do skalowania i wyg³adzania
-obrazów.
+Przeskaluje i wyg³adzi obraz przy pomocy podwójnego skalowania i
+algorytmu interpolacji.
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4554,15 +4568,18 @@ ilo¶æ linii wybierana ze ¶rodka obrazu (domy¶lnie: 12)
 .PD 1
 .
 .TP
-.B bmovl=hidden:opaque:<fifo>
-Odczytuje bitmapy z FIFO i wy¶wietla je w oknie.
+.B bmovl=ukryty:nieprzezroczysty:kolejka
+Odczytuje bitmapy z FIFO i wy¶wietla je w górnej czê¶ci filmu,
+pozwalaj±c na tranformacje na obrazie.
+TOOLS/bmovl-test.c jest ma³ym programem do testowania bmovl.
 .PD 0
 .RSs
-.IPs hidden
-ustawia domy¶ln± warto¶æ flagi "hidden" (warto¶æ logiczna)
-.IPs opaque
-flaga prze³±czaj±ca pomiêdzy trybem przezroczystym i nieprzezroczystym (szybki)
-.IPs fifo\ 
+.IPs <ukryty>
+Ustawia domy¶ln± warto¶æ flagi "hidden" (0=widoczny, 1=ukryty).
+.IPs <nieprzejzroczysty>
+Ustawia domy¶ln± warto¶æ flagi "opaque" czystym
+(0=przezroczysty, 1=nieprzezroczysty)).
+.IPs <kolejka> 
 ¶cie¿ka/\:nazwa pliku FIFO (nazwana kolejka ³±cz±ca mplayer \-vf bmovl
 z aplikacj± kontroluj±)
 .RE
@@ -4578,20 +4595,20 @@ i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych RGBA32.
 .IPs "ABGR32 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych ABGR2.
 .IPs "RGB24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
-i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych RGB32.
+i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych RGB24.
 .IPs "BGR24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
-i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych BGR32.
+i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych BGR24.
 .IPs "ALPHA szeroko¶æ wysoko¶æ xpoz ypoz alfa"
-zmienia kana³ alfa dla obszaru
+Zmienia przezroczysto¶æ alfa dla danego obszaru.
 .IPs "CLEAR szeroko¶æ wysoko¶æ xpoz ypoz"
-czy¶ci obszar
+Czy¶ci obszar.
 .IPs OPAQUE
 Wy³±cza ca³± przezroczysto¶æ alfa.
 Prze¶lij "ALPHA 0 0 0 0 0", aby w³±czyæ j± z powrotem.
 .IPs HIDE\ 
-ukrywa bitmapê
+Ukrywa bitmapê.
 .IPs SHOW\ 
-pokazuje bitmapê
+Pokazuje bitmapê.
 .RE
 .PD 1
 .sp 1
@@ -4601,9 +4618,9 @@ Argumenty oznaczaj±:
 .PD 0
 .RSs
 .IPs "szeroko¶æ, wysoko¶æ"
-wymiary obrazu/\:obszaru
+wymiary obrazu/obszaru
 .IPs "xpoz, ypoz"
-start blittingu w punkcie o wspó³rzêdnych X/Y
+Rozpoczyna blitting w punkcie o wspó³rzêdnych x/y.
 .IPs alfa
 Ustawia ró¿nicê alfa.
 Je¿eli ustawisz na -255, mo¿esz pó¼niej wysy³aæ sekwencjê komend ALPHA,
@@ -4612,9 +4629,9 @@ przenikania ! ;)
 .RSss
 0:    tak jak orygina³
 .br
-255:  zmienia wszystko na nieprzezroczyste
+255:  Zmienia wszystko na nieprzezroczyste.
 .br
--255: zmienia wszystko na przezroczyste
+-255: Zmienia wszystko na przezroczyste.
 .REss
 .IPs clear
 czy¶ci bufor przed blittingiem
@@ -4653,32 +4670,32 @@ Je¿eli podasz tylko "i", wtedy nic siê nie dzieje z klatkami, tylko "I!" bêdzie
 drukowane.
 .
 .TP
-.B tile=xtile:ytile:output:start:delta
+.B tile=xkawalki:ykawalki:wyj¶cie:start:delta
 £±czy szereg obrazów w jeden wiêkszy.
 Je¿eli ominiesz parametr lub podasz warto¶æ mniejsz± ni¿ 0, domy¶lna
 warto¶æ bêdzie u¿yta.
-Mo¿esz równie¿ przestaæ podawaæ opcje w ka¿dej chwili (... \-vf tile=10:5 ...)
+Mo¿esz równie¿ przestaæ podawaæ opcje w ka¿dej chwili (... \-vf tile=10:5 ...).
 Dobrym pomys³em bêdzie umieszczenie filtra skalowania (scale) przed ³±czeniem
-(tile) :-)
+(tile) :-).
 .sp 1
 Dostêpne parametry:
 .sp 1
 .PD 0
 .RSs
-.IPs xtile
+.IPs <xkawa³ki>
 ilo¶æ kawa³ków na osi X (domy¶lnie: 5)
-.IPs ytile
+.IPs <ykawa³ki>
 ilo¶æ kawa³ków na osi Y (domy¶lnie: 5)
-.IPs output
-Renderuje kawa³ek kiedy wyj¶ciowa ("output") ilo¶æ klatek jest osi±gniêta,
+.IPs <wyj¶cie>
+Renderuje kawa³ek kiedy wyj¶ciowa ("wyj¶cie") ilo¶æ klatek jest osi±gniêta,
 gdzie "output" powinien byæ liczb± mniejsz± ni¿ xtile * ytile.
 Brakuj±ce kawa³ki s± pozostawiane puste.
 Mo¿esz, na przyk³ad, zapisaæ kawa³ek 8 * 7 co ka¿de 50 klatek, aby uzyskiwaæ
 obraz co 2 sekundy (przy szybko¶ci 25 fps).
-.IPs start
-piksel pocz±tkowy (x/\:y) (domy¶lnie: 2)
+.IPs <start>
+grubo¶æ zewnêtrznego obramowanie w pikselach (domy¶lnie: 2)
 .IPs delta
-piksel pomiêdzy 2 kawa³kami (x/\:y) (domy¶lnie: 4)
+grubo¶æ wewnêtrznego obramowania w pikselach (domy¶lnie: 4)
 .RE
 .PD 1
 .
@@ -4690,9 +4707,9 @@ znika (a czasami pojawi siê co¶ o wiele brzydszego \- efekty mog± byæ ró¿ne).
 .PD 0
 .RSs
 .IPs x,y
-Pozycja lewego, górnego rogu logo.
+pozycja lewego, górnego rogu logo
 .IPs w,h
-Szeroko¶æ i wysoko¶æ czyszczonego prostok±tu.
+szeroko¶æ i wysoko¶æ czyszczonego prostok±ta
 .IPs t
 Grubo¶æ niewyra¼nej krawêdzi (dodana do w i h).
 Kiedy ustawiona zostanie na -1, zielony prostok±t zostanie narysowany na
@@ -5566,7 +5583,8 @@ wspó³czynnik kwantyzatora pomiêdzy klatkami B a innymi ni¿ B (przej¶cie\ 1/\:2)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-(przej¶cie\ 1/\:2) (domy¶lnie: 0.8)
+wspó³czynnik kwantyzatora pomiêdzy klatkami I a innymi ni¿ I (przej¶cie\ 1/\:2)
+(domy¶lnie: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
@@ -5897,13 +5915,29 @@ rozs±dny zakres
 .
 .TP
 .B tcplx_mask=<0.0\-1.0>
-maskowanie z³o¿ono¶ci czasowej (domy¶lnie: 0.0 (wy³±czone))
+maskowanie przej¶ciowej z³o¿ono¶ci (domy¶lnie: 0.0 (wy³±czone))
+Wyobra¼ sobie ujêcie z ptakiem lec±cym przez ca³± scenê. tcplx_mask
+zmniejszy kwantyzatory jego makrobloków (tym samym zmniejszaj±c ich jako¶æ),
+poniewa¿ ludzkie oko zazwyczaj nie ma czasu, ¿eby zobaczyæ wszystkie jego
+szczegó³y.
+Niestety, je¿eli przedmiot, na którego zosta³a na³o¿ona maska, zatrzyma siê
+(np.\& ptak wyl±duje) prawdopodobnie bêdzie wygl±da³o to okropnie przez
+krótk± chwilê, dopóki koder nie zauwa¿y tego, ¿e przedmiot ju¿ siê nie porusza
+i potrzebuje nowych bloków.
+Zaoszczêdzone bity, bêd± wykorzystane w innych czê¶ciach filmu, co mo¿e
+zwiêkszyæ subiektywn± jako¶æ, pod warunkiem, ¿e warto¶æ tcplx_mask jest
+dobierana ostro¿nie.
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
 Maskowanie z³o¿ono¶ci przestrzennej.
-Wiêksze warto¶ci pomagaj± przy blokowaniu, je¿eli ¿adne filtr odblokowania nie
-jest stosowany prze dekodowaniu.
+Wiêksze warto¶ci pomagaj± przy blokowaniu, je¿eli ¿aden filtr odblokowania nie
+jest stosowany przy dekodowaniu - nie jest to najlepszy pomys³.
+.br
+Wyobra¼ sobie scenê z traw± (która ma zazwyczaj du¿± kompleksowo¶æ przestrzenn±),
+niebieskim niebem i domem. scplx_mask zwiêkszy kwantyzatory makrobloków trawy
+,tym samym zmniejszaj±c jej jako¶æ, tak ¿eby wykorzystaæ wiêcej bitów na
+niebo i dom.
 .br
 .I WSKAZÓWKA:
 Usuñ wszystkie czarne krawêdzie, jako ¿e zmniejszaj± one jako¶æ
@@ -5914,10 +5948,23 @@ wy³±czone (domy¶lnie)
 .IPs 0.0\-0.5
 rozs±dny zakres
 .RE
+.sp 1
+.I INFORMACJA:
+Ten parametr nie dzia³a tak samo, jak u¿ycie w³asnej matrycy, która kompesowa³a
+by wy¿sze czêstotliwo¶ci lepiej, jako ¿e scplx_mask zmniejszy jako¶æ bloków P,
+nawet je¶li tylko DC siê zmienia -  nie bêdzieto prawdopodobnie wygl±da³o
+za dobrze.
 .
 .TP
 .B p_mask=<0.0\-1.0>
 Maskowanie inter MB (domy¶lnie: 0.0 (wy³±czone))
+
+.B p_mask=<0.0\-1.0> (also see vi_qfactor)
+Zmniejsza jako¶æ inter makrobloków.
+Jest to jednoznaczne z podniesieniem jako¶ci intra bloków, poniewa¿ ta sama,
+przeciêtna warto¶æ bitrate, bêdzie rozprowadzona przez kontroler tempa
+(rate controller) na ca³± sekwencjê video (domy¶lnie: 0.0 (wy³±czone)). 
+p_mask=1.0 podwoja lo¶æ bitów alokowanych do ka¿dego inta bloku.
 .
 .TP
 .B naq\ \ \ \ 
@@ -6835,12 +6882,14 @@ liczba klatek B pomiêdzy klatkami I i P (domy¶lnie: 0)
 .
 .TP
 .B deblock=<0|1>
-Wykorzystuje filtr deblokuj±cy (deblock) (domy¶lnie: w³±czony).
+Wykorzystuje filtr odblokowywuj±cy (deblock) (domy¶lnie: w³±czony).
+Jako, ¿e zabiera ma³o czasu procesora w porównaniu ze wzrostem jako¶ci,
+jaki daje, nie jest zalecane wy³±czanie go.
 .
 .TP
 .B deblockalpha=<-6\-6>
-Parametr AlphaC0 dla filtru deblokuj±cego (deblock) (domy¶lnie: 0).
-Opcja ta dostosowuje zakresy dla filtru deblokuj±cego H.264.
+Parametr AlphaC0 dla filtru odblokowywuj±cy (deblock) (domy¶lnie: 0).
+Opcja ta dostosowuje zakresy dla filtru odlokowywuj±cego H.264.
 Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
 nanie¶æ na pojedynczy piksel.
 Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
@@ -6853,7 +6902,7 @@ nieznaczne zwiêkszenie jego warto¶ci.
 .
 .TP
 .B deblockbeta=<-6\-6>
-Parametr Beta filtru deblokuj±cego (deblock) (domy¶lnie: 0).
+Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
