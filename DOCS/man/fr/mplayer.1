@@ -1,4 +1,4 @@
-.\" synced with 1.835
+.\" synced with 1.836
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -7634,16 +7634,17 @@ direct_pred=0 est généralement lent et de qualité moindre.
 .
 .TP
 .B (no)b8x8mv
-Utilise les types de macro-blocs b16x8, b8x16, b8x8 (par défaut\: activé).
-Nécessite des trames-B.
+Utilise en plus les types de macro-blocs b16x8, b8x16, b8x8
+(par défaut\: activé).
+Sans cette option, les trames-B n'utiliseront que les types 
+i16x16, i4x4, b16x16, skip, direct.
 Voir 4x4mv pour plus de détails.
 .
 .TP
 .B (no)4x4mv
-Utilise les types de macro-blocs p8x4, p4x8, p4x4.
-Les types de macro-blocs intra-trames disponibles sont i16x16, i4x4, p16x16,
-p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip, direct.
-Les types i16x16, i4x4, p16x16-8x8, b16x16, et skip sont toujours utilisés.
+Utilise en plus les types de macro-blocs p8x4, p4x8, p4x4.
+Sans cette option, les trames-P n'utiliseront que les types
+i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
 .br
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
@@ -7651,8 +7652,6 @@ Par exemple, un travelling est mieux représenté par des blocs 16x16, tandis
 qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 .br
 4x4mv n'est recommandé que si subq >=3.
-Suivant le type de source, ce paramètre peut améliorer ou dégrader la
-qualité, utilisez-le avec précaution.
 .
  .TP
 .B subq=<0\-5>
