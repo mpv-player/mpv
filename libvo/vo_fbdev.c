@@ -19,6 +19,7 @@
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <sys/kd.h>
 #include <linux/fb.h>
 
 #include "config.h"
@@ -622,6 +623,7 @@ static int vt_doit = 1;
 
 /* vo_fbdev related variables */
 static int fb_dev_fd;
+static int fb_tty_fd;
 static size_t fb_size;
 static uint8_t *frame_buffer;
 static uint8_t *L123123875;	/* thx .so :) */
@@ -746,11 +748,16 @@ static int fb_preinit(void)
 	}
 	fb_orig_vinfo = fb_vinfo;
 
+        if ((fb_tty_fd = open("/dev/tty", O_RDWR)) < 0) {
+                if (verbose > 0)
+                        printf(FBDEV "notice: Can't open /dev/tty: %s\n", strerror(errno));
+        }
+
 	fb_bpp = fb_vinfo.bits_per_pixel;
 
 	if (fb_bpp == 8 && !vo_dbpp) {
 		printf(FBDEV "8 bpp output is not supported.\n");
-		goto err_out_fd;
+		goto err_out_tty_fd;
 	}
 
 	/* 16 and 15 bpp is reported as 16 bpp */
@@ -770,6 +777,9 @@ static int fb_preinit(void)
 	fb_preinit_done = 1;
 	fb_works = 1;
 	return 1;
+err_out_tty_fd:
+        close(fb_tty_fd);
+        fb_tty_fd = -1;
 err_out_fd:
 	close(fb_dev_fd);
 	fb_dev_fd = -1;
@@ -934,8 +944,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	fb_vinfo.xres_virtual = fb_vinfo.xres;
 	fb_vinfo.yres_virtual = fb_vinfo.yres;
 
+        if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_GRAPHICS) < 0) {
+                if (verbose > 0)
+                        printf(FBDEV "Can't set graphics mode: %s\n", strerror(errno));
+                close(fb_tty_fd);
+                fb_tty_fd = -1;
+        }
+
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
 		printf(FBDEV "Can't put VSCREENINFO: %s\n", strerror(errno));
+                if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0) {
+                        printf(FBDEV "Can't restore text mode: %s\n", strerror(errno));
+                }
 		return 1;
 	}
 
@@ -1198,8 +1218,14 @@ static void uninit(void)
 	fb_orig_vinfo.yoffset = fb_vinfo.yoffset;
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
 		printf(FBDEV "Can't reset original fb_var_screeninfo: %s\n", strerror(errno));
+        if (fb_tty_fd >= 0) {
+                if (ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
+                        printf(FBDEV "Can't restore text mode: %s\n", strerror(errno));
+        }
 	if (vt_doit)
 		vt_set_textarea(0, fb_orig_vinfo.yres);
+        close(fb_tty_fd);
 	close(fb_dev_fd);
 	munmap(frame_buffer, fb_size);
 }
+
