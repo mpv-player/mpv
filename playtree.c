@@ -8,7 +8,7 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
-#include "cfgparser.h"
+#include "m_config.h"
 #include "playtree.h"
 #include "mp_msg.h"
 
@@ -270,17 +270,7 @@ play_tree_add_file(play_tree_t* pt,char* file) {
   e = pt->files[n] = strdup(file);
   pt->files[n+1] = NULL;
 
-  if(strncasecmp(e,"vcd://",6) == 0) {
-    pt->entry_type = PLAY_TREE_ENTRY_VCD;
-    memmove(e,e + 6,strlen(&e[6])+1);
-  } else if(strncasecmp(e,"dvd://",6) == 0) {
-    pt->entry_type = PLAY_TREE_ENTRY_DVD;
-    memmove(e,&e[6],strlen(&e[6])+1);
-  } else if(strncasecmp(e,"tv://",5) == 0) {
-    pt->entry_type = PLAY_TREE_ENTRY_TV;
-    memmove(e,&e[5],strlen(&e[5])+1);
-  } else
-    pt->entry_type = PLAY_TREE_ENTRY_FILE;
+  pt->entry_type = PLAY_TREE_ENTRY_FILE;
 
 }
 
@@ -753,9 +743,6 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
   return play_tree_iter_step(iter,0,with_nodes);
 }
 
-// This is used as a file name for vcd/tv/dvd
-char playtree_ret_filename[256];
-
 char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
   char* entry;
@@ -785,46 +772,7 @@ play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
     else
       iter->file--;
   }
-  entry = iter->tree->files[iter->file];
-
-  switch(iter->tree->entry_type) {
-  case PLAY_TREE_ENTRY_DVD :
-    if(strlen(entry) == 0) entry = "1";
-    if(iter->config)
-      m_config_set_option(iter->config,"dvd",entry);
-    snprintf(playtree_ret_filename,255,"DVD title %s",entry);
-    return playtree_ret_filename;
-  case PLAY_TREE_ENTRY_VCD :
-    if(strlen(entry) == 0) entry = "1";
-    if(iter->config)
-      m_config_set_option(iter->config,"vcd",entry);
-    snprintf(playtree_ret_filename,255,"VCD track %s",entry);
-    return playtree_ret_filename;
-  case PLAY_TREE_ENTRY_TV : 
-    {
-      if(strlen(entry) != 0) {
-	char *s,*e, *val = (char*)malloc(strlen(entry) + 11 + 1);
-	sprintf(val,"on:channel=%s",entry);
-	if(iter->config)
-	  m_config_set_option(iter->config,"tv",val);
-	s = playtree_ret_filename + sprintf(playtree_ret_filename,"TV channel ");
-	e = strchr(entry,':');
-	if(!e) strncpy(s,entry,255-11);
-	else {
-	  if(entry-e > 255) e = entry+255;
-	  strncpy(s,entry,val-e);
-	  s[val-e] = '\0';
-	}
-	return playtree_ret_filename;
-      } else {
-	if(iter->config)
-	  m_config_set_option(iter->config,"tv","on");
-	return "TV";
-      }
-    }
-  }
-
-  return entry;
+  return iter->tree->files[iter->file];
 }
 
 play_tree_t*
