@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <time.h>
 
 #if !defined(INFINITY) && defined(HUGE_VAL)
 #define INFINITY HUGE_VAL
@@ -53,9 +54,9 @@ static int const motion_presets[7] = {
 	0,
 	0,
 	0,
-	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | HALFPELREFINE16_BITS,
-	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | PMV_ADVANCEDDIAMOND16 | HALFPELREFINE16_BITS,
-	PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 | PMV_HALFPELREFINE8 | PMV_HALFPELDIAMOND8 | PMV_USESQUARES16 | EXTSEARCH_BITS | HALFPELREFINE8_BITS | HALFPELREFINE16_BITS | CHECKPREDICTION_BITS
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8,
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | PMV_ADVANCEDDIAMOND16,
+	PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 |	PMV_HALFPELREFINE8 | PMV_HALFPELDIAMOND8 | PMV_USESQUARES16
 #else
         0,
 	PMV_QUICKSTOP16,
@@ -72,7 +73,7 @@ static int const motion_presets[7] = {
 extern char* passtmpfile;
 
 static int xvidenc_pass = 0;
-static int xvidenc_quality = 4;
+static int xvidenc_quality = 6;
 static int xvidenc_4mv = 0;
 static int xvidenc_bitrate = -1;
 static int xvidenc_rc_reaction_delay_factor = -1;
@@ -100,11 +101,11 @@ static int xvidenc_bquant_ratio = 150;
 static int xvidenc_bquant_offset = 100;
 static int xvidenc_gmc = 0;
 static int xvidenc_chroma_me = 0;
+static int xvidenc_chroma_opt = 0;
 static int xvidenc_reduced = 0;
-static int xvidenc_hqac=0;
-static int xvidenc_vhq=0;
-static int xvidenc_pref=0;
-static int xvidenc_psnr=0;
+static int xvidenc_hqac = 0;
+static int xvidenc_vhq = 0;
+static int xvidenc_psnr = 0;
 static uint64_t xvid_error[3];
 #endif
 
@@ -142,8 +143,8 @@ struct config xvidencopts_conf[] = {
     { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "chroma_me", &xvidenc_chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hq_ac", &xvidenc_hqac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "vhq", &xvidenc_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "chroma_opt", &xvidenc_pref, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "vhq", &xvidenc_vhq, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+    { "chroma_opt", &xvidenc_chroma_opt, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -275,10 +276,20 @@ config(struct vf_instance_s* vf,
 #ifdef XVID_API_UNSTABLE
     if (xvidenc_qpel) {
 	fp->enc_frame.general |= XVID_QUARTERPEL;
-	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8 |QUARTERPELREFINE16_BITS | QUARTERPELREFINE8_BITS;
+	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
     }
-    if (xvidenc_vhq)
+    switch (xvidenc_vhq) {
+    case 3: // wide search
+	fp->enc_frame.motion |= EXTSEARCH_BITS | PMV_EXTSEARCH8;
+    case 2: // medium search
+	fp->enc_frame.motion |= HALFPELREFINE8_BITS | QUARTERPELREFINE8_BITS | CHECKPREDICTION_BITS;
+    case 1: // limited search
+	fp->enc_frame.motion |= HALFPELREFINE16_BITS | QUARTERPELREFINE16_BITS;
 	fp->enc_frame.general |= XVID_MODEDECISION_BITS;
+	break;
+    case 0: // off
+	break;
+    }
     if (xvidenc_gmc)
 	fp->enc_frame.general |= XVID_GMC;
     if (xvidenc_psnr)
@@ -289,7 +300,7 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_REDUCED;
     if(xvidenc_hqac)
 	fp->enc_frame.general |= XVID_HQACPRED;
-    if (xvidenc_pref)
+    if (xvidenc_chroma_opt)
 	fp->enc_frame.general |= XVID_CHROMAOPT;
 #endif
 
