@@ -16,6 +16,8 @@
 
 #include "../linux/shmem.h"
 
+#include "mp_msg.h"
+
 #include "stream.h"
 
 int stream_fill_buffer(stream_t *s);
@@ -83,7 +85,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
     if(newb>size) newb=size;
     
     // check:
-    if(s->read_filepos<s->min_filepos) printf("Ehh. s->read_filepos<s->min_filepos !!! Report bug...\n");
+    if(s->read_filepos<s->min_filepos) mp_msg(MSGT_CACHE,MSGL_ERR,"Ehh. s->read_filepos<s->min_filepos !!! Report bug...\n");
     
     // len=write(mem,newb)
     //printf("Buffer read: %d bytes\n",newb);
@@ -108,12 +110,12 @@ int cache_fill(cache_vars_t* s){
   
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
-      printf("Out of boundaries... seeking to 0x%X  \n",read);
+      mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%X  \n",read);
       s->offset= // FIXME!?
       s->min_filepos=s->max_filepos=read; // drop cache content :(
       if(s->stream->eof) stream_reset(s->stream);
       stream_seek(s->stream,read);
-      printf("Seek done. new pos: 0x%X  \n",(int)stream_tell(s->stream));
+      mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%X  \n",(int)stream_tell(s->stream));
   }
   
   // calc number of back-bytes:
@@ -213,7 +215,7 @@ int cache_stream_fill_buffer(stream_t *s){
 
 //  cache_stats(s->cache_data);
 
-  if(s->pos!=((cache_vars_t*)s->cache_data)->read_filepos) printf("!!! read_filepos differs!!! report this bug...\n");
+  if(s->pos!=((cache_vars_t*)s->cache_data)->read_filepos) mp_msg(MSGT_CACHE,MSGL_ERR,"!!! read_filepos differs!!! report this bug...\n");
 
   len=cache_read(s->cache_data,s->buffer, ((cache_vars_t*)s->cache_data)->sector_size);
   //printf("cache_stream_fill_buffer->read -> %d\n",len);
@@ -235,7 +237,7 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
   s=stream->cache_data;
 //  s->seek_lock=1;
   
-  printf("CACHE2_SEEK: 0x%X <= 0x%X (0x%X) <= 0x%X  \n",s->min_filepos,(int)pos,s->read_filepos,s->max_filepos);
+  mp_msg(MSGT_CACHE,MSGL_DBG2,"CACHE2_SEEK: 0x%X <= 0x%X (0x%X) <= 0x%X  \n",s->min_filepos,(int)pos,s->read_filepos,s->max_filepos);
 
   newpos=pos/s->sector_size; newpos*=s->sector_size; // align
   stream->pos=s->read_filepos=newpos;
@@ -252,7 +254,11 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
 //  stream->buf_pos=stream->buf_len=0;
 //  return 1;
 
-  printf("cache_stream_seek: WARNING! Can't seek to 0x%X !\n",(int)(pos+newpos));
+#ifdef _LARGEFILE_SOURCE
+  mp_msg(MSGT_CACHE,MSGL_V,"cache_stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
+#else
+  mp_msg(MSGT_CACHE,MSGL_V,"cache_stream_seek: WARNING! Can't seek to 0x%X !\n",(pos+newpos));
+#endif
   return 0;
 }
 
