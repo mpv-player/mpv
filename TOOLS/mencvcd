@@ -209,7 +209,7 @@ asr=44100
 vbr=1152
 vbrset=0
 denoise="cat -"
-norm="VCD"
+vnorm="VCD"
 mplexnorm="-f $VCDMODE -m 1 -V -b 46"
 imaget="-t vcd2"
 yuvin=""
@@ -304,7 +304,7 @@ while [ "$1"x != "x" ]; do
         shift 1
         ;;
       -svcdout)
-        norm="SVCD"
+        vnorm="SVCD"
 	;;
       -sync)
         sync="-O $2"
@@ -330,7 +330,7 @@ done
 
 # some configs
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
-if [ "$norm" == "SVCD" ]; then
+if [ "$vnorm" == "SVCD" ]; then
    [ $vbrset -eq 0 ] && vbr=2500
    mplexnorm="-f $SVCDMODE -m 2 -V -b 230"
    mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230"
@@ -362,7 +362,7 @@ if [ $burnonly -eq 0 ]; then
       
       # mjpegtools
       ($denoise < $VIDEO | \
-         yuvscaler -v 0 $wide -O $norm $size $yuvin | \
+         yuvscaler -v 0 $wide -O $vnorm $size $yuvin | \
          mpeg2enc -v 0 -s $mpegnorm $aratio -S $CDMAXSIZE -g 6 -G 15 -r 16 \
 	          $pd $framerate $yuvin -4 2 -2 1 -o $NAME.mpv) &
    
