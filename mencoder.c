@@ -90,6 +90,13 @@ char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
 int video_family=-1;     // override video codec family 
 
+// libvo opts: (defiend at libmpcodecs/vd.c)
+extern int screen_size_xy;
+extern float movie_aspect;
+extern int softzoom;
+extern int flip;
+
+
 #ifdef HAVE_MP3LAME
 int out_audio_codec=ACODEC_VBRMP3;
 #else

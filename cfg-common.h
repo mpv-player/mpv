@@ -101,6 +101,14 @@
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
+        {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
+        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
+	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
