@@ -309,15 +309,21 @@ REF_TRANSFORM trans[2] =
  *            cont - contrast                                               *
  *            sat - saturation                                              *
  *            hue - hue                                                     *
+ *            red_intense - intense of red component                        *
+ *            green_intense - intense of green component                    *
+ *            blue_intense - intense of blue component                      *
  *            ref - index to the table of refernce transforms               *
  *   Outputs: NONE                                                          *
  ****************************************************************************/
 
 static void radeon_set_transform(float bright, float cont, float sat,
-				 float hue, unsigned ref)
+				 float hue, float red_intense,
+				 float green_intense,float blue_intense,
+				 unsigned ref)
 {
 	float OvHueSin, OvHueCos;
 	float CAdjLuma, CAdjOff;
+	float RedAdj,GreenAdj,BlueAdj;
 	float CAdjRCb, CAdjRCr;
 	float CAdjGCb, CAdjGCr;
 	float CAdjBCb, CAdjBCr;
@@ -340,6 +346,9 @@ static void radeon_set_transform(float bright, float cont, float sat,
 
 	CAdjLuma = cont * trans[ref].RefLuma;
 	CAdjOff = cont * trans[ref].RefLuma * bright * 1023.0;
+	RedAdj = cont * trans[ref].RefLuma * red_intense * 1023.0;
+	GreenAdj = cont * trans[ref].RefLuma * green_intense * 1023.0;
+	BlueAdj = cont * trans[ref].RefLuma * blue_intense * 1023.0;
 
 	CAdjRCb = sat * -OvHueSin * trans[ref].RefRCr;
 	CAdjRCr = sat * OvHueCos * trans[ref].RefRCr;
@@ -365,11 +374,11 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	OvGCr = CAdjGCr;
 	OvBCb = CAdjBCb;
 	OvBCr = CAdjBCr;
-	OvROff = CAdjOff -
+	OvROff = RedAdj + CAdjOff -
 		OvLuma * Loff - (OvRCb + OvRCr) * Coff;
-	OvGOff = CAdjOff - 
+	OvGOff = GreenAdj + CAdjOff - 
 		OvLuma * Loff - (OvGCb + OvGCr) * Coff;
-	OvBOff = CAdjOff - 
+	OvBOff = BlueAdj + CAdjOff - 
 		OvLuma * Loff - (OvBCb + OvBCr) * Coff;
 #if 0 /* default constants */
 	OvROff = -888.5;
@@ -1102,6 +1111,9 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 		       RTFContrast(equal.contrast),
 		       RTFSaturation(equal.saturation),
 		       RTFHue(equal.hue),
+		       RTFBrightness(equal.red_intense),
+		       RTFBrightness(equal.green_intense),
+		       RTFBrightness(equal.blue_intense),
 		       itu_space);
 #endif
   return 0;
