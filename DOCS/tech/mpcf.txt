@@ -85,7 +85,8 @@ stream_header:
 	fourcc					v
 	average_bitrate				v
 	language_code				v
-	time_base				v
+	time_base_nom				v
+	time_base_denom				v
 	lsb_timestamp_length			v
 	fixed_fps				u(1)
 	codec_specific_header_flag		u(1)
@@ -191,10 +192,17 @@ language_code
 	something like 'u'<<24 + 's'<<16 + 'e'<<8 + 'n' (US english), can be 0
 	if unknown
 
-time_base
+time_base_nom / time_base_denom = time_base
 	the number of timer ticks per second, this MUST be equal to the fps
 	if the fixed_fps is 1
-	MUST be < 2^15
+	time_base_denom MUST not be 0
+	time_base_nom and time_base_denom MUST be relative prime
+	time_base_nom MUST be < 2^15
+	examples:
+        	fps	time_base_nom	time_base_denom
+		30	30		1
+		29.97	30000		1001
+		23.976	24000		1001
 
 lsb_timestamp_length
 	length in bits of the lsb_timestamp
