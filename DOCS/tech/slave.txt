@@ -52,12 +52,12 @@ sub_pos <value>
 vobsub_lang
 	Switch the subtitle language when using VOBSub subtitles.
 get_percent_pos
-	???
+	Print out the current position in the file, in integer percentage [0-100).
 get_time_length
-	???
+	Print out the length of the current file in seconds.
 vo_fullscreen
 	Switch to fullscreen mode.
-get_vo_Fullscreen
+get_vo_fullscreen
 	Print out fullscreen status (1 == fullscreened, 0 == windowed).
 panscan value [value2]
 	???
