@@ -13,144 +13,139 @@
 
 <P>Playing standard Video CDs:</P>
 
-<P>
-mplayer -vcd <I>trackno</I> [-cdrom-device device]<BR><BR>
-Examples:<BR>
-mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
-</P>
+<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device device]</CODE></P>
 
-<P>
-Notes:<BR>
-- Do NOT mount VCD disks and play DAT files directly! It may work under windows
-but won't work under linux. You have to play them directly, with the -vcd
-option!<BR>
-- VCD disks usually have 2 tracks: a data track (containing autostart windows
-playback program, karaoke data etc) and a mode-2 track (the movie), so try
--vcd 2 first!<BR>
-- the default VCD device is /dev/cdrom. if your device differs, then you have
-to make a symlink, or specify it in command line!
-</P>
+<P>Examples:<BR>
+  <CODE>mplayer -vcd 1<BR>
+  mplayer -fs -vcd 2 -cdrom-device /dev/hdc</CODE></P>
 
-<P>From Linux documentation:</P>
+Notes:
+<UL>
+  <LI>Do <B>not</B> mount VCD disks and play DAT files directly! It may work
+    under Windows but will not under Linux. You have to play VCDs with the
+    <CODE>-vcd</CODE> option.</LI>
+  <LI>VCD disks usually have 2 tracks: a data track (containing autostart
+    Windows playback program, karaoke data etc) and a mode-2 track (the movie).
+    So try <CODE>-vcd 2</CODE> first.</LI>
+  <LI>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
+    make a symlink, or specify the correct device on the command line with the
+    <CODE>-cdrom-device</CODE> option.</LI>
+</UL>
 
-<P>Some CDROM drives are capable of changing their head-speed. There are several
-reasons for changing the speed of a CDROM drive. Badly pressed CDROMs may
-benefit from less-than-maximum head rate. Modern CDROM drives can obtain very
-high head rates (up to 24-times is common).  It has been reported that these
-drives can make reading errors at these high speeds, reducing the speed can
-prevent data loss in these circumstances.  Finally, some of these drives can
-make an annoyingly loud noise, which a lower speed may reduce.</P>
+<P>Linux documentation excerpt:</P>
 
-<P>The recommended way to do it is with a program called 'setcd' . It's kinda
-old, but won't be too hard to find on the Net. (UPDATE : new hdparm
-has an option for this !)
-Use it with :</P>
+<P>Some CD-ROM drives are capable of changing their head speed. There are
+  several reasons for changing the speed of a CD-ROM drive. Badly pressed
+  CD-ROMs may benefit from less-than-maximum head speed. Modern CD-ROM drives
+  can obtain very high head speeds. It has been reported that these drives can
+  make read errors at these high speeds, reducing the speed can prevent data
+  loss under these circumstances. Finally, some of these drives can make an
+  annoyingly loud noise, which a lower speed may reduce.</P>
+
+<P>You can reduce the drive speed with hdparm or a program called setcd.
+  It works like this:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -E [speed] [cdrom device]</CODE></P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [speed] [cdrom device]</CODE></P>
 
-<P>Also you can try:</P>
+<P>You can also try</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[cdrom device]/settings</CODE></P>
 
-<P>but you'll need root privileges. I use following command too:</P>
+<P>but you will need root privileges. The following command may also help:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings</CODE></P>
 
-<P>for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
-It's recommended that you tuneup your CDROM drive also with hdparm:</P>
+<P>This sets prefetched file reading to 2MB, which helps with scratched CD-ROMs.
+  It is recommended that you also tune your CD-ROM drive with hdparm:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
 
-<P>to enable using DMA access, readahead, and IRQ unmasking.
-(if you don't understand these, *read the hdparm man page*)</P>
+<P>This enables DMA access, read-ahead, and IRQ unmasking (read the hdparm man
+  page for a detailed explanation).</P>
 
-<P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for fine-tuning your
-CDROM.</P>
+<P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for
+  fine-tuning your CD-ROM.</P>
 
 <P><B><A NAME=4.2>4.2. DVD playback</A></B></P>
   
 <P><B>MPlayer</B> uses <CODE>libdvdread</CODE> and <CODE>libdvdcss</CODE> for
-  DVD decryption and playing. These two libraries are contained in the
-  <CODE>libmpdvdkit/</CODE> subdirectory in the <B>MPlayer</B> tree, you
-  don't have to install them separately. We opt for this solution because
+  DVD decryption and playback. These two libraries are contained in the
+  <CODE>libmpdvdkit/</CODE> subdirectory of the <B>MPlayer</B> source tree, you
+  do not have to install them separately. We opted for this solution because
   we had to fix a libdvdread bug, and apply a patch which adds
-  <B>cracked CSS keys caching support</B> for libdvdcss (results in large
-  speed increase before playing). These cracked keys are stored in
-  <CODE>$HOME/.mplayer/DVDKeys</CODE> directory.</P>
+  <B>cracked CSS keys caching support</B> to libdvdcss. This results in a large
+  speed increase because the keys do not have to be cracked every time before
+  playing. The cracked keys are stored in the
+  <CODE>~/.mplayer/DVDKeys</CODE> directory.</P>
 
-<P>Support for <CODE>dvdnav</CODE> is being added (not usable now).</P>
+<P><B>MPlayer</B> can also use system-wide <CODE>libdvdread</CODE> and
+  <CODE>libdvdcss</CODE> libraries, but this solution is <B>not</B> recommended,
+  as it can result in bugs, library incompatibilities, and slower speed.</P>
+
+<P>Support for DVD navigation via <CODE>dvdnav</CODE> is being worked on, but
+  not finished yet.</P>
 
 <P><B>Old-style DVD support - <I>OPTIONAL</I></B></P>
 
-<P>Useful if you want to play encoded VOB's from hard disk. Compile and
-  install <B>libcss</B> 0.0.1 (not newer) (if <B>MPlayer</B> can't detect
-  it, use the <CODE>-csslib /path/to/libcss.so</CODE> option).</P>
-
-<P><B>Compile MPlayer.</B></P>
-
-<P>Run <CODE>./configure</CODE>. If you didn't delete
-  <CODE>libmpdvdkit</CODE> subdirectory from MPlayer tree, ./configure should
-  say the following:</P>
-
-<P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
-
-<P>(of course you can put your favourite configure options into the command
-  line when you run ./configure)</P>
-
-<P><B>MPlayer</B> can use <CODE>libdvdread</CODE> and <CODE>libdvdcss</CODE>
-  libraries installed system-wide, but this solution is NOT RECOMMENDED, as
-  can result in bugs, library incompatibilities, and slower speed.</P>
-
-<P>Either way, say: <CODE>make</CODE>, then <CODE>make install</CODE>.</P>
+<P>Useful if you want to play encoded VOBs from hard disk. Compile and
+  install <B>libcss</B> 0.0.1 (not newer) for this (If <B>MPlayer</B> fails to
+  detect it, use the <CODE>-csslib /path/to/libcss.so</CODE> option).</P>
 
 <P><B>Using MPlayer to play DVDs:</B></P>
 
 
-<TABLE BORDER=0 WIDTH="100%"><TR>
-<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TABLE BORDER=0 WIDTH="100%">
+<TR><TD VALIGN=top><CODE>-dvd &lt;title_id&gt;&nbsp;</CODE></TD>
 <TD>Enables DVD support and selects title.</TD><TR>
-<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD>Selects DVD chapter(s) to play (default: play from chapter 1).
-  Example : <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD VALIGN=top><CODE>-chapter &lt;chapter_id&gt;&nbsp;</CODE></TD>
+<TD>Selects DVD chapter(s) to play (default: 1).
+  Example: <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD></TR>
+<TR><TD VALIGN=top><CODE>-dvdangle &lt;angle_id&gt;&nbsp;</CODE></TD>
 <TD>Selects camera angle (default: 1)</TD><TR>
-<TD VALIGN=top>-alang &lt;country code&gt;&nbsp;</TD>
-<TD>  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
-  For the list of available languages, add <CODE>-v</CODE> option after
-  your DVD options, and browse the output.<BR>
-  For example :<BR>
-  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - first tries to find hungarian
-  audio, and if not found, decode english audio.</TD><TR>
-<TD VALIGN=top>-slang &lt;country code&gt;&nbsp;</TD>
-<TD>  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
+<TD VALIGN=top><CODE>-alang &lt;country code&gt;&nbsp;</CODE></TD>
+<TD>
+  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
+  For a list of available languages, add the <CODE>-v</CODE> option after
+  your DVD options and browse the output.<BR>
+  For example:<BR>
+  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - Tries to find Hungarian audio,
+  falling back to English audio.</TD></TR>
+<TR><TD VALIGN=top><CODE>-slang &lt;country code&gt;&nbsp;</CODE></TD>
+<TD>
+  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
   which language(s) to prefer.
-  For the list of available languages, add <CODE>-v</CODE> option after
-  your DVD options, and browse the output.<BR>
-  For example :<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - first tries to display hungarian
-  subtitles, and if not found, display english subtitles.</TD><TR>
-<TD VALIGN=top>-sid &lt;subtitle_id&gt;&nbsp;</TD>
-<TD>  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
-  0-31). Useful for example with badly mastered DVDs where country code
-  selects the wrong channel.</TD><TR>
-<TD VALIGN=top>-csslib &lt;path/filename&gt;</TD>
-<TD>  (old-style DVD option) This option is used to override the default location
-  of <CODE>libcss.so</CODE>
-  </TD><TR>
-<TD VALIGN=top>-dvdauth &lt;DVD device&gt;&nbsp;</TD>
-<TD>  (old-style DVD option) Turns on DVD authentication using the given device.
-  </TD><TR>
-<TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
-<TD>  (old-style DVD option) When decoding from non-DVD, this option gives the
+  For the list of available languages, add the <CODE>-v</CODE> option after
+  your DVD options and browse the output.<BR>
+  For example:<BR>
+  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - Tries to display Hungarian subtitles,
+  falling back to English subtitles.</TD></TR>
+<TR><TD VALIGN=top><CODE>-sid &lt;subtitle_id&gt;&nbsp;</CODE></TD>
+<TD>
+  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
+  0-31). Useful with badly mastered DVDs where the country code
+  selects the wrong channel.</TD></TR>
+<TR><TD VALIGN=top><CODE>-csslib &lt;path/filename&gt;</CODE></TD>
+<TD>
+  (old-style DVD option) This option is used to override the default location
+  of <CODE>libcss.so</CODE>.
+  </TD></TR>
+<TR><TD VALIGN=top><CODE>-dvdauth &lt;DVD device&gt;&nbsp;</CODE></TD>
+<TD>
+  (old-style DVD option) Turns on DVD authentication using the given device.
+  </TD></TR>
+<TR><TD VALIGN=top><CODE>-dvdkey &lt;CSS key&gt;</CODE></TD>
+<TD>
+  (old-style DVD option) When decoding from non-DVD, this option gives the
   CSS key needed to crack the DVD (the key is printed when authenticating
   with DVD).
-  </TD>
+  </TD></TR>
 </TABLE>
 
-<P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
-(compile time option), or you can specify it using the -dvd-device option :
-</P>
+<P>The default device is <CODE>/dev/dvd</CODE>, you can change it in
+  <CODE>config.h</CODE> (compile time option), or you can specify it using the
+  <CODE>-dvd-device</CODE> option:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en -dvd-device /dev/dvd</CODE></P>
