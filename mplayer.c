@@ -99,6 +99,28 @@ static int cfg_include(struct config *conf, char *filename){
 	return parse_config_file(conf, filename);
 }
 
+char *get_path(char *filename){
+	char *homedir;
+	char *buff;
+	static char *config_dir = "/.mplayer";
+	int len;
+
+	if ((homedir = getenv("HOME")) == NULL)
+		return NULL;
+	len = strlen(homedir) + strlen(config_dir) + 1;
+	if (filename == NULL) {
+		if ((buff = (char *) malloc(len)) == NULL)
+			return NULL;
+		sprintf(buff, "%s%s", homedir, config_dir);
+	} else {
+		len += strlen(filename) + 1;
+		if ((buff = (char *) malloc(len)) == NULL)
+			return NULL;
+		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
+	}
+	return buff;
+}
+
 static int max_framesize=0;
 
 static int dbg_es_sent=0;
@@ -385,9 +407,7 @@ int movie_size_y=0;
 int out_fmt=0;
 char *dsp="/dev/dsp";
 int force_ni=0;
-char *homedir;
-char conffile[100];
-char confdir[100];
+char *conffile;
 int conffile_fd;
 #include "cfg-mplayer.h"
 
@@ -395,18 +415,23 @@ int conffile_fd;
 
 if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
-if ((homedir = getenv("HOME")) == NULL) {
+if ((conffile = get_path("")) == NULL) {
   printf("Can't find HOME dir\n");
 } else {
-  snprintf(confdir, 100, "%s/.mplayer", homedir);
-  mkdir(confdir, 0777);
-  snprintf(conffile, 100, "%s/config", confdir);
-  if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0644)) != -1) {
-    write(conffile_fd, default_config, strlen(default_config));
-    close(conffile_fd);
+  mkdir(conffile, 0777);
+  free(conffile);
+  if ((conffile = get_path("config")) == NULL) {
+    printf("get_path(\"config\") sziiiivas\n");
+  } else {
+    if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0666)) != -1) {
+      printf("Creating config file: %s\n", conffile);
+      write(conffile_fd, default_config, strlen(default_config));
+      close(conffile_fd);
+    }
+    if (parse_config_file(conf, conffile) < 0)
+      exit(1);
+    free(conffile);
   }
-  if (parse_config_file(conf, conffile) < 0)
-    exit(1);
 }
 if (parse_command_line(conf, argc, argv, envp, &filename) < 0)
   exit(1);

@@ -38,6 +38,8 @@ static reg_handle_t* head=0;
 
 #define DIR -25
 
+extern char *get_path(char *);
+
 static void create_registry();
 static void open_registry();
 static void save_registry();
@@ -68,17 +70,18 @@ static void open_registry()
 	int fd;
 	int i;
 	int len;
-         struct passwd* pwent;
+//         struct passwd* pwent;
          char* pathname;
 	if(regs)
 	{
 		printf("Multiple open_registry(>\n");
 		return;
 	}
-        pwent=getpwuid(getuid());
-        pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
-	strcpy(pathname, pwent->pw_dir);
-        strcat(pathname, "/.mplayer/registry");
+//        pwent=getpwuid(getuid());
+//        pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
+//	strcpy(pathname, pwent->pw_dir);
+//        strcat(pathname, "/.mplayer/registry");
+	pathname = get_path("registry");
 	fd=open(pathname, O_RDONLY);
         free(pathname);
 	if(fd==-1)
@@ -120,12 +123,13 @@ error:
 static void save_registry()
 {
 	int fd, i, len;
-         struct passwd* pwent;
+//         struct passwd* pwent;
          char* pathname;
-        pwent=getpwuid(getuid());
-        pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
-	strcpy(pathname, pwent->pw_dir);
-        strcat(pathname, "/.mplayer/registry");
+//        pwent=getpwuid(getuid());
+//        pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
+//	strcpy(pathname, pwent->pw_dir);
+//        strcat(pathname, "/.mplayer/registry");
+	pathname = get_path("registry");
 	fd=open(pathname, O_WRONLY | O_CREAT, 00777);
         free(pathname);
 	if(fd==-1)
