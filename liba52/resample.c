@@ -282,14 +282,63 @@ int a52_resample_MMX(float * _f, int16_t * s16)
 		:"%esi", "memory"
 	);
 	break;
-    case A52_3F2R: //FIXME optimitze
-	for (i = 0; i < 256; i++) {
-	    s16[5*i] = convert (f[i]);
-	    s16[5*i+1] = convert (f[i+512]);
-	    s16[5*i+2] = convert (f[i+768]);
-	    s16[5*i+3] = convert (f[i+1024]);
-	    s16[5*i+4] = convert (f[i+256]);
-	}
+    case A52_3F2R: 
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"1:				\n\t"
+		"movd (%1, %%esi), %%mm0	\n\t"
+		"punpckldq 2048(%1, %%esi), %%mm0\n\t"
+		"movd 3072(%1, %%esi), %%mm1	\n\t"
+		"punpckldq 4096(%1, %%esi), %%mm1\n\t"
+		"movd 1024(%1, %%esi), %%mm2	\n\t"
+		"punpckldq 4(%1, %%esi), %%mm2	\n\t"
+		"movd 2052(%1, %%esi), %%mm3	\n\t"
+		"punpckldq 3076(%1, %%esi), %%mm3\n\t"
+		"movd 4100(%1, %%esi), %%mm4	\n\t"
+		"punpckldq 1028(%1, %%esi), %%mm4\n\t"
+		"movd 8(%1, %%esi), %%mm5	\n\t"
+		"punpckldq 2056(%1, %%esi), %%mm5\n\t"
+		"leal (%%esi, %%esi, 4), %%edi	\n\t"
+		"sarl $1, %%edi			\n\t"
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"psubd %%mm7, %%mm4		\n\t"
+		"psubd %%mm7, %%mm5		\n\t"
+		"packssdw %%mm1, %%mm0		\n\t"
+		"packssdw %%mm3, %%mm2		\n\t"
+		"packssdw %%mm5, %%mm4		\n\t"
+		"movq %%mm0, (%0, %%edi)	\n\t"
+		"movq %%mm2, 8(%0, %%edi)	\n\t"
+		"movq %%mm4, 16(%0, %%edi)	\n\t"
+		
+		"movd 3080(%1, %%esi), %%mm0	\n\t"
+		"punpckldq 4104(%1, %%esi), %%mm0\n\t"
+		"movd 1032(%1, %%esi), %%mm1	\n\t"
+		"punpckldq 12(%1, %%esi), %%mm1\n\t"
+		"movd 2060(%1, %%esi), %%mm2	\n\t"
+		"punpckldq 3084(%1, %%esi), %%mm2\n\t"
+		"movd 4108(%1, %%esi), %%mm3	\n\t"
+		"punpckldq 1036(%1, %%esi), %%mm3\n\t"
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"packssdw %%mm1, %%mm0		\n\t"
+		"packssdw %%mm3, %%mm2		\n\t"
+		"packssdw %%mm5, %%mm4		\n\t"
+		"movq %%mm0, 24(%0, %%edi)	\n\t"
+		"movq %%mm2, 32(%0, %%edi)	\n\t"
+		"movq %%mm4, 40(%0, %%edi)	\n\t"
+				
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1280), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
 	break;
     case A52_MONO | A52_LFE:
 	asm volatile(
