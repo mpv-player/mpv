@@ -73,6 +73,10 @@ int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
+#ifdef TARGET_LINUX
+#include <linux/rtc.h>
+#endif
+
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -191,6 +195,9 @@ static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
 static float audio_delay=0;
+
+static int dapsync=0;
+static int softsleep=0;
 
 static float force_fps=0;
 static int force_srate=0;
@@ -400,6 +407,8 @@ int v_saturation=50;
 
 int vo_flags=0;
 
+int rtc_fd=-1;
+
 //float a_frame=0;    // Audio
 
 int i;
@@ -582,6 +591,29 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   lirc_mp_setup();
   inited_flags|=INITED_LIRC;
 #endif
+
+#ifdef TARGET_LINUX
+    if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
+	perror ("Linux RTC init: open");
+    else {
+	unsigned long irqp;
+
+	/* if (ioctl(rtc_fd, RTC_IRQP_SET, _) < 0) { */
+	if (ioctl(rtc_fd, RTC_IRQP_READ, &irqp) < 0) {
+    	    perror ("Linux RTC init: ioctl (rtc_irqp_read)");
+    	    close (rtc_fd);
+    	    rtc_fd = -1;
+	} else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
+	    /* variable only by the root */
+    	    perror ("Linux RTC init: ioctl (rtc_pie_on)");
+    	    close (rtc_fd);
+	    rtc_fd = -1;
+	} else
+	    printf("Using Linux's hardware RTC timing (%ldHz)\n", irqp);
+    }
+    if(rtc_fd<0)
+#endif
+	printf("Using %s timing\n",softsleep?"software":"usleep()");
 
 #ifdef USE_TERMCAP
   if ( !use_gui ) load_termcap(NULL); // load key-codes
@@ -1058,12 +1090,15 @@ int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;
 int drop_frame_cnt=0;
+int too_slow_frame_cnt=0;
+int too_fast_frame_cnt=0;
 // for auto-quality:
 float AV_delay=0; // average of A-V timestamp differences
 double cvideo_base_vtime;
 double cvideo_base_vframe;
 double vdecode_time;
-
+unsigned int lastframeout_ts;
+float time_frame_corr_avg=0;
 
 //================ SETUP AUDIO ==========================
   current_module="setup_audio";
@@ -1273,6 +1308,11 @@ if(1)
       if(sh_audio && !d_audio->eof){
           int delay=audio_out->get_delay();
           mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%d\n",delay);
+
+if(!dapsync){
+
+	      /* Arpi's AV-sync */
+
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
           // we are out of time... drop next frame!
@@ -1286,7 +1326,54 @@ if(1)
 	      }
 	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
+
+} else {
+
+	      /* DaP's AV-sync */
+
+    	      float SH_AV_delay;
+	      /* SH_AV_delay = sh_video->timer - (sh_audio->timer - (float)((float)delay + sh_audio->a_buffer_len) / (float)sh_audio->o_bps); */
+	      SH_AV_delay = sh_video->timer - (sh_audio->timer - (float)((float)delay) / (float)sh_audio->o_bps);
+	      // printf ("audio slp req: %.3f TF: %.3f delta: %.3f (v: %.3f a: %.3f) | ", i, time_frame,
+	      //	    i - time_frame, sh_video->timer, sh_audio->timer - (float)((float)delay / (float)sh_audio->o_bps));
+	      if(SH_AV_delay<-2*frame_time){
+		  static int drop_message=0;
+	          drop_frame=frame_dropping; // tricky!
+	          ++drop_frame_cnt;
+		  if(drop_frame_cnt>50 && AV_delay>0.5 && !drop_message){
+	    	      drop_message=1;
+	    	      mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+	         }
+		printf ("A-V SYNC: FRAMEDROP (SH_AV_delay=%.3f)!\n", SH_AV_delay);
+	        mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
+	        /* go into unlimited-TF cycle */
+    		time_frame = SH_AV_delay;
+	      } else {
+#define	SL_CORR_AVG_LEN	125
+	        /* don't adjust under framedropping */
+	        time_frame_corr_avg = (time_frame_corr_avg * (SL_CORR_AVG_LEN - 1) +
+	    				(SH_AV_delay - time_frame)) / SL_CORR_AVG_LEN;
+#define	UNEXP_CORR_MAX	0.1	/* limit of unexpected correction between two frames (percentage) */
+#define	UNEXP_CORR_WARN	1.0	/* warn limit of A-V lag (percentage) */
+	        time_frame += time_frame_corr_avg;
+	        // printf ("{%.3f - %.3f}\n", i - time_frame, frame_time + frame_time_corr_avg);
+	        if (SH_AV_delay - time_frame < (frame_time + time_frame_corr_avg) * UNEXP_CORR_MAX &&
+		    SH_AV_delay - time_frame > (frame_time + time_frame_corr_avg) * -UNEXP_CORR_MAX)
+		    time_frame = SH_AV_delay;
+	        else {
+		    if (SH_AV_delay - time_frame > (frame_time + time_frame_corr_avg) * UNEXP_CORR_WARN ||
+		        SH_AV_delay - time_frame < (frame_time + time_frame_corr_avg) * -UNEXP_CORR_WARN)
+		        printf ("WARNING: A-V SYNC LAG TOO LARGE: %.3f {%.3f - %.3f} (too little UNEXP_CORR_MAX?)\n",
+		  	    SH_AV_delay - time_frame, SH_AV_delay, time_frame);
+		        time_frame += (frame_time + time_frame_corr_avg) * ((SH_AV_delay > time_frame) ?
+		    		      UNEXP_CORR_MAX : -UNEXP_CORR_MAX);
+	        }
+	      }	/* /start dropframe */
+
+}
+
       } else {
+          // NOSOUND:
           if( (time_frame<-3*frame_time || time_frame>3*frame_time) || benchmark)
 	      time_frame=0;
 	  
@@ -1303,19 +1390,34 @@ if(1)
 #endif
 
 if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
-      while(time_frame>0.005){
+
+#ifdef TARGET_LINUX
+    if(rtc_fd>=0){
+	// -------- RTC -----------
+        while (time_frame > 0.000) {
+	    unsigned long long rtc_ts;
+	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
+		    perror ("read (rtc_fd)");
+    	    time_frame-=GetRelativeTime();
+	}
+    } else
+#endif
+    {
+	// -------- USLEEP + SOFTSLEEP -----------
+	float min=softsleep?0.021:0.005;
+        while(time_frame>min){
           if(time_frame<=0.020)
-//             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
              usec_sleep(0); // sleeps 1 clock tick (10ms)!
           else
              usec_sleep(1000000*(time_frame-0.020));
-#ifdef HAVE_NEW_GUI
-          if(use_gui){
-            EventHandling();
-          }
-#endif
           time_frame-=GetRelativeTime();
-      }
+        }
+	if(softsleep){
+	    if(time_frame<0) printf("Warning! softsleep underflow!\n");
+	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
+	}
+    }
+
 }
 
         current_module="flip_page";
@@ -1325,6 +1427,18 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	video_out->check_events();
         if(blit_frame){
 	   unsigned int t2=GetTimer();
+
+	   float j;
+#define	FRAME_LAG_WARN	0.2
+	   j = ((float)t2 - lastframeout_ts) / 1000000;
+	   lastframeout_ts = GetTimer();
+	   if (j < frame_time + frame_time * -FRAME_LAG_WARN)
+		too_fast_frame_cnt++;
+		/* printf ("PANIC: too fast frame (%.3f)!\n", j); */
+	   else if (j > frame_time + frame_time * FRAME_LAG_WARN)
+		too_slow_frame_cnt++;
+		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
+
 	   video_out->flip_page();
 	   t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 	}
@@ -1502,6 +1616,7 @@ if(auto_quality>0){
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
+      (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
       if(use_gui && !gui_pause_flag) mplShMem->Playing=1; // play from keyboard
 #endif
@@ -1777,7 +1892,8 @@ if(rel_seek_secs || abs_seek_pos){
       osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
       drop_frame_cnt=0;
-  
+      too_slow_frame_cnt=0;
+      too_fast_frame_cnt=0;
   }
   rel_seek_secs=0;
   abs_seek_pos=0;

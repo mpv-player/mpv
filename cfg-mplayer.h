@@ -216,6 +216,12 @@ struct config conf[]={
 	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 
+	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0},
+	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1},
+	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0},
+	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1},
+
+
 #define MAIN_CONF
 #include "cfg-common.h"
 #undef MAIN_CONF
@@ -226,6 +232,5 @@ struct config conf[]={
 	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
