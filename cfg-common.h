@@ -8,16 +8,16 @@
 #else
 	{"cache", "MPlayer was compiled WITHOUT cache2 support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
-	{"cuefile", &cue_file_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vcd", "-vcd N is deprecated, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
+	{"cuefile", "-cuefile is deprecated, use cue://filname:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef USE_DVDNAV
-	{"dvdnav", &dvd_nav, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"dvdnav", "-dvdnav deprecated, use dvdnav:// instead.\n", CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"skipopening", &dvd_nav_skip_opening, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 #ifdef USE_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
-	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
+	{"dvd", "-dvd N is deprecated, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -275,7 +275,7 @@ extern char* edl_output_filename;
 
 #ifdef USE_TV
 struct config tvopts_conf[]={
-	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"on", "-tv on is deprecated, use tv:// instead\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef HAVE_TV_BSDBT848
 	{"immediatemode", &tv_param_immediate, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 #endif
@@ -352,7 +352,7 @@ extern int vivo_param_bytesperblock;
 extern int vivo_param_width;
 extern int vivo_param_height;
 extern int vivo_param_vformat;
-extern char *dvd_device, *cdrom_device, *cue_file_name;
+extern char *dvd_device, *cdrom_device;
 
 struct config vivoopts_conf[]={
 	{"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -368,7 +368,6 @@ struct config vivoopts_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-extern int    mf_support;
 extern int    mf_w;
 extern int    mf_h;
 extern float  mf_fps;
@@ -377,7 +376,7 @@ extern m_obj_settings_t* vf_settings;
 extern m_obj_list_t vf_obj_list;
 
 struct config mfopts_conf[]={
-        {"on", &mf_support, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"on", "-mf on is deprecated, use mf://files instead\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
         {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"fps", &mf_fps, CONF_TYPE_FLOAT, 0, 0, 0, NULL},
