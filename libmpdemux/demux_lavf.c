@@ -309,9 +309,10 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
         av_free_packet(&pkt);
     }
 
-    priv->last_pts= pkt.pts;
-    
-    dp->pts=pkt.pts / (float)AV_TIME_BASE;
+    if(pkt.pts != AV_NOPTS_VALUE){
+        priv->last_pts= pkt.pts;
+        dp->pts=pkt.pts / (float)AV_TIME_BASE;
+    }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
     // append packet to DS stream:
