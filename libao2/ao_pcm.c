@@ -109,7 +109,7 @@ static int init(int rate,int channels,int format,int flags){
 
 	if(fp) {
 		if(ao_pcm_waveheader) /* Reserve space for wave header */
-			fseek(fp, sizeof(wavhdr), SEEK_SET);
+			fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 		return 1;
 	}
 	printf("PCM: Failed to open %s for writing!\n", ao_outputfilename);
@@ -119,10 +119,9 @@ static int init(int rate,int channels,int format,int flags){
 // close audio device
 static void uninit(){
 	
-	if(ao_pcm_waveheader){ /* Write wave header */
+	if(ao_pcm_waveheader && fseek(fp, 0, SEEK_SET) == 0){ /* Write wave header */
 		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 		wavhdr.file_length = le2me_32(wavhdr.file_length);
-		fseek(fp, 0, SEEK_SET);
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 	}
 	fclose(fp);
