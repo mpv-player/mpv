@@ -41,3 +41,8 @@ void saver_on( Display * );
 #ifdef HAVE_XINERAMA
 void vo_x11_xinerama_move(Display *dsp, Window w);
 #endif
+
+#ifdef HAVE_XF86VM
+void vo_vm_switch(uint32_t, uint32_t, int*, int*);
+void vo_vm_close(Display*);
+#endif

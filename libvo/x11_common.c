@@ -25,6 +25,10 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
+#ifdef HAVE_XF86VM
+#include <X11/extensions/xf86vmode.h>
+#endif
+
 /*
  * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
  * visuals for the 'best' visual for MPlayer video display.  Note that
@@ -52,6 +56,10 @@ int WinID=-1;
 int xinerama_screen = 0;
 int xinerama_x = 0;
 int xinerama_y = 0;
+#endif
+
+#ifdef HAVE_XF86VM
+XF86VidModeModeInfo **vidmodes=NULL;
 #endif
 
 void vo_hidecursor ( Display *disp , Window win )
@@ -495,6 +503,64 @@ void vo_x11_xinerama_move(Display *dsp, Window w)
 		 /* printf("XXXX Xinerama screen: x: %hd y: %hd\n",xinerama_x,xinerama_y); */
 		XMoveWindow(dsp,w,xinerama_x,xinerama_y);
 	}
+}
+#endif
+
+#ifdef HAVE_XF86VM
+void vo_vm_switch(uint32_t X, uint32_t Y, int* modeline_width, int* modeline_height)
+{
+    unsigned int vm_event, vm_error;
+    unsigned int vm_ver, vm_rev;
+    int i,j,have_vm=0;
+
+    int modecount;
+    
+    if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
+      XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
+      printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+      have_vm=1;
+    } else
+      printf("XF86VidMode Extenstion not available.\n");
+
+    if (have_vm) {
+      if (vidmodes==NULL)
+        XF86VidModeGetAllModeLines(mDisplay,mScreen,&modecount,&vidmodes);
+      j=0;
+      *modeline_width=vidmodes[0]->hdisplay;
+      *modeline_height=vidmodes[0]->vdisplay;
+      
+      for (i=1; i<modecount; i++)
+        if ((vidmodes[i]->hdisplay >= X) && (vidmodes[i]->vdisplay >= Y))
+          if ( (vidmodes[i]->hdisplay < *modeline_width ) && (vidmodes[i]->vdisplay < *modeline_height) )
+	    {
+	      *modeline_width=vidmodes[i]->hdisplay;
+	      *modeline_height=vidmodes[i]->vdisplay;
+	      j=i;
+	    }
+      
+      printf("XF86VM: Selected video mode %dx%d for image size %dx%d.\n",*modeline_width, *modeline_height, X, Y);
+      XF86VidModeLockModeSwitch(mDisplay,mScreen,0);
+      XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
+      XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
+      X=(vo_screenwidth-*modeline_width)/2;
+      Y=(vo_screenheight-*modeline_height)/2;
+      XF86VidModeSetViewPort(mDisplay,mScreen,X,Y);
+    }
+}
+
+void vo_vm_close(Display *dpy)
+{
+ #ifdef HAVE_NEW_GUI
+        if ((vidmodes!=NULL)&&( vo_window == None ) )
+ #else
+        if (vidmodes!=NULL)
+ #endif
+        {
+          int screen; screen=DefaultScreen( dpy );
+          XF86VidModeSwitchToMode(dpy,screen,vidmodes[0]);
+          XF86VidModeSwitchToMode(dpy,screen,vidmodes[0]);
+          free(vidmodes);
+        }
 }
 #endif
 
