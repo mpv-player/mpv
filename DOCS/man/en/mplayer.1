@@ -1,5 +1,5 @@
 .\" $Revision$
-.\" MPlayer (C) 2000-2003 Arpad Gereoffy
+.\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" 
 .\" Run this to get a HTML version of the man page:
@@ -2130,6 +2130,14 @@ Do not play/\:encode sound.
 .B \-novideo
 Do not play/\:encode video.
 .TP
+.B \-oldpp <quality> (OBSOLETE)
+Use the opendivx postprocessing code instead of the internal one.
+Superceded by \-pp, the internal postprocessing offers better
+quality and performance.
+
+The valid range of \-oldpp values varies by codec, mostly
+0\-6, where 0=disable 6=slowest/\:best.
+.TP
 .B \-pp <quality> (see \-vf pp option too!)
 Set postprocess level of the DLL.
 This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
@@ -3252,7 +3260,9 @@ Where <codec> may be: lavc, xvidenc, divx4, lame
 
 
 .SS divx4 (\-divx4opts)
-
+divx4 is obsolete and only supported for completeness.
+For details about divx4 options, read the source, most options are not
+described here.
 .TP
 .B help\ \ \ 
 get help
@@ -3425,7 +3435,8 @@ print additional options and informations on presets settings.
 
 
 .SS lavc (\-lavcopts)
-
+lavc has many more options that are not described here.
+For full details read the source.
 .I EXAMPLE:
 .PD 0
 .RSs
