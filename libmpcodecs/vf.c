@@ -137,7 +137,6 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
     vf->control=vf_next_control;
     vf->query_format=vf_next_query_format;
     vf->put_image=vf_next_put_image;
-    vf->uninit=vf_next_uninit;
     if(vf->info->open(vf,args)>0) return vf; // Success!
     free(vf);
     mp_msg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'\n",name);
@@ -162,10 +161,6 @@ int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
     return vf->next->put_image(vf->next,mpi);
-}
-
-void vf_next_uninit(struct vf_instance_s* vf){
-    return vf->next->uninit(vf->next);
 }
 
 //============================================================================

@@ -57,10 +57,6 @@ static void draw_slice(struct vf_instance_s* vf,
     video_out->draw_slice(src,stride,w,h,x,y);
 }
 
-static void uninit(struct vf_instance_s* vf){
-//    video_out->uninit();
-}
-
 //===========================================================================//
 
 static int open(vf_instance_t *vf, char* args){
@@ -70,7 +66,6 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->draw_slice=draw_slice;
-    vf->uninit=uninit;
     vf->priv=(void*)args; // video_out
     if(!video_out) return 0; // no vo ?
 //    if(video_out->preinit(args)) return 0; // preinit failed
