@@ -29,6 +29,7 @@ MPlayer (1.0)
     * improved monitor selection in the DirectX video output driver
     * new DirectSound audio output driver
     * support for ZetaOS (mostly working)
+    * mouse support in Windows
 
     Drivers:
     * fixes in the VESA video output driver
@@ -131,6 +132,9 @@ MPlayer (1.0)
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
     * missing audio plugins (extrastereo, volnorm) converted to audio filters
+    * sine sweep generator
+    * bigendian fixes in rgb2rgb converter
+    * yuv2rgb Altivec optimization fixes
 
     Others:
     * -loop and -shuffle now work together
@@ -156,6 +160,8 @@ MPlayer (1.0)
     * -jpeg removed in favor of -vo jpeg suboptions
     * FriBiDi fixes for comma handling in Hebrew subtitles
     * -crash-debug option to attach gdb automatically after crashes
+    * gcc-4 compiler fixes
+    * compilation fixes for many files in TOOLS directory
 
 
   pre5: "LinuxTag release" July 15, 2004
