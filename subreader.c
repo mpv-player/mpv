@@ -1166,6 +1166,17 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     if(filename==NULL) return NULL; //qnx segfault
     fd=fopen (filename, "r"); if (!fd) return NULL;
+    
+    sub_format=sub_autodetect (fd, &uses_time);
+    mpsub_multiplier = (uses_time ? 100.0 : 1.0);
+    if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
+    srp=sr+sub_format;
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
+    
+    rewind (fd);
+
+#ifdef USE_ICONV
+    sub_utf8_prev=sub_utf8;
     {
 	    int l;
 	    if ((l=strlen(filename))>4){
@@ -1178,17 +1189,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 			}
 	    }
     }
-    sub_format=sub_autodetect (fd, &uses_time);
-    mpsub_multiplier = (uses_time ? 100.0 : 1.0);
-    if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
-    srp=sr+sub_format;
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
-    
-    rewind (fd);
-
-#ifdef USE_ICONV
-    sub_utf8_prev=sub_utf8;
-    subcp_open();
+    if (!(sub_utf8 & 1)) subcp_open();
 #endif
 
     sub_num=0;n_max=32;
