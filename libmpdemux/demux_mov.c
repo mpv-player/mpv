@@ -42,7 +42,9 @@
 #include <zlib.h>
 #endif
 
+#if !defined(__CYGWIN__)
 #include <fcntl.h>
+#endif
 
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
 #define BE_32(x) (be2me_32(*(unsigned int *)(x)))

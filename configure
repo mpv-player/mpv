@@ -1646,6 +1646,7 @@ echores "$_dvdio"
 
 echocheck "sys/cdio.h"
 cat > $TMPC << EOF
+#include <unistd.h>
 #include <sys/cdio.h>
 int main(void) { return 0; }
 EOF
@@ -3725,7 +3726,7 @@ EOF
 fi
 if darwin ; then
   # use gnu style cpp on Darwin
-  CFLAGS="$CFLAGS -no-cpp-precomp"
+  CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN"
 fi
 # Thread support
 if linux ; then
