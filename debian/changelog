@@ -1,3 +1,9 @@
+mplayer (0.60-3) unstable; urgency=low
+
+  * install xvidix correctly 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Sun, 17 Mar 2002 16:38:54 +0100
+
 mplayer (0.60-2) unstable; urgency=low
 
   * This is meaningless, just to mark that more then 2 months have passed
