@@ -769,9 +769,10 @@ vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *wi
 {
     int res = -1;
     FILE *fd = fopen(name, "rb");
-    if (fd == NULL)
-	perror("Can't open IFO file");
-    else {
+    if (fd == NULL) {
+        if (force)
+	    perror("Can't open IFO file");
+    } else {
 	// parse IFO header
 	unsigned char block[0x800];
 	const char *const ifo_magic = "DVDVIDEO-VTS";
