@@ -1446,8 +1446,10 @@ if(auto_quality>0){
 
 #ifdef USE_OSD
   if(osd_visible){
-    --osd_visible;
-    if(!osd_visible) vo_osd_progbar_type=-1; // disable
+    if (!--osd_visible){ vo_osd_progbar_type=-1; // disable
+       if (osd_function != OSD_PAUSE)
+	   osd_function = OSD_PLAY;
+    }
   }
 #endif
 
@@ -1699,7 +1701,7 @@ if(rel_seek_secs){
       
       c_total=0;
       max_pts_correction=0.1;
-//      force_redraw=5;
+      osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
       drop_frame_cnt=0;
   
