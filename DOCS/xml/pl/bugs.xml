@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with 1.4 -->
+<appendix id="bugs">
+<title>Znane błędy</title>
+<sect1 id="bugs-special">
+<title>Specjalne systemowe/specyficzne dla procesora błędy/problemy</title>
+<itemizedlist>
+<listitem>
+<para>SIGILL (sygnał 4) na P3 przy jądrze 2.2.x:</para>
+<para>Problem: jądro 2.2.x nie ma prawidłowej (działającej) obsługi SSE</para>
+<para>Rozwiązanie: aktualizacja jądra do 2.4.x</para>
+<para>Obejście: <command>./configure --disable-sse</command></para>
+</listitem>
+<listitem>
+<para>Ogólny SIGILL (sygnał 4):</para>
+<para>Problem: skompilowałeś i próbowałeś uruchomić MPlayera na dwóch różnych maszynach
+(np. skompilowałeś na P3, a próbowałeś uruchomić na Celeronie)</para>
+<para>Rozwiązanie: kompiluj MPlayera na tej samej maszynie, na której chcesz go używać!</para>
+<para>Obejście: polecenia <command>./configure --disable-sse</command> itp.</para>
+</listitem>
+<listitem>
+<para>&quot;Niespójność wewnętrznego bufora&quot; (&quot;Internal buffer inconsistency&quot;) w
+trakcie działania MEncodera:</para>
+<para>Problem: znany problem przy lame &lt; 3.90 skompilowanym za pomocą GCC 2.96 lub 3.x.</para>
+<para>Rozwiązanie: używaj lame'a &gt;=3.90.</para>
+<para>Obejście: skompiluj lame za pomocą GCC 2.95.x i usuń już zainstalowane pakiety lame'a, gdyż
+mogły one zostać skompilowane za pomocą GCC 2.96.</para>
+</listitem>
+<listitem>
+<para>Zepsuty dźwięk MP2/MP3 na PPC:</para>
+<para>Problem: znany błąd złej kompilacji kodu przez GCC dla platformy PPC, na razie bez rozwiązania.</para>
+<para>Obejście: użyj (powolnego) dekodera MP1/MP2/MP3 z FFmpeg (<option>-ac ffmpeg</option>)</para>
+</listitem>
+<listitem>
+<para>Sygnał 11 w libmpeg2, przy skalowaniu i kodowaniu:</para>
+<para>Problem: znany błąd MMX w GCC 2.95.2 MMX.</para>
+<para>Rozwiązanie: aktualizacja GCC do 2.95.3.</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="bugs-audio">
+<title>Różne problemy z synchronizacją A-V i dźwiękiem</title>
+
+<sect2 id="bugs-delay-all">
+<title>Ogólne opóźnienie audio lub "dławiący się" dźwięk (występuje przy wszystkich lub wielu plikach)</title>
+<itemizedlist>
+<listitem><para>
+najczęściej: zepsuty sterownik dźwięku! - spróbuj użyć innych sterowników, np. emulacji OSS
+ALSY 0.9 za pomocą opcji <option>-ao oss</option>. Spróbuj także <option>-ao sdl</option>. Opcje
+te czasem pomagają. Jeśli Twój plik odtwarza się bez problemów z opcją <option>-nosound</option>,
+to możesz być pewien, że to wina karty dźwiękowej lub jej sterownika.
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>problemy z buforem audio (źle wykryty rozmiar bufora)</para>
+<para>Obejście: opcja MPlayera <option>-abs</option></para>
+</listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>
+problemy z częstotliwością próbkowania - być może Twoja karta nie obsługuje
+częstotliwości próbkowania użytych w Twoich plikach - spróbuj wtyczki do zmiany
+rozdzielczości dźwięku (<option>-af resample=...</option>)
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>powolna maszyna (procesor lub karta graficzna)</para>
+<para>spróbuj opcji <option>-vo null</option>, jeśli odtwarza dobrze, oznacza to, że masz
+zbyt wolną kartę graficzną lub jej sterownik</para>
+<para>Obejście: kup szybszą kartę lub poczytaj tę dokumentację by dowiedzieć się jak
+przyspieszyć odtwarzanie</para>
+<para>Spróbuj również opcji<option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-delay-specific">
+<title>Opóźnienia/desynchronizacja dźwięku specyficzne dla jednego lub kilku plików</title>
+<itemizedlist>
+<listitem>
+<para>zły plik</para>
+<para>
+Obejścia:
+  <itemizedlist>
+  <listitem>
+    <para>opcje <option>-ni</option> lub <option>-nobps</option> (dla plików
+    bez przeplotu lub uszkodzonych)</para>
+    <para>i/lub</para>
+  </listitem>
+  <listitem>
+    <para>opcja <option>-mc 0</option> (wymagana dla plików ze
+    złym przeplotem dźwięku VBR)</para>
+    <para>i/lub</para>
+  </listitem>
+  <listitem>
+    <para>opcja <option>-delay</option> lub klawisze <keycap>+</keycap>/<keycap>-</keycap>
+    w trakcie odtwarzania do regulacji opóźnienia</para>
+  </listitem>
+  </itemizedlist>
+Jeśli żadne z wymienionych rozwiązań nie przynoszą efektu, przyślij nam plik, a my to sprawdzimy
+(i naprawimy).
+</para>
+</listitem>
+<listitem>
+<para>Twoja karta dźwiękowa nie obsługuje próbkowania 48kHz</para>
+<para>Obejście: kup lepszą kartę... lub spróbuj zmniejszyć liczbę klatek na sekundę o 10%
+(używając opcji <option>-fps 27</option> dla filmu o 30 klatkach na sekundę)
+lub użyj wtyczki do zmiany rozdzielczości dźwięku</para>
+</listitem>
+<listitem>
+<para>powolna maszyna (jeśli A-V nie jest w okolicach 0 i ostatnia liczba w statusie
+zwiększa się)</para>
+<para>Obejście: opcja <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nosound">
+<title>Zupełny brak dźwięku</title>
+<itemizedlist>
+<listitem>
+<para>Twój plik używa nieobsługiwanego kodeka audio</para>
+<para>Obejście: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nopicture">
+<title>Zupełny brak obrazu (jedynie puste, szare lub zielone okno)</title>
+<itemizedlist>
+<listitem>
+<para>Twój plik używa nieobsługiwanego kodeka video</para>
+<para>Obejście: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+</listitem>
+<listitem>
+<para>
+automatycznie wybrany kodek nie potrafi dekodować pliku, spróbuj użyć innego
+za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
+</para>
+</listitem>
+<listitem>
+<para>
+próbujesz odtwarzać plik DivX 3.x za pomocą kodeka OpenDivX lub XviD
+(opcja <option>-vc odivx</option>) - zainstaluj Divx4Linux i przekompiluj odtwarzacz
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-video">
+<title>Problemy z wyjściem video</title>
+<para>
+Pierwsza uwaga: opcje <option>-fs -vm</option> i <option>-zoom</option> są jedynie
+zaleceniami, nieobsługiwanymi (jeszcze) przez wszystkie sterowniki. Nie jest to więc
+błąd, jeśli nie działają. Tylko niektóre sterowniki obsługują skalowanie/powiększanie
+i nie oczekuj tego od x11 lub dga.
+</para>
+
+<formalpara>
+<title>Migotanie OSD/napisów</title>
+<para>
+<itemizedlist>
+<listitem><para>sterownik x11: przykro nam, ale nie da się tego teraz naprawić</para></listitem>
+<listitem><para>sterownik xv: użyj opcji <option>-double</option></para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Zielony obraz przy użyciu mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<para>
+<itemizedlist>
+<listitem><para>mga_vid źle wykrył ilość pamięci RAM na Twojej karcie, przeładuj go używając opcji
+<option>mga_ram_size</option>
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>

@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.6 -->
+<sect1 id="formats">
+<title>Obsługiwane formaty</title>
+
+<para>
+Na początek ważne jest wyjaśnienie pewnego często popełnianego błędu.
+Kiedy ludzie widzą plik o rozszerzeniu <filename>.AVI</filename>,
+automatycznie stwierdzają, że to nie jest plik MPEG. Nie jest to prawda.
+Przynajmniej niezupełnie. W przeciwieństwie do popularnego stwierdzenia,
+plik taki <emphasis>może</emphasis> zawierać video MPEG1.
+</para>
+
+<para>
+Widzisz, <emphasis role="bold">kodek</emphasis> to nie to samo, co
+<emphasis role="bold">format pliku</emphasis>.
+Przykłady <emphasis role="bold">kodeków</emphasis> video: MPEG1, MPEG2, DivX, Indeo5, 3vix.
+Przykłady <emphasis role="bold">formatów</emphasis> plików: MPG, AVI, ASF.
+</para>
+
+<para>
+W teorii, możesz umieścić video OpenDivX i dźwięk MP3 w
+<emphasis role="bold">pliku MPG</emphasis>. Większość odtwarzaczy
+nie będzie jednak w stanie go odtworzyć, gdyż spodziewają się obrazu MPEG1 i
+dźwięku MP2 (w przeciwieństwie do <emphasis role="bold">AVI</emphasis>,
+<emphasis role="bold">MPG</emphasis> nie ma odpowiednich pól do opisu jego
+strumieni audio i video). Możesz również umieścić video MPEG1 w pliku
+AVI. <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> i
+<link linkend="mencoder">MEncoder</link> potrafią tworzyć takie pliki.
+</para>
+
+
+<sect2 id="video-formats">
+<title>Formaty video</title>
+
+<sect3 id="mpg-vob-dat">
+<title>Pliki MPEG</title>
+
+<para>
+Pliki MPEG spotykamy w różnych kształtach:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  MPG: To jest najbardziej <emphasis role="bold">podstawowa</emphasis> forma
+  plików MPEG. Zawiera video MPEG1 i audio MP2 (MPEG-1 warstwa 2) lub rzadziej
+  MP1.
+  </simpara></listitem>
+<listitem><simpara>
+  DAT: To dokładnie ten sam format, co MPG, tylko z innym rozszerzeniem. Jest
+  on używany na płytach <emphasis role="bold">Video CD</emphasis>. W związku
+  ze sposobem tworzenia płyt VCD i struktury Linuksa, pliki DAT nie mogą być
+  odtwarzane ani kopiowane z VCD jak zwykłe pliki. Musisz użyć opcji
+  <option>vcd://</option> by odtworzyć Video CD.
+  </simpara></listitem>
+<listitem><simpara>
+  VOB: To format pliku MPEG na płytach <emphasis role="bold">DVD</emphasis>.
+  Jest to to samo, co MPG, plus możliwość umieszczenia w nim napisów lub
+  dźwięku nie-MPEG (AC3). Zawiera zakodowany strumień obrazu MPEG2 i przeważnie
+  dźwięk AC3, lecz dozwolone są także DTS, MP2 i nieskompresowane LPCM.
+  <emphasis role="bold">Poczytaj <link linkend="dvd">Sekcję DVD</link></emphasis>!
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+Serie klatek tworzą niezależne grupy w plikach MPEG. To oznacza, że możesz
+ciąć/łączyć plik MPEG za pomocą zwykłych narzędzi plikowych (typu
+<command>dd</command>, <command>cut</command>) i pozostaje on całkowicie
+funkcjonalny.
+</para>
+
+<para>
+Jedną ważną cechą plików MPG jest to, że zawierają pole opisujące stosunek
+szerokości do wysokości obrazu. Na przykład pliki SVCD zawierają obraz
+o rozdzielczości 480x480, a w nagłówku pole to jest ustawione na 4:3, więc
+odtwarzane są w 640x480. Pliki AVI nie zawierają tego pola, więc muszą być
+skalowane w trakcie kodowania lub odtwarzane z opcją <option>-aspect</option>
+</para>
+</sect3>
+
+
+<sect3 id="avi">
+<title>Pliki AVI</title>
+
+<para>
+Zaprojektowane przez Microsoft <emphasis role="bold">pliki AVI
+(Audio Video Interleaved)</emphasis> to szeroko stosowany wielofunkcyjny format
+aktualnie używany głównie dla video DivX i DivX4. Posiada wiele wad i niedociągnięć
+(np. przy strumieniowaniu). Obsługuje jeden strumień video i od 0 do 99 strumieni
+audio i może mieć co najwyżej 2 GB, lecz istnieje rozszerzenie, które pozwala na
+osiągnięcie większych plików, zwane <emphasis role="bold">OpenDML</emphasis>.
+Aktualnie Microsoft usilnie zniechęca do stosowania AVI i zaleca ASF/WMV. Nie żeby
+to kogoś obchodziło...
+</para>
+
+<para>
+Istnieje hack, który pozwala plikom AVI zawierać strumień audio Ogg Vorbis,
+ale powoduje to ich niekompatybilność ze zwykłymi AVI.
+<application>MPlayer</application> obsługuje odtwarzanie takich plików.
+Skoki są również zaimplementowane, lecz poważnie ograniczone poprzez
+źle zakodowane pliki z pomieszanymi nagłówkami tworzonymi przez zepsute
+programy. Niestety jedyny program, który potrafi tworzyć takie pliki -
+<application>NanDub</application> ma z tym problem.
+</para>
+
+<note>
+<para>
+Kamery DV tworzą surowe strumienie DV, które są konwertowane przez narzędzia
+do zgrywania DV do dwóch różnych typów plików AVI. Pliki te zawierają wtedy
+albo osobne strumienie audio i video, które <application>MPlayer</application>
+potrafi odtwarzać lub surowy strumień DV, którego obsługa jest w trakcie
+rozwoju.
+</para>
+</note>
+
+<para>
+Istnieją dwa typy plików AVI:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Z przeplotem:</emphasis> Zawartość audio i video jest
+  przepleciona. Jest to standardowy typ - zalecany i przeważnie używany. Niektóre
+  narzędzia tworzą przeplatane pliki AVI ze złą synchronizacją.
+  <application>MPlayer</application> wykrywa je jako przeplatane, ale powoduje
+  to utratę synchronizacji A/V (najczęściej przy skokach). Pliki te powinny
+  być odtwarzane jako bez przeplotu (opcja <option>-ni</option>).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Bez przeplotu:</emphasis> Najpierw umieszczony jest
+  cały strumień video, a potem cały strumień audio. Wymaga to więc dużo
+  "chodzenia" po pliku, co powoduje, że trudno jest je odtwarzać z sieci lub z
+  CD-ROMów.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> obsługuje dwie metody synchronizacji
+dla plików AVI:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">oparte na bps (bitach na sekundę):</emphasis> Oparta
+  jest na liczbie bitów/próbek na sekundę strumieni audio/video. Metoda ta jest
+  stosowana przez większość odtwarzaczy, włączając w to
+  <ulink url="http://avifile.sourceforge.net">avifile</ulink> oraz
+  <application>Windows Media Player</application>. Pliki z uszkodzonymi
+  nagłówkami i pliki z dźwiękiem VBR (Variable Bitrate - zmienne
+  tempo bitowe) utworzone za pomocą niekompatybilnego z VBR programu kodującego spowodują
+  desynchronizację A/V przy tej metodzie (głównie przy skokach).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">oparte na przeplocie:</emphasis> Nie korzysta z
+  informacji o tempie bitowym z nagłówka, lecz zamiast tego używa względnej
+  pozycji przeplecionych fragmentów audio i video, dzięki czemu źle zakodowane pliki
+  z dźwiękiem VBR można normalnie odtwarzać.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Każdy kodek video i audio jest dozwolony, lecz należy zauważyć, że dźwięk
+VBR nie jest zbyt dobrze obsługiwany przez większość odtwarzaczy. Format pliku
+co prawda pozwala na użycie dźwięku VBR, lecz większość odtwarzaczy spodziewa
+się dźwięku CBR (Constant Bitrate - stałe tempo bitowe), przez co
+zawiodą przy VBR. VBR nie jest powszechny i specyfikacja AVI Microsoftu opisuje
+jedynie CBR. Zauważyłem również, że większość enkoderów/multiplekserów AVI
+tworzy złe pliki z dźwiękiem VBR. Istnieją jedynie dwa wyjątki potwierdzające
+tę regułę:
+<application>NanDub</application> oraz <link linkend="mencoder">MEncoder</link>.
+</para>
+</sect3>
+
+
+<sect3 id="asf-wmv">
+<title>Pliki ASF/WMV</title>
+<para>
+ASF (Active Streaming Format - Aktywny Format Strumieniowania) pochodzi z
+Microsoftu. Rozwinęły się dwa warianty ASF: v1.0 i v2.0. v1.0 jest używana
+przez ich narzędzia medialne (<application>Windows Media Player</application>
+oraz <application>Windows Media Encoder</application>) i jest bardzo tajna.
+v2.0 jest opublikowana i opatentowana :). Oczywiście różnią się one znacząco i
+nie ma pomiędzy nimi żadnej kompatybilności (kolejna zagrywka legalistyczna).
+<application>MPlayer</application> obsługuje jedynie v1.0, gdyż nikt jeszcze nie
+widział żadnego pliku v2.0 :). Zauważ, że dzisiejsze pliki ASF mają rozszerzenia
+<filename>.WMA</filename> lub <filename>.WMV</filename>.
+</para>
+</sect3>
+
+
+<sect3 id="qt-mov">
+<title>Pliki QuickTime/MOV</title>
+
+<para>
+Formaty te zostały zaprojektowane przez Apple i mogą zawierać dowolny kodek,
+CBR lub VBR. Mają przeważnie rozszerzenie <filename>.QT</filename> lub
+<filename>.MOV</filename>. Warto zauważyć, że grupa MPEG4 wybrała QuickTime
+jako zalecany format pliku dla MPEG4, a ich pliki MOV mają rozszerzenie
+<filename>.MPG</filename> lub <filename>.MP4</filename> (interesujące jest to, że
+strumienie w tych plikach to w rzeczywistości pliki MPG i AAC. Możesz nawet je
+wyciągnąć za pomocą opcji <option>-dumpvideo</option> oraz <option>-dumpaudio</option>).
+</para>
+
+<note>
+<para>
+Większość nowych plików QuickTime używa kodeka video <emphasis role="bold">Sorenson</emphasis>
+i dźwięku QDesign Music. Zobacz naszą sekcję poświęconą kodekowi
+<link linkend="sorenson">Sorenson</link>.
+</para>
+</note>
+</sect3>
+
+
+<sect3 id="vivo">
+<title>Pliki VIVO</title>
+
+<para>
+<application>MPlayer</application> szczęśliwie demultipleksuje pliki VIVO.
+Największą niedogodnością formatu jest to, że nie ma on bloku indeksu
+ani stałego rozmiaru pakietu czy bajtów synchronizacji, a większość plików
+nie ma nawet klatek kluczowych, więc zapomnij o skakaniu po filmie!
+</para>
+
+<para>
+Kodek video plików VIVO/1.0 to standardowy <emphasis role="bold">h.263</emphasis>.
+Kodek video plików VIVO/2.0 to zmodyfikowany, niestandardowy
+<emphasis role="bold">h.263v2</emphasis>. Dźwięk jest ten sam i może to być
+<emphasis role="bold">g.723 (standardowy)</emphasis> lub
+<emphasis role="bold">Vivo Siren</emphasis>.
+</para>
+
+<para>
+Zobacz sekcje
+<link linkend="vivo-video">Kodeka video VIVO</link> i
+<link linkend="vivo-audio">Kodeka audio VIVO</link>
+by uzyskać informacje na temat instalacji.
+</para>
+</sect3>
+
+
+<sect3 id="fli">
+<title>Pliki FLI</title>
+<para>
+<emphasis role="bold">FLI</emphasis> jest bardzo starym formatem używanym przez
+Autodesk Animator, lecz jest to powszechny w sieci format dla krótkich animacji.
+<application>MPlayer</application> demultipleksuje i dekoduje pliki FLI i potrafi
+nawet po nich skakać (użyteczne przy zapętlaniu za pomocą opcji
+<option>-loop</option>). Pliki FLI nie zawierają klatek kluczowych, więc obraz
+będzie trochę zaśmiecony przez krótką chwilę po skoku.
+</para>
+</sect3>
+
+
+<sect3 id="realmedia">
+<title>Pliki RealMedia (RM)</title>
+
+<para>
+Tak, <application>MPlayer</application> potrafi czytać (demultipleksować)
+pliki RealMedia (<filename>.rm</filename>). Skoki działają, ale musisz dodatkowo
+podać opcję <option>-forceidx</option> (format obsługuje klatki kluczowe).
+Tu znajdziesz listę obsługiwanych kodeków <link linkend="realvideo">RealVideo</link>
+i <link linkend="realaudio">RealAudio</link>.
+</para>
+</sect3>
+
+
+<sect3 id="nuppelvideo">
+<title>Pliki NuppelVideo</title>
+<para>
+<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
+jest narzędziem do zgrywania TV (AFAIK :). <application>MPlayer</application>
+potrafi czytać jego pliki <filename>.NUV</filename> (tylko NuppelVideo 5.0). Pliki
+te mogą zawierać klatki: nieskompresowane YV12, skompresowane YV12+RTJpeg, skompresowane
+YV12 RTJpeg+lzo i skompresowane YV12+lzo. <application>MPlayer</application> dekoduje je
+(a nawet <emphasis role="bold">koduje</emphasis> za pomocą <application>MEncodera</application>)
+wszystkie. Działają również skoki.
+</para>
+</sect3>
+
+
+<sect3 id="yuv4mpeg">
+<title>pliki yuv4mpeg</title>
+<para>
+<ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+to format plików stosowany przez
+<ulink url="http://mjpeg.sf.net">programy mjpegtools</ulink>.
+Możesz zgrywać, produkować, filtrować lub kodować video w tym formacie za pomocą
+tych narzędzi. Format ten jest w rzeczywistości sekwencją nieskompresowanych
+obrazów YUV 4:2:0.
+</para>
+</sect3>
+
+
+<sect3 id="film">
+<title>Pliki FILM</title>
+<para>
+Format ten jest używany przez stare gry CD-ROM na Sega Saturn.
+</para>
+</sect3>
+
+
+<sect3 id="roq">
+<title>Pliki RoQ</title>
+<para>
+Pliki RoQ to pliki multimedialne używane w niektórych grach ID, np.
+Quake III czy Return to Castle Wolfenstein.
+</para>
+</sect3>
+
+
+<sect3 id="ogg">
+<title>Pliki OGG/OGM</title>
+<para>
+Jest to nowy format plików z <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
+Może zawierać dowolne kodeki audio i video, CBR lub VBR. Będziesz potrzebował
+zainstalowanych bibliotek <systemitem class="library">libogg</systemitem>
+oraz <systemitem class="library">libvorbis</systemitem> zanim skompilujesz
+<application>MPlayera</application> by móc go odtwarzać.
+</para>
+</sect3>
+
+
+<sect3 id="sdp">
+<title>Pliki SDP</title>
+<para>
+<ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> to standardowy
+format IETF dla opisu strumieni RTP audio i/lub video.
+(Wymagane jest &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
+</para>
+</sect3>
+
+
+<sect3 id="pva">
+<title>Pliki PVA</title>
+<para>
+PVA to format MPEGo-podobny używany przez oprogramowanie kart DVB (np.:
+<application>MultiDec</application> lub <application>WinTV</application> pod Windows).
+</para>
+
+<para>
+Specyfikacje PVA są do pobrania pod następującym adresem:
+<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
+</para>
+</sect3>
+
+
+<sect3 id="gif">
+<title>Pliki GIF</title>
+<para>
+Format <emphasis role="bold">GIF</emphasis> jest powszechnym formatem zapisu
+grafiki sieciowej. Istnieją dwie wersje specyfikacji GIF: GIF87a oraz GIF89a.
+Główną różnicą jest to, że GIF89a pozwala na animację. MPlayer obsługuje oba
+formaty plików za pomocą biblioteki <systemitem class="library">libungif</systemitem>
+lub innej, kompatybilnej z libgif biblioteki. Nieanimowane GIFy są wyświetlane
+jako filmy o pojedynczej klatce. (Użyj opcji <option>-loop</option> oraz
+<option>-fixed-vo</option> by wyświetlić je dłużej)
+</para>
+
+<para>
+<application>MPlayer</application> obecnie nie pozwala na skoki w plikach GIF.
+Pliki GIF bowiem niekoniecznie muszą mieć stałego rozmiaru klatki, ani stałej
+prędkości odtwarzania. Raczej każda klatka jest niezależnego rozmiaru i ma
+zostać umiejscowiona w odpowiednim miejscu na polu o ustalonym rozmiarze.
+Prędkość odtwarzania jest kontrolowana za pomocą opcjonalnego bloku przed
+każdą klatką, która ustala opóźnienie kolejnej klatki w setnych sekundy.
+</para>
+
+<para>
+Standardowe pliki GIF zawierają 24-bitowe klatki RGB z co najwyżej 8-bitową
+indeksowaną paletą. Klatki te są przeważnie kompresowane za pomocą LZW, lecz
+niektóre kodery produkują nieskompresowane klatki by uniknąć problemów
+patentowych w związku z kompresją LZW.
+</para>
+
+<para>
+Jeśli Twoja dystrybucja nie zawiera biblioteki <systemitem class="library">libungif</systemitem>,
+pobierz ją ze
+<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">strony domowej libungif</ulink>.
+By uzyskać szczegółowe informacje techniczne, zajrzyj do
+<ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">specyfikacji GIF89a</ulink>.
+</para>
+</sect3>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="audio-formats">
+<title>Formaty audio</title>
+
+<para>
+<application>MPlayer</application> jest odtwarzaczem
+<emphasis role="bold">filmów</emphasis>, a nie <emphasis role="bold">mediów</emphasis>.
+Potrafi jednak odtwarzać niektóre pliki audio (są one wymienione w sekcjach poniżej).
+Nie jest to jednak zalecane zastosowanie <application>MPlayera</application>.
+Powinieneś raczej użyć <ulink url="http://www.xmms.org">XMMSa</ulink>.
+</para>
+
+<sect3 id="mp3">
+<title>Pliki MP3</title>
+<para>
+Możesz mieć pewne problemy przy odtwarzaniu niektórych plików
+MP3, które <application>MPlayer</application> błędnie rozpozna jako
+MPEG i odtworzy je nieprawidłowo lub nie odtworzy ich wcale. Nie da się
+tego naprawić bez porzucenia wsparcia obsługi uszkodzonych plików
+MPEG i tak prawdopodobnie zostanie przez najbliższą przyszłość. Opcja
+<option>-demuxer</option> opisana na stronie man może pomóc Ci w takich
+przypadkach.
+</para>
+</sect3>
+
+<sect3 id="wav">
+<title>Pliki WAV</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="ogg-vorbis">
+<title>Pliki OGG/OGM (Vorbis)</title>
+<para>
+Wymaga poprawnie zainstalowanych bibliotek
+<systemitem class="library">libogg</systemitem> i
+<systemitem class="library">libvorbis</systemitem>.
+</para>
+</sect3>
+
+<sect3 id="wma-asf">
+<title>Pliki WMA/ASF</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="mp4">
+<title>Pliki MP4</title>
+<para></para>
+</sect3>
+
+<sect3 id="cdda">
+<title>CD audio</title>
+<para>
+<application>MPlayer</application> potrafi korzystać z programu
+<application>cdparanoia</application> do odtwarzania CDDA (Audio CD). Sekcja
+ta nie zawiera spisu możliwości programu <application>cdparanoia</application>.
+</para>
+
+<para>
+Zajrzyj do strony man i przeczytaj opis opcji <option>-cdda</option>, która może
+zostać wykorzystana do przekazania opcji do programu <application>cdparanoia</application>.
+</para>
+</sect3>
+
+<sect3 id="xmms">
+<title>XMMS</title>
+<para>
+<application>MPlayer</application> potrafi korzystać z wtyczek wejścia z programu
+<application>XMMS</application> do odtwarzania wielu formatów. Istnieją wtyczki do
+muzyczek z gier na SNES, muzyczek SID (z Commodore 64), wielu formatów Amigi, .xm,
+.it, VQF, musepack, Bonk, shorten i wielu innych. Możesz znaleźć je na
+<ulink url="http://www.xmms.org/plugins_input.html">Stronie wtyczek wejściowych do
+XMMS</ulink>.
+</para>
+
+<para>
+Do obsługi tej możliwości musisz mieć <application>XMMSa</application> i skompilować
+<application>MPlayera</application> za pomocą <filename>./configure --enable-xmms</filename>.
+Jeśli to nie zadziała, być może musisz ustawić ścieżki do wtyczek i bibliotek
+<application>XMMSa</application> ręcznie za pomocą opcji konfiguracji
+<option>--with-xmmsplugindir</option> i <option>--with-xmmslibdir</option>
+</para>
+</sect3>
+</sect2>
+</sect1>
