@@ -50,6 +50,23 @@ static char* banner_text=
 #include <lame/lame.h>
 #endif
 
+#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
+static AVCodec *lavc_venc_codec=NULL;
+static AVCodecContext lavc_venc_context;
+static AVPicture lavc_venc_picture;
+extern int avcodec_inited;
+
+char *lavc_param_vcodec = NULL;
+int lavc_param_vbitrate = -1;
+int lavc_param_vhq = 0; /* default is realtime encoding */
+int lavc_param_keyint = -1;
+#endif
+
 #ifdef HAVE_LIBCSS
 #include "libmpdemux/dvdauth.h"
 #endif
@@ -114,6 +131,8 @@ int force_srate=0;
 char* out_filename="test.avi";
 char* mp3_filename=NULL;
 char* ac3_filename=NULL;
+
+char *force_fourcc=NULL;
 
 static int pass=0;
 static char* passtmpfile="divx2pass.log";
@@ -581,6 +600,33 @@ case VCODEC_DIVX4:
     if (pass)
 	printf("Divx: 2-pass logfile: %s\n", passtmpfile);
     break;
+case VCODEC_LIBAVCODEC:
+#ifndef USE_LIBAVCODEC
+    printf("No support for FFmpeg's libavcodec compiled in\n");
+#else
+    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+    mux_v->bih->biWidth=vo_w;
+    mux_v->bih->biHeight=vo_h;
+    mux_v->bih->biPlanes=1;
+    mux_v->bih->biBitCount=24;
+    mux_v->bih->biCompression=mmioFOURCC(lavc_param_vcodec[0],
+	lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
+    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+
+    printf("videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
+	mux_v->bih->biWidth, mux_v->bih->biHeight, mux_v->bih->biCompression,
+	    &mux_v->bih->biCompression);
+#endif
+}
+
+/* force output fourcc to .. */
+if (force_fourcc != NULL)
+{
+    mux_v->bih->biCompression = mmioFOURCC(force_fourcc[0], force_fourcc[1],
+					    force_fourcc[2], force_fourcc[3]);
+    printf("Forcing output fourcc to %x [%.4s]\n",
+	mux_v->bih->biCompression, &mux_v->bih->biCompression);
 }
 
 // ============= AUDIO ===============
@@ -687,7 +733,8 @@ case VCODEC_DIVX4:
     case IMGFMT_BGR24:
     	enc_frame.colorspace=ENC_CSP_RGB24; break;
     default:
-	mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported out_fmt!\n");
+	mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported picture format (%s)!\n",
+	    vo_format_name(out_fmt));
     }
     switch(pass){
     case 1:
@@ -714,6 +761,113 @@ case VCODEC_DIVX4:
 	break;
     }
     break;
+case VCODEC_LIBAVCODEC:
+#ifndef USE_LIBAVCODEC
+    printf("No support for FFmpeg's libavcodec compiled in\n");
+#else
+    if (!avcodec_inited)
+    {
+	avcodec_init();
+	avcodec_register_all();
+	avcodec_inited=1;
+    }
+    
+    {
+	extern AVCodec *first_avcodec;
+	AVCodec *p = first_avcodec;
+	
+	lavc_venc_codec = NULL;
+	while (p)
+	{
+	    if (p->encode != NULL && strcmp(lavc_param_vcodec, p->name) == 0)
+		break;
+	    p = p->next;
+	}
+	lavc_venc_codec = p;
+    }
+
+    /* XXX: implement this in avcodec (i will send a patch to ffmpeglist) -- alex */
+//    lavc_venc_codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
+
+//    lavc_venc_codec = (AVCodec *)avcodec_find_encoder(0);
+    if (!lavc_venc_codec)
+    {
+	printf(MSGTR_MissingLAVCcodec, lavc_param_vcodec);
+	return 0; /* FIXME */
+    }
+
+    memset(&lavc_venc_context, 0, sizeof(lavc_venc_context));
+    
+    lavc_venc_context.width = mux_v->bih->biWidth;
+    lavc_venc_context.height = mux_v->bih->biHeight;
+    if (lavc_param_vbitrate >= 0) /* != -1 */
+	lavc_venc_context.bit_rate = lavc_param_vbitrate;
+    else
+	lavc_venc_context.bit_rate = 800000; /* default */
+    lavc_venc_context.frame_rate = mux_v->h.dwRate * FRAME_RATE_BASE;    
+    /* keyframe interval */
+    if (lavc_param_keyint >= 0) /* != -1 */
+	lavc_venc_context.gop_size = lavc_param_keyint;
+    else
+	lavc_venc_context.gop_size = 10; /* default */
+    
+    if (lavc_param_vhq)
+    {
+	printf("High quality encoding selected (non real time)!\n");
+	lavc_venc_context.flags = CODEC_FLAG_HQ;
+    }
+    else
+	lavc_venc_context.flags = 0;
+//    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
+
+    if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
+    {
+	printf(MSGTR_CantOpenCodec);
+	return 0; /* FIXME */
+    }
+
+    if (lavc_venc_context.codec->encode == NULL)
+    {
+	printf("avcodec init failed (ctx->codec->encode == NULL)!\n");
+	return 0;
+    }
+
+    switch(out_fmt)
+    {
+	case IMGFMT_YV12:
+	    lavc_venc_context.pix_fmt = PIX_FMT_YUV420P;
+	    break;
+	case IMGFMT_UYVY:
+	    lavc_venc_context.pix_fmt = PIX_FMT_YUV422;
+	    break;
+#if 0 /* it's faulting :( */
+	case IMGFMT_BGR24:
+	    lavc_venc_context.pix_fmt = PIX_FMT_BGR24;
+	    break;
+#endif
+	case IMGFMT_RGB24:
+	    lavc_venc_context.pix_fmt = PIX_FMT_RGB24;
+	    break;
+	default:
+	    printf("Not supported image format! (%s)\n",
+		vo_format_name(out_fmt));
+	    return 0; /* FIXME */
+    }
+
+    printf("Using picture format: %s\n", vo_format_name(out_fmt));
+
+    memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
+    avpicture_fill(&lavc_venc_picture, vo_image_ptr,
+	lavc_venc_context.pix_fmt, lavc_venc_context.width,
+	lavc_venc_context.height);
+
+    {
+	char buf[1024];
+	
+	avcodec_string((char *)&buf[0], 1023, &lavc_venc_context, 1);
+	printf(buf);
+    }
+#endif
 }
 
 if(sh_audio)
@@ -917,6 +1071,27 @@ case VCODEC_DIVX4:
 //    printf("  len=%d  key:%d  qualt:%d  \n",enc_frame.length,enc_result.is_key_frame,enc_result.quantizer);
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
+case VCODEC_LIBAVCODEC:
+    {
+#ifndef USE_LIBAVCODEC
+	printf("No support for FFmpeg's libavcodec compiled in\n");
+#else
+	int out_size;
+
+	blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+	if(skip_flag>0) break;
+	if(!blit_frame){
+	    // empty.
+	    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	    break;
+	}
+
+	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
+	    &lavc_venc_picture);
+//	printf("out_size = %d\n", out_size);
+	aviwrite_write_chunk(muxer,mux_v,muxer_f,out_size,lavc_venc_context.key_frame?0x10:0);
+#endif
+    }
 }
 
 if(skip_flag<0){

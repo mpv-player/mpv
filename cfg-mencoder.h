@@ -43,12 +43,29 @@ struct config lameopts_conf[]={
 };
 #endif
 
+#ifdef USE_LIBAVCODEC
+struct config lavcopts_conf[]={
+	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0},
+	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000},
+	{"vhq", &lavc_param_vhq, CONF_TYPE_FLAG, 0, 0, 1},
+	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0},
+	{NULL, NULL, 0, 0, 0, 0}
+};
+#endif
+
+#ifdef USE_WIN32DLL
+struct config vfwopts_conf[]={
+	{NULL, NULL, 0, 0, 0, 0}
+};
+#endif
+
 struct config ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO},
 	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4},
 	{"raw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAW},
-	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"lavc", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBAVCODEC},
+	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n   lavc\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 
@@ -83,12 +100,20 @@ struct config conf[]={
 	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 
+	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4},
+
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0},
 	
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 #ifdef HAVE_MP3LAME
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#endif
+#ifdef USE_LIBAVCODEC
+	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#endif
+#ifdef USE_WIN32DLL
+	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 #endif
 
 #define MAIN_CONF
