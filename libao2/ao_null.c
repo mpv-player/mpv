@@ -33,7 +33,7 @@ static int init(int rate,int channels,int format,int flags){
 
     ao_outburst=4096;
 
-    return 1;
+    return 0;
 }
 
 // close audio device
