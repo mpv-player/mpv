@@ -2077,6 +2077,9 @@ skipping (c from 0\-3) and scaling parameters can be specified.
 .IPs yuy2
 Forces software YV12/\:I420 or 422P to YUY2 conversion.
 Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
+.IPs yvu9
+Forces software YVU9 to YV12 colorspace conversion.
+Deprecated in favor of the software scaler.
 .IPs rgb2bgr[=swap]
 RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
 .RSss
@@ -2186,6 +2189,9 @@ chroma:	spatial chroma strength (default = 3)
 .br
 time:	temporal strength (default = 6)
 .REss
+.IPs "hqdn3d[=luma:chroma:time]"
+High precision/\:quality version of the denoise3d filter.
+Parameters and usage are the same.
 .IPs eq[=bright:cont]
 Software equalizer with interactive controls just like the hardware
 equalizer, for cards/\:drivers that do not support brightness and
@@ -2339,6 +2345,13 @@ t: linear (0) or cubic resampling (1)
 Use the 2x scale and interpolate algorithm for scaling and smoothing images.
 .IPs 1bpp
 1bpp bitmap to YUV/BGR 8/15/16/32 conversion
+.IPs down3dright[=lines]
+Reposition and resize stereoscopic images.
+Extracts both stereo fields and places them side by side, resizing
+them to maintain the original movie aspect.
+.RSss
+lines: number of lines to select from the middle of the image (default: 12)
+.REss
 .IPs "bmovl=hidden:opaque:<fifo>"
 Read bitmaps from a FIFO and display them in a window.
 .
