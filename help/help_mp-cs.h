@@ -124,6 +124,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Dostupné video kodeky:\n"
 #define MSGTR_AvailableAudioFm "\nDostupné (pøikompilované) rodiny audio kodekù/ovladaèe:\n"
 #define MSGTR_AvailableVideoFm "\nDostupné (pøikompilované) rodiny video kodekù/ovladaèe:\n"
+#define MSGTR_AvailableFsType "Dostupné zpùsoby zmìny hladiny pøi zobrazení pøes celou obrazovku:\n"
 #define MSGTR_UsingRTCTiming "Pou¾ito èasování pomocí Linux hardware RTC (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: nelze pøeèíst vlastnosti\n"
 #define MSGTR_NoStreamFound "Nenalezen ¾ádný proud\n"
