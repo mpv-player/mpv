@@ -3147,6 +3147,7 @@ static HRESULT WINAPI expCoCreateFreeThreadedMarshaler(void *pUnkOuter, void **p
 {
     printf("CoCreateFreeThreadedMarshaler(%p, %p) called!\n",
 	   pUnkOuter, ppUnkInner);
+//    return 0;
     return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
@@ -3707,8 +3708,23 @@ static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type
     return 1;
 }
 
+/* these are needed for mss1 */
 
+/* defined in stubs.s */
+void exp_EH_prolog(void);
 
+#include <netinet/in.h>
+static WINAPI inline unsigned long int exphtonl(unsigned long int hostlong)
+{
+//    dbgprintf("htonl(%x) => %x\n", hostlong, htonl(hostlong));
+    return htonl(hostlong);
+}
+
+static WINAPI inline unsigned long int expntohl(unsigned long int netlong)
+{
+//    dbgprintf("ntohl(%x) => %x\n", netlong, ntohl(netlong));
+    return ntohl(netlong);
+}
 
 struct exports
 {
@@ -3900,6 +3916,7 @@ struct exports exp_msvcrt[]={
     FF(fprintf,-1)
     FF(printf,-1)
     FF(getenv,-1)
+    FF(_EH_prolog,-1)
 };
 struct exports exp_winmm[]={
     FF(GetDriverModuleHandle, -1)
@@ -3968,7 +3985,10 @@ struct exports exp_comctl32[]={
     FF(StringFromGUID2, -1)
     FF(InitCommonControls, 17)
 };
-
+struct exports exp_wsock32[]={
+    FF(htonl,8)
+    FF(ntohl,14)
+};
 struct exports exp_msdmo[]={
     FF(memcpy, -1) // just test
 };
@@ -3987,6 +4007,7 @@ struct libs libraries[]={
     LL(ole32)
     LL(crtdll)
     LL(comctl32)
+    LL(wsock32)
     LL(msdmo)
 };
 
@@ -4109,7 +4130,7 @@ void my_garbagecollection(void)
 	unfreecnt++;
 	my_release(mem);
     }
-    printf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
+    dbgprintf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
 #endif
     g_tls = NULL;
     list = NULL;
