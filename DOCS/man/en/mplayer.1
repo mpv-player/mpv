@@ -2112,7 +2112,7 @@ Uses the DirectX driver with acceleration features turned off.
 
 FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
 fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
 
 Available video output drivers are:
 .
@@ -2368,12 +2368,18 @@ deinterlacing, scaling and synchronizing your video output to
 the vertical retrace of your monitor.
 .TP
 .B 3dfx (Linux only)
+3Dfx specific output driver.
+FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
+.TP
+.B tdfxfb (Linux only)
 This driver employs the tdfx framebuffer driver to play movies with
 YUV acceleration.
+FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
 .B tdfx_vid (Linux only)
 3Dfx specific output driver.
 Works in conjunction with a kernel module.
+FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
 .B dxr2 (DXR2 only)
 Creative DXR2 specific output driver.
