@@ -115,7 +115,8 @@ static int init(){
   ao_plugin_data.sz_mult    /= 2;
 
   // Figure out buffer space (in int16_ts) needed for the 15msec delay
-  pl_surround.delaybuf_len = (pl_surround.rate * pl_surround.msecs / 1000);
+  // Extra 31 samples allow for lowpass filter delay (taps-1)
+  pl_surround.delaybuf_len = (pl_surround.rate * pl_surround.msecs / 1000) + 31;
   // Allocate delay buffers
   pl_surround.Ls_delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
   pl_surround.Rs_delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
@@ -124,7 +125,8 @@ static int init(){
   pl_surround.delaybuf_pos = 0;
   // Surround filer coefficients
   pl_surround.filter_coefs_surround = calc_coefficients_7kHz_lowpass(pl_surround.rate);
-
+  //dump_filter_coefficients(pl_surround.filter_coefs_surround);
+  //testfilter(pl_surround.filter_coefs_surround, 32, pl_surround.rate);
   return 1;
 }
 
@@ -164,8 +166,12 @@ static int play(){
   // fprintf(stderr, "pl_surround: play %d bytes, %d samples\n", ao_plugin_data.len, samples);
 
   samples  = ao_plugin_data.len / sizeof(int16_t) / pl_surround.input_channels;
-
   out = pl_surround.databuf;  in = (int16_t *)ao_plugin_data.data;
+
+  // Testing - place a 1kHz tone in the front channels in anti-phase
+  //sinewave(in, samples, pl_surround.input_channels, 1000, 0.0, pl_surround.rate);
+  //sinewave(&in[1], samples, pl_surround.input_channels, 1000, PI, pl_surround.rate);
+
   for (i=0; i<samples; i++) {
 
     // About volume balancing...
