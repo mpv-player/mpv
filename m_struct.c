@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdlib.h>
 #include <string.h>
@@ -113,7 +110,3 @@ m_struct_copy(m_struct_t* st, void* obj) {
 
   return r;
 }
-  
-
-
-#endif // NEW_CONFIG

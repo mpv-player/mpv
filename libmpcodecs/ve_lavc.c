@@ -128,10 +128,10 @@ static int lavc_param_pbias= FF_DEFAULT_QUANT_BIAS;
 static int lavc_param_coder= 0;
 static int lavc_param_context= 0;
 
-#include "cfgparser.h"
+#include "m_option.h"
 
 #ifdef USE_LIBAVCODEC
-struct config lavcopts_conf[]={
+m_option_t lavcopts_conf[]={
 	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vratetol", &lavc_param_vrate_tolerance, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},

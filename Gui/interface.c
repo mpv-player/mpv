@@ -39,14 +39,8 @@
 #include "../libmpdemux/stheader.h"
 #include "../libmpcodecs/dec_video.h"
 
-
-#ifdef NEW_CONFIG
-  #include "../m_option.h"
-  #include "../m_config.h"
-#else
-  #include "../cfgparser.h"
-#endif
-#include "../cfg-mplayer-def.h"
+#include "../m_config.h"
+#include "../m_option.h"
 
 guiInterface_t guiIntfStruct;
 int guiWinID=-1;

@@ -16,7 +16,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mp_msg.h"
-#include "cfgparser.h"
+#include "m_option.h"
 #include "sub.h"
 
 #ifdef X11_FULLSCREEN
@@ -75,7 +75,7 @@ static int ck_b = 0xFF;
 static int cr_left = 0, cr_right = 0;
 static int cr_top = 55, cr_bot = 300;
 
-config_t dxr2_opts[] = {
+m_option_t dxr2_opts[] = {
   { "overlay", &use_ol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "nooverlay", &use_ol, CONF_TYPE_FLAG, 0, 1, 0, NULL},
   { "overlay-ratio", &ol_ratio, CONF_TYPE_INT, CONF_RANGE, 1, 2500, NULL },

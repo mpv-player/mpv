@@ -78,7 +78,7 @@ typedef struct {
 //unsigned int lavc_pp=0;
 //#endif
 
-#include "cfgparser.h"
+#include "m_option.h"
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
@@ -99,7 +99,7 @@ static int lavc_param_vstats=0;
 static int lavc_param_idct_algo=0;
 static int lavc_param_debug=0;
 
-struct config lavc_decode_opts_conf[]={
+m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
 	{"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},

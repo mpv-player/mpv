@@ -1,7 +1,5 @@
-
-#ifndef NEW_CONFIG
-#warning "Including m_struct.h but NEW_CONFIG is disabled"
-#else
+#ifndef _M_STRUCT_H
+#define _M_STRUCT_H
 
 ///////////////////// A struct setter ////////////////////////
 
@@ -47,4 +45,4 @@ m_struct_free(m_struct_t* st, void* obj);
 struct m_option*
 m_struct_get_field(m_struct_t* st,char* f);
 
-#endif
+#endif /* _M_STRUCT_H */

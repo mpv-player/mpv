@@ -1,7 +1,5 @@
-
-#ifndef NEW_CONFIG
-#warning "Including m_option.h but NEW_CONFIG is disabled"
-#else
+#ifndef _M_OPTION_H
+#define _M_OPTION_H
 
 typedef struct m_option_type m_option_type_t;
 typedef struct m_option m_option_t;
@@ -76,25 +74,25 @@ typedef struct {
 extern m_obj_params_t m_span_params_def;
 
 
-// Don't be stupid keep tho old names ;-)
+// FIXME: backward compatibility
 #define CONF_TYPE_FLAG		(&m_option_type_flag)
 #define CONF_TYPE_INT		(&m_option_type_int)
 #define CONF_TYPE_FLOAT		(&m_option_type_float)
-#define CONF_TYPE_STRING		(&m_option_type_string)
+#define CONF_TYPE_STRING	(&m_option_type_string)
 #define CONF_TYPE_FUNC		(&m_option_type_func)
 #define CONF_TYPE_FUNC_PARAM	(&m_option_type_func_param)
 #define CONF_TYPE_PRINT		(&m_option_type_print)
 #define CONF_TYPE_PRINT_INDIRECT (&m_option_type_print_indirect)
 #define CONF_TYPE_FUNC_FULL	(&m_option_type_func_full)
 #define CONF_TYPE_SUBCONFIG	(&m_option_type_subconfig)
-#define CONF_TYPE_STRING_LIST           (&m_option_type_string_list)
+#define CONF_TYPE_STRING_LIST	(&m_option_type_string_list)
 #define CONF_TYPE_POSITION	(&m_option_type_position)
-#define CONF_TYPE_IMGFMT		(&m_option_type_imgfmt)
+#define CONF_TYPE_IMGFMT	(&m_option_type_imgfmt)
 #define CONF_TYPE_SPAN		(&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
-#define CONF_TYPE_OBJ_PRESETS (&m_option_type_obj_presets)
-#define CONF_TYPE_CUSTOM_URL  (&m_option_type_custom_url)
-#define CONF_TYPE_OBJ_PARAMS  (&m_option_type_obj_params)
+#define CONF_TYPE_OBJ_PRESETS	(&m_option_type_obj_presets)
+#define CONF_TYPE_CUSTOM_URL	(&m_option_type_custom_url)
+#define CONF_TYPE_OBJ_PARAMS	(&m_option_type_obj_params)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -126,9 +124,6 @@ struct m_option_type {
   void (*free)(void* dst);
 };
 
-/// This is the same thing as a struct config it have been renamed
-/// to remove this config_t, m_config_t mess. Sorry about that,
-/// config_t is still provided for backward compat.
 struct m_option {
   char *name;
   void *p; 
@@ -160,6 +155,16 @@ struct m_option {
 #define M_OPT_NOSAVE		(1<<5)
 // Emulate old behaviour by pushing the option only if it was set by the user
 #define M_OPT_OLD		(1<<6)
+
+// FIXME: backward compatibility
+#define CONF_MIN		M_OPT_MIN
+#define CONF_MAX		M_OPT_MAX
+#define CONF_RANGE		M_OPT_RANGE
+#define CONF_NOCFG		M_OPT_NOCFG
+#define CONF_NOCMD		M_OPT_NOCMD
+#define CONF_GLOBAL		M_OPT_GLOBAL
+#define CONF_NOSAVE		M_OPT_NOSAVE
+#define CONF_OLD		M_OPT_OLD
 
 
 ///////////////////////////// Option type flags ///////////////////////////////////
@@ -206,8 +211,14 @@ struct m_option {
 #define M_OPT_MISSING_PARAM	-2
 #define M_OPT_INVALID		-3
 #define M_OPT_OUT_OF_RANGE	-4
-#define M_OPT_PARSER_ERR		-5
+#define M_OPT_PARSER_ERR	-5
 #define M_OPT_EXIT              -6
+
+// FIXME: backward compatibility
+#define ERR_NOT_AN_OPTION	M_OPT_UNKNOWN
+#define ERR_MISSING_PARAM	M_OPT_MISSING_PARAM
+#define ERR_OUT_OF_RANGE	M_OPT_OUT_OF_RANGE
+#define ERR_FUNC_ERR		M_OPT_PARSER_ERR
 
 m_option_t* m_option_list_find(m_option_t* list,char* name);
 
@@ -250,4 +261,4 @@ m_option_free(m_option_t* opt,void* dst) {
     opt->type->free(dst);
 }
 
-#endif
+#endif /* _M_OPTION_H */

@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "../m_option.h"
-#include "../m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -23,7 +22,7 @@ static int height = 0;
 static float fps = 25;
 static int imgsize=0;
 
-config_t demux_rawvideo_opts[] = {
+m_option_t demux_rawvideo_opts[] = {
   { "on", &demuxer_type, CONF_TYPE_FLAG, 0,0, DEMUXER_TYPE_RAWVIDEO, NULL },
   // size:
   { "w", &width, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },

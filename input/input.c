@@ -25,7 +25,8 @@
 #include "../osdep/keycodes.h"
 #include "../osdep/timer.h"
 #include "../mp_msg.h"
-#include "../cfgparser.h"
+#include "../m_config.h"
+#include "../m_option.h"
 
 #include "joystick.h"
 
@@ -399,11 +400,11 @@ static char* js_dev = NULL;
 static char* in_file = NULL;
 static int in_file_fd = -1;
 
-static int mp_input_print_key_list(config_t* cfg);
-static int mp_input_print_cmd_list(config_t* cfg);
+static int mp_input_print_key_list(m_option_t* cfg);
+static int mp_input_print_cmd_list(m_option_t* cfg);
 
 // Our command line options
-static config_t input_conf[] = {
+static m_option_t input_conf[] = {
   { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
@@ -414,7 +415,7 @@ static config_t input_conf[] = {
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static config_t mp_input_opts[] = {
+static m_option_t mp_input_opts[] = {
   { "input", &input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
   { "nojoystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
   { "joystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
@@ -1537,7 +1538,7 @@ mp_input_register_options(m_config_t* cfg) {
   m_config_register_options(cfg,mp_input_opts);
 }
 
-static int mp_input_print_key_list(config_t* cfg) {
+static int mp_input_print_key_list(m_option_t* cfg) {
   int i;
   printf("\n");
   for(i= 0; key_names[i].name != NULL ; i++)
@@ -1545,7 +1546,7 @@ static int mp_input_print_key_list(config_t* cfg) {
   exit(0);
 }
 
-static int mp_input_print_cmd_list(config_t* cfg) {
+static int mp_input_print_cmd_list(m_option_t* cfg) {
   mp_cmd_t *cmd;
   int i,j;
   char* type;
@@ -1596,5 +1597,3 @@ mp_input_check_interrupt(int time) {
   mp_cmd_free(cmd);
   return 0;
 }
-
-

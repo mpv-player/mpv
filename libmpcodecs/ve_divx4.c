@@ -68,9 +68,9 @@ static int vbrpass = -1;
 static int vbrdebug = 0;
 #endif
 
-#include "cfgparser.h"
+#include "m_option.h"
 
-struct config divx4opts_conf[]={
+m_option_t divx4opts_conf[]={
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 #if ENCORE_MAJOR_VERSION < 5200

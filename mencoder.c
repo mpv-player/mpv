@@ -33,14 +33,9 @@
 #include "cpudetect.h"
 
 #include "codec-cfg.h"
-#ifdef NEW_CONFIG
 #include "m_option.h"
 #include "m_config.h"
 #include "parser-mecmd.h"
-#else
-#include "cfgparser.h"
-#include "playtree.h"
-#endif
 
 #include "libmpdemux/stream.h"
 #include "libmpdemux/demuxer.h"
@@ -212,22 +207,18 @@ static void  lame_presets_longinfo_dm ( FILE* msgfp );
 
 m_config_t* mconfig;
 
-#ifdef NEW_CONFIG
-extern int
-m_config_parse_config_file(m_config_t* config, char *conffile);
-#endif
+extern int m_config_parse_config_file(m_config_t* config, char *conffile);
 
+static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
 
-static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
-
-static int cfg_include(struct config *conf, char *filename){
+static int cfg_include(m_option_t *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
 
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 
-static int parse_end_at(struct config *conf, const char* param);
+static int parse_end_at(m_option_t *conf, const char* param);
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
 #include "get_path.c"
@@ -343,12 +334,7 @@ lame_global_flags *lame;
 double v_pts_corr=0;
 double v_timer_corr=0;
 
-#ifdef NEW_CONFIG
 m_entry_t* filelist = NULL;
-#else
-play_tree_t* playtree;
-play_tree_iter_t* playtree_iter;
-#endif
 char* filename=NULL;
 char* frameno_filename="frameno.avi";
 
@@ -413,8 +399,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
 
-  // New config code
-#ifdef NEW_CONFIG
  mconfig = m_config_new();
  m_config_register_options(mconfig,mencoder_opts);
  parse_cfgfiles(mconfig);
@@ -422,26 +406,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
  if(!filelist) mencoder_exit(1, "error parsing cmdline");
  m_entry_set_options(mconfig,&filelist[0]);
  filename = filelist[0].name;
- // Warn the user if he put more than 1 filename ?
-#else
-  playtree = play_tree_new();
-  mconfig = m_config_new(playtree);
-  m_config_register_options(mconfig,mencoder_opts);
-  parse_cfgfiles(mconfig);
-
-  if(m_config_parse_command_line(mconfig, argc, argv) < 0) mencoder_exit(1, "error parsing cmdline");
-  playtree = play_tree_cleanup(playtree);
-  if(playtree) {
-    playtree_iter = play_tree_iter_new(playtree,mconfig);
-    if(playtree_iter) {  
-      if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
-	play_tree_iter_free(playtree_iter);
-	playtree_iter = NULL;
-      }
-      filename = play_tree_iter_get_file(playtree_iter,1);
-    }
-  }
-#endif
 
   if(!filename){
 	printf(MSGTR_MissingFilename);
@@ -1333,7 +1297,7 @@ if(stream) free_stream(stream); // kill cache thread
 return interrupted;
 }
 
-static int parse_end_at(struct config *conf, const char* param)
+static int parse_end_at(m_option_t *conf, const char* param)
 {
 
     end_at_type = END_AT_NONE;

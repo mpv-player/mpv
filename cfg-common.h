@@ -266,9 +266,9 @@ extern int network_ipv4_only_proxy;
 
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;
-extern config_t demux_rawaudio_opts[];
-extern config_t demux_rawvideo_opts[];
-extern config_t cdda_opts[];
+extern m_option_t demux_rawaudio_opts[];
+extern m_option_t demux_rawvideo_opts[];
+extern m_option_t cdda_opts[];
 
 extern char* audio_stream;
 extern char* sub_stream;
@@ -283,7 +283,7 @@ extern char* edl_output_filename;
 #endif
 
 #ifdef USE_TV
-struct config tvopts_conf[]={
+m_option_t tvopts_conf[]={
 	{"on", "-tv on is deprecated, use tv:// instead\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef HAVE_TV_BSDBT848
 	{"immediatemode", &tv_param_immediate, CONF_TYPE_FLAG, 0, 0, 0, NULL},
@@ -345,7 +345,7 @@ extern float sws_lum_gblur;
 extern float sws_chr_sharpen;
 extern float sws_lum_sharpen;
 
-struct config scaler_filter_conf[]={
+m_option_t scaler_filter_conf[]={
 	{"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -366,7 +366,7 @@ extern int vivo_param_height;
 extern int vivo_param_vformat;
 extern char *dvd_device, *cdrom_device;
 
-struct config vivoopts_conf[]={
+m_option_t vivoopts_conf[]={
 	{"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0, NULL},
 	/* audio options */
 	{"acodec", &vivo_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -387,7 +387,7 @@ extern char * mf_type;
 extern m_obj_settings_t* vf_settings;
 extern m_obj_list_t vf_obj_list;
 
-struct config mfopts_conf[]={
+m_option_t mfopts_conf[]={
         {"on", "-mf on is deprecated, use mf://files instead\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
         {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -400,18 +400,20 @@ extern m_obj_settings_t* vo_plugin_args;
 
 #include "libaf/af.h"
 extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-struct config audio_filter_conf[]={       
+m_option_t audio_filter_conf[]={       
 	{"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
         {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 #ifdef USE_LIBAVCODEC
-extern struct config lavc_decode_opts_conf[];
+extern m_option_t lavc_decode_opts_conf[];
 #endif
 
 #ifdef HAVE_XVID
-extern struct config xvid_dec_opts[];
+extern m_option_t xvid_dec_opts[];
 #endif
+
+int dvd_parse_chapter_range(m_option_t*, const char*);
 
 #endif

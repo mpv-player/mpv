@@ -22,7 +22,7 @@ SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 endif
 
-SRCS_COMMON = cpudetect.c codec-cfg.c cfgparser.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c sub_cc.c find_sub.c m_config.c m_option.c parser-cfg.c m_struct.c
+SRCS_COMMON = cpudetect.c codec-cfg.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c sub_cc.c find_sub.c m_config.c m_option.c parser-cfg.c m_struct.c
 SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c libvo/font_load_ft.c xvid_vbr.c parser-mecmd.c
 SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c parser-mpcmd.c
 

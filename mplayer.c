@@ -138,9 +138,9 @@ m_config_parse_config_file(m_config_t* config, char *conffile);
 //             Config file
 //**************************************************************************//
 
-static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
+static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
 
-static int cfg_include(struct config *conf, char *filename){
+static int cfg_include(m_option_t *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
 

@@ -241,12 +241,10 @@ stream_t* open_stream(char* filename,char** options,int* file_format);
 stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format);
 
 //#ifdef USE_DVDREAD
-struct config;
 extern int dvd_title;
 extern int dvd_chapter;
 extern int dvd_last_chapter;
 extern int dvd_angle;
-int dvd_parse_chapter_range(struct config*, const char*);
 //#endif
 
 extern int dvbin_param_on;

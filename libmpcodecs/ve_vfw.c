@@ -29,9 +29,9 @@
 
 static char *vfw_param_codec = NULL;
 
-#include "cfgparser.h"
+#include "m_option.h"
 
-struct config vfwopts_conf[]={
+m_option_t vfwopts_conf[]={
     {"codec", &vfw_param_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };

@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdlib.h>
 #include <string.h>
@@ -1787,5 +1784,3 @@ m_option_type_t m_option_type_custom_url = {
   NULL,
   NULL
 };	
-
-#endif

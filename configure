@@ -165,7 +165,6 @@ Optional features:
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
-  --disable-new-conf     Disable new experimental config parser code [enabled]
   --enable-menu          Enable OSD menu support (NOT DVD MENU) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
   --enable-fribidi       Enable using the FriBiDi libs [disabled]
@@ -1131,7 +1130,6 @@ _cdparanoia=auto
 _big_endian=auto
 _freetype=auto
 _shared_pp=no
-_new_conf=yes
 _menu=no
 _qtx=auto
 _macosx=auto
@@ -1354,9 +1352,6 @@ for ac_option do
 
   --enable-shared-pp) _shared_pp=yes ;;
   --disable-shared-pp) _shared_pp=no ;;
-
-  --enable-new-conf) _new_conf=yes ;;
-  --disable-new-conf) _new_conf=no ;;
 
   --enable-menu) _menu=yes ;;
   --disable-menu) _menu=no ;;
@@ -4980,17 +4975,8 @@ echores "$_byte_order"
 echocheck "shared postprocess lib"
 echores "$_shared_pp"
 
-echocheck "New config"
-if test "$_new_conf" = yes ; then
-    _def_new_conf='#define NEW_CONFIG 1'
-else
-    _def_new_conf='#undef NEW_CONFIG'
-fi
-echores "$_new_conf"
-
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
-    test "$_new_conf" != yes && die "New config support needed for the OSD menu (--enable-new-conf)."
     _def_menu='#define HAVE_MENU 1'
 else
 _def_menu='#undef HAVE_MENU'
@@ -5942,9 +5928,6 @@ $_def_vidix
 
 /* enables / disables new input joystick support */
 $_def_joystick
-
-/* enables / disables new config */
-$_def_new_conf
 
 /* enables / disables QTX codecs */
 $_def_qtx

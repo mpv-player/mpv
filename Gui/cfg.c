@@ -6,7 +6,8 @@
 #include "../config.h"
 #include "../mp_msg.h"
 #include "../mplayer.h"
-#include "../cfgparser.h"
+#include "../m_config.h"
+#include "../m_option.h"
 
 #ifdef USE_SETLOCALE
 #include <locale.h>
@@ -73,7 +74,7 @@ extern int    frame_dropping;
 extern int    stop_xscreensaver;
 
 static m_config_t * gui_conf;
-static config_t gui_opts[] =
+static m_option_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
  
@@ -199,11 +200,7 @@ int cfg_read( void )
 
 // -- read configuration
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[cfg] read config file: %s\n",cfg );
- gui_conf=m_config_new(
-#ifndef NEW_CONFIG
- play_tree_new()
-#endif
- ); 
+ gui_conf=m_config_new();
  m_config_register_options( gui_conf,gui_opts );
  if ( m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
   {
@@ -283,33 +280,12 @@ int cfg_write( void )
   {
    for ( i=0;gui_opts[i].name;i++ )
     {
-#ifdef NEW_CONFIG
       char* v = m_option_print(&gui_opts[i],gui_opts[i].p);
       if(v) {
 	fprintf( f,"%s = \"%s\"\n",gui_opts[i].name, v);
 	free(v);
       } else if((int)v == -1)
 	mp_msg(MSGT_GPLAYER,MSGL_WARN,"Unable to save the %s option\n");
-#else
-     switch ( gui_opts[i].type )
-      {
-       case CONF_TYPE_INT:
-       case CONF_TYPE_FLAG:   fprintf( f,"%s = %d\n",gui_opts[i].name,*( (int *)gui_opts[i].p ) );   break;
-       case CONF_TYPE_FLOAT:  fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) ); break;
-       case CONF_TYPE_STRING: 
-            {
-	     char * tmp = *( (char **)gui_opts[i].p );
-	     if ( tmp && tmp[0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp );
-	     break;
-	    }
-       case CONF_TYPE_STRING_LIST:
-            {
-	     char ** tmp = *( (char ***)gui_opts[i].p );
-	     if ( tmp && tmp[0] && tmp[0][0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp[0] );
-	     break;
-	    }
-      }
-#endif
     }
    fclose( f );
   }

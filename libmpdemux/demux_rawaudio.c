@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "../m_option.h"
-#include "../m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -20,7 +19,7 @@ static int samplerate = 44100;
 static int samplesize = 2;
 static int format = 0x1; // Raw PCM
 
-config_t demux_rawaudio_opts[] = {
+m_option_t demux_rawaudio_opts[] = {
   { "on", &demuxer_type, CONF_TYPE_FLAG, 0,0, DEMUXER_TYPE_RAWAUDIO, NULL },
   { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },

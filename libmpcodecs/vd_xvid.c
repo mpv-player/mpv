@@ -7,7 +7,7 @@
 #ifdef HAVE_XVID
 
 #include "vd_internal.h"
-#include "cfgparser.h"
+#include "m_option.h"
 
 #include <xvid.h>
 
@@ -56,7 +56,7 @@ typedef struct {
 
 static int do_dr2 = 0;
 
-struct config xvid_dec_opts[] = {
+m_option_t xvid_dec_opts[] = {
   { "dr2", &do_dr2, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "nodr2", &do_dr2, CONF_TYPE_FLAG, 0, 1, 0, NULL},
   {NULL, NULL, 0, 0, 0, 0, NULL}

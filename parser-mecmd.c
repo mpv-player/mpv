@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +13,6 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "parser-mecmd.h"
-
 
 void
 m_entry_list_free(m_entry_t* lst) {
@@ -139,5 +135,3 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
    m_entry_list_free(lst);
   return NULL;
 }
-
-#endif

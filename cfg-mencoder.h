@@ -17,11 +17,11 @@ extern void revertPPOpt(void *conf, char* opt);
 extern char *pp_help;
 
 #ifdef HAVE_DIVX4ENCORE
-extern struct config divx4opts_conf[];
+extern m_option_t divx4opts_conf[];
 #endif
 
 #ifdef HAVE_MP3LAME
-struct config lameopts_conf[]={
+m_option_t lameopts_conf[]={
 	{"q", &lame_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"aq", &lame_param_algqual, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"vbr", &lame_param_vbr, CONF_TYPE_INT, CONF_RANGE, 0, vbr_max_indicator, NULL},
@@ -45,20 +45,20 @@ struct config lameopts_conf[]={
 #endif
 
 #ifdef USE_LIBAVCODEC
-extern struct config lavcopts_conf[];
+extern m_option_t lavcopts_conf[];
 #endif
 
 #ifdef USE_WIN32DLL
-extern struct config vfwopts_conf[];
+extern m_option_t vfwopts_conf[];
 #endif
 
 #ifdef HAVE_XVID
-extern struct config xvidencopts_conf[];
+extern m_option_t xvidencopts_conf[];
 #endif
 
-extern struct config nuvopts_conf[];
+extern m_option_t nuvopts_conf[];
 
-struct config ovc_conf[]={
+m_option_t ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO, NULL},
 	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4, NULL},
@@ -99,7 +99,7 @@ struct config ovc_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-struct config oac_conf[]={
+m_option_t oac_conf[]={
 	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_COPY, NULL},
 	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM, NULL},
 #ifdef HAVE_MP3LAME
@@ -117,7 +117,7 @@ struct config oac_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-struct config info_conf[]={
+m_option_t info_conf[]={
 	{"name", &info_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"artist", &info_artist, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"genre", &info_genre, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -137,7 +137,7 @@ struct config info_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-struct config of_conf[]={
+m_option_t of_conf[]={
 	{"avi", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_AVI, NULL},
 	{"mpeg", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_MPEG, NULL},
 	{"help", "\nAvailable output formats:\n"
@@ -147,7 +147,7 @@ struct config of_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static config_t mencoder_opts[]={
+m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
 

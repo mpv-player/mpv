@@ -86,17 +86,17 @@ extern char **vo_fstype_list;
 #endif
 
 #ifdef HAVE_AA
-extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
-extern void vo_aa_revertoption(config_t* opt,char* param);
+extern int vo_aa_parseoption(m_option_t* conf, char *opt, char * param);
+extern void vo_aa_revertoption(m_option_t* opt,char* param);
 #endif
 
 #ifdef HAVE_ZR
-extern int vo_zr_parseoption(struct config * conf, char *opt, char * param);
-extern void vo_zr_revertoption(config_t* opt,char* pram);
+extern int vo_zr_parseoption(m_option_t* conf, char *opt, char * param);
+extern void vo_zr_revertoption(m_option_t* opt,char* pram);
 #endif
 
 #ifdef HAVE_DXR2
-extern config_t dxr2_opts[];
+extern m_option_t dxr2_opts[];
 #endif
 
 #ifdef STREAMING_LIVE_DOT_COM
@@ -126,7 +126,7 @@ extern int nortc;
 extern float monitor_aspect;
 
 /* Options related to audio out plugins */
-struct config ao_plugin_conf[]={
+m_option_t ao_plugin_conf[]={
 	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
@@ -138,7 +138,7 @@ struct config ao_plugin_conf[]={
 };
 
 #ifdef HAVE_JPEG
-struct config jpeg_conf[]={
+m_option_t jpeg_conf[]={
 	{"progressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noprogressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"baseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -169,7 +169,7 @@ extern char* pp_help;
  * by Folke
  */
 
-static config_t mplayer_opts[]={
+m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this don't need anymore to be the first!!! */
 

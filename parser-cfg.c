@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -211,5 +208,3 @@ out:
 	--recursion_depth;
 	return ret;
 }
-
-#endif

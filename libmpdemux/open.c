@@ -15,7 +15,7 @@
 #include <sys/cdrio.h>
 #endif
 
-#include "../m_config.h"
+#include "../m_option.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "mf.h"
@@ -532,7 +532,7 @@ if(strncmp("dvd://",filename,6) == 0){
   return open_stream_full(filename,STREAM_READ,options,file_format);
 }
 
-int dvd_parse_chapter_range(struct config *conf, const char *range){
+int dvd_parse_chapter_range(m_option_t *conf, const char *range){
   const char *s;
   char *t;
 /*  conf; prevent warning from GCC */

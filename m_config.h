@@ -1,7 +1,5 @@
-
-#ifndef NEW_CONFIG
-#warning "Including m_config.h but NEW_CONFIG is disabled"
-#else
+#ifndef _M_CONFIG_H
+#define _M_CONFIG_H
 
 typedef struct m_config_option m_config_option_t;
 typedef struct m_config_save_slot m_config_save_slot_t;
@@ -61,33 +59,4 @@ m_config_get_option(m_config_t *config, char* arg);
 void
 m_config_print_option_list(m_config_t *config);
 
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// Backward compat. stuff ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-typedef struct config config_t;
-struct config {
-  char *name;
-  void *p; 
-  struct m_option_type* type;
-  unsigned int flags;
-  double min,max;
-  void* priv;
-};
-
-
-#define CONF_MIN		(1<<0)
-#define CONF_MAX		(1<<1)
-#define CONF_RANGE	(CONF_MIN|CONF_MAX)
-#define CONF_NOCFG	(1<<2)
-#define CONF_NOCMD	(1<<3)
-#define CONF_GLOBAL	(1<<4)
-#define CONF_NOSAVE	(1<<5)
-#define CONF_OLD		(1<<6)
-
-#define ERR_NOT_AN_OPTION	 -1
-#define ERR_MISSING_PARAM	 -2
-#define ERR_OUT_OF_RANGE	 -3
-#define ERR_FUNC_ERR	 -4
-
-#endif
+#endif /* _M_CONFIG_H */

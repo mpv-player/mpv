@@ -28,7 +28,7 @@
 #include <xvid.h>
 #include "xvid_vbr.h"
 
-#include "cfgparser.h"
+#include "m_option.h"
 
 
 #ifdef XVID_API_UNSTABLE
@@ -110,7 +110,7 @@ static int xvidenc_psnr = 0;
 static uint64_t xvid_error[3];
 #endif
 
-struct config xvidencopts_conf[] = {
+m_option_t xvidencopts_conf[] = {
     { "pass", &xvidenc_pass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     { "me_quality", &xvidenc_quality, CONF_TYPE_INT, CONF_RANGE, 0,
       sizeof(motion_presets) / sizeof(motion_presets[0]) - 1, NULL},

@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,7 +7,6 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
-
 
 #include "m_config.h"
 #include "m_option.h"
@@ -379,5 +375,3 @@ m_config_print_option_list(m_config_t *config) {
   }
   printf("\nTotal: %d options\n",count);
 }
-
-#endif // NEW_CONFIG

@@ -1,7 +1,4 @@
-
 #include "config.h"
-
-#ifdef NEW_CONFIG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -219,5 +216,3 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   play_tree_free(root,1);
   return NULL;
 }
-
-#endif

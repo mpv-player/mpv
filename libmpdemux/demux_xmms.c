@@ -12,7 +12,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "../cfgparser.h"
+#include "../m_option.h"
 #include "../libao2/afmt.h"
 #include "stream.h"
 #include "demuxer.h"
