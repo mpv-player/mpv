@@ -219,8 +219,11 @@ static int init(sh_video_t *sh)
           mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[LCL] Normal compression.\n");
           break;
         default:
-          mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] Unsupported compression format for ZLIB (%d).\n", hc->compression);
-          return 0;
+          if ((hc->compression < Z_NO_COMPRESSION) || (hc->compression > Z_BEST_COMPRESSION)) {
+	    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[LCL] Unusupported compression level for ZLIB: (%d).\n", hc->compression);
+	    return 0;
+	  }
+          mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[LCL] Compression level for ZLIB: (%d).\n", hc->compression);
       }
       break;
     default:
@@ -407,10 +410,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
       }
       break;
     case CODEC_ZLIB:
-      switch (hc->compression) {
-        case COMP_ZLIB_HISPEED:
-        case COMP_ZLIB_HICOMP:
-        case COMP_ZLIB_NORMAL:
 #ifdef HAVE_ZLIB
           zret = inflateReset(&(hc->zstream));
           if (zret != Z_OK) {
@@ -430,7 +429,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
               return 0;
             }
             if (mthread_outlen != (unsigned int)(hc->zstream.total_out)) {
-              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: mthread1 decoded size differs (%d != %d)\n",
+              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: mthread1 decoded size differs (%u != %lu)\n",
                      mthread_outlen, hc->zstream.total_out);
             }
             zret = inflateReset(&(hc->zstream));
@@ -448,7 +447,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
               return 0;
             }
             if ((hc->decomp_size - mthread_outlen) != (unsigned int)(hc->zstream.total_out)) {
-              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: mthread2 decoded size differs (%d != %d)\n",
+              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: mthread2 decoded size differs (%d != %lu)\n",
                      hc->decomp_size - mthread_outlen, hc->zstream.total_out);
             }
           } else {
@@ -462,7 +461,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
               return 0;
             }
             if (hc->decomp_size != (unsigned int)(hc->zstream.total_out)) {
-              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: decoded size differs (%d != %d)\n",
+              mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[LCL] ZLIB: decoded size differs (%d != %lu)\n",
                      hc->decomp_size, hc->zstream.total_out);
             }
           }
@@ -472,11 +471,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
           mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] BUG! Zlib support not compiled in frame decoder.\n");
           return 0;
 #endif
-          break;
-        default:
-          mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] BUG! Unknown ZLIB compression in frame decoder.\n");
-          return 0;
-      }
       break;
     default:
       mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] BUG! Unknown codec in frame decoder compression switch.\n");
