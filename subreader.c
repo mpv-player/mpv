@@ -435,14 +435,14 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     if (!fgets (line, 1000, fd))
 	return NULL;
 
-    sub_readtext(&line,&current->text[0]);
+    sub_readtext((char *) &line,&current->text[0]);
     current->lines = 1;
     current->end = current->start; // will be corrected by next subtitle
 
     if (!fgets (line, 1000, fd))
 	return current;;
 
-    sub_readtext(&line,&current->text[1]);
+    sub_readtext((char *) &line,&current->text[1]);
     current->lines = 2;
 
     if ((current->text[0]=="") && (current->text[1]=="")) {
