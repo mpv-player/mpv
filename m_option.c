@@ -75,6 +75,7 @@ static char* dup_printf(const char *fmt, ...) {
 
 static int parse_flag(m_option_t* opt,char *name, char *param, void* dst, int src) {
   if (src == M_CONFIG_FILE) {
+    if(!param) return M_OPT_MISSING_PARAM;
     if (!strcasecmp(param, "yes") ||	/* any other language? */
 	!strcasecmp(param, "on") ||
 	!strcasecmp(param, "ja") ||
