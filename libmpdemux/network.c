@@ -84,10 +84,6 @@ streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 
 int
 read_rtp_from_server(int fd, char *buffer, int length) {
-	int ret;
-	int done=0;
-	fd_set set;
-	struct timeval tv;
 	struct rtpheader rh;
 	char *data;
 	int len;
@@ -233,7 +229,7 @@ http_read_response( int fd ) {
 // By using the protocol, the extension of the file or the content-type
 // we might be able to guess the streaming type.
 int
-autodetectProtocol(URL_t *url, int *fd_out) {
+autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_format) {
 	HTTP_header_t *http_hdr;
 	int fd=-1;
 	int i;
@@ -243,14 +239,19 @@ autodetectProtocol(URL_t *url, int *fd_out) {
 	char *next_url;
 	char response[1024];
 
+	URL_t *url = streaming_ctrl->url;
+	*file_format = DEMUXER_TYPE_UNKNOWN;
+
 	do {
-		*fd_out=-1;
+		*fd_out = -1;
 		next_url = NULL;
 		extension = NULL;
 		content_type = NULL;
 		redirect = 0;
 
-		if( url==NULL ) return DEMUXER_TYPE_UNKNOWN;
+		if( url==NULL ) {
+			return -1;
+		}
 
 		// Get the extension of the file if present
 		if( url->file!=NULL ) {
@@ -267,8 +268,8 @@ extension=NULL;
 			// Look for the extension in the extensions table
 			for( i=0 ; i<(sizeof(extensions_table)/sizeof(extensions_table[0])) ; i++ ) {
 				if( !strcasecmp(extension, extensions_table[i].extension) ) {
-					//if( url->port==0 ) url->port = 80;
-					return extensions_table[i].demuxer_type;
+					*file_format = extensions_table[i].demuxer_type;
+					return 0;
 				}
 			}
 		}
@@ -276,24 +277,22 @@ extension=NULL;
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
 			printf("RTSP protocol not yet implemented!\n");
-			return DEMUXER_TYPE_UNKNOWN;
+			return -1;
 		}
 
 		// Checking for RTP
 		if( !strcasecmp(url->protocol, "rtp") ) {
-			if( url->port==0 )
-			{
+			if( url->port==0 ) {
 				printf("You must enter a port number for RTP streams!\n");
-				exit(1);	//fixme
+				return -1;
 			}
-			*fd_out=-1;
-			return DEMUXER_TYPE_UNKNOWN;
+			return -1; 
 		}
 
 		// Checking for ASF
 		if( !strncasecmp(url->protocol, "mms", 3) ) {
-			//if( url->port==0 ) url->port = 80;
-			return DEMUXER_TYPE_ASF;
+			*file_format = DEMUXER_TYPE_ASF;
+			return 0;
 		}
 
 		// HTTP based protocol
@@ -302,26 +301,26 @@ extension=NULL;
 
 			fd = http_send_request( url );
 			if( fd<0 ) {
-				*fd_out=-1;
-				return DEMUXER_TYPE_UNKNOWN;
+				return -1;
 			}
 
 			http_hdr = http_read_response( fd );
 			if( http_hdr==NULL ) {
 				close( fd );
-				*fd_out=-1;
 				http_free( http_hdr );
-				return DEMUXER_TYPE_UNKNOWN;
+				return -1;
 			}
 
 			*fd_out=fd;
 			http_debug_hdr( http_hdr );
 
+			streaming_ctrl->data = (void*)http_hdr;
+			
 			// Check if the response is an ICY status_code reason_phrase
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {
 				// Ok, we have detected an mp3 streaming
-				http_free( http_hdr );
-				return DEMUXER_TYPE_MPEG_PS;
+				*file_format = DEMUXER_TYPE_MPEG_PS;
+				return 0;
 			}
 			
 			switch( http_hdr->status_code ) {
@@ -334,10 +333,13 @@ extension=NULL;
 						// Check in the mime type table for a demuxer type
 						for( i=0 ; i<(sizeof(mime_type_table)/sizeof(mime_type_table[0])) ; i++ ) {
 							if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
-								http_free( http_hdr );
-								return mime_type_table[i].demuxer_type;
+								*file_format = mime_type_table[i].demuxer_type;
+								return 0; 
 							}
 						}
+						// Not found in the mime type table, don't fail,
+						// we should try raw HTTP
+						return 0;
 					}
 					break;
 				// Redirect
@@ -349,24 +351,21 @@ extension=NULL;
 						close( fd );
 						url_free( url );
 						url = url_new( next_url );
+						http_free( http_hdr );
 						redirect = 1;	
 					}
 					break;
 				default:
 					printf("Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
-					close( fd );
-					*fd_out=-1;
-					http_free( http_hdr );
-					return DEMUXER_TYPE_UNKNOWN;
+					return -1;
 			}
 		} else {
 			printf("Unknown protocol '%s'\n", url->protocol );
-			return DEMUXER_TYPE_UNKNOWN;
+			return -1;
 		}
 	} while( redirect );
 
-	http_free( http_hdr );
-	return DEMUXER_TYPE_UNKNOWN;
+	return -1;
 }
 
 int
@@ -423,7 +422,7 @@ nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 
 int
 nop_streaming_start( stream_t *stream ) {
-	HTTP_header_t *http_hdr;
+	HTTP_header_t *http_hdr = NULL;
 	int fd;
 	if( stream==NULL ) return -1;
 
@@ -451,7 +450,19 @@ nop_streaming_start( stream_t *stream ) {
 				fd = -1;
 		}
 		stream->fd = fd;
+	} else {
+		http_hdr = (HTTP_header_t*)stream->streaming_ctrl->data;
+		if( http_hdr->body_size>0 ) {
+			if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+				http_free( http_hdr );
+				return -1;
+			}
+		}
+	}
+
+	if( http_hdr ) {
 		http_free( http_hdr );
+		stream->streaming_ctrl->data = NULL;
 	}
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
@@ -467,11 +478,9 @@ nop_streaming_start( stream_t *stream ) {
 // Start listening on a UDP port. If multicast, join the group.
 int
 rtp_open_socket( URL_t *url ) {
-	int fd;
 	int socket_server_fd;
 	int err, err_len;
 	fd_set set;
-	struct timeval tv;
 	struct sockaddr_in server_address;
 	struct ip_mreq mcast;
 
@@ -559,31 +568,21 @@ rtp_streaming_start( stream_t *stream ) {
 }
 
 int
-streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
+//streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
+streaming_start(stream_t *stream, int demuxer_type) {
 	int ret=-1;
 	if( stream==NULL ) return -1;
 	
-	stream->streaming_ctrl = streaming_ctrl_new( ); 
-	if( stream->streaming_ctrl==NULL ) {
-		return -1;
-	}
-	
-	stream->streaming_ctrl->url = url_copy(url);
-//	stream->streaming_ctrl->demuxer_type = demuxer_type;	
-
 	// For RTP streams, we usually don't know the stream type until we open it.
-	if( !strcmp( url->protocol, "rtp"))
-	{
-		if(stream->fd >= 0) 
-		{
+	if( !strcmp( stream->streaming_ctrl->url->protocol, "rtp")) {
+		if(stream->fd >= 0) {
 			if(close(stream->fd) < 0)
 				printf("streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
 		}
 		stream->fd = -1;
 		stream->fd = rtp_streaming_start( stream );
-	}
+	} else
 	// For connection-oriented streams, we can usually determine the streaming type.
-	else
 	switch( demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
 			// Send the appropriate HTTP request

@@ -72,6 +72,53 @@ asf_streaming_start( stream_t *stream ) {
 	return -1;
 }
 
+int 
+asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
+/*	
+printf("ASF stream chunck size=%d\n", stream_chunck->size);
+printf("length: %d\n", length );
+printf("0x%02X\n", stream_chunck->type );
+*/
+	if( drop_packet!=NULL ) *drop_packet = 0;
+
+	if( stream_chunck->size<8 ) {
+		printf("Ahhhh, stream_chunck size is too small: %d\n", stream_chunck->size);
+		return -1;
+	}
+	if( stream_chunck->size!=stream_chunck->size_confirm ) {
+		printf("size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
+		return -1;
+	}
+/*	
+	printf("  type: 0x%02X\n", stream_chunck->type );
+	printf("  size: %d (0x%02X)\n", stream_chunck->size, stream_chunck->size );
+	printf("  sequence_number: 0x%04X\n", stream_chunck->sequence_number );
+	printf("  unknown: 0x%02X\n", stream_chunck->unknown );
+	printf("  size_confirm: 0x%02X\n", stream_chunck->size_confirm );
+*/
+	switch(stream_chunck->type) {
+		case 0x4324:	// $C	Clear ASF configuration
+			printf("=====> Clearing ASF stream configuration!\n");
+			if( drop_packet!=NULL ) *drop_packet = 1;
+			return stream_chunck->size;
+			break;
+		case 0x4424:    // $D	Data follows
+//			printf("=====> Data follows\n");
+			break;
+		case 0x4524:    // $E	Transfer complete
+			printf("=====> Transfer complete\n");
+			if( drop_packet!=NULL ) *drop_packet = 1;
+			return stream_chunck->size;
+			break;
+		case 0x4824:    // $H	ASF header chunk follows
+			printf("=====> ASF header chunk follows\n");
+			break;
+		default:
+			printf("=====> Unknown stream type 0x%x\n", stream_chunck->type );
+	}
+	return stream_chunck->size+4;
+}
+
 static int
 asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   ASF_header_t asfh;
@@ -283,53 +330,6 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
   return read;
 }
 
-int 
-asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
-/*	
-printf("ASF stream chunck size=%d\n", stream_chunck->size);
-printf("length: %d\n", length );
-printf("0x%02X\n", stream_chunck->type );
-*/
-	if( drop_packet!=NULL ) *drop_packet = 0;
-
-	if( stream_chunck->size<8 ) {
-		printf("Ahhhh, stream_chunck size is too small: %d\n", stream_chunck->size);
-		return -1;
-	}
-	if( stream_chunck->size!=stream_chunck->size_confirm ) {
-		printf("size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
-		return -1;
-	}
-/*	
-	printf("  type: 0x%02X\n", stream_chunck->type );
-	printf("  size: %d (0x%02X)\n", stream_chunck->size, stream_chunck->size );
-	printf("  sequence_number: 0x%04X\n", stream_chunck->sequence_number );
-	printf("  unknown: 0x%02X\n", stream_chunck->unknown );
-	printf("  size_confirm: 0x%02X\n", stream_chunck->size_confirm );
-*/
-	switch(stream_chunck->type) {
-		case 0x4324:	// $C	Clear ASF configuration
-			printf("=====> Clearing ASF stream configuration!\n");
-			if( drop_packet!=NULL ) *drop_packet = 1;
-			return stream_chunck->size;
-			break;
-		case 0x4424:    // $D	Data follows
-//			printf("=====> Data follows\n");
-			break;
-		case 0x4524:    // $E	Transfer complete
-			printf("=====> Transfer complete\n");
-			if( drop_packet!=NULL ) *drop_packet = 1;
-			return stream_chunck->size;
-			break;
-		case 0x4824:    // $H	ASF header chunk follows
-			printf("=====> ASF header chunk follows\n");
-			break;
-		default:
-			printf("=====> Unknown stream type 0x%x\n", stream_chunck->type );
-	}
-	return stream_chunck->size+4;
-}
-
 int
 asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
 	return -1;
@@ -377,7 +377,6 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
 	char str[250];
 	char *ptr;
-	char *request;
 	int i,as = -1,vs = -1;
 
 	int offset_hi=0, offset_lo=0, length=0;
@@ -528,7 +527,6 @@ asf_http_streaming_start( stream_t *stream ) {
 	asf_http_streaming_ctrl_t *asf_http_ctrl;
 	ASF_StreamType_e streaming_type;
 	char buffer[BUFFER_SIZE];
-	unsigned int port;
 	int i, ret;
 	int fd = stream->fd;
 	int done;

@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 
 #include "url.h"
+#include "stream.h"
 
 #define BUFFER_SIZE		2048
 
@@ -36,6 +37,13 @@ typedef struct streaming_control {
 	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
 	void *data;
 } streaming_ctrl_t;
+
+streaming_ctrl_t *streaming_ctrl_new();
+void streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl );
+
+int autodetectProtocol( streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_format );
+
+//int streaming_start( stream_t *stream, int demuxer_type );
 
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
