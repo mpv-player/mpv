@@ -1,4 +1,4 @@
-.\" synced with 1.830
+.\" synced with 1.832
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2297,7 +2297,7 @@ Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 W³±cza VBI dla sterowników wyj¶cia video vesa, dfbmga i svga.
 .
 .TP
-.B \-wid <ID\ okna>] (tylko X11 i DirectX)
+.B \-wid <ID\ okna>] (sprawd¼ równie¿ \-guiwid, \-geometry) (tylko X11 i DirectX)
 Przekazuje MPlayerowi, by do³±czy³ siê do instniej±cego okna.
 Przydatne, by osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
 .
@@ -3682,6 +3682,32 @@ wspó³czynnik ró¿nicy (domy¶lnie: 2.5)
 .TP
 .B volnorm
 Maksymalnie zwiêksza g³o¶no¶æ, nie zniekszta³caj±c przy tym d¼wiêku.
+.
+.TP
+.B ladspa=plik:etykieta[:opcje...]
+£aduje wtyczkê LADSPA (Linux Audio Developer's Simple Plugin API).
+Filtr ten mo¿e mieæ wiele instancji, dlatego kilka wtyczek LADSPA mo¿e byæ
+u¿yte naraz.
+.PD 0
+.RSs
+.IPs plik\ 
+Okre¶la plik biblioteki z wtyczk± LADSPA.
+Je¿eli zmienna LADSPA_PATH jest ustawiona, program szuka okre¶lonego pliku.
+Je¿eli jednak nie jest ona ustawiona, musisz podaæ pe³n± ¶cie¿kê do tego zbioru.
+.IPs etykieta
+Okre¶la filtr wewn±trz biblioteki.
+Niektóre zbiory zawieraj± tylko jeden filtr z kolei inne mog± zawieraæ ich wiele.
+Podanie tutaj parametru "help" spowoduje wy¶wietlenie wszystkich dostêpnych
+filtrów w obrêbie konkretnj biblioteki, zastêpuje to funkcjê "listplugins"
+z pakietu SDK LADSPA.
+.IPs parametry
+Parametry s± liczbami rzeczywistymi wiêkszymi lub równymi zeru, które okre¶laj±
+zachowanie za³adowanej bilioteki (np. opó¼nienie, próg czy wzmocnienie).
+W trybie "gadatliwym" (dodaj flagê -v do wiersza poleceñ MPlayera), wypisywane
+s± wszystkie mo¿liwe parametry i ich poprawne zakresy.
+Zastêpuje to funkcjê "analyseplugin" z pakietu SDK LADSPA.
+.RE
+.PD 1
 .
 .
 .
