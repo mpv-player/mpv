@@ -36,3 +36,8 @@ extern vd_functions_t* mpcodecs_vd_drivers[];
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 
+// callbacks:
+int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
+mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
+
+
