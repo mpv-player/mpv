@@ -376,12 +376,12 @@ fi
 
 
 # Checking CC version...
-# gcc-3.0 merges optimizations coming from egcs, pgcc, agcc, ...
 if test "$_skip_cc_check" != yes ; then
- for _cc in $_cc gcc3 cc; do
+ for _cc in $_cc gcc-3.1 gcc3 gcc-3.0 cc ; do
   echocheck "$_cc version"
   cc_name=`$_cc -v 2>&1 | tail -1 | cut -d ' ' -f 1`
-  cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
+  #cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
+  cc_version=`$_cc -dumpversion`
   case $cc_version in
     '')
       cc_version="v. ?.??, bad"
