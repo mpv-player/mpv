@@ -101,6 +101,10 @@ params:
 	--disable-select        disable audio select() support ( for example required this
 	                        option ALSA or Vortex2 driver )
 
+	--disable-dshow         disable DirectShow support (if you don't have
+                                C++ compiler&libs, or you've found dshow codecs
+                                slower than old VfW ones)
+
         --with-x11libdir=DIR    X library files are in DIR
         --with-win32libdir=DIR  windows codec files
         --with-csslibdir=DIR    directory contains libcss.so shared library
@@ -207,6 +211,7 @@ _svga=no
 _fbdev=yes
 _lirc=no
 _css=no
+_dshow=yes
 
 _x=1
 _y=1
@@ -604,6 +609,9 @@ do
   --disable-select)
         _select='#undef HAVE_AUDIO_SELECT'
 	;;
+  --disable-dshow)
+        _dshow=no
+	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
 	_win32libdirnotify=no
@@ -660,6 +668,7 @@ echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
+echo "Checking for DirectShow ... $_dshow"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -682,6 +691,16 @@ else
    _css='#undef HAVE_LIBCSS'
    _csslib=''
    _cssinc=''
+fi
+
+if [ $_dshow = yes ]; then
+   _dshowlib='-Lloader/DirectShow -lDS_Filter -lstdc++'
+   _dshowdep='loader/DirectShow/libDS_Filter.a'
+   _dshow='#define USE_DIRECTSHOW'
+else
+   _dshowlib=''
+   _dshowdep=''
+   _dshow='#undef USE_DIRECTSHOW'
 fi
 
 if [ $_x11 = yes ]; then
@@ -758,6 +777,8 @@ LIRC_LIBS = $_lirclibs
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
+DS_DEP = $_dshowdep
+DS_LIB = $_dshowlib
 
 EOF
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak
@@ -950,6 +971,9 @@ $_css
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC
+
+/* DirectShow support */
+$_dshow
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */

@@ -34,7 +34,7 @@ all:	version.h $(PRG) $(PRG_CFG)
 # $(PRG_AVIP)
 
 .c.o:
-	$(CC) -c $(CFLAGS) -DUSE_DIRECTSHOW -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 COMMONLIBS = libvo/libvo.a libac3/libac3.a mp3lib/libMP3.a
 
@@ -62,17 +62,17 @@ opendivx/libdecore.a:
 encore/libencore.a:
 	$(MAKE) -C encore
 
-$(PRG):	.depend mplayer.o $(OBJS) loader/libloader.a loader/DirectShow/libDS_Filter.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -Lloader/DirectShow -lDS_Filter -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) $(CSS_LIB) -Lencore -lencore -lpthread -lstdc++
+$(PRG):	.depend mplayer.o $(OBJS) loader/libloader.a $(DS_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader $(DS_LIB) -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) $(CSS_LIB) -Lencore -lencore -lpthread
 
-$(PRG_HQ):	.depend mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
+# $(PRG_HQ):	.depend mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+# 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
 
-$(PRG_AVIP):	.depend aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
-	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
+# $(PRG_AVIP):	.depend aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
+# 	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
 
-$(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
-	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
+# $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
+# 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 $(PRG_CFG):        .depend codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
