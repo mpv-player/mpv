@@ -21,7 +21,7 @@ HTML_SINGLE_XSL := html-single.xsl
 ifeq (html-common.xsl,$(wildcard html-common.xsl))
 XSL_DEPS := $(HTML_SINGLE_XSL) html-common.xsl ../html-single.xsl ../html-common.xsl
 else
-XSL_DEPS := $(HTML_SINGLE_XSL) html-common.xsl ../html-single.xsl ../html-common.xsl
+XSL_DEPS := $(HTML_SINGLE_XSL) ../html-single.xsl ../html-common.xsl
 endif
 else
 HTML_SINGLE_XSL := ../html-single.xsl
