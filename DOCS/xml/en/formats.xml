@@ -85,7 +85,7 @@ option.
 
 <para>
 Designed by Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-is a widespread multipurpose format currently used mostly for DivX and DivX4
+is a widespread multipurpose format currently used mostly for MPEG4 (DivX and DivX4)
 video. It has many known drawbacks and shortcomings (for example in streaming). It
 supports one video stream and 0 to 99 audio streams and can be as big as
 2GB, but there exists an extension allowing bigger files called
