@@ -24,8 +24,11 @@ time for fixing buggy, broken or old patches!
    
 7. Subscribe to the mplayer-dev-eng list (don't worry, it's low traffic)
    and send your patch there as base64-encoded attachment (use gzip or
-   bzip2 *only* if it's really big). Also describe in a few sentences
-   what (and why) are the changes.
+   bzip2 *only* if it's really big or if you know that your mailer messes
+   up (re-format) text attachments).
+   Subject line should be: '[PATCH] very short description of the patch'.
+   In the mail, describe in a few sentences what (and why) are the changes.
+   If you made independent changes, try to send them as separate patches.
 
 Thank you!
 
