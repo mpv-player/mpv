@@ -55,7 +55,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "Creating config file: %s\n"
 #define MSGTR_InvalidVOdriver "Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n"
 #define MSGTR_InvalidAOdriver "Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n"
-#define MSGTR_CopyCodecsConf "(copy/link etc/codecs.conf to ~/.mplayer/codecs.conf)\n"
+#define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (from MPlayer source tree) to ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Can't load font: %s\n"
 #define MSGTR_CantLoadSub "Can't load subtitles: %s\n"
 #define MSGTR_ErrorDVDkey "Error processing DVD KEY.\n"
