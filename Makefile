@@ -102,11 +102,18 @@ else
 COMMON_DEPS += libvo/libvo.a
 endif
 ifeq ($(DVDKIT),yes)
+ifeq ($(DVDKIT_SHARED),yes)
+COMMON_DEPS += libmpdvdkit/libmpdvdkit.so
+else
 COMMON_DEPS += libmpdvdkit/libmpdvdkit.a
+endif
 endif
 
 libmpdvdkit/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit
+
+libmpdvdkit/libmpdvdkit.so:
+	$(MAKE) -C libmpdvdkit libmpdvdkit.so
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -234,7 +241,12 @@ endif
 	@if test -f $(CONFDIR)/codecs.conf.old ; then mv -f $(CONFDIR)/codecs.conf.old $(CONFDIR)/codecs.conf.older ; fi
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 	$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
-
+ifeq ($(DVDKIT),yes)
+ifeq ($(DVDKIT_SHARED),yes)
+	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
+	$(INSTALL) -m 755 -s libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
+endif
+endif
 ifeq ($(CSS_USE),yes)
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
@@ -263,13 +275,6 @@ depend:
 	./version.sh `$(CC) --version`
 	$(CC) -MM $(CFLAGS) mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
-
-# ./configure must be run if it changed in CVS
-config.h: configure
-	@echo "############################################################"
-	@echo "####### Please run ./configure again - it's changed! #######"
-	@echo "############################################################"
-	@exit 1
 
 # do not rebuild after cvs commits if .developer file is present!
 
