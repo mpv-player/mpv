@@ -21,7 +21,7 @@ extern char *tv_param_driver;
 extern int tv_param_width;
 extern int tv_param_height;
 extern int tv_param_input;
-extern char *tv_param_outfmt;
+extern int tv_param_outfmt;
 extern float tv_param_fps;
 extern char **tv_param_channels;
 extern int tv_param_noaudio;

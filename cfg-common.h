@@ -302,7 +302,7 @@ m_option_t tvopts_conf[]={
 	{"width", &tv_param_width, CONF_TYPE_INT, 0, 0, 4096, NULL},
 	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096, NULL},
 	{"input", &tv_param_input, CONF_TYPE_INT, 0, 0, 20, NULL},
-	{"outfmt", &tv_param_outfmt, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"outfmt", &tv_param_outfmt, CONF_TYPE_IMGFMT, 0, 0, 0, NULL},
 	{"fps", &tv_param_fps, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"channels", &tv_param_channels, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"brightness", &tv_param_brightness, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},

@@ -54,7 +54,7 @@ char *tv_param_driver = "dummy";
 int tv_param_width = -1;
 int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
-char *tv_param_outfmt = "yv12";
+int tv_param_outfmt = IMGFMT_YV12;
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
 #if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
@@ -147,7 +147,6 @@ static int open_tv(tvi_handle_t *tvh)
 {
     int i;
     tvi_functions_t *funcs = tvh->functions;
-    int picture_format = 0;
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
@@ -155,29 +154,26 @@ static int open_tv(tvi_handle_t *tvh)
 	return 0;
     }
 
-    if (!strcasecmp(tv_param_outfmt, "yv12"))
-	picture_format = IMGFMT_YV12;
-    else if (!strcasecmp(tv_param_outfmt, "i420"))
-	picture_format = IMGFMT_I420;
-    else if (!strcasecmp(tv_param_outfmt, "uyvy"))
-	picture_format = IMGFMT_UYVY;
-    else if (!strcasecmp(tv_param_outfmt, "yuy2"))
-	picture_format = IMGFMT_YUY2;
-    else if (!strcasecmp(tv_param_outfmt, "rgb32"))
-	picture_format = IMGFMT_RGB32;
-    else if (!strcasecmp(tv_param_outfmt, "rgb24"))
-	picture_format = IMGFMT_RGB24;
-    else if (!strcasecmp(tv_param_outfmt, "rgb16"))
-	picture_format = IMGFMT_RGB16;
-    else if (!strcasecmp(tv_param_outfmt, "rgb15"))
-	picture_format = IMGFMT_RGB15;
-    else
+    switch(tv_param_outfmt)
     {
-	mp_msg(MSGT_TV, MSGL_ERR, "Unknown format given: %s\n", tv_param_outfmt);
-	mp_msg(MSGT_TV, MSGL_V, "Using default: Planar YV12\n");
-	picture_format = IMGFMT_YV12;
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_UYVY:
+	case IMGFMT_YUY2:
+	case IMGFMT_RGB32:
+	case IMGFMT_RGB24:
+	case IMGFMT_RGB16:
+	case IMGFMT_RGB15:
+	    break;
+	default:
+	    mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, " WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUIRED (0x%x)\n", tv_param_outfmt);
+	    mp_msg(MSGT_TV, MSGL_ERR, " This may cause buggy playback or program crash! Bugreports will\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, " be ignored! You should try again with YV12 (which is the default\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, " colorspace) and read the documentation!\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
     }
-    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &picture_format);
+    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tv_param_outfmt);
 
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
