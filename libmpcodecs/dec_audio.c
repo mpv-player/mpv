@@ -96,10 +96,11 @@ int init_audio_codec(sh_audio_t *sh_audio)
   if(!sh_audio->o_bps)
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
 
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, %d bit (0x%X), ratio: %d->%d (%3.1f kbit)\n",
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
 	sh_audio->samplerate,sh_audio->channels,
-	sh_audio->samplesize*8,sh_audio->sample_format,
-        sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
+	af_fmt2str_short(sh_audio->sample_format),
+	sh_audio->i_bps*8*0.001,((float)sh_audio->i_bps/sh_audio->o_bps)*100.0,
+        sh_audio->i_bps,sh_audio->o_bps);
 
   sh_audio->a_out_buffer_size=sh_audio->a_buffer_size;
   sh_audio->a_out_buffer=sh_audio->a_buffer;
