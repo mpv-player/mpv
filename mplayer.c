@@ -3354,7 +3354,7 @@ if(rel_seek_secs || abs_seek_pos){
 
 //================= Update OSD ====================
 #ifdef USE_OSD
-  if(osd_level>=1){
+  if(osd_level>=1 && sh_video){
       int pts=sh_video->pts;
       char osd_text_tmp[64];
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
