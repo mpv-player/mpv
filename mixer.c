@@ -45,7 +45,7 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
   vol.right=r; vol.left=l;
   if(mixer->audio_out){
     if(CONTROL_OK != mixer->audio_out->control(AOCONTROL_SET_VOLUME,&vol)) {
-      if (mixer->afilter)
+      if (!mixer->afilter)
         return;
       else {
         // af_volume uses values in dB
