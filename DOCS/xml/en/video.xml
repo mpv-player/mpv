@@ -489,7 +489,7 @@ a (possibly slow) conversion has to be done.
 If you should be lucky enough to have enough offscreen memory left to
 put a whole image there, the DGA driver will use doublebuffering, which
 results in much smoother movie replaying. It will tell you whether
-double-buffering is enabled or not.
+doublebuffering is enabled or not.
 </para>
 
 <para>

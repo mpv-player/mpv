@@ -117,5 +117,5 @@ Each vo driver _has_ to implement these:
 	 (tdfxfb) or render subtitles under of the image (vo_mpegpes, sdl)
 
     flip_page(): this is called after each frame, this diplays the buffer for
-	 real. This is 'swapbuffers' when double-buffering.
+	 real. This is 'swapbuffers' when doublebuffering.
 
