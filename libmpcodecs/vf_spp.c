@@ -197,7 +197,7 @@ static inline void add_block(int16_t *dst, int stride, DCTELEM block[64]){
 	}
 }
 
-static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale){
+static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale){
 	int y, x;
 
 #define STORE(pos) \
@@ -205,7 +205,7 @@ static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_st
 	if(temp & 0x100) temp= ~(temp>>31);\
 	dst[x + y*dst_stride + pos]= temp;
 
-	for(y=0; y<8; y++){
+	for(y=0; y<height; y++){
 		uint8_t *d= dither[y];
 		for(x=0; x<width; x+=8){
 			int temp;
@@ -222,10 +222,10 @@ static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_st
 }
 
 #ifdef HAVE_MMX
-static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale){
+static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale){
 	int y;
 
-	for(y=0; y<8; y++){
+	for(y=0; y<height; y++){
 		uint8_t *dst1= dst;
 		int16_t *src1= src;
 		asm volatile(
@@ -262,7 +262,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_
 }
 #endif
 
-static void (*store_slice)(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale)= store_slice_c;
+static void (*store_slice)(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale)= store_slice_c;
 
 static void (*requantize)(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation)= requantize_c;
 
@@ -312,7 +312,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 			}
 		}
 		if(y)
-			store_slice(dst + (y-8)*dst_stride, p->temp + 8 + y*stride, dst_stride, stride, width, 6-p->log2_count);
+			store_slice(dst + (y-8)*dst_stride, p->temp + 8 + y*stride, dst_stride, stride, width, XMIN(8, height+8-y), 6-p->log2_count);
 	}
 #if 0
 	for(y=0; y<height; y++){
@@ -330,10 +330,11 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+	int h= (height+16+15)&(~15);
 
 	vf->priv->temp_stride= (width+16+15)&(~15);
-        vf->priv->temp= malloc(vf->priv->temp_stride*(height+16)*sizeof(int16_t));
-        vf->priv->src = malloc(vf->priv->temp_stride*(height+16)*sizeof(uint8_t));
+        vf->priv->temp= malloc(vf->priv->temp_stride*h*sizeof(int16_t));
+        vf->priv->src = malloc(vf->priv->temp_stride*h*sizeof(uint8_t));
         
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
