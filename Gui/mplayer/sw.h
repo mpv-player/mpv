@@ -66,7 +66,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            {
             if( SubVisible++%2 ) wsMoveTopWindow( wsDisplay,appMPlayer.mainWindow.WindowID );
              else if ( wsWMType != wsWMNetWM && wsWMType != wsWMKDE ) wsMoveTopWindow( wsDisplay,appMPlayer.subWindow.WindowID );
-    }
+	   }
           msButton=0;
           mplSubMoved=0;
           break;

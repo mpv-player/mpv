@@ -50,6 +50,7 @@
 #define evPlayDVD           39
 #define evPlayVCD	    40
 #define evPlayNetwork       41
+#define evLoadAudioFile	    42
 
 #define evExit              1000
 

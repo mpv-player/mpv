@@ -6,6 +6,7 @@
 #define fsVideoSelector    0
 #define fsSubtitleSelector 1
 #define fsOtherSelector    2
+#define fsAudioSelector	   3
 
 extern GtkWidget   * fsFileSelect;
 

@@ -202,6 +202,8 @@ extern int dvd_nav;
 int dvd_parse_chapter_range(struct config*, const char*);
 //#endif
 
+extern char * audio_stream;
+
 #ifdef USE_DVDNAV
 #include "dvdnav_stream.h"
 #endif

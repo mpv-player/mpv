@@ -178,13 +178,6 @@ void guiGetEvent( int type,char * arg )
 #endif
 	break;
    case guiReDraw:
-//        if ( audio_out )
-//         {
-//	  float l,r;
- //	  mixer_getvolume( &l,&r );
-//	  guiIntfStruct.Volume=(r>l?r:l);
-//	  printf( "!!! guiIntfStruct.Volume: %.2f   \n",guiIntfStruct.Volume );
-//	 }
 	mplEventHandling( evRedraw,0 );
 	break;
    case guiSetVolume:

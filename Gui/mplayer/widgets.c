@@ -174,6 +174,10 @@ void gtkShow( int type,char * param )
         ShowFileSelect( fsSubtitleSelector,0 );
 	gtkSetLayer( fsFileSelect );
         break;
+   case evLoadAudioFile:
+	ShowFileSelect( fsAudioSelector,0 );
+	gtkSetLayer( fsFileSelect );
+	break;
    case evAbout:
 	ShowAboutBox();
 	gtkSetLayer( AboutBox );

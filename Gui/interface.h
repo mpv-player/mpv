@@ -91,6 +91,9 @@ typedef struct
 
    char * Othername;
    int    OtherChanged;
+   
+   char * AudioFile;
+   int    AudioFileChanged;
 
    int    SkinChange;
 } guiInterface_t;

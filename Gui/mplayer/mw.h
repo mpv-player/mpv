@@ -351,6 +351,9 @@ NoPause:
         mplMainRender=1;
         gtkShow( evLoadSubtitle,NULL );
         break;
+   case evLoadAudioFile:
+	gtkShow( evLoadAudioFile,NULL );
+	break;
    case evPrev:
 	mplPrev();
         mplMainRender=1;
@@ -413,17 +416,6 @@ set_volume:
           case 1: wsIconify( appMPlayer.subWindow ); break;
          }
         break;
-   case evNormalSize:
-        if ( guiIntfStruct.Playing )
-         {
-          appMPlayer.subWindow.isFullScreen=True;
-          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth ) / 2;
-          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2;
-          appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight;
-          wsFullScreen( &appMPlayer.subWindow );
-	  vo_fs=0;
-         }
-        break;
    case evDoubleSize:
         if ( guiIntfStruct.Playing )
          {
@@ -435,6 +427,17 @@ set_volume:
 	  vo_fs=0;
          }
         break;
+   case evNormalSize:
+        if ( guiIntfStruct.Playing )
+         {
+          appMPlayer.subWindow.isFullScreen=True;
+          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth ) / 2;
+          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2;
+          appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight;
+          wsFullScreen( &appMPlayer.subWindow );
+	  vo_fs=0;
+	  break;
+         } else if ( !appMPlayer.subWindow.isFullScreen ) break;
    case evFullScreen:
         for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
          {

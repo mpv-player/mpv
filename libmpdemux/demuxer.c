@@ -946,7 +946,7 @@ pts_from_bps=0; // !!!
 return demuxer;
 }
 
-static char* audio_stream = NULL;
+char* audio_stream = NULL;
 static char* sub_stream = NULL;
 static int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
 extern m_config_t* mconfig;

@@ -862,6 +862,7 @@ if(!use_stdin && !slave_mode){
          }
    	guiIntfStruct.FilenameChanged=0;
        } 
+     audio_stream=guiIntfStruct.AudioFile; 
     }
 #endif
 //---------------------------------------------------------------------------

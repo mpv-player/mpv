@@ -277,6 +277,7 @@ GtkWidget * create_PopUpMenu( void )
 #endif
     AddMenuItem( SubMenu,MSGTR_MENU_PlayURL, evSetURL );
     AddMenuItem( SubMenu,MSGTR_MENU_LoadSubtitle"   ", evLoadSubtitle );
+    AddMenuItem( SubMenu,MSGTR_MENU_LoadExternAudioFile, evLoadAudioFile );
    SubMenu=AddSubMenu( Menu,MSGTR_MENU_Playing );
     AddMenuItem( SubMenu,MSGTR_MENU_Play"        ", evPlay );
     AddMenuItem( SubMenu,MSGTR_MENU_Pause, evPause );
