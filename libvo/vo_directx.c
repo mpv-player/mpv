@@ -59,6 +59,7 @@ extern void mplayer_put_key(int code);              //let mplayer handel the key
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern int vo_doublebuffering;                      //tribblebuffering    
 extern int vo_fs;
+extern int vo_directrendering;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -936,6 +937,10 @@ static void flip_page(void)
         g_lpddsPrimary->lpVtbl->Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
     }	
 	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL);
+    if(vo_directrendering && (dstride != ddsdsf.lPitch)){
+      mp_msg(MSGT_VO,MSGL_WARN,"<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
+      vo_directrendering=0;
+    }
 	dstride = ddsdsf.lPitch;
     image = ddsdsf.lpSurface;
 }
