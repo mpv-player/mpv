@@ -87,9 +87,15 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case AFMT_U16_BE:
 	    alsa_format.format = SND_PCM_SFMT_U16_BE;
 	    break;
+#ifndef WORDS_BIGENDIAN
+	case AFMT_AC3:
+#endif
 	case AFMT_S16_LE:
 	    alsa_format.format = SND_PCM_SFMT_S16_LE;
 	    break;
+#ifdef WORDS_BIGENDIAN
+	case AFMT_AC3:
+#endif
 	case AFMT_S16_BE:
 	    alsa_format.format = SND_PCM_SFMT_S16_BE;
 	    break;

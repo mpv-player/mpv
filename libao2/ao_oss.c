@@ -123,12 +123,18 @@ static int init(int rate,int channels,int format,int flags){
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
-  
+
+ac3_retry:  
   ao_data.format=format;
-  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
-  if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) {
-      printf("Can't set audio device %s to AC3 output\n", dsp);
-      return 0;
+  if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format)<0 ||
+      ao_data.format != format) if(format == AFMT_AC3){
+    printf("Can't set audio device %s to AC3 output, trying S16...\n", dsp);
+#ifdef WORDS_BIGENDIAN
+    format=AFMT_S16_BE;
+#else
+    format=AFMT_S16_LE;
+#endif
+    goto ac3_retry;
   }
   printf("audio_setup: sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));

@@ -291,7 +291,13 @@ static unsigned char nas_aformat_to_auformat(unsigned int format)
 	case	AFMT_S8:	return AuFormatLinearSigned8;
 	case	AFMT_U16_LE:	return AuFormatLinearUnsigned16LSB;
 	case	AFMT_U16_BE:	return AuFormatLinearUnsigned16MSB;
+#ifndef WORDS_BIGENDIAN
+	case AFMT_AC3:
+#endif
 	case	AFMT_S16_LE:	return AuFormatLinearSigned16LSB;
+#ifdef WORDS_BIGENDIAN
+	case AFMT_AC3:
+#endif
 	case	AFMT_S16_BE:	return AuFormatLinearSigned16MSB;
 	case	AFMT_MU_LAW:	return AuFormatULAW8;
 	default: return 0;
