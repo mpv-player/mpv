@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../cfgparser.h"
+#include "../m_option.h"
+#include "../m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -14,7 +15,7 @@
 
 #include "../libmpcodecs/img_format.h"
 
-int use_rawvideo = 0;
+extern int demuxer_type;
 static int format = IMGFMT_I420;
 static int size_id = 0;
 static int width = 0;
@@ -23,7 +24,7 @@ static float fps = 25;
 static int imgsize=0;
 
 config_t demux_rawvideo_opts[] = {
-  { "on", &use_rawvideo, CONF_TYPE_FLAG, 0,0, 1, NULL },
+  { "on", &demuxer_type, CONF_TYPE_FLAG, 0,0, DEMUXER_TYPE_RAWVIDEO, NULL },
   // size:
   { "w", &width, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
   { "h", &height, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
@@ -99,12 +100,12 @@ int demux_rawvideo_open(demuxer_t* demuxer) {
 }
 
 int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
-
+  sh_video_t* sh = demuxer->video->sh;
+  off_t pos;
   if(demuxer->stream->eof) return 0;
   if(ds!=demuxer->video) return 0;
-
-  ds_read_packet(ds,demuxer->stream,imgsize,0,stream_tell(demuxer->stream),0x10);
-
+  pos = stream_tell(demuxer->stream);
+  ds_read_packet(ds,demuxer->stream,imgsize,(pos/imgsize)*sh->frametime,pos,0x10);
   return 1;
 }
 
@@ -118,9 +119,11 @@ void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     pos += ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
   else
     pos += (rel_seek_secs*sh_video->i_bps);
-
+  if(pos < 0) pos = 0;
+  if(demuxer->movi_end && pos > demuxer->movi_end) pos = (demuxer->movi_end-imgsize);
   pos/=imgsize;
   stream_seek(s,pos*imgsize);
-  sh_video->timer=pos * sh_video->frametime;
+  //sh_video->timer=pos * sh_video->frametime;
+  demuxer->video->pts = pos * sh_video->frametime;
 //  printf("demux_rawvideo: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
