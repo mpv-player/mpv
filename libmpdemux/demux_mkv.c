@@ -2900,7 +2900,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   num = ebml_read_vlen_uint (block, &tmp);
   block += tmp;
   /* time (relative to cluster time) */
-  time = be2me_16 (* (int16_t *) block);
+  time = block[0] << 8 | block[1];
   block += 2;
   length -= tmp + 2;
   old_length = length;
