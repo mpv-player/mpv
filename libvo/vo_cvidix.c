@@ -47,7 +47,7 @@ static vidix_grkey_t gr_key;
 static uint32_t setup_vidix(){
   int x=vo_dx,y=vo_dy;
   aspect(&vo_dwidth,&vo_dheight,vo_fs ? A_ZOOM : A_NOZOOM);  
-  if(!vo_geometry || vo_fs){
+  if(vo_fs){
     if(vo_dwidth <= vo_screenwidth)x = (vo_screenwidth - vo_dwidth)/2;
     else x=0;
     if(vo_dheight <= vo_screenheight)y = (vo_screenheight - vo_dheight)/2;
