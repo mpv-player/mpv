@@ -222,6 +222,7 @@ Video output:
   --enable-svga          build with SVGAlib support [autodetect]
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
+  --enable-caca          build with CACA render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
   --enable-directx       build with DirectX support [autodetect]
   --enable-dxr2          build with DXR2 render support [autodetect]
@@ -1137,6 +1138,7 @@ _gif=auto
 _gl=auto
 _ggi=auto
 _aa=auto
+_caca=auto
 _svga=auto
 _vesa=auto
 _fbdev=auto
@@ -1283,6 +1285,8 @@ for ac_option do
   --disable-ggi)	_ggi=no		;;
   --enable-aa)		_aa=yes		;;
   --disable-aa)		_aa=no		;;
+  --enable-caca)	_caca=yes	;;
+  --disable-caca)	_caca=no	;;
   --enable-svga)	_svga=yes	;;
   --disable-svga)	_svga=no	;;
   --enable-vesa)	_vesa=yes	;;
@@ -3292,6 +3296,26 @@ else
   _novomodules="aa $_novomodules"
 fi
 echores "$_aa"
+
+echocheck "CACA"
+if test "$_caca" = auto ; then
+  cat > $TMPC << EOF
+#include <caca.h>
+int main(void) { (void) caca_init(); return 0; }
+EOF
+  _caca=no
+  cc_check `caca-config --libs` && _caca=yes
+fi
+if test "$_caca" = yes ; then
+  _def_caca='#define HAVE_CACA 1'
+  _ld_caca=`caca-config --libs`
+  _vosrc="$_vosrc vo_caca.c"
+  _vomodules="caca $_vomodules"
+else
+  _def_caca='#undef HAVE_CACA'
+  _novomodules="caca $_novomodules"
+fi
+echores "$_caca"
 
 
 echocheck "SVGAlib"
@@ -5901,6 +5925,7 @@ GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
+CACA_LIB = $_ld_caca
 
 # audio output
 ALSA_LIB = $_ld_alsa
@@ -6534,6 +6559,7 @@ $_def_svga
 $_def_vesa
 $_def_xdpms
 $_def_aa
+$_def_caca
 $_def_tga
 
 /* used by GUI: */

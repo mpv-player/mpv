@@ -83,6 +83,7 @@ extern vo_functions_t video_out_svga;
 extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
+extern vo_functions_t video_out_caca;
 extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_yuv4mpeg;
 #ifdef HAVE_DIRECTX
@@ -180,6 +181,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_AA
 	&video_out_aa,
+#endif
+#ifdef HAVE_CACA
+	&video_out_caca,
 #endif
 #ifdef HAVE_DXR2
 	&video_out_dxr2,
