@@ -561,7 +561,7 @@ int vf_config_wrapper(struct vf_instance_s* vf,
         if ((vf->fmt.orig_width != width)
 	    || (vf->fmt.orig_height != height)
 	    || (vf->fmt.orig_fmt != outfmt)) {
-            mp_msg(MSGT_VFILTER,MSGL_FATAL,MSGTR_ResolutionDoesntMatch);
+            mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_ResolutionDoesntMatch);
             return 0;
         }
         return 1;
@@ -570,7 +570,7 @@ int vf_config_wrapper(struct vf_instance_s* vf,
     vf->fmt.orig_height = height;
     vf->fmt.orig_width = width;
     vf->fmt.orig_fmt = outfmt;
-    vf->config(vf, width, height, d_width, d_height, flags, outfmt);
+    return vf->config(vf, width, height, d_width, d_height, flags, outfmt);
 }
 
 int vf_next_config(struct vf_instance_s* vf,
