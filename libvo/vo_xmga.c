@@ -257,6 +257,17 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
     {
      wndWidth=vo_screenwidth;
      wndHeight=vo_screenheight;
+#ifdef X11_FULLSCREEN
+     d_height=(int)((float)vo_screenwidth/(float)dwidth*(float)dheight);
+     d_height+=d_height%2; // round
+     d_width=vo_screenwidth;
+     if(dheight>vo_screenheight){
+       d_width=(int)((float)vo_screenheight/(float)dheight*(float)dwidth);
+       d_width+=d_width%2; // round
+       d_height=vo_screenheight;
+     }
+     dwidth=d_width; dheight=d_height;
+#endif
     }
 
    XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
