@@ -199,6 +199,7 @@ Michael Niedermayer <michaelni@gmx.at>
     * runtime CPU detection
     * SSE optimization of liba52
     * various encoder/decoder fixes, improvements in libavcodec, DR support
+    * various video filters, like il, swapuv, boxblur
 
 Sven Goethel <sgoethel@jausoft.com>
     * libvo driver: vo_gl2
@@ -313,7 +314,8 @@ Diego Biurrun <diego@biurrun.de>
 
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
-	* windows waveout AO driver
+    * windows waveout AO driver
+    * quicktime audio decoding (using win32 DLLs) support
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
@@ -329,6 +331,7 @@ Kees Cook <mplayer@outflux.net>
 
 Hampa Hug <hhug@student.ethz.ch>
     * LUT-based soft eq video filter (-vop eq2)
+    * .ogm demuxer endianess fixes
 
 Uwe Reder <Uwe.Reder@3SOFT.de>
     * various x11/vm/fs fixes
@@ -372,6 +375,26 @@ Gregory Kovriga <gkovriga@techunix.technion.ac.il>
     * GUI drag&drop support
     * GUI DVD fixes
     * various small bugfixes in ASX/URL parser
+
+Rémi Guyomarch <rguyom@pobox.com>
+    * various fixes
+    * 'unsharp' video filter
+
+Salvatore Falco <sfalco@studenti.ing.uniroma1.it>
+    * jacosub support
+    * overlapping subtitles supoprt
+
+Ville Syrjälä <syrjala@sci.fi>
+    * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
+
+Björn Sandell <biorn@dce.chalmers.se>
+    * various *BSD fixes
+    
+lucho <lucho@haemimont.bg>
+    * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
+
+Per Wigren <wigren@home.se>
+    * bmovl - Bitmap Overlay video filter
 
 
 NOTE: If you feel you were missed here, feel free to send a patch.

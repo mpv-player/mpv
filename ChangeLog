@@ -16,19 +16,29 @@ mplayer (0.90)
     * -vo zr fixes
     * fixed sig11 if vo init failed
     * various dxr2 and dxr3 fixes
-    * cleanup of postprocessing code - now it's threadsafe and can be shared
     * v4l buffering fixed
-    * now auto-inserting -vop lavc for mpeg-only vo's
+    * fixed multiple reads caused by byteswapping macro (mjpeg.c, mach64_vid.c)
+    * cleanup of postprocessing code - now it's threadsafe and can be shared
+    * ported to GNU/Hurd
     
     Features:
     * -ao win32 (for windows port)
-    * -vop 2xsai - 2x scaler for drawn images (low color cartoon anims)
     * libavcodec: native WMA v1/v2 (aka. DivX audio) decoder
-    * better deblocking filter (-vop pp), pp/npp syntax changed!
     * hw-accelerated video eq for -vo x11 and gl2, using DirectColor colormap
-    * -vop unsharp - an sharp/blur filter, nice, but very slow
     * overlapping subtitles support, jacosub (*.js) format support
     * dxr3 got a new syncengine, ':sync', read the manual for more info
+    * QDMC/QDM2 audio codec support, using quicktime 5 win32 DLLs (libwine!)
+    
+    Filters:
+    * -af/-af-adv options cleanup
+    * now auto-inserting -vop lavc for mpeg-only vo's
+    * video filter API documented :)
+    * better deblocking filter (-vop pp), pp/npp syntax changed!
+    * -vop 2xsai - 2x scaler for drawn images (low color cartoon anims)
+    * -vop unsharp - an sharp/blur filter, nice, but very slow
+    * -vop il - (de)interleave fields
+    * -vop swapuv - guess what :)
+    * -vop boxblur - box blur...
 
   pre9:
     Docs:
