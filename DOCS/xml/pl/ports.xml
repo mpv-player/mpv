@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.25 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
 <sect1 id="linux">
 <title>Linux</title>
 <para>
-Główną platformą rozwojową jest Linux x86, chociaż 
+Główną platformą rozwojową jest Linux x86, chociaż
 <application>MPlayer</application> pracuje również na wielu innych portach
 tego systemu. Pakiety binarne są dostępne z kilku źródeł, jednakże
 <emphasis role="bold">żaden z nich nie jest przez nas obsługiwany</emphasis>.
@@ -19,7 +19,7 @@ Zgłaszaj problemy do ich opiekunów, a nie do nas.
 Aby zbudować pakiet dla Debiana, wywołaj poniższą komendę w katalogu ze źródłami 
 MPlayera:
 <screen>fakeroot debian/rules binary</screen>
-Jako superużytkownik możesz zainstalować pakiet <filename>.deb</filename> tak jak zwykle:
+Jako superużytkownik możesz zainstalować pakiet <filename>.deb</filename> tak, jak zwykle:
 <screen>dpkg -i ../mplayer_<replaceable>wersja</replaceable>.deb</screen>
 </para>
 
@@ -40,8 +40,9 @@ Dominik Mierzejewski tworzy i opiekuje się oficjalnymi pakietami
 
 <para>
 RPMy dla Mandrake są dostępne na <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE zawiera okrojoną wersję MPlayera w dystrybucji. W pełni funkcjonalne pakiety możesz
-pobrać z <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
+SuSE zawierał okrojoną wersję MPlayera w dystrybucji. Usunęli ją w swoich
+najnowszych wydaniach. W pełni funkcjonalne pakiety możesz pobrać z 
+<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
@@ -154,7 +155,7 @@ które nie mogą być skompilowane przy pomocy assemblera Sun <filename>/usr/ccs/bi
 
 <para>Skrypt <filename>configure</filename> stara się określić, jaki assembler
 wywoływany jest przez komendę &quot;gcc&quot; (jeżeli próba zakończy się fiaskiem,
-użyj opcji <option>--as=/gdziekolwiek/zainstalowałeś/gnu-as</option>, żeby określić 
+użyj opcji <option>--as=/gdziekolwiek/zainstalowałeś/gnu-as</option>, żeby określić
 gdzie skrypt <filename>configure</filename> może znaleźć GNU "as" w Twoim
 systemie).
 </para>
@@ -192,10 +193,10 @@ o pojemności większej niż 4 GB:
 
 <itemizedlist>
 <listitem><para>
-Sterownik sd(7D) dla Solarisa 8 x86 ma błąd przy próbie dostępu do bloku dyskowego >4GB
-urządzenia korzystającego z logicznego rozmiaru bloku !=DEV_BSIZE (np. nośnik CD-ROM
-i DVD). Ze względu na przepełnienie liczb całkowitych 32bitowych, odczytywany jest
-adres dysku modulo 4GB
+Sterownik sd(7D) dla Solarisa 8 x86 ma błąd ujawniający się przy próbie dostępu do 
+bloku dyskowego >4GB urządzenia korzystającego z logicznego rozmiaru bloku !=DEV_BSIZE
+(np. nośnik CD-ROM i DVD). Ze względu na przepełnienie 32bitowych liczb całkowitych,
+odczytywany jest adres dysku modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
 Ten problem nie występuje na Solarisie 8 przeznaczonym dla procesorów SPARC.
 </para></listitem>
@@ -223,7 +224,7 @@ przestrzeni kolorów w sterownikach wyjściowych video.
 </para>
 </sect1>
 
-<sect1 id="sgi">
+<sect1 id="irix">
 <title>Silicon Graphics Irix</title>
 <para>
 Możesz albo spróbować zainstalować program GNU install i (jeżeli nie
@@ -246,7 +247,7 @@ na:
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-A potem wykonaj (z katalogu źródłowego MPlayera):
+A potem wykonaj (w katalogu źródłowym MPlayera):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 i dalej skompiluj i zainstaluj.
 </para>
@@ -281,8 +282,7 @@ wolna. Używaj SDL.
 
 <para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX 
   (<option>-vo directx</option>) i rdzennym wyjściem dźwiękowym wave Windows
-  <!-- Torinthiel: windows albo windowsów - niech się liczba zgadza -->
-  (<option>-ao win32</option>), jako że OpenGL nie działa, a SDL może zakłócać 
+  (<option>-ao win32</option>), jako że OpenGL nie działa, a SDL może zakłócać
   dźwięk i obraz albo wywołać błąd i zamknąć się na niektórych systemach. 
   Możesz ustawić tak okno z filmem, aby pozostawało na wierzchu przez opcję
   <option>-vo directx:ontop</option>. Jeżeli występują zakłócenia obrazu, spróbuj
@@ -380,7 +380,7 @@ wolna. Używaj SDL.
 <title>Mac OS</title>
 <para>
 "Surowe" źródła <application>MPlayera</application> obsługują
-tylko Mac OS X w wersjach 10.2 i wyżej. Możesz spróbować umożliwić
+tylko Mac OS X w wersjach 10.2 i wyższych. Możesz spróbować umożliwić
 obsługę starszych wersji Mac OS oraz przysłać nam łaty!
 </para>
 
