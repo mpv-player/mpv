@@ -70,9 +70,12 @@ static MatrixRecord matrix;
 static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
+extern int WinID;;
 extern int vo_ontop;
 extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
+
+int WinID = -1;
 
 static int winLevel = 1;
 int levelList[] =
@@ -569,6 +572,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		
 	if(vo_ontop)
 		window_ontop();
+		
+	if(WinID == 0)
+	{
+		vo_fs = TRUE;
+		winLevel = 0;
+		SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
+		window_fullscreen();
+	}
 	
 	return 0;
 }
