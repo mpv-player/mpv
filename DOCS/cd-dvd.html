@@ -87,7 +87,18 @@ downloaded, compiled and installed BEFORE you run ./configure script of
 <P><I>You can download them from
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
 (click 'download' in the menu at the left, and you can find libdvdcss and
-libdvdread in a table).</I></P></LI>
+libdvdread in a table).</I></P>
+
+<P><B><I>IMPORTANT !</I></B><BR>
+For
+<UL>
+  <LI>libdvdread 0.8 - you'll need <B>libcss</B> instead of libdvdcss</LI>
+  <LI>libdvdread 0.9 - you'll need <B>libdvdcss 0.0.3</B> ! Don't use newer
+    versions, they won't work!</LI>
+  <LI>For example <B><U>never</U></B> use libdvdcss <B>1.0</B>, it will be unusably slow!</LI>
+</UL>
+</P>
+</LI>
   
 <LI><P><B>Compile and install libdvdcss THEN libdvdread.</B></P>
     
@@ -128,6 +139,14 @@ machine.</P>
 <P><B><A NAME=4.3>4.3. DVD playback FAQ</A></B></P>
 
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Playing a DVD, I encountered this error :<BR>
+<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
+sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+This is a known libdvdread 0.9.1 bug, it should be already fixed in 0.9.2.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Can I compile libdvdread and libdvdcss for example on my sweet Sparc/Solaris?
