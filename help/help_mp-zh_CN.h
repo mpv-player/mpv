@@ -64,7 +64,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "创建config文件: %s\n"
 #define MSGTR_InvalidVOdriver "无效的视频输出驱动: %s\n用'-vo help' t查看可用的视频驱动的列表"
 #define MSGTR_InvalidAOdriver "无效的视频输出驱动: %s\n用'-vo help' t查看可用的视频驱动的列表"
-#define MSGTR_CopyCodecsConf "(把etc/codecs.conf(从MPlayer的源码树中)复制/链接 ~/.mplayer/codecs.conf)\n"
+#define MSGTR_CopyCodecsConf "(把etc/codecs.conf(从MPlayer的源代码中)复制/链接 ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "使用内建默认的codecs.conf\n"
 #define MSGTR_CantLoadFont "无法加载字体: %s\n"
 #define MSGTR_CantLoadSub "无法加载字幕: %s\n"
@@ -72,12 +72,12 @@ static char help_text[]=
 #define MSGTR_CmdlineDVDkey "DVD命令行要求的key被储存以用来解扰.\n"
 #define MSGTR_DVDauthOk "DVD授权序列似乎OK.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: 致命错误: 指定的流不存在!\n"
-#define MSGTR_CantOpenDumpfile "无法打开dump文件!!!\n"
+#define MSGTR_CantOpenDumpfile "无法打开dump文件.\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS在文件头中没有指定(或者是无效数据)! 用-fps选项!\n"
 #define MSGTR_TryForceAudioFmtStr "尝试指定音频解码器驱动族 %s ...\n"
 #define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频解码器, 只能使用其他驱动.\n"
-#define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器!\n"
+#define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器.\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "无法初始化音频解码器! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s ...\n"
@@ -91,20 +91,27 @@ static char help_text[]=
 "         ************************************************\n"\
 "         ****       你的系统太慢了，放不了这个！     ****\n"\
 "         ************************************************\n"\
-"!!! 可能的原因，问题，解决办法：\n"\
-"- 最普遍的原因：被损坏的/buggy的音频驱动。解决办法：试试-ao sdl或使用\n"\
-"  ALSA 0.5或ALSA 0.9的oss模拟。阅读DOCS/sound.html来寻找更多技巧！\n"\
-"- 视频输出太慢。试试不同的-vo驱动(-vo help有列表)或者试试\n"\
-"  使用-framedrop！阅读DOCS/video.html来寻找视频调整/提速的技巧。\n"\
-"- cpu太慢。不要试图在慢速cpu上播放大的dvd/divx! 试试-hardframedrop\n"\
-"- 被损坏的文件。试试下列选项的不同组合：-nobps  -ni  -mc 0  -forceidx\n"\
-"- 你使用-cache选项播放一个非交错的文件？试试使用-nocache\n"\
+" 可能的原因，问题，解决办法：\n"\
+"- 最普遍的原因：损坏的或有bug的_音频_驱动\n"\
+"  - 试试-ao sdl或使用 ALSA 0.5或ALSA 0.9的oss模拟。\n"\
+"  - 试试不同的-autosync的值，不妨从30开始。\n"\
+"- 视频输出太慢\n"\
+"  - 试试不同的-vo driver(-vo help有列表)或者试试-framedrop！\n"\
+"- cpu太慢\n"\
+"  - 不要试图在慢速cpu上播放大的dvd/divx! 试试-hardframedrop。\n"\
+"- 损坏的文件\n"\
+"  - 试试下列选项的不同组合：-nobps  -ni  -mc 0  -forceidx\n"\
+"- Slow media (NFS/SMB mounts, DVD, VCD etc)\n"\
+"  - 试试 -cache 8192。\n"\
+"- 你使用-cache选项播放一个非交错的avi文件？\n"\
+"  - 试试-nocache\n"\
+"阅读DOCS/video.html和DOCS/sound.html来寻找调整/加速的技巧。\n"\
 "如果这些一个都用不上，阅读DOCS/bugreports.html！\n\n"
 
 #define MSGTR_NoGui "Mplayer没有编译GUI的支持!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI需要X11!\n"
 #define MSGTR_Playing "播放 %s\n"
-#define MSGTR_NoSound "音频: no sound!!!\n"
+#define MSGTR_NoSound "音频: no sound\n"
 #define MSGTR_FPSforced "FPS指定为 %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "编译实时CPU检测 - 警告, 这不是最佳选择! 如果你想获得最佳的表现, 加上--disable-runtime-cpudetection选项重新编译mplayer\n"
 #define MSGTR_CompiledWithCPUExtensions "针对有扩展指令集x86 CPU编译:"
@@ -124,13 +131,13 @@ static char help_text[]=
 #define MSGTR_ForcedAudioCodec "指定的音频解码器: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: 描述: %s\nAO: 作者: %s\n"
 #define MSGTR_AOComment "AO: 备注: %s\n"
-#define MSGTR_Video_NoVideo "视频: no video!!!\n"
+#define MSGTR_Video_NoVideo "视频: no video\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命错误: 无法初始化视频插件(-vop)或视频输出(-vo) !\n"
 #define MSGTR_Paused "\n================= 暂停 =================\r"
 #define MSGTR_PlaylistLoadUnable "\n无法装载播放列表 %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- “非法指令”导致MPlayer崩溃。\n"\
-"  这可能是我们新的运行时cpu检测代码的一个bug...\n"\
+"  这可能是我们新的运行时CPU检测代码的一个bug...\n"\
 "  请阅读DOCS/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
 "- “非法指令”导致MPlayer崩溃。\n"\
@@ -139,7 +146,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- 过度使用CPU/FPU/RAM导致MPlayer崩溃.\n"\
 "  使用--enable-debug重新编译MPlayer用“gdb”backtrace和\n"\
-"  反汇编。具体细节看DOCS/bugreports.html section 5.b.\n"
+"  反汇编。具体细节看DOCS/bugreports.html#crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer崩溃了。这不应该发生。\n"\
 "  这可能是MPlayer代码中的 _或者_ 你的驱动中的 _or_ 你的gcc的\n"\
@@ -163,8 +170,8 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "无法打开编码器\n"
 #define MSGTR_ForcingOutputFourcc "指定输出的fourcc为 %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "正在写AVI文件头...\n"
-#define MSGTR_DuplicateFrames "\n已复制 %d 帧!!!    \n"
-#define MSGTR_SkipFrame "\n跳过这一帧!!!    \n"
+#define MSGTR_DuplicateFrames "\n已复制 %d 帧!\n"
+#define MSGTR_SkipFrame "\n跳过这一帧!\n"
 #define MSGTR_ErrorWritingFile "%s: 写入文件错误.\n"
 #define MSGTR_WritingAVIIndex "\n正在写AVI索引...\n"
 #define MSGTR_FixupAVIHeader "修复AVI文件头...\n"
@@ -246,21 +253,21 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD成功打开!\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "警告! 音频流头部 %d 被重新定义!\n"
-#define MSGTR_VideoStreamRedefined "警告! 视频流头部 %d 被重新定义!\n"
+#define MSGTR_AudioStreamRedefined "警告! 音频流头部 %d 被重新定义.\n"
+#define MSGTR_VideoStreamRedefined "警告! 视频流头部 %d 被重新定义.\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: buffer中音频包太多(%d in %d bytes) !\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: buffer中视频包太多(%d in %d bytes) !\n"
 #define MSGTR_MaybeNI "(也许你播放了一个非交错的流/文件或者是解码失败)?\n" \
-		      "对于.AVI文件, 尝试用-ni选项指定非交错模式\n"
-#define MSGTR_SwitchToNi "\n检测到糟糕的交错格式的.AVI - 切换到-ni模式!\n"
-#define MSGTR_Detected_XXX_FileFormat "检测到%s文件格式!\n"
+		      "对于AVI文件, 尝试用-ni选项指定非交错模式.\n"
+#define MSGTR_SwitchToNi "\n检测到糟糕的交错格式的AVI - 切换到-ni模式...\n"
+#define MSGTR_Detected_XXX_FileFormat "检测到%s文件格式。\n"
 #define MSGTR_DetectedAudiofile "检测到音频文件!\n"
 #define MSGTR_NotSystemStream "非MPEG系统的流格式... (可能是输送流?)\n"
 #define MSGTR_MissingMpegVideo "找不到MPEG视频流!? 联系作者, 这可能是个bug :(\n"
 #define MSGTR_InvalidMPEGES "无效的MPEG-ES流??? 联系作者, 这可能是个bug :(\n"
 #define MSGTR_FormatNotRecognized "============= 抱歉, 这种文件格式无法辨认或支持 ===============\n"\
 				  "=== 如果这个文件是一个AVI, ASF或MPEG流, 请联系作者! ===\n"
-#define MSGTR_MissingVideoStream "找不到视频流!\n"
+#define MSGTR_MissingVideoStream "找不到视频流. \n"
 #define MSGTR_MissingAudioStream "找不到音频流...  ->nosound\n"
 #define MSGTR_MissingVideoStreamBug "没有视频流!? 联系作者, 这可能是个bug :(\n"
 
@@ -272,15 +279,15 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "使用非交错的损坏的AVI文件格式!\n"
 #define MSGTR_CouldntDetFNo "无法决定帧数(用于绝对搜索)  \n"
-#define MSGTR_CantSeekRawAVI "无法在不完整的.AVI流中搜索! (需要索引, 尝试使用-idx 选项!)  \n"
-#define MSGTR_CantSeekFile "无法在这个文件中搜索!  \n"
+#define MSGTR_CantSeekRawAVI "无法在不完整的.AVI流中搜索. (需要索引, 尝试使用-idx 选项!)  \n"
+#define MSGTR_CantSeekFile "无法在这个文件中搜索.  \n"
 
-#define MSGTR_EncryptedVOB "加密的VOB文件(没有编译libcss支持)! 阅读DOCS/cd-dvd.html\n"
-#define MSGTR_EncryptedVOBauth "加密流但你没有要求使用授权!!\n"
+#define MSGTR_EncryptedVOB "加密的VOB文件(没有编译libcss支持)! 阅读DOCS/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOBauth "加密流但你没有要求使用授权!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: 压缩的文件头(目前)不支持!\n"
+#define MSGTR_MOVcomprhdr "MOV: 压缩的文件头(目前)不支持.\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告! 检测到可变的FOURCC!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: 警告! 太多轨道!"
+#define MSGTR_MOVtooManyTrk "MOV: 警告! 太多轨道."
 #define MSGTR_FoundAudioStream "==> 找到音频流: %d\n"
 #define MSGTR_FoundVideoStream "==> 找到视频流: %d\n"
 #define MSGTR_DetectedTV "检测到TV! ;-)\n"
@@ -294,6 +301,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s 已经显示\n!"
 #define MSGTR_ClipInfo "Clip info: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到渐进序列, 离开3:2 TELECINE模式\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到3:2 TELECINE, 启用反转telecine特效. FPS变为%5.3f!  \n"
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "无法打开解码器\n"
 #define MSGTR_CantCloseCodec "无法关闭解码器\n"
@@ -303,10 +312,10 @@ static char help_text[]=
 #define MSGTR_MissingLAVCcodec "在libavcodec中找不到解码器 '%s'...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: 致命错误: 搜索序列头时遇到EOF\n"
-#define MSGTR_CannotReadMpegSequHdr "致命错误: 无法读取序列头!\n"
-#define MSGTR_CannotReadMpegSequHdrEx "致命错误: 无法读取序列头扩展!\n"
-#define MSGTR_BadMpegSequHdr "MPEG: 糟糕的序列头!\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: 糟糕的序列头扩展!\n"
+#define MSGTR_CannotReadMpegSequHdr "致命错误: 无法读取序列头.\n"
+#define MSGTR_CannotReadMpegSequHdrEx "致命错误: 无法读取序列头扩展.\n"
+#define MSGTR_BadMpegSequHdr "MPEG: 糟糕的序列头.\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: 糟糕的序列头扩展.\n"
 
 #define MSGTR_ShMemAllocFail "无法分配共享内存\n"
 #define MSGTR_CantAllocAudioBuf "无法分配音频输出buffer\n"
@@ -315,9 +324,9 @@ static char help_text[]=
 
 #define MSGTR_UsingExternalPP "[PP] 使用外部的后处理插件, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] 使用解码器的后处理插件, max q = %d\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "所选的vo & vd不支持视频属性'%s'! \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "要求的视频解码器族 [%s] (vfm=%s) 不可用 (在编译时开启它!)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "要求的音频解码器族 [%s] (afm=%s) 不可用 (在编译时开启它!)\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "所选的vo & vd不支持视频属性'%s'. \n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "要求的视频解码器族 [%s] (vfm=%s) 不可用 (在编译时开启它)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "要求的音频解码器族 [%s] (afm=%s) 不可用 (在编译时开启它)\n"
 #define MSGTR_OpeningVideoDecoder "打开视频解码器: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "打开音频解码器: [%s] %s\n"
 #define MSGTR_UninitVideoStr "关闭视频: %s  \n"
@@ -391,6 +400,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] skin配置文件的 %d: %s行出错" 
 #define MSGTR_SKIN_WARNING1 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到\"section\" ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到 \"subsection\" ( %s) "
+#define MSGTR_SKIN_WARNING3 "[skin] 警告, 在skin配置文件的 %d行: 这个widget不支持这个subsection(%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "不支持少于16 bits色深的位图( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "找不到文件( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp读取错误( %s )\n"
@@ -507,6 +517,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "将所给字幕转换为基于时间的SubViewer(SRT) 格式"
 #define MSGTR_PREFERENCES_SUB_Overlap "开启字幕重叠"
 #define MSGTR_PREFERENCES_Font "字体:"
+#define MSGTR_PREFERENCES_Codecs "Codecs和demuxer"
 #define MSGTR_PREFERENCES_FontFactor "字体效果:"
 #define MSGTR_PREFERENCES_PostProcess "开启后期处理"
 #define MSGTR_PREFERENCES_AutoQuality "自动控制质量: "
@@ -518,7 +529,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Subtitle "字幕"
 #define MSGTR_PREFERENCES_FRAME_Font "字体"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "后期处理"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec和demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "缓存"
 #define MSGTR_PREFERENCES_FRAME_Misc "其他"
 #define MSGTR_PREFERENCES_OSS_Device "设备:"
@@ -562,9 +573,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
 #define MSGTR_PREFERENCES_CacheSize "缓存大小: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "停用XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "使用播放条"
 #define MSGTR_PREFERENCES_AutoSync "自同步 打开/关闭"
 #define MSGTR_PREFERENCES_AutoSyncValue "自同步: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-Rom设备:"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM设备:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD设备:"
 
 // --- messagebox
