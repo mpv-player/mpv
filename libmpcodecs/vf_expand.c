@@ -54,15 +54,15 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>1);
 	    mpi->planes[2]=vf->priv->dmpi->planes[2]+
 		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>1);
-	    mpi->stride[0]=vf->priv->dmpi->stride[0];
 	    mpi->stride[1]=vf->priv->dmpi->stride[1];
 	    mpi->stride[2]=vf->priv->dmpi->stride[2];
 	} else {
 	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
 		vf->priv->exp_y*vf->priv->dmpi->stride[0]+
 		vf->priv->exp_x*(vf->priv->dmpi->bpp/8);
-	    mpi->stride[0]=vf->priv->dmpi->stride[0];
 	}
+	mpi->stride[0]=vf->priv->dmpi->stride[0];
+	mpi->width=vf->priv->dmpi->width;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
     }
 }
