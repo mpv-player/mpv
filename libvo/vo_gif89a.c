@@ -79,7 +79,7 @@ static uint32_t config
 	case IMGFMT_RGB24:
 	break;     
 	case IMGFMT_YV12:
-	     yuv2rgb_init(24, MODE_RGB);
+	     yuv2rgb_init(24, MODE_BGR);
 	     image_data = malloc(image_width*image_height*3);
 	break;
 	default:

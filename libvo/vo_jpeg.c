@@ -191,17 +191,6 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
-  // hack: swap planes for I420 ;) -- alex 
- if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
-  {
-   uint8_t *src_i420[3];
-    
-   src_i420[0]=src[0];
-   src_i420[1]=src[2];
-   src_i420[2]=src[1];
-   src=src_i420;
-  }
-
  if (scale_srcW) 
   {
    uint8_t *dst[3]={image_data, NULL, NULL};
