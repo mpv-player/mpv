@@ -1469,6 +1469,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 					vo_fs=1;
 					ShowWindow(hWndFS,SW_SHOW);
 					ShowWindow(hWnd,SW_HIDE);
+					SetForegroundWindow(hWndFS);
 				}
                 else
 				{
