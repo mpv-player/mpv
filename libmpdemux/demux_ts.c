@@ -92,7 +92,6 @@ typedef struct {
 	demux_stream_t *ds;
 	demux_packet_t *pack;
 	int offset, buffer_size;
-	int broken; //set if it's the final part of a chunk (doesn't have a corresponding is_start)
 } av_fifo_t;
 
 typedef struct {
@@ -710,7 +709,6 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	{
 		priv->fifo[i].pack  = NULL;
 		priv->fifo[i].offset = 0;
-		priv->fifo[i].broken = 1;
 	}
 	priv->fifo[0].ds = demuxer->audio;
 	priv->fifo[1].ds = demuxer->video;
@@ -1037,7 +1035,6 @@ static void ts_dump_streams(ts_priv_t *priv)
 			priv->fifo[i].offset = 0;
 			priv->fifo[i].pack = NULL;
 		}
-		priv->fifo[i].broken = 1;
 	}
 }
 
@@ -1575,28 +1572,18 @@ static inline uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid)
 }
 
 
-static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **dp, int *dp_offset, int *broken)
+static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **dp, int *dp_offset)
 {
 	int ret = 0;
 
 	if((*dp != NULL) && (*dp_offset > 0))
 	{
-		if(*broken == 0)
-		{
 			ret = *dp_offset;
 			resize_demux_packet(*dp, ret);	//shrinked to the right size
 			ds_add_packet(ds, *dp);
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
 		}
-		else
-		{
-			ret = 0;
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "BROKEN PES, DISCARDING\n");
-			free_demux_packet(*dp);
-		}
-	}
 
-	*broken = 1;
 	*dp = NULL;
 	*dp_offset = 0;
 
@@ -1616,7 +1603,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	char *p, tmp[TS_FEC_PACKET_SIZE];
 	demux_stream_t *ds = NULL;
 	demux_packet_t **dp = NULL;
-	int *dp_offset = 0, *buffer_size = 0, *broken = NULL;
+	int *dp_offset = 0, *buffer_size = 0;
 	int32_t progid, pid_type, bad, ts_error;
 
 
@@ -1625,7 +1612,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		bad = ts_error = 0;
 		ds = (demux_stream_t*) NULL;
 		dp = (demux_packet_t **) NULL;
-		broken = dp_offset = buffer_size = NULL;
+		dp_offset = buffer_size = NULL;
 
 		buf_size = priv->ts.packet_size;
 
@@ -1750,7 +1737,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		else
 		{
 			progid = prog_id_in_pat(priv, pid);
-			if(((progid != -1) || (pid == 16)))
+			if(progid != -1)
 			{
 				if(pid != demuxer->video->id && pid != demuxer->audio->id && pid != demuxer->sub->id)
 				{
@@ -1759,7 +1746,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					continue;
 				}
 				else
-					mp_msg(MSGT_DEMUX, MSGL_ERR, "Argh! Data pid used in the PMT, Skipping PMT parsing!\n");
+					mp_msg(MSGT_DEMUX, MSGL_ERR, "Argh! Data pid %d used in the PMT, Skipping PMT parsing!\n", pid);
 			}
 		}
 
@@ -1786,7 +1773,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				dp = &priv->fifo[1].pack;
 				dp_offset = &priv->fifo[1].offset;
 				buffer_size = &priv->fifo[1].buffer_size;
-				broken = &priv->fifo[1].broken;
 			}
 			else if(is_audio && (demuxer->audio->id == tss->pid))
 			{
@@ -1795,7 +1781,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				dp = &priv->fifo[0].pack;
 				dp_offset = &priv->fifo[0].offset;
 				buffer_size = &priv->fifo[0].buffer_size;
-				broken = &priv->fifo[0].broken;
 			}
 			else if(is_sub
 				|| (pid_type == SPU_DVD) || (pid_type == SPU_DVB))
@@ -1842,7 +1827,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					dp = &priv->fifo[2].pack;
 					dp_offset = &priv->fifo[2].offset;
 					buffer_size = &priv->fifo[2].buffer_size;
-					broken = &priv->fifo[2].broken;
 				}
 				else
 				{
@@ -1859,7 +1843,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			//IS IT TIME TO QUEUE DATA to the dp_packet?
 			if(is_start && (dp != NULL))
 			{
-				retv = fill_packet(demuxer, ds, dp, dp_offset, broken);
+				retv = fill_packet(demuxer, ds, dp, dp_offset);
 			}
 
 
@@ -1916,7 +1900,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					return 1; //es->size;
 				else
 				{
-					*broken = 0;
 					if(es->size > 0)
 					{
 						if(*dp_offset + es->size > *buffer_size)
@@ -1937,6 +1920,12 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 						return retv;
 					else
 						continue;
+				}
+				
+				if(is_audio)
+				{
+					retv = fill_packet(demuxer, ds, dp, dp_offset);
+					return 1;
 				}
 			}
 			else
@@ -1998,6 +1987,12 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					stream_skip(stream, buf_size - sz);
 				}
 
+				if(is_audio)
+				{
+					retv = fill_packet(demuxer, ds, dp, dp_offset);
+					return 1;
+				}
+
 				continue;
 			}
 			else
@@ -2030,7 +2025,6 @@ static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
 			priv->fifo[0].pack = NULL;
 		}
 		priv->fifo[0].offset = 0;
-		priv->fifo[0].broken = 1;
 	}
 
 	if(v)
@@ -2041,7 +2035,6 @@ static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
 			priv->fifo[1].pack = NULL;
 		}
 		priv->fifo[1].offset = 0;
-		priv->fifo[1].broken = 1;
 	}
 
 	if(s)
@@ -2052,7 +2045,6 @@ static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
 			priv->fifo[2].pack = NULL;
 		}
 		priv->fifo[2].offset = 0;
-		priv->fifo[2].broken = 1;
 	}
 }
 
