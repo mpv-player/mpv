@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 #include "playtree.h"
 #include "mp_msg.h"
