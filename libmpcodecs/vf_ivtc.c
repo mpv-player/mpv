@@ -238,7 +238,8 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 #endif
 
 //#define MAG(a) ((a)*(a))
-#define MAG(a) (abs(a))
+//#define MAG(a) (abs(a))
+#define MAG(a) (((a)^((a)>>31))-((a)>>31))
 
 //#define LOWPASS(s) (((s)[-2] + 4*(s)[-1] + 6*(s)[0] + 4*(s)[1] + (s)[2])>>4)
 //#define LOWPASS(s) (((s)[-1] + 2*(s)[0] + (s)[1])>>2)
