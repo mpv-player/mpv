@@ -69,27 +69,13 @@ char * dvd_audio_stream_channels[6] =
 	{ "unknown", "stereo", "unknown", "unknown", "unknown", "5.1" };
 #endif
 
-extern int vcd_get_track_end(int fd,int track);
-
 #include "cue_read.h"
-
-#ifdef USE_TV
-#include "tv.h"
-extern char* tv_param_channel;
-#endif
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "dvbin.h"
 #endif
 
 
-
-#ifdef HAVE_CDDA
-stream_t* open_cdda(char* dev,char* track);
-#ifdef STREAMING
-stream_t* cddb_open(char* dev,char* track);
-#endif
-#endif
 
 // Define function about auth the libsmbclient library
 // FIXME: I really do not not is this function is properly working
@@ -135,9 +121,6 @@ stream_t* open_stream(char* filename,char** options, int* file_format){
 stream_t* stream=NULL;
 int f=-1;
 off_t len;
-#ifdef __FreeBSD__
-int bsize = VCD_SECTOR_SIZE;
-#endif
 *file_format = DEMUXER_TYPE_UNKNOWN;
 if(!filename) {
    mp_msg(MSGT_OPEN,MSGL_ERR,"NULL filename, report this bug\n");
@@ -483,31 +466,6 @@ if(strncmp("dvbin://",filename,8) == 0)
 }
 #endif
 
-
-
-
-//============ Check for TV-input or multi-file input ====
-  if( (strncmp("mf://",filename,5) == 0)
-#ifdef USE_TV
-   || (strncmp("tv://",filename,5) == 0)
-#endif
-  ){
-    /* create stream */
-    stream = new_stream(-1, STREAMTYPE_DUMMY);
-    if (!stream) return(NULL);
-    if(strncmp("mf://",filename,5) == 0) {
-      *file_format =  DEMUXER_TYPE_MF;
-#ifdef USE_TV
-     } else {
-      *file_format =  DEMUXER_TYPE_TV;
-      if(filename[5] != '\0')
-	tv_param_channel = strdup(filename + 5);
-#endif
-    }
-    stream->url= filename[5] != '\0' ? strdup(filename + 5) : NULL;
-    return(stream);
-  }
-  
 #ifdef STREAMING
 #ifdef STREAMING_LIVE_DOT_COM
   // Check for a SDP file:

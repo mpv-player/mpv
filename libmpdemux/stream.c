@@ -50,6 +50,7 @@ extern stream_info_t stream_info_cdda;
 #ifdef STREAMING
 extern stream_info_t stream_info_netstream;
 #endif
+extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
 
 stream_info_t* auto_open_streams[] = {
@@ -62,6 +63,7 @@ stream_info_t* auto_open_streams[] = {
 #ifdef STREAMING
   &stream_info_netstream,
 #endif
+  &stream_info_null,
   &stream_info_file,
   NULL
 };
