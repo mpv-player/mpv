@@ -1,4 +1,4 @@
-.\" MPlayer (C) 2000-2002 Arpad Gereoffy
+.\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" 
 .\" Run this to get a html version of the man page:
@@ -38,7 +38,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-12-28"
+.TH MPlayer 1 "2003-01-05"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -831,9 +831,17 @@ Turns off automatic loading of subtitle files.
 .B \-nooverlapsub
 Turns off support for overlapping subtitles.
 .TP
-.B \-osdlevel <0\-3> (MPLAYER only)
-Specifies which mode the OSD should start in (0: none, 1: seek, 2: seek+timer,
-3: seek+timer+total length, default is 1).
+.B \-osdlevel <0\-4> (MPLAYER only)
+Specifies which mode the OSD should start in.
+.RSss
+0: subtitles only
+.br
+1: volume + seek (default)
+.br
+2: volume + seek + timer + percentage
+.br
+3: volume + seek + timer + percentage + total time
+.REss
 .TP
 .B \-sid <id> (also see \-slang option)
 Turns on DVD subtitle displaying.
@@ -2662,11 +2670,11 @@ YV12: default
 .IPs qpel
 use quarter pel motion compensation
 .IPs precmp=<0\-2000>
-comparission function for motion estimation pre pass
+comparison function for motion estimation pre pass
 .IPs cmp=<0\-2000>
-comparission function for full pel motion estimation
+comparison function for full pel motion estimation
 .IPs subcmp=<0\-2000>
-comparission function for sub pel motion estimation
+comparison function for sub pel motion estimation
 .RSss
 0 (SAD): sum of absolute differences, fast (default)
 .br
