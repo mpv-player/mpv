@@ -58,7 +58,7 @@ Supported input formats:
 Supported audio codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~
 - PCM (uncompressed) audio (8/16 bit, mono/stereo)
-- MPEG layer 2/3 audio  (using mp3lib, based on mpg123)
+- MPEG layer 2/3 audio  (using mp3lib, based on mpg123 [www.mpg123.de])
 - AC3 audio             (using ac3dec/libac3)
 - Win32 ACM audio codecs (the *.ACM files)  [Only in the AVI player]
   tested with: DivX audio, MS-ADPCM
