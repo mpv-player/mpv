@@ -353,6 +353,14 @@ Rudolf Marek <MAREKR2@cs.felk.cvut.cz>
 Tilman Sauerbeck <tsauerbeck@users.sourceforge.net>
     * TGA decoder (rle/uncomp), -mf tga support
 
+Colin Leroy <colin@colino.net>
+    * gui endianness fixes
+    * volume control with -ao sdl
+    * mencoder -ovc lavc endianness fixes
+    * -ao pcm endianness fixes
+    * libdha on powerpc linux
+    * mach64 vidix driver endianness fixes
+
 NOTE: If you feel you were missed here, feel free to send a patch.
 =====
 
