@@ -47,7 +47,7 @@ static vidix_fourcc_t	  vidix_fourcc;
 
 extern vo_functions_t video_out_vesa;
 
-int vidix_preinit(const char *drvname)
+int vidix_preinit(const char *drvname,void *server)
 {
   int err;
   if(verbose > 1) printf("vosub_vidix: vidix_preinit(%s) was called\n",drvname);
@@ -72,10 +72,10 @@ int vidix_preinit(const char *drvname)
 	}
 	printf("vosub_vidix: Using: %s\n",vidix_cap.name);
 	/* we are able to tune up this stuff depend on fourcc format */
-	video_out_vesa.draw_slice=vidix_draw_slice;
-	video_out_vesa.draw_frame=vidix_draw_frame;
-	video_out_vesa.flip_page=vidix_flip_page;
-	video_out_vesa.draw_osd=vidix_draw_osd;
+	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
+	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
+	((vo_functions_t *)server)->flip_page=vidix_flip_page;
+	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
 	return 0;
 }
 
@@ -86,7 +86,12 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 {
   size_t i,awidth;
   int err;
-  if(verbose > 1) printf("vosub_vidix: vidix_init() was called\n");
+  if(verbose > 1)
+     printf("vosub_vidix: vidix_init() was called\n"
+    	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
+	    "format=%s dest_bpp=%u vid_w=%u vid_h=%u\n"
+	    ,src_width,src_height,x_org,y_org,dst_width,dst_height
+	    ,vo_format_name(format),dest_bpp,vid_w,vid_h);
 	if(vid_w > vidix_cap.maxwidth || vid_w < vidix_cap.minwidth ||
 	   vid_h > vidix_cap.maxheight || vid_h < vidix_cap.minheight)
 	{
