@@ -198,7 +198,7 @@ int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
     return 0;
 }
 
-int mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
+void mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
 {
   int n;
   n = 0;
@@ -260,20 +260,20 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
     }
   }
   
-  if(overscan=getbits(buf, n++, 1))
+  if((overscan=getbits(buf, n++, 1)))
     n++;
-  if(vsp_color=getbits(buf, n++, 1))
+  if((vsp_color=getbits(buf, n++, 1)))
   {
     n += 4;
     if(getbits(buf, n++, 1))
       n += 24;
   }
-  if(chroma=getbits(buf, n++, 1))
+  if((chroma=getbits(buf, n++, 1)))
   {
     read_golomb(buf, &n);
     read_golomb(buf, &n);
   }
-  if(timing=getbits(buf, n++, 1))
+  if((timing=getbits(buf, n++, 1)))
   {
     picture->timeinc_unit = (getbits(buf, n, 8) << 24) | (getbits(buf, n+8, 8) << 16) | (getbits(buf, n+16, 8) << 8) | getbits(buf, n+24, 8);
     n += 32;
