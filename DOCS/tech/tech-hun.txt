@@ -11,7 +11,7 @@ A program felépítése alapjaiban logikus, de eleg gányul van megirva :)
 A fõ modulok:
 
 1. streamer.c: ez az input, azaz ez olvassa a filet vagy VCD-t.
-   amit tudnia kell: megfelelõ bufferelés, seek, skip funkciók,
+   amit tudnia kell: megfelelõ sectoronkenti bufferelés, seek, skip funkciók,
 	 byte-onkénti ill. tetszõleges méretû blockonkénti olvasás.
 	 Egy stream (input device/file) leírására a stream_t struktura szolgál.
 	 
@@ -22,14 +22,40 @@ A fõ modulok:
 	 külön parser van, ezek a demux_*.c fileokban vannak.
 	 A hozza tartozo struktura a demuxer_t. osszesen egy demuxer van.
 	 
-2.a. demuxer stream, azaz ds. struct: demux_stream_t
-   minden egyes csatornahoz (a/v) tartozik egy ilyen.
-	 egyelore demuxer-enkent 2 ilyen lehet, egy a hanghoz es egy a kephez.
-	 
-2.b. demux_packet_t, azaz dp.
+2.a. demux_packet_t, azaz dp.
    ez egy darab chunk-ot (avi) vagy packet-et (asf,mpg) tartalmaz.
 	 memoriaban ezek lancolt listaban vannak, mivel kulonbozo meretuek.
 
+2.b. demuxer stream, azaz ds. struct: demux_stream_t
+   minden egyes csatornahoz (a/v) tartozik egy ilyen.
+	 ez tartalmazza a stream-hez tartozo packeteket (lasd. 2.a.)
+	 egyelore demuxer-enkent 2 ilyen lehet, egy a hanghoz es egy a kephez.
+
+2.c. stream header. 2 fele van (egyelore): sh_audio_t es sh_video_t
+   ez tartalmaz minden, a dekodolashoz szukseges parametert, igy az input
+   es output buffereket, kivalasztott codecet, fps/framerate stb adatokat.
+   Annyi van belole, ahany stream van a fileban tarolva. Lesz minimum egy
+   a videohoz, ha van hang akkor ahhoz is, de ha tobb audio/video stream
+   is van, akkor mindegyikhez lesz egy ilyen struct.
+   Ezeket avi/asf eseten a header alapjan tolti fel a header beolvaso,
+   mpeg eseten pedig a demux_mpg.c fogja letrehozni ha egy uj streamet
+   talal. Uj stream eseten ====> Found audio/video stream: <id>  jelenik meg.
+   
+   A kivalasztott stream header es a hozza tartozo demuxer stream kolcsonosen
+   hivatkoznak egymasra (ds->sh es sh->ds) az egyszerubb hasznalat miatt.
+   (igy a funkciotol fuggoen eleg vagy csak a ds vagy csak az sh atadasa)
+   
+   Pelda: van egy .asf fileunk, abban 6 db stream, ebbol 1 audio es 5 video.
+   A header beolvasasakor letre fog jonni 6 db sh struct, 1 audio es 5 video.
+   Amikor elkezdi olvasni a packeteket, az elso talalt audio es video streamet
+   kivalasztja, es ezekre allitja be a d_audio es d_video sh pointereit.
+   Igy kesobbiekben mar csak ezeket a streameket olvassa, a tobbit nem.
+   Persze ha az user masik streameket szeretne kivalasztani, akkor
+   force-olhatja a -aid es -vid kapcsolokkal.
+   Jo pelda erre a DVD, ahol nem mindig az angol szinkron hang az elso
+   megtalalt stream, es igy random minden vob mas nyelven szolalhat meg :)
+   Ilyenkor kell pl. az -aid 128 kaocsolot hasznalni.
+   
   hogy is muxik ez a beolvasosdi?
 	 - meghivodik a demuxer.c/demux_read_data(), megkapja melyik ds-bol
 	   (audio vagy video), mennyi byteot es hova (memoriacim) szeretnenk 
@@ -103,19 +129,74 @@ na nezzuk tovabb:
 4. codecek. ezek kulonbozo lib-ek szanaszet mindenfelol.
    mint pl. libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
 	 az mplayer.c hivogatja oket amikor egy egy darab hangot vagy framet
-	 kell lejatszani (lasd 3. pont elejen)
+	 kell lejatszani (lasd 3. pont elejen).
 	 ezek pedig hivjak a megfelelo demuxert hogy megkapjak a tomoritett
 	 adatokat (lasd 2. pont).
+	 parameterkent a megfelelo stream headert (sh_audio/sh_video) kell
+	 atadni, ez elvileg tartalmaz minden infot ami szukseges a
+	 dekodolashoz (tobbek kozott a demuxert is: sh->ds).
+   A codecek szeparalasa folyamatban van, az audio mar el van kulonitve
+   (lasd. dec_audio.c), a videon meg dolgozunk. Cel, hogy ne az mplayer.c
+   kelljen tudja milyen codecek vannak es hogy kell oket hasznalni, hanem
+   egy kozos init/decode audio/video functiont kelljen csak meghivnia.
 
-5. libvo: ez vegzi a kep kirakasat. jelenleg 2 kulonbozo kepkirako
-   van benne:
-5.a draw_slice(): ez planar YV12 kepet rak ki (3 db frame, egy teljes
-	 meretu ami a fenyerot tartalmazza, es 2 negyedakkora, ami a
-	 szin infot). ezt hasznaljak az mpeg codecek (libmpeg2,opendivx).
+5. libvo: ez vegzi a kep kirakasat.
+
+  Az img_format.h-ban definialva vannak konstansok a kulonbozo pixel-
+  formatumokhoz, ezeket kotelezo hasznalni.
+  
+  1-1 vo driver a kovetkezoket kell kotelezoen implementalja:
+
+  query_format()  - lekerdezi hogy egy adott pixelformat tamogatott-e.
+                    return value:  flags:
+		       0x1 - supported (by hardware or with conversion)
+		       0x2 - supported (by hardware, without conversion)
+		       0x4 - sub/osd supported (has draw_alpha)
+  FONTOS: minden vo driver kotelezo tamogassa az YV12 formatumot, es
+  egyiket (vagy mindkettot) a BGR15 es BGR24 kozul, ha kell, konvertalassal.
+  Ha ezeket nem tamogatja, akkor nem fog minden codec-kel mukodni!
+  Ennek az az oka, hogy az mpeg codecek csak YV12-t tudnak eloallitani,
+  a regebbi Win32 DLL codecek pedig csak 15 es 24bpp-t tudnak.
+  Van egy gyors MMX-es 15->16bpp konvertalo, igy az nem okoz kulonosebb
+  sebessegcsokkenest!
+  
+  A BPP tablazat, ha a driver nem tud bpp-t valtani:
+      jelenlegi bpp:    ezeket kell elfogadni:
+           15                    15
+	   16                    15,16
+	   24                    24
+	   24,32                 24,32
+
+  Ha tud bpp-t valtani (pl. DGA 2, fbdev, svgalib) akkor ha lehet, be kell
+  valtani a kert bpp-re. Ha azt a hardver nem tamogatja, akkor a legkozelebbi
+  modra (15 eseten 16-ra, 24 eseten 32-re) kell valtani es konvertalni!
+
+  init() - ez hivodik meg a legelso frame kirakasa elott - bufferek foglalasa
+           stb a celja.
+
+  draw_slice(): ez planar YV12 kepet rak ki (3 db plane, egy teljes
+	 meretu ami a fenyerot (Y) tartalmazza, es 2 negyedakkora, ami a
+	 szin (U,V) infot). ezt hasznaljak az mpeg codecek (libmpeg2,opendivx).
 	 ez mar tud olyat hogy nem az egesz kep kirakasa, hanem csak kis
 	 reszletek updatelese: ilyenkor a sarkanak es a darabka meretenek
 	 megadasaval lehet csinalni.
-5.b draw_frame(): ez a regebbi interface, ez csak komplett framet rak ki,
-   es csak packed formatumot (YUY2, RGB/BGR) tud.
+
+  draw_frame(): ez a regebbi interface, ez csak komplett framet rak ki,
+   es csak packed formatumot (YUY2 stb, RGB/BGR) tud.
 	 ezt hasznaljak a win32 codecek (divx,indeo stb).
 	 
+  draw_alpha(): ez rakja ki a subtitle-t es az OSD-t.
+   hasznalata kicsit cseles, mivel ez nem a libvo API resze, hanem egy
+   callback jellegu cucc. a flip_page() kell meghivja a vo_draw_text()-et
+   ugy, hogy parameterkent atadja a kepernyo mereteit es a pixelformatumnak
+   megfelelo draw_alpha() implementaciot (function pointer).
+   Ezutan a vo_draw_text() vegigmegy a kirajzolando karaktereken, es egyenkent
+   meghivja minden karakterre a draw_alpha()-t.
+   Segitseg keppen az osd.c-ben meg van irva a draw_alpha mindenfele
+   pixelformatumhoz, ha lehet ezt hasznald!
+   
+  flip_page(): ez meghivodik minden frame utan, ez kell tenylegesen
+   megjelenitse a buffert. double buffering eseten ez lesz a 'swapbuffers'.
+  
+
+
