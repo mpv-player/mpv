@@ -73,6 +73,7 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 	"pcmpeqb %%mm6, %%mm6\n\t" // F..F
 	::"m"(*dst),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=2){
+     if(srca[x] || srca[x+1])
 	asm volatile(
 		PREFETCHW" 32%0\n\t"
 		PREFETCH" 32%1\n\t"
@@ -174,6 +175,7 @@ PROFILE_START();
 	"pcmpeqb %%mm6, %%mm6\n\t" // F..F
 	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=2){
+     if(srca[x] || srca[x+1])
 	asm volatile(
 		PREFETCHW" 32%0\n\t"
 		PREFETCH" 32%1\n\t"
