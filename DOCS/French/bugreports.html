@@ -10,7 +10,7 @@
 <BODY>
 
 
-<H1><A NAME="B">Appendice C - Comment reporter un bogue</A></H1>
+<H1><A NAME="B">Appendice B - Comment reporter un bogue</A></H1>
 
 <P>Les bons rapports de bogue sont une contribution précieuse pour tout
   projet en développement. Mais tout comme pour écrire un bon logiciel, les bons
@@ -21,7 +21,7 @@
   que nous demandons et suivre de près les instructions de ce document.</P>
 
 
-<H2>Comment réparer les bogues</H2>
+<H2><A NAME="fix">B.1 Comment réparer les bogues</A></H2>
 
 <P>Si vous pensez avoir les talents nécessaires vous êtes invité à essayer de
   réparer le bogue vous-même. Ou peut-être l'avez-vous déjà fait ? Veuillez lire
@@ -31,14 +31,14 @@
   vous assisterons si vous avez des questions.</P>
 
 
-<H2>Comment rapporter les bogues</H2>
+<H2><A NAME="report">B.2 Comment rapporter les bogues</A></H2>
 
 <P>Tout d'abord veuillez essayer la dernière version CVS de MPlayer car votre bogue
   y est peut-être déjà réparé. Le développement évolue très rapidement, la plupart
   des problèmes des versions officielles sont rapportés dans les jours voir les 
   heures qui suivent, donc n'utilisez <B>que le CVS</B> pour rapporter les bogues.
   Les instructions CVS peuvent être trouvées en bas de 
-  <A HREF="documentation.html#known_bugs">cette page</A> ou dans le README. Si
+  <A HREF="http://www.mplayerhq.hu/homepage/dload.html">cette page</A> ou dans le README. Si
   tout cela ne vous aide pas veuillez vous référer à 
   <A HREF="documentation.html#known_bugs">la liste des bogues connus</A> et au
   reste de la documentation. Si votre problème n'est pas connu ou non résolvable
@@ -70,7 +70,7 @@
   problème ou même une réponse.</P>
 
 
-<H3>Où rapporter les bogues ?</H3>
+<H2><A NAME="where">B.3 Où rapporter les bogues</A></H2>
 
 <P>Souscrivez à la liste de diffusion mplayer-users:<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -83,14 +83,22 @@
   Vous ne serez qu'ignoré ou banni. Si vous ne savez pas ce qu'est un mail en HTML
   ou pourquoi c'est mauvais, lisez ce <A HREF="http://expita.com/nomime.html">
   sympatique document</A>. Il explique tous les détails et a des instructions pour
-  désactiver le HTML. Notez également que nous ne faisons pas de CC (copie-conforme)
+  désactiver le HTML. Notez également que nous ne ferons pas de CC (copie-conforme)
   individuelle et que c'est donc une bonne idée de souscrire pour recevoir votre
   réponse.</P>
 
 
-<H3>Que rapporter ?</H3>
+<H2><A NAME ="what">B.4 Que rapporter</A></H2>
 
-<H4>System Information:</H4>
+<P>Vous pouvez avoir besoin d'inclure des fichiers de log, de configuration ou 
+  d'échantillon. Si certains sont très gros alors il vaut mieux les uploader
+  sur notre <A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">serveur FTP</A> 
+  en format compressé (gzip et bzip2 préférés) et indiquer uniquement leur 
+  chemin et nom dans le rapport de bug. Nos listes de diffusion ont une taille 
+  de message limite de 80k, si vous avez quelque chose de plus gros vous devrez 
+  le compresser ou l'uploader.</P>
+
+<H3><A NAME="system">B.4.1 Information Système</A></H3>
 
 <UL>
   <LI>Votre distribution Linux ou système d'exploitation et version ex.:
@@ -115,7 +123,13 @@
       <LI>Type de gestionnaire de fenêtre et version</LI>
     </UL>
   </LI>
-  <LI>Si seule la GUI est boggué:
+  <LI>Si vous avez des problèmes avec XVIDIX:
+    <UL>
+      <LI>profondeur de couleur de X:<BR>
+          <CODE>xdpyinfo | grep "depth of root"</CODE></LI>
+    </UL>
+  </LI>
+  <LI>Si seule la GUI est boguée:
     <UL>
       <LI>Version de GTK</LI>
       <LI>Version de GLIB</LI>
@@ -126,7 +140,7 @@
 </UL>
 
 
-<H4>Matériel &amp; pilotes:</H4>
+<H3><A NAME="hardware">B.4.2 Matériel et pilotes</A></H3>
 
 <UL>
   <LI>info CPU (cela ne fonctionne que sous Linux):<BR>
@@ -147,7 +161,7 @@
   </LI>
   <LI>Type et version des drivers son, ex.:
     <UL>
-      <LI>Creative SBLive! Gold with OSS driver from oss.creative.com</LI>
+      <LI>Creative SBLive! Gold avec pilote OSS de oss.creative.com</LI>
       <LI>Creative SB16 avec pilotes noyau OSS</LI>
       <LI>GUS PnP avec émulation OSS ALSA</LI>
     </UL>
@@ -157,7 +171,7 @@
 </UL>
 
 
-<H4>En cas de problème/erreur de compilation:</H4>
+<H3><A NAME="compilation">B.4.3 Problèmes de compilation:</H3>
 
 Veuillez inclure ces fichiers:
 
@@ -175,11 +189,11 @@ Uniquement si la compilation échoue à partir d'un de ces répertoires, incluez ce
 </UL>
 
 
-<H4>Pour les problème de configure</H4>
+<H3><A NAME="configure">B.4.4 Problèmes de configure</A></H3>
 
 Incluez <CODE>configure.log</CODE>.
 
-<H4>Pour les problèmes de lecture</H4>
+<H3><A NAME="playback">B.4.5 Pour les problèmes de lecture</A></H3>
 
 <P>Merci d'inclure la sortie de MPlayer en verbosité niveau 1, mais rappelez-vous
   de <B>ne pas tronquer la sortie</B> en le copiant dans votre mail. Les développeurs
@@ -196,8 +210,8 @@ Incluez <CODE>configure.log</CODE>.
 <P>Uploadez aussi un petit fichier texte ayant le même nom que votre fichier mais
   avec une extension .txt. Décrivez le problème que vous avez avec ce fichier et
   incluez votre adresse e-mail ainsi que la sortie de MPlayer en verbosité niveau 1.
-  Généralement les premiers 1-5 MB sont suffisants pour reproduire le problème, 
-  mais pour être sur nous vous demandons de faire:</P>
+  Généralement les premiers 1-5 MB sont suffisants pour reproduire le problème,
+  mais pour être sûrs nous vous demandons de faire:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;dd if=votrefichier of=petitfichier bs=1024k count=5</CODE></P>
 
@@ -209,13 +223,14 @@ Incluez <CODE>configure.log</CODE>.
   téléchargement, envoyez seulement son adresse <STRONG>exacte</STRONG>.</P>
 
 
-<H4>Pour les plantages</H4>
+<H3><A NAME="crash">B.4.6 Plantages</A></H3>
 
 <P>Vous devez lancer MPlayer à l'intérieur de <CODE>gdb</CODE> et nous envoyer le résultat
   complet ou si vous avez un core dump du plantage vous pouvez extraire des informations
   utiles du fichier <CODE>Core</CODE>. Voici comment:</P>
 
-<H4>Comment conserver les informations avec un plantage reproduisible</H4>
+
+<H4><A NAME="debug">B.4.6.1 Comment conserver les informations avec un plantage reproduisible</A></H4>
 
 Recompilez MPlayer avec les instructions de déboguage:
 
@@ -234,10 +249,11 @@ et reproduisez votre plantage. Aussitôt que vous l'avez fait, gdb va vous
 renvoyer à la ligne de commande où vous devrez entrer
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;info all-registers</CODE></P>
 
 
-<H4>Comment extraire les informations significatives d'un core dump</H4>
+<H4><A NAME="core">B.4.6.2 Comment extraire les informations significatives d'un core dump</A></H4>
 
 <P>créez le fichier de commande suivant:</P>
 
@@ -249,16 +265,7 @@ renvoyer à la ligne de commande où vous devrez entrer
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=fichier_de_commande &gt; mplayer.bug</CODE></P>
 
 
-<H3>Note générale</H3>
-
-<P>Si quelque chose est très gros (les logs par exemple) alors il vaut mieux
-  l'uploader sur le serveur FTP en format compressé (gzip et bzip2 préférés) et
-  indiquer uniquement leur nom/adresse dans le rapport de bug. Nos listes de
-  diffusion ont une taille de message limite de 80k, si vous avez quelque chose
-  de plus gros vous devrez le compresser ou l'uploader.</P>
-
-
-<H2>Je sais ce que je fait...</H2>
+<H2><A NAME="advusers">B.5 Je sais ce que je fait...</A></H2>
 
 <P>Si vous avez créé un rapport de bogue correct en suivant les étapes ci-dessus
   et que vous êtes persuadé qu'il s'agit d'un bug dans MPlayer, pas un problème
