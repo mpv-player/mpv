@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "loader/wine/avifmt.h" // for mmioFOURCC macro
+#include "img_format.h"
 
 /* ------------------------------------------------------------------------
  * This function decodes a buffer containing a CYUV encoded frame.
@@ -50,7 +50,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				cur_U = *(ptr++);
 				cur_Y = (cur_U & 0x0f) << 4;
 				cur_U = cur_U & 0xf0;
-				if (format == mmioFOURCC('Y','U','Y','2'))
+				if (format == IMGFMT_YUY2)
 					{
 					*frame++ = cur_Y;
 					*frame++ = cur_U;
@@ -64,7 +64,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				cur_V = *(ptr++);
 				cur_Y = (cur_Y + delta_y_tbl[cur_V & 0x0f]) & 0xff;
 				cur_V = cur_V & 0xf0;
-				if (format == mmioFOURCC('Y','U','Y','2'))
+				if (format == IMGFMT_YUY2)
 					{
 					*frame++ = cur_Y;
 					*frame++ = cur_V;
@@ -80,7 +80,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				i = *(ptr++);
 				cur_U = (cur_U + delta_c_tbl[i >> 4]) & 0xff;
 				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				if (format == mmioFOURCC('Y','U','Y','2'))
+				if (format == IMGFMT_YUY2)
 					{
 					*frame++ = cur_Y;
 					*frame++ = cur_U;
@@ -94,7 +94,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				i = *(ptr++);
 				cur_V = (cur_V + delta_c_tbl[i >> 4]) & 0xff;
 				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				if (format == mmioFOURCC('Y','U','Y','2'))
+				if (format == IMGFMT_YUY2)
 					{
 					*frame++ = cur_Y;
 					*frame++ = cur_V;
@@ -108,7 +108,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 
 			i = *(ptr++);
 			cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-			if (format == mmioFOURCC('Y','U','Y','2'))
+			if (format == IMGFMT_YUY2)
 				{
 				*frame++ = cur_Y;
 				*frame++ = cur_U;
@@ -120,7 +120,7 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				}
 
 			cur_Y = (cur_Y + delta_y_tbl[i >> 4]) & 0xff;
-			if (format == mmioFOURCC('Y','U','Y','2'))
+			if (format == IMGFMT_YUY2)
 				{
 				*frame++ = cur_Y;
 				*frame++ = cur_V;
