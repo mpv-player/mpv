@@ -66,9 +66,9 @@ int xinerama_screen = 0;
 int xinerama_x = 0;
 int xinerama_y = 0;
 #endif
-
 #ifdef HAVE_XF86VM
 XF86VidModeModeInfo **vidmodes=NULL;
+XF86VidModeModeLine modeline;
 #endif
 
 void vo_hidecursor ( Display *disp , Window win )
@@ -214,6 +214,14 @@ int vo_init( void )
   XFree(screens);
   }
  else
+#endif
+#ifdef HAVE_XF86VM
+ {
+  int clock;
+  XF86VidModeGetModeLine( mDisplay,mScreen,&clock ,&modeline );
+  if ( !vo_screenwidth )  vo_screenwidth=modeline.hdisplay;
+  if ( !vo_screenheight ) vo_screenheight=modeline.vdisplay;
+ }
 #endif
  {
  if (! vo_screenwidth)
