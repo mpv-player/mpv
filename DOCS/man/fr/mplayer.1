@@ -1,4 +1,4 @@
-.\" synced with 1.539
+.\" synced with 1.708
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "9 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "9 Août 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -4668,15 +4668,15 @@ L'option fd dit au filtre de toujours appliquer la décimation demandée
 .
 .TP
 .B \-audio-delay <0.0\-...>
-Initialise le champs de décalage audio dans l'entête.
+Définit le champ retard audio dans l'entête.
 La valeur par défaut est 0.0, les valeurs négatives ne fonctionnent pas.
-Cela ne décale pas l'audio pendant l'encodage, mais le lecteur verra le décalage
-audio par défaut, vous évitant l'utilisation de l'option \-delay.
+Cela ne retarde pas l'audio pendant l'encodage, mais le lecteur verra le
+décalage audio par défaut, vous évitant l'utilisation de l'option \-delay.
 .
 .TP
 .B \-audio-density <1\-50>
 Nombre de morceaux audio par seconde (par défaut\ : 2 pour des morceaux
-audio de 0.5s de long).
+audio de 0.5s de durée).
 .br
 .I NOTE:
 CBR uniquement, VBR l'ignore car il place chaque paquet dans un nouveau
@@ -4684,7 +4684,7 @@ morceau.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Initialise l'intervalle de temps du tampon audio (par défaut\ : 0.5s).
+Définit la durée du tampon audio (par défaut\ : 0.5s).
 .
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb)
@@ -4692,9 +4692,9 @@ Stoppe l'encodage à la position temps ou octet indiquée.
 .br
 .I NOTE:
 La position en octet ne sera pas précise, car on ne peut
-s'arrêter qu'à une limite de trame.
-
-.I EXEMPLE:
+s'arrêter qu'en limite de trame.
+.sp 1
+.I EXEMPLE\ :
 .PD 0
 .RSs
 .IPs "\-endpos 56"
@@ -4708,9 +4708,9 @@ N'encode que 100 Mo.
 .
 .TP
 .B \-ffourcc <fourcc>
-Peut être utilisé pour outrepasser le fourcc vidéo du fichier de destination.
-
-.I EXEMPLE:
+Peut être utilisé pour outrepasser le fourcc vidéo du fichier de sortie.
+.sp 1
+.I EXEMPLE\ :
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
@@ -4719,36 +4719,43 @@ Le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
 .PD 1
 .
 .TP
+.B \-force-avi-aspect <0.2\-3.0>
+Outrepasse le rapport hauteur/\:largeur inscrit dans l'en-tête AVI OpenDML
+vprp.
+Cela permet, avec \-ovc copy, de changer le hauteur/\:largeur d'un fichier
+existant
+.
+.TP
 .B \-info <option1:option2:...> (AVI uniquement)
-Spécifie l'entête d'info dans le fichier AVI de destination.
+Définit l'entête d'info dans le fichier AVI de destination.
 .sp 1
 Les options disponibles sont:
 .
 .RSs
-.IPs help
+.IPs help\ 
 Affiche cette description.
 .IPs name=<valeur>
-titre du sujet du fichier
+titre du film
 .IPs artist=<valeur>
-artiste ou auteur du sujet original du fichier
+artiste ou auteur du film
 .IPs genre=<valeur>
-catégorie de travail originale
+catégorie de genre du film
 .IPs subject=<valeur>
-contenu du fichier
+contenu du film
 .IPs copyright=<valeur>
-information de copyright du fichier
+information de copyright
 .IPs srcform=<valeur>
-forme originale du matériel qui a été numérisé
+forme originale de la vidéo qui a été numérisée
 .IPs comment=<valeur>
-commentaires généraux sur le fichier ou le sujet du fichier
+commentaires généraux sur le film
 .RE
 .
 .TP
 .B \-noautoexpand
 N'insère pas automatiquement le filtre expand dans la chaine de filtres de
 MEncoder.
-Utile pour contrôler à quel point de la chaine de filtre les sous-titres sont
-affichés durant leur insertion en dur dans le film.
+Utile pour contrôler à quel maillon de la chaîne de filtre les sous-titres
+sont affichés lors de leur incrustation dans l'image.
 .
 .TP
 .B \-noencodedups
@@ -4761,13 +4768,14 @@ Pour le moment, le seul filtre le permettant est harddup.
 .TP
 .B \-noodml (\-of avi uniquement)
 Ne pas écrire l'index OpenDML des fichier AVI >1Go.
+.
 .TP
 .B \-noskip
 Ne saute pas de trames.
 .
 .TP
 .B \-o <nomfichier>
-Envoie dans le nom fichier indiqué, au lieu de 'test.avi' par défaut.
+Écrit dans le fichier <nomfichier>, au lieu de 'test.avi' par défaut.
 .
 .TP
 .B \-oac <nom codec>
@@ -4795,8 +4803,8 @@ Encode avec un des codecs de libavcodec.
 Encode dans le format de conteneur donné (par défaut\ : AVI).
 .br
 .I NOTE\ :
-Utilisez \-of help pour obtenir une liste des formats de conteneur
-disponibles.
+Pour obtenir la liste complète des formats de conteneurs disponibles,
+voir \-of help.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -4814,8 +4822,7 @@ flux vidéo brut (pas de multiplexage - uniquement un flux vidéo)
 .B \-ofps <fps>
 Définit le rapport trame/\:sec (fps) du fichier de sortie,
 qui peut être différent de celui de la source.
-source.
-Vous devez l'initialiser pour les fichiers à fps variables
+Vous devez le définir pour les fichiers à fps variable
 (ASF, quelques MOV) et progressifs (MPEG téléciné à 29.97fps).
 .
 .TP
@@ -4823,19 +4830,18 @@ Vous devez l'initialiser pour les fichiers à fps variables
 Encode avec le codec vidéo indiqué (pas de valeur par défaut).
 .br
 .I NOTE\ :
-Utilisez \-ovc help pour avoir une liste des codecs disponibles.
+Pour obtenir la liste complète des codecs disponibles, voir \-ovc help.
 .sp 1
-.I EXEMPLE:
+.I EXEMPLE\ :
 .PD 0
 .RSs
 .IPs "\-ovc copy"
 pas d'encodage, juste une copie du flux
 .IPs "\-ovc divx4"
-Encode en DivX4/\:DivX5 ou XviD.
-.IPs "\-ovc rawrgb"
-encode en RGB24 non-compressé
-.IPs "\-ovc rawyuv"
-encode en YUV non-compressé (I420)
+Encode en DivX4/\:DivX5.
+.IPs "\-ovc raw"
+encode dans un format non-compressé arbitraire (que vous sélectionnez
+avec \-vf format).
 .IPs "\-ovc lavc"
 Encode avec un codec de libavcodec.
 .RE
@@ -4843,8 +4849,8 @@ Encode avec un codec de libavcodec.
 .
 .TP
 .B \-passlogfile <nomfichier>
-Envoie les informations de la première passe dans <nomfichier>
-au lieu de divx2pass.log par défaut.
+Envoie les informations de la première passe du mode deux passes dans
+<nomfichier> au lieu de ./divx2pass.log par défaut.
 .
 .TP
 .B \-skiplimit <valeur>
@@ -4855,7 +4861,12 @@ une trame (\-noskiplimit pour un nombre illimité).
 .B \-vobsubout <nomdebase>
 Définit le nomdebase pour les fichiers .idx et .sub de destination.
 Cela désactive le rendu des sous-titres dans le film encodé et le redirige
-vers les fichiers de sous-titre Vobsub.
+vers un groupe de fichiers de sous-titre VObsub.
+.
+.TP
+.B \-vobsuboutid <langid>
+Définit le code-langue à deux lettres pour les sous-titres.
+Ceci outrepasse ce qui est lu depuis le DVD ou le fichier .ifo.
 .
 .TP
 .B \-vobsuboutindex <index>
@@ -4863,19 +4874,15 @@ Définit l'index des sous-titres dans les fichiers de sortie
 (par défaut\ : 0).
 .
 .TP
-.B \-vobsuboutid <langid>
-Spécifie la le code de langue à deux lettres pour les sous-titres.
-Ceci outrepasse ce qui est lu depuis le DVD ou le fichier .ifo.
-.
-.TP
 .B \-vobsuboutindex <index>
 Spécifie l'index des sous-titres dans le fichiers de sortie.
 (par défaut\ : 0)
 .
 .
+.
 .SH "OPTIONS D'ENCODAGE SPÉCIFIQUES AUX CODECS (MENCODER UNIQUEMENT)"
-Vous pouvez spécifier les options d'encodage spécifiques aux codecs en utilisant
-la syntaxe suivante:
+Vous pouvez définir les options d'encodage spécifiques aux codecs en suivant
+la syntaxe ci-dessous\ :
 .
 .TP
 .B \-<codec>opts <option1[=valeur],option2,...>
@@ -4885,17 +4892,17 @@ Où <codec> peut être: lavc, xvidenc, divx4, lame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
-divx4 est obsolète est n'est géré que par soucis d'exhaustivité.
-Pour avoir des détails sur les options divx4, lisez les sources, la plupart des
-options ne sont pas documentées ici.
+DivX4 est obsolète et n'géré que par soucis d'exhaustivité.
+Pour avoir des détails sur les options DivX4, lisez les sources, la plupart
+des options ne sont pas documentées ici.
 .
 .TP
-.B help
+.B help\ \ \ 
 obtenir l'aide
 .
 .TP
 .B br=<valeur>
-spécifie le bitrate
+définit le débit binaire (bitrate)
 .IPs 4\-16000
 (en kbits)
 .IPs 16001\-24000000
@@ -4908,7 +4915,7 @@ intervalle maximal entre deux trames-clé (en trames)
 .
 .TP
 .B deinterlace
-active le désentrelacement (évitez de l'utiliser, DivX4 est boggué)
+active le désentrelacement (à éviter, DivX4 est boggué)
 .
 .TP
 .B q=<1\-5>
@@ -4948,14 +4955,14 @@ pass=2.
 .B vbrpass=<0\-2>
 Outrepasse l'argument \-pass et utilise la librairie VBR XviD au lieu
 du VBR DivX4.
-Les options par défaut sont:
+Les options disponibles sont\ :
 .
 .RSs
 .IPs 0
 encodage une passe (comme en ne mettant pas \-pass en ligne de commande)
 .IPs 1
 (Première) passe d'analyse de l'encodage deux passes.
-Le fichier AVI de destination peut être dirigé vers /dev/\:null.
+Le fichier AVI de destination peut être redirigé vers /dev/\:null.
 .IPs 2
 (Seconde) passe finale de l'encodage deux passes.
 .RE
@@ -4964,7 +4971,7 @@ Le fichier AVI de destination peut être dirigé vers /dev/\:null.
 .SS lame (\-lameopts)
 .
 .TP
-.B help
+.B help\ \ \ 
 afficher l'aide
 .
 .TP
@@ -4987,24 +4994,24 @@ mtrh
 .
 .TP
 .B abr\ \ \ \ 
-bitrate moyen
+bitrate moyen (ou plutôt, moyenné)
 .
 .TP
 .B cbr\ \ \ \ 
-constant bitrate.
+bitrate constant.
 Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant
 .
 .TP
 .B br=<0\-1024>
-spécifie le bitrate en kBit (CBR et ABR uniquement)
+Définit le bitrate en kBit (CBR et ABR uniquement)
 .
 .TP
 .B q=<0\-9>
-qualité (0\-plus haut, 9\-plus bas) (uniquement pour VBR)
+qualité (0\-meilleure, 9\-moins bonne) (VBR uniquement)
 .
 .TP
 .B aq=<0\-9>
-qualité algorithmique (0\-meilleur/\:plus lent, 9\-pire/\:plus rapide)
+qualité algorithmique (0\-meilleure/\:plus lent, 9\-pire/\:plus rapide)
 .
 .TP
 .B ratio=<1\-100>
@@ -5012,7 +5019,7 @@ rapport de compression
 .
 .TP
 .B vol=<0\-10>
-fixer le gain d'entrée audio
+fixe le gain d'entrée audio
 .
 .TP
 .B mode=<0\-3>
@@ -5045,22 +5052,22 @@ ajuste
 .
 .TP
 .B fast\ \ \ 
-passe au mode VBR pré-sélectionné suivant, plus rapide que l'actuel, qualité
-légèrement inférieure et bitrates plus hauts.
+Sélectionne le plus rapide des modes pré-sélectionnés VBR suivant,
+qualité légèrement inférieure et bitrates plus importants.
 .
 .TP
 .B highpassfreq=<fréq>
-Fixe la fréquence du filtre passe-haut en Hz.
-Les fréquences en dessous de celle spécifiée seront coupées.
-Une valeur de -1 désactivera le filtrage, une valeur de 0
-laissera LAME choisir la valeur automatiquement.
+Définit la fréquence du filtre passe-haut en Hz.
+Les fréquences en dessous de celle définie seront coupées.
+Une fréquence de -1 désactivera le filtrage, tandis que 0
+laissera LAME choisir la fréquence automatiquement.
 .
 .TP
 .B lowpassfreq=<fréq>
-Fixe la fréquence du filtre passe-bas en Hz.
-Les fréquences au dessus de celle spécifiée seront coupées.
-Une valeur de -1 désactivera le filtrage, une valeur de 0
-laissera LAME choisir la valeur automatiquement.
+Définit la fréquence du filtre passe-bas en Hz.
+Les fréquences au dessus de celle définie seront coupées.
+Une fréquence de -1 désactivera le filtrage, tandis que 0
+laissera LAME choisir la fréquence automatiquement.
 .
 .TP
 .B preset=<valeur>
@@ -5084,7 +5091,7 @@ encodage ABR au bitrate moyen indiqué.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-pour la plupart des gens et la plupart des musiques et déjà de très haute
+pour la plupart des gens et la plupart des musiques et déjà d'assez grande
 qualité.
 .IPs cbr:preset=192
 encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
@@ -5093,8 +5100,8 @@ encode avec les présélections ABR à un bitrate moyen de 172 kbps.
 .IPs preset=extreme
 pour les gens avec une oreille extrêmement bonne et un équipement en rapport.
 .IPs preset=help
-affiche les options supplémentaires et des informations sur les
-paramètres pré-sélectionnés.
+Affiche des options supplémentaires et des informations sur les
+paramètres de présélections.
 .RE
 .PD 1
 .
@@ -5112,7 +5119,7 @@ Pour avoir tous les détails lisez le source.
 .
 .TP
 .B acodec=<value>
-Codec audio (par défaut\ : mp2):
+Codec audio (par défaut\ : mp2)\ :
 .PD 0
 .RSs
 .IPs mp2
@@ -6245,7 +6252,7 @@ Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde si <16000 ou
 en bits/\:seconde
 si >16000.
 Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
-désirée pour la vidéo.  (CBR ou mode 2passes, défaut\ : 687 kbits/\:s)
+visée de la vidéo (CBR ou mode 2passes, défaut\ : 687 kbits/\:s).
 .
 .TP
 .B fixed_quant=<1\-31>
@@ -6258,15 +6265,20 @@ Plus cette valeur est grande et plus l'évaluation est fine et utilise
 judicieusement les bits.
 En revanche, cette plus grande finesse se paye par un temps d'encodage plus
 long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
-paramètre. (par défaut\ : 6)
+paramètre (par défaut\ : 6).
 .
 .TP
 .B interlacing
 Active la gestion des vidéos entrelacées.
-Ainsi vous n'avez pas besoin d'utiliser de filtre de désentrelacement.
+L'encodage se fera en tenant compte des champs de la vidéo entrelacée.
+.br
+.I NOTE\ :
+Si vous redimmensionnez la vidéo, vous devriez utiliser un filtre de
+redimentionnement adapté à ce genre de vidéo, ce qui se fait avec
+-vf scale=<largeur>:<hauteur>:1.
 .
 .TP
-.B 4mv
+.B 4mv\ \ \ \ 
 Utilise 4 vecteurs de mouvement par macro-bloc.
 Peut améliorer la compressibilité mais ralenti l'encodage.
 .I ATTENTION\ :
@@ -6293,17 +6305,23 @@ Taille du tampon de contrôle du débit.
 .
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
-mode CBR\ : quantificateur min & max pour toutes les trames (défaut\ : 2\-31)
+mode CBR\ : quantificateur min & max pour toutes les trames
+(par défaut\ : 2\-31)
 .br
-mode 2passes\ : quantificateur min & max pour trames I/\:P (défaut\ : 2\-31/\:2\-31)
+mode 2passes\ : quantificateur min & max pour trames I/\:P
+(par défaut\ : 2\-31/\:2\-31)
+.br
+.I ATTENTION\ :
+Cette option est dépassée avec XviD-1.0.x, où elle est remplacée par les
+options [min|max]_[i|p|b]quant.
 .
 .TP
 .B min_key_interval=<valeur>
-Intervalle minimum entre les trames-clés. (défaut\ : 0, 2passes uniquement)
+Intervalle minimum entre les trames-clés. (par défaut\ : 0, 2passes uniquement)
 .
 .TP
 .B max_key_interval=<valeur>
-intervalle maximum entre les trames-clé (défaut\ : 10*fps)
+intervalle maximum entre les trames-clé (par défaut\ : 10*fps)
 .
 .TP
 .B mpeg_quant
@@ -6314,6 +6332,9 @@ conserver plus de détails.
 image où les macro-blocs se verront moins.
 Si vous utilisez vos propres matrices de quantization, vous devez
 utiliser MPEG.
+.I ATTENTION\ :
+Cette option est dépassée avec XviD-1.0.x, où elle est remplacée par l'option
+quant_type.
 .
 .TP
 .B mod_quant
@@ -6322,19 +6343,9 @@ Décide  trame par trame d'utiliser ou non les quantificateurs MPEG ou H.263.
 Cette option génèrera un flux vidéo incompatible avec la norme MPEG4.
 Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
 (mode 2passes uniquement)
-.
-.TP
-.B greyscale
-Indique à XviD de ne pas enregistrer l'information de chroma pour que la
-vidéo produite ne soit qu'en noir & blanc.
-Notez que cela ne changera en rien le temps de compression, cela évitera juste
-d'avoir l'information de chroma présente dans le fichier vidéo.
-.
-.TP
-.B debug
-Sauve les statistiques par trames dans ./xvid.dbg.
 .br
-Ce n'est PAS le fichier de contrôle 2passes.
+.I ATTENTION\ :
+Cette options n'existe plus avec XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6344,7 +6355,7 @@ pour augmenter la qualité des trame-clés.
 .
 .TP
 .B kfthreshold=<valeur>
-(défaut\ = 10, mode 2passes uniquement)
+(défaut\ : 0, mode 2passes uniquement)
 .
 .TP
 .B kfreduction=<0\-100>
@@ -6353,15 +6364,29 @@ semblent trop proches l'une de l'autre.
 kfthreshold contrôle la réduction de la distance inter trame-clées et
 kfreduction contrôle leur réduction de débit binaire.
 La dernière trame-clé est traitée normalement.
-(défaut\ : 30, mode 2passes uniquement)
+(défaut\ : 0, mode 2passes uniquement)
+.
+.TP
+.B greyscale\ \ 
+Indique à XviD de ne pas enregistrer l'information de chroma pour que la
+vidéo produite ne soit qu'en noir & blanc.
+Notez que cela ne changera en rien le temps de compression, cela évitera juste
+d'avoir l'information de chroma présente dans le fichier vidéo.
+.
+.TP
+.B debug\ \ 
+Sauve les statistiques par trames dans ./xvid.dbg. (Ce n'est pas le
+fichier de contrôle 2passes).
 .RE
+.
 .PP
+.sp 1
 Les options suivantes ne sont disponibles que dans les dernières versions
 stables 1.0.x de XviD (api4).
 .
 .TP
-.B packed
-Crée un flux de bits pouvant être décodé sans décalage. (défaut\ = off)
+.B packed\ 
+Crée un flux de bits pouvant être décodé sans délais.
 .br
 .I ATTENTION\ :
 Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG4,
@@ -6373,10 +6398,46 @@ l'autodétection de bogues risque de ne pas fonctionner.
 .
 .TP
 .B divx5bvop
-Génère des trames B compatibles DivX5. (défaut\ : on)
+Génère des trames B compatibles DivX5. (par défaut\ : on)
 .
 .TP
-.B qpel
+.B max_bframes=<0\-4>
+Nombre maximum de trames B à insérer entre les trames I/\:P (par défaut\ : 0).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+rapport de quantificateur entre les trames B et non B, 150=1.50
+(par défaut\ : 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+fffset de quantificateur entre les trames B et non B, 100=1.00
+(par défaut\ : 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Parfois, les trames B dégradent l'image en introduisant des artefacts visuels
+lorsque par exemple une scène est globalement statique sauf une petite
+région en mouvement rapide.
+Cette option permet de changer la probabilité qu'une trame soit une trame B.
+Plus la valeur est haute, plus la probabilité que la trame générée soit
+une trame B est forte (par défaut\ : 0).
+.
+.TP
+.B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
+Cette option vous permet de créer les flux vidéo à débit de trame variable.
+Le paramètre définit un seuil en dessous duquel, si la différence
+entre la trame précédente et la suivante est plus grande ou égale à ce
+seuil, la trame n'est pas codée (une trame appelée n-vop se sera juste
+présente dans le flux).
+Lors de la lecture, la n-vop sera joué en affichant la trame précédente.
+.br
+.I ATTENTION\ :
+Une mauvaise utilisation de cette option peut produire des vidéo vraiment
+moches, soyez prévenus\ !
+.
+.TP
+.B qpel\ \ \ 
 MPEG4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
 Il est néanmoins possible de faire une recherche avec une précision d'un
 quart de pixel, ce qui permet généralement d'obtenir une image plus
@@ -6389,7 +6450,7 @@ de ne garder que celle qui vous paraît la plus fidèle (qui n'est pas
 forcément celle dont le PSNR est le plus élevé).
 .
 .TP
-.B gmc
+.B gmc\ \ \ \ 
 Active la Compensation de Mouvement Globale, ce qui permet à XviD d'engendrer
 des trames spéciales (trames GMC), particulièrement adaptées aux mouvements
 de travelling/\:zoom/\:rotation.
@@ -6411,6 +6472,16 @@ Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
 à-plats de couleurs que l'on trouve typiquement dans les dessins animés.
 .
 .TP
+.B quant_type=<h263|mpeg>
+Définit le type de quantificateur à utiliser.
+À débit binaire plutôt élevé (> 950kb), les quantificateurs MPEG ont tendance à
+conserver plus de détails.
+À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
+image où les macro-blocs se verront moins.
+Si vous utilisez vos propres matrices de quantization, vous devez
+utiliser la quantification MPEG.
+.
+.TP
 .B chroma_me
 Utilise l'information chroma en plus de la luma pour estimer le mouvement.
 L'efficacité de cette option dépend de la vidéo source.
@@ -6422,35 +6493,6 @@ Active un préfiltre d'optimisation chroma qui améliore la qualité
 de l'image, tout en dégradant sensiblement le PSNR et la vitesse d'encodage.
 Étant donné que cette option travaille sur l'information de chroma, vous
 pouvez désactiver cette option lors d'un encodage en noir et blanc.
-.
-.TP
-.B reduced
-Active l'encodage de trames en résolution réduite.
-.br
-.I ATTENTION\ :
-Cette option générera un flux vidéo incompatible avec la norme MPEG4.
-Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec XviD.
-.
-.TP
-.B max_bframes=<0\-4>
-Nombre maximum de trames B à insérer entre les trames I/\:P. (défaut\ : 0)
-.
-.TP
-.B bquant_ratio=<0\-1000>
-Rapport de quantificateur entre les trames B et non B, 150=1.50. (défaut\ : 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-Offset de quantificateur entre les trames B et non B, 100=1.00. (défaut\ : 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Parfois, les trames B dégradent l'image en introduisant des artefacts visuels
-lorsque par exemple une scène est globalement statique sauf une petite
-région en mouvement rapide.
-Cette option permet de changer la probabilité qu'une trame soit une trame B.
-Plus la valeur est haute, plus la probabilité que la trame générée soit
-une trame B est forte. (défaut\ : 0)
 .
 .TP
 .B hq_ac
@@ -6480,6 +6522,145 @@ recherche moyenne
 recherche large
 .RE
 .PD 1
+.
+.TP
+.B min_iquant=<0\-31>
+quantificateur minimum pour les trames I (par défaut\ : 2)
+.
+.TP
+.B max_iquant=<0\-31>
+quantificateur maximum pour les trames I (par défaut\ : 31)
+.
+.TP
+.B min_pquant=<0\-31>
+quantificateur minimum pour les trames P (par défaut\ : 2)
+.
+.TP
+.B max_pquant=<0\-31>
+quantificateur maximum pour les trames P (par défaut\ : 31)
+.
+.TP
+.B min_bquant=<0\-31>
+quantificateur minimum pour les trames B (par défaut\ : 2)
+.
+.TP
+.B max_bquant=<0\-31>
+quantificateur maximum pour les trames B (par défaut\ : 31)
+.
+.TP
+.B quant_intra_matrix=<nom_fichier>
+Charge une matrice intra personnalisée.
+Vous pouvez construire de tels fichiers avec l'éditeur de matrices de
+xvid4conf.
+.
+.TP
+.B quant_inter_matrix=<filename>
+Charge une matrice inter personnalisée.
+Vous pouvez construire de tels fichiers avec l'éditeur de matrices de
+xvid4conf.
+.
+.TP
+.B curve_compression_high=<0\-100>
+Cette option permet à XviD de voler un certain pourcentage de bits aux
+scènes mouvementées pour les remettre dans le "pool" de bits.
+Vous pouvez par exemple agir sur cette option si vous avez un film
+dont les scènes mouvementées monopolisent tellement de bits que les scènes
+moins rapides en souffrent (par défaut\ : 0).
+.
+.TP
+.B curve_compression_low=<0\-100>
+Cette option permet à XviD de donner un certain pourcentage de bits en
+plus aux scènes lentes, en prenant quelques bits tout au long du film.
+Vous pouvez agir sur cette option si vous avez quelques scènes lentes qui
+sont encore "blocky" (par défaut\ : 0).
+.
+.TP
+.B overflow_control_strength=<0\-100> (mode 2-passes uniquement)
+Lors de la première passe de l'encodage 2-passes, une courbe de bitrate
+normalisée à 100 est calculée.
+La différence entre cette courbe et le résultat obtenu lors de l'encodage
+effectif est appelée "overflow".
+Bien évidemment, la deuxième passe s'efforce de compenser cet overflow,
+en le distribuant sur toutes les trames suivantes.
+Cette option vous permet de contrôler quelle fraction de cet overflow est
+distribué à chaque nouvelle trame.
+Une valeur basse permet un contrôle de l'overflow paresseux, où des grosses
+demandes de bitrate sont compensés lentement (ce qui peut faire beaucoup
+varier la taille des petites vidéos).
+Une valeur plus haute rendra la re-distribution de bits plus brusque,
+peut-être même trop brusque si vous lui donnez une valeur trop importante,
+ce qui créera des artefacts (par défaut\ : 5).
+.br
+.I NOTE\ :
+Cette option a un grand impact sur le résultat final, soyez prévenus!
+.
+.TP
+.B max_overflow_improvement=<0\-100>
+Lors de l'allocation de bits aux trames, le contrôleur d'overflow peut
+faire croître la taille de la trame.
+Cette option contrôle le pourcentage maximum d'accroissement par rapport
+à la courbe de bits calculée en première passe (par défaut\ : 5).
+.
+.TP
+.B max_overflow_degradation=<0\-100>
+Lors de l'allocation de bits aux trames, le contrôleur d'overflow peut
+diminuer la taille de la trame.
+Cette option contrôle le pourcentage maximum de diminution par rapport
+à la courbe de bits calculée en première passe (par défaut\ : 5).
+.
+.TP
+.B container_frame_overhead=<0..>
+Définit l'overhead moyen par trame, en octets.
+La plupart des utilisateurs indiquent la taille visée de leur vidéo
+sans tenir compte de l'overhead du conteneur vidéo.
+Ce petit, mais à peut près constant overhead peut faire excéder la taille
+du fichier généré.
+XviD permet aux utilisateurs de donner le l'overhead par trame de
+leur conteneur (donner une moyenne par trame).
+0 a un sens particulier, il laisse XviD prendre la valeur par défaut.
+(par défaut\ : 24 - l'overhead moyen d'AVI).
+.
+.TP
+.B par=<mode>
+Définit le mode de Pixel Aspect Ratio\ : Rapport largeur/\:hauteur des Pixels
+(à ne pas confondre avec le DAR, Display Aspect Ratio\ :
+Rapport hauteur/\:largeur d'affichage).
+PAR est le ratio entre la largeur et la hauteur d'un pixel.
+Ils sont tout deux liés par la formule\ : DAR = PAR * (largeur/hauteur).
+.br
+MPEG4 définit 5 PAR et un étendu, pour permettre de définir des PAR
+particuliers.
+5 modes standard peuvent être définis\ :
+.PD 0
+.RSs
+.IPs vga11
+C'est le PAR classique des vidéos informtiques.
+Les pixels sont carrés.
+.IPs pal43
+le PAR du standard PAL 4:3.
+Pixels are rectangles.
+.IPs pal169
+comme ci-dessus
+.IPs ntsc43
+comme ci-dessus
+.IPs ntsc169
+comme ci-dessus (N'oubliez pas de donner le ratio exact.)
+.IPs ext\ \ 
+Permet de définir un PAR particulier avec les options par_width et par_height.
+.RE
+.PD 1
+.br
+.I NOTE\ :
+Généralement, on peut se contenter d'utiliser les options aspect et
+autoaspect.
+.
+.TP
+.B par_width=<1..255> (par=ext uniquement)
+Définit la largeur du PAR particulier
+.
+.TP
+.B par_height=<1...255> (par=ext uniquement)
+Définit la hauteur du PAR particulier
 .
 .TP
 .B aspect=<x/\:y | f (nombre flottant)>
