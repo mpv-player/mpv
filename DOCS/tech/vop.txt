@@ -164,3 +164,12 @@ Current plugins:
     p mix random noise with a (semi)regular pattern
     MPI: DR (if possible) or TEMP, accepts stride
 
+-vop eq[=brightness:contrast]
+    software equalizer, for use with cards that don't support
+    brightness and contrast controls in hardware. It might also be
+    useful with mencoder, either for fixing poorly captured movies, or
+    for slightly reducing contrast to mask artifacts and get by with
+    lower bitrates. Initial values in the range -100..100 may be
+    given on the command line, and the eq filter is controllable
+    interactively just like with normal hardware equalizer controls.
+
