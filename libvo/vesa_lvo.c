@@ -24,6 +24,7 @@
 #include "../drivers/mga_vid.h" /* <- should be changed to "linux/'something'.h" */
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
+#include "../postproc/rgb2rgb.h"
 
 #define WIDTH_ALIGN 32 /* should be 16 for radeons */
 #define NUM_FRAMES 2
@@ -33,8 +34,10 @@ static int lvo_handler = -1;
 static uint8_t *lvo_mem = NULL;
 static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
-static unsigned image_bpp,image_height,image_width;
+static unsigned image_bpp,image_height,image_width,src_format;
 extern int verbose;
+
+#define HAVE_RADEON 1
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
@@ -59,15 +62,25 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 	image_width = src_width;
 	image_height = src_height;
 	mga_vid_config.version=MGA_VID_VERSION;
-        mga_vid_config.format=format;
+        src_format = mga_vid_config.format=format;
         awidth = (src_width + (WIDTH_ALIGN-1)) & ~(WIDTH_ALIGN-1);
         switch(format){
+#ifdef HAVE_RADEON
+        case IMGFMT_YV12:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+	    image_bpp=16;
+	    mga_vid_config.format = IMGFMT_YUY2;
+	    mga_vid_config.frame_size = awidth*src_height*2;
+	    break;
+#else
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
 	    image_bpp=16;
 	    mga_vid_config.frame_size = awidth*src_height+(awidth*src_height)/2;
 	    break;
+#endif	    
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
 	    image_bpp=16;
@@ -170,10 +183,21 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
 #else
  uint8_t *src;
  uint8_t *dst;
-    dst = lvo_mem + image_width * y + x;
-    src = image[0];
-    w *= (image_bpp+7)/8;
-    memcpy(dst,src,w*h);
+ uint8_t bytpp;
+ bytpp = (image_bpp+7)/8;
+ dst = lvo_mem + (image_width * y + x)*bytpp;
+#ifdef HAVE_RADEON
+    if(src_format == IMGFMT_YV12)
+    {
+      yv12toyuy2(image[0],image[1],image[2],dst
+                 ,w,h,stride[0],stride[1],w*2);
+    }
+    else
+#endif
+    {
+      src = image[0];
+      memcpy(dst,src,w*h*bytpp);
+    }  
 #endif
  return 0;
 }
