@@ -2,10 +2,6 @@ MPlayer (1.0)
 
   pre6:
 
-    Security:
-    * buffer overflow in mp3lib fixed
-    * many memleaks fixed
-
     DOCS:
     * finally all options are documented
     * man page completely reviewed for spelling, wording and clarity
@@ -181,6 +177,17 @@ MPlayer (1.0)
     * reduced verbosity of MPlayer's output somewhat
     * -identify now prints some information about available languages
     * double buffering (-double) is now default
+    * many memleaks fixed
+
+
+  pre5try2: December 15, 2004
+
+    Security:
+    * buffer overflow in mp3lib fixed
+    * heap overflow in Real RTSP streaming code fixed
+    * stack overflow in MMST streaming code fixed
+    * unnecessary BMP demuxer removed because of buffer overflows
+    * heap overflow in pnm streaming code fixed
 
 
   pre5: "LinuxTag release" July 15, 2004
@@ -983,7 +990,7 @@ MPlayer (0.90)
     * XAnim & RealPlayer binary Codecs working on PPC
     * Radeon 9000 support in VIDIX, colorkey restoring for all Radeons
     * initial PPC (big-endian) support in VIDIX Rage128 driver
-    * PNM:// streaming support (ported from xine)
+    * pnm:// streaming support (ported from xine)
     * muxer layer: MEncoder can now write MPEG-PS format, too (EXPERIMENTAL!)
     * libavcodec: WMV2 decoder (buggy/untested)
     * DVB "HEAD" (aka. NEWSTRUCT) drivers support
