@@ -82,7 +82,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   <application>MPlayer'а</application>, так и для <application>MEncoder'а</application>.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lame</emphasis> - рекомендуется, необходимо для кодирования MP3 аудио c Mencoder,
+  <emphasis role="bold">lame</emphasis> - рекомендуется, необходимо для кодирования MP3 аудио c MEncoder,
 рекомендуемая версия - это <emphasis role="bold"> всегда новейшая</emphasis> (как минимум 3.90).
   </para></listitem>
 <listitem><para>
