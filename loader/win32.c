@@ -180,6 +180,18 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
 #endif
+#ifdef USE_WIN32DLL
+    #include "../mp_msg.h"
+    {
+	char buf[1024];
+	va_list va;
+
+        va_start(va, fmt);
+	vsnprintf((char *)&buf[0], 1023, fmt, va);
+	mp_dbg(MSGT_WIN32, MSGL_DBG3, (char *)&buf[0]);
+	va_end(va);
+    }
+#endif
 }
 
 
