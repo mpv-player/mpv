@@ -436,6 +436,9 @@ extension=NULL;
 						*file_format = DEMUXER_TYPE_AUDIO;
 						return 0;
 					}
+					case 401: // Service Unavailable
+						printf("Error: ICY-Server return service unavailable, skipping!\n");
+						return -1;
 					case 404: // Resource Not Found
 						printf("Error: ICY-Server couldn't find requested stream, skipping!\n");
 						return -1;
