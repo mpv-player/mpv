@@ -3028,9 +3028,11 @@ EOF
 fi
 if test "$_cdparanoia" = yes ; then
     _def_cdparanoia='#define HAVE_CDDA'
+    _inputmodules="cdda $_inputmodules"
     _ld_cdparanoia="$_ld_cdparanoia -lcdda_interface -lcdda_paranoia"
 else
     _def_cdparanoia='#undef HAVE_CDDA'
+    _noinputmodules="cdda $_noinputmodules"
 fi
 echores "$_cdparanoia"
 
