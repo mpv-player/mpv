@@ -756,7 +756,7 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_ExistsButNoDirectory "already exists, but is not a directory."
 #define MSGTR_VO_JPEG_DirExistsButNotWritable "Output directory already exists, but is not writable."
 #define MSGTR_VO_JPEG_DirExistsAndIsWritable "Output directory already exists and is writable."
-#define MSGTR_VO_JPEG_CantCreateDirectory "Unable to create ouput directory."
+#define MSGTR_VO_JPEG_CantCreateDirectory "Unable to create output directory."
 #define MSGTR_VO_JPEG_CantCreateFile "Unable to create output file."
 #define MSGTR_VO_JPEG_DirectoryCreateSuccess "Output directory successfully created."
 #define MSGTR_VO_JPEG_ParsingSuboptions "Parsing suboptions."
