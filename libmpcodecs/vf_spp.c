@@ -128,7 +128,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	int x, y, i;
 	const int count= 1<<p->log2_count;
 	const int log2_scale= 6-p->log2_count;
-	const int stride= p->temp_stride;
+	const int stride= p->temp_stride; //FIXME
 	uint64_t block_align[32];
 	DCTELEM *block = (DCTELEM *)block_align;
 	DCTELEM *block2= (DCTELEM *)(block_align+16);
@@ -144,7 +144,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	}
 	for(y=0; y<8; y++){
 		memcpy(p->src + (      7-y)*stride, p->src + (      y+8)*stride, stride);
-		memcpy(p->src + (width+8+y)*stride, p->src + (width-y+7)*stride, stride);
+		memcpy(p->src + (height+8+y)*stride, p->src + (height-y+7)*stride, stride);
 	}
 	//FIXME (try edge emu)
 
