@@ -11,7 +11,7 @@
 
 #include "dll_init.h"
 
-static vd_info_t info_vfw = {
+static vd_info_t info = {
 	"Win32/VfW video codecs",
 	"vfw",
 	VFM_VFW,

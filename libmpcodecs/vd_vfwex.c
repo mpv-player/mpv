@@ -11,7 +11,7 @@
 
 #include "dll_init.h"
 
-static vd_info_t info_vfwex = {
+static vd_info_t info = {
 	"Win32/VfWex video codecs",
 	"vfwex",
 	VFM_VFWEX,
