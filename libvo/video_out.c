@@ -81,11 +81,13 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_SDL
         &video_out_sdl,
 #endif
+#ifdef HAVE_FBDEV
+	&video_out_fbdev,
+#endif
         &video_out_null,
         &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
-	&video_out_fbdev,
         NULL
 };
 
