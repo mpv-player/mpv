@@ -925,6 +925,11 @@ int vixProbe( int verbose,int force )
 	dname = pci_device_name(VENDOR_ATI,lst[i].device);
 	dname = dname ? dname : "Unknown chip";
 	printf(RADEON_MSG" Found chip: %s\n",dname);
+	if ((lst[i].command & PCI_COMMAND_IO) == 0)
+	{
+		printf("[radeon] Device is disabled, ignoring\n");
+		continue;
+	}
 #ifndef RAGE128	
 	if(idx != -1)
 	{

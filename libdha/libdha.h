@@ -24,10 +24,12 @@ extern "C" {
 #define MAX_PCI_DEVICES_PER_BUS 32
 #define MAX_PCI_DEVICES         64
 #define PCI_MULTIFUNC_DEV	0x80
+#define PCI_COMMAND_IO          0x1     /* Enable response to I/O space */
 
 typedef struct pciinfo_s
 {
   int		bus,card,func;			/* PCI/AGP bus:card:func */
+  unsigned short command;                       /* Device control register */
   unsigned short vendor,device;			/* Card vendor+device ID */
   unsigned	base0,base1,base2,baserom;	/* Memory and I/O base addresses */
 //  unsigned	base0_limit, base1_limit, base2_limit, baserom_limit;
