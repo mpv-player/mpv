@@ -9,8 +9,8 @@ OPTFLAGS := $(OPTFLAGS:-O4=-O0)
 endif
 CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
 ifeq ($(TARGET_ARCH_X86),yes)
-SRCS += d_cpu.s decode_i586.c
-OBJS += d_cpu.o decode_i586.o
+SRCS += decode_i586.c
+OBJS += decode_i586.o
 ifeq ($(TARGET_MMX),yes)
 CFLAGS += -fomit-frame-pointer
 SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c

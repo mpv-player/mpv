@@ -25,9 +25,15 @@
 #include "huffman.h"
 #include "mp3.h"
 #include "bswap.h"
-#include "d_cpu.h"
+#include "../cpudetect.h"
+#include "../liba52/mm_accel.h"
 
 #include "fastmemcpy.h"
+
+#ifdef ARCH_X86
+#define CAN_COMPILE_X86_ASM
+#endif
+
 //static FILE* mp3_file=NULL;
 
 int MP3_frames=0;
@@ -354,6 +360,8 @@ retry1:
   return frames;
 }
 
+int _has_mmx = 0;
+
 #include "layer2.c"
 #include "layer3.c"
 
@@ -378,12 +386,19 @@ void MP3_Init(int fakemono){
 #else
 void MP3_Init(){
 #endif
+  int accel=0;
 
-#if 0
-#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
-    if (gCpuCaps.hasMMX)
+    GetCpuCaps(&gCpuCaps);
+    if(gCpuCaps.hasMMX) 	accel |= MM_ACCEL_X86_MMX;
+    if(gCpuCaps.hasMMX2) 	accel |= MM_ACCEL_X86_MMXEXT;
+    if(gCpuCaps.hasSSE) 	accel |= MM_ACCEL_X86_SSE;
+    if(gCpuCaps.has3DNow) 	accel |= MM_ACCEL_X86_3DNOW;
+    if(gCpuCaps.has3DNowExt) 	accel |= MM_ACCEL_X86_3DNOWEXT;
+
+    if (accel & MM_ACCEL_X86_MMX)
     {
+	_has_mmx = 1;
 	make_decode_tables_MMX(outscale);
 	printf("mp3lib: made decode tables with MMX optimization\n");
     }
@@ -392,14 +407,6 @@ void MP3_Init(){
 #else
     make_decode_tables(outscale);
 #endif
-#else /* RUNTIME_CPUDETECT */
-#ifdef HAVE_MMX
-    make_decode_tables_MMX(outscale);
-    printf("mp3lib: made decode tables with MMX optimization\n");
-#else
-    make_decode_tables(outscale);
-#endif
-#endif /* RUNTIME_CPUDTECT */
 
 #ifdef USE_FAKE_MONO
     if (fakemono == 1)
@@ -421,10 +428,9 @@ void MP3_Init(){
     dct36_func = dct36;
     printf("init layer2&3 finished, tables done\n");
 
-#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 #if 0
-    if(gCpuCaps.hasSSE)
+    if(accel & MM_ACCEL_X86_SSE)
     {
 	/* SSE version is buggy */
 	synth_func = synth_1to1_MMX;
@@ -433,24 +439,24 @@ void MP3_Init(){
     }
     else
 #endif
-    if (gCpuCaps.has3DNowExt)
+    if (accel & MM_ACCEL_X86_3DNOWEXT)
     {
-	synth_func = synth_1to1_MMX;
-	dct36_func = dct36_3dnowex;
-	dct64_MMX_func = dct64_MMX_3dnowex;
+	synth_func=synth_1to1_MMX;
+	dct36_func=dct36_3dnowex;
+	dct64_MMX_func=dct64_MMX_3dnowex;
 	printf("mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
-    if (gCpuCaps.has3DNow)
+    if (accel & MM_ACCEL_X86_3DNOW)
     {
 	synth_func = synth_1to1_MMX;
 	dct36_func = dct36_3dnow;
 	dct64_MMX_func = dct64_MMX_3dnow;
 	printf("mp3lib: using 3DNow! optimized decore!\n");
-     }
-     else
-     if (gCpuCaps.hasMMX)
-     {
+    }
+    else
+    if (accel & MM_ACCEL_X86_MMX)
+    {
         synth_func = synth_1to1_MMX;
 	dct64_MMX_func = dct64_MMX;
 	printf("mp3lib: using MMX optimized decore!\n");
@@ -470,88 +476,7 @@ void MP3_Init(){
     synth_func = NULL;
     printf("mp3lib: using generic decore!\n");
 #endif
-#else /* RUNTIME_CPUDETECT */
 
-#if 0
-    /* SSE version is buggy */
-    synth_func = synth_1to1_MMX;
-    dct64_MMX_func = dct64_MMX_sse;
-    printf("mp3lib: using SSE optimized decore!\n");
-#endif
-
-#ifdef HAVE_3DNOWEX
-    synth_func = synth_1to1_MMX;
-    dct36_func = dct36_3dnowex;
-    dct64_MMX_func = dct64_MMX_3dnowex;
-    printf("mp3lib: using 3DNow!Ex optimized decore!\n");
-#elif defined(HAVE_3DNOW)
-    synth_func = synth_1to1_MMX;
-    dct36_func = dct36_3dnow;
-    dct64_MMX_func = dct64_MMX_3dnow;
-    printf("mp3lib: using 3DNow! optimized decore!\n");
-#elif defined(HAVE_MMX)
-    synth_func = synth_1to1_MMX;
-    dct64_MMX_func = dct64_MMX;
-    printf("mp3lib: using MMX optimized decore!\n");
-#elif defined(__CPU__ > 586)
-    synth_func = synth_1to1_pent;
-    printf("mp3lib: using Pentium optimized decore!\n");
-#else
-    synth_func = NULL; /* use default c version */
-    printf("mp3lib: using generic decore!\n");
-#endif
-#endif /* RUNTIME_CPUDETECT */
-
-#else
-#ifdef ARCH_X86
-    _CpuID=CpuDetect();
-    _i586=ipentium();
-#ifndef HAVE_MMX
-    _i586 &= 1;
-#endif
-    _3dnow=a3dnow();
-#ifndef HAVE_3DNOW
-    _3dnow = 0;
-#endif
-#ifndef HAVE_3DNOWEX
-    _3dnow &= 1;
-#endif
-    _isse=isse();
-#ifndef HAVE_SSE
-    _isse = 0;
-#endif
-#ifndef HAVE_SSE2
-    _isse &= 1;
-#endif
-    _has_mmx=_i586>1||_3dnow||_isse;
-    printf( "mp3lib: Processor ID: %x\n",_CpuID );
-    if(_i586&&!_3dnow&&!_isse)
-      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
-    else
-    if(_isse) 
-    /*
-       Note: It's ok, Since K8 will have SSE2 support and will much faster
-       of P4 ;) 
-     */
-//      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
-      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
-    else
-    if(_3dnow)
-      printf( "mp3lib: Using AMD 3dnow%s! optimized decore.\n",(_3dnow>1?"-dsp(k7)":""));
-#else
-      _CpuID = _i586 = _3dnow = _isse = _has_mmx = 0;
-      printf( "mp3lib: Using generic decore.\n");
-#endif
-#ifdef HAVE_MMX
-/* Use it for any MMX cpu */
-   if(_has_mmx)
-   {
-	make_decode_tables_MMX(outscale);
-	printf("mp3lib: made decode tables with MMX optimization\n");
-   }
-   else
-#endif
-	make_decode_tables(outscale);
 #ifdef USE_FAKE_MONO
     if (fakemono == 1)
         fr.synth=synth_1to1_l;
@@ -568,53 +493,6 @@ void MP3_Init(){
     init_layer2();
     init_layer3(fr.down_sample_sblimit);
     tables_done_flag=1;
-
-    dct36_func=dct36;
-/*#ifdef HAVE_SSE
-  if(_isse)
-  {
-    synth_func=synth_1to1_MMX;
-    dct64_MMX_func=dct64_MMX_sse;
-  }    
-  else
-#endif*/
-#ifdef HAVE_3DNOWEX
-  if ( _3dnow > 1 )
-  {
-     synth_func=synth_1to1_MMX;
-     dct36_func=dct36_3dnowex;
-     dct64_MMX_func=dct64_MMX_3dnowex;
-  }
-  else
-#endif
-#ifdef HAVE_3DNOW
-  if ( _3dnow )
-  {
-    synth_func=synth_1to1_MMX;
-    dct36_func=dct36_3dnow;
-    dct64_MMX_func=dct64_MMX_3dnow;
-  }
-  else
-#endif
-#ifdef HAVE_MMX
-  if ( _i586 > 1)
-  {
-    synth_func=synth_1to1_MMX;
-    dct64_MMX_func=dct64_MMX;
-  }    
-  else
-#endif
-#ifdef ARCH_X86
-  if ( _i586 )
-  {
-    synth_func=synth_1to1_pent;
-  }    
-  else
-#endif
-  {
-    synth_func = NULL;
-  }
-#endif
 }
 
 #if 0
