@@ -4309,6 +4309,13 @@ EOF
 else
   _inc_faad="-I`pwd`/libfaad2"
   _faad=yes
+  # the faad check needs a config.h file
+  if test -f "config.h" ; then
+    _rm_config_h=no
+  else
+    _rm_config_h=yes
+    echo "" > config.h
+  fi
   # internal faad: check if our dear gcc is able to compile it...
   echo "$_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra `pwd`/libfaad2/cfft.c -o $TMPO" >> "$TMPLOG"
   if ( $_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra "`pwd`/libfaad2/cfft.c" -o "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
@@ -4316,6 +4323,10 @@ else
   else
     _faad=no
     echores "no (broken gcc)"
+  fi
+  # remove a temporarily config.h, which was needed for the faad compile check
+  if test "$_rm_config_h" = yes; then
+    rm config.h
   fi
 fi
 fi
