@@ -79,7 +79,7 @@ int aaconfigmode=1;
 #ifdef USE_OSD
 font_desc_t* vo_font_save = NULL;
 #endif
-static SwsContext *sws=NULL;
+static struct SwsContext *sws=NULL;
 extern m_config_t *mconfig;
 
 /* our version of the playmodes :) */
@@ -119,8 +119,8 @@ resize(void){
     screen_x = (aa_scrwidth(c) - screen_w) / 2;
     screen_y = (aa_scrheight(c) - screen_h) / 2;
     
-    if(sws) freeSwsContext(sws);
-    sws = getSwsContextFromCmdLine(src_width,src_height,image_format,
+    if(sws) sws_freeContext(sws);
+    sws = sws_getContextFromCmdLine(src_width,src_height,image_format,
 				   image_width,image_height,IMGFMT_Y8);
 
     image[0] = aa_image(c) + image_y * aa_imgwidth(c) + image_x;
@@ -360,7 +360,7 @@ draw_frame(uint8_t *src[]) {
     break;
   }
 
-  sws->swScale(sws,src,stride,0,src_height,image,image_stride);
+  sws_scale(sws,src,stride,0,src_height,image,image_stride);
 
    /* Now 'ASCIInate' the image */ 
   if (fast)
@@ -380,7 +380,7 @@ draw_slice(uint8_t *src[], int stride[],
   int dx2 = screen_x + ((x+w) * screen_w / src_width);
   int dy2 = screen_y + ((y+h) * screen_h / src_height);
 
-  sws->swScale(sws,src,stride,y,h,image,image_stride);
+  sws_scale(sws,src,stride,y,h,image,image_stride);
 
   /* Now 'ASCIInate' the image */ 
   if (fast)
