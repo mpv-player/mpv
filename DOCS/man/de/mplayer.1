@@ -736,19 +736,23 @@ Programm
 (falls vorhanden) mit der gewählten Audiospur.
 .
 .TP
-.B \-alang <zweibuchstabiger Ländercode> (siehe auch \-aid) (nur bei DVD)
-Funktioniert nur bei DVD-Wiedergabe.
-Wählt die DVD-Audiosprache und versucht, die Audiospur abzuspielen, deren
-Ländercode dem angegebenen entspricht.
-MPlayer gibt alle vorhandenen Ländercodes aus, wenn er im Verbose-Modus (\-v)
-gestartet wird.
+.B \-alang <Sprachcode> (siehe auch \-aid)
+Spielt denjenigen Audiostream, der dem angegebenen Sprachcode entspricht.
+Verschiedene Containerformate verwenden unterschiedliche Ländercodes.
+DVDs benutzen den zweibuchstabigen ISO 639-1 Sprachcode, Matroska und NUT
+benutzen den dreibuchstabigen ISO 639-2 Sprachcode, während OGM einen
+formfreien Bezeichner verwendet.
+MPlayer gibt eine Liste aller vorhandenen Sprachen aus, wenn er im
+Verbose-Modus (\-v) gestartet wird.
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
-.IPs "\-alang hu,en"
-Wählt die ungarische Audiospur und zur Not die englische, falls keine
-ungarische Audiospur vorhanden ist.
+.IPs "mplayer dvd://1 \-alang hu,en"
+Wählt die ungarische Sprachspur einer DVD und wählt die Englische, wenn
+ungarisch nicht verfügbar ist.
+.IPs "mplayer \-alang jpn example.mkv"
+Spielt eine Matroskadatei auf japanisch ab.
 .RE
 .PD 1
 .
@@ -928,8 +932,12 @@ oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 .PD 1
 .
 .TP
-.B \-dvd\-device <Pfad\ zum\ Gerät> (nur bei DVD)
+.B \-dvd-device <Pfad\ zum\ Gerät> (nur bei DVD)
 Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
+Du kannst auch ein Verzeichnis angeben, das die zuvor direkt von DVD kopierten
+Dateien enthält (so wie mit vobcopy).
+Merke, daß die Benutzung von \-dumpstream normalerweise ein besserer Weg ist,
+DVD-Titel zu kopieren (siehe Beispiele).
 .
 .TP
 .B \-dvdangle <Winkel-ID> (nur bei DVD)
@@ -1114,8 +1122,9 @@ am Anfang.
 .
 .TP
 .B \-srate <Hz>
-Erzwingt eine Audioabspielrate, wobei die Videogeschwindigkeit angepasst
-wird, um die A/V-Synchronisation beizubehalten.
+Erzwingt eine Audioabspielrate, wobei bei Bedarf ein Resampling stattfindet.
+Der Resampling-Typ kann mit der Option \-af-adv gesteuert werden.
+Standard ist ein schnelles Resampling, das Störungen verursachen kann.
 MEncoder übergibt diesen Wert an lame für das Resampling.
 .
 .TP
@@ -1360,7 +1369,12 @@ Schaltet horizontales Spiegeln der Untertitel ein.
 Benutzt dazu FriBiDi.
 .
 .TP
-.B \-font <Pfad\ zur\ font.desc\-Datei> (nur bei OSD)
+.B \-noflip-hebrew-commas
+Ändere die Annahmen von FriBiDi über die Positionen von Kommas in Untertiteln.
+Benutze dies, falls Kommas in Untertiteln am Anfang eines Satzes anstelle am
+Ende angezeigt werden.
+.TP
+.B \-font <Pfad\ zur\ font.desc-Datei> (nur bei OSD)
 Sucht nach den OSD-/\:Untertitelschriften in einem anderen Verzeichnis
 (Standard für normale Schriften: ~/\:.mplayer/\:font/\:font.desc,
 Standard für FreeType\-Schriften: ~/.mplayer/\:subfont.ttf).
@@ -1543,11 +1557,11 @@ Gibt an, wie die Untertitel mit \-subpos positioniert werden sollen.
 .PD 0
 .RSs
 .IPs 0
-oben positionieren (Standard)
+Positioniere oben (Standard).
 .IPs 1
-mittig positionieren
+Positioniere mittig.
 .IPs 2
-unten positionieren
+Positioniere unten.
 .RE
 .PD 1
 .
@@ -1655,8 +1669,8 @@ Gibt die Bilder/\:Sekunde-Rate der Untertitel an (Fließkommazahl).
 Standard ist die gleiche FPS wie der Film.
 .br
 .I ANMERKUNG:
-Funktioniert NUR bei bildbasierenden Untertitelformaten, NICHT mit z.B.\&
-MicroDVD.
+Funktioniert nur bei bildbasierten Untertitelformaten wie z.B.\& dem
+MicroDVD-Format.
 .
 .TP
 .B \-subpos <0\-100> (nützlich mit \-vf expand) (nur bei OSD)
@@ -1768,7 +1782,8 @@ Benutze einen anderen Mixer als den Standardmixer /dev/\:mixer.
 Bei ALSA gibt dies den Mixer-Namen an.
 .
 .TP
-.B \-mixer-channel <Mixer-Anschluß> <nur bei \-ao oss und \-ao alsa)
+.B \-mixer-channel <Mixer-Anschluß>[,Mixer-Index] <nur bei \-ao oss und \-ao
+alsa)
 Bei dieser Option benutzt MPlayer zur Lautstärkeregulierung einen anderen
 Anschluß als die Standardeinstellung PCM.
 Optionen für OSS beinhalten
@@ -1778,6 +1793,12 @@ Datei /usr/\:include/\:linux/\:soundcard.h.
 Bei ALSA kannst du die Namen benutzen, die beispielsweise alsamixer anzeigt,
 wie
 .B Master, Line, PCM.
+.br
+.I ANMERKUNG:
+Die Namen von ALSA-Mixerkanälen gefolgt von einer Nummer müssen im Format
+<Name,Nummer> angegeben werden, z.B.\& muß ein Kanal, der im alsamixer 'PCM 1'
+heißt, umbenannt werden in
+.BR PCM,1 .
 .
 .TP
 .B \-nowaveheader (nur bei \-ao pcm)
