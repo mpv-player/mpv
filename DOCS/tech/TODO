@@ -9,6 +9,8 @@ demuxer:
 - check dvdread/dvdcss version problems
 - add -dumpstream
 - implement seek for VIVO
+- clean up vcd support (so it can be en/disabled)
+- implement forward seeking in indexed avi streams
 
 decoders:
 - check and import videodecoding.de stuff
@@ -16,6 +18,11 @@ decoders:
 - finish native g72x audio decoder
 - qtx support?
 - fix the MSVideo1-bugs
+- define some common api for native audio and video codecs
+  and move them to seperated place (hopefully will allow adding new
+  codecs without having to modify mplayer core code, also would speed
+  up by limiting number of select statements)
+- switch to liba52 for ac3 decoding
 
 mencoder:
 - add ffmpeg encoders support
@@ -26,7 +33,7 @@ mencoder:
 - implement VBR audio copy
 - Estimated Size and Time
 - stop/resume
-- image resize filter
+- image resize filter (->fix/use yuv2yuv scaler?)
 - image cut/crop filter
 
 gui:
