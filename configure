@@ -4025,6 +4025,7 @@ if test "$_directx" = auto ; then
   cat > $TMPC << EOF
 #include <windows.h>
 #include <ddraw.h>
+#include <dsound.h>
 int main(void) { return 0; }
 EOF
   _directx=no
@@ -4035,9 +4036,12 @@ if test "$_directx" = yes ; then
   _ld_win32libs="-lgdi32 $_ld_win32libs"
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
+  _aosrc="$_aosrc ao_dsound.c"
+  _aomodules="dsound $_aomodules"
 else
   _def_directx='#undef HAVE_DIRECTX'
   _novomodules="directx $_novomodules"
+  _noaomodules="dsound $_noaomodules"
 fi
 echores "$_directx"
 
