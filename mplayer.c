@@ -2404,6 +2404,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
 #endif
     } break;
+    case MP_CMD_MUTE: {
+     mixer_mute();
+    }
     case MP_CMD_MIXER_USEMASTER :  {
     } break;
     case MP_CMD_CONTRAST :  {
@@ -2545,6 +2548,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
     case MP_CMD_PANSCAN : {
+      if ( !video_out ) break;
       if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
        {
         int abs= cmd->args[1].v.i;

@@ -859,10 +859,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
+    if ( !vo_config_count || !vo_fs ) return VO_FALSE;
     return VO_TRUE;
   case VOCTRL_SET_PANSCAN:
-
-// if((vo_fs && (vo_panscan != vo_panscan_amount)) || (!vo_fs && vo_panscan_amount))
    if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
      {
       panscan_calc();

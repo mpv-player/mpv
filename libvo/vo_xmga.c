@@ -90,6 +90,8 @@ static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 static XSetWindowAttributes   xWAttribs;
 
+static int inited=0;
+
 #define VO_XMGA
 #include "mga_common.c"
 #undef  VO_XMGA
@@ -200,8 +202,6 @@ static void flip_page(void){
 
    vo_mga_flip_page();
 }
-
-static int inited=0;
 
 static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t* info)
 {
@@ -340,7 +340,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  XSync( mDisplay,False );
 
  saver_off(mDisplay);
-
+ 
  return 0;
 }
 

@@ -52,6 +52,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_OSD, "osd",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_VOLUME, "volume", 1, { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },
   { MP_CMD_MIXER_USEMASTER, "use_master", 0, { {-1,{0}} } },
+  { MP_CMD_MUTE, "mute", 0, { {-1,{0}} } },
   { MP_CMD_CONTRAST, "contrast",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_BRIGHTNESS, "brightness",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} }  },
   { MP_CMD_HUE, "hue",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
@@ -205,6 +206,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '/', 0 }, "volume -1" },
   { { '0', 0 }, "volume 1" },
   { { '*', 0 }, "volume 1" },
+  { { 'm', 0 }, "mute" },
   { { '1', 0 }, "contrast -1" },
   { { '2', 0 }, "contrast 1" },
   { { '3', 0 }, "brightness -1" },
@@ -220,7 +222,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'h', 0 }, "tv_step_channel 1" },
   { { 'k', 0 }, "tv_step_channel -1" },
   { { 'n', 0 }, "tv_step_norm" },
-  { { 'm', 0 }, "tv_step_chanlist" },
+  { { 'u', 0 }, "tv_step_chanlist" },
 #endif
 #ifdef HAVE_NEW_GUI
   { { 'l', 0 }, "gui_loadfile" },

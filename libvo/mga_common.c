@@ -282,6 +282,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 #endif
 #ifdef VO_XMGA
   case VOCTRL_GET_PANSCAN:
+      if ( !inited || !vo_fs ) return VO_FALSE;
       return VO_TRUE;
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )

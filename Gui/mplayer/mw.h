@@ -2,6 +2,7 @@
 // main window
 
 #include "../../libmpdemux/stream.h"
+#include "../../mixer.h"
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
@@ -99,6 +100,7 @@ calclengthmmmmss:
        case 'l': if ( guiIntfStruct.Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( guiIntfStruct.Playing == 2 ) strcat( trbuf,"e" ); break;
        case 'a':
+//            if ( guiIntfStruct.Mute ) { strcat( trbuf,"n" ); break; }
             switch ( guiIntfStruct.AudioType )
              {
               case 0: strcat( trbuf,"n" ); break;
@@ -373,7 +375,7 @@ NoPause:
 
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
-   case evMute:       guiIntfStruct.Mute=1; break;
+   case evMute:       mixer_mute(); guiIntfStruct.Mute=muted; break;
    case evSetVolume:
    case evSetBalance: guiIntfStruct.VolumeChanged=1; break;
 

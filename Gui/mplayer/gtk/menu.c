@@ -380,6 +380,7 @@ GtkWidget * create_PopUpMenu( void )
        }
 #endif
   AddSeparator( Menu );
+  AddMenuItem( Menu,"Mute", evMute );
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );

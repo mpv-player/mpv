@@ -370,6 +370,8 @@ else
     XSync(mDisplay, False);
 
     saver_off(mDisplay); /* turning off screen saver */
+    
+    vo_config_count++;
 
     return(0);
 }
@@ -430,6 +432,7 @@ static uint32_t query_format(uint32_t format)
 
 static void uninit(void)
 {
+    if ( vo_config_count ) return;
     vidix_term();
 
     saver_on(mDisplay); /* screen saver back on */
@@ -464,6 +467,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     vo_x11_fullscreen();
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
+      if ( !vo_config_count || !vo_fs ) return VO_FALSE;
       return VO_TRUE;
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )

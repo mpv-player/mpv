@@ -13,6 +13,10 @@ extern ao_functions_t *audio_out;
 
 char * mixer_device=NULL;
 
+int muted = 0;
+float mute_l = 0.0f;
+float mute_r = 0.0f;
+
 void mixer_getvolume( float *l,float *r )
 {
   ao_control_vol_t vol;
@@ -33,6 +37,7 @@ void mixer_setvolume( float l,float r )
     if(CONTROL_OK != audio_out->control(AOCONTROL_SET_VOLUME,(int)&vol))
       return;
   }
+ muted=0;
 }
 
 #define MIXER_CHANGE 3
@@ -66,7 +71,16 @@ float mixer_getbothvolume( void )
  return ( mixer_l + mixer_r ) / 2;
 }
 
-
+void mixer_mute( void )
+{
+ if ( muted ) mixer_setvolume( mute_l,mute_r );
+  else
+   { 
+    mixer_getvolume( &mute_l,&mute_r );
+    mixer_setvolume( 0,0 );
+    muted=1;
+   }
+}
 
 
 
