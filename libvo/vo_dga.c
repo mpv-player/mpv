@@ -298,7 +298,7 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 
   offset = vo_dga_width * y0 +x0;
   buffer_stride = vo_dga_width;
-  d = VIDEO_BUFFER_DRAW.data;
+  d = VIDEO_BUFFER_DRAW.data + vo_dga_vp_offset;
      
   switch( HW_MODE.vdm_mplayer_depth ){
 
@@ -345,7 +345,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
   char *s, *d;
 
   s = *src;
-  d = VIDEO_BUFFER_DRAW.data;
+  d = VIDEO_BUFFER_DRAW.data + vo_dga_vp_offset;
   
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
@@ -360,7 +360,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
   // DBG-COde
 
 #if 0
-  d = VIDEO_BUFFER_DRAW.data;
+  d = VIDEO_BUFFER_DRAW.data + vo_dga_vp_offset;
   fillblock(d, 0, 10, 0x800000ff);
   fillblock(d, 10, 10, 0x8000ff00);
   fillblock(d, 20, 10, 0x80ff0000);
