@@ -19,6 +19,9 @@
  * o works only on intel architectures
  *
  * $Log$
+ * Revision 1.10  2001/04/01 22:01:28  acki2
+ * - still more debug output to be able to fix 15/16 bpp problem
+ *
  * Revision 1.9  2001/04/01 08:07:14  acki2
  * - added detection of memsize of graphics card to check if double buffering is possible
  * - fixed resolution switching a little and added more debug output
@@ -261,11 +264,15 @@ static uint32_t query_format( uint32_t format )
         {
           // this only for debug reasons ...
 	  if(modelines[i].bitsPerPixel == 15 || modelines[i].bitsPerPixel == 16){
-              printf("vo_dga: depth: %d, %08x, %08x, %08x\n",
+              printf("vo_dga: num: %d, depth: %d, bpp: %d, %08x, %08x, %08x, %dx%d\n",
+		       i,
+		       modelines[i].depth,
 		       modelines[i].bitsPerPixel,
 		       modelines[i].redMask,
 		       modelines[i].greenMask,
-	               modelines[i].blueMask);			  
+	               modelines[i].blueMask,
+		       modelines[i].viewportWidth,
+		       modelines[i].viewportHeight);			  
           }
           for(k=0, dummy=1; k<modelines[i].bitsPerPixel-1; k++)dummy <<=1;
 	  dga_depths |= dummy;
@@ -498,6 +505,9 @@ static uint32_t init( uint32_t width,  uint32_t height,
   {
      if( modelines[i].bitsPerPixel == vo_dga_planes)
      {
+
+       printf("maxy: %4d, depth: %2d, %4dx%4d, ", modelines[i].maxViewportY, modelines[i].depth,
+		       modelines[i].imageWidth, modelines[i].imageHeight );
        if ( check_mode(i, d_width, d_height, modelines[i].bitsPerPixel,  
                   modelines[i].viewportWidth, 
                   modelines[i].viewportHeight, 
