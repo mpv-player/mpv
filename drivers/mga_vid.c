@@ -759,7 +759,7 @@ static int mga_vid_find_card(void)
 			printk(KERN_INFO "mga_vid: Couldn't detect RAMSIZE, assuming 16MB!");
 		}
 	    }else{
-		switch((card_option>>11)&3){
+		switch((card_option>>11)&1){
 		    case 0:  mga_ram_size = 8; break;
 		    default: mga_ram_size = 16;
 		}
