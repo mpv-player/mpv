@@ -175,11 +175,15 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	
     /* 512 IMDCT with source and dest data in 'data' */
 	
-    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
 #ifdef HAVE_SSE
+    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
+    /* Bit reversed shuffling */
 	asm volatile(
 		"xorl %%esi, %%esi			\n\t"
+		"leal bit_reverse_512, %%eax		\n\t"
 		"movl $1008, %%edi			\n\t"
+		"pushl %%ebp				\n\t" //use ebp without telling gcc
+		".balign 16				\n\t"
 		"1:					\n\t"
 		"movaps (%0, %%esi), %%xmm0		\n\t"
 		"movaps (%0, %%edi), %%xmm1		\n\t"
@@ -188,20 +192,25 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		"mulps sseSinCos1a(%%esi), %%xmm0	\n\t"
 		"mulps sseSinCos1b(%%esi), %%xmm1	\n\t"
 		"addps %%xmm1, %%xmm0			\n\t"
-		"movaps %%xmm0, (%1, %%esi)		\n\t"
+		"movzbl (%%eax), %%edx			\n\t"
+		"movzbl 1(%%eax), %%ebp			\n\t"
+		"movlps %%xmm0, (%1, %%edx,8)		\n\t"
+		"movhps %%xmm0, (%1, %%ebp,8)		\n\t"
 		"addl $16, %%esi			\n\t"
+		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
 		"subl $16, %%edi			\n\t"
 		" jnc 1b				\n\t"
-		:: "r" (data), "r" (buf)
-		: "%esi", "%edi"
+		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
+		:: "b" (data), "c" (buf)
+		: "%esi", "%edi", "%eax", "%edx"
 	);
 #else
+    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     for( i=0; i < 128; i++) {
 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
 	buf[i].real =         (data[256-2*i-1] * xcos1[i])  -  (data[2*i]       * xsin1[i]);
 	buf[i].imag = -1.0 * ((data[2*i]       * xcos1[i])  +  (data[256-2*i-1] * xsin1[i]));
     }
-#endif
 
     /* Bit reversed shuffling */
     for(i=0; i<128; i++) {
@@ -209,6 +218,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	if (k < i)
 	    swap_cmplx(&buf[i],&buf[k]);
     }
+#endif
+
 
     /* FFT Merge */
 #ifdef HAVE_SSE
@@ -230,6 +241,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		"xorps %%xmm1, %%xmm1	\n\t"
 		"xorps %%xmm2, %%xmm2	\n\t"
 		"movl %0, %%esi		\n\t"
+		".balign 16				\n\t"
 		"1:			\n\t"
 		"movlps (%%esi), %%xmm0	\n\t" //buf[p]
 		"movlps 8(%%esi), %%xmm1\n\t" //buf[q]
@@ -271,6 +283,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	asm volatile(
 		"movaps ps111_1, %%xmm7		\n\t" // 1,1,1,-1
 		"movl %0, %%esi			\n\t"
+		".balign 16				\n\t"
 		"1:				\n\t"
 		"movaps 16(%%esi), %%xmm2	\n\t" //r2,i2,r3,i3
 		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
