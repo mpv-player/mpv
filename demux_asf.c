@@ -312,3 +312,59 @@ int demux_asf_fill_buffer(demuxer_t *demux){
     printf("%08X:  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",demux->filepos,asf_packet[0],asf_packet[1],asf_packet[2],asf_packet[3],asf_packet[4]);
     return 0;
 }
+
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
+
+void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+//    sh_video_t *sh_video=d_video->sh;
+
+  //FIXME: OFF_T - didn't test ASF case yet (don't have a large asf...)
+  //FIXME: reports good or bad to steve@daviesfam.org please
+
+  //================= seek in ASF ==========================
+    float p_rate=10; // packets / sec
+    off_t rel_seek_packs=rel_seek_secs*p_rate; // FIXME: int may be enough?
+    off_t rel_seek_bytes=rel_seek_packs*asf_packetsize;
+    off_t newpos;
+    //printf("ASF: packs: %d  duration: %d  \n",(int)fileh.packets,*((int*)&fileh.duration));
+//    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
+//       rel_seek_secs,rel_seek_packs,rel_seek_bytes);
+    newpos=demuxer->filepos+rel_seek_bytes;
+    if(newpos<0 || newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+//    printf("\r -- asf: newpos=%d -- \n",newpos);
+    stream_seek(demuxer->stream,newpos);
+
+    ds_fill_buffer(d_video);
+    if(sh_audio){
+      ds_fill_buffer(d_audio);
+      resync_audio_stream(sh_audio);
+    }
+    
+    while(1){
+	if(sh_audio && !d_audio->eof){
+	  float a_pts=d_audio->pts;
+          a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+	  // sync audio:
+          if (d_video->pts > a_pts){
+	      skip_audio_frame(sh_audio);
+//	      if(!ds_fill_buffer(d_audio)) sh_audio=NULL; // skip audio. EOF?
+	      continue;
+	  }
+	}
+	if(d_video->flags&1) break; // found a keyframe!
+	if(!ds_fill_buffer(d_video)) break; // skip frame.  EOF?
+    }
+
+
+}
+

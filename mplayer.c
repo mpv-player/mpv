@@ -1145,13 +1145,13 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
     float x=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
 //    audio_delay-=x;
     if(verbose) printf("AVI Initial frame delay: %5.3f\n",x);
+    delay_corrected=0; // has to correct PTS diffs
   }
   if(verbose){
 //    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  sh_audio->timer=%5.3f\n",
 //             audio_delay,audio_buffer_delay,a_pts,sh_audio->timer);
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
   }
-  delay_corrected=0; // has to correct PTS diffs
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
 } else {
   pts_from_bps=0; // it must be 0 for mpeg/asf !
@@ -1439,7 +1439,7 @@ if(1)
       // PTS = (audio position)/(bytes per sec)
 //      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
       a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
-      delay_corrected=1; // hack
+//      delay_corrected=1; // hack
       v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
       if(verbose)printf("%5.3f|",v_pts-d_video->pts);
     } else {
@@ -1759,7 +1759,8 @@ if(auto_quality>0){
      seek_to_sec = NULL;
   }
   
-  if(rel_seek_secs)
+if(rel_seek_secs){
+  current_module="seek";
   if(demux_seek(demuxer,rel_seek_secs,0)){
       // success:
 
@@ -1776,9 +1777,8 @@ if(auto_quality>0){
       fflush(stdout);
 
       if(sh_audio){
-        current_module="audio_reset";
+        current_module="seek_audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
-        current_module=NULL;
       }
 
 #ifdef USE_OSD
@@ -1801,7 +1801,9 @@ if(auto_quality>0){
   
   }
   rel_seek_secs=0;
-  
+  current_module=NULL;
+}
+
 //================= Update OSD ====================
 #ifdef USE_OSD
   if(osd_level>=2){

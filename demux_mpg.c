@@ -10,6 +10,7 @@ extern int verbose; // defined in mplayer.c
 #include "dvdauth.h"
 #include "stream.h"
 #include "demuxer.h"
+#include "parse_es.h"
 
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
@@ -32,8 +33,14 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
 
 //static unsigned int packet_start_pos=0;
 
-extern void *new_sh_audio(demuxer_t *demux,int id);
-extern void *new_sh_video(demuxer_t *demux,int id);
+//extern void *new_sh_audio(demuxer_t *demux,int id);
+//extern void *new_sh_video(demuxer_t *demux,int id);
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
@@ -332,5 +339,55 @@ do{
     return 0;
   }
   return 1;
+}
+
+extern off_t seek_to_byte;
+
+void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
+
+  //================= seek in MPEG ==========================
+        off_t newpos;
+        if(!sh_video->i_bps) // unspecified?
+          newpos=demuxer->filepos+2324*75*rel_seek_secs; // 174.3 kbyte/sec
+        else
+          newpos=demuxer->filepos+(sh_video->i_bps)*rel_seek_secs;
+
+        if(newpos<seek_to_byte) newpos=seek_to_byte; // for VCD
+#ifdef _LARGEFILE_SOURCE
+        newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
+#else
+        newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
+#endif
+        stream_seek(demuxer->stream,newpos);
+
+        // re-sync video:
+        videobuf_code_len=0; // reset ES stream buffer
+
+	ds_fill_buffer(d_video);
+	if(sh_audio){
+	  ds_fill_buffer(d_audio);
+	  resync_audio_stream(sh_audio);
+	}
+
+	while(1){
+	  int i;
+          if(sh_audio && !d_audio->eof && d_video->pts && d_audio->pts){
+	    float a_pts=d_audio->pts;
+            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+	    if(d_video->pts>a_pts){
+	      skip_audio_frame(sh_audio);  // sync audio
+	      continue;
+	    }
+          }
+          i=sync_video_packet(d_video);
+          if(i==0x1B3 || i==0x1B8) break; // found it!
+          if(!i || !skip_video_packet(d_video)) break; // EOF?
+        }
+
+
 }
 
