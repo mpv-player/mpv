@@ -2632,6 +2632,7 @@ EOF
      _dvdread=yes
   fi
 fi
+_def_mpdvdkit="#undef USE_MPDVDKIT"
 case "$_dvdread" in
   yes)
 	_largefiles=yes
@@ -2650,6 +2651,7 @@ case "$_dvdread" in
 	_def_dvdread='#define USE_DVDREAD 1'
 	_ld_css='-Llibmpdvdkit -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
+	_def_mpdvdkit="#define USE_MPDVDKIT 1"
 	echores "disabled by libmpdvdkit"
 	;;
 esac
@@ -3628,8 +3630,11 @@ $_def_sighandler
 /* Toggles debugging informations */
 $_def_debug
 
-/* Indicates is Ogle's libdvdread is available for DVD playback */
+/* Indicates that Ogle's libdvdread is available for DVD playback */
 $_def_dvdread
+
+/* Indicates that dvdread is from libmpdvdkit */
+$_def_mpdvdkit
 
 /* Additional options for libmpdvdkit*/
 $_def_dvd
