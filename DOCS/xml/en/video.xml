@@ -1720,7 +1720,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
-<title>Using your DVB card for watching Digital TV (DVB input module)</title>
+<title>Digital TV (DVB input module)</title>
+<para>You can use your DVB card for watching Digital TV.</para>
 </formalpara>
 
 <para>
