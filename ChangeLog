@@ -1,10 +1,10 @@
 mplayer (1.0)
 
-  pre3: "FilterCounter"
+  pre3:
 
     DOCS:
     * all MPlayer and MEncoder options documented
-    * all lavc options documented
+    * all FFmpeg/libavcodec options documented
     * Support for building incomplete XML documentation
     * Support for building all-in-one HTML docs
     * HTML documentation obsoleted
@@ -30,7 +30,7 @@ mplayer (1.0)
     * fixed tons of bugs in MMS streaming
     * user settable http user-agent field
     * improved (now working) seeking in realmedia format
-    * saveable and loadable mplayer index files (workaround for formats not
+    * saveable and loadable index files (workaround for formats not
       supporting files over 2GB)
     * Ultimotion VfW decoder
     * support for MMS streams with UTF urls
@@ -62,7 +62,7 @@ mplayer (1.0)
     * more VQA files supported
     * Theora support
     * Sunplus JPEG (SP5X) support
-    * H263 GOB fixes
+    * H.263 GOB fixes
     * massive cleanups
     * reduced memory footprint (!)
     * fixed decoding if aspect ratio changes
@@ -92,8 +92,8 @@ mplayer (1.0)
     * Noise reduction of DCT coefficients
     * "av_log" logging API
     * support for buffer hints from codecs
-    * bgr24, rgb555 and pal8 image formats
-    * 8bps, msrle, msvidc, qtrpza, smc, flic and truemotion1 decoders
+    * BGR24, RGB555 and PAL8 image formats
+    * 8BPS, MS RLE, MS Video1, QT RPZA, QT SMC, FLIC and TrueMotion1 decoders
     * 16x8 MV visualisation support
     * H.263 overlapped block motion compensation (OBMC), 4MV support
     * H.263 alternative inter vlc support
