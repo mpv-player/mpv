@@ -105,7 +105,7 @@ man.
 <listitem><para>
   Na Solarisie konieczne jest u¿ycie sterownika SUN przy pomocy opcji
   <option>-ao sun</option>, w przeciwnym wypadku nie bêdzie dzia³aæ ani audio,
-  ani wideo.
+  ani video.
   </para></listitem>
 <listitem><para>
   Je¶li d¼wiêk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
@@ -130,7 +130,7 @@ przez system <ulink url="http://www.alsa-project.org">ALSA</ulink>
 (Advanced Linux Sound Architecture). Je¿eli Twoja dystrybucja nie u¿ywa jeszcze
 ALSA, mo¿esz chcieæ j± wypróbowaæ, je¿eli bêdziesz mia³ jakie¶ k³opoty
 z d¼wiêkiem. Sterowniki ALSA generalnie przewy¿szaj± OSS pod wzglêdem zgodno¶ci,
-wydajno¶ci i mo¿liwo¶ci. Jednak niektóre karty s± obs³ugiwane wy³±cznie przez
+wydajno¶ci i mo¿liwo¶ci, Jednak niektóre karty s± obs³ugiwane wy³±cznie przez
 komercyjn± wersjê OSS z witryny
 <ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
 Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
@@ -157,10 +157,10 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
     <entry spanname="driver">STEROWNIK</entry>
     <entry morerows="2" valign="middle">Maks. czêstotliwo¶æ (kHz)</entry>
     <entry morerows="2" valign="middle">Maks. liczba kana³ów</entry>
-    <entry morerows="2" valign="middle">Maks. liczba procesów
+    <entry morerows="2" valign="middle">Maks. liczba aplikacji
       <footnote id="maxopens">
-        <para>liczba procesów, które s± w stanie u¿ywaæ urz±dzenia
-         <emphasis>jednocze¶nie</emphasis>.</para>
+        <para>liczba aplikacji, które mog± <emphasis>jednocze¶nie</emphasis>
+         u¿ywaæ urz±dzenia.</para>
       </footnote>
     </entry>
   </row>
@@ -322,7 +322,7 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
     <entry>
       <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Sterowniki do PC speakera dla Linuksa (OSS)</ulink>
     </entry>
-    <entry>Sterownik emuluje 44,1, mo¿e wiêcej.</entry>
+    <entry>Sterownik emuluje 44.1, mo¿e wiêcej.</entry>
     <entry>mono</entry>
     <entry>1</entry>
   </row>
@@ -505,7 +505,7 @@ ró¿nice.
 MPlayer w pe³ni obs³uguje zmniejszanie/zwiêkszanie czêstotliwo¶ci (up/downsampling)
 poprzez filtr zmieniaj±cy czêstotliwo¶æ próbkowania - <option>resample</option> filter.
 Mo¿e on byæ u¿yty, je¿eli masz sta³± czêstotliwo¶æ na karcie, albo je¿eli nie jest
-ona w stanie obs³u¿yæ wiêcej ni¿ 44,1kHz. Filtr jest automatycznie uruchamiany,
+ona w stanie obs³u¿yæ wiêcej ni¿ 44.1kHz. Filtr jest automatycznie uruchamiany,
 je¿eli jest to konieczne, ale mo¿e równie¿ zostaæ w³±czony z poziomu linii poleceñ.
 Ma on trzy opcje:
 </para>
@@ -703,7 +703,7 @@ Oblicz opó¼nienia w nastêpuj±cy sposób
 <para>
 Przyk³ad:
 <screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
-opó¼ni lewy i prawy przedni g³o¶nik o 10,5ms, dwa tylne i subwoofer o 0ms a
+opó¼ni lewy i prawy przedni g³o¶nik o 10.5ms, dwa tylne i subwoofer o 0ms a
 centralny o 7ms.
 </para>
 
@@ -749,7 +749,7 @@ dopóki syczenie w tle nie ustanie. Filtr ma dwie opcje:
 <para>
 Przyk³ad:
 <screen>mplayer -af volume=10.1:0 media.avi</screen>
-wzmocni d¼wiêk o 10,1dB i zastosuje metodê twardego obcinania (hard-clip), je¿eli 
+wzmocni d¼wiêk o 10.1dB i zastosuje metodê twardego obcinania (hard-clip), je¿eli 
 poziom d¼wiêku jest za wysoki.
 </para>
 
@@ -778,16 +778,16 @@ czêstotliwo¶ci dla tych 10 pasm to:
   </row>
 </thead>
 <tbody>
-  <row><entry>0</entry><entry>31,25 Hz</entry></row>
-  <row><entry>1</entry><entry>62,50 Hz</entry></row>
-  <row><entry>2</entry><entry>125,0 Hz</entry></row>
-  <row><entry>3</entry><entry>250,0 Hz</entry></row>
-  <row><entry>4</entry><entry>500,0 Hz</entry></row>
-  <row><entry>5</entry><entry>1,000 kHz</entry></row>
-  <row><entry>6</entry><entry>2,000 kHz</entry></row>
-  <row><entry>7</entry><entry>4,000 kHz</entry></row>
-  <row><entry>8</entry><entry>8,000 kHz</entry></row>
-  <row><entry>9</entry><entry>16,00 kHz</entry></row>
+  <row><entry>0</entry><entry>31.25 Hz</entry></row>
+  <row><entry>1</entry><entry>62.50 Hz</entry></row>
+  <row><entry>2</entry><entry>125.0 Hz</entry></row>
+  <row><entry>3</entry><entry>250.0 Hz</entry></row>
+  <row><entry>4</entry><entry>500.0 Hz</entry></row>
+  <row><entry>5</entry><entry>1.000 kHz</entry></row>
+  <row><entry>6</entry><entry>2.000 kHz</entry></row>
+  <row><entry>7</entry><entry>4.000 kHz</entry></row>
+  <row><entry>8</entry><entry>8.000 kHz</entry></row>
+  <row><entry>9</entry><entry>16.00 kHz</entry></row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -1039,7 +1039,7 @@ Obecnie wtyczki audio nie mog± zostaæ u¿yte w <application>MEncoderze</applicati
 <application>MPlayer</application> w pe³ni obs³uguje zmniejszanie/zwiêkszanie
 czêstotliwo¶ci próbkowania (up/downsampling) d¼wiêku. Wtyczka ta mo¿e byæ
 u¿yta, je¿eli masz kartê ze sta³± czêstotliwo¶ci± lub posiadasz kartê, która 
-nie jest w stanie obs³u¿yæ wiêcej ni¿ 44,1 kHz. Ograniczenia Twojego sprzêtu
+nie jest w stanie obs³u¿yæ wiêcej ni¿ 44.1 kHz. Ograniczenia Twojego sprzêtu
 nie s± automatycznie wykrywane, wiêc musisz wyra¼nie podaæ czêstotliwo¶æ.
 Wtyczka ma jeden prze³±cznik: <option>fout</option>, który u¿ywany jest do
 ustawiania ¿±danej czêstotliwo¶ci wyj¶ciowej. Domy¶ln± warto¶ci± jest
