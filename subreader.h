@@ -5,6 +5,7 @@ extern int sub_uses_time;
 extern int sub_errs;
 extern int sub_num;         // number of subtitle structs
 extern int suboverlap_enabled;
+extern int sub_no_text_pp;  // disable text post-processing
 
 // subtitle formats
 #define SUB_INVALID   -1

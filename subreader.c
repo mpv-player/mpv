@@ -32,6 +32,8 @@ int sub_uses_time=0;
 int sub_errs=0;
 int sub_num=0;          // number of subtitle structs
 int sub_slacktime=2000; // 20 seconds
+int sub_no_text_pp=0;   // 1 => do not apply text post-processing
+                        // like {\...} elimination in SSA format.
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
@@ -1132,7 +1134,7 @@ subtitle* sub_read_file (char *filename, float fps) {
 	  return NULL; 
 	 }
         // Apply any post processing that needs recoding first
-        if ((sub!=ERR) && srp->post) srp->post(sub);
+        if ((sub!=ERR) && !sub_no_text_pp && srp->post) srp->post(sub);
 #ifdef USE_SORTSUB
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
