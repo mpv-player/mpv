@@ -52,11 +52,11 @@ extern "C" char* def_path;
     static DS_Filter* dsf=0;
 
     static AM_MEDIA_TYPE m_sOurType, m_sDestType;
-    static VIDEOINFOHEADER m_sVhdr;
+    static VIDEOINFOHEADER *m_sVhdr;
     static VIDEOINFOHEADER *m_sVhdr2;
     static void* m_pCust;
 
-    static BITMAPINFOHEADER m_bh;//format of input data
+    static BITMAPINFOHEADER *m_bh;//format of input data
     static BitmapInfo m_decoder;//format of decoder output
     static BitmapInfo m_obh;  //format of returned frames
 //    CImage* m_outFrame;
@@ -76,29 +76,46 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
 
     try
     {
-	m_bh=*format;
+	m_bh=format;
 	memset(&m_obh, 0, sizeof(m_obh));
 	m_obh.biSize=sizeof(m_obh);
 
+#if 0
 	memset(&m_sVhdr, 0, sizeof(m_sVhdr));
 	m_sVhdr.bmiHeader=m_bh;
 	m_sVhdr.rcSource.left=m_sVhdr.rcSource.top=0;
 	m_sVhdr.rcSource.right=m_sVhdr.bmiHeader.biWidth;
         m_sVhdr.rcSource.bottom=m_sVhdr.bmiHeader.biHeight;
 	m_sVhdr.rcTarget=m_sVhdr.rcSource;
-        m_sOurType.majortype=MEDIATYPE_Video;
+#else
+        unsigned bihs = (format->biSize < (int) sizeof(BITMAPINFOHEADER)) ?
+            sizeof(BITMAPINFOHEADER) : format->biSize;
+         bihs = sizeof(VIDEOINFOHEADER) - sizeof(BITMAPINFOHEADER) + bihs;
 
+        m_sVhdr = (VIDEOINFOHEADER*) new char[bihs];
+        memset(m_sVhdr, 0, bihs);
+        memcpy(&m_sVhdr->bmiHeader, m_bh, m_bh->biSize);
+	
+        m_sVhdr->rcSource.left = m_sVhdr->rcSource.top = 0;
+        m_sVhdr->rcSource.right = m_sVhdr->bmiHeader.biWidth;
+        m_sVhdr->rcSource.bottom = m_sVhdr->bmiHeader.biHeight;
+        m_sVhdr->rcTarget = m_sVhdr->rcSource;
+#endif
+        m_sOurType.majortype=MEDIATYPE_Video;
 	m_sOurType.subtype=MEDIATYPE_Video;
-        m_sOurType.subtype.f1=m_sVhdr.bmiHeader.biCompression;
+        m_sOurType.subtype.f1=m_sVhdr->bmiHeader.biCompression;
 	m_sOurType.formattype=FORMAT_VideoInfo;
         m_sOurType.bFixedSizeSamples=false;
 	m_sOurType.bTemporalCompression=true;
 	m_sOurType.pUnk=0;
-        m_sOurType.cbFormat=sizeof(m_sVhdr);
-        m_sOurType.pbFormat=(char*)&m_sVhdr;
+//        m_sOurType.cbFormat=sizeof(m_sVhdr);
+//        m_sOurType.pbFormat=(char*)&m_sVhdr;
+        m_sOurType.cbFormat = bihs;
+        m_sOurType.pbFormat = (char*)m_sVhdr;
 
 	m_sVhdr2=(VIDEOINFOHEADER*)(new char[sizeof(VIDEOINFOHEADER)+12]);
-	*m_sVhdr2=m_sVhdr;
+//	*m_sVhdr2=m_sVhdr;
+        memcpy(m_sVhdr2, m_sVhdr, sizeof(VIDEOINFOHEADER)+12);
 	m_sVhdr2->bmiHeader.biCompression=0;
 	m_sVhdr2->bmiHeader.biBitCount=24;
 
@@ -114,8 +131,7 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
 	m_sDestType.pUnk=0;
 	m_sDestType.cbFormat=sizeof(VIDEOINFOHEADER);
         m_sDestType.pbFormat=(char*)m_sVhdr2;
-
-	m_obh=m_bh;
+	m_obh = *m_bh;
 	m_obh.setBits(24);	
         
 	HRESULT result;
@@ -218,7 +234,7 @@ extern "C" int DS_VideoDecoder_DecodeFrame(char* src, int size, int is_keyframe,
 
     if(!size)return 0;
 
-        m_bh.biSizeImage=size;
+        m_bh->biSizeImage=size;
 
         IMediaSample* sample=0;
         //printf("GetBuffer... (m_pAll=%X) ",dsf->m_pAll);fflush(stdout);
@@ -336,7 +352,7 @@ extern "C" int DS_VideoDecoder_SetDestFmt(int bits, int csp){
 //    m_obh=temp;
 //    if(csp)
 //	m_obh.biBitCount=BitmapInfo::BitCount(csp);
-    m_bh.biBitCount=bits;
+    m_bh->biBitCount=bits;
     if(dsf->m_iState>0)
     {
 	int old_state=dsf->m_iState;

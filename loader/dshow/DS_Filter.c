@@ -181,6 +181,8 @@ void DS_Filter::Start()
     if (m_iState != 1)
 	return;
 
+    m_pFilter->vt->Pause(m_pFilter);
+
     HRESULT hr=m_pFilter->vt->Run(m_pFilter, 0);
     if (hr != 0)
     {
@@ -194,6 +196,7 @@ void DS_Filter::Start()
         return;
     }
     m_pImp->vt->NotifyAllocator(m_pImp, m_pAll,	0);
+    
     m_iState = 2;
 }
 
