@@ -472,7 +472,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding4 "Centroeuropeo (ISO-8859-2)"
 #define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Gallego, Maltés, Turco (ISO-8859-3)"
 #define MSGTR_PREFERENCES_FontEncoding6 "Báltico (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Cirílico (ISO-8859-5)"dd
+#define MSGTR_PREFERENCES_FontEncoding7 "Cirílico (ISO-8859-5)"
 #define MSGTR_PREFERENCES_FontEncoding8 "Árabe (ISO-8859-6)"
 #define MSGTR_PREFERENCES_FontEncoding9 "Griego moderno (ISO-8859-7)"
 #define MSGTR_PREFERENCES_FontEncoding10 "Turco (ISO-8859-9)"
