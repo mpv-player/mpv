@@ -7,9 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-
 #include "af.h"
 
 // Data for specific instances of this filter
@@ -43,7 +40,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     int         lt = s->len; // Old len
 
     if(*((float*)arg) > 30 || *((float*)arg) < 0){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"Error setting delay length in af_delay. Delay must be between 0s and 30s\n");
+      af_msg(AF_MSG_ERROR,"Error setting delay length in af_delay. Delay must be between 0s and 30s\n");
       s->len=0;
       s->tlen=0.0;
       af->delay=0.0;
@@ -55,8 +52,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->delay = s->tlen * 1000.0;
     s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
     s->buf  = malloc(s->len);
-    mp_msg(MSGT_AFILTER,MSGL_DBG2,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
-    mp_msg(MSGT_AFILTER,MSGL_DBG3,"[delay] Delaying audio output by %i bytes\n",s->len);
+    af_msg(AF_MSG_DEBUG0,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
+    af_msg(AF_MSG_DEBUG1,"[delay] Delaying audio output by %i bytes\n",s->len);
 
     // Out of memory error
     if(!s->buf){

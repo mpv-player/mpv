@@ -287,13 +287,13 @@ int init_audio_filters(sh_audio_t *sh_audio,
   // input format: same as codec's output format:
   afs->input.rate   = in_samplerate;
   afs->input.nch    = in_channels;
-  afs->input.format = in_format;
+  afs->input.format = af_format_decode(in_format);
   afs->input.bps    = in_bps;
 
   // output format: same as ao driver's input format (if missing, fallback to input)
   afs->output.rate   = out_samplerate ? out_samplerate : afs->input.rate;
   afs->output.nch    = out_channels ? out_channels : afs->input.nch;
-  afs->output.format = out_format ? out_format : afs->input.format;
+  afs->output.format = af_format_decode(out_format ? out_format : afs->input.format);
   afs->output.bps    = out_bps ? out_bps : afs->input.bps;
 
   // filter config:  
@@ -375,7 +375,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
   afd.len=declen;
   afd.rate=sh_audio->samplerate;
   afd.nch=sh_audio->channels;
-  afd.format=sh_audio->sample_format;
+  afd.format=af_format_decode(sh_audio->sample_format);
   afd.bps=sh_audio->samplesize;
   //pafd=&afd;
 //  printf("\nAF: %d --> ",declen);

@@ -8,9 +8,6 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-
 #include "af.h"
 
 // Local function for copying data
@@ -70,7 +67,7 @@ void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, i
     break;
   }
   default:
-    mp_msg(MSGT_AFILTER,MSGL_ERR,"[channels] Unsupported number of bytes/sample: %i please report this error on the MPlayer mailing list. \n",bps);
+    af_msg(AF_MSG_ERROR,"[channels] Unsupported number of bytes/sample: %i please report this error on the MPlayer mailing list. \n",bps);
   }
 }
 
@@ -99,12 +96,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     // Sanity check
     if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > 6){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"[channels] The number of output channels must be between 1 and 6. Current value is%i \n",((int*)arg)[0]);
+      af_msg(AF_MSG_ERROR,"[channels] The number of output channels must be between 1 and 6. Current value is%i \n",((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->nch=((int*)arg)[0]; 
-    mp_msg(MSGT_AFILTER,MSGL_V,"[channels] Changing number of channels to %i\n",af->data->nch);
+    af_msg(AF_MSG_VERBOSE,"[channels] Changing number of channels to %i\n",af->data->nch);
     return AF_OK;
   }
   return AF_UNKNOWN;

@@ -6,9 +6,6 @@
 #include <malloc.h>
 #endif
 
-#include "../config.h"
-#include "../mp_msg.h"
-
 #include "af.h"
 
 // Static list of filters
@@ -31,6 +28,12 @@ static af_info_t* filter_list[]={ \
    NULL \
 };
 
+// Message printing
+af_msg_cfg_t af_msg_cfg={0,NULL,NULL};
+
+// CPU speed
+int* af_cpu_speed = NULL;
+
 /* Find a filter in the static list of filters using it's name. This
    function is used internally */
 af_info_t* af_find(char*name)
@@ -41,7 +44,7 @@ af_info_t* af_find(char*name)
       return filter_list[i];
     i++;
   }
-  mp_msg(MSGT_AFILTER,MSGL_ERR,"Couldn't find audio filter '%s'\n",name);
+  af_msg(AF_MSG_ERROR,"Couldn't find audio filter '%s'\n",name);
   return NULL;
 } 
 
@@ -69,7 +72,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if(!new){
-    mp_msg(MSGT_AFILTER,MSGL_ERR,"Could not allocate memory\n");
+    af_msg(AF_MSG_ERROR,"Could not allocate memory\n");
     return NULL;
   }  
   memset(new,0,sizeof(af_instance_t));
@@ -85,13 +88,13 @@ af_instance_t* af_create(af_stream_t* s, char* name)
      non-reentrant */
   if(new->info->flags & AF_FLAGS_NOT_REENTRANT){
     if(af_get(s,name)){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"There can only be one instance of the filter '%s' in each stream\n",name);  
+      af_msg(AF_MSG_ERROR,"There can only be one instance of the filter '%s' in each stream\n",name);  
       free(new);
       return NULL;
     }
   }
   
-  mp_msg(MSGT_AFILTER,MSGL_V,"Adding filter %s \n",name);
+  af_msg(AF_MSG_VERBOSE,"Adding filter %s \n",name);
   
   // Initialize the new filter
   if(AF_OK == new->info->open(new) && 
@@ -105,7 +108,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   }
   
   free(new);
-  mp_msg(MSGT_AFILTER,MSGL_ERR,"Couldn't create or open audio filter '%s'\n",name);  
+  af_msg(AF_MSG_ERROR,"Couldn't create or open audio filter '%s'\n",name);  
   return NULL;
 }
 
@@ -206,56 +209,62 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
     case AF_OK:
       break;
     case AF_FALSE:{ // Configuration filter is needed
-      af_instance_t* new = NULL;
-      // Insert channels filter
-      if((af->prev?af->prev->data->nch:s->input.nch) != in.nch){
-	// Create channels filter
-	if(NULL == (new = af_prepend(s,af,"channels")))
+      // Do auto insertion only if force is not specified
+      if((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE){
+	af_instance_t* new = NULL;
+	// Insert channels filter
+	if((af->prev?af->prev->data->nch:s->input.nch) != in.nch){
+	  // Create channels filter
+	  if(NULL == (new = af_prepend(s,af,"channels")))
+	    return AF_ERROR;
+	  // Set number of output channels
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_CHANNELS,&in.nch)))
+	    return rv;
+	  // Initialize channels filter
+	  if(!new->prev) 
+	    memcpy(&in,&(s->input),sizeof(af_data_t));
+	  else
+	    memcpy(&in,new->prev->data,sizeof(af_data_t));
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
+	    return rv;
+	}
+	// Insert format filter
+	if(((af->prev?af->prev->data->format:s->input.format) != in.format) || 
+	   ((af->prev?af->prev->data->bps:s->input.bps) != in.bps)){
+	  // Create format filter
+	  if(NULL == (new = af_prepend(s,af,"format")))
+	    return AF_ERROR;
+	  // Set output format
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT,&in)))
+	    return rv;
+	  // Initialize format filter
+	  if(!new->prev) 
+	    memcpy(&in,&(s->input),sizeof(af_data_t));
+	  else
+	    memcpy(&in,new->prev->data,sizeof(af_data_t));
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
+	    return rv;
+	}
+	if(!new) // Should _never_ happen
 	  return AF_ERROR;
-	// Set number of output channels
-	if(AF_OK != (rv = new->control(new,AF_CONTROL_CHANNELS,&in.nch)))
-	  return rv;
-	// Initialize channels filter
-	if(!new->prev) 
-	  memcpy(&in,&(s->input),sizeof(af_data_t));
-	else
-	  memcpy(&in,new->prev->data,sizeof(af_data_t));
-	if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
-	  return rv;
+	af=new;
       }
-      // Insert format filter
-      if(((af->prev?af->prev->data->format:s->input.format) != in.format) || 
-	 ((af->prev?af->prev->data->bps:s->input.bps) != in.bps)){
-	// Create format filter
-	if(NULL == (new = af_prepend(s,af,"format")))
-	  return AF_ERROR;
-	// Set output format
-	if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT,&in)))
-	  return rv;
-	// Initialize format filter
-	if(!new->prev) 
-	  memcpy(&in,&(s->input),sizeof(af_data_t));
-	else
-	  memcpy(&in,new->prev->data,sizeof(af_data_t));
-	if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
-	  return rv;
-      }
-      if(!new) // Should _never_ happen
-	return AF_ERROR;
-      af=new;
       break;
     }
     case AF_DETACH:{ // Filter is redundant and wants to be unloaded
-      af_instance_t* aft=af->prev;
-      af_remove(s,af);
-      if(aft)
-	af=aft;
-      else
-	af=s->first; // Restart configuration
+      // Do auto remove only if force is not specified
+      if((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE){
+	af_instance_t* aft=af->prev;
+	af_remove(s,af);
+	if(aft)
+	  af=aft;
+	else
+	  af=s->first; // Restart configuration
+      }
       break;
     }
     default:
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"Reinitialization did not work, audio filter '%s' returned error code %i\n",af->info->name,rv);
+      af_msg(AF_MSG_ERROR,"Reinitialization did not work, audio filter '%s' returned error code %i\n",af->info->name,rv);
       return AF_ERROR;
     }
     af=af->next;
@@ -289,13 +298,8 @@ int af_init(af_stream_t* s)
   s->input.len    = s->output.len    = 0;
 
   // Figure out how fast the machine is
-  if(AF_INIT_AUTO == (AF_INIT_TYPE_MASK & s->cfg.force)){
-#    if defined(HAVE_SSE) || defined(HAVE_3DNOWEX)
-    s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_FAST;
-#    else
-    s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_SLOW;
-#    endif
-  }
+  if(AF_INIT_AUTO == (AF_INIT_TYPE_MASK & s->cfg.force))
+    s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_TYPE;
 
   // Check if this is the first call
   if(!s->first){
@@ -379,7 +383,7 @@ int af_init(af_stream_t* s)
        (s->last->data->nch    != s->output.nch)    || 
        (s->last->data->rate   != s->output.rate))  {
       // Something is stuffed audio out will not work 
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"Unable to setup filter system can not meet sound-card demands, please report this error on MPlayer development mailing list. \n");
+      af_msg(AF_MSG_ERROR,"Unable to setup filter system can not meet sound-card demands, please report this error on MPlayer development mailing list. \n");
       af_uninit(s);
       return -1;
     }
@@ -527,14 +531,14 @@ inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
   register int len = af_lencalc(af->mul,data);
-  mp_msg(MSGT_AFILTER,MSGL_V,"Reallocating memory in module %s, old len = %i, new len = %i\n",af->info->name,af->data->len,len);
+  af_msg(AF_MSG_VERBOSE,"Reallocating memory in module %s, old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
   if(af->data->audio) 
     free(af->data->audio);
   // Create new buffer and check that it is OK
   af->data->audio = malloc(len);
   if(!af->data->audio){
-    mp_msg(MSGT_AFILTER,MSGL_ERR,"Could not allocate memory \n");
+    af_msg(AF_MSG_FATAL,"Could not allocate memory \n");
     return AF_ERROR;
   }
   af->data->len=len;

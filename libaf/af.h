@@ -1,4 +1,9 @@
+#include <stdio.h>
+
+#include "config.h"
 #include "control.h"
+#include "af_format.h"
+#include "af_mp.h"
 
 #ifndef __aop_h__
 #define __aop_h__
@@ -23,7 +28,7 @@ typedef struct frac_s
   int d; // Denominator
 } frac_t;
 
-// Flags used for defining the behavour of an audio filter
+// Flags used for defining the behavior of an audio filter
 #define AF_FLAGS_REENTRANT 	0x00000000
 #define AF_FLAGS_NOT_REENTRANT 	0x00000001
 
@@ -56,16 +61,27 @@ typedef struct af_instance_s
 }af_instance_t;
 
 // Initialization flags
+extern int* af_cpu_speed;
+
 #define AF_INIT_AUTO		0x00000000
 #define AF_INIT_SLOW		0x00000001
 #define AF_INIT_FAST		0x00000002
 #define AF_INIT_FORCE	  	0x00000003
 #define AF_INIT_TYPE_MASK 	0x00000003
 
+// Default init type 
+#ifndef AF_INIT_TYPE
+#if defined(HAVE_SSE) || defined(HAVE_3DNOW)
+#define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_FAST)
+#else
+#define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_SLOW)
+#endif
+#endif
+
 // Configuration switches
 typedef struct af_cfg_s{
   int force;	// Initialization type
-  char** list;	/* list of names of plugins that are added to filter
+  char** list;	/* list of names of filters that are added to filter
 		   list during first initialization of stream */
 }af_cfg_t;
 
@@ -78,7 +94,7 @@ typedef struct af_stream_s
   // Storage for input and output data formats
   af_data_t input;
   af_data_t output;
-  // Cofiguration for this stream
+  // Configuration for this stream
   af_cfg_t cfg;
 }af_stream_t;
 
@@ -92,7 +108,7 @@ typedef struct af_stream_s
 #define AF_FALSE    0
 #define AF_UNKNOWN -1
 #define AF_ERROR   -2
-#define AF_NA      -3
+#define AF_FATAL   -3
 
 
 
@@ -100,12 +116,12 @@ typedef struct af_stream_s
 // Export functions
 */
 
-/* Initialize the stream "s". This function creates a new fileterlist
-   if nessesary according to the values set in input and output. Input
+/* Initialize the stream "s". This function creates a new filter list
+   if necessary according to the values set in input and output. Input
    and output should contain the format of the current movie and the
    formate of the preferred output respectively. The function is
-   reentreant i.e. if called wit an already initialized stream the
-   stream will be reinitialized. The return value is 0 if sucess and
+   reentrant i.e. if called wit an already initialized stream the
+   stream will be reinitialized. The return value is 0 if success and
    -1 if failure */
 int af_init(af_stream_t* s);
 
@@ -187,8 +203,37 @@ int af_lencalc(frac_t mul, af_data_t* data);
 #define sign(a) (((a)>0)?(1):(-1)) 
 #endif
 
-#ifndef lround
-#define lround(a,b) ((b)((a)>=0.0?(a)+0.5:(a)-0.5))
+#ifndef lrnd
+#define lrnd(a,b) ((b)((a)>=0.0?(a)+0.5:(a)-0.5))
 #endif
 
+/* Error messages */
+
+typedef struct af_msg_cfg_s
+{
+  int level;   	/* Message level for debug and error messages max = 2
+		   min = -2 default = 0 */
+  FILE* err;	// Stream to print error messages to
+  FILE* msg;	// Stream to print information messages to
+}af_msg_cfg_t;
+
+extern af_msg_cfg_t af_msg_cfg; // Message 
+
+#define AF_MSG_FATAL	-3 // Fatal error exit immediately
+#define AF_MSG_ERROR    -2 // Error return gracefully
+#define AF_MSG_WARN     -1 // Print warning but do not exit (can be suppressed)
+#define AF_MSG_INFO	 0 // Important information
+#define AF_MSG_VERBOSE	 1 // Print this if verbose is enabled 
+#define AF_MSG_DEBUG0	 2 // Print if very verbose
+#define AF_MSG_DEBUG1	 3 // Print if very very verbose 
+
+/* Macro for printing error messages */
+#ifndef af_msg
+#define af_msg(lev, args... ) \
+((lev<AF_MSG_WARN)?(fprintf(af_msg_cfg.err?af_msg_cfg.err:stderr, ## args )): \
+((lev<=af_msg_cfg.level)?(fprintf(af_msg_cfg.msg?af_msg_cfg.msg:stdout, ## args )):0))
 #endif
+
+#endif /* __aop_h__ */
+
+

@@ -9,17 +9,10 @@
 */
 
 /* This audio filter changes the sample rate. */
-
-#define PLUGIN
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
-
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../libao2/afmt.h"
 
 #include "af.h"
 #include "dsp.h"
@@ -214,11 +207,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Set parameters
     af->data->nch    = n->nch;
-    af->data->format = AFMT_S16_NE;
+    af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
     af->data->bps    = 2;
     if(af->data->format != n->format || af->data->bps != n->bps)
       rv = AF_FALSE;
-    n->format = AFMT_S16_NE;
+    n->format = AF_FORMAT_NE | AF_FORMAT_SI;
     n->bps = 2;
 
     // Calculate up and down sampling factors
@@ -256,7 +249,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       // Design prototype filter type using Kaiser window with beta = 10
       if(NULL == w || NULL == s->w || 
 	 -1 == design_fir(s->up*L, w, &fc, LP|KAISER , 10.0)){
-	mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] Unable to design prototype filter.\n");
+	af_msg(AF_MSG_ERROR,"[resample] Unable to design prototype filter.\n");
 	return AF_ERROR;
       }
       // Copy data from prototype to polyphase filter
@@ -269,7 +262,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	}
       }
       free(w);
-      mp_msg(MSGT_AFILTER,MSGL_V,"[resample] New filter designed up: %i down: %i\n", s->up, s->dn);
+      af_msg(AF_MSG_VERBOSE,"[resample] New filter designed up: %i down: %i\n", s->up, s->dn);
     }
 
     // Set multiplier and delay
@@ -289,12 +282,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     // Sanity check
     if(((int*)arg)[0] < 8000 || ((int*)arg)[0] > 192000){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] The output sample frequency must be between 8kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
+      af_msg(AF_MSG_ERROR,"[resample] The output sample frequency must be between 8kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->rate=((int*)arg)[0]; 
-    mp_msg(MSGT_AFILTER,MSGL_V,"[resample] Changing sample rate to %iHz\n",af->data->rate);
+    af_msg(AF_MSG_VERBOSE,"[resample] Changing sample rate to %iHz\n",af->data->rate);
     return AF_OK;
   }
   return AF_UNKNOWN;

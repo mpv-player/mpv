@@ -21,16 +21,12 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../libao2/afmt.h"
-
 #include "af.h"
 #include "equalizer.h"
 
-#define NCH 	6     // Max number of channels
-#define L   	2     // Storage for filter taps
-#define KM  	10    // Max number of bands 
+#define NCH	AF_NCH // Number of channels
+#define L   	2      // Storage for filter taps
+#define KM  	10     // Max number of bands 
 
 #define Q   1.2247449 /* Q value for band-pass filters 1.2247=(3/2)^(1/2)
 			 gives 4dB suppression @ Fc*2 and Fc/2 */
@@ -80,13 +76,16 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
-    af->data->format = AFMT_S16_LE;
+    af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
     af->data->bps    = 2;
     
     // Calculate number of active filters
     s->K=KM;
-    while(F[s->K-1] > (float)af->data->rate/2.0)
+    while(F[s->K-1] > (float)af->data->rate/2.2)
       s->K--;
+    
+    if(s->K != KM)
+      af_msg(AF_MSG_INFO,"Limiting the number of filters to %i due to low sample rate.\n",s->K);
 
     // Generate filter taps
     for(k=0;k<s->K;k++)
@@ -95,7 +94,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Calculate how much this plugin adds to the overall time delay
     af->delay += 2000.0/((float)af->data->rate);
 
-    // Only AFMT_S16_LE is supported 
+    // Only signed 16 bit little endian is supported 
     if(af->data->format != ((af_data_t*)arg)->format || 
        af->data->bps != ((af_data_t*)arg)->bps)
       return AF_FALSE;

@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-
 #include "af.h"
 
 // Initialization and runtime control
@@ -15,7 +12,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT:
     memcpy(af->data,(af_data_t*)arg,sizeof(af_data_t));
-    mp_msg(MSGT_AFILTER,MSGL_V,"[dummy] Was reinitialized, rate=%iHz, nch = %i, format = 0x%08X and bps = %i\n",af->data->rate,af->data->nch,af->data->format,af->data->bps);
+    af_msg(AF_MSG_VERBOSE,"[dummy] Was reinitialized, rate=%iHz, nch = %i, format = 0x%08X and bps = %i\n",af->data->rate,af->data->nch,af->data->format,af->data->bps);
     return AF_OK;
   }
   return AF_UNKNOWN;
@@ -33,7 +30,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
   // Do something necessary to get rid of annoying warning during compile
   if(!af)
-    printf("EEEK: Argument af == NULL in af_dummy.c play().");
+    af_msg(AF_MSG_ERROR,"EEEK: Argument af == NULL in af_dummy.c play().");
   return data;
 }
 
