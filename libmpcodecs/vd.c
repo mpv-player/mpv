@@ -56,6 +56,7 @@ extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
 extern vd_functions_t mpcodecs_vd_lcl;
 extern vd_functions_t mpcodecs_vd_lzo;
+extern vd_functions_t mpcodecs_vd_qtvideo;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -115,6 +116,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_libdv,
 #endif
 	&mpcodecs_vd_lcl,
+#ifdef USE_QTX_CODECS
+	&mpcodecs_vd_qtvideo,
+#endif
 	NULL
 };
 
