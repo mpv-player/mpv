@@ -47,7 +47,9 @@ int guiCMDArray[] =
 
 void guiGetEvent( int type,char * arg )
 {
+#ifdef USE_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
+#endif 
  switch ( type )
   {
    case guiXEvent:
