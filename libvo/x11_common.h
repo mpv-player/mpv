@@ -22,6 +22,7 @@ extern int mLocalDisplay;
 extern int WinID;
 
 extern int vo_mouse_timer_const;
+extern int vo_mouse_autohide;
 
 int vo_init( void );
 int vo_hidecursor ( Display* , Window );

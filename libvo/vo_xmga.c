@@ -59,6 +59,10 @@ static unsigned int timer=0;
 static unsigned int timerd=0;
 #endif
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+
 static vo_info_t vo_info =
 {
  "X11 (Matrox G200/G4x0/G550 overlay in window using /dev/mga_vid)",
@@ -67,7 +71,6 @@ static vo_info_t vo_info =
  ""
 };
 
-//static Display              * mDisplay;
 static XGCValues              wGCV;
 
 static XImage               * myximage;
@@ -187,17 +190,9 @@ static int inited=0;
 
 static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t* info)
 {
- char                 * frame_mem;
-// uint32_t               frame_size;
-// int                    mScreen;
- unsigned int           fg, bg;
  char                 * mTitle=(title == NULL) ? "XMGA render" : title;
- char                 * name=":0.0";
- XSizeHints             hint;
  XVisualInfo            vinfo;
- XEvent                 xev;
 
- XGCValues              xgcv;
  unsigned long          xswamask;
 
  width+=width&1;
@@ -241,6 +236,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  vo_dwidth=d_width; vo_dheight=d_height;
  if ( vo_fs )
   { vo_old_width=d_width; vo_old_height=d_height; }
+ vo_mouse_autohide=1;
 
  switch ( vo_depthonscreen )
   {
@@ -263,10 +259,9 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
      vo_dwidth=vo_screenwidth;
      vo_dheight=vo_screenheight;
 #ifdef X11_FULLSCREEN
-     aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
+     aspect(&dwidth,&dheight,A_ZOOM);
 #endif
     }
-   dwidth=vo_dwidth; dheight=vo_dheight;
 
    XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
    mDepth=attribs.depth;
@@ -304,7 +299,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 #endif
    vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
 #ifdef HAVE_NEW_GUI
-  }
+  } else guiGetEvent( guiSetShVideo,0 );
 #endif
 
  set_window();

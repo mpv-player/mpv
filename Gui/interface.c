@@ -96,12 +96,10 @@ void guiGetEvent( int type,char * arg )
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetShVideo:
-        if ( arg )
 	 {
-	  tmp_sh_video_t * sh_video = (tmp_sh_video_t *)arg;
 	  mplResizeToMovieSize( vo_dwidth,vo_dheight );
-	  guiIntfStruct.MovieWidth=sh_video->disp_w;
-	  guiIntfStruct.MovieHeight=sh_video->disp_h;
+	  guiIntfStruct.MovieWidth=vo_dwidth;
+	  guiIntfStruct.MovieHeight=vo_dwidth;
          }
 	break;
 #ifdef USE_DVDREAD

@@ -1319,7 +1319,6 @@ fflush(stdout);
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
     {
-     guiGetEvent( guiSetShVideo,(char *)sh_video );
      guiGetEvent( guiSetFileName,filename );
      guiIntfStruct.StreamType=stream->type;
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;

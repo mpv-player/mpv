@@ -41,6 +41,10 @@ LIBVO_EXTERN(xv)
 
 #include "../postproc/rgb2rgb.h"
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+
 static vo_info_t vo_info =
 {
         "X11/Xv",
@@ -330,6 +334,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  image_height = height;
  image_width = width;
  image_format=format;
+ 
+ vo_mouse_autohide=1;
 
  vo_dwidth=d_width; vo_dheight=d_height;
  vo_fs=flags&1;
@@ -446,7 +452,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      }
 #endif
 #ifdef HAVE_NEW_GUI
-  }
+  } else guiGetEvent( guiSetShVideo,0 );
 #endif
 
      mp_msg(MSGT_VO,MSGL_V, "using Xvideo port %d for hw scaling\n",xv_port );

@@ -60,6 +60,7 @@ int mLocalDisplay;
 
 /* output window id */
 int WinID=-1;
+int vo_mouse_autohide = 0;
 
 #ifdef HAVE_XINERAMA
 int xinerama_screen = 0;
@@ -90,7 +91,10 @@ void vo_hidecursor ( Display *disp , Window win )
 }
 
 void vo_showcursor( Display *disp, Window win )
-{ XDefineCursor( disp,win,0 ); }
+{ 
+ if ( WinID==0 ) return;
+ XDefineCursor( disp,win,0 ); 
+}
 
 #ifdef	SCAN_VISUALS
 /*
@@ -384,6 +388,9 @@ static Atom           vo_MotifHints  = None;
 void vo_x11_decoration( Display * vo_Display,Window w,int d )
 {
 
+  if ( !WinID ) return;
+
+#if 0
   if(vo_fsmode&1){
     XSetWindowAttributes attr;
     attr.override_redirect = True;
@@ -394,6 +401,7 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
   if(vo_fsmode&8){
     XSetTransientForHint (vo_Display, w, RootWindow(vo_Display,mScreen));
   }
+#endif
 
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
@@ -464,7 +472,7 @@ int vo_x11_check_events(Display *mydisplay){
 
 // unsigned long  vo_KeyTable[512];
 
- if ( --vo_mouse_counter == 0 ) vo_hidecursor( mydisplay,vo_window );
+ if ( ( vo_mouse_autohide )&&( --vo_mouse_counter == 0 ) ) vo_hidecursor( mydisplay,vo_window );
  
  while ( XPending( mydisplay ) )
   {
@@ -513,11 +521,11 @@ int vo_x11_check_events(Display *mydisplay){
 	   }
            break;
       case MotionNotify:
-           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
+           if ( vo_mouse_autohide ) { vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const; }
            break;
 #ifdef HAVE_NEW_INPUT
       case ButtonPress:
-           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
+           if ( vo_mouse_autohide ) { vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const; }
            // Ignore mouse whell press event
            if(Event.xbutton.button > 3) {
 	   mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
@@ -530,7 +538,7 @@ int vo_x11_check_events(Display *mydisplay){
            mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
            break;
       case ButtonRelease:
-           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
+           if ( vo_mouse_autohide ) { vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const; }
            #ifdef HAVE_NEW_GUI
 	    // Ignor mouse button 1 - 3 under gui 
 	    if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
@@ -591,7 +599,7 @@ void vo_x11_fullscreen( void )
  vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
  XMapRaised( mDisplay,vo_window );
-
+ 
  XRaiseWindow( mDisplay,vo_window );
  XFlush( mDisplay );
 }
