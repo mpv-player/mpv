@@ -14,7 +14,7 @@ et la configuration de MPlayer. Ce n'est pas facile, mais pas vraiment difficile
 non plus. Si vous rencontrez un comportement différent de celui de mes explications,
 cherchez dans la doc et vous trouverez les réponses. Si vous voyez des liens, suivez-les
 et lisez attentivement ce qu'ils contiennent. Cela prendra du temps, mais ça en vaut
-VRAIMENT le coup.
+VRAIMENT la peine.
 </para>
 
 <para>
@@ -66,7 +66,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">SDL</emphasis> - pas obligatoire, mais peut aider dans certains cas (mauvaise sortie audio,
-    cartes vidéo qui rament avec le pilote xv). Utilisez toujours la plus récente
+    cartes vidéo qui rament avec le pilote xv). Utilisez toujours la plus récente version
     (à partir de 1.2.x).
   </para></listitem>
 <listitem><para>
@@ -76,7 +76,7 @@ recommandés.
     si vous prévoyez de travailler avec des fichiers jpeg.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - recommendé et décodeur (M)PNG par défaut.
+  <emphasis role="bold">libpng</emphasis> - Décodeur (M)PNG par défaut, recommandé.
   Requis pour la GUI.
   Utile pour <application>MPlayer</application> et <application>MEncoder</application>.
   </para></listitem>
@@ -154,18 +154,18 @@ recommandés.
   <emphasis role="bold">AVANT</emphasis> de compiler <application>MPlayer</application>,
   sinon aucun support Win32 ne sera compilé!
   <note><para>Le projet avifile a un paquet de codecs similaire, mais qui diffère
-    du notre. Si vous voulez avoir tous les codecs supportés, alors installez notre paquet
+    du nôtre. Si vous voulez avoir tous les codecs supportés, alors installez notre paquet
     (ne vous inquiétez pas, avifile fonctionne avec sans problèmes).</para>
   </note>
   Fonctionnalités:
   <itemizedlist>
   <listitem><simpara>
-    vous en aurez besoin si vous voulez lire ou encoder par exemple des films enregistrés
-    avec des compresseurs matériels divers, comme des cartes tune ou des caméras numériques
+    Vous en aurez besoin si vous voulez lire ou encoder par exemple des films enregistrés
+    avec des compresseurs matériels divers, comme des cartes tuner ou des caméras numériques
    (exemple: DV, ATI VCR, MJPEG)
     </simpara></listitem>
   <listitem><simpara>
-    requis si vous voulez lire des <emphasis role="bold">films WMV9/WMA9</emphasis>.
+    Requis si vous voulez lire des <emphasis role="bold">films WMV9/WMA9</emphasis>.
    </simpara></listitem>
   <listitem><simpara>
   Non requis pour les vieux ASF avec vidéo MP41 ou MP42 (bien que VoxWare audio soit
@@ -404,7 +404,7 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS!
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">C-Media avec sortie SP/DIF</emphasis>: e transfert AC3 matériel est possible
+  <emphasis role="bold">C-Media avec sortie SP/DIF</emphasis>: Le transfert AC3 matériel est possible
     avec ces cartes, voir la section <link linkend="hwac3">Décodage AC3 matériel</link>.
   </simpara></listitem>
 <listitem><simpara>

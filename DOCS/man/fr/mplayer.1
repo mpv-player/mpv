@@ -1,7 +1,7 @@
-.\" synced with 1.505
+.\" synced with 1.509
 .\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
-.\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
+.\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
 .
 .\" --------------------------------------------------------------------------
 .\" Définition des macros
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Décembre 2003"
+.TH MPlayer 1 "28 Décembre 2003"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -532,7 +532,7 @@ gèrent pas les retours chariot (c-a-d \\r).
 .B \-really-quiet
 Affiche encore moins de messages.
 .TP
-.B \-shuffle \ \
+.B \-shuffle
 Joue les fichiers en ordre aléatoire.
 .TP
 .B \-skin <répertoire\ des\ skin>
@@ -2686,7 +2686,7 @@ le déblocage vertical suivant le temps CPU disponible.
 .RE
 .PD 1
 .TP
-.B spp[=qualité[:qp]]\ \ \
+.B spp[=qualité[:qp]]
 filtre de postprocessing simple
 .RSs
 .IPs qualité
@@ -2820,7 +2820,7 @@ Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .TP
-.B ilpack[=mode]\
+.B ilpack[=mode]
 Quand de la vidéo entrelacée est stockée aux formats YUV 4:2:0, l'entrelacement
 chroma ne se fait pas proprement à cause du downsampling vertical des canaux
 chroma.
@@ -3330,6 +3330,36 @@ vert est dessiné sur l'écran pour simplifier la recherche des paramètres
 x,y,l,h.
 .RE
 .PD 1
+.TP
+.B zrmjpeg[=options]
+Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique zr2.
+De multiples options puvent être spécifiées, vous devez alors les séparer
+par ':'.
+.RSs
+.IPs maxheight=h|maxwidth=l
+Ces options initialisent les largeur et hauteur maximum que la carte zr peut
+gérer. (la couche de filtres de MPlayer ne peut actuellement pas les deviner)
+.IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
+Utilisez ces options pour initialiser maxwidth et maxheight automatiquement
+avec les valeurs connues de combinaisons carte/mode. Par exemple, voici des
+options valides: dc10-PAL et buz-NTSC. Les options par défaut sont dc10+PAL.
+.IPs color|bw
+Sélectionne l'encodage couleur ou noir et blanc. L'encodage N&B est plus
+rapide. L'encodage couleur est utilisé par défaut.
+.IPs hdec={1,2,4}
+Décimation horizontale 1, 2 ou 4.
+.IPs vdec={1,2,4}
+Décimation verticale 1, 2 ou 4.
+.IPs quality=1-20
+Définie la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS]
+.IPs fd|nofd
+Par défaut, la décimation n'est appliquée que si le matériel zoran peut
+agrandir les images MJPEG à leur taille originale. L'option fd dit au filtre de
+toujours appliquer la décimation demandée (sale).
+By default, decimation is only performed if the zoran hardware
+can upscale the resulting MJPEG images to the original size. The option
+fd instructs the filter to always perform the requested decimation (ugly).
+.RE
 .
 .
 .SH "OPTIONS D'ENCODAGE (MENCODER UNIQUEMENT)"
@@ -3898,6 +3928,16 @@ Identique à mbd=1, gardé pour raisons de compatibilité.
 Permet 4 vecteurs de mouvement par macrobloc (qualité légèrement meilleure).
 (par défaut: désactivé)
 .TP
+.B obmc\ \ \
+Compensation de bloc de mouvement (H263+)
+.TP
+.B loop\ \ \
+Filtre loop (H263+)
+note: c'est actuellement cassé
+.TP
+.B inter_threshold <-1000\-1000>
+Ne fait absolument rien pour l'instant.
+.TP
 .B keyint=<0\-300>
 intervalle entre les trames-clé en trames.
 Les trames-clé sont nécessaires pour les déplacement puisque celui-ci n'est
@@ -4028,7 +4068,7 @@ trame P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .B \
 Astuce: Pour faire de l'encodage avec quantizer constant avec des quantizers
 différents pour les trames I/P et B vous pouvez utiliser:
-vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
+lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .TP
 .B vqblur=<0.0\-1.0> (passe1)
 Flou quantizer, des valeurs plus importantes provoqueront plus de
@@ -4219,7 +4259,10 @@ désactivé (par défaut)
 bon choix
 .RE
 .TP
-.B gray
+.B ss\ \ \ \ \
+mode structuré en tranches pour H263+
+.TP
+.B gray\ \ \
 encodage en niveaux de gris uniquement (plus rapide) (par défaut: désactivé)
 .TP
 .B vfdct=<0\-10>
@@ -4325,6 +4368,16 @@ correcte.
 .TP
 .B ildct
 utilise un dct entrelacé
+.TP
+.B top=<-1\-1>\ \ \
+.RSs
+.IPs -1
+automatique
+.IPs 0
+champ du dessous en premier
+.IPs 1
+champ du dessus en premier
+.RE
 .TP
 .B format=<valeur>
 .RSs
@@ -4524,23 +4577,26 @@ toujours
 .PD 1
 .TP
 .B subq=<1\-8>
-ré-affinage de la qualité subpel (pour qpel) (par défaut: 8).
+Ré-affinage de la qualité subpel (pour qpel) (par défaut: 8).
 .I NOTE:
 Ceci a un effet significatif sur la vitesse.
 .TP
-.B psnr
-affiche le psnr (peak signal to noise ratio) pour l'ensemble de la vidéo après
+.B psnr\ \ \
+Affiche le psnr (peak signal to noise ratio) pour l'ensemble de la vidéo après
 l'encodage et stocke le psnr par trame dans un fichier comme 'psnr_012345.log'.
 Les valeurs de retour sont en dB (décibel), le plus haut est le mieux.
 .TP
 .IPs mpeg_quant
-utilise les quantizers MPEG au lieu de H.263.
+Utilise les quantizers MPEG au lieu de H.263.
 (par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
 .TP
-.B aic
+.B aic\ \ \ \
 Intra prédication avancée (H.263+ uniquement)
 .I NOTE:
-vqmin devrait être égal à 8 ou plus.
+vqmin devrait être égal à 8 ou plus pour AIC H263+.
+.TP
+.B aiv\ \ \ \
+alternatice inter vlc pour H.263+
 .TP
 .B umv
 VMs illimités (H.263+ uniquement)
@@ -4846,6 +4902,12 @@ mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
+.B Lecture sur carte zoran (ancienne méthode, depréciée)
+mplayer -vo zr -vf scale=352:288 file.avi
+.TP
+.B Lecture sur carte zoran (nouvelle méthode)
+mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
+.TP
 .B Encodage du titre #2 d'un DVD, uniquement les chapitres sélectionnés
 mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
 .TP
@@ -4883,20 +4945,21 @@ cat *.vob | mencoder <options> \-
 .\" --------------------------------------------------------------------------
 .
 .SH BOGUES
-Probablement.
-S'IL VOUS PLAIT, regardez la documentation (surtout bugreports.html),
-la FAQ et les archives des listes au moins deux fois avant!
-.br
-Envoyez vos rapports de bogue complets à la liste de diffusion à
-<mplayer-users@mplayerhq.hu>.
-Nous adorons les rapports de bogues complets :)
+Si vous en trouvez un, faites-nous un rapport, mais s'il vous plaît,
+assurez-vous d'avoir lu toute la documentation auparavant.
+Beaucoup de bogues sont le résultat d'une installation incorrecte ou d'une
+mauvaise utilisation des paramètres.
+La section sur les rapports de bogues (DOCS/HTML/fr/bugreports.html)
+explique comment créer des rapports de bogue utiles.
 .
 .
 .SH AUTEURS
-Voir la documentation.
+MPlayer était écrit à l'origine par Arpad Gereoffy.
+Voir le fichier AUTHORS pour la liste de certains des nombreux autres
+contributeurs.
 .TP
 MPlayer est (C) 2000\-2003
-.B Arpad Gereoffy
+.B The MPlayer Team
 .TP
 Cette page de man est écrite et maintenue par
 .B Gabucino
@@ -4908,13 +4971,13 @@ Cette page de man est écrite et maintenue par
 et traduite en français par
 .B Nicolas Le Gaillart < nicolas@legaillart.com >
 .PP
-Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-users.
+Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-DOCS.
 .
 .
 .SH "DÉNÉGATION STANDARD"
-A utiliser à vos risques et périls!
+A utiliser à vos risques et périls !
 Il peut y avoir des erreurs et inexactitudes qui peuvent endommager votre 
-système ou votre oeil.
+système ou vos yeux.
 Procédez avec précaution, et bien que ce ne soit souvent pas le cas, les auteurs
-déclinent toute responsabilités quant à l'utilisation de ce logiciel!
+déclinent toute responsabilités quant à l'utilisation de ce logiciel !
 .\" end of file

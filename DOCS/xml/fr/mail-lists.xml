@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.7 -->
 <appendix id="mailinglists">
 <title>Listes de diffusion</title>
 <para>
@@ -89,7 +89,8 @@ Choses relatives à la carte de décodage matériel appelé DVB (<emphasis role="bol
 <listitem><para>
 MPlayer CVS-log:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
-Tous les changements de code dans MPlayer sont automatiquement envoyés sur cette liste.
+Tous les changements de code dans <application>MPlayer</application> sont
+automatiquement envoyés sur cette liste.
 Seules les questions à propos de ses changements sont autorisées ici (si vous ne
 comprenez pas pourquoi un changement est requis ou si vous en avez un meilleur ou si
 vous avez remarquer un bogue/problème possible dans l'envoi).
@@ -97,12 +98,13 @@ vous avez remarquer un bogue/problème possible dans l'envoi).
 <listitem><para>
 Liste du portage Cygwin de MPlayer:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-Liste pour la discussion à propos du port MPlayer sur Cygwin.
+Liste pour la discussion à propos du portage <application>MPlayer</application>
+sous <application>Cygwin</application> et <application>MinGW</application>.
 </para></listitem>
 <listitem><para>
 Liste de portage OS/2 de MPlayer:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
-Liste pour les discussions sur le portage OS/2 de MPlayer.
+Liste pour les discussions sur le portage OS/2 de <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
 Liste des éditeurs et traducteurs des MPlayer Weekly News (Nouvelles Hebdomadaires de MPlayer):

@@ -25,18 +25,18 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
-  </para><para>codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
+  </para><para>Le codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
     mais c'&eacute;tait lent et &eacute;crit en C++ (A'rpi d&eacute;teste le C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000
-  </para><para>codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
+  </para><para>Le codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
     Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
     et 100% compatible avec les standards MPEG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">MPlayer v0.3-v0.9</emphasis>: 18 Nov-4 Dec 2000
-  </para><para>condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
+  </para><para>Un condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
     bas&eacute; sur le chargeur de DLL Win32 de avifile.
   </para></listitem>
 <listitem><para>
@@ -46,7 +46,7 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">série MPlayer v0.11pre</emphasis>:
   </para><para>De nouveaux d&eacute;veloppeurs ont joint le projet et depuis la version 0.11 le projet
-    MPlayer est un travail d'&eacute;quipe ! Ajout&eacute; le support des fichiers .ASF, et
+    MPlayer est un travail d'&eacute;quipe ! Ajout du support des fichiers .ASF, et
     de l'encodage/d&eacute;codage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
   </para></listitem>
 <listitem><para>
@@ -54,7 +54,7 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
   </para><para>La finalisation de la version 0.11pre apr&egrave;s 4 mois de d&eacute;veloppement intensif !
     Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalit&eacute;s...
     et bien 	s&ucirc;r le code existant a &eacute;t&eacute; am&eacute;lior&eacute;,
-    les bogues fix&eacute;s, etc...
+    les bogues fix&eacute;s, etc.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">MPlayer 0.18 "The BugCounter"</emphasis> 9 Juillet 2001
@@ -65,7 +65,7 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">MPlayer 0.50 "The Faszom(C)ounter"</emphasis> 8 Oct 2001
   </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version
-    b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao,port&eacute;
+    b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao, portage
     sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
     encore... Essayez le !
   </para></listitem>
@@ -78,8 +78,8 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">MPlayer 0.90pre10 "The BirthdayCounter"</emphasis> 11 Nov 2002
   </para><para>MPlayer 0.90pre10 "The BirthdayCounter" 11 Nov 2002
-    Bien que ce ne soit pas une version officielle, Je la mentionne parce qu'elle est sortie 2 ans
-    après MPlayer v0.01. Joyeux anniversaire, MPlayer!
+    Bien que ce ne soit pas une version officielle, je la mentionne parce qu'elle est sortie 2 ans
+    après MPlayer v0.01. Joyeux anniversaire, MPlayer !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">MPlayer 0.90rc1 "The CodecCounter"</emphasis> 7 Dec 2002
@@ -90,8 +90,8 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> 6 Avr 2003
   </para><para>
-  </para><para>Après plus d'un an, nous avons finalement conclus que le code était
-  de nouveau suffisemment stable, et prèt à sortir en temps que version officielle.
+  </para><para>Après plus d'un an, nous avons finalement conclu que le code était
+  de nouveau suffisemment stable, et pret à sortir en temps que version officielle.
   Malheureusement nous avons oublié d'incrémenter le numéro de version, et d'autres
   bogues ennuyeux sont apparus, donc préparez-vous pour...
   </para></listitem>
