@@ -103,8 +103,10 @@ Támogatott video outputok:
 Általános:
 - x11:  X11 az SHM kiterjesztéssel
 - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
-- gl:   OpenGL renderelõ, csak Utah-GLX-szel mûködik, vagy Matrox es
-        X >= 4.0.3 kombinacioval! (mas DRI vagy nVidia nem tamogatott!)
+- gl:   OpenGL renderelo, egyenlore csak ezekkel megy:
+        - barmely kartyaval, Utah-GLX-szel
+        - Matrox kartyak + X/DRI >=4.0.3
+        - Radeon + X/DRI CVS
 - dga:  X11 a DGA kiterjesztéssel
 - fsdga:X11 a DGA kiterjesztéssel + teljesképernyõs render (csak 24/32bpp
         és MPEG!)
@@ -196,7 +198,7 @@ Például egy épp most letöltött divx film megnézése:
 Egy ASF grabberrel vagy HTTP dump programmal a netrõl is lejátszhatsz.
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-(késõbb majd lesz közvetlen ASF/http/ftp olvasás, kereséssel stb, de egyelõre
+(késõbb majd lesz közvetlen ASF/http/ftp olvasás, tekeressel stb, de egyelõre
 ez van)
 
 TV output:

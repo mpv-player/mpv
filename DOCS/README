@@ -101,8 +101,10 @@ Supported video output devices:
 General:
 - x11:	X11 with SHM extension
 - xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-- gl:	OpenGL renderer, works only with Utah-GLX or Matrox with X >=4.0.3 !
-        (no other DRI or nVidia drivers)
+- gl:	OpenGL renderer, so far works only with :
+	- all cards with Utah-GLX
+	- Matrox cards with X/DRI >=4.0.3
+	- Radeon with X/DRI CVS
 - dga:	X11 DGA extension
 - fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
 - fbdev:Output to general framebuffers
