@@ -53,7 +53,6 @@ typedef struct bes_registers_s
   uint32_t p3_x_start_end;
   uint32_t base_addr;
   uint32_t vid_buf0_base_adrs;
-  /* These ones are for auto flip: maybe in the future */
   uint32_t vid_buf1_base_adrs;
   uint32_t vid_buf2_base_adrs;
   uint32_t vid_buf3_base_adrs;
@@ -1051,25 +1050,37 @@ int vixPlaybackOff( void )
 
 int vixPlaybackFrameSelect(unsigned frame)
 {
-    uint32_t off0,off1,off2;
-/*    if(!besr.double_buff) return; */
+    uint32_t off[6];
+    /*
+    buf3-5 always should point onto second buffer for better
+    deinterlacing and TV-in
+    */
     if(frame%2)
     {
-      off0 = besr.vid_buf3_base_adrs;
-      off1 = besr.vid_buf4_base_adrs;
-      off2 = besr.vid_buf5_base_adrs;
+      off[0] = besr.vid_buf3_base_adrs;
+      off[1] = besr.vid_buf4_base_adrs;
+      off[2] = besr.vid_buf5_base_adrs;
+      off[3] = besr.vid_buf0_base_adrs;
+      off[4] = besr.vid_buf1_base_adrs;
+      off[5] = besr.vid_buf2_base_adrs;
     }
     else
     {
-      off0 = besr.vid_buf0_base_adrs;
-      off1 = besr.vid_buf1_base_adrs;
-      off2 = besr.vid_buf2_base_adrs;
+      off[0] = besr.vid_buf0_base_adrs;
+      off[1] = besr.vid_buf1_base_adrs;
+      off[2] = besr.vid_buf2_base_adrs;
+      off[3] = besr.vid_buf3_base_adrs;
+      off[4] = besr.vid_buf4_base_adrs;
+      off[5] = besr.vid_buf5_base_adrs;
     }
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
-    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off0);
-    OUTREG(OV0_VID_BUF1_BASE_ADRS,	off1);
-    OUTREG(OV0_VID_BUF2_BASE_ADRS,	off2);
+    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[0]);
+    OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[1]);
+    OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[2]);
+    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[3]);
+    OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[4]);
+    OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[5]);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
     if(__verbose > 1) radeon_vid_dump_regs();
     return 0;
