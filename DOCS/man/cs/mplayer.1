@@ -1,4 +1,4 @@
-.\" synced with 1.739
+.\" synced with 1.758
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -193,6 +193,9 @@ Dále umí proudovì kopírovat (stream copy) a má rozsáhlý systém filtrù (crop,
 expand, flip, postprocess, rotate, scale, noise, konverze RGB/\:yuv) a mnoho
 dal¹ích.
 .PP
+Abyste mohli rychle zaèít, naleznete pøíklady pou¾ití na konci této manuálové
+stránky.
+.PP
 .B gmplayer
 je MPlayer s grafickým u¾ivatelským rozhraním (GUI).
 Má stejné volby jako MPlayer.
@@ -370,7 +373,7 @@ Pou¾ije vypsaný soubor namísto systémového nebo vestavìného souboru codecs.conf.
 Vypsaný soubor bude zpracován po ostatních konfiguraèních souborech.
 .
 .TP
-.B \-quiet \ \ 
+.B \-quiet\ \
 Ménì upovídaný výstup na konzoli; konkrétnì potlaèí zobrazování stavového øádku
 (tedy\& A:   0.7 V:   0.6 A-V:  0.068 ...).
 Volba je u¾iteèná na pomalých nebo vadných terminálech, které nezvládají
@@ -845,6 +848,10 @@ nebo ~/.mplayer/\:channels.conf jako poslední záchrana.
 .TP
 .B \-dvd-device <cesta\ k\ zaøízení> (pouze DVD)
 Nastaví jméno DVD mechaniky (default: /dev/\:dvd).
+Rovnì¾ mù¾ete zadat adresáø do kterého jste pøedtím pøímo zkopírovali soubory
+z DVD (napø. pomocí vobcopy).
+Poznamenejme ¾e pøedev¹ím pou¾ití \-dumpstream je obvykle lep¹í zpùsob
+kopírování DVD (viz. pøíklady).
 .
 .TP
 .B \-dvdangle <ID\ úhlu> (pouze DVD)
@@ -1445,11 +1452,11 @@ Urèí jak budou zarovnány titulky pøi pou¾ití \-subpos.
 .PD 0
 .RSs
 .IPs 0
-zarovnané na horní okraj (originální/\:defaultní chování)
+Zarovnané na horní okraj (originální/\:defaultní chování).
 .IPs 1
-zarovnané na støed
+Zarovnané na støed.
 .IPs 2
-zarovnané na spodní okraj
+Zarovnané na spodní okraj.
 .RE
 .PD 1
 .
@@ -2760,20 +2767,8 @@ Aktivuje prebuffering, zatím nepodporováno.
 .PD 1
 .
 .TP
-.B md5\ \ \ \ 
-Vytvoøí obrázek z ka¾dého snímku s pomocí \-vo pgm a zapí¹e
-jeho md5 otisk do souboru.
-Pou¾itelné pøi hledání chyb.
-.PD 0
-.RSs
-.IPs filename
-Umo¾òuje zadat jméno výstupního souboru (default: ./md5).
-.RE
-.PD 1
-.
-.TP
-.B md5sum\ 
-Spoèítá MD5 otisk pro ka¾dý snímek a zapí¹e je do souboru.
+.B md5sum\
+Spoèítá MD5 otisk jednotlivì pro v¹echny snímky a zapí¹e je do souboru.
 Podporuje barevné prostory RGB24 a YV12.
 Pou¾itelné pøi hledání chyb.
 .PD 0
@@ -2850,12 +2845,11 @@ faktor rozmazání (default: 0)
 faktor kvality (default: 75)
 .IPs outdir=<adresáø>
 Nastavuje adresáø do kterého se budou ukládat JPEG soubory (default: ./).
-.IPs subdirs=<hodnota>
-Bude vytváøet oèíslované podadresáøe se zadanou pøedponou.
-Defaultnì nejsou vytváøeny ¾ádné podadresáøe podadresáøe a v¹echny PNM soubory
-jsou zapsány do stejného adresáøe.
+.IPs subdirs=<pøedpona>
+Vytvoøí oèíslované podadresáøe se zadanou pøedponou, do kterých budou ukládány
+soubory místo aktuálního adresáøe.
 .IPs maxfiles=<hodnota> (pouze subdirs)
-Maximální poèet JPEG souborù ulo¾ených v jednom podadresáøi.
+Maximální poèet souborù ulo¾ených v jednom podadresáøi.
 Musí být vìt¹í nebo rovno 1 (default: 1000).
 .RE
 .PD 1
@@ -2865,11 +2859,7 @@ Musí být vìt¹í nebo rovno 1 (default: 1000).
 Vyexportuje ka¾dý snímek do PNM souboru v aktuálního adresáøe.
 Ka¾dý ze souborù je pojmenován èíslem snímku vèetnì úvodních nul.
 Podporuje PPM, PGM a PGMYUV soubory v re¾imu raw i ASCII.
-Viz té¾ 
-.BR pnm (5),
-.BR ppm (5)
-a
-.BR pgm (5).
+Viz té¾ pnm (5), ppm (5) a pgm (5).
 .PD 0
 .RSs
 .IPs ppm
@@ -2886,25 +2876,14 @@ Zapisuje PNM soubory v raw re¾imu (default).
 Zapisuje PNM soubory v ASCII re¾imu.
 .IPs outdir=<adresáø>
 Nastaví adresáø pro ukládání PNM souborù (default: ./).
-.IPs subdirs=<hodnota>
-Bude vytváøet oèíslované podadresáøe se zadanou pøedponou.
-Defaultnì nejsou vytváøeny ¾ádné podadresáøe podadresáøe a v¹echny PNM soubory
-jsou zapsány do stejného adresáøe.
+.IPs subdirs=<pøedpona>
+Vytvoøí oèíslované podadresáøe se zadanou pøedponou, do kterých budou ukládány
+soubory místo aktuálního adresáøe.
 .IPs maxfiles=<hodnota> (pouze subdirs)
 Maximální poèet PNM souborù ulo¾ených v jednom podadresáøi.
 Musí být vìt¹í nebo rovno 1 (default: 1000).
 .RE
 .PD 1
-.
-.TP
-.B pgm\ \ \ \ 
-Vyexportuje ka¾dý snímek do PGM souboru v aktuálním adresáøi.
-Ka¾dý soubor bude pojmenován èíslem snímku i s vodícími nulami.
-Podporuje pouze formát YV12.
-Výsledná velikost obrazu je (¹íøka) * (vý¹ka * 1.5) originálu.
-Na souøadnicích 0,0 máte slo¾ku Y v rozli¹ení ¹íøka,vý¹ka, na
-souøadnicích 0,vý¹ka máte slo¾ku U v rozli¹ení ¹íøka/2,vý¹ka/2
-a na ¹íøka/2,vý¹ka máte slo¾ku V v rozli¹ení ¹íøka/2,vý¹ka/2.
 .
 .TP
 .B png(viz také volbu \-z)
@@ -3208,10 +3187,25 @@ dekódování pouze èernobíle (o nìco rychlej¹í ne¾ barevnì)
 Nejlep¹í kvality dekódování dosáhnete pou¾itím stejného idct algoritmu jak pro
 dekódování, tak pro enkódování.
 Ov¹em cenou za to mù¾e být vìrnost.
+.IPs lowres=<èíslo>
+Dekóduje s ni¾¹ím rozli¹ením.
+Dekódování pøi nízkém rozli¹ení není podporováno v¹emi kodeky a èasto povede
+k zobrazování o¹klivých artefaktù.
+To není chyba, ale vedlej¹í úèinek nedekódování na plné rozli¹ení.
+.RSss
+.br
+0: vypnuto
+.br
+1: 1/2 rozli¹ení
+.br
+2: 1/4 rozli¹ení
+.br
+3: 1/8 rozli¹ení
+.REss
 .IPs "sb=<poèet> (pouze MPEG2)"
-Pøeskoèí zadaný poèet dolních makroblokových øad.
+Pøeskoèí zadaný poèet dolních øad makroblokù.
 .IPs "st=<poèet> (pouze MPEG2)"
-Pøeskoèí zadaný poèet horních makroblokových øad.
+Pøeskoèí zadaný poèet horních øad makroblokù.
 .IPs vismv=<hodnota>
 vizualizace pohybového vektoru:
 .RSss
@@ -3314,11 +3308,11 @@ Mo¾ná nastavení jsou:
 .PD 0
 .RSs
 .IPs 0
-rychlý bilineární (default)
+rychlý bilineární
 .IPs 1
 bilineární
 .IPs 2
-bikubický (dobrá kvalita)
+bikubický (dobrá kvalita) (default)
 .IPs 3
 experimentální
 .IPs 4
@@ -3771,7 +3765,7 @@ jednoduchý postprocesní filtr
 .IPs quality
 0\-6 (default: 3)
 .IPs qp\ \ \ 
-vynutí kvantizaèní parametr (default: 0, pou¾ije QP z videa)
+Vynutí kvantizaèní parametr (default: 0, pou¾ije QP z videa).
 .IPs mode\ \ \ 
 0: ostrý práh (default)
 .br
@@ -3780,10 +3774,10 @@ vynutí kvantizaèní parametr (default: 0, pou¾ije QP z videa)
 .
 .TP
 .B qp=rovnice
-parametr kvantizeru mìní filtr
+filtr pro zmìnu kvantizaèního parametru (QP)
 .RSs
 .IPs rovnice
-nìjaká rovnice jako "2+2*sin(PI*qp)"
+nìjaká rovnice napø. "2+2*sin(PI*qp)"
 .RE
 .
 .TP
@@ -4365,15 +4359,15 @@ Dostupné re¾imy jsou:
 .PD 0
 .RSs
 .IPs 0
-liché snímky do lichého pùlsnímku, sudé do sudého, vytvoøí video s plnou vý¹kou,
-ale polovièní snímkovou rychlostí
+Pøesune liché snímky do lichého (horního) pùlsnímku, sudé do sudého (spodního),
+vytvoøí video s plnou (2x pùvodní) vý¹kou, ale polovièní rychlostí snímkování.
 .IPs 1
-do výstupu jdou pouze liché snímky, sudé se zahodí, vý¹ka zùstane nezmìnìna
+Do výstupu jdou pouze liché snímky, sudé se zahodí, vý¹ka zùstane nezmìnìna.
 .IPs 2
-do výstupu jdou pouze sudé snímky, liché se zahodí, vý¹ka zùstane nezmìnìna
+Do výstupu jdou pouze sudé snímky, liché se zahodí, vý¹ka zùstane nezmìnìna.
 .IPs 3
-ka¾dý snímek je expandován na plnou vý¹ku, jednotlivé øádky jsou prolo¾eny
-èernou, rychlost snímkování se nezmìní
+Ka¾dý snímek je expandován na plnou (2x pùvodní) vý¹ku, ale jednotlivé øádky
+jsou prolo¾eny èernou; rychlost snímkování se nezmìní.
 .RE
 .PD 1
 .
@@ -4387,13 +4381,13 @@ Dostupné re¾imy jsou:
 .PD 0
 .RSs
 .IPs 0
-ponechat políèka beze zmìn (to zpùsobí poskakování/\:chvìní)
+Ponechá políèka beze zmìn. (To zpùsobí poskakování/\:chvìní.)
 .IPs 1
-odvodit chybìjící øádky (pou¾itý algoritmus nemusí být to pravé oøechové)
+Odvodí chybìjící øádky. (Pou¾itý algoritmus nemusí být to pravé oøechové.)
 .IPs 2
-pøekládá políèka o 1/\:4 pixelu s lineární interpolací (¾ádné poskakování)
+Pøekládá políèka o 1/4 pixelu s lineární interpolací (¾ádné poskakování).
 .IPs 4
-pøekládá políèka o 1/\:4 pixelu s 4tap filtrem (vy¹¹í kvalita)
+Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita).
 .RE
 .PD 1
 .
@@ -4402,45 +4396,44 @@ pøekládá políèka o 1/\:4 pixelu s 4tap filtrem (vy¹¹í kvalita)
 kubické rozostøení
 .PD 0
 .RSs
-.IPs prùmìr
-velikost filtru
-.IPs síla 
-Kolikrát bude filtr aplikován.
+.IPs <prùmìr>
+síla rozostøování
+.IPs <síla>
+poèet aplikací filtru
 .RE
 .PD 1
 .
 .TP
-.B sab=prùm:pf:rozdílBarev[:prùm:pf:rozdílBarev]
+.B sab=prùmìr:pf:rozdílBarev[:prùm:pf:rozdílBarev]
 tvarovì-adaptivní rozostøení
 .PD 0
 .RSs
-.IPs rad\ \ \ 
-síla rozostøení (~0.1\-4.0) (èím vìt¹í, tím pomalej¹í)
-.IPs pf\ \ \ 
+.IPs <prùmìr>
+síla rozostøování (~0.1\-4.0) (èím vìt¹í, tím pomalej¹í)
+.IPs <pf>\
 síla pre-filtru (~0.1\-2.0)
-.IPs rozdílBarev
-Jak moc rozdílné pixely budou zapoèítávány.
-(~0.1\-100.0)
+.IPs <rozdílBarev>
+maximální odli¹nost pixelù které je¹tì budou zapoèítávány (~0.1\-100.0)
 .RE
 .PD 1
 .
 .TP
-.B smartblur=prùm:síla:práh[:prùm:síla:práh]
+.B smartblur=prùmìr:síla:práh[:prùmìr:síla:práh]
 chytré rozostøení
 .PD 0
 .RSs
-.IPs prùm\ \ 
-síla rozostøení (~0.1\-5.0) (èím vìt¹í, tím pomalej¹í)
-.IPs síla
+.IPs <prùmìr>
+síla rozostøování (~0.1\-5.0) (èím vìt¹í, tím pomalej¹í)
+.IPs <síla>
 rozostøení (0.0\-1.0) nebo zaostøení (-1.0\-0.0)
-.IPs práh
+.IPs <práh>
 filtrovat v¹e (0), filtrovat plochy (0\-30) nebo filtrovat obrysy (-30\-0)
 .RE
 .PD 1
 .
 .TP
 .B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
-korekce perspektivy
+Koriguje perspektivu filmù, které nebyly natáèeny kolmo na obrazovku.
 .PD 0
 .RSs
 .IPs x0,y0,...
@@ -4452,7 +4445,7 @@ lineární (0) nebo kubické pøevzorkování (1)
 .
 .TP
 .B 2xsai\ \ 
-Pou¾ije 2x ¹kálovací a interpolaèní algoritmus pro ¹kálování a vyhlazování obrázkù.
+©káluje a vyhladí obrázek pomocí algoritmu 2x scale s interpolací.
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4471,17 +4464,19 @@ poèet øádkù pro vybrání ze støedu obrázku (default: 12)
 .PD 1
 .
 .TP
-.B bmovl=hidden:opaque:<fifo>
-Ète bitmapy z FIFO a zobrazuje je v oknì.
+.B bmovl=hidden:opaque:fifo
+Tento filtr pro pøekrývání bitmap ète bitmapy z FIFO a vykresluje je pøes film,
+co¾ umo¾òuje nekteré transformace.
+Viz také TOOLS/\:bmovl-test.c, co¾ je malý testovací program pro tento filtr.
 .PD 0
 .RSs
-.IPs hidden
-nastaví default hodnotu pro flag 'hidden' (boolean)
-.IPs opaque
-flag pøepínající mezi prùhledným (alfa-kanál) a neprùhledným (rychlý) re¾imem
-.IPs fifo\ 
-cesta/\:jméno_souboru pro FIFO (pojmenovaná roura spojující mplayer \-vf bmovl 
-s ovládacím programem)
+.IPs <hidden>
+Nastaví default hodnotu pro flag 'hidden' (0=viditelné, 1=skryté).
+.IPs <opaque>
+Nastaví default hodnotu pro flag 'opaque' (0=prùhledné (pozadí), 1=neprùhledné).
+.IPs <fifo>
+Nastaví cestu/\:jméno_souboru pro FIFO (pojmenovaná roura spojující
+mplayer \-vf bmovl s ovládacím programem)
 .RE
 .PD 1
 .sp 1
@@ -4495,20 +4490,20 @@ následováno ¹íøka*vý¹ka*4 Bajty hrubých RGBA32 dat.
 .IPs "ABGR32 ¹íøka vý¹ka xpozice ypozice alfa clear"
 následováno ¹íøka*vý¹ka*4 Bajty hrubých ABGR32 dat.
 .IPs "RGB24 ¹íøka vý¹ka xpozice ypozice alfa clear"
-následováno ¹íøka*vý¹ka*3 Bajty hrubých RGB32 dat.
+následováno ¹íøka*vý¹ka*3 Bajty hrubých RGB24 dat.
 .IPs "BGR24 ¹íøka vý¹ka xpozice ypozice alfa clear"
-následováno ¹íøka*vý¹ka*3 Bajty hrubých BGR32 dat.
+následováno ¹íøka*vý¹ka*3 Bajty hrubých BGR24 dat.
 .IPs "ALPHA ¹íøka vý¹ka xpozice ypozice alfa"
-zmìní alfu pro plochu
+Zmìní alfa prùhlednost zadané oblasti.
 .IPs "CLEAR ¹íøka vý¹ka xpozice ypozice"
-vyèistí plochu
+Vyèistí oblast.
 .IPs OPAQUE
-zaká¾e ve¹kerou prùhlednost.
+Zaká¾e ve¹kerou prùhlednost.
 Po¹lete "ALPHA 0 0 0 0 0" a¾ ji budete chtít znovu zapnout.
 .IPs HIDE\ 
-skryje bitmapu
+Skryje bitmapu.
 .IPs SHOW\ 
-uká¾e bitmapu
+Uká¾e bitmapu.
 .RE
 .PD 1
 .sp 1
@@ -4518,22 +4513,22 @@ Argumenty jsou:
 .PD 0
 .RSs
 .IPs "¹íøka, vý¹ka"
-rozmìr obrázku/\:plochy
+Nastaví rozmìr obrázku/oblasti.
 .IPs "xpozice, ypozice"
-zaèít vykreslování na pozici X/\:Y
-.IPs alpha
+Zaène vykreslování na pozici x/y
+.IPs "alfa"
 Nastaví rozdíl alfa.
 Pokud toto nastavíte na -255 mù¾ete pak poslat sekvenci ALPHA-pøíkazù pro 
 nastavení plochy na -225, -200, -175 atd pro hezký stmívací efekt! ;)
 .RSss
-0:    stejnì jako originál
+0:    Zùstává stejný jako pùvodní.
 .br
-255:  v¹e bude neprùhledné
+255:  Nastaví v¹e na neprùhledné.
 .br
--255: v¹e bude prùhledné
+-255: Nastaví v¹e na prùhledné.
 .REss
 .IPs clear
-vyèistí framebuffer pøed naná¹ením.
+Vyèistí framebuffer pøed naná¹ením.
 .RSss
 0: Obrázek bude vykreslen na pøedchozí, tak¾e nemusíte posílat 1,8MB RGBA32 
 dat kdykoli se zmìní malá èást obrázku.
@@ -4568,30 +4563,30 @@ Pokud zadáte pouze i, pak není se snímky vùbec nic provádìno, pouze je
 vypisováno 'I!'.
 .
 .TP
-.B tile=xtile:ytile:output:start:delta
+.B tile=xdla¾dic:ydla¾dic:poèet_polí:start:odstup
 Vykreslí sadu obrázkù do jednoho velkého jako dla¾dice.
 Pokud vynecháte parametr nebo pou¾ijete hodnotu men¹í ne¾ 0, je pou¾ita 
 defaultní hodnota. 
-Mù¾ete také skonèit jakmile jste OK (... \-vf tile=10:5 ...)
+Nastavování parametrù mù¾ete kdykoliv ukonèit (... \-vf tile=10:5 ...).
 Zaøadit scale filtr pøed tile se zdá být docela dobrý nápad :-)
 .sp 1
 Parametry jsou:
 .sp 1
 .PD 0
 .RSs
-.IPs xtile
+.IPs <xdla¾dic>
 poèet dla¾dic v ose x (default: 5)
-.IPs ytile
+.IPs <ydla¾dic>
 poèet dla¾dic v ose y (default: 5)
-.IPs output
-Vykreslit kompletní dla¾bu jakmile je zpracováno 'output' obrázkù, s tím ¾e 'output'
-by mìlo být èíslo men¹í ne¾ xtile * ytile.
+.IPs <poèet_polí>
+Vykreslí kompletní dla¾bu jakmile je zpracováno 'poèet_polí' obrázkù s tím,
+¾e 'poèet_polí' by mìlo být èíslo men¹í ne¾ xdla¾dic * ydla¾dic.
 Chybìjící dla¾dice jsou prázdné.
 Mù¾ete napøíklad zapsat dla¾bu 8 * 7 dla¾dic ka¾dých 50 snímkù a dostat jeden 
 obrázek ka¾dé 2 sekundy @ 25 fps.
-.IPs start
+.IPs <start>
 pixelù od kraje (x/\:y) (default: 2)
-.IPs delta
+.IPs <odstup>
 pixelù mezi 2 dla¾dicemi (x/\:y) (default: 4)
 .RE
 .PD 1
@@ -4604,7 +4599,7 @@ objeví nìco je¹tì ¹kared¹ího \- zále¾í na vkusu).
 .PD 0
 .RSs
 .IPs x,y
-Pozice levého horního rohu loga.
+Levý horní roh loga.
 .IPs ¹,v
 ©íøka a vý¹ka èi¹tìného obdélníku.
 .IPs t
@@ -5256,15 +5251,16 @@ Dostupné metody jsou:
 .IPs 0
 ¾ádná (mizerná kvalita)
 .IPs 1
-úplná (pomalé)
+úplná (pomalá, momentálnì neudr¾ovaná a vypnutá)
 .IPs 2
-log (nízká kvalita)
+log (nízká kvalita, momentálnì neudr¾ovaná a vypnutá)
 .IPs 3
-phods (nízká kvalita)
+phods (nízká kvalita, momentálnì neudr¾ovaná a vypnutá)
 .IPs 4
-EPZS: diamant velikost=1 (default)
+EPZS: diamant velikost=1, velikost mù¾e být nastavena pomocí *dia voleb
+(default)
 .IPs 5
-X1 (experimentální)
+X1 (experimentální, momentálnì je aliasem pro EPZS)
 .RE
 .PD 1
 .
@@ -5473,11 +5469,11 @@ kvantizaèní faktor mezi B a ne B snímky (prùchod\ 1/\:2) (default: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-(prùchod\ 1/\:2) (default: 0.8)
+kvantizaèní faktor mezi I a ne-I snímky (prùchod\ 1/\:2) (default: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-pøesah kvantizeru mezi B a ne B snímky (prùchod\ 1/\:2) (default: 1.25)
+pøesah kvantizace mezi B a ne B snímky (prùchod\ 1/\:2) (default: 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
@@ -5800,13 +5796,26 @@ rozumný rozsah
 .
 .TP
 .B tcplx_mask=<0.0\-1.0>
-maskování doèasné komplexnosti (default: 0.0 (vypnuto))
+Maskování doèasné komplexnosti (default: 0.0 (vypnuto)).
+.br
+Pøedstavme si scénu s ptákem letícím pøes celou obrazovku; tcplx_mask
+sní¾í kvantizery ptaèích makroblokù (co¾ sní¾í jejich kvalitu), proto¾e lidské
+oko si zpravidla nemá èas v¹imnout v¹ech ptaèích detailù.
+Upozoròujeme, ¾e pokud se maskovaný objekt zastaví (napø.\& pták pøistane),
+pak bude po urèitou dobu vypadat hroznì, dokud enkodér nepozná, ¾e se objekt
+nehýbe a potøebuje kvalitní makrobloky.
+U¹etøené bity jsou pou¾ity na zbytek scény, co¾ zvy¹uje subjektivní kvalitu a
+je dùvodem pro opatrné nasazování filtru.
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
 Maskování prostorové komplexnosti.
 Vìt¹í hodnoty potlaèují ètvereèkování, pokud není pou¾íván ¾ádný deblokovací 
-filtr pøi dekódování.
+filtr pøi dekódování, co¾ nebývá dobrý nápad.
+.br
+Pøedstavme si scénu s trávou (ta mívá vysokou prostorovou komplexnost), domem a
+modrým nebem. Filtr scplx_mask sní¾í kvantizery makroblokù trávy (co¾ sní¾í
+jejich kvalitu) a u¹etøené bity pou¾ije na dùm a oblohu.
 .br
 .I TIP:
 Oøíznìte ve¹keré èerné okraje, proto¾e sni¾ují kvalitu makroblokù (to 
@@ -5817,10 +5826,19 @@ vypnuto (default)
 .IPs 0.0\-0.5
 rozumný rozsah
 .RE
+.sp 1
+.I POZNÁMKA:
+Tato volba nemá stejný efekt jako pou¾ití u¾ivatelské matice která by více
+komprimovala vysoké kmitoèty, jeliko¾ scplx_mask sní¾í kvalitu P blokù dokonce
+i kdy¾ se mìní pouze DC.
+Výsledek scplx_mask tedy pravdìpodobnì nebude vypadat tak dobøe.
 .
 .TP
-.B p_mask=<0.0\-1.0>
-interní maskování MB (default: 0.0 (vypnuto))
+.B p_mask=<0.0\-1.0> (viz také vi_qfactor)
+Sní¾í kvalitu 'inter' (P) blokù.
+Co¾ zvý¹í kvalitu 'intra' (I) blokù, proto¾e prùmìrný datový tok je pøidìlený
+celé video sekvenci (default: 0.0 (vypnuto)).
+Nastavení p_mask=1.0 zdvojnásobí poèet bitù pøidìlených jednotlivým I blokùm.
 .
 .TP
 .B naq\ \ \ \ 
@@ -6041,7 +6059,7 @@ error a lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-konstanta závislá na parametru kvantizeru (QP)
+konstanta závislá na kvantizaèním parametru (QP)
 .IPs bits\ 
 mno¾ství bitù potøebných k zakódování bloku
 .IPs error
@@ -6062,7 +6080,7 @@ Nemá ¾ádný vliv pokud mbd=0.
 .
 .TP
 .B qprd (pouze mbd=2)
-Datovým tokem zkreslený optimální parametr kvantizeru QP pro danou
+Datovým tokem zkreslený optimální kvantizaèní parametr QP pro danou
 lambda ka¾dého makrobloku.
 .
 .TP
@@ -6684,18 +6702,13 @@ Nastaví datový tok k pou¾ití v kbitech/\:sekundu (default: vypnuto).
 Toto je nutné, pokud chcete provádìt CBR (konstantní datový tok) enkódování.
 .
 .TP
-.B iframe=<hodnota>
-Frekvence I snímkù (default: 60)
-Vy¹¹í frekvence klíèových (I) snímkù obvykle zlep¹uje kvalitu.
+.B keyint=<hodnota>
+Nastaví maximální interval mezi I snímky.
+Vy¹¹í hodnoty ¹etøí bity, co¾ zvy¹uje kvalitu za cenu ni¾¹í pøesnosti pøi
+pøetáèení (default: 250).
 .
 .TP
-.B frameref=<hodnota>
-Mno¾ství pøedchozích snímkù pou¾itých jako indície v P-snímku (default: 1).
-Mù¾e zpùsobit drobné zmìny datového toku a PSNR (odstup signál/\:¹um).
-Nìkteré dekodéry si nedoká¾í poradit s vysokými hodnotami frameref.
-.
-.TP
-.B idrframe=<hodnota>
+.B idrint=<hodnota>
 Ka¾dé <hodnota> I-Snímky jsou IDR-Snímky (default: 2).
 V H.264, nemusí být nutnì I-Snímky zapouzdøeny v GOP, proto¾e je mo¾né
 aby byl P-snímek iniciován z více snímkù ne¾ bezprostøednì pøedcházejícím
@@ -6705,12 +6718,21 @@ IDR-Snímky zabrání dal¹ím P-snímkùm ukazovat na jakýkoli snímek
 pøed IDR-Snímkem.
 .
 .TP
-.B bframe=<hodnota>
-poèet B-Snímkù mezi I- a P-Snímky (default: 0)
+.B frameref=<1\-15>
+Poèet pøedchozích snímkù pou¾itých pro pøedpovìdi v P snímku (default: 1).
+Filtr je efektivní na animovaných filmech, ale na hrané filmy, zdá se,
+má jen malý vliv.
+Nìkteré dekodéry si nejsou schopny poradit s vysokými hodnotami frameref.
 .
 .TP
-.B deblock=<0|1>
+.B bframes=<0\-16>
+poèet po sobì jdoucích B snímkù mezi I a P snímky (default: 0)
+.
+.TP
+.B deblock | nodeblock
 Pou¾ít deblokovací filtr (default: on).
+Vzhledem k tomu jak malý èas to zabere, v porovnání s nárùstem kvality,
+nedoporuèujeme volbu vypínat.
 .
 .TP
 .B deblockalpha=<-6\-6>
@@ -6731,10 +6753,11 @@ Beta parametr deblokovacího filtru (default: 0).
 Ovlivòuje maximální povolený gradient uvnitø dvou pøilehlých blokù.
 .
 .TP
-.B cabac\ \ \ 
-Pou¾ije CABAC (Kontextovì-Adaptivní Binární Aritmetické Kódování).
-Zpomalí enkódování, ale mìlo by u¹etøit 10-15% bitù.
-Tuto volbu byste mìli aktivovat v¾dy, kdy¾ není kritická rychlost enkódování.
+.B cabac | nocabac
+Pou¾ije CABAC (Kontextovì-Adaptivní Binární Aritmetické Kódování)
+(default: zapnuto).
+Zpomalí enkódování, ale mìlo by u¹etøit 10-15% datového toku.
+Tuto volbu byste nemìli vypínat, pokud nevy¾adujete maximální rychlost enkódování.
 .
 .TP
 .B cabacidc=<hodnota>
@@ -6754,21 +6777,21 @@ neovlivní jeho omezení.
 .REss
 .
 .TP
-.B qp_constant=<2\-51>
+.B qp_constant=<1\-51>
 Toto vybere kvantizer k pou¾ití.
 20\-40 je pou¾itelný rozsah (default: 26).
 Ni¾¹í hodnoty poskytují vy¹¹í vìrnost, ale vìt¹í datové toky.
 Poznamenejme, ¾e kvantizace v H.264 pracuje odli¹nì od MPEG[124].
-Parametr H.264 kvantizeru (QP) je na logaritmické stupnici.
+Kvantizaèní parametr (QP) kodeku H.264 je na logaritmické stupnici.
 Napøíklad rozdíl v datovém toku mezi QP=20 a QP=40 je kolem faktoru 10.
 Pou¾itelné kvantizery v H.264 bývají velmi velké, v porovnání s MPEG[124].
 .
 .TP
-.B qp_min=<2\-51> (pouze CBR)
-Minimální kvantizer, 15\-35 se zdá být pou¾itelný rozsah (default: 10).
+.B qp_min=<1\-51> (pouze CBR nebo 2-prùchodový re¾im)
+Minimální kvantizer, 15\-35 se zdá být pou¾itelným rozsahem (default: 10).
 .
 .TP
-.B qp_max=<2\-51>  (pouze CBR)
+.B qp_max=<1\-51>  (pouze CBR nebo 2-prùchodový re¾im)
 Maximální kvantizer (default: 51)
 .
 .TP
@@ -6785,7 +6808,7 @@ hor¹í ne¾ datový tok který jste zadali)
 Nastaví prvotní vyrovnávací pamì» regulátoru datového toku (default: 1/4 hodnoty rc_buffer_size)
 .
 .TP
-.B rc_sens=<0\-100>
+.B rc_sens=<0\-100> (pouze CBR)
 citlivost regulátoru datového toku (default: 4)
 .
 .TP
@@ -6816,29 +6839,13 @@ Ni¾¹í hodnoty umo¾òují ostøej¹í skoky hodnoty kvantizeru,
 vy¹¹í hodnoty vynucují pozvolnìj¹í zmìny.
 .
 .TP
-.B fullinter
+.B fullinter | nofullinter
 Pou¾ije ve snímku v¹echny dostupné typy makrobloku (i16x16, i4x4, p16x16-4x4)
 Úèelem je najít typ a rozmìr nejlépe odpovídající urèité oblasti obrázku,
 co¾ se projeví zejména na animované tvorbì, kde jsou obvyklé velké stejnobarevné
 oblasti (default: i16x16, i4x4, p16x16-8x8).
 V závislosti na zdrojovém materiálu mù¾e tato volba zlep¹it, ale i zhor¹it
 kvalitu. Pou¾ívejte opatrnì.
-.
-.TP
-.B log=<-1\-3>
-Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
-.RSs
--1: ¾ádné
-.br
- 0: Vypisuje pouze chyby.
-.br
- 1: varování
-.br
- 2: PSNR, èasy enkódování a dal¹í analytické statistiky po skonèení enkódování
-(default)
-.br
- 3: PSNR, QP, typ snímku, velikost a ostatní statistiky pro ka¾dý snímek
-.REss
 .
 .TP
 .B subq=<0\-5>
@@ -6861,7 +6868,23 @@ Takto mù¾ete znatelnì zlep¹it kvalitu.
 .REss
 .
 .TP
-.B psnr\ \ \ 
+.B log=<-1\-3>
+Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
+.RSs
+-1: ¾ádné
+.br
+ 0: Vypisuje pouze chyby.
+.br
+ 1: varování
+.br
+ 2: PSNR, èasy enkódování a dal¹í analytické statistiky po skonèení enkódování
+(default)
+.br
+ 3: PSNR, QP, typ snímku, velikost a ostatní statistiky pro ka¾dý snímek
+.REss
+.
+.TP
+.B psnr | nopsnr
 Tiskne statistiky odstupu signál-¹um.
 .
 .
@@ -6941,6 +6964,14 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Pøehrávání z odli¹ného DVD zaøízení:
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.
+.TP
+.B Pøehrávání DVD videa z adresáøe s VOB soubory:
+mplayer dvd://1 \-dvd-device /cesta/\:do/\:adresáøe/
+.
+.TP
+.B Zkopírování filmu z DVD disku na hard disk, ulo¾ení do souboru "titul1.vob":
+mplayer dvd://1 \-dumpstream \-dumpfile titul1.vob
 .
 .TP
 .B Pøehrávat proud z HTTP:
