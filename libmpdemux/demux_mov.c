@@ -1180,8 +1180,18 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT grayscale palette\n");
 		      if (palette_count == 16)
 		        memcpy(palette_map, qt_default_grayscale_palette_16, 16 * 4);
-		      else if (palette_count == 256)
+		      else if (palette_count == 256) {
 		        memcpy(palette_map, qt_default_grayscale_palette_256, 256 * 4);
+		        if (trak->fourcc == mmioFOURCC('c','v','i','d')) {
+		          int i;
+		          // Hack for grayscale CVID, negative palette
+		          // If you have samples where this is not required contact me (rxt)
+		          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: greyscale cvid with default palette,"
+		            " enabling negative palette hack.\n");
+		          for (i = 0; i < 256 * 4; i++)
+		            palette_map[i] = palette_map[i] ^ 0xff;
+		        }
+		      }
 		    }
 		    else
 		    {
