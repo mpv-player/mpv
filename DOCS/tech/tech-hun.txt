@@ -16,7 +16,7 @@ A fõ modulok:
 	 Egy stream (input device/file) leírására a stream_t struktura szolgál.
 	 
 2. demuxer.c: ez végzi az input szétszedését audio és video csatornákra,
-   és a kiválasztott scatornák bufferelt package-nkénti olvasását.
+   és a kiválasztott csatornák bufferelt package-nkénti olvasását.
 	 A demuxer.c inkább csak egy framework, ami közös minden input
 	 formátumra, és az egyes formátumokhoz (mpeg-es,mpeg-ps, avi, avi-ni, asf)
 	 külön parser van, ezek a demux_*.c fileokban vannak.
