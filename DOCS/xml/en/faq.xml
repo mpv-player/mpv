@@ -955,7 +955,7 @@ I have A/V sync problems. Some of my AVIs play fine, but some play with double s
 </para></question>
 <answer><para>
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
-try to play a file which has 22050Hz audio. Try the resample audio plugin.
+try to play a file which has 22050Hz audio. Try the resample audio filter.
 </para></answer>
 </qandaentry>
 
