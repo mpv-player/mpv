@@ -22,7 +22,7 @@ static char help_text[]=
 #endif
 " -ss <timepos>   αναζήτηση σε δεδομένη θέση (δευτερόλεπτα ή ωω:λλ:δδ)\n"
 " -nosound        μη αναπαραγωγή του ήχου\n"
-" -fs -vm -zoom   επιλογές για αναπαραγωγή σε πλήρη οθόνη (fullscr,vidmode chg,softw.scale)\n"
+" -fs   επιλογές για αναπαραγωγή σε πλήρη οθόνη (ή -vm -zoom, δείτε man page για περισσότερες πληροφορίες)\n"
 " -x <x> -y <y>   κλιμάκωση εικόνας σε <x> * <y> αναλύσεις [αν ο -vo οδηγός το υποστηρίζει!]\n"
 " -sub <αρχείο>   επιλογή του αρχείου υποτίτλων για χρήση (βλέπε επίσης -subfps, -subdelay)\n"
 " -playlist <αρχείο> ορίζει το αρχείο της λίστας αναπαραγωγής\n"
@@ -76,7 +76,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του ήχου %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Δεν είναι δυνατή η εύρεση της οικογένειας του οδηγού  του ήχου, χρήση άλλου οδηγού.\n"
 #define MSGTR_CantFindAudioCodec "Δεν είναι δυνατή η εύρεση του format του οδηγού του ήχου 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Δοκιμάστε να αναβαθμίσετε το %s από το etc/codecs.conf\n*** Αν ακόμα υπάρχει πρόβλημα, διαβάστε το DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Δοκιμάστε να αναβαθμίσετε το %s από το etc/codecs.conf\n*** Αν ακόμα υπάρχει πρόβλημα, διαβάστε το DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Αδύνατη η αρχικοποίηση του οδηγού του ήχου! -> χωρίς-ήχο\n"
 #define MSGTR_TryForceVideoFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του βίντεο %d ...\n"
 #define MSGTR_CantFindVideoCodec "Δεν είναι δυνατή η εύρεση του οδηγού  για τον συγκεκριμένο -vo και το format του βίντεο 0x%X !\n"
@@ -91,7 +91,7 @@ static char help_text[]=
 "         **************************************************************************\n\n"\
 "Πιθανές αιτίες, προβλήματα, λύσεις: \n"\
 "- Συνήθη αιτία: πρόβλημα με τον οδηγό του ήχου\n"\
-"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9. Διαβάστε το DOCS/sound.html για περισσότερες λύσεις!\n"\
+"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9. Διαβάστε το DOCS/en/sound.html για περισσότερες λύσεις!\n"\
 "  - Μπορείτε επίσης να πειραματιστείτε με διάφορες τιμές του -autosync, η τιμή  30 είναι μια καλή αρχή.\n"\
 "- Αργή έξοδος του βίντεο\n"\
 "  - Δοκιμάστε διαφορετικό -vo οδηγό (για λίστα: -vo help) ή δοκιμάστε με -framedrop\n"\
@@ -103,8 +103,8 @@ static char help_text[]=
 "  - Δοκιμάστε -cache 8192\n"\
 "- Μήπως χρησιμοποιείται -cache για την αναπαραγωγή ενός non-interleaved αρχείου;\n"\
 "  - Δοκιμάστε με -nocache\n"\
-"Διαβάστε το DOCS/video.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
-"Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/bugreports.html !\n\n"
+"Διαβάστε το DOCS/en/video.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
+"Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για GUI!\n"
 #define MSGTR_GuiNeedsX "Το GUI του MPlayer χρειάζεται X11!\n"
@@ -120,6 +120,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Διαθέσιμα codecs βίντεο:\n"
 #define MSGTR_AvailableAudioFm "\nΔιαθέσιμοι (compiled-in) οδηγοί/οικογένειες codec ήχου:\n"
 #define MSGTR_AvailableVideoFm "\nΔιαθέσιμοι (compiled-in) οδηγοί/οικογένειες codec βίντεο:\n"
+#define MSGTR_AvailableFsType "Διαθέσιμα επίπεδα αλλαγής σε πλήρη οθόνη:\n"
 #define MSGTR_UsingRTCTiming "Χρήση του hardware RTC του linux στα (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Βίντεο: αδύνατη η ανάγνωση ιδιοτήτων\n"
 #define MSGTR_NoStreamFound "Δεν βρέθηκε κανάλι\n"
@@ -131,12 +132,12 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Σχόλιο: %s\n"
 #define MSGTR_Video_NoVideo "Βίντεο: δεν υπάρχει βίντεο!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\n Σφάλμα: Αδύνατη η αρχικοποίηση του φίλτρου βίντεο (-vop) ή της έξοδου βίντεο (-vo) !\n"
-#define MSGTR_Paused "\n------ ΠΑΥΣΗ -------\r"
+#define MSGTR_Paused "\n  =====  ΠΑΥΣΗ  =====\r"
 #define MSGTR_PlaylistLoadUnable "\n Αδύνατη η φόρτωση  της λίστας αναπαραγωγής %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- Το MPlayer κατέρρευσε από ένα 'Illegal Instruction'.\n"\
 "  Μπορεί να είναι πρόβλημα στον νέο κώδικα για runtime CPU-αναγνώριση...\n"\
-"  Παρακαλούμε διαβάστε το DOCS/bugreports.html.\n"
+"  Παρακαλούμε διαβάστε το DOCS/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- Το MPlayer κατέρρευσε από ένα 'Illegal Instruction'.\n"\
 "  Συνήθως συμβαίνει όταν τρέχετε το πρόγραμμα σε διαφορετικό επεξεργαστή από αυτόν στον οποίο έγινε\n"\
@@ -144,11 +145,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Το Mplayer κατέρρευσε  από κακή χρήση του επεξεργαστή ή της μνήμης.\n"\
 "  Αναμεταγλωττίστε το MPlayer με --enable-debug και τρέξτε 'gdb' backtrace και\n"\
-"  disassembly. Για λεπτομέρειες, δείτε το DOCS/bugreports.html#crash\n"
+"  disassembly. Για λεπτομέρειες, δείτε το DOCS/en/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- Το MPlayer κατέρρευσε. Αυτό δεν θα έπρεπε να είχε συμβεί.\n"\
 "  Μπορεί να είναι ένα πρόβλημα στον κώδικα του MPlayer _ή_ στους οδηγούς σας _ή_ στην έκδοση\n"\
-"  του gcc σας. Αν νομίζετε ότι φταίει το MPlayer, παρακαλώ διαβάστε το DOCS/bugreports.html\n"\
+"  του gcc σας. Αν νομίζετε ότι φταίει το MPlayer, παρακαλώ διαβάστε το DOCS/en/bugreports.html\n"\
 "  και ακολουθήστε της οδηγίες. Δεν μπορούμε και δεν θα προσφέρουμε βοήθεια εκτός και αν στείλετε\n"\
 "  τις πληροφορίες όταν αναφέρετε το πρόβλημα.\n"
 
@@ -279,7 +280,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Μη δυνατη αναζήτηση σε raw .AVI κανάλια! (το index είναι απαραίτητο, δοκιμάστε με την επιλογή -idx!)  \n"
 #define MSGTR_CantSeekFile "Αδύνατη η αναζήτηση σε αυτό το αρχείο!  \n"
 
-#define MSGTR_EncryptedVOB "Κωδικοποιημένο VOB αρχείο (η μετάφραση έγινε χωρίς την libcss υποστήριξη)! Διαβάστε to DOCS/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Κωδικοποιημένο VOB αρχείο (η μετάφραση έγινε χωρίς την libcss υποστήριξη)! Διαβάστε to DOCS/en/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Κωδικοποιημένο κανάλι αλλά δεν ζητήθηκε πιστοποίηση!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Συμπιεσμένες επικεφαλίδες δεν υποστηρίζονται (ακόμα)!\n"
@@ -564,6 +565,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Κορεάτικα (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Ταϊλανδέζικη κωδικοσειρά (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Κυριλλικά Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Σλάβικα/Κεντρικά Ευρωπαϊκά Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Όχι αυτόματη κλιμάκωση"
 #define MSGTR_PREFERENCES_FontPropWidth "Αναλογία με το πλάτος της ταινίας"
 #define MSGTR_PREFERENCES_FontPropHeight "Αναλογία με το ύψος της ταινίας"
@@ -576,8 +578,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Ενεργοποίηση/απενεργοποίηση της cache"
 #define MSGTR_PREFERENCES_CacheSize "Μέγεθος της cache: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Εκκίνηση σε πλήρης οθόνη"
-#define MSGTR_PREFERENCES_CacheSize "Μέγεθος της cache: "
+#define MSGTR_PREFERENCES_SaveWinPos "Αποθύκευση θέσης παραθύρου"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Απενεργοποίηση της προστασίας οθόνης"
+#define MSGTR_PREFERENCES_PlayBar "Ενεργοποίηση της playbar"
 #define MSGTR_PREFERENCES_AutoSync "Ενεργοποίηση/απενεργοποίηση του αυτόματου συγχρονισμού"
 #define MSGTR_PREFERENCES_AutoSyncValue "Αυτόματος συγχρονισμός: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM συσκευή:"
