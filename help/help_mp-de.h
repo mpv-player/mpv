@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.130
+// In synch with rev 1.131
 
 // ========================= MPlayer help ===========================
 
@@ -162,6 +162,19 @@ static char help_text[]=
 "  lies DOCS/de/bugreports.html und folge den dortigen Anweisungen.\n"\
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
+
+#define MSGTR_EdlCantUseBothModes "Kann -edl und -edlout nicht zur selben Zeit benutzen.\n"
+#define MSGTR_EdlOutOfMem "Kann nicht genug Speicher für EDL-Daten reservieren.\n"
+#define MSGTR_EdlRecordsNo "%d EDL-Aktionen gelesen.\n"
+#define MSGTR_EdlQueueEmpty "Es gibt keine auszuführenden EDL-Aktionen.\n"
+#define MSGTR_EdlCantOpenForWrite "Fehler beim Öffnen [%s] zum Schreiben.\n"
+#define MSGTR_EdlCantOpenForRead "Kann EDL-Datei [%s] nicht zum Lesen öffnen.\n"
+#define MSGTR_EdlNOsh_video "Kann EDL nicht ohne Video verwenden, deaktiviere.\n"
+#define MSGTR_EdlNOValidLine "Ungültige EDL-Zeile: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Schlecht formatierte EDL-Zeile [%d]. Verwerfe.\n"
+#define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist "\
+"[%f]. Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
+#define MSGTR_EdlBadLineBadStop "Zeit des Stops muß nach der Startzeit sein.\n"
 
 // mencoder.c:
 
