@@ -407,7 +407,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	if(telecine_cnt>-0.5 && telecine_cnt<0.5 && !force_fps){
 	    sh_video->fps=sh_video->fps*4/5;
 	    sh_video->frametime=sh_video->frametime*5/4;
-	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode,sh_video->fps);
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode);
 	    telecine=1;
 	}
 
