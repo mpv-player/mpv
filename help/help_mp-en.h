@@ -53,6 +53,8 @@ static char help_text[]=
 "\n";
 #endif
 
+#define MSGTR_SamplesWanted "Samples of this format are needed to improve support. Please contact the developers.\n"
+
 // ========================= MPlayer messages ===========================
 
 // mplayer.c:
