@@ -64,6 +64,9 @@ endif
 ifneq ($(W32_LIB),)
 PARTS += loader loader/dshow
 endif
+ifeq ($(LIBMENU),yes)
+PARTS += libmenu
+endif
 
 ALL_PRG = $(PRG)
 ifeq ($(MENCODER),yes)
@@ -175,7 +178,19 @@ postproc/libpostproc.so:
 input/libinput.a:
 	$(MAKE) -C input
 
+libmenu/libmenu.a:
+	$(MAKE) -C libmenu
+
 MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
+
+ifeq ($(LIBMENU),yes)
+MPLAYER_DEP += libmenu/libmenu.a
+MENU_LIBS = libmenu/libmenu.a
+PARTS += libmenu
+else
+MENU_LIBS =
+endif
+
 MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS)
 
 ifeq ($(VIDIX),yes)
@@ -186,7 +201,7 @@ endif
 
 $(PRG):	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) $(ARCH_LIB) -lm 
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) $(ARCH_LIB) -lm
 
 mplayer.exe.spec.c: libmpcodecs/libmpcodecs.a
 	winebuild -fPIC -o mplayer.exe.spec.c -exe mplayer.exe -mcui \

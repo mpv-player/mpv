@@ -152,6 +152,7 @@ Optional features:
   --enable-freetype      Enable freetype2 font rendering support [disabled]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --enable-new-conf      Enable new config stuff [disabled]
+  --enable-menu          Enable osd menu support (need new config) [disabled]
 
 Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
@@ -1015,6 +1016,7 @@ _big_endian=auto
 _freetype=no
 _shared_pp=no
 _new_conf=no
+_menu=no
 
 for ac_option do
   case "$ac_option" in
@@ -1197,6 +1199,9 @@ for ac_option do
 
   --enable-new-conf) _new_conf=yes ;;
   --disable-new-conf) _new_conf=no ;;
+
+  --enable-menu) _menu=yes ;;
+  --disable-menu) _menu=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -4248,6 +4253,15 @@ else
 fi
 echores "$_new_conf"
 
+echocheck "OSD menu"
+if test "$_menu" = yes ; then
+    test "$_new_conf" != yes && die "New config support needed for the OSD menu (--enable-new-conf)."
+    _def_menu='#define HAVE_MENU 1'
+else
+_def_menu='#undef HAVE_MENU'
+fi
+echores "$_menu"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -4517,6 +4531,7 @@ STREAMING_LIB = $_ld_streaming $_ld_live
 VIDIX = $_vidix
 PP_LIB = $_ld_pp
 SHARED_PP = $_shared_pp
+LIBMENU = $_menu
 
 OPENDIVX = $_opendivx
 
@@ -4984,6 +4999,9 @@ $_def_joystick
 
 /* enables / disables new config */
 $_def_new_conf
+
+/* enables / disables osd menu */
+$_def_menu
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)

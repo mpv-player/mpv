@@ -92,6 +92,7 @@ extern int tv_param_on;
 #include "playtree.h"
 
 play_tree_t* playtree;
+play_tree_iter_t* playtree_iter = NULL;
 
 #define PT_NEXT_ENTRY 1
 #define PT_PREV_ENTRY -1
@@ -139,7 +140,8 @@ static int max_framesize=0;
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
-//#include "libmpcodecs/vf.h"
+#include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/vf.h"
 
 extern void vf_list_plugins();
 
@@ -275,6 +277,22 @@ int vo_gamma_hue = 1000;
 
 // ---
 
+#ifdef HAVE_MENU
+#include "m_struct.h"
+#include "libmenu/menu.h"
+extern void vf_menu_pause_update(struct vf_instance_s* vf);
+extern vf_info_t vf_info_menu;
+static vf_info_t* libmenu_vfs[] = {
+  &vf_info_menu,
+  NULL
+};
+static vf_instance_t* vf_menu = NULL;
+static int use_menu = 0;
+static char* menu_cfg = NULL;
+static char* menu_root = "main";
+#endif
+
+
 #ifdef HAVE_RTC
 static int nortc;
 #endif
@@ -310,6 +328,9 @@ static void uninit_player(unsigned int mask){
     current_module="uninit_vcodec";
     if(sh_video) uninit_video(sh_video);
     sh_video=NULL;
+#ifdef HAVE_MENU
+    vf_menu=NULL;
+#endif
   }
  
   if(mask&INITED_DEMUXER){
@@ -507,6 +528,8 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
+static int play_tree_step = 1;
+
 /*
  * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
  * make it all work is to use the builtin SDL-bootstrap code, which 
@@ -523,9 +546,6 @@ int main(int argc,char* argv[]){
 static demux_stream_t *d_audio=NULL;
 static demux_stream_t *d_video=NULL;
 static demux_stream_t *d_dvdsub=NULL;
-
-// for multifile support:
-play_tree_iter_t* playtree_iter = NULL;
 
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
@@ -788,6 +808,19 @@ else if(!use_stdin)
   mp_input_add_key_fd(0,1,NULL,NULL);
 inited_flags|=INITED_INPUT;
 current_module = NULL;
+
+#ifdef HAVE_MENU
+ if(use_menu) {
+   if(!menu_cfg) menu_cfg = get_path("menu.conf");
+   if(menu_init(menu_cfg))
+     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited\n");
+   else {
+     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu init failed\n");
+     use_menu = 0;
+   }
+ }
+#endif
+  
 
 
   //========= Catch terminate signals: ================
@@ -1228,6 +1261,18 @@ inited_flags|=INITED_VO;
 current_module="init_video_filters";
 
 sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",video_out);
+#ifdef HAVE_MENU
+if(use_menu) {
+  vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",menu_root);
+  if(!vf_menu) {
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't open libmenu video filter with root menu %s\n",menu_root);
+    use_menu = 0;
+  }
+}
+if(vf_menu)
+  sh_video->vfilter=(void*)append_filters(vf_menu);
+else
+#endif
 sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
 
 current_module="init_video_codec";
@@ -1865,6 +1910,10 @@ if(auto_quality>0){
 		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos)) break;
              }
 #endif
+#ifdef HAVE_MENU
+	     if(vf_menu)
+	       vf_menu_pause_update(vf_menu);
+#endif
              usleep(20000);
          }
       mp_cmd_free(cmd);
@@ -1939,7 +1988,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       grab_frames=2;
     } break;
     case MP_CMD_PLAY_TREE_STEP : {
-      int n = cmd->args[0].v.i > 0 ? 1 : -1;
+      int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
       int force = cmd->args[1].v.i;
 
       if(!force) {
@@ -1950,6 +1999,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	play_tree_iter_free(i);
       } else
 	eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+      if(eof)
+	play_tree_step = n;
     } break;
     case MP_CMD_PLAY_TREE_UP_STEP : {
       int n = cmd->args[0].v.i > 0 ? 1 : -1;
@@ -2539,7 +2590,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
     if(loop_times>1) loop_times--; else
     if(loop_times==1) loop_times=-1;
-
+    play_n_frames=play_n_frames_mf;
     eof=0;
     abs_seek_pos=3; rel_seek_secs=0; // seek to start of movie (0%)
 
@@ -2783,12 +2834,13 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
-  if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
+  if(play_tree_iter_step(playtree_iter,play_tree_step,0) == PLAY_TREE_ITER_ENTRY) {
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
+  play_tree_step = 1;
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
   if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
