@@ -94,6 +94,12 @@ Brief: libcss is required for viewing encrypted DVDs
 URL:   http://www.linuxvideo.org/user/dl.html
 Note:  For details see DOCS/DVD
 
+libdvdread
+~~~~~~~~~~
+Brief: it's required for playing DVDs
+URL:   http://www.dtek.chalmers.se/groups/dvd
+Note:  For detail see DOCS/DVD
+
 liblirc
 ~~~~~~~
 Brief: Linux Infrared Remote Control. LIRC is a package that supports receiving
