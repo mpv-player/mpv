@@ -196,8 +196,9 @@ static int init(int rate,int channels,int format,int flags){
 		aspec.format = AUDIO_U16MSB;
 	    break;
 	    default:
+                aspec.format = AUDIO_S16LSB;
+                ao_data.format = AFMT_S16_LE;
                 mp_msg(MSGT_AO,MSGL_WARN,"SDL: Unsupported audio format: 0x%x.\n", format);
-                return 0;
 	}
 
 	/* The desired audio frequency in samples-per-second. */
