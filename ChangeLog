@@ -162,6 +162,7 @@ MPlayer (1.0)
     * doublesize bug fixed
     * slowdown after opening the preferences panel bug fixed
     * remaining messages moved to help file for translation
+    * slowdown after using the preferences panel fixed
 
     Encoding:
     * x264 encoder support
