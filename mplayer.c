@@ -25,6 +25,12 @@
 #include "version.h"
 #include "config.h"
 
+#ifndef OUTBURST
+#error "============================================="
+#error "Please re-run ./configure and then try again!"
+#error "============================================="
+#endif
+
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
 
