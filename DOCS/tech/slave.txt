@@ -21,8 +21,9 @@ edl_mark
 audio_delay <value>
     Adjust the audio delay by <value> seconds.
 
-quit
-    Quit MPlayer.
+quit [<value>]
+    Quit MPlayer. The optional integer value is used as the return code
+    for the mplayer process (default: 0).
 
 pause
     Pause/unpause the playback.
