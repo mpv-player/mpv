@@ -320,6 +320,49 @@ int a52_resample(float * _f, int16_t * s16)
 	}
 	break;
     case A52_2F2R | A52_LFE:
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+//		"pxor %%mm6, %%mm6		\n\t"
+		"1:				\n\t"
+		"movq 1024(%1, %%esi), %%mm0	\n\t"
+		"movq 2048(%1, %%esi), %%mm1	\n\t"
+		"movq 3072(%1, %%esi), %%mm2	\n\t"
+		"movq 4096(%1, %%esi), %%mm3	\n\t"
+		"movq (%1, %%esi), %%mm5	\n\t" 
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"psubd %%mm7, %%mm5		\n\t"
+		"leal (%%esi, %%esi, 2), %%edi	\n\t"
+		
+		"packssdw %%mm2, %%mm0		\n\t" // CcAa
+		"packssdw %%mm3, %%mm1		\n\t" // DdBb
+		"packssdw %%mm5, %%mm5		\n\t" // FfFf
+		"movq %%mm0, %%mm2		\n\t" // CcAa
+		"punpcklwd %%mm1, %%mm0		\n\t" // BAba
+		"punpckhwd %%mm1, %%mm2		\n\t" // DCdc
+		"pxor %%mm4, %%mm4		\n\t" // 0000
+		"punpcklwd %%mm5, %%mm4		\n\t" // F0f0
+		"movq %%mm0, %%mm1		\n\t" // BAba
+		"movq %%mm4, %%mm3		\n\t" // F0f0
+		"punpckldq %%mm2, %%mm0		\n\t" // dcba
+		"punpckhdq %%mm1, %%mm1		\n\t" // BABA
+		"punpckldq %%mm1, %%mm4		\n\t" // BAf0
+		"punpckhdq %%mm3, %%mm2		\n\t" // F0DC
+		
+		"movq %%mm0, (%0, %%edi)	\n\t"
+		"movq %%mm4, 8(%0, %%edi)	\n\t"
+		"movq %%mm2, 16(%0, %%edi)	\n\t"
+		"addl $8, %%esi			\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1536), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
+#else
 	for (i = 0; i < 256; i++) {
 	    s16[6*i] = convert (f[i+256]);
 	    s16[6*i+1] = convert (f[i+512]);
@@ -328,6 +371,7 @@ int a52_resample(float * _f, int16_t * s16)
 	    s16[6*i+4] = 0;
 	    s16[6*i+5] = convert (f[i]);
 	}
+#endif
 	break;
     case A52_3F2R | A52_LFE:
 #ifdef HAVE_MMX
