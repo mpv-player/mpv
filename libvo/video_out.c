@@ -100,11 +100,13 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_SVGALIB
 	&video_out_svga,
 #endif
+#ifdef HAVE_PNG
+	&video_out_png,
+#endif	
         &video_out_null,
         &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
-	&video_out_png,
         NULL
 };
 
