@@ -247,6 +247,23 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	    wf->nBlockAlign = 33;
 	    wf->wBitsPerSample = 16;
 	    wf->cbSize = 0;
+	  } else if (strcmp(subsession->codecName(), "MP4A-LATM") == 0) {
+	    wf->wFormatTag = sh_audio->format = mmioFOURCC('m','p','4','a');
+#ifndef HAVE_FAAD
+	    fprintf(stderr, "WARNING: Playing MPEG-4 (AAC) Audio requires the \"faad\" library!\n");
+#endif
+#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1042761600)
+	    fprintf(stderr, "WARNING: This audio stream might not play correctly.  Please upgrade to version \"2003.01.17\" or later of the \"LIVE.COM Streaming Media\" libraries.\n");
+#else
+	    // For the codec to work correctly, it needs "AudioSpecificConfig"
+	    // data, which is parsed from the "StreamMuxConfig" string that
+	    // was present (hopefully) in the SDP description:
+	    unsigned codecdata_len;
+	    sh_audio->codecdata
+	      = parseStreamMuxConfigStr(subsession->fmtp_config(),
+					codecdata_len);
+	    sh_audio->codecdata_len = codecdata_len;
+#endif
 	  } else {
 	    fprintf(stderr,
 		    "Unknown mplayer format code for MIME type \"audio/%s\"\n",
