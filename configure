@@ -2397,18 +2397,18 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lungif"
-  elif cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lgif"
-  elif cc_check -lungif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
+  elif cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
-    _ld_gif="-lungif $_ld_x11"
+    _ld_gif="-lungif"
   elif cc_check -lgif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lgif $_ld_x11"
+  elif cc_check -lungif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
+    _gif=yes
+    _ld_gif="-lungif $_ld_x11"
   fi
 fi
 
@@ -2421,8 +2421,11 @@ if test "$_gif" = yes ; then
   _def_gif_4='#undef HAVE_GIF_4'
 
   cat > $TMPC << EOF
+#include <signal.h>
 #include <gif_lib.h>
+void catch() { exit(1); }
 int main(void) {
+  signal(SIGSEGV, catch);  // catch segfault
   printf("EGifPutExtensionFirst is at address %p\n", EGifPutExtensionFirst);
   EGifSetGifVersion("89a");   // this will segfault a buggy gif lib.
   return 0;
