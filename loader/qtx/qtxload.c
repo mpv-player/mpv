@@ -1,3 +1,5 @@
+/* to compile: gcc -o qtxload qtxload.c ../libloader.a -lpthread -ldl -ggdb ../../cpudetect.o */
+
 #include <stdio.h>
 #include "qtxsdk/components.h"
 
@@ -21,7 +23,7 @@ char *get_path()
     return(".");
 }
 
-main()
+main(int argc, char *argv[])
 {
     void *handler;
     void *dispatcher;
@@ -45,9 +47,9 @@ main()
 
 	params = malloc(sizeof(struct ComponentParameters));
 
-	params->flags = 0;
+	params->flags = 2;
 	params->paramSize = sizeof(params);
-	params->what = 0x3f; /* probarly register :p */
+	params->what = atoi(argv[1]);
 	params->params[0] = 0x1984;
 	/* 0x1000100f will load QuickTime.qts */
 	/* 0x10001014 will use SendMessageA */
@@ -57,10 +59,11 @@ main()
 	/* 0x1000102d is a dialog */
 	/* 0x10001032 returns 20001 => CDVersion */
 	/* 0x10001069 returns 8a */
+	/* 0x100010b4 probarly init ?? */
 	printf("params: flags: %d, paramSize: %d, what: %d\n",
 	    params->flags, params->paramSize, params->what);
 	printf("params[0] = %x\n", params->params[0]);
-	ret = dispatcher_func(&params, globals);
+	ret = dispatcher_func(params, globals);
 	printf("CDComponentDispatch(%p, %p) => %x\n",
 	    &params, globals, ret);
 	free(globals);
