@@ -85,6 +85,7 @@ static int lavc_param_rc_max_rate=0;
 static int lavc_param_rc_min_rate=0;
 static float lavc_param_rc_initial_cplx=0;
 static int lavc_param_mpeg_quant=0;
+static int lavc_param_fdct=0;
 
 #include "cfgparser.h"
 
@@ -137,6 +138,9 @@ struct config lavcopts_conf[]={
 	{"vrc_buf_size", &lavc_param_rc_min_rate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vrc_buf_aggressivity", &lavc_param_rc_buffer_aggressivity, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 99.0, NULL},
 	{"vrc_init_cplx", &lavc_param_rc_initial_cplx, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9999999.0, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4621
+        {"vfdct", &lavc_param_fdct, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -209,6 +213,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.rc_buffer_size= lavc_param_rc_buffer_size*1000;
     lavc_venc_context.rc_buffer_aggressivity= lavc_param_rc_buffer_aggressivity;
     lavc_venc_context.rc_initial_cplx= lavc_param_rc_initial_cplx;
+
     p= lavc_param_rc_override_string;
     for(i=0; p; i++){
         int start, end, q;
@@ -238,7 +243,11 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4619
     lavc_venc_context.mpeg_quant=lavc_param_mpeg_quant;
 #endif
-    
+
+#if LIBAVCODEC_BUILD >= 4621
+    lavc_venc_context.dct_algo= lavc_param_fdct;
+#endif
+
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
