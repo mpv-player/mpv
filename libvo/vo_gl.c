@@ -5,12 +5,6 @@
 
 #define TEXTUREFORMAT_32BPP
 
-/* 
- * video_out_gl.c, X11/OpenGL interface
- * based on video_out_x11 by Aaron Holtzman,
- * and WS opengl window manager by Pontscho/Fresh!
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,28 +38,14 @@ static vo_info_t vo_info =
 	""
 };
 
-/* private prototypes */
-// static void Display_Image (unsigned char *ImageData);
-
 /* local data */
 static unsigned char *ImageData=NULL;
 
-/* X11 related variables */
-//static Display *mydisplay;
-//static Window vo_window;
-//static GC mygc;
-//static XImage *myximage;
-//static int depth,mode;
-//static XWindowAttributes attribs;
-//static int texture_id=1;
-
 static GLXContext wsGLXContext;
-//XVisualInfo        * wsVisualInfo;
 static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
                                        GLX_GREEN_SIZE,1,
                                        GLX_BLUE_SIZE,1,
-//                                       GLX_DEPTH_SIZE,16,
                                        GLX_DOUBLEBUFFER,
                                        None };
 
@@ -113,8 +93,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_width = width;
 	image_format = format;
   
-	if(!vo_init()) return -1;
-
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -138,9 +116,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	/* Make the window */
 
-//	XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
-
-//	XMatchVisualInfo(mDisplay, screen, depth, TrueColor, &vinfo);
   vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
   if (vinfo == NULL)
   {
@@ -150,65 +125,48 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	xswa.background_pixel = 0;
 	xswa.border_pixel     = 1;
-//	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo.visual, AllocNone);
 	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
-//  xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask | CWCursor | CWOverrideRedirect | CWSaveUnder | CWX | CWY | CWWidth | CWHeight;
 
-  vo_window = XCreateWindow(mDisplay, mRootWin,
-    hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
+	if ( vo_window == None )
+	 {
+      vo_window = XCreateWindow(mDisplay, mRootWin,
+        hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
 
-  vo_x11_classhint( mDisplay,vo_window,"gl" );
-  vo_hidecursor(mDisplay,vo_window);
+      vo_x11_classhint( mDisplay,vo_window,"gl" );
+      vo_hidecursor(mDisplay,vo_window);
 
-  wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
-//  XStoreName( wsDisplay,wsMyWin,wsSysName );
-
-//  printf("GLXcontext ok\n");
-
-//  if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
-
-	XSelectInput(mDisplay, vo_window, StructureNotifyMask);
-
-	/* Tell other applications about this window */
-
-	XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
-
-	/* Map window. */
-
-	XMapWindow(mDisplay, vo_window);
-	if ( flags&1 ) vo_x11_fullscreen();
+//      if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
+	  XSelectInput(mDisplay, vo_window, StructureNotifyMask);
+	  /* Tell other applications about this window */
+	  XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
+	  /* Map window. */
+	  XMapWindow(mDisplay, vo_window);
+	  if ( flags&1 ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
-	vo_x11_xinerama_move(mDisplay,vo_window);
+	  vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
 
-	/* Wait for map. */
-	do 
-	{
+	  /* Wait for map. */
+	  do 
+	  {
 		XNextEvent(mDisplay, &xev);
-	}
-	while (xev.type != MapNotify || xev.xmap.event != vo_window);
+	  }
+	  while (xev.type != MapNotify || xev.xmap.event != vo_window);
 
-	XSelectInput(mDisplay, vo_window, NoEventMask);
+	  XSelectInput(mDisplay, vo_window, NoEventMask);
+	 }
 
-  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
+	if ( vo_config_count ) glXDestroyContext( mDisplay,wsGLXContext );
+    wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
+    glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
 	XFlush(mDisplay);
 	XSync(mDisplay, False);
 
-//	mygc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-
-//		myximage = XGetImage(mDisplay, vo_window, 0, 0,
-//		width, image_height, AllPlanes, ZPixmap);
-//		ImageData = myximage->data;
-//	bpp = myximage->bits_per_pixel;
-
-	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
 	vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
 		     | ButtonPressMask | ButtonReleaseMask
         );
-
-//  printf("Window setup ok\n");
 
 #if 0
 	// If we have blue in the lowest bit then obviously RGB 
@@ -250,6 +208,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     image_bytes=(image_bpp+7)/8;
   }
 
+  if ( ImageData ) free( ImageData );
   ImageData=malloc(texture_width*texture_height*image_bytes);
   memset(ImageData,128,texture_width*texture_height*image_bytes);
 
@@ -334,8 +293,6 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	yuv2rgb(ImageData, src[0], src[1], src[2], 
 			w,h, dstride, stride[0],stride[1]);
 
-//	emms ();
-
     for(i=0;i<h;i++){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
 		       0,              // level
@@ -359,9 +316,6 @@ int i;
 	yuv2rgb(ImageData, src[0], src[1], src[2],
 		image_width, image_height, 
 		image_width*BYTES_PP, image_width, image_width/2 );
-//  printf("Ready!\n");
-
-//		emms ();
 
     for(i=0;i<image_height;i++){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
@@ -375,7 +329,6 @@ int i;
 		       ImageData+i*BYTES_PP*image_width );        // *pixels
     }
 
-//	Display_Image(ImageData);
 	return 0; 
 }
 
@@ -407,7 +360,6 @@ uint8_t *de=&ImageData[3*image_width];
 		       ImageData);        // *pixels
     }
 
-//	Display_Image(ImageData);
 	return 0; 
 }
 
@@ -430,7 +382,6 @@ uint8_t *ImageData=src[0];
 		       ImageData+i*image_bytes*image_width );        // *pixels
     }
 
-//	Display_Image(ImageData);
 	return 0; 
 }
 
@@ -476,6 +427,9 @@ static uint32_t preinit(const char *arg)
 	printf("[gl] Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+
+	if(!vo_init()) return 1;
+
     return 0;
 }
 

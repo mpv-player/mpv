@@ -201,8 +201,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     XWindowAttributes attribs;
     int window_depth;
 
-//    if (title)
-//	free(title);
     title = "MPlayer VIDIX X11 Overlay";
 
     panscan_init();
@@ -211,9 +209,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     image_width = width;
     image_format = format;
     vo_mouse_autohide=1;
-
-    if (!vo_init())
-        return(-1);
 
     aspect_save_orig(width, height);
     aspect_save_prescale(d_width, d_height);
@@ -258,9 +253,6 @@ else
 {
 #endif
 
-    /* destroy window before creating one */
-    if (vo_window) XDestroyWindow(mDisplay, vo_window);
-
 #ifdef X11_FULLSCREEN
     if ( ( flags&1 )||(flags & 0x04) ) aspect(&d_width, &d_height, A_ZOOM);
 #endif
@@ -296,24 +288,28 @@ else
     }
     else
      {
-      vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
-	    vo_dx, vo_dy, window_width, window_height, xswa.border_pixel,
-	    vinfo.depth, InputOutput, vinfo.visual, xswamask, &xswa);
+	  if ( vo_window == None )
+	   {
+        vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
+	      vo_dx, vo_dy, window_width, window_height, xswa.border_pixel,
+	      vinfo.depth, InputOutput, vinfo.visual, xswamask, &xswa);
 
-      vo_x11_classhint(mDisplay, vo_window, "xvidix");
-      vo_hidecursor(mDisplay, vo_window);
-      vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
+        vo_x11_classhint(mDisplay, vo_window, "xvidix");
+        vo_hidecursor(mDisplay, vo_window);
+        vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
 
-      XStoreName(mDisplay, vo_window, title);
-      XMapWindow(mDisplay, vo_window);
+        XStoreName(mDisplay, vo_window, title);
+        XMapWindow(mDisplay, vo_window);
     
-      if ( flags&1 ) vo_x11_fullscreen();
+        if ( flags&1 ) vo_x11_fullscreen();
     
 #ifdef HAVE_XINERAMA
-      vo_x11_xinerama_move(mDisplay, vo_window);
+        vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
-
+       } else if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
      }
+	 
+	if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
     vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
 #ifdef HAVE_NEW_GUI
 }
@@ -419,6 +415,8 @@ static uint32_t preinit(const char *arg)
 	mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available ones!\n");
 	vidix_name = NULL;
     }
+
+    if (!vo_init()) return(1);
 
     if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
 	return(1);

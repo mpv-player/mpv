@@ -380,7 +380,9 @@ static int mga_init(int width,int height,unsigned int format){
 	//clear the buffer
 	memset(frames[0],0x80,mga_vid_config.frame_size*mga_vid_config.num_frames);
 
+#ifndef VO_XMGA
 	ioctl(f,MGA_VID_ON,0);
+#endif
 
   return 0;
 }
