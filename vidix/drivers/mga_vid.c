@@ -60,6 +60,10 @@
 #include "../../libdha/pci_ids.h"
 #include "../../libdha/pci_names.h"
 
+#ifdef __MINGW32__
+#define ENOTSUP 134
+#endif
+
 #if    !defined(ENOTSUP) && defined(EOPNOTSUPP)
 #define ENOTSUP EOPNOTSUPP
 #endif
