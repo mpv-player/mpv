@@ -543,6 +543,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef HAVE_NEW_GUI
   if(use_gui){
        appInit( argc,argv,envp,(void*)mDisplay );
+       mplShMem->Playing= (gui_no_filename) ? 0 : 1;
   }
 #endif
 
@@ -570,7 +571,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   signal(SIGFPE,exit_sighandler);  // floating point exc.
   signal(SIGABRT,exit_sighandler); // abort()
 
-
 // ******************* Now, let's see the per-file stuff ********************
 
     curr_filename=0;
@@ -580,7 +580,7 @@ play_next_file:
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
       if(filename) strcpy( mplShMem->Filename,filename );
-      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
+//      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
       while(mplShMem->Playing!=1){
 	usleep(20000);
 	EventHandling();
