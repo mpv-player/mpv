@@ -2194,6 +2194,11 @@ if test "$_directfb" = yes ; then
   fi
   _vomodules="directfb $_vomodules"
   _ld_directfb='-ldirectfb'
+
+  if test "$_directfb_version" -ge 914; then
+    _vosrc="$_vosrc vo_dfbmga.c"
+    _vomodules="dfbmga $_vomodules"
+  fi
 else
   _def_directfb='#undef HAVE_DIRECTFB'
   _novomodules="directfb $_novomodules"

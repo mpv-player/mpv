@@ -90,7 +90,12 @@ extern vo_functions_t video_out_gif89a;
 #ifdef HAVE_VESA
 extern vo_functions_t video_out_vesa;
 #endif
+#ifdef HAVE_DIRECTFB
 extern vo_functions_t video_out_directfb;
+#if DIRECTFBVERSION >= 914
+extern vo_functions_t video_out_dfbmga;
+#endif
+#endif
 #ifdef CONFIG_VIDIX
 extern vo_functions_t video_out_xvidix;
 #endif
@@ -177,7 +182,10 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_DIRECTFB
 	&video_out_directfb,
-#endif	
+#if DIRECTFBVERSION >= 914
+        &video_out_dfbmga,
+#endif
+#endif
 #if defined(CONFIG_VIDIX) && defined(HAVE_X11) 
 	&video_out_xvidix,
 #endif
