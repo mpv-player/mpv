@@ -1676,13 +1676,6 @@ if(sh_audio){
 	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
 	ao_data.outburst*4, ao_data.buffersize)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
-#if 0
-      if(sh_audio->afilter){
-          free(sh_audio->afilter); sh_audio->afilter=NULL;
-      }
-#else
-      sh_audio->afilter=NULL;
-#endif
 //      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
 //      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
 //      sh_audio=d_audio->sh=NULL; // -> nosound

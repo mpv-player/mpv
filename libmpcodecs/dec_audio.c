@@ -353,6 +353,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   
   // let's autoprobe it!
   if(0 != af_init(afs,1)){
+    sh_audio->afilter=NULL;
     free(afs);
     return 0; // failed :(
   }
