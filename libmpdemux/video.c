@@ -412,6 +412,9 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           // frame_time = 1/25.0;
         }
       }
+      case DEMUXER_TYPE_GIF:
+	  frame_time=d_video->pts-pts1;
+        break;
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||

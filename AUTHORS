@@ -346,9 +346,10 @@ Andriy N. Gritsenko <andrej@lucky.net>
     * skip-deinterlace video filter
     * MUXER layer, and new MPEG-PS muxer
 
-Joey Parrish <joey@yunamusic.com>
+Joey Parrish <joey@nicewarrior.org>
     * various fixes
-    * -vo gif89 author
+    * -vo gif89a author
+    * gif demuxer author
 
 Juergen Hammelmann <juergen.hammelmann@gmx.de>
     * TOOLS/menvcd author

@@ -167,7 +167,7 @@ Optional features:
   --disable-sortsub      Disable subtitles sorting [enabled]
 
 Codecs:
-  --enable-gif		 enable gif89a output support [autodetect]
+  --enable-gif		 enable gif support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
   --enable-jpeg		 enable jpeg input/output support [autodetect]
   --enable-liblzo	 enable external liblzo support [autodetect]
@@ -2888,7 +2888,7 @@ else
 fi
 
 
-echocheck "GIF89a support"
+echocheck "GIF support"
 if test "$_gif" = auto ; then
   _gif=no
 cat > $TMPC << EOF
@@ -2915,9 +2915,10 @@ fi
 if test "$_gif" = yes ; then
   _def_gif='#define HAVE_GIF 1'
   _vosrc="$_vosrc vo_gif89a.c"
+  _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
   _mkf_gif="yes"
-  _gif="yes (old version, some functions disabled)"
+  _gif="yes (old version, some encoding functions disabled)"
   _def_gif_4='#undef HAVE_GIF_4'
 
   cat > $TMPC << EOF
@@ -2939,6 +2940,7 @@ else
   _def_gif='#undef HAVE_GIF'
   _def_gif_4='#undef HAVE_GIF_4'
   _novomodules="gif89a $_novomodules"
+  _nocodecmodules="gif $_codecmodules"
   _mkf_gif="no"
 fi
 echores "$_gif"

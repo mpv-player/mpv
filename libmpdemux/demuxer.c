@@ -133,6 +133,7 @@ extern void demux_close_rawdv(demuxer_t* demuxer);
 extern void demux_close_pva(demuxer_t* demuxer);
 extern void demux_close_smjpeg(demuxer_t* demuxer);
 extern void demux_close_xmms(demuxer_t* demuxer);
+extern void demux_close_gif(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -198,6 +199,10 @@ void free_demuxer(demuxer_t *demuxer){
 #ifdef HAVE_XMMS
     case DEMUXER_TYPE_XMMS:
       demux_close_xmms(demuxer); break;
+#endif
+#ifdef HAVE_GIF
+    case DEMUXER_TYPE_GIF:
+      demux_close_gif(demuxer); break;
 #endif
 
     }
@@ -276,6 +281,7 @@ int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
 int demux_pva_fill_buffer(demuxer_t *demux);
 int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
+int demux_gif_fill_buffer(demuxer_t *demux);
 
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
@@ -325,6 +331,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_RTP: return demux_rtp_fill_buffer(demux, ds);
 #endif
     case DEMUXER_TYPE_SMJPEG: return demux_smjpeg_fill_buffer(demux);
+#ifdef HAVE_GIF
+    case DEMUXER_TYPE_GIF: return demux_gif_fill_buffer(demux);
+#endif
   }
   return 0;
 }
@@ -549,6 +558,8 @@ extern int smjpeg_check_file(demuxer_t *demuxer);
 extern int demux_open_smjpeg(demuxer_t* demuxer);
 extern int bmp_check_file(demuxer_t *demuxer);
 extern int demux_xmms_open(demuxer_t* demuxer);
+extern int gif_check_file(demuxer_t *demuxer);
+extern int demux_open_gif(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -758,6 +769,19 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
       demuxer = NULL;
   }
 }
+#ifdef HAVE_GIF
+//=============== Try to open as GIF file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_GIF){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_GIF,audio_id,video_id,dvdsub_id);
+  if(gif_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"GIF");
+      file_format=DEMUXER_TYPE_GIF;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+#endif
 //=============== Try to open as BMP file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_BMP,audio_id,video_id,dvdsub_id);
@@ -958,6 +982,12 @@ switch(file_format){
   if (!demux_open_film(demuxer)) return NULL;
   break;
  }
+#ifdef HAVE_GIF
+ case DEMUXER_TYPE_GIF: {
+  if (!demux_open_gif(demuxer)) return NULL;
+  break;
+ }
+#endif
  case DEMUXER_TYPE_BMP: {
   if (!demux_open_bmp(demuxer)) return NULL;
   break;

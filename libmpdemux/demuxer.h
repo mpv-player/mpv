@@ -36,11 +36,12 @@
 #define DEMUXER_TYPE_XMMS 25
 #define DEMUXER_TYPE_RAWVIDEO 26
 #define DEMUXER_TYPE_MPEG4_ES 27
+#define DEMUXER_TYPE_GIF 28
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 27
+#define DEMUXER_TYPE_MAX 28
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code

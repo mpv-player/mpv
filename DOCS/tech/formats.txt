@@ -152,3 +152,9 @@
     
     Note, that similarity of real and asf has some background - they worked
     together on the (never finished/used) ASF v2 spec for some time.
+
+  - GIF files:
+    The GIF format is a common format for web graphics that supports
+    animation.  These are read through libungif or compatible library.
+    Variable frame delays are supported, but seeking is not supported.
+    Seeking will be supported once an index of gif frames can be built.
