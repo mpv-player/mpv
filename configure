@@ -18,9 +18,9 @@
 # GOTCHAS:
 #  - config files are currently:
 #    config2.h config2.mak libvo/config2.mak libao2/config2.mak
-#    Gui/config2.mak
+#    Gui/config2.mak libvo2/config2.mak
 #  - removed xmmp/esd
-#  - removec dvbincdir/madincdir/cssincdir: add them to extraincdir
+#  - removed dvbincdir/madincdir/cssincdir: add them to extraincdir
 #
 #############################################################################
 
@@ -95,7 +95,7 @@ Installation directories:
 Optional features:
   --enable-largefiles    enable support for files >2^32 bytes long [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
-  --enable-lirc          enable LIRC (remote control) support [disable]
+  --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
   --enable-tv            enable TV Interface (tv/dvb grabbers) [disable]
   --disable-win32        disable Win32 DLL support [autodetect]
@@ -646,20 +646,20 @@ _mlib=auto
 _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
-
 _fastmemcpy=yes
 _win32=auto
-  _dshow=auto
+_dshow=auto
 _def_select='#define HAVE_AUDIO_SELECT'
-
 _tv=no
 _streaming=no
 _divx4linux=auto
-_lirc=no
+_lirc=auto
 _gui=no
 _termcap=auto
 _3dfx=no
 _tdfxfb=no
+
+_vo2=no
 
 _x=1
 _y=1
@@ -738,8 +738,6 @@ for ac_option do
   --disable-tv)		_tv=no		;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
   --disable-fastmemcpy)	_fastmemcpy=no	;;
-  --enable-tv)		_tv=yes		;;
-  --disable-tv)		_tv=no		;;
   --enable-streaming)	_streaming=yes	;;
   --disable-streaming)	_streaming=no	;;
   --enable-divx4linux)	_divx4linux=yes	;;
@@ -756,6 +754,9 @@ for ac_option do
   --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
+
+  --enable-vo2)		_vo2=yes	;;
+  --disable-vo2)	_vo2=no		;;
 
   --enable-select)	_def_select='#define HAVE_AUDIO_SELECT'	;;
   --disable-select)	_def_select='#undef HAVE_AUDIO_SELECT'	;;
@@ -850,6 +851,7 @@ for ac_option do
   --datadir=*)
     _datadir=`echo $ac_option | cut -d '=' -f 2`
     ;;
+
 
   *)
     echo "Unknown parameter: $ac_option"
@@ -1200,6 +1202,10 @@ fi
 _ld_x11="-L$_x11libdir -lX11 -lXext"
 
 
+#########
+# VIDEO #
+#########
+
 echocheck "X11"
 if test "$_x11" = auto ; then
   cat > $TMPC <<EOF
@@ -1366,46 +1372,6 @@ fi
 echores "$_dga2"
 
 
-echocheck "SDL"
-if test -z "$_sdlconfig" ; then
-  if ( sdl-config --version ) >/dev/null 2>&1 ; then
-    _sdlconfig="sdl-config"
-  elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
-    _sdlconfig="sdl11-config"
-  else
-    _sdlconfig=false
-  fi
-fi
-if test "$_sdl" = auto || test "$_sdl" = yes ; then
-  _sdl=no
-  if "$_sdlconfig" --version >/dev/null 2>&1 ; then
-    if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` ; then
-      _sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
-        if test "$_sdlversion" -gt 116 ; then
-          if test "$_sdlversion" -lt 121 ; then
-            _def_sdlbuggy='#define BUGGY_SDL'
-          else
-            _def_sdlbuggy='#undef BUGGY_SDL'
-          fi
-          _sdl=yes
-        else
-          _sdl=outdated
-        fi
-     fi
-  fi
-fi
-if test "$_sdl" = yes ; then
-  _def_sdl='#define HAVE_SDL 1'
-  _ld_sdl=`$_sdlconfig --libs`
-  _inc_sdl=`$_sdlconfig --cflags`
-  _vosrc="$_vosrc vo_sdl.c"
-  _aosrc="$_aosrc ao_sdl.c"
-else
-  _def_sdl='#undef HAVE_SDL'
-fi
-echores "$_sdl (with $_sdlconfig)"
-
-
 echocheck "OpenGL"
 if test "$_gl" = auto ; then
   cat > $TMPC << EOF
@@ -1557,6 +1523,73 @@ fi
 echores "$_dvb"
 
 
+echocheck "PNG support"
+if test "$_png" = auto ; then
+  _png=no
+  if irix ; then
+    # Don't check for -lpng on irix since it has its own libpng
+    # incompatible with the GNU libpng
+    echores "disabled on irix (not GNU libpng)"
+  else
+    cc_check  -lpng -lz -lm && _png=yes
+    echores yes
+  fi
+else
+  echores "$_png"
+fi
+if test "$_png" = yes ; then
+  _def_png='#define HAVE_PNG 1'
+  _ld_png='-lpng -lz'
+  _vosrc="$_vosrc vo_png.c"
+else
+  _def_png='#undef HAVE_PNG'
+fi
+
+
+#################
+# VIDEO + AUDIO #
+#################
+
+
+echocheck "SDL"
+if test -z "$_sdlconfig" ; then
+  if ( sdl-config --version ) >/dev/null 2>&1 ; then
+    _sdlconfig="sdl-config"
+  elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
+    _sdlconfig="sdl11-config"
+  else
+    _sdlconfig=false
+  fi
+fi
+if test "$_sdl" = auto || test "$_sdl" = yes ; then
+  _sdl=no
+  if "$_sdlconfig" --version >/dev/null 2>&1 ; then
+    if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` ; then
+      _sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
+        if test "$_sdlversion" -gt 116 ; then
+          if test "$_sdlversion" -lt 121 ; then
+            _def_sdlbuggy='#define BUGGY_SDL'
+          else
+            _def_sdlbuggy='#undef BUGGY_SDL'
+          fi
+          _sdl=yes
+        else
+          _sdl=outdated
+        fi
+     fi
+  fi
+fi
+if test "$_sdl" = yes ; then
+  _def_sdl='#define HAVE_SDL 1'
+  _ld_sdl=`$_sdlconfig --libs`
+  _inc_sdl=`$_sdlconfig --cflags`
+  _vosrc="$_vosrc vo_sdl.c"
+  _aosrc="$_aosrc ao_sdl.c"
+else
+  _def_sdl='#undef HAVE_SDL'
+fi
+echores "$_sdl (with $_sdlconfig)"
+
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   cat > $TMPC << EOF
@@ -1575,6 +1608,11 @@ else
   _def_dxr3='#undef HAVE_DXR3'
 fi
 echores "$_dxr3"
+
+
+#########
+# AUDIO #
+#########
 
 
 echocheck "OSS Audio"
@@ -1748,29 +1786,6 @@ else
   _def_zlib='#undef HAVE_ZLIB'
 fi
 echores "$_zlib"
-
-
-echocheck "PNG support"
-if test "$_png" = auto ; then
-  _png=no
-  if irix ; then
-    # Don't check for -lpng on irix since it has its own libpng
-    # incompatible with the GNU libpng
-    echores "disabled on irix (not GNU libpng)"
-  else
-    cc_check  -lpng -lz -lm && _png=yes
-    echores yes
-  fi
-else
-  echores "$_png"
-fi
-if test "$_png" = yes ; then
-  _def_png='#define HAVE_PNG 1'
-  _ld_png='-lpng -lz'
-  _vosrc="$_vosrc vo_png.c"
-else
-  _def_png='#undef HAVE_PNG'
-fi
 
 
 echocheck "mad support"
@@ -2045,6 +2060,10 @@ fi
 
 
 echocheck "lirc"
+if test "$_lirc" = auto ; then
+  _lirc=no
+  test -c /dev/lirc && _lirc=yes
+fi
 if test "$_lirc" = yes ; then
   _def_lirc='#define HAVE_LIRC 1'
   _ld_lirc='-llirc_client'
@@ -2254,6 +2273,8 @@ EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 
 STREAMING = $_streaming
+
+VO2 = $_vo2
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
@@ -2552,6 +2573,16 @@ cat > libvo/config2.mak << EOF
 include ../config.mak
 OPTIONAL_SRCS = $_vosrc
 OPTIONAL_OBJS = $_voobj
+EOF
+
+#############################################################################
+
+echo "Creating libvo2/config2.mak"
+_vo2obj=`echo $_vo2src | sed -e 's/\.c/\.o/g'`
+cat > libvo2/config2.mak << EOF
+include ../config.mak
+OPTIONAL_SRCS = $_vo2src
+OPTIONAL_OBJS = $_vo2obj
 EOF
 
 #############################################################################

@@ -26,9 +26,17 @@ OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
 SRCS_MPLAYER = mplayer.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c msvidc.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c my_profile.c
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
+
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) $(MADLIB_INC) # -Wall
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB) $(SGI_AUDIO_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
+ifeq ($(VO2),yes)
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) $(MADLIB_INC) # -Wall
+VO_LIBS = -Llibvo2 -lvo2 $(MLIB_LIB) $(X_LIBS)
+endif
+
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB) $(SGI_AUDIO_LIB)
+
+
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
 XA_LIBS = -Lxa -lxa
@@ -37,6 +45,10 @@ XA_LIBS = -Lxa -lxa
 # OBJS = $(OBJS_MENCODER) $(OBJS_MPLAYER)
 
 PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
+ifeq ($(VO2),yes)
+PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo2 libao2 drivers drivers/syncfb linux postproc xa
+endif
+
 
 ifeq ($(GUI),yes)
 PARTS += Gui
@@ -68,6 +80,9 @@ all:	$(ALL_PRG)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+ifeq ($(VO2),yes)
+COMMONLIBS = libmpdemux/libmpdemux.a libvo2/libvo2.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+endif
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -86,6 +101,9 @@ libmpeg2/libmpeg2.a:
 
 libvo/libvo.a:
 	$(MAKE) -C libvo
+
+libvo2/libvo2.a:
+	$(MAKE) -C libvo2
 
 libao2/libao2.a:
 	$(MAKE) -C libao2
