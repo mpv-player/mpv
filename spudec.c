@@ -927,25 +927,7 @@ void spudec_set_font_factor(void * this, double factor)
 
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height)
 {
-  spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
-  if (this) {
-    if (palette) {
-      memcpy(this->global_palette, palette, sizeof(this->global_palette));
-      this->auto_palette = 0;
-    }
-    else {
-      /* No palette, compute one */
-      this->auto_palette = 1;
-    }
-    this->packet = NULL;
-    this->image = NULL;
-    this->scaled_image = NULL;
-    this->orig_frame_width = frame_width;
-    this->orig_frame_height = frame_height;
-  }
-  else
-    mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
-  return this;
+  return spudec_new_scaled_vobsub(palette, NULL, 0, frame_width, frame_height);
 }
 
 /* get palette custom color, width, height from .idx file */
@@ -957,8 +939,10 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
     this->packet = NULL;
     this->image = NULL;
     this->scaled_image = NULL;
-    this->orig_frame_width = frame_width;
-    this->orig_frame_height = frame_height;
+    /* XXX Although the video frame is some size, the SPU frame is
+       always maximum size i.e. 720 wide and 576 or 480 high */
+    this->orig_frame_width = 720;
+    this->orig_frame_height = (frame_height == 480 || frame_height == 240) ? 480 : 576;
     this->custom = custom;
     // set up palette:
     this->auto_palette = 1;
