@@ -766,14 +766,8 @@ if(i_x==image->width && i_y==image->height){
 
 void *XA_YUV221111_Func(unsigned int image_type)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Func('image_type: %d')", image_type);    
-    /* hotfix to disable segfault by Vivo/2.00 H263 stream */
-    if (image_type < 0x10) /* obtaining to the latest XAnim source: */
-			   /* XA_IMTYPE_* has values from 0x0 to 0x9 */
-	return((void *)XA_YUV221111_Convert);
-
-    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Unimplemented: XA_YUV221111_Func(image_type=%d)\n",image_type);
-    return((void *)XA_dummy);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Func('image_type: %d')\n",image_type);
+    return((void *)XA_YUV221111_Convert);
 }
 
 /* *** EOF XANIM *** */
