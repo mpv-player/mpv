@@ -15,6 +15,8 @@ extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
 extern vf_info_t vf_info_scale;
 extern vf_info_t vf_info_fame;
+extern vf_info_t vf_info_format;
+extern vf_info_t vf_info_yuy2;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -27,6 +29,8 @@ static vf_info_t* filter_list[]={
 //    &vf_info_osd,
     &vf_info_vo,
     &vf_info_fame,
+    &vf_info_format,
+    &vf_info_yuy2,
     NULL
 };
 
