@@ -95,7 +95,7 @@ static inline unsigned long long int read_tsc( void )
   return retval;
 }
 
-unsigned char arr1[ARR_SIZE],arr2[ARR_SIZE];
+unsigned char  __attribute__((aligned(4096)))arr1[ARR_SIZE],arr2[ARR_SIZE];
 
 int main( void )
 {
@@ -107,9 +107,12 @@ int main( void )
   mga_init();
   marr1 = &frame[3];
 #else
-  marr1 = &arr1[3];
+  marr1 = &arr1[0];
 #endif
-  marr2 = &arr2[9];
+  marr2 = &arr2[0];
+
+  for(i=0; i<ARR_SIZE; i++) marr1[i] = marr2[i] = i;
+
   t=GetTimer();
   v1 = read_tsc();
   for(i=0;i<100;i++) memcpy(marr1,marr2,ARR_SIZE-16);
