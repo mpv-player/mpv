@@ -22,6 +22,9 @@
 char *sub_cp=NULL;
 #endif
 
+
+static long int mpsub_position=0;
+
 int sub_uses_time=0;
 int sub_errs=0;
 int sub_num=0;          // number of subtitle structs
@@ -33,6 +36,7 @@ int sub_format=-1;     // 0 for microdvd
 		  // 5 for RT format
 		 // 6 for ssa (Sub Station Alpha)
 		// 7 for ... erm ... dunnowhat. tell me if you know
+	       // 8 for the glorious MPsub
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -367,10 +371,45 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
+	char line[1000];
+	int a,b,num=0;
+	char *p, *q;
+
+	do
+	{
+		if (!fgets(line, 1000, fd)) return NULL;
+	} while (sscanf (line, "%d %d", &a, &b) !=2);
+
+	mpsub_position += (a*100);
+	current->start=mpsub_position+1;
+	mpsub_position += (b*100);
+	current->end=mpsub_position;
+
+	while (num < SUB_MAX_TEXT) {
+		if (!fgets (line, 1000, fd)) return NULL;
+		p=line;
+		while (isspace(*p)) p++;
+		if (eol(*p) && num > 0) return current;
+		if (eol(*p)) return NULL;
+
+		for (q=p; !eol(*q); q++);
+		*q='\0';
+		if (strlen(p)) {
+			current->text[num]=strdup(p);
+			current->lines = ++num;
+		} else {
+			if (num) return current;
+			else return NULL;
+		}
+	}
+}
+
+
 int sub_autodetect (FILE *fd) {
     char line[1001];
     int i,j=0;
-//    char *p;
+    char p;
     
     while (j < 100) {
 	j++;
@@ -400,6 +439,10 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=1; return 6;}
 	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
 		{sub_uses_time=0;return 7;}
+	if (sscanf (line, "FORMAT=%d", &i) == 1)
+		{sub_uses_time=0; return 8;}
+	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
+		{sub_uses_time=1; return 8;}
     }
 
     return -1;  // too many bad lines
@@ -485,7 +528,8 @@ subtitle* sub_read_file (char *filename) {
 	    sub_read_line_vplayer,
 	    sub_read_line_rt,
 	    sub_read_line_ssa,
-	    sub_read_line_dunnowhat
+	    sub_read_line_dunnowhat,
+	    sub_read_line_mpsub
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;
