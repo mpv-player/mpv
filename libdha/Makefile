@@ -34,8 +34,7 @@ $(LIBNAME):     $(OBJS)
 all:    $(LIBNAME) $(SHORTNAME)
 
 pci_names.c:
-	gzip -d -c oth/pci.db.gz >pci.db
-	$(AWK) -f pci_db2c.awk pci.db
+	$(AWK) -f pci_db2c.awk oth/pci.db
 
 test:
 	$(CC) test.c -o test $(SHORTNAME)
