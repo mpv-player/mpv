@@ -216,7 +216,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     char fname[12];
     int fd, vt, major, minor;
     struct stat sbuf;
-    char * hidis;
+    char * hidis = NULL;
     int i;
 
     switch(format) {
@@ -255,8 +255,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 	sprintf (fname, "/dev/vcsa%i", vt);
 	fp = fopen (fname, "w+");
 	if (fp==NULL){
-	    fprintf(stderr,"VO: [aa] cannot open %s for writing, so we'll not use linux driver\n", fname);
+	    fprintf(stderr,"VO: [aa] cannot open %s for writing,"
+			"so we'll not use linux driver\n", fname);
     	    aa_recommendlowdisplay("linux");
+    	    aa_recommendhidisplay("curses");
+    	    aa_recommendhidisplay("X11");
 	}else fclose(fp);
     }
     c = aa_autoinit(&aa_defparams);
