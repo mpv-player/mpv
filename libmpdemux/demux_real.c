@@ -313,17 +313,31 @@ int real_check_file(demuxer_t* demuxer)
 
 void hexdump(char *, unsigned long);
 
+#define SKIP_BITS(n) buffer<<=n
+#define SHOW_BITS(n) ((buffer)>>(32-(n)))
+
 static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timestamp, float frametime, unsigned int format){
   float v_pts;
+  uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
   int kf=timestamp;
-  if(format==0x30335652){ // RV30 timestamps:
-    kf=2*(((s[1]&15)<<8)+s[2]); // 12-bit timestamp from frame header
-    //kf=((s[1]<<8)+s[2])>>3; // 12-bit timestamp from frame header
-    if(verbose>1) printf("\nTS: %08X (%04X) %02X %02X %02X %02X\n",timestamp,kf,s[0],s[1],s[2],s[3]);
+  int pict_type;
+  
+  if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
+    if(format==mmioFOURCC('R','V','3','0')){
+      SKIP_BITS(3);
+      pict_type= SHOW_BITS(2);
+      SKIP_BITS(2 + 7);
+    }else{
+      SKIP_BITS(1);
+      pict_type= SHOW_BITS(2);
+      SKIP_BITS(2 + 7 + 1);
+    }
+    kf= 2*SHOW_BITS(12);
+    if(verbose>1) printf("\nTS: %08X (%04X) %d %02X %02X %02X %02X\n",timestamp,kf,pict_type,s[0],s[1],s[2],s[3]);
     kf|=timestamp&(~0x1fff);	// combine with packet timestamp
     if(kf<timestamp-4096) kf+=8192; else // workaround wrap-around problems
     if(kf>timestamp+4096) kf-=8192;
-    if(!(s[0]&0x8) || !(s[0]&0x10)){ // P || I  frame -> swap timestamps
+    if(pict_type != 3){ // P || I  frame -> swap timestamps
 	int tmp=kf;
 	kf=priv->kf_pts;
 	priv->kf_pts=tmp;
