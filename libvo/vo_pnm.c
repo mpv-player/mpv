@@ -4,15 +4,18 @@
  * vo_pnm.c, PPM/PGM/PGMYUV Video Output Driver for MPlayer
  *
  * 
- * Written by Ivo van Poorten. (GPL)2004
+ * Written by Ivo van Poorten. (C) Copyright 2004, 2005.
+ * Licensed under GNU General Public License version 2.
  *
  *
  * Changelog
  * 
- * 2004-09-09   First draft.
+ * 2004-01-15   Replaced suboption parser by call to subopt-helper.
+ *              Got rid of stupid malloc_failed function.
  * 2004-09-16   Second draft. It now acts on VOCTRL_DRAW_IMAGE and does not
  *              maintain a local copy of the image if the format is YV12.
  *              Speed improvement and uses less memory.
+ * 2004-09-09   First draft.
  *
  *
  */
@@ -26,13 +29,13 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <math.h>               /* for log10() */
 
 /* ------------------------------------------------------------------------- */
 
 /* Local Includes */
 
 #include "config.h"
+#include "subopt-helper.h"
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -85,22 +88,6 @@ char *pnm_file_extension = NULL;
 
 /* ------------------------------------------------------------------------- */
 
-/** \brief Memory allocation failed.
- *
- * The video output driver failed to allocate a block of memory it needed.
- * It displays a message and exits the player.
- *
- * \return nothing It does not return.
- */
-
-void pnm_malloc_failed(void) {
-    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-            MSGTR_MemAllocFailed);
-    exit_player(MSGTR_Exit_error);
-}
-
-/* ------------------------------------------------------------------------- */
-
 /** \brief An error occured while writing to a file.
  *
  * The program failed to write data to a file.
@@ -115,6 +102,16 @@ void pnm_write_error(void) {
 }
 
 /* ------------------------------------------------------------------------- */
+
+/** \brief Validation function for maxfiles
+ */
+
+static int int_pos(int *mf)
+{
+    if ( *mf > 0 )
+        return 1;
+    return 0;
+}
 
 /** \brief Pre-initialisation.
  *
@@ -131,119 +128,77 @@ void pnm_write_error(void) {
 
 static uint32_t preinit(const char *arg)
 {
-    char *buf;      /* buf is used to store parsed string values */
-    int value;      /* storage for parsed integer values */
+    int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
+        raw_mode = 0, ascii_mode = 0, maxfiles = 0;
+    strarg_t outdir  = {0, NULL},
+             subdirs = {0, NULL};
+    opt_t subopts[] = {
+        {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL},
+        {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL},
+        {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL},
+        {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL},
+        {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
+        {"outdir",      OPT_ARG_STR,    &outdir,        NULL},
+        {"subdirs",     OPT_ARG_STR,    &subdirs,       NULL},
+        {"maxfiles",    OPT_ARG_INT,    &maxfiles,      (opt_test_f)int_pos},
+        {NULL}
+    };
+    const char *info_message = NULL;
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
-    
-    if (arg) {
 
-        while (*arg != '\0') {
-            if (!strncmp(arg, ":", 1)) {
-                arg++;
-                continue;   /* multiple ':' is not really an error */
-            } if (!strncmp(arg, "ascii", 5)) {
-                arg += 5;
-                pnm_mode = PNM_ASCII_MODE;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_PNM_ASCIIMode);
-            } else if (!strncmp(arg, "raw", 3)) {
-                arg += 3;
-                pnm_mode = PNM_RAW_MODE;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_PNM_RawMode);
-            } else if (!strncmp(arg, "ppm", 3)) {
-                arg += 3;
-                pnm_type = PNM_TYPE_PPM;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_PNM_PPMType);
-            } else if (!strncmp(arg, "pgmyuv", 6)) {
-                arg += 6;
-                pnm_type = PNM_TYPE_PGMYUV;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_PNM_PGMYUVType);
-            } else if (!strncmp(arg, "pgm", 3)) {
-                arg += 3;
-                pnm_type = PNM_TYPE_PGM;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_PNM_PGMType);
-            } else if (!strncmp(arg, "outdir=", 7)) {
-                arg += 7;
-                buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) {
-                    pnm_malloc_failed(); /* message and exit_player! */
-                }
-                if (sscanf(arg, "%[^:]", buf) == 1) {
-                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
-                            info.short_name, "outdir", buf);
-                    arg += strlen(buf);
-                    pnm_outdir = strdup(buf);
-                    if (!pnm_outdir) pnm_malloc_failed();
-                    free(buf);
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "outdir",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-            } else if (!strncmp(arg, "subdirs=", 8)) {
-                arg += 8;
-                buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) {
-                    pnm_malloc_failed();
-                }
-                if (sscanf(arg, "%[^:]", buf) == 1) {
-                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
-                            info.short_name, "subdirs", buf);
-                    arg += strlen(buf);
-                    pnm_subdirs = strdup(buf);
-                    if (!pnm_subdirs) pnm_malloc_failed();
-                    free(buf);
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "subdirs",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-            } else if (!strncmp(arg, "maxfiles=", 9)) {
-                arg += 9;
-                if (sscanf(arg, "%d", &value) == 1) {
-                    if (value < 1) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
-                                info.short_name, "maxfiles",
-                                MSGTR_VO_ValueOutOfRange, ">=1");
-                        exit_player(MSGTR_Exit_error);
-                    } else {
-                        pnm_maxfiles = value;
-                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
-                                info.short_name, "maxfiles", value);
-                    }
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "maxfiles",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-                /* only here if value is set and sane */
-                if (value) {
-                    arg += (int)log10(value) + 1;
-                } else {
-                    arg++;  /* log10(0) fails */
-                }
-            } else {
-                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %-20s...\n", info.short_name,
-                        MSGTR_VO_UnknownSuboptions, arg);
-                exit_player(MSGTR_Exit_error);
-            }
-        } /* end while */
-    } /* endif */
-    
-    /* If pnm_outdir is not set by an option, resort to default of "." */
-    if (!pnm_outdir) {
-        pnm_outdir = strdup(".");
-        if (!pnm_outdir) pnm_malloc_failed();
+    if (subopt_parse(arg, subopts) != 0) {
+        return -1;
     }
+
+    pnm_type     = PNM_TYPE_PPM;
+    pnm_mode     = PNM_RAW_MODE;
+    pnm_maxfiles = 1000;
+
+    if (pgmyuv_type) pnm_type     = PNM_TYPE_PGMYUV;
+    if (pgm_type)    pnm_type     = PNM_TYPE_PGM;
+    if (ppm_type)    pnm_type     = PNM_TYPE_PPM;
+    if (ascii_mode)  pnm_mode     = PNM_ASCII_MODE;
+    if (raw_mode)    pnm_mode     = PNM_RAW_MODE;
+    if (maxfiles)    pnm_maxfiles = maxfiles;
+
+    if (outdir.len) {
+        pnm_outdir = malloc(outdir.len + 1);
+        memcpy(pnm_outdir, outdir.str, outdir.len);
+        pnm_outdir[outdir.len] = '\0';
+    } else {
+        pnm_outdir = strdup(".");
+    }
+
+    if (subdirs.len) {
+        pnm_subdirs = malloc(subdirs.len + 1);
+        memcpy(pnm_subdirs, subdirs.str, subdirs.len);
+        pnm_subdirs[subdirs.len] = '\0';
+    }
+
+    switch (pnm_mode) {
+        case PNM_ASCII_MODE:
+            info_message = MSGTR_VO_PNM_ASCIIMode;
+            break;
+        case PNM_RAW_MODE:
+            info_message = MSGTR_VO_PNM_RawMode;
+            break;
+    }
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
+
+    switch (pnm_type) {
+        case PNM_TYPE_PPM:
+            info_message = MSGTR_VO_PNM_PPMType;
+            break;
+        case PNM_TYPE_PGM:
+            info_message = MSGTR_VO_PNM_PGMType;
+            break;
+        case PNM_TYPE_PGMYUV:
+            info_message = MSGTR_VO_PNM_PGMYUVType;
+            break;
+    }
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_SuboptionsParsedOK);
@@ -346,7 +301,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     } else if (pnm_type == PNM_TYPE_PGMYUV) {
         pnm_file_extension = strdup("pgmyuv");
     }
-    if (!pnm_file_extension) pnm_malloc_failed();
 
     return 0;
 }
