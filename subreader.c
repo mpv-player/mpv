@@ -1512,6 +1512,59 @@ void dump_jacosub(subtitle* subs, float fps) {
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.js\'.\n");
 }
 
+void dump_sami(subtitle* subs, float fps) {
+    int i,j;
+    FILE * fd;
+    subtitle * onesub;
+    unsigned long temp;
+
+    if (!sub_uses_time && sub_fps == 0)
+	sub_fps = fps;
+    fd=fopen("dumpsub.smi","w");
+    if(!fd)
+    { 
+	perror("dump_jacosub: fopen");
+	return;
+    }
+    fprintf(fd, "<SAMI>\n"
+		"<HEAD>\n"
+		"	<STYLE TYPE=\"Text/css\">\n"
+		"	<!--\n"
+		"	  P {margin-left: 29pt; margin-right: 29pt; font-size: 24pt; text-align: center; font-family: Tahoma; font-weight: bold; color: #FCDD03; background-color: #000000;}\n"
+		"	  .SUBTTL {Name: 'Subtitles'; Lang: en-US; SAMIType: CC;}\n"
+		"	-->\n"
+		"	</STYLE>\n"
+		"</HEAD>\n"
+		"<BODY>\n");
+    for(i=0;i<sub_num;i++)
+    {
+        onesub=subs+i;    //=&subs[i];
+
+	temp=onesub->start;
+	if (!sub_uses_time)
+	    temp = temp * 100 / sub_fps;
+	temp -= sub_delay * 100;
+	fprintf(fd,"\t<SYNC Start=%lu>\n"
+		    "\t  <P>", temp * 10);
+	
+	for(j=0;j<onesub->lines;j++)
+	    fprintf(fd,"%s%s",j ? "<br>" : "", onesub->text[j]);
+
+	fprintf(fd,"\n");
+
+	temp=onesub->end;
+	if (!sub_uses_time)
+	    temp = temp * 100 / sub_fps;
+	temp -= sub_delay * 100;
+	fprintf(fd,"\t<SYNC Start=%lu>\n"
+		    "\t  <P>&nbsp;\n", temp * 10);
+    }
+    fprintf(fd, "</BODY>\n"
+		"</SAMI>\n");
+    fclose(fd);
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.smi\'.\n");
+}
+
 void sub_free( subtitle * subs )
 {
  int i;

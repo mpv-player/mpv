@@ -1200,6 +1200,7 @@ if(sh_video) {
   if(subtitles && stream_dump_type==6) dump_srt(subtitles, sh_video->fps);
   if(subtitles && stream_dump_type==7) dump_microdvd(subtitles, sh_video->fps);
   if(subtitles && stream_dump_type==8) dump_jacosub(subtitles, sh_video->fps);
+  if(subtitles && stream_dump_type==9) dump_sami(subtitles, sh_video->fps);
 }
 #endif
 
