@@ -148,7 +148,7 @@ Video:
   --enable-vm            build with XF86VidMode support for X11 [autodetect]
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
-  --enable-fbdev         build with FBDev render support [disable]
+  --enable-fbdev         build with FBDev render support [autodetect]
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
@@ -679,7 +679,7 @@ _gl=auto
 _ggi=auto
 _aa=auto
 _svga=auto
-_fbdev=no
+_fbdev=auto
 _dvb=auto
 _dxr3=auto
 _iconv=auto
@@ -1365,7 +1365,7 @@ if test "$_directfb" = auto ; then
 #include <directfb.h>
 int main(void) { IDirectFB *foo; return 0; }
 EOF
-  cc_check -ldirectfb && _directfb=yes
+  linux && test -c /dev/fb0 && cc_check -ldirectfb && _directfb=yes
 fi
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
@@ -1757,7 +1757,7 @@ echores "$_svga"
 echocheck "FBDev"
 if test "$_fbdev" = auto ; then
   _fbdev=no
-  linux && _fbdev=yes
+  linux && test -c /dev/fb0 && _fbdev=yes
 fi
 if test "$_fbdev" = yes ; then
   _def_fbdev='#define HAVE_FBDEV 1'
