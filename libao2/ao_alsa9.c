@@ -208,8 +208,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     snd_pcm_info_t *alsa_info;
     char *str_block_mode;
     int device_set = 0;
-    
-    printf("alsa-init: testing and bugreports are welcome.\n");    
+
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
 
@@ -286,7 +285,6 @@ static int init(int rate_hz, int channels, int format, int flags)
       default:
 	break;	    
       }
-    bytes_per_sample = ao_data.bps / ao_data.samplerate;
 
     if (ao_subdevice) {
       //start parsing ao_subdevice, ugly and not thread safe!
@@ -337,7 +335,25 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 	}
       }
-    } //end parsing ao_subdevice
+    } else { //end parsing ao_subdevice
+        /* in any case for multichannel playback we should select
+         * appropriate device
+         */
+        char devstr[128];
+
+        switch (channels) {
+          case 4:
+            strcpy(devstr, "surround40");
+            alsa_device = devstr;
+           break;
+          case 6:
+            strcpy(devstr, "surround51");
+            alsa_device = devstr;
+           break;
+          default:
+        }
+    }
+
 
     /* switch for spdif
      * sets opening sequence for SPDIF
@@ -377,7 +393,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
       default:
 	fprintf(stderr, "%d channels are not supported\n", channels);
-	return(0);
+	exit (0);
       }
 
       alsa_device = devstr;
@@ -544,6 +560,21 @@ static int init(int rate_hz, int channels, int format, int flags)
 	printf("alsa-init: unable to set access type: %s\n", snd_strerror(err));
 	return (0);
       }
+
+      /* workaround for nonsupported formats
+	 sets default format to S16_LE if the given formats aren't supported */
+      if ((err = snd_pcm_hw_params_test_format(alsa_handler, alsa_hwparams,
+                                             alsa_format)) < 0)
+      {
+         printf("alsa-init: format %s are not supported by hardware, trying default\n",
+                 audio_out_format_name(format));
+         alsa_format = SND_PCM_FORMAT_S16_LE;
+         ao_data.format = AFMT_S16_LE;
+         ao_data.bps = channels * rate_hz * 2;
+      }
+
+      bytes_per_sample = ao_data.bps / ao_data.samplerate; //it should be here
+
     
       if ((err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams,
 					      alsa_format)) < 0)
@@ -916,7 +947,7 @@ static int play_normal(void* data, int len)
     printf("alsa-play: write error %s", snd_strerror(res));
     return 0;
   }
-  return res < 0 ? (int)res : len;
+  return res < 0 ? (int)res : len - len % bytes_per_sample;
 }
 
 /* mmap-mode mainly based on descriptions by Joshua Haberman <joshua@haberman.com>
