@@ -21,9 +21,19 @@
 */
 
 /* The principle:  Make rear channels by extracting anti-phase data
-   from the front channels, delay by 15msec and feed to rear in anti-phase
-   www.dolby.com has the background
+   from the front channels, delay by 20msec and feed to rear in anti-phase
 */
+
+
+// SPLITREAR: Define to decode two distinct rear channels -
+// 	this doesn't work so well in practice because
+//      separation in a passive matrix is not high.
+//      C (dialogue) to Ls and Rs 14dB or so -
+//      so dialogue leaks to the rear.
+//      Still - give it a try and send feedback.
+//      comment this define for old behaviour of a single
+//      surround sent to rear in anti-phase
+#define SPLITREAR
 
 
 #include <stdio.h>
@@ -65,7 +75,7 @@ typedef struct pl_surround_s
 
 } pl_surround_t;
 
-static pl_surround_t pl_surround={0,15,NULL,NULL,NULL,0,0,NULL,0,0,0};
+static pl_surround_t pl_surround={0,20,NULL,NULL,NULL,0,0,NULL,0,0,0};
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -153,13 +163,21 @@ static void reset()
   memset(pl_surround.Rs_delaybuf, 0, sizeof(int16_t)*pl_surround.delaybuf_len);
 }
 
+// The beginnings of an active matrix...
+static double steering_matrix[][12] = {
+//	LL	RL	LR	RR	LS	RS	LLs	RLs	LRs	RRs	LC	RC	
+       {.707,	.0,	.0,	.707,	.5,	-.5,	.5878,	-.3928,	.3928,	-.5878,	.5,	.5},
+};
+
+// Experimental moving average dominances
+static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
 
 // processes 'ao_plugin_data.len' bytes of 'data'
 // called for every block of data
 static int play(){
   int16_t *in, *out;
   int i, samples;
-  int surround;
+  double *matrix = steering_matrix[0]; // later we'll index based on detected dominance
 
   if (pl_surround.passthrough) return 1;
 
@@ -168,11 +186,17 @@ static int play(){
   samples  = ao_plugin_data.len / sizeof(int16_t) / pl_surround.input_channels;
   out = pl_surround.databuf;  in = (int16_t *)ao_plugin_data.data;
 
-  // Testing - place a 1kHz tone in the front channels in anti-phase
+  // Testing - place a 1kHz tone on Lt and Rt in anti-phase: should decode in S
   //sinewave(in, samples, pl_surround.input_channels, 1000, 0.0, pl_surround.rate);
   //sinewave(&in[1], samples, pl_surround.input_channels, 1000, PI, pl_surround.rate);
 
   for (i=0; i<samples; i++) {
+
+    // Dominance:
+    //abs(in[0])  abs(in[1]);
+    //abs(in[0]+in[1])  abs(in[0]-in[1]);
+    //10 * log( abs(in[0]) / (abs(in[1])|1) );
+    //10 * log( abs(in[0]+in[1]) / (abs(in[0]-in[1])|1) );
 
     // About volume balancing...
     //   Surround encoding does the following:
@@ -183,25 +207,39 @@ static int play(){
     //   must take 3dB off as we split it:
     //       Ls=Rs=.707*(Lt-Rt)
     //   Trouble is, Lt could be +32767, Rt -32768, so possibility that S will
-    //   clip.  So to avoid that, we cut L/R by 3dB (*.707), and S by 6dB (/2).
+    //   overflow.  So to avoid that, we cut L/R by 3dB (*.707), and S by 6dB (/2).
+    //   this keeps the overall balance, but guarantees no overflow.
 
     // output front left and right
-    out[0] = in[0]*.707;
-    out[1] = in[1]*.707;
-    // output Ls and Rs - from 15msec ago, lowpass filtered @ 7kHz
+    out[0] = matrix[0]*in[0] + matrix[1]*in[1];
+    out[1] = matrix[2]*in[0] + matrix[3]*in[1];
+    // output Ls and Rs - from 20msec ago, lowpass filtered @ 7kHz
     out[2] = firfilter(pl_surround.Ls_delaybuf, pl_surround.delaybuf_pos,
 		       pl_surround.delaybuf_len, 32, pl_surround.filter_coefs_surround);
-    out[3] = - out[2];
-    //    out[3] = firfilter(pl_surround.Rs_delaybuf, pl_surround.delaybuf_pos,
-    //		       pl_surround.delaybuf_len, 32, pl_surround.filter_coefs_surround);
-    // calculate and save surround for 15msecs time
-    surround = (in[0]/2 - in[1]/2);
-    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos] = surround;
-    pl_surround.Rs_delaybuf[pl_surround.delaybuf_pos++] = - surround;
+#ifdef SPLITREAR
+    out[3] = firfilter(pl_surround.Rs_delaybuf, pl_surround.delaybuf_pos,
+		       pl_surround.delaybuf_len, 32, pl_surround.filter_coefs_surround);
+#else
+    out[3] = -out[2];
+#endif
+    // calculate and save surround for 20msecs time
+#ifdef SPLITREAR
+    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos] =
+      matrix[6]*in[0] + matrix[7]*in[1];
+    pl_surround.Rs_delaybuf[pl_surround.delaybuf_pos++] =
+      matrix[8]*in[0] + matrix[9]*in[1];
+#else
+    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos] =
+      matrix[4]*in[0] + matrix[5]*in[1];
+#endif
     pl_surround.delaybuf_pos %= pl_surround.delaybuf_len;
+
     // next samples...
     in = &in[pl_surround.input_channels];  out = &out[4];
   }
+
+  // Show some state
+  //printf("\npl_surround: delaybuf_pos=%d, samples=%d\r\033[A", pl_surround.delaybuf_pos, samples);
   
   // Set output block/len
   ao_plugin_data.data=pl_surround.databuf;
