@@ -51,6 +51,7 @@ LIBVO_EXTERN (ggi)
 static struct ggi_conf_s {
     char *driver;
     
+    ggi_visual_t parentvis;
     ggi_visual_t vis;
     ggi_mode gmode;
     
@@ -60,6 +61,12 @@ static struct ggi_conf_s {
     int srcformat;
     int srcdepth;
     int srcbpp;
+
+    /* dirty region */
+    struct {
+	int x1, y1;
+	int x2, y2;
+    } flushregion;
     
     /* destination */
     int dstwidth;
@@ -70,10 +77,58 @@ static struct ggi_conf_s {
     int voflags;
 } ggi_conf;
 
+
+static void set_graphtype(uint32_t format, ggi_mode *mode)
+{
+    switch(format)
+    {
+	case IMGFMT_RGB4:
+	    mode->graphtype = GT_4BIT;
+            break;
+	case IMGFMT_BGR4:
+	    mode->graphtype = GT_4BIT;
+            GT_SETSUBSCHEME(mode->graphtype, GT_SUB_HIGHBIT_RIGHT);
+            break;
+	case IMGFMT_RGB8:
+	case IMGFMT_BGR8:
+	    mode->graphtype = GT_8BIT;
+	    break;
+	case IMGFMT_RGB15:
+	case IMGFMT_BGR15:
+	    mode->graphtype = GT_15BIT;
+	    break;
+	case IMGFMT_RGB16:
+	case IMGFMT_BGR16:
+	    mode->graphtype = GT_16BIT;
+	    break;
+	case IMGFMT_RGB24:
+	case IMGFMT_BGR24:
+	    mode->graphtype = GT_24BIT;
+	    break;
+	case IMGFMT_RGB32:
+	case IMGFMT_BGR32:
+	    mode->graphtype = GT_32BIT;
+	    break;
+    }
+
+    return;
+}
+
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-    ggi_mode mode =
+    int i;
+    int rc;
+
+    ggi_mode mode = {
+	1,			/* frames */
+	{ 0, 0 },		/* top, left corner */
+	{ width, height },	/* bottem, right corner */
+	{ GGI_AUTO, GGI_AUTO },	/* size */
+	GT_AUTO,		/* graphtype */
+	{ GGI_AUTO, GGI_AUTO }	/* dots per pixel */
+    };
+    ggi_mode parentmode =
     {
 	1,			/* frames */
 	{ width, height },	/* visible */
@@ -82,57 +137,57 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	GT_AUTO,		/* graphtype */
 	{ GGI_AUTO, GGI_AUTO }	/* dots per pixel */
     };
-    int i;
 
-    switch(format)
-    {
-	case IMGFMT_RGB|8:
-	case IMGFMT_BGR|8:
-	    mode.graphtype = GT_8BIT;
-	    break;
-	case IMGFMT_RGB|15:
-	case IMGFMT_BGR|15:
-	    mode.graphtype = GT_15BIT;
-	    break;
-	case IMGFMT_RGB|16:
-	case IMGFMT_BGR|16:
-	    mode.graphtype = GT_16BIT;
-	    break;
-	case IMGFMT_RGB|24:
-	case IMGFMT_BGR|24:
-	    mode.graphtype = GT_24BIT;
-	    break;
-	case IMGFMT_RGB|32:
-	case IMGFMT_BGR|32:
-	    mode.graphtype = GT_32BIT;
-	    break;
-    }
+    set_graphtype(format, &parentmode);
 
 #if 0
     printf("[ggi] mode: ");
-    ggiPrintMode(&mode);
+    ggiPrintMode(&parentmode);
     printf("\n");
 #endif
 
-    ggiCheckMode(ggi_conf.vis, &mode);
+    ggiCheckMode(ggi_conf.parentvis, &parentmode);
 
-    if (ggiSetMode(ggi_conf.vis, &mode))
+    if (ggiSetMode(ggi_conf.parentvis, &parentmode) < 0)
     {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set mode\n");
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set display mode\n");
 	return(-1);
     }
 
-    if (ggiGetMode(ggi_conf.vis, &mode))
+    if (ggiGetMode(ggi_conf.parentvis, &parentmode) < 0)
     {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get mode\n");
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get display mode\n");
 	return(-1);
     }
 
-    if ((mode.graphtype == GT_INVALID) || (mode.graphtype == GT_AUTO))
+    if ((parentmode.graphtype == GT_INVALID) || (parentmode.graphtype == GT_AUTO))
     {
 	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
 	return(-1);
     }
+
+    /* calculate top, left corner */
+    mode.visible.x = (parentmode.virt.x - width) / 2;
+    mode.visible.y = (parentmode.virt.y - height) / 2;
+
+    /* calculate bottom, right corner */
+    mode.virt.x = mode.visible.x + width;
+    mode.virt.y = mode.visible.y + height;
+
+    ggiCheckMode(ggi_conf.vis, &mode);
+
+    if (ggiSetMode(ggi_conf.vis, &mode) < 0)
+    {
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set video mode\n");
+	return(-1);
+    }
+
+    if (ggiGetMode(ggi_conf.vis, &mode) < 0)
+    {
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get video mode\n");
+	return(-1);
+    }
+
 
     ggi_conf.gmode = mode;
 
@@ -142,14 +197,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     printf("\n");
 #endif
 
-    vo_depthonscreen = GT_DEPTH(mode.graphtype);
-    vo_screenwidth = mode.visible.x;
-    vo_screenheight = mode.visible.y;
+    vo_depthonscreen = GT_DEPTH(parentmode.graphtype);
+    vo_screenwidth = parentmode.visible.x;
+    vo_screenheight = parentmode.visible.y;
     
     vo_dx = vo_dy = 0;
     vo_dwidth = mode.virt.x;
     vo_dheight = mode.virt.y;
-    vo_dbpp = GT_SIZE(mode.graphtype);
+    vo_dbpp = GT_SIZE(parentmode.graphtype);
 
     ggi_conf.srcwidth = width;
     ggi_conf.srcheight = height;
@@ -192,6 +247,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     ggi_conf.srcbpp = (ggi_conf.srcdepth+7)/8;
 
+    ggi_conf.flushregion.x1 = ggi_conf.flushregion.y1 = 0;
+    ggi_conf.flushregion.x2 = ggi_conf.dstwidth;
+    ggi_conf.flushregion.y2 = ggi_conf.dstheight;
+
     return(0);
 }
 
@@ -213,13 +272,15 @@ static uint32_t get_image(mp_image_t *mpi)
 	(mpi->width != ggi_conf.srcwidth) ||
 	(mpi->height != ggi_conf.srcheight)
     )
+    {
 	return(VO_FALSE);
+    }
 
     mpi->planes[1] = mpi->planes[2] = NULL;
     mpi->stride[1] = mpi->stride[2] = 0;
     
-    mpi->stride[0] = ggi_conf.srcwidth*ggi_conf.srcbpp;
     mpi->planes[0] = NULL;
+    mpi->stride[0] = ggi_conf.srcwidth * ggi_conf.srcbpp;
     mpi->flags |= MP_IMGFLAG_DIRECT;
 
 #ifdef GGI_FLIP
@@ -236,35 +297,55 @@ static uint32_t get_image(mp_image_t *mpi)
 static uint32_t draw_frame(uint8_t *src[])
 {
     ggiPutBox(ggi_conf.vis, 0, 0, ggi_conf.dstwidth, ggi_conf.dstheight, src[0]);
-    ggiFlush(ggi_conf.vis);
+
+    ggi_conf.flushregion.x1 = ggi_conf.flushregion.y1 = 0;
+    ggi_conf.flushregion.x2 = ggi_conf.dstwidth;
+    ggi_conf.flushregion.y2 = ggi_conf.dstheight;
 
     return(0);
 }
 
 static void draw_osd(void)
 {
-
+    return;
 }
 
 static void flip_page(void)
 {
-    ggiFlush(ggi_conf.vis);
+    ggiFlushRegion(ggi_conf.vis, ggi_conf.flushregion.x1, ggi_conf.flushregion.y1,
+		ggi_conf.flushregion.x2 - ggi_conf.flushregion.x1,
+		ggi_conf.flushregion.y2 - ggi_conf.flushregion.y1);
+    ggi_conf.flushregion.x1 = ggi_conf.flushregion.x2 = ggi_conf.dstwidth / 2;
+    ggi_conf.flushregion.y1 = ggi_conf.flushregion.y2 = ggi_conf.dstheight / 2;
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
     int x, int y)
 {
-    ggiPutHLine(ggi_conf.vis, x, y, w, src[0]);
+    ggiPutBox(ggi_conf.vis, x, y, w, h, src[0]);
+
+    if (x < ggi_conf.flushregion.x1)
+	    ggi_conf.flushregion.x1 = x;
+    if (y < ggi_conf.flushregion.y1)
+	    ggi_conf.flushregion.y1 = y;
+    if ((x + w) > ggi_conf.flushregion.x2)
+	    ggi_conf.flushregion.x2 = x + w;
+    if ((y + h) > ggi_conf.flushregion.y2)
+	    ggi_conf.flushregion.y2 = y + h;
+
     return(1);
 }
 
 static uint32_t query_format(uint32_t format)
 {
     ggi_mode mode;
-    
-    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.vis)
+    uint32_t vfcap;
+
+    vfcap = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_ACCEPT_STRIDE;
+
+    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.parentvis)
     {
-	if (ggiGetMode(ggi_conf.vis, &mode) == 0)
+	if (ggiGetMode(ggi_conf.parentvis, &mode) == 0)
 	{
 	    vo_depthonscreen = GT_DEPTH(mode.graphtype);
 	    vo_dbpp = GT_SIZE(mode.graphtype);
@@ -274,41 +355,17 @@ static uint32_t query_format(uint32_t format)
     if ((IMGFMT_IS_BGR(format) && (IMGFMT_BGR_DEPTH(format) == vo_dbpp)) ||
 	(IMGFMT_IS_RGB(format) && (IMGFMT_RGB_DEPTH(format) == vo_dbpp)))
     {
-	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW);
+	return vfcap;
     }
-    
+
     if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format))
     {
-	switch(format)
-	{
-	    case IMGFMT_RGB|8:
-	    case IMGFMT_BGR|8:
-		mode.graphtype = GT_8BIT;
-		break;
-	    case IMGFMT_RGB|15:
-	    case IMGFMT_BGR|15:
-		mode.graphtype = GT_15BIT;
-		break;
-	    case IMGFMT_RGB|16:
-	    case IMGFMT_BGR|16:
-		mode.graphtype = GT_16BIT;
-		break;
-	    case IMGFMT_RGB|24:
-	    case IMGFMT_BGR|24:
-		mode.graphtype = GT_24BIT;
-		break;
-	    case IMGFMT_RGB|32:
-	    case IMGFMT_BGR|32:
-		mode.graphtype = GT_32BIT;
-		break;
-	}
-	if (ggiCheckMode(ggi_conf.vis, &mode))
-	{
-	    return 0;
-	}
-	else
-	{
-	    return(VFCAP_CSP_SUPPORTED);
+	set_graphtype(format, &mode);
+
+	if (ggiCheckMode(ggi_conf.parentvis, &mode) < 0) {
+		return 0;
+	} else {
+		return vfcap;
 	}
     }
 
@@ -328,13 +385,23 @@ static uint32_t preinit(const char *arg)
     else
 	ggi_conf.driver = NULL;
     
-    if ((ggi_conf.vis = ggiOpen(ggi_conf.driver)) == NULL)
+    ggi_conf.parentvis = ggiOpen(ggi_conf.driver);
+    if (ggi_conf.parentvis == NULL)
     {
 	mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to open '%s' output\n",
 	    (ggi_conf.driver == NULL) ? "default" : ggi_conf.driver);
 	ggiExit();
 	return(-1);
     }
+
+    ggi_conf.vis = ggiOpen("display-sub", ggi_conf.parentvis);
+    if (ggi_conf.vis == NULL)
+    {
+	mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to open the video output\n");
+	ggiExit();
+	return(-1);
+    }
+
     
     mp_msg(MSGT_VO, MSGL_V, "[ggi] using '%s' output\n",
 	(ggi_conf.driver == NULL) ? "default" : ggi_conf.driver);
@@ -347,6 +414,7 @@ static void uninit(void)
     if (ggi_conf.driver)
 	free(ggi_conf.driver);
     ggiClose(ggi_conf.vis);
+    ggiClose(ggi_conf.parentvis);
     ggiExit();
 }
 
@@ -372,14 +440,14 @@ static void check_events(void)
     ggi_event event;
     ggi_event_mask mask;
 
-    if ((mask = ggiEventPoll(ggi_conf.vis, emAll, &tv)))
-    if (ggiEventRead(ggi_conf.vis, &event, emAll) != 0)
+    if ((mask = ggiEventPoll(ggi_conf.parentvis, emAll, &tv)))
+    if (ggiEventRead(ggi_conf.parentvis, &event, emAll) != 0)
     {
 	mp_dbg(MSGT_VO, MSGL_DBG3, "type: %4x, origin: %4x, sym: %4x, label: %4x, button=%4x\n",
 	    event.any.origin, event.any.type, event.key.sym, event.key.label, event.key.button);
 
-	if (event.key.type == evKeyPress)
-	{
+	switch (event.any.type) {
+	case evKeyPress:
 	    switch(event.key.sym)
 	    {
 		case GIIK_PAsterisk: /* PStar */
@@ -459,8 +527,10 @@ static void check_events(void)
 		    break;
 		default:
 		    break;
-	    }
-	}
-    }
+	    } /* switch */
+
+            break;
+	} /* switch */
+    } /* if */
     return;
 }
