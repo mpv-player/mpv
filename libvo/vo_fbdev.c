@@ -834,8 +834,10 @@ static void vt_set_textarea(int u, int l)
 
 	if (verbose > 1)
 		printf(FBDEV "vt_set_textarea(%d,%d): %d,%d\n", u, l, urow, lrow);
-	fprintf(vt_fp, "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
-	fflush(vt_fp);
+	if(vt_fp) {
+	  fprintf(vt_fp, "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
+	  fflush(vt_fp);
+	}
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
