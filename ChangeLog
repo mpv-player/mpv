@@ -43,6 +43,7 @@ MPlayer (1.0)
     * ALSA audio output driver always uses specified device, even for hwac3
     * support for mixer channel selection in the ALSA audio output driver
     * jpeg video output driver now supports output to multiple directories
+    * audio output driver for the polypaudio sound server
 
     Decoders:
     * "experimental" support for 20 and 24 bit LPCM (DVD-Audio)
