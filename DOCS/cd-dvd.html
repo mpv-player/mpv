@@ -42,6 +42,8 @@
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
 
 <P>This sets prefetched file reading to 2MB, which helps with scratched CD-ROMs.
+  If you set it to too high, the drive will continuously spin up and down, and
+  will dramatically decrease the performance.
   It is recommended that you also tune your CD-ROM drive with hdparm:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
