@@ -83,6 +83,11 @@ typedef struct stream_header
 
 /// Our private datas
 
+typedef struct ogg_syncpoint {
+  int64_t granulepos;
+  off_t page_pos;
+} ogg_syncpoint_t;
+
 /// A logical stream
 typedef struct ogg_stream {
   /// Timestamping stuff
@@ -92,6 +97,8 @@ typedef struct ogg_stream {
 
   // Logical stream state
   ogg_stream_state stream;
+  int hdr_packets;
+  int vorbis;
 } ogg_stream_t;
 
 typedef struct ogg_demuxer {
@@ -102,7 +109,11 @@ typedef struct ogg_demuxer {
   /// Logical streams
   ogg_stream_t *subs;
   int num_sub;
+  ogg_syncpoint_t* syncpoints;
+  int num_syncpoint;
 } ogg_demuxer_t;
+
+#define NUM_VORBIS_HDR_PACKETS 3
 
 /// Some defines from OggDS
 #define PACKET_TYPE_HEADER   0x01
@@ -135,6 +146,53 @@ static  int demux_ogg_get_page_stream(ogg_demuxer_t* ogg_d,ogg_stream_state** os
 
 }
 
+static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vorbis_info* vi,float* pts,int* flags) {
+  unsigned char* data;
+
+  *pts = 0;
+  *flags = 0;
+
+  if(os->vorbis) {
+    data = pack->packet;
+    if(*pack->packet & PACKET_TYPE_HEADER)
+      os->hdr_packets++;
+    else if(vi) {
+      // When we dump the audio, there is no vi, but we dont care of timestamp in this case
+      int32_t blocksize = vorbis_packet_blocksize(vi,pack) / vi->channels;
+      // Calculate the timestamp if the packet don't have any
+      if(pack->granulepos == -1) {
+	pack->granulepos = os->lastpos;
+	if(os->lastsize > 0)
+	  pack->granulepos += os->lastsize;
+      }
+      *pts = pack->granulepos / (float)vi->rate;
+      os->lastsize = blocksize;
+      os->lastpos = pack->granulepos;
+    }
+  } else {
+    // Find data start
+    int16_t hdrlen = (*pack->packet & PACKET_LEN_BITS01)>>6;
+    hdrlen |= (*pack->packet & PACKET_LEN_BITS2) <<1;
+    data = pack->packet + 1 + hdrlen;
+    // Calculate the timestamp
+    if(pack->granulepos == -1)
+      pack->granulepos = os->lastpos + os->lastsize;
+    // If we alredy have a timestamp it can be a syncpoint
+    if(*pack->packet & PACKET_IS_SYNCPOINT)
+      *flags = 1;
+    *pts =  pack->granulepos/os->samplerate;
+    // Save the packet length and timestamp
+    os->lastsize = 0;
+    while(hdrlen) {
+      os->lastsize <<= 8;
+      os->lastsize |= pack->packet[hdrlen];
+      hdrlen--;
+    }
+    os->lastpos = pack->granulepos;
+  }
+  return data;
+}
+
 /// Calculate the timestamp and add the packet to the demux stream
 // return 1 if the packet was added, 0 otherwise
 static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* pack) {
@@ -146,51 +204,16 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
 
   // If packet is an header we jump it except for vorbis
   if((*pack->packet & PACKET_TYPE_HEADER) && 
-     (ds == d->video || (ds == d->audio && ((sh_audio_t*)ds->sh)->format != 0xFFFE )))
+     (ds == d->video || (ds == d->audio && ( ((sh_audio_t*)ds->sh)->format != 0xFFFE || os->hdr_packets >= NUM_VORBIS_HDR_PACKETS ) ) ))
     return 0;
 
   // For vorbis packet the packet is the data, for other codec we must jump the header
-  if(ds == d->audio && ((sh_audio_t*)ds->sh)->format == 0xFFFE) {
-    data = pack->packet;
-    if(*pack->packet & PACKET_TYPE_HEADER)
-      pts = 0;
-    else {
-      vorbis_info* vi = &((ov_struct_t*)((sh_audio_t*)ds->sh)->context)->vi;
-      // When we dump the audio, there is no vi, but we dont care of timestamp in this case
-      if(vi) {
-	int32_t blocksize = vorbis_packet_blocksize(vi,pack) / vi->channels;
-	// Calculate the timestamp if the packet don't have any
-	if(pack->granulepos == -1) {
-	  pack->granulepos = os->lastpos;
-	  if(os->lastsize > 0)
-	    pack->granulepos += os->lastsize;
-	}
-	pts = pack->granulepos / (float)vi->rate;
-	os->lastsize = blocksize;
-	os->lastpos = pack->granulepos;
-      }
-    }
-  } else {
-    // Find data start
-    int16_t hdrlen = (*pack->packet & PACKET_LEN_BITS01)>>6;
-    hdrlen |= (*pack->packet & PACKET_LEN_BITS2) <<1;
-    data = pack->packet + 1 + hdrlen;
-    // Calculate the timestamp
-    if(pack->granulepos == -1)
-      pack->granulepos = os->lastpos + os->lastsize;
-    // If we alredy have a timestamp it can be a syncpoint
-    else if(*pack->packet & PACKET_IS_SYNCPOINT)
-      flags = 1;
-    pts =  pack->granulepos/os->samplerate;
-    // Save the packet length and timestamp
-    os->lastsize = 0;
-    while(hdrlen) {
-      os->lastsize <<= 8;
-      os->lastsize |= pack->packet[hdrlen];
-      hdrlen--;
-    }
-    os->lastpos = pack->granulepos;
-  }
+  if(ds == d->audio && ((sh_audio_t*)ds->sh)->format == 0xFFFE)
+    data = demux_ogg_read_packet(os,pack,&((ov_struct_t*)((sh_audio_t*)ds->sh)->context)->vi,
+				 &pts,&flags);
+  else
+    data = demux_ogg_read_packet(os,pack,NULL,&pts,&flags);
+
 
   /// Send the packet
   dp = new_demux_packet(pack->bytes-(data-pack->packet));
@@ -201,6 +224,111 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   if(verbose>1)printf("New dp: %p  ds=%p  pts=%5.3f  len=%d  flag=%d  \n",
       dp, ds, pts, dp->len, flags);
   return 1;
+}
+
+/// Build a table of all syncpoints to make seeking easier
+void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
+  ogg_demuxer_t* ogg_d = demuxer->priv;
+  stream_t *s = demuxer->stream;
+  ogg_sync_state* sync = &ogg_d->sync;
+  ogg_page* page= &ogg_d->page;
+  ogg_stream_state* oss;
+  ogg_stream_t* os;
+  ogg_packet op;
+  int np,sid,p;
+  vorbis_info* vi = NULL;
+  off_t pos, last_pos;
+  pos = last_pos = demuxer->movi_start;
+
+  // Reset the stream
+  stream_seek(s,demuxer->movi_start);
+  ogg_sync_reset(sync);
+
+  // Get the serial number of the stream we use
+  if(demuxer->video->id >= 0)
+    sid = demuxer->video->id;
+  else {
+    sid = demuxer->audio->id;
+    if(((sh_audio_t*)demuxer->audio->sh)->format == 0xFFFE)
+      vi = &((ov_struct_t*)((sh_audio_t*)demuxer->audio->sh)->context)->vi;
+  }
+  os = &ogg_d->subs[sid];
+  oss = &os->stream;
+
+  while(1) {
+    np = ogg_sync_pageseek(sync,page);
+    if(np < 0) { // We had to skip some bytes
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"Bad page sync while building syncpoints table (%ld)\n",-np);
+      pos += -np;
+      continue;
+    }
+    if(np <= 0) { // We need more data
+      char* buf = ogg_sync_buffer(sync,BLOCK_SIZE);
+      int len = stream_read(s,buf,BLOCK_SIZE);
+      if(len == 0 && s->eof)
+	break;
+      ogg_sync_wrote(sync,len);
+      continue;
+    }
+    // The page is ready
+    //ogg_sync_pageout(sync,page);
+    if(ogg_page_serialno(page) != os->stream.serialno) { // It isn't a page from the stream we want
+      pos += np;
+      continue;
+    }
+    if(ogg_stream_pagein(oss,page) != 0) {
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"Pagein error ????\n");
+      pos += np;
+      continue;
+    }
+    p = 0;
+    while(ogg_stream_packetout(oss,&op) == 1) {
+      float pts;
+      int flags;
+      demux_ogg_read_packet(os,&op,vi,&pts,&flags);
+      if(flags || (os->vorbis && op.granulepos >= 0)) {
+	ogg_d->syncpoints = (ogg_syncpoint_t*)realloc(ogg_d->syncpoints,(ogg_d->num_syncpoint+1)*sizeof(ogg_syncpoint_t));
+	ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos = op.granulepos;
+	ogg_d->syncpoints[ogg_d->num_syncpoint].page_pos = (ogg_page_continued(page) && p == 0) ? last_pos : pos;
+	ogg_d->num_syncpoint++;
+      }
+      p++;
+    }
+    if(p > 0)
+      last_pos = pos;
+    pos += np;
+  }
+
+  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg syncpoints table builed: %d syncpoints\n",ogg_d->num_syncpoint);
+
+  stream_reset(s);
+  stream_seek(s,demuxer->movi_start);
+  ogg_sync_reset(sync);
+  for(np = 0 ; np < ogg_d->num_sub ; np++) {
+    ogg_stream_reset(&ogg_d->subs[np].stream);
+    ogg_d->subs[np].lastpos = ogg_d->subs[np].lastsize = ogg_d->subs[np].hdr_packets = 0;
+  }
+
+  
+  // Get the first page
+  while(1) {
+    np = ogg_sync_pageout(sync,page);
+    if(np <= 0) { // We need more data
+      char* buf = ogg_sync_buffer(sync,BLOCK_SIZE);
+      int len = stream_read(s,buf,BLOCK_SIZE);
+      if(len == 0 && s->eof) {
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"EOF while trying to get the first page !!!!\n");
+	break;
+      }
+      
+      ogg_sync_wrote(sync,len);
+      continue;
+    }
+    demux_ogg_get_page_stream(ogg_d,&oss);
+    ogg_stream_pagein(oss,page);
+    break;
+  }
+  
 }
 
 /// Open an ogg physical stream
@@ -276,6 +404,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     if(pack.bytes >= 7 && ! strncmp(&pack.packet[1],"vorbis", 6) ) {
       sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
       sh_a->format = 0xFFFE;
+      ogg_d->subs[ogg_d->num_sub].vorbis = 1;
       n_audio++;
       mp_msg(MSGT_DEMUX,MSGL_V,"OGG : stream %d is vorbis\n",ogg_d->num_sub);
 
@@ -411,27 +540,32 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	if(demuxer->video->id == ogg_d->num_sub)
 	  ds = demuxer->video;
       }
-      /// Add the packet contained in this page
-       if(ds) {
-	 /// Finish the page, otherwise packets will be lost
-	 do {
-	   demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],&pack);
-	 } while(ogg_stream_packetout(&ogg_d->subs[ogg_d->num_sub].stream,&pack) == 1);
-	 
-       }
+      /// Add the header packets if the stream isn't seekable
+      if(ds && !s->end_pos) {
+	/// Finish the page, otherwise packets will be lost
+	do {
+	  demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],&pack);
+	} while(ogg_stream_packetout(&ogg_d->subs[ogg_d->num_sub].stream,&pack) == 1);
+      }
     }
     ogg_d->num_sub++;      
   }
 
   /// Finish to setup the demuxer
   demuxer->priv = ogg_d;
-  /// We can't seek :(
-  demuxer->seekable = 0;
 
   if(!n_video)
     demuxer->video->id = -2;
   if(!n_audio)
     demuxer->audio->id = -2;
+
+  if(!s->end_pos)
+    demuxer->seekable = 0;
+  else {
+    demuxer->movi_start = 0;
+    demuxer->movi_end = s->end_pos;
+    demux_ogg_build_syncpoints_table(demuxer);
+  }
 
   mp_msg(MSGT_DEMUX,MSGL_V,"OGG demuxer : found %d audio stream and %d video stream\n",n_audio,n_video);
  
@@ -608,6 +742,99 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
 }
 
-/// TODO : Seeking 8-)
-  
+void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
+  ogg_demuxer_t* ogg_d = demuxer->priv;
+  ogg_sync_state* sync = &ogg_d->sync;
+  ogg_page* page= &ogg_d->page;
+  ogg_stream_state* oss;
+  ogg_stream_t* os;
+  demux_stream_t* ds;
+  sh_audio_t* sh_audio = demuxer->audio->sh;
+  //sh_video_t* sh_video = demuxer->video->sh;
+  ogg_packet op;
+  float time_pos,rate;
+  int i,sp;
+  vorbis_info* vi = NULL;
+  int64_t gp;
+
+  if(!ogg_d->syncpoints)
+    return;
+
+  if(demuxer->video->id >= 0) {
+    ds = demuxer->video;
+    rate = ogg_d->subs[ds->id].samplerate;
+  } else {
+    ds = demuxer->audio;
+    vi = &((ov_struct_t*)((sh_audio_t*)ds->sh)->context)->vi;
+    rate = (float)vi->rate;
+  }
+
+  os = &ogg_d->subs[ds->id];
+  oss = &os->stream;
+
+  time_pos = flags & 1 ? 0 : os->lastpos/ rate;
+  if(flags & 2)
+    time_pos += ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos / rate * rel_seek_secs;
+  else
+    time_pos += rel_seek_secs;
+
+  gp = time_pos * rate;
+
+  for(sp = 0; sp < ogg_d->num_syncpoint ; sp++) {
+    if(ogg_d->syncpoints[sp].granulepos >= gp)
+      break;
+  }
+
+  if(sp >= ogg_d->num_syncpoint)
+    return;
+
+  stream_seek(demuxer->stream,ogg_d->syncpoints[sp].page_pos);
+  ogg_sync_reset(sync);
+  for(i = 0 ; i < ogg_d->num_sub ; i++)
+    ogg_stream_reset(&ogg_d->subs[i].stream);
+
+  while(1) {
+    int np = ogg_sync_pageout(sync,page);
+    if(np <= 0) { // We need more data
+      char* buf = ogg_sync_buffer(sync,BLOCK_SIZE);
+      int len = stream_read(demuxer->stream,buf,BLOCK_SIZE);
+       if(len == 0 && demuxer->stream->eof) {
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"EOF while trying to seek !!!!\n");
+	break;
+      }
+      ogg_sync_wrote(sync,len);
+      continue;
+    }
+
+    if(ogg_page_serialno(page) != os->stream.serialno)
+      continue;
+    if(ogg_stream_pagein(oss,page) != 0)
+      continue;
+
+    while(1) {
+      np = ogg_stream_packetpeek(oss,&op);
+      if(np < 0) {
+	ogg_stream_packetout(oss,&op);
+	continue;
+      } else if(np == 0)
+	break;
+      else {
+	float pts;
+	int f;
+	demux_ogg_read_packet(os,&op,vi,&pts,&f);
+	if(f || (os->vorbis && op.granulepos >= gp)) {
+	  if(sh_audio)
+ 	    resync_audio_stream(sh_audio); 
+	  return;
+	}
+	ogg_stream_packetout(oss,&op);
+	demux_ogg_read_packet(os,&op,vi,&pts,&f);
+      }
+    }
+  }
+
+  mp_msg(MSGT_DEMUX,MSGL_ERR,"Can't find the good packet :(\n");  
+
+}
+
 #endif

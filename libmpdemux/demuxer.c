@@ -921,6 +921,7 @@ void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -989,6 +990,8 @@ switch(demuxer->file_format){
       demux_audio_seek(demuxer,rel_seek_secs,flags);  break;
  case DEMUXER_TYPE_DEMUXERS:
       demux_demuxers_seek(demuxer,rel_seek_secs,flags);  break;
+ case DEMUXER_TYPE_OGG:
+      demux_ogg_seek(demuxer,rel_seek_secs,flags);  break;
 
 
 } // switch(demuxer->file_format)
