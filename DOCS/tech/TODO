@@ -6,13 +6,12 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 demuxer:
-- .VDR files from stdinput (ff detection bug) -- DONE (?)
+- .VDR files from stdinput (DONE)
 - test and cleanup FLI/FLC support (and implement seek)
 - check dvdread/dvdcss version problems -- .so ?
 
 decoders:
 - finish native g72x audio decoder
-- fix the MSVideo1-bugs (DONE)
 - finish and switch to C directshow code
 
 mencoder:
