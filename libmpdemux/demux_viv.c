@@ -652,6 +652,7 @@ if (demuxer->audio->id >= -1){
 		{
 		    mp_msg(MSGT_DEMUX, MSGL_ERR, "VIVO: Not support audio codec (%d)\n",
 			priv->audio_codec);
+		    free_sh_audio(sh);
 		    goto nosound;
 		}
 
@@ -713,7 +714,6 @@ if (demuxer->audio->id >= -1){
 		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 nosound:
-		free_sh_audio(sh);
 }
 }
 
