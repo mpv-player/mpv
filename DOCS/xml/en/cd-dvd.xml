@@ -109,6 +109,11 @@ and <systemitem>libdvdcss</systemitem> libraries, but this solution is
 library incompatibilities and slower speed.
 </para>
 
+<note><para>
+In case of DVD decoding problems, try disabling supermount, or any other such
+facilities.
+</para></note>
+
 <formalpara>
 <title>Old-style DVD support - OPTIONAL</title>
 <para>
