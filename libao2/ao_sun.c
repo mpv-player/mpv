@@ -43,7 +43,7 @@ LIBAO_EXTERN(sun)
 #endif
 
 
-static char *sun_mixer_device="/dev/audioctl";
+static char *sun_mixer_device = NULL;
 static char *audio_dev = NULL;
 static int queued_bursts = 0;
 static int queued_samples = 0;
@@ -261,12 +261,17 @@ static int init(int rate,int channels,int format,int flags){
     audio_info_t info;
     int ok;
 
-    if(mixer_device)
-      sun_mixer_device=mixer_device;
-
     if (audio_dev == NULL) {
 	if ((audio_dev = getenv("AUDIODEV")) == NULL)
 	    audio_dev = "/dev/audio";
+    }
+
+    if (sun_mixer_device == NULL) {
+	if ((sun_mixer_device = mixer_device) == NULL) {
+	    sun_mixer_device = malloc(strlen(audio_dev) + 4);
+	    strcpy(sun_mixer_device, audio_dev);
+	    strcat(sun_mixer_device, "ctl");
+	}
     }
 
     if (ao_subdevice) audio_dev = ao_subdevice;
