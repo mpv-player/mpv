@@ -16,112 +16,125 @@
 
 <P><B>How to report bugs?</B></P>
 
-<P>First, try the latest CVS, maybe your bug is already fixed. CVS download
-instructions (easy) can be found on our homepage.</P>
+<P>First of all please try the latest CVS version of mplayer as your bug might
+already be fixed there. CVS instructions can be found at the bottom of
+<A HREF="http://www.mplayerhq.hu/homepage/dload.html">this page</A>.</P>
 
-<P>If it didn't help: read <A HREF="documentation.html#D">Appendix D</A>, and other docs. If your problem isn't
-known or isn't solved by our instructions, then report the bug:</P>
+<P>If this did not help please refer to <A HREF="documentation.html#D">Appendix D</A>
+and the rest of the documentation. If your problem is not known or not solvable by
+our instructions, then please report the bug.</P>
 
-<P><B>Where?</B></P>
+<P><B>Where to report bugs?</B></P>
 
 <P>Subscribe to the mplayer-users mailing list:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
-and send your bugreport to:<BR>
+and send your bug report to:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
-We won't CC: so please subscribe!!!</P>
+Please note that we will not individually CC (carbon-copy) people so it is a good
+idea to subscribe to actually receive your answer.</P>
 
-<P>Don't send bugreports private, directly to author's address!!!
-We are working together on code, so everyone is interested in it.
-BTW many times other users know the solution (system config probs,
-bad drivers etc), even when we think it's a bug in our code.
-The language of this list is ENGLISH!</P>
+<P>Please do not send bug reports privately to individual developers.  This is
+community work and thus there might be several people interested in it.
+Also sometimes other users already experienced your troubles and have a
+solution in hand how to circumvent a problem even if it is a bug in mplayer
+code.<BR>
+The language of this list is <strong>English</strong>.</P>
 
-<P>Please describe your problem in details, examples etc, and don't
-forget to include these:</P>
+<P>Please describe your problem as detailed as possible with examples etc.
+and do not forget to include this valuable information:</P>
 
-<P><B>What?</B></P>
+<P><B>What to report?</B></P>
 
-<P><B><I>1. The system info what we always want:</I></B></P>
+<P><B><I>System Information</I></B></P>
 
 <UL>
-<LI>linux distribution<BR>
-examples:<UL>
-    <LI>RedHat 7.1
-    <LI>Slackware 7.0 + devel packs from 7.1 ...</UL>
+<LI>Your Linux distribution or operating system e.g.:
+    <UL>
+        <LI>Red Hat 7.1
+        <LI>Slackware 7.0 + devel packs from 7.1 ...
+    </UL>
 <LI>kernel version:<BR>
     <CODE>uname -a</CODE>
 <LI>libc version:<BR>
     <CODE>ls -l /lib/libc[.-]*</CODE>
 <LI>X version:<BR>
     <CODE>X -version</CODE>
-<LI>gcc and ld version:<BR>
+<LI>gcc and ld versions:<BR>
     <CODE>gcc -v<BR>
     ld -v</CODE>
 <LI>binutils version:<BR>
     <CODE>as --version</CODE>
 </UL>
 
-<P><B><I>2. Hardware & drivers:</I></B></P>
+<P><B><I>Hardware &amp; drivers</I></B></P>
 
 <UL>
-<LI>CPU info:<BR>
+<LI>CPU info (this works on Linux only):<BR>
     <CODE>cat /proc/cpuinfo</CODE>
-<LI>video card manufacturer and model<BR>
-    examples:<BR><UL>
-    <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-    <LI>Matrox G400 DH 32MB SGRAM</UL>
-<LI>video driver type&version<BR>
-    examples:<UL>
-    <LI>X built-in driver
-    <LI>nvidia 0.9.623
-    <LI>Utah-GLX CVS 2001-02-17
-    <LI>DRI from X 4.0.3</UL>
-<LI>sound card type & driver<BR>
-    examples:<BR><UL>
-    <LI>Creative SBLive! Gold with OSS driver from oss.creative.com
-    <LI>Creative SB16 with OSS drivers of kernel
-    <LI>GUS PnP with ALSA OSS emulation</UL>
-<LI>if you are unsure, attach output of lspci -v
+<LI>Video card manufacturer and model, e.g.:<BR>
+    <UL>
+        <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
+        <LI>Matrox G400 DH 32MB SGRAM
+    </UL>
+<LI>Video driver type &amp; version, e.g.:<BR>
+    <UL>
+        <LI>X built-in driver
+        <LI>nVidia 0.9.623
+        <LI>Utah-GLX CVS 2001-02-17
+        <LI>DRI from X 4.0.3
+    </UL>
+<LI>Sound card type &amp; driver, e.g.:<BR>
+    <UL>
+        <LI>Creative SBLive! Gold with OSS driver from oss.creative.com
+        <LI>Creative SB16 with kernel OSS drivers
+        <LI>GUS PnP with ALSA OSS emulation
+    </UL>
+<LI>if in doubt include <CODE>lspci -vv</CODE> output on Linux systems
 </UL>
 
-<P><B>For compiling problems/errors</B></P>
+<P><B>For compilation problems/errors</B></P>
 
-<P><B><I>3. these files:</I></B></P>
+<P><B><I>Please include these files:</I></B></P>
 <UL><LI>configure.log
 <LI>config.h
 <LI>config.mak
 <LI>libvo/config.mak
 </UL>
 
-<P><B>For playback problems:</B></P>
+<P><B>For playback problems</B></P>
 
-<P><B><I>3. Output of mplayer at verbose level 1 (-v)</I></B></P>
+<P><B><I>Please include the output of mplayer at verbosity level 1</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filename &amp;&gt; mplayer.log</CODE></P>
-  
-<P><B><I>4. If the problem is specific to one or a few files,
-  then please upload that file to:</I></B></P>
-<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Also upload a small .txt file with the same name as your file (+ .txt extension),
-  containing problem description, mplayer -v file output, and your email address!<BR>
-  Usually first 1-5 MB of the file is enough to reproduce
-  the problem, but first you should try it:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
-  (it will cut first 5 MB of 'yourfile' and save to 'smallfile')
-  Then try again on this small file, and if bug still exists
-  then it's enough to upload this small file.<BR>
-  NEVER send such files via mail! Upload it, and send only
-  the path/filename of the file on the FTP.
-  If the file is accessible on the net, then sending the
-  _exact_ URL is enough!
 
-<P><B><I>5. For crashes (segfault, SIGILL, signal 4 etc):</I></B></P>
+<P>If your problem is specific to one or more files, then please upload the
+offender(s) to:</P>
 
-<P><I>If you have coredump of the crash, see 5.a, else see 5.b:</I></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
 
-<P><B><I>5.a: Please print us coredump (if it was created).</I></B></P>
+<P>Also upload a small text file having the same base name as your file
+with a .txt extension. Describe the problem you are having with the
+particular file there and include your email address as well as the output
+of mplayer at verbosity level 1.<BR> 
+Usually the first 1-5 MB of a file are enough to reproduce the problem,
+but to be sure we ask you to:
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
 
-<P>Howto:
-please create following command file:</P>
+<P>It will take the  first five megabytes of <STRONG>'your-file'</STRONG> and
+write it to <STRONG>'small-file'</STRONG>.<BR>
+Then try again on this small file and if the bug still shows up 
+your sample is sufficient for us.<BR>
+Please <STRONG>do not ever</STRONG> send such files via mail! Upload it,
+and send only the path/filename of the file on the FTP-server.<BR>
+If the file is accessible on the net, then sending the
+<STRONG>exact</STRONG> URL is sufficient.</P>
+
+<P><B><I>For crashes</I></B></P>
+
+<P><I>If you have a core dump of the crash continue reading the next paragraph, otherwise skip it.</I></P>
+
+<P><B><I>How to extract meaningful information from a core dump</I></B></P>
+
+<P>Please create following command file:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
 printf "eax=%08lX\n",$eax<BR>
@@ -134,41 +147,45 @@ printf "edi=%08lX\n",$edi<BR>
 printf "esi=%08lX\n",$esi<BR>
 </CODE></P>
 
-<P>Then simply execute following command line:</P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file >mplayer.bug</CODE></P>
+<P>Then simply execute the following on your command line:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 
-<P><B><I>5.b.: run MPlayer in gdb:</I></B></P>
-<P>Re-compile mplayer with debugging code enabled:<BR>
-./configure --enable-debug<BR>
-make
-</P>
-<P>[at root/user shell prompt:]<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
-[at gdb prompt:]<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [options-to-mplayer] filename</CODE><BR>
-  ... (wait until it will crash)<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
-Send us the full output of the above things!
-</P>
+<P><B><I>How to conserve information about a reproducible crash</I></B></P>
+<P>Re-compile mplayer with debugging code enabled:</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
+and then run mplayer within gdb using:
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
 
-<P><B>In general:</B></P>
+<P>You are now within gdb. Type:</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [options-to-mplayer] filename</code></P>
+and reproduce your crash. As soon as you did it, gdb will
+return you to the command line prompt where you have to enter
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+and send the complete output to us.
 
-<P>If something is big (logs etc) then it's better to upload to the ftp
-(gzipped), and include only path/filename in the bugreport!</P>
+<P><B>General note</B></P>
 
-<P><B>I know what am I doing...</B></P>
+<P>If something is quite big (logs for instance) then it is better to upload
+it to the FTP-server in a compressed format (gzip and bzip preferred) and
+include only the path and filename in your bug report.</P>
 
-<P>If you created a proper bugreport following the above steps, and you are
-sure it's mplayer bug, not compiler's problem or broken file, you've already
-readed through docs and you didn't find the solution, your sound drivers are ok,
-then you may want to subscribe to the mplayer-advusers list and send your
-bugreport there to get better and faster answer. But BE WARNED: if you post
-newbie or rtfm-type questions there, you'll be immediatelly banned, instead or
-getting answered!!! So don't flame us, subscribe -advusers only if you really
-know what are you doing and you feel you as advanced mplayer user or developer.
-(and about how to subscribe: find it out! if you're really an advanced user,
-it shouldn't be a problem for you...)
+<P><B>I know what I am doing...</B></P>
+
+<P>If you created a proper bug report following the steps above and you are
+confident it is a bug in mplayer, not a compiler problem or broken file,
+you have already read the documentation and you could not find a solution,
+your sound drivers are OK, then you might want to subscribe to the
+mplayer-advusers list and send your bug report there to get a better and
+faster answer.<BR><BR> 
+Please be advised that if you post newbie questions or questions answered
+in the manual there, you will be ignored or flamed instead of getting an
+appropriate answer.<BR>
+So do not flame us and  subscribe to -advusers only if you really know
+what you are doing and feel like being an advanced mplayer user or
+developer.  If you meet these criteria it should not be difficult to find
+out how to subscribe...
 </P>
 
 </BODY>
