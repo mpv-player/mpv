@@ -35,16 +35,21 @@ static int shmem_type=0;
 
 void* shmem_alloc(int size){
 void* p;
-int devzero;
+static int devzero = -1;
 while(1){
   switch(shmem_type){
   case 0:  // ========= MAP_ANON|MAP_SHARED ==========
+#ifdef MAP_ANON
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_ANON|MAP_SHARED,-1,0);
     if(p==MAP_FAILED) break; // failed
 //    printf("shmem: %d bytes allocated using mmap anon (%X)\n",size,p);
     return p;
+#else
+// system does not support MAP_ANON at all (e.g. solaris 2.5.1/2.6), just fail
+    break;
+#endif
   case 1:  // ========= MAP_SHARED + /dev/zero ==========
-	  if ((devzero = open("/dev/zero", O_RDWR, 0)) == -1) break;
+    if (devzero == -1 && (devzero = open("/dev/zero", O_RDWR, 0)) == -1) break;
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,devzero,0);
     if(p==MAP_FAILED) break; // failed
 //    printf("shmem: %d bytes allocated using mmap /dev/zero (%X)\n",size,p);
