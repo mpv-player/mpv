@@ -2061,7 +2061,7 @@ For audio output, where <replaceable>X</replaceable> is the device number (0 if 
 </varlistentry>
 
 <varlistentry>
-<term><option>-aop list=resample:fout=<replaceable>xxxxx</replaceable></option></term>
+<term><option>-af resample=<replaceable>xxxxx</replaceable></option></term>
 <listitem><para>
 The em8300 cannot play back samplerates lower than 44100Hz. If the sample
 rate is below 44100Hz select either 44100Hz or 48000Hz depending on which

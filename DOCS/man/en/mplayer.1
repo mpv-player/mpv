@@ -1671,30 +1671,6 @@ Specify the VOBsub subtitle ID.
 Override audio driver/\:card buffer size detection.
 .
 .TP
-.B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
-Specify audio plugin(s) and their options
-(also see the audio plugins section of the documentation).
-.sp 1
-Available options are:
-.RSs
-.IPs list=[plugins]
-comma separated list of plugins (resample, surround, format, volume,
-extrastereo, volnorm, delay)
-.IPs delay=<sec>
-example plugin, do not use (delay plugin only)
-.IPs format=<format>
-output format (format plugin only)
-.IPs fout=<Hz>
-output frequency (resample plugin only)
-.IPs volume=<0\-255>
-volume (volume plugin only)
-.IPs mul=<value>
-stereo coefficient (default: 2.5) (extrastereo plugin only)
-.IPs softclip
-compressor / 'soft-clipping' capabilities (volume plugin only)
-.RE
-.
-.TP
 .B \-delay <sec>
 Audio delay in seconds (positive or negative float value).
 .
