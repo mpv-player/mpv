@@ -963,7 +963,8 @@ echores "$_extralibdir"
 
 echocheck "kstat"
 cat > $TMPC << EOF
-int main(void) { return 0; }
+#include <kstat.h>
+int main(void) { (void) kstat_open(); (void) kstat_close(0); return 0; }
 EOF
 _kstat=no
 cc_check -lkstat && _kstat=yes
@@ -978,10 +979,11 @@ fi
 echores "$_kstat"
 
 
-# required for nanosleep on some systems
 echocheck "posix4"
+# required for nanosleep on some systems
 cat > $TMPC << EOF
-int main(void) { return 0; }
+#include <time.h>
+int main(void) { (void) nanosleep(0, 0); return 0; }
 EOF
 _posix4=no
 cc_check -lposix4 && _posix4=yes
@@ -994,7 +996,8 @@ echores "$_posix4"
 echocheck "socklib"
 # for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
 cat > $TMPC << EOF
-int main(void) { return 0; }
+#include <netdb.h>
+int main(void) { (void) gethostbyname(0); return 0; }
 EOF
 cc_check $_ld_sock -lsocket && _ld_sock="$_ld_sock -lsocket"
 cc_check $_ld_sock -lnsl && _ld_sock="$_ld_sock -lnsl"
@@ -1008,7 +1011,7 @@ fi
 echocheck "malloc.h"
 cat > $TMPC << EOF
 #include <malloc.h>
-int main(void) { return 0; }
+int main(void) { (void) malloc(0); return 0; }
 EOF
 _malloc=no
 cc_check && _malloc=yes
@@ -1026,10 +1029,7 @@ echocheck "memalign()"
 # XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
 cat > $TMPC << EOF
 #include <malloc.h>
-int main (void) {
-  char *string = memalign(64, sizeof(char));
-  return 0;
-}
+int main (void) { (void) memalign(64, sizeof(char)); return 0; }
 EOF
 _memalign=no
 cc_check && _memalign=yes
@@ -1044,7 +1044,7 @@ echores "$_memalign"
 echocheck "alloca.h"
 cat > $TMPC << EOF
 #include <alloca.h>
-int main(void) { return 0; }
+int main(void) { (void) alloca(0); return 0; }
 EOF
 _alloca=no
 cc_check && _alloca=yes
@@ -1060,7 +1060,7 @@ echocheck "mman.h"
 cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/mman.h>
-int main(void) { return 0; }
+int main(void) { (void) mmap(0, 0, 0, 0, 0, 0); return 0; }
 EOF
 _mman=no
 cc_check && _mman=yes
@@ -1328,10 +1328,7 @@ fi
 _xdpms4=no
 if test "$_x11" = yes ; then
   cat > $TMPC <<EOF
-#include <X11/Xmd.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
 #include <X11/extensions/dpms.h>
 int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
@@ -1356,7 +1353,9 @@ fi
 echocheck "Xv"
 if test "$_x11" = yes && test "$_xv" = auto ; then
   cat > $TMPC <<EOF
-int main(void) { return 0; }
+#include <X11/Xlib.h>
+#include <X11/extensions/Xvlib.h>
+int main(void) { (void) XvGetPortAttribute(0, 0, 0, 0); return 0; }
 EOF
   _xv=no
   cc_check $_inc_x11 $_ld_x11 -lXv && _xv=yes
@@ -1376,7 +1375,9 @@ echores "$_xv"
 echocheck "Xinerama"
 if test "$_x11" = yes && test "$_xinerama" = auto ; then
   cat > $TMPC <<EOF
-int main(void) { return 0; }
+#include <X11/Xlib.h>
+#include <X11/extensions/Xinerama.h>
+int main(void) { (void) XineramaIsActive(0); return 0; }
 EOF
   _xinerama=no
   cc_check $_inc_x11 $_ld_x11 -lXinerama && _xinerama=yes
@@ -1400,7 +1401,9 @@ echores "$_xinerama"
 echocheck "Xxf86vm"
 if test "$_x11" = yes && test "$_vm" = auto ; then
   cat > $TMPC <<EOF
-int main(void) { return 0; }
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86vmode.h>
+int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
   cc_check $_inc_x11 $_ld_x11 -lXxf86vm && _vm=yes
@@ -1419,10 +1422,9 @@ echores "$_vm"
 echocheck "DGA"
 if test "$_x11" = yes && test "$_dga" = auto ; then
   cat > $TMPC << EOF
-#include <stdio.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
-int main (void) { return 0; }
+int main (void) { (void) XDGAQueryExtension(0, 0, 0); return 0; }
 EOF
   _dga=no
   cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga=yes
@@ -1431,7 +1433,7 @@ else
 fi
 if test "$_dga" = yes ; then
   _def_dga='#define HAVE_DGA 1'
-  _ld_dga='-lXxf86dga'
+  _ld_dga='-lXxf86dga -lXxf86vm'
   _vosrc="$_vosrc vo_dga.c"
 else
   _def_dga='#undef HAVE_DGA'
@@ -1442,7 +1444,6 @@ echores "$_dga"
 echocheck "DGA 2.0"
 if test "$_x11" = yes && test "$_dga2" = auto ; then
   cat > $TMPC << EOF
-#include <stdio.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 int main (void) { XDGAMode mode; XDGADevice device; return 0; }
@@ -1454,6 +1455,7 @@ else
 fi
 if test "$_dga2" = yes ; then
   _def_dga2='#define HAVE_DGA2 1'
+  _ld_dga2='-lXxf86dga -lXxf86vm'
   _vosrc="$_vosrc vo_dga.c"
 else
   _def_dga2='#undef HAVE_DGA2'
@@ -1551,7 +1553,7 @@ echocheck "AA"
 if test "$_aa" = auto ; then
   cat > $TMPC << EOF
 #include <aalib.h>
-int main(void) { return 0; }
+int main(void) { (void) aa_init(0, 0, 0); return 0; }
 EOF
   _aa=no
   cc_check  -laa && _aa=yes
@@ -1775,7 +1777,7 @@ if test "$_sunaudio" = auto ; then
   cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/audioio.h>
-int main(void) {  audio_info_t info; AUDIO_INITINFO(&info); }
+int main(void) { audio_info_t info; AUDIO_INITINFO(&info); return 0; }
 EOF
   _sunaudio=no
   cc_check && _sunaudio=yes
@@ -1846,7 +1848,7 @@ fi
 if test "$_css" = auto ; then
   cat > $TMPC <<EOF
 #include <css.h>
-int main(void) { int i=CSSisEncrypted(0); return 0; }
+int main(void) { (void) CSSisEncrypted(0); return 0; }
 EOF
   _css=no
   cc_check -lcss && _css=yes
@@ -2147,7 +2149,7 @@ if test "$_divx4linux" = auto ; then
   echocheck "Divx4linux decore"
   cat > $TMPC << EOF
 #include <decore.h>
-int main(void) { return DEC_OPT_FRAME_311; }
+int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
 EOF
   _divx4linux_decore=no
   if cc_check  -ldivxdecore -lm ; then
@@ -2160,7 +2162,7 @@ EOF
   echocheck "Divx4linux encore (for mencoder)"
   cat > $TMPC <<EOF
 #include <encore2.h>
-int main(void) { return 0; }
+int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   _divx4linux_encore=no
   cc_check  -ldivxencore -lm && _divx4linux_encore=yes
@@ -2397,7 +2399,7 @@ VO2 = $_vo2
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_static $_ld_x11
-X_LIBS = $_ld_static $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
+X_LIBS = $_ld_static $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_dga2 $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
 
 TERMCAP_LIB = $_ld_static $_ld_termcap
 LIRC_LIBS = $_ld_static $_ld_lirc
