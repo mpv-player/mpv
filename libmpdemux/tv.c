@@ -141,7 +141,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     else
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "Unknown format given: %s\n", tv_param_outfmt);
-	mp_msg(MSGT_TV, MSGL_INFO, "Using default: Planar YV12\n");
+	mp_msg(MSGT_TV, MSGL_V, "Using default: Planar YV12\n");
 	picture_format = IMGFMT_YV12;
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &picture_format);
@@ -157,7 +157,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     else if (!strcasecmp(tv_param_norm, "secam"))
 	tvh->norm = TV_NORM_SECAM;
 
-    mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
+    mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm);
 
     /* limits on w&h are norm-dependent -- JM */
@@ -206,7 +206,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	mp_msg(MSGT_TV, MSGL_WARN, "Unable to find selected channel list! (%s)\n",
 	    tv_param_chanlist);
     else
-	mp_msg(MSGT_TV, MSGL_INFO, "Selected channel list: %s (including %d channels)\n",
+	mp_msg(MSGT_TV, MSGL_V, "Selected channel list: %s (including %d channels)\n",
 	    chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
 
     if (tv_param_freq && tv_param_channel)
@@ -224,7 +224,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
 
 	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
-	mp_msg(MSGT_TV, MSGL_INFO, "Selected frequency: %lu (%.3f)\n",
+	mp_msg(MSGT_TV, MSGL_V, "Selected frequency: %lu (%.3f)\n",
 	    freq, (float)freq/16);
     }
 
@@ -282,8 +282,6 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 
     sh_video->frametime = 1.0f/sh_video->fps;
 
-    printf("fps: %f, frametime: %f\n", sh_video->fps, sh_video->frametime);
-
     /* If playback only mode, go to immediate mode, fail silently */
     if(tv_param_immediate == 1)
         {
@@ -297,8 +295,6 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     /* set height */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 
-    mp_msg(MSGT_TV, MSGL_INFO, "Output size: %dx%d\n", sh_video->disp_w, sh_video->disp_h);
-    
     demuxer->video->sh = sh_video;
     sh_video->ds = demuxer->video;
     demuxer->video->id = 0;
@@ -518,7 +514,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
 
 	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
-	mp_msg(MSGT_TV, MSGL_INFO, "Current frequency: %lu (%.3f)\n",
+	mp_msg(MSGT_TV, MSGL_V, "Current frequency: %lu (%.3f)\n",
 	    freq, (float)freq/16);
     }
 }

@@ -280,7 +280,7 @@ static void init_v4l_audio(priv_t *priv)
 
     /* audio chanlist */
 
-    mp_msg(MSGT_TV, MSGL_INFO, " Audio devices: %d\n", priv->capability.audios);
+    mp_msg(MSGT_TV, MSGL_V, " Audio devices: %d\n", priv->capability.audios);
 
     for (i = 0; i < priv->capability.audios; i++)
     {
@@ -541,14 +541,14 @@ static int uninit(priv_t *priv)
 {
     priv->shutdown = 1;
 
-    mp_msg(MSGT_TV, MSGL_INFO, "Waiting for threads to finish... ");
+    mp_msg(MSGT_TV, MSGL_V, "Waiting for threads to finish... ");
     if (!tv_param_noaudio) {
 	pthread_join(priv->audio_grabber_thread, NULL);
 	pthread_mutex_destroy(&priv->audio_starter);
 	pthread_mutex_destroy(&priv->skew_mutex);
     }
     pthread_join(priv->video_grabber_thread, NULL);
-    mp_msg(MSGT_TV, MSGL_INFO, "done\n");
+    mp_msg(MSGT_TV, MSGL_V, "done\n");
 
     priv->audio[priv->audio_id].volume = 0;
     priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
@@ -591,7 +591,7 @@ static int get_capture_buffer_size(priv_t *priv)
     cnt = bufsize/(priv->width*priv->bytesperline);
     if (cnt < 2) cnt = 2;
     
-    mp_msg(MSGT_TV, MSGL_INFO, "Allocating a ring buffer for %d frames, %d MB total size.\n",
+    mp_msg(MSGT_TV, MSGL_V, "Allocating a ring buffer for %d frames, %d MB total size.\n",
 	   cnt, cnt*priv->width*priv->bytesperline/(1024*1024));
 
     return cnt;
@@ -617,10 +617,10 @@ static int start(priv_t *priv)
 	priv->bytesperline = priv->width * 2;
     }
 
-    mp_msg(MSGT_TV, MSGL_INFO, "Picture values:\n");
-    mp_msg(MSGT_TV, MSGL_INFO, " Depth: %d, Palette: %d (Format: %s)\n", priv->picture.depth,
+    mp_msg(MSGT_TV, MSGL_V, "Picture values:\n");
+    mp_msg(MSGT_TV, MSGL_V, " Depth: %d, Palette: %d (Format: %s)\n", priv->picture.depth,
 	priv->picture.palette, vo_format_name(priv->format));
-    mp_msg(MSGT_TV, MSGL_INFO, " Brightness: %d, Hue: %d, Colour: %d, Contrast: %d\n",
+    mp_msg(MSGT_TV, MSGL_V, " Brightness: %d, Hue: %d, Colour: %d, Contrast: %d\n",
 	priv->picture.brightness, priv->picture.hue,
 	priv->picture.colour, priv->picture.contrast);
     
@@ -802,7 +802,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 	    output_fmt = priv->format;
 	    (int)*(void **)arg = output_fmt;
-	    mp_msg(MSGT_TV, MSGL_INFO, "Output format: %s\n", vo_format_name(output_fmt));
+	    mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", vo_format_name(output_fmt));
 	    return(TVI_CONTROL_TRUE);
 	}
 	case TVI_CONTROL_VID_SET_FORMAT:
@@ -829,7 +829,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int req_width = (int)*(void **)arg;
 	    
-	    mp_msg(MSGT_TV, MSGL_INFO, "Requested width: %d\n", req_width);
+	    mp_msg(MSGT_TV, MSGL_V, "Requested width: %d\n", req_width);
 	    if ((req_width >= priv->capability.minwidth) &&
 		(req_width <= priv->capability.maxwidth))
 		return(TVI_CONTROL_TRUE);
@@ -845,7 +845,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int req_height = (int)*(void **)arg;
 	    
-	    mp_msg(MSGT_TV, MSGL_INFO, "Requested height: %d\n", req_height);
+	    mp_msg(MSGT_TV, MSGL_V, "Requested height: %d\n", req_height);
 	    if ((req_height >= priv->capability.minheight) &&
 		(req_height <= priv->capability.maxheight))
 		return(TVI_CONTROL_TRUE);
@@ -932,7 +932,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 		return(TVI_CONTROL_FALSE);
 	    }
 	    
-	    mp_msg(MSGT_TV, MSGL_INFO, "Tuner (%s) range: %lu -> %lu\n", priv->tuner.name,
+	    mp_msg(MSGT_TV, MSGL_V, "Tuner (%s) range: %lu -> %lu\n", priv->tuner.name,
 		priv->tuner.rangelow, priv->tuner.rangehigh);
 	    return(TVI_CONTROL_TRUE);
 	}
