@@ -3968,10 +3968,10 @@ active le désentrelacement (évitez de l'utiliser, DivX4 est boggué)
 qualité (1\-plus rapide, 5\-meilleur)
 .TP
 .B min_quant=<1\-31>
-quantizer minimal
+quantificateur minimal
 .TP
 .B max_quant=<1\-31>
-quantizer maximal
+quantificateur maximal
 .TP
 .B rc_period=<valeur>
 période de contrôle du débit
@@ -4209,7 +4209,7 @@ codec vidéo sans perte de FFmpeg
 .PD 1
 .TP
 .B vqmin=<1\-31>
-minimum quantizer (passe\ 1/\:2)
+minimum quantificateur (passe\ 1/\:2)
 .RSs
 .IPs 1
 Non recommandé (fichier bien plus gros, petite différence de qualité et
@@ -4221,7 +4221,7 @@ Recommandé pour l'encodage normal mpeg4/mpeg1video (par défaut).
 .IPs 3
 Recommandé pour h263(p)/msmpeg4. La raison de préférer 3 à 2 est que
 2 peut conduire à des dépassements (ceci sera corrigé pour h263(p) en changeant
-les quantizer par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
+les quantificateur par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
 supporte pas cela).
 .RE
 .TP
@@ -4236,23 +4236,23 @@ Multiplicateur de lagrange maximum pour le contrôle de débit.
 .RE
 .TP
 .B vqscale=<1\-31>
-constant quantizer /\: qualité d'encodage constante (sélectionne le mode
-quantizer fixe). Une valeur basse signifie une meilleur qualité mais de gros
+constant quantificateur /\: qualité d'encodage constante (sélectionne le mode
+quantificateur fixe). Une valeur basse signifie une meilleur qualité mais de gros
 fichiers (par défaut: 0 (désactivé)).
 1 n'est pas recommandé (voir \-vqmin pour plus de détails).
 .TP
 .B vqmax=<1\-31>
-maximum quantizer (passe\ 1/\:2) 10\-31 devrait être un intervalle raisonable
+maximum quantificateur (passe\ 1/\:2) 10\-31 devrait être un intervalle raisonable
 (par défaut: 31)
 .TP
 .B mbqmin=<1\-31>
-minimum macroblock quantizer (passe\ 1/\:2) (par défaut: 2)
+minimum macroblock quantificateur (passe\ 1/\:2) (par défaut: 2)
 .TP
 .B mbqmax=<1\-31>
-maximum macroblock quantizer (passe\ 1/\:2) (par défaut: 31)
+maximum macroblock quantificateur (passe\ 1/\:2) (par défaut: 31)
 .TP
 .B vqdiff=<1\-31>
-maximum quantizer entre les trames I ou P (passe\ 1/\:2) (par défaut: 3)
+maximum quantificateur entre les trames I ou P (passe\ 1/\:2) (par défaut: 3)
 .TP
 .B vmax_b_frames=<0\-4>
 nombre maximum de trames B entre les trames non B:
@@ -4438,33 +4438,33 @@ acuellement inutile
 Inutilisé, réservé pour utilisation future.
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-facteur quantizer entre les trames B et non B (passe\ 1/\:2) (par défaut: 1.25)
+facteur quantificateur entre les trames B et non B (passe\ 1/\:2) (par défaut: 1.25)
 .TP
 .B vi_qfactor=<-31.0\-31.0>
 (passe\ 1/\:2) (par défaut: 0.8)
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-offset quantizer entre les trames B et non B (passe\ 1/\:2) (par défaut: 1.25)
+offset quantificateur entre les trames B et non B (passe\ 1/\:2) (par défaut: 1.25)
 .TP
 .B vi_qoffset=<-31.0\-31.0>
 (passe\ 1/\:2) (par défaut: 0.0)
 .br
 si v{b|i}_qfactor > 0
 .br
-I/\:quantizer Trame-B = quantizer Trame-P * v{b|i}_qfactor + v{b|i}_qoffset
+I/\:quantificateur Trame-B = quantificateur Trame-P * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 sinon
 .br
-procède à un contrôle de débit normal (ne verrouille pas le prochain quantizer
+procède à un contrôle de débit normal (ne verrouille pas le prochain quantificateur
 trame P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .TP
 .B \
-Astuce: Pour faire de l'encodage avec quantizer constant avec des quantizers
+Astuce: Pour faire de l'encodage avec quantificateur constant avec des quantificateurs
 différents pour les trames I/P et B vous pouvez utiliser:
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .TP
 .B vqblur=<0.0\-1.0> (passe1)
-Flou quantizer, des valeurs plus importantes provoqueront plus de
+Flou quantificateur, des valeurs plus importantes provoqueront plus de
 moyennes dans le temps (variations plus basses).
 .RSs
 .IPs 0.0
@@ -4472,15 +4472,15 @@ qblur désactivé
 .IPs 0.5
 (par défaut)
 .IPs 1.0
-fais une moyenne du quantizer sur toutes les trames précédentes
+fais une moyenne du quantificateur sur toutes les trames précédentes
 .RE
 .TP
 .B vqblur=<0.0\-99.0> (passe2)
-Flou gaussien quantizer, de plus grandes valeurs provoqueront plus
+Flou gaussien quantificateur, de plus grandes valeurs provoqueront plus
 de moyennes dans le temps (variations plus basses) (par défaut: 0.5)
 .TP
 .B vqcomp=<valeur>
-compression quantizer, dépends de vrc_eq (passe\ 1/\:2) (par défaut: 0.5)
+compression quantificateur, dépends de vrc_eq (passe\ 1/\:2) (par défaut: 0.5)
 .TP
 .B vrc_eq=<équation>
 équation principale de contrôle de débit (passe\ 1/\:2):
@@ -4560,7 +4560,7 @@ Les options sont <start-frame, end-frame, quality[/\:start-frame, end-frame,
 quality[/...]]>:
 .RSs
 .IPs "qualité (2\-31)"
-quantizer
+quantificateur
 .IPs "qualité (-500\-0)"
 correction qualité en %
 .RE
@@ -4569,7 +4569,7 @@ correction qualité en %
 complexité initiale (passe\ 1)
 .TP
 .B vqsquish=<0,1>
-spécifie comment garder le quantizer entre qmin et qmax (passe\ 1/\:2):
+spécifie comment garder le quantificateur entre qmin et qmax (passe\ 1/\:2):
 .PD 0
 .RSs
 .IPs 0
@@ -4754,9 +4754,9 @@ masquage inter-MB (par défaut: 0.0 (désactivé))
 .TP
 .B naq\ \ \ \
 Normalise la quantisation adaptive (expérimental).
-En utilisant la quantisation adaptive (*_mask), le quantizer moyen par Mo
-peut ne pas correspondre au quantizer niveau-trame demandé.
-Naq essaiera de s'ajuster aux quantizers par Mo pour maintenir une moyenne
+En utilisant la quantisation adaptive (*_mask), le quantificateur moyen par Mo
+peut ne pas correspondre au quantificateur niveau-trame demandé.
+Naq essaiera de s'ajuster aux quantificateurs par Mo pour maintenir une moyenne
 correcte.
 .TP
 .B ildct\ \
@@ -4992,8 +4992,8 @@ l'encodage et stocke le psnr par trame dans un fichier comme 'psnr_012345.log'.
 Les valeurs de retour sont en dB (décibel), le plus haut est le mieux.
 .TP
 .IPs mpeg_quant
-Utilise les quantizers MPEG au lieu de H.263.
-(par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
+Utilise les quantificateurs MPEG au lieu de H.263.
+(par défaut: désactivé) (c-a-d.\& utilisez les quantificateurs H.263)
 .TP
 .B aic\ \ \ \
 Intra prédication avancée (H.263+ uniquement)
@@ -5008,29 +5008,29 @@ VMs illimités (H.263+ uniquement)
 Authorise l'encodages de VMs de longueur arbitraire.
 .TP
 .B ibias=<-256\-256>
-polarisation intra quantizer (256 == 1.0)
+polarisation intra quantificateur (256 == 1.0)
 .br
-quantizer style mpeg par défaut: 96
+quantificateur style mpeg par défaut: 96
 .br
-quantizer style h263 par défaut: 0
+quantificateur style h263 par défaut: 0
 .br
 .I NOTE:
-Le quantizer h263 MMX ne peut pas gérer de polarisations positives
+Le quantificateur h263 MMX ne peut pas gérer de polarisations positives
 (vfdct=1or2)
-Le quantizer mpeg MMX ne peut pas gérer de polarisations negatives
+Le quantificateur mpeg MMX ne peut pas gérer de polarisations negatives
 (vfdct=1or2)
 .TP
 .B pbias=<-256\-256>
-polarisation inter quantizer (256 == 1.0)
+polarisation inter quantificateur (256 == 1.0)
 .br
-quantizer style mpeg par défaut: 0
+quantificateur style mpeg par défaut: 0
 .br
-quantizer style h263 par défaut: -64
+quantificateur style h263 par défaut: -64
 .br
 .I NOTE:
-Le quantizer h263 MMX ne peut pas gérer de polarisations positives
+Le quantificateur h263 MMX ne peut pas gérer de polarisations positives
 (vfdct=1or2)
-Le quantizer mpeg MMX ne peut pas gérer de polarisations negatives
+Le quantificateur mpeg MMX ne peut pas gérer de polarisations negatives
 (vfdct=1or2)
 .br
 Astuce: Une polarisation plus positive (-32\- -16 au lieu de -64) semble
@@ -5040,7 +5040,7 @@ améliorer le PSNR
 réduction du  bruit, 0 pour désactivé
 .TP
 .B qns=<0\-3>
-quantizer noise shaping, réduit les artéfacts, de plus grandes valeurs sont plus
+quantificateur noise shaping, réduit les artéfacts, de plus grandes valeurs sont plus
 lentes mais donnent une meilleur qualité.
 Ceci peut et doit être utilisé avec la quantisation par treillis, dans ce cas la quantisation
 par treillis (optimale pour un poids constant) sera utilisée comme point de départ pour
@@ -5105,127 +5105,205 @@ Active l'encodage rtjpeg.
 .
 .SS xvidenc (\-xvidencopts)
 .
-Il y a trois modes disponibles: constant bitrate (CBR), quantizer fixe et
-2passes.
+Il y a trois modes disponibles: débit binaire constant (CBR), quantificateur
+fixe et 2passes.
 .TP
 .B pass=<1|2>
-spécifie la passe en mode 2passes
+Défini la passe en mode 2passes.
 .TP
 .B bitrate=<valeur>
-fixe le bitrate à utiliser en kbits/\:seconde si <16000 ou en bits/\:seconde
-si >16000 (CBR ou mode 2passes, défault=687 kbits/s)
+Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde si <16000 ou
+en bits/\:seconde
+si >16000.
+.br
+Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
+désirée pour la vidéo.  (CBR ou mode 2passes, défaut\ : 687 kbits/s)
 .TP
 .B fixed_quant=<1\-31>
-passe en mode quantizer fixe et spécifie le quantizer à utiliser
+Passe en mode quantificateur fixe et défini le quantificateur à utiliser.
 .TP
 .B me_quality=<0\-6>
-spécifie la qualité de détection de mouvement (par défaut=6)
+Contrôle la qualité de détection de mouvement.
+Plus cette valeur est grande et plus l'évaluation est fine et utilise
+judicieusement les bits.
+En revanche, cette plus grande finesse se paye par un temps d'encodage plus
+long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
+paramètre. (par défaut\ : 6)
 .TP
 .B interlacing
-active le support pour contenu entrelacé (défaut=off)
+Active le support des vidéos entrelacées.
+Ainsi vous n'avez pas besoin d'utiliser de filtre de désentrelacement.
 .TP
 .B 4mv
-utilise 4 vecteurs de mouvement par macro-bloc, peut apporter une meilleure
-compression au coût d'un encodage plus lent (par défaut=off)
+Utilise 4 vecteurs de mouvement par macro-bloc.
+Peut améliorer la compressibilité mais ralenti l'encodage.
+.I ATTENTION\ :
+Cette option n'existe plus avec XviD 1.0.x
 .TP
 .B rc_reaction_delay_factor=<valeur>
-spécifie avec quelle rapidité le contrôleur de volume réagit, les valeurs
-les plus basses sont les plus rapides
+Défini avec quelle rapidité le contrôleur de débit binaire CBR réagira à un
+changement de débit binaire et s'efforcera de le compenser pour obtenir un
+débit binaire constant sur cet ensemble de trames.
 .TP
 .B rc_averaging_period=<valeur>
-période pour atteindre la moyenne requise
+Un encodage à débit binaire vraiment constant est très difficile à réaliser.
+En fonction du type de scène, le débit binaire peut fortement varier et peut
+être difficile à prédire.
+C'est pourquoi XviD essaye plutôt de garantir ce débit binaire sur <valeur>
+nombre de trames.
 .TP
 .B rc_buffer=<valeur>
-taille du tampon de contrôle du débit
+Taille du tampon de contrôle du débit.
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-quantizer min & max pour toutes les trames (défaut=2\-31, mode CBR)
+quantificateur min & max pour toutes les trames. (défaut\ : 2\-31, mode CBR)
 .br
-quantizer min & max pour trames I/P (défaut=2\-31/2\-31, mode 2passes)
+quantificateur min & max pour trames I/P. (défaut\ : 2\-31/2\-31, mode 2passes)
 .TP
 .B min_key_interval=<valeur>
-intervalle minimum entre les trames-clé (défaut=0, 2passes uniquement)
+Intervalle minimum entre les trames-clés. (défaut\ : 0, 2passes uniquement)
 .TP
 .B max_key_interval=<valeur>
-intervalle maximum entre les trames-clé (défaut=10*fps)
+intervalle maximum entre les trames-clé (défaut\ : 10*fps)
 .TP
 .B mpeg_quant
-utilise les quantizers MPEG au lieu de H.263 (défaut=off)
+Utilise les quantificateurs MPEG au lieu de H.263.
+À débit binaire plutôt élevé (> 950kb), les quantificateurs MPEG ont tendance à
+conserver plus de détails.
+À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
+image où les macro-blocs se verront moins.
+Si vous utilisez vos propres matrices de quantization, vous devez
+utiliser MPEG.
 .TP
 .B mod_quant
-décide d'utiliser ou non les quantizers MPEG ou H.263 sur une base
-trame-par-trame. (défaut=off, mode 2passes uniquement)
+Décide  trame par trame d'utiliser ou non les quantificateurs MPEG ou H.263.
+.I ATTENTION\ :
+Cette option génèrera un flux vidéo incompatible avec la norme MPEG4.
+Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
+(mode 2passes uniquement)
 .TP
 .B greyscale
-encode en noir & blanc (défaut=off)
+Indique à XviD de ne pas enregistrer l'information de chroma pour que la
+vidéo produite ne soit qu'en noir & blanc. 
+Notez que cela ne changera en rien le temps de compression, cela évitera juste
+d'avoir l'information de chroma présente dans le fichier vidéo.
 .TP
 .B debug
-sauve les statistiques par trames dans xvid.dbg (par défaut: off)
+Sauve les statistiques par trames dans ./xvid.dbg.
 .br
-ce n'est *pas* le fichier de contrôle 2passes
+Ce n'est PAS le fichier de contrôle 2passes.
 .TP
 .B keyframe_boost=<0\-1000>
-(défaut=0, mode 2passes uniquement)
+Emprunte des bits depuis les autre "pools" de trames vers les trames-clés
+pour augmenter la qualité des trame-clés.
+(défaut\ : 0, mode 2passes uniquement)
 .TP
 .B kfthreshold=<valeur>
 (défaut=10, mode 2passes uniquement)
 .TP
 .B kfreduction=<0\-100>
-(défaut=30, mode 2passes uniquement)
+Les deux options ci-dessus contrôlent la taille des trames-clées qui vous
+semblent trop proches l'une de l'autre.
+kfthreshold contrôle la réduction de la distance inter trame-clées et
+kfreduction contrôle leur réduction de débit binaire.
+La dernière trame-clé est traitée normalement.
+(défaut\ : 30, mode 2passes uniquement)
 .RE
 .PP
-Les options suivantes ne sont disponibles que dans la version instable
-(cvs -HEAD) de XviD. Soyez conscient que ces options sont expérimentales et
-risquent de ne pas fonctionner comme prévu.
+Les options suivantes ne sont disponibles que dans les dernières versions
+stables 1.0.x de XviD (api4). 
 .TP
 .B packed
-Crée un flux de bits pouvant être décodé sans décalage (défaut=off)
+Crée un flux de bits pouvant être décodé sans décalage. (défaut=off)
 .br
-.I ATTENTION:
-ceci génèrera un flux de bits illégal, et NE SERA PAS décodable par les
-décodeurs excepté divx/libavcodec/xvid
+.I ATTENTION\ :
+Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG4,
+et NE SERA PAS décodable par les décodeurs excepté divx/libavcodec/xvid.
 .br
-.I ATTENTION:
-ceci ajoutera également une fausse version de divx dans le fichier donc
-l'autodétection de bogues risque de ne pas fonctionner
+.I ATTENTION\ :
+Ceci ajoutera également une fausse version de divx dans le fichier donc
+l'autodétection de bogues risque de ne pas fonctionner.
 .TP
 .B divx5bvop
-génère des trames B compatibles DivX5 (défaut=on)
+Génère des trames B compatibles DivX5. (défaut\ : on)
 .TP
 .B qpel
-active l'estimation quarter-pixel motion (défaut=off)
+MPEG4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
+Il est néanmoins possible de faire une recherche avec une précision d'un
+quart de pixel, ce qui permet généralement d'obtenir une image plus
+détaillée et d'économiser des bits en description de mouvement.
+Malheureusement, cette plus grande précision consomme une partie de la bande
+passante vidéo, ainsi cette option peut aussi bien dégrader la qualité
+de l'image que l'améliorer.
+Le mieux est donc de comparer la vidéo obtenue avec et sans cette option et
+de ne garder que celle qui vous paraît la plus fidèle (qui n'est pas
+forcément celle dont le PSNR est le plus élevé).
 .TP
 .B gmc
-active la compensation de mouvement globale, peut sauver des bits sur les scenes
-panoramiques (défaut=off)
+Active la Compensation de Mouvement Globale, ce qui permet à XviD d'engendrer
+des trames spéciales (trames GMC), particulièrement adaptées aux mouvements
+de travelling/zoom/rotation.
+L'efficacité de cette option en terme d'économie de bits est très dépendante
+du type de vidéo source.
+.TP
+.B trellis
+La quantization trellis est un type d'encodage adaptatif qui permet
+d'économiser des bits en modifiant les coefficients de quantization pour
+augmenter la compressibilité de la vidéo.
+À même temps de calcul, cela améliore plus la qualité visuelle
+que de jouer sur les options VHQ .
+Aussi, dans un contexte d'encodage temps réel, pensez à cette option!
+.TP
+
+.B cartoon
+Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
+à-plats de couleurs que l'on trouve typiquement dans les dessins animés.
 .TP
 .B chroma_me
-utilise l'information chroma pour estimer le mouvement (défaut=off)
+Utilise l'information chroma en plus de la luma pour estimer le mouvement.
+L'efficacité de cette option dépend de la vidéo source.
 .TP
 .B chroma_opt
-active un préfiltre d'optimisation chroma (défaut=off)
+Active un préfiltre d'optimisation chroma qui améliore la qualité 
+.I subjective
+de l'image, tout en dégradant sensiblement le PSNR et la vitesse d'encodage.
 .TP
 .B reduced
-active l'encodage de trames en résolution réduite (défaut=off)
+Active l'encodage de trames en résolution réduite.
+.br
+.I ATTENTION\ : 
+Cette option générera un flux vidéo incompatible avec la norme MPEG4.
+Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec XviD.
 .TP
 .B max_bframes=<0\-4>
-nombre maximum de trames B à insérer entre les trames I/P (défaut=0)
+Nombre maximum de trames B à insérer entre les trames I/P. (défaut\ : 0)
 .TP
 .B bquant_ratio=<0\-1000>
-rapport de quantiseur entre les trames B et non B, 150=1.50 (défault=150)
+Rapport de quantificateur entre les trames B et non B, 150=1.50. (défaut\ : 150)
 .TP
 .B bquant_offset=<-1000\-1000>
-offset quantiseur entre les trames B et non B, 100=1.00 (défault=100)
+Offset de quantificateur entre les trames B et non B, 100=1.00. (défaut\ : 100)
 .TP
 .B bf_threshold=<-255\-255>
-change la probabilité qu'une trame soit une trame B (défaut=0)
+Parfois, les trames B dégradent l'image en introduisant des artefacts visuels
+lorsque par exemple une scène est globalement statique sauf une petite
+région en mouvement rapide.
+Cette option permet de changer la probabilité qu'une trame soit une trame B.
+Plus la valeur est haute, plus la probabilité que la trame générée soit
+une trame B est forte. (défaut\ : 0)
 .TP
 .B hq_ac
-active une meilleur prévision du composant AC (défaut=off)
+Active une meilleure prévision du composant AC.
 .TP
 .B vhq=<0\-4>
-active une recherche ME de meilleur qualité en utilisant DCT, de plus rapide à
-plus lent:
+L'algorithme de recherche de mouvement s'efforce de trouver un vecteur de
+mouvement qui minimise la différence entre la trame de référence et la trame
+encodée.
+Cette option permet à XviD de faire aussi sa recherche dans le domaine
+fréquentiel (DCT), pour obtenir non seulement un vecteur de mouvement qui
+minimise la différence spatiale du vecteur de mouvement mais aussi la
+longueur du bloc.
+Du plus rapide au plus lent\ :
 .PD 0
 .RSs
 .IPs 0
@@ -5241,24 +5319,25 @@ recherche large
 .RE
 .PD 1
 .TP
-.B aspect=<x/y | f (valeur à virgure)>
-Stoque l'aspect du film en interne, tout comme les fichiers MPEG.
-C'est une meilleur solution que le redimmensionnement, parce que la qualité
-n'est pas diminué.
+.B aspect=<x/y | f (nombre flottant)>
+Stocke le rapport d'aspect du film en interne, tout comme les fichiers MPEG.
+C'est une meilleure solution que le redimensionnement, parce que la qualité
+n'est pas alterée.
 MPlayer et quelques autres lecteurs liront ces fichiers correctement, les 
-autres l'afficheront avec le mauvais aspect.
-Le paramètre aspect peut être donné en ratio ou en nombre à virgule.
+autres l'afficheront avec un mauvais rapport d'aspect.
+Le paramètre aspect peut être donné en ratio ou en nombre flottant.
 .TP
 .B autoaspect
-Même chose que l'option aspect, mais calcule automatiquement l'aspect, en
-prenant en compte les ajustements (découpage/expension/redimensionnement/etc.)
-faits par la chaine de filtres.
+Même chose que l'option aspect mais calcule automatiquement le rapport
+d'aspect, en prenant en compte les ajustements faits par la chaîne de filtres
+(découpage/expansion/redimensionnement/etc...).
 .TP
-.B psnr\ \ \
-affiche le psnr (peak signal to noise ratio, rapport du signal crête sur bruit)
-pour l'ensemble de la vidéo après encodage et stocke le psnr par trame dans un
-fichier portant un nom tel que  'psnr_hhmmss.log'.
-Les valeurs renvoyées sont en dB (décibel), le plus haut est le mieux.
+.B psnr
+affiche le psnr (peak signal to noise ratio\ : rapport du signal crête sur
+bruit) pour l'ensemble de la vidéo après encodage et stocke le psnr par trame
+dans un fichier portant un nom tel que 'psnr_hhmmss.log'.
+Les valeurs renvoyées sont en dB (décibel), plus elles sont hautes, plus la
+vidéo générée est fidèle à l'originale.
 .
 .
 .\" --------------------------------------------------------------------------
