@@ -109,7 +109,7 @@ int audio_in_set_device(audio_in_t *ai, char *device)
 	if (ai->alsa.device) free(ai->alsa.device);
 	ai->alsa.device = strdup(device);
 	/* mplayer cannot handle colons in arguments */
-	for (i = 0; i < strlen(ai->alsa.device); i++) {
+	for (i = 0; i < (int)strlen(ai->alsa.device); i++) {
 	    if (ai->alsa.device[i] == '.') ai->alsa.device[i] = ':';
 	}
 	return 0;
@@ -171,6 +171,13 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	if (ret != ai->alsa.chunk_size) {
 	    if (ret < 0) {
 		mp_msg(MSGT_TV, MSGL_ERR, "\nerror reading audio: %s\n", snd_strerror(ret));
+		if (ret == -EPIPE) {
+		    if (ai_alsa_xrun(ai) == 0) {
+			mp_msg(MSGT_TV, MSGL_ERR, "Recovered from cross-run, some frames may be left out!\n");
+		    } else {
+			mp_msg(MSGT_TV, MSGL_ERR, "Fatal error, cannot recover!\n");
+		    }
+		}
 	    } else {
 		mp_msg(MSGT_TV, MSGL_ERR, "\nnot enough audio samples!\n");
 	    }

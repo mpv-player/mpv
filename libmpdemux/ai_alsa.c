@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "config.h"
 
@@ -13,11 +14,9 @@ int ai_alsa_setup(audio_in_t *ai)
 {
     snd_pcm_hw_params_t *params;
     snd_pcm_sw_params_t *swparams;
-    size_t buffer_size;
+    int buffer_size;
     int err;
-    size_t n;
     unsigned int rate;
-    snd_pcm_uframes_t start_threshold, stop_threshold;
 
     snd_pcm_hw_params_alloca(&params);
     snd_pcm_sw_params_alloca(&swparams);
@@ -122,6 +121,49 @@ int ai_alsa_init(audio_in_t *ai)
     err = ai_alsa_setup(ai);
 
     return err;
+}
+
+#ifndef timersub
+#define	timersub(a, b, result) \
+do { \
+	(result)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
+	(result)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
+	if ((result)->tv_usec < 0) { \
+		--(result)->tv_sec; \
+		(result)->tv_usec += 1000000; \
+	} \
+} while (0)
+#endif
+
+int ai_alsa_xrun(audio_in_t *ai)
+{
+    snd_pcm_status_t *status;
+    int res;
+	
+    snd_pcm_status_alloca(&status);
+    if ((res = snd_pcm_status(ai->alsa.handle, status))<0) {
+	mp_msg(MSGT_TV, MSGL_ERR, "ALSA status error: %s", snd_strerror(res));
+	return -1;
+    }
+    if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
+	struct timeval now, diff, tstamp;
+	gettimeofday(&now, 0);
+	snd_pcm_status_get_trigger_tstamp(status, &tstamp);
+	timersub(&now, &tstamp, &diff);
+	mp_msg(MSGT_TV, MSGL_ERR, "ALSA xrun!!! (at least %.3f ms long)\n",
+	       diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
+	if (mp_msg_test(MSGT_TV, MSGL_V)) {
+	    mp_msg(MSGT_TV, MSGL_ERR, "ALSA Status:\n");
+	    snd_pcm_status_dump(status, ai->alsa.log);
+	}
+	if ((res = snd_pcm_prepare(ai->alsa.handle))<0) {
+	    mp_msg(MSGT_TV, MSGL_ERR, "ALSA xrun: prepare error: %s", snd_strerror(res));
+	    return -1;
+	}
+	return 0;		/* ok, data should be accepted again */
+    }
+    mp_msg(MSGT_TV, MSGL_ERR, "ALSA read/write error");
+    return -1;
 }
 
 #endif /* HAVE_ALSA9 */
