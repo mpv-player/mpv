@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 20030709
+// Synced with help_mp-en.h 1.100
 
 // ========================= MPlayer help ===========================
 
