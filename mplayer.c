@@ -110,6 +110,10 @@ play_tree_t* playtree;
 
 m_config_t* mconfig;
 
+/**************************************************************************
+             Video accelerated architecture
+**************************************************************************/
+vo_vaa_t vo_vaa;
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -1305,7 +1309,7 @@ current_module="init_libvo";
    }
    inited_flags|=INITED_VO;
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
-
+   video_out->query_vaa(&vo_vaa);
    fflush(stdout);
    
 //================== MAIN: ==========================
