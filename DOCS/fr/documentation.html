@@ -583,9 +583,10 @@
     </UL>
   </LI>
   <LI><B>codecs Win32</B>: MPlayer sur une architecture non x86,
-    vous en aurez probablement besoin. Téléchargez et dézippez w32codecs.zip
-    dans /usr/lib/win32 <B>AVANT</B> de compiler MPlayer, sinon aucun support Win32
-    ne sera compilé!<BR>
+    vous en aurez probablement besoin. Téléchargez les codecs Win32 depuis notre
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page de codecs</A>
+    et installez-les dans <CODE>/usr/local/lib/codecs/</CODE> <B>AVANT</B> de
+    compiler MPlayer, sinon aucun support Win32 ne sera compilé!<BR>
     <B>Note:</B> le projet avifile a un paquet de codecs similaire, mais qui diffère
     du notre. Si vous voulez avoir tous les codecs supportés, alors installez notre paquet
     (ne vous inquiétez pas, avifile fonctionne avec sans problèmes). Fonctionnalités:<BR>
@@ -1300,8 +1301,8 @@ astuces:
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>fichier</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [options] [chemin/]nomfichier</CODE></TD></TR>
   <TR><TD></TD><TD>fichiers</TD><TD></TD><TD><CODE>mplayer [default options] [chemin/]nomfichier1 [options pour nomfichier1] nomfichier2 [options pour nomfichier2] ...</CODE></TD></TR>
-  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd nopiste [-cdrom-device /dev/cdrom]</CODE></TD></TR>
-  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd notitre [-dvd-device /dev/dvd]</CODE></TD></TR>
+  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] vcd://nopiste [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] dvd://notitre [-dvd-device /dev/dvd]</CODE></TD></TR>
   <TR><TD></TD><TD>WWW</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/fichier.asf (les playlists peuvent être utilisées, également)</CODE></TD></TR>
   <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [options] rtsp://server.exemple.com/NomFlux</CODE></TD></TR>
 </TABLE>
@@ -1312,9 +1313,9 @@ astuces:
 
 <PRE>
   mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2
+  mplayer vcd://2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/hdc
+  mplayer dvd://1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 </PRE>
 
@@ -1795,12 +1796,15 @@ end
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   pour obtenir de l'aide et les dernières informations.</P>
 
-<P>Vous devez copier ou lier <CODE>etc/cygwin_inttypes.h</CODE> depuis le répertoire 
+<P>Les versions de Cygwin antérieures à 1.3.23 n'incluent pas <CODE>inttypes.h</CODE>.
+  Vous devez copier ou lier <CODE>etc/cygwin_inttypes.h</CODE> depuis le répertoire
   source de MPlayer vers <CODE>/usr/include/inttypes.h</CODE> pour que MPlayer compile.</P>
 
 <P>Pour avoir de la vidéo DirectX native (<CODE>-vo directx</CODE>), désarchivez
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">les fichier d'entête DirectX 7</A>
-  dans <CODE>/usr/include/<CODE> ou <CODE>/usr/local/include/<CODE> et recompilez. 
+  dans <CODE>/usr/include/<CODE> ou <CODE>/usr/local/include/<CODE> et recompilez.
+  Vous pourez ensuite utiliser le pilote de sortie directx. Vous pouvez garder la
+  fenêtre vidéo au premier plan avec <CODE>-vo directx:ontop</CODE>.
   Si l'image est distordue, essayez de désactiver l'accélération matérielle avec 
   <CODE>-vo directx:noaccel</CODE>.</P>
 
@@ -1818,14 +1822,15 @@ end
 <P>Les DVDs fonctionnent également, définissez juste votre périphérique DVD pour qu'il
   corresponde à votre périphérique CD-ROM:</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
+<P><CODE>mplayer dvd://&lt;titre&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>Les DLLs QuickTime doivent normalement fonctionner. Compilez avec 
   <CODE>--enable-qtx-codecs</CODE> et placez les codecs dans l'emplacement par
   défaut des DLL Windows, <CODE>C:\WINNT\system32</CODE> ou <CODE>C:\Windows\system</CODE> 
   selon votre version de Windows.</P>
 
-
+<P>La console CygWin est particulèrement lente. Il semble que rediriger la sortie
+  ou utiliser l'option <CODE>-quiet</CODE> amèliore les performances.</P>
   
 <H1><A NAME="encoding">7.</A> <A HREF="encoding.html">Encodage avec MEncoder</A></H1>
 

@@ -532,7 +532,7 @@ décodeurs suivants:
 </para></step>
 <step><para>décompressez le pack de DLL QuickTime dans votre
 répertoire de codecs Win32
-(par défaut: <filename class="directory">/usr/lib/win32</filename>)
+(par défaut: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
 </procedure>
 

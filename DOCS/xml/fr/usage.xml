@@ -51,7 +51,7 @@ Lecture de plusieurs fichiers:
 Lecture de VCD:
 <synopsis>
 <command>mplayer</command> [<replaceable>options</replaceable>]<!--
---> -vcd <replaceable>N°piste</replaceable><!--
+--> vcd://<replaceable>N°piste</replaceable><!--
 --> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
 </synopsis>
 </para>
@@ -60,7 +60,7 @@ Lecture de VCD:
 Lecture de DVD:
 <synopsis>
 <command>mplayer</command> [<replaceable>options</replaceable>]<!--
---> -dvd <replaceable>N°titre</replaceable><!--
+--> dvd://<replaceable>N°titre</replaceable><!--
 --> [-dvd-device <replaceable>/dev/dvd</replaceable>]
 </synopsis>
 </para>
@@ -94,9 +94,9 @@ ou
 Exemples:
 <screen>
 mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-mplayer -vcd 2
+mplayer vcd://2
 mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-mplayer -dvd 1 -dvd-device /dev/hdc
+mplayer dvd://1 -dvd-device /dev/hdc
 mplayer -abs 65536 -delay -0.4 -nobps ~/films/test.avi<!--
 --></screen>
 </para>

@@ -74,12 +74,12 @@ connaissez une ? Dites-la nous!) Il y a un outil qui fonctionne pour les
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
 La syntaxe des Digital Versatile Disc (DVD) est la suivante:
-<screen>mplayer -dvd &lt;piste&gt; [-dvd-device &lt;périphérique&gt;]</screen>
+<screen>mplayer dvd://<replaceable>&lt;piste&gt;</replaceable> [-dvd-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
 </para>
 
 <para>
 Exemple:
-<screen>mplayer -dvd 1 -dvd-device /dev/hdc</screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -270,9 +270,9 @@ pour changer le code de zone de votre lecteur DVD (sous Linux).
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
 La syntaxe pour un Video CD standard (VCD) est la suivante:
-<screen>mplayer -vcd &lt;piste&gt; [-cdrom-device &lt;périphérique&gt;]</screen>
+<screen>mplayer vcd://<replaceable>&lt;piste&gt;</replaceable> [-cdrom-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
 Exemple:
-<screen>mplayer -vcd 2 -cdrom-device /dev/hdc</screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Le périphérique VCD par défaut est <filename>/dev/cdrom</filename>. Si votre installation diffère,
 faites un lien symbolique ou spécifiez le bon périphérique en ligne de commande avec l'option
 <option>-cdrom-device</option>.
@@ -307,7 +307,7 @@ iso9660, contenant généralement les lecteur de VCD Windows et peut-être d'autres
 La seconde piste et les suivantes sont des pistes MPEG brutes (film) à 2324 octets/secteur, contenant
 des paquets de données MPEG PS au lieu d'un système de fichier. Similaires à des pistes audio, elles
 <emphasis role="bold">ne peuvent être montées</emphasis>  (Avez-vous déjà monté un CD audio pour le
-lire ?). Comme la plupart des films sont sur cette piste, vous devriez essayer <option>-vcd 2</option>
+lire ?). Comme la plupart des films sont sur cette piste, vous devriez essayer <option>vcd://2</option>
 en premier.
 </para></listitem>
 
@@ -329,7 +329,7 @@ qui peut être trouvé dans la version Linux de PowerDVD. Il possède un pilote de 
 iso9660 modifié (<filename>vcdfs/isofs-2.4.X.o</filename>), qui est capable d'émuler les pistes brutes
 au travers de ce fichier .DAT fantôme. Si vous montez le disque en utilisant leur pilote, vous pouvez
 copier et même lire les fichiers .DAT avec mplayer. Mais cela ne <emphasis role="bold">fonctionnera pas</emphasis>
-avec le pilote iso9660 standard du noyau! Il est recommandé d'utiliser l'option <option>-vcd</option>
+avec le pilote iso9660 standard du noyau! Il est recommandé d'utiliser l'option <option>vcd://</option>
 à la place. D'autres possibilités pour la copie de VCD sont le nouveau pilote noyau
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (qui ne fait pas partie du noyau
 officiel) qui montre les sessions du CD en temps que fichiers image) et

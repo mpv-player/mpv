@@ -432,7 +432,7 @@ Dans ce cas, le pourcentage de décodage contient également le pourcentage d'affi
 
 <qandaentry>
 <question><para>
-Il a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/lib/win32/</filename> ...
+Il a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Téléchargez les codecs Win32 sur notre

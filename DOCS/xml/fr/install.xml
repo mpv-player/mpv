@@ -138,7 +138,7 @@ recommandés.
   <application>MPlayer</application> sur une architecture non x86, vous en aurez
   probablement besoin. Téléchargez les codecs Win32 depuis notre
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page de codecs</ulink>
-  et installez-les dans <filename class="directory">/usr/lib/win32</filename>
+  et installez-les dans <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">AVANT</emphasis> de compiler <application>MPlayer</application>,
   sinon aucun support Win32 ne sera compilé!
   <note><para>le projet avifile a un paquet de codecs similaire, mais qui diffère

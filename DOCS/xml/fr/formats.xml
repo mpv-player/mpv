@@ -50,8 +50,8 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
   DAT: C'est très exactement le même format que MPG mais avec une extension différente.
   Il est utilisé dans les <emphasis role="bold">Video CDs</emphasis>. A cause de
   la façon dont sont créés les VCDs et dont linux est conçu, les fichiers DAT ne
-  peuvent pas être lu ni copié depuis des VCDs en temps que fichiers réguliers.
-  Vous devrez utiliser l'option <option>-vcd</option> pour lire le Video CD.
+  peuvent être ni lus ni copiés depuis des VCDs en temps que fichiers réguliers.
+  Vous devrez utiliser l'option <option>vcd://</option> pour lire un Video CD.
   </simpara></listitem>
 <listitem><simpara>
   VOB: C'est le format de fichier MPEG des <emphasis role="bold">DVDs</emphasis>.

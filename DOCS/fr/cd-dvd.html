@@ -69,9 +69,9 @@ lecteur CD-ROM</P>
 <P>Pour voir la liste complète des options disponibles, veuillez lire la page de man.
   La syntaxe des Digital Versatile Disc (DVD) est la suivante:</P>
   
-<P><CODE>mplayer -dvd &lt;piste&gt; [-dvd-device &lt;périphérique&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;piste&gt; [-dvd-device &lt;périphérique&gt;]</CODE></P>
 
-<P>Exemple: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>Exemple: <CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>Le périphérique DVD par défaut est <CODE>/dev/dvd</CODE>. Si votre installation
   diffère, faites un lien symbolique ou spécifiez le périphérique correct en ligne
@@ -210,9 +210,9 @@ lecteur CD-ROM</P>
 <P>Pour voir la liste complète des options disponibles, veuillez lire la page de man.
   La syntaxe pour un Video CD standard (VCD) est la suivante:</P>
   
-<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;périph.&gt;]</CODE></P>
-  
-<P>Exemple: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+<P><CODE>mplayer vcd://&lt;track&gt; [-cdrom-device &lt;périph.&gt;]</CODE></P>
+
+<P>Exemple: <CODE>mplayer vcd://2 -cdrom-device /dev/hdc</CODE></P>
 
 <P>Le périphérique VCD par défaut est <CODE>/dev/cdrom</CODE>. Si votre installation
   diffère, faites un lien symbolique ou spécifiez le bon périphérique en ligne de
@@ -241,7 +241,7 @@ lecteur CD-ROM</P>
     de fichier. Similaires à des pistes audio, elles <B>ne peuvent être montées</B> 
     (Avez-vous déjà monté un CD audio pour le lire ?).
     Comme la plupart des films sont sur cette piste, vous devriez essayer
-    <CODE>-vcd 2</CODE> en premier.</LI>
+    <CODE>vcd://2</CODE> en premier.</LI>
   <LI>Il existe également certains disques VCD sans la première piste (une seule
     piste et pas de système de fichier du tout). Ils sont quand même lisibles,
     mais ne peuvent pas être montés.</LI>
@@ -261,7 +261,7 @@ lecteur CD-ROM</P>
   au travers de ce fichier .DAT fantôme. Si vous montez le disque en utilisant
   leur pilote, vous pouvez copier et même lire les fichiers .DAT avec mplayer.
   Mais cela ne <B>fonctionnera pas</B> avec le pilote iso9660 standard du noyau!
-  Il est recommandé d'utiliser l'option <CODE>-vcd</CODE> à la place. D'autres
+  Il est recommandé d'utiliser l'option <CODE>vcd://</CODE> à la place. D'autres
   possibilités pour la copie de VCD sont le nouveau pilote noyau 
   <A HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> (qui ne fait pas partie
   du noyau officiel) qui montre les <I>sessions</I> du CD en temps que fichiers image) et 

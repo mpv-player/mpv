@@ -37,8 +37,8 @@ Seules deux commandes sont requises:
 <screen>rm frameno.avi</screen>
 enlevez ce fichier, qui peut provenir d'un encodage 3-passes précédent (il interfère avec l'actuel)
 <screen>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi
 </screen>
 </para>
 
@@ -85,7 +85,7 @@ mencoder <replaceable>fichier/DVD</replaceable> -oac copy -pass 2 \
 Ceci est la seconde passe de l'encodage vidéo. Spécifiez le même bitrate vidéo que
 celui de la passe précédente à moins que vous ne sachiez réellement ce que vous faites.
 Dans cette passe, l'audio de <filename>frameno.avi</filename> sera inséré dans le
-fichier de destination.. et c'est tout prêt!
+fichier de destination... et tout est prêt!
 </para></step>
 </procedure>
 
@@ -96,9 +96,9 @@ fichier de destination.. et c'est tout prêt!
 enlevez ce fichier, qui peut provenir d'un encodage 3-passes précédent (il interfère
 avec l'actuel)
 <screen>
-mencoder -dvd 2 -ovc frameno -o frameno.avi -oac mp3lame -lameopts vbr=3
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi
+mencoder dvd://2 -ovc frameno -o frameno.avi -oac mp3lame -lameopts vbr=3
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi
 </screen>
 </para>
 </example>
@@ -284,7 +284,7 @@ La première colonne contient le nom du codec qui devrait être passé après la con
 <informalexample>
 <para>
 Un exemple, avec compression MJPEG:
-<screen>mencoder -dvd 2 -o titre2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
+<screen>mencoder dvd://2 -o titre2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
 </sect1>
@@ -417,9 +417,9 @@ et <filename>.sub</filename> déjà existants. Vous devrez donc les enlever avant 
 <title>Copier deux sous-titres d'un DVD pendant l'encodage 3-passes</title>
 <screen>
 rm soustitres.idx soustitres.sub
-mencoder -dvd 1 -vobsubout soustitres -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno
-mencoder -dvd 1 -oac copy -ovc divx4 -pass 1
-mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout soustitres -vobsuboutindex 1 -sid 5<!--
+mencoder dvd://1 -vobsubout soustitres -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno
+mencoder dvd://1 -oac copy -ovc divx4 -pass 1
+mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout soustitres -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 

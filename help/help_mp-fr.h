@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.89
+// Last sync on 2003-05-29 with help_mp-en.h 1.97
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -572,6 +572,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Coréen (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thaïlandais (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillique Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slave/Europe Centrale Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Pas d'agrandissement auto"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportionnel à la largeur du film"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportionnel à la hauteur du film"
