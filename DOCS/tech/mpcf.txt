@@ -90,9 +90,9 @@ stream_header:
 	time_base_denom				v
 	lsb_timestamp_length			v
 	fixed_fps				u(1)
-	codec_specific_header_flag		u(1)
 	index_flag				u(1)
-	reserved				u(5)
+	reserved				u(6)
+	codec_specific_data			b
 
 video_stream_header:
 	stream_header
@@ -113,13 +113,6 @@ audio_stream_header:
 	shuffle_type				v
 	reserved_bytes
 	checksum				u(32)
-
-codec_specific_header:
-	packet_header
-	codec_specific_startcode		f(64)
-	stream_id				v
-	codec_specific data
-	checksum
  
 frame
 	packet header
@@ -257,8 +250,8 @@ lsb_timestamp_length
 fixed_fps
 	1 indicates that the fps is fixed
 
-codec_specific_header_flag
-	1 indicates that this stream has a codec specific header
+codec_specific_data
+	private global data for a codec (could be huffman tables or ...)
         
 msb_timestamp_flag
 	indicates that the msb_timestamp is coded
@@ -372,12 +365,9 @@ stuffing
 the headers MUST be in exactly the following order (to simplify demuxer design)
 main header
 stream_header (id=0)
-codec_specific_header (id=0)
 stream_header (id=1)
-codec_specific_header (id=1)
 ...
 stream_header (id=n)
-codec_specific_header (id=n)
 
 headers may be repated, but if they are then they MUST all be repeated together
 and repeated headers MUST be identical
@@ -469,7 +459,6 @@ static inline void put_v(BufferContext *bc, uint64_t val){
                 
 main header
 video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-codec_specific_header (stream 0)
 video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
 video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
 audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
@@ -499,7 +488,6 @@ frame    (stream 0,                  lsb_timestamp=62)
 ...
 main header
 video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-codec_specific_header (stream 0)
 video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
 video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
 audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
@@ -517,7 +505,6 @@ keyframe (stream 3, msb_timestamp=0, lsb_timestamp=9)
 keyframe (stream 4, msb_timestamp=0, lsb_timestamp=9)
 main header
 video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-codec_specific_header (stream 0)
 video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
 video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
 audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
