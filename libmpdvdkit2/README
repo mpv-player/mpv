@@ -23,7 +23,7 @@ It is GPL code, so should be legal, anyway if you don't want it, just
 delete this directory! MPlayer's ./configure will check if this directory
 exists, so it is OK to delete.
 
-How to ccompile mpdvdkit as shared library (lib*.so)?
+How to compile mpdvdkit as shared library (lib*.so)?
 =====================================================
 After running MPlayer's ./configure, change this line in config.mak:
 DVDKIT_SHARED = no
