@@ -21,12 +21,6 @@
 #include "version.h"
 #include "config.h"
 
-#ifdef sun
-#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
-#else
-#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
-#endif
-
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
 
@@ -56,8 +50,6 @@
 
 #include "dvdauth.h"
 #include "spudec.h"
-
-extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
 #include "linux/getch2.h"
 #include "linux/keycodes.h"
@@ -148,27 +140,12 @@ char* encode_name=NULL;
 char* encode_index_name=NULL;
 int encode_bitrate=0;
 
-extern int asf_packetsize; // for seeking
-
-void read_avi_header(demuxer_t *demuxer,int index_mode);
-demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id);
-
-int asf_check_header(demuxer_t *demuxer);
-int read_asf_header(demuxer_t *demuxer);
-
-demuxer_t* demux_open(stream_t *stream,int file_format);
-int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
-
 int get_video_quality_max(sh_video_t *sh_video);
 void set_video_quality(sh_video_t *sh_video,int quality);
 int set_video_colors(sh_video_t *sh_video,char *item,int value);
 
 // MPEG video stream parser:
 #include "parse_es.h"
-
-extern int num_elementary_packets100; // for MPEG-ES fileformat detection
-extern int num_elementary_packets101;
-extern int num_elementary_packetsPES;
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
@@ -195,7 +172,7 @@ static vo_functions_t *video_out=NULL;
 #endif
 static ao_functions_t *audio_out=NULL;
 
-float c_total=0;
+static float c_total=0;
 
 double video_time_usage=0;
 double vout_time_usage=0;
@@ -217,13 +194,14 @@ extern void avi_fixate();
 // options:
 
 int divx_quality=0;
-int auto_quality=0;
-int output_quality=0;
+static int auto_quality=0;
+static int output_quality=0;
 
 int osd_level=2;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
 int has_audio=1;
+
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -245,10 +223,10 @@ int allow_dshow=0;
 //#endif
 
 // streaming:
-int audio_id=-1;
-int video_id=-1;
-int dvdsub_id=-1;
-int vcd_track=0;
+static int audio_id=-1;
+static int video_id=-1;
+static int dvdsub_id=-1;
+static int vcd_track=0;
 char *stream_dump_name=NULL;
 int stream_dump_type=0;
 int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
@@ -271,13 +249,13 @@ int play_n_frames=-1;
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
-int fullscreen=0;
-int vidmode=0;
-int softzoom=0;
-int flip=-1;
-int screen_size_x=0;//SCREEN_SIZE_X;
-int screen_size_y=0;//SCREEN_SIZE_Y;
-int screen_size_xy=0;
+static int fullscreen=0;
+static int vidmode=0;
+static int softzoom=0;
+static int flip=-1;
+static int screen_size_x=0;//SCREEN_SIZE_X;
+static int screen_size_y=0;//SCREEN_SIZE_Y;
+static int screen_size_xy=0;
 
 // sub:
 char *font_name=NULL;
@@ -289,7 +267,7 @@ int   sub_auto = 1;
 /*DSP!!char *dsp=NULL;*/
 
 float rel_seek_secs=0;
-float initial_pts_delay=0;
+//float initial_pts_delay=0;
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;
@@ -347,7 +325,7 @@ void exit_player(char* how){
   exit(1);
 }
 
-char* current_module=NULL; // for debugging
+static char* current_module=NULL; // for debugging
 
 void exit_sighandler(int x){
   static int sig_count=0;
@@ -381,6 +359,7 @@ extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 // dec_video.c:
+extern int video_read_properties(sh_video_t *sh_video);
 extern int init_video(sh_video_t *sh_video);
 #ifdef USE_LIBVO2
 extern int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
@@ -639,7 +618,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
-demuxer=demux_open(stream,file_format);
+demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
 if(!demuxer) exit(1); // ERROR
 
 file_format=demuxer->file_format;
@@ -1363,7 +1342,7 @@ if(1)
       if(!delay_corrected && d_audio->pts){
 //        float x=d_audio->pts-d_video->pts-(delay);
         float x=d_audio->pts-d_video->pts-(delay+audio_delay);
-        float y=-(delay+audio_delay);
+//        float y=-(delay+audio_delay);
       float bps_a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
       float bps_v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         printf("Initial PTS delay: %5.3f sec ->%5.3f (bps: %5.3f)  audio_delay=%5.3f\n",x,2*sh_video->frametime,bps_a_pts-bps_v_pts-(delay+audio_delay),audio_delay);
@@ -1448,7 +1427,7 @@ if(auto_quality>0){
     set_video_quality(sh_video,output_quality);
   }
 #else
-  float total=0.000001f * (GetTimer()-aq_total_time);
+//  float total=0.000001f * (GetTimer()-aq_total_time);
 //  if(output_quality<auto_quality && aq_sleep_time>0.05f*total)
   if(output_quality<auto_quality && aq_sleep_time>0)
       ++output_quality;

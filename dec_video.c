@@ -14,6 +14,7 @@ extern double vout_time_usage;
 extern int frameratecode2framerate[16];
 
 #include "linux/timer.h"
+#include "linux/shmem.h"
 
 #include "stream.h"
 #include "demuxer.h"

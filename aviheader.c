@@ -28,6 +28,7 @@ extern void print_avih(MainAVIHeader *h);
 extern void print_avih_flags(MainAVIHeader *h);
 extern void print_strh(AVIStreamHeader *h);
 extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_video_header(BITMAPINFOHEADER *h);
 extern void print_index(AVIINDEXENTRY *idx,int idx_size);
 
 void read_avi_header(demuxer_t *demuxer,int index_mode){

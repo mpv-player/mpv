@@ -307,7 +307,7 @@ int read_asf_header(demuxer_t *demuxer);
 demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id);
 
 
-demuxer_t* demux_open(stream_t *stream,int file_format){
+demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
 //int file_format=(*file_format_ptr);
 

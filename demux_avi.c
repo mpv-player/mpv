@@ -348,8 +348,8 @@ do{
   return 1;
 }
 
-extern int audio_id;
-extern int video_id;
+//extern int audio_id;
+//extern int video_id;
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
 extern int force_ni;
 extern int pts_from_bps;
@@ -437,7 +437,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 //    exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
-  if(audio_id!=-2){
+  if(d_audio->id!=-2){
     if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       printf("AVI: No Audio stream found...  ->nosound\n");

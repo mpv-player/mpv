@@ -145,5 +145,7 @@ static inline int avi_stream_id(unsigned int id){
   return a*10+b;
 }
 
+demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid);
+int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 
