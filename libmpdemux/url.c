@@ -231,7 +231,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 			(c >= '0' && c <= '9') ||
 			(c >= 0x7f) ||						/* fareast languages(Chinese, Korean, Japanese) */
 			c=='-' || c=='_' || c=='.' || c=='!' || c=='~' ||	/* mark characters */
-			c=='*' || c=='\'' || c=='(' || c==')' || c=='%' || 	/* do not touch escape character */
+			c=='*' || c=='\'' || c=='(' || c==')' || 	 	/* do not touch escape character */
 			c==';' || c=='/' || c=='?' || c==':' || c=='@' || 	/* reserved characters */
 			c=='&' || c=='=' || c=='+' || c=='$' || c==',' || 	/* see RFC 2396 */
 			c=='\0' ) {
