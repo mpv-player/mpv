@@ -1021,12 +1021,12 @@ _gawk_ver=`echo '' | awk -W version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\
   esac
 echo Checking for awk ... $_gawk_ver
 if test "$_gawk_verc_fail" ; then
-echo Awk was not found or has wrong version.
-echo If you have no such one then it can be downloaded from:
-echo ftp://ftp.gnu.org/gnu/gawk/
-echo Also check - maybe you already have gawk, mawk or nawk.
-echo If test is succesful then make awk symlink. Example ln -sf gawk awk
-echo Or rerun configure with --disable-vidix option.
+echo "Awk was not found or has wrong version."
+echo "If you have no such one, then the GNU implementation can be downloaded from:"
+echo "ftp://ftp.gnu.org/gnu/gawk/"
+echo "Also check - maybe you already have gawk, mawk or nawk."
+echo "If test is successful then make awk symlink. Example: ln -sf gawk awk"
+echo "Or rerun configure with --disable-vidix option."
 exit
 fi
 fi
@@ -2885,7 +2885,7 @@ $_def_encore
    Note: for mencoder */
 $_def_mp3lame
 
-/* Define libmp1e */
+/* Define libmp1e for realtime mpeg encoding (for DXR3 and DVB cards) */
 $_def_mp1e
 
 /* Define this to enable avg. byte/sec-based AVI sync method by default:
@@ -2974,12 +2974,14 @@ $_def_dshow
 $_def_libavcodec
 $_def_libavcodecso
 
-/* use only decoders from libavcodec: */
+/* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
+/* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
 
 /* XAnim DLL support */
 $_def_xanim
+/* Default search path */
 $_def_xanim_path
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
@@ -2989,14 +2991,13 @@ $_def_fastmemcpy
 $_def_gui
 #define PREFIX "$_prefix"
 
-/* Audio lib drivers */
+/* Audio output drivers */
 $_def_ossaudio
 $_def_alsa5
 $_def_alsa9
 $_def_sunaudio
 $_def_sgiaudio
 $_def_nas
-
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD
@@ -3061,6 +3062,7 @@ $_def_mad
 /* enable OggVorbis support */
 $_def_vorbis
 
+/* enable streaming */
 $_def_streaming
 
 /* enables / disables vidix usage */
@@ -3254,6 +3256,8 @@ if test "$_vidix" = no ; then
 cat <<EOF
 You've disabled VIDIX. Although it would be better to PORT it instead.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Also currently the only driver in VIDIX is for ATI Radeon and Rage128.
+Matrox G200/400 needs to be ported.
 EOF
 fi
 
