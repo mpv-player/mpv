@@ -65,6 +65,31 @@
 #define wsLess  '<'
 #define wsMore  '>'
 
+#define wsGrave      '`'
+#define wsTilde      '~'
+#define wsExclSign   '!'
+#define wsAt         '@'
+#define wsHash       '#'
+#define wsDollar     '$'
+#define wsPercent    '%'
+#define wsCircumflex '^'
+#define wsAmpersand  '&'
+#define wsobracket   '('
+#define wscbracket   ')'
+#define wsUnder      '_'
+#define wsocbracket  '{'
+#define wsccbracket  '}'
+#define wsColon      ':'
+#define wsSemicolon  ';'
+#define wsDblQuote   '\"'
+#define wsAcute      '\''
+#define wsComma      ','
+#define wsPoint      '.'
+#define wsQuestSign  '?'
+#define wsBSlash     '\\'
+#define wsPipe       '|'
+#define wsEqual      '='
+
 #define wsUp            0x52 + 256
 #define wsDown          0x54 + 256
 #define wsLeft          0x51 + 256
