@@ -133,8 +133,8 @@ I. TECH SIDE:
   details.
 
 
-Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
-server.
+Contact the project admin <root at mplayerhq dot hu> if you have technical
+problems with the CVS server.
 
 
 
