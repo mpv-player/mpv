@@ -934,7 +934,7 @@ d_video=demuxer->video;
 d_dvdsub=demuxer->sub;
 
 // DUMP STREAMS:
-if(stream_dump_type){
+if((stream_dump_type)&&(stream_dump_type!=4)){
   FILE *f;
   demux_stream_t *ds=NULL;
   current_module="dump";
@@ -942,8 +942,7 @@ if(stream_dump_type){
   switch(stream_dump_type){
   case 1: ds=d_audio;break;
   case 2: ds=d_video;break;
-  case 3:
-  case 4: ds=d_dvdsub;break;
+  case 3: ds=d_dvdsub;break;
   }
   if(!ds){        
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedSteramMissing);
