@@ -46,10 +46,7 @@ typedef struct {
     int do_dr1;
     int vo_inited;
     int convert;
-    int yuy2_support;
-#if LIBAVCODEC_BUILD >= 4615
-    int yvu9_support;
-#endif
+    int best_csp;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -80,29 +77,27 @@ struct config lavc_decode_opts_conf[]={
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-        switch(*((int*)arg)){
+	if( (*((int*)arg)) == ctx->best_csp ) return CONTROL_TRUE;//supported
+	// possible conversions:
+	switch( (*((int*)arg)) ){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
-#if LIBAVCODEC_BUILD >= 4615
-            if(ctx->yvu9_support) return CONTROL_FALSE;
-            else
-#endif
-                                  return CONTROL_TRUE;
+	    // "converted" using pointer/stride modification
+	    if(avctx->pix_fmt==PIX_FMT_YUV420P) return CONTROL_TRUE;// u/v swap
+	    if(avctx->pix_fmt==PIX_FMT_YUV422P) return CONTROL_TRUE;// half stride
+	    break;
+#if 1
         case IMGFMT_YUY2:
-            if(ctx->yuy2_support) return CONTROL_TRUE;
-                                  return CONTROL_FALSE;
-#if LIBAVCODEC_BUILD >= 4615
-        case IMGFMT_YVU9:
-            if(ctx->yvu9_support) return CONTROL_TRUE;
-                                  return CONTROL_FALSE;
+	    // converted using yuv422ptoyuy2()
+	    if(avctx->pix_fmt==PIX_FMT_YUV422P) return CONTROL_TRUE;
+	    break;
+	}
 #endif
-        default:
-            return CONTROL_FALSE;
-                
-        }
+        return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
 }
@@ -283,14 +278,21 @@ static int init_vo(sh_video_t *sh){
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
-	ctx->yuy2_support=(avctx->pix_fmt==PIX_FMT_YUV422P);
+	switch(avctx->pix_fmt){
 #if LIBAVCODEC_BUILD >= 4615
-	ctx->yvu9_support=(avctx->pix_fmt==PIX_FMT_YUV410P);
+	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
 #endif
-    	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,
-	    ctx->yuy2_support ? IMGFMT_YUY2 : IMGFMT_YV12))
+	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
+	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg
+	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //???
+	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //???
+	default:
+	    ctx->best_csp=0;
+	}
+    	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
     		return -1;
-	ctx->convert=(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_YUY2);
+	ctx->convert=(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_YUY2
+	    && ctx->best_csp!=IMGFMT_YUY2); // yuv422p->yuy2 conversion
     }
     return 0;
 }
@@ -474,8 +476,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         mpi->stride[2]=lavc_picture.linesize[2];
     }
 
-    if(avctx->pix_fmt==PIX_FMT_YUV422P){
-	// we have 422p but user wants yv12 (420p)
+    if(avctx->pix_fmt==PIX_FMT_YUV422P && mpi->chroma_y_shift==1){
+	// we have 422p but user wants 420p
 	mpi->stride[1]*=2;
 	mpi->stride[2]*=2;
     }
