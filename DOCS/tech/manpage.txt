@@ -1,0 +1,208 @@
+A documentation about MPlayer's man page
+========================================
+
+
+About the documentation
+-----------------------
+This guide should be used as a reference for questions about the man page
+structure. It's not a strict guide but we recommend following it to get a
+uniform man page.
+
+
+What belongs to the man page?
+-----------------------------
+    - option descriptions (all)
+    - usage (options, config files, controls, slave mode)
+    - basic examples
+
+
+What doesn't belong to the man page?
+------------------------------------
+    - instructions of a process (installation, encoding, etc)
+    - detailed valuations or hints
+    - tutorials, guides
+
+
+How should patches look like?
+-----------------------------
+Follow the rules in patches.txt, they apply to the man page too.
+Exceptions are:
+    - Cosmetic patches are allowed but should be done seperately from the real
+      changes, be marked as cosmetic changes and shouldn't change the general
+      style without reasons/permissions
+    - The same applies for spellchecks
+
+
+How do I create a html version of the man page?
+-----------------------------------------------
+The man pages was more or less designed for groff as it is the main tool for
+it. Therefore only groff produces acceptable results without changes.
+Additionaly, the SS variable was set to 4 instead of 18 (looks nice with man)
+to produce a better groff html output. Here's an overview again:
+    - groff:     groff -Thtml -m man mplayer.1 > manpage.groff.html
+    - man2html:  You can view it over your cgi script:
+                 http://localhost/cgi-bin/man2html?mplayer
+                 The output is unuseable as the script doesn't seem to
+                 support the macro definitions. Maybe a manual change of all
+                 leads to acceptable results.
+    - rman:      rman -f html mplayer.1 > manpage.rman.html
+                 The output is ugly, you need to remove the .PDs from the
+                 macro definitions to produce at least acceptable results.
+
+
+The structure
+-------------
+The options are divided into the the layer they belong to. The only exception
+is the OSD/SUB section. Inside the section they're alphabetically ordered.
+
+(Header)
+    Not visible, copyright and author informations.
+(Macro definitions)
+    Not visible, some macro defintions.
+NAME
+    The manpage is used for both: mplayer and mencoder.
+SYNOPSIS
+    A description of MPlayer's playtree.
+DESCRIPTION
+    A general description of MPlayer, MEncoder, GMPlayer and its features.
+GENERAL NOTES
+    Some general notes about the options and a description of the config file
+    format.
+PLAYER OPTIONS (MPLAYER ONLY)
+    Option descriptions about the user interface (mplayer only).
+DEMUXER/STREAM OPTIONS
+    Option descriptions about the demuxer and stream layer.
+OSD/SUB OPTIONS
+    This section is special: It contains all description about subtitles and
+    OSD. It is independent of the usual layer separation and was created
+    because of its size. The options may therefore come from any layer.
+AUDIO OUTPUT OPTIONS (MPLAYER ONLY)
+    Option descriptions about the audio output layer (ao) (mplayer only).
+VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
+    Option descriptions about the video output layer (vo) (mplayer only).
+DECODING/FILTERING OPTIONS
+    Options about the decoding and filter layer (ad,vd,vf,pl).
+ENCODING OPTIONS (MENCODER ONLY)
+    Encoding option descriptions (ve) (mencoder only).
+KEYBOARD CONTROL
+    A description of MPlayer's input system and the default keyboard controls.
+SLAVE MODE PROTOCOL
+    A description about the slave mode protocol (-slave).
+FILES
+    A list and description of all installed/used files/directories.
+EXAMPLES
+    Basic examples. Again: no long descriptions/processes.
+BUGS
+AUTHORS
+STANDARD DISCLAIMER
+
+
+The man page/groff format
+-------------------------
+Just read this and rtfs:
+    http://www.tldp.org/HOWTO/mini/Man-Page.html
+    man 7 man
+    man 7 groff
+
+
+Directives for the internal "style"
+-----------------------------------
+It was kept simple but there are still certain directives/rules to get a
+uniform man page. The best way is to read (and understand) the source.
+
+General:
+    - No line should contain more than 79 characters
+    - Used commands: .TH, .SH, .TP, .IP, .[R]B, .I, .br, .RS, .RE, macro
+                     definitions, comments
+    - Don't forget the quotation marks around expressions or the backslash
+      before a '-' if it's needed.
+
+Separations:
+    - Sections (.SH)   2 newlines before (3 visible because of .SH)
+    - Options          not (it's done automatically over .TP)
+    - Sub options      not (it's done automatically over .IP)
+                       should be be separated over a comment (.) at the
+                       beginning and the end to make the man page readable ;)
+    - Examples         1 newline before
+    - Big parts        better use .P (paragraph) or .br (equal to html's <BR>)
+                       instead of newlines
+    - In general       no newlines
+                       never more than 2 spaces between anything
+
+Option description:
+    - Option and/or suboption parameters should be short and descriptive.
+    - If the option is between a certain range, it should be specified at the
+      beginning (eg. <0\-100> or <\-100 \- 100>)
+    - All optional things are but between angular paranthesis ([])
+    - Obsolete options are followed by (OBSOLETE), beta options by
+      (BETA CODE), etc
+    - MPlayer only options in a section which isn't marked this way
+      are followed by (MPLAYER only)
+    - Add hints to other options if they belong to each other
+      eg. (\-vo zr only) or (see \-alang option too)
+    - If a non trivial default parameter exist, write it down
+      eg. (default: 24)
+    - Options inside a section are all alphabetically ordered
+    - Examples and notes at the end
+
+Macro definitions (see beginning of man page):
+    - SS      SS is the starting value of the suboption column
+    - .IPs    Add new suboption (we use .TP for normal options and .IP for
+              the rest)
+    - .RSs    Begin of suboptions, end with .RE
+    - .RSss   Begin of suboptions in a suboption
+    - .REss   End of suboptions in a suboption
+
+Options, sub options, examples structure:
+    - Normal options (note the '<' and '>'):
+
+      [...]
+      .TP
+      .B \-option <parameters>
+      description
+      [...]
+
+    - Sub options:
+
+      [...]
+      description. Available options are:
+      .
+      .RSs
+      .IPs "subopt1=<value>"
+      description1
+      .IPs "subopt2=<value>"
+      description2
+      [...]
+      .IPs "last subopt=<value>"
+      last description
+      .RE
+      .
+      [...]
+
+    - Sub options in sub options:
+
+      [...]
+      .IPs "subopt1=<value>"
+      description1
+      .RSss
+      subsubopt1: description1
+      .br
+      subsubopt2: description2
+      [...]
+      .REss
+      [...]
+
+    - Examples (like sub options, note: no '.', newline before and ':' after
+      .I EXAMPLE, .PD 0 before and .PD 1 after the examples):
+
+      [...]
+      
+      .I EXAMPLE:
+      .PD 0
+      .RSs
+      .IP "-option used parameters"
+      description
+      [...]
+      .RE
+      .PD 1
+      [...]
