@@ -216,7 +216,7 @@ if(verbose){
 
     case 0x75b22633: // Content description
       if(verbose){
-        char *string;
+        char *string=NULL;
         stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
         // extract the title
         if( contenth.title_size!=0 ) {
