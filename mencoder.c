@@ -1364,7 +1364,7 @@ if(sh_audio && !demuxer2){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->pack_no); // <- used for VBR audio
-	printf("samples=%d  \n",samples);
+//	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
     } else {
