@@ -34,7 +34,7 @@ LIBAO_EXTERN(dxr3)
 
 static audio_buf_info dxr3_buf_info;
 static int fd_control = 0, fd_audio = 0;
-int need_conversion = 0;
+static int need_conversion = 0;
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg)
