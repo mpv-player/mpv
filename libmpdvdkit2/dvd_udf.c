@@ -4,6 +4,9 @@
  *
  * Modifications by:
  *   Billy Biggs <vektor@dumbterm.net>.
+ *   Björn Englund <d4bjorn@dtek.chalmers.se>.
+ *   Joey Parrish <joey@nicewarrior.org>.
+ *     - updated from libdvdread 0.9.4 and removed udf caching
  *
  * dvdudf: parse and read the UDF volume information of a DVD Video
  * Copyright (C) 1999 Christian Wolff for convergence integrated media
@@ -93,6 +96,32 @@ struct AD {
     uint32_t Length;
     uint8_t  Flags;
     uint16_t Partition;
+};
+
+struct extent_ad {
+  uint32_t location;
+  uint32_t length;
+};
+
+struct avdp_t {
+  struct extent_ad mvds;
+  struct extent_ad rvds;
+};
+
+struct pvd_t {
+  uint8_t VolumeIdentifier[32];
+  uint8_t VolumeSetIdentifier[128];
+};
+
+struct lbudf {
+  uint32_t lb;
+  uint8_t *data;
+};
+
+struct icbmap {
+  uint32_t lbn;
+  struct AD file;
+  uint8_t filetype;
 };
 
 /* For direct data access, LSB first */
@@ -336,6 +365,67 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
     return 0;
 }
 
+
+static int UDFGetAVDP( dvd_reader_t *device,
+		       struct avdp_t *avdp)
+{
+  uint8_t Anchor[ DVD_VIDEO_LB_LEN ];
+  uint32_t lbnum, MVDS_location, MVDS_length;
+  uint16_t TagID;
+  uint32_t lastsector;
+  int terminate;
+  struct avdp_t; 
+  
+  /* Find Anchor */
+  lastsector = 0;
+  lbnum = 256;   /* Try #1, prime anchor */
+  terminate = 0;
+  
+  for(;;) {
+    if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
+      UDFDescriptor( Anchor, &TagID );
+    } else {
+      TagID = 0;
+    }
+    if (TagID != 2) {
+      /* Not an anchor */
+      if( terminate ) return 0; /* Final try failed */
+      
+      if( lastsector ) {
+	
+	/* We already found the last sector.  Try #3, alternative
+	 * backup anchor.  If that fails, don't try again.
+	 */
+	lbnum = lastsector;
+	terminate = 1;
+      } else {
+	/* TODO: Find last sector of the disc (this is optional). */
+	if( lastsector ) {
+	  /* Try #2, backup anchor */
+	  lbnum = lastsector - 256;
+	} else {
+	  /* Unable to find last sector */
+	  return 0;
+	}
+      }
+    } else {
+      /* It's an anchor! We can leave */
+      break;
+    }
+  }
+  /* Main volume descriptor */
+  UDFExtentAD( &Anchor[ 16 ], &MVDS_length, &MVDS_location );
+  avdp->mvds.location = MVDS_location;
+  avdp->mvds.length = MVDS_length;
+  
+  /* Backup volume descriptor */
+  UDFExtentAD( &Anchor[ 24 ], &MVDS_length, &MVDS_location );
+  avdp->rvds.location = MVDS_location;
+  avdp->rvds.length = MVDS_length;
+  
+  return 1;
+}
+
 /**
  * Looks for partition on the disc.  Returns 1 if partition found, 0 on error.
  *   partnum: Number of the partition, starting at 0.
@@ -344,52 +434,21 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
 static int UDFFindPartition( dvd_reader_t *device, int partnum,
 			     struct Partition *part ) 
 {
-    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ], Anchor[ DVD_VIDEO_LB_LEN ];
+    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ];
     uint32_t lbnum, MVDS_location, MVDS_length;
     uint16_t TagID;
-    uint32_t lastsector;
-    int i, terminate, volvalid;
+    int i, volvalid;
+    struct avdp_t avdp;
 
-    /* Find Anchor */
-    lastsector = 0;
-    lbnum = 256;   /* Try #1, prime anchor */
-    terminate = 0;
-
-    for(;;) {
-        if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
-            UDFDescriptor( Anchor, &TagID );
-        } else {
-            TagID = 0;
-        }
-        if (TagID != 2) {
-            /* Not an anchor */
-            if( terminate ) return 0; /* Final try failed */
-
-            if( lastsector ) {
-
-                /* We already found the last sector.  Try #3, alternative
-                 * backup anchor.  If that fails, don't try again.
-                 */
-                lbnum = lastsector;
-                terminate = 1;
-            } else {
-                /* TODO: Find last sector of the disc (this is optional). */
-                if( lastsector ) {
-                    /* Try #2, backup anchor */
-                    lbnum = lastsector - 256;
-                } else {
-                    /* Unable to find last sector */
-                    return 0;
-                }
-            }
-        } else {
-            /* It's an anchor! We can leave */
-            break;
-        }
+    
+    if(!UDFGetAVDP(device, &avdp)) {
+      return 0;
     }
+
     /* Main volume descriptor */
-    UDFExtentAD( &Anchor[ 16 ], &MVDS_length, &MVDS_location );
-	
+    MVDS_location = avdp.mvds.location;
+    MVDS_length = avdp.mvds.length;
+
     part->valid = 0;
     volvalid = 0;
     part->VolumeDesc[ 0 ] = '\0';
@@ -424,8 +483,9 @@ static int UDFFindPartition( dvd_reader_t *device, int partnum,
                  && ( ( !part->valid ) || ( !volvalid ) ) );
 
         if( ( !part->valid) || ( !volvalid ) ) {
-            /* Backup volume descriptor */
-            UDFExtentAD( &Anchor[ 24 ], &MVDS_length, &MVDS_location );
+	  /* Backup volume descriptor */
+	  MVDS_location = avdp.mvds.location;
+	  MVDS_length = avdp.mvds.length;
         }
     } while( i-- && ( ( !part->valid ) || ( !volvalid ) ) );
 
@@ -444,17 +504,18 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     char tokenline[ MAX_UDF_FILE_NAME_LEN ];
     char *token;
     uint8_t filetype;
-	
+
     *filesize = 0;
     tokenline[0] = '\0';
     strcat( tokenline, filename );
 
-    /* Find partition, 0 is the standard location for DVD Video.*/
-    if( !UDFFindPartition( device, 0, &partition ) ) return 0;
-
-    /* Find root dir ICB */
-    lbnum = partition.Start;
-    do {
+    
+      /* Find partition, 0 is the standard location for DVD Video.*/
+      if( !UDFFindPartition( device, 0, &partition ) ) return 0;
+      
+      /* Find root dir ICB */
+      lbnum = partition.Start;
+      do {
         if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
             TagID = 0;
         } else {
@@ -471,19 +532,27 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     /* Sanity checks. */
     if( TagID != 256 ) return 0;
     if( RootICB.Partition != 0 ) return 0;
-	
+
     /* Find root dir */
     if( !UDFMapICB( device, RootICB, &filetype, &partition, &File ) ) return 0;
     if( filetype != 4 ) return 0;  /* Root dir should be dir */
 
-    /* Tokenize filepath */
-    token = strtok(tokenline, "/");
-    while( token != NULL ) {
-        if( !UDFScanDir( device, File, token, &partition, &ICB ) ) return 0;
-        if( !UDFMapICB( device, ICB, &filetype, &partition, &File ) ) return 0;
+    {
+      /* Tokenize filepath */
+      token = strtok(tokenline, "/");
+      
+      while( token != NULL ) {
+       
+        if( !UDFScanDir( device, File, token, &partition, &ICB)) {
+         return 0;
+       }
+        if( !UDFMapICB( device, ICB, &filetype, &partition, &File ) ) {
+         return 0;
+       }
         token = strtok( NULL, "/" );
-    }
-    
+      }
+    } 
+
     /* Sanity check. */
     if( File.Partition != 0 ) return 0;
    
@@ -493,4 +562,82 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
       return 0;
     else
       return partition.Start + File.Location;
+}
+
+
+
+/**
+ * Gets a Descriptor .
+ * Returns 1 if descriptor found, 0 on error.
+ * id, tagid of descriptor
+ * bufsize, size of BlockBuf (must be >= DVD_VIDEO_LB_LEN).
+ */
+static int UDFGetDescriptor( dvd_reader_t *device, int id,
+			     uint8_t *descriptor, int bufsize) 
+{
+  uint32_t lbnum, MVDS_location, MVDS_length;
+  struct avdp_t avdp;
+  uint16_t TagID;
+  uint32_t lastsector;
+  int i, terminate;
+  int desc_found = 0;
+  /* Find Anchor */
+  lastsector = 0;
+  lbnum = 256;   /* Try #1, prime anchor */
+  terminate = 0;
+  if(bufsize < DVD_VIDEO_LB_LEN) {
+    return 0;
+  }
+  
+  if(!UDFGetAVDP(device, &avdp)) {
+    return 0;
+  }
+
+  /* Main volume descriptor */
+  MVDS_location = avdp.mvds.location;
+  MVDS_length = avdp.mvds.length;
+  
+  i = 1;
+  do {
+    /* Find  Descriptor */
+    lbnum = MVDS_location;
+    do {
+      
+      if( DVDReadLBUDF( device, lbnum++, 1, descriptor, 0 ) <= 0 ) {
+	TagID = 0;
+      } else {
+	UDFDescriptor( descriptor, &TagID );
+      }
+      
+      if( (TagID == id) && ( !desc_found ) ) {
+	/* Descriptor */
+	desc_found = 1;
+      }
+    } while( ( lbnum <= MVDS_location + ( MVDS_length - 1 )
+	       / DVD_VIDEO_LB_LEN ) && ( TagID != 8 )
+	     && ( !desc_found) );
+    
+    if( !desc_found ) {
+      /* Backup volume descriptor */
+      MVDS_location = avdp.rvds.location;
+      MVDS_length = avdp.rvds.length;
+    }
+  } while( i-- && ( !desc_found )  );
+  
+  return desc_found;
+}
+
+
+static int UDFGetPVD(dvd_reader_t *device, struct pvd_t *pvd)
+{
+  uint8_t pvd_buf[DVD_VIDEO_LB_LEN];
+  
+  if(!UDFGetDescriptor( device, 1, pvd_buf, sizeof(pvd_buf))) {
+    return 0;
+  }
+  
+  memcpy(pvd->VolumeIdentifier, &pvd_buf[24], 32);
+  memcpy(pvd->VolumeSetIdentifier, &pvd_buf[72], 128);
+  
+  return 1;
 }
