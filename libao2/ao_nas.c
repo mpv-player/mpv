@@ -482,6 +482,7 @@ static void uninit(int immed){
 	mp_msg(MSGT_AO, MSGL_DBG3, "ao_nas: uninit()\n");
 
 	nas_data->expect_underrun = 1;
+	if (!immed)
 	while (nas_data->state != AuStateStop) usleep(1000);
 	nas_data->stop_thread = 1;
 	pthread_join(nas_data->event_thread, NULL);

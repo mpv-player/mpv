@@ -126,6 +126,7 @@ static void uninit(int immed) {
   mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Uninit);
 
   if (ao_port) {
+    if (!immed)
     while(alGetFilled(ao_port) > 0) sginap(1);  
     alClosePort(ao_port);
     alFreeConfig(ao_config);

@@ -293,8 +293,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 static void uninit(int immed){
 	mp_msg(MSGT_AO,MSGL_V,"SDL: Audio Subsystem shutting down!\n");
 	if (!immed)
-	while(buf_free() < BUFFSIZE - CHUNK_SIZE)
-		usec_sleep(50000);
+	  usec_sleep(get_delay() * 1000 * 1000);
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }

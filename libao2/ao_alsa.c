@@ -687,6 +687,9 @@ static void uninit(int immed)
   if (alsa_handler) {
     int err;
 
+    if (!immed)
+      snd_pcm_drain(alsa_handler);
+
     if (!ao_noblock) {
       if ((err = snd_pcm_drop(alsa_handler)) < 0)
 	{
