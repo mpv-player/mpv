@@ -107,6 +107,43 @@
 #
 # --
 
+# SOME MACROS/USEFUL FUNCTIONS
+# Returns error code only - NO displaye
+function cc_check() {
+	"$_cc" "$TMPC" -o "$TMPO" "$@" >/dev/null 2>&1
+	return "$?"
+}
+
+# Display error message, flushes tempfile, exit 
+function die () {
+	echo
+	echo "Error: $@" >&2
+	echo >&2
+	rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
+	exit 1
+}
+
+function linux() {
+	test "$system_name" = "Linux"
+	return "$?"
+}
+function freebsd() {
+	test "$system_name" = "FreeBSD"
+	return "$?"
+}
+function openbsd() {
+	test "$system_name" = "OpenBSD"
+	return "$?"
+}
+function bsdos() {
+	test "$system_name" = "BSD/OS"
+	return "$?"
+}
+function bsd() {
+	freebsd || openbsd || bsdos
+	return "$?"
+}
+
 
 # Check how echo works in this /bin/sh
 case `echo -n` in
@@ -115,8 +152,6 @@ case `echo -n` in
 esac
 
 
-# LGB: Help moved here.
-
 for parm in "$@" ; do
 if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
 cat << EOF
@@ -124,77 +159,77 @@ cat << EOF
 usage: $0 [options]
 
 params:
-        --cc                    use this C compiler to build MPlayer [gcc]
-	--target=PLATFORM       target platform (i386-linux, arm-linux, etc)
-	--prefix=DIR		use this prefix for installing mplayer [/usr/local]
-	--datadir=DIR           use this prefix for installing machine independent
-				data [/usr/local/share/mplayer] 
-	--language=LANGUAGE	selects manual a language, e.g. de, en, hu, pl, ...
-	--enable-debug[=1-3]	compile debugging information into mplayer [disable]
-	--enable-profile	compile profiling information into mplayer [disable]
-	--enable-largefiles	build with support for files >2^32 bytes long [disable]
-        --enable-mmx            build with mmx support [autodetect]
-        --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
-        --enable-3dnow          build with 3dnow! support [autodetect]
-        --enable-3dnowex        build with 3dnow-dsp! support (K7) [autodetect]
-        --enable-sse            build with sse support [autodetect]
-        --enable-gl             build with OpenGL render support [autodetect]
-        --enable-dga            build with DGA support [autodetect]
-        --enable-svga           build with SVGAlib support [autodetect]
-        --enable-sdl            build with SDL render support [autodetect]
-        --enable-aa             build with AAlib render support [autodetect]
-        --enable-ggi            build with GGI render support [autodetect]
-        --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
-                                is available]
-	--enable-xmga           build with mga_vid X Window support [autodetect,
-				if both /dev/mga_vid and x11 are available]
-        --enable-xv             build with Xv render support for X 4.x [autodetect]
-	--enable-vm		build with XF86VidMode support for x11 driver
-	--enable-xinerama	build with Xinerama support for x11 driver [autodetect]
-        --enable-x11            build with X11 render support [autodetect]
-	--enable-fbdev		build with FBDev render support [_not_ autodetected]
-	--enable-mlib		build with MLIB support ( only Solaris )
-	--enable-vorbis		build with OggVorbis support [autodetect]
+  --cc                   use this C compiler to build MPlayer [gcc]
+  --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
+  --prefix=DIR           use this prefix for installing mplayer [/usr/local]
+  --datadir=DIR          use this prefix for installing machine independent
+                         data [/usr/local/share/mplayer] 
+  --language=LANGUAGE    selects manual a language, e.g. de, en, hu, pl, ...
+  --enable-debug[=1-3]   compile debugging information into mplayer [disable]
+  --enable-profile       compile profiling information into mplayer [disable]
+  --enable-largefiles    build with support for files >2^32 bytes long [disable]
+  --enable-mmx           build with mmx support [autodetect]
+  --enable-mmx2          build with mmx2 support (PIII, Athlon) [autodetect]
+  --enable-3dnow         build with 3dnow! support [autodetect]
+  --enable-3dnowex       build with 3dnow-dsp! support (K7) [autodetect]
+  --enable-sse           build with sse support [autodetect]
+  --enable-gl            build with OpenGL render support [autodetect]
+  --enable-dga           build with DGA support [autodetect]
+  --enable-svga          build with SVGAlib support [autodetect]
+  --enable-sdl           build with SDL render support [autodetect]
+  --enable-aa            build with AAlib render support [autodetect]
+  --enable-ggi           build with GGI render support [autodetect]
+  --enable-mga           build with mga_vid support
+                         [autodetect, if /dev/mga_vid is available]
+  --enable-xmga          build with mga_vid X Window support [autodetect,
+                         if both /dev/mga_vid and x11 are available]
+  --enable-xv            build with Xv render support for X 4.x [autodetect]
+  --enable-vm            build with XF86VidMode support for x11 driver
+  --enable-xinerama      build with Xinerama support for x11 driver [autodetect]
+  --enable-x11           build with X11 render support [autodetect]
+  --enable-fbdev         build with FBDev render support [_not_ autodetected]
+  --enable-mlib          build with MLIB support ( only Solaris )
+  --enable-vorbis        build with OggVorbis support [autodetect]
 
-	--enable-termcap	use termcap database for key codes
-	--enable-xmmp	        use XMMP audio drivers
-	--enable-lirc	        enable LIRC (remote control) support
+  --enable-termcap       use termcap database for key codes
+  --enable-xmmp          use XMMP audio drivers
+  --enable-lirc          enable LIRC (remote control) support
 
-	--disable-iconv		do not use iconv(3) function [autodetect]	
-        --disable-ossaudio      disable OSS sound support [autodetect]
-        --disable-alsa          disable alsa sound support [autodetect]
-	--disable-esd           disable esd sound support [autodetect]
-        --disable-sunaudio      disable Sun sound support [autodetect]
-		
-	--disable-gcc-checking  disable gcc version checking
-	--disable-kernel-extchk disables checking for CPU extension support in
-	                        your kernel (MMX, SSE, ...)
+  --disable-iconv        do not use iconv(3) function [autodetect]
+  --disable-ossaudio     disable OSS sound support [autodetect]
+  --disable-alsa         disable alsa sound support [autodetect]
+  --disable-esd          disable esd sound support [autodetect]
+  --disable-sunaudio     disable Sun sound support [autodetect]
 
-	--disable-select        disable audio select() support ( for example required this
-	                        option ALSA or Vortex2 driver )
+  --disable-gcc-checking    disable gcc version checking (READ THE DISCLAIMER)
+  --disable-kernel-extchk   disables checking for CPU extension support in
+                            your kernel (MMX, SSE, ...) (READ THE DISCLAIMER)
 
-	--disable-win32         disable Win32 DLL support
-	--disable-dshow         disable DirectShow support (if you don't have
-                                C++ compiler&libs, or you've found dshow codecs
-                                slower than old VfW ones)
+  --disable-select       disable audio select() support ( for example 
+                         required this option ALSA or Vortex2 driver )
 
-	--disable-fastmemcpy    disable 3dnow/sse/mmx optimized memcpy()
+  --disable-win32        disable Win32 DLL support
+  --disable-dshow        disable DirectShow support (if you don't have
+                         C++ compiler&libs, or you've found dshow codecs
+                         slower than old VfW ones)
 
-        --with-x11libdir=DIR    X library files are in DIR
-        --with-x11incdir=DIR    X headerss are in DIR
-                                (only needed if autodetection fails)
-        --with-win32libdir=DIR  windows codec files
-        --with-csslibdir=DIR    directory contains libcss.so shared library
-        --with-cssincdir=DIR    directory contains libcss header file (css.h)
-                                (--with-css* only needed, if libCSS autodetect fails)
-        --with-sdl-config=PATH  specify location of sdl-config if it's not in your PATH
-                                (example: --with-sdl-config=/usr/sdl/bin/sdl-config)
-        --with-extralibdir=DIR  extra library files (png, SDL) are in DIR
-                                (only needed if autodetection fails)
-        --with-extraincdir=DIR extra headers (png, SDL) are in DIR
-                                (only needed if autodetection fails)
-	--size-x=SIZE		default screen width
-	--size-y=SIZE		default screen height
+  --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy()
+
+  --with-x11libdir=DIR   X library files are in DIR
+  --with-x11incdir=DIR   X headerss are in DIR
+                         (only needed if autodetection fails)
+  --with-win32libdir=DIR windows codec files
+  --with-csslibdir=DIR   directory contains libcss.so shared library
+  --with-cssincdir=DIR   directory contains libcss header file (css.h)
+                         (--with-css* only needed, if libCSS autodetect fails)
+  --with-sdl-config=PATH specify location of 'sdl-config' if not in your PATH
+                         (example: --with-sdl-config=/usr/sdl/bin/sdl-config)
+  --with-extralibdir=DIR extra library files (png, SDL) are in DIR
+                         (only needed if autodetection fails)
+  --with-extraincdir=DIR extra headers (png, SDL) are in DIR
+                         (only needed if autodetection fails)
+  --size-x=SIZE          default screen width
+  --size-y=SIZE          default screen height
 EOF
 exit 0
 fi
@@ -300,7 +335,7 @@ echo "Detected host architecture: $host_arch"
 # Determine OS dependent libs
 _confcygwin="TARGET_CYGWIN=no"
 _confwin32=
-if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" || test "$system_name" = "BSD/OS" ; then
+if bsd ; then
     _archlibs="-rdynamic -pthread"
 elif test `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ; then
     _confcygwin="TARGET_CYGWIN=yes"
@@ -310,33 +345,18 @@ else
     _archlibs="-ldl -lpthread"
 fi
 
-if test "$system_name" = "BSD/OS" ; then
+if bsdos ; then
 	_archlibs="$_archlibs -ldvd"
 fi
 
 # LGB: temporary files
-
-TMPC="mplayer-conf-${RANDOM}-$$-${RANDOM}.c"
-TMPCPP="mplayer-conf-${RANDOM}-$$-${RANDOM}.cpp"
-TMPO="mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
-TMPS="mplayer-conf-${RANDOM}-$$-${RANDOM}.S"
-
-if test "$TMPDIR" ; then
-	TMPC="${TMPDIR}/${TMPC}"
-	TMPCPP="${TMPDIR}/${TMPCPP}"
-	TMPO="${TMPDIR}/${TMPO}"
-	TMPS="${TMPDIR}/${TMPS}"
-elif test "$TEMPDIR" ; then
-	TMPC="${TEMPDIR}/${TMPC}"
-	TMPCPP="${TEMPDIR}/${TMPCPP}"
-	TMPO="${TEMPDIR}/${TMPO}"
-	TMPS="${TEMPDIR}/${TMPS}"
-else
-	TMPC="/tmp/${TMPC}"
-	TMPCPP="/tmp/${TMPCPP}"
-	TMPO="/tmp/${TMPO}"
-	TMPS="/tmp/${TMPS}"
-fi
+for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
+	test "$I" && break
+done
+TMPC="$I/mplayer-conf-$RANDOM-$RANDOM-$$.c"
+TMPCPP="$I/mplayer-conf-$RANDOM-$RANDOM-$$.cpp"
+TMPO="$I/mplayer-conf-$RANDOM-$RANDOM-$$.o"
+TMPS="$I/mplayer-conf-$RANDOM-$RANDOM-$$.S"
 
 cat > $TMPC << EOF
 int main( void ) { return 0; }
@@ -380,7 +400,7 @@ _extraincdir=-I/usr/local/include
 fi
 
 if test -z "$_sdlconfig" ; then
-   if test "$system_name" = "FreeBSD" ; then
+   if freebsd ; then
       _sdlconfig='sdl11-config'
    else
       _sdlconfig='sdl-config'
@@ -417,7 +437,7 @@ If you don't want to downgrade, use the --disable-gcc-checking option to avoid
 this check, but DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* fault!
 Get ready for misterious crashes, no-picture bugs, strange noises... REALLY!
 EOF
-exit
+die "Bad gcc version"
 fi
 else
 # echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
@@ -441,12 +461,7 @@ echo -n "Enter keyword to continue: "
 read _answer
 
 if test "$_answer" != "gcc 2.96 is broken" ; then
-cat <<EOF
-
-Wrong answer. Next time try 'gcc 2.96 is broken'. But you'd better to downgrade.
-
-EOF
-exit
+  die "Wrong answer. Next time try 'gcc 2.96 is broken'. But you'd better to downgrade."
 fi
 
 fi
@@ -516,7 +531,7 @@ _dga=no
 _dga2=no
 _svga=no
 _fbdev=no
-test "$system_name" = Linux && _fbdev=yes
+linux && _fbdev=yes
 _lirc=no
 _css=no
 _dvdread=no
@@ -690,46 +705,34 @@ i386)
 
     #echo -n "Checking your GCC CPU optimalization abilities: "
     if test "$proc" = "k7" ; then
-	#echo -n "trying k7  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=athlon
+	cc_check -march=$proc -mcpu=$proc || proc=athlon
     fi
     if test "$proc" = "athlon" ; then
-	#echo -n "trying athlon  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
+	cc_check -march=$proc -mcpu=$proc || proc=pentiumpro
     fi
     if test "$proc" = "k6" ; then
-	#echo -n "trying k6  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k5
+	cc_check -march=$proc -mcpu=$proc  || proc=k5
     fi
     if test "$proc" = "k5" ; then
-	#echo -n "trying k5  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
+	cc_check -march=$proc -mcpu=$proc  || proc=pentium
     fi
     if test "$proc" = "i686" ; then
-	#echo -n "trying i686  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
+	cc_check -march=$proc -mcpu=$proc  || proc=pentiumpro
     fi
     if test "$proc" = "pentiumpro" ; then
-	#echo -n "trying pentiumpro  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
+	cc_check -march=$proc -mcpu=$proc  || proc=pentium
     fi
     if test "$proc" = "pentium" ; then
-	#echo -n "trying pentium  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i486
+	cc_check -march=$proc -mcpu=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then
-	#echo -n "trying i486  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i386
+	cc_check -march=$proc -mcpu=$proc  || proc=i386
     fi
     if test "$proc" = "i386" ; then
-	#echo -n "trying i386  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=error
+	cc_check -march=$proc -mcpu=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-	echo
-	echo "Your gcc does not support even \"i386\" for '-march' and '-mcpu'." >&2
-	rm -f $TMPC $TMPO $TMPS
-	exit
+	die "Your gcc does not support even \"i386\" for '-march' and '-mcpu'."
     fi
 
     _march="-march=$proc"
@@ -780,8 +783,8 @@ alpha)
 
 *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
-    echo "It seems, as if noone has ported MPlayer to your OS or CPU type yet."
-    exit 1
+    echo "It seems noone has ported MPlayer to your OS or CPU type yet."
+    die "unsupported architecture $host_arch"
     ;;
 esac
 
@@ -800,75 +803,65 @@ _mp_help="help_mp-"$LINGUAS".h"
 fi
 echo Using ... "$_mp_help" file
 
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
+cc_check $_extraincdir $_extralibdir -lvgagl -lvga && _svga=yes
 
-if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" || test "$system_name" = "BSD/OS" ; then
-$_cc $TMPC -o $TMPO -pthread > /dev/null 2>&1 || \
- { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
+if bsd ; then
+  cc_check -pthread || die "Lib pthread not found."
 else
-$_cc $TMPC -o $TMPO -lpthread > /dev/null 2>&1 || \
- { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
+  cc_check -lpthread || die "Lib pthread not found."
 fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if test "`($_sdlconfig --version) 2>/dev/null`" ; then
-if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2>&1 ; then
-	_sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
-	if test "$_sdlversion" -gt 116 ; then
-		if test "$_sdlversion" -lt 121 ; then
-			_sdlbuggy='#define BUGGY_SDL'
-		else	
-			_sdlbuggy='#undef BUGGY_SDL'
-		fi	
-		_sdl=yes
-	else
-		_sdl=outdated
-	fi
-fi	
+if "$_sdlconfig" --version >/dev/null 2>&1 ; then
+  if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` ; then
+    _sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
+      if test "$_sdlversion" -gt 116 ; then
+        if test "$_sdlversion" -lt 121 ; then
+          _sdlbuggy='#define BUGGY_SDL'
+        else    
+          _sdlbuggy='#undef BUGGY_SDL'
+        fi  
+        _sdl=yes
+      else
+        _sdl=outdated
+      fi
+   fi  
 fi
 
 
 # Atmosfear: added libcss autodetect
 _css=no
-if test -s "/usr/local/lib/libcss.so" ; then
-	_csslibdir="/usr/local/lib/"
-	if test -s "/usr/local/include/css.h" ; then
-		_cssincdir="/usr/local/include"
-		_css=yes
-	fi	
-else
-	if test -s "/usr/lib/libcss.so" ; then
-		_csslibdir="/usr/lib/"
-		if test -s "/usr/include/css.h" ; then
-			_cssincdir="/usr/include/"
-			_css=yes
-		fi	
-	fi
-fi
-
+for I in "/usr/local" "/usr" ; do
+  if test -s "$I/lib/libcss.so" && test -s "$I/include/css.h" ; then
+    _csslibdir="$I/lib/"
+    _cssincdir="$I/include"
+    _css=yes
+    break;
+  fi
+done
 
 _aa=no
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -laa > /dev/null 2>&1 && _aa=yes
+cc_check $_extraincdir $_extralibdir -laa && _aa=yes
 
 _divx4linux=no
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore -lm > /dev/null 2>&1 && _divx4linux=yes
+cc_check $_extraincdir $_extralibdir -ldivxdecore -lm && _divx4linux=yes
 
 _termcap=no
-$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
+cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
-$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
+cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
 
 _vorbis=no
-$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lvorbis -lm > /dev/null 2>&1 && _vorbis=yes
+cc_check $_extraincdir $_extralibdir -lvorbis -lm && _vorbis=yes
 
 _ggi=no
-$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
+cc_check $_extraincdir $_extralibdir -lggi && _ggi=yes
 
 _kstat=no
-$_cc $TMPC -o $TMPO -lkstat >/dev/null 2>&1 && _kstat=yes _archlibs="-lkstat $_archlibs"
-$_cc $TMPC -o $TMPO -lposix4 >/dev/null 2>&1 && _archlibs="-lposix4 $_archlibs"
+cc_check -lkstat && _kstat=yes _archlibs="-lkstat $_archlibs"
+cc_check -lposix4 && _archlibs="-lposix4 $_archlibs"
 
 _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
@@ -880,27 +873,27 @@ $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 
 # for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
 _socklib=
-$_cc $TMPC -o $TMPO $_socklib -lsocket >/dev/null 2>&1 && _socklib="$_socklib -lsocket"
-$_cc $TMPC -o $TMPO $_socklib -lnsl >/dev/null 2>&1 && _socklib="$_socklib -lnsl"
+cc_check $_socklib -lsocket && _socklib="$_socklib -lsocket"
+cc_check $_socklib -lnsl && _socklib="$_socklib -lnsl"
 
 if test "$_x11" = auto ; then
   _x11=no
-  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext $_socklib > /dev/null 2>&1 && _x11=yes
+  cc_check $_x11libdir -lX11 -lXext $_socklib && _x11=yes
 fi
 
 if test "$_x11" = yes ; then
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms_3=yes
+cc_check $_x11libdir -lX11 -lXext -lXdpms $_socklib && _xdpms_3=yes
 nm `echo $_x11libdir|cut -c 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXinerama $_socklib > /dev/null 2>&1 && _xinerama=yes
+cc_check $_x11libdir -lX11 -lXext -lXv $_socklib && _xv=yes
+cc_check $_x11libdir -lX11 -lXext -lXxf86vm $_socklib && _vm=yes
+cc_check $_x11libdir -lX11 -lXext -lXinerama $_socklib && _xinerama=yes
 
-# this is not yet checked with OpenBSD - atmos
-if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 && _gl=yes
+# XXX this is not yet checked with OpenBSD - atmos
+if freebsd || openbsd ; then
+  cc_check $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib && _gl=yes
 else
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1 && _gl=yes
+  cc_check $_x11libdir -lX11 -lXext -lGL -lm $_socklib && _gl=yes
 fi
 
 cat > $TMPC << EOF
@@ -937,24 +930,24 @@ main()
 
 EOF
 _iconv=yes
-if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS"; then
-$_cc $_extraincdir $TMPC -o $TMPO $_extralibdir -lm -liconv > /dev/null 2>&1 || \
+if freebsd || bsdos ; then
+  cc_check $_extraincdir $_extralibdir -lm -liconv >/dev/null 2>&1 || \
  { _iconv=no ; echo "iconv(3) function not detected!" ;}
 else
-$_cc $TMPC -o $TMPO -lm > /dev/null 2>&1 || \
+cc_check -lm || \
  { _iconv=no ; echo "iconv(3) function not detected!" ;}
 fi
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-# this is not yet checked with OpenBSD - atmos
-if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
-$_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 || \
- { _gl=no; echo "GL includes not found!";}
+# XXX check this for OpenBSD and BSD/OS
+if freebsd || openbsd ; then
+  cc_check $_x11incdir $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib || \
+    { _gl=no; echo "GL includes not found!"; }
 else
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1 || \
- { _gl=no; echo "GL includes not found!";}
+  cc_check  $_x11libdir -lX11 -lXext -lGL -lm $_socklib || \
+    { _gl=no; echo "GL includes not found!"; }
 fi
 
 cat > $TMPC << EOF
@@ -964,7 +957,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
+cc_check $_x11incdir -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -980,7 +973,7 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0;}
 EOF
 
 _dga2=no
-$_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga2=yes
+cc_check $_x11incdir -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib && _dga2=yes
 
 # --- checkin X11 XShape extension
 
@@ -1008,7 +1001,7 @@ int main( void )
 EOF
 
 _xshape=no
-$_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext $_socklib > /dev/null 2>&1 && _xshape=yes
+cc_check $_x11incdir -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext $_socklib && _xshape=yes
 
 fi
 
@@ -1016,8 +1009,8 @@ cat > $TMPC << EOF
 #include <decore.h>
 int main( void ) { return DEC_OPT_FRAME_311; }
 EOF
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore -lm > /dev/null 2>&1 || \
- { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!";}
+cc_check $_extraincdir $_extralibdir -ldivxdecore -lm || \
+ { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!"; }
 
 cat > $TMPC << EOF
 #include <dvdread/dvd_reader.h>
@@ -1026,37 +1019,35 @@ cat > $TMPC << EOF
 #include <dvdread/nav_read.h>
 int main( void ) { return 0; }
 EOF
-$_cc $_extraincdir $_extralibdir -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE $TMPC -o $TMPO -ldvdread > /dev/null 2>&1 && \
- { _dvdread=yes;_largefiles=yes; }
+cc_check $_extraincdir $_extralibdir -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -ldvdread && \
+ { _dvdread=yes; _largefiles=yes; }
 
 
 cat > $TMPC << EOF
 #include <mlib.h>
 int main( void ) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-$_cc $_extraincdir $_extralibdir -I$_mlibdir/include $TMPC -o $TMPO -L$_mlibdir/lib -lmlib >/dev/null 2>&1 && _mlib=yes;
+cc_check $_extraincdir $_extralibdir -I$_mlibdir/include -L$_mlibdir/lib -lmlib && _mlib=yes
 
-
-rm -f $TMPC $TMPO
 
 
 
 # ---
 # check availability of some header files
 
+# check for malloc.h and memalign() in it
 cat > $TMPC << EOF
 #include <malloc.h>
 int main( void ) { return 0; }
 EOF
-
 _memalign_def=
 _memalign=no
 _malloc_h=no
-if $_cc -o $TMPO $TMPC 2> /dev/null ; then
-_malloc_h=yes
-# check for memalign - atmos
-# should this be restricted to x86, or customized for cpu types (opt for cacheline sizes)?
-cat > $TMPC << EOF
+if cc_check ; then
+ _malloc_h=yes
+ # check for memalign - atmos
+ # should this be restricted to x86, or customized for cpu types (opt for cacheline sizes)?
+ cat > $TMPC << EOF
 #include <malloc.h>
 int main ( void ) {
 char *string = NULL;
@@ -1064,106 +1055,101 @@ string = memalign(64, sizeof(char));
 return 0;
 }
 EOF
-_memalign_def='/* #define memalign(a,b) malloc(b) */'
-_memalign=yes
-$_cc -o $TMPO $TMPC 2> /dev/null || _memalign=no 
-if test "$_memalign" = no ; then
-_memalign_def='#define memalign(a,b) malloc(b)'
-fi
+ if cc_check ; then
+  _memalign_def='/* #define memalign(a,b) malloc(b) */'
+  _memalign=yes
+ else
+  _memalign_def='#define memalign(a,b) malloc(b)'
+  _memalign=no
+ fi
 fi
 
-
+# check for alloca.h
 cat > $TMPC << EOF
 #include <alloca.h>
 int main( void ) { return 0; }
 EOF
-
 _alloca_h=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _alloca_h=yes
+cc_check && _alloca_h=yes
 
 
+# check for mman.h
 cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/mman.h>
 int main( void ) { return 0; }
 EOF
-
 _sys_mman_h=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _sys_mman_h=yes
+cc_check && _sys_mman_h=yes
 
 
+# check for dlfcn.h
 cat > $TMPC << EOF
 #include <dlfcn.h>
 int main( void ) {  return 0; }
 EOF
-
 _libdl=no
-$_cc -o $TMPO $TMPC -ldl 2> /dev/null && _libdl=yes
+cc_check -ldl && _libdl=yes
 
 
+# check for sys/soundcard.h
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
 int main( void ) { return 0; }
 EOF
-
 _sys_soundcard_h=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _sys_soundcard_h=yes
+cc_check && _sys_soundcard_h=yes
 
 
 # ---
 # try to detect type of audio supported on this machine
 
+# check for OSS audio
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
 int main( void ) {  int arg = SNDCTL_DSP_SETFRAGMENT; }
 EOF
-
 _oss_audio=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _oss_audio=yes
+cc_check && _oss_audio=yes
 
 
+# check for SUN audio
 cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/audioio.h>
 int main( void ) {  audio_info_t info; AUDIO_INITINFO(&info); }
 EOF
-
 _sun_audio=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _sun_audio=yes
+cc_check && _sun_audio=yes
 
 
-# ---
-
-cat > $TMPC << EOF
+# check for ALSA audio: 0.5.x then 0.9.x
+if test "$_alsa" = yes ; then
+  _alsaver=no
+  cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==5)return 0; return 1; }
 EOF
+  cc_check -lasound -ldl -lpthread && $TMPO && _alsaver='0.5.x'
 
-_alsaver=no
-$_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
-test "$_alsa" = yes && $TMPO && { _alsaver='0.5.x'; }
-
-if test "$_alsaver" = no ; then
-cat > $TMPC << EOF
+  cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==9)return 0; return 1; }
 EOF
-
-_alsaver=no
-$_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
-test $_alsa = yes && $TMPO && { _alsaver='0.9.x'; }
+  cc_check -lasound -ldl -lpthread && $TMPO && _alsaver='0.9.x'
 fi
+test "$_alsaver" || _alsa=no
 
-# ---
 
+# check for ESD audio
 cat > $TMPC << EOF
 #include <esd.h>
 int main( void ){ return 0; }
 EOF
+cc_check $_extraincdir $_extralibdir -lesd || _esd=no
 
-$_cc $_extraincdir $_extralibdir -o $TMPO -lesd $TMPC 2> /dev/null || { _esd=no; }
 
 # ---
 
@@ -1516,7 +1502,6 @@ fi
 #EOF
 #fi
 $_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
-rm -f $TMPS $TMPO $TMPC
 
 if test "$as_verc_fail" != yes ; then
   echo "ok"
@@ -1524,7 +1509,7 @@ else
   echo "failed"
   echo "Please upgrade(downgrade) binutils to "$_pref_as_version"..."
   if test "$_skip_as_check" != yes ; then
-    exit
+    die "Bad binutils version"
   else
     echo "YOU'VE SELECTED '--disable-as-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
   fi
@@ -1538,12 +1523,13 @@ cat > $TMPC <<EOF
 int main(void){__asm__ __volatile__ ("$3":::"memory");return(0);}
 EOF
 
-if ($_cc $TMPC -o $TMPO && $TMPO) > /dev/null 2>&1 ; then 
+if (cc_check && $TMPO) > /dev/null 2>&1 ; then 
 	echo "ok"
 	return 1
 else
 	echo "failed"
-	echo "It seems that your kernel does not correctly support $2. To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
+	echo "It seems that your kernel does not correctly support $2."
+	echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
 	return 0
 fi
 fi
@@ -1556,11 +1542,10 @@ if extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" ; then _3dnowex=no ; fi
 if extcheck $_mmx2 "mmx2" "sfence" ; then _mmx2=no ; fi
 if extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" ; then _sse=no ; fi
 #if extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" ; then _sse2=no ; fi
-rm -f $TMPS $TMPO $TMPC
 fi
 
 # Checking kernel version...
-if test "$system_name" = "Linux" ; then
+if linux ; then
     _k_verc_problem=no
     kernel_version=`uname -r 2>&1`
     echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
@@ -1674,8 +1659,7 @@ If you don't need DirectShow support, you can also use:
 ./configure --disable-dshow <your-normal-configure-options>
 to disable building of the C++ based DirectShow code.
 EOF
-    rm -f $TMPCPP $TMPO
-    exit
+    die "C++ runtime enviroment broken"
   fi
 else
   echo no
@@ -1687,10 +1671,8 @@ If you don't need DirectShow support, you can also use:
 ./configure --disable-dshow <your-normal-configure-options>
 to disable building of the C++ based DirectShow code.
 EOF
-  rm -f $TMPCPP $TMPO
-  exit
+  die "C++ compiler not supporting C++"
 fi
-rm -f $TMPCPP $TMPO
 fi
 
 echo "Checking for libavcodec ... $_libavcodec"
@@ -1706,33 +1688,33 @@ if test "$_gui" = yes ; then
 echo
 echo $_echo_n "Checking for gtk version ... $_echo_c"
 _gtk=`gtk-config --version 2>&1`
-test -z "$_gtk" && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtk" && die "gtk not found."
 echo "$_gtk"
 
 echo $_echo_n "Checking for gtk includes ... $_echo_c"
 _gtkinc=`gtk-config --cflags 2>&1`
-test -z "$_gtkinc" && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtkinc" && die "gtk not found."
 echo "done"
 
 echo $_echo_n "Checking for gtk libs ... $_echo_c"
 _gtklib=`gtk-config --libs 2>&1`
-test -z "$_gtklib" && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtklib" && die "gtk not found."
 echo "done"
 
 echo
 echo $_echo_n "Checking for glib version ... $_echo_c"
 _glib=`glib-config --version 2>&1`
-test -z "$_glib" && { echo 'glib not found.'; exit 1; }
+test -z "$_glib" && die "glib not found."
 echo "$_glib"
 
 echo $_echo_n "Checking for glib includes ... $_echo_c"
 _glibinc=`glib-config --cflags 2>&1`
-test -z "$_glibinc" && { echo 'glib not found.'; exit 1; }
+test -z "$_glibinc" && die "glib not found."
 echo "done"
 
 echo $_echo_n "Checking for glib libs ... $_echo_c"
 _gliblib=`glib-config --libs 2>&1`
-test -z "$_gliblib" && { echo 'glib not found.'; exit 1; }
+test -z "$_gliblib" && die "glib not found."
 echo "done"
 
 cat > Gui/config.mak << EOF
@@ -1746,6 +1728,7 @@ GLIBLIBS=$_gliblib
 
 EOF
 
+
 # --------------- GUI end -------------------
 fi
 
@@ -1756,8 +1739,8 @@ if test "$_streaming" = yes ; then
 fi
 
 if test "$_gl" = yes ; then
-   # niot yet etsted on OpenBSD - atmos	
-   if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
+   # XXX check this for OpenBSD & BSD/OS
+   if freebsd || openbsd ; then
       # Under XFree86 4.x GL port is poorly designed
       if test -r /usr/X11R6/bin/XFree86 ; then
          _gllib='-lGL -pthread'
@@ -1894,12 +1877,12 @@ else
 fi
 
 if test "$_iconv" = yes ; then
-_iconv='#define USE_ICONV'
-  if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS" ; then
-    _iconvlib="-liconv"
-  fi
+ _iconv='#define USE_ICONV'
+ if freebsd || bsdos ; then
+  _iconvlib="-liconv"
+ fi
 else
-_iconv='#undef USE_ICONV'
+ _iconv='#undef USE_ICONV'
 fi
 
 if test "$_lirc" = yes ; then
@@ -1926,8 +1909,15 @@ _aosrc=''
 _alsa5='#undef HAVE_ALSA5'
 _alsa9='#undef HAVE_ALSA9'
 if test "$_alsa" = yes ; then
- test "$_alsaver" = '0.5.x' && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
- test "$_alsaver" = '0.9.x' && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
+ if test "$_alsaver" = '0.5.x' ; then
+  _aosrc="$_aosrc ao_alsa5.c"
+  _alsa5='#define HAVE_ALSA5'
+  _alsalib='-lasound';
+ elif test "$_alsaver" = '0.9.x' ; then
+  _aosrc="$_aosrc ao_alsa9.c"
+  _alsa9='#define HAVE_ALSA9'
+  _alsalib='-lasound'
+ fi
 fi
   
 _esdd='#undef HAVE_ESD'
@@ -1958,7 +1948,7 @@ else
 fi
 
 # malloc.h useless in FreeBSD
-if test "$_malloc_h" = yes && test "$system_name" != "FreeBSD" ; then
+if test "$_malloc_h" = yes && ! freebsd ; then
  _have_malloc_h='#define HAVE_MALLOC_H 1'
 else
  _have_malloc_h='#undef  HAVE_MALLOC_H'
@@ -1992,24 +1982,25 @@ fi
 # Checking for CFLAGS
 if test "$_profile" || test "$_debug" ; then
  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
-else
-if test -z "$CFLAGS" ; then
+elif test -z "$CFLAGS" ; then
  CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
 fi
-fi
-# Under FreeBSD (maybe other systems as well?) we have to add to CFLAGS
-# for MT applications: 
-if test "$system_name" = "Linux" || test "$system_name" =  "FreeBSD" ; then
-CFLAGS="$CFLAGS -D_THREAD_SAFE"
+
+# XXX check this for OpenBSD and BSD/OS
+# Mandatory for MT applications on Linux & FreeBSD
+if linux ; then
+  CFLAGS="$CFLAGS -D_REENTRANT"
+elif bsd ; then
+  CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
 
 
 # 64 bit file offsets?
-if test "$_largefiles" = yes || test "$system_name" = "FreeBSD" ; then
-CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+if test "$_largefiles" = yes || freebsd ; then
+  CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   if test "$_dvdread" = yes ; then
-  # dvdread support requires this (for off64_t)
-  CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
+    # dvdread support requires this (for off64_t)
+    CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
   fi
 fi
 
@@ -2138,8 +2129,6 @@ if test "$_xinerama" = yes ; then
 else
  _xinerama='#undef HAVE_XINERAMA'
 fi
-
-# ---
 
 if test "$_mga" = yes ; then
  _mga='#define HAVE_MGA'
@@ -2543,12 +2532,12 @@ EOF
 cat << EOF
 
 Config files successfully generated by ./configure !
-Please check config.h and config.mak files, tune CPU
-and optimization flags if you don't like these defaults.
-You can compile the program with 'make' and
-install with  'make install'. Good luck!
-Note: On non-Linux systems you might need to use gmake
-instead of make.
+Please check config.h and config.mak files, tune CPU and optimization flags if
+you don't like these defaults.
+You can compile the program with 'make' and install with  'make install'. Good
+luck!
+
+Note: On non-Linux systems you might need to use 'gmake' instead of 'make'.
 
 EOF
 
@@ -2563,30 +2552,39 @@ if test "$_mtrr" = yes ; then
 fi
 
 if test "$_sdl" = "outdated" ; then
- echo "You have an outdated version of libSDL installed (older than v1.1.7)"
- echo "and SDL support has therefore been disabled. Please upgrade to a more"
- echo "recent version (v1.1.8 and v1.2.[0-1] are known to work) from:"
- echo "http://www.libsdl.org"
- echo "You need to re-run ./configure and recompile after updating SDL."
- echo "If you are only interested in the libSDL audio drivers, then older"
- echo "version might work. Use --enable-sdl to force usage of libSDL."
+  cat <<EOF
+You have an outdated version of libSDL installed (older than v1.1.7) and SDL
+support has therefore been disabled.
+
+Please upgrade to a more recent version (version 1.1.8 and above are known to
+work). You may get this library from: http://www.libsdl.org
+
+You need to re-run ./configure and recompile after updating SDL.  If you are
+only interested in the libSDL audio drivers, then older version might work.
+
+Use --enable-sdl to force usage of libSDL.
+EOF
 fi
 
 if test "$host_arch" = "i386" ; then
-    if test "$_win32libdirnotify" = yes ; then
-	echo "Failed to find a WIN32 codecs dir at $_win32libdir!"
-	echo "Create it and copy the DLL files there! (You can get them from your windows"
-	echo "directory or download them from:"
-	echo "ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip"
-    else
-	echo "Ok, found Win32 codecs directory at $_win32libdir."
-    fi
+  if test "$_win32libdirnotify" = yes ; then
+    cat <<EOF
+Failed to find a WIN32 codecs dir at $_win32libdir!
+Create it and copy the DLL files there! (You can get them from your windows
+directory or download them from:
+  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip
+EOF
+  else
+    echo "Ok, found Win32 codecs directory at $_win32libdir."
+  fi
 else
-    echo "NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch)."
-    echo "You may encounter a few AVI files that cannot be played due to"
-    echo "missing opensource video/audio codec support."
+  cat <<EOF	
+NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch).
+You may encounter a few AVI files that cannot be played due to missing
+opensource video/audio codec support.
+EOF
 fi
 
 # Last move:
+rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
 
-rm -f $TMPO $TMPC $TMPS
