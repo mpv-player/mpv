@@ -6,6 +6,9 @@
 
 #define DEBUG
 
+//disable asserts
+#define NDEBUG 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -399,6 +402,7 @@ static int get_token(int min, int max)
 out_ok:
 	return i;
 out_eof:
+	read_nextline = 1;
 	return RET_EOF;
 out_eol:
 	return RET_EOL;
@@ -409,30 +413,37 @@ static codecs_t *audio_codecs=NULL;
 static int nr_vcodecs = 0;
 static int nr_acodecs = 0;
 
-codecs_t **parse_codec_cfg(char *cfgfile)
+int parse_codec_cfg(char *cfgfile)
 {
 	codecs_t *codec = NULL; // current codec
 	codecs_t **codecsp = NULL;// points to audio_codecs or to video_codecs
-	static codecs_t *ret_codecs[2] = {NULL,NULL};
 	char *endptr;	// strtoul()...
 	int *nr_codecsp;
 	int codec_type;		/* TYPE_VIDEO/TYPE_AUDIO */
 	int tmp, i;
+	
+	// in case we call it secont time
+	if(video_codecs!=NULL)free(video_codecs);
+	else video_codecs=NULL;
+ 
+ 	if(audio_codecs!=NULL)free(audio_codecs);
+	else audio_codecs=NULL;
+	
+	nr_vcodecs = 0;
+	nr_acodecs = 0;
 
-#ifdef DEBUG
-	assert(cfgfile != NULL);
-#endif
-
+	if(cfgfile==NULL)return 0; 
+	
 	printf("Reading %s: ", cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
 		printf("can't open '%s': %s\n", cfgfile, strerror(errno));
-		return NULL;
+		return 0;
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
 		printf("can't get memory for 'line': %s\n", strerror(errno));
-		return NULL;
+		return 0;
 	}
 
 	/*
@@ -483,7 +494,8 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			for (i = 0; i < *nr_codecsp - 1; i++) {
-				if (!strcmp(token[0], (*codecsp)[i].name)) {
+				if(( (*codecsp)[i].name!=NULL) && 
+				    (!strcmp(token[0], (*codecsp)[i].name)) ) {
 					printf("codec name '%s' isn't unique", token[0]);
 					goto err_out_print_linenum;
 				}
@@ -592,12 +604,12 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	printf("%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
 	if(video_codecs) video_codecs[nr_vcodecs].name = NULL;
 	if(audio_codecs) audio_codecs[nr_acodecs].name = NULL;
-	ret_codecs[0] = video_codecs;
-	ret_codecs[1] = audio_codecs;
 out:
 	free(line);
+	line=NULL;
 	fclose(fp);
-	return ret_codecs;
+	return 1;
+
 err_out_parse_error:
 	printf("parse error");
 err_out_print_linenum:
@@ -607,9 +619,13 @@ err_out:
 		free(audio_codecs);
 	if (video_codecs)
 		free(video_codecs);
+	video_codecs=NULL;
+	audio_codecs=NULL;
+
 	free(line);
-	free(fp);
-	return NULL;
+	line=NULL;
+	fclose(fp);
+	return 0;
 err_out_not_valid:
 	printf("codec is not defined correctly");
 	goto err_out_print_linenum;

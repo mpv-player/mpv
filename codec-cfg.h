@@ -78,7 +78,7 @@ typedef struct codecs_st {
   short priority;
 } codecs_t;
 
-codecs_t** parse_codec_cfg(char *cfgfile);
+int parse_codec_cfg(char *cfgfile);
 codecs_t* find_video_codec(unsigned int fourcc, unsigned int *fourccmap, codecs_t *start);
 codecs_t* find_audio_codec(unsigned int fourcc, unsigned int *fourccmap, codecs_t *start);
 codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,codecs_t *start,int audioflag);
