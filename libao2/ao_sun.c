@@ -215,6 +215,8 @@ static int init(int rate,int channels,int format,int flags){
   audio_info_t info;
   int byte_per_sec;
 
+  if (ao_subdevice) audio_dev = ao_subdevice;
+
   if (enable_sample_timing == RTSC_UNKNOWN
       && !getenv("AO_SUN_DISABLE_SAMPLE_TIMING")) {
       enable_sample_timing = realtime_samplecounter_available(audio_dev);
