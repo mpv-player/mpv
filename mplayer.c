@@ -642,6 +642,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        appInit( argc,argv,envp,(void*)mDisplay );
        inited_flags|=INITED_GUI;
        mplShMem->Playing= (gui_no_filename) ? 0 : 1;
+       mplState();
   }
 #endif
 
