@@ -135,6 +135,7 @@ static vo_info_t vo_info =
 };
 
 #include <SDL.h>
+//#include <SDL/SDL_syswm.h>
 
 #if	defined(sun) && defined(__svr4__)
 /* setenv is missing on solaris */
@@ -557,8 +558,19 @@ static void set_fullmode (int mode) {
 	SDL_Surface *newsurface = NULL;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
-	if(mode < 0) 
-		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
+	/* But select a mode where the full video enter */
+	if (mode < 0) {
+	                int i;
+		mode = 0; // Default to the biggest mode avaible
+		for(i = findArrayEnd(priv->fullmodes) - 1; i >=0; i--) {
+		  if( (priv->fullmodes[i]->w >= priv->width) && 
+		      (priv->fullmodes[i]->h >= priv->height) ) {
+		    mode = i;
+		    break;
+		  }
+		}
+		priv->fullmode = mode;
+	}
 	
 	aspect_save_screenres(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
 
