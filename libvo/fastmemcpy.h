@@ -27,7 +27,7 @@ return (to);
 }
 #else
 //inline static void *__memcpy_mmx2(void *to, const void *from, unsigned len)
-inline static void * memcpy(void * to, const void * from, unsigned n)
+inline static void * memcpy(void * to, const void * from, unsigned len)
 {
 	void *p;
 	int i;
