@@ -1,3 +1,12 @@
+/* 
+ * URL Helper
+ * by Bertrand Baudet <bertrand_baudet@yahoo.com>
+ * (C) 2001, MPlayer team.
+ *
+ * TODO: 
+ * 	Extract the username/password if present
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,7 +14,7 @@
 #include "url.h"
 
 URL_t*
-set_url(char* url) {
+url_new(char* url) {
 	int pos1, pos2;
 	URL_t* Curl;
 	char *ptr1, *ptr2;
@@ -17,11 +26,7 @@ set_url(char* url) {
 		exit(1);
 	}
 	// Initialisation of the URL container members
-	Curl->url = NULL;
-	Curl->protocol = NULL;
-	Curl->hostname = NULL;
-	Curl->file = NULL;
-	Curl->port = 0;
+	memset( Curl, 0, sizeof(URL_t) );
 
 	// Copy the url in the URL container
 	Curl->url = (char*)malloc(strlen(url)+1);
@@ -101,11 +106,13 @@ set_url(char* url) {
 }
 
 void
-free_url(URL_t* url) {
+url_free(URL_t* url) {
 	if(url) return;
 	if(url->url) free(url->url);
 	if(url->protocol) free(url->protocol);
 	if(url->hostname) free(url->hostname);
 	if(url->file) free(url->file);
+	if(url->username) free(url->username);
+	if(url->password) free(url->password);
 	free(url);
 }
