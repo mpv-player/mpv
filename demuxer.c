@@ -1,53 +1,12 @@
 //=================== DEMUXER v2.5 =========================
 
-#define MAX_PACKS 2048
-#define MAX_PACK_BYTES 0x400000
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef struct demux_packet_st {
-  int len;
-  float pts;
-  int pos;  // pozicio indexben (AVI) ill. fileban (MPG)
-  unsigned char* buffer;
-  struct demux_packet_st* next;
-} demux_packet_t;
+extern int verbose; // defined in mplayer.c
 
-inline demux_packet_t* new_demux_packet(int len){
-  demux_packet_t* dp=malloc(sizeof(demux_packet_t));
-  dp->len=len;
-  dp->buffer=malloc(len);
-  dp->next=NULL;
-  dp->pts=0;
-  dp->pos=0;
-  return dp;
-}
-
-inline void free_demux_packet(demux_packet_t* dp){
-  free(dp->buffer);
-  free(dp);
-}
-
-typedef struct {
-  int buffer_pos;          // current buffer position
-  int buffer_size;         // current buffer size
-  unsigned char* buffer;   // current buffer
-  float pts;               // current buffer's pts
-  int eof;                 // end of demuxed stream? (true if all buffer empty)
-  int pos;                 // position in the input stream (file)
-  int dpos;                // position in the demuxed stream
-//---------------
-  int packs;              // number of packets in buffer
-  int bytes;              // total bytes of packets in buffer
-  demux_packet_t *first;  // read to current buffer from here
-  demux_packet_t *last;   // append new packets from input stream to here
-  int id;                 // stream ID  (for multiple audio/video streams)
-  int type;               // stream type (currently used only for audio)
-  struct demuxer_st *demuxer; // parent demuxer structure (stream handler)
-// ---- asf -----
-  demux_packet_t *asf_packet;  // read asf fragments here
-  int asf_seq;
-// ---- stream header ----
-  void* sh;
-} demux_stream_t;
+#include "stream.h"
+#include "demuxer.h"
 
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   demux_stream_t* ds=malloc(sizeof(demux_stream_t));
@@ -72,33 +31,9 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   return ds;
 }
 
-#define DEMUXER_TYPE_UNKNOWN 0
-#define DEMUXER_TYPE_MPEG_ES 1
-#define DEMUXER_TYPE_MPEG_PS 2
-#define DEMUXER_TYPE_AVI 3
-#define DEMUXER_TYPE_AVI_NI 4
-#define DEMUXER_TYPE_AVI_NINI 5
-#define DEMUXER_TYPE_ASF 6
-
-#define DEMUXER_TIME_NONE 0
-#define DEMUXER_TIME_PTS 1
-#define DEMUXER_TIME_FILE 2
-#define DEMUXER_TIME_BPS 3
-
-typedef struct demuxer_st {
-  stream_t *stream;
-  int synced;  // stream synced (used by mpeg)
-  int filepos; // input stream current pos.
-  int endpos;  // input stream end pos. (return EOF fi filepos>endpos)
-  int type;    // mpeg system stream, mpeg elementary s., avi raw, avi indexed
-//  int time_src;// time source (pts/file/bps)
-  demux_stream_t *audio;
-  demux_stream_t *video;
-  demux_stream_t *sub;
-} demuxer_t;
-
 demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   demuxer_t *d=malloc(sizeof(demuxer_t));
+  memset(d,0,sizeof(demuxer_t));
   d->stream=stream;
   d->synced=0;
   d->filepos=0;
@@ -109,7 +44,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   return d;
 }
 
-static void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
+void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
 //    demux_packet_t* dp=new_demux_packet(len);
 //    stream_read(stream,dp->buffer,len);
 //    dp->pts=pts; //(float)pts/90000.0f;
@@ -131,7 +66,7 @@ static void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
         dp->len,dp->pts,dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
 
-static void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos){
+void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos){
     demux_packet_t* dp=new_demux_packet(len);
     stream_read(stream,dp->buffer,len);
     dp->pts=pts; //(float)pts/90000.0f;
@@ -139,7 +74,6 @@ static void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts
     // append packet to DS stream:
     ds_add_packet(ds,dp);
 }
-
 
 // return value:
 //     0 = EOF or no stream found or invalid type
@@ -167,13 +101,13 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 // return value:
 //     0 = EOF
 //     1 = succesfull
-inline static int ds_fill_buffer(demux_stream_t *ds){
+int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->buffer) free(ds->buffer);
   if(verbose>2){
     if(ds==demux->audio) printf("ds_fill_buffer(d_audio) called\n");else
     if(ds==demux->video) printf("ds_fill_buffer(d_video) called\n");else
-                         printf("ds_fill_buffer(unknown 0x%X) called\n",ds);
+                         printf("ds_fill_buffer(unknown 0x%X) called\n",(unsigned int)ds);
   }
   while(1){
     if(ds->packs){
@@ -212,11 +146,7 @@ inline static int ds_fill_buffer(demux_stream_t *ds){
   return 0;
 }
 
-inline int ds_tell(demux_stream_t *ds){
-  return (ds->dpos-ds->buffer_size)+ds->buffer_pos;
-}
-
-int demux_read_data(demux_stream_t *ds,char* mem,int len){
+int demux_read_data(demux_stream_t *ds,unsigned char* mem,int len){
 int x;
 int bytes=0;
 while(len>0){
@@ -231,24 +161,6 @@ while(len>0){
 }
 return bytes;
 }
-
-
-#if 1
-#define demux_getc(ds) (\
-     (ds->buffer_pos<ds->buffer_size) ? ds->buffer[ds->buffer_pos++] \
-     :((!ds_fill_buffer(ds))? (-1) : ds->buffer[ds->buffer_pos++] ) )
-#else
-inline static int demux_getc(demux_stream_t *ds){
-  if(ds->buffer_pos>=ds->buffer_size){
-    if(!ds_fill_buffer(ds)){
-//      printf("DEMUX_GETC: EOF reached!\n");
-      return -1; // EOF
-    }
-  }
-//  printf("[%02X]",ds->buffer[ds->buffer_pos]);
-  return ds->buffer[ds->buffer_pos++];
-}
-#endif
 
 void ds_free_packs(demux_stream_t *ds){
   demux_packet_t *dp=ds->first;
@@ -273,7 +185,7 @@ void ds_free_packs(demux_stream_t *ds){
   ds->pts=0;
 }
 
-int ds_get_packet(demux_stream_t *ds,char **start){
+int ds_get_packet(demux_stream_t *ds,unsigned char **start){
     while(1){
         int len;
         if(ds->buffer_pos>=ds->buffer_size){
@@ -290,7 +202,7 @@ int ds_get_packet(demux_stream_t *ds,char **start){
     }
 }
 
-int ds_get_packet_sub(demux_stream_t *ds,char **start){
+int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
     while(1){
         int len;
         if(ds->buffer_pos>=ds->buffer_size){

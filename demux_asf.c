@@ -1,5 +1,21 @@
 //  ASF file parser for DEMUXER v0.3  by A'rpi/ESP-team
 
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+// defined at asfheader.c:
+extern unsigned char* asf_packet;
+extern int asf_scrambling_h;
+extern int asf_scrambling_w;
+extern int asf_scrambling_b;
+extern int asf_packetsize;
+
+
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
 //static float avi_pts_frametime=1.0f/25.0f;
@@ -15,6 +31,25 @@ typedef struct __attribute__((packed)) {
   unsigned char flag;
 } ASF_segmhdr_t;
 
+static void asf_descrambling(unsigned char *src,int len){
+  unsigned char *dst=malloc(len);
+  unsigned char *s2=src;
+  int i=0,x,y;
+  while(len-i>=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b){
+//    printf("descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
+	//i+=asf_scrambling_h*asf_scrambling_w;
+	for(x=0;x<asf_scrambling_w;x++)
+	  for(y=0;y<asf_scrambling_h;y++){
+	    memcpy(dst+i,s2+(y*asf_scrambling_w+x)*asf_scrambling_b,asf_scrambling_b);
+		i+=asf_scrambling_b;
+	  }
+	s2+=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b;
+  }
+  //if(i<len) memcpy(dst+i,src+i,len-i);
+  memcpy(src,dst,i);
+  free(dst);
+}
+
 
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs){
   demux_stream_t *ds=NULL;
@@ -22,18 +57,18 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
   if(verbose>=4) printf("demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
   
   if(demux->video->id==-1)
-    if(avi_header.v_streams[id])
+    if(demux->v_streams[id])
         demux->video->id=id;
 
   if(demux->audio->id==-1)
-    if(avi_header.a_streams[id])
+    if(demux->a_streams[id])
         demux->audio->id=id;
 
   if(id==demux->audio->id){
       // audio
       ds=demux->audio;
       if(!ds->sh){
-        ds->sh=avi_header.a_streams[id];
+        ds->sh=demux->a_streams[id];
         if(verbose) printf("Auto-selected ASF audio ID = %d\n",ds->id);
       }
   } else 
@@ -41,7 +76,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
       // video
       ds=demux->video;
       if(!ds->sh){
-        ds->sh=avi_header.v_streams[id];
+        ds->sh=demux->v_streams[id];
         if(verbose) printf("Auto-selected ASF video ID = %d\n",ds->id);
       }
   }
@@ -97,19 +132,19 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
 int demux_asf_fill_buffer(demuxer_t *demux){
 
   demux->filepos=stream_tell(demux->stream);
-  if(demux->filepos>=demux->endpos){
+  if(demux->filepos>=demux->movi_end){
           demux->stream->eof=1;
           return 0;
   }
 
-    stream_read(demux->stream,asf_packet,(int)fileh.packetsize);
+    stream_read(demux->stream,asf_packet,asf_packetsize);
     if(demux->stream->eof) return 0; // EOF
     
     if(asf_packet[0]==0x82){
             unsigned char flags=asf_packet[3];
             unsigned char segtype=asf_packet[4];
             unsigned char* p=&asf_packet[5];
-            unsigned char* p_end=p+(int)fileh.packetsize;
+            unsigned char* p_end=p+asf_packetsize;
             unsigned long time;
             unsigned short duration;
             int segs=1;
@@ -131,11 +166,11 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               // Explicit (absoulte) packet size
               plen=p[0]|(p[1]<<8); p+=2;
               if(verbose>1)printf("Explicit packet size specified: %d  \n",plen);
-              if(plen>fileh.packetsize) printf("Warning! plen>packetsize! (%d>%d)  \n",plen,(int)fileh.packetsize);
+              if(plen>asf_packetsize) printf("Warning! plen>packetsize! (%d>%d)  \n",plen,asf_packetsize);
               if(flags&(8|16)){
                 padding=p[0];p++;
                 if(flags&16){ padding|=p[0]<<8; p++;}
-                if(verbose)printf("Warning! explicit=%d  padding=%d  \n",plen,fileh.packetsize-padding);
+                if(verbose)printf("Warning! explicit=%d  padding=%d  \n",plen,asf_packetsize-padding);
               }
             } else {
               // Padding (relative) size
@@ -145,7 +180,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               if(flags&16){
                 padding=p[0]|(p[1]<<8);p+=2;
               }
-              plen=fileh.packetsize-padding;
+              plen=asf_packetsize-padding;
             }
 
             time=*((unsigned long*)p);p+=4;

@@ -1,44 +1,51 @@
 //  AVI file parser for DEMUXER v2.6  by A'rpi/ESP-team
 
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
 //static float avi_pts_frametime=1.0f/25.0f;
-static float avi_audio_pts=0;
-static float avi_video_pts=0;
-
-static int skip_video_frames=0;
-
-static inline int avi_stream_id(unsigned int id){
-  unsigned char *p=(unsigned char *)&id;
-  unsigned char a,b;
-  a=p[0]-'0'; b=p[1]-'0';
-  if(a>9 || b>9) return 100; // invalid ID
-  return a*10+b;
-}
+float avi_audio_pts=0;
+float avi_video_pts=0;
+//float avi_video_ftime=0.04;
+int skip_video_frames=0;
 
 // Select ds from ID
-static inline demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
+demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   int stream_id=avi_stream_id(id);
 
 //  printf("demux_avi_select_stream(%d)  {a:%d/v:%d}\n",stream_id,
 //       demux->audio->id,demux->video->id);
 
   if(demux->video->id==-1)
-    if(avi_header.v_streams[stream_id])
+    if(demux->v_streams[stream_id])
         demux->video->id=stream_id;
 
   if(demux->audio->id==-1)
-    if(avi_header.a_streams[stream_id])
+    if(demux->a_streams[stream_id])
         demux->audio->id=stream_id;
 
   if(stream_id==demux->audio->id){
       if(!demux->audio->sh){
-        demux->audio->sh=avi_header.a_streams[stream_id];
+        demux->audio->sh=demux->a_streams[stream_id];
         if(verbose) printf("Auto-selected AVI audio ID = %d\n",demux->audio->id);
       }
       return demux->audio;
   }
   if(stream_id==demux->video->id){
       if(!demux->video->sh){
-        demux->video->sh=avi_header.v_streams[stream_id];
+        demux->video->sh=demux->v_streams[stream_id];
         if(verbose) printf("Auto-selected AVI video ID = %d\n",demux->video->id);
       }
       return demux->video;
@@ -74,7 +81,9 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
      //avi_video_pts+=avi_pts_frametime;
      //avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
      //avi_video_pts+=((sh_video_t*)ds->sh)->frametime;
+// FIXME!!!
      avi_video_pts+=(float)((sh_video_t*)(demux->video->sh))->video.dwScale/(float)((sh_video_t*)(demux->video->sh))->video.dwRate;
+//     avi_video_pts+=avi_video_ftime;
      avi_audio_pts=avi_video_pts;
   }
   
@@ -108,19 +117,19 @@ int ret=0;
 do{
   AVIINDEXENTRY *idx=NULL;
   demux->filepos=stream_tell(demux->stream);
-  if(demux->filepos>=demux->endpos){
+  if(demux->filepos>=demux->movi_end){
           demux->stream->eof=1;
           return 0;
   }
   if(stream_eof(demux->stream)) return 0;
-  if(avi_header.idx_size>0 && avi_header.idx_pos<avi_header.idx_size){
+  if(demux->idx_size>0 && demux->idx_pos<demux->idx_size){
     unsigned int pos;
     
-    //if(avi_header.idx_pos<0) printf("Fatal! idx_pos=%d\n",avi_header.idx_pos);
+    //if(demux->idx_pos<0) printf("Fatal! idx_pos=%d\n",demux->idx_pos);
     
-    idx=&avi_header.idx[avi_header.idx_pos++];
+    idx=&((AVIINDEXENTRY *)demux->idx)[demux->idx_pos++];
     
-    //printf("[%d]",avi_header.idx_pos);fflush(stdout);
+    //printf("[%d]",demux->idx_pos);fflush(stdout);
     
     //stream_seek(demux->stream,idx.dwChunkOffset);
     //printf("IDX  pos=%X  idx.pos=%X  idx.size=%X  idx.flags=%X\n",demux->filepos,
@@ -134,8 +143,8 @@ do{
       continue; // skip this chunk
     }
 
-    pos=idx->dwChunkOffset+avi_header.idx_offset;
-    if(pos<avi_header.movi_start || pos>=avi_header.movi_end){
+    pos=idx->dwChunkOffset+demux->idx_offset;
+    if(pos<demux->movi_start || pos>=demux->movi_end){
       printf("ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
       continue;
     }
@@ -165,7 +174,7 @@ do{
       continue;
     }
   }
-  ret=demux_avi_read_packet(demux,id,len,avi_header.idx_pos-1);
+  ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1);
       if(!ret && skip_video_frames<=0)
         if(--max_packs==0){
           demux->stream->eof=1;
@@ -191,13 +200,14 @@ do{
   int idx_pos=0;
   demux->filepos=stream_tell(demux->stream);
   
-  if(ds==demux->video) idx_pos=avi_header.idx_pos_a++; else
-  if(ds==demux->audio) idx_pos=avi_header.idx_pos_v++; else
-                       idx_pos=avi_header.idx_pos++;
+  if(ds==demux->video) idx_pos=demux->idx_pos_a++; else
+  if(ds==demux->audio) idx_pos=demux->idx_pos_v++; else
+                       idx_pos=demux->idx_pos++;
   
-  if(avi_header.idx_size>0 && idx_pos<avi_header.idx_size){
+  if(demux->idx_size>0 && idx_pos<demux->idx_size){
     unsigned int pos;
-    idx=&avi_header.idx[idx_pos];
+    idx=&((AVIINDEXENTRY *)demux->idx)[idx_pos];
+//    idx=&demux->idx[idx_pos];
     
     if(idx->dwFlags&AVIIF_LIST){
       // LIST
@@ -208,8 +218,8 @@ do{
       continue; // skip this chunk
     }
 
-    pos=idx->dwChunkOffset+avi_header.idx_offset;
-    if(pos<avi_header.movi_start || pos>=avi_header.movi_end){
+    pos=idx->dwChunkOffset+demux->idx_offset;
+    if(pos<demux->movi_start || pos>=demux->movi_end){
       printf("ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
       continue;
     }
@@ -257,8 +267,8 @@ unsigned int len;
 int ret=0;
 int *fpos=NULL;
 
-  if(ds==demux->video) fpos=&avi_header.idx_pos_a; else
-  if(ds==demux->audio) fpos=&avi_header.idx_pos_v; else
+  if(ds==demux->video) fpos=&demux->idx_pos_a; else
+  if(ds==demux->audio) fpos=&demux->idx_pos_v; else
   return 0;
 
   stream_seek(demux->stream,fpos[0]);
@@ -266,7 +276,7 @@ int *fpos=NULL;
 do{
 
   demux->filepos=stream_tell(demux->stream);
-  if(demux->filepos>=demux->endpos){
+  if(demux->filepos>=demux->movi_end){
           demux->stream->eof=1;
           return 0;
   }
@@ -281,7 +291,7 @@ do{
   
   if(ds==demux_avi_select_stream(demux,id)){
     // read it!
-    ret=demux_avi_read_packet(demux,id,len,avi_header.idx_pos-1);
+    ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1);
   } else {
     // skip it!
     int skip=(len+1)&(~1); // total bytes in this chunk

@@ -1,7 +1,25 @@
 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-void read_avi_header(int index_mode){
+static MainAVIHeader avih;
+
+void read_avi_header(demuxer_t *demuxer,int index_mode){
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int stream_id=-1;
@@ -9,7 +27,7 @@ int idxfix_videostream=0;
 int idxfix_divx=0;
 
 //---- AVI header:
-avi_header.idx_size=0;
+demuxer->idx_size=0;
 while(1){
   int id=stream_read_dword_le(demuxer->stream);
   int chunksize,size2;
@@ -23,9 +41,9 @@ while(1){
     if(verbose>=2) printf("LIST %.4s  len=%d\n",&id,len);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
-      avi_header.movi_start=stream_tell(demuxer->stream);
-      avi_header.movi_end=avi_header.movi_start+len;
-      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",avi_header.movi_start,avi_header.movi_end);
+      demuxer->movi_start=stream_tell(demuxer->stream);
+      demuxer->movi_end=demuxer->movi_start+len;
+      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
       len=(len+1)&(~1);
       stream_skip(demuxer->stream,len);
     }
@@ -36,9 +54,9 @@ while(1){
   chunksize=(size2+1)&(~1);
   switch(id){
     case ckidAVIMAINHDR:          // read 'avih'
-      stream_read(demuxer->stream,(char*) &avi_header.avih,MIN(size2,sizeof(avi_header.avih)));
-      chunksize-=MIN(size2,sizeof(avi_header.avih));
-      if(verbose) print_avih(&avi_header.avih);
+      stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
+      chunksize-=MIN(size2,sizeof(avih));
+      if(verbose) print_avih(&avih);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;
@@ -79,6 +97,8 @@ while(1){
         case mmioFOURCC('d', 'i', 'v', '6'):
 	case mmioFOURCC('M', 'P', '4', '3'):
 	case mmioFOURCC('m', 'p', '4', '3'):
+	case mmioFOURCC('M', 'P', '4', '2'):
+	case mmioFOURCC('m', 'p', '4', '2'):
         case mmioFOURCC('A', 'P', '4', '1'):
           idxfix_divx=1; // we can fix keyframes only for divx coded files!
         }
@@ -95,13 +115,13 @@ while(1){
       break;
     }
     case ckidAVINEWINDEX: if(index_mode){
-      avi_header.idx_size=size2>>4;
+      demuxer->idx_size=size2>>4;
       if(verbose>=1) printf("Reading INDEX block, %d chunks for %d frames\n",
-        avi_header.idx_size,avi_header.avih.dwTotalFrames);
-      avi_header.idx=malloc(avi_header.idx_size<<4);
-      stream_read(demuxer->stream,(char*)avi_header.idx,avi_header.idx_size<<4);
-      chunksize-=avi_header.idx_size<<4;
-      if(verbose>=2) print_index();
+        demuxer->idx_size,avih.dwTotalFrames);
+      demuxer->idx=malloc(demuxer->idx_size<<4);
+      stream_read(demuxer->stream,(char*)demuxer->idx,demuxer->idx_size<<4);
+      chunksize-=demuxer->idx_size<<4;
+      if(verbose>=2) print_index(demuxer->idx,demuxer->idx_size);
       break;
     }
   }
@@ -110,20 +130,20 @@ while(1){
   
 }
 
-if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
+if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
   // build index for file:
   stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream,avi_header.movi_start);
+  stream_seek(demuxer->stream,demuxer->movi_start);
   
-  avi_header.idx_pos=0;
-  avi_header.idx=NULL;
+  demuxer->idx_pos=0;
+  demuxer->idx=NULL;
 
   while(1){
     int id,len,skip;
     AVIINDEXENTRY* idx;
     unsigned char c;
     demuxer->filepos=stream_tell(demuxer->stream);
-    if(demuxer->filepos>=avi_header.movi_end) break;
+    if(demuxer->filepos>=demuxer->movi_end) break;
     id=stream_read_dword_le(demuxer->stream);
     len=stream_read_dword_le(demuxer->stream);
     if(id==mmioFOURCC('L','I','S','T')){
@@ -131,12 +151,12 @@ if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
       continue;
     }
     if(stream_eof(demuxer->stream)) break;
-    if(avi_header.idx_pos<=avi_header.idx_size){
-      avi_header.idx_size+=32;
-      avi_header.idx=realloc(avi_header.idx,avi_header.idx_size*sizeof(AVIINDEXENTRY));
-      if(!avi_header.idx){avi_header.idx_pos=0; break;} // error!
+    if(demuxer->idx_pos<=demuxer->idx_size){
+      demuxer->idx_size+=32;
+      demuxer->idx=realloc(demuxer->idx,demuxer->idx_size*sizeof(AVIINDEXENTRY));
+      if(!demuxer->idx){demuxer->idx_pos=0; break;} // error!
     }
-    idx=&avi_header.idx[avi_header.idx_pos++];
+    idx=&((AVIINDEXENTRY *)demuxer->idx)[demuxer->idx_pos++];
     idx->ckid=id;
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
     idx->dwChunkOffset=demuxer->filepos;
@@ -163,8 +183,8 @@ if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
     skip=(len+1)&(~1); // total bytes in this chunk
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
-  avi_header.idx_size=avi_header.idx_pos;
-  printf("AVI: Generated index table for %d chunks!\n",avi_header.idx_size);
+  demuxer->idx_size=demuxer->idx_pos;
+  printf("AVI: Generated index table for %d chunks!\n",demuxer->idx_size);
 }
 
 }

@@ -1,3 +1,27 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "config.h"
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "loader.h"
+//#include "wine/mmreg.h"
+//#include "wine/vfw.h"
+#include "wine/avifmt.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
+#include "libvo/img_format.h"
+#include "linux/shmem.h"
+
+extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
+
 // ACM audio and VfW video codecs initialization
 // based on the avifile library [http://divx.euro.ru]
 
@@ -100,7 +124,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
 
 
 
-int init_video_codec(){
+int init_video_codec(sh_video_t *sh_video){
   HRESULT ret;
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];

@@ -33,7 +33,8 @@ typedef struct {
   int audio_in_minsize;
   int audio_out_minsize;
   // other codecs:
-  ac3_frame_t *ac3_frame;
+//  ac3_frame_t *ac3_frame;
+  void* ac3_frame;
   int pcm_bswap;
 } sh_audio_t;
 
@@ -57,4 +58,6 @@ typedef struct {
   HIC hic;  // handle
 } sh_video_t;
 
+sh_audio_t* new_sh_audio(int id);
+sh_video_t* new_sh_video(int id);
 

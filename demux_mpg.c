@@ -1,5 +1,13 @@
 //  MPG/VOB file parser for DEMUXER v2.5  by A'rpi/ESP-team
 
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
@@ -128,9 +136,9 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         // subtitle:
         aid&=0x1F;
 
-        if(!avi_header.s_streams[aid]){
+        if(!demux->s_streams[aid]){
             printf("==> Found subtitle: %d\n",aid);
-            avi_header.s_streams[aid]=1;
+            demux->s_streams[aid]=1;
             // new_sh_audio(aid);
         }
 
@@ -144,13 +152,13 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
 
-        if(!avi_header.a_streams[aid]) new_sh_audio(aid);
+        if(!demux->a_streams[aid]) new_sh_audio(aid);
         if(demux->audio->id==-1) demux->audio->id=aid;
 
       if(demux->audio->id==aid){
 //        int type;
         ds=demux->audio;
-        if(!ds->sh) ds->sh=avi_header.a_streams[aid];
+        if(!ds->sh) ds->sh=demux->a_streams[aid];
         // READ Packet: Skip additional audio header data:
         c=stream_read_char(demux->stream);//type=c;
         c=stream_read_char(demux->stream);//type|=c<<8;
@@ -197,22 +205,22 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
     int aid=id-0x1C0;
-    if(!avi_header.a_streams[aid]) new_sh_audio(aid);
+    if(!demux->a_streams[aid]) new_sh_audio(aid);
     if(demux->audio->id==-1) demux->audio->id=aid;
     if(demux->audio->id==aid){
       ds=demux->audio;
-      if(!ds->sh) ds->sh=avi_header.a_streams[aid];
+      if(!ds->sh) ds->sh=demux->a_streams[aid];
       if(ds->type==-1) ds->type=1;
     }
   } else
   if(id>=0x1E0 && id<=0x1EF){
     // mpeg video
     int aid=id-0x1E0;
-    if(!avi_header.v_streams[aid]) new_sh_video(aid);
+    if(!demux->v_streams[aid]) new_sh_video(aid);
     if(demux->video->id==-1) demux->video->id=aid;
     if(demux->video->id==aid){
       ds=demux->video;
-      if(!ds->sh) ds->sh=avi_header.v_streams[aid];
+      if(!ds->sh) ds->sh=demux->v_streams[aid];
     }
   }
 
@@ -234,8 +242,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   return 0;
 }
 
-static int num_elementary_packets100=0;
-static int num_elementary_packets101=0;
+int num_elementary_packets100=0;
+int num_elementary_packets101=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
 //if(demux->type==DEMUXER_TYPE_MPEG_ES)

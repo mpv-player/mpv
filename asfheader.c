@@ -1,5 +1,21 @@
 // .asf fileformat docs from http://divx.euro.ru
 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
 typedef struct __attribute__((packed)) {
   unsigned char guid[16];
   unsigned long long size;
@@ -38,38 +54,21 @@ typedef struct __attribute__((packed)) {
 } ASF_stream_header_t;
 
 
-ASF_header_t asfh;
-ASF_obj_header_t objh;
-ASF_file_header_t fileh;
-ASF_stream_header_t streamh;
+static ASF_header_t asfh;
+static ASF_obj_header_t objh;
+static ASF_file_header_t fileh;
+static ASF_stream_header_t streamh;
+
 unsigned char* asf_packet=NULL;
-//int asf_video_id=-1;
 int asf_scrambling_h=1;
 int asf_scrambling_w=1;
 int asf_scrambling_b=1;
+int asf_packetsize=0;
 
-int i;
+//int i;
 
-void asf_descrambling(unsigned char *src,int len){
-  unsigned char *dst=malloc(len);
-  unsigned char *s2=src;
-  int i=0,x,y;
-  while(len-i>=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b){
-//    printf("descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
-	//i+=asf_scrambling_h*asf_scrambling_w;
-	for(x=0;x<asf_scrambling_w;x++)
-	  for(y=0;y<asf_scrambling_h;y++){
-	    memcpy(dst+i,s2+(y*asf_scrambling_w+x)*asf_scrambling_b,asf_scrambling_b);
-		i+=asf_scrambling_b;
-	  }
-	s2+=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b;
-  }
-  //if(i<len) memcpy(dst+i,src+i,len-i);
-  memcpy(src,dst,i);
-  free(dst);
-}
 
-char* asf_chunk_type(unsigned char* guid){
+static char* asf_chunk_type(unsigned char* guid){
   switch(*((unsigned int*)guid)){
     case 0xF8699E40: return "guid_audio_stream";
     case 0xBC19EFC0: return "guid_video_stream";
@@ -85,7 +84,7 @@ char* asf_chunk_type(unsigned char* guid){
   return NULL;
 }
 
-int asf_check_header(){
+int asf_check_header(demuxer_t *demuxer){
   unsigned char asfhdrguid[16]={0x30,0x26,0xB2,0x75,0x8E,0x66,0xCF,0x11,0xA6,0xD9,0x00,0xAA,0x00,0x62,0xCE,0x6C};
   stream_read(demuxer->stream,(char*) &asfh,sizeof(asfh)); // header obj
 //  for(i=0;i<16;i++) printf(" %02X",temp[i]);printf("\n");
@@ -101,7 +100,7 @@ int asf_check_header(){
   return 1;
 }
 
-int read_asf_header(){
+int read_asf_header(demuxer_t *demuxer){
   unsigned char buffer[512];
   
 #if 1
@@ -166,12 +165,13 @@ if(verbose){
     case 0x8CABDCA1: // guid_file_header
       stream_read(demuxer->stream,(char*) &fileh,sizeof(fileh));
       if(verbose) printf("ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
-      asf_packet=malloc(fileh.packetsize); // !!!
+      asf_packetsize=fileh.packetsize;
+      asf_packet=malloc(asf_packetsize); // !!!
       break;
     case 0x75b22636: // guid_data_chunk
-      avi_header.movi_start=stream_tell(demuxer->stream)+26;
-      avi_header.movi_end=endpos;
-      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",avi_header.movi_start,avi_header.movi_end);
+      demuxer->movi_start=stream_tell(demuxer->stream)+26;
+      demuxer->movi_end=endpos;
+      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
       break;
 
 //    case 0x33000890: return "guid_index_chunk";

@@ -3,12 +3,6 @@
 // Enable ALSA emulation (using 32kB audio buffer) - timer testing only
 //#define SIMULATE_ALSA
 
-#ifdef USE_XMMP_AUDIO
-#define OUTBURST 4096
-#else
-//#define OUTBURST 1024
-#define OUTBURST 512
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,6 +84,11 @@ int verbose=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
+static subtitle* subtitles=NULL;
+void find_sub(subtitle* subtitles,int key);
+
+
+#if 0
 //**************************************************************************//
 //             .SUB 
 //**************************************************************************//
@@ -185,6 +184,7 @@ void find_sub(int key){
     vo_sub=NULL; // no sub here
 }
 
+#endif
 
 //**************************************************************************//
 //             Config file
@@ -234,15 +234,17 @@ static int max_framesize=0;
 //**************************************************************************//
 
 #include "stream.h"
-#include "demuxer.c"
+#include "demuxer.h"
 
 #include "stheader.h"
 
+#if 0
+
 typedef struct {
   // file:
-  MainAVIHeader avih;
-  unsigned int movi_start;
-  unsigned int movi_end;
+//  MainAVIHeader avih;
+//  unsigned int movi_start;
+//  unsigned int movi_end;
   // index:
   AVIINDEXENTRY* idx;
   int idx_size;
@@ -250,45 +252,46 @@ typedef struct {
   int idx_pos_a;
   int idx_pos_v;
   int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
-  // streams:
-  sh_audio_t* a_streams[256];
-  sh_video_t* v_streams[256];
-  char s_streams[32]; // dvd subtitles
   // video:
   unsigned int bitrate;
 } avi_header_t;
 
 avi_header_t avi_header;
 
-#include "aviprint.c"
+#endif
+
+int avi_bitrate=0;
+
+demuxer_t *demuxer=NULL;
+
+//#include "aviprint.c"
 
 sh_audio_t* new_sh_audio(int id){
-    if(avi_header.a_streams[id]){
+    if(demuxer->a_streams[id]){
         printf("Warning! Audio stream header %d redefined!\n",id);
     } else {
         printf("==> Found audio stream: %d\n",id);
-        avi_header.a_streams[id]=malloc(sizeof(sh_audio_t));
-        memset(avi_header.a_streams[id],0,sizeof(sh_audio_t));
+        demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
+        memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
     }
-    return avi_header.a_streams[id];
+    return demuxer->a_streams[id];
 }
 
 sh_video_t* new_sh_video(int id){
-    if(avi_header.v_streams[id]){
+    if(demuxer->v_streams[id]){
         printf("Warning! video stream header %d redefined!\n",id);
     } else {
         printf("==> Found video stream: %d\n",id);
-        avi_header.v_streams[id]=malloc(sizeof(sh_video_t));
-        memset(avi_header.v_streams[id],0,sizeof(sh_video_t));
+        demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
+        memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
     }
-    return avi_header.v_streams[id];
+    return demuxer->v_streams[id];
 }
 
 
-#include "demux_avi.c"
-#include "demux_mpg.c"
+//#include "demux_avi.c"
+//#include "demux_mpg.c"
 
-demuxer_t *demuxer=NULL;
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
 demux_stream_t *d_dvdsub=NULL;
@@ -300,8 +303,24 @@ char* encode_name=NULL;
 char* encode_index_name=NULL;
 int encode_bitrate=0;
 
+extern int asf_packetsize;
+
+extern float avi_audio_pts;
+extern float avi_video_pts;
+extern float avi_video_ftime;
+extern int skip_video_frames;
+
+void read_avi_header(demuxer_t *demuxer,int index_mode);
+demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id);
+
+int asf_check_header(demuxer_t *demuxer);
+int read_asf_header(demuxer_t *demuxer);
+
 // MPEG video stream parser:
 #include "parse_es.c"
+
+extern int num_elementary_packets100;
+extern int num_elementary_packets101;
 
 extern picture_t *picture;
 
@@ -321,20 +340,8 @@ int mplayer_audio_read(char *buf,int size){
   return len;
 }
 
-// AC3 decoder buffer callback:
-static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
-    int len=ds_get_packet(sh_audio->ds,(char**)start);
-    //printf("<ac3:%d>\n",len);
-    if(len<0)
-          *start = *end = NULL;
-    else
-          *end = *start + len;
-}
 
-#include "alaw.c"
-#include "xa/xa_gsm.h"
-
-#include "dec_audio.c"
+//#include "dec_audio.c"
 
 //**************************************************************************//
 //             The OpenDivX stuff:
@@ -386,15 +393,15 @@ while(len>0){
 //**************************************************************************//
 
 // AVI file header reader/parser/writer:
-#include "aviheader.c"
-#include "aviwrite.c"
+//#include "aviheader.c"
+//#include "aviwrite.c"
 
 // ASF headers:
-#include "asfheader.c"
-#include "demux_asf.c"
+//#include "asfheader.c"
+//#include "demux_asf.c"
 
 // DLL codecs init routines
-#include "dll_init.c"
+//#include "dll_init.c"
 
 // Common FIFO functions, and keyboard/event FIFO code
 #include "fifo.c"
@@ -443,7 +450,6 @@ void exit_sighandler(int x){
 }
 
 int divx_quality=0;
-extern int vo_dbpp;
 
 int main(int argc,char* argv[], char *envp[]){
 char* filename=NULL; //"MI2-Trailer.avi";
@@ -610,7 +616,7 @@ if(vcd_track){
   if(f<0){ printf("CD-ROM Device '%s' not found!\n",filename);return 1; }
   vcd_read_toc(f);
   ret=vcd_seek_to_track(f,vcd_track);
-  if(ret==-1){ printf("Error selecting VCD track!\n");return 1;}
+  if(ret<0){ printf("Error selecting VCD track!\n");return 1;}
   seek_to_byte+=ret;
   if(verbose) printf("VCD start byte position: 0x%X\n",seek_to_byte);
   stream_type=STREAMTYPE_VCD;
@@ -638,7 +644,6 @@ if(vcd_track){
 }
 
 stream=new_stream(f,stream_type);
-
 //============ Open & Sync stream and detect file format ===============
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
@@ -647,6 +652,7 @@ if(!has_audio) audio_id=-2; // do NOT read audio packets...
 stream_reset(stream);
 demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
 stream_seek(demuxer->stream,seek_to_byte);
+//printf("stream3=0x%X vs. 0x%X\n",demuxer->stream,stream);
 { //---- RIFF header:
   int id=stream_read_dword_le(demuxer->stream); // "RIFF"
   if(id==mmioFOURCC('R','I','F','F')){
@@ -663,7 +669,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
-  if(asf_check_header()){
+  if(asf_check_header(demuxer)){
       printf("Detected ASF file format!\n");
       file_format=DEMUXER_TYPE_ASF;
   }
@@ -722,31 +728,31 @@ d_dvdsub=demuxer->sub;
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
   //---- AVI header:
-  read_avi_header(index_mode);
+  read_avi_header(demuxer,index_mode);
   stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream,avi_header.movi_start);
-  avi_header.idx_pos=0;
-  avi_header.idx_pos_a=0;
-  avi_header.idx_pos_v=0;
-  if(avi_header.idx_size>0){
+  stream_seek(demuxer->stream,demuxer->movi_start);
+  demuxer->idx_pos=0;
+  demuxer->idx_pos_a=0;
+  demuxer->idx_pos_v=0;
+  if(demuxer->idx_size>0){
     // decide index format:
-    if(avi_header.idx[0].dwChunkOffset<avi_header.movi_start)
-      avi_header.idx_offset=avi_header.movi_start-4;
+    if(((AVIINDEXENTRY *)demuxer->idx)[0].dwChunkOffset<demuxer->movi_start)
+      demuxer->idx_offset=demuxer->movi_start-4;
     else
-      avi_header.idx_offset=0;
-    if(verbose) printf("AVI index offset: %d\n",avi_header.idx_offset);
+      demuxer->idx_offset=0;
+    if(verbose) printf("AVI index offset: %d\n",demuxer->idx_offset);
   }
-  demuxer->endpos=avi_header.movi_end;
+//  demuxer->endpos=avi_header.movi_end;
   
-  if(avi_header.idx_size>0){
+  if(demuxer->idx_size>0){
       // check that file is non-interleaved:
       int i;
       int a_pos=-1;
       int v_pos=-1;
-      for(i=0;i<avi_header.idx_size;i++){
-        AVIINDEXENTRY* idx=&avi_header.idx[i];
+      for(i=0;i<demuxer->idx_size;i++){
+        AVIINDEXENTRY* idx=&((AVIINDEXENTRY *)demuxer->idx)[i];
         demux_stream_t* ds=demux_avi_select_stream(demuxer,idx->ckid);
-        int pos=idx->dwChunkOffset+avi_header.idx_offset;
+        int pos=idx->dwChunkOffset+demuxer->idx_offset;
         if(a_pos==-1 && ds==demuxer->audio){
           a_pos=pos;
           if(v_pos!=-1) break;
@@ -775,8 +781,8 @@ switch(file_format){
       if(force_ni){
           printf("Using NON-INTERLEAVED Broken AVI file-format!\n");
           demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
-	  avi_header.idx_pos_a=
-	  avi_header.idx_pos_v=avi_header.movi_start;
+	  demuxer->idx_pos_a=
+	  demuxer->idx_pos_v=demuxer->movi_start;
 	  pts_from_bps=1; // force BPS sync!
       }
   }
@@ -800,27 +806,27 @@ switch(file_format){
   sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
   // calculating video bitrate:
-  avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-  if(sh_audio) avi_header.bitrate-=sh_audio->audio.dwLength;
-  if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-  avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)*sh_video->fps;
+  avi_bitrate=demuxer->movi_end-demuxer->movi_start-demuxer->idx_size*8;
+  if(sh_audio) avi_bitrate-=sh_audio->audio.dwLength;
+  if(verbose) printf("AVI video length=%d\n",avi_bitrate);
+  avi_bitrate=((float)avi_bitrate/(float)sh_video->video.dwLength)*sh_video->fps;
   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     &sh_video->bih->biCompression,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,
     sh_video->bih->biBitCount,
     sh_video->fps,
-    avi_header.bitrate*0.008f,
-    avi_header.bitrate/1024.0f );
+    avi_bitrate*0.008f,
+    avi_bitrate/1024.0f );
   break;
  }
  case DEMUXER_TYPE_ASF: {
   //---- ASF header:
-  read_asf_header();
+  read_asf_header(demuxer);
   stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream,avi_header.movi_start);
-  avi_header.idx_pos=0;
-  demuxer->endpos=avi_header.movi_end;
+  stream_seek(demuxer->stream,demuxer->movi_start);
+  demuxer->idx_pos=0;
+//  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
@@ -948,7 +954,7 @@ if(stream_dump_type){
   f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
   if(!f){ printf("Can't open dump file!!!\n");exit(1); }
   while(!ds->eof){
-    char* start;
+    unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
     if(in_size>0) fwrite(start,in_size,1,f);
   }
@@ -1011,7 +1017,7 @@ if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
 
 switch(sh_video->codec->driver){
  case 2: {
-   if(!init_video_codec(out_fmt)) exit(1);
+   if(!init_video_codec(sh_video)) exit(1);
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
    break;
  }
@@ -1439,7 +1445,7 @@ switch(sh_video->codec->driver){
     unsigned int t=GetTimer();
     unsigned int t2;
     DEC_FRAME dec_frame;
-    char* start=NULL;
+    unsigned char* start=NULL;
     int in_size=ds_get_packet(d_video,&start);
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
@@ -1461,7 +1467,7 @@ switch(sh_video->codec->driver){
   }
 #ifdef USE_DIRECTSHOW
   case 4: {        // W32/DirectShow
-    char* start=NULL;
+    unsigned char* start=NULL;
     unsigned int t=GetTimer();
     unsigned int t2;
     int in_size=ds_get_packet(d_video,&start);
@@ -1489,7 +1495,7 @@ switch(sh_video->codec->driver){
 #endif
   case 2: {
     HRESULT ret;
-    char* start=NULL;
+    unsigned char* start=NULL;
     unsigned int t=GetTimer();
     unsigned int t2;
     int in_size=ds_get_packet(d_video,&start);
@@ -1762,8 +1768,8 @@ switch(sh_video->codec->driver){
       break;
   }
   if(rel_seek_secs)
-  if(file_format==DEMUXER_TYPE_AVI && avi_header.idx_size<=0){
-    printf("Can't seek in raw .AVI streams! (index required)  \n");
+  if(file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
+    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
   } else {
     int skip_audio_bytes=0;
     float skip_audio_secs=0;
@@ -1795,11 +1801,11 @@ switch(file_format){
       // find video chunk pos:
       if(rel_seek_frames>0){
         // seek forward
-        while(video_chunk_pos<avi_header.idx_size){
-          int id=avi_header.idx[video_chunk_pos].ckid;
+        while(video_chunk_pos<demuxer->idx_size){
+          int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
-            if((--rel_seek_frames)<0 && avi_header.idx[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
+            if((--rel_seek_frames)<0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
             v_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             ++skip_audio_bytes;
           }
@@ -1808,25 +1814,25 @@ switch(file_format){
       } else {
         // seek backward
         while(video_chunk_pos>=0){
-          int id=avi_header.idx[video_chunk_pos].ckid;
+          int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
-            if((++rel_seek_frames)>0 && avi_header.idx[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
+            if((++rel_seek_frames)>0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
             v_pts-=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             --skip_audio_bytes;
           }
           --video_chunk_pos;
         }
       }
-      avi_header.idx_pos_a=avi_header.idx_pos_v=
-      avi_header.idx_pos=video_chunk_pos;
+      demuxer->idx_pos_a=demuxer->idx_pos_v=
+      demuxer->idx_pos=video_chunk_pos;
 //      printf("%d frames skipped\n",skip_audio_bytes);
 
 #if 1
       // re-calc video pts:
       avi_video_pts=0;
       for(i=0;i<video_chunk_pos;i++){
-          int id=avi_header.idx[i].ckid;
+          int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
             avi_video_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
@@ -1854,17 +1860,17 @@ switch(file_format){
 #else
         curr_audio_pos/=sh_audio->wf->nBlockAlign;
         curr_audio_pos*=sh_audio->wf->nBlockAlign;
-        avi_header.audio_seekable=1;
+        demuxer->audio_seekable=1;
 #endif
 
         // find audio chunk pos:
           for(i=0;i<video_chunk_pos;i++){
-            int id=avi_header.idx[i].ckid;
+            int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
             //if(TWOCCFromFOURCC(id)==cktypeWAVEbytes){
             if(avi_stream_id(id)==d_audio->id){
               int aid=StreamFromFOURCC(id);
               if(d_audio->id==aid || d_audio->id==-1){
-                len=avi_header.idx[i].dwChunkLength;
+                len=((AVIINDEXENTRY *)demuxer->idx)[i].dwChunkLength;
                 last=i;
                 if(apos<=curr_audio_pos && curr_audio_pos<(apos+len)){
                   if(verbose)printf("break;\n");
@@ -1883,8 +1889,8 @@ switch(file_format){
           // update stream position:
           d_audio->pos=audio_chunk_pos;
           d_audio->dpos=apos;
-          avi_header.idx_pos_a=avi_header.idx_pos_v=
-          avi_header.idx_pos=audio_chunk_pos;
+          demuxer->idx_pos_a=demuxer->idx_pos_v=
+          demuxer->idx_pos=audio_chunk_pos;
 
           if(!(sh_audio->codec->flags&CODECS_FLAG_SEEKABLE)){
 #if 0
@@ -1906,9 +1912,9 @@ switch(file_format){
           
           // calc skip_video_frames & adjust video pts counter:
 //          i=last;
-          i=avi_header.idx_pos;
+          i=demuxer->idx_pos;
           while(i<video_chunk_pos){
-            int id=avi_header.idx[i].ckid;
+            int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
 //            if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
             if(avi_stream_id(id)==d_video->id){  // video frame
               ++skip_video_frames;
@@ -1921,16 +1927,16 @@ switch(file_format){
       }
 
       if(verbose) printf("SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
-        avi_header.idx_pos,audio_chunk_pos,video_chunk_pos,
+        demuxer->idx_pos,audio_chunk_pos,video_chunk_pos,
         skip_video_frames,skip_audio_bytes,skip_audio_secs);
 
         // Set OSD:
       if(osd_level){
         osd_visible=sh_video->fps; // 1 sec
         vo_osd_progbar_type=0;
-        vo_osd_progbar_value=(demuxer->filepos)/((avi_header.movi_end-avi_header.movi_start)>>8);
+        vo_osd_progbar_value=(demuxer->filepos)/((demuxer->movi_end-demuxer->movi_start)>>8);
         //printf("avi filepos = %d  \n",vo_osd_progbar_value);
-  //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(avi_header.movi_end-avi_header.movi_start));
+  //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(demuxer->movi_end-demuxer->movi_start));
       }
 
   }
@@ -1940,7 +1946,7 @@ switch(file_format){
   //================= seek in ASF ==========================
     float p_rate=10; // packets / sec
     int rel_seek_packs=rel_seek_secs*p_rate;
-    int rel_seek_bytes=rel_seek_packs*fileh.packetsize;
+    int rel_seek_bytes=rel_seek_packs*asf_packetsize;
     int newpos;
     //printf("ASF: packs: %d  duration: %d  \n",(int)fileh.packets,*((int*)&fileh.duration));
 //    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
@@ -2057,7 +2063,7 @@ switch(file_format){
   if(subtitles){
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
-      find_sub(sub_uses_time?(100*(v_pts+sub_delay)):((v_pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+      find_sub(subtitles,sub_uses_time?(100*(v_pts+sub_delay)):((v_pts+sub_delay)*sub_fps)); // FIXME! frame counter...
       current_module=NULL;
   }
   

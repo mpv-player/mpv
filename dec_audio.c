@@ -1,4 +1,40 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "config.h"
+
+extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
+#include "mp3lib/mp3.h"
+#include "libac3/ac3.h"
+
+#include "alaw.c"
+#include "xa/xa_gsm.h"
+
+static sh_audio_t* ac3_audio_sh=NULL;
+
+// AC3 decoder buffer callback:
+static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
+    int len=ds_get_packet(ac3_audio_sh->ds,start);
+    //printf("<ac3:%d>\n",len);
+    if(len<0)
+          *start = *end = NULL;
+    else
+          *end = *start + len;
+}
+
+
 int init_audio(sh_audio_t *sh_audio){
 
 int driver=sh_audio->codec->driver;
@@ -79,6 +115,7 @@ case 8: {
 }
 case 3: {
   // Dolby AC3 audio:
+  ac3_audio_sh=sh_audio; // save sh_audio for the callback:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
   ac3_config.num_output_ch = 2;
   ac3_config.flags = 0;
@@ -91,7 +128,7 @@ case 3: {
   ac3_init();
   sh_audio->ac3_frame = ac3_decode_frame();
   if(sh_audio->ac3_frame){
-    sh_audio->samplerate=sh_audio->ac3_frame->sampling_rate;
+    sh_audio->samplerate=((ac3_frame_t*)sh_audio->ac3_frame)->sampling_rate;
     sh_audio->channels=2;
   } else {
     driver=0; // bad frame -> disable audio
@@ -179,7 +216,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen){
       { unsigned char buf[65]; // 65 bytes / frame
             len=0;
             while(len<OUTBURST){
-                if(demux_read_data(d_audio,buf,65)!=65) break; // EOF
+                if(demux_read_data(sh_audio->ds,buf,65)!=65) break; // EOF
                 XA_MSGSM_Decoder(buf,(unsigned short *) buf); // decodes 65 byte -> 320 short
 //  		XA_GSM_Decoder(buf,(unsigned short *) &sh_audio->a_buffer[sh_audio->a_buffer_len]); // decodes 33 byte -> 160 short
                 len+=2*320;
@@ -192,7 +229,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen){
         //printf("{2:%d}",avi_header.idx_pos);fflush(stdout);
         if(sh_audio->ac3_frame){
           len = 256 * 6 *sh_audio->channels*sh_audio->samplesize;
-          memcpy(buf,sh_audio->ac3_frame->audio_data,len);
+          memcpy(buf,((ac3_frame_t*)sh_audio->ac3_frame)->audio_data,len);
           sh_audio->ac3_frame=NULL;
         }
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);

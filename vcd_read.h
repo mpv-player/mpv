@@ -1,7 +1,7 @@
 //=================== VideoCD ==========================
 static struct cdrom_tocentry vcd_entry;
 
-void vcd_set_msf(unsigned int sect){
+static inline void vcd_set_msf(unsigned int sect){
   vcd_entry.cdte_addr.msf.frame=sect%75;
   sect=sect/75;
   vcd_entry.cdte_addr.msf.second=sect%60;
@@ -9,7 +9,7 @@ void vcd_set_msf(unsigned int sect){
   vcd_entry.cdte_addr.msf.minute=sect;
 }
 
-unsigned int vcd_get_msf(){
+static inline unsigned int vcd_get_msf(){
   return vcd_entry.cdte_addr.msf.frame +
         (vcd_entry.cdte_addr.msf.second+
          vcd_entry.cdte_addr.msf.minute*60)*75;
@@ -20,9 +20,9 @@ int vcd_seek_to_track(int fd,int track){
   vcd_entry.cdte_track  = track;
   if (ioctl(fd, CDROMREADTOCENTRY, &vcd_entry)) {
     perror("ioctl dif1");
-    return 0;
+    return -1;
   }
-  return 1;
+  return VCD_SECTOR_DATA*vcd_get_msf();
 }
 
 void vcd_read_toc(int fd){
@@ -52,12 +52,9 @@ void vcd_read_toc(int fd){
     }
 }
 
-#define VCD_SECTOR_SIZE 2352
-#define VCD_SECTOR_OFFS 24
-#define VCD_SECTOR_DATA 2324
 static char vcd_buf[VCD_SECTOR_SIZE];
 
-int vcd_read(int fd,char *mem){
+static int vcd_read(int fd,char *mem){
       memcpy(vcd_buf,&vcd_entry.cdte_addr.msf,sizeof(struct cdrom_msf));
       if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; // EOF?
 
@@ -91,7 +88,7 @@ void vcd_cache_init(int s){
   memset(vcd_cache_sectors,255,s*sizeof(int));
 }
 
-void vcd_cache_seek(int sect){
+static inline void vcd_cache_seek(int sect){
   vcd_cache_current=sect;
 }
 

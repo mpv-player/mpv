@@ -1,3 +1,20 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+//extern int verbose; // defined in mplayer.c
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+//#include "codec-cfg.h"
+//#include "stheader.h"
+
+
 void print_avih(MainAVIHeader *h){
   printf("======= AVI Header =======\n");
   printf("us/frame: %d  (fps=%5.3f)\n",h->dwMicroSecPerFrame,1000000.0f/(float)h->dwMicroSecPerFrame);
@@ -56,15 +73,15 @@ void print_video_header(BITMAPINFOHEADER *h){
 }
 
 
-void print_index(){
+void print_index(AVIINDEXENTRY *idx,int idx_size){
   int i;
-  for(i=0;i<avi_header.idx_size;i++){
-    printf("%5d:  %.4s  %4X  %08X (%08X)  %d\n",i,
-      &avi_header.idx[i].ckid,
-      avi_header.idx[i].dwFlags,
-      avi_header.idx[i].dwChunkOffset,
-      avi_header.idx[i].dwChunkOffset+avi_header.movi_start,
-      avi_header.idx[i].dwChunkLength
+  for(i=0;i<idx_size;i++){
+    printf("%5d:  %.4s  %4X  %08X  %d\n",i,
+      &idx[i].ckid,
+      idx[i].dwFlags,
+      idx[i].dwChunkOffset,
+//      idx[i].dwChunkOffset+demuxer->movi_start,
+      idx[i].dwChunkLength
     );
   }
 }

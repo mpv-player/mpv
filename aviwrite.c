@@ -1,4 +1,15 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+extern char* encode_name;
+extern char* encode_index_name;
+
 void write_avi_chunk(FILE *f,unsigned int id,int len,void* data){
 
 fwrite(&id,4,1,f);
