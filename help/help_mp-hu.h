@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.162 (2005. 03. 01.)
+// Sync'ed with help_mp-en.h 1.165 (2005. 03. 15.)
 
 // ========================= MPlayer help ===========================
 
@@ -214,9 +214,10 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "AVI fejléc írása...\n"
 #define MSGTR_DuplicateFrames "\n%d darab képkocka duplázása!!!\n"
 #define MSGTR_SkipFrame "\nképkocka átugrása!!!\n"
-#define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása különbözik az elõzõétõl.\n"
+#define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása vagy színtere különbözik az elõzõétõl.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAz összes videó fájlnak azonos fps-sel, felbontással, és codec-kel kell rendelkeznie az -ovc copy-hoz.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAz összes fájlnak azonos audió codec-kel és formátummal kell rendelkeznie az -oac copy-hoz.\n"
+#define MSGTR_NoSpeedWithFrameCopy "Bleh\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
 #define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
@@ -896,6 +897,16 @@ static char help_text[]=
 #define MSGTR_VO_ValueOutOfRange "Érték határon kívül"
 #define MSGTR_VO_NoValueSpecified "Nincs érték megadva."
 #define MSGTR_VO_UnknownSuboptions "Ismeretlen alopció(k)"
+
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nEzek az aalib vo_aa alopciói:\n"
+#define MSGTR_VO_AA_AdditionalOptions "A vo_aa által biztosított opciók:\n" \
+"  help        kiírja ezt a súgót\n" \
+"  osdcolor    osd szín beállítása\n  subcolor    feliratszín beállítása\n" \
+"        a szín paraméterek:\n           0 : normál\n" \
+"           1 : dim\n           2 : félkövér\n           3 : boldfont\n" \
+"           4 : fordított\n           5 : speciális\n\n\n"
 
 // vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progresszív JPEG engedélyezve."
