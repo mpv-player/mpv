@@ -36,7 +36,15 @@ int stream_fill_buffer(stream_t *s){
   switch(s->type){
   case STREAMTYPE_FILE:
   case STREAMTYPE_STREAM:
+#ifdef STREAMING
+    if( s->streaming_ctrl!=NULL ) {
+	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);break;
+    } else {
+      len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
+    }
+#else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
+#endif
   case STREAMTYPE_VCD:
 #ifdef VCD_CACHE
     len=vcd_cache_read(s->fd,s->buffer);break;
@@ -125,6 +133,17 @@ if(newpos==0 || newpos!=s->pos){
 #endif
   case STREAMTYPE_STREAM:
     //s->pos=newpos; // real seek
+    // Some streaming protocol allow to seek backward and forward
+    // A function call that return -1 can tell that the protocol
+    // doesn't support seeking.
+#ifdef STREAMING
+    if( s->streaming_ctrl!=NULL ) {
+      if( s->streaming_ctrl->streaming_seek( s->fd, pos, s->streaming_ctrl )<0 ) {
+        mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
+        return 1;
+      }
+    } 
+#else
     if(newpos<s->pos){
       mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
       return 1;
@@ -132,6 +151,7 @@ if(newpos==0 || newpos!=s->pos){
     while(s->pos<newpos){
       if(stream_fill_buffer(s)<=0) break; // EOF
     }
+#endif
     break;
 #ifdef USE_TV
   case STREAMTYPE_TV:
