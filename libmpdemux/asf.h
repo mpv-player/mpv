@@ -103,6 +103,18 @@ typedef struct __attribute__((packed)) {
 	uint16_t	size_confirm;
 } ASF_stream_chunck_t;
 
+// Definition of the stream type
+#ifdef WORDS_BIGENDIAN
+	#define ASF_STREAMING_CLEAR	0x2443		// $C
+	#define ASF_STREAMING_DATA	0x2444		// $D
+	#define ASF_STREAMING_END_TRANS	0x2445		// $E
+	#define	ASF_STREAMING_HEADER	0x2448		// $H
+#else
+	#define ASF_STREAMING_CLEAR	0x4324		// $C
+	#define ASF_STREAMING_DATA	0x4424		// $D
+	#define ASF_STREAMING_END_TRANS	0x4524		// $E
+	#define	ASF_STREAMING_HEADER	0x4824		// $H
+#endif
 
 // Definition of the differents type of ASF streaming
 typedef enum {
@@ -174,6 +186,12 @@ typedef enum {
     (h)->wBitsPerSample = le2me_16((h)->wBitsPerSample);		\
     (h)->cbSize = le2me_16((h)->cbSize);				\
 }
+#define le2me_ASF_stream_chunck_t(h) {					\
+    (h)->size = le2me_16((h)->size);					\
+    (h)->sequence_number = le2me_32((h)->sequence_number);		\
+    (h)->unknown = le2me_16((h)->unknown);				\
+    (h)->size_confirm = le2me_16((h)->size_confirm);			\
+}
 #else
 #define	le2me_ASF_obj_header_t(h)	/**/
 #define	le2me_ASF_header_t(h)		/**/
@@ -182,6 +200,7 @@ typedef enum {
 #define le2me_ASF_content_description_t(h) /**/
 #define le2me_BITMAPINFOHEADER(h)   /**/
 #define le2me_WAVEFORMATEX(h)	    /**/
+#define le2me_ASF_stream_chunck_t(h) /**/
 #endif
 
 #endif
