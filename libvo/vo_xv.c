@@ -672,7 +672,7 @@ static uint32_t preinit(const char *arg)
 	    "see 'mplayer -vo help' for other (non-xv) video out drivers.\n");
       else
 	mp_msg(MSGT_VO,MSGL_ERR,"It seems there is no Xvideo support for your video card available.\n"
-	    "Run 'xvinfo' to verify its Xv support and read DOCS/en/video.html#xv!\n"
+	    "Run 'xvinfo' to verify its Xv support and read DOCS/HTML/en/devices.html#xv!\n"
 	    "See 'mplayer -vo help' for other (non-xv) video out drivers. Try -vo x11\n");
 	return -1;
     }

@@ -12,7 +12,7 @@ not included.
 
 This document is for getting you started in a few minutes. It cannot answer all
 of your questions. If you have problems, please read the documentation in
-DOCS/en/documentation.html, which should help you solve most of your problems.
+DOCS/HTML/en/index.html, which should help you solve most of your problems.
 Also read the man page to learn how to use MPlayer.
 
 
@@ -26,10 +26,10 @@ Requirements:
 
 
 Before you start...
-Unless you know what are you doing, consult DOCS/en/video.html to see which driver
-to use with your video card to get the best quality and performance. Most cards
-require special drivers not included with XFree86 to drive their 2-D video
-acceleration features like YUV and scaling.
+Unless you know what are you doing, consult DOCS/HTML/en/devices.html#video-dev
+to see which driver to use with your video card to get the best quality and
+performance. Most cards require special drivers not included with XFree86 to
+drive their 2-D video acceleration features like YUV and scaling.
 
 A quick and incomplete list of recommendations:
 - ATI cards: Get the GATOS drivers for X11/Xv or use VIDIX.
@@ -37,7 +37,7 @@ A quick and incomplete list of recommendations:
 - 3dfx Voodoo3/Banshee: Get XFree86 4.2.0+ for Xv or use the tdfxfb driver.
 - nVidia cards: Get the X11 driver from www.nvidia.com for Xv support.
 - NeoMagic cards: Get an Xv capable driver from our homepage as described in
-  DOCS/en/video.html.
+  DOCS/HTML/en/devices.html#video-dev.
 
 Without accelerated video even an 800MHz P3 may be too slow to play DVDs.
 
@@ -223,5 +223,6 @@ files smoothly on a Celeron 366. Slower systems may need the '-framedrop'
 option.
 
 Questions you may have are probably answered in the rest of the documentation.
-The places to start reading are the man page, DOCS/en/documentation.html and
-DOCS/en/faq.html. If you find a bug, read DOCS/en/bugreports.html first!
+The places to start reading are the man page, DOCS/HTML/en/index.html and
+DOCS/HTML/en/faq.html. If you find a bug, please report it, but first read
+DOCS/HTML/en/bugreports.html.

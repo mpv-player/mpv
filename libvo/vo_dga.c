@@ -715,7 +715,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   if(vo_dga_vp_width == VO_DGA_INVALID_RES){
     mp_msg(MSGT_VO,  MSGL_ERR, "vo_dga: Something is wrong with your DGA. There doesn't seem to be a\n"
 		       "         single suitable mode!\n"
-		       "         Please file a bug report (see DOCS/en/bugreports.html)\n");
+		       "         Please file a bug report (see DOCS/HTML/en/bugreports.html)\n");
 #ifndef HAVE_DGA2
 #ifdef HAVE_XF86VM
     if(vo_dga_vidmodes){
