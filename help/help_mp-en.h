@@ -368,7 +368,8 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen Event!\n"
 
-#define MSGTR_NeedAfVolume "Mixer: This audio output driver needs \"-af volume\" for changing volume.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] No hardware mixing, inserting volume filter.\n"
+#define MSGTR_NoVolume "[Mixer] No volume control available.\n"
 
 // ====================== GUI messages/buttons ========================
 

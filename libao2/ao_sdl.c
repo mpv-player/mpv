@@ -36,7 +36,7 @@ static ao_info_t info =
 LIBAO_EXTERN(sdl)
 
 // turn this on if you want to use the slower SDL_MixAudio
-#define USE_SDL_INTERNAL_MIXER 1
+#undef USE_SDL_INTERNAL_MIXER
 
 // Samplesize used by the SDLlib AudioSpec struct
 #ifdef WIN32

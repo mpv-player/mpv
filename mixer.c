@@ -28,7 +28,8 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
         float db_vals[AF_NCH];
         if (!af_control_any_rev(mixer->afilter,
                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, db_vals))
-          return;
+          db_vals[0] = db_vals[1] = 1.0;
+        else
         af_from_dB (2, db_vals, db_vals, 20.0, -200.0, 60.0);
         vol.left = db_vals[0] * 90.0;
         vol.right = db_vals[1] * 90.0;
@@ -61,8 +62,14 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
         af_to_dB (AF_NCH, db_vals, db_vals, 20.0);
         if (!af_control_any_rev(mixer->afilter,
                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-          mp_msg(MSGT_GLOBAL, MSGL_HINT, MSGTR_NeedAfVolume);
-          return;
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, MSGTR_InsertingAfVolume);
+          if (af_add(mixer->afilter, "volume")) {
+            if (!af_control_any_rev(mixer->afilter,
+                   AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
+              mp_msg(MSGT_GLOBAL, MSGL_ERR, MSGTR_NoVolume);
+              return;
+            }
+          }
 	}
       }
     }
