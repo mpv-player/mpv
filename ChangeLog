@@ -20,14 +20,21 @@ mplayer (0.90)
     * fixed multiple reads caused by byteswapping macro (mjpeg.c, mach64_vid.c)
     * cleanup of postprocessing code - now it's threadsafe and can be shared
     * ported to GNU/Hurd
+    * cleanup of AVI pts (timestamp) handling - no more BPS hack in mplayer.c
+    * small cleanup of A-V sync code - using relative timers instead of absolute
+    * GUI code cleanup, obsolete files/dirs removed
+    * various small bugfixes, endianess fixes
+    * mencoder: -pass option removed, use -divx4opts pass=N / -lavcopts vpass=N
     
     Features:
     * -ao win32 (for windows port)
     * libavcodec: native WMA v1/v2 (aka. DivX audio) decoder
     * hw-accelerated video eq for -vo x11 and gl2, using DirectColor colormap
     * overlapping subtitles support, jacosub (*.js) format support
-    * dxr3 got a new syncengine, ':sync', read the manual for more info
+    * -vo dxr3 got a new syncengine, ':sync', read the manual for more info
     * QDMC/QDM2 audio codec support, using quicktime 5 win32 DLLs (libwine!)
+    * libavcodec: various MJPEG decoding fixes - now it decodes all sample files!
+    * mencvcd updates, sox/toolame support etc
     
     Filters:
     * -af/-af-adv options cleanup
