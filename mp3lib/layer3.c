@@ -663,7 +663,7 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
         { register short *val = h->table;
           while((y=*val++)<0) {
             part2remain--;
-            if(part2remain < 0) return 0;
+            if(part2remain < 0) return 1;
             if (get1bit()) val-=y;
           }
           x = y >> 4;
@@ -818,7 +818,7 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
         { register short *val = h->table;
           while((y=*val++)<0) {
             part2remain--;
-            if(part2remain < 0) return 0;
+            if(part2remain < 0) return 1;
             if (get1bit()) val -= y;
 //            if(part2remain<=0) return 0; // Arpi
           }
@@ -1008,7 +1008,7 @@ static int III_dequantize_sample_ms(real xr[2][SBLIMIT][SSLIMIT],int *scf,
           register short *val = h->table;
           while((y=*val++)<0) {
             part2remain--;
-            if(part2remain < 0) return 0;
+            if(part2remain < 0) return 1;
             if (get1bit()) val -= y;
 //            if(part2remain<=0) return 0; // Arpi
           }
@@ -1203,7 +1203,7 @@ static int III_dequantize_sample_ms(real xr[2][SBLIMIT][SSLIMIT],int *scf,
           register short *val = h->table;
           while((y=*val++)<0) {
             part2remain--;
-            if(part2remain < 0) return 0;
+            if(part2remain < 0) return 1;
             if (get1bit()) val -= y;
           }
           x = y >> 4;
