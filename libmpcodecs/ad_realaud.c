@@ -14,6 +14,7 @@
 #include "help_mp.h"
 
 #include "ad_internal.h"
+#include "wine/windef.h"
 
 static ad_info_t info =  {
 	"RealAudio decoder",

@@ -27,8 +27,8 @@
 #define aviTWOCC(ch0, ch1) ((uint16_t)(uint8_t)(ch0) | ((uint16_t)(uint8_t)(ch1) << 8))
 #endif
 
-typedef uint16_t TWOCC;
-typedef uint32_t FOURCC;
+//typedef uint16_t TWOCC;
+//typedef uint32_t FOURCC;
 
 /* form types, list types, and chunk types */
 #define formtypeAVI             mmioFOURCC('A', 'V', 'I', ' ')
@@ -96,8 +96,8 @@ typedef struct rectangle_t {
 } rectangle_t;
 
 typedef struct {
-    FOURCC		fccType;
-    FOURCC		fccHandler;
+    uint32_t		fccType;
+    uint32_t		fccHandler;
     uint32_t		dwFlags;	/* Contains AVITF_* flags */
     uint16_t		wPriority;
     uint16_t		wLanguage;

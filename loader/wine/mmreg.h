@@ -83,6 +83,7 @@ typedef struct {
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
 #endif // !_WAVEFORMATEXTENSIBLE_
 
+/*
 typedef struct mpeglayer3waveformat_tag {
   WORD   wFormatTag WINE_PACKED;
   WORD   nChannels WINE_PACKED;
@@ -97,6 +98,7 @@ typedef struct mpeglayer3waveformat_tag {
   WORD          nFramesPerBlock WINE_PACKED;
   WORD          nCodecDelay WINE_PACKED;
 } MPEGLAYER3WAVEFORMAT;
+*/
 
 /* WAVE form wFormatTag IDs */
 

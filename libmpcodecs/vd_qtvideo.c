@@ -4,6 +4,7 @@
 #include "config.h"
 
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
+#include "wine/windef.h"
 
 #include "mp_msg.h"
 #include "vd_internal.h"

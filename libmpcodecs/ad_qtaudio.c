@@ -7,6 +7,7 @@
 #include "../mp_msg.h"
 
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
+#include "wine/windef.h"
 
 #include "ad_internal.h"
 #include "bswap.h"
