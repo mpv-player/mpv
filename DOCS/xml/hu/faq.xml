@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.62 -->
+<!-- synced with 1.64 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -70,6 +70,25 @@ mint ahogy <ulink url="http://freshmeat.net/articles/view/889/">mások sem</ulink
 
 <qandadiv id="faq-compilation">
 <title>Fordítás</title>
+<qandaentry>
+<question><para>
+A fordítás leáll hibaüzenettel és a <application>gcc</application> valami
+titokzatos üzenetet ad ki magából, ami a
+<systemitem>internal compiler error</systemitem> vagy
+<systemitem>unable to find a register to spill</systemitem> sorokat
+tartalmazza.
+</para></question>
+<answer><para>
+Belebotlottál egy <application>gcc</application> hibába. Kérjük
+<ulink url="http://gcc.gnu.org/bugs.html">jelentsd a gcc csapatnak</ulink>
+és ne nekünk. Valamiért úgy tűnik az <application>MPlayer</application>
+folyamatosan fordító hibákat idéz elő. Azonban mi ezeket nem tudjuk javítani
+és nem teszünk "kerülőutakat" a kódba a fordító hibái miatt. Hogy elkerüld
+ezt a problémát, vagy használj ismert és megbízható, stabil verziót a
+fordítóból vagy frissítsd rendszeresen.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 Vannak bináris (RPM/deb) csomagok az <application>MPlayer</application>ből?
