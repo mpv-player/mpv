@@ -70,58 +70,40 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 
 <P><B><A NAME=4.2>4.2.  DVD lejátszás</A></B></P>
 
-<P>Örüljetek népek, itt az igazi DVD támogatás. Már nem kell egyesével
-lejátszani a VOB file-okat a video_ts könyvtárból, nem kell aggódni amiatt
-hogy a lemez kódolt-e vagy se (régebben kellett ilyenkor a '-dvdauth /dev/dvd'
-opció is), és még csak fel se kell mountolni a lemezt (bár a mountolás
-azzal a tagadhatatlan elõnnyel jár hogy a Linux a feltört CSS kulcsokat
-cache-be rakja, így a következõ lejátszásnál már nem kell a törésre várni).</P>
+<P>Az <B>MPlayer</B> a <CODE>libdvdread</CODE> és <CODE>libdvdcss</CODE>
+  néven ismert könyvtárakat használja a DVD dekódolásához és lejátszásához.
+  Ez a két program a <CODE>libmpdvdkit/</CODE> alkönyvtárban található, így
+  külön installálásuk szükségtelen és felesleges. Azért használjuk ezt a
+  módszert mert így lehetõségünk nyílt kijavítani egy <CODE>libdvdread</CODE>
+  bugot, és megpatchelni a <CODE>libdvdcss-t</CODE> olyan módon hogy a
+  feltört CSS kulcsokat mentse el a <CODE>$HOME/.mplayer/DVDKeys</CODE>
+  könyvtárba, így a következõ lejátszásnál nem lesz szükség ezek újabb
+  feltörésére.</P>
 
-<P>FONTOS: NE kérj semmit a DVD lejátszással kapcsolatban. Most elõször van
-mûködõ támogatás <B>MPlayer</B>-ben, és jelenleg a hibák kijavításán, és
-alapvetõ DVD funkciók beépítésén dolgozunk.</P>
+<P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban van, jelenleg
+  nem használható.</P>
 
-<P>Az <B>MPlayer</B> a libdvdread-et használja, ami tartalmaz beépített
-támogatást az IFO file-ok feldolgozásához, navi blokkok olvasásához, és
-autentikációhoz. Ezutóbbihoz a libdvdcss-t használja, így elõször
-azt kell lefordítani és installálni, majd ./configure, és az automatikusan
-felismeri.</P>
-
-<UL>
-<LI><P><B>Töltsd le a libdvdread és libdvdcss forrását.</B></P>
-  
-<P><I>Letöltheted õket a
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
-címrõl (klikkelj a 'download'-ra a bal oldali menûben).</I></P>
-
-<P><B><I>FONTOS !</I></B>
-<UL>
-  <LI>libdvdread 0.8-hoz libdvdcss helyett <B>libcss</B> kell</LI>
-  <LI>libdvdread 0.9-hez libdvdcss <B>0.0.3</B> kell! Az újabb libdvdcss
-    verziókkal nem fog mûködni!</LI>
-  <LI>libdvdcss <B>1.0</B>-t ne használj, mert használhatatlanul lassúvá teszi a
-    lejátszást.</LI>
-</UL>
-</P>
-</LI>
-
-<LI><P><B>Fordítsd le és installáld a libdvdcss-t és AZUTÁN a libdvdread-et.</B></P>
-
-<P><I>Olvasd el ezen csomagok dokumentációját, ha segítségre van szükséged.</I></P></LI>
-
-<LI><P><B>Régi DVD támogatás - <I>OPCIONÁLIS</I></B></P>
+<LI><P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
 
 <P><I>Ez akkor hasznos ha pl merevlemezrõl akarsz kódolt VOB-ot lejátszani.
   Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
   Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
   opciót.</P></LI>
 
-<LI><P><B>Fordítsd újra az MPlayer-t.</B></P>
+<LI><P><B>Fordítsd le az MPlayer-t.</B></P>
 
-<P><I>Futtasd a <CODE>./configure</CODE>-t. Ha helyesen tetted fel a libdvdread-et,
-a ./configure valami ilyesmit fog kiírni :<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
-Ezután a szokott módon <CODE>make</CODE> és <CODE>make install</CODE>.</I></P></LI>
-</UL>
+<P><I>Futtasd a <CODE>./configure</CODE>-t. Ha nem törölted le a
+  <CODE>libmpdvdkit</CODE> könyvtárat, a ./configure valami ilyesmit fog
+  kiírni :</P>
+
+<P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
+
+<P>Az <B>MPlayer</B> képes már installált <CODE>libdvdread</CODE> és
+  <CODE>libdvdcss</CODE> használatára, de ezen módszer használata NEM
+  AJÁNLOTT mivel használata különféle hibákhoz, inkompatibilitásokhoz, és
+  lassabb sebességhez vezet.</P>
+
+<P>Ezután a szokott módon <CODE>make</CODE> és <CODE>make install</CODE>.</P>
 
 <P>Természetesen miután felinstalláltad a libdvdcss-t és a libdvdread-et,
 nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
@@ -194,7 +176,8 @@ DVD lejátszás elõtt/helyett/közben ezt a hibaüzenetet kapom :<BR>
 <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
 sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Ismert libdvdread 0.9.1 bug, a 0.9.2-ben már javítva van.
+Ismert libdvdread 0.9.1 bug, a 0.9.2-ben és a libmpdvdkit-ben már javítva van,
+miért nem ezutóbbi használod?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>   
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -219,26 +202,12 @@ Igen, lásd fent, a DVD fejezetet.
      <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
- Szóval az MPlayer tud DVD lejátszást? Akkor biztos DeCSS-t használ!
-     Bûnösek vagytok a következõ vádpontokban : XYZ#$--
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Anyád. Nincs DeCSS kód az MPlayer-ben. libdvdcss-hez linkeli magát.<BR>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Muszáj rendszergazdai jogosultságokkal rendelkeznem hogy le tudjak
 játszani egy DVD-t?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
 Csak a régi fajta DVD támogatáshoz. Ezenkívül persze kellenek megfelelõ
 jogosultságok a DVD egységhez (pl /dev/dvd).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Hogy lehetne azt megcsinálni hogy ... ?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Mint fentebb is leírtuk, most a hibák javításán dolgozunk, a
-kívánságok majd késõbb jöhetnek.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -257,9 +226,8 @@ Igen, lásd fent a <CODE>-chapter</CODE> opciót.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Nagyon lassú a DVD lejátszás !
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Próbáld a <CODE>-cache</CODE> opciót (lásd manpage!). Ha így se jó, bizonyosodj
-meg róla hogy megfelelõ libdvdread+libdvdcss kombinációt használsz. Mindenképp
-próbáld meg bekapcsolni a DMA-t a DVD meghajtón.
+Próbáld a <CODE>-cache</CODE> opciót (lásd manpage!). Ha így se jó, próbáld meg
+bekapcsolni a DMA-t a DVD meghajtón.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>
