@@ -28,6 +28,11 @@ LIBS += -li386
 endif
 endif
 
+# If you want libdha to use svgalib_helper for hardware access,
+# uncomment this statement, and change the -I to the correct directory
+# that includes svgalib_helper.o:
+#CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
+
 .SUFFIXES: .c .o
 
 # .PHONY: all clean

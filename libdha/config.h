@@ -9,4 +9,8 @@
 #endif
 #endif
 
+#if defined(__powerpc__) && defined(CONFIG_SVGAHELPER)
+#undef CONFIG_SVGAHELPER
+#endif
+
 #endif /* LIBDHA_CONFIG_H */

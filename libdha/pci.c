@@ -478,6 +478,7 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #endif
 
 /* cpu depended stuff */
+#ifndef CONFIG_SVGAHELPER
 #if defined(__alpha__)
 #include "sysdep/pci_alpha.c"
 #elif defined(__ia64__)
@@ -491,7 +492,7 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #else
 #include "sysdep/pci_x86.c"
 #endif
-
+#endif
  
 static int pcicards=0 ;
 static pciinfo_t *pci_lst;

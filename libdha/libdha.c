@@ -66,21 +66,40 @@ void libdha_exit(const char *message, int level)
 #endif
 
 #ifdef CONFIG_DHAHELPER
-
 #include "kernelhelper/dhahelper.h"
+#endif
+
+#ifdef CONFIG_SVGAHELPER
+#include <svgalib_helper.h>
+#endif
 
 static int mem=-1;
 void *map_phys_mem(unsigned long base, unsigned long size)
-{
+{    
 #ifdef ARCH_ALPHA
 /* TODO: move it into sysdep */
   base += bus_base();
 #endif
+
+#ifdef CONFIG_SVGAHELPER
+  if ( (mem = open(DEV_SVGA,O_RDWR)) == -1) {
+      perror("libdha: SVGAlib kernelhelper failed");
+#ifdef CONFIG_DHAHELPER
+      goto dha_helper_way;
+#else
+      goto dev_mem_way;
+#endif
+  }
+  else
+      goto mmap;
+#endif
+
+#ifdef CONFIG_DHAHELPER
+dha_helper_way:
   if ( (mem = open("/dev/dhahelper",O_RDWR)) < 0)
   {
-    if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
-	perror("libdha: open(/dev/mem) failed") ; exit(1) ;
-    }
+      perror("libdha: DHA kernelhelper failed");
+      goto dev_mem_way;
   }
   else
   {
@@ -93,37 +112,41 @@ void *map_phys_mem(unsigned long base, unsigned long size)
     
     if (ioctl(mem, DHAHELPER_MEMORY, &mem_req) < 0)
     {
-	perror("libdha: failed mapping throught kernel helper");
-	return NULL;
+	perror("libdha: DHA kernelhelper failed");
+	close(mem);
+	goto dev_mem_way;
     }
+    else
+	goto mmap;
   }
-  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base) ;
-}
-#else
-
-static int mem=-1;
-void *map_phys_mem(unsigned long base, unsigned long size)
-{    
-#ifdef ARCH_ALPHA
-/* TODO: move it into sysdep */
-  base += bus_base();
 #endif
-  if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
-    perror("libdha: open(/dev/mem) failed") ; exit(1) ;
+
+dev_mem_way:
+  if ( (mem = open(DEV_MEM,O_RDWR)) == -1)
+  {
+    perror("libdha: opening /dev/mem failed");
+    exit(1);
   }
-  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base) ;
+
+mmap:
+  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base);
 }
 #endif /* CONFIG_DHAHELPER */
 
 void unmap_phys_mem(void *ptr, unsigned long size)
 {
-  int res=munmap(ptr,size) ;
-  if (res == -1) { perror("libdha: munmap() failed") ; exit(1) ; }
-  close(mem);
-}
-#endif
+  int res = munmap(ptr,size);
 
-unsigned char  INPORT8(unsigned idx)
+  if (res == -1)
+  {
+      perror("libdha: unmapping memory failed");
+      exit(1);
+  }
+  close(mem);
+  mem = -1;
+}
+
+unsigned char INPORT8(unsigned idx)
 {
   return inb(idx);
 }
@@ -133,23 +156,22 @@ unsigned short INPORT16(unsigned idx)
   return inw(idx);
 }
 
-unsigned       INPORT32(unsigned idx)
+unsigned INPORT32(unsigned idx)
 {
   return inl(idx);
 }
 
-void          OUTPORT8(unsigned idx,unsigned char val)
+void OUTPORT8(unsigned idx,unsigned char val)
 {
   outb(idx,val);
 }
 
-void          OUTPORT16(unsigned idx,unsigned short val)
+void OUTPORT16(unsigned idx,unsigned short val)
 {
   outw(idx,val);
 }
 
-void          OUTPORT32(unsigned idx,unsigned val)
+void OUTPORT32(unsigned idx,unsigned val)
 {
   outl(idx,val);
 }
-
