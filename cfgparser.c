@@ -62,9 +62,10 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 	int ret = -1;
 	char *endptr;
 
-//	printf("read_option: conf=%p optnr=%d opt='%s' param='%s'\n",
-//	    conf, conf_optnr, opt, param);
-
+#ifdef DEBUG
+	printf("read_option: conf=%p optnr=%d opt='%s' param='%s'\n",
+	    conf, conf_optnr, opt, param);
+#endif
 	for (i = 0; i < conf_optnr; i++) {
 		int namelength;
 		/* allow 'aa*' in config.name */
@@ -83,8 +84,10 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
-//	printf("read_option: name='%s' p=%p type=%d\n",
-//	    conf[i].name, conf[i].p, conf[i].type);
+#ifdef DEBUG
+	printf("read_option: name='%s' p=%p type=%d\n",
+	    conf[i].name, conf[i].p, conf[i].type);
+#endif
 	if (conf[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
 		printf("this option can only be used on command line:\n");
 		ret = ERR_NOT_AN_OPTION;
@@ -260,10 +263,25 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			token = strtok(param, (char *)&(":"));
 			while(token)
 			{
-			    int i;
+			    int ret;
+			    int err;
 			    
-			    if ((i = sscanf(token, "%[^=]=%s", subopt, subparam)) == 2)
-				read_option(&conf[i].p, subconf_optnr, subopt, subparam);
+			    ret = sscanf(token, "%[^=]=%s", subopt, subparam);
+			    switch(ret)
+			    {
+				case 1:
+				case 2:
+				    if ((err = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
+				    {
+					printf("Subconfig parsing returned error: %d in token: %s\n",
+					    err, token);
+					return(err);
+				    }
+				    break;
+				default:
+				    printf("Invalid subconfig argument! ('%s')\n", token);
+				    return(ERR_NOT_AN_OPTION);
+			    }
 //			    printf("token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
 			    token = strtok(NULL, (char *)&(":"));
 			}
@@ -527,7 +545,6 @@ next:
 			printf("Error %d while parsing option: '%s'!\n",
 			    tmp, opt);
 			goto err_out;
-			/* break; */
 		    default:
 			i += tmp;
 			break;
