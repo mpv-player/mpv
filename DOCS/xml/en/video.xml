@@ -1822,7 +1822,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   You should have the programs <command>scan</command> and
-  <command>szap/tzap/czap</command> installed; they are all included in
+  <command>szap/tzap/czap/azap</command> installed; they are all included in
   the drivers package.
 </para>
 
@@ -1834,16 +1834,17 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Now you should compile a <filename>~/.mplayer/channels.conf</filename>
-  file, with the syntax accepted by <command>szap/tzap/czap</command>, or
+  file, with the syntax accepted by <command>szap/tzap/czap/azap</command>, or
   have <command>scan</command> compile it for you.
 </para>
 
 <para>
-  If you have more than one card type (e.g. Satellitar, Terrestrial and Cable)
+  If you have more than one card type (e.g. Satellitar, Terrestrial, Cable and ATSC)
   you can save your channels files as
   <filename>~/.mplayer/channels.conf.sat</filename>,
-  <filename>~/.mplayer/channels.conf.ter</filename>
-  and <filename>~/.mplayer/channels.conf.cbl</filename>,
+  <filename>~/.mplayer/channels.conf.ter</filename>,
+  <filename>~/.mplayer/channels.conf.cbl</filename>,
+  and <filename>~/.mplayer/channels.conf.atsc</filename>,
   respectively, so as to implicitly hint <application>MPlayer</application>
   to use these files rather than <filename>~/.mplayer/channels.conf</filename>,
   and you only need to specify which card to use.
