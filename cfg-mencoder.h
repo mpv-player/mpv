@@ -11,6 +11,8 @@ extern int fakemono; // defined in dec_audio.c
 extern int use_old_pp;
 #endif
 
+extern int sws_flags;
+
 struct config divx4opts_conf[]={
 	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000},
 	{"rc_period", &divx4_param.rc_period, CONF_TYPE_INT, 0,0,0},

@@ -82,6 +82,7 @@
 #else
         {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
+	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2},
 
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},

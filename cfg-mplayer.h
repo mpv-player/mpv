@@ -74,6 +74,8 @@ extern float monitor_aspect;
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
 
+extern int sws_flags;
+
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implemtations for passing the params
@@ -175,7 +177,7 @@ struct config conf[]={
 
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
-#endif	
+#endif
 #ifdef HAVE_SDL
 	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
 	    CONF_TYPE_PRINT, 0, 0, 0},
