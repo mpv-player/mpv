@@ -184,6 +184,23 @@ csp_again:
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_CouldNotFindColorspace);
 	    vf=vf_open_filter(vf,"scale",NULL);
 	    goto csp_again;
+	} else { // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
+	     vf_instance_t* vo, *vp = NULL, *ve;
+	     // Remove the scale filter
+	     if(strcmp(vf->info->name,"scale") == 0) {
+	       ve = vf;
+	       vf = vf->next;
+	       vf_uninit_filter(ve);
+	     }
+	     // Find the last filter (vf_vo)
+	     for(vo = vf ; vo->next ; vo = vo->next)
+	       vp = vo;
+	     if(vo->query_format(vo,IMGFMT_MPEGPES) && (!vp || (vp && strcmp(vp->info->name,"lavc")))) {
+	       ve = vf_open_filter(vo,"lavc",NULL);
+	       if(vp) vp->next = ve;
+		 else vf = ve;
+	       goto csp_again;
+	     }
 	}
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_VOincompCodec);
 	sh->vf_inited=-1;
