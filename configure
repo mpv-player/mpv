@@ -1895,8 +1895,10 @@ echores "$_sgiaudio"
 echocheck "VCD support"
 if linux || bsdos || freebsd || sunos ; then
   _inputmodules="vcd $_inputmodules"
+  _def_vcd='#define HAVE_VCD 1'
   echores "ok"
 else
+  _def_vcd='#undef HAVE_VCD'
   echores "not supported on this OS"
 fi
 
@@ -2649,12 +2651,6 @@ $_def_encore
    -bps gives better sync for vbr mp3 audio, it is now default */
 #define AVI_SYNC_BPS 1
 
-/* Undefine this if you want soundcard-only timing by default:
-   You can still change this with the -alsa or -noalsa command-line option!
-   (This function was originally impemented to solve ALSA driver's big
-   buffer problems, but it seems to be useful for every soundcard drivers) */
-#define ALSA_TIMER 1
-
 /* Undefine this if you do not want to select mono audio (left or right)
    with a stereo MPEG layer 2/3 audio stream. The command-line option
    -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
@@ -2677,12 +2673,7 @@ $_def_rtc
 #define MAX_OUTBURST 65536
 
 /* set up audio OUTBURST. Do not change this! */
-#ifdef USE_XMMP_AUDIO
-#define OUTBURST 4096
-#else
-//#define OUTBURST 1024
 #define OUTBURST 512
-#endif
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
@@ -2788,6 +2779,8 @@ $_def_confwin32
 #define __CPU__ $iproc
 
 $_def_linux
+
+$_def_vcd
 
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
