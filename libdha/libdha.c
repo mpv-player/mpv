@@ -32,14 +32,6 @@
 #endif
 #include <unistd.h>
 
-/* instead exit() use libdha_exit, and do the 'mother-application' deinit
-   only in this code */
-void libdha_exit(const char *message, int level)
-{
-    printf("libdha: FATAL: %s\n", message);
-    exit(level); /* FIXME */
-}
-
 #if defined(_WIN32)
 #include "sysdep/libdha_win32.c"
 #elif defined (__EMX__)
@@ -73,7 +65,8 @@ void libdha_exit(const char *message, int level)
 #include <svgalib_helper.h>
 #endif
 
-static int mem=-1;
+static int mem_fd = -1;
+
 void *map_phys_mem(unsigned long base, unsigned long size)
 {    
 #ifdef ARCH_ALPHA
@@ -82,7 +75,7 @@ void *map_phys_mem(unsigned long base, unsigned long size)
 #endif
 
 #ifdef CONFIG_SVGAHELPER
-  if ( (mem = open(DEV_SVGA,O_RDWR)) == -1) {
+  if ( (mem_fd = open(DEV_SVGA,O_RDWR)) == -1) {
       perror("libdha: SVGAlib kernelhelper failed");
 #ifdef CONFIG_DHAHELPER
       goto dha_helper_way;
@@ -96,7 +89,7 @@ void *map_phys_mem(unsigned long base, unsigned long size)
 
 #ifdef CONFIG_DHAHELPER
 dha_helper_way:
-  if ( (mem = open("/dev/dhahelper",O_RDWR)) < 0)
+  if ( (mem_fd = open("/dev/dhahelper",O_RDWR)) < 0)
   {
       perror("libdha: DHA kernelhelper failed");
       goto dev_mem_way;
@@ -110,10 +103,10 @@ dha_helper_way:
     mem_req.offset = 0;
     mem_req.size = size;
     
-    if (ioctl(mem, DHAHELPER_MEMORY, &mem_req) < 0)
+    if (ioctl(mem_fd, DHAHELPER_MEMORY, &mem_req) < 0)
     {
 	perror("libdha: DHA kernelhelper failed");
-	close(mem);
+	close(mem_fd);
 	goto dev_mem_way;
     }
     else
@@ -122,14 +115,14 @@ dha_helper_way:
 #endif
 
 dev_mem_way:
-  if ( (mem = open(DEV_MEM,O_RDWR)) == -1)
+  if ( (mem_fd = open(DEV_MEM,O_RDWR)) == -1)
   {
     perror("libdha: opening /dev/mem failed");
-    exit(1);
+    return -1;
   }
 
 mmap:
-  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base);
+  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
 }
 #endif /* CONFIG_DHAHELPER */
 
@@ -140,10 +133,13 @@ void unmap_phys_mem(void *ptr, unsigned long size)
   if (res == -1)
   {
       perror("libdha: unmapping memory failed");
-      exit(1);
+      return -1;
   }
-  close(mem);
-  mem = -1;
+  
+  close(mem_fd);
+  mem_fd = -1;
+  
+  return;
 }
 
 unsigned char INPORT8(unsigned idx)
