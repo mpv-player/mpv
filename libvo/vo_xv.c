@@ -586,115 +586,65 @@ static void flip_page(void)
  return;
 }
 
-
-
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
- uint8_t *src;
  uint8_t *dst;
- int i;
- int srcstride;
 
  dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[0] + 
        xvimage[current_buf]->pitches[0]*y + x;
- src = image[0];
- if(w==stride[0] && w==xvimage[current_buf]->pitches[0]) memcpy(dst,src,w*h);
-   else
-    for(i=0;i<h;i++)
-     {
-      memcpy(dst,src,w);
-      src+=stride[0];
-      dst+=xvimage[current_buf]->pitches[0];
-     }
+ memcpy_pic(dst, image[0], w, h, xvimage[current_buf]->pitches[0], stride[0]);
 
  x/=2;y/=2;w/=2;h/=2;
 
  dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[1] + 
        xvimage[current_buf]->pitches[1]*y + x;
- src=image[2];srcstride=stride[2];
- if(image_format!=IMGFMT_YV12){ src=image[1];srcstride=stride[1]; }
- if(w==srcstride && w==xvimage[current_buf]->pitches[1]) memcpy(dst,src,w*h);
-  else
-   for(i=0;i<h;i++)
-    {
-     memcpy(dst,src,w);
-     src+=srcstride;
-     dst+=xvimage[current_buf]->pitches[1];
-   }
+ if(image_format!=IMGFMT_YV12)
+   memcpy_pic(dst, image[1], w, h, xvimage[current_buf]->pitches[1], stride[1]);
+ else
+   memcpy_pic(dst, image[2], w, h, xvimage[current_buf]->pitches[1], stride[2]);
 
  dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[2] + 
        xvimage[current_buf]->pitches[2]*y + x;
- src=image[2];srcstride=stride[2];
- if(image_format==IMGFMT_YV12){ src=image[1];srcstride=stride[1]; }
- if(w==srcstride && w==xvimage[current_buf]->pitches[2]) memcpy(dst,src,w*h);
-  else
-   for(i=0;i<h;i++)
-    {
-     memcpy(dst,src,w);
-     src+=srcstride;
-     dst+=xvimage[current_buf]->pitches[2];
-   }
+ if(image_format==IMGFMT_YV12)
+   memcpy_pic(dst, image[1], w, h, xvimage[current_buf]->pitches[1], stride[1]);
+ else
+   memcpy_pic(dst, image[2], w, h, xvimage[current_buf]->pitches[1], stride[2]);
 
  return 0;
 }
 
-static uint32_t draw_frame(uint8_t *src[])
-{
-
- switch (image_format) {
- case IMGFMT_YUY2:
- case IMGFMT_UYVY:
- case IMGFMT_YVYU:
-
-//    printf("off=0x%X  pitch=%d  width=%d  \n",xvimage[current_buf]->offsets[0],xvimage[current_buf]->pitches[0],image_width);
-
-    // YUY2 packed
-    if(image_width*2==xvimage[current_buf]->pitches[0]){
-	memcpy(xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
-	    src[0], image_width*image_height*2);
-    } else {
-	unsigned char* s=src[0];
-	unsigned char* d=xvimage[current_buf]->data+xvimage[current_buf]->offsets[0];
-	int i;
-	for(i=0;i<image_height;i++) {
-	    memcpy(d,s,image_width*2);
-	    s+=image_width*2;
-	    d+=xvimage[current_buf]->pitches[0];
-	}
-    }
-    break;
-
- case IMGFMT_BGR24:
-
-    if(flip_flag)	// tricky, using negative src stride:
-     rgb24toyv12(src[0]+3*image_width*(image_height-1),
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
-		 image_width,image_height,
-		 xvimage[current_buf]->pitches[0],
-		 xvimage[current_buf]->pitches[1],
-		 -3*image_width);
-    else
-     rgb24toyv12(src[0],
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
-                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
-		 image_width,image_height,
-		 xvimage[current_buf]->pitches[0],
-		 xvimage[current_buf]->pitches[1],
-		 3*image_width);
-     break;
-
- }
-
-  return 0;
+static uint32_t draw_frame(uint8_t *src[]){
+    printf("draw_frame() called!!!!!!");
+    return -1;
 }
 
 static uint32_t draw_image(mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	// direct rendering:
 	current_buf=(int)(mpi->priv);	// hack!
+	return VO_TRUE;
+    }
+    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK) return VO_TRUE; // done
+    if(mpi->flags&MP_IMGFLAG_PLANAR){
+	draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
+	return VO_TRUE;
+    }
+    if(mpi->flags&MP_IMGFLAG_YUV){
+	// packed YUV:
+	memcpy_pic(xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
+	    mpi->planes[0],mpi->w*(mpi->bpp/8),mpi->h,
+	    xvimage[current_buf]->pitches[0], mpi->stride[0]);
+	return VO_TRUE;
+    }
+    if(mpi->imgfmt==IMGFMT_BGR24){
+	rgb24toyv12(mpi->planes[0]+(flip_flag ? 3*image_width*(image_height-1) : 0),
+	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
+	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
+	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
+	    image_width,image_height,
+	    xvimage[current_buf]->pitches[0],
+	    xvimage[current_buf]->pitches[1],
+	    flip_flag ? -mpi->stride[0] : mpi->stride[0]);
 	return VO_TRUE;
     }
     return VO_FALSE; // not (yet) supported
