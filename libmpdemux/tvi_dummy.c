@@ -35,6 +35,8 @@ tvi_handle_t *tvi_init_dummy(char *device)
 /* initialisation */
 static int init(priv_t *priv, tvi_param_t *params)
 {
+    priv->width = 320;
+    priv->height = 200;
     return(1);
 }
 
@@ -67,8 +69,14 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_VID_SET_WIDTH:
 	    priv->width = (int)*(void **)arg;
 	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_GET_WIDTH:
+	    (int)*(void **)arg = priv->width;
+	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_HEIGHT:
 	    priv->height = (int)*(void **)arg;
+	    return(TVI_CONTROL_TRUE);	    
+	case TVI_CONTROL_VID_GET_HEIGHT:
+	    (int)*(void **)arg = priv->height;
 	    return(TVI_CONTROL_TRUE);	    
 	case TVI_CONTROL_VID_CHK_WIDTH:
 	case TVI_CONTROL_VID_CHK_HEIGHT:
