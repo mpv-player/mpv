@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.56 -->
+<!-- synced with 1.59 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -1929,7 +1929,14 @@ naziemnego), to możesz zapisać swoje pliki kanałów jako:
   następnego widzialnego kanału, lecz może to zająć trochę czasu jeżeli wystąpi
   po sobie wiele kanałów kodowanych.
 </para>
-
+<para>
+W polach audio i video możesz użyć rozszerzonej składni:
+<option>...:pid[+pid]:...</option> (każdy maksymalnie dla 6 pidów);
+W tym przypadku <application>MPlayer</application> uwzględni w strumieniu 
+wszystkie podane pidy, plus pid 0 (zawierający PAT). Zachęcamy do uwzględnienia
+w każdym wierszu pidu PMT (jeżeli go znasz) dla określanego kanału. Inne możliwe 
+zastosowania: pid televideo, druga ścieżka dźwiękowa, itp.
+</para>
 <para>
   Aby wyświetlić pierwszy z kanałów obecnych na Twojej liście uruchom
 </para>
@@ -2576,20 +2583,53 @@ Oczywiście najważniejsza jest część TwinView.
 <sect4 id="tvout-neomagic">
 <title>Neomagic</title>
 <para>
-Przetestowane na Toshiba Tecra 8000. Jego układ wyjścia TV jest żałosnym złomem. 
-Unikaj tego jeżeli tylko możesz.
-</para>
-<para>
-Musisz używać <option>-vo vesa</option>. Testowany układ był zdolny do
-wyświetlania obrazu tylko w formacie (proporcjach) 1.333333, wiec musisz używać
-opcji <option>-x</option>, <option>-y</option> i/lub filtrów
-<option>-vf scale,crop,expand</option> jeżeli sprzęt nie pozwoli Ci włączyć
-wyjścia TV. Maksymalną rozdzielczością było 720*576 przy 16bpp.
-</para>
-<para>
-Znane problemy: tylko VESA, ograniczenie do 1.33333, obraz nie zawsze jest
-wyśrodkowany, co 10 minut film zmienia się na 4bpp i tak zostaje. Częste twarde
-zwisy, problemy z wyświetlaczem LCD.
+Układ Neomagic Można znaleźć w rożnych laptopach, niektóre wyposażone są w
+prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Układ analogowy</emphasis>:
+	Przetestowane na Toshiba Tecra 8000. Jego układ wyjścia TV jest żałosnym złomem. 
+	Unikaj tego jeżeli tylko możesz.
+	</simpara>
+	<simpara>
+	Musisz używać <option>-vo vesa</option>. Testowany układ był zdolny do
+	wyświetlania obrazu tylko w formacie (proporcjach) 1.333333, wiec musisz używać
+	opcji <option>-x</option>, <option>-y</option> i/lub filtrów
+	<option>-vf scale,crop,expand</option> jeżeli sprzęt nie pozwoli Ci włączyć
+	wyjścia TV. Maksymalną rozdzielczością było 720*576 przy 16bpp.
+	</simpara>
+	<simpara>
+	Znane problemy: tylko VESA, ograniczenie do 1.33333, obraz nie zawsze jest
+	wyśrodkowany, co 10 minut film zmienia się na 4bpp i tak zostaje. Częste twarde
+	zwisy, problemy z wyświetlaczem LCD.
+  </simpara></listitem>
+	<listitem><simpara>
+  <emphasis role="bold">Układ kodujący Chrontel 70xx</emphasis>:
+  Obecny w IBM thinkpad 390E a także możliwe, że w innych Thinkpadach lub notebookach.
+	</simpara><simpara>
+	Dla trybu PAL musisz użyć <option>-vo vesa:neotv_pal</option>.
+	Dla truby NTSC - <option>-vo vesa:neotv_ntsc</option>.
+  Zapewni to funkcję wyjśca TV w następujących trybach 16 bpp i 8 bpp:
+	</simpara>
+	 <itemizedlist>
+	 <listitem><simpara>NTSC 320x240, 640x480, byćmoże także 800x600.</simpara></listitem>
+   <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.  </simpara></listitem>
+	 </itemizedlist>
+	 <simpara>Tryb 512x384 nie jest obsługiwany przez BIOS. Musisz przeskalować obraz
+						do innej rozdzielczości aby aktywować wyjście TV. Jeżeli widzisz obraz 
+						na ekranie w rozdzielczości 640x480 lub 800x600 lecz nie w 320x240, 
+						lub w innych mniejszych rozdzielczościach, to musisz zamienić dwie tabele w
+						<filename>vbelib.c</filename>.
+						Aby uzysać szczegóły zobacz do funkcji vbeSetTV. W tym przypadku skontaktuj
+						się z autorem.
+  </simpara>
+  <simpara>
+  Znane problemy: Tylko BESA, nie zaimplementowane inne kontrolki niż jasność, kontrast,
+	poziom czerni (blacklevel), filt migotania (flickfilter).
+  </simpara>
+	</listitem>
+  </itemizedlist>
+																				
 </para>
 </sect4>
 </sect3>
