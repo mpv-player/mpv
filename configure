@@ -1538,6 +1538,10 @@ if test "$_png" = auto ; then
     # incompatible with the GNU libpng
     echores "disabled on irix (not GNU libpng)"
   else
+cat > $TMPC << EOF
+#include <png.h>
+int main(void) { return 0; }
+EOF
     cc_check  -lpng -lz -lm && _png=yes
     echores yes
   fi
