@@ -82,12 +82,14 @@ static config_t gui_opts[] =
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
  { "font_name",&font_name,CONF_TYPE_STRING,0,0,0,NULL },
+#ifdef HAVE_FREETYPE 
  { "font_encoding",&subtitle_font_encoding,CONF_TYPE_STRING,0,0,0,NULL },
  { "font_text_scale",&text_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
  { "font_osd_scale",&osd_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
  { "font_blur",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
  { "font_outline",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
  { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
+#endif
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
