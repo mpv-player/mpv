@@ -3,7 +3,7 @@
 // Moritz Bunkus <moritz@bunkus.org>
 // Alexander Strasser <eclipse7@gmx.net>
 
-// In synch with rev 1.116
+// In synch with rev 1.117
 
 // ========================= MPlayer help ===========================
 
@@ -362,6 +362,9 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "Konnte keinen passenden Farbraum finden - versuche erneut mithilfe von -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Seitenverhältnis ist %.2f:1 - Skaliere zur korrekten Videogröße.\n"
 #define MSGTR_MovieAspectUndefined "Seitenverhältnis ist undefiniert - skaliere nicht.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
 
 // ====================== GUI messages/buttons ========================
 

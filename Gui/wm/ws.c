@@ -763,6 +763,8 @@ void wsFullScreen( wsTWindow * win )
 #ifdef ENABLE_DPMS
    wsScreenSaverOn( wsDisplay );
 #endif
+
+   vo_x11_ewmh_fullscreen( _NET_WM_STATE_REMOVE ); // removes fullscreen state if wm supports EWMH
   }
   else
    {
@@ -774,6 +776,8 @@ void wsFullScreen( wsTWindow * win )
 #ifdef ENABLE_DPMS
     wsScreenSaverOff( wsDisplay );
 #endif
+    
+     vo_x11_ewmh_fullscreen( _NET_WM_STATE_ADD ); // adds fullscreen state if wm supports EWMH
    }
 
  vo_x11_decoration( wsDisplay,win->WindowID,decoration );

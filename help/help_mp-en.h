@@ -360,6 +360,9 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
 
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen Event!\n"
+
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI

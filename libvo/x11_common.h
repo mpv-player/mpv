@@ -14,6 +14,12 @@
 #define vo_wm_BELOW 16
 #define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | vo_wm_BELOW)
 
+/* EWMH state actions, see
+	 http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
+#define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
+#define _NET_WM_STATE_ADD           1    /* add/set property */
+#define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
+
 extern int metacity_hack;
 extern int vo_fsmode;
 
@@ -62,6 +68,7 @@ extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
 extern void vo_x11_ontop();
+extern void vo_x11_ewmh_fullscreen( int action );
 
 #endif
 

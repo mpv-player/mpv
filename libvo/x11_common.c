@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <assert.h>
 
 #include "video_out.h"
 #include "aspect.h"
@@ -114,6 +115,48 @@ XF86VidModeModeLine modeline;
 #endif
 
 static int vo_x11_get_fs_type(int supported);
+
+
+/*
+ * Sends the EWMH fullscreen state event.
+ * 
+ * action: could be on of _NET_WM_STATE_REMOVE -- remove state
+ *                        _NET_WM_STATE_ADD    -- add state
+ *                        _NET_WM_STATE_TOGGLE -- toggle
+ */
+void vo_x11_ewmh_fullscreen( int action )
+{
+  assert( action == _NET_WM_STATE_REMOVE ||
+          action == _NET_WM_STATE_ADD ||
+          action == _NET_WM_STATE_TOGGLE    );
+  
+  if ( vo_fs_type & vo_wm_FULLSCREEN )
+  {
+    XEvent xev;
+  
+    /* init X event structure for _NET_WM_FULLSCREEN client msg */
+    xev.xclient.type = ClientMessage;
+    xev.xclient.serial = 0;
+    xev.xclient.send_event = True;
+    xev.xclient.message_type = XInternAtom( mDisplay,
+                                            "_NET_WM_STATE", False );
+    xev.xclient.window = vo_window;
+    xev.xclient.format = 32;
+    xev.xclient.data.l[0] = action;
+    xev.xclient.data.l[1] = XInternAtom( mDisplay,
+                                         "_NET_WM_STATE_FULLSCREEN", False );
+    xev.xclient.data.l[2] = 0;
+    xev.xclient.data.l[3] = 0;
+    xev.xclient.data.l[4] = 0;    
+  
+    /* finally send that damn thing */
+    if ( !XSendEvent( mDisplay, DefaultRootWindow( mDisplay ), False,
+  	              SubstructureRedirectMask | SubstructureNotifyMask, &xev ) )
+    {
+      mp_msg( MSGT_VO,MSGL_ERR, MSGTR_EwmhFullscreenStateFailed );
+    }
+  }
+}
 
 void vo_hidecursor ( Display *disp , Window win )
 {
@@ -1060,11 +1103,15 @@ void vo_x11_fullscreen( void )
 
  if ( vo_fs ){
    // fs->win
+   vo_x11_ewmh_fullscreen( _NET_WM_STATE_REMOVE ); // removes fullscreen state if wm supports EWMH
+   
    if(vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
    vo_fs=VO_FALSE;
    x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height;
  } else {
    // win->fs
+   vo_x11_ewmh_fullscreen( _NET_WM_STATE_ADD ); // sends fullscreen state to be added if wm supports EWMH
+   
    if(vo_old_width && 
      (vo_dwidth==vo_screenwidth && vo_dwidth!=vo_old_width) &&
      (vo_dheight==vo_screenheight && vo_dheight!=vo_old_height) ) return;
