@@ -1673,6 +1673,17 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
           bih->biCompression = mmioFOURCC('m', 'p', 'g', '2');
           track->reorder_timecodes = 1;
         }
+      else if (!strcmp(track->codec_id, MKV_V_MPEG4_AVC))
+        {
+          bih->biCompression = mmioFOURCC('a', 'v', 'c', '1');
+          if (track->private_data && (track->private_size > 0))
+            {
+              bih->biSize += track->private_size;
+              bih = (BITMAPINFOHEADER *) realloc (bih, bih->biSize);
+              memcpy (bih + 1, track->private_data, track->private_size);
+            }
+          track->reorder_timecodes = 1;
+        }
       else
         {
           mp_msg (MSGT_DEMUX,MSGL_WARN,"[mkv] Unknown/unsupported CodecID "
