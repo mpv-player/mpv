@@ -939,10 +939,11 @@ Available options:
     br=<value>      specify bitrate in
                     kbit <0-1024>
                     (only for CBR and ABR)
-    q=<value>       Quality
-                    (0-highest, 9-low)
-                    (for VBR)
-    aq=<value>      ?
+    q=<value>       quality
+                    (0-highest, 9-lowest)
+                    (only for VBR)
+    aq=<value>      algorithmic quality
+                    (0-best/slowest, 9-worst/fastest)
     ratio=<value>   compression ratio <1-100>
     vol=<value>     set audio input gain <0-10>
     mode=<value>    0=stereo
