@@ -384,6 +384,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	DCTELEM *block = (DCTELEM *)block_align;
 	DCTELEM *block2= (DCTELEM *)(block_align+16);
 
+	if (!src || !dst) return; // HACK avoid crash for Y8 colourspace
 	for(y=0; y<height; y++){
 		int index= 8 + 8*stride + y*stride;
 		memcpy(p->src + index, src + y*src_stride, width);
