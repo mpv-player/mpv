@@ -55,7 +55,7 @@ void mplStop()
 {
  if ( !mplShMem->Playing ) return;
 // ---
-printf("%%%%%% STOP  \n");
+//printf("%%%%%% STOP  \n");
 // ---
  mplShMem->Playing=0;
  if ( !appMPlayer.subWindow.isFullScreen )
@@ -69,10 +69,11 @@ printf("%%%%%% STOP  \n");
 
 void mplPlay( void )
 {
- if ( mplShMem->Filename[0] == 0 ) return;
- if ( mplShMem->Playing ) mplStop();
+ if ( ( mplShMem->Filename[0] == 0 )&&
+      ( mplShMem->Playing == 1 ) ) return;
+ if ( mplShMem->Playing == 2 ) { mplPause(); return; }
 // ---
-printf("%%%%%% PLAY  \n");
+//printf("%%%%%% PLAY  \n");
 // ---
  mplShMem->Playing=1;
  mplSubRender=0;
@@ -80,12 +81,24 @@ printf("%%%%%% PLAY  \n");
 
 void mplPause( void )
 {
- if ( mplShMem->Playing != 1 ) return;
 // ---
-printf("%%%%%% PAUSE  \n");
+//printf("%%%%%% PAUSE  \n");
 // ---
- mplShMem->Playing=2;
- mplSubRender=0;
+ switch( mplShMem->Playing )
+  {
+   case 1: // playing
+        mplShMem->Playing=2;
+	btnModify( evPlaySwitchToPause,btnReleased );
+	btnModify( evPauseSwitchToPlay,btnDisabled );
+        mplSubRender=0;
+	break;
+    case 2: // paused
+	mplShMem->Playing=1;
+	btnModify( evPlaySwitchToPause,btnDisabled );
+	btnModify( evPauseSwitchToPlay,btnReleased );
+        mplSubRender=0;
+	break;
+  }
 }
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
