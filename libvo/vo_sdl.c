@@ -89,8 +89,6 @@
  *    Felix Buenemann: further changes will be visible through cvs log, don't want
  *     to update this all the time (CVS info on http://mplayer.sourceforge.net)
  *
- *    KNOWN BUGS:
- *    - Crashes with aalib (fixed, but have to find cause!)
  */
 
 /* define to force software-surface (video surface stored in system memory)*/
@@ -337,9 +335,7 @@ static int sdl_open (void *plugin, void *name)
     * 8-bits, for example. So, if the display is less than 16-bits,
     * we'll force the BPP to 16, and pray that SDL can emulate for us.
     */
-	//commented out for RGB test reasons
 	priv->bpp = vidInfo->vfmt->BitsPerPixel;
-	//FIXME: DO NOT ADD ANY CODE BELOW THIS OR SDL WILL CRASH WITH AALIB!
 	if (!priv->mode && priv->bpp < 16) {
 
 		if(verbose) printf("SDL: Your SDL display target wants to be at a color depth of (%d), but we need it to be at\
@@ -353,15 +349,15 @@ increase your display's color depth, if possible.\n", priv->bpp);
 	 * We use SDL_KEYUP cause SDL_KEYDOWN seems to cause problems
 	 * with keys need to be pressed twice, to be recognized.
 	 */
-	/*SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_KEYDOWN, SDL_IGNORE);
+#ifndef BUGGY_SDL	
+	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
 	SDL_EventState(SDL_QUIT, SDL_IGNORE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);*/
-	
+	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+#endif	
 	
 	/* Success! */
 	return 0;
