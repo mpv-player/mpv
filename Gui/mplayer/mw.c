@@ -219,20 +219,14 @@ void mplMainDraw( void )
             break;
        case itSLabel:
             image=fntRender( item,0,"%s",item->label );
-            goto drawrenderedtext;
+            if ( image ) PutImage( image,item->x,item->y,1,0 );
        case itDLabel:
             {
 	     char * t = Translate( item->label );
 	     int    l = fntTextWidth( item->fontid,t );
              image=fntRender( item,(GetTimerMS() / 20)%(l?l:item->width),"%s",t );
 	    }
-drawrenderedtext:
-            if ( image )
-             {
-              PutImage( image,item->x,item->y,1,0 );
-              if ( image->Image ) free( image->Image );
-              free( image );
-             }
+            if ( image ) PutImage( image,item->x,item->y,1,0 );
             break;
       }
     }

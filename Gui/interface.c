@@ -277,6 +277,7 @@ void guiInit( void )
 
 void guiDone( void )
 {
+ mplMainRender=0;
  mp_msg( MSGT_GPLAYER,MSGL_V,"[gui] done.\n" );
  cfg_write();
  wsXDone();
@@ -284,7 +285,7 @@ void guiDone( void )
 
 int guiCMDArray[] =
  {
-  evLoad,
+  evLoadPlay,
   evLoadSubtitle,
   evAbout,
   evPlay,
