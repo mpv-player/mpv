@@ -327,6 +327,15 @@ if(!codec_inited){
   
     cres=ImageCodecPreDecompress(ci,&decpar);
     printf("ImageCodecPreDecompress cres=0x%X\n",cres);
+    
+    if(decpar.wantedDestinationPixelTypes)
+    { OSType *p=*(decpar.wantedDestinationPixelTypes);
+      if(p) while(*p){
+          printf("supported csp: 0x%08X %.4s\n",*p,p);
+	  ++p;
+      }
+    }
+    
 
 //    decpar.conditionFlags=0x10FFF; // first
 //    decpar.preferredOffscreenPixelSize=17207;
