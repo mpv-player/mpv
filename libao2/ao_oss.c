@@ -147,6 +147,9 @@ ac3_retry:
   }
   mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
+  if(ao_data.format!=format)
+	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
+
   
   if(format != AFMT_AC3) {
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
