@@ -200,6 +200,16 @@ query_format(uint32_t format)
     return 0;
 }
 
+static uint32_t control(uint32_t request, void *data, ...)
+{
+  switch (request) {
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
+}
+
+
 static int mga_init(){
 	char *frame_mem;
 
@@ -232,3 +242,9 @@ static int mga_uninit(){
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	close(f);
 }
+
+static uint32_t preinit(const char *arg)
+{
+  return 0;
+}
+
