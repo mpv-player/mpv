@@ -49,13 +49,14 @@ static vo_info_t vo_info =
 static Window mWindow;
 static int X_already_started = 0;
 
+/* Colorkey handling */
 static GC mGC;
 static XGCValues mGCV;
 static uint32_t	fgColor;
+static vidix_grkey_t gr_key;
 
-/* VIDIX related stuff */
-static const char *vidix_name = (char *)(-1);
-static int pre_init_err = 0;
+/* VIDIX related */
+static char *vidix_name;
 
 /* Image parameters */
 static uint32_t image_width;
@@ -67,12 +68,10 @@ static uint32_t image_depth;
 static uint32_t window_x, window_y;
 static uint32_t window_width, window_height;
 
-/* used by XGetGeometry & XTranslateCoordinates */
+/* used by XGetGeometry & XTranslateCoordinates for moving/resizing window */
 static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight, mFullscreen;
-
-static vidix_grkey_t gr_key;
 
 static void set_window(int force_update)
 {
@@ -169,7 +168,6 @@ static void set_window(int force_update)
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	window_x, window_y, window_width, window_height);
 
-
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
@@ -195,11 +193,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     XWindowAttributes attribs;
     int window_depth;
 
-    if(pre_init_err)
-    {
-	mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] Quiting due preinit error\n");
-	return -1;
-    }
 //    if (title)
 //	free(title);
     title = strdup("MPlayer VIDIX X11 Overlay");
@@ -390,7 +383,6 @@ static const vo_info_t *get_info(void)
     return(&vo_info);
 }
 
-
 static void check_events(void)
 {
     const int event = vo_x11_check_events(mDisplay);
@@ -437,30 +429,8 @@ static uint32_t draw_frame(uint8_t *src[])
 
 static uint32_t query_format(uint32_t format)
 {
-  static int first = 1;
-  if(first)
-  {
-    first = 0;
-    if (vidix_name == (char *)(-1))
-    {
-	if (vo_subdevice)
-	    vidix_name = strdup(vo_subdevice);
-	else
-	{
-    	    mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available drivers!\n");
-	    vidix_name = NULL;
-	}
-    }
-
-    if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
-    {
-	pre_init_err = 1;
-	return(0);
-    }
-  }    
-  return(pre_init_err ? 0 : vidix_query_fourcc(format));
+  return(vidix_query_fourcc(format));
 }
-
 
 static void uninit(void)
 {
@@ -493,7 +463,18 @@ static void Terminate_Display_Process(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if (arg)
+        vidix_name = strdup(arg);
+    else
+    {
+	mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available ones!\n");
+	vidix_name = NULL;
+    }
+
+    if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
+	return(1);
+
+    return(0);
 }
 
 static void query_vaa(vo_vaa_t *vaa)
