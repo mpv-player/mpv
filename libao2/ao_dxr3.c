@@ -207,8 +207,6 @@ static int get_space()
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
-    if( ioctl( fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_data.pts ) < 0 )
-	printf( "AO: [dxr3] Unable to set PTS\n" );
     if( ao_data.samplerate < 44100 )
     {
 	int i,j,ratio,len2;

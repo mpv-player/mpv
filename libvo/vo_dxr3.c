@@ -68,8 +68,6 @@ static vo_info_t vo_info =
 
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
-    if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
-	printf( "VO: [dxr3] Unable to set video PTS\n" );
     write( fd_video, data, size );
 }
 
@@ -267,9 +265,6 @@ static uint32_t draw_frame(uint8_t * src[])
     {
         int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
-
-	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
-	    printf( "VO: [dxr3] Unable to set video PTS\n" );
 
 	data_left = p->size;
 	while( data_left )
