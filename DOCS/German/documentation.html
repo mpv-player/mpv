@@ -117,6 +117,20 @@
       </UL>
     </UL>
     <LI><A HREF="encoding.html#2.4">2.4 MEncoder - Ein Encoder basierend auf MPlayer</A></LI>
+      <UL>
+        <LI><A HREF="encoding.html#2.4.1">2.4.1 Übersicht</A></LI>
+        <LI><A HREF="encoding.html#2.4.2">2.4.2 Kompierung</A></LI>
+        <LI><A HREF="encoding.html#2.4.3">2.4.3 Features</A></LI>
+          <UL>
+            <LI><A HREF="encoding.html#2.4.3">2.4.3 Zusammenfassung</A></LI>
+            <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 2-Pass DivX4 Enkodierung</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Rescaling von Filem</A></LI>
+            <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
+          </UL>
+        <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
+	<LI><A HREF="encoding.html#2.4.5">2.4.5 Verfügbare Optionen</A></LI>
+	<LI><A HREF="encoding.html#2.4.6">2.4.6 Beispiele</A></LI>
+      </UL>
     <LI><A HREF=#2.5>2.5 TV Eingang</A></LI>
   </UL>
   <LI><A HREF="#3">3. Verwendung</A></LI>
@@ -362,6 +376,48 @@ Karte besitzt, wir haben einen <B>XXX_vid</B>-Treiber für dich mit TV-Out ! Sieh
 HREF="video.html#2.3.1.14">hier</A>!</LI>
 </UL>
 
+<LI><B>S3 Karten</B> : Die Savage Chips besitzen Hardwarebeschleunigung. Verwende
+die neueste XFree86 Version die möglich ist, ältere Treiber sind fehlerhaft. Savage Chips
+machen Problem mit YV12 Anzeige, siehe <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A>
+für Details. Ältere, nicht-Savage Karten haben keine oder langsamen Hardwaresupport.</LI>
+
+<LI><B>Nvidia Karte</B> : sehr schlecht Wahl für Vidiowiedergabe. Nvidias Karten
+werden im Fernen Osten erzeugt und haben sehr billige und qulitat minderwertige Chips.
+<U>Der eingebaute Nvidia Treiber in XFree86 enthält keine Hardwareunterstützung
+für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von nvidia.com downloaden.
+Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
+
+<LI><B>andere Karten</B> : keine oben genannte?
+  <UL>
+  <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
+  Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
+  <LI>Wenn es Xv nicht unterstützt ist deine Karte eine von diesen:</LI>
+  </UL>
+</LI>
+
+</UL>
+</P>
+			
+<P>
+<B><I>Nicht-YUV Karten</I></B></P>
+			
+<P>
+Vollbild kann durch Zoomen (<B>per Software</B>, dies ist langsam) erreicht werden oder durch
+das Wechseln in ein kleineres Videomodus, wie zum Beispiel. Wenn du keine YUV Beschleunigung hast
+ist das Letztgenannte zu empfehlen. Bei <B>MPlayer</B> <U>kann dieses Verhalten durch das Verwenden
+der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werden:
+<UL>
+  <LI><B>Verwendung von</B> XFree86: siehe Details in der
+  <A HREF="video.html#2.3.1.3">DGA Treiber</A> und der
+  <A HREF="video.html#2.3.1.13">X11 Treiber</A> Sektion. DGA ist empfohlen!</LI>
+  <LI><B>Ohne</B> XFree86 : versuche die Treiber in folgender Reihenfolge:
+    <A HREF="video.html#2.3.1.12">vesa</A>,
+    <A HREF="video.html#2.3.1.6">fbdev</A>,
+    <A HREF="video.html#2.3.1.5">svgalib</A>,
+    <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
+</UL>
+</P>
+				
 <P><B><I>SOUNDKARTEN</I></B></P>
 
 <UL>
@@ -369,9 +425,13 @@ HREF="video.html#2.3.1.14">hier</A>!</LI>
 anstelle von 2 verwenden. Lese die <A HREF="codecs.html#2.2.2.1">Softwaremäßige AC3-Dekodierung</A> Sektion.</LI>
 </UL>
 
+<LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
+<U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
+</UL>
+    
 <P><B><I>FEATURES</I></B></P>
 
-<LI>Für DVD-Unterstützung musst libdvdread und libdvdcss kompilieren. Lese dazu die
+<LI>Für DVD-Unterstützung musst libdvdcss und libdvdread kompilieren (und in dieser Reichenfolge. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
 
 <LI>Entscheinde dich, ob du GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
@@ -432,6 +492,10 @@ Um MPlayer im GUI-Modus zu betreiben kannst du entweder
   und <CODE>gmplayer</CODE> aufrufen.
 </UL>
 </P>
+
+<P>Weil GTK nicht als <B>setuid root</B> Binary läuft kannst du das GUI und
+den <B>neuen Timing-Code</B> (oben beschrieben) nicht gleichzeitig benutzen (ausser wenn du
+<B>MPlayer</B> als root laufen lässt natürlich).</P>
 
 <P>Da <B>MPlayer</B> keine Skins enthält musst du dir welche downloaden, wenn du
 das GUI verwenden willst. Schau dazu auf die <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>.
@@ -654,7 +718,7 @@ Dummy Ausgabe zu AAlib :)<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
 <BR>
 Eingabe von Standard-V4L<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=800:height=600:device=/dev/video0:input=television:outfmt=yv12 -vc rawyv12 -vo xv</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=800:height=600:device=/dev/video0:input=television:outfmt=yv12 -vo xv</CODE><BR>
 </P>
 
 
@@ -677,49 +741,56 @@ Eingabe von Standard-V4L<BR>
 <P><B><A NAME=3.1>3.1. Steuerung mit der Tastatur</A></B></P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Suche zurück/vorwärts 10 Sekunden</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nach-oben und nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 1 Minute</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 10 Minute</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p oder Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause (drücke irgendeine Taste um weiterzumachen)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q oder STRG-C</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stoppe die Wiedergabe und beende Programm</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ oder -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/  und *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vermindere/erhöhe Lautstärke</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen Master/PCM-Channel für Lautstärkenregelung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen Vollbild-Modus (nur mit -vo sdl)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z oder x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD><TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Suche zurück/vorwärts 10 Sekunden</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nach-oben und nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 1 Minute</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 10 Minute</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p oder Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q oder ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stoppe die Wiedergabe und beende Programm</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ oder -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/  und *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vermindere/erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen Master/PCM-Channel für Lautstärkenregelung</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z oder x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
 
-<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig, wenn man DirectShow DivX Codecs verwendet)</I></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 oder 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Helligkeits-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 oder 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Farbton-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 oder 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Sättigungs-Einstellung</TD><TR>
-</TABLE></P>
+<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig, wenn man DirectShow DivX Codecs verwendet)</I></P></TD></TR>
 
-<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig, wenn man TV-Input verwendet</I></P></TD><TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 oder 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Helligkeits-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 oder 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Farbton-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 oder 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Sättigungs-Einstellung</TD></TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt vorherigen/nächsten Kanal</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanelliste</TD><TR>
+<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig bei Verwendung von TV-Input</I></P></TD></TR>
+   
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verheriger/nächster Kanal</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste/TD></TR>
 </TABLE></P>
 
 <P><B>GUI Keyboard-Tasten</B></P>
    
 <P><TABLE BORDER=0>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, und .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verherige / nächste Datei</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>graues - und +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringere / erhöhe Lautstärke</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>startet Wiedergabe</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Stop</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>über</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lädt Datei</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Skin-Browser</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Equalizer</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Playliste</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zu/von Vollbild</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert/deaktiviert Mute</TD><TR>
 
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, und .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verherige / nächste Datei</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>graues - und +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringere / erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>startet Wiedergabe</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Stop</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>über</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lädt Datei</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Skin-Browser</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Equalizer</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Playliste</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zu/von Vollbild</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert/deaktiviert Mute</TD></TR>
+</TABLE></P>
+
+<P><B>TV Input Kontroll</B></P>
+
+<P><TABLE BORDER=0>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verheriger/nächster Kanal</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste/TD></TR>
 </TABLE></P>
 
 <P><B><A NAME=3.2>3.2. Steuerung mit LIRC (Linux Infrared Remote Control)</A></P></B>
@@ -1221,6 +1292,11 @@ Autoren!</P>
   <LI>NAS audio output driver</LI>
 </UL></LI>
 
+<LI><B><A HREF="mailto:foth@informatik.uni-hamburg.de">Kilian A. Foth</A></B>
+<UL>
+  <LI>-slave mode</LI>
+</UL></LI>
+
 </UL></P>
 
 <P>Main testers:</P>
@@ -1527,3 +1603,4 @@ erwarte das nicht von x11 oder dga.</P>
 
 </BODY>
 </HTML>
+
