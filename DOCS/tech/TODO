@@ -2,21 +2,44 @@
 TODO:
 =====
 
+FOR THE RELEASE:
+~~~~~~~~~~~~~~~~
+
 demuxer:
 - .VDR files from stdinput (ff detection bug) -- DONE (?)
-- CivIIIE3Teaser.wmv (asf demuxer bug) -- DONE (not bug!, just use -vid 4)
 - test and cleanup FLI/FLC support (and implement seek)
 - check dvdread/dvdcss version problems -- .so ?
-- add -dumpstream  -- DONE!
-- clean up vcd support (so it can be en/disabled) -- DONE!
+
+decoders:
+- finish native g72x audio decoder
+- fix the MSVideo1-bugs -- DONE?
+- finish and switch to C directshow code
+
+mencoder:
+- add ffmpeg encoders support
+- add win32 encoders support
+- add raw video out
+- check/fix frame copy
+- implement CBR mp3 encoding
+- implement VBR audio copy
+- Estimated Size and Time
+- image cut/crop filter
+
+other:
+- fix DVB a-v sync problems, switch to mp1e
+- check if runtime cpu detection works and complete, and add ./configure option
+  and announce it and so on...
+
+
+FUTURE:
+~~~~~~~
+
+demuxer:
 - implement forward seeking in indexed avi streams
 
 decoders:
 - check and import videodecoding.de stuff
-- finish and switch to C directshow code
-- finish native g72x audio decoder
 - qtx support?
-- fix the MSVideo1-bugs
 - define some common api for native audio and video codecs
   and move them to seperated place (hopefully will allow adding new
   codecs without having to modify mplayer core code, also would speed
@@ -24,28 +47,17 @@ decoders:
 - switch to liba52 for ac3 decoding
 
 mencoder:
-- add ffmpeg encoders support
 - add ogg/vorbis audio encoder
-- add raw video out
-- check/fix frame copy
-- implement CBR mp3 encoding
-- implement VBR audio copy
-- Estimated Size and Time
 - stop/resume
-- image resize filter - implement bicubic downscaling
-- image cut/crop filter
 
 gui:
 - playlist ?
 - preferences ?
 
 other:
-- fix DVB a-v sync problems, switch to mp1e
 - dvd server
 - sub database
 - mga_vid crtc2 fix
 - make mach64_vid
 - libvo2
-- check if runtime cpu detection works and complete, and add ./configure option
-  and announce it and so on...
   
