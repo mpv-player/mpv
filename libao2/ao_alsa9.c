@@ -2,6 +2,8 @@
   ao_alsa9 - ALSA-0.9.x output plugin for MPlayer
 
   (C) Alex Beregszaszi <alex@naxine.org>
+
+  Don't use this buggy driver, ALSA-0.9.x emulates OSS very well...
 */
 
 #include <errno.h>
@@ -83,6 +85,8 @@ static int init(int rate_hz, int channels, int format, int flags)
     int err;
     int cards = -1;
     snd_pcm_info_t *alsa_info;
+    
+    printf("alsa-init: Don't use this buggy driver, ALSA-0.9.x emulates OSS very well...\n");
 
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
