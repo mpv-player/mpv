@@ -1174,6 +1174,17 @@ Because the bitrate you encoded the audio with is too large to fit the
 movie on any CD. Check if you have libmp3lame installed properly.
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+I can't encode ASF files to AVI/DivX because it uses 1000 fps?
+</para></question>
+<answer><para>
+Because ASF uses variable frame rate but AVI uses a fixed one, you 
+have to set it by hand using <option>-ofps</option>.</DD>
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
