@@ -626,32 +626,73 @@ void blur(
 
     unsigned char *s = buffer - r;
     unsigned char *t = tmp;
+    
+    int *m_end=m+256*mwidth;
+
     for (y = 0; y<height; ++y) {
 	for (x = 0; x<width; ++x, ++s, ++t) {
-	    unsigned sum = 0;
+	    unsigned sum = 65536/2;
 	    int x1 = (x<r) ? r-x:0;
 	    int x2 = (x+r>=width) ? (r+width-x):mwidth;
+	    unsigned* mp = m + 256*x1;
 	    int mx;
-	    for (mx = x1; mx<x2; ++mx)
-		sum+= s[mx] * m[mx];
-	    *t = (sum + volume/2) / volume;
-	    //*t = sum;
+	    for (mx = x1; mx<x2; ++mx, mp+=256)	sum+= mp[s[mx]];
+	    *t = sum>>16;
 	}
     }
     tmp -= r*width;
+
     for (x = 0; x<width; ++x, ++tmp, ++buffer) {
+	int y1max=(r<height)?r:height;
+	int y2min=height-r;
+	if(y2min<y1max) y2min=y1max;
 	s = tmp;
 	t = buffer;
+#if 0
 	for (y = 0; y<height; ++y, s+= width, t+= width) {
-	    unsigned sum = 0;
+	    unsigned sum = 65536/2;
 	    int y1 = (y<r) ? r-y:0;
 	    int y2 = (y+r>=height) ? (r+height-y):mwidth;
-	    unsigned char *smy = s + y1*width;
+	    register unsigned *mp = m + 256*y1;
+	    register unsigned char *smy = s + y1*width;
 	    int my;
-	    for (my = y1; my<y2; ++my, smy+= width)
-		sum+= *smy * m[my];
-	    *t = (sum + volume/2) / volume;
+	    for (my = y1; my<y2; ++my, smy+= width, mp+=256)
+		sum+= mp[*smy];
+	    *t = sum>>16;
 	}
+#else
+	// pass 1:  0..r
+	for (y = 0; y<y1max; ++y, s+= width, t+= width) {
+	    unsigned sum = 65536/2;
+	    int y1 = r-y;
+	    int my = y1;
+	    int y2 = (y+r>=height) ? (r+height-y):mwidth;
+	    unsigned char *smy = s + y1*width;
+	    unsigned* mp = m + 256*y1;
+	    for (; my<y2; ++my, smy+= width, mp+=256) sum+=mp[*smy];
+	    *t = sum>>16;
+	}
+	// pass 2:  r..(height-r)
+	for (; y<y2min; ++y, s+= width, t+= width) {
+	    unsigned sum = 65536/2;
+	    unsigned char *smy = s;
+	    unsigned* mp = m;
+//	    int my=0;
+//	    for (; my<mwidth; ++my, smy+=width, mp+=256) sum+=mp[*smy];
+	    for (; mp<m_end; smy+=width, mp+=256) sum+=mp[*smy];
+	    *t = sum>>16;
+	}
+	// pass 3:  (height-r)..height
+	for (; y<height; ++y, s+= width, t+= width) {
+	    unsigned sum = 65536/2;
+	    int y2 = r+height-y;
+	    unsigned char *smy = s;
+	    unsigned* mp = m;
+	    int my=0;
+	    for (; my<y2; ++my, smy+= width, mp+=256) sum+=mp[*smy];
+	    *t = sum>>16;
+	}
+#endif
     }
 }
 
@@ -691,11 +732,12 @@ void alpha() {
     unsigned volume = 0;		// volume under Gaussian area is exactly -pi*base/A
 
     unsigned *g = (unsigned*)malloc(g_w * sizeof(unsigned));
+    unsigned *gt = (unsigned*)malloc(256 * g_w * sizeof(unsigned));
     unsigned *om = (unsigned*)malloc(o_w*o_w * sizeof(unsigned));
     unsigned char *omt = malloc(o_size*256);
     unsigned char *omtp = omt;
 
-    if (g==NULL || om==NULL || omt==NULL) ERROR("malloc failed.");
+    if (g==NULL || gt==NULL || om==NULL || omt==NULL) ERROR("malloc failed.");
 
     // gaussian curve
     for (i = 0; i<g_w; ++i) {
@@ -705,6 +747,12 @@ void alpha() {
     }
     //volume *= volume;
     if (DEBUG) eprintf("\n");
+
+    // gauss table:
+    for(mx=0;mx<g_w;mx++){
+	for(i=0;i<256;i++)
+	    gt[256*mx+i] = (i*g[mx]*65536+(volume/2))/volume;
+    }
 
     /* outline matrix */
     for (my = 0; my<o_w; ++my) {
@@ -733,7 +781,8 @@ void alpha() {
     printf("outline: %7d us\n",ttime);
 
     ttime=GetTimer();
-    blur(abuffer, bbuffer, width, height, g, g_r, g_w, volume);
+//    blur(abuffer, bbuffer, width, height, g, g_r, g_w, volume);
+    blur(abuffer, bbuffer, width, height, gt, g_r, g_w, volume);
     ttime=GetTimer()-ttime;
     printf("gauss:   %7d us\n",ttime);
 
