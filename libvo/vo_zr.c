@@ -492,7 +492,7 @@ static uint32_t draw_frame(uint8_t * src[]) {
 
 static uint32_t query_format(uint32_t format) {
 	if(format==IMGFMT_YV12 || format==IMGFMT_YUY2) 
-	    return VFCAP_CSP_SUPPORTED|VFCAP_SUPPORTED_BY_HW;
+	    return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
 	return 0;
 }
 
