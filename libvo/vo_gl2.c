@@ -617,12 +617,18 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if (X_already_started) return -1;
 	if(!vo_init()) return -1;
 
+	aspect_save_orig(width,height);
+	aspect_save_prescale(d_width,d_height);
+	aspect_save_screenres(vo_screenwidth,vo_screenheight);
+
+	aspect(&d_width,&d_height,A_NOZOOM);
+
 	X_already_started++;
 
         if( flags&0x01 )
         {
-	  isFullscreen = GL_TRUE;
-          aspect(&d_width,&d_height,vo_screenwidth,vo_screenheight);
+	        isFullscreen = GL_TRUE;
+                aspect(&d_width,&d_height,A_ZOOM);
 		hint.x = 0;
 		hint.y = 0;
 		hint.width = vo_screenwidth;
