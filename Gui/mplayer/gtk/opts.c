@@ -123,6 +123,7 @@ static struct
   { "iso-8859-1",  MSGTR_PREFERENCES_FontEncoding2 },
   { "iso-8859-15", MSGTR_PREFERENCES_FontEncoding3 },
   { "iso-8859-2",  MSGTR_PREFERENCES_FontEncoding4 },
+  { "cp1250",      MSGTR_PREFERENCES_FontEncoding22},
   { "iso-8859-3",  MSGTR_PREFERENCES_FontEncoding5 },
   { "iso-8859-4",  MSGTR_PREFERENCES_FontEncoding6 },
   { "iso-8859-5",  MSGTR_PREFERENCES_FontEncoding7 },
