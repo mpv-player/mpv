@@ -3,19 +3,20 @@
 #include "libwin32.h"
 
 #include "DS_VideoDecoder.h"
-#include <wine/winerror.h>
+#include "wine/winerror.h"
 //#include <cpuinfo.h>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <iostream>
-#include <strstream>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <errno.h>
+//#include <sys/types.h>
+//#include <sys/mman.h>
 
-#include <registry.h>
+//#include <cstdio>
+//#include <iostream>
+//#include <strstream>
+
+#include "registry.h"
 //#include <wine/winreg.h>
 
 #include "DS_VideoDec.h"

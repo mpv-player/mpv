@@ -33,7 +33,7 @@
 #include <wine/vfw.h>
 #include <com.h>
 #include <stdarg.h>
-#include <string>
+//#include <string>
 #include <stdio.h>
 
 typedef unsigned int uint_t;    // use as generic type -
@@ -55,7 +55,8 @@ struct FatalError
 
 struct CodecInfo
 {
-    std::string dll;
+//    std::string dll;
+    char* dll;
     GUID guid;
 };
 

@@ -2,8 +2,12 @@
 #include "allocator.h"
 #include "iunk.h"
 #include "wine/winerror.h"
-#include <cstdio>
-#include <cstring>
+
+#include "stdio.h"
+//#include "string.h"
+
+//#include <cstdio>
+//#include <cstring>
 
 /*
     An object beyond interface IEnumMediaTypes.

@@ -1,7 +1,7 @@
 #ifndef AVIFILE_DSHOW_H
 #define AVIFILE_DSHOW_H
 
-#include <libwin32.h>
+#include "libwin32.h"
 #include "DS_Filter.h"
 
 class DS_AudioDecoder : public IAudioDecoder

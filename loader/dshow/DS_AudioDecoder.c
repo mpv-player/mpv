@@ -68,7 +68,7 @@ DS_AudioDecoder::DS_AudioDecoder(const CodecInfo& info, const WAVEFORMATEX* wf)
     try
     {
         m_pDS_Filter = new DS_Filter();
-	m_pDS_Filter->Create(info.dll.c_str(), &info.guid, &m_sOurType, &m_sDestType);
+	m_pDS_Filter->Create(info.dll, &info.guid, &m_sOurType, &m_sDestType);
 	m_pDS_Filter->Start();
 
 	ALLOCATOR_PROPERTIES props, props1;

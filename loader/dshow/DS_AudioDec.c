@@ -3,18 +3,18 @@
 #include "interfaces.h"
 
 #include "DS_AudioDecoder.h"
-#include <wine/winerror.h>
-#include <libwin32.h>
+#include "wine/winerror.h"
+#include "libwin32.h"
 //#include <cpuinfo.h>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <iostream>
-#include <strstream>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <errno.h>
+//#include <sys/types.h>
+//#include <sys/mman.h>
+//#include <cstdio>
+//#include <iostream>
+//#include <strstream>
 
 #include "DS_AudioDec.h"
 

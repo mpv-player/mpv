@@ -18,9 +18,10 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <cstdio>
-#include <iostream>
-#include <strstream>
+
+//#include <cstdio>
+//#include <iostream>
+//#include <strstream>
 
 #define __MODULE__ "DirectShow_VideoDecoder"
 
@@ -83,7 +84,7 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
 
 	HRESULT result;
 
-	m_pDS_Filter->Create(info.dll.c_str(), &info.guid, &m_sOurType, &m_sDestType);
+	m_pDS_Filter->Create(info.dll, &info.guid, &m_sOurType, &m_sDestType);
 
 	if (!flip)
 	{
@@ -150,10 +151,10 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
 	m_sVhdr2->bmiHeader.biCompression = 0;
 	m_sDestType.subtype = MEDIASUBTYPE_RGB24;
 
-	m_bIsDivX = ((info.dll == string("divxcvki.ax"))
-		     || (info.dll == string("divx_c32.ax"))
-		     || (info.dll == string("wmvds32.ax"))
-		     || (info.dll == string("wmv8ds32.ax")));
+	m_bIsDivX = ((strcmp(info.dll,"divxcvki.ax")==0)
+		  || (strcmp(info.dll,"divx_c32.ax")==0)
+		  || (strcmp(info.dll,"wmvds32.ax")==0)
+		  || (strcmp(info.dll,"wmv8ds32.ax")==0) );
 
 	printf("m_bIsDivX=%d\n",m_bIsDivX);
     }
@@ -501,7 +502,7 @@ HRESULT DS_VideoDecoder::GetValue(const char* name, int& value)
 	    return 0;
 	}
     }
-    else if (record.dll == string("ir50_32.dll"))
+    else if (strcmp(record.dll,"ir50_32.dll")==0)
     {
 	IHidden2* hidden = 0;
 	if (m_pDS_Filter->m_pFilter->vt->QueryInterface((IUnknown*)m_pDS_Filter->m_pFilter, &IID_Iv50Hidden, (void**)&hidden))
@@ -584,7 +585,7 @@ HRESULT DS_VideoDecoder::SetValue(const char* name, int value)
 	if (strcmp(name, "Hue") == 0)
 	    return hidden->vt->SetSmth5(hidden, value, 0);
     }
-    else if (record.dll == string("ir50_32.dll"))
+    else if (strcmp(record.dll,"ir50_32.dll")==0)
     {
 	IHidden2* hidden = 0;
 	if (m_pDS_Filter->m_pFilter->vt->QueryInterface((IUnknown*)m_pDS_Filter->m_pFilter, &IID_Iv50Hidden, (void**)&hidden))
