@@ -37,23 +37,51 @@ html-chunked: $(HTMLDIR)/index.html
 html-single: $(HTMLFILE)
 
 $(HTMLDIR)/index.html: documentation.xml $(CHUNK_XSL_DEPS)
-	@if test "$(HTMLDIR)" = "" ; then echo "Error: HTMLDIR not set!!!"; echo "Typically this means, that you've run make from subdir of DOCS/xml. Don't do this!" ; false; fi
-	if test "$(USE_SYMLINKS)" = "yes" ; then for file in ../en/*.xml ; do if ! test -r `basename $$file` ; then ln -s $$file `basename $$file` ; fi ; done ; fi
+	@if test "$(HTMLDIR)" = "" ; then \
+		echo "Error: HTMLDIR not set!!!"; \
+		echo "Typically this means, that you've run make from a subdir of DOCS/xml."; \
+		echo "Don't do this!"; \
+		false; \
+	fi
+	if test "$(USE_SYMLINKS)" = "yes" ; then \
+		for file in ../en/*.xml ; do \
+		if ! test -r `basename $$file` ; then \
+			ln -s $$file `basename $$file` ; \
+		fi ; \
+		done ; \
+	fi
 	-rm -f $(HTMLDIR)/*
 	../xmllint.sh $<
 	cp $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
 $(HTMLFILE): documentation.xml $(XSL_DEPS)
-	@if test "$(HTMLFILE)" = "" ; then echo "Error: HTMLFILE not set!!!"; echo "Typically this means, that you've run make from subdir of DOCS/xml. Don't do this!" ; false; fi
-	if test "$(USE_SYMLINKS)" = "yes" ; then for file in ../en/*.xml ; do if ! test -r `basename $$file` ; then ln -s $$file `basename $$file` ; fi ; done ; fi
+	@if test "$(HTMLFILE)" = "" ; then \
+		echo "Error: HTMLFILE not set!!!"; \
+		echo "Typically this means, that you've run make from a subdir of DOCS/xml."; \
+		echo "Don't do this!"; \
+		false; \
+	fi
+	if test "$(USE_SYMLINKS)" = "yes" ; then \
+		for file in ../en/*.xml ; do \
+		if ! test -r `basename $$file` ; then \
+			ln -s $$file `basename $$file` ; \
+		fi ; \
+		done ; \
+	fi
 	-rm -f $(HTMLFILE)
 	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
 	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
 
-../html-single.xsl:
-	cd .. && sh configure
+#../html-single.xsl:
+#	cd .. && sh configure
 
 distclean:
-	if test "$(USE_SYMLINKS)" = "yes" ; then for file in *.xml ; do if test -L $$file && test "`readlink $$file`" = "../en/$$file" ; then rm $$file ; fi ; done ; fi
+	if test "$(USE_SYMLINKS)" = "yes" ; then \
+		for file in *.xml ; do \
+		if test -L $$file && test "`readlink $$file`" = "../en/$$file" ; then \
+			rm $$file ; \
+		fi ; \
+		done ; \
+	fi
