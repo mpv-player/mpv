@@ -2144,20 +2144,25 @@ Zeit:	        zeitliche Stärke (standard = 6)
 Aktiviert den Softwareequalizer mit interaktiver Kontrolle wie der
 Hardware\-EQ\-Kontrolle.
 Die Werte können zwischen -100 und 100 liegen.
-.IPs eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg]
+.IPs eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg:weight]
 Alternativer Softwareequalizer, der Lookup-Tabellen benutzt (sehr langsam).
 Er erlaubt neben simpler Anpassung der Helligkeit, des Kontrastes und der
-Sättigung auch eine Gammakorrektur. Beachte, dass er den gleichen
-MMX-optimierten Code benutzt wie der eq-Filter, wenn alle Gammawerte 1.0
+Sättigung auch eine Gammakorrektur.
+Der Parameter weight kann verwendet werden, um die Wirkung hoher gamma
+Werte auf helle Bildbereiche zu reduzieren, sie also davon abzuhalten
+zu übersteuern und ganz weiss zu werden. Bei 0.0 hat die Gammakorrektur gar
+keinen Effekt mehr, bei 1.0 hat sie die volle Stärke.
+Beachte, dass er den gleichen MMX-optimierten Code benutzt wie der 
+eq-Filter, wenn alle Gammawerte 1.0
 betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
-Standardwerte sind gamma=1.0, Kontrast=1.0, und Helligkeit=0.0 und
-Sättigung=1.0. Die Parameter rg, gg, bg sind unabhängige Gammawerte für
-die einzelnen Farbkomponenten Rot, Grün und Blau. Alle drei sind standardmäßig
-auf 1.0.
+Standardwerte sind gamma=1.0, Kontrast=1.0, und Helligkeit=0.0,
+Sättigung=1.0 und weight=1.0. Die Parameter rg, gg, bg sind unabhängige 
+Gammawerte für die einzelnen Farbkomponenten Rot, Grün und Blau. Alle drei 
+sind standardmäßig auf 1.0.
 Die Wertebereiche betragen 0.1\-10 für gamma, -2\-2 für Kontrast (negative
-Werte invertieren das Bild), -1\-1 für die Helligkeit und 0\-3 für die
-Sättigung.
+Werte invertieren das Bild), -1\-1 für die Helligkeit, 0\-3 für die
+Sättigung und 0\-1 für weight.
 .IPs halfpack[=f]
 Konvertiert planaeres YUV 4:2:0 in halbhohes, gepacktes 4:2:2, wobei
 die Helligkeit runtergesamplet und der Farbanteil beibehalten wird.

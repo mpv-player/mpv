@@ -2725,7 +2725,7 @@ movies, or for slightly reducing contrast to mask artifacts and get by
 with lower bitrates.
 Initial values in the range -100\-100 may be given on the command line.
 .TP
-.B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
+.B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness
 and contrast adjustment.
@@ -2734,9 +2734,13 @@ gamma values are 1.0.
 The parameters are given as floating point values.
 Parameters rg, gg, bg are the independent gamma values for the Red, Green
 and Blue components.
-Defaults are 1.0, brightness=0.0.
+The weight parameter can be used to reduce the effect of a high gamma value on
+bright image areas, e.g. keep them from getting overamplified and just plain
+white. A value of 0.0 turns the gamma correction all the way down while 1.0 
+leaves it at its full strength.
+Defaults are contrast=1.0, brightness=0.0, gammas=1.0, saturation=1.0, weight=1.0.
 Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
-in a negative image), -1\-1 for brightness and 0\-3 for saturation.
+in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for weight.
 .TP
 .B hue[=hue:saturation]
 Defaults are hue=0.0, saturation=1.0.
