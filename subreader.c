@@ -307,15 +307,21 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	    hour2, min2, sec2, hunsec2, nothing;
 	
 	char line[1000],
-	     line2[1000];
+	     line3[1000],
+	     *line2;
 	do {
 		if (!fgets (line, 1000, fd)) return NULL;
 	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
-			"*Default,%d,%d,%d,%d,,%[^\n\r]", &nothing, &hour1, &min1,
-			&sec1, &hunsec1,
-			&hour2, &min2, &sec2, &hunsec2, &nothing,
-			&nothing, &nothing, &nothing, line2) < 14);
-	current->lines=1;
+			"%[^\n\r]", &nothing,
+			&hour1, &min1, &sec1, &hunsec1, 
+			&hour2, &min2, &sec2, &hunsec2,
+			line3) < 9);
+	line2=strstr(line3,",,");
+	if (!line2) return NULL;
+	line2 ++;
+	line2 ++;
+
+	current->lines=1; // ez a kiraly!!!
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
 	current->text[0]=(char *) malloc(strlen(line2)+1);
