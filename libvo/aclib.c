@@ -8,8 +8,15 @@
 
 #include <stddef.h>
 
-/* Enable this code, if SSE version works (faster) for you! */
-#if 1
+#ifndef HAVE_SSE2
+/*
+   P3 processor has only one SSE decoder so can execute only 1 sse insn per
+   cpu clock, but it has 3 mmx decoders (include load/store unit)
+   and executes 3 mmx insns per cpu clock.
+   P4 processor has some chances, but after reading:
+   http://www.emulators.com/pentium4.htm
+   I have doubts. Anyway SSE2 version of this code can be written better.
+*/
 #undef HAVE_SSE
 #endif
 
