@@ -854,10 +854,10 @@ Try <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
-How can i play MPEG Layer 2 (mp2) audio files ?
+How can i play MPEG Layer 2 (mp2) audio files?
 </para></question>
 <answer><para>
-You have to use <option>-rawaudio on:format=0x50</option>
+You have to use <option>-rawaudio on:format=0x50</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
