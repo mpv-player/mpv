@@ -112,6 +112,7 @@ static int config(struct vf_instance_s* vf,
     unsigned int best=find_best_out(vf);
     int vo_flags;
     int int_sws_flags=0;
+    int round_w=0, round_h=0;
     SwsFilter *srcFilter, *dstFilter;
     
     if(!best){
@@ -143,6 +144,15 @@ static int config(struct vf_instance_s* vf,
 	}
     }
 
+    if (vf->priv->w < 0 && (-vf->priv->w & 8)) {
+      vf->priv->w = -(-vf->priv->w & ~8);
+      round_w = 1;
+    }
+    if (vf->priv->h < 0 && (-vf->priv->h & 8)) {
+      vf->priv->h = -(-vf->priv->h & ~8);
+      round_h = 1;
+    }
+
     if (vf->priv->w < -3 || vf->priv->h < -3 ||
          (vf->priv->w < -1 && vf->priv->h < -1)) {
       // TODO: establish a direct connection to the user's brain
@@ -171,6 +181,11 @@ static int config(struct vf_instance_s* vf,
       vf->priv->h = vf->priv->w * height / width;
     if (vf->priv->h == -2)
       vf->priv->h = vf->priv->w * d_height / d_width;
+
+    if (round_w)
+      vf->priv->w = ((vf->priv->w + 8) / 16) * 16;
+    if (round_h)
+      vf->priv->h = ((vf->priv->h + 8) / 16) * 16;
 
     // calculate the missing parameters:
     switch(best) {
@@ -579,8 +594,8 @@ static m_obj_presets_t size_preset = {
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
-  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
+  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
+  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
   {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
   {"param" , ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
