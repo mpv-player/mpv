@@ -2519,6 +2519,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       brk_cmd = 1;
     } break;
     case MP_CMD_SUB_DELAY : {
+#ifdef USE_SUB
+    if (sh_video) {
       int abs= cmd->args[1].v.i;
       float v = cmd->args[0].v.f;
       if(abs)
@@ -2526,20 +2528,29 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       else
 	sub_delay += v;
       osd_show_sub_delay = 9; // show the subdelay in OSD
+    }
+#endif
     } break;
     case MP_CMD_SUB_STEP : {
+#ifdef USE_SUB
+    if (sh_video) {
       int movement = cmd->args[0].v.i;
       step_sub(subdata, sh_video->pts, movement);
       osd_show_sub_delay = 9; // show the subdelay in OSD
+    }
+#endif
     } break;
-    case MP_CMD_OSD : 
+    case MP_CMD_OSD :  {
+#ifdef USE_OSD
       if(sh_video) {
 	int v = cmd->args[0].v.i;
 	if(v < 0)
 	  osd_level=(osd_level+1)%(MAX_OSD_LEVEL+1);
 	else
 	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
-      } break;
+      }
+#endif
+    } break;
     case MP_CMD_OSD_SHOW_TEXT :  {
 #ifdef USE_OSD
       if(osd_level && sh_video){
@@ -2926,6 +2937,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_SUB_POS:
     {
+#ifdef USE_SUB
+      if (sh_video) {
         int v;
 	v = cmd->args[0].v.i;
     
@@ -2934,24 +2947,32 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(sub_pos <0) sub_pos=0;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
         osd_show_sub_pos = 9;
-    }	break;
+      }
+#endif
+    } break;
     case MP_CMD_SUB_ALIGNMENT:
     {
+#ifdef USE_SUB
+      if (sh_video) {
     	if (cmd->nargs >= 1)
     	    sub_alignment = cmd->args[0].v.i;
     	else
             sub_alignment = (sub_alignment+1) % 3;
 	osd_show_sub_alignment = 9;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
-	break;
-    }
+      }
+#endif
+    } break;
     case MP_CMD_SUB_VISIBILITY:
     {
+#ifdef USE_SUB
+      if (sh_video) {
 	sub_visibility=1-sub_visibility;
 	osd_show_sub_visibility = 9; // show state of subtitle visibility in OSD
 	vo_osd_changed(OSDTYPE_SUBTITLE);
-	break;
-    }
+      }
+#endif
+    } break;
     case MP_CMD_VOBSUB_LANG:
     if (vo_vobsub)
     {
