@@ -20,12 +20,12 @@ struct vf_priv_s {
 
 #ifdef HAVE_MMX
 static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
-		     unsigned int dststride, unsigned int srcstride[3],
+		     int dststride, int srcstride[3],
 		     int w, int h)
 {
 	int j;
 	unsigned char *y1, *y2, *u, *v;
-	unsigned int dstinc, yinc, uinc, vinc;
+	int dstinc, yinc, uinc, vinc;
 
 	y1 = src[0];
 	y2 = src[0] + srcstride[0];
@@ -107,12 +107,12 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 
 
 static void halfpack_C(unsigned char *dst, unsigned char *src[3],
-		     unsigned int dststride, unsigned int srcstride[3],
+		     int dststride, int srcstride[3],
 		     int w, int h)
 {
 	int i, j;
 	unsigned char *y1, *y2, *u, *v;
-	unsigned int dstinc, yinc, uinc, vinc;
+	int dstinc, yinc, uinc, vinc;
 
 	y1 = src[0];
 	y2 = src[0] + srcstride[0];
@@ -140,7 +140,7 @@ static void halfpack_C(unsigned char *dst, unsigned char *src[3],
 }
 
 static void (*halfpack)(unsigned char *dst, unsigned char *src[3],
-	unsigned int dststride, unsigned int srcstride[3], int w, int h);
+	int dststride, int srcstride[3], int w, int h);
 
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
