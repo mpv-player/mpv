@@ -140,6 +140,10 @@ void mplMainDraw( wsParamDisplay )
 
  btnModify( evSetMoviePosition,mplShMem->Position );
  btnModify( evSetVolume,mplShMem->Volume );
+ 
+// --- erosen ideiglenes.
+ strcpy( gtkShMem->fs.filename,mplShMem->Filename );
+// ---
 
  if ( mplMainRender )
   {
