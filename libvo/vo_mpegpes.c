@@ -163,7 +163,7 @@ if(format==IMGFMT_YV12){
     codec_context.frame_rate=25*FRAME_RATE_BASE; // !!!!!
     codec_context.gop_size=0; // I frames only
     codec_context.flags=CODEC_FLAG_QSCALE;
-    codec_context.quality=3; // quality!  1..31  (1=best,slowest)
+    codec_context.quality=2; // quality!  1..31  (1=best,slowest)
 
 #if 0
     codec_context.width=width;
