@@ -57,6 +57,19 @@ sample_t * a52_init (uint32_t mm_accel)
     downmix_accel_init(mm_accel);
 
     samples = memalign (16, 256 * 12 * sizeof (sample_t));
+#if defined(__MINGW32__) && defined(HAVE_SSE) 
+    for(i=0;i<10;i++){
+      if((int)samples%16){
+        sample_t* samplestmp=malloc(256 * 12 * sizeof (sample_t));   
+        free(samples);
+        samples = samplestmp;    
+      }
+      else break;
+    }
+    if((int)samples%16){
+      printf("unable to get 16 bit aligned memory => expect crashes when using SSE instructions\n");
+    }
+#endif
     if (samples == NULL)
 	return NULL;
 
