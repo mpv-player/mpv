@@ -345,7 +345,7 @@ _3dfx=no
 _syncfb=no
 _mlib=no
 _mpg123=no
-_xmga=no
+_xmga=autodetect
 _dga=no
 _dga2=no
 _svga=no
@@ -392,21 +392,10 @@ for i in `echo $pparam`; do
   mmxext)
         _mmx2=yes
         ;;
-  mtrr)
+  mtrr|k6_mtrr)
         _mtrr=yes
         ;;
-  k6_mtrr)
-        _mtrr=yes
-        ;;
-  xmm)
-        _sse=yes
-        _mmx2=yes
-        ;;
-  sse)
-        _sse=yes
-        _mmx2=yes
-        ;;
-  kni)
+  xmm|sse|kni)
         _sse=yes
         _mmx2=yes
         ;;
@@ -736,7 +725,7 @@ int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==5)return 0; return 1; }
 EOF
 
 _alsaver='not found'
-$_cc -o $TMPO -lasound $TMPC 2> /dev/null || _alsa=no
+$_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
 [ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.5.x'; }
 
 if [ "$_alsaver" = 'not found' ]; then
@@ -747,7 +736,7 @@ int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==9)return 0; return 1; }
 EOF
 
 _alsaver='not found'
-$_cc -o $TMPO -lasound $TMPC 2> /dev/null || _alsa=no
+$_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
 [ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.9.x'; }
 fi
 
@@ -1085,9 +1074,11 @@ echo "$kernel_version, ok"
 fi
 fi
 
-if [ $_x11 = 'yes' ]; then
- if [ $_mga = 'yes' ]; then
+if [ "$_xmga" == "autodetect" ]; then
+ if [ $_x11 = 'yes' ] && [ $_mga = 'yes' ]; then
   _xmga=yes
+ else
+  _xmga=no
  fi
 fi
 
@@ -1420,8 +1411,12 @@ if [ $_mga = yes ]; then
 else
  _mga='#undef HAVE_MGA'
 fi
+
 if [ $_xmga = yes ]; then
  _vosrc=$_vosrc' vo_xmga.c'
+ _xmga='#define HAVE_XMGA'
+else
+ _xmga='#undef HAVE_XMGA' 
 fi
 
 if [ $_syncfb = yes ]; then
@@ -1610,6 +1605,7 @@ $_sdlbuggy
 $_ggi
 $_3dfx
 $_mga
+$_xmga
 $_syncfb
 $_fbdev
 $_svga
