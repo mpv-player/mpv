@@ -57,6 +57,8 @@ typedef struct {
 
 #include "cfgparser.h"
 
+static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
+
 static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=0;
 static int lavc_param_gray=0;
@@ -77,14 +79,24 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     vd_ffmpeg_ctx *ctx = sh->context;
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-	if( (*((int*)arg)) == IMGFMT_YV12 ) return CONTROL_TRUE;
-	if( (*((int*)arg)) == IMGFMT_IYUV ) return CONTROL_TRUE;
-	if( (*((int*)arg)) == IMGFMT_I420 ) return CONTROL_TRUE;
-	if( (*((int*)arg)) == IMGFMT_YUY2 && ctx->yuy2_support ) return CONTROL_TRUE;
+        switch(*((int*)arg)){
+        case IMGFMT_YV12:
+        case IMGFMT_IYUV:
+        case IMGFMT_I420:
+            if(ctx->yuy2_support || ctx->yvu9_support) return CONTROL_FALSE;
+            else                                       return CONTROL_TRUE;
+        case IMGFMT_YUY2:
+            if(ctx->yuy2_support) return CONTROL_TRUE;
+                                  return CONTROL_FALSE;
 #if LIBAVCODEC_BUILD >= 4615
-	if( (*((int*)arg)) == IMGFMT_YVU9 && ctx->yvu9_support ) return CONTROL_TRUE;
+        case IMGFMT_YVU9:
+            if(ctx->yvu9_support) return CONTROL_TRUE;
+                                  return CONTROL_FALSE;
 #endif
-	return CONTROL_FALSE;
+        default:
+            return CONTROL_FALSE;
+                
+        }
     }
     return CONTROL_UNKNOWN;
 }
@@ -123,6 +135,13 @@ static int init(sh_video_t *sh){
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
     avctx = ctx->avctx;
+
+#if LIBAVCODEC_BUILD > 4615
+    if(ctx->do_dr1){
+        avctx->flags|= CODEC_FLAG_EMU_EDGE | CODEC_FLAG_DR1; 
+        avctx->get_buffer_callback= get_buffer;
+    }
+#endif
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
@@ -325,13 +344,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    avctx->draw_horiz_band=draw_slice;
 	}
     }
-
-#if LIBAVCODEC_BUILD > 4615
-    if(dr1){
-        avctx->flags|= CODEC_FLAG_EMU_EDGE | CODEC_FLAG_DR1;
-        avctx->get_buffer_callback= get_buffer;
-    }
-#endif
 
 #if LIBAVCODEC_BUILD > 4603
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
