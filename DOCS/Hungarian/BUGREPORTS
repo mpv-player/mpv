@@ -45,23 +45,6 @@ Mit?
 - binutils verzió:
   as --version
 
-1.1. Küldd el a coredump tartalmát (ha volt).
-Hogyan:
-Hozd létre a következõ parancs file-t:
-
-disass $eip $eip+15
-printf "eax=%08lX\n",$eax
-printf "ebx=%08lX\n",$ebx
-printf "ecx=%08lX\n",$ecx
-printf "edx=%08lX\n",$edx
-printf "esp=%08lX\n",$esp
-printf "ebp=%08lX\n",$ebp
-printf "edi=%08lX\n",$edi
-printf "esi=%08lX\n",$esi
-
-Aztán írd be a következõt:
-gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
-
 
 2. Hardware & driverek:
 - CPU infó:

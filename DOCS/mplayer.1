@@ -160,7 +160,7 @@ delays subtitles by <sec> seconds. Can be negative.
 .B \-osdlevel\ level
 specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 (default = 2)
-.TP
+.IP
 .B \-lircconf\ configfile
 specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
 .IP
@@ -179,6 +179,7 @@ instruction set, the first gives more performance. Your mileage may vary.
 .TP
 .B \-sb\ position
 seek to byte position
+.TP
 .B \-ss\ second
 seek to second position
 .TP
@@ -280,6 +281,9 @@ to display on. For example : -display xtest.localdomain:0
 .B \-unicode
 tells MPlayer to handle the subtitle file (with -sub option) as UNICODE.
 Contrary: -nounicode
+.TP
+.B \-lircconf\ configfile
+specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
