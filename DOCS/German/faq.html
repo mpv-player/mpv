@@ -165,7 +165,7 @@
 
   <DT>Q: Es wird nicht kompiliert, und es vermisst uint64_t, inttypes.h oder
     &auml;hnliche Dinge ...</DT>
-  <DD>A: Kopiere <CODE>etc/inttypes.h</CODE> in das <B>MPlayer</B>-Verzeichnis
+  <DD>A: Kopiere <CODE>etc/inttypes.h</CODE> in das MPlayer-Verzeichnis
     (<CODE>cp etc/inttypes.h</CODE>) und versuche es erneut ...</DD>
   <DD>&nbsp;</DD>
 
@@ -180,7 +180,7 @@
   <DD>A: Lies die <A HREF="video.html#mga_vid">mga_vid-Dokumentation</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Gibt es rpm/deb/...-Pakete von <B>MPlayer</B>?</DT>
+  <DT>Q: Gibt es rpm/deb/...-Pakete von MPlayer?</DT>
   <DD>A: Du kannst ein .deb Paket f&uuml;r dich selbst machen, lies die
     <A HREF="documentation.html#debian">Debian-Pakete-Sektion</A>.
     Es gibt Links zu offiziellen RedHat-RPM-Paketen. Sie sind auf der
@@ -230,10 +230,10 @@
   <DD>A: Die neuesten Kernelmodule ben&ouml;tigen einen Parameter, um ihre
     Lizenz anzuzeigen (haupts&auml;chlich, um Kernel-Hacker am Debuggen von
     Closed-Source-Treibern zu hindern). Update deinen Kernel, modutils und
-    <B>MPlayer</B>.</DD>
+    MPlayer.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: W&auml;hrend des Linkens von <B>MEncoder</B> passiert ein
+  <DT>Q: W&auml;hrend des Linkens von MEncoder passiert ein
     segfault!</DT>
   <DD>A: Dies ist ein Linker-Problem. Ein Upgrade deiner binutils sollte
     helfen (2.11.92.* oder neuer w&auml;re gut). Melde den Fehler <B>nicht</B>,
@@ -245,7 +245,7 @@
   <DD>A: chmod 644 /usr/lib/libc.so</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Ich m&ouml;chte gerne <B>MPlayer</B> auf Minix kompilieren!</DT>
+  <DT>Q: Ich m&ouml;chte gerne MPlayer auf Minix kompilieren!</DT>
   <DD>A: Ich auch. :)</DD>
   <DD>&nbsp;</DD>
 
@@ -257,30 +257,30 @@
 <DL>
 
   <DT>Q: Wie erzeuge ich einen vern&uuml;nftigen Patch f&uuml;r
-    <B>MPlayer</B>?</DT>
+    MPlayer?</DT>
   <DD>A: Wir haben daf&uuml;r ein <A HREF="../tech/patches.txt">kleines
     Dokument</A> erstellt, das alle notwendigen Details erkl&auml;rt. Folge
     bitte seinen Anweisungen.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Wie kann ich die Entwicklung von <B>MPlayer</B> unterst&uuml;tzen?</DT>
+  <DT>Q: Wie kann ich die Entwicklung von MPlayer unterst&uuml;tzen?</DT>
   <DD>A: Wir nehmen sehr gerne
     <A HREF="http://www.mplayerhq.hu/homepage/donations.html">Hard- und
-    Softwarespenden</A> an. Sie helfen uns, <B>MPlayer</B> st&auml;ndig zu
+    Softwarespenden</A> an. Sie helfen uns, MPlayer st&auml;ndig zu
     verbessern.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Wie kann ich ein <B>MPlayer</B>-Entwickler werden?</DT>
+  <DT>Q: Wie kann ich ein MPlayer-Entwickler werden?</DT>
   <DD>A: Wir nehmen Programmierer und Leute auf, die Dokumentation schreiben
     wollen. Lies die <A HREF="../tech/">technische Dokumentation</A>, um 
-    einen ersten &Uuml;berblick &uuml;ber <B>MPlayer</B> zu bekommen. Dann
+    einen ersten &Uuml;berblick &uuml;ber MPlayer zu bekommen. Dann
     solltest du dich bei der 
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">
     mplayer-dev-eng</A>-Mailingliste anmelden und mit dem Programmieren
     anfangen.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Kann ich <B>MPlayer</B> mehrmals aufrufen?</DT>
+  <DT>Q: Kann ich MPlayer mehrmals aufrufen?</DT>
   <DD>A: Ja. Einige Video-Ausgabetreiber wie xv, dga oder (x)mga erlauben
     jedoch nur eine Instanz, andere tun dies in Kombination mit gewissen
     Grafikkarten oder -treibern. Du wirst in diesen F&auml;llen nur jeweils
@@ -459,20 +459,20 @@
     compile time!)
     </PRE></DT>
   <DD>A: Wahrscheinlich wird ein Audiocodec verwendet,
-    der nicht in <B>MPlayer</B> eingebaut ist. Zur Abhilfe sollte das
+    der nicht in MPlayer eingebaut ist. Zur Abhilfe sollte das
     Win32-Codec Paket wie im README oder in der
     <A HREF="documentation.html#installation">Installation</A>
     beschrieben installiert werden.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: ... funktioniert mit avifile/aviplay, aber nicht bei <B>MPlayer</B>.
+  <DT>Q: ... funktioniert mit avifile/aviplay, aber nicht bei MPlayer.
     </DT>
-  <DD>A: <B>MPlayer</B> ist nicht avifile.
+  <DD>A: MPlayer ist nicht avifile.
     Der einzige gemeinsame Teil zwischen diesen beiden Playern ist der
     Win32-DLL-Loader. Das Codec-(DLL)-Setup, die Synchronisation,
     das Demultiplexing usw sind total unterschiedlich und sollten nicht
     verglichen werden. Wenn etwas mit aviplay funktioniert, bedeutet das nicht,
-    dass es bei <B>MPlayer</B> auch funktionieren wird (und umgekehrt).</DD>
+    dass es bei MPlayer auch funktionieren wird (und umgekehrt).</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Audio-Video-Synchronisation geht beim Abspielen eines AVIs
@@ -499,7 +499,7 @@
     l3codeca.acm eine nicht-verlegbare DLL ist, muss sie auf den
     Speicherbereich 0x00400000 geladen werden. Wir k&ouml;nnen das nicht
     &auml;ndern. Du solltest einen nicht-gepachten Kernel oder
-    <B>MPlayer</B>s <CODE>-afm 1</CODE> Option verwenden, um die l3codeca.acm
+    MPlayers <CODE>-afm 1</CODE> Option verwenden, um die l3codeca.acm
     auszuschalten.</DD>
   <DD>&nbsp;</DD>
 
@@ -514,11 +514,11 @@
 
   <DT>Q: MPlayer beendet sich mit "MPlayer interrupted by signal 4 in module:
     decode_video".</DT>
-  <DD>A: Versuche <B>MPlayer</B> auf dem Computer zu starten, auf dem es
-    kompiliert wurde. Oder kompiliere <B>MPlayer</B> mit
+  <DD>A: Versuche MPlayer auf dem Computer zu starten, auf dem es
+    kompiliert wurde. Oder kompiliere MPlayer mit
     Laufzeit-CPU-Erkennung (runtime CPU detection) neu
     (<CODE>./configure --enable-runtime-cpudetection</CODE>). Verwende
-    <B>MPlayer</B> auf keiner anderen CPU als auf der, auf der <B>MPlayer</B>
+    MPlayer auf keiner anderen CPU als auf der, auf der MPlayer
     kompiliert wurde ohne dieses Feature zu aktivieren.</DD>
   <DD>&nbsp;</DD>
 
@@ -546,7 +546,7 @@
     aktiviert werden. Falls dies fehlschl&auml;gt oder der Treiber nicht
     einkompiliert wurde, kann SDL (<CODE>-ao sdl</CODE>) verwendet werden.
     Dabei muss jedoch sichergestellt werden, dass SDL mit Arts umgehen kann.
-    Eine weitere M&ouml;glichkeit besteht darin, <B>MPlayer</B> mit artsdsp zu
+    Eine weitere M&ouml;glichkeit besteht darin, MPlayer mit artsdsp zu
     starten.</DD>
   <DD>&nbsp;</DD>
 
@@ -566,7 +566,7 @@
     <UL>
       <LI>Deine CPU <B>und/oder</B> deine Grafikkarte <B>und/oder</B> dein BUS
         ist/sind zu <B>langsam</B>.
-        <B>MPlayer</B> zeigt in diesem Fall eine Meldung (und der Z&auml;hler
+        MPlayer zeigt in diesem Fall eine Meldung (und der Z&auml;hler
         f&uuml;r die ausgelassenen Frames steigt).</LI>
       <LI>Wenn es eine AVI-Datei ist, hat sie m&ouml;glichweise ein schlechtes
         Interleaving. Versuche die <CODE>-ni</CODE> Option.</LI>
@@ -652,7 +652,7 @@
     </PRE></DT>
   <DD>A: Verwendest du KDE oder GNOME mit dem arts- oder esd-Sounddaemon?
     Versuche ihn zu deaktivieren, oder verwende die
-    <CODE>-ao arts</CODE>-Option, um <B>MPlayer</B> arts verwenden zu
+    <CODE>-ao arts</CODE>-Option, um MPlayer arts verwenden zu
     lassen.</DD>
   <DD>&nbsp;</DD>
 
@@ -670,7 +670,7 @@
   <DD>A: DGA funktioniert nur als Root! Dies ist eine
     DGA-Beschr&auml;nkung. Du solltest root werden (<CODE>su -</CODE>) und
     es erneut versuchen.
-    Eine andere L&ouml;sung ist, <B>MPlayer</B> auf SUID root zu stellen,
+    Eine andere L&ouml;sung ist, MPlayer auf SUID root zu stellen,
     aber das ist <B>nicht empfehlenswert!</B><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
@@ -679,7 +679,7 @@
     <B>Warnung: Sicherheitsrisiko</B><BR>
     Dies ist ein <B>gr&ouml;sseres</B> Sicherheitsrisiko! Tu das <B>nie</B>
     auf einem Server oder einem Computer, den du nicht vollst&auml;ndig
-    kontrollierst. Die User bekommen durch einen SUID root <B>MPlayer</B>
+    kontrollierst. Die User bekommen durch einen SUID root MPlayer
     Root-Privilegien! <B>Du bist also gewarnt worden.</B>
     </BLOCKQUOTE>
   </DD>
@@ -756,7 +756,7 @@
 <DL>
 
   <DT>Q: Was steht's mit DVD-Navigation?</DT>
-  <DD>A: Die Unterst&uuml;tzung f&uuml;r DVD-Navigation in <B>MPlayer</B> ist
+  <DD>A: Die Unterst&uuml;tzung f&uuml;r DVD-Navigation in MPlayer ist
     momentan kaputt. Die normale Wiedergabe funtkioniert nat&uuml;rlich. Wenn
     du unbedingt tolle Men&uuml;s haben m&ouml;chtest, dann benutze einen
     anderen Player wie z.B. <A HREF="http://xine.sourceforge.net/">xine</A>
@@ -772,7 +772,7 @@
     sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.
     </CODE></DT>
   <DD>A: Dies ist ein bekannter Fehler in libdvdread 0.9.1/0.9.2.
-    Verwende <B>libmpdvdkit2</B>, welche sich in den <B>MPlayer</B>-Sourcen
+    Verwende <B>libmpdvdkit2</B>, welche sich in den MPlayer-Sourcen
     befindet und standardm&auml;&szlig;ig verwendet wird.</DD>
   <DD>&nbsp;</DD>
 
@@ -781,7 +781,7 @@
   <DD>A: Wer wei&szlig;... Angeblich soll es funktionieren. Teste es, und
     sag uns dann bitte bescheid. Bitte lies auch die Documentation von
     libdvdread und seine Homepage. Wir sind nicht die Autoren von libdvdread.
-    Verwende <B>libmpdvdkit2</B>, welches sich in den <B>MPlayer</B>-Sourcen
+    Verwende <B>libmpdvdkit2</B>, welches sich in den MPlayer-Sourcen
     befindet und standardm&auml;&szlig;ig verwendet wird.</DD>
   <DD>&nbsp;</DD>
 
@@ -806,7 +806,7 @@
 
   <DT>Q: Wo kann ich die libdvdread- und libcss-Pakete bekommen?</DT>
   <DD>A: Die werden nicht ben&ouml;tigt. Verwende <B>libmpdvdkit2</B>, welches
-    sich in den <B>MPlayer</B>-Sourcen befindet und standardm&auml;&szlig;ig
+    sich in den MPlayer-Sourcen befindet und standardm&auml;&szlig;ig
     verwendet wird. Die erw&auml;hnten Pakete k&ouml;nnen
     von der <A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle-Seite</A>
     heruntergeladen werden.</DD>
@@ -832,7 +832,7 @@
 <DL>
 
   <DT>Q: Wenn MPlayer pausiert wird und ich vorspule oder zur&uuml;ckspu;e
-    oder eine andere Taste dr&uuml;cke, dann beendet <B>MPlayer</B> die
+    oder eine andere Taste dr&uuml;cke, dann beendet MPlayer die
     Pause. Ich w&uuml;rde gerne im pausierten Film spulen.</DT>
   <DD>A: Das ist sehr schwierig zu implementieren, ohne die
     A/V-Synchronisation zu verlieren. Alle Versuche scheiterten bisher.
@@ -886,7 +886,7 @@
     und avimerge, das Teil von 
     <A HREF="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">
     transcode</A> ist. Wenn du zwei Dateien hast, deren Aufl&ouml;sung und
-    Codec identisch sind, dann kannst du eventuell auch <B>MEncoder</B>
+    Codec identisch sind, dann kannst du eventuell auch MEncoder
     daf&uuml;r benutzen:<BR>  
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>cat file1 file2 &gt; file3</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>mencoder -ovc copy -oac copy -o out.avi
@@ -894,7 +894,7 @@
   <DD>&nbsp;</DD>
     
   <DT>Q: Mein Tuner funktioniert. Ich h&ouml;re Ton und sehe Video mit
-    <B>MPlayer</B>, aber <B>MEncoder</B> nimmt keinen Ton auf!</DT>
+    MPlayer, aber MEncoder nimmt keinen Ton auf!</DT>
   <DD>A: TV-Audioaufnahme f&uuml;r Linux ist momentan nicht implementiert.
     Wir arbeiten daran. Es l&auml;uft momentan nur auf BSD.</DD>
   <DD>&nbsp;</DD>
@@ -903,7 +903,7 @@
   <DD>A: Du musst die <CODE>-sid</CODE> Option korrekt verwenden!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: <B>MEncoder</B> segfaultet beim Start!</DT>
+  <DT>Q: MEncoder segfaultet beim Start!</DT>
   <DD>A: Besorg dir neue Versionen von DivX4Linux/XviD/etc.</DD>
   <DD>&nbsp;</DD>
 
@@ -918,7 +918,7 @@
     als 2Gb sind.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Wieso ist die von <B>MEncoder</B> vorgeschlagene Bitrate
+  <DT>Q: Wieso ist die von MEncoder vorgeschlagene Bitrate
     negativ?</DT>
   <DD>A: Weil die Bitrate, die bei der Audiokonvertierung verwendet wurde,
     zu hoch war, um den Film auf eine CD bringen. Du solltest

@@ -75,6 +75,7 @@
               <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF-Dateien</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 MP4-Dateien</A></LI>
               <LI><A HREF="formats.html#cdda">2.1.2.6 CD-Audio</A></LI>
+              <LI><A HREF="formats.html#xmms">2.1.2.7 XMMS</A></LI>
             </UL>
           </LI>
         </UL>
@@ -355,7 +356,7 @@ Mail-Liste folgendes schrieb:</P>
 
 <H1><A NAME="introduction">1. Einleitung</A></H1>
 
-<P><B>MPlayer</B> ist ein Video-Player f&uuml;r LINUX (er l&auml;uft auch auf
+<P>MPlayer ist ein Video-Player f&uuml;r LINUX (er l&auml;uft auch auf
 vielen anderen Unix-Systemen und <B>nicht-x86</B>-CPUs, siehe <A
 HREF="#ports">Sektion 6</A>). Er spielt die meisten MPEG, VOB, AVI, OGG/OGM,
 VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,  NuppelVideo, yuv4mpeg, FILM, RoQ und
@@ -363,14 +364,14 @@ PVA-Dateien ab. Dabei kommen viele eingebaute Codecs, Xanim-, RealPlayer und
 Win32-DLL-Codecs zum Einsatz. Du kannst dir <B>VideoCDs</B>, <B>SVCDs</B>,
 <B>DVDs</B>, <B>3ivx-</B>, <B>RealMedia-</B> und auch <B>DivX-</B>Filme sehen
 (und daf&uuml;r wird nicht einmal die avifile-Bibliotek ben&ouml;tigt). Ein
-weiteres gro&szlig;es Feature von <B>MPlayer</B> ist die gro&szlig;e Bandbreite
-unterst&uuml;tzter Ausgabetreiber. <B>MPlayer</B> funktioniert mit X11, Xv,
+weiteres gro&szlig;es Feature von MPlayer ist die gro&szlig;e Bandbreite
+unterst&uuml;tzter Ausgabetreiber. MPlayer funktioniert mit X11, Xv,
 DGA, OpenGL, SVGAlib, fbdev, AAlib und DirectFB. Du kannst aber auch GGI und
 SDL (und dadurch alle deren Treiber) und einige grafikkartenspezifische
 Low-Level-Treiber verwenden - z.B. f&uuml;r Matrox, 3Dfx und Radeon, Mach64
 oder Permedia3. Die meinsten von ihnen unterst&uuml;tzen Software- oder
 Hardware-Skalierung, sodass du deine Videos im Vollbild genie&szlig;en kannst.
-<B>MPlayer</B> unterst&uuml;tzt auch die Wiedergabe mit einigen
+MPlayer unterst&uuml;tzt auch die Wiedergabe mit einigen
 Hardware-MPEG-Decoder-Karten wie der <B><A HREF="video.html#dvb">DVB</A></B>
 und der <B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>! Und was meinst du
 zu den sch&ouml;nen, gro&szlig;en, antialiasten und schattierten Untertiteln
@@ -382,15 +383,15 @@ Schriften? Und das onscreen display (OSD)?</P>
 f&uuml;r einige VCDs) und schlechte AVI-Dateien, welche auch mit dem bekannten
 Windows Media Player nicht mehr abspielbar sind. Auch AVI-Dateien ohne Index
 sind abspielbar, und du kannst den Index entweder tempor&auml;r mit der
-<CODE>-idx</CODE>-Option oder permanent mit <B>MEncoder</B> wiederherstellen.
+<CODE>-idx</CODE>-Option oder permanent mit MEncoder wiederherstellen.
 Beides erm&ouml;glicht wieder die Suchfunktion! Du siehst also, Stabilit&auml;t
 und Qualit&auml;t sind die wichtigsten Dinge f&uuml;r mich, aber die
 Geschwindigkeit ist genauso beeindruckend.</P>
 
-<P><B>MEncoder</B> (der Filme encodierende Partner von <B>MPlayer</B>) ist ein
-einfacher Filmencodierer, der dazu bestimmt ist, von <B>MPlayer</B> abspielbare
+<P>MEncoder (der Filme encodierende Partner von MPlayer) ist ein
+einfacher Filmencodierer, der dazu bestimmt ist, von MPlayer abspielbare
 Filme (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) in andere
-von <B>MPlayer</B> abspielbare Formate umzuwandeln (siehe unten). Er kann
+von MPlayer abspielbare Formate umzuwandeln (siehe unten). Er kann
 verschiedene Codecs zum Encodieren benutzen (<B>DivX4</B> (mit 1 oder 2 
 Durchg&auml;ngen), libavcodec, <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B>-Audio).
 Er verf&uuml;gt weiterhin &uuml;ber ein m&auml;chtiges Pluginsystem f&uuml;r
@@ -400,7 +401,7 @@ die Manipulation des Videos.</P>
 
 <UL>
   <LI>verf&uuml;gt &uuml;ber die gleiche gro&szlig;e Bandbreite von
-    Eingangsformaten wie <B>MPlayer</B></LI>
+    Eingangsformaten wie MPlayer</LI>
   <LI>kann alle von FFmpegs <A HREF="codecs.html#libavcodec">libavcodec</A>
     zur Verf&uuml;gung gestellten Codecs benutzen</LI>
   <LI>Videoencodierung direkt von einem V4L-kompatiblen TV-Ger&auml;t</LI>
@@ -410,7 +411,7 @@ die Manipulation des Videos.</P>
   <LI>Encodieren mit einem, zwei oder drei Durchg&auml;ngen</LI>
   <LI><B>VBR</B> MP3-Audio - <B>WICHTIGER HINWEIS:</B> VBR-MP3-Audio wird
     eventuell nicht immer korrekt von Windows-Playern wiedergegeben!
-    Andererseits scheint <B>MEncoder</B>s aktuelle CBR-Implementierung noch
+    Andererseits scheint MEncoders aktuelle CBR-Implementierung noch
     schlechter mit den Windows-Playern zusammenzuarbeiten :)</LI>
   <LI>PCM-Audio</LI>
   <LI>1:1-Streamkopien</LI>
@@ -434,7 +435,7 @@ die Manipulation des Videos.</P>
   DivX4/Indeo5/VIVO-Streams ;))</LI>
 </UL>
 
-<P><B>MPlayer</B> und <B>MEncoder</B> k&ouml;nnen unter den Bedingungen der
+<P>MPlayer und MEncoder k&ouml;nnen unter den Bedingungen der
 GNU General Public License Version 2 vertrieben werden.</P>
 
 
@@ -462,7 +463,7 @@ beschloss ich, einen Player zu schreiben/zu modifizieren...</P>
     Lespinasse verwendet. Es ist gro&szlig;artiger, optimierter und schneller
     C-Code mit perfekter Bildqualit&auml;t und 100%ig zum MPEG-Standard
     kompatibel.</LI>
-   <LI><B>MPlayer v0.01:</B> Nov 11, 2000<BR>
+  <LI><B>MPlayer v0.01:</B> Nov 11, 2000<BR>
     Der erste MPlayer.</LI>
   <LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
     Diese Version war ein Paket aus 2 Programmen: mpg12play v0.95pre6 und mein
@@ -495,8 +496,8 @@ beschloss ich, einen Player zu schreiben/zu modifizieren...</P>
     TV-Grabbing, Cache, liba52, unz&auml;hlbare Fehlerbehebungen.</LI>           
   <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> Nov 11, 2002<BR>
     Obwohl diese Version kein Release ist werde ich sie hier erw&auml;hnen,
-    da sie genau zwei Jahre nach <B>MPlayer</B> v0.01 herauskam. Herzlichen
-    Gl&uuml;ckwunsch, <B>MPlayer</B>!</LI>
+    da sie genau zwei Jahre nach MPlayer v0.01 herauskam. Herzlichen
+    Gl&uuml;ckwunsch, MPlayer!</LI>
   <LI><B>MPlayer 0.90 "?"</B>Datum noch unbekannt</LI>
   <LI><B>MPlayer 0.90rc1 "The CodecCounter"</B> Dec 7, 2002<BR>
      Schon wieder kein Release, aber MPlayer ist nach den neuen Features
@@ -508,7 +509,7 @@ beschloss ich, einen Player zu schreiben/zu modifizieren...</P>
 <H2><A NAME="installation">1.2. Installation</A></H2>
 
 <P>In diesem Kapitel versuche ich, dich auf dem Weg der Konfiguration und
-Compilierung von <B>MPlayer</B> zu begleiten. Es ist nicht einfach, aber auch
+Compilierung von MPlayer zu begleiten. Es ist nicht einfach, aber auch
 nicht unn&ouml;tig schwer. Wenn dir ein unterschiedliches Verhalten als hier
 beschrieben auff&auml;llt, versuche bitte diese Dokumentation zu durchsuchen,
 und du wirst eine Antwort erhalten. Wenn du Links siehst, folge ihnen bitte und
@@ -526,7 +527,7 @@ empfohlen.</P>
     verantwortlich und deshalb sehr wichtig.</LI>
   <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B>, <B>2.95.4</B>
     und <B>3.1</B>. Verwende <B>NIEMALS</B> 2.96 oder 3.0.x! Sie erzeugen
-    f&uuml;r <B>MPlayer</B> fehlerhaften Code. Wenn du dich dazu entscheidest,
+    f&uuml;r MPlayer fehlerhaften Code. Wenn du dich dazu entscheidest,
     den 2.96 &uuml;ber Bord zu werfen, dann nimm nicht einfach den 3.0.x, nur
     weil er neuer ist! Fr&uuml;he Versionen von 3.0.x waren sogar schlechter
     als 2.96, downgrade also zu 2.95.x (downgrade auch die libstdc++, sie wird
@@ -537,7 +538,7 @@ empfohlen.</P>
     also darauf geachtet werden, dass wenigstens 3.1 verwendet wird,
     da diese Version getestet wurde und funktionieren sollte. Detaillierte
     Information dazu (die Fehler von gcc 2.96 sind immer noch <B>nicht</B>
-    behoben, sondern wurden nur in <B>MPlayer</B> <B>umgangen</B>) k&ouml;nnen
+    behoben, sondern wurden nur in MPlayer <B>umgangen</B>) k&ouml;nnen
     in der <A HREF="users_against_developers.html">gcc 2.96-Sektion</A>
     und in den <A HREF="faq.html">FAQs</A> gefunden werden.</LI>
   <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste
@@ -557,12 +558,12 @@ empfohlen.</P>
     mit dem Xv-Treiber haben). Verwende immer die aktuellste Version,
     mindestens aber 1.2.x).</LI>
   <LI><B>libjpeg</B> - optionaler (M)JPEG-Decoder, der bei -mf und einigen
-    QT-/MOV-Dateien benutzt wird.  Sowohl f&uuml;r <B>MPlayer</B> als auch
-    f&uuml;r <B>MEncoder</B> n&uuml;tzlich.</LI>
+    QT-/MOV-Dateien benutzt wird.  Sowohl f&uuml;r MPlayer als auch
+    f&uuml;r MEncoder n&uuml;tzlich.</LI>
   <LI><B>libpng</B> - empfohlen und Standard-(M)PNG-Decoder. Wird f&uuml;r das
-    GUI ben&ouml;tigt. Sowohl f&uuml;r <B>MPlayer</B> als auch f&uuml;r
-    <B>MEncoder</B> n&uuml;tzlich.</LI>
-  <LI><B>lame</B> - empfohlen, wird ben&ouml;tigt, um mit <B>MEncoder</B>
+    GUI ben&ouml;tigt. Sowohl f&uuml;r MPlayer als auch f&uuml;r
+    MEncoder n&uuml;tzlich.</LI>
+  <LI><B>lame</B> - empfohlen, wird ben&ouml;tigt, um mit MEncoder
     MP3-Audio zu encodieren. Die empfohlene Version ist <B>immer die neuste</B>
     (wenigstens 3.90).</LI>
   <LI><B>libogg</B> - optional, wird f&uuml;r das OGG-Dateiformat
@@ -577,6 +578,9 @@ empfohlen.</P>
   <LI><B>cdparanoia</B> - optional, f&uuml;r CDDA-Unterst&uuml;tzung</LI>
   <LI><B>libfreetype</B> - optional, f&uuml;r die Unterst&uuml;tzung von
     TrueType-Schriften. Mindestens Version 2.0.9 wird ben&auml;tigt.</LI>
+  <LI><B>libxmms</B> - optional, f&uuml;r Unterst&uuml;tzung von 
+    XMMS-Inputplugins. Mindestens Version 1.2.7 oder neuer wird ben&ouml;tigt.
+    </LI>
 </UL>
 	  
 <H4>Codecs</H4>
@@ -597,7 +601,7 @@ empfohlen.</P>
       </LI>
     </UL>
   </LI>
-  <LI><B>Win32-Codecs:</B> Wenn du planst, <B>MPlayer</B> auf einer x86
+  <LI><B>Win32-Codecs:</B> Wenn du planst, MPlayer auf einer x86
     Architektur zu verwenden, wirst du sie m&ouml;glicherweise brauchen. Lade
     dir dazu die w32codecs.zip herunter und entpacke sie nach /usr/lib/win32.
     <B>Hinweis</B>: Das Avifile-Projekt hat ein &auml;hnliches Codecs-Paket,
@@ -626,7 +630,7 @@ empfohlen.</P>
     <A HREF="codecs.html#sorenson">Sorenson Videocodec</A>.</LI>
   <LI><B>DivX4/DivX5:</B> Informationen zu diesem Codec sind in der Sektion <A
     HREF="codecs.html#divx">2.2.1.1</A> erh&auml;ltlich. Wenn du
-    <B>MEncoder</B> verwendest, solltest du auch <B>libavcodec</B> (siehe
+    MEncoder verwendest, solltest du auch <B>libavcodec</B> (siehe
     oben) verwenden, was schneller ist und eine bessere Qualit&auml;t bietet.
     Features:
     <UL>
@@ -655,7 +659,7 @@ empfohlen.</P>
     f&uuml;r verschiedenen Plattformen verf&uuml;gbar, sodass sie die einzige
     M&ouml;glichkeit sind, wenn du Indeo-Video auf nicht-x86-Plattformen
     abspielen m&auml;chtest (nun mal abgesehen von XAnim :). Andere Codecs
-    wie z.B. der Cinepak-Codec werden am besten mit dem <B>MPlayer</B> eigenen
+    wie z.B. der Cinepak-Codec werden am besten mit dem MPlayer eigenen
     Cinepak-Decoder wiedergegeben.</LI>
   <LI>F&uuml;r <B>Ogg Vorbis</B>-Audiodecodierung wird eine korrekte
     Installation von <CODE>libvorbis</CODE> ben&ouml;tigt. Es sollten, falls
@@ -663,7 +667,7 @@ empfohlen.</P>
     HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese
     Sourcen</A> kompiliert werden (dies ist eine t&auml;glich erneuerter
     tarball des Vorbis CVS).</LI>
-  <LI><B>MPlayer</B> kann die Libraries von RealPlayer 8 oder RealONE
+  <LI>MPlayer kann die Libraries von RealPlayer 8 oder RealONE
     verwenden, um Dateien mit <B>RealVideo 2.0 bis 4.0</B> und Sipro/Cook-Audio
     wiederzugeben. Eine Installationsanleitung und weitere Informationen finden
     sich in der Sektion <A
@@ -690,7 +694,7 @@ weswegen Abspielen im Vollbild gut aussieht und sehr schnell ist.</P>
     diese viel besser funktionieren. N&auml;heres zur Installation und dem
     Gebrauch findest du in der <A HREF="video.html#mga_vid">mga_vid</A>
     Sektion. Es ist wichtig, diese Schritte <B>vor</B> der Kompilierung von
-    <B>MPlayer</B> vorzunehmen, da ansonsten keine mga_vid-Unterst&uuml;tzung
+    MPlayer vorzunehmen, da ansonsten keine mga_vid-Unterst&uuml;tzung
     einkompiliert wird. Du solltest auch die <A
     HREF="video.html#tvout_matrox">Matrox TV-out</A>-Sektion lesen.
     <U><B>Nicht-Linux-Benutzer</B></U> k&ouml;nnen nur die Vidix-Treiber
@@ -698,7 +702,7 @@ weswegen Abspielen im Vollbild gut aussieht und sehr schnell ist.</P>
   <LI><B>3Dfx Voodoo3/Banshee-Karten:</B> Du solltest die Sektion <A
     HREF="video.html#tdfxfb">2.3.1.9</A> lesen, um eine m&ouml;glichst hohe
     Geschwindigkeit zu erzielen. Es ist wichtig, diese Schritte <B>vor</B> der
-    Kompilierung von <B>MPlayer</B> vorzunehmen, da ansonsten keine
+    Kompilierung von MPlayer vorzunehmen, da ansonsten keine
     3Dfx-Unterst&uuml;tzung eincompiliert wird. Du solltest auch die  <A
     HREF="video.html#tvout_tdfxfb">3dfx TV-out</A>-Sektion lesen. Wenn X
     verwendet wird, solltest du mindestens Version 4.2.0 installiert haben, da
@@ -753,7 +757,7 @@ Option <CODE>-zoom</CODE> oder <CODE>-vop scale</CODE>) erreicht werden. Aber
 sei gewarnt: Es ist <B>langsam</B>! Eventuell reicht es auch schon aus, in
 einen kleineren Videomodus zu wechseln, z.B. zu 352x288. Wenn keine
 YUV-Beschleunigung zur Verf&uuml;gung steht, ist diese letztgenannte Methode zu
-empfehlen. Bei <B>MPlayer</B> wird dieses mit der <CODE>-vm</CODE>-Option
+empfehlen. Bei MPlayer wird dieses mit der <CODE>-vm</CODE>-Option
 angeschaltet und funktioniert mit folgenden Karten:</P>
 
 <UL>
@@ -810,7 +814,7 @@ angeschaltet und funktioniert mit folgenden Karten:</P>
   <LI><B>C-Media mit SP/DIF Ausgang:</B> Hardware-AC3-Durchgabe ist mit diesen
     Karten m&ouml;glich; siehe
     <A HREF="codecs.html#hardware_ac3">AC3-Decodierung in Hardware</A>.
-  <LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht
+  <LI>Die Features von <B>anderen Karten</B> werden von MPlayer nicht
     unterst&uuml;tzt. <U>Es ist empfehlenswert, die <A
     HREF="sound.html">Soundkarten-Sektion</A> zu lesen!</U></LI>
 </UL>
@@ -820,18 +824,18 @@ angeschaltet und funktioniert mit folgenden Karten:</P>
 <UL>
   <LI>Entscheide dich, ob du das GUI brauchst. Wenn du es braucht, wirf einen
     Blick auf die <A HREF="#gui">GUI-Sektion</A> vor dem Kompilieren.</LI>
-  <LI>Wenn du <B>MEncoder</B> (unsen grossartigen Encoder-f&uuml;r-Alles)
+  <LI>Wenn du MEncoder (unsen grossartigen Encoder-f&uuml;r-Alles)
     installieren willst, dann lies die <A
     HREF="encoding.html">MEncoder-Sektion</A> .</LI>
   <LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B>-Karte hast und du mit
-    <B>MPlayer</B> fernsehen oder encodieren willst, dann lies die <A
+    MPlayer fernsehen oder encodieren willst, dann lies die <A
     HREF="#tv">TV-Input</A>-Sektion.</LI>
   <LI>Inzwischen gibt es ein h&uuml;bsches <B>OSD-Men&uuml</B>, das nur darauf
     wartet, ausprobiert zu werden. Schau dazu in der <A HREF="#menu">
     OSD-Men&uuml;</A>-Sektion nach.</LI>
 </UL>
 
-<P>Nun kompiliere <B>MPlayer:</B></P>
+<P>Nun kompiliere MPlayer:</P>
 
 <PRE>
     ./configure
@@ -839,19 +843,19 @@ angeschaltet und funktioniert mit folgenden Karten:</P>
     make install
 </PRE>
 
-<P>Ab diesem Zeitpunkt ist <B>MPlayer</B> zur Benutzung bereit. Das Verzeichnis
+<P>Ab diesem Zeitpunkt ist MPlayer zur Benutzung bereit. Das Verzeichnis
 <CODE>$PREFIX/etc/mplayer</CODE> enth&auml;lt die Datei
 <CODE>codecs.conf</CODE>, welche benutzt wird, um dem Programm alle Codecs und
 deren unterst&uuml;tze Features mitzuteilen. Diese Datei sollte zusammen mit
 dem Hauptprogramm immer aktuell gehalten werden!<BR> Du solltest 
 au&szlig;erdem &uuml;berpr&uuml;fen, ob eine <CODE>codecs.conf</CODE> deinem
 Home-Verzeichnis  (<CODE>~/.mplayer/codecs.conf</CODE>) von einer alten
-<B>MPlayer</B>-Version vorhanden ist. Diese solltest du unbedingt
+MPlayer-Version vorhanden ist. Diese solltest du unbedingt
 l&ouml;schen!</P>
 
 <P><B>Debian-Benutzer</B> k&ouml;nnen ein <CODE>.deb</CODE>-Paket f&uuml;r sich
 compilieren, was sehr einfach ist. Du musst blo&szlig; <CODE>fakeroot
-debian/rules binary</CODE> in <B>MPlayer</B>'s Sourceverzeichnis
+debian/rules binary</CODE> in MPlayer's Sourceverzeichnis
 ausf&uuml;hren. Genauere Anleitungen k&ouml;nnen in der <A
 HREF="documentation.html#debian">Debian</A>-Sektion gefunden werden.</P>
 
@@ -868,7 +872,7 @@ fehlt.</P>
 
 <P>Auch wenn sie nicht zwingend erforderlich sind, solltest du doch Schriften
 installieren, um das OSD und Untertitel benutzen zu k&ouml;nnen. Die empfohlene
-Methode ist, eine TrueType-Schrift zu installieren und <B>MPlayer</B> anzuweisen,
+Methode ist, eine TrueType-Schrift zu installieren und MPlayer anzuweisen,
 diese zu benutzen. Wie das funktioniert, kannst du in der Sektion &uuml;ber <A
 HREF="#subtitles_osd">Untertitel und das OSD</A>nachlesen.</P>
 
@@ -879,7 +883,7 @@ HREF="#subtitles_osd">Untertitel und das OSD</A>nachlesen.</P>
 Skins sind als PNG-Grafiken gespeichern, so dass du also auch gtk und die
 libpng (und deren devel-Pakete) installieren musst. Du kannst das GUI durch den
 Parameter <CODE>--enable-gui</CODE> bei <CODE>./configure</CODE> anschalten. Um
-<B>MPlayer</B> im GUI-Modus zu betreiben, kannst du entweder</P>
+MPlayer im GUI-Modus zu betreiben, kannst du entweder</P>
 
 <UL>
   <LI><CODE>gui=yes</CODE> in deine Config-File eintragen oder</LI>
@@ -890,12 +894,12 @@ Parameter <CODE>--enable-gui</CODE> bei <CODE>./configure</CODE> anschalten. Um
 <P>Im Moment kannst du die <CODE>-gui</CODE>-Kommandozeilenoption nicht
 verwenden.</P>
 
-<P>Da <B>MPlayer</B> keine Skins enth&auml;lt, musst du dir welche
+<P>Da MPlayer keine Skins enth&auml;lt, musst du dir welche
 herunterladen, wenn du das GUI verwenden willst. Schau dazu auf die <A
 HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>. Diese
 sollten in das normale, systemweite Verzeichnis
 (<CODE>$PREFIX/share/mplayer/Skin</CODE>) oder nach
-<CODE>$HOME/.mplayer/Skin</CODE> extrahiert werden. <B>Mplayer</B> sucht
+<CODE>$HOME/.mplayer/Skin</CODE> extrahiert werden. MPlayer sucht
 standardm&auml;&szlig;ig nach einem Verzeichnis namens <CODE>default</CODE>,
 aber du kannst mit der Option <CODE>-skin (neuer Skin)</CODE> oder dem Eintrag
 <CODE>skin=(neuer Skin)</CODE> in der Konfigurationsdatei den Skin
@@ -903,7 +907,7 @@ aber du kannst mit der Option <CODE>-skin (neuer Skin)</CODE> oder dem Eintrag
   
 <H2><A NAME="subtitles_osd">1.4. Untertitel und das OSD</H2>
 
-<P><B>MPlayer</B> kann Untertitel zu Filmen darstellen. Momentan werden folgende
+<P>MPlayer kann Untertitel zu Filmen darstellen. Momentan werden folgende
 Formate unterst&uuml;tzt:</P>
 
 <UL>
@@ -920,7 +924,7 @@ Formate unterst&uuml;tzt:</P>
   <LI>JACOsub</LI>
 </UL>
 
-<P><B>MPlayer</B> kann die oben aufgef&uuml;hrten Formate in die folgenden
+<P>MPlayer kann die oben aufgef&uuml;hrten Formate in die folgenden
 Formate konvertieren, wenn du die jeweils dahinter angegebene Option benutzt:
 </P>
 
@@ -944,7 +948,7 @@ musst du die Optionen <CODE>-vobsub beispiel [-vobsubid &lt;id&gt;]</CODE>
 angeben (optional mit Pfadangabe nat&uuml;rlich). Die
 <CODE>-vobsubid</CODE>-Option funktioniert wie <CODE>-sid</CODE> bei DVDs. Du
 kannst mit ihr zwischen Untertitel-Sprache w&auml;hlen. Falls keine
-<CODE>-vobsubid</CODE> angegeben wird, versucht <B>MPlayer</B>, die mit
+<CODE>-vobsubid</CODE> angegeben wird, versucht MPlayer, die mit
 <CODE>-slang</CODE> angegebene Sprache zu benutzen und zur Not die durch
 <CODE>langidx</CODE> in der .IDX-Datei angegebene Sprache w&auml;hlen. Wenn das
 ebenfalls fehlschl&auml;gt, werden keine Untertitel angezeigt.</P>
@@ -978,9 +982,9 @@ unterschiedlich sind.<BR>
 
 Es sei gesagt, dass das MicroDVD-Format absolute Bildnummern verwendet, um
 anzugeben, wann Text anzuzeigen ist. Deswegen funktioniert die
-<CODE>-subfps</CODE>-Option mit diesem Format nicht. Da <B>MPlayer</B>
+<CODE>-subfps</CODE>-Option mit diesem Format nicht. Da MPlayer
 nat&uuml;rlich nicht in der Lage ist, die richtige Bildrate zu erraten, musst
-du die Bildrate manuell konvertieren. Auf dem <B>MPlayer</B>-FTP-Server liegt
+du die Bildrate manuell konvertieren. Auf dem MPlayer-FTP-Server liegt
 im <CODE>contrib</CODE>-Verzeichnis ein kleines Perl-Skript, das diese
 Konvertierung f&uuml;r dich vornehmen kann.</P>
 
@@ -995,7 +999,7 @@ HREF="cd-dvd.html#dvd">DVD-Sektion</A>.</P>
 
 <H3><A NAME="mpsub">1.4.1 MPlayers eigenes Untertitelformat (MPsub)</A></H3>
 
-<P><B>MPlayer</B> hat ein neues Untertitelformat eingef&uuml;hrt, das
+<P>MPlayer hat ein neues Untertitelformat eingef&uuml;hrt, das
 <B>MPsub</B> genannt wird. Es wurde von mir (Gabucino) entwickelt. Das
 Haupt-Feature ist, dass es <B>dynamische</B> Zeitabh&auml;ngigkeiten benutzt
 (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (aus <A
@@ -1032,12 +1036,12 @@ Lautst&auml;rken- und Such-Leisten etc. anzuzeigen.</P>
 
 <H3><A NAME="install_osd">1.4.2 Installation des OSD und der Untertitel</A></H3>
 
-<P>Du brauchst ein <B>MPlayer</B>-Schriftenpaket, um das OSD oder Untertitel
+<P>Du brauchst ein MPlayer-Schriftenpaket, um das OSD oder Untertitel
 anzeigen zu k&ouml;nnen. Es gibt mehrere M&ouml;glichkeiten, eines zu
 bekommen:</P>
 
 <UL>
-  <LI>Lade die fertigen Schiftpakete von der <B>MPlayer</B>-Seite.
+  <LI>Lade die fertigen Schiftpakete von der MPlayer-Seite.
     Hinweis: Momentan sind nur Schriftarten verf&uuml;gbaren, die den
     ISO 8859-1/2-Zeichens&auml;tzen entsprechen, aber es gibt auch ein paar
     von Benutzern erstellte Font-Pakete f&uuml;r andere Zeichns&auml;tze
@@ -1064,7 +1068,7 @@ bekommen:</P>
     </UL></LI>
   <LI>Verwende das Schrift-Erzeugungs-Tool, das in TOOLS/subfont-c liegt. Es
     ist ein komplettes Tool, um TTF/Type1/usw.-Schriften in ein
-    <B>MPlayer</B>-Schriftpaket zu konvertieren (lies TOOLS/subfont-c/README
+    MPlayer-Schriftpaket zu konvertieren (lies TOOLS/subfont-c/README
     f&uuml;r Details).</LI>
   <LI>Verwende das GIMP-Plugin f&uuml;r Schrift-Erzeugung unter
     TOOLS/subfont-GIMP (Hinweis: Du musst auch das HSI-RAW-Plugin haben; siehe
@@ -1111,7 +1115,7 @@ in der Konfigurationsdatei oder der Kommandozeilenoption
 
 <H3><A NAME="menu">1.4.3 Das OSD-Men&uuml;</A></H3>
 
-<P><B>MPlayer</B> besitzt nun ein komplett vom Benutzer definierbares
+<P>MPlayer besitzt nun ein komplett vom Benutzer definierbares
 OSD-Men&uuml;.</P>
 
 <H4>Installation</H4>
@@ -1124,13 +1128,13 @@ OSD-Men&uuml;.</P>
   <LI>Kopiere die Datei <CODE>etc/menu.conf</CODE> in dein
     <CODE>~/.mplayer</CODE>-Verzeichnis.</LI>
   <LI>Kopiere die Datei <CODE>etc/input.conf</CODE> in dein
-    <CODE>~/.mplayer</CODE>-Verzeichnis oder in <B>MPlayer</B>s
+    <CODE>~/.mplayer</CODE>-Verzeichnis oder in MPlayers
     systemweites Konfigurationsverzeichnis (standardm&auml;&szlig;ig
     <CODE>/usr/local/etc/mplayer</CODE>).</LI>
   <LI>&Uuml;berpr&uuml;fe den Inhalt der Datei <CODE>input.conf</CODE> und
     passe ihn nach deinen W&uuml;nschen an, um die Navigationstasten des
     Men&uuml;s zu aktivieren. Wie das geht, steht unten.</LI>
-  <LI>Starte <B>MPlayer</B> analog zu diesem Beispiel:<BR>
+  <LI>Starte MPlayer analog zu diesem Beispiel:<BR>
     <CODE>$ mplayer -menu file.avi</CODE></LI>
   <LI>Dr&uuml;cke die Tasten, die du vorher f&uuml;r die Navigation
     festgelegt hast.</LI>
@@ -1140,12 +1144,12 @@ OSD-Men&uuml;.</P>
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
-<P>Es gibt drei Methoden der Zeitmessung in <B>MPlayer</B>.</P>
+<P>Es gibt drei Methoden der Zeitmessung in MPlayer.</P>
 
 <UL>
 
   <LI><B>Um die alte Methode zu verwenden</B>, musst du nichts tun.
-    <B>MPlayer</B> verwendet <CODE>usleep()</CODE>, um Audio und Video synchron
+    MPlayer verwendet <CODE>usleep()</CODE>, um Audio und Video synchron
     zu halten, und erreicht dabei eine Genauigkeit bis zu +/- 10ms. Manchmal
     muss die Synchronisation aber einfach feiner eingestellt werden
     k&ouml;nnen.</LI>
@@ -1154,7 +1158,7 @@ OSD-Men&uuml;.</P>
     [Echtzeituhr]) f&uuml;r diese Aufgabe, da sie Timer mit genauen
     1ms-Intervallen erzeugen kann. Dies wird automatisch aktiviert, falls
     verf&uuml;gbar, erfordert jedoch Root-Privilegien, ein <B>setuid root</B>
-    <B>MPlayer</B>-Binary oder einen passend eingerichteten Kernel.<BR>
+    MPlayer-Binary oder einen passend eingerichteten Kernel.<BR>
     Wenn der Kernel 2.4.19pre8 oder sp&auml;ter verwendet wird, kannst du die
     maximale RTC-Frequenz f&uuml;r normale Benutzer &uuml;ber das
     <CODE>/proc</CODE>-Dateisystem anpassen. Du kannst folgenden Befehl
@@ -1223,7 +1227,7 @@ der Tastatur f&uuml;r's Fernsehen.</P>
 
 <OL>
 
-   <LI>Als erstes musst du <B>MPlayer</B> neu compilieren.
+   <LI>Als erstes musst du MPlayer neu compilieren.
      <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von v4l und
      ob die <CODE>/dev/video*</CODE>-Eintr&auml;ge existieren. Wenn sie
      existieren, wird die TV-Unterst&uuml;tzung eingebaut (siehe Ausgabe von
@@ -1280,15 +1284,15 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
     
   <LI>Achte auf die CPU-Auslastung. Sie sollte die 90%-Barriere die meiste Zeit
     &uuml;ber nicht &uuml;berschreiten. Wenn du gro&szlig;e Aufnahmepuffer
-    verwendest, dann kann <B>MEncoder</B> auch ein paar Sekunden mit
+    verwendest, dann kann MEncoder auch ein paar Sekunden mit
     h&ouml;herer Auslastung &uuml;berleben, aber auch nicht mehr. Somit
     solltest du besser deine 3D-OpenGL-Bildschirmschoner und allgemein alles
     andere, was viel Performance kostet, vor der Aufnahme ausschalten.</LI>
 
-  <LI>Spiel nicht mit der Systemuhr herum. <B>MEncoder</B> benutzt die
+  <LI>Spiel nicht mit der Systemuhr herum. MEncoder benutzt die
     Systemuhr, um Audio und Video synchron zu halten. Wenn du die Uhrzeit
     ver&auml;nderst (besonders, wenn du sie zur&uuml;cksetzt), dann wird das
-    <B>MEncoder</B> verwirren, und er wird Bilder wegwerfen. Das ist besonders
+    MEncoder verwirren, und er wird Bilder wegwerfen. Das ist besonders
     dann wichtig, wenn dein Rechner die Systemzeit automatisch &uuml;ber das
     Netzwerk anpasst, z.B. mit einer Software wie NTP. Schalte also NTP
     w&auml;hrend der Aufnahme aus, wenn du verl&auml;ssliche Resultate
@@ -1297,7 +1301,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
   <LI>&Auml;ndere das <CODE>outfmt</CODE> nicht, es sei denn, du wei&szlig;t
     wirklich, was du da tust, oder wenn deine Karte/dein Treiber wirklich das
     Standardausgabeformat nicht beherrscht (YV12-Farbraum). In &auml;lteren
-    Versionen von <B>MPlayer</B>/<B>MEncoder</B> musste das <CODE>outfmt</CODE>
+    Versionen von MPlayer/MEncoder musste das <CODE>outfmt</CODE>
     immer mit angegeben werden, aber heute nicht mehr, und die Standardwerte
     passen eh in den meisten F&auml;llen. Wenn du z.B. nach mit DivX aufnehmen
     willst, daf&uuml;r die libavcodec benutzt und <CODE>outfmt=RGB24</CODE>
@@ -1319,7 +1323,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
     zu finden ist. Sie enth&auml;lt Informationen dar&uuml;ber, wie du diesen
     Treiber benutzt.</LI>
 
-  <LI>Falls <B>MEncoder</B> das Audioger&auml;t nicht &ouml;ffnen kann,
+  <LI>Falls MEncoder das Audioger&auml;t nicht &ouml;ffnen kann,
     dann geh sicher, dass es auch wirklich verf&uuml;gbar ist. Probleme machen
     vor allem die Soundserver wie z.B. arts vom KDE oder esd vom GNOME. Wenn
     du eine Full-Duplex-Soundkarte hast (und das ist heutzutage praktisch
@@ -1339,7 +1343,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
     on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   <BR>
 
-  Hier ein sinnvolleres und umfassenderes Beispiel. <B>MEncoder</B> wird
+  Hier ein sinnvolleres und umfassenderes Beispiel. MEncoder wird
   mit voller PAL-Gr&ouml;&szlig;e aufnehmen, das Bild an den R&auml;ndern
   beschneiden und mit einem linear-blend-Algorithmus ein Deinterlacing
   vornehmen. Audio wird mit einer Bitrate von 64kbps mit dem LAME-Codec in
@@ -1373,7 +1377,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
 
   Du k&ouml;nntest auch in der <CODE>-tv</CODE>-Option eine kleinere
   Bildgr&ouml;&szlig;e angeben und daf&uuml;r auf die Softwareskalierung
-  verzichten. Aber der oben gew&auml;hlte Ansatz gibt <B>MEncoder</B> die
+  verzichten. Aber der oben gew&auml;hlte Ansatz gibt MEncoder die
   maximal zur verf&uuml;gung stehende Information zur Verarbeitung und ist
   ein bischen resistenter gegen Bildrauschen. Dazu kommt, dass der bt8x8-Chip
   wegen einer Hardwarebeschr&auml;nkung nur in der Horizontale zwischen
@@ -1451,7 +1455,7 @@ Wahl die generierte EDL-Datei verfeinern.</P>
 
 <H2><A NAME="command_line">3.1. Kommandozeile</A></H2>
 
-<P><B>MPlayer</B> ben&uuml;tzt einen komplexen Abspielbaum. Er besteht aus
+<P>MPlayer ben&uuml;tzt einen komplexen Abspielbaum. Er besteht aus
 globalen Optionen am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen
 nach dem Dateinamen, welche nur f&uuml;r die jeweilige Datei/URL/etc gelten
 (z.B. <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR> Mit { und
@@ -1467,7 +1471,7 @@ nach dem Dateinamen, welche nur f&uuml;r die jeweilige Datei/URL/etc gelten
   <TR><TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD></TR>
 </TABLE>
 
-<P>Die neusten Versionen von <B>MPlayer</B> akkzeptieren auch VCD- und
+<P>Die neusten Versionen von MPlayer akkzeptieren auch VCD- und
 DVD-Tracks im URL-Format, so wie z.B. auch Xine: <CODE>mplayer dvd://1</CODE>
 oder <CODE>mplayer vcd://1</CODE></P>
 
@@ -1482,8 +1486,8 @@ oder <CODE>mplayer vcd://1</CODE></P>
 
 <H2><A NAME="control">3.2. Steuerung</A></H2>
 
-<P><B>MPlayer</B> besitzt eine vollst&auml;ndig konfigurierbare, durch Befehle
-angesteuerte Steuerungsschicht (control layer), der es erlaubt, <B>MPlayer</B>
+<P>MPlayer besitzt eine vollst&auml;ndig konfigurierbare, durch Befehle
+angesteuerte Steuerungsschicht (control layer), der es erlaubt, MPlayer
 mit Tastatur, Maus, Joystick oder Fernbedienung (unter Verwendung von LIRC) zu
 steuern. Schau in die man-page. Dort steht eine vollst&auml;ndige Liste
 aller Tastaturkommandos.</P>
@@ -1492,8 +1496,8 @@ aller Tastaturkommandos.</P>
 <H3><A NAME="default_controls">3.2.1. Konfiguration der Steuerung</A></H3>
 
 
-<P> <B>MPlayer</B> erm&ouml;glicht es, dass du jede Taste/jeden Button mit
-einem <B>MPlayer</B>-Befehl verbindest. Dieses wird in einer simplen
+<P> MPlayer erm&ouml;glicht es, dass du jede Taste/jeden Button mit
+einem MPlayer-Befehl verbindest. Dieses wird in einer simplen
 Konfigurationsdatei festgelegt. Die Syntax besteht einfach aus einem
 Tastennamen gefolgt vom auszuf&uuml;hrenden Befehl. Die
 Standardkonfigurationsdatei ist <CODE>$HOME/.mplayer/input.conf</CODE>, aber
@@ -1587,7 +1591,7 @@ sein)</H4>
   <LI><B>audio_delay</B> (float) Wert
     <P>Korrigiert die Audioverz&ouml;gerung um Wert Sekunden</P></LI>
   <LI><B>quit</B>
-    <P>Beendet <B>MPlayer</B></P></LI>
+    <P>Beendet MPlayer</P></LI>
   <LI><B>pause</B>
     <P>Wechselt zwischen Pause und Weiterspielen</P></LI>
   <LI><B>grap_frames</B>
@@ -1652,13 +1656,13 @@ und steuere deinen Linux-Rechner damit. Mehr dazu auf <A
 HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
 <P>Wenn du das lirc-Paket installiert hast, erkennt es <CODE>configure</CODE>
-automatisch. Wenn alles gut geht, gibt <B>MPlayer</B> w&auml;hrend des Starts
+automatisch. Wenn alles gut geht, gibt MPlayer w&auml;hrend des Starts
 eine Nachricht wie etwa "Setting up lirc support..." aus. Wenn ein Fehler
 auftritt, wird dies auch gemeldet. Wenn gar nichts gesagt wird, ist auch keine
 LIRC-Unterst&uuml;tzung eincompiliert. Das ist alles :-)</P>
 
-<P>Der Anwendungsname f&uuml;r <B>MPlayer</B> ist - oh, ein Wunder -
-<CODE>mplayer</CODE>. Du kannst jeden beliebigen <B>MPlayer</B>-Befehl benutzen
+<P>Der Anwendungsname f&uuml;r MPlayer ist - oh, ein Wunder -
+<CODE>mplayer</CODE>. Du kannst jeden beliebigen MPlayer-Befehl benutzen
 und sogar mehrere nacheinander ausf&uuml;hren lassen, indem du sie durch \n
 voneinander trennst. Vergiss nicht, die <CODE>repeat</CODE>-Option in der
 .lircrc zu benutzen, wenn es Sinn macht (beim Suchen, bei der Lautst&auml;rke
@@ -1700,19 +1704,19 @@ andere Datei anzugeben.</P>
 <H3><A NAME="slave">3.2.4. Der "Slave"-Modus</A></H3>
 
 <P>Der Slave-Modus erlaubt es dir, ein einfaches Frontend f&uuml;r
-<B>MPlayer</B> zu erstellen. Wenn er mit der Option <CODE>-slave</CODE>
-aktiviert wurde, dann liest <B>MPlayer</B> durch neue Zeilen unterbrochene
+MPlayer zu erstellen. Wenn er mit der Option <CODE>-slave</CODE>
+aktiviert wurde, dann liest MPlayer durch neue Zeilen unterbrochene
 Befehle (\n) von der Standardeingabe.</P>
 
 
 <H2><A NAME="streaming">3.3. Streaming &uuml;ber das Netzwerk oder
 Pipes</A></H2>
 
-<P><B>MPlayer</B> kann Videos &uuml;ber Netzwerke unter Verwendung des HTTP-
+<P>MPlayer kann Videos &uuml;ber Netzwerke unter Verwendung des HTTP-
 MMS- oder RTSP/RTP-Protokolls abspielen.</P>
 
 <P>Abspielen geht einfach durch das Hinzuf&uuml;gung der URL zu der
-Kommandozeile. <B>MPlayer</B> ber&uuml;cksichtigt auch die
+Kommandozeile. MPlayer ber&uuml;cksichtigt auch die
 http_proxy-Umgebungsvariable und benutzt einen Proxy, falls vorhanden. Der
 Proxygebrauch kann auch erzwungen werden:</P>
 
@@ -1720,7 +1724,7 @@ Proxygebrauch kann auch erzwungen werden:</P>
 http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE>
 </P>
 
-<P><B>MPlayer</B> kann auch von stdin lesen (<B>nicht</B> von benannte Pipes).
+<P>MPlayer kann auch von stdin lesen (<B>nicht</B> von benannte Pipes).
 Dies ist ein Beispiel f&uuml;r die Verwendung, um von FTP abzuspielen:</P>
 
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/etwas.avi -O - | mplayer
@@ -1788,7 +1792,7 @@ Versionen wird offiziell unterst&uuml;tzt.</P>
 
 <H2><A NAME="freebsd">6.2. *BSD</A></H2>
 
-<P><B>MPlayer</B> l&auml;uft auf FreeBSD, OpenBSD, NetBSDO, BSD/OS und Darwin.
+<P>MPlayer l&auml;uft auf FreeBSD, OpenBSD, NetBSDO, BSD/OS und Darwin.
 Es sind ports/pkgsrc/fink/etc-Versionen verf&uuml;gbar, die sich wahrscheinlich
 leichter als die normalen Quelltexte installieren lassen.</P>
 
@@ -1796,11 +1800,11 @@ leichter als die normalen Quelltexte installieren lassen.</P>
 /usr/ports/devel/gmake), das originale BSD make wird nicht funktionieren.
 Au&szlig;erdem ist eine relativ neue Version der binutils n&ouml;tig.</P>
 
-<P>Wenn <B>MPlayer</B> meldet "CD-ROM Device '/dev/cdrom' not found!" musst du
+<P>Wenn MPlayer meldet "CD-ROM Device '/dev/cdrom' not found!" musst du
 einen symbolischen Link setzen: <CODE>ln -s /dev/(dein CD-ROM Device)
 /dev/cdrom</CODE></P>
 
-<P>Wenn du die Win32-DLLs mit <B>MPlayer</B> benuzen willst, dann musst du
+<P>Wenn du die Win32-DLLs mit MPlayer benuzen willst, dann musst du
 deinen Kernel mit "<CODE>option USER_LDT</CODE>" neu compilieren (es sei denn,
 bei dir l&auml;uft FreeBSD-CURRENT, in dem der Kernel bereits damit 
 compiliert wurde).</P>
@@ -1823,9 +1827,9 @@ wird mit <CODE>gmake</CODE> der Kernel &uuml;bersetzt.</P>
 
 <H2><A NAME="solaris">6.3. Solaris</A></H2>
 
-<P><B>MPlayer</B> sollte auf Solaris 2.6 oder neuer funktionieren.</P>
+<P>MPlayer sollte auf Solaris 2.6 oder neuer funktionieren.</P>
 
-<P>Bei <B>UltraSPARC</B>s kann <B>MPlayer</B> die Vorteile der
+<P>Bei <B>UltraSPARC</B>s kann MPlayer die Vorteile der
 <B>VIS</B>-Erweiterungen (vergleichbar mit MMX) verwenden, zur Zeit jedoch erst
 in <CODE>libmpeg2</CODE>, <CODE>libvo</CODE> und <CODE>libavcodec</CODE>,
 jedoch nicht in <CODE>mp3lib</CODE>. Du kannst eine VOB-Datei auf einer 400MHz
@@ -1848,7 +1852,7 @@ Rolle, ob der GNU C/C++-Compiler mit oder ohne GNU Assembler konfiguriert
 ist.</P>
 
 <P>Unter Solaris x86 brauchst du den GNU C/C++-Compiler, welcher konfiguriert
-sein muss, den GNU Assembler zu verwenden! Der <B>MPlayer</B>-Code erzeugt auf
+sein muss, den GNU Assembler zu verwenden! Der MPlayer-Code erzeugt auf
 x86 Plattformen eine Binary mit Verwendungen von MMX-, SSE- und 3DNOW-Befehlen.
 Dies kann mit dem Sun Assembler <CODE>/usr/ccs/bin/as</CODE> nicht assembliert
 werden.</P>
@@ -1912,7 +1916,7 @@ mit einer Speicherkapazit&auml;t von mehr als 4GB zu verwenden:</P>
 
 <P>Bei Solaris mit einer UltraSPARC CPU kannst du zus&auml;tzliche
 Geschwindigkeit gewinnen, indem du die VIS-Befehle f&uuml;r rechenintensive
-Operationen verwendest. VIS-Beschleunigungen k&ouml;nnen von <B>MPlayer</B>
+Operationen verwendest. VIS-Beschleunigungen k&ouml;nnen von MPlayer
 durch das Aufrufen von Funktionen in Suns <A
 HREF="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</A> verwendet
 werden.</P>
@@ -1923,13 +1927,19 @@ und f&uuml;r Farbraumkonvertierung im Videoausgabetreiber verwendet.</P>
 
 <H2><A NAME="strongarm">6.4. StrongARM</A></H2>
 
-<P>Es wurde berichtet, dass man <B>MPlayer</B> auf einem StrongARM kompilieren
-kann. Verwende die folgende Kommandozeile:</P>
-
-<PRE>
-  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
-</PRE>
+<P>MPlayer l&auml;uft auf Linux-PDAs mit einer ARM-CPU, z.B. dem Sharp Zaurus
+oder dem Compaq Ipaq. Am einfachsten ist es, sich MPlayer von
+<A HREF="http://www.openzaurus.org">Openzaurus</A> runterzuladen.
+Wenn du MPlayer selber compilieren m&ouml;chtest, dann schau dir dir
+Verzeichnisse f&uuml;r 
+<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">
+mplayer</A> und
+<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">
+libavcodec</A> bei der OpenZaurus-Distribution an. Sie enthalten immer
+die aktuellen Makefiles und Patches, die benutzt werden k&ouml;nnen,
+um die CVS-Version von MPlayer mit libavcodec zu compilieren.<BR>
+Wenn du das GUI brauchst, dann kannst du <CODE>xmms-embedded</CODE>
+benutzen.</P>
 
 
 <H2><A NAME="sgi">6.5. Silicon Graphics / IRIX</A></H2>
@@ -1946,22 +1956,28 @@ hast):</P>
 <P>Die zweite M&ouml;glichkeit besteht darin, das bei IRIX 6.5 mitgelieferte
 "install" zu benutzen. Dazu musst du aber das Makefile ein wenig von Hand
 anpassen. &Auml;ndere die folgenden beiden Zeilen</P>
+
 <PRE>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
   $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </PRE>
+
 <P>in:</P>
+
 <PRE>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </PRE>
+
 <P>F&uuml;hr danach noch die beiden Befehle aus dem
-<B>MPlayer</B>-Quellcodeverzeichnis heraus auf:</P>
+MPlayer-Quellcodeverzeichnis heraus auf:</P>
+
 <PRE>
   cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
 </PRE>
+
 <P>Nun mache ganz normal mit dem Compilierungs- und Installationsprozess
 weiter.</P>
 
@@ -1969,7 +1985,7 @@ weiter.</P>
 <H2><A NAME="qnx">6.6 QNX</A></H2>
 
 <P>Funktioniert. Du musst SDL f&uuml;r QNX herunterladen, installieren und dann
-<B>MPlayer</B>  mit den Optionen <CODE>-vo sdl:photon</CODE> und <CODE>-ao
+MPlayer  mit den Optionen <CODE>-vo sdl:photon</CODE> und <CODE>-ao
 sdl:nto</CODE> starten. Es sollte schnell sein.</P>
 
 <P>Die <CODE>-vo x11</CODE>-Ausgabe ist sogar noch langsamer als unter Linux,
@@ -1990,14 +2006,14 @@ mplayer-cygwin</A> Mailingliste werfen, um Hilfe zu bekommen und die neuesten
 Informationen zu finden.</P>
 
 <P>Du wirst die Datei <CODE>etc/cygwin_inttypes.h</CODE> aus den
-<B>MPlayer</B>-Quellen nach  <CODE>/usr/include/inttypes.h</CODE> kopieren
-und erst danach <B>MPlayer</B> compilieren m&uuml;ssen, da der Compiler sich
+MPlayer-Quellen nach  <CODE>/usr/include/inttypes.h</CODE> kopieren
+und erst danach MPlayer compilieren m&uuml;ssen, da der Compiler sich
 sonst &uuml;ber eine fehlende <CODE>intypes.h</CODE> beschwert..</P>
 
 <P>Wenn du Unterst&uuml;tzung f&uuml;r DirectX-Videoausgabe (<CODE>-vo
 directx</CODE>) haben willst, dann installier die <A
 HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 Header Files</A>
-und compiliere <B>MPlayer</B> erneut. Du solltest mit <CODE>-vo directx -ao
+und compiliere MPlayer erneut. Du solltest mit <CODE>-vo directx -ao
 win32</CODE> die besten Ergebnisse erzielen. Falls das Bild gest&ouml;rt ist,
 so versuche es ohne die Hardwarebeschleunigung erneut: <CODE>-vo
 directx:noaccel</CODE>.</P>
@@ -2007,7 +2023,7 @@ der <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl-Seite</A>.</P>
 
 <H1><A NAME="mailing_lists">Anhang A - Mailing-Listen</A></H1>
 
-<P>Es stehen einige &ouml;ffentliche Mailinglisten f&uuml;r <B>MPlayer</B> zur
+<P>Es stehen einige &ouml;ffentliche Mailinglisten f&uuml;r MPlayer zur
 Verf&uuml;gung. Wenn nichts anderes angegeben wird, dann ist die auf der Liste
 zu verwendende Sprache <B>Englisch</B>. Bitte schreibe nicht in anderen
 Sprachen, und schick niemals HTML-Mails! Es gibt eine

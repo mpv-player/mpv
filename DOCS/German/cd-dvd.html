@@ -79,17 +79,17 @@ HREF="http://das.ist.org/~georg/">Plextor-SCSI-Laufwerken</A> funktioniert.</P>
 <P>Bitte schau in der man-Page nach, wenn du eine Auflistung aller
 verf&uuml;gbaren Optionen willst.</P>
   
-<P><B>MPlayer</B> benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE>
+<P>MPlayer benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE>
 f&uuml;r die DVD Entschl&uuml;sselung und Wiedergabe. Diese beiden Bibliotheken
 sind im <CODE>libmpdvdkit2/</CODE>-Unterverzeichnis enthalten und m&uuml;ssen
 nicht separat installiert werden. Wir haben uns dazu entschlossen, da wir einen
 Fehler in der <CODE>libdvdread</CODE> beheben mussten und einen Patch
 hinzuf&uuml;gt haben, welcher <B>Caching-Support f&uuml;r gecrackte
 CSS-Keys</B> f&uuml;r <CODE>libdvdcss</CODE> erm&ouml;glicht. Dies f&uuml;hrt
-zu einer Geschwindigkeitssteigerung, da <B>MPlayer</B> nicht vor jeder
+zu einer Geschwindigkeitssteigerung, da MPlayer nicht vor jeder
 Wiedergabe die Verschl&uuml;sselung erneut knacken muss.</P>
 
-<P><B>MPlayer</B> kann jedoch auch die systemweiten <CODE>libdvdread</CODE>-
+<P>MPlayer kann jedoch auch die systemweiten <CODE>libdvdread</CODE>-
 und <CODE>libdvdcss</CODE>-Bibliotheken verwenden. Diese L&ouml;sung wird
 jedoch aus oben den oben genannten Gr&uuml;nden <B>nicht</B> empfohlen.
 Aus&szlig;erdem kann es zu Fehlern, Inkompatibilit&auml;ten zwischen den
@@ -106,9 +106,9 @@ compilieren.</P>
 
 <P>Nützlich, wenn du verschl&uuml;sselte VOBs von der Festplatte abspielen
 willst. Kompiliere und installiere <B>libcss</B> 0.0.1 (nicht neuer). Wenn
-<B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib
+MPlayer sie nicht findet, dann benutze die Option <CODE>-csslib
 /pfad/zu/libcss.so</CODE>. Um diese Bibliothek zu benutzen musst du root-Rechte
-haben, das SUID-Bit f&uuml;r die <B>MPlayer</B>-Programmdatei setzen oder den
+haben, das SUID-Bit f&uuml;r die MPlayer-Programmdatei setzen oder den
 fibmap_mplayer-Wrapper benutzen, der das SUID-Bit gesetzt hat.</P>
 
 <H4>DVD-Strukturen</H4>
@@ -137,7 +137,7 @@ erhalten. Du hast nun die folgenden M&ouml;glichkeiten:</P>
 
 <UL>
   <LI>Sei root oder gib der mplayer-Programmdatei das SUID-Bit.</LI>
-  <LI>Lass <B>MPlayer</B> das Wrapper-Programm fibmap_mplayer ausf&uuml;hren,
+  <LI>Lass MPlayer das Wrapper-Programm fibmap_mplayer ausf&uuml;hren,
     welches das SUID-Bit gesetzt hat, um Zugriff auf die DVD zu bekommen
     (wird bei der alten DVD-Unterst&uuml;tzung mit der <CODE>libcss</CODE> so
     sgemacht).</LI>
@@ -189,20 +189,20 @@ Werte sind <CODE>key</CODE>, <CODE>disk</CODE> und <CODE>title</CODE>.</P>
     ein Ablauschen der Schl&uuml;ssel zu verhindern. Der bus key ist
     erforderlich, um den verschl&uuml;sselten disk key zu erhalten und zu
     entschl&uuml;sseln.</LI>
-  <LI><B>cached key:</B> <B>MPlayer</B> sucht nach bereits gecrackten
+  <LI><B>cached key:</B> MPlayer sucht nach bereits gecrackten
     Schl&uuml;sseln, die im <CODE>~/.mplayer/DVDKeys</CODE>-Verzeichnis
     gespeichert werden (das ist schnell ;).</LI>
   <LI><B>key:</B> Falls kein cached key vorhanden ist, so versucht
-    <B>MPlayer</B> den disk key mit Hilfe einer Reihe von mitgelieferten
+    MPlayer den disk key mit Hilfe einer Reihe von mitgelieferten
     und eincompilierten player keys zu entschl&uuml;sseln.</LI>
   <LI><B>disk:</B> Wenn die key-Methode fehlschl&auml;gt (z.B. wenn keine
-    Player-Schl&uuml;ssel dabei sind), so versucht <B>MPlayer</B>, den
+    Player-Schl&uuml;ssel dabei sind), so versucht MPlayer, den
     disk key mit Hilfe eines brute-force-Algorithmusses zu knacken. Dieser
     Prozess belastet die CPU sehr und ben&ouml;tigt mindestens 64MB Speicher
     (16M 32Bit breite Eintr&auml;ge in einer Hashtabelle), um tempor&auml;re
     Werte zu speichern. Diese Methode sollte immer funktionieren, ist aber
     langsam.</LI>
-  <LI><B>title request:</B> Mit dem disk key kann <B>MPlayer</B> den
+  <LI><B>title request:</B> Mit dem disk key kann MPlayer den
     verschl&uuml;sselten title key anfordern, der auf <I>versteckten
     Sektoren</I>, die mit <CODE>ioctl()</CODE> ausgelesen werden, auf der DVD
     gespeichert ist. Der Gebietsschutz der RPC-2-konformen DVD-Laufwerke
@@ -296,7 +296,7 @@ Linux-Version von PowerDVD enthalten ist. Er enth&auml;lt einen modifizierten
 Treiber f&uuml;r das ISO9660-Dateisystem (<CODE>vcdfs/isofs-2.4.X.o</CODE>),
 der ebenfalls in der Lage ist, das direkte Auslesen &uuml;ber diese .DAT-Datei
 zu emulieren. Wenn du die Disc mit diesem Treiber mountest, dann kannst du die
-.DAT-Datei kopieren und sogar direkt mit <B>MPlayer</B> abspielen. Das wird
+.DAT-Datei kopieren und sogar direkt mit MPlayer abspielen. Das wird
 aber <B>nicht</B> mit dem Standard-ISO9660-Treiber funktionieren! Benutze dabei
 <CODE>-vcd</CODE>. Alternativen f&uuml;r's Kopieren einer VCD sind der neue <A
 HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A>-Kerneltreiber (der

@@ -12,11 +12,11 @@
 
 <H2><A NAME="encoding">2.4.  Encodieren mit MEncoder</A></H2>
 
-<P>Eine komplette Auflistung aller <B>MEncoder</B>-Optionen und aller Beispiele
+<P>Eine komplette Auflistung aller MEncoder-Optionen und aller Beispiele
 findest du in der man-page.</P>
 
-<H3><A NAME="2pass">2.4.1. MPEG4-Encodierung ("DivX") in zwei oder drei Durchl&auml;ufen
-</A></H3>
+<H3><A NAME="2pass">2.4.1. MPEG4-Encodierung ("DivX") in zwei oder drei
+Durchl&auml;ufen </A></H3>
 
 <P><U><B>2-pass-Encodierung:</B></U> Der Name kommt in der Tat daher, dass
 diese Methode die Datei <I>zweimal</I> encodiert. Das erste Encodieren (1.
@@ -43,7 +43,7 @@ vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
 <P><U><B>3-Pass-Encodierung:</B></U> Dies ist eine Erweiterung der
 2-Pass-Encodierung, in der die Encodierung von Audio in einem separaten
-Durchlauf erledigt wird. Diese Methode erlaubt es <B>MEncoder</B>,
+Durchlauf erledigt wird. Diese Methode erlaubt es MEncoder,
 Vorschl&auml;ge f&uuml;r die Videobitrate zu machen, sodass das Ergebnis auf
 eine CD passt. Auch wird der Ton im Unterschied zum 2-Pass nur einmal
 encodiert. Das Schema: </P>
@@ -55,17 +55,18 @@ encodiert. Das Schema: </P>
     <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts
       vbr=3 -o frameno.avi</CODE></P>
       
-    <P>Hierbei wird ein AVI erstellt, das <B>nur</B> die gew&auml;hlte Audiospur
-      enth&auml;lt. Vergiss nicht, die <CODE>-lameopts</CODE> deinen W&uuml;nschen
-      anzupassen. Wenn du einen langen Film encodierst, so gibt dir <B>MEncoder</B>
-      am Schluss die empfohlenen Videobitraten aus, damit ein resultierender
-      Film auf eine 650MB-, eine 700MB- oder eine 800MB-CD passt.</P></LI>
+    <P>Hierbei wird ein AVI erstellt, das <B>nur</B> die gew&auml;hlte
+      Audiospur enth&auml;lt. Vergiss nicht, die <CODE>-lameopts</CODE> deinen
+      W&uuml;nschen anzupassen. Wenn du einen langen Film encodierst, so gibt
+      dir MEncoder am Schluss die empfohlenen Videobitraten aus, damit
+      ein resultierender Film auf eine 650MB-, eine 700MB- oder eine 800MB-CD
+      passt.</P></LI>
   <LI>Zweiter Durchgang:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=&lt;bitrate&gt;
       </CODE></P>
     <P>Genauso wie der erste Durchgang vom DivX4-Beispiel oben. Gib hier die
-      nach dem ersten Durchlauf von <B>MEncoder</B>empfohlene  oder eine andere
+      nach dem ersten Durchlauf von MEncoderempfohlene  oder eine andere
       von dir gew&auml;hlte Videobitrate an.</LI></P>
   <LI>Dritter Durchgang:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
@@ -81,8 +82,8 @@ encodiert. Das Schema: </P>
 <H4>Beispiel einer 3-Pass-Encodierung:</H4>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - L&ouml;sche diese Datei,
-  welche von einer fr&uuml;heren 3-Pass-Encodierung kommen kann (Sie f&uuml;hrt zu
-  einem Konflikt mit der momentanen Encodierung).<BR>
+  welche von einer fr&uuml;heren 3-Pass-Encodierung kommen kann (Sie f&uuml;hrt
+  zu einem Konflikt mit der momentanen Encodierung).<BR>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
   -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
@@ -107,7 +108,7 @@ H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
 <P>Der Skalierungsprozess erfolgt durch den <I>'scale</I>-Videofilter:
 <CODE>-vop scale=breite:hoehe</CODE>. Die Qualit&auml;t kann durch die Option
 <CODE>-sws</CODE> angegeben werden. Wenn nichts angegeben ist, verwendet
-<B>MEncoder</B> 0: schnelle bilienare Filterung ('fast bilinear').</P>
+MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 
 <H5>Verwendung:</H5>
 
@@ -116,7 +117,7 @@ H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
 
 <H3><A NAME="copying">2.4.3. Stream-Kopiermodus</A></H3>
 
-<P><B>MEncoder</B> kann Input-Streams auf zwei Arten bearbeiten:
+<P>MEncoder kann Input-Streams auf zwei Arten bearbeiten:
 <B>encodieren</B> oder <B>kopieren (copy)</B>. Diese Sektion erkl&auml;rt die
 <B>Stream-Kopie</B>.</P>
 
@@ -124,7 +125,7 @@ H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
   <LI><B>Videostreams</B> (Option <CODE>-ovc copy</CODE>): Es k&ouml;nnen nette
     Sachen gemacht werden :)<BR> Wie das kopieren (nicht konvertieren) von FLI-
     oder VIVO- oder MPEG1-Video in eine AVI-Datei. Nat&uuml;rlich ist nur
-    <B>MPlayer</B> in der Lage, solche Dateien abspielen :) Und vermutlich ist
+    MPlayer in der Lage, solche Dateien abspielen :) Und vermutlich ist
     das auch absolut nicht praxisrelevant. Das Kopieren von Videostream
     kann n&uuml;tzlicher sein, wenn man zum Beispiel nur den Audiostream
     encodieren will (z.B.: unkomprimiertes PCM zu MP3).</LI>
@@ -139,7 +140,7 @@ H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
 schlechtem Interleaving</A></H3>
 
 <P>Trivial. Wir kopieren einfach die Video- und Audiostreams, und
-<B>MEncoder</B> erzeugt den Index. Nat&uuml;rlich kann das keine Fehler in den
+MEncoder erzeugt den Index. Nat&uuml;rlich kann das keine Fehler in den
 Video- und/oder Audiostreams beheben. Es kann auch Dateien mit kaputten
 Interleaving reparieren, sodass die Option <CODE>-ni</CODE> f&uuml;r diese
 nicht mehr gebraucht wird.</P>
@@ -180,7 +181,7 @@ vcodec=mjpeg -oac copy</CODE></P>
 <H3><A NAME="image_files">2.4.6 Encodierung von mehreren Einzelbildern
   (JPEGs, PNGs oder TGAs)</A></H3>
 
-<P><B>MEncoder</B> kann aus mehreren JPEG-, PNG- oder TGA-Einzelbildern
+<P>MEncoder kann aus mehreren JPEG-, PNG- oder TGA-Einzelbildern
 einen Film erstellen. Durch einfaches Kopieren der Bilder kann er MJPEG-
 (Motion JPEG), MPNG- (Motion PNG) oder MTGA-Filme (Motion TGA) erzeugen.</P>
 
@@ -188,10 +189,10 @@ einen Film erstellen. Durch einfaches Kopieren der Bilder kann er MJPEG-
 
 <OL>
 
-  <LI><B>MEncoder</B> <I>decodiert</I> das/die Eingangsbild(er) mit
+  <LI>MEncoder <I>decodiert</I> das/die Eingangsbild(er) mit
     <CODE>libjpeg</CODE> (wenn PNGs decodiert werden, wird die <B>libpng</B>
     benutzt).</LI>
-  <LI><B>MEncoder</B> f&uuml;hrt die decodierten Bilder danach dem
+  <LI>MEncoder f&uuml;hrt die decodierten Bilder danach dem
     gew&auml;hlten Videokompressor zu (DivX4, Xvid, ffmpeg msmpeg4, etc...).
   </LI>
 </OL>
@@ -240,10 +241,10 @@ aktuellen Verzeichnis:</I><BR>
 <H3><A NAME="vobsub">2.4.7. Extrahieren von DVD-Untertiteln in eine
 Vobsub-Datei</A></H3>
   
-<P><B>MEncoder</B> kann Untertitel von einer DVD extrahieren und sie als Datei
+<P>MEncoder kann Untertitel von einer DVD extrahieren und sie als Datei
 im Vobsub-Format speichern. Dieses besteht aus einem Dateipaar
 (<CODE>.sub</CODE> und <CODE>.idx</CODE>) und wird gew&auml;hnlich in ein
-einziges <CODE>.rar</CODE> Archiv verpackt. <B>MPlayer</B> kann diese mit den
+einziges <CODE>.rar</CODE> Archiv verpackt. MPlayer kann diese mit den
 Optionen <CODE>-vobsub</CODE> und <CODE>-vobsubid</CODE> wiedergeben.</P>
 
 <P>Du gibst mit <CODE>-vobsubout</CODE> den Basisnamen der Ausgabedatei  (ohne
@@ -257,7 +258,7 @@ an.</P>
 
 <P>Wenn die Eingabe nicht von einer DVD stammt und keine
 <CODE>.ifo</CODE>-Datei vorhanden ist, ben&ouml;tigst du die
-<CODE>-vobsuboutid</CODE>-Option, um <B>MPlayer</B> zu sagen, welche Sprach-ID
+<CODE>-vobsuboutid</CODE>-Option, um MPlayer zu sagen, welche Sprach-ID
 f&uuml;r die <CODE>.idx</CODE> Datei verwendet werden soll.</P>
 
 <P>Jeder Aufruf f&uuml;gt neue Untertitel dazu, falls die <CODE>.idx</CODE>-
@@ -307,11 +308,11 @@ geben!?</P>
 <P>MPEG4 enth&auml;lt ein einzigartiges Feature: Im Videostream selber kann
 das H&ouml;hen-/Breitenverh&auml;ltnis gespeichert werden. Jop, genauso wie
 bei MPEG1/2 (DVD, SVCD). Leider gibt es bisher <U>keinen</U> Videoplayer, der
-dieses Feature unterst&uuml;tzt. Bis auf <B>MPlayer</B> nat&uuml;rlich.</P>
+dieses Feature unterst&uuml;tzt. Bis auf MPlayer nat&uuml;rlich.</P>
 
 <P>Dieses Feature kann nur in Verbindung mit dem <CODE>mpeg4</CODE>-Codec der
 <B>libavcodec</B> genutzt werden. Denke immer daran, dass - auch wenn
-<B>MPlayer</B> die Datei richtig wiedergeben wird - alle anderen Player ein
+MPlayer die Datei richtig wiedergeben wird - alle anderen Player ein
 falsches H&ouml;hen-/Breitenverh&auml;ltnis anzeigen werden.</P>
 
 <P>Du solltest ernsthaft in Erw&auml;gung ziehen, die eventuell vorhandenen

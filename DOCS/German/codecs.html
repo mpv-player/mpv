@@ -51,7 +51,7 @@ hinzuzuf&uuml;gen.</P>
 Divx5-Codec vom <A HREF="http://www.projectmayo.com">Project Mayo</A>. Ihre
 ersten verf&uuml;gbaren alpha-Versionen waren OpenDivX 4.0 alpha 47 und 48.
 Unterst&uuml;tzung daf&uuml;r war fr&uuml;her standardgem&auml;&szlig; in
-<B>MPlayer</B> eingebaut. Es wurde auch deren Postprocessing Code verwendet, um
+MPlayer eingebaut. Es wurde auch deren Postprocessing Code verwendet, um
 optional die Bildqualit&auml;t von MPEG1/2-Filmen zu verbessern. Nun benutzen
 wir unseren eigenen f&uuml;r alle Dateitypen.</P>
 
@@ -76,7 +76,7 @@ Closed-Source ist.</P>
 <CODE>/etc/ld.so.conf</CODE> hinzuzuf&uuml;gen und anschlie&szlig;end
 <CODE>ldconfig</CODE> aufzurufen!</P>
 
-<P><B>MPlayer</B> erkennt automatisch, ob DivX4/DivX5 korrekt installiert ist,
+<P>MPlayer erkennt automatisch, ob DivX4/DivX5 korrekt installiert ist,
 du kannst ihn wie gew&ouml;hnlich kompilieren. Wenn es nicht erkannt wird,
 wurde es nicht korrekt installiert oder konfiguriert.</P>
 
@@ -86,7 +86,7 @@ wurde es nicht korrekt installiert oder konfiguriert.</P>
   <DT><CODE>-vc odivx</CODE></DT>
   <DD>Spricht den Codec so wie den alten OpenDivX-Codec an. In diesem Fall
     produziert der Codec YV12-Bilder in seinem eigenen Puffer, und
-    <B>MPlayer</B> nimmt die Farbraumkonvertierung mittels libvo vor
+    MPlayer nimmt die Farbraumkonvertierung mittels libvo vor
     (<B>schneller und empfohlener Modus!</B>).</DD>
   <DT><CODE>-vc divx4</CODE></DT>
   <DD>Benutzt die Farbraumkonvertierung des Codecs. In diesem Modus kannst
@@ -119,11 +119,11 @@ DivX4/5-Bibliothek!</P>
 MPEG4-Varianten: DivX3, DivX4, DivX5, Windows Media Video 7 (WMV1). Ein
 weiterer sehr interessanter Deocder ist der f&uuml;r WMA.</P>
 
-<P>Wenn ein offizielles <B>MPlayer</B>-Release verwendet wird, befindet sich
+<P>Wenn ein offizielles MPlayer-Release verwendet wird, befindet sich
 libavcodec (die Codec-Bilbiothek des FFmpeg-Projektes) bereits im Paket,
-welches normal kompiliert werden kann. Wenn du die <B>MPlayer</B>-Sourcen per
+welches normal kompiliert werden kann. Wenn du die MPlayer-Sourcen per
 CVS runterl&auml;dst, musst du die libavcodec vom FFmpeg CVS-Server verwenden,
-da das offizielle FFmpeg-Release 0.4.5 <B>nicht</B> mit <B>Mplayer</B>
+da das offizielle FFmpeg-Release 0.4.5 <B>nicht</B> mit MPlayer
 zusammen l&auml;uft. Um dies zu erreichen gibst du folgendes ein:</P>
 
 <OL>
@@ -132,7 +132,7 @@ zusammen l&auml;uft. Um dies zu erreichen gibst du folgendes ein:</P>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg
     co ffmpeg</CODE></LI>
   <LI>Das <CODE>libavcodec</CODE>-Verzeichnis von den FFmpeg-Sourcen muss in's
-    Hauptverzeichnis des <B>MPlayer</B> CVS-Baums verschoben/kopiert werden.
+    Hauptverzeichnis des MPlayer CVS-Baums verschoben/kopiert werden.
     Es sollte etwa so aussehen:
     <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
     Das Erstellen eines symbolischen Links ist <B>nicht</B> genug; es muss
@@ -141,7 +141,7 @@ zusammen l&auml;uft. Um dies zu erreichen gibst du folgendes ein:</P>
     Compilierung erkennen.</LI>
 </OL>
 
-<P><B>Hinweis:</B> Die <B>MPlayer</B>-Sourcen im CVS enthalten ein
+<P><B>Hinweis:</B> Die MPlayer-Sourcen im CVS enthalten ein
 libavcodec-Unterverzeichnis. Es enth&auml;lt jedoch <B>nicht</B> den Quellcode
 von libavcodec! Du musst - wie oben beschrieben - dir die CVS-Version von 
 FFmpeg besorgen.</P>
@@ -159,7 +159,7 @@ Verwenden der Codecs mit anderen Programmen als XAnim verbietet. Der
 XAnim-Autor hat jedoch noch keine rechtliche Schritte gegen irgendjemanden
 wegen Codec bezogenen Fragen unternommen.</P>
 
-<P><B>MPlayer</B> kann XAnims Codecs f&uuml;r das Decodieren verwenden. Um
+<P>MPlayer kann XAnims Codecs f&uuml;r das Decodieren verwenden. Um
 diese zu aktivieren, solltest folgenden Anweisungen folgen:</P>
 
 <OL>
@@ -180,7 +180,7 @@ diese zu aktivieren, solltest folgenden Anweisungen folgen:</P>
 </OL>
   
 <P>XAnim ist die Videocodec-Familie Nummer 10. Du kannst also die
-<CODE>-vfm 10</CODE>-Option verwenden, um <B>MPlayer</B> zu sagen, dass er
+<CODE>-vfm 10</CODE>-Option verwenden, um MPlayer zu sagen, dass er
 sie, wenn m&ouml;glich, verwenden soll.</P>
 	  
 <P>Die getesteten Codecs beinhalten: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>,
@@ -189,7 +189,7 @@ sie, wenn m&ouml;glich, verwenden soll.</P>
 
 <H4><A NAME="vivo_video">2.2.1.4. VIVO-Video</A></H4>
 
-<P><B>MPlayer</B> kann VIVO (1.0 und 2.0) Videos abspielen. Der beste geeignete
+<P>MPlayer kann VIVO (1.0 und 2.0) Videos abspielen. Der beste geeignete
 Codec f&uuml;r 1.0-Dateien ist FFmpegs H263-Decoder. Du kannst ihn mit der
 <CODE>-vc ffh263</CODE>-Option aufrufen (standard) (ben&ouml;tigt die neuesten
 libavcodecs). F&uuml;r 2.0-Dateien verwende die <A
@@ -201,7 +201,7 @@ oder wo auch immer du deine Win32-Codecs speicherst.</P>
 <H4><A NAME="mpeg">2.2.1.5. MPEG 1/2-Video</A></H4>
 
 <P>MPEG1 und MPEG2 werden von der eingebauten Multiplatform-Bibliothek
-<B>libmpeg2</B> decodiert, deren Source in <B>MPlayer</B> enthalten ist. Wir
+<B>libmpeg2</B> decodiert, deren Source in MPlayer enthalten ist. Wir
 spielen fehlerhafte MPEG1/2-Videos durch das Abfangen des sig11 (segmentation
 fault) und die anschliessend schnelle neue Initialisierung des Codecs ab.
 Dadurch kann exakt an der Stelle des Fehlers fortgefahren werden. Es ist dabei
@@ -218,7 +218,7 @@ HREF="mailto:melanson@pcisys.net">Mike Melanson</A>) eingebaut.</P>
 
 <H4><A NAME="cinepak">2.2.1.7. Cinepak CVID</A></H4>
 
-<P><B>MPlayer</B> verwendet normalerweise seinen eigenen, Open-Source
+<P>MPlayer verwendet normalerweise seinen eigenen, Open-Source
 multiplatformf&auml;higen Cinepak-Decoder. Er unterst&uuml;tzt YUV-Ausgabe,
 was Hardwarescaling erm&ouml;glicht, wenn dies vom Videoausgabetreiber
 unterst&uuml;tzt wird.</P>
@@ -226,7 +226,7 @@ unterst&uuml;tzt wird.</P>
 
 <H4><A NAME="realvideo">2.2.1.8. RealVideo</A></H4>
 
-<P><B>MPlayer</B> unterst&uuml;tzt die Dekodierung aller Versionen von
+<P>MPlayer unterst&uuml;tzt die Dekodierung aller Versionen von
 RealVideo:</P>
 
 <UL>
@@ -237,9 +237,9 @@ RealVideo:</P>
 </UL>
 
 <P> Es wird empfohlen, RealPlayer8 oder RealONE herunterzuladen und zu
-installieren, da <B>MPlayer</B> deren Bibliotheken verwenden kann, um RealVideo
+installieren, da MPlayer deren Bibliotheken verwenden kann, um RealVideo
 2.0, 3.0 oder 4.0 zu decodieren. Das <CODE>configure</CODE>-Script von
-<B>MPlayer</B> sollte die RealPlayer-Bibliotheken an der normalen Stelle der
+MPlayer sollte die RealPlayer-Bibliotheken an der normalen Stelle der
 Vollinstallation finden. Falls nicht, kannst du <CODE>configure</CODE>
 &uuml;ber die Option <CODE>--with-reallibdir</CODE> mitteilen, wo sie zu
 suchen/finden sind.</P>
@@ -249,7 +249,7 @@ mit Linux, FreeBSD, NetBSD und Cygwin auf der x86 oder der Alpha-Plattform.</B>
 </P>
 
 <P><B>Hinweis2:</B> Wir k&ouml;nnen die RealPlayer-Bibliotheken nicht zum
-Download zur Verf&uuml;gung stellen oder sie mit <B>MPlayer</B> vertreiben, da
+Download zur Verf&uuml;gung stellen oder sie mit MPlayer vertreiben, da
 die Lizenz es nicht erlaubt. Du musst sie selbst runterladen.</P>
 
 
@@ -300,7 +300,7 @@ Download- und Installations-Anweisungen:</P>
   <LI>Nimm die <CODE>encore2.h</CODE> und <CODE>decore.h</CODE> vom 
     Divx4linux-Paket und kopiere diese nach <CODE>/usr/local/include/</CODE>.
     </LI>
-  <LI>compiliere <B>MPlayer</B> neu mit
+  <LI>compiliere MPlayer neu mit
     <CODE>--with-xvidcore=/pfad/zu/libcore.a</CODE>.</LI>
 </OL>
 
@@ -314,7 +314,7 @@ decodieren, die mit einer der folgenden Sorenson-Versionen erstellt wurden:</P>
 <UL>
   <LI>Sorenson 1 (fourcc <I>SVQ1</I>) - Decodierung durch <B>selbstentwickelte
     Codecs</B>. Tats&auml;chlich gibt es zwei (qualitativ nahezu identische)
-    Decoder f&uuml;r SVQ1: Einer ist der in <B>MPlayer</B> enthaltene
+    Decoder f&uuml;r SVQ1: Einer ist der in MPlayer enthaltene
     OpenSource-Codec, der andere ist der in libavcodec vorhandene Decoder.
     Du kannst sie mit <CODE>-vc svq1</CODE> respektive <CODE>-vc ffsvq1</CODE>
     benutzen. Manche Dateien funktionieren eventuell nur mit einem der beiden
@@ -323,14 +323,14 @@ decodieren, die mit einer der folgenden Sorenson-Versionen erstellt wurden:</P>
     <B>Win32-QuickTime-Bibliotheken</B></LI>
 </UL>
 
-<H4>Compilierung von <B>MPlayer</B> mit Support f&uuml;r die
+<H4>Compilierung von MPlayer mit Support f&uuml;r die
 QuickTime-Bibliotheken</H4>
 
 <P><B>Anmerkung:</B> Momentan wird nur die 32bit-Intel-Architektur
 unterst&uuml;tzt. </P>
 
 <OL>
-  <LI>Lade die CVS-Version von  <B>MPlayer</B> herunter.</LI>
+  <LI>Lade die CVS-Version von  MPlayer herunter.</LI>
   <LI>Compiliere MPlayer mit:<BR>
     <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
   <LI>Lade dir das QuickTime-DLL-Paket von
@@ -420,13 +420,13 @@ VIVO/1.0- oder VIVO/2.0-Datei ist. VIVO/1.0-Dateien verwenden
 <B>g.723</B>-Audio und VIVO/2.0-Dateien <B>Vivo-Siren</B>-Audio.  Beide werden
 unterst&uuml;tzt. Du kannst daf&uuml;r die  <A
 HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>-Win32-DLL
-von der <B>MPlayer</B>-Seite herunterladen und in in das
+von der MPlayer-Seite herunterladen und in in das
 <CODE>/usr/lib/win32</CODE>-Verzeichnis kopieren.</P>
 
 
 <H4><A NAME="realaudio">2.2.2.5. RealAudio</A></H4>
 
-<P><B>MPlayer</B> unterst&uuml;tzt die Dekodierung fast aller
+<P>MPlayer unterst&uuml;tzt die Dekodierung fast aller
 RealAudio-Versionen:</P>
 
 <UL>
@@ -461,7 +461,7 @@ Installationsanweisungen findest du in der Sektion &uuml;ber den
 
 <P>VfW (Video for Windows) ist die alte Video-Schnittstelle f&uuml;r Windows.
 Diese Codecs haben die Erweiterung .DLL oder (eher selten) .DRV.
-Wenn <B>MPlayer</B> mit folgender Meldung fehlschl&auml;gt, ein AVI
+Wenn MPlayer mit folgender Meldung fehlschl&auml;gt, ein AVI
 abzuspielen:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE>
@@ -524,7 +524,7 @@ DirectShow schwieriger, weil...</P>
 <P><B>Anmerkdung:</B> Wenn es keinen Eintrag namens <CODE>Filename</CODE> gibt
 und der <CODE>DisplayName</CODE>-Eintrag etwas in der Art
 <CODE>device:dmo</CODE> enth&auml;lt, so handelt es sich um einen DMO-Codec,
-der momentan nicht von <B>MPlayer</B> unterst&uuml;tzt wird.</P>
+der momentan nicht von MPlayer unterst&uuml;tzt wird.</P>
 
 <P><B>Alte Methode</B>: Atme tief durch und beginne mit dem Durchsuchen der
 Registry...</P>

@@ -26,7 +26,7 @@ dieses Dokumentes folgen musst, damit wir dir helfen k&ouml;nnen.</P>
 <P>Wenn man geschickt genugt ist, kann man versuchen, den Fehler selber zu
 beheben, was &auml;u&szlig;erst positiv aufgenommen wird. Falls du das schon
 getan hast, solltest du <A HREF="../tech/patches.txt">dieses kurze Dokument</A>
-lesen, um zu erfahren, wie der Code in <B>MPlayer</B> integriert werden kann.
+lesen, um zu erfahren, wie der Code in MPlayer integriert werden kann.
 Die Leute auf der
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
 Mailingliste k&ouml;nnen ansonsten bei Fragen helfen.</P>
@@ -35,7 +35,7 @@ Mailingliste k&ouml;nnen ansonsten bei Fragen helfen.</P>
 
 <P>Probiere es als allererstes die aktuelle CVS-Version, da dein Problem
 m&ouml;glicherweise schon gel&ouml;st ist. Die Entwicklung geht extrem
-schnell voran. Die meisten Probleme in offiziellen <B>MPlayer</B>-Versionen
+schnell voran. Die meisten Probleme in offiziellen MPlayer-Versionen
 werden innerhalb von Tagen oder sogar Stunden den Entwicklern mitgeteilt.
 Deswegen berichte Fehler nur dann, wenn sie in der <B>aktuellen CVS-Version</B>
 auch noch vorliegen. CVS-Anweisungen k&ouml;nnen am unteren Ende
@@ -47,11 +47,11 @@ ist oder durch unsere Anweisungen nicht gelst werden kann, dann berichte
 &uuml;ber den Fehler.</P>
 
 <P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler.
-<B>MPlayer</B> ist Gemeinschaftsarbeit, also wird es vielleicht mehrere
+MPlayer ist Gemeinschaftsarbeit, also wird es vielleicht mehrere
 interessierte Leute geben. Es kommt auch teilweise vor, dass derselbe Fehler
 von anderen Benutzern gefunden wurde, die bereits eine L&ouml;sung
 zur Umgehung des Problems haben (sogar bei einem Fehler im
-<B>MPlayer</B>-Code).</P>
+MPlayer-Code).</P>
 
 <P>Bitte beschreibe dein Problem so detailiert wie m&ouml;glich. Dazu
 geh&ouml;rt ein klein wenig Detektivarbeit, um die Umst&auml;nde einzuengen,
@@ -122,6 +122,12 @@ anzumelden, wenn man auch seine Antwort erhalten will.</P>
       <LI>Window-manager-Typ und -Version</LI>
     </UL>
   </LI>
+  <LI>Bei Problemen mit XVIDIX:
+    <UL>
+      <LI>X-Farbtiefe:<BR>
+          <CODE>xdpyinfo | grep "depth of root"</CODE></LI>
+    </UL>
+  </LI>
   <LI>Falls nur das GUI einen Fehler enth&auml;lt:
     <UL>
       <LI>GTK-Version</LI>
@@ -186,7 +192,7 @@ F&uuml;ge <CODE>configure.log</CODE> hinzu.
 
 <H4>Bei Wiedergabeproblemen</H4>
 
-<P>Bitte f&uuml;ge die Ausgabe von <B>MPlayer</B> in Ausführlichkeits-Stufe 1
+<P>Bitte f&uuml;ge die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1
 bei, aber denk daran <B>die Ausgabe nicht zu kürzen</B>, wenn diese der Mail
 eingef&uuml;gt wird. Die Entwickler ben&ouml;tigen alle Meldungen, um eine
 geignete Diagnose des Problems durchf&uuml;hren zu k&ouml;nnen. Die Ausgabe
@@ -202,7 +208,7 @@ ftp://mplayerhq.hu/MPlayer/incoming/</A></P> hoch.</P>
 
 <P>Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei  (+
 .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
-detaillierte Ausgabe (-v) von <B>MPlayer</B> und deine Email-Adresse
+detaillierte Ausgabe (-v) von MPlayer und deine Email-Adresse
 enth&auml;lt. Normalerweise reichen die ersten 1-5MB der Datei aus, um das
 Problem zu reproduzieren, aber als erstes solltest du folgendes
 ausprobieren:</P>
@@ -220,19 +226,19 @@ die Datei im Internet bereits verf&uuml;gbar ist, so reicht die
 
 <H4>Bei Abst&uuml;rzen</H4>
 
-<P>Du musst <B>MPlayer</B> aus <CODE>gdb</CODE> heraus aufrufen und uns
+<P>Du musst MPlayer aus <CODE>gdb</CODE> heraus aufrufen und uns
 die vollst&auml;ndige Ausgabe schicken. Wenn du einen core dump hast, dann
 kannst du auch aus der <CODE>core</CODE>-Datei n&uuml;tzliche Informationen
 extrahieren. So geht's:</P>
 
 <H4>Wie man Informationen bei einem reproduzierbaren Absturz bewahrt</H4>
 
-Kompiliere <B>MPlayer</B> mit eingeschaltetem Debugging:
+Kompiliere MPlayer mit eingeschaltetem Debugging:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 
-Starte nun gdb mit <B>MPlayer</B>:
+Starte nun gdb mit MPlayer:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb ./mplayer</CODE></P>
 
@@ -245,7 +251,8 @@ und reproduziere deinen Absturz. Sobald er auftritt, wird gdb zur
 Eingabeaufforderung zur&uuml;ckkehren, bei der du
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;info all-registers</CODE></P>
 
 eingibst.
 
@@ -274,7 +281,7 @@ FTP-Server.</P>
 <H4>Ich wei&szlig;, was ich mache...</H4>
 
 <P>Wenn du einen Fehlerbericht wie oben beschrieben geschreiben hast und du dir
-sicher bist, dass es ein Bug in <B>MPlayer</B> und nicht ein Problem mit dem
+sicher bist, dass es ein Bug in MPlayer und nicht ein Problem mit dem
 Compiler oder eine defekte Datei ist, dann kannst du auch der
 mplayer-advusers-Mailingliste beitreten und dort posten, wenn du alle
 Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst dort
@@ -283,7 +290,7 @@ Newbiefragen oder Fragen stellst, die in dieser Anleitung bereits beantwortet
 werden, wirst du ignoriert oder angemeckert,  anstatt eine Antwort zu
 erhalten.<BR> Also &auml;rgere uns nicht und trette der -advusers-Liste nur
 bei, wenn du wei&szlig;t, was du machst und  du dich wie ein erfahrener
-<B>MPlayer</B>-Benutzer oder -Entwickler f&uuml;hlst. Wenn du wirklich ein
+MPlayer-Benutzer oder -Entwickler f&uuml;hlst. Wenn du wirklich ein
 erfahrener Benutzer  bist sollte es kein Problem f&uuml;r dich sein, dich
 anzumelden...</P>
 

@@ -78,7 +78,7 @@ t&auml;t von der Verwendung stark ab und propergiert ASF/WMV. Als ob das
 irgendwen kratzen w&uuml;rde.</P>
 
 <P>Es gibt einen Hack, der es AVI-Dateien erlaubt, Ogg Vorbis Audio-Streams zu 
-enthalten, sie aber auch inkompatibel zu Standard-AVIs macht. <B>MPlayer</B> 
+enthalten, sie aber auch inkompatibel zu Standard-AVIs macht. MPlayer 
 unterst&uuml;tzt die Wiedergabe solcher Dateien. Eine Spulfunktion ist auch 
 implementiert, jedoch wird diese start von schlecht konvertierten Dateien mit 
 verwirrenden Headers gest&ouml;rt. Leider schreibt der einzige Encodierer, der 
@@ -88,7 +88,7 @@ Header.</P>
 <P><B>Hinweis:</B> DV-Kameras k&ouml;nnen Raw-DV-Streams erzeugen, welche von 
 DV-Aufnahmetools in zwei unterschiedliche Typen von AVI-Dateien konvertiert 
 werden. Die AVI-Datei enth&auml;lt dabei entweder separate Audio- und
-Video-Streams, die <B>Mplayer</B> wiedergeben kann, oder den
+Video-Streams, die MPlayer wiedergeben kann, oder den
 unver&auml;nderten DV-Stream. An dessen Unterst&uuml;tzung wird gerade
 gearbeitet.</P>
 
@@ -98,7 +98,7 @@ gearbeitet.</P>
   <LI><B>Interleaved:</B> Audio- und Video-Inhalt werden paketweise 
     ineinandergeschachtelt. Die ist &uuml;blich, wird empfohlen und auch meist 
     verwendet. Einige Tools erzeugen interleaved AVIs mit schlechtem Sync. 
-    <B>MPlayer</B> erkennt diese als interleaved, was zum Verlust von A/V-Sync 
+    MPlayer erkennt diese als interleaved, was zum Verlust von A/V-Sync 
     f&uuml;hren kann (evtl. erst beim Vor-/Zur&uuml;ckspueln). Diese Dateien 
     sollten non-interleaved (mit der <CODE>-ni</CODE>-Option) abgespielt 
     werden.</LI>
@@ -138,7 +138,7 @@ ASF entwickelt, v1.0 und v2.0. v1.0 wird von ihren Media Tools (Windows Media
 Player und Windows Media Encoder) verwendet und ist sehr geheim. v2.0 ist 
 ver&ouml;ffentlicht und patentiert :). Nat&uuml;rlich sind sie unterschiedlich 
 und besitzten &uuml;berhaupt keine Gemeinsamkeiten (es ist nur ein weiteres 
-Spiel mit den Gesetzen). <B>MPlayer</B> unterst&uuml;tzt nur v1.0, weil noch 
+Spiel mit den Gesetzen). MPlayer unterst&uuml;tzt nur v1.0, weil noch 
 niemand v2.0 Dateien gesehen hat :). Beachte, dass .ASF-Dateien heute auch mit 
 der Extension .WMA oder .WMV vorkommen.</P>
 
@@ -160,7 +160,7 @@ HREF="codecs.html#sorenson">Sorenson</A>-Codec-Sektion.</P>
 
 <H4><A NAME="vivo">2.1.1.5. VIVO-Dateien</A></H4>
 
-<P><B>MPlayer</B> demuxt nun auch fr&ouml;hlich VIVO-Dateiformate. Der 
+<P>MPlayer demuxt nun auch fr&ouml;hlich VIVO-Dateiformate. Der 
 gr&ouml;sste Nachteil des Formates ist, dass es keinen Index-Block besitzt, 
 auch keine fixe Paketgr&ouml;&szlig;e oder Sync-Bytes. Die meisten Dateien 
 besitzen nicht mal Keyframes, also vergiss das Spulen!</P>
@@ -179,7 +179,7 @@ Installationsanweisungen.</P>
 
 <P><B>FLI</B> ist ein sehr altes vom Autodesk Animator benutztes Dateiformat. 
 Es ist aber immer noch ein im Internet gebr&auml;ucliches Dateiformat f&uuml;r 
-kurze Animationen. <B>MPlayer</B> demuxt und decodiert FLI-Filme und ist sogar 
+kurze Animationen. MPlayer demuxt und decodiert FLI-Filme und ist sogar 
 f&auml;hig, in ihnen vor- und zur&uuml;ckzuspulen (n&uuml;tzlich, wenn man 
 looping mit der <CODE>-loop</CODE>-Option aktiviert hat). FLI-Dateien haben 
 keine Keyframes, was zu verunstalteten Bildern kurz nach dem Spulen 
@@ -188,7 +188,7 @@ f&uuml;hrt.</P>
 
 <H4><A NAME="real">2.1.1.7. RealMedia-(RM)-Dateien</A></H4>
 
-<P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Spulen
+<P>Ja, MPlayer kann RealMedia (.rm) Dateien lesen (demuxen). Spulen
 (seeking) funktioniert, jedoch muss die <CODE>-forceidx</CODE>-Option 
 verwendet werden (das Format unterst&uuml;zt Keyframes). Hier ist die Liste 
 der unterst&uuml;tzten <A HREF="codecs.html#realvideo">RealVideo-</A> und <A 
@@ -198,10 +198,10 @@ HREF="codecs.html#realaudio">RealAudio-</A>Codecs.</P>
 <H4><A NAME="nuppelvideo">2.1.1.8. NuppelVideo-Dateien</A></H4>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A> ist, 
-soweit ich weiss, ein TV-Aufnahmeprogramm. <B>MPlayer</B> kann dessen .NUV-
+soweit ich weiss, ein TV-Aufnahmeprogramm. MPlayer kann dessen .NUV-
 Dateien (nur NuppelVideo 5.0) lesen. Diese Dateien k&ouml;nnen unkomprimierte 
 YV12-, komprimierte YV12+RTJpeg-, komprimierte YV12-RTJpeg+lzo- und 
-komprimierte YV12+lzo-Frames enthalten, welche <B>MPlayer</B> alle dekodiert 
+komprimierte YV12+lzo-Frames enthalten, welche MPlayer alle dekodiert 
 (und diese auch mit MEncoder zu DivX/etc! <B>encodiert</B>). Spulen (seeking) 
 funktioniert.</P>
 
@@ -232,7 +232,7 @@ Quake III und Return to castle Wolfenstein benutzt werden.</P>
 HREF="http://www.xiph.org">Xiphophorus</A>. Es kann beliebige Video- und 
 Audio-Codecs enthalten, sowohl CBR als auch VBR. Man ben&ouml;tigt dazu 
 installierte <CODE>libogg-</CODE> und <CODE>libvorbis-</CODE>Bibliotheken vor 
-der Kompilierung von <B>MPlayer</B>, um sie wiedergeben zu k&ouml;nnen.</P>
+der Kompilierung von MPlayer, um sie wiedergeben zu k&ouml;nnen.</P>
 
 <H4><A NAME="sdp">2.1.1.13 SDP-Dateien</A></H4>
 
@@ -256,7 +256,7 @@ end.de/download/av_format_v1.pdf</A></P>
 <H3><A NAME="audio_for
 mats">2.1.2. Audio Formate</A></H3>
 
-<P><B>MPlayer</B> ist ein <B>Movie-(Film-)</B> und kein <B>Media-</B>Player. 
+<P>MPlayer ist ein <B>Movie-(Film-)</B> und kein <B>Media-</B>Player. 
 Er kann auch einige Audioformate wiedergeben (diese sind in der unteren 
 Sektion beschrieben). Dies wird jedoch nicht empfohlen, und du solltest besser 
 <A HREF="http://www.xmms.org">xmms</A> verwenden.</P>
@@ -265,7 +265,7 @@ Sektion beschrieben). Dies wird jedoch nicht empfohlen, und du solltest besser
 <H4><A NAME="mp3">2.1.2.1. MP3-Dateien</A></H4>
 
 <P>Du hast vielleicht Probleme mit der Wiedergabe einiger MP3-Dateien, die 
-<B>MPlayer</B> falsch als MPEGs erkennt und dementsprechend falsch oder gar 
+MPlayer falsch als MPEGs erkennt und dementsprechend falsch oder gar 
 nicht wiedergibt. Dies kann nicht gel&ouml;st werden, ohne die 
 Unterst&uuml;tzung f&uuml;r einige kaputte MPEG-Dateien aufzugeben und wird 
 desshalb bis auf weiteres so bleiben. Die Option <CODE>-demuxer</CODE>, welche 
@@ -287,12 +287,26 @@ helfen.</P>
 
 <H4><A NAME="cdda">2.1.2.6 CD-Audio</A></H4>
 
-<P><B>MPlayer</B> kann die Bibliotheken von <B>cdparanoia</B> benutzen,
+<P>MPlayer kann die Bibliotheken von <B>cdparanoia</B> benutzen,
 um CDDA-Dateien wiederzugeben. Alle Kommandozeilenparameter von cdparanoia
 aufzuz&auml;hlen geh&ouml;rt nicht zu den Aufgaben dieser Dokumentation.</P>
 
 <P>Schau in der Manpage bei der Option <CODE>-cdda</CODE> nach, wie mit ihr 
 Parameter an cdparanoia &uuml;bergeben werden k&ouml;nnen.</P>
+
+<H4><A NAME="xmms">2.1.2.7 XMMS</A></H4>
+
+<P>MPlayer kann XMMS-Inputplugins benutzen, um eine Vielzahl von Dateiformaten
+abzuspielen. Es gibt Plugins f&uuml;r SNES-Spielemusik, SID-Musik (vom guten
+alten Commodore 64), viele Amiga-Formate, .xm, .it, VQF, musepack, Bonk
+shorten und viele weitere. Du findest sie auf der Seite f&uuml;r
+<A HREF="http://www.xmms.org/plugins_input.html">XMMS-Inputplugins</A>.</P>
+
+<P>Um dieses Feature benutzen zu k&ouml;nnen, brauchst du XMMS und musst
+MPlayer mit <CODE>./configure --enable-xmms</CODE> compilieren. Funktioniert
+das nicht, dann musst du eventuell die Pfade f&uuml;r die XMMS-Plugings und die
+XMMS-Bibliotheken explizit mit <CODE>--with-xmmsplugindir</CODE> und
+<CODE>--withxmmslibdir</CODE> angeben.</P>
 
 </BODY>
 </HTML>

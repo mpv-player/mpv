@@ -13,7 +13,7 @@
 
 <H4><A NAME="sync">2.3.2.1 Audio-/VideoSynchronisation</A></H4>
 
-<P><B>MPlayer</B>s Audio-Interface wird <I>libao2</I> genannt. Es enth&auml;lt 
+<P>MPlayers Audio-Interface wird <I>libao2</I> genannt. Es enth&auml;lt 
 zur Zeit diese Treiber:</P>
 
 <DL>
@@ -43,7 +43,7 @@ zur Zeit diese Treiber:</P>
 </DL>
 
 <P>Fakt ist, dass Linux-Soundkartentreiber Kompatibilit&auml;tsprobleme haben. 
-Der Grund f&uuml;r diese Probleme liegt darin, dass <B>MPlayer</B> ein Feature 
+Der Grund f&uuml;r diese Probleme liegt darin, dass MPlayer ein Feature 
 des Soundkartentreibers benutzt, um Audio und Video synchron zu halten. Leider 
 k&uuml;mmern sich einige Soundkartentreiberprogrammierer nicht besonders um 
 diese Funktion, da sie weder f&uuml;r die Wiedergabe von MP3s noch f&uuml;r 
@@ -53,9 +53,9 @@ Soundeffeket ben&ouml;tigt wird.</P>
 wahrscheinlich so, wie sie sind, weil sie eine "simplere" Methode wie internes 
 Timing f&uuml;r die Audio-/Video-Synchronisation verwenden. Anmerkung: es hat 
 sich oft gezeigt, dass ihre Methoden nicht ganz so effizient wie 
-<B>MPlayer</B>s Methoden sind.</P>
+MPlayers Methoden sind.</P>
 
-<P>Wenn du <B>MPlayer</B> zusammen mit einem korrekt geschriebenen 
+<P>Wenn du MPlayer zusammen mit einem korrekt geschriebenen 
 Soundkartentreiber verwendest, dann wirst du niemals A/V-Desyncs aufgrund des 
 Audiotreibers erleben (h&ouml;chstens mit sehr schlecht erstellten Dateien. 
 Schau in einem solchen Fall in die Dokumentation, wie du das beheben 
@@ -74,7 +74,7 @@ kannst).</P>
     von KDE).</LI>
   <LI>Wenn du ALSA Version 0.5 verwendest, musst du fast immer <CODE>-ao 
     alsa5</CODE> verwenden, weil ALSA 0.5 einen fehlerhaften OSS-
-    Emulationscode hat. <B>MPlayer</B> wird mit etwa so einer Meldung 
+    Emulationscode hat. MPlayer wird mit etwa so einer Meldung 
     <B>abst&uuml;rzen</B>:<BR> <CODE>DEMUXER: Too many (945 in 8390980 bytes) 
     video packets in the buffer!</CODE></LI>
 </UL>
@@ -167,7 +167,7 @@ allgemein besser und wird in der <A HREF="cd-dvd.html#drives">CD-ROM-
 Sektion</A> genauer beschrieben.</P>
 
 <P>R&uuml;ckmeldungen zu diesem Dokument sind willkommen. Bitte sag uns, wie 
-<B>MPlayer</B> und deine Soundkarte(n) zusammen funktionieren.</P>
+MPlayer und deine Soundkarte(n) zusammen funktionieren.</P>
 
 <H4><A NAME="af">2.3.2.3 Audiofilter</A></H4>
 
@@ -500,7 +500,7 @@ ersetzt. Sie werden bald entfernt werden.</STRONG></H2>
 
 <H4><A NAME="plugins">2.3.2.4. Audio-Plugins (veraltet)</A></H4>
 
-<P><B>MPlayer</B> bietet Unterst&uuml;tzung f&uuml;r Audio-Plugins. Audio-
+<P>MPlayer bietet Unterst&uuml;tzung f&uuml;r Audio-Plugins. Audio-
 Plugins k&ouml;nnen benutzt werden, um die Einstellungen der Audio-Daten zu 
 &auml;ndern, bevor sie die Soundkarte erreichen. Sie aktiviert durch die 
 Option <CODE>-aop</CODE> aktiviert, welche 
@@ -525,17 +525,17 @@ list=resample,format:fout=44100:format=0x8</CODE></P>
 <P>w&uuml;rde die Ausgabefrequenz des Resample-Plugins auf 44100Hz and das 
 Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.</P>
            
-<P>Momentan k&ouml;nnen Audio-Plugins nicht im <B>MEncoder</B> verwendet 
+<P>Momentan k&ouml;nnen Audio-Plugins nicht im MEncoder verwendet 
 werden.</P>
           
            
 <H5><A NAME="resample">2.3.2.4.1. Up/Downsampling</A></H5>
 
-<P><B>MPlayer</B> unterst&uuml;tzt vollst&auml;ndiges up/downsampling von 
+<P>MPlayer unterst&uuml;tzt vollst&auml;ndiges up/downsampling von 
 Audiostreams. Dieses Plugin kann verwendet werden, wenn man eine Soundkarte 
 mit fester Frequenz besitzt, oder wenn man eine alte Soundkarte am Hals hat, 
 welche nur max 44.1kHz verarbeitet. Ob die Verwendung dieses Plugins 
-ben&ouml;tigt wird oder nicht erkennt <B>MPlayer</B> <B>automatisch</B>. 
+ben&ouml;tigt wird oder nicht erkennt MPlayer <B>automatisch</B>. 
 Dieses Plugin hat einen Schalter, <CODE>fout</CODE>, welcher benutzt wird, um 
 die gew&uuml;nschte Ausgabefrequenz zu setzen. Der Standard ist 48kHz und wird 
 in &lt;Hz&gt; angegeben.</P>
@@ -551,7 +551,7 @@ Audioverzerrungen.</P>
 
 <H5><A NAME="surround_decoding">2.3.2.4.2. Surround-Sound-Decodierung</A></H5>
 
-<P><B>MPlayer</B> hat ein Audio-Plugin das matrix-codierten Surround Sound 
+<P>MPlayer hat ein Audio-Plugin das matrix-codierten Surround Sound 
 decodieren kann. Dolby Surround ist ein Beispiel eines matrix-codierten 
 Formats. Viele Dateien mit zwei Audiokan&auml;len enthalten tats&auml;chlich 
 matrix Surround Sound. Um dieses Feature zu benutzen, brauchst du eine 
@@ -590,7 +590,7 @@ Entwickler bist.</P>
 
 <P>Dieses Plugin ist ein Software-Ersatz f&uuml;r die Lautst&auml;rkereglung 
 und kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann auch 
-verwendet werden, um die Ausgabelautst&auml;rke von <B>MPlayer</B> zu 
+verwendet werden, um die Ausgabelautst&auml;rke von MPlayer zu 
 &auml;ndern, ohne die Einstellung der PCM-Lautst&auml;rke im Mixer zu 
 &auml;ndern. Es gibt einen Schalter <CODE>volume</CODE>, welcher verwendet 
 wird, um den anf&auml;nglichen Schallpegel festzulegen. Der anf&auml;ngliche 
