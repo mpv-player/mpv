@@ -39,7 +39,13 @@
 #include <linux/mm.h>
 #include <linux/string.h>
 #include <linux/errno.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,10)
 #include <linux/malloc.h>
+#else
+#include <linux/slab.h>
+#endif
+
 #include <linux/pci.h>
 #include <linux/ioport.h>
 #include <linux/init.h>
