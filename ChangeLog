@@ -58,7 +58,7 @@ mplayer (0.90)
     * support for quicktime alaw/agsm audio codecs, 3IV2, 3VID video codecs
     * swscale now can output in YUY2 format, upscaled (default) or unscaled (-sws 0)
     * Vidix with LinuxPPC support (mach64 is confirmed to work)
-    * GUI: cache, autoq settings, display current dvd chapter
+    * GUI: cache, autoq settings, start in fullscreen, toggle button in menu
     * New video filter to overlay images over video: -vop bmovl
     
     Libavcodec:
