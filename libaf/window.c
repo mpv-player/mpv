@@ -24,7 +24,7 @@
 // n window length
 // w buffer for the window parameters
 */
-void boxcar(int n, _ftype_t* w)
+void af_window_boxcar(int n, _ftype_t* w)
 {
   int i;
   // Calculate window coefficients
@@ -44,7 +44,7 @@ void boxcar(int n, _ftype_t* w)
 // n window length
 // w buffer for the window parameters
 */
-void triang(int n, _ftype_t* w)
+void af_window_triang(int n, _ftype_t* w)
 {
   _ftype_t k1  = (_ftype_t)(n & 1);
   _ftype_t k2  = 1/((_ftype_t)n + k1);
@@ -65,7 +65,7 @@ void triang(int n, _ftype_t* w)
 // n window length
 // w buffer for the window parameters
 */
-void hanning(int n, _ftype_t* w)
+void af_window_hanning(int n, _ftype_t* w)
 {
   int	   i;
   _ftype_t k = 2*M_PI/((_ftype_t)(n+1)); // 2*pi/(N+1)
@@ -84,7 +84,7 @@ void hanning(int n, _ftype_t* w)
 // n window length
 // w buffer for the window parameters
 */
-void hamming(int n,_ftype_t* w)
+void af_window_hamming(int n,_ftype_t* w)
 {
   int      i;
   _ftype_t k = 2*M_PI/((_ftype_t)(n-1)); // 2*pi/(N-1)
@@ -103,7 +103,7 @@ void hamming(int n,_ftype_t* w)
 // n window length
 // w buffer for the window parameters
 */
-void blackman(int n,_ftype_t* w)
+void af_window_blackman(int n,_ftype_t* w)
 {
   int      i;
   _ftype_t k1 = 2*M_PI/((_ftype_t)(n-1)); // 2*pi/(N-1)
@@ -123,7 +123,7 @@ void blackman(int n,_ftype_t* w)
 // n window length
 // w buffer for the window parameters
 */
-void flattop(int n,_ftype_t* w)
+void af_window_flattop(int n,_ftype_t* w)
 {
   int      i;
   _ftype_t k1 = 2*M_PI/((_ftype_t)(n-1)); // 2*pi/(N-1)
@@ -142,7 +142,7 @@ void flattop(int n,_ftype_t* w)
 */
 #define BIZ_EPSILON 1E-21 // Max error acceptable 
 
-_ftype_t besselizero(_ftype_t x)
+static _ftype_t besselizero(_ftype_t x)
 { 
   _ftype_t temp;
   _ftype_t sum   = 1.0;
@@ -186,7 +186,7 @@ _ftype_t besselizero(_ftype_t x)
 // 8.960   5.7     0.000275  -90
 // 10.056  6.4     0.000087  -100
 */
-void kaiser(int n, _ftype_t* w, _ftype_t b)
+void af_window_kaiser(int n, _ftype_t* w, _ftype_t b)
 {
   _ftype_t tmp;
   _ftype_t k1  = 1.0/besselizero(b);

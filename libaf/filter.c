@@ -114,19 +114,19 @@ int design_fir(unsigned int n, _ftype_t* w, _ftype_t* fc, unsigned int flags, _f
   // Get window coefficients
   switch(flags & WINDOW_MASK){
   case(BOXCAR):
-    boxcar(n,w); break;
+    af_window_boxcar(n,w); break;
   case(TRIANG):
-    triang(n,w); break;
+    af_window_triang(n,w); break;
   case(HAMMING):
-    hamming(n,w); break;
+    af_window_hamming(n,w); break;
   case(HANNING):
-    hanning(n,w); break;
+    af_window_hanning(n,w); break;
   case(BLACKMAN):
-    blackman(n,w); break;
+    af_window_blackman(n,w); break;
   case(FLATTOP):
-    flattop(n,w); break;
+    af_window_flattop(n,w); break;
   case(KAISER):
-    kaiser(n,w,opt); break;
+    af_window_kaiser(n,w,opt); break;
   default:
     return -1;	
   }

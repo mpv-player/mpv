@@ -22,12 +22,12 @@
 #ifndef _WINDOW_H
 #define _WINDOW_H	1
 
-extern void boxcar(int n, _ftype_t* w);
-extern void triang(int n, _ftype_t* w);
-extern void hanning(int n, _ftype_t* w);
-extern void hamming(int n,_ftype_t* w);
-extern void blackman(int n,_ftype_t* w);
-extern void flattop(int n,_ftype_t* w);
-extern void kaiser(int n, _ftype_t* w,_ftype_t b);
+extern void af_window_boxcar(int n, _ftype_t* w);
+extern void af_window_triang(int n, _ftype_t* w);
+extern void af_window_hanning(int n, _ftype_t* w);
+extern void af_window_hamming(int n,_ftype_t* w);
+extern void af_window_blackman(int n,_ftype_t* w);
+extern void af_window_flattop(int n,_ftype_t* w);
+extern void af_window_kaiser(int n, _ftype_t* w,_ftype_t b);
 
 #endif
