@@ -34,7 +34,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     mpeg2_init();
-    picture->pp_options=0; //divx_quality;
+    picture->pp_options=divx_quality;
     // send seq header to the decoder:  *** HACK ***
     mpeg2_decode_data(NULL,videobuffer,videobuffer+videobuf_len,0);
     mpeg2_allocate_image_buffers (picture);

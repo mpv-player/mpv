@@ -1,15 +1,18 @@
+URGENT:
+- add common postprocessing filter support (export qscale array)
+
 TODO:
-- equalizer support to divx4, dshow
 - vo_config callbacks to ffmpeg, cinepak
 - better mpi support to xanim (now it's EXPORT but could be better)
-- fix initial postprocessing flags (divx_quality)
-- add common postprocessing filter support (export qscale array)
 - IP buffering for NUV
 - finish MPNG (8bpp support)
 - IPB buffering to libmpeg2
 - review authors
 
 DONE:
+- equalizer support to divx4, dshow
+- fix initial postprocessing flags (divx_quality)
+
 #define VFM_CINEPAK 13
 #define VFM_QTRPZA 20
 #define VFM_FFMPEG 5

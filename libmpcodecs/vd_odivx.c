@@ -97,7 +97,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     DEC_PARAM dec_param;
-//    DEC_SET dec_set;
+    DEC_SET dec_set;
     memset(&dec_param,0,sizeof(dec_param));
 #ifdef NEW_DECORE
     dec_param.output_format=DEC_USER;
@@ -111,8 +111,9 @@ static int init(sh_video_t *sh){
     dec_param.x_dim = sh->disp_w;
     dec_param.y_dim = sh->disp_h;
     decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
-//    dec_set.postproc_level = divx_quality;
-//    decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+
+    dec_set.postproc_level = divx_quality;
+    decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
     
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
 

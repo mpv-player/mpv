@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "config.h"
 #ifdef USE_DIRECTSHOW
@@ -32,9 +33,17 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	DS_VideoDecoder_SetValue(sh->context,"Quality",*((int*)arg));
 	return CONTROL_OK;
 
-// TODO: query/set video options (brightness contrast etc)
-//        DS_VideoDecoder_SetValue(ds_vdec,item,value);
-	
+    case VDCTRL_SET_EQUALIZER: {
+	va_list ap;
+	int value;
+	va_start(ap, arg);
+	value=va_arg(ap, int);
+	va_end(ap);
+	if(DS_VideoDecoder_SetValue(sh->context,arg,value)==0)
+	    return CONTROL_OK;
+	return CONTROL_FALSE;
+    }
+
     }
     return CONTROL_UNKNOWN;
 }
@@ -61,6 +70,7 @@ static int init(sh_video_t *sh){
     default:
 	DS_VideoDecoder_SetDestFmt(sh->context,out_fmt&255,0);    // RGB/BGR
     }
+    DS_SetAttr_DivX("Quality",divx_quality);
     DS_VideoDecoder_StartInternal(sh->context);
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/DShow video codec init OK!\n");
     return 1;

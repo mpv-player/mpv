@@ -8,6 +8,8 @@
 
 #include "vd.h"
 
+extern int divx_quality;
+
 // prototypes:
 //static vd_info_t info;
 static int control(sh_video_t *sh,int cmd,void* arg,...);

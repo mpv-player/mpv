@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <assert.h>
 
 #include "config.h"
@@ -41,6 +42,27 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
 	return CONTROL_OK;
     }
+#ifdef DECORE_VERSION
+#if DECORE_VERSION >= 20011010
+    case VDCTRL_SET_EQUALIZER: {
+	va_list ap;
+	int value;
+        int option;
+	va_start(ap, arg);
+	value=va_arg(ap, int);
+	va_end(ap);
+
+        if(!strcmp(arg,"Brightness")) option=DEC_GAMMA_BRIGHTNESS;
+        else if(!strcmp(arg, "Contrast")) option=DEC_GAMMA_CONTRAST;
+        else if(!strcmp(arg,"Saturation")) option=DEC_GAMMA_SATURATION;
+        else return CONTROL_FALSE;
+	
+        value = (value * 256) / 100 - 128;
+        decore(0x123, DEC_OPT_GAMMA, (void *)option, (void *) value);
+	return CONTROL_OK;
+    }
+#endif
+#endif
     
     }
 
@@ -50,7 +72,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     DEC_PARAM dec_param;
-//    DEC_SET dec_set;
+    DEC_SET dec_set;
     int bits=16;
     memset(&dec_param,0,sizeof(dec_param));
 
@@ -76,8 +98,9 @@ static int init(sh_video_t *sh){
     dec_param.x_dim = sh->disp_w;
     dec_param.y_dim = sh->disp_h;
     decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
-//    dec_set.postproc_level = divx_quality;
-//    decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+
+    dec_set.postproc_level = divx_quality;
+    decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
     
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: DivX4Linux video codec init OK!\n");
 
