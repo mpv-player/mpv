@@ -40,7 +40,7 @@
   Helvetica, sans-serif" size=2>
 &nbsp;&nbsp;<CODE>1.1.7:</CODE> supporta il ridimensionamento software<BR>
 &nbsp;&nbsp;<CODE>1.1.8:</CODE> supporta Xvideo (ridimensionamento hardware e schermo pieno)<BR>
-&nbsp;&nbsp;<CODE>1.2.0:</CODE> supporta AAlib (-vo aa è cadamente consigliato, vedi sotto!)</TD><TR>
+&nbsp;&nbsp;<CODE>1.2.0:</CODE> supporta AAlib (-vo aa è caldamente consigliato, vedi sotto!)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana,
   Arial, Helvetica, sans-serif" size=2>simile a SDL</TD><TR>
@@ -123,7 +123,7 @@ reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
 reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
 </CODE></P>
 
-<P>E a posto, mostra la mia Matrox G400 con 16Mb di memoria. L'ho ottenuto con
+<P>E' a posto, mostra la mia Matrox G400 con 16Mb di memoria. L'ho ottenuto con
 XFree 4.x.x , che configura i registri MTRR automaticamente.</P>
 
 <P>Se non ha funzionato, devi farlo manualmente. Prima, bisogna trovare l'indirizzo
@@ -173,7 +173,7 @@ per controllare').</P>
 <P>Sotto XFree86 4.0.2 o più recente, si possono usare le routine hardware della tua scheda
 usando l'estensione XVideo. Questo è quello che usa l'opzione '-vo xv'. Inoltre,
 questo driver è quello che supporta la regolazione di luminosità/contrasto/hue/etc (a meno che tu stia usando
-il vecchi, lento codec DirectShow DivX, che lo supporta ovunque), vedi la pagina di
+il vecchio, lento codec DirectShow DivX, che lo supporta ovunque), vedi la pagina di
 man.</P>
 
 <P>Per farlo funzionare, assicurati delle seguenti cose:</P>
@@ -232,7 +232,7 @@ non supportavano ne YUY2 ne YV12, e cose del genere. Verifica di possedere
 XFree86 versione 4.1.0 o maggiore, funziona bene con YUY2, ma va in <B>crash
 con YV12</B>! Quindi, o aspetta il 4.2.0 o usa il cvs di
 <A HREF="http://dri.sourceforge.net">DRI</A> .
-Se sperimenti strani effetti con -vo xv, prova SDL (ha anche XVideo)
+Se hai strani effetti con -vo xv, prova SDL (ha anche XVideo)
 e guarda se aiuta. Controlla la <A HREF="#2.3.1.4">sezione SDL</A> per dettagli.</P>
 
 <P><B>O</B>, prova il NUOVO driver -vo tdfxfb! Vedi la sezione <A HREF=#2.3.1.9>2.3.1.9</A>!</P>
@@ -386,7 +386,7 @@ nel file di log di X11. Si trova in:
 
 <P><B><A NAME=2.3.1.3.5>2.3.1.3.5. DGA &amp; MPlayer</A></B></P>
 
-<P>DGA è utilizzato in due posti in <B>MPlayer</B>: il driver SDL driver può farne uso
+<P>DGA è utilizzato in due posti in <B>MPlayer</B>: nel driver SDL
 (-vo sdl:dga) e nel driver DGA (-vo dga).
 Quello detto sopra è valido per entrambi; nella seguente sezione spiegherò come funziona
 il driver DGA di <B>MPlayer</B>.</P>
@@ -516,8 +516,8 @@ aiutare. Grazie!</P>
 <P><B><A NAME=2.3.1.4>2.3.1.4. SDL</A></B></P>
 
 <P>SDL (Simple Directmedia Layer, Semplice Livello Diretto per media, ndt) è in generale una interfaccio video/audio
-  unificata. I programmi che ne fanno usa conoscono solo l' SDL, e nulla su quale driver video
-  o audio SDL usa veramente. Per esempio un port di Doom che usa SDL
+  unificata. I programmi che ne fanno uso conoscono solo l' SDL, e nulla su quale driver video
+  o audio SDL usano veramente. Per esempio un port di Doom che usa SDL può
   essere eseguito su svgalib, aalib, X, fbdev, e altri, devi solo specificare il
   (per esempio) driver video da usare con la variabile d'ambiente SDL_VIDEODRIVER.
   Bhe, in teoria.</P>
@@ -661,7 +661,7 @@ hai la console matroxfb, o '-vo xmga' sotto XFree86 3.x.x o 4.x.x.</P>
 <P>Il driver mga_vid coopera con Xv.</P>
 
 <P>Il file del dispositivo <CODE>/dev/mga_vid</CODE> può essere letto (per esempio con
-  <CODE>cat /dev/mga_vid</CODE>) per alcune informazioni, e scritto per cambiare la luminosità
+  <CODE>cat /dev/mga_vid</CODE>) per avere alcune informazioni, e scritto per cambiare la luminosità
   : <CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
 
 
@@ -694,8 +694,8 @@ e per istruzioni sull'installazione.</P>
 <P><B><A NAME=2.3.1.11>2.3.1.11. AAlib - visione in modalità testo</B></P>
 
 <P><B>AAlib</B> è una libreria per vedere la grafica in modalità testo, usando un potente
-renderer ASCII. Ci sono MOLTI programmo che già la supportano, come Doom,
-Quake, ecc. MPlayer contiene un driver molto usabile per questa.
+renderer ASCII. Ci sono MOLTI programmi che già la supportano, come Doom,
+Quake, ecc. MPlayer contiene un driver molto facile da usare per questa.
 Se ./configure trova aalib installata, sarà compilato il driver libvo aalib.</P>
 
 <P><TABLE BORDER=0>
@@ -707,7 +707,7 @@ Se ./configure trova aalib installata, sarà compilato il driver libvo aalib.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(dis)attiva il rendering veloce</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>cambia la modalità di dithering (nessuno, distribuzione dell'errore, floyd steinberg)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>inverte l' immagine</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>cambia i controlli da aa a mplayer)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>cambia i controlli da aa a mplayer</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Possono essere usate le seguenti opzioni a riga di comando:</B></P></TD><TR>
 
@@ -730,19 +730,19 @@ non-framebuffer. Usa SVGATextMode per selezionare una modalità testo grande,
 e divertiti! (le schede Hercules con uscita secondaria vanno forte :)) (qualcuno può migliorare
 bdev per fare conversione/dithering a hgafb? Sarebbe bello :)</P>
 
-<P>Usa l'opzione -framedrop se il tuo computer non è abbastanza veloce da renderizzare tutto i frame!</P>
+<P>Usa l'opzione -framedrop se il tuo computer non è abbastanza veloce da renderizzare tutti i frame!</P>
 
 <P>Usandolo da terminale otterrai una più alta velocità e qualità usando il driver di linux, non
 curses (-aadriver linux). Ma per questo devi avere accesso in scrittura a /dev/vcsa&lt;terminale&gt;!
-Questo non è sistemato automaticamente da aalib, ma vo_aa cerca di trovare la modalità migliore.
+Questa non è ipostata automaticamente da aalib, ma vo_aa cerca di trovare la modalità migliore.
 Vedi <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A> per ulteriori questioni di regolazione.</P>
 
 
 <P><B><A NAME=2.3.1.12>2.3.1.12.  VESA - output col BIOS VESA</B></P>
 <P>
-Questodriver è stato pensato e introdotto come un <b>driver generico</b> per qualsiasi scheda video
-con un BIOS VESA VBE 2.0 compatibile. Ma cè ancora una ragione per lo sviluppo di
-questo driver - i suoi molti problemi con la visualizzazione di filmati sulla TV.<BR>
+Questo driver è stato pensato e introdotto come un <b>driver generico</b> per qualsiasi scheda video
+con un BIOS VESA VBE 2.0 compatibile. Ma c'è ancora una ragione per lo sviluppo di
+questo driver - le suoe molte possibilità di visualizzazione sulla TV.<BR>
 <b>VESA BIOS EXTENSION (VBE) Versione 3.0 Data: 16 Settembre 1998</b> (Pagina 70)
 dice:
 </P>
@@ -752,8 +752,8 @@ dice:
 <b>Design a doppio controller</b><br>
 VBE 3.0 supporta il design a doppio controller supponendo che, dato che entrambi
 i controller sono solitamente forniti dallo stesso OEM, sotto il controllo di una
-singola ROM BIOS sulla stessa scheda grafica, è possibile nascondere il fatto che
-sono realmente presenti due controller dall'applicazione. Questo ha la limitazione
+singola ROM BIOS sulla stessa scheda grafica, è possibile nascondere all'applicazione il fatto che
+sono realmente presenti due controller. Questo ha la limitazione
 di impedire l'uso contemporaneo dei controller indipendenti,
 ma consente alle applicazioni rilasciate prima del VBE 3.0 di operare normalmente. La funzione
 VBE 00h fornisce l'informazione combinata dei due
@@ -789,7 +789,7 @@ in modalità vm86).<BR>
    (Ma solo se la tua scheda non supporta la <b>modalità DGA</b> - altrimenti questo
    driver è simile in velocità a quelli <b>-vo dga</b> e <b>-vo fbdev</b>.<BR>
 
- - Puà essere usato solo da <b>ROOT</b>.<BR>
+ - Può essere usato solo da <b>ROOT</b>.<BR>
  - Attualmente è disponibile solo per <b>Linux</b>.<BR>
  - <b>Non usa</b> nessuna <b>accelerazione hardware</b> (come il livello YUV  o lo scaling hw).<BR>
 </P>
@@ -799,7 +799,7 @@ in modalità vm86).<BR>
 <P>
 <TABLE BORDER=0>
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Sono attualmente disponibili queste opzioni per VESA:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opzioni</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>attualmente riconosciuto: <b>dga</b> per forzare la modalità dga e <b>nodga</b> per disabilitarla. Nota: puoi omettere questi parametri per abilitare il riconoscimento <b>automatico</b> della modalità dga. (In futuro si potranno specificare anche parametri come refresh rate, interlacing, doublescan e così via. Esempi: i43, 85, d100)</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opzioni</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>attualmente riconosciute: <b>dga</b> per forzare la modalità dga e <b>nodga</b> per disabilitarla. Nota: puoi omettere questi parametri per abilitare il riconoscimento <b>automatico</b> della modalità dga. (In futuro si potranno specificare anche parametri come refresh rate, interlacing, doublescan e così via. Esempi: i43, 85, d100)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>forza la modalità definita dall'utente</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>configura il predimensionamento definito dall'utente</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>abilita il predimensionamento definito dall'utente</TD><TR>
@@ -819,7 +819,7 @@ dalla, per esempio, distribuzione Mandrake.<br>
  - Alcuni <b>driver grafici di Linux</b> non aggiornano la <b>modalità BIOS</b> attiva nella memoria DOS. Quindi se hai
 un tale problema - usa sempre il driver VESA solo dalla <b>modalità testo</b>. Altrimenti la modalità testo (#03) sarà
 attivata comunque e dovrai far ripartire il computer.<br>
- - Spesso dopo aver terminato il driver VESA ottieni uno <b>schermo nero</b>. Per farlo ritornare
+ - Spesso dopo aver terminato il driver VESA si ottiene uno <b>schermo nero</b>. Per farlo ritornare
 allo stato originale - cambia semplicemente console (premendo <b>Alt-Fx</b>) poi ritorna
 alla precedente console nello stesso modo.<br>
  - Per far <b>funzionare il TV-out</b> devi avere il connettore della tv inserito prima di far partire
@@ -859,17 +859,17 @@ risoluzione.</P>
 <P><B><A NAME=2.3.1.14>2.3.1.14. Livello video Rage128 (pro) / Radeon (radeon_vid)</A></B></P>
 <P>
 <b>radeon_vid</b> e <B>rage128_vid</B> forniscono supporto per il <b>BackEnd Scaler</b> su chipset ATI <b>Radeon</b> e Rage128 (Pro).
-E' stato studiato e introdotto come un analogo del driver <a href="video.html#2.3.1.7">mga_vid</a>, quindi puoi usarlo nello stesso modo!<br>
-Ma l'obbiettivo principale dell'uso di questo driver è il driver <a href="video.html#2.3.1.12">VESA</a>.<br>
+Sono stati studiati e introdotti come analoghi del driver <a href="video.html#2.3.1.7">mga_vid</a>, quindi puoi usarli nello stesso modo!<br>
+Ma l'obbiettivo principale dell'uso di questi driver è il driver <a href="video.html#2.3.1.12">VESA</a>.<br>
 Semplicemente perchè VESA abilita il TV-out sulle schede ATI ma il Backend scaler è usato dopo
 il cambiamento di modalità. Questa implementazione da il flusso video su entrambi: <b>schermo TV</b> e monitor <b>CRTC</b>
-simultaneamente. (Diminuisce leggermente la qualità dell'output video, ma è molto
+simultaneamente. (Diminuisce leggermente la qualità dell'output video, ma è meglio
 che niente).
 Spiacente! Non sono riuscito a trovare nessuna informazione sul livello video sulle
 pagine di ATI. (ho deciso di implementarlo attraverso chiamate <b>int 10h</b>). Ma è stato
 molto facile implementare queste cose attraverso le porte di lettura/scrittura di Radeon.
 <br><b>NOTA</b>: la tecnologia XXX_VID è assolutamente non documentata e probabilmente in futuro
-queste cose saranno completamente riscritte. Questo è il primo rilascio pubblico del
+queste cose saranno completamente riscritte. Questo è il primo rilascio pubblico dei
 driver.</P>
 
 <P><B>Installazione</B></P>
@@ -896,7 +896,7 @@ driver.</P>
 <P>Più esempi (per il deinterlacing hardware, ecc) si possono trovare
   <A HREF="../drivers/radeon/README">qui</A>.</P>
 
-<P><B>NOTA</B>: non usare nessun framebuffer se intendi usare questo driver ! Usalo
+<P><B>NOTA</B>: non usare nessun framebuffer se intendi usare questi driver ! Usalo
 solo da una console in modalità testo.</P>
 
 <P>
@@ -912,8 +912,8 @@ qualcosa mandami semplicemente le tue patch.
 <P>VIDIX è l'acronimo di <b>VID</b>eo <b>I</b>nterface for
   *ni<b>X</b> (Interfaccia Video per *nix, ndt).<BR>
   VIDIX è stato studiato e implementato come un'interfaccia per veloci driver in spazio utente
-  che forniscono <b>DGA</b> ovunque è possibile (<b>a differenza di X11</b>). I
-  Spero che questi driver siano portabili come X11 (<b>non solo su
+  che forniscono <b>DGA</b> ovunque è possibile (<b>a differenza di X11</b>).
+  Spero che questi driver saranno portabili come X11 (<b>non solo su
   *nix</b>).<BR>
   Cos'è:
   <LI>E' un successore portabile della tecnologia mga_vid, ma è localizzato in spazio
@@ -964,7 +964,7 @@ qualcosa mandami semplicemente le tue patch.
     vo_vesa.</I></LI>
   <LI>Il driver di output video di <B>MPlayer</B> dovrebbe conoscere la modalità video attiva ed essere in grado di
     dire al sottodispositivo VIDIX alcune caratteristiche video del server.</LI>
-  Credo tutti i driver di output video di <B>MPlayer</B> riconoscano
+  Credo che tutti i driver di output video di <B>MPlayer</B> riconoscano
   il sottodispositivo <CODE>:vidix</CODE>.
 </P>
 
@@ -1041,7 +1041,7 @@ qualcosa mandami semplicemente le tue patch.
   Il valore predefinito per ogni parametro è <B>0</B>.
 </P>
 <P>
-  <B>Nota:</B> Non tutti i driver supportano ogniuno di questi parametri.
+  <B>Nota:</B> Non tutti i driver supportano ognuno di questi parametri.
   Attualmente solo <B>radeon_vid.so</B> fornisce il pieno supporto per l'equalizzazione video.
   Altri driver supportano solo parzialmente queste opzioni.
 </P>
@@ -1062,7 +1062,7 @@ LML33, DC10). Il driver funziona codificando il frame in jpeg e mandandolo poi
 alla scheda. Per la codifica jpeg è usato <B>libavcodec</B>,
 ed è quindi necessario.</P>
 
-<P>Questo driver parla al driver del kernel disponibile a
+<P>Questo driver dialoga col driver del kernel disponibile a
 <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, quindi
 devi far funzionare questo prima. Poi ricompila <B>MPlayer</B> con
 <CODE>--enable-zr</CODE>.</P>
@@ -1070,14 +1070,14 @@ devi far funzionare questo prima. Poi ricompila <B>MPlayer</B> con
 <P>Alcune osservazioni:
 <UL>
   <LI>non iniziare o fermare XawTV sul dispositivo di riproduzione durante la stessa,
-    bloccherà il tuo computer. Va, comunque, bene far partire <B>PRIMA</B>
+    bloccherà il tuo computer. Va comunque bene far partire <B>PRIMA</B>
     XawTV, e <B>POI</B> <B>MPlayer</B>, aspettare che <B>MPlayer</B> finisca e
     <B>POI</B> fermare XawTV.</LI>
   <LI>questo driver aggiunge le opzioni <CODE>-zr*</CODE> alla linea di comando. La spiegazione di
     queste opzioni può essere visualizzata con <CODE>-zrhelp</CODE>. E' possibile tagliare
     il frame di input (tagliare i bordi per adattarlo o migliorare le prestazioni)
     e fare altre cose.</LI>
-  <LI>Il driver prende i dati nei formati YV12 e YUY2, Questo significa che alcuni
+  <LI>Il driver prende i dati nei formati YV12 e YUY2. Questo significa che alcuni
     codec non funzioneranno. Alcuni vecchi codec VfW (Video for Windows), per esempio,
     non sono compatibili con questo driver. Il messaggio d'errore che vedrai è:
     <CODE>Sorry, selected video_out device is incompatible with this codec.
@@ -1102,7 +1102,7 @@ devi far funzionare questo prima. Poi ricompila <B>MPlayer</B> con
     TV.<BR> <B>Questo metodo non da una riproduzione accelerata</B> come
     sotto Windoze! Il secondo connettore ha solo il framebuffer YUV, il <I>BES</I>
     (Back End Scaler, il ridimensionatore YUV sulle schede G200/G400/G450/G550) non funziona
-    su questo! Il driver per windows in qualche modo aggira questo, probabilmente usando il motore
+    su questo! Il driver per windows in qualche modo aggira questo problema, probabilmente usando il motore
     3D per zoomare, e il framebuffer YUV per visualizzare l'immagine zoomata.
     Se vuoi veramente usare X, usa le opzioni <CODE>-vo x11 -fs -zoom</CODE>,
     ma sarà <B>LENTO</B>, e ha la protezione da copia <B>Macrovision</B>
@@ -1221,7 +1221,7 @@ Dovrei dire anche delle buone parole a ATI Inc. :<br>
 <P>
 I <b>driver VESA</b> non usano nessuna accelerazione hardware ma simulano
 <b>DGA</b> con una finestra di 64K, che è configurata con le funzioni a 32-bit
-del BIOS. Le schede ATI hanno un'abbastanza <b>veloce memoria video</b> (chip DIMM o DDR
+del BIOS. Le schede ATI hanno una <b>memoria video</b> abbastanza veloce (chip DIMM o DDR
 con accesso a 64 - 128-bit) quindi non è un collo di bottiglia per loro. Non ci sono limitazioni
 per la scelta della modalità video da mostrare sulla TV (come in altre
 schede) quindi puoi usare <b>qualunque modalità video</b> sulla tua <b>TV</b> (da

@@ -61,7 +61,7 @@ e/o ha una configurazione sbagliata (vedi l'ultima domanda della sezione 5.1).</
 
 <P>Usarlo è un po' macchinoso. Dato che va in conflitto col vecchio OpenDivX (la sua API è
 molto simile a quella di OpenDivX), il codice OpenDivX è disabilitato, e anche il driver OpenDivX
-chiamo questa libreria.</P>
+chiama questa libreria.</P>
 
 <P>Generalmente possiamo indicare la questione col fatto che hai due opzioni per usare
 questo codec:</P>
@@ -132,7 +132,7 @@ h263+, ecc.</P>
 </UL>
 </P>
 
-<P>Quindi compila. configure controlla che tutto dia a posto, e può essere compilato. Il
+<P>Quindi compila. configure controlla che tutto sia a posto, e può essere compilato. Il
 codec supporta anche il <B>postprocessing!</B></P>
 
 <P>Per usarlo, aggiorna il tuo file codecs.conf, e modificalo come dicono la pagina di man,
@@ -287,7 +287,7 @@ multi-piattaforma. Se non sai a cosa serve, probabilmente non ne hai bisogno.</P
 
 <P><B><A NAME=2.2.2.4>2.2.2.4.  Audio VIVO</A></B></P>
 
-<P>Il codec audio usato nei file VIVO dipende dal fatto che sia un file VIVO/1.0 o
+<P>Il codec audio usato nei file VIVO dipende dal fatto che si tratti di un file VIVO/1.0 o
 VIVO/2.0. I file VIVO/1.0 hanno audio <B>g.723</B>, e i file VIVO/2.0
 hanno <B>Vivo Siren</B>. Entrambi sono <U>supportati</U>. Puoi prendere la DLL Win32 g.723/Siren
 da
@@ -319,7 +319,7 @@ il system.ini contiene questo (insieme a molti altri):</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>VIDC.HFYU=huffyuv.dll</CODE></P>
 
-<P>Quindi abbiamo bisogno del file huffyuv.dll. Nota che i codec audio sono specificato
+<P>Quindi abbiamo bisogno del file huffyuv.dll. Nota che i codec audio sono specificati
 dal prefisso MSACM:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>msacm.l3acm=L3codeca.acm</CODE></P>
@@ -342,7 +342,7 @@ registro :(
 <LI>abbiamo bisogno del GUID del codec.
 </UL></P>
 
-<P>Quindi cerchiamo ne dannato registro..
+<P>Quindi cerchiamo nel dannato registro..
 <UL>
 <LI>Esegui 'regedit'
 <LI>premi ctrl-f, disabilita i primi due checkbox, e abilita il terzo. Scrivi

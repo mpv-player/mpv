@@ -11,7 +11,7 @@
 studiato per codificare i filmati leggibili da MPlayer
 (<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) in altri formati leggibili da MPlayer
 (vedi sotto). Può usare vari codec, come <B>DivX4</B> (1 o
-2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche
+2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche la
 capacità di copiare da stream e di ridimensionare i video.</P>
 
 <P><B><A NAME=2.4.2>2.4.2.  Compilazione</B></P>
@@ -50,7 +50,7 @@ la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
   <UL>
     <LI>codifica dall'ampia scelta di formati file e decoder di <B>MPlayer</B></LI>
     <LI>codifica in tutti i codec del
-      <A HREF=codecs.html#2.2.1.2>libavcodec</A>di ffmpeg</LI>
+      <A HREF=codecs.html#2.2.1.2>libavcodec</A> di ffmpeg</LI>
     <LI>codifica video da <B>sintonizzatori TV compatibili con V4L</B></LI>
     <LI>codifica/multiplexing a file AVI intervallati con un indice corretto</LI>
     <LI>1, 2 o 3 passaggi video <B>DivX4</B></LI>
@@ -164,7 +164,7 @@ due comandi :<BR>
   questo valore. Quindi, l'unica soluzione è ridimensionare.</P>
 
 <P><B>MEncoder</B> può ridimensionare le immagini di input se sono in formato YV12 (per esempio:
-  ffdivx, driver odivx, o mpeg1/2). Le dimensioni di output si specificano co le opzioni
+  ffdivx, driver odivx, o mpeg1/2). Le dimensioni di output si specificano con le opzioni
   <CODE>-x</CODE>, e <CODE>-y</CODE>.  Inoltre, ci sono alcuni filtri
   di ridimensionamento in <B>MEncoder</B>, guarda la pagina di man !
   Possono essere specificati con l'opzione <CODE>-sws</CODE>. Se non specificato,
@@ -197,7 +197,7 @@ due comandi :<BR>
 
 <P>La cosa più semplice. Copiamo semplicemente i flussi audio e video, e
 <B>MEncoder</B> genera l'indice. Naturalmente questo non può correggere possibili bug
-nei flussi video e/o audio. Corregge anche i file con mal intervallati,
+nei flussi video e/o audio. Corregge anche i file mal intervallati,
 così non sarà più necessaria l'opzione <CODE>-ni</CODE> per leggerli.</P>
 
 <P>Comando : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
@@ -286,7 +286,7 @@ supportati). Puoi codificare i seguenti codec :</P>
 <P>NOTA : per tutte le opzioni disponibili, <B>leggi la pagina di man !</B></P>
 
 <P>
-  Dato che <B>MEncoder</B> è costruito sulle stesso codice di <B>MPlayer</B>, ci sono
+  Dato che <B>MEncoder</B> è costruito sullo stesso codice di <B>MPlayer</B>, ci sono
   molte opzioni di <B>MPlayer</B> che hanno funzioni anche in <B>MEncoder</B>!
   Vedi, puoi usare <CODE>-sid</CODE> per "rippare" un  DVD con i sottotitoli, o
   <CODE>-noidx</CODE> per ignorare in input l'indice malformato di un AVI. <B>Sii sveglio!</B>
@@ -413,7 +413,7 @@ supportati). Puoi codificare i seguenti codec :</P>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
-    &nbsp;&nbsp;<B>cbr</B> - seleziona MP£ <B>CBR</B> MP3 (il default è <B>VBR</B>)<BR>
+    &nbsp;&nbsp;<B>cbr</B> - seleziona MP3 <B>CBR</B> (il default è <B>VBR</B>)<BR>
     &nbsp;&nbsp;<B>br</B>=&lt;valore&gt; - specifica il bitrate in kbit &lt;0-1024&gt; (solo per <B>CBR</B>!)<BR>
     &nbsp;&nbsp;<B>q</B>=&lt;valore&gt; - qualità (0-alta, 9-veloce - predefinito 0) (solo per <B>VBR</B>!)<BR>
   </TD>

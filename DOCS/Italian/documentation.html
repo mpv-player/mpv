@@ -236,7 +236,7 @@ Lamentele degli sviluppatori
   hai altre domande, Ritorna alla Tabella dei contenuti e
   cerca l'argomento, leggi le FAQ, o prova ad usare "grep" sui file.</P>
 
-<P>La regole principale di questa documentazione: se non è documentato,
+<P>La regola principale di questa documentazione: se non è documentato,
   <U>non esiste</U>. Se non dico che puoi codificare l'audio dal sintonizzatore TV,
   non puoi. Però una certa abilità nel combinare questo con altri software è la benvenuta.
   Buona fortuna. Ne avrai bisogno :)</P>
@@ -246,13 +246,13 @@ Lamentele degli sviluppatori
 
 <P><B><A NAME=1.1>1.1. Generale</A></B></P>
 
-<P><B>MPlayer</B> è un lettore di filmati per LINUX (funzione su molti altri Unix, e
-<B>non-x86</B> CPU, vedi la <A HREF="#6">sezione 6</A>). Legge la maggior parte dei file MPEG, VOB,
+<P><B>MPlayer</B> è un lettore di filmati per LINUX (funziona su molti altri Unix, e CPU
+<B>non-x86</B>, vedi la <A HREF="#6">sezione 6</A>). Legge la maggior parte dei file MPEG, VOB,
 AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
 con l'aiuto di molti codec nativi, di XAnim e
 di Win32. Si possono guardare <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, e perfino film in <B>DivX</B> (e non necessita assolutamente la libreria di avifile
-!). L'altra importante caratteristica di mplayer l'ampia scelta di driver supportati per l'output.
+!). L'altra importante caratteristica di mplayer è l'ampia scelta di driver supportati per l'output.
 Funziona con X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, ma puoi usare GGI e SDL (e così tutti i loro driver)
 e anche alcuni driver di basso livello specifici di alcune schede (Matrox, 3Dfx e Radeon)!
@@ -280,7 +280,7 @@ e legge file AVI corrotti che sono illeggibili col famoso
 windows media player. Perfino file AVI senza la sezione dell'indice sono leggibili, e
 e si può ricostruire il loro indice con l'opzione -idx o permanentemente con <B>MEncoder</B>, abilitando così la ricerca!
 Come potete vedere, la stabilità e la qualità sono le cose più importanti per me,
-ma anche la stabilità è impressionante.</P>
+ma anche la velocità è impressionante.</P>
 
 <P><B><A NAME=1.2>1.2. Storia</A></B></P>
 
@@ -298,7 +298,7 @@ Così decisi di scriverne/modificarne uno...</P>
     ma c'erano problemi di qualità d'immagine e di velocità.</LI>
 <LI><B>mpg12play v0.5-v0.87:</B><BR>
     Codec Mpeg sostituito con DVDview di Dirk Farin, era roba buona,
-    ma rea lento e scritto in C++ (odio il C++!!!)</LI>
+    ma era lento e scritto in C++ (odio il C++!!!)</LI>
 <LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
     Il codec Mpeg era libmpeg2 (mpeg2dec) di Aaron Holtzman & Michel Lespinasse.
     E' grandioso, codice C ottimizzato e molto veloce con qualità dell'immagine perfetta e
@@ -363,8 +363,8 @@ del tempo, ma ne vale sicuramente la pena.</P>
     informazioni disponibili.</A><BR>
     Assicuratevi che siano installati anche i suoi <B>pacchetti di sviluppo</B> altrimenti
     non funzionerà.<BR>
-    Per alcune schede video no è necessario XFree86. Controllate la lista sotto.</LI>
-  <LI><B>make</B> - la versione suggerita <B>sempre la più nuova</B> (almeno la 3.79.x). Solitamente
+    Per alcune schede video non è necessario XFree86. Controllate la lista sotto.</LI>
+  <LI><B>make</B> - la versione suggerita è <B>sempre la più nuova</B> (almeno la 3.79.x). Solitamente
     non è importante.</LI>
   <LI><B>SDL</B> - non è obbligatorio, ma può aiutare in alcuni casi (audio difettoso,
     schede video stranamente lente col driver xv). Usate sempre la versione più recente
@@ -429,7 +429,7 @@ vengono letti meglio dal codec Cinepak proprio di <B>MPlayer</B> !</LI>
 
 <P>
 Possono visualizzare e riscalare (zoom) l'immagine a qualunque dimensione che rientri nella
-loreo memoria, con <B>scarso utilizzo della CPU</B> (zoommare non lo aumenta!), così
+loro memoria, con <B>scarso utilizzo della CPU</B> (zoommare non lo aumenta!), così
 si ottiene un filmato a pieno schermo di buona qualità e molto veloce.</P>
 
 <P>
@@ -547,7 +547,7 @@ vedere la nuova efficenza del timer nella riga di stato. Il terzo codice per il 
 si attiva con l'opzione <CODE>-softsleep</CODE>. Ha l'efficienza
 dell'RTC, ma non necessita dei permessi di root. D'altro canto,
 richiede più CPU. Nota: <B>MAI installare un binario MPlayer setuid su un
-sistema multiutente!</B> E' un modo semplice per chiunque per ottenere i privilegi di root.</LI>
+sistema multiutente!</B> E' un modo semplice per far ottenere a chiunque i privilegi di root.</LI>
 
 </UL>
 
@@ -559,14 +559,14 @@ sistema multiutente!</B> E' un modo semplice per chiunque per ottenere i privile
 
 <P>A questo punto, <B>MPlayer</B> è pronto ad essere usato. La directory
 <CODE>/usr/local/share/mplayer</CODE> contiene il file <CODE>codecs.conf</CODE>,
-che è serve per dire al programma di quali codec dispone e le loro caratteristiche.
+che serve per dire al programma di quali codec dispone e le loro caratteristiche.
 Questo file dovrebbe essere sempre tenuto aggiornato di pari passo col binario principale !</P>
 
 <P><B>Gli utenti Debian</B> possono costruirsi un pacchetto .deb, è molto
 semplice. Basta eseguire <CODE>fakeroot debian/rules binary</CODE> nella directory principale di <B>MPlayer</B>.
 Istruzioni dettagliate possono essere trovate <A HREF="documentation.html#6.1">qui</A>.</P>
 
-<P><B><I>Controllare SEMPRE l'output di ./configure</I></B>, e il file
+<P><B><I>Controllare SEMPRE l'output di ./configure</I></B> e il file
 <CODE>configure.log</CODE>, contengono informazioni su quello che sarà compilato,
 e quello che non lo sarà. Potresti anche guardare i file config.h e config.mak.</P>
 
@@ -600,8 +600,8 @@ contemporaneamente) per visualizzare un menu GTK, con opzioni per la lettura di 
 <P>Dato che <B>MPlayer</B> non ha una skin inclusa, devi scaricarle
 se vuoi usare la GUI. Vedi la <A HREF="http://www.mplayerhq.hu/homepage/dload.html">pagina dei download</A>.
 Dovranno essere estratti nella solita directory valida per tutto il sistema (<CODE>/usr/local/share/mplayer/Skin</CODE>),
-o in <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> di default cerca in
-queste directory una directory con un nome  <I>standard</I>, ma puoi usare l'opzione
+o in <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> cerca in
+queste una directory di nome  <I>default</I>, ma puoi usare l'opzione
 <I>-skin nuovaskin</I>, o la direttiva <I>skin=nuovaskin</I> del file di configurazione
 per usare la skin nella directory <CODE>*/Skin/nuovaskin</CODE>.</P>
 
@@ -769,7 +769,7 @@ compatibile con V4L</B>.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dice da quale
-  input del sintonizzatore TV si vogliono prelevare le immagini (e.g. <B>television</B>,
+  input del sintonizzatore TV si vogliono prelevare le immagini (es. <B>television</B>,
   <B>s-video</B>, <B>composite</B>, ...)<BR>
     Stampa quelli disponibili durante l'inizializzazione.</TD>
 </TR>
@@ -778,7 +778,7 @@ compatibile con V4L</B>.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifica la
-  frequenza alla quale settare il sintonizzatore (e.g. <B>511.250</B>)</TD>
+  frequenza alla quale settare il sintonizzatore (es. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -787,7 +787,7 @@ compatibile con V4L</B>.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in quale formato output
   vogliamo le immagini (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
   <B>uyvy</B>, <B>i420</B> (per i420 devi passare l'opzione <CODE>-vc rawi420</CODE>,
-   a causa di un conflitto fourcc))</TD>
+   a causa di un conflitto fourcc)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -887,10 +887,10 @@ Input da standard V4L<BR>
 
 <TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(i seguenti tasti sono disponibili solo con l'opzione <CODE>-vo xv</CODE>)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 o 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sistema il contrasto</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 o 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sistema la luminosità</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 o 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sistema l'hue</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 o 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sistema la saturazione</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 o 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>regola il contrasto</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 o 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>regola la luminosità</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 o 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>regola l'hue</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 o 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>regola la saturazione</TD></TR>
 </TABLE></P>
 
 <P><B>Controllo da tastiera della GUI</B></P>
@@ -937,7 +937,7 @@ su LIRC non c'è compilato il supporto. Questo è quanto :-)</P>
 Questa accetta i seguenti comandi:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSA</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pausa la riproduzione. Ogni alto pulsante continua la riproduzione.</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSA</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pausa la riproduzione. Ogni altro tasto continua la riproduzione.</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SPEGNI</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>esce da MPlayer</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INDIETRO</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 secondi indietro</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INDIETRO VELOCE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 secondi indietro</TD><TR>
@@ -983,7 +983,7 @@ L'utilizzo del proxy può anche essere forzato :</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
-<P><B>MPlayer</B> può legger dallo standard input (NON da named pipe). Questo può essere per esempio
+<P><B>MPlayer</B> può leggere dallo standard input (NON da named pipe). Questo può essere per esempio
 usato per riprodurre da FTP:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/qualcosa.avi -O - | mplayer -</CODE></P>
@@ -1064,8 +1064,8 @@ se il compilatore GNU C/C++ è configurato con o senza l'assembler GNU.</P>
 
 <P>Su Solaris x86, devi avere l'assembler GNU e il compilatore GNU C/C++,
 configurato per usare l'assembler GNU!  Il codice dell'mplayer
-sulla piattaforma x86 fa un uso pesante di MMX, SSE and 3DNOW!
-istruzioni che non possono essere compilate usando l'assembler della Sun
+sulla piattaforma x86 fa un uso pesante di MMX, SSE e 3DNOW!
+Istruzioni che non possono essere compilate usando l'assembler della Sun
 <CODE>/usr/ccs/bin/as</CODE>.</P>
 
 <P>Lo script di configurazione tenta di scoprire quale programma assembler è
@@ -1115,10 +1115,10 @@ l'accesso a tutti i dati è modulo 4GB
 
 <P>Su Solaris con CPU UltraSPARC, si può ottenere maggiore velocità
   usando le istruzioni VIS della CPU per certe operazioni che impiegano molto tempo.
-  l'accelerazione VIS può essere usata in MPlayer richiamando funzioni nella
+  L'accelerazione VIS può essere usata in MPlayer richiamando funzioni nella
   <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</A> di Sun.</P>
 
-<P>Opreazioni VIS accelerate da mediaLib sono usate per la decodifica video mpeg2
+<P>Operazioni VIS accelerate da mediaLib sono usate per la decodifica video mpeg2
   e per la conversione del color space nei driver di output video.</P>
 
 
@@ -1165,12 +1165,12 @@ Qualcuno ha informazioni più precise?</P>
   <LI>miglioramenti libvo: aggiunto supporto OpenGL, correzione bug nel driver mga...</LI>
   <LI>supporto triplo buffering &amp; YUY2 (per DivX/MPEG4) nel driver mga_vid</LI>
   <LI>script nella directory TVout (TVout su Matrox G400DH, vedi documentazione)</LI>
-  <LI>hacking dei codec DivX/Mpeg4 VfW per ottenere loutput YUV</LI>
+  <LI>hacking dei codec DivX/Mpeg4 VfW per ottenere l'output YUV</LI>
   <LI>ottimizzazioni velocità decoder opendivx (vedi opendivx/ChangeLog)</LI>
   <LI>codice visualizzazione OSD &amp; SUB</LI>
   <LI>integrazione ffmpeg/libavcodec</LI>
   <LI>supporto DivX4Linux (ProjectMayo) (vedi documentazione)</LI>
-  <LI>nuovo supporto DVD-Support usando libdvdread</LI>
+  <LI>nuovo supporto DVD usando libdvdread</LI>
   <LI>supporto DVB</LI>
   <LI>output MPEG PES</LI>
   <LI>tutto quello che non è menzionato da altre parti</LI>
@@ -1271,8 +1271,8 @@ Qualcuno ha informazioni più precise?</P>
   <LI>driver audio SDL in libao2</LI>
   <LI>scrittore file RAW PCM/WAVE per libao2</LI>
   <LI>supporto audio OggVorbis</LI>
-  <LI>Vario codice</LI>
-  <LI>Port Win32</LI>
+  <LI>vario codice</LI>
+  <LI>port Win32</LI>
   <LI>supporto priorità in codecs.conf</LI>
 </UL></LI>
 
@@ -1352,7 +1352,7 @@ Qualcuno ha informazioni più precise?</P>
 
 <LI><B><A HREF="mailto:lanzz@lanzz.org">lanzz@lanzz.org</A></B>
 <UL>
-  <LI>plugin GIMP per la generazione di fon (TOOLS/subfont-gimp)</LI>
+  <LI>plugin GIMP per la generazione di font (TOOLS/subfont-gimp)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:atlka@pg.gda.pl">Adam Tla/lka</A></B>
@@ -1723,7 +1723,7 @@ Questa lista dovrebbe essere mantenuta con un basso livello di traffico.</P>
 
 </LI><LI>Utenti MPlayer &amp; scheda DVB:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Questioni inerernti alla scheda di decodifica hardware chiamata DVB.<UL>
+<P>Questioni inerernti la scheda di decodifica hardware chiamata DVB.<UL>
 </P>
 
 </LI><LI>MPlayer CVS-log: <BR>
@@ -1776,7 +1776,7 @@ altrimenti.  Per favore non mandate messaggi in altre lingue!</P>
 
 <LI>"Internal buffer inconsistency" durante l'esecuzione di MEncoder:<BR>
   Problema: bug di gcc 2.96 conosciuto, ancora nessuna correzione disponibile. Se hai gcc 2.95,
-  hai la libreria libmp3lame che è stato compilata con gcc 2.96 (installata da un
+  hai la libreria libmp3lame che è stata compilata con gcc 2.96 (installata da un
   pacchetto deb/rpm?). Controlla quale libreria ha trovato MEncoder: ldd mencoder.</LI>
 
 <LI>Il suono in formato MP2/MP3 si sente male su PPC:<BR>

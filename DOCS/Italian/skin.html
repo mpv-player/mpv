@@ -49,7 +49,7 @@ Ultima modifica: Sep 10, 2001
 <h2><a name="intro">1 Introduzione</a></h2>
 
 Il proposito di questo documento è di descrivere il formato delle skin di MPlayer.
-Le in formazioni qui contenute possono essere errate, in quanto <em>a)</em> non sono stato io
+Le informazioni qui contenute possono essere errate, in quanto <em>a)</em> non sono stato io
 a scrivere la GUI, <em>b)</em> la GUI non è finita, <em>c)</em> posso
 sbagliarmi. Quindi non sorprenderti se qualcosa non funziona come descritto qui.
 
@@ -63,7 +63,7 @@ Grazie a <em>Zoltán Ponekker</em> per il suo aiuto.
 <h2><a name="overview">2 Generale</a></h2>
 
 Non ha niente a che fare col formato delle skin, ma dovresti sapere
-che <em>MPlayer <b>non</b> ha include una skin, quindi <b>devi installare almeno
+che <em>MPlayer <b>non</b> include una skin, quindi <b>devi installare almeno
 una skin per poter usare la GUI.</b></em>
 
 
@@ -116,7 +116,7 @@ destro).
 <li>
 La <b>finestra principale</b> è dove puoi controllare MPlayer. Lo sfondo della
 finestra è un'immagine. Vari oggetti possono (e devono) essere
-piazzati nella finestra: <em>bottoni</em>, <em>slider</em> e <em>etichetta</em>.
+piazzati nella finestra: <em>bottoni</em>, <em>slider</em> e <em>etichette</em>.
 Per ogni oggetto, devi
 specificare la sua posizione e dimensione.
 
@@ -252,7 +252,7 @@ oggetto = parametro
 </blockquote>
 
 <p>
-dove <i>oggetto</i> è unastringa che identifica il tipo di oggetto della GUI,
+dove <i>oggetto</i> è una stringa che identifica il tipo di oggetto della GUI,
 <i>parametro</i> è un valore numerico o testuale (o una lista di valori
 separati da virgole).
 </p>
@@ -561,7 +561,7 @@ I seguenti oggetti possono essere usati nel blocco
 L'immagine da visualizzare nella finestra.
 La finestra apparirà alla posizione <i>x</i>,<i>y</i> data
 sullo schermo (0,0 è l'angolo in alto a sinistra). Puoi specificare -1 per centro
-e -2 destra (x) e sotto (y). La finestra sarà grande quanto l'immagine.
+e -2 per destra (x) e sotto (y). La finestra sarà grande quanto l'immagine.
 <i>larghezza</i> e <i>altezza</i> danno la dimensione della finestra; sono opzionali
 (se mancano, la finestra è grande quanto l'immagine).
 </dd>
@@ -582,7 +582,7 @@ del colore (ognuno è un numero decimale compreso tra 0 e 255).
 
 <h3><a name="skinmenu">3.3 Menu della skin</a></h3>
 
-Come menzionatoprima, il menu è visualizzato usando due immagini.
+Come menzionato prima, il menu è visualizzato usando due immagini.
 Le normali voci del menu sono prese dall'immagine specificata dall'oggetto <i>base</i>,
 mentre la voce attualmente selezionata è presa dall'immagine specificata dall'oggetto
 <i>selected</i>.

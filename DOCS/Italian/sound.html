@@ -21,11 +21,11 @@ questi driver :</P>
 
 </TABLE>
 
-<P>Il fatto è che i driver per le schede sonore di Linux sono solitamente cattivi, e sempre tanto
-incompatibili quanto possono essere. PUO' volerci un po' prima di trovare la tua configurazione ottimale.</P>
+<P>Il fatto è che i driver per le schede sonore di Linux sono solitamente pessimi, e sempre
+incompatibili. PUOI metterci un po' prima di trovare la tua configurazione ottimale.</P>
 <P><UL>
 <LI>se hai OSS come driver, prima prova con <I>-ao oss</I> (questo è il default).
-Se sperimenti interruzioni, o qualunque cosa fuori dall'ordinario, prova
+Se riscontri interruzioni, o qualunque cosa fuori dall'ordinario, prova
 <I>-ao sdl</I> (NOTA: naturalmente devi avere una nuova libreria SDL e le sue parti
 di sviluppo installate). Aiuta in molti casi (supporta anche  ESD, ARTS, e
 sopra/sottocampionamento. /esd è il demone del suono di GNOME, arts è quello di KDE/).</LI>
@@ -41,7 +41,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 </UL></P>
 
 <P>Su sistemi <B>Solaris/FreeBSD</B>, usa il driver audio SUN con l'opzione
-<I>-ao sun</I>, altrimenti no avrai ne riproduzione video, ne audio.</P>
+<I>-ao sun</I>, altrimenti non avrai ne riproduzione video, ne audio.</P>
 
 <P><B><A NAME=2.3.2.1>2.3.2.1. Esperienze con le schede sonore, raccomandazioni</A></B></P>
 
@@ -113,7 +113,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 </TABLE></P>
 
 <P><UL>
-<LI>su Linux, usa almeno il kernel 2.4 se possibile, 2.2 non è stato testato
+<LI>su Linux, usa almeno il kernel 2.4 se possibile, il 2.2 non è stato testato
 <LI>se emette dei click leggendo da CD-ROM, abilita l' IRQ unmasking !
      per esempio "hdparm -u1 /dev/cdrom" (vedi "man hdparm" !!!)
      Questo è consigliato comunque... (per XMMS, ecc...)
@@ -159,7 +159,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Sopra/Sotto campionamento</A></B></P>
 
-<P><B>MPlayer</B> supporta pienamente la sopra/sotto campionamento del suono. Questo plugin può
+<P><B>MPlayer</B> supporta pienamente il sopra/sotto campionamento del suono. Questo plugin può
   per esempio essere usato se hai una scheda sonora a frequenza fissa o se sei
   bloccato con una vecchia scheda sonora in grado di dare al massimo 44.1kHz.
   Le limitazioni del tuo hardware non sono riconosciute automaticamente, quindi devi
@@ -221,7 +221,7 @@ surround.</p>
   iniziale. Può essere impostato a valori tra 0
   e 255 e il default è 255. Usa questo plugin con attenzione in quanto
   può aumentare il rumore nel segnale. Nella maggior parte dei casi
-  è meglio impostare il livello del suono PCM a massimo, lasciare perdere questo plugin
+  è meglio impostare il livello del suono PCM al massimo, lasciare perdere questo plugin
   e controllare il livello in output col controllo volume principale
   del mixer. Se è connesso al computer un aplificatore esterno
   (questo è quasi sempre il caso), il livello del rumore
@@ -234,7 +234,7 @@ surround.</p>
   list=volume:volume=&lt;0-255&gt;</CODE>
 </P>
 
-<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Extrastereo</A></B></P>
+<P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
 
 <P>Questo plugin aumenta (linearmente) la differenza tra i canali destro e sinistro
   (come il plugin extrastereo di XMMS) che da un certo effetto "live" alla

@@ -24,7 +24,7 @@
 <LI> supporta la <A HREF="documentation.html#3.3">lettura da stdin</A>, o rete tramite HTTP
 </UL></P>
 
-<P>E' importante fare chiarezza su un errore comune. Quando la gente cede un file con estensione
+<P>E' importante fare chiarezza su un errore comune. Quando la gente vede un file con estensione
 <B>.AVI</B>, dice subito che non è un file MPEG.
 Questo non è vero. Almeno non del tutto. Se gli dici che quel file può contenere
 un video MPEG1, ti ridono dietro. Sentiti libero di prenderli a calci
@@ -64,7 +64,7 @@ e di solito audio AC3, ma è permesso anche l'MP2.<BR>
 </P>
 
 <P>Nei file MPEG, serie di frame sono raggruppate insieme, e sono indipendenti
-dagli altri gruppi. Questo significa si può tagliare/unire un file MPEG con
+dagli altri gruppi. Questo significa che si può tagliare/unire un file MPEG con
 normali strumenti per i file (come dd, cut), e il risultato sarà totalmente funzionante.</P>
 
 <P>Una caratteristica importante degli MPG è che hanno un campo per descrivere
@@ -140,8 +140,8 @@ che in questi file il flusso video è un vero file .MPG. Con l'opzione
 <CODE>-dumpvideo</CODE> puoi perfino estrarlo).</P>
 
 <P><B>Codec</B>: qualsiasi codec è permesso, sia CBR che VBR. Nota: la maggior parte dei nuovi file mov usano
-video <B>Sorenson</B> audio QDesign Music. Questo formati sono totalmente
-segreti, è solo il lettore quicktime di Apple è in grado di leggerli (solo su
+video <B>Sorenson</B> e audio QDesign Music. Questo formati sono totalmente
+segreti, e solo il lettore quicktime di Apple è in grado di leggerli (solo su
 win/mac).</P>
 
 
@@ -152,7 +152,7 @@ win/mac).</P>
 e a molti file mancano anche i frame chiave, quindi dimenticati la funzionalità di ricerca!</P>
 
 <P>Il codec video dei file VIVO/1.0 è lo standard <B>h.263</B> . Il codec video dei file VIVO/2.0
-è un modificato, non standard <B>h.263</B> . L'audio è lo stesso,
+è un <B>h.263</B> modificato, non standard. L'audio è lo stesso,
 può essere <B>g.723</B> (standard), o <B>Vivo Siren</B> .</P>
 
 <P>Vedi le sezioni <A HREF=codecs.html#2.2.1.4>codec video VIVO</A>
@@ -162,7 +162,7 @@ sull'installazione.</P>
 
 <P><B><A NAME=2.1.1.6>2.1.1.6. File FLI</A></B></P>
 
-<P><B>FLI</B> è un formato file molto vecchi usato da Autodesk Animator, ma è
+<P><B>FLI</B> è un formato file molto vecchio usato da Autodesk Animator, ma è
 un formato comune per brevi animazioni sulla rete. <B>MPlayer</B> legge
 i filmati FLI ed è anche in grado di ricercare in questi (utile quando
 usato con l'opzione -loop). I file FLI non hanno frame chiave, quindi la visualizzazione
