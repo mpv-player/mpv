@@ -87,6 +87,9 @@ typedef struct {
     int stdata_len;  // stream data
     unsigned char* stdata;
     //
+    unsigned char* stream_header;
+    int stream_header_len; // if >0, this header should be sent before the 1st frame
+    //
     int samples_size;
     mov_sample_t* samples;
     int chunks_size;
@@ -772,6 +775,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      // add code here to save esds header of length atom_len-8
 		      // beginning at stdata[86] to some variable to pass it
 		      // on to the decoder ::atmos
+		      trak->stream_header=trak->stdata+pos+8;
+		      trak->stream_header_len=atom_len-8;
 		      break;
 		    default:
 	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
@@ -779,6 +784,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	      		  atom_len);
 		   }
 		   pos+=atom_len;
+//		   printf("pos=%d max=%d\n",pos,trak->stdata_len);
 		  }
 		}
 		if(!sh->fps) sh->fps=trak->timescale;
@@ -1170,13 +1176,14 @@ int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
     mov_priv_t* priv=demuxer->priv;
     mov_track_t* trak=NULL;
     float pts;
+    int x;
+    off_t pos;
     
     if(ds->id<0 || ds->id>=priv->track_db) return 0;
     trak=priv->tracks[ds->id];
 
 if(trak->samplesize){
     // read chunk:
-    int x;
     if(trak->pos>=trak->chunks_size) return 0; // EOF
     stream_seek(demuxer->stream,trak->chunks[trak->pos].pos);
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
@@ -1207,14 +1214,27 @@ if(trak->samplesize){
     }
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "Audio sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
     } /* MOV_TRAK_AUDIO */
-    ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
+    pos=trak->chunks[trak->pos].pos;
 } else {
     // read sample:
     if(trak->pos>=trak->samples_size) return 0; // EOF
     stream_seek(demuxer->stream,trak->samples[trak->pos].pos);
     pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
-    ds_read_packet(ds,demuxer->stream,trak->samples[trak->pos].size,pts,trak->samples[trak->pos].pos,0);
+    x=trak->samples[trak->pos].size;
+    pos=trak->samples[trak->pos].pos;
 }
+if(trak->pos==0 && trak->stream_header_len>0){
+    // we have to append the stream header...
+    demux_packet_t* dp=new_demux_packet(x+trak->stream_header_len);
+    memcpy(dp->buffer,trak->stream_header,trak->stream_header_len);
+    stream_read(demuxer->stream,dp->buffer+trak->stream_header_len,x);
+    dp->pts=pts;
+    dp->flags=0;
+    dp->pos=pos; // FIXME?
+    ds_add_packet(ds,dp);
+} else
+    ds_read_packet(ds,demuxer->stream,x,pts,pos,0);
+    
     ++trak->pos;
 
     return 1;
