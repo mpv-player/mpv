@@ -66,7 +66,8 @@ static const char *aspect_ratios[] = {
 static char *conf_mux = "mpeg2";
 static uint16_t conf_packet_size = 0;		//dvd
 static uint32_t conf_muxrate = 0;		//kb/s
-static char *conf_vaspect = NULL, *conf_vframerate = NULL;
+static char *conf_vaspect = NULL; 
+static float conf_vframerate = 0;
 static uint32_t conf_vwidth = 0, conf_vheight = 0, conf_panscan_width = 0, conf_panscan_height = 0;
 static uint32_t conf_vbitrate = 0;
 static int conf_init_vpts = 200, conf_init_apts = 200;
@@ -162,7 +163,7 @@ m_option_t mpegopts_conf[] = {
 	{"size", &(conf_packet_size), CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"muxrate", &(conf_muxrate), CONF_TYPE_INT, CONF_RANGE, 0, 12000000, NULL},	//12 Mb/s
 	{"vaspect", &(conf_vaspect), CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"vframerate", &(conf_vframerate), CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vframerate", &(conf_vframerate), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
 	{"vwidth", &(conf_vwidth), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
 	{"vheight", &(conf_vheight), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
 	{"vpswidth", &(conf_panscan_width), CONF_TYPE_INT, CONF_RANGE, 1, 16383, NULL},
@@ -2455,24 +2456,44 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   }
   
   priv->vframerate = 0;		// no change
-  if(conf_vframerate != NULL)
+  if(conf_telecine && conf_vframerate > 0)
   {
-	if(! strcmp(conf_vframerate, "23.976"))
-		priv->vframerate = FRAMERATE_23976;
-	else if(! strcmp(conf_vframerate, "24"))
-		priv->vframerate = FRAMERATE_24;
-	else if(! strcmp(conf_vframerate, "25"))
-		priv->vframerate = FRAMERATE_25;
-	else if(! strcmp(conf_vframerate, "29.97"))
-		priv->vframerate = FRAMERATE_2997;
-	else if(! strcmp(conf_vframerate, "30"))
-		priv->vframerate = FRAMERATE_30;
-	else if(! strcmp(conf_vframerate, "50"))
-		priv->vframerate = FRAMERATE_50;
-	else if(! strcmp(conf_vframerate, "59.94"))
-		priv->vframerate = FRAMERATE_5994;
-	else if(! strcmp(conf_vframerate, "60"))
-		priv->vframerate = FRAMERATE_60;
+  	mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR: options 'telecine' and 'vframerate' are mutually exclusive, vframerate disabled\n");
+	conf_vframerate = 0;
+  }
+  
+  if(conf_vframerate)
+  {
+	int fps;
+	
+	fps = (int) (conf_vframerate * 1000.0);
+	switch(fps)
+	{
+		case 24000:
+			priv->vframerate = FRAMERATE_24;
+			break;
+		case 25000:
+			priv->vframerate = FRAMERATE_25;
+			break;
+		case 30000:
+			priv->vframerate = FRAMERATE_30;
+			break;
+		case 50000:
+			priv->vframerate = FRAMERATE_50;
+			break;
+		case 60000:
+			priv->vframerate = FRAMERATE_60;
+			break;
+		default:
+			if(fps >= 23975 && fps <= 23977)
+				priv->vframerate = FRAMERATE_23976;
+			else if(fps >= 29969 && fps <= 29971)
+				priv->vframerate = FRAMERATE_2997;
+			else if(fps >= 59939 && fps <= 59941)
+				priv->vframerate = FRAMERATE_5994;
+			else
+				mp_msg(MSGT_MUXER, MSGL_ERR, "WRONG FPS: %d/1000, ignoring\n", fps);
+	}
   }
   
   priv->vwidth = (uint16_t) conf_vwidth;
