@@ -3559,9 +3559,9 @@ print additional options and informations on presets settings.
 .
 .
 .SS lavc (\-lavcopts)
-lavc has many more options that are not described here.
-For full details read the source.
-
+Many lavc options are very specialized and tersely documented.
+Read the source for full details.
+.PP
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -3822,6 +3822,9 @@ For MPEG1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
 Note: vratetol should not be too large during the second pass or there might
 be problems if vrc_(min|max)rate is used.
+.TP
+.B vrc_buf_aggressivity
+currently useless
 .TP
 .B vrc_strategy
 Dummy, reserved for future use.
@@ -4388,6 +4391,12 @@ Use custom inter matrix. It needs a comma separated string of 64 integers.
 .TP
 .B intra_matrix=<comma separated matrix>
 Use custom intra matrix. It needs a comma separated string of 64 integers.
+.TP
+.B vqmod_amp
+experimental quantizer modulation
+.TP
+.B vqmod_freq
+experimental quantizer modulation
 .RE
 .
 .SS nuv (\-nuvopts)
