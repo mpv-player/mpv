@@ -69,6 +69,8 @@ MPlayer (1.0)
     MEncoder:
     * new experimental MPEG muxer, compatible with DVD and (S)VCD
     * multiple file support
+    * -speed support (framerate conversion with speedup/slowdown)
+    * EDL support
 
     Others:
     * -z option replaced by -vo png suboption
