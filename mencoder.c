@@ -1289,14 +1289,16 @@ case VCODEC_FRAMENO:
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
-    blit_frame=decode_video(sh_video,start,in_size,(skip_flag>0)?1:0);
+    blit_frame=decode_video(sh_video,start,in_size,
+      skip_flag>0 && vf_next_control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE);
     if(!blit_frame){
       badframes++;
       if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
-	    muxer_write_chunk(mux_v,0,0);
+	    if (!encode_duplicates || vf_next_control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	      muxer_write_chunk(mux_v,0,0);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
