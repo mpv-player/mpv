@@ -1,6 +1,13 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
+2002-01-06: I've started working on config support.
+	    You can try -vo dxr3:swsync to disable hardware
+	    syncing and use mplayers software syncer instead.
+	    I'd like some feedback on which one works best
+	    on your particular machine =). (I recommend
+	    using em8300 0.10 or later)
+	    
 2001-12-28: There is a whole bunch of updates since the
             last time. For one thing, digital audio now
 	    works thanks to Steven Brookes.
@@ -21,10 +28,6 @@ DXR3/H+ video/audio output plugins manual by David Holm
 	    users who didn't rtfm and compiled it with
 	    ffmpeg support. Instead we are now using
 	    libmp1e which is a modified version of mp1e.
-	    
-2001-11-29: Thanks to Felix Buenemann I managed to
-	    optimize the odivx playback as well as add
-	    support for the rest of the codecs!
 	    
 1. Introduction
 
