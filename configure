@@ -116,6 +116,7 @@ usage: $0 [options]
 
 params:
         --cc                    use this C compiler to build MPlayer [gcc]
+	--target=PLATFORM       target platform (i386-linux, arm-linux, etc)
 	--prefix=DIR		use this prefix for installing mplayer [/usr/local]
 	--datadir=DIR           use this prefix for installing machine independent
 				data [/usr/local/share/mplayer] 
@@ -181,41 +182,96 @@ exit 0
 fi
 done # for parm in ...
 
+if [ "$CC" != "" ]; then
+  _cc=$CC
+else
+  _cc=gcc
+fi
+
+_as=auto
+_x11=auto
+
+for ac_option; do
+ case "$ac_option" in
+  --target=*)
+        _target=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --cc=*)
+        _cc=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --as=*)
+        _as=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --disable-gcc-checking)
+        _skip_cc_check=yes
+	;;
+  --disable-as-checking)
+        _skip_as_check=yes
+	;;
+  --with-x11libdir=*)
+        _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-x11incdir=*)
+        _x11incdir=-I`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --enable-x11)
+        _x11=yes
+        ;;
+  --disable-x11)
+        _x11=no
+        ;;
+  --with-sdl-config=*)
+        _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-extralibdir=*)
+        _extralibdir=-L`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-extraincdir=*)
+        _extraincdir=-I`echo $ac_option | cut -d '=' -f 2`
+        ;;
+ esac
+done
 
 # LGB: Some inital help
 
 echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
 
-
 # Determine our OS name and CPU architecture
+if [ "$_target" == "" ]; then
+   system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
+   host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 
-system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
-host_arch=`uname -p 2>&1`   # host's instruction set or processor type
-case "$host_arch" in
-i386|sparc|ppc|alpha)
-    # fine, uname -p output looks good, it has returned
-    # something this configure script recognizes
-    ;;
+   case "$host_arch" in
+   i386|sparc|ppc|alpha|arm)
+       # fine, uname -p output looks good, it has returned
+       # something this configure script recognizes
+       ;;
 
-*)  # uname -p on Linux returns 'unknown' for the processor type,
-    # OpenBSD returns 'Intel Pentium/MMX ("Genuine Intel" 586-class)'
+   *)  # uname -p on Linux returns 'unknown' for the processor type,
+       # OpenBSD returns 'Intel Pentium/MMX ("Genuine Intel" 586-class)'
 
-    # Maybe uname -m (machine hardware name) returns something we
-    # recognize.
+       # Maybe uname -m (machine hardware name) returns something we
+       # recognize.
 
-    case "`uname -m 2>&1`" in
-    i[3-9]86)
-	host_arch=i386;;
-    ppc)
-	host_arch=ppc;;
-    alpha)
-	host_arch=alpha;;
-    sparc64)
-	host_arch=sparc;;
-    esac
-    ;;
-esac
+       case "`uname -m 2>&1`" in
+       i[3-9]86)
+           host_arch=i386;;
+       ppc)
+           host_arch=ppc;;
+       alpha)
+           host_arch=alpha;;
+       sparc*)
+           host_arch=sparc;;
+       arm*)
+           host_arch=arm;;
+       esac
+       ;;
+   esac
+else
+   system_name=`echo $_target | cut -d '-' -f 2`
+   host_arch=`echo $_target | cut -d '-' -f 1`
+fi
 
 # Determine OS dependent libs
 
@@ -257,26 +313,24 @@ MCONF='config.mak'
 
 # ---  Check for C compiler:
 
-_cc=gcc
-_as=auto
-_x11=auto
-
-_x11libdir=
-if [ -d /usr/X11R6 ]; then
- _x11libdir=-L/usr/X11R6/lib
-else
- if [ -d /usr/X11 ]; then
-  _x11libdir=-L/usr/X11/lib
- fi
+if [ "$_x11libdir" = "" ]; then
+   if [ -d /usr/X11R6 ]; then
+      _x11libdir=-L/usr/X11R6/lib
+   else
+      if [ -d /usr/X11 ]; then
+         _x11libdir=-L/usr/X11/lib
+      fi
+   fi
 fi
 
-_x11incdir=
-if [ -d /usr/include/X11 ]; then
- _x11incdir=
-elif [ -d /usr/X11R6 ]; then
- _x11incdir=-I/usr/X11R6/include
-elif [ -d /usr/X11 ]; then
- _x11incdir=-I/usr/X11/include
+if [ "$_x11incdir" = "" ]; then
+   if [ -d /usr/include/X11 ]; then
+      _x11incdir=
+   elif [ -d /usr/X11R6 ]; then
+      _x11incdir=-I/usr/X11R6/include
+   elif [ -d /usr/X11 ]; then
+      _x11incdir=-I/usr/X11/include
+   fi
 fi
 
 # Lots of stuff are installed under /usr/local
@@ -284,52 +338,11 @@ fi
 _extralibdir=-L/usr/local/lib
 _extraincdir=-I/usr/local/include
 
-_skip_cc_check=no
-_skip_as_check=no
 if [ "$system_name" = "FreeBSD" ]; then
 _sdlconfig='sdl11-config'
 else
 _sdlconfig='sdl-config'
 fi
-
-for ac_option
-do
- case "$ac_option" in
-  --cc=*)
-        _cc=`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --as=*)
-        _as=`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --disable-gcc-checking)
-        _skip_cc_check=yes
-	;;
-  --disable-as-checking)
-        _skip_as_check=yes
-	;;
-  --with-x11libdir=*)
-        _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --with-x11incdir=*)
-        _x11incdir=-I`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --enable-x11)
-        _x11=yes
-        ;;
-  --disable-x11)
-        _x11=no
-        ;;
-  --with-sdl-config=*)
-        _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --with-extralibdir=*)
-        _extralibdir=-L`echo $ac_option | cut -d '=' -f 2`
-        ;;
-  --with-extraincdir=*)
-        _extraincdir=-I`echo $ac_option | cut -d '=' -f 2`
-        ;;
- esac
-done
 
 # ---
 
@@ -645,6 +658,16 @@ sparc)
     _mcpu="-mcpu=$proc"
     ;;
 
+arm)
+    _arch="#define ARCH_ARM 1"
+    _target_arch="TARGET_ARCH_ARM=yes"
+    _words_endian="#undef WORDS_BIGENDIAN"
+    iproc=arm
+    proc=
+    _march=""
+    _mcpu=""
+    ;;
+
 # Untested:
 #ppc)
 #    _arch="#define ARCH_PPC 1"
@@ -919,10 +942,8 @@ $_cc $_extraincdir $_extralibdir -o $TMPO -lesd $TMPC 2> /dev/null || { _esd=no;
 # check for the parameters.
 
 _prefix="/usr/local"
-_datadir=$_prefix"/share/mplayer"
 
-for ac_option
-do
+for ac_option; do
  case "$ac_option" in
   --enable-profile)
   	_profile='-p'
@@ -1156,6 +1177,11 @@ do
  esac
 done
 
+# Atmos: moved this here, to be correct, if --prefix is specified
+if test x"$_datadir" = x; then
+	_datadir=$_prefix"/share/mplayer"
+fi
+
 # Checking assembler (_as) compatibility...
 as_version=`$_as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
 echo $_echo_n "Checking assembler ($_as) ... $as_version, $_echo_c"
@@ -1218,7 +1244,7 @@ if test "$as_verc_fail" != "yes"; then
 else
   echo "failed"
   echo "Please upgrade(downgrade) binutils to "$_pref_as_version"..."
-  if [ $_skip_as_check = 'no' ]; then
+  if [ "$_skip_as_check" != "yes" ]; then
     exit
   else
     echo "YOU'VE SELECTED '--disable-as-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"

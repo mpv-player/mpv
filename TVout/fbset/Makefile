@@ -2,7 +2,7 @@
 # Linux Frame Buffer Device Configuration
 #
 
-CC =		gcc -Wall -O2 -I.
+CC =		$(CC) -Wall -O2 -I.
 BISON =		bison -d
 FLEX =		flex
 INSTALL =	install

@@ -1,5 +1,4 @@
 
-CC = gcc
 KERNEL_INCLUDES = /usr/src/linux/include
 INCLUDES = -I$(KERNEL_INCLUDES)
 CFLAGS = -g -O2  -Wall -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h
@@ -15,6 +14,8 @@ sis_vid.o: sis_vid.c sis_vid.h
 
 mga_vid_test: mga_vid_test.c
 	$(CC) -g -O -Wall $(INCLUDES) -o $@ $@.c
+
+dep:
 
 clean: 
 	rm -f *.o *~

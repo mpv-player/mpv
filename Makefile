@@ -22,7 +22,10 @@ CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
+PARTS = mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
+
 ifeq ($(TARGET_ARCH_X86),yes)
+PARTS += loader loader/DirectShow
 SRCS += dll_init.c
 LOADER_DEP = loader/libloader.a $(DS_DEP)
 LIB_LOADER = -Lloader -lloader $(DS_LIB)
@@ -42,7 +45,7 @@ all:	$(PRG) $(PRG_FIBMAP)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a
+COMMONLIBS = libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a encore/libencore.a
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -75,10 +78,9 @@ encore/libencore.a:
 	$(MAKE) -C encore
 
 
-MPLAYER_DEP = mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-
+MPLAYER_DEP = mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS) 
 mplayerwithoutlink: $(MPLAYER_DEP)	
-	@for a in mp3lib libac3 libmpeg2 libvo opendivx libavcodec encore loader/DirectShow ; do $(MAKE) -C $$a all ; done
+	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(ARCH_LIBS)
@@ -102,7 +104,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 # finish before be can start builing new object files.
 $(MPLAYER_DEP): version.h
 
-$(PRG_CFG):        version.h codec-cfg.c codec-cfg.h
+$(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(PRG) $(PRG_FIBMAP)
@@ -120,23 +122,15 @@ clean:
 	rm -f *.o *~ $(OBJS)
 
 distclean:
-	@for a in mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do \
-		if [ -d $$a ] ;  then \
-			$(MAKE) -C $$a distclean ; \
-		fi; \
-	done
 	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
+	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 dep:	depend
 
 depend:
 	./version.sh
 	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
-	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx libavcodec encore loader/DirectShow ; do \
-		if [ -d $$a ] ; then \
-			$(MAKE) -C $$a dep ; \
-		fi ; \
-	done
+	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 # ./configure must be run if it changed in CVS
 config.h: configure
@@ -162,5 +156,3 @@ endif
 ifneq ($(wildcard .depend),)
 include .depend
 endif
-
-
