@@ -2,13 +2,14 @@
 <HTML>
 
 <HEAD>
-<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+  <TITLE>Formate - MPlayer - The Movie Player for Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY>
 
-<P><B><A NAME=2.1>2.1. Unterstützte Formate</A></B></P>
+<P><B><A NAME="formats">2.1. Unterstützte Formate</A></B></P>
 
 <P>Es ist wichtig einen häufigen Fehler zu berichtigen. Wenn Leute eine Datei
 mit <B>.AVI</B>-Erweiterung sehen denken sie sofort, dass es keine MPEG-Datei ist.
@@ -29,9 +30,9 @@ beschreiben). Oder du könntest ein MPEG1 Video in ein .AVI geben.
 <P>Im Gegensatz dazu sind Audio <B>Codecs</B> and Audio <B>Formate</B> grundsätzlich gleich.</P>
 
 
-<P><B><A NAME=2.1.1>2.1.1. Video Formate</A></B></P>
+<P><B><A NAME="video_formats">2.1.1. Video Formate</A></B></P>
 
-<P><B><A NAME=2.1.1.1>2.1.1.1. MPEG Dateien</A></B></P>
+<P><B><A NAME="mpeg">2.1.1.1. MPEG Dateien</A></B></P>
 
 <P>MPEG-Dateien kommen in unterschiedlichen Erscheinungen:</P>
 
@@ -46,11 +47,11 @@ beschreiben). Oder du könntest ein MPEG1 Video in ein .AVI geben.
     Es ist das selbe wie MPG mit zusätzlicher Kapazität um Untertitel oder nicht-MPEG (AC3)
     Audio aufzunehmen. Es enthält MPEG2 Video und normalerweise AC3 Audio, aber DTS, MP2
     und unkomprimierte LPCMs sind auch erlaubt.<BR>
-    <B>Lies die <A HREF="cd-dvd.html#4.2">DVD Sektion</A> !</B></LI>
+    <B>Lies die <A HREF="cd-dvd.html#dvd">DVD Sektion</A> !</B></LI>
 </UL>
 
 <P>Serien von Frames bilden unabhängige Gruppen in MPEG Dateien. Das bedeutet, 
-dass du eine MPEG-Datei mit einem Standard-Dateitool (wie dd oder cut) schneiden
+dass du eine MPEG-Datei mit einem Standard-Dateitool (wie <CODE>dd</CODE> oder <CODE>cut</CODE>) schneiden
 und zusammenfügen kannst und dieses trotzdem vollständig funktionsfähig bleibt.</P>
 
 <P>Ein wichtiges Feature von MPGs ist, dass sie ein Feld besitzen das die
@@ -61,24 +62,24 @@ während des Encodierens skaliert werden müssen oder die Option -aspect bei der
 Wiedergabe verwendet werden muss.</P>
 
 
-<P><B><A NAME=2.1.1.2>2.1.1.2. AVI Dateien</A></B></P>
+<P><B><A NAME="avi">2.1.1.2. AVI Dateien</A></B></P>
 
-<P>Entworfen von Micro$oft, ist <B>AVI (Audio Video Interleaved)</B> ein
+<P>Entworfen von Microsoft, ist <B>AVI (Audio Video Interleaved)</B> ein
 weitverbeitetes Multifunktionsformat, es wird zur Zeit hauptsächlich für
 DivX und DivX4 Videos verwendet. Es hat einige bekannte Nachteile und
 Unfähigkeiten (zum Beispiel Streaming). Es unterstützt einen Videostream
-und 0 bis 99 Audiostreams. Die Dateien können bis zu 2 GB groß sein. Es
+und 0 bis 99 Audiostreams. Die Dateien können bis zu 2 GB groß sein, es
 existiert eine Erweiterung für größere Dateien, genannt <B>OpenDMS</B>.
-M$ versucht zur Zeit von der Verwendung stark abzuraten und propergiert
+Microsoft versucht zur Zeit von der Verwendung stark abzuraten und propergiert
 ASF/WMV. Aber keiner achtet darauf.</P>
 
 <P>Es gibt einen Hack, der es AVI-Dateien erlaubt Ogg Vorbis Audio Streams zu enthalten,
 sie aber auch inkompatibel mit Standard AVI macht. <B>MPlayer</B> unterstützt die Wiedergabe
 solcher Dateien. Eine Suchfunktion ist auch implementiert, wird jedoch stark gestört bei
 schlecht konvertierten Dateien mit verwirrenden Headers. Leider hat auch der einzige
-Encodierer, der fähig ist solche Dateien zu erzeugen (nansub), dieses Problem.</P>
+Encodierer, der fähig ist solche Dateien zu erzeugen (NanDub), dieses Problem.</P>
     
-<P><B>HINWEIS:</B> DV-Kameras können raw DV-Streams erzeugen, welche von DV-Tools in zwei
+<P><B>Hinweis:</B> DV-Kameras können raw DV-Streams erzeugen, welche von DV-Tools in zwei
 unterschiedliche Typen von AVI-Dateien konvertiert werden. Die AVI-Datei enthält dabei
 entweder separate Audio- und Video-Streams, die <B>Mplayer</B> wiedergeben kann, oder
 den raw DV-Stream. An dessen Unterstützung wird gerade gearbeitet.</P>
@@ -113,11 +114,11 @@ den raw DV-Stream. An dessen Unterstützung wird gerade gearbeitet.</P>
 Playern nicht gut unstützt wird. Das Dateiformat macht es möglich VBR
 Audio zu verwendenm, aber die meinsten Player erwarten CBR Audio, darum funktioniert VBR nicht. VBR ist
 ungewöhnlich und Microsofts Spezifikation zu AVI beschreiben nur CBR Audio. Bedenke auch, dass die meisten
-AVi Encoder/Multiplexer schlechte Dateien mit VBR Audio erzeugen. Es gibt nur 2 Ausnahmen
-(die ich kenne): NaNDub und <A HREF="encoding.html">MEncoder</A>.</P>
+AVi Encoder/Multiplexer schlechte Dateien mit VBR Audio erzeugen. Es gibt nur 2 Ausnahmen:
+NanDub und <A HREF="encoding.html">MEncoder</A>.</P>
 
 
-<P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV Dateien</A></B></P>
+<P><B><A NAME="asf">2.1.1.3. ASF/WMV Dateien</A></B></P>
 
 <P>ASF (Active Streaming Format) kommt von Microsoft. Sie habe 2 Arten von
 ASF, v1.0 und v2.0 entwickelt. v1.0 wird von ihren Media Tools (Windows
@@ -127,21 +128,21 @@ nur ein anderes legales Spiel). <B>MPlayer</B> unterstützt nur v1.0, weil noch n
 :). Beachte das .ASF Dateien heute auch mit der Extension .WMA oder .WMV vorkommen.</P>
 
 
-<P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV Dateien</A></B></P>
+<P><B><A NAME="mov">2.1.1.4. QuickTime/MOV Dateien</A></B></P>
 
-<P>Diese Formate sind von Apple designt. Normalerweise haben sie die Endung .QT oder .MOV . Bedenke dass -
-seitdem die MPEG4-Gruppe QuickTime als das empfohlene Dateiformat für MPEG4 ausgewählt hat -
-deren MPEG4 in .MOV Dateien mit .MPG oder .MP4 Extension erschienen sind (interessanterweise sind
-bei diesen Dateien die Video- und Audio-Streams richtige MPG- und AAC-Dateien. Mit der <CODE>-dumpvideo</CODE>
-Option kannst du sie sogar extrahieren.).</P>
+<P>Diese Formate sind von Apple designt und können irgendeinen Codec enthalten, CBR oder VBR.
+Normalerweise haben sie die Endung .QT oder .MOV. Seitdem die MPEG4-Gruppe QuickTime
+als das empfohlene Dateiformat für MPEG4 ausgewählt hat. Deren .MOV Dateien kommen
+mit den .MPG oder .MP4 Endungen (Interessanterweise sind bei diesen Dateien die
+Video- und Audiostreams richtige MPG und AAC Dateien. Mit der <CODE>-dumpvideo</CODE>
+und <CODE>-dumpaudio</CODE> Option kannst du sie sogar extrahieren.).</P>
 
-<P><B>Codecs</B>: alle Codecs erlaubt, beides, CBR und VBR. Bedenke das die meisten neuen
-Quicktime-Dateien <B>Sorenson</B> Video und QDesign Music Audio verwenden. Lies unsere
-<A HREF="codecs.html#2.2.1.10">Sorenson</A> Codec Sektion. QDesign Music Audio kann momentan
-nicht wiedergegeben werden.</P>
+<P><B>Hinweis</B>: Die meisten QuickTime-Dateien benutzen <B>Sorenson</B> Video und QDesign
+Audio. Lies dazu die <A HREF="codecs.html#sorenson">Sorenson</A> Codec Sektion. QDesign
+Music Audio kann momentan nicht wiedergegeben werden.</P>
 
 
-<P><B><A NAME=2.1.1.5>2.1.1.5. VIVO Dateien</A></B></P>
+<P><B><A NAME="vivo">2.1.1.5. VIVO Dateien</A></B></P>
 
 <P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. 
 Der grösste Nachteil des Formates ist das es keinen Index-Block besitzt, auch keine fixe Paketgröße oder Sync-Bytes.
@@ -151,11 +152,11 @@ Die meisten Dateien besitzen nicht mal Keyframes, also vergiss die Suchfunktion!
 VIVO/2.0 Dateien ist veränderter, nichtstandard <B>h.263</B>. Bei Audio ist es dasselbe, 
 es ist <B>g.723</B> (Standard) oder <B>Vivo Siren</B>.</P>
 
-<P>Siehe in der <A HREF="codecs.html#2.2.1.4">VIVO Videocodec</A>
-und <A HREF="codecs.html#2.2.2.4">VIVO Audiocodec</A> Sektion für Installationsanweisungen.</P>
+<P>Siehe in der <A HREF="codecs.html#vivo_video">VIVO Videocodec</A>
+und <A HREF="codecs.html#vivo_audio">VIVO Audiocodec</A> Sektion für Installationsanweisungen.</P>
 
 
-<P><B><A NAME=2.1.1.6>2.1.1.6. FLI Dateien</A></B></P>
+<P><B><A NAME="fli">2.1.1.6. FLI Dateien</A></B></P>
 
 <P><B>FLI</B> ist ein sehr altes Fileformat benutzt vom Autodesk Animator, aber es 
 ist ein gebräucliches Fileformat auf dem Netz für kurze Animationen. <B>MPlayer</B> demuxt
@@ -164,30 +165,16 @@ looping aktiviert mit der <CODE>-loop</CODE> Option). FLI Dateien haben keine Ke
 Bildern kurz nach dem Suchen führt.</P>
 
 
-<P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia (RM) Dateien</A></B></P>
+<P><B><A NAME="real">2.1.1.7. RealMedia (RM) Dateien</A></B></P>
 
 <P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Suchen (seeking)
 funktioniert, muss jedoch durch die <CODE>-forceidx</CODE> Option erzwungen werden
 (Das Format unterstüzt Keyframes). Hier ist die Liste der unterstützten 
-<A HREF="codecs.html#2.2.1.8">RealVideo</A> und 
-<A HREF="codecs.html#2.2.2.5">RealAudio</A> Codecs.</P>
-
-<P>Es wird empfohlen RealPlayer8 oder RealONE herunterzuladen, da
-<B>MPlayer</B> deren Libraries zur Dekodierung von RealVideo 2.0 oder
-RealVideo 3.0 Dateien verwenden kann!</P>
-
-<P><B>MPlayers</B> configure Script sollte die RealPlayer Bibliotheken an ihrer gewöhnlichen
-Stelle finden. Falls nicht, kann configure mit der Option <CODE>--with-reallibdir</CODE> mitgeteilt
-werden, wo diese sich befinden.</P>
-
-<P>Es ist auch möglich, die RealPlayer Bibliotheken einfach in ein geeignetes Verzeichnis wie
-<CODE>/usr/lib/real</CODE> oder <CODE>$LIBDIR/real</CODE> zu kopieren.</P>
-
-<P>HINWEIS: RealPlayer Libraries <B>funktionieren momentan nur mit Linux, FreeBSD, NetBSD und Cygwin
-auf der x86 Plattform</B>!</P>
+<A HREF="codecs.html#realvideo">RealVideo</A> und 
+<A HREF="codecs.html#realaudio">RealAudio</A> Codecs.</P>
 
 
-<P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo Dateien</A></B></P>
+<P><B><A NAME="nuppelvideo">2.1.1.8. NuppelVideo Dateien</A></B></P>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
 ist, soweit ich weiss, ein TV-Grabbing Tool. <B>MPlayer</B> kann dessen .NUV
@@ -197,7 +184,7 @@ welche <B>MPlayer</B> alle dekodiert (und diese auch mit MEncoder zu DivX/etc! <
 Suchen (seeking) funktioniert.</P>
 
 
-<P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg Dateien</A></B></P>
+<P><B><A NAME="yuv4mpeg">2.1.1.9. yuv4mpeg Dateien</A></B></P>
 
 <P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> ist ein Fileformat,
 das von <A HREF="http://mjpeg.sf.net">mjpegtools Programmen</A> verwendet wird. Du kannst damit
@@ -206,26 +193,26 @@ Das Dateiformat ist eigentlich eine Sequenz von unkomprimierten YUV 4:2:0 Bilder
 </P>
 
 
-<P><B><A NAME=2.1.1.10>2.1.1.10. FILM Dateien</A></B></P>
+<P><B><A NAME="film">2.1.1.10. FILM Dateien</A></B></P>
 
 <P>Dieses Format wird auf alten Sega Saturn CD-Rom games verwendet.</P>
 
 
-<P><B><A NAME=2.1.1.11>2.1.1.11. RoQ Dateien</A></B></P>
+<P><B><A NAME="roq">2.1.1.11. RoQ Dateien</A></B></P>
 
 <P>RoQ-Dateien sind Multimedia-Dateien, welche in gewissen ID Spielen wie Quake III
  und Return to castle Wolfenstein benützt werden.</P>
 
 
-<P><B><A NAME=2.1.1.12>2.1.1.12. OGG Dateien</A></B></P>
+<P><B><A NAME="ogg">2.1.1.12. OGG Dateien</A></B></P>
 
-<P>Dies ist ein neues Dateiformat von Xiphophorus, entwickelt um Vorbis
-  Audio zu enthalten. Man benötigt installierte <CODE>libogg</CODE> und
-  <CODE>libvorbis</CODE> vor der Kompilierung von <B>MPlayer</B> um
-  sie wiedergeben zu können.</P>
+<P>Dies ist ein neues Dateiformat von <A HREF="http://www.xiph.org">Xiphophorus</A>.
+  Es kann irgendein Video oder Audio Codec enthalten, CBR oder VBR. Man benötigt
+  dazu installierte <CODE>libogg</CODE> und <CODE>libvorbis</CODE> Bibliotheken vor
+  der Kompilierung von <B>MPlayer</B>, um sie wiedergeben zu können.</P>
 
 
-<P><B><A NAME=2.1.2>2.1.2. Audio Formate</A></B></P>
+<P><B><A NAME="audio_formats">2.1.2. Audio Formate</A></B></P>
 
 <P><B>MPlayer</B> ist ein <B>Film</B> und kein <B>Media</B> Player.
   Er kann auch einige Audioformate wiedergeben (diese sind in der unteren Sektion beschrieben).
@@ -233,7 +220,7 @@ Das Dateiformat ist eigentlich eine Sequenz von unkomprimierten YUV 4:2:0 Bilder
   verwendet werden.</P>
 
 
-<P><B><A NAME=2.1.2.1>2.1.2.1. MP3 Dateien</A></B></P>
+<P><B><A NAME="mp3">2.1.2.1. MP3 Dateien</A></B></P>
 
 <P>Du hast vielleicht Probleme mit der Wiedergabe einiger MP3-Dateien, die <B>MPlayer</B>
 falsch als MPEGs erkennt und dementsprechend falsch oder gar nicht wiedergibt.
@@ -242,16 +229,16 @@ aufzugeben und wird desshalb bis auf weiteres so bleiben. Die Option <CODE>-demu
 welche in der Manpage beschrieben wird, könnte dir in diesen Fällen helfen.</P>
 
 
-<P><B><A NAME=2.1.2.2>2.1.2.2. WAV Dateien</A></B></P>
+<P><B><A NAME="wav">2.1.2.2. WAV Dateien</A></B></P>
 
-<P><B><A NAME=2.1.2.3>2.1.2.3. OGG Dateien (Vorbis)</A></B></P>
+<P><B><A NAME="ogg_vorbis">2.1.2.3. OGG Dateien (Vorbis)</A></B></P>
 
 <P>Benötigt eine richtig installierte <CODE>libogg</CODE> und <CODE>libvorbis</CODE>.</P>
 
 
-<P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF Dateien</A></B></P>
+<P><B><A NAME="wma">2.1.2.4. WMA/ASF Dateien</A></B></P>
 
-<P><B><A NAME=2.1.2.5>2.1.2.5. MP4 Dateien</A></B></P>
+<P><B><A NAME="mp4">2.1.2.5. MP4 Dateien</A></B></P>
 
 </BODY>
 </HTML>

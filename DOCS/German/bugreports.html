@@ -2,23 +2,16 @@
 <HTML>
 
 <HEAD>
-<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+  <TITLE>Fehlerbehebung - MPlayer - The Movie Player for Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY>
 
 <P><B><A NAME=C>Anhang C - Wie man einen Fehler berichtet</A></B></P>
 
-<P><B>Wie bericht ich Programmfehler?</B></P>
-
-<P>Probiere es als allererstes die letzte CVS-Version, da dein Problem möglicherweise
-schon gelöst ist. CVS-Anweisungen können am unteren Ende <A HREF="http://www.mplayerhq.hu/homepage/dload.html">dieser Seite</A>
-gefunden werden.</P>
-
-<P>Wenn dies nicht hilft, sollte im <A HREF="documentation.html#D">Anhang D</A> und dem Rest der
-Dokumentationen nachgesehen werden. Wenn dein Problem nicht bekannt ist oder durch unsere Anweisungen
-nicht gelöst werden kann, dann berichte über den Fehler:</P>
+<P><B>Wie sollen Fehler behoben werden?</B></P>
 
 <P>Wenn man geschickt genugt ist, kann man versuchen den Fehler selber zu beheben,
 was äusserst positiv aufgenommen wird. Falls dies schon getan ist, sollte
@@ -26,6 +19,38 @@ was äusserst positiv aufgenommen wird. Falls dies schon getan ist, sollte
 wie der Code in <B>MPlayer</B> integriert werden kann. Die Leute auf der
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
 Mailingliste können ansonsten bei Fragen helfen.</P>
+
+<P><B>Wie sollen Fehler berichtet werden?</B></P>
+
+<P>Probiere es als allererstes die letzte CVS-Version, da dein Problem möglicherweise
+schon gelöst ist. CVS-Anweisungen können am unteren Ende
+<A HREF="http://www.mplayerhq.hu/homepage/dload.html">dieser Seite</A> oder im
+README gefunden werden. Wenn dies nicht hilft, sollte in der
+<A HREF="documentation.html#known_bugs">Liste der bekannten Fehler</A> und dem Rest der Dokumentationen
+nachgesehen werden. Wenn dein Problem nicht bekannt ist oder durch unsere
+Anweisungen nicht gelöst werden kann, dann berichte über den Fehler:</P>
+
+<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. <B>MPlayer</B> ist Gemeinschaftsarbeit,
+also wird es vielleicht mehrere interessierte Leute geben. Es kommt auch teilweise vor,
+dass derselbe Fehler von anderen Benutzern erlebt wurde, die bereits eine Lösung
+zur Umgehung des Problems haben (sogar bei einem Fehler im <B>MPlayer</B> Code).</P>
+
+<P>Bitte beschreibe dein Problem so detailiert wie möglich.
+Dazu gehört eine kleine Detektivarbeit um die Umstände unter denen das Problem auftritt
+einzuengen. Tritt der Fehler nur in bestimmten Situationen auf? Ist er abhängig von
+der Datei oder dem Dateityp? Tritt er nur mit einem Codec oder mit allen auf?
+Tritt er mit allen Ausgabetreibern auf? Je mehr Information zur Verfügung gestellt werden,
+um so besser stehen die Chance, dass das Problem gelöst werden wird. Es sollte nicht vergessen
+werden, auch die wertvollen unten angeforderten Informationen miteinzubeziehen, ansonsten
+ist es wahrscheinlich unmöglich eine Diagnose des Fehlers zu erstellen.</P>
+
+<P>Ein exzellenter und gut geschriebener Führer, wie Fragen in öffentlichen Foren
+beantwortet werden sollen ist 
+<A HREF="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask
+Questions The Smart Way</A> von Eric S. Raymond. Falls diesen Richtlinien gefolgt wird,
+sollte alles gut gehen. Bitte versteht, dass wir alle den Mailinglisten freiwillig in
+unserer Freizeit folgen. Wir sind sehr beschäftigt und können nicht garantieren,
+dass eine Lösung oder bloss eine Antwort zum beschriebenen Problem kommen wird.</P>
 
 <P><B>Wo sollen Fehler berichtet werden?</B></P>
 
@@ -39,14 +64,6 @@ zu folgen und <B>keine HTML Mails</B> zu irgendeiner unserer Listen zu senden.
 Man wird dabei bloss ignoriert oder von der Liste verstossen. Es sei auch darauf hingewiesen,
 keine individuellen Kopien (CC) versandt werden. Es ist also eine gute Idee sich anzumelden,
 wenn man auch seine Antwort erhalten will.</P>
-
-<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. <B>MPlayer</B> ist Gemeinschaftsarbeit,
-also wird es vielleicht mehrere interessierte Leute geben.
-Es kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzern erlebt wurde, die bereits eine Lösung
-zur Umgehung des Problems haben (sogar bei einem Fehler im <B>MPlayer</B> Code).</P>
-
-<P>Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
-nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
 <P><B>Was soll berichtet werden?</B></P>
 
@@ -118,7 +135,7 @@ Die Ausgabe kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] [Dateiname] &amp;&gt; mplayer.log</CODE></P>
   
-<P><B>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
+<P>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
 lade die Datei bitte auf <A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
 
 <P>Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
@@ -192,8 +209,8 @@ Antworten erhalten.<BR><BR>
 Aber sei gewarnt: Wenn du Newbiefragen oder Fragen welche hier beantwortet werden schickst, 
 wirst du sofort gebannt anstatt eine Antwort zu erhalten.<BR>
 Also ärgere uns nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
-du dich wie ein Advanced-MPlayer-User oder Entwickler fühlst. Wenn du wirklich ein Advanced-User 
-bist sollte es kein Problem für dich sein zu subscriben...</P>
+du dich wie ein erfahrener MPlayer Benutzer oder Entwickler fühlst. Wenn du wirklich ein erfahrener Benutzer 
+bist sollte es kein Problem für dich sein dich anzumelden...</P>
 
 </BODY>
 </HTML>

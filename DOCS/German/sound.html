@@ -2,13 +2,14 @@
 <HTML>
 
 <HEAD>
-<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+  <TITLE>Sound - MPlayer - The Movie Player for Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY>
 
-<P><B><A NAME=2.3.2>2.3.2. Audio Ausgabe-Geräte</A></B></P>
+<P><B><A NAME="audio">2.3.2. Audio Ausgabe-Geräte</A></B></P>
 
 <P><B>MPlayer</B>s Audio-Interface wird <I>libao2</I> genannt. Es enthält
 zur Zeit diese Treiber:</P>
@@ -46,7 +47,7 @@ Es <B>kann</B> vielleicht eine Weile dauern, bis du die optimale Einstellung hat
 ansonsten wirst du weder Video noch Ton haben.</P>    
 
 
-<P><B><A NAME=2.3.2.1>2.3.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
+<P><B><A NAME="experiences">2.3.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
 
 <TABLE BORDER=0 WIDTH=100%>
   <TR><TD COLSPAN=3><B>VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD></TR>
@@ -110,7 +111,7 @@ ansonsten wirst du weder Video noch Ton haben.</P>
   <LI>Wenn der sound während der Wiedergabe von CD-ROM "klickende" Geräusche
     verursacht, schalte die Interupt-Unmaskierung ein, zum Beispiel
     <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>).
-    Dies ist allgemein besser und wird in der <A HREF="cd-dvd.html#4.1">CD-ROM Sektion</A> genauer beschrieben.</LI>
+    Dies ist allgemein besser und wird in der <A HREF="cd-dvd.html#drives">CD-ROM Sektion</A> genauer beschrieben.</LI>
   <LI>Von einer Verwendung der Soundkarte mit anderen Anwendungen wie XMMS <B>wird stark abgeraten</B>!
     Wenn die andere Anwendung ESD verwendet, starte <B>MPlayer</B> mit der Option <CODE>-vo sdl:esd</CODE>
     um beide Soundausgaben zu kombinieren! Die Option <CODE>-vo sdl:esd</CODE> könnte auch verwendet
@@ -120,7 +121,7 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 </UL>
 
 
-<P><B><A NAME="2.3.2.2>2.3.2.2. Audio Plugins</A></B></P>
+<P><B><A NAME="plugins">2.3.2.2. Audio Plugins</A></B></P>
 
 <P><B>MPlayer</B> hat Unterstützung für Audio Plugins. Audio Plugins können 
 benutzt werden, um die Einstellungen der Audio-Daten zu ändern bevor der Ton die
@@ -146,7 +147,7 @@ Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.</P>
 <P>Momentan können Audio-Plugins nicht im <B>MEncoder</B> verwendet werden.</P>
           
            
-<P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</A></B></P>
+<P><B><A NAME="resample">2.3.2.2.1. Up/Downsampling</A></B></P>
 
 <P><B>MPlayer</B> unterstützt vollständiges up/downsampling von Audiostreams.
 Dieses Plugin kann verwendet werden, wenn man eine Soundkarte mit fester Frequenz
@@ -164,7 +165,7 @@ Die Skalierung führt dazu, dass der Audio- und Video-Stream in Zeitlupe wiederge
 werden, zusätzlich zu den Audioverzerrungen.</P>
 
 
-<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound Decodierung</A></B></P>
+<P><B><A NAME="surround_decoding">2.3.2.2.2. Surround Sound Decodierung</A></B></P>
 
 <P><B>MPlayer</B> hat ein Audio-Plugin das matrix codierten Surround Sound decodieren kann.
 Dolby Surround ist ein Beispiel eines matrix codierten Formats.
@@ -175,7 +176,7 @@ Um dieses Feature zu benutzen, brauchst du eine Soundkarte mit mindestens 4 Kanä
 &nbsp;&nbsp;<CODE>mplayer medium.avi -aop list=surround</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample Format Konvertierer</A></B></P>
+<P><B><A NAME="format">2.3.2.2.3. Sample Format Konvertierer</A></B></P>
 
 <P>Wenn deine Soundkarte keinen signed 16bit <CODE>int</CODE> Datentyp unterstützt, kann dieses
 Plugin benutzt werden um das Format in eines zu ändern, das deine Soundkarte versteht.
@@ -189,7 +190,7 @@ nicht die Samplefrequenz oder die Anzahl Kanäle ändert.</P>
 list=format:format=&lt;required output format&gt;</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Verzögerung</A></B></P>
+<P><B><A NAME="delay">2.3.2.2.4. Verzögerung</A></B></P>
   
 <P>Dieses Plugin verzögert den Ton und ist als Beispiel gedacht, wie man neue Plugins 
 schreibt. Es kann für nichts sinnvolles aus der Anwenderperspektive verwendet werden
@@ -197,7 +198,7 @@ und ist hier nur aus Gründen der Vollständigkeit erwähnt. Verwende dieses Plugin
 wenn du kein Entwickler bist.</P>
 
 
-<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software Lautstärkeregelung</A></B></P>
+<P><B><A NAME="volume">2.3.2.2.5. Software Lautstärkeregelung</A></B></P>
 
 <P>Dieses Plugin ist ein Software-Ersatz für die Lautstärkereglung und
 kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann
@@ -231,7 +232,7 @@ in Betracht gezogen werden.</P>
 list=volume:softclip</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
+<P><B><A NAME="extrastereo">2.3.2.2.6. Extrastereo</A></B></P>
 
 <P>Dieses Plugin erhäht (linear) die Differenz zwischen dem linken und rechten
 Kanal (wie das XMMS Extrastereo-Plugin), was zum Teil zu "live"-Effekten
@@ -247,7 +248,7 @@ auf 2.5 gestellt ist. Wenn man den Wert auf 0.0 setzt, erhält man einen Mono-Ton
 wenn man den Wert auf -1.0 setzt, wird der linke und rechte Kanal vertauscht.</P>
 
 
-<P><B><A NAME=2.3.2.2.7>2.3.2.2.7. Lautstärke Normalisierer</A></B></P>
+<P><B><A NAME="normalizer">2.3.2.2.7. Lautstärke Normalisierer</A></B></P>
 
 <P>Dieses Plugin maximiert die Lautstärke ohne den Ton zu verzerren.</P>
 
@@ -255,7 +256,7 @@ wenn man den Wert auf -1.0 setzt, wird der linke und rechte Kanal vertauscht.</P
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.8>2.3.2.2.8. Surround</A></B></P>
+<P><B><A NAME="surround">2.3.2.2.8. Surround</A></B></P>
 
 <P>Jemand sollte dies mal dokumentieren, irgendwann.</P>
 

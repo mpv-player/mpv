@@ -19,10 +19,10 @@ mencoder \- Movie Encoder für Linux
 .RB [globale\ Optionen]\ {\fIDateigruppe\ mit\ Optionen\fP}\ [gruppenspezifische\ Optionen]
 .br
 .B mplayer
-.RB [dvd|vcd|tv|cdda]://[Titel]\ [Optionen]
+.RB [dvd|vcd|tv|cdda|cddb]://[Titel]\ [Optionen]
 .br
 .B mplayer
-.RB [mms|mmst|http|http_proxy|rtp]://URL[:Port]\ [Optionen]
+.RB [mms|mmst|http|http_proxy|rtp|rtps]://[user]:[passwd@]URL[:Port]\ [Optionen]
 .br
 .B mencoder
 .RB [Optionen]\ [\fIDatei\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ Datei]
@@ -33,7 +33,7 @@ mencoder \- Movie Encoder für Linux
 .SH "BESCHREIBUNG"
 .I mplayer
 ist ein Filmspieler für LINUX (läuft auf vielen anderen Unix-Varianten und nicht-x86
-CPUs, siehe Dokumentation). Er spielt die meisten MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV,
+CPUs, siehe Dokumentation). Er spielt die meisten MPEG/VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ Dateien, unterstützt von vielen eingebauten, XAnim und
 Win32 DLL Codecs. Es lassen sich VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 und sogar WMV Filme
 betrachten (ohne die avifile-Bibliothek).
@@ -41,7 +41,7 @@ betrachten (ohne die avifile-Bibliothek).
 Ein anderes grossartiges Feature von mplayer ist die enorme Auswahl an unterstützten Ausgabetreibern.
 Er unterstützt X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB. Es können aber auch GGI,
 SDL (und alle davon unterstützen Treiber), VESA (auf jeder VESA kompatiblen Karte, sogar ohne X11!)
-und einige hardwarenahen kartenspezifische Treiber (für Matrox, 3Dfx und Radeon) benutzt werden!
+und einige hardwarenahen kartenspezifische Treiber (für Matrox, 3Dfx und ATI) benutzt werden!
 .br
 Die meisten davon unterstützen Software- oder Hardware-Skalierung, so dass die Filme im Vollbild
 genossen werden können. MPlayer unterstützt auch die Wiedergabe über einige Hardware
@@ -49,8 +49,10 @@ MPEG-Dekodierkarten, wie die Siemens DVB, DXR2 und DXR3/Hollywood+!
 
 MPlayer besitzt ein onscreen display (OSD) für Statusinformationen, hübsche, grosse, geglättete
 und schattierte Untertitel mit europäischen/ISO 8859-1,2 (ungarisch, englisch, tschechisch, etc),
-kyrillische und koreanische Schriften werden zusammen mit 10 Untertitel-Formaten unterstützt (VobSub,
-MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle und unser eigenes: MPsub).
+kyrillische und koreanische Schriften werden zusammen mit 9 Untertitel-Formaten unterstützt
+(MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle und unser eigenes: MPsub). DVD Untertitel
+(SPU Streams, VobSub und Closed Captions) werden unterstützt.
+
 
 .B mencoder
 (MPlayer's Movie Encoder) ist ein einfacher Filmkonverter, entworfen um
@@ -58,17 +60,34 @@ von MPlayer unterstützte Formate (AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV
 in andere auf MPlayer abspielbare Formate (siehe unten) zu konvertieren. Er kann zu
 Divx4 (1, 2 oder 3 Durchldufe), XviD, Codecs der libavcodec und PCM/MP3/VBRMP3 Audio
 konvertieren. Er hat auch die Fähigkeit Streams zu kopieren, ein mächtiges Pluginsystem
-(Schneiden, Erweitern, Spiegeln, Nachbearbeiten, Drehen, Skalieren, rgb/yuv Umwandlung, etc)
-und mehr.
+(Schneiden, Erweitern, Spiegeln, Nachbearbeiten, Drehen, Skalieren, hinzufügen/entfernen
+von Rauschen, rgb/yuv Umwandlung) und mehr.
 
 .B gmplayer
 ist MPlayer mit einer grafischen Benutzeroberfläche. Er besitzt dieselben Optionen wie MPlayer.
 
 
 .SH "ALLGEMEINE HINWEISE"
+.B Es sollte auch die HTML Dokumentation überprüft werden!
+.br
 Jede "flag" Option hat ein "noflag" Gegenstück, -fs hat z.B. -nofs als Gegenteil.
 .br
-.B Es sollte auch die HTML Dokumentation überprüft werden!
+Alle Optionen können in eine Konfigurationsdatei eingetragen werden, die bei jedem
+MPlayer Start gelesen wird. Sie befindet sich in '~/.mplayer/config'. Die Einträge
+werden durch die Kommandozeilen Optionen ersetzt. Die Syntax der Konfigurationsdatei
+ist 'option=<Wert>', alles hinter '#' wird als Kommentar gezählt. Optionen ohne Werte
+können durch 'yes' oder '1' aktiviert und durch 'no' und '0' deaktiviert werden.
+Als Beispiel lässt sich '<Pfad zum MPlayerverzeichnis>/etc/example.conf' verwenden.
+
+.I BEISPIEL
+.br
+# Verwende standardmässig den Matrox Treiber.
+.br
+vo=xmga
+.br
+# Ich übe gerne den Handstand während dem Filmansehen.
+.br
+flip=yes
 
 .SH "DEMUXER/STREAM OPTIONEN"
 .TP
@@ -109,8 +128,11 @@ Verfügbare Optionen sind:
 
     speed=<n>          Stellt die Drehgeschwindigkeit der CD ein
     paranoia=<0-2>     Stellt die Paranoia Stufe ein
+                         0: deaktiviert die Überprüfung
+                         1: überprüft nur Überlappungen (standard)
+                         2: überprüft und korrigiert die alle Daten
     generic-dev=<dev>  Verwendet das angegebene Scsi-Device
-    sector-size=<n>
+    sector-size=<n>    atomic Lesegrösse
     overlap=<n>
     toc-bias           Nimmt an, dass der Anfangsoffset von
                        Track 1 als LBA 0 addressiert wird.
@@ -131,6 +153,9 @@ Erzwingt den Demuxer Typ. Es muss eine Demuxer ID, welche in demuxers.h definier
 .TP
 .B \-dumpaudio (nur MPLAYER)
 Schreibt den Audiostream in ./stream.dump (Hauptsächlich benutzbar mit mpeg/ac3).
+.TP
+.B \-passwd <Passwort> (siehe auch \-user Option!)
+Gibt das für die http Authentifizierung zu verwendende Passwort an.
 .TP
 .B \-dumpfile <Dateiname> (nur MPLAYER)
 Gibt die Datei an, in die MPlayer schreiben soll. Diese Option sollte mit \-dumpaudio/\-dumpvideo/\-dumpstream
@@ -159,9 +184,9 @@ unten gefunden werden.
 (alte DVD-Option) Aktiviert die DVD Authentifizierung über das angegebene Device.
 .TP
 .B \-dvdkey <CSS\ Schlüssel>
-(alte DVD-Option) Wenn nicht von einer DVD eingelesen wird, gibt diese Option den CSS-Schlüssel
-an, der benötigt wird um die DVD zu knacken (Der Schlüssel wird bei der Authentifizierung mit der
-DVD angegeben).
+(alte DVD-Option) Wenn eine kopierte, nicht entschlüsselte .VOB Datei decodiert wird,
+gibt diese Option den CSS-Schlüssel an, der benötigt wird um die .VOB Datei zu entschlüsseln.
+(Der Schlüssel wird bei der Authentifizierung mit der DVD via \-dvdauth angegeben).
 .TP
 .B \-dvdnav (BETA CODE)
 Erzwingt den Gebrauch der libdvdnav.
@@ -197,7 +222,8 @@ Wird verwendet, wenn von mehreren PNG- oder JPEG-Dateien dekodiert/konvertiert w
     w=<Wert>     Breite der Ausgabe (automatisch erkannt)
     h=<Wert>     Höhe der Ausgabe (automatisch erkannt)
     fps=<Wert>   fps der Ausgabe (normal: 25)
-    type=<Wert>  Typ der Eingangsdateien (verfügbare Typen: jpeg, png)
+    type=<Wert>  Typ der Eingangsdateien
+                 (verfügbare Typen: jpeg, png)
 .TP
 .B \-ni (nur .AVI)
 Erzwingt den Gebrauch des non-interleaved AVI-Parsers (repariert die Wiedergabe
@@ -206,6 +232,17 @@ einiger kaputter AVI-Dateien).
 .B \-nobps
 Benutze keine byte/Sekunde-Werte für die Ton/Bild-Synchronisation (AVI).
 Dies hilft bei einigen AVI-Dateien mit kaputtem Header.
+.TP
+.B \-rawaudio <option1:option2:...>
+Diese Option erlaubt es einem, raw Audiodateien wiederzugeben. Sie kann auch
+verwendet werden um Audio CDs widerzugeben, die nicht 44Khz 16bit Stereo sind.
+Verfügbare Optionen sind:
+
+    on                 verwendet den raw Audiodemuxer
+    channels=<Wert>    Anzahl Kanäle
+    rate=<Wert>        Rate in Samples pro Sekunde
+    samplesize=<Wert>  Samplegrösse in bytes
+    format=<Wert>      fourcc in hex
 .TP
 .B \-skipopening
 Überspringt die DVD-Eröffnung (nur DVDNAV).
@@ -230,16 +267,25 @@ Verfügbare Optionen sind:
 
     on               verwende den TV-Eingang
     noaudio          kein Ton
-    driver=<Wert>    verfügbar: dummy, v4l
-    device=<Wert>    gibt ein anderes Device an als das normale /dev/video0
-    input=<Wert>     verfügbar: television, s-video, composite, etc
-    freq=<Wert>      gibt die zu verwendende Frequenz an (z.B. 511.250)
-    outfmt=<Wert>    Ausgabeformat des Tuners (rgb32, rgb24, yv12, uyvy, i420)
+    driver=<Wert>    verfügbar: dummy, v4l, bsdbt484
+    device=<Wert>    gibt ein anderes Device an als
+                     das normale /dev/video0
+    input=<Wert>     gibt einen anderen Input als der
+                     normale 0 (Television) an
+                     (siehe Ausgabe für eine Liste)
+    freq=<Wert>      gibt die zu verwendende Frequenz
+                     an (z.B. 511.250)
+    outfmt=<Wert>    Ausgabeformat des Tuners: rgb32,
+                     rgb24, rgb16, yuy2, yv12, uyvy, i420)
     width=<Wert>     Höhe der Ausgabe
     height=<Wert>    Breite der Ausgabe
     norm=<Wert>      verfügbar: PAL, SECAM, NTSC
     channel=<Wert>   wechselt zum angegebenen Kanal
-    chanlist=<Wert>  verfügbar: us-bcast, us-cable, europe-west, europe-east, etc
+    chanlist=<Wert>  verfügbar: us-bcast, us-cable,
+                     europe-west, europe-east, etc
+.TP
+.B \-user <Name> (siehe auch \-passwd Option!)
+Gibt den für die http Authentifizierung zu verwendenden Benutzername an.
 .TP
 .B \-vcd\ <Track>
 Spielt eine Video-CD Spur vom Device anstatt von einer normalen Datei.
@@ -290,6 +336,25 @@ kann bei AVI-Dateien jedoch nicht automatisch erkannt werden. Beispiele:
 .TP
 .B \-flip
 Spiegelt das Bild vertikal.
+.TP
+.B \-lavdopts <option1:option2:...> (DEBUG CODE)
+Wenn von einem Codec der libavcodec decodiert wird, können hier Parameter
+dazu agegeben werden.
+
+.I BEISPIEL:
+    \-lavdopts bug=1
+
+Verfügbare Optionen sind:
+
+    ver=<Wert>  Fehlerspannweite:
+                 -1  wird für einige sehr kaputte
+                     Kodierer benötigt
+                  0  standard
+                  1  aggressivere Fehlererkennung
+    bug=<Wert>  umgeht Codierfehler manuell
+                  0  standard
+                  1  Problemumgehung für einige alte
+                     lavc msmpeg4v3 Dateien
 .TP
 .B \-nosound
 Spielt den Ton nicht ab / codiert keinen Ton.
@@ -366,16 +431,24 @@ Wählt den Typ der MP2/MP3-Stereoausgabe.
     Rechter Kanal  2
 .TP
 .B \-sws\ <Software\ Skaliertyp>
+.I HINWEIS:
+Siehe auch DOCS/tech/swscaler_*.txt.
+.br
 Diese Option setzt die Qualität (und damit die jeweilige Geschwindigkeit) des Softwareskalierers,
 zusammen mit der -zoom Option. Z.B. mit x11 oder anderen Ausgabetreibern, die keine 
 Hardwarebeschleunigung unterstützen. Mögliche Einstellungen sind:
 
     0 - fast bilinear (normal)
     1 - bilinear
-    2 - bicubic (beste Qualität)
-    3 - ?
-    4 - nearest neighbor (schlechte Qualität)
-    5 - area averageing Skalierungs-Unterstützung
+    2  bicubic (good quality)
+    3  experimental (?)
+    4  nearest neighbour (bad quality)
+    5  area
+    6  luma bicubic / chroma bilinear
+    7  gauss
+    8  sincR
+    9  lanczos
+   10  bicubic spline
 .TP
 .B \-vc <Name>
 Erzwingt den Gebrauch eines speziellen Videocodecs, nach dessen Name in der codecs.conf.
@@ -413,38 +486,49 @@ diesen und wann welcher benutzt wird, lies in der DivX4 Sektion  in der Dokument
 Aktiviert die/den angegebene(n) Videofilter (siehe Dokumentation!).
 Verfügbare Plugins sind:
 
-    crop[=w:h:x:y]      Schneiden
-    expand[=w:h:x:y:o]  Erweitern und OSD
-    flip                vertikale Spiegelung
-    mirror              horizontale Spiegelung
-    rotate[=<0-3>]      dreht das Bild +- 90 Grad
-    scale[=w:h]         Softwareskalierung
-    yuy2                YV12/I420 \-> YUY2
-    rgb2bgr[=swap]      RGB 24/32 <\-> BGR 24/32
-    palette             RGB/BGR 8 \-> 15/16/24/32 bpp
-    format[=fourcc]     erzwingt Bildformat für
-                        nächsten Filter
-    pp[=flags]          Nachbearbeitung (siehe \-pp)
-    lavc[=Qualität:fps] YV12\->MPEG1 (libavcodec)
-    fame                YV12\->MPEG1 (libfame)
-    dvbscale[=aspect]   optimale Skalierung für DVB\-Karten
-                        (aspect=DVB_HEIGHT*ASPECTRATIO)
-    cropdetect          erkennt schwarze Ränder
-                        (gibt crop Werte aus)
+ crop[=w:h:x:y]      Schneiden
+ rectangle[=w:h:x:y] zeigt die Schneidegrenzen
+ expand[=w:h:x:y:o]  Erweitern und OSD
+ flip                vertikale Spiegelung
+ mirror              horizontale Spiegelung
+ rotate[=<0-3>]      dreht das Bild +- 90 Grad
+ scale[=w:h]         Softwareskalierung
+ yuy2                YV12/I420 \-> YUY2
+ rgb2bgr[=swap]      RGB 24/32 <\-> BGR 24/32
+ palette             RGB/BGR 8 \-> 15/16/24/32bpp
+ format[=fourcc]     erzwingt Bildformat für
+                     nächsten Filter
+ pp[=flags]          Nachbearbeitung (siehe \-pp)
+ lavc[=Qualität:fps] YV12\->MPEG1 (libavcodec)
+ fame                YV12\->MPEG1 (libfame)
+ dvbscale[=aspect]   optimale Skalierung für DVB
+                     Karten (aspect=
+                     DVB_HEIGHT*ASPECTRATIO)
+ cropdetect[=limit]  erkennt schwarze Ränder
+                     (gibt crop Werte aus)
+ noise[=Licht[u][t][h]:Farbe[u][t][h]
+                     fügt Rauschen hinzu
+                       <0-100>  Licht
+                       <0-100>  Farbe
+                       u        einheitlich
+                       t        zeitlich
+                       a        zeitlicher
+                                Durchschnitt
+                       h        hohe Qualität
 
 .I Parameter:
-    w,h  Ausgabe Höhe/Breite
-            Wert   : w/h = Wert
-            \-1     : w/h = Originalwert (Standard)
-            0      : w/h = skalierte (aspect) w/h
-            \-Wert  : w/h = Originalwert + Wert
-    x,y  x/y Position des Untertitelbildes
-            Wert   : x/y = Wert
-            \-1     : x/y = zentriert Bild (Standard)
-    o    (de)aktiviert OSD/Untertitel Wiedergabe
-            0      : deaktiviert (Standard)
-            1      : aktiviert
-          
+ w,h  Ausgabe Höhe/Breite
+         Wert    w/h = Wert
+         \-1      w/h = Originalwert (Standard)
+         0       w/h = skalierte (aspect) w/h
+         \-Wert   w/h = Originalwert + Wert
+ x,y  x/y Position des Untertitelbildes
+         Wert    x/y = Wert
+         \-1      x/y = zentriert Bild (Standard)
+ o    (de)aktiviert OSD/Untertitel Wiedergabe
+         0       deaktiviert (Standard)
+         1       aktiviert
+       
 Durch folgenden Befehl erhält man eine Liste der verfügbaren Plugins:
 .I mplayer \-vop help
 
@@ -452,6 +536,12 @@ Durch folgenden Befehl erhält man eine Liste der verfügbaren Plugins:
 .B \-x\ <x> (nur MPLAYER)
 Skaliert das Bild auf Breite x (wenn eine SW/HW-Skalierung verfügbar ist). Deaktiviert die
 Berechnung des Seitenverhältnisses.
+.TP
+.B \-xvidopts <option1:option2:...>
+Gibt zusätzliche Parameter für die XviD Decodierung an.
+
+    dr2    Aktiviert die direct rendering Methode 2
+    nodr2  Deaktiviert die DR Methode 2
 .TP
 .B \-xy\ <x> (nur MPLAYER)
     x<=8  Skaliert das Bild um den Faktor <x>
@@ -508,7 +598,7 @@ Deaktiviert automatische Untertitel.
 .TP
 .B \-osdlevel\ <0\-2>
 Gibt an, in welchem Modus das OSD starten soll (0 : aus, 1 : Suche, 2: Suche+Spielzeit)
-(Standard = 2).
+(Standard = 1).
 .TP
 .B \-sid\ <0-31> (siehe auch \-slang Option!)
 Wählt und aktiviert die DVD-Untertitel Wiedergabe/Sprache über eine Nummer.
@@ -619,7 +709,7 @@ Fügt keinen Wave-Header bei. Wird für RAW PCM verwendet.
 Man erhält eine Liste und Erklärung aller verfügbaren Optionen durch folgenden Befehl:
 .I mplayer \-aahelp
 .TP
-.B \-blue_intensity <\-1000\ \-\ 1000>
+.B \-blue_intensity <\-100\ \-\ 100>
 Verändert die Intensität der blauen Anteile des Videosignals (Standard 0).
 .TP
 .B \-bpp\ <Tiefe>
@@ -648,6 +738,25 @@ es auf Karten mit sehr kleinem Videospeicher nicht funktionieren wird.
 .B \-dr
 Aktiviert "direct rendering" (nicht von allen Codecs und Videoausgaben unterstützt).
 .TP
+.B \-dxr2 <option1:option2:...>
+Diese Option wird verwendet, um den dxr2 Treiber zu kontrollieren.
+
+    overlay                aktiviert das overlay
+    overlay-ratio          stimmt das overlay ab
+    ucode=<Wert>           Pfad zum Microcode
+    norm=<Wert>            TV Norm
+    ar-mode=<Wert>         Modus des Seitenverhältnis
+    macrovision=<Wert>     Macrovision Modus
+    75ire                  aktiviert 7.5 IRE
+    bw                     s/w TV Ausgabe
+    color                  farbige TV Ausgabe
+    interlaced             interlaced TV Ausgabe
+    square/ccir601-pixel   TV Pixelmodus
+    iec958-encoded/decoded iec958 Ausgabemodus
+    mute                   deaktiviert die Soundausgabe
+    ignore-cache           verwendet keinen VGA Cache
+    update-cache           erzeugt den VGA Cache neu
+.TP
 .B \-fb\ <Device> (nur fbdev oder DirectFB)
 Gibt an, welches Framebuffer-Device verwendet werden soll. Standardmässig wird /dev/fb0 verwendet.
 .TP
@@ -672,7 +781,7 @@ unterstützen dies).
 .B \-fsmode-dontuse <0-31> (VERALTET) (siehe \-fs Option)
 Falls immer noch Vollbild-Probleme auftreten, kann diese Option getestet werden.
 .TP
-.B \-green_intensity <\-1000\ \-\ 1000>
+.B \-green_intensity <\-100\ \-\ 100>
 Verändert die Intensität der grünen Anteile des Videosignals (Standard 0).
 .TP
 .B \-hue <\-100\ \-\ 100>
@@ -722,7 +831,7 @@ xmga und xvidix Treibern.
 
 Der Bereich (0.0-1.0) gibt an, wie viel des Bildes abgeschnitten werden soll.
 .TP
-.B \-red_intensity <\-1000\ \-\ 1000>
+.B \-red_intensity <\-100\ \-\ 100>
 Verändert die Intensität der roten Anteile des Videosignals (Standard 0).
 .TP
 .B \-saturation <\-100\ \-\ 100>
@@ -877,7 +986,22 @@ Aktiviert die detaillierte Ausgabe.
 
 .SH "KONVERTIERUNGS OPTIONEN (NUR MENCODER)"
 .TP
-.B \-divx4opts <Optionen>
+.B -audio-density <1\-50>
+Anzahl Audioeinheiten pro Sekunde (standardmässig 2 für 0.5s lange Audioeinheiten).
+
+.I HINWEIS:
+Nur CBR, VBR ignoriert dies, da dabei jedes Paket in eine neue Einheit gepackt wird.
+.TP
+.B -audio-delay <0.0\-...>
+Setzt das Audioverzögerungs Feld im Header. Standard ist 0.0, negative Werte
+funktionieren nicht. Es verzögert auch nicht den Ton während der Codierung, sondern
+lässt den Player bloss die standardmässige Verzögerung sehen, was einem die -delay
+Option erspart.
+.TP
+.B -audio-preload <0.0\-2.0>
+Setzt den Zeitinterval des Audiobufferings in Sekunden (standard 0.5s).
+.TP
+.B \-divx4opts <option1:option2:...>
 Wenn zu DivX4 konvertiert wird, kann man dessen Parameter hier angeben.
 
 .I BEISPIEL:
@@ -947,7 +1071,7 @@ Verfügbare Optionen sind:
                      4=mtrh
     q=<0-9>        Qualität für VBR
                    (0-höchste, 9-schnellste)
-    aq=<value>     ?
+    aq=<Wert>      ?
     mode=<Wert>    0=stereo
                    1=joint-stereo
                    2=Doppelkanal
@@ -959,7 +1083,7 @@ Verfügbare Optionen sind:
     ratio=<1-100>  Kompressionsrate
     vol=<0-10>     Audio-Verstärkung (Eingang)
 .TP
-.B \-lavcopts <Optionen>
+.B \-lavcopts <option1:option2:...>
 Wenn man mit einem Codec von libavcodec konvertiert, kann hier dessen 
 Parameter angeben werden.
 
@@ -987,7 +1111,7 @@ Verfügbare Optionen sind:
                       (Achtung: 1kbit = 1000 bits)
                       Standard = 800k
 
-    vratetol=<value>  Angenäherte Toleranz der Dateigrösse in kbits.
+    vratetol=<Wert>   Angenäherte Toleranz der Dateigrösse in kbits.
                       (Achtung: 1kbit = 1000 bits)
                       Standard = 1024*8 kbits = 1MByte
 
@@ -1093,8 +1217,8 @@ Alle anderen Optionen können überall verwendet werden.
 Erzeugt den angegebenen Dateinamen, anstelle des normalen test.avi.
 .TP
 .B \-oac <Codecname>
-Konvertiert mit dem angegebenen Codec (Codecnamen sind von der codecs.conf).
-Siehe -oac help für eine VOLLSTÄNDIGE Liste!
+Konvertiert mit dem angegebenen Codec (siehe -oac help für eine
+vollständige Liste, es gibt keine Voreinstellung).
 
 .I BEISPIEL:
     -oac help     gibt Hilfe
@@ -1108,8 +1232,8 @@ MUSS für variable fps (asf, einige movs) und progressive Dateien (genannter Wert
 entspricht nicht dem effektiven, z.B. 29.97fps telecined mpeg) gesetzt werden.
 .TP
 .B \-ovc <Codecname>
-Konvertiert mit dem angegebenen Codec (Die Codecnamen sind von der codecs.conf).
-Siehe -ovc help für eine VOLLSTÄNDIGE Liste!
+Konvertiert mit dem angegebenen Codec (siehe -ovc help für eine
+vollständige Liste, es gibt keine Voreinstellung).
 
 .I BEISPIEL:
     -ovc help   gibt Hilfe
@@ -1135,6 +1259,17 @@ Maximale Anzahl der zu ubespringenden Frames nach einem nicht-übersprungenen
 .TP
 .B \-v, \-\-verbose
 Aktiviert die detaillierte Ausgabe.
+.TP
+.B \-vobsubout <Basisname>
+Gibt den Basisnamen für die .idx und .sub Ausgabedateien an.
+Dies deaktiviert die Untertitel Wiedergabe des encodierten Films.
+.TP
+.B \-vobsuboutid <Sprachid>
+Gibt den 2-Zeichen Ländercode für den Untertitel an. Dies überschreibt
+die von DVD oder der .ifo Datei gelesenen Werte.
+.TP
+.B \-vobsuboutindex <Index>
+Gibt den Index des Untertitels in den Ausgabedateien an. Standardmässig auf 0.
 
 
 .SH "TASTATURBEDIENUNG"
@@ -1198,10 +1333,6 @@ r und t          korrigiert die Untertitel-Position
 7 und 8          korrigiert die Sättigung
 .TP
 .B GUI Bedienung
-, und .          vorherige/nächste Datei
-.br
-graues - und +   verringert/erhöht die Lautstärke
-.br
 ENTER            startet Wiedergabe
 .br
 s                stopt Wiedergabe
@@ -1210,18 +1341,16 @@ a                über
 .br
 l                lädt Datei
 .br
-b                Skin-Browser
+c                Skin-Browser
 .br
-e                zeigt Equalizer
-.br
-p                zeigt Playliste
+p                Playliste
 .TP
 .B TV Bedienung
-h und l          vorheriger/nächster Kanal
+h und k          vorheriger/nächster Kanal
 .br
 n                ändert die Norm
 .br
-b                ändert die Kanalliste
+u                ändert die Kanalliste
 .TP
 .B DVDNAV Bedienung
 K,J,H,L          browst hoch/runter/links/rechts
@@ -1368,25 +1497,25 @@ mplayer dummy.avi -sub source.sub -dumpmpsub
 mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
 .TP
 .B Konvertierung des 2. DVD-Titels, nur gewählte Kapitel
-mencoder -dvd 2 -chapter 10-15 -o titel2.avi
+mencoder -dvd 2 -chapter 10-15 -o titel2.avi -oac copy -ovc divx4
 .TP
 .B Konvertierung des 2. DVD-Titels, neue Grösse: 640x480
-mencoder -dvd 2 -vop scale=640:480 -o titel2.avi
+mencoder -dvd 2 -vop scale=640:480 -o titel2.avi -oac copy -ovc divx4
 .TP
 .B Konvertierung des 2. DVD-Titels, neue Grösse: 512xHHH (behält Seitenverhältnis bei)
-mencoder -dvd 2 -vop scale -zoom -xy 512 -o titel2.avi
+mencoder -dvd 2 -vop scale -zoom -xy 512 -o titel2.avi -oac copy -ovc divx4
 .TP
 .B Dasselbe mit der libavcodec (MPEG4 (Divx5) Komüpression)
-mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800
+mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800 -oac copy
 .TP
 .B Konvertierung aller .jpg Dateien im aktuellen Verzeichnis
-mencoder \\*.jpg -mf on:fps=25 -o ausgabe.avi
+mencoder \\*.jpg -mf on:fps=25 -o ausgabe.avi -ovc divx4
 .TP
 .B Konvertierung vom TV-Tuner
-mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi
+mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi -ovc rawrgb
 .TP
 .B Konvertierung von einer Pipe
-rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
+rar p test-SVCD.rar | mencoder -ovc divx4 -divx4opts br=800 -ofps 24 -pass 1 -- -
 .TP
 .B Konvertierung mehrerer .vob Dateien
 cat *.vob | mencoder <options> -
