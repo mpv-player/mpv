@@ -301,7 +301,8 @@ while(!stream_eof(demuxer->stream)){
         for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
           stream_id = le2me_16(*(uint16_t*)ptr);
           ptr += sizeof(uint16_t);
-          max_bitrate = le2me_32(*(uint32_t*)ptr);
+          memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
+          max_bitrate = le2me_32(max_bitrate);
           ptr += sizeof(uint32_t);
           printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
           printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
