@@ -232,23 +232,26 @@ if you choose to use such a version, you are on your own.
 <qandaentry>
 <question><para>
 I am still having trouble compiling with SDL support. gcc says something
-about &quot;undefined reference to `SDL_EnableKeyRepeat'&quot;. What now?
+about <screen>undefined reference to SDL_EnableKeyRepeat</screen>. What now?
 </para></question>
 <answer><para>
 Where did you install the SDL library? If you installed in
 <filename class="directory">/usr/local</filename> (the default) then edit the
-top level <filename>config.mak</filename> and add &quot;-L/usr/local/lib&quot;
-after &quot;X_LIBS=&quot;. Now type <command>make</command>. You're done!
+top level <filename>config.mak</filename> and add
+<systemitem>-L/usr/local/lib</systemitem> after <systemitem>X_LIBS=</systemitem>.
+Now type <command>make</command>. You're done!
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-It doesn't compile, and it misses uint64_t inttypes.h and similar things ...
+It doesn't compile, and it misses <systemitem>uint64_t</systemitem>,
+<filename>inttypes.h</filename> and similar things ...
 </para></question>
 <answer><para>
-Copy <filename>etc/inttypes.h</filename> to the MPlayer directory
-(<command>cp etc/inttypes.h .</command>) and try again ...
+Copy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">this <filename>inttypes.h</filename></ulink>
+to <filename class="directory">/usr/local/include/</filename> or an equivalent
+place and try again ...
 </para></answer>
 </qandaentry>
 
@@ -561,7 +564,8 @@ See the <link linkend="ffmpeg">libavcodec</link> section.
 
 <qandaentry>
 <question><para>
-But configure tells me &quot;Checking for libavcodec ... no&quot;!
+But configure tells me
+<screen>Checking for libavcodec ... no</screen>
 </para></question>
 <answer><para>
 You need to get libavcodec from FFmpeg's CVS. Read the instructions in the
@@ -589,7 +593,8 @@ access any menu items!
 Are you using FVWM? Try the following:
 <orderedlist>
 <listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Set &quot;Use Applications position hints&quot; to &quot;Yes&quot;</para></listitem>
+<listitem><para>Set <systemitem>Use Applications position hints</systemitem>
+to <systemitem>Yes</systemitem></para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -678,8 +683,8 @@ documentation to see if you can improve performance.
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> dies with &quot;MPlayer interrupted by
-signal 4 in module: decode_video&quot;.
+<application>MPlayer</application> dies with
+<screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
 <answer><para>
 Try running MPlayer on the machine you compiled on. Or recompile with runtime
@@ -854,7 +859,7 @@ Try <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
-How can i play MPEG Layer 2 (mp2) audio files?
+How can I play MPEG Layer 2 (mp2) audio files?
 </para></question>
 <answer><para>
 You have to use <option>-rawaudio on:format=0x50</option>.
@@ -931,7 +936,7 @@ X Error of failed request: BadAccess (attempt to access private resource denied)
 </screen>
 </para></question>
 <answer><para>
-The &quot;tdfx&quot; driver in XFree86 4.0.2/4.0.3 had this bug. This was
+The <systemitem>tdfx</systemitem> driver in XFree86 4.0.2/4.0.3 had this bug. This was
 solved by <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621
 of the XFree86 4.1.0 CVS log</ulink>. So upgrade to XFree86 4.1.0 or later.
 Alternatively, either download (at least) DRI version 0.6 from the
@@ -987,8 +992,8 @@ but not <systemitem>xv</systemitem>!
 Try that <systemitem>x11</systemitem> target again. Now try <option>-vo x11
 -fs -zoom</option>. See the difference? No?! OK, here comes the enlightenment:
 SDL's <systemitem>x11</systemitem> target uses xv when available, you don't have
-to worry about it ... Note: you can force/disable Xv via SDL using
-<option>-forcexv</option> and <option>-noxv</option>
+to worry about it ... Note: With SDL you can force/disable Xv using
+<option>-forcexv</option> and <option>-noxv</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
