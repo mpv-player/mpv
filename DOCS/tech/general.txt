@@ -236,7 +236,7 @@ Now, go on:
 
   As in libvo (see 5.) also here are some drivers, based on the same API:
 
-statis int control(int cmd, int arg);
+static int control(int cmd, int arg);
   This is for reading/setting driver-specific and other special parameters.
   Not really used for now.
 
