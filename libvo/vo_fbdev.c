@@ -34,6 +34,7 @@ char *fb_dev_name = NULL;
 static int fb_dev_fd;
 static size_t fb_size;
 static uint8_t *frame_buffer;
+static int fb_pixel_size;
 static int fb_bpp;
 struct fb_fix_screeninfo fb_fix_info;
 struct fb_var_screeninfo fb_var_info;
@@ -162,7 +163,9 @@ static int fb_init(void)
 			return 1;
 	}
 
-	fb_bpp = fb_var_info.bits_per_pixel;
+	fb_pixel_size = fb_var_info.bits_per_pixel / 8;
+	fb_bpp = fb_var_info.red.length + fb_var_info.green.length +
+		fb_var_info.blue.length;
 	screen_width = fb_fix_info.line_length;
 	fb_size = fb_fix_info.smem_len;
 	if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
@@ -174,7 +177,8 @@ static int fb_init(void)
 	printf("fb_init: framebuffer @ %p\n", frame_buffer);
 	printf("fb_init: framebuffer size: %d bytes\n", fb_size);
 	printf("fb_init: bpp: %d\n", fb_bpp);
-	printf("fb_init: pixel per line: %d\n", screen_width / (fb_bpp / 8));
+	printf("fb_init: pixel size: %d\n", fb_pixel_size);
+	printf("fb_init: pixel per line: %d\n", screen_width / fb_pixel_size);
 	printf("fb_init: visual: %d\n", fb_fix_info.visual);
 	printf("fb_init: red: %d %d %d\n", fb_var_info.red.offset,
 			fb_var_info.red.length, fb_var_info.red.msb_right);
@@ -200,13 +204,14 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	out_width = width;
 	out_height = height;
 	pixel_format = format;
-	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * (fb_bpp / 8)))) {
+	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
 		printf("Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
 	}
 
 	if (format == IMGFMT_YV12)
-		yuv2rgb_init(fb_bpp, MODE_RGB);
+//		yuv2rgb_init(fb_pixel_size * 8, MODE_RGB);
+		yuv2rgb_init((fb_pixel_size == 4) ? 32 : fb_bpp, MODE_RGB);
 	return 0;
 }
 
@@ -215,7 +220,7 @@ static uint32_t query_format(uint32_t format)
 	if (!fb_init_done)
 		if (fb_init())
 			return 0;
-	printf("vo_fbdev: query_format(%#x): ", format);
+	printf("vo_fbdev: query_format(%#x(%.4s)): ", format, &format);
 //	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
 //		goto not_supported;
 	switch (format) {
@@ -240,11 +245,11 @@ static uint32_t query_format(uint32_t format)
 			break;
 */
 		case IMGFMT_BGR|32:
-			if (fb_bpp == 32)
+			if (fb_bpp == 24 && fb_pixel_size == 4)
 				goto supported;
 			break;
 		case IMGFMT_BGR|24:
-			if (fb_bpp == 24)
+			if (fb_bpp == 24 && fb_pixel_size == 3)
 				goto supported;
 			break;
 		case IMGFMT_BGR|16:
@@ -277,14 +282,14 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 
 	if (pixel_format == IMGFMT_YV12) {
 		for (y = 0; y < h; y++){
-			dst = next_frame + (in_width * (y0 + y) + x0) * (fb_bpp / 8);
+			dst = next_frame + (in_width * (y0 + y) + x0) * fb_pixel_size;
 			for (x = 0; x < w; x++) {
 				if (srca[x]) {
 					dst[0]=((dst[0]*srca[x])>>8)+src[x];
 					dst[1]=((dst[1]*srca[x])>>8)+src[x];
 					dst[2]=((dst[2]*srca[x])>>8)+src[x];
 				}
-				dst += fb_bpp / 8;
+				dst += fb_pixel_size;
 			}
 			src += stride;
 			srca += stride;
@@ -296,10 +301,10 @@ static uint32_t draw_frame(uint8_t *src[])
 {
 	if (pixel_format == IMGFMT_YV12) {
 		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
-				in_height, in_width * (fb_bpp / 8),
+				in_height, in_width * fb_pixel_size,
 				in_width, in_width / 2);
 	} else if ((pixel_format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
-		memcpy(next_frame, src[0], in_width * in_height * (fb_bpp / 8));
+		memcpy(next_frame, src[0], in_width * in_height * fb_pixel_size);
 	} else if ((pixel_format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
 	}
 	return 0;
@@ -310,8 +315,8 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 {
 	uint8_t *dest;
 
-	dest = next_frame + (in_width * y + x) * (fb_bpp / 8);
-	yuv2rgb(dest, src[0], src[1], src[2], w, h, in_width * (fb_bpp / 8),
+	dest = next_frame + (in_width * y + x) * fb_pixel_size;
+	yuv2rgb(dest, src[0], src[1], src[2], w, h, in_width * fb_pixel_size,
 			stride[0], stride[1]);
 	return 0;
 }
@@ -326,9 +331,9 @@ static void put_frame(void)
 
 	for (i = 0; i < in_height; i++) {
 		memcpy(frame_buffer + out_offset, next_frame + in_offset,
-				in_width * (fb_bpp / 8));
+				in_width * fb_pixel_size);
 		out_offset += screen_width;
-		in_offset += in_width * (fb_bpp / 8);
+		in_offset += in_width * fb_pixel_size;
 	}
 }
 
@@ -347,7 +352,7 @@ static void uninit(void)
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info))
 		printf("vo_fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
 	close(fb_dev_fd);
-	memset(next_frame, '\0', in_height * in_width * (fb_bpp / 8));
+	memset(next_frame, '\0', in_height * in_width * fb_pixel_size);
 	put_frame();
 	if (vt_active >= 0)
 		ioctl(vt_fd, VT_ACTIVATE, vt_active);
