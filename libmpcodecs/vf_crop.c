@@ -9,9 +9,15 @@
 #include "mp_image.h"
 #include "vf.h"
 
-struct vf_priv_s {
+#include "m_option.h"
+#include "m_struct.h"
+
+static struct vf_priv_s {
     int crop_w,crop_h;
     int crop_x,crop_y;
+} vf_priv_dflt = {
+  -1,-1,
+  -1,-1
 };
 
 extern int opt_screen_size_x;
@@ -91,12 +97,14 @@ static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
+    if(!vf->priv) {
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->crop_x=
     vf->priv->crop_y=
     vf->priv->crop_w=
     vf->priv->crop_h=-1;
+    } //if(!vf->priv)
     if(args) sscanf(args, "%d:%d:%d:%d", 
     &vf->priv->crop_w,
     &vf->priv->crop_h,
@@ -110,13 +118,29 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+  {"w", ST_OFF(crop_w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"h", ST_OFF(crop_h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"x", ST_OFF(crop_x), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
+  {"y", ST_OFF(crop_y), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_opts = {
+  "crop",
+  sizeof(struct vf_priv_s),
+  &vf_priv_dflt,
+  vf_opts_fields
+};
+
 vf_info_t vf_info_crop = {
     "cropping",
     "crop",
     "A'rpi",
     "",
     open,
-    NULL
+    &vf_opts
 };
 
 //===========================================================================//

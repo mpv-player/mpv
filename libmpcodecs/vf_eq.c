@@ -15,10 +15,17 @@
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
 
-struct vf_priv_s {
+#include "m_option.h"
+#include "m_struct.h"
+
+static struct vf_priv_s {
 	unsigned char *buf;
 	int brightness;
 	int contrast;
+} vf_priv_dflt = {
+  NULL,
+  0,
+  0
 };
 
 #ifdef HAVE_MMX
@@ -202,8 +209,10 @@ static int open(vf_instance_t *vf, char* args)
 	vf->put_image=put_image;
 	vf->uninit=uninit;
 	
+	if(!vf->priv) {
 	vf->priv = malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
+	}
 	if (args) sscanf(args, "%d:%d", &vf->priv->brightness, &vf->priv->contrast);
 
 	process = process_C;
@@ -214,12 +223,26 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+  {"brightness", ST_OFF(brightness), CONF_TYPE_INT, M_OPT_RANGE,-100 ,100, NULL},
+  {"contrast", ST_OFF(contrast), CONF_TYPE_INT, M_OPT_RANGE,-100 ,100, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_opts = {
+  "eq",
+  sizeof(struct vf_priv_s),
+  &vf_priv_dflt,
+  vf_opts_fields
+};
+
 vf_info_t vf_info_eq = {
 	"soft video equalizer",
 	"eq",
 	"Richard Felker",
 	"",
 	open,
-	NULL
+	&vf_opts
 };
 
