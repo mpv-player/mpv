@@ -265,6 +265,7 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 
 // AVI demuxer params:
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
+extern char *index_file_save, *index_file_load;
 extern int force_ni;
 extern int pts_from_bps;
 

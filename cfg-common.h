@@ -77,6 +77,8 @@
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
+	{"saveidx", &index_file_save, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// select audio/videosubtitle stream
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
