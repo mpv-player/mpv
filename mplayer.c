@@ -3339,12 +3339,14 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   play_tree_step = 1;
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
-  if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    eof = 1;
-  } else {
-    play_tree_iter_free(playtree_iter);
-    playtree_iter = NULL;
-  }
+  if ( playtree_iter ) {
+    if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
+     eof = 1;
+    } else {
+      play_tree_iter_free(playtree_iter);
+      playtree_iter = NULL;
+    }
+   }
 } else { // NEXT PREV SRC
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
