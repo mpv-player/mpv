@@ -7,4 +7,10 @@ mplayer for Debian
   Recommended method is running "fakeroot debian/rules binary" in the top
   directory
 
-Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Wed Aug 22 21:54:12 CEST 2001
+  In case you would like to pass some parameters to ./configure, set variable
+  DEB_BUILD_OPTIONS like that:
+
+  eyck@ghost$ DEB_BUILD_OPTIONS="--enable-streaming" fakeroot debian/rules binary
+  
+
+Dariush Pietrzak <eyck@ghost.anime.pl>  Sat Jan  5 20:28:23 CET 2002
