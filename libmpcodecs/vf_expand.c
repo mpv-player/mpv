@@ -362,10 +362,10 @@ static int open(vf_instance_t *vf, char* args){
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(exp_w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
-  {"h", ST_OFF(exp_h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
-  {"x", ST_OFF(exp_x), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
-  {"y", ST_OFF(exp_y), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
+  {"w", ST_OFF(exp_w), CONF_TYPE_INT, 0, 0 ,0, NULL},
+  {"h", ST_OFF(exp_h), CONF_TYPE_INT, 0, 0 ,0, NULL},
+  {"x", ST_OFF(exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
+  {"y", ST_OFF(exp_y), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
   {"osd", ST_OFF(osd), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
