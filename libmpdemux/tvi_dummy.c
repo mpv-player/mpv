@@ -58,11 +58,13 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_IS_VIDEO:
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_FORMAT:
-	    (int)*(void **)arg = IMGFMT_YV12;
+//	    (int)*(void **)arg = IMGFMT_YV12;
+	    *(int *)arg = IMGFMT_YV12;
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_FORMAT:
 	{
-	    int req_fmt = (int)*(void **)arg;
+//	    int req_fmt = (int)*(void **)arg;
+	    int req_fmt = *(int *)arg;
 	    if (req_fmt != IMGFMT_YV12)
 		return(TVI_CONTROL_FALSE);
 	    return(TVI_CONTROL_TRUE);
