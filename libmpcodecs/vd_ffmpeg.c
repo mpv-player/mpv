@@ -383,14 +383,19 @@ static void draw_slice(struct AVCodecContext *s,
 static int init_vo(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
+#if LIBAVCODEC_BUILD >= 4687
+    float aspect= av_q2d(avctx->sample_aspect_ratio) * avctx->width / avctx->height;
+#else
+    float aspect= avctx->aspect_ratio;
+#endif
 
-    if (avctx->aspect_ratio != ctx->last_aspect ||
+    if ( aspect != ctx->last_aspect ||
 	avctx->width != sh->disp_w ||
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", avctx->aspect_ratio);
-        ctx->last_aspect = avctx->aspect_ratio;
+	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
+        ctx->last_aspect = aspect;
 //	if(ctx->last_aspect>=0.01 && ctx->last_aspect<100)
 	if(sh->aspect==0.0)
 	    sh->aspect = ctx->last_aspect;

@@ -445,7 +445,11 @@ static int config(struct vf_instance_s* vf,
 	}
 
 	if (e && ratio > 0.1 && ratio < 10.0) {
+#if LIBAVCODEC_BUILD >= 4687
+	    lavc_venc_context->sample_aspect_ratio= av_d2q(ratio * height / width, 30000);
+#else
 	    lavc_venc_context->aspect_ratio= ratio;
+#endif
 	    mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio: %f\n", ratio);
 	} else {
 	    mp_dbg(MSGT_MENCODER, MSGL_ERR, "aspect ratio: cannot parse \"%s\"\n", lavc_param_aspect);
@@ -453,7 +457,11 @@ static int config(struct vf_instance_s* vf,
 	}
     }
     else if (lavc_param_autoaspect)
+#if LIBAVCODEC_BUILD >= 4687
+	lavc_venc_context->sample_aspect_ratio = av_d2q((float)d_width/d_height*height / width, 30000);
+#else
 	lavc_venc_context->aspect_ratio = (float)d_width/d_height;
+#endif
 
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
