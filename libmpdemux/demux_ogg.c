@@ -335,14 +335,18 @@ int demux_ogg_open(demuxer_t* demuxer) {
       if(strncmp(st->streamtype,"video",5) == 0) {
 	sh_v = new_sh_video(demuxer,ogg_d->num_sub);
 	sh_v->bih = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+	sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(st->subtype[0],st->subtype[1],
 				  st->subtype[2],st->subtype[3]);
 	sh_v->frametime = st->time_unit*0.0000001;
 	sh_v->fps = 1/sh_v->frametime;
-	sh_v->bih->biSize = st->buffersize;
 	sh_v->bih->biBitCount = st->bits_per_sample;
 	sh_v->disp_w = sh_v->bih->biWidth = st->sh.video.width;
 	sh_v->disp_h = sh_v->bih->biHeight = st->sh.video.height;
+	if(!sh_v->bih->biBitCount) sh_v->bih->biBitCount=24; // hack, FIXME
+	sh_v->bih->biPlanes=1;
+	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
 
 	ogg_d->subs[ogg_d->num_sub].samplerate= sh_v->fps;
 	n_video++;
