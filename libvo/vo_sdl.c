@@ -99,6 +99,8 @@ LIBVO_EXTERN(sdl)
 //#include "log.h"
 //#define LOG if(0)printf
 
+extern int verbose;
+
 static vo_info_t vo_info = 
 {
 	"SDL YUV overlay (SDL v1.1.7+ only!)",
@@ -221,11 +223,11 @@ static int sdl_open (void *plugin, void *name)
 	priv->fullmode = -2;
 	/* other default values */
 	#ifdef SDL_NOHWSURFACE
-		printf("SDL: using software-surface\n");
+		if(verbose) printf("SDL: using software-surface\n");
 		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT;
 		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT;
 	#else	
-		printf("SDL: using hardware-surface\n");
+		if(verbose) printf("SDL: using hardware-surface\n");
 		priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT; //SDL_HWACCEL
 		priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT; //SDL_HWACCEL
 	#endif	
@@ -388,17 +390,17 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	sdl_format = format;
         switch(format){
 		case IMGFMT_YV12:
-			printf("SDL: Using 0x%X (YV12) image format\n", format); break;
+			if(verbose) printf("SDL: Using 0x%X (YV12) image format\n", format); break;
 		case IMGFMT_IYUV:
-			printf("SDL: Using 0x%X (IYUV) image format\n", format); break;
+			if(verbose) printf("SDL: Using 0x%X (IYUV) image format\n", format); break;
 		case IMGFMT_YUY2:
-			printf("SDL: Using 0x%X (YUY2) image format\n", format); break;
+			if(verbose) printf("SDL: Using 0x%X (YUY2) image format\n", format); break;
 		case IMGFMT_UYVY:
-			printf("SDL: Using 0x%X (UYVY) image format\n", format); break;
+			if(verbose) printf("SDL: Using 0x%X (UYVY) image format\n", format); break;
 		case IMGFMT_YVYU:
-			printf("SDL: Using 0x%X (YVYU) image format\n", format); break;
+			if(verbose) printf("SDL: Using 0x%X (YVYU) image format\n", format); break;
 		case IMGFMT_I420:
-			printf("SDL: Using 0x%X (I420) image format\n", format);
+			if(verbose) printf("SDL: Using 0x%X (I420) image format\n", format);
 			printf("SDL: Mapping I420 to IYUV\n");
 			sdl_format = SDL_IYUV_OVERLAY;
 		break;	
@@ -427,7 +429,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	switch(fullscreen){
 	  case 0x01:
 	  case 0x05:
-	  	printf("SDL: setting zoomed fullscreen without modeswitching\n");
+	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		priv->windowsize.w = d_width;
 	  	priv->windowsize.h = d_height;
           	if(priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags))
@@ -435,22 +437,28 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  break;	
 	  case 0x02:
 	  case 0x03:
-	 	printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
 		priv->windowsize.w = width;
 	  	priv->windowsize.h = height;
+#ifdef SDL_NOXV	  
+	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
           	if(priv->surface = SDL_SetVideoMode (width, height, priv->bpp, priv->sdlfullflags))
 			SDL_ShowCursor(0);
+#else
+	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
+          	priv->surface=NULL;
+          	set_fullmode(priv->fullmode);
+#endif		
 	  break;		
 	  case 0x06:
 	  case 0x07:
-	 	printf("SDL: setting zoomed fullscreen with modeswitching\n");
+	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 	  	priv->windowsize.w = width;
 	  	priv->windowsize.h = height;
           	priv->surface=NULL;
           	set_fullmode(priv->fullmode);
 	  break;  
           default:
-	 	printf("SDL: setting windowed mode\n");
+	 	if(verbose) printf("SDL: setting windowed mode\n");
 	  	priv->windowsize.w = d_width;
 	  	priv->windowsize.h = d_height;
           	priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlflags);
