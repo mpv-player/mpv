@@ -319,6 +319,46 @@ codec-nek egy alacsonyabb bitrátára optimalizált verziója. Elõfordul régi és
 új RealMedia file-okban is.</P>
 
 
+<P><B><A NAME=2.2.2.6>2.2.2.6.  XViD</A></B></P>
+
+<P>Az <B>XViD</B> egy - az OpenDivX-bõl származó - video codec. A másik
+  származékot DivX4 néven ismerjük.</P>
+
+<P><B>Elõnyei</B> :
+  <UL>
+    <LI>nyitott forrás</LI>
+    <LI>az API-ja kompatibilis a DivX4-gyel így könnyen irható hozzá
+      támogatás</LI>
+    <LI>2 menetes enkódolás</LI>
+    <LI>jó minõség, ezzel egyidejûleg a DivX4-nél magasabb sebesség
+      (fordításnál a gépedre optimalizálhatod)</LI>
+  </UL>
+</P>
+
+<P><B>Hátrányai</B> :
+  <UL>
+    <LI>jelenleg nem minden DivX/DivX4 file-t dekódol helyesen</LI>
+    <LI>nem lehet egyszerre DivX4 <B>ÉS</B> XViD támogatással fordítani
+      az <B>MPlayer</B>-t. Ezt fordításkor kell eldönteni.</LI>
+    <LI>fejlesztés alatt</LI>
+  </UL>
+</P>
+
+<P><B>Installálás</B> : jelenleg csak CVS-bõl elérhetõ. Ezek a letöltési
+  utasítások :<BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid
+    login</CODE><BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co
+    xvidcore</CODE><BR>
+  &nbsp;&nbsp;<CODE>cd xvidcore/build/generic</CODE><BR>
+  &nbsp;&nbsp;<CODE>Szerkeszd át a Makefile.linux-ot a gépednek
+    megfelelõen</CODE><BR>
+  &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
+  &nbsp;&nbsp;<CODE>fordítsd újra az <B>MPlayer</B>-t a következõ opcióval :
+    --with-xvidcore=/útvonal/libcore.a</CODE><BR>
+</P>
+
+
 <P><B><A NAME=2.2.3>2.2.3.  Hogyan használj ismeretlen Win32 codec-et</A></B></P>
 
 <P><B><A NAME=2.2.3.1>2.2.3.1.  VfW</A></B></P>
