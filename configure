@@ -2772,7 +2772,7 @@ echores "$_xv"
 
 
 echocheck "XvMC"
-if test "$_x11" = yes && test "$_xv" && test "$_xvmc" != no ; then
+if test "$_x11" = yes && test "$_xv" = yes && test "$_xvmc" != no ; then
   _xvmc=no
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
@@ -2783,7 +2783,7 @@ int main(void) {
   (void) XvMCCreateContext(0,0,0,0,0,0,0);
   return 0; }
 EOF
-  cc_check $_inc_x11 $_ld_x11 $_ld_xv -lXvMC -l$_xvmclib && _xvmc=yes
+  cc_check $_inc_x11 -lXvMC -l$_xvmclib $_ld_xv $_ld_x11 && _xvmc=yes
 fi
 if test "$_xvmc" = yes ; then
   _def_xvmc='#define HAVE_XVMC 1'
@@ -5371,6 +5371,8 @@ STATIC_LIB = $_ld_static
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
+
+HAVE_XVMC_ACCEL = $_xvmc
 
 # for libavcodec:
 SRC_PATH=.
