@@ -143,7 +143,7 @@ typedef struct _avistdindex_entry {
 } avistdindex_entry;
 
 // Standard index 
-typedef struct _avistdindex_chunk {
+typedef struct __attribute((packed)) _avistdindex_chunk {
     char           fcc[4];       // ix##
     uint32_t  dwSize;            // size of this chunk
     uint16_t wLongsPerEntry;     // must be sizeof(aIndex[0])/sizeof(DWORD)
