@@ -46,7 +46,7 @@ die () {
   echo "Error: $@" >&2
   echo >&2
   rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
-  echo "Check "$TMPLOG" if you do not understand why it failed."
+  echo "Check \"$TMPLOG\" if you do not understand why it failed."
   exit 1
 }
 
