@@ -30,6 +30,7 @@ static uint32_t mach64_ram_size = 0;
 static uint32_t mach64_buffer_base[10][3];
 static int num_mach64_buffers=-1;
 static int supports_planar=0;
+static int supports_lcd_v_stretch=0;
 
 pciinfo_t pci_info;
 static int probed = 0;
@@ -261,7 +262,7 @@ static int mach64_get_vert_stretch(void)
     int ret;
     int yres= mach64_get_yres();
 
-//FIXME check for mobility & co
+    if(!supports_lcd_etch) return 1<<16;
 
     lcd_index= INREG(LCD_INDEX);
     
@@ -282,7 +283,7 @@ static int mach64_get_vert_stretch(void)
     
     OUTREG(LCD_INDEX, lcd_index);
     
-    if(__verbose>VERBOSE_LEVEL) printf("[mach64] vertical stretching factor= %d\n", ret);
+    if(__verbose>0) printf("[mach64] vertical stretching factor= %d\n", ret);
     
     return ret;
 }
@@ -471,7 +472,15 @@ int vixInit(void)
   }
   if(supports_planar)	printf("[mach64] Planar YUV formats are supported :)\n");
   else			printf("[mach64] Planar YUV formats are not supported :(\n");
-
+  
+  if(   mach64_cap.device_id==DEVICE_ATI_RAGE_MOBILITY_P_M
+     || mach64_cap.device_id==DEVICE_ATI_RAGE_MOBILITY_P_M2
+     || mach64_cap.device_id==DEVICE_ATI_RAGE_MOBILITY_L
+     || mach64_cap.device_id==DEVICE_ATI_RAGE_MOBILITY_L2)
+         supports_lcd_v_stretch=1;
+  else
+         supports_lcd_v_stretch=0;
+  
   reset_regs();
   mach64_vid_make_default();
 
@@ -717,6 +726,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     dest_h = config->dest.h;
     besr.fourcc = config->fourcc;
     ecp = (INPLL(PLL_VCLK_CNTL) & PLL_ECP_DIV) >> 4;
+    if(__verbose>0) printf("[mach64] ecp: %d\n", ecp);
     v_inc = src_h * mach64_get_vert_stretch();
     
     if(mach64_is_interlace()) v_inc<<=1;
