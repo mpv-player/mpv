@@ -25,8 +25,8 @@ Requirements:
 
 
 Before you start...
-Unless you know what are you doing, consult DOCS/HTML/en/devices.html#video-dev
-to see which driver to use with your video card to get the best quality and
+Unless you know what are you doing, consult DOCS/HTML/en/video.html to see
+which driver to use with your video card to get the best quality and
 performance. Most cards require special drivers not included with XFree86 to
 drive their 2-D video acceleration features like YUV and scaling.
 
@@ -36,7 +36,7 @@ A quick and incomplete list of recommendations:
 - 3dfx Voodoo3/Banshee: Get XFree86 4.2.0+ for Xv or use the tdfxfb driver.
 - nVidia cards: Get the X11 driver from www.nvidia.com for Xv support.
 - NeoMagic cards: Get an Xv capable driver from our homepage as described in
-  DOCS/HTML/en/devices.html#video-dev.
+  DOCS/HTML/en/video.html.
 
 Without accelerated video even an 800MHz P3 may be too slow to play DVDs.
 
