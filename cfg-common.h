@@ -47,7 +47,7 @@
 #ifdef HAVE_AF_INET6
 	{"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else
-	{"prefer-ipv6", "MPlayer was compiled without IPv6 support\n", CONF_TYPE_PRINT, 0, 0, NULL},
+	{"prefer-ipv6", "MPlayer was compiled WITHOUT IPv6 support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
 #else
