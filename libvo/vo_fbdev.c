@@ -1350,55 +1350,11 @@ static uint32_t preinit(const char *arg)
     return(-1);
 }
 
-#ifdef HAVE_PNG
-static int fbdev_screenshot(void)
-{
-    uint32_t i;
-    uint8_t *ptrs[fb_vinfo.yres];
-    if(video_out_png.preinit(NULL)) 
-    {
-	printf("\nvo_fbdev: can't preinit vo_png\n");
-	return 1;
-    }
-    if(!video_out_png.control(VOCTRL_QUERY_FORMAT, &dstFourcc))
-    {
-	printf("\nvo_fbdev: vo_png doesn't support: %s fourcc\n",vo_format_name(dstFourcc));
-	return 1;
-    }
-    if(video_out_png.config(fb_vinfo.xres,
-			    fb_vinfo.yres,
-			    fb_vinfo.xres,
-			    fb_vinfo.yres,
-			    0,NULL,dstFourcc,NULL))
-    {
-	printf("\nvo_fbdev: can't configure vo_png\n");
-	return 1;
-    }
-    ptrs[0] = L123123875;
-    for(i=1;i<fb_vinfo.yres;i++)
-		ptrs[i] = ptrs[i-1]+fb_line_len;
-    if(video_out_png.draw_frame(ptrs))
-    {
-	printf("\nvo_fbdev: vo_png: error during dumping\n");
-	return 1;
-    }
-    
-    video_out_png.uninit();
-    if(verbose) printf("\nvo_fbdev: png output has been created\n");
-    return 0;
-}
-#endif
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
-#ifdef HAVE_PNG
-  case VOCTRL_SCREENSHOT:
-    return fbdev_screenshot();
-    break;
-#endif
   }
   return VO_NOTIMPL;
 }

@@ -946,74 +946,11 @@ static uint32_t preinit(const char *arg)
   return pre_init_err;
 }
 
-#ifdef HAVE_PNG
-static int vesa_screenshot(const char *fname)
-{
-    uint32_t i,n;
-    uint8_t *ptrs[video_mode_info.YResolution];
-    if(video_out_png.preinit(NULL)) 
-    {
-	printf("\nvo_vesa: can't preinit vo_png\n");
-	return 1;
-    }
-    if(!video_out_png.control(VOCTRL_QUERY_FORMAT, &dstFourcc))
-    {
-	printf("\nvo_vesa: vo_png doesn't support: %s fourcc\n",vo_format_name(dstFourcc));
-	return 1;
-    }
-    if(video_out_png.config(HAS_DGA()?video_mode_info.XResolution:dstW,
-			    HAS_DGA()?video_mode_info.YResolution:dstH,
-			    HAS_DGA()?video_mode_info.XResolution:dstW,
-			    HAS_DGA()?video_mode_info.YResolution:dstH,
-			    0,NULL,dstFourcc,NULL))
-    {
-	printf("\nvo_vesa: can't configure vo_png\n");
-	return 1;
-    }
-    n = HAS_DGA()?video_mode_info.YResolution:dstH;
-    for(i=0;i<n;i++)
-		ptrs[i] = &dga_buffer[(HAS_DGA()?video_mode_info.XResolution:dstW)*i*PIXEL_SIZE()];
-    if(video_out_png.draw_frame(ptrs))
-    {
-	printf("\nvo_vesa: vo_png: error during dumping\n");
-	return 1;
-    }
-    
-    video_out_png.uninit();
-    if(verbose) printf("\nvo_vesa: png output has been created\n");
-    return 0;
-}
-
-
-static char _home_name[FILENAME_MAX + 1];
-static char * __get_home_filename(const char *progname)
-{
-    char *p = getenv("HOME");
-
-    if (p == NULL || strlen(p) < 2) {
-	struct passwd *psw = getpwuid(getuid());
-	if (psw != NULL) p = psw->pw_dir;
-    }	
-
-    if (p == NULL || strlen(p) > FILENAME_MAX - (strlen(progname) + 4))
-	p = "/tmp";
-
-    strcpy(_home_name, p);
-    strcat(_home_name, "/.");
-    return strcat(_home_name, progname);
-}
-#endif
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
-#ifdef HAVE_PNG
-  case VOCTRL_SCREENSHOT:
-    return vesa_screenshot(__get_home_filename("mplayer_vesa_dump.png"));
-    break;
-#endif
   }
   return VO_NOTIMPL;
 }
