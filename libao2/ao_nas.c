@@ -1,3 +1,17 @@
+/*
+ * NAS output plugin for mplayer
+ *
+ * based on the libaudiooss parts rewritten by me, which were
+ * originally based on the NAS output plugin for xmms.
+ *
+ * xmms plugin by Willem Monsuwe
+ * adapted for libaudiooss by Jon Trulson
+ * further modified by Erik Inge Bolsø
+ * largely rewritten and used for this
+ * plugin by Tobias Diedrich
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -134,7 +148,7 @@ static AuBool error_handler(AuServer* aud, AuErrorEvent* ev)
 {
 	char s[100];
 	AuGetErrorText(aud, ev->error_code, s, 100);
-	fprintf(stderr,"libaudiooss: error [%s]\n"
+	fprintf(stderr,"ao_nas: error [%s]\n"
 		"error_code: %d\n"
 		"request_code: %d\n"
 		"minor_code: %d\n",
