@@ -476,8 +476,7 @@ void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
     return;
 }
 
-
-/* ---------------  4x4 pixel YUV block fillers (CVID) ----------------- */
+/* ---------------  4x4 pixel YUV block fillers [CVID] ----------------- */
 
 typedef struct
 {
@@ -499,7 +498,7 @@ typedef struct
     image->planes[1][((x)>>1)+((y)>>1)*image->stride[1]]=cmap2x2->clr1_0;\
     image->planes[2][((x)>>1)+((y)>>1)*image->stride[2]]=cmap2x2->clr1_1;
 
-void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
+void XA_2x2_OUT_1BLK_Convert(unsigned char *image_p, unsigned int x, unsigned int y,
     unsigned int imagex, XA_2x2_Color *cmap2x2)
 {
     xacodec_image_t *image=(xacodec_image_t*)image_p;
@@ -515,7 +514,7 @@ void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y
     return;
 }
 
-void XA_2x2_OUT_4BLKS_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
+void XA_2x2_OUT_4BLKS_Convert(unsigned char *image_p, unsigned int x, unsigned int y,
     unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
     XA_2x2_Color *cm3)
 {
@@ -534,9 +533,9 @@ void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 
     switch(blks){
     case 1:
-	return (void*) XA_2x2_OUT_1BLK_clr8;
+	return (void*) XA_2x2_OUT_1BLK_Convert;
     case 4:
-	return (void*) XA_2x2_OUT_4BLKS_clr8;
+	return (void*) XA_2x2_OUT_4BLKS_Convert;
     }
 
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Unimplemented: YUV2x2_Blk_Func(image_type=%d  blks=%d  dith=%d)\n",image_type,blks,dith_flag);
@@ -569,7 +568,7 @@ void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
     return((void*)XA_YUV_2x2_clr);
 }
 
-/* -------------------- whole YV12 frame converter ------------------- */
+/* -------------------- whole YUV frame converters ------------------------- */
 
 typedef struct
 {
@@ -592,7 +591,11 @@ typedef struct
     long	*YUV_VG_tab;
 } YUVTabs;
 
-//  Here's are the YUV 16 1 1  routines.
+YUVBufs jpg_YUVBufs;
+YUVTabs def_yuv_tabs;
+
+/* -------------- YUV 4x4 1x1 1x1  [Indeo 3,4,5] ------------------ */
+
 void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
@@ -653,15 +656,14 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
     return;
 }
 
-/* used by Indeo 3,4,5 */
 void *XA_YUV1611_Func(unsigned int image_type)
 {
 //    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
     return((void *)XA_YUV1611_Convert);
 }
 
+/* -------------- YUV 4x1 1x1 1x1 (4:1:1 ?) [???] ------------------ */
 
-/* YUV 41 11 11 (4:1:1) routines */
 void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
@@ -671,15 +673,14 @@ void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned in
     return;
 }
 
-
 void *XA_YUV411111_Func(unsigned int image_type)
 {
 //    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);
     return((void*)XA_YUV411111_Convert);
 }
 
+/* --------------- YUV 2x2 1x1 1x1 (4:2:0 aka YV12) [3ivX,H263] ------------ */
 
-/* input frame format:  YUV 4:2:0 (YV12) */
 void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs, unsigned int map_flag,
     unsigned int *map, XA_CHDR *chdr)
@@ -710,7 +711,6 @@ if(i_x==image->width && i_y==image->height){
     image->stride[1]=image->stride[2]=i_x/2; // yuv->uv_w
 } else {
     int y;
-//    printf("partial YV12 not implemented!!!!!!\n");
     for(y=0;y<i_y;y++)
 	memcpy(image->planes[0]+y*image->stride[0],yuv->Ybuf+y*i_x,i_x);
     i_x>>=1; i_y>>=1;
@@ -722,15 +722,10 @@ if(i_x==image->width && i_y==image->height){
     return;
 }
 
-/* used by H263,3ivX */
-/* YUV 22 11 11 (4:2:2) routines */
 void *XA_YUV221111_Func(unsigned int image_type)
 {
 //    XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
     return((void *)XA_YUV221111_Convert);
 }
-
-YUVBufs jpg_YUVBufs;
-YUVTabs def_yuv_tabs;
 
 /* *** EOF XANIM *** */
