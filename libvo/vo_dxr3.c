@@ -1066,7 +1066,7 @@ static overlay_t *overlay_init(int dev)
     if(!o)
 	return NULL;
 
-    memset(o,sizeof(overlay_t),0);
+    memset(o,0,sizeof(overlay_t));
 
     o->dev = dev;
     o->xres = 1280; o->yres=1024; o->xcorr=1000;
