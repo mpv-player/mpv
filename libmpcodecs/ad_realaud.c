@@ -295,7 +295,7 @@ static int load_syms_mac(char *path)
     raDecode = load_one_sym_mac("RADecode", connID);
     raFlush = load_one_sym_mac("RAFlush", connID);
     raFreeDecoder = load_one_sym_mac("RAFreeDecoder", connID);
-    raGetFlavorProperty = load_one_sym_mac("\RAGetFlavorProperty", connID);
+    raGetFlavorProperty = load_one_sym_mac("RAGetFlavorProperty", connID);
     raOpenCodec = load_one_sym_mac("RAOpenCodec", connID);
     raOpenCodec2 = load_one_sym_mac("RAOpenCodec2", connID);
     raInitDecoder = load_one_sym_mac("RAInitDecoder", connID);
