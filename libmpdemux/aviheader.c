@@ -62,7 +62,7 @@ while(1){
       if(!demuxer->movi_start) demuxer->movi_start=stream_tell(demuxer->stream);
       demuxer->movi_end=stream_tell(demuxer->stream)+len;
       mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
-      if(demuxer->stream->end_pos) demuxer->movi_end=demuxer->stream->end_pos;
+      if(demuxer->stream->end_pos>demuxer->movi_end) demuxer->movi_end=demuxer->stream->end_pos;
       if(index_mode==-2 || index_mode==2 || index_mode==0)
         break; // reading from non-seekable source (stdin) or forced index or no index forced
       len=(len+1)&(~1);
@@ -212,6 +212,7 @@ while(1){
 	  break;
         case mmioFOURCC('D', 'I', 'V', 'X'):
         case mmioFOURCC('d', 'i', 'v', 'x'):
+        case mmioFOURCC('D', 'X', '5', '0'):
           idxfix_divx=2; // we can fix keyframes only for divx coded files!
 	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 4 video\n");
 	  break;
