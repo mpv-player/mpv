@@ -4,7 +4,7 @@
 	Copyright 2000 Eugene Kuznetsov  (divx@euro.ru)
 
 *********************************************************/
-
+#include "config.h"
 #include "guids.h"
 #include "interfaces.h"
 #include "registry.h"
@@ -35,7 +35,9 @@ struct _DS_VideoDecoder
 #include "DS_VideoDecoder.h"
 
 #include "../wine/winerror.h"
+#ifdef WIN32_LOADER
 #include "../ldt_keeper.h"
+#endif
 
 #ifndef NOAVIFILE_HEADERS
 #define VFW_E_NOT_RUNNING               0x80040226
@@ -97,7 +99,9 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
     this->m_iLastQuality = -1;
     this->m_iMaxAuto = maxauto;
 
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
+#endif
 
     //memset(&m_obh, 0, sizeof(m_obh));
     //m_obh.biSize = sizeof(m_obh);
@@ -327,7 +331,9 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     // crashes inside ...->Receive() fixed now?
     //
     // nope - but this is surely helpfull - I'll try some more experiments
+#ifdef WIN32_LOADER
     Setup_FS_Segment();
+#endif
 #if 0
     if (!this->m_pDS_Filter || !this->m_pDS_Filter->m_pImp
 	|| !this->m_pDS_Filter->m_pImp->vt

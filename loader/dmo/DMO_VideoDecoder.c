@@ -4,11 +4,13 @@
 	Copyright 2000 Eugene Kuznetsov  (divx@euro.ru)
 
 *********************************************************/
-
+#include "config.h"
 #include "guids.h"
 #include "interfaces.h"
 #include "registry.h"
+#ifdef WIN32_LOADER
 #include "../ldt_keeper.h"
+#endif
 
 #ifndef NOAVIFILE_HEADERS
 #include "videodecoder.h"
@@ -101,7 +103,9 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
     this->m_iLastQuality = -1;
     this->m_iMaxAuto = maxauto;
 
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
+#endif
 
     //memset(&m_obh, 0, sizeof(m_obh));
     //m_obh.biSize = sizeof(m_obh);
@@ -313,7 +317,9 @@ int DMO_VideoDecoder_DecodeInternal(DMO_VideoDecoder *this, const void* src, int
 //	return -1;
 //    }
 
+#ifdef WIN32_LOADER
     Setup_FS_Segment();
+#endif
 
     bufferin = CMediaBufferCreate(size, (void*)src, size, 0);
     result = this->m_pDMO_Filter->m_pMedia->vt->ProcessInput(this->m_pDMO_Filter->m_pMedia, 0,
@@ -500,7 +506,9 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 	break;
     }
 
+#ifdef WIN32_LOADER
     Setup_FS_Segment();
+#endif
 
 //    if(should_test)
 //	result = this->m_pDMO_Filter->m_pOutputPin->vt->QueryAccept(this->m_pDMO_Filter->m_pOutputPin, &this->m_sDestType);

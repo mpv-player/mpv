@@ -1,3 +1,4 @@
+#include "config.h"
 #include "DMO_Filter.h"
 #include "driver.h"
 #include "com.h"
@@ -19,7 +20,9 @@ void DMO_Filter_Destroy(DMO_Filter* This)
 	This->m_pMedia->vt->Release((IUnknown*)This->m_pMedia);
 
     free(This);
+#ifdef WIN32_LOADER
     CodecRelease();
+#endif
 }
 
 DMO_Filter* DMO_FilterCreate(const char* dllname, const GUID* id,
@@ -33,7 +36,9 @@ DMO_Filter* DMO_FilterCreate(const char* dllname, const GUID* id,
 	return NULL;
 
     memset(This, 0, sizeof(DMO_Filter));
+#ifdef WIN32_LOADER
     CodecAlloc();
+#endif
 
     //This->Start = DS_Filter_Start;
     //This->Stop = DS_Filter_Stop;

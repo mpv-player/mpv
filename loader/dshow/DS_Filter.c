@@ -1,3 +1,4 @@
+#include "config.h"
 #include "DS_Filter.h"
 #include "driver.h"
 #include "com.h"
@@ -7,6 +8,22 @@
 #include "win32.h" // printf macro
 
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);
+
+#ifndef WIN32_LOADER
+const GUID IID_IUnknown =
+{
+    0x00000000, 0x0000, 0x0000,
+    {0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}
+};
+const GUID IID_IClassFactory =
+{
+    0x00000001, 0x0000, 0x0000,
+    {0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}
+};
+
+HRESULT STDCALL CoInitialize(LPVOID pvReserved); 
+void STDCALL CoUninitialize(void); 
+#endif
 
 //void trapbug();
 
@@ -77,7 +94,11 @@ void DS_Filter_Destroy(DS_Filter* This)
 
     free(This);
 
+#ifdef WIN32_LOADER
     CodecRelease();
+#else
+    CoUninitialize();
+#endif
 }
 
 DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
@@ -92,7 +113,11 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     if (!This)
 	return NULL;
 
+#ifdef WIN32_LOADER
     CodecAlloc();
+#else
+    CoInitialize(0L);
+#endif
 
     This->m_pFilter = NULL;
     This->m_pInputPin = NULL;

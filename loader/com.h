@@ -1,9 +1,8 @@
 #ifndef AVIFILE_COM_H
 #define AVIFILE_COM_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
+
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #else
@@ -14,7 +13,7 @@
  * Internal functions and structures for COM emulation code.
  */
 
-#ifndef WIN32
+#if !defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32)
 
 #ifdef __cplusplus
 extern "C" {
