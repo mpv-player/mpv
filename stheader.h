@@ -13,10 +13,14 @@ typedef struct {
   int samplesize;
   int channels;
   int o_bps; // == samplerate*samplesize*channels
-  // buffers:
+  // in buffers:
   char* a_in_buffer;
   int a_in_buffer_len;
   int a_in_buffer_size;
+  // out buffers:
+  char* a_buffer;
+  int a_buffer_len;
+  int a_buffer_size;
   // win32 codec stuff:
   AVIStreamHeader audio;
   WAVEFORMATEX wf;

@@ -1,7 +1,7 @@
 // ACM audio and VfW video codecs initialization
 // based on the avifile library [http://divx.euro.ru]
 
-int init_audio_codec(sh_audio_t *sh_audio){
+int init_acm_audio_codec(sh_audio_t *sh_audio){
     HRESULT ret;
     WAVEFORMATEX *in_fmt=&sh_audio->wf;
     unsigned long srcsize=0;
