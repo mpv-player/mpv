@@ -360,9 +360,9 @@ Specify configuration file to be parsed after the default ones.
 .TP
 .B \-quiet \ \ 
 Make console output less verbose; in particular, prevents the status line
-(i.e. A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
+(i.e.\& A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
 Particularly useful on slow terminals or broken ones which do not properly
-handle carriage return (i.e. \\r).
+handle carriage return (i.e.\& \\r).
 .TP
 .B \-v, \-verbose
 Increment verbose level (more \-v means more verbosity).
@@ -397,7 +397,7 @@ Specifying \-autosync\ 0, the default, will cause frame timing to be based
 entirely on audio delay measurements.
 Specifying \-autosync\ 1 will do the same, but will subtly change the A/\:V
 correction algorithm.
-An uneven video frame rate in a movie which plays fine with \-nosound can
+An uneven video framerate in a movie which plays fine with \-nosound can
 often be helped by setting this to an integer value greater than 1.
 The higher the value, the closer the timing will be to \-nosound.
 Try \-autosync\ 30 to smooth out problems with sound drivers which do
@@ -527,7 +527,7 @@ Specify the main menu.
 Prevent MPlayer from reading key events from standard input.
 Useful when reading data from standard input.
 This is automatically enabled when \- is found on the command line.
-There are situations where you have to set it manually, e.g.
+There are situations where you have to set it manually, e.g.\&
 if you open /dev/stdin (or the equivalent on your system), use stdin
 in a playlist or intend to read from stdin later on via the loadfile or
 loadlist slave commands.
@@ -607,19 +607,17 @@ silent and vice versa).
 This option only shows an effect if the AC3 stream contains the required range
 compression information.
 .TP
-.B \-aid <id> (also see \-alang option)
-Select audio channel [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
-VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190].
-MPlayer prints the available IDs when running in verbose (\-v) mode.
+.B \-aid <id> (also see \-alang)
+Select audio channel (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127,
+VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
+MPlayer prints the available IDs when run in verbose (\-v) mode.
 When playing an MPEG-TS stream, MPlayer/MEncoder will use the first program
 (if present) with the chosen audio stream.
 .TP
-.B \-alang <two letter\ country\ code> (also see \-aid option) (DVD only)
-Works only for DVD playback.
-It selects the DVD audio language and always tries to play audio streams whose
+.B \-alang <two letter\ country\ code> (also see \-aid) (DVD only)
+Selects the DVD audio language and tries to play audio streams whose
 language matches the given code.
-For the list of available languages, use with the \-v option and look at the
-output.
+MPlayer prints a list of available languages when run in verbose (\-v) mode.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -633,7 +631,7 @@ Plays Hungarian and falls back to English if Hungarian is not available.
 .B \-audio-demuxer <number> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
 Give the demuxer ID as defined in libmpdemux/demuxer.h.
-Use \-audio-demuxer 17 to force MP3 detection.
+\-audio-demuxer 17 forces MP3.
 .TP
 .B \-audiofile <filename>
 Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
@@ -649,12 +647,12 @@ able to send content in different bitrates).
 Useful if you want to watch live streamed media behind a slow connection.
 .TP
 .B \-cdrom-device <path\ to\ device>
-Override default CD-ROM drive name /dev/\:cdrom.
+Specify the CD-ROM device (default: /dev/\:cdrom).
 .TP
 .B \-cache <kBytes>
 This option specifies how much memory (in kBytes) to use when precaching a
-file/\:URL.
-Especially useful on slow media (default is \-nocache).
+file or URL.
+Especially useful on slow media.
 .TP
 .B \-cache-min <percentage>
 Playback will start when the cache fill threshold set with this option
@@ -671,9 +669,9 @@ Available options are:
 .
 .RSs
 .IPs speed=<value>
-set CD spin speed
+Set CD spin speed.
 .IPs paranoia=<0\-2>
-set paranoia level
+Set paranoia level.
 .RSss
 0: disable checking
 .br
@@ -682,11 +680,11 @@ set paranoia level
 2: full data correction and verification
 .REss
 .IPs generic-dev=<value>
-use specified generic SCSI device
+Use specified generic SCSI device.
 .IPs sector-size=<value>
-atomic read size
+Set atomic read size.
 .IPs overlap=<value>
-force minimum overlap search during verification to <value> sectors.
+Force minimum overlap search during verification to <value> sectors.
 .IPs toc-bias
 Assume that the beginning offset of track 1 as reported in the TOC will be
 addressed as LBA\ 0.
@@ -695,12 +693,12 @@ Some Toshiba drives need this for getting track boundaries correct.
 Add <value> sectors to the values reported when addressing tracks.
 May be negative.
 .IPs (no)skip
-(never) accept imperfect data reconstruction.
+(Never) accept imperfect data reconstruction.
 .RE
 .
 .TP
 .B \-channels <number>
-Change the number of playback channels, defaults to '2' if not specified.
+Change the number of playback channels (default: 2).
 If the number of output channels is bigger than the number of input channels
 empty channels are inserted (unless mixing from mono to stereo, then the mono
 channel is repeated in both output channels).
@@ -716,7 +714,7 @@ In that case liba52 does the decoding by default and correctly downmixes the
 audio into the requested number of channels.
 .br
 .I NOTE:
-This option is honored by codecs (AC3 only) filters (surround) and ao drivers
+This option is honored by codecs (AC3 only), filters (surround) and ao drivers
 (OSS at least).
 .sp 1
 Available options are:
@@ -736,24 +734,22 @@ full 5.1
 .B \-chapter <chapter\ id>[\-<end\ chapter\ id>] (DVD only)
 Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
-Examples can be found below.
 .TP
 .B \-cookies (network only)
 Send cookies when making HTTP requests.
 .TP
 .B \-cookies-file <filename> (network only)
-Read HTTP cookies from this file.
+Read HTTP cookies from specified file (default: ~/.mozilla/ and ~/.netscape/)
+and skip reading from default locations.
 The file is assumed to be in Netscape format.
-If you use this option, MPlayer will not look for cookies in ~/.netscape/
-and ~/.mozilla/.
 .TP
 .B \-demuxer <number>
 Force demuxer type.
 Give the demuxer ID as defined in libmpdemux/demuxer.h.
-Use \-demuxer 17 to force MP3 detection.
+\-demuxer 17 forces MP3.
 .TP
 .B \-dumpaudio (MPlayer only)
-Dumps raw compressed audio stream to ./stream.dump (useful with mpeg/\:ac3).
+Dumps raw compressed audio stream to ./stream.dump (useful with MPEG/\:AC3).
 .TP
 .B \-dumpfile <filename> (MPlayer only)
 Specify which file MPlayer should dump to.
@@ -783,62 +779,60 @@ or ~/.mplayer/channels.conf as a last resort.
 .
 .TP
 .B \-dvd-device <path\ to\ device> (DVD only)
-Override default DVD device name /dev/\:dvd.
+Specify the DVD device (default: /dev/\:dvd).
 .TP
 .B \-dvdangle <angle\ id> (DVD only)
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
-Examples can be found below.
 .TP
 .B \-forceidx
-Force rebuilding of index.
-Useful for files with broken index (desyncs, etc).
-Seeking will be possible.
+Force index rebuilding.
+Useful for files with broken index (A/V desync, etc).
+This will enable seeking in files where seeking was not possible.
 You can fix the index permanently with MEncoder (see the documentation).
 .br
 .I NOTE:
-You can only use this option if the underlying media supports seeking
+This option only works if the underlying media supports seeking
 (i.e.\& not with stdin, pipe, etc).
 .TP
-.B \-fps <value>
-Override video framerate (if value is wrong/\:missing in the header) (float
-number).
+.B \-fps <float value>
+Override video framerate.
+Useful if the original value is wrong or missing.
 .TP
 .B \-frames <number>
 Play/\:convert only first <number> frames, then quit.
 .TP
 .B \-hr-mp3-seek (MP3 only)
-Hi-res mp3 seeking.
-Default is: enabled when playing from external MP3 file, as we need to seek
+Hi-res MP3 seeking.
+Enabled when playing from an external MP3 file, as we need to seek
 to the very exact position to keep A/\:V sync.
-It can be slow especially when seeking backwards \- it has to rewind to the
-beginning to find the exact frame.
+Can be slow especially when seeking backwards since it has to rewind
+to the beginning to find an exact frame position.
 .TP
 .B \-idx (also see \-forceidx)
-Rebuilds index of files if no index was found,
-thus allowing seeking.
+Rebuilds index of files if no index was found, allowing seeking.
 Useful with broken/\:incomplete downloads, or badly created files.
 .br
 .I NOTE:
-You can only use this option if the underlying media supports seeking
+This option only works if the underlying media supports seeking
 (i.e.\& not with stdin, pipe, etc).
 .TP
 .B \-ipv4-only-proxy (network only)
 Skip the proxy for IPv6 addresses.
 It will still be used for IPv4 connections.
 .TP
-.B \-loadidx <filename>
-The file name from which to read the video INDEX data, as saved by \-saveidx.
-MPlayer will read the index from filename and use this data for seeking.
-This data will override any index data contained in the AVI itself.
-Further, MPlayer won't prevent you from loading an index file generated
+.B \-loadidx <index file>
+The file from which to read the video index data saved by \-saveidx.
+This index will be used for seeking, overriding any index data
+contained in the AVI itself.
+MPlayer won't prevent you from loading an index file generated
 from a different AVI, but this is sure to cause unfavorable results.
 .br
 .I NOTE:
-This option is obsolete, because MPlayer has OpenDML support.
+This option is obsolete now that MPlayer has OpenDML support.
 .TP
 .B \-mc <seconds/frame>
-Maximum A-V sync correction per frame (in seconds).
+maximum A-V sync correction per frame (in seconds)
 .TP
 .B \-mf <option1:option2:...>
 Used when decoding from multiple PNG or JPEG files.
@@ -848,34 +842,34 @@ Available options are:
 .PD 0
 .RSs
 .IPs w=<value>
-width of the output (autodetect)
+output width (default: autodetect)
 .IPs h=<value>
-height of the output (autodetect)
+output height (default: autodetect)
 .IPs fps=<value>
-fps of the output (default: 25)
+output fps (default: 25)
 .IPs type=<value>
-type of input files (available types: jpeg, png, tga, sgi)
+input file type (available: jpeg, png, tga, sgi)
 .RE
 .PD 1
 .
 .TP
 .B \-ni (AVI only)
-Force usage of non-interleaved AVI parser (fixes playing
+Force usage of non-interleaved AVI parser (fixes playback
 of some bad AVI files).
 .TP
 .B \-nobps (AVI only)
-Do not use average byte/\:sec value for A-V sync (AVI).
+Do not use average byte/\:second value for A-V sync.
 Helps with some AVI files with broken header.
 .TP
 .B \-noextbased
-Disables filename-extension based demuxer selection.
-By default, when file type (demuxer) cannot be detected reliably
+Disables extension-based demuxer selection.
+By default, when the file type (demuxer) cannot be detected reliably
 (the file has no header or it is not reliable enough), the filename
-extension is used to select demuxer.  It always falls back to content-based
-demuxer selection.
+extension is used to select the demuxer.
+Always falls back to content-based demuxer selection.
 .TP
 .B \-passwd <password> (see \-user option too) (network only)
-Specify password for http authentication.
+Specify password for HTTP authentication.
 .TP
 .B \-prefer-ipv4 (network only)
 Use IPv4 on network connections.
@@ -895,13 +889,13 @@ Available options are:
 .PD 0
 .RSs
 .IPs on\ \ \ 
-use raw audio demuxer
+Use raw audio demuxer.
 .IPs channels=<value>
 number of channels
 .IPs rate=<value>
 rate in samples per second
 .IPs samplesize=<value>
-sample size in byte
+sample size in bytes
 .IPs bitrate=<value>
 bitrate for rawaudio files
 .IPs format=<value>
@@ -918,9 +912,9 @@ Available options are:
 .PD 0
 .RSs
 .IPs on\ \ \ 
-use raw video demuxer
+Use raw video demuxer.
 .IPs fps=<value>
-rate in frames per second, default 25.0
+rate in frames per second (default: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
 set standard image size
 .IPs w=<value>
@@ -940,24 +934,23 @@ frame size in Bytes
 .B \-rtsp-stream-over-tcp (live.com only)
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
-This option may be useful if you have a broken Internet connection that does
+This option may be useful if you have a broken internet connection that does
 not pass incoming UDP packets (see http://www.live.com/mplayer/).
 .TP
 .B \-saveidx <filename>
-Force rebuilding of INDEX and output to a separate file specified by the
-argument filename.
+Force index rebuilding and dump the index to <filename>.
 Currently this only works with AVI files.
 .br
 .I NOTE:
-This option is obsolete, because MPlayer has OpenDML support.
+This option is obsolete now that MPlayer has OpenDML support.
 .TP
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.
-Useful for playback from CD-ROM images / .VOB files with junk at the beginning.
+Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .TP
 .B \-srate <Hz>
 Selects the given output sampling rate, resampling if necessary.
-MEncoder passes this value to lame for resampling.
+MEncoder passes this value to LAME for resampling.
 .TP
 .B \-ss <time> (see \-sb option too)
 Seek to given time position.
@@ -966,9 +959,9 @@ Seek to given time position.
 .PD 0
 .RSs
 .IPs "\-ss 56"
-seeks to 56 seconds
+Seeks to 56 seconds.
 .IPs "\-ss 01:10:00"
-seeks to 1\ hour 10\ min
+Seeks to 1\ hour 10\ min.
 .RE
 .PD 1
 .
@@ -980,7 +973,8 @@ Sometimes needed to play corrupted MPEG-TS files.
 .TP
 .B \-tsprog <1\-65534>
 When playing an MPEG-TS stream, you can specify with this option which
-program (if present) you want to play. Can be used with \-vid and \-aid.
+program (if present) you want to play.
+Can be used with \-vid and \-aid.
 .
 .TP
 .B \-tsprobe <byte\ position>
@@ -1003,29 +997,30 @@ no sound
 .IPs driver=<value>
 available: dummy, v4l, v4l2, bsdbt848
 .IPs device=<value>
-Specify other device than the default /dev/\:video0.
+Specify TV device (default: /dev/\:video0).
 .IPs input=<value>
-Specify other input than the default 0 (Television) (see output for a list)
+Specify input (default: 0 (TV), see console output for available inputs).
 .IPs freq=<value>
 Specify the frequency to set the tuner to (e.g.\& 511.250).
-Not compatible with channels parameter.
+Not compatible with the channels parameter.
 .IPs outfmt=<value>
 Specify the output format of the tuner with a preset value supported by the
 V4L driver (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420) or an
 arbitrary format given as hex value.
 Try outfmt=help for a list of all available formats.
 .IPs width=<value>
-width of the output window
+output window width
 .IPs height=<value>
-height of the output window
+output window height
 .IPs fps=<value>
 framerate at which to capture video (frames per second)
 .IPs buffersize=<value>
 maximum size of the capture buffer in megabytes (default: dynamical)
 .IPs norm=<value>
-available: PAL, SECAM, NTSC. For v4l2 use the normid option below.
-.IPs normid=<value>
-v4l2 only. See MPlayer output for a list of available TV norms.
+available: PAL, SECAM, NTSC.
+For v4l2 use the normid option below.
+.IPs normid=<value> (v4l2 only)
+See console output for a list of available TV norms.
 .IPs channel=<value>
 Set tuner to <value> channel.
 .IPs chanlist=<value>
@@ -1033,22 +1028,27 @@ available: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<channel>\-<name>,<channel>\-<name>,...
 Set names for channels.
 Use _ for spaces in names (or play with quoting ;-).
-The channel names will then be written using OSD, and the commands tv_step_channel,
-tv_set_channel and tv_last_channel will then be usable using a remote (see lirc).
-Not compatible with frequency parameter.
-Warning: The channel number will then be the position in the 'channels' list,
+The channel names will then be written using OSD, and the slave commands
+tv_step_channel, tv_set_channel and tv_last_channel will be usable for
+a remote control (see LIRC).
+Not compatible with the frequency parameter.
+.br
+.I NOTE:
+The channel number will then be the position in the 'channels' list,
 beginning with 1.
-Example: use tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2, tv_set_channel TV1, etc.
+.br
+.I EXAMPLE:
+tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-set the color equalizer on the card
+Set the image equalizer on the card.
 .IPs audiorate=<value>
-set audio capture bitrate
+Set audio capture bitrate.
 .IPs forceaudio
-capture audio even if there are no audio sources reported by v4l
+Capture audio even if there are no audio sources reported by v4l.
 .IPs alsa\ 
-capture from ALSA
+Capture from ALSA.
 .IPs amode=<0\-3>
-choose an audio mode:
+Choose an audio mode:
 .RSss
 0: mono
 .br
@@ -1060,26 +1060,22 @@ choose an audio mode:
 .REss
 .IPs forcechan=<1\-2>
 By default, the count of recorded audio channels is determined automatically
-by querying the audio mode from the tv card.
-This option allows to force stereo/\:mono recording regardless of the amode
+by querying the audio mode from the TV card.
+This option allows forcing stereo/\:mono recording regardless of the amode
 option and the values returned by v4l.
-This can be used for troubleshooting when the tv card is unable to report the
+This can be used for troubleshooting when the TV card is unable to report the
 current audio mode.
 .IPs adevice=<value>
-set an audio device
-.RSss
-/dev/\:...\& for OSS
-.br
-hardware ID for ALSA
-.REss
+Set an audio device.
+<value> should be /dev/\:xxx for OSS and a hardware ID for ALSA.
+See the \-ao alsa documentation to find out how to specify the hardware ID.
 .IPs audioid=<value>
-choose an audio output of the capture card, if it has more of them
-.IPs [volume|bass|treble|balance]=<0\-65535>
-.IPs [volume|bass|treble|balance]=<0\-100>
+Choose an audio output of the capture card, if it has more than one.
+.IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
+.IPs "[volume|bass|treble|balance]=<0\-100> (v4l2)"
 These options set parameters of the mixer on the video capture card.
-They will have no effect, if your card doesn't have one.
-For v4l1, 0\-65535 is a valid range.
-For v4l2, the valid range is 0 to 100, and 50 maps to the default value of the
+They will have no effect, if your card does not have one.
+For v4l2 50 maps to the default value of the
 control, as reported by the driver.
 .IPs immediatemode=<bool>
 A value of 0 means capture and buffer audio and video together
@@ -1087,13 +1083,13 @@ A value of 0 means capture and buffer audio and video together
 A value of 1 (default for MPlayer) means to do video capture only and let the
 audio go through a loopback cable from the TV card to the soundcard.
 .IPs mjpeg
-Use hardware mjpeg compression (if the card supports it).
+Use hardware MJPEG compression (if the card supports it).
 When using this option, you do not need to specify the width and height
 of the output window, because MPlayer will determine it automatically
 from the decimation value (see below).
 .IPs decimation=<1,2,4>
 choose the size of the picture that will be compressed by hardware
-mjpeg compression:
+MJPEG compression:
 .RSss
 1: full size
     704x576    PAL
@@ -1108,25 +1104,24 @@ mjpeg compression:
     176x120    NTSC
 .REss
 .IPs quality=<0\-100>
-choose the quality of the jpeg compression
-.br
-(quality < 60 recommended for full size)
+Choose the quality of the JPEG compression
+(< 60 recommended for full size).
 .RE
 .
 .TP
-.B \-user <user name> (see \-passwd option too) (network only)
-Specify user name for http authentication.
+.B \-user <user name> (also see \-passwd) (network only)
+Specify user name for HTTP authentication.
 .TP
 .B \-user-agent <string>
-Use string as User-Agent for HTTP streaming.
+Use <string> as user agent for HTTP streaming.
 .TP
 .B \-vid <id>
-Select video channel [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
+Select video channel (MPG: 0\-15, ASF: 0\-255, MPEG-TS: 17\-8190).
 When playing an MPEG-TS stream, MPlayer/MEncoder will use the first program
 (if present) with the chosen video stream.
 .TP
 .B \-vivo <sub-options> (DEBUG CODE)
-Force audio parameters for the .vivo demuxer (for debugging purposes).
+Force audio parameters for the VIVO demuxer (for debugging purposes).
 .
 .
 .SH "OSD/SUB OPTIONS"
