@@ -28,6 +28,7 @@ LIBVO_EXTERN( x11 )
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XShm.h>
+#include <X11/extensions/dpms.h>
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
@@ -66,6 +67,8 @@ static int depth,bpp,mode;
 static XWindowAttributes attribs;
 static int X_already_started=0;
 
+static int timeout_save=0;
+static int dpms_disabled=0;
 //static int vo_dwidth,vo_dheight;
 
 #define SH_MEM
@@ -111,6 +114,7 @@ static void check_events(){
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t fullscreen,char *title,uint32_t format )
 {
  int screen;
+ int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
  char *hello=( title == NULL ) ? "X11 render" : title;
  char *name=":0.0";
@@ -138,7 +142,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    fprintf( stderr,"Can not open display\n" );
    return -1;
   }
-
  screen=DefaultScreen( mDisplay );
 
  hint.x=0;
@@ -337,6 +340,24 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
 // vo_initthread( mThread );
 
+ if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
+ {
+     BOOL onoff;
+     CARD16 state;
+     DPMSInfo(mDisplay, &state, &onoff);
+     if (onoff)
+     {
+	 printf ("Disabling DPMS\n");
+	 dpms_disabled=1;
+         DPMSDisable(mDisplay);  // monitor powersave off
+     }
+ }
+
+ XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+ if (timeout_save)                                                       
+   XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+			     // switching off screensaver
+
  return 0;
 }
 
@@ -528,9 +549,35 @@ static uint32_t query_format( uint32_t format )
 }
 
 
+
 static void
 uninit(void)
 {
+
+ int nothing;
+
+// DMPSEnable doesn't work if there isn't a DPMSQueryExtension after it.
+// XSetScreenSaver doesn't work if there isn't an XGetScreensaver after it.
+
+if (dpms_disabled)
+ {
+     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
+     {
+         printf ("Enabling DPMS\n");
+         DPMSEnable(mDisplay);  // restoring power saving settings
+	 DPMSQueryExtension(mDisplay, &nothing, &nothing);
+     }
+ }
+
+ if (timeout_save)
+ {
+     int dummy, interval, prefer_blank, allow_exp;
+     XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank, &allow_exp);
+     XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank, allow_exp); // screensaver
+     XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+ }
+
+
 #ifdef HAVE_XF86VM
         if (vidmodes!=NULL)
         {
