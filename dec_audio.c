@@ -589,7 +589,12 @@ case AFM_VORBIS: {
        }
      
      sh_audio->channels=2; // hack
+/* var. name changed in 0.13.0 (beta) (libmad/CHANGES) -- alex */
+#if (MAD_VERSION_MAJOR >= 0) && (MAD_VERSION_MINOR >= 13)
+     sh_audio->samplerate=mad_frame.header.samplerate;
+#else
      sh_audio->samplerate=mad_frame.header.sfreq;
+#endif
      sh_audio->i_bps=mad_frame.header.bitrate;
      printf(__FILE__ ":%d:mad: continuing\n", __LINE__);
      break;
