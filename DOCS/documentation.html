@@ -220,7 +220,7 @@ This codec can play <B>DivX</B> movies much faster than the Win32 DLL, and
 You'll need this to gain <B>DivX</B> playing on non-x86 machines, or want to
 gain bigger speed than the Win32 codec does.</LI>
 
-<LI>For DVD support, you'll have to compile libdvdread and libcss.
+<LI>For DVD support, you'll have to compile libdvdread and libdvdcss.
 See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
 </UL>
 
@@ -250,7 +250,16 @@ directory (relative to the <B>MPlayer</B> tree) to $HOME/.mplayer/codecs.conf.</
 
 <P><B><A NAME=1.4>1.4. What about the GUI?</A></B></P>
 
-<P>TODO</P>
+<P>The GUI is built upon GTK, so gtk (and it's devel stuff) has to be installed.
+You can build it by specifying <CODE>--enable-new-gui</CODE> during ./configure .
+Then, to turn on GUI mode, you either
+<UL>
+  <LI>use the <CODE>-gui</CODE> option</LI>
+  <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
+  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
+  and call <CODE>gmplayer</CODE> instead.
+</UL>
+</P>
 
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
 
@@ -352,7 +361,7 @@ Now you have to see a timer at the upper left corner of the movie
 <P><B>GUI keyboard control</B></P>
 
 <P><TABLE BORDER=0>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, and .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>previous / next stream</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, and .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>previous / next file</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>gray - or +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease / increase volume</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>start playing</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>space</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause</TD><TR>
@@ -420,10 +429,12 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
 
-<P><B>MPlayer</B> can play media from network, by using the HTTP protocol.
+<P><B>MPlayer</B> can play files from network, using the HTTP protocol.
 Configuring it is simple, just recompile <B>MPlayer</B> with</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+
+<P>MPlayer <B>can NOT read ASF</B> files from network, neither with HTTP nor MMS.</P>
 
 <P><B>MPlayer</B> can read from stdin (NOT named pipes). This can be for example
 used to play from FTP:</P>

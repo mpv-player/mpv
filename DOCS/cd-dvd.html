@@ -75,21 +75,21 @@ play :)</P>
 This is the first version of some real DVD support inside <B>MPlayer</B> and
 we're busy with hunting bugs and implementing basic DVD player features.</P>
 
-<P><B>MPlayer</B> uses libdvdread which has got built in support for IFO parsing,
-reading navi blocks and doing authentication/descrambling. libdvdread
-use the good old libcss to the latter tasks. So you will need libcss and
-libdvdread downloaded, compiled and installed BEFORE you run ./configure
-script of <B>MPlayer</B> which will autodetect libdvdread for you in this way.</P>
+<P><B>MPlayer</B> uses libdvdread which has got built in support for IFO
+parsing, reading navi blocks and doing authentication/descrambling. libdvdread
+uses libdvdcss to the latter tasks. So you will need libdvdcss and libdvdread
+downloaded, compiled and installed BEFORE you run ./configure script of
+<B>MPlayer</B> which will autodetect libdvdread for you in this way.</P>
 
 <UL>  
-<LI><P><B>Download source of libdvdread and libcss.</B></P>
+<LI><P><B>Download source of libdvdread and libdvdcss.</B></P>
   
 <P><I>You can download them from
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
-(click 'download' in the menu at the left, and you can find libcss and
+(click 'download' in the menu at the left, and you can find libdvdcss and
 libdvdread in a table).</I></P></LI>
   
-<LI><P><B>Compile and install libcss THEN libdvdread.</B></P>
+<LI><P><B>Compile and install libdvdcss THEN libdvdread.</B></P>
     
 <P><I>Read documentation of these packages to do this step easily.</I></P></LI>
   
@@ -101,7 +101,7 @@ says something similar:<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
 line when you run ./configure). That's it! Say: <CODE>make</CODE>, then <CODE>make install</CODE>.</I></P></LI>
 </UL>
 
-<P>Of course after installing libcss and libdvdread you don't need recompile
+<P>Of course after installing libdvdcss and libdvdread you don't need recompile
 them at each time when you want to recompile <B>MPlayer</B> (from a new CVS version
 for example) since the needed packages have already been installed on your
 machine.</P>
@@ -130,7 +130,7 @@ machine.</P>
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Can I compile libdvdread and libcss for example on my sweet Sparc/Solaris?
+Can I compile libdvdread and libdvdcss for example on my sweet Sparc/Solaris?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Who knows ... Please test it and send feedback. But it's said that it
 should work. Please refer documentation of libdvdread and its homepage
@@ -174,7 +174,7 @@ So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
 under the XYZ#$ paragraph of the--
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Get back asshole, there is no DeCSS code in <B>MPlayer</B>. <B>MPlayer</B> uses libdvdread
-by linking against it, and libdvdread uses libcss by dynamic loading it.
+by linking against it, and libdvdread uses libdvdcss by dynamic loading it.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -193,7 +193,7 @@ basic features before implementing new features.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Where can I get libdvdread and libcss packages from?
+Where can I get libdvdread and libdvdcss packages from?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 From the site of Ogle:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.

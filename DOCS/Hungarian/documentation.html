@@ -228,7 +228,7 @@ gépeken futtatható.</LI>
 Szükséged lesz erre a codecre ha nem-x86 gépen akarsz lejátszani, vagy
 nagyobb sebességet akarsz mint amennyit a Win32-es codec tud.</LI>
 
-<LI>A DVD támogatáshoz le kell fordítanod a libdvdread-et és a libcss-t.
+<LI>A DVD támogatáshoz le kell fordítanod a libdvdread-et és a libdvdcss-t.
 Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 </UL>
 
@@ -257,7 +257,16 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 
 <P><B><A NAME=1.4>1.4. És a grafikus felület ?</A></B></P>
 
-<P>TODO</P>
+<P>A grafikus felület GTK-ra épül, így a gtk-t (és a hozzávaló fejlesztõi csomagokat)
+fel kell installálni. A lefordításhoz meg kell adni a <CODE>--enable-new-gui</CODE> opciót
+a ./configure-nak. Ezután, a GUI mód bekapcsolásához :
+<UL>
+  <LI>használd a <CODE>-gui</CODE> opciót</LI>vagy
+  <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba</LI>vagy
+  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
+  és a <CODE>gmplayer</CODE> file-t indítsd.
+</UL>
+</P>
 
 <P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
 
@@ -427,13 +436,15 @@ konfigurációs file-ban.</P>
 <P>Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
   a -lircconf [file-név] kapcsolót.</P>
 
-<P><B><A NAME=3.3>3.3.  Streaming from network or pipes</A></B></P>
+<P><B><A NAME=3.3>3.3.  Lejátszás hálózatról, vagy pipe-n keresztül</A></B></P>
 
 <P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül.
   A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :</P>
 
-
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+
+<P><B>Nem tud</B> viszont lejátszani ASF file-okat hálózatról se HTTP-vel, se
+MMS-el.</P>
 
 <P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
   Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>

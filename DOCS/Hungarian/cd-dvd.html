@@ -72,18 +72,18 @@ alapvetõ DVD funkciók beépítésén dolgozunk.</P>
 
 <P>Az <B>MPlayer</B> a libdvdread-et használja, ami tartalmaz beépített
 támogatást az IFO file-ok feldolgozásához, navi blokkok olvasásához, és
-autentikációhoz. Ezutóbbihoz a régi jó libcss-t használja, így elõször
+autentikációhoz. Ezutóbbihoz a libdvdcss-t használja, így elõször
 azt kell lefordítani és installálni, majd ./configure, és az automatikusan
 felismeri.</P>
 
 <UL>
-<LI><P><B>Töltsd le a libdvdread és libcss forrását.</B></P>
+<LI><P><B>Töltsd le a libdvdread és libdvdcss forrását.</B></P>
   
 <P><I>Letöltheted õket a
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/gr
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
 címrõl (klikkelj a 'download'-ra a bal oldali menûben).</I></P></LI>
 
-<LI><P><B>Fordítsd le és installáld a libcss-t és AZUTÁN a libdvdread-et.</B></P>
+<LI><P><B>Fordítsd le és installáld a libdvdcss-t és AZUTÁN a libdvdread-et.</B></P>
 
 <P><I>Olvasd el ezen csomagok dokumentációját, ha segítségre van szükséged.</I></P></LI>
 
@@ -94,7 +94,7 @@ a ./configure valami ilyesmit fog kiírni :<BR><CODE>Checking for DVDread support
 Ezután a szokott módon <CODE>make</CODE> és <CODE>make install</CODE>.</I></P></LI>
 </UL>
 
-<P>Természetesen miután felinstalláltad a libcss-t és a libdvdread-et,
+<P>Természetesen miután felinstalláltad a libdvdcss-t és a libdvdread-et,
 nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 
 <P><B>MPlayer használata DVD lejátszáshoz:</B></P>
@@ -119,7 +119,7 @@ változtathatod meg (fordításkor), van megadhatod filenévnek:</P>
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Lefordíthatom a libdvdread-et és a libcss-t például az én szép kis
+Lefordíthatom a libdvdread-et és a libdvdcss-t például az én szép kis
 Sparc/Solarisomon?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Ki tudja ... Próbáld ki és mondd el nekünk is. De elvileg mûködik.
@@ -161,7 +161,7 @@ Ismert probléma, nemsokára megoldjuk (libvo2 után).
  Szóval az MPlayer tud DVD lejátszást? Akkor biztos DeCSS-t használ!
      Bûnösek vagytok a következõ vádpontokban : XYZ#$--
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
- Anyád. Nincs DeCSS kód az MPlayer-ben. libcss-hez linkeli magát.
+ Anyád. Nincs DeCSS kód az MPlayer-ben. libdvdcss-hez linkeli magát.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -180,10 +180,10 @@ kívánságok majd késõbb jöhetnek.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Hol lehet letölteni a libdvdread-et és a libcss-et?
+Hol lehet letölteni a libdvdread-et és a libdvdcss-t?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Innen:
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/gr
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>
