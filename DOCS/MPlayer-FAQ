@@ -125,3 +125,6 @@ A: ...but you don't have the X development package installed. It's called
    Also check if the /usr/X11 symlink exists (this can be a problem on
    Mandrake systems). It can be created with the 'ln -sf /usr/X11R6 /usr/X11'
    command. Your distribution may differ from the Linux Filesystem Standard.
+
+Q: I have files with WMV (Windows Media Video) extension. Can I use'em?
+A: No, we couldn't find any way to get it work with MPlayer.

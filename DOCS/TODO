@@ -13,7 +13,7 @@ Fix compilation problems:
 Libvo features:
 - framebuffer and svgalib support (both)
 - real fullscreen (black bands at unused areas) support - DONE for xmga & x11
-- fix X4.0.x/DRI OpenGL (doesn't work, at least mga & tdfx & nvidia)
+- fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
 - change libmpeg2 & libvo interface to be compatible with libmpeg2-0.2.0 release
 
 Player features:
@@ -27,3 +27,6 @@ Player features:
 - support for more codecs  (sample .avi files and .dll needed!) - HELP!
 - support for MPEG TS (transport streams) and PES format - I need sample files!
 - verify valid range of numeric options (like '-xy 0')
+
+Requested codecs:
+- WMV (Windows Media Video 8)
