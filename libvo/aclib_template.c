@@ -101,15 +101,21 @@ __asm__ __volatile__(\
 #define MMREG_SIZE 64 //8
 #endif
 
-/* Small defines (for readability only) ;) */
 #undef PREFETCH
 #undef EMMS
-#ifdef HAVE_K6_2PLUS
-#define PREFETCH "prefetch"
+
+#ifdef HAVE_3DNOW
+#define PREFETCH  "prefetch"
+#elif defined ( HAVE_MMX2 )
+#define PREFETCH "prefetchnta"
+#else
+#define PREFETCH "/nop"
+#endif
+
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
+#ifdef HAVE_3DNOW
 #define EMMS     "femms"
 #else
-#define PREFETCH "prefetchnta"
 #define EMMS     "emms"
 #endif
 
