@@ -194,7 +194,7 @@ struct VesaProtModeInterface
 #define VBE_VESA_ERRCODE_MASK 0xff00
 
 extern int vbeInit( void );
-extern int vbeDetroy( void );
+extern int vbeDestroy( void );
 
 extern int vbeGetControllerInfo(struct VbeInfoBlock *);
 extern int vbeGetModeInfo(unsigned mode,struct VesaModeInfoBlock *);

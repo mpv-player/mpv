@@ -16,6 +16,7 @@
   - refresh rate support (need additional info from mplayer)
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <limits.h>
@@ -503,7 +504,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%04X\n"
 			 "vo_vesa:             #planes=%u model=%u(%s) #pages=%u\n"
 			 "vo_vesa:             winA=%X(attr=%u) winB=%X(attr=%u) winSize=%u winGran=%u\n"
-			 "vo_vesa:             direct_color=%u DGA_phys_addr=%08X\n"
+			 "vo_vesa:             direct_color=%u DGA_phys_addr=%08lX\n"
 			 ,i,mode_ptr[i],vmib.XResolution,vmib.YResolution,vmib.BitsPerPixel,vmib.ModeAttributes
 			 ,vmib.NumberOfPlanes,vmib.MemoryModel,model2str(vmib.MemoryModel),vmib.NumberOfImagePages
 			 ,vmib.WinASegment,vmib.WinAAttributes,vmib.WinBSegment,vmib.WinBAttributes,vmib.WinSize,vmib.WinGranularity
