@@ -72,8 +72,8 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Nemohu nalézt domácí (HOME) adresáø\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problém\n"
 #define MSGTR_CreatingCfgFile "Vytváøím konfiguraèní soubor: %s\n"
-#define MSGTR_InvalidVOdriver "Neplané jméno výstupního videoovladaèe: %s\nPou¾ijte '-vo help' pro seznam dostupných ovladaèù.\n"
-#define MSGTR_InvalidAOdriver "Neplané jméno výstupního audioovladaèe: %s\nPou¾ijte '-ao help' pro seznam dostupných ovladaèù.\n"
+#define MSGTR_InvalidVOdriver "Neplatné jméno výstupního video ovladaèe: %s\nPou¾ijte '-vo help' pro seznam dostupných ovladaèù.\n"
+#define MSGTR_InvalidAOdriver "Neplatné jméno výstupního audio ovladaèe: %s\nPou¾ijte '-ao help' pro seznam dostupných ovladaèù.\n"
 #define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (ze zdrojových kódù MPlayeru) do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Nemohu naèíst font: %s\n"
 #define MSGTR_CantLoadSub "Nemohu naèíst titulky: %s\n"
@@ -103,16 +103,19 @@ static char help_text[]=
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ***********************************************************\n"\
-"         ****  Na pøehrání tohoto je vá¹ systém pøíli¹ POMALÝ!  ****\n"\
+"         ****  Vá¹ systém je pøíli¹ POMALÝ pro toto pøehrávání! ****\n"\
 "         ***********************************************************\n"\
 "!!! Mo¾né pøíèiny, problémy a øe¹ení:\n"\
-"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè. Øe¹ení: zkuste -ao sdl nebo pou¾ijte\n"\
-"  ALSA 0.5 nebo oss emulaci z ALSA 0.9. více tipù se dozvíte v DOCS/sound.html!\n"\
+"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè. Øe¹ení: zkuste -ao sdl\n"\
+"  nebo pou¾ijte ALSA 0.5 èi oss emulaci z ALSA 0.9. Více tipù se dozvíte\n"\
+"  v souboru DOCS/sound.html!\n"\
 "- Pomalý video výstup. Zkuste jiný -vo ovladaè (pro seznam: -vo help) nebo zkuste\n"\
-"  s volbou -framedrop !  Tipy pro ladìní/zrychlení videa jsou v DOCS/video.html\n"\
-"- Pomalá cpu. Nezkou¹ejte pøehrávat velké dvd/divx na pomalé cpu! Zkuste -hardframedrop\n"\
-"- Po¹kozený soubor. Zkuste rùzné kombinace tìchto voleb: -nobps  -ni  -mc 0  -forceidx\n"\
-"Pokud nic z toho není pravda, pøeètìte si DOCS/bugreports.html !\n\n"
+"  volbu -framedrop ! Tipy pro ladìní/zrychlení videa jsou v DOCS/video.html\n"\
+"- Pomalé cpu. Nezkou¹ejte pøehrávat velké dvd/divx na pomalém cpu!\n"\
+"  Zkuste volbu -hardframedrop\n"\
+"- Po¹kozený soubor. Zkuste rùzné kombinace tìchto voleb:\n"\
+"  -nobps  -ni  -mc 0  -forceidx\n"\
+"Pokud nic z toho není pravda, pøeètìte si DOCS/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI vy¾aduje X11!\n"
@@ -122,8 +125,8 @@ static char help_text[]=
 #define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU ZA BÌHU - upozornìní, toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøeolo¾te znovu mplayer ze zdrojového kódu\ns úpøepínaèem --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro architekturu x86 pro CPU s roz¹íøením:"
 #define MSGTR_AvailableVideoOutputPlugins "Dostupné zásuvné video moduly:\n"
-#define MSGTR_AvailableVideoOutputDrivers "Dostupné oladaèe pro video:\n"
-#define MSGTR_AvailableAudioOutputDrivers "Dostupné oladaèe pro audio:\n"
+#define MSGTR_AvailableVideoOutputDrivers "Dostupné ovladaèe pro video:\n"
+#define MSGTR_AvailableAudioOutputDrivers "Dostupné ovladaèe pro audio:\n"
 #define MSGTR_AvailableAudioCodecs "Dostupné audio kodeky:\n"
 #define MSGTR_AvailableVideoCodecs "Dostupné video kodeky:\n"
 #define MSGTR_UsingRTCTiming "Pou¾ito èasování pomocí Linux hardware RTC (%ldHz)\n"
@@ -159,7 +162,7 @@ static char help_text[]=
 #define MSGTR_ErrorWritingFile "%s: chyba pøi zápisu souboru.\n"
 #define MSGTR_WritingAVIIndex "\nZapisuji AVI index...\n"
 #define MSGTR_FixupAVIHeader "Opravuji AVI hlavièku...\n"
-#define MSGTR_RecommendedVideoBitrate "Doporuèenný datový tok videa pro %s CD: %d\n"
+#define MSGTR_RecommendedVideoBitrate "Doporuèený datový tok videa pro %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d bps)  velikost: %d bytù  %5.3f sekund  %d snímkù\n"
 #define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d bps)  velikost: %d bytù  %5.3f sekund\n"
 
@@ -207,15 +210,15 @@ static char help_text[]=
 #define MSGTR_DetectedBMPfile "Detekován BMP formát souboru!\n"
 #define MSGTR_DetectedOGGfile "Detekován OGG formát souboru!\n"
 #define MSGTR_DetectedRAWDVfile "Detekován RAWDV formát souboru!\n"
-#define MSGTR_DetectedAudiofile "Detekován audio file!\n"
+#define MSGTR_DetectedAudiofile "Detekován audio soubor!\n"
 #define MSGTR_NotSystemStream "Toto není proud ve formátu MPEG System... (mo¾ná Transportní proud?)\n"
 #define MSGTR_MissingMpegVideo "Chybìjící MPEG video proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
-#define MSGTR_InvalidMPEGES "Neplatný MPEG-ES proud!? Kontaktuje autora, mo¾ná to je chyba (bug) :(\n"
-#define MSGTR_FormatNotRecognized "========== Bohu¾el, tento formát souboru není rozpoznán/podporován =========\n"\
-                                 "==== Pokud je tento soubor AVI, ASF nebo MPEG proud, kontaktuje autora! ====\n"
+#define MSGTR_InvalidMPEGES "Neplatný MPEG-ES proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
+#define MSGTR_FormatNotRecognized "======== Bohu¾el, formát tohoto souboru nebyl rozpoznán/není podporován =======\n"\
+                                 "= Pokud je soubor typu AVI, ASF nebo obsahuje MPEG proud, kontaktujte autora! =\n"
 #define MSGTR_MissingVideoStream "®ádný video proud nenalezen!\n"
 #define MSGTR_MissingAudioStream "®ádný audio proud nenalezen...  ->beze zvuku\n"
-#define MSGTR_MissingVideoStreamBug "Chybìjící video proud!? Kontaktuje autora, mo¾ná to je chyba (bug) :(\n"
+#define MSGTR_MissingVideoStreamBug "Chybìjící video proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
 
 #define MSGTR_DoesntContainSelectedStream "demux: soubor neobsahuje vybraný audio nebo video proud\n"
 
@@ -244,7 +247,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenSubtitlesStream "Nemohu otevøít proud s titulky: %s\n"
 #define MSGTR_OpeningAudioDemuxerFailed "Nepovedlo se otevøít audio demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Nepovedlo se otevøít demuxer pro titulky: %s\n"
-#define MSGTR_TVInputNotSeekable "TV vstup neumo¾òuje posun (seek)! (Pravdìpodobnì "posun" bude pou¾it ro zmìnu kanálù ;)\n"
+#define MSGTR_TVInputNotSeekable "TV vstup neumo¾òuje posun (seek)! (Pravdìpodobnì \"posun\" bude pou¾it pro zmìnu kanálù ;)\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Informace o demuxeru %s ji¾ pøítomno\n!"
 #define MSGTR_ClipInfo "Informace o klipu: \n"
 
@@ -276,7 +279,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Nemohu alokovat sdílenou pamì»\n"
 #define MSGTR_CantAllocAudioBuf "Nemohu alokovat pamì» pro výstupní audio buffer\n"
-#define MSGTR_NoMemForDecodedImage "nedostatek pamìti pro buffer pro dekódování obrazu (%ld bytes)\n"
+#define MSGTR_NoMemForDecodedImage "nedostatek pamìti pro buffer pro dekódování obrazu (%ld bytù)\n"
 
 #define MSGTR_AC3notvalid "Neplatný AC3 proud.\n"
 #define MSGTR_AC3only48k "Pouze proudy o frekvenci 48000 Hz podporovány.\n"
@@ -461,4 +464,5 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "Upozornìní ..."
 
 #endif
+
 
