@@ -1,4 +1,4 @@
-.\" synced with 1.737
+.\" synced with 1.742
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "22 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "25 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3002,9 +3002,7 @@ facteur d'adoucissement (par défaut\ : 0)
 .IPs quality=<0\-100>
 facteur de qualité (par défaut\ : 75)
 .IPs outdir=<chemin>
-Défini le répertoire où sauver les fichiers JPEG.
-Si non défini, tous les fichiers JPEG seront écrits dans le répertoire
-courant.
+Défini le répertoire où sauver les fichiers JPEG (par défaut\ ./).
 .IPs subdirs=<préfixe>
 Si défini, MPlayer créera des sous-répertoires numérotés et préfixés de
 <préfixe>.
@@ -5523,17 +5521,18 @@ Les méthodes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-aucune (qualité très mauvaise)
+aucune (qualité très mauvaise, n'est plus maintenu et est désactivé)
 .IPs 1
 pleine (lent)
 .IPs 2
-log (mauvaise qualité)
+log (mauvaise qualité, n'est plus maintenu et est désactivé)
 .IPs 3
-phods (mauvaise qualité)
+phods (mauvaise qualité, n'est plus maintenu et est désactivé)
 .IPs 4
-EPZS\ : diamant de taille 1 (par défaut)
+EPZS\ : diamant de taille 1, dont la taille peut être ajustée avec les
+options *dia (par défaut)
 .IPs 5
-X1 (expérimental)
+X1 (expérimental, est un alias de EPZS pour le moment)
 .RE
 .PD 1
 .
@@ -7015,24 +7014,26 @@ paramètre.
 .
 .TP
 .B iframe=<valeur>
-Fréquence des trames-I (par défaut\ : 60)
+Définit l'intervalle maximum autorisé entre trames I.
+Un intervalle plus grand fait économiser des bit, et donc améliore la
+qualité, mais rend la navigation moins précise (par défaut\ : 60).
 .
 .TP
-.B frameref=<valeur>
-Nombre des trames précédentes à utiliser comme prédicteur pour les trames-P
-(par défaut\ : 1).
-Cela peut changer un peut le bitrate et le PSNR.
-This may cause tiny changes in bitrate and PSNR.
+.B frameref=<1\-15>
+Nombre des trames précédentes à utiliser comme prédicteur pour les
+trames P (par défaut\ : 1).
+Est efficace avec les dessins animés, mais semble l'être beaucoup moins
+avec des films dont les sujets sont réels.
 Quelques décodeurs sont incapables de gérer de de grandes valeurs de
 frameref.
 .
 .TP
 .B idrframe=<valeur>
-Tous les <valeur> trames-I, on insère une trame-IDR (par défaut\ : 2).
-En H.264, les trames-I n'encadrent pas nécessairement un groupe fermé de
-trames prédites (closed GOP) car une trame-P peut aussi être prédite
+Toutes les <valeur> trames I se trouve une trame-IDR (par défaut\ : 2).
+En H.264, les trames I n'encadrent pas nécessairement un groupe fermé de
+trames prédites (closed GOP) car une trame P peut aussi être prédite
 à partir d'autres trames que celles la précédant (voir aussi frameref).
-Ainsi, les trames-I ne permettent pas nécessairement une navigation précise
+Ainsi, les trames I ne permettent pas nécessairement une navigation précise
 dans le film.
 Les trames-IDR empêchent les trames-P qui les suivent d'être prédites à partir
 de trames précédant mes trames-IDR.
@@ -7054,7 +7055,14 @@ Tout d'abord, cette option détermine à quel point le filtre peut modifier
 l'apparence de chacun des pixels de l'image.
 Ensuite, cette option détermine la différence maximale à la limite des blocs
 filtrés.
-Une valeur positive réduit les artefacts de blocking, mais réduira les détails.
+Une valeur positive réduit les artefacts de blocking, mais enlève du détail
+à l'image.
+.br
+Lorsque vous réalisez un encodage destiné à être de bonne qualité, vous
+devriez le diminuer un peu.
+Par contre, si la vidéo source souffre déjà d'artefacts de blocking
+ou de bruit que vous voudriez atténuer, ou bien si c'est un dessin animé,
+vous devriez l'augmenter un peu.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -7066,6 +7074,8 @@ Affecte le gradient maximum autorisé entre deux blocs adjacents
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
 Context-Adaptive Binary Arithmetic Coding).
 Ralentit l'encodage mais économise 10-15% des bits.
+À moins que vous ayez besoin de d'encoder à vitesse élevée, vous devriez
+toujours l'activer.
 .
 .TP
 .B cabacidc=<value>
@@ -7124,7 +7134,7 @@ FIXME: expliquer ce que veut dire ratecontrol
 taille initiale du tampon ratecontrol (par défaut\ : 1/4 de rc_buffer_size)
 .
 .TP
-.B rc_sens=<0\-100>
+.B rc_sens=<0\-100> (CBR uniquement)
 sensibilité du ratecontrol (default: 4)
 .
 .TP
@@ -7138,7 +7148,10 @@ facteur de quantification entre les trames P et B (par défaut\ : 2.0)
 .TP
 .B pass=<1|2>
 Active le mode 2-passes.
-La première passe est celle qui récolte des statistiques sur le vidéo.
+La première passe est celle qui récolte des statistiques sur la vidéo.
+Il est recommandé de toujours encoder en mode deux passe puisque cela
+permet une distribution plus adéquate des bits et améliore la qualité
+globale.
 .
 .TP
 .B qcomp=<0\-1>
@@ -7160,6 +7173,8 @@ L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
 Typiquement très efficace pour les dessins animés, qui contiennent souvent
 de grands à-plats de couleurs (par défaut\ : i16x16, i4x4, p16x16-8x8).
+Suivant le type de source, ce paramètre peut améliorer ou dégrader la
+qualité, utilisez-le avec précaution.
 .
 .TP
 .B log=<-1\-3>
@@ -7183,6 +7198,7 @@ statistiques sur chaque trame.
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse liées aux décisions du
 processus d'estimation du mouvement.
+Utilisé correctement, cela peut améliorer la qualité de façon significative.
 .RSs
 0: halfpel uniquement (précision d'un demi-pixel)
 .br
