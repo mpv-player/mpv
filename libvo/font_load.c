@@ -34,6 +34,8 @@ raw_file* load_raw(char *name,int verbose){
     return raw;
 }
 
+extern int sub_unicode;
+
 font_desc_t* read_font_desc(char* fname,float factor,int verbose){
 unsigned char sor[1024];
 unsigned char sor2[1024];
@@ -44,7 +46,6 @@ int i,j;
 int chardb=0;
 int fontdb=-1;
 int version=0;
-int sub_unicode=0;
 
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
