@@ -413,11 +413,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         all_frametime+=sh->frametime;
         fprintf(fvstats, "frame= %5d q= %2d f_size= %6d s_size= %8.0fkB ",
             ++frame_number, avctx->quality, len, (double)all_len/1024);
-        fprintf(fvstats, "time= %0.3f br= %7.1fkbit/s avg_br= %7.1fkbit/s\n",
+        fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
-        // FIXME key_frame isn't set by lavc on decoding! ::atmos
-        //fprintf(fvstats, "type= %c\n", avctx->key_frame == 1 ? 'I' : 'P');
+        fprintf(fvstats, "type= %c\n", sh->ds->flags&1 ? 'I' : 'P');
         break;
     }
 //--
