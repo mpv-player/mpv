@@ -1083,7 +1083,7 @@ d_video=demuxer->video;
 d_dvdsub=demuxer->sub;
 
 // DUMP STREAMS:
-if((stream_dump_type)&&(stream_dump_type!=4)){
+if((stream_dump_type)&&(stream_dump_type<4)){
   FILE *f;
   demux_stream_t *ds=NULL;
   current_module="dump";
@@ -1213,6 +1213,7 @@ if(sh_video) {
   }
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
+  if(subtitles && stream_dump_type==6) dump_srt(subtitles);
 }
 #endif
 
