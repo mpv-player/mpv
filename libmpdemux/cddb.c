@@ -28,8 +28,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#if defined(__FreeBSD__) || defined(__bsdi__)
 	#define SYS_BSD 1
+#endif
+
+#if defined(__NetBSD__)
+	#define SYS_NBSD 1
 #endif
 
 #if defined(__OpenBSD__)
@@ -39,6 +43,8 @@
 #if defined(__linux__)
 	#include <linux/cdrom.h>
 #elif defined(SYS_BSD)
+	#include <sys/cdio.h>
+#elif defined(SYS_NBSD)
 	#include <sys/cdio.h>
 #elif defined(SYS_OBSD)
 	#include <util.h>
@@ -113,6 +119,44 @@ read_toc(void) {
 	cdtoc[tochdr.ending_track].min = tocentry.entry.addr.msf.minute;
 	cdtoc[tochdr.ending_track].sec = tocentry.entry.addr.msf.second;
 	cdtoc[tochdr.ending_track].frame = tocentry.entry.addr.msf.frame;
+	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].min*60*75;
+	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].sec*75;
+	close(drive);
+	return tochdr.ending_track;
+}
+
+#elif defined(SYS_NBSD)
+int
+read_toc(void) {
+	int drive;
+	struct ioc_toc_header tochdr;
+	struct ioc_read_toc_entry tocentry;
+	int i;
+	struct cd_toc_entry toc_buffer;
+
+	drive = open("/dev/cdrom", O_RDONLY | O_NONBLOCK);
+	if (!drive)
+		return -1;
+
+	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
+	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
+		tocentry.starting_track = i;
+		tocentry.address_format = CD_MSF_FORMAT;
+		tocentry.data = &toc_buffer;
+		tocentry.data_len = sizeof(toc_buffer);
+		ioctl(drive, CDIOREADTOCENTRYS, &tocentry);
+		cdtoc[i-1].min = toc_buffer.addr.msf.minute;
+		cdtoc[i-1].sec = toc_buffer.addr.msf.second;
+		cdtoc[i-1].frame = toc_buffer.addr.msf.frame;
+		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
+		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
+	}
+	tocentry.starting_track = 0xAA;
+	tocentry.address_format = CD_MSF_FORMAT;
+	ioctl(drive, CDIOREADTOCENTRYS, &tocentry);
+	cdtoc[tochdr.ending_track].min = toc_buffer.addr.msf.minute;
+	cdtoc[tochdr.ending_track].sec = toc_buffer.addr.msf.second;
+	cdtoc[tochdr.ending_track].frame = toc_buffer.addr.msf.frame;
 	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].min*60*75;
 	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].sec*75;
 	close(drive);

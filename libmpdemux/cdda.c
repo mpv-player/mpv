@@ -12,7 +12,11 @@
 
 static int speed = -1;
 static int paranoia_mode = 1;
+#if defined(__NetBSD__)
+static char* generic_dev = "/dev/cdrom";
+#else
 static char* generic_dev = NULL;
+#endif
 static int sector_size = 0;
 static int search_overlap = -1;
 static int toc_bias = 0;
