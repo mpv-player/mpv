@@ -929,26 +929,23 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	if (gCpuCaps.has3DNow)
 	    PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 
-	    switch(gCpuCaps.cpuType)
+	    if (gCpuCaps.cpuType == 4)
 	    {
-		case CPUTYPE_I686:
-		case CPUTYPE_I586:
-		    cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-		    cachedsi.wProcessorLevel = 5;
-		    break;
-		case CPUTYPE_I486:
-		    cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
-		    cachedsi.wProcessorLevel = 4;
-		    break;
-		case CPUTYPE_I386:
-		default:
-		    cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
-		    cachedsi.wProcessorLevel = 3;
-		    break;
+	        cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
+		cachedsi.wProcessorLevel = 4;
+	    }
+	    else if (gCpuCaps.cpuType > 5)
+	    {
+		cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
+		cachedsi.wProcessorLevel = 5;
+	    }
+	    else
+	    {
+	        cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
+		cachedsi.wProcessorLevel = 3;
 	    }
 	    cachedsi.wProcessorRevision = gCpuCaps.cpuStepping;
     	    cachedsi.dwNumberOfProcessors = 1;	/* hardcoded */
-
     }
 #endif
 
