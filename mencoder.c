@@ -377,7 +377,7 @@ unsigned int timer_start;
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
-  if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
+  if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
     if(!parse_codec_cfg(NULL)){
       mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
       exit(0);
@@ -443,7 +443,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
        if(!vo_font)
-       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
+       vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
 #endif
 #endif

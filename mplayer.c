@@ -525,7 +525,7 @@ void parse_cfgfiles( m_config_t* conf )
 {
 char *conffile;
 int conffile_fd;
-if (m_config_parse_config_file(conf, CONFDIR"/mplayer.conf") < 0)
+if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
@@ -866,7 +866,7 @@ int gui_no_filename=0;
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
-  if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
+  if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
     if(!parse_codec_cfg(NULL)){
       mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
       exit(0);
@@ -1038,7 +1038,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
        if(!vo_font)
-       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
+       vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
 #ifdef HAVE_FREETYPE
   if (!vo_font)
@@ -1117,8 +1117,8 @@ current_module = NULL;
      if(menu_init(menu_cfg))
        mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", menu_cfg);
      else {
-       if(menu_init(CONFDIR"/menu.conf"))
-         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", CONFDIR"/menu.conf");
+       if(menu_init(MPLAYER_CONFDIR "/menu.conf"))
+         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", MPLAYER_CONFDIR"/menu.conf");
        else {
          mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu init failed\n");
          use_menu = 0;

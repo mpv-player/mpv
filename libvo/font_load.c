@@ -157,7 +157,7 @@ while(fgets(sor,1020,f)){
   } else    
 
   if(strcmp(section,"[files]")==0){
-      char *default_dir=DATADIR"/font";
+      char *default_dir=MPLAYER_DATADIR "/font";
       if(pdb==2 && strcmp(p[0],"alpha")==0){
     	  char *cp;
 	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) return NULL;

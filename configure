@@ -5432,9 +5432,9 @@ $_def_hpux_scsi_h
 $_def_stddef
 
 /* Common data directory (for fonts, etc) */
-#define DATADIR "$_datadir"
-#define CONFDIR "$_confdir"
-#define LIBDIR "$_libdir"
+#define MPLAYER_DATADIR "$_datadir"
+#define MPLAYER_CONFDIR "$_confdir"
+#define MPLAYER_LIBDIR "$_libdir"
 
 /* Define this to compile stream-caching support, it can be enabled via
    -cache <kilobytes> */

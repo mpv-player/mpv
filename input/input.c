@@ -1464,7 +1464,7 @@ mp_input_init(void) {
   
   if(! mp_input_parse_config(file)) {
     // Try global conf dir
-    file = CONFDIR"/input.conf";
+    file = MPLAYER_CONFDIR "/input.conf";
     if(! mp_input_parse_config(file))
       mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
   }

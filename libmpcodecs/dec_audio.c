@@ -160,11 +160,11 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
 	    ad_functions_t *funcs_sym;
 	    ad_info_t *info_sym;
 	    
-	    buf_len = strlen(LIBDIR)+strlen(sh_audio->codec->drv)+16;
+	    buf_len = strlen(MPLAYER_LIBDIR)+strlen(sh_audio->codec->drv)+16;
 	    buf = malloc(buf_len);
 	    if (!buf)
 		break;
-	    snprintf(buf, buf_len, "%s/mplayer/ad_%s.so", LIBDIR, sh_audio->codec->drv);
+	    snprintf(buf, buf_len, "%s/mplayer/ad_%s.so", MPLAYER_LIBDIR, sh_audio->codec->drv);
 	    mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "Trying to open external plugin: %s\n", buf);
 	    sh_audio->dec_handle = dlopen(buf, RTLD_LAZY);
 	    if (!sh_audio->dec_handle)
@@ -181,7 +181,7 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
 	    free(buf);
 	    mpadec = funcs_sym;
 	    mp_msg(MSGT_DECAUDIO, MSGL_V, "Using external decoder plugin (%s/mplayer/ad_%s.so)!\n",
-		LIBDIR, sh_audio->codec->drv);
+		MPLAYER_LIBDIR, sh_audio->codec->drv);
 	}
 #endif
 	if(!mpadec){ // driver not available (==compiled in)

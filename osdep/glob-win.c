@@ -5,7 +5,6 @@
 
 #ifndef HAVE_GLOB
 #ifdef __MINGW32__
-#undef DATADIR
 #include <windows.h>
 #include "glob.h"
 

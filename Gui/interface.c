@@ -188,7 +188,7 @@ void guiInit( void )
  wsXInit( (void *)mDisplay );
 // --- load skin
  skinDirInHome=get_path("Skin");
- skinMPlayerDir=DATADIR "/Skin";
+ skinMPlayerDir=MPLAYER_DATADIR "/Skin";
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
  if ( !skinName ) skinName=strdup( "default" );
@@ -405,7 +405,7 @@ void guiLoadFont( void )
     vo_font=read_font_desc( font_name,font_factor,0 );
     if ( !vo_font )
      {
-      gfree( (void **)&font_name ); font_name=gstrdup( DATADIR"/font/font.desc" );
+      gfree( (void **)&font_name ); font_name=gstrdup(MPLAYER_DATADIR "/font/font.desc" );
       vo_font=read_font_desc( font_name,font_factor,0 );
      }
    }

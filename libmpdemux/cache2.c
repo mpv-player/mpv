@@ -22,7 +22,6 @@
 #include <sys/wait.h>
 #include "../osdep/shmem.h"
 #else
-#undef DATADIR
 #include <windows.h>
 static DWORD WINAPI ThreadProc(void* s);
 #endif
