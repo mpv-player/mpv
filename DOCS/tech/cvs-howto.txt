@@ -157,7 +157,8 @@ II. POLICY / RULES:
 7. If you apply a patch by someone else, include his name and email address in
    the CVS comment! Do NOT commit patches for other developer's code (code not
    maintained by you) without his permission! If he didn't commit - he probably
-   has a reason!
+   has a reason! Send an answer to mplayer-dev-eng (or wherever you got the
+   patch from) saying that you applied it.
 
 8. A'rpi developed something called cvs-backup. It archives the CVS repository
    after each commit - so commits can be reversed (without messing up the
