@@ -51,13 +51,15 @@ typedef struct demux_packet_st {
   off_t pos;  // position in index (AVI) or file (MPG)
   unsigned char* buffer;
   int flags; // keyframe, etc
+  int refcount;   //refcounter for the master packet, if 0, buffer can be free()d
+  struct demux_packet_st* master; //pointer to the master packet if this one is a cloned one
   struct demux_packet_st* next;
 } demux_packet_t;
 
 typedef struct {
   int buffer_pos;          // current buffer position
   int buffer_size;         // current buffer size
-  unsigned char* buffer;   // current buffer
+  unsigned char* buffer;   // current buffer, never free() it, always use free_demux_packet(buffer_ref);
   float pts;               // current buffer's pts
   int pts_bytes;           // number of bytes read after last pts stamp
   int eof;                 // end of demuxed stream? (true if all buffer empty)
@@ -70,6 +72,7 @@ typedef struct {
   int bytes;              // total bytes of packets in buffer
   demux_packet_t *first;  // read to current buffer from here
   demux_packet_t *last;   // append new packets from input stream to here
+  demux_packet_t *current;// needed for refcounting of the buffer
   int id;                 // stream ID  (for multiple audio/video streams)
   struct demuxer_st *demuxer; // parent demuxer structure (stream handler)
 // ---- asf -----
@@ -123,11 +126,33 @@ inline static demux_packet_t* new_demux_packet(int len){
   dp->pts=0;
   dp->pos=0;
   dp->flags=0;
+  dp->refcount=1;
+  dp->master=NULL;
+  return dp;
+}
+
+inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
+  demux_packet_t* dp=malloc(sizeof(demux_packet_t));
+  while(pack->master) pack=pack->master; // find the master
+  memcpy(dp,pack,sizeof(demux_packet_t));
+  dp->next=NULL;
+  dp->refcount=0;
+  dp->master=pack;
+  pack->refcount++;
   return dp;
 }
 
 inline static void free_demux_packet(demux_packet_t* dp){
-  free(dp->buffer);
+  if (dp->master==NULL){  //dp is a master packet
+    dp->refcount--;
+    if (dp->refcount==0){
+      if (dp->buffer) free(dp->buffer);
+      free(dp);
+    }
+    return;
+  }
+  // dp is a clone:
+  free_demux_packet(dp->master);
   free(dp);
 }
 
