@@ -426,7 +426,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
   </simpara></listitem>
 <listitem><simpara>
   Возможности <emphasis role="bold">других карт</emphasis> не поддерживаются <application>MPlayer'ом</application>.
-  Очень рекомендуется прочитать секцию <link linkend="audio-dev">звуковые карты</link>!
+  Очень рекомендуется прочитать секцию <link linkend="audio">звуковые карты</link>!
   </simpara></listitem>
 </itemizedlist>
 </sect2>

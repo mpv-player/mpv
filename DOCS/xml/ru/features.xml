@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <chapter id="features">
 <title>Возможности</title>
 
 &formats.xml;
 &codecs.xml;
 
-<sect1 id="devices">
-<title>Устройства вывода</title>
 &video.xml;
 &audio.xml;
-</sect1>
 
 &tvinput.xml;
 
