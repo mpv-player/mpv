@@ -169,8 +169,8 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit(int immed)
 {
-    while (buffered_bytes > 0)
-	usec_sleep(50000);
+    if(!immed)while(buffered_bytes > 0)usec_sleep(50000);
+    else buffered_bytes=0;
 	waveOutReset(hWaveOut);
 	waveOutClose(hWaveOut);
 	mp_msg(MSGT_AO, MSGL_V,"waveOut device closed\n");
