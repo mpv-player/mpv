@@ -93,7 +93,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
 
   if(!p->keep) {
     if(end[0] != '\0') {
-      p->buffer_end -= strlen(p->line)+1;
+      p->buffer_end -= end-p->iter;
       memmove(p->buffer,end,p->buffer_end);
     } else
       p->buffer_end = 0;
