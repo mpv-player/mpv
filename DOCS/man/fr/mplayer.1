@@ -1,4 +1,4 @@
-.\" synced with 1.893
+.\" synced with 1.905
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -3859,7 +3859,7 @@ quand même échangés.
 .IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 Changerait le nombre de canaux à 6 et construit 4 routes copiant
 les canaux 0 vers les canaux 0 et 3
-Les canaux 4 et 5 contiendra du silence.
+Les canaux 4 et 5 contiendront du silence.
 .RE
 .PD 1
 .
@@ -3954,43 +3954,134 @@ nombre de canaux d'entrée (1\-6)
 .IPs <lij>
 Combien du canal j est mixé dans le canal de sortie i (0\-1).
 .RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
+Mixe ensemble les canaux stéréo vers mono.
+.IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+Donnerait 3 canaux, en laissant là où ils sont les canaux 0 et 1,
+et mixerait les canaux 0 et 1 vers le canal 2 (qui pourrait par
+exemple être envoyé sur un caisson de basse).
+.RE
 .PD 1
 .
 .TP
 .B sub[=fc:ch]
-Ajoute le canal du caisson de basse.
+Ajoute au plux audio un canal pour caisson de basse.
+Ce canal sera créé à partir des canaux 0 et 1 en faisant
+la moyenne des deux.
+Le son résultant passe alors par un filtre Butterworth
+passe-bas du 4ième ordre dont la la fréquence de coupure
+par défaut est 60Hz, et ajouté au flux audio dans un canal
+distinct.
+.br
+.I Attention\ :
+Désactivez ce filtre lorsque vous regardez un DVD avec du
+son Dolby Digital 5.1, ou sinon ce filtre perturbera le son
+déjà prévu pour le caisson de basse.
 .PD 0
 .RSs
 .IPs <fc>
-fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz)
+fréquence de coupure en Hz pour le filtre passe-bas (20Hz à 300Hz)
 (par défaut\ : 60Hz).
-.IPs <ca>
-numéro de canal pour le sous-canal
+Pour un meilleur résultat, essayez de baisser la fréquence de coupure
+aussi bas que possible.
+Cela améliorera l'effet surround ou stéréo.
+.IPs <ca>\ 
+Défini le numéro de canal vers lequel router le flux du caisson de basse.
+Le numéro de canal doit être compris entre 0 et 5 (par défaut\ : 5).
+Notez que le nombre de canaux sera automatiquement incrémenté jusqu'à <ch>
+si nécessaire.
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer -af sub=100:4 -channels 5 media.avi"
+ajoutera un canal pour caisson de basse dont la fréquence de
+coupure sera de 100Hz, et sera envoyé vers le canal 4.
 .RE
 .PD 1
 .
 .TP
 .REss
 .B surround[=retard]
-Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
-fichiers à deux canaux.
+Décodeur pour le son surround encodé en matrice comme Dolby Surround.
+Beaucoup de fichiers avec deux canaux audio contiennent actuellement
+du son surround en matrice.
+Pour utiliser cette fonction vous avez besoin d'une carte son
+supportant au moins 4 canaux.
 .PD 0
 .RSs
 .IPs <retard>
-décalage en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 20).
+retard en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 20)
+Ce décalage devrait être défini ainsi\ : si d1 est la distance entre la
+position d'écoute et les haut-parleurs de devant et d2 la distance entre
+la position d'écoute et les haut-parleurs de derrière, alors le retard
+d peut être fixé à 15ms si d1 si d1 <= d2 et à 15 + 5*(d1-d2) si d1 > d2.
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer \-af surround=15 \-channels 4 media.avi"
+Ajouterait un décodage de son surround avec un retard de 15ms pour le son des
+haut-parleurs arrière.
 .RE
 .PD 1
 .
 .TP
 .B delay[=ch1:ch2:...]
-Retarde la sortie du son.
-Définit le décalage séparément pour chaque canal en millisecondes (nombre
-flottant entre 0 et 1000).
+Retarde l'envoi du son vers les haut-parleurs de façon à faire
+arriver le son dans les différents canaux au même moment à la
+position d'écoute.
+Cela n'est utile que si vous avez plus de 2 haut-parleurs.
+.PD 0
+.RSs
+.IPs ch1,ch2,...
+Le retard en millisecondes devant être imposé à chaque canal
+(nombre flottant entre 0 et 1000).
+.RE
+.PD 1
+.sp 1
+.RS
+Pour calculer le décalage requis pour chaque canal, faites comme ceci:
+.IP 1. 3
+Mesurez la distance en mètre entre les hauts parleurs et votre position
+d'écoute, ce qui vous donne les distances s1 à s5 (pour un système 5.1).
+Ce n'est pas la peine de le faire pour le caisson de basses (vous
+n'entendrez pas la différence de toute façon).
+.IP 2. 3
+Soustrayez les distances s1 à s5 à la distance maximum c-à-d.\&
+s[i] = max(s) - s[i]; i = 1...5.
+.IP 3.
+Calculez les décalages requis (en ms) ainsi\ :
+d[i] = 1000*s[i]/342; i = 1...5
+.RE
+.PD 0
+.sp 1
+.RS
 .
 .TP
 .B export[=fichier_mmappé[:nsamples]]
 Exporte le signal entrant vers un autre processus en utilisant le mappage
 mémoire (mmap()).
+Les aires de mémoire mappées contiennent une entête:
+.sp 1
+.nf
+int nch                      /*nombre de canaux*/
+int size                     /*taille du tampon*/
+unsigned long long counter   /*Utilisé pour garder la synchro, mis à jour
+                               chaque fois que de nouvelles données son
+                               exportées.*/
+.fi
+.sp 1
+Le reste est charge utile, constitué de données 16bit (non-entrelacées).
 .PD 0
 .RSs
 .IPs <fichier_mmappé>
@@ -3998,16 +4089,27 @@ fichier où mapper les données (par défaut\ : ~/.mplayer/\:mplayer-af_export)
 .IPs <nsamples>
 nombre d'échantillons par canal (par défaut\ : 512)
 .RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer \-af export=/tmp/mplayer-af_export:1024 media.avi"
+Exporterait 1024 échantillons par canal dans '/tmp/mplayer-af_export'.
+.RE
 .PD 1
 .
 .TP
 .B extrastereo[=mul]
-Augmente la différence entre les canaux de gauche et de droite pour qu'à
-la lecture on ait un effet "live".
+Augmente (linéairement) la différence entre les canaux de gauche et de
+droite ce qui permet d'obtenir un lecture avec un effet 'live'.
 .PD 0
 .RSs
 .IPs <mul>
-coefficient de différence (par défaut\ : 2.5)
+Défini le coefficient de différence (par défaut\ : 2.5)
+0.0 donne un son mono (moyenne des deux cannaux), 1.0 done un son
+inchangé, tandis qu'avec -1.0 les canaux gauche et droit seront
+inversés.
 .RE
 .PD 1
 .
@@ -4069,7 +4171,7 @@ position x;y à partir de du coin supérieur gauche de la plus grande image.
 .I NOTE\ :
 Pour avoir une liste complète des filtres vidéo disponibles, voir \-vf help.
 .sp 1
-Les filtres sont gérés en liste.
+Les filtres vidéo sont gérés en liste.
 Il y a quelques commandes pour gérer la liste de filtres.
 .
 .TP
