@@ -347,7 +347,7 @@ flip=yes
 # start with mf://filemask
 mf=type=png:fps=25
 # Eerie negative images are cool.
--vf=eq2=1.0:-0.8
+vf=eq2=1.0:-0.8
 .fi
 .PP
 You can also write file-specific configuration files.
@@ -6770,20 +6770,10 @@ Sets the bitrate to be used in kbits/\:second (default: off).
 This is required if you want a CBR (constant bitrate) encode.
 .
 .TP
-.B keyint=<value>
+.B iframe=<value>
 Sets maximum interval between I frames.
 Larger values save bits, thus improve quality, at the cost of seeking
-precision (default: 250).
-.
-.TP
-.B idrint=<value>
-Each <value> I-Frames are IDR-Frames (default: 2).
-In H.264, I-Frames do not necessarily bound a closed GOP because it is
-allowable for a P-frame to be predicted from more frames than just the one
-frame before it (also see frameref).
-Therefore, I-frames are not necessarily seekable.
-IDR-Frames restrict subsequent P-frames from referring to any frame
-prior to the IDR-Frame.
+precision (default: 60).
 .
 .TP
 .B frameref=<1\-15>
@@ -6793,11 +6783,21 @@ live-action source material.
 Some decoders are unable to deal with large frameref values.
 .
 .TP
-.B bframes=<0\-16>
-number of consecutive B-Frames between I- and P-Frames (default: 0)
+.B idrframe=<value>
+Each <value> I-Frames are IDR-Frames (default: 2).
+In H.264, I-Frames do not necessarily bound a closed GOP because it is
+allowable for a P-frame to be predicted from more frames than just the one
+frame before it (also see frameref).
+Therefore, I-frames are not necessarily seekable.
+IDR-Frames restrict subsequent P-frames from referring to any frame
+prior to the IDR-Frame.
 .
 .TP
-.B deblock | nodeblock
+.B bframe=<value>
+number of B-Frames between I- and P-Frames (default: 0)
+.
+.TP
+.B deblock=<0|1>
 Use deblocking filter (default: on).
 As it takes very little time compared to its quality gain, it's not
 recommend to disable it.
@@ -6824,10 +6824,10 @@ Beta parameter of deblocking filter (default: 0).
 Affects the maximum allowed gradient within two adjacent blocks.
 .
 .TP
-.B cabac | nocabac
-Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
-Slightly slows down encoding and decoding, but should save 10-15% bitrate.
-Unless you are looking for speed, you should not disable it.
+.B cabac\ \ \ 
+Use CABAC (Context-Adaptive Binary Arithmetic Coding).
+Slows down encoding but should save 10-15% of the bits.
+Unless you are looking for speed, you should activate it.
 .
 .TP
 .B cabacidc=<value>
@@ -6847,7 +6847,7 @@ directly affect distortion.
 .REss
 .
 .TP
-.B qp_constant=<1\-51>
+.B qp_constant=<2\-51>
 This selects the quantizer to use.
 20\-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
@@ -6858,11 +6858,11 @@ is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
 .
 .TP
-.B qp_min=<1\-51> (CBR or 2 pass)
+.B qp_min=<2\-51> (CBR only)
 Minimum quantizer, 15\-35 seems to be a useful range (default: 10).
 .
 .TP
-.B qp_max=<1\-51> (CBR or 2 pass)
+.B qp_max=<2\-51>  (CBR only)
 maximum quantizer (default: 51)
 .
 .TP
@@ -6912,13 +6912,29 @@ Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
 .
 .TP
-.B fullinter | nofullinter
+.B fullinter
 Use all available interframe macroblock types (i16x16, i4x4, p16x16-4x4)
 The idea is to find the type and size that best describe a certain area
 of the picture, i.e.\& very effective for Anime, which usually contains
 large areas of the same color (default: i16x16, i4x4, p16x16-8x8).
 Depending on the source material, it can improve or degrade quality, use
 it with care.
+.
+.TP
+.B log=<-1\-3>
+Adjust the amount of logging info printed to the screen.
+.RSs
+-1: none
+.br
+ 0: Print errors only.
+.br
+ 1: warnings
+.br
+ 2: PSNR, encoding times, and other analysis stats when the encode finishes
+(default)
+.br
+ 3: PSNR, QP, frametype, size, and other stats for every frame
+.REss
 .
 .TP
 .B subq=<0\-5>
@@ -6941,24 +6957,8 @@ It can improve quality significantly.
 .REss
 .
 .TP
-.B log=<-1\-3>
-Adjust the amount of logging info printed to the screen.
-.RSs
--1: none
-.br
- 0: Print errors only.
-.br
- 1: warnings
-.br
- 2: PSNR, encoding times, and other analysis stats when the encode finishes
-(default)
-.br
- 3: PSNR, QP, frametype, size, and other stats for every frame
-.REss
-.
-.TP
-.B psnr | nopsnr
-Print signal-to-noise ratio statistics (default: off).
+.B psnr\ \ \ 
+Print signal-to-noise ratio statistics.
 .
 .
 .\" --------------------------------------------------------------------------
