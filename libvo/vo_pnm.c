@@ -227,8 +227,10 @@ void pnm_mkdir(char *buf, int verbose) {
                     exit_player(MSGTR_Exit_error);
                 }
                 
+                if (strcmp(buf, ".") != 0) {
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
                         buf, MSGTR_VO_DirExistsAndIsWritable);
+                }
                 break;
 
             default:
