@@ -129,9 +129,13 @@ extern void print_video_header(BITMAPINFOHEADER *h);
 
 int read_asf_header(demuxer_t *demuxer){
   static unsigned char buffer[1024];
+  uint32_t* streams = NULL;
   int audio_streams=0;
   int video_streams=0;
-  
+  uint16_t stream_count=0;
+  int best_video = -1;
+  int best_audio = -1;
+
 #if 1
   //printf("ASF file! (subchunks: %d)\n",asfh.cno);
 while(!stream_eof(demuxer->stream)){
@@ -184,7 +188,7 @@ while(!stream_eof(demuxer->stream)){
         }
       case ASF_GUID_PREFIX_video_stream: {
         sh_video_t* sh_video=new_sh_video(demuxer,streamh.stream_no & 0x7F);
-        int len=streamh.type_size-(4+4+1+2);
+        unsigned int len=streamh.type_size-(4+4+1+2);
 	++video_streams;
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
@@ -276,11 +280,11 @@ while(!stream_eof(demuxer->stream)){
       break;
     }
     case ASF_GUID_PREFIX_stream_group: {
-        uint16_t stream_count, stream_id, i;
+        uint16_t stream_id, i;
         uint32_t max_bitrate;
         char *object=NULL, *ptr=NULL;
         printf("============ ASF Stream group == START ===\n");
-        printf(" object size = %d\n", objh.size);
+        printf(" object size = %d\n", (int)objh.size);
         object = (char*)malloc(objh.size);
 	if( object==NULL ) {
           printf("Memory allocation failed\n");
@@ -291,6 +295,8 @@ while(!stream_eof(demuxer->stream)){
 	ptr = object;
         stream_count = *(uint16_t*)ptr;
         ptr += sizeof(uint16_t);
+        if(stream_count > 0)
+              streams = (uint32_t*)malloc(2*stream_count*sizeof(uint32_t));
         printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
           stream_id = *(uint16_t*)ptr;
@@ -299,6 +305,8 @@ while(!stream_eof(demuxer->stream)){
           max_bitrate = *(uint32_t*)ptr;
           ptr += sizeof(uint32_t);
           printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
+          streams[2*i] = stream_id;
+          streams[2*i+1] = max_bitrate;
         }
         printf("============ ASF Stream group == END ===\n");
         free( object );
@@ -311,15 +319,32 @@ while(!stream_eof(demuxer->stream)){
   if(!stream_seek(demuxer->stream,endpos)) break;
 } // while EOF
 
+if(streams) {
+  uint32_t vr = 0, ar = 0,i;
+  for(i = 0; i < stream_count; i++) {
+    uint32_t id = streams[2*i];
+    uint32_t rate = streams[2*i+1];
+    if(demuxer->v_streams[id] && rate > vr) {
+      vr = rate;
+      best_video = id;
+    } else if(demuxer->a_streams[id] && rate > ar) {
+      ar = rate;
+      best_audio = id;
+    }
+  }
+  free(streams);
+}
+
 mp_msg(MSGT_HEADER,MSGL_V,"ASF: %d audio and %d video streams found\n",audio_streams,video_streams);
 if(!audio_streams) demuxer->audio->id=-2;  // nosound
+else if(best_audio > 0 && demuxer->audio->id == -1) demuxer->audio->id=best_audio;
 if(!video_streams){
     if(!audio_streams){
 	mp_msg(MSGT_HEADER,MSGL_ERR,"ASF: no audio or video headers found - broken file?\n");
 	return 0; 
     }
     demuxer->video->id=-2; // audio-only
-}
+} else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
 #if 0
 if(verbose){
