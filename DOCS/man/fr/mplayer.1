@@ -1,4 +1,4 @@
-.\" synced with 1.880
+.\" synced with 1.893
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -889,8 +889,11 @@ Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .B \-channels <nombre>
 Indique le nombre de canaux audio à utiliser. (défaut\ : 2).
 Si le nombre de canaux de sortie est plus grand que celui des canaux
-d'entrée des canaux vides sont insérés (à moins de mixer de mono vers stéréo,
-dans ce cas le canal mono est répété sur les deux canaux de sortie).
+d'entrée des canaux vides sont insérés à l'aide du filtre audio channels
+(à moins de mixer de mono vers stéréo, dans ce cas le canal mono est
+répété sur les deux canaux de sortie).
+L'affectation des canaux sera celui existant par défaut dans le filtre
+channels.
 Si le nombre de canaux de sortie est plus petit que celui des canaux
 d'entrée, les résultats dépendront du décodeur audio (\-afm).
 MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
@@ -903,8 +906,8 @@ Dans ce cas liba52 fait le décodage par défaut et fusionne
 correctement l'audio dans le nombre requis de canaux.
 .br
 .I NOTE:
-Cette option est comprise par les codecs (ac3 uniquement) filtres (surround)
-et drivers ao (OSS au moins).
+Cette option est comprise par les codecs (AC3 uniquement), filtres (surround)
+et pilotes de sortie audio (OSS au moins).
 .sp 1
 Les options disponibles sont:
 .sp 1
@@ -3218,7 +3221,7 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .B \-af-adv <force=(0\-3):list=(filtres)> (voir aussi \-af)
 Définit les options avancées de filtrage audio\ :
 .RSs
-.IPs force=<0\-3>
+.IPs force=<0\-7>
 Force l'insertion de filtres audios de l'une des façons suivantes:
 .RSss
 0: insertion totalement automatique des filtres (par défaut)
@@ -3226,8 +3229,25 @@ Force l'insertion de filtres audios de l'une des façons suivantes:
 1: Optimise pour fidélité.
 .br
 2: Optimise pour la vitesse.
+.I Attention\ :
+Certaines fonctions dans la chaîne des filtres audio peuvent faillir en
+silence, et la qualité du son peut s'en voir dégradée.
 .br
-3: Désactive l'insertion automatique de filtre.
+3: Désactive toute optimisation et toute insertion automatique de filtre.
+.I Attention\ :
+Il se peut que MPlayer se plante en utilisant cette option.
+.br
+4: Active l'insertion automatique de filtre d'après 0 ci-dessus,
+mais si possible effectue le traitement en virgule flottante.
+.br
+5: Active l'insertion automatique de filtre d'après 1 ci-dessus,
+mais si possible effectue le traitement en virgule flottante.
+.br
+6: Active l'insertion automatique de filtre d'après 2 ci-dessus,
+mais si possible effectue le traitement en virgule flottante.
+.br
+7: Active l'insertion automatique de filtre d'après 3 ci-dessus,
+mais si possible effectue le traitement en virgule flottante.
 .REss
 .IPs list=<filtres>
 Identique à \-af.
@@ -5564,7 +5584,7 @@ la syntaxe ci-dessous\ :
 .B \-<codec>opts <option1[=valeur],option2,...>
 .
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, x264enc
+Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, x264enc, mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5887,11 +5907,14 @@ MPEG-1 video
 MPEG-2 video
 .IPs huffyuv
 HuffYUV
+.IPs ffvhuff (voir aussi\ : vstrict)
+HuffYUV non-standard produisant des fichiers 20% plus petits en
+utilisant YV12
 .IPs asv1\ 
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1\ 
+.IPs ffv1 (voir aussi\ : vstrict)
 codec vidéo sans perte de FFmpeg
 .RE
 .PD 1
@@ -6420,8 +6443,7 @@ désactivé (par défaut)
 Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG-4 de
 référence.
 .IPs -1
-Permet l'encodage non-standard huffyuv YV12 (fichiers 20% plus petits,
-mais qui ne peuvent pas être relus par le codec huffyuv officiel).
+Autorise l'encodage avec des codecs non-standard (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -6732,6 +6754,18 @@ codage arithmétique (CABAC)
 petit modèle contextuel
 .IPs 1
 grand modèle contextuel
+.RE
+.PD 1
+.sp 1
+.RS
+(pour ffvhuff)
+.RE
+.PD 0
+.RSs
+.IPs 0
+tables de huffman pré-calculées (intégrée ou deux passes)
+.IPs 1
+tables de huffman adaptives
 .RE
 .PD 1
 .
@@ -7958,6 +7992,83 @@ Ils sont affichés uniquement pour pouvoir les comparer à ceux du codec de
 référence JM.
 Dans les autres cas, préférez donc utiliser ou bien le PSNR 'Global', ou bien
 les PSNR de chaque trame affichés par l'option log=3.
+.
+.
+.SS multiplexeur MPEG (\-mpegopts)
+.
+Le multiplexeur MPEG peut générer 5 types de flux, chacun ayant des
+paramètres, raisonnables par défaut, que l'utilisateur peut redéfinir.
+En général, lorsque vous générez un fichier MPEG, il est recommandé
+de désactiver le code de saut de trames de MEncoder (voir \-noskip, \-mc,
+tout comme les filtres vidéo harddup et softskip).
+.
+.TP
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
+le format de flux (par défaut\ : mpeg2)
+.
+.TP
+.B size=<jusqu'à 65535>
+Taille des paquets en octets, à ne pas changer à moins que vous
+sachiez exactement ce que vous faites (par défaut\ : 2048).
+.
+.TP
+.B muxrate=<entier>
+Taux de multiplexage nominal en kbit/s utilisé dans l'entête des
+paquets headers (par défaut\ : 1800 kb/s).
+Sera mis à jour si nécessaire dans le cas où 'format=mpeg1' ou 'mpeg2'.
+.
+.TP
+.B tsaf\ \ \ 
+Place des markes d'horodatage (timestamps) dans chaque trame, si possible.
+.
+.TP
+.B (no)reorder
+Active le code de ré-ordonnancement de trames, qui stocke les trames
+dans l'ordre de décodage (au lieu de l'ordre d'affichage)
+(par défaut\ : désactivé).
+Ne l'utiliser que si vous pensez que si les trames du flux vidéo source
+était stocké dans le mauvais ordre.
+Ne fonctionne qu'avec les vidéos MPEG-1/2.
+.
+.TP
+.B init_vpts=<100\-700>
+pts vidéo initial, en millisecondes (par défaut\ : 200)
+.
+.TP
+.B init_apts=<100\-700>
+pts audio initial, in millisecondes (par défaut\ : 200)
+.
+.TP
+.B vdelay=<1\-32760>
+Retard vidéo initial, en millisecondes (par défaut\ : 0),
+à utiliser si vous voulez retarder la vidéo par rapport au son.
+.
+.TP
+.B drop\ \ \ 
+Lorsque utilisé en même temps que init_adelay, le multiplexeur élimine
+le début de la piste sonore qui n'aurait pas été jouée si elle commençait
+avant la vidéo.
+.
+.TP
+.B vwidth, vheight=<1,4095>
+Défini la largeur et la hauteur de la vidéo lorsqu'il s'agit de MPEG-1/2.
+.
+.TP
+.B vpswidth, vpsheight=<1,4095>
+Défini la largeur et la hauteur de la vidéo pan et scan lorsqu'il s'agit
+de MPEG-1/2.
+.
+.TP
+.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
+Défini le ratio d'aspect pour les vidéos MPEG-1/2.
+.
+.TP
+.B vbitrate=<entier>
+Défini le débit binaire vidéo kbit/s pour les vidéos MPEG-1/2.
+.
+.TP
+.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+Défini le nombre de trames par secondes pour les vidéos MPEG-1/2.
 .
 .
 .\" --------------------------------------------------------------------------
