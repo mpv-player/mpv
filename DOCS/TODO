@@ -28,6 +28,7 @@ Player features:
 - support for MPEG TS (transport streams) and PES format - I need sample files!
 - verify valid range of numeric options (like '-xy 0')
 - DirectShow support
+- OSD
 
 Requested codecs:
 - WMV (failing to load)
