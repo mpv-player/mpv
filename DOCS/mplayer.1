@@ -191,17 +191,19 @@ for example :
 .TP
 .B \-vfm <1-5>
 force usage of a specific codec FAMILY. For example:
-    2 : use VFW (Win32) codecs
-    4 : use DirectShow (Win32) codecs
-    5 : use libavcodec codecs
+
+    -vfm 2         use VFW (Win32) codecs
+    -vfm 4         use DirectShow (Win32) codecs
+    -vfm 5         use libavcodec codecs
 .TP
 .B \-afm <1-5>
 force usage of a specific audio format. For example:
-    1 : MPEG
-    2 : PCM
-    3 : AC3
-    4 : Win32
-    5 : aLaw
+
+    -afm 1         use libmp3 (mp1/mp2/mp3)
+    -afm 2         suppose raw PCM audio
+    -afm 3         use libac3
+    -afm 4         use a matching Win32 codec
+    -afm 5         use aLaw/uLaw driver
 .TP
 .B \-sb\ position
 seek to byte position
