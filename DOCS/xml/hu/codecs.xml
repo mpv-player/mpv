@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced to 1.51 -->
+<sect1 id="codecs">
+<title>Támogatott codec-ek</title>
+
+<sect2 id="video-codecs">
+<title>Videó codec-ek</title>
+
+<para>
+Nézd meg a <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">codec státusz táblázatot</ulink>
+a teljes, naponta generált listáért. Elég sok codec elérhetõ letöltésként a
+weboldalunkon. Szedd le õket a
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codec oldalról</ulink>.
+</para>
+
+<para>
+A legfontosabb dolgok:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">MPEG1</emphasis> (<emphasis role="bold">VCD</emphasis>) és
+  <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
+  </simpara></listitem>
+<listitem><simpara>
+  natív dekódolók <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
+  DivX 5 (Pro), 3ivX, M$ MPEG4</emphasis> v1, v2 és más MPEG4 variánsokhoz
+  </simpara></listitem>
+<listitem><simpara>
+  natív dekódoló <emphasis role="bold">Windows Media Video 7/8</emphasis>
+  (<emphasis role="bold">WMV1/WMV2</emphasis>), és Win32 DLL dekódoló
+  a <emphasis role="bold">Windows Media Video 9</emphasis> formátumhoz
+  (<emphasis role="bold">WMV3</emphasis>), mindkettõt a <filename>.wmv</filename>
+  fájloknál használjuk
+  </simpara></listitem>
+<listitem><simpara>
+  natív <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekódoló
+  </simpara></listitem>
+<listitem><simpara>
+  natív <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekódoló
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">3ivx</emphasis> v1, v2 dekódoló
+  </simpara></listitem>
+<listitem><simpara>
+  Cinepak és <emphasis role="bold">Intel Indeo</emphasis> codec (3.1,3.2,4.1,5.0)
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 és más hardveres
+  formátumok
+  </simpara></listitem>
+<listitem><simpara>
+  VIVO 1.0, 2.0, I263 és egyéb <emphasis role="bold">H.263(+)</emphasis> variánsok
+  </simpara></listitem>
+<listitem><simpara>
+  FLI/FLC
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> a
+  <systemitem class="library">libavcodec</systemitem>-bõl és
+  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> codec a RealPlayer
+  könyvtárak felhasználásával
+  </simpara></listitem>
+<listitem><simpara>
+  natív dekódoló HuffYUV-hoz
+  </simpara></listitem>
+<listitem><simpara>
+  különbözõ régi, egyszerû, RLE-szerû formátum
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+Ha van olyan Win32 codec-ed, ami nincs a listában és még nem támogatott,
+olvasd el a <link linkend="win32-codecs">codec importálás HOGYAN</link>-t
+és segítsd a munkánkat.
+</para>
+
+
+<sect3 id="divx4-5">
+<title>DivX4/DivX5</title>
+
+<para>
+Ez a rész a <ulink url="http://www.projectmayo.com">Project Mayo</ulink>
+DivX4 és DivX5 codec-jeirõl tartalmaz információkat. AZ elsõ elérhetõ
+alpha verziójuk az OpenDivX 4.0 alpha 47 és 48 volt. Ezek támogatása
+be volt építve az <application>MPlayer</application>be régen, és
+alapértelmezésként be is lett forgatva. Használtuk az utófeldolgozó kódjukat
+is az MPEG1/2 filmek képminõségének opcionális javításához. Most már a
+sajátunkat használjuk, minden típushoz.
+</para>
+
+<para>
+Ennek a codec-nek az új generációját DivX4-nek hívják és még a hírhedt
+DivX codec-kel készített filmek dekódolására is képes! Ráadásként sokkal
+gyorsabb, mint a natív Win32 DivX DLL, de lassabb, mint a
+<systemitem class="library">libavcodec</systemitem>.
+Ezért <emphasis role="bold">ellenezzük</emphasis> a dekóderként
+történõ használatát. Kódoláshoz viszont hasznos. Az egyetlen hátránya
+ennek a codec-nek, hogy nem elérhetõ Nyílt Forráskódú licensszel.
+</para>
+
+<para>
+A DivX4 két módban mûködik:
+<variablelist>
+<varlistentry><term><option>-vc odivx</option></term>
+<listitem><simpara>
+  A codec-et OpenDivX formában használja. Ebben az esetben YV12 képeket készít
+  a saját bufferében, és az <application>MPlayer</application> színtér konverziót
+  végez a libvo-n keresztül. (<emphasis role="bold">Gyors, javasolt!</emphasis>)
+  </simpara></listitem>
+</varlistentry>
+<varlistentry><term><option>-vc divx4</option></term>
+<listitem><simpara>
+  A codec színtér konverzióját használja. Ebben a módban használhatod a
+  YUY2/UYVY-t is. (<emphasis role="bold">LASSÚ</emphasis>)
+  </simpara></listitem>
+</varlistentry>
+</variablelist>
+</para>
+
+<para>
+A <option>-vc odivx</option> módszer általában gyorsabb, amiatt, hogy a
+kép adatait YU12 (planar YUV 4:2:0) formátumban viszi át, így sokkal
+kisebb sávszélesség kell neki az adatbuszon. A csomagolt YUV módok (YUY2, UYVY)
+a <option>-vc divx4</option> módszert használják. Az RGB módoknál a sebesség
+ugyan akkora, csak az aktuális színmélységedhez történõ alkalmazkodásukban
+különböznek.
+<note>
+<para>
+Ha a <option>-vo</option> vezérlõd támogatja a direkt renderelést, akkor a <option>-vc
+divx4</option> gyorsabb lehet vagy akár a leggyorsabb is.
+</para>
+
+<para>
+A DivX4/5 bináris codec könyvtár letölthetõ az
+<ulink url="http://avifile.sourceforge.net">avifile</ulink>-ról vagy
+a <ulink url="http://www.divx.com">divx.com</ulink> címrõl.
+Csomagold ki, futtasd az <filename>./install.sh</filename> fájlt root-ként és ne
+felejtsd el beírni a <filename class="directory">/usr/local/lib</filename>
+könyvtárat az <filename>/etc/ld.so.conf</filename> fájlba, majd futtatni az
+<command>ldconfig</command> parancsot.
+</para>
+
+<para>
+A RÉGI OpenDivX függvénykönyvtárnak a CVS verziója is letölthetõ:
+</para>
+
+<procedure>
+<step><para>
+<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
+</para></step>
+<step><para>
+<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
+</para></step>
+<step><para>
+Ez a fõ függvénykönyvtár decore és encore könyvtárakra van osztva, amiket külön
+kell fordítani. A decore könyvtárhoz egyszerûen írd be:
+<screen>
+cd divxcore/decore/build/linux
+make
+cp libdivxdecore.so /usr/local/lib
+ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+cp ../../src/decore.h /usr/local/include
+</screen>
+</para></step>
+<step><para>
+Sajnos az encore könyvtárhoz nincs Linuxos Makefile és az MMX optimalizáció csak
+Windowson mûködik. De így is le tudod fordítani,
+ezen
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>
+használatával.
+<screen>
+cd ../../../encore/build
+mkdir linux
+cd linux
+cp path/Makefile .
+make
+cp libdivxencore.so /usr/local/lib
+ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
+cp ../../src/encore.h /usr/local/include
+</screen>
+</para></step>
+</procedure>
+
+<para>
+Az <application>MPlayer</application> automatikusan megtalálja a DivX4/DivX5-öt ha az
+megfelelõen van telepítve, csak fordítsd le úgy, mint máskor. Ha nem találja meg,
+nem telepítetted vagy nem állítottad be megfelelõen.
+</para>
+
+</note>
+</para>
+</sect3>
+
+
+<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<title>FFmpeg/libavcodec</title>
+
+<para>
+Az <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> egy
+<emphasis role="bold">nyílt forráskódú</emphasis> codec csomagot tartamaz, ami
+képes számos audió és videó codec-et tartalmazó folyam dekódolására. Lenyûgözõ
+kódolási képességei is vannak, és gyorsabb mint a Win32 codec-ek a DivX.com
+DivX4/5 könyvtáraiban!
+</para>
+
+<para>
+Rengeteg szép codec-et tartalmaz, különösen fontosak az MPEG4 variánsok:
+DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Nagyon érdekes még a
+WMA dekódoló.
+</para>
+
+<para>
+A legújabb említésre méltó codec a <emphasis role="bold">Sorenson 3</emphasis>
+(SVQ3) codec. Ez az elsõ, teljesen nyílt forráskódú implementáció. És még gyorsabb
+is, mint az eredeti. Gyõzõdj meg róla, hogy ezt használod a bináris codec helyett!
+</para>
+
+<para>
+Az összes támogatott codec listájáért látogasd meg az FFmpeg weboldalát.
+Támogatott <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
+és <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audió</ulink> codec-ek.
+</para>
+
+<para>
+Ha egy <application>MPlayer</application> kiadást használsz, a
+<systemitem class="library">libavcodec</systemitem>
+benne van a csomagban, csak fordítsd le a szokásos módon. Ha az
+<application>MPlayer</application>t CVS-bõl szedted, ki kell csomagolnod
+a <systemitem class="library">libavcodec</systemitem>-et az FFmpeg
+CVS fájából, mivel az FFmpeg kiadások elég ritkán jönnek. A CVS
+legtöbbször stabil és több funkciót nyújt. Mindez így hajtható végre:
+</para>
+
+<procedure>
+<step><para>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
+  </para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
+  </para></step>
+<step><para>
+  Mozgasd át a <filename>libavcodec</filename> könyvtárat az FFmpeg
+  forrásából az <application>MPlayer</application> CVS fájának gyökérkönyvtárába.
+  Valahogy így kell kinéznie:
+  <filename class="directory">main/libavcodec</filename>
+  </para><para>
+  A szimbólikus link készítése <emphasis role="bold">nem</emphasis> elég, át kell
+  másolnod/mozgatnod!
+  </para></step>
+<step><para>
+  Ha azt szeretnéd, hogy a <systemitem class="library">libavcodec</systemitem>
+  mindig frissüljön, amikor frissíted az <application>MPlayer</application> CVS-t,
+  írd be a következõ sort a <filename>main/CVS/Entries</filename> fájlba:
+  <screen>D/libavcodec////</screen>
+  </para></step>
+<step><para>
+  Fordíts. Ha baj van, a <filename>configure</filename> megtalálja még a fordítás elõtt.
+  </para></step>
+</procedure>
+
+<note>
+<para>
+Az CVS-bõl származó <application>MPlayer</application> tartalmaz egy
+<filename>libavcodec</filename> alkönyvtárat, de ebben
+<emphasis role="bold">nincs</emphasis> bent a
+<systemitem class="library">libavcodec</systemitem> forrása!
+Kövesd a fenti lépéseket a függvénykönyvtár forrásának beszerzéséhez.
+</para>
+</note>
+
+<para>
+Az FFmpeg-gel és a Matrox G400-as kártyámmal még a legnagyobb felbontású DivX
+filmeket is képkockák eldobása nélkül tudom nézni a K6-2 500 gépemen.
+</para>
+</sect3>
+
+
+<sect3 id="xanim">
+<title>XAnim codec-ek</title>
+
+<note>
+<para>
+Hadd figyelmeztessünk, hogy az XAnim bináris codec-jeit egy kis szöveggel együtt
+csomagolják, amely egy legális szoftver licensz, és amely más megszorítások mellett
+megtiltja a a felhasználónak, hogy a codec-eket az <application>XAnim</application>-on
+kívül más programmal használja. Ennek ellenére az XAnim szerzõi még
+senki ellen sem tettek jogi lépéseket codec-használat ügyben.
+</para>
+</note>
+
+<formalpara>
+<title>TELEPÍTÉS ÉS HASZNÁLAT</title>
+<para>
+Az <application>MPlayer</application> képes az XAnim codec-ek dekódoláshoz
+történõ felhasználására. Kövesd az utasításokat a bekapcsolásukhoz:
+</para>
+</formalpara>
+
+<procedure>
+<step><para>
+  Töltsd le a kívánt codec-eket az
+  <ulink url="http://xanim.va.pubnix.com">XAnim oldaláról</ulink>.
+  A <emphasis role="bold">3ivx</emphasis> codec nincs ott, az a
+  <ulink url="http://www.3ivx.com">3ivx oldalon</ulink> van.
+  </para></step>
+<step><para>
+  <emphasis role="bold">VAGY</emphasis> töltsd le a codec csomagot a
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codec oldalunkról</ulink>
+  </para></step>
+<step><para>
+  Használd a <option>--with-xanimlibdir</option> kapcsolót, amivel
+  megmondhatod a <filename>configure</filename>-nak, hogy hol találhatóak az
+  XAnim codec-ek. Alapértelmezésben a
+  <filename class="directory">/usr/local/lib/codecs</filename>,
+  <filename class="directory">/usr/local/lib/xanim/mods</filename>,
+  <filename class="directory">/usr/lib/xanim/mods</filename> és
+  <filename class="directory">/usr/lib/xanim</filename> könyvtárakban keresi.
+  Alternatívaként az
+  <envar>XANIM_MOD_DIR</envar> környezeti változó beállításával is
+  megadhatod az XAnim codec-ek könyvtárát.
+  </para></step>
+<step><para>
+  Nevezd át/szimlinkelt a fájlokat, szedd ki az architektúra részeket, így ilyen
+  fájlneveket kapsz, mint ezek: <filename>vid_cvid.xa</filename>,
+  <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
+  </para></step>
+</procedure>
+
+<para>
+Az XAnim egy videó codec család, amelynek a használatát, ha az lehetséges,
+a <option>-vfm xanim</option> kapcsolóval írhatod elõ az <application>MPlayer</application>nek.
+</para>
+
+<para>
+Letesztelt codec-ek: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
+H.263.</emphasis>
+</para>
+</sect3>
+
+
+<sect3 id="vivo-video">
+<title>VIVO videó</title>
+<para>
+Az <application>MPlayer</application> le tudja játszani a Vivo (1.0 és 2.0) videókat. Az
+1.0-ás fájlokhoz leginkább az FFmpeg H.263 dekódere illik, ezt a
+<option>-vc ffh263</option> kapcsolóval tudod használni. A 2.0-ás fájlokhoz használd
+a Win32 DLL-t a <option>-vc vivo</option> kapcsoló segítségével. Ha nem adsz meg
+kapcsolót a parancsorban, az <application>MPlayer</application> automatikusan
+kiválasztja a legjobb codec-et.
+</para>
+</sect3>
+
+
+<sect3 id="mpeg12">
+<title>MPEG 1/2 videó</title>
+<para>
+Az MPEG1 és MPEG2 a <systemitem class="library">libmpeg2</systemitem> többplatformos,
+natív függvénykönyvtár segítségével kerülnek dekódolásra, aminek a forrása benne van
+az <application>MPlayer</application>ben. Le tudjuk kezelni a hibás MPEG 1/2
+videó fájlokat is a <systemitem>Signal 11</systemitem> elkapásával
+(<systemitem>szegmentálási hiba</systemitem>), és a codec gyors
+újrainicializálásával, pontosan onnan folytatva, ahol a hiba keletkezett. Ennek
+a javító technikának nincs mérhetõ sebességvesztesége.
+</para>
+</sect3>
+
+
+<sect3 id="avicodecs">
+<title>MS Video1, Cinepak CVID, és egyéb régi codec-ek</title>
+<para>
+Az <application>MPlayer</application> a legtöbb régi codec-kel készült AVI és MOV
+fájlt le tudja játszani. Régen bináris Win32 codec-ekkel voltak dekódolva, de most
+már <emphasis role="bold">natív codec-jeink</emphasis> vannak a legtöbbhöz a
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>-nek
+hála.
+</para>
+</sect3>
+
+
+<sect3 id="realvideo">
+<title>RealVideo</title>
+
+<para>
+Az <application>MPlayer</application> támogatja a RealVideo összes verziójának
+dekódolását:
+
+<itemizedlist>
+<listitem><simpara>
+  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - kódolás/dekódolás támogatása
+  <systemitem class="library">libavcodec</systemitem>-kel
+  </simpara></listitem>
+<listitem><simpara>
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - dekódolás támogatása
+  <emphasis role="bold">RealPlayer könyvtárakkal</emphasis>
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Töltsd le a Real codec-eket a
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
+könyvtárból és csomagold ki a
+<filename class="directory">/usr/local/lib/codecs</filename> könyvtárba.
+Ha máshol akarod tárolni õket, add meg a
+<option>--with-reallibdir</option> kapcsolót a <command>configure</command>-nak.
+</para>
+
+<note><para>
+A <application>RealPlayer</application> könyvtárak jelenleg
+<emphasis role="bold">csak Linux, FreeBSD, NetBSD és Cygwin alatt mûködnek
+x86-on, Alpha-n és PowerPC-n (a Linux/Alpha és Linux/PowerPC tesztelve lett) és Mac OS X-szel</emphasis>.
+</para></note>
+</sect3>
+
+
+<sect3 id="xvid">
+<title>XviD</title>
+
+<para>
+Az <ulink url="http://www.xvid.org">XviD</ulink> egy OpenDivX codec-bõl kivállt fejlesztés.
+Akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá tette
+DivX4 (most DivX5) néven, felbosszantva így a nem-ProjectMayo-s fejlesztõket, akik az OpenDivX-en
+dolgoztak, akik elindították az XviD-et. Így mindkét projektnek azonosak a gyökereik.
+
+<itemizedlist>
+<title>ELÕNYÖK</title>
+<listitem><simpara>
+  nyílt forráskódú
+  </simpara></listitem>
+<listitem><simpara>
+  az API-ja kompatibilis a DivX4-gyel, így könnyû a támogatása
+  </simpara></listitem>
+<listitem><simpara>
+  2-lépéses kódolás támogatása
+  </simpara></listitem>
+<listitem><simpara>
+  szép kódolási minõség, a DivX4-nél nagyobb sebesség (fordítás közben a saját gépedhez
+  optimalizálhatod)
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>HÁTRÁNYOK</title>
+<listitem><simpara>
+  jelenleg nem tudja megfelelõen <emphasis role="bold">dekódolni</emphasis> az összes
+  DivX/DivX4 fájlt (nem baj, mivel a
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  le tudja játszani õket)
+  </simpara></listitem>
+<listitem><simpara>
+  fejlesztés alatt áll
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<procedure>
+<title>XVID CVS TELEPÍTÉSE</title>
+<para>
+  Jelenleg csak CVS-bõl beszerezhetõ. Íme a letöltés és a telepítés lépései
+  (legalább 2.50-es autoconf, automake és libtool szükséges):
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+  </para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+  </para></step>
+<step><para>
+  <screen>./bootstrap.sh</screen>
+  </para></step>
+<step><para>
+  <screen>./configure</screen>
+  Meg kell adnod pár kapcsolót (tanulmányozd a
+  <command>./configure --help</command> kimenetét).
+  </para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+  </para></step>
+<step><para>
+  Ha megadtad a <option>--enable-divxcompat</option> kapcsolót,
+  másold át a <filename>../../src/divx4.h</filename> fájlt a
+  <filename class="directory">/usr/local/include/</filename>könyvtárba.
+  </para></step>
+<step><para>
+  Fordítsd újra az <application>MPlayer</application>t a
+  <option>--with-xvidlibdir=<replaceable>/eleresi/ut/</replaceable>libxvidcore.a</option>
+  <option>--with-xvidincdir=<replaceable>/eleresi/ut/</replaceable>xvid.h</option>
+  kapcsolókkal.
+  </para></step>
+</procedure>
+</sect3>
+
+
+<sect3 id="sorenson">
+<title>Sorenson</title>
+
+<para>
+A Sorenson egy Sorenson Media által kifejlesztett videó codec, amit az Apple-nek licenszelnek,
+aki a <application>QuickTime Player</application>-ével terjeszti. Képesek vagyunk
+a Sorenson videó fájlok összes verziójának dekódolására a következõ dekódolókkal:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - a dekódolást
+  <emphasis role="bold">natív codec</emphasis> biztosítja
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
+  </simpara></listitem>
+<listitem><simpara>
+  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - a dekódolást
+  <emphasis role="bold">natív codec</emphasis> biztosítja
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
+  </simpara></listitem>
+</itemizedlist>
+
+<procedure>
+<title>MPLAYER FORDÍTÁSA QUICKTIME KÖNYVTÁRAK TÁMOGATÁSÁVAL</title>
+<note><para>Jelenleg csak a 32-bit-es Intel platformok támogatottak.</para></note>
+<step><para>Töltsd le az <application>MPlayer</application> CVS-t</para></step>
+<step><para>Töltsd le a QuickTime DLL csomagot:
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
+</para></step>
+<step><para>Csomagold ki a QuickTime DLL-eket a Win32 codec könyvtáradba
+(alapértelmezett: <filename class="directory">/usr/local/lib/codecs/</filename>)
+</para></step>
+<step><para>fordítsd le az <application>MPlayer</application>t</para></step>
+</procedure>
+
+</sect3>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="audio-codecs">
+<title>Audió codec-ek</title>
+
+<itemizedlist>
+<title>A legfontosabb audió codec-ek:</title>
+<listitem><simpara>
+  MPEG layer 1/2/3 (MP1/2/3) audió (<emphasis role="bold">natív</emphasis>
+  kód, MMX/SSE/3DNow! optimalizációval)
+  </simpara></listitem>
+<listitem><simpara>
+  Windows Media Audio 7 és 8 (ismert mint WMAv1 és WMAv2) (<emphasis role="bold">natív</emphasis> kód,
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>-kel)
+  </simpara></listitem>
+<listitem><simpara>
+  Windows Media Audio 9 (WMAv3) (DMO DLL-lel)
+  </simpara></listitem>
+<listitem><simpara>
+  AC3 Dolby audió (<emphasis role="bold">natív</emphasis> kód,
+  MMX/SSE/3DNow! optimalizációval)
+  </simpara></listitem>
+<listitem><simpara>
+  hangkártyán áteresztõ AC3
+  </simpara></listitem>
+<listitem><simpara>
+  AAC
+  </simpara></listitem>
+<listitem><simpara>
+  Ogg Vorbis audió codec (<emphasis role="bold">natív</emphasis> függvénykönyvtár)
+  </simpara></listitem>
+<listitem><simpara>
+  RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro és ATRAC3
+  </simpara></listitem>
+<listitem><simpara>
+  QuickTime: Qualcomm és QDesign audió codec-ek
+  </simpara></listitem>
+<listitem><simpara>
+  VIVO audió (g723, Vivo Siren)
+  </simpara></listitem>
+<listitem><simpara>
+  Voxware audió (DirectShow DLL használatával)
+  </simpara></listitem>
+<listitem><simpara>
+  alaw és ulaw, számos gsm, adpcm és pcm formátum és más, egyszerû, régi
+  audió codec
+  </simpara></listitem>
+</itemizedlist>
+
+
+<sect3 id="swac3">
+<title>Szoftveres AC3 dekódolás</title>
+
+<para>
+Ez az alapértelmezésben használt dekódoló az AC3 audiójú fájlokhoz.
+</para>
+
+<para>
+Az AC3 dekódoló 2, 4 vagy 6 csatornás hangkimenet keverést tud csinálni.
+Ha 6 hangszóróra van beállítva, ez a dekódoló külön kimenetet biztosít hang
+vezérlõ összes AC3 csatornájának, létrehozva így a teljes "surround
+sound" hatást, a hwac3 codec-hez szükséges külsõ AC3 dekódoló nélkül.
+</para>
+
+<para>
+Használd a <option>-channels</option> kapcsolót a kimeneti csatornák számának
+megadásához. A <option>-channels 2</option> sztereo downmix-et produkál. Egy 4
+csatornás downmixhez (bal elülsõ, jobb elülsõ, bal Surround és jobb Surround
+kimenet) használd a <option>-channels 4</option> kapcsolót. Ebben az esetben,
+bármelyik középsõ csatorna egyenlõen lesz elkeverve az elülsõ csatornákhoz.
+A <option>-channels 6</option> kapcsoló minden AC3 csatornát úgy ad ki, ahogy
+azok kódolva lettek - bal, jobb, bal Surround, jobb Surround, Center és LFE
+sorrendben.
+</para>
+
+<para>
+A csatornák alapértelmezett száma 2.
+</para>
+
+<para>
+2-nél több kimeneti csatorna használatához OSS-t kell használnod, és egy olyan
+hangkártyával kell rendelkezned, ami támogatja a megfelelõ számú kimeneti
+csatornát az SNDCTL_DSP_CHANNELS ioctl-en keresztül. Például az emu10k1
+2001. augusztus vagy késõbbi verziói megfelelõ vezérlõk (a Soundblaster Live!
+kártyák használják, de az ALSA CVS is valószínûleg mûködik).
+</para>
+</sect3>
+
+
+<sect3 id="hwac3">
+<title>Hardveres AC3 dekódolás</title>
+<para>
+AC3-at támogató hangkártyára lesz szükséges, digitális kimenettel (S/PDIF). A
+kártya vezérlõjének megfelelõen támogatnia kell az AFMT_AC3 formátumot
+(a C-Media támogatja). Csatlakoztasd az AC3 dekódolódat az S/PDIF kimenethez és
+használd a <option>-ac hwac3</option> kapcsolót. Még kisérleti kód, de mûködik
+C-Media kártyákon és Soundblaster Live! + ALSA (de OSS-en nem) vezérlõvel,
+valamint DXR3/Hollywood+ MPEG dekódoló kártyákon.
+</para>
+</sect3>
+
+
+<sect3 id="libmad">
+<title>libmad támogatás</title>
+
+<para>
+A <ulink url="http://mad.sourceforge.net">libmad</ulink> egy többplatformos,
+csak egész (belsõ 24bit-es PCM) alapú MPEG audió dekódoló függvénykönyvtár.
+Nem kezeli jól a sérült fájlokat, és néha problémái vannak a kereséssel, de
+jobb a teljesítménye FPU nélküli rendszereken 
+(mint pl. az <link linkend="arm">ARM</link>), mint az mp3lib-é.
+</para>
+
+<para>
+A támogatás bekapcsolásához add meg a <option>--enable-mad</option> configure
+kapcsolót.
+</para>
+</sect3>
+
+
+<sect3 id="vivo-audio">
+<title>VIVO audió</title>
+<para>
+A VIVO fájlokban használt audió codec attól függ, hogy VIVO/1.0 vagy
+VIVO/2.0 fájlról van-e szó. A VIVO/1.0 fájlok <emphasis role="bold">g.723</emphasis> audiót
+tartalmaznak, a VIVO/2.0 fájlok pedig <emphasis role="bold">Vivo Siren</emphasis> audiót.
+Mindkettõ támogatott.
+</para>
+</sect3>
+
+
+<sect3 id="realaudio">
+<title>RealAudio</title>
+
+<para>
+Az <application>MPlayer</application> majdnem minden RealAudio verziót támogat:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  RealAudio DNET - a dekódolást a
+  <systemitem class="library">liba52</systemitem> biztosítja
+  </simpara></listitem>
+<listitem><simpara>
+  RealAudio Cook/Sipro/ATRAC3 - a dekódolást a
+  <emphasis role="bold">RealPlayer könyvtárak</emphasis> biztosítják
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+A RealPlayer könyvtárak telepítési útmutatóját a
+<link linkend="realvideo">RealVideo</link> részben találod.
+</para>
+</sect3>
+
+<sect3 id="qdesign">
+<title>QDesign codec-ek</title>
+<para>
+QDesign audió folyamok (fourcc:<emphasis>QDMC, QDM2</emphasis>) MOV/QT fájlokban
+találhatóak. Ezen codec mindkét verziója dekódolható a QuickTime
+könyvtárakkal. A telepítési útmutatóhoz olvasd el a
+<link linkend="sorenson">Sorenson videó codec</link> részt.
+</para>
+</sect3>
+
+<sect3 id="qualcomm">
+<title>Qualcomm codec-ek</title>
+<para>
+Qualcomm audio streams (fourcc:<emphasis>Qclp</emphasis>) MOV/QT fájlokban
+találhatóak. Dekódolhatóak a QuickTime könyvtárakkal.
+A telepítési útmutatóhoz olvasd el a
+<link linkend="sorenson">Sorenson videó codec</link> részt.
+</para>
+</sect3>
+
+<sect3 id="aac">
+<title>AAC codec</title>
+<para>
+Az AAC (Advanced Audio Coding) egy audió codec, amit néha MOV és MP4 fájlokban
+található. Egy FAAD nevû, nyílt forráskódú dekódoló elérhetõ a
+<ulink url="http://www.audiocoding.com"/> címen.
+Az <application>MPlayer</application> tartalmazza a libfaad 2.0RC1-et, nem szükséges
+külön beszerezni.
+</para>
+
+<para>
+Ha gcc 3.2-t használsz, ami nem tudja lefordítani a belsõ FAAD forrásunkat vagy valami
+más okból a külsõ függvénykönyvtárat szeretnéd használni, töltsd le a
+<ulink url="http://www.audiocoding.com/download.php">letöltési oldalról</ulink>
+és add meg a <option>--enable-external-faad</option> kapcsolót a <filename>configure</filename>-nak.
+Nem kell a teljes faad2 az AAC fájlok dekódolásához, a libfaad elég. Így készítsd el:
+<screen>
+cd faad2/
+chmod +x bootstrap
+./bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Binárisok nem tölthetõek le az audiocoding.com-ról, de (apt-)get-tel feltelepítheted
+Debian csomagokból <ulink url="http://marillat.free.fr">Christian Marillat weboldaláról</ulink>,
+vagy Mandrake RPM-bõl a <ulink url="http://plf.zarb.org">P.L.F</ulink>-rõl, RedHat RPM-bõl
+pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tól.
+</para>
+</sect3>
+
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="win32-codecs">
+<title>Win32 codec importálási HOGYAN</title>
+
+<!-- TODO: a short paragraph of text would be nice here... -->
+
+<sect3 id="vfw-codecs">
+<title>VFW codec-ek</title>
+
+<para>
+A VFW (Video for Windows) egy régi Videó API Windowshoz. A codecjei
+<filename>.DLL</filename> vagy (ritkán) <filename>.DRV</filename> kiterjesztésûek
+voltak. Ha az <application>MPlayer</application>nek nem sikerül lejátszani az AVI
+fájlodat egy ilyesmi üzenettel:
+<screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
+</para>
+
+<para>
+Ez azt jelenti, hogy az AVI fájlod egy olyan codec-kel lett elkódolva, aminek
+HFYU a fourcc-je (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, stb.). Most, hogy
+már tudod ezt, meg kell keresned, melyik DLL-t tölti be a Windows ennek a fájlnak
+a lejátszásához. A mi esetünkben, a <filename>system.ini</filename> tartalmazza
+ezt az információt ebben a sorban:
+<programlisting>VIDC.HFYU=huffyuv.dll</programlisting>
+</para>
+
+<para>
+Szükséged lesz a <filename>huffyuv.dll</filename> fájlra. Figyelj rá, hogy az
+audio codec-ek MSACM prefix-szel vannak megadva:
+<programlisting>msacm.l3acm=L3codeca.acm</programlisting>
+</para>
+
+<para>
+Ez az MP3 codec. Most már minden szükséges információval rendelkezel
+(fourcc, codec fájl, példa AVI), küldd be a codec támogatási kérésedet egy
+levélben és töltsd fel ezket a fájlokat az FTP-re:
+<systemitem role="url">
+ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+</systemitem>
+</para>
+
+<note><para>Windows NT/2000/XP alatt a regisztrációs adatbázisban keresd ezeket
+az információkat, pl. keress rá a &quot;VIDC.HFYU&quot;-ra. Hogy ezt hogy tudod
+megcsinálni, nézd meg a régi DirectShow módszert lejebb.
+</para></note>
+</sect3>
+
+
+<sect3 id="dshow-codecs">
+<title>DirectShow codec-ek</title>
+
+<para>
+A DirectShow egy újabb Videó API, ami még rosszabb, mint az elõdje.
+A dolgok nehezebben mennek a DirectShow-val, mivel
+<itemizedlist>
+<listitem><simpara>
+  a <filename>system.ini</filename> nem tartalmazza a megfelelõ információkat,
+  azok a regisztrációs adatbázisban vannak és
+  </simpara></listitem>
+<listitem><simpara>
+  szükségünk van a codec GUID-jére.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<procedure>
+<title>Új módszer:</title>
+<para>
+A <application>Microsoft GraphEdit</application> használatával (gyors)
+</para>
+<step><para>
+  Szedd le a <application>GraphEdit</application>-et a DirectX SDK-ból vagy a
+  <ulink url="http://doom9.org">doom9</ulink>-rõl.
+  </para></step>
+<step><para>
+  Indítsd el a <command>graphedit.exe</command>-t.
+  </para></step>
+<step><para>
+  A menüben válaszd ki a Graph -> Insert Filters menüpontot.
+  </para></step>
+<step><para>
+  Nyisd ki a <systemitem>DirectShow Filters</systemitem> elemeit.
+  </para></step>
+<step><para>
+  Válaszd ki a megfelelõ codec nevet és nyisd ki.
+  </para></step>
+<step><para>
+  A <systemitem>DisplayName</systemitem> bejegyzésben nézd meg a francia
+  zárójelek között lévõ karakterláncot és írd le (öt vonallal elválasztott
+  blokk, a GUID).
+  </para></step>
+<step><para>
+  A codec bináris a <systemitem>Filename</systemitem> bejegyzésben megadott
+  fájl.
+  </para></step>
+</procedure>
+
+<note>
+<para>
+Ha nincs <systemitem>Filename</systemitem> és a
+<systemitem>DisplayName</systemitem> olyasmit tartalmaz, hogy
+<systemitem>device:dmo</systemitem>, akkor ez egy DMO-Codec.
+</para>
+</note>
+
+<procedure>
+<title>Régi módszer:</title>
+<para>
+Végy egy nagy levegõt és kezdj keresni a regisztrációs adatbázisban...
+</para>
+<step><para>
+  indítsd el a <command>regedit</command>-et.
+  </para></step>
+<step><para>
+  Nyomd meg a <keycap>Ctrl</keycap>+<keycap>F</keycap>, kapcsold ki az elsõ
+  két kijelölõ dobozd és engedélyezd a harmadikat. Írd be a codec fourcc-jét (pl.
+  <userinput>TM20</userinput>).
+  </para></step>
+<step><para>
+  Egy mezõt kell látnod, ami az elérési utat és a fájl nevét tartalmazza (pl.
+  <filename>C:\WINDOWS\SYSTEM\TM20DEC.AX</filename>).
+  </para></step>
+<step><para>
+  Most, hogy megvan a fájl, a GUID-t kell megkeresni. Próbáld újra a keresést, de
+  most a codec nevére keress, ne a fourcc-re. A nevét a Media Player kiírja a
+  fájl lejátszása közben, ha megnézed a
+  <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
+  <guimenuitem>Advanced</guimenuitem> fület.
+  Ha mégsem, akkor így jártál. Próbáld meg kitalálni (pl. keress rá a TrueMotion-ra).
+  </para></step>
+<step><para>
+  Ha megvan a GUID, látnod kell egy <guilabel>FriendlyName</guilabel> és egy
+  <guilabel>CLSID</guilabel> mezõt. Írd le a 16 bájtos CLSID-t, ez
+  a GUID, ami kell.
+  </para></step>
+</procedure>
+
+<note>
+<para>
+Ha nem sikerült a keresés, próbáld meg bekapcsolni az összes kijelölõ dobozt. Ekkor
+kaphatsz hamis találatokat, de talán szerencséd lesz...
+</para>
+</note>
+
+<para>
+Most, hogy már megvan minden szükséges információ (fourcc, GUID, codec fájl,
+példa AVI), küldd el a codec támogatási kérelmedet levélben és töltsd fel a fájlokat
+az FTP-re:
+<systemitem
+role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+</systemitem>
+</para>
+</sect3>
+</sect2>
+</sect1>
