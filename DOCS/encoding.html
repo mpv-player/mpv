@@ -87,7 +87,7 @@
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
-<H2><A NAME="mpeg">7.1 Encoding to MPEG format</A></H2>
+<H2><A NAME="mpeg">7.2 Encoding to MPEG format</A></H2>
 
 <P>MEncoder can create MPEG (MPEG-PS) format output files. It's probably
   useful only with libavcodec's <I>mpeg1video</I> codec, because players
@@ -106,7 +106,7 @@
   -oac copy &lt;other options&gt; media.avi -o output.mpg</CODE></P>
 
 
-<H2><A NAME="rescaling">7.2 Rescaling movies</A></H2>
+<H2><A NAME="rescaling">7.3 Rescaling movies</A></H2>
 
 <P>Often the need to resize movie images' size emerges. Its reasons can be
   many: decreasing file size, network bandwidth, etc. Most people
@@ -126,7 +126,7 @@
   output.avi</CODE></P>
 
 
-<H2><A NAME="copying">7.3 Stream copying</A></H2>
+<H2><A NAME="copying">7.4 Stream copying</A></H2>
 
 <P>MEncoder can handle input streams in two ways: <B>encode</B> or
   <B>copy</B> them. This section is about <B>copying</B>.</P>
@@ -147,7 +147,7 @@
 </UL>
 
 
-<H2><A NAME="fixing">7.4 Fixing AVIs with broken index or interleaving</A></H2>
+<H2><A NAME="fixing">7.5 Fixing AVIs with broken index or interleaving</A></H2>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
   MEncoder generates the index. Of course this cannot fix possible bugs
@@ -158,7 +158,7 @@
 <P>Command: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H2><A NAME="libavcodec">7.5 Encoding with the libavcodec codec family</A></H2>
+<H2><A NAME="libavcodec">7.6 Encoding with the libavcodec codec family</A></H2>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> provides simple encoding to a
   lot of interesting video and audio formats (currently its audio codecs are
@@ -185,7 +185,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H2><A NAME="image_files">7.6 Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H2>
+<H2><A NAME="image_files">7.7 Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H2>
 
 <P>MEncoder is capable of creating movies from one or more JPEG, PNG or TGA
   files. With simple framecopy it can create MJPEG (Motion JPEG), MPNG
@@ -231,7 +231,7 @@ Explanation of the process:
   -o output.avi \*.tga</CODE></P>
 
 
-<H2><A NAME="vobsub">7.7 Extracting DVD subtitles to a Vobsub file</A></H2>
+<H2><A NAME="vobsub">7.8 Extracting DVD subtitles to a Vobsub file</A></H2>
 
 <P>MEncoder is capable of extracting subtitles from a DVD into
   Vobsub fomat files. They consist of a pair of files ending in
@@ -272,7 +272,7 @@ Explanation of the process:
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
-<H2><A NAME="aspect">7.8 Preserving aspect ratio</A></H2>
+<H2><A NAME="aspect">7.9 Preserving aspect ratio</A></H2>
 
 <P>DVDs and SVCDs (i.e. MPEG1/2) files contain an aspect ratio value,
   which describes how should the player scale the video stream, so humans
