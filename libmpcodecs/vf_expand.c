@@ -18,14 +18,23 @@
 #include "../libvo/osd.h"
 #endif
 
+#include "m_option.h"
+#include "m_struct.h"
+
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-struct vf_priv_s {
+static struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
     mp_image_t *dmpi;
     int osd;
     unsigned char* fb_ptr;
+} vf_priv_dflt = {
+  -1,-1,
+  -1,-1,
+  NULL,
+  0,
+  NULL
 };
 
 extern int opt_screen_size_x;
@@ -143,7 +152,8 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
     vo_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func);
     // save buffer pointer for double buffering detection - yes, i know it's
     // ugly method, but note that codecs with DR support does the same...
-    vf->priv->fb_ptr=vf->priv->dmpi->planes[0];
+    if(vf->priv->dmpi)
+      vf->priv->fb_ptr=vf->priv->dmpi->planes[0];
 }
 
 #endif
@@ -255,6 +265,7 @@ static void draw_slice(struct vf_instance_s* vf,
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->priv->dmpi=mpi->priv;
+	if(!vf->priv->dmpi) { printf("Why do we get NULL \n"); return 0; }
 	mpi->priv=NULL;
 	if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	    if(vf->priv->exp_y>0)
@@ -325,6 +336,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
+    if(!vf->priv) {
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->exp_x=
     vf->priv->exp_y=
@@ -332,6 +344,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->exp_h=-1;
     vf->priv->osd=0;
     //  parse args ->
+    } // if(!vf->priv)
     if(args) sscanf(args, "%d:%d:%d:%d:%d", 
     &vf->priv->exp_w,
     &vf->priv->exp_h,
@@ -347,6 +360,25 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+  {"w", ST_OFF(exp_w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"h", ST_OFF(exp_h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"x", ST_OFF(exp_x), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
+  {"y", ST_OFF(exp_y), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
+  {"osd", ST_OFF(osd), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_opts = {
+  "expand",
+  sizeof(struct vf_priv_s),
+  &vf_priv_dflt,
+  vf_opts_fields
+};
+
+
+
 vf_info_t vf_info_expand = {
 #ifdef OSD_SUPPORT
     "expanding & osd",
@@ -357,7 +389,7 @@ vf_info_t vf_info_expand = {
     "A'rpi",
     "",
     open,
-    NULL
+    &vf_opts
 };
 
 //===========================================================================//
