@@ -196,6 +196,8 @@ cache_vars_t* cache_init(int size,int sector){
 #else
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
 #endif
+  if(s==NULL) return NULL;
+  
   memset(s,0,sizeof(cache_vars_t));
   num=size/sector;
   if(num < 16){
@@ -208,6 +210,16 @@ cache_vars_t* cache_init(int size,int sector){
 #else
   s->buffer=malloc(s->buffer_size);
 #endif
+
+  if(s->buffer == NULL){
+#ifndef WIN32
+    shmem_free(s,sizeof(cache_vars_t));
+#else
+    free(s);
+#endif
+    return NULL;
+  }
+
   s->fill_limit=8*sector;
   s->back_size=s->buffer_size/2;
   return s;
@@ -249,6 +261,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   }
 
   s=cache_init(size,ss);
+  if(s == NULL) return 0;
   stream->cache_data=s;
   s->stream=stream; // callback
   s->prefill=prefill;
