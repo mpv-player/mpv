@@ -1343,11 +1343,13 @@ int too_slow_frame_cnt=0;
 int too_fast_frame_cnt=0;
 // for auto-quality:
 float AV_delay=0; // average of A-V timestamp differences
-double cvideo_base_vtime;
-double cvideo_base_vframe;
 double vdecode_time;
 unsigned int lastframeout_ts;
 float time_frame_corr_avg=0;
+
+float next_frame_time=0;
+int frame_time_remaining=0; // flag
+int blit_frame=0;
 
 //================ SETUP AUDIO ==========================
 
@@ -1484,15 +1486,13 @@ if(!sh_video) {
 
 /*========================== PLAY VIDEO ============================*/
 
-  float frame_time=0;
-  int blit_frame=0;
+  float frame_time=next_frame_time;
+  float delay=audio_out->get_delay()*0.5;
 
-    vo_pts=sh_video->timer*90000.0;
-    vo_fps=sh_video->fps;
+  vo_pts=sh_video->timer*90000.0;
+  vo_fps=sh_video->fps;
 
-    cvideo_base_vframe=sh_video->timer;
-    cvideo_base_vtime=video_time_usage;
-
+  if(!frame_time_remaining){
     //--------------------  Decode a frame: -----------------------
     vdecode_time=video_time_usage;
     while(1)
@@ -1500,7 +1500,7 @@ if(!sh_video) {
 	int in_size;
 	// get it!
 	current_module="video_read_frame";
-        in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
+        in_size=video_read_frame(sh_video,&next_frame_time,&start,force_fps);
 	if(in_size<0){ eof=1; break; }
 	if(in_size>max_framesize) max_framesize=in_size; // stats
 	sh_video->timer+=frame_time;
@@ -1537,6 +1537,8 @@ if(!sh_video) {
 	eof=1; goto goto_next_file;
     }
 
+  }
+
 // ==========================================================================
     
 //    current_module="draw_osd";
@@ -1558,7 +1560,7 @@ if(!sh_video) {
 }
 #endif
 
-    if(drop_frame){
+    if(drop_frame && !frame_time_remaining){
 
       time_frame=0;	// don't sleep!
       blit_frame=0;	// don't display!
@@ -1567,6 +1569,7 @@ if(!sh_video) {
 
       // It's time to sleep...
       
+      frame_time_remaining=0;
       time_frame-=GetRelativeTime(); // reset timer
 
       if(sh_audio && !d_audio->eof){
@@ -1625,6 +1628,14 @@ if(!sh_video) {
 
 	} // if(dapsync)
 
+	if(delay>0.25) delay=0.25; else
+	if(delay<0.10) delay=0.10;
+	if(time_frame>delay*0.6){
+	    // sleep time too big - may cause audio drops (buffer underrun)
+	    frame_time_remaining=1;
+	    time_frame=delay*0.5;
+	}
+
       } else {
 
           // NOSOUND:
@@ -1676,12 +1687,14 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
 }
 
+//if(!frame_time_remaining){	// should we display the frame now?
+
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
         current_module="flip_page";
 
 	if(vo_config_count) video_out->check_events();
-        if(blit_frame){
+        if(blit_frame && !frame_time_remaining){
 	   unsigned int t2=GetTimer();
 	   double tt;
 	   float j;
@@ -1741,7 +1754,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
           max_pts_correction=default_max_pts_correction;
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
-        sh_audio->timer+=x; c_total+=x;
+	if(!frame_time_remaining){ sh_audio->timer+=x; c_total+=x;} // correction
         if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
@@ -2756,6 +2769,7 @@ if(rel_seek_secs || abs_seek_pos){
   }
   rel_seek_secs=0;
   abs_seek_pos=0;
+  frame_time_remaining=0;
   current_module=NULL;
 }
 
