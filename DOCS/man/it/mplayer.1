@@ -3483,7 +3483,7 @@ canale destro
 .PD 1
 .
 .TP
-.B \-sws <tipo\ scalatore\ software> (vedi anche \-vf scale e \-zoom)
+.B \-sws <tipo \scalatore \software> (vedi anche \-vf scale e \-zoom)
 Specifica l' algoritmo da utilizzare nella scalatura software attivata
 dall' opzione \-zoom.
 Questo influenza quei driver di uscita video a cui manca l' accelerazione
@@ -3810,13 +3810,13 @@ Attiva la scalatura interlacciata.
 .IPs <chr_drop>
 eliminazione chroma
 .RSss
-0: Utilizza tutte le linee di ingresso per la crominanza
+0: Utilizza tutte le linee di ingresso per la crominanza.
 .br
-1: Utilizza solo una linea ogni 2 linee di ingresso per la crominanza
+1: Utilizza solo una linea ogni 2 linee di ingresso per la crominanza.
 .br
-2: Utilizza solo una linea ogni 4 linee di ingresso per la crominanza
+2: Utilizza solo una linea ogni 4 linee di ingresso per la crominanza.
 .br
-3: Utilizza solo una linea ogni 8 linee di ingresso per la crominanza
+3: Utilizza solo una linea ogni 8 linee di ingresso per la crominanza.
 .REss
 .IPs <param>
 .RSss
@@ -4199,7 +4199,7 @@ deve essere rilevata come interlacciata per eliminare il fotogramma.
 .
 .TP
 .B lavcdeint
-filtro di deinterlacciamento di libavcodec.
+filtro di deinterlacciamento di libavcodec
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
@@ -5367,21 +5367,21 @@ stampa le opzioni aggiuntive ed informazioni sui settaggi predefiniti.
 .SS toolame (\-toolameopts)
 .
 .TP
-.B br=<0\-384>
-specifica il bitrate in kBit (solo CBR).
+.B br=<0\-384> (solo CBR)
+Specifica il bitrate in kBit.
 .TP
 .B mode=<stereo | jstereo | mono | dual>
-seleziona la modalita' (default: mono per l' audio con un solo canale,
+Seleziona la modalita' (default: mono per l' audio con un solo canale,
 altrimenti stereo).
 .TP
 .B psy=<0\-3>
-modello psicoacustico (default: 2).
+modello psicoacustico (default: 2)
 .TP
 .B errprot=<0 | 1>
-inserisce anche la protezione dagli errori.
+Inserisce anche la protezione dagli errori.
 .TP
 .B debug=<0\-10>
-livello di debug.
+livello di debug
 .RE
 .PD 1
 .
@@ -6745,11 +6745,11 @@ alcuni decodificatori puo' venir confusa.
 .
 .TP
 .B divx5bvop
-Genera dei fotogrammi di tipo B compatibili con DivX5 (default: attivo)
+Genera dei fotogrammi di tipo B compatibili con DivX5 (default: attivo).
 .
 .TP
 .B max_bframes=<0\-4>
-Numero massimo di fotogrammi di tipo B da mettere tra i fotogrammi I/\:P (default: 0)
+Numero massimo di fotogrammi di tipo B da mettere tra i fotogrammi I/\:P (default: 0).
 .
 .TP
 .B bquant_ratio=<0\-1000>
@@ -6971,7 +6971,7 @@ inseriti, in ogni fotogramma, dal contenitore (il formato file che contiene
 audio e/o video, ad esempio AVI o NUT).
 Questo piccola ma (spesso) costante aggiunta puo' causare un superamento
 della dimensione prevista del file.
-XvidD permette all' utente di selezionare la dimensione
+XviD permette all' utente di selezionare la dimensione
 dell' aggiunta che viene fatta per ogni fotogramma dal formato contenitore (passa
 semplicemente il valore medio di ogni fotogramma).
 Zero ha un significato speciale in quanto lascia che XviD utilizzi il suo
@@ -6979,7 +6979,7 @@ valore di default (default: 24 - media aggiunta per il formato AVI).
 .
 .TP
 .B par=<mode>
-Specifica il Pixel Aspecr Ratio (rapporto di aspetto del punto), da non
+Specifica il Pixel Aspect Ratio (rapporto di aspetto del punto), da non
 confondere con il DAR che e' il Display Aspect Ratio (rapporto di aspetto del
 Display).
 Par e' il rapporto tra la larghezza e l' altezza di un singolo punto e percio'
@@ -7215,17 +7215,17 @@ Controlla la quelita' della rifinitura dei sotto pixel (subpel).
 Questo parametro controlla la qualita' rispetto alla velocita' coinvolta
 nel processo di decisione della stima del movimento.
 .RSs
-0: solo halfpel.
+0: solo halfpel
 .br
-1: 1 iterazione di qpel sul candidato prescelto (default).
+1: 1 iterazione di qpel sul candidato prescelto (default)
 .br
-2: 2 iterazioni di qpel sul candidato prescelto.
+2: 2 iterazioni di qpel sul candidato prescelto
 .br
-3: halfpel su tutti i tipi di MB, qpel sul candidato prescelto.
+3: halfpel su tutti i tipi di MB, qpel sul candidato prescelto
 .br
-4: qpel su tutti.
+4: qpel su tutti
 .br
-5: piu' iterazioni di qpel.
+5: piu' iterazioni di qpel
 .REss
 .
 .TP
