@@ -897,6 +897,12 @@ to the FTP site:
 role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
+
+<para>
+If you want to add a codec yourself, read
+<ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>.
+</para>
+
 </sect3>
 </sect2>
 </sect1>
