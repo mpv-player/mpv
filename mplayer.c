@@ -811,7 +811,7 @@ if(stream_dump_type){
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
-    if( (demuxer->file_format==DEMUXER_TYPE_AVI || demuxer->file_format==DEMUXER_TYPE_ASF)
+    if( (demuxer->file_format==DEMUXER_TYPE_AVI || demuxer->file_format==DEMUXER_TYPE_ASF || demuxer->file_format==DEMUXER_TYPE_MOV)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
   }
@@ -1360,6 +1360,11 @@ if(1)
           sh_video->frametime=d; // 1ms
           sh_video->fps=1.0f/d;
         }
+    } else
+    if(demuxer->file_format==DEMUXER_TYPE_MOV && !force_fps){
+        // .MOV files has no fixed FPS - just frame durations!
+        float d=d_video->pts-pts1;
+	frame_time=d;
     }
     sh_video->timer+=frame_time;
     time_frame+=frame_time;  // for nosound
