@@ -1974,7 +1974,7 @@ Wird er nicht hinzugefügt, erfolgt die Ausgabe als raw-PCM.
 Schreibe den Sound nach <Dateiname> und nicht in die Standarddatei
 audiodump.wav.
 Wurde nowaveheader angegeben, ist der Standard audiodump.pcm.
-.REss
+.RE
 .PD 1
 .
 .TP
@@ -5487,7 +5487,7 @@ Dies erzwingt den CBR-Modus auch bei ABR-Presets.
 .
 .TP
 .B br=<0\-1024>
-Bitrate in kBit/s an (nur bei CBR und ABR)
+Bitrate in kBit/s (nur bei CBR und ABR)
 .
 .TP
 .B q=<0\-9>
@@ -5550,7 +5550,7 @@ für die Frequenz automatisch wählen.
 .TP
 .B lowpassfreq=<Frequenz>
 Setzt die Frequenz für Lowpass-Filterung in Hz.
-Frequenzen überhalb der angegebenen werden abgeschnitten.
+Frequenzen oberhalb der angegebenen werden abgeschnitten.
 Ein Wert von -1 deaktiviert die Filterung, ein Wert von 0 lässt LAME die Werte
 für die Frequenz automatisch wählen.
 .
@@ -5611,53 +5611,123 @@ Debugging-Level
 .
 .
 .\" manpage is synced from top down to this option.
-.TP
-.B \-xvidencopts <option1:option2:...>
-Wenn mit XviD encodiert wird, können hier die Parameter dafür angegeben werden.
-.br
-Es gibt drei Modi: konstante Bitrate (CBR), feste Quantizer und
-Encodieren in zwei Durchgängen.
-.br
-Verfügbare Optionen sind:
+.SS xvidenc (\-xvidencopts)
 .
-.RSs
-.IPs pass=<1|2>
-Gibt die Nummer des Durchgangs an.
-.IPs bitrate=<Wert>
-Setzt die zu benutzende Bitrate in kbit/s an, wenn Wert < 16000 ist, oder in
-bit/s, wenn Wert > 16000 ist (nur bei CBR oder bei zwei Durchgängen,
-Standardwert: 687 kbit/s).
-.IPs fixed_quant=<1\-31>
-Aktiviert den Modus mit festen Quantizern und gibt den zu benutzenden
-Quantizer an.
-.IPs me_quality=<0\-6>
-Gibt die Qualität der Bewegungserkennung an (Standardwert: 4).
-.IPs 4mv
-Benutzt vier Motion-Vectors pro Makroblock, was eine bessere Kompression
-auf Kosten der Encodiergeschwindigkeit bringen kann (standardmäßig aus).
-.IPs rc_reaction_delay_factor=<Wert>
-Gibt an, wie schnell die Bitratenkontrolle reagiert. Niedrigere Werte stehen
-für schnellere Reaktion.
-.IPs rc_averaging_period=<Wert>
-Zeitraum zum Erreichen des geforderten Durchschnitts.
-.IPs rc_buffer=<Wert>
-Größe des Bitratenkontrollpuffers
-.IPs quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-minimale und maximale Quantizer für alle Bilder (Standard: 2\-31 im CBR-Modus)
+Es sind drei Modi verfügbar: konstante Bitrate (CBR), feste
+Quantisierungsparameter und Encodieren in zwei Durchläufen (two-pass).
+.
+.TP
+.B pass=<1|2>
+Gibt die Nummer des Durchgangs im two-pass-Modus an.
+.
+.TP
+.B bitrate=<Wert>
+Setzt die zu benutzende Bitrate in kbit/s an, wenn der Wert < 16000 ist, oder
+in bit/s, wenn der Wert > 16000 ist.
+Ist <Wert> negativ, so benutzt XviD dessen absoluten Wert als Zielgröße des
+Videos (in kBytes) und berechnet die zugehörige Bitrate automagisch.
+(nur bei CBR oder bei zwei Durchläufen, Standardwert: 687 kbit/\:s)
+.
+.TP
+.B fixed_quant=<1\-31>
+Aktiviert den Modus mit festen Quantisierungsparametern und legt den zu
+benutzenden Quantisierungsparameter fest.
+.
+.TP
+.B me_quality=<0\-6>
+Diese Option kontrolliert das Subsystem der Bewegungsabschätzung.
+Je höher der Wert, desto genauer sollte die Abschätzung sein (Standard: 6).
+Je genauer die Abschätzung ist, desto mehr Bits können eingespart werden.
+Die Präzision wird auf Kosten der CPU-Zeit erreicht; benutze also niedrigere
+Werte, falls du Encodierung in Echtzeit brauchst.
+.
+.TP
+.B (no)interlacing
+Encodiert die Felder von interlaced Videomaterial.
+Schalte diese Option bei interlaced Inhalten ein.
 .br
-minimale und maximale Quantizer für I\-/\:P\-Frames (Standard: 2\-31/2\-31 im
-Modus mit zwei Durchgängen)
-.IPs min_key_interval=<Wert>
-minimale Anzahl Bilder zwischen zwei Schlüsselbildern (Standardwert 0, nur
-im Modus mit zwei Durchgängen)
-.IPs max_key_interval=<Wert>
-maximale Anzahl Bilder zwischen zwei Schlüsselbildern (Standardwert 10 * FPS,
-nur im Modus mit zwei Durchgängen)
-.IPs mpeg_quant
-benutze MPEG\-Quantizer anstelle von H.263\-Quantizern (Standard: aus)
-.IPs mod_quant
-Entscheide für jedes Bild, ob MPEG\- oder H.263\-Quantizer zu verwenden
-sind (standardmäßig aus, nur beim Modus mit zwei Durchgängen).
+.I ANMERKUNG:
+Solltest du das Video anders skalieren, brauchst du einen Skalierer, der
+interlaced Material bemerkt; du kannst einen solchen mit '-vf
+scale=<Breite>:<Höhe>:1' aktivieren.
+.
+.TP
+.B 4mv\ \ \ \ 
+Benutzt vier Motion-Vectors pro Makroblock, was eine bessere Kompression
+auf Kosten der Encodiergeschwindigkeit bringen kann.
+.br
+.I WARNUNG:
+Seit Version 1.0.x von XviD ist diese Option nicht mehr separat verfügbar,
+die Funktionalität wurde in die Option me_quality integriert.
+Bei me_quality > 4 wird 4mv aktiviert.
+.
+.TP
+.B rc_reaction_delay_factor=<Wert>
+Dieser Parameter kontrolliert die Anzahl der Frames, die die
+CBR-Bitratenkontrolle wartet, bevor sie auf Änderungen der Bitrate reagiert
+und sie anpasst, um in einer durchschnittlich großen Spanne von Frames eine
+konstante Bitrate zu erhalten.
+.
+.TP
+.B rc_averaging_period=<Wert>
+Eine wirklich konstante Bitrate ist nur schwer zu erreichen.
+Abhängig vom Videomaterial kann die Bitrate variabel und schwer vorauszusagen
+sein.
+Daher benutzt der XviD-Encoder einen durchschnittlichen Zeitraum, für den er
+eine gegebene Anzahl Bits garantiert (minus einer kleinen Schwankung).
+Diese Option setzt die Anzahl der Frames, über denen XviD die Bitrate mittelt,
+um eine konstante Bitrate zu erreichen.
+.
+.TP
+.B rc_buffer=<Wert>
+Größe des Bitratenkontrollpuffers
+.
+.TP
+.B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
+CBR-Modus: minimaler und maximaler Quantisierungsparameter für alle Frames
+(Standard: 2\-31)
+.br
+Two-pass-Modus: minimaler und maximaler Quantisierungsparameter für
+I/\:P-Frames (Standard: 2\-31/\:2\-31)
+.br
+.I WARNUNG:
+Seit Version 1.0.x von XviD ist diese Option ersetzt durch die
+Optionen [min|max]_[i|p|b]quant.
+.
+.TP
+.B min_key_interval=<Wert>
+minimale Anzahl Frames zwischen zwei Keyframes (Standard: 0, nur im
+two-pass-Modus)
+.
+.TP
+.B max_key_interval=<Wert>
+maximale Anzahl Frames zwischen zwei Keyframes (Standard: 10*fps)
+.
+.TP
+.B mpeg_quant
+Benutze die MPEG-Quantisierung anstelle von H.263.
+Bei hohen Bitraten wirst du finden, dass die MPEG-Quantisierung mehr Details
+behält.
+Bei niedrigen Bitraten wird die Glättung von H.263 weniger Blockartefakte
+liefern.
+Bei der Benutzung eigener Matrizen muss die MPEG-Quantisierung benutzt werden.
+.br
+.I WARNUNG:
+Seit XviD 1.0.x ist diese Option ersetzt durch die Option quant_type.
+.
+.TP
+.B mod_quant
+Entscheide für jedes Bild, ob MPEG- oder H.263-Quantisierung zu verwenden
+ist (nur im two-pass-Modus).
+.br
+.I WARNUNG:
+Dies erzeugt einen unerlaubten Bitstream, der höchstwahrscheinlich von keinem
+Decoder außer libavcodec oder XviD dekodiert werden kann.
+.br
+.I WARNUNG:
+Seit Version 1.0.x von XviD ist diese Version nicht länger verfügbar.
+.
+.TP
 .IPs lumi_mask
 Benutze einen Algorithmus zur Helligkeitsmaskierung (standardmäßig aus,
 scheint buggy zu sein)
