@@ -441,9 +441,20 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
+ int tmp;
  while(pes>=0){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
-  if(!pes) demuxer->synced=1; // hack!
+  
+  // try to pre-detect PES:
+  tmp=stream_read_dword(demuxer->stream);
+  if(tmp==0x1E0 || tmp==0x1C0){
+      tmp=stream_read_word(demuxer->stream);
+      if(tmp>1 && tmp<=2048) pes=0; // demuxer->synced=3; // PES...
+  }
+  stream_seek(demuxer->stream,0);
+  
+  if(!pes) demuxer->synced=3; // hack!
+
   num_elementary_packets100=0;
   num_elementary_packets101=0;
   num_elementary_packets1B6=0;

@@ -278,8 +278,8 @@ do{
   // sure: head=0x000001XX
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"*** head=0x%X\n",head);
   if(demux->synced==0){
-    if(head==0x1BA) demux->synced=1; else
-    if(head==0x1BD || (head>=0x1C0 && head<=0x1EF)) demux->synced=3; // PES?
+    if(head==0x1BA) demux->synced=1; //else
+//    if(head==0x1BD || (head>=0x1C0 && head<=0x1EF)) demux->synced=3; // PES?
   } else
   if(demux->synced==1){
     if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
