@@ -674,7 +674,7 @@ you have to manually convert the subtitle file framerate.
 <application>MPlayer</application> can do this
 conversion for you:
 
-<screen>mplayer <replaceable>dummy.avi</replaceable> -fps subtitles_fps -subfps avi_fps [-subdelay sec] [-sub subtitle_filename] <replaceable>-dumpmicrodvdsub</replaceable></screen>
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
 </para>
 
 <para>
