@@ -25,6 +25,7 @@ typedef struct da_priv {
 
 extern int mp_decode_mp3_header(unsigned char* hbuf);
 extern void free_sh_audio(sh_audio_t* sh);
+extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 
 int demux_audio_open(demuxer_t* demuxer) {
@@ -82,8 +83,18 @@ int demux_audio_open(demuxer_t* demuxer) {
   switch(frmt) {
   case MP3:
     sh_audio->format = 0x55;
-    stream_seek(s,st_pos);
     demuxer->movi_start = st_pos;
+    for(n = 0; n < 5 ; n++) {
+      pos = mp_decode_mp3_header(hdr);
+      if(pos < 0)
+	return 0;
+      stream_skip(s,pos-4);
+      if(s->eof)
+	return 0;
+      stream_read(s,hdr,4);
+      if(s->eof)
+	return 0;
+    }
     if(s->end_pos) {
       char tag[4];
       stream_seek(s,s->end_pos-128);
@@ -197,7 +208,7 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
 	ds_add_packet(ds,dp);
 	return 1;
       }
-    }
+    } break;
   case WAV : {
     int l = sh_audio->wf->nAvgBytesPerSec;
     demux_packet_t*  dp = new_demux_packet(l);
@@ -245,5 +256,7 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   }
 
   stream_seek(s,pos);
+
+  resync_audio_stream(sh_audio);
 
 }
