@@ -26,6 +26,7 @@ mencoder \- Movie Encoder für Linux
 .RB [ \-ac3file\ <Dateiname> ]
 .RB [ \-ovc\ <Videocodec\ Name> ]
 .RB [ \-oac\ <Audiocodec\ Name> ]
+.RB [ \-nosound ]
 .RB [ \-mf\ <Optionen\ für\ mehrere\ Eingangsdateien> ]
 .RB [ \-divx4opts\ <Codec\ Optionen> ]
 .RB [ \-lavcopts\ <Codec\ Optionen> ]
@@ -140,6 +141,9 @@ Beispiele:
   -oac copy      keine Konvertierung, nur Streamkopierung
   -oac pcm       konvertiert zu unkomprimiertem PCM
   -oac mp3lame   konvertiert zu MP3 (benutzt Lame)
+.TP
+.B \-nosound
+konvertiert nur Video, keine Tonspur
 .TP
 .B \-audiofile <Dateiname>
 kopiert Audio von einer externen Datei
