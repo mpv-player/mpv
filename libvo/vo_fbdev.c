@@ -395,6 +395,41 @@ static int in_range(range_t *r, float f)
 	return 0;
 }
 
+static int mode_works(fb_mode_t *m, range_t *hfreq, range_t *vfreq,
+		range_t *dotclock)
+{
+	float h = hsf(m);
+	float v = vsf(m);
+	float d = dcf(m);
+	int ret = 1;
+
+	if (verbose > 1)
+		printf(FBDEV "mode %dx%d:", m->xres, m->yres);
+	if (!in_range(hfreq, h)) {
+		ret = 0;
+		if (verbose > 1)
+			printf(" hsync out of range.");
+	}
+	if (!in_range(vfreq, v)) {
+		ret = 0;
+		if (verbose > 1)
+			printf(" vsync out of range.");
+	}
+	if (!in_range(dotclock, d)) {
+		ret = 0;
+		if (verbose > 1)
+			printf(" dotclock out of range.");
+	}
+	if (verbose > 1) {
+		if (ret)
+			printf(" hsync, vsync, dotclock ok.\n");
+		else
+			printf("\n");
+	}
+
+	return ret;
+}
+
 static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 		range_t *vfreq, range_t *dotclock)
 {
@@ -402,10 +437,11 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 	fb_mode_t *best = fb_modes;
 	fb_mode_t *curr;
 
-	/* find first working mode */
+	if (verbose > 1)
+		printf(FBDEV "Searching for first working mode\n");
+
 	for (i = 0; i < nr_modes; i++, best++)
-		if (in_range(hfreq, hsf(best)) && in_range(vfreq, vsf(best)) &&
-				in_range(dotclock, dcf(best)))
+		if (mode_works(best, hfreq, vfreq, dotclock))
 			break;
 
 	if (i == nr_modes)
@@ -413,40 +449,46 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 	if (i == nr_modes - 1)
 		return best;
 
-	if (verbose > 1)
-		printf(FBDEV "%dx%d\n", best->xres, best->yres);
+	if (verbose > 1) {
+		printf(FBDEV "First working mode: %dx%d\n", best->xres, best->yres);
+		printf(FBDEV "Searching for better modes\n");
+	}
 
-	for (curr = best + 1; i < nr_modes; i++, curr++) {
-		if (!in_range(hfreq, hsf(curr)) ||
-		    !in_range(vfreq, vsf(curr)) ||
-		    !in_range(dotclock, dcf(curr)))
+	for (curr = best + 1; i < nr_modes - 1; i++, curr++) {
+		if (!mode_works(curr, hfreq, vfreq, dotclock))
 			continue;
+
 		if (verbose > 1)
-			printf(FBDEV "%dx%d ", curr->xres, curr->yres);
-		if ((best->xres < xres || best->yres < yres) &&
-				(curr->xres > best->xres ||
-				 curr->yres > best->yres)) {
-			if (verbose > 1)
-				printf("better than %dx%d\n", best->xres,
-						best->yres);
-			best = curr;
-		} else if (curr->xres >= xres && curr->yres >= yres) {
-			if (curr->xres < best->xres && curr->yres < best->yres) {
+			printf(FBDEV);
+
+		if (best->xres < xres || best->yres < yres) {
+			if (curr->xres > best->xres || curr->yres > best->yres) {
 				if (verbose > 1)
-					printf("smaller than %dx%d\n",
+					printf("better than %dx%d, which is too small.\n",
 							best->xres, best->yres);
 				best = curr;
-			} else if (curr->xres == best->xres &&
-					curr->yres == best->yres &&
-					(vsf(curr) > vsf(best))) {
-				if (verbose > 1)
-					printf("faster screen refresh\n");
-				best = curr;
 			} else if (verbose > 1)
-				printf("\n");
-		} else if (verbose > 1)
-			printf("is too small\n");
+				printf("too small.\n");
+		} else if (curr->xres == best->xres && curr->yres == best->yres &&
+				vsf(curr) > vsf(best)) {
+			if (verbose > 1)
+				printf("faster screen refresh.\n");
+			best = curr;
+		} else if ((curr->xres <= best->xres && curr->yres <= best->yres) &&
+				(curr->xres >= xres && curr->yres >= yres)) {
+			if (verbose > 1)
+				printf("better than %dx%d, which is too large.\n",
+						best->xres, best->yres);
+			best = curr;
+		} else if (verbose > 1) {
+			if (curr->xres < xres || curr->yres < yres)
+				printf("too small.\n");
+			else if (curr->xres > best->xres || curr->yres > best->yres)
+				printf("too large.\n");
+			else printf("it's worse, don't know why.\n");
+		}
 	}
+
 	return best;
 }
 
@@ -711,7 +753,7 @@ static int fb_preinit(void)
 		goto err_out_fd;
 	}
 
-	/* 16 and 15 bpp is reported 16 bpp */
+	/* 16 and 15 bpp is reported as 16 bpp */
 	if (fb_bpp == 16)
 		fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
 			fb_vinfo.blue.length;
