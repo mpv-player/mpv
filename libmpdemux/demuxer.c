@@ -520,7 +520,7 @@ switch(file_format){
   break;
  }
 } // switch(file_format)
-
+pts_from_bps=0; // !!!
 return demuxer;
 }
 
