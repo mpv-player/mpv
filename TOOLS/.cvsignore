@@ -1,6 +1,7 @@
 bios2dump
 mem2dump
 movinfo
+cpuinfo
 audio-select
 audio-block
 png2raw
