@@ -27,6 +27,7 @@ typedef struct _fli_frames_t {
 //     1 = successfully read a packet
 int demux_fli_fill_buffer(demuxer_t *demuxer){
   fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
+  sh_video_t *sh_video = demuxer->video->sh;
 
   // see if the end has been reached
   if (frames->current_frame == frames->num_frames)
@@ -39,9 +40,9 @@ int demux_fli_fill_buffer(demuxer_t *demuxer){
   ds_read_packet(demuxer->video,
     demuxer->stream, 
     frames->frame_size[frames->current_frame],
-    0, /* not sure what pts is for */
+    frames->current_frame/sh_video->fps,
     frames->filepos[frames->current_frame],
-    0 /* what flags? */
+    0 /* what flags? -> demuxer.h (alex) */
   );
 
   // get the next frame ready
