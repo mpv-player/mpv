@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+void free_registry(void);
+
 long RegOpenKeyExA(long key, const char* subkey, long reserved,
 		   long access, int* newkey);
 long RegCloseKey(long key);

@@ -170,7 +170,7 @@ static inline void dbgprintf(char* fmt, ...)
 	va_list va;
         va_start(va, fmt);
 	f=fopen("./log", "a");
-        vprintf(fmt, va);
+	vprintf(fmt, va);
     	if(f)
 	{
 	    vfprintf(f, fmt, va);
@@ -192,8 +192,21 @@ char export_names[500][30]={
 
 void destroy_event(void* event);
 
+struct th_list_t;
+typedef struct th_list_t{
+    int id;
+    void* thread;
+    struct th_list_t* next;
+    struct th_list_t* prev;
+} th_list;
+
+
+// have to be cleared by GARBAGE COLLECTOR
 static unsigned char* heap=NULL;
 static int heap_counter=0;
+static tls_t* g_tls=NULL;
+static th_list* list=NULL;
+
 static void test_heap(void)
 {
     int offset=0;
@@ -294,6 +307,15 @@ static int alccnt = 0;
 #define AREATYPE_EVENT 1
 #define AREATYPE_MUTEX 2
 #define AREATYPE_COND 3
+#define AREATYPE_CRITSECT 4
+
+/* -- critical sections -- */
+struct CRITSECT
+{
+    pthread_t id;
+    pthread_mutex_t mutex;
+    int locked;
+};
 
 void* mreq_private(int size, int to_zero, int type);
 void* mreq_private(int size, int to_zero, int type)
@@ -341,6 +363,7 @@ int my_release(void* memory)
 #ifdef GARBAGE
     alloc_header* prevmem;
     alloc_header* nextmem;
+
     if (memory == 0)
 	return 0;
 
@@ -363,6 +386,11 @@ int my_release(void* memory)
     case AREATYPE_MUTEX:
 	pthread_mutex_destroy((pthread_mutex_t*)memory);
 	break;
+    case AREATYPE_CRITSECT:
+	pthread_mutex_destroy(&((struct CRITSECT*)memory)->mutex);
+	break;
+    default:
+	//memset(memory, 0xcc, header->size);
     }
 
     prevmem = header->prev;
@@ -382,7 +410,7 @@ int my_release(void* memory)
 	pthread_mutex_unlock(&memmut);
     else
 	pthread_mutex_destroy(&memmut);
-
+    
     //if (alccnt < 40000) printf("MY_RELEASE: %p\t%ld    (%d)\n", header, header->size, alccnt);
 #else
     if (memory == 0)
@@ -531,17 +559,6 @@ HMODULE WINAPI expGetModuleHandleA(const char* name)
          dbgprintf("GetModuleHandleA('%s') => 0x%x\n", name, result);
 	return result;
 }
-
-struct th_list_t;
-typedef struct th_list_t{
-int id;
-void* thread;
-struct th_list_t* next;
-struct th_list_t* prev;
-}th_list;
-
-static th_list* list=NULL;
-
 
 
 void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize, void* lpStartAddress,
@@ -1056,9 +1073,11 @@ void* WINAPI expHeapAlloc(HANDLE heap, int flags, int size)
 /**
  Morgan's m3jpeg32.dll v. 2.0 encoder expects that request for
  HeapAlloc returns area larger than size argument :-/
+ - do we really have to vaste that much memory - I would
+ suggest to make extra check for this value - FIXME
 **/
-    z=my_mreq(((size+4095)/4096)*4096, flags&8);
-//    z=HeapAlloc(heap,flags,size);
+    //z=my_mreq(size, flags&8);
+    z=my_mreq((size + 0xfff) & 0x7ffff000, flags&8);
     if(z==0)
 	printf("HeapAlloc failure\n");
     dbgprintf("HeapAlloc(heap 0x%x, flags 0x%x, size 0x%x) => 0x%x\n", heap, flags, size, z);
@@ -1075,7 +1094,7 @@ long WINAPI expHeapDestroy(void* heap)
 long WINAPI expHeapFree(int arg1, int arg2, void* ptr)
 {
     dbgprintf("HeapFree(0x%x, 0x%x, pointer 0x%x) => 1\n", arg1, arg2, ptr);
-    if (heapfreehack != ptr)
+    if (heapfreehack != ptr && ptr != (void*)0xffffffff)
 	my_release(ptr);
     else
     {
@@ -1119,14 +1138,6 @@ int WINAPI expVirtualFree(void* v1, int v2, int v3)
     dbgprintf("VirtualFree(0x%x, %d, %d) => %d\n",v1,v2,v3, result);
     return result;
 }
-
-/* -- critical sections -- */
-struct CRITSECT
-{
-    pthread_t id;
-    pthread_mutex_t mutex;
-    int locked;
-};
 
 /* we're building a table of critical sections. cs_win pointer uses the DLL
    cs_unix is the real structure, we're using cs_win only to identifying cs_unix */
@@ -1214,11 +1225,10 @@ void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 }
 #else
 {
-    struct CRITSECT cs;
-    pthread_mutex_init(&cs.mutex, NULL);
-    cs.locked=0;
-    *(void**)c=malloc(sizeof cs);
-    memcpy(*(void**)c, &cs, sizeof cs);
+    struct CRITSECT* cs = mreq_private(sizeof(struct CRITSECT), 0, AREATYPE_CRITSECT);
+    pthread_mutex_init(&cs->mutex, NULL);
+    cs->locked=0;
+    *(void**)c = cs;
 }
 #endif
     return;
@@ -1243,7 +1253,6 @@ void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 #endif
 	printf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
     }
-//    cs.id=pthread_self();
     if(cs->locked)
 	if(cs->id==pthread_self())
 	    return;
@@ -1361,7 +1370,6 @@ struct tls_s {
     struct tls_s* next;
 };
 
-tls_t* g_tls=NULL;
 void* WINAPI expTlsAlloc()
 {
     if(g_tls==NULL)
@@ -1717,11 +1725,8 @@ long WINAPI expRegSetValueExA(long key, const char* name, long v1, long v2, void
     return result;
 }
 
-long WINAPI expRegOpenKeyA (
-long hKey,
- LPCSTR lpSubKey,
- int* phkResult
-){
+long WINAPI expRegOpenKeyA (long hKey, LPCSTR lpSubKey, int* phkResult)
+{
     long result=RegOpenKeyExA(hKey, lpSubKey, 0, 0, phkResult);
     dbgprintf("RegOpenKeyExA(key 0x%x, subkey '%s', 0x%x) => %d\n",
 	hKey, lpSubKey, phkResult, result);
@@ -3119,14 +3124,14 @@ LONG WINAPI explstrcmpiA(const char* str1, const char* str2)
 LONG WINAPI explstrlenA(const char* str1)
 {
     LONG result=strlen(str1);
-    dbgprintf("strlen(0x%x='%s') => %d\n", str1, str1, result);
+    dbgprintf("strlen(0x%x='%.50s') => %d\n", str1, str1, result);
     return result;
 }
 
 LONG WINAPI explstrcpyA(char* str1, const char* str2)
 {
     int result= (int) strcpy(str1, str2);
-    dbgprintf("strcpy(0x%x, 0x%x='%s') => %d\n", str1, str2, str2, result);
+    dbgprintf("strcpy(0x%.50x, 0x%.50x='%.50s') => %d\n", str1, str2, str2, result);
     return result;
 }
 LONG WINAPI explstrcpynA(char* str1, const char* str2,int len)
@@ -3532,6 +3537,7 @@ void my_garbagecollection(void)
 #ifdef GARBAGE
     int unfree = 0, unfreecnt = 0;
 
+    free_registry();
     while (last_alloc)
     {
 	alloc_header* mem = last_alloc + 1;
@@ -3541,4 +3547,6 @@ void my_garbagecollection(void)
     }
     printf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
 #endif
+    g_tls = NULL;
+    list = NULL;
 }

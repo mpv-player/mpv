@@ -18,21 +18,12 @@
 //#undef TRACE
 //#define TRACE printf
 
-struct reg_value
-{
-	int type;
-	char* name;
-	int len;
-	char* value;
-};
-
 // ...can be set before init_registry() call
 char* regpathname = 0;
 
-static int reg_size=0;
-static struct reg_value* regs = 0;
 
-struct reg_handle_s;
+static char* localregpathname = 0;
+
 typedef struct reg_handle_s
 {
 	int handle;
@@ -41,7 +32,17 @@ typedef struct reg_handle_s
 	struct reg_handle_s* prev;
 } reg_handle_t;
 
-static reg_handle_t* head=0;
+struct reg_value
+{
+	int type;
+	char* name;
+	int len;
+	char* value;
+};
+
+static struct reg_value* regs = NULL;
+static int reg_size;
+static reg_handle_t* head = NULL;
 
 #define DIR -25
 
@@ -49,8 +50,6 @@ static void create_registry(void);
 static void open_registry(void);
 static void save_registry(void);
 static void init_registry(void);
-
-
 
 
 static void create_registry(void){
@@ -69,8 +68,10 @@ static void create_registry(void){
     regs[0].value=regs[1].value=NULL;
     regs[0].len=regs[1].len=0;
     reg_size=2;
+    head = 0;
     save_registry();
 }
+
 static void open_registry(void)
 {
 	int fd;
@@ -81,7 +82,7 @@ static void open_registry(void)
 		printf("Multiple open_registry(>\n");
 		return;
 	}
-	fd = open(regpathname, O_RDONLY);
+	fd = open(localregpathname, O_RDONLY);
 	if (fd == -1)
 	{
 	    printf("Creating new registry\n");
@@ -90,6 +91,7 @@ static void open_registry(void)
 	}
 	read(fd, &reg_size, 4);
 	regs=(struct reg_value*)malloc(reg_size*sizeof(struct reg_value));
+	head = 0;
 	for(i=0; i<reg_size; i++)
 	{
 		read(fd,&regs[i].type,4);
@@ -106,7 +108,7 @@ static void open_registry(void)
 		regs[i].value=(char*)malloc(regs[i].len+1);
 		if(regs[i].value==0)
 		{
-			free(regs[i].name);
+		        free(regs[i].name);
 			reg_size=i+1;
 			goto error;
 		}
@@ -123,11 +125,11 @@ static void save_registry(void)
 	int fd, i;
 	if (!regs)
 		init_registry();
-	fd = open(regpathname, O_WRONLY | O_CREAT, 00666);
+	fd = open(localregpathname, O_WRONLY | O_CREAT, 00666);
 	if (fd == -1)
 	{
 	    printf("Failed to open registry file '%s' for writing.\n",
-		   regpathname);
+		   localregpathname);
 	    return;
 	}
 	write(fd, &reg_size, 4);
@@ -142,6 +144,38 @@ static void save_registry(void)
 	}
 	close(fd);
 }
+
+void free_registry(void)
+{
+    reg_handle_t* t = head;
+    while (t)
+    {
+	reg_handle_t* f = t;
+        if (t->name)
+	    free(t->name);
+	t=t->prev;
+        free(f);
+    }
+    head = 0;
+    if (regs)
+    {
+        int i;
+	for(i=0; i<reg_size; i++)
+	{
+	    free(regs[i].name);
+	    free(regs[i].value);
+	}
+	free(regs);
+	regs = 0;
+    }
+    if (localregpathname)
+    {
+	free(localregpathname);
+	localregpathname = 0;
+    }
+}
+
+
 static reg_handle_t* find_handle_by_name(const char* name)
 {
 	reg_handle_t* t;
@@ -237,14 +271,15 @@ static struct reg_value* insert_reg_value(int handle, const char* name, int type
 		if(regs==0)
 		    create_registry();
 		regs=(struct reg_value*)realloc(regs, sizeof(struct reg_value)*(reg_size+1));
+		//regs=(struct reg_value*)my_realloc(regs, sizeof(struct reg_value)*(reg_size+1));
 		v=regs+reg_size;
 		reg_size++;
 	}
 	else
 	//replacing old one
 	{
-		free(v->value);
-		free(v->name);
+	    free(v->value);
+	    free(v->name);
 	}
 	v->type=type;
 	v->len=len;
@@ -252,26 +287,35 @@ static struct reg_value* insert_reg_value(int handle, const char* name, int type
 	memcpy(v->value, value, len);
 	v->name=(char*)malloc(strlen(fullname)+1);
 	strcpy(v->name, fullname);
+        free(fullname);
 	save_registry();
 	return v;
 }
 
 static void init_registry(void)
 {
-	struct passwd* pwent;
 	TRACE("Initializing registry\n");
-	pwent = getpwuid(geteuid());
 	// can't be free-ed - it's static and probably thread
 	// unsafe structure which is stored in glibc
 
-#if 1
+#ifdef USE_WIN32DLL
+	// MPlayer:
 	regpathname = get_path("registry");
 #else
-	if (regpathname == 0)
+	// avifile:
+	if (localregpathname == 0)
 	{
-	    regpathname = (char*)malloc(strlen(pwent->pw_dir)+20);
-	    strcpy(regpathname, pwent->pw_dir);
-	    strcat(regpathname, "/.registry");
+            const char* pthn = regpathname;
+	    if (!regpathname)
+	    {
+		struct passwd* pwent;
+		pwent = getpwuid(geteuid());
+                pthn = pwent->pw_dir;
+	    }
+
+	    localregpathname = (char*)malloc(strlen(pthn)+20);
+	    strcpy(localregpathname, pthn);
+	    strcat(localregpathname, "/.registry");
 	}
 #endif
 
@@ -352,7 +396,6 @@ long RegCloseKey(long key)
     return 1;
 }
 
-extern void trapbug(void);
 long RegQueryValueExA(long key, const char* value, int* reserved, int* type, int* data, int* count)
 {
 	struct reg_value* t;
@@ -367,17 +410,14 @@ long RegQueryValueExA(long key, const char* value, int* reserved, int* type, int
 	    printf("Query for AudioReserved001  %p  %p  count: %d\n", type, data, *count);
 	    *(int*)type = REG_DWORD;
 	    *(int*)data = 256;
-	    //trapbug();
 	    return 0;
 	}
 	if(c==NULL)
-		return 1;
-	if((t=find_value_by_name(c))==0)
-	{
-		free(c);
-		return 2;
-	}
+	    	return 1;
+        t=find_value_by_name(c);
 	free(c);
+	if(t==0)
+		return 2;
 	if(type)
 		*type=t->type;
 	if(data)
