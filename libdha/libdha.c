@@ -88,7 +88,9 @@ void *map_phys_mem(unsigned long base, unsigned long size)
 #endif
 
 #ifdef CONFIG_DHAHELPER
+#ifdef CONFIG_SVGAHELPER
 dha_helper_way:
+#endif
   if ( (mem_fd = open("/dev/dhahelper",O_RDWR)) < 0)
   {
       perror("libdha: DHA kernelhelper failed");
@@ -118,22 +120,22 @@ dev_mem_way:
   if ( (mem_fd = open(DEV_MEM,O_RDWR)) == -1)
   {
     perror("libdha: opening /dev/mem failed");
-    return -1;
+    return MAP_FAILED;
   }
 
 mmap:
   return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
 }
-#endif /* CONFIG_DHAHELPER */
+#endif /* Generic mmap (not win32, nor os2) */
 
 void unmap_phys_mem(void *ptr, unsigned long size)
 {
   int res = munmap(ptr,size);
 
-  if (res == -1)
+  if (res == (int)MAP_FAILED)
   {
       perror("libdha: unmapping memory failed");
-      return -1;
+      return;
   }
   
   close(mem_fd);
