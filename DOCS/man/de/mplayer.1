@@ -203,6 +203,9 @@ Rauschunterdrückung (denoising), RGB/\:YUV\-Konvertierung und mehr).
 ist die Bezeichnung für MPlayer mit einem graphischen Benutzerinterface. Er 
 verfügt über die gleichen Optionen wie MPlayer.
 .PP
+Beispiele zum Gebrauch, die Dir zu einem schnellen Start verhelfen,
+findest Du am Ende dieser Manpage.
+.PP
 .B Siehe auch die HTML-Dokumentation!
 .
 .
@@ -241,6 +244,11 @@ nächster/\:voriger Eintrag des Wiedergabebaums der aktuellen Liste
 nächste/\:vorige alternative Quelle (nur bei ASX-Playlists)
 .IPs "p / LEERTASTE"
 Wiedergabe pausieren (jede Taste unterbricht die Pause).
+.IPs .\ \ \ \ 
+Einen Schritt vorwärts.
+Einmaliges Drücken pausiert die Wiedergabe, jedes weitere wird einen Frame
+abspielen und die Wiedergabe erneut anhalten (jede andere Taste hebt die Pause
+auf).
 .IPs "q / ESC"
 Beendet die Wiedergabe und MPlayer.
 .IPs "+ und -"
@@ -295,6 +303,27 @@ Passe Helligkeit an.
 Passe Farbton an.
 .IPs "7 und 8"
 Passe Sättigung an.
+.RE
+.PD 1
+.PP
+(Die folgenden Tasten sind nur gültig bei Benutzung des
+Quartz-Videoausgabetreibers.)
+.PP
+.PD 0
+.RSs
+.IPs "Option + 0"
+Ändere die Größe des Abspielfensters auf die Hälfte der Originalgröße.
+.IPs "Option + 1"
+Ändere die Größe des Abspielfensters auf die Originalgröße.
+.IPs "Option + 2"
+Ändere die Größe des Abspielfensters auf das doppelte der Originalgröße.
+.IPs "Option + f"
+Aktiviere/\:deaktiviere Vollbildwiedergabe (siehe auch \-fs).
+.IPs "Option + [ und Option + ]"
+Setze Alphawert des Abspielfensters.
+.IPs T\ \ \ \ 
+Ändere den Video-Layer: immer ganz oben/\:ganz unten/\:normal (siehe auch
+\-ontop).
 .RE
 .PD 1
 .
@@ -584,6 +613,10 @@ Benutzt eine andere menu.conf.
 .TP
 .B \-menu\-root <Wert> (nur bei OSD)
 Gibt das Hauptmenü an.
+.
+.TP
+.B \-menu-startup (nur bei OSD)
+Zeigt das Hauptmenü beim Start von MPlayer.
 .
 .TP
 .B \-noconsolecontrols
