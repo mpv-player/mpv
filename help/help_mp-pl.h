@@ -96,11 +96,14 @@ static char help_text[]=
 "- Najczêstsza przyczyna: uszkodzony/obarczony b³edami sterownik _audio_.\n"\
 "  Rozwi±zanie: spróbuj -ao sdl lub u¿yj ALSA 0.5 lub emulacjê OSS w ALSA 0.9\n"\
 "  Przeczytaj DOCS/sound.html!\n"\
+"  Mo¿esz tak¿e eksperymentowaæ z -autosync 30 (lub innymi warto¶ciami)\n"
 "- Wolny sterownik video. Spróbuj z inny sterownikiem -vo (lista: -vo help)\n"\
 "  lub odtwarzaj z opcj± -framedrop ! Przeczytaj DOCS/video.html!\n"\
 "- Wolny procesor. Nie odtwarzaj du¿ych dvd/divx na wolnych procesorach!\n"\
 "  Spróbuj z opcj± -hardframedrop\n"\
 "- Uszkodzony plik. Spróbuj ró¿nych kombinacji: -nobps -ni -mc 0 -forceidx\n"\
+"- Odtwarzaj±c z wolnego ¼ród³a (zamontowane partycje nfs/smb, dvd, vcd itp)\n"
+"  spróbuj z opcj± -cache 8192\n"\
 "- U¿ywasz -cache do odtwarzania plikow non-interleaved? Spróbuj z -nocache\n"\
 "Je¶li nic z powy¿szego nie pomaga, przeczytaj DOCS/bugreports.html !\n\n"
 
@@ -163,6 +166,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "Nie mogê otworzyæ URL: %s\n"
 #define MSGTR_ConnToServer "Po³±czony z serwerem: %s\n"
 #define MSGTR_FileNotFound "Plik nieznaleziony: '%s'\n"
+
+#define MSGTR_SMBInitError "Nie mogê zainicjowaæ biblioteki libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Nie mogê otworzyæ z sieci: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer nie zosta³ skompilowany z obs³ug± SMB\n"
 
 #define MSGTR_CantOpenDVD "Nie mogê otworzyæ urz±dzenia DVD: %s\n"
 #define MSGTR_DVDwait "Odczytujê strukturê dysku, proszê czekaæ...\n"
