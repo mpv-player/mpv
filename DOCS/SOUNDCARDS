@@ -2,12 +2,11 @@
 Recommendations for misc. soundcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aureal Vortex 2: (Pontscho)
-			In config.h, change #define HAVE_AUDIO_SELECT to
-			  #undef HAVE_AUDIO_SELECT
-			OSS	: With MPEG files : defaults are ok
-				  With AVI files  : -delay -0.5
-			ALSA	: same
+Aureal Vortex 2:        In config.h, change #define HAVE_AUDIO_SELECT to
+			  #undef HAVE_AUDIO_SELECT or run 
+			  ./configure script with --disable-select option
+			  
+ALSA with GUS PnP:	see Aureal Vortex2
 
 SB Live!:
 			OSS	: OK

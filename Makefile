@@ -22,8 +22,8 @@ PRG_CFG = codec-cfg
 prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c
-OBJS = codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o
+SRCS = codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c
+OBJS = codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o mixer.o
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
@@ -32,7 +32,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	version.h $(PRG) $(PRG_CFG)
+all:	$(PRG) $(PRG_CFG)
 # $(PRG_AVIP)
 
 .c.o:
@@ -65,6 +65,7 @@ encore/libencore.a:
 	$(MAKE) -C encore
 
 $(PRG):	.depend mplayer.o $(OBJS) loader/libloader.a loader/DirectShow/libDS_Filter.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a; done
 	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -Lloader/DirectShow -lDS_Filter -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread -lstdc++
 
 $(PRG_HQ):	.depend mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
@@ -76,7 +77,7 @@ $(PRG_AVIP):	.depend aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
 $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
-$(PRG_CFG):        .depend codec-cfg.c codec-cfg.h
+$(PRG_CFG):        codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DTESTING
 
 install: $(PRG)
@@ -98,20 +99,9 @@ depend: .depend
 .depend: Makefile config.mak config.h
 	makedepend -f- -- $(CFLAGS) -- mplayer.c mplayerHQ.c aviparse.c tvision.c $(SRCS) 1>.depend 2>/dev/null
 
-# rebuild at every config.h/config.mak change:
-version.h: config.h config.mak Makefile
-	$(MAKE) distclean
-	./version.sh
-
-# rebuild at every CVS update:
-ifneq ($(wildcard CVS/Entries),)
-version.h: CVS/Entries
-endif
-
 #
 # include dependency files if they exist
 #
 ifneq ($(wildcard .depend),)
 include .depend
 endif
-
