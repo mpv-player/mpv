@@ -2,10 +2,9 @@ TO DO:
 ~~~~~~
 Urgent:
 - asterix.avi audio delays after 5-10 mins (bps mode only)
-- PAUSE doesn't work in the X11 and SDL windows (no Check X Events) (DONE?)
-- SDL fullscreen problems at quit/eof - DONE?
-- finish ASF seeking
-- fix vo_syncfb - DONE for G400
+- finish ASF seeking (find next keyframe)
+- fix DGA driver to work in 15/16 bpp
+- fix x11 driver to work without SHM (for remote playing etc)
 
 Fix compilation problems:
 - SDL version detection into ./configure - DONE (disabled :))
@@ -14,11 +13,10 @@ Libvo features:
 - framebuffer and svgalib support (both)
 - real fullscreen (black bands at unused areas) support - DONE for xmga & x11
 - fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
-- "raw" X11 output - for viewing over network (without MIT-SHM)
 
 Player features:
 - libcss support
-- subtitles support (.sub files)
+- subtitles (.sub files) & OSD support
 - show movie length / position in percent
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
@@ -26,12 +24,11 @@ Player features:
 - integrating the gui?
 - support for more codecs  (sample .avi files and .dll needed!) - HELP!
 - support for MPEG TS (transport streams) and PES format - I need sample files!
-- verify valid range of numeric options (like '-xy 0')
+- verify valid range of numeric options (like '-xy 0') - new configfile code?
 - DirectShow support
-- OSD
-- add FULL OpenDivX encoding capability (audio+video)
+- audio copy/encoding capability
 
 Requested codecs:
-- WMV (failing to load)
-- ASUS ASV1 (loaded, but picture is upside-down and very pixelized)
+- WMV (failing to load) - Check again with new loader!
+- ASUS ASV2 (loaded, but picture is upside-down and very pixelized)
 - VoxWare audio (DirectShow required)
