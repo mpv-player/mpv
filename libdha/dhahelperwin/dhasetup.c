@@ -8,6 +8,7 @@
 int main(int argc,char* argv[]){
   SC_HANDLE hSCManager;
   SC_HANDLE hService;
+  char path[MAX_PATH];
   printf("dhasetup (c) 2004 Sascha Sommer\n");
   if(argc==1){
     printf("usage:\n");
@@ -16,10 +17,12 @@ int main(int argc,char* argv[]){
     return 0;
   }
   hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-  
+  GetWindowsDirectory(path,MAX_PATH);
+  strcpy(path+strlen(path),"\\system32\\drivers\\dhahelper.sys");
   if(!strcmp(argv[1],"install")){
     printf("installing dhahelper\n");
-    CopyFile("dhahelper.sys","c:\\windows\\System32\\drivers\\dhahelper.sys",FALSE);
+    if(!CopyFile("dhahelper.sys",path,FALSE))
+      printf("can't find dhahelper.sys\n");
     // Install the driver
     hService = CreateService(hSCManager,
                              "DHAHELPER",
@@ -28,7 +31,7 @@ int main(int argc,char* argv[]){
                              SERVICE_KERNEL_DRIVER,
                              SERVICE_SYSTEM_START,
                              SERVICE_ERROR_NORMAL,
-                             "c:\\windows\\System32\\drivers\\dhahelper.sys",
+                             path,
                              NULL,
                              NULL,
                              NULL,
@@ -41,7 +44,7 @@ int main(int argc,char* argv[]){
     hService = OpenService(hSCManager, "DHAHELPER", SERVICE_ALL_ACCESS);
     ControlService(hService, SERVICE_CONTROL_STOP, &ServiceStatus);
     DeleteService(hService);
-    DeleteFile("c:\\windows\\System32\\drivers\\dhahelper.sys");
+    DeleteFile(path);
   }
   else {
     printf("unknown parameter: %s\n",argv[1]);
