@@ -17,6 +17,12 @@ RAGE128_OBJS=rage128_vid.o
 RAGE128_LIBS=-L../../libdha -ldha
 RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
 
+MACH64_VID=mach64_vid.so
+MACH64_SRCS=mach64_vid.c
+MACH64_OBJS=mach64_vid.o
+MACH64_LIBS=-L../../libdha -ldha
+MACH64_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
+
 NVIDIA_VID=nvidia_vid.so
 NVIDIA_SRCS=nvidia_vid.c
 NVIDIA_OBJS=nvidia_vid.o
@@ -41,7 +47,7 @@ MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
 MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DCRTC2
 
-all:    $(RADEON_VID) $(RAGE128_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID)
+all:    $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID)
 
 
 .SUFFIXES: .c .o
@@ -59,6 +65,12 @@ $(RAGE128_OBJS):    $(RAGE128_SRCS)
 
 $(RAGE128_VID):     $(RAGE128_OBJS)
 	$(LD) $(RAGE128_LIBS) -shared -soname $(RAGE128_VID) -o $(RAGE128_VID) $(RAGE128_OBJS)
+
+$(MACH64_OBJS):    $(MACH64_SRCS)
+	$(CC) -c $(MACH64_CFLAGS) -o $@ $<
+
+$(MACH64_VID):     $(MACH64_OBJS)
+	$(LD) $(MACH64_LIBS) -shared -soname $(MACH64_VID) -o $(MACH64_VID) $(MACH64_OBJS)
 
 $(NVIDIA_OBJS):    $(NVIDIA_SRCS)
 	$(CC) -c $(NVIDIA_CFLAGS) -o $@ $<
