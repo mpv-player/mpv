@@ -279,8 +279,8 @@ Lásd a DOCS/documentation.html#edl fejezetet a részletekhez.
 A video rendszer egy javított változatának használata, mely több file
 lejátszásakor nyújt elõnyöket.
 Csak egy ablak lesz nyitva az összes file-nak.
-Jelenleg a következõ meghajtók fixed-vo támogatottak: x11, xv, xvidix, xmga,
-gl2, és svga.
+Jelenleg a következõ meghajtók fixed-vo támogatottak: gl2, mga, svga, x11,
++xmga, xv and xvidix.
 .TP
 .B \-framedrop (lásd mág \-hardframedrop)
 Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
@@ -339,6 +339,9 @@ mûködni fog.
 LIRC (Linux Infrared Remote Control) konfigurációs file megadása, ha
 nem tetszik az alapértelmezett ~/\:.lircrc.
 .TP
+.B \-list-options
+Kilistázza az összes rendelkezésre álló opciót.
+.TP
 .B \-loop <szám>
 Film lejátszása <szám>szor.
 A 0 érték végtelent jelent.
@@ -381,7 +384,7 @@ Még kevesebb üzenet kiírása.
 .B \-shuffle \ \ 
 File-ok lejátszása véletlenszerû sorrendben.
 .TP
-.B \-skin <skin\ könyvtár> (BÉTA KÓD)
+.B \-skin <skin\ könyvtár> (CSAK GUI) (BÉTA KÓD)
 Skin betöltése a megadott könyvtárból (útvonalnév NÉLKÜL).
 
 .I PÉLDA:
@@ -2625,6 +2628,8 @@ kötelezõ):
 .RSss
 mjpeg: Motion JPEG
 .br
+ljpeg: veszteségmentes JPEG
+.br
 h263: H263
 .br
 h263p: H263 Plus
@@ -2633,9 +2638,25 @@ mpeg4: DivX 4/\:5
 .br
 msmpeg4: DivX 3
 .br
+msmpeg4v2: MS MPEG4 v2
+.br
+wmv1: Windows Media Video, 1-es verzió (WMV7)
+.br
+wmv2: Windows Media Video, 2-es verzió (WMV8)
+.br
 rv10: egy régi RealVideo codec
 .br
-mpeg1video: MPEG1 video :)
+mpeg1video: MPEG1 video
+.br
+mpeg2video: MPEG2 video
+.br
+huffyuv: HuffYUV
+.br
+asv1: ASUS Video 1
+.br
+asv2: ASUS Video 2
+.br
+ffv1: az ffmpeg veszteségmentes codec-e
 .REss
 .IPs vqmin=<1\-31>
 minimum quantizer (pass 1/\:2) (alap: 2)
@@ -2966,7 +2987,13 @@ use interlaced dct
 .RSss
 YV12: default
 .br
-422P: for huffyuv
+444P: ffv1-hez
+.br
+422P: huffyuv, jpeg, és ffv1
+.br
+411P, YVU9: ljpeg, ffv1
+.br
+BGR32: csak ljpeg
 .REss
 .IPs pred
 (for huffyuv)
@@ -3482,7 +3509,7 @@ betûtipusok könyvtára (egy font.desc file-t, és több .RAW kiterjesztésû
 file-t kell tartalmaznia)
 .TP
 ~/.mplayer/\:DVDkeys/
-feltört CSS kulcsok
+CSS kulcsok
 .PD 0
 .TP
 A felirat file-ok keresési sorrendje a következõ (a példa film

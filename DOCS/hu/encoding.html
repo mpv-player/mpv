@@ -89,10 +89,11 @@
 
 <H2><A NAME="mpeg">7.2 Enkódolás MPEG formátumba</A></H2>
 
-<P>A MEncoder képes MPEG (MPEG-PS) formátumú kimeneti file-t generálni.
-  Ez persze valószínûleg csak a libavcodec <I>mpeg1video</I> codec-ével
-  hasznos, mert (az MPlayer-t kivéve) minden lejátszó MPEG1 video, és
-  MPEG1 layer2 (MP2) audio stream-re számít az MPEG file-okban.</P>
+<P>A MEncoder képes MPEG (MPEG-PS) formátumú kimeneti file-t generálni.  Ez
+  persze valószínûleg csak a <a href="codecs.html#libavcodec">libavcodec</a>
+  <I>mpeg1video</I> codec-ével hasznos, mert (az MPlayer-t kivéve) minden
+  lejátszó MPEG1 video, és MPEG1 layer2 (MP2) audio stream-re számít az MPEG
+  file-okban.</P>
 
 <P>A MEncoder ezen képessége jelenleg nem túl hasznos, mert - attól eltekintve
   hogy még eléggé bugos is -, még nem lehet MPEG 1 layer 2 (MP2) audio-ba
@@ -177,6 +178,7 @@
 
 <UL>
   <LI>mjpeg - Motion JPEG</LI>
+  <LI>ljpeg - Lossless JPEG</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
   <LI>mpeg4 - ISO szabványos MPEG4 (DivX5, XVID kompatibilis)</LI>
@@ -184,9 +186,14 @@
   <LI>msmpeg4v2 - szabványosítás elõtti MPEG4 (Micro$oft), v2 (régi ASF
     file-okban)</LI>
   <LI>wmv1 - Windows Media Video, 1-es verzió (alias WMV7)</LI>
+  <LI>wmv2 - Windows Media Video, 2-es verzió (alias WMV8)</LI>
   <LI>rv10 - egy régi RealVideo codec</LI>
-  <LI>mpeg1video - MPEG1 video :)</LI>
+  <LI>mpeg1video - MPEG1 video</LI>
+  <LI>mpeg2video - MPEG2 video</LI>
   <LI>huffyuv - veszteségmentes tömörítés</LI>
+  <LI>asv1 - ASUS Video v1</LI>
+  <LI>asv2 - ASUS Video v2</LI>
+  <LI>ffv1 - az FFmpeg saját veszteségmentes codec-e</LI>
 </UL>
 
 <P>Az elsõ oszlopban felsorolt codec-eket kell átadni a
@@ -293,11 +300,11 @@
 <P>Van is.</P>
 
 <P>Az MPEG4 formátumnak egyik egyedülálló tulajdonsága, hogy beleírható az
-  aspect ratio értéke (csakúgy mint az MPEG1/2 file-oknál). Ennek egyetlen
-  hátulütõje, hogy jelenleg az MPlayer az egyetlen lejátszó amelynek megvan
-  ez a képessége.</P>
+  aspect ratio értéke (csakúgy mint az MPEG1/2, illetve H263 file-oknál). Ennek
+  egyetlen hátulütõje, hogy jelenleg az MPlayer az egyetlen lejátszó amelynek
+  megvan ez a képessége.</P>
 
-<P>A használata csakis a <B>libavcodec</B> <CODE>mpeg4</CODE> codec-ével
+<P>A használata csakis a <a href="codecs.html#libavcodec">libavcodec</a> <CODE>mpeg4</CODE> codec-ével
   lehetséges.</P>
 
 <P>Semmiképpen ne felejtsd el levágni a film tetejérõl és aljáról a fekete
@@ -309,6 +316,60 @@
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
+
+<H2><A NAME=custommatrices>7.10 Saját inter/intra mátrixok</A></H2>
+
+<P>A <A HREF="codecs.html#libavcodec">libavcodec</A> ezen képességének
+  kihasználásával be lehet állítani saját inter (I, azaz kulcs képkockák),
+  és intra (P képkockák) mátrixok használatát. Sok codec támogatja, amik
+  közül az <CODE>mpeg1video</CODE> és az <CODE>mpeg2video</CODE> bizonyosan
+  mûködik.</P>
+
+<P>A funkció tipikusan a <A HREF="http://www.kvcd.net/">KVCD</A>
+  specifikációhoz illeszkedõ mátrixok beállítására használható.</P>
+
+<P>A <B>KVCD "Notch" Quantization Matrix</B>:</P>
+
+<P><I>Intra:</I>
+  <PRE>
+  8 9 12 22 26 27 29 34
+  9 10 14 26 27 29 34 37
+  12 14 18 27 29 34 37 38
+  22 26 27 31 36 37 38 40
+  26 27 29 36 39 38 40 48
+  27 29 34 37 38 40 48 58
+  29 34 37 38 40 48 58 69
+  34 37 38 40 48 58 69 79
+  </PRE>
+</P>
+
+<P>
+  <I>Inter:</I>
+  <PRE>
+  16 18 20 22 24 26 28 30
+  18 20 22 24 26 28 30 32
+  20 22 24 26 28 30 32 34
+  22 24 26 30 32 32 34 36
+  24 26 28 32 34 34 36 38
+  26 28 30 32 34 36 38 40
+  28 30 32 34 36 38 42 42
+  30 32 34 36 38 40 42 44
+  </PRE>
+</P>
+
+<H4>Használata:</H4>
+
+<P><CODE>$ mencoder bemenet.avi -o kimenet.avi -oac copy -ovc lavc -lavcopts
+  inter_matrix=...:intra_matrix=...</CODE></P>
+
+<P><CODE>$ mencoder bemenet.avi -ovc lavc -lavcopts
+  vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
+  12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,
+  29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79
+  :inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,
+  28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,
+  36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o
+  svcd.mpg</CODE></P>
 
 </BODY>
 </HTML>
