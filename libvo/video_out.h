@@ -10,6 +10,7 @@
 
 #include "font_load.h"
 #include "img_format.h"
+#include "../vidix/vidix.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
@@ -27,10 +28,53 @@ typedef struct vo_info_s
         const char *comment;
 } vo_info_t;
 
+/* Direct access to BES */
+typedef struct bes_da_s
+{
+	vidix_rect_t	dest;           /* This field should be filled by x,y,w,h
+					   from vidix:src but pitches from
+					   vidix:dest */
+	int		flags;          /* Probably will work only when flag == 0 */
+	/* memory model */
+	unsigned	frame_size;		/* destinition frame size */
+	unsigned	num_frames;		/* number available frames */
+	unsigned	offsets[VID_PLAY_MAXFRAMES]; /* relative offset of each frame from begin of video memory */
+	vidix_yuv_t	offset;			/* relative offsets within frame for yuv planes */
+	void*		dga_addr;		/* linear address of BES */
+}bes_da_t;
+
+/*
+   Video Accelearted Architecture.
+   Every field of this structure can be set to NULL that means that
+   features is not supported
+*/
+typedef struct vo_vaa_s
+{
+	uint32_t    flags; /* currently undefined */
+		/*
+		 * Query Direct Access to BES
+		 * info - information to be filled
+		 * returns: 0 on success errno on error.
+		 */
+	int  (*query_bes_da)(bes_da_t *info);
+	int  (*get_video_eq)(vidix_video_eq_t *info);
+	int  (*set_video_eq)(const vidix_video_eq_t *info);
+	int  (*get_num_fx)(unsigned *info);
+	int  (*get_oem_fx)(vidix_oem_fx_t *info);
+	int  (*set_oem_fx)(const vidix_oem_fx_t *info);
+	int  (*set_deint)(const vidix_deinterlace_t *info);
+}vo_vaa_t;
+
 typedef struct vo_functions_s
 {
+	/*
+	 * Preinitializes driver (real INITIALIZATION)
+	 *   arg - currently it's vo_subdevice
+	 *   returns: zero on successful initialization, non-zero on error.
+	 */
+	uint32_t (*preinit)(const char *arg);
         /*
-         * Initialize the display driver.
+         * Initialize (means CONFIGURE) the display driver.
 	 * params:
          *   width,height: image source size
 	 *   d_width,d_height: size of the requested window size, just a hint
@@ -92,6 +136,14 @@ typedef struct vo_functions_s
          * Closes driver. Should restore the original state of the system.
          */
         void (*uninit)(void);
+
+	/*
+	 * Query Video Accelerated Architecture information.
+	 * params:
+	 *   vaa: address of struct to be filled.
+	 *  (Note: driver should memset it to ZERO if it doesn't support vaa.)
+	 */
+	void (*query_vaa)(vo_vaa_t *vaa);
 
 } vo_functions_t;
 

@@ -23,8 +23,8 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.36  2002/01/08 20:58:53  atmos4
- * SwScaler support for vo_png by Kim Minh, SwScale w/aspecz for vo_dga by me
+ * Revision 1.37  2002/01/26 16:01:26  nick
+ * Extensions for video accelerated architecture
  *
  * Revision 1.35  2001/12/28 20:52:54  alex
  * use XF86VidMode later in init (at line 1031) only if we've got support (if have_vm==1)
@@ -1173,6 +1173,16 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vd_printf(VD_INFO, "vo_dga: Doublebuffering is %s.\n", vo_dga_dbf_mem_offset ? "enabled" : "disabled");
   vo_dga_is_running = 1;
   return 0;
+}
+
+static uint32_t preinit(const char *arg)
+{
+  return 0;
+}
+
+static void query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
 }
 
 //---------------------------------------------------------

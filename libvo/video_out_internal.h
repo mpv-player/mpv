@@ -30,9 +30,12 @@ static void flip_page(void);
 static void check_events(void);
 static void uninit(void);
 static uint32_t query_format(uint32_t format);
+static uint32_t preinit(const char *);
+static void query_vaa(vo_vaa_t *);
 
 #define LIBVO_EXTERN(x) vo_functions_t video_out_##x =\
 {\
+	preinit,\
 	init,\
         query_format,\
 	get_info,\
@@ -42,6 +45,7 @@ static uint32_t query_format(uint32_t format);
 	flip_page,\
 	check_events,\
 	uninit,\
+	query_vaa\
 };
 
 #include "osd.h"

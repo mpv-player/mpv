@@ -13,8 +13,7 @@
 #define __VOSUB_VIDIX_INCLUDED
 
 		    /* drvname can be NULL */
-int	 vidix_preinit(
-const char *drvname,void *server);
+int	 vidix_preinit(const char *drvname,void *server);
 int      vidix_init(unsigned src_width,unsigned src_height,
 		    unsigned dest_x,unsigned dest_y,unsigned dst_width,
 		    unsigned dst_height,unsigned format,unsigned dest_bpp,

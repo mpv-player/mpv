@@ -604,3 +604,13 @@ void vo_zr_revertoption(config_t* opt,char* param) {
     norm = VIDEO_MODE_AUTO;
 
 }
+
+static uint32_t preinit(const char *arg)
+{
+  return 0;
+}
+
+static void query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+}

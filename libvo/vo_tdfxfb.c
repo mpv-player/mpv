@@ -823,4 +823,12 @@ static void my_draw_alpha_accel(int x0, int y0, int w, int h, unsigned char *src
 }
 #endif /* ! HWACCEL_OSD_M2 */
 
+static uint32_t preinit(const char *arg)
+{
+  return 0;
+}
 
+static void query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+}

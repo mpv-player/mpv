@@ -611,5 +611,12 @@ static void uninit(void)
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 }
 
+static uint32_t preinit(const char *arg)
+{
+  return 0;
+}
 
-
+static void query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+}
