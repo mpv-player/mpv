@@ -761,7 +761,7 @@ where &quot;?&quot; is any number then it's OK, the error is not here. If it is:
 then there is a problem with your kernel/libc. Maybe you are using some security
 patches (for example Solar Designer's OpenWall patch) which forces loading
 libraries to very low addresses. Because <filename>l3codeca.acm</filename> is a
-non-relocatable DLL, it must be loaded to <literal>0x00400000</literal>, we can't
+non-relocatable DLL, it must be loaded to <literal>0x40000000</literal>, we can't
 change this. You should use a non-patched kernel, or use <application>MPlayer</application>'s
 <option>-afm 1</option> option to disable using <filename>l3codeca.acm</filename>.
 </para></answer>
