@@ -235,8 +235,9 @@ stream_starcode
 	0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
 frame_startcode
 	0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
-	frame_startcodes MUST be placed immedeatly before a keyframe if the
-	previous frame of the same stream was a non-keyframe
+	frame_startcodes SHOULD be placed immedeatly before a keyframe if the
+	previous frame of the same stream was a non-keyframe, unless such
+	non-keyframe - keyframe tansitions are very frequent
 
 index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
