@@ -127,6 +127,11 @@ extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
 
+m_option_t vd_conf[]={       
+	{"help", "To avoid vd, always use MPlayer with an appropriate video file instead of a live partner.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implementations for passing the params
@@ -406,5 +411,7 @@ m_option_t mplayer_opts[]={
 	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+
+	{"vd", vd_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
