@@ -1601,6 +1601,9 @@ for ac_option do
 	;;
   --as=*)
 	;;
+  *)
+	die "Unknow parameter: $ac_option"
+	;;
  esac
 done
 
