@@ -940,7 +940,7 @@ static uint32_t preinit(const char *arg)
     wc.hCursor       =  LoadCursor(NULL,IDC_ARROW);
     wc.hIcon         =  mplayericon;
     wc.hbrBackground =  CreateSolidBrush(vidmode?RGB(0,0,0):windowcolor);
-    wc.lpszClassName =  "Mplayer - Movieplayer for Linux";
+    wc.lpszClassName =  "MPlayer - The Movie Player";
     wc.lpszMenuName  =  NULL;
     RegisterClass(&wc);
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
