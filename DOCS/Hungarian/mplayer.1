@@ -1,0 +1,544 @@
+.\" MPlayer (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
+.\" English version and hungarian translation by Gabucino
+.\"
+.TH MPlayer
+.SH NAME
+mplayer \- Filmlejátszó Linuxra
+.SH VÁZLAT
+.B mplayer
+.RB [ \-gui ]
+.RB [ \-v ]
+.RB [ \-quiet ]
+.RB [ \-vo\ <meghajtó>[:<egység>] ]
+.RB [ \-ao\ <meghajtó>[:<egység>] ]
+.RB [ \-vcd\ sáv\ ]
+.RB [ \-sb\ byte\ pozíció ]
+.RB [ \-nosound ]
+.RB [ \-abs\ byte-ok ]
+.RB [ \-delay\ másodperc ]
+.RB [ \-nobps ]
+.RB [ \-aid\ id ]
+.RB [ \-vid\ id ]
+.RB [ \-fps\ ráta ]
+.RB [ \-mc\ másodperc/5kocka ]
+.RB [ \-fs ]
+.RB [ \-vm ]
+.RB [ \-zoom ]
+.RB [ \-x\ x ]
+.RB [ \-y\ y ]
+.RB [ \-xy\ faktor ]
+.RB [ \-pp\ minõség ]
+.RB [ \-include\ configfile ]
+.RB [ \-lircconf\ configfile ]
+.RB [ \-ffactor\ szám ]
+.RB [ \-sub\ file ]
+.RB [ \-subfps\ ráta ]
+.RB [ \-subdelay\ másodperc ]
+.RB [ \-z\ <0-8> ]
+.RB [ \-idx ]
+.RB [ \-forceidx ]
+.RB [ \-nodshow ]
+.RB [ \-noxv ]
+.RB [ \-forcexv ]
+.RB [ \-ss\ másodperc ]
+.RB [ \-dumpaudio ]
+.RB [ \-dumpvideo ]
+.RB [ \-noframedrop ]
+.RB [ \-framedrop ]
+.RB [ \-nodouble ]
+.RB [ \-double ]
+.RB [ \-stereo\ mód ]
+.RB [ \-srate\ Hz ]
+.RB [ \-osdlevel\ fokozat ]
+.RB [ \-config\ file ]
+.RB [ \-display\ név ]
+.RB [ \-unicode ]
+.RB [ \-utf8 ]
+.RB [ \-fsmode\ mód ]
+.RB [ \-vc\ video\ codec\ neve ]
+.RB [ \-ac\ audio\ codec\ neve ]
+.RB [ \-vfm\ video\ codec\ család ]
+.RB [ \-afm\ audio\ codec\ család ]
+.RB [ \-frames\ szám ]
+.RB [ \-autoq\ minõség ]
+.RB [ \-fb\ egység ]
+.RB [ \-fbmode\ módnév ]
+.RB [ \-fbmodeconfig\ file ]
+.RB [ \-benchmark ]
+.RB [ \-dvd\ cím ]
+.RB [ \-chapter\ fejezet ]
+.RB [ \-dvdangle\ szög ]
+.RB [ \-dvdkey\ kulcs ]
+.RB [ \-skin\ skin ]
+.RB [ \-aspect\ ratio ]
+.I - vagy file vagy eszköz
+.PP
+.SH LEÍRÁS
+.I mplayer
+Az MPlayer egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és akár
+nem-x86 processzorokon is. Lásd a 6-os fejezetet). Le tudja játszani a legtöbb
+MPEG, AVI és ASF/WMV file-t, valamint felsorakoztat jónéhány natív és Win32
+codecet. Nézhetsz vele VideoCD-t, SVCD-t, DVD-t, és még DivX-et is (ezutóbbihoz
+egyáltalán nincs szükség az avifile csomagra!). A másik óriási tulajdonsága az
+MPlayernek a megjelenítési módok széles választéka. Mûködik X11, Xv, DGA,
+OpenGL, SVGAlib, fbdev, aalib, sõt SDL-lel is (beleértve ezáltal az SDL
+drivereit is), és néhány alacsonyszintû kártyaspecifikus driver
+(Matrox/3dfx/SiS) is használható! Legtöbbjük támogat szoftveres vagy hardveres
+skálázást, így a teljesképernyõs mód is elérhetõ. És még nem is szóltam a szép,
+élsímított, árnyékolt feliratozásról (7 támogatott típus!), ami támogat
+európai/ISO 8859-1,2 (magyar, angol, cseh, stb), cirill és koreai fontokat,
+valamint OSD-t!
+.LP
+.SH "ÁLTALÁNOS OPCIÓK"
+.TP
+.I MEGJEGYZÉS
+Minden paraméter nélküli opciónak megvan az ellenpárja, például az "-fs"-nek
+"-nofs"
+.TP
+.B \-dvd\ cím
+megadja hogy az MPlayer a DVD-n található mely filmeket (amiket számokkal
+jelölnek) játssza le. Például az 1-esek általában elõzetesek, és a 2 az
+igazi film.
+.TP
+.B \-chapter\ fejezet
+megadja hogy melyik fejezetnél (DVD) kezdõdjön a lejátszás. Példákat
+lásd lent.
+.TP
+.B \-dvdangle\ szög
+néhány DVD lemez olyan jeleneteket tartalmaz, amelyeket más kameraállásból
+is meg lehet tekinteni. Itt lehet megadni az MPlayernek hogy melyik
+kameraállást használja. Példákat lásd lent.
+.TP
+.B \-vo\ <meghajtó>[:<eszköz>]
+a video kimeneti meghajtó és opcionálisan az eszköz kiválasztása.
+Az "eszköz" az SDL-nél és GGI-nél az almeghajtókat jelöli. (pl: -vo sdl:aalib).
+
+A rendelkezésre álló meghajtók listáját a következõ opcióval lehet
+lekérni :
+.I mplayer -vo help
+
+.TP
+.B \-ao\ <meghajtó>[:<eszköz>]
+az audio kimeneti meghajtó és opcionálisan az eszköz kiválasztása.
+Az "eszköz" az SDL-nél az almeghajtókat jelöli. (pl: -vo sdl:esd).
+
+OSS használatakor a használni kívánt eszközt lehet megadni :
+-ao oss:/dev/dsp1
+
+A rendelkezésre álló meghajtók listáját a következõ opcióval lehet
+lekérni :
+.I mplayer -ao help
+
+.TP
+.B \-vcd\ sáv
+Video CD sáv lejátszása file helyett
+.TP
+.B \-nosound
+hang nélküli lejátszás
+.TP
+.B \-fs
+teljesképernyõs lejátszás (középre helyezi a filmet, és fekete sávokat
+tesz köré)
+.TP
+.B \-vm
+az XF86VidMode kiterjesztés használata, felbontásváltásra
+.TP
+.B \-zoom
+szoftveres nagyítás használata, ahol rendelkezésre áll (-nofs kell)
+.TP
+.B \-x\ x
+kép nagyítása x pixel szélességûre [ha a meghajtó támogatja!]
+.TP
+.B \-y\ y
+kép nagyítása y pixel magasságúra [ha a meghajtó támogatja!]
+.TP
+.B \-xy\ factor
+a kép nagyítása <factor>-szorosra
+.TP
+.B \-pp\ minõség
+minõségjavítõ szûrõ használata a dekódolt képen.
+Ehhez erõs CPU ajánlott!
+A támogatott formátumok illetve fokozataik a következõk:
+
+        MPEG 1/2   0 (nincs), 1, 3, 7, 15, 31, 63
+        OpenDivX   0 (nincs), 1, 3, 7, 15, 31, 63
+        DivX4      0 (nincs) - 60
+        DivX       0 (nincs), 1, 2, 3, 4
+
+.TP
+.B \-autoq\ minõség
+a képjavítás mértékének dinamikus változtatása, a rendelkezésre álló
+processzoridõ függvényében. Ugyanazok a beállításai mint a -pp-nek. A
+szám amit megadsz az számít a maximumnak. Általában egy megfelelõen
+magas szám megadása az ajánlott. Nem lehet a -pp-vel együtt használni!
+.TP
+.B \-ffactor\ szám
+a betûk körvonalának beállítása. Lehetséges beállítások:
+resample alphamap of the font. Can be:
+
+        0    körvonal nélkül
+        0.75 nagyon vékony fekete körvonal [alap]
+        1    vékony fekete körvonal
+        10   vastag fekete körvonal
+.TP
+.B \-sub\ file
+a megadott feliratfile használata
+.TP
+.B \-subfps\ ráta
+a feliratfile képkocka/másodperc értékének megadása (CSAK képkocka-alapú
+fileoknál lehetséges!) Alapállapot: a film kk/mp értéke.
+.TP
+.B \-subdelay\ másodperc
+a feliratok kezdõidejének késleltetése a megadott idõtartammal. Lehet
+negatív is.
+.TP
+.B \-osdlevel\ fokozat
+megadja hogy az OSD milyen módban induljon (0 : nincs, 1 : keresõ, 2: keresõ+timer)
+(alap = 2)
+.TP
+.B \-lircconf\ configfile
+LIRC konfigurációs file megadása (lásd http://www.lirc.org), ha a ~/.lircrc-tõl
+eltérõ helyen van
+.TP
+.B \-v
+bõvebb kimenet bekapcsolása (minél több -v, annál részletesebb)
+.TP
+.B \-quiet
+kevesebb kimenet bekapcsolása
+.TP
+.B \-benchmark
+a -nosound-dal, és -vo null-lal használatos, sebességmérésre
+.TP
+.B \-skin skin directory
+a megadott könyvtárban található skin használata (útvonal NÉLKÜL!).
+Például a '-skin fittyfene' ezeket próbálja végig :
+
+    /usr/local/share/mplayer/Skin/fittyfene
+    ~/.mplayer/Skin/fittyfene
+.TP
+.B \-aspect ratio
+a film aspektusarányának beállítása. MPEG file-oknál detektálódik,
+de AVI-knál nem. Példák:
+
+    -aspect 4:3
+    -aspect 1.2
+
+(van -noaspect ellenpár)
+.IP
+.SH "HALADÓSZINTÛ OPCIÓK"
+.TP
+.I MEGJEGYZÉS
+Ezek az opciók jó eséllyel megoldást jelenthetnek esetleges lejátszási
+gondjaidra.. Továbba, olvasd el a dokumentációt !
+.TP
+.B \-vc <név>
+a megadott video codec használata, a codecs.conf-ban szereplõ név szerint,
+például :
+
+    -vc divx       VFW DivX codec
+    -vc divxds     DirectShow DivX codec
+    -vc ffdivx     libavcodec DivX codec
+    -vc ffmpeg12   libavcodec MPEG1/2 codec
+    -vc divx4      ProjectMayo DivX codec
+
+Teljes listát a -vc help ad !
+.TP
+.B \-ac <name>
+a megadott audio codec használata, a codecs.conf-ban szereplõ név szerint,
+például :
+
+    -ac mp3        libmp3 MP3 codec
+    -ac mp3acm     l3codeca.acm MP3 codec
+    -ac ac3        AC3 codec
+    -ac hwac3      hardveres AC3 használata
+                   (lásd dokumentáció)
+    -ac vorbis     libvorbis
+    -ac ffmp3      ffmpeg MP3 decoder (lassú)
+
+Teljes listát az -ac help ad !
+.TP
+.B \-vfm <1-5>
+megadott video codec CSALÁD használata, ha nem található benne megfelelõ
+dekóder, akkor vissza az automatikus detektálásra. Példák :
+
+    -vfm 2         VFW (Win32) codec-ek
+    -vfm 3         OpenDivX/DivX4 codec-ek (YV12)
+                   (ugyanaz mint -vc odivx, de lásd fent)
+    -vfm 4         DirectShow (Win32) codec-ek
+    -vfm 5         libavcodec codec-ek
+    -vfm 7         DivX4 codec (YUY2)
+
+Teljes listát a -vc help ad !
+
+MEGJEGYZÉS : ha a libdivxdecore támogatást is befordítottad, a 3-as és 7-es
+ugyanazt a DivX4 codec-et fogja tartalmazni, a különbségeket lásd a
+dokumentációban.
+.TP
+.B \-afm <1-5>
+megadott audio formátum használata. Példák:
+
+    -afm 1         libmp3 (mp2/mp3,
+                   de nincs mp1)
+    -afm 2         tömörítetlen PCM audio
+    -afm 3         libac3
+    -afm 4         megfelelõ Win32 codec
+    -afm 5         aLaw/uLaw meghajtó
+    -afm 10        libvorbis
+    -afm 11        ffmpeg MP3 dekódere
+
+Teljes listát az -ac help ad !
+.TP
+.B \-sb\ pozíció
+lejátszás kezdése a megadott byte-tól
+.TP
+.B \-ss\ idõ
+lejátszás kezdése a megadott idõponttól. Például:
+
+    -ss 56
+    -ss 01:10:00
+
+.TP
+.B \-abs\ byte
+hangkártya audio bufferének mérete (byte-okban, alap: mérés)
+.TP
+.B \-delay\ másodperc
+audio késleltetés, másodpercben megadva (lehet negatív)
+.TP
+.B \-nobps
+másik módszer használata a hang/kép szinkronhoz (AVI)
+.TP
+.B \-aid\ id
+másik audio csatorna választása [MPG: 0-31  AVI: 1-99]
+.TP
+.B \-vid\ id
+másik video csatorna választása [MPG: 0-15  AVI:  -- ]
+.TP
+.B \-fps\ érték
+képkocka/másodperc érték felülbírálása (ha a fejlécben rosszul szerepel)
+.TP
+.B \-mc\ másodperc/5képkocka
+maximális szinkronkorrekció, 5 másodperc alatt (másodpercben)
+.TP
+.B \-ni
+non-interleaved AVI feltételezése
+.TP
+.B \-include configfile
+az itt megadott konfigurációs file használata, az alapértelmezett file után
+.TP
+.B \-z\ <0-8>
+a PNG kimenet tömörítési fokának megadása
+          0 : nincs tömörítés
+          8 : maximális tömörítés
+.TP
+.B \-idx
+az AVI indexének újraépítése. Hibásan letöltött vagy rosszul
+létrehozott fileoknál használatos.
+.TP
+.B \-forceidx
+index ujraépítésének kényszerítése. Tesztelésre, vagy rossz indexszel
+ellátott AVI-knál használatos.
+.TP
+.B \-nodshow
+DirectShow codec-ek használatának tiltása
+.TP
+.B \-noxv
+XVideo hardveres gyorsítás kikapcsolása (csak SDL-el!)
+.TP
+.B \-forcexv
+XVideo használatának kényszerítése (csak SDL-el!)
+.TP
+.B \-dumpaudio
+a file-ban található audio kimentése a ./stream.dump file-ba
+(leginkább mpeg/ac3-mal használható)
+.TP
+.B \-noframedrop
+képkockaeldobás kikapcsolása : minden képkocka lejátszásra kerül, igy az
+audio és video szinkron elcsúszhat (alapértelmezés)
+.TP
+.B \-framedrop
+képkockaeldobás : minden képkocka dekódolása, a kép ugorhat
+.TP
+.B \-nodouble
+duplánbufferelés kikapcsolása. Jelenleg csak a DGA és Xv
+meghajtóknál számit, lásd dokumentáció.
+.TP
+.B \-double
+duplánpufferelés bekapcsolása (alapértelmezés). Jelenleg csak a DGA és Xv
+meghajtóknál számít, a feliratoknál.
+.TP
+.B \-dvdkey kulcs
+kulcs, a CSS-el kódolt fileokhoz szükséges. Például : -dvdkey F169072699
+(NEM DVD lejátszáshoz !! Arra ott a -dvd opció!)
+.TP
+.B \-stereo mód
+MPEG1 sztereó kimenet tipusának kiválasztása
+
+        Sztereó        0
+        Bal csatorna   1
+        Jobb csatorna  2
+
+.TP
+.B \-srate Hz
+audio lejátszása a megadott frekvencián. A lejátszás sebességére van
+hatással.
+.TP
+.B \-config configfile
+megadja hogy hol van a konfigurációs file
+.TP
+.B \-display név
+gépnév és display-szám megadása, ha távoli X szerveren kell a képet
+megjeleníteni. Például : -display xtest.localdomain:0
+.TP
+.B \-unicode
+ennek hatására az MPlayer UNICODE-ként kezeli a feliratfile-t. Ellentéte :
+-nounicode
+.TP
+.B \-utf8
+ennek hatására az MPlayer UTF8-ként kezeli a feliratfile-t.
+.TP
+.B \-fsmode\ mód
+Ezzel az opcióval ki lehet kerülni néhány problémát amely egyes
+ablakkezelõkkel és a teljesképernyõs móddal adódhat. 0 és 7 között lehet
+változtatni :
+
+        -fsmode 0      új módszer (alap)
+        -fsmode 1      ICCCWM patch
+                       (KDE2/icewm-hez)
+        -fsmode 2      régi módszer
+        -fsmode 3      ICCCWM patch
+                       plusz Motif módszer
+.TP
+.B \-frames\ szám
+Megadott számú képkocka lejátszása, majd kilépés
+.TP
+.B \-fb\ egység
+Megadott framebuffer egység használata. Alapállapotban /dev/fb0 .
+Csak az fbdev meghajtó használja.
+.TP
+.B \-fbmode\ módnév
+Videomód megváltoztatása az /etc/fb.modes fileban szereplõ módok valamelyikére.
+Csak az fbdev meghajtóval.
+.TP
+.I MEGJEGYZÉS
+A VESA framebuffer nem támogatja a módváltást.
+.TP
+.B \-fbmodeconfig\ filenév
+A megadott konfigurációs file használata az /etc/fb.modes helyett.
+Csak az fbdev meghajtóval.
+.IP
+.SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
+.TP
+.I MEGJEGYZÉS
+Ezek csupán a teljesség igényének szem elõtt tartása miatt kerültek be
+ide! Ha nem tudod mik ezek, NINCS szükséged rájuk! Mindenesetre, kétszer
+is olvasd el a dokumentációt !
+.TP
+.B \-br\ rate
+'-vo odivx'-szel használatos.
+Megadja a tömörítéshez használandó bitrátát bitekben. Pl : 780000
+.TP
+.I MEGJEGYZÉS
+NEM kódolhatsz hangot, csak képet! Ne kérd, dolgozunk rajta.
+.TP
+.B \-encode\ file
+'-vo odivx'-szel használatos.
+A kimeneti OpenDivX file megadása. Nem ír felül.
+.TP
+.B \-dumpvideo
+video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
+(nem túl használható)
+.TP
+.B \-sid
+DVD felirat megadása (?)
+.IP
+.SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
+.TP
+.I MEGJEGYZÉS
+.TP
+	  <-  v.  ->      hátra/elõre tekerés 10 másodperccel
+
+up v. down      hátra/elõre tekerés   1 perccel
+
+pgup/pgdown     hátra/elõre tekerés  10 perccel
+
+p v. SPACE      pillanatállj
+
+q v. ESC        kilépés
+
++ v. -          audio késleltetés változtatása +- 0.1 mp-cel
+
+/ v. *          hangerõ csökkentése/növelése
+
+o               OSD választás: nincs / keresõ / keresõ+timer
+
+m               master/pcm hangerõállítás között váltás
+
+z v. x          felirat késleltetésének változtatása +- 0.1 mp-cel
+
+(a következõk csak a DirectShow DivX codec használatának esetén élnek)
+
+1 v. 2          kontraszt állítása
+
+3 v. 4          fényerõ állítása
+
+5 v. 6          hue állítása
+
+7 v. 8          szaturáció állítása
+
+.IP
+.SH FILE-OK ÉS KÖNYVTÁRAK
+.TP
+.I KONFIGURÁCIÓS FILE-OK
+A beállítások rendszerszinten a /etc/mplayer.conf file-ban
+tárolódnak, felhasználónként pedig a $HOME/.mplayer/config fileban.
+A $HOME/.mplayer könyvtár és a benne lévõ 'config' file létrehozásra
+kerül, ha nem létezik.
+.TP
+.I BETÛTIPUSOK
+A betûtipusok helye a $HOME/.mplayer/font könyvtáron belül van.
+Kell lennie ott egy font.desc file-nak, és .RAW kiterjesztésû
+betûtipusoknak.
+.TP
+.I FELIRATFILEOK
+Az MPlayer jelenleg 7 fajtát támogat : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha).
+A fileokat ebben a sorrendben keresi : (például /mnt/cdrom/movie.avi)
+    /mnt/cdrom/movie.sub
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
+    $HOME/.mplayer/sub/movie.sub
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
+    $HOME/.mplayer/default.sub
+.IP
+.SH "PÉLDÁK"
+.B DVD lejátszás
+mplayer -dvd 1
+.TP
+.B DVD lejátszás más kameraállásból
+mplayer -dvd 1 -dvdangle 2
+.TP
+.B Lejátszás más DVD egységrõl
+mplayer -dvd 1 /dev/dvd2
+.TP
+.B HTTP-rõl lejátszás
+mplayer http://mplayer.hq/example.avi
+.LP
+.SH HIBÁK
+Biztos vannak. Lásd dokumentáció.
+
+.LP
+.SH KÉSZÍTÕK
+Lásd dokumentáció.
+
+MPlayer is (C) 2000-2001
+.I Arpad Gereoffy <arpi@thot.banki.hu>
+
+Az angol manpage-t készítette
+.I Gabucino.
+
+A magyar fordítást készítette
+.I Gabucino.
+.LP
+.SH FIGYELMEZTETÉS
+A programból eredõ esetleges károkért a készítõk NEM vállalnak semmilyen
+felelõsséget!
+.\" end of file
