@@ -27,8 +27,13 @@ endif
 
 # .PHONY: all clean
 
+all:	libMP3.a
+
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
+
+decode_i586.o: decode_i586.c
+	$(CC) -c $(CFLAGS) -fomit-frame-pointer -o $@ $<
 
 .s.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -46,8 +51,6 @@ test1:	libMP3.a test.c
 
 test2:	libMP3.a test2.c
 	$(CC) $(CFLAGS) test2.c ../libvo/aclib.c -o test2 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
-
-all:	libMP3.a
 
 clean:
 	rm -f *~ *.o *.a

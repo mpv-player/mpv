@@ -164,18 +164,19 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   static const int step = 2;
   static int bo = 1;
   short *samples = (short *) (out + *pnt);
-
   real *b0,(*buf)[0x110];
   int clip = 0;
   int bo1;
+
+  *pnt += 128;
+
 /* optimized for x86 */
 #if defined(CAN_COMPILE_X86_ASM)
   if ( synth_func )
    {
-    int ret;
-    ret=(*synth_func)( bandPtr,channel,samples);
-    *pnt+=128;
-    return ret;
+//    printf("Calling %p, bandPtr=%p channel=%d samples=%p\n",synth_func,bandPtr,channel,samples);
+    // FIXME: synth_func() may destroy EBP, don't rely on stack contents!!!
+    return (*synth_func)( bandPtr,channel,samples);
    }
 #endif
   if(!channel) {     /* channel=0 */
@@ -264,7 +265,6 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
       WRITE_SAMPLE(samples,sum,clip);
     }
   }
-  *pnt += 128;
 
   return clip;
 
