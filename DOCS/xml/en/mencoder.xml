@@ -117,7 +117,7 @@ audio streams in MPEG files.
 </para>
 
 <para>
-this feature is not very useful right now, aside that it probably has many bugs,
+This feature is not very useful right now, aside that it probably has many bugs,
 but the more importantly because <application>MEncoder</application> currently
 cannot encode MPEG1 layer 2 (MP2) audio, which all other players expect in MPEG files.
 </para>
