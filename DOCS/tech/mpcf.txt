@@ -375,8 +375,12 @@ depth
 	for compatibility with some win32 codecs
 
 colorspace_type
-	?
-        
+	0	unknown
+	1	ITU Rec 624 / ITU Rec 601 Y range: 16..235 Cb/Cr range: 16..240
+	2	ITU Rec 709               Y range: 16..235 Cb/Cr range: 16..240
+	17	ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
+	18	ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
+
 samplerate_mul
 	the number of samples per second in one time_base unit
 	samplerate = time_base*samplerate_mul
