@@ -11,6 +11,7 @@
 #include "../input/input.h"
 #include "stream.h"
 #include "dvdnav_stream.h"
+#include "../libvo/video_out.h"
 #include "../spudec.h"
 
 int dvd_nav_skip_opening=0;     /* skip opening stalls? */
