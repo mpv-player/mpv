@@ -32,8 +32,13 @@ static int init(sh_audio_t *sh_audio)
     case 0x736F7774: // 'twos'
     case 0x74776F73: // 'swot'
        if(sh_audio->samplesize==1) sh_audio->sample_format=AFMT_S8;
+// Uncomment this if twos audio is broken for you
+// (typically with movies made on sgi machines)
+// This is just a workaround, the real bug is elsewhere
+#if 0
        sh_audio->ds->ss_div= sh_audio->samplesize;
        sh_audio->ds->ss_mul= sh_audio->samplesize * sh_audio->channels;
+#endif
        break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AFMT_U8;
   }
