@@ -322,6 +322,12 @@ while(!stream_eof(demuxer->stream)){
 
 if(streams) {
   uint32_t vr = 0, ar = 0,i;
+  if( demuxer->stream->streaming_ctrl!=NULL ) {
+	  if( demuxer->stream->streaming_ctrl->bandwidth!=0 && demuxer->stream->streaming_ctrl->data!=NULL ) {
+		  best_audio = ((asf_http_streaming_ctrl_t*)demuxer->stream->streaming_ctrl->data)->audio_id;
+		  best_video = ((asf_http_streaming_ctrl_t*)demuxer->stream->streaming_ctrl->data)->video_id;
+	  }
+  } else 
   for(i = 0; i < stream_count; i++) {
     uint32_t id = streams[2*i];
     uint32_t rate = streams[2*i+1];
