@@ -1,20 +1,20 @@
-
+.\" MPlayer (C) 2000-2002 Arpad Gereoffy <sendmail@to.mplayer-users>
 .\" This manpage was/is done by Gabucino
 .\" 
-.TH "MPlayer" "1" "2002-04-18"
+.TH "MPlayer" "1" "2002-05-03"
 
 .SH "NAME"
 mplayer \- Movie Player for Linux
 
 .SH "SYNOPSIS"
 .B mplayer
-.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ |\ ...]
+.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ ]
 .br
 .B mplayer
-.RB [global\ options]\ \fIfile1\fP\ [specific\ options]\ [file2]\ [specific\ options]\ ...
+.RB [global\ options]\ \fIfile1\fP\ [specific\ options]\ [file2]\ [specific\ options]
 .br
 .B mplayer
-.RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]\ ...
+.RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]
 .br
 .B mplayer
 .RB [dvd|vcd|tv]://[title]\ [options]
@@ -256,12 +256,12 @@ This option sets the quality (and speed, respectively) of the software scaler,
 with the \-zoom option. For example with x11 or other outputs which lack
 hardware acceleration. Possible settings are:
 
-    0 \- fast bilinear (default)
-    1 \- bilinear
-    2 \- bicubic (best quality)
-    3 \- ?
-    4 \- nearest neighbor (bad quality)
-    5 \- area averageing scaling support
+    0   fast bilinear (default)
+    1   bilinear
+    2   bicubic (best quality)
+    3   ?
+    4   nearest neighbor (bad quality)
+    5   area averageing scaling support
 .TP 
 .B \-tv\ <sub\-options>
 This option enables the TV grabbing feature of MPlayer. The sub\-options are separated
@@ -313,7 +313,7 @@ These options can help you solve your particular problem (see documentation too!
 Used for \-vo aa. You can get a list and an explanation of available options executing
 .I mplayer \-aahelp
 .TP 
-.B \-ac <name>
+.B \-ac <codec name>
 Force usage of a specific audio codec, according to its name in codecs.conf,
 for example:
 
@@ -336,7 +336,18 @@ Use \-alang to define the language by name.
 Filename for \-ao pcm.
 .TP
 .B \-aop\ <sub\-options>
-Specify audio plugin(s) and their options (see documentation!!).
+Specify audio plugin(s) and their options, separated by ":" (see documentation!!).
+Available sub\-options are:
+
+    list=[plugins]  comma separated list of plugins
+                    (resample, format, surround, format, volume, extrastereo, volnorm)
+    delay=<sec>     example plugin, don't use!
+    format=<format> output format (format plugin only)
+    fout=<Hz>       output frequency (resample plugin only)
+    volume=<0-255>  volume (volume plugin only)
+    mul=<value>     stereo coefficient, defaults to 1 (extrastereo plugin only)
+    softclip        compressor/"soft\-clipping" capabilities (volume plugin only)
+    
 .TP 
 .B \-audio\-demuxer <number>
 Force audio demuxer type for \-audiofile. Give the demuxer ID as defined in
@@ -378,6 +389,11 @@ Force demuxer type. Give the demuxer ID as defined in demuxers.h.
 .B \-display <name>
 Specify the hostname and display number of the X server you want
 to display on. For example: \-display xtest.localdomain:0
+.TP 
+.B \-double
+Enables doublebuffering. Fixes flicker by storing two frames in memory, and
+displaying one while decoding another. Can effect OSD. Needs twice the memory
+than a single buffer, so it won't work on cards with very few video memory.
 .TP 
 .B \-dumpaudio
 Writes audio stream of the file to ./stream.dump (mostly usable
@@ -457,7 +473,8 @@ Adjust hue of video signal (default 0). You can get colored negative
 of image with this option.
 .TP 
 .B \-idx (see \-forceidx option too!)
-Rebuilds INDEX of the AVI, thus allowing seeking. Useful with broken/incomplete
+Rebuilds INDEX of the AVI if no INDEX was found, 
+thus allowing seeking. Useful with broken/incomplete
 downloads, or badly created AVIs.
 .TP 
 .B \-include <configfile>
@@ -465,24 +482,30 @@ Specify config file to be parsed after the default
 .TP 
 .B \-input <commands>
 This option can be used to configure certain parts of the input system.
-        conf=<file> read alternative input.conf.
-                    If given without pathname,
-                    $HOME/.mplayer is assumed.
-        ar\-delay    delay in msec before we start
-                    to autorepeat a key
-                    (0 to disable)
-        ar\-rate     how many keypress/second when
-                    we autorepeat
-        keylist     prints all keys that can be
-                    bound to
-        cmdlist     prints all commands that can
-                    be bound
-        js-dev      specifies the joystick device
-                    to use 
-                    (default is /dev/input/js0)
+
+    conf=<file>    read alternative input.conf.
+                   If given without pathname,
+                   $HOME/.mplayer is assumed.
+    ar\-delay       delay in msec before we start
+                   to autorepeat a key
+                   (0 to disable)
+    ar\-rate        how many keypress/second when
+                   we autorepeat
+    keylist        prints all keys that can be
+                   bound to
+    cmdlist        prints all commands that can
+                   be bound
+    js\-dev         specifies the joystick device
+                   to use
+                   (default is /dev/input/js0)
 
 .I NOTE:
 Autorepeat is currently only supported by joysticks.
+.TP 
+.B \-jpeg <sub\-options> 
+Specify options for for JPEG output, separated by ":" (see documentation!).
+Available sub\-options are [no]progressiv, [no]baseline, 
+optimize, smooth, quality and outdir.
 .TP 
 .B \-mc\ <seconds/frame>
 Maximum A-V sync correction per frame (in seconds)
@@ -500,11 +523,6 @@ of some bad AVI files).
 .TP 
 .B \-nobps
 Don't use avg. byte/sec value for A\-V sync (AVI). Helps with some AVI files with broken header.
-.TP 
-.B \-double
-enables doublebuffering. Fixes flicker by storing two frames in memory, and
-displaying one while decoding another. Can effect OSD. Needs twice the memory
-than a single buffer, so it won't work on cards with very few video memory.
 .TP 
 .B \-nojoystick
 Turns off joystick support. Default is on, if compiled in.
@@ -596,19 +614,22 @@ but requires more CPU.
 .B \-srate <Hz>
 Specifies Hz to playback audio on. Has effect on playback speed!
 .TP 
+.B \-sstep <sec>
+Specifies seconds between displayed frames. Usefull for slideshows.
+.TP 
 .B \-stereo <mode>
 Select type of MP2/MP3 stereo output.
 
-        Stereo         0
-        Left channel   1
-        Right channel  2
+    Stereo          0
+    Left channel    1
+    Right channel   2
 .TP 
 .B \-subcp\ codepage
 If your system supports iconv(3), you can use this option to
 specify codepage of the subtitle. Examples:
 
-        \-subcp latin2
-        \-subcp cp1250
+    \-subcp   latin2
+    \-subcp   cp1250
 .TP 
 .B \-unicode
 Tells MPlayer to handle the subtitle file as UNICODE.
@@ -616,7 +637,7 @@ Tells MPlayer to handle the subtitle file as UNICODE.
 .B \-utf8
 Tells MPlayer to handle the subtitle file as UTF8.
 .TP 
-.B \-vc <name>
+.B \-vc <codec name>
 Force usage of a specific video codec, according to its name in codecs.conf,
 for example:
 
@@ -631,8 +652,25 @@ See '\-vc help' for FULL list!
 .B \-vid\ <id>
 Select video channel [MPG: 0\-15  ASF:  0\-255 ]
 .TP 
-.B \-vop <filter>
-Activate video filters (see documentation!).
+.B \-vop <plugin>
+Activate video filters (see documentation!). 
+Available plugins are:
+
+    crop[=w:h:x:y]     simple cropping plugin
+    expand[=w:h:x:y:o] expanding and (optional) OSD rendering plugin
+    flip               flips image upside-down
+    mirror             horizontal mirroring
+    rotate[=x]         rotate image +/\- 90 degrees
+    scale[=w:h]        software scaling (zoom) and yuv<\->rgb colorspace conversion
+    yuy2               forced software YV12/I420 \-> YUY2 conversion
+    rgb2bgr[=swap]     RGB 24/32 <\-> BGR 24/32 colorspace conversion (default)
+                       optional with R<\->B swapping
+    palette            RGB/BGR 8 \-> RGB/BGR 15/16/24/32 colorspace conversion using palette
+    format[=fourcc]    restrict the list of supported colorspaces to a single fourcc
+                       (default 'yuy2', may be rgb12, bgr24, yv12 etc...)
+    pp[=flags]         postprocessing filter (see \-pp option)
+    lavc               fast software YV12\->MPEG1 conversion
+    fame               fast software YV12\->MPEG1 conversion
 .TP
 .B \-vsync
 Enables VBI for vesa
@@ -649,8 +687,8 @@ displays) this option tells MPlayer which screen to display movie on. Range 0 \-
 Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
 .TP 
 .B \-xy\ <x>
-x<=8: Scale image by factor <x>
-x>8:  Set width to <x> and calculate height to keep correct aspect ratio
+    x<=8   Scale image by factor <x>
+    x>8    Set width to <x> and calculate height to keep correct aspect ratio
 .TP 
 .B \-y\ <y>
 Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
@@ -661,8 +699,8 @@ Allow software scaling, where available. Could be used to force scaling with -vo
 .TP 
 .B \-z\ <0\-9>
 Specifies compression level for PNG output (-vo png)
-          0 : no compression
-          9 : max compression
+    0   no compression
+    9   max compression
 .TP
 .B \-zr*
 Used for \-vo zr. You can get a list and an explanation of available options executing
@@ -678,6 +716,14 @@ double\-check the documentation!
 Dump raw compressed video stream to ./stream.dump (not very usable)
 .TP 
 .B \-ssf <mode>
+Specifies SwScaler filters. Available modes are:
+
+    lgb   gaussian blur filter (luma) 
+    cgb   gaussian blur filter (chroma)
+    cvs   chroma vertival shifting
+    chs   chroma horizontal shifting
+    ls    sharpen filter (luma)
+    cs    sharpen filter (chroma)
 .TP 
 .B \-sub\-demuxer <number>
 Force subtitle demuxer type for \-subfile.
@@ -871,7 +917,7 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
 
 .SH "BUGS"
 Probably. PLEASE, double-check the documentation (especially bugreports.html),
-the FAQ and the mail archive before !
+the FAQ and the mail archive before!
 
 Send your complete bugreports to the MPlayer-users mailing list at
 <mplayer-users@mplayerhq.hu>. We love complete bugreports :)
