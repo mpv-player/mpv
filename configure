@@ -193,7 +193,7 @@ fi
 _as=auto
 _x11=auto
 
-for ac_option; do
+for ac_option do
  case "$ac_option" in
   --target=*)
         _target=`echo $ac_option | cut -d '=' -f 2`
@@ -949,7 +949,7 @@ $_cc $_extraincdir $_extralibdir -o $TMPO -lesd $TMPC 2> /dev/null || { _esd=no;
 
 _prefix="/usr/local"
 
-for ac_option; do
+for ac_option do
  case "$ac_option" in
   --enable-profile)
   	_profile='-p'
