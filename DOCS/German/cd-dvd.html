@@ -14,7 +14,7 @@
 
 <P><B><A NAME=4.1>4.1. CD-ROM Laufwerke</A></B></P>
 
-<P>Abspielen von Standard Video-CDs:</P>
+<P><B>Abspielen von Standard Video-CDs:</B></P>
 
 <P>
 mplayer -vcd <I>tracknummer</I> [-cdrom-device Device]<BR><BR>
@@ -75,64 +75,38 @@ zustellen.</P>
 
 <P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
   
-<P>Ja, richtige DVD-Unterstützung wurde erreicht. Du brauchst nicht mehr manuell
-VOB Dateien von der Disk abspielen und über die Dateien im video_ts Verzeichnis
-bescheid wissen, du musst dir nicht gedanken machen, ob es sich um eine 
-verschüsselte DVD handelt oder nicht (in alten Versionen von <B>MPlayer</B> musstest du
-den '-dvdauth /dev/dvd' Parameter verwenden, wenn es eine verschlüsselte DVD war),
-und du brauchst nicht mal mehr die DVD mounten um sie spielen zu können :)</P>
-  
-<P>WICHTIGER HINWEIS: Bitte erwarte _KEINE_ erweiterten Merkmale von der DVD-
-Wiedergabe. Dies ist die erste Version mit richtiger DVD-Unterstützung in
-<B>MPlayer</B> und wir sind beschäftigt damit, Fehler zu suchen und grundlegende
-DVD-Player Funktionen zu implementieren.</P>
+<P><B>MPlayer</B> benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE> für
+  die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind in dem
+  <CODE>libmpdvdkit/</CODE> Unterverzeichnis enthalten, sie müssen nicht separat
+  installiert werden. Wir gehen in diese Richtung, da schon ein libdvdread Bug
+  behoben werden musste und wir einen Patch hinzufügten, welcher
+  <B>Cache Support für gecrackte CSS keys</B> for libdvdcss erlaubt (führt zu einer
+  hohen Geschwindigkeitssteigerung vor der Wiedergabe). Die gecrackten Keys werden
+  im <CODE>$HOME/.mplayer/DVDKeys</CODE> Verzeichnis abgelegt.</P>
 
-<P><B>MPlayer</B> verwendet libdvdread, welches eingebaute Unterstützung für IFO-Parsing,
-lesen von Navi Blöcken und Authentifizierung/Entschlüsselung hat. Libdvdread
-verwendet libdvdcss für die letztgenannten Funktionen. Also musst du libdvdcss
-und libdvdread heruntergeladen, kompiliert und installiert haben, BEVOR du den 
-./configure Script von <B>MPlayer</B>, welcher libdvdread automatisch erkennt,
-ausführst.</P>
-
-<UL>  
-<LI><P><B>Laden der Sourcen von libdvdread und libdvdcss.</B></P>
+<P>Unterstützung für <CODE>dvdnav</CODE> wurde hinzugefügt (momentan nicht benutzbar).</P>
   
-<P><I>Du kannst sie hier downloaden:
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
-(klicke auf 'download' im Menü links und du kannst libdvdcss und libdvdread in der
-Tabelle finden).</I></P>
-  
-<P><B><I>WICHTIG !</I></B><BR>
-Für
-<UL>
-  <LI>libdvdread 0.8 - wirst du <B>libcss</B> statt libdvdcss brauchen</LI>
-  <LI>libdvdread 0.9 - du brauchst <B>libdvdcss 0.0.3</B> ! Verwende keine neueren
-    Versionen, sie werden nicht funktionieren!</LI>
-  <LI>Verwende zum Beispiel <B><U>nie</U></B> libdvdcss <B>1.0</B>, sie wird ungewöhlich langsam sein!</LI>
-</UL>
-</P>
-</LI>
+<P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
 
-<LI><P><B>Kompiliere und installiere libdvdcss, DANACH libdvdread.</B></P>
-    
-<P><I>Lese die Dokumentationen dieser Pakete um diesen Schritt einfach zu machen.</I></P></LI>
-  
-<LI><P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
+<I>Nützlich, wenn du verschlüsselte VOBs von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
+ 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</I><BR>
 
-<P><I>Nützlich, wenn du verschlüsselte VOB0s von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
- 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</P></LI>    
-    
-<LI><P><B>Kompiliere MPlayer neu.</B></P>
-  
-<P><I>Lass <CODE>./configure</CODE> laufen. Wenn du libdvdread richtig installiert hast,
-wird ./configure etwa so was sagen:<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
-(Natürlich kannst du deine Lieblings-Optionen verwenden, wenn du ./configure laufen lässt).
-Das wars! Tippe: <CODE>make</CODE>, dann <CODE>make install</CODE>.</I></P></LI>
-</UL>
+<P><B>Kompiliere MPlayer:</B></P>
 
-<P>Natürlich müsst libdvdcss und libdvdread nicht neu kompilieren, wenn du MPlayer
-neu kompilierst (z.B. aufgrund einer neuen CVS-Version), wenn diese 2 Pakete bereits
-installiert sind.</P>
+<P>Lass <CODE>./configure</CODE> laufen. Wenn das <CODE>libmpdvdkit</CODE>
+  Unterverzeichnis nicht gelöscht wurde, sollte ./configure folgendes sagen:</P>
+
+<P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
+
+<P>(natürlich kann man beliebte configure Optionen in der Kommandozeile angeben,
+  wenn ./configure gestartet wird)</P>
+
+<P><B>MPlayer</B> kann die systemweiten Bibliotheken <CODE>libdvdread</CODE>
+  und <CODE>libdvdcss</CODE> verwenden aber diese Lösung ist NICHT EMPFOHLEN,
+  da sie zu Fehlern, Inkompatibilitäten und einer langsameren Geschwindigkeit
+  führen kann.</P>
+
+<P>Wie auch immer, gib folgendes ein: <CODE>make</CODE> und dann <CODE>make install</CODE>.</P>
 
 <P><B>Verwendung von MPlayer zum DVD-Spielen:</B></P>
 
@@ -202,7 +176,8 @@ Beim Abspielen der DVD erscheint folgender Fehler:<BR>
 <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
 sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Dies ist ein bekannter libdvdread 0.9.1 Bug, er sollte in 0.9.2 gefixt sein.
+Dies ist ein bekannter libdvdread 0.9.1 Bug, er sollte bereits in 0.9.2 und
+libmpdvdkit gefixt sein, verwende letzteres.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 					
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -227,27 +202,10 @@ Verwende das 'regionset'-Tool:
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Also MPlayer kann DVDs abspielen? Dann musst du DeCSS verwerden! Du bist verhaftet
-unter dem XYZ#$ Paragraphen von dem--
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Weiche von mir Arschloch, es ist kein DeCSS-Code im <B>MPlayer</B>. <B>MPlayer</B> 
-verwendet libdvdread durch linken und libdvdread verwendet libdvdcss durch
-dynamisches laden.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Muss ich (setuid) root/setuid sein, dass fibmap_mplayer DVDs spielen kann?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
 No, musst du nicht. Das ist Vergangenheit :) Natürlich brauchst du aber die
 Zugriffsrechte für das DVD-Laufwerk (in /dev).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Wie kann ich ... (füge hier erwartetes Features eines DVD Player ein)?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Die aktuelle Implementation ist die Erste mit einer richtiger DVD-Player
-Funkionalität. Als erstes möchten wir aber bestehende Bugs lösen und grund-
-legende Funtionen einbauen, bevor wir zu den neuen Features gehen.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -266,9 +224,9 @@ Ja, siehe in der <CODE>-chapter</CODE> Option.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Meine DVD-Wiedergabe ist träge !
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
-Benutze die <CODE>-cache</CODE> Option (lies die Manpage!). Falls es immer noch nicht
-geht, überprüfe den Anfang dieser Dokumentation für geeignete libdvdread+libdvdcss 
-Kombinationen. Versuche auch den DMA-Modus für das DVD-Laufwerk zu aktivieren.
+Benutze die <CODE>-cache</CODE> Option (lies die Manpage!).
+Versuche auch den DMA-Modus für das DVD-Laufwerk zu aktivieren, falls
+es immer noch nicht geht.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>

@@ -182,7 +182,7 @@ ist, soweit ich weiss, ein TV-Grabbing Tool. <B>MPlayer</B> kann dessen .NUV
 Dateien (nur NuppelVideo 5.0) lesen. Diese Dateien können unkomprimierte YV12,
 YV12+RTJpeg komprimierte, YV12 RTJpeg+lzo komprimierte und YV12+lzo komprimierte Frames enthalten, 
 welche <B>MPlayer</B> alle dekodiert (und diese auch mit MEncoder zu DivX/etc! <B>encodiert</B>). 
-Eine Suchfunktion wird implementiert.</P>
+Suchen (seeking) funktioniert.</P>
 
 
 <P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg Dateien</A></B></P>
@@ -203,6 +203,14 @@ Das Dateiformat ist eigentlich eine Sequenz von unkomprimierten YUV 4:2:0 Bilder
 
 <P>RoQ-Dateien sind Multimedia-Dateien, welche in gewissen ID Spielen wie Quake III
  und Return to castle Wolfenstein benützt werden.</P>
+
+
+<P><B><A NAME=2.1.1.12>2.1.1.12. OGG Dateien</A></B></P>
+
+<P>Dies ist ein neues Dateiformat von Xiphophorus, entwickelt um Vorbis
+  Audio zu enthalten. Man benötigt installierte <CODE>libogg</CODE> und
+  <CODE>libvorbis</CODE> vor der Kompilierung von <B>MPlayer</B> um
+  sie wiedergeben zu können.</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio Formate</A></B></P>
@@ -227,7 +235,7 @@ welche in der Manpage beschrieben wird, könnte dir in diesen Fällen helfen.</P>
 
 <P><B><A NAME=2.1.2.3>2.1.2.3. OGG Dateien (Vorbis)</A></B></P>
 
-<P>Benötigt eine richtig installierte <CODE>libvorbis</CODE>.</P>
+<P>Benötigt eine richtig installierte <CODE>libogg</CODE> und <CODE>libvorbis</CODE>.</P>
 
 
 <P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF Dateien</A></B></P>
