@@ -452,6 +452,34 @@ if(video_driver && strcmp(video_driver,"help")==0){
   exit(0);
 }
 
+if(!filename){
+  if(vcd_track) filename="/dev/cdrom"; 
+  else {
+    printf("%s",help_text); exit(0);
+  }
+}
+
+// check video_out driver name:
+  if(!video_driver)
+    video_out=video_out_drivers[0];
+  else
+  for (i=0; video_out_drivers[i] != NULL; i++){
+    const vo_info_t *info = video_out_drivers[i]->get_info ();
+    if(strcmp(info->short_name,video_driver) == 0){
+      video_out = video_out_drivers[i];break;
+    }
+  }
+  if(!video_out){
+    printf("Invalid video output driver name: %s\n",video_driver);
+    return 0;
+  }
+
+// check codec.conf
+if(!parse_codec_cfg(get_path("codecs.conf"))){
+    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
+    exit(1);
+}
+
 // check font
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
@@ -469,35 +497,6 @@ if(video_driver && strcmp(video_driver,"help")==0){
       // try default:
        subtitles=sub_read_file(get_path("default.sub"));
   }
-
-
-// check video_out driver name:
-  if(!video_driver)
-    video_out=video_out_drivers[0];
-  else
-  for (i=0; video_out_drivers[i] != NULL; i++){
-    const vo_info_t *info = video_out_drivers[i]->get_info ();
-    if(strcmp(info->short_name,video_driver) == 0){
-      video_out = video_out_drivers[i];break;
-    }
-  }
-  if(!video_out){
-    printf("Invalid video output driver name: %s\n",video_driver);
-    return 0;
-  }
-
-if(!filename){
-  if(vcd_track) filename="/dev/cdrom"; 
-  else {
-    printf("%s",help_text); exit(0);
-  }
-}
-
-// check codec.conf
-if(!parse_codec_cfg(get_path("codecs.conf"))){
-    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
-    exit(1);
-}
 
 
 if(vcd_track){
