@@ -389,10 +389,6 @@ TMPCPP="$I/mplayer-conf-$RANDOM-$RANDOM-$$.cpp"
 TMPO="$I/mplayer-conf-$RANDOM-$RANDOM-$$.o"
 TMPS="$I/mplayer-conf-$RANDOM-$RANDOM-$$.S"
 
-cat > $TMPC << EOF
-int main( void ) { return 0; }
-EOF
-
 # ---
 
 # config files
@@ -657,6 +653,10 @@ if test -c /dev/mga_vid ; then
  _mga=yes
  _syncfb=yes
 fi
+
+cat > $TMPC << EOF
+int main( void ) { return 0; }
+EOF
 
 case "$host_arch" in
 i386)
