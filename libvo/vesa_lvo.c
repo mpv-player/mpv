@@ -23,10 +23,8 @@
 #include "img_format.h"
 #include "../drivers/mga_vid.h" /* <- should be changed to "linux/'something'.h" */
 #include "fastmemcpy.h"
-#include "../mmx_defs.h"
-#include "../postproc/rgb2rgb.h"
 
-#define WIDTH_ALIGN 16 /* should be 16 for radeons */
+#define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
 #define NUM_FRAMES 2
 static uint8_t *frames[NUM_FRAMES];
 
@@ -36,8 +34,6 @@ static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width,src_format;
 extern int verbose;
-
-#define HAVE_RADEON 1
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
@@ -67,22 +63,12 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
         src_format = mga_vid_config.format=format;
         awidth = (src_width + (WIDTH_ALIGN-1)) & ~(WIDTH_ALIGN-1);
         switch(format){
-#ifdef HAVE_RADEON
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-	    image_bpp=16;
-	    mga_vid_config.format = IMGFMT_YUY2;
-	    mga_vid_config.frame_size = awidth*src_height*2;
-	    break;
-#else
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
 	    image_bpp=16;
 	    mga_vid_config.frame_size = awidth*src_height+(awidth*src_height)/2;
 	    break;
-#endif	    
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
 	    image_bpp=16;
@@ -144,7 +130,7 @@ void vlvo_term( void )
 	if(lvo_handler != -1) close(lvo_handler);
 }
 
-uint32_t vlvo_draw_slice_mga(uint8_t *image[], int stride[], int w,int h,int x,int y)
+uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -191,16 +177,10 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
  if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
  bytpp = (image_bpp+7)/8;
  dst = lvo_mem + (image_width * y + x)*bytpp;
-#ifdef HAVE_RADEON
-    if(src_format == IMGFMT_YV12)
-      yv12toyuy2(image[0],image[1],image[2],dst
-                 ,w,h,stride[0],stride[1],w*2);
+    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
+      vlvo_draw_slice_420(image,stride,w,h,x,y);
     else
-#else
-    if(src_format == IMGFMT_YV12)
-      vlvo_draw_slice_mga(image,stride,w,h,x,y);
-    else
-#endif
+      /* vlvo_draw_slice_422(image,stride,w,h,x,y); just for speed */
       memcpy(dst,image[0],mga_vid_config.frame_size);
  return 0;
 }
