@@ -71,7 +71,6 @@ int mLocalDisplay;
 
 /* output window id */
 int WinID=-1;
-int vo_nomouse_input = 0;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
 static int vo_fs_type = 0;

@@ -1191,6 +1191,8 @@ static void check_events (void)
 			break;
 			
 			case SDL_MOUSEBUTTONDOWN:
+				if(vo_nomouse_input)
+				    break;
 				if(event.button.button == 4 || event.button.button == 5)
 					mplayer_put_key(MOUSE_BASE+event.button.button-1);
 				else
@@ -1198,6 +1200,8 @@ static void check_events (void)
 				break;			    
 		
 			case SDL_MOUSEBUTTONUP:
+				if(vo_nomouse_input)
+				    break;
 				mplayer_put_key(MOUSE_BASE+event.button.button-1);
 				break;
 	
