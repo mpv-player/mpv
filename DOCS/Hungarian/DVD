@@ -17,7 +17,7 @@ Elõször fordítsd le és installáld a libcss-t.
 Utána fordítsd újra az MPlayer-t, hogy beleforduljon a libcss támogatás is.
 Ha nem teszi ezt automatikusan, akkor probáld így :
 
-./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincidr=/usr/local/include
+./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include
 
 (természetesen beírhatod a saját opcióidat is)
 

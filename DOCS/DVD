@@ -19,7 +19,7 @@ autodetection of libcss, but if it fails, see below :
 
 Call ./configure script of MPlayer with these options:
 
-./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincdir=/usr/local/include
+./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include
 
 (of course you can append your favourite options as well)
 

@@ -41,12 +41,14 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - webpage maintainer
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
+- experimental MINIX port
 
 Szabolcs Berecz: <szabi@inf.elte.hu>
 - codecs.conf file parser
 - config file and command line parser
 - mga_vid fixes, module option stc.
 - fbdev support in libvo
+- type #7 subtitle support
 
 László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 - SUB reader

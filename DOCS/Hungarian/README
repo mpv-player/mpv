@@ -12,7 +12,7 @@ OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt SDL-lel is (beleértve ezáltal az
 SDL képességeit is), és néhány alacsonyszintû kártyaspecifikus driver
 (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy hardware
 scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is szóltam a
-szép, elsimított, árnyékolt feliratozásról (7 támogatott típus!), ami támogat
+szép, élsímított, árnyékolt feliratozásról (7 támogatott típus!), ami támogat
 magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
 
 Történet:
