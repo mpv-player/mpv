@@ -208,7 +208,6 @@ if(dvd_title){
     /**
      * Check number of audio channels and types
      */
-//    fprintf( stderr,"[open] nr_audio streams: %d\n",vts_file->vtsi_mat->nr_of_vts_audio_streams );
     {
      int ac3aid = 128;
      int mpegaid = 0;
@@ -264,7 +263,41 @@ if(dvd_title){
 	  d->nr_of_channels++;
 	 }
       }
-     mp_msg(MSGT_OPEN,MSGL_V,"[open] %d audio channel found on disk.\n",d->nr_of_channels );
+     mp_msg(MSGT_OPEN,MSGL_V,"[open] number of audio channels on disk: %d.\n",d->nr_of_channels );
+    }
+
+    /**
+     * Check number of subtitles and language
+     */
+    {
+     int i;
+
+     d->nr_of_subtitles=0;
+     for ( i=0;i<32;i++ )
+      if ( vts_file->vts_pgcit->pgci_srp[0].pgc->subp_control[i] & 0x80000000 )
+       {
+        subp_attr_t * subtitle = &vts_file->vtsi_mat->vts_subp_attr[i];
+	int language = 0;
+	char tmp[] = "unknown";
+	
+	if ( subtitle->type == 1 )
+	 {
+	  language=subtitle->lang_code;
+	  tmp[0]=language>>8;
+	  tmp[1]=language&0xff;
+	  tmp[2]=0;
+	 }
+	 
+	d->subtitles[ d->nr_of_subtitles ].language=language;
+	d->subtitles[ d->nr_of_subtitles ].id=d->nr_of_subtitles;
+	
+        mp_msg(MSGT_OPEN,MSGL_V,"[open] subtitle ( sid ): %d language: %s\n",
+	  d->nr_of_subtitles,
+	  tmp
+	  );
+        d->nr_of_subtitles++;
+       }
+     mp_msg(MSGT_OPEN,MSGL_V,"[open] number of subtitles on disk: %d\n",d->nr_of_subtitles );
     }
 
     /**

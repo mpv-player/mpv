@@ -178,6 +178,11 @@ typedef struct {
 } audio_stream_t;
 
 typedef struct {
+ int id; // 0 - 31
+ int language;
+} subtitle_t;
+
+typedef struct {
   dvd_reader_t *dvd;
   dvd_file_t *title;
   ifo_handle_t *vmg_file;
@@ -196,6 +201,9 @@ typedef struct {
 // audio datas
   int nr_of_channels;
   audio_stream_t audio_streams[8];
+// subtitles
+  int nr_of_subtitles;
+  subtitle_t subtitles[32];
 } dvd_priv_t;
 
 #endif
