@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.64 -->
+<!-- synced with 1.65 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1330,21 +1330,18 @@ kódolni és még közvetlenül CD-re is írhatod őket.
 Hogy tudok összefűzni két videó fájlt?
 </para></question>
 <answer><para>
-Ez a végtelenségig lett magyarázva az mplayer-users listán. Menj és keress rá az
-<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archívumban</ulink>
-a teljes leírásra. Ez egy komplikált dolog és sebessége nagy mértékben függ
-az összekapcsolni kívánt fájlok típusától. Az MPEG-ek kis szerencsével összefűzhetőek
-egy fájlba. Az AVI-khoz van két eszköz, az
-<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> és az
-<application>avimerge</application> (a
-<ulink url="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</ulink>
-eszközkészlet része), ami elvégzi a dolgot. Megpróbálhatod a <application>MEncoder</application>t
-is, ha a két fájlnak azonos a képmérete és a codec-je. Próbáld ki a
+Az MPEG fájlok csak szerencsés esetben fűzhetőek össze egy fájlba.
+AVI fájlokhoz használhatod a <application>MEncoder</application>
+több fájl támogatását így:
 <screen>
-     cat file1 file2 > file3
-     mencoder -ovc copy -oac copy -o out.avi -forceidx file3.avi
+mencoder -ovc copy -oac copy -o out.avi file1.avi file2.avi     
 </screen>
-parancsot.
+Ez csak akkor működik, ha a fájlok ugyan felbontásúak és ugyanolyan codec-kel
+készültek. Megpróbálhatod az
+<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink>-ot és az
+<application>avimerge</application>-t (a
+<ulink url="http://www.transcoding.org/">transcode</ulink>
+eszközcsomag részei).
 </para></answer>
 </qandaentry>
 
