@@ -497,8 +497,12 @@ int sub_autodetect (FILE *fd) {
 
     return -1;  // too many bad lines
 }
-	
+
+#ifdef DUMPSUBS
+int sub_utf8=0;
+#else
 extern int sub_utf8;
+#endif
 
 #ifdef USE_ICONV
 static iconv_t icdsc;
@@ -771,7 +775,7 @@ void dump_mpsub(subtitle* subs){
 
 
 
-#if 0
+#ifdef DUMPSUBS
 int main(int argc, char **argv) {  // for testing
 
     int i,j;
@@ -782,7 +786,7 @@ int main(int argc, char **argv) {  // for testing
         printf("\nUsage: subreader filename.sub\n\n");
         exit(1);
     }
-    
+    sub_cp = argv[2]; 
     subs=sub_read_file(argv[1]);
     if(!subs){
         printf("Couldn't load file... let's write a bugreport :)\n");
