@@ -148,6 +148,7 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('I', '2', '6', '3'):
 	case mmioFOURCC('i', '2', '6', '3'):
 	  printf("Video in I263 format\n");
+	  avi_header.yuv_supported=1;
           return "i263_32.drv";
 
 	case mmioFOURCC('M', 'J', 'P', 'G'):
