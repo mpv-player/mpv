@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +12,8 @@
 #include <wine/winnt.h>
 #include <wine/winerror.h>
 
-#include <ext.h>
-#include <registry.h>
+#include "ext.h"
+#include "registry.h"
 
 //#undef TRACE
 //#define TRACE printf
@@ -168,11 +168,10 @@ void free_registry(void)
 	free(regs);
 	regs = 0;
     }
-    if (localregpathname)
-    {
+
+    if (localregpathname && localregpathname != regpathname)
 	free(localregpathname);
-	localregpathname = 0;
-    }
+    localregpathname = 0;
 }
 
 
@@ -298,16 +297,21 @@ static void init_registry(void)
 	// can't be free-ed - it's static and probably thread
 	// unsafe structure which is stored in glibc
 
-#ifdef USE_WIN32DLL
-	// MPlayer:
-	localregpathname = get_path("registry");
+#ifdef MPLAYER
+	regpathname = get_path("registry");
+	localregpathname = regpathname;
 #else
-	// avifile:
+	// regpathname is an external pointer
+        //
+	// registry.c is holding it's own internal pointer
+	// localregpathname  - which is being allocate/deallocated
+
 	if (localregpathname == 0)
 	{
             const char* pthn = regpathname;
 	    if (!regpathname)
 	    {
+		// avifile - for now reading data from user's home
 		struct passwd* pwent;
 		pwent = getpwuid(geteuid());
                 pthn = pwent->pw_dir;
@@ -402,16 +406,9 @@ long RegQueryValueExA(long key, const char* value, int* reserved, int* type, int
 	char* c;
 	TRACE("Querying value %s\n", value);
 	if(!regs)
-	    init_registry()
-;
+	    init_registry();
+
 	c=build_keyname(key, value);
-	if (strcmp(value, "AudioReserved001")==0)
-	{
-	    printf("Query for AudioReserved001  %p  %p  count: %d\n", type, data, *count);
-	    *(int*)type = REG_DWORD;
-	    *(int*)data = 256;
-	    return 0;
-	}
 	if(c==NULL)
 	    	return 1;
         t=find_value_by_name(c);
@@ -446,8 +443,8 @@ long RegCreateKeyExA(long key, const char* name, long reserved,
 //        TRACE("Creating/Opening key %s\n", name);
         TRACE("Creating/Opening key %s\n", name);
 	if(!regs)
-	    init_registry()
-;
+	    init_registry();
+
 	fullname=build_keyname(key, name);
 	if(fullname==NULL)
 		return 1;
@@ -509,12 +506,19 @@ long RegSetValueExA(long key, const char* name, long v1, long v2, const void* da
     char* c;
     TRACE("Request to set value %s\n", name);
     if(!regs)
-        init_registry()
-;
+	init_registry();
+
     c=build_keyname(key, name);
     if(c==NULL)
 	return 1;
     insert_reg_value(key, name, v2, data, size);
     free(c);
     return 0;
+}
+
+long RegEnumKeyExA(HKEY hKey, DWORD dwIndex, LPSTR lpName, LPDWORD lpcbName,
+		   LPDWORD lpReserved, LPSTR lpClass, LPDWORD lpcbClass,
+		   LPFILETIME lpftLastWriteTime)
+{
+    return ERROR_NO_MORE_ITEMS;
 }

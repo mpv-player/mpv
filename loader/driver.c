@@ -136,7 +136,7 @@ DrvOpen(LPARAM lParam2)
     if (!(npDriver = DrvAlloc(&hDriver, &uDrvResult)))
 	return ((HDRVR) 0);
 
-    if (!(npDriver->hDriverModule = expLoadLibraryA(win32_codec_name))) {
+    if (!(npDriver->hDriverModule = LoadLibraryA(win32_codec_name))) {
      	printf("Can't open library %s\n", win32_codec_name);
         DrvFree(hDriver);
         return ((HDRVR) 0);

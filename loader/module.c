@@ -3,7 +3,7 @@
  *
  * Copyright 1995 Alexandre Julliard
  */
-#include <config.h>
+#include "config.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -14,33 +14,8 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/types.h>
-/*
-#ifdef __linux__
-#include <asm/unistd.h>
-#include <asm/ldt.h>
-#else
-#define LDT_ENTRIES     8192
-#define LDT_ENTRY_SIZE  8
 
-struct modify_ldt_ldt_s {
-        unsigned int  entry_number;
-        unsigned long base_addr;
-        unsigned int  limit;
-        unsigned int  seg_32bit:1;
-        unsigned int  contents:2;
-        unsigned int  read_exec_only:1;
-        unsigned int  limit_in_pages:1;
-        unsigned int  seg_not_present:1;
-        unsigned int  useable:1;
-};
 
-#define MODIFY_LDT_CONTENTS_DATA        0
-#define MODIFY_LDT_CONTENTS_STACK       1
-#define MODIFY_LDT_CONTENTS_CODE        2
-#define __NR_modify_ldt         123
-#endif
-
-*/
 #include <wine/windef.h>
 #include <wine/winerror.h>
 #include <wine/heap.h>
@@ -71,7 +46,7 @@ modref_list* local_wm=NULL;
 
 HANDLE SegptrHeap;
 
-WINE_MODREF *MODULE_FindModule(LPCSTR m)
+WINE_MODREF* MODULE_FindModule(LPCSTR m)
 {
     modref_list* list=local_wm;
     TRACE("Module %s request\n", m);
@@ -215,7 +190,7 @@ static WIN_BOOL MODULE_InitDll( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
  * NOTE: Assumes that the process critical section is held!
  *
  */
-WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
+static WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
 {
     WIN_BOOL retv = TRUE;
     int i;
@@ -276,7 +251,7 @@ WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
  * sequence at MODULE_DllProcessAttach.  Unless the bForceDetach flag
  * is set, only DLLs with zero refcount are notified.
  */
-void MODULE_DllProcessDetach( WINE_MODREF* wm, WIN_BOOL bForceDetach, LPVOID lpReserved )
+static void MODULE_DllProcessDetach( WINE_MODREF* wm, WIN_BOOL bForceDetach, LPVOID lpReserved )
 {
     //    WINE_MODREF *wm=local_wm;
     modref_list* l = local_wm;
@@ -291,6 +266,74 @@ void MODULE_DllProcessDetach( WINE_MODREF* wm, WIN_BOOL bForceDetach, LPVOID lpR
     local_wm = 0;*/
 }
 
+/***********************************************************************
+ *	MODULE_LoadLibraryExA	(internal)
+ *
+ * Load a PE style module according to the load order.
+ *
+ * The HFILE parameter is not used and marked reserved in the SDK. I can
+ * only guess that it should force a file to be mapped, but I rather
+ * ignore the parameter because it would be extremely difficult to
+ * integrate this with different types of module represenations.
+ *
+ */
+static WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD flags )
+{
+	DWORD err = GetLastError();
+	WINE_MODREF *pwm;
+	int i;
+//	module_loadorder_t *plo;
+
+        SetLastError( ERROR_FILE_NOT_FOUND );
+	TRACE("Trying native dll '%s'\n", libname);
+	pwm = PE_LoadLibraryExA(libname, flags);
+#ifdef HAVE_LIBDL
+	if(!pwm)
+	{
+    	    TRACE("Trying ELF dll '%s'\n", libname);
+	    pwm=(WINE_MODREF*)ELFDLL_LoadLibraryExA(libname, flags);
+	}
+#endif
+//		printf("0x%08x\n", pwm);
+//		break;
+	if(pwm)
+	{
+		/* Initialize DLL just loaded */
+		TRACE("Loaded module '%s' at 0x%08x, \n", libname, pwm->module);
+		/* Set the refCount here so that an attach failure will */
+		/* decrement the dependencies through the MODULE_FreeLibrary call. */
+		pwm->refCount++;
+
+                SetLastError( err );  /* restore last error */
+		return pwm;
+	}
+
+
+	WARN("Failed to load module '%s'; error=0x%08lx, \n", libname, GetLastError());
+	return NULL;
+}
+
+/***********************************************************************
+ *           MODULE_FreeLibrary
+ *
+ * NOTE: Assumes that the process critical section is held!
+ */
+static WIN_BOOL MODULE_FreeLibrary( WINE_MODREF *wm )
+{
+    TRACE("(%s) - START\n", wm->modname );
+
+    /* Recursively decrement reference counts */
+    //MODULE_DecRefCount( wm );
+
+    /* Call process detach notifications */
+    MODULE_DllProcessDetach( wm, FALSE, NULL );
+
+    PE_UnloadLibrary(wm);
+
+    TRACE("END\n");
+
+    return TRUE;
+}
 
 /***********************************************************************
  *           LoadLibraryExA   (KERNEL32)
@@ -311,6 +354,8 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		return 0;
 	}
 	printf("Loading DLL: '%s'\n", libname);
+//	if(fs_installed==0)
+//	    install_fs();
 
 	while (wm == 0 && listpath[++i])
 	{
@@ -367,59 +412,11 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 
 
 /***********************************************************************
- *	MODULE_LoadLibraryExA	(internal)
- *
- * Load a PE style module according to the load order.
- *
- * The HFILE parameter is not used and marked reserved in the SDK. I can
- * only guess that it should force a file to be mapped, but I rather
- * ignore the parameter because it would be extremely difficult to
- * integrate this with different types of module represenations.
- *
- */
-WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD flags )
-{
-	DWORD err = GetLastError();
-	WINE_MODREF *pwm;
-	int i;
-//	module_loadorder_t *plo;
-
-        SetLastError( ERROR_FILE_NOT_FOUND );
-	TRACE("Trying native dll '%s'\n", libname);
-	pwm = PE_LoadLibraryExA(libname, flags);
-#ifdef HAVE_LIBDL
-	if(!pwm)
-	{
-    	    TRACE("Trying ELF dll '%s'\n", libname);
-	    pwm=(WINE_MODREF*)ELFDLL_LoadLibraryExA(libname, flags);
-	}
-#endif
-//		printf("0x%08x\n", pwm);
-//		break;
-	if(pwm)
-	{
-		/* Initialize DLL just loaded */
-		TRACE("Loaded module '%s' at 0x%08x, \n", libname, pwm->module);
-		/* Set the refCount here so that an attach failure will */
-		/* decrement the dependencies through the MODULE_FreeLibrary call. */
-		pwm->refCount++;
-
-                SetLastError( err );  /* restore last error */
-		return pwm;
-	}
-
-
-	WARN("Failed to load module '%s'; error=0x%08lx, \n", libname, GetLastError());
-	return NULL;
-}
-
-/***********************************************************************
  *           LoadLibraryA         (KERNEL32)
  */
 HMODULE WINAPI LoadLibraryA(LPCSTR libname) {
 	return LoadLibraryExA(libname,0,0);
 }
-
 
 /***********************************************************************
  *           FreeLibrary
@@ -430,7 +427,6 @@ WIN_BOOL WINAPI FreeLibrary(HINSTANCE hLibModule)
     WINE_MODREF *wm;
 
     wm=MODULE32_LookupHMODULE(hLibModule);
-//    wm=local_wm;
 
     if ( !wm || !hLibModule )
     {
@@ -476,28 +472,6 @@ static void MODULE_DecRefCount( WINE_MODREF *wm )
 
         wm->flags &= ~WINE_MODREF_MARKER;
     }
-}
-
-/***********************************************************************
- *           MODULE_FreeLibrary
- *
- * NOTE: Assumes that the process critical section is held!
- */
-WIN_BOOL MODULE_FreeLibrary( WINE_MODREF *wm )
-{
-    TRACE("(%s) - START\n", wm->modname );
-
-    /* Recursively decrement reference counts */
-    //MODULE_DecRefCount( wm );
-
-    /* Call process detach notifications */
-    MODULE_DllProcessDetach( wm, FALSE, NULL );
-
-    PE_UnloadLibrary(wm);
-
-    TRACE("END\n");
-
-    return TRUE;
 }
 
 /***********************************************************************
@@ -551,11 +525,13 @@ static int acounter = 0;
 void CodecAlloc(void)
 {
     acounter++;
+    //printf("**************CODEC ALLOC %d\n", acounter);
 }
 
 void CodecRelease(void)
 {
     acounter--;
+    //printf("**************CODEC RELEASE %d\n", acounter);
     if (acounter == 0)
     {
 	for (;;)

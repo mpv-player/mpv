@@ -8,9 +8,7 @@
 #define __WINE_MODULE_H
 
 #include "windef.h"
-//#include "dosexe.h"
 #include "pe_image.h"
-
 
 
 typedef struct {
@@ -133,66 +131,9 @@ typedef struct resource_nameinfo_s NE_NAMEINFO;
 /* module.c */
 extern FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, WIN_BOOL snoop );
 extern WINE_MODREF *MODULE32_LookupHMODULE( HMODULE hModule );
-extern WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved );
-extern void MODULE_DllProcessDetach( WINE_MODREF *wm, WIN_BOOL bForceDetach, LPVOID lpReserved );
-extern void MODULE_DllThreadAttach( LPVOID lpReserved );
-extern void MODULE_DllThreadDetach( LPVOID lpReserved );
-extern WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD flags );
-extern WIN_BOOL MODULE_FreeLibrary( WINE_MODREF *wm );
 extern WINE_MODREF *MODULE_FindModule( LPCSTR path );
-extern HMODULE MODULE_CreateDummyModule( LPCSTR filename, HMODULE module32 );
-extern FARPROC16 WINAPI WIN32_GetProcAddress16( HMODULE hmodule, LPCSTR name );
-extern SEGPTR WINAPI HasGPHandler16( SEGPTR address );
-extern void MODULE_WalkModref( DWORD id );
 
 /* resource.c */
 extern INT       WINAPI AccessResource(HMODULE,HRSRC); 
-/*
-/ loader/ne/module.c 
-extern NE_MODULE *NE_GetPtr( HMODULE16 hModule );
-extern void NE_DumpModule( HMODULE16 hModule );
-extern void NE_WalkModules(void);
-extern void NE_RegisterModule( NE_MODULE *pModule );
-extern WORD NE_GetOrdinal( HMODULE16 hModule, const char *name );
-extern FARPROC16 WINAPI NE_GetEntryPoint( HMODULE16 hModule, WORD ordinal );
-extern FARPROC16 NE_GetEntryPointEx( HMODULE16 hModule, WORD ordinal, WIN_BOOL16 snoop );
-extern WIN_BOOL16 NE_SetEntryPoint( HMODULE16 hModule, WORD ordinal, WORD offset );
-extern int NE_OpenFile( NE_MODULE *pModule );
-extern WIN_BOOL NE_CreateProcess( HANDLE hFile, LPCSTR filename, LPCSTR cmd_line, LPCSTR env, 
-                              LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
-                              WIN_BOOL inherit, DWORD flags, LPSTARTUPINFOA startup,
-                              LPPROCESS_INFORMATION info );
-extern WIN_BOOL NE_InitProcess( NE_MODULE *pModule );
-
-
-/ loader/ne/resource.c 
-extern HGLOBAL16 WINAPI NE_DefResourceHandler(HGLOBAL16,HMODULE16,HRSRC16);
-extern WIN_BOOL NE_InitResourceHandler( HMODULE16 hModule );
-extern HRSRC16 NE_FindResource( NE_MODULE *pModule, LPCSTR name, LPCSTR type );
-extern INT16 NE_AccessResource( NE_MODULE *pModule, HRSRC16 hRsrc );
-extern DWORD NE_SizeofResource( NE_MODULE *pModule, HRSRC16 hRsrc );
-extern HGLOBAL16 NE_LoadResource( NE_MODULE *pModule, HRSRC16 hRsrc );
-extern WIN_BOOL16 NE_FreeResource( NE_MODULE *pModule, HGLOBAL16 handle );
-extern NE_TYPEINFO *NE_FindTypeSection( LPBYTE pResTab, NE_TYPEINFO *pTypeInfo, LPCSTR typeId );
-extern NE_NAMEINFO *NE_FindResourceFromType( LPBYTE pResTab, NE_TYPEINFO *pTypeInfo, LPCSTR resId );
-
-// loader/ne/segment.c
-extern WIN_BOOL NE_LoadSegment( NE_MODULE *pModule, WORD segnum );
-extern WIN_BOOL NE_LoadAllSegments( NE_MODULE *pModule );
-extern WIN_BOOL NE_CreateSegment( NE_MODULE *pModule, int segnum );
-extern WIN_BOOL NE_CreateAllSegments( NE_MODULE *pModule );
-extern HINSTANCE16 NE_GetInstance( NE_MODULE *pModule );
-extern void NE_InitializeDLLs( HMODULE16 hModule );
-extern void NE_DllProcessAttach( HMODULE16 hModule );
-
-// loader/ne/convert.c 
-HGLOBAL16 NE_LoadPEResource( NE_MODULE *pModule, WORD type, LPVOID bits, DWORD size );
-*/
-/* relay32/builtin.c */
-extern WINE_MODREF *BUILTIN32_LoadLibraryExA(LPCSTR name, DWORD flags);
-extern HMODULE BUILTIN32_LoadExeModule( LPCSTR *filename );
-extern void BUILTIN32_UnloadLibrary(WINE_MODREF *wm);
-extern void *BUILTIN32_dlopen( const char *name );
-extern int BUILTIN32_dlclose( void *handle );
 
 #endif  /* __WINE_MODULE_H */

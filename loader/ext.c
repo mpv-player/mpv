@@ -5,7 +5,7 @@
  *
  *
  ********************************************************/
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_MALLOC_H
@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <wine/windef.h>
 #include <wine/winbase.h>
 #include <wine/debugtools.h>
@@ -146,6 +147,7 @@ LPSTR WINAPI lstrcpynWtoA(LPSTR dest, LPCWSTR src, INT count)
     }
     return result;
 }
+/* i stands here for ignore case! */
 int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n)
 {
     /*
@@ -156,17 +158,21 @@ int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n)
     */
     while(n>0)
     {
-	if(*s1<*s2)
-	    return -1;
-	else
-    	    if(*s1>*s2)
-		return 1;
+	if (((*s1 | *s2) & 0xff00) || toupper((char)*s1) != toupper((char)*s2))
+	{
+
+	    if(*s1<*s2)
+		return -1;
 	    else
-		if(*s1==0)
-		    return 0;
-    s1++;
-    s2++;
-    n--;
+		if(*s1>*s2)
+		    return 1;
+		else
+		    if(*s1==0)
+			return 0;
+	}
+	s1++;
+	s2++;
+	n--;
     }
     return 0;
 }
