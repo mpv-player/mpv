@@ -1455,11 +1455,11 @@ if [ $_gl = yes ]; then
    fi
 fi
 
-_css='#undef HAVE_LIBCSS'
 _csslib=''
 _cssinc=''
 
 if [ $_dvdread = yes ]; then
+   _css='#undef HAVE_LIBCSS'
    _csslib='-ldvdread'
    _dvdreaddef='#define USE_DVDREAD'
 else
