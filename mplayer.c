@@ -1512,6 +1512,7 @@ if(!sh_video) {
 	sh_video->timer+=frame_time;
 	time_frame+=frame_time;  // for nosound
 	// check for frame-drop:
+	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
 	    float delay=audio_out->get_delay();
 	    float d=(sh_video->timer)-(sh_audio->timer-delay);
@@ -1538,8 +1539,8 @@ if(!sh_video) {
 
 // ==========================================================================
     
-    current_module="draw_osd";
-    if(vo_config_count) video_out->draw_osd();
+//    current_module="draw_osd";
+//    if(vo_config_count) video_out->draw_osd();
 
 #ifdef HAVE_NEW_GUI
     if(use_gui) guiEventHandling();

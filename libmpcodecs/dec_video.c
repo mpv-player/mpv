@@ -194,16 +194,15 @@ else if(gCpuCaps.hasMMX){
 }
 #endif
 
-if(!mpi) return 0; // error / skipped frame
-
 t2=GetTimer();t=t2-t;
 tt = t*0.000001f;
 video_time_usage+=tt;
 
-if(drop_frame) return 0;
+if(!mpi || drop_frame) return 0; // error / skipped frame
 
 //vo_draw_image(video_out,mpi);
 vf->put_image(vf,mpi);
+vf->control(vf,VFCTRL_DRAW_OSD,NULL);
 
     t2=GetTimer()-t2;
     tt=t2*0.000001f;

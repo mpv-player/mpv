@@ -42,6 +42,11 @@ static int config(struct vf_instance_s* vf,
 
 static int control(struct vf_instance_s* vf,
         int request, void* data){
+    switch(request){
+    case VFCTRL_DRAW_OSD:
+	video_out->draw_osd();
+	return CONTROL_TRUE;
+    }
     // return video_out->control(request,data);
     return CONTROL_UNKNOWN;
 }

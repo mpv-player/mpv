@@ -50,6 +50,8 @@ typedef struct vf_instance_s {
 #define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
 #define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
 
+#define VFCTRL_DRAW_OSD 7
+
 #include "vfcap.h"
 
 // functions:
