@@ -1,4 +1,4 @@
-// Translated by:  Codre Adrian <codreadrian@softhome.net>
+// Translated by:  Codre Adrian <codreadrian@softhome.net> (address bounces)
 
 // ========================= MPlayer help ===========================
 
