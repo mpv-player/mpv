@@ -29,16 +29,32 @@ static int config(struct vf_instance_s* vf,
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t *dmpi;
+    int y,w,h;
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,IMGFMT_YV12,
 	MP_IMGTYPE_TEMP, 0/*MP_IMGFLAG_ACCEPT_STRIDE*/,
 	mpi->w, mpi->h);
 
-    yvu9toyv12(mpi->planes[0],mpi->planes[1],mpi->planes[2],
-	    dmpi->planes[0], dmpi->planes[1], dmpi->planes[2], mpi->w, mpi->h,
-	    dmpi->stride[0], dmpi->stride[1]);
-    
+    for(y=0;y<mpi->h;y++)
+	memcpy(dmpi->planes[0]+dmpi->stride[0]*y,
+	       mpi->planes[0]+mpi->stride[0]*y,
+	       mpi->w);
+
+    w=mpi->w/4; h=mpi->h/2;
+    for(y=0;y<h;y++){
+	unsigned char* s=mpi->planes[1]+mpi->stride[1]*(y>>1);
+	unsigned char* d=dmpi->planes[1]+dmpi->stride[1]*y;
+	int x;
+	for(x=0;x<w;x++) d[2*x]=d[2*x+1]=s[x];
+    }
+    for(y=0;y<h;y++){
+	unsigned char* s=mpi->planes[2]+mpi->stride[2]*(y>>1);
+	unsigned char* d=dmpi->planes[2]+dmpi->stride[2]*y;
+	int x;
+	for(x=0;x<w;x++) d[2*x]=d[2*x+1]=s[x];
+    }
+
     dmpi->qscale=mpi->qscale;
     dmpi->qstride=mpi->qstride;
     
