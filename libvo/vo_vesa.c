@@ -457,6 +457,17 @@ static void paintBkGnd( void )
     }
 }
 
+static void clear_screen( void )
+{
+    int x_res = video_mode_info.XResolution;
+    int y_res = video_mode_info.YResolution;
+    int x, y;
+
+    for (y = 0; y < y_res; ++y)
+	for (x = 0; x < x_res; ++x)
+	    __vbeSetPixel(x, y, 0, 0, 0);
+}
+
 static char *model2str(unsigned char type)
 {
   char *retval;
@@ -854,6 +865,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("vo_vesa: VESA initialization complete\n");
 	  fflush(stdout);
 	}
+	/* Clear screen for stupid BIOSes */
+	clear_screen();
 	if(HAS_DGA() && vo_doublebuffering)
 	{
 	    for(i=0;i<MAX_BUFFERS;i++)
