@@ -821,6 +821,18 @@ i386|i486|i586|i686)
 
     _march="-march=$proc"
     _mcpu="-mcpu=$proc"
+
+    ##
+    ## Gabucino : --target takes effect here (hopefully...) by overwriting
+    ##            autodetected mcpu/march parameters
+    ##
+
+    if test "$_target" ; then
+      _march="-march=$host_arch"
+      _mcpu="-mcpu=$host_arch"
+      proc="$_target"		# a little cosmetic
+    fi
+
     #echo "DONE (${proc})."
     ;;
 
@@ -885,16 +897,6 @@ mips)
     ;;
 esac
 
-##
-## Gabucino : --target takes effect here (hopefully...) by overwriting
-##            autodetected mcpu/march parameters
-##
-
-if test "$_target" ; then
-  _march="-march=$host_arch"
-  _mcpu="-mcpu=$host_arch"
-  proc="$_target"		# a little cosmetic
-fi
 
 # ---
 
