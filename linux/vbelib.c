@@ -89,6 +89,27 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
 #define VBE_LRMI_int(int_no,regs) (VBE_LRMI_int(int_no,regs))
 #endif
 
+static FILE *my_stdin;
+static FILE *my_stdout;
+static FILE *my_stderr;
+
+static void __set_cursor_type(FILE *stdout_fd,int cursor_on)
+{
+  fprintf(stdout_fd,"\033[?25%c",cursor_on?'h':'l');
+}
+
+/* TODO: do it only on LCD or DFP. We should extract such info from DDC */
+static void hide_terminal_output( void )
+{
+  my_stdin  = fopen(ttyname(fileno(stdin )),"r");
+  my_stdout = fopen(ttyname(fileno(stdout)),"w");
+  my_stderr = fopen(ttyname(fileno(stderr)),"w");
+  __set_cursor_type(stdout,0);
+/*if(isatty(fileno(stdin ))) stdin =freopen("/dev/null","r",stdin );*/
+  if(isatty(fileno(stdout))) stdout=freopen("/dev/null","w",stdout);
+  if(isatty(fileno(stderr))) stderr=freopen("/dev/null","w",stderr);
+}
+
 static unsigned hh_int_10_seg;
 static int fd_mem;
 int vbeInit( void )
@@ -115,11 +136,13 @@ int vbeInit( void )
 	 && vbe_pm_info.iopl_ports[i++] > 1023) ioperm(iopl_port,1,1);
    iopl(3);
    fd_mem = open("/dev/mem",O_RDWR);
+   hide_terminal_output();
    return VBE_OK;
 }
 
 int vbeDestroy( void ) 
 {
+  __set_cursor_type(my_stdout,1);
   close(fd_mem);
   return VBE_OK;
 }
