@@ -10,7 +10,7 @@ static vd_info_t info = {
 	"Microsoft RLE decoder",
 	"msrle",
 	VFM_MSRLE,
-	"A'rpi",
+	"Mike Melanson",
 	"Mike Melanson",
 	"native codec"
 };
@@ -24,23 +24,56 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-  unsigned char *palette = (unsigned char *)sh->bih+40;
+  unsigned char *palette_map = NULL;
+  unsigned char *orig_map = (unsigned char *)sh->bih+40;
   int i;
   unsigned short color;
+  unsigned char r, g, b;
+  int bits_per_pixel = sh->codec->outfmt[sh->outfmtidx] & 255;
 
-  // if BGR15 & BGR16, modify palette in place
-  for (i = 0; i < sh->bih->biClrUsed; i++)
+  // convert the palette for the requested output format
+  switch (bits_per_pixel)
   {
+    case 15:
+    case 16:
+      if ((palette_map =
+        (unsigned char *)malloc(sh->bih->biClrUsed * 2)) == NULL)
+        return 0;
+
+      for (i = 0; i < sh->bih->biClrUsed; i++)
+      {
+        r = orig_map[i * 4 + 2];
+        g = orig_map[i * 4 + 1];
+        b = orig_map[i * 4 + 0];
+        if (bits_per_pixel == 15)
+          color = ((r>>3)<<10) | ((g>>3)<<5) | ((b>>3));
+        else
+          color = ((r>>3)<<11) | ((g>>2)<<5) | ((b>>3));
+        palette_map[i * 2 + 1] = color >> 8;
+        palette_map[i * 2 + 0] = color & 0xFF;
+      }
+      break;
+
+    case 24:
+    case 32:
+      if ((palette_map =
+        (unsigned char *)malloc(sh->bih->biClrUsed * 4)) == NULL)
+        return 0;
+      memcpy(palette_map, orig_map, sh->bih->biClrUsed * 4);
+      break;
   }
+
+  sh->context = palette_map;
 
   return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24);
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-}
+  unsigned char *palette_map = (unsigned char *)sh->context;
 
-//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
+  free(palette_map);
+}
 
 #define FETCH_NEXT_STREAM_BYTE() \
     if (stream_ptr >= encoded_size) \
@@ -61,8 +94,10 @@ void decode_msrle4(
   int bits_per_pixel)
 {
   int bytes_per_pixel = (bits_per_pixel + 1) / 8;
-  unsigned char r1, g1, b1;
+  unsigned char r1, g1, b1;  // for 24/32 bpp
   unsigned char r2, g2, b2;
+  unsigned char color_hi1, color_lo1;  // for 15/16 bpp
+  unsigned char color_hi2, color_lo2;
   int stream_ptr = 0;
   unsigned char rle_code;
   unsigned char extra_byte;
@@ -73,6 +108,8 @@ void decode_msrle4(
   int row_ptr = (height - 1) * row_dec;
   int i;
 
+  r1 = r2 = g1 = g2 = b1 = b2 = 
+    color_hi1 = color_hi2 = color_lo1 = color_lo2 = 0;
   while (row_ptr >= 0)
   {
     FETCH_NEXT_STREAM_BYTE();
@@ -116,22 +153,42 @@ void decode_msrle4(
         {
           if (pixel_ptr >= row_dec)
             break;
-          r1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 2];
-          g1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 1];
-          b1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 0];
-          decoded[row_ptr + pixel_ptr + 0] = b1;
-          decoded[row_ptr + pixel_ptr + 1] = g1;
-          decoded[row_ptr + pixel_ptr + 2] = r1;
+          if (bytes_per_pixel == 2)
+          {
+            color_hi1 = palette_map[(encoded[stream_ptr + i] >> 4) * 2 + 0];
+            color_lo1 = palette_map[(encoded[stream_ptr + i] >> 4) * 2 + 1];
+            decoded[row_ptr + pixel_ptr + 0] = color_hi1;
+            decoded[row_ptr + pixel_ptr + 1] = color_lo1;
+          }
+          else
+          {
+            r1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 2];
+            g1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 1];
+            b1 = palette_map[(encoded[stream_ptr + i] >> 4) * 4 + 0];
+            decoded[row_ptr + pixel_ptr + 0] = b1;
+            decoded[row_ptr + pixel_ptr + 1] = g1;
+            decoded[row_ptr + pixel_ptr + 2] = r1;
+          }
           pixel_ptr += bytes_per_pixel;
 
           if (pixel_ptr >= row_dec)
             break;
-          r1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 2];
-          g1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 1];
-          b1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 0];
-          decoded[row_ptr + pixel_ptr + 0] = b1;
-          decoded[row_ptr + pixel_ptr + 1] = g1;
-          decoded[row_ptr + pixel_ptr + 2] = r1;
+          if (bytes_per_pixel == 2)
+          {
+            color_hi1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 2 + 0];
+            color_lo1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 2 + 1];
+            decoded[row_ptr + pixel_ptr + 0] = color_hi1;
+            decoded[row_ptr + pixel_ptr + 1] = color_lo1;
+          }
+          else
+          {
+            r1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 2];
+            g1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 1];
+            b1 = palette_map[(encoded[stream_ptr + i] & 0x0F) * 4 + 0];
+            decoded[row_ptr + pixel_ptr + 0] = b1;
+            decoded[row_ptr + pixel_ptr + 1] = g1;
+            decoded[row_ptr + pixel_ptr + 2] = r1;
+          }
           pixel_ptr += bytes_per_pixel;
         }
         stream_ptr += rle_code;
@@ -145,12 +202,22 @@ void decode_msrle4(
     {
       // decode a run of data
       FETCH_NEXT_STREAM_BYTE();
-      r1 = palette_map[(stream_byte >> 4) * 4 + 2];
-      g1 = palette_map[(stream_byte >> 4) * 4 + 1];
-      b1 = palette_map[(stream_byte >> 4) * 4 + 0];
-      r2 = palette_map[(stream_byte & 0x0F) * 4 + 2];
-      g2 = palette_map[(stream_byte & 0x0F) * 4 + 1];
-      b2 = palette_map[(stream_byte & 0x0F) * 4 + 0];
+      if (bytes_per_pixel == 2)
+      {
+        color_hi1 = palette_map[(stream_byte >> 4) * 2 + 0];
+        color_lo1 = palette_map[(stream_byte >> 4) * 2 + 1];
+        color_hi2 = palette_map[(stream_byte & 0x0F) * 2 + 0];
+        color_lo2 = palette_map[(stream_byte & 0x0F) * 2 + 1];
+      }
+      else
+      {
+        r1 = palette_map[(stream_byte >> 4) * 4 + 2];
+        g1 = palette_map[(stream_byte >> 4) * 4 + 1];
+        b1 = palette_map[(stream_byte >> 4) * 4 + 0];
+        r2 = palette_map[(stream_byte & 0x0F) * 4 + 2];
+        g2 = palette_map[(stream_byte & 0x0F) * 4 + 1];
+        b2 = palette_map[(stream_byte & 0x0F) * 4 + 0];
+      }
       for (i = 0; i < rle_code; i++)
       {
         if (pixel_ptr >= row_dec)
@@ -158,15 +225,31 @@ void decode_msrle4(
 
         if ((i & 1) == 0)
         {
-          decoded[row_ptr + pixel_ptr + 0] = b1;
-          decoded[row_ptr + pixel_ptr + 1] = g1;
-          decoded[row_ptr + pixel_ptr + 2] = r1;
+          if (bytes_per_pixel == 2)
+          {
+            decoded[row_ptr + pixel_ptr + 0] = color_hi1;
+            decoded[row_ptr + pixel_ptr + 1] = color_lo1;
+          }
+          else
+          {
+            decoded[row_ptr + pixel_ptr + 0] = b1;
+            decoded[row_ptr + pixel_ptr + 1] = g1;
+            decoded[row_ptr + pixel_ptr + 2] = r1;
+          }
         }
         else
         {
-          decoded[row_ptr + pixel_ptr + 0] = b2;
-          decoded[row_ptr + pixel_ptr + 1] = g2;
-          decoded[row_ptr + pixel_ptr + 2] = r2;
+          if (bytes_per_pixel == 2)
+          {
+            decoded[row_ptr + pixel_ptr + 0] = color_hi2;
+            decoded[row_ptr + pixel_ptr + 1] = color_lo2;
+          }
+          else
+          {
+            decoded[row_ptr + pixel_ptr + 0] = b2;
+            decoded[row_ptr + pixel_ptr + 1] = g2;
+            decoded[row_ptr + pixel_ptr + 2] = r2;
+          }
         }
         pixel_ptr += bytes_per_pixel;
       }
@@ -190,7 +273,8 @@ void decode_msrle8(
   int bits_per_pixel)
 {
   int bytes_per_pixel = (bits_per_pixel + 1) / 8;
-  unsigned char r, g, b;
+  unsigned char r, g, b;  // for 24/32 bpp
+  unsigned char color_hi, color_lo;  // for 15/16 bpp
   int stream_ptr = 0;
   unsigned char rle_code;
   unsigned char extra_byte;
@@ -200,6 +284,7 @@ void decode_msrle8(
   int row_dec = width * bytes_per_pixel;
   int row_ptr = (height - 1) * row_dec;
 
+  r = g = b = color_hi = color_lo = 0;
   while (row_ptr >= 0)
   {
     FETCH_NEXT_STREAM_BYTE();
@@ -247,13 +332,23 @@ void decode_msrle8(
 
         while (rle_code--)
         {
-          r = palette_map[encoded[stream_ptr] * 4 + 2];
-          g = palette_map[encoded[stream_ptr] * 4 + 1];
-          b = palette_map[encoded[stream_ptr] * 4 + 0];
-          stream_ptr++;
-          decoded[row_ptr + pixel_ptr + 0] = b;
-          decoded[row_ptr + pixel_ptr + 1] = g;
-          decoded[row_ptr + pixel_ptr + 2] = r;
+          FETCH_NEXT_STREAM_BYTE();
+          if (bytes_per_pixel == 2)
+          {
+            color_hi = palette_map[stream_byte * 2 + 0];
+            color_lo = palette_map[stream_byte * 2 + 1];
+            decoded[row_ptr + pixel_ptr + 0] = color_hi;
+            decoded[row_ptr + pixel_ptr + 1] = color_lo;
+          }
+          else
+          {
+            r = palette_map[stream_byte * 4 + 2];
+            g = palette_map[stream_byte * 4 + 1];
+            b = palette_map[stream_byte * 4 + 0];
+            decoded[row_ptr + pixel_ptr + 0] = b;
+            decoded[row_ptr + pixel_ptr + 1] = g;
+            decoded[row_ptr + pixel_ptr + 2] = r;
+          }
           pixel_ptr += bytes_per_pixel;
         }
 
@@ -275,14 +370,30 @@ void decode_msrle8(
 
       FETCH_NEXT_STREAM_BYTE();
 
-      r = palette_map[stream_byte * 4 + 2];
-      g = palette_map[stream_byte * 4 + 1];
-      b = palette_map[stream_byte * 4 + 0];
+      if (bytes_per_pixel == 2)
+      {
+        color_hi = palette_map[stream_byte * 2 + 0];
+        color_lo = palette_map[stream_byte * 2 + 1];
+      }
+      else
+      {
+        r = palette_map[stream_byte * 4 + 2];
+        g = palette_map[stream_byte * 4 + 1];
+        b = palette_map[stream_byte * 4 + 0];
+      }
       while(rle_code--)
       {
-        decoded[row_ptr + pixel_ptr + 0] = b;
-        decoded[row_ptr + pixel_ptr + 1] = g;
-        decoded[row_ptr + pixel_ptr + 2] = r;
+        if (bytes_per_pixel == 2)
+        {
+          decoded[row_ptr + pixel_ptr + 0] = color_hi;
+          decoded[row_ptr + pixel_ptr + 1] = color_lo;
+        }
+        else
+        {
+          decoded[row_ptr + pixel_ptr + 0] = b;
+          decoded[row_ptr + pixel_ptr + 1] = g;
+          decoded[row_ptr + pixel_ptr + 2] = r;
+        }
         pixel_ptr += bytes_per_pixel;
       }
     }
@@ -299,7 +410,7 @@ void decode_msrle8(
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     if(len<=0) return NULL; // skipped frame
-    
+
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE, 
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
@@ -308,14 +419,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
       decode_msrle8(
         data,len, mpi->planes[0],
         sh->disp_w, sh->disp_h,
-        (unsigned char *)sh->bih+40,
-        mpi->bpp);
+        (unsigned char *)sh->context,
+        mpi->imgfmt & 255);
     else if (sh->format == 2)
       decode_msrle4(
         data,len, mpi->planes[0],
         sh->disp_w, sh->disp_h,
-        (unsigned char *)sh->bih+40,
-        mpi->bpp);
+        (unsigned char *)sh->context,
+        mpi->imgfmt & 255);
     else
       mp_msg(MSGT_DECVIDEO, MSGL_WARN,
         "MS RLE: Don't know how to decode format %08X", sh->format);
