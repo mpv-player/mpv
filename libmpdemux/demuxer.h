@@ -173,6 +173,7 @@ inline static int demux_getc(demux_stream_t *ds){
 void ds_free_packs(demux_stream_t *ds);
 int ds_get_packet(demux_stream_t *ds,unsigned char **start);
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
+float ds_get_next_pts(demux_stream_t *ds);
 
 // This is defined here because demux_stream_t ins't defined in stream.h
 stream_t* new_ds_stream(demux_stream_t *ds);

@@ -438,6 +438,25 @@ int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
     }
 }
 
+float ds_get_next_pts(demux_stream_t *ds) {
+  demuxer_t* demux = ds->demuxer;
+  while(!ds->first) {
+    if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyAudioInBuffer,demux->audio->packs,demux->audio->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
+      return -1;
+    }
+    if(demux->video->packs>=MAX_PACKS || demux->video->bytes>=MAX_PACK_BYTES){
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyVideoInBuffer,demux->video->packs,demux->video->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
+      return -1;
+    }
+    if(!demux_fill_buffer(demux,ds))
+      return -1;
+  }
+  return ds->first->pts;
+}
+
 // ====================================================================
 
 // feed-back from demuxers:
@@ -696,7 +715,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPSfile);
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
-    printf("MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
+    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
 	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES,num_mp3audio_packets);
 //MPEG packet stats: p100: 458  p101: 458  PES: 0  MP3: 1103  (.m2v)
     if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100

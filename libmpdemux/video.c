@@ -291,14 +291,18 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
       case DEMUXER_TYPE_ASF: {
-        float d=d_video->pts-pts1;
-        if(d>0 && d<5) frame_time=d;
+        float next_pts = ds_get_next_pts(d_video);
+        float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
         if(d>0){
           if(verbose)
             if((int)sh_video->fps==1000)
               mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
           sh_video->frametime=d; // 1ms
           sh_video->fps=1.0f/d;
+          frame_time = d;
+        } else {
+          mp_msg(MSGT_CPLAYER,MSGL_WARN,"\nInvalid frame duration value. Defaulting to 1/25 sec.\n");
+          frame_time = 1/25.0;
         }
       }
     }
