@@ -3466,9 +3466,10 @@ maximum number of B frames to put between I/P frames (default=0)
 quantizer ratio between B and non B frames, 150=1.50 (default=150)
 .IPs bquant_offset=<-1000\-1000>
 quantizer offset between B and non B frames, 100=1.00 (default=100)
+.IPs bf_threshold=<-255\-255>
+change the probability of a frame to be a bframe (default=0)
 .IPs hq_ac
-enable a better prediction of AC component, will save bits at cost of a 
-slightly slower encoding (default=off)
+enable a better prediction of AC component (default=off)
 .IPs vhq=<0\-4>
 enable a higher quality ME search using DCT, faster to slower:
 
