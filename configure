@@ -283,6 +283,8 @@ Use these options if autodetection fails:
   --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
   --with-xmmsplugindir=DIR path to xmms plugins
   --with-xmmslibdir=DIR    path to libxmms.so.1
+  --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR
+  --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR
 
 EOF
     exit 0
