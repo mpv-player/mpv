@@ -125,7 +125,7 @@ libvo drivers:
     * vo_svga.c - Ivan Kalvachev
     * vo_tdfxfb.c - Alban Bedel
     * vo_tga.c - Daniele Forghieri
-    * vo_vesa.c - None
+    * vo_vesa.c - Aurelien Jacobs
     * vo_winvidix.c - Sascha Sommer
     * vo_x11.c - Alexander Strasser
     * vo_xmga.c - Attila Kinali
