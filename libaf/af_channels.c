@@ -49,6 +49,21 @@ static void copy(void* in, void* out, int ins, int inos,int outs, int outos, int
     }
     break;
   }
+  case 3:{
+    int8_t* tin  = (int8_t*)in;
+    int8_t* tout = (int8_t*)out;
+    tin  += 3 * inos;
+    tout += 3 * outos;
+    len = len / ( 3 * ins);
+    while (len--) {
+      tout[0] = tin[0];
+      tout[1] = tin[1];
+      tout[2] = tin[2];
+      tin += 3 * ins;
+      tout += 3 * outs;
+    }
+    break;
+  }
   case 4:{
     int32_t* tin  = (int32_t*)in;
     int32_t* tout = (int32_t*)out;
