@@ -141,8 +141,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     }
 
   } else {
-    if(c!=0x0f) printf("  {ERROR5,c=%d}  \n",c);
-    return -1;  // invalid packet !!!!!!
+    if(c!=0x0f){
+      printf("  {ERROR5,c=%d}  \n",c);
+      return -1;  // invalid packet !!!!!!
+    }
   }
   if(verbose>=3) printf(" => len=%d\n",len);
 
