@@ -1177,7 +1177,7 @@ Co z nawigacją po DVD?
 <answer><para>
 Obsługa dvdnav w <application>MPlayerze</application> obecnie jest zepsuta,
 jednakże normalne odtwarzanie działa. Jeżeli chcesz mieć fikuśne menu, będziesz
-musiał użyć innego odtwarzacza takiego jak <application>Xine</application> lub
+musiał użyć innego odtwarzacza takiego jak <application>xine</application> lub
 <application>Ogle</application>. Jeżeli zależy Ci na nawigacji po DVD, przyślij
 <ulink url="../../tech/patches.txt">łatkę</ulink>.
 </para></answer>

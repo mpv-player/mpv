@@ -1077,7 +1077,7 @@ que precupar de ello ... Nota: Con SDL puede forzar/desactivar Xv usando
 <answer><para>
 El soporte para dvdnav en <application>MPlayer</application> no funciona,
 aunque la reproducción normal sí funciona. Si quiere tener menús elaborados, tendrá que usar
-otro reproductor como <application>Xine</application> o
+otro reproductor como <application>xine</application> o
 <application>Ogle</application>. Si le preocupa la navegacion DVD, mande un
 <ulink url="../../tech/patches.txt">parche</ulink>.
 </para></answer>

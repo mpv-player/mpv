@@ -990,7 +990,7 @@ Et a propos de la navigation DVD ?
 <answer><para>
 Le support pour dvdnav dans <application>MPlayer</application> est actuellement cassé,
 bien que la lecture normale fonctionne. Si vous voulez jouer avec des jolis menus, vous
-devrez utiliser un autre lecteur comme <application>Xine</application> ou
+devrez utiliser un autre lecteur comme <application>xine</application> ou
 <application>Ogle</application>. Si vous vous souciez de la navigation DVD, envoyez un
 <ulink url="../../tech/patches.txt">patch</ulink>.
 </para></answer>
