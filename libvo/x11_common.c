@@ -103,8 +103,6 @@ static int vo_old_y = 0;
 static int vo_old_width = 0;
 static int vo_old_height = 0;
 
-int vo_x11_keepaspect = 1;
-
 #ifdef HAVE_XINERAMA
 int xinerama_screen = 0;
 int xinerama_x = 0;
@@ -825,7 +823,7 @@ int vo_x11_check_events(Display *mydisplay){
 void vo_x11_sizehint( int x, int y, int width, int height, int max )
 {
  vo_hint.flags=PPosition | PSize | PWinGravity;
- if(vo_x11_keepaspect)
+ if(vo_keepaspect)
  {
  	vo_hint.flags |= PAspect;
 	vo_hint.min_aspect.x = width;

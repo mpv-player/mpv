@@ -64,6 +64,7 @@ extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
 extern char *vo_geometry;
 extern int vo_ontop;
+extern int vo_keepaspect;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
@@ -77,17 +78,11 @@ extern int osd_level;
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
 
-#ifdef HAVE_DIRECTX
-extern int adapter_num;
-extern int refresh_rate;
-#endif
-
 #ifdef HAVE_X11
 extern char *mDisplayName;
 extern int WinID;
 extern int fs_layer;
 extern int stop_xscreensaver;
-extern int vo_x11_keepaspect;
 extern char **vo_fstype_list;
 extern int vo_nomouse_input;
 #endif
@@ -302,8 +297,6 @@ m_option_t mplayer_opts[]={
 	{"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"keepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nokeepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
 #endif
@@ -316,6 +309,8 @@ m_option_t mplayer_opts[]={
 	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+	{"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nokeepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	// direct rendering (decoding to video out buffer)
 	{"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},

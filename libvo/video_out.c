@@ -43,6 +43,7 @@ float vo_panscan = 0.0f;
 int vo_ontop = 0;
 int vo_adapter_num=0;
 int vo_refresh_rate=0;
+int vo_keepaspect=1;
 
 int vo_pts=0; // for hw decoding
 float vo_fps=0; // for mp1e rte
