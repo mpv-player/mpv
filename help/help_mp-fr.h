@@ -94,18 +94,24 @@ static char help_text[]=
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************************************\n"\
 "         **** Votre système est trop LENT pour jouer ce fichier! ****\n"\
-"         ************************************************************\n"\
+"         ************************************************************\n\n"\
 "Raisons possibles, problèmes, solutions:\n"\
-"- Le plus courant: pilote _audio_ cassé/bogué: Essayez -ao sdl ou utilisez\n"\
-"  ALSA 0.5 ou l'émulation OSS d'ALSA 0.9. Lisez DOCS/sound.html pour plus d'astuces!\n"\
-"  Essayez aussi avec -autosync 30 ou d'autres valeurs.\n"\
-"- Vidéo lente. Essayez avec un pilotes -vo différent (-vo help pour la liste) ou\n"\
-"  esssayez avec -framedrop! lisez DOCS/video.html pour les astuces de réglage.\n"\
-"- CPU lent. Evitez de lire de gros DVD/DivX sur un CPU lent! essayez -hardframedrop.\n"\
-"- Fichier corrompu => essayez des mélanges de: -nobps -ni -mc 0 -forceidx\n"\
-"- Pour jouer depuis un média lent (nfs/smb, DVD, VCD, etc.), essayez avec -cache 8192\n"\
-"- -cache est utilisé avec un fichier AVI mal multiplexé? Essayez avec -nocache\n"\
-"Si rien de tout cela ne résout le problème, lisez DOCS/bugreports.html.\n\n"
+"- Le plus courant: pilote _audio_ cassé/bogué\n"\
+"  - Essayez -ao sdl ou utilisez ALSA 0.5 ou l'émulation OSS d'ALSA 0.9.\n"\
+"  - Essayez différentes valeurs pour -autosync, 30 est un bon début.\n"\
+"- Vidéo lente\n"\
+"  - Essayez avec un pilotes -vo différent (-vo help pour la liste) ou\n"\
+"    essayez avec -framedrop!\n"\
+"- CPU lent\n"\
+"  - N'essayez pas de lire de gros DVD/DivX sur un CPU lent! essayez -hardframedrop.\n"\
+"- Fichier corrompu\n"\
+"  - Éssayez des mélanges de -nobps -ni -forceidx -mc 0.\n"\
+"- Pour jouer depuis un média lent (nfs/smb, DVD, VCD, etc.)\n"\
+"  - Essayez -cache 8192\n"\
+"- Utilisez-vous -cache avec un fichier AVI mal multiplexé? \n"\
+"  - Essayez avec -nocache\n"\
+"Lisez DOCS/video.html et DOCS/sound.html pour les astuces de réglage/accélération.\n"\
+"Si rien de tout cela ne résoud le problème, lisez DOCS/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI a besoin de X11!\n"
