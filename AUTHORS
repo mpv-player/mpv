@@ -1,11 +1,11 @@
                    *****************************************
                                     AUTHORS
                    *****************************************
-                   
+
 NOTE: NEVER send bug reports, help and feature requests directly to the
 authors, but you're free to write mails about donating!
 
-For donation request visit http://www.mplayerhq.hu/homepage/donations.html!
+For donation requests visit http://www.mplayerhq.hu/homepage/donations.html!
 
 ___________________
 The MPlayer project
@@ -315,7 +315,8 @@ Jindrich Makovicka <makovick@KMLinux.fjfi.cvut.cz>
 
 D Richard Felker III <dalias@aerifal.cx>
     * various bugfixes
-    * soft eq and halfpack video filters
+    * eq, halfpack, dint, detc, field, decimate, dsize, ilpack, ivtc,
+      tfields, pullup video filters
 
 Dominik Mierzejewski <dominik@rangers.eu.org>
     * compiler warning fixes
@@ -335,6 +336,7 @@ Sascha Sommer <saschasommer@freenet.de>
     * windows waveout AO driver
     * quicktime audio+video decoding, video encoding (using win32 DLLs) support
     * MinGW port
+    * nvidia_vid driver
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
@@ -373,7 +375,7 @@ Martin Gansser <mgansser@ngi.de>
 
 Matteo Giani <matgiani@ctonet.it>
     * PVA demuxer
-    
+
 Rudolf Marek <MAREKR2@cs.felk.cvut.cz>
     * gtf code for -vo vesa
 
@@ -412,7 +414,7 @@ Ville Syrjälä <syrjala@sci.fi>
 
 Björn Sandell <biorn@dce.chalmers.se>
     * various *BSD fixes
-    
+
 lucho <lucho@haemimont.bg>
     * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
@@ -435,9 +437,8 @@ András Mohari <mayday@varoshaza.nagyatad.hu>
     * 1st half of the documentation HTML --> XML conversion
 
 Dénes Balatoni <pnis@coder.hu>
-    * xmms inputplugin support
-    * various minor feature additions & fixes mostly to 
-      make mplayer work better on my pda
+    * XMMS inputplugin support
+    * minor features & fixes mostly to make MPlayer work better on a PDA
 
 Oskar Liljeblad <oskar@osk.mine.nu>
     * various OSD related patches
@@ -510,6 +511,9 @@ Dmitry Baryshkov <mitya@school.ioffe.ru>
 
 rgselk <rgselknospam@yahoo.com>
     * Real rtsp Range support
+
+Zoltan Hidvegi <mplayer@hzoli.2y.net>
+    * filmdint filter
 
 
 NOTE: If you think you are missing here, feel free to send a patch.
