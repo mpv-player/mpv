@@ -104,13 +104,17 @@ vqcomp (0.0-1.0) quantizer compression (for pass1/2)
 vrc_strategy (0,1,2)
 	FIXME (different rate control strategies)
 
-vlelim (0-1000) single coefficient elimination threshold for luminance
+vlelim (-1000-1000) single coefficient elimination threshold for luminance
 	0 disabled (default)
-	4 (JVT recommendation)
+	-4 (JVT recommendation)
+	negative values will allso consider the dc coefficient
+	should be at least -4 or lower for encoding at quant=1
 
-vcelim (0-1000) single coefficient elimination threshold for chrominance
+vcelim (-1000-1000) single coefficient elimination threshold for chrominance
 	0 disabled (default)
 	7 (JVT recommendation)
+	negative values will allso consider the dc coefficient
+	should be at least -4 or lower for encoding at quant=1
 
 vstrict strict standard compliance
 	only recommended if you want to feed the output into the mpeg4 reference
