@@ -38,7 +38,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-10-19"
+.TH MPlayer 1 "2002-12-28"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -389,7 +389,8 @@ Give the demuxer ID as defined in demuxers.h.
 Use \-audio\-demuxer 17 to force .mp3 detection.
 .TP
 .B \-audiofile <filename>
-Play audio from an external file (WAV, MP3 or Ogg Vorbis).
+Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
+movie.
 .TP
 .B \-cdrom\-device <path\ to\ device>
 Override default CDROM drive name /dev/\:cdrom.
@@ -1107,7 +1108,8 @@ Audio delay in seconds (may be +/\:\- float value).
 .B \-format <0\-8192>
 Select the format used for output from the filter layer (according to the
 defines in libao2/afmt.h):
-.
+
+.PD 0
 .RSs
 .IPs 1
 Mu-Law
@@ -1136,6 +1138,7 @@ Signed 32-bit (Little-Endian)
 .IPs 8192
 Signed 32-bit (Big-Endian)
 .RE
+.PD 1
 .
 .TP
 .B \-mixer <device>
@@ -2718,7 +2721,21 @@ Maximal skipable frames after non-skipped one
 (-noskiplimit for unlimited number).
 .TP
 .B \-v, \-\-verbose
-Enable verbose output (more \-v means more verbosity).
+Increment verbose level (more \-v means more verbosity).
+
+.PD 0
+.RSs
+.IPs 0
+only some informal output (default)
+.IPs 1
+some basic debug infos, avi header, function values (init debug)
+.IPs 2
+print avi indexes, chunk inputs, more debug infos (player debug)
+.IPs 3
+prints everything related to input parsers (parser debug)
+.RE
+.PD 1
+.
 .TP
 .B \-vobsubout <basename>
 Specify the basename for the output .idx and .sub files.
