@@ -447,429 +447,423 @@ jók legyenek.
 .
 .TP
 .B \-channels <szám>
-Change the number of playback channels, defaults to '2' if not specified.
-If the number of output channels is bigger than the number of input channels
-empty channels are inserted (unless mixing from mono to stereo, then the mono
-channel is repeated in both output channels).
-If the number of output channels is smaller than the number of input channels,
-results depend on the audio decoder (\-afm).
-Mplayer asks the decoder to decode the audio into as many channels as
-specified.
-Now it's up to the decoder to fulfill the requirement.
-If the decoder outputs more channels than requested, the exceeding channels
-are truncated.
-This is usually only important when playing videos with AC3 audio (like DVDs).
-In that case liba52 does the decoding by default and correctly downmixes the
-audio into the requested number of channels.
+Hangcsatornák számának megváltoztatása, ha nincs megadva, alapban 2.
+Ha a kimeneti csatornák száma nagyobb mint a hang csatornáinak száma,
+akkor üres csatornák lesznek beillesztve (kivéve mono-ról sztereóra
+mixelés esetén).Ha a kimeneti csatornák száma kevesebb mint a bemeneté,
+az eredmény az audió dekódertõl függ (\-afm).
+Az MPlayer megmondja a dekódernek hogy annyi csatornán dekódoljon,
+amennyit ez az opció megad.
+Innentõl a dekóderen múlik ennek teljesítése. Ha a dekóder több csatorán
+akar adni mint ami meg lett adva, a limitet túllépõ csatornák törlõdnek.
+Ez akkor fontos ha AC3-as hanggal ellátott videót nézel (pl DVD).
+Ebben az esetben a liba52 dekódol, és lemixeli az audiót a kért számú
+csatornára.
 
-.I NOTE:
 .br
-This option is honored by codecs (AC3 only) filters (surround) and ao drivers
-(OSS at least).
-.br
-Available options are:
+A rendelkezésre álló opciók:
 
 .PD 0
 .RSs
 .IPs 2
-Stereo
+Sztereó
 .IPs 4
-Surround
+Térhatás
 .IPs 6
-Full 5.1
+Teljes 5.1
 .RE
 .PD 1
 .
 .TP
-.B \-chapter <chapter\ id>[-<end\ chapter\ id>]
-Specify which chapter to start playing at.
-Optionally specify which chapter to end playing at (default: 1).
-Examples can be found below.
+.B \-chapter <fejezet\ id>[-<utolsó\ fejezet\ id>]
+Itt adható meg, hogy a lejátszás mely fejezetnél kezdõdjön. Opcionálisan az
+is megadható, hogy melyiknél végzõdjön (alapban: 1).
+Példákat lásd alább.
 .TP
-.B \-csslib <filename>
-(old-style DVD option) This option is used to override the default location of
-libcss.so.
+.B \-csslib <filenév>
+(régi tipusú DVD opció) Ezzel az opcióval felül lehet bírálni a libcss.so
+alapértelmezett helyét.
 .TP
-.B \-cuefile <filename> (see \-vcd too)
-Play (S)VCD from CDRwin's (bin/cue fileformat) disk image, described by the
-specified file.
+.B \-cuefile <filenév> (lásd még \-vcd)
+(S)VCD lejátszása a CDRwin (bin/cue) image-ébõl, amit az itt megadott
+file ír le.
 .TP
-.B \-demuxer <number>
-Force demuxer type.
-Give the demuxer ID as defined in demuxers.h.
-Use \-demuxer 17 to force .mp3 detection.
+.B \-demuxer <szám>
+Használandó demuxer tipusának felülbírálata.
+A demuxers.h file-ban leírt ID-k lehetnek a paraméterek.
+Használd a \-demuxer 17 opciót az MP3 detektálás kényszerítésére.
 .TP
-.B \-dumpaudio (MPLAYER only)
-Dumps raw compressed audio stream to ./\:stream.dump (useful with mpeg/\:ac3).
+.B \-dumpaudio (csak MPLAYER)
+Nyers, tömörített audio stream kiírása a ./\:stream.dump file-ba
+(MPEG/\:AC3-nál hasznos).
 .TP
-.B \-dumpfile <filename> (MPLAYER only)
-Specify which file MPlayer should dump to.
-Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream.
+.B \-dumpfile <filenév> (csak MPLAYER)
+Itt adható meg hogy az MPlayer melyik file-ba dumpoljon.
+Együtt használandó a \-dumpaudio / \-dumpvideo / \-dumpstream opciókkal.
 .TP
-.B \-dumpstream (MPLAYER only)
-Dumps the raw stream to ./\:stream.dump.
-Useful when ripping from DVD or network.
+.B \-dumpstream (csak MPLAYER)
+Nyers, tömörítetlen stream kiírása a ./\:stream.dump file-ba.
+Hasznos DVD rippeléshez, vagy hálozati lejátszáshoz.
 .TP
-.B \-dumpvideo (MPLAYER only)
-Dump raw compressed video stream to ./\:stream.dump (not very usable).
+.B \-dumpvideo (csak MPLAYER)
+Nyers, tömörítetlen video stream kiírása a ./\:stream.dump file-ba
+(nem túl hasznos)
 .TP
-.B \-dvd <title\ id>
-Tell MPlayer which movies (specified by title id) to play.
-For example sometimes '1' is a trailer, and '2' is the real movie.
+.B \-dvd <cím\ id>
+Megadja az MPlayernek hogy mely ID-vel ellátott filmeket játssza le.
+Például néha az '1'-es egy elõzetes, és a '2'-es az igazi film.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-Sometimes deinterlacing is required for DVD playback,
-see the \-vop pp=0x20000 option.
+Néha a deinterlace-elés szükséges a DVD lejátszáshoz,
+lásd a \-vop pp=0x20000 opciót.
 .TP
-.B \-dvd\-device <path\ to\ device>
-Override default DVD device name /dev/\:dvd.
+.B \-dvd\-device <útvonal\ az\ egységhez>
+Alapértelmezett /dev/\:dvd egységnév felülbírálata.
 .TP
-.B \-dvdangle <angle\ id>
-Some DVD discs contain scenes that can be viewed from multiple angles.
-Here you can tell MPlayer which angles to use (default: 1).
-Examples can be found below.
+.B \-dvdangle <szög\ id>
+Néhány DVD lemezen egyes jelenetek több szemszögbõl is megtekinthetõk.
+Itt adható meg az MPlayer-nek, hogy mely szögeket jelenítse meg
+(alapban: 1).
+Példákat lásd alább.
 .TP
-.B \-dvdauth <DVD\ device>
-(old-style DVD option) Turns on DVD authentication using the given device.
+.B \-dvdauth <DVD\ egység>
+(régi tipusú DVD opció) Bekapcsolja a DVD autentikációt a megadott egységre.
 .TP
-.B \-dvdkey <CSS\ key>
-(old-style DVD option) When decoding a VOB file copied undecrypted from DVD,
-this option gives the CSS key needed to decrypt the VOB (the key is printed
-when authenticating with the DVD drive using \-dvdauth).
+.B \-dvdkey <CSS\ kulcs>
+(régi tipusú DVD opció) Egy DVD-rõl dekódolatlanul HDD-re másolt VOB file
+lejátszásához szükséges ez az opció, mely megadja a dekódoláshoz
+szükséges CSS kulcsot (amelyet a \-dvdauth opcióval történõ autentikációval
+lehet megszerezni).
 .TP
-.B \-dvdnav (BETA CODE!)
-Force usage of libdvdnav.
+.B \-dvdnav (BÉTA KÓD)
+libdvdnav használatának kényszerítése.
 .TP
 .B \-forceidx
-Force rebuilding of INDEX.
-Useful for files with broken index (desyncs, etc).
-Seeking will be possible.
-You can fix the index permanently with MEncoder (see the documentation).
+INDEX újraépítésének kényszerítése.
+Hibás AVI-k lejátszásánál hasznos, a tekerés bekapcsolásához.
+Az ilyen file-okat a MEncoder-rel lehet maradandóan javítani (lásd a
+dokumentációt.
 .TP
-.B \-fps <value>
-Override video framerate (if value is wrong/\:missing in the header) (float
-number).
+.B \-fps <érték>
+A video framerate-jének felülbírálata (ha a fejlécben nem, vagy rosszul
+szerepel) (lebegõpontos szám).
 .TP
-.B \-frames <number>
-Play/\:convert only first <number> frames, then quit.
+.B \-frames <szám>
+Csak a megadott számú képkocka lejátszása/konvertálása.
 .TP
-.B \-hr\-mp3\-seek (.MP3 only)
-Hi\-res mp3 seeking.
-Default is: enabled when playing from external MP3 file, as we need to seek
-to the very exact position to keep A/\:V sync.It can be slow especially when
-seeking backwards \- it has to rewind to the beginning to find the exact
-frame.
+.B \-hr\-mp3\-seek (csak .MP3)
+Magas pontosságú MP3 tekerés.
+Alapban csak külsõ MP3 file-ból történõ lejátszásnál van bekapcsolva,
+mivel ilyenkor a pontos helyre kell tekerni az A/\:V szinkronhoz. Fõleg
+akkor lehet lassú ha hátrafelé kell tekerni, mivel ilyenkor a file elejétõl
+újra kell számolni a frame-eket.
 .TP
-.B \-idx (also see \-forceidx)
-Rebuilds INDEX of the AVI if no INDEX was found,
-thus allowing seeking.
-Useful with broken/\:incomplete downloads, or badly created AVIs.
+.B \-idx (lásd még \-forceidx)
+AVI INDEX újraépítése, ha hiányzik, így a tekerés lehetõvé tétele.
+Hasznos hibás/\:folyamatban lévõ letöltésekhez, vagy rosszul
+létrehozott file-okhoz.
 .TP
-.B \-mc <seconds/frame>
-Maximum A-V sync correction per frame (in seconds).
+.B \-mc <másodperc/frame>
+Maximális A-V szinkron javítás egy képkocka alatt.
 .TP
-.B \-mf <option1:option2:...>
-Used when decoding from multiple PNG or JPEG files.
+.B \-mf <opció1:opció2:...>
+Több PNG vagy JPEG file-ból történõ dekódolásnál használatos.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 
 .PD 0
 .RSs
 .IPs on\ \ \ 
-turns on multifile support
-.IPs w=<value>
-width of the output (autodetect)
-.IPs h=<value>
-height of the output (autodetect)
-.IPs fps=<value>
-fps of the output (default: 25)
-.IPs type=<value>
-type of input files (available types: jpeg, png, tga)
+multifile támogatás bekapcsolása
+.IPs w=<érték>
+a kimenet szélessége (autodetekt)
+.IPs h=<érték>
+a kimenet magassága (autodetekt)
+.IPs fps=<érték>
+kimenet fps-e (alapban: 25)
+.IPs type=<érték>
+bemeneti file-ok tipusa (használható: jpeg, png, tga)
 .RE
 .PD 1
 .
 .TP
-.B \-ni (.AVI only)
-Force usage of non\-interleaved AVI parser (fixes playing
-of some bad AVI files).
+.B \-ni (csak .AVI)
+Non\-interleaved AVI parser használata (néhány hibás file lejátszásánál segít.
 .TP
-.B \-nobps (.AVI only)
-Do not use average byte/\:sec value for A\-V sync (AVI).
-Helps with some AVI files with broken header.
+.B \-nobps (csak .AVI)
+Ne haszálja az AVI byte/\:sec értékét az A\-V szinkronhoz (AVI).
+Hibás fejlécû AVI-knál használatos.
 .TP
 .B \-noextbased
-Disables filename-extension based demuxer selection.
-By default, when file type (demuxer) cannot be detected reliably
-(the file has no header or it is not reliable enough), the filename
-extension is used to select demuxer. It always falls back to content-based
-demuxer selection.
+Kikapcsolja a kiterjesztés alapján történõ demuxerkiválasztást.
+Alapban mikor olyan file-t kell betölteni melyet nem lehet megbízhatóan
+detektálni, a file kiterjesztése alapján töltõdik be a megfelelõ
+demuxer. Sikertelenség esetén visszalép a tartalom alapján történõ
+detektáláshoz.
 .TP
-.B \-passwd <password> (see \-user option too)
-Specify password for http authentication.
+.B \-passwd <jelszó> (lásd még \-user opció)
+Jelszó megadása HTTP autentikációhoz.
 .TP
-.B \-rawaudio <option1:option2:...>
-This option lets you play raw audio files.
-It may also be used to play audio CDs which are not 44KHz 16Bit stereo.
+.B \-rawaudio <opció1:opció2:...>
+Ezzel az opcióval le lehet játszani nyers audio file-okat.
+Használható olyan audio CD-k lejátszásához, melyek nem 44kHz 16bit sztereók.
 .br
-Available options are:
+A használható opciók:
 
 .PD 0
 .RSs
 .IPs on\ \ \ 
-use raw audio demuxer
-.IPs channels=<value>
-number of channels
-.IPs rate=<value>
-rate in samples per second
-.IPs samplesize=<value>
-sample size in byte
-.IPs format=<value>
-fourcc in hex
+nyers audio demuxer használata
+.IPs channels=<érték>
+csatornák száma
+.IPs rate=<érték>
+frekvencia
+.IPs samplesize=<érték>
+minták mérete byte-ban
+.IPs format=<érték>
+fourcc hexában
 .RE
 .PD 1
 .
 .TP
-.B \-rawvideo <option1:option2:...>
-This option lets you play raw video files.
+.B \-rawvideo <opció1:opció2:...>
+Ezzel az opcióval le lehet játszani nyers video file-okat.
 .br
-Available options are:
+A használható opciók:
 
 .PD 0
 .RSs
 .IPs on\ \ \ 
-use raw video demuxer
-.IPs fps=<value>
-rate in frames per second, default 25.0
+nyers video demuxer bekapcsolása
+.IPs fps=<érték>
+képkocka/másodperc, alapban 25.0
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
-set standard image size
-.IPs w=<value>
-image width in pixels
-.IPs h=<value>
-image height in pixels
+képszabvány tipusa
+.IPs w=<érték>
+kép szélessége pixelben
+.IPs h=<érték>
+kép magassága pixelben
 .IPs y420|yv12|yuy2|y8
-set colorspace
-.IPs format=<value>
-colorspace (fourcc) in hex
-.IPs size=<value>
-frame size in bytes
+colorspace beállítása
+.IPs format=<érték>
+colorspace (fourcc) hexában
+.IPs size=<érték>
+képkockák mérete byte-ban
 .RE
 .PD 1
 .
 .TP
 .B \-rtsp-stream-over-tcp
-Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
-packets be streamed over TCP (using the same TCP connection as RTSP).
-This option may be useful if you have a broken Internet connection that does
-not pass incoming UDP packets (see http://www.live.com/mplayer/).
+'rtsp://' URL-ekkel használandó, azt adja meg hogy a bejövõ RTP és RTCP
+csomagok TCP-n keresztül jöjjenek. Olyan internet kapcsolat esetében
+hasznos, amely nem engedi be az UDP csomagokat.
+(lásd http://www.live.com/mplayer/).
 .TP
 .B \-skipopening
-Skip DVD opening (dvdnav only).
+DVD megnyitás átlépése (csak dvdnav).
 .TP
-.B \-sb <byte\ position> (see \-ss option too)
-Seek to byte position.
-Useful for playback from CDROM images / .VOB files with junk at the beginning.
+.B \-sb <byte\ pozíció> (lásd még \-ss opció)
+Byte pozícióra tekerés.
+CDROM image-ek, vagy olyan VOB file-ok lejátszásánál hasznos, melyek elején
+szemét van.
 .TP
 .B \-srate <Hz>
-Forces the given audio playback rate, changing video speed to keep a-v sync.
-MEncoder passes this value to lame for resampling.
+A megadott audio lejátszási ráta kényszerítése, egyben a video lejátszás
+sebességének megváltoztatásával. A MEncoder ezt az értéket átadja a lame-nak
+mintavételezésre.
 .TP
-.B \-ss <time> (see \-sb option too)
-Seek to given time position.
+.B \-ss <idõ> (lásd még \-sb opció)
+Megadott idõponthoz tekerés.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-ss 56"
-seeks to 56 seconds
+tekerés 56 másodperchez
 .IPs "\-ss 01:10:00"
-seeks to 1\ hour 10\ min
+tekerés 1\ óra 10\ perchez
 .RE
 .PD 1
 .
 .TP
-.B \-tv <option1:option2:...>
-This option enables the TV grabbing feature of MPlayer.
+.B \-tv <opció1:opció2:...>
+Ez az opció bekapcsolja az MPlayer TV grabbelõ részét.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-MPlayer doesn't accept colons so type dots instead in the device ID
-(e.g.\& hw.0,0 instead of hw:0,0).
+Az MPlayer nem fogad el kettõspontokat, igy azok helyett pontokat kell
+használni a device ID-ben (tehát hw:0,0 helyett hw.0,0)
 .br
-Be advised that although you can select any samplerate when using ALSA,
-the LAME audio codec is able to encode only the 'standard' samplerates.
-You'll get an .avi file with no sound when you choose an odd
-samplerate and use this codec.
+Figyelem: bár itt bármilyen audio frekvenciát ki lehet választani,
+a LAME audio codec csak a szabványosakba képes kódolni. Nem szabványos
+frekvenciák esetén hang nélküli AVI lesz az eredmény.
 .br
-Available options are:
+A használható opciók:
 .
 .RSs
 .IPs on\ \ \ 
-use TV input
+TV bemenet bekapcsolása
 .IPs noaudio
-no sound
-.IPs driver=<value>
-available: dummy, v4l, bsdbt848
-.IPs device=<value>
-Specify other device than the default /dev/\:video0.
-.IPs input=<value>
-Specify other input than the default 0 (Television) (see output for a list)
-.IPs freq=<value>
-Specify the frequency to set the tuner to (e.g.\& 511.250).
-Not compatible with channels parameter.
-.IPs outfmt=<value>
-output format of the tuner (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
-i420)
-.IPs width=<value>
-width of the output window
-.IPs height=<value>
-height of the output window
-.IPs fps=<value>
-framerate at which to capture video (frames per second)
-.IPs buffersize=<value>
-maximum size of the capture buffer in megabytes (default: half of the
-physical memory)
-.IPs norm=<value>
-available: PAL, SECAM, NTSC
-.IPs channel=<value>
-Set tuner to <value> channel.
-.IPs chanlist=<value>
-available: europe-east, europe-west, us-bcast, us-cable, etc
-.IPs channels=<channel>\-<name>,<channel>\-<name>,...
-Set names for channels.
-Use _ for spaces in names (or play with quoting ;-).
-The channel names will then be written using OSD, and the commands tv_step_channel,
-tv_set_channel and tv_last_channel will then be usable using a remote (see lirc).
-Not compatible with frequency parameter.
-Warning : The channel number will then be the position in the 'channels' list,
-beginning with 1.
-Example: use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
-.IPs audiorate=<value>
-set audio capture bitrate
+hang kikapcsolása
+.IPs driver=<érték>
+használható: dummy, v4l, bsdbt848
+.IPs device=<érték>
+Az alap /dev/\:video0 egység használatának felülbírálata.
+.IPs input=<érték>
+Az alap 0 (Televízió) bemenet helyett más kiválasztása (listához lásd a
+kimenetet)
+.IPs freq=<érték>
+A tuner megadott frekvenciára történõ állítása (pl. 511.250>
+Nem használható a channels opcióval.
+.IPs outfmt=<érték>
+A tuner kimeneti formátumának megváltoztatása
+(yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420)
+.IPs width=<érték>
+a kimeneti ablak szélessége
+.IPs height=<érték>
+a kimeneti ablak magassága
+.IPs fps=<érték>
+a video capture-elés framerátája (képkocka/másodperc)
+.IPs buffersize=<érték>
+a capture buffer maximális mérete megabyte-ban (alapban: dinamikus)
+.IPs norm=<érték>
+használható: PAL, SECAM, NTSC
+.IPs channel=<érték>
+A tuner <érték> csatornára állítása.
+.IPs chanlist=<érték>
+használható: europe-east, europe-west, us-bcast, us-cable, stb
+.IPs channels=<csatorna>\-<név>,<csatorna>\-<név>,...
+Csatornák elnevezése.
+Sorköz helyett használd a _ karaktert.
+A csatornák nevei OSD-vel ki lesznek írva, és a tv_step_channel, tv_set_channel,
+és tv_last_channel parancsok távirányítóval is használhatóak lesznek
+(lásd lirc).
+Nem kompatibilis a freq opcióval.
+Vigyázat: a csatornák száma ilyenkor a 'channels' listában elfoglalt
+pozíciójuk lesz, 1-el kezdõdõen.
+Például:  tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, stb.
+.IPs audiorate=<érték>
+audio capture-elés bitrátája
 .IPs forceaudio
-capture audio even if there are no audio sources reported by v4l
+audio felvétele akkor is, ha a v4l szerint nincs audio bemenet
 .IPs alsa
-capture from ALSA
+felvétel ALSA-ról
 .IPs amode=<0\-3>
-choose an audio mode:
+audio mód választás:
 .RSss
 0: mono
 .br
-1: stereo
+1: sztereó
 .br
-2: language 1
+2: 1-es nyelv
 .br
-3: language 2
+3: 2-es nyelv
 .REss
 .IPs forcechan=<1\-2>
-By default, the count of recorded audio channels is determined automatically
-by querying the audio mode from the tv card.
-This option allows to force stereo/\:mono recording regardless of the amode
-option and the values returned by v4l.
-This can be used for troubleshooting when the tv card is unable to report the
-current audio mode.
-.IPs adevice=<value>
-set an audio device
+Alapban a felvett audio csatornák száma a tv kártya lekérdezésével derül ki.
+Ezzel az opcióval felül lehet bírálnia a visszaadott értéket.
+.IPs adevice=<érték>
+megadott audio bemenet használata
 .RSss
-/dev/\:...\& for OSS
+/dev/\:...\& OSS-hez
 .br
-hardware ID for ALSA
+hardware ID ALSA-hoz
 .REss
-.IPs audioid=<value>
-choose an audio output of the capture card, if it has more of them
+.IPs audioid=<érték>
+a felvevõkártya audio kimenetei közötti választás, ha több van
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
-These options set parameters of the mixer on the video capture card.
-They will have no effect, if your card doesn't have one.
+Ezekkel az opciókkal a felvevõkártya mixerének egyes paraméterei állíthatók.
+Ha nincs neki, az opció hatástalan.
 .IPs immediatemode=<bool>
-A value of 0 means capture and buffer audio and video together
-(default for mencoder).
-A value of 1 (default for mplayer) means to do video capture only and let the
-audio go through a loopback cable from the TV card to the soundcard.
+A 0-ás érték az audio és video egyszerre felvételét jelenti (mencoder-nél
+alap). Az 1-es érték (mplayer-nél alap) csak video felvételt jelent, az audio
+külsõ kábelen fog menni.
 .RE
 .
 .TP
-.B \-user <user name> (see \-passwd option too)
-Specify user name for http authentication.
+.B \-user <felhasználóné> (lásd a \-passwd opciót)
+Felhasználónév megadása HTTP autentikációhoz.
 .TP
-.B \-vcd <track>
-Play video CD track from a device or image file (see \-cuefile).
+.B \-vcd <sáv>
+Megadott video CD sáv lejátszása egységrõl, vagy image fileból
+(lásd a \-cuefile opciót)
 .TP
 .B \-vid <id>
-Select video channel [MPG: 0\-15 ASF: 0\-255].
+Video csatorna kiválasztása [MPG: 0\-15 ASF: 0\-255].
 .TP
-.B \-vivo <sub\-options> (DEBUG CODE)
-Force audio parameters for the .vivo demuxer (for debugging purposes).
+.B \-vivo <al\-opciók> (DEBUG KÓD)
+A .vivo demuxer audio paramétereinek felülbírálata (hibakeresõ célokra).
 
 
-.SH "OSD/SUB OPTIONS"
-.I NOTE:
+.SH "OSD/SUB OPCIÓK"
+.I MEGJEGYZÉS:
 .br
-See \-vop expand too.
+Lásd még a \-vop expand opciót.
 .TP
-.B \-dumpmicrodvdsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the
-MicroDVD subtitle format.
-Creates a dumpsub.sub file in the current directory.
+.B \-dumpmicrodvdsub (csak MPLAYER)
+A használt felirat (amit a \-sub opció ad meg) MicroDVD formátumba
+konvertálása.
+A jelenlegi könyvtárban hoz létre egy dumpsub.sub file-t.
 .TP
-.B \-dumpmpsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to MPlayer's
-subtitle format, MPsub.
-Creates a dump.mpsub file in the current directory.
+.B \-dumpmpsub (csak MPLAYER)
+A használt felirat (amit a \-sub opció ad meg) MPsub formátumba
+konvertálása.
+A jelenlegi könyvtárban hoz létre egy dump.mpsub file-t.
 .TP
-.B \-dumpsrtsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the time-based
-SubViewer (SRT) subtitle format.
-Creates a dumpsub.srt file in the current directory.
+.B \-dumpsrtsub (csak MPLAYER)
+A használt felirat (amit a \-sub opció ad meg) idõ alapú SubViewer formátumba
+konvertálása.
+A jelenlegi könyvtárban hoz létre egy dumpsub.srt file-t.
 .TP
-.B \-dumpjacosub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the time-based
-JACOsub subtitle format.
-Creates a dumpsub.js file in the current directory.
+.B \-dumpjacosub (csak MPLAYER)
+A használt felirat (amit a \-sub opció ad meg) idõ alapú JACOsub formátumba
+konvertálása.
+A jelenlegi könyvtárban hoz létre egy dumpsub.js file-t.
 .TP
 .B \-dumpsami (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the time-based
-SAMI subtitle format.
-Creates a dumpsub.smi file in the current directory.
+A használt felirat (amit a \-sub opció ad meg) idõ alapú SAMI formátumba
+konvertálása.
+A jelenlegi könyvtárban hoz létre egy dumpsub.smi file-t.
 .TP
-.B \-dumpsub (MPLAYER only) (BETA CODE)
-Dumps the subtitle substream from VOB streams.
-See -dump*sub and -vobsubout* options too.
+.B \-dumpsub (csak MPLAYER) (BÉTA KÓD)
+VOB stream-ekbõl a felirat stream kimentése.
+Lásd még -dump*sub és -vobsubout* opciókat is.
 .TP
 .B \-ifo <vobsub\ ifo\ file>
-Indicate the file that will be used to load palette and frame size for VOBSUB
-subtitles.
+Itt adható meg hogy a VOBSUB feliratfile paletta és frame adatai melyik
+file-ban tárolódnak.
 .TP
-.B \-ffactor <number>
-Resample alphamap of the font.
-Can be:
+.B \-ffactor <szám>
+Font alphamap-jának megadása.
+Lehetséges:
 
 .PD 0
 .RSs
 .IPs 0\ \ \ \ 
-plain white fonts
+egyszerû fehér betûk
 .IPs 0.75\ \ 
-very narrow black outline (default)
+nagyon halvány fekete körvonal (alap)
 .IPs 1\ \ \ \ 
-narrow black outline
+vékony fekete körvonal
 .IPs 10\ \ \ 
-bold black outline
+vastag fekete körvonal
 .RE
 .PD 1
 .
 .TP
-.B \-font <path\ to\ font.desc\ file>
-Search for the OSD/\:SUB fonts in an alternative directory (default for normal
-fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
-~/.mplayer/\:subfont.ttf).
+.B \-font <útvonal\ a\ font.desc\ filehoz>
+Az OSD/\:SUB betûtipusok megadott könyvtárban történõ keresése
+(normál fontoknál alapértelmezett:
+~/\:.mplayer/\:font/\:font.desc, FreeType fontokhoz: ~/.mplayer/\:subfont.ttf).
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-With FreeType, this option determines path to the text font file.
+FreeType-nál, ez az opció a file nevét adja meg.
 .br
-The \-subfont-* options are available only with FreeType support compiled in.
-If FreeType support is enabled, the old font support can't be used.
+A \-subfont-* opciók csak FreeType támogatással használhatóak.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 \-font ~/\:.mplayer/\:arial\-14/\:font.desc
@@ -880,79 +874,76 @@ If FreeType support is enabled, the old font support can't be used.
 .
 .TP
 .B \-noautosub
-Turns off automatic loading of subtitle files.
+Automatikus feliratkeresés és betöltés kikapcsolása.
 .TP
 .B \-overlapsub
-Enables overlapping subtitles support for all subtitles formats.
+Overlapping támogatás bekapcsolása minden feliratformátumhoz.
 .TP
 .B \-nooverlapsub
-Disables overlapping subtitles support for all subtitles formats (default
-behaviour is to enable the support only for specific formats).
+Overlapping támogatás kikapcsolása minden feliratformátumhoz (alapban
+csak néhány formátumnál van bekapcsolva).
 .TP
-.B \-osdlevel <0\-3> (MPLAYER only)
-Specifies which mode the OSD should start in.
+.B \-osdlevel <0\-3> (csak MPLAYER)
+Megadja hogy mely OSD módban induljon az MPlayer.
 
 .PD 0
 .RSs
 .IPs 0
-subtitles only
+csak feliratok
 .IPs 1
-volume + seek (default)
+hangerõ + tekerés (alap)
 .IPs 2
-volume + seek + timer + percentage
+hangerõ + tekerés + idõ + százalék
 .IPs 3
-volume + seek + timer + percentage + total time
+hangerõ + tekerés + idõ + százalék + teljes idõtartam
 .RE
 .PD 1
 .
 .TP
-.B \-sid <id> (also see \-slang option)
-Turns on DVD subtitle displaying.
-Also, you MUST specify a number which corresponds to a DVD subtitle language
-(0\-31).
-For the list of available subtitles, use with the \-v option and look at the
-output.
+.B \-sid <id> (lásd még \-slang opció)
+DVD felirat megjelenítésének bekapcsolása.
+Meg kell adnod egy számot amely a választott nyelvre mutat (0\-31).
+A használható feliratok listájához a \-v opcióval indítsd a lejátszást,
+és figyeld a kimenetet.
 .TP
-.B \-slang <two\ letter\ country\ code> (also see \-sid option)
-Works only for DVD playback.
-Turns on/\:selects DVD subtitle language.
-For the list of available subtitles, use with the \-v option and look at the
-output.
+.B \-slang <két\ betûs\ országkód> (lásd még \-sid opció)
+Csak DVD lejátszásnál használható.
+Bekapcsolja a DVD feliratok megjelenítését.
+A használható feliratok listájához a \-v opcióval indítsd a lejátszást,
+és figyeld a kimenetet.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-slang hu,en"
-Selects Hungarian and falls back to English if Hungarian is not available.
+Lehetõség szerint magyar, ha nincs akkor angol felirat használata.
 .RE
 .PD 1
 .
 .TP
-.B \-sub <subtitle\ file>
-Use/\:display this subtitle file.
+.B \-sub <felirat\ file>
+Adott feliratfile használata.
 .TP
 .B \-sub-bg-alpha <0\-255>
-Specify the alpha channel value for subtitles and OSD backgrounds.
-Big values mean more transparency.
-The 0 value is an exception and means completly transparent.
+Megadott alpha érték használata a feliratokhoz és OSD-hez.
+A nagyobb érték nagyobb átlátszóságot jelent.
+A 0 érték kivétel, ez jelenti a teljes átlátszóságot.
 .TP
 .B \-sub-bg-color <0\-255>
-Specify the color value for subtitles and OSD backgrounds.
-Currently subtitles are grayscale so this value is equivalente to the
-intensity of the color.
-The 255 value means white and 0 black.
+Megadott szín érték használata a feliratok és OSD hátteréhez.
+Jelenleg a feliratok feketefehérek, így ez az intenzitást szabályozza.
+A 255-ös érték fehéret, a 0 feketét jelent.
 .TP
 .B \-subcc \ 
-Display DVD Closed Caption (CC) subtitles.
-These are NOT the VOB subtitles, these are special ASCII subtitles for the
-hearing impaired encoded in the VOB userdata stream on most region 1 DVDs.
-CC subtitles have not been spotted on DVDs from other regions so far.
+DVD Closed Caption (CC) feliratok megjelenítése.
+Ezek nem VOB feliratok, hanem ASCII-k. Az 1-es régiókódú lemezeken
+haszálatosak.
 .TP
-.B \-subcp <codepage>
-If your system supports iconv(3), you can use this option to
-specify codepage of the subtitle.
+.B \-subcp <kódlap>
+Ha a rendszered támogatja az iconv(3) használatát, ezzel az opcióval
+meg lehet adni a felirat kódlapját.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 \-subcp latin2
@@ -962,127 +953,125 @@ specify codepage of the subtitle.
 .PD 1
 .
 .TP
-.B \-sub\-demuxer <number> (BETA CODE)
-Force subtitle demuxer type for \-subfile.
+.B \-sub\-demuxer <szám> (BÉTA KÓD)
+Felirat demuxer tipusának felülbírálata a \-subfile opcióhoz.
 .TP
-.B \-subdelay <sec>
-Delays subtitles by <sec> seconds.
-Can be negative.
+.B \-subdelay <mp>
+Feliratok <mp> másodperccel történõ késleltetése.
+Lehet negatív is.
 .TP
 .B \-subfont-autoscale <0\-3>
-Sets the autoscale mode.
+Az automatikus feliratátméterezés módja.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-Zero means that text-scale and osd-scale are font heights in points.
+A 0 azt jelenti, hogy a text-scale és osd-scale a font magassága pontban.
 .br
-The mode can be:
+A módok:
 
 .PD 0
 .RSs
 .IPs 0
-no autoscale
+automatikus átméretezés kikapcsolása
 .IPs 1
-proportional to movie height
+proporcionális a film magasságához
 .IPs 2
-proportional to movie width
+proporcionális a film szélességéhez
 .IPs 3
-proportional to movie diagonal (default)
+proporcionális a film átlójához (alap)
 .RE
 .PD 1
 .
 .TP
 .B \-subfont-blur <0\-8>
-Sets the font blur radius (default: 2).
+A font elmosásának átmérõje (alapban: 2).
 .TP
-.B \-subfont-encoding <value>
-Sets the font encoding.
-When set to 'unicode', all the glyphs from the font file will be rendered and
-unicode will be used (default: unicode).
+.B \-subfont-encoding <érték>
+A font enkódolásának beállítása. Alapban: unicode.
 .TP
 .B \-subfont-osd-scale <0\-100>
-Sets the osd elements autoscale coefficient (default: 6).
+Az OSD elemek autoscale értéke (alapban: 6).
 .TP
 .B \-subfont-outline <0\-8>
-Sets the font outline thickness (default: 2).
+A font körvonalának vastagsága (alapban: 2).
 .TP
 .B \-subfont-text-scale <0\-100>
-Sets the subtitle text autoscale coefficient (percentage of the
-screen size) (default: 5).
+A felirat autoscale értéke (a képernyõméret százalékában) (alapban: 5).
 .TP
-.B \-subfps <rate>
-Specify frame/\:sec rate of subtitle file (float number),
-default: the same fps as the movie.
+.B \-subfps <ráta>
+A frame/\:mp értéke a felirat file-nak (lebegõpontos szám). Alapban: a
+film fps-ével megegyezõ.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-ONLY for frame\-based SUB files, i.e.\& NOT MicroDVD format.
+Csak frame alapú feliratokhoz, azaz a MicroDVD formátumhoz NEM.
 .TP
-.B \-subfile <filename> (BETA CODE)
-Currently useless.
-Same as \-audiofile, but for subtitle streams (OggDS?).
+.B \-subfile <filenév> (BÉTA KÓD)
+Jelenleg haszontalan.
+Ugyanaz mint az \-audiofile, de felirat stream-ekhez (OggDS?).
 .TP
-.B \-subpos <0\-100> (useful with \-vop expand)
-Specify the position of subtitles on the screen.
-The value is the vertical position of the subtitle in % of the screen height.
+.B \-subpos <0\-100> (a \-vop expand opcióval hasznos)
+A feliratok képernyõn elfoglalt helye.
+Az érték a képernyõ magasságának megadott százaléka, ahol a felirat
+legyen.
 .TP
 .B \-subalign <0\-2>
-Specify how subtitles should be aligned with subpos.
-0 means align at top (original/default behavior), 1 means align at center, and
-2 means align at bottom.
+Megadja hogy a feliratok merre legyenek rendezve.
+A 0 a képernyõ felsõ része, az 1 a közepe, a 2 az alsó része.
 .TP
 .B \-subwidth <10\-100>
-Specify the maximum width of subtitles on the screen.
-Useful for TV-out.
-The value is the width of the subtitle in % of the screen width.
+Megadja a feliratok maximális szélességét.
+Hasznos a TV kimenethez.
+Az érték a felirat szélessége százalékban, a képernyõ szélességéhez
+viszonyítva.
 .TP
 .B \-unicode
-Tells MPlayer to handle the subtitle file as UNICODE.
+Megadja az MPlayer-nek, hogy a feliratot UNICODE-ként kezelje.
 .TP
 .B \-utf8 \ \ 
-Tells MPlayer to handle the subtitle file as UTF8.
+Megadja az MPlayer-nek, hogy a feliratot UTF8-ként kezelje.
 .TP
 .B \-sub-no-text-pp
-Disables any kind of text post processing done after loading the subtitles.
-Used for debug purposes.
+Kikapcsol mindenféle szöveg útómunkálatot a felirat betöltése után.
+Hibakeresõi célra használatos.
 .TP
-.B \-vobsub <vobsub\ file\ without\ extension>
-Specify the VobSub files that are to be used for subtitle.
-This is the full pathname without extensions, i.e.\& without the '.idx',
-\'.ifo' or '.sub'.
+.B \-vobsub <vobsub\ file\ kiterjesztés\ nélkül>
+Megadja hogy mely VobSub file-okat kell betölteni.
+Ez a teljes útvonal és filenév, de kiterjesztések nélkül, tehát
+\'.idx', '.ifo', '.sub' elhagyandó.
 .TP
 .B \-vobsubid <0-31>
-Specify the VobSub subtitle id.
+A VobSub felirat ID-je itt adható meg.
 .TP
 .B \-spualign <-1\-2>
-Specify how spu (DVD/VobSub) subtitles should be aligned.
-Values are the same as for -subpos, with the extra choice -1 for original
-position.
+Megadja hogy az spu (DVD/VobSub) feliratok hogyan legyenek helyezve.
+Az értékek ugyanazok mint a -subpos esetén, illetve a -1 az eredeti
+helyet jelenti.
 .TP
-.B \-spuaa <mode>
-Antialiasing/scaling mode for DVD/VobSub. A value of 16 may be added
-to mode in order to force scaling even when original and scaled frame
-size already match, for example to smooth subtitles with the gaussian
-blur. The available modes are:
+.B \-spuaa <mód>
+Antialias/nagyítása a DVD/VobSub-nak. A módhoz 16 hozzáadása azt
+eredményezi hogy a nagyítás akkor is megtörténik, ha az eredeti és
+a nagyított méret ugyanakkora. Például a feliratok gaussian blur-ral
+történõ elmosásához. A használható módok:
 .PD 0
 .RSs
 .IPs 0
-none (fastest, very ugly)
+nincs (leggyorsabb, jó ocsmány)
 .IPs 1
-approximate (broken?)
+körülbelül (hibás?)
 .IPs 2
-full (slow)
+teljes (lassú)
 .IPs 3
-bilinear (default, fast and not too bad)
+bilineáris (alap, gyors, és nem rossz)
 .IPs 4
-uses swscaler gaussian blur (looks very good)
+swscaler gaussian blur-jának használata (nagyon szép)
 .RE
 .PD 1
 .
 .TP
 .B \-spugauss <0.0\-3.0>
-Variance parameter of gaussian used by -spuaa 4. Higher means more
-blur. The default is 1.0.
+Az -spuaa 4 opció által használt gaussian blue paramétere. Alapértelmezett:
+1.0.
 
 
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
