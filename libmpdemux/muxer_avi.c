@@ -191,9 +191,11 @@ static void avifile_write_header(muxer_t *muxer){
       switch(muxer->streams[i]->type){
       case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
+          muxer->streams[i]->h.fccHandler = muxer->streams[i]->bih->biCompression;
 	  break;
       case MUXER_TYPE_AUDIO:
           hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
+          muxer->streams[i]->h.fccHandler = muxer->streams[i]->wf->wFormatTag;
 	  break;
       }
       write_avi_list(f,listtypeSTREAMHEADER,hdrsize);
