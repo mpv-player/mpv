@@ -39,9 +39,9 @@
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
     can come from a previous 3-pass encoding (it interferes with current
     one)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
@@ -79,11 +79,11 @@
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file,
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
     -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
@@ -193,7 +193,7 @@
   <CODE>vcodec</CODE> config, like: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>An example, with MJPEG compression:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o title2.avi -ovc lavc
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
@@ -275,10 +275,10 @@ Explanation of the process:
 
 <P><I>Copying two subtitles from a DVD while doing 3-pass encoding</I><BR>
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout subtitles -vobsuboutindex 0
     -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copying a french subtitle from an MPEG file</I><BR>

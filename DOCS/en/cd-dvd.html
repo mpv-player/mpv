@@ -70,9 +70,9 @@
 <P>For the complete list of available options, please read the man page.
   The Syntax for a standard Digital Versatile Disc (DVD) is as follows:</P>
 
-<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
 
-<P>Example: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>Example: <CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>The default DVD device is <CODE>/dev/dvd</CODE>. If your setup differs,
   make a symlink or specify the correct device on the command line with the
@@ -208,9 +208,9 @@
 <P>For the complete list of available options, please read the man page.
   The Syntax for a standard Video CD (VCD) is as follows:</P>
 
-<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE></P>
+<P><CODE>mplayer vcd://&lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE></P>
 
-<P>Example: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+<P>Example: <CODE>mplayer vcd://2 -cdrom-device /dev/hdc</CODE></P>
 
 <P>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
   make a symlink or specify the correct device on the command line with the
@@ -238,7 +238,7 @@
     containing one MPEG PS data packet per sector instead of a filesystem. 
     Similar to audio CD tracks, these tracks <B>cannot be mounted</B> (Did you
     ever mount an audio CD to play it?). As most movies are inside this track,
-    you should try <CODE>-vcd 2</CODE> first.</LI>
+    you should try <CODE>vcd://2</CODE> first.</LI>
   <LI>There exist VCD disks without the first track (single track and no
     filesystem at all). They are still playable, but cannot be mounted.</LI>
 </UL>
@@ -256,7 +256,7 @@
   the raw tracks through this shadow .DAT file. If you mount the disc using
   their driver, you can copy and even play .DAT files with mplayer. But it
   <B>will not work</B> with the standard iso9660 driver of the Linux kernel!
-  Use the <CODE>-vcd</CODE> option instead. Alternatives for VCD copying are
+  Use <CODE>vcd://</CODE> instead. Alternatives for VCD copying are
   the new <A HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> kernel
   driver (not part of the official kernel) that shows CD <I>sessions</I>
   as image files and <A HREF="http://cdrdao.sourceforge.net/">cdrdao</A>, a

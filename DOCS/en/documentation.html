@@ -1329,21 +1329,17 @@ are just a few tips:
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [options] [path/]filename</CODE></TD></TR>
   <TR><TD></TD><TD>files</TD><TD></TD><TD><CODE>mplayer [default options] [path/]filename1 [options for filename1] filename2 [options for filename2] ...</CODE></TD></TR>
-  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
-  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
+  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] vcd:// trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] dvd:// titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
   <TR><TD></TD><TD>WWW</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf (playlists can be used, too)</CODE></TD></TR>
   <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [options] rtsp://server.example.com/streamName</CODE></TD></TR>
 </TABLE>
 
-<P>
-  Latest versions of MPlayer also accept VCD and DVD tracks in URL style, just like
-  xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE></P>
-
 <PRE>
   mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2
+  mplayer vcd://2 -cdrom-device /dev/hdc
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/hdc
+  mplayer dvd://1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 </PRE>
 
@@ -1850,7 +1846,7 @@ end
 <P>DVDs also work, just set the DVD device correctly to whatever your CD-ROM
   device is:</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
+<P><CODE>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>QuickTime DLLs have also been reported to work. Compile with
   <CODE>--enable-qtx-codecs</CODE> and put the codecs into the
