@@ -288,10 +288,11 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     return;
   }
 
-  base = flags&1 ? demuxer->movi_start : stream_tell(s) ;
-  len = (demuxer->movi_end && flags&2) ? (demuxer->movi_end - demuxer->movi_start)*rel_seek_secs : rel_seek_secs;
-
-  pos = base+(len*sh_audio->i_bps);
+  base = flags&1 ? demuxer->movi_start : stream_tell(s);
+  if(flags&2)
+    pos = base + ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
+  else
+    pos = base + (rel_seek_secs*sh_audio->i_bps);
 
   if(demuxer->movi_end && pos >= demuxer->movi_end) {
     sh_audio->timer = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
