@@ -111,14 +111,18 @@ install: $(PRG) $(PRG_FIBMAP)
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
-	@echo "able to play DVDs."
+	@echo "able to play encrypted DVDs."
 	install -D -o root -g root -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 
 clean:
 	rm -f *.o *~ $(OBJS)
 
 distclean:
-	@for a in mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
+	@for a in mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do \
+		if [ -d $$a ] ;  then \
+			$(MAKE) -C $$a distclean ; \
+		fi; \
+	done
 	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
 
 dep:	depend
@@ -126,7 +130,11 @@ dep:	depend
 depend:
 	./version.sh
 	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
-	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx libavcodec encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
+	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx libavcodec encore loader/DirectShow ; do \
+		if [ -d $$a ] ; then \
+			$(MAKE) -C $$a dep ; \
+		fi ; \
+	done
 
 # ./configure must be run if it changed in CVS
 config.h: configure
