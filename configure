@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/08/27 by Johannes Feigl
+# - added manual selection of language
+#
 # 2001/08/22 by Nick Kurshev
 # - added autodetection of local language
 #
@@ -126,6 +129,7 @@ params:
 	--prefix=DIR		use this prefix for installing mplayer [/usr/local]
 	--datadir=DIR           use this prefix for installing machine independent
 				data [/usr/local/share/mplayer] 
+	--language=LANGUAGE	selects manual a language, e.g. de, en, hu, pl, ...
 	--enable-debug[=1-3]	compile debugging information into mplayer [disable]
 	--enable-profile	compile profiling information into mplayer [disable]
 	--enable-largefiles	build with support for files >2^32 bytes long [disable]
@@ -149,6 +153,7 @@ params:
         --enable-x11            build with X11 render support [autodetect]
 	--enable-fbdev		build with FBDev render support [_not_ autodetected]
 	--enable-mlib		build with MLIB support ( only Solaris )
+	--enable-oggvorbis	build with OggVorbis support [autodetect]
 
 	--enable-termcap	use termcap database for key codes
 	--enable-xmmp	        use XMMP audio drivers
@@ -213,6 +218,9 @@ for ac_option do
   --as=*)
         _as=`echo $ac_option | cut -d '=' -f 2`
         ;;
+  --language=*)
+        LINGUAS=`echo $ac_option | cut -d '=' -f 2`
+	;;
   --disable-gcc-checking)
         _skip_cc_check=yes
 	;;
@@ -748,6 +756,7 @@ fi
 echo Checking for language ... "$LINGUAS"
 _mp_help="help_mp-"$LINGUAS".h"
 if test ! -f "$_mp_help"; then
+echo "Language file ("$_mp_help") not found!"
 LINGUAS="en"
 _mp_help="help_mp-"$LINGUAS".h"
 fi
@@ -813,6 +822,9 @@ $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _
 
 _png=no
 $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
+
+_vorbis=no
+$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lvorbis -lm > /dev/null 2>&1 && _vorbis=yes
 
 _ggi=no
 $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
@@ -972,6 +984,7 @@ string = memalign(64, sizeof(char));
 return 0;
 }
 EOF
+_memalign_def='/* #define memalign(a,b) malloc(b) */'
 $_cc -o $TMPO $TMPC 2> /dev/null || _memalign_def='#define memalign(a,b) malloc(b)'
 fi
 
@@ -1158,6 +1171,9 @@ for ac_option do
   --enable-mlib)
 	_mlib=yes
 	;;
+  --enable-vorbis)
+	_vorbis=yes
+	;;
   --enable-termcap)
 	_termcap=yes
 	;;
@@ -1302,6 +1318,9 @@ EOF
 	;;
   --enable-divx4)
   	_divx4linux=yes
+	;;
+  --disable-vorbis)
+  	_vorbis=no
 	;;
   --enable-new-gui)
   	_gui=yes
@@ -1523,6 +1542,7 @@ echo "Checking for Sun mediaLib ... $_mlib"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
+echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
 
@@ -1788,6 +1808,13 @@ fi
 
 if [ $_png = yes ]; then
    _libpng='-lpng -lz'
+fi
+
+if [ $_vorbis = yes ]; then
+   _vorbis='#define HAVE_OGGVORBIS'
+   _libvorbis='-lvorbis -lm'
+else
+   _vorbis='#undef HAVE_OGGVORBIS'
 fi
 
 _aosrc=''
@@ -2099,7 +2126,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2293,7 +2320,11 @@ $_confwin32
 /* termcap flag for getch2.c */
 $_termcap
 
+/* enable PNG support */
 $_png
+
+/* enable OggVorbis support */
+$_vorbis
 
 $_streamingdef
 
