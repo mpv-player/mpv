@@ -986,6 +986,50 @@ would export 1024 samples per channel to <filename>/tmp/mplayer-af_export</filen
 </para>
 </sect4>
 
+<sect4 id="af_extrastereo">
+<title>Extrastereo</title>
+
+<para>
+This audio filter (linearly) increases the difference between left and
+right channels (like the <application>XMMS</application> extrastereo
+plugin) which adds some sort of &quot;live&quot; effect to playback.
+This filter has one parameter:</para>
+
+<variablelist>
+<varlistentry>
+<term><option>mul</option></term>
+<listitem><para>
+is the difference coefficient, an optional floating point number that defaults
+to <literal>2.5</literal>. If you set it to <literal>0.0</literal>, you will
+have mono sound (average of both channels). If you set it to
+<literal>1.0</literal>, sound will be unchanged, if you set it to
+<literal>-1.0</literal>, left and right channels will be swapped.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Usage:
+<screen>
+mplayer -af extrastereo <replaceable>media.avi</replaceable>
+mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
+--></screen>
+</para>
+</sect4>
+
+<sect4 id="af_volnorm">
+<title>Volume normalizer</title>
+
+<para>
+This audio filter maximizes the volume without distorting the sound.
+</para>
+
+<para>
+Usage:
+<screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
+</para>
+</sect4>
+
 </sect3>
 
 <sect3 id="audio-plugins">
