@@ -308,8 +308,8 @@ void ShowPreferences( void )
  switch ( subtitle_autoscale )
   {
    case 0: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontNoAutoScale ),TRUE ); break;
-   case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleWidth ),TRUE ); break;
-   case 2: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleHeight ),TRUE ); break;
+   case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleHeight ),TRUE ); break;
+   case 2: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleWidth ),TRUE ); break;
    case 3: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleDiagonal ),TRUE ); break;
   }
 #endif
@@ -416,8 +416,8 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CBShowVideoWindow ),"toggled",GTK_SIGNAL_FUNC( prToggled ), (void*)3 );
 #ifdef HAVE_FREETYPE
  gtk_signal_connect( GTK_OBJECT( RBFontNoAutoScale ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)4 );
- gtk_signal_connect( GTK_OBJECT( BRFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
- gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleHeight ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)6 );
+ gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleHeight ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
+ gtk_signal_connect( GTK_OBJECT( BRFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)6 );
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleDiagonal ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)7 );
 #endif
  gtk_signal_connect( GTK_OBJECT( CBCache ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)8);
@@ -563,8 +563,8 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkSet( gtkSetFontTextScale,HSFontTextScaleadj->value,NULL );
 	gtkSet( gtkSetFontOSDScale,HSFontOSDScaleadj->value,NULL );
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontNoAutoScale ) ) ) gtkSet( gtkSetFontAutoScale,0,NULL );
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleWidth ) ) ) gtkSet( gtkSetFontAutoScale,1,NULL );
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleHeight ) ) ) gtkSet( gtkSetFontAutoScale,2,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleHeight ) ) ) gtkSet( gtkSetFontAutoScale,1,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleWidth ) ) ) gtkSet( gtkSetFontAutoScale,2,NULL );
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleDiagonal ) ) ) gtkSet( gtkSetFontAutoScale,3,NULL );
 #endif
 
@@ -1054,8 +1054,8 @@ GtkWidget * create_Preferences( void )
 #else
 
   RBFontNoAutoScale=AddRadioButton( MSGTR_PREFERENCES_FontNoAutoScale,&Font_group,vbox603 );
-  BRFontAutoScaleWidth=AddRadioButton( MSGTR_PREFERENCES_FontPropWidth,&Font_group,vbox603 );
   RBFontAutoScaleHeight=AddRadioButton( MSGTR_PREFERENCES_FontPropHeight,&Font_group,vbox603 );
+  BRFontAutoScaleWidth=AddRadioButton( MSGTR_PREFERENCES_FontPropWidth,&Font_group,vbox603 );
   RBFontAutoScaleDiagonal=AddRadioButton( MSGTR_PREFERENCES_FontPropDiagonal,&Font_group,vbox603 );
 
   table1=gtk_table_new( 3,2,FALSE );
