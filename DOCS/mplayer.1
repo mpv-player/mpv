@@ -161,15 +161,19 @@ Options that work without values can be enabled by setting them to 'yes' or
 \'1' and disabled by setting them to 'no' or '0'.
 Even suboptions can be specified in this way.
 
-.nf
 .I EXAMPLE:
+.br
 # Use Matrox driver by default.
+.br
 vo=xmga
+.br
 # I love practicing handstands while watching videos.
+.br
 flip=yes
+.br
 # Decode/\:encode multiple files from png, start it with -mf on
+.br
 mf= type=png:fps=25
-.fi
 
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
@@ -190,7 +194,6 @@ correction algorithm used.
 An uneven video frame rate in a movie which plays fine with \-nosound can
 often be helped by setting this to an integer value greater than 1.
 The higher the value, the closer the timing will be to -nosound.
-.PP
 Try \-autosync\ 30 to smooth out problems with sound drivers which do
 not implement a perfect audio delay measurement.
 With this value, if large A/\:V sync offsets occur, they will only take about
@@ -355,11 +358,11 @@ set CD spin speed
 .IPs paranoia=<0\-2>
 set paranoia level
 .RSss
-.nf
 0: disable checking
+.br
 1: overlap checking only (default)
+.br
 2: full data correction and verification
-.fi
 .REss
 .IPs generic-dev=<value>
 use specified generic SCSI device
@@ -612,12 +615,13 @@ capture from ALSA
 .IPs amode=<0\-3>
 choose an audio mode:
 .RSss
-.nf
 0: mono
+.br
 1: stereo
+.br
 2: language 1
+.br
 3: language 2
-.fi
 .REss
 .IPs forcechan=<1\-2>
 By default, the count of recorded audio channels is determined automatically
@@ -1629,15 +1633,19 @@ The threshold can be optionally specified from nothing (0) to everything
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Adds noise
 .RSss
-.nf
 <0\-100>: luma noise
+.br
 <0\-100>: chroma noise
+.br
 u: uniform noise
+.br
 t: temporal noise
+.br
 a: averaged temporal noise
+.br
 h: high quality
+.br
 p: mix with pattern
-.fi
 .REss
 .IPs eq[=bright:cont]
 Activates the software equalizer with interactive controls like the hardware
@@ -1825,13 +1833,15 @@ get help
 .IPs vbr=<0\-4>
 variable bitrate method
 .RSss
-.nf
 0: cbr
+.br
 1: mt
+.br
 2: rh(default)
+.br
 3: abr
+.br
 4: mtrh
-.fi
 .REss
 .IPs abr\ \ 
 average bitrate
@@ -1850,20 +1860,21 @@ set audio input gain
 .IPs mode=<0\-3>
 (default: auto)
 .RSss
-.nf
 0: stereo
+.br
 1: joint-stereo
+.br
 2: dualchannel
+.br
 3: mono
-.fi
 .REss
 .IPs padding=<0\-2>
 .RSss
-.nf
 0: no
+.br
 1: all
+.br
 2: adjust
-.fi
 .REss
 .RE
 .
@@ -1887,15 +1898,19 @@ Available options are:
 .IPs vcodec=<value>
 use the specified codec (there is no default, you must specify it):
 .RSss
-.nf
 mjpeg: Motion JPEG
+.br
 h263: H263
+.br
 h263p: H263 Plus
+.br
 mpeg4: DivX 4/\:5
+.br
 msmpeg4: DivX 3
+.br
 rv10: an old RealVideo codec
+.br
 mpeg1video: MPEG1 video :)
-.fi
 .REss
 .IPs vqmin=<2\-31>
 minimum quantizer (pass\ 1/\:2) (default: 3)
@@ -1915,14 +1930,17 @@ maximum number of B frames between non B frames:
 .IPs vme=<0\-5>
 motion estimation method:
 .RSss
-.nf
 0: none (very lq)
+.br
 1: full (slow)
+.br
 2: log (lq)
+.br
 3: phods (lq)
+.br
 4: EPZS (default)
+.br
 5: X1
-.fi
 .REss
 .IPs vhq\ \ 
 high quality mode, encode each macro block in all modes an choose the smallest
@@ -1955,12 +1973,13 @@ Activates internal 2pass mode (default: disabled):
 .IPs vbitrate=<value>
 specify bitrate (pass\ 1/\:2) in
 .RSss
-.nf
 kBit <4\-16000> or
+.br
 Bit  <16001\-24000000>
+.br
 (warning: 1kBit = 1000 Bits)
+.br
 (default: 800)
-.fi
 .REss
 .IPs vratetol=<value>
 approximated filesize tolerance in kbit.
@@ -2284,13 +2303,15 @@ Available options are:
 .IPs mode=<mode>
 specify the mode to be used for encoding
 .RSss
-.nf
 help: show this help
+.br
 cbr: constant bit rate (default)
+.br
 2pass-1: first pass of two pass mode
+.br
 2pass-2: second pass of two pass mode
+.br
 fixedquant: fixed quantizer mode
-.fi
 .REss
 .IPs quality=<0\-6>
 specify the encoding quality
@@ -2535,11 +2556,11 @@ cracked CSS keys
 Sub files
 are searched for in this priority (for example /mnt/\:movie/\:movie.avi):
 .RSs
-.nf
 /mnt/\:cdrom/\:movie.sub
+.br
 ~/.mplayer/\:sub/\:movie.sub
+.br
 ~/.mplayer/\:default.sub
-.fi
 .RE
 .PD 1
 
@@ -2631,11 +2652,11 @@ MPlayer is (C) 2000\-2002
 .B Arpad Gereoffy
 .TP
 This man page is written and maintained by
-.nf
 .B Gabucino
+.br
 .B Diego Biurrun
+.br
 .B Jonas Jermann
-.fi
 .PP
 Please send mails about it to the MPlayer-users mailing list.
 

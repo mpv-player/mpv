@@ -121,9 +121,8 @@ uniform man page. The best way is to read (and understand) the source.
 
 General:
     - No line should contain more than 79 characters
-    - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .nf,
-                     .fi, .na, .nh, .ad, .hy, macro definitions, comments and
-                     some more
+    - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .na,
+                     .nh, .ad, .hy, macro definitions, comments and some more
     - Don't forget the quotation marks around expressions, the backslash
       before a '-' if it's needed, etc...
 
