@@ -53,6 +53,7 @@ int stop_xscreensaver=0;
 static int dpms_disabled=0;
 static int timeout_save=0;
 static int xscreensaver_was_running=0;
+static int kdescreensaver_was_running=0;
 
 char* mDisplayName=NULL;
 Display* mDisplay=NULL;
@@ -787,6 +788,11 @@ void saver_on(Display *mDisplay) {
 	system("cd /; xscreensaver -no-splash &");
 	xscreensaver_was_running = 0;
     }
+    if (kdescreensaver_was_running && stop_xscreensaver) {
+	system("dcop kdesktop KScreensaverIface enable true 2>/dev/null >/dev/null");
+	kdescreensaver_was_running = 0;
+    }
+
 
 }
 
@@ -816,8 +822,19 @@ void saver_off(Display *mDisplay) {
 	if (timeout_save)
 	    XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
     }
-    xscreensaver_was_running = stop_xscreensaver && ! system("xscreensaver-command -exit");
 		    // turning off screensaver
+    if (stop_xscreensaver && !xscreensaver_was_running)
+    {
+      xscreensaver_was_running = (system("xscreensaver-command -version 2>/dev/null >/dev/null")==0);
+      if (xscreensaver_was_running)
+	 system("xscreensaver-command -exit 2>/dev/null >/dev/null");    
+    }
+    if (stop_xscreensaver && !kdescreensaver_was_running)
+    {
+      kdescreensaver_was_running=(system("dcop kdesktop KScreensaverIface isEnabled 2>/dev/null | sed 's/1/true/g' | grep true 2>/dev/null >/dev/null")==0);
+      if (kdescreensaver_was_running)
+	  system("dcop kdesktop KScreensaverIface enable false 2>/dev/null >/dev/null");
+    }
 }
 
 static XErrorHandler old_handler = NULL;
