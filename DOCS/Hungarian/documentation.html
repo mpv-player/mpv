@@ -233,65 +233,61 @@
 <P><B><A NAME=3.1>3.1.  Irányítás billentyûzetrõl</A></B></P>
 
 
-    <-  és  ->          hátra/elõre seek, 10 másodpercnyi
-    up or down          hátra/elõre seek, 1 percnyi
-    p or SPACE          pillanatállj, bármely billentyûre tovább
-    q  or  ^C           lejátszás leállítasa, kilépés
-    o                   OSD funkciók : nincs / seek / seek+idõ
-    /  and *            hangerõ csökkentése/növelése
-    m                   master/pcm csatorna használata hangerõhöz
-    f                   teljes képernyõs mód ki/be (csak SDL!)   
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD>&lt;-  és  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>hátra/elõre seek, 10 másodpercnyi</TD><TR>
+<TD></TD><TD>up or down</TD><TD></TD><TD>hátra/elõre seek, 1 percnyi</TD><TR>
+<TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>hátra/elõre seek, 10 percnyi</TD><TR>
+<TD></TD><TD>p or SPACE</TD><TD></TD><TD>pillanatállj, bármely billentyûre tovább</TD><TR>
+<TD></TD><TD>q or ESC</TD><TD></TD><TD>lejátszás leállítasa, kilépés</TD><TR>
+<TD></TD><TD>+ or -</TD><TD></TD><TD>audio késleltetése +/- 0.1 másodperccel</TD><TR>
+<TD></TD><TD>/ or *</TD><TD></TD><TD>hangerõ csökkentése/növelése</TD><TR>
+<TD></TD><TD>o</TD><TD></TD><TD>OSD funkciók : nincs / seek / seek+idõ</TD><TR>
+<TD></TD><TD>m</TD><TD></TD><TD>master/pcm csatorna használata hangerõhöz</TD><TR>
+<TD></TD><TD>z or x</TD><TD></TD><TD>feliratok késleltetése +/- 0.1 másodperccel</TD><TR>
 
-    <-  és  ->          hátra/elõre seek, 10 másodpercnyi
-    up or down          hátra/elõre seek, 1 percnyi
-    p or SPACE          pillanatállj, bármely billentyûre tovább
-    q  or  ^C           lejátszás leállítasa, kilépés
-    + or -              audio késleltetése +/- 0.1 másodperccel
-    / or *              hangerõ csökkentése/növelése
-    o                   toggle OSD: none / seek / seek+timer
-    m                   master/pcm csatorna használata hangerõhöz
-    z or x              adjust subtitle delay by +/- 0.1 second
+<TD COLSPAN=4><P><I>(a következõk csak a DirectShow DivX codecre érvényesek)</I></P></TD><TR>
 
-  (a következõk csak a DirectShow DivX codecre érvényesek)
-
-    1 vagy 2            kontraszt
-    3 vagy 4            fényerõ
-    5 vagy 6            ?
-    7 vagy 8            szaturáció
+<TD></TD><TD>1 vagy 2</TD><TD></TD><TD>kontraszt beállítása</TD><TR>
+<TD></TD><TD>3 vagy 4</TD><TD></TD><TD>fényerõ beállítása</TD><TR>
+<TD></TD><TD>5 vagy 6</TD><TD></TD><TD>hue állítása</TD><TR>
+<TD></TD><TD>7 vagy 8</TD><TD></TD><TD>szaturáció állítása</TD><TR>
+</TABLE></P>
 
 
-  <A NAME=3.2>3.2.  Irányítás LIRC-cel</A>
+<P><B><A NAME=3.2>3.2.  Irányítás LIRC-cel</A></B></P>
 
-  Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
+<P>Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
   infravörös távirányítót, hogy irányítsd vele a géped!
-  Részletek a www.lirc.org címen.
+  Részletek a <A HREF="www.lirc.org">www.lirc.org</A> címen.</P>
 
-  Ha felinstalláltad a lirc csomagot, így fordítsd az <B>MPlayer</B>-t :
-  ./configure --enable-lirc
+<P>Ha felinstalláltad a lirc csomagot, így fordítsd az <B>MPlayer</B>-t :
+  ./configure --enable-lirc</P>
 
-  Ha sikerült, az <B>MPlayer</B> ezt fogja kiírni induláskor:
+<P>Ha sikerült, az <B>MPlayer</B> ezt fogja kiírni induláskor:
     LIRC init was successful.
   Ha hibát talál, azt is kiírja. Ha semmi LIRC-szerût nem mond, akkor
-  nincs belefordítva.
+  nincs belefordítva.</P>
 
-  A megadandó programnév - mily' csoda - mplayer_lirc.
-  A következõ parancsokat érti:
+<P>A megadandó programnév - mily' csoda - mplayer_lirc.
+  A következõ parancsokat érti:</P>
 
-  PAUSE  - lejátszás megállítása. Bármely másik billentyû újraindítja.
-  QUIT   - kilépés
-  RWND   - 10 másodperccel vissza 
-  FRWND  - 60 másodperccel vissza
-  FWD    - 10 másodperccel elõre
-  FFWD   - 60 másodperccel elõre
-  INCVOL - hangerõ növelése 1 százalékkal
-  DECVOL - hangerõ csökkentése 1 százalékkal
-  MASTER - 'master' mixer csatorna használata
-  PCM    - 'pcm' mixer csatorna használata
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD>lejátszás megállítása. Bármely másik billentyû újraindítja.</TD><TR>
+<TD></TD><TD>QUIT</TD><TD></TD><TD>kilépés</TD><TR>
+<TD></TD><TD>RWND</TD><TD></TD><TD>10 másodperccel vissza</TD><TR>
+<TD></TD><TD>FRWND</TD><TD></TD><TD>60 másodperccel vissza</TD><TR>
+<TD></TD><TD>FWD</TD><TD></TD><TD>10 másodperccel elõre</TD><TR>  
+<TD></TD><TD>FFWD</TD><TD></TD><TD>60 másodperccel elõre</TD><TR> 
+<TD></TD><TD>INCVOL</TD><TD></TD><TD>hangerõ növelése 1 százalékkal</TD><TR>
+<TD></TD><TD>DECVOL</TD><TD></TD><TD>hangerõ csökkentése 1 százalékkal</TD><TR>
+<TD></TD><TD>MASTER</TD><TD></TD><TD>'master' mixer csatorna használata</TD><TR>   
+<TD></TD><TD>PCM</TD><TD></TD><TD>'pcm' mixer csatorna használata</TD><TR>
+</TABLE></P>
 
-  Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.
-  Itt egy példa az enyémbõl:
+<P>Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.
+  Itt egy példa az enyémbõl:</P>
 
-  begin
+<P><PRE>  begin
    remote = CU-SX070
    prog = mplayer_lirc
    button = Tape_Play
@@ -304,150 +300,138 @@
    prog = mplayer_lirc
    button = Tape_Stop
    config = QUIT
-  end
+  end</PRE></P>
 
-  Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
-  a -lircconf [file-név] kapcsolót.
+<P>Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
+  a -lircconf [file-név] kapcsolót.</P>
 
+<P><B><A NAME=3.3>3.3.  Streaming from network or pipes</A></B></P>
 
-  <A NAME=3.3>3.3.  Streaming from network or pipes</A>
-
-  Az <B>MPlayer</B> a HTTP protokolllal tud lejátszani hálózaton keresztül,
+<P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül,
   és béta állapotú ASF streaming támogatással is rendelkezik.
-  A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :
+  A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :</P>
 
 
-	./configure --enable-streaming
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+
+<P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
+  Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+
+<P><B><A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A></B></P>
+
+<P><B><A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A></B></P>
+
+<P><B><A NAME=6>6.  Különbözõ operációs rendszerek</A></B></P>
+
+<P><B><A NAME=6.1>6.1.  Debian csomagolás</A></B></P>
+
+<P>A csomag felépítéséhez töltsd le a cvs verziót vagy .tgz-t, tömörítsd ki,
+  majd lépj bele :</P>
+
+<P><PRE>     cd main
+    fakeroot debian/rules binary</PRE></P>
 
 
-  <B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
-  Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :
+<P>(... mplayer detektálja a hardware-t/software-t, lefordul, és..)</P>
 
+<P><PRE>    dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</PRE></P>
 
-        wget ftp://micorsops.com/something.avi -O - | mplayer -
+<P>Most root-ként add ki a következõ parancsot :</P>
 
+<P><PRE>   dpkg -i ../mplayer_0.18-1_i386.deb</PRE></P>
 
-  <A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A>
+<P>Valahogy így kell kinéznie:</P>
 
-
-  <A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A>
-
-
-  <A NAME=6>6.  Különbözõ operációs rendszerek</A>
-
-
-  <A NAME=6.1>6.1.  Debian csomagolás</A>
-
-  A csomag felépítéséhez töltsd le a cvs verziót vagy .tgz-t, tömörítsd ki,
-  majd lépj bele :
-
-
-		cd main
-		fakeroot debian/rules binary
-
-
-  (... mplayer detektálja a hardware-t/software-t, lefordul, és..)
-  dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
-
-  Most root-ként add ki a következõ parancsot :
-
-
-		dpkg -i ../mplayer_0.18-1_i386.deb
-
-
-  Valahogy így kell kinéznie:
-
-	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+<P><PRE>	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
 	Password:
 	(Reading database ... 26946 files and directories currently installed.)
 	Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
 	Unpacking replacement mplayer ...
-	Setting up mplayer (0.18-1) ...
+	Setting up mplayer (0.18-1) ...</PRE></P>
 
 
-  <A NAME=6.2>6.2.  FreeBSD</A>
+<P><B><A NAME=6.2>6.2.  FreeBSD</A></B></P>
 
-  A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
-  natív BSD make nem jó.
+<P>A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
+  natív BSD make nem jó.</P>
 
-  Az <B>MPlayer</B> futtatásához fordítsd újra a kernelt
+<P>Az <B>MPlayer</B> futtatásához fordítsd újra a kernelt
   "options USER_LDT"-vel, kivéve ha -CURRENT-et használsz, ahol ez az
   alapállapot). Ha van SSE-t támogató CPU-d, használd az "options
-  CPU_ENABLE_SSE"-t is. FreeBSD-STABLE kell, vagy kernel patch-ek.
+  CPU_ENABLE_SSE"-t is. FreeBSD-STABLE kell, vagy kernel patch-ek.</P>
 
-  Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
-  csinálj egy linket : ln -s /dev/(meghajtó) /dev/cdrom
+<P>Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
+  csinálj egy linket : <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
 
-  Egyenlõre nincs DVD támogatás FreeBSD-hez.
-  Nyugodtan csinálj egyet :-)
+<P>Egyenlõre nincs DVD támogatás FreeBSD-hez.
+  Nyugodtan csinálj egyet :-)</P>
 
 
-  <A NAME=6.3>6.3.  Solaris</A>
+<P><B><A NAME=6.3>6.3.  Solaris</A></B></P>
 
-  Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
+<P>Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
   megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
   Solaris SPARC-on jónéhány AVI file lesz ami nem fog mûködni, mert csak
   win32-es codec van hozzá. <B>DivX/OpenDivX</B> filmek menni fognak,
-  ha libavcodec-et használsz.
+  ha libavcodec-et használsz.</P>
 
-  A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
-  Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol :
+<P>A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
+  Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol :</P>
 
+<P><PRE>   % /usr/ccs/bin/make
+   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen</PRE></P>
 
-   % /usr/ccs/bin/make
-   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+<P>Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít ha assemblerrel
+  vagy nélküle van.</P>
 
-
-  Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít ha assemblerrel
-  vagy nélküle van.
-
-  Solaris x86-on kell a GNU assembler is és a GNU C/C++ fordító is,
+<P>Solaris x86-on kell a GNU assembler is és a GNU C/C++ fordító is,
   aminek támogatnia kell a GNU assemblert! Az MPlayer igencsak támaszkodik
   az MMX, SSE és 3DNOW! utasításokra, amiket a Solaris standard assemblere
-  (/usr/ccs/bin/as) nem támogat.
+  (<CODE>/usr/ccs/bin/as</CODE>) nem támogat.</P>
 
-  A configure script megpróbálja megkeresni hogy a "gcc" parancsod
+<P>A configure script megpróbálja megkeresni hogy a "gcc" parancsod
   melyik assemblert indítja (ha nem sikerül neki, használd a
-  "--as=/ahova/installáltad/gnu-as" parancsot).
+  "--as=/ahova/installáltad/gnu-as" parancsot).</P>
 
-  GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :
+<P>GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :</P>
 
-   % configure
+<P><PRE>   % configure
    ...
    Checking assembler (/usr/ccs/bin/as) ... , failed
-   Please upgrade(downgrade) binutils to 2.10.1...
+   Please upgrade(downgrade) binutils to 2.10.1...</PRE></P>
 
-  (Megoldás: "--with-as=gas"-al fordított GCC használata)
+<P>(Megoldás: "--with-as=gas"-al fordított GCC használata)</P>
 
-  Tipikus hiba GNU as nem-használatára:
+<P>Tipikus hiba GNU as nem-használatára:</P>
 
-   % gmake
+<P><PRE>   % gmake
    ...
    gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
 	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
    Assembler: mplayer.c
    "(stdin)", line 3567 : Illegal mnemonic
    "(stdin)", line 3567 : Syntax error
-   ... more "Illegal mnemonic" and "Syntax error" errors ...
+   ... more "Illegal mnemonic" and "Syntax error" errors ...</PRE></P>
 
+<P>DVD támogatáshoz patchelt libcss szükséges. Patch :
+  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A></P>
 
-  DVD támogatáshoz patchelt libcss szükséges. Patch :
-  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>
+<P>2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
+  ha annak kapacitása nagyobb mint 4 GB :</P>
 
-
-  2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
-  ha annak kapacitása nagyobb mint 4 GB :
-
-   - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
+<P><UL><LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
      disk block >4GB on a device using a logical blocksize != DEV_BSIZE
      (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
      address modulo 4GB is accessed.
      (http://groups.yahoo.com/group/solarisonintel/message/22516)
 
-   - The similar bug is present in the hsfs(7FS) filesystem code (aka
+<LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
      ISO9660), hsfs currently does not support partitions/disks >4GB,
      all data is accessed modulo 4GB
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
+</UL></P>
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
   using the CPU's VIS instructions for certain time consuming operations. 
@@ -457,72 +441,67 @@
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video
   decoding and for color space conversion in the video output drivers.</P>
 
-  <A NAME=6.4>6.4.  StrongARM</A>
+<P><B><A NAME=6.4>6.4.  StrongARM</A></B></P>
 
-  Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
-  használd :
-
-
-  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
+<P>Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
+  használd :</P>
 
 
-  <A NAME=A>Appendix A - Authors</A>
+<P><PRE>  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
+	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
+
+<P><B><A NAME=A>Appendix A - Authors</A></B></P>
+
+<P><B><A NAME=B>Appendix B - Mailing lists</A></B></P>
+
+<P>Jónéhány <B>MPlayer</B> lista van. A következõ címeken lehet feliratkozni:</P>
+
+<P><UL>
+<LI>MPlayer belsõ/magyar fejlesztõk listája:<BR>
+<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
+<P>Nemtom, talán magyar nyelvû FLAME lista :)
+Továbbá a core csapattagok magánügyei, pl. mplayer parti, szponzorok, stb.</P>
+
+</LI><LI>MPlayer fejlesztõk listája:<BR>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng">http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng</A>
+<P>Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
+library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
+NE küldj ide bugreportot, kérdést!
+Ne növeljük a lista forgalmát.</P>
+
+</LI><LI>MPlayer felhasználók listája:<BR>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A>
+<P><UL>
+<LI>ide küldj bugreport-ot (miután elolvastad Appendix <A HREF="bugreports.html">C</A>-t)</LI>
+<LI>feature kérést (miután elolvastad DOCS/TODO)</LI>
+<LI>felhasználói kérdéseket (miután elolvastad ezt az egész dokumentációt.)</LI>
+</UL></P>
+
+</LI><LI>MPlayer &amp; Matrox G200/G400/G450 felhasználók:
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
+<P>Matrox-szal kapcsolatos kérdések helye,<UL>
+<LI>mga_vid</LI>
+<LI>matrox hivatalos driver-ei (4-es X)</LI>
+<LI>matroxfb-TVout</LI></UL></P>
+
+</LI><LI>MPlayer bejelentések:<BR>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-announce">http://lists.sourceforge.net/lists/listinfo/mplayer-announce</A>
+<P>Alacsony forgalmú lista :)
+És read-only. Ide írok vmit, ha kész az új verzió.</P>
+
+</LI><LI>MPlayer CVS-log:     
+<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
+<P>CVS-beli változásokról kérdéseket ide küldj.
+(ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
+Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!</P>
+
+</LI></UL></P>
+
+<P>Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
+Más nyelven ne írj!</P>
 
 
-  <A NAME=B>Appendix B - Mailing lists</A>
-
-  Jónéhány <B>MPlayer</B> lista van. A következõ címeken lehet feliratkozni:
-
-  - <B>MPlayer</B> belsõ/magyar fejlesztõk listája:
-	<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
-
-        Nemtom, talán magyar nyelvû FLAME lista :)
-        Továbbá a core csapattagok magánügyei, pl. mplayer parti, szponzorok,
-        stb.
-
-  - <B>MPlayer</B> fejlesztõk listája:
-	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng">http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng</A>
-
-        Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
-        library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
-        NE küldj ide bugreportot, kérdést!
-        Ne növeljük a lista forgalmát.
-
-  - <B>MPlayer</B> felhasználók listája:
-	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A>
-
-        - ide küldj bugreport-ot (miután elolvastad Appendix <A HREF="bugreports.html">C</A>-t)
-        - feature kérést (miután elolvastad DOCS/TODO)
-        - felhasználói kérdéseket (miután elolvastad ezt az egész
-          dokumentációt.)
-
-  - <B>MPlayer</B> &amp; Matrox G200/G400/G450 felhasználók:
-	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
-
-        Matrox-szal kapcsolatos kérdések helye,
-        - mga_vid
-        - matrox hivatalos driver-ei (4-es X)
-        - matroxfb-TVout
-
-  - <B>MPlayer</B> bejelentések:
-	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-announce">http://lists.sourceforge.net/lists/listinfo/mplayer-announce</A>
-
-        Alacsony forgalmú lista :)
-        És read-only. Ide írok vmit, ha kész az új verzió.
-
-  - <B>MPlayer</B> CVS-log:     
-	<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
-
-        CVS-beli változásokról kérdéseket ide küldj.
-        (ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
-        Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!
-
-  Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
-       Más nyelven ne küldj üzenetet!
-
-
-  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A>
+<P><B><A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A></B></P>
 
 </BODY>
 
