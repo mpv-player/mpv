@@ -95,7 +95,13 @@ typedef struct RTPState {
   struct timeval firstSyncTime;
 };
 
+int rtspStreamOverTCP = 0; 
+
 extern "C" void demux_open_rtp(demuxer_t* demuxer) {
+  if (rtspStreamOverTCP && LIVEMEDIA_LIBRARY_VERSION_INT < 1033689600) {
+    fprintf(stderr, "TCP streaming of RTP/RTCP requires \"LIVE.COM Streaming Media\" library version 2002.10.04 or later - ignoring the \"-rtsp-stream-over-tcp\" flag\n");
+    rtspStreamOverTCP = 0;
+  }
   do {
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();
     if (scheduler == NULL) break;
@@ -155,7 +161,8 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 
 	if (rtspClient != NULL) {
 	  // Issue RTSP "SETUP" and "PLAY" commands on the chosen subsession:
-	  if (!rtspClient->setupMediaSubsession(*subsession)) break;
+	  if (!rtspClient->setupMediaSubsession(*subsession, False,
+						rtspStreamOverTCP)) break;
 	  if (!rtspClient->playMediaSubsession(*subsession)) break;
 	}
 

@@ -90,6 +90,7 @@ extern void vo_zr_revertoption(config_t* opt,char* pram);
 
 #ifdef STREAMING_LIVE_DOT_COM
 extern int isSDPFile;
+extern int rtspStreamOverTCP;
 #endif
 
 #ifdef HAVE_NEW_GUI
@@ -302,8 +303,11 @@ static config_t mplayer_opts[]={
 #ifdef STREAMING_LIVE_DOT_COM
 	// -sdp option, specifying that the source is a SDP file
         {"sdp", &isSDPFile, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
+        {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
-	{"sdp", "MPlayer was compiled WITHOUT the \"LIVE.COM Streaming Media\" libraries!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"sdp", "SDP file support requires the \"LIVE.COM Streaming Media\" libraries!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
 //---------------------- mplayer-only options ------------------------
