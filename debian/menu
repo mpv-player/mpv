@@ -1,1 +1,1 @@
-?package(mplayer):command=/usr/bin/gmplayer section="Apps/Viewers" needs="X11" title=MPlayer icon=/usr/share/icons/MPlayer_mini.xpm
+?package(mplayer):command=/usr/bin/gmplayer section="Apps/Viewers" needs="X11" title=MPlayer icon=/usr/share/icons/mplayer-desktop.xpm
