@@ -51,19 +51,19 @@ Now, go on:
 
 3. mplayer.c - ooh, he's the boss :)
    The timing is solved odd, since it has/recommended to be done differently
-	 for each of the formats, and sometimes can be done by many ways.
+	 for each of the formats, and sometimes can be done in many ways.
 	 There are the a_frame and v_frame float variables, they store the
 	 just played a/v position is seconds.
 	 A new frame is displayed if v_frame<a_frame, and sound is decoded if
 	 a_frame<v_frame.
 	 When playing (a/v), it increases the variables by the duration of the
 	 played a/v. In video, it's usually 1.0/fps, but I have to mention that
-	 doesn't really matters at video, for example asf doesn't have that,
-	 instead there is "duration" and it can change per frames.
+	 fps doesn't really matters at video, for example asf doesn't have that,
+	 instead there is "duration" and it can change per frame.
 	 MPEG2 has "repeat_count" which delays the frame by 1-2.5 ...
 	 Maybe only AVI and MPEG1 has fixed fps.
 
-	 So everything works perfect until the audio and video are in perfect
+	 So everything works right until the audio and video are in perfect
 	 synchronity, since the audio goes, it gives the timing, and if the
 	 time of a frame passed, the next frame is displayed.
 	 But what if these two aren't synchronized in the input file?
@@ -110,8 +110,8 @@ Now, go on:
 5.a Codec controller: this is the greatest hack in the whole :)
 	 The libmpeg2 is so unstable, that I can't believe it.
 	 Of course I don't mean it bullshit :) rather it only accepts
-	 totally perfect, errorfree streams. If it founds error, it's
-	 just a segfault ;) And don't start laughing, this is great this way,
+	 totally perfect, error-free streams. If it founds error, it
+	 just segfaults ;) And don't start laughing, this is great this way,
 	 from the view of speed it would be 50-100% slower if stuffed full with
 	 verifications. That's why I solved it by running it in a separate
 	 process, and if it dies, who cares, just start another.
@@ -121,11 +121,11 @@ Now, go on:
 		 So the MPlayer doesn't have to care about this, it just pumps the
 		 compressed stuff into the child, which displays it.
 	 - shmem: the compressed data, and the uncompressed frames are both
-	   in shared memory, so all 3 processes (mplayer, codeccontrol,
+		 in shared memory, so all 3 processes (mplayer, codeccontrol,
 		 libmpeg2 codec) sees 'em, so they can trade data fast.
 	 - FIFO is used for the communication between them.
 	 - If the child dies while decoding, the succesfully decoded data
-		 isn't lost, they are inherited by the new child throught the
+		 isn't lost, it's inherited by the new child through the
 		 shared mem! So only a little error can be seen in the video,
 		 it won't disappear or turn green, as in the older versions.
 
