@@ -22,7 +22,7 @@
   <DD>pilote OSS (ioctl) (supporte le transfert AC3 matériel)</DD>
 
   <DT>sdl</DT>
-  <DD>pilote SDL (supporte <B>ESD</B>, <B>ARTS</B> etc)</DD>
+  <DD>pilote SDL (supporte les démons de son comme <B>ESD</B> et <B>ARTS</B>)</DD>
 
   <DT>nas</DT>
   <DD>pilote NAS (Network Audio System)</DD>
@@ -43,21 +43,22 @@
   <DD>pilote ESD natif (principalement pour les utilisateurs GNOME)</DD>
 </DL>
 
-<P>Il faut bien le reconnaître, les pilotes des cartes son ont des problèmes
-  d'incompatibilité. MPlayer utilise une fonction des pilotes écrits correctement
-  pour maintenir la synchro audio/vidéo. Malheureusement, certains auteurs de pilote
-  n'ont que faire de cette fonction: elle n'est pas requise pour lire des MP3s, ou
-  pour les effets sonores.</P>
+<P>Les pilotes Linux des cartes son ont des problèmes d'incompatibilité. C'est pourquoi 
+  MPlayer utilise une fonction des pilotes écrits <EM>correctement</EM> pour maintenir une
+  synchro audio/vidéo correcte. Malheureusement, certains auteurs de pilotes
+  n'ont que faire de cette fonction: elle n'est pas requise pour jouer des MP3s ou
+  des effets sonores.</P>
 
-<P>Les autres lecteurs multimédia comme aviplay ou xine fonctionnent probablement
-  autrement avec ces pilotes parce qu'ils utilisent de "simples" méthodes pour leur
-  synchro interne. Une note: le temps affiché avec leurs méthodes ne sont pas AUSSI
-  précis que celui de MPlayer.</P>
+<P>D'autres lecteurs multimédia comme <A HREF="http://avifile.sourceforge.net">aviplay</A> 
+  ou <A HREF="http://xine.sourceforge.net">xine</A> fonctionnent probablement
+  autrement avec ces pilotes parce qu'ils utilisent des méthodes &quot;simples&quot; pour leur
+  synchro interne. Le temps affiché avec leurs méthodes n'est pas aussi précis que celui 
+  de MPlayer.</P>
 
-<P>Avec un pilote correctement écrit Mplayer ne provoquera pas de désynchro
-  A/V relatives à l'audio, à moins que votre fichier soit très endommagé. Quelques options
-  pour contourner ces problèmes sont décris dans la page de man).</P>
-
+<P>Utiliser MPlayer avec un pilote correctement écrit ne provoquera pas de désynchro
+  A/V relatives à l'audio, à part avec les fichiers très mal créés (voir la page de
+  man pour les solutions).</P>
+  
 <P>Si vous avez un mauvais pilote audio, essayez l'option <CODE>-autosync</CODE>,
   il devrait régler vos problèmes. Voir la page de man pour les informations
   détaillées.</P>
@@ -69,96 +70,163 @@
     (utilisé par défaut). Si vous obtenez des scratchs ou une sonorité anormale, 
     essayez l'option <CODE>-ao sdl</CODE> (NOTE: vous devez bien sûr avoir installé 
     les librairies SDL ainsi que leurs fichiers d'entête). Le pilote audio SDL est plus 
-    efficace dans de nombreux cas et supporte également ESD et ARTS. (ESD est le le 
-    démon son de GNOME, ARTS celui de KDE).</LI>
+    efficace dans de nombreux cas et supporte également ESD (GNOME) et ARTS (KDE).</LI>
   <LI>Si vous avez ALSA version 0.5, vous devrez presque toujours utiliser l'option
     <CODE>-ao alsa5</CODE> , la version 0.5 émulant mal l'OSS, qui <B>plante MPlayer</B> 
       avec un message du type:<BR>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+  <LI>Sur <B>Solaris</B>, utilisez le pilote audio SUN avec l'option
+  <CODE>-ao sun</CODE>, sinon ni la vidéo ni le son ne fonctionneront.</LI>
+  <LI>Si le son émet des cliquements lors d'une lecture depuis le CD-ROM, activez l'IRQ 
+    unmasking, ex.
+    <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). Ceci est généralement
+    bénéfique et décrit plus en détail dans la 
+    <A HREF="cd-dvd.html#drives">section CD-ROM</A>.</LI>
 </UL>
-
-<P>Sur <B>Solaris</B>, utilisez le pilote audio SUN avec l'option
-  <CODE>-ao sun</CODE>, sinon ni la vidéo ni le son ne fonctionneront.</P>
 
 
 <H4><A NAME="experiences">2.3.2.2 Problèmes de cartes son, recommandations</A></H4>
 
-<TABLE BORDER=0 WIDTH="100%">
-  <TR><TD COLSPAN=3><B>Chipset VIA intégré (via82cxxx) 48kHz uniquement</B></TD></TR>
-  <TR><TD></TD><TD>Pilote:</TD><TD> depuis 
-  <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">le projet gkernel</A></TD></TR>
-
-  <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
-  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-  <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">la page de Pontscho</A>
-    (<I>taille du buffer augmentée à 32k</I>)</TD></TR>
-
-  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>Analogique OK, SP/DIF non fonctionnelle</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>Les deux OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>192</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>max 44kHz</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>48kHz son mauvais</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>pas OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>44</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Cartes C-Media (lesquelles?)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>pas OK (hissing) (?)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Cartes Yamaha (*ymf*)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>pas OK (?) (peut-être <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK uniquement avec ALSA 0.5 avec émulation OSS <B>ET</B> <CODE>-ao sdl</CODE> (!) (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Cartes avec chips envy24 (comme la Terratec EWS88MT)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>PC Speaker ou DAC</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK (Utilisez le pilote SDL: <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>Ce pilote émule 44.1, peut-être plus.</TD></TR>
-  <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
-</TABLE>
-
 <P>Sous Linux, utilisez le noyau 2.4 si possible, le 2.2 n'a pas été testé.</P>
 
-<P>Si le son émet des cliquements en lisant depuis le CD-ROM, activez l'IRQ unmasking ! par exemple
-  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). C'est généralement bénéfique
-  et décrit plus en détail dans la <A HREF="cd-dvd.html#drives">section CD-ROM</A>.</P>
+<P>Les pilotes son de Linux sont surtout fournis par la version libre d'OSS. Ces pilotes
+  ont été repris par <A HREF="http://www.alsa-project.org">ALSA</A> (Advanced Linux Sound 
+  Architecture) dans la série de développement 2.5. Si votre distribution n'utilise pas
+  déjà ALSA vous pourriez souhaiter essayer leurs pilotes si vous avez des problèmes
+  de son. Les pilotes ALSA sont généralement supérieurs à OSS en compatibilité, performances
+  et fonctionnalités. Mais certaines cartes ne sont supportées que par les pilotes OSS
+  commerciaux de <A HREF="http://www.opensound.com/">4Front Technologies</A>. Ils supportent
+  également de nombreux systèmes non-Linux.</P>
+  
+<TABLE BORDER="1" WIDTH="100%">
 
-<P>Les retour sur ce document sont les bienvenus.
-  Merci de nous faire savoir comment MPlayer gère votre carte son.</P>
+  <TR>
+    <TD ROWSPAN="2"><B>CARTE SON</B></TD>
+    <TD COLSPAN="4"><B>PILOTE</B></TD>
+    <TD ROWSPAN="2"><B>kHz Max</B></TD>
+  </TR>
+
+  <TR>
+    <TD><B>OSS/Libre</B></TD>
+    <TD><B>ALSA</B></TD>
+    <TD><B>OSS/Pro</B></TD>
+    <TD><B>Autres</B></TD>
+  </TR>
+
+  <TR>
+    <TD><B>VIA intégré (686/A/B, 8233, 8235)</B></TD>
+    <TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</A></TD>
+    <TD>snd-via82xx</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>4-48 kHz ou 48 kHz uniquement, selon le chipset</TD>
+  </TR>
+
+  <TR>
+    <TD><B>Aureal Vortex 2</B></TD>
+    <TD>aucun</TD>
+    <TD>aucun</TD>
+    <TD>OK</TD>
+    <TD><A HREF="http://aureal.sourceforge.net">Pilotes Linux Aureal</A><BR>
+      <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">taille du tampon portée à 32k</A></TD> 
+    <TD>48</TD>
+  </TR>
+
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>aucun</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB Live!</B></TD>
+    <TD>Analogique OK, SP/DIF non fonctionnel</TD>
+    <TD>Tous deux OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>192</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB AWE 64</B></TD>
+    <TD>max 44kHz</TD>
+    <TD>48kHz mauvaise qualité</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound ACE</B></TD>
+    <TD>pas OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>44</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound MAX</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>ESS 688</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Cartes C-Media (lesquelles ?)</B></TD>
+    <TD>pas OK (hissing) (?)</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Yamaha cards (*ymf*)</B></TD>
+    <TD>pas OK (?) (peut-être <CODE>-ao sdl</CODE>)</TD>
+    <TD>OK uniquement avec ALSA 0.5 avec émulation OSS <B>ET</B>
+      <CODE>-ao sdl</CODE> (!) (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Cartes avec chips envy24 (comme la Terratec EWS88MT)</B></TD>
+    <TD>?</TD>
+    <TD>?</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+
+  <TR>
+    <TD><B>PC Speaker ou DAC</B></TD>
+    <TD>OK (Utilisez le pilote SDL: <CODE>-ao sdl</CODE>)</TD>
+    <TD>aucun</TD>
+    <TD>&nbsp;</TD>
+    <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">Pilote PC speaker OSS Linux</a></TD>
+    <TD>Ce pilote émule 44.1, peut-être plus.</TD>
+  </TR>
+
+</TABLE>
+
+<P>Les retour sur ce document sont les bienvenus. Merci de nous faire savoir comment 
+  MPlayer et votre(vos) carte(s) son ont fonctionné ensemble.</P>
 
   
 <H4><A NAME="af">2.3.2.3 Filtres audio</A></H4>
@@ -409,7 +477,7 @@
 <DL>
   <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
   <DD>est un nombre à virgule compris entre <CODE>-200</CODE> et <CODE>+60</CODE> 
-    qui représente le niveau du volume en dB. Le niveau par défaut est -10dB.</DD>
+    qui représente le niveau du volume en dB. Le niveau par défaut est 0dB.</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>est un contrôle binaire qui active et désactuve le soft clipping. Le Soft-clipping 
@@ -460,7 +528,7 @@
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
-  <DD>sont des nombres à virgule compris entre <CODE>-12</CODE> et <CODE>+12dB</CODE> 
+  <DD>sont des nombres à virgule compris entre <CODE>-12</CODE> et <CODE>+12</CODE> 
     représentant le gain en dB pour chaque bande de fréquence.</DD>
 </DL>
 
@@ -606,10 +674,9 @@
 <P>Mplayer supporte pleinement l'up/downsampling du son. Ce plugin peut
   être utilisé si vous avez une carte son à fréquence fixe ou que vous
   vous battez avec une vieille carte son qui n'est capable que de sampler
-  à 44.1kHz maxi. Que l'utilisation de ce plugin soit nécessaire ou pas, il
-  est <B>autodétecté</B>. Ce plugin à une option:
-  <CODE>fout</CODE> qui peut être utilisé pour fixer la fréquence de sortie désirée. 
-  Elle est par défaut de 48kHz, et est donnée en &lt;Hz&gt;.</P>
+  à 44.1kHz maxi. MPlayer <B>autodétecte</B> si il est nécessaire ou pas d'utiliser
+  ce plugin. Ce plugin à une option: <CODE>fout</CODE> qui peut être utilisé pour fixer 
+  la fréquence de sortie désirée. Elle est donnée en Hz, et est par défaut de 48kHz.</P>
 
 <P>Utilisation:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;fréquence requise
@@ -653,7 +720,11 @@
   point de vue utilisateur et n'est mentionné ici que pour l'amour de l'exhaustivité.
   N'utilisez pas ce plugin à moins que vous soyez un développeur.</P>
 
-
+<P>Si vous avez un fichier avec des pertes de synchro A/V ponctuelles, utilisez à la place 
+  les touches <CODE>+/-</CODE> pour ajuster la synchro à la volée. L'utilisation de l'OSD
+  est recommandé pour simplifier cette tâche.</P>
+  
+   
 <H5><A NAME="volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
 
 <P>Ce plugin est un remplacement logiciel pour le contrôleur de volume,

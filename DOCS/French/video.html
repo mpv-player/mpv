@@ -520,7 +520,15 @@
   Peut être que la correction d'aspect automatique doit être coupée:<BR>
   &nbsp;&nbsp;<CODE>-noaspect</CODE></P>
 
+<P><B>NOTE:</B> d'après mon expérience, la meilleur qualité d'image sur les écrans EGA
+  peut être obtenue en diminuant légèrement la luminosité: <CODE>-vop
+  eq=-20:0</CODE>. J'ai également besoin de diminuer la fréquence d'échantionnage sur ma
+  machine, car le son est endommagé en 44kHz: <CODE>-srate 22050</CODE>.</P>
 
+<P>Vous pouvez activer l'OSD et les sous-titres uniquement avec le filtre <CODE>expand</CODE>,
+  voir la page de man pour les paramètres exacts.</P>
+
+  
 <H4><A NAME="fbdev">2.3.1.2.5 Sortie framebuffer (FBdev)</A></H4>
 
 <P>La compilation de le sortie FBdev est autodétectée durant ./configure . 
@@ -1314,7 +1322,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 	résolutions depuis le menu et/ou expérimentez avec fbset.</LI>
     </OL>
 
-    <P>Yoh. La prochaine tâche est de faire disparaître le cursor sur tty1 (ou n'importe quelle autre),
+    <P>Yoh. La prochaine tâche est de faire disparaître le curseur sur tty1 (ou n'importe quelle autre),
     et de désactiver l'économiseur d'écran. Exécutez les commandes suivantes:</P>
 
     <P><CODE>echo -e '\033[?25l'</CODE> or <CODE>setterm -cursor off<BR>
@@ -1335,13 +1343,16 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4>Construire un câble de sortie TV Matrox</H4>
 
-<P>Ces informations nous ont été fournies par <B>Rácz Balázs</B>. Bien sûr
-  personne ne prends de responsabilités, ni n'offre de garanties quant aux
+<P>Personne ne prends de responsabilités, ni n'offre de garanties quant aux
   éventuels dommages causés par cette documentation.</P>
 
-<P>La quatrième broche du connecteur CRTC2 transmet le signal vidéo composite. La terre
-  ground) est sur les sixième, septième et huitième broches.</P>
-
+<P><B>Cable pour G400</B>: La quatrième broche du connecteur CRTC2 transmet 
+  le signal vidéo composite. La terre (ground) est sur les sixième, septième 
+  et huitième broches. (info donnée par Balázs Rácz)</P>
+  
+<P><B>Cable pour G450</B>: La première broche du connecteur CRTC2 transmet 
+  le signal vidéo composite. La terre (ground) est sur les cinquième, sixième, septième, 
+  et quinzième (5, 6, 7, 15) broches. (info donnée par Balázs Kerekes)</P>
 
 <H4><A NAME="tv-out_matrox_g450">2.3.1.5.2 Cartes Matrox G450/G550</A></H4>
 
