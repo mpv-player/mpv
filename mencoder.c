@@ -97,7 +97,7 @@ codecs_t *vfw_codec = NULL;
 #endif
 
 #include <inttypes.h>
-#include "../postproc/swscale.h"
+#include "postproc/swscale.h"
 
 #include "fastmemcpy.h"
 
@@ -208,9 +208,11 @@ int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
 #endif
 
-static int scale_srcW=0;
-static int scale_srcH=0;
 static int vo_w=0, vo_h=0;
+static int crop_width, crop_height, crop_x0 = 0, crop_y0 = 0;
+static int input_pitch, input_bpp;
+static SwsContext* swsContext = NULL;
+
 //-------------------------- config stuff:
 
 m_config_t* mconfig;
@@ -226,6 +228,7 @@ static off_t seek_to_byte=0;
 
 static int parse_end_at(struct config *conf, const char* param);
 static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
+static int bits_per_pixel(uint32_t fmt);
 
 #include "get_path.c"
 
@@ -269,34 +272,71 @@ static unsigned char* vo_image_ptr=NULL;
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int y0){
   int y;
 //  printf("draw_slice %dx%d %d;%d\n",w,h,x0,y0);
-  if(scale_srcW || scale_srcH)
+
+  if(y0 + h < crop_y0)
+      return 0;
+
+  if(y0 > crop_height + crop_y0)
+      return 0;
+
+  if(x0 + w < crop_x0)
+      return 0;
+
+  if(x0 > crop_width + crop_x0)
+      return 0;
+  
+  if(y0 < crop_y0) {
+      src[0] += stride[0]*(crop_y0 - y0);
+      src[1] += stride[1]*(crop_y0 - y0)/2;
+      src[2] += stride[2]*(crop_y0 - y0)/2;
+      h -= crop_y0 - y0;
+      y0 = crop_y0;
+  }
+
+  if(x0 < crop_x0) {
+      src[0] += crop_x0 - x0;
+      src[1] += (crop_x0 - x0)/2;
+      src[2] += (crop_x0 - x0)/2;
+      w -= crop_x0 - x0;
+      x0 = crop_x0;
+  }
+  
+  if(y0 + h > crop_y0 + crop_height)
+      h = crop_y0 + crop_height - y0;
+
+  if(x0 + w > crop_x0 + crop_width)
+      w = crop_x0 + crop_width - x0;
+
+  if(swsContext) 
   {
       uint8_t* dstPtr[3]= {
-      		vo_image, 
-		vo_image + vo_w*vo_h*5/4,
-      		vo_image + vo_w*vo_h};
-      SwScale_YV12slice(src, stride, y0, h, dstPtr, vo_w, 12, scale_srcW, scale_srcH, vo_w, vo_h);
+          vo_image,
+          vo_image + vo_w*vo_h*5/4,
+          vo_image + vo_w*vo_h};
+      int dstStride[3] = {vo_w, vo_w/2, vo_w/2};
+
+      swsContext->swScale(swsContext, src, stride, y0 - crop_y0, h, dstPtr, dstStride);
   }
   else 
   {
   // copy Y:
-  for(y=0;y<h;y++){
-      unsigned char* s=src[0]+stride[0]*y;
-      unsigned char* d=vo_image+vo_w*(y0+y)+x0;
+  for(y = 0; y < h; y++){
+      unsigned char* s = src[0] + stride[0]*y;
+      unsigned char* d = vo_image + vo_w*(y0 - crop_y0 + y);
       memcpy(d,s,w);
   }
   x0>>=1;y0>>=1;
   w>>=1;h>>=1;
   // copy U:
-  for(y=0;y<h;y++){
-      unsigned char* s=src[2]+stride[2]*y;
-      unsigned char* d=vo_image+vo_w*vo_h+(vo_w>>1)*(y0+y)+x0;
+  for(y = 0; y < h; y++){
+      unsigned char* s = src[2] + stride[2]*y;
+      unsigned char* d = vo_image + vo_w*vo_h + (vo_w>>1)*(y0 - crop_y0/2 + y);
       memcpy(d,s,w);
   }
   // copy V:
-  for(y=0;y<h;y++){
-      unsigned char* s=src[1]+stride[1]*y;
-      unsigned char* d=vo_image+vo_w*vo_h+vo_w*vo_h/4+(vo_w>>1)*(y0+y)+x0;
+  for(y = 0; y < h; y++){
+      unsigned char* s = src[1] + stride[1]*y;
+      unsigned char* d = vo_image + vo_w*vo_h + vo_w*vo_h/4 + (vo_w>>1)*(y0 - crop_y0/2 + y);
       memcpy(d,s,w);
   }
   } // !swscaler
@@ -304,10 +344,25 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
 }
 
 static uint32_t draw_frame(uint8_t *src[]){
+    int y;
   // printf("This function shouldn't be called - report bug!\n");
   // later: add YUY2->YV12 conversion here!
-  vo_image_ptr=src[0];
-  return(0);
+    
+    if(swsContext) {
+        uint8_t* src_img = *src + crop_y0*input_pitch + crop_x0*input_bpp/8;
+        int dstStride = vo_w * input_bpp/8;
+
+        swsContext->swScale(swsContext, &src_img, &input_pitch, 0, crop_height,
+                            &vo_image_ptr, &dstStride);
+    }
+    else {
+        for(y = crop_y0; y < crop_height + crop_y0; y++)
+            memcpy(&vo_image_ptr[(y - crop_y0)*crop_width*input_bpp/8],
+                   src[0] + y*input_pitch + crop_x0*input_bpp/8,
+                   crop_width*input_bpp/8);
+    }
+      
+    return(0);
 }
 
 static int query_format(unsigned int out_fmt){
@@ -633,30 +688,41 @@ mp_msg(MSGT_CPLAYER,MSGL_INFO,"=================================================
 //sh_video->outfmtidx=i;    // FIXME!!!!!!!!!!!!!!!!!!!
 
 
-if((out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_IYUV || out_fmt==IMGFMT_I420) &&
-    (vo_w!=0 || vo_h!=0))
-{
-	scale_srcW= sh_video->disp_w;
-	scale_srcH= sh_video->disp_h;
-	if(!vo_w) vo_w=sh_video->disp_w;
-	if(!vo_h) vo_h=sh_video->disp_h;
-}
-else
-{
-	vo_w=sh_video->disp_w;
-	vo_h=sh_video->disp_h;
-}
+ if(!crop_width)
+     crop_width = sh_video->disp_w - crop_x0;
+ if(!crop_height)
+     crop_height = sh_video->disp_h - crop_y0;
+ 
+ if(crop_width  + crop_x0 > sh_video->disp_w ||
+    crop_height + crop_y0 > sh_video->disp_h) {
+     printf("Fatal error: x0 + xsize (or y0 + ysize) is larger than the movie.\n");
+     return 1;
+ }
 
-if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
-    vo_image=malloc(vo_w*vo_h*3/2);
-    vo_image_ptr=vo_image;
-}
+ if(crop_x0 >= sh_video->disp_w ||
+    crop_y0 >= sh_video->disp_h) {
+     printf("Fatal error: You tried to crop away more than the entire movie!\n");
+     return 1;
+ }
 
-if (IMGFMT_IS_BGR(out_fmt))
-    vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_BGR_DEPTH(out_fmt)/8);
+ printf("x0: %d y0: %d crop_width: %d crop_height: %d\n", crop_x0, crop_y0, crop_width, crop_height);
 
-if (IMGFMT_IS_RGB(out_fmt))
-    vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_RGB_DEPTH(out_fmt)/8);
+ if(!vo_w) vo_w = crop_width;
+ if(!vo_h) vo_h = crop_height;
+
+ if(vo_w != crop_width || vo_h != crop_height)
+ {
+     swsContext = getSwsContextFromCmdLine(crop_width, crop_height, out_fmt, vo_w, vo_h, out_fmt);
+
+     if(!swsContext) {
+         printf("Fatal error: Initialization of software scaler faild.\n");
+         return 1;
+     }
+ }
+
+ input_bpp = bits_per_pixel(out_fmt);
+ vo_image_ptr = vo_image = malloc(vo_w*vo_h*input_bpp/8); 
+ input_pitch = sh_video->disp_w*input_bpp/8;
 
 } // if(out_video_codec)
 
@@ -700,7 +766,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 
 
 // set up video encoder:
-SwScale_Init();
 
 #ifdef USE_DVDREAD
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
@@ -772,8 +837,8 @@ case VCODEC_RAW:
 case VCODEC_RAWRGB:
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-	mux_v->bih->biWidth=sh_video->disp_w;
-	mux_v->bih->biHeight=sh_video->disp_h;
+	mux_v->bih->biWidth=vo_w;
+	mux_v->bih->biHeight=vo_h;
 	mux_v->bih->biCompression=0;
 	mux_v->bih->biPlanes=1;
 	
@@ -1484,8 +1549,8 @@ case VCODEC_RAWRGB:
                                               vo_w*3, vo_h);
      }
      else {
-         yuv2rgb(raw_rgb_buffer, vo_image_ptr, vo_image_ptr + vo_w*vo_h*5/4,
-                 vo_image_ptr + vo_w*vo_h, vo_w, vo_h, vo_w*24/8, vo_w, vo_w/2);
+         yuv2rgb(raw_rgb_buffer, vo_image_ptr, vo_image_ptr + vo_w*vo_h,
+                 vo_image_ptr + vo_w*vo_h*5/4, vo_w, vo_h, vo_w*24/8, vo_w, vo_w/2);
          mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
                                           vo_w*3, vo_h);
      }
@@ -1795,4 +1860,29 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
 
     free(tmp);
     return dst;
+}
+
+/* Bits per pixel for format fmt. Not depth */
+static int bits_per_pixel(uint32_t fmt)
+{
+    if(IMGFMT_IS_RGB(fmt)) {
+        if(IMGFMT_RGB_DEPTH(fmt) == 15)
+            return 16;
+        else
+            return IMGFMT_RGB_DEPTH(fmt);
+    }
+    else if(IMGFMT_IS_BGR(fmt)) {
+        if(IMGFMT_BGR_DEPTH(fmt) == 15)
+            return 16;
+        else
+            return IMGFMT_BGR_DEPTH(fmt);
+    }
+    else if(fmt==IMGFMT_YV12 || fmt==IMGFMT_I420 || fmt==IMGFMT_IYUV)
+        return 12;
+    else if(fmt == IMGFMT_YUY2 || fmt == IMGFMT_UYVY)
+        return 16;
+    else {
+        fprintf(stderr, "Error: bits_per_pixel: Unknown imgfmt: %s\n", vo_format_name(fmt));
+        return 0;
+    }
 }

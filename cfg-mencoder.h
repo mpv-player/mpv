@@ -112,6 +112,12 @@ static config_t mencoder_opts[]={
 	{"x", &vo_w, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &vo_h, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 
+    {"x0", &crop_x0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"y0", &crop_y0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+
+    {"xsize", &crop_width, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"ysize", &crop_height, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+
 	{"mp3file", &mp3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ac3file", &ac3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
