@@ -159,7 +159,8 @@ int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
 int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
-int demux_real_fill_buffer(demuxer_t *demux);
+int demux_real_fill_buffer(demuxer_t *demuxer);
+int demux_nuv_fill_buffer(demuxer_t *demux);
 #ifdef USE_TV
 #include "tv.h"
 extern tvi_handle_t *tv_handler;
@@ -184,6 +185,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
     case DEMUXER_TYPE_REAL: return demux_real_fill_buffer(demux);
+    case DEMUXER_TYPE_NUV: return demux_nuv_fill_buffer(demux);
 #ifdef USE_TV
     case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
 #endif
@@ -371,6 +373,9 @@ extern void demux_open_y4m(demuxer_t *demuxer);
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
 
+extern int nuv_check_file(demuxer_t *demuxer);
+extern void demux_open_nuv(demuxer_t *demuxer);
+
 demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
 //int file_format=(*file_format_ptr);
@@ -424,6 +429,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   if(y4m_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
       file_format=DEMUXER_TYPE_Y4M;
+  }
+}
+//=============== Try to open as NUV file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_NUV,audio_id,video_id,dvdsub_id);
+  if(nuv_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected NuppelVideo file format!\n");
+      file_format=DEMUXER_TYPE_NUV;
   }
 }
 //=============== Try to open as MOV file: =================
@@ -550,6 +563,10 @@ switch(file_format){
  case DEMUXER_TYPE_AVI: {
   return (demuxer_t*) demux_open_avi(demuxer);
 //  break;
+ }
+ case DEMUXER_TYPE_NUV: {
+  demux_open_nuv(demuxer);
+  break;
  }
  case DEMUXER_TYPE_VIVO: {
   demux_open_vivo(demuxer);
