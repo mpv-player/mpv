@@ -2,6 +2,11 @@
  * codec.conf parser
  * by Szabolcs Berecz <szabi@inf.elte.hu>
  * (C) 2001
+ *
+ * to compile tester app: gcc -Iloader/ -DTESTING -o codec-cfg codec-cfg.c
+ * to compile CODECS2HTML: gcc -Iloader/ -DCODECS2HTML -o codecs2html codecs-cfg.c
+ *
+ * TODO: implement informat in CODECS2HTML too
  */
 
 #define DEBUG
@@ -903,25 +908,27 @@ int main(void)
 #ifdef TESTING
 int main(void)
 {
-	codecs_t **codecs, *c;
+	codecs_t *c;
         int i,j, nr_codecs, state;
 
-	if (!(codecs = parse_codec_cfg("etc/codecs.conf")))
+	if (!(parse_codec_cfg("etc/codecs.conf")))
 		return 0;
-	if (!codecs[0])
+	if (!video_codecs)
 		printf("no videoconfig.\n");
-	if (!codecs[1])
+	if (!audio_codecs)
 		printf("no audioconfig.\n");
 
 	printf("videocodecs:\n");
-	c = codecs[0];
+	c = video_codecs;
 	nr_codecs = nr_vcodecs;
 	state = 0;
 next:
 	if (c) {
-		printf("number of codecs: %d\n", nr_codecs);
+		printf("number of %scodecs: %d\n", state==0?"video":"audio",
+		    nr_codecs);
 		for(i=0;i<nr_codecs;i++, c++){
-		    printf("\n============== codec %02d ===============\n",i);
+		    printf("\n============== %scodec %02d ===============\n",
+			state==0?"video":"audio",i);
 		    printf("name='%s'\n",c->name);
 		    printf("info='%s'\n",c->info);
 		    printf("comment='%s'\n",c->comment);
@@ -941,6 +948,12 @@ next:
 		      }
 		    }
 
+		    for(j=0;j<CODECS_MAX_INFMT;j++){
+		      if(c->infmt[j]!=0xFFFFFFFF){
+			  printf("infmt %02d:  %08X (%.4s)  flags: %d\n",j,c->infmt[j],(char *) &c->infmt[j],c->inflags[j]);
+		      }
+		    }
+
 		    printf("GUID: %08lX %04X %04X",c->guid.f1,c->guid.f2,c->guid.f3);
 		    for(j=0;j<8;j++) printf(" %02X",c->guid.f4[j]);
 		    printf("\n");
@@ -950,7 +963,7 @@ next:
 	}
 	if (!state) {
 		printf("audiocodecs:\n");
-		c = codecs[1];
+		c = audio_codecs;
 		nr_codecs = nr_acodecs;
 		state = 1;
 		goto next;
