@@ -353,7 +353,7 @@ divx4_param.rc_reaction_ratio  = 20;
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
 
-  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
+  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);

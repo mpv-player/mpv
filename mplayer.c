@@ -821,7 +821,8 @@ if(stream_dump_type==5){
 #endif
   current_module=NULL;
 
-  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
+    // initial prefill: 20%  later: 5%  (should be set by -cacheopts)
+  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20);
 
   use_stdin=filename && (!strcmp(filename,"-"));
 
