@@ -69,6 +69,7 @@ sh_audio->sample_format=AFMT_S16_LE;
 #endif
 sh_audio->samplerate=0;
 //sh_audio->pcm_bswap=0;
+sh_audio->o_bps=0;
 
 sh_audio->a_buffer_size=0;
 sh_audio->a_buffer=NULL;
@@ -230,7 +231,8 @@ case AFM_HWAC3: {
   unsigned char *buffer;		    
   struct hwac3info ai;
   int len, skipped;
-  len = ds_get_packet(sh_audio->ds, &buffer);
+  len = ds_get_packet(sh_audio->ds, &buffer); // maybe 1 packet is not enough,
+    // at least for mpeg, PS packets contain about max. 2000 bytes of data.
   if(ac3_iec958_parse_syncinfo(buffer, len, &ai, &skipped) < 0) {
       fprintf(stderr, "AC3 stream not valid.\n");
       driver = 0;
@@ -242,10 +244,11 @@ case AFM_HWAC3: {
       break;
   }
   sh_audio->samplerate=ai.samplerate;
-//  sh_audio->samplesize=ai.framesize;
+  sh_audio->samplesize=ai.framesize;
   sh_audio->channels=1;
   sh_audio->i_bps=ai.bitrate*(1000/8);
   sh_audio->ac3_frame=malloc(6144);
+  sh_audio->o_bps=sh_audio->i_bps;  // XXX FIXME!!! XXX
   break;
 }
 case AFM_ALAW: {
@@ -293,10 +296,10 @@ if(!sh_audio->channels || !sh_audio->samplerate){
   if(!driver){
       if(sh_audio->a_buffer) free(sh_audio->a_buffer);
       sh_audio->a_buffer=NULL;
-      sh_audio->o_bps=0;
       return 0;
   }
 
+  if(!sh_audio->o_bps)
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
   return driver;
 }
