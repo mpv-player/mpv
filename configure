@@ -4136,7 +4136,6 @@ fi
 
 if test "$_win32" = auto ; then
   if x86 ; then
-    cygwin && _win32=no # Win32 DLLs not supported under Cygwin
     qnx && _win32=no
   else
     _win32=no # x86 arch only
@@ -4144,6 +4143,11 @@ if test "$_win32" = auto ; then
 fi
 
 if test "$_win32" != no ; then
+    if test -z "$_win32libdir" ; then
+      if cygwin || mingw32 ; then
+        _win32libdir="codecs"
+      fi
+    fi
     if test -z "$_win32libdir" ; then
       for I in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
@@ -4172,7 +4176,7 @@ fi
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
   echocheck "Win32 loader support"
-  if not cygwin ; then
+  if not cygwin && not mingw32 ; then
     _ld_win32='loader/libloader.a'
     _dep_win32='loader/libloader.a'
     _codecmodules="win32 $_codecmodules"
@@ -4182,6 +4186,10 @@ if test "$_win32" != no ; then
     _def_win32_loader='#define WIN32_LOADER 1'
     echores "yes"
   else
+    _ld_win32='loader/driver.o loader/vfl.o loader/afl.o'
+    _dep_win32='loader/driver.o loader/vfl.o loader/afl.o'
+    _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
+    _codecmodules="win32 $_codecmodules"
     echores "no (using native windows)"
   fi
 fi
@@ -4279,12 +4287,17 @@ if test "$_real" = auto ; then
   _real=no
   if test "$_dl" = yes || test "$_win32" = yes ; then
 #  if test "$_dl" = yes  ; then
-    if linux || freebsd || netbsd || cygwin ; then
+    if linux || freebsd || netbsd || cygwin || mingw32 ; then
       _real=yes
     else
-      echores "no (tested only on Linux/FreeBSD/NetBSD/CygWin)"
+      echores "no (tested only on Linux/FreeBSD/NetBSD/Cygwin/MINGW32)"
     fi
     if test "$_real" = yes ; then
+      if test -z "$_reallibdir" ; then
+	if cygwin || mingw32 ; then
+	  _reallibdir="codecs"
+	fi
+      fi
       if test -z "$_reallibdir" ; then
 	for I in "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
 	  /usr/lib/RealPlayer*/Codecs /usr/local/RealPlayer*/Codecs \
@@ -5924,7 +5937,7 @@ Use --enable-sdl to force usage of libSDL.
 EOF
 fi
 
-if x86 && not cygwin; then
+if x86; then
   if test "$_win32" = no ; then
     if test "$_win32libdir" ; then
       cat <<EOF
@@ -5952,9 +5965,8 @@ EOF
 else
   cat <<EOF
 NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
-operating system ($system_name). Why don't you help us port it?
-You may encounter a few AVI files that cannot be played due to missing
-Open Source video/audio codec support.
+operating system ($system_name). You may encounter a few AVI files that
+cannot be played due to missing Open Source video/audio codec support.
 
 EOF
 fi
