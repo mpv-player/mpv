@@ -193,7 +193,6 @@ That's it for the moment. To start playing movies, open a command line and try
 
 or for the GUI
 
-  mplayer -gui <moviefile>
   gmplayer <moviefile>
 
 gmplayer is a symbolic link to mplayer created by 'make install'.
