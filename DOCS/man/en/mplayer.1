@@ -7369,7 +7369,18 @@ Some decoders are unable to deal with large frameref values.
 .
 .TP
 .B bframes=<0\-16>
-number of consecutive B-frames between I- and P-frames (default: 0)
+maximum number of consecutive B-frames between I- and P-frames (default: 0)
+.
+.TP
+.B (no)b_adapt
+Automatically decides when to use B-frames and how many, up to the maximum
+specified above (default: on).
+If this option is disabled, then the maximum number of B-frames is used.
+.
+.TP
+.B b_bias=<-100\-100>
+Controls the decision performed by b_adapt.
+A higher b_bias produces more B-frames. (default: 0)
 .
 .TP
 .B (no)deblock

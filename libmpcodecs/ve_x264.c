@@ -65,6 +65,8 @@ static int keyint_max = 250;
 static int keyint_min = -1;
 static int scenecut_threshold = 40;
 static int bframe = 0;
+static int bframe_adaptive = 1;
+static int bframe_bias = 0;
 static int deblock = 1;
 static int deblockalpha = 0;
 static int deblockbeta = 0;
@@ -101,6 +103,9 @@ m_option_t x264encopts_conf[] = {
     {"keyint_min", &keyint_min, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"scenecut", &scenecut_threshold, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
     {"bframes", &bframe, CONF_TYPE_INT, CONF_RANGE, 0, 16, NULL},
+    {"b_adapt", &bframe_adaptive, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nob_adapt", &bframe_adaptive, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"b_bias", &bframe_bias, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"deblock", &deblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nodeblock", &deblock, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"deblockalpha", &deblockalpha, CONF_TYPE_INT, CONF_RANGE, -6, 6, NULL},
@@ -137,7 +142,9 @@ m_option_t x264encopts_conf[] = {
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-    
+
+static int put_image(struct vf_instance_s *vf, mp_image_t *mpi);
+static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
     h264_module_t *mod=(h264_module_t*)vf->priv;
@@ -151,6 +158,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_keyint_min = keyint_min > 0 ? keyint_min : keyint_max * 2 / 5;
     mod->param.i_scenecut_threshold = scenecut_threshold;
     mod->param.i_bframe = bframe;
+    mod->param.b_bframe_adaptive = bframe_adaptive;
+    mod->param.i_bframe_bias = bframe_bias;
     mod->param.b_deblocking_filter = deblock;
     mod->param.i_deblocking_filter_alphac0 = deblockalpha;
     mod->param.i_deblocking_filter_beta = deblockbeta;
@@ -280,7 +289,14 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
 
 static int control(struct vf_instance_s* vf, int request, void *data)
 {
-    return CONTROL_UNKNOWN;
+    switch(request){
+        case VFCTRL_FLUSH_FRAMES:
+            if(bframe)
+                while(encode_frame(vf, NULL) > 0);
+            return CONTROL_TRUE;
+        default:
+            return CONTROL_UNKNOWN;
+    }
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
@@ -306,10 +322,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
 {
     h264_module_t *mod=(h264_module_t*)vf->priv;
-    int i_nal;
-    x264_nal_t *nal;
     int i;
-    int i_size = 0;
     
     int csp=mod->pic.img.i_csp;
     memset(&mod->pic, 0, sizeof(x264_picture_t));
@@ -321,9 +334,22 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
     }
 
     mod->pic.i_type = X264_TYPE_AUTO;
-    if(x264_encoder_encode(mod->x264, &nal, &i_nal, &mod->pic) < 0) {
+
+    return encode_frame(vf, &mod->pic) >= 0;
+}
+
+static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
+{
+    h264_module_t *mod=(h264_module_t*)vf->priv;
+    x264_picture_t pic_out;
+    x264_nal_t *nal;
+    int i_nal;
+    int i_size = 0;
+    int i;
+
+    if(x264_encoder_encode(mod->x264, &nal, &i_nal, pic_in, &pic_out) < 0) {
         mp_msg(MSGT_MENCODER, MSGL_ERR, "x264_encoder_encode failed\n");
-        return 0;
+        return -1;
     }
     
     for(i=0; i < i_nal; i++) {
@@ -331,12 +357,13 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
         i_size += x264_nal_encode(mod->mux->buffer + i_size, &i_data, 1, &nal[i]);
     }
     if(i_size>0) {
-        int keyframe = (mod->pic.i_type == X264_TYPE_IDR) ||
-                       (mod->pic.i_type == X264_TYPE_I
+        int keyframe = (pic_out.i_type == X264_TYPE_IDR) ||
+                       (pic_out.i_type == X264_TYPE_I
                         && frame_ref == 1 && !bframe);
         muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0);
     }
-    return 1;
+
+    return i_size;
 }
 
 static void uninit(struct vf_instance_s *vf)

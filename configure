@@ -5906,7 +5906,7 @@ cat > $TMPC << EOF
 #include <stdint.h>
 #include <stdarg.h>
 #include <x264.h>
-#if X264_BUILD < 0x0012
+#if X264_BUILD < 0x0013
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
