@@ -620,6 +620,8 @@ if(!demuxer->seekable){
     ds_free_packs(d_video);
     
     demuxer->stream->eof=0; // clear eof flag
+    demuxer->video->eof=0;
+    demuxer->audio->eof=0;
 
     if(sh_audio) sh_audio->timer=0;
     sh_video->timer=0; // !!!!!!
