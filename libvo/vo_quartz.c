@@ -1,7 +1,7 @@
 /*
 	vo_quartz.c
 	
-	by Nicolas Plourde <nicolasplourde@hotmail.com>
+	by Nicolas Plourde <nicolasplourde@gmail.com>
 	
 	Copyright (c) Nicolas Plourde - April 2004
 
@@ -105,6 +105,15 @@ static Rect winRect; // size of the window containg the displayed image (include
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 static Rect deviceRect; // size of the display device
 
+enum
+{
+	kQuitCmd			= 1,
+	kHalfScreenCmd		= 2,
+	kNormalScreenCmd	= 3,
+	kDoubleScreenCmd	= 4,
+	kFullScreenCmd		= 5
+};
+
 #include "../osdep/keycodes.h"
 extern void mplayer_put_key(int code);
 
@@ -165,8 +174,6 @@ static inline int convert_key(UInt32 key, UInt32 charcode)
 		case QZ_KP7: return KEY_KP7;
 		case QZ_KP8: return KEY_KP8;
 		case QZ_KP9: return KEY_KP9;
-		case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05); return -1;
-		case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05); return -1;
 		default: return charcode;
     }
 }
@@ -202,8 +209,53 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 	UInt32 kind = GetEventKind (event); 
 
 	result = CallNextEventHandler(nextHandler, event);
- 
-	if(class == kEventClassWindow)
+	
+	if(class == kEventClassCommand)
+	{
+		HICommand theHICommand;
+		GetEventParameter( event, kEventParamDirectObject, typeHICommand, NULL, sizeof( HICommand ), NULL, &theHICommand );
+		
+		switch ( theHICommand.commandID )
+		{
+			case kHICommandQuit:
+				uninit();
+				mplayer_put_key(KEY_ESC);
+				break;
+				
+			case kHalfScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kNormalScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kDoubleScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kFullScreenCmd:
+				vo_fs = (!(vo_fs)); window_fullscreen();
+				break;
+
+			default:
+				printf("\nHI Command ID Unknown: %d\n", theHICommand.commandID);
+				break;
+		}
+	}
+	else if(class == kEventClassWindow)
 	{
 		WindowRef     window;
 		Rect          rectPort = {0,0,0,0};
@@ -241,12 +293,54 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 		GetEventParameter(event, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(macCharCodes), NULL, &macCharCodes);
 		GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(macKeyCode), NULL, &macKeyCode);
 		GetEventParameter(event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(macKeyModifiers), NULL, &macKeyModifiers);
-	
-		if (kind == kEventRawKeyRepeat || kind == kEventRawKeyDown)
+		
+		if(macKeyModifiers != 256)
 		{
-			int key = convert_key(macKeyCode, macCharCodes);
-			if(key != -1)
-				mplayer_put_key(key);
+			if (kind == kEventRawKeyRepeat || kind == kEventRawKeyDown)
+			{
+				int key = convert_key(macKeyCode, macCharCodes);
+				if(key != -1)
+					mplayer_put_key(key);
+			}
+		}
+		else if(macKeyModifiers == 256)
+		{
+			switch(macCharCodes)
+			{
+				case '0':
+					{
+						ShowMenuBar();
+						ShowCursor();
+						SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
+						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+						window_resized();
+					}
+					break;
+					
+				case '1':
+					{
+						ShowMenuBar();
+						ShowCursor();
+						SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
+						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+						window_resized();
+					}
+					break;
+					
+				case '2':
+					{
+						ShowMenuBar();
+						ShowCursor();
+						SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
+						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+						window_resized();
+					}
+					break;
+				
+				case 'f': vo_fs = (!(vo_fs)); window_fullscreen(); break;
+				case '[': SetWindowAlpha(theWindow, winAlpha-=0.05); break;
+				case ']': SetWindowAlpha(theWindow, winAlpha+=0.05); break;		
+			}	
 		}
 		else
 			result = eventNotHandledErr;
@@ -319,7 +413,35 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&oldWinRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
+	
+	MenuRef windMenu;
+	CreateStandardWindowMenu(0, &windMenu);
+	InsertMenu(windMenu, 0);
+	
+	MenuRef movMenu;
+	CreateNewMenu (1004, 0, &movMenu);
+	
+	CFStringRef movMenuTitle = CFSTR("Movie");
+	SetMenuTitleWithCFString(movMenu, movMenuTitle);
+	
+	MenuItemIndex index;
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Half Size"), 0, kHalfScreenCmd, &index);
+	SetMenuItemCommandKey(movMenu, index, 0, '0');
+	
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Normal Size"), 0, kNormalScreenCmd, &index);
+	SetMenuItemCommandKey(movMenu, index, 0, '1');
+	
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Double Size"), 0, kDoubleScreenCmd, &index);
+	SetMenuItemCommandKey(movMenu, index, 0, '2');
+	
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Full Size"), 0, kFullScreenCmd, &index);
+	SetMenuItemCommandKey(movMenu, index, 0, 'F');
+	
+	InsertMenu(movMenu, GetMenuID(windMenu)); //insert before Window menu
+	
+	DrawMenuBar();
   
+	//create window
 	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
 	
 	CreateWindowGroup(0, &winGroup);
@@ -338,7 +460,8 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 										{ kEventClassMouse, kEventMouseDown },
 										{ kEventClassMouse, kEventMouseWheelMoved },
 										{ kEventClassWindow, kEventWindowClosed }, 
-										{ kEventClassWindow, kEventWindowBoundsChanged } };
+										{ kEventClassWindow, kEventWindowBoundsChanged },
+										{ kEventClassCommand, kEventCommandProcess } };
   
 	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, NULL, NULL);
 }
