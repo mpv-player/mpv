@@ -54,7 +54,7 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->context) pp_free_context(vf->priv->context);
     vf->priv->context= pp_get_context(width, height, flags);
 
-    return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
+    return vf_next_config(vf,width,height,d_width,d_height,voflags,outfmt);
 }
 
 static void uninit(struct vf_instance_s* vf){
@@ -114,7 +114,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// no DR, so get a new image! hope we'll get DR buffer:
-	vf->priv->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
+	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 //	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 //	    mpi->w,mpi->h);
