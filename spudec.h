@@ -1,8 +1,8 @@
+#include "config.h"
 #ifdef USE_DVDREAD
 #ifndef _MPLAYER_SPUDEC_H
 #define _MPLAYER_SPUDEC_H
 
-#include "config.h"
 #include "stream.h"
 void spudec_heartbeat(void *this, int pts100);
 void spudec_assemble(void *this, unsigned char *packet, int len, int pts100);
@@ -12,3 +12,4 @@ void spudec_free(void *this);
 
 #endif
 #endif
+

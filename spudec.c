@@ -10,6 +10,7 @@
    For information on SPU format see <URL:http://sam.zoy.org/doc/dvd/subtitles/>
 
  */
+#include "config.h"
 
 #ifdef USE_DVDREAD
 
