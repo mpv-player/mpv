@@ -6324,6 +6324,7 @@ fi
 if test "$_vidix" = yes && (win32); then
   _vosrc="$_vosrc vo_winvidix.c"
   _vomodules="winvidix $_vomodules"
+  _ld_win32libs="-lgdi32 $_ld_win32libs"
 else
   _novomodules="winvidix $_novomodules"
 fi
