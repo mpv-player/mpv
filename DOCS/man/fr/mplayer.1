@@ -1182,12 +1182,14 @@ erronées au début.
 .
 .TP
 .B \-srate <Hz>
-Sélectionne  la fréquence d'échantillonnage audio, en ré-échantillonnant si
-nécessaire.
+Sélectionne la fréquence d'échantillonnage audio de sortie à utiliser
+(tout en sachant que les cartes son ont leurs limites dans ce domaine).
+Si la fréquence d'échantillonnage sélectionnée est différente de celle du
+média courant, le filtre audio resample ou lavcresample sera inséré dans la
+couche audio pour compenser la différence.
 Le type de ré-échantillonnage peut être contrôlé par l'option \-af-adv.
 Par défaut, un ré-échantillonnage rapide est fait, ce qui peut créer des
 distorsions.
-MEncoder passe cette valeur à LAME pour le ré-échantillonnage.
 .TP
 .B \-ss <temps> (voir aussi \-sb)
 Se place à la position temporelle indiquée.
