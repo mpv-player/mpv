@@ -153,6 +153,10 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
+#ifdef WIN32
+char * proc_priority=NULL;
+#endif
+
 // A-V sync:
 int delay_corrected=1;
 static float default_max_pts_correction=-1;//0.01f;
@@ -478,6 +482,19 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
 
   mp_msg_set_level(verbose+MSGL_STATUS);
+
+#ifdef WIN32
+  if(proc_priority){
+    int i;
+    for(i=0; priority_presets_defs[i].name; i++){
+      if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
+        break;
+    }
+    mp_msg(MSGT_CPLAYER,MSGL_STATUS,"Setting process priority: %s\n",
+					priority_presets_defs[i].name);
+    SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
+  }
+#endif	
 
 // check font
 #ifdef USE_OSD

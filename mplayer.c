@@ -88,6 +88,10 @@ int verbose=0;
 int identify=0;
 int quiet=0;
 
+#ifdef WIN32
+char * proc_priority=NULL;
+#endif
+
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
@@ -1145,6 +1149,18 @@ int gui_no_filename=0;
       }
     }
 	
+#ifdef WIN32
+	if(proc_priority){
+		int i;
+        	for(i=0; priority_presets_defs[i].name; i++){
+        		if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
+				break;
+		}
+		mp_msg(MSGT_CPLAYER,MSGL_STATUS,"Setting process priority: %s\n",
+				priority_presets_defs[i].name);
+		SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
+	}
+#endif	
 #ifndef HAVE_NEW_GUI
     if(use_gui){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);

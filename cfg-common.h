@@ -6,6 +6,7 @@
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 100, NULL},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
+	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 // ------------------------- stream options --------------------
 
@@ -469,6 +470,24 @@ m_option_t audio_filter_conf[]={
         {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+#ifdef WIN32
+
+extern char * proc_priority;
+
+struct {
+  char* name;
+  int prio;
+} priority_presets_defs[] = {
+  { "realtime", REALTIME_PRIORITY_CLASS},
+  { "high", HIGH_PRIORITY_CLASS},
+  { "abovenormal", ABOVE_NORMAL_PRIORITY_CLASS},
+  { "normal", NORMAL_PRIORITY_CLASS},
+  { "belownormal", BELOW_NORMAL_PRIORITY_CLASS},
+  { "idle", IDLE_PRIORITY_CLASS},
+  { NULL, NORMAL_PRIORITY_CLASS} /* default */
+};
+#endif /* WIN32 */
 
 #ifdef USE_LIBAVCODEC
 extern m_option_t lavc_decode_opts_conf[];

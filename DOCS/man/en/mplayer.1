@@ -433,6 +433,19 @@ Particularly useful on slow terminals or broken ones which do not properly
 handle carriage return (i.e.\& \\r).
 .
 .TP
+.B \-priority <prio> (Windows only)
+Set process priority for MPlayer according to Windows predefined priorities.
+.sp 1
+Possible values of <prio>:
+.RSs
+idle|belownormal|normal|abovenormal|high|realtime
+.sp 1
+.I Warning:
+.br
+Using realtime priority can cause system lockup.
+.RE
+.
+.TP
 .B \-v, \-verbose
 Increment verbose level (more \-v means more verbosity).
 .PD 0
