@@ -388,6 +388,9 @@ if test "$_skip_cc_check" != yes ; then
   echocheck "$_cc version"
   cc_name=`( $_cc -v ) 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`( $_cc -dumpversion ) 2>&1`
+  if test "$?" -gt 0; then
+    cc_version="not found"
+  fi
   case $cc_version in
     '')
       cc_version="v. ?.??, bad"
@@ -396,6 +399,9 @@ if test "$_skip_cc_check" != yes ; then
     2.95.[2-9]|2.95.[2-9][-.][0-9]|3.[0-9]|3.[0-9].[0-9])
       cc_version="$cc_version, ok"
       cc_verc_fail=no
+      ;;
+    'not found')
+      cc_verc_fail=yes
       ;;
     *)
       cc_version="$cc_version, bad"
@@ -470,7 +476,7 @@ if x86 || ppc; then
     # FreeBSD with linux emulation /proc mounted,
     # extract cpu information from it
     _cpuinfo="cat /compat/linux/proc/cpuinfo"
-  else
+  elif x86; then
     # all other OS try to extract cpu information from a small helper
     # program TOOLS/cpuinfo instead
     $_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
