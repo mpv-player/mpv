@@ -61,6 +61,7 @@ while [ 1 ]; do
 
 clear
 
+echo " [ 0 ]    Clear & blank screen"
 echo " [ 1 ]    Monitor only"
 echo "                          /---> Monitor"
 echo " [ 2 ]    DualHead - CRTC1"
@@ -77,6 +78,13 @@ echo " [ G ]	640x480		NTSC, Interlaced"
 read ABC
 
 case "$ABC" in
+	0)
+	clear
+	setterm -cursor off
+	setterm -blank 0
+	read
+	;;
+
 	1)
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 1
