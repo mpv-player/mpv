@@ -71,7 +71,7 @@ int add_plugin(int i,char* cfg){
 
   // Is this the last iteration or just another plugin
   if(cfg[cnt]=='\0'){
-    ao_plugin_local_data.plugins=malloc((i+1)*sizeof(ao_plugin_functions_t*));
+    ao_plugin_local_data.plugins=malloc((i+2)*sizeof(ao_plugin_functions_t*));
     if(ao_plugin_local_data.plugins){
       ao_plugin_local_data.plugins[i+1]=NULL;
       // Find the plugin matching the cfg string name
