@@ -7,7 +7,7 @@ include ../gui.mak
 
 LIB = mplayer
 
-INCDIR  = -I. -I../event -I../wm -I../skin $(GTKINC)
+INCDIR  = -I. -I../event -I../wm -I../skin $(GTKINC) $(EXTRA_INC)
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
 	    -fexpensive-optimizations -fschedule-insns2 -Wall
