@@ -10,6 +10,8 @@
 //  (Complete list of documentation at http://developer.apple.com/quicktime/)
 //  MP4-Lib sources from http://mpeg4ip.sf.net/ might be usefull fot .mp4
 //  aswell as .mov specific stuff.
+//  All sort of Stuff about MPEG4:
+//  http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
 
 #include <stdio.h>
 #include <stdlib.h>
