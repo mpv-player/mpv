@@ -907,7 +907,7 @@ Available options are:
 .IPs noaudio
 no sound
 .IPs driver=<value>
-available: dummy, v4l, bsdbt848
+available: dummy, v4l, v4l2, bsdbt848
 .IPs device=<value>
 Specify other device than the default /dev/\:video0.
 .IPs input=<value>
@@ -927,7 +927,9 @@ framerate at which to capture video (frames per second)
 .IPs buffersize=<value>
 maximum size of the capture buffer in megabytes (default: dynamical)
 .IPs norm=<value>
-available: PAL, SECAM, NTSC
+available: PAL, SECAM, NTSC. For v4l2 use the normid option below.
+.IPs normid=<value>
+v4l2 only. See MPlayer output for a list of available TV norms.
 .IPs channel=<value>
 Set tuner to <value> channel.
 .IPs chanlist=<value>
@@ -977,8 +979,12 @@ hardware ID for ALSA
 .IPs audioid=<value>
 choose an audio output of the capture card, if it has more of them
 .IPs [volume|bass|treble|balance]=<0\-65535>
+.IPs [volume|bass|treble|balance]=<0\-100>
 These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
+For v4l1, 0-65535 is a valid range. For v4l2, the valid range is
+0 to 100, and 50 maps to the default value of the control, as reported
+by the driver.
 .IPs immediatemode=<bool>
 A value of 0 means capture and buffer audio and video together
 (default for MEncoder).

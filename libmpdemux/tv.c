@@ -45,6 +45,9 @@ int tv_param_immediate = 0;
 char *tv_param_freq = NULL;
 char *tv_param_channel = NULL;
 char *tv_param_norm = "pal";
+#ifdef HAVE_TV_V4L2
+int tv_param_normid = -1;
+#endif
 char *tv_param_chanlist = "europe-east";
 char *tv_param_device = NULL;
 char *tv_param_driver = "dummy";
@@ -54,7 +57,7 @@ int tv_param_input = 0; /* used in v4l and bttv */
 char *tv_param_outfmt = "yv12";
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
-#ifdef HAVE_TV_V4L
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 int tv_param_amode = -1;
 int tv_param_audio_id = 0;
 int tv_param_volume = 60000;
@@ -179,6 +182,9 @@ static int open_tv(tvi_handle_t *tvh)
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
 
+#ifdef HAVE_TV_V4L2
+    if (strcmp(tv_param_driver, "v4l2") != 0) {
+#endif
     /* select video norm */
     tvh->norm = norm_from_string(tv_param_norm);
 
@@ -187,7 +193,17 @@ static int open_tv(tvi_handle_t *tvh)
 	mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
 	return 0;
     }
-
+#ifdef HAVE_TV_V4L2
+    } else {
+	if (tv_param_normid >= 0) {
+	    mp_msg(MSGT_TV, MSGL_V, "Selected norm id: %d\n", tv_param_normid);
+	    if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
+		mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
+		return 0;
+	    }
+	}
+    }
+#endif
 
 #ifdef HAVE_TV_V4L
     if ( tv_param_mjpeg )
@@ -582,6 +598,7 @@ int demux_close_tv(demuxer_t *demuxer)
 /* ================== STREAM_TV ===================== */
 tvi_handle_t *tvi_init_dummy(char *device);
 tvi_handle_t *tvi_init_v4l(char *device, char *adevice);
+tvi_handle_t *tvi_init_v4l2(char *device, char *adevice);
 tvi_handle_t *tvi_init_bsdbt848(char *device);
 
 tvi_handle_t *tv_begin(void)
@@ -591,6 +608,10 @@ tvi_handle_t *tv_begin(void)
 #ifdef HAVE_TV_V4L
     if (!strcmp(tv_param_driver, "v4l"))
 	return tvi_init_v4l(tv_param_device, tv_param_adevice);
+#endif
+#ifdef HAVE_TV_V4L2
+    if (!strcmp(tv_param_driver, "v4l2"))
+	return tvi_init_v4l2(tv_param_device, tv_param_adevice);
 #endif
 #ifdef HAVE_TV_BSDBT848
     if (!strcmp(tv_param_driver, "bsdbt848"))

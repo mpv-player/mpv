@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L) && defined(HAVE_ALSA9)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)) && defined(HAVE_ALSA9)
 
 #include <alsa/asoundlib.h>
 #include "audio_in.h"

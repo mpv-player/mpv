@@ -3,7 +3,7 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L) && defined(USE_OSS_AUDIO)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)) && defined(USE_OSS_AUDIO)
 
 #include <string.h> /* strerror */
 #include <fcntl.h>

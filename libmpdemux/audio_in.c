@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2))
 
 #include "audio_in.h"
 #include "mp_msg.h"

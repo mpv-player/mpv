@@ -13,6 +13,9 @@ extern char *tv_param_freq;
 extern char *tv_param_channel;
 extern char *tv_param_chanlist;
 extern char *tv_param_norm;
+#ifdef HAVE_TV_V4L2
+extern int tv_param_normid;
+#endif
 extern char *tv_param_device;
 extern char *tv_param_driver;
 extern int tv_param_width;
@@ -24,7 +27,7 @@ extern char **tv_param_channels;
 extern int tv_param_noaudio;
 extern int tv_param_immediate;
 extern int tv_param_audiorate;
-#ifdef HAVE_TV_V4L
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 extern int tv_param_amode;
 extern int tv_param_audio_id;
 extern int tv_param_volume;

@@ -291,6 +291,9 @@ struct config tvopts_conf[]={
 	{"channel", &tv_param_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"chanlist", &tv_param_chanlist, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"norm", &tv_param_norm, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#ifdef HAVE_TV_V4L2
+	{"normid", &tv_param_normid, CONF_TYPE_INT, 0, 0, 0, NULL},
+#endif
 	{"width", &tv_param_width, CONF_TYPE_INT, 0, 0, 4096, NULL},
 	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096, NULL},
 	{"input", &tv_param_input, CONF_TYPE_INT, 0, 0, 20, NULL},
