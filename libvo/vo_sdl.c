@@ -523,8 +523,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	/* Save the original Image size */
 	
-	priv->width  = d_width ? d_width : width;
-	priv->height = d_height ? d_height : height;
+	//priv->width  = d_width ? d_width : width;
+	//priv->height = d_height ? d_height : height;
+	priv->width  = width;
+	priv->height = height;
         priv->format = format;
 	priv->windowsize.w = d_width ? d_width : width;
   	priv->windowsize.h = d_height ? d_height : height;
