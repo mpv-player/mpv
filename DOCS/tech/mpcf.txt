@@ -362,8 +362,10 @@ name
 	"CreationTime"	"2003-01-20 20:13:15Z", ... 
 			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
 			Note: dont forget the timezone
+	"Keywords"
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
+	Note: nonstandard fields should be prefixed by "X-"
 
 value
 	
