@@ -834,7 +834,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	aspect_save_prescale(d_width ? d_width : width, d_height ? d_height : height);
 
 	/* Save the original Image size */
-    priv->X = 0;
     priv->width  = width;
     priv->height = height;
     priv->dstwidth  = d_width ? d_width : width;
@@ -1609,6 +1608,7 @@ static uint32_t preinit(const char *arg)
     SDL_VideoDriverName(priv->driver, 8);
     printf("SDL: Using driver: %s\n", priv->driver);
 
+    priv->X = 0;
 #ifdef HAVE_X11
     XDisplay = XOpenDisplay(NULL);
     if(XDisplay) {
