@@ -190,6 +190,8 @@ int frameratecode2framerate[16] = {
 static vo_functions_t *video_out=NULL;
 static ao_functions_t *audio_out=NULL;
 
+float c_total=0;
+
 double video_time_usage=0;
 double vout_time_usage=0;
 static double audio_time_usage=0;
@@ -244,6 +246,7 @@ int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
 int force_ni=0;
 
 float default_max_pts_correction=-1;//0.01f;
+float max_pts_correction=0;//default_max_pts_correction;
 #ifdef AVI_SYNC_BPS
 int pts_from_bps=1;
 #else
@@ -277,6 +280,7 @@ int   sub_auto = 1;
 /*DSP!!char *dsp=NULL;*/
 
 float rel_seek_secs=0;
+float initial_pts_delay=0;
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;
@@ -330,7 +334,7 @@ void exit_player(char* how){
   exit(1);
 }
 
-static char* current_module=NULL; // for debugging
+char* current_module=NULL; // for debugging
 
 void exit_sighandler(int x){
   static int sig_count=0;
@@ -417,7 +421,6 @@ stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 //
 int delay_corrected=1;
-float initial_pts_delay=0;
 #ifdef VCD_CACHE
 int vcd_cache_size=128;
 #endif
@@ -946,11 +949,9 @@ float frame_correction=0; // average of A-V timestamp differences
 int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
-float c_total=0;
-float max_pts_correction=0;//default_max_pts_correction;
 int eof=0;
 int force_redraw=0;
-float num_frames=0;      // number of frames played
+//float num_frames=0;      // number of frames played
 int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;
@@ -1220,7 +1221,7 @@ if(1)
 //------------------------ frame decoded. --------------------
 
     // Increase video timers:
-    num_frames+=frame_time;
+    sh_video->num_frames+=frame_time;
     frame_time*=sh_video->frametime;
     if(file_format==DEMUXER_TYPE_ASF && !force_fps){
         // .ASF files has no fixed FPS - just frame durations!
@@ -1360,7 +1361,7 @@ if(1)
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
         printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d\r",c_total,
-        (int)num_frames,
+        (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
@@ -1380,7 +1381,7 @@ if(1)
     if(frame_corr_num==5){
 //      printf("A: ---   V:%6.1f   \r",v_pts);
       printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",v_pts,
-        (int)num_frames,
+        (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
@@ -1581,7 +1582,7 @@ switch(file_format){
           int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
           if(avi_stream_id(id)==d_video->id) ++d_video->pack_no;
       }
-      num_frames=d_video->pack_no;
+      sh_video->num_frames=d_video->pack_no;
       avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
       if(sh_audio){

@@ -49,11 +49,13 @@ typedef struct {
   float timer;		   // value of old v_frame
   float fps;
   float frametime;  // 1/fps
+  int i_bps; // == bitrate  (compressed bytes/sec)
   int disp_w,disp_h;   // display size (filled by fileformat parser)
 //  int coded_w,coded_h; // coded size (filled by video codec)
   unsigned int outfmtidx;
 //  unsigned int bitrate;
   // buffers:
+  float num_frames;       // number of frames played
   char *our_out_buffer;
   // win32 codec stuff:
   AVIStreamHeader video;
