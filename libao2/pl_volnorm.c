@@ -23,12 +23,6 @@
 #include "audio_plugin_internal.h"
 #include "afmt.h"
 
-#ifdef __FreeBSD__
-#include "machine/limits.h"
-#define INT16_MAX INT_MAX
-#define INT16_MIN INT_MIN
-#endif
-
 static ao_info_t info = {
         "Volume normalizer",
         "volnorm",
@@ -53,11 +47,15 @@ static float lastavg;
 #define SMOOTH_MUL 0.06
 #define SMOOTH_LASTAVG 0.06
 
+// Some limits
+#define MIN_S16 -32768
+#define MAX_S16  32767
+
 // ideal average level
-#define MID_S16 (INT16_MAX * 0.25)
+#define MID_S16 (MAX_S16 * 0.25)
 
 // silence level
-#define SIL_S16 (INT16_MAX * 0.02)
+#define SIL_S16 (MAX_S16 * 0.02)
 
 // local data
 static struct {
@@ -151,7 +149,7 @@ static int play(){
     // Scale & clamp the samples
     for (i=0; i < len ; ++i) {
       tmp = data[i] * mul;
-      CLAMP(tmp, INT16_MIN, INT16_MAX);
+      CLAMP(tmp, MIN_S16, MAX_S16);
       data[i] = tmp;
     }
 
