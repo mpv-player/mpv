@@ -127,9 +127,8 @@ Michael Hipp:
 
 Mark Podlipec:
 - xanim author    [I'm using its aLaw+uLaw audio decoder]
-
-Jutta Degener and Carsten Bormann:
-- xa_gsm.c authors  [MS-GSM audio codec]
+- xa_gsm.c author  [MS-GSM audio codec]
+                   [from a GSM library by Jutta Degener and Carsten Bormann]
 
 Their code is not used in current player version, but I've got some ideas or
 other technical help from:

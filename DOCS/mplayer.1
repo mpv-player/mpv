@@ -47,6 +47,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-framedrop ]
 .RB [ \-hardframedrop ]
 .RB [ \-dvdkey\ key ]
+.RB [ \-stereo\ mode ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -228,6 +229,14 @@ specify -nodshow !!!)
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
 (this is NOT for DVD playing! For DVD use the -dvd option!)
+.TP
+.B \-stereo mode
+select type of MPEG1 stereo output. Mode may be 0:stereo 1:left 2:right
+
+        Stereo         0
+        Left channel   1
+        Right channel  2
+
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
