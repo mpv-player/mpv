@@ -109,39 +109,37 @@ static zr_info_t zr_info[ZR_MAX_DEVICES] = {
 
 
 int zoran_getcap(zr_info_t *zr) {
-	char* dev;
+	char* dev = NULL;
 
 	if (zr->device)
 		dev = zr->device;
-	else {  /* code borrowed from mjpegtools lavplay.c // 20020416 too */
+	else {
 		struct stat vstat;
+		const char *devs[] = {
+		    "/dev/video",
+		    "/dev/video0",
+		    "/dev/v4l/video0",
+		    "/dev/v4l0",
+		    "/dev/v4l",
+		    NULL
+		};
+		int i = 0;
+		
+		do
+		{
+		    if ((stat(devs[i], &vstat) == 0) && S_ISCHR(vstat.st_mode))
+		    {
+			dev = devs[i];
+			mp_msg(MSGT_VO, MSGL_V, "zr: found video device %s\n", dev);
+			break;
+		    }
+		} while (devs[++i] != NULL);
 
-#undef VIDEV		
-#define VIDEV "/dev/video"		
-		if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
-			dev = VIDEV;
-#undef VIDEV		
-#define VIDEV "/dev/video0"		
-		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
-			dev = VIDEV;
-#undef VIDEV		
-#define VIDEV "/dev/v4l/video0"		
-		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
-			dev = VIDEV;
-#undef VIDEV		
-#define VIDEV "/dev/v4l0"		
-		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
-			dev = VIDEV;
-#undef VIDEV		
-#define VIDEV "/dev/v4l"		
-		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
-			dev = VIDEV;
-#undef VIDEV		
-		else {
-			mp_msg(MSGT_VO, MSGL_ERR, "zr: unable to find video device\n");
-			return 1;
+		if (!dev)
+		{
+		    mp_msg(MSGT_VO, MSGL_ERR, "zr: unable to find video device\n");
+		    return 1;
 		}
-		mp_msg(MSGT_VO, MSGL_V, "zr: found video device %s\n", dev);
 	}
 			
 	zr->vdes = open(dev, O_RDWR);
