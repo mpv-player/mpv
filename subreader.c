@@ -1041,36 +1041,33 @@ extern float sub_fps;
 #ifdef USE_ICONV
 static iconv_t icdsc = (iconv_t)(-1);
 
-#ifdef HAVE_ENCA
-void	subcp_open_noenca ()
-{
-    char enca_lang[100], enca_fallback[100];
-    if (sub_cp) {
-	if (sscanf(sub_cp, "enca:%2s:%s", enca_lang, enca_fallback) == 2
-	    || sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
-	    subcp_open(enca_fallback);
-	} else {
-	    subcp_open(sub_cp);
-	}
-    }
-}
-#else
-void	subcp_open_noenca ()
-{
-    subcp_open(sub_cp);
-}
-#endif
-
-void	subcp_open (char *current_sub_cp)
+void	subcp_open (FILE *enca_fd)
 {
 	char *tocp = "UTF-8";
 
-	if (current_sub_cp){
-		if ((icdsc = iconv_open (tocp, current_sub_cp)) != (iconv_t)(-1)){
+	if (sub_cp){
+		char *cp_tmp = sub_cp;
+#ifdef HAVE_ENCA
+		char enca_lang[3], enca_fallback[100];
+		int free_cp_tmp = 0;
+		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
+		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
+		  if (enca_fd) {
+		    cp_tmp = guess_cp(enca_fd, enca_lang, enca_fallback);
+		    free_cp_tmp = 1;
+		  } else {
+		    cp_tmp = enca_fallback;
+		  }
+		}
+#endif
+		if ((icdsc = iconv_open (tocp, cp_tmp)) != (iconv_t)(-1)){
 			mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: opened iconv descriptor.\n");
 			sub_utf8 = 2;
 		} else
 			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
+#ifdef HAVE_ENCA
+		if (free_cp_tmp && cp_tmp) free(cp_tmp);
+#endif
 	}
 }
 
@@ -1317,9 +1314,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     int n_max, n_first, i, j, sub_first, sub_orig;
     subtitle *first, *second, *sub, *return_sub;
     sub_data *subt_data;
-    char enca_lang[100], enca_fallback[100];
     int uses_time = 0, sub_num = 0, sub_errs = 0;
-    char *current_sub_cp=NULL;
     struct subreader sr[]=
     {
 	    { sub_read_line_microdvd, NULL, "microdvd" },
@@ -1351,17 +1346,6 @@ sub_data* sub_read_file (char *filename, float fps) {
     rewind (fd);
 
 #ifdef USE_ICONV
-#ifdef HAVE_ENCA
-    if (sscanf(sub_cp, "enca:%2s:%s", enca_lang, enca_fallback) == 2
-	|| sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
-	current_sub_cp = guess_cp(fd, enca_lang, enca_fallback);
-    } else {
-	current_sub_cp = sub_cp ? strdup(sub_cp) : NULL;
-    }
-#else
-    current_sub_cp = sub_cp ? strdup(sub_cp) : NULL;
-#endif
-
     sub_utf8_prev=sub_utf8;
     {
 	    int l,k;
@@ -1374,10 +1358,9 @@ sub_data* sub_read_file (char *filename, float fps) {
 			    break;
 			}
 	    }
-	    if (k<0) subcp_open(current_sub_cp);
+	    if (k<0) subcp_open(fd);
     }
 #endif
-    if (current_sub_cp) free(current_sub_cp);
 
     sub_num=0;n_max=32;
     first=(subtitle *)malloc(n_max*sizeof(subtitle));

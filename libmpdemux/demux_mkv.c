@@ -2018,7 +2018,7 @@ demux_mkv_open (demuxer_t *demuxer)
   char *str;
 
 #ifdef USE_ICONV
-  subcp_open_noenca();
+  subcp_open(NULL);
 #endif
 
   stream_seek(s, s->start_pos);

@@ -1552,7 +1552,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   qt_image_description_t *idesc;
 
 #ifdef USE_ICONV
-  subcp_open_noenca();
+  subcp_open(NULL);
 #endif
 
   s = demuxer->stream;

@@ -53,8 +53,9 @@ typedef struct {
 
 sub_data* sub_read_file (char *filename, float pts);
 subtitle* subcp_recode1 (subtitle *sub);
-void subcp_open (char *current_sub_cp); /* for demux_ogg.c */
-void subcp_open_noenca (); /* for demux_ogg.c */
+// enca_fd is the file enca uses to determine the codepage.
+// setting to NULL disables enca.
+void subcp_open (FILE *enca_fd); /* for demux_ogg.c */
 void subcp_close (void); /* for demux_ogg.c */
 char ** sub_filenames(char *path, char *fname);
 void list_sub_file(sub_data* subd);
