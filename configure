@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/05/40 by LGB
+#  - added --prefix support
+#
 # 2001/05/22 by Nick Kurshev
 #  - added definition of CPU clone
 #
@@ -79,6 +82,7 @@ usage: $0 [options]
 
 params:
         --cc                    use this C compiler to build MPlayer [gcc]
+	--prefix=DIR		use this prefix for installing mplayer [/usr/local]
 	--enable-debug[=1-3]	compile debugging information into mplayer [disable]
 	--enable-profile	compile profiling information into mplayer [disable]
         --enable-mmx            build with mmx support [autodetect]
@@ -531,6 +535,8 @@ rm -f $TMPC $TMPO
 
 # check for the parameters.
 
+_prefix="/usr/local"
+
 for ac_option
 do
  case "$ac_option" in
@@ -715,6 +721,9 @@ do
 	_y=`echo $ac_option | cut -d '=' -f 2`
 	;;
   --with-x11libdir=*)
+	;;
+  --prefix=*)
+	_prefix=`echo $ac_option | cut -d '=' -f 2`
         ;;
   --cc=*)
 	;;
@@ -731,6 +740,7 @@ fi
 echo -n "Kernel: "
 uname -a
 echo "Using C compiler: $_cc"
+echo "Install prefix: $_prefix"
 $_cc -v
 as --version | head -n 1
 echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
@@ -883,6 +893,7 @@ CSS_INC = $_cssinc
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
 DS_DEP = $_dshowdep
 DS_LIB = $_dshowlib
+prefix = $_prefix
 
 EOF
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak

@@ -17,7 +17,7 @@ PRG_AVIP = aviparse
 PRG_TV = tvision
 PRG_CFG = codec-cfg
 
-prefix = /usr/local
+#prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
 SRCS = find_sub.c aviprint.c dll_init.c dec_audio.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c
