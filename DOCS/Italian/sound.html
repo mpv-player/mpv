@@ -2,6 +2,7 @@
 <HTML>
 
 <HEAD>
+<TITLE>Suono - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
@@ -9,7 +10,7 @@
 <BODY>
 
 
-<P><B><A NAME=2.3.2>2.3.2. Dispositivi di output audio</A></B></P>
+<P><B><A NAME="audio">2.3.2. Dispositivi di output audio</A></B></P>
 
 <P>L'interfaccia audio di <B>MPlayer</B> è chiamata <I>libao2</I>. Attualmente contiene
 questi driver :</P>
@@ -50,7 +51,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 <P>Su sistemi <B>Solaris/FreeBSD</B>, usa il driver audio SUN con l'opzione
 <I>-ao sun</I>, altrimenti non avrai ne riproduzione video, ne audio.</P>
 
-<P><B><A NAME=2.3.2.1>2.3.2.1. Esperienze con le schede sonore, raccomandazioni</A></B></P>
+<P><B><A NAME="experiences">2.3.2.1. Esperienze con le schede sonore, raccomandazioni</A></B></P>
 
 <P><TABLE BORDER=0 WIDTH=100%>
 <TD COLSPAN=3><B>Chipset VIA integrato (via82cxxx) solo 48Khz</B></TD><TR>
@@ -124,14 +125,14 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 <LI>se emette dei click leggendo da CD-ROM, abilita l' IRQ unmasking !
      per esempio "hdparm -u1 /dev/cdrom" (vedi "man hdparm" !!!)
      Questo è consigliato comunque... (per XMMS, ecc...)
-     Leggi la sezione <A HREF="cd-dvd.html#4.1">4.1</A>.
+     Leggi la <A HREF="cd-dvd.html#drives">sezione CD-ROM</A>.
 <LI>non usare la scheda sonora con altre applicazioni ( es. XMMS ) !
      se usi ESD, esegui MPlayer con l'opzione '-vo sdl:esd' !
 <LI>Per favore dicci come MPlayer e la tua scheda sonora hanno lavorato insieme!
 </UL></P>
 
 
-<P><B><A NAME=2.3.2.2>2.3.2.2. Plugin Audio</A></B></P>
+<P><B><A NAME="plugins">2.3.2.2. Plugin Audio</A></B></P>
 
 <P><B>MPlayer</B> supporta plugin audio. Possono essere usati per
   cambiare le proprietà dei dati audio prima che raggiungano la scheda
@@ -164,7 +165,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 <P>Attualmente i plugin audio non possono essere usati in <B>MEncoder</B>.</P>
 
 
-<P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Sopra/Sotto campionamento</A></B></P>
+<P><B><A NAME="resample">2.3.2.2.1. Sopra/Sotto campionamento</A></B></P>
 
 <P><B>MPlayer</B> supporta pienamente il sopra/sotto campionamento del suono. Questo plugin può
   per esempio essere usato se hai una scheda sonora a frequenza fissa o se sei
@@ -181,7 +182,7 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
   frequenza in Hz, come 44100&gt;</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Decodifica Suono Surround</A></B></P>
+<P><B><A NAME="surround_decoding">2.3.2.2.2. Decodifica Suono Surround</A></B></P>
 
 <P><B>MPlayer</b> ha un plugin audio che puo decodificare una matrice di suono
 surround.  Dolby Surround è un esempio di un formato di matrice.</p>
@@ -195,7 +196,7 @@ surround.</p>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Convertitore del formato di campionamento</A></B></P>
+<P><B><A NAME="format">2.3.2.2.3. Convertitore del formato di campionamento</A></B></P>
                                                                                
 <P>Se il driver della tua scheda sonora non supporta gli int signed a 16bit, questo plugin può
   essere usato per cambiare il formato ad uno compreso dalla tua scheda sonora. Ha
@@ -211,14 +212,14 @@ surround.</p>
 </P>
 
 
-<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Ritardo</A></B></P>
+<P><B><A NAME="delay">2.3.2.2.4. Ritardo</A></B></P>
 
 <P>Questo plugin ritarda il suono ed è da intendersi come un esempio di come sviluppare
   nuovi plugin. Non può essere usato per niente di utile dalla prospettiva degli utenti
   ed è menzionato qui solo per dovere di completezza. Non usare questo plugin
   se non sei uno sviluppatore.</P>
 
-<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Controllo volume via software</A></B></P>
+<P><B><A NAME="volume">2.3.2.2.5. Controllo volume via software</A></B></P>
 
 <P>Questo plugin è un sostituto software per il controllo volume, e
   può essere usato in macchine con dispositivo mixer non funzionante. Può
@@ -253,7 +254,7 @@ surround.</p>
   list=volume:softclip</CODE>
 </P>
 
-<P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
+<P><B><A NAME="extrastereo">2.3.2.2.6. Extrastereo</A></B></P>
 
 <P>Questo plugin aumenta (linearmente) la differenza tra i canali destro e sinistro
   (come il plugin extrastereo di XMMS) che da un certo effetto "live" alla
@@ -270,7 +271,7 @@ surround.</p>
   destro e sinistro risulteranno scambiati.</P>
 
 
-<P><B><A NAME=2.3.2.2.7>2.3.2.2.7. Normalizzatore volume</A></B></P>
+<P><B><A NAME="normalizer">2.3.2.2.7. Normalizzatore volume</A></B></P>
 
 <P>Questo plugin massimizza il volume mantenendo il suono senza
   distorsioni.

@@ -2,28 +2,34 @@
 <HTML>
 
 <HEAD>
+<TITLE>FAQ - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<STYLE TYPE="text/css">
+      dt	{
+	font-weight : bold;
+      }
+  </STYLE>
 </HEAD>
 
 <BODY>
 
-<P><B><A NAME=5>5. Sezione FAQ (Domande frequenti)</A></B></P>
+<P><B><A NAME="faq">5. Sezione FAQ (Domande frequenti)</A></B></P>
 
 <UL>
-  <LI><A HREF="#5.1">5.1 Compilazione</A></LI>
-  <LI><A HREF="#5.2">5.2 Domande generali</A></LI>
-  <LI><A HREF="#5.3">5.3 Problemi di riproduzione file</A></LI>
-  <LI><A HREF="#5.4">5.4 Problemi driver video/audio (vo/ao)</A></LI>
-  <LI><A HREF="#5.5">5.5 Riproduzione DVD</A></LI>
-  <LI><A HREF="#5.6">5.6 Richieste di caratteristiche</A></LI>
-  <LI><A HREF="#5.7">5.7 Codificare</A></LI>
+  <LI><A HREF="#compilation">5.1 Compilazione</A></LI>
+  <LI><A HREF="#general">5.2 Domande generali</A></LI>
+  <LI><A HREF="#playback">5.3 Problemi di riproduzione file</A></LI>
+  <LI><A HREF="#driver">5.4 Problemi driver video/audio (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.5 Riproduzione DVD</A></LI>
+  <LI><A HREF="#features">5.6 Richieste di caratteristiche</A></LI>
+  <LI><A HREF="#encoding">5.7 Codificare</A></LI>
 </UL>
 
 
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
-<TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilazione</A></B></P>
+<TR><TD COLSPAN=3><P><B><A NAME="compilation"><FONT CLASS="text">5.1 Compilazione</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>D:</TD><TD WIDTH="100%"><B>La compilazione si ferma con un messaggio d'errore simile a questo:
@@ -69,7 +75,7 @@ Bene, ho il gcc 3.0.1 di RedHat/Mandrake, quindi sono a posto--!
 <TD><FONT CLASS="text">
 No, ci sono questioni anche con quei compilatori.<BR>
 Per controllare lo stato dei compilatori che Mplayer attualmente supporta, vedi la sezione
-<A HREF="documentation.html#1.3">Installazione</A> .
+<A HREF="documentation.html#installation">Installazione</A> .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
@@ -192,7 +198,7 @@ Ci sono pacchetti rpm/deb/... di <B>MPlayer</B>?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
 Puoi farti un pacchetto .deb, guarda la sezione <A
- HREF="documentation.html#6.1">6.1</A>.
+ HREF="documentation.html#debian">6.1</A>.
 Ci sono dei link ai pacchetti RPM ufficiali di Red Hat sulla nostra
 <A HREF="http://www.mplayerhq.hu/homepage/dload.html">pagina di download</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -283,7 +289,7 @@ Anche a me. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME="5.2"><FONT CLASS="text">5.2. Domande generali</A></B>
+<TD COLSPAN=3><B><A NAME="general"><FONT CLASS="text">5.2. Domande generali</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>D:</TD><TD WIDTH="100%"><B>C'è un timer nell'angolo
@@ -388,19 +394,19 @@ Ho trovato un brutto bug quando ho provato a leggere il mio video preferito!!
 Chi dovrei informare?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Vedi l'Appendice <A HREF="bugreports.html">C</A>.
+Leggi la guida a <A HREF="bugreports.html">come segnalare un bug</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
 <TD WIDTH=100%><B><FONT CLASS="text">
-Ho problemi a leggere file col codec ... Posso usarli?
+Ho problemi a leggere file col codec ... Come posso fare?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
 Controlla <A
  HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/
 DOCS/codecs-status.html</A>,
-se non c'è il tuo codec, leggi la
-<A HREF="codecs.html#2.1.3">sezione 2.1.3</A>, e contattaci.
+se non c'è il tuo codec, leggi la sezione
+<A HREF="codecs.html#importing">importare codec</A>, e contattaci.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
@@ -458,7 +464,7 @@ usa l'opzione -double.
 Cosè esattamente libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Vedi la <A HREF="codecs.html#2.1.2.2">sezione 2.1.2.2</A>.
+Vedi la <A HREF="codecs.html#libavcodec">sezione libavcodec</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -467,7 +473,7 @@ Ma configure mi dice "Checking for libavcodec ... no"!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
 Devi prendere libavcodec dal CVS di FFmpeg. Leggi le istruzioni nella
-<A HREF="codecs.html#2.1.2.2">sezione ffmpeg</A>.
+<A HREF="codecs.html#libavcodec">sezione libavcodec</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -498,7 +504,7 @@ Come posso eseguire MPlayer in background ?
 Usa : <CODE>mplayer &lt;opzioni&gt; &lt;nomefile&gt; &lt; /dev/null &
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 <TD COLSPAN=3>
-<B><A NAME="5.3"><FONT CLASS="text">5.3.
+<B><A NAME="playback"><FONT CLASS="text">5.3.
  Problemi di lettura file</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -509,7 +515,7 @@ Requested audio codec family [divx] (afm=4) not available (enable it at   compil
 </PRE>   
 </B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD>Probabilmente l'audio usa un codec non 
 supportato nativamente da <B>MPlayer</B>. Installa il pacchetto di codec Win32 come
-descritto nel README o <A HREF="documentation.html#1.3">qui</A>.   
+descritto nel README o <A HREF="documentation.html#installation">qui</A>.   
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -691,7 +697,7 @@ Quando cerco di cominciare la riproduzione, ottengo questo messaggio, ma la
 <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Vedi la <A HREF="documentation.html#1.3">Sezione sull'installazione</A>. La
+Vedi la <A HREF="documentation.html#installation">Sezione sull'installazione</A>. La
  parte
 sul nuovo codice di sincronia.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -738,7 +744,7 @@ Questo è ancora un effetto della gestione energetica (vedi sopra). Collega l'ali
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.4"><FONT CLASS="text">5.4.
+<B><A NAME="driver"><FONT CLASS="text">5.4.
  Problemi driver video/audio (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -850,7 +856,7 @@ Vedi la differenza? No?! Ok, ecco l'illuminazione: il target
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN="3">
-<B><A NAME="5.5"><FONT CLASS="text">5.5. Riproduzione DVD</A></B>
+<B><A NAME="dvd"><FONT CLASS="text">5.5. Riproduzione DVD</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -914,7 +920,7 @@ funziona, prova ad abilitare il DMA per il lettore DVD ( è descritto nella
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.6"><FONT CLASS="text">5.6.
+<B><A NAME="features"><FONT CLASS="text">5.6.
  Richieste di caratteristiche</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -945,11 +951,11 @@ implementarlo, e manda una patch. Non chiederlo.
   Non è rilasciata, e non lo sarà. Guarda la scena windows (parser ASF
  opensource,
   encoder ASF opensource, ecc) e saprai il perchè. Non vogliamo
-  andare in galera. Comunque puoi compilartelo sotto <A HREF="documentation.html#6.8">Cygwin</A>.
+  andare in galera. Comunque puoi compilartelo sotto <A HREF="documentation.html#cygwin">Cygwin</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.7"><FONT CLASS="text">5.7.
+<B><A NAME="encoding"><FONT CLASS="text">5.7.
  Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -1009,6 +1015,9 @@ Sto cercando di leggere file da 2Gb+ su un filesystem VFAT. Funziona?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
 No, VFAT non supporta file da 2Gb+.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text"> Perchè il bitrate raccomandato da MEncoder ha un valore negativo?</TD>
+</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text"> Perchè il bitrate a cui hai codificato l'audio è troppo alto per
+poter usare un CD. Controlla se libmp3lame è installato correttamente.</TD>
 
 </TABLE>
 

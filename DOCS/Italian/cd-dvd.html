@@ -2,6 +2,7 @@
 <HTML>
 
 <HEAD>
+<TITLE>CD, DVD, VCD - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
@@ -9,28 +10,7 @@
 <BODY>
 
 
-<P><B><A NAME=4.1>4.1. Lettori CD</A></B></P>
-
-<P>Vedere gli standard Video CD:</P>
-
-<P>
-mplayer -vcd <I>numerotraccia</I> [-cdrom-device device]<BR><BR>
-Esempi:<BR>
-mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
-</P>
-
-<P>
-Note:<BR>
-- NON montare i VCD e leggere direttamente i file DAT! Può funzionare sotto windows
-ma non funzionerà sotto linux. Devi leggerli direttamente, con l'opzione -vcd !
-<BR>
-- solitamente i VCD hanno 2 tracce: una traccia di dati (che contiene il programma di autostart di windows,
-dati per il karaoke ecc) e una seconda (il filmato), quindi prova
--vcd 2 prima!<BR>
-- il dispositivo VCD di default è /dev/cdrom. Se il dispositivo è diverso, allora devi fare un
-link simbolico, o specificarlo dalla linea di comando!
-</P>
+<P><B><A NAME="drives">4.1. Lettori CD/DVD</A></B></P>
 
 <P>Dalla documentazione di Linux:</P>
 
@@ -68,7 +48,7 @@ Si consiglia anche di regolare il tuo lettore CDROM anche con hdparm:</P>
 <P>Per favore fai riferimento a "<CODE>/proc/ide/[cdrom device]/settings</CODE>" per una regolazione fine del
 CDROM.</P>
 
-<P><B><A NAME=4.2>4.2. Vedere i DVD</A></B></P>
+<P><B><A NAME="dvd">4.2. Vedere i DVD</A></B></P>
 
 <P><B>MPlayer</B> usa <CODE>libdvdread</CODE> e <CODE>libdvdcss</CODE> per
   decifrare e leggere i DVD. Queste due librerie si trovano nella subdirectory
@@ -104,66 +84,30 @@ CDROM.</P>
 
 <P>Ad ogni modo, fai: <CODE>make</CODE>, poi <CODE>make install</CODE>.</P>
 
-<P><B>Usare MPlayer per leggere i DVD:</B></P>
+<P>Per tutte le opzioni disponibili, vedi la pagina di man.</P>
 
+<H2><A NAME="vcd">4.3 Vedere i VCD</A></H2>
 
-<TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top>-dvd &lt;id_titolo&gt;&nbsp;</TD>
-<TD>Abilita il supporto DVD e seleziona il titolo.</TD><TR>
-<TD VALIGN=top>-chapter &lt;id_capitolo&gt;&nbsp;</TD>
-<TD>Seleziona il capitolo del DVD da leggere (default: leggi dal capitolo 1).
-  Esempio : <CODE>-chapter 5-10</CODE> o <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top>-dvdangle &lt;id_angolo&gt;&nbsp;</TD>
-<TD>Seleziona l'angolo della telecamera (default: 1)</TD><TR>
-<TD VALIGN=top>-alang &lt;codice paese&gt;&nbsp;</TD>
-<TD>
-  Il <CODE>codice paese</CODE> dice a <B>MPlayer</B> quale lingua audio preferire.
-  Per la lista delle lingue disponibili, aggiungi l'opzione <CODE>-v</CODE> dopo
-  le tue opzioni DVD, e cerca nell'output.<BR>
-  Per esempio :<BR>
-  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - prima cerca di usare l'ungaro,
-  e se non disponibile, usa l'audio inglese.</TD></TR>
-<TD VALIGN=top>-slang &lt;codice paese&gt;&nbsp;</TD>
-<TD>
-  Abilita i sottotitoli. Il <CODE>codice paese</CODE> dice a <B>MPlayer</B>
-  quale lingua audio preferire.
-  Per la lista delle lingue disponibili, aggiungi l'opzione <CODE>-v</CODE> dopo
-  le tue opzioni DVD, e cerca nell'output.<BR>
-  Per esempio :<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - prima cerca di mostrare i sottotitoli in ungaro,
-  e se non trovati, mostra i sottotitoli in inglese.</TD></TR>
-<TD VALIGN=top>-sid &lt;id_sottotitolo&gt;&nbsp;</TD>
-<TD>
-  Mostra il canale del sottotitolo con il dato <CODE>id</CODE> (i valori possono essere
-  0-31). Utile per esempio con DVD masterizzati male dove il codice paese
-  seleziona il canale sbagliato.</TD></TR>
-<TD VALIGN=top>-csslib &lt;path/nomefile&gt;</TD>
-<TD>
-  (opzione DVD vecchio stile) Questa opzione è usata per dare una locazione diversa da quella di default
-  di <CODE>libcss.so</CODE>
-  </TD></TR>
-<TD VALIGN=top>-dvdauth &lt;dispositivo DVD&gt;&nbsp;</TD>
-<TD>
-  (opzione DVD vecchio stile) Abilita l'autenticazione DVD usando il dispositivo dato.
-  </TD></TR>
-<TD VALIGN=top>-dvdkey &lt;chiave CSS&gt;</TD>
-<TD>
-  (opzione DVD vecchio stile) Quando si decodifica non da DVD, questa opzione da la chiave
-  CSS necessaria per "crackare" il DVD (la chiave è stampata al momento dell'autenticazione col
-  DVD).
-  </TD></TR>
-</TABLE>
+<P>Vedere gli standard Video CD:</P>
 
-<P>Il dispositivo di default è <CODE>/dev/dvd</CODE>, puoi cambiarlo in config.h
-(Al momento della compilazione), o puoi specificarlo con l'opzione -dvd-device :
+<P>
+mplayer -vcd <I>numerotraccia</I> [-cdrom-device device]<BR><BR>
+Esempi:<BR>
+mplayer -vcd 1<BR>
+mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
 </P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en -dvd-device /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en -dvd-device /dev/dvd -chapter 20-25</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang sp -chapter 5 -dvdangle 2</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
+<P>
+Note:<BR>
+- NON montare i VCD e leggere direttamente i file DAT! Può funzionare sotto windows
+ma non funzionerà sotto linux. Devi leggerli direttamente, con l'opzione -vcd !
+<BR>
+- solitamente i VCD hanno 2 tracce: una traccia di dati (che contiene il programma di autostart di windows,
+dati per il karaoke ecc) e una seconda (il filmato), quindi prova
+-vcd 2 prima!<BR>
+- il dispositivo VCD di default è /dev/cdrom. Se il dispositivo è diverso, allora devi fare un
+link simbolico, o specificarlo dalla linea di comando!
+</P>
 
 </BODY>
 </HTML>

@@ -2,13 +2,14 @@
 <HTML>
 
 <HEAD>
+<TITLE>Formati - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY>
 
-<P><B><A NAME=2.1>2.1. Formati supportati</A></B></P>
+<P><B><A NAME="format">2.1. Formati supportati</A></B></P>
 
 <P>E' importante fare chiarezza su un errore comune. Quando la gente vede un file con estensione
 <B>.AVI</B>, dice subito che non è un file MPEG.
@@ -28,10 +29,10 @@ O si può mettere video MPEG1 in un .AVI. Per esempio <A HREF="http://ffmpeg.sour
 e <A HREF="encoding.html">MEncoder</A> possono creare questi file.</P>
 
 
-<P><B><A NAME=2.1.1>2.1.1. Formati video</A></B></P>
+<P><B><A NAME="video_formats">2.1.1. Formati video</A></B></P>
 
 
-<P><B><A NAME=2.1.1.1>2.1.1.1. File MPEG</A></B></P>
+<P><B><A NAME="mpeg">2.1.1.1. File MPEG</A></B></P>
 
 <P>I file MPEG si presentano in diverse forme:</P>
 <UL>
@@ -44,7 +45,7 @@ i file DAT non possono essere letti o copiati dai VCD. Devi usare l'opzione
 <LI>VOB : questo è il formato file MPEG dei <B>DVD</B>. Come MPG, più
 la possibilità di contenere sottotitoli, o audio non-MPEG (AC3). Contiene video MPEG2,
 e di solito audio AC3, ma è permesso anche l'MP2 e LPCM non compresso.<BR>
-<B>Leggi la <A HREF="cd-dvd.html#4.2">sezione DVD</A> !</B></LI>
+<B>Leggi la <A HREF="cd-dvd.html#dvd">sezione DVD</A> !</B></LI>
 </UL>
 
 <P>Serie di frame formano gruppi indipendenti nei file MPEG.
@@ -58,7 +59,7 @@ le proporzioni del flusso video che contengono. Per esempio gli SVCD hanno una r
 ridimensionarlo durante la codifica o usa l'opzione -aspect alla lettura.</P>
 
 
-<P><B><A NAME=2.1.1.2>2.1.1.2. File AVI</A></B></P>
+<P><B><A NAME="avi">2.1.1.2. File AVI</A></B></P>
 
 <P>Introdotti dalla Micro$oft, l'<B>AVI (Audio Video Interleaved, Audio Video Intervallato ndt)</B> è un
 formato diffuso e multipurpose, attualmente usato soprattutto per i video DivX e DivX4.
@@ -112,7 +113,7 @@ la maggior parte degli encoder/multiplexer AVI creano file malformati se usano a
 eccezioni (da me conosciute): NaNDub e <A HREF="encoding.html">MEncoder</A>.</P>
 
 
-<P><B><A NAME=2.1.1.3>2.1.1.3. File ASF/WMV</A></B></P>
+<P><B><A NAME="asf">2.1.1.3. File ASF/WMV</A></B></P>
 
 <P>ASF (active streaming format, formato di flusso attivo ndt) viene da Microsoft. Hanno sviluppato due
 varianti di ASF, v1.0 e v2.0. La v1.0 è usata dai loro programmi multimediali (windows
@@ -123,7 +124,7 @@ file v2.0 :) . Nota che i file .ASF oggigiorno hanno l'estensione .WMA o
 .WMV.</P>
 
 
-<P><B><A NAME=2.1.1.4>2.1.1.4. File QuickTime/MOV</A></B></P>
+<P><B><A NAME="mov">2.1.1.4. File QuickTime/MOV</A></B></P>
 
 <P>Questi formati sono stati creati dalla Apple. Di solito hanno estensioni .QT o .MOV . Nota
 che da quando il Gruppo MPEG4 ha scelto QuickTime come formato file raccomandato
@@ -133,11 +134,11 @@ che in questi file il flusso video è un vero file MPG o ACC. Con le opzioni
 
 <P><B>Codec</B>: qualsiasi codec è permesso, sia CBR che VBR. Nota: la maggior parte dei nuovi file mov usano
 video <B>Sorenson</B> e audio QDesign Music. Vedi la sezione dei codec
-<A HREF="codecs.html#2.2.1.10">Sorenson</A>. L'audio QDesign Music
+<A HREF="codecs.html#soreson">Sorenson</A>. L'audio QDesign Music
 attualmente non può essere riprodotto.</P>
 
 
-<P><B><A NAME=2.1.1.5>2.1.1.5. File VIVO</A></B></P>
+<P><B><A NAME="vivo">2.1.1.5. File VIVO</A></B></P>
 
 <P><B>MPlayer</B> legge felicemente i formati file VIVO. Il più grande svantaggio di questo formato
 è che non c'è un'area per l'indice, ne una grandezza fissa di pacchetto o byte di sincronia,
@@ -147,12 +148,12 @@ e a molti file mancano anche i frame chiave, quindi dimenticati la funzionalità 
 è un <B>h.263</B> modificato, non standard. L'audio è lo stesso,
 può essere <B>g.723</B> (standard), o <B>Vivo Siren</B> .</P>
 
-<P>Vedi le sezioni <A HREF="codecs.html#2.2.1.4">codec video VIVO</A>
-e <A HREF="codecs.html#2.2.2.4">codec audio VIVO</A> per istruzioni
+<P>Vedi le sezioni <A HREF="codecs.html#vivo_video">codec video VIVO</A>
+e <A HREF="codecs.html#vivo_audio">codec audio VIVO</A> per istruzioni
 sull'installazione.</P>
 
 
-<P><B><A NAME=2.1.1.6>2.1.1.6. File FLI</A></B></P>
+<P><B><A NAME="fli">2.1.1.6. File FLI</A></B></P>
 
 <P><B>FLI</B> è un formato file molto vecchio usato da Autodesk Animator, ma è
 un formato comune per brevi animazioni sulla rete. <B>MPlayer</B> legge
@@ -161,16 +162,16 @@ usato con l'opzione -loop). I file FLI non hanno frame chiave, quindi la visuali
 sarà confusa per breve tempo dopo una ricerca.</P>
 
 
-<P><B><A NAME=2.1.1.7>2.1.1.7. File RealMedia (RM)</A></B></P>
+<P><B><A NAME="real">2.1.1.7. File RealMedia (RM)</A></B></P>
 
 <P>Si, <B>MPlayer</B> può leggere (demux) file RealMedia (.rm). La ricerca
 funziona, ma devi specificare esplicitamente l'opzione <CODE>-forceidx</CODE> 
 (il formato supporta i frame chiave).
-Qui c'è la lista dei codec supportati: <A HREF="codecs.html#2.2.1.8">RealVideo</A>
-e <A HREF="codecs.html#2.2.2.5">RealAudio</A>.
+Qui c'è la lista dei codec supportati: <A HREF="codecs.html#realvideo">RealVideo</A>
+e <A HREF="codecs.html#realaudio">RealAudio</A>.
 
 
-<P><B><A NAME=2.1.1.8>2.1.1.8. File NuppelVideo</A></B></P>
+<P><B><A NAME="nuppelvideo">2.1.1.8. File NuppelVideo</A></B></P>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
 è uno strumento per catturare da TV (AFAIK:). <B>MPlayer</B> può leggere i suoi file .NUV
@@ -180,7 +181,7 @@ YV12+RTJpeg compressi, YV12 RTJpeg+lzo compressi, e YV12+lzo compressi,
 DivX/etc!) tutti quanti. La ricerca all'interno del filmato funziona.</P>
 
 
-<P><B><A NAME=2.1.1.9>2.1.1.9. File yuv4mpeg</A></B></P>
+<P><B><A NAME="yuv4mpeg">2.1.1.9. File yuv4mpeg</A></B></P>
 
 <P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> è
 un formato file usato dai <A HREF="http://mjpeg.sf.net">programmi mjpegtools</A>.
@@ -189,17 +190,17 @@ Questi file sono in realtà una sequenza di immagini YUV 4:2:0 non compresse.
 </P>
 
 
-<P><B><A NAME=2.1.1.10>2.1.1.10. File FILM</A></B></P>
+<P><B><A NAME="film">2.1.1.10. File FILM</A></B></P>
 
 <P>Questo formato è usato nei CD-ROM dei giochi del vecchio Sega Saturn.</P>
 
 
-<P><B><A NAME=2.1.1.11>2.1.1.11. File RoQ</A></B></P>
+<P><B><A NAME="roq">2.1.1.11. File RoQ</A></B></P>
 
 <P>I file RoQ sono file multimediali in alcuni giochi della ID come Quake III e
   Return to Castle Wolfenstein.</P>
 
-<P><B><A NAME=2.1.1.12>2.1.1.12. File OGG</A></B></P>
+<P><B><A NAME="ogg">2.1.1.12. File OGG</A></B></P>
 
 <P>Questo è un nuovo formato di <A HREF="http://www.xiph.org">Xiphophorus</A>.
   Può contenere qualsiasi codec video o audio, CBR o VBR.
@@ -208,14 +209,14 @@ Questi file sono in realtà una sequenza di immagini YUV 4:2:0 non compresse.
 
 
 
-<P><B><A NAME=2.1.2>2.1.2. Formati audio</A></B></P>
+<P><B><A NAME="audio_formats">2.1.2. Formati audio</A></B></P>
 
 <P>Attualmente <B>MPlayer</B> è ancora un "<B>Movie</B> Player" e non un "<B>Media</B>
 Player". Questo sta lentamente cambiando e attualmente sono supportati MP3, OGG VORBIS, WMA, MP4 e WAV.
 Ciò nonostante l'obbiettivo principale è ancora il video, quindi potresti preferire usare alternative come
 <A HREF="http://www.xmms.org">xmms</A>, <A HREF="http://www.mpg123.de">mpg123</A>.</P>
 
-<P><B><A NAME=2.1.2.1>2.1.2.1. File MP3</A></B></P>
+<P><B><A NAME="mp3">2.1.2.1. File MP3</A></B></P>
 
 <P>Potresti avere dei problemi con certi file MP3 che <B>MPlayer</B> riconosce
 come mpegs e non legge correttamente o non legge del tutto. Questo comportamento non
@@ -223,15 +224,15 @@ può essere corretto senza abbandonare il supporto per certi file mpeg corrotti, 
 rimmarrà così per il prossimo futuro. L'opzione <CODE>-demuxer</CODE> descritta nella pagina di man
 può esserti d'aiuto in questi casi.</P>
 
-<P><B><A NAME=2.1.2.2>2.1.2.2. WAV files</A></B></P>
+<P><B><A NAME="wav">2.1.2.2. File WAV</A></B></P>
 
-<P><B><A NAME=2.1.2.3>2.1.2.3. OGG files (Vorbis)</A></B></P>
+<P><B><A NAME="ogg_vorbis">2.1.2.3. File OGG (Vorbis)</A></B></P>
 
 <P>Richiede <CODE>libogg</CODE> e <CODE>libvorbis</CODE> corretamente installati.</P>
 
-<P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF files</A></B></P>
+<P><B><A NAME="wma">2.1.2.4. File WMA/ASF</A></B></P>
 
-<P><B><A NAME=2.1.2.5>2.1.2.5. MP4 files</A></B></P>
+<P><B><A NAME="mp4">2.1.2.5. File MP4</A></B></P>
 
 </BODY>
 </HTML>
