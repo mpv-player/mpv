@@ -206,7 +206,7 @@ static int open(af_instance_t* af){
   // Enable volume control and set initial volume to 0.1
   ((af_volume_t*)af->setup)->onoff = 1;
   for(i=0;i<NCH;i++)
-    ((af_volume_t*)af->setup)->volume[i]=0.1;
+    ((af_volume_t*)af->setup)->volume[i]=1.0; //0.1;
 
   return AF_OK;
 }

@@ -17,6 +17,7 @@ extern af_info_t af_info_delay;
 extern af_info_t af_info_channels;
 extern af_info_t af_info_format;
 extern af_info_t af_info_resample;
+extern af_info_t af_info_volume;
 
 static af_info_t* filter_list[]={ \
    &af_info_dummy,\
@@ -24,6 +25,7 @@ static af_info_t* filter_list[]={ \
    &af_info_channels,\
    &af_info_format,\
    &af_info_resample,\
+   &af_info_volume,\
    NULL \
 };
 
