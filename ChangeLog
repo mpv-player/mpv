@@ -7,6 +7,8 @@ MPlayer (1.0)
 
     Ports:
     * DirectX video output fixed on Windows95
+    * DirectX video output now supports 256 color mode
+    * audio device selection support for ao dsound
 
     Drivers:
     * fixed ontop event for some window managers
@@ -16,6 +18,7 @@ MPlayer (1.0)
     * TWinVQ decoder via binary DLL
     * integrated Tremor decoder for Ogg/Vorbis
     * fixed decoding of stereo alaw files
+    * preload QuickTime dlls to workaround problems caused by hardcoded paths in the dlls
 
     Demuxers:
     * vqf demuxer
