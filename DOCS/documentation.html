@@ -75,6 +75,7 @@
               <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF files</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 files</A></LI>
               <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
+              <LI><A HREF="formats.html#xmms">2.1.2.7 XMMS</A></LI>
             </UL>
           </LI>
         </UL>
@@ -537,6 +538,8 @@
     <A HREF="http://www.directfb.org">http://www.directfb.org</A></LI>
   <LI><B>cdparanoia</B> - optional, for CDDA support</LI>
   <LI><B>libfreetype</B> - optional, for TTF fonts support. At least 2.0.9 is
+    required.</LI>
+  <LI><B>libxmms</B> - optional, for XMMS input plugin support. At least 1.2.7 is
     required.</LI>
 </UL>
 
@@ -1725,39 +1728,51 @@ end
 
 <H2><A NAME="strongarm">6.4 StrongARM</A></H2>
 
-<P>MPlayer is reported to compile on StrongARM. Use the following command line:</P>
-
-<PRE>
-  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
-</PRE>
+<P>MPlayer works on Linux PDAs with ARM CPU e.g. Sharp Zaurus, Compaq Ipaq.
+  The easiest way to obtain MPlayer is to get it from one of the
+  <A HREF="http://www.openzaurus.org">Openzaurus</A> package feeds.
+  If you want to compile it yourself, you should look at the
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</A>
+  and the
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</A>
+  directory in the OpenZaurus distribution buildroot. These always have the
+  latest Makefile and patches used for building a CVS MPlayer with libavcodec.
+  <BR>If you need a GUI frontend, you can use xmms-embedded.</P>
 
 
 <H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
 
 <P>You can either try to install the GNU install program, and (if you did not
   put it in your global path) then point to the location with:</P>
+
 <PRE>
   ./configure --install-path=PATH
 </PRE>
+
 <P>Or you can use the default install delivered with IRIX 6.5 in which case you
   will have to edit the Makefile a littlebit by hand. Change the following two
   lines:</P>
+
 <PRE>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
   $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </PRE>
+
 <P>to:</P>
+
 <PRE>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </PRE>
+
 <P>And then do (from within the MPlayer source dir):</P>
+
 <PRE>
   cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
 </PRE>
+
 <P>and then go on with building and installing.</P>
 
 
