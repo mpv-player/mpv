@@ -113,6 +113,7 @@ typedef struct ogg_stream {
   int vorbis;
   int theora;
   int flac;
+  int text;
 } ogg_stream_t;
 
 typedef struct ogg_demuxer {
@@ -139,6 +140,8 @@ typedef struct ogg_demuxer {
 #define PACKET_IS_SYNCPOINT  0x08
 
 extern int index_mode;
+
+extern char *dvdsub_lang, *audio_lang;
 
 //-------- subtitle support - should be moved to decoder layer, and queue
 //                          - subtitles up in demuxer buffer...
@@ -393,9 +396,69 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
   return data;
 }
 
+// check if clang has substring from comma separated langlist
+static int demux_ogg_check_lang(char *clang, char *langlist)
+{
+  char *c;
+
+  if (!langlist || !*langlist)
+    return 0;
+  while ((c = strchr(langlist, ',')))
+  {
+    if (!strncasecmp(clang, langlist, c - langlist))
+      return 1;
+    langlist = &c[1];
+  }
+  if (!strncasecmp(clang, langlist, strlen(langlist)))
+    return 1;
+  return 0;
+}
+
+/// Try to print out comments and also check for LANGUAGE= tag
+static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vorbis_comment *vc)
+{
+  char *hdr, *val;
+  char **cmt = vc->user_comments;
+
+  while(*cmt)
+  {
+    hdr = NULL;
+    if (!strncasecmp(*cmt, "ENCODED_USING=", 14))
+    {
+      hdr = "Software";
+      val = *cmt + 14;
+    }
+    else if (!strncasecmp(*cmt, "LANGUAGE=", 9))
+    {
+      val = *cmt + 9;
+      // check for -slang if subs are uninitialized yet
+      if (os->text && d->sub->id == -1 && demux_ogg_check_lang(val, dvdsub_lang))
+      {
+	d->sub->id = id;
+	mp_msg(MSGT_DEMUX, MSGL_V, "Stream language matched -slang: %s\n", val);
+      }
+      else
+	hdr = "Language";
+    }
+    else if (!strncasecmp(*cmt, "ENCODER_URL=", 12))
+    {
+      hdr = "Encoder URL";
+      val = *cmt + 12;
+    }
+    else if (!strncasecmp(*cmt, "TITLE=", 6))
+    {
+      hdr = "Name";
+      val = *cmt + 6;
+    }
+    if (hdr)
+      mp_msg(MSGT_DEMUX, MSGL_V, " %s: %s\n", hdr, val);
+    cmt++;
+  }
+}
+
 /// Calculate the timestamp and add the packet to the demux stream
 // return 1 if the packet was added, 0 otherwise
-static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* pack) {
+static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_packet* pack) {
   demuxer_t* d = ds->demuxer;
   demux_packet_t* dp;
   unsigned char* data;
@@ -403,8 +466,23 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   int flags = 0;
   void *context = NULL;
 
-  if (ds == d->sub) { // don't want to add subtitles to the demuxer for now
-    demux_ogg_add_sub(os,pack);
+  // If packet is an comment header then we try to get comments at first
+  if (pack->bytes >= 7 && !memcmp(pack->packet, "\003vorbis", 7))
+  {
+    vorbis_info vi;
+    vorbis_comment vc;
+
+    vorbis_info_init(&vi);
+    vorbis_comment_init(&vc);
+    vi.rate = 1L; // it's checked by vorbis_synthesis_headerin()
+    if(vorbis_synthesis_headerin(&vi, &vc, pack) == 0) // if no errors
+      demux_ogg_check_comments(d, os, id, &vc);
+    vorbis_comment_clear(&vc);
+    vorbis_info_clear(&vi);
+  }
+  if (os->text) {
+    if (id == d->sub->id) // don't want to add subtitles to the demuxer for now
+      demux_ogg_add_sub(os,pack);
     return 0;
   }
   // If packet is an header we jump it except for vorbis and theora
@@ -810,6 +888,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
           mp_msg(MSGT_DEMUX, MSGL_V, "OGG stream %d is text\n", ogg_d->num_sub);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
+	  ogg_d->subs[ogg_d->num_sub].text = 1;
           n_text++;
           demux_ogg_init_sub();
 	//// Unknown header type
@@ -850,7 +929,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       if(ds && !s->end_pos) {
 	/// Finish the page, otherwise packets will be lost
 	do {
-	  demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],&pack);
+	  demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],ogg_d->num_sub,&pack);
 	} while(ogg_stream_packetout(&ogg_d->subs[ogg_d->num_sub].stream,&pack) == 1);
       }
     }
@@ -954,11 +1033,11 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
       ds = d->audio;
     else if(id == d->video->id)
       ds = d->video;
-    else if (id == d->sub->id)
+    else if (ogg_d->subs[id].text)
       ds = d->sub;
 
     if(ds) {
-      if(!demux_ogg_add_packet(ds,&ogg_d->subs[id],&pack))
+      if(!demux_ogg_add_packet(ds,&ogg_d->subs[id],id,&pack))
 	continue; /// Unuseful packet, get another
       d->filepos = ogg_d->pos;
       return 1;
@@ -1180,7 +1259,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
         vo_sub = &ogg_sub;
         vo_osd_changed(OSDTYPE_SUBTITLE);
         clear_sub = -1;
-	demux_ogg_add_packet(ds,os,&op);
+	demux_ogg_add_packet(ds,os,ds->id,&op);
 	if(sh_audio)
 	  resync_audio_stream(sh_audio); 
 	return;
