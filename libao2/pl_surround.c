@@ -229,7 +229,7 @@ static int play(){
     pl_surround.Rs_delaybuf[pl_surround.delaybuf_pos++] =
       matrix[8]*in[0] + matrix[9]*in[1];
 #else
-    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos] =
+    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos++] =
       matrix[4]*in[0] + matrix[5]*in[1];
 #endif
     pl_surround.delaybuf_pos %= pl_surround.delaybuf_len;
