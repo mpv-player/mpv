@@ -25,6 +25,7 @@
 
 #include "vosub_vidix.h"
 #include "../vidix/vidixlib.h"
+#include "../postproc/rgb2rgb.h"
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
@@ -37,7 +38,7 @@
 static VDL_HANDLE vidix_handler = NULL;
 static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
-static unsigned image_Bpp,image_height,image_width,src_format;
+static unsigned image_Bpp,image_height,image_width,src_format,forced_fourcc=0;
 extern int verbose;
 static int video_on=0;
 
@@ -47,7 +48,6 @@ static vidix_fourcc_t	  vidix_fourcc;
 static vo_functions_t *   vo_server;
 static vidix_yuv_t	  dstrides;
 static uint32_t (*server_control)(uint32_t request, void *data, ...);
-
 
 static int  vidix_get_bes_da(bes_da_t *);
 static int  vidix_get_video_eq(vidix_video_eq_t *info);
@@ -141,6 +141,15 @@ void vidix_term( void )
   if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
 	vidix_stop();
 	vdlClose(vidix_handler);
+}
+
+static uint32_t vidix_draw_slice_swYV12(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+  uint8_t *dest;
+  dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+  dest += dstrides.y*y + x;
+  yv12toyuy2(image[0], image[1], image[2], dest, w, h, stride[0], stride[1],dstrides.y);
+  return 0;
 }
 
 static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -340,8 +349,24 @@ uint32_t vidix_query_fourcc(uint32_t format)
   if(verbose > 1) printf("vosub_vidix: query_format was called: %x (%s)\n",format,vo_format_name(format));
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
-  if (vidix_fourcc.depth == VID_DEPTH_NONE) return(0);
-  return(0x2); /* hw support without conversion */
+  if (vidix_fourcc.depth == VID_DEPTH_NONE)
+  {
+    if(format == IMGFMT_YV12)
+    {
+	vidix_fourcc.fourcc = IMGFMT_YUY2;
+	vdlQueryFourcc(vidix_handler,&vidix_fourcc);
+	if (vidix_fourcc.depth == VID_DEPTH_NONE) return 0;
+	else
+	{
+	    vo_server->draw_slice = vidix_draw_slice_swYV12;
+	    forced_fourcc=IMGFMT_YUY2;
+	    printf("vosub_vidix: WARNING!!! Using YV12 to YUY2 SW convertion\n");
+	    return 0x02;
+	}
+    }
+    return 0 ;
+  }
+  return 0x2; /* hw support without conversion */
 }
 
 int vidix_grkey_support(void)
@@ -476,6 +501,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	image_width = src_width;
 	image_height = src_height;
 	src_format = format;
+	if(forced_fourcc) format = forced_fourcc;
 	memset(&vidix_play,0,sizeof(vidix_playback_t));
 	vidix_play.fourcc = format;
 	vidix_play.capability = vidix_cap.flags; /* every ;) */
@@ -590,13 +616,16 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	}
         /* tune some info here */
 	sstride = src_width*2;
-	is_422_planes_eq = sstride == dstrides.y;
-        if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
-		vo_server->draw_slice = vidix_draw_slice_420;
-	else	vo_server->draw_slice =
-			is_422_planes_eq ?
-			vidix_draw_slice_packed_fast:
-			vidix_draw_slice_packed;
+	if(!forced_fourcc)
+	{
+	    is_422_planes_eq = sstride == dstrides.y;
+	    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
+		 vo_server->draw_slice = vidix_draw_slice_420;
+	    else vo_server->draw_slice =
+		 is_422_planes_eq ?
+		 vidix_draw_slice_packed_fast:
+		 vidix_draw_slice_packed;
+	}
 	return 0;
 }
 
@@ -604,7 +633,8 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 {
     if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
-    if(is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)))
+    if((is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) && 
+       !forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
     {
 	mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
 	mpi->stride[0]=dstrides.y;
