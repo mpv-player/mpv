@@ -31,7 +31,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 #ifdef KEEP_BUFFER
 	static unsigned char *previous_buffer = 0; /* to support Last-frame-copy */
 #endif
-	static is_lzo_inited = 0;
+	static int is_lzo_inited = 0;
 
 //	printf("frametype: %c, comtype: %c, encoded_size: %d, width: %d, height: %d\n",
 //	    encodedh->frametype, encodedh->comptype, encoded_size, width, height);
@@ -44,7 +44,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		if (encodedh->comptype == 'R')
 		{
 		    RTjpeg_init_decompress ( encoded+12, width, height );
-		    printf("Found RTjpeg tables (size: %d, width: %d, height: %d)\n",
+		    mp_msg(MSGT_DECVIDEO, MSGL_V, "Found RTjpeg tables (size: %d, width: %d, height: %d)\n",
 			encoded_size-12, width, height);
 		}
 		break;
@@ -61,8 +61,8 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		{
 		    /* frame using lzo, init lzo first if not inited */
 		    if ( lzo_init() != LZO_E_OK ) 
-			{
-			fprintf ( stderr, "%s\n", "lzo_init() failed !!!" );
+		    {
+			mp_msg(MSGT_DECVIDEO, MSGL_ERR, "LZO init failed\n");
 			return;
 		    }
 		    is_lzo_inited = 1;
@@ -81,14 +81,14 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			    buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
 			if (!buffer)
 			{
-			    printf ( "Error decompressing\n" );
+			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
 			    break;
 			}
 			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, buffer, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
-				printf ( "Error decompressing\n" );
-				break;
+			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
+			    break;
 			}
 			RTjpeg_decompressYUV420 ( ( __s8 * ) buffer, decoded );
 			break;
@@ -96,8 +96,8 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, decoded, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
-				printf ( "Error decompressing\n" );
-				break;
+			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
+			    break;
 			}
 			break;
 		    case 'N': /* black frame */
@@ -117,6 +117,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		break;
 	    }
 	    default:
-		printf("Unknown chunk: %c\n", encodedh->frametype);
+		mp_msg(MSGT_DECVIDEO, MSGL_V, "Nuppelvideo: unknwon frametype: %c\n",
+		    encodedh->frametype);
 	}
 }
