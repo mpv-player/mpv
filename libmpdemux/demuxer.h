@@ -25,6 +25,9 @@
 #define DEMUXER_TYPE_MAX 17
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
+// A virtual demuxer type for the network code
+#define DEMUXER_TYPE_PLAYLIST (2<<16)
+
 
 #define DEMUXER_TIME_NONE 0
 #define DEMUXER_TIME_PTS 1

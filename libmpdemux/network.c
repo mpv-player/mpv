@@ -49,6 +49,10 @@ static struct {
 	{ "video/x-ms-wvx", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wmv", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
+	// Playlists
+	{ "audio/x-scpls", DEMUXER_TYPE_PLAYLIST },
+	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
+	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST }
 };
 
 static struct {
@@ -70,6 +74,8 @@ static struct {
 	{ "y4m", DEMUXER_TYPE_Y4M },
 	{ "mp3", DEMUXER_TYPE_AUDIO },
 	{ "wav", DEMUXER_TYPE_AUDIO },
+	{ "pls", DEMUXER_TYPE_PLAYLIST },
+	{ "m3u", DEMUXER_TYPE_PLAYLIST }
 };
 
 streaming_ctrl_t *
@@ -706,6 +712,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		case DEMUXER_TYPE_FILM:
 		case DEMUXER_TYPE_ROQ:
 		case DEMUXER_TYPE_AUDIO:
+		case DEMUXER_TYPE_PLAYLIST:
 		case DEMUXER_TYPE_UNKNOWN:
 			// Generic start, doesn't need to filter
 			// the network stream, it's a raw stream
@@ -713,6 +720,8 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			if( ret<0 ) {
 				printf("nop_streaming_start failed\n");
 			}
+			if((*demuxer_type) == DEMUXER_TYPE_PLAYLIST)
+			  stream->type = STREAMTYPE_PLAYLIST;
 			break;
 		default:
 			printf("Unable to detect the streaming type\n");
