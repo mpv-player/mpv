@@ -160,6 +160,10 @@ static int init(int rate,int channels,int format,int flags){
 		printf("SDL: using %s audio driver\n", ao_subdevice);
 	}
 
+	ao_data.channels=channels;
+	ao_data.samplerate=rate;
+	ao_data.format=format;
+
 	ao_data.bps=channels*rate;
 	if(format != AFMT_U8 && format != AFMT_S8)
 	  ao_data.bps*=2;
