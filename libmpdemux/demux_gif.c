@@ -24,10 +24,12 @@ static unsigned char *pallete = NULL;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
 
+int my_read_gif(GifFileType *gif, uint8_t *buf, int len) {
+  return stream_read(gif->UserData, buf, len);
+}
+  
 int gif_check_file(demuxer_t *demuxer)
 {
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
   if (stream_read_int24(demuxer->stream) == GIF_SIGNATURE)
     return 1;
   return 0;
@@ -82,9 +84,6 @@ int demux_gif_fill_buffer(demuxer_t *demuxer)
           }
 	}
 	printf("\n");
-      // FIXME  support these:
-      } else if (code == 0x01) { // plaintext extension
-      } else if (code == 0xFF) { // application extension
       }
       while (p != NULL) {
         if (DGifGetExtensionNext(gif, &p) == GIF_ERROR) {
@@ -127,8 +126,7 @@ int demux_gif_fill_buffer(demuxer_t *demuxer)
 
     for (y = 0; y < gif->Image.Height; y++) {
       unsigned char *drow = dp->buffer;
-      int x = gif->Image.Height - y - 1; // BGR8 is flipped
-      unsigned char *gbuf = buf + (x * gif->Image.Width);
+      unsigned char *gbuf = buf + (y * gif->Image.Width);
 
       drow += gif->Image.Width * (y + gif->Image.Top);
       drow += gif->Image.Left;
@@ -156,11 +154,9 @@ demuxer_t* demux_open_gif(demuxer_t* demuxer)
   demuxer->seekable = 0; // FIXME
 
   // go back to the beginning
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
-  lseek(demuxer->stream->fd, 0, SEEK_SET);
+  stream_seek(stream,stream->start_pos);
 
-  gif = DGifOpenFileHandle(demuxer->stream->fd);
+  gif = DGifOpen(demuxer->stream, my_read_gif);
   if (!gif) {
     PrintGifError();
     return NULL;
