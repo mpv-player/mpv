@@ -436,6 +436,10 @@ static uint32_t parseSubDevice(const char *sd)
 {
    uint32_t flags;
    flags = 0;
+   lvo_name = NULL;
+#ifdef CONFIG_VIDIX
+   vidix_name = NULL;
+#endif
    if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
    else
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
