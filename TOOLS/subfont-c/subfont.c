@@ -17,17 +17,17 @@
 
 
 #ifndef OLD_FREETYPE2
-
 #include <ft2build.h>	
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
-
 #else			/* freetype 2.0.1 */
-
 #include <freetype/freetype.h>
 #include <freetype/ftglyph.h>
-
 #endif
+
+
+#include "../../bswap.h"
+
 
 #ifndef DEBUG
 #define DEBUG	0
@@ -418,14 +418,12 @@ FT_ULong decode_char(char c) {
     int outbytesleft = sizeof(FT_ULong);
 
     size_t count = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-//    if (count==-1) o = 0; // not OK, at least my iconv() returns E2BIG for all
-    if (outbytesleft!=0) o = 0;
 
-    /* convert unicode BE -> LE */
-    o = ((o>>24)&0xff)
-      | ((o>>8)&0xff00)
-      | ((o&0xff00)<<8)
-      | ((o&0xff)<<24);
+    /* convert unicode BigEndian -> MachineEndian */
+    o = be2me_32(o);
+
+    // if (count==-1) o = 0; // not OK, at least my iconv() returns E2BIG for all
+    if (outbytesleft!=0) o = 0;
 
     /* we don't want control characters */
     if (o>=0x7f && o<0xa0) o = 0;

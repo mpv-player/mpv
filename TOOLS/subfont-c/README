@@ -100,8 +100,6 @@ Notes:
   + Starting x position of each character and the bitmap width is aligned
 to multiple of 8 (required by mplayer).
 
-  + Currently subfont won't work on big-endian systems. I need help.
-
   + My development platform is RedHat 7.1.  FreeType versions tested are
 2.0.1 through 2.0.4.
 

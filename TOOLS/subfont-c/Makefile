@@ -12,10 +12,10 @@ CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
 
 subfont:	subfont.o
 
-subfont.o:	subfont.c Makefile
+subfont.o:	subfont.c Makefile ../../bswap.h
 
-subfont.S:	subfont.c
-	$(CC) $(CFLAGS) -S $^ -o $@
+subfont.S:	subfont.c Makefile ../../bswap.h
+	$(CC) $(CFLAGS) -S $< -o $@
 
 clean:
 	rm -f subfont subfont.o core
