@@ -38,7 +38,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-05"
+.TH MPlayer 1 "2003-01-11"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -396,6 +396,11 @@ Use \-audio\-demuxer 17 to force .mp3 detection.
 Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
 movie.
 .TP
+.B \-bandwidth <value>
+Specify the maximum bandwidth for network streaming (for servers that are
+able to send content in different bitrates).
+Usefull if you want to watch live streamed media behind a slow connection.
+.TP
 .B \-cdrom\-device <path\ to\ device>
 Override default CDROM drive name /dev/\:cdrom.
 .TP
@@ -482,6 +487,10 @@ Examples can be found below.
 .B \-csslib <filename>
 (old-style DVD option) This option is used to override the default location of
 libcss.so.
+.TP
+.B \-cuefile <filename> (see \-vcd too)
+Play (S)VCD from CDRwin's (bin/cue fileformat) disk image, described by the
+specified file.
 .TP
 .B \-demuxer <number>
 Force demuxer type.
@@ -691,12 +700,14 @@ Set tuner to <value> channel.
 .IPs chanlist=<value>
 available: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<channel>\-<name>,<channel>\-<name>,...
-Set names for channels. Use _ for spaces in names (or play with quoting ;-).
+Set names for channels.
+Use _ for spaces in names (or play with quoting ;-).
 The channel names will then be written using OSD, and the commands tv_step_channel,
 tv_set_channel and tv_last_channel will then be usable using a remote (see lirc).
 Not compatible with frequency parameter.
 Warning : The channel number will then be the position in the 'channels' list,
-beginning with 1. Ie. use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+beginning with 1.
+Example: use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
 .IPs audiorate=<value>
 set audio capture bitrate
 .IPs forceaudio
@@ -735,9 +746,9 @@ These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
 .IPs immediatemode=<bool>
 A value of 0 means capture and buffer audio and video together
-(default for mencoder). A value of 1 (default for mplayer) means to do
-video capture only and let the audio go through a loopback cable from
-the TV card to the soundcard.
+(default for mencoder).
+A value of 1 (default for mplayer) means to do video capture only and let the
+audio go through a loopback cable from the TV card to the soundcard.
 .RE
 .
 .TP
@@ -745,7 +756,7 @@ the TV card to the soundcard.
 Specify user name for http authentication.
 .TP
 .B \-vcd <track>
-Play video CD track from device instead of plain file.
+Play video CD track from a device or image file (see \-cuefile).
 .TP
 .B \-vid <id>
 Select video channel [MPG: 0\-15 ASF: 0\-255].
@@ -844,15 +855,20 @@ behaviour is to enable the support only for specific formats).
 .TP
 .B \-osdlevel <0\-3> (MPLAYER only)
 Specifies which mode the OSD should start in.
+
+.PD 0
 .RSs
-0: subtitles only
-.br
-1: volume + seek (default)
-.br
-2: volume + seek + timer + percentage
-.br
-3: volume + seek + timer + percentage + total time
+.IPs 0
+subtitles only
+.IPs 1
+volume + seek (default)
+.IPs 2
+volume + seek + timer + percentage
+.IPs 4
+volume + seek + timer + percentage + total time
 .RE
+.PD 1
+.
 .TP
 .B \-sid <id> (also see \-slang option)
 Turns on DVD subtitle displaying.
@@ -975,9 +991,9 @@ Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
 .TP
 .B \-subalign <0\-2>
-Specify how subtitles should be aligned with subpos. 0 means align at
-top (original/default behavior), 1 means align at center, and 2 means
-align at bottom.
+Specify how subtitles should be aligned with subpos.
+0 means align at top (original/default behavior), 1 means align at center, and
+2 means align at bottom.
 .TP
 .B \-subwidth <10\-100>
 Specify the maximum width of subtitles on the screen.
@@ -1209,6 +1225,9 @@ screen.
 Adjust contrast of video output (default 0).
 Works in similar manner as brightness.
 .TP
+.B \-dfbopts <value> (\-vo directfb2 only)
+Specify a parameter list for the directfb driver.
+.TP
 .B \-display <name>
 Specify the hostname and display number of the X server you want to display
 on.
@@ -1341,8 +1360,9 @@ Adjust where the output is on the screen initially.
 The x and y specifications are in pixels measured from the top-right of the
 screen to the top-right of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
-screen size in that direction. It also supports the standard option format to
-the standard X \-geometry option.
+screen size in that direction.
+It also supports the standard option format to the standard X \-geometry
+option.
 The values given must be integers.
 
 Note: This option is only supported by a few vo's, including tdfxfb, fbdev and
@@ -1978,18 +1998,22 @@ The values can be from -100 to 100.
 .IPs eq2[=gamma:cont:bright]
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness and
-contrast adjustment. The parameters are given as floating point
-values. Defaults are gamma=1.0, contrast=1.0, and brightness=0.0.
+contrast adjustment.
+The parameters are given as floating point values.
+Defaults are gamma=1.0, contrast=1.0, and brightness=0.0.
+The values are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
+in negative image) and -1\-1 for brightness.
 .IPs halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
 Useful for output to low-resolution display devices when hardware downscaling
-is poor quality or is not available. Can also be used as a primitive
-luma-only deinterlacer with very low cpu usage.
-By default, halfpack averages pairs of lines when downsampling. The
-optional parameter f can be 0 to only use even lines, or 1 to only use
-odd lines. Any other value for f gives the default (averaging)
-behavior.
+is poor quality or is not available.
+Can also be used as a primitive luma-only deinterlacer with very low cpu
+usage.
+By default, halfpack averages pairs of lines when downsampling.
+The optional parameter f can be 0 to only use even lines, or 1 to only use
+odd lines.
+Any other value for f gives the default (averaging) behavior.
 .IPs dint[=sense:level]
 Detects and drops first of interlaced frames in video stream.
 Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
@@ -2068,16 +2092,80 @@ t: linear (0) or cubic resampling (1)
 Use the 2x scale and interpolate algorithm for scaling and smoothing images.
 .IPs 1bpp
 1bpp bitmap to YUV/BGR 8/15/16/32 conversion
-.IPs eq2[=gamma:cont:bright]
-LUT-based software equalizer.
-The values can be from -100 to 100.
-TODO: document this
-.IPs yvu9
-TODO: document this
-.IPs bmovl
+.IPs "bmovl=hidden:opaque:<fifo>"
 Read bitmaps from a FIFO and display them in window.
-TODO: document this
+.
+.RSss
+hidden: sets the default value of the 'hidden' flag (boolean)
+.br
+opaque: flag switching between alphablended (transparent) and opaque (fast)
+mode
+.br
+fifo: path/filename for the FIFO (named pipe connecting mplayer -vop bmovl
+to the controlling application)
+.REss
+
+.RS
+FIFO commands are:
 .RE
+.RSss
+RGBA32 width height xpos ypos alpha clear
+.br
+followed by width*height*4 bytes of raw RGBA32 data.
+
+ABGR32 width height xpos ypos alpha clear
+.br
+followed by width*height*4 bytes of raw ABGR32 data.
+
+RGB24 width height xpos ypos alpha clear
+.br
+followed by width*height*3 bytes of raw RGB32 data.
+
+BGR24 width height xpos ypos alpha clear
+.br
+followed by width*height*3 bytes of raw BGR32 data.
+
+ALPHA width height xpos ypos alpha
+.br
+change alpha for area
+
+CLEAR width height xpos ypos
+.br
+clear area
+
+OPAQUE
+.br
+disable all alpha transparency.
+Send "ALPHA 0 0 0 0 0" to enable it again.
+
+HIDE
+.br
+hide bitmap
+
+SHOW
+.br
+show bitmap
+.REss
+
+.RS
+Arguments are:
+.RE
+.RSss
+width, height: size of image/area
+.br
+xpos, ypos: start blitting at X/Y position   
+.br
+alpha: set alpha difference.
+0 means same as original, 255 makes everything
+opaque, -255 makes everything transparent.
+If you set this to -255 you can then send a sequence of ALPHA-commands to set
+the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
+.br
+clear: clear the framebuffer before blitting.
+1 means clear, if 0, the image will just be blitted on top of the old one, so
+you don't need to send 1,8MB of RGBA32 data everytime a small part of the
+screen is updated.
+.REss
 .
 .TP
 .B \-x <x> (MPLAYER only)
@@ -2358,7 +2446,7 @@ here.
 .RE
 .PD 1
 
-.RS 7
+.RS
 Available options are:
 .RE
 .
@@ -2600,10 +2688,17 @@ or lower for encoding at quant=1):
 .br
 7 (JVT recommendation)
 .REss
-.IPs vstrict
-strict standard compliance.
-Only recommended if you want to feed the output into the mpeg4 reference
-decoder.
+.IPs vstrict=<-1\-1>
+(strict) standard compliance.
+.RSss
+0: disabled (default)
+.br
+1: only recommended if you want to feed the output into the mpeg4
+reference decoder
+.br
+-1: allows non-standard YV12 huffyuv encoding (20% smaller files, but
+can't be played back by the official huffyuv codec)
+.REss
 .IPs vdpart
 data partitioning.
 Adds 2 byte per video packet, improves error-resistance when transfering over
@@ -2791,6 +2886,9 @@ motion estimation pre-pass
 .IPs subq=<1\-8>
 subpel refinement quality (for qpel) (default: 8).
 Note: this has a significant effect on the speed
+.IPs psnr
+print the psnr (peak signal to noise ratio) for the whole video after encoding
+and store the per frame psnr in a file with name like 'psnr_012345.log'.
 .IPs mpeg_quant
 use MPEG quantizers instead of H.263.
 (default: disabled) (i.e.\& use H.263 quantizers)
