@@ -12,7 +12,7 @@
 <FONT CLASS="text">
 
 <P>
-<B>Question:</B> What is GCC 2.96 ? I can't find it at GNU site.
+<B>Question:</B> What is GCC 2.96 ? I can't find it at the GNU site.
 </P>
 
 <P>
@@ -39,35 +39,35 @@
 </I></P>
 
 <P>
-And for the people, who periodically asks what are the exact problems with
-gcc 2.96, my answer: <I>we don't know exactly.</I> 
+And for the people who periodically ask what the exact problems with
+gcc 2.96 are, my answer: <I>We don't know exactly.</I> 
 There were various problems and new problems / bugs come up periodically.
-It is <I>not a single bug/problem</I>. We just see various bugreports, mostly
+It is <I>not a single bug/problem</I>. We just see various bug reports, mostly
 gcc internal bugs, compiler syntax errors in source or bad code compiled. They
-all are solved using different version of gcc. I understand that gcc 2.96
-has different default optimization flags and they conflicts with our inline
+are all solved by using a different version of gcc. I understand that gcc 2.96
+has different default optimization flags and they conflict with our inline
 asm code, but we can't fix them, and we really don't want to fix them as they
 work with other compilers or gcc versions, and the fix may cause speed loss.
 </P>
 
 <P>
-I think that the gcc 2.96 should be fixed to be option-compatible with other
-releases, but redhat guys refused to do it. If someone interested - ask
+I think that gcc 2.96 should be fixed to be option-compatible with other
+releases, but Red Hat guys refused to do it. If someone is interested - ask
 Eugene K., avifile author, he has a long mailing with them, because they had
 the same problems with avifile. Finally he changed avifile source to
-<I>workaround</I> gcc 2.96 bugs...
-We simply has no interest and time to do it.
+<I>work around</I> gcc 2.96 bugs...
+We simply have no interest and time to do it.
 </P>
 
 <P>
 Ah, and about the pipe-in-comment bug: it wasn't really our bug.
-I've talked one of gcc maintainers, and he told me that gcc 2.96 and 3.x
-supports intel asm syntax, and it caused the pipe bug. But it <I>is</I> a bug,
+I've talked to one of the gcc maintainers, and he told me that gcc 2.96 and 3.x
+support Intel asm syntax, and it caused the pipe bug. But it <I>is</I> a bug,
 because gcc <I>silently</I>, without any warning, ignored the whole asm block!
 </P>
 
 <P>
-Other gcc 3.x problems comes from broken libstdc++ or glibc header (std_*.h)
+Other gcc 3.x problems come from a broken libstdc++ or glibc header (std_*.h)
 installation. They are not our fault. MPlayer compiles and works well with
 gcc 2.95.3 (<B>MEncoder</B> won't work with 2.95.2 because it miscompiles
 some MMX instructions). <B>2.96 and 3.0.x are broken</B>, but it depends on
@@ -91,9 +91,9 @@ Also read <A HREF="users_against_developers.html">this</A> text !!!</P>
 
 <P>
 No. You are wrong!
-Several projects (mostly which contain highly optimized inline asm code)
-had problems with gcc 2.96. For example: avifile, MESA / DRI, Wine, ffmpeg,
-lame, NuppelVideo, MySQL. But other projects already workarounded gcc bugs
+Several projects (mostly those which contain highly optimized inline asm code)
+had problems with gcc 2.96, for example: avifile, MESA / DRI, Wine, ffmpeg,
+lame, NuppelVideo, MySQL. But other projects already worked around gcc bugs
 (changed code which triggered compiler bugs) so they work for now.
 </P>
 
@@ -112,11 +112,11 @@ It only means that you are lucky, until you find a problem. But don't forget the
 <B>No.1 rule of gcc 2.96 users: NEVER REPORT BUGS OR PROBLEMS IF YOU ARE USING GCC 2.96</B> !
 
 <P>
-<B>Question:</B> Ok. Understood. But I want to give it a try... how to compile with gcc 2.96?
+<B>Question:</B> OK. Understood. But I want to give it a try... how to compile with gcc 2.96?
 </P>
 
 <P>
-<B>Answer:</B> Really? Are you sure? Ok. You know... here it is: ./configure --disable-gcc-checking
+<B>Answer:</B> Really? Are you sure? OK. You know... here it is: ./configure --disable-gcc-checking
 </P>
 
 <P>
