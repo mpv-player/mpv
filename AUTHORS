@@ -181,7 +181,7 @@ Artur Zaprzala <zybi@fanthom.irc.pl>
     * complete font generator prog + OSD font (TOOLS/subfont-c)
 
 Mihail Milushev <lanzz@lanzz.org>
-    * Gimp font generator plugin (TOOLS/subfont-gimp)
+    * GIMP font generator plugin (TOOLS/subfont-gimp)
 
 Adam Tla/lka <atlka@pg.gda.pl>
     * OSD/subtitle review, fixes, optimization, UTF8 support
