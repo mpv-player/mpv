@@ -344,6 +344,7 @@ printf("streaming_bufferize\n");
 	}
 	memcpy( streaming_ctrl->buffer, buffer, size );
 	streaming_ctrl->buffer_size = size;
+	return size;
 }
 
 int
