@@ -290,7 +290,7 @@ force usage of a specific audio format. For example:
     -afm 4         use a matching Win32 codec
     -afm 5         use aLaw/uLaw driver
     -afm 10        use libvorbis
-    -afm 11        use ffmpeg's MP3 decoder
+    -afm 11        use ffmpeg's MP3 decoder (even mp1)
 
 See -ac help for FULL list !
 .TP
@@ -314,7 +314,7 @@ audio delay in seconds (may be +/- float value)
 don't use avg. byte/sec value for A-V sync (AVI)
 .TP
 .B \-aid\ id
-select audio channel [MPG: 0-31  AVI: 1-99]
+select audio channel [MPG: 0-31  AVI: 1-99  DVD: 128-...]
 .TP
 .B \-vid\ id
 select video channel [MPG: 0-15  AVI:  -- ]
@@ -365,7 +365,7 @@ sync (default)
 frame dropping : decode all frames, video may skip
 .TP
 .B \-nodouble
-disable doublebuffering (default). Currently this is only honoured by the DGA driver.
+disable doublebuffering (default). Currently this is only honoured by the Xv and the DGA driver.
 With the DGA driver this also disables OSD support but yields some speed gain.
 .TP
 .B \-double
@@ -445,9 +445,9 @@ subtitle format, MPsub. Dumps a dump.mpsub file to current directory.
 .SH "ALPHA/BETA CODE"
 .TP
 .I NOTE
-These are included in this manpage just for completeness! If you don't
-know what are these, you DON'T need these! In either case, double-check the
-documentation !
+These are included in this manpage just for completeness! These may or may NOT
+work! If you don't know what are these, you DON'T need these! In either case,
+double-check the documentation !
 .TP
 .B \-br\ rate
 used with '-vo odivx' .
@@ -466,7 +466,7 @@ Specifies the output OpenDivX file. Won't overwrite.
 dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
 .TP
 .B \-sid
-specify DVD subtitle (?)
+specify DVD subtitle (?) (IT _WILL NOT_ DISPLAY! RTFM!)
 .IP
 .SH KEYBOARD CONTROL
 .TP
@@ -516,8 +516,8 @@ Fonts are searched in $HOME/.mplayer/font. There must be a font.desc
 file, and files with .RAW extension.
 .TP
 .I SUBTITLE FILES
-MPlayer currently supports 7 subtitle formats : MicroDVD, SubRip, unnamed,
-SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha).
+MPlayer currently supports 8 subtitle formats : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), and our own: MPsub.
 Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
     /mnt/cdrom/movie.sub
      (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
@@ -556,7 +556,7 @@ Check documentation !
 MPlayer is (C) 2000-2001
 .I Arpad Gereoffy <arpi@thot.banki.hu>
 
-This manpage is maintained by
+This manpage is written and maintained by
 .I Gabucino .
 .LP
 .SH STANDARD DISCLAIMER

@@ -175,7 +175,6 @@ magas szám megadása az ajánlott. Nem lehet a -pp-vel együtt használni!
 .TP
 .B \-ffactor\ szám
 a betûk körvonalának beállítása. Lehetséges beállítások:
-resample alphamap of the font. Can be:
 
         0    körvonal nélkül
         0.75 nagyon vékony fekete körvonal [alap]
@@ -221,23 +220,23 @@ Például a '-skin fittyfene' ezeket próbálja végig :
 a film aspektusarányának beállítása. MPEG file-oknál detektálódik,
 de AVI-knál nem. Példák:
 
-    -aspect 4:3  or -aspect 1.3333
-    -aspect 16:9 or -aspect 1.7777
+    -aspect 4:3  vagy -aspect 1.3333
+    -aspect 16:9 vagy -aspect 1.7777
 
 (van -noaspect ellenpár)
 .TP
 .B \-monitoraspect ratio
 a képernyõ aspektusarányának beállítása. Példák:
 
-    -aspect 4:3  or -aspect 1.3333
-    -aspect 16:9 or -aspect 1.7777
+    -monitoraspect 4:3  vagy 1.3333
+    -monitoraspect 16:9 vagy 1.7777
 
 .IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
 .I MEGJEGYZÉS
 Ezek az opciók jó eséllyel megoldást jelenthetnek esetleges lejátszási
-gondjaidra.. Továbba, olvasd el a dokumentációt !
+gondjaidra.. Továbbá, olvasd el a dokumentációt !
 .TP
 .B \-vc <név>
 a megadott video codec használata, a codecs.conf-ban szereplõ név szerint,
@@ -316,7 +315,7 @@ audio késleltetés, másodpercben megadva (lehet negatív)
 másik módszer használata a hang/kép szinkronhoz (AVI)
 .TP
 .B \-aid\ id
-másik audio csatorna választása [MPG: 0-31  AVI: 1-99]
+másik audio csatorna választása [MPG: 0-31  AVI: 1-99  DVD: 128-...]
 .TP
 .B \-vid\ id
 másik video csatorna választása [MPG: 0-15  AVI:  -- ]
@@ -470,7 +469,7 @@ video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 (nem túl használható)
 .TP
 .B \-sid
-DVD felirat megadása (?)
+DVD felirat megadása (?) (_NEM FOGJA_ MEGJELENÍTENI! RTFM!)
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP
@@ -521,8 +520,8 @@ Kell lennie ott egy font.desc file-nak, és .RAW kiterjesztésû
 betûtipusoknak.
 .TP
 .I FELIRATFILEOK
-Az MPlayer jelenleg 7 fajtát támogat : MicroDVD, SubRip, unnamed,
-SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha).
+Az MPlayer jelenleg 8 fajtát támogat : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), MPsub.
 A fileokat ebben a sorrendben keresi : (például /mnt/cdrom/movie.avi)
     /mnt/cdrom/movie.sub
      (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
