@@ -9,17 +9,18 @@ float monitor_aspect=4.0/3.0;
 void aspect(int *srcw, int *srch, int fitinw, int fitinh){
   int srcwcp, srchcp;
   srcwcp=*srcw; srchcp=*srch;
-  *srcw=fitinw;
-  *srch=(int)(((float)fitinw / (float)srcwcp * (float)srchcp)
+  srcwcp=fitinw;
+  srchcp=(int)(((float)fitinw / (float)*srcw * (float)*srch)
             * ((float)fitinh/((float)fitinw/monitor_aspect)));
-  *srch+=*srch%2; // round
-  //printf("aspect rez wh: %dx%d\n",*srcw,*srch);
-  if(*srch>fitinh || *srch<srchcp){
-    *srch=fitinh;
-    *srcw=(int)(((float)fitinh / (float)srchcp * (float)srcwcp)
+  srchcp+=srchcp%2; // round
+  //printf("aspect rez wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
+  if(srchcp>fitinh || srchcp<*srch){
+    srchcp=fitinh;
+    srcwcp=(int)(((float)fitinh / (float)*srch * (float)*srcw)
               * ((float)fitinw/((float)fitinh/(1/monitor_aspect))));
-    *srcw+=*srcw%2; // round
+    srcwcp+=srcwcp%2; // round
   }
-  //printf("aspect ret wh: %dx%d\n",*srcw,*srch);
+  //printf("aspect ret wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
+  *srcw=srcwcp; *srch=srchcp;
 }
 
