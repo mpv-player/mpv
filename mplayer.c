@@ -1223,6 +1223,7 @@ if(1)
 
     // Increase video timers:
     sh_video->num_frames+=frame_time;
+    ++sh_video->num_frames_decoded;
     frame_time*=sh_video->frametime;
     if(file_format==DEMUXER_TYPE_ASF && !force_fps){
         // .ASF files has no fixed FPS - just frame durations!
@@ -1377,9 +1378,9 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        if(!quiet) printf("A:%6.1f V:%6.1f  A-V:%7.3f ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",
+        if(!quiet) printf("A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
-          (int)sh_video->num_frames,
+          (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
           (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
           (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
           (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0

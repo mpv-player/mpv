@@ -56,6 +56,7 @@ typedef struct {
 //  unsigned int bitrate;
   // buffers:
   float num_frames;       // number of frames played
+  int num_frames_decoded;       // number of frames decoded
   char *our_out_buffer;
   // win32 codec stuff:
   AVIStreamHeader video;
