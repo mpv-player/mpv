@@ -25,7 +25,7 @@ speed_mult <value>
     Multiply the current speed by <value>.
 
 edl_mark
-    ???
+    Write the current position into the EDL file.
 
 audio_delay <value>
     Adjust the audio delay by <value> seconds.
@@ -67,8 +67,7 @@ osd [<level>]
     Toggle OSD mode or set it to level when <level> >= 0.
 
 osd_show_text <string>
-    Show <string> on the OSD. Spaces need to be escaped with \, otherwise
-    only the first word will be shown.
+    Show <string> on the OSD.
 
 volume <value>
     Increase/decrease volume.
@@ -132,8 +131,11 @@ switch_ratio [<value>]
     as a float (e.g. 1.77778 for 16/9).
     There might be problems with some video filters.
 
-panscan <value> [value2]
-    ???
+panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
+    Increase or decrease the pan-and-scan range by <value>, 1.0 is the maximum.
+    Negative values decrease the pan-and-scan range.
+    If <absolute> is != 0, then the pan-and scan range is interpreted as an
+    absolute range.
 
 loadfile <file|url>
     Load the given file/URL.
@@ -169,7 +171,7 @@ dvdnav <button>
         6 select
 
 dvdnav_event <value>
-    ???
+    Send <value> as DVDNAV event. DVDNAV support in MPlayer is disabled.
 
 tv_step_channel <channel>
     Select next/previous TV channel.
@@ -216,11 +218,16 @@ dvb_set_channel <channel_number> <card_number>
 screenshot
     Take a screenshot. Currently not implemented in any video output driver.
 
-menu <value>
-    ???
+menu <command>
+    Execute an OSD menu command.
+        up     Move cursor up.
+        down   Move cursor down.
+        ok     Accept selection.
+        cancel Cancel selection.
+        hide   Hide the OSD menu.
 
-set_menu <value>
-    ???
+set_menu <menu_name>
+    Display the menu named <menu_name>.
 
 help
     ???
@@ -232,7 +239,7 @@ hide
     ???
 
 run <value>
-    ???
+    Run <value> as shell command.
 
 All commands can be prefixed with "pausing ", causing MPlayer to get into
 paused mode as soon as possible after processing the command.
