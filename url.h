@@ -5,7 +5,7 @@ typedef struct {
 	char *url;
 	char *protocol;
 	char *hostname;
-	char *path;
+	char *file;
 	unsigned int port;
 } URL_t;
 

@@ -16,6 +16,13 @@ set_url(char* url) {
 		printf("Memory allocation failed!\n");
 		exit(1);
 	}
+	// Initialisation of the URL container members
+	Curl->url = NULL;
+	Curl->protocol = NULL;
+	Curl->hostname = NULL;
+	Curl->file = NULL;
+	Curl->port = 0;
+
 	// Copy the url in the URL container
 	Curl->url = (char*)malloc(strlen(url)+1);
 	if( Curl->url==NULL ) {
@@ -27,7 +34,7 @@ set_url(char* url) {
 	// extract the protocol
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
-		printf("Malformed URL!\n");
+		printf("Malformed URL or not an URL!\n");
 		return NULL;
 	}
 	pos1 = ptr1-url;
@@ -62,6 +69,7 @@ set_url(char* url) {
 		exit(1);
 	}
 	strncpy(Curl->hostname, ptr1+3, pos2-pos1-3);
+	Curl->hostname[pos2-pos1-3] = '\0';
 
 	// Look if a path is given
 	ptr2 = strstr(ptr1+3, "/");
@@ -70,12 +78,12 @@ set_url(char* url) {
 		// check if it's not a trailing '/'
 		if( strlen(ptr2)>1 ) {
 			// copy the path/filename in the URL container
-			Curl->path = (char*)malloc(strlen(ptr2));
-			if( Curl->path==NULL ) {
+			Curl->file = (char*)malloc(strlen(ptr2));
+			if( Curl->file==NULL ) {
 				printf("Memory allocation failed!\n");
 				exit(1);
 			}
-			strcpy(Curl->path, ptr2+1);
+			strcpy(Curl->file, ptr2+1);
 		}
 	}
 	
@@ -88,6 +96,6 @@ free_url(URL_t* url) {
 	if(url->url) free(url->url);
 	if(url->protocol) free(url->protocol);
 	if(url->hostname) free(url->hostname);
-	if(url->path) free(url->path);
+	if(url->file) free(url->file);
 	free(url);
 }
