@@ -26,6 +26,8 @@
 #include <inttypes.h>
 
 #include "mpeg2.h"
+#include "attributes.h"
+#include "mpeg2_internal.h"
 
 #ifdef ACCEL_DETECT
 #ifdef ARCH_X86
@@ -35,7 +37,7 @@ static inline uint32_t arch_accel (void)
     int AMD;
     uint32_t caps;
 
-#ifndef PIC
+#if !defined(PIC) && !defined(__PIC__)
 #define cpuid(op,eax,ebx,ecx,edx)	\
     __asm__ ("cpuid"			\
 	     : "=a" (eax),		\
@@ -106,7 +108,7 @@ static inline uint32_t arch_accel (void)
 }
 #endif /* ARCH_X86 */
 
-#ifdef ARCH_PPC
+#if defined(ARCH_PPC) || defined(ARCH_SPARC)
 #include <signal.h>
 #include <setjmp.h>
 
@@ -124,6 +126,7 @@ static RETSIGTYPE sigill_handler (int sig)
     siglongjmp (jmpbuf, 1);
 }
 
+#ifdef ARCH_PPC
 static inline uint32_t arch_accel (void)
 {
     static RETSIGTYPE (* oldsig) (int);
@@ -146,10 +149,48 @@ static inline uint32_t arch_accel (void)
 		  :
 		  : "r" (-1));
 
+    canjump = 0;
+
     signal (SIGILL, oldsig);
     return MPEG2_ACCEL_PPC_ALTIVEC;
 }
 #endif /* ARCH_PPC */
+
+#ifdef ARCH_SPARC
+static inline uint32_t arch_accel (void)
+{
+    static RETSIGTYPE (* oldsig) (int);
+
+    oldsig = signal (SIGILL, sigill_handler);
+    if (sigsetjmp (jmpbuf, 1)) {
+	signal (SIGILL, oldsig);
+	return 0;
+    }
+
+    canjump = 1;
+
+    /* pdist %f0, %f0, %f0 */
+    __asm__ __volatile__(".word\t0x81b007c0");
+
+    canjump = 0;
+
+    if (sigsetjmp (jmpbuf, 1)) {
+	signal (SIGILL, oldsig);
+	return MPEG2_ACCEL_SPARC_VIS;
+    }
+
+    canjump = 1;
+
+    /* edge8n %g0, %g0, %g0 */
+    __asm__ __volatile__(".word\t0x81b00020");
+
+    canjump = 0;
+
+    signal (SIGILL, oldsig);
+    return MPEG2_ACCEL_SPARC_VIS | MPEG2_ACCEL_SPARC_VIS2;
+}
+#endif /* ARCH_SPARC */
+#endif /* ARCH_PPC || ARCH_SPARC */
 
 #ifdef ARCH_ALPHA
 static inline uint32_t arch_accel (void)
@@ -167,7 +208,7 @@ static inline uint32_t arch_accel (void)
 #endif
 }
 #endif /* ARCH_ALPHA */
-#endif
+#endif /* ACCEL_DETECT */
 
 uint32_t mpeg2_detect_accel (void)
 {
@@ -175,11 +216,8 @@ uint32_t mpeg2_detect_accel (void)
 
     accel = 0;
 #ifdef ACCEL_DETECT
-#ifdef LIBMPEG2_MLIB
-    accel = MPEG2_ACCEL_MLIB;
-#endif
-#if defined (ARCH_X86) || defined (ARCH_PPC) || defined (ARCH_ALPHA)
-    accel |= arch_accel ();
+#if defined (ARCH_X86) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
+    accel = arch_accel ();
 #endif
 #endif
     return accel;

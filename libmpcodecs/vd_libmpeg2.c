@@ -12,7 +12,7 @@
 
 static vd_info_t info = 
 {
-	"MPEG 1/2 Video decoder libmpeg2-v0.3.1",
+	"MPEG 1/2 Video decoder libmpeg2-v0.4.0b",
 	"libmpeg2",
 	"A'rpi & Fabian Franz",
 	"Aaron & Walken",
@@ -24,6 +24,7 @@ LIBVD_EXTERN(libmpeg2)
 //#include "libvo/video_out.h"	// FIXME!!!
 
 #include "libmpeg2/mpeg2.h"
+#include "libmpeg2/attributes.h"
 #include "libmpeg2/mpeg2_internal.h"
 //#include "libmpeg2/convert.h"
 
@@ -111,7 +112,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     while(1){
 	int state=mpeg2_parse (mpeg2dec);
 	switch(state){
-	case -1:
+	case STATE_BUFFER:
 	    // parsing of the passed buffer finished, return.
 //	    if(!mpi) printf("\nNO PICTURE!\n");
 	    return mpi;
@@ -153,28 +154,18 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    else mpi->fields &= ~MP_IMGFIELD_REPEAT_FIRST;
 	    mpi->fields |= MP_IMGFIELD_ORDERED;
 
-#ifdef MPEG12_POSTPROC
-	    if(!mpi->qscale){
-		mpi->qstride=(info->sequence->picture_width+15)>>4;
-		mpi->qscale=malloc(mpi->qstride*((info->sequence->picture_height+15)>>4));
-	    }
-	    mpeg2dec->decoder.quant_store=mpi->qscale;
-	    mpeg2dec->decoder.quant_stride=mpi->qstride;
-	    mpi->pict_type=type; // 1->I, 2->P, 3->B
-	    mpi->qscale_type= 1;
-#endif
-
 	    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
 		!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		   // nice, filter/vo likes draw_callback :)
 		    mpeg2dec->decoder.convert=draw_slice;
-		    mpeg2dec->decoder.fbuf_id=sh;
+		    mpeg2dec->decoder.convert_id=sh;
 		} else
 		    mpeg2dec->decoder.convert=NULL;
 	    break;
 	}
 	case STATE_SLICE:
 	case STATE_END:
+	case STATE_INVALID_END:
 	    // decoding done:
 	    if(mpi) printf("AJAJJJJJJJJ2!\n");
 	    if(info->display_fbuf) mpi=info->display_fbuf->id;

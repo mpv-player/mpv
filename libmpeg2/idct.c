@@ -1,6 +1,6 @@
 /*
  * idct.c
- * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
@@ -27,29 +27,35 @@
 #include <inttypes.h>
 
 #include "mpeg2.h"
-#include "mpeg2_internal.h"
 #include "attributes.h"
+#include "mpeg2_internal.h"
 
-#define W1 2841 /* 2048*sqrt (2)*cos (1*pi/16) */
-#define W2 2676 /* 2048*sqrt (2)*cos (2*pi/16) */
-#define W3 2408 /* 2048*sqrt (2)*cos (3*pi/16) */
-#define W5 1609 /* 2048*sqrt (2)*cos (5*pi/16) */
-#define W6 1108 /* 2048*sqrt (2)*cos (6*pi/16) */
-#define W7 565  /* 2048*sqrt (2)*cos (7*pi/16) */
+#define W1 2841 /* 2048 * sqrt (2) * cos (1 * pi / 16) */
+#define W2 2676 /* 2048 * sqrt (2) * cos (2 * pi / 16) */
+#define W3 2408 /* 2048 * sqrt (2) * cos (3 * pi / 16) */
+#define W5 1609 /* 2048 * sqrt (2) * cos (5 * pi / 16) */
+#define W6 1108 /* 2048 * sqrt (2) * cos (6 * pi / 16) */
+#define W7 565  /* 2048 * sqrt (2) * cos (7 * pi / 16) */
 
 /* idct main entry point  */
 void (* mpeg2_idct_copy) (int16_t * block, uint8_t * dest, int stride);
 void (* mpeg2_idct_add) (int last, int16_t * block,
 			 uint8_t * dest, int stride);
 
-static uint8_t clip_lut[1024];
-#define CLIP(i) ((clip_lut+384)[(i)])
+/*
+ * In legal streams, the IDCT output should be between -384 and +384.
+ * In corrupted streams, it is possible to force the IDCT output to go
+ * to +-3826 - this is the worst case for a column IDCT where the
+ * column inputs are 16-bit values.
+ */
+uint8_t mpeg2_clip[3840 * 2 + 256];
+#define CLIP(i) ((mpeg2_clip + 3840)[i])
 
 #if 0
 #define BUTTERFLY(t0,t1,W0,W1,d0,d1)	\
 do {					\
-    t0 = W0*d0 + W1*d1;			\
-    t1 = W0*d1 - W1*d0;			\
+    t0 = W0 * d0 + W1 * d1;		\
+    t1 = W0 * d1 - W1 * d0;		\
 } while (0)
 #else
 #define BUTTERFLY(t0,t1,W0,W1,d0,d1)	\
@@ -69,7 +75,7 @@ static inline void idct_row (int16_t * const block)
     /* shortcut */
     if (likely (!(block[1] | ((int32_t *)block)[1] | ((int32_t *)block)[2] |
 		  ((int32_t *)block)[3]))) {
-	uint32_t tmp = (uint16_t) (block[0] << 3);
+	uint32_t tmp = (uint16_t) (block[0] >> 1);
 	tmp |= tmp << 16;
 	((int32_t *)block)[0] = tmp;
 	((int32_t *)block)[1] = tmp;
@@ -78,7 +84,7 @@ static inline void idct_row (int16_t * const block)
 	return;
     }
 
-    d0 = (block[0] << 11) + 128;
+    d0 = (block[0] << 11) + 2048;
     d1 = block[1];
     d2 = block[2] << 11;
     d3 = block[3];
@@ -100,17 +106,17 @@ static inline void idct_row (int16_t * const block)
     b3 = t1 + t3;
     t0 -= t2;
     t1 -= t3;
-    b1 = ((t0 + t1) * 181) >> 8;
-    b2 = ((t0 - t1) * 181) >> 8;
+    b1 = ((t0 + t1) >> 8) * 181;
+    b2 = ((t0 - t1) >> 8) * 181;
 
-    block[0] = (a0 + b0) >> 8;
-    block[1] = (a1 + b1) >> 8;
-    block[2] = (a2 + b2) >> 8;
-    block[3] = (a3 + b3) >> 8;
-    block[4] = (a3 - b3) >> 8;
-    block[5] = (a2 - b2) >> 8;
-    block[6] = (a1 - b1) >> 8;
-    block[7] = (a0 - b0) >> 8;
+    block[0] = (a0 + b0) >> 12;
+    block[1] = (a1 + b1) >> 12;
+    block[2] = (a2 + b2) >> 12;
+    block[3] = (a3 + b3) >> 12;
+    block[4] = (a3 - b3) >> 12;
+    block[5] = (a2 - b2) >> 12;
+    block[6] = (a1 - b1) >> 12;
+    block[7] = (a0 - b0) >> 12;
 }
 
 static inline void idct_col (int16_t * const block)
@@ -139,10 +145,10 @@ static inline void idct_col (int16_t * const block)
     BUTTERFLY (t2, t3, W3, W5, d1, d2);
     b0 = t0 + t2;
     b3 = t1 + t3;
-    t0 = (t0 - t2) >> 8;
-    t1 = (t1 - t3) >> 8;
-    b1 = (t0 + t1) * 181;
-    b2 = (t0 - t1) * 181;
+    t0 -= t2;
+    t1 -= t3;
+    b1 = ((t0 + t1) >> 8) * 181;
+    b2 = ((t0 - t1) >> 8) * 181;
 
     block[8*0] = (a0 + b0) >> 17;
     block[8*1] = (a1 + b1) >> 17;
@@ -173,8 +179,8 @@ static void mpeg2_idct_copy_c (int16_t * block, uint8_t * dest,
 	dest[6] = CLIP (block[6]);
 	dest[7] = CLIP (block[7]);
 
-	block[0] = 0;	block[1] = 0;	block[2] = 0;	block[3] = 0;
-	block[4] = 0;	block[5] = 0;	block[6] = 0;	block[7] = 0;
+	((int32_t *)block)[0] = 0;	((int32_t *)block)[1] = 0;
+	((int32_t *)block)[2] = 0;	((int32_t *)block)[3] = 0;
 
 	dest += stride;
 	block += 8;
@@ -186,7 +192,7 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
 {
     int i;
 
-    if (last != 129 || (block[0] & 7) == 4) {
+    if (last != 129 || (block[0] & (7 << 4)) == (4 << 4)) {
 	for (i = 0; i < 8; i++)
 	    idct_row (block + 8 * i);
 	for (i = 0; i < 8; i++)
@@ -201,8 +207,8 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
 	    dest[6] = CLIP (block[6] + dest[6]);
 	    dest[7] = CLIP (block[7] + dest[7]);
 
-	    block[0] = 0;	block[1] = 0;	block[2] = 0;	block[3] = 0;
-	    block[4] = 0;	block[5] = 0;	block[6] = 0;	block[7] = 0;
+	    ((int32_t *)block)[0] = 0;	((int32_t *)block)[1] = 0;
+	    ((int32_t *)block)[2] = 0;	((int32_t *)block)[3] = 0;
 
 	    dest += stride;
 	    block += 8;
@@ -210,7 +216,7 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
     } else {
 	int DC;
 
-	DC = (block[0] + 4) >> 3;
+	DC = (block[0] + 64) >> 7;
 	block[0] = block[63] = 0;
 	i = 8;
 	do {
@@ -241,33 +247,28 @@ void mpeg2_idct_init (uint32_t accel)
     } else
 #endif
 #ifdef ARCH_PPC
-#ifdef HAVE_ALTIVEC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
 	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
 	mpeg2_idct_add = mpeg2_idct_add_altivec;
 	mpeg2_idct_altivec_init ();
     } else
 #endif
-#endif
 #ifdef ARCH_ALPHA
 #ifdef CAN_COMPILE_ALPHA_MVI
     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
 	mpeg2_idct_add = mpeg2_idct_add_mvi;
-	mpeg2_idct_alpha_init (0);
+	mpeg2_idct_alpha_init ();
     } else
 #endif
     if (accel & MPEG2_ACCEL_ALPHA) {
+	int i;
+
 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
 	mpeg2_idct_add = mpeg2_idct_add_alpha;
-	mpeg2_idct_alpha_init (1);
-    } else
-#endif
-#ifdef LIBMPEG2_MLIB
-    if (accel & MPEG2_ACCEL_MLIB) {
-	mpeg2_idct_copy = mpeg2_idct_copy_mlib_non_ieee;
-	mpeg2_idct_add = (getenv ("MLIB_NON_IEEE") ?
-			  mpeg2_idct_add_mlib_non_ieee : mpeg2_idct_add_mlib);
+	mpeg2_idct_alpha_init ();
+	for (i = -3840; i < 3840 + 256; i++)
+	    CLIP(i) = (i < 0) ? 0 : ((i > 255) ? 255 : i);
     } else
 #endif
     {
@@ -277,8 +278,8 @@ void mpeg2_idct_init (uint32_t accel)
 
 	mpeg2_idct_copy = mpeg2_idct_copy_c;
 	mpeg2_idct_add = mpeg2_idct_add_c;
-	for (i = -384; i < 640; i++)
-	    clip_lut[i+384] = (i < 0) ? 0 : ((i > 255) ? 255 : i);
+	for (i = -3840; i < 3840 + 256; i++)
+	    CLIP(i) = (i < 0) ? 0 : ((i > 255) ? 255 : i);
 	for (i = 0; i < 64; i++) {
 	    j = mpeg2_scan_norm[i];
 	    mpeg2_scan_norm[i] = ((j & 0x36) >> 1) | ((j & 0x09) << 2);

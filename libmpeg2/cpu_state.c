@@ -27,8 +27,8 @@
 #include <inttypes.h>
 
 #include "mpeg2.h"
-#include "mpeg2_internal.h"
 #include "attributes.h"
+#include "mpeg2_internal.h"
 #ifdef ARCH_X86
 #include "mmx.h"
 #endif
@@ -43,7 +43,7 @@ static void state_restore_mmx (cpu_state_t * state)
 }
 #endif
 
-#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+#ifdef ARCH_PPC
 #ifdef HAVE_ALTIVEC_H	/* gnu */
 #define LI(a,b) "li " #a "," #b "\n\t"
 #define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"

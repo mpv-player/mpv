@@ -1,6 +1,6 @@
 /*
  * mpeg2_internal.h
- * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
@@ -29,12 +29,11 @@
 #define MACROBLOCK_QUANT 16
 #define DCT_TYPE_INTERLACED 32
 /* motion_type */
-#define MOTION_TYPE_MASK (3*64)
-#define MOTION_TYPE_BASE 64
-#define MC_FIELD (1*64)
-#define MC_FRAME (2*64)
-#define MC_16X8 (2*64)
-#define MC_DMV (3*64)
+#define MOTION_TYPE_SHIFT 6
+#define MC_FIELD 1
+#define MC_FRAME 2
+#define MC_16X8 2
+#define MC_DMV 3
 
 /* picture structure */
 #define TOP_FIELD 1
@@ -47,6 +46,8 @@
 #define B_TYPE 3
 #define D_TYPE 4
 
+typedef void mpeg2_mc_fct (uint8_t *, const uint8_t *, int, int);
+
 typedef struct {
     uint8_t * ref[2][3];
     uint8_t ** ref2[2];
@@ -54,12 +55,13 @@ typedef struct {
     int f_code[2];
 } motion_t;
 
-struct decoder_s {
+typedef void motion_parser_t (mpeg2_decoder_t * decoder,
+			      motion_t * motion,
+			      mpeg2_mc_fct * const * table);
+
+struct mpeg2_decoder_s {
     /* first, state that carries information from one macroblock to the */
     /* next inside a slice, and is never used outside of mpeg2_slice() */
-
-    /* DCT coefficients - should be kept aligned ! */
-    int16_t DCTblock[64];
 
     /* bit parsing stuff */
     uint32_t bitstream_buf;		/* current 32 bit working set */
@@ -67,14 +69,13 @@ struct decoder_s {
     const uint8_t * bitstream_ptr;	/* buffer with stream data */
 
     uint8_t * dest[3];
-    uint8_t * picture_dest[3];
-    void (* convert) (void * fbuf_id, uint8_t * const * src,
-		      unsigned int v_offset);
-    void * fbuf_id;
 
     int offset;
     int stride;
     int uv_stride;
+    int slice_stride;
+    int slice_uv_stride;
+    int stride_frame;
     unsigned int limit_x;
     unsigned int limit_y_16;
     unsigned int limit_y_8;
@@ -85,24 +86,34 @@ struct decoder_s {
     /* predictors */
     motion_t b_motion;
     motion_t f_motion;
+    motion_parser_t * motion_parser[5];
 
     /* predictor for DC coefficients in intra blocks */
     int16_t dc_dct_pred[3];
 
-    int quantizer_scale;	/* remove */
-    int dmv_offset;		/* remove */
-    unsigned int v_offset;	/* remove */
+    /* DCT coefficients */
+    int16_t DCTblock[64] ATTR_ALIGN(64);
+
+    uint8_t * picture_dest[3];
+    void (* convert) (void * convert_id, uint8_t * const * src,
+		      unsigned int v_offset);
+    void * convert_id;
+
+    int dmv_offset;
+    unsigned int v_offset;
 
     /* now non-slice-specific information */
 
     /* sequence header stuff */
-    uint8_t intra_quantizer_matrix [64];
-    uint8_t non_intra_quantizer_matrix [64];
+    uint16_t * quantizer_matrix[4];
+    uint16_t (* chroma_quantizer[2])[64];
+    uint16_t quantizer_prescale[4][32][64];
 
     /* The width and height of the picture snapped to macroblock units */
     int width;
     int height;
     int vertical_position_extension;
+    int chroma_format;
 
     /* picture header stuff */
 
@@ -120,8 +131,6 @@ struct decoder_s {
     /* bool to indicate whether intra blocks have motion vectors */
     /* (for concealment) */
     int concealment_motion_vectors;
-    /* bit to indicate which quantization table to use */
-    int q_scale_type;
     /* bool to use different vlc tables */
     int intra_vlc_format;
     /* used for DMV MC */
@@ -135,25 +144,21 @@ struct decoder_s {
     int second_field;
 
     int mpeg1;
-
-    /* for MPlayer: */
-    char* quant_store;
-    int   quant_stride;
 };
 
 typedef struct {
-    fbuf_t fbuf;
+    mpeg2_fbuf_t fbuf;
 } fbuf_alloc_t;
 
 struct mpeg2dec_s {
-    decoder_t decoder;
+    mpeg2_decoder_t decoder;
 
     mpeg2_info_t info;
 
     uint32_t shift;
     int is_display_initialized;
-    int (* action) (struct mpeg2dec_s * mpeg2dec);
-    int state;
+    mpeg2_state_t (* action) (struct mpeg2dec_s * mpeg2dec);
+    mpeg2_state_t state;
     uint32_t ext_state;
 
     /* allocated in init - gcc has problems allocating such big structures */
@@ -165,10 +170,10 @@ struct mpeg2dec_s {
     /* last start code ? */
     uint8_t code;
 
-    /* PTS */
-    uint32_t pts_current, pts_previous;
-    int num_pts;
-    int bytes_since_pts;
+    /* picture tags */
+    uint32_t tag_current, tag2_current, tag_previous, tag2_previous;
+    int num_tags;
+    int bytes_since_tag;
 
     int first;
     int alloc_index_user;
@@ -176,27 +181,39 @@ struct mpeg2dec_s {
     uint8_t first_decode_slice;
     uint8_t nb_decode_slices;
 
-    sequence_t new_sequence;
-    sequence_t sequence;
-    picture_t pictures[4];
-    picture_t * picture;
-    /*const*/ fbuf_t * fbuf[3];	/* 0: current fbuf, 1-2: prediction fbufs */
+    unsigned int user_data_len;
+
+    mpeg2_sequence_t new_sequence;
+    mpeg2_sequence_t sequence;
+    mpeg2_gop_t new_gop;
+    mpeg2_gop_t gop;
+    mpeg2_picture_t new_picture;
+    mpeg2_picture_t pictures[4];
+    mpeg2_picture_t * picture;
+    /*const*/ mpeg2_fbuf_t * fbuf[3];	/* 0: current fbuf, 1-2: prediction fbufs */
 
     fbuf_alloc_t fbuf_alloc[3];
     int custom_fbuf;
 
     uint8_t * yuv_buf[3][3];
     int yuv_index;
-    void * convert_id;
-    int convert_size[3];
-    void (* convert_start) (void * id, uint8_t * const * dest, int flags);
-    void (* convert_copy) (void * id, uint8_t * const * src,
-			   unsigned int v_offset);
+    mpeg2_convert_t * convert;
+    void * convert_arg;
+    unsigned int convert_id_size;
+    int convert_stride;
+    void (* convert_start) (void * id, const mpeg2_fbuf_t * fbuf,
+			    const mpeg2_picture_t * picture,
+			    const mpeg2_gop_t * gop);
 
     uint8_t * buf_start;
     uint8_t * buf_end;
 
     int16_t display_offset_x, display_offset_y;
+
+    int copy_matrix;
+    int8_t q_scale_type, scaled[4];
+    uint8_t quantizer_matrix[4][64];
+    uint8_t new_quantizer_matrix[4][64];
 };
 
 typedef struct {
@@ -206,15 +223,6 @@ typedef struct {
     int dummy;
 } cpu_state_t;
 
-/* alloc.c */
-#define ALLOC_MPEG2DEC 0
-#define ALLOC_CHUNK 1
-#define ALLOC_YUV 2
-#define ALLOC_CONVERT_ID 3
-#define ALLOC_CONVERTED 4
-void * mpeg2_malloc (int size, int reason);
-void mpeg2_free (void * buf);
-
 /* cpu_accel.c */
 uint32_t mpeg2_detect_accel (void);
 
@@ -222,33 +230,27 @@ uint32_t mpeg2_detect_accel (void);
 void mpeg2_cpu_state_init (uint32_t accel);
 
 /* decode.c */
-int mpeg2_seek_sequence (mpeg2dec_t * mpeg2dec);
-int mpeg2_seek_header (mpeg2dec_t * mpeg2dec);
-int mpeg2_parse_header (mpeg2dec_t * mpeg2dec);
+mpeg2_state_t mpeg2_seek_header (mpeg2dec_t * mpeg2dec);
+mpeg2_state_t mpeg2_parse_header (mpeg2dec_t * mpeg2dec);
 
 /* header.c */
 void mpeg2_header_state_init (mpeg2dec_t * mpeg2dec);
+void mpeg2_reset_info (mpeg2_info_t * info);
 int mpeg2_header_sequence (mpeg2dec_t * mpeg2dec);
 int mpeg2_header_gop (mpeg2dec_t * mpeg2dec);
-int mpeg2_header_picture_start (mpeg2dec_t * mpeg2dec);
+mpeg2_state_t mpeg2_header_picture_start (mpeg2dec_t * mpeg2dec);
 int mpeg2_header_picture (mpeg2dec_t * mpeg2dec);
 int mpeg2_header_extension (mpeg2dec_t * mpeg2dec);
 int mpeg2_header_user_data (mpeg2dec_t * mpeg2dec);
 void mpeg2_header_sequence_finalize (mpeg2dec_t * mpeg2dec);
-int mpeg2_header_slice_start (mpeg2dec_t * mpeg2dec);
-int mpeg2_header_end (mpeg2dec_t * mpeg2dec);
-void mpeg2_set_fbuf (mpeg2dec_t * mpeg2dec, int coding_type);
+void mpeg2_header_gop_finalize (mpeg2dec_t * mpeg2dec);
+void mpeg2_header_picture_finalize (mpeg2dec_t * mpeg2dec, uint32_t accels);
+mpeg2_state_t mpeg2_header_slice_start (mpeg2dec_t * mpeg2dec);
+mpeg2_state_t mpeg2_header_end (mpeg2dec_t * mpeg2dec);
+void mpeg2_set_fbuf (mpeg2dec_t * mpeg2dec, int b_type);
 
 /* idct.c */
 void mpeg2_idct_init (uint32_t accel);
-
-/* idct_mlib.c */
-void mpeg2_idct_add_mlib (int last, int16_t * block,
-			  uint8_t * dest, int stride);
-void mpeg2_idct_copy_mlib_non_ieee (int16_t * block, uint8_t * dest,
-				    int stride);
-void mpeg2_idct_add_mlib_non_ieee (int last, int16_t * block,
-				   uint8_t * dest, int stride);
 
 /* idct_mmx.c */
 void mpeg2_idct_copy_mmxext (int16_t * block, uint8_t * dest, int stride);
@@ -272,12 +274,10 @@ void mpeg2_idct_add_mvi (int last, int16_t * block,
 void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, int stride);
 void mpeg2_idct_add_alpha (int last, int16_t * block,
 			   uint8_t * dest, int stride);
-void mpeg2_idct_alpha_init(int no_mvi);
+void mpeg2_idct_alpha_init (void);
 
 /* motion_comp.c */
 void mpeg2_mc_init (uint32_t accel);
-
-typedef void mpeg2_mc_fct (uint8_t *, const uint8_t *, int, int);
 
 typedef struct {
     mpeg2_mc_fct * put [8];
@@ -297,4 +297,4 @@ extern mpeg2_mc_t mpeg2_mc_mmxext;
 extern mpeg2_mc_t mpeg2_mc_3dnow;
 extern mpeg2_mc_t mpeg2_mc_altivec;
 extern mpeg2_mc_t mpeg2_mc_alpha;
-extern mpeg2_mc_t mpeg2_mc_mlib;
+extern mpeg2_mc_t mpeg2_mc_vis;

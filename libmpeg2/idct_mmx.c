@@ -28,11 +28,11 @@
 #include <inttypes.h>
 
 #include "mpeg2.h"
-#include "mpeg2_internal.h"
 #include "attributes.h"
+#include "mpeg2_internal.h"
 #include "mmx.h"
 
-#define ROW_SHIFT 11
+#define ROW_SHIFT 15
 #define COL_SHIFT 6
 
 #define round(bias) ((int)(((bias)+0.5) * (1<<ROW_SHIFT)))
@@ -701,7 +701,7 @@ do {					\
 static inline void block_add_DC (int16_t * const block, uint8_t * dest,
 				 const int stride, const int cpu)
 {
-    movd_v2r ((block[0] + 4) >> 3, mm0);
+    movd_v2r ((block[0] + 64) >> 7, mm0);
     pxor_r2r (mm1, mm1);
     movq_m2r (*dest, mm2);
     dup4 (mm0);
@@ -763,7 +763,7 @@ void mpeg2_idct_copy_mmxext (int16_t * const block, uint8_t * const dest,
 void mpeg2_idct_add_mmxext (const int last, int16_t * const block,
 			    uint8_t * const dest, const int stride)
 {
-    if (last != 129 || (block[0] & 7) == 4) {
+    if (last != 129 || (block[0] & (7 << 4)) == (4 << 4)) {
 	mmxext_idct (block);
 	block_add (block, dest, stride);
 	block_zero (block);
@@ -786,7 +786,7 @@ void mpeg2_idct_copy_mmx (int16_t * const block, uint8_t * const dest,
 void mpeg2_idct_add_mmx (const int last, int16_t * const block,
 			 uint8_t * const dest, const int stride)
 {
-    if (last != 129 || (block[0] & 7) == 4) {
+    if (last != 129 || (block[0] & (7 << 4)) == (4 << 4)) {
 	mmx_idct (block);
 	block_add (block, dest, stride);
 	block_zero (block);

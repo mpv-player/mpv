@@ -28,8 +28,8 @@
 #include <inttypes.h>
 
 #include "mpeg2.h"
-#include "mpeg2_internal.h"
 #include "attributes.h"
+#include "mpeg2_internal.h"
 #include "mmx.h"
 
 #define CPU_MMXEXT 0
