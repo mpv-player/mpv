@@ -15,7 +15,7 @@ static vd_info_t info = {
 	"RealVideo decoder",
 	"real",
 	VFM_REAL,
-	"Florian Schneider",
+	"Florian Schneider & A'rpi",
 	"using original closed source codecs for Linux",
 	"binary real video codecs"
 };
@@ -178,19 +178,30 @@ static void uninit(sh_video_t *sh){
 	rv_handle=NULL;
 }
 
+// copypaste from demux_real.c - it should match to get it working!
+typedef struct dp_hdr_s {
+    uint32_t chunks;	// number of chunks
+    uint32_t timestamp; // timestamp from packet header
+    uint32_t len;	// length of actual data
+    uint32_t chunktab;	// offset to chunk offset array
+} dp_hdr_t;
+
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mp_image_t* mpi;
 	unsigned long result;
-	int *buff=(unsigned int *)((char*)data+len);
+	dp_hdr_t* dp_hdr=(dp_hdr_t*)data;
+	unsigned char* dp_data=((unsigned char*)data)+sizeof(dp_hdr_t);
+	uint32_t* extra=(uint32_t*)(((char*)data)+dp_hdr->chunktab);
+
 	unsigned long transform_out[5];
 	unsigned long transform_in[6]={
-		len,		// length of the packet (sub-packets appended)
+		dp_hdr->len,	// length of the packet (sub-packets appended)
 		0,		// unknown, seems to be unused
-		buff[0],	// number of sub-packets - 1
-		&buff[2],	// table of sub-packet offsets
+		dp_hdr->chunks,	// number of sub-packets - 1
+		extra,		// table of sub-packet offsets
 		0,		// unknown, seems to be unused
-		buff[1],	// timestamp (the integer value from the stream)
+		dp_hdr->timestamp,// timestamp (the integer value from the stream)
 	};
 
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
@@ -199,7 +210,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->disp_w, sh->disp_h);
 	if(!mpi) return NULL;
 	
-	result=(*rvyuv_transform)(data, mpi->planes[0], transform_in,
+	result=(*rvyuv_transform)(dp_data, mpi->planes[0], transform_in,
 		transform_out, sh->context);
 
 	return (result?NULL:mpi);
