@@ -275,7 +275,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
 inline static void vo_draw_spudec(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-    spudec_draw(vo_spudec, draw_alpha);
+    spudec_draw_scaled(vo_spudec, dxs, dys, draw_alpha);
 }
 inline static void vo_draw_vobsub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
     vobsub_draw(vo_vobsub, dxs, dys, draw_alpha);

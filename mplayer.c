@@ -900,18 +900,6 @@ if(stream_dump_type==5){
   exit_player(MSGTR_Exit_eof);
 }
 
-#ifdef USE_DVDREAD
-  current_module="dvd lang->id";
-  if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
-
-  current_module="spudec";
-  vo_spudec=spudec_new(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL);
-  if (vo_spudec!=NULL)
-    inited_flags|=INITED_SPUDEC;
-#endif
-  current_module=NULL;
-
     // initial prefill: 20%  later: 5%  (should be set by -cacheopts)
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20);
 
@@ -1038,6 +1026,18 @@ if(!sh_video){
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
+#ifdef USE_DVDREAD
+current_module="dvd lang->id";
+if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+
+current_module="spudec";
+vo_spudec=spudec_new_scaled(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
+			    sh_video->disp_w, sh_video->disp_h);
+if (vo_spudec!=NULL)
+  inited_flags|=INITED_SPUDEC;
+#endif
+current_module=NULL;
 	
 #ifdef USE_SUB
 // after reading video params we should load subtitles because
