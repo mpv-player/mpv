@@ -34,12 +34,12 @@ int init_audio(sh_audio_t *sh_audio)
 	mpadec=mpcodecs_ad_drivers[i]; break;
     }
   if(!mpadec){
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Requested audio codec family [%s] (afm=%d) not available (enable it at compile time!)\n",
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailable,
           sh_audio->codec->name, sh_audio->codec->driver);
       return 0; // no such driver
   }
   
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Opening audio decoder: [%s] %s\n",mpadec->info->short_name,mpadec->info->name);
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_OpeningAudioDecoder,mpadec->info->short_name,mpadec->info->name);
 
   // reset in/out buffer size/pointer:
   sh_audio->a_buffer_size=0;
@@ -64,14 +64,14 @@ int init_audio(sh_audio_t *sh_audio)
   
   if(!mpadec->preinit(sh_audio))
   {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"ADecoder preinit failed :(\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ADecoderPreinitFailed);
       return 0;
   }
 
 /* allocate audio in buffer: */
   if(sh_audio->audio_in_minsize>0){
       sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
-      mp_msg(MSGT_DECAUDIO,MSGL_V,"dec_audio: Allocating %d bytes for input buffer\n",
+      mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_AllocatingBytesForInputBuffer,
           sh_audio->a_in_buffer_size);
       sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
       memset(sh_audio->a_in_buffer,0,sh_audio->a_in_buffer_size);
@@ -81,7 +81,7 @@ int init_audio(sh_audio_t *sh_audio)
 /* allocate audio out buffer: */
   sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST; /* worst case calc.*/
 
-  mp_msg(MSGT_DECAUDIO,MSGL_V,"dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
+  mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_AllocatingBytesForOutputBuffer,
       sh_audio->audio_out_minsize,MAX_OUTBURST,sh_audio->a_buffer_size);
 
   sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
@@ -93,7 +93,7 @@ int init_audio(sh_audio_t *sh_audio)
   sh_audio->a_buffer_len=0;
 
   if(!mpadec->init(sh_audio)){
-      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"ADecoder init failed :(\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,MSGTR_ADecoderInitFailed);
       uninit_audio(sh_audio); // free buffers
       return 0;
   }
@@ -119,7 +119,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
     sh_audio->a_in_buffer=NULL;
     if(!sh_audio->inited) return;
-    mp_msg(MSGT_DECAUDIO,MSGL_V,"uninit audio: %d  \n",sh_audio->codec->driver);
+    mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudio,sh_audio->codec->driver);
     mpadec->uninit(sh_audio);
     sh_audio->inited=0;
 }

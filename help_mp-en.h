@@ -283,6 +283,21 @@ static char help_text[]=
 #define MSGTR_AC3only48k "Only 48000 Hz streams supported.\n"
 #define MSGTR_UnknownAudio "Unknown/missing audio format, using nosound\n"
 
+#define MSGTR_UsingExternalPP "[PP] Using external postprocessing filter, max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] Using codec's postprocessing, max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video attribute '%s' isn't supported by selected vo & vd! \n"
+#define MSGTR_VideoCodecFamilyNotAvailable "Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailable "Requested audio codec family [%s] (afm=%d) not available (enable it at compile time!)\n"
+#define MSGTR_OpeningVideoDecoder "Opening video decoder: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "Opening audio decoder: [%s] %s\n"
+#define MSGTR_UninitVideo "uninit video: %d  \n"
+#define MSGTR_UninitAudio "uninit audio: %d  \n"
+#define MSGTR_VDecoderInitFailed "VDecoder init failed :(\n"
+#define MSGTR_ADecoderInitFailed "ADecoder init failed :(\n"
+#define MSGTR_ADecoderPreinitFailed "ADecoder preinit failed :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allocating %d bytes for input buffer\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes for output buffer\n"
+			 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Setting up lirc support...\n"
 #define MSGTR_LIRCdisabled "You won't be able to use your remote control\n"

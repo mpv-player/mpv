@@ -49,14 +49,14 @@ int get_video_quality_max(sh_video_t *sh_video){
   if(vf){
     int ret=vf->control(vf,VFCTRL_QUERY_MAX_PP_LEVEL,NULL);
     if(ret>0){
-      mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Using external postprocessing filter, max q = %d\n",ret);
+      mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_UsingExternalPP,ret);
       return ret;
     }
   }
   if(mpvdec){
     int ret=mpvdec->control(sh_video,VDCTRL_QUERY_MAX_PP_LEVEL,NULL);
     if(ret>0){
-      mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Using codec's postprocessing, max q = %d\n",ret);
+      mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_UsingCodecPP,ret);
       return ret;
     }
   }
@@ -93,7 +93,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
     if(mpvdec)
 	if( mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value)
 	    == CONTROL_OK) return 1;
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Video attribute '%s' isn't supported by selected vo & vd! \n",item);
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VideoAttributeNotSupportedByVO_VD,item);
     return 0;
 }
 
@@ -135,7 +135,7 @@ int set_rectangle(sh_video_t *sh_video,int param,int value)
 
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
-    mp_msg(MSGT_DECVIDEO,MSGL_V,"uninit video: %d  \n",sh_video->codec->driver);
+    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideo,sh_video->codec->driver);
     mpvdec->uninit(sh_video);
     vf_uninit_filter_chain(sh_video->vfilter);
     sh_video->inited=0;
@@ -164,7 +164,7 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
 	mpvdec=mpcodecs_vd_drivers[i];
 	if(!mpvdec){ // driver not available (==compiled in)
-	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_VideoCodecFamilyNotAvailable,
 		sh_video->codec->name, sh_video->codec->driver);
 	    continue;
 	}
@@ -181,9 +181,9 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	    }
 	}
 	// init()
-	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Opening video decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_OpeningVideoDecoder,mpvdec->info->short_name,mpvdec->info->name);
 	if(!mpvdec->init(sh_video)){
-	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDecoder init failed :(\n");
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VDecoderInitFailed);
 	    continue; // try next...
 	}
 	// Yeah! We got it!
