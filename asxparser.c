@@ -8,6 +8,9 @@
 #include "playtreeparser.h"
 #include "asxparser.h"
 #include "mp_msg.h"
+#include "cfgparser.h"
+
+extern m_config_t* mconfig;
 
 ////// List utils
 
@@ -233,7 +236,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   char *attribs = NULL;
   char *element = NULL, *body = NULL, *ret = NULL, *buffer;
   int n_attrib = 0;
-  int body_line = 0,attrib_line,ret_line;
+  int body_line = 0,attrib_line,ret_line,in = 0;
 
   if(_buffer == NULL || _element == NULL || _body == NULL || _attribs == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : asx_get_element called with invalid value",parser->line);
@@ -360,21 +363,39 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     ptr4 = ptr3;
     body_line = parser->line;
     while(1) { // Find closing element
-      for( ; strncmp(ptr4,"</",2) != 0; ptr4++) {
+      for( ; ptr4[0] != '<' ; ptr4++) {
 	if(ptr4[0] == '\0') {
 	  ptr4 = NULL;
 	  break;
 	}
 	if(ptr4[0] == '\n') parser->line++;
       }
-      //ptr4 = strstr(ptr4,"</");
-      if(ptr4 == NULL || ptr4[2] == '\0') { 
+      if(strncmp(ptr4,"<!--",4) == 0) { // Comments
+	for( ; strncmp(ptr4,"-->",3) != 0 ; ptr4++) {
+	if(ptr4[0] == '\0') {
+	  ptr4 = NULL;
+	  break;
+	}
+	if(ptr1[0] == '\n') parser->line++;
+	}
+	continue;
+      }
+      if(ptr4 == NULL || ptr4[1] == '\0') { 
 	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
 	free(element);
 	if(attribs) free(attribs);
 	return -1;
       }
-      if(strncasecmp(element,ptr4+2,strlen(element)) == 0) { // Extract body
+      if(ptr4[1] != '/' && strncasecmp(element,ptr4+1,strlen(element)) == 0) {
+	in++;
+	ptr4+=2;
+	continue;
+      } else if(strncasecmp(element,ptr4+2,strlen(element)) == 0) { // Extract body
+	if(in > 0) {
+	  in--;
+	  ptr4 += 2+strlen(element);
+	  continue;
+	}
 	ret = ptr4+strlen(element)+3;
 	if(ptr4 != ptr3) {
 	  ptr4--;
@@ -429,6 +450,27 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   *_buffer = ret;
   return 1;
 
+}
+
+static void
+asx_parse_param(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
+  char *name,*val;
+  
+  name = asx_get_attrib("NAME",attribs);
+  if(!name) {
+    asx_warning_attrib_required(parser,"PARAM" ,"NAME" );
+    return;
+  }
+  val = asx_get_attrib("VALUE",attribs);
+  if(m_config_get_option(mconfig,name) == NULL) {
+    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Found unknow param in asx: %s",name);
+    if(val)
+      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"=%s\n",val);
+    else
+      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"\n");
+    return;
+  }
+  play_tree_set_param(pt,name,val);
 }
 
 static void
@@ -574,6 +616,8 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 	 else play_tree_append_entry(list,entry);
 	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
        }
+     } else if(strcasecmp(element,"PARAM") == 0) {
+       asx_parse_param(parser,attribs,repeat);
      } else
        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
     if(body) free(body);
