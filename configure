@@ -213,7 +213,7 @@ Codecs:
   --enable-external-flac build with external libFLAC [disable]
   
 Video output:
-  --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
+  --disable-vidix        disable VIDIX [enable on x86 *nix]
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
   --enable-vesa          build with VESA support [autodetect]
@@ -225,6 +225,7 @@ Video output:
   --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
   --enable-dvb           build with support for output via DVB-Card [autodetect]
+  --enable-dvbhead       build with DVB support (HEAD version) [autodetect]
   --enable-mga           build with mga_vid (for Matrox G200/G4x0/G550) support
                          (check for /dev/mga_vid) [autodetect]
   --enable-xmga          build with mga_vid X Window support
@@ -5497,7 +5498,7 @@ EOF
   if test "$_xshape" = yes ; then
     _def_xshape='#define HAVE_XSHAPE 1'
   else
-    die "the GUI requires the X11 extension XShape (which was not found)"
+    die "The GUI requires the X11 extension XShape (which was not found)."
   fi
   echores "$_xshape"
 
@@ -5510,7 +5511,7 @@ EOF
     elif ( gtk12-config --version ) >/dev/null 2>&1 ; then
       _gtkconfig="gtk12-config"
     else
-      die "the GUI requires GTK (which was not found)"
+      die "The GUI requires GTK devel packages (which were not found)."
     fi
   fi
   _gtk=`$_gtkconfig --version 2>&1`
@@ -5526,7 +5527,7 @@ EOF
     elif ( glib12-config --version ) >/dev/null 2>&1 ; then
       _glibconfig="glib12-config"
     else
-      die "the GUI requires GLIB (which was not found)"
+      die "The GUI requires GLib devel packages (which were not found)"
     fi
   fi
   _glib=`$_glibconfig --version 2>&1`
