@@ -2,7 +2,7 @@
 // Wszelkie uwagi i poprawki mile widziane :)
 //
 // Fixes and updates: Wojtek Kaniewski <wojtekka@bydg.pdi.net>
-// Last sync on 2003-05-27 with help_mp-en.h 1.97
+// Last sync on 2003-07-30 with help_mp-en.h 1.105
 
 // ========================= MPlayer help ===========================
 
@@ -78,7 +78,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Wymuszam zastosowanie kodeka audio z rodziny %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Nie mogê znale¼æ kodeka audio dla wymuszonej rodziny, wracam do standardowych.\n"
 #define MSGTR_CantFindAudioCodec "Nie mogê znale¼æ kodeka dla formatu audio 0x%X.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Spróbuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Spróbuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/pl/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Nie moge zainicjowaæ sterownika audio -> brak d¼wiêku.\n"
 #define MSGTR_TryForceVideoFmtStr "Wymuszam zastosowanie kodeka video z rodziny %s ...\n"
 #define MSGTR_CantFindVideoCodec "Nie mogê znale¼æ kodeka dla wybranego -vo i formatu video 0x%X.\n"
@@ -94,7 +94,7 @@ static char help_text[]=
 "Mo¿liwe przyczyny, problemy, rozwi±zania: \n"\
 "- Najczêstsza przyczyna: uszkodzony/obarczony b³êdami sterownik _audio_.\n"\
 "  Rozwi±zanie: spróbuj -ao sdl lub u¿yj ALSA 0.5 lub emulacjê OSS w ALSA 0.9\n"\
-"  Przeczytaj DOCS/sound.html!\n"\
+"  Przeczytaj DOCS/pl/sound.html!\n"\
 "  Mo¿esz tak¿e eksperymentowaæ z -autosync 30 (lub innymi warto¶ciami).\n"\
 "- Wolny sterownik video. Spróbuj z inny sterownikiem -vo (lista: -vo help)\n"\
 "  lub odtwarzaj z opcj± -framedrop!\n"\
@@ -104,9 +104,9 @@ static char help_text[]=
 "- Odtwarzaj±c z wolnego ¼ród³a (zamontowane partycje NFS/SMB, DVD, VCD itp)\n"\
 "  spróbuj z opcj± -cache 8192\n"\
 "- U¿ywasz -cache do odtwarzania plikow non-interleaved? Spróbuj z -nocache\n"\
-"Przeczytaj DOCS/video.html i DOCS/sound.html -- znajdziesz tam wskazówki\n"\
-"jak przyspieszyæ dzia³anie. Je¶li nic z powy¿szego nie pomaga, przeczytaj\n"\
-"DOCS/bugreports.html.\n\n"
+"Przeczytaj DOCS/pl/video.html i DOCS/pl/sound.html -- znajdziesz tam\n"\
+"wskazówki jak przyspieszyæ dzia³anie. Je¶li nic z powy¿szego nie pomaga,\n"\
+"przeczytaj DOCS/pl/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer zosta³ skompilowany BEZ obs³ugi GUI.\n"
 #define MSGTR_GuiNeedsX "GUI MPlayera wymaga X11.\n"
@@ -139,7 +139,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer wykona³ nieprawid³ow± operacjê.\n"\
 "  Byæ mo¿e to b³±d w nowym kodzie wykrywania procesora...\n"\
-"  Przeczytaj DOCS/bugreports.html.\n"
+"  Przeczytaj DOCS/pl/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer wykona³ nieprawid³ow± operacjê.\n"\
 "  Zwykle zdarza siê to, gdy uruchamiasz go na innym procesorze ni¿ ten,\n"\
@@ -147,12 +147,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer wykona³ nieprawid³ow± operacjê zwi±zan± z pamiêci±/koprocesorem.\n"\
 "  Przekompiluj MPlayera z --enable-debug i wykonad backtrace 'gdb' i\n"\
-"  deasemblacjê. Szczegó³y w pliku DOCS/bugreports.html#crash\n"
+"  deasemblacjê. Szczegó³y w pliku DOCS/pl/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer wykona³ nieprawid³ow± operacjê. To nie powinno siê zdarzyæ.\n"\
 "  Byæ mo¿e to b³±d w kodzie MPlayera _lub_ w Twoich sterownikach _lub_\n"\
 "  w u¿ywanej przez Ciebie wersji gcc. Je¶li my¶lisz, ¿e to wina MPlayera,\n"\
-"  przeczytaj proszê DOCS/bugreports.html i postêpuj zgodnie z instrukacjami.\n"\
+"  przeczytaj proszê DOCS/pl/bugreports.html i postêpuj zgodnie z instrukacjami.\n"\
 "  Nie mo¿emy pomóc i nie pomo¿emy je¶li nie dostarczysz tych informacji przy\n"\
 "  zg³aszaniu b³êdu.\n"
 	
@@ -285,7 +285,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nie mogê przeszukiwaæ nieindeksowanych strumieni .AVI! (sprawd¼ opcjê -idx!)\n"
 #define MSGTR_CantSeekFile "Nie mogê przeszukiwaæ tego pliku.\n"
 
-#define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj DOCS/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj DOCS/pl/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, nie za¿±da³e¶ autoryzacji!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Skompresowane nag³ówki nie s± obs³ugiwane (na razie).\n"
