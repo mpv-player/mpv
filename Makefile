@@ -40,7 +40,7 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 VO_LIBS = $(SDL_LIB) $(GGI_LIB) $(AA_LIB) $(X_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(GIF_LIB) 
 AO_LIBS = $(ARTS_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
 CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(LZO_LIB) $(XVID_LIB) $(DECORE_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) 
-COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(STREAMING_LIB) $(WIN32_LIB)
+COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a $(PP_LIB) postproc/libswscale.a linux/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(STREAMING_LIB) $(WIN32_LIB)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
@@ -73,7 +73,12 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a libaf/libaf.a
+COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
+ifeq (($SHARED_PP),yes)
+COMMON_DEPS += postproc/libpostproc.so
+else
+COMMON_DEPS += postproc/libpostproc.a
+endif
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -158,7 +163,13 @@ Gui/libgui.a:
 linux/libosdep.a:
 	$(MAKE) -C linux
 
+postproc/libswscale.a:
+	$(MAKE) -C postproc
+
 postproc/libpostproc.a:
+	$(MAKE) -C postproc
+
+postproc/libpostproc.so:
 	$(MAKE) -C postproc
 
 input/libinput.a:
@@ -200,6 +211,9 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
+endif
+ifeq ($(SHARED_PP),yes)
+	$(MAKE) install -C postproc 
 endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)

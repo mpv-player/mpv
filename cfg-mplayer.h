@@ -153,7 +153,6 @@ struct config jpeg_conf[]={
 
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
-extern int readNPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 
 
@@ -357,7 +356,7 @@ static config_t mplayer_opts[]={
 	{"dumpmicrodvdsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 7, NULL},
 
 #ifdef HAVE_LIRC
-	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL}, 
+	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
 	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCMD, 0, 1, NULL},

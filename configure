@@ -216,6 +216,7 @@ Miscellaneous options:
                          options with --enable-static="-lslang -lncurses"
   --language=xx          select a language (for translated messages/gui) [en]
                          (Available: $LANGUAGES)
+  --enabled-shared-pp    install & use shared postprocessing lib
 
 Advanced options:
   --enable-mmx           build with mmx support [autodetect]
@@ -1006,6 +1007,7 @@ _libdv=auto
 _cdparanoia=auto
 _big_endian=auto
 _freetype=no
+_shared_pp=no
 
 for ac_option do
   case "$ac_option" in
@@ -1180,6 +1182,9 @@ for ac_option do
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
   --disable-dga) _dga=no ;;
+
+  --enable-shared-pp) _shared_pp=yes ;;
+  --disable-shared-pp) _shared_pp=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -4164,6 +4169,14 @@ else
 fi
 echores "$_byte_order"
 
+echocheck "shared postprocess lib"
+if test "$_shared_pp" = yes ; then
+  _ld_pp='-lpostproc'
+else
+  _ld_pp='postproc/libpostproc.a'
+fi
+echores "$_shared_pp"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -4431,6 +4444,8 @@ STREAMING = $_streaming
 STREAMING_LIVE_DOT_COM = $_live
 STREAMING_LIB = $_ld_streaming $_ld_live
 VIDIX = $_vidix
+PP_LIB = $_ld_pp
+SHARED_PP = $_shared_pp
 
 OPENDIVX = $_opendivx
 

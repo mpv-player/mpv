@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -12,7 +13,9 @@
 #include "../postproc/postprocess.h"
 
 struct vf_priv_s {
-    unsigned int pp;
+    int pp;
+    PPMode ppMode[GET_PP_QUALITY_MAX+1];
+    void *context;
     mp_image_t *dmpi;
     unsigned int outfmt;
 };
@@ -22,6 +25,10 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
+
+    if(vf->priv->context) freePPContext(vf->priv->context);
+    vf->priv->context= getPPContext(width, height);
+
     return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
 }
 
@@ -40,7 +47,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     case VFCTRL_QUERY_MAX_PP_LEVEL:
 	return GET_PP_QUALITY_MAX;
     case VFCTRL_SET_PP_LEVEL:
-	vf->priv->pp=getPpModeForQuality(*((unsigned int*)data));
+	vf->priv->pp= *((unsigned int*)data);
 	return CONTROL_TRUE;
     }
     return vf_next_control(vf,request,data);
@@ -80,11 +87,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
-	postprocess(mpi->planes,mpi->stride[0],
-		    vf->priv->dmpi->planes,vf->priv->dmpi->stride[0],
+	postprocess(mpi->planes           ,mpi->stride,
+		    vf->priv->dmpi->planes,vf->priv->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
-		    vf->priv->pp);
+		    &vf->priv->ppMode[ vf->priv->pp ], vf->priv->context);
     }
     
     return vf_next_put_image(vf,vf->priv->dmpi);
@@ -102,7 +109,10 @@ static unsigned int fmt_list[]={
 };
 
 static int open(vf_instance_t *vf, char* args){
-    char *endptr;
+    char *endptr, *name;
+    int i;
+    int hex_mode=0;
+    
     vf->query_format=query_format;
     vf->control=control;
     vf->config=config;
@@ -116,10 +126,45 @@ static int open(vf_instance_t *vf, char* args){
     if(!vf->priv->outfmt) return 0; // no csp match :(
     
     if(args){
-	vf->priv->pp=strtol(args, &endptr, 0);
-	if(!(*endptr)) return 1;
+	if(!strcmp("help", args)){
+		printf("%s", postproc_help);
+		exit(1);
+	}
+	
+	hex_mode= strtol(args, &endptr, 0);
+	if(*endptr){
+            name= args;
+	}else
+            name= NULL;
+    }else{
+        name="de";
     }
-    vf->priv->pp=divx_quality;
+    
+    if(name){
+        for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+            vf->priv->ppMode[i]= getPPModeByNameAndQuality(name, i);
+            if(vf->priv->ppMode[i].error) return -1;
+        }
+    }else{
+        /* hex mode for compatibility */
+        for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+	    PPMode ppMode;
+	    
+	    ppMode.lumMode= hex_mode;
+	    ppMode.chromMode= ((hex_mode&0xFF)>>4) | (hex_mode&0xFFFFFF00);
+	    ppMode.maxTmpNoise[0]= 700;
+	    ppMode.maxTmpNoise[1]= 1500;
+	    ppMode.maxTmpNoise[2]= 3000;
+	    ppMode.maxAllowedY= 234;
+	    ppMode.minAllowedY= 16;
+	    ppMode.maxDcDiff= 1;
+	    ppMode.flatnessThreshold=40;
+    
+            vf->priv->ppMode[i]= ppMode;
+        }
+    }
+    
+    vf->priv->pp=GET_PP_QUALITY_MAX; //divx_quality;
     return 1;
 }
 
