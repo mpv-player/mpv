@@ -554,7 +554,10 @@ uninit(void)
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
- saver_on(mDisplay); // screen saver back on
+ {
+  saver_on(mDisplay); // screen saver back on
+  XDestroyWindow( mDisplay,mywindow );
+ } 
 #ifdef HAVE_XF86VM
  #ifdef HAVE_NEW_GUI
         if ((vidmodes!=NULL)&&( vo_window == None ) )
@@ -568,7 +571,6 @@ uninit(void)
           free(vidmodes);
         }
 #endif
- XDestroyWindow( mDisplay,mywindow );
 printf("vo: uninit!\n");
 }
 

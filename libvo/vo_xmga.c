@@ -346,8 +346,10 @@ uninit(void)
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
+ {
   saver_on(mDisplay);
+  XDestroyWindow( mDisplay,mWindow );
+ }
  mga_uninit();
- XDestroyWindow( mDisplay,mWindow );
  printf("vo: uninit!\n");
 }

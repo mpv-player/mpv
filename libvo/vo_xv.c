@@ -486,9 +486,11 @@ static void uninit(void)
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
+ {
   saver_on(mDisplay); // screen saver back on
+  XDestroyWindow( mDisplay,mywindow );
+ }
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
- XDestroyWindow( mDisplay,mywindow );
 }
 
 
