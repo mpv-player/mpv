@@ -2019,7 +2019,7 @@ demux_mkv_open (demuxer_t *demuxer)
   else
     {
       mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No audio track found/wanted.\n");
-      demuxer->video->id = -2;
+      demuxer->audio->id = -2;
     }
 
   /* DO NOT automatically select a subtitle track and behave like DVD */
