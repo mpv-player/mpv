@@ -1,4 +1,4 @@
-.\" synced with 1.771
+.\" synced with 1.779
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -36,7 +36,7 @@
 .\" Titolo
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-09-19" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-10-14" "The MPlayer Project" "The Movie Player"
 .
 .SH NOME
 mplayer  \- visualizzatore di film
@@ -241,6 +241,11 @@ Vai alla 'entry' successiva/\:precedente nella playlist
 Va alla successiva/\:precedente sorgente alternativa (solo playlist ASX)
 .IPs "p / SPAZIO"
 Pausa film (qualsiasi tasto continua)
+.IPs "."
+Passo avanti.
+Premendolo una volta il film passa in pausa, ogni pressione seguente riprodurra'
+solo un fotogramma per poi ritornare ancora nella modalita' pausa (qualsiasi
+altro tasto continua).
 .IPs "q / ESC"
 Smette di riprodurre ed esce
 .IPs "+ e -"
@@ -2270,8 +2275,8 @@ Abilita le funzionalita' di Pan e Scan (elimina i lati ad esempio di un
 filmato in formato 16:9 per adattarlo su uno schermo 4:3 senza avere bande
 nere)
 Il parametro controlla quanto dell'immagine viene tagliato.
-Questa opzione funziona solo con i driver di uscita video x11, xv, xmga,
-xvidix e quartz.
+Questa opzione funziona solo con i driver di uscita video xv, xmga, mga,
+gl e xvidix.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2675,7 +2680,7 @@ Fondamentalmente utile per test, dovresti usare \-osdlevel 0 per disabilitare
 l'OSD.
 .IPs (no)aspect
 Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
-panscan (default: abilitato).
+pan e scan (default: abilitato).
 Disabilitarlo puo' incrementare la velocita'.
 .RE
 .PD 1
@@ -2912,13 +2917,13 @@ Permette di specificare il nome del file di uscita (default: ./grab.mpg).
 .PD 1
 .
 .TP
-.B zr (vedi anche \-zr* e \-zrhelp, filtro video zrmjpeg)
+.B zr (vedi anche \-zr* e \-zrhelp)
 Driver di uscita video per un certo numero di schede di cattura e
 riproduzione MJPEG.
 Vedi anche le opzioni -zr* e -zrhelp.
 .
 .TP
-.B zr2\ \ \ \ 
+.B zr2 (vedi anche il filtro video zrmjpeg)
 Driver di uscita video per un certo numero di schede di cattura e
 riproduzione MJPEG, seconda generazione.
 .PD 0
@@ -5161,7 +5166,7 @@ sintassi seguente:
 .RE
 .
 .PP
-dove <codec> puo' essere: lavc, xvidenc, divx4, lame, x264enc
+Dove <codec> puo' essere: lavc, xvidenc, divx4, lame, toolame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5175,7 +5180,7 @@ ottieni l'aiuto
 .
 .TP
 .B br=<valore>
-specifica il bitrate, la quantita' di spazio che occupera' il filmato
+Specifica il bitrate, la quantita' di spazio che occupera' il filmato
 .RSs
 .IPs 4\-16000
 (in kbit)
@@ -5189,7 +5194,7 @@ valore massimo dell'intervallo tra due fotogrammi chiave (in fotogrammi)
 .
 .TP
 .B deinterlace
-abilita il deinterlacciamento (evitalo, DivX4 non lo gestisce in modo corretto)
+Abilita il deinterlacciamento (evitalo, DivX4 non lo gestisce in modo corretto)
 .
 .TP
 .B q=<1\-5>
@@ -5217,13 +5222,13 @@ rapporto di reazione per il controllo del bitrate
 .
 .TP
 .B crispness=<0\-100>
-specifica ?dettagli?/\:appiattimento ?crispness/\:smoothness?
+Specifica l'increspatura/\:appiattimento.
 .
 .TP
 .B pass=<1\-2>
 Con questa opzione puoi codificare file Divx4 con due passi.
-Prima codifica con pass=1 poi, con gli stessi parametri, codifica
-con pass=2.
+Prima effettua una codifica con pass=1, poi esegui un'altra codifica con
+gli stessi parametri e pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
@@ -5271,17 +5276,17 @@ media (average) bitrate
 .
 .TP
 .B cbr\ \ \ \ 
-bitrate costante.
+bitrate costante
 Forza anche la modalita' di codifica CBR (Costant BitRate, bitrate costante)
 nei modi ABR (Average BitRate, bitrate media) predefiniti successivi.
 .
 .TP
 .B br=<0\-1024>
-specifica il bitrate in kBit (solo CBR e ABR)
+bitrate in kBit (solo CBR e ABR)
 .
 .TP
 .B q=<0\-9>
-qualita' (0\-migliore, 9\-peggiore) (solo per VBR, Variable BitRate, bitrate variabile)
+qualita' (0\-migliore, 9\-peggiore) (solo VBR, Variable BitRate, bitrate variabile)
 .
 .TP
 .B aq=<0\-9>
@@ -5293,7 +5298,7 @@ rapporto di compressione
 .
 .TP
 .B vol=<0\-10>
-regola il guadagno dell'ingresso audio
+guadagno dell'ingresso audio
 .
 .TP
 .B mode=<0\-3>
@@ -5316,7 +5321,7 @@ mono
 .PD 0
 .RSs
 .IPs 0
-no
+nessuno
 .IPs 1
 tutto
 .IPs 2
@@ -5326,8 +5331,8 @@ adattivo
 .
 .TP
 .B fast\ \ \ 
-attiva una codifica veloce sulle modalita' VBR predefinite successive,
-fondamentalmente minor qualita' e bitrate maggiori
+Attiva una codifica veloce sulle modalita' VBR predefinite successive,
+generando leggermente minor qualita' e bitrate maggiori
 .
 .TP
 .B highpassfreq=<freq>
@@ -5347,16 +5352,18 @@ lascia che sia LAME a scegliere il valore automaticamente.
 .B preset=<valore>
 valore dei settaggi predefiniti
 .RSs
+.IPs help\ 
+Stampa le opzioni aggiuntive ed informazioni sui settaggi predefiniti.
 .IPs medium
-codifica VBR, buona qualita', bitrate compreso tra 150\-180 kbps.
+codifica VBR, buona qualita', bitrate compreso tra 150\-180 kbps
 .IPs standard
-codifica VBR, alta qualita', bitrate compreso tra 170\-210 kbps.
+codifica VBR, alta qualita', bitrate compreso tra 170\-210 kbps
 .IPs extreme
-codifica VBR, qualita' molto alta, bitrate compreso tra 200\-240 kbps.
+codifica VBR, qualita' molto alta, bitrate compreso tra 200\-240 kbps
 .IPs insane
-codifica CBR, il settaggio di miglior qualita', bitrate di 320 kbps.
+codifica CBR, il settaggio di miglior qualita', bitrate di 320 kbps
 .IPs <8\-320>
-codifica ABR al bitrate medio specificato.
+codifica ABR al bitrate medio specificato
 .RE
 .sp 1
 .RS
@@ -5365,16 +5372,14 @@ codifica ABR al bitrate medio specificato.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-per molte persone, con la maggior parte della musica e comunque gia' una qualita'
+adatto per molte persone, con la maggior parte della musica e comunque gia' una qualita'
 abbastanza alta.
 .IPs cbr:preset=192
-codifica in ABR con un bitrate costante e forzato di 192 kbps
+Codifica in ABR con un bitrate costante e forzato di 192 kbps
 .IPs preset=172
-codifica in ABR ad un bitrate medio di 172 kbps.
+Codifica in ABR ad un bitrate medio di 172 kbps.
 .IPs preset=extreme
-per persone con orecchie estremamente buone e apparecchi similari.
-.IPs preset=help
-stampa le opzioni aggiuntive ed informazioni sui settaggi predefiniti.
+per persone con orecchie estremamente buone e apparecchi similari
 .RE
 .PD 1
 .
@@ -6164,8 +6169,8 @@ puo' percio' migliorare a patto di selezionare attentamente tcplx_mask.
 .B scplx_mask=<0.0\-1.0>
 Maschera di complessita' spaziale.
 Valori grandi aiutano per la 'blocchizzazione', se non viene usato nessun
-filtro di 'deblocchizzazione' nella decodifica., che potrebbe non essere una buona
-idea.
+filtro di 'deblocchizzazione' nella decodifica, cosa che potrebbe non essere
+una buona idea.
 .br
 Immagina una scena con un prato (che normalmente ha una alta complessita' spaziale),
 un cielo blu ed una casa; scplx_mask aumentera' il quantizzatore dei macroblocchi del
@@ -6305,7 +6310,7 @@ Consiglio: Sembra utile solo per codifiche ad alto bitrate.
 .TP
 .B mbcmp=<0\-2000>
 Seleziona la funzione di comparazione per la decisione del macroblok,
-utilizzato solo se mbd=0
+utilizzato solo se mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -6591,11 +6596,11 @@ Attualmente non funziona (ancora).
 .
 .SS nuv (\-nuvopts)
 .
-Nuppel video e' basato su rtjpeg e lzo.
-Per default i fotogrammi sono prima codificati con rtjpeg e poi compressi con lzo.
+Nuppel video e' basato su RTJPEG e LZO.
+Per default i fotogrammi sono prima codificati con RTJPEG e poi compressi con LZO.
 Ma entrambi i passi possono essere abilitati o meno.
-Percio' puoi generare flussi grezzi i420, flussi i420 compressi, rtjpeg oppure il
-default lussi rtjpeg compressi con lzo.
+Percio' puoi generare flussi grezzi i420, flussi i420 compressi, RTJPEG oppure il
+default, flussi RTJPEG compressi con LZO.
 .br
 .I NOTA:
 La documentazione di nuvrec contiene qualche consiglio ed esempi sulle
@@ -6603,23 +6608,27 @@ predisposizioni da usare per la maggior parte delle codifiche dalla TV.
 .
 .TP
 .B c=<0\-20>
-soglia della crominanza
+soglia della crominanza (default: 1)
 .
 .TP
 .B l=<0\-20>
-soglia della luminanza
+soglia della luminanza (default: 1)
 .
 .TP
-.B nolzo \ 
-disabilita la compressione lzo.
+.B lzo\ 
+Abilita la compressione LZO (default).
+.
+.TP
+.B nolzo\ 
+Disabilita la compressione LZO.
 .
 .TP
 .B q=<3\-255>
-Regola il livello di qualita'.
+Regola il livello di qualita' (default: 255)
 .
 .TP
 .B raw \ \ \ 
-Disabilita la codifica rtjpeg.
+Disabilita la codifica rtjpeg (default).
 .
 .TP
 .B rtjpeg\ 
@@ -6651,7 +6660,7 @@ da usare
 .TP
 .B me_quality=<0\-6>
 Questa opzione controlla il sottosistema di stima del movimento.
-Piu' e' alto il valore piu' dovrebbe essere precisa la stima.
+Piu' e' alto il valore piu' dovrebbe essere precisa la stima (default: 6).
 Piu' e' precisa la stima del movimento, piu' bit possono essere risparmiati.
 La precisione viene aumentata a spese del tempo di CPU percio' cala questo
 valore se hai bisogno di una codifica in tempo reale.
@@ -6783,7 +6792,7 @@ stabile XviD 1.0.x (api4).
 Crea un flusso di bit che puo' essere decodificato delay-free.
 .br
 .I ATTENZIONE:
-Verra' generato un flusso illegale, e NON SARA' decodificabile
+Verra' generato un flusso illegale, e non sara' decodificabile
 dai decodificatori ISO-MPEG4 eccetto DivX/\:libavcodec/\:XviD
 .br
 .I ATTENZIONE:
@@ -7092,6 +7101,19 @@ per il video completo alla fine della codifica e memorizza il PSNR di ogni fotog
 in un file con il nome simile a 'psnr_hhmmss.log' nella directory corrente.
 I valori tornati sono in dB (decibel), piu' alto e' migliore.
 .
+.PP
+.sp 1
+Le opzioni che seguono sono disponibili solo nella versione di sviluppo
+XviD 1.1.x.
+.
+.TP
+.B bvhq=<0|1>
+Questa opzione permette la scelta dei vettori per i fotogrammi di
+tipo B utilizzando un operatore ottimizzato sull' indice della distorsione,
+che e' quello che viene fatto per i fotogrammi P con l'opzione vhq.
+Questo produce dei fotogrammi B di bell'aspetto e contemporaneamente non
+riduce quasi per niente le prestazioni.
+.
 .
 .SS x264enc (\-x264encopts)
 .
@@ -7108,7 +7130,7 @@ spese della precisione di posizionamento (default: 250).
 .
 .TP
 .B idrint=<valore>
-Ogni <valore> fotogramma I e' un fotogramma IDR (default: 2).
+Uno ogni <valore> fotogramma I e' un fotogramma IDR (default: 2).
 In H.264, i fotogrammi I non necessariamente racchiudono un GOP chiuso perche'
 e' permesso predirre i fotogrammi P da piu' fotogrammi oltre a quello che
 lo precede (vedi anche frameref).
@@ -7257,7 +7279,7 @@ primo passo
 .IPs 2
 secondo passo
 .IPs 3
-Ennesimo passo (secondo e terzo passo della codifica a 3 passi).
+ennesimo passo (secondo e terzo passo della codifica a 3 passi)
 .RE
 .RS
 Ecco come lavora e come usarlo:
