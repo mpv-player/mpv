@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.58 -->
+<!-- Synced with 1.59 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -740,8 +740,7 @@ Pro dekódování AAC souborů nepotřebujete celou faad2, libfaad stačí.
 Zkompilujete ji takto:
 <screen>
 cd faad2/
-chmod +x bootstrap
-./bootstrap
+sh bootstrap
 ./configure
 cd libfaad
 make
