@@ -15,12 +15,13 @@ static struct {
         char *extension;
         int demuxer_type;
 } extensions_table[] = {
-        { "mpeg", DEMUXER_TYPE_MPEG_PS },
-        { "mpg", DEMUXER_TYPE_MPEG_PS },
-        { "mpe", DEMUXER_TYPE_MPEG_PS },
+//        { "mpeg", DEMUXER_TYPE_MPEG_PS },
+//        { "mpg", DEMUXER_TYPE_MPEG_PS },
+//        { "mpe", DEMUXER_TYPE_MPEG_PS },
         { "vob", DEMUXER_TYPE_MPEG_PS },
         { "m2v", DEMUXER_TYPE_MPEG_PS },
         { "avi", DEMUXER_TYPE_AVI },
+        { "mp4", DEMUXER_TYPE_MOV },
         { "mov", DEMUXER_TYPE_MOV },
         { "qt", DEMUXER_TYPE_MOV },
         { "asx", DEMUXER_TYPE_ASF },
@@ -37,8 +38,8 @@ static struct {
         { "wav", DEMUXER_TYPE_AUDIO },
         { "ogg", DEMUXER_TYPE_OGG },
         { "ogm", DEMUXER_TYPE_OGG },
-        { "pls", DEMUXER_TYPE_PLAYLIST },
-        { "m3u", DEMUXER_TYPE_PLAYLIST },
+//        { "pls", DEMUXER_TYPE_PLAYLIST },
+//        { "m3u", DEMUXER_TYPE_PLAYLIST },
         { "xm", DEMUXER_TYPE_XMMS },
         { "mod", DEMUXER_TYPE_XMMS },
         { "s3m", DEMUXER_TYPE_XMMS },
