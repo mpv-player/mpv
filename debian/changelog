@@ -1,3 +1,9 @@
+mplayer (0.50-1) unstable; urgency=low
+
+  * 0.50 released.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri, 12 Oct 2001 13:26:03 +0200
+
 mplayer (0.18-4) unstable; urgency=low
 
   * Changes to debian packaging suggested Josip Rodin 
