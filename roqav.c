@@ -1,9 +1,9 @@
 /*
-        RoQ A/V decoder for the MPlayer program
-        by Mike Melanson
-        based on Dr. Tim Ferguson's RoQ document and accompanying source
-        code found at:
-          http://www.csse.monash.edu.au/~timf/videocodec.html
+    RoQ A/V decoder for the MPlayer program
+    by Mike Melanson
+    based on Dr. Tim Ferguson's RoQ document and accompanying source
+    code found at:
+      http://www.csse.monash.edu.au/~timf/videocodec.html
 */
 
 #include <stdio.h>
@@ -39,6 +39,16 @@ typedef struct
   // chrominance components
   unsigned char u, v;
 
+  // these variables are for rendering a doublesized 8x8 block; e.g.:
+  // v2_y_rows12 = [y0 y0 y1 y1]
+  // v2_y_rows34 = [y2 y2 y3 y3]
+  unsigned long v2d_y_rows_12;
+  unsigned long v2d_y_rows_34;
+  // ex: v2_u_row1 = [u u]
+  //     v2_v_row2 = [v v]
+  unsigned short v2d_u_rows_12;
+  unsigned short v2d_v_rows_12;
+
   // maintain separate bytes for the luminance values as well
   unsigned char y0, y1, y2, y3;
 } roq_v2_codebook;
@@ -46,41 +56,7 @@ typedef struct
 // codebook entry for 4x4 vector
 typedef struct
 {
-  // these variables are for rendering a 4x4 block built from 4 2x2
-  // vectors [va vb vc vd]; e.g.:
-  // v4_y_row1 = [va.y0 va.y1 vb.y0 vb.y1]
-  // v4_y_row4 = [vc.y2 vc.y3 vd.y2 vd.y3]
-  unsigned long v4_y_row1;
-  unsigned long v4_y_row2;
-  unsigned long v4_y_row3;
-  unsigned long v4_y_row4;
-  // ex: v4_u_row1 = [va.u vb.u]
-  //     v4_u_row2 = [vc.u vd.u]
-  unsigned short v4_u_row1;
-  unsigned short v4_u_row2;
-  unsigned short v4_v_row1;
-  unsigned short v4_v_row2;
-
-  // these variables are for rendering a 4x4 block doublesized to an
-  // 8x8 block
-  // ex: v4d_y_rows_12_l contains the 4 luminance values used to paint
-  // the left half (4 pixels) of rows 1 and 2 of the 8x8 block, which
-  // will be comprised from the original 2x2 vectors as
-  // [va.y0 va.y0 va.y1 va.y1]
-  unsigned long v4d_y_rows_12_l;
-  unsigned long v4d_y_rows_12_r;
-  unsigned long v4d_y_rows_34_l;
-  unsigned long v4d_y_rows_34_r;
-  unsigned long v4d_y_rows_56_l;
-  unsigned long v4d_y_rows_56_r;
-  unsigned long v4d_y_rows_78_l;
-  unsigned long v4d_y_rows_78_r;
-  // doublesized chrominance values
-  // ex: v4d_u_rows_12 = [va.u va.u vb.u vb.u]
-  unsigned long v4d_u_rows_12;
-  unsigned long v4d_u_rows_34;
-  unsigned long v4d_v_rows_12;
-  unsigned long v4d_v_rows_34;
+  unsigned char v2_index[4];
 } roq_v4_codebook;
 
 typedef struct
@@ -97,56 +73,85 @@ inline void prep_v2(roq_v2_codebook *v2)
 {
   v2->v2_y_u = be2me_16((v2->y0 << 8) | v2->y1);
   v2->v2_y_l = be2me_16((v2->y2 << 8) | v2->y3);
+
+  v2->v2d_y_rows_12 = be2me_32((v2->y0 << 24) | (v2->y0 << 16) |
+    (v2->y1 << 8) | v2->y1);
+  v2->v2d_y_rows_34 = be2me_32((v2->y2 << 24) | (v2->y2 << 16) |
+    (v2->y3 << 8) | v2->y3);
+
+  // no reason to swap these for endianness since they're the same bytes
+  v2->v2d_u_rows_12 = (v2->u << 8) | v2->u;
+  v2->v2d_v_rows_12 = (v2->v << 8) | v2->v;
 }
 
-// This function fills in the missing information for a v4 vector based
-// on 4 v2 indices.
-void prep_v4(roq_v4_codebook *v4,
-  roq_v2_codebook *v2_a, roq_v2_codebook *v2_b,
-  roq_v2_codebook *v2_c, roq_v2_codebook *v2_d)
+inline void paint_v2double_block(
+  unsigned char *y_plane,
+  unsigned char *u_plane,
+  unsigned char *v_plane,
+  roq_v2_codebook *v2,
+  unsigned int y_stride,
+  unsigned int u_stride,
+  unsigned int v_stride)
 {
-  // fill in the v4 variables
-  v4->v4_y_row1 = be2me_32((v2_a->v2_y_u << 16) | v2_b->v2_y_u);
-  v4->v4_y_row2 = be2me_32((v2_a->v2_y_l << 16) | v2_b->v2_y_l);
-  v4->v4_y_row3 = be2me_32((v2_c->v2_y_u << 16) | v2_d->v2_y_u);
-  v4->v4_y_row4 = be2me_32((v2_c->v2_y_l << 16) | v2_d->v2_y_l);
+  // render the luminance components
+  *(unsigned int *)y_plane = v2->v2d_y_rows_12;
+  y_plane += y_stride;
+  *(unsigned int *)y_plane = v2->v2d_y_rows_12;
+  y_plane += y_stride;
+  *(unsigned int *)y_plane = v2->v2d_y_rows_34;
+  y_plane += y_stride;
+  *(unsigned int *)y_plane = v2->v2d_y_rows_34;
 
-  v4->v4_u_row1 = be2me_16((v2_a->u << 8) | v2_b->u);
-  v4->v4_u_row2 = be2me_16((v2_c->u << 8) | v2_d->u);
+  // render the color planes
+  *(unsigned short *)u_plane = v2->v2d_u_rows_12;
+  u_plane += u_stride;
+  *(unsigned short *)u_plane = v2->v2d_u_rows_12;
 
-  v4->v4_v_row1 = be2me_16((v2_a->v << 8) | v2_b->v);
-  v4->v4_v_row2 = be2me_16((v2_c->v << 8) | v2_d->v);
+  *(unsigned short *)v_plane = v2->v2d_v_rows_12;
+  v_plane += v_stride;
+  *(unsigned short *)v_plane = v2->v2d_v_rows_12;
+}
 
-  // fill in the doublesized v4 variables
-  v4->v4d_y_rows_12_l = be2me_32((v2_a->y0 << 24) | (v2_a->y0 << 16) |
-    (v2_a->y1 << 8) | v2_a->y1);
-  v4->v4d_y_rows_12_r = be2me_32((v2_b->y0 << 24) | (v2_b->y0 << 16) |
-    (v2_b->y1 << 8) | v2_b->y1);
+inline void paint_v4_block(
+  unsigned char *y_plane,
+  unsigned char *u_plane,
+  unsigned char *v_plane,
+  unsigned int y_stride,
+  unsigned int u_stride,
+  unsigned int v_stride,
+  roq_v2_codebook *v2_a,
+  roq_v2_codebook *v2_b,
+  roq_v2_codebook *v2_c,
+  roq_v2_codebook *v2_d)
+{
+  // render luminance components
+  ((unsigned short *)y_plane)[0] = v2_a->v2_y_u;
+  ((unsigned short *)y_plane)[1] = v2_b->v2_y_u;
 
-  v4->v4d_y_rows_34_l = be2me_32((v2_a->y2 << 24) | (v2_a->y2 << 16) |
-    (v2_a->y3 << 8) | v2_a->y3);
-  v4->v4d_y_rows_34_r = be2me_32((v2_b->y2 << 24) | (v2_b->y2 << 16) |
-    (v2_b->y3 << 8) | v2_b->y3);
+  y_plane += y_stride;
+  ((unsigned short *)y_plane)[0] = v2_a->v2_y_l;
+  ((unsigned short *)y_plane)[1] = v2_b->v2_y_l;
 
-  v4->v4d_y_rows_56_l = be2me_32((v2_c->y0 << 24) | (v2_c->y0 << 16) |
-    (v2_c->y1 << 8) | v2_c->y1);
-  v4->v4d_y_rows_56_r = be2me_32((v2_d->y0 << 24) | (v2_d->y0 << 16) |
-    (v2_d->y1 << 8) | v2_d->y1);
+  y_plane += y_stride;
+  ((unsigned short *)y_plane)[0] = v2_c->v2_y_u;
+  ((unsigned short *)y_plane)[1] = v2_d->v2_y_u;
 
-  v4->v4d_y_rows_78_l = be2me_32((v2_c->y2 << 24) | (v2_c->y2 << 16) |
-    (v2_d->y3 << 8) | v2_d->y3);
-  v4->v4d_y_rows_78_r = be2me_32((v2_c->y2 << 24) | (v2_c->y2 << 16) |
-    (v2_d->y3 << 8) | v2_d->y3);
+  y_plane += y_stride;
+  ((unsigned short *)y_plane)[0] = v2_c->v2_y_l;
+  ((unsigned short *)y_plane)[1] = v2_d->v2_y_l;
 
-  v4->v4d_u_rows_12 = be2me_32((v2_a->u << 24) | (v2_a->u << 16) |
-    (v2_b->u << 8) | v2_b->u);
-  v4->v4d_u_rows_34 = be2me_32((v2_c->u << 24) | (v2_c->u << 16) |
-    (v2_d->u << 8) | v2_d->u);
+  // render the color planes
+  u_plane[0] = v2_a->u;
+  u_plane[1] = v2_b->u;
+  u_plane += u_stride;
+  u_plane[0] = v2_c->u;
+  u_plane[1] = v2_d->u;
 
-  v4->v4d_v_rows_12 = be2me_32((v2_a->v << 24) | (v2_a->v << 16) |
-    (v2_b->v << 8) | v2_b->v);
-  v4->v4d_v_rows_34 = be2me_32((v2_c->v << 24) | (v2_c->v << 16) |
-    (v2_d->v << 8) | v2_d->v);
+  v_plane[0] = v2_a->v;
+  v_plane[1] = v2_b->v;
+  v_plane += v_stride;
+  v_plane[0] = v2_c->v;
+  v_plane[1] = v2_d->v;
 }
 
 // This function copies the 4x4 block from the prev_*_planes to the
@@ -164,7 +169,7 @@ inline void copy_4x4_block(
 {
   int i;
 
-  // copy over the luminance components (4 rows, 2 uints each)
+  // copy over the luminance components (4 rows, 1 uint each)
   for (i = 0; i < 4; i++)
   {
     *(unsigned int *)y_plane = *(unsigned int *)prev_y_plane;
@@ -177,8 +182,10 @@ inline void copy_4x4_block(
   {
     *(unsigned short*)u_plane = *(unsigned short*)prev_u_plane;
     u_plane += u_stride;
+    prev_u_plane += u_stride;
     *(unsigned short*)v_plane = *(unsigned short*)prev_v_plane;
     v_plane += v_stride;
+    prev_v_plane += v_stride;
   }
 }
 
@@ -211,8 +218,10 @@ inline void copy_8x8_block(
   {
     *(unsigned int*)u_plane = *(unsigned int*)prev_u_plane;
     u_plane += u_stride;
+    prev_u_plane += u_stride;
     *(unsigned int*)v_plane = *(unsigned int*)prev_v_plane;
     v_plane += v_stride;
+    prev_v_plane += v_stride;
   }
 }
 
@@ -220,7 +229,7 @@ inline void copy_8x8_block(
 void *roq_decode_video_init(void)
 {
   roqvideo_info *info =
-    (roqvideo_info *)malloc(sizeof(roqvideo_info));
+    (roqvideo_info *)calloc(sizeof(roqvideo_info), 1);
 
   info->prev_frame = NULL;
 
@@ -269,24 +278,22 @@ void roq_decode_video(void *context, unsigned char *encoded,
   roqvideo_info *info = (roqvideo_info *)context;
 
   int stream_ptr = 0;
-  int i, j, k;
+  int i, j;
   int chunk_length;
   int v2_count;
   int v4_count;
-  int v2_ia, v2_ib, v2_ic, v2_id;
 
   int roq_code;
   unsigned int current_roq_codeword = EMPTY_ROQ_CODEWORD;
   unsigned char argument = 0;
-  int mean_motion_x;
-  int mean_motion_y;
+  char mean_motion_x;
+  char mean_motion_y;
   int mx, my; // for calculating the motion vector
 
   int mblock_x = 0;
   int mblock_y = 0;
   int quad8_x, quad8_y;  // for pointing to 8x8 blocks in a macroblock
   int quad4_x, quad4_y;  // for pointing to 4x4 blocks in an 8x8 block
-  int quad2_x, quad2_y;  // for pointing to 2x2 blocks in a 4x4 block
 
   unsigned char *y_plane;
   unsigned char *u_plane;
@@ -299,10 +306,6 @@ void roq_decode_video(void *context, unsigned char *encoded,
   unsigned int v_stride = mpi->stride[2];
 
   roq_v4_codebook v4;
-  roq_v2_codebook v2;
-
-int debugger = 0;
-
 
   // make sure the encoded chunk is of minimal acceptable length
   if (encoded_size < 8)
@@ -322,8 +325,6 @@ int debugger = 0;
 
   if (LE_16(&encoded[stream_ptr]) == RoQ_QUAD_CODEBOOK)
   {
-if (debugger)
-printf ("parsing codebook\n");
     stream_ptr += 2;
     chunk_length = LE_32(&encoded[stream_ptr]);
     stream_ptr += 4;
@@ -370,28 +371,31 @@ printf ("parsing codebook\n");
     // load the 4x4 vectors
     for (i = 0; i < v4_count; i++)
     {
-      v2_ia = encoded[stream_ptr++];
-      v2_ib = encoded[stream_ptr++];
-      v2_ic = encoded[stream_ptr++];
-      v2_id = encoded[stream_ptr++];
-      prep_v4(&info->v4[i], &info->v2[v2_ia], &info->v2[v2_ib],
-        &info->v2[v2_ic], &info->v2[v2_id]);
+      info->v4[i].v2_index[0] = encoded[stream_ptr++];
+      info->v4[i].v2_index[1] = encoded[stream_ptr++];
+      info->v4[i].v2_index[2] = encoded[stream_ptr++];
+      info->v4[i].v2_index[3] = encoded[stream_ptr++];
     }
   }
 
   if (LE_16(&encoded[stream_ptr]) == RoQ_QUAD_VQ)
   {
-if (debugger)
-printf ("parsing quad vq\n");
     stream_ptr += 2;
     chunk_length = LE_32(&encoded[stream_ptr]);
     stream_ptr += 4;
     mean_motion_y = encoded[stream_ptr++];
     mean_motion_x = encoded[stream_ptr++];
-if (debugger){
-for (i = 0; i < 16; i++)
-  printf (" %02X", encoded[stream_ptr + i]);
-printf("\n");}
+
+    // start by copying entire previous frame
+    if (info->prev_frame)
+    {
+      memcpy(mpi->planes[0], info->prev_frame->planes[0],
+        mpi->width * mpi->height);
+      memcpy(mpi->planes[1], info->prev_frame->planes[1],
+        (mpi->width * mpi->height) / 4);
+      memcpy(mpi->planes[2], info->prev_frame->planes[2], 
+        (mpi->width * mpi->height) / 4);
+    }
 
     // iterate through the 16x16 macroblocks
     for (mblock_y = 0; mblock_y < mpi->height; mblock_y += 16)
@@ -413,33 +417,11 @@ printf("\n");}
 
           // decide how to handle this 8x8 quad
           FETCH_NEXT_CODE();
-if (debugger)
-printf ("  (%d, %d), %d\n", quad8_x, quad8_y, roq_code);
           switch(roq_code)
           {
-            // 8x8 block is painted with the same block as the last frame
+            // 8x8 block is the same as in the previous frame;
+            // skip it
             case 0:
-              CHECK_PREV_FRAME();
-              // prepare the pointers to the planes in the previous frame
-              prev_y_plane = info->prev_frame->planes[0] +
-                quad8_y * y_stride + quad8_x;
-              prev_u_plane = info->prev_frame->planes[1] +
-                (quad8_y / 2) * u_stride + (quad8_x / 2);
-              prev_v_plane = info->prev_frame->planes[2] +
-                (quad8_y / 2) * v_stride + (quad8_x / 2);
-
-// sanity check before rendering
-              copy_8x8_block(
-                y_plane,
-                u_plane,
-                v_plane,
-                prev_y_plane,
-                prev_u_plane,
-                prev_v_plane,
-                y_stride,
-                u_stride,
-                v_stride
-              );
               break;
 
             // 8x8 block is painted with an 8x8 block from the last frame
@@ -479,58 +461,33 @@ printf ("  (%d, %d), %d\n", quad8_x, quad8_y, roq_code);
             case 2:
               FETCH_NEXT_ARGUMENT();
               v4 = info->v4[argument];
-if (debugger)
-printf ("    vector: %d, %08X %08X %08X %08X  %08X %08X\n", argument,
-  v4.v4d_y_rows_12_l, v4.v4d_y_rows_12_r,
-  v4.v4d_y_rows_34_l, v4.v4d_y_rows_34_r,
-  v4.v4d_u_rows_12, v4.v4d_u_rows_34);
 
 // sanity check before rendering
-              // take care of the 8 luminance rows
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_12_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_12_r;
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_12_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_12_r;
+              // iterate through 4 4x4 blocks
+              for (j = 0; j < 4; j++)
+              {
+                quad4_x = quad8_x;
+                quad4_y = quad8_y;
+                if (j & 0x01) quad4_x += 4;
+                if (j & 0x02) quad4_y += 4;
 
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_34_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_34_r;
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_34_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_34_r;
+                // set up the planes
+                y_plane = mpi->planes[0] + quad4_y * y_stride + quad4_x;
+                u_plane = mpi->planes[1] + 
+                  (quad4_y / 2) * u_stride + (quad4_x / 2);
+                v_plane = mpi->planes[2] + 
+                  (quad4_y / 2) * v_stride + (quad4_x / 2);
 
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_56_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_56_r;
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_56_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_56_r;
-
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_78_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_78_r;
-              y_plane += y_stride;
-              ((unsigned int*)y_plane)[0] = v4.v4d_y_rows_78_l;
-              ((unsigned int*)y_plane)[1] = v4.v4d_y_rows_78_r;
-
-              // then the 4 U & V chrominance rows
-              *(unsigned int*)u_plane = v4.v4d_u_rows_12;
-              u_plane += u_stride;
-              *(unsigned int*)u_plane = v4.v4d_u_rows_12;
-              u_plane += u_stride;
-              *(unsigned int*)u_plane = v4.v4d_u_rows_34;
-              u_plane += u_stride;
-              *(unsigned int*)u_plane = v4.v4d_u_rows_34;
-
-              *(unsigned int*)v_plane = v4.v4d_v_rows_12;
-              v_plane += v_stride;
-              *(unsigned int*)v_plane = v4.v4d_v_rows_12;
-              v_plane += v_stride;
-              *(unsigned int*)v_plane = v4.v4d_v_rows_34;
-              v_plane += v_stride;
-              *(unsigned int*)v_plane = v4.v4d_v_rows_34;
-
+                paint_v2double_block(
+                  y_plane,
+                  u_plane,
+                  v_plane,
+                  &info->v2[v4.v2_index[j]],
+                  y_stride,
+                  u_stride,
+                  v_stride
+                );
+              }
               break;
 
             // 8x8 block is broken down into 4 4x4 blocks and painted using
@@ -553,34 +510,11 @@ printf ("    vector: %d, %08X %08X %08X %08X  %08X %08X\n", argument,
 
                 // decide how to handle this 4x4 quad
                 FETCH_NEXT_CODE();
-if (debugger)
-printf ("    (%d, %d), %d\n", quad4_x, quad4_y, roq_code);
                 switch(roq_code)
                 {
-                  // 4x4 block is the same as in the previous frame
+                  // 4x4 block is the same as in the previous frame;
+                  // skip it
                   case 0:
-                    CHECK_PREV_FRAME();
-      
-                    // prepare the pointers to the planes in the previous frame
-                    prev_y_plane = info->prev_frame->planes[0] +
-                      quad4_y * y_stride + quad4_x;
-                    prev_u_plane = info->prev_frame->planes[1] +
-                      (quad4_y / 2) * u_stride + (quad4_x / 2);
-                    prev_v_plane = info->prev_frame->planes[2] +
-                      (quad4_y / 2) * v_stride + (quad4_x / 2);
-
-// sanity check before rendering
-                    copy_4x4_block(
-                      y_plane,
-                      u_plane,
-                      v_plane,
-                      prev_y_plane,
-                      prev_u_plane,
-                      prev_v_plane,
-                      y_stride,
-                      u_stride,
-                      v_stride
-                    );
                     break;
 
                   // 4x4 block is motion compensated from the previous frame
@@ -619,59 +553,39 @@ printf ("    (%d, %d), %d\n", quad4_x, quad4_y, roq_code);
                     FETCH_NEXT_ARGUMENT();
                     v4 = info->v4[argument];
 
-                    // copy the 4 luminance rows
-                    *(unsigned int*)y_plane = v4.v4_y_row1;
-                    y_plane += y_stride;
-                    *(unsigned int*)y_plane = v4.v4_y_row2;
-                    y_plane += y_stride;
-                    *(unsigned int*)y_plane = v4.v4_y_row3;
-                    y_plane += y_stride;
-                    *(unsigned int*)y_plane = v4.v4_y_row4;
-                    
-                    // copy the U & V chrominance rows
-                    *(unsigned short*)u_plane = v4.v4_u_row1;
-                    u_plane += u_stride;
-                    *(unsigned short*)u_plane = v4.v4_u_row2;
-
-                    *(unsigned short*)v_plane = v4.v4_v_row1;
-                    v_plane += v_stride;
-                    *(unsigned short*)v_plane = v4.v4_v_row2;
-
+                    paint_v4_block(
+                      y_plane,
+                      u_plane,
+                      v_plane,
+                      y_stride,
+                      u_stride,
+                      v_stride,
+                      &info->v2[v4.v2_index[0]],
+                      &info->v2[v4.v2_index[1]],
+                      &info->v2[v4.v2_index[2]],
+                      &info->v2[v4.v2_index[3]]);
                     break;
 
                   // 4x4 block is built from 4 2x2 vectors
                   case 3:
-                    // iterate through 4 2x2 blocks
-                    for (k = 0; k < 4; k++)
+                    if (stream_ptr + 4 > encoded_size)
                     {
-                      quad2_x = quad4_x;
-                      quad2_y = quad4_y;
-                      if (k & 0x01) quad2_x += 2;
-                      if (k & 0x02) quad2_y += 2;
-
-                      // set up the planes
-                      y_plane = mpi->planes[0] + quad2_y * y_stride + quad2_x;
-                      u_plane = mpi->planes[1] + 
-                        (quad2_y / 2) * u_stride + (quad2_x / 2);
-                      v_plane = mpi->planes[2] + 
-                        (quad2_y / 2) * v_stride + (quad2_x / 2);
-
-                      // fetch the next index into the v2 vector table
-                      FETCH_NEXT_ARGUMENT();
-if (debugger)
-printf ("      (%d, %d), %d\n", quad2_x, quad2_y, argument);
-                      v2 = info->v2[argument];
-
-                      // copy the luminance components
-                      *(unsigned short*)y_plane = v2.v2_y_u;
-                      y_plane += y_stride;
-                      *(unsigned short*)y_plane = v2.v2_y_l;
-                      
-                      // copy the U and V bytes
-                      u_plane[0] = v2.u;
-                      v_plane[0] = v2.v;
+                      mp_msg(MSGT_DECVIDEO, MSGL_WARN,
+                        "RoQ video: stream pointer just went out of bounds (2)\n");
+                      return;
                     }
-                    
+                    paint_v4_block(
+                      y_plane,
+                      u_plane,
+                      v_plane,
+                      y_stride,
+                      u_stride,
+                      v_stride,
+                      &info->v2[encoded[stream_ptr + 0]],
+                      &info->v2[encoded[stream_ptr + 1]],
+                      &info->v2[encoded[stream_ptr + 2]],
+                      &info->v2[encoded[stream_ptr + 3]]);
+                    stream_ptr += 4;
                     break;
                 }
               }
