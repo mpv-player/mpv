@@ -203,7 +203,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	     s->step);
       af->mul.n = af->data->rate;
       af->mul.d = n->rate;
-      return AF_OK;
+      return rv;
     }
 
     // Calculate up and down sampling factors
