@@ -67,7 +67,7 @@ static int init(sh_audio_t *sh_audio)
 	lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
 	lavc_context->block_align = sh_audio->wf->nBlockAlign;
     }
-    lavc_context->fourcc = sh_audio->format;
+    lavc_context->codec_tag = sh_audio->format; //FOURCC
     lavc_context->codec_id = lavc_codec->id; // not sure if required, imho not --A'rpi
 
     /* alloc extra data */

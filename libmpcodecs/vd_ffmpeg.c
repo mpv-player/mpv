@@ -90,7 +90,7 @@ static int lavc_param_idct_algo=0;
 static int lavc_param_debug=0;
 
 struct config lavc_decode_opts_conf[]={
-	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
+	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
 	{"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
@@ -186,7 +186,7 @@ static int init(sh_video_t *sh){
     avctx->workaround_bugs= lavc_param_workaround_bugs;
     avctx->error_resilience= lavc_param_error_resilience;
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
-    avctx->fourcc= sh->format;
+    avctx->codec_tag= sh->format;
     avctx->idct_algo= lavc_param_idct_algo;
     avctx->error_concealment= lavc_param_error_concealment;
 #if LIBAVCODEC_BUILD >= 4642
@@ -540,7 +540,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
-
+//printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
 #if LIBAVCODEC_BUILD >= 4643
     while(lavc_param_vstats){ // always one time loop
