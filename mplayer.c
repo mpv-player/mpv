@@ -998,10 +998,12 @@ if(stream_dump_type==5){
 }
 
 #ifdef USE_DVDREAD
-current_module="dvd lang->id";
-if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
-if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
-current_module=NULL;
+if(stream->type==STREAMTYPE_DVD){
+  current_module="dvd lang->id";
+  if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  current_module=NULL;
+}
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
