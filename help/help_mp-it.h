@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.96
+// Updated to help_mp-en.h v1.105
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
@@ -564,6 +564,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "No autoscale"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporzionale alla larghezza del filmato"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporzionale all'altezza del filmato"
