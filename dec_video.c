@@ -45,7 +45,11 @@ extern int init_video_codec(sh_video_t *sh_video,int ex);
     AVPicture lavc_picture;
 #endif
 
+#ifndef NEW_DECORE
 #include "opendivx/decore.h"
+#else
+#include <decore.h>
+#endif
 
 //**************************************************************************//
 //             The OpenDivX stuff:
@@ -156,29 +160,47 @@ switch(sh_video->codec->driver){
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
+        memset(&dec_param,0,sizeof(dec_param));
 #ifdef NEW_DECORE
-     DEC_MEM_REQS dec_mem;
         dec_param.output_format=DEC_USER;
 #else
         dec_param.color_depth = 32;
 #endif
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
-#ifdef NEW_DECORE
-        // 0.50-CVS new malloc scheme
-        decore(0x123, DEC_OPT_MEMORY_REQS, &dec_param, &dec_mem);
-        dec_param.buffers.mp4_edged_ref_buffers=malloc(dec_mem.mp4_edged_ref_buffers_size);
-        dec_param.buffers.mp4_edged_for_buffers=malloc(dec_mem.mp4_edged_for_buffers_size);
-        dec_param.buffers.mp4_display_buffers=malloc(dec_mem.mp4_display_buffers_size);
-        dec_param.buffers.mp4_state=malloc(dec_mem.mp4_state_size);
-        dec_param.buffers.mp4_tables=malloc(dec_mem.mp4_tables_size);
-        dec_param.buffers.mp4_stream=malloc(dec_mem.mp4_stream_size);
-#endif
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
-
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
-
+   }
+   if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
+   break;
+ }
+ case 7: {  // DivX4Linux
+   if(verbose) printf("DivX4Linux video codec\n");
+   { DEC_PARAM dec_param;
+     DEC_SET dec_set;
+     int bits=16;
+        memset(&dec_param,0,sizeof(dec_param));
+	switch(out_fmt){
+	case IMGFMT_YV12: dec_param.output_format=DEC_YV12;bits=12;break;
+	case IMGFMT_YUY2: dec_param.output_format=DEC_YUY2;break;
+	case IMGFMT_UYVY: dec_param.output_format=DEC_UYVY;break;
+	case IMGFMT_I420: dec_param.output_format=DEC_420;bits=12;break;
+	case IMGFMT_BGR15: dec_param.output_format=DEC_RGB555_INV;break;
+	case IMGFMT_BGR16: dec_param.output_format=DEC_RGB565_INV;break;
+	case IMGFMT_BGR24: dec_param.output_format=DEC_RGB24_INV;bits=24;break;
+	case IMGFMT_BGR32: dec_param.output_format=DEC_RGB32_INV;bits=32;break;
+	default:
+	  fprintf(stderr,"Unsupported out_fmt: 0x%X\n",out_fmt);
+	  return 0;
+	}
+	dec_param.x_dim = sh_video->bih->biWidth;
+	dec_param.y_dim = sh_video->bih->biHeight;
+	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
+	dec_set.postproc_level = divx_quality;
+	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+//	sh_video->our_out_buffer = shmem_alloc(((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
+	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
    }
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
    break;
@@ -247,14 +269,19 @@ switch(sh_video->codec->driver){
     // let's decode
         dec_frame.length = in_size;
 	dec_frame.bitstream = start;
-	dec_frame.render_flag = 1;
+	dec_frame.render_flag = drop_frame?0:1;
+
 #ifdef NEW_DECORE
         dec_frame.bmp=&dec_pic;
         dec_pic.y=dec_pic.u=dec_pic.v=NULL;
-#endif
+	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+#else
 	decore(0x123, 0, &dec_frame, NULL);
+#endif
+
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
+    // let's display
 #ifdef NEW_DECORE
       if(dec_pic.y){
         void* src[3];
@@ -276,6 +303,41 @@ switch(sh_video->codec->driver){
         blit_frame=1;
       }
 #endif
+      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+
+    break;
+  }
+  case 7: {
+    // DivX4Linux
+    unsigned int t=GetTimer();
+    unsigned int t2;
+    DEC_FRAME dec_frame;
+    // let's decode
+        dec_frame.length = in_size;
+	dec_frame.bitstream = start;
+	dec_frame.render_flag = drop_frame?0:1;
+        dec_frame.bmp=sh_video->our_out_buffer;
+        dec_frame.stride=sh_video->disp_w;
+//	printf("Decoding DivX4 frame\n");
+	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+
+    if(!drop_frame && sh_video->our_out_buffer){
+//	printf("Displaying DivX4 frame\n");
+      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
+        uint8_t* dst[3];
+        int stride[3];
+        stride[0]=sh_video->disp_w;
+        stride[1]=stride[2]=sh_video->disp_w/2;
+        dst[0]=sh_video->our_out_buffer;
+        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
+        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
+        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+      } else
+        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
+      blit_frame=1;
+    }
+
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
     break;
