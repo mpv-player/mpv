@@ -3813,6 +3813,35 @@ coefficient de différence (par défaut\ : 2.5)
 .B volnorm
 Maximalise le volume sans introduire de distortions sonores.
 .
+.TP
+.B ladspa=nom_fichier:label[:contrôles...]
+Charge un plugin LADSPA (Linux Audio Developer's Simple Plugin API).
+Ce filtre est réentrant, donc plusieurs instances de plugins LADSPA penvent
+être utilisé à la fois.
+.PD 0
+.RSs
+.IPs nom_fichier\ 
+Définit le fichier de la librairie du plugin LADSPA.
+Si LADSPA_PATH est définit, la recherche se fait dans le répertoire spécifié.
+S'il n'est pas définit, vous devez alors donner le chemin absolu.
+.IPs label
+Sélectionne le filtre de la librairie.
+Certaines librairies disposent d'un seul filtre, mais d'autres en contiennent
+plusieurs.
+Entrez 'help' ici pour obtenir une liste des filtres disponibles dans la
+librairie donnée, ce qui élimine d'utilisation de 'listplugins' depuis le
+kit de développement LADSPA.
+.IPs contrôles
+Les paramètres contrôles sont aucun ou plus nombres flottants qui
+contrôlent le comportement du plugin chargé (par exemple délais, seuil ou
+amplification).
+En mode bavard (en ajoutant -v à la ligne de commande de MPlayer), s'affichent
+tous les paramètres de contrôle ainsi que leurs intervalles valides.
+Ceci élimine d'utilisation de 'analyseplugin' depuis le kit de développement
+LADSPA.
+.RE
+.PD 1
+.
 .
 .
 .SH "FILTRES VIDÉO"
