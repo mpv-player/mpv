@@ -259,15 +259,16 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             sh_video->bih->biSizeImage=sh_video->bih->biWidth*sh_video->bih->biHeight*3;
 
             // here we search for the correct keyframe 
-            // vp6 keyframe is when the 2nd byte of the vp6 header is 0x36
+            // vp6 keyframe is when the 2nd byte of the vp6 header is
+            // 0x36 for VP61 and 0x46 for VP62
             if((priv->v_format==mmioFOURCC('V','P','6','1')) ||
                (priv->v_format==mmioFOURCC('V','P','6','2')) ||
                (priv->v_format==mmioFOURCC('V','P','3','1'))) {
                 stream_read(demuxer->stream,buf,10);
-                if (((((priv->v_format>>16) & 0xff) == '6') && (buf[8]!=0x36)) ||
+                if (((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0f)!=0x06)) ||
                     ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))) {
                     mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: searching %.4s keyframe...\n", (char*)&priv->v_format);
-                    while(((((priv->v_format>>16) & 0xff) == '6') && (buf[8]!=0x36)) ||
+                    while(((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0f)!=0x06)) ||
                           ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))){
                         mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: %.4s block skip.\n", (char*)&priv->v_format);
                         videolen=(buf[2]>>4)|(buf[3]<<4)|(buf[4]<<0xC);
