@@ -94,8 +94,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	case IMGFMT_I420:
 	case IMGFMT_YV12:
 	     bpp = 24;
-	     cspace = RGB;
-	     yuv2rgb_init(bpp,MODE_BGR);
+	     cspace = BGR;
+	     yuv2rgb_init(bpp,MODE_RGB);
 	     image_data = malloc(image_width*image_height*3);
 	break;
 	default:
