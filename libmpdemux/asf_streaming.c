@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "config.h"
 
@@ -141,18 +142,37 @@ printf("0x%02X\n", stream_chunck->type );
 	return stream_chunck->size+4;
 }
 
+extern int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len);
+extern const char asf_file_header_guid[];
+extern const char asf_stream_header_guid[];
+extern const char asf_stream_group_guid[];
+extern int audio_id;
+extern int video_id;
+
+static int max_idx(int s_count, int *s_rates, int bound) {
+  int i, best = -1, rate = 0;
+  for (i = 0; i < s_count; i++) {
+    if (s_rates[i] > rate && s_rates[i] <= bound) {
+      rate = s_rates[i];
+      best = i;
+    }
+  }
+  return best;
+}
+
 static int
 asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   ASF_header_t asfh;
-  ASF_obj_header_t objh;
-  ASF_file_header_t fileh;
-  ASF_stream_header_t streamh;
   ASF_stream_chunck_t chunk;
   asf_http_streaming_ctrl_t* asf_ctrl = (asf_http_streaming_ctrl_t*) streaming_ctrl->data;
   char* buffer=NULL, *chunk_buffer=NULL;
   int i,r,size,pos = 0;
+  int start;
   int buffer_size = 0;
   int chunk_size2read = 0;
+  int bw = streaming_ctrl->bandwidth;
+  int *v_rates = NULL, *a_rates = NULL;
+  int v_rate = 0, a_rate = 0, a_idx = -1, v_idx = -1;
   
   if(asf_ctrl == NULL) return -1;
 
@@ -219,35 +239,34 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
     return -1;
   }
 
-  pos += sizeof(asfh);
+  start = sizeof(asfh);
   
-  while(size - pos >= (int)sizeof(objh)) {
-    memcpy(&objh,buffer+pos,sizeof(objh));
-    le2me_ASF_obj_header_t(&objh);
-
-    switch(ASF_LOAD_GUID_PREFIX(objh.guid)) {
-    case 0x8CABDCA1 : // File header
-      pos += sizeof(objh);
-      memcpy(&fileh,buffer + pos,sizeof(fileh));
-      le2me_ASF_file_header_t(&fileh);
+  pos = find_asf_guid(buffer, asf_file_header_guid, start, size);
+  if (pos >= 0) {
+    ASF_file_header_t *fileh = (ASF_file_header_t *) &buffer[pos];
+    pos += sizeof(ASF_file_header_t);
+    if (pos > size) goto len_err_out;
+      le2me_ASF_file_header_t(fileh);
 /*
       if(fileh.packetsize != fileh.packetsize2) {
 	printf("Error packetsize check don't match\n");
 	return -1;
       }
 */
-      asf_ctrl->packet_size = fileh.max_packet_size;
+      asf_ctrl->packet_size = fileh->max_packet_size;
       // before playing. 
       // preroll: time in ms to bufferize before playing
-      streaming_ctrl->prebuffer_size = (unsigned int)((double)((double)fileh.preroll/1000)*((double)fileh.max_bitrate/8));
-      pos += sizeof(fileh);
-      break;
-    case 0xB7DC0791 : // stream header
-      pos += sizeof(objh);
-      memcpy(&streamh,buffer + pos,sizeof(streamh));
-      le2me_ASF_stream_header_t(&streamh);
-      pos += sizeof(streamh) + streamh.type_size;
-      switch(ASF_LOAD_GUID_PREFIX(streamh.type)) {
+      streaming_ctrl->prebuffer_size = (unsigned int)(((double)fileh->preroll/1000.0)*((double)fileh->max_bitrate/8.0));
+  }
+
+  pos = start;
+  while ((pos = find_asf_guid(buffer, asf_stream_header_guid, pos, size)) >= 0)
+  {
+    ASF_stream_header_t *streamh = (ASF_stream_header_t *)&buffer[pos];
+    pos += sizeof(ASF_stream_header_t);
+    if (pos > size) goto len_err_out;
+      le2me_ASF_stream_header_t(streamh);
+      switch(ASF_LOAD_GUID_PREFIX(streamh->type)) {
       case 0xF8699E40 : // audio stream
 	if(asf_ctrl->audio_streams == NULL){
 	  asf_ctrl->audio_streams = (int*)malloc(sizeof(int));
@@ -257,11 +276,7 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	  asf_ctrl->audio_streams = (int*)realloc(asf_ctrl->audio_streams,
 						     asf_ctrl->n_audio*sizeof(int));
 	}
-	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh.stream_no;
-	pos += streamh.stream_size;
-	if( streaming_ctrl->bandwidth==0 ) {
-	  asf_ctrl->audio_id = streamh.stream_no;
-	}
+	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh->stream_no;
 	break;
       case 0xBC19EFC0 : // video stream
 	if(asf_ctrl->video_streams == NULL){
@@ -272,57 +287,127 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	  asf_ctrl->video_streams = (int*)realloc(asf_ctrl->video_streams,
 						     asf_ctrl->n_video*sizeof(int));
 	}
-	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh.stream_no;
-	if( streaming_ctrl->bandwidth==0 ) {
-	  asf_ctrl->video_id = streamh.stream_no;
-	}
+	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh->stream_no;
 	break;
       }
-      break;
-    case 0x7bf875ce :  // stream bitrate properties object
-printf("Stream bitrate properties object\n");
-printf("Max bandwidth set to %d\n", streaming_ctrl->bandwidth);
-	asf_ctrl->audio_id = 0;
-	asf_ctrl->video_id = 0;
-	if( streaming_ctrl->bandwidth!=0 ) {
-		int stream_count, stream_id, max_bitrate;
-		char *ptr = buffer+pos;
-		unsigned int total_bitrate=0, p_id=0, p_br=0;
-		int i;
-		ptr += sizeof(objh);
+  }
+
+  // always allocate to avoid lots of ifs later
+  v_rates = calloc(asf_ctrl->n_video, sizeof(int));
+  a_rates = calloc(asf_ctrl->n_audio, sizeof(int));
+
+  pos = find_asf_guid(buffer, asf_stream_group_guid, start, size);
+  if (pos >= 0) {
+    // stream bitrate properties object
+	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
+	int stream_count;
+	char *ptr = &buffer[pos];
+	
 		stream_count = le2me_16(*(uint16_t*)ptr);
 		ptr += sizeof(uint16_t);
-printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
-		for( i=0 ; i<stream_count && ptr<((char*)buffer+pos+objh.size) ; i++ ) {
-			stream_id = le2me_16(*(uint16_t*)ptr);
+		if (ptr > &buffer[size]) goto len_err_out;
+		mp_msg(MSGT_NETWORK, MSGL_V, " stream count=[0x%x][%u]\n",
+		        stream_count, stream_count );
+		for( i=0 ; i<stream_count ; i++ ) {
+			uint32_t rate;
+			int id;
+			int j;
+			id = le2me_16(*(uint16_t*)ptr);
 			ptr += sizeof(uint16_t);
-			memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
-			max_bitrate = le2me_32(max_bitrate);
-			if( stream_id==1 ) total_bitrate = max_bitrate;
-			else if( total_bitrate+max_bitrate>streaming_ctrl->bandwidth ) {
-				total_bitrate += p_br;
-printf("total_bitrate=%d\n", total_bitrate);
-printf("id=%d\n", p_id);
-				break;
-			}
+			if (ptr > &buffer[size]) goto len_err_out;
+			memcpy(&rate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
 			ptr += sizeof(uint32_t);
-printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
-printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
-			p_id = stream_id;
-			p_br = max_bitrate;
+			if (ptr > &buffer[size]) goto len_err_out;
+			rate = le2me_32(rate);
+			mp_msg(MSGT_NETWORK, MSGL_V,
+                                "  stream id=[0x%x][%u]\n", id, id);
+			mp_msg(MSGT_NETWORK, MSGL_V,
+			        "  max bitrate=[0x%x][%u]\n", rate, rate);
+			for (j = 0; j < asf_ctrl->n_video; j++) {
+			  if (id == asf_ctrl->video_streams[j]) {
+			    mp_msg(MSGT_NETWORK, MSGL_V, "  is video stream\n");
+			    v_rates[j] = rate;
+			    break;
+			  }
+			}
+			for (j = 0; j < asf_ctrl->n_audio; j++) {
+			  if (id == asf_ctrl->audio_streams[j]) {
+			    mp_msg(MSGT_NETWORK, MSGL_V, "  is audio stream\n");
+			    a_rates[j] = rate;
+			    break;
+			  }
+			}
 		}
-		asf_ctrl->audio_id = 1;
-		asf_ctrl->video_id = p_id;
-	}
-	pos += objh.size;
-	break;
-    default :
-      pos += objh.size;
-      break;
-    }
   }
   free(buffer);
+
+  // automatic stream selection based on bandwidth
+  if (bw == 0) bw = INT_MAX;
+  mp_msg(MSGT_NETWORK, MSGL_V, "Max bandwidth set to %d\n", bw);
+
+  if (asf_ctrl->n_audio) {
+    // find lowest-bitrate audio stream
+    a_rate = a_rates[0];
+    a_idx = 0;
+    for (i = 0; i < asf_ctrl->n_audio; i++) {
+      if (a_rates[i] < a_rate) {
+        a_rate = a_rates[i];
+        a_idx = i;
+      }
+    }
+    if (max_idx(asf_ctrl->n_video, v_rates, bw - a_rate) < 0) {
+      // both audio and video are not possible, try video only next
+      a_idx = -1;
+      a_rate = 0;
+    }
+  }
+  // find best video stream
+  v_idx = max_idx(asf_ctrl->n_video, v_rates, bw - a_rate);
+  if (v_idx >= 0)
+    v_rate = v_rates[v_idx];
+
+  // find best audio stream
+  a_idx = max_idx(asf_ctrl->n_audio, a_rates, bw - v_rate);
+    
+  free(v_rates);
+  free(a_rates);
+
+  if (a_idx < 0 && v_idx < 0) {
+    mp_msg(MSGT_NETWORK, MSGL_FATAL, "bandwidth too small, "
+            "file cannot be played!\n");
+    return -1;
+  }
+
+  if (audio_id > 0)
+    // a audio stream was forced
+    asf_ctrl->audio_id = audio_id;
+  else if (a_idx >= 0)
+    asf_ctrl->audio_id = asf_ctrl->audio_streams[a_idx];
+  else if (asf_ctrl->n_audio) {
+    mp_msg(MSGT_NETWORK, MSGL_WARN, "bandwidth too small, "
+            "deselected audio stream\n");
+    audio_id = -2;
+  }
+
+  if (video_id > 0)
+    // a video stream was forced
+    asf_ctrl->video_id = video_id;
+  else if (v_idx >= 0)
+    asf_ctrl->video_id = asf_ctrl->video_streams[v_idx];
+  else if (asf_ctrl->n_video) {
+    mp_msg(MSGT_NETWORK, MSGL_WARN, "bandwidth too small, "
+            "deselected video stream\n");
+    video_id = -2;
+  }
+
   return 1;
+
+len_err_out:
+  mp_msg(MSGT_NETWORK, MSGL_FATAL, "Invalid length in ASF header!\n");
+  if (buffer) free(buffer);
+  if (v_rates) free(v_rates);
+  if (a_rates) free(a_rates);
+  return -1;
 }
 
 int
@@ -531,10 +616,11 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			if(asf_http_ctrl->n_audio > 0) {
 				for( i=0; i<asf_http_ctrl->n_audio ; i++ ) {
 					stream_id = asf_http_ctrl->audio_streams[i];
-					if(stream_id == asf_http_ctrl->audio_id || !asf_http_ctrl->audio_id) {
+					if(stream_id == asf_http_ctrl->audio_id) {
 						enable = 0;
 					} else {
 						enable = 2;
+						continue;
 					}
 					asf_nb_stream++;
 					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
@@ -543,10 +629,11 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			if(asf_http_ctrl->n_video > 0) {
 				for( i=0; i<asf_http_ctrl->n_video ; i++ ) {
 					stream_id = asf_http_ctrl->video_streams[i];
-					if(stream_id == asf_http_ctrl->video_id || !asf_http_ctrl->video_id) {
+					if(stream_id == asf_http_ctrl->video_id) {
 						enable = 0;
 					} else {
 						enable = 2;
+						continue;
 					}
 					asf_nb_stream++;
 					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
