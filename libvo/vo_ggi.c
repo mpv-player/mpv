@@ -12,6 +12,7 @@
    * implement gamma handling (VAA isn't obsoleted?)
  
   BUGS:
+   * palettized playback has bad colors, probably swapped palette?
    * fbdev & DR produces two downscaled images
    * fbdev & FLIP (& DR) produces no image
 
@@ -349,37 +350,7 @@ static uint32_t draw_frame_directbuffer(uint8_t *src[])
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-    int x, y;
-    unsigned char *spt;
-    ggi_color col;
-
-    spt = src[0];
-
-    for (y = 0; y < ggi_conf.srcheight; y++)
-    {
-	for (x = 0; x < ggi_conf.srcwidth; x++)
-	{
-	    /* add support for RGB */
-	    switch(ggi_conf.srcformat)
-	    {
-		case IMGFMT_BGR24:
-		case IMGFMT_BGR32:
-		    col.r = *spt++ << 8;
-		    col.g = *spt++ << 8;
-		    col.b = *spt++ << 8;
-		    if (ggi_conf.srcformat == IMGFMT_BGR32)
-			spt++;
-		    break;
-		default:
-		    mp_msg(MSGT_VO, MSGL_V, "[ggi] unsupported input format\n");
-		    return(0);
-	    }
-	    
-//	    printf("pixel: x:%d, y:%d, r:%d, g:%d, b:%d\n",
-//		x, y, col.r, col.b, col.g);
-	    ggiPutPixel(ggi_conf.vis, x, y, ggiMapColor(ggi_conf.vis, &col));
-	}
-    }
+    ggiPutBox(ggi_conf.vis, 0, 0, ggi_conf.dstwidth, ggi_conf.dstheight, src[0]);
     ggiFlush(ggi_conf.vis);
 
     return(0);
@@ -438,7 +409,8 @@ static void flip_page(void)
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
     int x, int y)
 {
-    return(0);
+    ggiPutHLine(ggi_conf.vis, x, y, w, src[0]);
+    return(1);
 }
 
 static uint32_t query_format(uint32_t format)
@@ -470,6 +442,35 @@ static uint32_t query_format(uint32_t format)
     
     if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format))
     {
+	switch(format)
+	{
+	    case IMGFMT_RGB|8:
+	    case IMGFMT_BGR|8:
+		mode.graphtype = GT_8BIT;
+		break;
+	    case IMGFMT_RGB|15:
+	    case IMGFMT_BGR|15:
+		mode.graphtype = GT_15BIT;
+		break;
+	    case IMGFMT_RGB|16:
+	    case IMGFMT_BGR|16:
+		mode.graphtype = GT_16BIT;
+		break;
+	    case IMGFMT_RGB|24:
+	    case IMGFMT_BGR|24:
+		mode.graphtype = GT_24BIT;
+		break;
+	    case IMGFMT_RGB|32:
+	    case IMGFMT_BGR|32:
+		mode.graphtype = GT_32BIT;
+		break;
+	}
+	if (ggiCheckMode(ggi_conf.vis, &mode))
+	{
+	    return 0;
+	}
+	else
+	{
 	if (ggi_conf.directbuffer)
 #ifdef GGI_FLIP
 	    return(VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_FLIP);
@@ -478,6 +479,7 @@ static uint32_t query_format(uint32_t format)
 #endif
 	else
 	    return(VFCAP_CSP_SUPPORTED);
+	}
     }
 
     return(0);
