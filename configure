@@ -608,7 +608,7 @@ _alsaver='not found'
 $_cc -o $TMPO -lasound $TMPC 2> /dev/null || _alsa=no
 [ $_alsa == 'yes' ] && $TMPO && { _alsaver='0.5.x'; }
 
-if [ $_alsaver == 'not found' ]; then
+if [ "$_alsaver" == 'not found' ]; then
 cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
