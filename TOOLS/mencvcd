@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.6
+# Version:          0.1.7
 #
 # Licence:          GPL
 #
@@ -38,6 +38,9 @@
 #                     - bugfixes
 #                     - new option "-vfr"
 #                     - "-norm" renamed to "-vnorm"
+# 2002/05/15        v0.1.7
+#                     - bugfixes
+#                     - more help
 #
 ################################################################################
 #
@@ -61,15 +64,22 @@ function usage() {
    echo
    echo "$HOWCALLED options:"
    echo
-   echo "-h|-?         help"
-   echo "-w            outputs in wide screen format 16:9"
-   echo "-abr <n>      output audio bitrate in kbs [224]"
-   echo "-asr <n>      output audio sample rate in Hz [48000]"
-   echo "-blank        cleans cd-rw before burning"
-   echo "-burnonly     burn only the premastered <name>*.cue/<name>*.bin images"
-   echo "-cdsize <n>   maximal size of cd images [646]"
-   echo "-denoise      denoises mpeg stream"
-   echo "-vfr <n>      sets the frame-rate: of  the output-stream. Currently"
+   echo "-?|-h         help."
+   echo "-abr <n>      output audio bitrate in kbs [224]."
+   echo "-asr <n>      output audio sample rate in Hz [44100]."
+   echo "-blank        cleans cd-rw before burning."
+   echo "-burnonly     burn only the premastered <name>*.cue/<name>*.bin images."
+   echo "-cdsize <n>   maximal size of cd images [646]."
+   echo "-denoise      denoises mpeg stream."
+   echo "-mp3          outputs audio in mp3 instead of mp2 format."
+   echo "-mpg          don't encode from source, multiplex/burn."
+   echo "              only the encoded mpg stream."
+   echo "-noburn       disables burning."
+   echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)."
+   echo "-size <X>x<Y> sets output size of frames."
+   echo "-svcdout      encode to SVCD format [VCD default]."
+   echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]."
+   echo "-vfr <n>      sets the frame-rate of the output-stream. Currently"
    echo "              only the standard MPEG rates are supported."
    echo "              0 - illegal"
    echo "              1 - 24000.0/1001.0 (NTSC 3:2 pulldown converted FILM)"
@@ -80,21 +90,21 @@ function usage() {
    echo "              6 - 50.0 (PAL FIELD RATE)"
    echo "              7 - 60000.0/1001.0 (NTSC FIELD RATE)"
    echo "              8 - 60.0"
-   echo "-noburn       disables burning"
-   echo "-mp3          outputs audio in mp3 instead of mp2 format"
-   echo "-mpg          don't encode from source, multiplex/burn"
-   echo "              only the encoded mpg stream"
-   echo "-vnorm p|n|s  sets the output norm p,n or s: forces the input stream to"
-   echo "              be treated as  NTSC|PAL|SECAM  regardless  of  what the"
-   echo "              stream header might suggest.  Basically this just sets"
-   echo "              the defaults for a bunch of other options."
-   echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)"
-   echo "-size <X>x<Y> sets output size of frames"
-   echo "-svcdout      encode to SVCD format [VCD default]"
-   echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]"
+   echo "-vnorm p|n|s  sets the input video norm p, n or s:"
+   echo "              forces the input stream to be treated as PAL|NTSC|SECAM"
+   echo "              regardless  of  what the stream header might suggest."
+   echo "-w            outputs in wide screen format 16:9."
    echo
-   echo "example:"
-   echo "'$HOWCALLED crazy -dvd 3 -w' encodes and burns dvd title 3 to VCD in 16:9."
+   echo "examples:"
+   echo
+   echo "'$HOWCALLED crazy -dvd 3 -w':"
+   echo "encodes and burns dvd title 3 to VCD in 16:9."
+   echo
+   echo "'mencvcd carter -dvd 1 -sid 0 -aid 128 -ss 3:00 -frames 1500 \\"
+   echo "        -noburn -vnorm n -vfr 1':"
+   echo "this encodes 1500 frames of dvd title 1 with subtitle 0 and audio stream"
+   echo "128 starting from 3:00 with frame rate 29.97 fps and input video norm NTSC"
+   echo "and output frame rate 23.98 fps because of the 3:2 pulldown method in NTSC."
 }
 
 HOWCALLED=`basename $0`
@@ -133,7 +143,7 @@ mplexnorm="-f $VCDMODE -m 1 -V -b 46"
 max=646
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
-yuvout=""
+yuvin=""
 framerate=""
 
 while [ "$1"x != "x" ]; do
@@ -179,7 +189,7 @@ while [ "$1"x != "x" ]; do
       	mkstream=0
 	;;
       -vnorm)
-        yuvout="-n $2"
+        yuvin="-n $2"
 	shift 1
 	;;
       -denoise)
@@ -249,9 +259,9 @@ if [ $burnonly -eq 0 ]; then
 
       # mjpegtools
       ($denoise < $VIDEO | \
-         yuvscaler -v 0 $wide -O $norm $size $yuvout | \
+         yuvscaler -v 0 $wide -O $norm $size $yuvin | \
          mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 \
-	          $framerate $yuvout -4 2 -2 1 -o $NAME.mpv) &
+	          $framerate $yuvin -4 2 -2 1 -o $NAME.mpv) &
    
       # wait for finishing the subprocesses
       wait
