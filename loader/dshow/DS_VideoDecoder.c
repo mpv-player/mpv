@@ -272,7 +272,7 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
     this->m_pDS_Filter->m_pAll->vt->SetProperties(this->m_pDS_Filter->m_pAll, &props, &props1);
     this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
     
-    //this->iv.m_State = START;
+    this->iv.m_State = START;
 }
 
 void DS_VideoDecoder_StopInternal(DS_VideoDecoder *this)
@@ -719,13 +719,12 @@ int DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* value
 
 int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 {
-/*
-    if (m_bIsDivX4)
-    {
-	IDivxFilterInterface* pIDivx;
-	if (m_pDS_Filter->m_pFilter->vt->QueryInterface((IUnknown*)m_pDS_Filter->m_pFilter, &IID_IDivxFilterInterface, (void**)&pIDivx))
+    if (this->m_bIsDivX4) {
+	IDivxFilterInterface* pIDivx=NULL;
+	printf("DS_SetValue for DIVX4, name=%s  value=%d\n",name,value);
+	if (this->m_pDS_Filter->m_pFilter->vt->QueryInterface((IUnknown*)this->m_pDS_Filter->m_pFilter, &IID_IDivxFilterInterface, (void**)&pIDivx))
 	{
-	    Debug printf("No such interface\n");
+	    printf("No such interface\n");
 	    return -1;
 	}
 	if (strcmp(name, "Postprocessing") == 0)
@@ -737,14 +736,15 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 	else if (strcmp(name, "Saturation") == 0)
 	    pIDivx->vt->put_Saturation(pIDivx, value);
 	else if (strcmp(name, "MaxAuto") == 0)
-            m_iMaxAuto = value;
+            this->m_iMaxAuto = value;
 	pIDivx->vt->Release((IUnknown*)pIDivx);
 	//printf("Set %s  %d\n", name, value);
 	return 0;
     }
-    else if (m_bIsDivX)
-    {
-	if (m_State != START)
+
+    if (this->m_bIsDivX) {
+	IHidden* hidden;
+	if (this->iv.m_State != START)
 	    return VFW_E_NOT_RUNNING;
 
 	//cout << "set value " << name << "  " << value << endl;
@@ -759,10 +759,11 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 // get4=set3 73
 // get5=set4 19
 	// get6=set5 23
-    	IHidden* hidden = (IHidden*)((int)m_pDS_Filter->m_pFilter + 0xb8);
+    	hidden = (IHidden*)((int)this->m_pDS_Filter->m_pFilter + 0xb8);
+	printf("DS_SetValue for DIVX, name=%s  value=%d\n",name,value);
 	if (strcmp(name, "Quality") == 0)
 	{
-            m_iLastQuality = value;
+            this->m_iLastQuality = value;
 	    return hidden->vt->SetSmth(hidden, value, 0);
 	}
 	if (strcmp(name, "Brightness") == 0)
@@ -775,11 +776,12 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 	    return hidden->vt->SetSmth5(hidden, value, 0);
 	if (strcmp(name, "MaxAuto") == 0)
 	{
-            m_iMaxAuto = value;
-	    return 0;
+            this->m_iMaxAuto = value;
 	}
+        return 0;
     }
-    else if (strcmp((const char*)record.dll, "ir50_32.dll") == 0)
+#if 0    
+    if (strcmp((const char*)record.dll, "ir50_32.dll") == 0)
     {
 	IHidden2* hidden = 0;
 	if (m_pDS_Filter->m_pFilter->vt->QueryInterface((IUnknown*)m_pDS_Filter->m_pFilter, &IID_Iv50Hidden, (void**)&hidden))
@@ -819,7 +821,8 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 
 	return result;
     }
-*/
+#endif
+    printf("DS_SetValue for ????, name=%s  value=%d\n",name,value);
     return 0;
 }
 /*
