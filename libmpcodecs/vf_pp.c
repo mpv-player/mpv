@@ -37,12 +37,20 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
-    if(vf->priv->context) pp_free_context(vf->priv->context);
-    vf->priv->context= pp_get_context(width, height,
+    int flags=
           (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
 	| (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0)
-	| (gCpuCaps.has3DNow ? PP_CPU_CAPS_3DNOW : 0)
-    );
+	| (gCpuCaps.has3DNow ? PP_CPU_CAPS_3DNOW : 0);
+
+    switch(outfmt){
+    case IMGFMT_444P: flags|= PP_FORMAT_444; break;
+    case IMGFMT_422P: flags|= PP_FORMAT_422; break;
+    case IMGFMT_411P: flags|= PP_FORMAT_411; break;
+    default:          flags|= PP_FORMAT_420; break;
+    }
+        
+    if(vf->priv->context) pp_free_context(vf->priv->context);
+    vf->priv->context= pp_get_context(width, height, flags);
 
     return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
 }
@@ -61,7 +69,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	return vf_next_query_format(vf,vf->priv->outfmt);
+    case IMGFMT_444P:
+    case IMGFMT_422P:
+    case IMGFMT_411P:
+	return vf_next_query_format(vf,fmt);
     }
     return 0;
 }
@@ -129,6 +140,9 @@ static unsigned int fmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
+    IMGFMT_444P,
+    IMGFMT_422P,
+    IMGFMT_411P,
     0
 };
 
