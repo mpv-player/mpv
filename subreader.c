@@ -1348,6 +1348,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     rewind (fd);
 
+#ifdef USE_ICONV
 #ifdef HAVE_ENCA
     if (sscanf(sub_cp, "enca:%2s:%s", enca_lang, enca_fallback) == 2
 	|| sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
@@ -1359,7 +1360,6 @@ sub_data* sub_read_file (char *filename, float fps) {
     current_sub_cp = sub_cp ? strdup(sub_cp) : NULL;
 #endif
 
-#ifdef USE_ICONV
     sub_utf8_prev=sub_utf8;
     {
 	    int l,k;
