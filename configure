@@ -6039,9 +6039,6 @@ $_def_dynamic_plugins
 
 #define PREFIX "$_prefix"
 
-/* define this to use simple idct with patched libavcodec */
-#define SIMPLE_IDCT 1
-
 #define USE_OSD 1
 #define USE_SUB 1
 
@@ -6187,7 +6184,7 @@ $_def_kstat
 /* Define this if you have zlib */
 $_def_zlib
 #ifdef HAVE_ZLIB
-#define CONFIG_ZLIB
+#define CONFIG_ZLIB 1
 #endif
 
 /* Define this if you have shm support */
@@ -6508,10 +6505,6 @@ $_def_mmx2	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
 $_def_altivec	// only define if you have Altivec (G4)
-
-#ifdef HAVE_MMX
-#define USE_MMX_IDCT 1
-#endif
 
 $_def_altivec_h	// enables usage of altivec.h
 
