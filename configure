@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/10/26 by al3x
+# - added detection of zlib (used by libmpdemux/demux_mov.c)
+#
 # 2001/10/22 by Jeroen Dobbelaere
 # - added selection of libmad
 #
@@ -1147,6 +1150,13 @@ EOF
 _libdl=no
 cc_check -ldl && _libdl=yes
 
+# check for zlib.h
+cat > $TMPC << EOF
+#include <zlib.h>
+int main( void ) { return 0; }
+EOF
+_zlib=no
+cc_check -lz && _zlib=yes
 
 # check for sys/soundcard.h
 cat > $TMPC << EOF
@@ -1699,6 +1709,7 @@ echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for iconv function ... $_iconv"
+echo "Checking for zlib ... $_zlib"
 
 # check if compiler supports C++ and C++-libs are installed correctly
 if test "$_win32" = yes && test "$_dshow" = yes ; then
@@ -2076,6 +2087,13 @@ else
  _have_libdl='#undef  HAVE_LIBDL'
 fi
 
+if test "$_zlib" = yes ; then
+ _have_zlib='#define HAVE_ZLIB 1'
+ _zlib='-lz'
+else
+ _have_zlib='#undef  HAVE_ZLIB'
+ _zlib=''
+fi
 
 # Checking for CFLAGS
 if test "$_profile" || test "$_debug" ; then
@@ -2361,7 +2379,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad $_zlib
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2490,12 +2508,14 @@ $_have_alloca_h
 /* Define this if your system has the "sys/mman.h" header file */
 $_have_mman_h
 
-
 /* Define this if you have the elf dynamic linker -ldl library */
 $_have_libdl
 
 /* Define this if you have the kstat kernel statistics library */
 $_have_libkstat
+
+/* Define this if you have zlib */
+$_have_zlib
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
