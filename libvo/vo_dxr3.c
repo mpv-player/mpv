@@ -70,7 +70,6 @@
 #include "../postproc/rgb2rgb.h"
 #include "../postproc/swscale.h"
 
-#undef USE_LIBFAME
 #ifdef USE_LIBFAME
 #include "../libfame/fame.h"
 static unsigned char *outbuf = NULL;
@@ -471,7 +470,11 @@ static uint32_t preinit(const char *arg)
 {
 	char devname[80];
 	int fdflags = O_WRONLY;
-	
+
+/* With fame we loose sync and seeking =( */
+#ifdef USE_LIBFAME
+	noprebuf = 1;
+#endif
 	/* Open the control interface */
 	if (arg && !strcmp("noprebuf", arg)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
