@@ -451,7 +451,7 @@ _vm=no
 _xdpms=no
 _3dfx=no
 _syncfb=no
-_mlib=no
+_mlib=no _mlibdir=/opt/SUNWmlib
 _xmga=autodetect
 _dga=no
 _dga2=no
@@ -897,7 +897,16 @@ EOF
 $_cc $_extraincdir $_extralibdir -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE $TMPC -o $TMPO -ldvdread > /dev/null 2>&1 && \
  { _dvdread=yes;_largefiles=yes; }
 
+
+cat > $TMPC << EOF
+#include <mlib.h>
+int main( void ) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
+EOF
+$_cc $_extraincdir $_extralibdir -I$_mlibdir/include $TMPC -o $TMPO -L$_mlibdir/lib -lmlib 9>/dev/null 2>&1 && _mlib=yes;
+
+
 rm -f $TMPC $TMPO
+
 
 
 # ---
@@ -1253,6 +1262,10 @@ for ac_option do
         _cssincdir=`echo $ac_option | cut -d '=' -f 2`
         _css='yes';
         ;;
+  --with-mlibdir=*)
+        _mlibdir=`echo $ac_option | cut -d '=' -f 2`
+	_mlib=yes
+        ;;
   --size-x=*)
 	_x=`echo $ac_option | cut -d '=' -f 2`
 	;;
@@ -1450,6 +1463,7 @@ echo "Checking for OSS Audio ... $_oss_audio"
 echo "Checking for ALSA Audio ... $_alsaver"
 echo "Checking for ESD Audio ... $_esd"
 echo "Checking for Sun Audio ... $_sun_audio"
+echo "Checking for Sun mediaLib ... $_mlib"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
@@ -1765,9 +1779,12 @@ fi
 
 if [ $_mlib = yes ]; then
  _mlib='#define HAVE_MLIB'
+ _mlibinc="-I$_mlibdir/include"
+ _mliblib="-L$_mlibdir/lib -R$_mlibdir/lib -lmlib"
  _vosrc=$_vosrc' yuv2rgb_mlib.c'
 else
  _mlib='#undef HAVE_MLIB'
+ _mlibinc= _mliblib=
 fi
 
 # ---
@@ -1930,6 +1947,8 @@ ARCH_LIBS = $_archlibs
 STREAM_SRCS = $_streamingsrcs
 DECORE_LIBS = $_decorelibs
 DIVX4LINUX=$_divx4linux
+MLIB_INC = $_mlibinc
+MLIB_LIB = $_mliblib
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -2107,6 +2126,11 @@ $_ssem     // only define if you have SSE (Intel Pentium III/4 or Celeron II)
 
 #ifdef HAVE_MMX
 #define USE_MMX_IDCT
+#endif
+
+/* libmpeg2 uses a different feature test macro for mediaLib */
+#ifdef HAVE_MLIB
+#define	LIBMPEG2_MLIB
 #endif
 
 /* libvo options */

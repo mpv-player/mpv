@@ -20,7 +20,7 @@ SRCS = mp_msg.c open.c parse_es.c ac3-iec958.c find_sub.c aviprint.c dec_audio.c
 OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
-VO_LIBS = -Llibvo -lvo $(X_LIBS)
+VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 
 PARTS = mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
 
