@@ -19,6 +19,21 @@
 
 #include "x11_common.h"
 
+#ifdef HAVE_SHM
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <X11/extensions/XShm.h>
+
+static int Shmem_Flag;
+//static int Quiet_Flag;  Here also what is this for. It's used but isn't inited ?
+static XShmSegmentInfo Shminfo[1];
+static int gXErrorFlag;
+static int CompletionType=-1;
+
+/* since it doesn't seem to be defined on some platforms */
+int XShmGetEventBase( Display* );
+#endif
+
 #include "fastmemcpy.h"
 #include "sub.h"
 
@@ -61,20 +76,6 @@ static int int_pause;
 static int Flip_Flag;
 static int zoomFlag;
 
-#ifdef HAVE_SHM
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <X11/extensions/XShm.h>
-
-static int Shmem_Flag;
-//static int Quiet_Flag;  Here also what is this for. It's used but isn't inited ?
-static XShmSegmentInfo Shminfo[1];
-static int gXErrorFlag;
-static int CompletionType=-1;
-
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase( Display* );
-#endif
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -672,4 +673,3 @@ static uint32_t control(uint32_t request, void *data, ...)
   }
   return VO_NOTIMPL;
 }
-
