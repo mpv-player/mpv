@@ -4627,7 +4627,7 @@ syntax:
 .B \-<codec>opts <option1[=value],option2,...>
 .
 .PP
-Where <codec> may be: lavc, xvidenc, divx4, lame, x264
+Where <codec> may be: lavc, xvidenc, divx4, lame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6221,52 +6221,51 @@ This is required if you want a CBR (constant bitrate) encode.
 .
 .TP
 .B iframe=<value>
-Frequency of I frames (default: 60)
+I frame frequency (default: 60)
 .
 .TP
 .B frameref=<value>
-Number of previous frames used as predictors in a P-frame (default: 1)
+Number of previous frames used as predictors in a P-frame (default: 1).
 .br
 .I NOTE:
-The current version of x264 (r38) hasn't yet implemented this feature.
+As of x264 r38 this feature is not implemented yet.
 .
 .TP
 .B idrframe=<value>
-Each <value> I-Frames are IDR-Frames.
+Each <value> I-Frames are IDR-Frames (default: 2).
 In H.264, I-Frames do not necessarily bound a closed GOP because it is
 allowable for a P-frame to be predicted from more frames than just the one
 frame before it (also see frameref).
-Therefore, I-frames are not necessarily seekable. IDR-Frames restrict
-subsequent P-frames from referring to any frame prior to the IDR-Frame
-(default: 2)
+Therefore, I-frames are not necessarily seekable.
+IDR-Frames restrict subsequent P-frames from referring to any frame
+prior to the IDR-Frame.
 .
 .TP
 .B bframe=<value>
-Number of B-Frames between I- and P-Frames (default: 0)
+number of B-Frames between I- and P-Frames (default: 0)
 .
 .TP
 .B deblock=<0|1>
-Use deblocking filter (default: on)
+Use deblocking filter (default: on).
 .
 .TP
 .B deblockalpha=<-6-6>
-AlphaC0 parameter of deblocking filter.
+AlphaC0 parameter of deblocking filter (default: 0).
 This adjusts thresholds for the H.264 deblocking filter.
 First, this parameter adjusts the maximum amount of change that the filter is
 allowed to cause on any one pixel.
 Secondly, this parameter affects the threshold for difference across the
 edge being filtered.
-A positive value reduces blocking artifacts more, but will also smear details
-(default: 0)
+A positive value reduces blocking artifacts more, but will also smear details.
 .
 .TP
 .B deblockbeta=<-6-6>
-Beta parameter of deblocking filter.
-Affects the maximum allowed gradient within two adjacent blocks (default: 0)
+Beta parameter of deblocking filter (default: 0).
+Affects the maximum allowed gradient within two adjacent blocks.
 .
 .TP
 .B cabac
-Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: off)
+Use CABAC (Context-Adaptive Binary Arithmetic Coding).
 .
 .TP
 .B cabacidc=<value>
@@ -6276,7 +6275,7 @@ first block in a frame, there are no prior blocks to predict the context.
 Adjusting this may affect bitrate by a fraction of a percent, but it doesn't
 directly affect distortion.
 .RSs
--1: Let the encoder decide which context (default) (it usually chooses 0)
+-1: Encoder chooses context, usually 0 (default).
 .br
 0: low complexity
 .br
@@ -6288,25 +6287,26 @@ directly affect distortion.
 .TP
 .B qp_constant=<2-51>
 This selects the quantizer to use.
+20-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
-Note that quantization in H.264 works differently from mpeg[124].
-H.264's QP is on a logarithmic scale. As an example, the bitrate difference
-between QP=20 and QP=40 is about a factor of 10.
-Useful quantizers in H.264 tend to be very large compared to mpeg[124].
-20-40 is a useful range (default: 26)
+Note that quantization in H.264 works differently from MPEG[124].
+H.264's QP is on a logarithmic scale.
+As an example, the bitrate difference between QP=20 and QP=40
+is about a factor of 10.
+Useful quantizers in H.264 tend to be very large compared to MPEG[124].
 .br
 .I NOTE:
-This option takes effect even if you specify a cbr encode.
-In such a case, the first frame encoded will use the quantization factor you
+This option takes effect even if you specify a CBR encode.
+In such a case, the first encoded frame will use the quantization factor you
 specified, but in later frames, the ratecontrol decides what quants to use.
 .
 .TP
-.B qp_min=<2-51>
-Minimum quantizer. CBR only. 20-40 seems to be a useful range (default: 2)
+.B qp_min=<2-51> (CBR only)
+Minimum quantizer, 20-40 seems to be a useful range (default: 2).
 .
 .TP
-.B qp_max=<2-51>
-Maximum quantizer. CBR only.
+.B qp_max=<2-51>  (CBR only)
+Maximum quantizer
 .
 .TP
 .B qp_step=<value>
@@ -6315,43 +6315,47 @@ frames.
 .
 .TP
 .B rc_buffer_size=<value>
-Size of the ratecontrol buffer. (default: 1 second's worth at the bitrate you
+ratecontrol buffer size (default: 1 second's worth at the bitrate you
 specified)
 .
 .TP
 .B rc_init_buffer=<value>
-Set the initial size of ratecontrol buffer (default: 1/4 of rc_buffer_size)
+Set the initial ratecontrol buffer (default: 1/4 of rc_buffer_size)
+.
+.TP
 .B rc_sens=<0-100>
-Ratecontrol sensitivity (default: 100)
+ratecontrol sensitivity (default: 100)
 .
 .TP
 .B ip_factor=<value>
-Quantizer factor between I amd P frames (default: 2.0)
+quantizer factor between I amd P frames (default: 2.0)
 .
 .TP
 .B pb_factor=<value>
-Quantizer factor between P and B frames (default: 2.0)
+quantizer factor between P and B frames (default: 2.0)
 .
 .TP
 .B pass=<1|2>
-For 2-pass mode. The first pass saves statistics.
+Enable 2-pass mode.
+The first pass saves statistics.
 .
 .TP
 .B qcompress=<0-1>
-Quantizer compression. This affects the ratecontrol: a lower value makes the
+quantizer compression (default: 0.6).
+This affects the ratecontrol: a lower value makes the
 bitrate more constant, while a higher value makes the quantization parameter
-more constant (default: 0.6)
+more constant.
 .
 .TP
 .B qblur=<0-1>
-Temporal blur of the quantization parameter. Lower values allow the quantizer
-value to jump around more; higher values force it to vary more smoothly
-(default: 0.5)
+Temporal blur of the quantization parameter (default: 0.5).
+Lower values allow the quantizer value to jump around more,
+higher values force it to vary more smoothly.
 .
 .TP
 .B fullinter
-Use all available interframe analyse methods (i4x4, psub8x8, psub16x16)
-(default: 4x4, psub16x16)
+Use all available interframe analysis methods (i4x4, psub8x8, psub16x16)
+(default: 4x4, psub16x16).
 .
 .TP
 .B log=<-1-3>
