@@ -11,8 +11,9 @@ OSD is used to display current time, volume bar, seek bar etc.
 INSTALLING OSD and SUB
 -------
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@ NOTE: OSD is NOT enabled by default! You have to download fonts from   @
-@ mplayer's download page (mplayer.sourceforge.net/homepage/dload.html): @
+@ NOTE: OSD and SUBTITLES are NOT enabled by default! You have to        @
+@ download fonts from mplayer's download page                            @
+@  mplayer.sourceforge.net/homepage/dload.html                           @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 english, hungarian, czech fonts:
 	http://thot.banki.hu/mp-ftp/releases/mp_font1.zip
@@ -26,7 +27,7 @@ Cyrillic fonts:
 And visit this site for korean subtitle support:
 	http://realtime.ssu.ac.kr/~lethean/mplayer
 	
-After that, copy the files from the zip to ~/.mplayer/font/
+After that, UNZIP the files to ~/.mplayer/font/
 Now you have to see a clock at the upper left corner of the movie
 (switch it off with 'o')
 
