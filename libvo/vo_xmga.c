@@ -102,6 +102,9 @@ static XSetWindowAttributes   xWAttribs;
 
 static void mDrawColorKey( void )
 {
+ XSetBackground( mDisplay,mGC,0 );
+// XFillRectangle( mDisplay,mWindow,mGC,0,0,drwWidth,drwHeight );
+ XClearWindow( mDisplay,mWindow );
  XSetForeground( mDisplay,mGC,fgColor );
  XFillRectangle( mDisplay,mWindow,mGC,drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight) );
  XFlush( mDisplay );
