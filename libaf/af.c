@@ -63,6 +63,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
 {
   char* cmdline = name;
   char* delim   = "=";
+
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if(!new){

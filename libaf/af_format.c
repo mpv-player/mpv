@@ -88,6 +88,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->mul.n      = af->data->bps;
     af->mul.d      = ((af_data_t*)arg)->bps;
     return AF_OK;
+  case AF_CONTROL_COMMAND_LINE:{
+    af_data_t d;
+    sscanf((char*)arg,"%i:%i",&(d.format),&(d.bps));
+    return af->control(af,AF_CONTROL_FORMAT,&d);
+  }  
   case AF_CONTROL_FORMAT:
     // Reinit must be called after this function has been called
     

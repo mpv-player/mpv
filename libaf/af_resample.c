@@ -69,6 +69,8 @@ typedef struct af_resample_s
   uint32_t	i; 	// Number of new samples to put in x queue
   uint32_t  	dn;     // Down sampling factor
   uint32_t	up;	// Up sampling factor 
+  int		sloppy;	// Enable sloppy resampling to reduce memory usage
+  int		fast;	// Enable linear interpolation instead of filtering
 } af_resample_t;
 
 // Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
@@ -222,6 +224,19 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Calculate up and down sampling factors
     d=gcd(af->data->rate,n->rate);
 
+    // If sloppy resampling is enabled limit the upsampling factor
+    if(s->sloppy && (af->data->rate/d > 5000)){
+      int up=af->data->rate/2;
+      int dn=n->rate/2;
+      int m=2;
+      while(af->data->rate/(d*m) > 5000){
+	d=gcd(up,dn); 
+	up/=2; dn/=2; m*=2;
+      }
+      d*=m;
+    }
+    printf("\n%i %i %i\n",d,af->data->rate/d,n->rate/d);
+
     // Check if the the design needs to be redone
     if(s->up != af->data->rate/d || s->dn != n->rate/d){
       float* w;
@@ -263,6 +278,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->mul.n = s->up;
     af->mul.d = s->dn;
     return rv;
+  }
+  case AF_CONTROL_COMMAND_LINE:{
+    af_resample_t* s   = (af_resample_t*)af->setup; 
+    int rate=0;
+    sscanf((char*)arg,"%i:%i:%i",&rate,&(s->sloppy), &(s->fast));
+    return af->control(af,AF_CONTROL_RESAMPLE,&rate);
   }
   case AF_CONTROL_RESAMPLE: 
     // Reinit must be called after this function has been called

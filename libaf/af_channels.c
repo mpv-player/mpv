@@ -89,6 +89,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->mul.n        = af->data->nch;
     af->mul.d	     = ((af_data_t*)arg)->nch;
     return AF_OK;
+  case AF_CONTROL_COMMAND_LINE:{
+    int nch = 0;
+    sscanf((char*)arg,"%i",&nch);
+    return af->control(af,AF_CONTROL_CHANNELS,&nch);
+  }  
   case AF_CONTROL_CHANNELS: 
     // Reinit must be called after this function has been called
     

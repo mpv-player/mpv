@@ -32,6 +32,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     return af->control(af,AF_CONTROL_DELAY_SET_LEN,&((af_delay_t*)af->setup)->tlen);
   }
+  case AF_CONTROL_COMMAND_LINE:{
+    float d = 0;
+    sscanf((char*)arg,"%f",&d);
+    return af->control(af,AF_CONTROL_DELAY_SET_LEN,&d);
+  }  
   case AF_CONTROL_DELAY_SET_LEN:{
     af_delay_t* s  = (af_delay_t*)af->setup;
     void*       bt = s->buf; // Old buffer
