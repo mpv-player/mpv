@@ -104,6 +104,7 @@ Unfortunately, most of the x86 codecs call our BGR to RGB, so it sometimes
 confuse developers.
 
 memory order:           name
+lowest address .. highest address
 RGBA                    IMGFMT_RGBA
 ARGB                    IMGFMT_ARGB
 BGRA                    IMGFMT_BGRA
@@ -126,5 +127,5 @@ mostsignifant .. least significant bit
 1R2G1B1R2G1B            IMGFMT_BGR4
 1B2G1R1B2G1R            IMGFMT_RGB4
 
-depending upon little vs big endian different in memory & in register formats 
-will be equal (LE -> BGRA == BGR32 / BE -> ARGB == BGR32)
+depending upon if the cpu is little or big endian, different 'in memory' and 
+'in register' formats will be equal (LE -> BGRA == BGR32 / BE -> ARGB == BGR32)
