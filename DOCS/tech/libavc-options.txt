@@ -362,10 +362,6 @@ Notes:	1. lavc will strictly follow the quantizer limits vqmin, vqmax, vqdiff
 FAQ:	Q: Why is the filesize much too small?
 	A: Try to increase vqmin=2 or 1 (be carefull with 1, it could cause
            strange things to happen).
-	Q: Can I use -pass 1 & -pass 2 with vmax_b_frames>0 ?
-	A: -pass x uses the divx4 twopass-encoding codem which is incompatible
-           with the libavcodec encode.
-           If you want to fix it read DOCS/tech/patches.txt and send a patch.
 	Q: What provides better error recovery while keeping the filesize low?
            Should I use data partitioning or increase the number of video packets?
 	A: Data partitioning is better in this case.
