@@ -51,6 +51,19 @@ typedef struct {
 //unsigned int lavc_pp=0;
 //#endif
 
+#include "cfgparser.h"
+
+static int lavc_param_workaround_bugs=0;
+static int lavc_param_error_resilience=0;
+
+struct config lavc_decode_opts_conf[]={
+#if LIBAVCODEC_BUILD >= 4611
+	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+	{"ver", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
+#endif
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -97,6 +110,11 @@ static int init(sh_video_t *sh){
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
+#if LIBAVCODEC_BUILD >= 4611
+    avctx->workaround_bugs= lavc_param_workaround_bugs;
+    avctx->error_resilience= lavc_param_error_resilience;
+#endif
+    
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
 	avctx->sub_id = 3;
@@ -199,10 +217,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     ret = avcodec_decode_video(avctx, &lavc_picture,
 	     &got_picture, data, len);
-    
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
     if(!got_picture) return NULL;	// skipped image
-
+                                    
     if (avctx->aspect_ratio_info != ctx->last_aspect ||
 	avctx->width != sh->disp_w ||
 	avctx->height != sh->disp_h ||

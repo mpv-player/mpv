@@ -125,6 +125,9 @@
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 
+#ifdef USE_LIBAVCODEC
+	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
@@ -235,5 +238,9 @@ struct config mfopts_conf[]={
 };
 						
 extern char** vo_plugin_args;
+
+#ifdef USE_LIBAVCODEC
+extern struct config lavc_decode_opts_conf[];
+#endif
 
 #endif
