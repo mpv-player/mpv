@@ -70,6 +70,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
         case IMGFMT_YUY2:
 	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
             mga_vid_config.format=MGA_VID_FORMAT_YUY2; break;
+        case IMGFMT_UYVY:
+	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
+            mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
         default: 
             fprintf(stderr,"mga: invalid output format %0X\n",format);
             return (-1);

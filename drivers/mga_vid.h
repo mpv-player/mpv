@@ -39,6 +39,7 @@ uint32_t num_frames;
 
 #define MGA_VID_FORMAT_YV12 0x32315659
 #define MGA_VID_FORMAT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
+#define MGA_VID_FORMAT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
 
 #define MGA_VID_CONFIG    _IOR('J', 1, mga_vid_config_t)
 #define MGA_VID_ON        _IO ('J', 2)

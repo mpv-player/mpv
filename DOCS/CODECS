@@ -80,7 +80,7 @@ Audio codecs:
 ~~~~~~~~~~~~~
 Built-in native codecs:
 
-- Uncompressed PCM (0x1)
+- Uncompressed PCM (0)
 - Uncompressed DVD PCM: (0x10001)
 - MPEG layer 2 and 3:  (0x50, 0x55)
   mp3lib, based on mpg123  (sometimes segfaults, then use ACM, see below)

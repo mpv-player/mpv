@@ -28,11 +28,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
 .RB [ \-ffactor\ number ]
-.RB [ \-sub\ file ]
-.RB [ \-subfps\ rate ]
-.RB [ \-vm\ ]
-.RB [ \-zoom\ ]
-
 .I file
 .PP
 .SH DESCRIPTION
@@ -65,15 +60,12 @@ play video cd track from device instead of plain file
 don't play sound
 .TP
 .B \-fs
-fullscreen playing (with xv, xmga, gl, sdl, x11,
-fbdev drivers)
-.TP
-.B \-vm
-use the XF86VidMode extension (with x11, sdl, and dga1
-drivers, dga2 doesn't need this)
-.TP
-.B \-zoom
-use software scaling
+fullscreen playing (only gl, xmga and xv drivers)
+
+.I NOTE
+The X11 driver doesn't support fullscreen and scaling.
+However, you can do it yourself, just press ALT,CTRL,-
+or ALT,CTRL,+ simultaneously, see X-server docs for details.
 .TP
 .B \-x\ x
 scale image to x width [if driver suppports!]
@@ -155,13 +147,6 @@ force usage of non-interleaved AVI parser
 .TP
 .B \-include
 specify config file to be parsed after the default
-.TP
-.B \-sub
-specify subtitle file to display
-.TP
-.B \-subfps
-specify frame/sec rate of the subtitle file, in
-case it was autodetected wrong
 .IP
 .SH "ALPHA/BETA CODE"
 .TP

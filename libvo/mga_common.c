@@ -150,9 +150,13 @@ write_frame_yuy2(uint8_t *y)
 static uint32_t
 draw_frame(uint8_t *src[])
 {
-        if (mga_vid_config.format==MGA_VID_FORMAT_YUY2)
-                write_frame_yuy2(src[0]);
-	return 0;
+    switch(mga_vid_config.format){
+    case MGA_VID_FORMAT_YUY2:
+        write_frame_yuy2(src[0]);break;
+    case MGA_VID_FORMAT_UYVY:
+        write_frame_yuy2(src[0]);break;
+    }
+    return 0;
 }
 
 static uint32_t
@@ -161,6 +165,7 @@ query_format(uint32_t format)
     switch(format){
     case IMGFMT_YV12:
     case IMGFMT_YUY2:
+    case IMGFMT_UYVY:
 //    case IMGFMT_RGB|24:
 //    case IMGFMT_BGR|24:
         return 1;

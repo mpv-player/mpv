@@ -1,19 +1,23 @@
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
+#include "config.h"
+
+#ifdef X11_FULLSCREEN
+
+#include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 
-#include "config.h"
 #include "video_out.h"
-
-#ifdef X11_FULLSCREEN
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+
+#include <X11/extensions/dpms.h>
 
 static int dpms_disabled=0;
 static int timeout_save=0;
@@ -21,17 +25,17 @@ static int timeout_save=0;
 
 void vo_hidecursor ( Display *disp , Window win )
 {
-        Cursor no_ptr;
-        Pixmap bm_no;
-        XColor black,dummy;
-        Colormap colormap;
-        static unsigned char bm_no_data[] = { 0,0,0,0, 0,0,0,0  };
-
-        colormap = DefaultColormap(disp,DefaultScreen(disp));
-        XAllocNamedColor(disp,colormap,"black",&black,&dummy);
-        bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8,8);
-        no_ptr=XCreatePixmapCursor(disp, bm_no, bm_no,&black, &black,0, 0);
-        XDefineCursor(disp,win,no_ptr);
+	Cursor no_ptr;
+	Pixmap bm_no;
+	XColor black,dummy;
+	Colormap colormap;
+	static unsigned char bm_no_data[] = { 0,0,0,0, 0,0,0,0  };
+	
+	colormap = DefaultColormap(disp,DefaultScreen(disp));
+	XAllocNamedColor(disp,colormap,"black",&black,&dummy);	
+	bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8,8);    
+	no_ptr=XCreatePixmapCursor(disp, bm_no, bm_no,&black, &black,0, 0);									          
+	XDefineCursor(disp,win,no_ptr);
 }
 
 
@@ -96,10 +100,6 @@ void vo_x11_putkey(int key){
    case wsGrayMinus: mplayer_put_key('-'); break;
    case wsPlus:
    case wsGrayPlus:  mplayer_put_key('+'); break;
-   case wsGrayMul:
-   case wsMul:       mplayer_put_key('*'); break;
-   case wsGrayDiv:
-   case wsDiv:       mplayer_put_key('/'); break;
    default: if((key>='a' && key<='z')||(key>='A' && key<='Z')) mplayer_put_key(key);
   }
 
@@ -153,17 +153,17 @@ int vo_x11_check_events(Display *mydisplay){
    switch( Event.type )
     {
        case Expose:
-             ret|=VO_EVENT_EXPOSE;
+	     ret|=VO_EVENT_EXPOSE;
              break;
        case ConfigureNotify:
              vo_dwidth=Event.xconfigure.width;
-             vo_dheight=Event.xconfigure.height;
-             ret|=VO_EVENT_RESIZE;
+	     vo_dheight=Event.xconfigure.height;
+	     ret|=VO_EVENT_RESIZE;
              break;
        case KeyPress:
              XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
              vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-             ret|=VO_EVENT_KEYPRESS;
+	     ret|=VO_EVENT_KEYPRESS;
              break;
     }
   }
@@ -171,27 +171,25 @@ int vo_x11_check_events(Display *mydisplay){
   return ret;
 }
 
-#endif
-
 void saver_on(Display *mDisplay) {
 
     int nothing;
     if (dpms_disabled)
     {
-        if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
-        {
-            printf ("Enabling DPMS\n");
-            DPMSEnable(mDisplay);  // restoring power saving settings
-            DPMSQueryExtension(mDisplay, &nothing, &nothing);
-        }
+	if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
+	{
+	    printf ("Enabling DPMS\n");
+	    DPMSEnable(mDisplay);  // restoring power saving settings
+	    DPMSQueryExtension(mDisplay, &nothing, &nothing);
+	}
     }
-
+    
     if (timeout_save)
     {
-        int dummy, interval, prefer_blank, allow_exp;
-        XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank, &allow_exp);
-        XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank, allow_exp);
-        XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+	int dummy, interval, prefer_blank, allow_exp;
+	XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank, &allow_exp);
+	XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank, allow_exp);
+	XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
     }
 
 }
@@ -202,18 +200,20 @@ void saver_off(Display *mDisplay) {
 
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
     {
-        BOOL onoff;
-        CARD16 state;
-        DPMSInfo(mDisplay, &state, &onoff);
-        if (onoff)
-        {
-            printf ("Disabling DPMS\n");
-            dpms_disabled=1;
-                DPMSDisable(mDisplay);  // monitor powersave off
-        }
+	BOOL onoff;
+	CARD16 state;
+	DPMSInfo(mDisplay, &state, &onoff);
+	if (onoff)
+	{
+	    printf ("Disabling DPMS\n");
+	    dpms_disabled=1;
+		DPMSDisable(mDisplay);  // monitor powersave off
+	}
     }
     XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
     if (timeout_save)
-        XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
-                    // turning off screensaver
+	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+		    // turning off screensaver
 }
+
+#endif

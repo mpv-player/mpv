@@ -60,8 +60,6 @@
 #define wsSpace ' '
 #define wsMinus '-'
 #define wsPlus  '+'
-#define wsMul   '*'
-#define wsDiv   '/'
 
 #define wsUp            0x52 + 256
 #define wsDown          0x54 + 256

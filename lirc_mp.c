@@ -95,11 +95,7 @@ int lirc_mp_getinput(){
     {"FFWD" , KEY_UP},
     {"RWND" , KEY_LEFT},
     {"FRWND" , KEY_DOWN},
-    {"PAUSE", 'p'},
-    {"INCVOL", '*'},
-    {"DECVOL", '/'},
-    {"MASTER", 'm'},
-    {"PCM", 'c'}
+    {"PAUSE", 'p'}    
   };
        
   char *code;

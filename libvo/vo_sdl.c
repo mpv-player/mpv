@@ -377,27 +377,24 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
 
-	sdl_format = format;
+
         switch(format){
-		case IMGFMT_YV12:
-			printf("\nSDL: Using 0x%X (YV12) image format\n", format); break;
-		case IMGFMT_IYUV:
-			printf("\nSDL: Using 0x%X (IYUV) image format\n", format); break;
-		case IMGFMT_YUY2:
-			printf("\nSDL: Using 0x%X (YUY2) image format\n", format); break;
-		case IMGFMT_UYVY:
-			printf("\nSDL: Using 0x%X (UYVY) image format\n", format); break;
-		case IMGFMT_YVYU:
-			printf("\nSDL: Using 0x%X (YVYU) image format\n", format); break;
-		case IMGFMT_I420:
-			printf("\nSDL: Using 0x%X (I420) image format\n", format);
-			printf("SDL: Mapping I420 to IYUV (untested please report if it works)\n");
-			sdl_format = SDL_IYUV_OVERLAY;
-		break;	
-		default:
-			printf("\nSDL: Unsupported image format (0x%X)\n",format);
-			return -1;
-	}
+          case IMGFMT_YV12:
+	  	sdl_format=SDL_YV12_OVERLAY;
+		printf("SDL: Using YV12 image format\n");
+	  break;
+          case IMGFMT_YUY2:
+	  	sdl_format=SDL_YUY2_OVERLAY;
+		printf("SDL: Using YUY2 image format\n");
+	  break;
+          case IMGFMT_UYVY:
+	  	sdl_format=SDL_UYVY_OVERLAY;
+		printf("SDL: Using UYVY image format\n");
+	  break;
+          default:
+            printf("SDL: Unsupported image format (0x%X)\n",format);
+            return -1;
+        }
 
 	sdl_open (NULL, NULL);
 
