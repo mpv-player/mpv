@@ -152,8 +152,8 @@ int demux_asf_fill_buffer(demuxer_t *demux){
     stream_read(demux->stream,asf_packet,asf_packetsize);
     if(demux->stream->eof) return 0; // EOF
     
-    {	    unsigned char ecc_flags=asf_packet[0];
-	    unsigned char* p=&asf_packet[1+(ecc_flags&15)];
+    {
+	    unsigned char* p=asf_packet;
             unsigned char* p_end=asf_packet+asf_packetsize;
             unsigned char flags=p[0];
             unsigned char segtype=p[1];
@@ -173,6 +173,16 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                 printf("\n");
             }
             
+	    // skip ECC data if present by testing bit 7 of flags
+	    // 1xxxbbbb -> ecc data present, skip bbbb byte(s)
+	    // 0xxxxxxx -> payload parsing info starts
+	    if (flags & 0x80)
+	    {
+		p += (flags & 0x0f)+1;
+		flags = p[0];
+		segtype = p[1];
+	    }
+	    
             //if(segtype!=0x5d) printf("Warning! packet[4] != 0x5d  \n");
 
 	    p+=2; // skip flags & segtype
