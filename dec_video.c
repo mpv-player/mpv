@@ -556,8 +556,10 @@ else
 	blit_frame=2;
     } else {
 	// software decoding:
-	mpeg2_decode_data(video_out, start, start+in_size,drop_frame); // decode
-	if(!drop_frame) blit_frame=1;
+	if(
+	mpeg2_decode_data(video_out, start, start+in_size,drop_frame) > 0 // decode
+	&& (!drop_frame)
+	   ) blit_frame=1;
     }
     break;
   case VFM_RAW:

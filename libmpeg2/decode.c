@@ -182,12 +182,10 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
         
 //        if(picture->picture_structure != FRAME_PICTURE) printf("Field! %d  \n",picture->second_field);
         
-	if(!framedrop)
-	if (((picture->picture_structure == FRAME_PICTURE) ||
-		 (picture->second_field))
-           ) {
+	    if(picture->picture_structure == FRAME_PICTURE) 
+	    {
 #ifdef MPEG12_POSTPROC
-	       if(picture->pp_options){
+	       if( (picture->pp_options) && (!framedrop) ){
                     // apply OpenDivX postprocess filter
             	    int stride[3];
             	    stride[0]=picture->coded_picture_width;
@@ -201,20 +199,23 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
 		    output->draw_slice (frames[3].base, stride, 
                         picture->display_picture_width,
                         picture->display_picture_height, 0, 0);
-	       }// else
-#endif
-#if 0
-		if (picture->picture_coding_type != B_TYPE) {
+	       } 
+#endif	    
+	    }else{
+	       if( (picture->second_field) && (!framedrop) )
+	       {
             	    int stride[3];
             	    stride[0]=picture->coded_picture_width;
             	    stride[1]=stride[2]=stride[0]/2;
-		    output->draw_slice (picture->forward_reference_frame->base,
+		    output->draw_slice ((picture->picture_coding_type == B_TYPE) ?
+			    picture->current_frame->base :
+			    picture->forward_reference_frame->base,
 			stride, 
                         picture->display_picture_width,
                         picture->display_picture_height, 0, 0);
-                }
-#endif
-	}
+                }else
+		is_frame_done=0;// we don't draw top fields
+    	    }
 #ifdef ARCH_X86
 	if (config.flags & MM_ACCEL_X86_MMX) emms();
 #endif
@@ -273,14 +274,16 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
 		}
 	    }
 
-#if 1
 #ifdef MPEG12_POSTPROC
-	            if(picture->pp_options)
-			picture->current_frame->copy=NULL; else
+            if(picture->pp_options)
+		picture->current_frame->copy=NULL; 
+	    else
 #endif
-		    picture->current_frame->copy=copy_slice;
-#endif
-	    if(framedrop) picture->current_frame->copy=NULL;
+	    picture->current_frame->copy=copy_slice;
+
+
+	    if ((framedrop) || (picture->picture_structure != FRAME_PICTURE) )
+		picture->current_frame->copy=NULL;
 	    picture->current_frame->vo=output;
 	    picture->slice=0;
 
