@@ -3186,18 +3186,18 @@ the right x,y,w,h parameters.
 
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .TP
+.B \-audio-delay <0.0\-...>
+Sets the audio delay field in the header.
+Default is 0.0, negative values do not work.
+This does not delay the audio while encoding, but the player will see the
+default audio delay, sparing you the use of the \-delay option.
+.TP
 .B \-audio-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
 
 .I NOTE:
 .br
 CBR only, VBR ignores this as it puts each packet in a new chunk.
-.TP
-.B \-audio-delay <0.0\-...>
-Sets the audio delay field in the header.
-Default is 0.0, negative values do not work.
-This does not delay the audio while encoding, but the player will see the
-default audio delay, sparing you the use of the \-delay option.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Sets up audio buffering time interval (default: 0.5s).
