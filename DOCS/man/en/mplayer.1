@@ -5665,7 +5665,7 @@ mencoder dvd://2 \-o titel2.avi \-ovc lavc
 .B Encoding all *.jpg files in the current dir
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
-.B Encoding from tuner
+.B Encoding from tuner (specify a format with \-vf format)
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Encoding from a pipe
