@@ -68,6 +68,7 @@ extern void* WINAPI expLocalReAlloc(int handle,int size,int flags);
 extern void* WINAPI expLocalLock(void* z);
 extern void* WINAPI expGlobalAlloc(int flags, int size);
 extern void* WINAPI expGlobalLock(void* z);
+extern int WINAPI expGlobalSize(void* amem);
 extern int WINAPI expLoadStringA(long instance, long  id, void* buf, long size);
 extern long WINAPI expMultiByteToWideChar(long v1, long v2, char* s1, long siz1, short* s2, int siz2);
 extern long WINAPI expWideCharToMultiByte(long v1, long v2, short* s1, long siz1, char* s2, int siz2, char* c3, int* siz3);
@@ -126,6 +127,8 @@ extern void* WINAPI expSleep(int time);
 extern void* WINAPI expCreateCompatibleDC(int hdc);
 extern int WINAPI expGetDeviceCaps(int hdc, int unk);
 extern WIN_BOOL WINAPI expDeleteDC(int hdc);
+extern void* WINAPI expGetWindowDC(int hdc);
+extern void* WINAPI expCreateFontA(void);
 extern int WINAPI expGetPrivateProfileIntA(const char* appname, const char* keyname, int default_value, const char* filename);
 extern int WINAPI expGetProfileIntA(const char* appname, const char* keyname, int default_value);
 extern int WINAPI expGetPrivateProfileStringA(const char* appname, const char* keyname,
@@ -200,6 +203,20 @@ extern LONG WINAPI explstrcpynA(char* str1, const char* str2,int len);
 extern LONG WINAPI explstrcatA(char* str1, const char* str2);
 extern LONG WINAPI expInterlockedExchange(long *dest, long l);
 void WINAPI expInitCommonControls(void);
+extern HRESULT WINAPI expCoCreateFreeThreadedMarshaler(void *pUnkOuter, void **ppUnkInner);
+extern int WINAPI expDuplicateHandle(
+	HANDLE hSourceProcessHandle,  // handle to source process
+	HANDLE hSourceHandle,         // handle to duplicate
+	HANDLE hTargetProcessHandle,  // handle to target process
+	HANDLE* lpTargetHandle,      // duplicate handle
+	DWORD dwDesiredAccess,        // requested access
+	int bInheritHandle,          // handle inheritance option  
+	DWORD dwOptions               // optional actions
+);
+extern HRESULT WINAPI expCoInitialize(
+	LPVOID lpReserved       /* [in] pointer to win32 malloc interface
+                                   (obsolete, should be NULL) */
+);                                                                                     
 
 
 extern void* CDECL expmalloc(int size);
