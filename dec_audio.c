@@ -1153,7 +1153,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
           FOX62_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
           break; // EOF
         len = 2 * fox62_adpcm_decode_block(
-          (unsigned short*)buf,ibuf, sh_audio->wf->nChannels);
+          (unsigned short*)buf,ibuf);
         break;
       }
 #ifdef USE_LIBAC3

@@ -296,55 +296,159 @@ int fox61_adpcm_decode_block(unsigned short *output, unsigned char *input)
 
 // note: This decoder assumes the format 0x62 data always comes in
 // stereo flavor
-int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input,
-  int channels)
+int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input)
 {
-  int predictor_l;
-  int predictor_r;
-  int index_l;
-  int index_r;
-  int i;
-  int adjustment;
+  int pred1;
+  int pred2;
+  int index1;
+  int index2;
+  int in_ptr = 0x10;
+  int out_ptr = 0;
 
-static int counter = 0;
+  int flag1 = 0;
+  int flag2 = 1;
+  int sum;
+  unsigned char last_byte = 0;
+  unsigned char nibble;
 
-  predictor_l = LE_16(&input[10]);
-  predictor_r = LE_16(&input[12]);
-  SE_16BIT(predictor_l);
-  SE_16BIT(predictor_r);
-  index_l = input[14];
-  index_r = input[15];
+  // ADPCM work variables
+  int sign;
+  int delta;
+  int step;
+  int diff;
 
-  for (i = 16; i < FOX62_ADPCM_BLOCK_SIZE; i++)
+  pred1 = LE_16(&input[10]);
+  pred2 = LE_16(&input[12]);
+  SE_16BIT(pred1);
+  SE_16BIT(pred2);
+  sum = pred2;
+  index1 = input[14];
+  index2 = input[15];
+
+  while (in_ptr < 2048)
   {
-    output[(i - 16) * 2 + 0] = input[i] & 0x0F;
-    output[(i - 16) * 2 + 1] = (input[i] >> 4) & 0x0F;
+    if (flag2)
+    {
+      last_byte = input[in_ptr++];
+      nibble = last_byte & 0x0F;
+
+      step = adpcm_step[index1];
+
+      sign = nibble & 8;
+      delta = nibble & 7;
+
+      diff = step >> 3;
+      if (delta & 4) diff += step;
+      if (delta & 2) diff += step >> 1;
+      if (delta & 1) diff += step >> 2;
+
+      if (sign)
+        pred1 -= diff;
+      else
+        pred1 += diff;
+
+      CLAMP_S16(pred1);
+
+      index1 += adpcm_index[nibble];
+      CLAMP_0_TO_88(index1);
+
+      if (flag1)
+        flag2 = 0;
+      else
+      {
+        nibble = (last_byte >> 4) & 0x0F;
+
+        step = adpcm_step[index2];
+
+        sign = nibble & 8;
+        delta = nibble & 7;
+
+        diff = step >> 3;
+        if (delta & 4) diff += step;
+        if (delta & 2) diff += step >> 1;
+        if (delta & 1) diff += step >> 2;
+
+        if (sign)
+          pred2 -= diff;
+        else
+          pred2 += diff;
+
+        CLAMP_S16(pred2);
+
+        index2 += adpcm_index[nibble];
+        CLAMP_0_TO_88(index2);
+
+        sum = (sum + pred2) / 2;
+      }
+      output[out_ptr++] = pred1 + sum;
+      output[out_ptr++] = pred1 - sum;
+
+      flag1 ^= 1;
+      if (in_ptr >= 2048)
+        break;
+    }
+    else
+    {
+      nibble = (last_byte >> 4) & 0x0F;
+
+      step = adpcm_step[index1];
+
+      sign = nibble & 8;
+      delta = nibble & 7;
+
+      diff = step >> 3;
+      if (delta & 4) diff += step;
+      if (delta & 2) diff += step >> 1;
+      if (delta & 1) diff += step >> 2;
+
+      if (sign)
+        pred1 -= diff;
+      else
+        pred1 += diff;
+
+      CLAMP_S16(pred1);
+
+      index1 += adpcm_index[nibble];
+      CLAMP_0_TO_88(index1);
+
+      if (flag1)
+        flag2 = 1;
+      else
+      {
+        last_byte = input[in_ptr++];
+        nibble = last_byte & 0x0F;
+
+        step = adpcm_step[index2];
+
+        sign = nibble & 8;
+        delta = nibble & 7;
+
+        diff = step >> 3;
+        if (delta & 4) diff += step;
+        if (delta & 2) diff += step >> 1;
+        if (delta & 1) diff += step >> 2;
+
+        if (sign)
+          pred2 -= diff;
+        else
+          pred2 += diff;
+
+        CLAMP_S16(pred2);
+
+        index2 += adpcm_index[nibble];
+        CLAMP_0_TO_88(index2);
+
+        sum = (sum + pred2) / 2;
+      }
+
+      output[out_ptr++] = pred1 + sum;
+      output[out_ptr++] = pred1 - sum;
+
+      flag1 ^= 1;
+      if (in_ptr >= 2048)
+        break;
+    }
   }
 
-  decode_nibbles(output, FOX62_ADPCM_SAMPLES_PER_BLOCK * channels, channels,
-  predictor_l, index_l,
-  predictor_r, index_r);
-
-
-  for (i = 0; i < FOX62_ADPCM_SAMPLES_PER_BLOCK / 2; i += 2)
-  {
-    adjustment = (predictor_r + output[i + 1]) / 2;
-if (counter < 20)
-{
-printf ("(L, R) = %04X, %04X, prev_r = %04X, adjustment = %04X\n", 
-  output[i], output[i+1], predictor_r, adjustment);
-  counter++;
-}
-    predictor_r = output[i + 1];
-    output[i + 1] = output[i] - adjustment;
-    output[i] += adjustment;
-  }
-
-if (counter++ == 20)
-{
-printf (" after:\n");
-for (i = 0; i < 20; i++)
-  printf ("%04X\n", output[i]);
-}
-  return FOX62_ADPCM_SAMPLES_PER_BLOCK * channels;
+  return out_ptr;
 }
