@@ -69,6 +69,12 @@ static int config(struct vf_instance_s* vf,
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t *dmpi;
+    
+    if (!mpi->planes[1])
+    {
+	mp_msg(MSGT_VFILTER,MSGL_V,"[%s] no palette given\n",vf->info->name);
+	return;
+    }
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
