@@ -399,11 +399,13 @@ $_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if test `sdl-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
-	$_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _sdl=yes
-else
-	_sdl=outdated
-fi
+if $_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/null ; then
+	if test `sdl-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
+		_sdl=yes
+	else
+		_sdl=outdated
+	fi
+fi	
 
 _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
