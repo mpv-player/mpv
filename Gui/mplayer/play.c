@@ -24,6 +24,8 @@
 #include "../skin/skin.h"
 #include "../skin/font.h"
 
+#include "../libmpdemux/stream.h"
+
 extern float rel_seek_secs;
 extern int abs_seek_pos;
 
@@ -246,14 +248,14 @@ void ChangeSkin( char * name )
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
-void mplSetFileName( char * dir,char * name )
+void mplSetFileName( char * dir,char * name,int type )
 {
  if ( !name ) return;
  
  if ( !dir ) guiSetFilename( guiIntfStruct.Filename,name )
   else guiSetDF( guiIntfStruct.Filename,dir,name )
 
- guiIntfStruct.StreamType=STREAMTYPE_FILE;
+ guiIntfStruct.StreamType=type;
  guiIntfStruct.FilenameChanged=1;
  gfree( (void **)&guiIntfStruct.AudioFile );
  gfree( (void **)&guiIntfStruct.Subtitlename );
@@ -285,7 +287,7 @@ void mplPrev( void )
    default: 
 	if ( (prev=gtkSet( gtkGetPrevPlItem,0,NULL)) )
 	 {
-	  mplSetFileName( prev->path,prev->name );
+	  mplSetFileName( prev->path,prev->name,STREAMTYPE_FILE );
 	  mplGotoTheNext=0;
 	  break;
 	 }
@@ -321,7 +323,7 @@ void mplNext( void )
    default:
 	if ( (next=gtkSet( gtkGetNextPlItem,0,NULL)) ) 
 	 { 
-	  mplSetFileName( next->path,next->name );
+	  mplSetFileName( next->path,next->name,STREAMTYPE_FILE );
 	  mplGotoTheNext=0;
 	  break;
 	 }

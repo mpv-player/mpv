@@ -815,9 +815,9 @@ if(!use_stdin && !slave_mode){
       guiGetEvent( guiSetDefaults,NULL );
 
       if ( ( guiIntfStruct.FilenameChanged || !filename )
-#ifdef USE_DVDREAD
-           && ( guiIntfStruct.StreamType != STREAMTYPE_DVD )
-#endif
+//#ifdef USE_DVDREAD
+//           && ( guiIntfStruct.StreamType != STREAMTYPE_DVD )
+//#endif
        )      
        {
         play_tree_t * entry = play_tree_new();
@@ -1358,7 +1358,8 @@ fflush(stdout);
      guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
-     guiGetEvent( guiSetValues,(char *)sh_video );
+     guiGetEvent( guiSetFileFormat,(char *)demuxer->file_format );
+     if ( guiGetEvent( guiSetValues,(char *)sh_video ) ) goto goto_next_file;
     }
 #endif
 

@@ -71,6 +71,7 @@ typedef struct
 
    int    MovieWidth;
    int    MovieHeight;
+   int    NoWindow;
 
    float  Volume;
    float  Balance;
@@ -82,6 +83,7 @@ typedef struct
    int    TimeSec;
    int    LengthInSec;
    int    FrameDrop;
+   int    FileFormat;
 
    char * Filename;
    int    FilenameChanged;
@@ -116,6 +118,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetVolume        11
 #define guiSetDefaults	    12
 #define guiSetValues	    13
+#define guiSetFileFormat    14
 
 #define guiSetStop  0
 #define guiSetPlay  1
@@ -130,7 +133,7 @@ extern char *get_path(char *filename);
 
 extern void guiInit( void );
 extern void guiDone( void );
-extern void guiGetEvent( int type,char * arg );
+extern int  guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
 extern void guiLoadFont( void );
 

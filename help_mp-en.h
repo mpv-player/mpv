@@ -352,6 +352,7 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
 #define MSGTR_NEMFMM "Sorry, not enough memory for main window shape mask."
 #define MSGTR_IDFGCVD "Sorry, i don't find gui compatible video output driver."
+#define MSGTR_NEEDLAVCFAME "Sorry, you don't play non-mpeg files in your DXR3/H+ device without reencoding.\nPlease enable lavc or fame in DXR3/H+ configbox."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s" 
@@ -482,6 +483,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSS_Device "Device:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Please remember, some function need restart the playing."
+#define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Use LAVC ( ffmpeg encoder )"
+#define MSGTR_PREFERENCES_DXR3_FAME "Use FAME"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatal error ..."

@@ -143,6 +143,9 @@ static int set_video_eq(vidix_video_eq_t *info);
 uint32_t control(uint32_t request, void *data, ...)
 {
 	switch (request) {
+	case VOCTRL_GUISUPPORT:
+	case VOCTRL_GUI_NOWINDOW:
+		return VO_TRUE;
 	case VOCTRL_RESUME:
 		if (!noprebuf) {
 			ioval = EM8300_PLAYMODE_PLAY;

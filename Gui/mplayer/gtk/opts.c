@@ -83,14 +83,19 @@ static struct
   { 10,MSGTR_PREFERENCES_Codec6 } };
 	    
        int    gtkVPreferences = 0;
-static int    gtkVOSSConfig = 0;
 static int    old_audio_driver = 0;
 static char * ao_driver[3];
 static char * vo_driver[3];
 static int    old_video_driver = 0;
 
-void ShowOSSConfig( void );
-void HideOSSConfig( void );
+#ifdef USE_OSS_AUDIO
+ void ShowOSSConfig( void );
+ void HideOSSConfig( void );
+#endif
+#ifdef HAVE_DXR3
+ void ShowDXR3Config( void );
+ void HideDXR3Config( void );
+#endif
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
@@ -121,13 +126,15 @@ void ShowPreferences( void )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( !gstrcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
+    if ( !gstrcmp( gtkAODriver,(char *)info->short_name ) ) old_audio_driver=i - 1;
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
   gtk_widget_set_sensitive( AConfig,FALSE );
-  if ( !strcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+#ifdef USE_OSS_AUDIO
+  if ( !gstrcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+#endif
  }
 
 // -- 2. page
@@ -147,7 +154,7 @@ void ShowPreferences( void )
      if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
       {
        const vo_info_t *info = video_out_drivers[i - 1]->get_info(); 
-       if ( !gstrcmp( video_driver,info->short_name ) ) gtkVODriver=gstrdup( video_driver );
+       if ( !gstrcmp( video_driver,(char *)info->short_name ) ) gtkVODriver=gstrdup( video_driver );
       }
    }
   i=0;
@@ -155,12 +162,15 @@ void ShowPreferences( void )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 
      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-     if ( !gstrcmp( gtkVODriver,info->short_name ) ) old_video_driver=c; c++;
+     if ( !gstrcmp( gtkVODriver,(char *)info->short_name ) ) old_video_driver=c; c++;
      tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLVDrivers ),old_video_driver,0,(char **)&vo_driver );
   gtk_widget_set_sensitive( VConfig,FALSE );
+#ifdef HAVE_DXR3
+  if ( !gstrcmp( vo_driver[0],"dxr3" ) ) gtk_widget_set_sensitive( VConfig,TRUE );
+#endif
  }
 
 // -- 3. page
@@ -186,7 +196,7 @@ void ShowPreferences( void )
 // -- 4. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),gtkVNIAVI );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),gtkVIndex );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVPP );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_adjustment_set_value( HSPPQualityadj,gtkVAutoq );
  {
   int i = 0;
@@ -246,7 +256,12 @@ void HidePreferences( void )
  if ( !gtkVPreferences ) return;
  gtkVPreferences=0;
  gtk_widget_hide( Preferences ); gtk_widget_destroy( Preferences );
+#ifdef USE_OSS_AUDIO
  HideOSSConfig();
+#endif
+#ifdef HAVE_DXR3
+ HideDXR3Config();
+#endif
 }
 
 static void prDestroy( GtkObject * object,gpointer user_data )
@@ -303,7 +318,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	// -- 4. page
 	gtkVNIAVI=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
 	gtkVIndex=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
-	gtkVPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
+	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 	{
 	 int i;
@@ -318,10 +333,16 @@ void prButton( GtkButton * button,gpointer user_data )
 	break;
    case bAConfig:
         gtk_widget_set_sensitive( AConfig,FALSE );
+#ifdef USE_OSS_AUDIO
         if ( !strcmp( ao_driver[0],"oss" ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
+#endif
 	break;
-//   case bVconfig:
-//	break;
+   case bVconfig:
+        gtk_widget_set_sensitive( VConfig,FALSE );
+#ifdef HAVE_DXR3
+	if ( !gstrcmp( vo_driver[0],"dxr3" ) ) { ShowDXR3Config(); gtk_widget_set_sensitive( VConfig,TRUE ); }
+#endif
+	break;
 #if 0
    case bLSubtitle:
 	break;
@@ -385,10 +406,16 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
    case 0: // audio driver 
 	gtk_clist_get_text( GTK_CLIST( CLADrivers ),row,0,(char **)&ao_driver ); 
 	gtk_widget_set_sensitive( AConfig,FALSE );
+#ifdef USE_OSS_AUDIO
 	if ( !strcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+#endif
 	break;
    case 1: // video driver 
 	gtk_clist_get_text( GTK_CLIST( CLVDrivers ),row,0,(char **)&vo_driver ); 
+	gtk_widget_set_sensitive( VConfig,FALSE );
+#ifdef HAVE_DXR3
+	if ( !gstrcmp( vo_driver[0],"dxr3" ) ) gtk_widget_set_sensitive( VConfig,TRUE );
+#endif
 	break;
   } 
 }
@@ -1444,6 +1471,7 @@ GtkWidget * create_Preferences( void )
   return Preferences;
 }
 
+#ifdef USE_OSS_AUDIO
        GtkWidget * OSSConfig;
 static GtkWidget * CEOssDevice;
 static GtkWidget * CEOssMixer;
@@ -1451,6 +1479,8 @@ static GtkWidget * CBOssMixer;
 static GtkWidget * CBOssDevice;
 static GtkWidget * BOssOk;
 static GtkWidget * BOssCancel;
+
+       int         gtkVOSSConfig = 0;
 
 void ShowOSSConfig( void )
 {
@@ -1682,3 +1712,278 @@ GtkWidget * create_OSSConfig( void )
   return OSSConfig;
 }
 
+#endif
+
+#ifdef HAVE_DXR3
+// --- dxr3 config box
+
+static GtkWidget * DXR3Config;
+static GtkWidget * CBDevice;
+static GtkWidget * CEDXR3Device;
+static GtkWidget * RBVNone;
+static GtkWidget * RBVLavc;
+static GtkWidget * RBVFame;
+static GtkWidget * dxr3BOk;
+static GtkWidget * dxr3BCancel;
+
+static int gtkVDXR3Config = 0;
+
+GtkWidget * create_DXR3Config( void );
+
+void ShowDXR3Config( void )
+{
+ if ( gtkVDXR3Config ) gtkActive( DXR3Config );
+  else DXR3Config=create_DXR3Config();
+
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
+ if ( gtkVopLAVC ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVLavc ),TRUE );
+ if ( gtkVopFAME ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVFame ),TRUE );
+ 
+ gtk_widget_show( DXR3Config );
+ gtkSetLayer( DXR3Config );
+ gtkVDXR3Config=1;
+}
+
+void HideDXR3Config( void )
+{
+ if ( !gtkVDXR3Config ) return;
+ gtk_widget_hide( DXR3Config );
+ gtk_widget_destroy( DXR3Config );
+ gtkVDXR3Config=0;
+}
+
+static void dxr3Button( GtkButton * button,gpointer user_data )
+{
+ switch ( (int)user_data )
+ {
+  case 0: // Ok
+       gtkVopLAVC=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVLavc ) );
+       gtkVopFAME=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVFame ) );
+  case 2: // Destroy
+  case 1: // Cancel
+       HideDXR3Config();
+       break;
+  case 3: // Show
+       gtkVDXR3Config=1;
+       break;
+  case 4: // Hide
+       gtkVDXR3Config=0;
+       break;
+ }
+}
+
+GtkWidget * create_DXR3Config( void )
+{
+ GtkWidget * frame1;
+ GtkWidget * frame2;
+ GtkWidget * frame3;
+ GtkWidget * frame4;
+ GtkWidget * vbox1;
+ GtkWidget * vbox2;
+ GtkWidget * hbox1;
+ GtkWidget * label1;
+ GList     * CBDevice_items = NULL;
+ GtkWidget * hseparator2;
+ GtkWidget * vbox3;
+ GtkWidget * label2;
+ GSList    * VEncoder_group = NULL;
+ GtkWidget * hseparator1;
+ GtkWidget * hbuttonbox1;
+ GtkAccelGroup * accel_group;
+
+ accel_group=gtk_accel_group_new();
+
+ DXR3Config=gtk_window_new( GTK_WINDOW_DIALOG );
+ gtk_widget_set_name( DXR3Config,"DXR3Config" );
+ gtk_object_set_data( GTK_OBJECT( DXR3Config ),"DXR3Config",DXR3Config );
+ gtk_widget_set_usize( DXR3Config,300,156 );
+ GTK_WIDGET_SET_FLAGS( DXR3Config,GTK_CAN_DEFAULT );
+ gtk_window_set_title( GTK_WINDOW( DXR3Config ),"DXR3/H+" );
+ gtk_window_set_position( GTK_WINDOW( DXR3Config ),GTK_WIN_POS_CENTER );
+ gtk_window_set_modal( GTK_WINDOW( DXR3Config ),TRUE );
+ gtk_window_set_policy( GTK_WINDOW( DXR3Config ),FALSE,FALSE,FALSE );
+ gtk_window_set_wmclass( GTK_WINDOW( DXR3Config ),"DXR3","MPlayer" );
+
+ gtk_widget_realize( DXR3Config );
+ gtkAddIcon( DXR3Config );
+
+ frame1=gtk_frame_new( NULL );
+ gtk_widget_set_name( frame1,"frame1" );
+ gtk_widget_ref( frame1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame1",frame1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( frame1 );
+ gtk_container_add( GTK_CONTAINER( DXR3Config ),frame1 );
+ gtk_container_set_border_width( GTK_CONTAINER( frame1 ),1 );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
+
+ frame2=gtk_frame_new( NULL );
+ gtk_widget_set_name( frame2,"frame2" );
+ gtk_widget_ref( frame2 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( frame2 );
+ gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
+
+ frame3=gtk_frame_new( NULL );
+ gtk_widget_set_name( frame3,"frame3" );
+ gtk_widget_ref( frame3 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( frame3 );
+ gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
+
+ frame4=gtk_frame_new( NULL );
+ gtk_widget_set_name( frame4,"frame4" );
+ gtk_widget_ref( frame4 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( frame4 );
+ gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
+
+ vbox1=gtk_vbox_new( FALSE,0 );
+ gtk_widget_set_name( vbox1,"vbox1" );
+ gtk_widget_ref( vbox1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"vbox1",vbox1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( vbox1 );
+ gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
+
+ vbox2=gtk_vbox_new( FALSE,0 );
+ gtk_widget_set_name( vbox2,"vbox2" );
+ gtk_widget_ref( vbox2 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"vbox2",vbox2,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( vbox2 );
+ gtk_box_pack_start( GTK_BOX( vbox1 ),vbox2,TRUE,TRUE,0 );
+
+ hbox1=gtk_hbox_new( FALSE,0 );
+ gtk_widget_set_name( hbox1,"hbox1" );
+ gtk_widget_ref( hbox1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"hbox1",hbox1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( hbox1 );
+ gtk_box_pack_start( GTK_BOX( vbox2 ),hbox1,FALSE,FALSE,0 );
+
+ label1=gtk_label_new( MSGTR_PREFERENCES_OSS_Device );
+ gtk_widget_set_name( label1,"label1" );
+ gtk_widget_ref( label1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( label1 );
+ gtk_box_pack_start( GTK_BOX( hbox1 ),label1,FALSE,FALSE,0 );
+ gtk_misc_set_alignment( GTK_MISC( label1 ),7.45058e-09,0.5 );
+ gtk_misc_set_padding( GTK_MISC( label1 ),4,0 );
+
+ CBDevice=gtk_combo_new();
+ gtk_widget_set_name( CBDevice,"CBDevice" );
+ gtk_widget_ref( CBDevice );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"CBDevice",CBDevice,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( CBDevice );
+ gtk_box_pack_start( GTK_BOX( hbox1 ),CBDevice,TRUE,TRUE,0 );
+ CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300" );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBDevice ),CBDevice_items );
+ g_list_free( CBDevice_items );
+
+ CEDXR3Device=GTK_COMBO( CBDevice )->entry;
+ gtk_widget_set_name( CEDXR3Device,"CEDXR3Device" );
+ gtk_widget_ref( CEDXR3Device );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"CEDXR3Device",CEDXR3Device,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( CEDXR3Device );
+ gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),"/dev/em8300" );
+
+ hseparator2=gtk_hseparator_new();
+ gtk_widget_set_name( hseparator2,"hseparator2" );
+ gtk_widget_ref( hseparator2 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"hseparator2",hseparator2,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( hseparator2 );
+ gtk_box_pack_start( GTK_BOX( vbox2 ),hseparator2,FALSE,FALSE,0 );
+ gtk_widget_set_usize( hseparator2,-2,6 );
+
+ vbox3=gtk_vbox_new( FALSE,0 );
+ gtk_widget_set_name( vbox3,"vbox3" );
+ gtk_widget_ref( vbox3 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"vbox3",vbox3,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( vbox3 );
+ gtk_box_pack_start( GTK_BOX( vbox2 ),vbox3,TRUE,TRUE,0 );
+
+ label2=gtk_label_new( MSGTR_PREFERENCES_DXR3_VENC );
+ gtk_widget_set_name( label2,"label2" );
+ gtk_widget_ref( label2 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( label2 );
+ gtk_box_pack_start( GTK_BOX( vbox3 ),label2,FALSE,FALSE,0 );
+ gtk_misc_set_alignment( GTK_MISC( label2 ),7.45058e-09,0.5 );
+ gtk_misc_set_padding( GTK_MISC( label2 ),4,0 );
+
+ RBVNone=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_None );
+ VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVNone ) );
+ gtk_widget_set_name( RBVNone,"RBVNone" );
+ gtk_widget_ref( RBVNone );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"RBVNone",RBVNone,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( RBVNone );
+ gtk_box_pack_start( GTK_BOX( vbox3 ),RBVNone,FALSE,FALSE,0 );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
+
+ RBVLavc=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_DXR3_LAVC );
+ VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVLavc ) );
+ gtk_widget_set_name( RBVLavc,"RBVLavc" );
+ gtk_widget_ref( RBVLavc );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"RBVLavc",RBVLavc,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( RBVLavc );
+ gtk_box_pack_start( GTK_BOX( vbox3 ),RBVLavc,FALSE,FALSE,0 );
+
+ RBVFame=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_DXR3_FAME );
+ VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVFame ) );
+ gtk_widget_set_name( RBVFame,"RBVFame" );
+ gtk_widget_ref( RBVFame );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"RBVFame",RBVFame,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( RBVFame );
+ gtk_box_pack_start( GTK_BOX( vbox3 ),RBVFame,FALSE,FALSE,0 );
+
+ hseparator1=gtk_hseparator_new();
+ gtk_widget_set_name( hseparator1,"hseparator1" );
+ gtk_widget_ref( hseparator1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"hseparator1",hseparator1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( hseparator1 );
+ gtk_box_pack_start( GTK_BOX( vbox1 ),hseparator1,FALSE,FALSE,0 );
+ gtk_widget_set_usize( hseparator1,-2,6 );
+
+ hbuttonbox1=gtk_hbutton_box_new();
+ gtk_widget_set_name( hbuttonbox1,"hbuttonbox1" );
+ gtk_widget_ref( hbuttonbox1 );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"hbuttonbox1",hbuttonbox1,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( hbuttonbox1 );
+ gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
+ gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
+ gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
+ gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),85,20 );
+ gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox1 ),0,0 );
+
+ dxr3BOk=gtk_button_new_with_label( MSGTR_Ok );
+ gtk_widget_set_name( dxr3BOk,"dxr3BOk" );
+ gtk_widget_ref( dxr3BOk );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"dxr3BOk",dxr3BOk,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( dxr3BOk );
+ gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),dxr3BOk );
+// GTK_WIDGET_UNSET_FLAGS( bOk,GTK_CAN_FOCUS );
+
+ dxr3BCancel=gtk_button_new_with_label( MSGTR_Cancel );
+ gtk_widget_set_name( dxr3BCancel,"dxr3BCancel" );
+ gtk_widget_ref( dxr3BCancel );
+ gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"dxr3BCancel",dxr3BCancel,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( dxr3BCancel );
+ gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),dxr3BCancel );
+// GTK_WIDGET_UNSET_FLAGS( bCancel,GTK_CAN_FOCUS );
+
+ gtk_widget_add_accelerator( dxr3BOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+ gtk_widget_add_accelerator( dxr3BCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+
+ gtk_signal_connect( GTK_OBJECT( DXR3Config ),"destroy",GTK_SIGNAL_FUNC( dxr3Button ),(void *)2 );
+ gtk_signal_connect( GTK_OBJECT( DXR3Config ),"show",GTK_SIGNAL_FUNC( dxr3Button ),(void *)3 );
+ gtk_signal_connect( GTK_OBJECT( DXR3Config ),"hide",GTK_SIGNAL_FUNC( dxr3Button ),(void *)4 );
+ 
+ gtk_signal_connect( GTK_OBJECT( dxr3BOk ),"released",GTK_SIGNAL_FUNC( dxr3Button ),(void *)0 );
+ gtk_signal_connect( GTK_OBJECT( dxr3BCancel ),"released",GTK_SIGNAL_FUNC( dxr3Button ),(void *)1 );
+
+ gtk_window_add_accel_group( GTK_WINDOW( DXR3Config ),accel_group );
+
+ return DXR3Config;
+}
+
+#endif

@@ -246,7 +246,7 @@ void mplEventHandling( int msg,float param )
    case evSetVCDTrack:
         guiIntfStruct.Track=(int)param;
    case evPlayVCD:
- 	gtkSet( gtkClearStruct,guiALL,NULL );
+ 	gtkSet( gtkClearStruct,0,(void *)guiALL );
 	guiIntfStruct.StreamType=STREAMTYPE_VCD;
 	goto play;
 #endif
@@ -256,7 +256,7 @@ void mplEventHandling( int msg,float param )
         guiIntfStruct.DVD.current_chapter=1;
         guiIntfStruct.DVD.current_angle=1;
 play_dvd_2:
- 	gtkSet( gtkClearStruct,guiALL - guiDVD,NULL );
+ 	gtkSet( gtkClearStruct,0,(void *)(guiALL - guiDVD) );
         guiIntfStruct.StreamType=STREAMTYPE_DVD;
 #endif
    case evPlay:
@@ -283,16 +283,13 @@ play:
          {
 	  case STREAMTYPE_STREAM:
 	  case STREAMTYPE_FILE:
-	       gtkSet( gtkClearStruct,guiALL - guiFilenames,NULL );
+	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiFilenames) );
 	       break;
 #ifdef HAVE_VCD
           case STREAMTYPE_VCD:
-	       gtkSet( gtkClearStruct,guiALL - guiVCD - guiFilenames,NULL );
-	       if ( !cdrom_device )
-	        {
-		 cdrom_device=DEFAULT_CDROM_DEVICE;
-		 guiSetFilename( guiIntfStruct.Filename,cdrom_device );
-		}
+	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiVCD - guiFilenames) );
+	       if ( !cdrom_device ) cdrom_device=DEFAULT_CDROM_DEVICE;
+	       mplSetFileName( NULL,cdrom_device,STREAMTYPE_VCD );
 	       if ( guiIntfStruct.Playing != 2 )
 	        {
 		 if ( !guiIntfStruct.Track )
@@ -307,12 +304,9 @@ play:
 #endif
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
-	       gtkSet( gtkClearStruct,guiALL - guiDVD - guiFilenames,NULL );
-	       if ( !dvd_device ) 
-	        {
-	         dvd_device=DEFAULT_DVD_DEVICE;
-                 guiSetFilename( guiIntfStruct.Filename,dvd_device )
-		} 
+	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiDVD - guiFilenames) );
+	       if ( !dvd_device ) dvd_device=DEFAULT_DVD_DEVICE;
+	       mplSetFileName( NULL,dvd_device,STREAMTYPE_DVD );
 	       if ( guiIntfStruct.Playing != 2 )
 	        {
 	         dvd_title=guiIntfStruct.DVD.current_title;
@@ -696,7 +690,7 @@ void mplDandDHandler(int num,const char** files)
     free( str );
   }
 
-  mplSetFileName( NULL,files[0] );
+  mplSetFileName( NULL,files[0],STREAMTYPE_FILE );
   if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evStop,0 );
   mplEventHandling( evPlay,0 );
 

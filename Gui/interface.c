@@ -143,7 +143,7 @@ void guiInit( void )
  cfg_read(); 
  appInit( (void*)mDisplay );
        
- if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name );
+ if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
  if ( sub_delay != 0.0f ) gtkSubDelay=sub_delay;
  if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
 #if defined( USE_OSD ) || defined( USE_SUB )
@@ -237,7 +237,41 @@ void guiLoadFont( void )
 }
 #endif
 
-void guiGetEvent( int type,char * arg )
+static void add_vop( char * str )
+{
+ mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] add video filter: %s\n",str );
+ if ( vo_plugin_args )
+  {
+   int i = 0;
+   while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],str ) ) { i=-1; break; }
+   if ( i != -1 )
+     { vo_plugin_args=realloc( vo_plugin_args,( i + 2 ) * sizeof( char * ) ); vo_plugin_args[i]=strdup( str ); vo_plugin_args[i+1]=NULL; }
+  } else { vo_plugin_args=malloc( 2 * sizeof( char * ) ); vo_plugin_args[0]=strdup( str ); vo_plugin_args[1]=NULL; }
+}
+
+static void remove_vop( char * str )
+{
+ int n = 0;
+
+ if ( !vo_plugin_args ) return;
+
+ mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] remove video filter: %s\n",str );
+
+ while ( vo_plugin_args[n++] ); n--;
+ if ( n > -1 )
+  {
+   int i = 0,m = -1;
+   while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],str ) ) { m=i - 1; break; }
+   i--;
+   if ( m > -1 )
+    {
+     if ( n == 1 ) { free( vo_plugin_args[0] ); free( vo_plugin_args ); vo_plugin_args=NULL; }
+      else memcpy( &vo_plugin_args[i],&vo_plugin_args[i + 1],( n - i ) * sizeof( char * ) );
+    }
+  }
+}
+
+int guiGetEvent( int type,char * arg )
 {
  stream_t * stream = (stream_t *) arg;
 #ifdef USE_DVDREAD
@@ -266,7 +300,7 @@ void guiGetEvent( int type,char * arg )
         break;
    case guiSetAudioOnly:
 	guiIntfStruct.AudioOnly=(int)arg;
-	if ( (int)arg ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	if ( (int)arg ) { guiIntfStruct.NoWindow=True; wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow ); }
 	  else wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 	break;
    case guiReDrawSubWindow:
@@ -351,6 +385,9 @@ void guiGetEvent( int type,char * arg )
 	 btnModify( evSetBalance,guiIntfStruct.Balance );
 	}
 	break;
+   case guiSetFileFormat:
+        guiIntfStruct.FileFormat=(int)arg;
+	break;
    case guiSetValues:
 // -- video
 	if ( arg )
@@ -364,6 +401,9 @@ void guiGetEvent( int type,char * arg )
 	  if ( vo_gamma_saturation  == 1000 )
 	   { vo_gamma_saturation=0; get_video_colors( (void *)arg,"saturation",&vo_gamma_saturation ); }
 	 }
+
+	if ( guiIntfStruct.NoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+
 // -- audio
         if ( audio_out )
 	{
@@ -398,6 +438,14 @@ void guiGetEvent( int type,char * arg )
 #ifdef USE_OSD
 	gtkSubFFactor=font_factor;
 #endif
+#ifdef HAVE_DXR3
+	if ( !gstrcmp( gtkVODriver,"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
+	 {
+	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVCFAME );
+	  guiIntfStruct.Playing=0;
+	  return True;
+	 }
+#endif
 	break;
    case guiSetDefaults:
 	if ( filename && !guiIntfStruct.Filename )
@@ -408,7 +456,7 @@ void guiGetEvent( int type,char * arg )
 
        guiIntfStruct.DiskChanged=0;
 
-// --- video opts	 
+// --- video opts
        if ( !gtkVODriver )
 	{
          int i = 0;
@@ -433,35 +481,38 @@ void guiGetEvent( int type,char * arg )
 	
 	if ( gtkVODriver ) { gfree( (void **)&video_driver ); video_driver=gstrdup( gtkVODriver ); }
 	  else { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
-	
-	if ( gtkVPP )
-	 {
-	  if ( vo_plugin_args )
+
+	{
+	 int i = 0;
+         guiIntfStruct.NoWindow=False;
+         while ( video_out_drivers[i++] )
+	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	   {
-	    int i = 0;
-	    while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],"pp" ) ) { i=-1; break; }
-	    if ( i != -1 )
-	     { vo_plugin_args=realloc( vo_plugin_args,( i + 2 ) * sizeof( char * ) ); vo_plugin_args[i]=strdup( "pp" ); vo_plugin_args[i+1]=NULL; }
-	   } else { vo_plugin_args=malloc( 2 * sizeof( char * ) ); vo_plugin_args[0]=strdup( "pp" ); vo_plugin_args[1]=NULL; }
-	  auto_quality=gtkVAutoq;
-	 } 
-	 else
-	  if ( vo_plugin_args )
-	   {
-	    int n = 0;
-	    while ( vo_plugin_args[n++] ); n--;
-	    if ( n > -1 )
-	     {
-	      int i = 0;
-	      while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],"pp" ) ) break; i--;
-	      if ( n == i )
-	       {
-	        if ( n == 1 ) { free( vo_plugin_args[0] ); free( vo_plugin_args ); vo_plugin_args=NULL; }
-	         else memcpy( &vo_plugin_args[i],&vo_plugin_args[i+1],( n - i ) * sizeof( char * ) );
-	       }
-	     }
-	    auto_quality=0;
+	    const vo_info_t *info = video_out_drivers[i - 1]->get_info();
+	    if  ( ( !gstrcmp( gtkVODriver,(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
+	      { guiIntfStruct.NoWindow=True; break; }
 	   }
+	}
+
+#ifdef HAVE_DXR3
+	remove_vop( "lavc" );
+	remove_vop( "fame" );
+	if ( !gstrcmp( gtkVODriver,"dxr3" ) )
+	 {
+	  #warning workaround for this moment.
+	  osd_level=0;
+	  // ---
+	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
+	   {
+	    if ( gtkVopLAVC ) add_vop( "lavc" );
+	    if ( gtkVopFAME ) add_vop( "fame" );
+	   }
+	 }
+#endif
+// ---	 
+	if ( gtkVopPP ) { add_vop( "pp" ); auto_quality=gtkVAutoq; } 
+	 else { remove_vop( "pp" ); auto_quality=0; }
+
         vo_doublebuffering=gtkVODoubleBuffer;
         vo_directrendering=gtkVODirectRendering;
 	frame_dropping=gtkVFrameDrop;
@@ -516,6 +567,7 @@ void guiGetEvent( int type,char * arg )
 	
 	break;
   }
+ return False;
 }
 
 extern unsigned int GetTimerMS( void );
@@ -523,7 +575,7 @@ extern int mplTimer;
 
 void guiEventHandling( void )
 {
- if ( !guiIntfStruct.Playing || guiIntfStruct.AudioOnly ) wsHandleEvents();
+ if ( !guiIntfStruct.Playing || guiIntfStruct.NoWindow ) wsHandleEvents();
  gtkEventHandling();
  mplTimer=GetTimerMS() / 20;
 }
@@ -644,17 +696,18 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 #endif
 // --- misc
    case gtkClearStruct:
-        if ( (unsigned int)fparam & guiFilenames )
+        if ( (unsigned int)vparam & guiFilenames )
 	 {
 	  gfree( (void **)&guiIntfStruct.Filename );
 	  gfree( (void **)&guiIntfStruct.Subtitlename );
 	  gfree( (void **)&guiIntfStruct.AudioFile );
+	  gtkSet( gtkDelPl,0,NULL );
 	 }
 #ifdef USE_DVDREAD
-	if ( (unsigned int)fparam & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
+	if ( (unsigned int)vparam & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
 #endif
 #ifdef HAVE_VCD
-	if ( (unsigned int)fparam & guiVCD ) guiIntfStruct.VCDTracks=0;
+	if ( (unsigned int)vparam & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	return NULL;
    case gtkSetExtraStereo:

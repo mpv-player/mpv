@@ -133,7 +133,8 @@ GtkWidget * create_MessageBox( int type )
  gtk_object_set_data_full( GTK_OBJECT( MessageBox ),"gtkMessageBoxText",gtkMessageBoxText,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( gtkMessageBoxText );
  gtk_box_pack_start( GTK_BOX( hbox1 ),gtkMessageBoxText,TRUE,TRUE,0 );
- gtk_label_set_justify( GTK_LABEL( gtkMessageBoxText ),GTK_JUSTIFY_FILL );
+// gtk_label_set_justify( GTK_LABEL( gtkMessageBoxText ),GTK_JUSTIFY_FILL );
+ gtk_label_set_justify( GTK_LABEL( gtkMessageBoxText ),GTK_JUSTIFY_CENTER );
  gtk_label_set_line_wrap( GTK_LABEL( gtkMessageBoxText ),FALSE );
 
  hseparator1=gtk_hseparator_new();

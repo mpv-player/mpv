@@ -28,6 +28,6 @@ extern void mplPlayerThread( void );
 extern void ChangeSkin( char * name );
 extern void EventHandling( void );
 
-extern void mplSetFileName( char * dir,char * name );
+extern void mplSetFileName( char * dir,char * name,int type );
 
 #endif

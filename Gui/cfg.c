@@ -28,8 +28,11 @@ int    gtkVNIAVI = 0;
 int    gtkVFlip = 0;
 int    gtkVIndex = 1;
 int    gtkVVFM = -1;
-int    gtkVPP = 0;
 int    gtkVAutoq = 0;
+
+int    gtkVopPP = 0;
+int    gtkVopLAVC = 0;
+int    gtkVopFAME = 0;
 
 char * gtkAODriver = NULL;
 int    gtkAONoSound = 0;
@@ -72,8 +75,11 @@ static config_t gui_opts[] =
  { "v_ni",&gtkVNIAVI,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_idx",&gtkVIndex,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_vfm",&gtkVVFM,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
- { "vf_pp",&gtkVPP,CONF_TYPE_FLAG,0,0,1,NULL },
+
+ { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&gtkVAutoq,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
+ { "vf_lavc",&gtkVopLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "vf_fame",&gtkVopFAME,CONF_TYPE_FLAG,0,0,1,NULL },
 
  { "ao_driver",&gtkAODriver,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_nosound",&gtkAONoSound,CONF_TYPE_FLAG,0,0,1,NULL },

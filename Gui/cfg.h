@@ -14,8 +14,11 @@ extern int    gtkVNIAVI;
 extern int    gtkVFlip;
 extern int    gtkVIndex;
 extern int    gtkVVFM;
-extern int    gtkVPP;
 extern int    gtkVAutoq;
+
+extern int    gtkVopPP;
+extern int    gtkVopLAVC;
+extern int    gtkVopFAME;
 
 extern char * gtkAODriver;
 extern int    gtkAONoSound;
