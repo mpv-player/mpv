@@ -29,4 +29,5 @@ Player features:
 - verify valid range of numeric options (like '-xy 0')
 
 Requested codecs:
-- WMV (Windows Media Video 8)
+- WMV (failing to load)
+- ASUS ASV1 (failing to load)
