@@ -468,6 +468,10 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           mplMainRender=1;
           itemtype=0;
           break;
+	  
+   case wsPMMouseButton:
+        gtkSendMessage( evShowPopUpMenu );
+	break;	  
 
 // --- rolled mouse ... de szar :)))
    case wsP5MouseButton: value=-2.5f; goto rollerhandled;

@@ -15,8 +15,8 @@
 
 typedef struct
 {
- char dir[ 1024 ];
- char filename[ 1024 ];
+ char dir[ 2048 ];
+ char filename[ 2048 ];
 } gtkFileSelectorStruct;
 
 typedef struct
@@ -61,6 +61,7 @@ extern GtkWidget     * PlayList;
 extern GtkWidget     * FileSelect;
 extern GtkWidget     * AboutBox;
 extern GtkWidget     * Options;
+extern GtkWidget     * PopUpMenu;
 
 extern GtkWidget     * MessageBox;
 
@@ -76,6 +77,7 @@ extern int             gtkVisibleFileSelect;
 extern int             gtkVisibleMessageBox;
 extern int             gtkVisibleAboutBox;
 extern int             gtkVisibleOptions;
+extern int             gtkVisiblePopUpMenu;
 
 extern char          * sbMPlayerDirInHome;
 extern char          * sbMPlayerPrefixDir;

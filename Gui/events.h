@@ -46,6 +46,8 @@
 
 #define evHelp              37
 
+#define evLoadSubtitle      38
+
 #define evExit              1000
 
 // --- General events ---
@@ -55,6 +57,7 @@
 #define evMessageBox      5002
 #define evGeneralTimer    5003
 #define evGtkIsOk         5004
+#define evShowPopUpMenu   5005
 
 #define evFName           7000
 #define evMovieTime       7001
