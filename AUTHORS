@@ -427,9 +427,6 @@ Oskar Liljeblad <oskar@osk.mine.nu>
 Bernd Ernesti <mplayer@lists.veego.de>
     * NetBSD support patches
 
-Michael Halcrow <mah69@email.byu.edu>
-    * EDL 0.5 - edit lists support
-
 Eviv Bulgroz <ebulgroz@yahoo.com>
     * Presets support for mp3lame encoding
     * AVI demuxer time/bitrate calculation fixes

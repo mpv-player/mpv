@@ -1,5 +1,4 @@
 // EDL version 0.5
-// Author: Michael Halcrow <mhalcrow@byu.edu>
 
 #ifndef EDLH
 #define EDLH
