@@ -1,3 +1,7 @@
+
+#ifndef __AUDIO_OUT_H
+#define __AUDIO_OUT_H
+
 typedef struct ao_info_s
 {
         /* driver name ("Matrox Millennium G200/G400" */
@@ -68,4 +72,4 @@ typedef struct ao_control_vol_s {
 	float right;
 } ao_control_vol_t;
 
-
+#endif

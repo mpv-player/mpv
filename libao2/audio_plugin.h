@@ -83,6 +83,8 @@ extern ao_plugin_functions_t audio_plugin_eq;
 
 // Control parameters used by the plugins
 #define AOCONTROL_PLUGIN_SET_LEN 1  // All plugins must respond to this parameter
+#define AOCONTROL_PLUGIN_ES_SET  4  // set extra stereo coefficient
+#define AOCONTROL_PLUGIN_ES_GET  5  // get extra stereo coefficient
 
 #endif
 

@@ -46,6 +46,9 @@ static int control(int cmd,int arg){
 	case AOCONTROL_SET_DEVICE:
 	    dsp=(char*)arg;
 	    return CONTROL_OK;
+	case AOCONTROL_GET_DEVICE:
+	    (char*)arg=dsp;
+	    return CONTROL_OK;
 	case AOCONTROL_QUERY_FORMAT:
 	    return CONTROL_TRUE;
 	case AOCONTROL_GET_VOLUME:

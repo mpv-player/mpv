@@ -33,8 +33,8 @@ LIBAO_PLUGIN_EXTERN(extrastereo)
 // local data
 static struct {
   float    mul;         // intensity
-  int      inuse;     	// This plugin is in use TRUE, FALSE
-  int      format;	// sample format
+  int      inuse;      // This plugin is in use TRUE, FALSE
+  int      format;     // sample format
 } pl_extrastereo = {2.5, 0, 0};
 
 
@@ -42,6 +42,12 @@ static struct {
 static int control(int cmd,int arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
+    return CONTROL_OK;
+  case AOCONTROL_PLUGIN_ES_SET:
+    pl_extrastereo.mul=*((float*)arg);
+    return CONTROL_OK;
+  case AOCONTROL_PLUGIN_ES_GET:
+    *((float*)arg)=pl_extrastereo.mul;
     return CONTROL_OK;
   }
   return CONTROL_UNKNOWN;
