@@ -7,16 +7,16 @@
 
 <P><B>Wie berichte ich über Programmfehler?</B></P>
 
-<P>Zuerst lese DOCS/BUGS sowie andere Dokumentationen. Wenn dein Problem
+<P>Lese zuerst <A HREF="documentation.html#D">Anhang D</A> sowie andere Dokumentationen. Wenn dein Problem
 nicht bekannt ist oder durch unsere Anweisungen nicht gelöst werden kann,
 berichte über den Fehler:</P>
 
 <P><B>Wo?</B></P>
 
 <P>Tritt der mplayer-users Mailingliste bei:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>http://lists.sourceforge.net/lists/listinfo/mplayer-users</CODE><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A><BR>
 und sende deinen Fehlerbericht an:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@lists.sourceforge.net</CODE><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@lists.sourceforge.net">mplayer-users@lists.sourceforge.net</A><BR>
 Wir werden keine persönliche Kopie senden, also bitte anmelden!!!</P>
 
 <P>Sende auf keinen Fall Fehlerberichte direkt an die private Mail-Adresse
@@ -98,12 +98,14 @@ z.B.:<UL>
 <P><B><I>4. Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
   lade die Datei bitte auf:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
+  Uploade auch eine kleine .txt-Datei mit dem selben name wie die Datei,
+  die das Problem beschreibt!
   Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
   reproduzieren, aber als erstes solltest du das ausprobieren:
 <P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1k count=1024</CODE></P>
   (kopiert das erste MB von 'deinedatei' in die Datei 'kleinedatei')
   Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
-  immer noch auftritt reicht es die kleine Datei hochzuladen.
+  immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
   Sende NIE solche Dateien via mail! Lade es herauf und schicke nur den Pfad/
   Dateinamen der Datei auf den FTP Server.
   Wenn die Datei im Internet bereits verfügbar ist reicht die _exakte_ URL
@@ -134,6 +136,10 @@ printf "esi=%08lX\n",$esi<BR>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei >mplayer.bug</CODE></P>
 
 <P><B><I>5.b.: Führe MPlayer im gdb (GNU Debugger) aus:</I></B></P>
+<P>Kompiliere <B>MPlayer</B> neu, mit eingeschaltetem debugging:<BR>
+./configure --enable-debug<BR>
+make
+</P>
 <P>[im Root/User Shell Prompt:]<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
 [im gdb Prompt:]<BR>
