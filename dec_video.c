@@ -176,6 +176,10 @@ switch(sh_video->codec->driver){
    break;
  }
  case 7: {  // DivX4Linux
+#ifndef NEW_DECORE
+   fprintf(stderr,"MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n");
+   return 0; //exit(1);
+#else
    if(verbose) printf("DivX4Linux video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
@@ -199,11 +203,12 @@ switch(sh_video->codec->driver){
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
-//	sh_video->our_out_buffer = shmem_alloc(((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
-	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
+	sh_video->our_out_buffer = shmem_alloc(((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
+//	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
    }
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
    break;
+#endif
  }
  case 5: {  // FFmpeg's libavcodec
 #ifndef USE_LIBAVCODEC
@@ -307,6 +312,7 @@ switch(sh_video->codec->driver){
 
     break;
   }
+#ifdef NEW_DECORE
   case 7: {
     // DivX4Linux
     unsigned int t=GetTimer();
@@ -342,6 +348,7 @@ switch(sh_video->codec->driver){
 
     break;
   }
+#endif
 #ifdef USE_DIRECTSHOW
   case 4: {        // W32/DirectShow
     unsigned int t=GetTimer();
