@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <strings.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -17,6 +18,10 @@
 
 #include "stream.h"
 #include "demuxer.h"
+
+#include "../m_option.h"
+#include "../m_struct.h"
+
 
 extern int verbose; // defined in mplayer.c
 
@@ -52,6 +57,100 @@ void close_cdda(stream_t* s);
 #include "libsmbclient.h"
 #endif
 
+extern stream_info_t stream_info_file;
+
+stream_info_t* auto_open_streams[] = {
+  &stream_info_file,
+  NULL
+};
+
+stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
+			     char** options, int* file_format, int* ret) {
+  void* arg = NULL;
+  stream_t* s;
+  m_struct_t* desc = (m_struct_t*)sinfo->opts;
+
+  // Parse options
+  if(desc) {
+    arg = m_struct_alloc(desc);
+    if(sinfo->opts_url) {
+      m_option_t url_opt = 
+	{ "stream url", arg , CONF_TYPE_CUSTOM_URL, 0, 0 ,0, sinfo->opts };
+      if(m_option_parse(&url_opt,"stream url",filename,arg,M_CONFIG_FILE) < 0) {
+	mp_msg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
+	m_struct_free(desc,arg);
+	return NULL;
+      }	
+    }
+    if(options) {
+      int i;
+      for(i = 0 ; options[i] != NULL ; i += 2) {
+	mp_msg(MSGT_OPEN,MSGL_DBG2, "Set stream arg %s=%s\n",
+	       options[i],options[i+1]);
+	if(!m_struct_set(desc,arg,options[i],options[i+1]))
+	  mp_msg(MSGT_OPEN,MSGL_WARN, "Failed to set stream option %s=%s\n",
+		 options[i],options[i+1]);
+      }
+    }
+  }
+  s = new_stream(-2,-2);
+  s->url=strdup(filename);
+  s->flags |= mode;
+  *ret = sinfo->open(s,mode,arg,file_format);
+  if((*ret) != STREAM_OK) {
+    free(s->url);
+    free(s);
+    return NULL;
+  }
+  if(s->type <= -2)
+    mp_msg(MSGT_OPEN,MSGL_WARN, "Warning streams need a type !!!!\n");
+  if(s->flags & STREAM_SEEK && !s->seek)
+    s->flags &= ~STREAM_SEEK;
+  if(s->seek && !(s->flags & STREAM_SEEK))
+    s->flags &= STREAM_SEEK;
+  
+
+  mp_msg(MSGT_OPEN,MSGL_V, "STREAM: [%s] %s\n",sinfo->name,filename);
+  mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Description: %s\n",sinfo->info);
+  mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Author: %s\n", sinfo->author);
+  mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Comment: %s\n", sinfo->comment);
+  
+  return s;
+}
+
+
+stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format) {
+  int i,j,l,r;
+  stream_info_t* sinfo;
+  stream_t* s;
+
+  for(i = 0 ; auto_open_streams[i] ; i++) {
+    sinfo = auto_open_streams[i];
+    if(!sinfo->protocols) {
+      mp_msg(MSGT_OPEN,MSGL_WARN, "Stream type %s have protocols == NULL, it's a bug\n");
+      continue;
+    }
+    for(j = 0 ; sinfo->protocols[j] ; j++) {
+      l = strlen(sinfo->protocols[j]);
+      // l == 0 => Don't do protocol matching (ie network and filenames)
+      if((l == 0) || ((strncmp(sinfo->protocols[j],filename,l) == 0) &&
+		      (strncmp("://",filename+l,3) == 0))) {
+	*file_format = DEMUXER_TYPE_UNKNOWN;
+	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r);
+	if(s) return s;
+	if(r != STREAM_UNSUPORTED) {
+	  mp_msg(MSGT_OPEN,MSGL_ERR, "Failed to open %s\n",filename);
+	  return NULL;
+	}
+	break;
+      }
+    }
+  }
+
+  mp_msg(MSGT_OPEN,MSGL_ERR, "No stream found to handle url %s\n",filename);
+  return NULL;
+}
+
 //=================== STREAMER =========================
 
 int stream_fill_buffer(stream_t *s){
@@ -63,9 +162,7 @@ int stream_fill_buffer(stream_t *s){
     len=smbc_read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
     break;
 #endif    
-  case STREAMTYPE_FILE:
   case STREAMTYPE_STREAM:
-  case STREAMTYPE_PLAYLIST:
 #ifdef STREAMING
     if( s->streaming_ctrl!=NULL ) {
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);break;
@@ -115,7 +212,8 @@ int stream_fill_buffer(stream_t *s){
 
 
     
-  default: len=0;
+  default: 
+    len= s->fill_buffer ? s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE) : 0;
   }
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
   s->buf_pos=0;
@@ -133,7 +231,6 @@ off_t newpos=0;
   s->buf_pos=s->buf_len=0;
 
   switch(s->type){
-  case STREAMTYPE_FILE:
   case STREAMTYPE_SMB:
   case STREAMTYPE_STREAM:
 #ifdef _LARGEFILE_SOURCE
@@ -151,6 +248,18 @@ off_t newpos=0;
   case STREAMTYPE_CDDA:
     newpos=(pos/VCD_SECTOR_SIZE)*VCD_SECTOR_SIZE;break;
 #endif
+  default:
+    // Round on sector size
+    if(s->sector_size)
+      newpos=(pos/s->sector_size)*s->sector_size;
+    else { // Otherwise on the buffer size
+#ifdef _LARGEFILE_SOURCE
+      newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
+#else
+      newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
+#endif
+    }
+    break;
   }
 
 if(verbose>=3){
@@ -167,10 +276,6 @@ if(verbose>=3){
 
 if(newpos==0 || newpos!=s->pos){
   switch(s->type){
-  case STREAMTYPE_FILE:
-    s->pos=newpos; // real seek
-    if(lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
-    break;
 #ifdef LIBSMBCLIENT
   case STREAMTYPE_SMB:
     s->pos=newpos; // real seek
@@ -236,7 +341,14 @@ if(newpos==0 || newpos!=s->pos){
 #endif
     break;
   default:
-    return 0;
+    // This should at the beginning as soon as all streams are converted
+    if(!s->seek)
+      return 0;
+    // Now seek
+    if(!s->seek(s,newpos)) {
+      mp_msg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
+      return 0;
+    }
   }
 //   putchar('.');fflush(stdout);
 //} else {
@@ -328,8 +440,13 @@ void free_stream(stream_t *s){
   case STREAMTYPE_DVD:
     dvd_close(s->priv);
 #endif
-  }  
-  if(s->priv) free(s->priv);
+  default:
+    if(s->close) s->close(s);
+  }
+  // Disabled atm, i don't like that. s->priv can be anything after all
+  // streams should destroy their priv on close
+  //if(s->priv) free(s->priv);
+  if(s->url) free(s->url);
   free(s);
 }
 

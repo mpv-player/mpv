@@ -26,6 +26,26 @@
 #define VCD_SECTOR_OFFS 24
 #define VCD_SECTOR_DATA 2324
 
+/// atm it will always use mode == STREAM_READ
+/// streams that use the new api should check the mode at open
+#define STREAM_READ  0
+#define STREAM_WRITE 1
+/// Seek flags, if not mannualy set and s->seek isn't NULL
+/// STREAM_SEEK is automaticly set
+#define STREAM_SEEK_BW  2
+#define STREAM_SEEK_FW  4
+#define STREAM_SEEK  (STREAM_SEEK_BW|STREAM_SEEK_FW)
+
+//////////// Open return code
+/// This can't open the requested protocol (used by stream wich have a
+/// * protocol when they don't know the requested protocol)
+#define STREAM_UNSUPORTED -1
+#define STREAM_ERROR 0
+#define STREAM_OK    1
+
+#define MAX_STREAM_PROTOCOLS 10
+
+
 #ifdef STREAMING
 #include "network.h"
 #endif
@@ -33,9 +53,41 @@
 int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 
+struct stream_st;
+typedef struct stream_info_st {
+  const char *info;
+  const char *name;
+  const char *author;
+  const char *comment;
+  /// mode isn't used atm (ie always READ) but it shouldn't be ignored
+  /// opts is at least in it's defaults settings and may have been
+  /// altered by url parsing if enabled and the options string parsing.
+  int (*open)(struct stream_st* st, int mode, void* opts, int* file_format);
+  char* protocols[MAX_STREAM_PROTOCOLS];
+  void* opts;
+  int opts_url; /* If this is 1 we will parse the url as an option string
+		 * too. Otherwise options are only parsed from the
+		 * options string given to open_stream_plugin */
+} stream_info_t;
+
 typedef struct stream_st {
+  // Read
+  int (*fill_buffer)(struct stream_st *s, char* buffer, int max_len);
+  // Write
+  int (*write_buffer)(struct stream_st *s, char* buffer, int len);
+  // Seek
+  int (*seek)(struct stream_st *s,off_t pos);
+  // Control
+  // Will be later used to let streams like dvd and cdda report
+  // their structure (ie tracks, chapters, etc)
+  int (*control)(struct stream_st *s,int cmd,void* arg);
+  // Close
+  void (*close)(struct stream_st *s);
+
   int fd;   // file descriptor, see man open(2)
   int type; // see STREAMTYPE_*
+  int flags;
+  int sector_size; // sector size (seek will be aligned on this size if non 0)
   unsigned int buf_pos,buf_len;
   off_t pos,start_pos,end_pos;
   int eof;
@@ -187,7 +239,8 @@ void stream_reset(stream_t *s);
 stream_t* new_stream(int fd,int type);
 void free_stream(stream_t *s);
 stream_t* new_memory_stream(unsigned char* data,int len);
-stream_t* open_stream(char* filename,int vcd_track,int* file_format);
+stream_t* open_stream(char* filename,char** options,int* file_format);
+stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format);
 
 //#ifdef USE_DVDREAD
 struct config;
