@@ -86,6 +86,17 @@ Ha szerencséd van és van még elég memóriád hogy a kép mégegyszer elférjen,
 akkor a DGA driver doublebuffering-et fog alkalmazni, ami sokkal folyamatosabb
 lejátszást eredményez.
 
+A doublebuffering azt jelenti, hogy a video következõ képkockájának kirajzolása
+a videomemórián kívül történik, amíg az elõzõ képkocka kirajzolódik. Amint elkészül,
+a grafikus kártya megkapja ennek a memóriaterületnek a címét, és azt jeleníti meg ami
+ott van. Mindeközben a másik memóriaterület újra feltöltõdik.
+
+A doublebuffering a -double opcióval kapcsolható be, és a -nodouble opcióval ki.
+Jelenleg alapállapotban ki van kapcsolva. Ha a DGA drivert használod, csak
+doublebuffering esetén lesz OSD-d. Viszont, ha bekapcsolod az nagy teljesítménycsökkenéssel
+járhat (a K6-II+ 525 gépemen plusz 20% CPU idõ!), függõen a videokártyád DGA driverértõl. 
+
+
 
 6. Sebesség
 ~~~~~~~~~~~
