@@ -62,14 +62,16 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	printf("couldn't allocate image for cinepak codec\n");
 	return NULL;
     }
-    
+
+#if 0    
     printf("mpi: %p/%d %p/%d %p/%d (%d) (%d)  \n",
 	mpi->planes[0], mpi->stride[0],
 	mpi->planes[1], mpi->stride[1],
 	mpi->planes[2], mpi->stride[2],
 	mpi->planes[1]-mpi->planes[0],
 	mpi->planes[2]-mpi->planes[1]);
-    
+#endif
+
 //    decode_cinepak(sh->context, data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
 //	(mpi->flags&MP_IMGFLAG_YUV)?16:(mpi->imgfmt&255), mpi->stride[0]);
 
