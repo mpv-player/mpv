@@ -708,7 +708,6 @@ _dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
 _nas=auto
-_jpeg=auto
 _png=auto
 _gl=auto
 _ggi=auto
@@ -781,8 +780,6 @@ for ac_option do
   --disable-sdl)	_sdl=no		;;
   --enable-nas)		_nas=yes	;;
   --disable-nas)	_nas=no		;;
-  --enable-jpeg)	_jpeg=yes	;;
-  --disable-jpeg)	_jpeg=no	;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
   --enable-gl)		_gl=yes		;;
@@ -1866,35 +1863,6 @@ else
 fi
 echores "$_dvb"
 
-echocheck "JPEG support"
-if test "$_jpeg" = auto; then
-  _jpeg=no
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <jpeglib.h>
-int main(void) { return 0; }
-EOF
-  cc_check -ljpeg  && _jpeg=yes
-fi
-echores "$_jpeg"
-
-echocheck "zr"
-if test "$_zr" = yes ; then
-  if test "$_jpeg" = yes ; then
-    _ld_jpeg='-ljpeg'
-    _def_zr='#define HAVE_ZR 1'
-    _vosrc="$_vosrc vo_zr.c"
-    _vomodules="zr $_vomodules"
-    echores "$_zr"
-  else
-    echores "jpeglib is required by zr, sorry"
-    _def_zr='#undef HAVE_ZR'
-  fi
-else
-  _def_zr='#undef HAVE_ZR'
-  echores "$_zr"
-fi
-
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
@@ -2533,6 +2501,21 @@ elif test "$_libavcodecso" = yes ; then
   _codecmodules="libavcodec.so $_codecmodules"
 fi
 
+echocheck "zr"
+if test "$_zr" = yes ; then
+  if test "$_libavcodec" = yes ; then
+    _def_zr='#define HAVE_ZR 1'
+    _vosrc="$_vosrc vo_zr.c jpeg_enc.c"
+    _vomodules="zr $_vomodules"
+    echores "$_zr"
+  else
+    echores "libavcodec (static) is required by zr, sorry"
+    _def_zr='#undef HAVE_ZR'
+  fi
+else
+  _def_zr='#undef HAVE_ZR'
+  echores "$_zr"
+fi
 
 # FIXME : variables don't have a "standard" name so check this one day
 if test "$_divx4linux" = auto ; then
@@ -2869,7 +2852,7 @@ AR = ar
 CC = $_cc
 AWK = $_awk
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS = -Djpeg_fdct_ifast=jpeg_fdct_ifast2 $CFLAGS
+OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 
@@ -2892,7 +2875,6 @@ X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_so
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
-JPEG_LIB = $_ld_jpeg
 PNG_LIB = $_ld_png
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
