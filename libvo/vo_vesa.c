@@ -12,7 +12,7 @@
   TODO:
   - hw YUV support (need volunteers who have corresponding hardware)
   - triple buffering (if it will really speedup playback).
-    note: triple buffering requires VBE 3.0.
+    note: triple buffering requires VBE 3.0 - need volunteers.
   - refresh rate support (need additional info from mplayer)
 */
 #include <stdio.h>
@@ -328,7 +328,7 @@ static void flip_page(void)
     if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
     {
       vesa_term();
-      PRINT_VBE_ERR("vbeSetDispayStart",err);
+      PRINT_VBE_ERR("vbeSetDisplayStart",err);
       printf("vo_vesa: Fatal error occured! Can't continue\n");
       exit(EXIT_FAILURE);
     }
