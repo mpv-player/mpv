@@ -1639,11 +1639,15 @@ EOF
         FSF_flags='-maltivec -mabi=altivec'
         Darwin_flags='-faltivec'
 
-        if test -z "$p"; then
-            cc_check $FSF_flags && p='FSF'
-        fi
+        # check for Darwin-style flags first, since
+        # gcc-3.3 (August Update from Apple) on MacOS 10.2.8
+        # accepts but ignores FSF-style flags...
+
         if test -z "$p"; then
             cc_check $Darwin_flags && p='Darwin'
+        fi
+        if test -z "$p"; then
+            cc_check $FSF_flags && p='FSF'
         fi
 
         case $p in
@@ -1664,7 +1668,6 @@ EOF
     # check if <altivec.h> should be included
 
     _def_altivec_h='#undef HAVE_ALTIVEC_H'
-    _def_altivec='#undef HAVE_ALTIVEC'
 
     if test "$_altivec" = yes ; then
         echocheck "altivec.h"
@@ -1676,7 +1679,6 @@ EOF
          cc_check $_altivec_gcc_flags && _have_altivec_h=yes
          if test "$_have_altivec_h" = yes ; then
              _def_altivec_h='#define HAVE_ALTIVEC_H 1'
-             _def_altivec='#define HAVE_ALTIVEC 1'
          fi
          echores "$_have_altivec_h"
     fi
@@ -1699,6 +1701,14 @@ EOF
 
     if test "$_altivec" = yes ; then
         _mcpu="$_mcpu $_altivec_gcc_flags"
+    fi
+
+    # setup _def_altivec correctly
+
+    if test "$_altivec" = yes ; then
+	_def_altivec='#define HAVE_ALTIVEC 1'
+    else
+	_def_altivec='#undef HAVE_ALTIVEC'
     fi
 fi
 
