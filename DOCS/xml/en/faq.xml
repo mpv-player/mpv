@@ -70,6 +70,32 @@ section for details.
 <question><para>
 Compilation stops with an error message similar to this one:
 <screen>
+    cfft.c: In function`passf2':
+    cfft.c:556: unable to find a register to spill in class `FLOAT_REGS'
+    cfft.c:556: this is the insn:
+    (insn 235 233 246 (set (subreg:SF (reg/v:DI 29 rmm0 [110]) 0)
+            (minus:SF (mem:SF (plus:SI (mult:SI (reg:SI 1 edx [112])
+                            (const_int 8 [0x8]))
+                        (reg/v/f:SI 3 ebx [62])) [4 S4 A32])
+                (reg:SF 8 st(0) [132]))) 533 {*fop_sf_1_nosse} (insn_list
+    232 (nil))    (expr_list:REG_DEAD (reg:SF 8 st(0) [132])
+            (nil)))
+    cfft.c:556: confused by earlier errors, bailing out
+</screen>
+</para></question>
+<answer><para>
+This is a known problem of <application>gcc</application> 3.2, upgrade
+to 3.3 to solve the problem. How to install gcc is described in the
+<link linkend="gcc-296">gcc 2.96</link> section. Alternatively you can use
+an external FAAD library as described in the
+<link linkend="aac">AAC</link> section. 
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Compilation stops with an error message similar to this one:
+<screen>
     In file included from mplayer.c:34:
     mw.h: In function `mplMainDraw':
     mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458

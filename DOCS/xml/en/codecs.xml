@@ -720,6 +720,27 @@ files. An open source decoder called FAAD is available from
 <ulink url="http://www.audiocoding.com"/>.
 MPlayer includes libfaad 2.0RC1, so you do not need to get it separately.
 </para>
+
+<para>
+If you use gcc 3.2 which fails to compile our internal FAAD or want to use
+the external library for some other reason, download the library from the
+<ulink url="http://www.audiocoding.com/download.php">download page</ulink>
+and pass <option>--with-externalfaad</option> to <filename>configure</filename>.
+You do not need all of faad2 to decode AAC files, libfaad is enough. Build
+it like this:
+<screen>
+cd faad2/
+chmod +x bootstrap
+./bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Binaries are not available from audiocoding.com, but you can (apt-)get Debian
+packages from <ulink url="http://marillat.free.fr">Christian Marillat's homepage</ulink>
+and Mandrake RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>.
+</para>
 </sect3>
 
 </sect2>
