@@ -497,6 +497,13 @@ Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev,
 svga, vesa, winvidix, xmga, xvidix und xover.
 .
 .TP
+.B \-crash-debug (DEBUG-CODE)
+Hängt bei einem Absturz oder SIGTRAP automatisch gdb an.
+Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
+mit --enable-crash-debug oder Vorhandensein einer .developer-Datei im
+Source-Tree.
+.
+.TP
 .B \-edl <Dateiname> (nur bei EDL)
 Aktiviert EDL-Aktionen (Edit Decision List) während der Wiedergabe.
 Teile des Videos werden entsprechend den Einträgen der angegebenen
@@ -2286,7 +2293,7 @@ Aktiviert Pan & Scan.
 Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
 abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
-Dies funktioniert nur mit den xv-, xmga-, mga-, gl- und
+Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, quartz- und
 xvidix-Videoausgabetreibern.
 .
 .TP
@@ -2590,8 +2597,11 @@ YUV-Ausgabeformat zu erzwingen, z.B.\& mit \-vf format=yuy2.
 .RSs
 .IPs device_id=<Nummer>
 Wähle ein Gerät für die Darstellung im Vollbildmodus.
+.IPs fs_res=<Breite>:<Höhe>
+Gib die Auflösung im Vollbildmodus an (nützlich auf langsamen Systemen).
 .RE
 .PD 1
+.
 .TP
 .B fbdev (nur bei Linux)
 Benutze für die Videoausgabe den Kernel-Framebuffer.
@@ -3146,9 +3156,32 @@ Für eine vollständige Liste der verfügbaren Audiofilter, siehe \-af help.
 .sp 1
 Die verfügbaren Filter lauten:
 .RSs
-.IPs resample[=srate[:sloppy][:type]]
+.IPs resample[=srate[:salopp][:Typ]]
 Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
 Unterstützt nur das 16-bit Little-Endian-Format.
+In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
+.IPs lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
+Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
+Unterstützt nur das 16-bit Little-Endian-Format.
+In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
+.RSss
+srate: die Samplerate der Ausgabe
+.br
+Länge: Länge des Filters hinsichtlich der niedrigeren Samplerate
+Standard: 16
+.br
+linear: Falls 1 werden die Filter zwischen Polyphase-Einträgen linear
+interpoliert.
+.br
+Zähler: log2 der Anzahl der Polyphase-Einträge
+(..., 10->1024, 11->2048, 12->4096, ...)
+Standard: 10->1024
+.br
+Abschluss: Abschlussfrequenz (0.0-1.0), Standardwert wird abhängig von
+der Filterlänge gesetzt.
+.REss
+.IPs sweep[=Geschwindigkeit]
+Sinus des Durchlaufs
 .IPs channels[=nch]
 Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
 Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
@@ -3184,7 +3217,7 @@ entspricht.
 .br
 sc: Aktiviert "Soft-Clipping".
 .REss
-.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
+.IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mischt Kanäle beliebig.
 Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:devices.html#audio-dev.
 .RSss
@@ -3220,6 +3253,14 @@ mmapped_Datei: Datei, zur der die Daten exportiert werden sollen
 .br
 nsamples: Anzahl der Samples pro Kanal (Standard: 512)
 .REss
+.IPs extrastereo[=mul]
+Erhöht den Unterschied zwischen linken und rechten Kanälen, um der Wiedergabe
+eine Art "Live"-Effekt zuzufügen.
+.RSss
+mul: Differenz-Koeffizient (Standard: 2.5)
+.REss
+.IPs volnorm
+Maximiert die Lautstärke, ohne den Klang zu verzerren.
 .RE
 .
 .TP
@@ -3397,9 +3438,25 @@ vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
 .IPs gray
 Decodierung nur mit Graustufen (was ein bischen schneller als mit Farbe ist)
 .IPs "idct=<0\-99> (siehe \-lavcopts)"
-Um die beste Decodierqualität zu erreichen, benutze denselben idct-Algorithmus
+Um die beste Decodierqualität zu erreichen, benutze denselben IDCT-Algorithmus
 für Encodierung und Decodierung.
 Dies kann allerdings auf Kosten der Genauigkeit gehen.
+.IPs lowres=<Nummer>
+Decodierung von niedrigeren Auflösungen.
+Dies wird nicht von allen Codecs unterstützt und wird oft in hässlichen
+Artefakten resultieren.
+Dies ist kein Bug sondern ein Nebeneffekt der Decodierung bei nicht voller
+Auflösung.
+.RSss
+.br
+0: deaktiviert
+.br
+1: 1/2 Auflösung
+.br
+2: 1/4 Auflösung
+.br
+3: 1/8 Auflösung
+.REss
 .IPs "sb=<Nummer> (nur bei MPEG2)"
 Überspringe unten die angegebene Anzahl von Makroblockreihen.
 .IPs "st=<Nummer> (nur bei MPEG2)"
@@ -3470,9 +3527,9 @@ Gibt die Parameter für den Softwareskalierer an.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-Gaußscher Unschärfefilter (beim Helligkeitsanteil)
+gaußscher Unschärfefilter (beim Helligkeitsanteil)
 .IPs cgb=<0\-100>
-Gaußscher Unschärfefilter (beim Farbanteil)
+gaußscher Unschärfefilter (beim Farbanteil)
 .IPs ls=<0\-100>
 Schärfefilter (beim Helligkeitsanteil)
 .IPs cs=<0\-100>
@@ -3510,11 +3567,11 @@ Mögliche Werte sind:
 .PD 0
 .RSs
 .IPs 0
-fast bilinear (Standard)
+fast bilinear
 .IPs 1
 bilinear
 .IPs 2
-bicubic (gute Qualität)
+bicubic (gute Qualität) (Standard)
 .IPs 3
 experimental
 .IPs 4
@@ -3530,13 +3587,13 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-bicubic spline
+natural bicubic spline
 .RE
 .PD 1
 .sp 1
 .RS
 .I ANMERKUNG:
-Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter (p) des
+Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter des
 Skalierungsfilters (\-vf scale (0 (weich) \-  100 (scharf))) gesetzt werden.
 Bei \-sws 9 gibt dieser Parameter dagegen die Filterlänge an (1 \- 10).
 .RE
@@ -3599,24 +3656,38 @@ Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
 .TP
 .B \-xvidopts <Option1:Option2:...>
 Gibt zusätzliche Parameter für die Decodierung mit XviD an.
+.br
+.I ANMERKUNG:
+Da libavcodec schneller als XviD ist, könntest du in Betracht ziehen, den
+Nachbearbeitungsfilter (\-vf pp) und Decoder (\-vfm ffmpeg) von libavcodec zu
+benutzen.
+.sp 1
+XviD's interne Nachbearbeitungsfilter:
 .PD 0
 .RSs
-.IPs deblock-chroma
-Aktiviert den internen Postprocessing-Filter von XviD: Chroma-Deblock-Filter.
-Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
-.IPs deblock-luma
-Aktiviert den internen Postprocessing-Filter von XviD: Luma-Deblock-Filter.
-Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
-.IPs dr2\ \ 
+.IPs deblock-chroma (siehe auch \-vf pp)
+Chrominanz-Deblock-Filter
+.IPs deblock-luma (siehe auch \-vf pp)
+Luminanz-Deblock-Filter
+.IPs dering-luma (siehe auch \-vf pp)
+Luminanz-Deringing-Filter
+.IPs dering-chroma (siehe auch \-vf pp)
+Chrominanz-Deringing-Filter
+.IPs filmeffect (siehe auch \-vf noise)
+Fügt dem Video künstlich Körnung hinzu.
+Kann die wahrgenommene Qualität erhöhen, während die eigentliche Qualität
+geringer ist.
+.RE
+.sp 1
+.RS
+Methoden für das Rendern:
+.RE
+.PD 0
+.RSs
+.IPs dr2\ \
 Aktiviert direktes Rendern mit Methode 2.
 .IPs nodr2
 Deaktiviert direktes Rendern mit Methode 2.
-.IPs filmeffect
-Aktiviert den internen Film-Körnungs-Effekt von XviD.
-Dieser fügt einem Film künstlich Körnung hinzu.
-Dies kann die wahrgenommene Qualität erhöhen, während sich die wirkliche
-Qualität verschlechtert.
-Siehe auch \-vf noise.
 .RE
 .PD 1
 .
