@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.107
+// Updated to help_mp-en.h v1.108
 
 // ========================= MPlayer help ===========================
 
@@ -276,7 +276,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi! (richiesto un indice, prova con l\'opzione -idx !)  \n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
-#define MSGTR_EncryptedVOB "File VOB criptato (non compilato con il supporto delle libcss)! Leggi il file DOCS/it/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/it/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Flusso criptato di cui non è stata chiesta l\'autenticazione!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
