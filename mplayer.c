@@ -1444,6 +1444,9 @@ if(!sh_video){
    uninit_player(INITED_VO);
 }
 
+if (!sh_video && !sh_audio)
+    goto goto_next_file;
+
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps){
   vo_fps = sh_video->fps=force_fps;
