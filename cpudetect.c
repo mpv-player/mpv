@@ -16,7 +16,8 @@ CpuCaps gCpuCaps;
 
 #ifdef __NetBSD__
 #include <sys/param.h>
-#include <setjmp.h>
+#include <sys/sysctl.h>
+#include <machine/cpu.h>
 #endif
 
 #ifdef __FreeBSD__
@@ -242,15 +243,6 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #undef CPUID_STEPPING
 
 
-#ifdef __NetBSD__
-jmp_buf sseCheckEnv;
-
-void sseCheckHandler(int i)
-{
-        longjmp(sseCheckEnv, 1);
-}
-#endif
-
 #if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
@@ -308,33 +300,37 @@ static void check_os_katmai_support( void )
       gCpuCaps.hasSSE=0;
 
 #elif defined(__NetBSD__)
-#if __NetBSD_Version__ >= 105260000
-   if ( gCpuCaps.hasSSE ) {
-      void (*oldHandler)(int);
+#if __NetBSD_Version__ >= 105250000
+   int has_sse, has_sse2, ret, mib[2];
+   size_t varlen;
 
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+   mib[0] = CTL_MACHDEP;
+   mib[1] = CPU_SSE;
+   varlen = sizeof(has_sse);
 
-      oldHandler = signal(SIGILL, sseCheckHandler);
-      if (setjmp(sseCheckEnv)) {
-        gCpuCaps.hasSSE = 0;
-      } else {
-         __asm__ __volatile__ (
-               "subl $0x10, %esp     \n"
-               "movups %xmm0, (%esp) \n"
-               "emms                 \n"
-               "addl $0x10, %esp     \n"
-           );
-      }
-      signal(SIGILL, oldHandler);
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+   ret = sysctl(mib, 2, &has_sse, &varlen, NULL, 0);
+   if (ret < 0 || !has_sse) {
+      gCpuCaps.hasSSE=0;
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+   } else {
+      gCpuCaps.hasSSE=1;
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
+   }
 
-      if ( gCpuCaps.hasSSE ) {
-	mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
-      } else {
-	mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
-      }
+   mib[1] = CPU_SSE2;
+   varlen = sizeof(has_sse2);
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE2... " );
+   ret = sysctl(mib, 2, &has_sse2, &varlen, NULL, 0);
+   if (ret < 0 || !has_sse2) {
+      gCpuCaps.hasSSE2=0;
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+   } else {
+      gCpuCaps.hasSSE2=1;
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
    }
 #else
-   gCpuCaps.hasSSE = 0
+   gCpuCaps.hasSSE = 0;
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
 #endif
 #elif defined(__linux__)
