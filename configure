@@ -172,6 +172,7 @@ Optional features:
   --disable-dshow        disable DirectShow support (if no C++ compiler and
                          libs are available or find the dshow codecs slower 
                          than the old VfW ones) [autodetect]
+  --disable-xanim        disable XAnim DLL support [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
 
@@ -231,6 +232,7 @@ Use these options if autodetection fails:
   --with-x11libdir=DIR     X library files in DIR
   --with-x11incdir=DIR     X headers in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
+  --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-csslibdir=DIR     'libcss.so' (libcss shared lib.) in DIR
   --with-cssincdir=DIR     'css.h' (libcss header file) in DIR
   --with-sdl-config=PATH   path to 'sdl-config'
@@ -567,6 +569,7 @@ _lirc=no
 _css=no
 _dvdread=no
 _win32=yes _dshow=yes
+_xanim=yes
 test "$host_arch" != i386 && _dshow=no _win32=no
 _fastmemcpy=yes
 _streaming=no
@@ -635,6 +638,15 @@ if test "$_win32" = yes ; then
   done
 fi
 
+_xanimlibdir=
+if test "$_xanim" = yes ; then
+  for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
+    if test -d "$I" ; then
+      _xanimlibdir="$I"
+      break;
+    fi;
+  done
+fi
 
 if test -d libavcodec && test -f libavcodec/Makefile ; then
     _libavcodec=yes
@@ -1491,6 +1503,10 @@ for ac_option do
   --disable-dshow)
         _dshow=no
 	;;
+  --disable-xanim)
+	_xanim=no
+	_xanimlibdir=
+	;;
   --disable-fastmemcpy)
         _fastmemcpy=no
 	;;
@@ -1520,6 +1536,10 @@ for ac_option do
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
         _win32=yes
         ;;
+  --with-xanimlibdir=*)
+	_xanimlibdir=`echo $ac_option | cut -d '=' -f 2`
+	_xanim=yes
+	;;
   --with-csslibdir=*)
         _csslibdir=`echo $ac_option | cut -d '=' -f 2`
 	_css=yes
@@ -1692,6 +1712,10 @@ if test "$_xmga" = "autodetect" ; then
  fi
 fi
 
+if test "$_xanim" = yes && test "$_libdl" = no ; then
+  _xanim = no
+fi
+
 # to screen.
 echo "Install prefix: $_prefix"
 echo "Data directory: $_datadir"
@@ -1738,6 +1762,7 @@ echo "Checking for PNG support ... $_png"
 echo "Checking for mad support ... $_mad"
 echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32"
+echo "Checking for XAnim DLL support ... $_xanim"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for iconv function ... $_iconv"
 echo "Checking for zlib ... $_zlib"
@@ -1923,6 +1948,14 @@ else
   _use_directshow="#undef USE_DIRECTSHOW"
   _dshowlib=
   _dshowdep=
+fi
+
+if test "$_xanim" = yes ; then
+  _use_xanim="#define USE_XANIM 1"
+  _xanim_path="#define XACODEC_PATH \"$_xanimlibdir\""
+else
+  _use_xanim="#undef USE_XANIM"
+  _xanim_path=
 fi
 
 
@@ -2594,6 +2627,10 @@ $_libavcodec
 $_libavcodecso
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS
+
+/* XAnim DLL support */
+$_use_xanim
+$_xanim_path
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_fastmemcpy
