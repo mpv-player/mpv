@@ -33,19 +33,10 @@ typedef struct {
   // win32 codec stuff:
   AVIStreamHeader audio;
   WAVEFORMATEX *wf;
-//  char wf_ext[64];     // in format
-  WAVEFORMATEX o_wf;   // out format
-  HACMSTREAM srcstream;  // handle
   int audio_in_minsize;
   int audio_out_minsize;
   // other codecs:
   void* context; // codec-specific stuff (usually HANDLE or struct pointer)
-//  ac3_frame_t *ac3_frame;
-  void* ac3_frame;  // TODO: use *context
-  int pcm_bswap;
-#ifdef HAVE_OGGVORBIS
-  struct ov_struct_st *ov; // should be assigned on init  TODO: use *context
-#endif
   unsigned char *codecdata;
   int codecdata_len;
 } sh_audio_t;
@@ -68,15 +59,11 @@ typedef struct {
   // buffers:
   float num_frames;       // number of frames played
   int num_frames_decoded;       // number of frames decoded
-  unsigned our_out_buffer_size;
-  char *our_out_buffer;
   mp_image_t *image;
   // win32 codec stuff:
   AVIStreamHeader video;
   BITMAPINFOHEADER *bih;   // in format
-  BITMAPINFOHEADER o_bih; // out format
   void* context; // codec-specific stuff (usually HANDLE or struct pointer)
-  HIC hic;  // handle
   void* video_out;
   void* vfilter;
   int vf_inited;
