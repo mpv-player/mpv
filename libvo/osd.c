@@ -76,12 +76,25 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
     return;
 }
 
+#ifdef PROFILE_ME
+static inline unsigned long long int read_tsc( void )
+{
+  unsigned long long int retval;
+  __asm __volatile ("rdtsc":"=A"(retval)::"memory");
+  return retval;
+}
+#endif
+
 void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
+#ifdef PROFILE_ME
+unsigned long long v1,v2;
+v1 = read_tsc();
+#endif
     for(y=0;y<h;y++){
         register int x;
 #ifdef ARCH_X86
-#if 0 /*def HAVE_MMX2*/
+#ifdef HAVE_MMX2
 	asm volatile(
 		"pxor %%mm7, %%mm7		\n\t"
 		"xorl %%eax, %%eax		\n\t"
@@ -117,41 +130,33 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		: "%eax"
 		);
 #else /* 0 HAVE_MMX2*/
-	asm volatile(
-		"xorl %%eax, %%eax		\n\t"
-		"xorl %%ebx, %%ebx		\n\t"
-		"xorl %%edx, %%edx		\n\t"
-		".balign 16\n\t"
-		"1:				\n\t"
-		"movb (%1, %%eax), %%bl		\n\t"
-		"cmpb $0, %%bl			\n\t"
-		" jz 2f				\n\t"
-		"movzbl (%2, %%eax), %%edx	\n\t"
-		"shll $8, %%edx			\n\t"
-		"decb %%bl			\n\t"
-		"movzbl (%0, %%eax, 4), %%ecx	\n\t"
-		"imull %%ebx, %%ecx		\n\t"
-		"addl %%edx, %%ecx		\n\t"
-		"movb %%ch, (%0, %%eax, 4)	\n\t"
+    for(x=0;x<w;x++){
+        if(srca[x]){
+	    asm volatile(
+		"movzbl (%0), %%ecx\n\t"
+		"movzbl 1(%0), %%eax\n\t"
+		"movzbl 2(%0), %%edx\n\t"
 
-		"movzbl 1(%0, %%eax, 4), %%ecx	\n\t"
-		"imull %%ebx, %%ecx		\n\t"
-		"addl %%edx, %%ecx		\n\t"
-		"movb %%ch, 1(%0, %%eax, 4)	\n\t"
+		"imull %1, %%ecx\n\t"
+		"imull %1, %%eax\n\t"
+		"imull %1, %%edx\n\t"
 
-		"movzbl 2(%0, %%eax, 4), %%ecx	\n\t"
-		"imull %%ebx, %%ecx		\n\t"
-		"addl %%edx, %%ecx		\n\t"
-		"movb %%ch, 2(%0, %%eax, 4)	\n\t"
+ 		"addl %2, %%ecx\n\t"
+		"addl %2, %%eax\n\t"
+		"addl %2, %%edx\n\t"
 
-		"2:				\n\t"
-		"addl $1, %%eax			\n\t"
-		"cmpl %3, %%eax			\n\t"
-		" jb 1b				\n\t"
+		"movb %%ch, (%0)\n\t"
+		"movb %%ah, 1(%0)\n\t"
+		"movb %%dh, 2(%0)\n\t"
 
-		:: "r" (dstbase), "r" (srca), "r" (src), "m" (w)
-		: "%eax", "%ebx", "%ecx", "%edx"
+		:
+		:"r" (&dstbase[4*x]),
+		 "r" ((unsigned)srca[x]),
+		 "r" (((unsigned)src[x])<<8)
+		:"%eax", "%ecx", "%edx"
 		);
+            }
+        }
 #endif /* 0 HAVE_MMX*/
 #else /*non x86 arch*/
         for(x=0;x<w;x++){
@@ -170,9 +175,13 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
         srca+=srcstride;
         dstbase+=dststride;
     }
-#if 0 /*def HAVE_MMX2*/
+#ifdef HAVE_MMX2
 	asm volatile(SFENCE:::"memory");
 	asm volatile(EMMS:::"memory");
+#endif
+#ifdef PROFILE_ME
+v2 = read_tsc();
+printf("rd_tsc: %llu\n\t",v2-v1);
 #endif
     return;
 }
