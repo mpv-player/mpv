@@ -999,6 +999,49 @@ to improve something then simply send me your patches.
   set the <b>suid</b> bit on the <B>MPlayer</B> excecutable.
 </P>
 
+<P><B><I>VIDEO EQUALIZER</I></B></P>
+
+<P>
+  This is a video equalizer implemented especially for Vidix. Currently you
+  can use it by command line arguments only. <B>MPlayer</B> recognizes the
+  following options :
+</P>
+
+<P>
+  &nbsp;&nbsp;<CODE>-brightness</CODE> - adjust <B>BRIGHTNESS</B> of video
+  output. It's not equal to brightness adjusting on monitor panel or on TV. It
+  changes intensity of RGB components of video signal from black to white
+  screen.<BR>
+  &nbsp;&nbsp;<CODE>-contrast</CODE> - adjust <B>CONTRAST</B> of video output. 
+  Works in similar manner as brightness.<BR>
+  &nbsp;&nbsp;<CODE>-saturation</CODE> - adjust <B>SATURATION</B> of video
+  output.  You can get grayscale output with this option.<BR>
+  &nbsp;&nbsp;<CODE>-hue</CODE> - adjust <B>HUE</B> of video signal.  You can
+  get colored negative of image with this option.<BR>
+  &nbsp;&nbsp;<CODE>-red_intensity</CODE> - adjust intensity of <B>RED</B>
+    component of video signal.<BR>
+  &nbsp;&nbsp;<CODE>-green_intensity</CODE> - adjust intensity of <B>GREEN</B>
+    component of video signal.<BR>
+  &nbsp;&nbsp;<CODE>-blue_intensity</CODE> - adjust intensity of <B>BLUE</B>
+    component of video signal.
+</P>
+<P>
+  Each parameter can accept values from <B>-1000</B> to <B>+1000</B>.<BR>
+  Default value for each parameter is <B>0</B>.
+</P>
+<P>
+  <B>Note:</B> Not every driver provides support for each of those parameters.
+  Currently only <B>radeon_vid.so</B> provides full support for video eqalizing.
+  Other drivers only partly support these options.
+</P>
+<P><B>Examples:</B><BR>
+  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
+  filename.avi</CODE><BR>
+  or<BR>
+  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
+  filename.vob</CODE>
+</P>
+
 
 <P><B><A NAME=2.3.1.16>2.3.1.16. Zr</A></B></P>
 
@@ -1032,6 +1075,7 @@ you must get it working first. Then recompile <B>MPlayer</B> with
     subtitles.</LI>
 </UL>
 </P>
+
 
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
