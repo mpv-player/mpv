@@ -1,5 +1,77 @@
 MPlayer (1.0)
 
+  pre6:
+
+    Security:
+    * buffer overflow in mp3lib fixed
+    * many memleaks fixed
+
+    Ports:
+    * full x86_64 support
+    * -rootwin, -panscan support in the Quartz video output driver
+    * holding key pressed now works in the Quartz video output driver
+    * VCD support for Darwin
+    * fix for stdin input and slave mode on MinGW
+    * support for -rootwin in the DirectX video output driver
+    * improved monitor selection in the DirectX video output driver
+    * new DirectSound audio output driver
+    * support for ZetaOS (mostly working)
+
+    Drivers:
+    * fixes in the VESA video output driver
+    * JPEG video output driver suboptions
+    * improvements for Blinkenlights ;-)
+    * JACK audio output driver updated to bio2jack API changes
+    * OpenGL video output driver colorformat fixes (with :manyfmts)
+    * aspect, panscan, Hardware OSD support in the OpenGL video output driver
+    * new pnm and md5sum video output drivers
+    * ALSA audio output driver always uses specified device, even for hwac3
+    * support for mixer channels selection in the ALSA audio output driver
+
+    Decoders:
+    * "experimental" support for 20 and 24 bit LPCM (DVD-Audio)
+    * libmpeg2 updated to 0.4.0b
+    * libfaad2 updated to 2.1beta CVS snapshot
+    * DTS decoding via lavc
+
+    Demuxers:
+    * fix -nosound and -novideo for NSV
+    * subtitle switching and language code displaying for Matroska
+    * support .vp5 file format (AVI variant)
+    * seeking for audio-only ASF files fixed
+    * improved MP3 detection
+
+    Streaming:
+    * -cache-min option
+    * compilation fix for newer LIVE.COM versions
+    * make ASF without ECC work
+    * support for MMS on non-standard port
+
+    FFmpeg/libavcodec:
+    * new snow video codec
+    * new sonic audio codec
+    * reduced resolution decoding
+    * TSCC support
+
+    Filters:
+    * software volume control when no hardware support
+    * high-quality audio resampling with -af lavcresample
+    * cropdetect rounding parameter
+    * remaining audio plugins (extrastereo, volnorm) converted to audio filters
+
+    Others:
+    * -loop and -shuffle now work together
+    * GUI unified audio options dialog, also for ALSA
+    * GUI redrawing limited, decreases CPU usage in audio-only case
+    * x264 encoder support
+    * better EDL support
+    * some --disable configure options finally work (mp3lib, liba52, libmpeg2)
+    * framestepping
+    * changeable playback speed
+    * some crashes with binary codecs fixed
+    * subtitle alignment support for SAMI files
+
+
   pre5: "LinuxTag release" July 15, 2004
 
     Name:
