@@ -97,7 +97,6 @@ struct vf_priv_s {
 	int qp;
 	int mode;
 	int mpeg2;
-	unsigned int outfmt;
 	int temp_stride;
 	uint8_t *src;
 	int16_t *temp;
@@ -452,7 +451,6 @@ static int config(struct vf_instance_s* vf,
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
-    if(mpi->imgfmt!=vf->priv->outfmt) return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->w, mpi->h);
@@ -473,7 +471,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		// no DR, so get a new image! hope we'll get DR buffer:
-                dmpi=vf_get_image(vf->next,vf->priv->outfmt,
+                dmpi=vf_get_image(vf->next,mpi->imgfmt,
                     MP_IMGTYPE_TEMP,
                     MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
                     mpi->w,mpi->h);
@@ -568,7 +566,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 static int open(vf_instance_t *vf, char* args){
 
-    int log2c=0;
+    int log2c=-1;
     
     vf->config=config;
     vf->put_image=put_image;
@@ -609,14 +607,6 @@ static int open(vf_instance_t *vf, char* args){
 	}
     }
 #endif
-    
-    // check csp:
-    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
-    if(!vf->priv->outfmt)
-    {
-	uninit(vf);
-        return 0; // no csp match :(
-    }
     
     return 1;
 }
