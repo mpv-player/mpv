@@ -289,3 +289,19 @@ int ds_get_packet(demux_stream_t *ds,char **start){
         return len;
     }
 }
+
+int ds_get_packet_sub(demux_stream_t *ds,char **start){
+    while(1){
+        int len;
+        if(ds->buffer_pos>=ds->buffer_size){
+          *start = NULL;
+          if(!ds->packs) return -1; // no sub
+          if(!ds_fill_buffer(ds)) return -1; // EOF
+        }
+        len=ds->buffer_size-ds->buffer_pos;
+        *start = &ds->buffer[ds->buffer_pos];
+        ds->buffer_pos+=len;
+        return len;
+    }
+}
+

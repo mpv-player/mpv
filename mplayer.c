@@ -289,6 +289,7 @@ sh_video_t* new_sh_video(int id){
 demuxer_t *demuxer=NULL;
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
+demux_stream_t *d_dvdsub=NULL;
 
 sh_audio_t *sh_audio=NULL;//&sh_audio_i;
 sh_video_t *sh_video=NULL;//&sh_video_i;
@@ -708,6 +709,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 //====== File format recognized, set up these for compatibility: =========
 d_audio=demuxer->audio;
 d_video=demuxer->video;
+d_dvdsub=demuxer->sub;
 //d_audio->sh=sh_audio; 
 //d_video->sh=sh_video; 
 //sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -2039,6 +2041,15 @@ switch(file_format){
       find_sub(sub_uses_time?(100*(v_pts+sub_delay)):((v_pts+sub_delay)*sub_fps)); // FIXME! frame counter...
       current_module=NULL;
   }
+  
+  // DVD sub:
+  { unsigned char* buf=NULL;
+    int len=ds_get_packet_sub(d_dvdsub,&buf);
+    if(len>0){
+       printf("\rDVD sub: %d   \n",len);
+    }
+  }
+  
 }
 
 } // while(!eof)

@@ -3,9 +3,9 @@
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
-static void parse_dvdsub(unsigned char *buf,int len){
-    printf("\rDVDsub packet: %d  \n",len);
-}
+//static void parse_dvdsub(unsigned char *buf,int len){
+//    printf("\rDVDsub packet: %d  \n",len);
+//}
 
 static int mpeg_pts_error=0;
 
@@ -226,7 +226,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     }
 #endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,0);
-    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
+//    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
   if(verbose>=2) printf("DEMUX_MPG: Skipping %d data bytes from packet %04X\n",len,id);
@@ -289,14 +289,12 @@ do{
   } // else
   if(demux->synced==2){
       ret=demux_mpg_read_packet(demux,head);
-/*
       if(!ret)
         if(--max_packs==0){
           demux->stream->eof=1;
           printf("demux: file doesn't contain the selected audio or video stream\n");
           return 0;
         }
-*/
   } else {
     if(head>=0x100 && head<0x1B0){
       if(head==0x100)
