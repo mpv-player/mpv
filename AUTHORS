@@ -407,6 +407,8 @@ Per Wigren <wigren@home.se>
 
 Nicolas Le Gaillart <n@tourmentine.com>
     * French documentation translation
+    * documentation updates and fixes
+    * 2nd half of the documentation HTML --> XML conversion
 
 Lu Ran <hephooey@fastmail.fm>
     * Chinese documentation translation
@@ -415,6 +417,7 @@ Lu Ran <hephooey@fastmail.fm>
 András Mohari <mayday@varoshaza.nagyatad.hu>
     * skin documentation
     * various docs updates and fixes
+    * 1st half of the documentation HTML --> XML conversion
 
 Dénes Balatoni <pnis@coder.hu>
     * xmms inputplugin support
