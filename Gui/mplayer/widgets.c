@@ -40,7 +40,6 @@ int             gtkVisibleFileSelect = 0;
 int             gtkVisibleMessageBox = 0;
 int             gtkVisibleAboutBox = 0;
 int             gtkVisibleOptions = 0;
-int             gtkVisiblePopUpMenu = 0;
 
 gtkCommStruct * gtkShMem;
 

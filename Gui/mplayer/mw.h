@@ -5,7 +5,9 @@
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
+
 int             mplMainAutoPlay = 0;
+int		mplMiddleMenu = 0;
 
 int             mainVisible = 1;
 
@@ -380,7 +382,14 @@ NoPause:
           mplMainRender=1;
           mplMainAutoPlay=0;
           mplPlay();
+	  break;
          }
+	if ( mplMiddleMenu )
+	 {
+	  mplMiddleMenu=0;
+	  mplMsgHandle( gtkShMem->popupmenu,0 );
+	  break;
+	 }
         break;
 // --- system events
    case evNone:

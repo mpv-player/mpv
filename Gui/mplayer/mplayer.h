@@ -11,6 +11,7 @@ extern unsigned char * mplMenuDrawBuffer;
 extern int             mainVisible;
 
 extern int             mplMainAutoPlay;
+extern int	       mplMiddleMenu;
 
 extern void mplInit( int argc,char* argv[], char *envp[], void* disp );
 extern void mplMsgHandle( int msg,float param );

@@ -52,6 +52,7 @@ typedef struct
  gtkSkinStruct         sb;
  gtkVisibleStruct      vs;
  gtkOptionsStruct      op;
+ int		       popupmenu;
 } gtkCommStruct;
 
 extern gtkCommStruct * gtkShMem;
@@ -77,7 +78,6 @@ extern int             gtkVisibleFileSelect;
 extern int             gtkVisibleMessageBox;
 extern int             gtkVisibleAboutBox;
 extern int             gtkVisibleOptions;
-extern int             gtkVisiblePopUpMenu;
 
 extern char          * sbMPlayerDirInHome;
 extern char          * sbMPlayerPrefixDir;

@@ -8,8 +8,9 @@
 
 void ActivateMenuItem( int Item )
 {
- gtkVisiblePopUpMenu=0;
- fprintf( stderr,"[menu] item: %d\n",Item );
+// fprintf( stderr,"[menu] item: %d\n",Item );
+ gtkShMem->popupmenu=Item;
+ gtkSendMessage( evShowPopUpMenu );
 }
 
 GtkWidget * AddMenuItem( GtkWidget * Menu,char * label,int Number )
@@ -51,6 +52,8 @@ GtkWidget * AddSeparator( GtkWidget * Menu )
 }
 
 GtkWidget * DVDSubMenu;
+GtkWidget * DVDAudioLanguageMenu;
+GtkWidget * DVDSubtitleLanguageMenu;
 
 GtkWidget * create_PopUpMenu( void )
 {
@@ -63,7 +66,7 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( Menu,"About MPlayer""      ", evAbout );
   AddSeparator( Menu );
    SubMenu=AddSubMenu( Menu,"Open ..." );
-    AddMenuItem( SubMenu,"Play file ...""    ", evLoad );
+    AddMenuItem( SubMenu,"Play file ...""    ", evLoadPlay );
     AddMenuItem( SubMenu,"Play VCD ...", evNone );
     AddMenuItem( SubMenu,"Play DVD ...", evNone );
     AddMenuItem( SubMenu,"Play URL ...", evNone );
@@ -86,10 +89,11 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( SubMenu,"Double size", evDoubleSize );
     AddMenuItem( SubMenu,"Fullscreen", evFullScreen );
    DVDSubMenu=AddSubMenu( Menu,"DVD" );
-    AddMenuItem( DVDSubMenu,"Play disc ...", evNone );
+    AddMenuItem( DVDSubMenu,"Play disc ...""    ", evNone );
     AddMenuItem( DVDSubMenu,"Show DVD Menu", evNone );
     AddSeparator( DVDSubMenu );
-    AddMenuItem( DVDSubMenu,"    ...      ", evNone );
+    DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,"Audio language" );
+    DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,"Subtitle language" );
   AddSeparator( Menu );
   AddMenuItem( Menu,"Playlist", evPlayList );
   AddMenuItem( Menu,"Skin browser", evSkinBrowser );
