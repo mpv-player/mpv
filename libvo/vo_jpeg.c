@@ -493,6 +493,7 @@ static uint32_t preinit(const char *arg)
     /* If jpeg_outdir is not set by an option, resort to default of "." */
     if (!jpeg_outdir) {
         jpeg_outdir = strdup(".");
+        if (!jpeg_outdir) jpeg_malloc_failed();
     }
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
