@@ -151,7 +151,7 @@ readme or other docs.
 You should try the latest test (pre) release version too, maybe your bug
 is already fixed, but the new version hasn't been released.
 If you couldn't solve the problem, then send a quality bugreport
-via E-Mail to the MPlayer-users list : mplayer@alan.umcs.lublin.pl
+via E-Mail to the MPlayer-users list : mplayer-users@lists.sourceforge.net
 
 *NEVER* send attached AVIs, MPEGs, or any big files to this list!!!
 Upload them to ftp://thot.banki.hu/incoming , and inform the list about
@@ -248,16 +248,13 @@ Homepage:  http://mplayer.sourceforge.net
 
 Mailing lists:
 ~~~~~~~~~~~~~~
-There are two public mailing lists on MPlayer. Subscribing can be achieved by
-writing to the following addresses, and specifying "subscribe" in the Subject,
-or message body.
+There are two public mailing lists on MPlayer. Subscribing can be achieved on
+the following addresses:
 
 - MPlayer-users
-       Write an e-mail to mplayer-request@alan.umcs.lublin.pl
+       http://lists.sourceforge.net/lists/listinfo/mplayer-users
 - MPlayer-announce
-       Write an e-mail to mplayer-announce-request@alan.umcs.lublin.pl
-
-Special thanks to Dariusz Pietrzak for the list hosting!
+       http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
