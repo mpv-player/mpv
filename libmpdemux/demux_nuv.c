@@ -43,7 +43,9 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	    return 0; /* EOF */
 
 #if 0
-	printf("NUV frame read: %c packetlength: %d orig: %d new: %d\n", rtjpeg_frameheader.frametype,rtjpeg_frameheader.packetlength, orig_pos, orig_pos+rtjpeg_frameheader.packetlength);
+	printf("NUV frame: frametype: %c, comptype: %c, packetlength: %d\n",
+	    rtjpeg_frameheader.frametype, rtjpeg_frameheader.comptype,
+	    rtjpeg_frameheader.packetlength);
 #endif
 
 	/* Skip Seekpoint, Text and Sync for now */
@@ -117,14 +119,14 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 
 	sh_video->disp_w = rtjpeg_fileheader.width;
 	sh_video->disp_h = rtjpeg_fileheader.height;
-	
-	sh_video->aspect = rtjpeg_fileheader.aspect;
+
+	sh_video->aspect = (float)rtjpeg_fileheader.aspect;
 
 	/* Get the FPS */
 	sh_video->fps = rtjpeg_fileheader.fps;
 	sh_video->frametime = 1 / sh_video->fps;
 
-#if 0
+#if 1
 	if (rtjpeg_fileheader.audioblocks != 0)
 	{
 	    sh_audio = new_sh_audio(demuxer, 0);
