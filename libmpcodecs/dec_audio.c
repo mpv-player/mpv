@@ -59,11 +59,7 @@ int init_audio_codec(sh_audio_t *sh_audio)
   // Set up some common usefull defaults. ad->preinit() can override these:
   
   sh_audio->samplesize=2;
-#ifdef WORDS_BIGENDIAN
-  sh_audio->sample_format=AFMT_S16_BE;
-#else
-  sh_audio->sample_format=AFMT_S16_LE;
-#endif
+  sh_audio->sample_format=AFMT_S16_NE;
   sh_audio->samplerate=0;
   sh_audio->channels=0;
   sh_audio->i_bps=0;  // input rate (bytes/sec)

@@ -30,18 +30,10 @@ char *audio_out_format_name(int format)
 	    return("MPEG (2) audio");
 	case AFMT_AC3:
 	    return("AC3");
-/*
-  the following two formats are not available with old linux kernel
-  headers (e.g. in 2.2.16)
-*/
-#ifdef AFMT_S32_LE
 	case AFMT_S32_LE:
 	    return("Signed 32-bit (Little-Endian)");
-#endif
-#ifdef AFMT_S32_BE
 	case AFMT_S32_BE:
 	    return("Signed 32-bit (Big-Endian)");
-#endif
 	case AFMT_FLOAT:
 	    return("Floating Point");
     }
@@ -58,18 +50,8 @@ int audio_out_format_bits(int format){
 	case AFMT_U16_BE: 
 	return 16;//16 bits
 
-/*
-  the following two formats are not available with old linux kernel
-  headers (e.g. in 2.2.16)
-*/
-#ifdef AFMT_S32_LE
 	case AFMT_S32_LE:
-	return 32;
-#endif
-#ifdef AFMT_S32_BE
 	case AFMT_S32_BE:
-	return 32;
-#endif
 	case AFMT_FLOAT:
 	return 32;
 	
