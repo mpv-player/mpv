@@ -107,14 +107,17 @@ static int lavc_param_prediction_method= FF_PRED_LEFT;
 static char *lavc_param_format="YV12";
 static int lavc_param_debug= 0;
 static int lavc_param_psnr= 0;
+static int lavc_param_me_pre_cmp= 0;
 static int lavc_param_me_cmp= 0;
 static int lavc_param_me_sub_cmp= 0;
 static int lavc_param_mb_cmp= 0;
+static int lavc_param_pre_dia_size= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
 static int lavc_param_last_pred= 0;
 static int lavc_param_pre_me= 1;
+static int lavc_param_me_subpel_quality= 8;
 
 #include "cfgparser.h"
 
@@ -178,9 +181,11 @@ struct config lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4643
         {"psnr", &lavc_param_psnr, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PSNR, NULL},
 #endif 
+        {"precmp", &lavc_param_me_pre_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"cmp", &lavc_param_me_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"subcmp", &lavc_param_me_sub_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"mbcmp", &lavc_param_mb_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"predia", &lavc_param_pre_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
         {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
 #if LIBAVCODEC_BUILD >= 4648
@@ -188,6 +193,7 @@ struct config lavcopts_conf[]={
 #endif
 	{"last_pred", &lavc_param_last_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+	{"subq", &lavc_param_me_subpel_quality, CONF_TYPE_INT, CONF_RANGE, 0, 8, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -266,6 +272,13 @@ static int config(struct vf_instance_s* vf,
 #endif
 #if LIBAVCODEC_BUILD >= 4650
     lavc_venc_context->pre_me= lavc_param_pre_me;
+#endif
+#if LIBAVCODEC_BUILD >= 4651
+    lavc_venc_context->me_pre_cmp= lavc_param_me_pre_cmp;
+    lavc_venc_context->pre_dia_size= lavc_param_pre_dia_size;
+#endif
+#if LIBAVCODEC_BUILD >= 4652
+    lavc_venc_context->me_subpel_quality= lavc_param_me_subpel_quality;
 #endif
     
     p= lavc_param_rc_override_string;

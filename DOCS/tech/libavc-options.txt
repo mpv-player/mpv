@@ -276,6 +276,7 @@ pred (for huffyuv)
 qpel	use quarter pel motion compensation
 	Tip: this seems only usefull for high bitrate encodings
 
+precmp	comparission function for motion estimation pre pass
 cmp	comparission function for full pel motion estimation
 subcmp	comparission function for sub pel motion estimation
 	0 SAD (sum of absolute differences) (default)
@@ -289,6 +290,7 @@ subcmp	comparission function for sub pel motion estimation
         Tip2: when using SATD for full pel search u should use a larger diamond
               something like dia=2 or dia=4
 
+predia	(-99 - 6) diamond type & size for motion estimation pre pass
 dia	(-99 - 6) diamond type & size for motion estimation
 	...
 	-3 shape adaptive diamond with size 3
@@ -318,6 +320,7 @@ trell	trellis quantization
 	lambda is a qp dependant constant
 	bits is the amount of bits needed to encode the block
 	error is simple the sum of squared errors of the quantization
+        Tip: this 
         
 last_pred	(0-99) amount of motion predictors from the previous frame
 	0 (default)
@@ -327,6 +330,10 @@ preme	(0-2) Motion estimation pre-pass
 	0 disabled
 	1 only after I frames (default)
 	2 allways
+        
+subq	(1-8) subpel refinement quality (for qpel)
+	8 (default)
+	Note: this has a significant effect on the speed
 
 lavdopts: (decoder options)
 ---------------------------
