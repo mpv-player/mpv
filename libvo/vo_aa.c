@@ -218,6 +218,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     struct stat sbuf;
     char * hidis = NULL;
     int i;
+    extern aa_linkedlist *aa_displayrecommended;
 
     switch(format) {
 	case IMGFMT_BGR24:
@@ -240,10 +241,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 
     /* initializing of aalib */
     
-    /* why removes get after getting it the gotten value out of the list? :( */
-    //hidis=aa_getfirst(&aa_displayrecommended); 
-    if (aa_displayrecommended!=NULL)
-      hidis=aa_displayrecommended->text;
+    hidis=aa_getfirst(&aa_displayrecommended); 
     if ( hidis==NULL ){
 	/* check /dev/vcsa<vt> */
 	/* check only, if no driver is explicit set */
@@ -261,7 +259,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     	    aa_recommendhidisplay("curses");
     	    aa_recommendhidisplay("X11");
 	}else fclose(fp);
-    }
+    } else aa_recommendhidisplay(hidis);
     c = aa_autoinit(&aa_defparams);
     aa_resizehandler(c, (void *)resize);
 
