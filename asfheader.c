@@ -100,6 +100,9 @@ int asf_check_header(demuxer_t *demuxer){
   return 1;
 }
 
+extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_video_header(BITMAPINFOHEADER *h);
+
 int read_asf_header(demuxer_t *demuxer){
   unsigned char buffer[512];
   
