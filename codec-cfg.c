@@ -143,6 +143,8 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"444P",  IMGFMT_444P},
 		{"422P",  IMGFMT_422P},
 		{"411P",  IMGFMT_411P},
+		{"Y800",  IMGFMT_Y800},
+		{"Y8",    IMGFMT_Y8},
 
 		{"YUY2",  IMGFMT_YUY2},
 		{"UYVY",  IMGFMT_UYVY},
