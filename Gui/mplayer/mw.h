@@ -536,14 +536,8 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsRight:     msg=evForward10sec; break;
    case wsLeft:      msg=evBackward10sec; break;
 
-   case wsGrayMul:   
-        msg=evIncVolume; 
-	vo_x11_putkey( Key );
-	break;
-   case wsGrayDiv:   
-        msg=evDecVolume; 
-	vo_x11_putkey( Key );
-	break;
+   case wsGrayMul:   msg=evIncVolume; break;
+   case wsGrayDiv:   msg=evDecVolume; break;
 
    case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
@@ -563,7 +557,6 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
-   default:          vo_x11_putkey( Key ); return;
   }
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {
@@ -571,4 +564,5 @@ void mplMainKeyHandle( int State,int Type,int Key )
    mplMainRender=1;
    wsPostRedisplay( &appMPlayer.mainWindow );
   }
+ vo_x11_putkey( Key );
 }
