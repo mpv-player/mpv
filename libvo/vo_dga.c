@@ -34,6 +34,9 @@
  *   Beware: unless you can use DGA2.0 this has to be your X Servers
  *           depth!!!
  * o Added double buffering :-))
+ * o included VidMode switching support for DGA1.0, written by  Michael Graffam
+ *    mgraffam@idsi.net
+ * 
  */
 
 
@@ -47,12 +50,20 @@
 #include "video_out_internal.h"
 #include "yuv2rgb.h"
 
+
 //#undef HAVE_DGA2
+//#undef HAVE_XF86VM
+
 
 LIBVO_EXTERN( dga )
 
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
+
+#ifdef HAVE_XF86VM
+#include <X11/extensions/xf86vmode.h>
+#endif
+
 
 #include "x11_common.h"
 
@@ -64,8 +75,14 @@ static vo_info_t vo_info =
         ""
 };
 
+#ifdef HAVE_XF86VM
+static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
+#endif
+
+
 static int       vo_dga_width;           // bytes per line in framebuffer
-static int       vo_dga_vp_width;        // visible pixels per line in framebuffer
+static int       vo_dga_vp_width;        // visible pixels per line in 
+                                         // framebuffer
 static int       vo_dga_vp_height;       // visible lines in framebuffer
 static int       vo_dga_is_running = 0; 
 static int       vo_dga_src_width;       // width of video in pixels
@@ -284,21 +301,36 @@ uninit(void)
 #ifdef HAVE_DGA2
   XDGADevice *dgadevice;
 #endif
-	
-  vo_dga_is_running = 0;
-  printf("vo_dga: in uninit\n");
-  XUngrabPointer (vo_dga_dpy, CurrentTime);
-  XUngrabKeyboard (vo_dga_dpy, CurrentTime);
+
+  if(vo_dga_is_running){	
+    vo_dga_is_running = 0;
+    printf("vo_dga: in uninit\n");
+    XUngrabPointer (vo_dga_dpy, CurrentTime);
+    XUngrabKeyboard (vo_dga_dpy, CurrentTime);
 #ifdef HAVE_DGA2
-  dgadevice = XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
-  if(dgadevice != NULL){
-     XFree(dgadevice);	
-  }
-  XDGACloseFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
+    dgadevice = XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
+    if(dgadevice != NULL){
+      XFree(dgadevice);	
+    }
+    XDGACloseFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
 #else
-  XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
+    XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
+    // first disable DirectVideo and then switch mode back!	
+#ifdef HAVE_XF86VM
+    if (vo_dga_vidmodes != NULL ){
+      int screen; screen=XDefaultScreen( vo_dga_dpy );
+      printf("vo_dga: VidModeExt: Switching back..\n");
+      // seems some graphics adaptors need this more than once ...
+      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
+      XFree(vo_dga_vidmodes);
+    }
 #endif
-  XCloseDisplay(vo_dga_dpy);
+#endif
+    XCloseDisplay(vo_dga_dpy);
+  }
 }
 
 
@@ -377,6 +409,12 @@ static uint32_t init( uint32_t width,  uint32_t height,
   XDGAMode   *modelines=NULL;
   XDGADevice *dgadevice;
 #else
+#ifdef HAVE_XF86VM
+  unsigned int vm_event, vm_error;
+  unsigned int vm_ver, vm_rev;
+  int i,j,have_vm=0;
+  int modecount,mX, mY, mVBI, dga_modenum;  
+#endif
   int bank, ram;
 #endif
 
@@ -394,8 +432,9 @@ static uint32_t init( uint32_t width,  uint32_t height,
   }else{
     vo_dga_planes = (format & 0xff);
 
-    // hack!!! here we should only get what we told in query_format()
-    // but mplayer is somewhat generous about 15/16bit depth ...
+    // hack!!! here we should only get what we told we can handle in 
+    // query_format() but mplayer is somewhat generous about 
+    // 15/16bit depth ...
     
     vo_dga_planes = vo_dga_planes == 15 ? 16 : vo_dga_planes;
   }
@@ -407,6 +446,16 @@ static uint32_t init( uint32_t width,  uint32_t height,
   } 
 
   vo_dga_bpp = (vo_dga_planes+7) >> 3;
+
+  // TODO: find out screen resolution of X-Server here and
+  //       provide them as default values (used only in case
+  //       DGA1.0 and no VidMode Ext or VidModeExt doesn't return
+  //       any screens to check if video is larger than current screen)
+
+  vo_dga_vp_width = 1280;
+  vo_dga_vp_height = 1024;
+
+
 
 // choose a suitable mode ...
   
@@ -461,14 +510,75 @@ static uint32_t init( uint32_t width,  uint32_t height,
   
 #else
 
-  printf("vo_dga: DGA 1.0 compatibility code: mode switching not supported (yet)!\n");
 
-  // assume these values are already known at this stage some day 
-  // so that the following check for video <-> screen size can be done ...
+#ifdef HAVE_XF86VM
+
+  printf("vo_dga: DGA 1.0 compatibility code: Using XF86VidMode for mode switching!\n");
+
+  if (XF86VidModeQueryExtension(vo_dga_dpy, &vm_event, &vm_error)) {
+    XF86VidModeQueryVersion(vo_dga_dpy, &vm_ver, &vm_rev);
+    printf("vo_dga: XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+    have_vm=1;
+  } else {
+    printf("vo_dga: XF86VidMode Extention not available.\n");
+  }
+
+#define GET_VREFRESH(dotclk, x, y)( (((dotclk)/(x))*1000)/(y) )
   
-  vo_dga_vp_width = 1280;
-  vo_dga_vp_height = 1024;
-  
+  if (have_vm) {
+    int screen;
+    screen=XDefaultScreen(vo_dga_dpy);
+    XF86VidModeGetAllModeLines(vo_dga_dpy,screen,&modecount,&vo_dga_vidmodes);
+
+    if(vo_dga_vidmodes != NULL ){
+   
+      mX=vo_dga_vidmodes[0]->hdisplay;
+      mY=vo_dga_vidmodes[0]->vdisplay;
+      
+      // TODO: calculate refreshrate from dotclock, hss, hstp, ...
+      mVBI = GET_VREFRESH(vo_dga_vidmodes[0]->dotclock, 
+	                  vo_dga_vidmodes[0]->htotal,
+			  vo_dga_vidmodes[0]->vtotal);                       
+      
+      j=0; 
+      for (i=1; i<modecount; i++){
+	printf("vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ %2d bpp ..",
+	       i,
+	       vo_dga_vidmodes[i]->hdisplay, 
+	       vo_dga_vidmodes[i]->vdisplay,
+               GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
+	                    vo_dga_vidmodes[i]->htotal,
+			    vo_dga_vidmodes[i]->vtotal),
+	       vo_dga_planes );
+	
+	if ( check_mode(d_width, d_height, 
+			vo_dga_vidmodes[i]->hdisplay, 
+			vo_dga_vidmodes[i]->vdisplay,
+			GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
+				     vo_dga_vidmodes[i]->htotal,
+				     vo_dga_vidmodes[i]->vtotal),
+			&mX, &mY, &mVBI )){
+	  j = i;
+	  printf(".ok!!\n");
+	}else{
+	  printf(".no\n");
+	}
+      }
+    
+      printf("vo_dga: Selected video mode %4d x %4d @ %3d Hz for image size %3d x %3d.\n", 
+	     mX, mY, mVBI, width, height);  
+    }else{
+      printf("vo_dga: XF86VidMode returned no screens - using current resolution.\n");
+    }
+    dga_modenum = j;
+    vo_dga_vp_width = mX;
+    vo_dga_vp_height = mY;
+  }
+
+
+#else
+  printf("vo_dga: Only have DGA 1.0 extension and no XF86VidMode :-(\n");
+#endif
 #endif
 
 
@@ -481,6 +591,14 @@ static uint32_t init( uint32_t width,  uint32_t height,
   {
      printf("vo_dga: Sorry, video larger than viewport is not yet supported!\n");
      // ugly, do something nicer in the future ...
+#ifndef HAVE_DGA2
+#ifdef HAVE_XF86VM
+     if(vo_dga_vidmodes){
+	XFree(vo_dga_vidmodes);
+	vo_dga_vidmodes = NULL;
+     }
+#endif
+#endif
      return 1;
   }
 		         
@@ -502,7 +620,15 @@ static uint32_t init( uint32_t width,  uint32_t height,
   XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0, XDGAFlipRetrace);
   
 #else
-
+  
+#ifdef HAVE_XF86VM
+    XF86VidModeLockModeSwitch(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),0);
+    // Two calls are needed to switch modes on my ATI Rage 128. Why?
+    // for riva128 one call is enough!
+    XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
+    XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
+#endif
+  
   XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
 		         &vo_dga_vp_width,
 			 &vo_dga_vp_height); 
@@ -548,11 +674,10 @@ static uint32_t init( uint32_t width,  uint32_t height,
   XGrabPointer (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);
-  
 // TODO: chekc if mem of graphics adaptor is large enough for dbf
 
-  
   // set up variables for double buffering ...
+  // note: set vo_dga_dbf_mem_offset to NULL to disable doublebuffering
   
   vo_dga_dbf_y_offset = y_off + vo_dga_src_height;
   vo_dga_dbf_mem_offset = vo_dga_width * vo_dga_bpp *  vo_dga_dbf_y_offset;
@@ -560,13 +685,18 @@ static uint32_t init( uint32_t width,  uint32_t height,
   
   if(format ==IMGFMT_YV12 )vo_dga_dbf_mem_offset = 0;
   // disable doublebuffering for YV12
+
+  printf("vo_dga: Doublebuffering %s.\n", vo_dga_dbf_mem_offset ? "enabled" : "disabled");
   
   // now clear screen
-
-  memset(vo_dga_base, 0, vo_dga_width *  
-	 (vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ? (vo_dga_src_height+y_off) : 0)) * 
-         vo_dga_bpp);  
-
+  {
+    int size = vo_dga_width *
+	(vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ?
+	(vo_dga_src_height+y_off) : 0)) *
+	vo_dga_bpp;
+   fprintf(stderr, "vo_dga: Before memset: %d. If mplayer exits here, you haven't enough memory for doublebuffering. I'll fix this in the future to check for amount of mem available... For now, select a lower resolution ...\n", size);   
+   memset(vo_dga_base, 0, size);  
+  }
   vo_dga_is_running = 1;
   return 0;
 }
