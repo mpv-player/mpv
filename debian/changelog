@@ -1,3 +1,9 @@
+mplayer (0.90pre2-1) unstable; urgency=low
+
+  * new release.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Sun, 21 Apr 2002 12:49:35 +0200
+
 mplayer (0.60-3) unstable; urgency=low
 
   * install xvidix correctly 
