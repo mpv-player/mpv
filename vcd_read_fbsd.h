@@ -4,12 +4,13 @@
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA
 
-typedef	struct {
-	unsigned char   unused;
-	unsigned char   minute;
-	unsigned char   second;
-	unsigned char   frame;
-} cdrom_msf;
+typedef struct {
+	uint8_t sync            [12];
+	uint8_t header          [4];
+	uint8_t subheader       [8];
+	uint8_t data            [2324];
+	uint8_t spare           [4];
+} cdsector_t;
 
 static struct ioc_read_toc_single_entry vcd_entry;
 
@@ -76,13 +77,14 @@ void vcd_read_toc(int fd){
     }
 }
 
-static char vcd_buf[VCD_SECTOR_SIZE];
+static cdsector_t vcd_buf;
 
 static int vcd_read(int fd,char *mem){
-      memcpy(vcd_buf,&vcd_entry.entry.addr.msf,sizeof(cdrom_msf));
-/*      if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; */ // EOF?
-/*      if(ioctl(fd,CDRIOCSETBLOCKSIZE,VCD_SECTOR_SIZE)==-1) return 0;
-      if (pread(fd,vcd_buf,VCD_SECTOR_SIZE,ntohl(vcd_entry.entry.addr.lba)*VCD_SECTOR_SIZE) != VCD_SECTOR_SIZE) return 0; */ // EOF?
+	off_t offset = 0;
+      if (pread(fd,&vcd_buf,VCD_SECTOR_SIZE,vcd_get_msf()*VCD_SECTOR_SIZE)
+	 != VCD_SECTOR_SIZE) return 0;  // EOF?
+      offset++;
+
       vcd_entry.entry.addr.msf.frame++;
       if (vcd_entry.entry.addr.msf.frame==75){
         vcd_entry.entry.addr.msf.frame=0;
@@ -92,8 +94,7 @@ static int vcd_read(int fd,char *mem){
           vcd_entry.entry.addr.msf.minute++;
         }
       }
-
-      memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
+      memcpy(mem,vcd_buf.data,VCD_SECTOR_DATA);
       return VCD_SECTOR_DATA;
 }
 

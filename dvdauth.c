@@ -19,7 +19,7 @@
 # include <dvd.h>
 # undef	 OLD_CSS_API
 #else
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <sys/dvdio.h>
 # elif defined(__linux__)
 #  include <linux/cdrom.h>

@@ -10,7 +10,6 @@
 extern int verbose; // defined in mplayer.c
 
 #ifdef __FreeBSD__
-#warning "VCD support under FreeBSD not implemented yet"
 #include "vcd_read_fbsd.c" 
 #else
 #include "vcd_read.c"

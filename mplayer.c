@@ -22,6 +22,9 @@
 
 #if	defined(sun)
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#elif defined(__FreeBSD__)
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#include <sys/cdrio.h>
 #else
 #define	DEFAULT_CDROM_DEVICE	"/dev/cdrom"
 #endif
@@ -491,6 +494,9 @@ float initial_pts_delay=0;
 #ifdef VCD_CACHE
 int vcd_cache_size=128;
 #endif
+#ifdef __FreeBSD__
+int bsize = VCD_SECTOR_SIZE;
+#endif
 char* title="MPlayer";
 
 // movie info:
@@ -630,6 +636,11 @@ if(vcd_track){
   if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",seek_to_byte,ret2);
 #ifdef VCD_CACHE
   vcd_cache_init(vcd_cache_size);
+#endif
+#ifdef __FreeBSD__
+  if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {
+        perror ( "Error in CDRIOCSETBLOCKSIZE");
+  }
 #endif
   stream=new_stream(f,STREAMTYPE_VCD);
   stream->start_pos=ret;

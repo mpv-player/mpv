@@ -142,13 +142,18 @@ params:
 	--disable-fastmemcpy    disable 3dnow/sse/mmx optimized memcpy()
 
         --with-x11libdir=DIR    X library files are in DIR
+        --with-x11incdir=DIR    X headerss are in DIR
+                                (only needed if autodetection fails)
         --with-win32libdir=DIR  windows codec files
         --with-csslibdir=DIR    directory contains libcss.so shared library
         --with-cssincdir=DIR    directory contains libcss header file (css.h)
                                 (--with-css* only needed, if libCSS autodetect fails)
         --with-sdl-config=PATH  specify location of sdl-config if it's not in your PATH
                                 (example: --with-sdl-config=/usr/sdl/bin/sdl-config)
-
+        --with-extralibdir=DIR  extra library files (png, SDL) are in DIR
+                                (only needed if autodetection fails)
+        --with-extraincdir=DIR extra headers (png, SDL) are in DIR
+                                (only needed if autodetection fails)
 	--size-x=SIZE		default screen width
 	--size-y=SIZE		default screen height
 EOF
@@ -159,6 +164,15 @@ fi
 
 echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
+
+# Determine our OS name and OS dependent libs
+
+system_name=`uname -s 2>&1`
+if [ "$system_name" = "FreeBSD" ]; then
+_archlibs="-rdynamic -pthread"
+else
+_archlibs="-ldl -lpthread"
+fi
 
 # LGB: temporary files
 
@@ -201,9 +215,27 @@ else
  fi
 fi
 
+_x11incdir=
+if [ -d /usr/include/X11 ]; then
+ _x11incdir=
+elif [ -d /usr/X11R6 ]; then
+ _x11incdir=-I/usr/X11R6/include
+elif [ -d /usr/X11 ]; then
+ _x11incdir=-I/usr/X11/include
+fi
+
+# Lots of stuff are installed under /usr/local
+
+_extralibdir=-L/usr/local/lib
+_extraincdir=-I/usr/local/include
+
 _skip_cc_check=no
 _skip_as_check=no
+if [ "$system_name" = "FreeBSD" ]; then
+_sdlconfig='sdl11-config'
+else
 _sdlconfig='sdl-config'
+fi
 
 for ac_option
 do
@@ -223,6 +255,9 @@ do
   --with-x11libdir=*)
         _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
         ;;
+  --with-x11incdir=*)
+        _x11incdir=-I`echo $ac_option | cut -d '=' -f 2`
+        ;;
   --enable-x11)
         _x11=yes
         ;;
@@ -231,6 +266,12 @@ do
         ;;
   --with-sdl-config=*)
         _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-extralibdir=*)
+        _extralibdir=-L`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-extraincdir=*)
+        _extraincdir=-I`echo $ac_option | cut -d '=' -f 2`
         ;;
  esac
 done
@@ -265,6 +306,10 @@ fi
 if [ -r /proc/cpuinfo ]; then
 	# linux with /proc mounted, extract cpu information from it
 	_cpuinfo="cat /proc/cpuinfo"
+elif [ -r /compat/linux/proc/cpuinfo ]; then
+        # FreeBSD with linux emulation /proc mounted, 
+	# extract cpu information from it
+        _cpuinfo="cat /compat/linux/proc/cpuinfo"
 else
 	# all other OS try to extract cpu information from a small helper
 	# program TOOLS/cpuinfo instead
@@ -523,10 +568,15 @@ fi
 #echo "DONE (${proc})."
 
 
-$_cc $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
+if [ "$system_name" = "FreeBSD" ]; then
+$_cc $TMPC -o $TMPO -pthread > /dev/null 2>&1 || \
+ { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
+else
 $_cc $TMPC -o $TMPO -lpthread > /dev/null 2>&1 || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
+fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
@@ -569,7 +619,7 @@ _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
 
 _png=no
-$_cc $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
 
 _ggi=no
 $_cc $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
@@ -598,14 +648,23 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 
+if [ "$system_name" = "FreeBSD" ]; then
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 && _gl=yes
+else
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 && _gl=yes
+fi
 
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
+if [ "$system_name" = "FreeBSD" ]; then
+$_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 || \
+ { _gl=no; echo "GL includes not found!";}
+else
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
+fi
 
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -614,7 +673,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
+$_cc -I/usr/X11R6/unclude $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -630,7 +689,7 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0;}
 EOF
 
 _dga2=no
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga2=yes
+$_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga2=yes
 
 fi
 
@@ -699,7 +758,7 @@ cat > $TMPC << EOF
 int main( void ){ return 0; }
 EOF
 
-$_cc -o $TMPO -lesd $TMPC 2> /dev/null || { _esd=no; }
+$_cc $_extraincdir $_extralibdir -o $TMPO -lesd $TMPC 2> /dev/null || { _esd=no; }
 
 # ---
 
@@ -920,6 +979,12 @@ do
 	;;
   --with-x11libdir=*)
 	;;
+  --with-x11incdir=*)
+        ;;
+  --with-extralibdir=*)
+        ;;
+  --with-extraincdir=*)
+        ;;
   --prefix=*)
 	_prefix=`echo $ac_option | cut -d '=' -f 2`
         ;;
@@ -1001,7 +1066,7 @@ fi
 
 # Checking kernel version...
 _k_verc_problem=no
-system_name=`uname -s 2>&1`
+if [ "$system_name" != "FreeBSD" ];then
 kernel_version=`uname -r 2>&1`
 echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
 case $kernel_version in
@@ -1017,6 +1082,7 @@ echo "$kernel_version, fail"
 echo "WARNING! You want to run mplayer on this system then be prepared for problems"
 else
 echo "$kernel_version, ok"
+fi
 fi
 
 if [ $_x11 = 'yes' ]; then
@@ -1067,7 +1133,16 @@ if [ $_streaming = yes ]; then
 fi
 
 if [ $_gl = yes ]; then
+   if [ "$system_name" = "FreeBSD" ]; then
+      # Under XFree86 4.x GL port is poorly designed
+      if [ -r /usr/X11R6/bin/XFree86 ]; then
+         _gllib='-lGL -pthread'
+      else
+         _gllib='-lGL'
+      fi
+   else
    _gllib='-lGL'
+   fi
 fi
 
 if [ $_css = yes ]; then
@@ -1219,9 +1294,9 @@ AR=ar
 CC=$_cc
 X11DIR=$_x11libdir
 # OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS=$CFLAGS
+OPTFLAGS=$CFLAGS $_x11incdir $_extraincdir
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_ggilib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_ggilib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_sdllib $_ggilib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
@@ -1235,7 +1310,7 @@ DS_LIB = $_dshowlib
 ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 prefix = $_prefix
-ARCH_LIBS = -ldl -lpthread
+ARCH_LIBS = $_archlibs
 STREAM_SRCS = $_streamingsrcs
 
 EOF
