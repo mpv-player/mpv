@@ -144,6 +144,8 @@ load skin from this directory (WITHOUT path name!). For example '-skin fittyfene
 .I NOTE:
 These options are valid only with DVD support compiled in. For details,
 see the documentation.
+.I NOTE:
+DVD playback sometimes requires deinterlacing: see '-pp 0x20000' or '-npp lb' options.
 .TP
 .B \-dvd\ titleid
 tell MPlayer which movies (marked with titleid) to play. For example
@@ -239,10 +241,10 @@ hardware acceleration. Possible settings are :
 scale image by <factor>
 .TP
 .B \-autoq\ <quality>
-dynamically changes the level of postprocess, depending on spare CPU
-time available. Uses the same value ranges as -pp . The number you
-specify will be the maximum level used. Usually you can use some big
-number. You don't have to (and don't) use together with -pp !
+dynamically changes the level of postprocess, depending on spare CPU time
+available. The number you specify will be the maximum level used. Usually you
+can use some big number. You may not use together with -pp but it's ok with
+-npp !
 .TP
 .B \-ffactor\ <number>
 resample alphamap of the font. Can be:
@@ -410,37 +412,22 @@ seek to byte position
 use different color depth than autodetect. Not all -vo drivers support
 it (fbdev, dga2, svga, vesa).
 .TP
-.B \-pp\ <quality>
-apply postprocess filter on decoded image.
+.B \-pp\ <quality> (see -npp option too !)
+apply postprocess filter on decoded image
+
 Postprocessing effect depends on the codec and works only for MPEG1/2,
 libavcodec codecs (ff*). It doesn't work for Win32/XAnim codecs.
-Quality is an hexadecimal number built as below:
 
-0x 00 TX hv YZ
-      ^^ ^^ ^^
-      ||  | ||
-      ||  | |\- postprocessing flag for luminance:
-      ||  | |   1/2: v/h deblock  4: dering
-      ||  | |   8: auto contrast/brightness correction
-      ||  | |
-      ||  | \-- postproc flags for color:
-      ||  |     1/2: v/h deblock  4: dering
-      ||  |
-      ||  \---- experimental deblocking filters:
-      ||        11: X's filter 22: x1 filter
-      ||
-      |\------- deinterlacing modes
-      |         1: linear interpolation  2: linear blend
-      |         4: cubic interpolation   8: median
-      |
-      \-------- temporal denoise filter: 1 enabled
-	
-.I HINT:
-0x2007f or 0x7f are known to give good results.
-.I NOTE:
-0x20000 (deinterlacing) may be required for DVD playback 
+This is the numerical mode to use postprocessing. The '-npp' option described
+below has the same effects but with letters. To have several filters at the
+same time, simply add the hexadecimal values.
+
+.I EXAMPLE:
+The following values are known to give good results:
+    \-pp 0x20000 <=> \-npp lb (deinterlacing - for DVD/MPEG2 playback e.g.)
+    \-pp 0x7f    <=> \-npp hb,vb,dr,al (smooth the images)
 .TP
-.B \-npp\ <options> (EXPERIMENTAL)
+.B \-npp\ <options>
 This option allows to give more litterate options for postprocessing, and is
 another way of calling it (not with -pp).
 
@@ -449,31 +436,42 @@ another way of calling it (not with -pp).
     '-pp 0x7f'    <=> '-npp hb,vb,dr,al'
 
 The options for -npp are a coma separated list of the keywords below:
+    help                 : display the options available and exit MPlayer
     de or default        : hdeblock:a,vdeblock:a,
-                           dering:a,autolevels,tmpnoise:a:150:200:400 (0xTODO)
+                           dering:a,autolevels,tmpnoise:a:150:200:400
     fa or fast           : x1hdeblock:a,x1vdeblock:a,
-                           dering:a,autolevels,tmpnoise:a:150:200:400 (0xTODO)
-    hb or hdeblock       : horizontal deblocking filter (0xTODO)
-    vb or vdeblock       : vertical deblocking filter (0xTODO)
-    hr or rkhdeblock     : rk horizontal deblock filter (0xTODO)
-    vr or rkvdeblock     : rk vertical deblock filter (0xTODO)
-    h1 or x1hdeblock     : x1 horizontal deblock filter (0xTODO)
-    v1 or x1vdeblock     : y1 horizontal deblock filter (0xTODO)
-    dr or dering         : TODO
-    al or autolevels     : brightness/contrast correction (0xTODO)
+                           dering:a,autolevels,tmpnoise:a:150:200:400
+    hb or hdeblock       : horizontal deblocking filter
+                           (luminance: 0x2 chrominance: 0x20)
+        + 1st threshold  : default is 1, higher means stronger deblocking
+        + 2nd threshold  : default is 40, lower means stronger deblocking
+    vb or vdeblock       : vertical deblocking filter
+                           (luminance: 0x1 chrominance: 0x10)
+        + 2 thresholds   : shared with hdeblock thresholds
+    hr or rkhdeblock     : Ramkishor & Karandikar's horizontal deblock
+                           filter (0x1000)
+    vr or rkvdeblock     : R&K's vertical deblock filter (0x100)
+    h1 or x1hdeblock     : x1 horizontal deblock filter (0x2000)
+    v1 or x1vdeblock     : y1 horizontal deblock filter (0x200)
+    dr or dering         : dering
+                           (luminance: 0x4 chrominance: 0x40)
+    al or autolevels     : auto brightness/contrast correction (0x8)
     lb or linblenddeint  : linear blend deinterlacing (0x20000)
     li or linipoldeint   : linear interpolation deinterlacing (0x10000)
     ci or cubicipoldeint : cubic interpolation deinterlacing (0x40000)
     md or mediandeint    : median deinterlacing (0x80000)
-    tn or tmpnoise       : temporal denoise filter (0x100000)
+    tn or tmpnoise       : temporal noise reducer (0x100000)
+        + 3 thresholds   : t1 <= t2 <= t3 (larger means stronger filtering)
+    fq or forcequant     : force quantizer [for low-quality movies
+                           reencoded at high bitrates] (0x200000)
 
 These keywords accept a '-' prefix to disable the option.
 
 .I EXAMPLE:
     '-npp de,-al' means 'default filters without brightness/contrast correction'
 
-A postfix letter, separated by ':' may be appended to the option to indicate
-its scope:
+A ':' followed by a letter may be appended to the option to indicate its
+scope:
     a : automatically switches the filter off if the cpu is too slow
     c : do chrominance filtering too
     y : do not do chrominance filtering (that is only luminance filtering)
@@ -485,11 +483,6 @@ Each filter defaults to 'c' (chrominance).
     '-npp hb:y,vb:a -autoq 6' means 'deblock horizontal only luminance, and
     automatically switch vertical deblocking on/off depending on available 
     cpu time'
-
-.I HINT:
-    the following values are known to give good results:
-    -npp default -autoq 6 and -npp tn:150:200:400 for the denoiser
-
 .TP
 .B \-slave
 This option switches on slave mode. This is intended for use
