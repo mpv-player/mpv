@@ -749,9 +749,11 @@ if(trak->samplesize){
 	x*=(trak->stdata[38]<<8)+trak->stdata[39];  // bytes/frame
     } else {
 	// works for ima4:   -- we should find this info in mov headers!
-	x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix  ! HACK !
-	// x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
-	
+	if(ds->ss_div!=1 || ds->ss_mul!=1){
+	    x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix  ! HACK !
+	} else {
+	    x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
+	}
     }
     ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
     if(ds==demuxer->audio) mp_msg(MSGT_DEMUX, MSGL_DBG2, "sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
