@@ -36,6 +36,7 @@ int dvd_last_chapter=0;
 int dvd_angle=1;
 char* dvd_device=NULL;
 char* cdrom_device=NULL;
+char* cue_file_name=NULL;
 int dvd_nav=0;                  /* use libdvdnav? */
 
 #ifdef USE_DVDNAV
@@ -66,6 +67,10 @@ char * dvd_audio_stream_channels[6] =
 #endif
 
 extern int vcd_get_track_end(int fd,int track);
+extern int cue_read_cue (const char *);
+extern int cue_vcd_seek_to_track (int track);
+extern int cue_vcd_get_track_end (int track);
+extern void cue_vcd_read_toc ();
 
 #ifdef USE_TV
 #include "tv.h"
@@ -139,7 +144,7 @@ if(filename && strncmp("cddb://",filename,7) == 0)
 
 //============ Open VideoCD track ==============
 #ifdef HAVE_VCD
-if(vcd_track){
+if(vcd_track && !cue_file_name){
   int ret,ret2;
   if(!cdrom_device) cdrom_device=strdup(DEFAULT_CDROM_DEVICE);
   f=open(cdrom_device,O_RDONLY);
@@ -161,6 +166,26 @@ if(vcd_track){
   return stream;
 }
 #endif
+
+
+// for opening of vcds in bincue files
+if(vcd_track && cue_file_name){
+  int ret,ret2;
+  if ((f = cue_read_cue (cue_file_name)) == -1) return NULL;
+
+  cue_vcd_read_toc();
+  ret2=cue_vcd_get_track_end(vcd_track);
+  ret=cue_vcd_seek_to_track(vcd_track);
+  if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");return NULL;}
+  mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
+
+  stream=new_stream(f,STREAMTYPE_VCDBINCUE);
+  stream->start_pos=ret;
+  stream->end_pos=ret2;
+  printf ("start:%d end:%d\n", ret, ret2);
+  return stream;
+}
+
 
 //============ Open DVD title ==============
 #ifdef USE_DVDNAV

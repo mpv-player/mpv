@@ -32,6 +32,8 @@ extern int verbose; // defined in mplayer.c
 
 #endif
 
+#include "vcd_read_bincue.h"
+
 #ifdef USE_DVDREAD
 int dvd_read_sector(dvd_priv_t *d,unsigned char* data);
 void dvd_seek(dvd_priv_t *d,int pos);
@@ -80,6 +82,8 @@ int stream_fill_buffer(stream_t *s){
   case STREAMTYPE_VCD:
     len=vcd_read(s->fd,s->buffer);break;
 #endif
+  case STREAMTYPE_VCDBINCUE:
+    len=cue_vcd_read(s->buffer);break;
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
     dvdnav_stream_read((dvdnav_priv_t*)s->priv,s->buffer,&len);
@@ -128,6 +132,8 @@ off_t newpos=0;
 #endif
   case STREAMTYPE_VCD:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
+  case STREAMTYPE_VCDBINCUE:
+    newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_DVD:
     newpos=pos/2048; newpos*=2048; break;
 #ifdef HAVE_CDDA
@@ -166,6 +172,10 @@ if(newpos==0 || newpos!=s->pos){
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
     break;
 #endif
+  case STREAMTYPE_VCDBINCUE:
+    s->pos=newpos; // real seek
+    cue_set_msf(s->pos/VCD_SECTOR_DATA);
+    break;
 #ifdef HAVE_CDDA
   case STREAMTYPE_CDDA: {
     s->pos=newpos;
