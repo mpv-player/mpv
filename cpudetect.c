@@ -73,7 +73,7 @@ do_cpuid(unsigned int ax, unsigned int *p)
 	("movl %%ebx, %%esi\n\t"
          "cpuid\n\t"
          "xchgl %%ebx, %%esi"
-         : "=a" (p[0]), "=S" (p[1]),
+         : "=a" (p[0]), "=S" (p[1]), 
            "=c" (p[2]), "=d" (p[3])
          : "0" (ax));
 #endif
@@ -101,7 +101,7 @@ void GetCpuCaps( CpuCaps *caps)
 		do_cpuid(0x00000001, regs2);
 
 		tmpstr=GetCpuFriendlyName(regs, regs2);
-		printf("CPU: %s\n",tmpstr);
+		printf("CPU: %s ",tmpstr);
 		free(tmpstr);
 
 		caps->cpuType=(regs2[0] >> 8)&0xf;
@@ -109,6 +109,9 @@ void GetCpuCaps( CpuCaps *caps)
 		    // use extended family (P4, IA64)
 		    caps->cpuType=8+((regs2[0]>>20)&255);
 		}
+		caps->cpuStepping=regs2[0] & 0xf;
+		printf("(Type: %d, Stepping: %d)\n",
+		    caps->cpuType, caps->cpuStepping);
 
 		// general feature flags:
 		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
@@ -347,6 +350,7 @@ static void check_os_katmai_support( void )
 void GetCpuCaps( CpuCaps *caps)
 {
 	caps->cpuType=0;
+	caps->cpuStepping=0;
 	caps->hasMMX=0;
 	caps->hasMMX2=0;
 	caps->has3DNow=0;

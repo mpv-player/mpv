@@ -8,6 +8,7 @@
 
 typedef struct cpucaps_s {
 	int cpuType;
+	int cpuStepping;
 	int hasMMX;
 	int hasMMX2;
 	int has3DNow;
