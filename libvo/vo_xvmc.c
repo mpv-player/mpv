@@ -598,20 +598,19 @@ static uint32_t vm_height;
                printf("    Subpicture id 0x%08X\n",xvfmv[s].id);
          }
 
-         if(verbose > 0)
          for(s=0;s<num_subpic;s++){
-            for(k=0;osd_render[k].draw_func_ptr!=NULL;k++)
+            for(k=0;osd_render[k].draw_func_ptr!=NULL;k++){
+               if(xvfmv[s].id == osd_render[k].id)
+               {  
+                  init_osd_fnc  = osd_render[k].init_func_ptr;
+                  draw_osd_fnc  = osd_render[k].draw_func_ptr;
+                  clear_osd_fnc = osd_render[k].clear_func_ptr;
 
-            if(xvfmv[s].id == osd_render[k].id)
-            {  
-               init_osd_fnc  = osd_render[k].init_func_ptr;
-               draw_osd_fnc  = osd_render[k].draw_func_ptr;
-               clear_osd_fnc = osd_render[k].clear_func_ptr;
-
-               subpicture_mode = BLEND_SUBPICTURE;
-               subpicture_info = xvfmv[s];
-               print_xvimage_format_values(&subpicture_info);
-               goto found_subpic;
+                  subpicture_mode = BLEND_SUBPICTURE;
+                  subpicture_info = xvfmv[s];
+                  print_xvimage_format_values(&subpicture_info);
+                  goto found_subpic;
+               }
             }
          }
 found_subpic:
