@@ -479,7 +479,7 @@ Tomas Hurka <tom@hukatronic.cz>
     * Darwin DVD support (mpdvdkit2)
     * various fixes
 
-Moritz Bunkus <moritz@bunkus.org>
+Moritz "mosu" Bunkus <moritz@bunkus.org>
     * various OGM hacks/fixes
     * author of ogm-tools
     * Matroska demuxer
