@@ -4037,8 +4037,10 @@ fi
 if test "$_faad" = yes ; then
   _def_faad='#define HAVE_FAAD 1'
   _ld_faad='-lfaad'
+  _codecmodules="faad2 $_codecmodules"
 else
   _def_faad='#undef HAVE_FAAD'
+  _nocodecmodules="faad2 $_nocodecmodules"
 fi
 
 if test "$_faad" = yes; then
