@@ -589,7 +589,7 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 }
 
 void *
-vobsub_open(const char *const name)
+vobsub_open(const char *const name, const int force)
 {
     vobsub_t *vob = malloc(sizeof(vobsub_t));
     if (vob) {
@@ -605,9 +605,10 @@ vobsub_open(const char *const name)
 	    strcpy(buf, name);
 	    strcat(buf, ".ifo");
 	    fd = fopen(buf, "rb");
-	    if (fd == NULL)
-		perror("VobSub: Can't open IFO file");
-	    else {
+	    if (fd == NULL) {
+		if(force)
+                    perror("VobSub: Can't open IFO file");
+	    } else {
 		// parse IFO header
 		unsigned char block[0x800];
 		const char *const ifo_magic = "DVDVIDEO-VTS";
@@ -660,9 +661,12 @@ vobsub_open(const char *const name)
 	    strcpy(buf, name);
 	    strcat(buf, ".idx");
 	    fd = fopen(buf, "rb");
-	    if (fd == NULL)
-		perror("VobSub: Can't open IDX file");
-	    else {
+	    if (fd == NULL) {
+		if(force)
+                    perror("VobSub: Can't open IDX file");
+                else
+                    return NULL;
+	    } else {
 		while (vobsub_parse_one_line(vob, fd) >= 0)
 		    /* NOOP */ ;
 		fclose(fd);
@@ -672,9 +676,10 @@ vobsub_open(const char *const name)
 	    strcpy(buf, name);
 	    strcat(buf, ".sub");
 	    mpg = mpeg_open(buf);
-	    if (mpg == NULL)
-		perror("VobSub: Can't open SUB file");
-	    else {
+	    if (mpg == NULL) {
+                if(force)
+		    perror("VobSub: Can't open SUB file");
+	    } else {
 		long last_pts_diff = 0;
 		while (!mpeg_eof(mpg)) {
 		    off_t pos = mpeg_tell(mpg);

@@ -766,7 +766,7 @@ play_dvd:
 
     current_module="vobsub";
     if (vobsub_name){
-      vo_vobsub=vobsub_open(vobsub_name);
+      vo_vobsub=vobsub_open(vobsub_name,1);
       if(vo_vobsub==NULL)
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
     }else if(sub_auto && filename && (strlen(filename)>=5)){
@@ -774,7 +774,7 @@ play_dvd:
       char *buf = malloc((strlen(filename)-3) * sizeof(char));
       memset(buf,0,strlen(filename)-3); // make sure string is terminated
       strncpy(buf, filename, strlen(filename)-4); 
-      vo_vobsub=vobsub_open(buf);
+      vo_vobsub=vobsub_open(buf,0);
       free(buf);
     }
     if(vo_vobsub)
