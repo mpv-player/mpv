@@ -1,0 +1,11 @@
+libdha - Library of Direct Hardware Access.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This library was designed for direct hardware access under different
+OS and architectures. It's not linux specific only (like harddrake
+and other).
+
+This library is based on gfxdump utility from GATOS project.
+Full list of supported OS'es see in libdha.h
+
+Note: This library requires ROOT privileges or SUID'ed executable
+file (same as XServer).
