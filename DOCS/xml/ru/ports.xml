@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.19 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -291,14 +291,16 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">файлы заголовков
   DirectX 7</ulink>, чтобы скомпилировать видео драйвер DirectX.</para>
 
-<para>Win32 кодеки, QuickTime DLL'и и Real Win32 кодеки (не Real Linux кодеки)
-  также работают. Поместите их куда-нибудь в пути или укажите <filename>
+<para>Вы можете использовать Win32 кодеки и Real Win32 кодеки (не Real Linux кодеки),
+  если хотите. Поместите их куда-нибудь в пути или укажите <filename>
   configure</filename> опцию <option>--with-codecsdir=c:/path/to/your/codecs
   </option> (или <option>--with-codecsdir=/path/to/your/codecs</option>, но
   только под Cygwin). У нас были сообщения о том, что Real DLL'и должны быть
   доступны пользователю, запускающему MPlayer, для записи, но только на
   некоторых системах. Если у Вас проблемы с ними, попробуйте сделать их
-  записываемыми.</para>
+  записываемыми. QuickTime DLL'и также работают, но Вы должны поместить их
+  в системный Windows каталог (<filename class="directory">C:\Windows\system\</filename>
+  или что-то в этом духе).</para>
 
 <para>Консоль Cygwin/MinGW слегка медленная. Перенаправление вывода или
   использование опции <option>-quiet</option> улучшает производительность на
@@ -319,10 +321,10 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <sect2 id="cygwin">
 <title>Cygwin</title>
 
-<para>Cygwin версий до 1.5.0 не включал <filename>inttypes.h</filename>. Вы
-  должны скопировать или создать символическую ссылку на
-  <filename>etc/cygwin_inttypes.h</filename> из каталога с исходным кодом
-  MPlayer'а в <filename>/usr/include/inttypes.h</filename>, чтобы MPlayer
+<para>Cygwin версий до 1.5.0 не включал <filename>inttypes.h</filename>.
+  Поместите этот
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  в <filename class="directory">/usr/include/</filename>, чтобы MPlayer
   мог скомпилироваться.</para>
 
 <para>Файлы заголовков DirectX надо распаковать в <filename class="directory">
