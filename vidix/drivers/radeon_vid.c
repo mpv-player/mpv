@@ -954,20 +954,23 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	  config->offset.u = config->offset.v;
 	  config->offset.v = tmp;
 	}
+	besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
+	besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs+config->frame_size;
+	besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs+config->frame_size;
     }
     else
     {
       besr.vid_buf0_base_adrs = radeon_overlay_off;
       config->offset.y = config->offset.u = config->offset.v = ((left & ~7) << 1)&VIF_BUF0_BASE_ADRS_MASK;
       besr.vid_buf0_base_adrs += config->offset.y;
-      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
       besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf3_base_adrs = besr.vif_buf0_base_adrs+config->frame_size;
+      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
     }
     config->offsets[0] = 0;
     config->offsets[1] = config->frame_size;
-    besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-    besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs+config->frame_size;
-    besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs+config->frame_size;
 
     tmp = (left & 0x0003ffff) + 0x00028000 + (h_inc << 3);
     besr.p1_h_accum_init = ((tmp <<  4) & 0x000f8000) |
