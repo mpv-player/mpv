@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="users-vs-dev">
+<title>Lloriqueos de desarrolladores</title>
+
+<sect1 id="gcc-296">
+<title>GCC 2.96</title>
+
+<formalpara>
+<title>El escenario:</title>
+<para>
+La serie <emphasis role="bold">2.95</emphasis> de GCC es una liberación oficial
+de GNU y la verseión 2.95.3 de GCC es la serie más libre de errores que existe.
+Nunca se han tenido problemas de compilación derivados de gcc-2.95.3. Comenzando
+con Red Hat Linux 7.0, <emphasis role="bold">Red Hat</emphasis> fue incluida una
+versión de CVS fuertemente parcheada de GCC en sus distribuciones y fue denominada
+<emphasis role="bold">2.96</emphasis>. Red Hat incluyó esta versión en su
+distribución porque GCC 3.0 no estaba finalizada en ese momento, y necesitaban
+un compilador que funcionase bien en todas las plataformas soportadas, incluyendo
+IA64 y s390. El distribuidor de Linux <emphasis role="bold">Mandrake</emphasis>
+también siguió el ejemplo de Red Hat y comenzó a llevar GCC 2.96 en su serie
+Linux-Mandrake 8.0.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Los hechos:</title>
+<para>
+El equipo GCC renuncian cualquier vinculación con GCC 2.96 y publican una
+<ulink url="http://gcc.gnu.org/gcc-2.96.html">respuesta oficial</ulink>
+sobre GCC 2.96. Algunos desarrolladores alrededor del mundo comienzan a tener
+problemas con GCC 2.96, y empiezan a recomendar otros compiladores. Ejemplos son
+<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
+y
+<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+Otros enlaces interesantes son
+<ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
+noticias instantáneas acerca del kernel de Linux 2.4.17</ulink>
+y
+<ulink url="http://www.voy.com/3516/572.html">Voy Forum</ulink>.
+<application>MPlayer</application> también sufre problemas intermitentes
+que son resueltos cambiando entre diferentes versiones de GCC. Varios
+proyectos empiezan a implementar variaciones de algunos aspectos de 2.96,
+pero se niegan a arreglar problemas de otras personas, especialmente porque
+algunos arreglos pueden implicar pérdidas de rendimiento.
+</para>
+</formalpara>
+
+<para>
+Puede leer el otro lado de la historia
+<ulink url="http://www.bero.org/gcc296.html">en este sitio</ulink>.
+GCC 2.96 no permite caracteres <literal>|</literal> (tuberías) en comentarios
+en ensamblador porque esto lo hace Intel igual que la sintaxis de AT&amp;T y
+el caracter <literal>|</literal> es un símbolo en la variante Intel. El problema
+es que <emphasys>silenciosamente</emphasis> ignora el bloque de ensamblador
+por completo. Esto es supuestamente corregible ahora, GCC imprime un mensaje
+de advertencia en lugar de saltarse el bloque.
+</para>
+
+<formalpara>
+<title>El presente:</title>
+<para>
+Red Hat dice que GCC 2.96-85 y superior están arreglados. La situación ha sido
+mejorada, pero se siguen viendo informes de problemas en nuestras listas de correo
+que desaparecen con un compilador diferente. En cualquier caso esto no tiene
+más importancia. Alegremente, un maduro GCC 3.x ha resuelto bien los problemas. Si
+desea compilar con 2.96 puede indicar el parámetro
+<option>--disable-gcc-checking</option> a <filename>configure</filename>. Recuerde que
+que es elección suya y <emphasis role="bold">no informe de problemas</emphasis>. Si lo
+hace será expulsado de nuestras listas de correo porque ha sido avisao de manera
+más que suficiente de las guerras con GCC 2.96. Por favor, déjenos contarle el resto.
+</para>
+</formalpara>
+
+<para>
+Si tiene problemas con GCC 2.96, puede obtener los paquetes 2.96-85 del
+<ulink url="ftp://updates.redhat.com">servidor ftp</ulink> de Red Hat, o
+vaya directamente a por los <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">
+paquetes gcc-3.2-10 (no oficiales, pero funcionan bien) y puede instalarlos junto
+con gcc-2.96 si ya lo tiene. MPlayer detectará y usará 3.2 en lugar de 2.96. Si no desea
+o no puede usar los paquetes binarios, aquí tiene cómo compilar GCC 3 desde el código
+fuente:
+</para>
+
+<procedure>
+<step><para>
+  Vaya a 
+  <ulink url="http://gcc.gnu.org/mirrors.html">la web de sitios espejo de GCC</ulink>
+  y descargue <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename>
+  donde <replaceable>XXX</replaceable> es el número de versión. Esto incluye el compilador
+  C completo y es suficiente para <application>MPlayer</application>. Si también quiere
+  C++, Java, o algunas de las otras características avanzadas de GCC,
+  <filename>gcc-<replaceable>XXX</replaceable>.tar.gz</filename> suplirá mejor sus necesidades.
+  </para></step>
+<step><para>
+  Extraiga el fichero con
+  <screen>tar -xvzf gcc-core-<replaceable>XXX</replaceable>.tar.gz</screen>
+  </para></step>
+<step><para>
+  GCC no es construido dentro del directorio del código fuente como la mayoría
+  de los programas, sino que necesita un directorio fuera donde compilarse. Por eso
+  necesita crear ese directorio via
+  <screen>mkdir gcc-build</screen>
+  </para></step>
+<step><para>
+  Entonces puede proceder a configurar gcc en el directorio build, pero puede
+  que necesite configurar desde el directorio de fuentes:
+  <screen>
+cd gcc-build
+../gcc-3.<replaceable>XXX</replaceable>/configure</screen>
+  </para></step>
+<step><para>
+  Compile GCC usando esta orden en el directorio build:
+  <screen>make bootstrap</screen>
+  </para></step>
+<step><para>
+  Ahora puede instalar GCC (como root) escribiendo
+  <screen>make install</screen>
+  </para></step>
+</procedure>
+</sect1>
+
+
+<sect1 id="mplayer-binary">
+<title>Distribución binaria</title>
+
+<para>
+<application>MPlayer</application> previamente contenía código fuente del proyecto
+OpenDivX, que no permitía su distribución binaria. Este código ha sido eliminado
+en la versión 0.90-pre1 y el archivo que queda <filename>divx_vbr.c</filename>
+que ha derivado del código de OpenDivX ha sido puesto bajo licencia GPL por sus
+autores como la versión 0.90pre9. Ahora es bienvenido a crear paquetes binarios
+como usted quiera ajustarlo.
+</para>
+
+<para>
+Otro impedimento para la distribución binaria es por optimizaciones en tiempo
+de compilación para la arquitectura de la CPU. <application>MPlayer</application>
+ahora soporta detección de CPU en tiempo de ejecución (especificando la
+opción <option>--enable-runtime-cpudetection</option> durante la compilación).
+Está desactivado por defecto porque implica un pequeño sacrificio de velocidad,
+ahora es posible crear binarios que corran en diferentes miembros de la familia
+de CPU's Intel.
+</para>
+</sect1>
+
+
+<sect1 id="nvidia-opinions">
+<title>nVidia</title>
+
+<para>
+Nos desagrada el hecho de que <ulink url="http://www.nvidia.com">nVidia</ulink>
+solo provea controladores binarios (para usar con XFree86), que tienen muchos fallos.
+Tenemos muchos informes en
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+acerca de problemas relacionados con estos controladores de código-cerrado
+y de su pobre calidad, inestabilidad y pobre soporte a usuarios y expertos.
+Aquí hay un ejemplo en el
+<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">Foro de Linux de nVidia</ulink>.
+Muchos de estos problemas/informes aparecen repetidamente.
+Hemos contactado con nVideia, y nos dicen que esos errores no existen, que la
+inestabilidad es causada por circuitos AGP malos, y que ellos no reciben informes
+de fallos en sus controladores (como la línea púrpura). De modo que si tiene un problema
+con su tarjeta nVidia, actualice su controlador nVidia y/o compre
+una placa base nueva o pregunte a nVidia por unos controladores de código-abierto.
+En cualquier caso, si está usando los controladores binarios de nVidia y experimenta
+problemas relacionados con eso, por favor sepa que por nuestra parte recibirá muy poca ayuda
+porque tenemos muy poca información a respecto.
+</para>
+</sect1>
+
+
+<sect1 id="joe-barr">
+<title>Joe Barr</title>
+
+<para>
+Joe Barr se ha hecho infame por escribir un
+<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
+artículo sobre <application>MPlayer</application></ulink> muy poco favorable.
+Él encuentra <application>MPlayer</application> dificil de instalar, pero tampoco 
+le tiene afecto a
+<ulink url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">
+leer documentación</ulink>.
+También ha llegado a la conclusión de que los desarrolladores son poco amistosos
+y la documentación es incompleta e insultante.
+Juzgue usted mismo.
+Él hace mención de <application>MPlayer</application> de manera negativa en su
+<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 predicciones sobre Linux para el 2002</ulink>.
+En un nuevo artículo
+<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</ulink>
+sigue aumentando la controversia. Irónicamente al final del artículo
+cita su intercambio con Günter Bartsch, el autor original de <application>xine</application>,
+que resume perfectamente la situación por completo:
+
+<blockquote><para>
+Sin embargo, también ha dicho que se "sorprendió" por mi columna acerca de
+<application>MPlayer</application> y piensa que es injusto, recordandome que esto
+es un proyecto de software libre. "Si no te gusta hazlo tú," dice Bartsch, "eres libre de no
+usarlo".
+</para></blockquote>
+</para>
+
+<para>
+Él no contesta a nuestros correos. Su editor no responde a nuestros correos.
+Aquí algunas citas de personas diferentes acerca de Joe Barr, para que pueda usted
+formarse su propia opinión:
+</para>
+
+<para>
+Marc Rassbach tiene 
+<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">algo que decir</ulink>
+sobre este hombre.
+
+<blockquote><para>
+Usted puede recordar el LinuxWorld 2000, donde él aclamaba a Linux T diciendo
+que 'FreeBSD es solo un puñado de programadores'. Linus no dice NADA de esto.
+Cuando a Joe se le dijo que había dicho esto, su reacción fue llamar a los
+sustentadores de BSD idiotas y burros.
+</para></blockquote>
+</para>
+
+<para>
+Una <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">cita</ulink>
+de Robert Munro en la lista de correo
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+
+<blockquote>
+<para>
+Él es interesante, pero no es bueno evitarlo, um... controversia. Joe Barr
+se usa regularmente en el foro Will Zachmann's Canopus en Compuserve, desde
+hace años. Es un abogado de OS/2 (yo soy un fan de OS/2 también).
+</para>
+
+<para>
+Él lo usa para estar-por-encima, peleándose con la gente, y sospecho que ha
+pasado duros momentos, por ello. Ha madurado algo, a juzgar por sus columnas recientes.
+Moderadamente tiene un sutil humor que no tenía en días anteriores, de todos modos.
+</para>
+</blockquote>
+</para>
+
+</sect1>
+</appendix>
