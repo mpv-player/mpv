@@ -1,0 +1,24 @@
+
+#######################################
+## Reading the MPlayer Documentation ##
+#######################################
+
+Thanks for reading MPlayer documentation !!!
+
+
+1. For "release" version users (i.e. non-CVS):
+
+   a, Enter the HTML/ directory, and there you'll find the documentation,
+      each language in its of subdirectory.
+
+   b, If the HTML/ directory doesn't contain your language, try the
+      subdirectories in this very same folder.
+
+
+2. For "development" version users (i.e. CVS or CVS snapshots):
+
+   a, Enter the xml/ directory, and read the README file there.
+      Find the created documentation in the HTML/ directory.
+
+   b, If the xml/ directory doesn't contain your language, try the
+      subdirectories in this very same folder.
