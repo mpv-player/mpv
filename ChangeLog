@@ -1,18 +1,19 @@
 mplayer (1.0)
 
-  pre3:
+  pre3: "FilterCounter"
 
     DOCS:
     * Support for building incomplete XML documentation
+    * Support for building all-in-one HTML docs
     * HTML documentation obsoleted
-    * English and French HTML documentation removed
+    * English, Polish and French HTML documentation removed
     * Spanish documentation translation finished
 
     Codecs and demuxers:
     * improved FLAC configure detection
     * better support for (buggy) MEncoder created streams in libmpeg2
     * better AC3 detection in Matroska
-    * fixed compilation of matroska on mingw32/cygwin
+    * fixed compilation of matroska on MinGW32/Cygwin
     * support for (uncompressed) VobSubs inside Matroska
     * support for MP2 inside Matroska
     * MPEG-TS demuxer updates
@@ -24,17 +25,18 @@ mplayer (1.0)
     * some fixes in the delogo filter 
     * optimized eq2 filter
     * weighted gamma support in the eq2 filter
+    * new filters: hue, spp, fil
     
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
-    * fixed an old bug fixed in MPlayer's support code
-    * support wider range of VOLs in h263
+    * fixed an old bug in MPlayer's support code
+    * support wider range of VOLs in H263
     * direct rendering support in MJPEG
     * massive MLib optimization support
     * more VQA files supported
     * Theora support
     * Sunplus JPEG (SP5X) support
-    * h263 GOB fixes
+    * H263 GOB fixes
     * massive cleanups
     * reduced memory footprint (!)
     * fixed decoding if aspect ratio changes
@@ -55,7 +57,7 @@ mplayer (1.0)
     * VIDIX colorkeying support in fbdev, svga and vesa
     * obsoleted option: -fb
     * new SiS 650/651/740/etc VIDIX driver
-    * safer vo_directx directrendering
+    * safer vo_directx direct rendering
     * massive nvidia_vid updates
     * gl2 updates
     * ggi now supports non-directbuffer rendering and slices
@@ -70,10 +72,10 @@ mplayer (1.0)
     
     Others:
     * sub autoloading under Windows
-    * Darwin xmms libs supported
+    * Darwin XMMS libs supported
     * support newer Darwin versions in Altivec detection code
-    * fixed aspecting and geometry
-    * fixed compilation when libavcodec is missing (altought it's a bad choice)
+    * fixed aspect and geometry
+    * fixed compilation when libavcodec is missing (although it's a bad idea)
     * support for newer Apple GCC's
 
 
