@@ -30,7 +30,7 @@
 #include "libvo/img_format.h"
 #include "xacodec.h"
 
-#ifdef HAVE_LIBDL
+#if defined(HAVE_LIBDL) || defined(__FreeBSD__)
 
 #if 0 
 typedef char xaBYTE;
