@@ -33,6 +33,18 @@ care. However, they are organized in a particular order for the benefit of
 human readers. For example, all of the open source decoders that MPlayer
 implements natively are grouped in one section.
 
+Release Number
+--------------
+Your codecs.conf now requires a release number to avoid codec release
+incompatibilities. The format is simple: (YYYYMMDD)
+
+release 20020520
+
+Whenever changes are made to the codecs that *require* an updated
+codecs.conf, then MPlayer will no longer accept outdated versions.
+It is not recommended to change this line unless you know exactly
+what you are doing.
+
 Video Codecs
 ------------
 Let's jump right in with an example. Here is an example video codec block:

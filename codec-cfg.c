@@ -368,10 +368,10 @@ static FILE *fp;
 static int line_num = 0;
 static char *line;
 static char *token[MAX_NR_TOKEN];
+static int read_nextline = 1;
 
 static int get_token(int min, int max)
 {
-	static int read_nextline = 1;
 	static int line_pos;
 	int i;
 	char c;
@@ -466,15 +466,33 @@ int parse_codec_cfg(char *cfgfile)
 		mp_msg(MSGT_CODECCFG,MSGL_FATAL,"can't get memory for 'line': %s\n", strerror(errno));
 		return 0;
 	}
+	read_nextline = 1;
 
 	/*
-	 * check if the cfgfile starts with 'audiocodec' or
-	 * with 'videocodec'
+	 * this only catches release lines at the start of 
+	 * codecs.conf, before audiocodecs and videocodecs.
 	 */
 	while ((tmp = get_token(1, 1)) == RET_EOL)
 		/* NOTHING */;
 	if (tmp == RET_EOF)
 		goto out;
+	if (!strcmp(token[0], "release")) {
+		if (get_token(1, 2) < 0)
+			goto err_out_parse_error;
+		tmp = atoi(token[0]);
+		if (tmp < CODEC_CFG_MIN)
+			goto err_out_release_num;
+		while ((tmp = get_token(1, 1)) == RET_EOL)
+			/* NOTHING */;
+		if (tmp == RET_EOF)
+			goto out;
+	} else
+		goto err_out_release_num;
+
+	/*
+	 * check if the next block starts with 'audiocodec' or
+	 * with 'videocodec'
+	 */
 	if (!strcmp(token[0], "audiocodec") || !strcmp(token[0], "videocodec"))
 		goto loop_enter;
 	goto err_out_parse_error;
@@ -652,10 +670,14 @@ err_out:
 
 	free(line);
 	line=NULL;
+	line_num = 0;
 	fclose(fp);
 	return 0;
 err_out_not_valid:
 	mp_msg(MSGT_CODECCFG,MSGL_ERR,"codec is not defined correctly");
+	goto err_out_print_linenum;
+err_out_release_num:
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"this codecs.conf is too old, incompatible with this mplayer release!");
 	goto err_out_print_linenum;
 }
 
