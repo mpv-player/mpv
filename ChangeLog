@@ -3,7 +3,7 @@ MPlayer (1.0)
   pre4: "YAML Counter" Apr 27, 2004
 
     Security:
-    * HTTP parser remote heap overflow vulnerability fixed
+    * HTTP parser remote heap overflow vulnerability fixed (from 1.0pre3try2)
     * Real RTSP remote buffer overflow vulnerability fixed
     * buffer overflow in the Matroska demuxer
     * potentially exploitable buffer overflow in CDDB TOC code
@@ -56,7 +56,7 @@ MPlayer (1.0)
     * AVI OpenDML read and write support
 
     Streaming:
-    * smil playlist parser
+    * SMIL playlist parser
     * support for URL redirection
     * support for seeking in HTTP streams
     * updated LIVE.COM streaming code
