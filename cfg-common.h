@@ -41,6 +41,7 @@
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	
 	{"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
 	{"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
@@ -53,7 +54,9 @@
 
 #else
 	{"user", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"passwd", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"bandwidth", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"user-agent", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
 	
@@ -273,6 +276,7 @@ extern int audio_output_channels;
 extern char *network_username;
 extern char *network_password;
 extern int   network_bandwidth;
+extern char *network_useragent;
 
 extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;

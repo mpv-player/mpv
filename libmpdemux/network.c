@@ -47,10 +47,12 @@ extern int mp_input_check_interrupt(int time);
 int asf_streaming_start( stream_t *stream, int *demuxer_type );
 int rtsp_streaming_start( stream_t *stream );
 
-/* Variables for the command line option -user, -passwd & -bandwidth */
+/* Variables for the command line option -user, -passwd, -bandwidth 
+   and -user-agent */
 char *network_username=NULL;
 char *network_password=NULL;
 int   network_bandwidth=0;
+char *network_useragent=NULL;
 
 /* IPv6 options */
 int   network_prefer_ipv4 = 0;
@@ -426,7 +428,7 @@ int
 http_send_request( URL_t *url ) {
 	HTTP_header_t *http_hdr;
 	URL_t *server_url;
-	char str[80];
+	char str[256];
 	int fd;
 	int ret;
 	int proxy = 0;		// Boolean
@@ -441,9 +443,15 @@ http_send_request( URL_t *url ) {
 		server_url = url;
 		http_set_uri( http_hdr, server_url->file );
 	}
-	snprintf(str, 80, "Host: %s", server_url->hostname );
+	snprintf(str, 256, "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
-	http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
+	if (network_useragent)
+	{
+	    snprintf(str, 256, "User-Agent: %s", network_useragent);
+	    http_set_field(http_hdr, str);
+	}
+	else
+	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
 	http_set_field( http_hdr, "Connection: closed");
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
