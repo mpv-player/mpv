@@ -212,7 +212,7 @@ idct	(0-99) idct algorithm
         5 ps2
         6 mlib
         7 arm
-        note: all these IDCTs do pass the IEEE1180 tests AFIAK
+        note: all these IDCTs do pass the IEEE1180 tests AFAIK
 
 lumi_mask	(0.0-1.0) luminance masking
 	0.0 disabled (default)
