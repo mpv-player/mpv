@@ -12,11 +12,19 @@
 #include "../../../mixer.h"
 #include "../../../libao2/audio_out.h"
 #include "../../../libvo/video_out.h"
+
 #include "../../cfg.h"
 #include "../../interface.h"
 #include "../widgets.h"
 #include "opts.h"
 #include "fs.h"
+
+typedef struct sh_video_t sh_video_t;
+typedef struct mp_image_t mp_image_t;
+typedef struct sh_audio_t sh_audio_t;
+
+#include "../../../libmpcodecs/vd.h"
+#include "../../../libmpcodecs/ad.h"
 
        GtkWidget * Preferences;
 static GtkWidget * AConfig;
@@ -32,8 +40,10 @@ static GtkWidget * CLVDrivers;
 //static GtkWidget * ESubtitleName;
        GtkWidget * prEFontName;
 static GtkWidget * EVFM;
+static GtkWidget * EAFM;
 
 static GtkWidget * CBVFM;
+static GtkWidget * CBAFM;
 static GtkWidget * CBAudioEqualizer;
 //static GtkWidget * CBSurround;
 static GtkWidget * CBExtraStereo;
@@ -78,22 +88,6 @@ static GtkWidget     * CBFontEncoding, * EFontEncoding;
 static GtkWidget     * RBFontNoAutoScale, * BRFontAutoScaleWidth, * RBFontAutoScaleHeight, * RBFontAutoScaleDiagonal;
 //static GtkWidget     * AutoScale;
 #endif
-
-static struct
-{
- int    vfm;
- char * name;
-} lVFM[] =
- { 
-  { -1,MSGTR_PREFERENCES_None   },
-  {  2,MSGTR_PREFERENCES_Codec1 },
-  {  3,MSGTR_PREFERENCES_Codec2 },
-  {  4,MSGTR_PREFERENCES_Codec3 },
-  {  5,MSGTR_PREFERENCES_Codec4 },
-  {  7,MSGTR_PREFERENCES_Codec5 },
-  { 10,MSGTR_PREFERENCES_Codec6 },
-  { 0,NULL }
- };
 
 #ifdef HAVE_FREETYPE
 static struct 
@@ -266,10 +260,32 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
  {
-  int i = 0;
-  for ( i=0;i<7;i++ )
-    if ( lVFM[i].vfm == video_family ) break;
-  gtk_entry_set_text( GTK_ENTRY( EVFM ),lVFM[i].name );
+  int     i;
+  GList * Items = NULL;
+  char  * name = NULL;
+
+  for( i=0;mpcodecs_vd_drivers[i];i++ )
+   {
+    Items=g_list_append( Items,(char *)mpcodecs_vd_drivers[i]->info->name );
+    if ( !gstrcmp( video_fm,(char *)mpcodecs_vd_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_vd_drivers[i]->info->name;
+   }
+  gtk_combo_set_popdown_strings( GTK_COMBO( CBVFM ),Items );
+  g_list_free( Items );
+  if ( name ) gtk_entry_set_text( GTK_ENTRY( EVFM ),name );
+ }
+ {
+  int     i;
+  GList * Items = NULL;
+  char  * name = NULL;
+
+  for( i=0;mpcodecs_ad_drivers[i];i++ )
+   {
+    Items=g_list_append( Items,(char *)mpcodecs_ad_drivers[i]->info->name );
+    if ( !gstrcmp( audio_fm,(char *)mpcodecs_ad_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_ad_drivers[i]->info->name;
+   }
+  gtk_combo_set_popdown_strings( GTK_COMBO( CBAFM ),Items );
+  g_list_free( Items );
+  if ( name ) gtk_entry_set_text( GTK_ENTRY( EAFM ),name );
  }
 
 // -- disables
@@ -433,9 +449,16 @@ void prButton( GtkButton * button,gpointer user_data )
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
-	 video_family=-1;
-	 for ( i=0;i<7;i++ )
-	  if ( !strcmp( tmp,lVFM[i].name ) ) { video_family=lVFM[i].vfm; break; }
+	 gfree( (void **)&video_fm );
+         for( i=0;mpcodecs_vd_drivers[i];i++ )
+           if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) { video_fm=gstrdup( (char *)mpcodecs_vd_drivers[i]->info->short_name ); break; }
+	}
+	{
+	 int i;
+	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EAFM ) );
+	 gfree( (void **)&audio_fm );
+         for( i=0;mpcodecs_ad_drivers[i];i++ )
+           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) ) { audio_fm=gstrdup( (char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
 	}
 
    case bCancel:
@@ -587,7 +610,6 @@ GtkWidget * create_Preferences( void )
   GtkWidget * vbox600;
   GSList    * OSD_group = NULL;
   GSList    * Font_group = NULL;
-  GList	    * CBVFM_items = NULL;
   GList     * CBFontEncoding_items = NULL;
   GtkWidget * frame6;
   GtkWidget * vbox7;
@@ -1649,12 +1671,6 @@ GtkWidget * create_Preferences( void )
   gtk_widget_ref( CBVFM );
   gtk_widget_show( CBVFM );
   gtk_box_pack_start( GTK_BOX( hbox5 ),CBVFM,TRUE,TRUE,0 );
-  {
-   int i;
-   for ( i=0;lVFM[i].name;i++ ) CBVFM_items=g_list_append( CBVFM_items,lVFM[i].name );
-  }
-  gtk_combo_set_popdown_strings( GTK_COMBO( CBVFM ),CBVFM_items );
-  g_list_free( CBVFM_items );
 
   EVFM=GTK_COMBO( CBVFM )->entry;
   gtk_widget_set_name( EVFM,"CEVFM" );
@@ -1662,6 +1678,35 @@ GtkWidget * create_Preferences( void )
   gtk_widget_ref( EVFM );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EVFM",EVFM,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EVFM );
+
+  hbox5=gtk_hbox_new( FALSE,0 );
+  gtk_widget_set_name( hbox5,"hbox5" );
+  gtk_widget_ref( hbox5 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"hbox5",hbox5,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( hbox5 );
+  gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_AudioCodecFamily );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_box_pack_start( GTK_BOX( hbox5 ),label16,FALSE,FALSE,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+
+  CBAFM=gtk_combo_new();
+  gtk_widget_set_name( CBAFM,"CBAFM" );
+  gtk_widget_ref( CBAFM );
+  gtk_widget_show( CBAFM );
+  gtk_box_pack_start( GTK_BOX( hbox5 ),CBAFM,TRUE,TRUE,0 );
+
+  EAFM=GTK_COMBO( CBAFM )->entry;
+  gtk_widget_set_name( EAFM,"EAFM" );
+  gtk_entry_set_editable( GTK_ENTRY( EAFM ),FALSE );
+  gtk_widget_ref( EAFM );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EAFM",EAFM,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( EAFM );
 
   label4=gtk_label_new( "Misc" );
   gtk_widget_set_name( label4,"label4" );
@@ -1753,7 +1798,7 @@ GtkWidget * create_Preferences( void )
   gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( on_HSPPQuality_motion_notify_event ),NULL );
 #endif
 
-  gtk_notebook_set_page( GTK_NOTEBOOK( notebook1 ),2 );
+  gtk_notebook_set_page( GTK_NOTEBOOK( notebook1 ),3 );
 
   gtk_window_add_accel_group( GTK_WINDOW( Preferences ),accel_group );
 

@@ -10,7 +10,8 @@ extern char* current_module;
 extern int fullscreen;
 extern int vcd_track;
 
-//extern int    video_family; // OBSOLETE, use video_fm
+extern char * audio_fm;
+extern char * video_fm;
 extern char * video_driver;
 extern char * audio_driver;
 extern int    has_audio;

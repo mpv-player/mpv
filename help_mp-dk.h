@@ -430,12 +430,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "Ingen"
-#define MSGTR_PREFERENCES_Codec1 "Benyt VFW (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec2 "Benyt OpenDivX/DivX4 codec (YV12)"
-#define MSGTR_PREFERENCES_Codec3 "Benyt DirectShow (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec4 "Benyt ffmpeg (libavcodec) codecs"
-#define MSGTR_PREFERENCES_Codec5 "benyt DivX4 codec (YUY2)"
-#define MSGTR_PREFERENCES_Codec6 "Benyt XAnim codecs"
 #define MSGTR_PREFERENCES_AvailableDrivers "Tilgængelige drivere:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Afspil ikke lyd"
 #define MSGTR_PREFERENCES_NormalizeSound "Ensart lydstyrke"

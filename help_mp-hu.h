@@ -345,12 +345,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "Egyik sem"
-#define MSGTR_PREFERENCES_Codec1 "VFW (Win32) kodek család"
-#define MSGTR_PREFERENCES_Codec2 "OpenDivX/DivX4 kodek"
-#define MSGTR_PREFERENCES_Codec3 "DirectShow (Win32) kodek család"
-#define MSGTR_PREFERENCES_Codec4 "ffmpeg (libavcodec) család"
-#define MSGTR_PREFERENCES_Codec5 "DivX4 (YUY2) kodek"
-#define MSGTR_PREFERENCES_Codec6 "XAnim kodek család"
 #define MSGTR_PREFERENCES_AvailableDrivers "Driverek:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Hang nélkül"
 #define MSGTR_PREFERENCES_NormalizeSound "Hang normalizálása"
@@ -384,6 +378,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_NI "non-interleaved  AVI  feltételezése (hibás AVI-knál segíthet"
 #define MSGTR_PREFERENCES_IDX "Az AVI indexének újraépítése, ha szükséges"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Video kodek család:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Audio kodek család:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD szint"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Felirat"
 #define MSGTR_PREFERENCES_FRAME_Font "Betû"

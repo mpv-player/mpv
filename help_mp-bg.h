@@ -421,12 +421,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "Нищо"
- #define MSGTR_PREFERENCES_Codec1 "VFW (Win32)"
- #define MSGTR_PREFERENCES_Codec2 "OpenDivX/DivX4 (YV12)"
- #define MSGTR_PREFERENCES_Codec3 "DirectShow (Win32)"
- #define MSGTR_PREFERENCES_Codec4 "ffmpeg (libavcodec)"
- #define MSGTR_PREFERENCES_Codec5 "DivX4 (YUY2)"
- #define MSGTR_PREFERENCES_Codec6 "XAnim"
 #define MSGTR_PREFERENCES_AvailableDrivers "Налични драйвери:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Без звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Изравняване силата на звука"

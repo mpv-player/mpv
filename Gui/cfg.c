@@ -59,7 +59,8 @@ static config_t gui_opts[] =
  { "v_flip",&flip,CONF_TYPE_INT,CONF_RANGE,-1,1,NULL },
  { "v_ni",&force_ni,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_idx",&index_mode,CONF_TYPE_INT,CONF_RANGE,-1,2,NULL },
- { "v_vfm",&video_family,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
+ { "v_vfm",&video_fm,CONF_TYPE_STRING,0,0,0,NULL },
+ { "a_afm",&audio_fm,CONF_TYPE_STRING,0,0,0,NULL },
 
  { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },

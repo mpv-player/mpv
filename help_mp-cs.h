@@ -438,12 +438,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "Nic"
-#define MSGTR_PREFERENCES_Codec1 "Pou¾ít VFW (Win32) kodeky"
-#define MSGTR_PREFERENCES_Codec2 "Pou¾ít OpenDivX/DivX4 kodek (YV12)"
-#define MSGTR_PREFERENCES_Codec3 "Pou¾ít DirectShow (Win32) kodeky"
-#define MSGTR_PREFERENCES_Codec4 "Pou¾ít ffmpeg (libavcodec) kodeky"
-#define MSGTR_PREFERENCES_Codec5 "Pou¾ít DivX4 kodek (YUY2)"
-#define MSGTR_PREFERENCES_Codec6 "Pou¾ít XAnim kodeky"
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostupné ovladaèe:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nepøehrávat zvuk"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizovat zvuk"

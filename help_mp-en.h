@@ -442,12 +442,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "None"
-#define MSGTR_PREFERENCES_Codec1 "Use VFW (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec2 "Use OpenDivX/DivX4 codec (YV12)"
-#define MSGTR_PREFERENCES_Codec3 "Use DirectShow (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec4 "Use ffmpeg (libavcodec) codecs"
-#define MSGTR_PREFERENCES_Codec5 "Use DivX4 codec (YUY2)"
-#define MSGTR_PREFERENCES_Codec6 "Use XAnim codecs"
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Do not play sound"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalize sound"
@@ -481,6 +475,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_NI "Use non-interleaved AVI parser"
 #define MSGTR_PREFERENCES_IDX "Rebuilt index table, if needed"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Video codec family:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Audio codec family:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD level"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Subtitle"
 #define MSGTR_PREFERENCES_FRAME_Font "Font"

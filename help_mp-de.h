@@ -438,12 +438,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "Nichts"
-#define MSGTR_PREFERENCES_Codec1 "Verwende VFW (Win32) Codecs"
-#define MSGTR_PREFERENCES_Codec2 "Verwende OpenDivX/DivX4 Codec (YV12)"
-#define MSGTR_PREFERENCES_Codec3 "Verwende DirectShow (Win32) Codecs"
-#define MSGTR_PREFERENCES_Codec4 "Verwende ffmpeg (libavcodec) Codecs"
-#define MSGTR_PREFERENCES_Codec5 "Verwende DivX4 Codec (YUY2)"
-#define MSGTR_PREFERENCES_Codec6 "Verwende XAnim Codecs"
 #define MSGTR_PREFERENCES_AvailableDrivers "Verfügbare Treiber:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spiele keinen Ton"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalisiere Ton"

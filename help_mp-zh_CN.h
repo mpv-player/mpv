@@ -403,12 +403,6 @@ static char help_text[]=
 
 // --- preferences
 #define MSGTR_PREFERENCES_None "None"
-#define MSGTR_PREFERENCES_Codec1 "使用VFW (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec2 "使用OpenDivX/DivX4 codec (YV12)"
-#define MSGTR_PREFERENCES_Codec3 "使用DirectShow (Win32) codecs"
-#define MSGTR_PREFERENCES_Codec4 "使用ffmpeg (libavcodec) codecs"
-#define MSGTR_PREFERENCES_Codec5 "使用DivX4 codec (YUY2)"
-#define MSGTR_PREFERENCES_Codec6 "使用XAnim codecs"
 #define MSGTR_PREFERENCES_AvailableDrivers "可用驱动:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "不播放声音"
 #define MSGTR_PREFERENCES_NormalizeSound "声音标准化"
