@@ -1111,18 +1111,17 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     for external tools like em8300setup. Valid norms are 5 = NTSC, 4 = PAL-60,
     3 = PAL. Special norms are 2 (auto-adjust using PAL/PAL-60) and 1
     (auto-adjust using PAL/NTSC) because they decide which norm to use by
-    looking at the frame rate of the movie. Modern TVs are capable of PAL and
-    NTSC. Watching movies with the framerate they were initially encoded with
-    results in smooth playback without framedrop. norm = 0 (default) does not
+    looking at the frame rate of the movie. norm = 0 (default) does not
     change the current norm.<BR>
     <CODE>&lt;device&gt;</CODE> = device number to use if you have more than one
     em8300 card.
     <BR>
     Any of these options may be left out.<BR>
-    <CODE>:prebuf:sync</CODE> seems to work great when playing DivX etc, even on
-    AMD's CPUs. But people have reported problems using these options when playing
-    normal MPEGs. You might want to try running without any options first, if you
-    have sync problems give <CODE>:sync</CODE> a try.</DD>
+    <CODE>:prebuf:sync</CODE> seems to work great when playing DivX movies.
+    People have reported problems using the <CODE>prebuf</CODE> option when playing
+    MPEG1/2 files. You might want to try running without any options first, if you
+    have sync problems, or DVD subtitle problems, give <CODE>:sync</CODE> a
+    try.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
   <DD>For audio output, where <CODE>X</CODE> is the device number
@@ -1162,19 +1161,8 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   <DD>The em8300 supports playing back AC3 audio (surround sound) through the
     digital audio output of the card. See the <CODE>-ao oss</CODE> option
     above, it must be used to specify the DXR3's output instead of
-    a soundcard. Also read <A HREF="codecs.html#hardware_ac3">hardware AC3</A>
-    section for further information on AC3.</DD>
+    a soundcard.</DD>
 </DL>
-
-<H4>MPEG1, MPEG2, VCD and DVD Notes</H4>
-
-<P>In some instances, subtitles may not appear properly in sync with the A/V
-  stream when using hardware decoding. This is a known bug. The em8300 will
-  also improperly handle subtitles that are too big, and may hang for a second
-  or two. At this time, the only workaround is to use <CODE>-vop lavc</CODE>
-  when viewing DVDs with subtitles. When running with <CODE>-vop lavc</CODE>
-  MPlayer will reencode video to MPEG (even if it already is MPEG). This means
-  that it will need more CPU power, and you might loose some picture quality.</P>
 
 
 <H4><A NAME="other">2.3.1.4 Other visualization hardware</A></H4>
