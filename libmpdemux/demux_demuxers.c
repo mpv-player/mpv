@@ -73,8 +73,7 @@ void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
     // In case the demuxer don't set pts
     if(!demuxer->audio->pts)
       demuxer->audio->pts = pos-((ds_tell_pts(demuxer->audio)-sh->a_in_buffer_len)/(float)sh->i_bps);
-    if(sh->timer)
-      sh->timer = 0;
+    sh->delay = 0;
   }
 
   if(priv->sd != priv->vd)

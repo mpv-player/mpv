@@ -295,7 +295,7 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     }
     if(len > 0)
       high_res_mp3_seek(demuxer,len);
-    sh_audio->timer = priv->last_pts -  (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+    sh_audio->delay = priv->last_pts -  (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     resync_audio_stream(sh_audio);
     return;
   }
@@ -307,13 +307,13 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     pos = base + (rel_seek_secs*sh_audio->i_bps);
 
   if(demuxer->movi_end && pos >= demuxer->movi_end) {
-    sh_audio->timer = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
+    sh_audio->delay = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
     return;
   } else if(pos < demuxer->movi_start)
     pos = demuxer->movi_start;
 
   priv->last_pts = (pos-demuxer->movi_start)/(float)sh_audio->i_bps;
-  sh_audio->timer = priv->last_pts - (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+  sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
   
   switch(priv->frmt) {
   case WAV:

@@ -46,7 +46,7 @@ typedef struct {
   struct codecs_st *codec;
   unsigned int format;
   int inited;
-  float timer;		   // value of old a_frame
+  float delay;		   // value of old a_frame
   // output format:
   int sample_format;
   int samplerate;

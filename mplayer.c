@@ -1349,7 +1349,7 @@ if(sh_audio){
 current_module="av_init";
 
 if(sh_video) sh_video->timer=0;
-if(sh_audio) sh_audio->timer=-audio_delay;
+if(sh_audio) sh_audio->delay=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
@@ -1414,7 +1414,7 @@ while(sh_audio){
 
   current_module="play_audio";
   
-  ao_data.pts=sh_audio->timer*90000.0;
+  ao_data.pts=((sh_video?sh_video->timer:0)+sh_audio->delay)*90000.0;
   playsize=audio_out->get_space();
   
   // handle audio-only case:
@@ -1445,7 +1445,7 @@ while(sh_audio){
   if(playsize>0){
       sh_audio->a_out_buffer_len-=playsize;
       memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
-      sh_audio->timer+=playback_speed*playsize/((float)((ao_data.bps && sh_audio->afilter) ?
+      sh_audio->delay+=playback_speed*playsize/((float)((ao_data.bps && sh_audio->afilter) ?
           ao_data.bps : sh_audio->o_bps));
   }
 
@@ -1455,8 +1455,8 @@ while(sh_audio){
 if(!sh_video) {
   // handle audio-only case:
   if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f %4.1f%% %d%%   \r"
-		    ,sh_audio->timer-audio_out->get_delay()
-		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
+		    ,sh_audio->delay-audio_out->get_delay()
+		    ,(sh_audio->delay>0.5)?100.0*audio_time_usage/(double)sh_audio->delay:0
 		    ,cache_fill_status
 		    );
   if(d_audio->eof) eof = PT_NEXT_ENTRY;
@@ -1482,12 +1482,13 @@ if(!sh_video) {
 	if(in_size<0){ eof=1; break; }
 	if(in_size>max_framesize) max_framesize=in_size; // stats
 	sh_video->timer+=frame_time;
+	if(sh_audio) sh_audio->delay-=frame_time;
 	time_frame+=frame_time;  // for nosound
 	// check for frame-drop:
 	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
 	    float delay=playback_speed*audio_out->get_delay();
-	    float d=(sh_video->timer)-(sh_audio->timer-delay);
+	    float d=delay-sh_audio->delay;
 	    // we should avoid dropping to many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
 	    if(d<-dropped_frames*frame_time-0.100){
@@ -1573,13 +1574,12 @@ if(!sh_video) {
 	     * sync to settle at the right value (but it eventually will.)
 	     * This settling time is very short for values below 100.
 	     */
-	    float predicted = sh_audio->timer-sh_video->timer+time_frame;
+	    float predicted = sh_audio->delay+time_frame;
 	    float difference = delay - predicted;
 	    delay = predicted + difference / (float)autosync;
 	  }
 
-          time_frame=sh_video->timer;
-          time_frame-=sh_audio->timer-delay;
+          time_frame=delay-sh_audio->delay;
 
 	// delay = amount of audio buffered in soundcard/driver
 	if(delay>0.25) delay=0.25; else
@@ -1693,7 +1693,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
        * value here, even a "corrected" one, would be incompatible with
        * autosync mode.)
        */
-      delay=sh_audio->timer-sh_video->timer;
+      delay=sh_audio->delay;
       delay+=(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
     }
 
@@ -1742,7 +1742,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
           max_pts_correction=default_max_pts_correction;
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
-	if(!frame_time_remaining){ sh_audio->timer+=x; c_total+=x;} // correction
+	if(!frame_time_remaining){ sh_audio->delay+=x; c_total+=x;} // correction
         if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
@@ -1897,7 +1897,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       float v = cmd->args[0].v.f;
       audio_delay += v;
       osd_show_av_delay = 9;
-      if(sh_audio) sh_audio->timer+= v;
+      if(sh_audio) sh_audio->delay+= v;
     } break;
     case MP_CMD_PAUSE : {
       osd_function=OSD_PAUSE;
@@ -2591,7 +2591,7 @@ if(rel_seek_secs || abs_seek_pos){
 	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - demuxer->movi_start ) * 100.0f / len );
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
-	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;
+	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->delay;
 	guiGetEvent( guiReDraw,NULL );
 	guiGetEvent( guiSetVolume,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP
