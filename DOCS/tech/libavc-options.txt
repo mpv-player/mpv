@@ -278,6 +278,7 @@ bug	manual workaround encoder bugs (autodetection isnt foolproof for these)
 	8 for mpeg4	UMP4                     (autodetected if fourcc==UMP4)
         16for mpeg4	padding bug
         32for mpeg4	illegal vlc bug          (autodetected per fourcc)
+	64for mpeg4	XVID&DIVX qpel bug	 (autodetected for divx)
         Note: just add the ones u want to enable
 
 gray	grayscale only decoding (a bit faster than with color ...)
