@@ -151,24 +151,25 @@ ENTER pt_step 1 1<!--
 
 <para>
 Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
-an (almost) arbitrary remote control and control your linux box with it!
-More about it at <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
+an (almost) arbitrary remote control and control your Linux box with it!
+More about it on the <ulink url="http://www.lirc.org">LIRC homepage</ulink>.
 </para>
 
 <para>
-If you have installed the lirc-package, configure will autodetect it. If
-everything went fine, <application>MPlayer</application> will print a
-message like "<computeroutput>Setting up lirc support...</computeroutput>"
-on startup. If an error occurs it will tell you. If it doesn't tell you
-anything about LIRC there's no support compiled in. That's it :-)
+If you have the LIRC package installed, <filename>configure</filename> will
+autodetect it. If everything went fine, <application>MPlayer</application>
+will print &quot;<systemitem>Setting up LIRC support...</systemitem>&quot;
+on startup. If an error occurs it will tell you. If there is no message about
+LIRC there is no support compiled in. That's it :-)
 </para>
 
 <para>
-The application name for <application>MPlayer</application> is - oh wonder
-- <filename>mplayer</filename>.  You can use any mplayer commands and even
-pass more than one command by separating them with <literal>\n</literal>.
+The application name for <application>MPlayer</application> is - surprise -
+<filename>mplayer</filename>. You can use any <application>MPlayer</application>
+commands and even pass more than one command by separating them with
+<literal>\n</literal>.
 Don't forget to enable the repeat flag in <filename>.lircrc</filename> when
-it make sense (seek, volume, etc). Here's an excerpt from my
+it makes sense (seek, volume, etc). Here's an excerpt from a sample
 <filename>.lircrc</filename>:
 </para>
 
@@ -227,27 +228,27 @@ The commands are documented in the
 <title>Streaming from network or pipes</title>
 
 <para>
-<application>MPlayer</application> can play files from network, using the
+<application>MPlayer</application> can play files from the network, using the
 HTTP, FTP, MMS or RTSP/RTP protocol.
 </para>
 
 <para>
-Playing goes by simply using adding the URL to the command line.
-<application>MPlayer</application> also honors the
-<envar>http_proxy</envar> environment variable, and uses proxy if
-available.  Proxy usage can also be forced:
+Playing works simply by passing the URL on the command line.
+<application>MPlayer</application> honors the <envar>http_proxy</envar>
+environment variable, using a proxy if available. Proxies can also be forced:
 <screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
 
 <para>
 <application>MPlayer</application> can read from stdin
-(<emphasis>not</emphasis> named pipes). This can be for example used to
+(<emphasis>not</emphasis> named pipes). This can for example be used to
 play from FTP:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
-Note: it's also recommended to enable <option>-cache</option> when playback from network:
+Note: It's also recommended to enable <option>-cache</option> when playing
+from the network:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
