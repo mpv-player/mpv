@@ -301,8 +301,8 @@ static int sdl_open (void *plugin, void *name)
 		}	
 	#endif	
 	
-	/* Setup Keyrepeats */
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+	/* Setup Keyrepeats (500/30 are defaults) */
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
 
 	/* get information about the graphics adapter */
 	vidInfo = SDL_GetVideoInfo ();
@@ -806,21 +806,8 @@ static void check_events (void)
 			
 			/* graphics mode selection shortcuts */
 			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-                                case SDLK_UP: mplayer_put_key(KEY_UP);break;
-                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
-                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
-                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-                                case SDLK_ASTERISK:
-				case SDLK_KP_MULTIPLY:
-				case SDLK_w: mplayer_put_key('*');break;
-				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE:
-                                case SDLK_s: mplayer_put_key('/');break;
-				}
-			break;	
-			case SDL_KEYUP:	
 				keypressed = event.key.keysym.sym;
+				if(verbose > 1) printf("SDL: Key pressed: '%i'\n", keypressed);
 
 				/* c key pressed. c cycles through available fullscreenmodes, if we have some */
 				if ( ((keypressed == SDLK_c)) && (priv->fullmodes) ) {
@@ -864,6 +851,16 @@ static void check_events (void)
 				case SDLK_TAB: mplayer_put_key('\t');break;
 				case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
 				case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
+                                case SDLK_UP: mplayer_put_key(KEY_UP);break;
+                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
+                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
+                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+                                case SDLK_ASTERISK:
+				case SDLK_KP_MULTIPLY:
+				case SDLK_w: mplayer_put_key('*');break;
+				case SDLK_SLASH:
+				case SDLK_KP_DIVIDE:
+                                case SDLK_s: mplayer_put_key('/');break;
 				default:
 					mplayer_put_key(keypressed);
                                 }
