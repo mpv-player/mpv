@@ -149,6 +149,7 @@ extern void demux_close_nuv(demuxer_t* demuxer);
 extern void demux_close_audio(demuxer_t* demuxer);
 extern void demux_close_ogg(demuxer_t* demuxer);
 extern void demux_close_demuxers(demuxer_t* demuxer);
+extern void demux_close_avi(demuxer_t *demuxer);
 
 void free_demuxer(demuxer_t *demuxer){
     int i;
@@ -178,6 +179,10 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_ogg(demuxer); break;
     case DEMUXER_TYPE_DEMUXERS:
       demux_close_demuxers(demuxer); return;
+    case DEMUXER_TYPE_AVI: 
+    case DEMUXER_TYPE_AVI_NI:
+    case DEMUXER_TYPE_AVI_NINI:
+      demux_close_avi(demuxer); return;
     }
     // free streams:
     for(i=0;i<256;i++){

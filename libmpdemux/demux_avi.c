@@ -726,4 +726,13 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 }
 
 
+void demux_close_avi(demuxer_t *demuxer) {
+  avi_priv_t* priv=demuxer->priv;
 
+  if(!priv)
+    return;
+
+  if(priv->idx_size > 0)
+    free(priv->idx);
+  free(priv);
+}
