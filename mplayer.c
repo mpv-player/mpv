@@ -815,12 +815,10 @@ static void print_status(float a_pos, float a_v, float corr)
   int width;
   char *line;
   unsigned pos = 0;
-#ifndef __MINGW32__
-  struct winsize ws;
-  if (ioctl(0, TIOCGWINSZ, &ws) != -1 && ws.ws_col)
-    width = ws.ws_col;
+  get_screen_size();
+  if (screen_width > 0)
+    width = screen_width;
   else
-#endif
   width = 80;
   line = malloc(width + 1); // one additional for terminating null
   
