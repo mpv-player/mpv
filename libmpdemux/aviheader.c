@@ -39,22 +39,28 @@ priv->idx_size=0;
 priv->audio_streams=0;
 while(1){
   int id=stream_read_dword_le(demuxer->stream);
-  int chunksize,size2;
+  unsigned chunksize,size2;
   static int last_fccType=0;
   char* hdr=NULL;
   //
   if(stream_eof(demuxer->stream)) break;
   //
   if(id==mmioFOURCC('L','I','S','T')){
-    int len=stream_read_dword_le(demuxer->stream)-4; // list size
-    id=stream_read_dword_le(demuxer->stream);        // list type
-    mp_msg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
-    list_end=stream_tell(demuxer->stream)+((len+1)&(~1));
+    unsigned len=stream_read_dword_le(demuxer->stream);   // list size
+    id=stream_read_dword_le(demuxer->stream);             // list type
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%u\n",(char *) &id,len);
+    if(len >= 4) {
+	len -= 4;
+	list_end=stream_tell(demuxer->stream)+((len+1)&(~1));
+    } else {
+	mp_msg(MSGT_HEADER,MSGL_WARN,"** empty list?!\n");
+	list_end = 0;
+    }
     mp_msg(MSGT_HEADER,MSGL_V,"list_end=0x%X\n",(int)list_end);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       if(!demuxer->movi_start) demuxer->movi_start=stream_tell(demuxer->stream);
-      demuxer->movi_end=demuxer->movi_start+len;
+      demuxer->movi_end=stream_tell(demuxer->stream)+len;
       mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
       if(demuxer->stream->end_pos) demuxer->movi_end=demuxer->stream->end_pos;
       if(index_mode==-2 || index_mode==2 || index_mode==0)
@@ -65,7 +71,7 @@ while(1){
     continue;
   }
   size2=stream_read_dword_le(demuxer->stream);
-  mp_msg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%d\n",(char *) &id,size2);
+  mp_msg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%u\n",(char *) &id,size2);
   chunksize=(size2+1)&(~1);
   switch(id){
 
@@ -173,7 +179,7 @@ while(1){
       if(last_fccType==streamtypeVIDEO){
         sh_video->bih=calloc((chunksize<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):chunksize,1);
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
-        mp_msg(MSGT_HEADER,MSGL_V,"found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
+        mp_msg(MSGT_HEADER,MSGL_V,"found 'bih', %u bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
 	// fixup MS-RLE header (seems to be broken for <256 color files)
@@ -212,7 +218,7 @@ while(1){
         }
       } else
       if(last_fccType==streamtypeAUDIO){
-	int wf_size = chunksize<sizeof(WAVEFORMATEX)?sizeof(WAVEFORMATEX):chunksize;
+	unsigned wf_size = chunksize<sizeof(WAVEFORMATEX)?sizeof(WAVEFORMATEX):chunksize;
         sh_audio->wf=calloc(wf_size,1);
 //        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
         mp_msg(MSGT_HEADER,MSGL_V,"found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
@@ -245,9 +251,21 @@ while(1){
       if(verbose>=2) print_index(priv->idx,priv->idx_size);
       break;
     }
+    /* added May 2002 */
+    case mmioFOURCC('R','I','F','F'): {
+	char riff_type[4];
+
+	mp_msg(MSGT_HEADER, MSGL_V, "additional RIFF header...\n");
+	stream_read(demuxer->stream, riff_type, sizeof riff_type);
+	if (strncmp(riff_type, "AVIX", sizeof riff_type))
+	    mp_msg(MSGT_HEADER, MSGL_WARN,
+		   "** warning: this is no extended AVI header..\n");
+	chunksize = 0;
+	list_end = 0; /* a new list will follow */
+	break; }
   }
   if(hdr){
-    mp_msg(MSGT_HEADER,MSGL_V,"hdr=%s  size=%d\n",hdr,size2);
+    mp_msg(MSGT_HEADER,MSGL_V,"hdr=%s  size=%u\n",hdr,size2);
     if(size2==3)
       chunksize=1; // empty
     else {
@@ -269,7 +287,7 @@ while(1){
       list_end=0;
   } else
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
-  if(chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
+  if((int)chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%u  (id=%.4s)\n",chunksize,(char *) &id);
   
 }
 
@@ -283,15 +301,17 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   priv->idx=NULL;
 
   while(1){
-    int id,len,skip;
+    int id;
+    unsigned len;
+    off_t skip;
     AVIINDEXENTRY* idx;
     unsigned int c;
     demuxer->filepos=stream_tell(demuxer->stream);
     if(demuxer->filepos>=demuxer->movi_end && demuxer->movi_start<demuxer->movi_end) break;
     id=stream_read_dword_le(demuxer->stream);
     len=stream_read_dword_le(demuxer->stream);
-    if(id==mmioFOURCC('L','I','S','T')){
-      id=stream_read_dword_le(demuxer->stream);      // list type
+    if(id==mmioFOURCC('L','I','S','T') || id==mmioFOURCC('R', 'I', 'F', 'F')){
+      id=stream_read_dword_le(demuxer->stream); // list or RIFF type
       continue;
     }
     if(stream_eof(demuxer->stream)) break;
@@ -306,7 +326,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
     idx->ckid=id;
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
-    idx->dwChunkOffset=demuxer->filepos;
+    idx->dwChunkOffset=(unsigned long)demuxer->filepos;
     idx->dwChunkLength=len;
     
     c=stream_read_dword(demuxer->stream);
@@ -321,8 +341,8 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
       }
 
     // update status line:
-    { static int lastpos;
-      int pos;
+    { static off_t lastpos;
+      off_t pos;
       off_t len=demuxer->movi_end-demuxer->movi_start;
       if(len){
           pos=100*(demuxer->filepos-demuxer->movi_start)/len; // %
@@ -331,11 +351,11 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
       }
       if(pos!=lastpos){
           lastpos=pos;
-	  mp_msg(MSGT_HEADER,MSGL_STATUS,"Generating Index: %3d %s     \r",
-	      pos, len?"%":"MB");
+	  mp_msg(MSGT_HEADER,MSGL_STATUS,"Generating Index: %3lu %s     \r",
+		 (unsigned long)pos, len?"%":"MB");
       }
     }
-    mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %08X %X\n",(int)demuxer->filepos,id,(char *) &id,(int)c,(unsigned int) idx->dwFlags);
+    mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %08X %X\n",(unsigned int)demuxer->filepos,id,(char *) &id,(int)c,(unsigned int) idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
       int i;
@@ -346,7 +366,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     }
 #endif
 skip_chunk:
-    skip=(len+1)&(~1); // total bytes in this chunk
+    skip=(len+1)&(~1UL); // total bytes in this chunk
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
   priv->idx_size=priv->idx_pos;

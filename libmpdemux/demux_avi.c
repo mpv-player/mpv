@@ -46,6 +46,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   if(id!=mmioFOURCC('J','U','N','K')){
      // unknown
      mp_msg(MSGT_DEMUX,MSGL_DBG2,"Unknown chunk: %.4s (%X)\n",(char *) &id,id);
+     //abort();
   }
   return NULL;
 }
@@ -173,7 +174,7 @@ do{
   if(stream_eof(demux->stream)) return 0;
 #endif
   if(priv->idx_size>0 && priv->idx_pos<priv->idx_size){
-    unsigned int pos;
+    off_t pos;
     
     //if(priv->idx_pos<0) printf("Fatal! idx_pos=%d\n",priv->idx_pos);
     
@@ -193,7 +194,7 @@ do{
       continue; // skip this chunk
     }
 
-    pos=idx->dwChunkOffset+priv->idx_offset;
+    pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
@@ -234,8 +235,8 @@ do{
     len=stream_read_dword_le(demux->stream);
     if(stream_eof(demux->stream)) return 0; // EOF!
     
-    if(id==mmioFOURCC('L','I','S','T')){
-      id=stream_read_dword_le(demux->stream);      // list type
+    if(id==mmioFOURCC('L','I','S','T') || id==mmioFOURCC('R', 'I', 'F', 'F')){
+      id=stream_read_dword_le(demux->stream); // list or RIFF type
       continue;
     }
   }
@@ -272,7 +273,7 @@ do{
                        idx_pos=priv->idx_pos++;
   
   if(priv->idx_size>0 && idx_pos<priv->idx_size){
-    unsigned int pos;
+    off_t pos;
     idx=&((AVIINDEXENTRY *)priv->idx)[idx_pos];
 //    idx=&priv->idx[idx_pos];
     
@@ -285,7 +286,7 @@ do{
       continue; // skip this chunk
     }
 
-    pos=idx->dwChunkOffset+priv->idx_offset;
+    pos = priv->idx_offset+(unsigned long)idx->dwChunkOffset;
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
       continue;
@@ -338,7 +339,7 @@ avi_priv_t *priv=demux->priv;
 unsigned int id=0;
 unsigned int len;
 int ret=0;
-int *fpos=NULL;
+off_t *fpos=NULL;
 
   if(ds==demux->video) fpos=&priv->idx_pos_v; else
   if(ds==demux->audio) fpos=&priv->idx_pos_a; else
@@ -359,6 +360,12 @@ do{
   len=stream_read_dword_le(demux->stream);
   if(id==mmioFOURCC('L','I','S','T')){
       id=stream_read_dword_le(demux->stream);      // list type
+      continue;
+  }
+  
+  if(id==mmioFOURCC('R','I','F','F')){
+      printf("additional RIFF header...\n");
+      id=stream_read_dword_le(demux->stream);      // "AVIX"
       continue;
   }
   
@@ -420,13 +427,13 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(priv->idx_size>1){
     // decide index format:
 #if 1
-    if(((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start ||
-       ((AVIINDEXENTRY *)priv->idx)[1].dwChunkOffset<demuxer->movi_start)
+    if((unsigned long)((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start ||
+       (unsigned long)((AVIINDEXENTRY *)priv->idx)[1].dwChunkOffset<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
     else
       priv->idx_offset=0;
 #else
-    if(((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start)
+    if((unsigned long)((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
     else
       priv->idx_offset=0;
@@ -441,12 +448,12 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(priv->idx_size>0){
       // check that file is non-interleaved:
       int i;
-      int a_pos=-1;
-      int v_pos=-1;
+      off_t a_pos=-1;
+      off_t v_pos=-1;
       for(i=0;i<priv->idx_size;i++){
         AVIINDEXENTRY* idx=&((AVIINDEXENTRY *)priv->idx)[i];
         demux_stream_t* ds=demux_avi_select_stream(demuxer,idx->ckid);
-        int pos=idx->dwChunkOffset+priv->idx_offset;
+        off_t pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
         if(a_pos==-1 && ds==demuxer->audio){
           a_pos=pos;
           if(v_pos!=-1) break;
@@ -504,7 +511,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   // calculating video bitrate:
   sh_video->i_bps=demuxer->movi_end-demuxer->movi_start-priv->idx_size*8;
   if(sh_audio) sh_video->i_bps-=sh_audio->audio.dwLength;
-  mp_msg(MSGT_DEMUX,MSGL_V,"AVI video length=%d\n",sh_video->i_bps);
+  mp_msg(MSGT_DEMUX,MSGL_V,"AVI video length=%lu\n",(unsigned long)sh_video->i_bps);
   sh_video->i_bps=((float)sh_video->i_bps/(float)sh_video->video.dwLength)*sh_video->fps;
   mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&sh_video->bih->biCompression,

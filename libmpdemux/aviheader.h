@@ -89,10 +89,10 @@ typedef struct {
   // index stuff:
   void* idx;
   int idx_size;
-  int idx_pos;
-  int idx_pos_a;
-  int idx_pos_v;
-  int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
+  off_t idx_pos;
+  off_t idx_pos_a;
+  off_t idx_pos_v;
+  off_t idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
   // interleaved PTS stuff:
   int skip_video_frames;
   int audio_streams;
