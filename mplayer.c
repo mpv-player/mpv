@@ -656,6 +656,8 @@ int i;
 
 int gui_no_filename=0;
 
+  srand((int) time(NULL)); 
+
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
 
