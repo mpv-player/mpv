@@ -149,7 +149,7 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
 synth_func_t synth_func;
 
-#ifdef HAVE_MMX
+#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(HAVE_MMX)
 int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
     static short buffs[2][2][0x110];
@@ -168,7 +168,8 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   real *b0,(*buf)[0x110];
   int clip = 0;
   int bo1;
-#ifdef ARCH_X86
+/* optimized for x86 */
+#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(ARCH_X86)
   if ( synth_func )
    {
     int ret;
