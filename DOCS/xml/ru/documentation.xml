@@ -198,17 +198,16 @@ Public License Version 2.
 </chapter>
 
 
-<!-- FIXME: uncomment each file when translation is finished -->
 &features.xml;
-<!-- &usage.xml; -->
-<!-- &faq.xml; -->
+&usage.xml;
+&faq.xml;
 &cd-dvd.xml;
 &ports.xml;
-<!-- &mencoder.xml; -->
+&mencoder.xml;
 &mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
-<!-- &skin.xml; -->
+&skin.xml;
 &users-vs-dev.xml;
 &patches.xml;
 </book>
