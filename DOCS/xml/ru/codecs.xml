@@ -71,7 +71,7 @@
 
 <para>
 Если у Вас есть не упомянутый здесь Win32 кодек, который ещё не поддерживается,
-пожалуйста, прочтите <link linkend="win32-codecs">Как добавить кодек [codec
+пожалуйста, прочтите <link linkend="codec-importing">Как добавить кодек [codec
 importing HOWTO]</link> и помогите нам добавить для него поддержку.
 </para>
 
@@ -763,7 +763,7 @@ Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'
 
 <!-- ********** -->
 
-<sect2 id="win32-codecs">
+<sect2 id="codec-importing">
 <title>КАК извлечь кодек из Win32</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
