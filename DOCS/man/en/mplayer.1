@@ -670,7 +670,7 @@ MPlayer prints a list of available languages when run in verbose (\-v) mode.
 .PD 0
 .RSs
 .IPs "\-alang hu,en"
-Plays Hungarian and falls back to English if Hungarian is not available.
+Plays Hungarian and falls back on English if Hungarian is not available.
 .RE
 .PD 1
 .
@@ -940,7 +940,7 @@ Disables extension-based demuxer selection.
 By default, when the file type (demuxer) cannot be detected reliably
 (the file has no header or it is not reliable enough), the filename
 extension is used to select the demuxer.
-Always falls back to content-based demuxer selection.
+Always falls back on content-based demuxer selection.
 .
 .TP
 .B \-passwd <password> (also see \-user) (network only)
@@ -949,12 +949,12 @@ Specify password for HTTP authentication.
 .TP
 .B \-prefer-ipv4 (network only)
 Use IPv4 on network connections.
-Falls back to IPv6 automatically.
+Falls back on IPv6 automatically.
 .
 .TP
 .B \-prefer-ipv6 (IPv6 network only)
 Use IPv6 on network connections.
-Falls back to IPv4 automatically.
+Falls back on IPv4 automatically.
 .
 .TP
 .B \-rawaudio <option1:option2:...>
@@ -1350,7 +1350,7 @@ MPlayer prints the available subtitle languages when run in verbose (\-v) mode.
 .PD 0
 .RSs
 .IPs "\-slang hu,en"
-Selects Hungarian and falls back to English if Hungarian is not available.
+Selects Hungarian and falls back on English if Hungarian is not available.
 .RE
 .PD 1
 .
@@ -1480,17 +1480,16 @@ You can specify your language using a two letter language code to
 make ENCA detect the codepage automatically.
 If unsure, enter anything and watch mplayer \-v output for available
 languages.
-Fallback codepage specifies the codepage to use, when the
-autodetection fails.
+Fallback codepage specifies the codepage to use, when autodetection fails.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-subcp enca:cs:latin2"
-Guess the encoding, assuming the subtitles are Czech, fall back to
+Guess the encoding, assuming the subtitles are Czech, fall back on
 latin 2, if the detection fails.
 .IPs "\-subcp enca:pl:cp1250"
-Guess the encoding for Polish, fall back to cp1250.
+Guess the encoding for Polish, fall back on cp1250.
 .RE
 .PD 1
 .
@@ -1696,8 +1695,8 @@ The syntax is:
 .B \-ao <driver1[:suboption1[=value]:...],driver2,...[,]>
 Specify a priority list of audio output drivers to be used.
 .PP
-If the list has a trailing ',' it will fall back to drivers not listed
-on the command line.
+If the list has a trailing ',' MPlayer will fall back on drivers not
+contained in the list.
 Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
@@ -2289,8 +2288,8 @@ The syntax is:
 .B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
 Specify a priority list of video output drivers to be used.
 .PP
-If the list has a trailing ',' it will fall back to drivers not listed on the
-command line.
+If the list has a trailing ',' MPlayer will fall back on drivers not
+contained in the list.
 Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
@@ -2749,7 +2748,8 @@ Each file takes the frame number padded with leading zeros as name.
 Specify a priority list of audio codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
-If the list has a trailing ',' it will fallback to codecs not listed.
+If the list has a trailing ',' MPlayer will fall back on codecs not
+contained in the list.
 .br
 .I NOTE:
 See \-ac help for a full list of available codecs.
@@ -2758,13 +2758,13 @@ See \-ac help for a full list of available codecs.
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-force l3codeca.acm MP3 codec
+Force l3codeca.acm MP3 codec.
 .IPs "\-ac mad,"
-try libmad first, then fallback to others
+Try libmad first, then fall back on others.
 .IPs "\-ac hwac3,a52,"
-try hardware AC3 passthrough, then software AC3 codec, then others
+Try hardware AC3 passthrough, then software AC3 codec, then others.
 .IPs "\-ac -ffmp3,"
-try other codecs except FFmpeg's MP3 decoder
+Skip FFmpeg's MP3 decoder.
 .RE
 .PD 1
 .
@@ -2864,7 +2864,7 @@ Same as \-af.
 .B \-afm <driver1,driver2,...>
 Specify a priority list of audio codec families to be used, according
 to their codec name in codecs.conf.
-It falls back to default if none is OK.
+Falls back on the default codecs if none of the given codec families work.
 .br
 .I NOTE:
 See \-afm help for a full list of available drivers.
@@ -3149,7 +3149,8 @@ bicubic spline
 Specify a priority list of video codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
-If the list has a trailing ',' it will fallback to codecs not listed.
+If the list has a trailing ',' MPlayer will fall back on codecs not
+contained in the list.
 .br
 .I NOTE:
 See \-vc help for a full list of available codecs.
@@ -3160,7 +3161,7 @@ See \-vc help for a full list of available codecs.
 .IPs "\-vc divx"
 Force Win32/\:VFW DivX codec, no fallback.
 .IPs "\-vc divx4,"
-Try divx4linux codec first, then fall back to others.
+Try divx4linux codec first, then fall back on others.
 .IPs "\-vc -divxds,-divx,"
 Try other codecs except Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -3172,7 +3173,7 @@ Try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others.
 .B \-vfm <driver1,driver2,...>
 Specify a priority list of video codec families to be used, according
 to their names in codecs.conf.
-It falls back to default if none is OK.
+Falls back on the default codecs if none of the given codec families work.
 .br
 .I NOTE:
 See \-vfm help for a full list of available drivers.
@@ -3181,8 +3182,8 @@ See \-vfm help for a full list of available drivers.
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-Try the libavcodec, then Directshow, then VFW codecs and fall back
-to the others, if still none is OK.
+Try the libavcodec, then Directshow, then VfW codecs and fall back
+on others, if they do not work.
 .IPs "\-vfm xanim"
 Try XAnim codecs first.
 .RE
