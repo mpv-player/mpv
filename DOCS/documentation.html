@@ -642,9 +642,9 @@ TV tuner</B>.</P>
 </UL>
 </P>
 
-<P><B>Hint #2</B> : are the colors messed up? Then your tuner can't display
-  in YV12 colorspace. Try YUY2, UYVY or if none of these works: RGB32 (this one
-  with <CODE>-vo sdl</CODE>).
+<P><B>Hint</B> : are the colors messed up? Then your tuner can't display
+  in YV12 colorspace. Try I420 (you must use the <CODE>-vc rawi420</CODE> option too!), or YUY2, UYVY, RGB32 (this one
+  with <CODE>-vo sdl</CODE>) colorspaces.
   You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
 <P><B><I>Available options</I></B><BR>

@@ -668,9 +668,9 @@ TV tuner-rõl</B>.</P>
 </UL>
 </P>
 
-<P><B>Tipp #2</B> : rosszak a színek? Ezekszerint a tunered nem tudja a képet
-  YV12 colorspace-ben grabbelni. Próbáld a YUY2, UYVY vagy végsõ esetben az
-  RGB32 colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
+<P><B>Tipp</B> : rosszak a színek? Ezekszerint a tunered nem tudja a képet
+  YV12 colorspace-ben grabbelni. Próbáld az I420-as colorspace-t (ennél meg kell adni a <CODE>-vc rawi420</CODE> opciót is), vagy az
+  YUY2, UYVY, RGB32 colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
   <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
 <P><B><I>Rendelkezésre álló opciók</I></B><BR>
