@@ -469,7 +469,7 @@ Feature benutzen kannst.
 Hänge die auf der Kommandozeile angegebenen Dateien an die Playlist an,
 anstatt sie sofort abzuspielen.
 .TP
-.B \-fixed-vo (BETA\-CODE!)
+.B \-fixed-vo (BETA-CODE!)
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
 für alle Dateien).
 Dementsprechend wird für alle Dateien nur ein Fenster geöffnet.
@@ -615,7 +615,7 @@ Anstatt selber Tastatureingaben auszuwerten, liest MPlayer einfache
 Kommandos von stdin. 
 .br
 .I ANMERKUNG:
-Siehe DOCS/tech/slave.txt (englisch) und \-input cmdlist für eine
+Siehe DOCS/tech/slave.txt (Englisch) und \-input cmdlist für eine
 Liste der Befehle.
 .TP
 .B \-softsleep
@@ -1574,25 +1574,25 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-Unsigned 8-bit
+unsigned 8-bit
 .IPs 16
-Signed 16-bit (Little-Endian)
+signed 16-bit (Little-Endian)
 .IPs 32
-Signed 16-bit (Big-Endian)
+signed 16-bit (Big-Endian)
 .IPs 64
-Signed 8-bit
+signed 8-bit
 .IPs 128
-Unsigned  16-bit (Little-Endian)
+unsigned  16-bit (Little-Endian)
 .IPs 256
-Unsigned 16-bit (Big-Endian)
+unsigned 16-bit (Big-Endian)
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
 AC3
 .IPs 4096
-Signed 32-bit (Little-Endian)
+signed 32-bit (Little-Endian)
 .IPs 8192
-Signed 32-bit (Big-Endian)
+signed 32-bit (Big-Endian)
 .RE
 .PD 1
 .
@@ -1615,6 +1615,10 @@ wie
 .B \-nowaveheader (nur bei \-ao pcm)
 Schreibe keinen Wave-Header in die Datei.
 Wird für raw-PCM benutzt.
+.TP
+.B \-volstep <0\-100>
+Setzt die Schrittweite der Mixer-Lautstärkeänderungen in Prozent der
+Gesamtweite (Standard: 3).
 .
 .
 .SH "AUDIOAUSGABETREIBER (NUR BEI MPLAYER)"
@@ -1771,7 +1775,7 @@ die Anzeige erscheinen soll.
 .
 .TP
 .B \-double
-Aktiviert doppelte Pufferung.
+Aktiviert Double-Buffering.
 Vermeidet Flimmern dadurch, dass zwei Bilder im Speicher gehalten werden,
 von denen das eine angezeigt wird, während das andere noch decodiert wird.
 Kann das OSD negativ beeinflussen, entfernt aber oft Flimmern des OSD.
@@ -1845,7 +1849,7 @@ Setzt den Wert für das Abschneiden des Bildrandes oben (Standard: 0)
 .IPs cr-bottom=<0\-500>
 Setzt den Wert für das Abschneiden des Bildrandes unten (Standard: 0)
 .IPs ck-[r|g|b]=<0\-255>
-Setzt die verstärkung des r(oten), g(rünen) oder b(lauen) Wertes des
+Setzt die Verstärkung des r(oten), g(rünen) oder b(lauen) Wertes des
 Overlay-Farbschlüssels.
 .IPs ck-[r|g|b]min=<0\-255>
 Setzt den Minimalwert für den entsprechenden Farbschlüssel.
@@ -1860,14 +1864,14 @@ Aktiviert Overlay-Onscreen-Anzeige.
 .IPs nool-osd
 Deaktiviert Overlay-Onscreen-Anzeige (Standard).
 .IPs ol[h|w|x|y]-cor=<Wert>
-Passt die Größe (Höhe,Breite) und Position des Overlays an, falls es nicht
+Passt die Größe (Höhe, Breite) und Position des Overlays an, falls es nicht
 ganz den Fensterproportionen entspricht (Standard: 0).
 .IPs overlay
 Aktiviert das Overlay (Standard).
 .IPs nooverlay
 Aktiviert die TV-Ausgabe.
 .IPs overlay-ratio=<1\-2500>
-Stellt das Overlay ein (Standard: 1000)
+Stellt das Overlay ein (Standard: 1000).
 .RE
 .
 .TP
@@ -1885,7 +1889,7 @@ Der VESA-Framebuffer unterstützt den Auflösungswechsel nicht.
 .B \-fbmodeconfig <Dateiname> (nur bei \-vo fbdev)
 Benutze diese Konfigurationsdatei an Stelle der Standarddatei /etc/\:fb.modes.
 .TP
-.B \-forcexv (nur bei SDL)
+.B \-forcexv (nur bei \-vo sdl)
 Erzwingt die Benutzung von XVideo über den SDL-Videoausgabetreiber.
 .TP
 .B \-fs (siehe auch \-zoom) 
@@ -1993,11 +1997,11 @@ Gibt Standard-JPEG oder progressives JPEG an.
 .IPs [no]baseline
 Benutze eine/\:keine Baseline.
 .IPs optimize=<Wert>
-Optimierungswert (0\-100)
+Optimierungswert <0\-100>
 .IPs smooth=<Wert>
-Glättungsfaktor (0\-100)
+Glättungsfaktor <0\-100>
 .IPs quality=<Wert>
-Qualitätsfaktor (0\-100)
+Qualitätsfaktor <0\-100>
 .IPs outdir=<Wert>
 Verzeichnis, in dem die JPEG-Bilder gespeichert werden.
 .RE
@@ -2028,7 +2032,8 @@ Siehe auch \-aspect, das das Verhältnis des Films angibt.
 .
 .TP
 .B \-nograbpointer
-Greift nicht nach dem Mauszeiger nach einem Wechsel des Videomodus (mit \-vm).
+Übernimmt den Mauszeiger nach einem Wechsel des Videomodus (mit \-vm)
+nicht.
 Nützlich bei Multihead-Einstellungen.
 .TP
 .B \-nokeepaspect
@@ -2036,10 +2041,10 @@ Erhalte beim Ändern der Fenstergröße unter X11 nicht das
 Höhen-/\:Breitenverhältnis.
 Funktioniert nur mit den x11-, xv-, xmga-, xvidix- und
 directx-Videoausgabetreibern.
-Außerdem muss dein Windowmanager unter X11 Anweisungen zum Fenster-Aspect
-verstehen.
+Außerdem muß dein Windowmanager unter X11 Anweisungen zum
+Fenster-Seitenverhältnis verstehen.
 .TP
-.B \-noxv (nur bei \-vo SDL)
+.B \-noxv (nur bei \-vo sdl)
 Deaktiviert die Benutzung von XVideo durch den SDL-Videoausgabetreiber.
 .TP
 .B \-ontop
@@ -2083,7 +2088,7 @@ beim Beenden wieder.
 .TP
 .B \-vm \ \ \ 
 Versucht, in einen anderen Videomodus zu wechseln.
-Unterstützt von dga-, x11-/\:xv- (XF86VidMode) und SDL-Videoausgabetreibern.
+Unterstützt von dga-, x11, xv-, sdl- und directx-Videoausgabetreibern.
 In Verbindung mit dem directx-Videoausgabetreiber können die Optionen
 \-screenw, \-screenh, \-bpp und \-refreshrate benutzt werden, um einen neuen
 Anzeigemodus zu setzen.
@@ -2167,7 +2172,8 @@ kontrolliert (Standard: zentriert).
 .
 .
 .SH "VIDEOAUSGABETREIBER (NUR BEI MPLAYER)"
-Videoausgabetreiber sind Schnittstellen zu verschiedenen Ausgabeeinrichtungen.
+Videoausgabetreiber sind Schnittstellen zu verschiedenen
+Videoausgabe-Einrichtungen.
 Die Syntax ist folgende:
 .TP
 .B \-vo <Treiber1[:Unteroption1[=Wert]:...],Treiber2,...[,]>
@@ -2197,7 +2203,387 @@ tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
 png, tga.
 .sp 1
 Folgende Videoausgabetreiber sind verfügbar:
-FIXME: Videoausgabetreiber eintragen!
+.
+.TP
+.B xv (nur bei X11)
+Benutzt die XVideo-Erweiterung von XFee86 4.x, um hardwarebeschleunigtes
+Abspielen zu ermöglichen.
+Wenn du keinen hardwarespezifischen Treiber wählen kannst, ist dies für dich
+vermutlich die beste Wahl.
+.PD 0
+.RSs
+.IPs port=<Nummer>
+Wähle einen bestimmten Port für XVideo.
+.RE
+.PD 1
+.TP
+.B x11 (nur bei X11)
+Ein Videoausgabetreiber mit Shared Memory ohne Hardwarebeschleunigung, der
+immer funktioniert, wenn X11 läuft.
+.TP
+.B xover (nur bei X11)
+Ergänzt alle Overlay-basierten Treiber um X11-Unterstützung.
+Momentan nur von tdfx_vid unterstützt.
+.TP
+.B xvmc (nur bei X11, nur mit \-vc ffmpeg12mc)
+Ein Videoausgabetreiber, der die XvMC- (X Video Motion Compensation)
+Unterstützung von XFree86 4.x benutzt, um das Decodieren von MPEG1/\:2 und VCR2
+zu beschleunigen.
+.PD 0
+.RSs
+.IPs benchmark
+Deaktiviert die Anzeige von Bildern.
+Benötigt für einwandfreies Benchmarking von Treibern, die den Bildpuffer nur
+bei einem Monitor-Retrace ändern (nVidia).
+.IPs queue
+Frames werden in einer Queue angeordnet, um der Videohardware weitergehendes
+paralleles Arbeiten zu ermöglichen.
+Dies kann eine geringe konstante (nicht bemerkbare) A/\:V-Desynchronisation mit
+sich bringen.
+.IPs sleep
+Benutze die Sleep-Funktion, während auf Beendigung des Renderns gewartet
+wird (nicht empfohlen unter Linux).
+.IPs wait\ 
+Benutze die Sleep-Funktion nicht, während auf Beendigung des Renderns gewartet
+wird (Standard).
+.RE
+.PD 1
+.TP
+.B dga (nur bei X11)
+Gib das Video über die Direct Graphics Access-Erweiterung von XFree86 aus.
+Wird als veraltet betrachtet.
+.TP
+.B sdl (nur bei SDL)
+Höchst-plattformunabhängiger Videoausgabetreiber der SDL- (Simple Directmedia
+Layer) Bibliothek.
+.TP
+.B vidix\ \ 
+VIDIX (VIDeo Interface für *niX) ist eine Schnittstelle zu den
+Videobeschleunigungsfunktionen verschiedener Grafikkarten.
+Sehr schneller Videoausgabetreiber bei Karten, die dies unterstützen.
+.PD 0
+.RSs
+.IPs <Subdevice>
+Wähle explizit einen VIDIX-Subdevice-Treiber, der benutzt werden soll.
+Verfügbare Subdevice-Treiber sind cyberblade_vid, mach64_vid, mga_crtc2_vid,
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid und sis_vid.
+.RE
+.PD 1
+.TP
+.B xvidix (nur bei X11)
+X11-Frontend für VIDIX
+.PD 0
+.RSs
+.IPs <Subdevice>
+das gleich wie bei vidix
+.RE
+.PD 1
+.TP
+.B cvidix\ 
+Generisches, plattformunabhängiges VIDIX-Frontend, das mit nVidia-Karten sogar
+in der Konsole läuft.
+.PD 0
+.RSs
+.IPs <Subdevice>
+das gleich wie bei vidix
+.RE
+.PD 1
+.TP
+.B winvidix (nur bei Windows)
+Windows-Frontend für VIDIX
+.PD 0
+.RSs
+.IPs <Subdevice>
+das gleich wie bei vidix
+.RE
+.PD 1
+.TP
+.B directx (nur bei Windows)
+Videoausgabetreiber, der die DirectX-Schnittstelle benutzt.
+.PD 0
+.RSs
+.IPs noaccel
+Schaltet Hardwarebeschleunigung ab.
+Probiere diese Option bei Problemen mit der Darstellung.
+.RE
+.PD 1
+.TP
+.B quartz (nur bei Mac OS X)
+Mac OS X Quartz-Videoausgabetreiber.
+Unter manchen Umständen mag es effizienter sein, ein komprimiertes
+YUV-Ausgabeformat zu erzwingen, z.B.\& mit \-vf format=yuy2.
+.PD 0
+.RSs
+.IPs device_id=<Nummer>
+Wähle ein Gerät für die Darstellung im Vollbildmodus.
+.RE
+.PD 1
+.TP
+.B fbdev (nur bei Linux)
+Benutze für die Videoausgabe den Kernel-Framebuffer.
+.TP
+.B fbdev2 (nur bei Linux)
+Benutze für die Videoausgabe den Kernel-Framebuffer, alternative
+Implementation.
+.TP
+.B vesa\ \ \ 
+Sehr genereller Videoausgabetreiber, der mit jeder VESA VBE 2.0-kompatiblen
+Karte funktionieren sollte.
+.PD 0
+.RSs
+.IPs dga\ \ 
+Schaltet den DGA-Modus an.
+.IPs nodga
+Schaltet den DGA-Modus ab.
+.IPs vidix
+FIXME: dokumentiere dies
+.IPs lvo\ \ 
+FIXME: dokumentiere dies
+.RE
+.PD 1
+.TP
+.B svga\ \ \ 
+Gib das Video über die SVGA-Bibliothek aus.
+.TP
+.B gl\ \ \ \ \ 
+OpenGL-Videoausgabetreiber.
+Sehr einfache Version ohne OSD-Unterstützung, die Videogröße muß kleiner
+sein als die maximale Texturgröße deiner OpenGL-Implementierung.
+Es ist beabsichtigt, auch mit den einfachsten OpenGL-Implementierungen zu
+funktionieren.
+.PD 0
+.RSs
+.IPs manyfmts
+Schaltet die Unterstütztung für mehr (RGB und BGR) Farbformate.
+Benötigt eine OpenGL-Version >= 1.2, funktioniert noch nicht korrekt.
+.IPs slice-height=<0\-...>
+Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
+0 für ganzes Bild.
+.RE
+.PD 1
+.TP
+.B gl2\ \ \ \ 
+OpenGL-Videoausgabetreiber, zweite Generation.
+Unterstützt OSD und Videos, die größer als die maximale Texturgröße sind.
+.TP
+.B null\ \ \ 
+Produziert keine Videoausgabe.
+Nützlich für Benchmarking-Zwecke.
+.TP
+.B aa\ \ \ \ \ 
+ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
+.TP
+.B caca\ \ \ 
+Farbiger ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
+.TP
+.B bl\ \ \ \ \ 
+Videowiedergabe, die das Blinkenlights-UDP-Protokoll unterstützt.
+Dieser Treiber ist höchstgradig hardwarespezifisch.
+.TP
+.B ggi\ \ \ \ 
+Videoausgabetreiber für das GGI-Grafiksystem.
+.TP
+.B directfb
+Videowiedergabe über die DirectFB-Bibliothek.
+.PD 0
+.RSs
+.IPs (no)input
+Benutze DirectFB anstelle des MPlayer-Tastaturcodes (Standard: aktiviert).
+.IPs buffermode=single|double|triple
+Doppeltes (double) und dreifaches (triple) Buffering liefern die besten
+Resultate, wenn du Abreiß-Probleme vermeiden möchstest.
+Triplebuffering ist effizienter als Doublebuffering, da es MPlayer
+während des Wartens auf das vertikale Retrace nicht blockiert.
+Einfaches Buffern sollte vermieden werden (Standard: single).
+.IPs fieldparity=top|bottom
+Kontrolliert die Ausgabereihenfolge für interlaced-Bilder (Standard:
+deaktiviert).
+Gültige Werte sind top = obere Felder zuerst, bottom = untere Felder zuerst.
+Diese Option hat keinerlei Effekt auf progressives Filmmaterial, wie es die
+meisten MPEG-Filme sind.
+Du mußt diese Option aktivieren, wenn es beim Schauen von
+interlaced-Filmmaterial
+zu Abreißeffekten oder unscharfen Bewegungen kommt.
+.IPs layer=N
+Wird den Layer mit der Id N für die Wiedergabe erzwingen (Standard: -1 - auto).
+.RE
+.PD 1
+.TP
+.B dfbmga\ 
+Matrox G400/G450/G550-spezifische Videoausgabetreiber, die die
+DirectFB-Bibliothek benutzen.
+Ermöglicht CRTC2 (zweiter Bildschirm), stellt Videos unabhängig vom ersten
+Bildschirm dar.
+.PD 0
+.RSs
+.IPs (no)bes
+Ermöglicht die Nutzung von Matrox BES (Backend-Skalierer) (Standard:
+deaktiviert).
+Gibt hinsichtlich Geschwindigkeit und Ausgabequalität sehr gute Resultate, da
+interpolierte Bildverarbeitung in der Hardware geschieht.
+Funktioniert nur auf dem ersten Bildschirm.
+.IPs (no)spic
+Nutzt den Matrox-Sub-Picture-Layer für die Anzeige des OSD (Standard:
+aktiviert).
+.IPs (no)crtc2
+Schaltet TV-Out des zweiten Monitors an (Standard: aktiviert).
+An der Wiedergabequalität ist erstaunlich, dass ein komplettes Interlaced-Bild
+mit exakter Synchronisation auf jedem un-/\:graden Feld dargestellt wird.
+.IPs (no)input
+Benutze DirectFB anstelle des MPlayer-Tastaturcodes (Standard: aktiviert).
+.IPs buffermode=single|double|triple
+Doppeltes (double) und dreifaches (triple) Buffering liefern die besten
+Resultate, wenn du Abreiß-Probleme vermeiden möchstest.
+Triplebuffering ist effizienter als Doublebuffering, da es MPlayer
+während des Wartens auf das vertikale Retrace nicht blockiert.
+Einfaches Buffern sollte vermieden werden (Standard: single).
+.IPs fieldparity=top|bottom
+Kontrolliert die Ausgabereihenfolge für interlaced-Bilder (Standard:
+deaktiviert).
+Gültige Werte sind top = obere Felder zuerst, bottom = untere Felder zuerst.
+Diese Option hat keinerlei Effekt auf progressives Filmmaterial, wie es die
+meisten MPEG-Filme sind.
+Du mußt diese Option aktivieren, wenn es beim Schauen von
+interlaced-Filmmaterial
+zu Abreißeffekten oder unscharfen Bewegungen kommt.
+.IPs tvnorm=pal|ntsc|auto
+Setzt die TV-Norm der Matrox-Karte, ohne /etc/\:directfbrc ändern zu
+müssen (Standard: deaktiviert).
+Gültige Normen sind pal = PAL, ntsc = NTSC.
+Eine spezielle Norm ist auto (automatisches Anpassen zu PAL/NTSC), denn
+die Norm wird bestimmt, indem die Framerate des Films betrachtet wird.
+.RE
+.PD 1
+.TP
+.B mga (nur bei Linux)
+Matrox-spezifischer Videoausgabetreiber, der den YUV-Backend-Scaler von
+Gxxx-Karten durch ein Kernelmodul benutzt.
+Wenn du eine Matroxkarte hast, ist dies die schnellste Option.
+.TP
+.B xmga (nur bei Linux, X11)
+Der mga-Videoausgabetreiber, läuft in einem X11-Fenster.
+.TP
+.B syncfb\ 
+Videoausgabetreiber für das SyncFB-Kernelmodul, das spezielle
+Hardwareeigenschaften von Matrox Gxxx-Karten bereitstellt, wie
+Hardware-Deinterlacing, Skalierung und Synchronisation der Videoausgabe für
+das vertikale Retrace auf dem Monitor.
+.TP
+.B 3dfx (nur bei Linux)
+3Dfx-spezifischer Videoausgabetreiber.
+FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+.TP
+.B tdfxfb (Linux only)
+Dieser Treiber setzt den tdfx-Framebuffer-Treiber ein, um Filme mit
+YUV-Beschleunigung abzuspielen.
+FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+.TP
+.B tdfx_vid (Linux only)
+3Dfx-spezifischer Videoausgabetreiber.
+Funktioniert in Verbindung mit einem Kernelmodul.
+FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+.TP
+.B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
+Creative DXR2-spezifischer Videoausgabetreiber.
+.PD 0
+.RSs
+.IPs x11
+Aktiviert Overlay.
+.IPs xv
+Aktiviert Overlay.
+.RE
+.PD 1
+.TP
+.B dxr3 (nur bei DXR3)
+Sigma Designs em8300 MPEG-Decoder-Chip- (Creative DXR3, Sigma Designs
+Hollywood Plus) spezifischer Videoausgabetreiber.
+Siehe auch lavc-Videofilter.
+.PD 0
+.RSs
+.IPs overlay
+Aktiviert Overlay anstelle von TV-Ausgabe.
+.IPs prebuf
+Schaltet Prebuffering ein.
+.IPs sync
+Schaltet die neue Sync-Engine ein.
+.IPs norm=<Norm>
+Gibt die TV-Norm an.
+.RSss
+0: Ändert die aktuelle Norm nicht (Standard).
+.br
+1: Automatische Anpassung mit PAL/NTSC.
+.br
+2: Automatische Anpassung mit PAL/PAL-60.
+.br
+3: PAL
+.br
+4: PAL-60
+.br
+5: NTSC
+.REss
+.IPs device=<Nummer>
+Gibt die Gerätenummer an, wenn mehr als eine em8300-Karte vorhanden ist.
+.RE
+.PD 1
+.TP
+.B mpegpes (nur bei DVB)
+DVB-spezifischer Videoausgabetreiber.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Gibt die Gerätenummer an, wenn mehr als eine DVB-Karte vorhanden ist (nur bei
+V3 API, wie bei den Treibern der 1.x.y-Serie).
+.RE
+.PD 1
+.TP
+.B zr (siehe auch \-zr* und \-zrhelp)
+Videoausgabetreiber für eine Anzahl von MJPEG-Capture/\:Wiedergabe-Karten.
+.TP
+.B zr2\ \ \ \ 
+Videoausgabetreiber für eine Anzahl von MJPEG-Capture/\:Wiedergabe-Karten,
+zweite Generation.
+Siehe auch den zrmjpeg-Videofilter.
+.TP
+.B md5\ \ \ \ 
+Generiert Bilder von jedem Frame mit Hilfe von \-vo pgm und schreibt die
+MD5-Prüfsummen in eine Datei.
+Nützlich für Debugging-Zwecke.
+.PD 0
+.RSs
+.IPs filename
+Erlaubt die Angabe des Ausgabe-Dateinamens (Standard: ./md5).
+.RE
+.PD 1
+.TP
+.B yuv4mpeg
+Wandelt den Videostream in eine Abfolge von unkomprimierten YUV 4:2:0-Bildern
+um speichert diese in einer Datei namens 'stream.yuv' im aktuellen Verzeichnis.
+Nützlich, wenn du das Video mit den mjpegtools-Tools bearbeiten möchtest.
+.TP
+.B gif89a\ 
+Gibt jeden Frame in eine GIF-Datei im aktuellen Verzeichnis aus.
+Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Name.
+.TP
+.B jpeg\ \ \ 
+Gibt jeden Frame in eine JPEG-Datei im aktuellen Verzeichnis aus.
+Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Name.
+.TP
+.B pgm\ \ \ \ 
+Gibt jeden Frame in eine PGM-Datei im aktuellen Verzeichnis aus.
+Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Name.
+.TP
+.B png\ \ \ \ 
+Gibt jeden Frame in eine PNG-Datei im aktuellen Verzeichnis aus.
+Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Name.
+.TP
+.B tga\ \ \ \ 
+Gibt jeden Frame in eine TGA-Datei im aktuellen Verzeichnis aus.
+Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Name.
 .
 .
 .SH "OPTIONEN FÜR DIE DECODIERUNG/DAS FILTERN"
@@ -2241,8 +2627,8 @@ Unterstützt nur das 16-bit Little-Endian-Format.
 .IPs channels[=nch]
 Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
 Falls die Anzahl Ausgabekanäle größer ist als die Anzahl der Eingangskanäle, 
-so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann der
-Monokanal auf beiden Ausgabekanälen wiederholt).
+so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
+der Monokanal auf beiden Ausgabekanälen wiederholt).
 Ist die Anzahl Ausgabekanäle kleiner als die Anzahl Eingangskanäle,
 so werden die überschüssigen Kanäle verworfen.
 .IPs format[=bps,f]
