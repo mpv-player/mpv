@@ -6,10 +6,14 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-09:
+ *  Thanks to the new control() method I have finally been able to enable the em8300 prebuffering.
+ *  This should speed up playback on all systems, the vout cpu usage should rocket since I will be hogging
+ *  the pci bus. Not to worry though, since frames are prebuffered it should be able to take a few blows
+ *  if you start doing other stuff simultaneously.
+ *
  * 2002-02-03:
  *  Removal of libmp1e, libavcodec has finally become faster (and it's code is helluva lot cleaner)
- *  We will call this one the "gentoo" release in favour of the gentoo linux distribution (www.gentoo.org), which
- *  aims at providing maximum performance
  *
  * 2002-02-02:
  *  Cleaned out some old code which might have slowed down writes
@@ -80,6 +84,7 @@ static int img_format = 0;
 static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
+static char fdv_name[80];
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
@@ -92,12 +97,16 @@ static vo_info_t vo_info =
 	""
 };
 
-static uint32_t control(uint32_t request, void *data, ...)
+uint32_t control(uint32_t request, void *data, ...)
 {
 	uint32_t flag = 0;
 	switch (request) {
 	case VOCTRL_RESET:
-		fsync(fd_video);
+		/* Apparently the new em8300 flushing code is still not working.
+		 * I'll get on it, but this should be good enough for now
+		 */
+		close(fd_video);
+		fd_video = open(fdv_name, O_WRONLY);
 		return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
 		switch (*((uint32_t*)data)) {	
@@ -117,10 +126,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 			printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
 #else
 		default:
-			printf("VO: [dxr3] You have enable libavcodec support (Read DOCS/codecs.html)!\n");
+			printf("VO: [dxr3] You have disabled libavcodec support (Read DOCS/codecs.html)!\n");
 #endif
 		}
-		return flag;
+		return (flag | 0x100);
 	}
 	return VO_NOTIMPL;
 }
@@ -270,14 +279,11 @@ static const vo_info_t* get_info(void)
 	return &vo_info;
 }
 
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
+static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
 #ifdef USE_LIBAVCODEC
-	/* This function draws the osd and subtitles etc. */
-	if (img_format != IMGFMT_MPEGPES) {
-		vo_draw_alpha_yv12(w, h, src, srca, srcstride,
-			avc_picture.data[0] + (x0 + d_pos_x) + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
-	}
+	vo_draw_alpha_yv12(w, h, src, srca, srcstride,
+		avc_picture.data[0] + (x + d_pos_x) + (y + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
 #endif
 }
 
@@ -320,7 +326,8 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	/* Flush the device if a seek occured */
+	ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+	ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
@@ -452,6 +459,7 @@ static uint32_t preinit(const char *arg)
 	} else {
 		printf("VO: [dxr3] Opened %s\n", devname);
 	}
+	strcpy(fdv_name, devname);
 	
 	/* Open the subpicture interface */
 	if (vo_subdevice) {
