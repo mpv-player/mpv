@@ -45,6 +45,7 @@ extern int verbose;
 
 int vlvo_preinit(const char *drvname)
 {
+  if(verbose > 1) printf("vesa_lvo: vlvo_preinit(%s) was called\n",drvname);
 	lvo_handler = open(drvname,O_RDWR);
 	if(lvo_handler == -1)
 	{
@@ -59,6 +60,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp)
 {
   size_t i,awidth;
+  if(verbose > 1) printf("vesa_lvo: vlvo_init() was called\n");
 	image_width = src_width;
 	image_height = src_height;
 	mga_vid_config.version=MGA_VID_VERSION;
@@ -136,6 +138,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 
 void vlvo_term( void )
 {
+  if(verbose > 1) printf("vesa_lvo: vlvo_term() was called\n");
 	ioctl( lvo_handler,MGA_VID_OFF,0 );
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	if(lvo_handler != -1) close(lvo_handler);
@@ -181,7 +184,6 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
         dest += bespitch2;
     }
 #else
- uint8_t *src;
  uint8_t *dst;
  uint8_t bytpp;
  bytpp = (image_bpp+7)/8;
@@ -194,32 +196,23 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
     }
     else
 #endif
-    {
-      src = image[0];
-      memcpy(dst,src,w*h*bytpp);
-    }  
+      memcpy(dst,image[0],mga_vid_config.frame_size);
 #endif
+ if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
  return 0;
 }
 
-uint32_t vlvo_draw_frame(uint8_t *src[])
+uint32_t vlvo_draw_frame(uint8_t *image[])
 {
-	size_t i, ssize;
-	uint8_t *dest;
-	const uint8_t *sptr;
-	ssize = IMAGE_LINE_SIZE((image_bpp+7)/8);
-	dest = lvo_mem;
-	sptr = src[0];
-	for(i=0;i<image_height;i++)
-	{
-	   memcpy(dest,sptr,ssize);
-	   sptr += ssize;
-	   dest += ssize;
-	}
+/* Note it's very strange but sometime for YUY2 draw_frame is called */
+  memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
+  if(verbose > 1) printf("vesa_lvo: vlvo_draw_frame() was called\n");
+  return 0;
 }
 
 void     vlvo_flip_page(void)
 {
+  if(verbose > 1) printf("vesa_lvo: vlvo_flip_page() was called\n");
 	ioctl(lvo_handler,MGA_VID_FSEL,&next_frame);
 	next_frame=(next_frame+1)%mga_vid_config.num_frames;
 	lvo_mem=frames[next_frame];
@@ -227,11 +220,12 @@ void     vlvo_flip_page(void)
 
 void     vlvo_draw_osd(void)
 {
+  if(verbose > 1) printf("vesa_lvo: vlvo_draw_osd() was called\n");
   /* TODO: hw support */
 }
 
 uint32_t vlvo_query_info(uint32_t format)
 {
-  if(verbose) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
+  if(verbose > 1) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
   return 1;
 }
