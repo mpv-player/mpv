@@ -42,6 +42,7 @@
 
 #include "mm_accel.h"
 
+#include "../cpudetect.h"
 
 //this is where we keep the state of the decoder
 //picture_t picture_data;
@@ -71,15 +72,12 @@ void mpeg2_init (void)
 
     printf (PACKAGE"-"VERSION" (C) 2000-2001 Aaron Holtzman & Michel Lespinasse\n");
     config.flags = 0;
-#ifdef HAVE_MMX
+if(gCpuCaps.hasMMX)
     config.flags |= MM_ACCEL_X86_MMX;
-#endif
-#ifdef HAVE_SSE
+if(gCpuCaps.hasMMX2)
     config.flags |= MM_ACCEL_X86_MMXEXT;
-#endif
-#ifdef HAVE_3DNOW
+if(gCpuCaps.has3DNow)
     config.flags |= MM_ACCEL_X86_3DNOW;
-#endif
 #ifdef HAVE_MLIB
     config.flags |= MM_ACCEL_MLIB;
 #endif
