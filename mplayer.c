@@ -68,13 +68,6 @@ XMM xmm;
 XMM_PluginSound *pSound=NULL;
 #endif
 
-#ifdef HAVE_FBDEV
-extern char *fb_dev_name;
-extern char *fb_mode_cfgfile;
-extern char *fb_mode_name;
-extern int fb_mode_depth;
-#endif
-
 extern int vo_screenwidth;
 
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!

@@ -2,6 +2,13 @@
  * config for cfgparser
  */
 
+#ifdef HAVE_FBDEV
+extern char *fb_dev_name;
+extern char *fb_mode_cfgfile;
+extern char *fb_mode_name;
+extern int fb_mode_depth;
+#endif
+
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
@@ -67,3 +74,4 @@ struct config conf[]={
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
+
