@@ -351,7 +351,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-        unsigned int sdl_format, mode;
+        unsigned int sdl_format;
 
 
         switch(format){
@@ -389,10 +389,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  case 0x01:
 	  case 0x05:
 	  	printf("SDL: setting zoomed fullscreen without modeswitching\n");
-		//priv->fullmodes[mode]->w 
-		/*priv->fullmode++;
-		if (priv->fullmode > (findArrayEnd(priv->fullmodes) - 1)) priv->fullmode = 0;
-		set_fullmode(priv->fullmode);*/
 		priv->windowsize.w = d_width;
 	  	priv->windowsize.h = d_height;
           	if(priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags))
@@ -583,7 +579,7 @@ static void check_events (void)
 			case SDL_KEYUP:
 				keypressed = event.key.keysym.sym;
 
-				/* c key pressed. plus cycles through available fullscreenmodes, if we have some */
+				/* c key pressed. c cycles through available fullscreenmodes, if we have some */
 				if ( ((keypressed == SDLK_c)) && (priv->fullmodes) ) {
 					/* select next fullscreen mode */
 					priv->fullmode++;
