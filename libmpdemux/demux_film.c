@@ -29,6 +29,8 @@ typedef struct _film_chunk_t
   int chunk_size;
   unsigned int syncinfo1;
   unsigned int syncinfo2;
+
+  float pts;
 } film_chunk_t;
 
 typedef struct _film_data_t
@@ -61,16 +63,17 @@ printf ("current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n"
   if (new_current_chunk < 0)
     new_current_chunk = 0;
   if ((unsigned int)new_current_chunk > film_data->total_chunks)
-    new_current_chunk = film_data->total_chunks;
+    new_current_chunk = film_data->total_chunks - 1;
 
   while (((film_data->chunks[new_current_chunk].syncinfo1 == 0xFFFFFFFF) ||
     (film_data->chunks[new_current_chunk].syncinfo1 & 0x80000000)) &&
     (new_current_chunk > 0))
     new_current_chunk--;
 
-printf ("  actual new chunk = %d (syncinfo1 = %08X)\n",
-  new_current_chunk, film_data->chunks[new_current_chunk].syncinfo1);
   film_data->current_chunk = new_current_chunk;
+
+printf ("  (flags = %X)  actual new chunk = %d (syncinfo1 = %08X)\n",
+  flags, film_data->current_chunk, film_data->chunks[film_data->current_chunk].syncinfo1);
 }
 
 // return value:
@@ -104,7 +107,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
     if (stream_read(demuxer->stream, dp->buffer, film_chunk.chunk_size) !=
       film_chunk.chunk_size)
       return 0;
-    dp->pts = 0;
+    dp->pts = film_chunk.pts;
     dp->pos = film_chunk.chunk_offset;
     dp->flags = 0;
 
@@ -141,7 +144,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
       if (stream_read(demuxer->stream, dp->buffer + 10, 
         film_chunk.chunk_size - 12) != (film_chunk.chunk_size - 12))
         return 0;
-      dp->pts = (film_chunk.syncinfo1 & 0x7FFFFFFF) / sh_video->fps;
+      dp->pts = film_chunk.pts;
       dp->pos = film_chunk.chunk_offset;
       dp->flags = (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0;
 
@@ -159,7 +162,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
     else
     {
       ds_read_packet(demuxer->video, demuxer->stream, film_chunk.chunk_size,
-        (film_chunk.syncinfo1 & 0x7FFFFFFF) / sh_video->fps,
+        film_chunk.pts,
         film_chunk.chunk_offset, (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0);
       film_data->current_chunk++;
     }
@@ -182,6 +185,7 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
   int audio_channels;
   unsigned int film_version;
   int counting_chunks;
+  unsigned int total_audio_bytes = 0;
 
   film_data = (film_data_t *)malloc(sizeof(film_data_t));
   film_data->total_chunks = 0;
@@ -309,7 +313,6 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         film_chunk.chunk_size = stream_read_dword(demuxer->stream);
         film_chunk.syncinfo1 = stream_read_dword(demuxer->stream);
         film_chunk.syncinfo2 = stream_read_dword(demuxer->stream);
-        film_data->chunks[i] = film_chunk;
 
         // count chunks for the purposes of seeking
         if (counting_chunks)
@@ -323,9 +326,22 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
           else
             film_data->chunks_per_second++;
         }
+
+        // precalculate PTS
+        if (film_chunk.syncinfo1 == 0xFFFFFFFF)
+        {
+          film_chunk.pts =
+            (float)total_audio_bytes / (float)sh_audio->wf->nAvgBytesPerSec;
+          total_audio_bytes += film_chunk.chunk_size;
+        }
+        else
+          film_chunk.pts =
+            (film_chunk.syncinfo1 & 0x7FFFFFFF) / sh_video->fps;
+
+        film_data->chunks[i] = film_chunk;
       }
 
-      // in some FILM files (notable '1.09'), the length of the FDSC chunk
+      // in some FILM files (notably '1.09'), the length of the FDSC chunk
       // follows different rules
       if (chunk_size == (film_data->total_chunks * 16))
         header_size -= 16;
