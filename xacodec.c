@@ -599,6 +599,13 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
     int uvstride;
 
 #if 0
+    printf("YUVTabs:  %d %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
+	yuv_tabs->YUV_Y_tab,
+	yuv_tabs->YUV_UB_tab,
+	yuv_tabs->YUV_VR_tab,
+	yuv_tabs->YUV_UG_tab,
+	yuv_tabs->YUV_VG_tab );
+
     XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	image, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
 
@@ -608,7 +615,11 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
 #endif
 
     // copy Y plane:
-    memcpy(image->planes[0],yuv->Ybuf,imagex*imagey);
+    if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
+	for(y=0;y<imagey*imagex;y++)
+	    image->planes[0][y]=yuv->Ybuf[y]<<1;
+    } else
+	memcpy(image->planes[0],yuv->Ybuf,imagex*imagey);
 
     // scale U,V planes by 2:
     imagex>>=2;
@@ -624,9 +635,16 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
 	unsigned char *du=image->planes[1]+2*y*strideu;
 	unsigned char *dv=image->planes[2]+2*y*stridev;
 	int x;
-	for(x=0;x<imagex;x++){
-	    du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x];
-	    dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x];
+	if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
+	    for(x=0;x<imagex;x++){
+		du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x]*2;
+		dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x]*2;
+	    }
+	} else {
+	    for(x=0;x<imagex;x++){
+		du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x];
+		dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x];
+	    }
 	}
     }
 
