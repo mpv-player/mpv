@@ -1,4 +1,4 @@
-.\" synced with 1.773
+.\" synced with 1.777
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "13 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "14 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2282,8 +2282,8 @@ aussi bien que directx et gl2 sous Windows.
 Active la fonctionnalité pan et scan (par ex.\& couper les côtés d'un
 film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
-Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga
-et xvidix.
+Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
+gl et xvidix.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2664,7 +2664,7 @@ Surtout pour des test, vous devriez utiliser \-osdlevel 0 pour désactiver
 l'incrustation OSD.
 .IPs (no)aspect
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
-le panscan (par défaut\ : activé).
+le "pan and scan" (par défaut\ : activé).
 Sa désactivation peut faire gagner un peu de temps processeur.
 .RE
 .PD 1
@@ -2912,12 +2912,12 @@ Définit le nom du fichier de sortie (par défaut\ : ./grab.mpg).
 .PD 1
 .
 .TP
-.B zr (voir aussi \-zr* et \-zrhelp, le filtre vidéo zrmjpeg)
+.B zr (voir aussi \-zr* et \-zrhelp)
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG.
 .
 .TP
-.B zr2\ \ \ \ 
+.B zr2 (voir aussi le filtre vidéo zrmjpeg)
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG, seconde génération.
 .PD 0
@@ -5146,7 +5146,7 @@ la syntaxe ci-dessous\ :
 .B \-<codec>opts <option1[=valeur],option2,...>
 .
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame, x264enc
+Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5173,7 +5173,7 @@ intervalle maximal entre deux trames-clé (en trames)
 .
 .TP
 .B deinterlace
-active le désentrelacement (à éviter, DivX4 est boggué)
+Active le désentrelacement (à éviter, DivX4 est boggué).
 .
 .TP
 .B q=<1\-5>
@@ -5201,13 +5201,12 @@ rapport de réaction de contrôle du débit
 .
 .TP
 .B crispness=<0\-100>
-spécifie la dureté/\:douceur
+Définit la dureté/\:douceur.
 .
 .TP
 .B pass=<1\-2>
 Permet d'encoder des fichiers DivX4 en 2 passes.
-Encodez d'abord avec pass=1, puis avec les mêmes paramètres encodez avec
-pass=2.
+Encodez d'abord avec pass=1, puis encodez avec les mêmes paramètres et pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
@@ -5261,7 +5260,7 @@ Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant.
 .
 .TP
 .B br=<0\-1024>
-Définit le bitrate en kBit (CBR et ABR uniquement).
+bitrate en kBit/s (CBR et ABR uniquement).
 .
 .TP
 .B q=<0\-9>
@@ -5277,7 +5276,7 @@ rapport de compression
 .
 .TP
 .B vol=<0\-10>
-Fixe le gain d'entrée audio.
+gain d'entrée audio
 .
 .TP
 .B mode=<0\-3>
@@ -5300,7 +5299,7 @@ mono
 .PD 0
 .RSs
 .IPs 0
-non
+aucun
 .IPs 1
 tous
 .IPs 2
@@ -5310,8 +5309,10 @@ ajuste
 .
 .TP
 .B fast\ \ \ 
-Sélectionne le plus rapide des modes pré-sélectionnés VBR suivant,
-qualité légèrement inférieure et bitrates plus importants.
+Sélectionne le plus rapide des modes VBR pré-sélectionnés à suivre cette
+option.
+Produit des fichiers de qualité légèrement inférieure au bitrate plus
+importants.
 .
 .TP
 .B highpassfreq=<fréq>
@@ -5331,16 +5332,19 @@ laissera LAME choisir la fréquence automatiquement.
 .B preset=<valeur>
 valeurs de preset
 .RSs
+.IPs help\ 
+Affiche d'autres options et des informations sur sur les modes
+pré-sélectionnés.
 .IPs medium
-encodage VBR, bonne qualité, intervalle bitrate 150\-180 kbps.
+encodage VBR, bonne qualité, intervalle bitrate 150\-180 kbps
 .IPs standard
-encodage VBR, haute qualité, intervalle bitrate 170\-210 kbps.
+encodage VBR, haute qualité, intervalle bitrate 170\-210 kbps
 .IPs extreme
-encodage VBR, très haute qualité, intervalle bitrate 200\-240 kbps.
+encodage VBR, très haute qualité, intervalle bitrate 200\-240 kbps
 .IPs insane
-encodage CBR, plus haute qualité pré-sélectionnée, bitrate 320 kbps.
+encodage CBR, plus haute qualité pré-sélectionnée, bitrate 320 kbps
 .IPs <8-320>
-encodage ABR au bitrate moyen indiqué.
+encodage ABR au bitrate moyen indiqué
 .RE
 .sp 1
 .RS
@@ -5352,15 +5356,12 @@ encodage ABR au bitrate moyen indiqué.
 Devrait convenir à la plupart des gens et à plupart des musiques car ce
 preset est déjà d'assez grande qualité.
 .IPs cbr:preset=192
-encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
+Encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
 .IPs preset=172
-encode avec les présélections ABR à un bitrate moyen de 172 kbps.
+Encode avec les présélections ABR à un bitrate moyen de 172 kbps.
 .IPs preset=extreme
 Devrait convenir aux gens très exigeants, ayant une audition extrêmement
 bonne et un équipement HI-FI en rapport.
-.IPs preset=help
-Affiche des options supplémentaires et des informations sur les
-paramètres de présélections.
 .RE
 .PD 1
 .
@@ -6575,11 +6576,11 @@ Ne fonctionne pas (encore).
 .
 .SS nuv (\-nuvopts)
 .
-Nuppel video est basé sur rtjpeg et lzo.
-Par défaut les trames sont d'abord encodées avec rtjpeg et ensuite avec lzo.
+Nuppel video est basé sur RTJPEG et LZO.
+Par défaut les trames sont d'abord encodées avec RTJPEG et ensuite avec LZO.
 Mais chacune des passes peut être activée ou pas.
-Donc vous pouvez en fait obtenir du i420 brut, du i420 compressé par lzo, du
-rtjpeg, ou le rtjpeg compressé par lzo.
+Donc vous pouvez en fait obtenir du i420 brut, du i420 compressé par LZO, du
+RTJPEG, ou le RTJPEG compressé par LZO.
 .br
 .I NOTE:
 La documentation de nuvrec contient quelques conseils et exemples sur les
@@ -6587,23 +6588,27 @@ paramètres à utiliser avec les encodages TV courants.
 .
 .TP
 .B c=<0\-20>
-seuil de chrominance
+seuil de chrominance (par défaut\ : 1)
 .
 .TP
 .B l=<0\-20>
-seuil de luminance
+seuil de luminance (par défaut\ : 1)
+.
+.TP
+.B lzo \ 
+Active la compression LZO (par défaut).
 .
 .TP
 .B nolzo \ 
-Désactive la compression lzo
+Désactive la compression LZO.
 .
 .TP
 .B q=<3\-255>
-Fixe le niveau de qualité
+niveau de qualité (par défaut: 255)
 .
 .TP
 .B raw
-Désactive l'encodage rtjpeg
+Désactive l'encodage RTJPEG (par défaut).
 .
 .TP
 .B rtjpeg
@@ -6635,10 +6640,10 @@ Passe en mode quantificateur fixe et définit le quantificateur à utiliser.
 .B me_quality=<0\-6>
 Contrôle la qualité de détection de mouvement.
 Plus cette valeur est grande et plus l'évaluation est fine et utilise
-judicieusement les bits.
+judicieusement les bits (par défaut\ : 6).
 En revanche, cette plus grande finesse se paye par un temps d'encodage plus
 long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
-paramètre (par défaut\ : 6).
+paramètre.
 .
 .TP
 .B interlacing
@@ -7092,7 +7097,7 @@ qualité, mais rend la navigation moins précise (par défaut\ : 250).
 .
 .TP
 .B idrint=<valeur>
-Toutes les <valeur> trames-I se trouve une trame-IDR (par défaut\ : 2).
+Une trame sur <valeur> trames-I se trouve une trame-IDR (par défaut\ : 2).
 En H.264, les trames I n'encadrent pas nécessairement un groupe fermé de
 trames prédites (closed GOP) car une trame-P peut aussi être prédite
 à partir d'autres trames que celles la précédant (voir aussi frameref).
