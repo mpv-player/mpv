@@ -1,4 +1,4 @@
-.\" synced with 1.833
+.\" synced with 1.837
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1692,10 +1692,6 @@ Okre¶la ID napisów VOBsub.
 Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 .
 .TP
-.B \-aofile <nazwa\ zbioru>
-Zmienia domy¶ln± nazwê zbioru dla \-ao pcm.
-.
-.TP
 .B \-aop <list=wtyczka1,wtyczka2...:opcja1=warto¶æ1:opcja2=warto¶æ2...>
 Okre¶l wtyczki audio i ich opcje
 (sprawd¼ równie¿ rozdzia³ dokumentacji traktuj±cy o wtyczkach audio).
@@ -1790,11 +1786,6 @@ Warto¶æ 200 pozwoli na podniesienie g³o¶no¶ci do maksimum dwukrotno¶ci
 aktualnego poziomu.
 Przy warto¶ciach poni¿ej 100 pocz±tkowa g³o¶no¶æ (wynosz±ca 100%)
 bêdzie powy¿ej maksimum, czego np.\& OSD nie potrafi prawid³owo wy¶wietliæ.
-.
-.TP
-.B \-nowaveheader (tylko \-ao pcm)
-Nie do³±cza nag³ówków wave.
-U¿ywany przy surowym PCM.
 .
 .TP
 .B \-volstep <0\-100>
@@ -1933,9 +1924,25 @@ Nie przekazuje d¼wiêku, ale utrzymuje prêdko¶æ odtwarzania video.
 Do testów wydajno¶ciowych u¿yj \-nosound.
 .
 .TP
-.B pcm (sprawd¼ równie¿ \-aofile)
+.B pcm
 Sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/\:wave.
-Zapisuje d¼wiêk do ./audiodump.wav.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Do³±cza lub pomija nag³ówek wave (domy¶lnie: do³±cza).
+Je¿eli nie jest do³±czony, zostanie wygenerowane srowe wyj¶cie PCM.
+.IPs file=<nazwa\ pliku>
+Zapisuje d¼wiêk do <nazwa\ pliku> zamiast domy¶lnego audiodump.wav.
+Je¿eli okre¶lnono parametr nowaveheader, domy¶lnym zbiorem wyj¶ciowym jest
+audiodump.pcm.
+.REss
+.PD 1
+.RS
+.sp 1
+.I INFORMACJA:
+Je¿eli nie okre¶lisz ¿adnej opcji, wyj¶cie jest progresywne
+(np.\& bez przeplotu).
+.RE
 .
 .TP
 .B plugin\ \ 
@@ -7154,6 +7161,67 @@ Ustawia u¿yty bitrate w kbit/\:sekunda (domy¶lnie: wy³±czone).
 Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
 .
 .TP
+.B qp_constant=<1\-51>
+Wybiera kwantyzator, jaki bêdzie u¿yty z klatkami P.
+Klatki I i B ró¿ni± siê od tej warto¶ci odpowiednio o ip_factor i pb_factor.
+Najbardziej przydatny zakres to 20\-40 (domy¶lnie: 26).
+Ni¿sze warto¶ci to lepsza dok³adno¶c, ale wiêksze warto¶ci bitrate.
+Zauwa¿, ¿e kwantyzacja w H.264 dzia³a zupe³nie inaczej ni¿ w MPEG[124].
+Parametr kwantyzacji (QP) H.264 jest w skali logarytmicznej.
+Na przyk³ad, ró¿nica bitratete miêdzy QP=20 a QP=40 jest mniej wiêcej równa
+wspó³czynnikowi wynosz±cemu 10. Przydatne kwantyzatory w H.264 s± du¿o wiêksze
+w porównaniu z tymi z MPEG[124].
+.
+.TP
+.B pass=<1\-3>
+Korzysta z trybu dwu lub trzyprzebiegowego.
+Zaleca siê kodowanie zawsze w jednym z tych dwóch trybów, poniewa¿ bity
+s± lepiej rozprowadzany i podnosi siê jako¶æ.
+.PD 0
+.RSs
+.IPs 1
+pierwszy przebieg
+.IPs 2
+drugi przebieg (kodowania dwuprzebiegowego)
+.IPs 3
+n-ty przebieg (drugi i trzeci przebieg kodowania trzyprzebiegowego)
+.RE
+.RS
+A teraz jak to dzia³a i jak z tego korzystaæ:
+.br
+Pierwszy przebieg (pass=1) zbiera statystyki klipu i zapisuje je do pliku.
+Bêdziesz pewnie chcia³ wy³±czyæ niektóre opcje wymagaj±ce du¿ej mocy obliczeniowej, poza
+tymi u¿ywanymi domy¶lnie.
+.br
+W trybie dwuprzebiegowym, drugie przej¶cie (pass=2) czyta dane z pliku i opiera
+na nich decyzje dotycz±ce kontroli tempa.
+.br
+W trybie trzyprzebiegowym, drugie przej¶cie (pass=3, to nie b³±d)
+robi dwie rzeczy na raz: Czyta dane i nadpisuje je. Mo¿e bêdziesz chcia³
+zabezpieczyæ plik divx2pass.log zanim zaczniesz kodowaæ, je¿eli istnieje
+jakakolwiek szansa, ¿e bêdziesz musia³ przerwaæ dzia³anie MEncodera.
+Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi wymagaj±cymi
+du¿ej mocy obliczeniowej.
+.br
+Trzeci przebieg (pass=3) dzia³a podobnie jak drugi, poza tym ¿e korzysta z
+zasobu ze statystykami zebranymi podczas drugiego przebiegu.
+Mo¿esz korzystaæ z wszystkich opcji kodowanie, ³±cznie z tymi wymagaj±cymi
+du¿ej mocy obliczeniowej.
+.br
+Pierwszy przebieg mo¿e u¿ywaæ albo sta³ej warto¶ci bitrate albo sta³ego
+kwantyzatora. Ten drugi czêsto jest lepszym wyborem, ale wymaga okre¶lenia
+warto¶ci qp_constant bêd±cej najbli¿szej oczekiwanej warto¶ci bitrate.
+(Lepiej jest b³êdnie wybraæ ni¿sz± warto¶æ qp_constant, np. wy¿szy bitrate.)
+Kolejne przebiegi s± w trybie ABR i musi zostaæ okre¶lona warto¶æ bitrate.
+.br
+.I
+INFORMACJA:
+Obs³uga kodowania trzyprzebiegowego w x264 jest ca³kiem nowa w MEncoderze, zachêcamy
+do pomocy i przesy³ania nam dobrych kombinacji parametrów x264, które by³yby jednocze¶nie
+szybki i zapewnia³y wysok± jako¶æ.
+.REss
+.
+.TP
 .B keyint=<warto¶æ>
 Ustawia maksymaln± przerwê miêdzy ramkami I.
 Wiêksze warto¶ci oszczêdzaj± bity, a tym samym poprawiaj± jako¶æ,
@@ -7257,24 +7325,24 @@ Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
 .
 .TP
 .B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
-Minimalny kwantyzator, 15\-35 to u¿yteczny zakres (domy¶lnie: 10).
+Minimalny kwantyzator, 10\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
 .B qp_max=<1\-51> (tylko CBR)
 maksymalny kwantyzator (domy¶lnie: 51)
 .
 .TP
-.B qp_step=<warto¶æ>
+.B qp_step=<1\-50> (tylko CBR lub tryb dwuprzebiegowy)
 Maksymalna warto¶æ o jak± kwantyzator mo¿e byæ zwiêkszony/zmniejszony
-pomiêdzy klatkami.
+pomiêdzy klatkami (domy¶lnie: 1).
 .
 .TP
-.B rc_buffer_size=<warto¶æ>
-rozmiar bufora kontroli tempa (domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
+.B rc_buffer_size=<warto¶æ> (tylko CBR lub tryb dwuprzebiegowy) 
+rozmiar bufora kontroli tempa w kbitach(domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
 .
 .TP
 .B rc_init_buffer=<warto¶æ>
-Ustawia pocz±tkowego bufora kontroli tempa (domy¶lnie: 1/4 rc_buffer_size)
+Ustawia wstêpne zape³nienie bufora kontroli tempa (domy¶lnie: 0.25)
 .
 .TP
 .B rc_sens=<0\-100> (tylko CBR)
@@ -7289,56 +7357,12 @@ wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 1.4)
 wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.3)
 .
 .TP
-.B pass=<1\-3>
-Uruchamia tryb dwu- lub trójprzebiegowy.
-Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzebiegowym z uwagi na
-lepsz± dystrybucjê bitów i poprawê ogólnej jako¶ci.
-.PD 0
-.RSs
-.IPs 1
-pierwszy przebieg
-.IPs 2
-drugi przebieg
-.IPs 3
-N-ty przebieg (drugi i trzeci w trybie trójprzebiegowym)
-.RE
-.RS
-A teraz jak to dzia³a i jak tego u¿ywaæ:
-.br
-Pierwszy przebieg (pass=1) zbiera statystyki video i zapisuje je do pliku.
-Mo¿e bêdziesz chcia³ wy³±czyæ opcje wymagaj±ce du¿ej mocy obliczeniowej
-poza tymi domy¶lnymi.
-.br
-W trybie dwuprzebiegowym, drugi przebieg (pass=2) czyta plik ze statystykami
-i opiera na tym decyzje kontroli tempa.
-.br
-W trybie trójprzebiegowym, drugi przebieg (pass=3, to nie pomy³ka) robi
-obie rzeczy: Najpierw czyta statystyki i nadpisuje je.
-Mo¿e bêdziesz chcia³ zrobiæ kopiê pliku divx2pass.log zanim to siê stanie,
-je¿eli istnieje szansa, ¿e przerwiesz dzia³anie MEncodera.
-Mo¿esz u¿yæ wszelkich opcji kodowania, poza tymi szczególnie wymagaj±cymi
-du¿ej mocy obliczeniowej.
-.br
-Trzeci przebieg (pass=3) dzia³a tak samo jak drugi przebieg, poza tym ¿e
-korzysta ze statystyk drugiego przebiegu.
-Mo¿esz u¿yæ wszelkich opcji kodowania, nawet te wymagaj±ce
-du¿ej mocy obliczeniowej.
-.br
-.I INFORMACJA:
-Obs³uga trybu trójprzebiegowego x264 jest ca³kiem nowa w MEncoderze, mile
-widziane s± wszelkie informacje o dobrych kombinacjach opcji x264,
-które s± i szybkie i daj± dobr± jako¶æ.
-.REss
+.B qcomp=<0\-1> (tylko drugie przej¶cie)
+Ni¿sza warto¶æ sprawia, ¿e bitrate jest bardziej sta³y, podczas gdy wy¿sza,
+sprawia, ¿e parametr kwantyzacji jest bardziej sta³y.
 .
 .TP
-.B qcomp=<0\-1>
-Kompresja kwantyzatora (domy¶lnie: 0.6).
-Wp³ywa na kontrolê tempa: ni¿sza warto¶æ sprawia, ¿e bitrate
-jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
-jest bardziej sta³y.
-.
-.TP
-.B cplx_blur=<0\-999>
+.B cplx_blur=<0\-999> (tylko drugie przej¶cie)
 Rozmycie w czasie szacowanej z³o¿ono¶ci klatki, przed kompresj± krzywej
 (domy¶lnie: 20).
 Mniejsze warto¶ci pozwalaj± na wiêksze zmiany kwantyzatora,
@@ -7349,7 +7373,7 @@ z³o¿ono¶ci (n.p.\& animacja z niewielkim fps) nie bêd± marnowa³y bitów na
 zmiany kwantyzatora.
 .
 .TP
-.B qblur=<0\-99>
+.B qblur=<0\-99> (tylko drugie przej¶cie)
 Rozmycie w czasie parametru kwantyzacji, po kompresji krzywej (domy¶lnie: 0.5).
 Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
@@ -7364,6 +7388,7 @@ typu B.
 ¯aden: bezpo¶rednie makrobloki nie s± wykorzystywane.
 .IPs 1
 Tymczasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
+(domy¶lny)
 .IPs 2
 Przestrzenny: wektory ruchu s± ekstrapolowane z s±siednich bloków.
 .RE
@@ -7375,17 +7400,15 @@ direct_pred=0 to zazwyczaj wolniejsza i daj±ca gorsz± jako¶æ metoda.
 .
 .TP
 .B (no)b8x8mv
-Wykorzystuje makrobloki typu b16x8, b8x16 i b8x8 (domy¶lnie: w³±czone).
-Wymaga klatek B.
-Wiecej szczegó³ów znajdziesz w dokumentacji opcji 4x4mv.
+Wykorzystuje dodatkowe typy makrobloków b16x8, b8x16 i b8x8 (domy¶lnie: wy³±czone).
+Bez tej opcji, klatki B bêd± u¿ywa³y tylko typów i16x16, i4x4, b16x16, skip, 
+bezpo¶rednie. Wiecej szczegó³ów znajdziesz w dokumentacji opcji 4x4mv.
 .
 .TP
  .B (no)4x4mv
-Wykorystuje makrobloki typu p8x4, p4x8 i p4x4 (domy¶lnie: w³±czone).
-.br
-Dostêpne typy makrobloków interklatek to i16x16, i4x4, p16x16, p16x8,
-p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip i bezpo¶rednie.
-i16x16, i4x4, p16x16-8x8, b16x16 i skip s± zawsze wykorzystywane.
+Wykorzystuje dodatkowe typy makrobloków p8x4, p4x8 i p4x4 (domy¶lnie: wy³±czone).
+Bez tej opcji, klatki P bêd± korzysta³y tylko z typów i16x16, i4x4, p16x16, p16x8,
+p8x16, p8x8 i skip.
 .br
 Pomys³ polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
 okre¶lony obszar obrazu.
@@ -7394,8 +7417,6 @@ Na przyk³ad, globalny pan jest lepiej reprezentowany przez bloki 16x16,
 podczas gdy ma³e poruszaj±ce siê obiekty przez mniejsze segmenty.
 .br
 Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
-W zale¿no¶ci od ¼ród³owego materia³u, mo¿e to polepszyæ lub pogorszyæ jako¶æ,
-korzystaj z tego ostro¿nie.
 .
 .TP
 .B subq=<0\-5>
