@@ -253,7 +253,11 @@ connect2Server_with_af(char *host, int port, int af) {
 			return -2;
 	}
 
-	inet_ntop(af, our_s_addr, buf, 255);			
+#ifdef USE_ATON
+	strncpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
+#else
+	inet_ntop(af, our_s_addr, buf, 255);
+#endif
 	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
 
 	// Turn the socket as non blocking so we can timeout on the connection
