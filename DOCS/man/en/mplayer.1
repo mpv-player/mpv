@@ -2521,17 +2521,21 @@ Use svga with VIDIX.
 .TP
 .B gl\ \ \ \ \ 
 OpenGL video output driver.
-Very simple version, no OSD support and video size must be smaller than
+Simple version, video size must be smaller than
 the maximum texture size of your OpenGL implementation.
 Intended to work even with the most simple OpenGL implementations.
 .PD 0
 .RSs
 .IPs (no)manyfmts
 Enables support for more (RGB and BGR) color formats.
-Needs OpenGL version >= 1.2, NOT yet WORKING correctly.
+Needs OpenGL version >= 1.2.
 .IPs slice-height=<0\-...>
 Number of lines copied to texture in one piece (default: 4).
 0 for whole image.
+.IPs (no)osd
+Enable or disable support for OSD rendering via OpenGL.
+Mostly for testing, you should use \-osdlevel 0 to disable OSD.
+Default: enabled
 .RE
 .PD 1
 .

@@ -10,6 +10,8 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "font_load.h"
+#include "sub.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -40,6 +42,14 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_DOUBLEBUFFER,
                                        None };
 
+int use_osd;
+#define MAX_OSD_PARTS 20
+GLuint osdtex[MAX_OSD_PARTS];
+#ifndef FAST_OSD
+GLuint osdatex[MAX_OSD_PARTS];
+#endif
+GLuint osdDispList[MAX_OSD_PARTS];
+int osdtexCnt = 0;
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -66,6 +76,12 @@ static void resize(int x,int y){
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
+#ifdef HAVE_FREETYPE
+  // adjust font size to display size
+  force_load_font = 1;
+#endif
+  vo_osd_changed(1);
 }
 
 static int find_gl_format (uint32_t format)
@@ -162,6 +178,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     vo_dwidth = d_width;
     vo_dheight = d_height;
 
+  sub_bg_alpha = 255; // We need alpha = 255 for invisible part of the OSD
 	int_pause = 0;
 
 	aspect_save_orig(width,height);
@@ -291,8 +308,110 @@ static void check_events(void)
     if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
+/**
+ * Creates the textures and the display list needed for displaying
+ * an OSD part.
+ * Callback function for vo_draw_text().
+ */
+static void create_osd_texture(int x0, int y0, int w, int h,
+                                 unsigned char *src, unsigned char *srca,
+                                 int stride)
+{
+  int sx = 1, sy = 1;
+  GLfloat xcov, ycov;
+  char *clearTexture;
+  while (sx < w) sx *= 2;
+  while (sy < h) sy *= 2;
+  xcov = (GLfloat) w / (GLfloat) sx;
+  ycov = (GLfloat) h / (GLfloat) sy;
+
+  if (osdtexCnt >= MAX_OSD_PARTS) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
+    return;
+  }
+  clearTexture = malloc(sx * sy);
+  memset(clearTexture, 0, sx * sy);
+
+  // create Textures for OSD part
+  glGenTextures(1, &osdtex[osdtexCnt]);
+  glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sx, sy, 0,
+                 GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE, src);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+#ifndef FAST_OSD
+  glGenTextures(1, &osdatex[osdtexCnt]);
+  glBindTexture(GL_TEXTURE_2D, osdatex[osdtexCnt]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, sx, sy, 0,
+                 GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_ALPHA,
+                    GL_UNSIGNED_BYTE, srca);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  free(clearTexture);
+
+  // Create a list for rendering this OSD part
+  osdDispList[osdtexCnt] = glGenLists(1);
+  glNewList(osdDispList[osdtexCnt], GL_COMPILE);
+#ifndef FAST_OSD
+  // render alpha
+  glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+  glBindTexture(GL_TEXTURE_2D, osdatex[osdtexCnt]);
+  glBegin(GL_QUADS);
+  glTexCoord2f (0, 0);
+  glVertex2f (x0, y0);
+  glTexCoord2f (0, ycov);
+  glVertex2f (x0, y0 + h);
+  glTexCoord2f (xcov, ycov);
+  glVertex2f (x0 + w, y0 + h);
+  glTexCoord2f (xcov, 0);
+  glVertex2f (x0 + w, y0);
+  glEnd();
+#endif
+  // render OSD
+  glBlendFunc (GL_ONE, GL_ONE);
+  glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
+  glBegin(GL_QUADS);
+  glTexCoord2f (0, 0);
+  glVertex2f (x0, y0);
+  glTexCoord2f (0, ycov);
+  glVertex2f (x0, y0 + h);
+  glTexCoord2f (xcov, ycov);
+  glVertex2f (x0 + w, y0 + h);
+  glTexCoord2f (xcov, 0);
+  glVertex2f (x0 + w, y0);
+  glEnd();
+  glEndList();
+
+  osdtexCnt++;
+}
+
 static void draw_osd(void)
 {
+  int i;
+  if (!use_osd) return;
+  if (vo_osd_changed(0)) {
+    for (i = 0; i < osdtexCnt; i++) {
+      glDeleteTextures(1, &osdtex[i]);
+#ifndef FAST_OSD
+      glDeleteTextures(1, &osdatex[i]);
+#endif
+      glDeleteLists(osdDispList[i], 1);
+    }
+    osdtexCnt = 0;
+    // draw OSD with full resolution
+    vo_draw_text(vo_dwidth, vo_dheight, create_osd_texture);
+  }
 }
 
 static void
@@ -309,6 +428,21 @@ flip_page(void)
     glTexCoord2f(1,1);glVertex2i(texture_width,texture_height);
     glTexCoord2f(1,0);glVertex2i(texture_width,0);
   glEnd();
+
+  if (osdtexCnt > 0) {
+    // set special rendering parameters
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
+    glEnable(GL_BLEND);
+    // draw OSD
+    glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
+    // set rendering parameters back to defaults
+    glDisable (GL_BLEND);
+    glPopMatrix();
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
 
 //  glFlush();
   glFinish();
@@ -352,10 +486,13 @@ uint8_t *ImageData=src[0];
 static uint32_t
 query_format(uint32_t format)
 {
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    if (use_osd)
+      caps |= VFCAP_OSD;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+        return caps;
     if (many_fmts && find_gl_format(format))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+        return caps;
     return 0;
 }
 
@@ -372,6 +509,7 @@ static uint32_t preinit(const char *arg)
     int parse_err = 0;
     unsigned int parse_pos = 0;
     many_fmts = 0;
+    use_osd = 1;
     slice_height = 4;
     if(arg) 
     {
@@ -382,6 +520,12 @@ static uint32_t preinit(const char *arg)
             } else if (strncmp (&arg[parse_pos], "nomanyfmts", 10) == 0) {
                 parse_pos += 10;
                 many_fmts = 0;
+            } else if (strncmp (&arg[parse_pos], "osd", 3) == 0) {
+                parse_pos += 3;
+                use_osd = 1;
+            } else if (strncmp (&arg[parse_pos], "noosd", 5) == 0) {
+                parse_pos += 5;
+                use_osd = 0;
             } else if (strncmp (&arg[parse_pos], "slice-height=", 13) == 0) {
                 int val;
                 char *end;
@@ -411,6 +555,8 @@ static uint32_t preinit(const char *arg)
               "    Enable extended color formats for OpenGL 1.2 and later\n"
               "  slice-height=<0-...>\n"
               "    Slice size for texture transfer, 0 for whole image\n"
+              "  noosd\n"
+              "    Do not use OpenGL OSD code\n"
               "\n" );
       return -1;
     }
