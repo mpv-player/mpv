@@ -426,6 +426,12 @@ fi
 # Let users use this stuff explicitly as command line argument.
 # In other words: It would be resonable have or only /usr/include
 # or only /usr/local/include.
+
+if freebsd ; then
+_extralibdir=-L/usr/local/lib
+_extraincdir=-I/usr/local/include
+fi
+
 if test -z "$_extralibdir" ; then
 _extralibdir=-L/usr/lib
 fi
