@@ -37,13 +37,13 @@
 #include <lirc/lircc.h>
 #endif
 
-/// This array defines all know commands.
-/// The first field is an id used to recognize the command without too many strcmp
-/// The second is abviously the command name
-/// The third is the minimum number of argument this command need
-/// Then come the definition of each argument, terminated with and arg of type -1
-/// A command can take maximum MP_CMD_MAX_ARGS-1 arguments (-1 because of
-/// the terminal one) wich is actually 9
+/// This array defines all known commands.
+/// The first field is an id used to recognize the command without too many strcmp.
+/// The second is obviously the command name.
+/// The third is the minimum number of arguments this command needs.
+/// Then comes the definition of each argument, terminated with an arg of type -1.
+/// A command can take a maximum of MP_CMD_MAX_ARGS-1 arguments (-1 because of
+/// the last one) which is actually 9.
 
 /// For the args, the first field is the type (actually int, float or string), the second
 /// is the default value wich is used for optional arguments
@@ -121,7 +121,7 @@ static mp_cmd_t mp_cmds[] = {
   { 0, NULL, 0, {} }
 };
 
-/// The names of the key for input.conf
+/// The names of the keys as used in input.conf
 /// If you add some new keys, you also need to add them here
 
 static mp_key_name_t key_names[] = {
@@ -220,8 +220,8 @@ static mp_key_name_t key_names[] = {
   { 0, NULL }
 };
 
-// This is the default binding. The content of input.conf override these ones.
-// The first args is a null terminated array of key codes.
+// This is the default binding. The content of input.conf overrides these.
+// The first arg is a null terminated array of key codes.
 // The second is the command
 
 static mp_cmd_bind_t def_cmd_binds[] = {
@@ -349,7 +349,7 @@ typedef struct mp_input_fd {
   void* read_func;
   mp_close_func_t close_func;
   int flags;
-  // This fields are for the cmd fds
+  // These fields are for the cmd fds.
   char* buffer;
   int pos,size;
 } mp_input_fd_t;
@@ -432,7 +432,7 @@ mp_input_get_key_name(int key);
 int
 mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t close_func) {
   if(num_cmd_fd == MP_MAX_CMD_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Too much command fd, unable to register fd %d\n",fd);
+    mp_msg(MSGT_INPUT,MSGL_ERR,"Too many command fds, unable to register fd %d.\n",fd);
     return 0;
   }
 
@@ -488,7 +488,7 @@ mp_input_rm_key_fd(int fd) {
 int
 mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func) {
   if(num_key_fd == MP_MAX_KEY_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Too much key fd, unable to register fd %d\n",fd);
+    mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key fds, unable to register fd %d.\n",fd);
     return 0;
   }
 
@@ -552,7 +552,7 @@ mp_input_parse_cmd(char* str) {
       errno = 0;
       cmd->args[i].v.i = atoi(ptr);
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s : argument %d isn't an integer\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d isn't an integer.\n",cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -567,7 +567,7 @@ mp_input_parse_cmd(char* str) {
       setlocale(LC_NUMERIC, "");
 #endif
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s : argument %d isn't a float\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d isn't a float.\n",cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -589,7 +589,7 @@ mp_input_parse_cmd(char* str) {
       }
       
       if(term != ' ' && (!e || e[0] == '\0')) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s : argument %d is unterminated\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d is unterminated.\n",cmd_def->name,i+1);
 	ptr = NULL;
 	break;
       } else if(!e) e = ptr+strlen(ptr);
@@ -613,7 +613,7 @@ mp_input_parse_cmd(char* str) {
 
   if(cmd_def->nargs > cmd->nargs) {
     mp_msg(MSGT_INPUT,MSGL_ERR,"Got command '%s' but\n",str);
-    mp_msg(MSGT_INPUT,MSGL_ERR,"command %s require at least %d arguments, we found only %d so far\n",cmd_def->name,cmd_def->nargs,cmd->nargs);
+    mp_msg(MSGT_INPUT,MSGL_ERR,"command %s requires at least %d arguments, we found only %d so far.\n",cmd_def->name,cmd_def->nargs,cmd->nargs);
     mp_cmd_free(cmd);
     return NULL;
   }
@@ -651,7 +651,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   char* end;
   (*ret) = NULL;
 
-  // Allocate the buffer if it dont exist
+  // Allocate the buffer if it doesn't exist
   if(!mp_fd->buffer) {
     mp_fd->buffer = (char*)malloc(MP_CMD_MAX_SIZE*sizeof(char));
     mp_fd->pos = 0;
@@ -666,7 +666,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
       switch(r) {
       case MP_INPUT_ERROR:
       case MP_INPUT_DEAD:
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d: %s\n",mp_fd->fd,strerror(errno));
       case MP_INPUT_NOTHING:
 	return r;
       }
@@ -691,13 +691,13 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     if(!end) {
       // If buffer is full we must drop all until the next \n
       if(mp_fd->size - mp_fd->pos <= 1) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Cmd buffer of fd %d is full : dropping content\n",mp_fd->fd);
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Cmd buffer of fd %d is full: dropping content\n",mp_fd->fd);
 	mp_fd->pos = 0;
 	mp_fd->flags |= MP_FD_DROP;
       }
       break;
     }
-    // We alredy have a cmd : set the got_cmd flag
+    // We already have a cmd : set the got_cmd flag
     else if((*ret)) {
       mp_fd->flags |= MP_FD_GOT_CMD;
       break;
@@ -802,7 +802,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   }
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Invalid command for binded key %s",mp_input_get_key_name(key_down[0]));
+    mp_msg(MSGT_INPUT,MSGL_ERR,"Invalid command for bound key %s",mp_input_get_key_name(key_down[0]));
     if(  num_key_down > 1) {
       unsigned int s;
       for(s=1; s < num_key_down; s++)
@@ -863,7 +863,7 @@ if(n>0){
     if(select(max_fd+1,&fds,NULL,NULL,time_val) < 0) {
       if(errno == EINTR)
 	continue;
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Select error : %s\n",strerror(errno));
+      mp_msg(MSGT_INPUT,MSGL_ERR,"Select error: %s\n",strerror(errno));
     }
     break;
   }
@@ -873,7 +873,7 @@ if(n>0){
 
   for(i = last_loop + 1 ; i != last_loop ; i++) {
     int code = -1;
-    // This is to check all fd in turn
+    // This is to check all fds in turn
     if((unsigned int)i >= num_key_fd) {
       i = -1;
       last_loop++;
@@ -926,7 +926,7 @@ mp_input_read_keys(int time,int paused) {
     // key pushed
     if(code & MP_KEY_DOWN) {
       if(num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Too much key down at the same time\n");
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key down events at the same time\n");
 	continue;
       }
       code &= ~MP_KEY_DOWN;
@@ -952,7 +952,7 @@ mp_input_read_keys(int time,int paused) {
     }
     if(j == num_key_down) { // key was not in the down keys : add it
       if(num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Too much key down at the same time\n");
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key down events at the same time\n");
 	continue;
       }
       key_down[num_key_down] = code;
@@ -1047,7 +1047,7 @@ mp_input_read_cmds(int time) {
       if(i < 0) {
 	if(errno == EINTR)
 	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Select error : %s\n",strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Select error: %s\n",strerror(errno));
       }
       if(!got_cmd)
 	return NULL;
@@ -1305,7 +1305,7 @@ mp_input_parse_config(char *file) {
   fd = open(file,O_RDONLY);
 
   if(fd < 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open input config file %s : %s\n",file,strerror(errno));
+    mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open input config file %s: %s\n",file,strerror(errno));
     return 0;
   }
 
@@ -1318,7 +1318,7 @@ mp_input_parse_config(char *file) {
       if(r < 0) {
 	if(errno == EINTR)
 	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading input config file %s : %s\n",file,strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading input config file %s: %s\n",file,strerror(errno));
 	mp_input_free_binds(binds);
 	close(fd);
 	return 0;
@@ -1331,7 +1331,7 @@ mp_input_parse_config(char *file) {
     }
     // Empty buffer : return
     if(bs <= 1) {
-      mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed : %d binds\n",file,n_binds);
+      mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed: %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
       close(fd);
@@ -1373,12 +1373,12 @@ mp_input_parse_config(char *file) {
       // Find the end of the key code name
       for(end = iter; end[0] != '\0' && strchr(SPACE_CHAR,end[0]) == NULL ; end++)
 	/*NOTHING */;
-      if(end[0] == '\0') { // Key name don't fit in the buffer
+      if(end[0] == '\0') { // Key name doesn't fit in the buffer
 	if(buffer == iter) {
 	  if(eof && (buffer-iter) == bs)
 	    mp_msg(MSGT_INPUT,MSGL_ERR,"Unfinished binding %s\n",iter);
 	  else
-	    mp_msg(MSGT_INPUT,MSGL_ERR,"Buffer is too small for this key name : %s\n",iter);
+	    mp_msg(MSGT_INPUT,MSGL_ERR,"Buffer is too small for this key name: %s\n",iter);
 	  mp_input_free_binds(binds);
 	  return 0;
 	}
@@ -1447,7 +1447,7 @@ mp_input_parse_config(char *file) {
       continue;
     }
   }
-  mp_msg(MSGT_INPUT,MSGL_ERR,"What are we doing here ?\n");
+  mp_msg(MSGT_INPUT,MSGL_ERR,"What are we doing here?\n");
   close(fd);
   return 0;
 }
