@@ -138,6 +138,29 @@ static char help_text[]=
 #define MSGTR_Paused "\n------ PAUSE -------\r"
 #define MSGTR_PlaylistLoadUnable "\nKann Playliste %s nicht laden\n"
 
+// mencoder.c:
+
+#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (siehe DOCS!)\n"
+#define MSGTR_UsingPass3ControllFile "Verwende Pass 3 Kontrolldatei: %s\n"
+#define MSGTR_MissingFilename "\nDateiname nicht angegeben!\n\n"
+#define MSGTR_CannotOpenFile_Device "Kann Datei/Gerät nicht öffnen\n"
+#define MSGTR_ErrorDVDAuth "Fehler bei der DVD Authentifizierung...\n"
+#define MSGTR_CannotOpenDemuxer "Kann Demuxer nicht öffnen\n"
+#define MSGTR_NoAudioEncoderSelected "\nKein Audioencoder (-oac) ausgewählt! Wähle einen aus oder verwende -nosound. Verwende -oac help !\n"
+#define MSGTR_NoVideoEncoderSelected "\nKein Videoencoder (-ovc) selected! Wähle einen aus, verwende -ovc help !\n"
+#define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen\n"
+#define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen\n"
+#define MSGTR_ForcingOutputFourcc "Output-Fourcc auf %x [%.4s] gestellt\n"
+#define MSGTR_WritingAVIHeader "Schreibe AVI Header...\n"
+#define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!!!    \n"
+#define MSGTR_SkipFrame "\nFrame ausgelassen!!!    \n"
+#define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
+#define MSGTR_WritingAVIIndex "\nSchreibe AVI Index...\n"
+#define MSGTR_FixupAVIHeader "Fixiere AVI Header...\n"
+#define MSGTR_RecommendedVideoBitrate "Empfohlene Videobitrate für %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nVideostream: %8.3f kbit/s  (%d bps)  Größe: %d Bytes  %5.3f Sek.  %d Frames\n"
+#define MSGTR_AudioStreamResult "\nAudiostream: %8.3f kbit/s  (%d bps)  Größe: %d Bytes  %5.3f Sek.\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Gerät '%s' nicht gefunden!\n"
 #define MSGTR_ErrTrackSelect "Fehler beim Auswählen des VCD Tracks!"

@@ -25,7 +25,7 @@
 
 static char* banner_text=
 "\n\n"
-"MEncoder " VERSION "(C) 2000-2002 Arpad Gereoffy (see DOCS!)\n"
+"MEncoder " VERSION MSGTR_MEncoderCopyright
 "\n";
 
 #include "cpudetect.h"
@@ -359,7 +359,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2);
-    if(demuxer2) printf("Using pass3 control file: %s\n",frameno_filename);
+    if(demuxer2) printf(MSGTR_UsingPass3ControllFile,frameno_filename);
   }
 
   playtree = play_tree_new();
@@ -382,7 +382,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 
   if(!filename && !vcd_track && !dvd_title && !tv_param_on){
-	printf("\nMissing filename!\n\n");
+	printf(MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
   }
 
@@ -406,7 +406,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   stream=open_stream(filename,vcd_track,&file_format);
 
   if(!stream){
-	printf("Cannot open file/device\n");
+	printf(MSGTR_CannotOpenFile_Device);
 	mencoder_exit(1,NULL);
   }
 
@@ -433,7 +433,7 @@ if(stream->type==STREAMTYPE_DVD){
   if (dvd_auth_device) {
     //  if (dvd_auth(dvd_auth_device,f)) {
     if (dvd_auth(dvd_auth_device,filename)) {
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDAuth);
       mencoder_exit(1,NULL);
     }
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
@@ -447,7 +447,7 @@ if(stream->type==STREAMTYPE_DVD){
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
-	printf("Cannot open demuxer\n");
+	printf(MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }
 
@@ -468,11 +468,11 @@ sh_video=d_video->sh;
   );
 
   if(sh_audio && out_audio_codec<0){
-    mp_msg(MSGT_MENCODER,MSGL_FATAL,"\nNo audio encoder (-oac) selected! Select one or use -nosound. Use -oac help !\n");
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioEncoderSelected);
     mencoder_exit(1,NULL);
   }
   if(sh_video && out_video_codec<0){
-    mp_msg(MSGT_MENCODER,MSGL_FATAL,"\nNo video encoder (-ovc) selected! Select one, use -ovc help !\n");
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoVideoEncoderSelected);
     mencoder_exit(1,NULL);
   }
 
@@ -502,7 +502,7 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 }
 
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
-  mp_msg(MSGT_MENCODER,MSGL_V,"Initializing audio codec...\n");
+  mp_msg(MSGT_MENCODER,MSGL_V,MSGTR_InitializingAudioCodec);
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
@@ -573,7 +573,7 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
-  printf("Cannot open output file '%s'\n", out_filename);
+  printf(MSGTR_CannotOpenOutputFile, out_filename);
   mencoder_exit(1,NULL);
 }
 
@@ -643,7 +643,7 @@ default:
         sh_video->vfilter=vf_open_encoder(NULL,"libdv",(char *)mux_v); break;
     }
     if(!mux_v->bih || !sh_video->vfilter){
-        mp_msg(MSGT_MENCODER,MSGL_FATAL,"Failed to open the encoder\n");
+        mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_EncoderOpenFailed);
         mencoder_exit(1,NULL);
     }
     // append 'expand' filter, it fixes stride problems and renders osd:
@@ -656,7 +656,7 @@ sh_video->inited=0;
 codecs_reset_selection(0);
 if(video_codec){
     // forced codec by name:
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
     init_video(sh_video,video_codec,-1,-1);
 } else {
     int status;
@@ -684,7 +684,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 {
     mux_v->bih->biCompression = mmioFOURCC(force_fourcc[0], force_fourcc[1],
 					    force_fourcc[2], force_fourcc[3]);
-    printf("Forcing output fourcc to %x [%.4s]\n",
+    printf(MSGTR_ForcingOutputFourcc,
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
@@ -777,7 +777,7 @@ if(audio_delay!=0.0){
 
 } // if(sh_audio)
 
-printf("Writing AVI header...\n");
+printf(MSGTR_WritingAVIHeader);
 aviwrite_write_header(muxer,muxer_f);
 
 decoded_frameno=0;
@@ -1046,7 +1046,7 @@ videorate+=(GetTimerMS() - ptimer_start);
 
 if(skip_flag<0){
     // duplicate frame
-	if(!tv_param_on && !verbose) printf("\nduplicate %d frame(s)!!!    \n",-skip_flag);
+	if(!tv_param_on && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
@@ -1055,7 +1055,7 @@ if(skip_flag<0){
 } else
 if(skip_flag>0){
     // skip frame
-	if(!tv_param_on && !verbose) printf("\nskip frame!!!    \n");
+	if(!tv_param_on && !verbose) printf(MSGTR_SkipFrame);
 	skippedframes++;
     --skip_flag;
 }
@@ -1181,7 +1181,7 @@ if(sh_audio && !demuxer2){
 #endif
 
  if(ferror(muxer_f)) {
-     mp_msg(MSGT_MENCODER,MSGL_FATAL,"%s: error writing file.\n", out_filename);
+     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
      mencoder_exit(1, NULL);
  }
 
@@ -1202,29 +1202,29 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 }
 #endif
 
-printf("\nWriting AVI index...\n");
+printf(MSGTR_WritingAVIIndex);
 aviwrite_write_index(muxer,muxer_f);
 muxer_f_size=ftello(muxer_f);
-printf("Fixup AVI header...\n");
+printf(MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
-    mp_msg(MSGT_MENCODER,MSGL_FATAL,"%s: error writing file.\n", out_filename);
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
     mencoder_exit(1, NULL);
 }
 if(vobsub_writer)
     vobsub_out_close(vobsub_writer);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
-    printf("Recommended video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf("Recommended video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf("Recommended video bitrate for 800MB CD: %d\n",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf(MSGTR_RecommendedVideoBitrate,"650MB",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf(MSGTR_RecommendedVideoBitrate,"700MB",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf(MSGTR_RecommendedVideoBitrate,"800MB",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
 
-printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
+printf(MSGTR_VideoStreamResult,
     (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (int)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
-printf("\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
+printf(MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
 if(stream) free_stream(stream); // kill cache thread
