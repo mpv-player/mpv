@@ -746,9 +746,8 @@ static uint32_t get_image(mp_image_t *mpi){
     if(mpi->type==MP_IMGTYPE_IPB && num_buffers<3 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
     if(mpi->type==MP_IMGTYPE_IP  && num_buffers<2 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
     if(mpi->imgfmt!=image_format || mpi->imgfmt==IMGFMT_BGR24) return VO_FALSE; // needs conversion :(
-    if(  xvimage[current_buf]->pitches[0]*mpi->height 
-       > xvimage[current_buf]->offsets[1] - xvimage[current_buf]->offsets[0]) return VO_FALSE; //buffer to small
-    if(  xvimage[current_buf]->pitches[0] < mpi->width /*FIXME non yv12*/) return VO_FALSE; //buffer to small
+    if(mpi->height > xvimage[current_buf]->height) return VO_FALSE; //buffer to small
+    if(mpi->width*(mpi->bpp/8) > xvimage[current_buf]->pitches[0]) return VO_FALSE; //buffer to small
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
     if( (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ||
 	(mpi->width*(mpi->bpp/8)==xvimage[current_buf]->pitches[0]) ){
