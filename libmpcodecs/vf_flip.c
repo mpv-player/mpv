@@ -65,7 +65,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	vf->priv->dmpi->planes[2]=mpi->planes[2]+
 	    mpi->stride[2]*((mpi->height>>mpi->chroma_y_shift)-1);
 	vf->priv->dmpi->stride[2]=-mpi->stride[2];
-    }
+    } else
+	vf->priv->dmpi->planes[1]=mpi->planes[1]; // passthru bgr8 palette!!!
     
     vf_next_put_image(vf,vf->priv->dmpi);
 }
