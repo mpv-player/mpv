@@ -186,12 +186,22 @@ vstrict strict standard compliance
 
 vdpart	data partitioning
 	adds 2 byte per video packet
+	each videopacket will be encoded in 3 seperate partitions:
+		1. MVs             (=movement)
+		2. DC coefficients (=low res picture)
+		3. AC coefficients (=details)
+	the MV & DC are most important, loosing them looks far worse than 
+	loosing the AC and the 1. & 2. partition (MV&DC) are far smaller than
+	the 3. partition (AC) -> errors will hit the AC partition much more
+	often than the MV&DC -> the picture will look better with partitioning
+	than without, as without partitining an error will trash AC/DC/MV 
+	equally
 	improves error-resistance when transfering over unreliable channels (eg.
         streaming over the internet)
 
 vpsize	(0-10000) video packet size
 	0 disabled (default)
-	500-1000 good choice
+	100-1000 good choice
 	improves error-resistance (see vdpart for more info)
 
 gray	grayscale only encoding (a bit faster than with color ...)
