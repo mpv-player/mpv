@@ -624,14 +624,14 @@
   change: <CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
-<H4><A NAME="tdfxfb">2.3.1.9 3dfx YUV support (tdfxfb)</A></H4>
+<H4><A NAME="tdfxfb">2.3.1.8 3dfx YUV support (tdfxfb)</A></H4>
 
 <P>This driver uses the kernel's tdfx framebuffer driver to play movies with
   YUV acceleration. You'll need a kernel with tdfxfb support, and recompile
   with <CODE>./configure --enable-tdfxfb</CODE></P>
 
 
-<H4><A NAME="opengl">2.3.1.10 OpenGL output</A></H4>
+<H4><A NAME="opengl">2.3.1.9 OpenGL output</A></H4>
 
 <P><B>MPlayer</B> supports displaying movies using OpenGL, but if your
   platform/driver supports xv as should be the case on a PC with Linux, use xv
@@ -649,7 +649,7 @@
   for download and installation instructions.</P>
 
 
-<H4><A NAME="aalib">2.3.1.11 AAlib - text mode displaying</A></H4>
+<H4><A NAME="aalib">2.3.1.10 AAlib - text mode displaying</A></H4>
 
 <P><B>AAlib</B> is a library for displaying graphics in text mode, using powerful
   ASCII renderer. There are LOTS of programs already supporting it, like Doom,
@@ -713,7 +713,7 @@
   for further tuning issues.</P>
 
 
-<H4><A NAME="vesa">2.3.1.12  VESA - output to VESA BIOS</A></H4>
+<H4><A NAME="vesa">2.3.1.11  VESA - output to VESA BIOS</A></H4>
 
 <P>This driver was designed and introduced as a <B>generic driver</B> for any
   video card which has VESA VBE 2.0 compatible BIOS. Another advantage of this
@@ -817,7 +817,7 @@
 </UL>
 
 
-<H4><A NAME="x11">2.3.1.13  X11</A></H4>
+<H4><A NAME="x11">2.3.1.12  X11</A></H4>
 
 <P>Avoid if possible. Outputs to X11 (uses shared memory extension), with no
   hardware acceleration at all. Supports (MMX/3DNow/SSE accelerated, but still
@@ -847,7 +847,7 @@
   video modes.</P>
 
 
-<H4><A NAME="vidix">2.3.1.14 VIDIX</A></H4>
+<H4><A NAME="vidix">2.3.1.13 VIDIX</A></H4>
 
 <P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for
   *ni<B>X</B>.<BR>
@@ -980,7 +980,7 @@ recognize <CODE>:vidix</CODE> subdevice.
   filename.vob</CODE></P>
 
 
-<H4><A NAME="zr">2.3.1.15 Zr</A></H4>
+<H4><A NAME="zr">2.3.1.14 Zr</A></H4>
 
 <P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
   capture/playback cards (tested for DC10+ and Buz, and it should work for the
@@ -1064,7 +1064,8 @@ recognize <CODE>:vidix</CODE> subdevice.
   <B>FIRST</B> start XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for
   <B>MPlayer</B> to finish and <B>THEN</B> stop XawTV.</P>
 
-<H4><A NAME="dvb">2.3.1.16 DVB</A></H4>
+
+<H4><A NAME="dvb">2.3.1.15 DVB</A></H4>
 
 <P><B>MPlayer</B> supports cards with the Siemens DVB chipset from vendors like
   Siemens, Technotrend, Galaxis or Hauppauge.  The latest DVB drivers are
@@ -1167,7 +1168,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   decompression).</P>
 
 
-<H4><A NAME="dxr3">2.3.1.17 DXR3/Hollywood+</A></H4>
+<H4><A NAME="dxr3">2.3.1.16 DXR3/Hollywood+</A></H4>
 
 <P><B>MPlayer</B> supports hardware accelerated playback with the Creative DXR3
   and Sigma Designs Hollywood Plus cards. These cards both use the em8300 MPEG
