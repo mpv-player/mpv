@@ -263,5 +263,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "identificateur de fonte inexistant ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "paramètre inconnu ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[Browser de skins] pas assez de mémoire.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trouvé ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Erreur de lecture du fichier de configuration du skin ( %s ).\n"
 
 #endif
