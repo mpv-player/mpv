@@ -3,13 +3,15 @@ Recommendations for misc. soundcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Aureal Vortex 2:
-			OSS	: OK
+			OSS	: no driver
 			ALSA	: no driver
-			Max kHz : 48 (probably)
+			Max kHz : 48
+			Driver	: aureal.sourceforge.net
 
 GUS PnP:
-			OSS	: none
-			ALSA	: see Aureal Vortex2
+			OSS/Free: no driver
+			OSS	: OK
+			ALSA	: OK
 			Max kHz	: 48
 
 SB Live!:

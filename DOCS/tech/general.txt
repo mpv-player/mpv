@@ -1,14 +1,11 @@
 So, I'll describe how this stuff works.
 
-The basis of the program's structure is basically logical, however it's
-a big hack :)
-
 The main modules:
 
-1. streamer.c: this is the input, this reads the file or the VCD.  what it has
-   to know: appropriate buffering by sector, seek, skip functions,
-	 reading by bytes, or blocks with any size.
-	 The stream_t structure describes the input stream, file/device.
+1. streamer.c: this is the input layer, this reads the file or the VCD or
+   stdin.  what it has to know: appropriate buffering by sector, seek, skip
+   functions, reading by bytes, or blocks with any size.  The stream_t
+   structure describes the input stream, file/device.
 
 2. demuxer.c: this does the demultiplexing of the input to audio and video
    channels, and their reading by buffered packages.
@@ -21,10 +18,13 @@ The main modules:
    Contains one chunk (avi) or packet (asf,mpg). They are stored in memory as
 	 in chained list, cause of their different size.
 
-2.b. demuxer stream, that is DS. Struct: demux_stream_t
-   Every channel (a/v) has one. This contains the packets for the stream (see
-	 2.a). For now, there can be 2 for each demuxer, one for the audio and
-	 one for the video.
+2.b. demuxer stream, that is DS.
+   Struct: demux_stream_t
+   Every channel (a/v) has one. This contains the packets for the stream
+         (see 2.a). For now, there can be 3 for each demuxer :
+	 - audio (d_audio)
+	 - video (d_video)
+	 - DVD subtitle (d_dvdsub)
 
 2.c. stream header. There are 2 types (for now): sh_audio_t and sh_video_t
    This contains every parameter essential for decoding, such as input/output
@@ -40,11 +40,12 @@ The main modules:
 	 ds or the sh, depending on the function.
 
 	 For example: we have an asf file, 6 streams inside it, 1 audio, 5
-	 video. During the reading of the header, 6 sh structs are created,
-	 1 audio and 5 video. When it starts reading the packet, it chooses
-	 the first found audio & video stream, and sets the sh pointers of
-	 d_audio and d_video according to them. So later it reads only these
-	 streams. Of course the user can force choosing a specific stream with
+	 video. During the reading of the header, 6 sh structs are created, 1
+	 audio and 5 video. When it starts reading the packet, it chooses the
+	 stream for the first found audio & video packet, and sets the sh
+	 pointers of d_audio and d_video according to them. So later it reads
+	 only these streams. Of course the user can force choosing a specific
+	 stream with
 	 -vid and -aid switches.
 	 A good example for this is the DVD, where the english stream is not
 	 always the first, so every VOB has different language :)
@@ -74,12 +75,26 @@ Now, go on:
 3. mplayer.c - ooh, he's the boss :)
    The timing is solved odd, since it has/recommended to be done differently
 	 for each of the formats, and sometimes can be done in many ways.
-	 There are the a_frame and v_frame float variables, they store the
-	 just played a/v position is seconds.
 	 A new frame is displayed if v_frame<a_frame, and sound is decoded if
 	 a_frame<v_frame.
+
+	 The structure of the playing loop :
+         while(not EOF) {
+             fill audio buffer (read & decode audio) + increase a_frame
+             read & decode a single video frame + increase v_frame
+             sleep  (wait until a_frame>=v_frame)
+             display the frame
+             apply A-V PTS correction to a_frame
+             check for keys -> pause,seek,...
+         }
+
 	 When playing (a/v), it increases the variables by the duration of the
-	 played a/v. In video, it's usually 1.0/fps, but I have to mention that
+	 played a/v.
+	 - with audio this is played bytes / sh_audio->o_bps
+	 Note: i_bps = number of compressed bytes for one second of audio
+	       o_bps = number of uncompressed bytes for one second of audio
+		   (this is = bps*samplerate*channels)
+	 - with video this is usually == 1.0/fps, but I have to note that
 	 fps doesn't really matters at video, for example asf doesn't have that,
 	 instead there is "duration" and it can change per frame.
 	 MPEG2 has "repeat_count" which delays the frame by 1-2.5 ...
@@ -97,14 +112,19 @@ Now, go on:
 
 	 Of course this is not everything, several things suck.
 	 For example the soundcards delay, which has to be corrected by
-	 MPlayer: that's why it needs the size of the audio buffer. It can
-	 be measured with select(), which is unfortunately not supported by
-	 every card... That's when it has to be given with the -abs option.
-	 
-	 Then there's another problem: in MPEG, the PTS is not given by
-	 frames, rather by sectors, which can contain 10 frames, or only 0.1 .
-	 In order this won't fuck up timing, we average the PTS by 5 frames,
-	 and use this when correcting.
+	 MPlayer! The audio delay is the sum of all these:
+	 - bytes read since the last timestamp:
+	   t1 = d_audio->pts_bytes/sh_audio->i_bps
+	 - if Win32/ACM then the bytes stored in audio input buffer
+	   t2 = a_in_buffer_len/sh_audio->i_bps
+	 - uncompressed bytes in audio out buffer
+	   t3 = a_buffer_len/sh_audio->o_bps
+	 - not yet played bytes stored in the soundcard's (or DMA's) buffer
+	   t4 = get_audio_delay()/sh_audio->o_bps
+
+	 From this we can calculate what PTS we need for the just played
+	 audio, then after we compare this with the video's PTS, we have
+	 the difference!
 	 
 	 Life didn't get simpler with AVI. There's the "official" timing
 	 method, the BPS-based, so the header contains how many compressed
@@ -121,6 +141,27 @@ Now, go on:
 	 Of course there are 2 of them, one is stored in the header and not
 	 really used :) the other isn't stored anywhere, this can only be
 	 measured...
+
+3.a. audio playback:
+	 Some words on audio playback:
+	 Not the playing is hard, but:
+	 1. knowing when to write into the buffer, without blocking
+	 2. knowing how much was played of what we wrote into
+	 The first is needed for audio decoding, and to keep the buffer
+	 full (so the audio will never skip). And the second is needed for
+	 correct timing, because some soundcards delay even 3-7 seconds,
+	 which can't be forgotten about.
+	 To solve this, the OSS gives several possibilities:
+	 - ioctl(SNDCTL_DSP_GETODELAY): tells how many unplayed bytes are in
+	   the soundcard's buffer -> perfect for timing, but not all drivers
+	   support it :(
+	 - ioctl(SNDCTL_DSP_GETOSPACE): tells how much can we write into the
+	   soundcard's buffer, without blocking. If the driver doesn't
+	   support GETODELAY, we can use this to know how much the delay is.
+	 - select(): should tell if we can write into the buffer without
+	   blocking. Unfortunately it doesn't say how much we could :((
+	   Also, doesn't/badly works with some drivers.
+	   Only used if none of the above works.
 	 
 4. Codecs. They are separate libs.
    For example libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
