@@ -2,10 +2,12 @@
 include ../config.mak
 
 LIBNAME = libmpcodecs.a
+LIBNAME2 = libmpencoders.a
 
 AUDIO_SRCS=dec_audio.c ad.c ad_a52.c ad_acm.c ad_alaw.c ad_dk3adpcm.c ad_dk4adpcm.c ad_dshow.c ad_dvdpcm.c ad_ffmpeg.c ad_hwac3.c ad_imaadpcm.c ad_mp3.c ad_msadpcm.c ad_pcm.c ad_roqaudio.c ad_msgsm.c ad_faad.c ad_vorbis.c ad_libmad.c
 VIDEO_SRCS=dec_video.c vd.c vd_null.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c vd_huffyuv.c vd_zlib.c vd_mpegpes.c
 VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_pp.c vf_scale.c vf_fame.c vf_format.c vf_yuy2.c
+ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_rawrgb.c
 
 ifeq ($(PNG),yes)
 VIDEO_SRCS += vd_mpng.c
@@ -15,8 +17,11 @@ ifeq ($(JPEG),yes)
 VIDEO_SRCS += vd_ijpg.c
 endif
 
-SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS)
+SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(ENCODER_SRCS)
 OBJS=$(SRCS:.c=.o)
+
+SRCS2=$(ENCODER_SRCS)
+OBJS2=$(SRCS2:.c=.o)
 
 CFLAGS  = -Wall $(OPTFLAGS) -I. -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
 
@@ -27,10 +32,13 @@ CFLAGS  = -Wall $(OPTFLAGS) -I. -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
+all:    $(LIBNAME) $(LIBNAME2)
+
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
-all:    $(LIBNAME)
+$(LIBNAME2):     $(OBJS2)
+	$(AR) r $(LIBNAME2) $(OBJS2)
 
 clean:
 	rm -f *.o *.a *~
@@ -41,7 +49,7 @@ distclean:
 dep:    depend
 
 depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
 
 #
 # include dependency files if they exist

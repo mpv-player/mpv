@@ -142,7 +142,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
 //============================================================================
 
-vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
+vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char *args){
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -164,6 +164,10 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
     free(vf);
     mp_msg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'\n",name);
     return NULL;
+}
+
+vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
+    return vf_open_plugin(filter_list,next,name,args);
 }
 
 //============================================================================

@@ -49,7 +49,10 @@ typedef struct vf_instance_s {
 
 // functions:
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
+
+vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char *args);
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args);
+vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args);
 
 // default wrappers:
 int vf_next_config(struct vf_instance_s* vf,
@@ -58,6 +61,6 @@ int vf_next_config(struct vf_instance_s* vf,
 int vf_next_control(struct vf_instance_s* vf, int request, void* data);
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt);
 void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi);
-vf_instance_t* append_filters(vf_instance_t* last);
 
+vf_instance_t* append_filters(vf_instance_t* last);
 
