@@ -106,7 +106,7 @@ static char help_text[]=
 "  **************************************************************\n"\
 " Posibles razones, problemas, soluciones: \n"\
 "- Más común: controlador de _audio_ con errores. Solución: use\n"\
-"  -ao sdl o ALSA 0.5 o ALSA 0.9 con emulacion OSS. Lea DOCS/soung.html\n"\
+"  -ao sdl o ALSA 0.5 o ALSA 0.9 con emulacion OSS. Lea DOCS/sound.html\n"\
 "  para más ayuda\n"\
 "- Salida de video lenta: pruebe otro -vo driver (para obtener una lista,\n"\
 "   -vo help) o pruebe -framedrop ! Lea DOCS/video.html para mas ayuda.\n"\
