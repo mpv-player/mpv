@@ -178,7 +178,70 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLenum *gl_texfmt,
   return 1;
 }
 
-#ifndef GL_WIN32
+#ifdef GL_WIN32
+int setGlWindow(int *vinfo, HGLRC *context, HWND win)
+{
+  int new_vinfo;
+  HDC windc = GetDC(win);
+  HGLRC new_context = 0;
+  int keep_context = 0;
+
+  // should only be needed when keeping context, but not doing glFinish
+  // can cause flickering even when we do not keep it.
+  glFinish();
+  new_vinfo = GetPixelFormat(windc);
+  if (*context && *vinfo && new_vinfo && *vinfo == new_vinfo) {
+      // we can keep the wglContext
+      new_context = *context;
+      keep_context = 1;
+  } else {
+    // create a context
+    new_context = wglCreateContext(windc);
+    if (!new_context) {
+      mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
+      return SET_WINDOW_FAILED;
+    }
+  }
+
+  // set context
+  if (!wglMakeCurrent(windc, new_context)) {
+    mp_msg (MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+    if (!keep_context) {
+      wglDeleteContext(new_context);
+    }
+    return SET_WINDOW_FAILED;
+  }
+
+  // set new values
+  vo_window = win;
+  vo_hdc = windc;
+  {
+    RECT rect;
+    GetClientRect(win, &rect);
+    vo_dwidth = rect.right;
+    vo_dheight = rect.bottom;
+  }
+  if (!keep_context) {
+    if (*context)
+      wglDeleteContext(*context);
+    *context = new_context;
+    *vinfo = new_vinfo;
+
+    // and inform that reinit is neccessary
+    return SET_WINDOW_REINIT;
+  }
+  return SET_WINDOW_OK;
+}
+
+void releaseGlContext(int *vinfo, HGLRC *context) {
+  *vinfo = 0;
+  if (*context) {
+    wglMakeCurrent(0, 0);
+    wglDeleteContext(*context);
+  }
+  *context = 0;
+}
+#else
 /**
  * Returns the XVisualInfo associated with Window win.
  * \param win Window whose XVisualInfo is returne.

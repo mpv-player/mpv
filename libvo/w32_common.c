@@ -19,8 +19,7 @@ uint32_t o_dwidth;
 uint32_t o_dheight;
 
 static HINSTANCE hInstance;
-static HWND vo_hwnd = 0;
-static HGLRC wglContext = 0;
+HWND vo_window = 0;
 static int cursor = 1;
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -143,10 +142,12 @@ static void changeMode(void) {
     vo_dwidth = vo_screenwidth;
     vo_dheight = vo_screenheight;
 
+    if (vo_vm)
     ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
 }
 
 static void resetMode(void) {
+    if (vo_vm)
     ChangeDisplaySettings(0, 0);
 
     DEVMODE dm;
@@ -169,19 +170,18 @@ static void resetMode(void) {
 
 int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
-    if (wglContext) return 1;
 
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
 	changeMode();
-	SetWindowPos(vo_hwnd, layer, 0, 0, vo_screenwidth, vo_screenheight, SWP_SHOWWINDOW);
+	SetWindowPos(vo_window, layer, 0, 0, vo_screenwidth, vo_screenheight, SWP_SHOWWINDOW);
 	if (cursor) {
 	    ShowCursor(0);
 	    cursor = 0;
 	}
     } else {
 	resetMode();
-	SetWindowPos(vo_hwnd, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+	SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 	if (!cursor) {
 	    ShowCursor(1);
 	    cursor = 1;
@@ -204,29 +204,13 @@ int createRenderingContext(void) {
 
     SetPixelFormat(vo_hdc, pf, &pfd);
     
-    wglContext = wglCreateContext(vo_hdc);
-    if (!wglContext) {
-	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create wgl rendering context!\n");
-	return 0;
-    }
-
-    if (!wglMakeCurrent(vo_hdc, wglContext)) {
-	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to make wgl rendering context current!\n");
-	return 0;
-    }	
-
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
     return 1;
 }
 
 void destroyRenderingContext(void) {
-    if (wglContext) {
-	wglMakeCurrent(0, 0);
-	wglDeleteContext(wglContext);
-	wglContext = 0;
 	resetMode();
-    }
 }
 
 int vo_init(void) {
@@ -234,7 +218,7 @@ int vo_init(void) {
     char 	exedir[MAX_PATH];
     DEVMODE	dm;
 
-    if (vo_hwnd)
+    if (vo_window)
 	return 1;
 
     hInstance = GetModuleHandle(0);
@@ -251,13 +235,13 @@ int vo_init(void) {
 	return 0;
     }
 
-    vo_hwnd = CreateWindowEx(0, classname, classname, WS_POPUP, CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
-    if (!vo_hwnd) {
+    vo_window = CreateWindowEx(0, classname, classname, WS_POPUP, CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
+    if (!vo_window) {
 	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
 	return 0;
     }
 
-    vo_hdc = GetDC(vo_hwnd);
+    vo_hdc = GetDC(vo_window);
 
     dm.dmSize = sizeof dm;
     dm.dmDriverExtra = 0;
@@ -286,7 +270,7 @@ void vo_w32_ontop( void )
     if (!vo_fs) {
 	HWND layer = HWND_NOTOPMOST;
 	if (vo_ontop) layer = HWND_TOPMOST;
-	SetWindowPos(vo_hwnd, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+	SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
     }
 }
 
@@ -296,7 +280,7 @@ void vo_w32_uninit() {
     ShowCursor(1);
     vo_depthonscreen = 0;
     destroyRenderingContext();
-    DestroyWindow(vo_hwnd);
-    vo_hwnd = 0;
+    DestroyWindow(vo_window);
+    vo_window = 0;
     UnregisterClass(classname, 0);
 }

@@ -70,7 +70,10 @@ static unsigned char *ImageData=NULL;
 
 //static int texture_id=1;
 
-#ifndef GL_WIN32
+#ifdef GL_WIN32
+    static int gl_vinfo = 0;
+    static HGLRC gl_context = 0;
+#else
     static XVisualInfo *gl_vinfo = NULL;
     static GLXContext gl_context = 0;
 #endif
@@ -766,7 +769,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
   if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen();
 
-  setGlWindow(&gl_vinfo, &gl_context, vo_window);
         return 0;
 }
 
@@ -775,7 +777,6 @@ static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
   vo_dwidth = d_width;
   vo_dheight = d_height;
   guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
-  setGlWindow(&gl_vinfo, &gl_context, vo_window);
   return 0;
 }
 #endif
@@ -862,6 +863,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
 	    return -1;
 	
+  setGlWindow(&gl_vinfo, &gl_context, vo_window);
+
   glVersion = glGetString(GL_VERSION);
 
   mp_msg(MSGT_VO, MSGL_V, "[gl2] OpenGL Driver Information:\n");
@@ -1058,9 +1061,7 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
-#ifndef GL_WIN32
   releaseGlContext(&gl_vinfo, &gl_context);
-#endif
   if (texgrid) {
     free(texgrid);
     texgrid = NULL;
@@ -1102,10 +1103,12 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_FULLSCREEN:
 #ifdef GL_WIN32
     vo_w32_fullscreen();
-    initGl(vo_dwidth, vo_dheight);
 #else
     vo_x11_fullscreen();
 #endif 
+    if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_REINIT)
+      initGl(vo_dwidth, vo_dheight);
+    resize(&vo_dwidth, &vo_dheight);
     return VO_TRUE;
 #ifndef GL_WIN32
   case VOCTRL_SET_EQUALIZER:

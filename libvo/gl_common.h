@@ -7,7 +7,11 @@
 #include <GL/gl.h>
 #include "video_out.h"
 
-#ifndef GL_WIN32
+#ifdef GL_WIN32
+#include <windows.h>
+#include <GL/glext.h>
+#include "w32_common.h"
+#else
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include "x11_common.h"
@@ -27,7 +31,10 @@ int glFindFormat(uint32_t format, uint32_t *bpp, GLenum *gl_texfmt,
 //! new window is set, but the OpenGL context needs to be reinitialized.
 #define SET_WINDOW_REINIT 1
 
-#ifndef GL_WIN32
+#ifdef GL_WIN32
+int setGlWindow(int *vinfo, HGLRC *context, HWND win);
+void releaseGlContext(int *vinfo, HGLRC *context);
+#else
 int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
 void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
 #endif

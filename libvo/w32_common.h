@@ -3,6 +3,7 @@ extern int vo_screenwidth;
 extern int vo_screenheight;
 extern uint32_t o_dwidth;
 extern uint32_t o_dheight;
+extern HWND vo_window;
 extern HDC vo_hdc;
 extern int vo_fs;
 extern int vo_vm;
