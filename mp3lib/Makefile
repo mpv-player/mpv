@@ -15,7 +15,7 @@ CFLAGS  = $(OPTFLAGS)
 .s.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-libMP3.a:	$(OBJS)
+libMP3.a:	.depend $(OBJS)
 	$(AR) r libMP3.a $(OBJS)
 
 all:	libMP3.a
@@ -24,11 +24,17 @@ clean:
 	rm -f *~ *.o *.a
 
 distclean:
-	makedepend
-	rm -f *~ *.o *.a Makefile.bak
+	rm -f *~ *.o *.a Makefile.bak .depend
 
-dep:	depend
+dep:    depend
+depend: .depend
 
-depend:
-	makedepend -- $(CFLAGS) -- $(SRCS) &>/dev/null
-# DO NOT DELETE
+.depend: Makefile config.mak ../config.mak ../config.h
+	makedepend -f- -- $(CFLAGS) -- $(SRCS) 1>.depend 2>/dev/null
+
+#
+# include dependency files if they exist
+#
+ifneq ($(wildcard .depend),)
+include .depend
+endif
