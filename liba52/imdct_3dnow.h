@@ -39,9 +39,8 @@ static void FFT_4_3DNOW(complex_t *x)
 #ifdef HAVE_3DNOWEX
 	"pswapd %%mm4, %%mm4\n\t"
 #else
-	"movq   %%mm4, %%mm5\n\t"
-	"psrlq	$32, %%mm4\n\t"
-	"punpckldq %%mm5, %%mm4\n\t"
+	"punpckldq %%mm4, %%mm5\n\t"
+	"punpckhdq %%mm5, %%mm4\n\t"
 #endif
 	"movq	(%1), %%mm5\n\t" /* yb.re = x[0].re - x[2].re; */
 	"movq	(%1), %%mm6\n\t" /* yt.re = x[0].re + x[2].re; */
@@ -117,9 +116,8 @@ static void FFT_8_3DNOW(complex_t *x)
 #ifdef HAVE_3DNOWEX
       "pswapd	%%mm3,	%%mm3\n\t"
 #else
-      "movq	%%mm3,	%%mm6\n\t"
-      "psrlq	$32,	%%mm3\n\t"
-      "punpckldq %%mm6,	%%mm3\n\t"
+      "punpckldq %%mm3,	%%mm6\n\t"
+      "punpckhdq %%mm6,	%%mm3\n\t"
 #endif
       "pfadd	%%mm0,	%%mm1\n\t"
       "movq	%%mm4,	%%mm5\n\t"
@@ -149,18 +147,16 @@ static void FFT_8_3DNOW(complex_t *x)
 #ifdef HAVE_3DNOWEX
 	"pswapd	%%mm1,	%%mm1\n\t"
 #else
-	"movq	%%mm1,	%%mm2\n\t"
-	"psrlq	$32,	%%mm1\n\t"
-	"punpckldq %%mm2,%%mm1\n\t"
+	"punpckldq %%mm1, %%mm2\n\t"
+	"punpckhdq %%mm2, %%mm1\n\t"
 #endif
 	"pxor	%%mm7,	%%mm1\n\t"
 	"pfadd	%%mm1,	%%mm0\n\t"
 #ifdef HAVE_3DNOWEX
 	"pswapd	%%mm3,	%%mm3\n\t"
 #else
-	"movq	%%mm3,	%%mm2\n\t"
-	"psrlq	$32,	%%mm3\n\t"
-	"punpckldq %%mm2,%%mm3\n\t"
+	"punpckldq %%mm3, %%mm2\n\t"
+	"punpckhdq %%mm2, %%mm3\n\t"
 #endif
 	"pxor	%%mm6,	%%mm3\n\t"
 	"pfadd	%%mm3,	%%mm0\n\t"
@@ -173,9 +169,8 @@ static void FFT_8_3DNOW(complex_t *x)
 #ifdef HAVE_3DNOWEX
 	"pswapd	%%mm5,	%%mm5\n\t"
 #else
-	"movq	%%mm5,	%%mm1\n\t"
-	"psrlq	$32,	%%mm5\n\t"
-	"punpckldq %%mm1,%%mm5\n\t"
+	"punpckldq %%mm5, %%mm1\n\t"
+	"punpckhdq %%mm1, %%mm5\n\t"
 #endif
 	"movq	%%mm5,	%0\n\t"
 	
@@ -198,8 +193,8 @@ static void FFT_8_3DNOW(complex_t *x)
 	"pswapd	%3,	%%mm1\n\t"
 #else
 	"movq	%3,	%%mm1\n\t"
-	"psrlq	$32,	%%mm1\n\t"
-	"punpckldq %3,	%%mm1\n\t"
+	"punpckldq %%mm1, %%mm2\n\t"
+	"punpckhdq %%mm2, %%mm1\n\t"
 #endif
 	"pxor	%%mm6,	%%mm1\n\t"	
 	"pfadd	%%mm1,	%%mm0\n\t"
@@ -210,9 +205,8 @@ static void FFT_8_3DNOW(complex_t *x)
 #ifdef HAVE_3DNOWEX
 	"pswapd	%%mm2,	%%mm2\n\t"
 #else
-	"movq	%%mm2,	%%mm5\n\t"
-	"psrlq	$32,	%%mm2\n\t"
-	"punpckldq %%mm5,%%mm2\n\t"
+	"punpckldq %%mm2, %%mm5\n\t"
+	"punpckhdq %%mm5, %%mm2\n\t"
 #endif
 	"movq	24(%4),	%%mm3\n\t"
 	"pfsub	%%mm2,	%%mm0\n\t"
@@ -363,9 +357,8 @@ imdct_do_512_3dnow
 #ifdef HAVE_3DNOWEX
 		"pswapd	%%mm1, %%mm1\n\t"
 #else
-		"movq %%mm1, %%mm5\n\t"
-		"psrlq $32, %%mm1\n\t"
-		"punpckldq %%mm5, %%mm1\n\t"
+		"punpckldq %%mm1, %%mm5\n\t"
+		"punpckhdq %%mm5, %%mm1\n\t"
 #endif
 		"pfmul	%%mm1, %%mm2\n\t"
 #ifdef HAVE_3DNOWEX
@@ -436,9 +429,8 @@ imdct_do_512_3dnow
 		"movq %1, %%mm0\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 		"movq %%mm0, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 #ifndef HAVE_3DNOWEX
-		"movq %%mm1, %%mm2\n\t"
-		"psrlq $32, %%mm1\n\t"
-		"punpckldq %%mm2, %%mm1\n\t"
+		"punpckldq %%mm1, %%mm2\n\t"
+		"punpckhdq %%mm2, %%mm1\n\t"
 #else			 
 		"pswapd %%mm1, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 #endif			 
@@ -449,9 +441,9 @@ imdct_do_512_3dnow
 #ifndef HAVE_3DNOWEX
 		"pxor  %%mm7, %%mm0\n\t"
 		"pfacc %%mm1, %%mm0\n\t"
-		"movd %%mm0, 4%0\n\t"
-		"psrlq $32, %%mm0\n\t"
-		"movd %%mm0, %0\n\t"
+		"punpckldq %%mm0, %%mm1\n\t"
+		"punpckhdq %%mm1, %%mm0\n\t"
+		"movq %%mm0, %0\n\t"
 #else
 		"pfpnacc %%mm1, %%mm0\n\t" /* mm0 = mm0[0] - mm0[1] | mm1[0] + mm1[1] */
 		"pswapd %%mm0, %%mm0\n\t"
@@ -538,12 +530,12 @@ imdct_do_512_3dnow
 		"pswapd	(%3), %%mm3\n\t"
 		"pswapd	-512(%3), %%mm4\n\t"
 #else
-		"movq	(%3), %%mm3\n\t"/**delay_ptr++=-buf[64+i].re**--window_ptr;*/
+		"movq	(%3), %%mm3\n\t"
+		"punpckldq %%mm3, %%mm2\n\t"
+		"punpckhdq %%mm2, %%mm3\n\t"
 		"movq	-512(%3), %%mm4\n\t"
-		"psrlq	$32, %%mm3\n\t"/*delay_ptr[128]=buf[i].im**window_ptr[-512];*/
-		"psrlq	$32, %%mm4\n\t"/**delay_ptr++=buf[64-i-1].im**--window_ptr;*/
-		"punpckldq (%3), %%mm3\n\t"/*delay_ptr[128]=-buf[128-i-1].re**window_ptr[-512];*/
-		"punpckldq -512(%3), %%mm4\n\t"
+		"punpckldq %%mm4, %%mm2\n\t"
+		"punpckhdq %%mm2, %%mm4\n\t"
 #endif
 		"pfmul	%%mm3, %%mm0\n\t"
 		"pfmul	%%mm4, %%mm1\n\t"
