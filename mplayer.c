@@ -3270,12 +3270,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  vo_osd_progbar_type=OSD_PANSCAN;
 	  vo_osd_progbar_value=vo_panscan*256;
 	  vo_osd_changed(OSDTYPE_PROGBAR);
+        }
 #ifdef HAVE_FREETYPE
-	  if (subtitle_autoscale == 2 || subtitle_autoscale == 3)
+	if (sh_video && (subtitle_autoscale == 2 || subtitle_autoscale == 3))
 	    // force scaling font to movie width or diagonal
 	    force_load_font = 1;
 #endif
-        }
 #endif
        }
     } break;
