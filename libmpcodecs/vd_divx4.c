@@ -75,6 +75,19 @@ static int init(sh_video_t *sh){
     DEC_SET dec_set;
     int bits=16;
 
+#ifndef NEW_DECORE
+    if(sh->format==mmioFOURCC('D','I','V','3')){
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"DivX 3.x not supported by opendivx decore - it requires divx4linux\n");
+	return 0; // not supported
+    }
+#endif
+#ifndef DECORE_DIVX5
+    if(sh->format==mmioFOURCC('D','X','5','0')){
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"DivX 5.00 not supported by divx4linux decore - it requires divx5linux\n");
+	return 0; // not supported
+    }
+#endif
+
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
 
     memset(&dec_param,0,sizeof(dec_param));
