@@ -324,6 +324,10 @@ index_id
 	each index packet contains every index_moduloth's keyframe of a stream,
 	so the i'th keyframe of a stream will be at least in packets with 
 	(i % index_modulo) == index_id 
+	furthermore a index packet contains all indexed keyframes since the
+	last index packet
+	(indexed keyframes == keyframes which are referenced from any index 
+	packet)
 
 index_increment
 	the index_id increment value, this MUST be a relative prime to
