@@ -83,7 +83,8 @@ media player. Even AVI files without index chunk are playable, and you can
 temporarily rebuild their indexes with the <option>-idx</option> option, or
 permanently with <application>MEncoder</application>, thus enabling
 seeking!  As you see, stability and quality are the most important things,
-but the speed is also amazing.
+but the speed is also amazing. There is also a powerful filter system for
+video and audio manipulation.
 </para>
 
 <para>
@@ -95,7 +96,7 @@ to other <application>MPlayer</application>-playable formats (see below). It
 can encode with various codecs, like <emphasis role="bold">DivX4</emphasis>
 (1 or 2 passes), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
-audio. Also has powerful plugin system for video manipulation.
+audio.
 </para>
 
 
@@ -142,7 +143,7 @@ audio. Also has powerful plugin system for video manipulation.
   29.97 fps VOB to 24 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
-  Using our very powerful plugin system (crop, expand, flip, postprocess,
+  Using our very powerful filter system (crop, expand, flip, postprocess,
   rotate, scale, rgb/yuv conversion)
   </simpara></listitem>
 <listitem><simpara>
