@@ -1667,9 +1667,10 @@ end
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   mailing list for help and latest information.</P>
 
-<P>To get native DirectX video (<CODE>-vo directx</CODE>), install
+<P>To get native DirectX video (<CODE>-vo directx</CODE>), extract the
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>
-  and recompile. This, together with <CODE>-ao win32</CODE> should give you best
+  into <CODE>/usr/include/<CODE> or <CODE>/usr/local/include/<CODE> and
+  recompile. This, together with <CODE>-ao win32</CODE> should give you best
   results. If the image is distorted, try turning off hardware acceleration with
   <CODE>-vo directx:noaccel</CODE>.</P>
 
