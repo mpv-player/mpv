@@ -816,7 +816,7 @@ _aa=no
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -laa > /dev/null 2>&1 && _aa=yes
 
 _divx4linux=no
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 && _divx4linux=yes
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore -lm > /dev/null 2>&1 && _divx4linux=yes
 
 _termcap=no
 $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
@@ -938,7 +938,7 @@ cat > $TMPC << EOF
 #include <decore.h>
 int main( void ) { return DEC_OPT_FRAME_311; }
 EOF
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 || \
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore -lm > /dev/null 2>&1 || \
  { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!";}
 
 cat > $TMPC << EOF
