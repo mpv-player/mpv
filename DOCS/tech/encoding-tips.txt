@@ -440,7 +440,7 @@ viewed fullscreen.
 4)  I would  recommend  using the  Ogg  Vorbis audio  codec  with the  .ogm
 container format. Ogg  Vorbis compress audio better than MP3.  On a typical
 old,  mono-only audio  stream, a  45 kbits/s  Vorbis stream  is ok.  How to
-extract  & compress  an audio  stream  from a  ripped DVD  (mplayer dvd:// 1
+extract  & compress  an audio  stream  from a  ripped DVD  (mplayer dvd://1
 -dumpstream) :
 
 rm -f audiodump.pcm ; mkfifo -m 600 audiodump.pcm
