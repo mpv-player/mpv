@@ -18,6 +18,7 @@
 
 typedef struct {
     /* generic */
+    char	version;
     int		supported;
     /* info */
     char	*title;
@@ -82,8 +83,12 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Version: %s\n", param);
 	    if (!strncmp(param, "Vivo/1", 6) || !strncmp(param, "Vivo/2", 6))
+	    {
 //	    if (atoi(param) == 1 || atoi(param) == 2)
 		priv->supported = 1;
+		/* safe version for fourcc */
+		priv->version = param[5];
+	    }
 	}
 
 	/* video specific */	
@@ -469,8 +474,10 @@ void demux_open_vivo(demuxer_t* demuxer){
   
 
 {		sh_video_t* sh=new_sh_video(demuxer,0);
-    
-		sh->format=0x6f766976; // "vivo"
+
+		/* viv1, viv2 (for better codecs.conf) */    
+		sh->format = mmioFOURCC('v', 'i', 'v', priv->version);
+//		sh->format=0x6f766976; // "vivo"
 		if(!sh->fps)
 		{
 		    if (priv->fps)
