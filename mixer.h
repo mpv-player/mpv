@@ -3,6 +3,7 @@
 #define __MPLAYER_MIXER
 
 extern char * mixer_device;
+extern char * mixer_channel;
 extern int    muted;
 
 extern void mixer_getvolume( float *l,float *r );

@@ -37,6 +37,7 @@ static audio_buf_info zz;
 static int audio_fd=-1;
 
 char *oss_mixer_device = PATH_DEV_MIXER;
+int oss_mixer_channel = SOUND_MIXER_PCM;
 
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
@@ -61,18 +62,18 @@ static int control(int cmd,void *arg){
 	    if ((fd = open(oss_mixer_device, O_RDONLY)) > 0)
 	    {
 		ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
-		if (devs & SOUND_MASK_PCM)
+		if (devs & (1 << oss_mixer_channel))
 		{
 		    if (cmd == AOCONTROL_GET_VOLUME)
 		    {
-		        ioctl(fd, SOUND_MIXER_READ_PCM, &v);
+		        ioctl(fd, MIXER_READ(oss_mixer_channel), &v);
 			vol->right = (v & 0xFF00) >> 8;
 			vol->left = v & 0x00FF;
 		    }
 		    else
 		    {
 		        v = ((int)vol->right << 8) | (int)vol->left;
-			ioctl(fd, SOUND_MIXER_WRITE_PCM, &v);
+			ioctl(fd, MIXER_WRITE(oss_mixer_channel), &v);
 		    }
 		}
 		else
@@ -92,6 +93,7 @@ static int control(int cmd,void *arg){
 // open & setup audio device
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
+  char *mixer_channels [SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
 
   mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
     audio_out_format_name(format));
@@ -102,7 +104,38 @@ static int init(int rate,int channels,int format,int flags){
   if(mixer_device)
     oss_mixer_device=mixer_device;
 
+  if(mixer_channel){
+    int fd, devs, i;
+    
+    if ((fd = open(oss_mixer_device, O_RDONLY)) == -1){
+      mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't open mixer device %s: %s\n",
+        oss_mixer_device, strerror(errno));
+    }else{
+      ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
+      close(fd);
+      
+      for (i=0; i<SOUND_MIXER_NRDEVICES; i++){
+        if(!strcasecmp(mixer_channels[i], mixer_channel)){
+          if(!(devs & (1 << i))){
+            mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Audio card mixer does not have channel '%s' using default\n",
+              mixer_channel);
+            i = SOUND_MIXER_NRDEVICES+1;
+            break;
+          }
+          oss_mixer_channel = i;
+          break;
+        }
+      }
+      if(i==SOUND_MIXER_NRDEVICES){
+        mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't find mixer channel '%s' using default\n",
+          mixer_channel);
+      }
+    }
+  }
+
   mp_msg(MSGT_AO,MSGL_V,"audio_setup: using '%s' dsp device\n", dsp);
+  mp_msg(MSGT_AO,MSGL_V,"audio_setup: using '%s' mixer device\n", oss_mixer_device);
+  mp_msg(MSGT_AO,MSGL_V,"audio_setup: using '%s' mixer device\n", mixer_channels[oss_mixer_channel]);
 
 #ifdef __linux__
   audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);

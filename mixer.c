@@ -14,6 +14,7 @@
 extern ao_functions_t *audio_out;
 
 char * mixer_device=NULL;
+char * mixer_channel=NULL;
 
 int muted = 0;
 float mute_l = 0.0f;

@@ -188,6 +188,7 @@ m_option_t mplayer_opts[]={
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// override audio buffer size (used only by -ao oss, anyway obsolete...)
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
