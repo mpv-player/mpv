@@ -186,7 +186,7 @@ int read_cdda(stream_t* s) {
 		  cd_track = cd_info_get_track(p->cd_info, i+1);
 //printf("Track %d, sector=%d\n", i, p->sector-1);
 		  if( cd_track!=NULL ) {
-			  printf("%s\n", cd_track->name ); 
+			  printf("\n%s\n", cd_track->name ); 
 		  }
 		  break;
 	  }
@@ -221,7 +221,7 @@ void seek_cdda(stream_t* s) {
 //printf("Track %d, sector=%d\n", seeked_track, sec);
 		  cd_track = cd_info_get_track(p->cd_info, seeked_track+1);
 		  if( cd_track!=NULL ) {
-			  printf("%s\n", cd_track->name ); 
+			  printf("\n%s\n", cd_track->name ); 
 		  }
 
 	}
