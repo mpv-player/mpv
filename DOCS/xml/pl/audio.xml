@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.19 -->
-<sect2 id="audio-dev">
+<!-- synced with 1.20 -->
+<sect1 id="audio">
 <title>Urządzenia wyjściowe audio</title>
-<sect3 id="sync">
+<sect2 id="sync">
 <title>Synchronizacja Audio/Video</title>
 
 
@@ -117,9 +117,9 @@ man.
   szczegółowo w sekcji dotyczącej <link linkend="drives">CD-ROMu</link>.
  </para></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
-<sect3 id="experiences">
+<sect2 id="experiences">
 <title>Doświadczenia związane z użytkowaniem kart dźwiękowych i zalecenia</title>
 <para>
 Przy stosowaniu Linuksa, zalecamy jądro z serii 2.4.x. Jądro w wersji 2.2 nie było
@@ -339,10 +339,10 @@ Pomoc przy tworzeniu tego dokumentu jest mile widziana. Powiedz jak
 <application>MPlayer</application> i Twoja karta dźwiękowa
 (karty dźwiękowe) współpracują razem.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="af">
+<sect2 id="af">
 <title>Filtry audio</title>
 <para>
   Stare wtyczki audio zostały wyparte przez nową warstwę filtrów dźwiękowych.
@@ -503,7 +503,7 @@ różnice.
 </varlistentry>
 </variablelist>
 
-<sect4 id="af_resample">
+<sect3 id="af_resample">
 <title>Zmniejszenie/Zwiększenie częstotliwości próbkowania (Up/Downsampling)</title>
 
 <para>
@@ -563,9 +563,9 @@ ustawi częstotliwość wyjściową filtru zmieniającego częstotliwość próbkowania
 (resample filter) na 44100Hz używając przy tym dokładnego skalowania częstotliwości 
 wyjściowej oraz interpolacji liniowej (linear interpolation).
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_channels">
+<sect3 id="af_channels">
 <title>Zmiana liczby kanałów</title>
 <para>
 Filtr kanałów (<option>channels</option> filter) można użyć w celu dodania
@@ -630,9 +630,9 @@ mplayer -af channels=6:4:0:0:0:1:0:2:0:3 <replaceable>film.avi</replaceable>
 zmieni liczbę kanałów na 6 i ustawi 4 drogi przekierowywania, które skopiują
 kanał 0 do 0 i 3. Kanały 4 i 5 będą puste.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_format">
+<sect3 id="af_format">
 <title>Konwerter formatu próbek (sample format converter)</title>
 <para>
 Filtr formatu (<option>format</option> filter) przekształca jedne formaty
@@ -670,9 +670,9 @@ mplayer -af format=4:float <replaceable>film.avi</replaceable>
 </screen>
 ustawi format wyjściowy na 4 bajty danych zmiennoprzecinkowych przypadających na próbkę.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_delay">
+<sect3 id="af_delay">
 <title>Opóźnienie (delay)</title>
 <para>
 Filtr opóźniający (<option>delay</option> filter) opóźnia dźwięk zmierzający do
@@ -721,9 +721,9 @@ opóźni lewy i prawy przedni głośnik o 10.5ms, dwa tylne i subwoofer o 0ms a
 centralny o 7ms.
 </para>
 
-</sect4>
+</sect3>
 
-<sect4 id="af_volume">
+<sect3 id="af_volume">
 <title>Programowa regulacja głośności (software volume control)</title>
 
 <para>Programowa regulacja głośności (software volume control) jest obsługiwana
@@ -773,9 +773,9 @@ po zakończeniu <application>MPlayera</application>. Oszacowana głośność może być
 użyta do ustawienia poziomu dźwięku w <application>MEncoderze</application> tak,
 żeby maksymalny zasięg dynamiczny był możliwy do osiągnięcia.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_equalizer">
+<sect3 id="af_equalizer">
 <title>Korektor (equalizer)</title>
 <para>
 Filtr korektora (<option>equalizer</option> filter) to 10 oktawowy korektor graficzny
@@ -837,9 +837,9 @@ mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 <replaceable>film.avi</replacea
 wzmocni dźwięk w wyższych i niższych zakresach częstotliwości, wyciszając go 
 prawie całkowicie około 1kHz.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_panning">
+<sect3 id="af_panning">
 <title>Filtr pan (panning filter)</title>
 <para>
 Użyj filtru pan (<option>pan</option> filter), żeby dowolnie miksować kanały. Najprościej 
@@ -898,9 +898,9 @@ mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 <replaceable>film.avi</replaceable>
 da 3 kanał wyjściowy, zostawiając 0 i 1 nietknięte i miksując kanały 0 i 1
 do 2 kanału wyjściowego (który może być na przykład wysłany do subwoofera).
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_sub">
+<sect3 id="af_sub">
 <title>Subwoofer</title>
 <para>
 Filtr subwoofera (<option>sub</option> filter) dodaje kanał subwoofera do strumienia
@@ -942,9 +942,9 @@ mplayer -af sub=100:4 -channels 5 <replaceable>film.avi</replaceable>
 </screen>
 doda kanał subwoofera z częstotliwością graniczną równą 100Hz do 4 kanału wyjściowego.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_surround">
+<sect3 id="af_surround">
 <title>Dekoder dźwięku przestrzennego (Surround-sound decoder)</title>
 <para>
 Macierzowo zakodowany dźwięk przestrzenny, może być zdekodowany filtrem przestrzennym
@@ -976,9 +976,9 @@ mplayer -af surround=15 -channels 4 <replaceable>film.avi</replaceable>
 </screen>
 doda dźwięk przestrzenny dekodując dźwięk dla tylnych głośników z opóźnieniem 15ms.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_export">
+<sect3 id="af_export">
 <title>Audio Exporter</title>
 <para>
 Ten filtr audio eksportuje nadchodzący sygnał do innych procesów,
@@ -1019,9 +1019,9 @@ mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>film.avi</replaceabl
 </screen>
 wyeksportuje 1024 próbek na kanał do <filename>/tmp/mplayer-af_export</filename>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_extrastereo">
+<sect3 id="af_extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1050,9 +1050,9 @@ mplayer -af extrastereo <replaceable>media.avi</replaceable>
 mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
 +--></screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_volnorm">
+<sect3 id="af_volnorm">
 <title>Volume normalizer</title>
 
 <para>
@@ -1064,11 +1064,10 @@ szumów.
 Sposób użycia:
 <screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
 </para>
-</sect4>
-
 </sect3>
+</sect2>
 
-<sect3 id="audio-plugins">
+<sect2 id="audio-plugins">
 <title>Wtyczki Audio (odradzane)</title>
 <note><para><emphasis role="bold">Wtyczki audio zostały zastąpione przez filtry
 audio i wkrótce zostaną usunięte.</emphasis></para></note>
@@ -1108,7 +1107,7 @@ na AFMT_U8.
 Obecnie wtyczki audio nie mogą zostać użyte w <application>MEncoderze</application>.
 </para>
 
-<sect4 id="updn-sampling">
+<sect3 id="updn-sampling">
 <title>Zwiększanie/Zmniejszanie częstotliwości próbkowania (up/downsampling)</title>
 
 <para>
@@ -1139,10 +1138,10 @@ Spowoduje to odtwarzanie strumieni audio i video w zwolnionym tempie oraz
 zakłócenia dźwięku.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="surround-decode">
+<sect3 id="surround-decode">
 <title>Dekodowanie dźwięku przestrzennego</title>
 
 <para>
@@ -1157,10 +1156,10 @@ potrzebujesz karty z obsługą przynajmniej 4 kanałów.
 Sposób użycia:
 <screen>mplayer <replaceable>film.avi</replaceable> -aop list=surround</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="sample-format-conv">
+<sect3 id="sample-format-conv">
 <title>Konwerter formatu próbek (sample format converter)</title>
 
 <para>
@@ -1182,9 +1181,9 @@ mplayer <replaceable>film.avi</replaceable> -aop list=format:format=<replaceable
 gdzie <literal><replaceable>outfmt</replaceable></literal> to wymagany format
 próbki.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="audio-delay">
+<sect3 id="audio-delay">
 <title>Opóźnianie</title>
 <para>
 Wtyczka opóźnia dźwięk i jest przykładem tego, jak tworzyć nowe wtyczki. Nie ma
@@ -1192,9 +1191,9 @@ dla niej żadnego sensownego zastosowania z punktu widzenia użytkownika i wspomni
 tylko o niej ze względu na kompletność tej dokumentacji. Nie używaj tej wtyczki,
 chyba że jesteś deweloperem.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="sw-volume">
+<sect3 id="sw-volume">
 <title>Programowa regulacja głośnością (software volume control)</title>
 
 <para>
@@ -1230,9 +1229,9 @@ Sposób użycia:
 <screen>
 mplayer <replaceable>film.avi</replaceable> -aop list=volume:softclip</screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="extrastereo">
+<sect3 id="extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1253,10 +1252,10 @@ której wartość domyślna to 2.5. Jeżeli ustawisz go na <literal>0.0</literal>, ot
 dźwięk mono (średnia obu kanałów). Jeśli na <literal>1.0</literal>, nic się nie 
 zmieni, a jeśli na <literal>-1.0</literal>, lewy i prawy kanał zostaną zamienione.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="volnorm">
+<sect3 id="volnorm">
 <title>Normalizator głośności (volume normalizer)</title>
 
 <para>
@@ -1267,6 +1266,6 @@ Wtyczka ustawia maksymalny poziom dźwięku, bez powodowania zakłóceń.
 Sposób użycia:
 <screen>mplayer <replaceable>film.avi</replaceable> -aop list=volnorm</screen>
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>

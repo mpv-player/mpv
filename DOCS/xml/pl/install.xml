@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.46 -->
+<!-- synced with 1.47 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -438,7 +438,7 @@ działa ona z następującymi sterownikami:
 <listitem><simpara>
   Możliwości <emphasis role="bold">innych kart</emphasis> nie są obsługiwane przez
   <application>MPlayera</application>. <emphasis role="bold">Zalecamy, abyś przeczytał
-  sekcję <link linkend="audio-dev">karty dźwiękowe</link>!</emphasis>
+  sekcję <link linkend="audio">karty dźwiękowe</link>!</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </sect2>

@@ -947,7 +947,7 @@ Jeżeli to plik AVI, to może ma zły przeplot. Wypróbuj opcję
 </para></listitem>
 <listitem><para>
 Twój sterownik dźwięku jest wadliwy lub używasz ALSA 0.5 z <option>-ao oss</option>.
-Spójrz do <link linkend="audio-dev">sekcji kart dźwiękowych</link>.
+Spójrz do <link linkend="audio">sekcji kart dźwiękowych</link>.
 </para></listitem>
 <listitem><para>
 Plik Avi ma zły nagłówek, spróbuj użyć opcji <option>-nobps</option> i/lub <option>-mc 0</option>.

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.66 -->
-<sect2 id="video-dev">
+<sect1 id="video">
 <title>Urządzenia wyjścia video</title>
 
-<sect3 id="mtrr">
+<sect2 id="mtrr">
 <title>Ustawianie MTRR</title>
 
 <para>
@@ -83,11 +83,11 @@ Nie wszystkie procesory obsługują MTRR. Na przykład starsze K6-2
 (jakieś 266MHz, stepping 0) nie obsługują MTRR, ale już stepping 12 tak. 
 (<command>cat /proc/cpuinfo </command> aby sprawdzić).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="output-trad">
+<sect2 id="output-trad">
 <title>Wyjścia video dla tradycyjnych kart graficznych</title>
-<sect4 id="xv">
+<sect3 id="xv">
 <title>Xv</title>
 
 <para>
@@ -162,7 +162,7 @@ Jeżeli została zbudowana obsługa Xv to powinna się pojawić podobna linia:
 </orderedlist>
 </para>
 
-<sect5 id="tdfx">
+<sect4 id="tdfx">
 <title>Karty 3dfx</title>
 
 <para>
@@ -178,9 +178,9 @@ Dokładniejsze instrukcje są w sekcji <link linkend="sdl">SDL</link>.
 <para>
 <emphasis role="bold">LUB</emphasis>, spróbuj NOWEGO sterownika <option>-vo tdfxfb</option>! Zajrzyj do sekcji <link linkend="tdfxfb">tdfxfb</link>
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="s3">
+<sect4 id="s3">
 <title>Karty S3</title>
 
 <para>
@@ -198,10 +198,10 @@ zdobądź nowsze sterowniki, lub grzecznie poproś o sterownik z obsługą MMX/3
 na grupie dyskusyjnej mplayer-users 
 </para>
 </note>
-</sect5>
+</sect4>
 
 
-<sect5 id="nvidia">
+<sect4 id="nvidia">
 <title>Karty nVidia</title>
 
 <para>
@@ -226,10 +226,10 @@ obsługujący większość kart nVidia.
 Obecnie znajduje się w stadium beta i ma pewne ograniczenia. 
 Więcej informacji znajdziesz w sekcji <link linkend="vidix-nvidia">nVidia</link>.
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="ati">
+<sect4 id="ati">
 <title>Karty ATI</title>
 
 <para>
@@ -251,10 +251,10 @@ z lub bez <emphasis role="bold">wyjścia TV</emphasis>.
 Żadne biblioteki czy X nie są do tego potrzebne. 
 Poczytaj sekcję o <link linkend="vidix">VIDIX</link>.
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="neomagic">
+<sect4 id="neomagic">
 <title>Karty NeoMagic</title>
 
 <para>
@@ -285,10 +285,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="trident">
+<sect4 id="trident">
 <title>Karty Trident</title>
 <para>
 Jeżeli chcesz używać Xv z kartą trident (zakładając, że nie działa z 4.1.0), 
@@ -302,22 +302,22 @@ karty Cyberblade/i1.
 </para>
 
 
-</sect5>
+</sect4>
 
 
-<sect5 id="kyro">
+<sect4 id="kyro">
 <title>Karty Kyro/PowerVR</title>
 <para>
 Jeżeli chcesz używać Xv z kartą opartą na Kyro 
 (na przykład Hercules Prophet 4000XT), powinieneś ściągnąć sterowniki ze 
 <ulink url="http://www.powervr.com/">strony PowerVR</ulink>
 </para>
-</sect5>
 </sect4>
+</sect3>
 
 <!-- ********** -->
 
-<sect4 id="dga">
+<sect3 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -619,12 +619,12 @@ OSD działa tylko z włączonym podwójnym buforowaniem (w przeciwnym razie migo
   </simpara></listitem>
 </itemizedlist>
 
-</sect4>
-<!--</sect3>-->
+</sect3>
+<!--</sect2>-->
 
 <!-- ********** -->
 
-<sect4 id="sdl">
+<sect3 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -717,10 +717,10 @@ Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pask
   Nie będzie to działało tak jak powinno.
   </simpara></listitem>
 </itemizedlist>
-</sect4>
+</sect3>
 
 
-<sect4 id="svgalib">
+<sect3 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -792,10 +792,10 @@ próbkowania, ponieważ dźwięk 44kHz był popsuty: <option>-srate 22050</optio
 OSD i napisy możesz wyłączyć tylko przy pomocy filtru 
 <option>expand</option>. Dokładne parametry znajdziesz na stronie man.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="fbdev">
+<sect3 id="fbdev">
 <title>Wyjście bufora ramki (FBdev)</title>
 
 <para>
@@ -889,10 +889,10 @@ i nie proś o to, ponieważ nie jest to ograniczenie w
 <application>MPlayerze</application>.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="mga_vid">
+<sect3 id="mga_vid">
 <title>Bufor ramki Matrox (mga_vid)</title>
 
 <para>
@@ -967,10 +967,10 @@ Sterownik mga_vid współpracuje z Xv.
  i może być modyfikowany w celu zmiany jasności:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect3 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Obsługa 3dfx YUV</title>
 <para>
 Ten sterownik używa bufora ramki tdfx w jądrze aby odtwarzać filmy 
@@ -978,10 +978,10 @@ z przyśpieszeniem YUV. Będziesz potrzebował jądra z obsługą tdfxfb.
 Będziesz także musiał odpowiednio skompilować <application>MPlayera</application>. 
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="opengl">
+<sect3 id="opengl">
 <title>Wyjście OpenGL</title>
 
 <para>
@@ -1015,10 +1015,10 @@ zmienną środowiskową (przynajmniej dla nVidia):
 <command>export $__GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect4>
+</sect3>
 
 
-<sect4 id="aalib">
+<sect3 id="aalib">
 <title>AAlib - wyświetlanie w trybie tekstowym</title>
 
 <para>
@@ -1147,11 +1147,11 @@ znaleźć najlepszy tryb. Spójrz na
 <ulink url="http://aa-project.sourceforge.net/tune"/>, 
 jest tam więcej informacji o dostrajaniu.
 </para>
-</sect4>
+</sect3>
  
-<sect4 id="caca">
+<sect3 id="caca">
 	<title><systemitem class="library">libcaca</systemitem> - Color ASCII
-		Art library (bibliotek kolorowego ASCII-Art)</title>
+		Art library (biblioteka kolorowego ASCII-Art)</title>
 
 <para>
 Biblioteka<ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
@@ -1243,9 +1243,9 @@ sterownik caca libvo.
 	wszystkie ramki, użyj opcji <option>-framedrop</option>.
 </para>
 
-</sect4>
+</sect3>
 
-<sect4 id="vesa">
+<sect3 id="vesa">
 <title>VESA - wyjście na VESA BIOS</title>
 
 <para>
@@ -1389,10 +1389,10 @@ musisz mieć podłączony odbiornik TV przed włączeniem swojego PC,
 ponieważ video BIOS inicjalizuje się tylko podczas procedury POST
   </simpara></listitem>
 </itemizedlist>
-</sect4>
+</sect3>
 
 
-<sect4 id="x11">
+<sect3 id="x11">
 <title>X11</title>
 
 <para>
@@ -1440,10 +1440,10 @@ Jeżeli nie możesz znaleźć trybów, które wstawiłeś, przeszukaj komunikaty
 Niektóre sterowniki nie mogą używać niskich pixelclock (częstotliwości 
 taktowania układu RAMDAC), które są wymagane dla trybów o niskiej rozdzielczości.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="vidix">
+<sect3 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1607,7 +1607,7 @@ Przekompiluj i zainstaluj libdha
   </para></step>
 </procedure>
 
-<sect5 id="vidix-ati">
+<sect4 id="vidix-ati">
 <title>Karty ATI</title>
 <para>
 Obecnie większość kart ATI jest obsługiwana natywnie, 
@@ -1620,9 +1620,9 @@ Są dwie skompilowanie binarki: <filename>radeon_vid</filename> dla Radeonów or
 Możesz wymusić jedną z nich lub pozwolić systemowi VIDIX na autodetekcję 
 dostępnych sterowników.
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-mga">
+<sect4 id="vidix-mga">
 <title>Karty Matrox</title>
 <para>
 Matrox G200, G400, G450 i G550 zgłoszono jako działające.
@@ -1632,9 +1632,9 @@ Matrox G200, G400, G450 i G550 zgłoszono jako działające.
 Sterownik obsługuje korektory (equalizery) video i powinien być prawie tak szybki jak 
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-trident">
+<sect4 id="vidix-trident">
 <title>Karty Trident</title>
 <para>
 Jest dostępny sterownik dla układu Trident Cyberblade/i1, który można znaleźć 
@@ -1645,17 +1645,17 @@ na płytach głównych VIA Epia.
 Sterownik ten został napisany (i jest utrzymywany) przez
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastaira M. Robinsona</ulink>
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-3dlabs">
+<sect4 id="vidix-3dlabs">
 <title>Karty 3DLabs</title>
 <para>
 Chociaż istnieje sterownik dla układów 3DLabs GLINT R3 oraz Permedia3, 
 to nikt go nie testował (sprawozdania są mile widziane)
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-nvidia">
+<sect4 id="vidix-nvidia">
 <title>Karty nVidia</title>
 <para>
 Dostępny jest stosunkowo nowy sterownik nVidia, działa na kartach Riva128, TNT i 
@@ -1698,9 +1698,9 @@ poniższy przykład:
 <para>
 Czekamy na raporty!
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-sis">
+<sect4 id="vidix-sis">
 <title>Karty SiS</title>
 <para>
 Jest to kod wysoce eksperymentalny. (Tak jak nvidia_vid).
@@ -1716,12 +1716,12 @@ SiS versions of the "Shuttle XPC" barebones boxes out there)-->
 <para>
 Czekamy na raporty!
 </para>
-</sect5>
 </sect4>
+</sect3>
 
 
 
-<sect4 id="directfb">
+<sect3 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
 &quot;DirectFB jest biblioteką graficzną, która była tworzona z myślą o 
@@ -1747,9 +1747,9 @@ Możesz używać opcji DirectFB w linii poleceń, używając opcji <option>-dfbo
 Wyboru warstwy można dokonać metodą podurządzenia. 
 Przykład: <option>-vo directfb:2</option> (standardową jest warstwa -1 : autodetekcja)
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="dfbmga">
+<sect3 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Przeczytaj proszę główną sekcję <link linkend="directfb">DirectFB</link>, znajdziesz tam
@@ -1780,13 +1780,13 @@ Port kodu CRTC2 do
 Mile widziane są 
 <ulink url="../../tech/patches.txt">łatki</ulink>.
 </para></note>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="mpeg_decoders">
+<sect2 id="mpeg_decoders">
 <title>Dekodery MPEG</title>
 
-<sect4 id="dvb">
+<sect3 id="dvb">
 <title>Wejście i wyjście DVB</title>
 <para>
 <application>MPlayer</application> obsługuje karty z układem Siemens DVB, 
@@ -2023,9 +2023,9 @@ przy użyciu natywnej cechy OSD kart DVB, a także bardziej płynnego
 odtwarzania filmów innych niż 25fps oraz transkodowania w czasie rzeczywistym MPEG2 i MPEG4 
 (częściowa dekompresja)
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="dxr2">
+<sect3 id="dxr2">
 <title>DXR2</title>
 <para><application>MPlayer</application> obsługuje sprzętowo przyśpieszane odtwarzanie przy 
 użyciu karty DXR2.</para>
@@ -2063,9 +2063,9 @@ Jeżeli dobrze dostosujesz ustawienia koloru kluczowego powinieneś uzyskać akc
 </para>
 
 <para>Listę dostępnych opcji znajdziesz na stronie man.</para>
-</sect4>
+</sect3>
 
-<sect4 id="dxr3">
+<sect3 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
 <application>MPlayer</application> obsługuje sprzętowo przyśpieszane odtwarzanie 
@@ -2193,14 +2193,13 @@ użyta aby określić wyjście DXR3 zamiast tego z karty dźwiękowej.
 </para></listitem>
 </varlistentry>
 </variablelist>
-</sect4>
-
 </sect3>
+</sect2>
 
-<sect3 id="other">
+<sect2 id="other">
 <title>Inny sprzęt do wizualizacji</title>
 
-<sect4 id="zr">
+<sect3 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2294,9 +2293,9 @@ odtwarzającym - zawiesisz swój komputer. W porządku jest
 poczekać aż <application>MPlayer</application> zakończy działanie i 
 <emphasis role="bold">POTEM</emphasis> wyłączyć XawTV.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="blinkenlights">
+<sect3 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
 Ten sterownik zdolny jest do odtwarzanie używając protokołu UDP Blinkenlights
@@ -2310,13 +2309,13 @@ do zaoferowania. Po prostu pooglądaj kilka
 Blinkenlights</ulink>. Na filmie Arcade możesz zobaczyć sterownik wyjściowy
 Blinkenlights w akcji w 00:07:50.
 </para>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="tvout">
+<sect2 id="tvout">
 <title>Obsługa wyjścia TV</title>
 
-<sect4 id="tvout-mga-g400">
+<sect3 id="tvout-mga-g400">
 <title>Karty Matrox G400</title>
 
 <para>
@@ -2462,9 +2461,9 @@ piątej, szóstej, siódmej i pietnastej (5, 6, 7, 15) nóżce. (info dostarczon
 przez Balázs Kerekes)
 </para>
 </formalpara>
-</sect4>
+</sect3>
 
-<sect4 id="tv-out_matrox_g450">
+<sect3 id="tv-out_matrox_g450">
 <title>Karty Matrox G450/G550</title>
 <para>
 Obsługa wyjścia TV dla tych kart została przedstawione dopiero niedawno i nie
@@ -2488,16 +2487,16 @@ jest w tej chwili zalecane dla G400 (-> sekcja wyżej).
 Potrzebną łatkę na jądro i dokładne HOWTO można ściągnąć z 
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tvout-ati">
+<sect3 id="tvout-ati">
 <title>karty ATI</title>
 
 <formalpara>
 <title>WSTĘP</title>
 <para>
-Obecnie ATI nie chce wspierać pod Linuksem żadnego z układów TV-out, z powodu ich
+Obecnie ATI nie chce obsługiwać pod Linuksem żadnego z układów TV-out, z powodu ich
 licencjonowanej technologii Macrovision.
 </para>
 </formalpara>
@@ -2534,17 +2533,17 @@ Jedyna rzecz, którą musisz zrobić to:
 <emphasis role="bold">Mieć podłączony odbiornik TV przez zabootowaniem swojego
 PC</emphasis>, ponieważ video BIOS inicjalizuje się tylko podczas procedury POST.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tvout-voodoo">
+<sect3 id="tvout-voodoo">
 <title>Voodoo 3</title>
 <para>
 Sprawdź <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ten URL</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="tvout-nvidia">
+<sect3 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
 Najpierw MUSISZ ściągnąć sterowniki o zamkniętych źródłach z 
@@ -2580,9 +2579,9 @@ EndSection
 <para>
 Oczywiście najważniejsza jest część TwinView.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="tvout-neomagic">
+<sect3 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
 Układ NeoMagic Można znaleźć w rożnych laptopach, niektóre wyposażone są w
@@ -2633,7 +2632,7 @@ prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
   </itemizedlist>
 																				
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>
 
