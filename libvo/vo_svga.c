@@ -681,7 +681,12 @@ static uint32_t query_format(uint32_t format) {
       case 8 : if ((format == IMGFMT_RGB8 ) || (format == IMGFMT_BGR8))
                  return ((bpp_avail & BPP_8 ) ? 1 : 0);
 	       break;
-	       //FIXME RGB4 RGB1 ?
+      case 4 : if ((format == IMGFMT_RGB4 ) || (format == IMGFMT_BGR4))
+                 return ((bpp_avail & BPP_4 ) ? 1 : 0);
+	       break;
+      case 1 : if ((format == IMGFMT_RGB1 ) || (format == IMGFMT_BGR1))
+                 return ((bpp_avail & BPP_1 ) ? 1 : 0);
+	       break;
     }
   } else {
       switch (format) {
@@ -706,6 +711,10 @@ static uint32_t query_format(uint32_t format) {
         case IMGFMT_YV12: return (1); break;
         case IMGFMT_RGB8:
         case IMGFMT_BGR8: return ((bpp_avail & BPP_8) ? 1 : 0); break;
+        case IMGFMT_RGB4:
+        case IMGFMT_BGR4: return ((bpp_avail & BPP_4) ? 1 : 0); break;
+        case IMGFMT_RGB1:
+        case IMGFMT_BGR1: return ((bpp_avail & BPP_1) ? 1 : 0); break;
       }
     }
   return (0);
