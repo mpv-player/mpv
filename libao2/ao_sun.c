@@ -67,21 +67,21 @@ extern int verbose;
 // convert an OSS audio format specification into a sun audio encoding
 static int oss2sunfmt(int oss_format)
 {
-  switch (oss_format){
-  case AFMT_MU_LAW:
-    return AUDIO_ENCODING_ULAW;
-  case AFMT_A_LAW:
-    return AUDIO_ENCODING_ALAW;
-  case AFMT_S16_LE:
-    return AUDIO_ENCODING_LINEAR;
-  case AFMT_U8:
-    return AUDIO_ENCODING_LINEAR8;
+    switch (oss_format){
+    case AFMT_MU_LAW:
+	return AUDIO_ENCODING_ULAW;
+    case AFMT_A_LAW:
+	return AUDIO_ENCODING_ALAW;
+    case AFMT_S16_LE:
+	return AUDIO_ENCODING_LINEAR;
+    case AFMT_U8:
+	return AUDIO_ENCODING_LINEAR8;
 #ifdef	AUDIO_ENCODING_DVI	// Missing on NetBSD...
-  case AFMT_IMA_ADPCM:
-    return AUDIO_ENCODING_DVI;
+    case AFMT_IMA_ADPCM:
+	return AUDIO_ENCODING_DVI;
 #endif
-  default:
-    return AUDIO_ENCODING_NONE;
+    default:
+	return AUDIO_ENCODING_NONE;
   }
 }
 
@@ -101,7 +101,11 @@ static int realtime_samplecounter_available(char *dev)
     unsigned increment;
     unsigned min_increment;
 
-    len = 44100 * 4 / 4;    // amount of data for 0.25sec of 44.1khz, stereo, 16bit
+    len = 44100 * 4 / 4;    /* amount of data for 0.25sec of 44.1khz, stereo,
+			     * 16bit.  44kbyte can be sent to all supported
+			     * sun audio devices without blocking in the
+			     * "write" below.
+			     */
     silence = calloc(1, len);
     if (silence == NULL)
 	goto error;
@@ -172,6 +176,15 @@ static int realtime_samplecounter_available(char *dev)
 	last_samplecnt = info.play.samples;
     }
 
+    /*
+     * For 44.1kkz, stereo, 16-bit format we would send sound data in 16kbytes
+     * chunks (== 4096 samples) to the audio device.  If we see a minimum
+     * sample counter increment from the soundcard driver of less than
+     * 2000 samples,  we assume that the driver provides a useable realtime
+     * sample counter in the AUDIO_INFO play.samples field.  Timing based
+     * on sample counts should be much more accurate than counting whole 
+     * 16kbyte chunks.
+     */
     if (min_increment < 2000)
 	rtsc_ok = RTSC_ENABLED;
 
@@ -198,92 +211,100 @@ error:
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
-  switch(cmd){
+    switch(cmd){
     case AOCONTROL_SET_DEVICE:
-      audio_dev=(char*)arg;
-      return CONTROL_OK;
+	audio_dev=(char*)arg;
+	return CONTROL_OK;
     case AOCONTROL_QUERY_FORMAT:
-      return CONTROL_TRUE;
-  }
-  return CONTROL_UNKNOWN;
+	return CONTROL_TRUE;
+    }
+    return CONTROL_UNKNOWN;
 }
 
 // open & setup audio device
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-  audio_info_t info;
-  int byte_per_sec;
+    audio_info_t info;
+    int byte_per_sec;
 
-  if (ao_subdevice) audio_dev = ao_subdevice;
+    if (ao_subdevice) audio_dev = ao_subdevice;
 
-  if (enable_sample_timing == RTSC_UNKNOWN
-      && !getenv("AO_SUN_DISABLE_SAMPLE_TIMING")) {
-      enable_sample_timing = realtime_samplecounter_available(audio_dev);
-  }
-
-  printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
-	 rate,channels,audio_out_format_name(format),format);
-
-  audio_fd=open(audio_dev, O_WRONLY);
-  if(audio_fd<0){
-    printf("Can't open audio device %s, %s  -> nosound\n", audio_dev, strerror(errno));
-    return 0;
-  }
-
-  ioctl(audio_fd, AUDIO_DRAIN, 0);
-
-  AUDIO_INITINFO(&info);
-  info.play.encoding = oss2sunfmt(ao_format = format);
-  info.play.precision = (format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
-  info.play.channels = ao_channels = channels;
-  info.play.sample_rate = ao_samplerate = rate;
-  if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
-    printf("audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate\n",channels,audio_out_format_name(format),rate);
-  bytes_per_sample = channels * info.play.precision / 8;
-  byte_per_sec = bytes_per_sample * rate;
-  ao_outburst = byte_per_sec > 100000 ? 16384 : 8192;
-
-  if(ao_buffersize==-1){
-    // Measuring buffer size:
-    void* data;
-    ao_buffersize=0;
-#ifdef HAVE_AUDIO_SELECT
-    data=malloc(ao_outburst); memset(data,0,ao_outburst);
-    while(ao_buffersize<0x40000){
-      fd_set rfds;
-      struct timeval tv;
-      FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
-      tv.tv_sec=0; tv.tv_usec = 0;
-      if(!select(audio_fd+1, NULL, &rfds, NULL, &tv)) break;
-      write(audio_fd,data,ao_outburst);
-      ao_buffersize+=ao_outburst;
+    if (enable_sample_timing == RTSC_UNKNOWN
+	&& !getenv("AO_SUN_DISABLE_SAMPLE_TIMING")) {
+	enable_sample_timing = realtime_samplecounter_available(audio_dev);
     }
-    free(data);
-    if(ao_buffersize==0){
-        printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
-          printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
-        return 0;
+
+    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
+	   rate,channels,audio_out_format_name(format),format);
+
+    audio_fd=open(audio_dev, O_WRONLY);
+    if(audio_fd<0){
+	printf("Can't open audio device %s, %s  -> nosound\n", audio_dev, strerror(errno));
+	return 0;
     }
-#ifdef	__svr4__
-    // remove the 0 bytes from the above ao_buffersize measurement from the
-    // audio driver's STREAMS queue
-    ioctl(audio_fd, I_FLUSH, FLUSHW);
-#endif
+
     ioctl(audio_fd, AUDIO_DRAIN, 0);
+
+    AUDIO_INITINFO(&info);
+    info.play.encoding = oss2sunfmt(ao_format = format);
+    info.play.precision = (format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.channels = ao_channels = channels;
+    info.play.sample_rate = ao_samplerate = rate;
+    if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
+	printf("audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate\n",
+	       channels, audio_out_format_name(format), rate);
+    bytes_per_sample = channels * info.play.precision / 8;
+    byte_per_sec = bytes_per_sample * rate;
+    ao_outburst = byte_per_sec > 100000 ? 16384 : 8192;
+
+#ifdef	__not_used__
+    /*
+     * hmm, ao_buffersize is currently not used in this driver, do there's
+     * no need to measure it
+     */
+    if(ao_buffersize==-1){
+	// Measuring buffer size:
+	void* data;
+	ao_buffersize=0;
+#ifdef HAVE_AUDIO_SELECT
+	data = malloc(ao_outburst);
+	memset(data, format==AFMT_U8 ? 0x80 : 0, ao_outburst);
+	while(ao_buffersize<0x40000){
+	    fd_set rfds;
+	    struct timeval tv;
+	    FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
+	    tv.tv_sec=0; tv.tv_usec = 0;
+	    if(!select(audio_fd+1, NULL, &rfds, NULL, &tv)) break;
+	    write(audio_fd,data,ao_outburst);
+	    ao_buffersize+=ao_outburst;
+	}
+	free(data);
+	if(ao_buffersize==0){
+	    printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
+	    printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
+	    return 0;
+	}
+#ifdef	__svr4__
+	// remove the 0 bytes from the above ao_buffersize measurement from the
+	// audio driver's STREAMS queue
+	ioctl(audio_fd, I_FLUSH, FLUSHW);
 #endif
-  }
+	ioctl(audio_fd, AUDIO_DRAIN, 0);
+#endif
+    }
+#endif	/* __not_used__ */
 
-  AUDIO_INITINFO(&info);
-  info.play.samples = 0;
-  info.play.eof = 0;
-  info.play.error = 0;
-  ioctl (audio_fd, AUDIO_SETINFO, &info);
+    AUDIO_INITINFO(&info);
+    info.play.samples = 0;
+    info.play.eof = 0;
+    info.play.error = 0;
+    ioctl (audio_fd, AUDIO_SETINFO, &info);
 
-  queued_bursts = 0;
-  queued_samples = 0;
+    queued_bursts = 0;
+    queued_samples = 0;
 
-  return 1;
+    return 1;
 }
 
 // close audio device
@@ -369,15 +390,35 @@ static int get_space(){
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
+
     if (len < ao_outburst) return 0;
     len /= ao_outburst;
-    len = write(audio_fd, data, len*ao_outburst);
+    len *= ao_outburst;
+
+#if	WORDS_BIGENDIAN
+    {
+	static void *swab_buf;
+	static int swab_len;
+	if (ao_format == AFMT_S16_LE && len > swab_len) {
+	    if (swab_buf)
+		swab_buf = realloc(swab_buf, len);
+	    else
+		swab_buf = malloc(len);
+	    swab_len = len;
+	    if (swab_buf == NULL) return 0;
+	}
+	swab(data, swab_buf, len);
+	data = swab_buf;
+    }
+#endif
+
+    len = write(audio_fd, data, len);
     if(len > 0) {
-      queued_samples += len / bytes_per_sample;
-      if (write(audio_fd,data,0) < 0)
-	  perror("ao_sun: send EOF audio record");
-      else
-	  queued_bursts ++;
+	queued_samples += len / bytes_per_sample;
+	if (write(audio_fd,data,0) < 0)
+	    perror("ao_sun: send EOF audio record");
+	else
+	    queued_bursts ++;
     }
     return len;
 }
