@@ -9,7 +9,7 @@ SHORTNAME = libdha.dll
 else
 SHORTNAME = libdha.so
 endif
-LIBNAME = libdha-$(VERSION).so
+LIBNAME = libdha.so.$(VERSION)
 
 SRCS=libdha.c mtrr.c pci.c pci_names.c
 OBJS=$(SRCS:.c=.o)
@@ -30,7 +30,7 @@ endif
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
-	$(CC) -shared -o $(LIBNAME) $(OBJS) $(LIBS)
+	$(CC) -shared -Wl,-soname -Wl,$(LIBNAME) -o $(LIBNAME) $(OBJS) $(LIBS)
 	ln -sf $(LIBNAME) $(SHORTNAME)
 
 all:    $(LIBNAME) $(SHORTNAME)
