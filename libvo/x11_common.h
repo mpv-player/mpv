@@ -54,6 +54,11 @@ extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
 extern uint32_t vo_x11_set_equalizer(char *name, int value);
 extern uint32_t vo_x11_get_equalizer(char *name, int *value);
 extern void fstype_help(void);
+extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
+	Visual *vis, int x, int y, unsigned int width, unsigned int height,
+	int depth, Colormap col_map);
+extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
+	int img_width, int img_height, int use_fs);
 
 #endif
 

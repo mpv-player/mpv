@@ -816,10 +816,9 @@ static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
 //
 Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot, Visual *vis, int x, int y, unsigned int width, unsigned int height, int depth, Colormap col_map)
 {
-   unsigned long xswamask;
+   unsigned long xswamask = CWBackingStore | CWBorderPixel;
    XSetWindowAttributes xswa;
-   
-   xswamask=CWBackingStore | CWBorderPixel;
+   Window ret_win;
    
    if (col_map!=CopyFromParent)
    {
@@ -831,7 +830,7 @@ Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot, Visual *vis
    xswa.backing_store = Always;
    xswa.bit_gravity = StaticGravity;
    
-   Window ret_win = XCreateWindow(mDisplay, mRootWin, x, y, width, height, 0, depth,
+   ret_win = XCreateWindow(mDisplay, mRootWin, x, y, width, height, 0, depth,
 		        CopyFromParent, vis, xswamask , &xswa);
    if (!f_gc) f_gc=XCreateGC (mDisplay, ret_win, 0, 0);
    XSetForeground (mDisplay, f_gc, 0);
@@ -840,24 +839,26 @@ Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot, Visual *vis
 }
 	
 
-void vo_x11_clearwindow_part( Display *mDisplay, Window vo_window, int img_wid, int img_hei, int use_fs)
+void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window, int img_width, int img_height, int use_fs)
 {
-   if (!f_gc) return;
-   int u_dheight = use_fs?vo_screenheight:vo_dheight;
-   int u_dwidth = use_fs?vo_screenwidth:vo_dwidth;
-   
-   if (u_dheight<=img_hei && u_dwidth<=img_wid) return;
+   int u_dheight, u_dwidth, left_ov, left_ov2;
 
-   int left_ov = (u_dheight - img_hei)/2;
-   int left_ov2 = (u_dwidth - img_wid)/2;   
+   if (!f_gc) return;
+
+   u_dheight = use_fs?vo_screenheight:vo_dheight;
+   u_dwidth = use_fs?vo_screenwidth:vo_dwidth;
+   if ((u_dheight<=img_height) && (u_dwidth<=img_width)) return;
+
+   left_ov = (u_dheight - img_height)/2;
+   left_ov2 = (u_dwidth - img_width)/2;   
    
    XFillRectangle(mDisplay, vo_window, f_gc, 0, 0, u_dwidth, left_ov);
    XFillRectangle(mDisplay, vo_window, f_gc, 0, u_dheight-left_ov-1, u_dwidth, left_ov+1);
    
-   if (u_dwidth>img_wid)
+   if (u_dwidth>img_width)
    {
-   XFillRectangle(mDisplay, vo_window, f_gc, 0, left_ov, left_ov2, img_hei);
-   XFillRectangle(mDisplay, vo_window, f_gc, u_dwidth-left_ov2-1, left_ov, left_ov2, img_hei);
+   XFillRectangle(mDisplay, vo_window, f_gc, 0, left_ov, left_ov2, img_height);
+   XFillRectangle(mDisplay, vo_window, f_gc, u_dwidth-left_ov2-1, left_ov, left_ov2, img_height);
    }
 
    XFlush(mDisplay);
