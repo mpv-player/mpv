@@ -308,6 +308,9 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "No se pudo setear las opciones de Lame, revise el"\
+" bitrate/samplerate, algunos bitrates muy bajos (<32) necesitan una tasa de"\
+" muestreo más baja (ej. -srate 8000). Si todo falla, pruebe con un preset."
 #define MSGTR_ConfigfileError "error en archivo de configuración"
 #define MSGTR_ErrorParsingCommandLine "error en parametros de la línea de comando"
 #define MSGTR_VideoStreamRequired "¡El flujo de video es obligatorio!\n"

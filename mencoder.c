@@ -1110,7 +1110,10 @@ if(lame_param_preset != NULL){
   lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset);
 }
 #endif
-lame_init_params(lame);
+if(lame_init_params(lame) == -1){
+    mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameCantInit); 
+    mencoder_exit(1,NULL);
+}
 if(verbose>0){
     lame_print_config(lame);
     lame_print_internals(lame);
