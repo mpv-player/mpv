@@ -22,8 +22,12 @@ SB Live!:
 			ALSA	: (?)
 			Max kHz : 48
 
+SB AWE 64		OSS	: max 44kHz
+			ALSA	: 48kHz sounds shit
+			Max kHz : 48
+
 Gravis UltraSound ACE:
-			OSS     : sucks, max 44Khz ! Also has problems with the
+			OSS     : max 44Khz. Also has problems with the
 				  new sound code.
 			ALSA    : OK
 			Max kHz : 48
