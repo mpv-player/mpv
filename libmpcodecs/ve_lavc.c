@@ -98,7 +98,9 @@ static int config(struct vf_instance_s* vf,
 
     lavc_venc_context.width = width;
     lavc_venc_context.height = height;
-    if (lavc_param_vbitrate >= 0) /* != -1 */
+    if (lavc_param_vbitrate > 16000) /* != -1 */
+	lavc_venc_context.bit_rate = lavc_param_vbitrate;
+    else if (lavc_param_vbitrate >= 0) /* != -1 */
 	lavc_venc_context.bit_rate = lavc_param_vbitrate*1000;
     else
 	lavc_venc_context.bit_rate = 800000; /* default */
