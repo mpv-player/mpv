@@ -29,8 +29,9 @@ Linux-Mandrake 8.0 series.
 The GCC team disclaimed any link with GCC 2.96 and issued an
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">official response</ulink>
 to GCC 2.96. Many developers around the world began having problems with
-GCC 2.96, and started recommending other compilers like
-<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink> and others.
+GCC 2.96, and several projects,
+<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink> among them,
+started recommending other compilers.
 Other interesting links are
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</ulink>
