@@ -13,7 +13,9 @@ The codecs.conf file is stored either in a shared directory for all system
 users to access, or in the .mplayer directory in a user's home
 directory. When MPlayer starts, it first looks for a codecs.conf file in a
 user's home directory. Failing that, it searches for the shared file. If
-the file has syntax errors, MPlayer will not start and report the error.
+no codecs.conf file is found MPlayer falls back on its internal hardcoded
+configuration. If the file is present but has syntax errors, MPlayer will
+report the error.
 
 The codecs.conf file is really quite simple. It is simply a collection of
 codec definition blocks that define how different media types should be
@@ -96,7 +98,7 @@ The "guid" keyword identifies a 16-byte Microsoft GUID that some media
 files use to identify codecs. Used only for win32 dshow and DMO codecs.
 
 The "out" keyword identifies which output format the decoder is known
-to output. Just like the fourcc line, there can be multiple out lines or
+to provide. Just like the fourcc line, there can be multiple out lines or
 multiple comma-separated output formats on the same line. The output
 formats should be listed in order of preference.
 
