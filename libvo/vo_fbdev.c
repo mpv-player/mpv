@@ -1196,8 +1196,20 @@ static const vo_info_t *get_info(void)
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
-	unsigned char *dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
-	int dstride = in_width * fb_pixel_size;
+	unsigned char *dst;
+	int dstride;
+
+#ifdef USE_CONVERT2FB
+	if (pixel_format == IMGFMT_YV12) {
+	  dst = L123123875 + (fb_xres * y0 + x0) * fb_pixel_size;
+	  dstride = fb_xres * fb_pixel_size;
+	}
+	else
+#endif
+	  {
+	    dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
+	    dstride = in_width * fb_pixel_size;
+	  }
 
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, dstride);
 }
@@ -1205,9 +1217,16 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 static uint32_t draw_frame(uint8_t *src[])
 {
 	if (pixel_format == IMGFMT_YV12) {
+#ifdef USE_CONVERT2FB
+		yuv2rgb(L123123875, src[0], src[1], src[2], fb_xres,
+				fb_yres, fb_xres * fb_pixel_size,
+				in_width, in_width / 2);
+#else
 		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
 				in_height, in_width * fb_pixel_size,
 				in_width, in_width / 2);
+#endif
+
 	} else if (flip) {
 		int h = in_height;
 		int len = in_width * fb_pixel_size;
@@ -1237,6 +1256,21 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 {
 	uint8_t *dest;
 
+#ifdef USE_CONVERT2FB
+	if (pixel_format == IMGFMT_YV12) {
+	  if(x < fb_xres && y < fb_yres) {
+	    if(x+w > fb_xres) w= fb_xres-x;
+	    if(y+h > fb_yres) h= fb_yres-y;
+
+	    dest = L123123875 + (fb_xres * y + x) * fb_pixel_size;
+	    yuv2rgb(dest, src[0], src[1], src[2], w, h, fb_xres * fb_pixel_size,
+		    stride[0], stride[1]);
+	  }
+
+	  return 0;
+	}
+#endif
+
 	dest = next_frame + (in_width * y + x) * fb_pixel_size;
 	yuv2rgb(dest, src[0], src[1], src[2], w, h, in_width * fb_pixel_size,
 			stride[0], stride[1]);
@@ -1250,6 +1284,11 @@ static void check_events(void)
 static void put_frame(void)
 {
 	int i, out_offset = 0, in_offset = 0;
+
+#ifdef USE_CONVERT2FB
+	if(pixel_format == IMGFMT_YV12)
+	  return;
+#endif
 
 	for (i = 0; i < in_height; i++) {
 		memcpy(L123123875 + out_offset, next_frame + in_offset,
