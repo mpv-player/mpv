@@ -85,13 +85,8 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
         width/=2;height/=2;x/=2;y/=2;
 
 	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
-	if(mga_vid_config.format==MGA_VID_FORMAT_YV12){
-	    src = image[1];
-	    src2 = image[2];
-	} else {
-	    src = image[2];
-	    src2 = image[1];
-	}
+	src = image[1];
+	src2 = image[2];
 	
 	for(h=0; h < height; h++)
 	{
@@ -238,6 +233,7 @@ get_image(mp_image_t *mpi){
 //    printf("mga: get_image() called\n");
     if(mpi->type==MP_IMGTYPE_STATIC && mga_vid_config.num_frames>1) return VO_FALSE; // it is not static
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
+    if(mga_vid_config.card_type == MGA_G200 && mpi->flags&MP_IMGFLAG_PLANAR) return VO_FALSE;
 //    printf("width=%d vs. bespitch=%d, flags=0x%X  \n",mpi->width,bespitch,mpi->flags);
     if((mpi->width==bespitch) ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))){
