@@ -135,6 +135,16 @@ int lirc_mp_getinput(){
 
           }
         }
+	// the lirc support is "broken by design": (see mailing list discussion)
+	// we only accept one command at each call of this subroutine, but the
+	// "lirc_code2char()" function should be called in a loop
+	// until it reports "empty"... (see lirc documentation)
+	// so we need to flush the lirc command queue after we processed one
+	// command. of course we report if we really lose a message.
+        while((ret=lirc_code2char(lirc_config,code,&c))==0 && c!=NULL){
+          fprintf(stderr, "LIRC: lost command \"%s\"",c);
+	}
+	
         free(code);
         if(ret==-1){ 
            mp_msg(MSGT_LIRC,MSGL_V,"LIRC: lirc_code2char() returned an error!\n");
