@@ -1,0 +1,138 @@
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <unistd.h>
+#include <signal.h>
+
+int    mplParent = 1;
+
+int    mplx,mply,mplwidth,mplheight;
+
+#include "../app.h"
+
+#include "../wm/ws.h"
+#include "../wm/wskeys.h"
+#include "../wm/widget.h"
+
+#include "../../config.h"
+
+#include "widgets.h"
+#include "./mplayer.h"
+#include "psignal.h"
+#include "play.h"
+
+mplCommStruct * mplShMem;
+char          * Filename = NULL;
+
+void mplPlayerThread( void )
+{
+// mplayer( 0,NULL,NULL );
+}
+
+void mplFullScreen( void )
+{
+ if ( appMPlayer.subWindow.isFullScreen )
+  {
+   if ( mplShMem->Playing )
+    {
+     appMPlayer.subWindow.OldX=mplx;
+     appMPlayer.subWindow.OldY=mply;
+     appMPlayer.subWindow.OldWidth=mplwidth;
+     appMPlayer.subWindow.OldHeight=mplheight;
+    }
+    else
+     {
+      appMPlayer.subWindow.OldWidth=appMPlayer.sub.width;
+      appMPlayer.subWindow.OldHeight=appMPlayer.sub.height;
+      appMPlayer.subWindow.OldX=( wsMaxX - appMPlayer.sub.width ) / 2;
+      appMPlayer.subWindow.OldY=( wsMaxY - appMPlayer.sub.height ) / 2;
+     }
+  }
+ wsFullScreen( &appMPlayer.subWindow );
+ wsMoveTopWindow( &appMPlayer.subWindow );
+}
+
+extern int mplSubRender;
+
+void mplStop()
+{
+ if ( !mplShMem->Playing ) return;
+// ---
+printf("%%%%%% STOP  \n");
+// ---
+ mplShMem->Playing=0;
+}
+
+void mplPlay( void )
+{
+ if ( !Filename ) return;
+ if ( mplShMem->Playing ) mplStop();
+// ---
+printf("%%%%%% PLAY  \n");
+// ---
+ mplShMem->Playing=1;
+}
+
+void mplPause( void )
+{
+ if ( mplShMem->Playing != 1 ) return;
+// ---
+printf("%%%%%% PAUSE  \n");
+// ---
+ mplShMem->Playing=2;
+}
+
+void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
+{
+}
+
+void mplMPlayerInit( int argc,char* argv[], char *envp[] )
+{
+ mplShMem=shmem_alloc( ShMemSize );
+ signal( SIGTYPE,mplMainSigHandler );
+ signal( SIGCHLD,SIG_IGN );
+
+ mplShMem->Playing=0;
+ mplShMem->Volume=0.0f;
+ mplShMem->Position=0.0f;
+ mplShMem->Balance=50.0f;
+ mplShMem->Track=0;
+ mplShMem->AudioType=0;
+ mplShMem->StreamType=0;
+ mplShMem->TimeSec=0;
+ mplShMem->LengthInSec=0;
+
+// ---
+// ---
+}
+
+float mplGetPosition( void )
+{ // return 0.0 ... 100.0
+ return mplShMem->Position;
+}
+
+void mplRelSeek( float s )
+{ // -+s
+// ---
+printf("%%%%%% RelSEEK=%5.3f  \n",s);
+// ---
+ mplShMem->Position=mplGetPosition() + s;
+}
+
+void mplAbsSeek( float s )
+{ // 0.0 ... 100.0
+// ---
+printf("%%%%%% AbsSEEK=%5.3f  \n",s);
+// ---
+ mplShMem->Position=s;
+ mplShMem->TimeSec=s;
+}
+
+void mplIncAudioBufDelay( void )
+{
+}
+
+void mplDecAudioBufDelay( void )
+{
+}
