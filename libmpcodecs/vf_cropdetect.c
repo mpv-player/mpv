@@ -47,8 +47,8 @@ static int checkline(unsigned char* src,int stride,int len,int bpp){
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    vf->priv->x1=width;
-    vf->priv->y1=height;
+    vf->priv->x1=width - 1;
+    vf->priv->y1=height - 1;
     vf->priv->x2=0;
     vf->priv->y2=0;
     vf->priv->fno=0;
@@ -109,8 +109,8 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     x=(vf->priv->x1+1)&(~1);
     y=(vf->priv->y1+1)&(~1);
     
-    w = vf->priv->x2 - x;
-    h = vf->priv->y2 - y;
+    w = vf->priv->x2 - x + 1;
+    h = vf->priv->y2 - y + 1;
 
     // w and h must be divisible by 2 as well because of yuv
     // colorspace problems.
