@@ -77,6 +77,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-screenw\ pixels ]
 .RB [ \-screenh\ pixels ]
 .RB [ \-cache\ kbytes ]
+.RB [ \-bpp\ depth ]
+.RB [ \-flip ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -148,6 +150,10 @@ use XF86VidMode extension for mode changing
 .TP
 .B \-zoom
 use software scaling, where available (use with -nofs)
+.TP
+.B \-flip
+flip image (useful for example for old Indeo codecs). Supported only(?)
+by the 'sdl' and 'vesa' outputs.
 .TP
 .B \-x\ x
 scale image to x width [if driver suppports!]
@@ -306,6 +312,10 @@ seek to given time position. For example :
     -ss 56
     -ss 01:10:00
 
+.TP
+.B \-bpp\ depth
+use different color depth than autodetect. Not all -vo drivers support
+it (fbdev, dga2, svga, vesa).
 .TP
 .B \-abs\ bytes
 sound card audio buffer size (in bytes, default: measuring)
