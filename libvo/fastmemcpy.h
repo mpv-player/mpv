@@ -29,6 +29,25 @@ inline static void * fast_memcpy(void * to, const void * from, unsigned len)
 	void *p;
 	int i;
 
+        
+#ifdef HAVE_SSE /* Only P3 (may be Cyrix3) */
+//        printf("fastmemcpy_pre(0x%X,0x%X,0x%X)\n",to,from,len);
+        // Align dest to 16-byte boundary:
+        if((unsigned int)to&15){
+          int len2=16-((unsigned int)to&15);
+          if(len>len2){
+            len-=len2;
+            __asm__ __volatile__(
+	    "rep ; movsb\n"
+	    :"=D" (to), "=S" (from)
+            : "D" (to), "S" (from),"c" (len2)
+	    : "memory");
+          }
+        }
+//        printf("fastmemcpy(0x%X,0x%X,0x%X)\n",to,from,len);
+#endif
+    
+
         if(len >= 0x200) /* 512-byte blocks */
 	{
   	  p = to;
