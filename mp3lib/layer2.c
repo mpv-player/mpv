@@ -50,8 +50,16 @@ static void init_layer2(void)
   {
     double m=mulmul[k];
     table = muls[k];
+    if(_has_mmx) 
+    {
+        for(j=3,i=0;i<63;i++,j--)
+	  *table++ = 16384 * m * pow(2.0,(double) j / 3.0);
+    }
+    else
     for(j=3,i=0;i<63;i++,j--)
+    {
       *table++ = m * pow(2.0,(double) j / 3.0);
+    }
     *table++ = 0.0;
   }
 }

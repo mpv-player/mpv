@@ -343,6 +343,12 @@ retry1:
 
 static int tables_done_flag=0;
 
+/* It's hidden from gcc in assembler */
+extern void dct64_MMX( void );
+extern void dct64_MMX_3dnow( void );
+extern void dct64_MMX_3dnowex( void );
+void (*dct64_MMX_func)( void );
+
 // Init decoder tables.  Call first, once!
 #ifdef USE_FAKE_MONO
 void MP3_Init(int fakemono){
@@ -351,20 +357,41 @@ void MP3_Init(){
 #endif
     _CpuID=CpuDetect();
     _i586=ipentium();
-#ifdef HAVE_3DNOW
+#ifndef HAVE_MMX
+    _i586 &= 1;
+#endif
     _3dnow=a3dnow();
+#ifndef HAVE_3DNOW
+    _3dnow = 0;
 #endif
-
+#ifndef HAVE_3DNOWEX
+    _3dnow &= 1;
+#endif
+    _isse=isse();
+#ifndef HAVE_SSE
+    _isse = 0;
+#endif
+#ifndef HAVE_SSE2
+    _isse &= 1;
+#endif
+    _has_mmx=_i586>1||_3dnow||_isse;
     printf( "mp3lib: Processor ID: %x\n",_CpuID );
-    printf( "mp3lib: i586 processor %sdetected.\n",(_i586?"":"not ") );
-#ifdef HAVE_3DNOW
-    printf( "mp3lib: AMD 3dnow! extension %sdetected.\n",(_3dnow?"":"not ") );
-#endif
-#ifdef HAVE_3DNOWEX
-    printf( "mp3lib: AMD 3dnow-dsp! extension %sdetected.\n",(_3dnow>1?"":"not ") );
-#endif
+    if(_i586&&!_3dnow&&!_isse)
+      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
+    else
+    if(_isse) 
+    /*
+       Note: It's ok, Since K8 will have SSE2 support and will much faster
+       of P4 ;) 
+     */
+      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
+    else
+    if(_3dnow)
+      printf( "mp3lib: Using AMD 3dnow%s! optimized decore.\n",(_3dnow>1?"-dsp(k7)":""));
 
-    make_decode_tables(outscale);
+/* Use it for any MMX cpu */
+   if(_has_mmx)	make_decode_tables_MMX(outscale);
+   else		make_decode_tables(outscale);
 #ifdef USE_FAKE_MONO
     if (fakemono == 1)
         fr.synth=synth_1to1_l;
@@ -381,6 +408,42 @@ void MP3_Init(){
     init_layer2();
     init_layer3(fr.down_sample_sblimit);
     tables_done_flag=1;
+
+    dct36_func=dct36;
+  if(_isse)
+  {
+    synth_func=synth_1to1_MMX;
+    dct64_MMX_func=dct64_MMX;
+  }    
+  else
+  if ( _3dnow > 1 )
+  {
+     synth_func=synth_1to1_MMX;
+     dct36_func=dct36_3dnowex;
+     dct64_MMX_func=dct64_MMX_3dnowex;
+  }
+  else
+  if ( _3dnow )
+  {
+    synth_func=synth_1to1_MMX;
+    dct36_func=dct36_3dnow;
+    dct64_MMX_func=dct64_MMX_3dnow;
+  }
+  else
+  if ( _i586 > 1)
+  {
+    synth_func=synth_1to1_MMX;
+    dct64_MMX_func=dct64_MMX;
+  }    
+  else
+  if ( _i586 )
+  {
+    synth_func=synth_1to1_pent;
+  }    
+  else
+  {
+    synth_func = NULL;
+  }
 }
 
 #if 0

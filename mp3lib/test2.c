@@ -1,5 +1,5 @@
 
-// gcc test.c -I.. -L. -lMP3 -lm -o test2 -O4
+//gcc test2.c -O2 -I.. -L. ../libvo/aclib.c -lMP3 -lm -o test2
 
 #include <stdio.h>
 #include <stdlib.h>

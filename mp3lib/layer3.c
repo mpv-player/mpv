@@ -22,9 +22,9 @@ static real win1[4][36];
 #define GP2MAX (256+118+4)
 static real gainpow2[GP2MAX];
 
-static real nCOS9[9];
+real COS9[9];
 static real COS6_1,COS6_2;
-static real tfcos36[9];
+real tfcos36[9];
 static real tfcos12[3];
 #ifdef NEW_DCT9
 static real cos9[3],cos18[3];
@@ -111,8 +111,12 @@ void init_layer3(int down_sample_sblimit)
   int i,j,k,l;
 
   for(i=-256;i<118+4;i++)
-    gainpow2[i+256] = pow((double)2.0,-0.25 * (double) (i+210) );
-
+  {
+    if(_has_mmx)
+      gainpow2[i+256] = 16384.0 * pow((double)2.0,-0.25 * (double) (i+210) );
+    else
+      gainpow2[i+256] = pow((double)2.0,-0.25 * (double) (i+210) );
+  }
   for(i=0;i<8207;i++)
     ispow[i] = pow((double)i,(double)4.0/3.0);
 
@@ -139,7 +143,7 @@ void init_layer3(int down_sample_sblimit)
   }
 
   for(i=0;i<9;i++)
-    nCOS9[i] = cos( M_PI / 18.0 * (double) i);
+    COS9[i] = cos( M_PI / 18.0 * (double) i);
 
   for(i=0;i<9;i++)
     tfcos36[i] = 0.5 / cos ( M_PI * (double) (i*2+1) / 36.0 );
@@ -1533,6 +1537,9 @@ static void III_antialias(real xr[SBLIMIT][SSLIMIT],struct gr_info_s *gr_info)
 /*
  * III_hybrid
  */
+ 
+dct36_func_t dct36_func;
+  
 static void III_hybrid(real fsIn[SBLIMIT][SSLIMIT],real tsOut[SSLIMIT][SBLIMIT],
    int ch,struct gr_info_s *gr_info)
 {
@@ -1553,8 +1560,8 @@ static void III_hybrid(real fsIn[SBLIMIT][SSLIMIT],real tsOut[SSLIMIT][SBLIMIT],
 
    if(gr_info->mixed_block_flag) {
      sb = 2;
-     dct36(fsIn[0],rawout1,rawout2,win[0],tspnt);
-     dct36(fsIn[1],rawout1+18,rawout2+18,win1[0],tspnt+1);
+     (*dct36_func)(fsIn[0],rawout1,rawout2,win[0],tspnt);
+     (*dct36_func)(fsIn[1],rawout1+18,rawout2+18,win1[0],tspnt+1);
      rawout1 += 36; rawout2 += 36; tspnt += 2;
    }
  
@@ -1567,8 +1574,8 @@ static void III_hybrid(real fsIn[SBLIMIT][SSLIMIT],real tsOut[SSLIMIT][SBLIMIT],
    }
    else {
      for (; sb<gr_info->maxb; sb+=2,tspnt+=2,rawout1+=36,rawout2+=36) {
-       dct36(fsIn[sb],rawout1,rawout2,win[bt],tspnt);
-       dct36(fsIn[sb+1],rawout1+18,rawout2+18,win1[bt],tspnt+1);
+       (*dct36_func)(fsIn[sb],rawout1,rawout2,win[bt],tspnt);
+       (*dct36_func)(fsIn[sb+1],rawout1+18,rawout2+18,win1[bt],tspnt+1);
      }
    }
 

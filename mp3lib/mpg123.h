@@ -104,33 +104,22 @@ struct III_sideinfo
 };
 
 static long freqs[9];
-#ifdef HAVE_3DNOW
-        real decwin[2*(512+32)];
-#else
-        real decwin[512+32];
-#endif
-       real *pnts[];
+extern real decwin[(512+32)];
+extern real *pnts[];
 
 static int do_layer2(struct frame *fr,int single);
 static int do_layer3(struct frame *fr,int single);
 static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt);
 
-extern int  synth_1to1_pent( real *,int,unsigned char * );
+extern int synth_1to1_pent( real *,int,short * );
+extern void make_decode_tables_MMX(long scaleval);
+extern int synth_1to1_MMX( real *,int,short * );
+extern int synth_1to1_MMX_s(real *, int, short *, short *, int *);
 extern void dct64(real *a,real *b,real *c);
 
-#ifdef HAVE_3DNOW
- extern void dct64_3dnow( real *,real *, real * );
- extern void dct36_3dnow(real *,real *,real *,real *,real *);
- extern int  synth_1to1_3dnow( real *,int,unsigned char * );
-#endif
-#ifdef HAVE_3DNOWEX
- extern void dct64_3dnowex( real *,real *, real * );
- extern void dct36_3dnowex(real *,real *,real *,real *,real *);
- extern int  synth_1to1_3dnowex( real *,int,unsigned char * );
-#endif
-#ifdef HAVE_SSE_MP3
-// extern void dct64_3dnow( real *,real *, real * );
-// extern void dct36_3dnow(real *,real *,real *,real *,real *);
- extern int  synth_1to1_sse( real *,int,unsigned char * );
-#endif
+extern void dct36_3dnow(real *,real *,real *,real *,real *);
+extern void dct36_3dnowex(real *,real *,real *,real *,real *);
+extern void dct36_sse(real *,real *,real *,real *,real *);
 
+typedef int (*synth_func_t)( real *,int,short * );
+typedef void (*dct36_func_t)(real *,real *,real *,real *,real *);

@@ -9,6 +9,7 @@
 .globl CpuDetect
 .globl ipentium
 .globl a3dnow
+.globl isse
 
 / ---------------------------------------------------------------------------
 /  in C: unsigned long CpuDetect( void );
@@ -45,7 +46,9 @@ exit_cpudetect:
 
 / ---------------------------------------------------------------------------
 /  in C: unsigled long ipentium( void );
-/   return: 0 if the processor is not P5 or above else above 1.
+/  return: 0 if this processor i386 or i486
+/          1 otherwise
+/          2 if this cpu supports mmx
 / ---------------------------------------------------------------------------
 ipentium:
         pushl  %ebx
@@ -63,10 +66,15 @@ ipentium:
         jz     no_cpuid
         movl   $1,%eax
         cpuid
-        shrl   $8,%eax
-        cmpl   $5,%eax
-        jb     no_cpuid
-        movl   $1,%eax
+	movl   %eax, %ecx
+	xorl   %eax, %eax
+        shrl   $8,%ecx
+        cmpl   $5,%ecx
+        jb     exit
+        incl   %eax
+	test   $0x00800000, %edx
+	jz     exit
+	incl   %eax
         jmp    exit
 no_cpuid:
         xorl   %eax,%eax
@@ -109,6 +117,36 @@ a3dnow:
         inc    %eax
 exit2:
 
+        popl   %ecx
+        popl   %edx
+        popl   %ebx
+        ret
+
+/ ---------------------------------------------------------------------------
+/  in C: unsigned long isse( void );
+/  return: 0 if this processor does not support sse
+/          1 otherwise
+/          2 if this cpu supports sse2 extension
+/ ---------------------------------------------------------------------------
+isse:
+        pushl  %ebx
+        pushl  %edx
+        pushl  %ecx
+
+        call   ipentium
+        testl  %eax,%eax
+        jz     exit3
+
+        movl   $1,%eax
+        cpuid
+	xorl   %eax, %eax
+        testl  $0x02000000,%edx
+        jz     exit3
+	incl   %eax
+        testl  $0x04000000,%edx
+        jz     exit3
+        incl   %eax
+exit3:
         popl   %ecx
         popl   %edx
         popl   %ebx

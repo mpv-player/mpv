@@ -193,7 +193,7 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
     sum1 = (tmp2b - tmp1b) * tfcos36[(v)]; \
 	MACRO0(v); }
 
-    register const real *c = nCOS9;
+    register const real *c = COS9;
     register real *out2 = o2;
 	register real *w = wintab;
 	register real *out1 = o1;

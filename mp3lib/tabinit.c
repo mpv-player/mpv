@@ -1,20 +1,7 @@
+real decwin[(512+32)], cos64[32], cos32[16], cos16[8], cos8[4], cos4[2];
+real *pnts[]={ cos64,cos32,cos16,cos8,cos4 };
 
-
-#ifdef HAVE_3DNOW
-        real decwin[2*(512+32)] __attribute__((aligned(8)));
-        real cos64[32] __attribute__((aligned(8)));
-	real cos32[16] __attribute__((aligned(8)));
-	real cos16[8] __attribute__((aligned(8)));
-	real cos8[4] __attribute__((aligned(8)));
-	real cos4[2] __attribute__((aligned(8)));
-        real *pnts[]={ cos64,cos32,cos16,cos8,cos4 };
-#else
-        real decwin[512+32];
-        real cos64[16],cos32[8],cos16[4],cos8[2],cos4[1];
-        real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
-#endif
-
-long intwinbase[] = {
+static long intwinbase[] = {
      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,    -2,    -2,
     -2,    -3,    -3,    -4,    -4,    -5,    -5,    -6,    -7,    -7,
     -8,    -9,   -10,   -11,   -13,   -14,   -16,   -17,   -19,   -21,
@@ -42,7 +29,7 @@ long intwinbase[] = {
  64019, 65290, 66494, 67629, 68692, 69679, 70590, 71420, 72169, 72835,
  73415, 73908, 74313, 74630, 74856, 74992, 75038 };
 
-       void make_decode_tables(long scaleval)
+void make_decode_tables(long scaleval)
 {
   int i,j,k,kr,divv;
   real *table,*costab;
@@ -53,17 +40,13 @@ long intwinbase[] = {
     kr=0x10>>i; divv=0x40>>i;
     costab = pnts[i];
     for(k=0;k<kr;k++) costab[k] = 1.0 / (2.0 * cos(M_PI * ((double) k * 2.0 + 1.0) / (double) divv));
-    #ifdef HAVE_3DNOW
-     if ( _3dnow ) for(k=0;k<kr;k++) costab[k+kr]=-costab[k];
-    #endif
-
   }
 
   table = decwin;
   scaleval = -scaleval;
   for(i=0,j=0;i<256;i++,j++,table+=32)
   {
-         if(table < decwin+512+16)
+    if(table < decwin+512+16)
       table[16] = table[0] = (double) intwinbase[j] / 65536.0 * (double) scaleval;
     if(i % 32 == 31)
       table -= 1023;
@@ -80,14 +63,6 @@ long intwinbase[] = {
     if(i % 64 == 63)
       scaleval = - scaleval;
   }
-  #ifdef HAVE_3DNOW
-   if ( _3dnow )
-    for(i=0;i<512+32;i++)
-     {
-      decwin[512+31-i]*=65536.0; // allows faster clipping in 3dnow code
-      decwin[512+32+i]=decwin[512+31-i];
-     }
-  #endif
 }
 
 

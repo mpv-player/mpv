@@ -105,6 +105,15 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 }
 #endif
 
+synth_func_t synth_func;
+
+int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
+{
+    static short buffs[2][2][0x110];
+    static int bo = 1;
+    synth_1to1_MMX_s(bandPtr, channel, samples, (short *) buffs, &bo); 
+    return 0;
+  } 
 
 static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 {
@@ -117,39 +126,12 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   int clip = 0;
   int bo1;
 
-  #ifdef HAVE_SSE_MP3
-  //if ( _3dnow )
+  if ( synth_func )
    {
     int ret;
-    ret=synth_1to1_sse( bandPtr,channel,out+*pnt );
+    ret=(*synth_func)( bandPtr,channel,samples);
     *pnt+=128;
     return ret;
-   }
-  #endif
-  #ifdef HAVE_3DNOWEX
-  if ( _3dnow > 1 )
-   {
-    int ret;
-    ret=synth_1to1_3dnowex( bandPtr,channel,out+*pnt );
-    *pnt+=128;
-    return ret;
-   }
-  #endif
-  #ifdef HAVE_3DNOW
-  if ( _3dnow )
-   {
-    int ret;
-    ret=synth_1to1_3dnow( bandPtr,channel,out+*pnt );
-    *pnt+=128;
-    return ret;
-   }
-  #endif
-  if ( _i586 )
-   {
-     int ret;
-     ret=synth_1to1_pent( bandPtr,channel,out+*pnt );
-     *pnt+=128;
-     return ret;
    }
 
   if(!channel) {     /* channel=0 */
