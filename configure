@@ -139,7 +139,7 @@ Optional features:
   --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
-  --disable-vidix        disable VIDIX stuff [enable on x86]
+  --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
@@ -1169,8 +1169,9 @@ fi
 
 if test "$_vidix" = auto ; then
   _vidix=no
-  # should check for x86 systems supporting vidix (does cygwin or qnx have vidix?)
+  # should check for x86 systems supporting vidix (does qnx have vidix?)
   x86 && _vidix=yes
+  cygwin && _vidix=no
 fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
