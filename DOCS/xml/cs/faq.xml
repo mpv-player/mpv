@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.65  -->
+<!-- Synced with: 1.67  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -596,6 +596,26 @@ Use:
 
 <qandaentry>
 <question><para>
+Nemohu přijít na příčinu nějakého podivného problému při přehrávání.
+</para></question>
+<answer><para>
+Máte zatoulaný soubor <filename>codecs.conf</filename> v
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> a podobně? Odstraňte jej, protože
+zastaralé <filename>codecs.conf</filename> soubory mohou způsobit obskurní
+potíže a jsou zamýšleny jen pro použití vývojáři.
+Například se v současnosti změnilo FourCC pro Vorbis.
+Pokud někde povalujete starý <filename>codecs.conf</filename>, pak jistě
+neobsahuje toto nové FourCC.
+Proto se nebude přehrávat.
+Pokud neplánujete své připojení k vývoji <application>MPlayer</application>u,
+není vám tento soubor na nic a měl by být smazán.
+<application>MPlayer</application> použije místo něj svůj vestavěný.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Jak mohu vybrat audio/titulkové stopy z DVD, OGM, Matroska nebo NUT souboru?
 </para></question>
 <answer><para>
@@ -673,20 +693,6 @@ Pokud používáte TrueType fonty, ověřte zda máte nainstalovánu
 <systemitem class="library">FreeType</systemitem> knihovnu.
 Další postup zahrnuje prověření vašich titulků v textovém editoru nebo v jiných
 přehrávačích. Také je zkuste převézt do jiného formátu.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Nemohu přijít na kloub podivným problémům při přehrávání.
-</para></question>
-<answer><para>
-Máte zatoulaný soubor <filename>codecs.conf</filename> v
-<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> nebo podobném místě? Vymažte ho,
-zastaralé <filename>codecs.conf</filename> soubory mohou způsobovat obskurní
-problémy. <application>MPlayer</application> bude místo nich používat svůj
-vestavěný.
 </para></answer>
 </qandaentry>
 
@@ -1341,7 +1347,7 @@ nebo jiné filmy do VCD nebo SVCD formátu a dokonce je vypálit přímo na CD.
 Jak spojím dva video soubory?
 </para></question>
 <answer><para>
-MPEGy mohou být spojeny do jediného souboru s trochou štěstí.
+MPEGy mohou být spojeny do jediného souboru s trochou štěstí přímo.
 Pro AVI soubory můžete využít podporu pro více souborů
 v <application>MEncoder</application>u takto:
 <screen>
