@@ -238,10 +238,6 @@ typedef struct mkv_track {
 
   // Generic content encoding support.
   vector<mkv_content_encoding_t> *c_encodings;
-#ifdef HAVE_ZLIB
-  z_stream zstream;
-  bool zstream_initiated;
-#endif
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -719,7 +715,7 @@ static bool mkv_parse_idx(mkv_track_t *t) {
 
 static bool reverse_encodings(mkv_track_t *track, unsigned char *&data,
                               uint32_t &size, uint32_t type) {
-  int new_size;
+  int new_size, n;
   unsigned char *new_data, *old_data;
   bool modified;
   vector<mkv_content_encoding_t>::iterator ce;
@@ -738,33 +734,49 @@ static bool reverse_encodings(mkv_track_t *track, unsigned char *&data,
 #ifdef HAVE_ZLIB
     if (ce->comp_algo == 0) {
       int result;
+      z_stream zstream;
 
       old_data = new_data;
-      new_data = (unsigned char *)safemalloc(new_size * 20);
 
-      track->zstream.zalloc = (alloc_func)0;
-      track->zstream.zfree = (free_func)0;
-      track->zstream.opaque = (voidpf)0;
-      inflateInit(&track->zstream);
-      track->zstream.next_in = (Bytef *)old_data;
-      track->zstream.next_out = (Bytef *)new_data;
-      track->zstream.avail_in = new_size;
-      track->zstream.avail_out = 20 * new_size;
-      result = inflate(&track->zstream, Z_FULL_FLUSH);
+      zstream.zalloc = (alloc_func)0;
+      zstream.zfree = (free_func)0;
+      zstream.opaque = (voidpf)0;
+      result = inflateInit(&zstream);
       if (result != Z_OK) {
-        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Zlib decompression failed. "
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Zlib initialization failed. "
               "Result: %d\n", result);
         safefree(new_data);
         data = old_data;
         size = new_size;
-        inflateEnd(&track->zstream);
         return modified;
       }
+      zstream.next_in = (Bytef *)old_data;
+      zstream.avail_in = new_size;
+
+      n = 0;
+      new_data = NULL;
+      do {
+        n++;
+        new_data = (unsigned char *)realloc(new_data, n * 4000);
+        zstream.next_out = (Bytef *)&new_data[(n - 1) * 4000];
+        zstream.avail_out = 4000;
+        result = inflate(&zstream, Z_NO_FLUSH);
+        if ((result != Z_OK) && (result != Z_STREAM_END)) {
+          mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Zlib decompression failed. "
+                 "Result: %d \n", result);
+          safefree(new_data);
+          data = old_data;
+          size = new_size;
+          inflateEnd(&zstream);
+          return modified;
+        }
+      } while ((zstream.avail_out == 0) &&
+               (zstream.avail_in != 0) && (result != Z_STREAM_END));
 
       mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] zlib decompression: from %d to "
-            "%d\n", new_size, 20 * new_size - track->zstream.avail_out);
-      new_size = 20 * new_size - track->zstream.avail_out;
-      inflateEnd(&track->zstream);
+            "%d \n", new_size, zstream.total_out);
+      new_size = zstream.total_out;
+      inflateEnd(&zstream);
 
       if (modified)
         safefree(old_data);
