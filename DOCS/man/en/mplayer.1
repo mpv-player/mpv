@@ -51,6 +51,7 @@ mencoder \- movie encoder
 .RI [options]\ [ \ file\  | \ URL\  | \ playlist\  | \ \-\  ]
 .
 .br
+.in
 .B mplayer
 'in +\n[.k]u
 [global options]
@@ -2022,10 +2023,10 @@ Do not set fullscreen window layer.
 .IPs stays_on_top
 Use _NETWM_STATE_STAYS_ON_TOP hint if available.
 .REss
-.\" This is a hack to keep EXAMPLE indented. Fix someday..
-.TP
-.B \ 
+.sp 1
+.RS
 .I EXAMPLE:
+.RE
 .PD 0
 .RSs
 .IPs layer,stays_on_top,above,fullscreen
@@ -4639,8 +4640,7 @@ syntax:
 .
 .TP
 .B \-<codec>opts <option1[=value],option2,...>
-.RE
-.br
+.
 .PP
 Where <codec> may be: lavc, xvidenc, divx4, lame, x264
 .
@@ -5955,6 +5955,7 @@ Disable rtjpeg encoding.
 .TP
 .B rtjpeg\ 
 Enable rtjpeg encoding.
+.
 .
 .SS xvidenc (\-xvidencopts)
 .
