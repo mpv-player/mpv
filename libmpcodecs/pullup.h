@@ -26,7 +26,7 @@ struct pullup_field
 	int breaks;
 	int affinity;
 	int *diffs;
-	int *licomb;
+	int *comb;
 	struct pullup_field *prev, *next;
 };
 
@@ -54,7 +54,7 @@ struct pullup_context
 	struct pullup_buffer *buffers;
 	int nbuffers;
 	int (*diff)(unsigned char *, unsigned char *, int);
-	int (*licomb)(unsigned char *, unsigned char *, int);
+	int (*comb)(unsigned char *, unsigned char *, int);
 	int metric_w, metric_h, metric_len, metric_offset;
 	struct pullup_frame *frame;
 };

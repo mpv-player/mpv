@@ -172,6 +172,17 @@ static int licomb_y(unsigned char *a, unsigned char *b, int s)
 	return diff;
 }
 
+static int qpcomb_y(unsigned char *a, unsigned char *b, int s)
+{
+	int i, j, diff=0;
+	for (i=4; i; i--) {
+		for (j=0; j<8; j++)
+			diff += ABS(a[j] - 3*b[j-s] + 3*a[j+s] - b[j]);
+		a+=s; b+=s;
+	}
+	return diff;
+}
+
 #if 0
 static int licomb_y_test(unsigned char *a, unsigned char *b, int s)
 {
@@ -291,7 +302,7 @@ static void compute_metric(struct pullup_context *c,
 static void alloc_metrics(struct pullup_context *c, struct pullup_field *f)
 {
 	f->diffs = calloc(c->metric_len, sizeof(int));
-	f->licomb = calloc(c->metric_len, sizeof(int));
+	f->comb = calloc(c->metric_len, sizeof(int));
 	/* add more metrics here as needed */
 }
 
@@ -341,7 +352,7 @@ void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int 
 	f->affinity = 0;
 
 	compute_metric(c, f, parity, f->prev->prev, parity, c->diff, f->diffs);
-	compute_metric(c, parity?f->prev:f, 0, parity?f:f->prev, 1, c->licomb, f->licomb);
+	compute_metric(c, parity?f->prev:f, 0, parity?f:f->prev, 1, c->comb, f->comb);
 
 	/* Advance the circular list */
 	if (!c->first) c->first = c->head;
@@ -434,18 +445,19 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 	if (f->flags & F_HAVE_AFFINITY) return;
 	f->flags |= F_HAVE_AFFINITY;
 	for (i = 0; i < c->metric_len; i++) {
-		l = f->licomb[i] - f->next->licomb[i];
+		l = f->comb[i] - f->next->comb[i];
 		if (l > max_l) max_l = l;
 		if (-l > max_r) max_r = -l;
 	}
-	if (max_l + max_r < 64) return;
+	printf("%d %d\n", max_l, max_r);
+	if (max_l + max_r < 32) return;
 	if (max_r > 2*max_l) f->affinity = -1;
 	else if (max_l > 2*max_r) f->affinity = 1;
-	else if (max_l + max_r > 1024) {
+	else if (max_l + max_r > 512) {
 		l = t = 0;
 		for (i = 0; i < c->metric_len; i++) {
-			l += f->licomb[i] - f->next->licomb[i];
-			t += ABS(f->licomb[i] - f->next->licomb[i]);
+			l += f->comb[i] - f->next->comb[i];
+			t += ABS(f->comb[i] - f->next->comb[i]);
 		}
 		if (-l*4 > t) f->affinity = -1;
 		else if (l*4 > t) f->affinity = 1;
@@ -496,6 +508,7 @@ static int decide_frame_length(struct pullup_context *c)
 		else if (f2->affinity == 1) return 2;
 		else if (f0->affinity == 1 && f2->affinity == -1) return 3;
 		else if (f2->affinity == -1) return 1;
+		else if (f0->affinity == 1) return 2;
 		else if (f2->affinity == 0 && f3->affinity == 1) return 3;
 		else return 2;
 	}
@@ -654,13 +667,14 @@ void pullup_init_context(struct pullup_context *c)
 	switch(c->format) {
 	case PULLUP_FMT_Y:
 		c->diff = diff_y;
-		c->licomb = licomb_y;
+		c->comb = licomb_y;
 #ifdef HAVE_MMX
 		if (c->cpu & PULLUP_CPU_MMX) {
 			c->diff = diff_y_mmx;
-			c->licomb = licomb_y_mmx;
+			c->comb = licomb_y_mmx;
 		}
 #endif
+		//c->comb = qpcomb_y;
 		break;
 #if 0
 	case PULLUP_FMT_YUY2:
@@ -680,7 +694,7 @@ void pullup_free_context(struct pullup_context *c)
 	f = c->head;
 	do {
 		free(f->diffs);
-		free(f->licomb);
+		free(f->comb);
 		f = f->next;
 		free(f->prev);
 	} while (f != c->head);
