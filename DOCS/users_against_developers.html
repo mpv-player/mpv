@@ -106,56 +106,6 @@ to suffer from your unrightful wrath?</P>
 </UL>
 </P>
 
-<A NAME=binary><P><B><I>Binary distribution of MPlayer</I></B></P>
-
-<P>Tons of users asked us about this. For example Debian users tend to say: Oh,
-I can <CODE>apt-get install avifile</CODE>, why should I <B>compile MPlayer</B> ?
-While this may sound reasonable, the problem lies a bit deeper than
-those-fuckin-MPlayer-developers-hate-gcc-2.96-and-RedHat-and-Debian.</P>
-
-<P>Reasons: <B>Law</B></P>
-
-<P><B>MPlayer</B> describes the <U>sourcecode</U>. It contains several files with incompatible
-licenses especially on the redistribution clauses. As source files, they are
-allowed to coexist in a same project.</P>
-
-<P>Therefore, <U>NEITHER BINARIES NOR BINARY PACKAGES OF <B>MPlayer</B> ARE ALLOWED TO EXIST SINCE
-SUCH OBJECTS BREAK LICENSES</U>. PEOPLE WHO DISTRIBUTE SUCH BINARY PACKAGES ARE
-DOING ILLEGAL ACTIVITIES.</P>
-
-<P>So if you know somebody who maintains a binary package then forward her/him
-this text and (ask him to) contact us. What (s)he is doing is illegal and IT IS
-NO LONGER <B>MPlayer</B>, but <U>his/her</U> mplayer. If it breaks, it is
-his/her fault. Don't come and cry on the <B>MPlayer</B> mailing lists, you will
-most likely be blacklisted.</P>
-
-<P>Reasons: <B>Technical</B></P>
-
-<P>
-<UL>
-  <LI><B>MPlayer's</B> speed (MMX, SSE, fastmemcpy, etc) optimizations are
-    determined during compilation. Thus a compiled binary contains very
-    processor-specific code. An <B>MPlayer</B> binary compiled for K6 will die
-    on Pentiums and vice versa. This has to be workarounded by runtime
-    detection, which is not an easy thing to do becase it causes massive speed
-    decrease. If you don't believe (it was explained in details 10000 times on
-    mplayer-users, search the archive), solve it and send us a patch. Someone
-    begun work on it, but disappeared since then.</LI>
-  <LI><B>MPlayer's</B> video/audio system is not plugin based. It is compiled
-    into the binary, thus making the binary depend on various libraries (the
-    GUI depends on GTK, DivX4 depends on libdivxdecore, SDL depends on libSDL,
-    every SDL release contains an unique bug that has to be workarounded during
-    compiletime, X11 output compiles differently for X3 and X4, etc). You may
-    say: yes, let's make 30 versions of downloadable binaries! We won't. We
-    will make these stuff pluggable in the future.</LI>
-</UL>
-
-<P>We will (at least we wish) solve 2 of these problems in the next major release:
-the legal problems (we're on removing all non-GPL codes and getting others to
-change license to GPL) and the runtime CPU detection. Anyway, dependency on
-various libraries, versions and environment parameters will remain.</P>
-
-
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 
 <P>We don't like nvidia's binary drives, their quality, unstability,
