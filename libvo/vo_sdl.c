@@ -707,7 +707,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		set_fullmode(priv->fullmode);
 	} 
         else {
-		if(strcmp(priv->driver, "x11") == 0) {
+		if((strcmp(priv->driver, "x11") == 0) || (strcmp(priv->driver, "aalib") == 0)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
 #ifdef HAVE_X11		
           	priv->surface = SDL_SetVideoMode (res.w, res.h, priv->bpp, priv->sdlflags);
