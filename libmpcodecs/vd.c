@@ -39,6 +39,7 @@ extern vd_functions_t mpcodecs_vd_vfwex;
 extern vd_functions_t mpcodecs_vd_odivx;
 extern vd_functions_t mpcodecs_vd_divx4;
 extern vd_functions_t mpcodecs_vd_raw;
+extern vd_functions_t mpcodecs_vd_hmblck;
 extern vd_functions_t mpcodecs_vd_xanim;
 extern vd_functions_t mpcodecs_vd_msrle;
 extern vd_functions_t mpcodecs_vd_msvidc;
@@ -89,6 +90,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #endif
         &mpcodecs_vd_lzo,
         &mpcodecs_vd_raw,
+        &mpcodecs_vd_hmblck,
         &mpcodecs_vd_msrle,
         &mpcodecs_vd_msvidc,
         &mpcodecs_vd_fli,

@@ -40,6 +40,8 @@ config_t demux_rawvideo_opts[] = {
   { "format", &format, CONF_TYPE_INT, 0, 0 , 0, NULL },
   { "y420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
   { "yv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YV12, NULL },
+  { "nv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_NV12, NULL },
+  { "hm12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_HM12, NULL },
   { "yuy2", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YUY2, NULL },
   { "uyvy", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_UYVY, NULL },
   { "y8", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_Y8, NULL },
@@ -73,6 +75,8 @@ int demux_rawvideo_open(demuxer_t* demuxer) {
   switch(format){
   case IMGFMT_I420:
   case IMGFMT_IYUV:
+  case IMGFMT_NV12:
+  case IMGFMT_HM12:
   case IMGFMT_YV12: imgsize=width*height+2*(width>>1)*(height>>1);break;
   case IMGFMT_YUY2: imgsize=width*height*2;break;
   case IMGFMT_UYVY: imgsize=width*height*2;break;
