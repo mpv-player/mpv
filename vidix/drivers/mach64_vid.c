@@ -29,6 +29,7 @@ static int32_t mach64_overlay_offset = 0;
 static uint32_t mach64_ram_size = 0;
 static uint32_t mach64_buffer_base[10][3];
 static int num_mach64_buffers=-1;
+static int supports_planar=0;
 
 pciinfo_t pci_info;
 static int probed = 0;
@@ -176,6 +177,17 @@ static void mach64_wait_for_idle( void )
 {
     mach64_fifo_wait(16);
     while ((INREG(GUI_STAT) & 1)!= 0);
+}
+
+static void mach64_wait_vsync( void )
+{
+    int i;
+
+    for(i=0; i<2000000; i++)
+	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK)==0 ) break;
+    for(i=0; i<2000000; i++)
+	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK) ) break;
+
 }
 
 static vidix_capability_t mach64_cap =
@@ -443,8 +455,28 @@ int vixInit(void)
   printf("[mach64] Video memory = %uMb\n",mach64_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,mach64_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf("[mach64] Set write-combining type of video memory\n");
+  
+  /* check if planar formats are supported */
+  supports_planar=0;
+  mach64_wait_for_idle();
+  mach64_fifo_wait(2);
+  if(INREG(SCALER_BUF0_OFFSET_U)) supports_planar=1;
+  else
+  {
+	OUTREG(SCALER_BUF0_OFFSET_U,	-1);
+
+	mach64_wait_vsync();
+	mach64_wait_for_idle();
+	mach64_fifo_wait(2);
+
+	if(INREG(SCALER_BUF0_OFFSET_U)) 	supports_planar=1;
+  }
+  if(supports_planar)	printf("[mach64] Planar YUV formats are supported :)\n");
+  else			printf("[mach64] Planar YUV formats are not supported :(\n");
+
   reset_regs();
   mach64_vid_make_default();
+
   if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
   return 0;
 }
@@ -575,6 +607,9 @@ static void mach64_vid_display_video( void )
     OUTREG(SCALER_BUF1_OFFSET,			mach64_buffer_base[0][0]);
     OUTREG(SCALER_BUF1_OFFSET_U,		mach64_buffer_base[0][1]);
     OUTREG(SCALER_BUF1_OFFSET_V,		mach64_buffer_base[0][2]);
+    mach64_wait_vsync();
+    
+    mach64_fifo_wait(4);
     OUTREG(OVERLAY_SCALE_CNTL, 0xC4000003);
 // OVERLAY_SCALE_CNTL bits & what they seem to affect
 // bit 0 no effect
@@ -769,23 +804,24 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     return 0;
 }
 
-
-uint32_t supported_fourcc[] = 
+static int is_supported_fourcc(uint32_t fourcc)
 {
-  IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
-  IMGFMT_YVU9,
-  IMGFMT_UYVY, IMGFMT_YUY2,
-  IMGFMT_BGR15,IMGFMT_BGR16,IMGFMT_BGR32
-};
-
-__inline__ static int is_supported_fourcc(uint32_t fourcc)
-{
-  unsigned i;
-  for(i=0;i<sizeof(supported_fourcc)/sizeof(uint32_t);i++)
-  {
-    if(fourcc==supported_fourcc[i]) return 1;
-  }
-  return 0;
+    switch(fourcc)
+    {
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_YVU9:
+    case IMGFMT_IYUV:
+	return supports_planar;
+    case IMGFMT_YUY2:
+    case IMGFMT_UYVY:
+    case IMGFMT_BGR15:
+    case IMGFMT_BGR16:
+    case IMGFMT_BGR32:
+	return 1;
+    default:
+	return 0;
+    }
 }
 
 int vixQueryFourcc(vidix_fourcc_t *to)
@@ -828,17 +864,6 @@ int vixPlaybackOff(void)
 {
   mach64_vid_stop_video();
   return 0;
-}
-
-static void mach64_wait_vsync( void )
-{
-    int i;
-
-    for(i=0; i<2000000; i++)
-	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK)==0 ) break;
-    for(i=0; i<2000000; i++)
-	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK) ) break;
-
 }
 
 int vixPlaybackFrameSelect(unsigned int frame)
