@@ -55,6 +55,7 @@ for DLL to know too much about its environment.
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <dirent.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
 #ifdef	HAVE_KSTAT
@@ -3250,17 +3251,46 @@ static unsigned int WINAPI expGetTempPathA(unsigned int len, char* path)
  } WIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
  */
 
+static DIR* qtx_dir=NULL;
+
+static WIN_BOOL WINAPI expFindNextFileA(HANDLE h,LPWIN32_FIND_DATAA lpfd)
+{
+#ifdef QTX
+    dbgprintf("FindNextFileA(0x%x, 0x%x) => 0\n", h, lpfd);
+    if(h==FILE_HANDLE_quicktimeqtx){
+	struct dirent* d;
+	if(!qtx_dir) return 0;
+	while((d=readdir(qtx_dir))){
+	    char* x=strrchr(d->d_name,'.');
+	    if(!x) continue;
+	    if(strcmp(x,".qtx")) continue;
+	    strcpy(lpfd->cFileName,d->d_name);
+//	    sprintf(lpfd->cAlternateFileName,"%-8s.qtx",d->d_name);
+	    strcpy(lpfd->cAlternateFileName,"foobar.qtx");
+	    printf("### FindNext: %s\n",lpfd->cFileName);
+	    return 1;
+	}
+	closedir(qtx_dir); qtx_dir=NULL;
+	return 0;
+    }
+#endif
+    return 0;
+}
+
 static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 {
 #ifdef QTX
     if(strstr(s, "*.QTX")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTX\n", s, s, lpfd);
-	strcpy(lpfd->cFileName, "QuickTimeEssentials.qtx");
-	strcpy(lpfd->cAlternateFileName, "QuickEss.qts");
-	return FILE_HANDLE_quicktimeqtx;
+	qtx_dir=opendir(def_path);
+	if(!qtx_dir) return (HANDLE)-1;
+	memset(lpfd,0,sizeof(*lpfd));
+	if(expFindNextFileA(FILE_HANDLE_quicktimeqtx,lpfd))
+	    return FILE_HANDLE_quicktimeqtx;
+	printf("loader: Couldn't find the QuickTime plugins (.qtx files) at %s\n",def_path);
+	return (HANDLE)-1;
     }
-    if (strstr(s, "QuickTime.qts") || strstr(s,"c:\\windows\\system") )
-    {
+    if(strstr(s, "QuickTime.qts")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTS\n", s, s, lpfd);
 //	if(!strcmp(s,"C:\\windows\\QuickTime.qts\\QuickTime.qts\\*.QTX"))
 //	    return (HANDLE)-1;
@@ -3274,21 +3304,16 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
     strcpy(lpfd->cAlternateFileName, "msms001.vwp");
     return (HANDLE)-1;
 }
-static WIN_BOOL WINAPI expFindNextFileA(HANDLE h,LPWIN32_FIND_DATAA lpfd)
-{
-    dbgprintf("FindNextFileA(0x%x, 0x%x) => 0\n", h, lpfd);
-#if 0
-    if(h==FILE_HANDLE_quicktimeqts && strcmp(lpfd->cFileName,"QuickTimeEssentials.qtx")){
-	strcpy(lpfd->cFileName, "QuickTimeEssentials.qtx");
-	strcpy(lpfd->cAlternateFileName, "QuickT~1.qtx");
-	return FILE_HANDLE_quicktimeess;
-    }
-#endif
-    return 0;
-}
+
 static WIN_BOOL WINAPI expFindClose(HANDLE h)
 {
     dbgprintf("FindClose(0x%x) => 0\n", h);
+#ifdef QTX
+//    if(h==FILE_HANDLE_quicktimeqtx && qtx_dir){
+//	closedir(qtx_dir);
+//	qtx_dir=NULL;
+//    }
+#endif
     return 0;
 }
 static UINT WINAPI expSetErrorMode(UINT i)
@@ -3401,13 +3426,13 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	free(tmp);
 	return result;
     }
-    if(strstr(cs1, "QuickTimeEssentials.qtx"))
+    if(strstr(cs1, ".qtx"))
     {
 	int result;
-	char* tmp=(char*)malloc(strlen(def_path)+50);
-	strcpy(tmp, def_path);
-	strcat(tmp, "/");
-	strcat(tmp, "QuickTimeEssentials.qtx");
+	char* tmp=(char*)malloc(strlen(def_path)+250);
+	char* x=strrchr(cs1,'\\');
+	sprintf(tmp,"%s/%s",def_path,x?(x+1):cs1);
+//	printf("### Open: %s -> %s\n",cs1,tmp);
 	result=open(tmp, O_RDONLY);
 	free(tmp);
 	return result;
