@@ -1,5 +1,3 @@
-//#define USE_WIN32_REAL_CODECS
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -67,10 +65,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-#ifndef USE_WIN32_REAL_CODECS
-
 /* exits program when failure */
-int load_syms(char *path) {
+int load_syms_linux(char *path) {
 		void *handle;
 		char *error;
 
@@ -98,9 +94,8 @@ int load_syms(char *path) {
     return 0;
 }
 
-#else
-
-int load_syms(char *path) {
+#ifdef USE_WIN32DLL
+int load_syms_windows(char *path) {
     void *handle;
     Setup_LDT_Keeper();
     rv_handle = handle = LoadLibraryA(path);
@@ -119,7 +114,6 @@ int load_syms(char *path) {
        rvyuv_transform) return 1;
     return 0; // error
 }
-
 #endif
 
 /* we need exact positions */
@@ -148,7 +142,14 @@ static int init(sh_video_t *sh){
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",extrahdr[1],extrahdr[0]);
 
 	sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
-	if(!load_syms(path)){
+
+	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
+	   then try to load the windows ones */
+	if(!load_syms_linux(path))
+#ifdef USE_WIN32DLLS
+	    if (!load_syms_windows(path))
+#endif
+	{
 		mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
 		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"You need to copy the contents from the RealPlayer codecs directory\n");
 		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"into " REALCODEC_PATH "/ !\n");
