@@ -500,6 +500,12 @@ sh_video=d_video->sh;
    sh_video->fps,sh_video->frametime
   );
 
+  if(force_fps){
+    sh_video->fps=force_fps;
+    sh_video->frametime=1.0f/sh_video->fps;
+    mp_msg(MSGT_MENCODER,MSGL_INFO,"input fps will be interpreted as %5.2f instead\n", sh_video->fps);
+  }
+
   if(sh_audio && out_audio_codec<0){
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioEncoderSelected);
     mencoder_exit(1,NULL);
