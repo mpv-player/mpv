@@ -179,6 +179,7 @@ static int output_quality=0;
 float playback_speed=1.0;
 
 int use_gui=0;
+#define MAX_OSD_LEVEL 3
 
 int osd_level=1;
 int osd_level_saved=-1;
@@ -578,6 +579,7 @@ int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
 int osd_show_sub_alignment = 0;
 int osd_show_vobsub_changed = 0;
+int osd_show_percentage = 0;
 
 int rtc_fd=-1;
 
@@ -2104,6 +2106,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     switch(cmd->id) {
     case MP_CMD_SEEK : {
       int v,abs;
+      osd_show_percentage = 25;
       if ( stream->type == STREAMTYPE_STREAM ) break;
       v = cmd->args[0].v.i;
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
@@ -2201,9 +2204,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if(sh_video) {
 	int v = cmd->args[0].v.i;
 	if(v < 0)
-	  osd_level=(osd_level+1)%3;
+	  osd_level=(osd_level+1)%(MAX_OSD_LEVEL+1);
 	else
-	  osd_level= v > 2 ? 2 : v;
+	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
       } break;
     case MP_CMD_VOLUME :  {
       int v = cmd->args[0].v.i;
@@ -2942,9 +2945,23 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_av_delay) {
 	  sprintf(osd_text_tmp, "A-V delay: %d ms", ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
-      } else if(osd_level>=2)
-          sprintf(osd_text_tmp,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
-      else osd_text_tmp[0]=0;
+      } else if(osd_level>=2) {
+          int len = demuxer_get_time_length(demuxer);
+          int percentage = -1;
+          char percentage_text[50];
+          if (osd_show_percentage) {
+            percentage = demuxer_get_percent_pos(demuxer);
+            osd_show_percentage--;
+          }
+          if (percentage >= 0)
+            sprintf(percentage_text, " (%d%%)", percentage);
+          else
+            sprintf(percentage_text, "");
+          if (osd_level == 3) 
+            sprintf(osd_text_tmp,"%c %02d:%02d:%02d / %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,len/3600,(len/60)%60,len%60,percentage_text);
+          else
+            sprintf(osd_text_tmp,"%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
+      } else osd_text_tmp[0]=0;
       
       if(strcmp(vo_osd_text, osd_text_tmp)) {
 	      strcpy(vo_osd_text, osd_text_tmp);
