@@ -281,6 +281,12 @@ If you want to use xv with a trident card, provided that it doesn't work
 with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen xv
 support with the Cyberblade XP card.
 </para>
+
+<para>
+Alternatively, MPlayer contains a <link linkend="vidix">Vidix</link> driver
+for the Cyberblade/i1 card.
+</para>
+
 </sect5>
 
 
@@ -1468,11 +1474,8 @@ can be found on VIA Epia motherboards.
 </para>
 
 <para>
-The driver was written and is maintained by Alastair M. Robinson, who
-offers the very latest driver versions for download from his
-<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">homepage</ulink>.
-The drivers are added to <application>MPlayer</application> with only a short
-delay, so CVS should always be up to date.
+The driver was written and is maintained by
+<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
 </para>
 </sect5>
 
