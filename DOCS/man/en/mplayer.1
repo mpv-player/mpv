@@ -693,8 +693,8 @@ Slow down or speed up playback by the factor given as parameter.
 .B \-sstep <sec>
 Display one frame every <sec> seconds.
 Useful for slideshows.
-This uses normal seeking, and thus is just as inexact (i.e.\& with most formats
-you will get one frame between every <sec> and <sec>+20 seconds).
+Since MPlayer can only seek to the next keyframe this may be inexact.
+Most formats have one keyframe every <sec> and <sec>+20 seconds.
 .
 .
 .
@@ -1457,13 +1457,13 @@ uses swscaler gaussian blur (looks very good)
 Specify how SPU (DVD/\:VOBsub) subtitles should be aligned.
 .PD 0
 .RSs
-.IPs -1
+.IPs "-1"
 original position
-.IPs 0
+.IPs " 0"
 align at top (original/\:default behavior)
-.IPs 1
+.IPs " 1"
 align at center
-.IPs 2
+.IPs " 2"
 align at bottom
 .RE
 .PD 1
@@ -1706,25 +1706,25 @@ Select the format used for output from the filter layer (according to the
 defines in libao2/\:afmt.h):
 .PD 0
 .RSs
-.IPs 1
+.IPs "   1"
 Mu-Law
-.IPs 2
+.IPs "   2"
 A-Law
-.IPs 4
+.IPs "   4"
 Ima-ADPCM
-.IPs 8
+.IPs "   8"
 unsigned 8-bit
-.IPs 16
+.IPs "  16"
 signed 16-bit (little-endian)
-.IPs 32
+.IPs "  32"
 signed 16-bit (big-endian)
-.IPs 64
+.IPs "  64"
 signed 8-bit
-.IPs 128
+.IPs " 128"
 unsigned 16-bit (little-endian)
-.IPs 256
+.IPs " 256"
 unsigned 16-bit (big-endian)
-.IPs 512
+.IPs " 512"
 MPEG (2) Audio
 .IPs 1024
 AC3
@@ -1824,16 +1824,6 @@ Make sure you do not set this when you want hwac3 output via S/PDIF, unless
 you really know how to set it correctly.
 .RE
 .PD 1
-.
-.TP
-.B alsa1x (OBSOLETE)
-ALSA 1.x audio output driver.
-Obsoleted by the general alsa audio output driver.
-.
-.TP
-.B alsa9 (OBSOLETE)
-ALSA 0.9 audio output driver.
-Obsoleted by the general alsa audio output driver.
 .
 .TP
 .B alsa5\ \ 
@@ -2969,15 +2959,15 @@ It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
 Also see pnm(5), ppm(5) and pgm(5).
 .PD 0
 .RSs
-.IPs ppm
+.IPs ppm\ \ 
 Write PPM files (default).
-.IPs pgm
+.IPs pgm\ \ 
 Write PGM files.
 .IPs pgmyuv
 Write PGMYUV files.
 PGMYUV is like PGM, but it also contains the U and V plane, appended at the
 bottom of the picture.
-.IPs raw
+.IPs raw\ \ 
 Write PNM files in raw mode (default).
 .IPs ascii
 Write PNM files in ASCII mode.
@@ -4062,6 +4052,7 @@ and contrast adjustment.
 Note that it uses the same MMX optimized code as \-vf eq if all
 gamma values are 1.0.
 The parameters are given as floating point values.
+.PD 0
 .RSs
 .IPs rg
 gamma value for the red component
@@ -4069,7 +4060,9 @@ gamma value for the red component
 gamma value for the green component
 .IPs bg
 gamma value for the blue component
-.RE
+.REss
+.PD 1
+.RS
 Parameters rg, gg, bg are the independent gamma values for the red, green
 and blue components.
 The weight parameter can be used to reduce the effect of a high gamma value on
@@ -4082,6 +4075,7 @@ weight=1.0.
 Value ranges are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
 in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for
 weight.
+.RE
 .
 .TP
 .B hue[=hue:saturation]
