@@ -605,7 +605,20 @@ keypressed:
 #endif
         break;
 
-   case MotionNotify:  i=wsMoveMouse;                 goto buttonreleased;
+   case MotionNotify:
+     i=wsMoveMouse;
+     {
+       /* pump all motion events from the display queue:
+	  this way it works faster when moving the window */
+       static XEvent e;
+       while(XCheckTypedWindowEvent(display,Event->xany.window,MotionNotify,&e)){
+	 /* FIXME: need to make sure we didn't release/press the button in between...*/
+	 /* FIXME: do we need some timeout here to make sure we don't spend too much time
+	    removing events from the queue? */
+	 Event = &e;
+       }
+     }
+     goto buttonreleased;
    case ButtonRelease: i=Event->xbutton.button + 128; goto buttonreleased;
    case ButtonPress:   i=Event->xbutton.button;       goto buttonreleased;
    case EnterNotify:   i=wsEnterWindow;               goto buttonreleased;
