@@ -1498,6 +1498,7 @@ if(auto_quality>0){
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+		if(mplShMem->Playing!=2) break; // end of pause
              }
 #endif
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
@@ -1767,6 +1768,15 @@ if(rel_seek_secs || abs_seek_pos){
 	  mplShMem->Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
 	mplShMem->TimeSec=d_video->pts; 
+	printf("mplShMem->Playing=%d  \n",mplShMem->Playing);
+	switch(mplShMem->Playing){
+	case 0: // stop
+//	  osd_function=OSD_PAUSE;break;
+	case 1: // play
+	  break;
+	case 2: // pause
+	  osd_function=OSD_PAUSE;break;
+	}
       }
 #endif
 
