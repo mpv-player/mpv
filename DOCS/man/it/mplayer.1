@@ -1,4 +1,4 @@
-.\" synced with 1.555
+.\" synced with 1.559
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -617,7 +617,7 @@ L' ingresso standard (noto anche come stdin) verra' utilizzato per leggere
 i dati invece di utilizzare direttamente gli eventi della tastiera.
 Se apri /dev/stdin (oppure l' equivalente nel tuo sistema), utilizzi stdin
 in una playlist oppure intendi leggere da stdin successivamente oppure
-attraverso i comandi openfile o openlist tu
+attraverso i comandi loadfile o loadlist tu
 .B necessiti
 di questa opzione.
 .
@@ -650,7 +650,7 @@ Utilizza l' italiano e passa all' inglese se l' italiano non e' disponibile.
 .TP
 .B \-audio-demuxer <numero> (solo \-audiofile)
 Forza il tipo di demuxer audio per \-audiofile.
-L' ID deve esse specificato come definito in demuxers.h.
+L' ID deve esse specificato come definito in libmpdemux/demuxer.h.
 Utilizza \-audio-demuxer 17 per forzare il riconoscimento del formato .mp3.
 .TP
 .B \-audiofile <nomefile>
@@ -764,7 +764,7 @@ e ~/.mozilla/.
 .TP
 .B \-demuxer <numero>
 Forza il tipo di demuxer audio.
-L' ID deve esse specificato come definito in demuxers.h.
+L' ID deve esse specificato come definito in libmpdemux/demuxer.h.
 Utilizza \-demuxer 17 per forzare il riconoscimento del formato .mp3.
 .TP
 .B \-dumpaudio (solo MPLAYER)
@@ -858,7 +858,7 @@ creato con un altro file AVI, ma siamo sicuri che questo creera' risultati
 sfavorevoli.
 .br
 .I NOTA:
-Questa opzione diventera' obsoleta appena verra' inserita la gestione ODML per i file AVI.
+Questa opzione e' obsoleta perche' MPlayer ha la gestione ODML per i file AVI.
 .TP
 .B \-mc <seconds/frame>
 Massima correzione della sincronizzazione A-V per fotogramma (in secondi).
@@ -970,23 +970,9 @@ in maniera corretta i pacchetti UDP (vedi http://www.live.com/mplayer/).
 Forza la ricostruzione dell' INDICE e lo scrive su un file separato
 specificato da nomefile.
 Attualmente funziona solo con i file AVI.
-Anche se puoi usare MEncoder per correggere file senza indice, il
-formato dei file AVI e' limitato all' indicizzazione di file fino
-a 2GB di dimensione.
-E' pero' possibile memorizzare i' indice in un file separato ed usarlo
-successivamente con \-loadidx che e' piu' veloce della ricostruzione
-dell' indice (con \-idx o \-forceidx) ogni volta che si riproduce il video.
-(Questa e' una limitazione del formato AVI e, anche se esiste una
-estensione che permette di avere indici anche per file con dimensioni maggiori
-di 2GB, ODML, MPlayer non la gestisce ancora).
-Dopo che l' indice e' stato creato, MPlayer comincera' a visualizzare il
-video.
-Se vuoi automatizzare la creazione dei file indice (dopo aver codificato un
-grosso file da una scheda di cattura TV, ad esempio) puoi specificare \-frames 0
-per evitare che MPlayer visualizzi il file dopo aver generato l' indice.
 .br
 .I NOTA:
-Questa opzione diventera' obsoleta appena verra' inserira la gestione ODML per i file AVI.
+Questa opzione e' obsoleta perche' MPlayer ha la gestione ODML per i file AVI.
 .TP
 .B \-sb <byte\ position> (vedi anche l' opzione \-ss)
 Si posiziona al byte specificato.
@@ -1623,6 +1609,12 @@ Puoi avere una lista ed una spiegazione delle opzioni disponibili
 eseguendo
 .I mplayer \-aahelp
 .TP
+.B \-adapter <valore> (solo \-vo directx)
+Seleziona la scheda grafica che ricevera' l' immagine.
+Serve anche l' opzione \-vm per funzionare.
+Puoi avere una lista delle schede disponibili se utilizzi questa 
+opzione insieme a \-v.
+.TP
 .B \-bpp <depth>
 Una una differente profondita' di colore rispetto a quella trovata
 automaticamente.
@@ -1822,8 +1814,8 @@ Vedi \-fstype help per una lista completa dei modi disponibili.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Regola dove viene visualizzato l' uscita sullo schermo inizialmente.
-I valori di x ed y sono in pixel misurati dall' angolo alto a destra
-dello schermo all' angolo alto a destra dell' immagine visualizzata,
+I valori di x ed y sono in pixel misurati dall' angolo alto a sinistra
+dello schermo all' angolo alto a sinistra dell' immagine visualizzata,
 comunque se viene aggiunto il segno di percentuale ad un argomento
 il valore viene convertito in una percentuale della dimensione
 dello schermo in quella direzione.
@@ -1838,13 +1830,13 @@ directx e tdfxfb.
 .PD 0
 .RSs
 .IPs 50:40
-Posiziona la finestra a x=50, y=40
+Posiziona la finestra a x=50, y=40.
 .IPs 50%:50%
-Posiziona la finestra nel mezzo dello schermo
+Posiziona la finestra nel mezzo dello schermo.
 .IPs 100%\ 
-Posiziona la finestra nell' angolo in alto a sinistra dello schermo
+Posiziona la finestra nel mezzo dell' angolo in alto a destra dello schermo
 .IPs 100%:100%
-Posiziona la finestra nell' angolo in basso a sinistra dello schermo
+Posiziona la finestra nell' angolo in basso a destra dello schermo
 .RE
 .PD 1
 .
@@ -1930,6 +1922,11 @@ Questa opzione funziona solo con i driver di uscita video xv, xmga, mga e xvidix
 .br
 Il parametro controlla quanto dell' immagine viene tagliato.
 .TP
+.B \-refreshrate <Hz>
+Attiva la frequenza di rinfresco del monitor in Hz.
+Attualmente e' supportato solo dal driver \-vo directx combinato con 
+l' opzione \-vm.
+.TP
 .B \-rootwin
 Visualizza il filmato nella finestra root (lo sfondo del desktop) invece
 che aprire una nuova finestra.
@@ -1939,7 +1936,7 @@ Funziona solo con i driver x11, xv, xmga e xvidix.
 Regola la saturazione dell' uscita video (default: 0).
 Puoi ottenere un' uscita in bianco e nero con questa opzione.
 .TP
-.B \-screenw <pixels> \-screenh <pixels>
+.B \-screenh <pixels> \-screenw <pixels>
 Se utilizza un driver di uscita che non conosce la risoluzione dello
 schermo (fbdev/\:x11 and/\:or TVout) con queste opzioni puoi specificare
 la risoluzione orizzontale e verticale.
@@ -1950,6 +1947,9 @@ Disattiva il salvaschermo x alla partenza e lo riattiva all' uscita.
 .B \-vm \ \ \ 
 Cerca di cambiare in un modo video migliore.
 Viene supportato dai driver dga, x11/\:xv (XF86VidMode) ed sdl.
+Se e' usato con il driver di uscita video directx allora si possono usare
+le opzioni \-screenw, \-screenh, \-bpp e \-refreshrate per selezionare
+le caratteristiche del modo di visualizzazione.
 .TP
 .B \-vsync \ \ 
 Abilita il VBI per vesa.
@@ -2186,6 +2186,9 @@ automaticamente su molti file AVI.
 .PD 1
 .
 .TP
+.B \-noaspect
+Disabilita la compensazione automatica del rapporto di aspetto del film.
+.TP
 .B \-flip \ 
 Ribalta l' immagine alto-basso.
 .TP
@@ -2311,9 +2314,6 @@ Questo puo' pero' portare a qualche inaccuratezza.
 decodifica a scala di grigi (un poco piu' veloce che a colori).
 .RE
 .
-.TP
-.B \-noaspect
-Disabilita la compensazione automatica del rapporto di aspetto del film.
 .TP
 .B \-noslices
 Disabilita il disegno del video a striscie / bande alte 16 pixel, invece
