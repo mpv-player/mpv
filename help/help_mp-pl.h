@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Last sync on 2003-11-03 with help_mp-en.h 1.112
+// Synced with help_mp-en.h 1.113
 
 // ========================= MPlayer help ===========================
 
