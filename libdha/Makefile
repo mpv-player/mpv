@@ -4,7 +4,11 @@ include ../config.mak
 
 VERSION = 0.1
 
+ifeq ($(TARGET_OS),CYGWIN)
+SHORTNAME = libdha.dll
+else
 SHORTNAME = libdha.so
+endif
 LIBNAME = libdha-$(VERSION).so
 
 SRCS=libdha.c pci.c pci_names.c
