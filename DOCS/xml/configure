@@ -6,7 +6,7 @@
 _xsltwrapper="xsltproc.sh"
 _xmllintwrapper="xmllint.sh"
 
-for _try_catalog in /etc/sgml/catalog /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog /usr/share/apps/ksgmltools2/customization/en/catalog /usr/share/sgml/catalog /usr/local/share/sgml/catalog /usr/lib/sgml/catalog /usr/local/lib/sgml/catalog
+for _try_catalog in /etc/sgml/catalog /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog /usr/share/apps/ksgmltools2/customization/en/catalog /usr/share/sgml/catalog /usr/local/share/sgml/catalog /usr/lib/sgml/catalog /usr/local/lib/sgml/catalog /usr/share/docbook-xml42/catalog.xml
 do
   if test -f "$_try_catalog"
   then
@@ -26,7 +26,7 @@ fi
 
 
 echo "Searching for stylesheet..."
-for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl
+for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl
 do
   if test -f "$_try_chunk_xsl"
   then
