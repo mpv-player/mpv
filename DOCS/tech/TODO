@@ -6,11 +6,11 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 URGENT:
-- fix mpeg PES/PS detection (VDR vs. BIN)
 - fix suid root
 - check wmv8 with gcc 3.0x
 - fix cvid on ppc
-
+- add extra checks for spudec (5.element hun sub)
+- add CRC checks for liba52
 
 demuxer:
 - prebuffering to cache2 (req. for MMS) - URGENT!
