@@ -1102,10 +1102,6 @@ subtitles.
 .B \-noautosub
 Turns off automatic loading of subtitle files.
 .TP
-.B \-nooverlapsub
-Disables time wise overlapping subtitles support for all subtitles formats 
-(default behaviour is to enable the support only for specific formats).
-.TP
 .B \-osdlevel <0\-3> (MPLAYER only)
 Specifies which mode the OSD should start in.
 
@@ -1124,7 +1120,9 @@ volume + seek + timer + percentage + total time
 .
 .TP
 .B \-overlapsub
-Enables time wise overlapping subtitles support for all subtitles formats.
+Allows the next subtitle to be displayed while the current one is
+still visible (default is to enable the support only for specific
+formats).
 .TP
 .B \-sid <id> (also see \-slang option)
 Turns on DVD subtitle displaying.
