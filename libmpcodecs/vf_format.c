@@ -40,6 +40,11 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"bgr16")) vf->priv->fmt=IMGFMT_BGR16; else
 	if(!strcasecmp(args,"bgr15")) vf->priv->fmt=IMGFMT_BGR15; else
 	if(!strcasecmp(args,"bgr8")) vf->priv->fmt=IMGFMT_BGR8; else
+	if(!strcasecmp(args,"rgb24")) vf->priv->fmt=IMGFMT_RGB24; else
+	if(!strcasecmp(args,"rgb32")) vf->priv->fmt=IMGFMT_RGB32; else
+	if(!strcasecmp(args,"rgb16")) vf->priv->fmt=IMGFMT_RGB16; else
+	if(!strcasecmp(args,"rgb15")) vf->priv->fmt=IMGFMT_RGB15; else
+	if(!strcasecmp(args,"rgb8")) vf->priv->fmt=IMGFMT_RGB8; else
 	{ printf("Unknown format name: '%s'\n",args);return 0;}
     } else
         vf->priv->fmt=IMGFMT_YUY2;

@@ -26,3 +26,4 @@ extern int vd_use_slices;
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
 
+#define VDFLAGS_DROPFRAME 3

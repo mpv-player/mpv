@@ -33,9 +33,12 @@ LIBVD_EXTERN(divx4)
 #include <decore.h>
 #endif
 
+#define USE_DIVX_BUILTIN_PP
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
+#ifdef USE_DIVX_BUILTIN_PP
     case VDCTRL_QUERY_MAX_PP_LEVEL:
 	return 9; // for divx4linux
     case VDCTRL_SET_PP_LEVEL: {
@@ -46,6 +49,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
 	return CONTROL_OK;
     }
+#endif
 #ifdef DECORE_VERSION
 #if DECORE_VERSION >= 20011010
     case VDCTRL_SET_EQUALIZER: {
@@ -127,8 +131,10 @@ static int init(sh_video_t *sh){
     dec_param.y_dim = sh->disp_h;
     decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 
+#ifdef USE_DIVX_BUILTIN_PP
     dec_set.postproc_level = divx_quality;
     decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+#endif
     
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: DivX4Linux video codec init OK!\n");
 
@@ -146,12 +152,15 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     DEC_FRAME dec_frame;
+#ifndef USE_DIVX_BUILTIN_PP
+    DEC_FRAME_INFO frameinfo;
+#endif
 
     if(len<=0) return NULL; // skipped frame
 
     dec_frame.length = len;
     dec_frame.bitstream = data;
-    dec_frame.render_flag = (flags&3)?0:1;
+    dec_frame.render_flag = (flags&VDFLAGS_DROPFRAME)?0:1;
 
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_PRESERVE | MP_IMGFLAG_ACCEPT_WIDTH,
 	sh->disp_w, sh->disp_h);
@@ -159,16 +168,27 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     dec_frame.bmp=mpi->planes[0];
     dec_frame.stride=mpi->width;
-    
+
+    decore(0x123,
 #ifndef DEC_OPT_FRAME_311
-    decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
+        DEC_OPT_FRAME,
 #else
-    decore(0x123, (sh->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+	(sh->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME,
+#endif
+	&dec_frame,
+#ifndef USE_DIVX_BUILTIN_PP
+	&frameinfo
+#else
+	NULL
+#endif
+    );
+
+#ifndef USE_DIVX_BUILTIN_PP
+    mpi->qscale = frameinfo.quant_store;
+    mpi->qstride = frameinfo.quant_stride;
 #endif
 
     return mpi;
 }
-
 #endif
 #endif
-

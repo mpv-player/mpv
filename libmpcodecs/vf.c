@@ -200,7 +200,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		  (mpi->type==MP_IMGTYPE_EXPORT)?"Exporting":
 	          ((mpi->flags&MP_IMGFLAG_DIRECT)?"Direct Rendering":"Allocating"),
 	          mpi->width,mpi->height,mpi->bpp,
-		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
+		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":((mpi->flags&MP_IMGFLAG_SWAPPED)?"BGR":"RGB"),
 		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
 	          mpi->bpp*mpi->width*mpi->height/8);
 	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %x,%x,%x strides: %d,%d,%d, chroma: %dx%d, shift: h:%d,v:%d)\n",
