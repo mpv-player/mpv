@@ -1,5 +1,5 @@
-// Translated by:  Daniel Beòa, benad@centrum.cz
-// last sync on 2003-04-01
+// Translated by:  Daniel Beòa, benad (at) centrum.cz
+// last sync on 2003-07-30 with 1.105
 
 // ========================= MPlayer help ===========================
 
@@ -38,7 +38,7 @@ static char help_text[]=
 " hore / dole     posun vzad/vpred o  1 minútu\n"
 " pgup alebo pgdown  posun vzad/vpred o 10 minút\n"
 " < alebo >       posun vzad/vpred v zozname prehrávaných súborov\n"
-" p al. medzerník pauza pri prehrávaní (pokraèovaní stlaèením niektorej klávesy)\n"
+" p al. medzerník pauza (pokraèovanie stlaèením klávesy)\n"
 " q alebo ESC     koniec prehrávania a ukonèenie programu\n"
 " + alebo -       upravi» spozdenie zvuku v krokoch +/- 0.1 sekundy\n"
 " o               cyklická zmena re¾imu OSD:  niè / pozícia / pozícia+èas\n"
@@ -77,7 +77,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Pokú¹am sa vynúti» rodinu audiokodeku %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Nemô¾em nájs» audio kodek pre po¾adovanú rodinu, pou¾ijem ostatné.\n"
 #define MSGTR_CantFindAudioCodec "Nemô¾em nájs» kodek pre audio formát 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokúste sa upgradova» %s z etc/codecs.conf\n*** Pokiaµ problém pretrvá, preèítajte si DOCS/CODECS!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokúste sa upgradova» %s z etc/codecs.conf\n*** Pokiaµ problém pretrvá, preèítajte si DOCS/en/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nejde inicializova» audio kodek! -> bez zvuku\n"
 #define MSGTR_TryForceVideoFmtStr "Pokú¹am se vnúti» rodinu videokodeku %s ...\n"
 #define MSGTR_CantFindVideoCodec "Nemô¾em najs» kodek pre video formát 0x%X !\n"
@@ -92,16 +92,16 @@ static char help_text[]=
 "         ***********************************************************\n"\
 "!!! Mo¾né príèiny, problémy a rie¹enia:\n"\
 "- Nejèastej¹ie: nesprávny/chybný _zvukový_ ovládaè. Rie¹enie: skúste -ao sdl al. pou¾ite\n"\
-"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/sound.html!\n"\
+"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/en/sound.html!\n"\
 "- Pomalý video výstup. Skúste iný -vo ovládaè (pre zoznam: -vo help) alebo skúste\n"\
-"  s voµbou -framedrop !  Tipy pre ladenie/zrýchlenie videa sú v DOCS/video.html\n"\
+"  s voµbou -framedrop !  Tipy pre ladenie/zrýchlenie videa sú v DOCS/en/video.html\n"\
 "- Pomalý cpu. Neskú¹ajte prehráva» veµké dvd/divx na pomalom cpu! Skúste -hardframedrop\n"\
 "- Po¹kodený súbor. Skúste rôzne kombinácie týchto volieb: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Pomalé médium (NFS/SMB, DVD, VCD ...). Skúste -cache 8192.\n"\
 "- Pou¾ívate -cache na prehrávanie non-interleaved súboru? skúste -nocache\n"\
-"Pokiaµ niè z toho nie je pravda, preèítajte si DOCS/bugreports.html !\n\n"
+"Pokiaµ niè z toho nie je pravda, preèítajte si DOCS/en/bugreports.html !\n\n"
 
-#define MSGTR_NoGui "MPlayer bol prelo¾ený BEZ podpory GUI!\n"
+#define MSGTR_NoGui "MPlayer bol zostavený BEZ podpory GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI vy¾aduje X11!\n"
 #define MSGTR_Playing "Prehrávam %s\n"
 #define MSGTR_NoSound "Audio: bez zvuku!!!\n"
@@ -127,12 +127,12 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Komentár: %s\n"
 #define MSGTR_Video_NoVideo "Video: ¾iadne video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Nemô¾em inicializova» video filtre (-vop) alebo video výstup (-vo) !\n"
-#define MSGTR_Paused "\n------ PAUZA -------\r"
+#define MSGTR_Paused "\n  =====  PAUZA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nNemô¾em naèíta» playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
 "  Mô¾e to by» chyba v na¹om novom kóde na detekciu procesora...\n"\
-"  Prosím preèítajte si DOCS/bugreports.html.\n"
+"  Prosím preèítajte si DOCS/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
 "  Obyèajne sa to stáva, keï ho pou¾ívate na inom procesore ako pre ktorý bol\n"\
@@ -140,11 +140,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer zhavaroval nesprávnym pou¾itím CPU/FPU/RAM.\n"\
 "  Prekompilujte MPlayer s --enable-debug a urobte 'gdb' backtrace a\n"\
-"  disassemblujte. Pre detaily, pozrite DOCS/bugreports.html#crash.b.\n"
+"  disassemblujte. Pre detaily, pozrite DOCS/en/bugreports.html#crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer zhavaroval. To sa nemalo sta».\n"\
 "  Mô¾e to by» chyba v MPlayer kóde _alebo_ vo Va¹ích ovládaèoch _alebo_ gcc\n"\
-"  verzii. Ak si myslíte, ¾e je to chyba MPlayeru, prosím preèítajte si DOCS/bugreports.html\n"\
+"  verzii. Ak si myslíte, ¾e je to chyba MPlayeru, prosím preèítajte si DOCS/en/bugreports.html\n"\
 "  a postupujte podµa in¹trukcii. Nemô¾eme Vám pomôc», pokiaµ neposkytnete\n"\
 "  tieto informácie pri ohlasovaní mo¾nej chyby.\n"
 
@@ -155,8 +155,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "Nemô¾em otvori» súbor/zariadenie\n"
 #define MSGTR_ErrorDVDAuth "Chyba v DVD auth...\n"
 #define MSGTR_CannotOpenDemuxer "Nemô¾em otvori» demuxer\n"
-#define MSGTR_NoAudioEncoderSelected "\n®iaden encoder (-oac) vybraný! Vyberte jeden alebo -nosound. Pou¾ite -oac help !\n"
-#define MSGTR_NoVideoEncoderSelected "\n®iaden encoder (-ovc) vybraný! Vyberte jeden, pou¾ite -ovc help !\n"
+#define MSGTR_NoAudioEncoderSelected "\nNevybraný encoder (-oac)! Vyberte jeden alebo -nosound. Pou¾itie -oac help !\n"
+#define MSGTR_NoVideoEncoderSelected "\nNevybraný encoder (-ovc)! Vyberte jeden, pou¾itie -ovc help !\n"
 #define MSGTR_InitializingAudioCodec "Inicializujem audio kodek...\n"
 #define MSGTR_CannotOpenOutputFile "Nemô¾em otvori» súbor '%s'\n"
 #define MSGTR_EncoderOpenFailed "Zlyhal to open the encoder\n"
@@ -207,7 +207,7 @@ static char help_text[]=
 "                1: all\n"\
 "                2: adjust\n"\
 "\n"\
-" fast          prepnú» na rýchlej¹ie kódovanie na na podsekvenciách VBR módov,\n"\
+" fast          prepnú» na rýchlej¹ie kódovanie na podsekvenciách VBR módov,\n"\
 "               mierne ni¾¹ia kvalita and vy¹¹ia bit. rýchlos».\n"\
 "\n"\
 " preset=<value> umo¾òuje najvy¹¹ie mo¾né nastavenie kvality.\n"\
@@ -274,7 +274,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nemô¾em sa posúva» v surových (raw) .AVI prúdoch! (Potrebujem index, zkuste pou¾í» voµbu -idx !)  \n"
 #define MSGTR_CantSeekFile "Nemô¾em sa posúva» v tomto súbore!  \n"
 
-#define MSGTR_EncryptedVOB "Kódovaný VOB súbor (prelo¾ené bez podpory libcss)! Preèítajte si DOCS/DVD\n"
+#define MSGTR_EncryptedVOB "Kódovaný VOB súbor (prelo¾ené bez podpory libcss)! Preèítajte si DOCS/en/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Zakódovaný prúd, ale overenie autenticity ste nepo¾adovali!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nie sú (e¹te) podporované!\n"
@@ -290,7 +290,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Nemô¾em otvori» audio demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Nemô¾em otvori» demuxer titulkov: %s\n"
 #define MSGTR_TVInputNotSeekable "v TV vstupe nie je mo¾né sa pohybova»! (mo¾no posun bude na zmenu kanálov ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s u¾ prítomné\n!"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s u¾ prítomné!\n"
 #define MSGTR_ClipInfo "Informácie o klipe: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progresívna seq detekovaná, nechávam mód 3:2 TELECINE \n"
@@ -322,8 +322,8 @@ static char help_text[]=
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Po¾adovaná rodina audio kodekov [%s] (afm=%s) nie je dostupná (zapnite ju pri kompilácii!)\n"
 #define MSGTR_OpeningVideoDecoder "Otváram video dekóder: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Otváram audio dekóder: [%s] %s\n"
-#define MSGTR_UninitVideoStr "uninit video: %s  \n"
-#define MSGTR_UninitAudioStr "uninit audio: %s  \n"
+#define MSGTR_UninitVideoStr "odinicializova» video: %s  \n"
+#define MSGTR_UninitAudioStr "odinicializova» audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "VDecoder init zlyhal :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder init zlyhal :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit zlyhal :(\n"
@@ -395,7 +395,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[témy] chyba v konfig. súbore tém %d: %s"
 #define MSGTR_SKIN_WARNING1 "[témy] varovanie v konfig. súbore tém na riadku %d: widget najdený ale pred  \"section\" nenájdený ( %s )"
 #define MSGTR_SKIN_WARNING2 "[témy] varovanie v konfig. súbore tém na riadku %d: widget najdený ale pred \"subsection\" nenájdený (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] varovanie v konfig. súbore tém na riadku %d: táto subsekcia nie je podporovaná týmto widget (%s)"
+#define MSGTR_SKIN_WARNING3 "[témy] varovanie v konfig. súbore tém na riadku %d: táto subsekcia nie je podporovaná týmto widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "bitmapa s håbkou 16 bit a menej je nepodporovaná ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "súbor nenájdený ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "chyba èítania bmp ( %s )\n"
@@ -561,6 +561,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Nemeni» rozmery"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporcionálne k ¹írke obrazu"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporcionálne k vý¹ke obrazu"
@@ -583,14 +584,14 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "Film FPS:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Ukáza» video okno pri neaktivite"
 
-#define MSGTR_ABOUT_UHU "vývoj GUI sponoroval UHU Linux\n"
+#define MSGTR_ABOUT_UHU "vývoj GUI sponzoroval UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer základný tým:\n"
 #define MSGTR_ABOUT_AdditionalCoders "   Ïal¹í vývojári:\n"
 #define MSGTR_ABOUT_MainTesters "   Hlavní testeri:\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "fatálna chyba ..."
-#define MSGTR_MSGBOX_LABEL_Error "chyba ..."
-#define MSGTR_MSGBOX_LABEL_Warning "upozornenie ..."
+#define MSGTR_MSGBOX_LABEL_FatalError "Fatálna chyba!"
+#define MSGTR_MSGBOX_LABEL_Error "Chyba!"
+#define MSGTR_MSGBOX_LABEL_Warning "Upozornenie!"
 
 #endif
