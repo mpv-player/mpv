@@ -674,6 +674,7 @@ Tlalka, Adam (atlka) <atlka@pg.gda.pl>
 
 Tiesi, Gianluigi <sherpya@netfarm.it>
     * AC3 passthrough support for ao_win32
+    * avisynth demuxer
 
 Togni, Roberto (rxt) <r_togni@tiscali.it>
     * open source QT RPZA decoder

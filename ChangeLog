@@ -32,6 +32,7 @@ MPlayer (1.0)
     * automatic framerate calculation for MPEG-4 in raw and TS files
     * MP3 in Real files
     * more user-friendly info about audio and subtitle tracks in Ogg files
+    * avisynth demuxer
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
