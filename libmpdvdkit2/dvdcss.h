@@ -61,12 +61,18 @@ typedef struct dvdcss_s* dvdcss_t;
  */
 extern char *        dvdcss_interface_2;
 
+/*
+ * Path to CSS key cache. Default == NULL (no cache).
+ */
+extern char * dvdcss_cache_dir;
 
 /*
  * Exported prototypes.
  */
 extern dvdcss_t dvdcss_open  ( char *psz_target );
 extern int      dvdcss_close ( dvdcss_t );
+extern int      dvdcss_title ( dvdcss_t,
+                               int i_block );
 extern int      dvdcss_seek  ( dvdcss_t,
                                int i_blocks,
                                int i_flags );

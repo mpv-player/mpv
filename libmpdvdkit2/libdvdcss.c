@@ -97,7 +97,7 @@
 #   include <unistd.h>
 #endif
 
-#include "dvdcss/dvdcss.h"
+#include "dvdcss.h"
 
 #include "common.h"
 #include "css.h"

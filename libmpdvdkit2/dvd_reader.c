@@ -17,6 +17,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
  */
 
+#include "config.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h> /* For the timing of dvdcss_title crack. */
@@ -144,6 +146,13 @@ static int initAllCSSKeys( dvd_reader_t *dvd )
 }
 
 
+#ifndef HAVE_MPLAYER
+ #include "get_path.c"
+#else
+ extern char * get_path( char * filename );
+#endif
+
+extern char * dvdcss_cache_dir;
 
 /**
  * Open a DVD image or block device file.
@@ -152,7 +161,16 @@ static dvd_reader_t *DVDOpenImageFile( const char *location, int have_css )
 {
     dvd_reader_t *dvd;
     dvd_input_t dev;
+
+    /* setup cache dir */
+    if(!dvdcss_cache_dir){
+	dvdcss_cache_dir=get_path( "" );
+	if ( dvdcss_cache_dir ) { mkdir( dvdcss_cache_dir,493 ); free( dvdcss_cache_dir ); }
+	dvdcss_cache_dir=get_path( "DVDKeys" );
+	if(dvdcss_cache_dir) mkdir( dvdcss_cache_dir,493 );
+    }
     
+    /* open it */
     dev = DVDinput_open( location );
     if( !dev ) {
 	fprintf( stderr, "libdvdread: Can't open %s for reading\n", location );
@@ -364,6 +382,9 @@ dvd_reader_t *DVDOpen( const char *path )
             }
             fclose( mntfile );
 	}
+#elif defined(WIN32)	
+	dev_name = strdup(path);
+	auth_drive = DVDOpenImageFile( path, have_css );
 #endif
 	if( !dev_name ) {
 	  fprintf( stderr, "libdvdread: Couldn't find device name.\n" );
@@ -554,8 +575,8 @@ static dvd_file_t *DVDOpenVOBUDF( dvd_reader_t *dvd, int title, int menu )
     }
     
     if( dvd->css_state == 1 /* Need key init */ ) {
-        initAllCSSKeys( dvd );
-	dvd->css_state = 2;
+//        initAllCSSKeys( dvd );
+//	dvd->css_state = 2;
     }
     /*    
     if( DVDinput_seek( dvd_file->dvd->dev, 

@@ -42,7 +42,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "dvdcss/dvdcss.h"
+#include "dvdcss.h"
 
 #include "common.h"
 #include "css.h"

@@ -45,7 +45,7 @@
 #   include <sys/uio.h>                                      /* struct iovec */
 #endif
 
-#include "dvdcss/dvdcss.h"
+#include "dvdcss.h"
 
 #include "common.h"
 #include "css.h"

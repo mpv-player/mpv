@@ -20,8 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include <config.h>
-
 #if defined(WORDS_BIGENDIAN)
 /* All bigendian systems are fine, just ignore the swaps. */  
 #define B2N_16(x) (void)(x)
@@ -48,13 +46,51 @@
 #define B2N_32(x) x = swap32(x)
 #define B2N_64(x) x = swap64(x)
 
+#elif defined(ARCH_X86)
+inline static unsigned short bswap_16(unsigned short x)
+{
+  __asm("xchgb %b0,%h0" :
+        "=q" (x)        :
+        "0" (x));
+    return x;
+}
+#define B2N_16(x) x = bswap_16(x)
+
+inline static unsigned int bswap_32(unsigned int x)
+{
+ __asm(
+#if __CPU__ > 386
+      "bswap   %0":
+      "=r" (x)     :
+#else
+      "xchgb   %b0,%h0\n"
+      " rorl    $16,%0\n"
+      " xchgb   %b0,%h0":
+      "=q" (x)          :
+#endif
+      "0" (x));
+  return x;
+}
+#define B2N_32(x) x = bswap_32(x)
+
+inline static unsigned long long int bswap_64(unsigned long long int x)
+{
+  register union { __extension__ uint64_t __ll;
+          uint32_t __l[2]; } __x;
+  asm("xchgl    %0,%1":
+      "=r"(__x.__l[0]),"=r"(__x.__l[1]):
+      "0"(bswap_32((unsigned long)x)),"1"(bswap_32((unsigned long)(x>>32))));
+  return __x.__ll;
+}
+#define B2N_64(x) x = bswap_64(x)
+
 /* This is a slow but portable implementation, it has multiple evaluation 
  * problems so beware.
  * FreeBSD and Solaris don't have <byteswap.h> or any other such 
  * functionality! 
  */
 
-#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__)
+#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(__CYGWIN__)
 #define B2N_16(x) \
  x = ((((x) & 0xff00) >> 8) | \
       (((x) & 0x00ff) << 8))

@@ -30,7 +30,7 @@
  */
 
 #include <inttypes.h>
-#include <dvdread/ifo_types.h> // only dvd_time_t, vm_cmd_t and user_ops_t
+#include "ifo_types.h" // only dvd_time_t, vm_cmd_t and user_ops_t
 
 
 #undef ATTRIBUTE_PACKED

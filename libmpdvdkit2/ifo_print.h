@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <dvdread/ifo_types.h>
-#include <dvdread/dvd_reader.h>
+#include "ifo_types.h"
+#include "dvd_reader.h"
 
 #ifdef __cplusplus
 extern "C" {

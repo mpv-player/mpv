@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
+//#include <assert.h>
 
 #include "config.h" // Needed for WORDS_BIGENDIAN
 #include "ifo_types.h"

@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <string.h>
-#include <assert.h>
+//#include <assert.h>
 
 #include "dvd_reader.h"
 
