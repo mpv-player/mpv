@@ -65,17 +65,21 @@ we have had more than enough flame wars over GCC 2.96. Please let the matter res
 
 <P>If you have problems with GCC 2.96, you can get 2.96-85 packages from the
 Red Hat <A HREF="ftp://updates.redhat.com">ftp server</A>, or just go for the
-3.04 packages offered for version 7.2 and later. If you do not want to or cannot
-use the binary packages, here is how you can compile GCC 3.0.4 from source:</P>
+3.0.4 packages offered for version 7.2 and later. You can also get gcc-3.1
+packages (unofficial, but working fine)
+<A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">here</A> and you can
+install them along the gcc-2.96 you already have. MPlayer will detect it and
+use 3.1 instead of 2.96. If you do not want to or cannot use the binary
+packages, here is how you can compile GCC 3.1 from source:</P>
 
 <UL>
   <LI>Go to the <A HREF="http://gcc.gnu.org/mirrors.html">GCC mirrors page</A>
-    page and download <CODE>gcc-core-3.0.4.tar.gz</CODE>.  This includes the
+    page and download <CODE>gcc-core-3.1.tar.gz</CODE>.  This includes the
     complete C compiler and is sufficient for <B>MPlayer</B>. If you also want
     C++, Java or some of the other advanced GCC features
-    <CODE>gcc-3.0.4.tar.gz</CODE> may better suit your needs.</LI>
+    <CODE>gcc-3.1.tar.gz</CODE> may better suit your needs.</LI>
   <LI>Extract the archive with<BR>
-    <CODE>tar -xvzf gcc-core-3.0.4.tar.gz</CODE></LI>
+    <CODE>tar -xvzf gcc-core-3.1.tar.gz</CODE></LI>
   <LI>GCC is not built inside the source directory itself like most programs,
     but needs a build directory outside the source directory.  Thus you need to
     create this directory via<BR>
@@ -83,7 +87,7 @@ use the binary packages, here is how you can compile GCC 3.0.4 from source:</P>
   <LI>Then you can proceed to configure gcc in the build directory, but you need
     the configure from the source directory:<BR>
     <CODE>cd gcc-build<BR>
-    ../gcc-3.0.4/configure</CODE></LI>
+    ../gcc-3.1/configure</CODE></LI>
   <LI>Compile GCC by issuing this command in the build directory:<BR>
     <CODE>make bootstrap</CODE></LI>
   <LI>Now you can install GCC (as root) by typing<BR>

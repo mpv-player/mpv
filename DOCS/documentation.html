@@ -417,28 +417,27 @@ will take some time, but it DOES worth it.</P>
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
-  <LI><B>gcc</B> - suggested version is from <B>2.95.3</B> to <B>2.95.4</B>.
-    <B>NEVER</B> use 2.96 or 3.x.x !!! They generate faulty code. If you decide
-    to change gcc from 2.96, then don't decide in favor of 3.x just because
-    it's newer! In some ways it's even worse than 2.96. So downgrade to
-    2.95.x (downgrade libstdc++ too, other programs may need it) or don't
-    up/downgrade at all (but in this case, be prepared for compiletime/runtime
-    problems).
-    If you vote for 3.x.x, try to use the latest version, early releases had
-    various bugs, so be sure you use at least 3.1, it's tested and working.
-    Don't use RedHat's gcc 3.x versions! 3.0.4-RH reproducably dies with
-    internal error during GUI compilation (vanilla 3.0.4 does not).
-    Detailed information about gcc 2.96's bugs (that are still NOT fixed, they
-    are WORKAROUNDED in <B>MPlayer</B>!) can be found
+  <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B>, <B>2.95.4</B> and <B>3.1</B>.
+    <B>NEVER</B> use 2.96 or 3.0.x !!! They generate faulty code for MPlayer.
+    If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
+    just because it's newer! Early releases of 3.0.x were even more buggy than
+    2.96. So downgrade to 2.95.x (downgrade libstdc++ too, other programs may
+    need it) or don't up/downgrade at all (but in this case, be prepared for
+    runtime problems). If you vote for 3.x.x, try to use the latest version,
+    early releases had various bugs, so be sure you use at least 3.1, it's
+    tested and working. Don't use RedHat's gcc 3.0.x versions! 3.0.4-RH
+    reproducibly dies with internal error during GUI compilation (vanilla 3.0.4
+    does not). Detailed information about gcc 2.96's bugs (that are still NOT
+    fixed, they have been WORKED AROUND in <B>MPlayer</B>!) can be found
     <A HREF="users_against_developers.html"><B><I>here</I></B></A> and in the
     <A HREF="faq.html">FAQ</A> !</LI>
   <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.0)</B>.
-    Normally everyone wants this, as starting from XFree86 4.0.2, it contains
-    the <A HREF="video.html#2.3.1.2">XVideo</A> extension (somewhere referred
+    Normally, everyone wants this, as starting with XFree86 4.0.2, it contains
+    the <A HREF="video.html#2.3.1.2">XVideo</A> extension (somewhere referred to
     as <B>Xv</B>) which is needed to enable the hardware YUV acceleration (fast
     image display) on cards that support it. <A HREF="video.html#2.3.1.2">More
     information available.</A><BR>
-    Make sure its <B>development package</B> is installed too otherwise
+    Make sure its <B>development package</B> is installed, too, otherwise
     it won't work.<BR>
     For some videocards you don't need XFree86. See list below.</LI>
   <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
@@ -450,6 +449,8 @@ will take some time, but it DOES worth it.</P>
     Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B>.</LI>
+  <LI><B>lame</B> - recommended, needed for encoding MP3 audio with MEncoder,
+    suggested version is <B>always the newest</B> (at least 3.90).</LI>
   <LI><B>libogg</B> - optional, needed for playing OGG file format.</LI>
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
 </UL>
@@ -2510,10 +2511,10 @@ otherwise.  Please do not send messages using other language!</P>
   Workaround: ./configure --disable-sse etc. options</LI>
 
 <LI>"Internal buffer inconsistency" during MEncoder run:<BR>
-  Problem: known problem when lame was compiled with gcc 2.96 or 3.x, no fix
-  yet.<BR>
-  Workaround: compile lame with gcc 2.95. Be sure to remove any installed
-  lame packages, they may have been compiled with gcc 2.96 .</LI>
+  Problem: known problem when lame &lt; 3.90 was compiled with gcc 2.96 or 3.x.<BR>
+  Solution: use lame &gt;=3.90.<BR>
+  Workaround: compile lame with gcc 2.95.x and remove any already installed
+  lame packages, they may have been compiled with gcc 2.96.</LI>
 
 <LI>Messed up MP2/MP3 sound on PPC:<BR>
   Problem: known GCC miscompilation bug on PPC platforms, no fix yet.<BR>
