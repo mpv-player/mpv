@@ -36,6 +36,7 @@ LIBVO_EXTERN(xv)
 
 #include "fastmemcpy.h"
 #include "sub.h"
+#include "aspect.h"
 
 static vo_info_t vo_info =
 {
@@ -120,6 +121,7 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 // int screen;
+// int myx,myy;
  char *hello = (title == NULL) ? "Xv render" : title;
 // char *name = ":0.0";
  XSizeHints hint;
@@ -158,23 +160,19 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
     {
      hint.width=vo_screenwidth;
      hint.height=vo_screenheight;
+#ifdef X11_FULLSCREEN
      /* this code replaces X11_FULLSCREEN hack in mplayer.c
-      * with libvo2 this should be unified among vo plugins
+      * aspect() is available through aspect.h for all vos.
       * besides zooming should only be done with -zoom,
       * but I leave the old -fs behaviour so users don't get
       * irritated for now (and send lots o' mails ;) ::atmos
       */
 
-#ifdef X11_FULLSCREEN
-     d_height=(int)((float)vo_screenwidth/(float)dwidth*(float)dheight);
-     d_height+=d_height%2; // round
-     d_width=vo_screenwidth;
-     if(dheight>vo_screenheight){
-       d_width=(int)((float)vo_screenheight/(float)dheight*(float)dwidth);
-       d_width+=d_width%2; // round
-       d_height=vo_screenheight;
+     {
+       rect_t newres = aspect(d_width,d_height,vo_screenwidth,vo_screenheight);
+       dwidth=d_width=newres.w; dheight=d_height=newres.h;
+       //myx=newres.x; myy=newres.y;
      }
-     dwidth=d_width; dheight=d_height;
 #endif
 
     }
@@ -288,12 +286,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
      if ( mFullscreen )
       {
-       drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
+       drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2; /* =myx; */
        drwcX+=drwX;
-       drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
+       drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2; /* =myy; */
        drwcY+=drwY;
-       drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-       drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
+       drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth); /* =dwidth */
+       drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight); /* =dheight */
        printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
 #ifdef HAVE_NEW_GUI
