@@ -24,6 +24,7 @@ mplayer (0.90)
     * get_delay() smoothing (-autosync) - should help buggy sound drivers
     * mencoder: demuxer/codec uninit order fixed (solves some sig11)
     * various v4l and alsa capturing fixes
+    * demux_mov: fixed crash with mpeg4 on SPARC, decoding on bigendian
 
     Features:
     * new audio filter layer (libaf) - automatic samplerate conversion
