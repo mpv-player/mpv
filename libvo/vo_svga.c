@@ -105,6 +105,7 @@ static vo_info_t info = {
 
 #ifdef CONFIG_VIDIX
 static char vidix_name[32] = "";
+static vidix_grkey_t gr_key;
 #endif
 
 LIBVO_EXTERN(svga)
@@ -526,6 +527,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     printf("vo_svga: Using VIDIX. w=%i h=%i  mw=%i mh=%i\n",width,height,
            modeinfo->width,modeinfo->height);
     vidix_start();
+    /*set colorkey*/       
+    if(vidix_grkey_support()){
+      vidix_grkey_get(&gr_key);
+      gr_key.key_op = KEYS_PUT;
+      if (vo_colorkey != 0xFF000000) {
+	gr_key.ckey.op = CKEY_TRUE;
+	gr_key.ckey.red = (vo_colorkey & 0x00FF0000) >> 16;
+	gr_key.ckey.green = (vo_colorkey & 0x0000FF00) >> 8;
+	gr_key.ckey.blue = vo_colorkey & 0x000000FF;
+      } else
+	gr_key.ckey.op = CKEY_FALSE;
+      vidix_grkey_set(&gr_key);
+    }         
   }
 #endif    
 

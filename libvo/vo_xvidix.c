@@ -197,11 +197,14 @@ static void set_window(int force_update)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
+    if (vo_colorkey != 0xff000000)
+    {
     XSetBackground(mDisplay, vo_gc, 0L);
     XClearWindow( mDisplay,vo_window );
     XSetForeground(mDisplay, vo_gc, colorkey);
     XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 	(vo_fs ? drwHeight - 1 : drwHeight));
+    }
     /* flush, update drawable */
     XFlush(mDisplay);
 
@@ -346,10 +349,15 @@ else
     {
 	vidix_grkey_get(&gr_key);
 	gr_key.key_op = KEYS_PUT;
-	gr_key.ckey.op = CKEY_TRUE;
-	gr_key.ckey.red = r;
-	gr_key.ckey.green = g;
-	gr_key.ckey.blue = b;
+	if (vo_colorkey != 0xff000000)
+	{
+	    gr_key.ckey.op = CKEY_TRUE;
+	    gr_key.ckey.red = r;
+	    gr_key.ckey.green = g;
+	    gr_key.ckey.blue = b;
+	}
+	else
+	    gr_key.ckey.op = CKEY_FALSE;
 	vidix_grkey_set(&gr_key);
     }
 
