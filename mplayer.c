@@ -572,6 +572,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     curr_filename=0;
 play_next_file:
     filename=(num_filenames>0)?filenames[curr_filename]:NULL;
+#ifdef HAVE_NEW_GUI
+    strcpy( mplShMem->Filename,filename );
+#endif    
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Playing %s\n", filename);
 
 #ifdef USE_SUB
