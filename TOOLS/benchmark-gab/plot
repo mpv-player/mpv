@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# needs ImageMagick and gnuplot installed
+# ImageMagick not needed in you don't wanna convert to JPG
+#
+
+. ./variables
+
+rm -f *.plot
+rm -f log-*.pbm
+rm -f log-*.jpg
+rm -f plot.file
+
+for i in log-*; do
+  grep Total: $i | awk '{print $6}' | sed s/s// | nl | head -n 75 > $i.plot
+done
+
+for i in log-*.plot; do
+  echo "set key left box" > plot.file
+  echo "set samples 50" >> plot.file
+  echo "set term pbm" >> plot.file
+  echo "plot [0:75] '$i'" >> plot.file
+  #echo "pause -1 \"Hit return to continue\"" >> plot.file
+  #echo "" >> plot.file
+  gnuplot plot.file > $i.pbm
+  convert $i.pbm $i.jpg
+  rm -f $i.pbm
+done
+
+#gnuplot plot.file > out.pbm
+rm -f *.plot
+rm -f plot.file
