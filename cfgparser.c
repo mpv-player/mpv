@@ -118,7 +118,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 				    !strcmp(param, "0"))
 					*((int *) conf[i].p) = conf[i].min;
 				else {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid parameter for flag:\n");
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid parameter for flag: %s\n", param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -134,21 +134,21 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			tmp_int = strtol(param, &endptr, 0);
 			if (*endptr) {
-				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be an integer:\n");
+				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be an integer: %s\n", param);
 				ret = ERR_OUT_OF_RANGE;
 				goto out;
 			}
 
 			if (conf[i].flags & CONF_MIN)
 				if (tmp_int < conf[i].min) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d:\n", (int) conf[i].min);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d: %s\n", (int) conf[i].min, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
 			if (conf[i].flags & CONF_MAX)
 				if (tmp_int > conf[i].max) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d:\n", (int) conf[i].max);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d: %s\n", (int) conf[i].max, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -167,22 +167,21 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			if (*endptr) {
 				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be a floating point number"
-				       " or a ratio (numerator[:/]denominator):\n");
-
+				       " or a ratio (numerator[:/]denominator): %s\n", param);
 				ret = ERR_MISSING_PARAM;
 				goto out;
 			}
 
 			if (conf[i].flags & CONF_MIN)
 				if (tmp_float < conf[i].min) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %f:\n", conf[i].min);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %f: %s\n", conf[i].min, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
 			if (conf[i].flags & CONF_MAX)
 				if (tmp_float > conf[i].max) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %f:\n", conf[i].max);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %f: %s\n", conf[i].max, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -196,20 +195,19 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			if (conf[i].flags & CONF_MIN)
 				if (strlen(param) < conf[i].min) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d chars:\n",
-							(int) conf[i].min);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d chars: %s\n",
+							(int) conf[i].min, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
 			if (conf[i].flags & CONF_MAX)
 				if (strlen(param) > conf[i].max) {
-					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d chars:\n",
-							(int) conf[i].max);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d chars: %s\n",
+							(int) conf[i].max, param);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
-
 			*((char **) conf[i].p) = strdup(param);
 			ret = 1;
 			break;
@@ -261,26 +259,26 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			token = strtok(param, (char *)&(":"));
 			while(token)
 			{
-			    int ret;
-			    int err;
+			    int sscanf_ret;
 			    
-			    ret = sscanf(token, "%[^=]=%s", subopt, subparam);
-			    switch(ret)
+			    sscanf_ret = sscanf(token, "%[^=]=%s", subopt, subparam);
+			    switch(sscanf_ret)
 			    {
 				case 1:
 				case 2:
-				    if ((err = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
+				    if ((ret = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
 				    {
 					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Subconfig parsing returned error: %d in token: %s\n",
-					    err, token);
-					return(err);
+					    ret, token);
+					goto out;
 				    }
 				    break;
 				default:
 				    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid subconfig argument! ('%s')\n", token);
-				    return(ERR_NOT_AN_OPTION);
+				    ret = ERR_NOT_AN_OPTION;
+				    goto out;
 			    }
-			    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
+			    mp_dbg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
 			    token = strtok(NULL, (char *)&(":"));
 			}
 
@@ -299,7 +297,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 out:
 	return ret;
 err_missing_param:
-	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "missing parameter:\n");
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "missing parameter: %s\n", param);
 	ret = ERR_MISSING_PARAM;
 	goto out;
 }

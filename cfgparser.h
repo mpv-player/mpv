@@ -16,7 +16,6 @@
 #define CONF_TYPE_SUBCONFIG	8
 
 
-
 #define ERR_NOT_AN_OPTION	-1
 #define ERR_MISSING_PARAM	-2
 #define ERR_OUT_OF_RANGE	-3
@@ -33,8 +32,8 @@
 struct config {
 	char *name;
 	void *p;
-	unsigned int type :4;
-	unsigned int flags:4;
+	unsigned int type;
+	unsigned int flags;
 	float min,max;
 };
 
