@@ -613,6 +613,34 @@ Use:
 
 <qandaentry>
 <question><para>
+I've just installed <application>MPlayer</application>. When I want to
+open a video file it causes a fatal error:
+<screen>
+Error opening/initializing the selected video_out (-vo) device.
+</screen>
+How can I solve my problem?
+</para></question>
+<answer><para>
+Just change your video output device. Issue the following comand to get
+a list of available video output drivers:
+<screen>
+mplayer -vo help
+</screen>
+After you've chosen the correct video output driver, add it to
+your configuration file. Add
+<programlisting>
+ vo = <replaceable>selected_vo</replaceable>
+</programlisting>
+to <filename>~/.mplayer/config</filename> and/or
+<programlisting>
+vo_driver = <replaceable>selected_vo</replaceable>
+</programlisting>
+to <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I cannot pinpoint the cause of some strange playback problem.
 </para></question>
 <answer><para>
