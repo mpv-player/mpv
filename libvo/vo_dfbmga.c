@@ -1,5 +1,5 @@
 /*
-   MPlayer video driver for DirectFB / Matrox G400/G450/G550
+   MPlayer video driver for DirectFB / Matrox G200/G400/G450/G550
 
    Copyright (C) 2002,2003 Ville Syrjala <syrjala@sci.fi>
 
@@ -39,7 +39,7 @@
 #include "aspect.h"
 
 static vo_info_t info = {
-     "DirectFB / Matrox G400/G450/G550",
+     "DirectFB / Matrox G200/G400/G450/G550",
      "dfbmga",
      "Ville Syrjala <syrjala@sci.fi>",
      ""
@@ -75,12 +75,12 @@ static IDirectFBSurface *subframe;
 static DFBSurfacePixelFormat frame_format;
 static DFBSurfacePixelFormat subframe_format;
 
-static DFBRectangle drect;
+static DFBRectangle besrect;
+static DFBRectangle c2rect;
+static DFBRectangle *subrect;
 
 static IDirectFBInputDevice  *keyboard;
 static IDirectFBEventBuffer  *buffer;
-
-static int inited = 0;
 
 static int blit_done;
 static int stretch;
@@ -97,6 +97,8 @@ static int osd_changed;
 static int osd_dirty;
 static int osd_current;
 static int osd_max;
+
+static int is_g200 = 0;
 
 /******************************
 *	    vo_dfbmga         *
@@ -161,7 +163,7 @@ imgfmt_to_pixelformat( uint32_t format )
      switch (format) {
      case IMGFMT_RGB32:
      case IMGFMT_BGR32:
-	  return DSPF_ARGB;
+	  return DSPF_RGB32;
      case IMGFMT_RGB24:
      case IMGFMT_BGR24:
 	  return DSPF_RGB24;
@@ -206,7 +208,8 @@ get_layer_by_name( DFBDisplayLayerID id,
                return DFENUM_CANCEL;
 #else
      /* Fake it according to id */
-     if ((id == 1 && !strcmp( l->name, "Matrox Backend Scaler" )) ||
+     if ((id == 0 && !strcmp( l->name, "FBDev Primary Layer" )) ||
+         (id == 1 && !strcmp( l->name, "Matrox Backend Scaler" )) ||
          (id == 2 && !strcmp( l->name, "Matrox CRTC2" )) ||
          (id == 3 && !strcmp( l->name, "Matrox CRTC2 Sub-Picture" )))
           if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
@@ -350,7 +353,6 @@ preinit( const char *arg )
           return -1;
      }
 
-     if (!inited) {
           if ((res = DirectFBInit( NULL, NULL )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: DirectFBInit() failed - %s\n",
@@ -371,10 +373,9 @@ preinit( const char *arg )
                return -1;
           }
 
-          inited = 1;
-     }
-
      if (use_bes) {
+          DFBDisplayLayerConfig      dlc;
+          DFBDisplayLayerConfigFlags failed;
           struct layer_enum l = {
                "Matrox Backend Scaler",
                &bes,
@@ -391,6 +392,12 @@ preinit( const char *arg )
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to BES - %s\n",
                        DirectFBErrorString( res ) );
                return -1;
+          }
+          dlc.flags = DLCONF_PIXELFORMAT;
+          dlc.pixelformat = DSPF_RGB16;
+          if (bes->TestConfiguration( bes, &dlc, &failed ) != DFB_OK) {
+               is_g200 = 1;
+               use_crtc2 = 0;
           }
           bes->SetOpacity( bes, 0 );
      }
@@ -500,9 +507,37 @@ config( uint32_t width, uint32_t height,
       * BES
       */
      if (use_bes) {
+          IDirectFBDisplayLayer *primary;
+          DFBDisplayLayerConfig pdlc;
+          struct layer_enum l = {
+               "FBDev Primary Layer",
+               &primary,
+               DFB_UNSUPPORTED
+          };
+          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
+          if (l.res != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get primary layer - %s\n",
+                       DirectFBErrorString( l.res ) );
+               return -1;
+          }
+          if ((res = primary->GetConfiguration( primary, &pdlc )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't get primary layer configuration - %s!\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+          primary->Release( primary );
+
+          aspect_save_screenres( pdlc.width, pdlc.height );
+          aspect( &out_width, &out_height, A_ZOOM );
+          besrect.x = (pdlc.width - out_width) * in_width / pdlc.width / 2;
+          besrect.y = (pdlc.height - out_height) * in_height / pdlc.height / 2;
+          besrect.w = in_width;
+          besrect.h = in_height;
+
           dlc.flags       = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
-          dlc.width       = in_width;
-          dlc.height      = in_height;
+          dlc.width       = besrect.w + besrect.x * 2;
+          dlc.height      = besrect.h + besrect.y * 2;
 
           if (use_crtc2)
                dlc.buffermode = DLBM_FRONTONLY;
@@ -524,13 +559,7 @@ config( uint32_t width, uint32_t height,
           bes->GetSurface( bes, &besframe );
           besframe->SetBlittingFlags( besframe, DSBLIT_NOFX );
 
-          aspect_save_screenres( 10000, 10000 );
-          aspect( &out_width, &out_height, A_ZOOM );
-          bes->SetScreenLocation( bes,
-                                  (1.0f - (float) out_width  / 10000.0f) / 2.0f,
-                                  (1.0f - (float) out_height / 10000.0f) / 2.0f,
-                                  (float) out_width  / 10000.0f,
-                                  (float) out_height / 10000.0f );
+          bes->SetScreenLocation( bes, 0.0, 0.0, 1.0, 1.0 );
 
           besframe->Clear( besframe, 0, 0, 0, 0xff );
           besframe->Flip( besframe, NULL, 0 );
@@ -554,7 +583,7 @@ config( uint32_t width, uint32_t height,
 
 #if DIRECTFBVERSION > 916
           if (field_parity != -1) {
-               dlc.options  = DLOP_FIELD_PARITY;
+               dlc.options |= DLOP_FIELD_PARITY;
           }
 #endif
 
@@ -620,10 +649,10 @@ config( uint32_t width, uint32_t height,
           else
                stretch = 0;
 
-          drect.x = (screen_width  - out_width)  / 2;
-          drect.y = (screen_height - out_height) / 2;
-          drect.w = out_width;
-          drect.h = out_height;
+          c2rect.x = (screen_width  - out_width)  / 2;
+          c2rect.y = (screen_height - out_height) / 2;
+          c2rect.w = out_width;
+          c2rect.h = out_height;
 
           c2frame->Clear( c2frame, 0, 0, 0, 0xff );
           c2frame->Flip( c2frame, NULL, 0 );
@@ -710,9 +739,11 @@ config( uint32_t width, uint32_t height,
      } else if (use_crtc2) {
           /* Draw OSD to CRTC2 surface */
           subframe = c2frame;
+          subrect = &c2rect;
      } else {
           /* Draw OSD to BES surface */
           subframe = besframe;
+          subrect = &besrect;
      }
 
      subframe->GetSize( subframe, &sub_width, &sub_height );
@@ -749,11 +780,13 @@ query_format( uint32_t format )
           case IMGFMT_BGR16:
           case IMGFMT_RGB15:
           case IMGFMT_BGR15:
-          case IMGFMT_YUY2:
           case IMGFMT_UYVY:
           case IMGFMT_YV12:
           case IMGFMT_I420:
           case IMGFMT_IYUV:
+               if (is_g200)
+                    return 0;
+          case IMGFMT_YUY2:
                return (VFCAP_HWSCALE_UP |
                        VFCAP_HWSCALE_DOWN |
                        VFCAP_CSP_SUPPORTED_BY_HW |
@@ -807,11 +840,11 @@ draw_alpha( int x0, int y0,
           if (!osd_changed || (!flipping && !vo_osd_changed))
                return;
           osd_dirty |= osd_current;
-     } else if (use_crtc2) {
-          if (x0 < drect.x ||
-              y0 < drect.y ||
-              x0 + w > drect.x + drect.w ||
-              y0 + h > drect.y + drect.h)
+     } else {
+          if (x0 < subrect->x ||
+              y0 < subrect->y ||
+              x0 + w > subrect->x + subrect->w ||
+              y0 + h > subrect->y + subrect->h)
                osd_dirty |= osd_current;
      }
 
@@ -915,13 +948,15 @@ static void
 blit_to_screen( void )
 {
      IDirectFBSurface *blitsrc = frame;
+     DFBRectangle *srect = NULL;
 
      if (use_bes) {
           if (vo_vsync && !flipping && !use_crtc2)
                bes->WaitForSync( bes );
 
-          besframe->Blit( besframe, blitsrc, NULL, 0, 0 );
+          besframe->Blit( besframe, blitsrc, NULL, besrect.x, besrect.y );
           blitsrc = besframe;
+          srect = &besrect;
      }
 
      if (use_crtc2) {
@@ -929,9 +964,9 @@ blit_to_screen( void )
                crtc2->WaitForSync( crtc2 );
 
      if (stretch)
-               c2frame->StretchBlit( c2frame, blitsrc, NULL, &drect );
+               c2frame->StretchBlit( c2frame, blitsrc, srect, &c2rect );
      else
-               c2frame->Blit( c2frame, blitsrc, NULL, drect.x, drect.y );
+               c2frame->Blit( c2frame, blitsrc, srect, c2rect.x, c2rect.y );
      }
 }
 
@@ -946,20 +981,20 @@ draw_osd( void )
           if (use_spic) {
                if (flipping)
                     subframe->Clear( subframe, 0, 0, 0, 0 );
-          } else if (use_crtc2) {
+          } else {
                /* Clear black bars around the picture */
                subframe->FillRectangle( subframe,
                                         0, 0,
-                                        screen_width, drect.y );
+                                        sub_width, subrect->y );
                subframe->FillRectangle( subframe,
-                                        0, drect.y + drect.h,
-                                        screen_width, drect.y );
+                                        0, subrect->y + subrect->h,
+                                        sub_width, subrect->y );
                subframe->FillRectangle( subframe,
-                                        0, drect.y,
-                                        drect.x, drect.h );
+                                        0, subrect->y,
+                                        subrect->x, subrect->h );
                subframe->FillRectangle( subframe,
-                                        drect.x + drect.w, drect.y,
-                                        drect.x, drect.h );
+                                        subrect->x + subrect->w, subrect->y,
+                                        subrect->x, subrect->h );
           }
           osd_dirty &= ~osd_current;
      }
@@ -998,7 +1033,7 @@ flip_page( void )
      }
 
      blit_done = 0;
-     current_buf = 0;//vo_directrendering ? 0 : (current_buf + 1) % num_bufs;
+     current_buf = 0;
 }
 
 static void
@@ -1041,13 +1076,10 @@ uninit( void )
           subframe = NULL;
           spic = NULL;
      }
-
-     /*
-      * Don't release. Segfault in preinit() if
-      * DirectFBCreate() called more than once.
-      *
-      * dfb->Release( dfb );
-      */
+     if (dfb) {
+          dfb->Release( dfb );
+          dfb = NULL;
+     }
 }
 
 static uint32_t
@@ -1056,11 +1088,6 @@ get_image( mp_image_t *mpi )
      int buf = current_buf;
      void *dst;
      int pitch;
-
-     if (use_bes &&
-         (mpi->type == MP_IMGTYPE_STATIC ||
-          mpi->flags & MP_IMGFLAG_READABLE))
-          return VO_FALSE;
 
      if (mpi->flags & MP_IMGFLAG_READABLE &&
          (mpi->type == MP_IMGTYPE_IPB || mpi->type == MP_IMGTYPE_IP)) {
