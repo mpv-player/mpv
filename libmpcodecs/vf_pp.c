@@ -16,12 +16,14 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#ifdef USE_LIBAVCODEC
+
 #define EMU_OLD
 
-#include "../postproc/postprocess.h"
+#include "../libavcodec/libpostproc/postprocess.h"
 
 #ifdef EMU_OLD
-#include "../postproc/postprocess_internal.h"
+#include "../libavcodec/libpostproc/postprocess_internal.h"
 #endif
 
 struct vf_priv_s {
@@ -241,3 +243,5 @@ vf_info_t vf_info_pp = {
 };
 
 //===========================================================================//
+
+#endif // USE_LIBAVCODEC

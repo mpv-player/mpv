@@ -37,8 +37,6 @@
 extern double video_time_usage;
 extern double vout_time_usage;
 
-#include "postproc/postprocess.h"
-
 #include "cpudetect.h"
 
 int divx_quality=0;

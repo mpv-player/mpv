@@ -4494,11 +4494,6 @@ fi
 echores "$_byte_order"
 
 echocheck "shared postprocess lib"
-if test "$_shared_pp" = yes ; then
-  _ld_pp='-Lpostproc -lpostproc'
-else
-  _ld_pp='postproc/libpostproc.a'
-fi
 echores "$_shared_pp"
 
 echocheck "New config"
@@ -4836,8 +4831,8 @@ STREAMING = $_streaming
 STREAMING_LIVE_DOT_COM = $_live
 STREAMING_LIB = $_ld_streaming $_ld_live
 VIDIX = $_vidix
-PP_LIB = $_ld_pp
 SHARED_PP = $_shared_pp
+CONFIG_PP = yes
 CONFIG_RISKY = yes
 LIBMENU = $_menu
 I18NLIBS = $_i18n_libs
