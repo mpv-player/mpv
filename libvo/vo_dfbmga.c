@@ -951,8 +951,10 @@ blit_to_screen( void )
      DFBRectangle *srect = NULL;
 
      if (use_bes) {
+#if DIRECTFBVERSION > 915
           if (vo_vsync && !flipping && !use_crtc2)
                bes->WaitForSync( bes );
+#endif
 
           besframe->Blit( besframe, blitsrc, NULL, besrect.x, besrect.y );
           blitsrc = besframe;
@@ -960,8 +962,10 @@ blit_to_screen( void )
      }
 
      if (use_crtc2) {
+#if DIRECTFBVERSION > 915
           if (vo_vsync && !flipping)
                crtc2->WaitForSync( crtc2 );
+#endif
 
      if (stretch)
                c2frame->StretchBlit( c2frame, blitsrc, srect, &c2rect );
