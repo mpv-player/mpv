@@ -45,3 +45,40 @@ char *audio_out_format_name(int format)
     }
     return("Unknown");
 }
+
+// return number of bits for 1 sample in one channel, or 8 bits for compressed
+int audio_out_format_bits(int format){
+    switch (format)
+    {
+/*
+  the following two formats are not available with old linux kernel
+  headers (e.g. in 2.2.16)
+*/
+#ifdef AFMT_S32_LE
+	case AFMT_S32_LE:
+	return 32;
+#endif
+#ifdef AFMT_S32_BE
+	case AFMT_S32_BE:
+	return 32;
+#endif
+
+	case AFMT_U16_LE:
+	case AFMT_U16_BE: 
+	case AFMT_S16_LE:
+	case AFMT_S16_BE:
+	return 16;//16 bits
+	
+	case AFMT_MU_LAW:
+	case AFMT_A_LAW:
+	case AFMT_IMA_ADPCM:
+	case AFMT_S8:
+	case AFMT_U8:
+	case AFMT_MPEG:
+	case AFMT_AC3:
+	default:
+	    return 8;//default 1 byte
+	
+    }
+    return 8;
+}

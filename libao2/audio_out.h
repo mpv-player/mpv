@@ -42,6 +42,7 @@ extern ao_data_t ao_data;
 
 // prototypes
 extern char *audio_out_format_name(int format);
+extern int   audio_out_format_bits(int format);
 
 // NULL terminated array of all drivers
 extern ao_functions_t* audio_out_drivers[];
