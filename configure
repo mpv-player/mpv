@@ -3587,17 +3587,15 @@ int main(void) {
 }
 EOF
   _iconv=no
-  if freebsd || bsdos || openbsd ; then
-    cc_check  -lm -liconv && _iconv=yes
+  if cc_check -lm -liconv ; then
+    _iconv=yes
   else
     cc_check -lm && _iconv=yes
   fi
 fi
 if test "$_iconv" = yes ; then
   _def_iconv='#define USE_ICONV 1'
-  freebsd && _ld_iconv='-liconv'
-  bsdos && _ld_iconv='-liconv'
-  openbsd && _ld_iconv='-liconv'
+  linux || _ld_iconv='-liconv'
 else
   _def_iconv='#undef USE_ICONV'
 fi
