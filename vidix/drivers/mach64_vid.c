@@ -3,7 +3,7 @@
    Copyrights 2002 Nick Kurshev. This file is based on sources from
    GATOS (gatos.sf.net) and X11 (www.xfree86.org)
    Licence: GPL
-   WARNING: THIS DRIVER IS IN BETTA STAGE AND DOESN'T WORK WITH PLANAR FOURCCS!
+   WARNING: THIS DRIVER IS IN BETTA STAGE
 */
 #include <errno.h>
 #include <stdio.h>
@@ -27,6 +27,8 @@ static void *mach64_mmio_base = 0;
 static void *mach64_mem_base = 0;
 static int32_t mach64_overlay_offset = 0;
 static uint32_t mach64_ram_size = 0;
+static uint32_t mach64_buffer_base[10][3];
+static int num_mach64_buffers=-1;
 
 pciinfo_t pci_info;
 static int probed = 0;
@@ -46,12 +48,6 @@ typedef struct bes_registers_s
   uint32_t y_x_end;
   uint32_t vid_buf_pitch;
   uint32_t height_width;
-  uint32_t vid_buf0_base_adrs;
-  uint32_t vid_buf1_base_adrs;
-  uint32_t vid_buf2_base_adrs;
-  uint32_t vid_buf3_base_adrs;
-  uint32_t vid_buf4_base_adrs;
-  uint32_t vid_buf5_base_adrs;
 
   uint32_t scale_cntl;
   uint32_t exclusive_horz;
@@ -60,7 +56,6 @@ typedef struct bes_registers_s
   uint32_t key_cntl;
   uint32_t test;
   /* Configurable stuff */
-  int double_buff;
   
   int brightness;
   int saturation;
@@ -556,12 +551,12 @@ static void mach64_vid_display_video( void )
     OUTREG(OVERLAY_SCALE_INC,			besr.scale_inc);
     OUTREG(SCALER_BUF_PITCH,			besr.vid_buf_pitch);
     OUTREG(SCALER_HEIGHT_WIDTH,			besr.height_width);
-    OUTREG(SCALER_BUF0_OFFSET,			besr.vid_buf0_base_adrs);
-    OUTREG(SCALER_BUF0_OFFSET_U,		besr.vid_buf1_base_adrs);
-    OUTREG(SCALER_BUF0_OFFSET_V,		besr.vid_buf2_base_adrs);
-    OUTREG(SCALER_BUF1_OFFSET,			besr.vid_buf3_base_adrs);
-    OUTREG(SCALER_BUF1_OFFSET_U,		besr.vid_buf4_base_adrs);
-    OUTREG(SCALER_BUF1_OFFSET_V,		besr.vid_buf5_base_adrs);
+    OUTREG(SCALER_BUF0_OFFSET,			mach64_buffer_base[0][0]);
+    OUTREG(SCALER_BUF0_OFFSET_U,		mach64_buffer_base[0][1]);
+    OUTREG(SCALER_BUF0_OFFSET_V,		mach64_buffer_base[0][2]);
+    OUTREG(SCALER_BUF1_OFFSET,			mach64_buffer_base[0][0]);
+    OUTREG(SCALER_BUF1_OFFSET_U,		mach64_buffer_base[0][1]);
+    OUTREG(SCALER_BUF1_OFFSET_V,		mach64_buffer_base[0][2]);
     OUTREG(OVERLAY_SCALE_CNTL, 0xC4000003);
 // OVERLAY_SCALE_CNTL bits & what they seem to affect
 // bit 0 no effect
@@ -631,9 +626,13 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 {
     uint32_t src_w,src_h,dest_w,dest_h,pitch,h_inc,v_inc,left,leftUV,top,ecp,y_pos;
     int is_420,best_pitch,mpitch;
+    int src_offset_y, src_offset_u, src_offset_v;
+    unsigned int i;
+    
     mach64_vid_stop_video();
-    left = config->src.x << 16;
-    top =  config->src.y << 16;
+/* warning, if left or top are != 0 this will fail, as the framesize is too small then */
+    left = config->src.x;
+    top =  config->src.y;
     src_h = config->src.h;
     src_w = config->src.w;
     is_420 = 0;
@@ -684,28 +683,20 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     h_inc = (src_w << (12+ecp)) / dest_w;
     /* keep everything in 16.16 */
     config->offsets[0] = 0;
-    config->offsets[1] = config->frame_size;
+    for(i=1; i<config->num_frames; i++)
+        config->offsets[i] = config->offsets[i-1] + config->frame_size;
+    
     if(is_420)
     {
-        uint32_t d1line,d2line,d3line;
-	d1line = top*pitch;
-	d2line = src_h*pitch+(d1line>>2);
-	d3line = d2line+((src_h*pitch)>>2);
-	d1line += (left >> 16) & ~15;
-	d2line += (left >> 17) & ~15;
-	d3line += (left >> 17) & ~15;
-	config->offset.y = d1line & ~15;
-	config->offset.v = d2line & ~15;
-	config->offset.u = d3line & ~15;
-        besr.vid_buf0_base_adrs=((mach64_overlay_offset+config->offsets[0]+config->offset.y)&~15);
-        besr.vid_buf1_base_adrs=((mach64_overlay_offset+config->offsets[0]+config->offset.v)&~15);
-        besr.vid_buf2_base_adrs=((mach64_overlay_offset+config->offsets[0]+config->offset.u)&~15);
-        besr.vid_buf3_base_adrs=((mach64_overlay_offset+config->offsets[1]+config->offset.y)&~15);
-        besr.vid_buf4_base_adrs=((mach64_overlay_offset+config->offsets[1]+config->offset.v)&~15);
-        besr.vid_buf5_base_adrs=((mach64_overlay_offset+config->offsets[1]+config->offset.u)&~15);
-	config->offset.y = ((besr.vid_buf0_base_adrs)&~15) - mach64_overlay_offset;
-	config->offset.v = ((besr.vid_buf1_base_adrs)&~15) - mach64_overlay_offset;
-	config->offset.u = ((besr.vid_buf2_base_adrs)&~15) - mach64_overlay_offset;
+	config->offset.y= 0;
+	config->offset.u= pitch*src_h; // FIXME wrong?
+	config->offset.v= config->offset.u + (pitch*src_h>>2); // FIXME wrong?
+	//FIXME align & fix framesize
+
+	src_offset_y= config->offset.y + top*pitch + left;
+	src_offset_u= config->offset.u + (top*pitch>>2) + (left>>1);
+	src_offset_v= config->offset.v + (top*pitch>>2) + (left>>1);
+	
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -714,16 +705,23 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 	  config->offset.v = tmp;
 	}
     }
+    else if(besr.fourcc == IMGFMT_BGR32)
+    {
+      config->offset.y = config->offset.u = config->offset.v = 0;
+      src_offset_y= src_offset_u= src_offset_v= (left << 2)&~15;
+    }
     else
     {
-      besr.vid_buf0_base_adrs = mach64_overlay_offset;
-      config->offset.y = config->offset.u = config->offset.v = ((left & ~7) << 1)&~15;
-      besr.vid_buf0_base_adrs += config->offset.y;
-      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-      besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
+      config->offset.y = config->offset.u = config->offset.v = 0;
+      src_offset_y= src_offset_u= src_offset_v= (left << 1)&~15;
+    }
+
+    num_mach64_buffers= config->num_frames;
+    for(i=0; i<config->num_frames; i++)
+    {
+	mach64_buffer_base[i][0]= (mach64_overlay_offset + config->offsets[i] + src_offset_y)&~15;
+	mach64_buffer_base[i][1]= (mach64_overlay_offset + config->offsets[i] + src_offset_u)&~15;
+	mach64_buffer_base[i][2]= (mach64_overlay_offset + config->offsets[i] + src_offset_v)&~15;
     }
 
     leftUV = (left >> 17) & 15;
@@ -744,7 +742,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     if(mach64_grkey.ckey.op == CKEY_TRUE)
     {
 	besr.ckey_on=1;
-	
+
 	switch(mach64_vid_get_dbpp())
 	{
 	case 15:
@@ -828,9 +826,8 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 int vixConfigPlayback(vidix_playback_t *info)
 {
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
-  if(info->num_frames>2) info->num_frames=2;
-  if(info->num_frames==1) besr.double_buff=0;
-  else                    besr.double_buff=1;
+  if(info->num_frames>3) info->num_frames=3; //more than 3 make no sense at the moment but they do work
+
   mach64_compute_framesize(info);
   mach64_overlay_offset = mach64_ram_size - info->frame_size*info->num_frames;
   mach64_overlay_offset &= 0xffff0000;
@@ -866,96 +863,21 @@ static void mach64_wait_vsync( void )
 int vixPlaybackFrameSelect(unsigned int frame)
 {
     uint32_t off[6];
+    int i;
+    int last_frame= (frame-1+num_mach64_buffers) % num_mach64_buffers;
+//printf("Selecting frame %d\n", frame);    
     /*
     buf3-5 always should point onto second buffer for better
     deinterlacing and TV-in
     */
-    if(!besr.double_buff) return 0;
-    if((frame%2))
-    {
-      off[0] = besr.vid_buf3_base_adrs;
-      off[1] = besr.vid_buf4_base_adrs;
-      off[2] = besr.vid_buf5_base_adrs;
-      off[3] = besr.vid_buf0_base_adrs;
-      off[4] = besr.vid_buf1_base_adrs;
-      off[5] = besr.vid_buf2_base_adrs;
-    }
-    else
-    {
-      off[0] = besr.vid_buf0_base_adrs;
-      off[1] = besr.vid_buf1_base_adrs;
-      off[2] = besr.vid_buf2_base_adrs;
-      off[3] = besr.vid_buf3_base_adrs;
-      off[4] = besr.vid_buf4_base_adrs;
-      off[5] = besr.vid_buf5_base_adrs;
-#if 0 // debuging code, can be removed
-{
-int x,y;
-char *buf0= (char *)mach64_mem_base + mach64_overlay_offset;
-char *buf1= (char *)mach64_mem_base + mach64_overlay_offset;
-char *buf2= (char *)mach64_mem_base + mach64_overlay_offset;
-buf0 += ((besr.vid_buf0_base_adrs)&~15) - mach64_overlay_offset;
-buf1 += ((besr.vid_buf1_base_adrs)&~15) - mach64_overlay_offset;
-buf2 += ((besr.vid_buf2_base_adrs)&~15) - mach64_overlay_offset;
-/*for(y=0; y<480/4; y++)
-{
-	for(x=0; x<640/4; x++)
-	{
-		buf1[x + y*160]= 0; // buf1[2*x + y*160*4];
-		buf2[x + y*160]= 0; //buf2[2*x + y*160*4];
-	}
-}*/
-/*)for(y=479; y>0; y--)
-{
-	for(x=0; x<640; x++)
-	{
-		buf0[x*2 + y*1280+1]=
-		buf0[x*2 + y*1280]= buf0[x + y*640];
-	}
-}*/
-for(y=0; y<480; y++)
-{
-	for(x=0; x<1280; x++) buf0[x + y*1280]=0;
-	for(x=0; x<1280/2; x++) buf0[x*2 + y*1280]=128;
-	for(x=0; x<1280/24; x++)
-	{
-// 1-> gray0
-//		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
-//		buf0[x*2 + y*1280 +1] ^= buf0[x*2 + y*1280 +0];
-//		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
-		
-		buf0[x*24 + y*1280 +0] =128;
-		buf0[x*24 + y*1280 +1] =x; //buf0[x*4 + y*1280 +0]>>1;
-		buf0[x*24 + y*1280 +2] =128;
-		buf0[x*24 + y*1280 +3] =x; //buf0[x*4 + y*1280 +2]>>1;
+    if(num_mach64_buffers==1) return 0;
 
-//		buf0[x*8 + y*1280 +0]= 1;
-//		buf0[x*2 + y*1280 +1]= 7;
-//		buf0[x*2 + y*1280+6 ]= 255;
-	}
-// Y, Y, Y, Y, U, V, U, V
-}
-/*for(y=0; y<480; y++)
-{
-//	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
-	for(x=0; x<640; x++)
-	{
-//		buf0[x + y*640 ]=255;//>>=1;
-//		buf0[x + y*640 ]|=128;
-	}
-}
-for(y=0; y<480/2; y++)
-{
-//	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
-	for(x=0; x<640/2; x++)
-	{
-		buf1[x + y*320 ]+=128 ;//>>=1;
-		buf2[x + y*320 ]+=128 ;//>>=1;
-	}
-}*/
-}
-#endif
+    for(i=0; i<3; i++)
+    {
+    	off[i]  = mach64_buffer_base[frame][i];
+    	off[i+3]= mach64_buffer_base[last_frame][i];
     }
+
 #if 0 // delay routine so the individual frames can be ssen better
 {
 volatile int i=0;
@@ -972,8 +894,8 @@ for(i=0; i<10000000; i++);
     OUTREG(SCALER_BUF1_OFFSET,		off[3]);
     OUTREG(SCALER_BUF1_OFFSET_U,	off[4]);
     OUTREG(SCALER_BUF1_OFFSET_V,	off[5]);
-    mach64_wait_vsync();
-
+    if(num_mach64_buffers==2) mach64_wait_vsync(); //only wait for vsync if we do double buffering
+       
     if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
     return 0;
 }

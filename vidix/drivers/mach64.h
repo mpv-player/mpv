@@ -1704,10 +1704,10 @@ This means that this sources don't support ISA and VLB cards */
 /*	?			BlockIOTag(0x172u) */
 /*	?			BlockIOTag(0x173u) */
 /*	?			BlockIOTag(0x174u) */
-#define SCALER_BUF0_OFFSET_U	BlockIOTag(0x175u)	/* GTPro */
-#define SCALER_BUF0_OFFSET_V	BlockIOTag(0x176u)	/* GTPro */
-#define SCALER_BUF1_OFFSET_U	BlockIOTag(0x177u)	/* GTPro */
-#define SCALER_BUF1_OFFSET_V	BlockIOTag(0x178u)	/* GTPro */
+#define SCALER_BUF0_OFFSET_V	BlockIOTag(0x175u)	/* GTPro */
+#define SCALER_BUF0_OFFSET_U	BlockIOTag(0x176u)	/* GTPro */
+#define SCALER_BUF1_OFFSET_V	BlockIOTag(0x177u)	/* GTPro */
+#define SCALER_BUF1_OFFSET_U	BlockIOTag(0x178u)	/* GTPro */
 /*	?			BlockIOTag(0x179u) */
 /*	?			BlockIOTag(0x17au) */
 /*	?			BlockIOTag(0x17bu) */
