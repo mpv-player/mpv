@@ -81,17 +81,34 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   int      (*_cap)(vidix_capability_t*);
   strcpy(drv_name,path);
   strcat(drv_name,name);
+  if(verbose) printf("vidixlib: PROBING: %s\n",drv_name);
   if(!(t_vdl(stream)->handle = dlopen(drv_name,RTLD_NOW|RTLD_GLOBAL))) return 0;
   _ver = dlsym(t_vdl(stream)->handle,"vixGetVersion");
   _probe = dlsym(t_vdl(stream)->handle,"vixProbe");
   _cap = dlsym(t_vdl(stream)->handle,"vixGetCapability");
-  if(_ver) { if((*_ver)() != VIDIX_VERSION) { err: dlclose(t_vdl(stream)->handle); t_vdl(stream)->handle = 0; return 0; } }
-  else goto err;
+  if(_ver) 
+  {
+    if((*_ver)() != VIDIX_VERSION) 
+    { 
+      if(verbose) printf("vidixlib: %s has wrong version\n",drv_name);
+      err:
+      dlclose(t_vdl(stream)->handle);
+      t_vdl(stream)->handle = 0;
+      return 0;
+     }
+  }
+  else
+  {
+    fatal_err:
+    if(verbose) printf("vidixlib: %s has no function definition\n",drv_name);
+    goto err;
+  }
   if(_probe) { if((*_probe)(verbose) != 0) goto err; }
-  else goto err;
+  else goto fatal_err;
   if(_cap) { if((*_cap)(&vid_cap) != 0) goto err; }
-  else goto err;
+  else goto fatal_err;
   if((vid_cap.type & cap) != cap) goto err;
+  if(verbose) printf("vidixlib: %s probed o'k\n",drv_name);
   return 1;
 }
 
@@ -104,7 +121,11 @@ static int vdl_find_driver(VDL_HANDLE stream,const char *path,unsigned cap,int v
   while(!done)
   {
     name = readdir(dstream);
-    if(name) { if(vdl_probe_driver(stream,path,name->d_name,cap,verbose)) break; }
+    if(name) 
+    { 
+      if(name->d_name[0] != '.')
+	if(vdl_probe_driver(stream,path,name->d_name,cap,verbose)) break; 
+    }
     else done = 1;
   }
   closedir(dstream);

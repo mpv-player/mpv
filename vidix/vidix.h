@@ -104,7 +104,7 @@ typedef struct vidix_yuv_s
 typedef struct vidix_rect_s
 {
 	unsigned x,y,w,h;	/* in pixels */
-	vidix_yuv_t pitch;	/* bytes per line */
+	vidix_yuv_t pitch;	/* line-align in bytes */
 }vidix_rect_t;
 
 typedef struct vidix_color_key_s
@@ -145,7 +145,7 @@ typedef struct vidix_playback_s
 #define KEYS_XOR	3
 	unsigned	key_op;		/* app -> driver: keys operations */
 	/* memory model */
-	unsigned	frame_size;		/* app -> driver */
+	unsigned	frame_size;		/* driver -> app; destinition frame size */
 	unsigned	num_frames;		/* app -> driver; after call: driver -> app */
 #define LVO_MAXFRAMES 32
 	unsigned	offsets[LVO_MAXFRAMES];	/* driver -> app */
