@@ -31,9 +31,9 @@
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - enlevez ce fichier, qui peut
     provenir d'un encodage 3-passes précédent (il interfère avec l'actuel)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:vpass=1:plus_d_options -oac copy -o film.avi<BR>
+    vcodec=mpeg4:vpass=1 -oac copy -o film.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:vpass=2:plus_d_options -oac copy -o film.avi</CODE></P>
+    vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
 <P><U><B>Encodage 3-passes:</B></U> c'est une extension de l'encodage 2-passes,
   où l'encodage audio prends place dans une passe séparée. Cette méthode permet
@@ -70,11 +70,11 @@
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - enlevez ce fichier, qui peut
   provenir d'un encodage 3-passes précédent (il interfère avec l'actuel)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-    -o frameno.avi -oac mp3lame -lameopts vbr=3:plus_d_options<BR>
+    -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:vpass=1:more_options -oac copy -o film.avi<BR>
+    -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:vpass=2:plus_d_options -oac copy -o film.avi</CODE></P>
+    -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
 <H3><A NAME="rescaling">2.4.2 Redimensionnement des films</A></H3>
 
@@ -92,7 +92,7 @@
 <H5>Utilisation:</H5>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder entree.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:plus_d_options -vop scale=640:480 -oac copy -o
+  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
   sortie.avi</CODE></P>
 
 
