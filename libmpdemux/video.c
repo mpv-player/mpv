@@ -199,7 +199,7 @@ static void process_userdata(unsigned char* buf,int len){
 //    	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"video.c: process_userdata() detected Closed Captions!\n");
 	if(subcc_enabled) subcc_process_data(buf+2,len-2);
     }
-    if(!verbose) return;
+    if(verbose<2) return;
     printf( "user_data: len=%3d  %02X %02X %02X %02X '",
 	    len, buf[0], buf[1], buf[2], buf[3]);
     for(i=0;i<len;i++)
