@@ -543,7 +543,7 @@ int gui_no_filename=0;
 #ifdef RUNTIME_CPUDETECT
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled with RUNTIME CPU Detection - warning, it's not optimal! To get best performance, recompile mplayer from sources with --disable-runtime-cpudetection\n");
 #else
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled for x86 CPU with features:");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled for x86 CPU with extensions:");
 #ifdef HAVE_MMX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
 #endif

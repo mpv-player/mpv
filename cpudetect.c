@@ -95,11 +95,11 @@ void GetCpuCaps( CpuCaps *caps)
 
 	memset(caps, 0, sizeof(*caps));
 	if (!has_cpuid()) {
-	    mp_msg(MSGT_CPUDETECT,MSGL_ERR,"CPUID not supported!???\n");
+	    mp_msg(MSGT_CPUDETECT,MSGL_WARN,"CPUID not supported!??? (maybe an old 486?)\n");
 	    return;
 	}
 	do_cpuid(0x00000000, regs); // get _max_ cpuid level and vendor name
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",
 			(char*) (regs+1),(char*) (regs+3),(char*) (regs+2), regs[0]);
 	if (regs[0]>=0x00000001)
 	{
@@ -128,7 +128,7 @@ void GetCpuCaps( CpuCaps *caps)
 	}
 	do_cpuid(0x80000000, regs);
 	if (regs[0]>=0x80000001) {
-		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
+		mp_msg(MSGT_CPUDETECT,MSGL_V,"extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
 		do_cpuid(0x80000001, regs2);
 		caps->hasMMX  |= (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
 		caps->hasMMX2 |= (regs2[3] & (1 << 22 )) >> 22; // 0x400000
@@ -160,27 +160,27 @@ void GetCpuCaps( CpuCaps *caps)
 //		caps->hasMMX = 0;
 
 #ifndef HAVE_MMX
-	if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"MMX supported but disabled\n");
+	if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX supported but disabled\n");
 	caps->hasMMX=0;
 #endif
 #ifndef HAVE_MMX2
-	if(caps->hasMMX2) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"MMX2 supported but disabled\n");
+	if(caps->hasMMX2) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX2 supported but disabled\n");
 	caps->hasMMX2=0;
 #endif
 #ifndef HAVE_SSE
-	if(caps->hasSSE) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"SSE supported but disabled\n");
+	if(caps->hasSSE) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"SSE supported but disabled\n");
 	caps->hasSSE=0;
 #endif
 #ifndef HAVE_SSE2
-	if(caps->hasSSE2) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"SSE2 supported but disabled\n");
+	if(caps->hasSSE2) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"SSE2 supported but disabled\n");
 	caps->hasSSE2=0;
 #endif
 #ifndef HAVE_3DNOW
-	if(caps->has3DNow) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"3DNow supported but disabled\n");
+	if(caps->has3DNow) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNow supported but disabled\n");
 	caps->has3DNow=0;
 #endif
 #ifndef HAVE_3DNOWEX
-	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"3DNowExt supported but disabled\n");
+	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNowExt supported but disabled\n");
 	caps->has3DNowExt=0;
 #endif
 }
@@ -239,7 +239,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
-   mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SIGILL, " );
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
 
    /* Both the "xorps %%xmm0,%%xmm0" and "divps %xmm0,%%xmm1"
     * instructions are 3 bytes long.  We must increment the instruction
@@ -258,7 +258,7 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 
 static void sigfpe_handler_sse( int signal, struct sigcontext sc )
 {
-   mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SIGFPE, " );
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGFPE, " );
 
    if ( sc.fpstate->magic != 0xffff ) {
       /* Our signal context has the extended FPU state, so reset the
@@ -270,8 +270,8 @@ static void sigfpe_handler_sse( int signal, struct sigcontext sc )
    } else {
       /* If we ever get here, we're completely hosed.
        */
-      mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "\n\n" );
-      mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SSE enabling test failed badly!" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "\n\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "SSE enabling test failed badly!" );
    }
 }
 #endif /* __linux__ && _POSIX_SOURCE && X86_FXSR_MAGIC */
@@ -312,15 +312,15 @@ static void check_os_katmai_support( void )
     * does.
     */
    if ( gCpuCaps.hasSSE ) {
-      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Testing OS support for SSE... " );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
 
 //      __asm __volatile ("xorps %%xmm0, %%xmm0");
       __asm __volatile ("xorps %xmm0, %xmm0");
 
       if ( gCpuCaps.hasSSE ) {
-	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "yes.\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
       } else {
-	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "no!\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
       }
    }
 
@@ -338,14 +338,14 @@ static void check_os_katmai_support( void )
     * and therefore to be safe I'm going to leave this test in here.
     */
    if ( gCpuCaps.hasSSE ) {
-      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Testing OS support for SSE unmasked exceptions... " );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE unmasked exceptions... " );
 
 //      test_os_katmai_exception_support();
 
       if ( gCpuCaps.hasSSE ) {
-	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "yes.\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
       } else {
-	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "no!\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
       }
    }
 
@@ -358,9 +358,9 @@ static void check_os_katmai_support( void )
     * safe to go ahead and hook out the SSE code throughout Mesa.
     */
    if ( gCpuCaps.hasSSE ) {
-      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Tests of OS support for SSE passed.\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE passed.\n" );
    } else {
-      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Tests of OS support for SSE failed!\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE failed!\n" );
    }
 #else
    /* We can't use POSIX signal handling to test the availability of
@@ -372,7 +372,7 @@ static void check_os_katmai_support( void )
 #else
    /* Do nothing on other platforms for now.
     */
-   mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Not testing OS support for SSE, leaving disabled.\n" );
+   mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, leaving disabled.\n" );
    gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }
