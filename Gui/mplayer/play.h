@@ -87,7 +87,6 @@ extern float mplGetPosition( void );
 
 extern void mplPlayFork( void );
 extern void mplSigHandler( int s );
-extern void mplSendMessage( int msg );
 extern void mplPlayerThread( void );
 
 extern void ChangeSkin( void );

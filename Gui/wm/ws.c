@@ -452,7 +452,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->Rolled=0;
  if ( D & wsShowWindow ) XMapWindow( wsDisplay,win->WindowID );
 
- wsCreateImage( win );
+ wsCreateImage( win,win->Width,win->Height );
 // --- End of creating --------------------------------------------------------------------------
 
  wsWindowList[wsWLCount++]=win;
@@ -1006,14 +1006,14 @@ void wsDestroyImage( wsTWindow * win )
  win->xImage=NULL;
 }
 
-void wsCreateImage( wsTWindow * win )
+void wsCreateImage( wsTWindow * win,int Width,int Height )
 {
  int CompletionType = -1;
  if ( wsUseXShm )
   {
    CompletionType=XShmGetEventBase( wsDisplay ) + ShmCompletion;
    win->xImage=XShmCreateImage( wsDisplay,win->VisualInfo.visual,
-                   win->Attribs.depth,ZPixmap,NULL,&win->Shminfo,win->Width,win->Height );
+                   win->Attribs.depth,ZPixmap,NULL,&win->Shminfo,Width,Height );
    if ( win->xImage == NULL )
     {
      fprintf( stderr,"[ws] shared memory extension error.\n" );
@@ -1046,7 +1046,7 @@ void wsCreateImage( wsTWindow * win )
   else
    {
     win->xImage=XCreateImage( wsDisplay,win->VisualInfo.visual,win->Attribs.depth,
-                              ZPixmap,0,0,win->Width,win->Height,
+                              ZPixmap,0,0,Width,Height,
                               (wsDepthOnScreen == 3) ? 32 : wsDepthOnScreen,
                               0 );
     if ( ( win->xImage->data=malloc( win->xImage->bytes_per_line * win->xImage->height ) ) == NULL )
@@ -1060,8 +1060,8 @@ void wsCreateImage( wsTWindow * win )
  win->ImageDatadw=(unsigned int *)win->xImage->data;
 }
 
-void wsResizeImage( wsTWindow * win )
-{ wsDestroyImage( win ); wsCreateImage( win ); }
+void wsResizeImage( wsTWindow * win,int Width,int Height )
+{ wsDestroyImage( win ); wsCreateImage( win,Width,Height ); }
 
 int wsGetOutMask( void )
 {

@@ -13,8 +13,8 @@ void mplSubDraw( wsParamDisplay )
 
  if ( mplShMem->Playing )
   { 
-   wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
-   wsClearWindow( appMPlayer.subWindow );
+//   wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+//   wsClearWindow( appMPlayer.subWindow );
    vo_expose=1; 
    mplSubRender=0;
   }

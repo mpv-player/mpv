@@ -357,6 +357,11 @@ static void check_events(void)
      printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
     }
   }
+ if ( e & VO_EVENT_EXPOSE )
+  {
+   XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
+   XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight), False);
+  }
 }
 
 static void draw_osd(void)

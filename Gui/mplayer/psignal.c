@@ -177,15 +177,6 @@ void mplMainSigHandler( int s )
 // mplShMem->message=0;
 }
 
-void mplSendMessage( int msg )
-{
- if ( !mplShMem->Playing ) return;
- mplShMem->message=msg;
-// kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
-// kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
- kill( mplMPlayerPID,SIGTYPE );
-}
-
 void gtkSendMessage( int msg )
 {
  if ( !gtkIsOk ) return;

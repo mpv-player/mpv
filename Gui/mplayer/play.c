@@ -67,6 +67,8 @@ void mplPlay( void )
  if ( mplShMem->Playing == 2 ) { mplPause(); return; }
  mplShMem->Playing=1;
  mplSubRender=0;
+ wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+ wsClearWindow( appMPlayer.subWindow ); 
  wsPostRedisplay( &appMPlayer.subWindow );
 }
 
@@ -162,9 +164,10 @@ void ChangeSkin( void )
     { message( False,langNEMDB ); return; }
    wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
    wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );
-   wsResizeImage( &appMPlayer.mainWindow );
+   wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
    wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
    mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
+   
    btnModify( evSetVolume,mplShMem->Volume );
    btnModify( evSetBalance,mplShMem->Balance );
    btnModify( evSetMoviePosition,mplShMem->Position );
@@ -175,17 +178,22 @@ void ChangeSkin( void )
      if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
       { message( False,langNEMDB ); return; }
      wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
-     wsResizeImage( &appMPlayer.menuWindow );
+     wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
     }
 
    mplSkinChanged=1;
+   if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
    if ( !mplShMem->Playing )
     {
      mplSkinChanged=0;
-     if ( appMPlayer.subWindow.isFullScreen ) wsFullScreen( &appMPlayer.subWindow );
-     wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-     wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
-     if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow );
+//     if ( appMPlayer.subWindow.isFullScreen ) wsFullScreen( &appMPlayer.subWindow );
+     if ( !appMPlayer.subWindow.isFullScreen ) 
+      {
+       wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+       wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+      } 
+     wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+     wsClearWindow( appMPlayer.subWindow );
      mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
     }
   }

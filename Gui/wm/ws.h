@@ -227,10 +227,10 @@ extern void wsSetMousePosition( wsTWindow * win,int x, int y );
 // ----------------------------------------------------------------------------------------------
 // Image handling
 // ----------------------------------------------------------------------------------------------
-extern void wsCreateImage( wsTWindow * win );
+extern void wsCreateImage( wsTWindow * win,int Width,int Height );
 extern void wsConvert( wsTWindow * win,unsigned char * Image,unsigned int Size );
 extern void wsPutImage( wsTWindow * win );
-extern void wsResizeImage( wsTWindow * win );
+extern void wsResizeImage( wsTWindow * win,int Width,int Height );
 extern void wsDestroyImage( wsTWindow * win );
 extern int  wsGetOutMask( void );
 

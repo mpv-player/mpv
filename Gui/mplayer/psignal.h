@@ -57,7 +57,6 @@ extern void gtkSigHandler( int s );
 extern void mplPlayerSigHandler( int s );
 extern void mplMainSigHandler( int s );
 
-extern void mplSendMessage( int msg );
 extern void gtkSendMessage( int msg );
 
 extern void mplErrorHandler( int critical,const char * format, ... );
