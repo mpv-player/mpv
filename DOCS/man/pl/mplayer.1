@@ -1,4 +1,4 @@
-.\" synced with 1.799
+.\" synced with 1.803
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-10-20" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-11-07" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -6563,7 +6563,7 @@ Precyzja jest osi±gana kosztem mocy obliczeniowej, wiêc zmniejsz jej warto¶æ,
 je¿eli masz zamiar kodowaæ w czasie rzeczywistym.
 .
 .TP
-.B interlacing
+.B (no)interlacing
 Koduje pola filmu z przeplotem.
 Je¿eli korzystasz z materia³u filmowego z przeplotem, w³±cz tê opcjê.
 .br
@@ -6578,8 +6578,8 @@ Korzysta z 4 wektorów ruchu na makroblok.
 Mo¿e daæ lepsz± kompresjê kosztem wolniejszego kodowania.
 .br
 .I UWAGA:
-Parametr ten jest ju¿ uznawany za przestarza³y w XviD-1.0.x, jako ¿e wszystko
-jest teraz realizowane przez opcjê me_quality.
+Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna niezale¿nie,
+a jej funkcjonalno¶æ jest w³±czona w opcjê me_quality.
 Kiedy me_quality > 4, 4mv jest uruchamiane.
 .
 .TP
@@ -6610,7 +6610,7 @@ Tryb dwuprzej¶ciowy: min.\& i maks.\& kwantyzator dla klatek typu I/P
 (domy¶lnie: 2\-31/\:2\-31)
 .br
 .I UWAGA:
-Ta opcja jest odradzana w XviD-1.0.x i jest zast±piona przez
+Pocz±wszy od XviD-1.0.x opcja ta jest zast±piona przez
 opcje [min|max]_[i|p|b]quant.
 .
 .TP
@@ -6633,7 +6633,7 @@ Kiedy wykorzystywane s± okre¶lone przez u¿ytkownika matryce, musi byæ
 wykorzystywany MPEG.
 .br
 .I UWAGA:
-Ta opcja jest odradzana w XviD-1.0.x i jest zast±piona przez opcjê quant_type.
+Pocz±wszy od XviD-1.0.x opcja ta jest zast±piona przez opcjê quant_type.
 .
 .TP
 .B mod_quant
@@ -6646,7 +6646,7 @@ stanie zdekodowaæ ¿aden dekoder MPEG4 poza libavcodec albo XviD.
 (tylko tryb dwuprzej¶ciowy)
 .br
 .I UWAGA:
-Ta opcja jest odradzana w XviD-1.0.x.
+Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6668,7 +6668,15 @@ Ostatnia ramka I jest traktowana normalnie.
 (domy¶lnie: 30, tylko tryb dwuprzej¶ciowy)
 .
 .TP
-.B greyscale
+.B divx5bvop
+Wygeneruje kompatybilne z DivX5 ramki B (domy¶lnie: w³±czone).
+Wygl±da na to, ¿e jest to obowi±zkowe tylko dla starszych wersji dekodera DivX.
+.br
+.I UWAGA:
+Pocz±wszy od XviD-1.0.x, opcja ta jest zast±piona przez opcjê closed_gop.
+.
+.TP
+.B (no)greyscale
 Sprawia, ¿e XviD ignoruje przestrzeñ kolorów, wiêc wynikowy film jest
 w skali szaro¶ci.
 Zauwa¿, ¿e nie przyspiesza to kodowania, zapobiega to tylko zapisaniu
@@ -6686,8 +6694,13 @@ Poni¿sze opcje s± dostêpne tylko w najnowszych stabilnych
 wersjach XviD 1.0.x (api4).
 .
 .TP
-.B packed\ 
-Tworzy strumieñ który mo¿e byæ dekodowany bez opó¼nieñ.
+.B (no)packed
+Opcja ta jest przeznaczona do rozwi±zywania problemów z kolejno¶ci± ramek,
+przy kodowaniu do formatów typu AVI które nie radz± sobie ze z³± kolejno¶ci±.
+W praktyce, wiêkszo¶æ dekoderów (tak sprzêtowych jak i programowych) sama radzi
+sobie z kolejno¶ci± ramek i mo¿e siê zgubiæ je¶li ta opcja jest w³±czona.
+Bezpieczniej jest wiêc zostawiæ j± wy³±czon±, chyba ¿e na prawdê wiesz co
+robisz.
 .br
 .I UWAGA:
 Stworzy to niepoprawny strumieñ bitów i nie bêdzie on odtwarzany przez
@@ -6696,10 +6709,6 @@ dekodery ISO-MPEG4 poza DivX/\:libavcodec/\:XviD.
 .I UWAGA:
 Zapisuje to tak¿e fa³szyw± wersjê DivX do pliku,
 wiêc autodedetekcja b³êdów niektórych dekoderów mo¿e siê gubiæ.
-.
-.TP
-.B divx5bvop
-Wygeneruje kompatybilne z DivX5 ramki B (domy¶lnie: w³±czone).
 .
 .TP
 .B max_bframes=<0\-4>
@@ -6727,6 +6736,14 @@ Im wy¿sza warto¶æ, tym wiêksze prawdopodobieñstwo u¿ycia klatek B.
 (domy¶lnie: 0)
 .
 .TP
+.B (no)closed_gop
+Ta opcja mówi XviD, ¿eby zamyka³ ka¿dy GOP (Group Of Pictures, grupa obrazów
+ograniczona dwiema ramkami typu I), dziêki czemu GOP'y s± niezale¿ne od siebie.
+To jedynie implikuje ¿e ostatni± ramk± GOP'u jest albo ramka typu P albo
+typu N, ale nie typu B.
+Zazwyczaj dobrze jest w³±czyæ tê opcjê (domy¶lnie: w³±czona).
+.
+.TP
 .B frame_drop_ratio=<0\-100> (tylko z ax_bframes=0)
 Ten parametr umo¿liwia tworzenie strumieni video ze zmienn± szybko¶ci± klatek.
 Je¶li ró¿nica miêdzy bie¿±c± a poprzedni± klatk±
@@ -6740,7 +6757,7 @@ Odtwarzanie z tym parametrem mo¿e spowodowaæ, ¿e film bêdzie poszarpany, wiêc
 u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
 .TP
-.B qpel\ \ \ 
+.B (no)qpel\ 
 MPEG4 domy¶lnie u¿ywa precyzji co do po³owy piksela przy wyszukiwaniu ruchu.
 Standard proponuje tryb, w którym kodery mog± korzystaæ z precyzji quarter
 pixel (co do æwieræ piskela).
@@ -6751,14 +6768,14 @@ Najlepiej jest sprawdziæ rezultat z i bez tej opcji, i samemu zdecydowaæ czy
 jest warta w³±czenia.
 .
 .TP
-.B gmc\ \ \ \ 
+.B (no)gmc\ 
 W³±cza Globaln± Kompensacjê Ruchu, która sprawia, ¿e XviD generuje specjalne
 ramki (ramki GMC), które s± dobrze przystosowane do
 przesuwania/\:przybli¿onia/\:obracania obrazów.
 To, czy w³±czenie tej opcji zaoszczêdzi bity zale¿y od materia³u filmowego.
 .
 .TP
-.B trellis
+.B (no)trellis
 Kwantyzacja kratowa (Trellis Quantization) jest rodzajem metody kwantyzacji
 adaptatywnej, która zachowuje bity poprzez modyfikacjê skwantyzowanych
 wspó³czynników, tak aby lepiej ulaga³y kompresji przez koder entropii.
@@ -6768,7 +6785,7 @@ kilku bitów (i poprawiaj±c± jako¶æ przy sta³ym bitrate) przy mniejszym
 obci±¿eniu ni¿ VHQ.
 .
 .TP
-.B cartoon
+.B (no)cartoon
 W³±cz tê opcjê, je¿eli kodowana sekwencja jest rysunkowa.
 Modyfikuje ona kilka wewnêtrznych progów XviD, tak ¿e te podejmuje
 lepsze decyzje o typie ramek i wektorach ruchu dla p³askich rysunków.
@@ -6781,7 +6798,7 @@ Dla niskich warto¶ci bitrate, wyg³adzanie H.263 da mniej szumów blokowych.
 Je¶li u¿ywasz w³asnych macierzy, musi byæ ustawiona kwantyzacja MPEG.
 .
 .TP
-.B chroma_me
+.B (no)chroma_me
 Zwyk³y algorytm przewidywania ruchu u¿ywa tylko informacji o jasno¶ci
 dla znalezienia najlepszego wektora ruchu.
 Jednak¿e dla niektórych filmów, wykorzystanie przestrzeni kolorów pozwoli
@@ -6789,7 +6806,7 @@ znale¼æ lepsze wektory.
 Ten parametr w³±cza wykorzystanie przestrzeni barw do przewidywania ruchu.
 .
 .TP
-.B chroma_opt
+.B (no)chroma_opt
 Uruchamia prefiltr optymalizacji barw.
 Poczaruje to trochê nad danymi o kolorach ¿eby zmniejszyæ widoczny na
 krawêdziach efekt schodów.
@@ -6800,7 +6817,7 @@ Jako ¿e dzia³a na informacji o kolorach, mo¿esz chcieæ to wy³±czyæ je¶li
 kodujesz w skali szaro¶ci.
 .
 .TP
-.B hq_ac\ \ 
+.B (no)hq_ac
 W³±cza lepsze przewidywania sk³adowej AC z s±siednich bloków.
 .
 .TP
@@ -6973,7 +6990,7 @@ inne wy¶wietl± je w z³ych proporcjach.
 Parametr proporcji mo¿e byæ podany jako proporcja lub liczba rzeczywista.
 .
 .TP
-.B autoaspect
+.B (no)autoaspect
 Podobnie jak opcja aspect, ale proporcja wyliczana jest automatycznie, bior±c
 pod uwagê wszystkie filtry dostrajaj±ce (crop/\:expand/\:scale/\:itp.) podane w
 ³añcuchu.
@@ -7047,7 +7064,7 @@ Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
 liczba kolejnych klatek B pomiêdzy ramkami I i P (domy¶lnie: 0)
 .
 .TP
-.B deblock | nodeblock
+.B (no)deblock
 Wykorzystuje filtr odblokowywuj±cy (deblock) (domy¶lnie: w³±czony).
 Jako, ¿e zabiera ma³o czasu procesora w porównaniu ze wzrostem jako¶ci,
 jaki daje, nie jest zalecane wy³±czanie go.
@@ -7072,7 +7089,7 @@ Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
-.B cabac | nocabac
+.B (no)cabac
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
 (domy¶lnie: w³±czony).
 Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza ok³lo 10-15% bitów.
@@ -7195,7 +7212,7 @@ Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
-.B fullinter | nofullinter
+.B (no)fullinter
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
 (i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip).
 Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
@@ -7242,7 +7259,7 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .REss
 .
 .TP
-.B psnr | nopsnr
+.B (no)psnr
 Drukuje statystyki stosunku sygna³u do szumu.
 .br
 .I INFORMACJA:
