@@ -21,8 +21,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef __sparc__
+/*
+ * the alt bitstream reader performs unaligned memory accesses; that doesn't work
+ * on sparc.  For now, disable ALT_BITSTREAM_READER.
+ */
+#undef	ALT_BITSTREAM_READER
+#else
 // alternative (faster) bitstram reader (reades upto 3 bytes over the end of the input)
 #define ALT_BITSTREAM_READER
+#endif
  
 /* (stolen from the kernel) */
 #ifdef WORDS_BIGENDIAN
