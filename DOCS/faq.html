@@ -1,3 +1,4 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
@@ -30,6 +31,21 @@
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Compilation stops with an error message similar to this one:
+<PRE>
+In file included from mplayer.c:34:
+mw.h: In function `mplMainDraw':
+mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
+Please submit a full bug report,
+with preprocessed source if appropriate.
+See http://bugzilla.redhat.com/bugzilla/ for instructions.
+</PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
+As the error message clearly states, this is a compiler problem.  Upgrade your
+compiler and report the problem to your vendor or the compiler authors.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Configure ends with this text, and MPlayer won't compile!<BR>
 <CODE>"Your gcc does not support even i386 for '-march' and '-mcpu'."</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
@@ -46,7 +62,7 @@ Probably there is no such file or directory.
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 What's the problem with gcc 2.96?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-<B><I>We strongly discourage the use of gcc 2.96!!!</I></B><BR>
+<B>We strongly discourage the use of gcc 2.96!!!</B><BR>
 Read <A HREF="users_against_developers.html#gcc">this</A>
 document for details. If you still really really want to use it, be sure to get
 the latest release, but remember that  you are on your own. Do <B>not</B> report
@@ -60,7 +76,7 @@ Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 No, since there have been/are issues with these compilers as well.<BR>
 Use the 2.95.x series for reliability (not <A HREF="users_against_developers.html#gcc">2.96</A>).
-Use the latest gcc 3.0.x (starting at 3.0.2) if you want to use a 3.0.x version.
+Use the latest gcc 3.x (starting at 3.0.4) if you want to use a 3.x version.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -186,16 +202,6 @@ with these commands:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6/include/X11 /usr/include/X11</CODE><BR>
 Your distribution may differ from the
 <A HREF="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What about the DGA driver? I can't find it!!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-<CODE>./configure</CODE> autodetects your DGA driver. If <CODE>-vo help</CODE> doesn't show
-DGA, then there's a problem with your X installation.
-Try <CODE>./configure --enable-dga</CODE> and read the
-<A HREF="video.html#2.3.1.3">documentation</A>.
-Alternatively, try SDL's DGA driver with the <CODE>-vo sdl:dga</CODE> option.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -573,6 +579,16 @@ connector in <B>before</B> you power on your notebook or use the
 
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+What about the DGA driver? I can't find it!!!
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
+<CODE>./configure</CODE> autodetects your DGA driver. If <CODE>-vo help</CODE> doesn't show
+DGA, then there's a problem with your X installation.
+Try <CODE>./configure --enable-dga</CODE> and read the
+<A HREF="video.html#2.3.1.3">documentation</A>.
+Alternatively, try SDL's DGA driver with the <CODE>-vo sdl:dga</CODE> option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 OK, <CODE>-vo help</CODE> shows DGA driver, but it complains about permissions!
 Help me!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
@@ -707,7 +723,7 @@ the proper rights on the DVD device entry (in <CODE>/dev/</CODE>).
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
 <FONT CLASS="text">My DVD playback is sluggish!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
-<FONT CLASS="text">Use the <CODE>-cache</CODE> option (described in the manpage)
+<FONT CLASS="text">Use the <CODE>-cache</CODE> option (described in the man page)
 and try enabling DMA for the DVD drive with the hdparm tool (described in the
 <A HREF="cd-dvd.html">DVD chapter</A> of the documentation).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -987,14 +1003,14 @@ Use the <CODE>-chapter</CODE> option correctly, like: <CODE>-chapter 5-7</CODE>
 I'm trying to work with 2GB+ files on a VFAT file system. Does it work?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 No, VFAT doesn't support 2GB+ files.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Why is the recommended bitrate printed by MEncoder negative?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Because the bitrate you encoded the audio with is too large to fit the
 movie on any CD. Check if you have libmp3lame installed properly.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>
 
