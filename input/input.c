@@ -601,14 +601,15 @@ mp_input_parse_cmd(char* str) {
 	break;
       } else if(!e) e = ptr+strlen(ptr);
       l = e-start;
-      cmd->args[i].v.s = (char*)malloc((l+1)*sizeof(char));
-      strncpy(cmd->args[i].v.s,start,l);
-      cmd->args[i].v.s[l] = '\0';
       ptr2 = start;
        for(e = strchr(ptr2,'\\') ; e ; e = strchr(ptr2,'\\')) {
 	memmove(e,e+1,strlen(e));
 	ptr2 = e + 1;
+        l--;
       }
+      cmd->args[i].v.s = (char*)malloc((l+1)*sizeof(char));
+      strncpy(cmd->args[i].v.s,start,l);
+      cmd->args[i].v.s[l] = '\0';
     } break;
     case -1:
       ptr = NULL;

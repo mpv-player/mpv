@@ -77,12 +77,22 @@ static char* replace_path(char* title , char* dir) {
     int dl = strlen(dir);
     int t1l = p-title; 
     int l = tl - 2 + dl;
-    char*r = malloc(l + 1);
+    char *r, *n, *d = dir;
+    char term = *(p-1);
+
+    do {
+      if (*d == '\\' || *d == term)
+        l++;
+    } while (*d++);
+    r = malloc(l + 1);
+    n = r + t1l;
     memcpy(r,title,t1l);
-    memcpy(r+t1l,dir,dl);
+    do {
+      if (*dir == '\\' || *dir == term)
+        *n++ = '\\';
+    } while ((*n++ = *dir++));
     if(tl - t1l - 2 > 0)
-      memcpy(r+t1l+dl,p+2,tl - t1l - 2);
-    r[l] = '\0';
+      strcpy(n-1,p+2);
     return r;
   } else
     return title;
