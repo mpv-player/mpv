@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.4
+# Version:          0.1.5
 #
 # Licence:          GPL
 #
@@ -32,6 +32,9 @@
 # 2002/04/22        v0.1.4
 #                     - bugfixes / changes
 #                     - more options
+# 2002/05/06        v0.1.5
+#                     - new option "-norm"
+#
 #
 ################################################################################
 #
@@ -67,6 +70,8 @@ function usage() {
    echo "-mp3          outputs audio in mp3 instead of mp2 format"
    echo "-mpg          don't encode from source, multiplex/burn"
    echo "              only the encoded mpg stream"
+   echo "-norm <p|n|s> sets the output norm p,n,s (pal, ntsc, secam),"
+   echo "              sometimes needed for yuvscaler!"
    echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)"
    echo "-size  <XxY>  sets output size of frames"
    echo "-svcdout      encode to SVCD format [VCD default]"
@@ -112,6 +117,7 @@ mplexnorm="-f $VCDMODE -m 1 -V -b 46"
 max=646
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
+yuvout=""
 
 while [ "$1"x != "x" ]; do
    case $1 in
@@ -150,6 +156,10 @@ while [ "$1"x != "x" ]; do
         ;;
       -mpg)
       	mkstream=0
+	;;
+      -norm)
+        yuvout="-n $2"
+	shift 1
 	;;
       -denoise)
         denoise="yuvdenoise"
@@ -218,7 +228,7 @@ if [ $burnonly -eq 0 ]; then
 
       # mjpegtools
       ($denoise < $VIDEO | \
-         yuvscaler -v 0 $wide -O $norm $size | \
+         yuvscaler -v 0 $wide -O $norm $size $yuvout | \
          mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 \
 	          -4 2 -2 1 -o $NAME.mpv) &
    
