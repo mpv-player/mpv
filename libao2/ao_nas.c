@@ -339,6 +339,8 @@ static int control(int cmd, int arg)
 	AuFixedPoint fpgain;
 	AuStatus as;
 	int gain;
+	int retval = CONTROL_UNKNOWN;
+
 	ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 
 	dattr = AuGetDeviceAttributes(nas_data->aud, nas_data->dev, &as);
@@ -356,7 +358,9 @@ static int control(int cmd, int arg)
 		vol->right = (float) gain;
 		vol->left = vol->right;
 
-		return CONTROL_OK;
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_GET_VOLUME: %d\n", gain);
+		retval = CONTROL_OK;
+		break;
 
 	case AOCONTROL_SET_VOLUME:
 		/*
@@ -365,6 +369,7 @@ static int control(int cmd, int arg)
 		 * so i take the mean of both values.
 		 */
 		gain = (int) ((vol->left+vol->right)/2);
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_SET_VOLUME: %d\n", gain);
 
 		fpgain = AuFixedPointFromSum(gain, 0);
 		AuDeviceGain(dattr) = fpgain;
@@ -373,13 +378,13 @@ static int control(int cmd, int arg)
 		if (as != AuSuccess) {
 			nas_print_error(nas_data->aud,
 			                "control(): AuSetDeviceAttributes", as);
-			return CONTROL_ERROR;
-		}
-		return CONTROL_OK;
-
-	default:
-		return CONTROL_UNKNOWN;
+			retval = CONTROL_ERROR;
+		} else retval = CONTROL_OK;
+		break;
 	};
+
+	AuFreeDeviceAttributes(nas_data->aud, 1, dattr);
+	return retval;
 }
 
 // open & setup audio device
