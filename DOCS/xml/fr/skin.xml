@@ -669,7 +669,7 @@ entre 0 et 255).
 <title>Menu</title>
 <para>
 Comme mentionné précédemment, le menu s'affiche en utilisant deux images. Les
-entrées normales du menu sont extraite de l'image spécifiée par l'objet
+entrées normales du menu sont extraites de l'image spécifiée par l'objet
 <literal>base</literal>, tandis que l'entrée actuellement sélectionnée est
 extraite de l'image spécifiée par l'objet <literal>selected</literal>. Vous devez
 définir la taille et la position de chaque entrée du menu par l'objet
@@ -812,7 +812,7 @@ Saute à la prochaine piste dans la playlist.
   <listitem><para>
 Associé à la commande <literal>evPlaySwitchToPause</literal>. Ils s'utilisent pour
 avoir un bouton play/pause commun. Les deux messages peuvent être assignés aux
-boutons affiches exactement à la même position dans la fenêtre. Ces message mettent
+boutons affichés exactement à la même position dans la fenêtre. Ces messages mettent
 la lecture en pause et le bouton <literal>evPlaySwitchToPause</literal> s'affiche
 (pour indiquer que le bouton peut être pressé pour continuer la lecture).
     </para></listitem>

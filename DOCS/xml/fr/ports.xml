@@ -230,7 +230,7 @@ Ce problème n'existe pas sur la version SPARC de Solaris 8.
 
 <listitem><para>
 Un bogue similaire est présent dans le code du système de fichier hsfs(7FS) (alias ISO9660), il se peut
-que hsfs ne supporte pas les partitions/disques plus gros(ses) que 4GB, toutes les donnés sont accédés
+que hsfs ne supporte pas les partitions/disques plus gros(ses) que 4GB, toutes les données sont accédées
 modulo 4Go.
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
 Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc) / 109765-04 (x86).
@@ -337,7 +337,7 @@ X qui est TRÈS lente. Utilisez SDL.
   affichée par l'option <option>-vf format=fmt=help</option>. Si vous
   trouvez une palette que votre carte gère particulièrement mal,
   <option>-vf noformat=<replaceable>palette</replaceable></option>
-  l'empèchera d'être utilisé. Ajouter cela à votre fichier de conf pour
+  l'empèchera d'être utilisée. Ajouter cela à votre fichier de conf pour
   ne plus l'utiliser de façon permanente.</para>
   
 <para>Vous pouvez utiliser les codecs Win32 et les codecs Real Win32 (pas les

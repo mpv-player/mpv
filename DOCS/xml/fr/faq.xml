@@ -100,7 +100,7 @@ La compilation s'arrête avec un message d'erreur similaire à celui-ci:
 C'est un problème connu de <application>gcc</application> 3.2, upgradez
 en 3.3 pour résoudre le problème. Comment installer gcc est décrit dans la
 section <link linkend="gcc-296">gcc 2.96</link>. Vous pouvez également utiliser
-une librairie FAAD externe comme décrit dans la section 
+une librairie FAAD externe comme décrite dans la section 
 <link linkend="aac">AAC</link>.
 </para></answer>
 </qandaentry>
@@ -282,7 +282,7 @@ Warning: loading mga_vid.o will taint the kernel: no license
 <answer><para>
 Les derniers modutils du noyau requièrent un flag indiquant la licence
 (principalement pour éviter que les hackers noyau ne débogguent des noyaux
-closed source). Upgradez vos noyau, modutils et <application>MPlayer</application>.
+closed source). Upgradez vos noyaux, modutils et <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -681,7 +681,7 @@ liste des pilotes de sortie vidéo disponibles:
 <screen>
 mplayer -vo help
 </screen>
-Après avoir choisi le pilote vidéo approprié, ajoutez-leà votre fichier de configuration.
+Après avoir choisi le pilote vidéo approprié, ajoutez-le à votre fichier de configuration.
 Ajoutez
 <programlisting>
  vo = <replaceable>pilote_choisi</replaceable>
@@ -959,7 +959,7 @@ J'ai des problèmes de synchro A/V. Certains de mes AVIs sont lus correctement, m
 d'autres sont lus à double vitesse !
 </para></question>
 <answer><para>
-Vous avez une carte son/pilote boguée. Elle est certainement fixé à 44100Hz, et
+Vous avez une carte son/pilote boguée. Elle est certainement fixée à 44100Hz, et
 vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le filtre audio resample.
 </para></answer>
 </qandaentry>
@@ -1006,7 +1006,7 @@ notebook ou utilisez l'option <option>-nortc</option>.
 
 <qandaentry> 
 <question><para>
-Pendant la lecture d'un film tout deviens sale et j'obtiens le message suivant:
+Pendant la lecture d'un film tout devient sale et j'obtiens le message suivant:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
@@ -1164,7 +1164,7 @@ mais pas de <systemitem>xv</systemitem>!
 <answer><para>
 Testez si <systemitem>x11</systemitem> Maintenant essayez <option>-vo x11
 -fs -zoom</option>. Vous voyez la différence? Non?! OK, voici quelques
-eclaircissements: la destination <systemitem>x11</systemitem> de SDL utilise xv si
+éclaircissements: la destination <systemitem>x11</systemitem> de SDL utilise xv si
 disponible, vous n'avez pas à vous en soucier... Note: Avec SDL vous pouvez
 forcer/désactiver Xv en utilisant <option>-forcexv</option> et <option>-noxv</option>.
 </para></answer>
@@ -1303,7 +1303,7 @@ les tentatives ont échouées jusqu'à présent, mais les patches sont les bienvenus
 J'aimerais me déplacer de +/- 1 trames au lieu de 10 secondes.
 </para></question>
 <answer><para>
-Cela ne peut pas être réalisé. Cela l'était, mais foutait en l'air la synchro A/V.
+Cela ne peut pas être réalisé. Cela l'était, mais foutez en l'air la synchro A/V.
 Vous êtes libre de l'implémenter, et d'envoyer un patch. Ne le demandez pas.
 </para></answer>
 </qandaentry>
@@ -1345,7 +1345,7 @@ ou d'autres films en format VCD ou SVCD et même les graver directement sur un CD
 
 <qandaentry>
 <question><para>
-Comment puis-je joindre deux fichiers vidéo ?
+Comment puis-je joindre deux fichiers vidéos ?
 </para></question>
 <answer><para>
 Cela à été l'objet d'une discussion sans fin sur mplayer-users. Allez chercher dans les

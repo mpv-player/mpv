@@ -5,7 +5,7 @@
 <para>
 Les bons rapports de bogue sont une contribution précieuse pour tout projet en
 développement. Mais tout comme pour écrire un bon logiciel, les bons rapports de
-problème exigent du travail. Rendez-vous compte que la plupart des développeurs sont
+problèmes exigent du travail. Rendez-vous compte que la plupart des développeurs sont
 extrêmement occupés et reçoivent un nombre colossal d'emails. Donc bien que votre retour soit crucial pour l'amélioration de <application>MPlayer</application> et soit très apprécié, comprenez que vous devez fournir <emphasis role="bold">toutes</emphasis>  les informations que nous demandons
 et suivre de près les instructions de ce document.
 </para>
@@ -38,7 +38,7 @@ de rapporter le bogue.
 <para>
 Merci de ne pas envoyer de rapports de bogues en privé à chaque développeur. C'est un
 travail commun et il y a donc plein de gens que cela pourrait intéresser. Parfois
-d'autres utilisateurs on rencontré les mêmes ennuis que vous et savent comment
+d'autres utilisateurs ont rencontré les mêmes ennuis que vous et savent comment
 contourner le problème même si c'est un bogue dans le code de <application>MPlayer</application>.
 </para>
 
@@ -205,7 +205,7 @@ En cas de doute, joignez-y le résultat de <command>lspci -vv</command> sur les s
 Si vous rencontrez des erreurs pendant l'éxecution de <command>./configure</command>,
 ou si l'auto-détection ou autre chose échoue, lisez <filename>configure.log</filename>.
 Vous pourriez y trouver la réponse, par exemple des versions multiples de la même
-librairie mélangés dans votre système, ou vous avez oublié d'installer les paquets de
+librairie mélangées dans votre système, ou vous avez oublié d'installer les paquets de
 développement (ceux avec le suffixe -dev). Si vous pensez que c'est un bogue, incluez
 <filename>configure.log</filename> dans votre rapport de bogue.
 </para>

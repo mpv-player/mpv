@@ -11,7 +11,7 @@ détaillés sur l'utilisation des nombreux paramètres d'encodage, lisez les
 été collectés sur de nombreuses threads de la liste de diffusion mplayer-users.
 Cherchez dans les
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archives</ulink> pour trouver
-les discussions à propos de tous les aspects et problèmes relatif à l'encodage avec
+les discussions à propos de tous les aspects et problèmes relatifs à l'encodage avec
 <application>MEncoder</application>.
 </para>
 
@@ -56,7 +56,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 <sect1 id="menc-feat-mpeg">
 <title>Encodage au format MPEG</title>
 <para>
-<application>MEncoder</application> peut créer des fichier au format MPEG (MPEG-PS).
+<application>MEncoder</application> peut créer des fichiers au format MPEG (MPEG-PS).
 Ceci n'est probablement utile qu'avec le codec <emphasis>mpeg1video</emphasis>
 de <systemitem class="library">libavcodec</systemitem>, car les lecteurs - excepté <application>MPlayer</application>
 - attendent de la vidéo MPEG-1, et de l'audio MPEG-1 layer 2 (MP2) dans les fichiers MPEG.
@@ -542,9 +542,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   L'hypothèse principale de ce guide est que vous n'avez pas de contraintes
-  de taille particulières et que perdre des octets en échange d'une meilleure qualitée
+  de taille particulière et que perdre des octets en échange d'une meilleure qualitée
   ne vous dérange pas. Bien que la plupart des informations présentées ici soient 
-  utile dans la plupart des cas, une partie peut vous poser problème si vous
+  utiles dans la plupart des cas, une partie peut vous poser problème si vous
   prévoyez une certaine taille, pour faire tenir une vidéo sur un CD par exemple.
 </para>
 
@@ -570,7 +570,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Lorsque vous spécifiez un débit constant, <systemitem
   class="library">libavcodec</systemitem> encodera la vidéo en éliminant juste assez
   de détails pour rester en dessous du débit demandé. Si vous ne vous souciez pas
-  de la taille de fichier, vous pouvez utiliser le CBR est spécifier un débit
+  de la taille de fichier, vous pouvez utiliser le CBR et spécifier un débit
   infini (en pratique, cela signifie une valeur suffisamment grande pour ne pas
   avoir de limite, comme 10000Kbit). Sans réelle restriction de débit, en définitive
   <systemitem class="library">libavcodec</systemitem> utilisera le plus
@@ -630,10 +630,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Un bon point de départ pour un rip de très haute qualité est environ 2000Kbit,
-  plus ou moins 200Kbit. Pour les vidéos comportant beaucoup d'action ou de détails,
+  plus ou moins 200Kbit. Pour les vidéos comportant beaucoup d'actions ou de détails,
   ou si vous avez de très bon yeux, vous pouvez choisir 2400 ou 2600.
   Pour certains DVDs, vous pourriez voir une différence à 1400Kbit. C'est une bonne
-  idée que d'essayer sur des scènes à différents débit pour s'en rendre compte.
+  idée que d'essayer sur des scènes à différents débits pour s'en rendre compte.
 </para>
 
 </sect2>
@@ -842,7 +842,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   il serait plus sympatique de retirer un peu du haut et du bas pour aligner
   au centre.
   Nous rabotons la hauteur de 10 pixels, mais nous ne voulons pas augmenter
-  le y-offset de 5 pixels car c'est un nombre impaire et cela pourrait affecter
+  le y-offset de 5 pixels car c'est un nombre impair et cela pourrait affecter
   la qualité. À la place, nous allons augmenter le y-offset de 4 pixels:
 
   <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
@@ -898,7 +898,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   qualité au détriment du temps d'encodage. Il y a peu de raisons d'enlever
   ces options quand notre but principal est la qualité. Les options
   <option>cmp=3:subcmp=3:mbcmp=3</option> selectionnent une fonction de
-  comparaison qui donne une meilleur qualité que les paramètres par défaut.
+  comparaison qui donne une meilleure qualité que les paramètres par défaut.
   Vous pouvez faire des expérimentations avec ce paramètre (référez-vous à la 
   page de manuel pour les valeurs possibles) car les différentes fonctions
   peuvent avoir un impact important sur la qualité suivant la source.
@@ -1001,7 +1001,7 @@ Notes:
   Les exemples de d'utilisation de <application>MEncoder</application>
   présents dans ce document ne sont <emphasis role="bold">pas</emphasis>
   destinées à un usage tel-quel.
-  Ce sont juste le minimum requis pour encoder des vidéos de cette catégorie.
+  C'est juste le minimum requis pour encoder des vidéos de cette catégorie.
   Comment faire des bons rips DVD ou paramétrer 
   <systemitem class="library">libavcodec</systemitem> pour la meilleure qualité
   possible est en dehors du cadre de ce document.
@@ -1086,15 +1086,15 @@ Notes:
     Regardez le motif des trames à l'apparence entrelacées et progressives.
     Si le motif que vous voyez est PPPII,PPPII,PPPII,... alors la vidéo est
     téléciné. Si vous voyez un autre motif, alors la vidéo a été téléciné en
-    utiliisant une méthode non-standard et <application>MEncoder</application>
+    utilisant une méthode non-standard et <application>MEncoder</application>
     ne peut pas la convertir en progressive sans perte. Si vous ne voyez
-    aucun motif, c'est certainement que la vidéo est entrelaçé.
+    aucun motif, c'est certainement que la vidéo est entrelaçée.
     </para></listitem>
   </orderedlist>
 </para>
 
 <para>
-  Parfois la vidéo téléciné est appelé &quot;hard-telecine&quot;.
+  Parfois la vidéo téléciné est appelée &quot;hard-telecine&quot;.
 </para>
 </sect3>
 
@@ -1186,10 +1186,10 @@ Notes:
   en utilisant un procédé appelé inverse-téléciné.
   <application>MPlayer</application> contient deux filtres pour accomplir cela:
   <option>detc</option> et <option>ivtc</option>. Vous pouvez lire la page de
-  man pour voir leur différences, mais pour les DVDs je n'ai jamais eu de
+  man pour voir leurs différences, mais pour les DVDs je n'ai jamais eu de
   problèmes avec <option>ivtc</option>. Notez que vous devriez 
   <emphasis role="bold">toujours</emphasis> appliquer l'inverse-telecine avant
-  tout redimensionnement; à mois que vous ne sachiez vraiment ce que vous
+  tout redimensionnement; à moins que vous ne sachiez vraiment ce que vous
   faites, appliquez l'inverse-téléciné également avant tout découpage
   <link linkend="menc-feat-telecine-footnotes">[1]</link>. De nouveau,
   <option>-ofps 23.976</option> est également requis.

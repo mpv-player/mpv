@@ -206,7 +206,7 @@ diffusion mplayer-users.
 <title>Cartes nVidia</title>
 
 <para>
-nVidia n'est pas un très bon chois sous Linux (d'après nVidia, ce n'est
+nVidia n'est pas un très bon choix sous Linux (d'après nVidia, ce n'est
 <link linkend="nvidia-opinions">pas vrai</link>)... Les pilotes open-source de
 XFree86 supportent la plupart de ces cartes, mais dans certains cas, vous devrez
 utiliser les pilotes binaires closed-source de nVidia, disponibles sur le

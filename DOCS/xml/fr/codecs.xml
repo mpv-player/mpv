@@ -81,10 +81,10 @@ et aidez-nous à en ajouter le support.
 Cette section contient des informations sur les codecs DivX4 et DivX5 de
 <ulink url="http://www.projectmayo.com">Project Mayo</ulink>.
 La première version (alpha) disponible fût OpenDivX 4.0 alpha 47 et 48.
-Son support était inclut dans <application>MPlayer</application>, et compilé
+Son support était inclu dans <application>MPlayer</application>, et compilé
 par défaut. Nous avons fréquemment utilisé son code de postprocessing pour
 améliorer la qualité visuelle des vidéos MPEG-1/2. Maintenant nous utilisons
-notre propre code, pour tous les types de fichier.
+notre propre code, pour tous les types de fichiers.
 </para>
 
 <para>
@@ -93,7 +93,7 @@ vidéos créées avec le très mauvais codec DivX ! De plus il est plus rapide que
 les DLLs Win32 DivX natives mais plus lent que <systemitem
 class="library">libavcodec</systemitem>. Son utilisation en tant que décodeur
 est donc <emphasis role="bold">déconseillé</emphasis>. Cependant, il est utile
-pour l'encodage. Un désavantage de ce codec est que ces sources sont ne sont
+pour l'encodage. Un désavantage de ce codec est que ses sources ne sont
 pas disponibles sous une licence Open Source.
 </para>
 
@@ -275,7 +275,7 @@ résolution sans sauter de trames sur mon K6-2 500.
 
 <note>
 <para>
-Soyez prévenu que les codecs binaires XAnim sont packagées avec un un morceau
+Soyez prévenu que les codecs binaires XAnim sont packagées avec un morceau
 de texte revendiquant être la licence liée au logiciel qui, entre autres
 restrictions, interdit à l'utilisateur d'utiliser les codecs en conjonction
 avec n'importe quel autre programme que <application>XAnim</application>.
@@ -584,11 +584,11 @@ répertoire de codecs Win32
 <title>Décodage AC3 logiciel</title>
 
 <para>
-C'est le décodeur utilisé par défaut pour les fichier avec de l'audio AC3.
+C'est le décodeur utilisé par défaut pour les fichiers avec de l'audio AC3.
 </para>
 
 <para>
-Le décodeur AC3 peut créer des sortie audio mixées pour 2, 4 ou 6 haut-parleurs.
+Le décodeur AC3 peut créer des sorties audio mixées pour 2, 4 ou 6 haut-parleurs.
 Quand il est configuré pour 6 haut-parleurs, ce décodeur fournit des sorties
 séparées pour tous les canaux AC3 du pilote son, autorisant la pleine expérience
 du &quot;son surround&quot; sans décodeur AC3 externe requis pour l'usage du codec hwac3.
@@ -600,7 +600,7 @@ de sortie. Utilisez <option>-channels 2</option> pour un mix stéréo. Pour un
 mix 4 canaux (Avant Gauche, Avant Droite, Surround Gauche et Surround Droit),
 utilisez<option>-channels 4</option>. Dans ce cas, l'éventuel canal du centre
 sera mixé à part égale sur les canaux de devant. <option>-channels 6</option>
-sortira tous les canaux AC3 tels qu'ils ont été encodé - dans l'ordre Gauche,
+sortira tous les canaux AC3 tels qu'ils ont été encodés - dans l'ordre Gauche,
 Droite, Surround Gauche, Surround Droit, Centre et LFE.
 </para>
 
@@ -652,7 +652,7 @@ Pour en activer le support, compilez avec l'option de configuration
 <sect3 id="vivo-audio">
 <title>VIVO audio</title>
 <para>
-Le codec audio utilisé dans les fichiers VIVO dépends du fait que ce soit un fichier
+Le codec audio utilisé dans les fichiers VIVO dépend du fait que ce soit un fichier
 VIVO/1.0 ou VIVO/2.0. Les fichiers VIVO/1.0 ont de l'audio <emphasis role="bold">g.723</emphasis>,
 et les fichiers VIVO/2.0 de l'audio <emphasis role="bold">Vivo Siren</emphasis>.
 Les deux sont supportés.

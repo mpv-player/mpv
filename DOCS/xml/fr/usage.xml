@@ -157,7 +157,7 @@ sur <ulink url="http://www.lirc.org">la page de LIRC</ulink>.
 
 <para>
 Si vous avez installé le paquet LIRC, <filename>configure</filename> le détectera automatiquement. Si
-tout c'est bien passé, <application>MPlayer</application> affichera un
+tout s'est bien passé, <application>MPlayer</application> affichera un
 message du genre &quot;<computeroutput>Setting up LIRC support...</computeroutput>&quot;
 au démarrage. Si une erreur se produit il vous le dira. Si il ne vous dit
 rien à propos de LIRC c'est que son support n'est pas compilé. C'est tout :-)
@@ -299,8 +299,8 @@ n'est pas requise mais vivement recommandée.
 
 <para>
 Soyez conscient que pour l'instant le serveur n'est pas sécurisé du tout. Donc
-ne vous pleignez pas des nombreuses attaques possibles par cette voie. À la place
-envoyez-nous quelques (bons) patches pour le rendre meilleur ou ecrivez votre propre
+ne vous plaignez pas des nombreuses attaques possibles par cette voie. À la place
+envoyez-nous quelques (bons) patches pour le rendre meilleur ou écrivez votre propre
 serveur.
 </para>
 
@@ -319,7 +319,7 @@ basé sur un fichier de configuration EDL spécifique au film.
 
 <para>
 Ceci est utile pour ceux qui veulent voir un film en mode "tout public".
-Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
+Vous pouvez couper toute violence, profanation, Jar-Jar Binks .. d'un film
 suivant vos préférences personnelles. A part ça, il y a d'autres
 utilisations, comme sauter automatiquement les publicités dans les fichiers vidéos
 que vous regardez.
@@ -358,7 +358,7 @@ Exemple:
 </programlisting>
 Cela va sauter de la seconde 5.3 à la seconde 7.1 de la vidéo, puis va couper
 le son à 15 secondes, le remettre à 16.7 secondes et sauter de la seconde 420
-à la seconde 422 de la vidéo. Ces actions seront appliqués quand le temps de
+à la seconde 422 de la vidéo. Ces actions seront appliquées quand le temps de
 lecture atteint le temps indiqué dans le fichier.
 </para>
 

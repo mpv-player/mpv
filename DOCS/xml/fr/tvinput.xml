@@ -108,7 +108,7 @@ il était nécessaire de spécifier le format de sortie. Ce problème devrait être r
 actuelle et <option>outfmt</option> n'est plus requis, et la valeur par défaut
 convient dans la plupart des cas. Par exemple, si vous capturez en DivX en utilisant
 <systemitem class="library">libavcodec</systemitem> et que vous spécifiez <option>outfmt=RGB24</option> de façon à augmenter
-la qualité de l'image capturée, l'image capturée sera reconverti plus tard en YV12;
+la qualité de l'image capturée, l'image capturée sera reconvertie plus tard en YV12;
 donc la seule chose que vous obtiendrez est un gaspillage massif de puissance CPU.
 </para>
 </listitem>
@@ -137,7 +137,7 @@ pas celle de <application>MPlayer</application>) pour les instructions d'utilisa
 Si <application>MEncoder</application> ne peut pas ouvrir le périphérique audio,
 assurez-vous qu'il soit réellement disponible. Il peut y avoir des ennuis avec
 certains serveurs de son comme arts (KDE) ou esd (GNOME). Si vous avez une carte
-son full duplex (presques toutes les cartes décentes le supportent aujourd'hui),
+son full duplex (presque toutes les cartes décentes le supportent aujourd'hui),
 et que vous utilisez KDE, essayez d'activer l'otpion &quot;full duplex&quot; dans le
 menu des préférences du serveur de son.
 </para>
@@ -171,7 +171,7 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 <para>
 Un exemple plus élaboré. Ici <application>MEncoder</application> capture l'image PAL entière, coupe les marges, et
 désentrelace l'image en utilisant un algorithme de mélange linéaire. L'audio est
-compressé à un débit constant de 64kbps, en utilisant le codec LAME. Cette
+compressée à un débit constant de 64kbps, en utilisant le codec LAME. Cette
 combinaison est adaptée pour capturer des films.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
@@ -197,7 +197,7 @@ très importante.
 </screen>
 Il est également possible de spécifier des dimensions d'image plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche
-utilise le maximum d'informations disponibles et est un peut plus résistant au bruit.
+utilise le maximum d'informations disponibles et, est un peu plus résistant au bruit.
 Les chipsets bt8x8 peuvent faire une moyenne de pixels uniquement dans la direction
 horizontale à cause d'une limitation matérielle.
 </para>

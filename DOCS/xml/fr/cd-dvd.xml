@@ -212,7 +212,7 @@ cryptées avec les clés bus et disque.
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">titre</emphasis>: Cette méthode est utilisé si la demande de titre a échoué et ne
+<emphasis role="bold">titre</emphasis>: Cette méthode est utilisée si la demande de titre a échoué et ne
 repose sur aucun échange de clé avec le lecteur DVD. Il utilise une attaque crypto pour deviner la clé
 titre directement (en trouvant un motif répété dans le contenu VOB décodé et en supposant que le texte
 en clair correspondant aux premiers octets cryptés est une continuation de ce motif). Cette méthode est
@@ -302,7 +302,7 @@ copier et même lire les fichiers .DAT avec mplayer. Mais cela ne <emphasis role=
 avec le pilote iso9660 standard du noyau! Il est recommandé d'utiliser l'option <option>vcd://</option>
 à la place. D'autres possibilités pour la copie de VCD sont le nouveau pilote noyau
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (qui ne fait pas partie du noyau
-officiel) qui montre les sessions du CD en temps que fichiers image) et
+officiel) qui montre les sessions du CD en temps que fichier image) et
 <ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, une application d'enregistrement/copie
 bit-a-bit).
 </para>

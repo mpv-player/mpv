@@ -116,8 +116,8 @@ peut lire, soit un flux DV brut pour lequel le support est en développement.
 Il y a deux types de fichiers AVI:
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">Entrelacé:</emphasis> Les contenus audio et vidéo sont
-  entrelacés. C'est l'utilisation standard. Recommandé et généralement utilisé.
+  <emphasis role="bold">Entrelacé:</emphasis> Les contenus audios et vidéos sont
+  entrelacés. C'est l'utilisation standard. Recommandée et généralement utilisée.
   Certains outils créent des AVIs entrelacés avec une mauvaise synchro.
   <application>MPlayer</application> les détecte comme entrelacés, ce qui va
   enduire une perte de synchro A/V, probablement pendant un déplacement. Ces
@@ -186,7 +186,7 @@ Notez que les fichiers ASF portent maintenant l'extension
 Ces formats ont été conçus par Apple et peuvent contenir n'importe quel codec, CBR ou VBR.
 Ils ont généralement une extension <filename>.QT</filename> ou <filename>.MOV</filename>.
 Notez que depuis que le groupe MPEG4 a choisi QuickTime en tant que
-format recommandé pour le MPEG4, leur fichiers MOV sont diffusés avec une
+format recommandé pour le MPEG4, leurs fichiers MOV sont diffusés avec une
 extension <filename>.MPG</filename> ou <filename>.MP4</filename> (Au passage les
 flux vidéo et audio de ces fichiers sont de véritables fichiers MPG et AAC. Vous
 pouvez même les extraire avec les options <option>-dumpvideo</option> et
@@ -295,7 +295,7 @@ Ce format est utilisé par les vieux jeux Sega Saturn CD-ROM.
 <sect3 id="roq">
 <title>Fichiers RoQ</title>
 <para>
-Les fichiers RoQ sont des fichiers multimédia utilisé dans
+Les fichiers RoQ sont des fichiers multimédia utilisés dans
 certains jeux ID comme Quake III et Return to Castle Wolfenstein.
 </para>
 </sect3>
@@ -361,7 +361,7 @@ Le format <emphasis role="bold">GIF</emphasis>est un format courant pour les
 graphismes web. Il y a deux versions des specs GIF, GIF87a et GIF89a. La
 principale différence est que le GIF89a autorise l'animation. <application>MPlayer</application> supporte
 les deux formats en utilisant <systemitem class="library">libungif</systemitem>
-ou une autre librairie compatible libgif. Les GIFs non-animées seront affichées
+ou une autre librairie compatible libgif. Les GIFs non-animés seront affichées
 comme des vidéos à simple trame. (Utilisez les options <option>-loop</option>
 et <option>-fixed-vo</option> pour les afficher plus longtemps).
 </para>
@@ -370,7 +370,7 @@ et <option>-fixed-vo</option> pour les afficher plus longtemps).
 <application>MPlayer</application> ne supporte actuellement pas le déplacement
 dans les fichiers GIF. Les fichiers GIF n'ont pas nécessairement une taille de
 trame fixe, ni un débit fixe. De plus, chaque trame est de taille indépendante
-et est sensée être positionné à une certaine place dans un champ de taille fixe.
+et, est sensée être positionné à une certaine place dans un champ de taille fixe.
 Le débit est contrôlé par un bloc optionnel avant chaque trame qui spécifie le
 décalage de la prochaine trame en centièmes de seconde.
 </para>

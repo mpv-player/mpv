@@ -337,8 +337,8 @@ Les retours sur ce document sont les bienvenus. Merci de nous faire savoir comme
   Les filtres audio sont utilisés pour changer les propriétés des données audio avant
   que le son n'atteigne la carte son. L'activation et la désactivation sont normalement
   automatisés mais peuvent être outrepassés. Les filtres sont activés quand les
-  propriétés des données audio différent de celles requises par la carte son et
-  désactivés si nécessaire. L'option <option>-af filtre1,filtre2,...</option> est
+  propriétés des données audio sont différentes de celles requises par la carte son et
+  désactivées si nécessaire. L'option <option>-af filtre1,filtre2,...</option> est
   utilisée pour outrepasser l'activation automatique des filtres ou pour insérer des
   filtres qui ne le sont pas automatiquement. Les filtres seront exécutés dans l'ordre
   où ils apparaissent dans la liste séparée par des virgules.
@@ -458,8 +458,8 @@ la plupart des filtres.
 <varlistentry>
 <term><option>-channels</option></term>
 <listitem><para>
-Cette option définie le nombre de canaux de sortie voulus pour votre carte son. Il
-affecte également le nombre de canaux qui sont décodés à partir des média. Si le médium
+Cette option défini le nombre de canaux de sortie voulus pour votre carte son. Il
+affecte également le nombre de canaux qui sont décodés à partir des médias. Si le médium
 contient moins de canaux que le nombre demandé le filtre channels (voir plus bas) sera
 automatiquement inséré. Le routage sera le routage par défaut pour le filtre channels.
 </para></listitem>
@@ -738,7 +738,7 @@ amplifierait le son de 10.1dB et bloque le volume si il est trop haut.
 Ce filtre a une seconde fonction: Il mesure le niveau maximum du son et l'affiche
 quand <application>MPlayer</application> se termine. Cette estimation de volume peut être
 utilisée pour définir le niveau de son dans <application>MEncoder</application> pour que
-la dynamique maximale soit utilisé.
+la dynamique maximale soit utilisée.
 </para>
 </sect3>
 
@@ -1113,8 +1113,8 @@ Usage:
 Si votre carte son ne supporte pas le format de données int 16bit signé, ce plugin peut
 être utilisé pour le changer dans un format que votre carte son comprend. Il a une
 option, <option>format</option>, qui peut être initialisé avec les nombres trouvés
-dans <filename>libao2/afmt.h</filename>. Ce plugin est très rarement utilisé et est
-réservée aux utilisateurs avancés. Gardez à l'esprit que ce plugin ne change que le
+dans <filename>libao2/afmt.h</filename>. Ce plugin est très rarement utilisé et, est
+réservé aux utilisateurs avancés. Gardez à l'esprit que ce plugin ne change que le
 format de sample et pas sa fréquence ou le nombre de canaux.
 </para>
 
@@ -1198,7 +1198,7 @@ mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--
 Le coefficient par défaut (<option>mul</option>) est un nombre à virgule initialisé à
 2.5. Si vous l'initialisez à <literal>0.0</literal>, vous aurez un son mono (moyenne
 des deux canaux). Si vous l'initialisez à <literal>1.0</literal>, le son sera inchangé,
-si vous l'initialisez à <literal>-1.0</literal>, les canaux gauche et droit seront inversés.
+si vous l'initialisez à <literal>-1.0</literal>, les canaux gauches et droits seront inversés.
 </para>
 </sect3>
 

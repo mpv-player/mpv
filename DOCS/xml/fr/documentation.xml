@@ -79,7 +79,7 @@ ainsi que de l'OnScreenDisplay (OSD) ?
 Ce lecteur peut lire les fichiers MPEG endommagés (utile pour certains VCDs),
 ainsi que les mauvais fichiers AVI qui ne sont pas lisibles par le célèbre Windows
 Media Player. Même les fichiers AVI sans index sont lisibles, et vous pouvez
-reconstruire ses indexes soit temporairement avec l'option <option>-idx</option>,
+reconstruire ses indexs soit temporairement avec l'option <option>-idx</option>,
 soit de manière définitive avec <application>MEncoder</application>, autorisant
 ainsi l'avance/retour rapide ! Comme vous pouvez le constater, le stabilité et la
 qualité sont les choses les plus importantes, mais la vitesse est également formidable.

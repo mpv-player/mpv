@@ -45,7 +45,7 @@ recommandés.
   pour un 3.x, essayez toujours la dernière version, les plus anciennes avaient des
   bogues variés, donc assurez-vous d'utiliser au moins 3.1, il est testé et
   fonctionnel. Pour de plus amples informations sur les bogues de gcc 2.96 (qui ne
-  sont toujours PAS fixés, il ont été CONTOURNÉS dans MPlayer!), voir la section
+  sont toujours PAS fixés, ils ont été CONTOURNÉS dans MPlayer!), voir la section
   <link linkend="gcc-296">gcc 2.96</link> et la <xref linkend="faq"/>.
   </para></listitem>
 <listitem><para>
@@ -66,7 +66,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">SDL</emphasis> - pas obligatoire, mais peut aider dans certains cas (mauvaise sortie audio,
-    cartes vidéo qui rament avec le pilote xv). Utilisez toujours la plus récente version
+    cartes vidéos qui rament avec le pilote xv). Utilisez toujours la version la plus récente.
     (à partir de 1.2.x).
   </para></listitem>
 <listitem><para>
@@ -299,7 +299,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
   est fourni pour les cartes suivantes:
   <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
   Voir aussi la section <link linkend="tvout-ati">Cartes ATI</link> de la documentation TV-out,
-  pour savoir si la sortie TV de votre carte est supporté sous Linux/<application>MPlayer</application>.
+  pour savoir si la sortie TV de votre carte est supportée sous Linux/<application>MPlayer</application>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Cartes S3</emphasis>: les chipsets Savage et Virge/DX possèdent 
@@ -332,7 +332,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
     Si ce n'est pas le cas, alors les fonctionnalités de votre carte vidéo ne sont
     pas supportées sous votre système d'exploitation :(
     Si le zoom matériel fonctionne sous Windows, cela ne veut pas dire qu'il
-    fonctionnera sous Linux ou d'autres systèmes d'exploitation: cela dépends des pilotes.
+    fonctionnera sous Linux ou d'autres systèmes d'exploitation: cela dépend des pilotes.
     La plupart des fabriquants ne font pas de pilotes Linux ni ne diffusent les spécifications
     de leurs chipsets, donc vous n'avez pas de chance d'utiliser leur cartes.
     Voir <xref linkend="non-yuv-cards"/>.
@@ -471,7 +471,7 @@ ancienne installation de <application>MPlayer</application>, et supprimez-le.
 
 <para>
 Notez que si vous avez un <filename>codecs.conf</filename> dans
-<filename>~/.mplayer/</filename>, les fichier <filename>codecs.conf</filename>
+<filename>~/.mplayer/</filename>, les fichiers <filename>codecs.conf</filename>
 du système ou celui intégré seront complètement ignorés.
 Ne faites pas cela à moins de vouloir jouer avec le fonctionnement interne de
 <application>MPlayer</application> car cela peut poser des problèmes. Si vous voulez changer l'ordre de

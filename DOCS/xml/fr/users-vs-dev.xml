@@ -28,7 +28,7 @@ l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec sa série Linux-Man
 L'équipe GCC a nié tout lien avec GCC 2.96 et a publié une
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">réponse officielle</ulink>
 à GCC 2.96. De nombreux développeurs à travers le monde ont commencé à avoir des
-problèmes avec GCC 2.96, et ont commencé à recommander d'autres compilateurs. Par Exemple
+problèmes avec GCC 2.96, et ont donc recommandé d'autres compilateurs. Par Exemple
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink> et
 <ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>.
 D'autres liens intéressants sont
@@ -55,7 +55,7 @@ un warning au lieu de sauter le bloc.
 <formalpara>
 <title>Le présent:</title>
 <para>
-Red Hat dit que GCC 2.96-85 et supérieur est réparé. La situation c'est en effet
+Red Hat dit que GCC 2.96-85 et supérieur est réparé. La situation s'est en effet
 améliorée, mais nous voyons toujours des problèmes sur les listes de diffusion qui
 disparaissent avec un compilateur différent. Dans tous les cas cela ne peut plus durer.
 Normalement un GCC 3.x mature résoudra les problèmes. Si vous voulez compiler avec 2.96
@@ -147,9 +147,9 @@ Nous n'aimons pas le fait que <ulink url="http://www.nvidia.com">nVidia</ulink> 
 fournisse que des pilotes binaires (à utiliser avec XFree86), qui sont souvent bogués.
 Nous avons eu de nombreux rapports sur
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
-à propos de problèmes relatif à ces pilotes closed-source et à leur piètre qualité,
+à propos de problèmes relatifs à ces pilotes closed-source et à leur piètre qualité,
 leur instabilité et le piètre support utilisateur et expert.
-Beaucoup de ces problèmes continuent de ce répéter. Nous avons contacté nVidia
+Beaucoup de ces problèmes continuent de se répéter. Nous avons contacté nVidia
 récemment, et ils nous ont dit que ces bogues n'existaient pas, que l'instabilité
 était causée par de mauvais chips AGP, et qu'ils n'avaient pas reçu de rapports de
 bogues (comme la ligne violette). Donc si vous avez un problème avec votre carte
@@ -209,7 +209,7 @@ au début, certaines choses n'ont pas changées du tout.
 
 Nous n'aurions pas pu résumer mieux nos sentiments à l'égard de Joe Barr:
 &quot;Ce n'est toujours pas l'article le plus honnête ou le plus recherché au monde,
-mais c'est meilleurs qu'avant.&quot; Espérons que la prochaine fois nous répondrons
+mais c'est meilleur qu'avant.&quot; Espérons que la prochaine fois nous répondrons
 mutuellement à nos attentes. De toute façon, le chemin de la maturité passe
 uniquement par l'âge, et peut-être en faisant fi des empoignades.
 </para>
