@@ -1,5 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
 //maintained by:   Philippe De Swert <philippe.deswert@student.denayer.wenk.be>
+//synced with help_mp-en.h revision 1.108
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -74,6 +75,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Probeer audio codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindAfmtFallback "Kan audio codec voor geforceerde driver familie niet vinden, val terug op andere drivers.\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
+#define MSGTR_RTFMCodecs "Lees DOCS/en/codecs.html voor meer informatie!\n"
 #define MSGTR_CouldntInitAudioCodec "Kon audio codec niet initialiseren! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "Probeer video codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindVideoCodec "Kan codec voor video format 0x%X niet vinden!\n"
@@ -574,6 +576,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD schaal:"
 #define MSGTR_PREFERENCES_Cache "Cache aan/uit"
 #define MSGTR_PREFERENCES_LoadFullscreen "Start op volledige schermgrootte"
+#define MSGTR_PREFERENCES_SaveWinPos "Bewaar de positie van het venster"
 #define MSGTR_PREFERENCES_CacheSize "Cache grootte: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Activeer playbar"
