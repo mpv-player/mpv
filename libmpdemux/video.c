@@ -391,6 +391,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
     // override frame_time for variable/unknown FPS formats:
     if(!force_fps) switch(demuxer->file_format){
+      case DEMUXER_TYPE_GIF:
       case DEMUXER_TYPE_REAL:
 	if(d_video->pts>0 && pts1>0 && d_video->pts>pts1)
 	  frame_time=d_video->pts-pts1;
@@ -417,9 +418,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           // frame_time = 1/25.0;
         }
       }
-      case DEMUXER_TYPE_GIF:
-	  frame_time=d_video->pts-pts1;
-        break;
+      break;
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
