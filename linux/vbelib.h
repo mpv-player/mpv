@@ -1,7 +1,7 @@
 /*
    VESA VBE 2.0 compatible structures and definitions.
    You can redistribute this file under terms and conditions
-   GNU General Public licence v2.
+   of GNU General Public licence v2.
    Written by Nick Kurshev <nickols_k@mail.ru>
 */
 #ifndef __VESA_VBELIB_INCLUDED__
@@ -203,17 +203,12 @@ extern int vbeSaveState(void **data); /* note never copy this data */
 extern int vbeRestoreState(void *data);
 extern int vbeGetWindow(unsigned *win_num); /* win_A=0 or win_B=1 */
 extern int vbeSetWindow(unsigned win_num,unsigned win_gran);
-/*
-   Func 0x06:
-   Support of logical scan line length is not implemented.
-   We assume that logical scan line length == physical scan line length.
-   (Logical display memory == displayed area).
-*/ 
-/*
-   Func 0x07:
-   Support of disply start is not implemented.
-   We assume that display start always == 0, 0.
-*/ 
+extern int vbeGetScanLineLength(unsigned *num_pixels,unsigned *num_bytes);
+extern int vbeGetMaxScanLines(unsigned *num_pixels,unsigned *num_bytes, unsigned *num_lines);
+extern int vbeSetScanLineLength(unsigned num_pixels);
+extern int vbeSetScanLineLengthB(unsigned num_bytes);
+extern int vbeGetDisplayStart(unsigned *pixel_num,unsigned *scan_line);
+extern int vbeSetDisplayStart(unsigned long offset, int vsync);
 /*
    Func 0x08-0x09:
    Support of palette currently is not implemented.

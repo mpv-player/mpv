@@ -4,7 +4,7 @@
    So it's not an emulator - it calls real int 10h handler under Linux.
    Note: VESA is available only on x86 systems.
    You can redistribute this file under terms and conditions
-   GNU General Public licence v2.
+   of GNU General Public licence v2.
    Written by Nick Kurshev <nickols_k@mail.ru>
 */
 #include "vbelib.h"
@@ -21,6 +21,7 @@
 #include <fcntl.h>
 
 static struct VesaProtModeInterface vbe_pm_info;
+static struct VesaModeInfoBlock curr_mode_info;
 
 static inline int VERR(const void *p)
 {
@@ -322,7 +323,12 @@ int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *data)
   if(rm_space) LRMI_free_real(rm_space);
   if(!retval) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
-  if(retval == 0x4f) retval = VBE_OK;
+  if(retval == 0x4f)
+  {
+    /* Just info for internal use (currently in SetDiplayStart func). */
+    vbeGetModeInfo(mode&0x1f,&curr_mode_info);
+    retval = VBE_OK;
+  }
   return retval;
 }
 
@@ -432,6 +438,123 @@ int vbeSetWindow(unsigned win_num,unsigned win_gran)
     r.eax = 0x4f05;
     r.ebx = win_num & 0x0f;
     r.edx = win_gran;
+    if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+    retval = r.eax & 0xffff;
+    if(retval == 0x4f) retval = VBE_OK;
+  }
+  return retval;
+}
+
+int vbeGetScanLineLength(unsigned *num_pixels,unsigned *num_bytes)
+{
+  struct LRMI_regs r;
+  int retval;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f06;
+  r.ebx = 1;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f)
+  {
+    if(num_bytes)  *num_bytes = r.ebx & 0xffff;
+    if(num_pixels) *num_pixels= r.ecx & 0xffff;
+    retval = VBE_OK;
+  }
+  return retval;
+}
+
+int vbeGetMaxScanLines(unsigned *num_pixels,unsigned *num_bytes, unsigned *num_lines)
+{
+  struct LRMI_regs r;
+  int retval;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f06;
+  r.ebx = 3;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f)
+  {
+    if(num_bytes)  *num_bytes = r.ebx & 0xffff;
+    if(num_pixels) *num_pixels= r.ecx & 0xffff;
+    if(num_lines)  *num_lines = r.edx & 0xffff;
+    retval = VBE_OK;
+  }
+  return retval;
+}
+
+int vbeSetScanLineLength(unsigned num_pixels)
+{
+  int retval;
+  struct LRMI_regs r;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f06;
+  r.ebx = 0;
+  r.ecx = num_pixels;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f) retval = VBE_OK;
+  return retval;
+}
+
+int vbeSetScanLineLengthB(unsigned num_bytes)
+{
+  int retval;
+  struct LRMI_regs r;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f06;
+  r.ebx = 2;
+  r.ecx = num_bytes;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f) retval = VBE_OK;
+  return retval;
+}
+
+int vbeGetDisplayStart(unsigned *pixel_num,unsigned *scan_line)
+{
+  struct LRMI_regs r;
+  int retval;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f07;
+  r.ebx = 1;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f)
+  {
+    if(pixel_num) *pixel_num = r.ecx & 0xffff;
+    if(scan_line) *scan_line = r.edx & 0xffff;
+    retval = VBE_OK;
+  }
+  return retval;
+}
+
+int vbeSetDisplayStart(unsigned long offset, int vsync)
+{
+  int retval;
+  if(vbe_pm_info.SetDisplayStart)
+  {
+     /* Don't verbose this stuff from performance reasons */
+     /* 32-bit function call is much better of int 10h */
+     __asm __volatile(
+	"pushl	%%ebx\n"
+	"movl	%1, %%ebx\n"
+	::"a"(0x4f07),"S"(vsync ? 0x80 : 0),
+	  "c"(offset & 0xffff),"d"((offset>>16)&0xffff):"memory");
+    (*vbe_pm_info.SetDisplayStart)();
+    __asm __volatile("popl	%%ebx":::"memory");
+    retval = VBE_OK;
+  }
+  else
+  {
+    struct LRMI_regs r;
+    unsigned long pixel_num;
+    memset(&r,0,sizeof(struct LRMI_regs));
+    r.eax = 0x4f07;
+    r.ebx = vsync ? 0x80 : 0;
+    pixel_num = offset%(unsigned long)curr_mode_info.BytesPerScanLine;
+    if(pixel_num*(unsigned long)curr_mode_info.BytesPerScanLine!=offset) pixel_num++;
+    r.ecx = pixel_num;
+    r.edx = offset/(unsigned long)curr_mode_info.BytesPerScanLine;
     if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
     retval = r.eax & 0xffff;
     if(retval == 0x4f) retval = VBE_OK;
