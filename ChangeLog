@@ -21,6 +21,8 @@ MPlayer (1.0)
     * fixed decoding of stereo alaw files
     * preload QT DLLs to work around problems with their hardcoded paths
     * support for Real 10 RV30/40 binary codec
+    * expose support for 422P and 444P raw formats
+    * 32 bit RGB support in binary TSCC decoder
     * dropped support of old faad2 versions (<= 1.1)
 
     Demuxers:
@@ -29,6 +31,7 @@ MPlayer (1.0)
     * support for Real multirate files
     * automatic framerate calculation for MPEG-4 in raw and TS files
     * MP3 in Real files
+    * more user-friendly info about audio and subtitle tracks in Ogg files
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
@@ -39,6 +42,11 @@ MPlayer (1.0)
     * many H.264 fixes
     * B-frames in H.264, H.264 weighted prediction support
     * a lot of integer overflow and pointer fixes
+    * 32 bit RGB support in TSCC
+
+    GUI:
+    * half size event implemented and added to the menu
+    * memleaks fixed
 
     Filters:
     * big cleanup of audio filter layer
