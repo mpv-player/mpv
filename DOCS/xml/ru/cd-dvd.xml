@@ -28,18 +28,16 @@
 <para>
 Вы можете уменьшить скорость врашения IDE CD-ROM приводов программами
 <command>hdparm</command> или <command>setcd</command>. Это работает так:
-<screen>hdparm -E <replaceable>[скорость]</replaceable> <replaceable>[привод]
-  </replaceable></screen>
-<screen>setcd -x <replaceable>[скорость]</replaceable> <replaceable>[привод]
-</replaceable></screen>
+<screen>hdparm -E <replaceable>[скорость]</replaceable> <replaceable>[привод]</replaceable></screen>
+<screen>setcd -x <replaceable>[скорость]</replaceable> <replaceable>[привод]</replaceable></screen>
 </para>
 
 <para>
 Вы также можете попробовать
-<screen>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</screen>
+<screen>echo current_speed:4 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
 но для этого требуются привилегии администратора. Следующая команда
 тоже может быть полезна:
-<screen>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</screen>
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
 </para>
 
 <para>
@@ -57,7 +55,7 @@
 </para>
 
 <para>
-Обратитесь к &quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
+Обратитесь к &quot;<filename>/proc/ide/<replaceable>cdrom device</replaceable>/settings</filename>&quot;
 для подстройки Вышего CD-ROM привода.
 </para>
 
@@ -78,7 +76,7 @@
 Полный список возможных опций можно прочитать в man.
 Синтаксис для стандартных Цифровых Многоцелевых Дисков[Digital Versatile Disc]
 (DVD) таков:
-<screen>mplayer -dvd <replaceable>ролик</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
+<screen>mplayer -dvd <replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
 </para>
 
 <para>
@@ -87,7 +85,7 @@
 </para>
 
 <para>
-Устройство DVD по-умолчанию - это <filename>/dev/dvd</filename>. Если Ваши
+Устройство DVD по умолчанию - это <filename>/dev/dvd</filename>. Если Ваши
 настройки отличаются, создайте символическую ссылку или укажите правильное
 устройство в командной строке, используя опцию <option>-dvd-device</option>.
 </para>
@@ -202,7 +200,7 @@ UDF. Также DVD не обязан быть замонтированным, поскольку используется
 </para>
 
 <para>
-Устройство DVD по-умолчанию &mdash; <filename>/dev/dvd</filename>. Если Ваши
+Устройство DVD по умолчанию &mdash; <filename>/dev/dvd</filename>. Если Ваши
 установки отличаются, создайте символическую ссылку или укажите правильное
 название в командной строке после опции <filename>-dvd-device</filename>.
 </para>
@@ -218,7 +216,7 @@ UDF. Также DVD не обязан быть замонтированным, поскольку используется
 </formalpara>
 
 <para>
-Если ничего не указано, она пробует следующие методы (по-умолчанию: key,
+Если ничего не указано, она пробует следующие методы (по умолчанию: key,
 title request):
 </para>
 
@@ -293,7 +291,7 @@ RPC-2 привод. Обновления прошивок могут быть найдены на
 <para>
 Полный список возможных опций можно прочитать в man. Синтаксис для обычного
 Видео-CD (VCD):
-<screen>mplayer -vcd <replaceable>дорожка</replaceable> [-cdrom-device <replaceable>устройство</replaceable>]</screen>
+<screen>mplayer -vcd <replaceable>&lt;дорожка&gt;</replaceable> [-cdrom-device <replaceable>&lt;устройство&gt;</replaceable>]</screen>
 Пример:
 <screen>mplayer -vcd 2 -cdrom-device /dev/hdc</screen>
 Устройство VCD по умолчанию &mdash; <filename>/dev/cdrom</filename>. Если Ваши
