@@ -4340,8 +4340,10 @@ cat > help_mp.h << EOF
 #include "$_mp_help"
 EOF
 
-echo "Adding untranslated messages to help_mp.h"
-./help_diff.sh $_mp_help <help_mp-en.h >> help_mp.h
+if test $_mp_help != "help_mp-en.h"; then
+  echo "Adding untranslated messages to help_mp.h"
+  ./help_diff.sh $_mp_help <help_mp-en.h >> help_mp.h
+fi
 
 #############################################################################
 
