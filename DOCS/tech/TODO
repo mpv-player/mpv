@@ -29,11 +29,8 @@ runtime:
 - add --enable-runtime or something (should change VERSION header and enable
   runtime cpu detect and print banner telling users to recompile for speed)
 - runtime cpu detection in: 
-     aclib.c
      vo_dga.c (asm stuff may be removed and replaced by fastmemcpy?)
-     vbelib.c (is it ok for all x86 cpus?)
      libac3 (should be ported to liba52)
-     win32.c ??? (its cpu detection is unclean for me)
      
 
 FUTURE:
@@ -50,7 +47,6 @@ decoders:
   and move them to seperated place (hopefully will allow adding new
   codecs without having to modify mplayer core code, also would speed
   up by limiting number of select statements)
-- switch to liba52 for ac3 decoding
 
 mencoder:
 - add ogg/vorbis audio encoder
