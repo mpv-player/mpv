@@ -1540,17 +1540,23 @@ for ac_option do
     _xmmsplugindir=`echo $ac_option | cut -d '=' -f 2`
     ;;
     
-  --disable-profile)
-    _profile=
-    ;;
   --enable-profile)
     _profile='-p'
+    ;;
+  --disable-profile)
+    _profile=
     ;;
   --enable-debug)
     _debug='-g'
     ;;
   --enable-debug=*)
     _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --disable-debug)
+    _debug=
+    ;;
+  --enable-sighandler)
+    _sighandler=yes
     ;;
   --disable-sighandler)
     _sighandler=no
