@@ -284,10 +284,12 @@ msb_timestamp_flag
 	MUST be 1 for keyframes
         
 subpacket_type
-	00	1		subpacket per packet (normally used for video)
+	00	1		subpacket per packet (video, ...)
 	01	subpacket_count	fixed length subpackets per packet
 	10	subpacket_count	variable length subpackets per packet
 	11	reserved
+	the only legal subpacket_type for video streams is 00, so video streams
+	MUST NOT contain multiple subpackets per packet
 	Note, if there are multiple subpackets then the timestamp of the packet
 	is the timestamp of the first subpacket
 	Note, if multiple subpackets are stored in one frame then the resulting
