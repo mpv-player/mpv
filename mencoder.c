@@ -554,7 +554,7 @@ if(!init_video(sh_video)){
 
 } // if(out_video_codec)
 
-if(sh_audio && out_audio_codec){
+if(sh_audio && (out_audio_codec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
   if(audio_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
@@ -579,7 +579,7 @@ if(sh_audio && out_audio_codec){
   }
 }
 
-if(sh_audio && out_audio_codec){
+if(sh_audio && (out_audio_codec || !sh_audio->wf)){
   mp_msg(MSGT_MENCODER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
@@ -780,19 +780,24 @@ mux_a->codec=out_audio_codec;
 
 switch(mux_a->codec){
 case ACODEC_COPY:
-    mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
-    mux_a->h.dwScale=sh_audio->audio.dwScale;
-    mux_a->h.dwRate=sh_audio->audio.dwRate;
-    if (sh_audio->wf)
+    if(sh_audio->audio.dwScale){
+	mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
+	mux_a->h.dwScale=sh_audio->audio.dwScale;
+	mux_a->h.dwRate=sh_audio->audio.dwRate;
+    } else {
+	mux_a->h.dwSampleSize=1;
+	mux_a->h.dwScale=1;
+	mux_a->h.dwRate=sh_audio->i_bps;
+    }
+    if (sh_audio->wf){
 	mux_a->wf=sh_audio->wf;
-    else
-    {
+    } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
 	mux_a->wf->nBlockAlign = mux_a->h.dwSampleSize;
-	mux_a->wf->wFormatTag = sh_audio->sample_format;
+	mux_a->wf->wFormatTag = sh_audio->format;
 	mux_a->wf->nChannels = sh_audio->channels;
 	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
-	mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
+	mux_a->wf->nAvgBytesPerSec=sh_audio->i_bps; //mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
 	mux_a->wf->wBitsPerSample = 16; // FIXME
 	mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
     }
