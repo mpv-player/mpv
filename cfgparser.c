@@ -83,6 +83,7 @@ static int read_option(char *opt, char *param)
 			if (parser_mode == CONFIG_FILE) {
 				if (!strcasecmp(param, "yes") ||	/* any other language? */
 				    !strcasecmp(param, "ja") ||
+				    !strcasecmp(param, "si") ||
 				    !strcasecmp(param, "igen") ||
 				    !strcasecmp(param, "y") ||
 				    !strcasecmp(param, "i") ||
