@@ -175,6 +175,18 @@ static void x11_errorhandler(Display *display, XErrorEvent *event)
 #undef MSGLEN
 }
 
+int vo_wm_string_test( char * name )
+{
+ if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
+  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" ); return vo_wm_IceWM; }
+ if ( !strncmp( name,"_KDE_",5 ) )
+  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" ); return vo_wm_KDE; }
+ if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); return vo_wm_WMakerStyle; }
+// fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
+ return vo_wm_Unknown;
+}
+
 int vo_wm_detect( void )
 {
  Atom            type;
@@ -214,14 +226,8 @@ int vo_wm_detect( void )
      name=XGetAtomName( mDisplay,xev.xproperty.atom );
      if ( !name ) break;
 
-     if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" ); wm=vo_wm_IceWM; break; }
-     if ( !strncmp( name,"_KDE_",5 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" ); wm=vo_wm_KDE; break; }
-     if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); wm=vo_wm_WMakerStyle; break; }
-//     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
-
+     wm=vo_wm_string_test( name );
+     if ( wm != vo_wm_Unknown ) break;
      XFree( name ); name=NULL;
     }
  } while( c++ < 25 );
@@ -620,34 +626,21 @@ int vo_x11_check_events(Display *mydisplay){
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
 #endif
-#if 1
       case PropertyNotify: 
     	   {
 	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );
+	    int    wm = vo_wm_Unknown;
+	    
 	    if ( !name ) break;
 	    
-            if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
-	      {
-	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" );
-	       vo_wm_type=vo_wm_IceWM;
-	      }
-	    if ( !strncmp( name,"_KDE_",5 ) )
-	      {
-	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" );
-	       vo_wm_type=vo_wm_KDE;
-	      }
-	    if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
-	      {
-	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" );
-	       vo_wm_type=vo_wm_WMakerStyle;
-	     }
+	    wm=vo_wm_string_test(name);
+	    if ( wm != vo_wm_Unknown ) vo_wm_type=wm;
 
-// 	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",vo_window,name,Event.xproperty.atom );
+//          fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",vo_window,name,Event.xproperty.atom );
 	      
 	    XFree( name );
 	   }
 	   break;
-#endif
      }
   }
   return ret;
@@ -655,14 +648,13 @@ int vo_x11_check_events(Display *mydisplay){
 
 void vo_x11_sizehint( int x, int y, int width, int height, int max )
 {
- vo_hint.flags=PPosition | PSize | PWinGravity | PBaseSize;
+ vo_hint.flags=PPosition | PSize | PWinGravity;
  vo_hint.x=x; vo_hint.y=y; vo_hint.width=width; vo_hint.height=height;
  if ( max )
   {
    vo_hint.max_width=width; vo_hint.max_height=height;
    vo_hint.flags|=PMaxSize;
   } else { vo_hint.max_width=0; vo_hint.max_height=0; }
- vo_hint.base_width=width; vo_hint.base_height=height;
  vo_hint.win_gravity=StaticGravity;
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
