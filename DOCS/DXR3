@@ -1,40 +1,41 @@
-How to use a Sigma Designs Hollywood Plus and/or a Creative DXR3 by David Holm
-==============================================================================
+How to use a Sigma Designs Hollywood Plus and/or a Creative DXR3 (by David Holm)
+================================================================================
 
 Thanks goes out to Daniel Bell for the donation of a brand new 20GB IBM
 harddisk.
 
 1. Requirements
 
- * First of all you will need the DXR3/H+ drivers properly installed.
-   Version 0.12.0 or later. You can find it at
+ * First of all you will need properly installed DXR3/H+ drivers, version
+   0.12.0 or later. You can find them at
    http://dxr3.sourceforge.net/
-   (you only need to run "make install devices" in em8300-x.y.z/modules
-    not in the root dir)
+   (You only need to run "make install devices" in em8300-x.y.z/modules,
+    not in the root directory.)
 
- * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
-   if you want to play files other than mpeg I highly recommend you install
+ * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes.
+   If you want to play files other than MPEG I highly recommend you install
    libavcodec as well (Read DOCS/codecs.html for more info).
    
- From here on compilation (of at least my code ;) should go without any
+ From here on compilation (at least of my code ;)) should go without any
  problems.
 
 
 
 2. Usage
-    -vo dxr3:<noprebuf>:<codec>:<device>Where noprebuf specifies to turn off
-					prebuffering. This is done automatically
-					on athlons. If playback is out of sync
+
+  -vo dxr3:<noprebuf>:<codec>:<device>  Where noprebuf specifies turning off
+				        prebuffering. This is done automatically
+					on Athlons. If playback is out of sync
 					try disabling prebuffering. If noprebuf
 					is left out prebuffering is enabled
-					(except on athlons).
+					(except on Athlons).
 					
 					<codec> = fame/avcodec, avcodec produces
 					better quality output, but fame is
 					faster for those of you with slow
 					machines. The default is to use
 					libavcodec. Note that you need
-					libavcodec properly installed (read
+					properly installed libavcodec (read
 					DOCS/codecs.html)
 					
 					<device> = device number to use in case
@@ -48,35 +49,49 @@ harddisk.
 					he usually hangs out in #dxr3 on
 					irc.openprojects.net, let him know
 					you like it...
-    -ao oss:/dev/em8300_ma-X		For audio output, where X is the device
-					number (0 if one card)
-    -ac hwac3				For digital audio output instead of
-					analog
-    -vc mpegpes				Force hardware acceleration, only works
-					with mpeg1/2
-    -aop list=resample:fout=xxxxx	If samplerate is below 44100Hz, select
-					either 44100 or 48000 depending on
+
+  -ao oss:/dev/em8300_ma-X		For audio output, where X is the device
+					number (0 if one card).
+
+  -ac hwac3				For digital instead of analog audio
+                                        output.
+
+  -vc mpegpes				Force hardware acceleration, only works
+					with MPEG1/2.
+
+  -aop list=resample:fout=xxxxx 	If sample rate is below 44100Hz, select
+					either 44100Hz or 48000Hz depending on
 					which which one matches closest. I.e.
-					if the movie uses 22050 use 44100 as
-					44100 / 2 = 22050, if it's 24000 use
-					48000 as 48000 / 2 = 24000 and so on.
+					if the movie uses 22050Hz use 44100Hz as
+					44100 / 2 = 22050, if it is 24000Hz use
+					48000Hz as 48000 / 2 = 24000 and so on.
  					This does not work with digital audio
-					output (-ac hwac3)
+					output (-ac hwac3).
+
 
 Overlay
-To get overlay run dxr3view that comes with the em8300 package before staring
-mplayer. You can set various options in dxr3view by pressing T while holding
+
+To get overlay run dxr3view that comes with the em8300 package before starting
+MPlayer. You can set various options in dxr3view by pressing T while holding
 the mouse cursor above the window.
 
+
 MPEG-1, MPEG-2, VCD and DVD Notes
-MPEG 1/2 content should now automatically be detected by mplayer and it will
+
+MPEG 1/2 content should now automatically be detected by MPlayer and it will
 use the hardware acceleration of the DXR3 to play it. If not, you can force
-it to hardware acceleration with -vc mpegpes. Also, if you plan to use any
-postprocessing filters you must use -vc mpeg12.
+it to hardware acceleration with '-vc mpegpes'. Also, if you plan to use any
+postprocessing filters you must use '-vc mpeg12'.
+
+In some instances, subtitles may not appear properly in sync with the A/V stream
+when using hardware decoding ('-vc mpegpes'). This is a known bug. The em8300
+will also improperly handle subtitles that are too big, and may hang for a second
+or two. At this time, the only workaround is to use '-vc mpeg12' when viewing
+DVDs with subtitles.
 
 3. Contacting me
 
-You can contact me either by e-mailing me, <dholm@telia.com> or by using
-icq: 798427
-Feedback, bugreports and general suggestions are appreciated (preferably
+You can contact me either by e-mailing <dholm@telia.com> or by using
+ICQ: 798427
+Feedback, bug reports and general suggestions are appreciated (preferably
 by e-mail).
