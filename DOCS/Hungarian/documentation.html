@@ -184,6 +184,22 @@
       <LI><A HREF=#2.5.4>2.5.4 Irányítás billentyûzetrõl</A></LI>
       <LI><A HREF=#2.5.5>2.5.5 Példák</A></LI>
     </UL>
+    <LI><A HREF=#2.6>2.6 Video filterek</A></LI>
+    <UL>
+      <LI><A HREF=#2.6.1>2.6.1 Áttekintés</A></LI>
+      <LI><A HREF=#2.6.2>2.6.2 Használat</A></LI>
+      <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI> 
+      <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
+      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
+      <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
+      <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>    
+      <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
+      <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI> 
+      <LI><A HREF=#2.6.12>2.6.12 VO/A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>  
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
     <UL>
@@ -929,6 +945,158 @@ Szabványos V4L-rõl bemenet<BR>
 </P>
 
 
+<A NAME=2.6><P><B><I>2.6.  Video filterek</I></B></P>
+
+
+<A NAME=2.6.1><P><B><I>2.6.1.  Áttekintés</I></B></P>
+
+<P>Mind az <B>MPlayer</B>, mind a <B>MEncoder</B> támogatja a nemrég
+  elkészült univerzális video filter réteg használatát, ami számos pluginból
+  áll - lásd lent. Ezek a pluginek sokféle mûveletet tudnak a képpel
+  elvégezni, mint például a szoftveres nagyítás, a fekete sávok levágása vagy
+  éppen hozzátétele (a levágás nemcsak enkódolásnál, hanem a buszra nehezedõ
+  átvitelmennyiség csökkentésénél is fontos lehet).</P>
+
+<P>Ezzel a filter réteggel lehetõvé vált a gyors képformátum konverzió az
+  RGB és a YUV módok között. Például RGB kimenetû codec-ek mostmár
+  használhatóak az <CODE>xv</CODE> és az <CODE>xmga</CODE> kimeneteken is
+  (lásd a <A HREF=#2.6.11>Scale</A> filtert).</P>
+
+<P>A layer <B>Direct Rendert</B> használ a pluginek között, ezzel is
+  növelve a sebességet.</P>
+
+<P>Megjegyzendõ hogy mostantól a postprocess kód is a filter réteg egyik
+  pluginje. Lásd alant.</P>
+
+
+<A NAME=2.6.2><P><B><I>2.6.2.  Használat</I></B></P>
+
+<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
+  </P>
+
+<P>Ez felállítja a használni kívánt filterek sorrendjét (természetesen
+  bármilyen számú filter használható). A paramétereik opcionálisak, és ha
+  nincsenek megadva, alapértelmezett értékre állnak. Például <I>x és y</I>
+  nullára, <I>szélesség és magasság</I> a film szélességére és magasságára.</P>
+
+<P>A filterek megadott sorrendje a libvo után teendõ, tehát a filter1 lesz
+  az utolsó filter, utána már a libvo következik, illetve <B>MEncoder</B>
+  esetén az enkódolás.</P>
+
+
+<A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>A kép megadott részén kívüli részeket eldobja. Szélesvásznú filmek
+  szélein lévõ fekete sávok levágására használható.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop crop[=szélesség:magasság:x:y]</CODE></P>
+
+
+<A NAME=2.6.4><P><B><I>2.6.4.  Expand</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Megnöveli (NEM nagyítja) a film felbontását a megadott értékre, és
+  a nagyítatlan eredeti képet az <I>x</I> és <I>y</I> koordinátákra
+  helyezi. Használható fekete sávok létrehozásához, melyek például SVCD-knél
+  szükségesek, vagy <B>MPlayer</B>-rrel és az <A HREF="video.html#2.3.1.4">SDL
+  video kimenettel</A>, amely a fekete sávokon is képes feliratot
+  megjeleníteni.
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop expand[=szélesség:magasság:x:y]</CODE></P>
+
+
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+
+<P>Hmm, segfaulted. :)</P>
+
+
+<A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Y tengely mentén megfordítja a képet. Hasznos az olyan régi codec-eknél
+  melyek csak fejjel lefele képet tudnak kiadni (ezek autodetektálva
+  vannak).</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
+
+
+<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Ez a filter NEM képformátum koverter. Egyetlen feladata hogy kényszeríti
+  a következõ filtert (vagy a libvo-t) a megadott formátum használatára.
+  Hasznos a lassú YV12-vel rendelkezõ kártyák használatakor, mint
+  például a tdfx és a Savage4. Az igazi konverzióhoz a <I>Scale</I> filtert
+  kell használni.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop format[=formátum]</CODE> (ahol a
+  <CODE>formátum</CODE> lehet például: rgb32, yuy2, stb...)</P>
+
+
+<A NAME=2.6.8><P><B><I>2.6.8.  Postprocess</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Ez a régi jó postprocess (minõségjavító), csak éppen át lett rakva a
+  filter layerhez. Javítja a kockásodást, deinterlace-el, stb, lásd az
+  <CODE>-npp help</CODE> opciót.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop pp[=postprocess opciók/kulcsszavak]</CODE></P>
+
+
+<A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></P>
+
+<P>Vmi..</P>
+
+
+<A NAME=2.6.10><P><B><I>2.6.10.  Rotate</I></B></P>
+
+<P>genyo</P>
+
+
+<A NAME=2.6.11><P><B><I>2.6.11.  Scale</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>A kép nagyítását vagy kicsinyítését végzi (hasznos olyan kártyák
+  használatakor, melyek nem tudnak hardveresen kicsinyíteni), szoftveresen
+  (lassú). A minõsége állítható az <CODE>-sws</CODE> opcióval, lásd a
+  manpage-t. Természetesen a szebb minõség lassabb sebességet eredményez.</P>
+
+<P><B>MEGJEGYZÉS</B>: opciók nélkül (is) meghívva <B>képformátum
+  konvertálást</B> eredményez! Ez olyan codeceknél nagy segítség, amelyek
+  nem tudnak a kívánt video kimeneti eszköznek megfelelõ formátumban
+  dekódolni. Az ilyenek (remélhetõleg) autodetektálva vannak, és a scale
+  filter a helyzetnek megfelelõen konvertálást végez. Más esetekben
+  meghívható manuálisan is.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop scale[=szélesség:magasság]</CODE></P>
+
+
+<A NAME=2.6.12><P><B><I>2.6.12.  VO</I></B></P>
+
+<P>WTF</P>
+
+<A NAME=2.6.13><P><B><I>2.6.13.  YUY2</I></B></P>
+
+<P>Biztos</P>
 
 
 <P><B><A NAME=3>3.  Használat</A></B></P>
