@@ -562,7 +562,7 @@ static int init(int rate,int channels,int format,int flags){
     }
 
     bytes_per_sample = channels * info.play.precision / 8;
-    ao_data.bps = byte_per_sec = bytes_per_sample * rate;
+    ao_data.bps = byte_per_sec = bytes_per_sample * ao_data.samplerate;
     ao_data.outburst = byte_per_sec > 100000 ? 16384 : 8192;
 
 #ifdef	__not_used__
