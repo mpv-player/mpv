@@ -57,6 +57,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
 	if( (*((int*)arg)) == IMGFMT_YV12 ) return CONTROL_TRUE;
+	if( (*((int*)arg)) == IMGFMT_IYUV ) return CONTROL_TRUE;
+	if( (*((int*)arg)) == IMGFMT_I420 ) return CONTROL_TRUE;
 	if( (*((int*)arg)) == IMGFMT_YUY2 && ctx->yuy2_support ) return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
