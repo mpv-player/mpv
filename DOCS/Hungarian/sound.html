@@ -127,6 +127,19 @@ is bugzik...</I></TD><TR>
 <LI>Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!  
 </UL></P>
 
+
+<P><B><A NAME=2.3.2.2>2.3.2.2.  Audio pluginek</A></B></P>
+
+<P><B><A NAME=2.3.2.2.1>2.3.2.2.1.  Up/Downsampling</A></B></P>
+
+<P>Az <B>MPlayer</B> képes az audio stream frekvenciáját növelni illetve
+csökkenteni. Ennek szükségessége nincs autodetektálva, így külön meg kell adni
+például ha csak 44.1Khz-et tudó kártyád van, és 48Khz-es audiot akarsz
+lejátszani. Valamint: ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
+
+<P>Használat :<BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;a kívánt
+  frekvencia Hz-ben, pl 44100&gt;</CODE></P>
 </BODY>
 
 </HTML>
