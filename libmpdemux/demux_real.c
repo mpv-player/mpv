@@ -1447,8 +1447,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
 		    /* emulate BITMAPINFOHEADER */
-		    sh->bih = malloc(sizeof(BITMAPINFOHEADER)+12);
-		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER)+12);
+		    sh->bih = malloc(sizeof(BITMAPINFOHEADER)+16);
+		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER)+16);
 	    	    sh->bih->biSize = 48;
 		    sh->disp_w = sh->bih->biWidth = stream_read_word(demuxer->stream);
 		    sh->disp_h = sh->bih->biHeight = stream_read_word(demuxer->stream);
@@ -1517,9 +1517,19 @@ void demux_open_real(demuxer_t* demuxer)
 		    }
 
 		    if((sh->format<=0x30335652) && (tmp>=0x20200002)){
-			// read secondary WxH for the cmsg24[] (see vd_realvid.c)
-			((unsigned short*)(sh->bih+1))[4]=4*(unsigned short)stream_read_char(demuxer->stream); //widht
-			((unsigned short*)(sh->bih+1))[5]=4*(unsigned short)stream_read_char(demuxer->stream); //height
+			    // read data for the cmsg24[] (see vd_realvid.c)
+			    unsigned int cnt = codec_data_size - (stream_tell(demuxer->stream) - codec_pos);
+			    if (cnt < 2) {
+			        mp_msg(MSGT_DEMUX, MSGL_ERR,"realvid: cmsg24 data too short (size %u)\n", cnt);
+			    } else  {
+			        int ii;
+			        if (cnt > 6) {
+			            mp_msg(MSGT_DEMUX, MSGL_WARN,"realvid: cmsg24 data too big, please report (size %u)\n", cnt);
+			            cnt = 6;
+			        }
+			        for (ii = 0; ii < cnt; ii++)
+			            ((unsigned char*)(sh->bih+1))[8+ii]=(unsigned short)stream_read_char(demuxer->stream);
+			    }
 		    } 
 		    
 		    /* Select video stream with highest bitrate if multirate file*/
