@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.20  2002/08/12 00:04:37  arpi
+    RV40 support
+
     Revision 1.19  2002/08/05 03:13:45  arpi
     fixed 'eof at 66s' bug
 
@@ -518,7 +521,8 @@ loop:
 	    ds_add_packet(ds, dp);
 	} else
 	if (sh_video != NULL) {
-	    if (sh_video->format==0x30335652 ||
+	    if (sh_video->format==0x30345652 ||
+		sh_video->format==0x30335652 ||
 		sh_video->format==0x30325652 ) {
 		// we need a more complicated demuxing
 		// a block may contain multiple packets
@@ -1064,6 +1068,9 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			case 0x30202002:
 			    /* codec id: rv30 */
+			    break;
+			case 0x40000000:
+			    /* codec id: rv40 */
 			    break;
 			default:
 			    /* codec id: none */
