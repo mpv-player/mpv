@@ -396,7 +396,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	line2 ++;
 	line2 ++;
 
-	current->lines=1;num=0;
+	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
 	
@@ -410,8 +410,8 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 		if (current->lines >=  SUB_MAX_TEXT) return current;
 	}
 
-
 	current->text[num]=strdup(line2);
+	current->lines++;
 
 	return current;
 }
