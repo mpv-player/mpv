@@ -1,12 +1,15 @@
 TO DO:
 ~~~~~~
+For the Release:
+- fix -framedrop, support for mpeg files
+- fix -nobps avi seeking
+- audio playback rate setting [Jelmer Feenstra]
+- finish ASF seeking (find next keyframe)
 
 High Priority:
-- finish ASF seeking (find next keyframe)
-- audio playback rate setting [Jelmer Feenstra]
-- asterix.avi audio delays after 5-10 mins (bps mode only) - DONE?
-- fix x11 driver to work without SHM (for remote playing etc)
-- further optimizations
+- fix x11 driver to work without SHM (for remote playing etc) - DONE?
+- further optimizations - DONE?
+- support mpeg2 interlaced files (field pictures)
 
 Medium Priority:
 - show current frame number [Gabucino]
@@ -15,6 +18,6 @@ Medium Priority:
 - support SSA subtitles : http://www.eswat.demon.co.uk
 
 Low Priority:
-- fix X4.0.x/DRI OpenGL - DONE?  mga works with 4.0.3
+- fix X4.0.x/DRI OpenGL - DONE?  mga&radeon works with 4.0.3/DRI
 - support for MPEG TS (transport streams) - I need sample files!
 - integrating the gui? - DONE?
