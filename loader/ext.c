@@ -250,7 +250,7 @@ LPVOID FILE_dommap( int unix_handle, LPVOID start,
         {
             if ((fdzero = open( "/dev/zero", O_RDONLY )) == -1)
             {
-                perror( "/dev/zero: open" );
+    		perror( "Cannot open /dev/zero for READ. Check permissions! error: " );
                 exit(1);
             }
         }
@@ -366,8 +366,10 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
     {
 	anon=1;
 	hFile=open("/dev/zero", O_RDWR);
-	if(hFile<0)
+	if(hFile<0){
+    	    perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: " );
 	    return 0;
+	}
     }
     if(!anon)
     {
@@ -455,6 +457,10 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 {
     void* answer;
     int fd=open("/dev/zero", O_RDWR);
+    if(fd<0){
+        perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: " );
+	return NULL;
+    }
     size=(size+0xffff)&(~0xffff);
     //printf("VirtualAlloc(0x%08X, %d)\n", address, size);
     if(address!=0)

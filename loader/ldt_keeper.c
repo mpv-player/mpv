@@ -157,6 +157,10 @@ void Setup_LDT_Keeper(void)
 
     prev_struct = 0;
     fd = open("/dev/zero", O_RDWR);
+    if(fd<0){
+        perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: " );
+	return;
+    }
     fs_seg = mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE,
 		  fd, 0);
     if(fs_seg==(void*)-1)
