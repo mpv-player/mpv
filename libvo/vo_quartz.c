@@ -72,6 +72,9 @@ extern int vo_ontop;
 extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
 extern float monitor_aspect;
+extern int vo_keepaspect; //keep aspect ratio when resizing
+extern float movie_aspect;
+static float old_movie_aspect;
 
 static int winLevel = 1;
 int levelList[] =
@@ -106,6 +109,10 @@ static Rect winRect; // size of the window containg the displayed image (include
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 static Rect deviceRect; // size of the display device
 
+static MenuRef windMenu;
+static MenuRef movMenu;
+static MenuRef aspectMenu;
+
 static int border = 20;
 enum
 {
@@ -113,7 +120,11 @@ enum
 	kHalfScreenCmd		= 2,
 	kNormalScreenCmd	= 3,
 	kDoubleScreenCmd	= 4,
-	kFullScreenCmd		= 5
+	kFullScreenCmd		= 5,
+	kKeepAspectCmd		= 6,
+	kAspectOrgCmd		= 7,
+	kAspectFullCmd		= 8,
+	kAspectWideCmd		= 9
 };
 
 #include "osdep/keycodes.h"
@@ -367,6 +378,29 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				vo_fs = (!(vo_fs)); window_fullscreen();
 				break;
 
+			case kKeepAspectCmd:
+				vo_keepaspect = (!(vo_keepaspect));
+				CheckMenuItem (aspectMenu, 1, vo_keepaspect);
+				break;
+				
+			case kAspectOrgCmd:
+				movie_aspect = old_movie_aspect;
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				window_resized();
+				break;
+				
+			case kAspectFullCmd:
+				movie_aspect = 4.0f/3.0f;
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				window_resized();
+				break;
+				
+			case kAspectWideCmd:
+				movie_aspect = 16.0f/9.0f;
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				window_resized();
+				break;
+				
 			default:
 				result = eventNotHandledErr;
 				break;
@@ -411,22 +445,24 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CFStringRef		titleKey;
 	CFStringRef		windowTitle; 
 	OSStatus	       	result;
+	
+	MenuItemIndex index;
+	CFStringRef movMenuTitle;
+	CFStringRef aspMenuTitle;
  
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&oldWinRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
 	
-	MenuRef windMenu;
+	//Create Window Menu
 	CreateStandardWindowMenu(0, &windMenu);
 	InsertMenu(windMenu, 0);
 	
-	MenuRef movMenu;
+	//Create Movie Menu
 	CreateNewMenu (1004, 0, &movMenu);
-	
-	CFStringRef movMenuTitle = CFSTR("Movie");
+	movMenuTitle = CFSTR("Movie");
 	SetMenuTitleWithCFString(movMenu, movMenuTitle);
 	
-	MenuItemIndex index;
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Half Size"), 0, kHalfScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, '0');
 	
@@ -439,6 +475,23 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Full Size"), 0, kFullScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, 'F');
 	
+	AppendMenuItemTextWithCFString(movMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
+
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Aspect Ratio"), 0, NULL, &index);
+	
+	////Create Aspect Ratio Sub Menu
+	CreateNewMenu (0, 0, &aspectMenu);
+	aspMenuTitle = CFSTR("Aspect Ratio");
+	SetMenuTitleWithCFString(aspectMenu, aspMenuTitle);
+	SetMenuItemHierarchicalMenu(movMenu, 6, aspectMenu);
+	
+	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Keep"), 0, kKeepAspectCmd, &index);
+	CheckMenuItem (aspectMenu, 1, vo_keepaspect);
+	AppendMenuItemTextWithCFString(aspectMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
+	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Original"), 0, kAspectOrgCmd, &index);
+	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("4:3"), 0, kAspectFullCmd, &index);
+	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("16:9"), 0, kAspectWideCmd, &index);
+		
 	InsertMenu(movMenu, GetMenuID(windMenu)); //insert before Window menu
 	
 	DrawMenuBar();
@@ -529,6 +582,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(device_width, device_height);
 
+	movie_aspect = (float)imgRect.right/(float)imgRect.bottom;
+	old_movie_aspect = movie_aspect; 
+	
 	aspect(&d_width,&d_height,A_NOZOOM);
 	
 	if(image_data)
@@ -1088,7 +1144,10 @@ void window_resized()
 
 	GetPortBounds( GetWindowPort(theWindow), &winRect );
 
+	if(vo_keepaspect)
+	{
 	aspect( &d_width, &d_height, A_NOZOOM);
+	d_height = ((float)d_width/movie_aspect);
 	
 	aspectX = (float)((float)winRect.right/(float)d_width);
 	aspectY = (float)((float)(winRect.bottom-border)/(float)d_height);
@@ -1102,6 +1161,11 @@ void window_resized()
 	{
 		padding = ((winRect.bottom-border) - d_height*aspectX)/2;
 		SetRect(&dstRect, 0, padding, (d_width*aspectX), d_height*aspectX+padding);
+	}
+	}
+	else
+	{
+		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom-border);
 	}
 
 	//Clear Background
