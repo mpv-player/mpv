@@ -175,7 +175,7 @@ void stream_enable_cache(stream_t *s,int size){
     if(!cache_fill(s->cache_data)){
 	 usleep(50000); // idle
     }
-	 cache_stats(s->cache_data);
+//	 cache_stats(s->cache_data);
   }
 }
 
@@ -184,8 +184,10 @@ int cache_stream_fill_buffer(stream_t *s){
   if(s->eof){ s->buf_pos=s->buf_len=0; return 0; }
   if(!s->cache_pid) return stream_fill_buffer(s);
 
+  cache_stats(s->cache_data);
+
   len=cache_read(s->cache_data,s->buffer, ((cache_vars_t*)s->cache_data)->sector_size);
-  
+
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
   s->buf_pos=0;
   s->buf_len=len;
