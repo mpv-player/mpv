@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <appendix id="mailinglists">
 <title>Listy mailingowe</title>
 <para>
@@ -35,7 +35,7 @@ ruchu na liście.
 Lista dokumentacji MPlayera:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
 To lista na dyskusje o dokumentacji MPlayera i jej tłumaczeniu.
-Przesyłane są też na niż logi CVS dotyczące dokumentacji i strony domowej.
+Przesyłane są też na nią logi CVS dotyczące dokumentacji i strony domowej.
 </para></listitem>
 <listitem><para>
 Lista użytkowników MPlayera:
