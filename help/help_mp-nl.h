@@ -1,6 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
-//maintained by:   Philippe De Swert <philippe.deswert@student.denayer.wenk.be>
-//synced with help_mp-en.h revision 1.115
+//maintained by:   Philippe De Swert <philippe.deswert@pi.be>
+//synced with help_mp-en.h revision 1.123
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -277,6 +277,7 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
 
 #define MSGTR_EncryptedVOB "Ge-encrypteerd VOB bestand! Lees DOCS/HTML/en/dvd.html voor meer informatie.\n"
+#define MSGTR_EncryptedVOBauth "Ge-encrypteerde stream maar zonder vraag voor authentificatie!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Waarschuwing! variabele FOURCC gedetecteerd!?\n"
@@ -349,6 +350,17 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "Kon geen bijpassende kleurenruimte vinden - ik probeer opnieuw met -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Film-Aspect is %.2f:1 - voorscalering naar het correcte film-aspect.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect is niet gedefinieerd - geen voorscalering toegepast.\n"
+
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "De binary codecs moeten worden geinstalleerd of bijgewerkt.\nZie http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow video codec initialisatie OK.\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO video codec initialisatie OK.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Kon de "EWMH fullscreen Event!" niet versturen\n"
+
+#define MSGTR_InsertingAfVolume "[Mixer] Geen hardware mixing, een volume filter wordt gebruikt.\n"
+#define MSGTR_NoVolume "[Mixer] Geen geluidsvolume controle beschikbaar.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -492,6 +504,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "Geen"
+#define MSGTR_PREFERENCES_DriverDefault "standaard driver"
 #define MSGTR_PREFERENCES_AvailableDrivers "Beschikbare drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Speel geen geluid af"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizeer het geluid"
@@ -535,6 +548,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSS_Device "Apparaat:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_SDL_Driver "Driver:"
+#define MSGTR_PREFERENCES_Audio_Device "Apparaat:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer kanaal:"
 #define MSGTR_PREFERENCES_Message "Denk eraan, dat sommige functies het afspelen herstarten."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Gebruik LAVC (FFmpeg)"
