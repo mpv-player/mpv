@@ -412,6 +412,11 @@ Utilisez \-audio\-demuxer 17 pour forcer la détection des .mp3.
 Joue l'audio depuis un fichier externe ((WAV, MP3 ou Ogg Vorbis) pendant la 
 visualisation d'un film.
 .TP
+.B \-bandwidth <valeur>
+Spécifie la bande passante maximum pour le streaming par le réseau (pour les
+serveurs capable d'envoyer du contenu à différents débits).
+Utile si vous voulez voir en direct des média streamés avec un connection lente.
+.TP
 .B \-cdrom\-device <chemin\ périphérique>
 Outrepasse le nom par défaut du lecteur de CDROM /dev/\:cdrom.
 .TP
@@ -501,6 +506,10 @@ Vous pouvez également indiquer à quel chapitre arrêter la lecture
 .B \-csslib <nomfichier>
 (option DVD ancienne méthode) Cette option est utilisé pour forcer 
 l'endroit où se trouve libcss.so.
+.TP
+.B \-cuefile <nomfichier> (voir \-vcd également)
+Lit un (S)VCD à partir d'une image CDRwin (format de fichier bin/cue), décrite 
+par le fichier spécifié.
 .TP
 .B \-demuxer <nombre>
 Forcer le type de demuxer.
@@ -718,15 +727,15 @@ Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
-Défini des noms pour les canaux. Utilisez _ pour les espaces dans les noms 
-(ou jouez avec les quotes ;-).
+Défini des noms pour les canaux. 
+Utilisez _ pour les espaces dans les noms (ou jouez avec les quotes ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables 
 avec une télécommande (voir. lirc).
 Non compatible avec le paramètre frequency.
 Attention : Le numéro de canal sera sa position dans la liste des 'channels',
-en commençant à 1. C-a-d. utilisez tv://1, tv://2, tv_set_channel 1, 
-tv_set_channel 2, etc.
+en commençant à 1. 
+Exemple: utilisez tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
 .IPs audiorate=<valeur>
 Fixe la fréquence de capture audio
 .IPs forceaudio
@@ -766,17 +775,19 @@ Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
 .IPs immediatemode=<bool>
 Un valeur de 0 signifie capturer et buffériser l'audio et la vidéo ensemble
-(par défaut pour mencoder). Un valeur de 0 (par défaut pour mplayer) signigie
-ne capturer que la vidéo et laisser l'audio passer au travers du cable de
-loopback de la carte TV à la carte son.
+(par défaut pour mencoder).
+Une valeur de 0 (par défaut pour mplayer) signifie ne capturer que la vidéo et 
+laisser l'audio passer au travers du cable de loopback de la carte TV à la 
+carte son.
 .RE
 .
 .TP
 .B \-user <nom utilisateur> (voir également l'option \-passwd)
-Indiquer un nom d'utilisateur pour l'identification http.
+Indique un nom d'utilisateur pour l'identification http.
 .TP
 .B \-vcd <piste>
-Joue une piste Video CD depuis un périphérique au lieu d'un fichier.
+Joue une piste Video CD depuis un périphérique ou un fichier image (voir 
+\-cuefile).
 .TP
 .B \-vid <id>
 Sélectionne le canal vidéo [MPG: 0\-15 ASF: 0\-255].
@@ -878,15 +889,20 @@ pour certains formats).
 .TP
 .B \-osdlevel <0\-3> (MPLAYER uniquement)
 Spécifie dans quel mode OSD démarrer.
+
+.PD 0
 .RSs
+.IPs 0
 0: sous-titres uniquement
-.br
-1: volume + position (par défaut)
-.br
-2: volume + position + compteur + pourcentage
-.br
-3: volume + position + compteur + pourcentage + temps total
+.IPs 1
+volume + position (par défaut)
+.IPs 2
+volume + position + compteur + pourcentage
+.IPs 4
+volume + position + compteur + pourcentage + temps total
 .RE
+.PD 1
+.
 .TP
 .B \-sid <id> (voir aussi l'option \-slang)
 Active l'affichage des sous-titres DVD.
@@ -1255,6 +1271,9 @@ blanc.
 Ajuste le contraste de la sortie vidéo (0 par défaut).
 Fonctionne de manière similaire à la luminosité.
 .TP
+.B \-dfbopts <valeur> (\-vo directfb2 uniquement)
+Specifie une liste de paramétres pour le pilote directfb.
+.TP
 .B \-display <nom>
 Spécifier le nom d'hôte et le numéro d'affichage du serveur X sur lequel vous
 désirer afficher la vidéo.
@@ -1345,7 +1364,7 @@ ne pas utilise le cache VGA
 .IPs ol-osd
 active le hack osd sur le chevauchage
 .IPs ol[hwxy]\-cor=<valeur>
-ajuste la taille et la position du chevauchage au cas ou il ne corresponde
+ajuste la taille et la position du chevauchage au cas où il ne corresponde
 pas parfaitement à la fenêtre
 .IPs overlay
 autorise le chevauchage
@@ -1386,12 +1405,13 @@ Voir aussi \-zoom.
 Essayez cette option si vous avez encode des problème en plein écran.
 .TP
 .B \-geometry x[%][:y[%]] ou [WxH][+x+y]
-Ajuste la position d'origine de la sortie. Les variables x et y sont en pixels
-mesurés à partir du coin supérieur droit de l'écran jusqu'au coin
-supérieur droit de la vidéo affichée, cependant si un '%' est indiqué après
-la variable, cette valeur est alors considérée comme le pourcentage de la
-taille de l'écran dans cette direction. Il supporte également le format d'option
-standard pour l'option X standard \-geometry.
+Ajuste la position d'origine sur l'écran de la sortie.
+Les variables x et y sont en pixels mesurés à partir du coin supérieur droit de 
+l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si un 
+signe pourcentage est indiqué après la variable, cette valeur est alors 
+considérée comme le pourcentage de la taille de l'écran dans cette direction. 
+Il supporte également le format d'option standard pour l'option X standard 
+\-geometry.
 Les valeur données doivent être des valeurs entières.
 
 Note: Cette option n'est supportée que par quelques vo, incluant tdfxfb, fbdev et
@@ -2030,19 +2050,24 @@ Les valeurs peuvent aller de -100 à 100.
 .IPs eq2[=gamma:cont:lumi]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
 authorisant une correction du gamma en plus d'un simple ajustement de luminosité
-et de contraste. Les paramètres sont donnés en nombres à virgule. Les valeurs
-par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0.
+et de contraste. 
+Les paramètres sont donnés en nombres à virgule. 
+Les valeurs par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0.
+Les intervalles de valeur sont 0.1\-10 pour le gamma, -2\-2 pour le contraste
+(les valeurs négatives provoquent une image négative) et -1\-1 pour la 
+luminosité.
 .IPs halfpack[=f]
 Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
 mais en gardant les samples chroma.
 Utile quand la sortie est un périphérique à basse résolution quand la diminution
-est de mauvais qualité ou n'est pas disponible. Peut également être utilisé 
-comme désentrelaceur primitif pour luma uniquement avec une utilisation CPU très
-basse.
-Par défaut, halfpack fait une moyenne des paires de lignes pendant le 
-downsampling. Le paramètre optionnel f peut valoir 0 pour n'utiliser que les 
-lignes paires, ou 1 pour n'utiliser que les lignes impaires. Tout autre valeur
-de f renvoie au comportement par défaut (moyenne).
+est de mauvais qualité ou n'est pas disponible. 
+Peut également être utilisé comme désentrelaceur primitif pour luma uniquement 
+avec une utilisation CPU très basse.
+Par défaut, halfpack fait une moyenne des paires de lignes pendant le
+downsampling. 
+Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires, 
+ou 1 pour n'utiliser que les lignes impaires.
+Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .IPs dint[=sense:level]
 Détecte et saute la première des trames entrelacées du flux video.
 Les valeurs peuvent aller de 0.0 à 1.0 la première (0.15 par défaut) est la
@@ -2066,19 +2091,20 @@ amount: taux relatif de sharpness / flou à ajouter à l'image
 Interchange les plans U & V.
 .IPs "il=[d|i][s][:[d|i][s]]"
 (dés)entrelace les lignes.
-Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs d'images 
-entrelacées sans les désentrelacer.
-Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser l'entrelacement.
-Pendant que le désentrelacement (avec le filtre de postprocessing) supprime le désentrelacement
-de facon permanente (en lissant la moyenne etc), le démultiplexage sépare la trame en 2 champs
-(appelé demi-images), de facon à ce que vous puissiez les traiter (filtrer) indépendemment et les
-re-multiplexer.
+Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs 
+d'images entrelacées sans les désentrelacer.
+Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser 
+l'entrelacement. Pendant que le désentrelacement (avec le filtre de 
+postprocessing) supprime le désentrelacement de façon permanente (en lissant 
+la moyenne etc), le démultiplexage sépare la trame en 2 champs (appelé 
+demi-images), de façon à ce que vous puissiez les traiter (filtrer) 
+indépendemment et les re-multiplexer.
 .RSss
 d: désentrelace
 .br
 i: entrelace
 .br
-s: échange les champs (échange même les lignes impaires)
+s: échange les champs (échange même les lignes impaires & paires)
 .REss
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
 flou boite
@@ -2118,21 +2144,83 @@ t: rééchantillonage linéaire (0) ou cubique (1)
 .REss
 .
 .IPs 2xsai
-Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser les 
-images.
+Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser
+les images.
 .IPs 1bpp
 conversion bitmap 1bpp vers YUV/BGR 8/15/16/32
-A FAIRE: documenter ça
-.IPs eq2[=gamma:cont:lum]
-égualiseur logiciel basé sur LUT
-Les valeurs peuvent aller de -100 à 100.
-A FAIRE: documenter ça
-.IPs yvu9
-A FAIRE: documenter ça
-.IPs bmovl
-Lit des bitmaps depuis un FIFO et les affiche dans une fenêtre.
-A FAIRE: documenter ça
+.IPs "bmovl=hidden:opaque:<fifo>"
+Lit les bitmaps depuis un FIFO et les affiche dans une fenêtre.
+.
+.RSss
+hidden: définie la valeur par défaut de l'option 'hidden' (booléen)
+.br
+opaque: option changeant de mode entre alphablended (transparent) et opaque 
+(rapide)
+.br
+fifo: chemin/nom de fichier pour le FIFO (pipe nommé connectant mplayer \-vop 
+bmovl à l'application le contrôlant)
+.REss
+.RS
+les commandes FIFO sont:
 .RE
+.RSss
+RGBA32 largeur hauteur xpos ypos alpha clear
+.br
+suivi de largeur*hauteur*4 octets de données RGBA32 brutes.
+
+ABGR32 largeur hauteur xpos ypos alpha clear
+.br
+suivi de largeur*hauteur*4 octets de données ABGR32 brutes.
+
+RGB24 largeur hauteur xpos ypos alpha clear
+.br
+suivi de largeur*hauteur*3 octets de données RGB32 brutes.
+
+BGR24 largeur hauteur xpos ypos alpha clear
+.br
+suivi de largeur*hauteur*3 octets de données BGR32 brutes.
+
+ALPHA largeur hauteur xpos ypos alpha
+.br
+change l'alpha de la surface
+
+CLEAR largeur hauteur xpos ypos
+.br
+efface la surface
+
+OPAQUE
+.br
+désactive toute transparence alpha.
+Envoyez  "ALPHA 0 0 0 0 0" pour la réactiver.
+
+HIDE
+.br
+cache la bitmap
+
+SHOW
+.br
+montre la bitmap
+.REss
+
+.RS
+Les arguments sont:
+.RE
+.RSss
+width, height: taille de l'image/surface
+.br
+xpos, ypos: démarre le blitting à la position X/Y
+.br
+alpha: fixe la différence alpha.
+0 signifie la même que l'original, 255 rends tout opaque, \-255 rends tout
+transparent.
+Si vous le fixez à \-255 vous pouvez envoyer une séquence de commandes ALPHA
+pour fixer la surface à \-225, \-200, \-175 etc pour un joli effet de fondu ! ;)
+.br
+clear: efface le framebuffer avant blitting.
+1 signifie effacer, si 0, l'image sera simplement blittée par dessus l'ancienne,
+donc vous n'aurez pas à envoyer 1,8 Mo de données RGBA32 chaque fois qu'une 
+petite partie de l'écran est mise à jour.
+.REss
 .
 .TP
 .B \-x <x> (MPLAYER uniquement)
@@ -2292,7 +2380,7 @@ Spécifie le fichier de configuration à analyser après ceux par défaut.
 .B \-info <option1:option2:...> (.AVI uniquement)
 Spécifie l'entête d'info dans le fichier .AVI de destination.
 .br
-Les options par défaut sont:
+Les options disponibles sont:
 .
 .RSs
 .IPs help
@@ -2318,7 +2406,7 @@ commentaires généraux sur le fichier ou le sujet du fichier
 Pour l'encodage en MP3 avec libmp3lame, vous pouvez spécifier ses 
 paramètres ici.
 .br
-Les options par défaut sont:
+Les options disponibles sont:
 .
 .RSs
 .IPs help
@@ -2509,7 +2597,7 @@ Active le mode 2passes interne (par défaut: désactivé):
 .IPs aspect=<x.x/y.y>
 Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
-n'en est pas diminuée. 
+n'en est pas diminuée.
 Seul MPlayer sera capable de relire ces fichiers correctement, les autres 
 lecteurs l'afficheront avec un mauvais aspect. 
 Exemple:
@@ -2667,10 +2755,17 @@ Des valeurs négatives prendront aussi en compte le coefficient dc (qui devrait
 .br
 7 (recommandation JVT)
 .REss
-.IPs vstrict
-conformité standard stricte.
-Seulement recommandé si vous voulez fournir la sortie au décodeur mpeg4 de
-référence.
+.IPs vstrict=<-1\-1>
+conformité standard (stricte).
+.RSss
+0: désactivé (par défaut)
+.br
+1: Seulement recommandé si vous voulez fournir la sortie au décodeur mpeg4 de
+référence
+.br
+-1: permet l'encodage non-standard huffyuv YV12 (fichiers 20% plus petits,
+mais qui ne peuvent pas être relus par le codec huffyuv officiel)
+.REss
 .IPs vdpart
 partionnement des données.
 Ajoute 2 octets par paquet vidéo, améliore la résistance aux erreurs pendant un
@@ -2860,6 +2955,9 @@ pré-passe d'estimation de mouvement
 .IPs subq=<1\-8>
 réaffinage de la qualité subpel (pour qpel) (par défaut: 8).
 Note: ceci a un effet significatif sur la vitesse
+.IPs psnr
+affiche le psnr (peak signal to noise ratio) pour l'ensemble de la vidéo après
+l'encodage et stocke le psnr par trame dans un fichier comme 'psnr_012345.log'.
 .IPs mpeg_quant
 utilise les quantizers MPEG au lieu de H.263.
 (par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
@@ -3345,7 +3443,7 @@ Nous adorons les rapports de bogues complets :)
 .SH AUTEURS
 Voir la documentation.
 .TP
-MPlayer is (C) 2000\-2003
+MPlayer est (C) 2000\-2003
 .B Arpad Gereoffy
 .TP
 Cette page de man est écrite et maintenue par
