@@ -741,7 +741,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		}
         case WM_CLOSE:
 		{
-			mplayer_put_key('q');
+			mp_input_queue_cmd(mp_input_parse_cmd("quit"));
 			return 0;
 		}
         case WM_WINDOWPOSCHANGED:
@@ -780,8 +780,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					{mplayer_put_key(KEY_DOWN);break;} 
 	            case VK_TAB:
 					{mplayer_put_key(KEY_TAB);break;}
-		        case VK_CONTROL:
-					{mplayer_put_key(KEY_CTRL);break;}
+		        case VK_BACK:
+					{mplayer_put_key(KEY_BS);break;}
 		        case VK_DELETE:
 					{mplayer_put_key(KEY_DELETE);break;}
 		        case VK_INSERT:
