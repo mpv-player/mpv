@@ -38,7 +38,9 @@ libMP3.a:	$(OBJS)
 ifeq ($(TARGET_OS),CYGWIN)
 	./mp3lib_objfix.sh
 endif
-
+ifeq ($(TARGET_OS),OpenBSD)
+	./mp3lib_objfix.sh
+endif
 test1:	libMP3.a test.c
 	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. -L. -lMP3 -lm
 
