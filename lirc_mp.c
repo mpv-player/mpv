@@ -28,6 +28,7 @@
 
 static struct lirc_config *lirc_config;
 static int    lirc_is_setup = 0;
+char *lirc_configfile = NULL;
 
 // setup routine ---------------------------------------------------
 
@@ -57,8 +58,9 @@ void lirc_mp_setup(void){
   }
 
 
-  if(lirc_readconfig( NULL,&lirc_config,NULL )!=0 ){
-    printf("Failed to read standard config (~/.lircrc)!\n" );
+  if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
+    printf("Failed to read config file %s !\n", 
+		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
     printf("You won't be able to use your remote control\n");
     lirc_deinit();
     return;

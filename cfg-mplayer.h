@@ -23,6 +23,11 @@ extern char *sdl_adriver;
 extern int fakemono; // defined in dec_audio.c
 #endif
 
+#ifdef HAVE_LIRC
+extern char *lirc_configfile;
+#endif
+
+extern int vo_doublebuffering;
 extern int vo_dbpp;
 extern int osd_level;
 extern int sub_unicode;
@@ -150,6 +155,11 @@ struct config conf[]={
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0},
        
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1},
+	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0},
+#ifdef HAVE_LIRC
+	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
+#endif
 	
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
