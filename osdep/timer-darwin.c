@@ -107,9 +107,6 @@ float GetRelativeTime()
 {
   double last_time;
 
-  if (!startup_time)
-    InitTimer();
-  
   last_time = relative_time;
   
   relative_time = mach_absolute_time() * timebase_ratio;
