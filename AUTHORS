@@ -409,9 +409,9 @@ Zdenek Kabelac <kabi@informatics.muni.cz>
     * current avifile maintainer
     * some technical help about the win32 stuff, .asf formats and timers
 
-Gerard Lantau <glantau@yahoo.fr>
-    * FFmpeg/libavcodec author,maintainer (open source mpeg, mjpeg,
-      divx en/decoder)
+Fabrice Bellard <fabrice.bellard@free.fr>
+    * FFmpeg/libavcodec author, maintainer (open source mpeg, mjpeg,
+      divx, wma, dv etc audio/video en/decoder)
 
 Project Mayo <http://www.projectmayo.com>
     * the OpenDivX codec authors
