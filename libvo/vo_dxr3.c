@@ -164,17 +164,12 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
 	
-	/* Flush the buffer and make sure it is clean by syncing it */
-	ioval = EM8300_SUBDEVICE_VIDEO;
-	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+	/* Clean buffer by syncing it */
 	fsync(fd_video);
 	ioval = 0x900;
 	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
 	ioval = 0;
 	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
-	/* We'll be nice and flush the audio buffer as well */
-	ioval = EM8300_SUBDEVICE_AUDIO;
-	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
