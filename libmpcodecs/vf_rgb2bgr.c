@@ -62,6 +62,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		rgb32tobgr32(src,dst,srcsize);
 	    else
 		rgb24tobgr24(src,dst,srcsize);
+	    src+=mpi->stride[0];
+	    dst+=dmpi->stride[0];
 	}
     } else {
 	if(mpi->bpp==32)
