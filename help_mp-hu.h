@@ -95,9 +95,21 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "VÉGZETES HIBA: Nem tudom elindítani a video-meghajtót!\n"
 #define MSGTR_CannotInitAO "nem tudom megnyitni az audio-egységet -> NOSOUND\n"
 #define MSGTR_StartPlaying "Lejátszás indítása...\n"
-#define MSGTR_SystemTooSlow "\n************************************************************************"\
-			    "\n** A rendszered túl LASSÚ ehhez! Próbáld -framedrop-pal, vagy RTFM!  **"\
-			    "\n************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ***************************************\n"\
+"         **** A rendszered túl LASSÚ ehhez! ****\n"\
+"         ***************************************\n"\
+"!!! Lehetséges okok, és megoldásaik: \n"\
+"- Legyakrabban : hibás _audio_ meghajtó. Workaround: próbáld az -ao sdl\n"\
+"  opciót, vagy 0.5-ös ALSA-t, vagy ALSA 0.9-et oss emulációval.\n"\
+"  További info a DOCS/sound.html file-ban!\n"\
+"- Lassú video kimenet. Próbálj másik -vo meghajtót (lista: -vo help) vagy\n"\
+"  a -framedrop opciót ! Sebességnövelõ tippekhez lásd DOCS/video.html.\n"\
+"- Lassú CPU. Fölösleges gyenge CPU-n DVD-t vagy nagy DivX-et lejátszani.\n"\
+"  Talán -hardframedrop opcióval.\n"\
+"- Hibás file. A következõk kombinációjaival probálkozz: -nobps -ni -mc 0\n"\
+"  -forceidx\n"\
+"Ha egyik se müxik, olvasd el a DOCS/bugreports.html file-t !\n\n"
 
 #define MSGTR_NoGui "Az MPlayer grafikus felület NÉLKÜL lett fordítva!\n"
 #define MSGTR_GuiNeedsX "Az MPlayer grafikus felületének X11-re van szüksége!\n"
