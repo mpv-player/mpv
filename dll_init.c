@@ -1,6 +1,10 @@
 // ACM audio and VfW video codecs initialization
 // based on the avifile library [http://divx.euro.ru]
 
+static char* a_in_buffer=NULL;
+static int a_in_buffer_len=0;
+static int a_in_buffer_size=0;
+
 int init_audio_codec(){
     HRESULT ret;
     WAVEFORMATEX *in_fmt=(WAVEFORMATEX*)&avi_header.wf_ext;
@@ -45,8 +49,59 @@ int init_audio_codec(){
     avi_header.audio_in_minsize=srcsize; // audio input min. size
     if(verbose) printf("Audio ACM input buffer min. size: %d\n",srcsize);
 
+    a_in_buffer_size=avi_header.audio_in_minsize;
+    a_in_buffer=malloc(a_in_buffer_size);
+    a_in_buffer_len=0;
+
     return 1;
 }
+
+int acm_decode_audio(void* a_buffer,int len){
+        ACMSTREAMHEADER ash;
+        HRESULT hr;
+        DWORD srcsize=0;
+        acmStreamSize(avi_header.srcstream,len , &srcsize, ACM_STREAMSIZEF_DESTINATION);
+        if(verbose>=3)printf("acm says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,a_in_buffer_size,len);
+//        if(srcsize==0) srcsize=((WAVEFORMATEX *)&avi_header.wf_ext)->nBlockAlign;
+        if(srcsize>a_in_buffer_size) srcsize=a_in_buffer_size; // !!!!!!
+        if(a_in_buffer_len<srcsize){
+          a_in_buffer_len+=
+            demux_read_data(d_audio,&a_in_buffer[a_in_buffer_len],
+            srcsize-a_in_buffer_len);
+        }
+        memset(&ash, 0, sizeof(ash));
+        ash.cbStruct=sizeof(ash);
+        ash.fdwStatus=0;
+        ash.dwUser=0; 
+        ash.pbSrc=a_in_buffer;
+        ash.cbSrcLength=a_in_buffer_len;
+        ash.pbDst=a_buffer;
+        ash.cbDstLength=len;
+        hr=acmStreamPrepareHeader(avi_header.srcstream,&ash,0);
+        if(hr){
+          printf("ACM_Decoder: acmStreamPrepareHeader error %d\n",hr);
+					return -1;
+        }
+        hr=acmStreamConvert(avi_header.srcstream,&ash,0);
+        if(hr){
+          printf("ACM_Decoder: acmStreamConvert error %d\n",hr);
+					return -1;
+        }
+        //printf("ACM convert %d -> %d  (buf=%d)\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed,a_in_buffer_len);
+        if(ash.cbSrcLengthUsed>=a_in_buffer_len){
+          a_in_buffer_len=0;
+        } else {
+          a_in_buffer_len-=ash.cbSrcLengthUsed;
+          memcpy(a_in_buffer,&a_in_buffer[ash.cbSrcLengthUsed],a_in_buffer_len);
+        }
+        len=ash.cbDstLengthUsed;
+        hr=acmStreamUnprepareHeader(avi_header.srcstream,&ash,0);
+        if(hr){
+          printf("ACM_Decoder: acmStreamUnprepareHeader error %d\n",hr);
+        }
+        return len;
+}
+
 
 
 int init_video_codec(int outfmt){

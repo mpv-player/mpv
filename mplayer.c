@@ -995,9 +995,6 @@ if(has_video==1){
 char* a_buffer=NULL;
 int a_buffer_len=0;
 int a_buffer_size=0;
-char* a_in_buffer=NULL;
-int a_in_buffer_len=0;
-int a_in_buffer_size=0;
 int audio_fd=-1;
 int pcm_bswap=0;
 float buffer_delay=0;
@@ -1058,9 +1055,6 @@ if(has_audio==4){
   if(init_audio_codec()){
     MP3_channels=avi_header.wf.nChannels;
     MP3_samplerate=avi_header.wf.nSamplesPerSec;
-    a_in_buffer_size=avi_header.audio_in_minsize;
-    a_in_buffer=malloc(a_in_buffer_size);
-    a_in_buffer_len=0;
     if(a_buffer_size<avi_header.audio_out_minsize+OUTBURST)
         a_buffer_size=avi_header.audio_out_minsize+OUTBURST;
   } else {
@@ -1077,6 +1071,17 @@ if(has_audio==4){
 a_buffer=malloc(a_buffer_size);
 memset(a_buffer,0,a_buffer_size);
 a_buffer_len=0;
+
+if(has_audio==4){
+    int ret=acm_decode_audio(a_buffer,a_buffer_size);
+    if(ret<0){
+        printf("ACM error %d -> switching to nosound...\n",ret);
+        has_audio=0;
+    } else {
+        a_buffer_len=ret;
+        printf("ACM decoding test: %d bytes\n",ret);
+    }
+}
 
 if(has_audio==2){
   if(file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_AVI_NI){
@@ -1236,12 +1241,14 @@ if(force_fps) default_fps=force_fps;
 
 printf("Start playing...\n");fflush(stdout);
 
-if(0)        // ACM debug code
+#if 0
+     // ACM debug code
 {   DWORD srcsize=0;
     DWORD dstsize=16384*8;
     int ret=acmStreamSize(avi_header.srcstream,dstsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
     printf("acmStreamSize %d -> %d (err=%d)\n",dstsize,srcsize,ret);
 }
+#endif
 
 InitTimer();
 
@@ -1286,12 +1293,12 @@ while(has_audio){
       }
       case 6:  // MS-GSM decoder
       { unsigned char buf[65]; // 65 bytes / frame
-	    while(a_buffer_len<OUTBURST){
-		  if(demux_read_data(d_audio,buf,65)!=65) break; // EOF
-		  XA_MSGSM_Decoder(buf,(unsigned short *) &a_buffer[a_buffer_len]); // decodes 65 byte -> 320 short
+            while(a_buffer_len<OUTBURST){
+                if(demux_read_data(d_audio,buf,65)!=65) break; // EOF
+                XA_MSGSM_Decoder(buf,(unsigned short *) &a_buffer[a_buffer_len]); // decodes 65 byte -> 320 short
 //  		XA_GSM_Decoder(buf,(unsigned short *) &a_buffer[a_buffer_len]); // decodes 33 byte -> 160 short
-          a_buffer_len+=2*320;
-		}
+                a_buffer_len+=2*320;
+            }
         break;
       }
       case 3: // AC3 decoder
@@ -1306,46 +1313,8 @@ while(has_audio){
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
       case 4:
-      { ACMSTREAMHEADER ash;
-        HRESULT hr;
-        DWORD srcsize=0;
-        acmStreamSize(avi_header.srcstream,a_buffer_size-a_buffer_len , &srcsize, ACM_STREAMSIZEF_DESTINATION);
-        if(verbose>=3)printf("acm says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,a_in_buffer_size,a_buffer_size-a_buffer_len);
-//        if(srcsize==0) srcsize=((WAVEFORMATEX *)&avi_header.wf_ext)->nBlockAlign;
-        if(srcsize>a_in_buffer_size) srcsize=a_in_buffer_size; // !!!!!!
-        if(a_in_buffer_len<srcsize){
-          a_in_buffer_len+=
-            demux_read_data(d_audio,&a_in_buffer[a_in_buffer_len],
-            srcsize-a_in_buffer_len);
-        }
-        memset(&ash, 0, sizeof(ash));
-        ash.cbStruct=sizeof(ash);
-        ash.fdwStatus=0;
-        ash.dwUser=0; 
-        ash.pbSrc=a_in_buffer;
-        ash.cbSrcLength=a_in_buffer_len;
-        ash.pbDst=&a_buffer[a_buffer_len];
-        ash.cbDstLength=a_buffer_size-a_buffer_len;
-        hr=acmStreamPrepareHeader(avi_header.srcstream,&ash,0);
-        if(hr){
-          printf("ACM_Decoder: acmStreamPrepareHeader error %d\n",hr);break;
-        }
-        hr=acmStreamConvert(avi_header.srcstream,&ash,0);
-        if(hr){
-          printf("ACM_Decoder: acmStreamConvert error %d\n",hr);break;
-        }
-        //printf("ACM convert %d -> %d  (buf=%d)\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed,a_in_buffer_len);
-        if(ash.cbSrcLengthUsed>=a_in_buffer_len){
-          a_in_buffer_len=0;
-        } else {
-          a_in_buffer_len-=ash.cbSrcLengthUsed;
-          memcpy(a_in_buffer,&a_in_buffer[ash.cbSrcLengthUsed],a_in_buffer_len);
-        }
-        a_buffer_len+=ash.cbDstLengthUsed;
-        hr=acmStreamUnprepareHeader(avi_header.srcstream,&ash,0);
-        if(hr){
-          printf("ACM_Decoder: acmStreamUnprepareHeader error %d\n",hr);
-        }
+      { int ret=acm_decode_audio(&a_buffer[a_buffer_len],a_buffer_size-a_buffer_len);
+        if(ret>0) a_buffer_len+=ret;
         break;
       }
     }
