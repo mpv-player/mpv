@@ -80,11 +80,6 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 		c->metric_plane = 0;
 	}
 
-	c->strict_breaks = 0;
-	c->junk_left = c->junk_right = 1;
-	c->junk_top = c->junk_bottom = 4;
-	c->verbose = verbose;
-
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
 	if (gCpuCaps.has3DNow) c->cpu |= PULLUP_CPU_3DNOW;
@@ -315,6 +310,7 @@ static void uninit(struct vf_instance_s* vf)
 static int open(vf_instance_t *vf, char* args)
 {
 	struct vf_priv_s *p;
+	struct pullup_context *c;
 	vf->get_image = get_image;
 	vf->put_image = put_image;
 	vf->config = config;
@@ -322,8 +318,15 @@ static int open(vf_instance_t *vf, char* args)
 	vf->uninit = uninit;
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
-	p->ctx = pullup_alloc_context();
+	p->ctx = c = pullup_alloc_context();
 	p->fakecount = 2;
+	c->verbose = verbose;
+	c->junk_left = c->junk_right = 1;
+	c->junk_top = c->junk_bottom = 4;
+	c->strict_breaks = 0;
+	if (args) {
+		sscanf(args, "%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks);
+	}
 	return 1;
 }
 
