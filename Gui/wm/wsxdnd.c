@@ -163,7 +163,7 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
       unsigned long ret_items;
 
       /* while there is data left...*/
-      while(ret_left){
+      while(ret_left && atom_support == None){
 	XGetWindowProperty(wsDisplay,event->data.l[0],_XA_XdndTypeList,
 			   offset,256,False,XA_ATOM,&ret_type,
 			   &ret_format,&ret_items,&ret_left,
@@ -183,9 +183,6 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
 	      break;
 	    }
 	  }
-	  /* found it ! */
-	  if (atom_support != None)
-	    break;
 	}
 	/* maybe next time ... */
 	XFree(ret_buff);

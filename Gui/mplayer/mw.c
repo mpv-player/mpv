@@ -688,11 +688,12 @@ void mplDandDHandler(int num,char** files)
   struct stat buf;
   int f = 0;
 
+  char* subtitles = NULL;
+  char* filename = NULL;
+
   if (num <= 0)
     return;
 
-  /* clear playlist */
-  gtkSet(gtkDelPl,0,NULL);
 
   /* now fill it with new items */
   for(f=0; f < num; f++){
@@ -710,16 +711,42 @@ void mplDandDHandler(int num,char** files)
     if(stat(str,&buf) == 0 && S_ISDIR(buf.st_mode) == 0) {
       /* this is not a directory so try to play it */
       printf("Received D&D %s\n",str);
+      
+      /* check if it is a subtitle file */
+      {
+	char* ext = strrchr(str,'.');
+	if (ext) {
+	  static char supported[] = "utf/sub/srt/smi/rt//txt/ssa/aqt/";
+	  char* type;
+	  int len;
+	  if((len=strlen(++ext)) && (type=strstr(supported,ext)) &&\
+	     (type-supported)%4 == 0 && *(type+len) == '/'){
+	    /* handle subtitle file */
+	    gfree((void**)&subtitles);
+	    subtitles = str;
+	    continue;
+	  }
+	}
+      }
+
+      /* clear playlist */
+      if (filename == NULL) {
+	filename = files[f];
+	gtkSet(gtkDelPl,0,NULL);
+      }
+
       item = calloc(1,sizeof(plItem));
       
       /* FIXME: decompose file name ? */
       /* yes -- Pontscho */
-      if ( strrchr( str,'/' ) )
-       {
+      if ( strrchr( str,'/' ) ) {
 	char * s = strrchr( str,'/' ); *s=0; s++;
-        item->name = gstrdup( s );
-        item->path = gstrdup( str );
-       } else { item->name = strdup(str); item->path = strdup(""); }
+	item->name = gstrdup( s );
+	item->path = gstrdup( str );
+      } else {
+	item->name = strdup(str);
+	item->path = strdup("");
+      }
       gtkSet(gtkAddPlItem,0,(void*)item);
     } else {
       printf("Received not a file: %s !\n",str);
@@ -727,8 +754,14 @@ void mplDandDHandler(int num,char** files)
     free( str );
   }
 
-  mplSetFileName( NULL,files[0],STREAMTYPE_FILE );
-  if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evStop,0 );
-  mplEventHandling( evPlay,0 );
-
+  if (filename) {
+    mplSetFileName( NULL,filename,STREAMTYPE_FILE );
+    if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evStop,0 );
+    mplEventHandling( evPlay,0 );
+  }
+  if (subtitles) {
+    gfree((void**)&guiIntfStruct.Subtitlename);
+    guiIntfStruct.Subtitlename = subtitles;
+    guiLoadSubtitle(guiIntfStruct.Subtitlename);
+  }
 }
