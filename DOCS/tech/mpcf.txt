@@ -72,7 +72,7 @@ main header:
 	version					v
 	stream_count				v
 	file_size				v
-	length_in msec				v
+	length_in_msec				v
 	reserved_bytes
 	checksum				u(32)
 
@@ -144,18 +144,27 @@ Index:
 		index_timestamp			v
 		index_position			v
 	}
+	reserved_bytes
 	checksum				u(32)
 
-info_header: (optional)
+info_packet: (optional)
 	packet header
 	info_startcode				f(64)
+	start_time				v
+	end_time				v
 	entry_count				v
 	for(i=0; i<entry_count; i++){
 		name				sz
 		value				sz
         }
+	reserved_bytes
         checksum				u(32)
-        
+
+stuffing_packet: (optional)
+	packet_header
+	stuffing_startcode			f(64)
+	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
+		stuffing			f(8)
 
 forward_ptr
 backward_ptr
@@ -281,6 +290,10 @@ index_position
 	position in bytes of the first byte of the keyframe header, relative
 	to the last index_position
 
+start_time, stop_time
+	the time range in msecs to which the info applies
+	Note: can be used to mark chapters
+        
 name
 	the name of the info entry, valid names are
 	"Author","Description","Copyright","Encoder","Title"
@@ -289,7 +302,8 @@ name
 
 value
 	
-        
+stuffing
+	0xFF
 
 			Structure:
 
@@ -307,11 +321,27 @@ headers may be repated, but if they are then they MUST all be repeated together
 and repeated headers MUST be identical
 
 headers MUST be repeated every 10sec at least ? FIXME
+headers MUST be repeated at least twice (so they exist 3 times in a file)
 
-the info_header can be repeated, it can also contain different names & values
-each time
-        
-        
+		Index
+the index can be repeated but there MUST be at least one at the end
+
+		Info packets
+the info_packet can be repeated, it can also contain different names & values
+each time but only if allso the time is different
+Info packets can be used to describe the file or some part of it (chapters)
+
+info packets, SHOULD be placed at the begin of the file at least
+for realtime streaming info packets will normally be transmitted when they apply
+for example, the current song title & artist of the currently shown music video
+
+		Stuffing packets
+can be used as a filler, for example to leave some empty space at the begin for
+a copy of the index
+
+		Unknown packets
+MUST be ignored by the decoder
+
 			Sample code (GPL, & untested)
 
 typedef BufferContext{
