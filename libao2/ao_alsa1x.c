@@ -175,23 +175,6 @@ spdif_init(int acard, int adevice)
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
 {
-    switch(cmd)
-    {
-	case AOCONTROL_GET_DEVICE:
-	    return((char *)alsa_device); /* egy kicsit brutalis, dehat :) */
-	case AOCONTROL_SET_DEVICE:
-	{
-	    int ret;
-
-	    strncpy(alsa_device, (char *)arg, ALSA_DEVICE_SIZE);
-	    uninit();
-	    ret = init(ao_data.samplerate, ao_data.channels, ao_data.format, 0);
-	    if (ret == 0)
-		return(CONTROL_ERROR);
-	    else
-		return(CONTROL_OK);
-	}
-    }
     return(CONTROL_UNKNOWN);
 }
 
