@@ -239,8 +239,8 @@ must not be broken. You may need to fix your input AVI files first, as described
 
 <para>
 <link linkend="ffmpeg">libavcodec</link> provides simple encoding to a lot
-of interesting video and audio formats (currently its audio codecs are
-unsupported). You can encode to the following codecs (more or less up to date):
+of interesting video and audio formats.
+You can encode to the following codecs (more or less up to date):
 
 <informaltable frame="all">
 <tgroup cols="2">
