@@ -111,12 +111,12 @@ AUDIO OUTPUT DRIVERS (MPLAYER ONLY)
     Audio output driver description (ao)
 VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
     Video output layer (vo) option descriptions (MPlayer only).
+VIDEO OUTPUT DRIVERS (MPLAYER ONLY)
+    Video output driver description (vo)
 DECODING/FILTERING OPTIONS
     Decoding/Filtering layer options (ad, vd, pl).
 VIDEO FILTERS
     Video filter description (vf)
-VIDEO OUTPUT DRIVERS (MPLAYER ONLY)
-    Video output driver description (vo)
 GENERAL ENCODING OPTIONS (MENCODER ONLY)
     Encoding option descriptions (ve) (MEncoder only).
 CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)

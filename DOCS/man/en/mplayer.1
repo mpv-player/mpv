@@ -2061,6 +2061,384 @@ of the movie relative to the upper left corner of the screen.
 The movie is centered by default.
 .
 .
+.SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
+Video output drivers are interfaces to different output facilities.
+The syntax is:
+.TP
+.B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
+Specify a priority list of video output drivers to be used.
+.PP
+If the list has a trailing ',' it will fall back to drivers not listed on the
+command line.
+Suboptions are optional and can mostly be omitted.
+.br
+.I NOTE:
+See \-vo help for a list of compiled-in drivers.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-vo xmga,xv,"
+Try the Matrox X11 driver, then the Xv driver, then others.
+.br
+.IPs "\-vo directx:noaccel"
+Uses the DirectX driver with acceleration features turned off.
+.RE
+.PD 1
+.
+
+FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
+fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+
+Available video output drivers are:
+.
+.TP
+.B xv (X11 only)
+Uses the XVideo extension of XFree86 4.x to enable hardware
+accelerated playback.
+If you cannot use a hardware specific driver, this is probably
+the best option.
+.PD 0
+.RSs
+.IPs port=<number>
+Select a specific XVideo port.
+.RE
+.PD 1
+.TP
+.B x11 (X11 only)
+Shared memory output driver without hardware acceleration that
+works whenever X11 is present.
+.TP
+.B xover (X11 only)
+Adds X11 support to all overlay based video output drivers.
+Currently only supported by tdfx_vid.
+.TP
+.B xvmc (X11, \-vc ffmpeg12mc only)
+Video output driver that uses the XvMC (X Video Motion Compensation)
+extension of XFree86 4.x to speed up MPEG1/2 and VCR2 decoding.
+.PD 0
+.RSs
+.IPs benchmark
+Disables image display.
+Necessary for proper benchmarking of drivers that change
+image buffers on monitor retrace only (nVidia).
+.IPs queue
+Queue frames for display to allow more parallel work of the video hardware.
+May add a small (not noticeable) constant A/V desync.
+.IPs sleep
+Use sleep function while waiting for rendering to finish
+(not recomended on Linux).
+.IPs wait\ 
+Do not use sleep function while waiting for rendering to finish
+(default).
+.RE
+.PD 1
+.TP
+.B dga (X11 only)
+Output video through the XFree86 Direct Graphics Access extension.
+Considered obsolete.
+.TP
+.B sdl (SDL only)
+Highly platform independent SDL (Simple Directmedia Layer) library
+video output driver.
+.TP
+.B vidix\ \ 
+VIDIX (VIDeo Interface for *niX) is an interface to the
+video acceleration features of different graphics cards.
+Very fast output driver on cards that support it.
+.PD 0
+.RSs
+.IPs <subdevice>
+Explicitly choose the VIDIX subdevice driver to use.
+Available subdevice drivers are cyberblade_vid, mach64_vid, mga_crtc2_vid,
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
+.RE
+.PD 1
+.TP
+.B xvidix (X11 only)
+X11 frontend for VIDIX
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
+.TP
+.B cvidix\ 
+Generic and platform independent VIDIX frontend, can even run in a
+textconsole with nVidia cards.
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
+.TP
+.B winvidix (Windows only)
+Windows frontend for VIDIX
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
+.TP
+.B directx (Windows only)
+Output driver that uses the DirectX interface.
+.PD 0
+.RSs
+.IPs noaccel
+Turns off hardware acceleration.
+Try this option if you have display problems.
+.RE
+.PD 1
+.TP
+.B quartz (Mac OS X only)
+Mac OS X Quartz output driver.
+Under some circumstances, it might be more efficient to force a
+packed YUV output format, with e.g. \-vf format=yuy2
+.PD 0
+.RSs
+.IPs device_id=<number>
+Choose the display device to use in fullscreen.
+.RE
+.PD 1
+.TP
+.B fbdev (Linux only)
+Uses the kernel framebuffer to output video.
+.TP
+.B fbdev2 (Linux only)
+Uses the kernel framebuffer to output video,
+alternative implementation.
+.TP
+.B vesa\ \ \ 
+Very general output driver that should work on any VESA VBE 2.0
+compatible card.
+.PD 0
+.RSs
+.IPs dga\ \ 
+Turns on DGA mode.
+.IPs nodga
+Turns off DGA mode.
+.IPs vidix
+FIXME: document this
+.IPs lvo\ \ 
+FIXME: document this
+.RE
+.PD 1
+.TP
+.B svga\ \ \ 
+Output video using the SVGA library.
+.TP
+.B gl\ \ \ \ \ 
+OpenGL output driver.
+Very simple version, no OSD support and video size must be smaller than
+the maximum texture size of your OpenGL implementation.
+Intended to work even with the most simple OpenGL implementations.
+.PD 0
+.RSs
+.IPs manyfmts
+Enables support for more (RGB and BGR) color formats.
+Needs OpenGL version >= 1.2, NOT yet WORKING correctly.
+.IPs slice-height=<0\-...>
+Number of lines copied to texture in one piece (default: 4).
+0 for whole image.
+.RE
+.PD 1
+.TP
+.B gl2\ \ \ \ 
+OpenGL output driver, second generation.
+Supports OSD and videos larger than the maximum texture size.
+.TP
+.B null\ \ \ 
+Produces no video output.
+Useful for benchmarking.
+.TP
+.B aa\ \ \ \ \ 
+ASCII art output driver that works on a text console.
+.TP
+.B caca\ \ \ 
+Colour AsCii Art output driver that works on a text console.
+.TP
+.B bl\ \ \ \ \ 
+Video playback using the Blinkenlights UDP protocol.
+This driver is highly hardware specific.
+.TP
+.B ggi\ \ \ \ 
+Output driver for the GGI graphics system.
+.TP
+.B directfb
+Play video using the DirectFB library.
+.PD 0
+.RSs
+.IPs (no)input
+Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
+.IPs buffermode=single|double|triple
+Double and triple buffering give best results if you want to avoid tearing issues.
+Triple buffering is more efficent than double buffering as it doesn't block MPlayer
+while waiting for the vertical retrace.
+Single buffering should be avoided (default: single).
+.IPs fieldparity=top|bottom
+Control the output order for interlaced frames (default: disabled).
+Valid values are top = top fields first, bottom = bottom fields first.
+This option doesn't have any effect on progressive film material
+like most MPEG movies are.
+You need to enable this option if you have tearing issues/unsmooth
+motions watching interlaced film material.
+.IPs layer=N
+Will force layer with id N for playback (default: -1 - auto).
+.RE
+.PD 1
+.TP
+.B dfbmga\ 
+Matrox G400/G450/G550 specific output driver that uses the DirectFB library.
+Enables CRTC2 (second head), displaying video independently of the first head.
+.PD 0
+.RSs
+.IPs (no)bes
+Enable the use of the Matrox BES (backend scaler) (default: disabled).
+Gives very good results concerning speed and output quality as interpolated
+picture processing is done in hardware.
+Works only on the primary head.
+.IPs (no)spic
+Make use of the Matrox sub picture layer to display the OSD (default: enabled).
+.IPs (no)crtc2
+Turn on TV-out on the second head (default: enabled).
+The output quality is amazing as it's a full interlaced picture
+with proper sync to every odd/even field.
+.IPs (no)input
+Use the DirectFB instead of the MPlayer keyboard code (default: disabled).
+.IPs buffermode=single|double|triple
+Double and triple buffering give best results if you want to avoid tearing issues.
+Triple buffering is more efficent than double buffering as it doesn't block MPlayer
+while waiting for the vertical retrace.
+Single buffering should be avoided (default: triple).
+.IPs fieldparity=top|bottom
+Control the output order for interlaced frames (default: disabled).
+Valid values are top = top fields first, bottom = bottom fields first.
+This option doesn't have any effect on progressive film material
+like most MPEG movies are.
+You need to enable this option if you have tearing issues/unsmooth
+motions watching interlaced film material.
+.IPs tvnorm=pal|ntsc|auto
+Will set the TV norm of the Matrox card without the need
+for modifying /etc/\:directfbrc (default: disabled).
+Valid norms are pal = PAL, ntsc = NTSC.
+Special norm is auto (auto-adjust using PAL/NTSC) because it decides
+which norm to use by looking at the frame rate of the movie.
+.RE
+.PD 1
+.TP
+.B mga (Linux only)
+Matrox specific output driver that makes use of the YUV back
+end scaler on Gxxx cards through a kernel module.
+If you have a Matrox card, this is the fastest option.
+.TP
+.B xmga (Linux, X11 only)
+The mga output driver, running in an X11 window.
+.TP
+.B syncfb\ 
+Video output driver for the SyncFB kernel module, which provides
+special hardware features of Matrox Gxxx cards like hardware
+deinterlacing, scaling and synchronizing your video output to
+the vertical retrace of your monitor.
+.TP
+.B 3dfx (Linux only)
+This driver employs the tdfx framebuffer driver to play movies with
+YUV acceleration.
+.TP
+.B tdfx_vid (Linux only)
+3Dfx specific output driver.
+Works in conjunction with a kernel module.
+.TP
+.B dxr2 (DXR2 only)
+Creative DXR2 specific output driver.
+Also see the \-dxr2 option.
+.PD 0
+.RSs
+.IPs x11
+Enables overlay.
+.IPs xv
+Enables overlay.
+.RE
+.PD 1
+.TP
+.B dxr3 (DXR3 only)
+Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
+Hollywood Plus) specific output driver.
+Also see the lavc video filter.
+.PD 0
+.RSs
+.IPs overlay
+Activates the overlay instead of TVOut.
+.IPs prebuf
+Turns on prebuffering.
+.IPs sync
+Will turn on the new sync-engine.
+.IPs norm=<norm>
+Specifies the TV norm.
+.RSss
+0: Does not change current norm (default).
+.br
+1: Auto-adjust using PAL/NTSC.
+.br
+2: Auto-adjust using PAL/PAL-60.
+.br
+3: PAL
+.br
+4: PAL-60
+.br
+5: NTSC
+.REss
+.IPs device=<number>
+Specifies the device number to use if you have more than one em8300 card.
+.RE
+.PD 1
+.TP
+.B mpegpes (DVB only)
+DVB specific output driver.
+.TP
+.B zr\ \ \ \ \ 
+Output driver for a number of MJPEG capture/playback cards.
+Also see the -zr* options and -zrhelp.
+.TP
+.B zr2\ \ \ \ 
+Output driver for a number of MJPEG capture/playback cards, second generation.
+Also see the zrmjpeg video filter.
+.TP
+.B md5\ \ \ \ 
+Writes md5sums for each frame into a file called 'md5' in the
+current directory.
+Useful for debugging.
+.TP
+.B yuv4mpeg
+Transforms the video stream into a sequence of uncompressed YUV 4:2:0
+images and stores it in a file called 'stream.yuv' in the current
+directory.
+Useful if you want to process the video with the mjpegtools suite.
+.TP
+.B gif89a\ 
+Output each frame into a GIF file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+.TP
+.B jpeg\ \ \ 
+Output each frame into a JPEG file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+.TP
+.B pgm\ \ \ \ 
+Output each frame into a PGM file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+.TP
+.B png\ \ \ \ 
+Output each frame into a PNG file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+.TP
+.B tga\ \ \ \ 
+Output each frame into a Targa file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+.
+.
 .SH "DECODING/FILTERING OPTIONS"
 .TP
 .B \-ac <[-]codec1,[-]codec2,...[,]>
@@ -3674,384 +4052,6 @@ can upscale the resulting MJPEG images to the original size.
 The option fd instructs the filter to always perform the requested
 decimation (ugly).
 .RE
-.
-.
-.SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
-Video output drivers are interfaces to different output facilities.
-The syntax is:
-.TP
-.B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
-Specify a priority list of video output drivers to be used.
-.PP
-If the list has a trailing ',' it will fall back to drivers not listed on the
-command line.
-Suboptions are optional and can mostly be omitted.
-.br
-.I NOTE:
-See \-vo help for a list of compiled-in drivers.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-vo xmga,xv,"
-Try the Matrox X11 driver, then the Xv driver, then others.
-.br
-.IPs "\-vo directx:noaccel"
-Uses the DirectX driver with acceleration features turned off.
-.RE
-.PD 1
-.
-
-FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
-fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
-
-Available video output drivers are:
-.
-.TP
-.B xv (X11 only)
-Uses the XVideo extension of XFree86 4.x to enable hardware
-accelerated playback.
-If you cannot use a hardware specific driver, this is probably
-the best option.
-.PD 0
-.RSs
-.IPs port=<number>
-Select a specific XVideo port.
-.RE
-.PD 1
-.TP
-.B x11 (X11 only)
-Shared memory output driver without hardware acceleration that
-works whenever X11 is present.
-.TP
-.B xover (X11 only)
-Adds X11 support to all overlay based video output drivers.
-Currently only supported by tdfx_vid.
-.TP
-.B xvmc (X11, \-vc ffmpeg12mc only)
-Video output driver that uses the XvMC (X Video Motion Compensation)
-extension of XFree86 4.x to speed up MPEG1/2 and VCR2 decoding.
-.PD 0
-.RSs
-.IPs benchmark
-Disables image display.
-Necessary for proper benchmarking of drivers that change
-image buffers on monitor retrace only (nVidia).
-.IPs queue
-Queue frames for display to allow more parallel work of the video hardware.
-May add a small (not noticeable) constant A/V desync.
-.IPs sleep
-Use sleep function while waiting for rendering to finish
-(not recomended on Linux).
-.IPs wait\ 
-Do not use sleep function while waiting for rendering to finish
-(default).
-.RE
-.PD 1
-.TP
-.B dga (X11 only)
-Output video through the XFree86 Direct Graphics Access extension.
-Considered obsolete.
-.TP
-.B sdl (SDL only)
-Highly platform independent SDL (Simple Directmedia Layer) library
-video output driver.
-.TP
-.B vidix\ \ 
-VIDIX (VIDeo Interface for *niX) is an interface to the
-video acceleration features of different graphics cards.
-Very fast output driver on cards that support it.
-.PD 0
-.RSs
-.IPs <subdevice>
-Explicitly choose the VIDIX subdevice driver to use.
-Available subdevice drivers are cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
-.RE
-.PD 1
-.TP
-.B xvidix (X11 only)
-X11 frontend for VIDIX
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.TP
-.B cvidix\ 
-Generic and platform independent VIDIX frontend, can even run in a
-textconsole with nVidia cards.
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.TP
-.B winvidix (Windows only)
-Windows frontend for VIDIX
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.TP
-.B directx (Windows only)
-Output driver that uses the DirectX interface.
-.PD 0
-.RSs
-.IPs noaccel
-Turns off hardware acceleration.
-Try this option if you have display problems.
-.RE
-.PD 1
-.TP
-.B quartz (Mac OS X only)
-Mac OS X Quartz output driver.
-Under some circumstances, it might be more efficient to force a
-packed YUV output format, with e.g. \-vf format=yuy2
-.PD 0
-.RSs
-.IPs device_id=<number>
-Choose the display device to use in fullscreen.
-.RE
-.PD 1
-.TP
-.B fbdev (Linux only)
-Uses the kernel framebuffer to output video.
-.TP
-.B fbdev2 (Linux only)
-Uses the kernel framebuffer to output video,
-alternative implementation.
-.TP
-.B vesa\ \ \ 
-Very general output driver that should work on any VESA VBE 2.0
-compatible card.
-.PD 0
-.RSs
-.IPs dga\ \ 
-Turns on DGA mode.
-.IPs nodga
-Turns off DGA mode.
-.IPs vidix
-FIXME: document this
-.IPs lvo\ \ 
-FIXME: document this
-.RE
-.PD 1
-.TP
-.B svga\ \ \ 
-Output video using the SVGA library.
-.TP
-.B gl\ \ \ \ \ 
-OpenGL output driver.
-Very simple version, no OSD support and video size must be smaller than
-the maximum texture size of your OpenGL implementation.
-Intended to work even with the most simple OpenGL implementations.
-.PD 0
-.RSs
-.IPs manyfmts
-Enables support for more (RGB and BGR) color formats.
-Needs OpenGL version >= 1.2, NOT yet WORKING correctly.
-.IPs slice-height=<0\-...>
-Number of lines copied to texture in one piece (default: 4).
-0 for whole image.
-.RE
-.PD 1
-.TP
-.B gl2\ \ \ \ 
-OpenGL output driver, second generation.
-Supports OSD and videos larger than the maximum texture size.
-.TP
-.B null\ \ \ 
-Produces no video output.
-Useful for benchmarking.
-.TP
-.B aa\ \ \ \ \ 
-ASCII art output driver that works on a text console.
-.TP
-.B caca\ \ \ 
-Colour AsCii Art output driver that works on a text console.
-.TP
-.B bl\ \ \ \ \ 
-Video playback using the Blinkenlights UDP protocol.
-This driver is highly hardware specific.
-.TP
-.B ggi\ \ \ \ 
-Output driver for the GGI graphics system.
-.TP
-.B directfb
-Play video using the DirectFB library.
-.PD 0
-.RSs
-.IPs (no)input
-Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
-.IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
-while waiting for the vertical retrace.
-Single buffering should be avoided (default: single).
-.IPs fieldparity=top|bottom
-Control the output order for interlaced frames (default: disabled).
-Valid values are top = top fields first, bottom = bottom fields first.
-This option doesn't have any effect on progressive film material
-like most MPEG movies are.
-You need to enable this option if you have tearing issues/unsmooth
-motions watching interlaced film material.
-.IPs layer=N
-Will force layer with id N for playback (default: -1 - auto).
-.RE
-.PD 1
-.TP
-.B dfbmga\ 
-Matrox G400/G450/G550 specific output driver that uses the DirectFB library.
-Enables CRTC2 (second head), displaying video independently of the first head.
-.PD 0
-.RSs
-.IPs (no)bes
-Enable the use of the Matrox BES (backend scaler) (default: disabled).
-Gives very good results concerning speed and output quality as interpolated
-picture processing is done in hardware.
-Works only on the primary head.
-.IPs (no)spic
-Make use of the Matrox sub picture layer to display the OSD (default: enabled).
-.IPs (no)crtc2
-Turn on TV-out on the second head (default: enabled).
-The output quality is amazing as it's a full interlaced picture
-with proper sync to every odd/even field.
-.IPs (no)input
-Use the DirectFB instead of the MPlayer keyboard code (default: disabled).
-.IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
-while waiting for the vertical retrace.
-Single buffering should be avoided (default: triple).
-.IPs fieldparity=top|bottom
-Control the output order for interlaced frames (default: disabled).
-Valid values are top = top fields first, bottom = bottom fields first.
-This option doesn't have any effect on progressive film material
-like most MPEG movies are.
-You need to enable this option if you have tearing issues/unsmooth
-motions watching interlaced film material.
-.IPs tvnorm=pal|ntsc|auto
-Will set the TV norm of the Matrox card without the need
-for modifying /etc/\:directfbrc (default: disabled).
-Valid norms are pal = PAL, ntsc = NTSC.
-Special norm is auto (auto-adjust using PAL/NTSC) because it decides
-which norm to use by looking at the frame rate of the movie.
-.RE
-.PD 1
-.TP
-.B mga (Linux only)
-Matrox specific output driver that makes use of the YUV back
-end scaler on Gxxx cards through a kernel module.
-If you have a Matrox card, this is the fastest option.
-.TP
-.B xmga (Linux, X11 only)
-The mga output driver, running in an X11 window.
-.TP
-.B syncfb\ 
-Video output driver for the SyncFB kernel module, which provides
-special hardware features of Matrox Gxxx cards like hardware
-deinterlacing, scaling and synchronizing your video output to
-the vertical retrace of your monitor.
-.TP
-.B 3dfx (Linux only)
-This driver employs the tdfx framebuffer driver to play movies with
-YUV acceleration.
-.TP
-.B tdfx_vid (Linux only)
-3Dfx specific output driver.
-Works in conjunction with a kernel module.
-.TP
-.B dxr2 (DXR2 only)
-Creative DXR2 specific output driver.
-Also see the \-dxr2 option.
-.PD 0
-.RSs
-.IPs x11
-Enables overlay.
-.IPs xv
-Enables overlay.
-.RE
-.PD 1
-.TP
-.B dxr3 (DXR3 only)
-Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
-Hollywood Plus) specific output driver.
-Also see the lavc video filter.
-.PD 0
-.RSs
-.IPs overlay
-Activates the overlay instead of TVOut.
-.IPs prebuf
-Turns on prebuffering.
-.IPs sync
-Will turn on the new sync-engine.
-.IPs norm=<norm>
-Specifies the TV norm.
-.RSss
-0: Does not change current norm (default).
-.br
-1: Auto-adjust using PAL/NTSC.
-.br
-2: Auto-adjust using PAL/PAL-60.
-.br
-3: PAL
-.br
-4: PAL-60
-.br
-5: NTSC
-.REss
-.IPs device=<number>
-Specifies the device number to use if you have more than one em8300 card.
-.RE
-.PD 1
-.TP
-.B mpegpes (DVB only)
-DVB specific output driver.
-.TP
-.B zr\ \ \ \ \ 
-Output driver for a number of MJPEG capture/playback cards.
-Also see the -zr* options and -zrhelp.
-.TP
-.B zr2\ \ \ \ 
-Output driver for a number of MJPEG capture/playback cards, second generation.
-Also see the zrmjpeg video filter.
-.TP
-.B md5\ \ \ \ 
-Writes md5sums for each frame into a file called 'md5' in the
-current directory.
-Useful for debugging.
-.TP
-.B yuv4mpeg
-Transforms the video stream into a sequence of uncompressed YUV 4:2:0
-images and stores it in a file called 'stream.yuv' in the current
-directory.
-Useful if you want to process the video with the mjpegtools suite.
-.TP
-.B gif89a\ 
-Output each frame into a GIF file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-.TP
-.B jpeg\ \ \ 
-Output each frame into a JPEG file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-.TP
-.B pgm\ \ \ \ 
-Output each frame into a PGM file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-.TP
-.B png\ \ \ \ 
-Output each frame into a PNG file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-.TP
-.B tga\ \ \ \ 
-Output each frame into a Targa file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
 .
 .
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
