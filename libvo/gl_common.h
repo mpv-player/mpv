@@ -24,6 +24,7 @@ void glAdjustAlignment(int stride);
 
 #ifndef GL_WIN32
 int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
+void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
 #endif
 
 #endif
