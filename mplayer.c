@@ -2390,9 +2390,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
 #endif
     } break;
-    case MP_CMD_MUTE: {
-     mixer_mute();
-    }
+    case MP_CMD_MUTE:
+      mixer_mute();
+      break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();
       play_tree_add_file(e,cmd->args[0].v.s);
