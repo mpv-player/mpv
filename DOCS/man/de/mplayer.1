@@ -6648,48 +6648,105 @@ normale Raute der Größe 2
 .RE
 .
 .TP
-.\" man page is synced from top down to this option.
-.B trell\ \
-Trellis\-Quantisierung.
-Hiermit wird die optimale Encodierung für jeden 8x8\-Block gefunden.
-Die Trellis\-Quantisierung ist im Sinne von 'PSNR vs Bitrate' einfahc die
-optimale Quantisierung (unter der Annahme, dass durch die IDCT keine
+.B trell\ \ 
+Trellis-Quantisierung.
+Hiermit wird die optimale Encodierung für jeden 8x8-Block gefunden.
+Die Trellis-Quantisierung ist bei gegenseitiger Abschätzung von PSNR-Wert gegen
+die Bitrate optimal (unter der Annahme, dass durch die IDCT keine
 Rundungsfehler ins Spiel kommen \- was natürlich nicht der Fall ist).
 Sie findet einfach einen Block für das Minimum von Fehler und lambda * bits.
-.RSss
-lambda: qp\-abhängige Konstante
+.PD 0
+.RSs
+.IPs lambda
+vom Quantisierungsparameter (QP) abhängige Konstante
+.IPs bits\ 
+Menge der für die Encodierung eines Blocks benötigten Bits
+.IPs error
+Summe der quadrierten Quantisierungsfehler
+.RE
+.PD 1
+.
+.TP
+.B cbp\ \ \ \ 
+Ratenverzerrtes optimal codiertes Blockmuster (coded block pattern).
+Wird dasjenige codierte Blockmuster auswählen, das Verzerrung + lambda*rate
+minimiert.
+Dies kann nur zusammen mit der Trellis-Quantisierung benutzt werden.
+.
+.TP
+.B mv0\ \ \ \ 
+Versuche jeden Macroblock mit Motion-Vector=<0,0> zu encodieren und wähle
+den besseren.
+Dies hat keinen Effekt, falls mbd=0.
+.
+.TP
+.B qprd (nur mit mbd=2)
+Ratenverzerrter optimaler Quantisierungsparameter bei gegebenem lambda für
+jeden Macroblock
+.
+.TP
+.B last_pred=<0\-99>
+Menge der Bewegungsvorhersagen vom vorigen Frame
+.PD 0
+.RSs
+.IPs 0
+(Standard)
+.IPs a
+Benutzt ein 2a+1 x 2a+1 Macroblockquadrat von Motion-Vector-Vorhersagen vom
+vorigen Frame.
+.RE
+.PD 1
+.
+.TP
+.B preme=<0\-2>
+"pre-pass"-Bewegungsabschätzung
+.PD 0
+.RSs
+.IPs 0
+deaktiviert
+.IPs 1
+nur nach Intraframes (Standard)
+.IPs 2
+immer
+.RE
+.PD 1
+.
+.TP
+.B subq=<1\-8>
+"subpel refinement"-Qualität (für qpel) (Standard: 8 (hohe Qualität))
 .br
-bits: für die Encodierung des Blockes benötigte Anzahl Bits
-.br
-error: Summe der quadratischen Quantisierungsfehler
-.REss
-.IPs last_pred=<0\-99>
-Menge der motion predictors vom letzten Bild
-.RSss
-0: (Standard)
-.br
-a: benutzt 2a+1 x 2a+1 MB\-Quadrat von MV predictors vom vorherigen Bild
-.REss
-.IPs preme=<0\-2> 
-motion estimation pre-pass
-.RSss
-0: deaktiviert
-.br
-1: nur nach I\-Frames (Standard)
-.br
-2: immer
-.REss
-.IPs subq=<1\-8>
-subpel refinement quality (für qpel) (Standardwert: 8).
-Anmerkung: Diese Einstellung hat eine signifikante Auswirkung auf die
-Geschwindigkeit.
-.IPs psnr
+.I ANMERKUNG:
+Diese Einstellung hat signifikante Auswirkung auf die Geschwindigkeit.
+.
+.TP
+.B psnr\ \ \ 
 Gibt den maximalen Signal-zu-Rauschabstand (peak signal to noise ratio) für
-das komlpette Video nach dem Encodieren aus und speichert die psnr-Werte für
-jedes Bild in der Datei 'psnr_012345.log'.
-.IPs mpeg_quant
-benutze MPEG\-Quantizer anstelle der H.263\-Quantizer
-(Standard: deaktiviert = benutze H.263\-Quantizer)
+das komlpette Video nach dem Encodieren aus und speichert die PSNR-Werte für
+jedes Bild in einer Datei der Form 'psnr_hhmmss.log'.
+Ausgegebene Werte haben die Einheit dB (Dezibel), je höher desto besser.
+.
+.TP
+.B mpeg_quant
+Benutze MPEG-Quantisierungsparameter anstelle von H.263.
+.
+.TP
+.B aic\ \ \ \ 
+AC-Vorhersage (advanced intra prediction, verbesserte Intra-Vorhersage für
+H.263+)
+.br
+.I ANMERKUNG:
+vqmin sollte 8 oder höher sein für H.263+ AIC.
+.
+.TP
+.B aiv\ \ \ \ 
+alternativer "inter vlc" für H.263+
+.
+.TP
+.B umv\ \ \ \ 
+unbegrenzte Motion-Vectors (unlimited MVs) (nur bei H.263+)
+.br
+Erlaubt die Encodierung von beliebig langen Motion-Vectors.
+.\" man page is synced from top down to this option.
 .RE
 .
 .
