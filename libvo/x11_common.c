@@ -165,7 +165,7 @@ void vo_hidecursor(Display * disp, Window win)
     Pixmap bm_no;
     XColor black, dummy;
     Colormap colormap;
-    static unsigned char bm_no_data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static char bm_no_data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (WinID == 0)
         return;                 // do not hide, if we're playing at rootwin
@@ -851,8 +851,6 @@ typedef struct
     long state;
 } MotifWmHints;
 
-extern MotifWmHints vo_MotifWmHints;
-extern Atom vo_MotifHints;
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
@@ -1777,8 +1775,8 @@ void vo_x11_xinerama_move(Display * dsp, Window w)
 void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
                   int *modeline_height)
 {
-    unsigned int vm_event, vm_error;
-    unsigned int vm_ver, vm_rev;
+    int vm_event, vm_error;
+    int vm_ver, vm_rev;
     int i, j, have_vm = 0;
 
     int modecount;
