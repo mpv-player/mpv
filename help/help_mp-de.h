@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.133
+// In synch with rev 1.141
 
 // ========================= MPlayer help ===========================
 
@@ -117,8 +117,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Verfügbare Audioausgabetreiber:\n"
 #define MSGTR_AvailableAudioCodecs "Verfügbare Audiocodecs:\n"
 #define MSGTR_AvailableVideoCodecs "Verfügbare Videocodecs:\n"
-#define MSGTR_AvailableAudioFm "\nVerfügbare (in das Binary kompilierte) Audio Codec Familien:\n"
-#define MSGTR_AvailableVideoFm "\nVerfügbare (in das Binary kompilierte) Video Codec Familien:\n"
+#define MSGTR_AvailableAudioFm "Verfügbare (in das Binary kompilierte) Audio Codec Familien:\n"
+#define MSGTR_AvailableVideoFm "Verfügbare (in das Binary kompilierte) Video Codec Familien:\n"
 #define MSGTR_AvailableFsType "Verfügbare Vollbildschirm-Modi:\n"
 #define MSGTR_UsingRTCTiming "Verwende Linux Hardware RTC-Timing (%ldHz).\n"
 #define MSGTR_CannotReadVideoProperties "Video: Kann Eigenschaften nicht lesen.\n"
@@ -775,6 +775,31 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline-JPEG aktiviert."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline-JPEG deaktiviert."
 
+// vo_pnm.c
+#define MSGTR_VO_PNM_ASCIIMode "ASCII-Modus aktiviert."
+#define MSGTR_VO_PNM_RawMode "Raw-Modus aktiviert."
+#define MSGTR_VO_PNM_PPMType "Werde PPM-Dateien schreiben."
+#define MSGTR_VO_PNM_PGMType "Werde PGM-Dateien schreiben."
+#define MSGTR_VO_PNM_PGMYUVType "Werde PGMYUV-Dateien schreiben."
+
+// vo_yuv4mpeg.c
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Interlaced-Modus benötigt eine durch 4 teilbare Bildhöhe."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Kann Linien-Buffer für den Interlaced-Modus nicht allozieren."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Eingabe ist nicht RGB, kann Chrominanz nicht in Felder separieren!"
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Bildhöhe muss durch 2 teilbar sein."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Nicht genug Speicher, um RGB-Framebuffer zu allozieren."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Bekomme keinen Speicher oder Datei-Handle, um \"stream.yuv\" zu schreiben!"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Fehler beim Schreiben des Bildes auf die Ausgabe!"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Unbekanntes Subdevice: %s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Benutze Interlaced-Ausgabemodus, oberes Feld (top-field) zuerst."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Benutze Interlaced-Ausgabemodus, unteres Feld (bottom-field) zuerst."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Benutze (Standard-) Progressive-Frame-Modus."
+
+// Old vo drivers that have been replaced
+
+#define MSGTR_VO_PGM_HasBeenReplaced "Der pgm-Videoausgabetreiber wurde ersetzt durch -vo pnm:pgmyuv.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "Der md5-Videoausgabetreiber wurde ersetzt durch -vo md5sum.\n"
+
 // ======================= AO Audio Output drivers ========================
 
 // libao2
@@ -815,7 +840,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Datei: %s (%s)\nPCM: Samplerate: %iHz Kanäle: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am schnellsten mit -vc dummy -vo null erreicht.\nPCM: Info: Um WAVE-Dateien zu schreiben, benutze -waveheader (Standard)."
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am schnellsten mit -vc dummy -vo null erreicht.\nPCM: Info: Um WAVE-Dateien zu schreiben, benutze -waveheader (Standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Öffnen von %s zum Schreiben fehlgeschlagen!\n"
 
 // ao_sdl.c
@@ -872,3 +897,7 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: Fehler beim Vorbereiten der Wiedergabe: %s\n"
 #define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: Schreibfehler nach Rücksetzen: %s - gebe auf.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: Ausgabefehler: %s\n"
+
+// ao_plugin.c
+
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] ungültiges Plugin: %s\n"
