@@ -16,7 +16,7 @@
 #include "vf.h"
 
 //#include "../libvo/fastmemcpy.h"
-#include "../libfame/fame.h"
+#include <fame.h>
 
 struct vf_priv_s {
     unsigned char* outbuf;
