@@ -478,7 +478,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD scale:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtitle & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
-#define MSGTR_PREFERENCES_LoadFullscreen "Started in fullscreen"
+#define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
