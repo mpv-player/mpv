@@ -9,7 +9,7 @@
 
 <BODY>
 
-<H1><A NAME=C>Anhang B - Wie man einen Fehler berichtet</A></H1>
+<H1><A NAME="appendix_b">Anhang B - Wie man einen Fehler berichtet</A></H1>
 
 <P>Gute Fehlerberichte sind bei jedem Softwareprojekt sehr wertvolle
 Beitr&auml;ge f&uuml;r die Entwicklung. Aber genauso, wie es beim Schreiben
@@ -21,7 +21,7 @@ entscheidender Bedeutung ist, so verstehe bitte, dass du wirklich <B>alle</B>
 hier verlangten Informationen zur Verf&uuml;gung stellen und den Anweisungen
 dieses Dokumentes folgen musst, damit wir dir helfen k&ouml;nnen.</P>
 
-<H4>Wie sollen Fehler behoben werden?</H4>
+<H2><A NAME="fix">B.1 Wie sollen Fehler behoben werden?</A></H2>
 
 <P>Wenn man geschickt genugt ist, kann man versuchen, den Fehler selber zu
 beheben, was &auml;u&szlig;erst positiv aufgenommen wird. Falls du das schon
@@ -31,7 +31,7 @@ Die Leute auf der
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
 Mailingliste k&ouml;nnen ansonsten bei Fragen helfen.</P>
 
-<H4>Wie sollen Fehler berichtet werden?</H4>
+<H2><A NAME="report">B.2 Wie sollen Fehler berichtet werden?</A></H2>
 
 <P>Probiere es als allererstes die aktuelle CVS-Version, da dein Problem
 m&ouml;glicherweise schon gel&ouml;st ist. Die Entwicklung geht extrem
@@ -77,7 +77,7 @@ alle den Mailinglisten freiwillig in unserer Freizeit folgen. Wir sind sehr
 besch&auml;ftigt und k&ouml;nnen nicht garantieren, dass eine L&ouml;sung oder
 blo&szlig; eine Antwort zum beschriebenen Problem kommen wird.</P>
 
-<H4>Wo sollen Fehler berichtet werden?</H4>
+<H2><A HREF="where">B.3 Wo sollen Fehler berichtet werden?</A></H2>
 
 <P>Tritt der mplayer-users Mailingliste bei:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -95,9 +95,19 @@ ausschaltet. Bitte denk auch daran,  keine individuellen Kopien (CC) an
 einzelne Personen zu versenden. Es ist also eine gute Idee, sich an der Liste
 anzumelden, wenn man auch seine Antwort erhalten will.</P>
 
-<H4>Was soll berichtet werden?</H4>
+<H2><A HREF="what">B.4 Was soll berichtet werden?</A></H2>
 
-<P><B>Systeminformationen:</B></P>
+<P>Du wirst wahrscheinlich Logdateien, Konfigurationsinformationen und
+Beispieldateien in deinen Fehlerbericht aufnehmen m&uuml;ssen. Wenn einige
+von ihnen ziemlich gro&szlig; werden, so ist es besser, wenn du sie auf unseren
+<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">FTP-Server</A> hochl&auml;dst
+und sie vorher komprimierst (bitte mit <CODE>gzip</CODE> oder
+<CODE>bzip2</CODE>). Gib dann in deinem Fehlerbericht nur den Pfad- und
+Dateinamen an. Unsere Mailinglisten haben eine
+Gr&ouml;&szlig;enbeschr&auml;nkung auf 80k, sodass du gr&ouml;&szlig;ere
+Sachen definitiv komprimieren und hochladen musst.</P>
+
+<H3><A NAME="system">B.4.1 Systeminformationen</A></H3>
 
 <UL>
   <LI>Deine Linux-Distribution oder Betriebssystem und die Versionsnummer:
@@ -138,7 +148,7 @@ anzumelden, wenn man auch seine Antwort erhalten will.</P>
   </LI>
 </UL>
 
-<P><B>Hardware &amp; Treiber:</B></P>
+<H3><A NAME="hardware">B.4.2 Hardware und Treiber</A></H3>
 
 <UL>
   <LI>CPU-Infos (dies funktioniert nur mit Linux):<BR>
@@ -168,7 +178,8 @@ anzumelden, wenn man auch seine Antwort erhalten will.</P>
     mitschicken (auf Linux-Systemen).</LI>
 </UL>
 
-<H4>Bei Problemen/Fehlern w&auml;hrend des &Uuml;bersetzens</H4>
+<H3><A NAME="compilation">B.4.3 Bei Fehlern w&auml;hrend des
+&Uuml;bersetzens</A></H3>
 
 Bitte schicke diese Dateien mit:
 
@@ -185,12 +196,11 @@ fehlschl&auml;gt, f&uuml;ge diese Datein an:
   <LI><CODE>libao2/config.mak</CODE></LI>
 </UL>
 
-
-<H4>Bei Problemen mit configure</H4>
+<H3><A NAME="configure">B.4.4 Bei Problemen mit <CODE>configure</CODE></A></H3>
 
 F&uuml;ge <CODE>configure.log</CODE> hinzu.
 
-<H4>Bei Wiedergabeproblemen</H4>
+<H3><A NAME="playback">B.4.5 Bei Wiedergabeproblemen</A></H3>
 
 <P>Bitte f&uuml;ge die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1
 bei, aber denk daran <B>die Ausgabe nicht zu kürzen</B>, wenn diese der Mail
@@ -224,14 +234,15 @@ herauf und schicke nur den Pfad/Dateinamen der Datei auf dem FTP Server. Wenn
 die Datei im Internet bereits verf&uuml;gbar ist, so reicht die
 <STRONG>exakte</STRONG> URL aus.</P>
 
-<H4>Bei Abst&uuml;rzen</H4>
+<H3><A NAME="crash">B.4.6 Bei Abst&uuml;rzen</A></H3>
 
 <P>Du musst MPlayer aus <CODE>gdb</CODE> heraus aufrufen und uns
 die vollst&auml;ndige Ausgabe schicken. Wenn du einen core dump hast, dann
 kannst du auch aus der <CODE>core</CODE>-Datei n&uuml;tzliche Informationen
 extrahieren. So geht's:</P>
 
-<H4>Wie man Informationen bei einem reproduzierbaren Absturz bewahrt</H4>
+<H4><A NAME="debug">B.4.6.1 Wie man Informationen bei einem reproduzierbaren
+Absturz bewahrt</A></H4>
 
 Kompiliere MPlayer mit eingeschaltetem Debugging:
 
@@ -256,8 +267,9 @@ Eingabeaufforderung zur&uuml;ckkehren, bei der du
 
 eingibst.
 
+<H4><A NAME="core">B.4.6.2 Wie man brauchbare Informationen von einem core
+dump extrahiert</A></H4>
 
-<H4>Wie man brauchbare Informationen von einem core dump extrahiert</H4>
 
 <P>Bitte erzeuge die folgende Befehlsdatei (Command File):</P>
 
@@ -269,16 +281,7 @@ eingibst.
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch
 --command=command_file &gt; mplayer.bug</CODE></P>
 
-<H4>Allgemeine Hinweise</H4>
-
-<P>Wenn etwas sehr gro&szlig; ist (Log-Dateien z.B.), so ist es besser, diese
-komprimiert (gzip und bzip2 werden bevorzugt) auf den FTP hochzuladen und nur
-den Pfad/Dateinamen im Fehlerbericht anzugebeben. Unsere Maillisten haben eine
-Beschr&auml;ankung der Mailgr&ouml;&szlig;e auf 80k. Wenn du etwas
-gr&ouml;&szlig;eres hast, dann komprimier es oder uploade es auf den
-FTP-Server.</P>
-
-<H4>Ich wei&szlig;, was ich mache...</H4>
+<H2><A NAME="advusers">B.5 Ich wei&szlig;, was ich tue...</A></H2>
 
 <P>Wenn du einen Fehlerbericht wie oben beschrieben geschreiben hast und du dir
 sicher bist, dass es ein Bug in MPlayer und nicht ein Problem mit dem

@@ -10,12 +10,20 @@
 <BODY>
 
 
-<H2><A NAME="encoding">2.4.  Encodieren mit MEncoder</A></H2>
+<H2><A NAME="encoding">7. Encodieren mit MEncoder</A></H2>
 
 <P>Eine komplette Auflistung aller MEncoder-Optionen und aller Beispiele
-findest du in der man-page.</P>
+findest du in der man-page. Einige sinnvolle Beispiele und detaillierte
+Anleitungen, wie die diversen Parameter benutzt werden, findest du in den
+<A HREF="../tech/encoding-tips.txt">Encodierungstipps (englisch)</A>, die
+von mehreren Emails auf der
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">mplayer-users</A>
+zusammengetragen wurden. Durchsuche auch das
+<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">Archiv</A>. Dort findest
+du eine Unmenge an Diskussionen &uuml;ber alle m&ouml;glichen Themen rund um
+die Encodierung mit MEncoder.</P>
 
-<H3><A NAME="2pass">2.4.1. MPEG4-Encodierung ("DivX") in zwei oder drei
+<H3><A NAME="2pass">7.1. MPEG4-Encodierung ("DivX") in zwei oder drei
 Durchl&auml;ufen </A></H3>
 
 <P><U><B>2-pass-Encodierung:</B></U> Der Name kommt in der Tat daher, dass
@@ -95,7 +103,7 @@ encodiert. Das Schema: </P>
   -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
-<H3><A NAME="rescaling">2.4.2. Skalierung von Filmen</A></H3>
+<H3><A NAME="rescaling">7.2. Skalierung von Filmen</A></H3>
 
 <P>Oftmals ist die &Auml;nderung der Bildgr&ouml;&szlig;e erforderlich. Die
 Gr&uuml;nde daf&uuml;r k&ouml;nnen verschieden sein: Dateigr&ouml;&szlig;e
@@ -115,7 +123,7 @@ MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4 -vop scale=640:480 -sws 2 -oac copy -o ausgabe.avi</CODE></P>
 
-<H3><A NAME="copying">2.4.3. Stream-Kopiermodus</A></H3>
+<H3><A NAME="copying">7.3. Stream-Kopiermodus</A></H3>
 
 <P>MEncoder kann Input-Streams auf zwei Arten bearbeiten:
 <B>encodieren</B> oder <B>kopieren (copy)</B>. Diese Sektion erkl&auml;rt die
@@ -136,7 +144,7 @@ MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 </UL>
 
 
-<H3><A NAME="fixing">2.4.4. Reparieren von AVIs mit defektem Index oder
+<H3><A NAME="fixing">7.4. Reparieren von AVIs mit defektem Index oder
 schlechtem Interleaving</A></H3>
 
 <P>Trivial. Wir kopieren einfach die Video- und Audiostreams, und
@@ -149,7 +157,7 @@ nicht mehr gebraucht wird.</P>
 ausgabe.avi</CODE></P>
 
 
-<H3><A NAME="libavcodec">2.4.5. Encodierung mit der
+<H3><A NAME="libavcodec">7.5. Encodierung mit der
   <I>libavcodec</I>-Codec-Familie</A></H4>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> bietet eine einfache
@@ -161,7 +169,7 @@ Codecs encodieren:</P>
   <LI>mjpeg - Motion JPEG</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
-  <LI>mpeg4 - ISO-Standard-MPEG4 (kompatibel zu DivX4/5, OpenDivX, XviD)</LI>
+  <LI>mpeg4 - ISO-Standard-MPEG4 (kompatibel zu DivX5, XviD)</LI>
   <LI>msmpeg4 - pre-Standard-MPEG4-Variante von MS, v3 (aka DivX3)</LI>
   <LI>msmpeg4v2 - pre-Standard-MPEG4-Variante von MS, v2 (wird in alten
     ASF-Dateien benutzt)</LI>
@@ -178,7 +186,7 @@ Codecs encodieren:</P>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts
 vcodec=mjpeg -oac copy</CODE></P>
 
-<H3><A NAME="image_files">2.4.6 Encodierung von mehreren Einzelbildern
+<H3><A NAME="image_files">7.6 Encodierung von mehreren Einzelbildern
   (JPEGs, PNGs oder TGAs)</A></H3>
 
 <P>MEncoder kann aus mehreren JPEG-, PNG- oder TGA-Einzelbildern
@@ -238,7 +246,7 @@ aktuellen Verzeichnis:</I><BR>
 &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
 -o output.avi</CODE></P>
 
-<H3><A NAME="vobsub">2.4.7. Extrahieren von DVD-Untertiteln in eine
+<H3><A NAME="vobsub">7.7. Extrahieren von DVD-Untertiteln in eine
 Vobsub-Datei</A></H3>
   
 <P>MEncoder kann Untertitel von einer DVD extrahieren und sie als Datei
@@ -288,7 +296,7 @@ pass=1</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder film.mpg -ifo film.ifo -vobsubout untertitel
 -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H3><A NAME="aspect">2.4.8. Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
+<H3><A NAME="aspect">7.8. Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
 </A></H3>
 
 <P>DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert, der das Verh&auml;ltnis

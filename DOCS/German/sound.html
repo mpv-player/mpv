@@ -199,35 +199,43 @@ ist ein Beispiel, wie Filter mit Parametern verwendet werden k&ouml;nnen:</P>
 <P>Das setzt die Ausgabefrequenz des Resampleplugins auf 11025Hz und
 downmixt das Audio auf einen Kanal mit dem Pan-Filter.</P>
 
-<P>Die meisten Filter geben mehr Statusinformationen aus, wenn <CODE>-v</CODE>
-benutzt wird.</P>
-
 <P>Die allgemeine Kontrolle der Filterschicht geschieht &uuml;ber
 <CODE>-af-adv</CODE>. Diese Option kennt zwei Parameter:</P>
 
 <DL>
   <DT><CODE>force</CODE><DT>
-  <DD>ist eine ganze Zahl zwischen 0 und 3, die angibt, wie die Filter
+  <DD>ist ein Bitfeld, das angibt, wie die Filter
     einzuf&uuml;gen sind und welche Geschwindigkeits-/Genauigkeitsoptimierungen
     sie verwenden:
     <DL>
-      <DT>0</DT>
+      <DT><CODE>0</CODE></DT>
       <DD>Benutzt automatisches Einf&uuml;gen und optimiert in Abh&auml;ngigkeit
         der CPU-Geschwindigkeit.</DD>
-      <DT>1</DT>
+      <DT><CODE>1</CODE></DT>
       <DD>Benutzt automatisches Einf&uuml;gen und optimiert f&uuml;r die
-        h&ouml;chstm&ouml;gliche Geschwindigkeit. Wenn diese Option gesetzt
-        ist, dann wird Fixkommaarithmetik verwendet. Warnung: Einige
+        h&ouml;chstm&ouml;gliche Geschwindigkeit.<BR>
+        <EM>Warnung:</EM> Einige
         Features der Audiofilter werden kommentarlos deaktiviert, und die
         Soundqualit&auml;t k&ouml;nnte niedriger sein als erwartet.</DD>
-      <DT>2</DT>
+      <DT><CODE>2</CODE></DT>
       <DD>Benutzt automatisches Einf&uuml;gen der Filter und optimiert f&uuml;r
-        Qualit&auml;t. Wenn diese Option gesetzt ist, dann wird
-        Flie&szlig;kommaarithmetik verwendet. Das ist nat&uuml;rlich sehr
-        CPU-intensiv, liefert aber auch die beste Qualit&auml;t.</DD>
-      <DT>3</DT>
-      <DD>F&uuml;t nicht automatisch Filter ein. Warnung: Hiermit kann
+        Qualit&auml;t.</DD>
+      <DT><CODE>3</CODE></DT>
+      <DD>F&uuml;t nicht automatisch Filter ein.<BR>
+        <I>Warnung:</I> Hiermit kann
         MPlayer eventuell zum Absturz gebracht werden.</DD>
+      <DT><CODE>4</CODE></DT>
+      <DD>F&uuml;gt automatisch Filter so wie bei 0 hinzu, benutzt aber
+        Flie&szlig;kommaarithmetik, wo dies m&ouml;glich ist.</DD>
+      <DT><CODE>5</CODE></DT>
+      <DD>F&uuml;gt automatisch Filter so wie bei 1 hinzu, benutzt aber
+        Flie&szlig;kommaarithmetik, wo dies m&ouml;glich ist.</DD>
+      <DT><CODE>6</CODE></DT>
+      <DD>F&uuml;gt automatisch Filter so wie bei 2 hinzu, benutzt aber
+        Flie&szlig;kommaarithmetik, wo dies m&ouml;glich ist.</DD>
+      <DT><CODE>7</CODE></DT>
+      <DD>F&uuml;gt keine Filter automatisch hinzu, benutzt aber
+        Flie&szlig;kommaarithmetik, wo dies m&ouml;glich ist.</DD>
     </DL>
   </DD>
 
@@ -235,17 +243,44 @@ benutzt wird.</P>
   <DD>Dies ist ein Synonym f&uuml;r <CODE>-af</CODE>.</DD>
 </DL>
 
+<P>Die Filterschicht wird auch von den folgenden allgemeinen Optionen
+beeinflusst:</P>
+
+<DL>
+  <DT><CODE>-v</CODE></DT>
+  <DD>Gibt ausf&uuml;hrlichere Meldungen aus. Die meisten Filter geben hiermit
+    auch mehr Statusinformationen aus.</DD>
+  <DT><CODE>-channels</CODE></DT>
+  <DD>Diese Option setzt die Anzahl der Ausgabekan&auml;le, die deine
+    Soundkarte benutzt. Sie beeinflusst auch die Anzahl der Kan&auml;le, die
+    vom Quellstream decodiert werden. Wenn der Stream weniger als die hiermit
+    geforderte Anzahl Kan&auml;le enth&auml;lt, so werden automatisch
+    Filter eingef&uuml;gt (siehe unten). Das Routing ist das Standardrouting
+    des channels-Filters.</DD>
+  <DT><CODE>-srate</CODE></DT>
+  <DD>Diese Option gibt die Samplerate deiner Soundkarte an. Wenn die
+    Samplefrequenz deiner Soundkarte anders ist als die des aktuellen
+    Quellstreams, so wird der resample-Filter (siehe unten) automatisch
+    eingef&uuml;gt, um diese Differenz auszugleichen.</DD>
+  <DT><CODE>-format</CODE><DT>
+  <DD>Diese Option setzt das Sampleformt der Audiofilterschicht und der
+    Soundkarte. Wenn das angeforderte Format der Soundkarte nicht das gleiche
+    wie das des Quellstreams ist, dann wird der format-Filter (siehe unten)
+    automatisch eingef&uuml;gt, um das Format zu konvertieren.</DD>
+</DL>
+
 
 <H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
 
-<P>MPlayer unterst&uuml;tzt vollst&auml;ndig Up-/Downsampling. Dieser Filter
-kann benutzt werden, wenn du eine Soundkarte hast, die nur eine feste Frequenz
-unterst&uuml;tzt, oder die nur maximal 44.1kHz unterst&uuml;tzt. Dieser Filter
-wird automatisch aktiviert, wenn er ben&ouml;tigt wird. Er kann aber auch
-explizit auf der Kommandozeile aktiviert werden. Er kennt drei Optionen:</P>
+<P>MPlayer unterst&uuml;tzt vollst&auml;ndig Up-/Downsampling mit dem
+resample-Filter. Dieser Filter kann benutzt werden, wenn du eine Soundkarte
+hast, die nur eine feste Frequenz unterst&uuml;tzt, oder die nur maximal
+44.1kHz unterst&uuml;tzt. Dieser Filter wird automatisch aktiviert, wenn er
+ben&ouml;tigt wird. Er kann aber auch explizit auf der Kommandozeile aktiviert
+werden. Er kennt drei Optionen:</P>
 
 <DL>
-  <DT><CODE>srate</CODE></DT>
+  <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
   <DD>wird benutzt, um die Ausgabesmaplefrequenz in Hz anzugeben. Der
     g&uuml;ltige Bereich liegt zwischen 8kHz und 192kHz. Wenn Eingangs-
     und Ausgabefrequenz gleich sind, oder wenn dieser Parameter nicht angegeben
@@ -256,17 +291,23 @@ explizit auf der Kommandozeile aktiviert werden. Er kennt drei Optionen:</P>
   <DT><CODE>sloppy</CODE></DT>
   <DD>Mit dieser Option wird zugelassen, dass die Ausgabefrequenz leicht von
     der geforderten Frequenz (<CODE>srate</CODE>) abweicht. Diese Option
-    kann benutzt werden, wenn das Playback nur sehr langsam startet.</DD>
+    kann benutzt werden, wenn das Playback nur sehr langsam startet.
+    Diese Option ist standardm&auml;&szlig;ig aktiviert.</DD>
 
-  <DT><CODE>fast</CODE><DT>
-  <DD>Dieser Parameter aktiviert otpional lineare Interpolation als
-    Resamplingmethode. Lineare Interpolation ist sehr schnell, liefert aber
-    auch schlechtere Soundqualit&auml;t, vor allem in Verbindung mit
-    Up-/Downsampling.</DD>
+  <DT><CODE>type &lt;0-2&gt;</CODE><DT>
+  <DD>ist ein optional anzugebender Integer zwischen <CODE>0</CODE> und
+    <CODE>2</CODE>, der den zu benutzenden Resamplealgorithmus ausw&auml;hlt.
+    Hier w&auml;hlt <CODE>0</CODE> lineare Interpolation und <CODE>1</CODE>
+    mehrphasige Filterb&auml;nke mit Ganzahlarithmetik. <CODE>2</CODE>
+    w&auml;hlt mehrphasige Filterb&auml;nke mit Flie&szlig;kommaarithmetik.
+    Lineare Interpolation ist sehr schnell, liefert daf&uuml;r aber auch
+    schlechte Qualit&auml;t, vor allem, wenn sie benutzt wird, um die
+    Samplerate zu erh&ouml;hen. Die beste Qualit&auml;t liefert <CODE>2</CODE>.
+    Daf&uuml;r ben&ouml;tigt sie aber auch die meiste CPU-Zeit.</DD>
 </DL>
 
 <P>Beispiele:<BR>
-  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:1</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
 
 <P>Dies setzt die Ausgabefrequenz des Resample-Filters auf exakt 44100Hz
 mit linearer Interpolation.</P>
@@ -284,19 +325,21 @@ Wenn er nicht gebraucht wird, so entl&auml;dt sich dieser Filter automatisch.
 Die Anzahl der Parameter ist dynamisch:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
-  <DD>ist eine ganze Zahl zwischen 1 und 6, die die Nummer der
-    Ausgabekan&auml;le festlegt. Dieser Parameter wird ben&ouml;tigt. Wenn er
-    weggelassen wird, dann erh&auml;lt man einen Laufzeitfehler.</DD>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>ist eine ganze Zahl zwischen <CODE>1</CODE> und <CODE>6</CODE>, die die
+    Anzahl der Ausgabekan&auml;le festlegt. Dieser Parameter wird
+    ben&ouml;tigt. Wenn er weggelassen wird, dann erh&auml;lt man einen
+    Laufzeitfehler.</DD>
 
-  <DT><CODE>nr</CODE></DT>
-  <DD>ist eine ganze Zahl zwischen 1 und 6, die die Anzahl der Umleitungen
+  <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
+  <DD>ist eine ganze Zahl zwischen <CODE>1</CODE> und <CODE>6</CODE>, die die
+    Anzahl der Umleitungen
     festlegt. Dieser Parameter ist optional. Wenn er weggelassen wird, dann
     werden keine Umleitungen vorgenommen.</DD>
 
   <DT><CODE>von1:nach1:von2:nach2:von3:nach3...</CODE></DT>
-  <DD>sind paare von Nummern zwischen 0 und 5, die festlegen, wohin jeder
-    Kanal umgeleitet werden soll.</DD>
+  <DD>sind paare von Nummern zwischen <CODE>0</CODE> und <CODE>5</CODE>, die
+    festlegen, wohin jeder Kanal umgeleitet werden soll.</DD>
 </DL>
 
 <P>Wenn nur <CODE>nch</CODE> angegeben wird, dann werden die
@@ -322,16 +365,18 @@ leise, aber 0 und 1 werden trotzdem vertauscht.</P>
 
 <H5><A NAME="af_format">2.3.2.3.3 Formatkonvertierung</A></H5>
 
-<P>Dieser Filter konviert das Sampleformat. Er wird automatisch aktiviert,
-wenn er ben&ouml;tigt wird.</P>
+<P>Der <CODE>format</CODE>-Filter konvertiert zwischen verschiedenen
+Sampleformaten. Er wird automatisch aktiviert, wenn er von der Soundkarte
+oder einem anderen Filter ben&ouml;tigt wird.</P>
 
 <DL>
-  <DT><CODE>bps</CODE></DT>
-  <DD>kann 1, 2 oder 4 sein und gibt die Anzahl der Bytes pro Sample an.
+  <DT><CODE>bps &lt;Nummer&gt;</CODE></DT>
+  <DD>kann <CODE>1</CODE>, <CODE>2</CODE> oder <CODE>4</CODE> sein und gibt die
+    Anzahl der Bytes pro Sample an.
     Dieser Parameter wird ben&ouml;tigt und f&uuml;hrt zu einem Laufzeitfehler,
     wenn er weggelassen wird.</DD>
 
-  <DT><CODE>f</CODE></DT>
+  <DT><CODE>f &lt;format&gt;</CODE></DT>
   <DD>ist ein Textstring, der das Sampleformat beschreibt. Der String besteht
     aus einem Mix der folgenden Schl&uuml;sselw&ouml;rter:
     <CODE>alaw</CODE>, <CODE>mulaw</CODE> oder
@@ -343,17 +388,18 @@ wenn er ben&ouml;tigt wird.</P>
 </DL>
 
 <P>Beispiel:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -af format=4:float</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer -af format=4:float media.avi</CODE></P>
 
 <P>setzt das Ausgabeformat auf 4 Bytes pro Sample Flie&szlig;kommadaten.</P>
 
 
 <H5><A NAME="af_delay">2.3.2.3.4 Verz&ouml;gerung</A></H5>
 
-<P>Dieser Filter verz&ouml;gert den Sound auf dem Weg zum Lautsprecher, damit
-die verschiedenen Kan&auml;le zur gleichen Zeit bei der Sitzposition ankommen.
-Dieser Filter ist nur dann n&uuml;tzlich, wenn du mehr als zwei Lautsprecher
-hast. Dieser Filter erh&auml;lt eine variable Anzahl Parameter:</P>
+<P>Der <CODE>delay</CODE>-Filter verz&ouml;gert den Sound auf dem Weg zum
+Lautsprecher, damit die verschiedenen Kan&auml;le zur gleichen Zeit bei der
+Sitzposition ankommen. Dieser Filter ist nur dann n&uuml;tzlich, wenn du mehr
+als zwei Lautsprecher hast. Dieser Filter erh&auml;lt eine variable Anzahl
+Parameter:</P>
 
 <DL>
   <DT><CODE>d1:d2:d3...</CODE></DT>
@@ -384,21 +430,22 @@ die beiden hinteren Kan&auml;le um 0ms und den zentrierten Kanal um 7ms.</P>
 
 <H5><A NAME="af_volume">2.3.2.3.5 Lautst&auml;rkekontrolle mit Software</A></H5>
 
-<P>Dieser Filter stellt eine Softwarelautst&auml;rkeregelung dar. Sei bei der
-Benutzung dieses Filters vorsichtig, da er den Signal-zu-Rausch-Abstand
-verringern kann. In den meisten F&auml;llen ist es besser, beim Mixer deiner
-Soundkarte den PCM-Regler auf's Maximum zu setzen und diesen Filter
-wegzulassen. &Auml;ndere dann die Lautst&auml;rke mit dem Hauptregler des
-Mixers. Wenn der Computer an einen externen Verst&auml;rker angeschlossen ist
-(was meistens der Fall ist), dann kann der Rauschpegel minimiert werden, indem
-der Hauptregler und der Lautst&auml;rkeregler des Verst&auml;rkers angepasst
-werden, bis das Hintergrundzischen verschwunden ist. Der Filter selber kennt
-zwei Parameter:</P>
+<P>Lautst&auml;rkeregelung in Software wird mit dem <CODE>volume</CODE>-Filter
+realisiert. Sei bei der Benutzung dieses Filters vorsichtig, da er den
+Signal-zu-Rausch-Abstand verringern kann. In den meisten F&auml;llen ist es
+besser, beim Mixer deiner Soundkarte den PCM-Regler auf's Maximum zu setzen und
+diesen Filter wegzulassen. &Auml;ndere dann die Lautst&auml;rke mit dem
+Hauptregler des Mixers. Wenn der Computer an einen externen Verst&auml;rker
+angeschlossen ist (was meistens der Fall ist), dann kann der Rauschpegel
+minimiert werden, indem der Hauptregler und der Lautst&auml;rkeregler des
+Verst&auml;rkers angepasst werden, bis das Hintergrundzischen verschwunden ist.
+Der Filter selber kennt zwei Parameter:</P>
 
 <DL>
-  <DT><CODE>v</CODE></DT>
-  <DD>ist eine Flie&szlig;kommazahl zwischen -200 und +60 und gibt die
-    Lautst&auml;rke in dB an. Der Standardlevel ist -10dB.</DD>
+  <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
+  <DD>ist eine Flie&szlig;kommazahl zwischen <CODE>-200</CODE> und
+    <CODE>+60</CODE> und gibt die Lautst&auml;rke in dB an. Der Standardlevel
+    ist -10dB.</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>ist ein Bin&auml;rwert, der soft clipping an- oder ausschaltet.
@@ -422,10 +469,10 @@ die Dynamikbandbreite vollst&auml;ndig ausgenutzt wird.</P>
 
 <H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
 
-<P>Dieser Filter ist ein 10-Band Graphicequalizer, der durch 10
-IIR-Bandpassfilter (infinite impulse response, rekursive Filter) realisiert
-wird. Das bedeutet, dass er unabh&auml;ngig vom wiederzugebenden Audiotyp
-funktioniert. Die Mittenfrequenzen der zehn B&auml;ndern sind:</P>
+<P>Der <CODE>equalizer</CODE>-Filter ist ein 10-Band Graphicequalizer, der
+durch 10 IIR-Bandpassfilter (infinite impulse response, rekursive Filter)
+realisiert wird. Das bedeutet, dass er unabh&auml;ngig vom wiederzugebenden
+Audiotyp funktioniert. Die Mittenfrequenzen der zehn B&auml;ndern sind:</P>
 
 <TABLE BORDER="0" WIDTH="100%">
   <TR><TD>Band Nr.</TD><TD>Mittenfrequenz</TD></TR>
@@ -452,8 +499,9 @@ resample-Filter vorgenommen wird.</P>
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
-  <DD>sind Flie&szlig;kommazahlen zwischen -12 und +12dB, die die
-    Verst&auml;rkung in dB des jeweiligen Bandes angeben.</DD>
+  <DD>sind Flie&szlig;kommazahlen zwischen <CODE>-12</CODE> und
+    <CODE>+12</CODE>, die die Verst&auml;rkung in dB des jeweiligen Bandes
+    angeben.</DD>
 </DL>
 
 <P>Beispiel:<BR>
@@ -464,9 +512,10 @@ l&ouml;scht ihn um 1kHz beinahe komplett aus.</P>
 
 <H5><A NAME="af_panning">2.3.2.3.7 Panning-Filter </A></H5>
 
-<P>Dieser Filter kann benutzt werden, um Kan&auml;le beliebig zu mischen. Er
-ist grundlegend nur eine Kombination des Lautst&auml;rkefilters und des
-channels-Filters. Es gibt zwei Haupteinsatzgebiete f&uuml;r diesen Filter:</P>
+<P>Der <CODE>pan</CODE>-Filter kann benutzt werden, um Kan&auml;le beliebig zu
+mischen. Er ist grundlegend nur eine Kombination des Lautst&auml;rkefilters und
+des channels-Filters. Es gibt zwei Haupteinsatzgebiete f&uuml;r diesen
+Filter:</P>
 
 <OL>
   <LI>Heruntermischen vieler Kan&auml;le auf wenige, z.B. Stereo zu Mono.</LI>
@@ -479,20 +528,92 @@ Ausprobieren, bevor die gew&uuml;nschten Ergebnisse erzielt werden. Die Anzahl
 der Parameter h&auml;ngt von der Anzahl der Ausgabekan&auml;le ab:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
-  <DD>ist eine ganze Zahl zwischen 1 und 6 und wird benutzt, um die Anzahl
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>ist eine ganze Zahl zwischen <CODE>1</CODE> und <CODE>6</CODE> und wird
+    benutzt, um die Anzahl
     der Ausgabekan&auml;le zu setzen. Dieser Parameter wird ben&ouml;tigt.
     Wenn er weggelassen wird, erh&auml;lt man einen Laufzeitfehler.</DD>
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
-  <DD>sind Flie&szlig;kommazhalen zwischen 0 und 1. <CODE>l[i][j]</CODE>
-    gibt an, wieviel vom Einganskanal j in den Ausgabekanal i zu mischen
-    ist.</DD>
+  <DD>sind Flie&szlig;kommazhalen zwischen <CODE>0</CODE> und
+    <CODE>1</CODE>. <CODE>l[i][j]</CODE>
+    gibt an, wieviel vom Einganskanal <CODE>j</CODE> in den Ausgabekanal
+    <CODE>i</CODE> zu mischen ist.</DD>
 </DL>
 
-<P>Beispiel:<BR>
+<P>Beispiel 1:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
 
 <P>mischt stereo auf mono.</P>
+
+
+<P>Beispiel 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3
+  media.avi</CODE></P>
+
+<P>gibt drei Kan&auml;le aus, l&auml;sst dabei Kan&auml;le 0 und 1 intakt und
+mischt die Quellkan&auml;le 0 und 1 in den Ausgabekanal 2 (welcher z.B. an
+einen Sub-woofer geschickt werden kann).
+
+
+<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+
+<P>Der <CODE>sub</CODE>-Filter f&uuml;gt dem Audiostream einen Sub-woofer-Kanal
+hinzu. Die dazu verwendeten Audiodaten sind der Durchschnitt der Kan&auml;le 0
+und 1. Der resultierende Sound wird dann mit einem Butterworth-Filter vierten
+Grades tiefpassgefiltert. Der Filter schneidet bei 60Hz ab. Warnung: deaktivier
+diesen Filter, wenn du DVDs mit Dolby Digital 5.1-Sound abspielst, weil dieser
+Filter ansonsten den bereits vorhandenen Sub-woofer-Kanal st&ouml;rt. Dieser
+Filter bekommt zwei Parameter:</P>
+
+<DL>
+  <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
+  <DD>ist eine optionale Flie&szlig;kommazahl, die die Frequenz in Hz angibt,
+    bei der Tiefpass abschneidet. G&uuml;ltig sind Werte ziwschen
+    <CODE>20</CODE> und <CODE>300</CODE>. Das beste Ergebnis erh&auml;lst du,
+    wenn du die Frequenz so niedrig wie m&ouml;glich setzt. Das wird das
+    Stereo- und Surround-Sound-Erlebnis verbessern. Der Standardwert f&uuml;r
+    die Frequenzgrenze liegt bei 60Hz.</DD>
+
+  <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
+  <DD>ist eine optionale ganze Zahl zwischen <CODE>0</CODE> und <CODE>5</CODE>,
+    die angibt, auf welchem Kanal der Sub-woofer-Kanal auszugeben ist.
+    Der Standardkanal ist <CODE>5</CODE>. Die gesamte Anzahl an Kan&auml;len
+    wird auf <CODE>ch</CODE> erh&ouml;ht, falls dies notwendig sein sollte.</DD>
+</DL>
+
+<P>Beispiel:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
+
+<P>f&uuml;gt einen Sub-woofer-Kanal mit Grenzfrequenz von 100Hz hinzu und gibt
+ihn auf Kanal 4 aus.</P>
+
+<H5><A NAME="af_surround">2.3.2.3.9 Surround-sound-Decoder</A></H5>
+
+<P>Matrix encodierter Surround-Sound kann mit dem <CODE>surround</CODE>-Filter
+decodiert werden. Dolby Surround ist ein Beispiel f&uuml;r ein matrix
+encodiertes Format. Viele Dateien mit Zweikanalaudio enthalten tats&auml;chlich
+matrix encodierten Surround-Sound. Um diesen Filter zu benutzen, brauchst du
+eine Soundkarte, die mindestens vier Kan&auml;le unterst&uuml;tzt. Dieser
+Filter kennt einen Parameter:</P>
+
+<DL>
+  <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
+  <DD>ist eine optionale Flie&szlig;kommazahl zwischen <CODE>0</CODE> und
+    <CODE>1000</CODE>, die die Verz&ouml;gerung in ms f&uuml;r den hinteren
+    Lautsprecher angibt. Die Verz&ouml;gerung soltle wie folgt gew&auml;hlt
+    werden: Wenn d1 die Entfernung zwischen der Sitzposition und den vorderen
+    Lautsprechern ist, und wenn d2 die Entfernung zwischen der Sitzposition
+    und den hinteren Lautsprechern ist, dann sollte <CODE>d</CODE> auf
+    15ms gesetzt werden, wenn d1 &lt;= d2 ist, und auf 15 + 5*(d1-d2), wenn
+    d1 &gt; d2 ist. Der Standardwert <CODE>d</CODE> ist 20ms.</DD>
+</DL>
+
+<P>Beispiel:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
+
+<P>decodiert Surround-Sound mit einer Verz&ouml;gerung von 15ms f&uuml;r die
+hinteren Lautsprecher.</P>
+
 
 
 <H2><STRONG>Anmerkung: Audioplugins sind veraltet und wurden durch Audiofilter

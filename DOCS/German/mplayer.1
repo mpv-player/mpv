@@ -39,7 +39,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-05"
+.TH MPlayer 1 "2003-01-11"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -412,6 +412,12 @@ Benutze \-audio\-demuxer 17, um eine Datei als .mp3 abzuspielen.
 Spielt Audio aus einer externen Datei (WAV, MP3 oder Ogg Vorbis) zu einem
 Film ab.
 .TP
+.B \-bandwidth <Wert>
+Gibt die maximal zu benutzende Bandbreite für Netzwerkstreaming an (bei
+Servern, die Streams in verschiedenen Bitraten senden können).
+Nützlich, wenn du Live\-Streams über eine langsame Verbindung ansehen
+möchtest.
+.TP
 .B \-cdrom\-device <Pfad zum Gerät>
 Ändert den Standardwert für das CDROM-Gerät, /dev/\:cdrom.
 .TP
@@ -502,6 +508,10 @@ Unten stehen Beispiele.
 .TP
 .B \-csslib <Dateiname>
 (alter DVD-Zugriff) Gibt die zu verwendende libcss.so an.
+.TP
+.B \-cuefile <Datename> (siehe auch \-vcd)
+Spiele eine VCD/\:SVCD/\:XCD in CDRwins Diskformat (bin/\:cue) ab und benutze
+dazu die angegebene .cue\-Datei.
 .TP
 .B \-demuxer <Nummer>
 Erzwingt einen bestimmten Audiodemuxertyp.
@@ -711,6 +721,9 @@ Ausgabeformat des Tuners (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420)
 Breite des Ausgabefensters
 .IPs height=<Wert>
 Höhe des Ausgabefensters
+.IPs fps=<Wert>
+Bildanzahl, mit der Video aufgenommen wird (Bilder pro Sekunde, frames per
+second).
 .IPs buffersize=<Wert>
 Maximalgröße des Capture-Puffers in Megabytes (Standard ist die Hälfte
 des physikalisch verfügbaren Speichers)
@@ -766,6 +779,12 @@ Wählt einen Audioausgang der TV-Karte, wenn diese mehrere hat.
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
 Diese Optionen setzen Parameter des Mixers auf der Capture-Karte.
 Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
+.IPs immediatemode=<Boolean>
+Ein Wert von 0 bedeutet: nimm Audio und Video zusammen in einem Puffer auf
+(Standardwert für mencoder).
+Ein Wert von 1 beduetet: nimm nur Video direkt von der Karte auf und Audio
+über ein externes Kabel von der TV\-Karte zur Soundkarte (Standardwert
+für mplayer).
 .RE
 .
 .TP
@@ -773,7 +792,8 @@ Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
 Gibt den Benutzernamen für die HTTP-Authentifizierung an.
 .TP
 .B \-vcd <Titel>
-Spielt den Video\-CD\-Titel direkt vom Gerät anstatt aus einer Datei ab.
+Spielt den Video\-CD\-Titel direkt von einem Gerät oder einem Diskabbild
+ab (siehe \-cuefile).
 .TP
 .B \-vid <id>
 Wählt die Videospur [MPG: 0\-15 ASF: 0\-255].
@@ -863,19 +883,26 @@ alte Schriftunterstützung nicht mehr benutzt werden.
 .B \-noautosub
 Deaktiviert das automatische Laden von Untertiteln.
 .TP
+.B \-overlapsub
+Aktiviert die Überlappung von Untertiteln bei allen Untertitelformaten.
+.TP
 .B \-nooverlapsub
-Deaktiviert das Überlappen von Untertiteln.
+Deaktiviert das Überlappen von Untertiteln. Normalerweise wird es bei
+bestimmten Formaten automatisch aktiviert.
 .TP
 .B \-osdlevel <0\-3> (nur bei MPLAYER)
 Gibt den Modus an, in dem das OSD startet:
+
+.PD 0
 .RSs
-0: nur Untertitel
-.br
-1: Lautstärkeleiste und Positionsanzeige (Standard)
-.br
-2: Lautstärkeleiste, Positionsanzeige und prozentuale Dateiposition
-.br
-3: Lautstärkeleiste, Positionsanzeige, prozentuale Dateiposition und
+.IPs 0:
+nur Untertitel
+.IPs 1:
+Lautstärkeleiste und Positionsanzeige (Standard)
+.IPs 2:
+Lautstärkeleiste, Positionsanzeige und prozentuale Dateiposition
+.IPs 3:
+Lautstärkeleiste, Positionsanzeige, prozentuale Dateiposition und
 Dateidauer
 .RE
 .TP
@@ -1001,6 +1028,11 @@ Audio macht (OggDS?).
 Gibt die Position der Untertitel auf dem Bildschirm an.
 Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 .TP
+.B \-subalign <0\-2>
+Gibt an, wie die Untertitel an subpos ausgerichtet werden.
+0 bedeutet Ausrichtung oben (Standardverhalten), 1 bedeutet Ausrichtung in
+der Mitte, und 2 bedeutet Ausrichtung unten.
+.TP
 .B \-subwidth <10\-100>
 Gibt die maximale Breite der Untertitel an. Nützlich für Ausgabe auf dem
 Fernseher.
@@ -1034,7 +1066,7 @@ Optionen.
 Die verfügbaren Filter lauten:
 .
 .RSs
-.IPs resample[=srate[:sloppy][:fast]]
+.IPs resample[=srate[:sloppy][:type]]
 Ändert die Samplerate des Audiostreams zu der ganzzahlen srate (in Hz).
 Unterstützt nur das 16bit Little-Endian-Format.
 .IPs channels[=nch]
@@ -1057,7 +1089,7 @@ unsigned oder signed
 .br
 le oder be (little oder big endian)
 .br
-.IPs "volume[=v:sc:pr:en]"
+.IPs "volume[=v:sc]"
 Wählt das Lautstärkelevel der Ausgabe.
 Der Filter ist nicht reentrant und kann dementsprechend nur einmal pro
 Audiostream aufgerufen werden.
@@ -1069,18 +1101,34 @@ entsprechend.
 Die Standardverstärkung ist -20dB.
 .br
 sc: Aktiviert "soft clipping".
-.br
-pr: Aktiviert die Untersuchung der Lautstärke jedes Audiostreams. Sowohl
-die maximale als auch die momentane Lautstärke werden untersucht. Auf die
-momentane Lautstärke kann nur durch das Laufzeitinterface zugegriffen
-werden. Die maximale Lautstärke wird aber am Ende des Films ausgegeben.
-Der Wert kann benutzt werden, um beim Encodieren die Dynamikbandbreite
-voll auszunutzen.
-.br
-en: (De-)Aktiviert die Lautstärkeregelung.
 .REss
-.IPs delay[=d] (DEBUG\-CODE)
-Verzögert die Soundausgabe um d Sekunden (Fließkommazahl).
+.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+Mischt Kanäle beliebig. Details findest du in DOCS/sound.html.
+.RSss
+n: Anzahl der Ausgabekanäle (1 - 6).
+.br
+lij: gibt an, wieviel vom Quallkanal j in den Ausgabekanal i gemischt wird.
+.REss
+.IPs "sub[=fc:ch]"
+Fügt einen Sub-woofer-Kanal hinzu.
+.RSss
+fc: ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz,
+Standardwert ist 60Hz).
+.br
+ch: Anzahl der Sub-Kanäle.
+.REss
+.IPs "surround[=d]"
+Decoder für matrix encodierten Surroundsound. Funktioniert bei vielen
+Zweikanaldateien.
+.RSss
+d: Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms,
+Standardwert ist 15ms).
+.REss
++.IPs delay[=ch1:ch2:...]
+Verzögert die Soundausgabe.
+Gibt für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
+(Fließkommazahl zwischen 0 und 1000).
+ um d Sekunden (Fließkommazahl).
 .RE
 .
 .TP
@@ -1220,6 +1268,9 @@ Weiß.
 .B \-contrast <\-100\-100>
 Passt den Kontrast der Videoausgabe an (Standard: 0).
 Funktioniert so ähnlich wie bei der Helligkeit.
+.TP
+.B \-dfbopts <Wert> (nur mit \-vo directfb2)
+Gibt eine Parameterliste für den directfb-Treiber an.
 .TP
 .B \-display <Name>
 Gibt den Rechnernamen und die Anzeigenummer des X-Servers an, auf dem
@@ -2006,11 +2057,26 @@ p: Mische Rauschen mit einem (halbwegs) gleichmäßigen Muster
 Aktiviert den Softwareequalizer mit interaktiver Kontrolle wie der
 Hardware\-EQ\-Kontrolle.
 Die Werte können zwischen -100 und 100 liegen.
-.IPs halfpack
+.IPs eq2[=gamma:cont:bright]
+Alternativer Softwareequalizer, der Lookup-Tabellen benutzt (sehr langsam).
+Er erlaubt neben simpler Anpassung der Helligkeit und des Kontrastes auch
+eine Gammakorrektur.
+Die Parameter werden als Fließkommazahlen angegeben.
+Standardwerte sind gamma=1.0, contrast=1.0 und brightness=0.0.
+Die Wertebereiche betragen 0.1\-10 für gamma, -2\-2 für Kontrast (negative
+Werte invertieren das Bild) und -1\-1 für die Helligkeit.
+.IPs halfpack[=f]
 Konvertiert planaeres YUV 4:2:0 in halbhohes, gepacktes 4:2:2, wobei
 die Helligkeit runtergesamplet und der Farbanteil beibehalten wird.
 Nützlich bei Ausgaben auf Geräte mit niedriger Auflösung, bei denen
 die Hardwareskalierung schlechte Qualität liefert oder nicht verfügbar ist.
+Kann auch als primitiver Deinterlacer benutzt werden, der nur auf dem
+Helligkeitsanteil arbeitet und sehr wenig CPU-Leistung erfordert.
+Standardmäßig bildet halfpack den Durchschnitt mehrer Zeilen beim
+Downsampling.
+Der optionale Parameter f steuert, welche Zeilen erhalten bleiben: bei 0
+nur die geraden, bei 1 nur die ungeraden.
+Andere Werte für f aktivieren das Standardverhalten (Durchschnittsbildung).
 .IPs dint[=sense:level]
 Erkennt interlaced Bilder im Videostream und verwirft jeweils das erste.
 Die Werte können zwischen 0.0 und 1.0 liegen. Der erste Wert (Standard: 0.1)
@@ -2094,14 +2160,80 @@ Benutzt den 2x-Skalier- und Interpolationsalgorithmus für die Skalierung
 und Glättung des Bildes.
 .IPs 1bpp
 Konvertierung von 1bpp\-Bitmaps nach YUV/BGR 8/15/16/32
-.IPs eq2[=Gamma:Kontrast:Helligkeit]
-LUT\-basierender Softwareequalizer
-Der Wertebereich der Parameter beträgt \-100 bis 100.
-.IPs yvu9
-TODO: dokumentiert das mal
-.IPs bmovl
+.IPs "bmovl=hidden:opaque:<fifo>"
 Liest Bitmaps von einem FIFO und zeigt sie im Fenster an.
+.
+.RSss
+hidden: setzt den Standardwert des 'hidden'-Flag (Boolean)
+.br
+opaque: schaltet zwischen Alphablending (transparent) und opaque (schnell)
+um
+.br
+fifo: Pfad und Dateiname des FIFOs (eine named pipe, die mplayer -vop bmovl
+mit der kontrollierenden Anwendung verknüpft)
+.REss
+
+.RS
+FIFO-Kommandos:
 .RE
+.RSss
+RGBA32 Breite Höhe xpos ypos alpha clear
+.br
+gefolgt von Breite*Höhe*4 Bytes RGBA32-Daten.
+
+ABGR32 Breite Höhe xpos ypos alpha clear
+.br
+gefolgt von Breite*Höhe*4 Bytes ABGR32-Daten.
+
+RGB24 Breite Höhe xpos ypos alpha clear
+.br
+gefolgt von Breite*Höhe*3 Bytes RGB32-Daten.
+
+BGR24 Breite Höhe xpos ypos alpha clear
+.br
+gefolgt von Breite*Höhe*3 bytes BGR32-Daten.
+
+ALPHA Breite Höhe xpos ypos alpha
+.br
+ändert Alpha für den Bereich
+
+CLEAR Breite Höhe xpos ypos
+.br
+löscht den Bereich
+
+OPAQUE
+.br
+deaktiviert die Alphatransparenz.
+Schicke "ALPHA 0 0 0 0 0", um sie wieder zu aktivieren.
+
+HIDE
+.br
+versteckt die Bitmap
+
+SHOW
+.br
+zeigt die Bitmap an
+.REss
+
+.RS
+Argumente:
+.RE
+.RSss
+Breite, Höhe: Größe des Bildes/Bereiches.
+.br
+xpos, ypos: fange an Position X/Y an
+.br
+alpha: setzt die Alphadifferenz. 0 bedeutet gleich wie beim Quellbild,
+255 keine Transparenz, -255 komplett transparent.
+Wenn du den Wert auf -255 setzt, dann kannst du mit einer Sequenz von
+ALPHA-Kommandos den Bereich auf -225, -200, -175 etc setzen, um einen netten
+Fade-In-Effekt zu erzielen ;)
+.br
+clear: löscht den Framebuffer vor dem Blitten.
+1 beduetet löschen. Bei 0 wird das Bild einfach auf das vorhandene geschrieben,
+sodass du nicht immer 1,8MB RGBA32-Daten schicken musst, wenn sich nur ein
+kleiner Teil des Bildschirms ändert.
+.REss
 .
 .TP
 .B \-x <x> (nur bei MPLAYER)
@@ -2387,7 +2519,7 @@ Wenn du mit libavcodec encodierst, kannst du hiermit die Optionen angeben.
 .RE
 .PD 1
 
-.RS 7
+.RS
 Verfügbare Optionen sind:
 .RE
 .
@@ -2646,9 +2778,18 @@ encodiert wird):
 .br
 7 (JVT\-Empfehlung)
 .REss
-.IPs vstrict
-Genaues Befolgen der Standards. Nur empfehlenswert, wenn die Ausgabe mit
-einem MPEG4\-Referenzdecoder decodiert werden soll.
+.IPs vstrict=<-1\-1>
+Strikte Einhaltung der Standards.
+.RSss
+0: deaktiviert (Standardeinstellung)
+.br
+1: Nur empfehlenswert, wenn die Ausgabe mit einem MPEG4 Referenzdekoder
+dekodiert werden soll.
+.br
+-1: Erlaubt nichstandardkonforme YV12-Huffyuv-Encodierung (20% kleinere
+Dateien, die aber nicht mit dem offiziellen Huffyuv-Codec abgespielt
+werden können).
+.REss
 .IPs vdpart
 Datenpartitionierung. Fügt zwei Bytes pro Videopaket hinzu und erhöht die
 Fehlerresistenz beim Transfer über unzuverlässige Kanäle (z.B.\& Streaming
@@ -2840,6 +2981,10 @@ motion estimation pre-pass
 subpel refinement quality (für qpel) (Standardwert: 8).
 Anmerkung: Diese Einstellung hat eine signifikante Auswirkung auf die
 Geschwindigkeit.
+.IPs psnr
+Gibt den maximalen Signal-zu-Rauschabstand (peak signal to noise ratio) für
+das komlpette Video nach dem Encodieren aus und speichert die psnr-Werte für
+jedes Bild in der Datei 'psnr_012345.log'.
 .IPs mpeg_quant
 benutze MPEG\-Quantizer anstelle der H.263\-Quantizer
 (Standard: deaktiviert = benutze H.263\-Quantizer)
@@ -3077,6 +3222,8 @@ schaltet Verwerfen von Bildern an/\:aus
 de\-/\:aktiviert die Anzeige von Untertiteln
 .IPs j\ \ \ \ 
 schaltet durch die vorhandenen Untertitelsprachen
+.IPs a\ \ \ \ 
+wechselt die Ausrichtung der Untertitel: oben, mittig, unten
 .IPs "z und x"
 verändert die Untertitelverzögerung um +/\:\- 0.1 Sekunden
 .IPs "r und t"
@@ -3107,8 +3254,6 @@ Sättigungsanpassung
 starte das Abspielen
 .IPs s\ \ \ \ 
 beende das Abspielen
-.IPs a\ \ \ \ 
-zeigt den 'Über...'\-Dialog an
 .IPs l\ \ \ \ 
 lädt eine Datei
 .IPs c\ \ \ \ 

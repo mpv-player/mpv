@@ -198,6 +198,8 @@
                   <LI><A HREF="sound.html#af_volume">2.3.2.3.5 Lautst&auml;rkeregelung per Software</A></LI>
                   <LI><A HREF="sound.html#af_equalizer">2.3.2.3.6 Equalizer</A></LI>
                   <LI><A HREF="sound.html#af_panning">2.3.2.3.7 Panning-Filter</A></LI>
+                  <LI><A HREF="sound.html#af_sub">2.3.2.3.8 Sub-woofer</A></LI>
+                  <LI><A HREF="sound.html#af_surround">2.3.2.3.9 Surround-sound decoder</A></LI>
                 </UL>
               </LI>
               <LI><A HREF="sound.html#plugins">2.3.2.4 Audio plugins (veraltet)</A>
@@ -215,29 +217,17 @@
           </LI>
         </UL>
       </LI>
-      <LI><A HREF="encoding.html">2.4 Encodieren mit MEncoder</A>
+      <LI><A HREF="#tv">2.4 TV-Eingang</A>
         <UL>
-          <LI><A HREF="encoding.html#2pass">2.4.1 2- oder 3-pass-Encodierung mit MPEG4 ("DivX")</A></LI>
-          <LI><A HREF="encoding.html#rescaling">2.4.2 Bildgr&ouml;&szlig;e skalieren</A></LI>
-          <LI><A HREF="encoding.html#copying">2.4.3 Kopieren einzelner Streams</A></LI>
-          <LI><A HREF="encoding.html#fixing">2.4.4 AVIs mit defektem Index reparieren</A></LI>
-          <LI><A HREF="encoding.html#libavcodec">2.4.5 Encodierung mit der libavcodec-Familie</A></LI>
-          <LI><A HREF="encoding.html#image_files">2.4.6 Encodieren einer Menge einzelner Bildern (PNGs oder JPGs)</A></LI>
-          <LI><A HREF="encoding.html#vobsub">2.4.7 DVD-Untertitel in eine Vobsub-Datei extrahieren</A></LI>
-          <LI><A HREF="encoding.html#aspect">2.4.8 H&ouml;hen-Seitenverh&auml;ltnis beibehalten</A></LI>
+          <LI><A HREF="#tv_compilation">2.4.1 Compilierung</A></LI>
+          <LI><A HREF="#tv_tips">2.4.2 Tipps zur Benutzung</A></LI>
+          <LI><A HREF="#tv_examples">2.4.3 Beispiele</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="#tv">2.5 TV-Eingang</A>
+      <LI><A HREF="#edl">2.5 Edit Decision Lists (EDL)</A>
         <UL>
-          <LI><A HREF="#tv_compilation">2.5.1 Compilierung</A></LI>
-          <LI><A HREF="#tv_options">2.5.2 Tipps zur Benutzung</A></LI>
-          <LI><A HREF="#tv_examples">2.5.3 Beispiele</A></LI>
-        </UL>
-      </LI>
-      <LI><A HREF="#edl">2.6 Edit Decision Lists (EDL)</A>
-        <UL>
-          <LI><A HREF="#edl_using">2.6.1 Benutzung einer EDL-Datei</A></LI>
-          <LI><A HREF="#edl_making">2.6.2 Erstellen einer EDL-Datei</A></LI>
+          <LI><A HREF="#edl_using">2.5.1 Benutzung einer EDL-Datei</A></LI>
+          <LI><A HREF="#edl_making">2.5.2 Erstellen einer EDL-Datei</A></LI>
         </UL>
       </LI>
     </UL>
@@ -284,6 +274,7 @@
         <UL>
 	  <LI><A HREF="#debian">6.1.1 Debian-Pakete</A></LI>
 	  <LI><A HREF="#rpm">6.1.2 RPM-Pakete</A></LI>
+	  <LI><A HREF="#arm">6.1.3 ARM</A></LI>
 	</UL>
       </LI>
       <LI><A HREF="#bsd">6.2 *BSD</A>
@@ -293,28 +284,58 @@
         </UL>
       </LI>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
-      <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
-      <LI><A HREF="#sgi">6.5 Silicon Graphics / Irix</A></LI>
-      <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
+      <LI><A HREF="#sgi">6.4 Silicon Graphics / Irix</A></LI>
+      <LI><A HREF="#qnx">6.5 QNX</A></LI>
+      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
+    </UL>
+  </LI>
+  <LI><A HREF="encoding.html">7. Encodieren mit MEncoder</A>
+    <UL>
+      <LI><A HREF="encoding.html#2pass">7.1 2- oder 3-pass-Encodierung mit MPEG4 ("DivX")</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.2 Bildgr&ouml;&szlig;e skalieren</A></LI>
+      <LI><A HREF="encoding.html#copying">7.3 Kopieren einzelner Streams</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.4 AVIs mit defektem Index reparieren</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.5 Encodierung mit der libavcodec-Familie</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.6 Encodieren einer Menge einzelner Bildern (PNGs oder JPGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.7 DVD-Untertitel in eine Vobsub-Datei extrahieren</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.8 H&ouml;hen-Seitenverh&auml;ltnis beibehalten</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Anhang A - Mail-Listen</A></LI>
   <LI><A HREF="bugreports.html">Anhang B - Wie man einen Fehler berichtet</A>
     <UL>
-      <LI><A HREF="tech/patches.txt">Anhang B2 - Wie man einen Patch schickt</A></LI>
+      <LI><A HREF="bugreports.html#fix">B.1 Wie man Fehler berichtigt</A></LI>
+      <LI><A HREF="bugreports.html#report">B.2 Wie man &uuml;ber einen Fehler berichtet</A></LI>
+      <LI><A HREF="bugreports.html#where">B.3 Wo man Fehler berichtet</A></LI>
+      <LI><A HREF="bugreports.html#what">B.4 Was man melden sollte</A>
+        <UL>
+          <LI><A HREF="bugreports.html#system">B.4.1 Systeminformationen</A></LI>
+          <LI><A HREF="bugreports.html#hardware">B.4.2 Hardware und Treiber</A></LI>
+          <LI><A HREF="bugreports.html#compilation">B.4.3 Probleme bei der Compilierung</A></LI>
+          <LI><A HREF="bugreports.html#configure">B.4.4 Probleme mit <CODE>configure</CODE></A></LI>
+          <LI><A HREF="bugreports.html#playback">B.4.5 Wiedergabeprobleme</A></LI>
+          <LI><A HREF="bugreports.html#crash">B.4.6 Abst&uuml;rze</A>
+            <UL>
+              <LI><A HREF="bugreports.html#debug">B.4.6.1 Wie man Informationen &uuml;ber einen reproduzierbaren Absturz erh&auml;lt</A></LI>
+              <LI><A HREF="bugreports.html#core">B.4.6.2 Wie man sinnvolle Informationen aus einem core dump extrahiert</A></LI>
+            </UL>
+          </LI>
+        </UL>
+      </LI>
+      <LI><A HREF="bugreports.html#advusers">B.5 Ich wei&szlig;, was ich tue...</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Anhang C - Bekannte Fehler</A></LI>
   <LI><A HREF="../skin-en.html">Anhang D - Skin file format (Englisch)</A></LI>
   <LI><A HREF="users_against_developers.html">Anhang E - Aufschrei der Entwickler</A>
     <UL>
-      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
-      <LI><A HREF="users_against_developers.html#binary">Distribution in compilierter Form</A></LI>
-      <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
-      <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
+      <LI><A HREF="users_against_developers.html#gcc">E.1 GCC 2.96</A></LI>
+      <LI><A HREF="users_against_developers.html#binary">E.2 Distribution in compilierter Form</A></LI>
+      <LI><A HREF="users_against_developers.html#nvidia">E.3 nVidia</A></LI>
+      <LI><A HREF="users_against_developers.html#barr">E.4 Joe Barr</A></LI>
     </UL>
   </LI>
+  <LI><A HREF="../tech/patches.txt">Anhang F - Wie man Patches erstellt (englisch)</A></LI>
 </UL>
         
 <HR>
@@ -1140,8 +1161,6 @@ OSD-Men&uuml;.</P>
     festgelegt hast.</LI>
 </OL>
 
-<P>
-
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
 <P>Es gibt drei Methoden der Zeitmessung in MPlayer.</P>
@@ -1213,17 +1232,14 @@ Codecs</A></H2>
 <H2><A NAME="output">2.3.</A> <A HREF="video.html">Video</A> &amp; <A
 HREF="sound.html">Audio-Ausgabeger&auml;te</A></H2>
 
-<H2><A NAME="encoding">2.4.</A> <A HREF="encoding.html">MEncoder - Ein
-vielseitiger Encoder</A></H2>
-
-<H2><A NAME="tv">2.5. TV input</A></H2>
+<H2><A NAME="tv">2.4. TV input</A></H2>
 
 <P>Dieser Teil der Docs zeigt, wie man mit einem V4L-kompatiblen Ger&auml;t
 (z.B. einer TV-Karte) <B>fernsehen oder Sendungen aufnehmen</B> kann. In
 der man-page findest du eine Beschreibung aller TV-Optionen sowie die Belegung
 der Tastatur f&uuml;r's Fernsehen.</P>
 
-<H3><A NAME="tv_compilation">2.5.1. Compilierung</A></H3>
+<H3><A NAME="tv_compilation">2.4.1. Compilierung</A></H3>
 
 <OL>
 
@@ -1238,7 +1254,7 @@ der Tastatur f&uuml;r's Fernsehen.</P>
 
 </OL>
 
-<H3><A NAME="tv_tips">2.5.2 Tipps zur Benutzung</A></H3>
+<H3><A NAME="tv_tips">2.4.2 Tipps zur Benutzung</A></H3>
 
 Die vollst&auml;ndige Auflistung der vorhandenen Optionen ist in der man-page
 verf&uuml;gbar. Hier nur ein paar Tipps:
@@ -1332,7 +1348,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
 
 </UL>
 
-<H3><A NAME="tv_examples">2.5.3 Beispiele</A></H3>
+<H3><A NAME="tv_examples">2.4.3 Beispiele</A></H3>
 
 <P>Dummy-Ausgabe mittels AAlib ;)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv
@@ -1384,7 +1400,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
   Pixeln interpolieren kann.</P>
 
 
-<H2><A NAME="edl">2.6 Edit Decision Lists (EDL)</A></H2>
+<H2><A NAME="edl">2.5 Edit Decision Lists (EDL)</A></H2>
 
 <P>Die Edit Decision Lists (EDL) erlauben es, bestimmte Stellen bei der
 Wiedergabe  automatisch zu &uuml;berspringen oder stummzuschalten. Dabei werden
@@ -1405,12 +1421,12 @@ EDL-Formaten trotzdem gewahrt) werden.</P>
 Falls du mehr davon brauchst, dann &auml;ndern einfach
 <CODE>#define MAX_EDL_ENTRIES</CODE> in der Datei <CODE>edl.h</CODE>.</P>
 
-<H3><A NAME="edl_using">2.6.1 Benutzung von EDL-Dateien</A></H3>
+<H3><A NAME="edl_using">2.5.1 Benutzung von EDL-Dateien</A></H3>
 
 <P>Gib mit der Option <CODE>-edl &lt;Dateiname&gt;</CODE> die EDL-Datei an,
 die du auf dein Video angewandt haben m&ouml;chtest.</P>
 
-<H3><A NAME="edl_making">2.6.2 Erstellen von EDL-Dateien</A></H3>
+<H3><A NAME="edl_making">2.5.2 Erstellen von EDL-Dateien</A></H3>
 
 <P>Das aktuelle EDL-Dateiformat sieht so aus:</P>
 
@@ -1437,17 +1453,6 @@ Werte erreicht.</P>
 <CODE>i</CODE> dr&uuml;cken. Es wird dann ein Eintrag erstellt, der an dieser
 Stelle 2 Sekunden &uuml;berspringt. Du kannst dann mit einem Editor deiner
 Wahl die generierte EDL-Datei verfeinern.</P>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1790,6 +1795,22 @@ offiziellen Distribution aus, Mandrake-Pakete gibt es von
 <A HREF="http://plf.zarb.org/">P.L.F</A>) von MPlayer, aber keine dieser
 Versionen wird offiziell unterst&uuml;tzt.</P>
 
+<H3><A NAME="arm">6.1.3. ARM</A></H3>
+
+<P>MPlayer l&auml;uft auf Linux-PDAs mit einer ARM-CPU, z.B. dem Sharp Zaurus
+oder dem Compaq Ipaq. Am einfachsten ist es, sich MPlayer von
+<A HREF="http://www.openzaurus.org">Openzaurus</A> runterzuladen.
+Wenn du MPlayer selber compilieren m&ouml;chtest, dann schau dir dir
+Verzeichnisse f&uuml;r 
+<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">
+mplayer</A> und
+<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">
+libavcodec</A> bei der OpenZaurus-Distribution an. Sie enthalten immer
+die aktuellen Makefiles und Patches, die benutzt werden k&ouml;nnen,
+um die CVS-Version von MPlayer mit libavcodec zu compilieren.<BR>
+Wenn du das GUI brauchst, dann kannst du <CODE>xmms-embedded</CODE>
+benutzen.</P>
+
 <H2><A NAME="freebsd">6.2. *BSD</A></H2>
 
 <P>MPlayer l&auml;uft auf FreeBSD, OpenBSD, NetBSDO, BSD/OS und Darwin.
@@ -1925,23 +1946,6 @@ werden.</P>
 und f&uuml;r Farbraumkonvertierung im Videoausgabetreiber verwendet.</P>
 
 
-<H2><A NAME="strongarm">6.4. StrongARM</A></H2>
-
-<P>MPlayer l&auml;uft auf Linux-PDAs mit einer ARM-CPU, z.B. dem Sharp Zaurus
-oder dem Compaq Ipaq. Am einfachsten ist es, sich MPlayer von
-<A HREF="http://www.openzaurus.org">Openzaurus</A> runterzuladen.
-Wenn du MPlayer selber compilieren m&ouml;chtest, dann schau dir dir
-Verzeichnisse f&uuml;r 
-<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">
-mplayer</A> und
-<A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">
-libavcodec</A> bei der OpenZaurus-Distribution an. Sie enthalten immer
-die aktuellen Makefiles und Patches, die benutzt werden k&ouml;nnen,
-um die CVS-Version von MPlayer mit libavcodec zu compilieren.<BR>
-Wenn du das GUI brauchst, dann kannst du <CODE>xmms-embedded</CODE>
-benutzen.</P>
-
-
 <H2><A NAME="sgi">6.5. Silicon Graphics / IRIX</A></H2>
 
 <P>Du hast zwei M&ouml;glichkeiten. Die eine besteht darin, das GNU
@@ -2020,6 +2024,13 @@ directx:noaccel</CODE>.</P>
 
 <P>Anweisungen, wie du SDL unter Cygwin zum Laufen bringst, findest du auf
 der <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl-Seite</A>.</P>
+
+
+
+<H1><A NAME="encoding">7.</A><A HREF="encoding.html">Encodierung mit
+MEncoder</A></H1>
+
+
 
 <H1><A NAME="mailing_lists">Anhang A - Mailing-Listen</A></H1>
 
@@ -2259,6 +2270,12 @@ unterst&uuml;tzten Scaling/Zooming, erwarte das nicht von x11 oder dga.</P>
 
 <H1><A NAME="flame_wars">Anhang E</A> - <A HREF="users_against_developers.html">
 Aufschrei der Entwickler</A></H1>
+
+
+
+<H1><A NAME="patches">Anhang F</A> - <A HREF="tech/patches.txt">Wie man
+Patches erstellt</A></H1>
+
 
 
 </BODY>
