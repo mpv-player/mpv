@@ -814,6 +814,7 @@ $_cc -o $TMPO $TMPC 2> /dev/null && _alloca_h=yes
 
 
 cat > $TMPC << EOF
+#include <sys/types.h>
 #include <sys/mman.h>
 int main( void ) { return 0; }
 EOF
