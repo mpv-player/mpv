@@ -19,12 +19,17 @@ extern "C" {
 #include <ebml/EbmlVersion.h>
 #include <ebml/StdIOCallback.h>
 
+#include <matroska/KaxVersion.h>
+
 #include <matroska/KaxAttachments.h>
 #include <matroska/KaxBlock.h>
 #include <matroska/KaxBlockData.h>
 #include <matroska/KaxChapters.h>
 #include <matroska/KaxCluster.h>
 #include <matroska/KaxClusterData.h>
+#if LIBMATROSKA_VERSION >= 000503
+#include <matroska/KaxContentEncoding.h>
+#endif
 #include <matroska/KaxContexts.h>
 #include <matroska/KaxCues.h>
 #include <matroska/KaxCuesData.h>
@@ -44,6 +49,10 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 #include "../mp_msg.h"
 #include "../help_mp.h"
 #include "stream.h"
@@ -60,10 +69,6 @@ extern "C" {
 using namespace libebml;
 using namespace libmatroska;
 using namespace std;
-
-#ifndef LIBEBML_VERSION
-#define LIBEBML_VERSION 000000
-#endif // LIBEBML_VERSION
 
 #if LIBEBML_VERSION < 000500
 #error libebml version too old - need at least 0.5.0
@@ -82,6 +87,29 @@ extern char *audio_lang;
 
 #define MKV_SUBCOMPRESSION_NONE           0
 #define MKV_SUBCOMPRESSION_ZLIB           1
+
+#define safefree(m) { if (m != NULL) free(m); }
+void *safemalloc(int bytes) {
+  void *dst;
+
+  dst = malloc(bytes);
+  if (dst == NULL) {
+    mp_msg(MSGT_DEMUX, MSGL_FATAL, "[mkv] Could not allocate %d bytes of "
+          "memory.\n", bytes);
+    exit(1);
+  }
+
+  return dst;
+}
+
+void *safememdup(const void *src, int bytes) {
+  void *dst;
+
+  dst = safemalloc(bytes);
+  memcpy(dst, src, bytes);
+
+  return dst;
+}
 
 class mpstream_io_callback: public IOCallback {
   private:
@@ -149,6 +177,16 @@ typedef struct mkv_track_index {
   mkv_index_entry_t *entries;
 } mkv_track_index_t;
 
+typedef struct {
+  uint32_t order, type, scope;
+  uint32_t comp_algo;
+  unsigned char *comp_settings;
+  uint32_t comp_settings_len;
+  uint32_t enc_algo, sig_algo, sig_hash_algo;
+  unsigned char *enc_keyid, *sig_keyid, *signature;
+  uint32_t enc_keyid_len, sig_keyid_len, signature_len;
+} mkv_content_encoding_t;
+
 typedef struct mkv_track {
   uint32_t tnum, xid;
   
@@ -190,7 +228,13 @@ typedef struct mkv_track {
 
   // Stuff for VobSubs
   mkv_sh_sub_t sh_sub;
-  int vobsub_compression;
+
+  // Generic content encoding support.
+  vector<mkv_content_encoding_t> *c_encodings;
+#ifdef HAVE_ZLIB
+  z_stream zstream;
+  bool zstream_initiated;
+#endif
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -531,22 +575,22 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
 static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
   mkv_track_t *t;
   
-  t = (mkv_track_t *)malloc(sizeof(mkv_track_t));
-  if (t != NULL) {
-    memset(t, 0, sizeof(mkv_track_t));
-    d->tracks = (mkv_track_t **)realloc(d->tracks, (d->num_tracks + 1) *
-                                        sizeof(mkv_track_t *));
-    if (d->tracks == NULL)
-      return NULL;
-    d->tracks[d->num_tracks] = t;
-    d->num_tracks++;
+  t = (mkv_track_t *)safemalloc(sizeof(mkv_track_t));
+  memset(t, 0, sizeof(mkv_track_t));
+  d->tracks = (mkv_track_t **)realloc(d->tracks, (d->num_tracks + 1) *
+                                      sizeof(mkv_track_t *));
+  if (d->tracks == NULL)
+    return NULL;
+  d->tracks[d->num_tracks] = t;
+  d->num_tracks++;
 
-    // Set default values.
-    t->default_track = 1;
-    t->a_sfreq = 8000.0;
-    t->a_channels = 1;
-    t->language = strdup("eng");
-  }
+  // Set default values.
+  t->default_track = 1;
+  t->a_sfreq = 8000.0;
+  t->a_channels = 1;
+  t->language = strdup("eng");
+
+  t->c_encodings = new vector<mkv_content_encoding_t>;
   
   return t;
 }
@@ -657,17 +701,132 @@ static bool mkv_parse_idx(mkv_track_t *t) {
   return (things_found == 3);
 }
 
+static bool reverse_encodings(mkv_track_t *track, unsigned char *&data,
+                              uint32_t &size, uint32_t type) {
+  int new_size;
+  unsigned char *new_data, *old_data;
+  bool modified;
+  vector<mkv_content_encoding_t>::iterator ce;
+
+  if (track->c_encodings->size() == 0)
+    return false;
+
+  new_data = data;
+  new_size = size;
+  modified = false;
+  for (ce = track->c_encodings->begin(); ce < track->c_encodings->end();
+       ce++) {
+    if ((ce->scope & type) == 0)
+      continue;
+
+#ifdef HAVE_ZLIB
+    if (ce->comp_algo == 0) {
+      int result;
+
+      old_data = new_data;
+      new_data = (unsigned char *)safemalloc(new_size * 20);
+
+      track->zstream.next_in = (Bytef *)old_data;
+      track->zstream.next_out = (Bytef *)new_data;
+      track->zstream.avail_in = new_size;
+      track->zstream.avail_out = 20 * new_size;
+      result = inflate(&track->zstream, Z_FULL_FLUSH);
+      if (result != Z_OK) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Zlib decompression failed. "
+              "Result: %d\n", result);
+        safefree(new_data);
+        data = old_data;
+        size = new_size;
+        return modified;
+      }
+
+      mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] zlib decompression: from %d to "
+            "%d\n", new_size, 20 * new_size - track->zstream.avail_out);
+      new_size = 20 * new_size - track->zstream.avail_out;
+
+      if (modified)
+        safefree(old_data);
+      modified = true;
+    }
+#endif
+  }
+
+  data = new_data;
+  size = new_size;
+
+  return modified;
+}
+
 static int check_track_information(mkv_demuxer_t *d) {
   int i, track_num;
   unsigned char *c;
   uint32_t u, offset, length;
   mkv_track_t *t;
+  mkv_content_encoding_t *ce;
   BITMAPINFOHEADER *bih;
   WAVEFORMATEX *wfe;
   
   for (track_num = 0; track_num < d->num_tracks; track_num++) {
-    
     t = d->tracks[track_num];
+    
+    t->ok = 1;
+    for (i = 0; i < (int)t->c_encodings->size(); i++) {
+      ce = &(*t->c_encodings)[i];
+
+      if (ce->type == 1) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track number %u has been "
+              "encrypted and decryption has not yet been implemented. "
+              "Skipping track.\n", t->tnum);
+        t->ok = 0;
+        break;
+      }
+
+      if (ce->type != 0) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown content encoding type %u "
+              "for track %u. Skipping track.\n", ce->type, t->tnum);
+        t->ok = 0;
+        break;
+      }
+
+      if (ce->comp_algo == 0) {
+#if !defined(HAVE_ZLIB)
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Track %u was compressed with zlib but "
+              "mplayer has not been compiled with support for zlib "
+              "compression. Skipping track.\n", t->tnum);
+        t->ok = 0;
+        break;
+#else
+        if (!t->zstream_initiated) {
+          t->zstream.zalloc = (alloc_func)0;
+          t->zstream.zfree = (free_func)0;
+          t->zstream.opaque = (voidpf)0;
+          inflateInit(&t->zstream);
+          t->zstream_initiated = true;
+        }
+#endif
+      } else {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track %u has been compressed "
+               "with an unknown/unsupported compression algorithm (%u). "
+               "Skipping track.\n", t->tnum, ce->comp_algo);
+        t->ok = 0;
+        break;
+      }
+    }
+
+    if (!t->ok)
+      continue;
+    t->ok = 0;
+
+    if (t->private_data != NULL) {
+      c = (unsigned char *)t->private_data;
+      length = t->private_size;
+      if (reverse_encodings(t, c, length, 2)) {
+        safefree(t->private_data);
+        t->private_data = c;
+        t->private_size = length;
+      }
+    }
+
     switch (t->type) {
       case 'v':                 // video track
         if (t->codec_id == NULL)
@@ -888,7 +1047,7 @@ static int check_track_information(mkv_demuxer_t *d) {
         break;
 
       case 's':
-        if (!strncmp(t->codec_id, MKV_S_VOBSUB, strlen(MKV_S_VOBSUB))) {
+        if (!strcmp(t->codec_id, MKV_S_VOBSUB)) {
           if (mkv_parse_idx(t)) {
             t->ok = 1;
             mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
@@ -920,7 +1079,7 @@ static int check_track_information(mkv_demuxer_t *d) {
 }
 
 static void free_mkv_demuxer(mkv_demuxer_t *d) {
-  int i;
+  int i, k;
   
   if (d == NULL)
     return;
@@ -931,6 +1090,17 @@ static void free_mkv_demuxer(mkv_demuxer_t *d) {
         free(d->tracks[i]->private_data);
       if (d->tracks[i]->language != NULL)
         free(d->tracks[i]->language);
+      for (k = 0; k < (int)d->tracks[i]->c_encodings->size(); k++) {
+        safefree((*d->tracks[i]->c_encodings)[k].comp_settings);
+        safefree((*d->tracks[i]->c_encodings)[k].enc_keyid);
+        safefree((*d->tracks[i]->c_encodings)[k].sig_keyid);
+        safefree((*d->tracks[i]->c_encodings)[k].signature);
+      }
+      delete d->tracks[i]->c_encodings;
+#ifdef HAVE_ZLIB
+      if (d->tracks[i]->zstream_initiated)
+        inflateEnd(&d->tracks[i]->zstream);
+#endif
       free(d->tracks[i]);
     }
 
@@ -1244,9 +1414,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   
   try {
     // structure for storing the demuxer's private data
-    mkv_d = (mkv_demuxer_t *)malloc(sizeof(mkv_demuxer_t));
-    if (mkv_d == NULL)
-      return 0;
+    mkv_d = (mkv_demuxer_t *)safemalloc(sizeof(mkv_demuxer_t));
     memset(mkv_d, 0, sizeof(mkv_demuxer_t));
     mkv_d->duration = -1.0;
     
@@ -1356,6 +1524,11 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
           KaxCodecPrivate *kcodecpriv;
           KaxTrackFlagDefault *ktfdefault;
           KaxTrackLanguage *ktlanguage;
+#if LIBMATROSKA_VERSION >= 000503
+          KaxContentEncodings *kcencodings;
+          int kcenc_idx;
+          vector<mkv_content_encoding_t>::iterator ce_ins_it;
+#endif
 
           mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + a track...\n");
             
@@ -1507,13 +1680,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + CodecPrivate, length "
                    "%llu\n", kcodecpriv->GetSize());
             track->private_size = kcodecpriv->GetSize();
-            if (track->private_size > 0) {
-              track->private_data = malloc(track->private_size);
-              if (track->private_data == NULL)
-                return 0;
-              memcpy(track->private_data, kcodecpriv->GetBuffer(),
-                     track->private_size);
-            }
+            if (track->private_size > 0)
+              track->private_data = safememdup(kcodecpriv->GetBuffer(),
+                                               track->private_size);
           }
 
           ktfdefault = FINDFIRST(ktentry, KaxTrackFlagDefault);
@@ -1532,6 +1701,115 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             track->language = strdup(string(*ktlanguage).c_str());
           }
 
+#if LIBMATROSKA_VERSION >= 000503
+          kcencodings = FINDFIRST(ktentry, KaxContentEncodings);
+          if (kcencodings != NULL) {
+            for (kcenc_idx = 0; kcenc_idx < (int)kcencodings->ListSize();
+                 kcenc_idx++) {
+              EbmlElement *l3;
+
+              l3 = (*kcencodings)[kcenc_idx];
+              if (EbmlId(*l3) == KaxContentEncoding::ClassInfos.GlobalId) {
+                KaxContentEncoding *kcenc;
+                KaxContentEncodingOrder *ce_order;
+                KaxContentEncodingType *ce_type;
+                KaxContentEncodingScope *ce_scope;
+                KaxContentCompression *ce_comp;
+                KaxContentEncryption *ce_enc;
+                mkv_content_encoding_t enc;
+
+                memset(&enc, 0, sizeof(mkv_content_encoding_t));
+                kcenc = static_cast<KaxContentEncoding *>(l3);
+
+                ce_order = FINDFIRST(kcenc, KaxContentEncodingOrder);
+                if (ce_order != NULL)
+                  enc.order = uint32(*ce_order);
+
+                ce_type = FINDFIRST(kcenc, KaxContentEncodingType);
+                if (ce_type != NULL)
+                  enc.type = uint32(*ce_type);
+
+                ce_scope = FINDFIRST(kcenc, KaxContentEncodingScope);
+                if (ce_scope != NULL)
+                  enc.scope = uint32(*ce_scope);
+                else
+                  enc.scope = 1;
+
+                ce_comp = FINDFIRST(kcenc, KaxContentCompression);
+                if (ce_comp != NULL) {
+                  KaxContentCompAlgo *cc_algo;
+                  KaxContentCompSettings *cc_settings;
+
+                  cc_algo = FINDFIRST(ce_comp, KaxContentCompAlgo);
+                  if (cc_algo != NULL)
+                    enc.comp_algo = uint32(*cc_algo);
+
+                  cc_settings = FINDFIRST(ce_comp, KaxContentCompSettings);
+                  if (cc_settings != NULL) {
+                    enc.comp_settings =
+                      (unsigned char *)safememdup(&binary(*cc_settings),
+                                                  cc_settings->GetSize());
+                    enc.comp_settings_len = cc_settings->GetSize();
+                  }
+                }
+
+                ce_enc = FINDFIRST(kcenc, KaxContentEncryption);
+                if (ce_enc != NULL) {
+                  KaxContentEncAlgo *ce_ealgo;
+                  KaxContentEncKeyID *ce_ekeyid;
+                  KaxContentSigAlgo *ce_salgo;
+                  KaxContentSigHashAlgo *ce_shalgo;
+                  KaxContentSigKeyID *ce_skeyid;
+                  KaxContentSignature *ce_signature;
+
+                  ce_ealgo = FINDFIRST(ce_enc, KaxContentEncAlgo);
+                  if (ce_ealgo != NULL)
+                    enc.enc_algo = uint32(*ce_ealgo);
+
+                  ce_ekeyid = FINDFIRST(ce_enc, KaxContentEncKeyID);
+                  if (ce_ekeyid != NULL) {
+                    enc.enc_keyid =
+                      (unsigned char *)safememdup(&binary(*ce_ekeyid),
+                                                  ce_ekeyid->GetSize());
+                    enc.enc_keyid_len = ce_ekeyid->GetSize();
+                  }
+
+                  ce_salgo = FINDFIRST(ce_enc, KaxContentSigAlgo);
+                  if (ce_salgo != NULL)
+                    enc.enc_algo = uint32(*ce_salgo);
+
+                  ce_shalgo = FINDFIRST(ce_enc, KaxContentSigHashAlgo);
+                  if (ce_shalgo != NULL)
+                    enc.enc_algo = uint32(*ce_shalgo);
+
+                  ce_skeyid = FINDFIRST(ce_enc, KaxContentSigKeyID);
+                  if (ce_skeyid != NULL) {
+                    enc.sig_keyid =
+                      (unsigned char *)safememdup(&binary(*ce_skeyid),
+                                                  ce_skeyid->GetSize());
+                    enc.sig_keyid_len = ce_skeyid->GetSize();
+                  }
+
+                  ce_signature = FINDFIRST(ce_enc, KaxContentSignature);
+                  if (ce_signature != NULL) {
+                    enc.signature =
+                      (unsigned char *)safememdup(&binary(*ce_signature),
+                                                  ce_signature->GetSize());
+                    enc.signature_len = ce_signature->GetSize();
+                  }
+
+                }
+
+                ce_ins_it = track->c_encodings->begin();
+                while ((ce_ins_it != track->c_encodings->end()) &&
+                       (enc.order <= (*ce_ins_it).order))
+                  ce_ins_it++;
+                track->c_encodings->insert(ce_ins_it, enc);
+              }
+            }
+          }
+
+#endif
           ktentry = FINDNEXT(l1, KaxTrackEntry, ktentry);
         } // while (ktentry != NULL)
 
@@ -1650,11 +1928,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     BITMAPINFOHEADER *bih;
 
     idesc = NULL;
-    bih = (BITMAPINFOHEADER *)calloc(1, track->private_size);
-    if (bih == NULL) {
-      free_mkv_demuxer(mkv_d);
-      return 0;
-    }
+    bih = (BITMAPINFOHEADER *)safemalloc(track->private_size);
+    memset(bih, 0, sizeof(BITMAPINFOHEADER));
 
     if (track->ms_compat) {         // MS compatibility mode
       BITMAPINFOHEADER *src;
@@ -1816,19 +2091,12 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
     mkv_d->audio = track;
 
-    if (track->ms_compat) {
-      sh_a->wf = (WAVEFORMATEX *)calloc(1, track->private_size);
-      if (sh_a->wf == NULL) {
-        free_mkv_demuxer(mkv_d);
-        return 0;
-      }
-      memcpy(sh_a->wf, track->private_data, track->private_size);
-    } else {
-      sh_a->wf = (WAVEFORMATEX *)calloc(1, sizeof(WAVEFORMATEX));
-      if (sh_a->wf == NULL) {
-        free_mkv_demuxer(mkv_d);
-        return 0;
-      }
+    if (track->ms_compat)
+      sh_a->wf = (WAVEFORMATEX *)safememdup(track->private_data,
+                                            track->private_size);
+    else {
+      sh_a->wf = (WAVEFORMATEX *)safemalloc(sizeof(WAVEFORMATEX));
+      memset(sh_a->wf, 0, sizeof(WAVEFORMATEX));
     }
     sh_a->format = track->a_formattag;
     sh_a->wf->wFormatTag = track->a_formattag;
@@ -1866,8 +2134,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       track->fix_i_bps = true;
       track->qt_last_a_pts = 0.0;
       if (track->private_data != NULL) {
-        sh_a->codecdata = (unsigned char *)calloc(track->private_size, 1);
-        memcpy(sh_a->codecdata, track->private_data, track->private_size);
+        sh_a->codecdata = (unsigned char *)safememdup(track->private_data,
+                                                      track->private_size);
         sh_a->codecdata_len = track->private_size;
       }
       if (!strcmp(track->codec_id, MKV_A_QDMC))
@@ -1919,7 +2187,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       else
         srate_idx = 11;
 
-      sh_a->codecdata = (unsigned char *)calloc(1, 2);
+      sh_a->codecdata = (unsigned char *)safemalloc(2);
       sh_a->codecdata_len = 2;
       sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xe) >> 1);
       sh_a->codecdata[1] = ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
@@ -1988,14 +2256,14 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   else if (dvdsub_lang != NULL)
     track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
   if (track) {
-    if (!strncmp(track->codec_id, MKV_S_VOBSUB, strlen(MKV_S_VOBSUB))) {
+    if (!strcmp(track->codec_id, MKV_S_VOBSUB)) {
       mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will display subtitle track %u\n",
              track->tnum);
       mkv_d->subs_track = track;
       mkv_d->subtitle_type = MKV_SUBTYPE_VOBSUB;
-      demuxer->sub->sh = (mkv_sh_sub_t *)malloc(sizeof(mkv_sh_sub_t));
+      demuxer->sub->sh = (mkv_sh_sub_t *)safememdup(&track->sh_sub,
+                                                    sizeof(mkv_sh_sub_t));
       demuxer->sub->id = track->xid;
-      memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
 
     } else if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
                strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
@@ -2009,7 +2277,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       mkv_d->subs_track = track;
       if (!mkv_d->subs.text[0]) {
         for (i = 0; i < SUB_MAX_TEXT; i++)
-          mkv_d->subs.text[i] = (char *)malloc(256);
+          mkv_d->subs.text[i] = (char *)safemalloc(256);
 
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
           sub_utf8 = 1;       // Force UTF-8 conversion.
@@ -2095,9 +2363,8 @@ static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
   return v_pts;
 }
 
-static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
-                             bool keyframe, int &found_data) {
-  unsigned char *p;
+static void handle_realvideo(demuxer_t *demuxer, unsigned char *data,
+                             uint32_t size, bool keyframe, int &found_data) {
   dp_hdr_t *hdr;
   int chunks, isize;
   mkv_demuxer_t *mkv_d;
@@ -2106,12 +2373,11 @@ static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
 
   mkv_d = (mkv_demuxer_t *)demuxer->priv;
   ds = demuxer->video;
-  p = (unsigned char *)data.Buffer();
-  chunks = p[0];
-  isize = data.Size() - 1 - (chunks + 1) * 8;
+  chunks = data[0];
+  isize = size - 1 - (chunks + 1) * 8;
   dp = new_demux_packet(sizeof(dp_hdr_t) + isize + 8 * (chunks + 1));
-  memcpy(&dp->buffer[sizeof(dp_hdr_t)], &p[1 + (chunks + 1) * 8], isize);
-  memcpy(&dp->buffer[sizeof(dp_hdr_t) + isize], &p[1], (chunks + 1) * 8);
+  memcpy(&dp->buffer[sizeof(dp_hdr_t)], &data[1 + (chunks + 1) * 8], isize);
+  memcpy(&dp->buffer[sizeof(dp_hdr_t) + isize], &data[1], (chunks + 1) * 8);
   hdr = (dp_hdr_t *)dp->buffer;
   hdr->len = isize;
   hdr->chunks = chunks;
@@ -2134,15 +2400,15 @@ static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
   found_data++;
 }
 
-static void handle_realaudio(demuxer_t *demuxer, DataBuffer &data,
-                             bool keyframe, int &found_data) {
+static void handle_realaudio(demuxer_t *demuxer, unsigned char *data,
+                             uint32_t size, bool keyframe, int &found_data) {
   mkv_demuxer_t *mkv_d;
   demux_packet_t *dp;
 
   mkv_d = (mkv_demuxer_t *)demuxer->priv;
 
-  dp = new_demux_packet(data.Size());
-  memcpy(dp->buffer, data.Buffer(), data.Size());
+  dp = new_demux_packet(size);
+  memcpy(dp->buffer, data, size);
   if ((mkv_d->audio->ra_pts == mkv_d->last_pts) &&
       !mkv_d->a_skip_to_keyframe)
     dp->pts = 0;
@@ -2370,6 +2636,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   demux_packet_t *dp;
   demux_stream_t *ds;
   mkv_demuxer_t *mkv_d;
+  mkv_track_t *t;
   int upper_lvl_el, exit_loop, found_data, i, linei, sl;
   char *texttmp;
   // Elements for different levels
@@ -2490,14 +2757,18 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
               ds = NULL;
               if ((mkv_d->video != NULL) &&
-                  (mkv_d->video->tnum == kblock->TrackNum()))
+                  (mkv_d->video->tnum == kblock->TrackNum())) {
                 ds = d->video;
-              else if ((mkv_d->audio != NULL) && 
-                         (mkv_d->audio->tnum == kblock->TrackNum()))
+                t = mkv_d->video;
+              } else if ((mkv_d->audio != NULL) && 
+                         (mkv_d->audio->tnum == kblock->TrackNum())) {
                 ds = d->audio;
-              else if ((mkv_d->subs_track != NULL) && 
-                       (mkv_d->subs_track->tnum == kblock->TrackNum()))
+                t = mkv_d->audio;
+              } else if ((mkv_d->subs_track != NULL) && 
+                         (mkv_d->subs_track->tnum == kblock->TrackNum())) {
                 ds = d->sub;
+                t = mkv_d->subs_track;
+              }
 
               use_this_block = true;
 
@@ -2564,28 +2835,37 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                 mkv_d->last_filepos = d->filepos;
 
                 for (i = 0; i < (int)kblock->NumberFrames(); i++) {
+                  unsigned char *re_buffer;
+                  uint32_t re_size;
+                  bool re_modified;
                   DataBuffer &data = kblock->GetBuffer(i);
 
+                  re_buffer = data.Buffer();
+                  re_size = data.Size();
+                  re_modified = reverse_encodings(t, re_buffer, re_size, 1);
+
                   if ((ds == d->video) && mkv_d->video->realmedia)
-                    handle_realvideo(d, data, block_bref == 0,
+                    handle_realvideo(d, re_buffer, re_size, block_bref == 0,
                                      found_data);
 
                   else if ((ds == d->audio) && mkv_d->audio->realmedia)
-                    handle_realaudio(d, data, block_bref == 0,
+                    handle_realaudio(d, re_buffer, re_size, block_bref == 0,
                                      found_data);
 
                   else if ((ds == d->sub) &&
                            (mkv_d->subtitle_type == MKV_SUBTYPE_VOBSUB))
-                    mpeg_run(d, (unsigned char *)data.Buffer(), data.Size());
+                    mpeg_run(d, re_buffer, re_size);
 
                   else {
-                    dp = new_demux_packet(data.Size());
-                    memcpy(dp->buffer, data.Buffer(), data.Size());
+                    dp = new_demux_packet(re_size);
+                    memcpy(dp->buffer, re_buffer, re_size);
                     dp->flags = block_bref == 0 ? 1 : 0;
                     dp->pts = mkv_d->last_pts;
                     ds_add_packet(ds, dp);
                     found_data++;
                   }
+                  if (re_modified)
+                    safefree(re_buffer);
                 }
                 if (ds == d->video) {
                   mkv_d->v_skip_to_keyframe = false;
