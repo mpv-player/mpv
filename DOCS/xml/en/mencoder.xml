@@ -521,15 +521,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Making a high quality MPEG-4 (&quot;DivX&quot;) rip of a DVD movie</title>
 
 <para>
-  One frequently asked question is "How do I make the highest quality DVD
-  rip possible?  I don't care about file size, I just want the best
-  quality."
+  One frequently asked question is "How do I make highest quality rip for
+  a given size?". Another question is "How do I make the highest quality DVD
+  rip possible? I don't care about file size, I just want the best quality."
 </para>
 
 <para>
-  This question is perhaps at least somewhat wrongly posed. After all, if
-  you don't care about file size, why not simply copy the MPEG-2 video
-  stream from the DVD whole? Sure, your AVI will end up being 5GB, give
+  The latter question is perhaps at least somewhat wrongly posed. After all, if
+  you don't care about file size, why not simply copy the entire MPEG-2 video
+  stream from the the DVD? Sure, your AVI will end up being 5GB, give
   or take, but if you want the best quality and don't care about size,
   this is certainly your best option.
 </para>
@@ -551,11 +551,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  The main assumption of this guide is that you have no specific file size
-  constraints and have no problem giving up bits in exchange for quality.
-  While much of the information presented here is useful in any case, some
-  of it may work against you if you have a file size goal, such as fitting a
-  video on a CD.
+  If this seems to be too much for you, you should probably use one of the
+  many fine front-ends that are listed on our
+  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html">related projects page</ulink>.
+  That way, you should be able to achieve high quality rips without too much
+  thinking, because most of those tools are designed to take clever decisions
+  for you.
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
@@ -590,8 +591,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>vqmin</option>, which is 2 by default). As soon as you specify a
   low enough bitrate that <systemitem class="library">libavcodec</systemitem>
   is forced to use a higher quantizer, then you're almost certainly ruining
-  the quality of your video. In general, you should avoid CBR altogether if
-  you care about quality.
+  the quality of your video.
+  In order to avoid that, you should probably down-scale your video, according
+  to the method which will be exposed later on that guide.
+  In general, you should avoid CBR altogether if you care about quality.
 </para>
 
 <para>
@@ -642,11 +645,24 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  A good starting point for a very high quality rip is about 2000Kbit plus
-  or minus 200Kbit. For fast action or high detail source video, or if
-  you just have a very critical eye, you might decide on 2400 or 2600.
+  If size doesn't matter, a good starting point for a very high quality
+  rip is about 2000Kbit plus or minus 200Kbit.
+  For fast action or high detail source video, or if you just have a very
+  critical eye, you might decide on 2400 or 2600.
   For some DVDs, you might not notice a difference at 1400Kbit. It's a
   good idea to experiment with scenes at different bitrates to get a feel.
+</para>
+
+<para>
+  If you aim at a certain size, you will have to somehow calculate the bitrate.
+  But before that, you need to know how much space you should reserve for the
+  audio track(s), so you should <link linkend="menc-feat-dvd-mpeg4-audio">rip
+  those</link> first.
+  You can compute the bitrate with the following equation:
+  bitrate = (target_size_in_Mbytes - sound_size_in_Mbytes) * 1024 * 1024 / length_in_secs * 8 / 1000
+  For instance, to squeeze a two-hour movie into a 702Mbytes CD, with 60Mbytes
+  of audio track, the video bitrate will have to be
+  (702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000 = 740kbps.
 </para>
 
 </sect2>
@@ -677,6 +693,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   scaling video.) If you're not comfortable throwing a few extra pixels
   away, you might prefer instead to scale the video instead. We'll look
   at this in our example below.
+  You can actually let the <option>cropdetect</option> filter do all of the
+  above for you, as it has an optional <option>round</option> parameter that
+  is equal to 16 by default.
 </para>
 
 <para>
@@ -691,10 +710,62 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   could calculate the new aspect ratio manually, but
   <application>MEncoder</application> offers an option for <systemitem
   class="library">libavcodec</systemitem> called <option>autoaspect</option>
-  that will do this for you. Absolutely do not scale this video in order to
+  that will do this for you. Absolutely do not scale this video up in order to
   square the pixels unless you like to waste your hard disk space. Scaling
   should be done on playback, and the player will use the aspect stored in
   the AVI to determine the correct resolution.
+  Unfortunately, not all players enforce this auto-scaling information,
+  therefore you may still want to rescale.
+</para>
+
+<para>
+  First, you should compute the encoded aspect ratio:
+  ARc = (Wc x (ARa / PRdvd )) / Hc
+<itemizedlist>
+<title>where:</title>
+<listitem><para>
+  Wc and Hc are the width and height of the cropped video,
+</para></listitem>
+<listitem><para>
+  PRdvd is the pixel ratio of the DVD wich is equal to 1.25=(720/576) for PAL,
+</para></listitem>
+<listitem><para>
+  DVDs and 1.5=(720/480) for NTSC DVDs,
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+  Then, you can compute the X and Y resolution, according to a certain
+  Compression Quality (CQ) factor:
+  ResY = INT( SQRT(1000 * Bitrate / 25 / ARc / CQ) / 16 ) * 16
+  ResX = INT( ResY * ARc / 16) * 16
+</para>
+
+<para>
+  Okay, but what is the CQ?
+  The CQ represents the number of bits per pixel and per frame of the encode.
+  Roughly speaking, the greater the CQ, the less the likelihood to see
+  encoding artifacts.
+  However, if you have a target size for your movie (1 or 2 CDs for instance),
+  there's a limited total number of bits that you can spend; therefore it's
+  necessary to find a good tradeoff between compressibility and quality.
+  The CQ depends both on the bitrate and the movie resolution.
+  In order to raise the CQ, typically you'd downscale the movie given that the
+  bitrate is computed in function of the target size and the length of the
+  movie, which are constant.
+  A CQ below 0.18 usually ends up in a very blocky picture, because there
+  aren't enough bits to code the information of each macroblock (MPEG4, like
+  many other codecs, groups pixels by blocks of several pixels to compress the
+  image; if there aren't enough bits, the edge of those blocks are
+  visible).
+  It's therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
+  and  0.26-0.28 for 2 CDs.
+  Please thake note that the CQ is just an indicative figure, as depending on
+  the encoded content, a CQ of 0.18 may look just fine for a Bergman, contrary
+  to a movie such as The Matrix, which contains many high-motion scenes.
+  On the other hand, it's worthless to raise CQ as higher than 0.30 as you'd
+  be wasting bits without any noticeable quality gain.
 </para>
 
 </sect2>
@@ -703,14 +774,54 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Audio</title>
 
 <para>
-  Audio is a much simpler problem to solve: just leave it as is. Even AC3
-  5.1 streams are at most 448Kbit/s, and they're worth every bit. You
-  might be tempted to transcode the audio to high quality Ogg Vorbis, but
+  Audio is a much simpler problem to solve: if you care about quality, just
+  leave it as is.
+  Even AC3 5.1 streams are at most 448Kbit/s, and they're worth every bit.
+  You might be tempted to transcode the audio to high quality Ogg Vorbis, but
   just because you don't have an A/V receiver for AC3 pass-through today
   doesn't mean you won't have one tomorrow. Future-proof your DVD rips by
   preserving the AC3 stream.
+  You can keep the AC3 stream either by copying it directly into the video
+  stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
+  You can also extract the AC3 stream in order to mux it into containers such
+  as NUT, Matroska or OGM.
+  <screen>mplayer source_file.vob -aid 129 -dumpaudio -dumpfile sound.ac3</screen>
+  will dump into the file sound.ac3 the audio track number 129 from the file
+  source_file.vob (NB: DVD VOB files usually use a different audio numbering,
+  which means that the VOB audio track 128 is the 2nd audio track of the file).
 </para>
 
+<para>
+  But sometimes you truly have no choice but to further compress the
+  sound so that more bits can be spent on the video.
+  Most people choose to compress audio with either MP3 or Ogg Vorbis audio
+  codecs.
+  While the latter is a very space-efficient codec, MP3 is better supported
+  by hardware players, although this trend is changing.
+</para>
+
+<para>
+  First of all, you will have to convert the DVD sound into a WAV file that the
+  audio codec can use as input.
+  For example:
+  <screen>mplayer source_file.vob -ao pcm:file=destination_sound.wav -vc dummy -aid 1 -vo null</screen>
+  will dump the second audio track from the file source_file.vob into the file
+  destination_sound.wav.
+  You may want to normalize the sound before encoding, as DVD audio tracks
+  are commonly recorded at low volumes.
+  You can use the tool <application>normalize</application> for instance,
+  which is available in most distribution.
+  You will compress in either Ogg Vorbis or MP3.
+  For example:
+  <screen>oggenc -q1 destination_sound.wav</screen>
+  will encode destination_sound.wav with the encoding quality 1, which is
+  roughly equivalent to 80Kb/s, and is the minimum quality at which you
+  should encode if you care about quality.
+  Please note that MEncoder currently can't currently mux Ogg Vorbis files
+  into a video stream because it can only create AVI and MPEG files.
+  Don't worry, this document will show you how you can do that with third
+  party programs.
+</para>
 
 </sect2>
 
@@ -801,6 +912,153 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-encoding-options">
+<title>Encoding options</title>
+
+<para>
+  Ideally, you'd probably want to be able to just tell the encoder to switch
+  into "high quality" mode and move on.
+  That would probably be nice, but unfortunately hard to implement as different
+  encoding options yield different qualities depending on the source material.
+  Anime and live action are for example two very different materials that
+  require different care.
+  The good news is that some options should never be left out, like
+  <option>mbd=2</option>, <option>trell</option>, and <option>v4mv</option>.
+  See below a detailed description of common encoding options. 
+</para>
+
+
+<itemizedlist>
+<title>Options to adjust:</title>
+<listitem><para>
+  <emphasis role="bold">vmax_b_frames</emphasis>: 1 or 2 is good, depending on
+  the movie.
+  Note that libavcodec does not yet support closed GOP (the option
+  <option>cgop</option> doesn't currently work), so DivX5 won't be able to
+  decode anything encoded with B-frames.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vb_strategy=1</emphasis>: helps in high-motion scenes.
+  Requires vmax_b_frames >= 2.
+  On some videos, vmax_b_frames may hurt quality, but vmax_b_frames=2 along
+  with vb_strategy=1 helps.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">dia</emphasis>: motion search range. Bigger is better
+  and slower.
+  Negative values are a completely different scale.
+  Good values are -1 for a fast encode, or 2-4 for slower.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">predia</emphasis>: motion search pre-pass.
+  Not as important as dia. Good values are 1 (default) to 4. Requires preme=2
+  to really be useful.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">cmp, subcmp, precmp</emphasis>: Comparison function for
+  motion estimation.
+  Experiment with values of 0 (default), 2 (hadamard), 3 (dct), and 6 (rate
+  distortion).
+  0 is fastest, and sufficient for precmp.
+  For cmp and subcmp, 2 is good for anime, and 3 is good for live action.
+  6 may or may not be slightly better, but is slow.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">last_pred</emphasis>: Number of motion predictors to
+  take from the previous frame.
+  1-3 or so help at little speed cost.
+  Higher values are slow for no extra gain.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">cbp, mv0</emphasis>: Controls the selection of macroblocks.
+  Small speed cost for small quality gain.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">qprd</emphasis>: adaptive quantization based on the
+  macroblock's complexity.
+  May help or hurt depending on the video and other options.
+  This can cause artifacts unless you set vqmax to some reasonably small value
+  (6 is good, maybe as low as 4); vqmin=1 should also help.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">qns</emphasis>: very slow, especially when combined
+  with qprd.
+  This option will make the encoder reduce as much as possible noise due to
+  compression artifacts instead making the encoded video strictly match the
+  source.
+  Don't use this unless you've already tweaked everything else as far as it
+  will go and the results still aren't good enough.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vqcomp</emphasis>: Tweak ratecontrol.
+  What values are good depends on the movie.
+  You can safely leave this alone if you want.
+  Reducing vqcomp puts more bits on low-complexity scenes, increasing it puts
+  them on high-complexity scenes (default: 0.5, range: 0-1. recommended range:
+  0.5-0.7).
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vlelim, vcelim</emphasis>: Sets the single coefficient
+  elimination threshold for luminance and chroma planes.
+  These are encoded separately in all MPEG-like algorithms.
+  The idea behind these options is to use some good heuristics to determine
+  when the change in a block is less than the threshold you specify, and in
+  such a case, to just  encode the block as "no change".
+  This saves bits and perhaps speeds up encoding. vlelim=-4 and vcelim=9
+  seem to be good for live movies, but seem not to help in with anime;
+  when encoding animation, you should probably leave them unchanged.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">qpel</emphasis>: Quarter pixel motion estimation.
+  MPEG-4 uses a half pixel precision for its motion search by default,
+  therefore this option comes with an overhead as more information will be
+  stored in the encoded file.
+  The compression gain/loss depends on the movie, but it's usually not very
+  effective on anime.
+  qpel always incurs a significant cost in CPU time needed to decode (+20% in
+  practice).
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">psnr</emphasis>: doesn't affect the actual encoding,
+  but writes a log file giving the type/size/quality of each frame, and
+  prints a sumary of PSNR (Peak Signal to Noise Ratio) at the end.
+</para></listitem>
+
+</itemizedlist>
+
+<itemizedlist>
+<title>Options not recommended to play with:</title>
+<listitem><para>
+  <emphasis role="bold">vme</emphasis>: The default is best.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Psychovisual adaptive
+  quantization.
+  You don't want to play with those options if you care about quality.
+  Reasonable values may be effective in your case, but be warned this is a very
+  subjective.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">scplx_mask</emphasis>: Tries to prevent blocky
+  artifacts, but postprocessing is better.
+</para></listitem>
+</itemizedlist>
+
+</sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-example">
 <title>Example</title>
@@ -1372,7 +1630,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <blockquote><para>It's OK, but IMO it tries to deinterlace rather
     than doing inverse telecine too often (much like settop DVD
     players &amp; progressive TVs) which gives ugly flickering and
-    other artefacts. If you're going to use it, you at least need to
+    other artifacts. If you're going to use it, you at least need to
     spend some time tuning the options and watching the output first
     to make sure it's not messing up.</para></blockquote>
   </para></listitem>
