@@ -575,7 +575,7 @@ Prints all keys that can be bound to commands.
 Prints all commands that can be bound to keys.
 .IPs js-dev
 Specifies the joystick device to use (default: /dev/\:input/\:js0).
-.IPs file\ 
+.IPs file=<filename>
 Read commands from the given file.
 Mostly useful with a FIFO.
 .br
@@ -8117,6 +8117,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Play a 6-channel AAC file with only two speakers:
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+.br
 You might want to play a bit with the pan values (e.g multiply with a value) to
 increase volume or avoid clipping.
 .
