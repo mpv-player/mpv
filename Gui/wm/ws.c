@@ -507,6 +507,7 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
 
  l=wsSearch( Event->xany.window );
  if ( l == -1 ) return !wsTrue;
+ wsWindowList[l]->State=0;
  switch( Event->type )
   {
    case ClientMessage:
