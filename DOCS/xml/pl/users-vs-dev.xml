@@ -57,13 +57,13 @@ zosta³o to ju¿ naprawione i GCC wy¶wietla ostrze¿enie zamiast pomijania tego blo
 <title>Tera¼niejszo¶æ:</title>
 <para>
 Red Hat twierdzi, ¿e GCC 2.96-85 i kolejne zosta³y ju¿ poprawione. Sytuacja rzeczywi¶cie
-poprawi³a siê, ci±gle jednak dostajemy raporty o b³êdach na nasze listy mailingowe, które znikaj± 
+poprawi³a siê, ci±gle jednak dostajemy raporty o b³êdach na nasze listy dyskusyjne, które znikaj± 
 wraz z przej¶ciem na inny kompilator. W ka¿dym razie, nie ma to ju¿ znaczenia. 
 Mamy nadziejê, ¿e dojrzewaj±ce GCC 3.x na dobre zakoñczy tê sprawê.  Je¿eli chcesz 
 kompilowaæ z 2.96, przeka¿ flagê <option>--disable-gcc-checking</option>
 skryptowi <filename>configure</filename>. Pamiêtaj, ¿e mo¿esz wtedy liczyæ tylko na siebie i
 <emphasis role="bold">nie zg³aszaj ¿adnych b³êdów</emphasis>. Je¿eli to zrobisz, zostanie
-odebrany Ci dostêp do naszej listy mailingowej, poniewa¿ mamy ju¿ bardziej ni¿ do¶æ bezsensownych k³ótni
+odebrany Ci dostêp do naszej listy dyskusyjnej, poniewa¿ mamy ju¿ bardziej ni¿ do¶æ bezsensownych k³ótni
 na temat GCC 2.96. Proszê, zostaw tê sprawê w spokoju.
 </para>
 </formalpara>
@@ -154,8 +154,8 @@ Dostali¶my wiele zg³oszeñ na
 o ich b³êdach, marnej jako¶ci, braku stabilno¶ci oraz 
 s³abym wsparciu dla u¿ytkownika i eksperta.
 Wiele z tych problemów/kwestii pojawia siê ci±gle. nVidia skontaktowa³a siê
-z nami ostatnio i stwierdzi³a, ¿e te b³êdy nie istniej±, a brak stabilno¶ci
-jest podyktowany wadliwymi chipami AGP, nie otrzymali równie¿ ¿adnych zg³oszeñ
+z nami ostatnio i stwierdzi³a, ¿e te b³êdy nie istniej±, a przyczyn± braku
+stabilno¶ci s± wadliwe uk³ady AGP, nie otrzymali równie¿ ¿adnych zg³oszeñ
 o b³êdach w sterowniku (takich, jak purpurowa linia). Je¿eli masz problem ze swoj± kart± 
 nVidia, radzimy zainstalowaæ najnowsz± wersjê sterowników nVidia i/lub 
 kupno nowej p³yty g³ównej lub poprosiæ nVidiê o otwarte sterowniki. W ka¿dym razie,
