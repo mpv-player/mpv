@@ -10,11 +10,10 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:   -'plist' resource
-			-Choose fullscreen display device (-xineramascreen / -multiscreen).
-			-resize black bar without CGContext
+			-RGB32 color space support
 			-rootwin
 			-screen overlay output
-			-non-blocking event
+			-while mouse button down event mplayer is locked, fix that
 			-(add sugestion here)
  */
 
@@ -89,8 +88,6 @@ static Rect winRect; // size of the window containg the displayed image (include
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 static Rect deviceRect; // size of the display device
 
-CGrafPtr gDisplayPortPtr;
-
 #include "../osdep/keycodes.h"
 extern void mplayer_put_key(int code);
 
@@ -128,7 +125,6 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
-	OSStatus result = eventNotHandledErr;
 	UInt32 class = GetEventClass (event);
 	UInt32 kind = GetEventKind (event); 
   
@@ -400,72 +396,40 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		SizeWindow (theWindow, d_width, d_height, 1);
  	}
 	
-	gDisplayPortPtr = GetWindowPort(theWindow);
-	
- 	get_image_done = 0;
-
-	if (!EnterMoviesDone)
-	{
-		qterr = EnterMovies();
-		EnterMoviesDone = 1;
-	}
-	else
-		qterr = 0;
-	
-	if (qterr)
-	{
-		mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
-		return -1;
-	}
-	
-	SetPort(gDisplayPortPtr);
-	SetIdentityMatrix(&matrix);
-	
-	if ((d_width != width) || (d_height != height))
-	{
-		ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
-	}
+	SetPort(GetWindowPort(theWindow));
 	
 	switch (image_format) 
 	{
-		case IMGFMT_RGB32:
-		{
-			ImageDescriptionHandle desc;
-			GWorldPtr imgGWorld;
-			image_data = calloc(sizeof(image_size),1);
-			NewGWorldFromPtr (&imgGWorld, k32ARGBPixelFormat, &imgRect, 0, 0, 0, image_data, imgRect.right * 4);
-			MakeImageDescriptionForPixMap(GetGWorldPixMap(imgGWorld), &desc);
-			DisposeGWorld(imgGWorld);
-		
-			qterr = DecompressSequenceBeginS (  &seqId,
-												desc,
-												image_data,
-												image_size,
-												GetWindowPort(theWindow),
-												NULL,
-												NULL,
-												((d_width != width) || (d_height != height)) ? &matrix : NULL,
-												srcCopy,
-												NULL,
-												0,
-												codecLosslessQuality,
-												bestSpeedCodec);
-			free(image_data);
-			image_data = NULL;
-			if (qterr)
-			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
-				return -1;
-			}
-		}
-		break;
-		
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
 		{
+		 	get_image_done = 0;
+
+			if (!EnterMoviesDone)
+			{
+				qterr = EnterMovies();
+				EnterMoviesDone = 1;
+			}
+			else
+				qterr = 0;
+	
+			if (qterr)
+			{
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
+				return -1;
+			}
+	
+	
+			SetIdentityMatrix(&matrix);
+	
+			if ((d_width != width) || (d_height != height))
+			{
+				ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
+			}		
+
 			yuv_qt_stuff.desc = (ImageDescriptionHandle)NewHandleClear( sizeof(ImageDescription) );
 		
 			yuv_qt_stuff.extension_colr = NewHandleClear(sizeof(NCLCColorInfoImageDescriptionExtension));
@@ -558,7 +522,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 					   yuv_qt_stuff.desc,
 					   (char *)P,
 					   image_buffer_size,
-					   gDisplayPortPtr,//GetWindowPort(theWindow),
+					   GetWindowPort(theWindow),
 					   NULL,
 					   NULL,
 					   ((d_width != width) || (d_height != height)) ? 
@@ -631,29 +595,6 @@ static void flip_page(void)
 {
 	switch (image_format) 
 	{
-		case IMGFMT_RGB32:
-		{
-		  if (EnterMoviesDone && (image_data != NULL)) 
-			{
-				OSErr qterr;
-				CodecFlags flags = 0;
-				
-				qterr = DecompressSequenceFrameWhen(seqId,
-													image_data,
-													image_size,
-													0,
-													&flags,
-													NULL,
-													NULL);
-				image_data = NULL;
-				if (qterr)
-				{
-					mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
-				}
-			}
-		}
-		break;
-
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
@@ -707,10 +648,6 @@ static uint32_t draw_frame(uint8_t *src[])
 {
 	switch (image_format)
 	{
-		case IMGFMT_RGB32:
-			image_data = src[0];
-			return 0;
-
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
 			memcpy_pic(((char*)P), src[0], imgRect.right * 2, imgRect.bottom, imgRect.right * 2, imgRect.right * 2);
@@ -723,11 +660,6 @@ static uint32_t query_format(uint32_t format)
 {
 	image_format = format;
 	image_qtcodec = 0;
-    
-	if (format == IMGFMT_RGB32)
-	{
-		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
-	}
     
     if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
 	{
@@ -772,7 +704,7 @@ static uint32_t preinit(const char *arg)
 	
     if(arg) 
     {
-        char *parse_pos = &arg[0];
+        char *parse_pos = (char *)&arg[0];
         while (parse_pos[0] && !parse_err) 
 		{
 			if (strncmp (parse_pos, "device_id=", 10) == 0)
@@ -902,8 +834,7 @@ void window_resized()
 	uint32_t d_width;
 	uint32_t d_height;
 	
-	//GetWindowPortBounds(theWindow, &winRect);
-	GetPortBounds( gDisplayPortPtr, &winRect );
+	GetPortBounds( GetWindowPort(theWindow), &winRect );
 
 	aspect( &d_width, &d_height, A_NOZOOM);
 	
@@ -922,7 +853,7 @@ void window_resized()
 	}
 
 	//Clear Background
-	SetGWorld( gDisplayPortPtr, NULL );
+	SetGWorld( GetWindowPort(theWindow), NULL );
 	RGBColor blackC = { 0x0000, 0x0000, 0x0000 };
     RGBForeColor( &blackC );
     PaintRect( &winRect );
@@ -954,9 +885,6 @@ void window_ontop()
 
 void window_fullscreen()
 {
-	GDHandle deviceHdl;
-	//Rect deviceRect;
-
 	//go fullscreen
 	if(vo_fs)
 	{
