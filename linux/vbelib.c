@@ -554,7 +554,7 @@ int vbeSetDisplayStart(unsigned long offset, int vsync)
     pixel_num = offset%(unsigned long)curr_mode_info.BytesPerScanLine;
     if(pixel_num*(unsigned long)curr_mode_info.BytesPerScanLine!=offset) pixel_num++;
     r.eax = 0x4f07;
-    r.ebx = vsync ? 0x80 : 0;
+    r.ebx = vsync ? 0x82 : 2;
     r.ecx = pixel_num;
     r.edx = offset/(unsigned long)curr_mode_info.BytesPerScanLine;
     if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
@@ -563,6 +563,23 @@ int vbeSetDisplayStart(unsigned long offset, int vsync)
 #endif
     retval = VBE_BROKEN_BIOS;
   }
+  return retval;
+}
+
+int vbeSetScheduledDisplayStart(unsigned long offset, int vsync)
+{
+  int retval;
+  struct LRMI_regs r;
+  unsigned long pixel_num;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  pixel_num = offset%(unsigned long)curr_mode_info.BytesPerScanLine;
+  if(pixel_num*(unsigned long)curr_mode_info.BytesPerScanLine!=offset) pixel_num++;
+  r.eax = 0x4f07;
+  r.ebx = vsync ? 0x82 : 2;
+  r.ecx = offset;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f) retval = VBE_OK;
   return retval;
 }
 

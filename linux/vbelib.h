@@ -209,6 +209,7 @@ extern int vbeSetScanLineLength(unsigned num_pixels);
 extern int vbeSetScanLineLengthB(unsigned num_bytes);
 extern int vbeGetDisplayStart(unsigned *pixel_num,unsigned *scan_line);
 extern int vbeSetDisplayStart(unsigned long offset, int vsync);
+extern int vbeSetScheduledDisplayStart(unsigned long offset, int vsync);
 /*
    Func 0x08-0x09:
    Support of palette currently is not implemented.
