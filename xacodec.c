@@ -13,7 +13,7 @@
 #include <errno.h> /* strerror, errno */
 
 #include "config.h"
-#define XACODEC_PATH "/usr/lib/xanim"
+#define XACODEC_PATH "/usr/lib/xanim/mods"
 
 #include "mp_msg.h"
 #include "bswap.h"
@@ -22,8 +22,6 @@
 #include "demuxer.h"
 #include "codec-cfg.h"
 #include "stheader.h"
-
-//#include "loader/DirectShow/default.h"
 
 #include "libvo/img_format.h"
 #include "xacodec.h"
@@ -39,7 +37,6 @@ typedef unsigned int xaULONG;
 #define xaFALSE 0
 #define xaTRUE 1
 
-
 #ifndef RTLD_NOW
 #define RLTD_NOW 2
 #endif
@@ -52,6 +49,9 @@ typedef unsigned int xaULONG;
 
 extern int verbose;
 
+#define XA_CLOSE_FUNCS 5
+int xa_close_func = 0;
+
 typedef struct xacodec_driver
 {
     XA_DEC_INFO *decinfo;
@@ -59,11 +59,10 @@ typedef struct xacodec_driver
     long (*iq_func)(XA_CODEC_HDR *codec_hdr);
     unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 	unsigned int dsize, XA_DEC_INFO *dec_info);
-    void (*close_func)();
+    void *close_func[XA_CLOSE_FUNCS];
 } xacodec_driver_t;
 
 xacodec_driver_t *xacodec_driver = NULL;
-
 
 /* Needed by XAnim DLLs */
 int XA_Print(char *fmt, ...)
@@ -77,10 +76,22 @@ int XA_Print(char *fmt, ...)
     va_end(vallist);
 }
 
+/* 0 is no debug (needed by 3ivX) */
+long xa_debug = 2;
+
 int TheEnd1(char *err_mess)
 {
     XA_Print("error: %s - exiting\n", err_mess);
     xacodec_exit();
+}
+
+int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
+{
+    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
+	    anim_hdr, function);
+    xacodec_driver->close_func[xa_close_func] = function;
+    if (xa_close_func+1 < XA_CLOSE_FUNCS)
+	xa_close_func++;
 }
 /* end of crap */
 
@@ -145,28 +156,26 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
 	return(0);
     }
     
-    if (verbose > 2)
-	printf("dump: funcs: 0x%08x (num %d)\n", mod_hdr->funcs, mod_hdr->num_funcs);
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "dump: funcs: 0x%08x (num %d)\n", mod_hdr->funcs, mod_hdr->num_funcs);
     for (i = 0; i < mod_hdr->num_funcs; i++)
     {
-	if (verbose > 2)
-	    printf("dump(%d): %d %d [iq:0x%08x d:0x%08x]\n", i,
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "dump(%d): %d %d [iq:0x%08x d:0x%08x]\n", i,
 		func[i].what, func[i].id, func[i].iq_func, func[i].dec_func);
 	if (func[i].what & XAVID_AVI_QUERY)
 	{
-	    printf("0x%08x: avi init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: avi init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
 	    codec_driver->iq_func = func[i].iq_func;
 	}
 	if (func[i].what & XAVID_QT_QUERY)
 	{
-	    printf("0x%08x: qt init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: qt init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
 	    codec_driver->iq_func = func[i].iq_func;
 	}
 	if (func[i].what & XAVID_DEC_FUNC)
 	{
-	    printf("0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
 		func[i].dec_func, func[i].iq_func, func[i].id);
 	    codec_driver->dec_func = func[i].dec_func;
 	}
@@ -183,15 +192,15 @@ int xacodec_query(xacodec_driver_t *codec_driver, XA_CODEC_HDR *codec_hdr)
     {
 	case CODEC_SUPPORTED:
 	    codec_driver->dec_func = codec_hdr->decoder;
-	    printf("Codec is supported: found decoder for %s at 0x%08x\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Codec is supported: found decoder for %s at 0x%08x\n",
 		codec_hdr->description, codec_hdr->decoder);
 	    return(1);
 	case CODEC_UNSUPPORTED:
-	    printf("Codec is unsupported\n");
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec is unsupported by driver\n");
 	    return(0);
 	case CODEC_UNKNOWN:
 	default:
-	    printf("Codec is unknown\n");
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec is unknown by driver\n");
 	    return(0);
     }
 }
@@ -202,6 +211,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 {
     char dll[1024];
     XA_CODEC_HDR codec_hdr;
+    int i;
     
     xacodec_driver = realloc(xacodec_driver, sizeof(struct xacodec_driver));
     if (xacodec_driver == NULL)
@@ -209,7 +219,9 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     xacodec_driver->iq_func = NULL;
     xacodec_driver->dec_func = NULL;
-    xacodec_driver->close_func = NULL;
+
+    for (i=0; i < XA_CLOSE_FUNCS; i++)
+	xacodec_driver->close_func[i] = NULL;
 
     snprintf(dll, 1024, "%s/%s", xacodec_def_path, vidinfo->codec->dll);
     if (xacodec_init(dll, xacodec_driver) == 0)
@@ -258,12 +270,15 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 	case IMGFMT_BGR32:
 	    codec_hdr.depth = 32;
 	    break;
+	case IMGFMT_I420:
+	    codec_hdr.depth = 32;
+	    break;
 	default:
-	    printf("xacodec: not supported image format (%s)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image format (%s)\n",
 		vo_format_name(out_format));
 	    return(0);
     }
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "xacodec: querying for %dx%d %dbit [fourcc: %4x] (%s)...\n",
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "xacodec: querying for %dx%d %dbit [fourcc: %4x] (%s)...\n",
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth, codec_hdr.compression,
 	codec_hdr.description);
 
@@ -292,12 +307,12 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     if (vidinfo->our_out_buffer == NULL)
     {
-	mp_msg(MSGT_DECVIDEO,MSGL_ERR,  "cannot allocate memory for output: %s",
+	mp_msg(MSGT_DECVIDEO, MSGL_ERR, "cannot allocate memory for output: %s",
 	    strerror(errno));
 	return(0);
     }
 
-    printf("extra: %08x - %dx%d %dbit\n", codec_hdr.extra,
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "extra: %08x - %dx%d %dbit\n", codec_hdr.extra,
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth);
     return(1);
 }
@@ -390,8 +405,17 @@ int xacodec_decode_frame(uint8_t *frame, int frame_size,
 
 int xacodec_exit()
 {
-    if (xacodec_driver->close_func)
-	xacodec_driver->close_func();
+    int i;
+    void (*close_func)();
+
+    for (i=0; i < XA_CLOSE_FUNCS; i++)
+	if (xacodec_driver->close_func[i])
+	{
+	    close_func = xacodec_driver->close_func[i];
+	    close_func();
+	}
+//    if (xacodec_driver->close_func)
+//	xacodec_driver->close_func();
     dlclose(xacodec_driver->file_handler);
     if (xacodec_driver->decinfo != NULL)
 	free(xacodec_driver->decinfo);
@@ -403,6 +427,17 @@ int xacodec_exit()
 
 /* *** XANIM SHIT *** */
 /* like loader/win32.c - mini XANIM library */
+
+
+unsigned long XA_Time_Read()
+{
+    return(GetRelativeTime());
+}
+
+void XA_dummy()
+{
+    XA_Print("dummy() called");
+}
 
 typedef struct
 {
@@ -476,9 +511,6 @@ XA_2x2_OUT_1BLK_clr8(image,x+2,y+2,imagex,cm3);
 
 }
 
-void dummy(){
-    XA_Print("dummy() called");
-}
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
@@ -568,12 +600,6 @@ void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
     return (void*)XA_YUV_2x2_clr;
 }
 
-int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
-{
-    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
-	    anim_hdr, function);
-    xacodec_driver->close_func = function;
-}
 
 int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
 {
@@ -655,11 +681,6 @@ void *XA_YUV1611_Func(unsigned int image_type)
     return((void *)color_func);
 }
 
-unsigned long XA_Time_Read()
-{
-    return(GetRelativeTime());
-}
-
 /* YUV 41 11 11 routines */
 void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
@@ -684,6 +705,12 @@ void *XA_YUV411111_Func(unsigned int image_type)
     return((void *)color_func);
 }
 
+/* YUV 22 11 11 routines */
+void *XA_YUV221111_Func(unsigned int image_type)
+{
+    XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
+    return((void *)XA_dummy);
+}
 
 YUVBufs jpg_YUVBufs;
 YUVTabs def_yuv_tabs;
