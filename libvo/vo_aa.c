@@ -238,7 +238,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     aa_hidecursor(c);
     p = aa_getrenderparams();
 
-    if ((strstr(c->driver->name,"curses")) || (strstr(c->driver->name,"linux"))){
+    if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
 	freopen("/dev/null", "w", stderr);
 	quiet=1; /* disable mplayer outputs */
     }
@@ -527,7 +527,7 @@ uninit(void) {
     free(stx);
     free(sty);
     if (convertbuf!=NULL) free(convertbuf);
-    if (strstr(c->driver->name,"curses") || strstr(c->driver->name,"libux")){
+    if (strstr(c->driver->name,"Curses") || strstr(c->driver->name,"Linux")){
 	freopen("/dev/tty", "w", stderr);
 	quiet=0; /* enable mplayer outputs */
     }
