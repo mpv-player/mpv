@@ -92,6 +92,7 @@ distclean:
 dep:	depend
 
 depend:
+	./version.sh
 	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
 	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
 
