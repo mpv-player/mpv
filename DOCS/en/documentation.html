@@ -814,6 +814,15 @@
   Check if you have <CODE>codecs.conf</CODE> in your home directory
   (<CODE>~/.mplayer/codecs.conf</CODE>) left from old MPlayer versions, and remove it.</P>
 
+<P>Note that if you have a <CODE>codecs.conf</CODE> in <CODE>~/.mplayer/</CODE>,
+  the builtin and system <CODE>codecs.conf</CODE> will be ignored completely.
+  Do not do this unless you want to fiddle with MPlayer internals as this can
+  can cause many problems.  If you want to change the codecs search order, use
+  the <CODE>-vc</CODE>, <CODE>-ac</CODE>, <CODE>-vfm</CODE>, or <CODE>-afm</CODE>
+  options either on the command line or in your config file (see the manual
+  page).</P>
+
+
 <P><B>Debian users</B> can build a <CODE>.deb</CODE> package for themselves,
   it's very simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
   MPlayer's root directory. See
