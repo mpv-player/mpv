@@ -721,7 +721,7 @@ seconds to/from the subtitle.
 
 <para>
 Subtitles are displayed with a technique called <emphasis role="bold">'OSD',
-On Screen Display</emphasis>.OSD is used to display current time, volume bar,
+On Screen Display</emphasis>. OSD is used to display current time, volume bar,
 seek bar etc.
 </para>
 </sect2>
