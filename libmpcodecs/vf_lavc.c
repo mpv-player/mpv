@@ -22,7 +22,7 @@
 #endif
 
 #if LIBAVCODEC_BUILD < 4641
-#error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
+#error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
 extern int avcodec_inited;
@@ -156,11 +156,7 @@ static int open(vf_instance_t *vf, char* args){
     if(p_quality<32){
 	// fixed qscale
 	lavc_venc_context.flags = CODEC_FLAG_QSCALE;
-#if LIBAVCODEC_BUILD >= 4641
 	vf->priv->pic->quality = (p_quality<1) ? 1 : p_quality;
-#else
-	lavc_venc_context.quality = (p_quality<1) ? 1 : p_quality;
-#endif
     } else {
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;

@@ -33,7 +33,7 @@ LIBVD_EXTERN(ffmpeg)
 #endif
 
 #if LIBAVCODEC_BUILD < 4641
-#error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
+#error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
 int avcodec_inited=0;
@@ -64,11 +64,7 @@ typedef struct {
 static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
 
-#ifdef FF_BUG_AUTODETECT
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
-#else
-static int lavc_param_workaround_bugs= 0;
-#endif
 static int lavc_param_error_resilience=2;
 static int lavc_param_error_concealment=3;
 static int lavc_param_gray=0;
@@ -76,19 +72,11 @@ static int lavc_param_vstats=0;
 static int lavc_param_idct_algo=0;
 
 struct config lavc_decode_opts_conf[]={
-#if LIBAVCODEC_BUILD >= 4611
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
 	{"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-#endif
-#if LIBAVCODEC_BUILD >= 4614
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
-#endif
-#if LIBAVCODEC_BUILD >= 4629
 	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-#endif
-#if LIBAVCODEC_BUILD >= 4631
 	{"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-#endif
 	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -147,33 +135,22 @@ static int init(sh_video_t *sh){
     if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
 	ctx->do_slices=1;
  
-#if LIBAVCODEC_BUILD > 4615
     if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
     //XXX:FIXME:HACK:UGLY 422P with direct rendering is buggy cuz of that chroma stride trick ...
     if(sh->format == mmioFOURCC('H','F','Y','U'))
         ctx->do_dr1=0;
-#endif
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
 
-#if LIBAVCODEC_BUILD >= 4641
     ctx->pic = avcodec_alloc_picture();
-#endif
-#if LIBAVCODEC_BUILD >= 4624
     ctx->avctx = avcodec_alloc_context();
-#else
-    ctx->avctx = malloc(sizeof(AVCodecContext));
-    memset(ctx->avctx, 0, sizeof(AVCodecContext));
-#endif
     avctx = ctx->avctx;
 
-#if LIBAVCODEC_BUILD > 4615
     if(ctx->do_dr1){
         avctx->flags|= CODEC_FLAG_EMU_EDGE; 
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
     }
-#endif
 
 #ifdef CODEC_FLAG_NOT_TRUNCATED
     avctx->flags|= CODEC_FLAG_NOT_TRUNCATED;
@@ -181,25 +158,14 @@ static int init(sh_video_t *sh){
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
-#if LIBAVCODEC_BUILD >= 4611
     avctx->workaround_bugs= lavc_param_workaround_bugs;
     avctx->error_resilience= lavc_param_error_resilience;
-#endif
-#if LIBAVCODEC_BUILD >= 4614
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
-#endif
-#if LIBAVCODEC_BUILD >= 4628
     avctx->fourcc= sh->format;
-#endif
-#if LIBAVCODEC_BUILD >= 4629
     avctx->idct_algo= lavc_param_idct_algo;
-#endif
-#if LIBAVCODEC_BUILD >= 4631
     avctx->error_concealment= lavc_param_error_concealment;
-#endif
     
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
-#if LIBAVCODEC_BUILD >= 4605
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
        MJPG fourcc :( */
@@ -224,7 +190,6 @@ static int init(sh_video_t *sh){
 	}
 #endif
     }
-#endif
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3')){
         avctx->extradata_size= 8;
@@ -257,10 +222,8 @@ static int init(sh_video_t *sh){
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
     }
     
-#if LIBAVCODEC_BUILD >= 4639
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
-#endif    
 
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
@@ -280,16 +243,12 @@ static void uninit(sh_video_t *sh){
     if (avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
 
-#if LIBAVCODEC_BUILD >= 4605
     if (avctx->extradata_size)
 	free(avctx->extradata);
     avctx->extradata=NULL;
-#endif
-#if LIBAVCODEC_BUILD >= 4630
     if(avctx->slice_offset!=NULL) 
         free(avctx->slice_offset);
     avctx->slice_offset=NULL;
-#endif
 
     if (avctx)
 	free(avctx);
@@ -306,18 +265,14 @@ static void draw_slice(struct AVCodecContext *s,
     int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
-#if LIBAVCODEC_BUILD >= 4641
     UINT8 *skip= &s->coded_picture->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_picture->age;
-#endif
 
     stride[0]=linesize;
-#if LIBAVCODEC_BUILD >= 4641
     if(s->coded_picture->linesize[1]){
         stride[1]= s->coded_picture->linesize[1];
         stride[2]= s->coded_picture->linesize[2];
     }else
-#endif
         stride[1]=stride[2]=stride[0]/2;
 #if 0
     if(s->pict_type!=B_TYPE){
@@ -348,24 +303,18 @@ static int init_vo(sh_video_t *sh){
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
     {
-#if LIBAVCODEC_BUILD >= 4640
 	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "aspect_ratio: %d\n", avctx->aspect_ratio);
 	sh->aspect = 
         ctx->last_aspect = avctx->aspect_ratio;
-#endif
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
 	switch(avctx->pix_fmt){
-#if LIBAVCODEC_BUILD >= 4615
 	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
-#endif
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
 	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //???
-#if LIBAVCODEC_BUILD >= 4631
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
-#endif
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
 	case PIX_FMT_BGRA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
@@ -380,7 +329,6 @@ static int init_vo(sh_video_t *sh){
     return 0;
 }
 
-#if LIBAVCODEC_BUILD >= 4641
 static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic){
     sh_video_t * sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -409,13 +357,11 @@ static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic){
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
                 | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
 
-#if LIBAVCODEC_BUILD > 4616
     if(avctx->has_b_frames){
         type= MP_IMGTYPE_IPB;
     }else{
         type= MP_IMGTYPE_IP;
     }
-#endif
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
 
     mpi= mpcodecs_get_image(sh,type, flags,
@@ -489,7 +435,6 @@ static void release_buffer(struct AVCodecContext *avctx, AVVideoFrame *pic){
     }
 //printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 }
-#endif
 
 // copypaste from demux_real.c - it should match to get it working!
 //FIXME put into some header
@@ -524,11 +469,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	}
     }
 
-#if LIBAVCODEC_BUILD > 4603
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
-#endif
 
-#if LIBAVCODEC_BUILD >= 4630
 //    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3'))
@@ -547,7 +489,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	len=hdr->len;
         data+= sizeof(dp_hdr_t);
     }
-#endif
 
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
@@ -607,11 +548,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(init_vo(sh)<0) return NULL;
 
-#if LIBAVCODEC_BUILD > 4615
     if(dr1 && pic->opaque){
         mpi= (mp_image_t*)pic->opaque;
     }
-#endif
         
     if(!mpi && ctx->convert){
 	// do yuv422p -> yuy2 conversion:
@@ -648,11 +587,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
 /* to comfirm with newer lavc style */
-#if LIBAVCODEC_BUILD >= 4641
     mpi->qscale =pic->qscale_table;
     mpi->qstride=pic->qstride;
     mpi->pict_type=pic->pict_type;
-#endif
     
     return mpi;
 }
