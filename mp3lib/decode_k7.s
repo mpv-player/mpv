@@ -104,41 +104,41 @@ synth_1to1_3dnowex:
 
 .L55:
 
-        movq  (%ecx),%mm4
-        movq  8(%ecx),%mm0
-        pfmul (%ebx),%mm4
+        movq  (%ecx),%mm0
+        pfmul (%ebx),%mm0
 
-        pfmul 8(%ebx),%mm0
-        movq  16(%ebx),%mm3
-        pfadd %mm0,%mm4
+        movq  8(%ecx),%mm1
+        pfmul 8(%ebx),%mm1
+        pfadd %mm1,%mm0
 
-        movq  24(%ecx),%mm0
-        pfmul 16(%ecx),%mm3
-        pfadd %mm3,%mm4
+        movq  16(%ebx),%mm2
+        pfmul 16(%ecx),%mm2
+        pfadd %mm2,%mm0
 
-        pfmul 24(%ebx),%mm0
-        movq  32(%ebx),%mm3
-        pfadd %mm0,%mm4
+        movq  24(%ecx),%mm3
+        pfmul 24(%ebx),%mm3
+        pfadd %mm3,%mm0
 
-        movq  40(%ecx),%mm0
-        pfmul 32(%ecx),%mm3
-        pfadd %mm3,%mm4
+        movq  32(%ebx),%mm4
+        pfmul 32(%ecx),%mm4
+        pfadd %mm4,%mm0
 
-        pfmul 40(%ebx),%mm0
-        movq  48(%ebx),%mm3
-        pfadd %mm0,%mm4
+        movq  40(%ecx),%mm5
+        pfmul 40(%ebx),%mm5
+	pfadd %mm5,%mm0
 
-        movq  56(%ecx),%mm0
-        pfmul 48(%ecx),%mm3
-        pfadd %mm3,%mm4
+        movq  48(%ebx),%mm6
+        pfmul 48(%ecx),%mm6
+        pfadd %mm6,%mm0
 
-        pfmul 56(%ebx),%mm0
-        pfadd %mm0,%mm4
+        movq  56(%ecx),%mm7
+        pfmul 56(%ebx),%mm7
+        pfadd %mm7,%mm0
 
-	pfnacc %mm4, %mm4
+	pfnacc %mm0, %mm0
 
-        pf2id %mm4,%mm4
-        movd  %mm4,%eax
+        pf2id %mm0,%mm0
+        movd  %mm0,%eax
 
         sar   $16,%eax
         movw  %ax,(%esi)
@@ -151,39 +151,39 @@ synth_1to1_3dnowex:
 
 / --- end of  loop 1 ---
 
-        movd  (%ecx),%mm2
-        pfmul (%ebx),%mm2
+        movd  (%ecx),%mm0
+        pfmul (%ebx),%mm0
 
         movd  8(%ebx),%mm1
         pfmul 8(%ecx),%mm1
-        pfadd %mm1,%mm2
+        pfadd %mm1,%mm0
 
-        movd  16(%ebx),%mm1
-        pfmul 16(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  16(%ebx),%mm2
+        pfmul 16(%ecx),%mm2
+        pfadd %mm2,%mm0
 
-        movd  24(%ebx),%mm1
-        pfmul 24(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  24(%ebx),%mm3
+        pfmul 24(%ecx),%mm3
+        pfadd %mm3,%mm0
 
-        movd  32(%ebx),%mm1
-        pfmul 32(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  32(%ebx),%mm4
+        pfmul 32(%ecx),%mm4
+        pfadd %mm4,%mm0
 
-        movd  40(%ebx),%mm1
-        pfmul 40(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  40(%ebx),%mm5
+        pfmul 40(%ecx),%mm5
+        pfadd %mm5,%mm0
 
-        movd  48(%ebx),%mm1
-        pfmul 48(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  48(%ebx),%mm6
+        pfmul 48(%ecx),%mm6
+        pfadd %mm6,%mm0
 
-        movd  56(%ebx),%mm1
-        pfmul 56(%ecx),%mm1
-        pfadd %mm1,%mm2
+        movd  56(%ebx),%mm7
+        pfmul 56(%ecx),%mm7
+        pfadd %mm7,%mm0
 
-        pf2id %mm2,%mm2
-        movd  %mm2,%eax
+        pf2id %mm0,%mm0
+        movd  %mm0,%eax
 
         sar   $16,%eax
 
@@ -197,37 +197,37 @@ synth_1to1_3dnowex:
 .L68:
 	pxor  %mm0, %mm0
 
-        movq  (%ecx),%mm2
-        pfmul (%ebx),%mm2
+        movq  (%ecx),%mm1
+        pfmul (%ebx),%mm1
+        pfsub %mm1,%mm0
+
+        movq  8(%ecx),%mm2
+        pfmul 8(%ebx),%mm2
         pfsub %mm2,%mm0
 
-        movq  8(%ecx),%mm4
-        pfmul 8(%ebx),%mm4
-        pfsub %mm4,%mm0
-
-        movq  16(%ecx),%mm2
-        pfmul 16(%ebx),%mm2
-        pfsub %mm2,%mm0
+        movq  16(%ecx),%mm3
+        pfmul 16(%ebx),%mm3
+        pfsub %mm3,%mm0
 
         movq  24(%ecx),%mm4
         pfmul 24(%ebx),%mm4
         pfsub %mm4,%mm0
 
-        movq  32(%ecx),%mm2
-        pfmul 32(%ebx),%mm2
-        pfsub %mm2,%mm0
+        movq  32(%ecx),%mm5
+        pfmul 32(%ebx),%mm5
+        pfsub %mm5,%mm0
 
-        movq  40(%ecx),%mm4
-        pfmul 40(%ebx),%mm4
-        pfsub %mm4,%mm0
+        movq  40(%ecx),%mm6
+        pfmul 40(%ebx),%mm6
+        pfsub %mm6,%mm0
 
-        movq  48(%ecx),%mm2
-        pfmul 48(%ebx),%mm2
-        pfsub %mm2,%mm0
+        movq  48(%ecx),%mm7
+        pfmul 48(%ebx),%mm7
+        pfsub %mm7,%mm0
 
-        movq  56(%ecx),%mm4
-        pfmul 56(%ebx),%mm4
-        pfsub %mm4,%mm0
+        movq  56(%ecx),%mm1
+        pfmul 56(%ebx),%mm1
+        pfsub %mm1,%mm0
 
         pfacc %mm0,%mm0
 
