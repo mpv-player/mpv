@@ -88,7 +88,7 @@ static int init(sh_audio_t *sh){
   sh->channels=(this->frame.header.mode == MAD_MODE_SINGLE_CHANNEL) ? 1 : 2;
   sh->samplerate=this->frame.header.samplerate;
   sh->i_bps=this->frame.header.bitrate/8;
-  sh_audio->samplesize=2;
+  sh->samplesize=2;
   
   return 1;
 }
