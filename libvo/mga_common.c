@@ -257,7 +257,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 static int mga_init(){
 	char *frame_mem;
 
-	mga_vid_config.num_frames=4;
+	mga_vid_config.num_frames=(vo_directrendering && !vo_doublebuffering)?1:3;
 	mga_vid_config.version=MGA_VID_VERSION;
 	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
 	{
@@ -266,6 +266,8 @@ static int mga_init(){
 		return -1;
 	}
 	ioctl(f,MGA_VID_ON,0);
+	
+	printf("[mga] Using %d buffers.\n",mga_vid_config.num_frames);
 
 	frames[0] = (char*)mmap(0,mga_vid_config.frame_size*mga_vid_config.num_frames,PROT_WRITE,MAP_SHARED,f,0);
 	frames[1] = frames[0] + 1*mga_vid_config.frame_size;
