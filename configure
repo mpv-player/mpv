@@ -528,14 +528,14 @@ fi
 # Try to find the available options for the current CPU
 if x86 || ppc; then
   if test -r /proc/cpuinfo ; then
-    # linux with /proc mounted, extract cpu information from it
+    # Linux with /proc mounted, extract CPU information from it
     _cpuinfo="cat /proc/cpuinfo"
   elif test -r /compat/linux/proc/cpuinfo ; then
-    # FreeBSD with linux emulation /proc mounted,
-    # extract cpu information from it
+    # FreeBSD with Linux emulation /proc mounted,
+    # extract CPU information from it
     _cpuinfo="cat /compat/linux/proc/cpuinfo"
   elif x86; then
-    # all other OS try to extract cpu information from a small helper
+    # all other OSes try to extract CPU information from a small helper
     # program TOOLS/cpuinfo instead
     $_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
     _cpuinfo="TOOLS/cpuinfo"
@@ -580,7 +580,7 @@ if x86 || ppc; then
   echocheck "CPU type"
   echores "$pname"
 
-  # just leaving this here becouse the non-x86 optims
+  # leaving this here because of the non-x86 optimizations
   if test "$_runtime_cpudetection" = yes ; then
     if x86; then
       _mmx=yes
@@ -651,9 +651,9 @@ case "$host_arch" in
 		proc=athlon-4
 	elif test "$pmodel" -ge 6; then
 		# only Athlon XP supports ssem MP, Duron etc not
-		# but most of them are cpuid 666, so check if sse detected
+		# but most of them are CPUID 666, so check if sse detected
 		# btw. there is also athlon-mp opt, but we need extended
-		# cpuid to detect if cpu is SMP capable -> athlon-mp ::atmos
+		# CPUID to detect if CPU is SMP capable -> athlon-mp ::atmos
 		if test "$_sse" = yes && test "$pstepping" -ge 2; then
 			proc=athlon-xp
 		else
@@ -704,7 +704,7 @@ case "$host_arch" in
     proc=i586 iproc=586 ;;
   esac
 
-    # check that gcc supports our cpu, if not, fallback to earlier ones
+    # check that gcc supports our CPU, if not, fall back to earlier ones
     # LGB: check -mcpu and -march swithing step by step with enabling
     # to fall back till 386.
 
@@ -744,7 +744,7 @@ EOF
       cc_check -march=$proc -mcpu=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-      echores "Your $_cc does not support even \"i386\" for '-march' and '-mcpu'."
+      echores "Your $_cc does not even support \"i386\" for '-march' and '-mcpu'."
       _mcpu=""
       _march=""
       _optimizing=""
@@ -758,7 +758,7 @@ EOF
       _optimizing="$proc"
     fi
   else
-    # i686 is probably the most common cpu - optimize to it
+    # i686 is probably the most common CPU - optimize for it
     _mcpu="-mcpu=i686"
     # at least i486 required, for bswap instruction
     _march="-march=i486"
@@ -769,7 +769,7 @@ EOF
     ## Gabucino : --target takes effect here (hopefully...) by overwriting
     ##             autodetected mcpu/march parameters
     if test "$_target" ; then
-      # TODO: it may be a good idea to check GCC and fallback in all cases
+      # TODO: it may be a good idea to check GCC and fall back in all cases
       if test "$host_arch" = "i586-i686"; then
         _march="-march=i586"
         _mcpu="-mcpu=i686"
@@ -1326,7 +1326,7 @@ for ac_option do
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
   --enable-mmx)	_mmx=yes ;;
-  --disable-mmx) # without mmx 3Dnow! and stuff is also not possible
+  --disable-mmx) # 3Dnow! and MMX2 require MMX
         _3dnow=no _3dnowex=no _mmx=no _mmx2=no ;;
 
   --enable-win32) _win32=yes ;;
@@ -1484,7 +1484,7 @@ if x86 && linux ; then
     echo "experience crashes. MPlayer tries to autodetect if your kernel correctly"
     echo "supports SSE, but you have been warned! If you are using a kernel older than"
     echo "2.2.x you must upgrade it to get SSE support!"
-#    die "old kernel for this cpu" # works fine on some 2.2.x so don't die (later check will test)
+#    die "Your kernel is too old for this CPU." # works fine on some 2.2.x so don't die (later check will test)
   else
     echores "$kernel_version, ok"
   fi
@@ -1492,7 +1492,7 @@ fi
 
 if test "$_vidix" = auto ; then
   _vidix=no
-  # should check for x86 systems supporting vidix (does qnx have vidix?)
+  # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
   x86 && _vidix=yes
   cygwin && _vidix=no
   qnx && _vidix=no
@@ -1969,10 +1969,10 @@ EOF
 _soundcard=no
 cc_check && _soundcard=yes
 if linux || test "$_ossaudio" != no ; then
-  # use soundcard.h on linux, or when OSS support is enabled
+  # use soundcard.h on Linux, or when OSS support is enabled
   echores "$_soundcard"
 else
-  # we don't want to use soundcard.h on non-linux if no OSS support enabled!
+  # we don't want to use soundcard.h on non-Linux if OSS support not enabled!
   echores "$_soundcard, but ignored!"
   _soundcard=no
 fi
@@ -4708,7 +4708,7 @@ test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
 _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
-# TODO cleanup the vidix stuff here
+# TODO cleanup the VIDIX stuff here
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
 if test "$_vidix" = yes && test "$_x11" = yes; then
@@ -5262,7 +5262,7 @@ $_def_use_aton
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
 
-/* enables / disables vidix usage */
+/* enables / disables VIDIX usage */
 $_def_vidix
 
 /* enables / disables new input joystick support */
