@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  pre4: "Niu ririsu" Apr 26, 2004
+  pre4: "YAML Counter" Apr 27, 2004
 
     Security:
     * HTTP parser remote heap overflow vulnerability fixed
@@ -107,9 +107,9 @@ MPlayer (1.0)
     * support for VIDIX when ATI FireGLX drivers are used
 
     FFmpeg/libavcodec:
-    * H263 AIC and MQ encoding support
+    * H.263 AIC and MQ encoding support
     * fixed low delay decoding
-    * fixed H263+ encoding without UMV
+    * fixed H.263+ encoding without UMV
     * lots of CBR improvements
     * MB type and QP visualization
     * lots of code cleanup
@@ -126,7 +126,7 @@ MPlayer (1.0)
     * fixed never-before-tested embedded string decoder in SVQ1
     * optimized quantization (including the trellis way)
     * Sierra VMD video decoder
-    * MMX and SSE2 optimized H263 denoiser
+    * MMX and SSE2 optimized H.263 denoiser
     * better SVCD compliance (encoder side)
     * MMX and MMX2 optimized interlaced DCT decision
     * various cleanup, memleak and segfault fixes
@@ -145,10 +145,10 @@ MPlayer (1.0)
     * better support for DivX5
     * MMX and SSE2 optimized VP3/Theora decoding
     * support for Theora alpha3
-    * many H264 improvements
+    * many H.264 improvements
     * more robust MJPEG startcode search mechanism
     * better WMV8 decoding
-    * native Sparc VIS optimizations
+    * native SPARC VIS optimizations
     * native G.726 codec
 
     Others:
@@ -240,13 +240,13 @@ MPlayer (1.0)
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
     * fixed an old bug in MPlayer's support code
-    * support wider range of VOLs in H263
+    * support wider range of VOLs in H.263
     * direct rendering support in MJPEG
     * massive MLib optimizations
     * more VQA files supported
     * Theora support
     * Sunplus JPEG (SP5X) support
-    * H263 GOB fixes
+    * H.263 GOB fixes
     * massive cleanups
     * reduced memory footprint (!)
     * fixed decoding if aspect ratio changes
@@ -279,11 +279,11 @@ MPlayer (1.0)
     * BGR24, RGB555 and PAL8 image formats
     * 8BPS, MS RLE, MS Video1, QT RPZA, QT SMC, FLIC and TrueMotion1 decoders
     * 16x8 MV visualisation support
-    * H263 overlapped block motion compensation (OBMC), 4MV support
-    * H263 alternative inter vlc support
-    * H263 deblocking filter (MMX optimized)
-    * H263 modified quantization support
-    * H263 slice structured mode support
+    * H.263 overlapped block motion compensation (OBMC), 4MV support
+    * H.263 alternative inter vlc support
+    * H.263 deblocking filter (MMX optimized)
+    * H.263 modified quantization support
+    * H.263 slice structured mode support
     * Real RV20 decoder (with B-frame support)
 
     Drivers:
@@ -469,7 +469,7 @@ MPlayer (1.0)
     * RealAudio 14_4 and 28_8 codecs support (both binary DLLs and native code)
     * realmedia rtsp:// support (independent from the live.com RTSP stuff!)
     * Matroska demuxer (C++ version)
-    * demuxer: enabling MPEG4-ES autodetection, H264-ES support
+    * demuxer: enabling MPEG4-ES autodetection, H.264-ES support
     * WAV extradata parsing (for truespeech, atrac3, etc)
     * MPEG-TS (Transport Stream) and TIVO demuxers
     * DVB (Digital Video Broadcasting) input driver
@@ -487,7 +487,7 @@ MPlayer (1.0)
     * DivX.com 5.0.5 libs support
     * support for latest XviD en/decoder features
     * decoder for Hauppauge PVR 250/350 MB-YUV format (fourcc HM12)
-    * support for Vanguard's Win32 H264 etc codecs
+    * support for Vanguard's Win32 H.264 etc codecs
     * Video for Linux 1: various bugfixes, video eq support
     * Video for Linux 2 support
     * TV support: kick-ass image format handling
@@ -508,10 +508,10 @@ MPlayer (1.0)
     * user settable quantizer bias
     * MPEG1 slice encoding support
     * MSMPEG4 2-pass support
-    * H264 video decoding
+    * H.264 video decoding
     * Indeo 3 video decoding
     * VP3 video decoder (buggy somtimes)
-    * Sorenson 3 (SVQ3) video decoder (it's actually a H264 variant)
+    * Sorenson 3 (SVQ3) video decoder (it's actually a H.264 variant)
     * 3IV1 (3ivx v1) decoding
     * ASV1 (ASUS Video v1) and ASV2 (ASUS Video v2) en/decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
@@ -867,7 +867,7 @@ MPlayer (0.90)
     * RTC setup fixes, more verbose messages, hints
     * MEncoder: demuxer/codec uninit order fixed (solves some sig11)
     * various v4l and ALSA capturing fixes
-    * demux_mov: fixed crash with MPEG4 on Sparc, decoding on big endian
+    * demux_mov: fixed crash with MPEG4 on SPARC, decoding on big endian
     * various NAS ao fixes
     * libvo: optional stride support for packed YUV / RGB formats
     * MEncoder: set keyframe flag on audio packets, fixes Windows seeking
@@ -906,7 +906,7 @@ MPlayer (0.90)
     * DV decoding (both PAL and NTSC)
     * MPEG1 2-pass encoding support
     * better/cleaner error resilience (done in a 2nd pass after decoding)
-    * H263/MPEG4 out of order slice decoding
+    * H.263/MPEG4 out of order slice decoding
     * -lavdopts bug= reworked, now uses flags, autodetects most of them
     * complete MPEG4 GMC decoding support
 
@@ -927,7 +927,7 @@ MPlayer (0.90)
 
     Fixes:
     * the http:// infinite memleak bug has been fixed, some WMS9 mms:// fixes
-    * various Sparc/Sun, HP-UX and NetBSD/OpenBSD portability fixes
+    * various SPARC/Sun, HP-UX and NetBSD/OpenBSD portability fixes
     * -vop palette fixes, CRAM and QPEG colors are OK now
     * demuxer fixed for >2GB nuppelvideo files
     * MEncoder: -ss fixed for 3-pass encoding
@@ -939,7 +939,7 @@ MPlayer (0.90)
     * new demuxer for .PVA files (file format of TV/DVB apps on Win32)
     * -mf now supports TGA (24/32bpp uncompressed/rle) images
     * libavcodec: support for interlaced MPEG4 _de_coding
-    * libavcodec: aspect ratio encoding support (MPEG4, MJPEG, H263?)
+    * libavcodec: aspect ratio encoding support (MPEG4, MJPEG, H.263?)
     * Win32 DLL loader merged/synced with avifile CVS
 
 
@@ -1035,7 +1035,7 @@ MPlayer (0.90)
     * GUI: VCD and URL support, some bugs fixed
     * some cleanup of messages (less debug stuff) printed by MPlayer
     * gcc 3.1 support
-    * various portability fixes (Cygwin, Darwin, 64bit Sparc/Alpha)
+    * various portability fixes (Cygwin, Darwin, 64bit SPARC/Alpha)
 
 
   pre4: May 13, 2002
