@@ -1,4 +1,4 @@
-.\" synced with 1.694
+.\" synced with 1.708
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1778,6 +1778,8 @@ Ustawia urz±dzenie wyj¶ciowe d¼wiêku (domy¶lnie: /dev/\:dsp).
 .B sdl\ \ \ \ 
 Sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
 Directmedia Layer).
+Jako ¿e SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie
+maj± tu ¿adnego wp³ywu.
 .
 .TP
 .B arts\ \ \ 
@@ -2091,39 +2093,6 @@ ekranu video, co jest przydatne by osadziæ mini-GUI w przegl±darce
 Modyfikuje barwê sygna³u video (domy¶lnie 0).
 Dziêki tej opcji mo¿esz otrzymaæ kolorowy negatyw obrazu.
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
-.
-.TP
-.B \-jpeg <opcja1:opcja2:...> (tylko \-vo jpeg)
-Podaje opcje dla sterownika wyj¶cia video jpeg.
-.sp 1
-Dostêpne s± opcje:
-.sp 1
-.PD 0
-.RSs
-.IPs [no]progressive
-Wybiera miêdzy standardowym lub progresywnym JPEG (domy¶lnie: noprogressive).
-.IPs [no]baseline
-Wybiera, czy ma u¿ywaæ baseline czy nie (domy¶lnie: baseline).
-.IPs optimize=<0\-100>
-wspó³czynnik optymalizacji (domy¶lnie: 100)
-.IPs smooth=<0\-100>
-wspó³czynnik wyg³adzania (domy¶lnie: 0)
-.IPs quality=<0\-100>
-wspó³czynnik jako¶ci (domy¶lnie: 75)
-.IPs outdir=<warto¶æ>
-Okre¶la katalog, w którym bêd± zapisywane pliki JPEG.
-Je¿eli nie podano ¿adnej warto¶ci, wszystkie pliki bêd± zapisane
-w bie¿±cym katalogu.
-.IPs subdirs=<warto¶æ>
-Je¶li podane, MPlayer stworzy poszeregowane podkatalogi z okre¶lnonym prefiksem.
-Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
-pliki JPEG bêd± zapisane do tego samego katalogu.
-.IPs maxfiles=<warto¶æ>
-Maksymalna ilo¶æ zapisanych w podkatalogach plików JPEG (je¿eli podana
-jest opcja subdirs).
-Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
-.RE
-.PD 1
 .
 .TP
 .B \-monitor-dotclock <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
@@ -2754,6 +2723,32 @@ Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
 .B jpeg\ \ \ 
 Zapisuje ka¿d± ramkê do pliku JPEG w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+.PD 0
+.RSs
+.IPs [no]progressive
+Wybiera miêdzy standardowym lub progresywnym JPEG (domy¶lnie: noprogressive).
+.IPs [no]baseline
+Wybiera, czy ma u¿ywaæ baseline czy nie (domy¶lnie: baseline).
+.IPs optimize=<0\-100>
+wspó³czynnik optymalizacji (domy¶lnie: 100)
+.IPs smooth=<0\-100>
+wspó³czynnik wyg³adzania (domy¶lnie: 0)
+.IPs quality=<0\-100>
+wspó³czynnik jako¶ci (domy¶lnie: 75)
+.IPs outdir=<warto¶æ>
+Okre¶la katalog, w którym bêd± zapisywane pliki JPEG.
+Je¿eli nie podano ¿adnej warto¶ci, wszystkie pliki bêd± zapisane
+w bie¿±cym katalogu.
+.IPs subdirs=<warto¶æ>
+Je¶li podane, MPlayer stworzy poszeregowane podkatalogi z okre¶lnonym prefiksem.
+Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
+pliki JPEG bêd± zapisane do tego samego katalogu.
+.IPs maxfiles=<warto¶æ>
+Maksymalna ilo¶æ zapisanych w podkatalogach plików JPEG (je¿eli podana
+jest opcja subdirs).
+Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
+.RE
+.PD 1
 .
 .TP
 .B pgm\ \ \ \ 
@@ -2803,6 +2798,9 @@ Pomija kodek MP3 FFmpeg.
 .B \-af <filtr1[=parametr1:parametr2:...],filtr2,...>
 Podaje listê oddzielanych przecinkami filtrów audio i ich opcji.
 Przeczytaj równie¿ rozdzia³ dokumentacji o filtrach audio.
+.br
+.I INFORMACJA:
+Aby uzyskaæ pe³n± listê dostêpnych filtrów audio, skorzystaj z \-af help.
 .sp 1
 Dostêpne s± filtry:
 .RSs
@@ -2843,7 +2841,7 @@ sc: W³±cza miêkkie obcinanie (soft-clipping).
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Dowolnie miksuje kana³y, szczegó³y w DOCS/\:HTML/\:pl/\:devices.html#audio-dev
 .RSss
-n: liczba kana³ów wyj¶ciowych (1\-6)
+n: liczba kana³ów wej¶ciowych (1\-6)
 .br
 lij: Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
 .REss
@@ -2952,29 +2950,32 @@ Okre¶la parametry dekodowania z libavcodec.
 Dostêpne s± opcje:
 .RE
 .RSs
-.IPs ec\ \ \ 
-ukrywanie b³êdów:
+.IPs bug=<warto¶æ> 
+Rêczne obej¶cie b³êdów kodera:
 .RSss
-1: U¿ywa silnego filtru deblokuj±cego (deblock) dla uszkodzonych MB-ów.
+0: nic
 .br
-2: iteracyjne szukanie MV (wolne)
+1: automatyczne wykrywanie b³êdów
 .br
-3: wszystko (domy¶lnie)
-.REss
-.IPs er=<warto¶æ>
-odporno¶æ na b³êdy:
-.RSss
+2 (msmpeg4v3): stare pliki msmpeg4v3 wygenerowane przez lavc (bez autodetekcji)
 .br
-0: wy³±czona
+4 (mpeg4): b³±d przeplotu XviD (automatycznie wykrywany, je¶li fourcc==XVIX)
 .br
-1: ostro¿na (Powinno pracowaæ z zepsutymi koderami.)
+8 (mpeg4): UMP4 (automatycznie wykrywanany, je¶li fourcc==UMP4)
 .br
-2: normalna (domy¶lne) (Pracuje ze zgodnymi koderami.)
+16 (mpeg4): b³±d wype³nienia (padding) (automatycznie wykrywany)
 .br
-3: agresywna (Wiêcej sprawdza, ale mo¿e powodowaæ problemy nawet z poprawnymi
-strumieniami.)
+32 (mpeg4): b³±d niedozwolonego vlc (automatycznie wykrywany przez fourcc)
 .br
-4: bardzo agresywna
+64 (mpeg4): b³±d qpel w XviD i DivX (automatycznie wykrywany przez fourcc/\:wersjê)
+.br
+128 (mpeg4): qpel w starym standardzie (automatycznie wykrywany przez fourcc/\:wersjê)
+.br
+256 (mpeg4): kolejny b³±d qpel (automatycznie wykrywany przez fourcc/\:wersjê)
+.br
+512 (mpeg4): b³±d rozmiaru bloku bezpo¶redniego qpel (automatycznie wykrywany przez fourcc/\:wersjê)
+.br
+1024 (mpeg4): b³±d wype³nienia krawêdzi (automatycznie wykrywany przez fourcc/\:wersjê)
 .REss
 .IPs debug=<warto¶æ>
 informacje debugowania:
@@ -2988,15 +2989,15 @@ informacje debugowania:
 .br
 4: bitstream
 .br
-8: typ MB
+8: typ makrobloku (MB)
 .br
-16: QP
+16: parametr kwantyzacji (QP)
 .br
-32: Wektor ruchu
+32: wektor ruchu
 .br
 0x0040: wizualizacja wektora ruchu (u¿yj \-noslices)
 .br
-0x0080: przeskakiwanie MB
+0x0080: przeskakiwanie makrobloku (MB)
 .br
 0x0100: kod startowy
 .br
@@ -3008,56 +3009,59 @@ informacje debugowania:
 .br
 0x1000: b³êdy
 .REss
-.IPs vismv=<warto¶æ>
-vismv:
+.IPs ec=<warto¶æ> 
+ukrywanie b³êdów:
 .RSss
 .br
-0: wy³±czone
+1: U¿ywa silnego filtru deblokuj±cego (deblock) dla uszkodzonych
+makrobloków (MB).
 .br
-1: wizualizacja przewidywanych wektorów ruchu ramek P
+2: iteracyjne szukanie wektorów ruchu (MV) (wolne)
 .br
-2: wizualizacja przewidywanych wektorów ruchu ramek B
-.br
-4: wizualizacja przewidywanych do ty³u wektorów ruchu ramek B
+3: wszystko (domyslnie)
 .REss
-.IPs bug=<warto¶æ>
-Rêczne pomijanie b³êdów kodera:
+.IPs er=<warto¶æ>
+elastyczno¶æ na b³êdy:
 .RSss
-0: nic
 .br
-1: autodetekcja b³êdów (domy¶lne)
+0: wy³±czona
 .br
-2 (msmpeg4v3):  niektóre generowane przez stare lavc zbiory msmpeg4v3
-(bez autodetekcji)
+1: ostro¿na (Powinna dzia³aæ z zepsutymi koderami.)
 .br
-4 (mpeg4): b³±d przeplatania XviD (autodetekcja je¶li fourcc==XVIX)
+2: normalna (domy¶lnie (Dzia³a uleg³ymi koderami.)
 .br
-8 (mpeg4): UMP4 (autodetekcja je¶li fourcc==UMP4)
+3: agresywna (Wiêcej testów, mo¿e jednak sprawiæ problemy nawet z poprawnymi
+strumieniami bitowymi.)
 .br
-16 (mpeg4): b³±d wyrównywania (wykrywany automatycznie)
-.br
-32 (mpeg4): b³±d w niepoprawnym vlc (autodetekcja zale¿na od fourcc)
-.br
-64 (mpeg4): b³±d w XviD i DivX qpel (autodetekcja zale¿na od fourcc/\:version)
-.br
-128 (mpeg4): stary standardowy qpel (autodetekcja zale¿na od fourcc/\:version)
-.br
-256 (mpeg4): jeszcze jeden b³±d qpel (autodetekcja zale¿na od fourcc/\:version)
-.br
-512 (mpeg4): b³±d direct-qpel-blocksize (autodetekcja zale¿na od fourcc/\:version)
-.br
-1024 (mpeg4): b³±d wyrównania krawêdzi (autodetekcja zalezna od fourcc/\:version)
+4: bardzo agresywna
 .REss
+.IPs fast\ 
+Korzysta z optymalizacji niestosuj±cych siê do specyfikacji i tym samym
+mog±cych sprawiæ problemy (takie jak prostsza dekwantyzacja, stosowanie
+domy¶lnej matrycy kwantyzacji, stosowanie YUV 4:2:0, pomijanie kilku testów
+na wykrycie uszkodzonych strumieni bitowych).
+.IPs gray\ 
+dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
 .IPs idct=<0\-99> (zobacz tak¿e \-lavcopts)
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 idct do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
-.IPs gray\ 
-Dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
 .IPs "sb=<number> (tylko MPEG2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
 .IPs "st=<number> (tylko MPEG2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na górze.
+.IPs vismv=<warto¶æ>
+vismv:
+.RSss
+.br
+0: wy³±czona
+.br
+1: Wizualizuje przewidziane w przód wektory ruchu (MV) klatek P.
+.br
+2: Wizualizuje przewidziane w przód wektory ruchu (MV) klatek B.
+.br
+4: Wizualizuje przewidziane w ty³ wektory ruchu (MV) klatek B.
+.REss
 .IPs vstats
 Wy¶wietla pewne statystyki i zapisuje je w zbiorze ./vstats_*.log.
 .RE
@@ -3618,7 +3622,7 @@ wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video)
 .
 .TP
 .B qp=równanie
-filtr zmiany QP
+filtr zmiany parametru kwantyzacji (QP)
 .RSs
 .IPs równanie
 jakie¶ równanie postaci "2+2*sin(PI*qp)"
@@ -3967,7 +3971,7 @@ Dalszy rozwój ivtc jest wstrzymamy, jako ¿e filtry pullup i filmdint
 wydaj± siê byæ dok³adniejsze.
 .
 .TP
-.B pullup[=jl:jr:jt:jb:sb]\ 
+.B pullup[=jl:jr:jt:jb:sb:mp]\ 
 Filtr odwracania telecine trzeciej generacji, zdolny do przetwarzania mieszanki
 twardego telecine (hard-telecine) oraz progresywnej zawarto¶ci 24 i 30 fps.
 Filtr pullup jest zaprojektowany, aby by³ skuteczniejszy ni¿ detc czy ivtc,
@@ -3984,6 +3988,17 @@ Domy¶lnie jest to 8 pikseli z ka¿dej strony.
 Ustawiaj±c opcjê sb (strict breaks - sta³e przerwy) na 1, zmniejsza siê
 szansa, ¿e pullup stworzy niepasuj±c± klatkê, ale mo¿e równie¿ prowadziæ do
 ominiêcia wielu ramek podczas scen z du¿± ilo¶ci± ruchu.
+Odwrotnie, je¶li ustawisz na -1, to pullup ³atwiej bêdzie dopasowywa³ pola.
+Mo¿e to pomoæ przy przetwarzaniu filmu, w którym jest delikatne rozmazanie miêdzy
+polami, ale mo¿e równie¿ sprawiæ, ¿e w wyj¶ciu znajd± siê klatki z przeplotem.
+Opcja mp (przestrzeñ metryczna) mo¿e byæ ustawiona na 1 lub 2, aby u¿yæ
+przestrzeni barw zamiast przestrzeni jasno¶ci dla obliczeñ pullup.
+Mo¿e to polepszyæ dok³adno¶æ na bardzo czystym materiale ¼ród³owym, ale
+prawdopodobnie spadnie dok³adno¶æ, je¶li film ma zniekszta³cone
+barwy (efekt têczy) lub jest on w skali szaro¶ci.
+G³ownym celem ustawienia mp w przestrzeñ bar jest zmniejszenie obci±¿enia
+CPU i sprawienie, aby pullup by³ u¿yteczny w czasie rzeczywistym na wolnych
+maszynach.
 .br
 .I INFORMACJA:
 Zawsze stosuj filtr softskip po pullup przy kodowaniu, aby mieæ pewno¶æ,
@@ -4576,6 +4591,14 @@ ogólna uwaga na temat pliku
 Nie umieszcza automatycznie filtru expand w ³añcuchu filtrów MEncodera.
 Przydatne do kontrolowania, w którym momencie ³añcucha napisy s± renderowane
 podczas w³±czania napisów na sztywno do filmu.
+.
+.TP
+.B \-noencodedups
+Nie koduje zduplikowanych klatek w duplikacie; w wyj¶ciu umieszcza
+klatki zero bajtowe do wskazania duplikatów.
+Klatki zero bajtowe bêd±, tak czy inaczej, zapisane, chyba ¿e filtr lub koder
+zdolny do kodowania zduplikowanego jest za³adowany.
+Obecnie nadaje siê do tego tylko filtr harddup.
 .
 .TP
 .B \-noodml (tylko \-of avi)
@@ -5820,7 +5843,7 @@ Po prostu znajduje blok dla minimalnej ilo¶ci b³êdów i bitów*lambda.
 .PD 0
 .RSs
 .IPs lambda
-zmienna uzale¿niona od QP
+zmienna uzale¿niona od parametru kwantyzacji (QP)
 .IPs bits\ 
 ilo¶æ bitów potrzebna do zakodowania bloku
 .IPs error
@@ -5840,9 +5863,9 @@ Spróbuje zakodowaæ ka¿dy MB z MV=<0,0> i wybierze lepszy.
 Nie ma to znaczenia je¿eli mbd=0.
 .
 .TP
-.B qprd\ \ \ 
-QP optymalne pod wzglêdem zniekszta³ceñ tempa dla lambda podanej dla ka¿dego
-makrobloku, wymaga mbd=2
+.B qprd (tylko z mbd=2) 
+parametr kwantyzacji (QP) optymalny pod wzglêdem zniekszta³ceñ tempa dla
+lambda podanej dla ka¿dego makrobloku
 .
 .TP
 .B last_pred=<0\-99>
@@ -5852,7 +5875,7 @@ Ilo¶æ przewidywaczy ruchu z poprzedniej ramki
 .IPs 0
 (domy¶lnie)
 .IPs a
-wykorzysta kwadratowe bloki wektorów przewidywaczy ruchu 2a+1 x 2a+1
+wykorzysta makroblokowy kwadrat o wymiarach 2a+1 x 2a+1 wektorów przewidywaczy ruchu
 z poprzedniej ramki
 .RE
 .PD 1
@@ -5873,7 +5896,7 @@ zawsze
 .
 .TP
 .B subq=<1\-8>
-jako¶æ udoskonalenia subpel (dla qpel) (domy¶lnie: 8).
+jako¶æ udoskonalenia subpel (dla qpel) (domy¶lnie: 8 (wysoka jako¶æ)).
 .br
 .I INFORMACJA:
 Ma to powa¿ny wp³yw na szybko¶æ.
@@ -6052,6 +6075,11 @@ je¿eli masz zamiar kodowaæ w czasie rzeczywistym.
 .B interlacing
 Koduje pola filmu z przeplotem.
 Je¿eli korzystasz z materia³u filmowego z przeplotem, w³±cz tê opcjê.
+.br
+.I INFORMACJA:
+Je¶li chcia³by¶ przeskalowaæ film, potrzebowa³by¶ filtru skaluj±cego,
+który wiedzia³by, ¿e ma do czyniena z materia³em zawieraj±cym przeplot,
+mo¿esz go uruchomiæ przez -vf scale=<szeroko¶æ>:<wysoko¶æ>:1.
 .
 .TP
 .B 4mv\ \ \ \ 
@@ -6059,12 +6087,14 @@ Korzysta z 4 wektorów ruchu na makroblok.
 Mo¿e daæ lepsz± kompresjê kosztem wolniejszego kodowania.
 .br
 .I UWAGA:
-Ta opcja nie istnieje w XviD-1.0.x.
+Parametr ten jest ju¿ uznawany za przestarza³y w XviD-1.0.x, jako ¿e wszystko
+jest teraz realizowane przez opcjê me_quality.
+Kiedy me_quality > 4, 4mv jest uruchamiane.
 .
 .TP
 .B rc_reaction_delay_factor=<warto¶æ>
-Ten parametr okre¶la opó¼nienie w ramkach, po jakim kontroler tempa CBR
-zareaguje na zmianê warto¶ci bitrate i spróbuje wyrównaæ zmianê, tak aby
+Ten parametr okre¶la ilo¶æ ramek, jak± przeczeka kontroler tempa CBR
+zanim zareaguje na zmianê warto¶ci bitrate i bêdzie próbowa³ wyrównaæ zmianê, tak aby
 uzyskaæ sta³y bitrate na u¶redniaj±cym zakresie klatek.
 .
 .TP
@@ -6087,6 +6117,10 @@ Tryb CBR: min.\& i maks.\& kwantyzator dla wszystkich klatek (domy¶lnie: 2\-31)
 .br
 Tryb dwuprzej¶ciowy: min.\& i maks.\& kwantyzator dla klatek I/P
 (domy¶lnie: 2\-31/\:2\-31)
+.br
+.I UWAGA:
+Ta opcja jest ju¿ uznawana za przestarza³± w XviD-1.0.x i jest zast±piona
+przez opcje [min|max]_[i|p|b]quant.
 .
 .TP
 .B min_key_interval=<warto¶æ>
@@ -6106,28 +6140,23 @@ Dla niskich warto¶ci bitrate, wyg³adzanie H.263 da w rezultacie mniej szumu
 blokowego.
 Kiedy wykorzystywane s± okre¶lone przez u¿ytkownika matryce, musi byæ
 wykorzystywany MPEG.
+.br
+.I UWAGA:
+Ta opcja jest ju¿ uznawana za przestarza³± w XviD-1.0.x i jest zast±piona
+przez opcjê quant_type.
 .
 .TP
 .B mod_quant
 Decyduje czy wykorzystywaæ kwantyzatory MPEG czy H.263 na podstawia badania
-klatka po klatce.
+klatka po klatce (tylko tryb dwuprzej¶ciowy).
 .br
 .I UWAGA:
 Wygeneruje to nieprawid³owy stumieñ bitów, którego prawdopodobnie nie jest w
 stanie zdekodowaæ ¿aden dekoder MPEG4 poza libavcodec albo XviD.
 (tylko tryb dwuprzej¶ciowy)
-.
-.TP
-.B greyscale
-Sprawia, ¿e XviD ignoruje przestrzeñ kolorów, wiêc wynikowy film jest
-w skali szaro¶ci.
-Zauwa¿, ¿e nie przyspiesza to kodowania, zapobiega to tylko zapisaniu
-danych kolorów w ostatniej fazie kodowania.
-.
-.TP
-.B debug\ \ 
-Zapisuje statystyki ka¿dej ramki w ./xvid.dbg.
-To NIE jest plik kontroli trybu dwuprzej¶ciowego.
+.br
+.I WARNING:
+Ta opcja jest uznawana za przestarza³± w XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6145,9 +6174,22 @@ Powy¿sze dwa parametry mog± byæ wykorzystane do okre¶lenia rozmiaru klatek
 kluczowych, których po³o¿enie uwa¿asz za zbyt bliskie do pierwszej (w rzêdzie).
 kfthreshold ustawia zakres, w którym klatki kluczowe s± redukowane, a
 kfreduction okre¶la ich redukcjê bitrate'ow±.
-Ostatnia i-klatka jest traktowana normalnie.
+Ostatnia I-klatka jest traktowana normalnie.
 (domy¶lnie: 30, tylko tryb dwuprzej¶ciowy)
+.
+.TP
+.B greyscale
+Sprawia, ¿e XviD ignoruje przestrzeñ kolorów, wiêc wynikowy film jest
+w skali szaro¶ci.
+Zauwa¿, ¿e nie przyspiesza to kodowania, zapobiega to tylko zapisaniu
+danych kolorów w ostatniej fazie kodowania.
+.
+.TP
+.B debug\ \ 
+Zapisuje statystyki ka¿dej ramki w ./xvid.dbg.
+(To jest plik kontroli trybu dwuprzej¶ciowego).
 .RE
+.
 .PP
 .sp 1
 Poni¿sze opcje s± dostêpne tylko w najnowszych stabilnych
@@ -6167,7 +6209,44 @@ wiêc autodedetekcja b³êdów niektórych dekoderów mo¿e siê gubiæ.
 .
 .TP
 .B divx5bvop
-wygeneruje kompatybilne z DivX5 klatki B (domy¶lnie: w³±czone)
+Wygeneruje kompatybilne z DivX5 klatki B (domy¶lnie: w³±czone).
+.
+.TP
+.B max_bframes=<0\-4>
+maksymalna ilo¶æ klatek B umieszczonych pomiêdzy klatkami I/\:P (domy¶lnie: 0)
+.
+.TP
+.B bquant_ratio=<0\-1000>
+squantizer ratio between B and non B frames, 150=1.50 (default: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+wspó³czynnik offsetu kwantyzatora pomiêdzy klatkami B a innymi,
+100=1.00 (domy¶lnie: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Czasami klatki B nie wygl±daj± dobrze i wystêpuj± na nich zniekszta³cenia,
+kiedy wiêkszo¶æ klatki jest statyczna a tylko ma³e strefy zawieraj±
+du¿o ruchu (w statycznej scenie z gadaj±cym cz³owiekiem, jego
+usta bêd± najprawdopodobniej wygl±da³y ¼le, je¶li ca³e t³o jest
+ca³kowicie statyczne).
+Ten parametr umo¿liwia Ci okre¶lenie, jaki priorytet u¿ycia klatek B
+ma byæ ustawiony.
+Im wy¿sza warto¶æ,tym wiêksze prawdopodobieñstwo u¿ycia klatek B.
+(default: 0)
+.
+.TP
+.B frame_drop_ratio=<0\-100> (mtylko z ax_bframes=0)
+Ten parametr umo¿liwia tworzenie strumieni video ze zmienn± szybko¶ci± klatek.
+Je¶li ró¿nica miêdzy bie¿±c± a poprzedni± klatk±
+jest ni¿sza lub równa ustawionemu przez ten parametr progowi,
+klatka nie bêdzie kodowana (tzw. n-vop jest wstawiany w strumieñ).
+On playback, when reaching an n-vop the previous frame will be displayed.
+.br
+.I WARNING:
+Odtwarzanie z tym parametrem mo¿e spowodowaæ, ¿e film bêdzie poszarpany, wiêc
+u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
 .TP
 .B qpel\ \ \ 
@@ -6204,6 +6283,13 @@ Modyfikuje ona kilka wewnêtrznych progów XviD, tak ¿e te podejmuje
 lepsze decyzje o typie ramek i wektorach ruchu dla p³askich rysunków.
 .
 .TP
+.B quant_type=<h263|mpeg>
+Ustawia tym wykorzystywanego kwantyzatora.
+Dla wysokich warto¶ci bitrate, kwantyzacja MPEG zachowa wiêcej szczegó³ów.
+Dla niskich warto¶ci bitrate, wyg³adzanie H.263 da mniej szumów blokowych.
+Je¶li u¿ywasz w³asnych matryce, kwantyzacja MPEG musi byæ ustawiona.
+.
+.TP
 .B chroma_me
 Zwyk³y algorytm przewidywania ruchu u¿ywa tylko informacji o jasno¶ci
 dla znalezienia najlepszego wektora ruchu.
@@ -6221,37 +6307,6 @@ Z natury zmniejsza PSNR, jako ¿e podnosi matematyczne odchylenie od
 oryginalnego obrazu, ale poprawia subiektywn± jako¶æ obrazu.
 Jako ¿e dzia³a na informacji o kolorach, mo¿esz chcieæ to wy³±czyæ je¶li
 kodujesz w skali szaro¶ci.
-.
-.TP
-.B reduced
-W³±cza kodowanie klatek o zmniejszonej rozdzielczo¶ci.
-.br
-.I UWAGA:
-Tworzony strumieñ bitów jest poza jakimkolwiek profilem MPEG-4!
-Oznacza to ¿e najprawdopodobniej nic poza XviD go nie zdekoduje.
-.
-.TP
-.B max_bframes=<0\-4>
-maksymalna ilo¶æ klatek B do umieszczenia miêdzy klatkami I/\:P (domy¶lnie: 0)
-.
-.TP
-.B bquant_ratio=<0\-1000>
-stosunek kwantyzatora pomiêdzy klatkami B a pozosta³ymi, 150=1.50
-(domy¶lnie: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-offset kwantyzatora pomiêdzy klatkami B a pozosta³ymi, 100=1.00 (domy¶lnie: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Czasami klatki typy B nie wygl±daj± zbyt dobrze i prezentuj± ró¿ne zak³ócenia,
-kiedy wiêkszo¶æ klatki jest sta³a, a kilka ma³ych stref zawiera du¿o ruchu
-(w scenach statycznych z rozmawiaj±cym cz³owiekiem, jego usta bêd±
-prawdopodobnie wygl±da³y ¼le, je¿eli wszystko co go otacza jest statyczne).
-Ten parametr pozwala okre¶liæ prawdopodobieñstwo pojawienia siê klatek typu B.
-Im wy¿sza warto¶æ, tym wy¿sze prawdopodobieñstwo wykorzystania klatki B.
-(domy¶lnie: 0)
 .
 .TP
 .B hq_ac\ \ 
@@ -6280,6 +6335,142 @@ ograniczone przeszukiwanie
 szerokie przeszukiwanie
 .RE
 .PD 1
+.
+.TP
+
+.B min_iquant=<0\-31>
+minimalny kwantyzator klatek I (domy¶lnie: 2)
+.
+.TP
+.B max_iquant=<0\-31>
+maksymalny kwantyzator klatek I (domy¶lnie: 31)
+.
+.TP
+.B min_pquant=<0\-31>
+minimalny kwantyzator klatek P (domy¶lnie: 2)
+.
+.TP
+.B max_pquant=<0\-31>
+maksymalny kwantyzator klatek P (domy¶lnie: 31)
+.
+.TP
+.B min_bquant=<0\-31>
+minimalny kwantyzator klatek B (domy¶lnie: 2)
+.
+.TP
+.B max_bquant=<0\-31>
+maksymalny kwantyzator klatek B (domy¶lnie: 31)
+.
+.TP
+.B quant_intra_matrix=<nazwa\ pliku>
+Wczytuje plik z okre¶lon± matryc± intra.
+Mo¿esz stworzyæ taki plik edytorem matric xvid4conf.
+.
+.TP
+.B quant_inter_matrix=<nazwa\ pliku>
+Wczytuje plik z okre¶lon± matryc± inter.
+Mo¿esz stworzyæ taki plik edytorem matric xvid4conf.
+.
+.TP
+.B curve_compression_high=<0\-100>
+Ten parametr pozwala XviD'owi na przekazanie okre¶lonego procentu bitów ze scen
+o wysokiej warto¶ci bitrate do rezerwy bitowej.
+Mo¿esz równie¿ skorzystaæ z tej opcji, je¶li masz klip z tak du¿± ilo¶ci±
+bitów przeznaczon± na sceny o wysokiej warto¶ci bitrate, ¿e sceny z ni¿sz± warto¶ci±
+wygl±daj± ¼le (domyslnie: 0).
+.
+.TP
+.B curve_compression_low=<0\-100>
+.\" paszczi: nie jestem pewien co do ostatniego zdania...
+Ten parametr pozwala XviD'owi na przekazanie okre¶lonego procentu dodatkowych
+bitów do scen z nisk± warto¶ci± bitrate z ca³ego klipu.
+Opcja ta mo¿e byæ przydatna, je¿eli masz kilka scen z nisk± warto¶ci± bitrate,
+które s± ci±gle blokowe (domy¶lnie: 0).
+.
+.TP
+.B overflow_control_strength=<0\-100>
+Podczas pierwszego przebiegu w kodowaniu dwuprzej¶ciowym obliczana jest
+przeskalowana krzywa bitrate.
+Ró¿nica miêdzy oczekiwan± krzyw± a wynikow± otrzyman± podczas kodowania nazywana
+jest overflow (przepe³nienie - przyp. t³umacza).
+Oczywi¶cie dwuprzej¶ciowy kontroler tempa stara siê
+zniwelowaæ t± ró¿nicê przez rozpraszanie jej na kolejne klatki.
+Ten parametr kontroluje ile overflow jest rozpraszane za ka¿dym razem, kiedy
+pojawia siê nowa klatka.
+Niske warto¶ci pozwalaj± na leniw± kontrolê overflow, wielkie ró¿nice
+s± kompensowane wolniej (mo¿e to doprowadziæ do braku precyzji
+przy ma³ych filmach). Wy¿sze warto¶ci sprawiaj±, ¿e redystrybucja bitów jest
+gwa³towniejsza, czasami za gwa³towna, je¶li ustawisz opcjê na zbyt wysok±,
+co mo¿e doprowadziæ do powstania zniekszta³ceñ (domy¶lnie: 5).
+.br
+.I NOTE:
+Ten parametr ma du¿y wp³yw na jako¶æ, baw siê nim ostro¿nie!
+.
+.TP
+.B max_overflow_improvement=<0\-100>
+Podczas alokacji bitów w klatce, kontrola overflow mo¿e zwiêkszyæ jej rozmiar.
+Parametr ten okre¶la maksymalny procent rozmiaru o jaki kontrola overflow
+mo¿e zwiekszyæ klatkê, w porównaniu z idealn± alokacj± krzywej (domy¶lnie: 5).
+.
+.TP
+.B max_overflow_degradation=<0\-100>
+Podczas alokacji bitów w klatce, kontrola overflow mo¿e zmniejszyæ jej rozmiar.
+Parametr ten okre¶la maksymalny procent rozmiaru o jaki kontrola overflow
+mo¿e zmniejszyæ klatkê, w porównaniu z idealn± alokacj± krzywej (domy¶lnie: 5).
+.
+.TP
+.B container_frame_overhead=<0..>
+Okre¶la ¶redni± nadwy¿kê (overhead) przypadaj±c± na klatkê w bajtach.
+Przewa¿nie u¿ytkownicy okre¶laj± ¿adany bitrate bez brania pod uwagê
+nadwy¿ki na ramkê video.
+Ta ma³a ale (przewa¿nie) sta³a nadwy¿ka mo¿e spowodowaæ, ¿e docelowy rozmiar
+pliku zostanie przekroczony.
+XviD pozwala u¿ytkownikom na ustawienie wielko¶ci nadwy¿ki
+przypadaj±cej na klatkê, któr± generuje ramka video (podaj tylko
+u¶rednion± warto¶æ na ramkê).
+0 ma specjalne znaczenie, pozwala XviD'owi na u¿ycie jego w³asnych
+warto¶ci domy¶lnych (domy¶lnie: 24 - ¶rednia nadwy¿ka AVI).
+.
+.TP
+.B par=<tryb>
+Okre¶la tryb Wspó³czynnika Proporcji Piksela (Pixel Aspect Ratio - PAR)
+(nie myliæ z Wspó³czynnikiem Proporcji Obrazu (Display Aspect Ratio - DAR)).
+PAR to stosunek szeroko¶ci do wysoko¶c pojedynczego piksela.
+Wiêc oba s± zwi±zane: DAR = PAR * (szeroko¶æ/wysoko¶æ).
+.br
+MPEG4 okre¶la 5 wspó³czynników proporcji piksela i defines 5 pixel i
+jeden rozszerzony, daj±cy szansê na podanie konkretnego wspó³czynnika
+proporcji piksela. Mo¿e byæ okre¶lony jeden z 5 standardowych trybów:
+.PD 0
+.RSs
+.IPs vga11
+zwyczajny PAR dla PC
+Piksele s± jednostk± kwadratow±.
+.IPs pal43
+standard dla PAL - 4:3 PAR
+Piksele s± prostok±tami.
+.IPs pal169
+jak wy¿ej
+.IPs ntsc43
+jak wy¿ej
+.IPs ntsc169
+jak wy¿ej (Nie zapomnij podaæ dok³adnego wspó³czynnika.)
+.IPs ext\ \ 
+Pozwala na okre¶lenie w³asnego wspó³czynnika proporcji piksela przez par_width
+i par_height.
+.RE
+.PD 1
+.br
+.I INFORMACJA\ :
+Ogólnie ustawienie opcji aspect i autoaspect jest wystarczaj±ce.
+.
+.TP
+.B par_width=<1..255> (tylko z par=ext)
+Okre¶la szeroko¶æ zadeklarowanego wspó³czynnika proporcji piksela.
+.
+.TP
+.B par_height=<1...255> (tylko z par=ext)
+Okre¶la wysoko¶æ szeroko¶æ zadeklarowanego wspó³czynnika proporcji piksela.
 .
 .TP
 .B aspect=<x/\:y | f (warto¶æ rzeczywista)>
@@ -6381,7 +6572,7 @@ Okre¶la, który kwantyzator zostanie u¿yty, 20-40 to u¿yteczny zakres
 (domy¶lnie: 26).
 Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
 Zauwa¿, ¿e kwantyzacja w H.264 dzia³a inaczej ni¿ w MPEG[124].
-QP H.264 jest w skali logarytmicznej.
+Parametr kwantyzacji (QP)H.264 jest w skali logarytmicznej.
 Dla przyk³adu, ró¿nica w bitrate pomiêdzy QP=20 a QP=40 to wspó³czynnik
 oko³o 10.
 Przydatne kwantyzatory w H.264 s± wiêksze w porownaniu z MPEG[124].
