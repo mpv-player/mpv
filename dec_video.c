@@ -159,7 +159,8 @@ void decode_cinepak(
   unsigned char *frame,
   int width,
   int height,
-  int bit_per_pixel);
+  int bit_per_pixel,
+  int stride);
 
 void decode_cyuv(
   unsigned char *buf,
@@ -865,7 +866,7 @@ switch(sh_video->codec->driver){
    else
    {
      decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
-       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
+       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255), 0);
      blit_frame = 3;
    }
    break;

@@ -383,7 +383,7 @@ int i, x;
  * bit_per_pixel - the number of bits per pixel allocated to the output
  *   frame (only 24 or 32 bpp are supported)
  */
-void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel)
+void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel, int stride_)
 {
 cinepak_info *cvinfo = (cinepak_info *)context;
 cvid_codebook *v4_codebook, *v1_codebook, *codebook = NULL;
@@ -429,7 +429,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 			break;
 		}
 
-	frm_stride = width * bpp;
+	frm_stride = stride_ ? stride_ : width * bpp;
 	frm_ptr = frame;
 	frm_end = frm_ptr + width * height * bpp;
 
