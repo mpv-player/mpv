@@ -13,12 +13,12 @@ The codecs.conf file is stored either in a shared directory for all system
 users to access, or in the .mplayer directory in a user's home
 directory. When MPlayer starts, it first looks for a codecs.conf file in a
 user's home directory. Failing that, it searches for the shared file. If
-it can't find a codecs.conf file, MPlayer will refuse to run.
+the file has syntax errors, MPlayer will not start and report the error.
 
 The codecs.conf file is really quite simple. It is simply a collection of
 codec definition blocks that define how different media types should be
 handled. There are a number of keywords that can occur in a block. Not all
-of them are required and there is no particular order enforced.
+of them are required and no particular order is enforced.
 
 Editing codecs.conf
 -------------------
@@ -63,22 +63,22 @@ videocodec indeo5ds
 This is a particularly full-featured video codec. The "videocodec" keyword
 identifies the fact that this is the start of a new video
 codec. "indeo5ds" is MPlayer's unique name for the codec. You have to use
-this name with the -vd/-ad option.
+this name with the -vc/-ac option.
 
 The next line has the keyword "info" which specifies a human-readable
-comment accompanies this codec. This is printed by -vd help / -ad help.
+comment accompanying this codec. This is printed by -vc help / -ac help.
 
 The "status" keyword carries information about the codec's functional
 status. MPlayer currently recognizes 4 status levels: working, buggy,
 crashing, and untested. When it gets to codec auto-selection, it tries
-untested first (to force the users to test it for us and report result :)),
+untested first (to force users to test it for us and report results :)),
 then working and finally buggy ones. Codecs marked crashing won't be tried,
-unless explicitly (-vd/-ad) selected.
+unless explicitly (-vc/-ac) selected.
 
 The next line lists 4-character codes (FOURCCs) that are associated with
 this codec. There can be more than one FOURCC specified on a fourcc line
-as long as they're separated with a comma. There can also be multiple
-fourcc lines in the codec. There also can be a second fourcc given, separated
+as long as they are separated with a comma. There can also be multiple
+fourcc lines in the codec. A second fourcc can also be given, separated
 with a space. MPlayer will replace the original fourcc in the headers with
 this one before opening the codec. It's useful for win32 codecs checking for
 the fourccs.
@@ -93,48 +93,48 @@ only used in conjunction with the dshow, vfw, acm, xanim and real drivers since
 they all manage communication with binary-only modules.
 
 The "guid" keyword identifies a 16-byte Microsoft GUID that some media
-files use to identify codecs. Used only for win32 dshow codecs.
+files use to identify codecs. Used only for win32 dshow and DMO codecs.
 
-The "out" keyword identifies which output format that the decoder is known
+The "out" keyword identifies which output format the decoder is known
 to output. Just like the fourcc line, there can be multiple out lines or
 multiple comma-separated output formats on the same line. The output
 formats should be listed in order of preference.
 
 The outfmt values can be followed by one or more flags, like flip, noflip,
-static, query. Describe these in detail:
+static, query. The flags are defined as follows:
 
 "flip":
     If this flag is set for a given format, then o_bih->biHeight will NOT be
-    set to -bih->biHeight, ie image will be decoded upside-down.
+    set to -bih->biHeight, i.e. the image will be decoded upside-down.
     Used only by vfw and vfwex codecs.
 
 "noflip":
     This flag is ignored (no effect) without "flip" being set!
     If this flag is set, it means the codec doesn't decode upside-down,
-    altought it's told to do so.
-    
+    although it's told to do so.
+
 "yuvhack":
     This flag is required for the old win32 ms-mpeg4 vfw codecs, including
-    MP42 and DIV3 (divx 3.11). These DLLs actually support YUV formats,
+    MP42 and DIV3 (DivX 3.11). These DLLs actually support YUV formats,
     but the query/begin functions are buggy and don't accept YUV fourccs
-    (the decode func. accepts it and works well!)
+    (the decode function accepts it and works well!)
     If this flag is set, then o_bih->biCompression will be set to 0 for
     the initialization for the YUV modes. Used only by vfw/vfwex codecs.
-    
+
 "query":
     This flag is used to control VDCTRL_QUERY_FORMAT for vfw/vfewx codecs.
-    If thsi flag is set, the control() will query the codec for the csp
-    support, otherwise it will assume constant csp table. Required for
+    If this flag is set, the control() will query the codec for the csp
+    support, otherwise it will assume a constant csp table. Required for
     some DLLs (like huffyuv, CRAM).
 
 "static",
     This flag forces STATIC (instead of TEMP) buffer allocation for the codec.
-    Used for some very old DLLs like Indeo 3 and for some xanim codecs like
+    Used for some very old DLLs like Indeo 3 and for some XAnim codecs like
     cinepak. See dr-methods.txt for details on buffer types.
 
 Audio Codecs
 ------------
-Here is an example a rather full-featured audio codec block:
+Here is an example of a rather full-featured audio codec block:
 
 audiocodec mp3
   info "MPEG layer-2, layer-3"
@@ -155,13 +155,13 @@ another human-readable note for this codec.
 The "format" keyword performs a similar job as the fourcc line. However,
 since certain media file formats (notably AVI) identify audio formats with
 16-bit numbers rather than 32-bit FOURCCs, it's necessary to use this
-convention to accomodate them. However, as shown in this example, FOURCCs
+convention to accommodate them. However, as shown in this example, FOURCCs
 can also be specified with the format keyword as long as they're converted
 to their hex representation. It's important to note that this can be
 useful for video codecs as well if a FOURCC contains a space (such as
 Apple's "rle " codec).
 
 The "flags" keywords identifies any additional abilities of this
-codec. Currently, seekable is the only flag supported.
+codec. Currently, seekable is the only supported flag.
 
 EOF
