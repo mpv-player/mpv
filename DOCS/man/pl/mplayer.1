@@ -1,4 +1,4 @@
-.\" synced with 1.851
+.\" synced with 1.858
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-30" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-01-13" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -1803,7 +1803,7 @@ Dostêpne sterowniki wyj¶ciowe audio:
 .
 .TP
 .B alsa\ \ \ 
-Sterownik ALSA 0.9/\:1.x.
+sterownik ALSA 0.9/\:1.x
 .PD 0
 .RSs
 .IPs mmap\ \ \ 
@@ -1824,7 +1824,7 @@ sterownik ALSA 0.5
 .
 .TP
 .B oss\ \ \ \ 
-Sterownik OSS
+sterownik OSS
 .PD 0
 .RSs
 .IPs dsp-device
@@ -1834,8 +1834,8 @@ Ustawia urz±dzenie wyj¶ciowe d¼wiêku (domy¶lnie: /dev/\:dsp).
 .
 .TP
 .B sdl\ \ \ \ 
-Sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
-Directmedia Layer).
+sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
+Directmedia Layer)
 .PD 0
 .RSs
 .IPs <sterownik>
@@ -1845,11 +1845,11 @@ Okre¶la, jaki sterownik d¼wiêku ma zostaæ u¿yty przez SDL (domy¶lnie: SDL wybier
 .
 .TP
 .B arts\ \ \ 
-Przekazuje d¼wiêk przez demona Arts.
+przekazuje d¼wiêk przez demona Arts
 .
 .TP
 .B esd\ \ \ \ 
-Przekazuje d¼wiêk przez demona ESD.
+przekazuje d¼wiêk przez demona ESD
 .PD 0
 .RSs
 .IPs <serwer>
@@ -1860,23 +1860,23 @@ Okre¶la jaki serwer ESD ma zostaæ u¿yty (domy¶lnie: localhost).
 .
 .TP
 .B jack\ \ \ \ 
-Przekazuje d¼wiêk przez JACK (Jack Audio Connection Kit).
+przekazuje d¼wiêk przez JACK (Jack Audio Connection Kit)
 .
 .TP
 .B nas\ \ \ \ 
-Przekazuje d¼wiêk przez NAS.
+przekazuje d¼wiêk przez NAS
 .
 .TP
 .B macosx (tylko Mac OS X)
-Rdzenny sterownik Mac OS X.
+rdzenny sterownik Mac OS X
 .
 .TP
 .B sgi (tylko SGI)
-Rdzenny sterownik SGI.
+rdzenny sterownik SGI
 .
 .TP
 .B sun (tylko Sun)
-Rdzenny sterownik Sun.
+rdzenny sterownik Sun
 .PD 0
 .RSs
 .IPs <urz±dzenie>
@@ -1886,26 +1886,26 @@ Okre¶la, jakie urz±dzenie audio ma zostaæ u¿yte (domy¶lnie: /dev/\:audio).
 .
 .TP
 .B win32 (tylko Windows)
-Rdzenny sterownik waveout Windows.
+rdzenny sterownik waveout Windows
 .
 .TP
 .B dsound (tylko Windows)
-Sterownik wyj¶cia d¼wiêkowego Directx DirectSound.
+sterownik wyj¶cia d¼wiêkowego Directx DirectSound
 .PD 0
 .RSs
 .IPs device=<numer\ urz±dzenia>
 Okre¶la numer u¿ywanego urz±dzenia.
-Odtwarzanie pliku z opcj± -v wy¶wietli wszystkie dostêpne urz±dzenia.
+Odtwarzanie pliku z opcj± \-v wy¶wietli wszystkie dostêpne urz±dzenia.
 .RE
 .PD 1
 .
 .TP
 .B dxr2 (patrz te¿ \-dxr2) (tylko DXR2)
-Specyficzny sterownik Creative DXR2.
+specyficzny sterownik Creative DXR2
 .
 .TP
 .B mpegpes (tylko DVB)
-Specyficzny sterownik DVB.
+specyficzny sterownik DVB
 .
 .TP
 .B null\ \ \ 
@@ -1914,22 +1914,22 @@ Do testów wydajno¶ciowych u¿yj \-nosound.
 .
 .TP
 .B pcm
-Sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/\:wave.
+sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/\:wave
 .PD 0
 .RSs
 .IPs (no)waveheader
 Do³±cza lub pomija nag³ówek wave (domy¶lnie: do³±cza).
-Je¿eli nie jest do³±czony, zostanie wygenerowane srowe wyj¶cie PCM.
+Je¿eli nie jest do³±czony, zostanie wygenerowane surowe wyj¶cie PCM.
 .IPs file=<nazwa\ pliku>
 Zapisuje d¼wiêk do <nazwa\ pliku> zamiast domy¶lnego audiodump.wav.
-Je¿eli okre¶lnono parametr nowaveheader, domy¶lnym zbiorem wyj¶ciowym jest
+Je¿eli okre¶lono parametr nowaveheader, domy¶lnym zbiorem wyj¶ciowym jest
 audiodump.pcm.
 .RE
 .PD 1
 .
 .TP
 .B plugin\ \ 
-Sterownik wyj¶ciowy wtyczki.
+sterownik wyj¶ciowy wtyczki
 .
 .
 .
@@ -3010,7 +3010,7 @@ Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .PD 1
 .
 .TP
-.B png\ \
+.B png\ \ \ \ 
 Zapisuje ka¿d± klatkê do pliku PNG w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer klatki poprzedzony zerami.
 Obs³uguje formaty RGB i BGR z 24 bpp.
@@ -3106,7 +3106,7 @@ Próbuje najpierw kodeki Win32.
 .PD 1
 .
 .TP
-.B \-aspect <stosunek>
+.B \-aspect <stosunek> (patrz te¿ \-zoom)
 Zmienia proporcje filmu.
 Proporcje s± automatycznie wykrywane w MPEG, ale nie stosuje siê to
 do wiêkszo¶ci zbiorów AVI.
@@ -3442,7 +3442,7 @@ Najpierw próbuje kodek XAnim.
 .PD 1
 .
 .TP
-.B \-x <x> (tylko MPlayer)
+.B \-x <x> (patrz te¿ \-zoom) (tylko MPlayer)
 Skaluje obraz do szeroko¶ci <x> (je¶li jest dostêpne skalowanie sprzêtowe lub
 programowe).
 Wy³±cza przeliczania proporcji.
@@ -3484,7 +3484,7 @@ Wy³±cza bezpo¶rednie wy¶wietlanie metod± 2.
 .PD 1
 .
 .TP
-.B \-xy <warto¶æ>
+.B \-xy <warto¶æ> (patrz tez \-zoom)
 .PD 0
 .RSs
 .IPs warto¶æ<=8
@@ -3496,18 +3496,17 @@ proporcje.
 .PD 1
 .
 .TP
-.B \-y <y> (tylko MPlayer)
+.B \-y <y> (patrz te¿ \-zoom) (tylko MPlayer)
 Skaluje obraz do wysoko¶ci <y> (je¶li jest dostêpne skalowanie sprzêtowe lub
 programowe)
 Wy³±cza przeliczenia proporcji.
 .
 .TP
 .B \-zoom\ \ 
-Umo¿liwia skalowanie programowe, je¶li jest dostêpne.
-Mo¿e byæ u¿yte do wymuszenia skalowania z \-vf scale.
-.br
-.I INFORMACJA:
-\-vf scale zignoruje \-x / \-y / \-xy / \-fs / \-aspect bez \-zoom.
+W³acza skalowanie programowe, je¶li jest dostêpne.
+Umozliwi to skalowanie tym sterownikom wyj¶cia video (jak x11, fbdev), które
+nie maja skalowania sprzetowego, kiedy to MPlayer domy¶lnie wy³±cza skalowanie
+z powodów wydajnosciowych.
 .
 .
 .
@@ -3678,8 +3677,8 @@ Maksymalnie zwiêksza g³o¶no¶æ, nie zniekszta³caj±c przy tym d¼wiêku.
 .TP
 .B ladspa=plik:etykieta[:opcje...]
 £aduje wtyczkê LADSPA (Linux Audio Developer's Simple Plugin API).
-Filtr ten mo¿e mieæ wiele instancji, dlatego kilka wtyczek LADSPA mo¿e byæ
-u¿yte naraz.
+Filtr ten mo¿e mieæ wiele instancji, wiêc mo¿na u¿ywaæ kilku wtyczek LADSPA
+jednocze¶nie.
 .PD 0
 .RSs
 .IPs plik\ 
@@ -3690,11 +3689,11 @@ Je¿eli jednak nie jest ona ustawiona, musisz podaæ pe³n± ¶cie¿kê do tego zbioru.
 Okre¶la filtr wewn±trz biblioteki.
 Niektóre zbiory zawieraj± tylko jeden filtr z kolei inne mog± zawieraæ ich wiele.
 Podanie tutaj parametru "help" spowoduje wy¶wietlenie wszystkich dostêpnych
-filtrów w obrêbie konkretnj biblioteki, zastêpuje to funkcjê "listplugins"
+filtrów w obrêbie konkretnej biblioteki, zastêpuje to funkcjê "listplugins"
 z pakietu SDK LADSPA.
 .IPs parametry
 Parametry s± liczbami rzeczywistymi wiêkszymi lub równymi zeru, które okre¶laj±
-zachowanie za³adowanej bilioteki (np. opó¼nienie, próg czy wzmocnienie).
+zachowanie za³adowanej biblioteki (np. opó¼nienie, próg czy wzmocnienie).
 W trybie "gadatliwym" (dodaj flagê \-v do wiersza poleceñ MPlayera), wypisywane
 s± wszystkie mo¿liwe parametry i ich poprawne zakresy.
 Zastêpuje to funkcjê "analyseplugin" z pakietu SDK LADSPA.
@@ -3850,7 +3849,7 @@ Dla warto¶ci pomiêdzy 4\-7 obracanie wykona siê tylko je¿eli obraz
 jest wy¿szy ni¿ szerszy.
 .RSs
 .IPs 0
-Obraca o 90 stopni w prawo i odbija.
+Obraca o 90 stopni w prawo i odbija (domy¶lnie)
 .IPs 1
 Obraca o 90 stopni w prawo.
 .IPs 2
@@ -3935,7 +3934,7 @@ spal:    768x576 (PAL z kwadratowymi pikselami)
 .RE
 .
 .TP
-.B dsize=[proporcja|w:h]
+.B dsize[=proporcja|w:h]
 Zmienia po¿±dan± wielko¶æ obrazu/\:proporcjê w wybranym miejscu ³añcucha
 filtrów.
 Proporcja mo¿e byæ podana jako u³amek (4/\:3) lub liczba rzeczywista (1.33).
@@ -4285,8 +4284,8 @@ ró¿nic± pomiêdzy s±siaduj±cymi pikselami, drugi (domy¶lnie 0.15) okre¶la w
 jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
 .
 .TP
-.B lavcdeint
-filtr usuwaj±cy przeplot z libavcodec
+.B lavcdeint (PRZESTARZA£E)
+filtr usuwaj±cy przeplot z libavcodec, to samo co \-vf pp=fd
 .
 .TP
 .B kerndeint[=próg[:mapa[:kolejno¶æ[:ostr[:dwustr]]]]]
@@ -4308,7 +4307,7 @@ W³±cza dwustronne wyostrzanie (domy¶lnie: 0).
 .PD 1
 .
 .TP
-.B unsharp=l|cWxH:ilo¶æ[:l|cWxH:ilo¶æ]
+.B unsharp[=l|cWxH:ilo¶æ[:l|cWxH:ilo¶æ]]
 maska zmiêkczaj±ca / rozmycie gaussa
 .RSs
 .IPs l\ \ \ \ 
@@ -4333,7 +4332,7 @@ Wzglêdny wspó³czynnik wyostrzenia/\:rozmycia obrazu
 Zamienia p³aszczyzny U i V.
 .
 .TP
-.B il=[d|i][s][:[d|i][s]]
+.B il[=d|i][s][:[d|i][s]]
 Usuwa/wstawia przeplot w obrazie.
 Celem tego filtra jest dodanie mo¿liwo¶ci przetwarzania przeplatanych obrazów
 pojedynczymi obrazami bez usuwania przeplotu.
@@ -4355,7 +4354,7 @@ zamienia pola (parzyste i nieparzyste linie)
 .PD 1
 .
 .TP
-.B fil=[i|d]
+.B fil[=i|d]
 Rozdziela przeplatane obrazy.
 Ten filtr jest bardzo podobny do filtru il ale o wiele szybszy, jego g³ówn±
 wad± jest to, ¿e nie zawsze dzia³a.
@@ -4379,7 +4378,7 @@ Opcjonalny argument n okre¶la, czy wyci±gaæ parzyste, czy nieparzyste pola
 (zale¿nie od tego czy n jest parzyste, czy nieparzyste).
 .
 .TP
-.B detc[=zmienna1=warto¶æ2:zmienna2=warto¶æ2:...]
+.B detc[=zmienna1=warto¶æ1:zmienna2=warto¶æ2:...]
 Próbuje odwróciæ proces "telecine" by uzyskaæ czysty strumieñ bez przeplotu
 przy prêdko¶ci klatek filmu.
 By³ to pierwszy i najbardziej prymitywny filtr odwróconego telecine, który
@@ -4609,7 +4608,7 @@ zmieszanie pól, zamiast opuszczania jednego z nich.
 Proces deghostingu wzmacnia wszystkie pozosta³o¶ci po kompresji w zmieszanych
 klatkach, wtedy parametr warto¶æ okre¶la granicê wy³±czenia tych pikseli
 z deghostingu, które ró¿ni± siê od poprzedniej klatki o mniej ni¿ wyznaczony
-kres.
+próg.
 Je¿eli u¿ywany jest tryb dwuprzebiegowy, mo¿e byæ u¿yta warto¶æ ujemna, aby
 zmusiæ filtr do przeanalizowania ca³ego video na pocz±tku drugiego przebiegu
 w celu okre¶lenia czy zastosowanie filtru jest konieczne i wybranie albo 0,
@@ -4619,7 +4618,7 @@ to ¿adnego efektu.
 .RE
 .
 .TP
-.B phase=[t|b|p|a|u|T|B|A|U][:v]
+.B phase[=t|b|p|a|u|T|B|A|U][:v]
 Opó¼nia film z przeplotem o jedno pole czasowe, tak ¿e kolejno¶æ pól ulega
 zmianie.
 Zamierzonym dzia³aniem jest naprawienie filmów w trybie PAL, które by³y
@@ -7155,18 +7154,18 @@ Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
 Wybiera kwantyzator, jaki bêdzie u¿yty z klatkami P.
 Klatki I i B ró¿ni± siê od tej warto¶ci odpowiednio o ip_factor i pb_factor.
 Najbardziej przydatny zakres to 20\-40 (domy¶lnie: 26).
-Ni¿sze warto¶ci to lepsza dok³adno¶c, ale wiêksze warto¶ci bitrate.
-Zauwa¿, ¿e kwantyzacja w H.264 dzia³a zupe³nie inaczej ni¿ w MPEG-[124].
+Ni¿sze warto¶ci to lepsza dok³adno¶æ, ale wiêksze warto¶ci bitrate.
+Zauwa¿, ¿e kwantyzacja w H.264 dzia³a zupe³nie inaczej ni¿ w MPEG-1/2/4:
 Parametr kwantyzacji (QP) H.264 jest w skali logarytmicznej.
-Na przyk³ad, ró¿nica bitratete miêdzy QP=20 a QP=40 jest mniej wiêcej równa
-wspó³czynnikowi wynosz±cemu 10. Przydatne kwantyzatory w H.264 s± du¿o wiêksze
-w porównaniu z tymi z MPEG-[124].
+Przelicznik ma w przybli¿eniu warto¶æ H264QP = 12 + 6*log2(MPEGQP).
+Na przyk³ad, wspó³czynnik QP=2 dla MPEG odpowiada warto¶ci QP=18 dla
+H.264.
 .
 .TP
 .B pass=<1\-3>
-Korzysta z trybu dwu lub trzyprzebiegowego.
+Korzysta z trybu dwu- lub trzyprzebiegowego.
 Zaleca siê kodowanie zawsze w jednym z tych dwóch trybów, poniewa¿ bity
-s± lepiej rozprowadzany i podnosi siê jako¶æ.
+s± lepiej rozprowadzane i podnosi siê jako¶æ.
 .PD 0
 .RSs
 .IPs 1
@@ -7180,15 +7179,15 @@ n-ty przebieg (drugi i trzeci przebieg kodowania trzyprzebiegowego)
 A teraz jak to dzia³a i jak z tego korzystaæ:
 .br
 Pierwszy przebieg (pass=1) zbiera statystyki klipu i zapisuje je do pliku.
-Bêdziesz pewnie chcia³ wy³±czyæ niektóre opcje wymagaj±ce du¿ej mocy obliczeniowej, poza
-tymi u¿ywanymi domy¶lnie.
+Bêdziesz pewnie chcia³ wy³±czyæ niektóre opcje wymagaj±ce du¿ej mocy
+obliczeniowej, poza tymi u¿ywanymi domy¶lnie.
 .br
 W trybie dwuprzebiegowym, drugie przej¶cie (pass=2) czyta dane z pliku i opiera
 na nich decyzje dotycz±ce kontroli tempa.
 .br
 W trybie trzyprzebiegowym, drugie przej¶cie (pass=3, to nie b³±d)
 robi dwie rzeczy na raz: Czyta dane i nadpisuje je. Mo¿e bêdziesz chcia³
-zabezpieczyæ plik divx2pass.log zanim zaczniesz kodowaæ, je¿eli istnieje
+zrobiæ kopiê plik divx2pass.log zanim zaczniesz kodowaæ, je¿eli istnieje
 jakakolwiek szansa, ¿e bêdziesz musia³ przerwaæ dzia³anie MEncodera.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi wymagaj±cymi
 du¿ej mocy obliczeniowej.
@@ -7205,24 +7204,27 @@ warto¶ci qp_constant bêd±cej najbli¿szej oczekiwanej warto¶ci bitrate.
 Kolejne przebiegi s± w trybie ABR i musi zostaæ okre¶lona warto¶æ bitrate.
 .br
 .I
-INFORMACJA:
-Obs³uga kodowania trzyprzebiegowego w x264 jest ca³kiem nowa w MEncoderze, zachêcamy
-do pomocy i przesy³ania nam dobrych kombinacji parametrów x264, które by³yby jednocze¶nie
-szybki i zapewnia³y wysok± jako¶æ.
+INFORMACJA: Obs³uga kodowania trzyprzebiegowego w x264 jest ca³kiem nowa
+w MEncoderze, zachêcamy do pomocy i przesy³ania nam dobrych kombinacji
+parametrów x264, które by³yby jednocze¶nie szybki i zapewnia³y wysok± jako¶æ.
 .REss
 .
 .TP
 .B keyint=<warto¶æ>
-Ustawia maksymaln± przerwê miêdzy ramkami I.
+Ustawia maksymaln± przerwê miêdzy ramkami I (domy¶lnie: 250).
 Wiêksze warto¶ci oszczêdzaj± bity, a tym samym poprawiaj± jako¶æ,
-odbywa siê to jednak kosztem precyzji przy przeszukiwaniu (domy¶lnie: 250).
+odbywa siê to jednak kosztem precyzji przy przeszukiwaniu.
+W odró¿nieniu od MPEG-1/2/4, H.264 nie jest nara¿one na wahania DCT przy
+du¿ych warto¶ciach keyint.
 .
 .TP
-.B idrint=<warto¶æ>
-Jedna na ka¿de <warto¶æ> ramek I jest ramkami IDR (domy¶lnie: 2).
-W H.264 ramki I niekoniecznie ograniczaj± zamkniêty GOP, poniewa¿ jest
-ramka P mo¿e byæ przewidziana z wiêkszej liczby poprzedzaj±cych
-j± klatek ni¿ tylko jedna (sprawd¼ te¿ opcjê frameref).
+.B keyint_min=<1\-keyint/2>
+Ustawia minimaln± odleg³o¶æ miêdzy ramkami IDR (domy¶lnie: keyint * 0.4).
+Je¶li w obrêbie tego przedzia³u pojawi sie zmiana sceny, nadal jest ona
+kodowana jako ramka I, ale nie zaczyna nowego GOPu.
+W H.264 ramki I niekoniecznie ograniczaj± zamkniêty GOP, poniewa¿
+ramka P mo¿e byæ przewidziana z wiêcej ni¿ jednej poprzedzaj±cej klatki
+(patrz te¿ opcja frameref).
 Dlatego te¿ niekoniecznie da siê przewijaæ do klatek I.
 Ramki IDR ograniczaj± odnoszenie siê ramki P do jakiejkolwiek ramki
 poprzedzaj±cej ramkê IDR.
@@ -7303,17 +7305,6 @@ ale nie ma bezpo¶redniego wp³ywu na zniekszta³cenie.
 .REss
 .
 .TP
-.B qp_constant=<1\-51>
-Okre¶la, który kwantyzator zostanie u¿yty, 20\-40 to u¿yteczny zakres
-(domy¶lnie: 26).
-Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
-Zauwa¿, ¿e kwantyzacja w H.264 dzia³a inaczej ni¿ w MPEG[124].
-Parametr kwantyzacji (QP) H.264 jest w skali logarytmicznej.
-Dla przyk³adu, ró¿nica w bitrate pomiêdzy QP=20 a QP=40 to wspó³czynnik
-oko³o 10.
-Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
-.
-.TP
 .B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
 Minimalny kwantyzator, 10\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
@@ -7328,10 +7319,10 @@ pomiêdzy klatkami (domy¶lnie: 1).
 .
 .TP
 .B rc_buffer_size=<warto¶æ> (tylko CBR lub tryb dwuprzebiegowy) 
-rozmiar bufora kontroli tempa w kbitach(domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
+rozmiar bufora kontroli tempa w kbitach (domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
 .
 .TP
-.B rc_init_buffer=<warto¶æ>
+.B rc_init_buffer=<0.0\-1.0> (tylko CBR)
 Ustawia wstêpne zape³nienie bufora kontroli tempa (domy¶lnie: 0.25)
 .
 .TP
@@ -7347,12 +7338,13 @@ wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 1.4)
 wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.3)
 .
 .TP
-.B qcomp=<0\-1> (tylko drugie przej¶cie)
+.B qcomp=<0\-1> (tylko tryb dwuprzebiegowy)
+Kompresja kwantyzatora (domy¶lnie: 0.6).
 Ni¿sza warto¶æ sprawia, ¿e bitrate jest bardziej sta³y, podczas gdy wy¿sza,
 sprawia, ¿e parametr kwantyzacji jest bardziej sta³y.
 .
 .TP
-.B cplx_blur=<0\-999> (tylko drugie przej¶cie)
+.B cplx_blur=<0\-999> (tylko tryb dwuprzebiegowy)
 Rozmycie w czasie szacowanej z³o¿ono¶ci klatki, przed kompresj± krzywej
 (domy¶lnie: 20).
 Mniejsze warto¶ci pozwalaj± na wiêksze zmiany kwantyzatora,
@@ -7363,15 +7355,15 @@ z³o¿ono¶ci (n.p.\& animacja z niewielkim fps) nie bêd± marnowa³y bitów na
 zmiany kwantyzatora.
 .
 .TP
-.B qblur=<0\-99> (tylko drugie przej¶cie)
+.B qblur=<0\-99> (tylko tryb dwuprzebiegowy)
 Rozmycie w czasie parametru kwantyzacji, po kompresji krzywej (domy¶lnie: 0.5).
 Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
 .B direct_pred=<0\-2>
-Wykrywa typ systemu przewidywania ruchu dla bezpo¶rednich makrobloków w klatkach
-typu B.
+Wykrywa typ systemu przewidywania ruchu dla bezpo¶rednich makrobloków
+w klatkach typu B.
 .PD 0
 .RSs
 .IPs 0
@@ -7379,31 +7371,40 @@ typu B.
 .IPs 1
 Przestrzenny: wektory ruchu s± ekstrapolowane z s±siednich bloków.
 .IPs 2
-Tymczasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
+Czasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
 (domy¶lny)
 .RE
 .PD 1
 W³a¶ciwy wybór zale¿y od filmu.
-Typ przestrzenny i tymczasowy maj± podobn± prêdko¶æ dzia³ania i wspó³czynnik
+Typ przestrzenny i czasowy maj± podobn± prêdko¶æ dzia³ania i wspó³czynnik
 PSNR, ale najczê¶ciej ten drugi wygl±da lepiej.
-direct_pred=0 to zazwyczaj wolniejsza i daj±ca gorsz± jako¶æ metoda.
+direct_pred=0 to zazwyczaj metoda wolniejsza i daj±ca gorsz± jako¶æ.
 .
 .TP
 .B (no)b8x8mv
-Wykorzystuje dodatkowe typy makrobloków b16x8, b8x16 i b8x8 (domy¶lnie: wy³±czone).
+Wykorzystuje dodatkowe typy makrobloków b16x8, b8x16 i b8x8
+(domy¶lnie: wy³±czone).
 Bez tej opcji, klatki B bêd± u¿ywa³y tylko typów i16x16, i4x4, b16x16, skip, 
-bezpo¶rednie. Wiecej szczegó³ów znajdziesz w dokumentacji opcji 4x4mv.
+direct. Wiêcej szczegó³ów znajdziesz w dokumentacji opcji 4x4mv.
 .
 .TP
- .B (no)4x4mv
-Wykorzystuje dodatkowe typy makrobloków p8x4, p4x8 i p4x4 (domy¶lnie: wy³±czone).
-Bez tej opcji, klatki P bêd± korzysta³y tylko z typów i16x16, i4x4, p16x16, p16x8,
-p8x16, p8x8 i skip.
+.B (no)8x8mv
+U¿ywa dodatkowych typów makrobloków p16x8, p8x16, p8x8 (domy¶lnie: w³±czone).
+Bez tej opcji ramki P bêd± u¿ywa³y tylko typów i16x16, i4x4, p16x16, skip.
+Ta opcja jest przeznaczona tylko do eksperymentowania.
+Nie jest zalecane wy³±czanie 8x8mv w prawdziwym kodowaniu.
+.
+.TP
+.B (no)4x4mv
+Wykorzystuje dodatkowe typy makrobloków p8x4, p4x8 i p4x4
+(domy¶lnie: wy³±czone).
+Bez tej opcji, klatki P bêd± korzysta³y tylko z typów i16x16, i4x4, p16x16,
+p16x8, p8x16, p8x8 i skip.
+Wymaga 8x8mv
 .br
 Pomys³ polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
 okre¶lony obszar obrazu.
-of the picture.
-Na przyk³ad, globalny pan jest lepiej reprezentowany przez bloki 16x16,
+Na przyk³ad, globalne przesuwanie jest lepiej reprezentowane przez bloki 16x16,
 podczas gdy ma³e poruszaj±ce siê obiekty przez mniejsze segmenty.
 .br
 Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
@@ -7421,26 +7422,26 @@ Potem wybiera najlepszy typ.
 Potem poprawia ruch tego typu co do prezycji quarterpixel.
 (najszybsze)
 .br
-2: Podobnie jak 1, ale korzysta z delikatnie wolniejszego przeszukiwania fullpixel i
-delikatnie wolniejszego poprawiania quarterpixel.
+2: Podobnie jak 1, ale korzysta z nieco wolniejszego przeszukiwania fullpixel i
+nieco wolniejszego poprawiania quarterpixel.
 .br
-3: Korzysta z przewidywania ruchu z prezycj± halfpixel dla wszystkich typów kandyduj±cych
-typów makrobloków.
+3: Korzysta z przewidywania ruchu z precyzj± halfpixel dla wszystkich
+kandyduj±cych typów makrobloków.
 Potem wybiera najlepszy typ.
-Potem poprawia ruch tego typu co do prezycji quarterpixel.
+Potem poprawia ruch tego typu co do precyzji quarterpixel.
 .br
-4: Korzysta z szybkiego przewidywania ruchu z precyzj± quarterpixel dla wszystkich
-kondyduj±cych typów makrobloków.
+4: Korzysta z szybkiego przewidywania ruchu z precyzj± quarterpixel dla
+wszystkich kandyduj±cych typów makrobloków.
 Potem wybiera najlepszy typ.
 Potem koñczy poprawianie quarterpixel dla tego typu.
 .br
-5: Korzysta z najlepszej jako¶ci przewidywania ruchu z prezycj± quarterpixel
+5: Korzysta z najlepszej jako¶ci przewidywania ruchu z precyzj± quarterpixel
 dla wszystkich kandyduj±cych typów makrobloków, przed wyborem najlepszego.
 (najlepsze, domy¶lne)
 .REss
 W powy¿szych parametrach, przez "wszystkich kandydatów" nie nale¿y rozumieæ
 wszystkich aktywnych typów:
-4x4, 4x8, 8x4 s± sprawdzane tylko, je¿eli 8x8 jest lepsy ni¿ 16x16.
+4x4, 4x8, 8x4 s± sprawdzane tylko, je¿eli 8x8 jest lepszy ni¿ 16x16.
 .
 .TP
 .B log=<-1\-3>
@@ -7648,7 +7649,8 @@ MPlayer (C) 2000\-2005  Za³oga MPlayera
 .PP
 G³ównymi autorami tej strony s± Gabucino, Jonas Jermann i Diego Biurrun.
 Obecnie opiekuje siê ni± Diego Biurrun.
-Proszê przesy³aæ wszelkie maile o niej na listê dyskusyjn± MPlayer-DOCS.
+Proszê przesy³aæ wszelkie maile o niej na listê dyskusyjn± MPlayer-DOCS,
+za¶ maile odno¶nie t³umaczenia na listê MPlayer-translations.
 .
 .
 .
@@ -7661,5 +7663,5 @@ Adriana Pawlika <imoteph@wp.pl> i Konrada Materki <kmaterka@wp.pl>
 T³umaczenie mo¿e zawieraæ liczne b³êdy, niektóre s³owa mog³y byæ
 przet³umaczone b³êdnie lub nie powinny byæ t³umaczone.
 Je¶li zauwa¿ysz jaki¶ b³±d, prze¶lij informacjê o nim (i ewentualnie ³atkê) do
-t³umaczy lub na listê dyskusyjn± MPlayer-DOCS.
+t³umaczy lub na listê dyskusyjn± MPlayer-translations.
 .\" end of file
