@@ -579,7 +579,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Ripping a DVD title into a maximally high quality MPEG4 (DivX) file
   involves many considerations. Below is an example of the process when
   there is no file size goal (other than perhaps fitting the result into 2GB).
-  <systemitem class="library"><systemitem class="library">libavcodec</systemitem></systemitem>
+  <systemitem class="library">libavcodec</systemitem>
   will be used for the video,
   and the audio will be copied as is without any changes.
 </para>
@@ -607,7 +607,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   quantizing AKA constant quality is a good choice. That way each frame
   is given as much bits as its needs to keep the quality at the desired
   level, but multiple encoding passes are not needed. With
-  <systemitem class="library"><systemitem class="library">libavcodec</systemitem></systemitem>,
+  <systemitem class="library">libavcodec</systemitem>,
   you get constant quality by using
   <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
   <option>vqscale=3</option> should give you a file below 2GB in size,
