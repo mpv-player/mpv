@@ -36,6 +36,8 @@
 #include "version.h"
 #include "config.h"
 
+#include "cfgparser.h"
+
 #include "libvo/video_out.h"
 
 // CODECS:
@@ -322,7 +324,7 @@ void missing_param(char *s){
 
 int divx_quality=0;
 
-int main(int argc,char* argv[]){
+int main(int argc,char* argv[], char *envp[]){
 char* filename=NULL; //"MI2-Trailer.avi";
 int i;
 int seek_to_sec=0;
@@ -371,65 +373,24 @@ int movie_size_y=0;
 int out_fmt=0;
 char *dsp="/dev/dsp";
 int force_ni=0;
+char *homedir;
+char conffile[100];
+#include "cfg-mplayer.h"
 
   printf("%s",banner_text);
 
-/* CHKOPT(a): check, wether there is 'a' more options left */
-#define CHKOPT(a) if ((argc - i) < (a + 1)) missing_param(argv[i]);
-if (argc == 1)
-  usage();
-for(i=1;i<argc;i++){
-  if(strcmp(argv[i],"-o")==0){
-    printf("Option -o has been renamed to -vo (video-out), use -vo !\n");
+if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
+  exit(1);
+if ((homedir = getenv("HOME")) == NULL) {
+  printf("Can't find HOME dir\n");
+  exit(1);
+} else {
+  snprintf(conffile, 100, "%s/.mplayerrc", homedir);
+  if (parse_config_file(conf, conffile) < 0)
     exit(1);
-  } else
-  if(strcmp(argv[i],"-divxq")==0){
-    printf("Option -divxq has been renamed to -pp (postprocessing), use -pp !\n");
-    exit(1);
-  } else
-  if(strcmp(argv[i],"-vo")==0) {CHKOPT(1); video_driver=argv[++i];} else
-  if(strcmp(argv[i],"-dsp")==0) {CHKOPT(1); dsp=argv[++i];} else
-  if(strcmp(argv[i],"-encode")==0) {CHKOPT(1); encode_name=argv[++i];} else
-  if(strcmp(argv[i],"-bg")==0) {play_in_bg=1;} else
-  if(strcmp(argv[i],"-sb")==0) {CHKOPT(1); seek_to_byte=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-ss")==0) {CHKOPT(1); seek_to_sec=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-nosound")==0) {has_audio=0;} else
-  if(strcmp(argv[i],"-abs")==0) {CHKOPT(1); audio_buffer_size=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-delay")==0) {CHKOPT(1); audio_delay=strtod(argv[++i],NULL);} else
-#ifdef AVI_SYNC_BPS
-  if(strcmp(argv[i],"-nobps")==0) {pts_from_bps=0;} else
-#else
-  if(strcmp(argv[i],"-bps")==0) {pts_from_bps=1;} else
-#endif
-#ifdef ALSA_TIMER
-  if(strcmp(argv[i],"-noalsa")==0) {alsa=0;} else
-#else
-  if(strcmp(argv[i],"-alsa")==0) {alsa=1;} else
-#endif
-  if(strcmp(argv[i],"-ni")==0) {force_ni=1;} else
-  if(strcmp(argv[i],"-aid")==0) {CHKOPT(1); audio_id=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-vid")==0) {CHKOPT(1); video_id=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-auds")==0) {CHKOPT(1); avi_header.audio_codec=argv[++i];} else
-  if(strcmp(argv[i],"-vids")==0) {CHKOPT(1); avi_header.video_codec=argv[++i];} else
-  if(strcmp(argv[i],"-mc")==0) {CHKOPT(1); default_max_pts_correction=strtod(argv[++i],NULL);} else
-  if(strcmp(argv[i],"-fps")==0) {CHKOPT(1); force_fps=strtod(argv[++i],NULL);} else
-  if(strcmp(argv[i],"-afm")==0) {CHKOPT(1); audio_format=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-vcd")==0) {CHKOPT(1); vcd_track=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-pp")==0) {CHKOPT(1); divx_quality=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-br")==0) {CHKOPT(1); encode_bitrate=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-x")==0) {CHKOPT(1); screen_size_x=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-y")==0) {CHKOPT(1); screen_size_y=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-xy")==0) {CHKOPT(1); screen_size_xy=strtol(argv[++i],NULL,0);} else
-  if(strcmp(argv[i],"-fs")==0) {fullscreen=1;} else
-  if(strcmp(argv[i],"-noidx")==0) {no_index=1;} else
-  if(strcmp(argv[i],"-v")==0) {++verbose;} else
-  if(strcmp(argv[i],"-h")==0) {usage();} else
-  if(strcmp(argv[i],"--help")==0) {usage();} else
-  { if(filename){ printf("invalid option: %s\n",filename);exit(1);}
-    filename=argv[i];
-  }
 }
-#undef CHKOPT	/* we don't need this anymore */
+if (parse_command_line(conf, argc, argv, envp, &filename) < 0)
+  exit(1);
 
 // Many users forget to include command line in bugreports...
 if(verbose){
