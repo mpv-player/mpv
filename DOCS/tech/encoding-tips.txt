@@ -1,4 +1,13 @@
 
+Some important URLs:
+~~~~~~~~~~~~~~~~~~~~
+http://www.mplayerhq.hu/~michael/codec-features.html <- lavc vs. divx5 vs. xvid
+http://rguyom.chez.tiscali.fr/libavcodec_tests.html  <- lavc benchmarks, options
+http://cutka.szm.sk/ffdshow/index.html               <- lavc for win32 :)
+http://www.bunkus.org/dvdripping4linux/index.html    <- a nice tutorial
+
+================================================================================
+
 ENCODING QUALITY - OR WHY AUTOMATISM IS BAD.
 
 Hi everyone.
