@@ -4,6 +4,13 @@
 #ifdef USE_FASTMEMCPY
 #include <stddef.h>
 
+// Enable this code, if SSE version works (faster) for you!
+#if 0
+#ifdef HAVE_SSE
+#define FASTMEMCPY_SSE
+#endif
+#endif
+
 /*
  This part of code was taken by from Linux-2.4.3 and slightly modified
 for MMX, MMX2, SSE instruction set. I have done it since linux uses page aligned
@@ -54,7 +61,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 #if defined( HAVE_MMX2 ) || defined( HAVE_3DNOW ) || defined( HAVE_MMX )
 
 #undef HAVE_MMX1
-#if defined(HAVE_MMX) && !defined(HAVE_MMX2) && !defined(HAVE_3DNOW) && !defined(HAVE_SSE)
+#if defined(HAVE_MMX) && !defined(HAVE_MMX2) && !defined(HAVE_3DNOW) && !defined(FASTMEMCPY_SSE)
 /*  means: mmx v.1. Note: Since we added alignment of destinition it speedups
     of memory copying on PentMMX, Celeron-1 and P2 upto 12% versus
     standard (non MMX-optimized) version.
@@ -82,7 +89,7 @@ __asm__ __volatile__(\
         : "memory");\
 }
 
-#ifdef HAVE_SSE
+#ifdef FASTMEMCPY_SSE
 #define MMREG_SIZE 16
 #else
 #define MMREG_SIZE 8
@@ -141,7 +148,7 @@ inline static void * fast_memcpy(void * to, const void * from, size_t len)
            perform reading and writing to be multiple to a number of
            processor's decoders, but it's not always possible.
         */
-#ifdef HAVE_SSE /* Only P3 (may be Cyrix3) */
+#ifdef FASTMEMCPY_SSE /* Only P3 (may be Cyrix3) */
          if(((unsigned long)from) & 15)
          /* if SRC is misaligned */
          for(; i>0; i--)
@@ -215,7 +222,7 @@ inline static void * fast_memcpy(void * to, const void * from, size_t len)
                  * is needed to become ordered again. */
                  __asm__ __volatile__ ("sfence":::"memory");
 #endif
-#ifndef HAVE_SSE
+#ifndef FASTMEMCPY_SSE
                  /* enables to use FPU */
                  __asm__ __volatile__ (EMMS:::"memory");
 #endif
