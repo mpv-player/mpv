@@ -235,14 +235,19 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Vybrat titulky ..."
 #define MSGTR_MessageBox "Zpráva"
 #define MSGTR_PlayList "Soubory pro pøehrání"
+#define MSGTR_Equalizer "Ekvalizér"
 #define MSGTR_SkinBrowser "Prohlí¾eè témat"
 #define MSGTR_OtherSelect "Vybrat ..."
+#define MSGTR_AudioFileSelect "Vybrat externí zvukový kanál ..."
+#define MSGTR_Network "Sí» ..." //opravit
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Zru¹it"
 #define MSGTR_Add "Pøidat"
 #define MSGTR_Remove "Odebrat"
+#define MSGTR_Clear "Vynulovat"
+#define MSGTR_Config "Konfigurace"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Bohu¾el, nedostatek pamìti pro buffer pro kreslení."
@@ -281,6 +286,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Pøehrát DVD ..."
 #define MSGTR_MENU_PlayURL "Ètení URL ..."
 #define MSGTR_MENU_LoadSubtitle "Naèíst titulky ..."
+#define MSGTR_MENU_LoadExternAudioFile "Naèíst externí soubor se zvukem ..."
 #define MSGTR_MENU_Playing "Ovládání pøehrávání"
 #define MSGTR_MENU_Play "Pøehrát"
 #define MSGTR_MENU_Pause "Pauza"
@@ -306,6 +312,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Prohli¾eè témat"
 #define MSGTR_MENU_Preferences "Pøedvolby"
 #define MSGTR_MENU_Exit "Konec ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Zvuk"
+#define MSGTR_EQU_Video "Obraz"
+#define MSGTR_EQU_Contrast "Kontrast: "
+#define MSGTR_EQU_Brightness "Jas: "
+#define MSGTR_EQU_Hue "Odstín: "
+#define MSGTR_EQU_Saturation "Sytost: "
+#define MSGTR_EQU_Front_Left "Levý pøední"
+#define MSGTR_EQU_Front_Right "Pravý pøední"
+#define MSGTR_EQU_Back_Left "Levý zadní"
+#define MSGTR_EQU_Back_Right "Pravý zadní"
+#define MSGTR_EQU_Center "Centrální"
+#define MSGTR_EQU_Bass "Basový"
+#define MSGTR_EQU_All "V¹e"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
