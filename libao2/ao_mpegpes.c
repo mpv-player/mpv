@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef DVB_HEAD
+
+#include "../config.h"
+
+#ifdef HAVE_DVB_HEAD
 #define HAVE_DVB 1
 #endif
 
 #ifdef HAVE_DVB
 #include <sys/ioctl.h>
 #endif
-
-#include "../config.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -23,7 +24,7 @@
 #include <ost/audio.h>
 audioMixer_t dvb_mixer={255,255};
 #else
-#include </linux/dvb/audio.h>
+#include <linux/dvb/audio.h>
 audio_mixer_t dvb_mixer={255,255};
 #endif
 #endif
