@@ -16,6 +16,7 @@ typedef struct cpucaps_s {
 	int hasSSE;
 	int hasSSE2;
 	int isX86;
+	unsigned cl_size; /* size of cache line */
 } CpuCaps;
 
 extern CpuCaps gCpuCaps;

@@ -98,9 +98,9 @@ void GetCpuCaps( CpuCaps *caps)
 	unsigned int regs[4];
 	unsigned int regs2[4];
 
-	caps->isX86=1;
-
 	memset(caps, 0, sizeof(*caps));
+	caps->isX86=1;
+	caps->cl_size=32; /* default */
 	if (!has_cpuid()) {
 	    mp_msg(MSGT_CPUDETECT,MSGL_WARN,"CPUID not supported!??? (maybe an old 486?)\n");
 	    return;
@@ -111,6 +111,7 @@ void GetCpuCaps( CpuCaps *caps)
 	if (regs[0]>=0x00000001)
 	{
 		char *tmpstr;
+		unsigned cl_size;
 
 		do_cpuid(0x00000001, regs2);
 
@@ -132,6 +133,8 @@ void GetCpuCaps( CpuCaps *caps)
 		caps->hasSSE  = (regs2[3] & (1 << 25 )) >> 25; // 0x2000000
 		caps->hasSSE2 = (regs2[3] & (1 << 26 )) >> 26; // 0x4000000
 		caps->hasMMX2 = caps->hasSSE; // SSE cpus supports mmxext too
+		cl_size = ((regs2[1] >> 8) & 0xFF)*8;
+		if(cl_size) caps->cl_size = cl_size;
 	}
 	do_cpuid(0x80000000, regs);
 	if (regs[0]>=0x80000001) {
@@ -142,6 +145,13 @@ void GetCpuCaps( CpuCaps *caps)
 		caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
 		caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 	}
+	if(regs[0]>=0x80000006)
+	{
+		do_cpuid(0x80000006, regs2);
+		mp_msg(MSGT_CPUDETECT,MSGL_V,"extended cache-info: %d\n",regs2[2]&0x7FFFFFFF);
+		caps->cl_size  = regs2[2] & 0xFF;
+	}
+	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"Detected cache-line size is %u bytes\n",caps->cl_size);
 #if 0
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
 		gCpuCaps.hasMMX,
