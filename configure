@@ -104,7 +104,7 @@ case `echo -n` in
   *)	_echo_n='-n '	_echo_c=	;;	# BSD echo
 esac
 
-LANGUAGES=`echo help_mp-??.h help_mp-??_??.h | sed "s/help_mp-\(..\).h/\1/g" |sed "s/help_mp-\(.....\).h/\1/g"`
+LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed "s/help_mp-\(..\).h/\1/g" |sed "s/help_mp-\(.....\).h/\1/g"`
 
 for parm in "$@" ; do
   if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
@@ -1484,14 +1484,14 @@ echores "$_setlocale"
 
 echocheck "language"
 test -z "$LINGUAS" && LINGUAS="en"
-if test -f "help_mp-${LINGUAS}.h" ; then
+if test -f "help/help_mp-${LINGUAS}.h" ; then
   echores "using ${LINGUAS}"
 else
   echores "${LINGUAS} not found, using en"
   LINGUAS="en"
 fi
-_mp_help="help_mp-${LINGUAS}.h"
-test -f help_mp-${LINGUAS}.h || die "help_mp-${LINGUAS}.h not found"
+_mp_help="help/help_mp-${LINGUAS}.h"
+test -f $_mp_help || die "$_mp_help not found"
 
 echocheck "enable sighandler"
 if test "$_sighandler" = yes ; then
@@ -4881,9 +4881,9 @@ cat > help_mp.h << EOF
 #include "$_mp_help"
 EOF
 
-if test $_mp_help != "help_mp-en.h"; then
+if test $_mp_help != "help/help_mp-en.h"; then
   echo "Adding untranslated messages to help_mp.h"
-  ./help_diff.sh $_mp_help <help_mp-en.h >> help_mp.h
+  help/help_diff.sh $_mp_help <help/help_mp-en.h >> help_mp.h
 fi
 
 #############################################################################
