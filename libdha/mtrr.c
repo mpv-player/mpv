@@ -13,10 +13,13 @@
 #include "AsmMacros.h"
 
 #if defined (__i386__) && defined (__NetBSD__)
+#include <sys/param.h>
+#if __NetBSD_Version__ > 105240000
 #include <stdint.h>
 #include <stdlib.h>
 #include <machine/mtrr.h>
 #include <machine/sysarch.h>
+#endif
 #endif
 
 #if defined( __i386__ )
@@ -47,6 +50,7 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     }
     return ENOSYS;
 #elif defined (__NetBSD__)
+#if __NetBSD_Version__ > 105240000
     struct mtrr *mtrrp;
     int n;
 
@@ -63,6 +67,10 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     }
     free(mtrrp);
     return 0;
+#else
+    /* NetBSD prior to 1.5Y doesn't have MTRR support */
+    return ENOSYS;
+#endif
 #else
 #warning Please port MTRR stuff!!!
     return ENOSYS;

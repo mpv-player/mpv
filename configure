@@ -2642,7 +2642,7 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd ; then
+ if linux || freebsd || netbsd ; then
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
