@@ -873,6 +873,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  sh->wf->nBlockAlign=char2int(trak->stdata,36);
 		} else {
 		  sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
+		  // workaround for ms11 ima4
+		  if (sh->format == 0x1100736d && trak->stdata_len >= 36)
+		      sh->wf->nBlockAlign=char2int(trak->stdata,36);
 		}
 		// Selection:
 		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
