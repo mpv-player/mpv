@@ -580,10 +580,6 @@ static int fb_bpp_we_want;	// 32: 32  24: 24  16: 16  15: 15
 static int fb_screen_width;
 static fb_mode_t *fb_mode = NULL;
 
-static int left_band_width;
-static int right_band_width;
-static int upper_band_height;
-static int lower_band_height;
 static uint8_t *next_frame;
 static int in_width;
 static int in_height;
