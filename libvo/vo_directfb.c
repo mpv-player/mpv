@@ -164,14 +164,25 @@ struct vlayer_t {
 	int saturation;
 	int contrast;
 	int hue;
+	int hwscale;
         } videolayercaps;
 // workabout for DirectFB bug
 static int buggyYV12BitBlt=0;
 static int memcpyBitBlt=0;
+// 
+static int hwstretchblit=0;
 #define DIRECTRENDER
 #ifdef DIRECTRENDER
 static int dr_enabled=0;
 static int framelocked=0;
+#endif
+#define FLIPPING
+#ifdef FLIPPING
+static int do_flipping=0; // turn (on) off flipping - prepared for cmd line switch
+static int wait_vsync_after_flip=0; 
+static int flipping=0; // flipping is active
+static int invram=0; // backbuffer in video memory
+static int blitperformed=0; // in case of temporary frame we will blit before drawing osd
 #endif
 // primary & frame stuff
 static int frameallocated=0;
@@ -193,6 +204,7 @@ if (!modes[index].valid) {
         modes[index].height=height;
         modes[index].overx=overx;
         modes[index].overy=overy;
+	if (verbose) printf("DirectFB: Mode added %i %i %i\n",width,height,bpp);
         }
 if ((modes[index].overy<0)||(modes[index].overx<0)) we_are_under=1; // stored mode is smaller than req mode
 if (abs(overx*overy)<abs(modes[index].overx * modes[index].overy)) closer=1; // current mode is closer to desired res
@@ -203,7 +215,7 @@ if ((closer && (over || we_are_under)) || (we_are_under && over)) {
                 modes[index].height=height;
                 modes[index].overx=overx;
                 modes[index].overy=overy;
-		if (verbose) printf("DirectFB:Better mode added %i %i %i\n",width,height,bpp);
+		if (verbose) printf("DirectFB: Better mode added %i %i %i\n",width,height,bpp);
                 };
 
 return DFENUM_OK;
@@ -238,9 +250,10 @@ if (verbose) {
      if (caps & DLCAPS_FLICKER_FILTERING)
           printf( "  - Supports flicker filtering.\n" );
 
+/*   renamed in dfb v. 0.9.13
      if (caps & DLCAPS_INTERLACED_VIDEO)
           printf( "  - Can natively display interlaced video.\n" );
-
+*/
      if (caps & DLCAPS_OPACITY)
           printf( "  - Supports blending based on global alpha factor.\n" );
 
@@ -289,15 +302,15 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 
         DFBCHECK (DirectFBInit (NULL,NULL));
 
-	if ((directfb_major_version >= 0) &&
-	    (directfb_minor_version >= 9) &&
-	    (directfb_micro_version >= 7))
+	if (!((directfb_major_version <= 0) &&
+	    (directfb_minor_version <= 9) &&
+	    (directfb_micro_version < 7)))
 	{
     	    if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
     	    DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
 	}
 
-	// disable YV12 for dfb until 0.9.11 - there is a bug in dfb! should be revised with every dfb version until bug is fixed in dfb.
+	// use own bitblt for YV12 beacuse bug in dfb till 0.9.11 
 	if ((directfb_major_version <= 0) &&
 	    (directfb_minor_version <= 9) &&
 	    (directfb_micro_version <= 11)) {
@@ -305,11 +318,32 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 	    if (verbose) printf("DirectFB: Buggy YV12BitBlt!\n");
 	}
 
+#ifdef FLIPPING
+	// activate flipping from release 0.9.11
+	if ((directfb_major_version <= 0) &&
+	    (directfb_minor_version <= 9) &&
+	    (directfb_micro_version <= 10)) {
+	    do_flipping=0;
+	} else {
+//	(de)activated by default - should be overwritten by cmd line option
+//	    do_flipping=1;
+	}
+	// wait for vsync if ver <0.9.13
+	if ((directfb_major_version <= 0) &&
+	    (directfb_minor_version <= 9) &&
+	    (directfb_micro_version <= 12)) {
+	    wait_vsync_after_flip=1;
+            if (verbose) printf("DirectFB: Manual wait for vsync enabled!\n");
+	} else {
+	    wait_vsync_after_flip=0; 
+	}
+#endif
+
 //	uncomment this if you do not wish to create a new vt for DirectFB
-       DFBCHECK (DirectFBSetOption ("no-vt-switch",""));
+//       DFBCHECK (DirectFBSetOption ("no-vt-switch",""));
 
 //	uncomment this if you want to allow vt switching
-       DFBCHECK (DirectFBSetOption ("vt-switching",""));
+//       DFBCHECK (DirectFBSetOption ("vt-switching",""));
 #ifdef HAVE_DIRECTFB099
 //	uncomment this if you want to hide gfx cursor (req dfb >=0.9.9)
        DFBCHECK (DirectFBSetOption ("no-cursor",""));
@@ -332,6 +366,8 @@ if (verbose) printf("DirectFB: Preinit entered\n");
             videolayeractive=0;
 
         } else {
+	// just to be sure that layer is hidden during config
+		videolayer->SetOpacity(videolayer,0);
 
         // there is an additional layer so test it for YUV formats
 	// some videolayers support RGB formats - not used now
@@ -410,6 +446,13 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 		    videolayercaps.saturation=0;
 		};
 		
+		// test if layer can change size/position
+    		if (caps & DLCAPS_SCREEN_LOCATION) {
+		    videolayercaps.hwscale=1;
+		} else {
+		    videolayercaps.hwscale=0;
+		};
+		
 	  
 		}
 
@@ -425,6 +468,14 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 		};
         }
 
+// check generic card capabilities (for hw scaling)
+    {
+    DFBCardCapabilities caps;    
+    DFBCHECK (dfb->GetCardCapabilities(dfb,&caps));
+    if (caps.acceleration_mask & DFXL_STRETCHBLIT) hwstretchblit=1; else hwstretchblit=0;
+    if (verbose) printf("DirectFB: Card supports hw stretch blit\n");
+    }
+
 // just look at RGB things for main layer
         modes[0].valid=0;
         modes[1].valid=0;
@@ -432,21 +483,31 @@ if (verbose) printf("DirectFB: Preinit entered\n");
         modes[3].valid=0;
         DFBCHECK (dfb->EnumVideoModes(dfb,enum_modes_callback,NULL));
 
+
   /*
    * (Get keyboard)
    */
-  DFBCHECK (dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard));
+  ret = dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard);
+
+  if (ret==DFB_OK) {
+    if (verbose) {
+    printf("DirectFB: Keyboard init OK\n");
+    }
+  } else {
+    keyboard = NULL;
+    printf("DirectFB: Keyboard init FAILED\n");
+  }
 
   /*
    * Create an input buffer for the keyboard.
    */
 #ifdef HAVE_DIRECTFB099
-  DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
+  if (keyboard) DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
 #else
-  DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
+  if (keyboard) DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
 #endif
   // just to start with clean ...
-  buffer->Reset(buffer);
+  if (buffer) buffer->Reset(buffer);
   return 0;
 
 }
@@ -519,14 +580,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 				};
 				break;
 		
-        	    default: // try all of them in order 16bit 24bit 32bit 8bit
-				if (modes[1].valid) {
-				    dfb->SetVideoMode(dfb,modes[1].width,modes[1].height,16);
-				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 16 bpp]\n",modes[1].width,modes[1].height);
-				    }
-				else if (modes[2].valid) {
+        	    default: // try all of them in order 24bit 16bit 32bit 8bit
+				if (modes[2].valid) {
 				    dfb->SetVideoMode(dfb,modes[2].width,modes[2].height,24);
 				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 24 bpp]\n",modes[2].width,modes[2].height);
+				    }
+				else if (modes[1].valid) {
+				    dfb->SetVideoMode(dfb,modes[1].width,modes[1].height,16);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 16 bpp]\n",modes[1].width,modes[1].height);
 				    }
 				else if (modes[3].valid) {
 				    dfb->SetVideoMode(dfb,modes[3].width,modes[3].height,32);
@@ -636,11 +697,42 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	ret =videolayer->SetConfiguration( videolayer, &dlc );
         if (!ret) {
              if (verbose) printf("DirectFB: SetConfiguration for layer OK\n");
+
+#ifdef FLIPPING
+	     // try to set flipping for videolayer
+	     if (do_flipping) {
+	        dlc.flags = DLCONF_BUFFERMODE;
+	        dlc.buffermode = DLBM_BACKVIDEO;
+		invram = 1;
+	        flipping = 1;
+	        ret =videolayer->SetConfiguration( videolayer, &dlc );
+	        if (ret!=DFB_OK) {
+	    	    invram = 0;
+		    if (!((directfb_major_version <= 0) &&
+			(directfb_minor_version <= 9) &&
+			(directfb_micro_version <= 11))) {
+		    
+	    		dlc.buffermode = DLBM_BACKSYSTEM;
+			ret =videolayer->SetConfiguration( videolayer, &dlc );
+	        	if (ret!=DFB_OK) {
+			    flipping = 0;
+			}
+		    } else { flipping = 0; };
+	        }
+	        if (verbose) if (flipping) {
+	    	    printf("DirectFB: SetFlipping for layer: OK (vram=%i)\n",invram);
+	        } else {
+	            printf("DirectFB: SetFlipping for layer: FAILED\n");
+		}
+	     } else flipping=0;
+#endif
 	     ret = videolayer->GetSurface( videolayer, &primary );
 	     if (!ret){
                 videolayeractive=1;
-                if (verbose) printf("DirectFB: Get surface for layer OK\n");
+                if (verbose) printf("DirectFB: Get surface for layer: OK\n");
 		primaryallocated=1;
+		// set videolayer to be visible
+		videolayer->SetOpacity(videolayer,0xFF);
               } else {
 	      videolayeractive=0;
 	      if (videolayer) videolayer->SetOpacity(videolayer,0);
@@ -652,9 +744,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
       }
 
-// for flipping we will use BitBlt not integrated directfb flip
+// for flipping we will use BitBlt not integrated directfb flip (if necessary)
   dsc.flags = DSDESC_CAPS | DSDESC_PIXELFORMAT;
-  dsc.caps  = DSCAPS_PRIMARY | DSCAPS_VIDEOONLY;//| DSCAPS_FLIPPING;
+  dsc.caps  = DSCAPS_PRIMARY /*| DSCAPS_VIDEOONLY*/;
 
   switch (format) {
         case IMGFMT_RGB32: dsc.pixelformat =  DSPF_ARGB; source_pixel_size= 4; break;
@@ -669,10 +761,68 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         };
 
   if (!videolayeractive) {
+#ifdef FLIPPING
+      if (do_flipping) {
+          flipping = 1;
+          invram = 0;
+          dsc.caps |= DSCAPS_FLIPPING;
+          ret = dfb->CreateSurface( dfb, &dsc, &primary );
+          if (ret!=DFB_OK) {
+	    dsc.caps &= ~DSCAPS_FLIPPING;
       DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary ));
-      if (verbose) printf("DirectFB: Get primary surface OK\n");
+	    flipping = 0;
+          } else {
+         // test flipping again
+    	    DFBCHECK (primary->GetCapabilities(primary,&dsc.caps));
+    	    if (!(dsc.caps & DSCAPS_FLIPPING)) {
+		printf("DirectFB: Error - surface sucesfully created with flipping flag, but doesn't support it.\n");
+		flipping = 0;
+    	    } else {
+	    // test fliping in real - sometimes flips fails even if shouldn't
+		DFBResult ret;
+		ret = primary->Flip(primary,NULL,0);
+		if (ret!=DFB_OK) {
+		    // recreate surface as non flipping
+    		    printf("DirectFB: Error - surface sucesfully created with flipping flag, but test flip failed.\n");
+		    flipping = 0;
+	            dsc.caps &= ~DSCAPS_FLIPPING;
+		    primary->Release(primary);
+	            DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary ));
+		}
+		
+	    }	
+          }
+/*         if (verbose) if (flipping) {
+	        printf("DirectFB: Flipping for primary: OK\n");
+	 } else {
+	        printf("DirectFB: Flipping for primary: FAILED\n");
+	 }
+*/    } else {
+        flipping = 0;
+#endif
+      DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary ));
+#ifdef FLIPPING
+      }
+#endif
+      
+      if (verbose) printf("DirectFB: Get primary surface: OK\n");
+
       primaryallocated=1;
   } 
+
+#ifdef FLIPPING
+//	     final check for flipping - based on real caps
+
+	    	    DFBCHECK (primary->GetCapabilities(primary,&dsc.caps));
+	    	    if (!(dsc.caps & DSCAPS_FLIPPING)) {
+			printf("DirectFB: Flipping si NOT active.\n");
+			flipping = 0;
+	            } else {
+			printf("DirectFB: Flipping is active.\n");
+			flipping = 1;
+		    }
+//	        }	
+#endif		
 
   DFBCHECK (primary->GetSize (primary, &screen_width, &screen_height));
 
@@ -712,6 +862,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
    memcpyBitBlt = 0;
 #endif   
 
+
   // release frame if it is already allocated
   if (frameallocated) {
     if (verbose ) printf("DirectFB: Release frame\n");
@@ -719,20 +870,58 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     frameallocated=0;
   };
 
+// picture size and position
 
-  // prevent from memcpy from videomemory to videomemory 
-/*  if (memcpyBitBlt) {  
-    dsc.caps  = DSCAPS_SYSTEMONLY;
+ aspect_save_orig(in_width,in_height);
+ aspect_save_prescale(d_width,d_height);
+ if (videolayeractive) {//  try to set pos for YUY2 layer and proper aspect ratio
+		aspect_save_screenres(10000,10000);
+		aspect(&out_width,&out_height,A_ZOOM);
+
+                ret = videolayer->SetScreenLocation(videolayer,(1-(float)out_width/10000)/2,(1-(float)out_height/10000)/2,((float)out_width/10000),((float)out_height/10000));
+
+		xoffset = 0;
+		yoffset = 0;
   } else {
-    dsc.caps  = DSCAPS_VIDEOONLY;
+                // aspect ratio correction for zoom to fullscreen
+		aspect_save_screenres(screen_width,screen_height);
+	
+		if(fs) /* -fs */
+			aspect(&out_width,&out_height,A_ZOOM);
+		else
+			aspect(&out_width,&out_height,A_NOZOOM);
+
+
+    		xoffset = (screen_width - out_width) / 2;
+	        yoffset = (screen_height - out_height) / 2;
   }
-  ret = dfb->CreateSurface( dfb, &dsc, &frame);
-  if (ret) {
-    if (verbose) printf ("DirectFB: Trying do create buffer in system memory (2)\n");*/
+
+ if (((out_width != in_width) || (out_height != in_height)) && (!videolayeractive)) {stretch = 1;} else stretch=0; //yuy doesn't like strech and should not be needed
+
+#ifdef FLIPPING
+    // frame will not be allocated in case of overlay or nonstrech blit on primary
+    if (flipping && (!stretch)) {
+     frame = primary;
+     frameallocated = 0;
+     if (verbose) printf("DirectFB: Frame is NOT used (flipping is active).\n");
+    } else {
+#endif
+    /*
     dsc.caps  = DSCAPS_SYSTEMONLY;
+      //let dfb decide where frame should be - preparation for AGP support
+    */
+     dsc.flags &=~DSDESC_CAPS;
+     
     DFBCHECK (dfb->CreateSurface( dfb, &dsc, &frame));
     frameallocated=1;
-//  }
+#ifdef FLIPPING
+     if (verbose) if (flipping) {
+	printf("DirectFB: Frame created (flipping&stretch is active).\n");
+     } else {
+	printf("DirectFB: Frame created (flipping is NOT active).\n");
+     };
+    };
+#endif
   
   DFBCHECK (frame->GetPixelFormat (frame, &frame_format));
 
@@ -780,37 +969,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
  if (((format == IMGFMT_YV12) || (format == IMGFMT_YUY2)) && (!videolayeractive)){ yuv2rgb_init(frame_pixel_size * 8,MODE_RGB);};
 
-// picture size and position
-
- aspect_save_orig(in_width,in_height);
- aspect_save_prescale(d_width,d_height);
- if (videolayeractive) {//  try to set pos for YUY2 layer and proper aspect ratio
-		aspect_save_screenres(10000,10000);
-		aspect(&out_width,&out_height,A_ZOOM);
-
-                ret = videolayer->SetScreenLocation(videolayer,(1-(float)out_width/10000)/2,(1-(float)out_height/10000)/2,((float)out_width/10000),((float)out_height/10000));
-
-		xoffset = 0;
-		yoffset = 0;
-  } else {
-                // aspect ratio correction for zoom to fullscreen
-		aspect_save_screenres(screen_width,screen_height);
-	
-		if(fs) /* -fs */
-			aspect(&out_width,&out_height,A_ZOOM);
-		else
-			aspect(&out_width,&out_height,A_NOZOOM);
-
-
-    		xoffset = (screen_width - out_width) / 2;
-	        yoffset = (screen_height - out_height) / 2;
-	}
-
- if (((out_width != in_width) || (out_height != in_height)) && (!videolayeractive)) {stretch = 1;} else stretch=0; //yuy doesn't like strech and should not be needed
-
  if ((verbose)&&(memcpyBitBlt)) printf("DirectFB: Using memcpyBitBlt\n");
 #ifdef DIRECTRENDER
-//direct rendering is enabled in case of sane buffer and im format
+//direct rendering is enabled in case of same buffer and img format
  if ((format==IMGFMT_RGB32)&&(frame_format ==DSPF_ARGB) ||
      (format==IMGFMT_BGR32)&&(frame_format ==DSPF_ARGB) ||
      (format==IMGFMT_RGB24)&&(frame_format ==DSPF_RGB24) ||
@@ -847,6 +1008,25 @@ static uint32_t query_format(uint32_t format)
 //        preinit(NULL);
 
 	if (verbose ) printf("DirectFB: Format query: %s\n",vo_format_name(format));
+
+	switch (format) {
+		// primary
+                case IMGFMT_RGB32:
+                case IMGFMT_BGR32: 
+                case IMGFMT_RGB24:
+                case IMGFMT_BGR24:
+                case IMGFMT_RGB16:
+                case IMGFMT_BGR16:
+                case IMGFMT_RGB15:
+                case IMGFMT_BGR15:  if (hwstretchblit) ret |=VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
+				     break;
+		// overlay		     
+                case IMGFMT_YUY2:
+        	case IMGFMT_YV12:   if (videolayercaps.hwscale) ret |=VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
+                                    break;
+ 	}
+	
+
 	switch (format) {
 
 // RGB mode works only if color depth is same as on screen and this driver doesn't know before init
@@ -865,19 +1045,21 @@ static uint32_t query_format(uint32_t format)
                 case IMGFMT_BGR15: if (modes[1].valid) return ret;
                                    break;
                 case IMGFMT_YUY2: if (videolayerpresent) {
+				    if (videolayercaps.hwscale) ret |=VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
 				    if (videolayercaps.yuy2) {
 					return ret|VFCAP_CSP_SUPPORTED_BY_HW;
-				    } else {
+// disabled - MPlayer will do conversion automatically
+/*				    } else {
 				    	return ret;
-				    };
+*/				    };
 				   };				    
                                    break;
         	case IMGFMT_YV12:  if ((videolayerpresent) &&
 				       (videolayercaps.i420 || videolayercaps.iv12))
 				    return ret|VFCAP_CSP_SUPPORTED_BY_HW;
-				    else return ret;
-                                   break;
-  // YV12 should work in all cases
+// disabled - MPlayer will do conversion automatically
+/*				    else return ret;
+*/                                   break;
  	}
 
 	return 0;
@@ -894,6 +1076,8 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
         void *dst;
         int pitch;
 	int len;
+	static IDirectFBSurface *surface = NULL;
+	
 
 #ifdef DIRECTRENDER
 	if(framelocked) {
@@ -901,8 +1085,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	    framelocked=0;
 	};
 #endif
+#ifdef FLIPPING
+	if (flipping && stretch) {
+        DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
+	} else {
+#endif
         DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
-
+#ifdef FLIPPING
+	}
+#endif
 	switch(frame_format) {
                 case DSPF_RGB32:
                 case DSPF_ARGB:
@@ -936,7 +1127,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		break;
 #endif
 		}
+#ifdef FLIPPING
+	if (flipping && stretch) {
+        DFBCHECK (primary->Unlock(primary));
+	} else {
+#endif
         DFBCHECK (frame->Unlock(frame));
+#ifdef FLIPPING
+	}
+#endif
 }
 
 static uint32_t draw_frame(uint8_t *src[])
@@ -1208,6 +1407,8 @@ extern void mplayer_put_key(int code);
 static void check_events(void)
 {
 
+	if (buffer) {
+
       DFBInputEvent event;
 //if (verbose) printf ("DirectFB: Check events entered\n");
 #ifdef HAVE_DIRECTFB0910
@@ -1259,18 +1460,53 @@ if (buffer->GetEvent(buffer, &event) == DFB_OK) {
 #endif
 	};
     };
+}
 // empty buffer, because of repeating (keyboard repeat is faster than key handling
 // and this causes problems during seek)
 // temporary workabout should be solved in the future
 
-buffer->Reset(buffer);
+if (buffer) buffer->Reset(buffer);
 //if (verbose) printf ("DirectFB: Check events finished\n");
 
 }
 
 static void draw_osd(void)
 {
+// if flipping is active we will draw directly to primary
+// we will also blit from frame to primary if necessary
+#ifdef FLIPPING
+        if (stretch && flipping) {
+        	DFBRectangle rect;
+        	rect.x=xoffset;
+	        rect.y=yoffset;
+	        rect.w=out_width;
+	        rect.h=out_height;
+#ifdef DIRECTRENDER
+		if(framelocked) {
+	            frame->Unlock(frame);
+		    framelocked=0;
+		};
+#endif
+		// lets clear blackborders
+		primary->SetColor(primary,0,0,0,0);
+		// top
+		primary->FillRectangle(primary,0,0,screen_width,yoffset);
+		// bottom
+		primary->FillRectangle(primary,0,screen_height-yoffset,screen_width,yoffset);
+		//left
+//		primary->FillRectangle(primary,0,yoffset,xoffset,screen_height-2*yoffset);
+		//right
+//		primary->FillRectangle(primary,screen_width-xoffset-1,yoffset,xoffset,screen_height-2*yoffset);
+		
+                DFBCHECK (primary->StretchBlit(primary,frame,NULL,&rect));
+		blitperformed=1;
+    		vo_draw_text(screen_width, screen_height, draw_alpha);
+        } else {
+#endif	
 	vo_draw_text(in_width, in_height, draw_alpha);
+#ifdef FLIPPING
+	}
+#endif	
 }
 
 static void flip_page(void)
@@ -1287,7 +1523,11 @@ static void flip_page(void)
 	    framelocked=0;
 	};
 #endif
-        if (stretch) {
+        if (stretch 
+#ifdef FLIPPING
+	&& (!blitperformed)
+#endif
+	) {
         	DFBRectangle rect;
         	rect.x=xoffset;
 	        rect.y=yoffset;
@@ -1295,8 +1535,14 @@ static void flip_page(void)
 	        rect.h=out_height;
 
                 DFBCHECK (primary->StretchBlit(primary,frame,NULL,&rect));
+#ifdef FLIPPING
+		blitperformed=0;
+#endif
                 }
         else    {
+#ifdef FLIPPING
+	 if (!flipping) {
+#endif
 #ifdef HAVE_DIRECTFB099
 		if (!memcpyBitBlt) {
 #endif
@@ -1341,8 +1587,25 @@ static void flip_page(void)
 	            primary->Unlock(primary);
 		};
 #endif		
+#ifdef FLIPPING
                 };
-//      DFBCHECK (primary->Flip (primary, NULL, DSFLIP_WAITFORSYNC));
+#endif		
+        };
+#ifdef FLIPPING
+    if (flipping) { 
+	if (videolayeractive && wait_vsync_after_flip) {
+	    DFBCHECK (primary->Flip (primary, NULL, /*DSFLIP_WAITFORSYNC*/0));
+	    /* workabout for videolayer
+	    flip will take place on next vsync, but pointers are updated instanlty ->
+	    -> decoding goes into "new" buffer which is still displayed ->
+	    -> so wait for vsync to be safe (and have surfaces REALLY flipped)
+	    */
+	    dfb->WaitForSync(dfb); 
+	} else {
+    	    DFBCHECK (primary->Flip (primary, NULL, DSFLIP_WAITFORSYNC));
+	};
+    };
+#endif    
 }
 
 static void uninit(void)
@@ -1352,9 +1615,9 @@ static void uninit(void)
    * (Release)
    */
   if (verbose ) printf("DirectFB: Release buffer\n");
-  buffer->Release (buffer);
+  if (buffer) buffer->Release (buffer);
   if (verbose ) printf("DirectFB: Release keyboard\n");
-  keyboard->Release (keyboard);
+  if (keyboard) keyboard->Release (keyboard);
   if (frameallocated) {
     if (verbose ) printf("DirectFB: Release frame\n");
     frame->Release (frame);
@@ -1467,8 +1730,9 @@ static uint32_t get_image(mp_image_t *mpi){
 //    printf("DirectFB: get_image() called\n");
 
 //    now we are always in system memory (in this version - mybe will change in future)
-//    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
-
+#ifdef FLIPPING
+    if((mpi->flags&MP_IMGFLAG_READABLE) && invram) return VO_FALSE; // slow video ram
+#endif
 //    printf("width=%d vs. pitch=%d, flags=0x%X  \n",mpi->width,pitch,mpi->flags);
     if((mpi->width==pitch/frame_pixel_size) ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))){
