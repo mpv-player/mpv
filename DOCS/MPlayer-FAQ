@@ -220,3 +220,6 @@ A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
 
 Q: I have problems with icewm and fullscreen xv mode..
 A: Known problem, icewm sucks.
+
+Q: But it works with aviplay/etc !
+A: So what?

@@ -4,8 +4,8 @@ http://mplayer.sourceforge.net
 
 Röviden:
 ~~~~~~~~
-Az MPlayer egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb mpeg,
-avi és asf file-t, valamint felsorakoztat jónéhány nativ és Win32 codecet.
+Az MPlayer egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb MPEG,
+AVI és ASF file-t, valamint felsorakoztat jónéhány nativ és Win32 codecet.
 Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási tulajdonsága az
 MPlayernek a megjelenítési módok széles választéka. Mûködik X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt SDL-lel is (beleértve ezáltal az
@@ -22,7 +22,7 @@ Hogy mi ebben a különleges? Nos, mûködik, legalábbis nekem :)
 Nagyon sok lejátszót próbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
 VideoLAN,xine,xanim,avifile,xmmp), de mindnek ugyanazok a problémái.
 Többnyire a különleges file-okkal, vagy a hang/kép szinkronnal. Legtöbbjük
-képtelen mind mpeg1, mpeg2 ÉS avi (DivX) lejátszásra. Sokuknak gondjuk van
+képtelen mind MPEG1, MPEG2 ÉS AVI (DivX) lejátszásra. Sokuknak gondjuk van
 a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
 
 - mpg12play v0.1-v0.3:
@@ -57,7 +57,7 @@ VCD-nél), és lejátszik minden olyan hibás AVI-t, amit a csodás windows
 media player nem. Még az index chunk nélküli AVI-k is lejátszhatók, sõt
 az indexet fel is lehet építeni a '-idx' opcióval, így seekelni is lehet
 bennük! Amint az látszik, a stabilitás és a minõség a legfontosabbak
-a számomra, de a sebesség se éppen alacsony.
+a számomra, de a sebesség se semmi.
 
 És a grafikus felület?
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -82,14 +82,14 @@ Támogatott audio és video codecek:
 ***                a teljes listához                     ***
 
 A legfontosabb video codecek:
-- mpeg1 (VCD) és mpeg2 (DVD) video
+- MPEG1 (VCD) és MPEG2 (DVD) video
 - DivX, OpenDivX és más MPEG4 variánsok
 - Windows Media Video 7 (WMV1) ami .wmv file-okban van
 - Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
 - MJPEG, ASV2 és más hardware formátumok
 
 A legfontosabb audio codecek:
-- mpeg layer 2, és layer 3 (MP3) audio
+- MPEG layer 2, és layer 3 (MP3) audio
 - AC3 dolby audio
 - VoxWare audio
 - alaw, msgsm, pcm és más régi formátumok
@@ -103,7 +103,8 @@ Támogatott video outputok:
 Általános:
 - x11:  X11 az SHM kiterjesztéssel
 - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
-- gl:   OpenGL renderelõ, csak Utah-GLX-szel mûködik!
+- gl:   OpenGL renderelõ, csak Utah-GLX-szel mûködik, vagy Matrox es
+        X >= 4.0.3 kombinacioval! (mas DRI vagy nVidia nem tamogatott!)
 - dga:  X11 a DGA kiterjesztéssel
 - fsdga:X11 a DGA kiterjesztéssel + teljesképernyõs render (csak 24/32bpp
         és MPEG!)
@@ -123,7 +124,7 @@ Kártyaspecifikus:
 Egyéb:
 - png:  output PNG file-okba (-z kapcsoló a tömörítés mértékét állítja)
 - pgm:  output PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)
-- md5:  MD5sum támogatás (mpeg konformancia tesztekhez)
+- md5:  MD5sum támogatás (MPEG konformancia tesztekhez)
 - odivx:OpenDivX AVI file output (-br a bitrate-et állítja)
 - null: output a nagy semmibe (sebességtesztekhez)
 
@@ -192,10 +193,10 @@ Ez a tulajdonság néhány külsõ programmal együtt kibõvíti a lehetõségeinket.
 Például egy épp most letöltött divx film megnézése:
 	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
 
-Egy asf grabberrel vagy HTTP dump programmal a netrõl is lejátszhatsz.
+Egy ASF grabberrel vagy HTTP dump programmal a netrõl is lejátszhatsz.
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-(késõbb majd lesz közvetlen asf/http/ftp olvasás, kereséssel stb, de egyelõre
+(késõbb majd lesz közvetlen ASF/http/ftp olvasás, kereséssel stb, de egyelõre
 ez van)
 
 TV output:
@@ -258,12 +259,13 @@ Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
 
 Licensz:
 ~~~~~~~~
-Mivel MPlayer rengeteg kódot tartalmaz más projectekbõl, ez még nincs
-eldöntve. A GPL-re hajtunk (bár igen nehéz lesz).
+Az MPlayer tartalmaz jonehany mas projectekbol atvett kodot, de jelenleg az
+OpenDivX kivetelevel minden a General Public License (GPL) version 2 vagy
+kesobbi ala tartozik.
+Lasd DOCS/COPYING
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
 Csak a saját felelõsségedre használd! Hibák és pontatlanságok elõfordulhatnak,
-amik kárt tesznek a rendszeredben és/vagy a szemedben. Óvatosan járj el, mert
-semmiféle felelõsséget nem vállalunk!
-
+amik kárt tesznek a rendszeredben és/vagy a szemedben/fuledben. Óvatosan járj
+el, mert semmiféle felelõsséget nem vállalunk!

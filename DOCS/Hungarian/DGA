@@ -28,7 +28,7 @@ Tartalom
  memoriaba. Szaknyelven szolva ez a framebuffer memorianak a processz
  teruletere torteno lapozasaval tortenik. Ezt a kernel csak root jogosultsaggal
  engedi. Ez tortenhet root-kent torteno bejelentkezessel, vagy a suid bit
- beallitasaval az mplayer programon.
+ beallitasaval az mplayer programon (NEM ajanlott!).
 
  A DGA-nak ket verzioja van: a DGA1-et az XFree 3.X.X hasznalja, a DGA2
  pedig az XFree 4.0.1 ota letezik.
@@ -75,12 +75,14 @@ A. Nehany modeline
 ~~~~~~~~~~~~~~~~~~
 Section "Modes"
   Identifier    "Modes[0]"
-  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
-  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
-  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
   # 800x600 @ 60 Hz, 37.8 kHz hsync
   Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
+  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
+  Modeline 	"400x300"     20     400  416  480  528   300  301  303  314 Doublescan
   Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+  Modeline	"320x240"     12.588  320 336 384 400 240 245 246 262 Doublescan
 EndSection
 
 

@@ -35,7 +35,8 @@ Gábor Lénárt (LGB): <lgb@lgb.hu>
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer
-- documentation hungarian translation
+- hungarian translation of documentation
+- second webpage design&gfx
 - webpage maintainer
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
@@ -52,7 +53,7 @@ László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 
 Gyula László (Chass, Tégla): <chass-@freemail.hu>
 - first fonts (mp_font1.zip)
-- new homepage design&gfx
+- third (current) homepage design&gfx
 
 Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 - SVGAlib support in libvo
@@ -69,7 +70,7 @@ Felix Bünemann: <atmosfear@users.sourceforge.net>
 - PNG file output support in libvo
 
 TeLeNiEkO: <telenieko@telenieko.com>
-- spanish translations (see DOCS/Spanish/*)
+- spanish translation of documentation
 
 Michael Graffam: <mgraffam@idsi.net>
 - XF86VidMode support to vo_x11 and vo_dga
@@ -83,7 +84,7 @@ Nick Kurshev: <nickols_k@mail.ru>
 - memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
 - further 3DNow! optimizations into mp3lib and libac3
-- russian DOCS translation
+- russian translation of documentation
 
 German Gomez Garcia: <german@piraos.com>
 - DVD .ifo parser and chapter selection [not yet in the main trunk]

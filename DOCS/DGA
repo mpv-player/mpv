@@ -23,17 +23,18 @@ Contents
 2. What is DGA?
 ~~~~~~~~~~~~~~~
 
- DGA is short for Direct Graphics Access and is a mean for a program to
- bypass the X-Server and directly modifying the framebuffer memory. 
+ DGA is short for Direct Graphics Access and is a method for a program to
+ bypass the X-Server and directly modify the framebuffer memory. 
  Technically spoken this happens by mapping the framebuffer memory into
- the memory range of your process. This is just allowed by the kernel
+ the memory range of your process. This is only allowed by the kernel
  if you have superuser privileges. You can get these either by logging in 
- as root or by setting the suid bit on the mplayer executable.
+ as root or by setting the suid bit on the mplayer executable (NOT
+ recommended!).
 
- There are two versions of DGA: DGA1 is used by XFree 3.X.X and DGA2 was 
+ There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was 
  introduced with XFree 4.0.1.
 
- DGA1 just provides direct framebuffer access as described above. For 
+ DGA1 provides only the direct framebuffer access as described above. For 
  switching the resolution of the video signal you have to rely on the 
  XVidMode extension.
 
@@ -57,12 +58,12 @@ Contents
  /etc/X11/XF86Config (/etc/X11/XF86Config-4 for XFree 4.0.X respectively).
  Those are defined by so-called modelines and depend on the capabilites
  of your video hardware. The XServer scans this config file on startup and
- disables those modelines not suitable for your hardware. You can find 
+ disables the modelines not suitable for your hardware. You can find 
  out which modes survive with the X11 log file. It can be found at:
  /var/log/XFree86.0.log
  See appendix A for some sample modeline definitions.
 
-4. DGA & MPLayer
+4. DGA & MPlayer
 ~~~~~~~~~~~~~~~~
 
  DGA is used in two places with MPlayer: The SDL driver can be made to make
@@ -107,12 +108,15 @@ A. Sample modelines
 ~~~~~~~~~~~~~~~~~~~
 Section "Modes"
   Identifier    "Modes[0]"
-  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
-  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
-  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
   # 800x600 @ 60 Hz, 37.8 kHz hsync
   Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
+  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
+  Modeline 	"400x300"     20     400  416  480  528   300  301  303  314 Doublescan
   Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+  Modeline	"320x240"     12.588  320 336 384 400 240 245 246 262 Doublescan
+
 EndSection
 
 

@@ -7,7 +7,9 @@ Aureal Vortex 2:
 			OSS	: OK
 			ALSA	: no driver
 			Max kHz : 48
-			Driver	: aureal.sourceforge.net (not OK with slow CPU)
+			Driver	: aureal.sourceforge.net
+	Driver2 : http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2
+	(buffer size increased to 64k)
 
 GUS PnP:
 			OSS/Free: no driver
