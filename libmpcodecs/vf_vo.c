@@ -40,7 +40,7 @@ static int config(struct vf_instance_s* vf,
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
   }
 
-    if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt,NULL))
+    if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
     ++vo_config_count;
     return 1;
