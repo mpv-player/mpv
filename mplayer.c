@@ -2658,7 +2658,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                         d_audio->id,aid_temp);
                 // FIXME: need a bettery way to change audio stream id
                 d_audio->id=dvdsub_id=aid_temp;
-                resync_audio_stream(sh_audio);
+                if(sh_audio) resync_audio_stream(sh_audio);
         }
 
         break;
