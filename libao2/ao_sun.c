@@ -463,6 +463,20 @@ static int init(int rate,int channels,int format,int flags){
 	enable_sample_timing = realtime_samplecounter_available(audio_dev);
     }
 
+#define	AF_FILTER_TEST 0
+#if	AF_FILTER_TEST
+    /* test code to force use of the audio filter modules */
+    {
+	char *s;
+	if (s = getenv("AF_RATE"))
+	    rate = atoi(s);
+	if (s = getenv("AF_CHANNELS"))
+	    channels = atoi(s);
+	if (s = getenv("AF_BITS"))
+	    format = atoi(s) == 16 ? AFMT_S16_NE : AFMT_U8;
+    }
+#endif
+
 //    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
 //	   rate,channels,audio_out_format_name(format),format);
 
@@ -548,7 +562,7 @@ static int init(int rate,int channels,int format,int flags){
     }
 
     bytes_per_sample = channels * info.play.precision / 8;
-    byte_per_sec = bytes_per_sample * rate;
+    ao_data.bps = byte_per_sec = bytes_per_sample * rate;
     ao_data.outburst = byte_per_sec > 100000 ? 16384 : 8192;
 
 #ifdef	__not_used__
@@ -746,7 +760,7 @@ static float get_delay(){
     return (float) info.play.seek/ (float)byte_per_sec ;
 #else
     if (info.play.samples && enable_sample_timing == RTSC_ENABLED)
-	return (float)(queued_samples - info.play.samples) / (float)byte_per_sec;
+	return (float)(queued_samples - info.play.samples) / (float)ao_data.samplerate;
     else
 	return (float)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
 #endif
