@@ -38,7 +38,6 @@ struct config conf[]={
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
 	{"idx", &no_index, CONF_TYPE_FLAG, 0, 1, 0},
 	{"noidx", &no_index, CONF_TYPE_FLAG, 0, 0, 1},
-	{"v", &verbose, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nov", &verbose, CONF_TYPE_FLAG, 0, 1, 0},
+	{"v", &verbose, CONF_TYPE_INT, 0, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };

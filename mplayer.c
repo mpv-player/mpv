@@ -381,7 +381,6 @@ if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((homedir = getenv("HOME")) == NULL) {
   printf("Can't find HOME dir\n");
-  exit(1);
 } else {
   snprintf(conffile, 100, "%s/.mplayerrc", homedir);
   if (parse_config_file(conf, conffile) < 0)
