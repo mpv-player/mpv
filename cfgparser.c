@@ -22,6 +22,15 @@
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
 
+#define CONFIG_GLOBAL (1<<0)
+#define CONFIG_RUNNING (1<<1)
+
+#define SET_GLOBAL(c)  (c->flags |= CONFIG_GLOBAL)
+#define UNSET_GLOBAL(c) (c->flags &= (!CONFIG_GLOBAL))
+#define IS_GLOBAL(c) (c->flags & CONFIG_GLOBAL)
+#define SET_RUNNING(c) (c->flags |= CONFIG_RUNNING)
+#define IS_RUNNING(c) (c->flags & CONFIG_RUNNING)
+
 #define MAX_RECURSION_DEPTH	8
 
 #ifdef MP_DEBUG
@@ -248,7 +257,7 @@ m_config_new(play_tree_t* pt) {
     free(config);
     return NULL;
   }
-  config->global = 1; // We always start with global options
+  SET_GLOBAL(config); // We always start with global options
   config->pt = pt;
   return config;
 }
@@ -279,9 +288,57 @@ static int init_conf(m_config_t *config, int mode)
 	}
 #endif
 	config->parser_mode = mode;
-	config->global = 1;
 	return 1;
 }
+
+static int config_is_entry_option(m_config_t *config, char *opt, char *param) {
+  play_tree_t* entry = NULL;
+
+#ifdef MP_DEBUG
+  assert(config->pt != NULL);
+#endif
+
+  if(strcasecmp(opt,"playlist") == 0) { // We handle playlist here
+    if(!param)
+      return ERR_MISSING_PARAM;
+    entry = parse_playlist_file(param);
+  }
+
+  if(! IS_RUNNING(config)) {
+    if(strcasecmp(opt,"vcd") == 0) {
+      char* s;
+      if(!param)
+	return ERR_MISSING_PARAM;
+      s = (char*)malloc((strlen(param) + 6 + 1)*sizeof(char));
+      sprintf(s,"vcd://%s",param);
+      entry = play_tree_new();
+      play_tree_add_file(entry,s);
+      free(s);
+    } else if(strcasecmp(opt,"dvd") == 0) {
+      char* s;
+      if(!param)
+	return ERR_MISSING_PARAM;
+      s = (char*)malloc((strlen(param) + 6 + 1)*sizeof(char));
+      sprintf(s,"dvd://%s",param);
+      entry = play_tree_new();
+      play_tree_add_file(entry,s);
+      free(s);
+    }
+  }
+
+  if(entry) {
+    if(config->last_entry)
+      play_tree_append_entry(config->last_entry,entry);
+    else
+      play_tree_set_child(config->pt,entry);
+    config->last_entry = entry;
+    if(config->parser_mode == COMMAND_LINE)
+      UNSET_GLOBAL(config);
+    return 1;
+  } else
+    return 0;
+}
+
 
 
 static int config_read_option(m_config_t *config,config_t** conf_list, char *opt, char *param)
@@ -315,7 +372,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 		}
 	}
 	if (config->parser_mode == CONFIG_FILE)
-		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option:\n");
+	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option: %s\n",opt);
 	ret = ERR_NOT_AN_OPTION;
 	goto out;	
 	option_found :
@@ -332,30 +389,12 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
-	if(strcasecmp(opt,"playlist") == 0) { // We handle playlist here
-	  play_tree_t* list;
-#ifdef MP_DEBUG
-	  assert(config->pt != NULL);
-#endif
-	  if(!param) {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "playlist option need a filename\n");
-	    ret = ERR_MISSING_PARAM;
-	    goto out;
-	  }
-	  list = parse_playlist_file(param);
-	  if(list) {
-	    if(config->last_entry) {
-	      play_tree_append_entry(config->last_entry,list);
-	    }
-	    else
-	      play_tree_set_child(config->pt,list);
-	    config->last_entry = list;
-	  }
-	  if(config->parser_mode == COMMAND_LINE)
-	    config->global = 0;
-	  return 1;	
-	}
-	if(config->global == 0 && ! (conf[i].flags & CONF_GLOBAL) )
+	ret = config_is_entry_option(config,opt,param);
+	if(ret != 0)
+	  return ret;
+	else
+	  ret = -1;
+	if(! IS_RUNNING(config) && ! IS_GLOBAL(config) && ! (conf[i].flags & CONF_GLOBAL) )
 	  m_config_push(config);
 	if( !(conf[i].flags & CONF_NOSAVE) && ! (conf[i].flags & CONF_GLOBAL) )
 	  m_config_save_option(config,&conf[i],opt,param);
@@ -508,19 +547,21 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			config_t *subconf;
 			config_t *sublist[] = { NULL , NULL };
 			char *token;
+			char *p;
 
 			if (param == NULL)
 				goto err_missing_param;
 
 			subparam = malloc(strlen(param)+1);
 			subopt = malloc(strlen(param)+1);
+			p = strdup(param); // In case that param is a static string (cf man strtok)
 
 			subconf = conf[i].p;
 			sublist[0] = subconf;
 			for (subconf_optnr = 0; subconf[subconf_optnr].name != NULL; subconf_optnr++)
 			    /* NOTHING */;
 
-			token = strtok(param, (char *)&(":"));
+			token = strtok(p, (char *)&(":"));
 			while(token)
 			{
 			    int sscanf_ret;
@@ -552,6 +593,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 
 			free(subparam);
 			free(subopt);
+			free(p);
 			ret = 1;
 			break;
 		    }
@@ -563,7 +605,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			break;
 	}
 out:
-	if(ret >= 0 && config->global == 0 && ! (conf[i].flags & CONF_GLOBAL)) {
+	if(ret >= 0 && ! IS_RUNNING(config) && ! IS_GLOBAL(config) && ! (conf[i].flags & CONF_GLOBAL)) {
 	  play_tree_t* dest = config->last_entry ? config->last_entry : config->last_parent;
 #ifdef MP_DEBUG
 	  assert(dest != NULL);
@@ -585,6 +627,7 @@ int m_config_set_option(m_config_t *config,char *opt, char *param) {
 
 #ifdef MP_DEBUG
   assert(config != NULL);
+  assert(config->opt_list != NULL);
   assert(opt != NULL);
 #endif
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting option %s=%s\n",opt,param);
@@ -825,7 +868,7 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		if((opt[0] == '{') && (opt[1] == '\0'))
 		  {
 		    play_tree_t* entry = play_tree_new();
-		    config->global = 0;		    
+		    UNSET_GLOBAL(config);		    
 		    if(config->last_entry == NULL) {
 		      play_tree_set_child(config->last_parent,entry);
 		    } else {
@@ -874,7 +917,7 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		    mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Adding file %s\n",argv[i]);
 		    play_tree_add_file(entry,argv[i]);
 		    /* opt is not an option -> treat it as a filename */
-		    config->global = 0; // We start entry specific options
+		    UNSET_GLOBAL(config); // We start entry specific options
 		    if(config->last_entry == NULL)
 		      play_tree_set_child(config->last_parent,entry);		      
 		    else 
@@ -886,7 +929,8 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 	--config->recursion_depth;
 	if(config->last_parent != config->pt)
 	  mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Missing }- ?\n");
-	config->global = 1;
+	UNSET_GLOBAL(config);
+	SET_RUNNING(config);
 	return 1; 
 #if 0
 err_out_mem:
@@ -894,7 +938,6 @@ err_out_mem:
 #endif
 err_out:
 	--config->recursion_depth;
-	config->global = 1;
 	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "command line: %s\n", argv[i]);
 	return -1;
 }
@@ -977,7 +1020,7 @@ m_config_set_flag(m_config_t *config, char* opt, int max) {
   config_t *conf;
   conf = m_config_get_option(config,opt);
   if(!conf) return;
-  if(conf->type != CONF_TYPE_FLAG) return 0;
+  if(conf->type != CONF_TYPE_FLAG) return;
   if(max) AS_INT(conf) = conf->max;
   else AS_INT(conf) = conf->min;
 }

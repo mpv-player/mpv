@@ -14,9 +14,6 @@
 static int
 play_tree_is_valid(play_tree_t* pt);
 
-static void
-play_tree_iter_set_param(play_tree_iter_t* iter,char* opt,char* val);
-
 play_tree_t*
 play_tree_new(void) {
   play_tree_t* r = (play_tree_t*)calloc(1,sizeof(play_tree_t));
@@ -264,13 +261,13 @@ play_tree_add_file(play_tree_t* pt,char* file) {
   e = pt->files[n] = strdup(file);
   pt->files[n+1] = NULL;
 
-  if(strncasecmp(e,"vcd://",6) == 0 && strlen(&e[6]) > 0) {
+  if(strncasecmp(e,"vcd://",6) == 0) {
     pt->entry_type = PLAY_TREE_ENTRY_VCD;
     memmove(e,e + 6,strlen(&e[6])+1);
-  } else if(strncasecmp(e,"dvd://",6) == 0 && strlen(&e[6]) > 0) {
+  } else if(strncasecmp(e,"dvd://",6) == 0) {
     pt->entry_type = PLAY_TREE_ENTRY_DVD;
     memmove(e,&e[6],strlen(&e[6])+1);
-  } else if(strncasecmp(e,"tv://",5) == 0 && strlen(&e[5]) > 0) {
+  } else if(strncasecmp(e,"tv://",5) == 0) {
     pt->entry_type = PLAY_TREE_ENTRY_TV;
     memmove(e,&e[5],strlen(&e[5])+1);
   } else
@@ -385,7 +382,7 @@ play_tree_unset_param(play_tree_t* pt, char* name) {
   return 1;
 }
 
-static int 
+static void 
 play_tree_iter_push_params(play_tree_iter_t* iter) {
   int n;
   play_tree_t* pt;
@@ -397,10 +394,14 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
 
   pt = iter->tree;
 
-  if(pt->params == NULL)
-    return 0;
-
+  // We always push a config because we can set some option
+  // while playing
   m_config_push(iter->config);
+
+  if(pt->params == NULL)
+    return;
+
+  
   for(n = 0; pt->params[n].name != NULL ; n++) {
     if(m_config_set_option(iter->config,pt->params[n].name,pt->params[n].value) < 0) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while setting option '%s' with value '%s'\n",
@@ -410,21 +411,7 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
 
   if(!pt->child)
     iter->entry_pushed = 1;
-  return 1;
-}
-
-static void
-play_tree_iter_pop_params(play_tree_iter_t* iter) {
-  
-#ifdef MP_DEBUG
-  assert(iter != NULL);
-  assert(iter->config != NULL);
-#endif
-
-  if(iter->tree->params == NULL)
-    return;
-  iter->entry_pushed = 0;
-  m_config_pop(iter->config);
+  return;
 }
 
 play_tree_iter_t*
@@ -483,8 +470,10 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
     return play_tree_iter_step(iter,0,with_nodes);
   }
 
-  if(iter->config && iter->entry_pushed)
-    play_tree_iter_pop_params(iter);
+  if(iter->config && iter->entry_pushed > 0) {
+    iter->entry_pushed--;
+    m_config_pop(iter->config);
+  }
 
   iter->file = -1;
   if( d > 0 )
@@ -542,8 +531,10 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
     /* NOTHING */;
   iter->num_files = d;
 
-  if(iter->config)
+  if(iter->config) {
     play_tree_iter_push_params(iter);
+    iter->entry_pushed++;
+  }
 
   return PLAY_TREE_ITER_ENTRY;
 
@@ -602,7 +593,7 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
   // Pop subtree params
   if(iter->config)
-    play_tree_iter_pop_params(iter);
+    m_config_pop(iter->config);
 
   return play_tree_iter_step(iter,d,with_nodes);
 }
@@ -644,6 +635,9 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
   return play_tree_iter_step(iter,0,with_nodes);
 }
 
+// This is used as a file name for vcd/tv/dvd
+char playtree_ret_filename[256];
+
 char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
   char* entry;
@@ -677,17 +671,38 @@ play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
 
   switch(iter->tree->entry_type) {
   case PLAY_TREE_ENTRY_DVD :
-    play_tree_iter_set_param(iter,"dvd",entry);
-    break;
+    if(strlen(entry) == 0) entry = "1";
+    if(iter->config)
+      m_config_set_option(iter->config,"dvd",entry);
+    snprintf(playtree_ret_filename,255,"DVD title %s",entry);
+    return playtree_ret_filename;
   case PLAY_TREE_ENTRY_VCD :
-    play_tree_iter_set_param(iter,"vcd",entry);
-    break;
+    if(strlen(entry) == 0) entry = "1";
+    if(iter->config)
+      m_config_set_option(iter->config,"vcd",entry);
+    snprintf(playtree_ret_filename,255,"VCD track %s",entry);
+    return playtree_ret_filename;
   case PLAY_TREE_ENTRY_TV : 
     {
-      char* val = (char*)malloc(strlen(entry) + 11 + 1);
-      sprintf(val,"on:channel=%s",entry);
-      play_tree_iter_set_param(iter,"tv",val);
-      break;
+      if(strlen(entry) != 0) {
+	char *s,*e, *val = (char*)malloc(strlen(entry) + 11 + 1);
+	sprintf(val,"on:channel=%s",entry);
+	if(iter->config)
+	  m_config_set_option(iter->config,"tv",val);
+	s = playtree_ret_filename + sprintf(playtree_ret_filename,"TV channel ");
+	e = strchr(entry,':');
+	if(!e) strncpy(s,entry,255-11);
+	else {
+	  if(entry-e > 255) e = entry+255;
+	  strncpy(s,entry,val-e);
+	  s[val-e] = '\0';
+	}
+	return playtree_ret_filename;
+      } else {
+	if(iter->config)
+	  m_config_set_option(iter->config,"tv","on");
+	return "TV";
+      }
     }
   }
 
@@ -757,26 +772,4 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
   return iter;
 }
 
-static void
-play_tree_iter_set_param(play_tree_iter_t* iter,char* opt,char* val) {
-  int push = 0;
-  play_tree_t* pt;
-#ifdef MP_DEBUG
-  assert(iter != NULL);
-  assert(iter->tree != NULL);
-#endif
-
-  pt = iter->tree;
-  
-  if(iter->tree->params == NULL)
-    push = 1;
-
-  play_tree_set_param(iter->tree,opt,val);
-
-  if(push)
-    play_tree_iter_push_params(iter);
-  else if(iter->config)
-    m_config_set_option(iter->config,opt,val);
-
-}
 

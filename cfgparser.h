@@ -56,7 +56,7 @@ struct m_config {
   config_save_t** config_stack;
   int cs_level;
   int parser_mode;  /* COMMAND_LINE or CONFIG_FILE */
-  int global; // Are we parsing global option
+  int flags;
   play_tree_t* pt; // play tree we use for playlist option, etc
   play_tree_t* last_entry; // last added entry
   play_tree_t* last_parent; // if last_entry is NULL we must create child of this
