@@ -165,7 +165,8 @@ inline static void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
   mp_image_t *dmpi = NULL;
 
-  if(vf->priv->current->show) {
+  if(vf->priv->current->show 
+  || (vf->priv->current->parent && vf->priv->current->parent->show)) {
   // Close all menu who requested it
   while(vf->priv->current->cl && vf->priv->current != vf->priv->root) {
     menu_t* m = vf->priv->current;
