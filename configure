@@ -2269,7 +2269,7 @@ VO2 = $_vo2
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
-X_LIBS = $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_z
+X_LIBS = $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
 
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIBS = $_ld_lirc
