@@ -44,6 +44,10 @@ char *network_username=NULL;
 char *network_password=NULL;
 int   network_bandwidth=0;
 
+/* IPv6 options */
+int   network_prefer_ipv4 = 0;
+int   network_ipv4_only_proxy = 0;
+
 
 static struct {
 	char *mime_type;
@@ -151,49 +155,112 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 }
 #endif
 
-// Connect to a server using a TCP connection
+
+// Converts an address family constant to a string
+
+char *af2String(int af) {
+	switch (af) {
+		case AF_INET:	return "AF_INET";
+		
+#ifdef HAVE_AF_INET6
+		case AF_INET6:	return "AF_INET6";
+#endif
+		default:	return "Unknown address family!";
+	}
+}
+
+
+
+// Connect to a server using a TCP connection, with specified address family
 // return -2 for fatal error, like unable to resolve name, connection timeout...
 // return -1 is unable to connect to a particular port
+
 int
-connect2Server(char *host, int port) {
+connect2Server_with_af(char *host, int port, int af) {
 	int socket_server_fd;
 	int err, err_len;
 	int ret,count = 0;
 	fd_set set;
 	struct timeval tv;
-	struct sockaddr_in server_address;
+	union {
+		struct sockaddr_in four;
+#ifdef HAVE_AF_INET6
+		struct sockaddr_in6 six;
+#endif
+	} server_address;
+	size_t server_address_size;
+	void *our_s_addr;	// Pointer to sin_addr or sin6_addr
 	struct hostent *hp=NULL;
-
-	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	char buf[255];
+	
+	socket_server_fd = socket(af, SOCK_STREAM, 0);
+	
+	
 	if( socket_server_fd==-1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create %s socket:\n", af2String(af));
 		return -2;
 	}
 
-	if( isalpha(host[0]) ) {
-		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s ...\n", host );
+	switch (af) {
+		case AF_INET:  our_s_addr = (void *) &server_address.four.sin_addr; break;
+#ifdef HAVE_AF_INET6
+		case AF_INET6: our_s_addr = (void *) &server_address.six.sin6_addr; break;
+#endif
+		default:
+			mp_msg(MSGT_NETWORK,MSGL_ERR, "Unknown address family %d:\n", af);
+			return -2;
+	}
+	
+	
+	bzero(&server_address, sizeof(server_address));
+	
+#ifdef USE_ATON
+	if (inet_aton(host, our_s_addr)!=1)
+#else
+	if (inet_pton(af, host, our_s_addr)!=1)
+#endif
+	{
+		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s for %s...\n", host, af2String(af));
+		
+#ifdef HAVE_GETHOSTBYNAME2
+		hp=(struct hostent*)gethostbyname2( host, af );
+#else
 		hp=(struct hostent*)gethostbyname( host );
+#endif
 		if( hp==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", host);
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't resolve name for %s: %s\n", af2String(af), host);
 			return -2;
 		}
-		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
-	} else {
-		inet_pton(AF_INET, host, &server_address.sin_addr);
+		
+		memcpy( our_s_addr, (void*)hp->h_addr, hp->h_length );
 	}
-	server_address.sin_family=AF_INET;
-	server_address.sin_port=htons(port);
 	
-	// Turn the socket as non blocking so we can timeout on the connection
-	if( isalpha(host[0]) && hp!=NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%d.%d.%d.%d]:%d ...\n", host, (hp->h_addr_list[0][0])&0xff, (hp->h_addr_list[0][1])&0xff, (hp->h_addr_list[0][2])&0xff, (hp->h_addr_list[0][3])&0xff, port );
-	} else {
-		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s:%d ...\n", host, port );
+	switch (af) {
+		case AF_INET:
+			server_address.four.sin_family=af;
+			server_address.four.sin_port=htons(port);			
+			server_address_size = sizeof(server_address.four);
+			break;
+#ifdef HAVE_AF_INET6		
+		case AF_INET6:
+			server_address.six.sin6_family=af;
+			server_address.six.sin6_port=htons(port);
+			server_address_size = sizeof(server_address.six);
+			break;
+#endif
+		default:
+			mp_msg(MSGT_NETWORK,MSGL_ERR, "Unknown address family %d:\n", af);
+			return -2;
 	}
+
+	inet_ntop(af, our_s_addr, buf, 255);			
+	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
+
+	// Turn the socket as non blocking so we can timeout on the connection
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
-	if( connect( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
+	if( connect( socket_server_fd, (struct sockaddr*)&server_address, server_address_size )==-1 ) {
 		if( errno!=EINPROGRESS ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server with %s\n", af2String(af));
 			close(socket_server_fd);
 			return -1;
 		}
@@ -233,7 +300,32 @@ connect2Server(char *host, int port) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Connect error : %s\n",strerror(err));
 		return -1;
 	}
+	
 	return socket_server_fd;
+}
+
+// Connect to a server using a TCP connection
+// return -2 for fatal error, like unable to resolve name, connection timeout...
+// return -1 is unable to connect to a particular port
+
+
+int
+connect2Server(char *host, int  port) {
+#ifdef HAVE_AF_INET6
+	int r;
+	int s = -2;
+
+	r = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET:AF_INET6);	
+	if (r > -1) return r;
+
+	s = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET6:AF_INET);
+	if (s == -2) return r;
+	return s;
+#else	
+	return connect2Server_with_af(host, port, AF_INET);
+#endif
+
+	
 }
 
 URL_t*
@@ -260,6 +352,14 @@ check4proxies( URL_t *url ) {
 				mp_msg(MSGT_NETWORK,MSGL_WARN,"Invalid proxy setting...Trying without proxy.\n");
 				return url_out;
 			}
+			
+#ifdef HAVE_AF_INET6
+			if (network_ipv4_only_proxy && (gethostbyname(url->hostname)==NULL)) {
+				mp_msg(MSGT_NETWORK,MSGL_WARN,
+					"Could not find resolve remote hostname for AF_INET. Trying without proxy.\n");
+				return url_out;
+			}
+#endif
 
 			mp_msg(MSGT_NETWORK,MSGL_V,"Using HTTP proxy: %s\n", proxy_url->url );
 			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port

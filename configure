@@ -168,7 +168,9 @@ Optional features:
   --disable-sortsub      Disable subtitles sorting [enabled]
   --enable-fribidi       Enable using the FriBiDi libs [disabled]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
-
+  --disable-inet6        Disable IPv6 support [autodetect]
+  --disable-gethostbyname2
+                         gethostbyname() is not provided by the c library [autodetect]
 Codecs:
   --enable-gif		 enable gif support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
@@ -1075,7 +1077,8 @@ _sortsub=yes
 _freetypeconfig='freetype-config'
 _fribidi=no
 _fribidiconfig='fribidi-config'
-
+_inet6=auto
+_gethostbyname2=auto
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -1264,6 +1267,12 @@ for ac_option do
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
+
+  --enable-inet6)	_inet6=yes	;;
+  --disable-inet6)	_inet6=no	;;
+
+  --enable-gethostbyname2)	_gethostbyname2=yes	;;
+  --disable-gethostbyname2)	_gethostbyname2=no	;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
@@ -4739,6 +4748,48 @@ else
 fi
 echores "$_xmms"
 
+
+echocheck "inet6"
+if test "$_inet6" = auto ; then
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+int main(void) { socket(AF_INET6, SOCK_STREAM, AF_INET6); }
+EOF
+  _inet6=no
+  if cc_check ; then
+    _inet6=yes
+  fi
+fi
+if test "$_inet6" = yes ; then
+  _def_inet6='#define HAVE_AF_INET6 1'
+else
+  _def_inet6='#undef HAVE_AF_INET6'
+fi
+echores "$_inet6"
+
+
+echocheck "gethostbyname2"
+if test "$_gethostbyname2" = auto ; then
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main(void) { gethostbyname2("", AF_INET); }
+EOF
+  _gethostbyname2=no
+  if cc_check ; then
+    _gethostbyname2=yes
+  fi
+fi
+
+if test "$_inet6" = yes ; then
+  _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
+else
+  _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
+fi
+echores "$_gethostbyname2"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -5536,6 +5587,12 @@ $_def_sortsub
 /* XMMS input plugin support */
 $_def_xmms
 #define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
+
+/* enables inet6 support */
+$_def_inet6
+
+/* do we have gethostbyname2? */
+$_def_gethostbyname2
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)

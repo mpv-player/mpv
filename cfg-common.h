@@ -40,10 +40,21 @@
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	
+	{"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
+	{"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
+
+#ifdef HAVE_AF_INET6
+	{"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+#else
+	{"prefer-ipv6", "MPlayer was compiled without IPv6 support\n", CONF_TYPE_PRINT, 0, 0, NULL},
+#endif
+
 #else
 	{"user", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"bandwidth", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+
 	
 // ------------------------- demuxer options --------------------
 
@@ -237,6 +248,10 @@ extern int audio_output_channels;
 extern char *network_username;
 extern char *network_password;
 extern int   network_bandwidth;
+
+extern int network_prefer_ipv4;
+extern int network_ipv4_only_proxy;
+
 #endif
 
 /* defined in libmpdemux: */
