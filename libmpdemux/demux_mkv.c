@@ -2265,6 +2265,12 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
               mkv_d->clear_subs_at[mkv_d->subs.lines++]
                 = timecode + block_duration;
               *ptr2 = '\0';
+              if (mkv_d->subs.lines >= SUB_MAX_TEXT)
+                {
+                  mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many "
+                          "sublines to render, skipping\n");
+                  return;
+                }
               ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
               ptr1 += 2;
             }
@@ -2282,11 +2288,15 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
             {
               if (state == 0)  /* normal char --> newline */
                 {
-                  if (mkv_d->subs.lines == SUB_MAX_TEXT - 1)
-                    break;
                   *ptr2 = '\0';
                   mkv_d->clear_subs_at[mkv_d->subs.lines++]
                     = timecode + block_duration;
+                  if (mkv_d->subs.lines >= SUB_MAX_TEXT)
+                    {
+                      mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many "
+                              "sublines to render, skipping\n");
+                      return;
+                    }
                   ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
                   state = 1;
                 }
