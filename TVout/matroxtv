@@ -1,8 +1,9 @@
 #!/bin/sh
 #
 # Gabucino - no warranty, this script can BOOM your TV and/or monitor, or else.
-# v2.0
-# This script has been tested and configured on a Matrox G400DH and a PAL TV.
+# v2.5
+# This script has been tested and configured on a Matrox G400DH, a PAL TV,
+# a 14" analog and a 15" digital monitor.
 #
 # INSTALLATION:
 #	1. READ MPLAYER'S TVOUT DOCUMENTATION!
@@ -47,24 +48,60 @@ function TVdefaultmode {
 }
 
 function SetTVstandard {
-	matroxset 1		# PAL
+	matroxset 128		# PAL
 	# matroxset 2		# NTSC
 }
 
 function SetMonitorMode {
-	matroxset 128
+        matroxset 128
 }
 
-function nomapping {
-       con2fb /dev/fb0 /dev/tty1
-       con2fb /dev/fb0 /dev/tty2
+function mappingreset {
+	matroxset -f /dev/fb0 -m 0
+	matroxset -f /dev/fb1 -m 0
+	matroxset -f /dev/fb0 -m 1
+	con2fb /dev/fb0 /dev/tty1
+	con2fb /dev/fb0 /dev/tty2
+	SetMonitorMode
+	defaultmode
 }
-	
+
+function warn {
+	clear
+	echo "Display routing is about to come! Due to certain limitations"
+	echo "(kernel? driver?), you MUST switch ttys a few times for"
+	echo "these changes to take effect!!!!! After pressing a key now."
+	echo
+	echo "I.e.: press alt-f1, alt-f2, alt-f3, then back to alt-f1"
+	echo
+	echo "NOTE: you won't automatically get consoles on the new display."
+	echo "      To achieve that, use the con2fb utility:"
+	echo "        $ con2fb /dev/fb1 /dev/tty1"
+	echo "      (and don't forget to change ttys a few times...)"
+	echo
+	echo
+	echo "If you read this, PRESS ANY KEY TO CONTINUE"
+	read
+}
+
+function warn2 {
+	clear
+	echo
+	echo
+	echo
+	echo
+	echo Routing done!
+	echo Change consoles!
+	echo
+	echo Then PRESS ANY KEY TO RETURN to menu
+	read
+}	
+
 echo
 echo "Please read MPlayer's TV-out documentation, and install 'matroxset' and 'fbset'."
 echo "Then edit this script to suit your monitor+TV set."
 echo
-exit 1
+#exit 1
 
 while [ 1 ]; do
 
@@ -73,20 +110,25 @@ clear
 echo " [ 0 ]    Clear & blank screen"
 echo " [ 1 ]    Monitor only"
 echo "                          /---> Monitor"
-echo " [ 2 ]    DualHead - CRTC1"
-echo " [ 2 ]    Cloning - CRTC1" 
+echo " [ 2 ]    Cloning - CRTC1"
 echo "                          \\---> TV"
 echo
-echo "                          /---> Monitor"
+echo "                          /---> Monitor1"
 echo " [ 3 ]    Cloning - CRTC1"
-echo "                          \\---> Monitor"
+echo "                          \\---> Monitor2"
 echo
-echo "                     CRTC1 ---> Monitor"
+echo "                     CRTC1 ---> Monitor1"
 echo " [ 4 ]    DualHead -"
-echo "                     CRTC2 ---> Monitor"
+echo "                     CRTC2 ---> Monitor2"
+echo
+echo "                     CRTC1 ---> Monitor2"
+echo " [ 5 ]    DualHead -                      SWAP!"
+echo "                     CRTC2 ---> Monitor1"
 
 echo
 
+echo -- TV MODES
+echo
 echo " [ A ]	640x512		PAL"
 echo " [ S ]	640x528		PAL"
 echo " [ D ]	720x576		PAL"
@@ -97,44 +139,45 @@ read ABC
 
 case "$ABC" in
 	0)
+	mappingreset
 	clear
 	setterm -cursor off
 	setterm -blank 0
 	read
+	setterm -cursor on
 	;;
 
 	1)
-	nomapping
-	matroxset -f /dev/fb1 -m 0
-	matroxset -f /dev/fb0 -m 1
-	defaultmode
+	mappingreset
 	echo
 	;;
 
 	2)
-	nomapping
-	matroxset -f /dev/fb1 -m 0
+	mappingreset
 	matroxset -f /dev/fb0 -m 3
 	SetTVstandard
 	TVdefaultmode
 	;;
 
 	3)
-	nomapping
-	matroxset -f /dev/fb1 -m 0
+	mappingreset
 	matroxset -f /dev/fb0 -m 3
-	SetMonitorMode
-	defaultmode
 	;;
 
 	4)
-	nomapping
+	warn
+	mappingreset
+	matroxset -f /dev/fb0 -m 1
+	matroxset -f /dev/fb1 -m 2
+	warn2
+	;;
+
+	5)
+	warn
+	mappingreset
 	matroxset -f /dev/fb0 -m 2
 	matroxset -f /dev/fb1 -m 1
-	SetMonitorMode
-	defaultmode
-	con2fb /dev/fb1 /dev/tty1
-	con2fb /dev/fb1 /dev/tty2
+	warn2
 	;;
 
 	a)
@@ -149,7 +192,8 @@ case "$ABC" in
 
 	d)
 	# 720x576 78Hz 32bpp
-	fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+#	fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+	fbset -depth 32 -right -36 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
 	;;
 
 	f)
