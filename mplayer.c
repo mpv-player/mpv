@@ -748,8 +748,8 @@ switch(file_format){
     printf("MPEG: No Audio stream found...  ->nosound\n");
     has_audio=0;
   } else {
+    if(verbose) printf("detected MPG-PS audio format: %d\n",d_audio->type);
     switch(d_audio->type){
-      if(verbose) printf("detected MPG-PS audio format: %d\n",d_audio->type);
       case 1: sh_audio->format=0x50;break; // mpeg
       case 2: sh_audio->format=0x2;break;  // pcm
       case 3: sh_audio->format=0x2000;break; // ac3
