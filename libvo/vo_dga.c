@@ -21,6 +21,14 @@
  *      BGR_32_24_888
  *
  * $Log$
+ * Revision 1.47  2002/09/25 21:08:44  arpi
+ * Attached patch improves the vertical retrace synchronisation (vsync)
+ * of the mplayer DGA driver.
+ * It implements a more general buffer scheme than double buffers that
+ * allows for deeper buffer queues.
+ *
+ * by Fredrik Noring <noring@nocrew.org>
+ *
  * Revision 1.46  2002/08/28 21:32:31  alex
  * finally removed query_vaa, bes_da and vo_tune_info - the obsoleted libvo api
  *
@@ -374,14 +382,26 @@ static int       vo_dga_src_mode = 0;    // index in mode list that is used by
 static int       vo_dga_XServer_mode = 0;// index in mode list for resolution
                                          // XServer is running
 
-static int       vo_dga_dbf_mem_offset;  // offset in bytes for alternative 
-                                         // framebuffer (0 if dbf is not 
-					 // possible)
-static int       vo_dga_dbf_y_offset;    // y offset (in scanlines)
-static int       
-                 vo_dga_dbf_current;     // current buffer (0 or 1)
+#define MAX_NR_VIDEO_BUFFERS 3
 
-static unsigned char     *vo_dga_base;
+#define VIDEO_BUFFER_DRAW \
+        (vo_dga_video_buffer[vo_dga_current_video_buffer % \
+			     vo_dga_nr_video_buffers])
+
+#define VIDEO_BUFFER_DISPLAY \
+        (vo_dga_video_buffer[(vo_dga_current_video_buffer + \
+			      vo_dga_nr_video_buffers - 1) % \
+			     vo_dga_nr_video_buffers])
+
+static int vo_dga_nr_video_buffers;      // Total number of frame buffers.
+static int vo_dga_current_video_buffer;  // Buffer available for rendering.
+
+static struct video_buffer
+{
+	int y;
+	uint8_t *data;
+} vo_dga_video_buffer[MAX_NR_VIDEO_BUFFERS];
+
 static Display  *vo_dga_dpy;
 
 /* saved src and dst dimensions for SwScaler */
@@ -421,7 +441,7 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 
   offset = vo_dga_width * y0 +x0;
   buffer_stride = vo_dga_width;
-  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+  d = VIDEO_BUFFER_DRAW.data;
      
   switch( HW_MODE.vdm_mplayer_depth ){
 
@@ -468,7 +488,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
   char *s, *d;
 
   s = *src;
-  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+  d = VIDEO_BUFFER_DRAW.data;
   
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
@@ -479,18 +499,18 @@ static uint32_t draw_frame( uint8_t *src[] ){
 	numlines,
 	vo_dga_bytes_per_line+vo_dga_vp_skip, 
 	vo_dga_bytes_per_line);
-	  
+    
   // DBG-COde
 
 #if 0
-  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+  d = VIDEO_BUFFER_DRAW.data;
   fillblock(d, 0, 10, 0x800000ff);
   fillblock(d, 10, 10, 0x8000ff00);
   fillblock(d, 20, 10, 0x80ff0000);
   fillblock(d, 30, 10, 0xff0000ff);
   fillblock(d, 40, 10, 0x800000ff);
   fillblock(d, 50, 10, 0x0f0000ff);
-#endif	  
+#endif
     break;
   case VDM_CONV_15TO16:
         {
@@ -539,20 +559,28 @@ static void check_events(void)
 static void draw_osd(void)
 { vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha); }
 
-static void flip_page( void ){
+static void switch_video_buffers(void)
+{
+	vo_dga_current_video_buffer =
+		(vo_dga_current_video_buffer + 1) % vo_dga_nr_video_buffers;
+}
 
-  if(vo_dga_dbf_mem_offset != 0){
-
+static void flip_page( void )
+{
+	if(1 < vo_dga_nr_video_buffers)
+	{
 #ifdef HAVE_DGA2
-    XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
-		    0, vo_dga_dbf_current * vo_dga_dbf_y_offset, 
-		    XDGAFlipRetrace);
+		XDGASetViewport(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+				0,
+				VIDEO_BUFFER_DISPLAY.y, 
+				XDGAFlipRetrace);
 #else
-    XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
-		        0, vo_dga_dbf_current * vo_dga_dbf_y_offset);
+		XF86DGASetViewPort(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
+				   0,
+				   VIDEO_BUFFER_DISPLAY.y);
 #endif
-    vo_dga_dbf_current = 1 - vo_dga_dbf_current;
-  }
+		switch_video_buffers();
+	}
 }
 
 //---------------------------------------------------------
@@ -561,13 +589,18 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
   if (scale_srcW) {
-    uint8_t *dst[3] = {vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset, NULL, NULL};
+    uint8_t *dst[3] =
+    {
+	    VIDEO_BUFFER_DRAW.data + vo_dga_vp_offset,
+	    0,
+	    0
+    };
     SwScale_YV12slice(src,stride,y,h,
           dst,
           /*scale_dstW*/ vo_dga_width * HW_MODE.vdm_bytespp, HW_MODE.vdm_bitspp,
 		      scale_srcW, scale_srcH, scale_dstW, scale_dstH);
   } else {
-    yuv2rgb( vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset + 
+    yuv2rgb(VIDEO_BUFFER_DRAW.data + vo_dga_vp_offset + 
           (vo_dga_width * y +x) * HW_MODE.vdm_bytespp,
            src[0], src[1], src[2],
            w,h, vo_dga_width * HW_MODE.vdm_bytespp,
@@ -796,6 +829,35 @@ int check_res( int num, int x, int y, int bpp,
 
 //---------------------------------------------------------
 
+static void init_video_buffers(XDGAMode *modeline, uint8_t *buffer_base,
+			       int use_multiple_buffers)
+{
+	int bytes_per_buffer =
+		modeline->viewportHeight * modeline->bytesPerScanline;
+	int i;
+
+	if(use_multiple_buffers)
+		vo_dga_nr_video_buffers =
+			modeline->pixmapHeight / modeline->viewportHeight;
+	else
+		vo_dga_nr_video_buffers = 1;
+
+	vo_dga_current_video_buffer = 0;
+	
+	if(MAX_NR_VIDEO_BUFFERS < vo_dga_nr_video_buffers)
+		vo_dga_nr_video_buffers = MAX_NR_VIDEO_BUFFERS;
+	
+	for(i = 0; i < vo_dga_nr_video_buffers; i++)
+	{
+		vo_dga_video_buffer[i].y = i * modeline->viewportHeight;
+		vo_dga_video_buffer[i].data =
+			buffer_base + i * bytes_per_buffer;
+		
+		// Clear video buffer.
+		memset(vo_dga_video_buffer[i].data, 0, bytes_per_buffer);
+	}
+}
+
 static uint32_t config( uint32_t width,  uint32_t height,
                       uint32_t d_width,uint32_t d_height,
                       uint32_t flags,char *title,uint32_t format)
@@ -808,8 +870,9 @@ static uint32_t config( uint32_t width,  uint32_t height,
   // needed to change DGA video mode
   int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES , mVBI=100000, mMaxY=0, i,j=0;
   int dga_modenum;
-  XDGAMode   *modelines=NULL;
+  XDGAMode   *modelines=NULL, *modeline;
   XDGADevice *dgadevice;
+  unsigned char *vo_dga_base;
   int max_vpy_pos;
 #else
 #ifdef HAVE_XF86VM
@@ -947,6 +1010,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   vo_dga_width = modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
   dga_modenum =  modelines[j].num;
   max_vpy_pos =  modelines[j].maxViewportY;
+  modeline = modelines + j;
   
   XFree(modelines);
   modelines = NULL;
@@ -1120,50 +1184,12 @@ static uint32_t config( uint32_t width,  uint32_t height,
   XGrabPointer (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);
-// TODO: chekc if mem of graphics adaptor is large enough for dbf
 
-  // set up variables for double buffering ...
-  // note: set vo_dga_dbf_mem_offset to NULL to disable doublebuffering
+  init_video_buffers(modeline, vo_dga_base, vo_doublebuffering);
+
+  vd_printf(VD_DBG, "vo_dga: Using %d frame buffer%s.\n",
+	    vo_dga_nr_video_buffers, vo_dga_nr_video_buffers == 1 ? "" : "s");
   
-  vo_dga_dbf_y_offset = y_off + vo_dga_src_height;
-  vo_dga_dbf_mem_offset = vo_dga_width * HW_MODE.vdm_bytespp *  vo_dga_dbf_y_offset;
-  vo_dga_dbf_current = 0;
-
-
- if(!vo_doublebuffering) vo_dga_dbf_mem_offset = 0;
-  
-  // if(format ==IMGFMT_YV12 )
-  //vo_dga_dbf_mem_offset = 0;
-  // disable doublebuffering for YV12
-
-#ifdef HAVE_DGA2
-      if(vo_dga_vp_height>max_vpy_pos){
-        vo_dga_dbf_mem_offset = 0;
-	vd_printf(VD_INFO, "vo_dga: Not enough memory for double buffering!\n");
-      }
-#endif  
-  
-  // now clear screen
-  {
-    int size = vo_dga_width *
-	(vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ?
-	(vo_dga_src_height+y_off) : 0)) *
-	HW_MODE.vdm_bytespp;
-#ifndef HAVE_DGA2
-    vd_printf(VD_DBG, "vo_dga: wanted size=%d, fb-size=%d\n", size, ram);
-    if(size>ram*1024){
-      vo_dga_dbf_mem_offset = 0;
-      vd_printf(VD_INFO, "vo_dga: Not enough memory for double buffering!\n");
-      size -= (vo_dga_src_height+y_off) * vo_dga_width * HW_MODE.vdm_bytespp;
-    }				        
-#endif
-    
-    vd_printf(VD_INFO, "vo_dga: Clearing framebuffer (%d bytes). If mplayer exits", size);
-    vd_printf(VD_INFO, " here, you haven't enough memory on your card.\n");   
-    fflush(stdout);
-    memset(vo_dga_base, 0, size);  
-  }
-  vd_printf(VD_INFO, "vo_dga: Doublebuffering is %s.\n", vo_dga_dbf_mem_offset ? "enabled" : "disabled");
   vo_dga_is_running = 1;
   return 0;
 }
