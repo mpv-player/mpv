@@ -1,4 +1,6 @@
 
+#define DUMP_PCM
+
 // gcc test.c -I.. -L. -lMP3 -o test -O4
 
 #include <stdio.h>
@@ -33,6 +35,10 @@ int main(int argc,char* argv[]){
   int total=0;
   unsigned int time1;
   float length;
+#ifdef DUMP_PCM
+  FILE *f=NULL;
+  f=fopen("test.pcm","wb");
+#endif
   
   mp3file=fopen((argc>1)?argv[1]:"test.mp3","rb");
   if(!mp3file){  printf("file not found\n");  exit(1); }
@@ -46,9 +52,12 @@ int main(int argc,char* argv[]){
   MP3_samplerate=MP3_channels=0;
   
   time1=GetTimer();
-  while((len=MP3_DecodeFrame(buffer,-1))>0){
+  while((len=MP3_DecodeFrame(buffer,-1))>0 && total<2000000){
       total+=len;
       // play it
+#ifdef DUMP_PCM
+      fwrite(buffer,len,1,f);
+#endif
       //putchar('.');fflush(stdout);
   }
   time1=GetTimer()-time1;
