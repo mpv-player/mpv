@@ -7,10 +7,14 @@
 #ifdef HAVE_XVID
 
 #include "vd_internal.h"
+#include "cfgparser.h"
 
 #include <divx4.h>
 #include <xvid.h>
 
+#ifndef XVID_CSP_EXTERN
+#error "You need lastest XviD CVS"
+#endif
 
 static vd_info_t info = 
 {
@@ -26,9 +30,18 @@ LIBVD_EXTERN(xvid)
 
 typedef struct {
   int cs;
+  unsigned char img_type;
   void* hdl;
   mp_image_t* mpi;
 } priv_t;
+
+static int do_dr2 = 0;
+
+struct config xvid_dec_opts[] = {
+  { "dr2", &do_dr2, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+  { "nodr2", &do_dr2, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+  {NULL, NULL, 0, 0, 0, 0, NULL}
+};
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -50,7 +63,7 @@ static int init(sh_video_t *sh){
 
   switch(sh->codec->outfmt[sh->outfmtidx]){
   case IMGFMT_YV12:
-    cs= XVID_CSP_USER;
+    cs= do_dr2 ? XVID_CSP_EXTERN : XVID_CSP_USER;
     break;
   case IMGFMT_YUY2:
     cs=XVID_CSP_YUY2;
@@ -106,6 +119,18 @@ static int init(sh_video_t *sh){
   p->hdl = dec_p.handle;
   sh->context = p;
 
+  switch(cs) {
+  case XVID_CSP_EXTERN:
+    p->img_type = MP_IMGTYPE_STATIC;
+    break;
+  case XVID_CSP_USER:
+    p->img_type = MP_IMGTYPE_EXPORT;
+    break;
+  default:
+    p->img_type = MP_IMGTYPE_TEMP;
+    break;
+  }
+
   return 1;
 }
 
@@ -122,10 +147,10 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   XVID_DEC_FRAME dec;
   DEC_PICTURE d4_pic;
+  XVID_DEC_PICTURE pic;
   priv_t* p = sh->context;
 
-  mp_image_t* mpi = mpcodecs_get_image(sh,  p->cs == XVID_CSP_USER ?
-				       MP_IMGTYPE_EXPORT : MP_IMGTYPE_TEMP,
+  mp_image_t* mpi = mpcodecs_get_image(sh,  p->img_type,
 				       MP_IMGFLAG_ACCEPT_STRIDE,
 				       sh->disp_w,sh->disp_h);
 
@@ -139,6 +164,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   switch(p->cs) {
   case XVID_CSP_USER:
     dec.image = &d4_pic;
+    break;
+  case XVID_CSP_EXTERN:
+    pic.y = mpi->planes[0];
+    pic.u = mpi->planes[1];
+    pic.v = mpi->planes[2];
+    pic.stride_y = mpi->stride[0];
+    pic.stride_u = mpi->stride[1];
+    pic.stride_v = mpi->stride[2];
+    dec.image = &pic;
     break;
   default:
     dec.image = mpi->planes[0];
