@@ -124,19 +124,19 @@
 #include "../input/input.h"
 #include "../input/mouse.h"
 
-LIBVO_EXTERN(sdl)
-
 extern int verbose;
 int sdl_noxv;
 int sdl_forcexv;
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"SDL YUV/RGB/BGR renderer (SDL v1.1.7+ only!)",
 	"sdl",
 	"Ryan C. Gordon <icculus@lokigames.com>, Felix Buenemann <atmosfear@users.sourceforge.net>",
 	""
 };
+
+LIBVO_EXTERN(sdl)
 
 #include <SDL.h>
 //#include <SDL/SDL_syswm.h>
@@ -1568,12 +1568,6 @@ query_format(uint32_t format)
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_FLIP;
     }
     return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 

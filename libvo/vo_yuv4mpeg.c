@@ -37,15 +37,16 @@
 #include "fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
 
-LIBVO_EXTERN (yuv4mpeg)
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"yuv4mpeg output for mjpegtools (to \"stream.yuv\")",
 	"yuv4mpeg",
 	"Robert Kesterson <robertk@robertk.com>",
 	""
 };
+
+LIBVO_EXTERN (yuv4mpeg)
 
 static int image_width;
 static int image_height;
@@ -137,11 +138,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	fflush(yuv_out);
 	return 0;
-}
-
-static const vo_info_t* get_info(void)
-{
-    return &vo_info;
 }
 
 /* Only use when h divisable by 2! */

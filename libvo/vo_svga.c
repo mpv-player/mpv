@@ -72,14 +72,14 @@ static uint8_t checked = 0;
 
 static uint32_t x_pos, y_pos;
 
-LIBVO_EXTERN(svga)
-
-static vo_info_t vo_info = {
+static vo_info_t info = {
 	"SVGAlib",
         "svga",
         "Zoltan Mark Vician <se7en@sch.bme.hu>",
         ""
 };
+
+LIBVO_EXTERN(svga)
 
 static uint32_t preinit(const char *arg)
 {
@@ -477,10 +477,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   vga_setdisplaystart(0);
 
   return (0);
-}
-
-static const vo_info_t* get_info(void) {
-  return (&vo_info);
 }
 
 static uint32_t draw_frame(uint8_t *src[]) {

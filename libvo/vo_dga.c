@@ -60,8 +60,6 @@
 #include "../postproc/rgb2rgb.h"
 #include "aspect.h"
 
-LIBVO_EXTERN( dga )
-
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 
@@ -75,7 +73,7 @@ LIBVO_EXTERN( dga )
 
 #include "../mp_msg.h"
 
-static vo_info_t vo_info =
+static vo_info_t info =
 {
 #ifdef HAVE_DGA2
         "DGA ( Direct Graphic Access V2.0 )",
@@ -90,6 +88,8 @@ static vo_info_t vo_info =
         "Andreas Ackermann <acki@acki-netz.de>",
         ""
 };
+
+LIBVO_EXTERN( dga )
 
 
 //------------------------------------------------------------------
@@ -454,11 +454,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
   }
   return 0;
 };
-
-//---------------------------------------------------------
-
-static const vo_info_t* get_info( void )
-{ return &vo_info; }
 
 //---------------------------------------------------------
 

@@ -36,15 +36,15 @@
 #include "../cfgparser.h"
 #include "fastmemcpy.h"
 
-LIBVO_EXTERN (bl)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"Blinkenlights driver: http://www.blinkenlights.de",
 	"bl",
 	"Rik Snel <snel@phys.uu.nl>",
 	""
 };
+
+LIBVO_EXTERN (bl)
 
 /* General variables */
 
@@ -218,10 +218,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	memset(image, 0, bl->width*bl->height*3); /* blank the image */
 	mp_msg(MSGT_VO, MSGL_V, "vo_config bl called\n");
 	return 0;
-}
-
-static const vo_info_t* get_info(void) {
-	return &vo_info;
 }
 
 static void draw_osd(void) {

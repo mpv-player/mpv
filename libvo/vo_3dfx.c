@@ -30,8 +30,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN(3dfx)
-
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -51,13 +49,15 @@ LIBVO_EXTERN(3dfx)
 
 #include "fastmemcpy.h"
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"3dfx (/dev/3dfx)",
 	"3dfx",
 	"Colin Cross <colin@MIT.EDU>",
 	""
 };
+
+LIBVO_EXTERN(3dfx)
 
 static uint32_t is_fullscreen = 1;
 
@@ -419,12 +419,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	printf("(display) 3dfx initialized %p\n",memBase1);
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 static uint32_t 

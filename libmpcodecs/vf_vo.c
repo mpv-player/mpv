@@ -26,8 +26,8 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
 
-  if(video_out->get_info)
-  { const vo_info_t *info = video_out->get_info();
+  if(video_out->info)
+  { const vo_info_t *info = video_out->info;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          width, height,
          d_width, d_height,
@@ -47,6 +47,7 @@ static int config(struct vf_instance_s* vf,
 
     if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
+
     ++vo_config_count;
     return 1;
 }

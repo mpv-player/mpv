@@ -25,7 +25,6 @@
 
 #include <dxr2ioctl.h>
 
-LIBVO_EXTERN (dxr2)
 
 extern char *get_path(char *filename);
 
@@ -134,12 +133,14 @@ config_t dxr2_opts[] = {
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
 
-static vo_info_t vo_info = {
+static vo_info_t info = {
   "DXR2 video out",
   "dxr2",
   "Alban Bedel <albeu@free.fr> and Tobias Diedrich <ranma@gmx.at>",
   ""
 };
+
+LIBVO_EXTERN (dxr2)
 
 static char *ucodesearchpath[] = {
   "/usr/local/lib/dxr2/dvd12.ux",
@@ -577,7 +578,7 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
 }
 
 static int dxr2_setup_vga_params(void) {
-  const vo_info_t* vi = sub_vo->get_info();
+  const vo_info_t* vi = sub_vo->info;
   dxr2_vgaParams_t vga;
 
   int loaded = dxr2_load_vga_params(&vga,(char*)vi->short_name);
@@ -793,7 +794,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
     }
     // Does the sub vo support the x11 stuff
     // Fix me : test the other x11 vo's and enable them
-    if(strcmp(sub_vo->get_info()->short_name,"x11") == 0)
+    if(strcmp(sub_vo->info->short_name,"x11") == 0)
       sub_vo_win = 1;
     else
       sub_vo_win = 0;
@@ -859,11 +860,6 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
     return 0;
   } else
     return VO_ERROR;
-}
-
-static const vo_info_t* get_info(void)
-{
-  return &vo_info;
 }
 
 static void clear_alpha(int x0,int y0, int w,int h) {
@@ -965,7 +961,7 @@ static uint32_t preinit(const char *arg) {
   if(use_ol) {
     if (arg) {
       for(n = 0 ; video_out_drivers[n] != NULL ; n++) {
-	const vo_info_t* vi = video_out_drivers[n]->get_info();
+	const vo_info_t* vi = video_out_drivers[n]->info;
 	if(!vi)
 	  continue;
 	if(strcasecmp(arg,vi->short_name) == 0)

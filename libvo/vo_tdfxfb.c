@@ -45,15 +45,15 @@
 #include "aspect.h"
 #include "sub.h"
 
-LIBVO_EXTERN(tdfxfb)
-
-static vo_info_t vo_info =
+static vo_info_t info =
 {
 	"3Dfx Banshee/Voodoo3/Voodoo5",
 	"tdfxfb",
 	"Mark Zealey <mark@zealos.org>",
 	""
 };
+
+LIBVO_EXTERN(tdfxfb)
 
 /* Some registers on the card */
 #define S2S_STRECH_BLT		2			// BLT + Strech
@@ -513,4 +513,3 @@ static uint32_t control(uint32_t request, void *data, ...)
 
 /* Dummy funcs */
 static void check_events(void) {}
-static const vo_info_t* get_info(void) { return &vo_info; }

@@ -22,15 +22,15 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN (md5)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"MD5 sum",
 	"md5",
 	"walken",
 	""
 };
+
+LIBVO_EXTERN (md5)
 
 extern vo_functions_t video_out_pgm;
 extern char vo_pgm_filename[24];
@@ -42,12 +42,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
     md5_file = fopen ("md5", "w");
     return video_out_pgm.config (width, height, d_width,d_height,fullscreen, title, format);
-}
-
-static const vo_info_t*
-get_info(void)
-{
-    return &vo_info;
 }
 
 static void draw_osd(void)

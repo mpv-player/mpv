@@ -100,10 +100,7 @@ static directx_fourcc_caps g_ddpf[] =
 };
 #define NUM_FORMATS (sizeof(g_ddpf) / sizeof(g_ddpf[0]))
 
-
-LIBVO_EXTERN(directx)
-
-static vo_info_t vo_info =
+static vo_info_t info =
 {
 	"Directx DDraw YUV/RGB/BGR renderer",
 	"directx",
@@ -111,6 +108,7 @@ static vo_info_t vo_info =
 	""
 };
 
+LIBVO_EXTERN(directx)
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
@@ -303,12 +301,6 @@ static uint32_t Directx_CreateClipper()
     if(g_lpddsPrimary->lpVtbl->SetClipper (g_lpddsPrimary,g_lpddclipper)!=DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't associate primary surface with clipper\n");return 1;}
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>clipper succesfully created\n");
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 static void uninit(void)

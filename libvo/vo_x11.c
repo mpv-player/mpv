@@ -8,7 +8,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN( x11 )
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -33,13 +32,15 @@ LIBVO_EXTERN( x11 )
 #include "../mplayer.h"
 #endif
 
-static vo_info_t vo_info =
+static vo_info_t info =
 {
         "X11 ( XImage/Shm )",
         "x11",
         "Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
         ""
 };
+
+LIBVO_EXTERN( x11 )
 
 /* private prototypes */
 static void Display_Image ( XImage * myximage,unsigned char *ImageData );
@@ -431,9 +432,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  saver_off(mDisplay);
  return 0;
 }
-
-static const vo_info_t* get_info( void )
-{ return &vo_info; }
 
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {

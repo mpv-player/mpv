@@ -41,17 +41,15 @@
 
 #undef GGI_FLIP
 
-#include "../libmpcodecs/mp_image.h"
-
-LIBVO_EXTERN (ggi)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"General Graphics Interface (GGI) output",
 	"ggi",
 	"Alex Beregszaszi <alex@naxine.org>",
 	"under developement"
 };
+
+LIBVO_EXTERN (ggi)
 
 static struct ggi_conf_s {
     char *driver;
@@ -268,11 +266,6 @@ db_ok:
     ggi_conf.srcbpp = (ggi_conf.srcdepth+7)/8;
 
     return(0);
-}
-
-static const vo_info_t *get_info(void)
-{
-    return &vo_info;
 }
 
 static uint32_t get_image(mp_image_t *mpi)

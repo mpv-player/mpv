@@ -47,12 +47,10 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN (mpegpes)
-
 int vo_mpegpes_fd=-1;
 int vo_mpegpes_fd2=-1;
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 #ifdef HAVE_DVB
 	"Mpeg-PES to DVB card",
@@ -63,6 +61,8 @@ static vo_info_t vo_info =
 	"A'rpi",
 	""
 };
+
+LIBVO_EXTERN (mpegpes)
 
 static uint32_t
 config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
@@ -142,11 +142,6 @@ static uint32_t preinit(const char *arg){
     return 0;
 }
 
-static const vo_info_t*
-get_info(void)
-{
-    return &vo_info;
-}
 
 static void draw_osd(void)
 {

@@ -41,14 +41,14 @@
 #define MESSAGE_SIZE 512
 #define MESSAGE_DEKO " +++ %s +++ "
 
-LIBVO_EXTERN(aa)
-
-	static vo_info_t vo_info = {
+	static vo_info_t info = {
 	    "AAlib",
 	    "aa",
 	    "Alban Bedel <albeu@free.fr> and Folke Ashberg <folke@ashberg.de>",
 	    ""
 	};
+
+LIBVO_EXTERN(aa)
 
 /* aa's main context we use */
 aa_context *c;
@@ -336,12 +336,6 @@ query_format(uint32_t format) {
 	    ;
     }
     return 0;
-}
-
-static const vo_info_t* 
-get_info(void) {
-    /* who i am? */
-    return (&vo_info);
 }
 
 static uint32_t 

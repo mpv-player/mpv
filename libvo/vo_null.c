@@ -29,16 +29,15 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN(null)
-
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"Null video output",
 	"null",
 	"Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
 	""
 };
+
+LIBVO_EXTERN(null)
 
 static uint32_t image_width, image_height;
 
@@ -76,12 +75,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_width = width;
 	image_height = height;
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 static void

@@ -23,15 +23,15 @@
 
 #define GIFWHORE_version 0.90
 
-LIBVO_EXTERN (gif89a)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"GIF89a (out.gif)",
 	"gif89a",
 	"GifWhore <joey@yunamusic.com>",
 	""
 };
+
+LIBVO_EXTERN (gif89a)
 
 extern int verbose;
 extern int vo_config_count;
@@ -113,11 +113,6 @@ static uint32_t config
 #endif
     
     return 0;
-}
-
-static const vo_info_t* get_info(void)
-{
-    return &vo_info;
 }
 
 /* forward declaration */

@@ -45,7 +45,6 @@
 
 #include "../postproc/swscale.h"
 
-LIBVO_EXTERN(vesa)
 
 #ifdef HAVE_PNG
 extern vo_functions_t video_out_png;
@@ -68,13 +67,15 @@ extern char *monitor_dotclock_str;
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"VESA VBE 2.0 video output",
 	"vesa",
 	"Nick Kurshev <nickols_k@mail.ru>",
         "Requires ROOT privileges"
 };
+
+LIBVO_EXTERN(vesa)
 
 /* driver data */
 
@@ -985,14 +986,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	    }
 	}
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-    if(verbose > 2)
-        printf("vo_vesa: get_info was called\n");
-	return &vo_info;
 }
 
 static void

@@ -77,6 +77,7 @@ typedef struct vo_info_s
 
 typedef struct vo_functions_s
 {
+	vo_info_t *info;
 	/*
 	 * Preinitializes driver (real INITIALIZATION)
 	 *   arg - currently it's vo_subdevice
@@ -101,12 +102,6 @@ typedef struct vo_functions_s
 	 * Control interface
 	 */
 	uint32_t (*control)(uint32_t request, void *data, ...);
-
-        /*
-         * Return driver information.
-         *   returns : read-only pointer to a vo_info_t structure.
-         */
-        const vo_info_t* (*get_info)(void);
 
         /*
          * Display a new RGB/BGR frame of the video to the screen.

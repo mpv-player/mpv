@@ -10,8 +10,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN(mga)
-
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -22,7 +20,7 @@ LIBVO_EXTERN(mga)
 #include "sub.h"
 #include "aspect.h"
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"Matrox G200/G4x0/G550 overlay (/dev/mga_vid)",
 	"mga",
@@ -30,6 +28,7 @@ static vo_info_t vo_info =
 	"Based on some code by Aaron Holtzman <aholtzma@ess.engr.uvic.ca>"
 };
 
+LIBVO_EXTERN(mga)
 
 #include "mga_common.c"
 
@@ -81,11 +80,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 	
     return mga_init(width,height,format);
-}
-
-static const vo_info_t* get_info(void)
-{
-    return &vo_info;
 }
 
 static void uninit(void)

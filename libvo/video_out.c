@@ -196,7 +196,7 @@ void list_video_out(){
       int i=0;
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
       while (video_out_drivers[i]) {
-        const vo_info_t *info = video_out_drivers[i++]->get_info ();
+        const vo_info_t *info = video_out_drivers[i++]->info;
       	printf("\t%s\t%s\n", info->short_name, info->name);
       }
       printf("\n");
@@ -215,7 +215,7 @@ vo_functions_t* init_best_video_out(char** vo_list){
 	}
 	for(i=0;video_out_drivers[i];i++){
 	    vo_functions_t* video_driver=video_out_drivers[i];
-	    const vo_info_t *info = video_driver->get_info();
+	    const vo_info_t *info = video_driver->info;
 	    if(!strcmp(info->short_name,vo)){
 		// name matches, try it
 		if(!video_driver->preinit(vo_subdevice))

@@ -65,14 +65,14 @@
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
 
-LIBVO_EXTERN(directfb)
-
-static vo_info_t vo_info = {
+static vo_info_t info = {
 	"Direct Framebuffer Device",
 	"directfb",
 	"Jiri Svoboda Jiri.Svoboda@seznam.cz",
 	""
 };
+
+LIBVO_EXTERN(directfb)
 
 extern int verbose;
 
@@ -1077,11 +1077,6 @@ static uint32_t query_format(uint32_t format)
  	}
 
 	return 0;
-}
-
-static const vo_info_t *get_info(void)
-{
-	return &vo_info;
 }
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,

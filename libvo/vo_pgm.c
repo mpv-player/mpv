@@ -22,15 +22,15 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN (pgm)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"PGM file",
 	"pgm",
 	"walken",
 	""
 };
+
+LIBVO_EXTERN (pgm)
 
 static int image_width;
 static int image_height;
@@ -51,12 +51,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     snprintf (header, 1024, "P5\n\n%d %d\n255\n", width, height*3/2);
 
     return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-    return &vo_info;
 }
 
 static void draw_osd(void)

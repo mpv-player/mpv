@@ -18,15 +18,15 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN (png)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"PNG file",
 	"png",
 	"Felix Buenemann <atmosfear@users.sourceforge.net>",
 	""
 };
+
+LIBVO_EXTERN (png)
 
 extern int verbose;
 int z_compression = Z_NO_COMPRESSION;
@@ -60,12 +60,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     if(verbose)	printf("PNG Compression level %i\n", z_compression);   
 	  	
     return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-    return &vo_info;
 }
 
 

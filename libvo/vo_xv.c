@@ -25,7 +25,6 @@ Buffer allocation:
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN(xv)
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -43,13 +42,15 @@ LIBVO_EXTERN(xv)
 #include "../Gui/interface.h"
 #endif
 
-static vo_info_t vo_info =
+static vo_info_t info =
 {
         "X11/Xv",
         "xv",
         "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",
         ""
 };
+
+LIBVO_EXTERN(xv)
 
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
@@ -447,9 +448,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      saver_off(mDisplay);  // turning off screen saver
      return 0;
 }
-
-static const vo_info_t * get_info(void)
-{ return &vo_info; }
 
 static void allocate_xvimage(int foo)
 {

@@ -22,15 +22,15 @@
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
 
-LIBVO_EXTERN (jpeg)
-
-static vo_info_t vo_info=
+static vo_info_t info=
 {
 	"JPEG file",
 	"jpeg",
 	"Zoltan Ponekker (pontscho@makacs.poliod.hu)",
 	""
 };
+
+LIBVO_EXTERN (jpeg)
 
 #define RGB 0
 #define BGR 1
@@ -102,12 +102,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
   }		
     
  return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-    return &vo_info;
 }
 
 static uint32_t jpeg_write( uint8_t * name,uint8_t * buffer )

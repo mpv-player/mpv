@@ -17,8 +17,6 @@
 #include "video_out_internal.h"
 #include "sub.h"
 
-LIBVO_EXTERN(gl2)
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 //#include <X11/keysym.h>
@@ -34,13 +32,15 @@ LIBVO_EXTERN(gl2)
 #define NDEBUG
 //#undef NDEBUG
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"X11 (OpenGL) - multiple textures version",
 	"gl2",
 	"Arpad Gereoffy & Sven Goethel",
 	""
 };
+
+LIBVO_EXTERN(gl2)
 
 /* private prototypes */
 
@@ -979,12 +979,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       saver_off(mDisplay);  // turning off screen saver
 
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 static int gl_handlekey(int key)

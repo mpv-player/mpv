@@ -129,7 +129,7 @@
 
 #define SPU_SUPPORT
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"DXR3/H+ video out",
 	"dxr3",
@@ -607,11 +607,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
 	return 0;
-}
-
-static const vo_info_t* get_info(void)
-{
-	return &vo_info;
 }
 
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)

@@ -30,15 +30,15 @@
 
 #include "jpeg_enc.h"
 
-LIBVO_EXTERN (zr)
-
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"Zoran ZR360[56]7/ZR36060 Driver (DC10(+)/buz/lml33/MatroxRR)",
 	"zr",
 	"Rik Snel <snel@phys.uu.nl>",
 	""
 };
+
+LIBVO_EXTERN (zr)
 
 #define	ZR_MAX_DEVICES 4
 /* General variables */
@@ -472,10 +472,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	
 	}
 	return 0;
-}
-
-static const vo_info_t* get_info(void) {
-	return &vo_info;
 }
 
 static void draw_osd(void) {

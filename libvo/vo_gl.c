@@ -15,9 +15,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-
-LIBVO_EXTERN(gl)
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 //#include <X11/keysym.h>
@@ -30,13 +27,15 @@ LIBVO_EXTERN(gl)
 #include "x11_common.h"
 #include "aspect.h"
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
 	"X11 (OpenGL)",
 	"gl",
 	"Arpad Gereoffy <arpi@esp-team.scene.hu>",
 	""
 };
+
+LIBVO_EXTERN(gl)
 
 /* local data */
 static unsigned char *ImageData=NULL;
@@ -243,12 +242,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       saver_off(mDisplay);  // turning off screen saver
 
 	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 static void check_events(void)

@@ -37,15 +37,16 @@
 #include "../Gui/interface.h"
 #endif
 
-LIBVO_EXTERN(xvidix)
 
-static vo_info_t vo_info = 
+static vo_info_t info = 
 {
     "X11 (VIDIX)",
     "xvidix",
     "Alex Beregszaszi",
     ""
 };
+
+LIBVO_EXTERN(xvidix)
 
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
@@ -340,11 +341,6 @@ else
     vo_config_count++;
 
     return(0);
-}
-
-static const vo_info_t *get_info(void)
-{
-    return(&vo_info);
 }
 
 static void check_events(void)

@@ -57,14 +57,14 @@
 #endif
 
 
-LIBVO_EXTERN(directfb)
-
-static vo_info_t vo_info = {
+static vo_info_t info = {
 	"Direct Framebuffer Device",
 	"directfb",
 	"Jiri Svoboda Jiri.Svoboda@seznam.cz",
 	"v 2.0 (for DirectFB version >=0.9.13)"
 };
+
+LIBVO_EXTERN(directfb)
 
 extern int verbose;
 
@@ -666,11 +666,6 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
  if (verbose) printf("DirectFB: Config finished [%ix%i] - [%ix%i]\n",out_width,out_height,width,height);
 
 return 0;
-}
-
-static const vo_info_t *get_info(void)
-{
-	return &vo_info;
 }
 
 extern void mplayer_put_key(int code);

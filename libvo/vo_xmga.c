@@ -17,7 +17,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN( xmga )
 
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -48,13 +47,16 @@ static unsigned int timerd=0;
 #include "../Gui/interface.h"
 #endif
 
-static vo_info_t vo_info =
+static vo_info_t info =
 {
  "Matrox G200/G4x0/G550 overlay in X11 window (using /dev/mga_vid)",
  "xmga",
  "Zoltan Ponekker <pontscho@makacs.poliod.hu>",
  ""
 };
+
+LIBVO_EXTERN( xmga )
+
 
 static XGCValues              wGCV;
 
@@ -220,8 +222,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  return 0;
 }
-
-static const vo_info_t* get_info( void ){ return &vo_info; }
 
 static void uninit(void){
  mp_msg(MSGT_VO,MSGL_V,"vo: uninit!\n");

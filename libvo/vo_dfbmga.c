@@ -52,14 +52,14 @@
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
 
-LIBVO_EXTERN(dfbmga)
-
-static vo_info_t vo_info = {
+static vo_info_t info = {
      "DirectFB / Matrox G400",
      "dfbmga",
      "Ville Syrjala <syrjala@sci.fi>",
      ""
 };
+
+LIBVO_EXTERN(dfbmga)
 
 extern int verbose;
 
@@ -464,11 +464,6 @@ query_format( uint32_t format )
      }
 
      return 0;
-}
-
-static const vo_info_t *get_info( void )
-{
-	return &vo_info;
 }
 
 static void

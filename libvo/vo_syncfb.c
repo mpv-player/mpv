@@ -34,8 +34,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-LIBVO_EXTERN(syncfb)
-
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -46,13 +44,15 @@ LIBVO_EXTERN(syncfb)
 
 #include "fastmemcpy.h"
 
-static vo_info_t vo_info =
+static vo_info_t info =
 {
 	"Matrox G200/G400 Synchronous framebuffer (/dev/syncfb)",
 	"syncfb",
 	"Matthias Oelmann <mao@well.com>",
 	""
 };
+
+LIBVO_EXTERN(syncfb)
 
 /* deinterlacing on? looks only good in 50 Hz(PAL) or 60 Hz(NTSC) modes */
 static int vo_conf_deinterlace = 0;
@@ -429,12 +429,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	//clear the buffer
 	// memset(frame_mem,0x80,frame_size*2);
   	return 0;
-}
-
-static const vo_info_t*
-get_info(void)
-{
-	return &vo_info;
 }
 
 
