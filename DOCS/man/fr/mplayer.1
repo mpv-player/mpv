@@ -4172,7 +4172,7 @@ filtre de postprocessing simple
 .IPs qualité
 0\-6 (par défaut\ : 3)
 .IPs qp\ \ \ 
-Force le paramètre de quantisation (par défaut\ : 0, utilise le QP de
+Force le paramètre de quantification (par défaut\ : 0, utilise le QP de
 la video).
 .IPs mode\ \ \ 
 0: fort seuillage (hard thresholding) (par défaut)
@@ -4183,7 +4183,7 @@ mais image plus floue)
 .
 .TP
 .B qp=equation
-filtre de changement des paramètres de quantization (QP)
+filtre de changement des paramètres de quantification (QP)
 .RSs
 .IPs equation
 une équation comme "2+2*sin(PI*qp)"
@@ -5382,11 +5382,11 @@ qualité (1\-plus rapide, 5\-meilleur)
 .
 .TP
 .B min_quant=<1\-31>
-quantificateur minimal
+quantum minimal
 .
 .TP
 .B max_quant=<1\-31>
-quantificateur maximal
+quantum maximal
 .
 .TP
 .B rc_period=<valeur>
@@ -5681,7 +5681,7 @@ codec vidéo sans perte de FFmpeg
 .
 .TP
 .B vqmin=<1\-31>
-quantificateur minimum (passe\ 1/\:2)
+quantum minimum (passe\ 1/\:2)
 .RSs
 .IPs 1
 Non recommandé (fichier bien plus gros, faible différence de qualité et
@@ -5693,7 +5693,7 @@ Recommandé pour l'encodage normal mpeg4/\:mpeg1video (par défaut).
 .IPs 3
 Recommandé pour h263(p)/\:msmpeg4. La raison de préférer 3 à 2 est que
 2 peut conduire à des dépassements.
-(Ceci sera corrigé pour h263(p) en changeant les quantificateurs par MB
+(Ceci sera corrigé pour h263(p) en changeant les quantum par macro-bloc
 dans le futur, msmpeg4 ne peut être corrigé car il ne gère pas cela).
 .RE
 .
@@ -5731,7 +5731,7 @@ obsolète, utilisez vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-différence maximale de quantificateur entre chaque trame-I ou -P
+différence maximale de quantum entre chaque trame-I ou -P
 consécutive (passe\ 1/\:2) (par défaut\ : 3)
 .
 .TP
@@ -5994,17 +5994,17 @@ Inutilisé, réservé pour utilisation future.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-facteur des quantificateurs entre les trames-B et non-B (passe\ 1/\:2)
+facteur de quantum entre les trames-B et non-B (passe\ 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-facteur des quantificateurs entre les trames-I et non-I (passe\ 1/\:2)
+facteur de quantum entre les trames-I et non-I (passe\ 1/\:2)
 (par défaut\ : 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-offset des quantificateurs entre les trames-B et non-B (passe\ 1/\:2)
+offset des quantum entre les trames-B et non-B (passe\ 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
@@ -6013,42 +6013,42 @@ offset des quantificateurs entre les trames-B et non-B (passe\ 1/\:2)
 .br
 si v{b|i}_qfactor > 0
 .br
-I/\:quantificateur trame-B = quantificateur trame-P * v{b|i}_qfactor +
+quantum trame-I/\:B = quantum trame-P * v{b|i}_qfactor +
 v{b|i}_qoffset
 .br
 sinon
 .br
 procède à un contrôle de débit normal (ne verrouille pas le prochain
-quantificateur trame-P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+quantum trame-P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 .I ASTUCE\ :
-Pour faire de l'encodage avec quantificateur constant avec des
-quantificateurs différents pour les trames-I/\:P et -B vous pouvez utiliser\ :
+Pour faire de l'encodage à quantum constant avec des
+quantum différents pour les trames-I/\:P et -B vous pouvez utiliser\ :
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
 .TP
 .B vqblur=<0.0\-1.0> (passe 1)
-Flou quantificateur (par défaut\ : 0.5), plus la valeur est grande, plus
-les quantificateurs seront semblables d'une trame à l'autre (variations
+Flou quantum (par défaut\ : 0.5), plus la valeur est grande, plus
+les quantum seront semblables d'une trame à l'autre (variations
 plus basses).
 .PD 0
 .RSs
 .IPs 0.0
-Flou quantificateur désactivé.
+Flou quantum désactivé.
 .IPs 1.0
-Fait une moyenne du quantificateur d'après toutes les trames précédentes.
+Répartit les quantum sur toutes les trames précédentes.
 .RE
 .PD 1
 .
 .TP
 .B vqblur=<0.0\-99.0> (passe 2)
-Flou gaussien quantificateur (par défaut\ : 0.5), plus la valeur est grande,
-plus les quantificateurs seront semblables d'une trame à l'autre
+Flou gaussien quantum (par défaut\ : 0.5), plus la valeur est grande,
+plus les quantum seront semblables d'une trame à l'autre
 (variations plus basses).
 .
 .TP
 .B vqcomp=<valeur>
-Compression quantificateur, dépend de vrc_eq (passe\ 1/\:2)
+Compression quantum, dépend de vrc_eq (passe\ 1/\:2)
 (par défaut\ : 0.5).
 .
 .TP
@@ -6134,7 +6134,7 @@ début>, <trame de fin>, <qualité>[/...]]:
 .PD 0
 .RSs
 .IPs "qualité (2\-31)"
-quantificateur
+quantum
 .IPs "qualité (-500\-0)"
 correction de qualité en %
 .RE
@@ -6146,7 +6146,7 @@ complexité initiale (passe\ 1)
 .
 .TP
 .B vqsquish=<0,1>
-Définit comment garder le quantificateur entre qmin et qmax (passe\ 1/\:2).
+Définit comment garder le quantum entre qmin et qmax (passe\ 1/\:2).
 .PD 0
 .RSs
 .IPs 0
@@ -6354,7 +6354,7 @@ intervalle sensé
 .B tcplx_mask=<0.0\-1.0>
 Masquage de la complexité temporelle (par défaut\ : 0.0 (désactivé)).
 Imaginez une scène avec un oiseau y volant, tcplx_mask va augmenter les
-quantificateurs des macro-blocs décrivant l'oiseau (et donc réduit leur
+quantum des macro-blocs décrivant l'oiseau (et donc réduit leur
 qualité) puisque l'oeil humain n'a normalement pas le temps de voir tous
 les détails de l'oiseau.
 Sachez cependant que si l'objet masqué s'arrêtre (ex.\& l'oiseau se pose)
@@ -6374,7 +6374,7 @@ n'est d'ailleurs pas une bonne idée.
 .br
 Imaginez une scène avec une pelouse (caractéristique d'une grande complexité
 spatiale), un ciel bleu et une maison, scplx_mask va augmenter les
-quantificateurs des macro-blocs décrivant la pelouse (et donc réduit leur
+quantum des macro-blocs décrivant la pelouse (et donc réduit leur
 qualité), pour pouvoir distribuer plus de bits au ciel et à la maison.
 .I
 ASTUCE\ :
@@ -6406,10 +6406,10 @@ p_mask=1.0 double la quantité de bits donnés à chaque bloc intra.
 .
 .TP
 .B naq\ \ \ \ 
-Normalise la quantisation adaptive (expérimental).
-En utilisant la quantisation adaptive (*_mask), le quantificateur moyen
-par MB peut ne pas correspondre au quantificateur par trame demandée.
-Naq essaiera d'ajuster les quantificateurs par MB pour maintenir une
+Normalise la quantification adaptive (expérimental).
+En utilisant la quantification adaptive (*_mask), le quantum moyen
+par MB peut ne pas correspondre au quantum par trame demandée.
+Naq essaiera d'ajuster les quantum par MB pour maintenir une
 moyenne correcte.
 .
 .TP
@@ -6532,7 +6532,7 @@ somme des différences absolues de la transformée de Hadamard
 .IPs "3 (DCT)"
 somme des différences absolues de la transformée DCT
 .IPs "4 (PSNR)"
-somme des erreurs de quantisation au carré (éviter, mauvaise qualité)
+somme des erreurs de quantification au carré (éviter, mauvaise qualité)
 .IPs "5 (BIT)"
 nombre de bits requis pour le bloc
 .IPs "6 (RD)"
@@ -6634,7 +6634,7 @@ diamant normal de taille=2
 .B trell\ \ 
 Quantisation par recherche trellis.
 Ceci trouvera l'encodage optimal pour chaque bloc 8x8.
-La quantisation par recherche trellis est en gros une quantisation
+La quantification par recherche trellis est en gros une quantification
 optimale en terme de compromis entre PSNR et bitrate (En supposant qu'il
 n'y aurait pas d'erreurs introduites par l'IDCT, ce qui n'est clairement
 pas le cas.).
@@ -6642,11 +6642,11 @@ Il trouve simplement un bloc ayant le minimum d'erreurs et lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-constante dépendante des paramètres de quantization (QP)
+constante dépendante des paramètres de quantification (QP)
 .IPs bits\ 
 quantité de bits requis pour encoder le bloc
 .IPs error
-somme des erreurs au carré de la quantisation
+somme des erreurs au carré de la quantification
 .RE
 .PD 1
 .
@@ -6662,7 +6662,7 @@ Ceci n'a pas d'effet si mbd=0.
 .
 .TP
 .B qprd (mbd=2 uniquement)
-paramètres de quantization (QP) à taux de distortion optimal pour le
+paramètres de quantification (QP) à taux de distortion optimal pour le
 lambda donné de chaque macrobloc
 .
 .TP
@@ -6707,7 +6707,7 @@ Les valeurs retournées sont en dB (décibel), le plus haut est le mieux.
 .
 .TP
 .B mpeg_quant
-Utilise les quantificateurs MPEG au lieu de H.263.
+Utilise les quantum MPEG au lieu de H.263.
 .
 .TP
 .B aic\ \ \ \ 
@@ -6728,26 +6728,26 @@ Autorise l'encodage de Vecteurs de Mouvements de longueur arbitraire.
 .
 .TP
 .B ibias=<-256\-256>
-polarisation intra quantificateur (256 équivaut à 1.0, les quantificateurs
-de type MPEG par défaut\ : 96, les quantificateurs de type H.263
+polarisation intra quantum (256 équivaut à 1.0, les quantum
+de type MPEG par défaut\ : 96, les quantum de type H.263
 par défaut\ : 0)
 .br
 .I NOTE\ :
-Le quantificateur H.263 MMX ne peut pas gérer de polarisations positives
+Le quantum H.263 MMX ne peut pas gérer de polarisations positives
 (choisir vfdct=1 ou 2).
-Le quantificateur MPEG MMX ne peut pas gérer de polarisations négatives
+Le quantum MPEG MMX ne peut pas gérer de polarisations négatives
 (choisir vfdct=1 ou 2)
 .
 .TP
 .B pbias=<-256\-256>
-polarisation inter quantificateur (256 équivaut à 1.0, les quantificateurs
-de type MPEG par défaut\ : 0, les quantificateurs de type H.263
+polarisation inter quantum (256 équivaut à 1.0, les quantum
+de type MPEG par défaut\ : 0, les quantum de type H.263
 par défaut\ : -64)
 .br
 .I NOTE\ :
-Le quantificateur H.263 MMX ne peut pas gérer de polarisations positives
+Le quantum H.263 MMX ne peut pas gérer de polarisations positives
 (choisir vfdct=1 ou 2)
-Le quantificateur MPEG MMX ne peut pas gérer de polarisations negatives
+Le quantum MPEG MMX ne peut pas gérer de polarisations negatives
 (choisir vfdct=1 ou 2)
 .br
 .I ASTUCE\ :
@@ -6761,12 +6761,12 @@ Réduction du  bruit, 0 signifie désactivé.
 .TP
 .B qns=<0\-3>
 Quantification d'après un modèle de bruit.
-Au lieu de baser sa quantification pour avoir l'image la plus fidèle d'un
-point de vue PSNR, la quantification sera faite de façon à ce que le bruit
-(souvent le "ringing") sera masqué par des données de fréquence similaire
-dans l'image.
-Ceci peut et doit être utilisé avec la quantisation par treillis, dans ce
-cas la quantisation par trellis (optimale pour un poids constant) sera
+Au lieu d'effectuer la quantification dans le but d'obtenir avoir l'image la
+plus fidèle d'un point de vue PSNR, la quantification sera faite de façon à
+ce que le bruit (souvent le "ringing") soit masqué par des données de
+fréquence similaire dans l'image.
+Ceci peut et doit être utilisé avec la quantification par treillis, dans ce
+cas la quantification par trellis (optimale pour un poids constant) sera
 utilisée comme point de départ pour la recherche itérative.
 .PD 0
 .RSs
@@ -6793,11 +6793,11 @@ séparés par des virgules.
 .
 .TP
 .B vqmod_amp
-modulation de quantificateur expérimental
+modulation de quantum expérimental
 .
 .TP
 .B vqmod_freq
-modulation de quantificateur expérimental
+modulation de quantum expérimental
 .TP
 .B dc\ \ \ \ \ 
 Précision DC intra en bits (par défaut\ : 8).
@@ -6852,7 +6852,7 @@ Active l'encodage RTJPEG (par défaut).
 .
 .SS xvidenc (\-xvidencopts)
 .
-Il y a trois modes disponibles: débit binaire constant (CBR), quantificateur
+Il y a trois modes disponibles: débit binaire constant (CBR), quantum
 fixe et 2passes.
 .
 .TP
@@ -6869,7 +6869,7 @@ visée de la vidéo (CBR ou mode 2passes, défaut\ : 687 kbits/\:s).
 .
 .TP
 .B fixed_quant=<1\-31>
-Passe en mode quantificateur fixe et définit le quantificateur à utiliser.
+Passe en mode quantum fixe et définit le quantum à utiliser.
 .
 .TP
 .B me_quality=<0\-6>
@@ -6919,10 +6919,10 @@ Taille du tampon de contrôle du débit.
 .
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
-mode CBR\ : quantificateur min & max pour toutes les trames
+mode CBR\ : quantum min & max pour toutes les trames
 (par défaut\ : 2\-31)
 .br
-mode 2passes\ : quantificateur min & max pour trames-I/\:P
+mode 2passes\ : quantum min & max pour trames-I/\:P
 (par défaut\ : 2\-31/\:2\-31)
 .br
 .I ATTENTION\ :
@@ -6939,12 +6939,12 @@ intervalle maximum entre les trames-clé (par défaut\ : 10*fps)
 .
 .TP
 .B mpeg_quant
-Utilise les quantificateurs MPEG au lieu de H.263.
-À débit binaire plutôt élevé (> 950kb), les quantificateurs MPEG ont tendance à
+Utilise les quantum MPEG au lieu de H.263.
+À débit binaire plutôt élevé (> 950kb), les quantum MPEG ont tendance à
 conserver plus de détails.
 À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
 image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantization, vous devez
+Si vous utilisez vos propres matrices de quantification, vous devez
 utiliser MPEG.
 .I ATTENTION\ :
 À partir de XviD-1.0.x, cette option est remplacée par l'option
@@ -6952,7 +6952,7 @@ quant_type.
 .
 .TP
 .B mod_quant
-Décide  trame par trame d'utiliser ou non les quantificateurs MPEG ou H.263.
+Décide trame par trame d'utiliser ou non les quantum MPEG ou H.263.
 .br
 .I ATTENTION\ :
 Cette option génèrera un flux vidéo incompatible avec la norme MPEG-4.
@@ -7033,12 +7033,12 @@ Nombre maximum de trames-B à insérer entre les trames-I/\:P (par défaut\ : 0).
 .
 .TP
 .B bquant_ratio=<0\-1000>
-rapport de quantificateur entre les trames-B et non-B, 150=1.50
+rapport de quantum entre les trames-B et non-B, 150=1.50
 (par défaut\ : 150)
 .
 .TP
 .B bquant_offset=<-1000\-1000>
-offset de quantificateur entre les trames-B et non-B, 100=1.00
+offset de quantum entre les trames-B et non-B, 100=1.00
 (par défaut\ : 100)
 .
 .TP
@@ -7095,8 +7095,8 @@ du type de vidéo source.
 .
 .TP
 .B (no)trellis
-La quantization trellis est un type d'encodage adaptatif qui permet
-d'économiser des bits en modifiant les coefficients de quantization pour
+La quantification trellis est un type d'encodage adaptatif qui permet
+d'économiser des bits en modifiant les coefficients de quantification pour
 augmenter la compressibilité de la vidéo.
 À même temps de calcul, cela améliore plus la qualité visuelle
 que de jouer sur les options VHQ .
@@ -7109,12 +7109,12 @@ Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
 .
 .TP
 .B quant_type=<h263|mpeg>
-Définit le type de quantificateur à utiliser.
-À débit binaire plutôt élevé (> 950kb), les quantificateurs MPEG ont tendance à
+Définit le type de quantum à utiliser.
+À débit binaire plutôt élevé (> 950kb), les quantum MPEG ont tendance à
 conserver plus de détails.
 À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
 image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantization, vous devez
+Si vous utilisez vos propres matrices de quantification, vous devez
 utiliser la quantification MPEG.
 .
 .TP
@@ -7161,27 +7161,27 @@ recherche large
 .
 .TP
 .B min_iquant=<0\-31>
-quantificateur minimum pour les trames-I (par défaut\ : 2)
+quantum minimum pour les trames-I (par défaut\ : 2)
 .
 .TP
 .B max_iquant=<0\-31>
-quantificateur maximum pour les trames-I (par défaut\ : 31)
+quantum maximum pour les trames-I (par défaut\ : 31)
 .
 .TP
 .B min_pquant=<0\-31>
-quantificateur minimum pour les trames-P (par défaut\ : 2)
+quantum minimum pour les trames-P (par défaut\ : 2)
 .
 .TP
 .B max_pquant=<0\-31>
-quantificateur maximum pour les trames-P (par défaut\ : 31)
+quantum maximum pour les trames-P (par défaut\ : 31)
 .
 .TP
 .B min_bquant=<0\-31>
-quantificateur minimum pour les trames-B (par défaut\ : 2)
+quantum minimum pour les trames-B (par défaut\ : 2)
 .
 .TP
 .B max_bquant=<0\-31>
-quantificateur maximum pour les trames-B (par défaut\ : 31)
+quantum maximum pour les trames-B (par défaut\ : 31)
 .
 .TP
 .B quant_intra_matrix=<nom_fichier>
@@ -7454,15 +7454,15 @@ FIXME: indiquer ce que signifie IDC.
 .
 .TP
 .B qp_constant=<1\-51>
-Définit le quantificateur à utiliser.
+Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
 Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
-L'échelle des paramètres de quantization (QP) de H.264 est logarithmique.
+L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
-Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
+Les quantum utiles en H.264 ont tendance à être bien plus importants
 comparés à MPEG[124].
 .
 .TP
@@ -7472,11 +7472,11 @@ Quantificateur minimum, 15\-35 semble être un intervalle raisonnable
 .
 .TP
 .B qp_max=<1\-51> (CBR uniquement)
-quantificateur maximum (par défaut\ : 51)
+quantum maximum (par défaut\ : 51)
 .
 .TP
 .B qp_step=<valeur>
-Différence de quantification maximale autorisée d'une trame à l'autre.
+Différence de quantum maximale autorisée d'une trame à l'autre.
 .
 .TP
 .B rc_buffer_size=<valeur>
@@ -7548,27 +7548,27 @@ produisant des images de qualité.
 .
 .TP
 .B qcomp=<0\-1>
-compression des quantificateurs (par défaut\ : 0.6)
+compression des quantum (par défaut\ : 0.6)
 Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
-constant, alors qu'une valeur importante rend les quantificateurs plus
+constant, alors qu'une valeur importante rend les quantum plus
 constants.
 .
 .TP
 .B cplx_blur=<0\-999>
 Flou temporel de la complexité de trame estimée, avant la compression de
 la courbe (défaut\ : 20).
-Des valeurs plus faibles permettent au quantificateurs de plus changer d'une
+Des valeurs plus faibles permettent au quantum de plus changer d'une
 trame à l'autre, des valeurs plus hautes forcent une variation plus douce.
 cplx_blur permet de s'assurer que chaque trame-I ait une qualité comparable
 aux trame-P suivantes, et garantit qu'une alternance de trames à complexité
 forte et faible (par exemple un dessin animé dont la cadence d'animation est
-faible) ne gâche pas de bits en faisant fluctuer les quantificateurs.
+faible) ne gâche pas de bits en faisant fluctuer les quantum.
 .
 .TP
 .B qblur=<0\-99>
-Flou temporel entre les quantificateurs, après la compression de la courbe
+Flou temporel entre les quantum, après la compression de la courbe
 (par défaut\ : 0.5).
-Une faible valeur permet aux quantificateurs de voir leur valeur varier plus
+Une faible valeur permet aux quantum de voir leur valeur varier plus
 d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
@@ -7616,7 +7616,7 @@ Ajuste la quantité d'informations de log à afficher à l'écran.
  2: PSNR, temps d'encodage et autres analyses statistiques lorsque
 l'encodage se termine (par défaut)
 .br
- 3: PSNR, paramètres de quantificateurs, type de trame, taille, et autres
+ 3: PSNR, paramètres de quantification, type de trame, taille, et autres
 statistiques sur chaque trame
 .REss
 .
