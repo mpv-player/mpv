@@ -1,5 +1,6 @@
-// Transated by: Leandro Lucarella <leandro@lucarella.com.ar>
-//
+// Translated by: Leandro Lucarella <leandro@lucarella.com.ar>
+// Translated by: Jesús Climent <jesus.climent@hispalinux.es>
+// 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -30,6 +31,7 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <mode>  selecciona la salida estéreo MPEG1 (0:estéreo 1:izquierda 2:derecha)\n"
 #endif
+" -channels <n>   número de canales de salida de audio\n"
 " -fs -vm -zoom   opciones de pantalla completa (pantalla completa,cambio de modo de video,escalado por software)\n"
 " -x <x> -y <y>   escala la imagen a resolución <x> * <y> [si -vo driver lo soporta!]\n"
 " -sub <file>     especifica el archivo de subtitulos a usar (vea también -subfps, -subdelay)\n"
@@ -39,6 +41,7 @@ static char help_text[]=
 " -pp <quality>   activa filtro de postprocesado (0-4 para DivX, 0-63 para mpegs)\n"
 " -nobps          usa sincronía A-V alternativa para AVIs (puede ayudar!)\n"
 " -framedrop      activa frame-dropping (para máquinas lentas)\n"
+" -wid <window id> usa una ventana activa para dirigir la salida de video (útil conjuntamente con el \"plugger\"\n"
 "\n"
 "Teclas:\n"
 " <-  o  ->      avanza/retrocede 10 segundos\n"
@@ -96,9 +99,21 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: No se puede inicializar el driver de video!\n"
 #define MSGTR_CannotInitAO "no se puede abrir/inicializar dispositivo de audio -> SIN SONIDO\n"
 #define MSGTR_StartPlaying "Empezando a reproducir...\n"
-#define MSGTR_SystemTooSlow "\n************************************************************************"\
-			    "\n*  Su sistema es lento para reproducir esto! Pruebe -framedrop o RTFM! *"\
-			    "\n************************************************************************\n"
+
+#define MSGTR_SystemTooSlow "\n\n"\
+"  **************************************************************\n"\
+"  *  Su sistema es demasiado lento para reproducir el video!   *\n"\
+"  **************************************************************\n"\
+" Posibles razones, problemas, soluciones: \n"\
+"- Más común: controlador de _audio_ con errores. Solución: use\n"\
+"  -ao sdl o ALSA 0.5 o ALSA 0.9 con emulacion OSS. Lea DOCS/soung.html\n"\
+"  para más ayuda\n"\
+"- Salida de video lenta: pruebe otro -vo driver (para obtener una lista,\n"\
+   -vo help) o pruebe -framedrop ! Lea DOCS/video.html para mas ayuda.\n"\
+"- CPU lenta: no reproduzca DVD/DivX grandes en una CPU lenta. pruebe\n"\
+"  -hardframedrop !\n"\
+"- Fichero erróneo: pruebe combinaciones de: -nobps -ni -mc 0 -forceidx\n"\
+"Si niguna funciona, lea DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer fue compilado sin soporte de GUI!\n"
 #define MSGTR_GuiNeedsX "El GUI de MPlayer requiere X11!\n"
@@ -197,7 +212,7 @@ static char help_text[]=
 #define MSGTR_NoMemForDecodedImage "no hay memoria suficiente para decodificar el buffer de las imágenes (%ld bytes)\n"
 
 #define MSGTR_AC3notvalid "Stream AC3 inválido.\n"
-#define MSGTR_AC3only48k "Sólo streams de 48000 soportados.\n"
+#define MSGTR_AC3only48k "Sólo streams de 48000 Hz soportados.\n"
 #define MSGTR_UnknownAudio "Formato de audio desconocido/perdido, usando sin sonido\n"
 
 // LIRC:
@@ -215,6 +230,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "Acerca de ..."
 #define MSGTR_FileSelect "Seleccionar archivo ..."
+#define MSGTR_SubtitleSelect "Seleccionar subtítulos..."
+#define MSGTR_OtherSelect "Seleccionar..."
 #define MSGTR_MessageBox "CajaDeMensaje"
 #define MSGTR_PlayList "ListaDeReproducción"
 #define MSGTR_SkinBrowser "Navegador de Skins"
@@ -250,6 +267,46 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "identificador de fuente no existente ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "parametro desconocido ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] no hay suficiente memoria.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin no encontrado( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Error de lectura de la configuración del skin ( %s ).\n"
+#define MSGTR_SKIN_LABEL "Skins:"
+
+// --- gtk menus
+#define MSGTR_MENU_AboutMPlayer "Sobre MPlayer"
+#define MSGTR_MENU_Open "Abrir ..."
+#define MSGTR_MENU_PlayFile "Reproducir file ..."
+#define MSGTR_MENU_PlayVCD "Reproducir VCD ..."
+#define MSGTR_MENU_PlayDVD "Reproducir DVD ..."
+#define MSGTR_MENU_PlayURL "Reproducir URL ..."
+#define MSGTR_MENU_LoadSubtitle "Cargar subtítulos ..."
+#define MSGTR_MENU_Playing "Reproduciendo"
+#define MSGTR_MENU_Play "Reproducir"
+#define MSGTR_MENU_Pause "Pausa"
+#define MSGTR_MENU_Stop "Parar"
+#define MSGTR_MENU_NextStream "Siguiente stream"
+#define MSGTR_MENU_PrevStream "Anterior stream"
+#define MSGTR_MENU_Size "Tamaño"
+#define MSGTR_MENU_NormalSize "Tamaño normal"
+#define MSGTR_MENU_DoubleSize "Tamaño doble"
+#define MSGTR_MENU_FullScreen "Fullscreen"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_PlayDisc "Reproducir disco ..."
+#define MSGTR_MENU_ShowDVDMenu "Mostrar menú DVD"
+#define MSGTR_MENU_Titles "Títulos"
+#define MSGTR_MENU_Title "Título %2d"
+#define MSGTR_MENU_None "(ninguno)"
+#define MSGTR_MENU_Chapters "Capítulos"
+#define MSGTR_MENU_Chapter "Capítulo %2d"
+#define MSGTR_MENU_AudioLanguages "Idiomas audio"
+#define MSGTR_MENU_SubtitleLanguages "Idiomas de subtítulos"
+#define MSGTR_MENU_PlayList "Lista de Reproducción"
+#define MSGTR_MENU_SkinBrowser "Navegador de Skins"
+#define MSGTR_MENU_Preferences "Preferencias"
+#define MSGTR_MENU_Exit "Salir ..."
+
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "error fatal ..."
+#define MSGTR_MSGBOX_LABEL_Error "error ..."
+#define MSGTR_MSGBOX_LABEL_Warning "advertencia ..." 
 
 #endif
-
