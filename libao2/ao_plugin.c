@@ -3,6 +3,7 @@
 
 #include "../config.h"
 
+#include "afmt.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
@@ -21,41 +22,25 @@ LIBAO_EXTERN(plugin)
 #define plugin(i) (ao_plugin_local_data.plugins[i])
 #define driver() (ao_plugin_local_data.driver)
 
-#define NPL 2 //Number of PLugins
-
-extern ao_plugin_functions_t audio_plugin_delay;
-
 // local data 
 typedef struct ao_plugin_local_data_s
 {
-  char* cfg_plugins;           // List of plugins read from cfg-file
   ao_functions_t* driver;      // Output driver set in mplayer.c
   ao_plugin_functions_t** plugins;               // List of used plugins
-  ao_plugin_functions_t* available_plugins[NPL]; // List of abailabel plugins
+  ao_plugin_functions_t* available_plugins[NPL]; // List of available plugins
 } ao_plugin_local_data_t;
 
-ao_plugin_local_data_t ao_plugin_local_data={
-  NULL,
-  NULL,
-  NULL,
-  {
-    &audio_plugin_delay,
-    NULL
-  }
-};
+ao_plugin_local_data_t ao_plugin_local_data={NULL,NULL,AO_PLUGINS};
 
 // gloabal data 
-ao_plugin_data_t ao_plugin_data;
-  
+ao_plugin_data_t ao_plugin_data; // data used by the plugins
+ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS;  // cfg data set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
   switch(cmd){
   case AOCONTROL_SET_PLUGIN_DRIVER:
     ao_plugin_local_data.driver=(ao_functions_t*)arg;
-    return CONTROL_OK;
-  case AOCONTROL_SET_PLUGIN_LIST:
-    ao_plugin_local_data.cfg_plugins=(char*)arg;
     return CONTROL_OK;
   default:
     return driver()->control(cmd,arg);
@@ -119,8 +104,8 @@ static int init(int rate,int channels,int format,int flags){
 
   /* Create list of plugins from cfg option */
   int i=0; 
-  if(ao_plugin_local_data.cfg_plugins){
-    if(!add_plugin(i,ao_plugin_local_data.cfg_plugins))
+  if(ao_plugin_cfg.plugin_list){
+    if(!add_plugin(i,ao_plugin_cfg.plugin_list))
       return 0;
   }
 
@@ -153,7 +138,7 @@ static int init(int rate,int channels,int format,int flags){
      input and output buffers for each plugin */
   ao_plugin_data.len=driver()->get_space();
   while((i>0) && ok)
-    ok=plugin(--i)->control(AOCONTROL_PLUGIN_SET_LEN,ao_plugin_data.len);
+    ok=plugin(--i)->control(AOCONTROL_PLUGIN_SET_LEN,0);
 
   if(!ok) return 0;
 

@@ -46,6 +46,7 @@ extern void* mDisplay; // Display* mDisplay;
 #endif
 
 #include "libao2/audio_out.h"
+#include "libao2/audio_plugin.h"
 
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
@@ -218,7 +219,6 @@ static int play_n_frames=-1;
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
-char* audio_plugins=NULL;
 static int fullscreen=0;
 static int vidmode=0;
 static int softzoom=0;
@@ -763,12 +763,11 @@ play_next_file:
     exit_player(MSGTR_Exit_error);
   }
   /* Initailize audio plugin interface if used */
-  if(audio_plugins){
+  if(ao_plugin_cfg.plugin_list){
     for (i=0; audio_out_drivers[i] != NULL; i++){
       const ao_info_t *info = audio_out_drivers[i]->info;
       if(strcmp(info->short_name,"plugin") == 0){
 	audio_out_drivers[i]->control(AOCONTROL_SET_PLUGIN_DRIVER,(int)audio_out);
-	audio_out_drivers[i]->control(AOCONTROL_SET_PLUGIN_LIST,(int)audio_plugins);
 	audio_out = audio_out_drivers[i];
 	break;
       }

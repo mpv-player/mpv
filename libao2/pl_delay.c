@@ -3,6 +3,7 @@
    the output signal by the nuber of samples set by aop_delay n
    where n is the number of bytes.
  */
+#define PLUGIN
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@
 
 static ao_info_t info =
 {
-        "Null audio plugin",
+        "Delay audio plugin",
         "delay",
         "Anders",
         ""
@@ -36,17 +37,14 @@ typedef struct pl_delay_s
 
 static pl_delay_t pl_delay={NULL,NULL,0,0,0,0};
 
-// global data
-int pl_delay_len=0; // number of samples to delay sound output set from cmd line
-
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_delay.data) 
       uninit();
-    pl_delay.len = arg;
-    pl_delay.data=(void*)malloc(arg);
+    pl_delay.len = ao_plugin_data.len;
+    pl_delay.data=(void*)malloc(ao_plugin_data.len);
     return CONTROL_OK;
   }
   return -1;
@@ -64,17 +62,17 @@ static int init(){
   pl_delay.format=ao_plugin_data.format;
 
   // Tell ao_plugin how much this plugin adds to the overall time delay
-  time_delay=-1*(float)pl_delay_len/((float)pl_delay.channels*(float)pl_delay.rate);
+  time_delay=-1*(float)ao_plugin_cfg.pl_delay_len/((float)pl_delay.channels*(float)pl_delay.rate);
   if(pl_delay.format != AFMT_U8 && pl_delay.format != AFMT_S8)
     time_delay/=2;
   ao_plugin_data.delay_fix+=time_delay;
 
-  pl_delay.delay=(void*)malloc(pl_delay_len);
+  pl_delay.delay=(void*)malloc(ao_plugin_cfg.pl_delay_len);
   if(!pl_delay.delay)
     return 0;
-  for(i=0;i<pl_delay_len;i++)
+  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++)
     ((char*)pl_delay.delay)[i]=0;
-  printf("[pl_delay] Output sound delayed by %i bytes\n",pl_delay_len);
+  printf("[pl_delay] Output sound delayed by %i bytes\n",ao_plugin_cfg.pl_delay_len);
   return 1;
 }
 
@@ -84,7 +82,7 @@ static void uninit(){
     free(pl_delay.delay);
   if(pl_delay.data) 
     free(pl_delay.data);
-  pl_delay_len=0;
+  ao_plugin_cfg.pl_delay_len=0;
 }
 
 // empty buffers
@@ -92,7 +90,7 @@ static void reset(){
   int i = 0;
   for(i=0;i<pl_delay.len;i++)
     ((char*)pl_delay.data)[i]=0;
-  for(i=0;i<pl_delay_len;i++)
+  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++)
     ((char*)pl_delay.delay)[i]=0;
 }
 
@@ -103,13 +101,13 @@ static int play(){
   int j=0;
   int k=0;
   // Copy end of prev block to begining of buffer
-  for(i=0;i<pl_delay_len;i++,j++)
+  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++,j++)
     ((char*)pl_delay.data)[j]=((char*)pl_delay.delay)[i];
   // Copy current block except end
-  for(i=0;i<ao_plugin_data.len-pl_delay_len;i++,j++,k++)
+  for(i=0;i<ao_plugin_data.len-ao_plugin_cfg.pl_delay_len;i++,j++,k++)
     ((char*)pl_delay.data)[j]=((char*)ao_plugin_data.data)[k];
   // Save away end of current block for next call
-  for(i=0;i<pl_delay_len;i++,k++)
+  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++,k++)
     ((char*)pl_delay.delay)[i]=((char*)ao_plugin_data.data)[k];
   // Set output data block
   ao_plugin_data.data=pl_delay.data;

@@ -1,4 +1,7 @@
-/* functions supplied by plugins */
+#ifndef __audio_plugin_h__
+#define __audio_plugin_h__
+
+// Functions supplied by plugins
 typedef struct ao_plugin_functions_s
 {
 	ao_info_t *info;
@@ -9,7 +12,7 @@ typedef struct ao_plugin_functions_s
         int (*play)();
 } ao_plugin_functions_t;
 
-/* Global data for all audio plugins */
+// Global data for all audio plugins
 typedef struct ao_plugin_data_s
 {
   void* data;       /* current data block read only ok to change */
@@ -25,7 +28,41 @@ typedef struct ao_plugin_data_s
 
 extern ao_plugin_data_t ao_plugin_data;
 
-//List of plugins 
+// Plugin confuguration data set by cmd-line parameters
+typedef struct ao_plugin_cfg_s
+{
+  char* plugin_list; 	// List of used plugins read from cfg
+  int pl_format_type;	// Output format
+  int pl_delay_len;	// Number of samples to delay sound output
+} ao_plugin_cfg_t;
+
+extern ao_plugin_cfg_t ao_plugin_cfg;
+
+// Configuration defaults
+#define CFG_DEFAULTS { \
+ NULL, \
+ AFMT_S16_LE, \
+ 0 \
+};
+
+// This block should not be available in the pl_xxxx files
+// due to compilation issues
+#ifndef PLUGIN
+#define NPL 2+1 // Number of PLugins ( +1 list ends with NULL )
+// List of plugins 
+extern ao_plugin_functions_t audio_plugin_delay;
+extern ao_plugin_functions_t audio_plugin_format; 
+
+#define AO_PLUGINS { \
+   &audio_plugin_delay, \
+   &audio_plugin_format, \
+   NULL \
+}
+#endif /* PLUGIN */
 
 
-#define AOCONTROL_PLUGIN_SET_LEN 1
+// Control parameters used by the plugins
+#define AOCONTROL_PLUGIN_SET_LEN 1  // All plugins must respond to this parameter
+
+#endif
+
