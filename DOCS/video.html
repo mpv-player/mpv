@@ -1262,7 +1262,8 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <P>Under Linux you have 2 methods to get G400 TV out working:</P>
 
-<P><B>IMPORTANT:</B> Only Matrox G400DH/G400MAX has TV-out support under Linux, others (G450, G550) have <B>not!</B></P>
+<P><B>IMPORTANT:</B> for Matrox G450/G550 TV-out instructions, please see the
+  next section!</P>
 
 <UL>
   <LI><B>XFree86</B>: using the driver and the HAL module, available from
@@ -1322,7 +1323,26 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </UL>
 
 
-<H5><A NAME="tv-out_ati">2.3.1.A.2 ATI cards</A></H5>
+<H5><A NAME="tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550 cards</A></H5>
+
+<P>TV output support for these cards has only been recently introduced, and is
+  not yet in the mainstream kernel. Currently the <B>mga_vid</B> module
+  can't be used AFAIK, because the G450/G550 driver works only in one
+  configuration: the first CRTC chip (with much more features) on the first
+  display (on monitor), and the second CRTC (no <B>BES</B> - for explanation 
+  on BES, please see the G400 section above) on TV. So you can only use
+  <B>MPlayer's</B> <I>fbdev</I> output driver at the present.</P>
+
+<P>The first CRTC can't be routed to the second head currently.
+  The author of the kernel matroxfb driver - Petr Vandrovec - will maybe make
+  support for this, by displaying the first CRTC's output onto both of the
+  heads at once, as currently recommended for G400, see the section above.</P>
+
+<P>The necessary kernel patch and the detailed howto is downloadable from
+  <A HREF="http://www3.sympatico.ca/dan.eriksen/matrox_tvout">http://www3.sympatico.ca/dan.eriksen/matrox_tvout</A></P>
+
+
+<H5><A NAME="tv-out_ati">2.3.1.A.3 ATI cards</A></H5>
 
 <H5>PREAMBLE</H5>
 
@@ -1349,7 +1369,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   POST procedure.</P>
 
 
-<H5><A NAME="tv-out_voodoo">2.3.1.A.3 Voodoo 3</A></H5>
+<H5><A NAME="tv-out_voodoo">2.3.1.A.4 Voodoo 3</A></H5>
 
 <P>Check <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</A>.</P>
 
