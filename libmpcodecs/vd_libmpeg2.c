@@ -290,5 +290,16 @@ while(current<end){
 	if(ret) mpi=ret;
 //    }
 
+    if(mpi){
+        static int last_non_b_type= 0;
+
+	if(picture->picture_coding_type == B_TYPE)
+	    mpi->pict_type= B_TYPE;
+	else{
+	    mpi->pict_type= last_non_b_type;
+	    last_non_b_type= picture->picture_coding_type;
+	}
+    }
+
     return mpi;
 }

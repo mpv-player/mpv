@@ -630,6 +630,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->qscale=&quant_store[0][0];
     mpi->qstride=MBC+1;
 #endif
+
+    {
+        static int last_non_b_type= 0;
+
+	if(avctx->pict_type == B_TYPE)
+	    mpi->pict_type= B_TYPE;
+	else{
+	    mpi->pict_type= last_non_b_type;
+	    last_non_b_type= avctx->pict_type;
+	}
+    }
     
     return mpi;
 }
