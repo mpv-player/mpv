@@ -234,7 +234,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	  int start=videobuf_len+4;
           if(in_frame){
             if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
-#if 1
+#if 0
               // send END OF FRAME code:
               videobuffer[videobuf_len+0]=0;
               videobuffer[videobuf_len+1]=0;
