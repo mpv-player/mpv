@@ -54,7 +54,9 @@ static struct {
 #ifdef USE_WIN32DLL
         { "avs", DEMUXER_TYPE_AVS },
 #endif
-	{ "nut", DEMUXER_TYPE_LAVF }
+	{ "nut", DEMUXER_TYPE_LAVF },
+	{ "swf", DEMUXER_TYPE_LAVF },
+	{ "flv", DEMUXER_TYPE_LAVF }
 };
 
 int demuxer_type_by_filename(char* filename){
