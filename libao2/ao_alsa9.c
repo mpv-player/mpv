@@ -3,10 +3,11 @@
 
   (C) Alex Beregszaszi <alex@naxine.org>
   
-  modified for better alsa-0.9.0beta12(rc1)-support by Joy Winter <joy@pingfm.org>
-  additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>
+  modified for real alsa-0.9.0-support by Joy Winter <joy@pingfm.org>
+  additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>  
+  08/22/2002 iec958-init rewritten and merged with common init, joy
   
-  Any bugreports regarding to this driver are welcome either to the mplayer-user-mailinglist or directly to the authors.
+  Any bugreports regarding to this driver are welcome.
 */
 
 #include <errno.h>
@@ -47,7 +48,7 @@ static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
-static char *alsa_device;
+const char *alsa_device;
 
 /* possible 4096, original 8192 
  * was only needed for calculating chunksize? */
@@ -73,126 +74,6 @@ static int set_block_mode;
 #undef BUFFERTIME
 #define SET_CHUNKSIZE
 #undef USE_POLL
-
-snd_pcm_t *spdif_init(char *pcm_name)
-{
-	//char *pcm_name = "hw:0,2"; /* first card second device */
-	static snd_aes_iec958_t spdif;
-	static snd_aes_iec958_t spdif_test;
-	snd_pcm_info_t 	*info;
-	snd_pcm_t *handler;
-	snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
-	unsigned int channels = 2;
-	unsigned int rate = 48000;
-	int err, c;
-
-	if ((err = snd_pcm_open(&handler, pcm_name, SND_PCM_STREAM_PLAYBACK, 0)) < 0)
-	{
-		fprintf(stderr, "open: %s\n", snd_strerror(err));
-		return NULL;
-	}
-
-	snd_pcm_info_alloca(&info);
-
-	if ((err = snd_pcm_info(handler, info)) < 0) {
-		fprintf(stderr, "info: %s\n", snd_strerror(err));
-		snd_pcm_close(handler);
-		return NULL;
-	}
-        printf("device: %d, subdevice: %d\n", snd_pcm_info_get_device(info),
-                snd_pcm_info_get_subdevice(info));                              
-	{
-
-        snd_ctl_elem_value_t *ctl;
-        snd_ctl_t *ctl_handler;
-	snd_ctl_elem_id_t *elem_id;
-	unsigned int elem_device;
-	const char *elem_name;
-        char ctl_name[12];
-        int ctl_card;
-	//elem_id = 36;
-
-	spdif.status[0] = IEC958_AES0_NONAUDIO |
-			  IEC958_AES0_CON_EMPHASIS_NONE;
-	spdif.status[1] = IEC958_AES1_CON_ORIGINAL |
-			  IEC958_AES1_CON_PCM_CODER;
-	spdif.status[2] = 0;
-	spdif.status[3] = IEC958_AES3_CON_FS_48000;
-
-        snd_ctl_elem_value_alloca(&ctl);
-	snd_ctl_elem_id_alloca(&elem_id); 
-	snd_ctl_elem_value_set_interface(ctl, SND_CTL_ELEM_IFACE_PCM); //SND_CTL_ELEM_IFACE_MIXER
-        snd_ctl_elem_value_set_device(ctl, snd_pcm_info_get_device(info));
-        snd_ctl_elem_value_set_subdevice(ctl, snd_pcm_info_get_subdevice(info));
-        snd_ctl_elem_value_set_name(ctl,SND_CTL_NAME_IEC958("", PLAYBACK, PCM_STREAM)); //SWITCH
-	snd_ctl_elem_value_set_iec958(ctl, &spdif);
-        ctl_card = snd_pcm_info_get_card(info);
-        if (ctl_card < 0) {
-           fprintf(stderr, "Unable to setup the IEC958 (S/PDIF) interface - PCM has no assigned card");
-           goto __diga_end;
-        }
-
-       sprintf(ctl_name, "hw:%d", ctl_card);
-       printf("hw:%d\n", ctl_card);
-       if ((err = snd_ctl_open(&ctl_handler, ctl_name, 0)) < 0) {
-          fprintf(stderr, "Unable to open the control interface '%s': %s\n", ctl_name, snd_strerror(err));                                                    
-          goto __diga_end;
-       }
-       if ((err = snd_ctl_elem_write(ctl_handler, ctl)) < 0) {
-	 //fprintf(stderr, "Unable to update the IEC958 control: %s\n", snd_strerror(err));
-	 printf("alsa-spdif-init: cant set spdif-through automatically\n");
-        goto __diga_end;
-       }
-
-      snd_ctl_close(ctl_handler);
-      __diga_end:                                                       
-
-       }
-
-	{
-	  snd_pcm_hw_params_t *params;
-	  snd_pcm_sw_params_t *swparams;
-	  
-	  snd_pcm_hw_params_alloca(&params);
-	  snd_pcm_sw_params_alloca(&swparams);
-
-          err = snd_pcm_hw_params_any(handler, params);
-          if (err < 0) {
-             fprintf(stderr, "Broken configuration for this PCM: no configurations available");                                                                        
-	     return NULL;
-	  }
-
-	  err = snd_pcm_hw_params_set_access(handler, params,SND_PCM_ACCESS_RW_INTERLEAVED);
-	  if (err < 0) {
-	    fprintf(stderr, "Access tyep not available");
-	    return NULL;
-	  }
-	  err = snd_pcm_hw_params_set_format(handler, params, format);
-
-	  if (err < 0) {
-	    fprintf(stderr, "Sample format non available");
-	    return NULL;
-	  }
-
-	  err = snd_pcm_hw_params_set_channels(handler, params, channels);
-
-	  if (err < 0) {
-	    fprintf(stderr, "Channels count non avaible");
-	    return NULL;
-	  }
-
-          err = snd_pcm_hw_params_set_rate_near(handler, params, rate, 0);        assert(err >= 0);
-
-	  err = snd_pcm_hw_params(handler, params);
-
-	  if (err < 0) {
-	    fprintf(stderr, "Cannot set buffer size\n");
-	    return NULL;
-	  }
-	  snd_pcm_sw_params_current(handler, swparams);
-	}  
-	return handler;
-}
 
 
 /* to set/get/query special features/parameters */
@@ -413,7 +294,6 @@ static int init(int rate_hz, int channels, int format, int flags)
       char *token_str[3];
       char* test_str = strdup(ao_subdevice);
 
-      //printf("subd=%s, test=%s\n", ao_subdevice,test_str);
 
       if ((strcspn(ao_subdevice, ":")) > 0) {
 
@@ -422,12 +302,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 	while (((sub_str = strtok(NULL, ":")) != NULL) && (i2 <= 3)) {
 	  *(token_str+i2) = sub_str;
-	  //printf("token %i: %s\n", i2, *(token_str+i2));
 	  i2 += 1;
 	}
 
 	for (i3=0; i3 <= i2-1; i3++) {
-	  //printf("test %i, %s\n", i3, *(token_str+i3));
 	  if (strcmp(*(token_str + i3), "mmap") == 0) {
 	    ao_mmap = 1;
 	  }
@@ -436,25 +314,66 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 	  else if (strcmp(*(token_str+i3), "hw") == 0) {
 	    if ((i3 < i2-1) && (strcmp(*(token_str+i3+1), "noblock") != 0) && (strcmp(*(token_str+i3+1), "mmap") != 0)) {
-	      //printf("next tok = %s\n", *(token_str+(i3+1)));
 	      alsa_device = alloca(ALSA_DEVICE_SIZE);
 	      snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%s", *(token_str+(i3+1)));
 	      device_set = 1;
 	    }
 		else {
-		  //printf("setting hw\n");
 		  alsa_device = *(token_str+i3);
 		  device_set = 1;
 		}
 	  }
 	  else if (device_set == 0 && (!ao_mmap || !ao_noblock)) {
-	    //printf("setting common, %s\n", *(token_str+i3));
 	    alsa_device = *(token_str+i3);
 	    device_set = 1;
 	  }
 	}
       }
     } //end parsing ao_subdevice
+
+    /* switch for spdif
+     * sets opening sequence for SPDIF
+     * sets also the playback and other switches 'on the fly'
+     * while opening the abstract alias for the spdif subdevice
+     * 'iec958'
+     */
+    if (format == AFMT_AC3) {
+      char devstr[128];
+      unsigned char s[4];
+      int err, c;
+
+      switch (channels) {
+      case 1:
+      case 2:
+
+	s[0] = IEC958_AES0_NONAUDIO | 
+	  IEC958_AES0_CON_EMPHASIS_NONE;
+	s[1] = IEC958_AES1_CON_ORIGINAL | 
+	  IEC958_AES1_CON_PCM_CODER;
+	s[2] = 0;
+	s[3] = IEC958_AES3_CON_FS_48000;
+
+	sprintf(devstr, "iec958:AES0=0x%x,AES1=0x%x,AES2=0x%x,AES3=0x%x", 
+		s[0], s[1], s[2], s[3]);
+
+	if (verbose)
+	  printf("alsa-spdif-init: playing AC3, %i channels\n", channels);
+	break;
+      case 4:
+	strcpy(devstr, "surround40");
+	break;
+    
+      case 6:
+	strcpy(devstr, "surround51");
+	break;
+
+      default:
+	fprintf(stderr, "%d channels are not supported\n", channels);
+	exit (0);
+      }
+
+      alsa_device = devstr;
+    }
 
     if (alsa_device == NULL)
       {
@@ -506,15 +425,6 @@ static int init(int rate_hz, int channels, int format, int flags)
       } else {
 		printf("alsa-init: soundcard set to %s\n", alsa_device);
       }
-
-    // switch for spdif
-    // Try to initialize the SPDIF interface
-    if (format == AFMT_AC3) {
-      if (device_set)
-	alsa_handler = spdif_init(alsa_device);
-      else
-	alsa_handler = spdif_init("iec958");
-    }
 
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
