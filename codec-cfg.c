@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "loader.h"	  // loader+avifmt for mmioFOURCC
+// for mmioFOURCC:
 #include "wine/avifmt.h"
 
 #include "libvo/img_format.h"
