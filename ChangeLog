@@ -10,12 +10,17 @@ mplayer (1.0)
     * HTML documentation obsoleted
     * English, Polish and French HTML documentation removed
     * Spanish documentation translation finished
+    * Macedonian runtime output translation added
+    * small improvements and bug fixes all over the place
+
+    Ports:
+    * fixed compilation of matroska on MinGW32/Cygwin
+    * support for detecting non-Intel CPUs under Cygwin
+    * sub autoloading under Windows
 
     Codecs and demuxers:
-    * improved FLAC configure detection
     * better support for (buggy) MEncoder created streams in libmpeg2
     * better AC3 detection in Matroska
-    * fixed compilation of matroska on MinGW32/Cygwin
     * support for (uncompressed) VobSubs inside Matroska
     * support for MP2 inside Matroska
     * MPEG-TS demuxer updates
@@ -44,7 +49,7 @@ mplayer (1.0)
     * reduced memory footprint (!)
     * fixed decoding if aspect ratio changes
     * MMX2 optimizations in HuffYUV
-    * lot of bugs squashed in HuffYUV
+    * lots of bugs squashed in HuffYUV
     * fixed the long standing decoding errors after 'first frame is not keyframe'
     * CRI ADX support
     * XA ADPCM support
@@ -65,7 +70,7 @@ mplayer (1.0)
     * gl2 updates
     * ggi now supports non-directbuffer rendering and slices
     * tdfxfb fixed on gcc 3.x
-    * dfbmga updated, g200 support
+    * dfbmga updated, G200 support
     * colorkeying can be disabled
     
     SWScaler:
@@ -74,15 +79,14 @@ mplayer (1.0)
     * MMX optimized UYVY output
     
     Others:
-    * sub autoloading under Windows
     * Darwin XMMS libs supported
     * support newer Darwin versions in Altivec detection code
     * fixed aspect and geometry
     * fixed compilation when libavcodec is missing (although it's a bad idea)
-    * support for newer Apple GCC's
-    * support for detecting non-Intel CPUs under Cygwin
+    * support for newer Apple GCCs
     * MTRR detection added to TOOLS/cpuinfo
     * FAAD detection in configure fixed/improved
+    * improved FLAC configure detection
 
 
   pre2:
