@@ -1,6 +1,6 @@
 // $Revision$
 // MASTER FILE. Use this file as base for translations.
-// Translated files should be sent to the mplayer-dev-eng mailing list or
+// Translated files should be sent to the mplayer-DOCS mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
 // The header of the translated file should contain credits and contact
 // information. Before major releases we will notify all translators to update
@@ -19,7 +19,7 @@ static char help_text[]=
 " -vo <drv[:dev]>  select video output driver & device ('-vo help' for a list)\n"
 " -ao <drv[:dev]>  select audio output driver & device ('-ao help' for a list)\n"
 #ifdef HAVE_VCD
-" vcd://<trackno>   play VCD (Video CD) track from device instead of plain file\n"
+" vcd://<trackno>   play (S)VCD (Super Video CD) track (raw device, no mount)\n"
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>   play DVD title from device instead of plain file\n"
@@ -116,7 +116,7 @@ static char help_text[]=
 #define MSGTR_Playing "Playing %s.\n"
 #define MSGTR_NoSound "Audio: no sound\n"
 #define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compiled with Runtime CPU Detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Compiled with runtime CPU detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compiled for x86 CPU with extensions:"
 #define MSGTR_AvailableVideoOutputPlugins "Available video output plugins:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Available video output drivers:\n"
