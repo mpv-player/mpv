@@ -250,6 +250,7 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     mp_image_t* mpi=NULL;
 //    int flags= MP_IMGFLAG_ALIGNED_STRIDE;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE;
+    int type= MP_IMGTYPE_IPB;
     
     if(init_vo(sh)<0){
         printf("init_vo failed\n");
@@ -262,7 +263,16 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     else
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
 
-    mpi= mpcodecs_get_image(sh,MP_IMGTYPE_IPB, flags,
+#if LIBAVCODEC_BUILD > 4616
+    if(avctx->has_b_frames){
+        type= MP_IMGTYPE_IPB;
+    }else{
+        type= MP_IMGTYPE_IP;
+    }
+#endif
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
+
+    mpi= mpcodecs_get_image(sh,type, flags,
 // MN: arpi, is the next line ok? (i doubt it), its needed for height%16!=0 files
 			(width+15)&(~15), (height+15)&(~15));
 
@@ -282,13 +292,10 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     }
 
     avctx->dr_stride   = mpi->stride[0];
+    avctx->dr_uvstride = mpi->stride[1];
 
-    if(mpi->stride[0]>>1 != mpi->stride[1] 
-     ||mpi->stride[0]>>1 != mpi->stride[2]){
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: chroma stride != luma stride >>1\n");
-    }
-    
     avctx->dr_opaque_frame = mpi;
+    avctx->dr_ip_buffer_count=2; //FIXME
 }
 #endif
 
@@ -300,7 +307,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
-    int dr1= ctx->do_dr1=0;
+    int dr1= ctx->do_dr1;
 
     if(len<=0) return NULL; // skipped frame
 
