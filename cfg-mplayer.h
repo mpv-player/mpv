@@ -67,6 +67,11 @@ extern int dvd_angle;
 extern char * skinName;
 #endif
 
+#ifdef HAVE_ODIVX_POSTPROCESS
+extern int use_old_pp;
+#endif
+
+
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
@@ -204,6 +209,11 @@ struct config conf[]={
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
+#ifdef HAVE_ODIVX_POSTPROCESS
+        {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1},
+#else
+        {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#endif
 	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
 #ifdef HAVE_PNG
