@@ -1,8 +1,11 @@
 //  QuickTime MOV file parser by A'rpi
-//  based on TOOLS/movinfo.c by me & Al3x
+//  additional work by Atmos
+//  based on TOOLS/movinfo.c by A'rpi & Al3x
 //  compressed header support from moov.c of the openquicktime lib.
 //  References: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
 //  http://www.geocities.com/SiliconValley/Lakes/2160/fformats/files/mov.pdf
+//  The QuickTime File Format PDF (QTFileFormat.pdf) from Apple:
+//  http://developer.apple.com/quicktime/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +31,9 @@
 
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
 #define BE_32(x) (be2me_32(*(unsigned int *)(x)))
+
+#define char2short(x,y) ((x[y]<<8)|x[y+1])
+#define char2int(x,y) ((x[y]<<24)|(x[y+1]<<16)|(x[y+2]<<8)|x[y+3])
 
 typedef struct {
     unsigned int pts; // duration
@@ -216,7 +222,7 @@ int mov_check_file(demuxer_t* demuxer){
 	{
 #ifndef _LARGEFILE_SOURCE
 	    if (stream_read_dword(demuxer->stream) != 0)
-		mp_msg(MSGT_DEMUX, MSGL_WARN, "64bit file, but you've MPlayer compiled without LARGEFILE support!\n");
+		mp_msg(MSGT_DEMUX, MSGL_WARN, "64bit file, but you've compiled MPlayer without LARGEFILE support!\n");
 	    len = stream_read_dword(demuxer->stream);
 #else
 	    len = stream_read_qword(demuxer->stream);
@@ -572,7 +578,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		   int16_t compression_id;	// if version 0 then 0
 		  				// if version 1 and vbr then -2 else 0
 		   int16_t packet_size;		// 0
-		   uint32_t sample_rate;	// samplerate (Hz)
+		   uint16_t sample_rate;	// samplerate (Hz)
 		   // qt3.0+ (version == 1)
 		   uint32_t samples_per_packet;	// 0 or num uncompressed samples in a packet
 		   				// if 0 below three values are also 0
@@ -590,7 +596,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
 
-// assumptions for below table: short is 16bit, int is 32bit		
+// assumptions for below table: short is 16bit, int is 32bit, intfp is 16bit
+// XXX: 32bit fixed point numbers (intfp) are only 2 Byte!		
 // short values are usually one byte leftpadded by zero		
 //   int values are usually two byte leftpadded by zero		
 //  stdata[]:
@@ -601,29 +608,19 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //	18  short	samplesize
 //	20  short	compression_id
 //	22  short	packet_size (==0)
-//	24  int		sample_rate
+//	24  intfp	sample_rate
+//     (26  short)	unknown (==0)
 //    ---- qt3.0+
 //	28  int		samples_per_packet
 //	32  int		bytes_per_packet
 //	36  int		bytes_per_frame
 //	40  int		bytes_per_sample
-// my recoveries from .mp4 files with correct index (counting from 0):
-// it's always start with padding/real start		
-//    8/ 9  short	version	
-//   10/11  short	revision	
-//   12/14  int		vendor_id	
-//   16/17  short	channels
-//   18/19  short	samplesize
-//   20/21  short	compression_id		
-//   22/23  short	packet_size (XXX: this overlaps with sample_rate ?)		
-//   22/24  int		sample_rate		
+// there may be additional atoms following at 28 (version 0)
+// or 44 (version 1), eg. esds atom of .MP4 files		
 // esds atom:
-//   28/31  int		atom size (bytes of int size, int type and data)
-//   32/32  int		atom type (fourc charater code -> esds)		
-//   62/63  int  	compressed datarate (Bits)
-
-#define char2short(x,y) ((x[y]<<8)|x[y+1])
-#define char2int(x,y) ((x[y]<<24)|(x[y+1]<<16)|(x[y+2]<<8)|x[y+3])
+//      28  int		atom size (bytes of int size, int type and data)
+//      32  char[4]	atom type (fourc charater code -> esds)		
+//      62  int  	compressed datarate (Bits)
 
 		sh->samplesize=char2short(trak->stdata,18)/8;
 		sh->channels=char2short(trak->stdata,16);
@@ -658,14 +655,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'):
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: MP4 esds audio atom found (%d)!\n", atom_len);
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 esds audio atom (%d)!\n", atom_len);
 			if(atom_len >= 28)
 			  mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio compressed datarate: %dkbit/s\n",
 			      char2int(trak->stdata,62)/1000);
 			  sh->i_bps=char2int(trak->stdata,62)/8;
 			break;
 		      default:
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: unknown audio atom %c%c%c%c found (%d)!\n",
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
 			    trak->stdata[32],trak->stdata[33],trak->stdata[34],trak->stdata[35],
 			    atom_len);
 		    }
@@ -716,10 +713,58 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //	32  int		v_dpi
 //	36  int		0
 //	40  short	frames_per_sample
-//	42  char[32]	compressor_name
+//	42  char[4]	compressor_name
 //	74  short	depth
 //	76  short	color_table_id
+// additional atoms may follow,
+// eg esds atom from .MP4 files
+//      78  int		atom size
+//      82  char[4]	atom type
+//	86  ...		atom data
 
+
+		if(trak->stdata_len >= 86) { // extra atoms found
+		  int atom_len = char2int(trak->stdata,78);
+		  if((trak->stdata_len - atom_len) > 78)
+		      mp_msg(MSGT_DEMUX, MSGL_WARN, "MOV: Movie stdata contains more then one atom (yet unsupported)!\n");
+		  // TODO: add support for multiple atoms, by analyzing stdata len
+		  // and comparing with len of first atom ::atmos
+		  switch(char2int(trak->stdata,82)) { // switch atom type
+		    case MOV_FOURCC('g','a','m','a'):
+		      // intfp with gamma value at which movie was captured
+		      // can be used to gamma correct movie display
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported Gamma-Correction movie atom (%d)!\n",
+			  atom_len);
+		      break;
+		    case MOV_FOURCC('f','i','e','l'):
+		      // 2 char-values (8bit int) that specify field handling
+		      // see the Apple's QuickTime Fileformat PDF for more info
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported Field-Handling movie atom (%d)!\n",
+			  atom_len);
+		      break;
+		    case MOV_FOURCC('m','j','q','t'):
+		      // Motion-JPEG default quantization table
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported MJPEG-Quantization movie atom (%d)!\n",
+			  atom_len);
+		      break;
+		    case MOV_FOURCC('m','j','h','t'):
+		      // Motion-JPEG default huffman table
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported MJPEG-Huffman movie atom (%d)!\n",
+			  atom_len);
+		      break;
+		    case MOV_FOURCC('e','s','d','s'):
+		      // MPEG4 esds header
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 esds movie atom (%d)!\n", atom_len);
+		      // add code here to save esds header of length atom_len-8
+		      // beginning at stdata[86] to some variable to pass it
+		      // on to the decoder ::atmos
+		      break;
+		    default:
+	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
+	      		  trak->stdata[86],trak->stdata[87],trak->stdata[88],trak->stdata[89],
+	      		  atom_len);
+		  }
+		}
 		if(!sh->fps) sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
 #if 0
