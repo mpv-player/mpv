@@ -1,5 +1,6 @@
 #include "config.h"
 #include "cpudetect.h"
+#include "mp_msg.h"
 
 CpuCaps gCpuCaps;
 
@@ -94,11 +95,11 @@ void GetCpuCaps( CpuCaps *caps)
 
 	memset(caps, 0, sizeof(*caps));
 	if (!has_cpuid()) {
-	    printf("CPUID not supported!???\n");
+	    mp_msg(MSGT_CPUDETECT,MSGL_ERR,"CPUID not supported!???\n");
 	    return;
 	}
 	do_cpuid(0x00000000, regs); // get _max_ cpuid level and vendor name
-	printf("CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",
+	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",
 			(char*) (regs+1),(char*) (regs+3),(char*) (regs+2), regs[0]);
 	if (regs[0]>=0x00000001)
 	{
@@ -107,7 +108,7 @@ void GetCpuCaps( CpuCaps *caps)
 		do_cpuid(0x00000001, regs2);
 
 		tmpstr=GetCpuFriendlyName(regs, regs2);
-		printf("CPU: %s ",tmpstr);
+		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: %s ",tmpstr);
 		free(tmpstr);
 
 		caps->cpuType=(regs2[0] >> 8)&0xf;
@@ -116,7 +117,7 @@ void GetCpuCaps( CpuCaps *caps)
 		    caps->cpuType=8+((regs2[0]>>20)&255);
 		}
 		caps->cpuStepping=regs2[0] & 0xf;
-		printf("(Type: %d, Stepping: %d)\n",
+		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Type: %d, Stepping: %d)\n",
 		    caps->cpuType, caps->cpuStepping);
 
 		// general feature flags:
@@ -127,7 +128,7 @@ void GetCpuCaps( CpuCaps *caps)
 	}
 	do_cpuid(0x80000000, regs);
 	if (regs[0]>=0x80000001) {
-		printf("extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
+		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
 		do_cpuid(0x80000001, regs2);
 		caps->hasMMX  |= (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
 		caps->hasMMX2 |= (regs2[3] & (1 << 22 )) >> 22; // 0x400000
@@ -135,7 +136,7 @@ void GetCpuCaps( CpuCaps *caps)
 		caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 	}
 #if 0
-	printf("cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
+	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
 		gCpuCaps.hasMMX,
 		gCpuCaps.hasMMX2,
 		gCpuCaps.hasSSE,
@@ -159,27 +160,27 @@ void GetCpuCaps( CpuCaps *caps)
 //		caps->hasMMX = 0;
 
 #ifndef HAVE_MMX
-	if(caps->hasMMX) printf("MMX supported but disabled\n");
+	if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"MMX supported but disabled\n");
 	caps->hasMMX=0;
 #endif
 #ifndef HAVE_MMX2
-	if(caps->hasMMX2) printf("MMX2 supported but disabled\n");
+	if(caps->hasMMX2) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"MMX2 supported but disabled\n");
 	caps->hasMMX2=0;
 #endif
 #ifndef HAVE_SSE
-	if(caps->hasSSE) printf("SSE supported but disabled\n");
+	if(caps->hasSSE) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"SSE supported but disabled\n");
 	caps->hasSSE=0;
 #endif
 #ifndef HAVE_SSE2
-	if(caps->hasSSE2) printf("SSE2 supported but disabled\n");
+	if(caps->hasSSE2) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"SSE2 supported but disabled\n");
 	caps->hasSSE2=0;
 #endif
 #ifndef HAVE_3DNOW
-	if(caps->has3DNow) printf("3DNow supported but disabled\n");
+	if(caps->has3DNow) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"3DNow supported but disabled\n");
 	caps->has3DNow=0;
 #endif
 #ifndef HAVE_3DNOWEX
-	if(caps->has3DNowExt) printf("3DNowExt supported but disabled\n");
+	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_INFO,"3DNowExt supported but disabled\n");
 	caps->has3DNowExt=0;
 #endif
 }
@@ -199,7 +200,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 	int i;
 
 	if (NULL==(retname=(char*)malloc(256))) {
-		printf("Error: GetCpuFriendlyName() not enough memory\n");
+		mp_msg(MSGT_CPUDETECT,MSGL_FATAL,"Error: GetCpuFriendlyName() not enough memory\n");
 		exit(1);
 	}
 
@@ -211,13 +212,13 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 				snprintf(retname,255,"%s %s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL]);
 			} else {
 				snprintf(retname,255,"unknown %s %d. Generation CPU",cpuvendors[i].name,CPUID_FAMILY); 
-				printf("unknown %s CPU:\n",cpuvendors[i].name);
-				printf("Vendor:   %s\n",cpuvendors[i].string);
-				printf("Type:     %d\n",CPUID_TYPE);
-				printf("Family:   %d (ext: %d)\n",CPUID_FAMILY,CPUID_EXTFAMILY);
-				printf("Model:    %d (ext: %d)\n",CPUID_MODEL,CPUID_EXTMODEL);
-				printf("Stepping: %d\n",CPUID_STEPPING);
-				printf("Please send the above info along with the exact CPU name"
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"unknown %s CPU:\n",cpuvendors[i].name);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Vendor:   %s\n",cpuvendors[i].string);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Type:     %d\n",CPUID_TYPE);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Family:   %d (ext: %d)\n",CPUID_FAMILY,CPUID_EXTFAMILY);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Model:    %d (ext: %d)\n",CPUID_MODEL,CPUID_EXTMODEL);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Stepping: %d\n",CPUID_STEPPING);
+				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Please send the above info along with the exact CPU name"
 				       "to the MPlayer-Developers, so we can add it to the list!\n");
 			}
 		}
@@ -238,7 +239,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
-   printf( "SIGILL, " );
+   mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SIGILL, " );
 
    /* Both the "xorps %%xmm0,%%xmm0" and "divps %xmm0,%%xmm1"
     * instructions are 3 bytes long.  We must increment the instruction
@@ -257,7 +258,7 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 
 static void sigfpe_handler_sse( int signal, struct sigcontext sc )
 {
-   printf( "SIGFPE, " );
+   mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SIGFPE, " );
 
    if ( sc.fpstate->magic != 0xffff ) {
       /* Our signal context has the extended FPU state, so reset the
@@ -269,8 +270,8 @@ static void sigfpe_handler_sse( int signal, struct sigcontext sc )
    } else {
       /* If we ever get here, we're completely hosed.
        */
-      printf( "\n\n" );
-      printf( "SSE enabling test failed badly!" );
+      mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "\n\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_FATAL, "SSE enabling test failed badly!" );
    }
 }
 #endif /* __linux__ && _POSIX_SOURCE && X86_FXSR_MAGIC */
@@ -311,15 +312,15 @@ static void check_os_katmai_support( void )
     * does.
     */
    if ( gCpuCaps.hasSSE ) {
-      printf( "Testing OS support for SSE... " );
+      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Testing OS support for SSE... " );
 
 //      __asm __volatile ("xorps %%xmm0, %%xmm0");
       __asm __volatile ("xorps %xmm0, %xmm0");
 
       if ( gCpuCaps.hasSSE ) {
-	 printf( "yes.\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "yes.\n" );
       } else {
-	 printf( "no!\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "no!\n" );
       }
    }
 
@@ -337,14 +338,14 @@ static void check_os_katmai_support( void )
     * and therefore to be safe I'm going to leave this test in here.
     */
    if ( gCpuCaps.hasSSE ) {
-      printf( "Testing OS support for SSE unmasked exceptions... " );
+      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Testing OS support for SSE unmasked exceptions... " );
 
 //      test_os_katmai_exception_support();
 
       if ( gCpuCaps.hasSSE ) {
-	 printf( "yes.\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "yes.\n" );
       } else {
-	 printf( "no!\n" );
+	 mp_msg(MSGT_CPUDETECT,MSGL_INFO, "no!\n" );
       }
    }
 
@@ -357,21 +358,21 @@ static void check_os_katmai_support( void )
     * safe to go ahead and hook out the SSE code throughout Mesa.
     */
    if ( gCpuCaps.hasSSE ) {
-      printf( "Tests of OS support for SSE passed.\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Tests of OS support for SSE passed.\n" );
    } else {
-      printf( "Tests of OS support for SSE failed!\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_INFO, "Tests of OS support for SSE failed!\n" );
    }
 #else
    /* We can't use POSIX signal handling to test the availability of
     * SSE, so we disable it by default.
     */
-   printf( "Cannot test OS support for SSE, disabling to be safe.\n" );
+   mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, disabling to be safe.\n" );
    gCpuCaps.hasSSE=0;
 #endif /* _POSIX_SOURCE && X86_FXSR_MAGIC */
 #else
    /* Do nothing on other platforms for now.
     */
-   printf( "Not testing OS support for SSE, leaving disabled.\n" );
+   mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Not testing OS support for SSE, leaving disabled.\n" );
    gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }

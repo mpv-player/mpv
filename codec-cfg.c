@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 // for mmioFOURCC:
 #include "wine/avifmt.h"
@@ -31,7 +32,7 @@
 #include "libvo/img_format.h"
 #include "codec-cfg.h"
 
-#define PRINT_LINENUM printf(" at line %d\n", line_num)
+#define PRINT_LINENUM mp_msg(MSGT_CODECCFG,MSGL_ERR," at line %d\n", line_num)
 
 #define MAX_NR_TOKEN	16
 
@@ -73,13 +74,13 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		goto err_out_parse_error;
 	return 1;
 err_out_duplicated:
-	printf("duplicated fourcc/format");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc/format");
 	return 0;
 err_out_too_many:
-	printf("too many fourcc/format...");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many fourcc/format...");
 	return 0;
 err_out_parse_error:
-	printf("parse error");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
 	return 0;
 }
 
@@ -92,18 +93,18 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 	for (i = 0; i < CODECS_MAX_FOURCC && fourcc[i] != 0xffffffff; i++)
 		/* NOTHING */;
 	if (i == CODECS_MAX_FOURCC) {
-		printf("too many fourcc/format...");
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many fourcc/format...");
 		return 0;
 	}
 
         fourcc[i]=fourccmap[i]=strtoul(s,&endptr,0);
 	if (*endptr != '\0') {
-		printf("parse error");
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
 		return 0;
 	}
 	for (j = 0; j < i; j++)
 		if (fourcc[j] == fourcc[i]) {
-			printf("duplicated fourcc/format");
+			mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc/format");
 			return 0;
 		}
 
@@ -196,10 +197,10 @@ static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
         
 	return 1;
 err_out_too_many:
-	printf("too many out...");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many out...");
 	return 0;
 err_out_parse_error:
-	printf("parse error");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
 	return 0;
 }
 
@@ -268,14 +269,14 @@ static short get_driver(char *s,int audioflag)
 
 static int validate_codec(codecs_t *c, int type)
 {
-	int i;
+	unsigned int i;
 	char *tmp_name = strdup(c->name);
 
 	for (i = 0; i < strlen(tmp_name) && isalnum(tmp_name[i]); i++)
 		/* NOTHING */;
 
 	if (i < strlen(tmp_name)) {
-		printf("\ncodec(%s) name is not valid!\n", c->name);
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) name is not valid!\n", c->name);
 		return 0;
 	}
 
@@ -284,13 +285,13 @@ static int validate_codec(codecs_t *c, int type)
 
 #if 0
 	if (c->fourcc[0] == 0xffffffff) {
-		printf("\ncodec(%s) does not have fourcc/format!\n", c->name);
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have fourcc/format!\n", c->name);
 		return 0;
 	}
 
 	/* XXX fix this: shitty with 'null' codec */
 	if (!c->driver) {
-		printf("\ncodec(%s) does not have a driver!\n", c->name);
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have a driver!\n", c->name);
 		return 0;
 	}
 #endif
@@ -300,7 +301,7 @@ static int validate_codec(codecs_t *c, int type)
 #warning HOL VANNAK DEFINIALVA????????????
 	if (!c->dll && (c->driver == 4 ||
 				(c->driver == 2 && type == TYPE_VIDEO))) {
-		printf("\ncodec(%s) needs a 'dll'!\n", c->name);
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) needs a 'dll'!\n", c->name);
 		return 0;
 	}
 #warning guid.f1 lehet 0? honnan lehet tudni, hogy nem adtak meg?
@@ -308,7 +309,7 @@ static int validate_codec(codecs_t *c, int type)
 
 	if (type == TYPE_VIDEO)
 		if (c->outfmt[0] == 0xffffffff) {
-			printf("\ncodec(%s) needs an 'outfmt'!\n", c->name);
+			mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) needs an 'outfmt'!\n", c->name);
 			return 0;
 		}
 #endif
@@ -326,7 +327,7 @@ static int add_comment(char *s, char **d)
 		(*d)[pos++] = '\n';
 	}
 	if (!(*d = (char *) realloc(*d, pos + strlen(s) + 1))) {
-		printf("can't allocate mem for comment. ");
+		mp_msg(MSGT_CODECCFG,MSGL_FATAL,"can't allocate mem for comment. ");
 		return 0;
 	}
 	strcpy(*d + pos, s);
@@ -375,7 +376,7 @@ static int get_token(int min, int max)
 	char c;
 
 	if (max >= MAX_NR_TOKEN) {
-		printf("get_token(): max >= MAX_NR_TOKEN!");
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"get_token(): max >= MAX_NR_TOKEN!");
 		goto out_eof;
 	}
 
@@ -453,15 +454,15 @@ int parse_codec_cfg(char *cfgfile)
 
 	if(cfgfile==NULL)return 0; 
 	
-	printf("Reading %s: ", cfgfile);
+	mp_msg(MSGT_CODECCFG,MSGL_INFO,"Reading %s: ", cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
-		printf("can't open '%s': %s\n", cfgfile, strerror(errno));
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"can't open '%s': %s\n", cfgfile, strerror(errno));
 		return 0;
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		printf("can't get memory for 'line': %s\n", strerror(errno));
+		mp_msg(MSGT_CODECCFG,MSGL_FATAL,"can't get memory for 'line': %s\n", strerror(errno));
 		return 0;
 	}
 
@@ -495,13 +496,13 @@ int parse_codec_cfg(char *cfgfile)
 				codecsp = &audio_codecs;
 #ifdef DEBUG
 			} else {
-				printf("picsba\n");
+				mp_msg(MSGT_CODECCFG,MSGL_ERR,"picsba\n");
 				goto err_out;
 #endif
 			}
 		        if (!(*codecsp = (codecs_t *) realloc(*codecsp,
 				sizeof(codecs_t) * (*nr_codecsp + 2)))) {
-			    printf("can't realloc '*codecsp': %s\n", strerror(errno));
+			    mp_msg(MSGT_CODECCFG,MSGL_FATAL,"can't realloc '*codecsp': %s\n", strerror(errno));
 			    goto err_out;
 		        }
 			codec=*codecsp + *nr_codecsp;
@@ -516,19 +517,19 @@ int parse_codec_cfg(char *cfgfile)
 			for (i = 0; i < *nr_codecsp - 1; i++) {
 				if(( (*codecsp)[i].name!=NULL) && 
 				    (!strcmp(token[0], (*codecsp)[i].name)) ) {
-					printf("codec name '%s' isn't unique", token[0]);
+					mp_msg(MSGT_CODECCFG,MSGL_ERR,"codec name '%s' isn't unique", token[0]);
 					goto err_out_print_linenum;
 				}
 			}
 			if (!(codec->name = strdup(token[0]))) {
-				printf("can't strdup -> 'name': %s\n", strerror(errno));
+				mp_msg(MSGT_CODECCFG,MSGL_ERR,"can't strdup -> 'name': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "info")) {
 			if (codec->info || get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			if (!(codec->info = strdup(token[0]))) {
-				printf("can't strdup -> 'info': %s\n", strerror(errno));
+				mp_msg(MSGT_CODECCFG,MSGL_ERR,"can't strdup -> 'info': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "comment")) {
@@ -556,7 +557,7 @@ int parse_codec_cfg(char *cfgfile)
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			if (!(codec->dll = strdup(token[0]))) {
-				printf("can't strdup -> 'dll': %s\n", strerror(errno));
+				mp_msg(MSGT_CODECCFG,MSGL_ERR,"can't strdup -> 'dll': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "guid")) {
@@ -627,7 +628,7 @@ int parse_codec_cfg(char *cfgfile)
 	}
 	if (!validate_codec(codec, codec_type))
 		goto err_out_not_valid;
-	printf("%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
+	mp_msg(MSGT_CODECCFG,MSGL_INFO,"%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
 	if(video_codecs) video_codecs[nr_vcodecs].name = NULL;
 	if(audio_codecs) audio_codecs[nr_acodecs].name = NULL;
 out:
@@ -637,7 +638,7 @@ out:
 	return 1;
 
 err_out_parse_error:
-	printf("parse error");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
 err_out_print_linenum:
 	PRINT_LINENUM;
 err_out:
@@ -653,7 +654,7 @@ err_out:
 	fclose(fp);
 	return 0;
 err_out_not_valid:
-	printf("codec is not defined correctly");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"codec is not defined correctly");
 	goto err_out_print_linenum;
 }
 
@@ -733,11 +734,11 @@ void list_codecs(int audioflag){
 		if (audioflag) {
 			i = nr_acodecs;
 			c = audio_codecs;
-			printf("ac:      afm: status:   info:  [lib/dll]\n");
+			mp_msg(MSGT_CODECCFG,MSGL_INFO,"ac:      afm: status:   info:  [lib/dll]\n");
 		} else {
 			i = nr_vcodecs;
 			c = video_codecs;
-			printf("vc:      vfm: status:   info:  [lib/dll]\n");
+			mp_msg(MSGT_CODECCFG,MSGL_INFO,"vc:      vfm: status:   info:  [lib/dll]\n");
 		}
 		if(!i) return;
 		for (/* NOTHING */; i--; c++) {
@@ -749,9 +750,9 @@ void list_codecs(int audioflag){
 			  case CODECS_STATUS_UNTESTED:    s="untested";break;
 			}
 			if(c->dll)
-			  printf("%-11s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
 			else
-			  printf("%-11s%2d  %s  %s\n",c->name,c->driver,s,c->info);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s%2d  %s  %s\n",c->name,c->driver,s,c->info);
 			
 		}
 
