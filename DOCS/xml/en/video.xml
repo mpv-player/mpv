@@ -1476,6 +1476,41 @@ Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips, no one
 has tested it, so reports are welcome.
 </para>
 </sect5>
+
+<sect5 id="vidix-nvidia">
+<title>nVidia cards</title>
+<para>
+There's a relatively new nVidia driver out there, it's known to work on Riva
+128, TNT and GeForce2 chipsets, also others have been reported working.
+</para>
+
+<para>
+It's recommended to use the binary nVidia drivers for X before using this
+VIDIX driver, because some of the registers which need to be initialized
+haven't been discovered yet, so it will probably fail with the Open Source
+XFree86 <filename>nv.o</filename> driver.
+</para>
+
+<para>
+Reports awaited!
+</para>
+</sect5>
+
+<sect5 id="vidix-sis">
+<title>SiS cards</title>
+<para>
+This is very experimental code, just like nvidia_vid.
+</para>
+
+<para>
+It's been tested on SiS 650/651/740 (the most common chipsets used in the 
+SiS versions of the "Shuttle XPC" barebones boxes out there)
+</para>
+
+<para>
+Reports awaited!
+</para>
+</sect5>
 </sect4>
 
 <sect4 id="directfb">
