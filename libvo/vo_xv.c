@@ -377,10 +377,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
        drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
        printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
-#ifdef HAVE_NEW_GUI
-     if ( vo_window == None )
-#endif
-      saver_off(mDisplay);  // turning off screen saver
+     saver_off(mDisplay);  // turning off screen saver
      return 0;
     }
   }
@@ -585,11 +582,11 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void) 
 {
  int i;
+ saver_on(mDisplay); // screen saver back on
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
  {
-  saver_on(mDisplay); // screen saver back on
   XDestroyWindow( mDisplay,mywindow );
  }
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );

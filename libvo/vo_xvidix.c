@@ -380,9 +380,6 @@ else
 	XSync(mDisplay, False);
     }
 
-#ifdef HAVE_NEW_GUI
-    if (vo_window == None)
-#endif
     saver_off(mDisplay); /* turning off screen saver */
 
     return(0);
@@ -468,12 +465,12 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
     vidix_term();
+    saver_on(mDisplay); /* screen saver back on */
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
     if (vo_window == None)
 #endif
     {
-	saver_on(mDisplay); /* screen saver back on */
 	if (!(WinID > 0)) /* don't destory window if -wid specified */
 	{
 	    XDestroyWindow(mDisplay, mWindow);

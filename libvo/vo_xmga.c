@@ -368,11 +368,8 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    XFlush( mDisplay );
    XSync( mDisplay,False );
  }
- 
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif
-  saver_off(mDisplay);
+
+ saver_off(mDisplay);
 
  return 0;
 }
@@ -384,11 +381,11 @@ static const vo_info_t* get_info( void )
 static void
 uninit(void)
 {
+ saver_on(mDisplay);
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
  {
-  saver_on(mDisplay);
   XDestroyWindow( mDisplay,mWindow );
  }
  mga_uninit();

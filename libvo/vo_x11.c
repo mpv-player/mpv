@@ -431,8 +431,8 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 #endif 
   {
    XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
-   saver_off(mDisplay);
   }
+ saver_off(mDisplay);
  return 0;
 }
 
@@ -579,11 +579,11 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
+ saver_on(mDisplay); // screen saver back on
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif
  {
-  saver_on(mDisplay); // screen saver back on
   XDestroyWindow( mDisplay,mywindow );
  } 
 #ifdef HAVE_XF86VM
