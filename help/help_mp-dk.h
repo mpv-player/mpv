@@ -105,8 +105,8 @@ static char help_text[]=
 "  - Prøv -cache 8192.\n"\
 "- Bruger du -cache til at afspille en non-interleaved AVI fil?\n"\
 "  - Prøv -nocache.\n"\
-"Se DOCS/en/video.html og DOCS/en/sound.html for tuning/optimerings tips.\n"\
-"Hvis intet af dette hjalp, så læs DOCS/en/bugreports.html !\n\n"
+"Se DOCS/HTML/en/devices.html for tuning/optimerings tips.\n"\
+"Hvis intet af dette hjalp, så læs DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer blev kompileret UDEN grafisk brugergrænseflade!\n"
 #define MSGTR_GuiNeedsX "MPlayer grafisk brugergrænseflade kræver X11!\n"
@@ -139,7 +139,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer fik en alvorlig fejl af typen 'ulovlig instruktion'.\n"\
 "  Det kan være en fejl i den nye dynamiske processoroptimeringskode...\n"\
-"  Se DOCS/en/bugreports.html.\n"
+"  Se DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer fik en alvorlig fejl af typen 'ulovlig instruktion'.\n"\
 "  Dette sker oftest kun hvis du kører på en processor forskellig fra den\n"\
@@ -147,12 +147,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer fik en alvorlig fejl pga. forkert brug af CPU/FPU/RAM.\n"\
 "  Rekompiler MPlayer med --enable-debug og lav et 'gdb' backtrace og\n"\
-"  disassemling. For detaljer læs venligst DOCS/en/bugreports.html#crash.b.\n"
+"  disassemling. For detaljer læs venligst DOCS/HTML/en/bugreports_what.html#bugreports_crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer fik en alvorlig fejl af ukendt type. Dette burde ikke ske.\n"\
 "  Det kan være en fejl i MPlayer koden _eller_ i andre drivere _ eller_ i \n"\
 "  den version af gcc du kører. Hvis du tror det er en fejl i MPlayer læs da \n"\
-"  venligst DOCS/en/bugreports.html og følg instruktionerne der. Vi kan ikke \n"\
+"  venligst DOCS/HTML/en/bugreports.html og følg instruktionerne der. Vi kan ikke \n"\
 "  og vil ikke hjælpe medmindre du følger instruktionerne når du rapporterer \n"\
 "  en mulig fejl.\n"
 
@@ -282,7 +282,7 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Kunne ikke beregne antallet af billeder (til søgning)  \n"
 #define MSGTR_CantSeekRawAVI "Søgning i rå AVI-filer ikke mulig. (Index kræves, prøv -idx.)  \n"
 #define MSGTR_CantSeekFile "Kan ikke søge i denne fil.\n"
-#define MSGTR_EncryptedVOB "Krypteret VOB fil (ikke kompileret med libcss support)! Se DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Krypteret VOB fil (ikke kompileret med libcss support)! Se DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Krypteret film men autorisation blev ikke påbegyndt.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimerede headers (endnu) ikke understøttet!\n"

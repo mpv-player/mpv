@@ -114,8 +114,8 @@ static char help_text[]=
 "  - Опитай с -cache 8192\n"\
 "- Използваш опция -cache при неправилно структуриран файл (non-interleaved)? \n"\
 "  - Опитай с -nocache\n"\
-"Прочети DOCS/en/video.html и DOCS/en/sound.html за съвети и настойки\n"\
-"Ако нищо не помогне, прочети DOCS/en/bugreports.html !\n\n"
+"Прочети DOCS/HTML/en/devices.html за съвети и настойки\n"\
+"Ако нищо не помогне, прочети DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer е компилиран БЕЗ Графичен Потребителски Интерфейс (GUI) !\n"
 #define MSGTR_GuiNeedsX "MPlayer с GUI изисква графична среда X11 !\n"
@@ -148,7 +148,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  Може да има бъг в кода за динамично определяне на процесора...\n"\
-"  Моля изпратете рапорт, след като прочетете DOCS/en/bugreports.html.\n"
+"  Моля изпратете рапорт, след като прочетете DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  Тази грешка се получава ако компилирате mplayer за един процесор\n" \
@@ -156,12 +156,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Прекомпилирайте MPlayer с --enable-debug, направете make и 'gdb' backtrace с\n"\
-"  disassembly. За по-точни инструкции вижте DOCS/en/bugreports.html#crash.b .\n"
+"  disassembly. За по-точни инструкции вижте DOCS/HTML/en/bugreports_what.html#bugreports_crash.b .\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  Може да има бъг в MPlayer _или_ във вашите драйвери _или_ във вашия\n"\
 "  компилатор (gcc). Ако мислите че е грешка в MPlayer's, моля следвайте\n"\
-"  инструкциите в DOCS/en/bugreports.html. Ние не можем и не бихме могли да\n"\
+"  инструкциите в DOCS/HTML/en/bugreports.html. Ние не можем и не бихме могли да\n"\
 "  ви помогнем без тази информация!\n"
 
 // mencoder.c
@@ -245,7 +245,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Не мога да превъртам при `сурови` .AVI потоци! (необходим е индекс, опитай с опция -idx !)\n"
 #define MSGTR_CantSeekFile "Не мога превъртам в този файл!\n"
 
-#define MSGTR_EncryptedVOB "Кодиран VOB файл (компилирано е без libcss дешифратор)! Прочети DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Кодиран VOB файл (компилирано е без libcss дешифратор)! Прочети DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Кодиран VOB поток, но вие не сте поискали authentication!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers (засега) на се поддържат!\n"

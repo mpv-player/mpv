@@ -102,8 +102,8 @@ static char help_text[]=
 "  - -cache 8192를 시도해보세요.\n"\
 "- non-interleaved AVI 파일을 -cache 옵션으로 재생하고 있나요?\n"\
 "  - -nocache를 시도해보세요.\n"\
-"미세조정/속도향상 팁은 DOCS/en/video.html과 DOCS/en/sound.html을 참조하세요.\n"\
-"위의 어떤 사항도 도움이 되지 않는다면, DOCS/en/bugreports.html을 참조하세요.\n\n"
+"미세조정/속도향상 팁은 DOCS/HTML/en/devices.html#video-dev과 DOCS/HTML/en/devices.html#audio-dev을 참조하세요.\n"\
+"위의 어떤 사항도 도움이 되지 않는다면, DOCS/HTML/en/bugreports.html을 참조하세요.\n\n"
 
 #define MSGTR_NoGui "MPlayer가 GUI를 사용할 수 있도록 컴파일되지 않았습니다.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI는 X11을 필요로합니다!\n"
@@ -136,7 +136,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer가 '잘못된 연산'으로 종료되었습니다.\n"\
 "  런타임 CPU 감지 코드에 버그가 있을 지도 모릅니다...\n"\
-"  DOCS/en/bugreports.html을 참조하세요.\n"
+"  DOCS/HTML/en/bugreports.html을 참조하세요.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer가 '잘못된 연산'으로 종료되었습니다.\n"\
 "  컴파일/최적화된 CPU와 다른 모델의 CPU에서 실행될 때\n"\
@@ -144,11 +144,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer가 잘못된 CPU/FPU/RAM의 사용으로 종료되었습니다.\n"\
 "  MPlayer를 --enable-debug 옵션으로 다시 컴파일하고, 'gdb' 백트레이스 및\n"\
-"  디스어셈블해보세요. 자세한 사항은 DOCS/en/bugreports.html#crash를 참조하세요.\n"
+"  디스어셈블해보세요. 자세한 사항은 DOCS/HTML/en/bugreports_what.html#bugreports_crash를 참조하세요.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer가 알 수 없는 이유로 종료되었습니다.\n"\
 "  MPlayer 코드나 드라이버의 버그, 혹은 gcc버전의 문제일 수도 있습니다.\n"\
-"  MPlayer의 문제라고 생각한다면, DOCS/en/bugreports.html을 읽고 거기있는\n"\
+"  MPlayer의 문제라고 생각한다면, DOCS/HTML/en/bugreports.html을 읽고 거기있는\n"\
 "  설명대로 하시기 바랍니다. 가능한 버그를 보고할 땐, 이 정보를 포함하세요.\n"\
 "  그렇지 않으면, 도와줄 방법이 없습니다.\n"
 
@@ -279,7 +279,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "raw AVI 스트림에서는 탐색할 수 없습니다. (인덱스가 필요합니다. -idx 스위치로 시도해보세요.)  \n"
 #define MSGTR_CantSeekFile "이 파일에서는 탐색할 수 없습니다.\n"
 
-#define MSGTR_EncryptedVOB "암호화된 VOB 파일입니다 (libcss 지원없이 컴파일되었음)! DOCS/en/cd-dvd.html을 참조하세요\n"
+#define MSGTR_EncryptedVOB "암호화된 VOB 파일입니다 (libcss 지원없이 컴파일되었음)! DOCS/HTML/en/dvd.html을 참조하세요\n"
 #define MSGTR_EncryptedVOBauth "암호화된 스트림이나, 인증 요청을 하지않았습니다!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: 압축된 헤더는 (아직) 지원되지않습니다.\n"

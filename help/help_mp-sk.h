@@ -91,14 +91,14 @@ static char help_text[]=
 "         ***********************************************************\n"\
 "!!! Mo¾né príèiny, problémy a rie¹enia:\n"\
 "- Nejèastej¹ie: nesprávny/chybný _zvukový_ ovládaè. Rie¹enie: skúste -ao sdl al. pou¾ite\n"\
-"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/en/sound.html!\n"\
+"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/HTML/en/devices.html#audio-dev!\n"\
 "- Pomalý video výstup. Skúste iný -vo ovládaè (pre zoznam: -vo help) alebo skúste\n"\
-"  s voµbou -framedrop !  Tipy pre ladenie/zrýchlenie videa sú v DOCS/en/video.html\n"\
+"  s voµbou -framedrop !  Tipy pre ladenie/zrýchlenie videa sú v DOCS/HTML/en/devices.html#video-dev\n"\
 "- Pomalý cpu. Neskú¹ajte prehráva» veµké dvd/divx na pomalom cpu! Skúste -hardframedrop\n"\
 "- Po¹kodený súbor. Skúste rôzne kombinácie týchto volieb: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Pomalé médium (NFS/SMB, DVD, VCD ...). Skúste -cache 8192.\n"\
 "- Pou¾ívate -cache na prehrávanie non-interleaved súboru? skúste -nocache\n"\
-"Pokiaµ niè z toho nie je pravda, preèítajte si DOCS/en/bugreports.html !\n\n"
+"Pokiaµ niè z toho nie je pravda, preèítajte si DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer bol zostavený BEZ podpory GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI vy¾aduje X11!\n"
@@ -131,7 +131,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
 "  Mô¾e to by» chyba v na¹om novom kóde na detekciu procesora...\n"\
-"  Prosím preèítajte si DOCS/en/bugreports.html.\n"
+"  Prosím preèítajte si DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
 "  Obyèajne sa to stáva, keï ho pou¾ívate na inom procesore ako pre ktorý bol\n"\
@@ -139,11 +139,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer zhavaroval nesprávnym pou¾itím CPU/FPU/RAM.\n"\
 "  Prekompilujte MPlayer s --enable-debug a urobte 'gdb' backtrace a\n"\
-"  disassemblujte. Pre detaily, pozrite DOCS/en/bugreports.html#crash.b.\n"
+"  disassemblujte. Pre detaily, pozrite DOCS/HTML/en/bugreports_what.html#bugreports_crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer zhavaroval. To sa nemalo sta».\n"\
 "  Mô¾e to by» chyba v MPlayer kóde _alebo_ vo Va¹ích ovládaèoch _alebo_ gcc\n"\
-"  verzii. Ak si myslíte, ¾e je to chyba MPlayeru, prosím preèítajte si DOCS/en/bugreports.html\n"\
+"  verzii. Ak si myslíte, ¾e je to chyba MPlayeru, prosím preèítajte si DOCS/HTML/en/bugreports.html\n"\
 "  a postupujte podµa in¹trukcii. Nemô¾eme Vám pomôc», pokiaµ neposkytnete\n"\
 "  tieto informácie pri ohlasovaní mo¾nej chyby.\n"
 
@@ -273,7 +273,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nemô¾em sa posúva» v surových (raw) .AVI prúdoch! (Potrebujem index, zkuste pou¾í» voµbu -idx !)  \n"
 #define MSGTR_CantSeekFile "Nemô¾em sa posúva» v tomto súbore!  \n"
 
-#define MSGTR_EncryptedVOB "Kódovaný VOB súbor (prelo¾ené bez podpory libcss)! Preèítajte si DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Kódovaný VOB súbor (prelo¾ené bez podpory libcss)! Preèítajte si DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Zakódovaný prúd, ale overenie autenticity ste nepo¾adovali!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nie sú (e¹te) podporované!\n"

@@ -134,7 +134,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nu pot cãuta în fiºiere .AVI neindexate! (am nevoie de index, încercaþi cu -idx!)  \n"
 #define MSGTR_CantSeekFile "Nu pot cãuta în fiºier!  \n"
 
-#define MSGTR_EncryptedVOB "Fiºier VOB encriptat (necompilat cu suport libcss)! Citiþi fiºierul DOCS/DVD\n"
+#define MSGTR_EncryptedVOB "Fiºier VOB encriptat (necompilat cu suport libcss)! Citiþi fiºierul DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Fiºier encriptat dar autentificarea nu a fost cerutã de dumneavoastrã.!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Antetele compresate nu sunt (încã) suportate!\n"

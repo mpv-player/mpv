@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.108
+   Was synced with help_mp-en.h: rev 1.109
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -75,7 +75,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Попытка форсировать семейство аудио кодеков %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов, переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X !\n"
-#define MSGTR_RTFMCodecs "Прочтите DOCS/en/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Прочтите DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не смог инициализировать аудио кодек! -> без звука\n"
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видео кодеков %s ...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для видео формата 0x%X !\n"
@@ -101,8 +101,8 @@ static char help_text[]=
 "  - Используйте -cache 8192.\n"\
 "- Используете ли Вы -cache для проигрывания не-'слоёных'[non-interleaved] AVI файлов?\n"\
 "  - Используйте -nocache.\n"\
-"Читайте DOCS/en/video.html и DOCS/en/sound.html для советов по подстройке/ускорению.\n"\
-"Если ничего не помогло, тогда читайте DOCS/en/bugreports.html !\n\n"
+"Читайте DOCS/HTML/en/devices.html для советов по подстройке/ускорению.\n"\
+"Если ничего не помогло, тогда читайте DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer был скомпилирован БЕЗ поддержки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI требует X11!\n"
@@ -134,7 +134,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
 "  Это может быть ошибкой нашего нового кода определения типа CPU во время выполнения...\n"\
-"  Пожалуйста, читайте DOCS/en/bugreports.html.\n"
+"  Пожалуйста, читайте DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
 "  Обычно, это происходит когда вы его запускаете на CPU, отличном от того, для которого\n"\
@@ -142,12 +142,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer сломался из-за плохого использования CPU/FPU/RAM.\n"\
 "  Перекомпилируйте MPlayer с --enable-debug и сделайте 'gdb' backtrace и\n"\
-"  дизассемблирование. Для подробностей, см. DOCS/en/bugreports.html#crash\n"
+"  дизассемблирование. Для подробностей, см. DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer сломался. Это не должно происходить.\n"\
 "  Это может быть ошибкой в коде MPlayer'а _или_ в Вашем драйвере _или_\n"\
 "  Вашей версии gcc. Если Вы думаете, что в этом виноват MPlayer, пожалуйста,\n"\
-"  прочтите DOCS/en/bugreports.html и следуйте инструкциям оттуда. Мы не сможем\n"\
+"  прочтите DOCS/HTML/en/bugreports.html и следуйте инструкциям оттуда. Мы не сможем\n"\
 "  и не будем помогать, если Вы не предоставите эту информацию,\n"\
 "  сообщая о возможной ошибке.\n"
 
@@ -280,7 +280,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Не могу переместиться в сыром потоке AVI! (требуется индекс, попробуйте с ключом -idx!)\n"
 #define MSGTR_CantSeekFile "Не могу перемещаться в этом файле!\n"
 
-#define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Шифрованный поток, но авторизация не была Вами затребована!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Для поддержки сжатых заголовков необходима zlib!\n"

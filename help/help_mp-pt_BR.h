@@ -113,8 +113,8 @@ static char help_text[]=
 "  - Tente -cache 8192.\n"\
 "- Você está usando -cache para reproduzir um arquivo AVI não-entrelaçado?\n"\
 "  - Tente -nocache.\n"\
-"Leia DOCS/en/video.html e DOCS/en/sound.html para dicas de ajuste/velocidade.\n"\
-"Se nenhum destes ajudar você, leia DOCS/en/bugreports.html.\n\n"
+"Leia DOCS/HTML/en/devices.html para dicas de ajuste/velocidade.\n"\
+"Se nenhum destes ajudar você, leia DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer foi compilado SEM suporte a GUI (interface gráfica com o usuário)!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI (interface gráfica com o usuário) requer X11!\n"
@@ -146,7 +146,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer falhou por uma 'Instrução Ilegal'.\n"\
 "  Pode ser um erro no nosso novo código de detecção de CPU em tempo real...\n"\
-"  Por favor leia DOCS/en/bugreports.html.\n"
+"  Por favor leia DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer falhou por uma 'Instrução Ilegal'.\n"\
 "  Isso frequentemente acontece quando você o exucuta em um CPU diferente do que\n"\
@@ -154,12 +154,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer falhou por mau uso do CPU/FPU/RAM.\n"\
 "  Recompile o MPlayer com --enable-debug e faça um 'gdb backtrace' e\n"\
-"  'disassembly'. Para detalhes, veja DOCS/en/bugreports.html#crash\n"
+"  'disassembly'. Para detalhes, veja DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer falhou. Isso não deveria acontecer.\n"\
 "  Pode ser um erro no código do MPlayer _ou_ em seus drivers _ou_ em sua versão\n"\
 "  do gcc. Se você acha que é culpa do MPlayer, por favor leia\n"\
-"  DOCS/en/bugreports.html e siga as instruções. Nós não podemos e não vamos ajudar\n"\
+"  DOCS/HTML/en/bugreports.html e siga as instruções. Nós não podemos e não vamos ajudar\n"\
 "  a não ser que você proveja esta informação quando reportar um possível erro.\n"
 
 // mencoder.c:
@@ -289,7 +289,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Impossível buscar em fluxos de .AVI brutos! (índice requerido, tente com a opção -idx!)  \n"
 #define MSGTR_CantSeekFile "Impossível buscar neste arquivo!  \n"
 
-#define MSGTR_EncryptedVOB "Arquivo VOB encriptado (compilado sem suporte a libcss)! Leia DOCS/en/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "Arquivo VOB encriptado (compilado sem suporte a libcss)! Leia DOCS/HTML/en/dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Fluxo encriptado mas você não requisitou autenticação!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Cabeçalhos comprimidos não suportados (ainda)!\n"

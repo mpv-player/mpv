@@ -90,15 +90,15 @@ static char help_text[]=
 "         ************************************************\n"\
 "!!!  Muhtemel nedenler, problemler,Çözümleri: \n"\
 "- En genel: bozuk/hatalý _ses_ kartý. Çözüm: -ao sdl veya baþka birþey deneyin\n"\
-"  ALSA 0.9 için ALSA 0.5 veya OSS emülasyonu.DOCS/sound.html dosyasýna gözatýn!\n"\
+"  ALSA 0.9 için ALSA 0.5 veya OSS emülasyonu. DOCS/HTML/en/devices.html#audio-dev dosyasýna gözatýn!\n"\
 "  -autosync 30 veya baþka deðerlerle denemeler yapabilirsiniz.\n"\
 "- Yavaþ Video çýkýþý.  -vo komutu ile baþka sürücü seçin(liste için: -vo help) veya\n"\
-"  -framedrop ile deneyin!  DOCS/video.html dosyasýna video hýzlandýrma için gözatýn.\n"\
+"  -framedrop ile deneyin!  DOCS/HTML/en/devices.html#video-dev dosyasýna video hýzlandýrma için gözatýn.\n"\
 "- Yavaþ CPU. Büyük bir DVD/divx i yavaþ bir CPU ile çalýþtýrmayýn! -hardframedrop u\n"\
 "kullanýn. -Bozuk Dosya. Çeþitli seçenekler deneyin: -nobps  -ni  -mc 0  -forceidx gibi.\n"\
 "- Yavaþ sürücüden çalacaksanýz (nfs/smb aglarý, dvd, vcd v.b.) -cache 8192  i deneyin.\n"\
 "-  -cache ile boþluklandýrýlmamiþ AVI dosyasýmý açýyorsunuz? -nocache ile kullanin.\n"\
-"Bunlari yaptýðýnýzda birþey deðiþmiyorsa, DOCS/bugreports.html dosyasýna gözatýn!\n\n"
+"Bunlari yaptýðýnýzda birþey deðiþmiyorsa, DOCS/HTML/en/bugreports.html dosyasýna gözatýn!\n\n"
 
 #define MSGTR_NoGui "MPlayer GRAFÝK ARABÝRÝMSÝZ seçeneðiyle oluþturulmuþ!\n"
 #define MSGTR_GuiNeedsX "MPlayer GRAFÝK ARABÝRÝMÝ X11 i gerektirir!\n"
@@ -203,7 +203,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "AVI Biçimleri Raw da aranamadý! (Index zorunlu, -idx  komutuyla deneyin!)  \n"
 #define MSGTR_CantSeekFile "Bu dosyada aranamaz!  \n"
 
-#define MSGTR_EncryptedVOB "Þifreli VOB dosyasý (libcss desteði olmadan oluþturulmuþ)! DOCS/cd-dvd.html ye göz atýn.\n"
+#define MSGTR_EncryptedVOB "Þifreli VOB dosyasý (libcss desteði olmadan oluþturulmuþ)! DOCS/HTML/en/dvd.html ye göz atýn.\n"
 #define MSGTR_EncryptedVOBauth "Þifreli biçim ama giriþ isteði gönderilmemiþ!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Þýkýþtýrýlmýþ biçimler (þimdilik) deskteklenmiyor !\n"

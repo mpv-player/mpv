@@ -102,8 +102,8 @@ static char help_text[]=
 "  - Zkuste -cache 8192.\n"\
 "- Pou¾íváte -cache pro neprokládané AVI soubory?\n"\
 "  - Zkuste -nocache.\n"\
-"Tipy na vyladìní a zrychlení najdete v DOCS/en/video.html a DOCS/en/sound.html.\n"\
-"Pokud nic z toho nepomù¾e, pøeètìte si DOCS/en/bugreports.html.\n\n"
+"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/devices.html.\n"\
+"Pokud nic z toho nepomù¾e, pøeètìte si DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI.\n"
 #define MSGTR_GuiNeedsX "GUI MPlayeru vy¾aduje X11.\n"
@@ -136,7 +136,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer havaroval kvùli 'Illegal Instruction'.\n"\
 "  To mù¾e být chyba v kódu pro rozpoznání CPU za bìhu...\n"\
-"  Prosím, pøeètìte si DOCS/en/bugreports.html.\n"
+"  Prosím, pøeètìte si DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer havaroval kvùli 'Illegal Instruction'.\n"\
 "  To se obvykle stává, kdy¾ se ho pokusíte spustit na CPU odli¹ném, ne¾ pro který\n"\
@@ -144,12 +144,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer havaroval kvùli ¹patnému pou¾ití CPU/FPU/RAM.\n"\
 "  Pøelo¾te MPlayer s volbou --enable-debug , proveïte 'gdb' backtrace\n"\
-"  a disassembly. Detaily najdete v DOCS/en/bugreports.html#crash.\n"
+"  a disassembly. Detaily najdete v DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer havaroval. To by se nemìlo stát.\n"\
 "  Mù¾e to být chyba v kódu MPlayeru _nebo_ ve va¹ich ovladaèích _nebo_ ve verzi\n"\
 "  va¹eho gcc. Pokud si myslíte, ¾e je to chyba MPlayeru, pøeètìte si, prosím,\n"\
-"  DOCS/en/bugreports.html a pokraèujte dle tam uvedeného návodu. My vám nemù¾eme\n"\
+"  DOCS/HTML/en/bugreports.html a pokraèujte dle tam uvedeného návodu. My vám nemù¾eme\n"\
 "  pomoci, pokud tyto informace neuvedete pøi ohla¹ování mo¾né chyby.\n"
 
 // mencoder.c:
@@ -279,7 +279,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nelze se posouvat v surových (raw) AVI proudech! (Potøebuji index, zkuste pou¾ít volbu -idx.)\n"
 #define MSGTR_CantSeekFile "Nemohu se posouvat v tomto souboru.\n"
 
-#define MSGTR_EncryptedVOB "©ifrovaný VOB soubor (Pøelo¾eno bez podpory libcss!) Pøeètìte si DOCS/en/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "©ifrovaný VOB soubor (Pøelo¾eno bez podpory libcss!) Pøeètìte si DOCS/HTML/en/dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Za¹ifrovaný proud, ale autentizaci jste nepo¾adoval!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nejsou (je¹tì) podporovány.\n"

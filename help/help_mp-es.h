@@ -95,13 +95,13 @@ static char help_text[]=
 "       **************************************************************\n"\
 "Posibles razones, problemas, soluciones: \n"\
 "- Más común: driver de _audio_ con errores. Solución: intenta -ao sdl, o usa\n"\
-"  ALSA 0.5 o la emulación OSS de ALSA 0.9. Lee DOCS/en/sound.html para más información.\n"\
+"  ALSA 0.5 o la emulación OSS de ALSA 0.9. Lee DOCS/HTML/es/devices.html#audio-dev para más información.\n"\
 "- Salida de vídeo lenta: prueba otro driver -vo (para obtener una lista, -vo help) o\n"\
-"  intenta iniciar con la opción -framedrop. Lee DOCS/en/video.html para más sugerencias.\n"\
+"  intenta iniciar con la opción -framedrop. Lee DOCS/HTML/es/devices.html#video-dev para más sugerencias.\n"\
 "- CPU lenta: no reproduzcas DVD o DivX grandes en una CPU lenta. Intenta iniciar con\n"\
 "  la opción -hardframedrop.\n"\
 "- Archivo erróneo: prueba combinaciones de: -nobps, -ni, -mc 0, -forceidx\n"\
-"  Si ninguna funciona, lee DOCS/en/bugreports.html\n\n"
+"  Si ninguna funciona, lee DOCS/HTML/es/bugreports.html\n\n"
 
 #define MSGTR_NoGui "MPlayer fue compilado sin soporte para interfaz gráfica.\n"
 #define MSGTR_GuiNeedsX "La interfaz gráfica de MPlayer requiere X11!\n"
@@ -135,7 +135,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto puede ser un defecto en nuestra rutina nueva de autodetección de CPU...\n"\
-"  Por favor lee DOCS/en/bugreports.html.\n"
+"  Por favor lee DOCS/HTML/es/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto ocurre normalmente cuando ejecuta el programa en una CPU diferente de\n"\
@@ -143,11 +143,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer se detuvo por mal uso de CPU/FPU/RAM.\n"\
 "  Recompila MPlayer con la opción --enable-debug y hace un backtrace en 'gdb' y\n"\
-"  un desensamblado. Para más detalles, vea DOCS/en/bugreports.html#crash\n"
+"  un desensamblado. Para más detalles, vea DOCS/HTML/es/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer se detuvo. Esto no debería haber pasado.\n"\
 "  Puede ser un defecto en el código de MPlayer _o_ en sus drivers _o_ en su versión\n"\
-"  de gcc. Si piensa que es la culpa de MPlayer, por favor lea DOCS/en/bugreports.html\n"\
+"  de gcc. Si piensa que es la culpa de MPlayer, por favor lea DOCS/HTML/es/bugreports.html\n"\
 "  y siga las instrucciones que allí se encuentran. No podemos y no lo ayudaremos a\n"\
 "  menos que nos provea esa información cuando este reportando algún posible defecto.\n"
 
@@ -277,7 +277,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "No se puede avanzar o retroceder en un stream crudo .AVI (se requiere índice, prueba con -idx).\n"
 #define MSGTR_CantSeekFile "No se puede avanzar o retroceder en este archivo.\n"
 
-#define MSGTR_EncryptedVOB "Archivo VOB encriptado (no se compiló con soporte de libcss). Lee DOCS/en/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "Archivo VOB encriptado (no se compiló con soporte de libcss). Lee DOCS/HTML/es/dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Stream encriptado pero no pediste autenticación.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Cabecera comprimida no suportada (por ahora).\n"

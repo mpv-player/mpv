@@ -1,6 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
 //maintained by:   Philippe De Swert <philippe.deswert@student.denayer.wenk.be>
-//synced with help_mp-en.h revision 1.108
+//synced with help_mp-en.h revision 1.109
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -75,7 +75,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Probeer audio codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindAfmtFallback "Kan audio codec voor geforceerde driver familie niet vinden, val terug op andere drivers.\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
-#define MSGTR_RTFMCodecs "Lees DOCS/en/codecs.html voor meer informatie!\n"
+#define MSGTR_RTFMCodecs "Lees DOCS/HTML/en/codecs.html voor meer informatie!\n"
 #define MSGTR_CouldntInitAudioCodec "Kon audio codec niet initialiseren! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "Probeer video codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindVideoCodec "Kan codec voor video format 0x%X niet vinden!\n"
@@ -102,8 +102,8 @@ static char help_text[]=
 "  - Probeer met -cache 8192.\n"\
 "- Gebruik je -cache om een niet-interleaved bestand af te spelen?\n"\
 "  - Probeer met -nocache\n"\
-"Lees DOCS/video.html en DOCS/sound.html voor tips aangaande het afstellen en versnellen van MPlayer.\n"\
-"Als geen van deze oorzaken van toepassingen zijn, lees dan DOCS/bugreports.html !\n\n"
+"Lees DOCS/HTML/en/devices.html voor tips aangaande het afstellen en versnellen van MPlayer.\n"\
+"Als geen van deze oorzaken van toepassingen zijn, lees dan DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer werd gecompileerd ZONDER GUI ondersteuning!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI heeft X11 nodig!\n"
@@ -136,7 +136,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer crashte door een 'Illegale Instructie'.\n"\
 "  Het kan een bug zijn in onze nieuwe runtime CPU-detectie code...\n"\
-"  Lees DOCS/bugreports.html.\n"
+"  Lees DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer crashte door een 'Illegale Instructie'.\n"\
 "  Dit gebeurt meestal als je het uitvoert op een andere CPU dan diegene waarvoor het werd\n"\
@@ -144,11 +144,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashte door slecht gebruik van CPU/FPU/RAM.\n"\
 "  Hercompileer MPlayer met --enable-debug en genereer een 'gdb' backtrace en\n"\
-"  disassembly. Voor details, zie DOCS/bugreports.html#crash\n"
+"  disassembly. Voor details, zie DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashte. Dit zou niet mogen gebeuren.\n"\
 "  Het kan een bug in de MPlayer code _of_ in uw drivers _of_ in uw gcc\n"\
-"  versie. Als je denkt dat het MPlayer's fout is, lees dan DOCS/bugreports.html\n"\
+"  versie. Als je denkt dat het MPlayer's fout is, lees dan DOCS/HTML/en/bugreports.html\n"\
 "  en volg de instructies. We kunnen en zullen niet helpen tenzij je deze informatie\n"\
 "  meelevert bij het rapporteren van een mogelijke bug.\n"
 
@@ -279,7 +279,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kan niet in raw .AVI streams verplaatsen! (index nodig, probeer met de -idx optie!)  \n"
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
 
-#define MSGTR_EncryptedVOB "Geencrypteerd VOB bestand (niet gecompileerd met libcss ondersteuning)! Lees DOCS/cd-dvd.html bestand\n"
+#define MSGTR_EncryptedVOB "Geencrypteerd VOB bestand (niet gecompileerd met libcss ondersteuning)! Lees DOCS/HTML/en/dvd.html bestand\n"
 #define MSGTR_EncryptedVOBauth "Geencrypteerde stream maar authenticatie was niet aangevraagd door u!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"

@@ -104,8 +104,8 @@ static char help_text[]=
 "- Пов╕льний нос╕й (диски NFS/SMB, DVD, VCD та ╕н.). Спробуйте -cache 8192.\n"\
 "- Ви використову╓те -cache для програвання неперемеженого AVI файлу?\n"\
 "  - спробуйте -nocache.\n"\
-"Читайте поради в файлах DOCS/en/video.html та DOCS/en/sound.html .\n"\
-"Якщо н╕чого не допомогло, тод╕ читайте DOCS/en/bugreports.html !\n\n"
+"Читайте поради в файлах DOCS/HTML/en/devices.html .\n"\
+"Якщо н╕чого не допомогло, тод╕ читайте DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer був скомп╕льований БЕЗ п╕дтримки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI вимага╓ X11!\n"
@@ -138,7 +138,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  It may be a bug in our new runtime CPU-detection code...\n"\
-"  Please read DOCS/en/bugreports.html.\n"
+"  Please read DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  It usually happens when you run it on a CPU different than the one it was\n"\
@@ -146,12 +146,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/en/bugreports.html#crash\n"
+"  disassembly. For details, see DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
 "  gcc version. If you think it's MPlayer's fault, please read\n"\
-"  DOCS/en/bugreports.html and follow the instructions there. We can't and\n"\
+"  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
 "  won't help unless you provide this information when reporting a possible bug.\n"
 
 // mencoder.c:
@@ -274,7 +274,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Не можу перем╕ститися у непро╕ндексованому потоц╕ .AVI! (вимага╓ться ╕ндекс, спробуйте з ключом -idx!)\n"
 #define MSGTR_CantSeekFile "Не можу перем╕щуватися у цьому файл╕!\n"
 
-#define MSGTR_EncryptedVOB "Шифрований VOB файл (mplayer не скомп╕льований з п╕дтримкою libcss)! Див. DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Шифрований VOB файл (mplayer не скомп╕льований з п╕дтримкою libcss)! Див. DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Шифрований пот╕к але ви не вимагали авторизац╕╖!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Стиснут╕ заголовки (поки що) не п╕дтримуються!\n"

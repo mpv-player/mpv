@@ -90,7 +90,7 @@ static char help_text[]=
 "         **************************************************************************\n\n"\
 "Πιθανές αιτίες, προβλήματα, λύσεις: \n"\
 "- Συνήθη αιτία: πρόβλημα με τον οδηγό του ήχου\n"\
-"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9. Διαβάστε το DOCS/en/sound.html για περισσότερες λύσεις!\n"\
+"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9. Διαβάστε το DOCS/HTML/en/devices.html#audio-dev για περισσότερες λύσεις!\n"\
 "  - Μπορείτε επίσης να πειραματιστείτε με διάφορες τιμές του -autosync, η τιμή  30 είναι μια καλή αρχή.\n"\
 "- Αργή έξοδος του βίντεο\n"\
 "  - Δοκιμάστε διαφορετικό -vo οδηγό (για λίστα: -vo help) ή δοκιμάστε με -framedrop\n"\
@@ -102,8 +102,8 @@ static char help_text[]=
 "  - Δοκιμάστε -cache 8192\n"\
 "- Μήπως χρησιμοποιείται -cache για την αναπαραγωγή ενός non-interleaved αρχείου;\n"\
 "  - Δοκιμάστε με -nocache\n"\
-"Διαβάστε το DOCS/en/video.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
-"Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/en/bugreports.html !\n\n"
+"Διαβάστε το DOCS/HTML/en/devices.html#video-dev για ρύθμιση/επιτάχυνση του βίντεο.\n"\
+"Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για GUI!\n"
 #define MSGTR_GuiNeedsX "Το GUI του MPlayer χρειάζεται X11!\n"
@@ -136,7 +136,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- Το MPlayer κατέρρευσε από ένα 'Illegal Instruction'.\n"\
 "  Μπορεί να είναι πρόβλημα στον νέο κώδικα για runtime CPU-αναγνώριση...\n"\
-"  Παρακαλούμε διαβάστε το DOCS/en/bugreports.html.\n"
+"  Παρακαλούμε διαβάστε το DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- Το MPlayer κατέρρευσε από ένα 'Illegal Instruction'.\n"\
 "  Συνήθως συμβαίνει όταν τρέχετε το πρόγραμμα σε διαφορετικό επεξεργαστή από αυτόν στον οποίο έγινε\n"\
@@ -144,11 +144,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Το Mplayer κατέρρευσε  από κακή χρήση του επεξεργαστή ή της μνήμης.\n"\
 "  Αναμεταγλωττίστε το MPlayer με --enable-debug και τρέξτε 'gdb' backtrace και\n"\
-"  disassembly. Για λεπτομέρειες, δείτε το DOCS/en/bugreports.html#crash\n"
+"  disassembly. Για λεπτομέρειες, δείτε το DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- Το MPlayer κατέρρευσε. Αυτό δεν θα έπρεπε να είχε συμβεί.\n"\
 "  Μπορεί να είναι ένα πρόβλημα στον κώδικα του MPlayer _ή_ στους οδηγούς σας _ή_ στην έκδοση\n"\
-"  του gcc σας. Αν νομίζετε ότι φταίει το MPlayer, παρακαλώ διαβάστε το DOCS/en/bugreports.html\n"\
+"  του gcc σας. Αν νομίζετε ότι φταίει το MPlayer, παρακαλώ διαβάστε το DOCS/HTML/en/bugreports.html\n"\
 "  και ακολουθήστε της οδηγίες. Δεν μπορούμε και δεν θα προσφέρουμε βοήθεια εκτός και αν στείλετε\n"\
 "  τις πληροφορίες όταν αναφέρετε το πρόβλημα.\n"
 
@@ -279,7 +279,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Μη δυνατη αναζήτηση σε raw .AVI κανάλια! (το index είναι απαραίτητο, δοκιμάστε με την επιλογή -idx!)  \n"
 #define MSGTR_CantSeekFile "Αδύνατη η αναζήτηση σε αυτό το αρχείο!  \n"
 
-#define MSGTR_EncryptedVOB "Κωδικοποιημένο VOB αρχείο (η μετάφραση έγινε χωρίς την libcss υποστήριξη)! Διαβάστε to DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Κωδικοποιημένο VOB αρχείο (η μετάφραση έγινε χωρίς την libcss υποστήριξη)! Διαβάστε to DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Κωδικοποιημένο κανάλι αλλά δεν ζητήθηκε πιστοποίηση!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Συμπιεσμένες επικεφαλίδες δεν υποστηρίζονται (ακόμα)!\n"

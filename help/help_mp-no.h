@@ -90,14 +90,14 @@ static char help_text[]=
 "!!! Mulige årsaker, problemer, løsninger: \n"\
 "- Vanligste problem: ødelagte _lyd_ drivere, eller lyddrivere med feil. \n"\
 "  Prøv: -ao sdl eller bruk ALSA 0.5/oss emuleringen i ALSA 0.9. Les også\n"\
-"  DOCS/sound.html for flere tips!\n"\
+"  DOCS/HTML/en/devices.html#audio-dev for flere tips!\n"\
 "- Treg video output. Prøv en annen -vo driver (for liste: -vo help) eller\n"\
-"  prøv med -framedrop! Les DOCS/video.html for flere tips\n"\
+"  prøv med -framedrop! Les DOCS/HTML/en/devices.html#video-dev for flere tips\n"\
 "- Treg CPU. ikke forsøk å spille av store dvd/divx filer på en treg CPU!\n"\
 "  forsøk -hardframedrop\n"\
 "- Feil på filen. forsøk forskjellige kombinasjoner av disse:\n"\
 "  -nobps  -ni  -mc 0  -forceidx\n"\
-"Dersom dette ikke hjelper, les DOCS/bugreports.html !\n\n"
+"Dersom dette ikke hjelper, les DOCS/HTML/en/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer er kompilert uten GUI-støtte!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI trenger X11!\n"
@@ -150,7 +150,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kan ikke søke i rå .AVI streams! (index behøves, prøv med -idx valget!)  \n"
 #define MSGTR_CantSeekFile "Kan ikke søke i denne filen!  \n"
 
-#define MSGTR_EncryptedVOB "Kryptert VOB fil (ikke kompilert med libcss støtte)! Les filen DOCS/DVD\n"
+#define MSGTR_EncryptedVOB "Kryptert VOB fil (ikke kompilert med libcss støtte)! Les filen DOCS/HTML/en/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Kryptert stream men autentikasjon var ikke forespurt av deg!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimerte headere ikke støttet (enda)!\n"
