@@ -52,7 +52,7 @@ static int preinit(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    // TODO!
+    close_acm_audio_codec(sh);
 }
 
 static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
