@@ -3,11 +3,12 @@ mplayer (1.0)
   pre4: "New Year Release"
   
     DOCS:
-    * new Copyright file covering the licenses involved
+    * Copyright file covers files coming from other projects and their licenses
     * new Japanese console message translation
     * Polish translation almost finished
     * DVD ripping guide
     * video out driver section added to the man page
+    * XML build system rewritten
     * Miscellaneous updates all over the place
 
     Ports:
@@ -15,7 +16,7 @@ mplayer (1.0)
     * support for VAX (tested on VAXstation 4000/VLC) -- really, believe me!
     * optimizing for specific MIPS CPUs under IRIX
     * AMD64 detection under BSDs
-    * working fbdev and matrox drivers under Linux 2.6 series
+    * fbdev driver updated for Linux 2.6
     * support for ELF only OpenBSD
     * optimizing for PPC 970 (aka G5)
 
@@ -32,12 +33,12 @@ mplayer (1.0)
     * MPEG Aspect code 4 fixed
 
     Decoders:
-    * removed zlib dependency in vd/lcl
+    * compilation failure without zlib in vd/lcl fixed
     * removed obsoleted decoders (which were moved to libavcodec), affected:
       vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
     * workaround for buggy codecs in ad/acm (support for Sharp G.726)
     * synced to original FLAC sources
-    * fixed chrom-swapping in Hauppauge Macroblock decoder
+    * fixed chroma-swapping in Hauppauge Macroblock decoder
     * Altivec optimized resampler in liba52
 
     Filters:
@@ -54,8 +55,8 @@ mplayer (1.0)
     * -mixer support for alsa9
     * fixed OSS audio grabber module with hardware not supporting 44khz
     * native ALSA 1.x support (not through 0.9 emulation)
-    * better multibuffer support in VIDIX NVidia driver
-    * pan & scan support in VIDIX NVidia driver
+    * better multibuffer support in VIDIX nVidia driver
+    * pan & scan support in VIDIX nVidia driver
 
     FFmpeg/libavcodec:
     * H.263 AIC and MQ encoding support
@@ -78,7 +79,7 @@ mplayer (1.0)
     * optimized quantization (including the trellis way)
     * Sierra VMD video decoder
     * MMX and SSE2 optimized H.263 denoiser
-    * better SVCD compilance (encoder side)
+    * better SVCD compliance (encoder side)
     * MMX and MMX2 optimized interlaced DCT decision
     * various cleanup, memleak and segfault fixes
     * slightly optimized (2x faster) the MPEG layer 3 decoder
@@ -92,7 +93,7 @@ mplayer (1.0)
     * -codecs-file option for specifying alternative codecs.conf files
     * fixed some minor bugs in the GUI
     * prevent sig11 when $HOME is not set
-    * fix some commandline handling corruptions
+    * fix some command line handling corruptions
     * swedish and polish yes/no options in config files
     * support binding F11 and F12 keys
 
