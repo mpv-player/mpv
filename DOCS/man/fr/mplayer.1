@@ -1,4 +1,4 @@
-.\" synced with 1.767
+.\" synced with 1.772
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "08 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "11 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2442,7 +2442,7 @@ Les pilotes de sortie disponibles sont:
 Utilise l'extension XVideo de XFree86 4.x pour permettre la
 lecture avec accélération matérielle.
 Si vous ne pouvez pas utiliser un pilote spécifique a votre matériel,
-ceci est probablement la meilleur option.
+ceci est probablement la meilleure option.
 .PD 0
 .RSs
 .IPs port=<nombre>
@@ -2653,9 +2653,14 @@ Nécessite une version d'OpenGL >= 1.2.
 Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
 0 pour l'image entière.
 .IPs (no)osd
-Active ou désactive la gestion de l'incrustation OSD via OpenGL.
+Active ou désactive la gestion de l'incrustation OSD via OpenGL
+(par défaut\ : activé).
 Surtout pour des test, vous devriez utiliser \-osdlevel 0 pour désactiver
-l'incrustation OSD (par défaut\ : activé).
+l'incrustation OSD.
+.IPs (no)aspect
+Active ou désactive la gestion du redimensionnement du ratio d'aspect et
+le panscan (par défaut\ : activé).
+Sa désactivation peut faire gagner un peu de temps processeur.
 .RE
 .PD 1
 .
@@ -2711,15 +2716,16 @@ Joue la vidéo en utilisant la librairie DirectFB.
 Utilise les codes de touches de DirectFB au lieu de ceux de MPlayer
 (par défaut\ : activé).
 .IPs buffermode=single|double|triple
-Le tamponnage (buffering) double ou triple donnent les meilleurs résultats si vous voulez éviter les effets de distortions.
-Le triple tamponnage est plus efficace que le double puisqu'ill ne bloque
+Le tamponnage (buffering) double ou triple donnent les meilleurs résultats
+si vous voulez éviter les effets de distortions.
+Le triple tamponnage est plus efficace que le double puisqu'il ne bloque
 pas MPlayer lorsqu'il attend le rafraîchissement vertical.
 Le tamponnage simple devrait être évité (par défaut\ : single).
 .IPs fieldparity=top|bottom
 Contrôle l'ordre d'affichage des trames entrelacées (défaut\ : désactivé).
 Les paramètres valides sont top = les champs du haut en premier,
 bottom = les champs du bas en premier.
-Cette options n'a aucun effet sur les vidéo non entrelacées, ce qui représente
+Cette option n'a aucun effet sur les vidéo non entrelacées, ce qui représente
 la majorité des vidéos MPEG.
 Vous devriez activer cette option si vous observez des distortions ou des
 mouvements saccadés lorsque vous regardez une vidéo entrelacée.
@@ -2763,7 +2769,7 @@ Le tamponnage simple devrait être évité (par défaut\ : triple).
 Contrôle l'ordre d'affichage des trames entrelacées (par défaut\ : désactivé).
 Les paramètres valides sont "top" (les champs du haut en premier),
 "bottom" (les champs du bas en premier).
-Cette option n'a aucun effet sur les vidéo non entrelacées, ce qui représente
+Cette option n'a aucun effet sur les vidéos non entrelacées, ce qui représente
 la majorité des vidéos MPEG.
 Vous devriez activer cette option si vous observez des distortions ou des
 mouvements saccadés lorsque vous regardez une vidéo entrelacée.
@@ -2771,7 +2777,7 @@ mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 Défini la norme TV de la carte Matrox sans avoir besoin de modifier
 /etc/\:directfbrc (par défaut\ : désactivé).
 Les normes valides sont pal = PAL, ntsc = NTSC.
-La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisi
+La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisit
 la norme à utiliser en fonction du nombre de trames par secondes du fim.
 .RE
 .PD 1
@@ -3780,7 +3786,7 @@ largeur/\:hauteur redimensionnées (par défaut\ : largeur, hauteur originales)
 .br
 .I NOTE:
 Si \-zoom est utilisée, et que les filtres sous-jacents (y compris libvo)
-ne sont pas capable de redimmensionner, alors les valeurs par défaut seront
+ne sont pas capables de redimmensionner, alors les valeurs par défaut seront
 d_width/\:d_height !
 .RSss
  0:   largeur/\:hauteur dimmensionnées à d_width/\:d_height
@@ -3855,8 +3861,8 @@ Change la taille ou le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
 "aspect" peut être donné en tant que fraction (4/\:3) ou que nombre flottant
 (1.33).
-Vous pouvez également spécifier les largeur et hauteur exactes de l'affichage
-désiré.
+Vous pouvez également spécifier les largeurs et hauteurs exactes de
+l'affichage désiré.
 Notez que ce filtre ne fait AUCUN redimmensionnement lui-même; il affecte juste
 ce que feront les prochains redimmensionnements (logiciels ou matériels) feront
 en corrigeant le rapport hauteur/\:largeur.
@@ -4002,7 +4008,7 @@ Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .B lavc[=qualité:fps]
 Conversion logicielle rapide YV12 vers MPEG1 avec libavcodec pour utilisation
 avec DVB/\:DXR3.
-Plus rapide et de meilleur qualitée que \-vf fame.
+Plus rapide et de meilleur qualité que \-vf fame.
 .RSs
 .IPs qualité
 .RSss
@@ -4106,7 +4112,7 @@ Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
-composantes rouge, vert et bleu.
+composantes rouges, vertes et bleues.
 Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
 grand sur les parties claires de l'image, c-à-d.\& les empécher d'être
 sur-amplifiées et de devenir complètement blanches.
@@ -4148,9 +4154,9 @@ Ce filtre convertit les données 4:2:0 planaires au format YUY2 (4:2:2)
 avec les lignes chroma à leur bon emplacement, de façon à ce que à chaque
 ligne de balayage (scanline), les données luma et chroma proviennent toutes
 deux du même champ.
-L'argument optionnel sélectionne le mode d'échantillonage.
+L'argument optionnel sélectionne le mode d'échantillonnage.
 Par défaut, l'interpolation linéaire (mode 1) est utilisé.
-Le mode 0 utilise un échantillonage du 'plus proche voisin' (nearest-neighbor),
+Le mode 0 utilise un échantillonnage du 'plus proche voisin' (nearest-neighbor),
 qui est rapide mais incorrect.
 .
 .TP
@@ -4158,8 +4164,8 @@ qui est rapide mais incorrect.
 Utile uniquement avec MEncoder.
 Si harddup est utilisé lors de l'encodage, les trames dupliquées seront
 aussi présentes en sortie.
-Cela nécessite un peu plus de place, mais est nécessaire pour les
-fichier de sortie MPEG ou si vous comptez démultiplexer et multiplexer
+Cela nécessite un peu plus de place, mais est indispensable pour les
+fichiers de sortie MPEG ou si vous comptez démultiplexer et multiplexer
 le flux vidéo après l'encodage.
 Devrait être mis à la fin (ou presque) de la chaîne de filtres, à moins
 que vous ayez une bonne raison de faire autrement.
@@ -4169,7 +4175,7 @@ que vous ayez une bonne raison de faire autrement.
 Utile uniquement avec MEncoder.
 Softskip change le moment du "skipping" (saut) de trame lors de l'encodage,
 qui se fait normalement avant la chaîne de filtres, pour qu'elle se fasse à
-l'intérieur de la chaîne de filtres.
+l'intérieur de celle-ci.
 Cela permet aux filtres qui ont besoin de voir toutes les trames
 (téléciné inverse, débruitage temporel, etc.\&) pour fonctionner
 correctement.
@@ -4330,7 +4336,7 @@ Les valeurs disponibles sont 0 (motif fixé avec numéro de trame initiale
 définit par fr=#) et 1 (recherche agressive du motif telecine).
 La valeur par défaut est 1.
 .IPs fr\ \ \ 
-Définie le numéro de trame initiale de la séquence.
+Définit le numéro de trame initiale de la séquence.
 0\-2 sont les trois trames progressives propres; 3 et 4 sont les deux trames
 entrelaçées.
 La valeur par défaut, -1, signifie "pas dans la séquence telecine".
@@ -4349,7 +4355,7 @@ Cela donne de bien meilleurs résultats pour une vidéo ayant subi d'importantes
 modifications/\:éditions après que telecine ait été appliqué, mais par contre
 il n'est pas aussi tolérant aux entrées avec beaucoup de bruit, comme par
 exemple la capture TV.
-Le paramètre optionnel (itvc=1) corresponds à l'option dr=1 du filtre detc,
+Le paramètre optionnel (itvc=1) correspond à l'option dr=1 du filtre detc,
 et devrait être utilisé avec MEncoder mais pas avec MPlayer.
 Comme pour detc, vous devez définir le débit de trame de sortie correct
 (\-ofps 23.976) en utilisant MEncoder.
@@ -4403,8 +4409,8 @@ Si un champ n'a pas de corespondance, il est désentrelacé par simple
 approximation linéaire.
 Si la source est en MPEG-2, il doit être le premier filtre à avoir accès
 aux "field-flags" initialisés par l'encodeur MPEG-2.
-Suivant la source MPEG, vous pouvez ne pas tenir compte de ce conseil, du
-moment que vous ne voyez pas pleins d'avertissements "Bottom-first field".
+Suivant la source MPEG, il est inutile de tenir compte de ce conseil, tant
+que vous ne voyez pas une multitude d'avertissements "Bottom-first field".
 Sans options il fait un telecine inverse normal, et devrait être utilisé avec
 mencoder \-fps 29.97 \-ofps 23.976.
 Quand ce filtre est utilisé avec mplayer, cela produira un débit impair
@@ -4413,7 +4419,7 @@ pp=lb ou pas de désentrelacement du tout.
 Les options multiples doivent être séparées par /.
 .RSs
 .IPs crop=l:h:x:y
-Exactement comme le filtre crop, mais plus rapide, et fonctionne également sur
+Exactement comme le filtre crop, mais plus rapide, et fonctionne également avec
 avec des films teleciné hard et soft mélangés, du moment que y soit un
 multiple de 4.
 Si x ou y nécessitaient de couper des fractions de pixels du plan chroma,
@@ -4526,7 +4532,7 @@ Définit le seuil "deghosting" (0\-255 pour le mode à passe unique,
 -255\-255 pour celui 2-passes, par défaut 0).
 Si non-nul, le mode deghosting est utilisé.
 Ceci est destiné aux vidéos ayant été désentrelacées en fusionnant les champs
-ensemble au lieu d'en jetter un.
+ensemble au lieu d'en jeter un.
 Le deghosting amplifie les artefacts de compression des champs fusionnés,
 et la valeur du paramètre est celle du seuil pour exclure les pixels 
 du filtre deghosting s'il diffère moins que ce seuil de la trame
@@ -4542,7 +4548,7 @@ passe.
 .TP
 .B phase=[t|b|p|a|u|T|B|A|U][:v]
 .I NOTE\ :
-Si vous aves des connaissances audiovisuelles, veuillez indiquez au traducteur
+Si vous avez des connaissances audiovisuelles, veuillez indiquez au traducteur
 si cette option -très technique- est correctement décrite, en vous aidant de
 sa version anglaise.
 .br
@@ -4606,7 +4612,7 @@ Le paramètre optionnel départ indique où démarrer (0-3).
 .TP
 .B "tinterlace[=mode]"
 Entrelacement temporel de champs \- réunis des paires de trames dans une trame
-entrelacée, divisant le debit par deux.
+entrelacée, divisant le débit par deux.
 Les trames paires sont déplacées dans le champ supérieur, les trames impaires
 le sont dans le champ inférieur.
 Ceci peut être utilisé pour inverser complètement l'effets du filtre tfields
@@ -4868,7 +4874,7 @@ pour obtenir une image toutes les 2 secondes à 25 fps.
 Supprime un logo de station de télé par simple interpolation des pixels
 environnants.
 Définissez juste un rectangle recouvrant le logo et regardez-le
-disparaître (ou parfois voir quelque chose d'encore pire apparaître \-
+disparaître (vous risquez aussi de voir quelque chose de pire apparaître \-
 ça dépend des cas).
 .PD 0
 .RSs
@@ -5010,7 +5016,7 @@ sont affichés lors de leur incrustation dans l'image.
 .
 .TP
 .B \-noencodedups
-Ne pas encoder en les trames répétées\ ;
+Ne pas encoder les trames répétées\ ;
 Encoder chacune d'elles par une trame nulle pour indiquer qu'elle était
 en double.
 Les trames nulles seront écrites quand même, sauf si un filtre ou un
@@ -5590,7 +5596,7 @@ Gagne à être utilisé en conjonction de mbd>0.
 .
 .TP
 .B obmc\ \ \ 
-Compensation de mouvement de par groupes de blocs (H.263+)
+Compensation de mouvement par groupes de blocs (H.263+)
 .
 .TP
 .B loop\ \ \ 
@@ -5604,14 +5610,14 @@ Ne fait absolument rien pour l'instant.
 .TP
 .B keyint=<0\-300>
 intervalle (en trames) entre les trames-clé (keyframe).
-Les trames-clé sont nécessaires pour les déplacements puisque celui-ci n'est
+Les trames-clé sont indispensables pour les déplacements puisque celui-ci n'est
 possible que d'une trame-clé vers une autre, mais celles-ci prennent plus
 de place que les autres trames.
-De plus grands nombres ici signifient donc des fichiers légèrement plus
-petits, mais un déplacement moins précis, 0 signifie pas de
+Un espacement plus important des trames-clé signifie donc des fichiers
+légèrement plus petits, mais un déplacement moins précis, 0 signifie pas de
 trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
-mauvaise suivant le décodeur, l'encodeur et la chance.
+mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
 Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
 (par défaut\ : 250 ou une trame-clé toutes les dix secondes dans un
 film à 25fps)
@@ -5637,7 +5643,7 @@ toujours utiliser le nombre maximum de trames B (par défaut)
 .
 .TP
 .B vpass=<1\-3>
-Active le mode deux (ou trois) passes interne ne le spécifiez que si
+Active le mode deux (ou trois) passes internes ne le spécifiez que si
 vous désirez utiliser l'encodage deux (ou trois) passes\ :
 .PD 0
 .RSs
@@ -5737,7 +5743,7 @@ par défaut
 .TP
 .B vratetol=<valeur>
 tolérance approximative de taille du fichier en kbit.
-1000\-100000 est un intervalle raisonable.
+1000\-100000 est un intervalle raisonnable.
 attention: 1kBit = 1000 Bits
 (par défaut\ : 8000)
 .br
@@ -5828,7 +5834,7 @@ quantificateurs seront semblables d'une trame à l'autre
 .
 .TP
 .B vqcomp=<valeur>
-compression quantificateur, dépends de vrc_eq (passe\ 1/\:2)
+compression quantificateur, dépend de vrc_eq (passe\ 1/\:2)
 (par défaut\ : 0.5)
 .
 .TP
@@ -6707,7 +6713,7 @@ Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
 (mode 2passes uniquement)
 .br
 .I ATTENTION\ :
-Cette options n'existe plus avec XviD-1.0.x.
+Cette option n'existe plus avec XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -7030,7 +7036,7 @@ Définit la hauteur du PAR particulier.
 Stocke le rapport hauteur/\:largeur du film en interne, tout comme les fichiers
 MPEG.
 C'est une meilleure solution que le redimensionnement, parce que la qualité
-n'est pas alterée.
+n'est pas altérée.
 MPlayer et quelques autres lecteurs liront ces fichiers correctement, les
 autres l'afficheront avec un mauvais rapport hauteur/\:largeur.
 Le paramètre aspect peut être donné en ratio ou en nombre flottant.
@@ -7049,6 +7055,19 @@ bruit) pour l'ensemble de la vidéo après encodage et stocke le PSNR par trame
 dans un fichier portant un nom tel que 'psnr_hhmmss.log'.
 Les valeurs renvoyées sont en dB (décibel), plus elles sont hautes, plus la
 vidéo générée est fidèle à l'originale.
+.
+.PP
+.sp 1
+L'option suivant n'est disponible que dans les versions de développement
+de XviD 1.1.x.
+.
+.TP
+.B bvhq=<0|1>
+Cette option permet une sélection des différents candidats de vecteurs
+de mouvement pour les trames-B d'après leur taux de distortion,
+ce qui correspond à ce que fait l'option vhq avec les trames-P.
+Cela produit des trames-B plus jolies sans pour autant avoir un impact
+significatif sur le temps de calcul.
 .
 .
 .SS x264enc (\-x264encopts)
@@ -7101,7 +7120,7 @@ Nombre des trames précédentes à utiliser comme prédicteur pour les
 trames-P (par défaut\ : 1).
 Est efficace avec les dessins animés, mais semble l'être beaucoup moins
 avec des films dont les sujets sont réels.
-Quelques décodeurs sont incapables de gérer de de grandes valeurs de
+Quelques décodeurs sont incapables de gérer de grandes valeurs de
 frameref.
 .
 .TP
