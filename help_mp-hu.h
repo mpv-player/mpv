@@ -190,8 +190,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Nem tudok megosztott memóriát lefoglalni\n"
 #define MSGTR_CantAllocAudioBuf "Nem tudok kimeneti hangbuffer lefoglalni\n"
-#define MSGTR_NoMemForDecodedImage "nincs elég memória a dekódolt képhez
-(%ld bájt)\n"
+#define MSGTR_NoMemForDecodedImage "nincs elég memória a dekódolt képhez (%ld bájt)\n"
 
 #define MSGTR_AC3notvalid "AC3 folyam hibás.\n"
 #define MSGTR_AC3only48k "Csak 48000 Hz-es folyamok vannak támogatva.\n"
