@@ -148,25 +148,6 @@ int i;
 
 extern int vaa_use_dr;
 
-static int use_dr=0,use_dr_422=0;
-static bes_da_t bda;
-void init_video_vaa( unsigned width )
-{
-  unsigned adp;
-  memset(&bda,0,sizeof(bes_da_t));
-  if(vo_vaa.query_bes_da)
-    use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
-  if(!vaa_use_dr) use_dr = 0;
-  if(use_dr)
-  {
-    uint32_t sstride,dstride;
-    sstride=width*2;
-    adp = bda.dest.pitch.y-1;
-    dstride=(width*2+adp)&~adp;
-    if(sstride == dstride) use_dr_422 = 1;
-  }
-}
-
 int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 mp_image_t *mpi=NULL;
 int blit_frame=0;
