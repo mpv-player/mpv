@@ -1854,6 +1854,17 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
+  In your audio and video fields you can use an extended syntax:
+  <option>...:pid[+pid]:...</option> (for a maximum of 6 pids each);
+  in this case <application>MPlayer</application> will include in the
+  stream all the indicated pids, plus pid 0 (that contains the PAT).
+  You are encouraged to include in each row the PMT pid for the
+  corresponding channel (if you know it).
+  Other possible uses are: televideo pid, second audio track, etc.
+</para>
+
+
+<para>
   To show the first of the channels present in your list, run
 </para>
 
