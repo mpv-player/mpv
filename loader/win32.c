@@ -160,6 +160,7 @@ static void longcount_stub(long long* z)
 }
 
 int LOADER_DEBUG=1; // active only if compiled with -DDETAILED_OUT
+//#define DETAILED_OUT
 static inline void dbgprintf(char* fmt, ...)
 {
 #ifdef DETAILED_OUT
@@ -180,6 +181,8 @@ static inline void dbgprintf(char* fmt, ...)
     }
 #endif
 }
+
+
 char export_names[500][30]={
 "name1",
 //"name2",
@@ -322,7 +325,7 @@ void* mreq_private(int size, int to_zero, int type)
     header->size = size;
     header->type = type;
 
-    //if (alccnt < 400) printf("MY_REQ: %p\t%d     (%d)\n",  answer, size, alccnt);
+    //if (alccnt < 40000) printf("MY_REQ: %p\t%d   t:%d  (cnt:%d)\n",  header, size, type, alccnt);
     return header + 1;
 }
 
@@ -341,13 +344,13 @@ int my_release(void* memory)
     if (memory == 0)
 	return 0;
 
-    pthread_mutex_lock(&memmut);
-
     if (header->deadbeef != 0xdeadbeef)
     {
-	printf("FATAL releasing corrupted memory!\n");
+	printf("FATAL releasing corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
 	return 0;
     }
+
+    pthread_mutex_lock(&memmut);
 
     switch(header->type)
     {
@@ -361,7 +364,7 @@ int my_release(void* memory)
 	pthread_mutex_destroy((pthread_mutex_t*)memory);
 	break;
     }
-    	
+
     prevmem = header->prev;
     nextmem = header->next;
 
@@ -380,7 +383,7 @@ int my_release(void* memory)
     else
 	pthread_mutex_destroy(&memmut);
 
-    //if (alccnt < 400) printf("MY_RELEASE: %p\t%ld    (%d)\n", mem, mem[3], alccnt);
+    //if (alccnt < 40000) printf("MY_RELEASE: %p\t%ld    (%d)\n", header, header->size, alccnt);
 #else
     if (memory == 0)
 	return 0;
@@ -608,7 +611,7 @@ void destroy_event(void* event)
 		printf("%x => ", pp);
 		pp=pp->prev;
 	    }
-	    printf("0\n");    
+	    printf("0\n");
 */
 	    return;
 	}
@@ -719,14 +722,14 @@ void* WINAPI expWaitForSingleObject(void* object, int duration)
     {
 /**
 From GetCurrentThread() documentation:
-A pseudo handle is a special constant that is interpreted as the current thread handle. The calling thread can use this handle to specify itself whenever a thread handle is required. Pseudo handles are not inherited by child processes. 
+A pseudo handle is a special constant that is interpreted as the current thread handle. The calling thread can use this handle to specify itself whenever a thread handle is required. Pseudo handles are not inherited by child processes.
 
-This handle has the maximum possible access to the thread object. For systems that support security descriptors, this is the maximum access allowed by the security descriptor for the calling process. For systems that do not support security descriptors, this is THREAD_ALL_ACCESS. 
+This handle has the maximum possible access to the thread object. For systems that support security descriptors, this is the maximum access allowed by the security descriptor for the calling process. For systems that do not support security descriptors, this is THREAD_ALL_ACCESS.
 
-The function cannot be used by one thread to create a handle that can be used by other threads to refer to the first thread. The handle is always interpreted as referring to the thread that is using it. A thread can create a "real" handle to itself that can be used by other threads, or inherited by other processes, by specifying the pseudo handle as the source handle in a call to the DuplicateHandle function. 
+The function cannot be used by one thread to create a handle that can be used by other threads to refer to the first thread. The handle is always interpreted as referring to the thread that is using it. A thread can create a "real" handle to itself that can be used by other threads, or inherited by other processes, by specifying the pseudo handle as the source handle in a call to the DuplicateHandle function.
 **/
 	dbgprintf("WaitForSingleObject(thread_handle) called\n");
-	return WAIT_FAILED;
+	return (void*)WAIT_FAILED;
     }
     dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
 
@@ -843,14 +846,13 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	cachedsi.dwAllocationGranularity	= 0x10000;
 	cachedsi.wProcessorLevel		= 5; /* pentium */
 	cachedsi.wProcessorRevision		= 0x0101;
-        cachedsi.dwNumberOfProcessors		= 1;
 
 #if 1
 	/* mplayer's way to detect PF's */
 	{
 	    #include "../cpudetect.h"
 	    extern CpuCaps gCpuCaps;
-	    
+
 	    if (gCpuCaps.hasMMX)
 		PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
 	    if (gCpuCaps.hasSSE)
@@ -859,7 +861,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 		PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 	}
 #endif
-	
+
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__)
 	do_cpuid(1, regs);
 	switch ((regs[0] >> 8) & 0xf) {			// cpu family
@@ -1041,6 +1043,12 @@ HANDLE WINAPI expHeapCreate(long flags, long init_size, long max_size)
     dbgprintf("HeapCreate(flags 0x%x, initial size %d, maximum size %d) => 0x%x\n", flags, init_size, max_size, result);
     return result;
 }
+
+// this is another dirty hack
+// VP31 is releasing one allocated Heap twice
+// we will silently ignore this second call...
+static void* heapfreehack = 0;
+static int heapfreehackshown = 0;
 void* WINAPI expHeapAlloc(HANDLE heap, int flags, int size)
 {
     void* z;
@@ -1054,6 +1062,7 @@ void* WINAPI expHeapAlloc(HANDLE heap, int flags, int size)
     if(z==0)
 	printf("HeapAlloc failure\n");
     dbgprintf("HeapAlloc(heap 0x%x, flags 0x%x, size 0x%x) => 0x%x\n", heap, flags, size, z);
+    heapfreehack = 0; // reset
     return z;
 }
 long WINAPI expHeapDestroy(void* heap)
@@ -1066,7 +1075,14 @@ long WINAPI expHeapDestroy(void* heap)
 long WINAPI expHeapFree(int arg1, int arg2, void* ptr)
 {
     dbgprintf("HeapFree(0x%x, 0x%x, pointer 0x%x) => 1\n", arg1, arg2, ptr);
-    my_release(ptr);
+    if (heapfreehack != ptr)
+	my_release(ptr);
+    else
+    {
+        if (!heapfreehackshown++)
+	    printf("Info: HeapFree deallocating same memory twice! (%p)\n", ptr);
+    }
+    heapfreehack = ptr;
     return 1;
 }
 long WINAPI expHeapSize(int heap, int flags, void* pointer)
@@ -1102,10 +1118,10 @@ int WINAPI expVirtualFree(void* v1, int v2, int v3)
     int result=VirtualFree(v1,v2,v3);
     dbgprintf("VirtualFree(0x%x, %d, %d) => %d\n",v1,v2,v3, result);
     return result;
-}    
+}
 
 /* -- critical sections -- */
-struct CRITSECT 
+struct CRITSECT
 {
     pthread_t id;
     pthread_mutex_t mutex;
@@ -1120,13 +1136,17 @@ struct critsecs_list_t
     struct CRITSECT *cs_unix;
 };
 
+#undef CRITSECS_NEWTYPE
+//#define CRITSECS_NEWTYPE 1
+
+#ifdef CRITSECS_NEWTYPE
 #define CRITSECS_LIST_MAX 20
 static struct critsecs_list_t critsecs_list[CRITSECS_LIST_MAX];
 
 int critsecs_get_pos(CRITICAL_SECTION *cs_win)
 {
     int i;
-    
+
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == cs_win)
 	    return(i);
@@ -1136,7 +1156,7 @@ int critsecs_get_pos(CRITICAL_SECTION *cs_win)
 int critsecs_get_unused(void)
 {
     int i;
-    
+
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == NULL)
 	    return(i);
@@ -1149,16 +1169,14 @@ int critsecs_get_unused(void)
 struct CRITSECT *critsecs_get_unix(CRITICAL_SECTION *cs_win)
 {
     int i;
-    
+
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == cs_win && critsecs_list[i].cs_unix)
 	    return(critsecs_list[i].cs_unix);
     return(NULL);
 }
 #endif
-
-#undef CRITSECS_NEWTYPE
-//#define CRITSECS_NEWTYPE 1
+#endif
 
 void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 {
@@ -1266,13 +1284,13 @@ void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 #ifdef CRITSECS_NEWTYPE
 {
     int i = critsecs_get_pos(c);
-     
+
     if (i < 0)
     {
         printf("DeleteCriticalSection(%p) error (critsec not found)\n", c);
         return;
     }
-     
+
     critsecs_list[i].cs_win = NULL;
     expfree(critsecs_list[i].cs_unix);
     critsecs_list[i].cs_unix = NULL;
@@ -1294,7 +1312,10 @@ int WINAPI expGetCurrentProcess()
 
 extern void* fs_seg;
 
-#if 1
+#if 0
+// this version is required for Quicktime codecs (.qtx/.qts) to work.
+// (they assume some pointers at FS: segment)
+
 //static int tls_count;
 static int tls_use_map[64];
 int WINAPI expTlsAlloc()
@@ -1458,6 +1479,38 @@ void* WINAPI expGlobalLock(void* z)
 {
     dbgprintf("GlobalLock(0x%x) => 0x%x\n", z, z);
     return z;
+}
+// pvmjpg20 - but doesn't work anyway
+int WINAPI expGlobalSize(void* amem)
+{
+    int size = 100000;
+#ifdef GARBAGE
+    alloc_header* header = last_alloc;
+    alloc_header* mem = (alloc_header*) amem - 1;
+    if (amem == 0)
+        return 0;
+    pthread_mutex_lock(&memmut);
+    while (header)
+    {
+	    if (header->deadbeef != 0xdeadbeef)
+	    {
+		printf("FATAL found corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
+		break;
+	    }
+
+	    if (header == mem)
+	    {
+                size = header->size;
+		break;
+	    }
+
+	    header = header->prev;
+    }
+    pthread_mutex_unlock(&memmut);
+#endif
+
+    dbgprintf("GlobalSize(0x%x)\n", amem);
+    return size;
 }
 int WINAPI expLoadStringA(long instance, long  id, void* buf, long size)
 {
@@ -2038,11 +2091,6 @@ int WINAPI expLoadLibraryA(char* name)
     // we skip to the last backslash
     // this is effectively eliminating weird characters in
     // the text output windows
-    
-    if (strcmp(name, "KERNEL32") == 0){
-	printf("expLoadLibraryA('%s')\n",name);
-	return (int) LookupExternal(name, 0);
-    }
 
     lastbc = strrchr(name, '\\');
     if (lastbc)
@@ -2061,8 +2109,8 @@ int WINAPI expLoadLibraryA(char* name)
 
     dbgprintf("Entering LoadLibraryA(%s)\n", name);
     // PIMJ is loading  kernel32.dll
-    if (strcasecmp(name, "kernel32.dll") == 1)
-	return (int) LookupExternal(name, 0);
+    if (strcasecmp(name, "kernel32.dll") == 0)
+	return MODULE_HANDLE_kernel32;
 
     result=LoadLibraryA(name);
     dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
@@ -2151,6 +2199,18 @@ WIN_BOOL WINAPI expDeleteDC(int hdc)
 {
         dbgprintf("DeleteDC(0x%x) => 0\n", hdc);
         return 0;
+}
+
+// btvvc32.drv wants this one
+void* WINAPI expGetWindowDC(int hdc)
+{
+        dbgprintf("GetWindowDC(%d) => 0x81\n", hdc);
+        return (void*)0x81;
+}
+
+void* WINAPI expCreateFontA(void)
+{
+    return 0;
 }
 
 int expwsprintfA(char* string, char* format, ...)
@@ -2465,6 +2525,11 @@ int exp_ftol(float f)
     return (int)(f+.5);
 }
 
+int exp_stricmp(const char* s1, const char* s2)
+{
+    return strcasecmp(s1, s2);
+}
+
 int WINAPI expStringFromGUID2(GUID* guid, char* str, int cbMax)
 {
     int result=snprintf(str, cbMax, "%.8x-%.4x-%.4x-%.2x%.2x%.2x%.2x%.2x%.2x%.2x%.2x",
@@ -2491,6 +2556,10 @@ int WINAPI expIsBadStringPtrW(const short* string, int nchars)
     dbgprintf("IsBadStringPtrW(0x%x, %d) => %d", string, nchars, result);
     if(string)wch_print(string);
     return result;
+}
+int WINAPI expIsBadStringPtrA(const char* string, int nchars)
+{
+    return expIsBadStringPtrW((const short*)string, nchars);
 }
 extern long WINAPI InterlockedExchangeAdd( long* dest, long incr )
 {
@@ -2914,7 +2983,8 @@ HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     dbgprintf("CreateFileA(0x%x='%s', %d, %d, 0x%x, %d, %d, 0x%x)\n", cs1, cs1, i1,
 	     i2, p1, i3, i4, i5);
     if((!cs1) || (strlen(cs1)<2))return -1;
-    if(strncmp(cs1, "AP", 2))
+
+    if(strncmp(cs1, "AP", 2) == 0)
     {
 	int result;
 	char* tmp=(char*)malloc(strlen(def_path)+50);
@@ -2924,7 +2994,33 @@ HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	result=open(tmp, O_RDONLY);
 	free(tmp);
 	return result;
-    };
+    }
+    if (strstr(cs1, "vp3"))
+    {
+	int r;
+	int flg = 0;
+	char* tmp=(char*)malloc(20 + strlen(cs1));
+	strcpy(tmp, "/tmp/");
+	strcat(tmp, cs1);
+	r = 4;
+	while (tmp[r])
+	{
+	    if (tmp[r] == ':' || tmp[r] == '\\')
+		tmp[r] = '_';
+	    r++;
+	}
+	if (GENERIC_READ & i1)
+	    flg |= O_RDONLY;
+	else if (GENERIC_WRITE & i1)
+	{
+	    flg |= O_WRONLY;
+	    printf("Warning: openning filename %s  %d (flags; 0x%x) for write\n", tmp, r, flg);
+	}
+	r=open(tmp, flg);
+	free(tmp);
+	return r;
+    }
+
     return atoi(cs1+2);
 }
 static char sysdir[]=".";
@@ -3091,6 +3187,7 @@ int WINAPI expDuplicateHandle(
     return 1;
 }
 
+// required by PIM1 codec (used by win98 PCTV Studio capture sw)
 HRESULT WINAPI expCoInitialize(
 	LPVOID lpReserved	/* [in] pointer to win32 malloc interface
                                    (obsolete, should be NULL) */
@@ -3124,6 +3221,7 @@ struct exports exp_kernel32[]={
 FF(IsBadWritePtr, 357)
 FF(IsBadReadPtr, 354)
 FF(IsBadStringPtrW, -1)
+FF(IsBadStringPtrA, -1)
 FF(DisableThreadLibraryCalls, -1)
 FF(CreateThread, -1)
 FF(CreateEventA, -1)
@@ -3157,6 +3255,7 @@ FF(LocalLock, -1)
 FF(GlobalAlloc, -1)
 FF(GlobalReAlloc, -1)
 FF(GlobalLock, -1)
+FF(GlobalSize, -1)
 FF(MultiByteToWideChar, 427)
 FF(WideCharToMultiByte, -1)
 FF(GetVersionExA, -1)
@@ -3257,6 +3356,7 @@ FF(strcpy, -1)
 FF(strcmp, -1)
 FF(strncmp, -1)
 FF(strcat, -1)
+FF(_stricmp,-1)
 FF(isalnum, -1)
 FF(memmove, -1)
 FF(memcmp, -1)
@@ -3295,6 +3395,7 @@ FF(RegisterWindowMessageA,-1)
 FF(GetSystemMetrics,-1)
 FF(GetSysColor,-1)
 FF(GetSysColorBrush,-1)
+FF(GetWindowDC, -1)
 };
 struct exports exp_advapi32[]={
 FF(RegOpenKeyA, -1)
@@ -3310,6 +3411,7 @@ FF(CreateCompatibleDC, -1)
 FF(GetDeviceCaps, -1)
 FF(DeleteDC, -1)
 FF(GetSystemPaletteEntries, -1)
+FF(CreateFontA, -1)
 };
 struct exports exp_version[]={
 FF(GetFileVersionInfoSizeA, -1)

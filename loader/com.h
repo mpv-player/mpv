@@ -46,10 +46,11 @@ struct IUnknown_vt
     long STDCALL (*AddRef)(struct IUnknown* _this) ;
     long STDCALL (*Release)(struct IUnknown* _this) ;
 } ;
-struct IUnknown
+
+typedef struct IUnknown
 {
     struct IUnknown_vt* vt;
-};
+} IUnknown;
 
 struct IClassFactory_vt
 {
