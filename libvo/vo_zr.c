@@ -626,7 +626,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 	return 1;
     }else if (!strcasecmp(opt, "zrquality")) {
         i = atoi(param);
-	if (i < 2 || i > 20) return ERR_OUT_OF_RANGE;
+	if (i < 1 || i > 20) return ERR_OUT_OF_RANGE;
 	quality = i;
 	return 1;
     }else if (!strcasecmp(opt, "zrnorm")) {
@@ -658,7 +658,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 		    "              this switch allows you to see the effects\n"
 		    "              of too much decimation\n"
 		    "  -zrbw       display in black&white (speed increase)\n"
-		    "  -zrquality  jpeg compression quality [BEST] 2 - 20 [VERY BAD]\n"
+		    "  -zrquality  jpeg compression quality [BEST] 1 - 20 [VERY BAD]\n"
 		    "  -zrdev      playback device (example -zrdev /dev/video1\n"
 		    "  -zrnorm     specify norm PAL/NTSC [dev: leave at current setting]\n"
 		    "\n"
