@@ -394,8 +394,6 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #endif
 }
 
-#include "osd.h"
-
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     switch(bpp){
         case 24: 

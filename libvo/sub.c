@@ -7,7 +7,7 @@ font_desc_t* vo_font=NULL;
 unsigned char* vo_osd_text="00:00:00";
 int sub_unicode=0;
 
-void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
         int len=strlen(vo_osd_text);
         int j;
         int y=10;
@@ -31,7 +31,7 @@ void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,in
 int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..255
 
-void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
         int len=strlen(vo_osd_text);
         int i;
         int y=dys/2;
@@ -91,7 +91,7 @@ void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int 
 
 subtitle* vo_sub=NULL;
 
-void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
     int i;
     int y;
     y=dys-(1+vo_sub->lines-1)*vo_font->height-10;

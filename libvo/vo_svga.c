@@ -22,7 +22,6 @@
 #include "mmx.h"
 
 #include "sub.h"
-#include "osd.h"
 
 extern void rgb15to16_mmx(char* s0,char* d0,int count);
 extern int vo_dbpp;

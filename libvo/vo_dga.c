@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.23  2001/05/24 20:48:45  arpi_esp
+ * removed redundant osd.h includes
+ *
  * Revision 1.22  2001/05/07 19:16:04  acki2
  * - now chooses mode with highest ymax (enables doublebuffering in some cases
  *   it didn't work before)
@@ -324,8 +327,6 @@ void vd_printf( int level, const char *str, ...){
 }
 
 //---------------------------------------------------------
-
-#include "osd.h"
 
 static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride ){
 

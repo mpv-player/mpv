@@ -25,7 +25,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
-#include "osd.h"
 #include "sub.h"
 #include "yuv2rgb.h"
 extern void rgb15to16_mmx(char *s0, char *d0, int count);
