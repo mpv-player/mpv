@@ -785,6 +785,118 @@ void update_set_of_subtitles()
 #endif
 
 /**
+ * \brief append a formatted string
+ * \param buf buffer to print into
+ * \param pos position of terminating 0 in buf
+ * \param len maximum number of characters in buf, not including terminating 0
+ * \param format printf format string
+ */
+static void saddf(char *buf, unsigned *pos, int len, const char *format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  *pos += vsnprintf(&buf[*pos], len - *pos, format, va);
+  va_end(va);
+  if (*pos >= len ) {
+    buf[len] = 0;
+    *pos = len;
+  }
+}
+
+/**
+ * \brief print the status line
+ * \param a_pos audio position
+ * \param a_v A-V desynchronization
+ * \param corr amount out A-V synchronization
+ */
+static void print_status(float a_pos, float a_v, float corr)
+{
+  int width;
+  char *line;
+  unsigned pos = 0;
+#ifndef __MINGW32__
+  struct winsize ws;
+  if (ioctl(0, TIOCGWINSZ, &ws) != -1 && ws.ws_col)
+    width = ws.ws_col;
+  else
+#endif
+  width = 80;
+  line = malloc(width + 1); // one additional for terminating null
+  
+  // Audio time
+  if (sh_audio) {
+    saddf(line, &pos, width, "A:%6.1f ", a_pos);
+    if (!sh_video) {
+      // convert time to HH:MM:SS.F format
+      long tenths = 10 * a_pos;
+      int f1 = tenths % 10;
+      int ss = (tenths /  10) % 60;
+      int mm = (tenths / 600) % 60;
+      int hh = (tenths / 36000) % 100;
+      saddf(line, &pos, width, "(");
+      if (hh > 0)
+        saddf(line, &pos, width, "%2d:", hh);
+      if (hh > 0 || mm > 0)
+        saddf(line, &pos, width, "%02d:", mm);
+      saddf(line, &pos, width, "%02d.", ss);
+      saddf(line, &pos, width, "%1d", f1);
+      saddf(line, &pos, width, ") ");
+    }
+  }
+
+  // Video time
+  if (sh_video)
+    saddf(line, &pos, width, "V:%6.1f ", sh_video->pts);
+
+  // A-V sync
+  if (sh_audio && sh_video)
+    saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ", a_v, corr);
+
+  // Video stats
+  if (sh_video)
+    saddf(line, &pos, width, "%3d/%3d ",
+      (int)sh_video->num_frames,
+      (int)sh_video->num_frames_decoded);
+
+  // CPU usage
+  if (sh_video) {
+    if (sh_video->timer > 0.5)
+      saddf(line, &pos, width, "%2d%% %2d%% %4.1f%% ",
+        (int)(100.0*video_time_usage*playback_speed/(double)sh_video->timer),
+        (int)(100.0*vout_time_usage*playback_speed/(double)sh_video->timer),
+        (100.0*audio_time_usage*playback_speed/(double)sh_video->timer));
+    else
+      saddf(line, &pos, width, "??%% ??%% ??,?%% ");
+  } else if (sh_audio) {
+    if (sh_audio->delay > 0.5)
+      saddf(line, &pos, width, "%4.1f%% ",
+        100.0*audio_time_usage/(double)sh_audio->delay);
+    else
+      saddf(line, &pos, width, "??,?%% ");
+  }
+
+  // VO stats
+  if (sh_video) 
+    saddf(line, &pos, width, "%d %d ", drop_frame_cnt, output_quality);
+
+#ifdef USE_STREAM_CACHE
+  // cache stats
+  if (stream_cache_size > 0)
+    saddf(line, &pos, width, "%d%% ", cache_fill_status);
+#endif
+
+  // other
+  if (playback_speed != 1)
+    saddf(line, &pos, width, "%4.2fx ", playback_speed);
+
+  // end
+  memset(&line[pos], ' ', width - pos);
+  line[width] = 0;
+  mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s\r", line);
+  free(line);
+}
+
+/**
  * \brief build a chain of audio filters that converts the input format
  * to the ao's format, taking into account the current playback_speed.
  * \param sh_audio describes the requested input format of the chain.
@@ -2113,40 +2225,8 @@ while(sh_audio){
 if(!sh_video) {
   // handle audio-only case:
   if(!quiet) {
-      //
-      // convert time to HH:MM:SS.F format
-      //
-      long tenths = 10 * (sh_audio->delay-audio_out->get_delay()*playback_speed);
-      int hh = (tenths / 36000) % 100;
-      int mm = (tenths / 600) % 60;
-      int ss = (tenths /  10) % 60;
-      int f1 = tenths % 10;
-      char hhmmssf[16]; // only really need 11, but just in case...
-      sprintf( hhmmssf, "%2d:%2d:%2d.%1d", hh, mm, ss, f1);
-      if (0 == hh) {
-        hhmmssf[1] = ' ';
-        hhmmssf[2] = ' ';
-      }
-      // uncomment the next three lines to show leading zero ten-hours
-      // else if (' ' == hhmmssf[0]) {
-      //   hhmmssf[0] = '0';
-      // }
-      if ((0 == hh) && (0 == mm)) {
-        hhmmssf[4] = ' ';
-        hhmmssf[5] = ' ';
-      }
-      else if ((' ' == hhmmssf[3]) && (' ' != hhmmssf[2])) {
-        hhmmssf[3] = '0';
-      }
-      if ((' ' == hhmmssf[6]) && (' ' != hhmmssf[5])) {
-        hhmmssf[6] = '0';
-      }
-             mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:  %s %4.1f%% %d%% %4.2fx  \r"
-		    ,hhmmssf
-		    ,(sh_audio->delay>0.5)?100.0*audio_time_usage/(double)sh_audio->delay:0
-		    ,cache_fill_status
-		    ,playback_speed
-		    );
+    float a_pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
+    print_status(a_pos, 0, 0);
   }
   if(d_audio->eof) eof = PT_NEXT_ENTRY;
 
@@ -2442,35 +2522,15 @@ if(time_frame>0.001 && !(vo_flags&256)){
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
 	if(!frame_time_remaining){ sh_audio->delay+=x; c_total+=x;} // correction
-        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f %3d/%3d %2d%% %2d%% %4.1f%% %d %d %d%% %4.2fx\r",
-	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
-          (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
-          (sh_video->timer>0.5)?(int)(100.0*video_time_usage*playback_speed/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage*playback_speed/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(100.0*audio_time_usage*playback_speed/(double)sh_video->timer):0
-          ,drop_frame_cnt
-	  ,output_quality
-	  ,cache_fill_status
-	  ,playback_speed
-        );
-        fflush(stdout);
+        if(!quiet)
+          print_status(a_pts - audio_delay - delay, AV_delay, c_total);
       }
     
   } else {
     // No audio:
     
     if(!quiet)
-      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",sh_video->pts,
-        (int)sh_video->num_frames,
-        (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
-        (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
-        (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
-          ,drop_frame_cnt
-	  ,output_quality
-	  ,cache_fill_status
-        );
-
-      fflush(stdout);
+      print_status(0, 0, 0);
 
   }
 
