@@ -235,6 +235,11 @@ struct config conf[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
 #endif
 
+#ifdef USE_DVDREAD
+	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0},
+	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0},
+#endif
+
 	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0},
       

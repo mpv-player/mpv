@@ -189,6 +189,8 @@ int allow_dshow=0;
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
+char* audio_lang=NULL;
+char* dvdsub_lang=NULL;
 static int vcd_track=0;
 
 // cache2:
@@ -851,8 +853,11 @@ if(stream_dump_type==5){
   exit_player(MSGTR_Exit_eof);
 }
 
-
 #ifdef USE_DVDREAD
+  current_module="dvd lang->id";
+  if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+
   current_module="spudec";
   vo_spudec=spudec_new(stream->priv);
   if (vo_spudec!=NULL)
