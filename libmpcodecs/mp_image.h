@@ -1,33 +1,54 @@
 #ifndef __MP_IMAGE_H
 #define __MP_IMAGE_H 1
 
+//--------- codec's requirements (filled by the codec/vf) ---------
+
+//--- buffer content restrictions:
 // set if buffer content shouldn't be modified:
 #define MP_IMGFLAG_PRESERVE 0x01
 // set if buffer content will be READ for next frame's MC: (I/P mpeg frames)
 #define MP_IMGFLAG_READABLE 0x02
-// set if buffer is allocated (used in destination images):
-#define MP_IMGFLAG_ALLOCATED 0x04
-// set if it's in video buffer/memory:
-#define MP_IMGFLAG_DIRECT 0x08
+
+//--- buffer width/stride/plane restrictions: (used for direct rendering)
+// stride _have_to_ be aligned to MB boundary:  [for DR restrictions]
+#define MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE 0x4
+// stride should be aligned to MB boundary:     [for buffer allocation]
+#define MP_IMGFLAG_PREFER_ALIGNED_STRIDE 0x8
 // codec accept any stride (>=width):
 #define MP_IMGFLAG_ACCEPT_STRIDE 0x10
-// codec accept any width (width*bpp=stride) (>=width):
+// codec accept any width (width*bpp=stride -> stride%bpp==0) (>=width):
 #define MP_IMGFLAG_ACCEPT_WIDTH 0x20
-// stride should be aligned to 16-byte (MB) boundary:
-#define MP_IMGFLAG_ALIGNED_STRIDE 0x40
-// codec uses drawing/rendering callbacks (draw_slice()-like thing, DR method 2)
-#define MP_IMGFLAG_DRAW_CALLBACK 0x80
+//--- for planar formats only:
+// uses only stride[0], and stride[1]=stride[2]=stride[0]>>mpi->chroma_x_shift
+#define MP_IMGFLAG_COMMON_STRIDE 0x40
+// uses only planes[0], and calculates planes[1,2] from width,height,imgfmt
+#define MP_IMGFLAG_COMMON_PLANE 0x80
 
+#define MP_IMGFLAGMASK_RESTRICTIONS 0xFF
+
+//--------- color info (filled by mp_image_setfmt() ) -----------
 // set if number of planes > 1
 #define MP_IMGFLAG_PLANAR 0x100
 // set if it's YUV colorspace
 #define MP_IMGFLAG_YUV 0x200
-// set if it's swapped plane/byteorder
+// set if it's swapped (BGR or YVU) plane/byteorder
 #define MP_IMGFLAG_SWAPPED 0x400
-// type displayed (do not set this flag - it's for internal use!)
-#define MP_IMGFLAG_TYPE_DISPLAYED 0x800
 // using palette for RGB data
-#define MP_IMGFLAG_TYPE_RGB_PALETTE 0x1000
+#define MP_IMGFLAG_RGB_PALETTE 0x800
+
+#define MP_IMGFLAGMASK_COLORS 0xF00
+
+// codec uses drawing/rendering callbacks (draw_slice()-like thing, DR method 2)
+// [the codec will set this flag if it supports callbacks, and the vo _may_
+//  clear it in get_image() if draw_slice() not implemented]
+#define MP_IMGFLAG_DRAW_CALLBACK 0x1000
+// set if it's in video buffer/memory: [set by vo/vf's get_image() !!!]
+#define MP_IMGFLAG_DIRECT 0x2000
+// set if buffer is allocated (used in destination images):
+#define MP_IMGFLAG_ALLOCATED 0x4000
+
+// buffer type was printed (do NOT set this flag - it's for INTERNAL USE!!!)
+#define MP_IMGFLAG_TYPE_DISPLAYED 0x8000
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:

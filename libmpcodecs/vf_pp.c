@@ -71,15 +71,18 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// no DR, so get a new image! hope we'll get DR buffer:
 	vf->priv->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
-	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ALIGNED_STRIDE,
-	    mpi->w,mpi->h);
+	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+//	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+//	    mpi->w,mpi->h);
+	    (mpi->w+7)&(~7),(mpi->h+7)&(~7));
+	vf->priv->dmpi->w=mpi->w; vf->priv->dmpi->h=mpi->h; // display w;h
     }
     
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
 	postprocess(mpi->planes,mpi->stride[0],
 		    vf->priv->dmpi->planes,vf->priv->dmpi->stride[0],
-		    mpi->w,mpi->h,
+		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
 		    vf->priv->pp);
     }

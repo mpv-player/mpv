@@ -112,7 +112,7 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
 
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
-  int w2=w; //(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
+  int w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE)?((w+15)&(~15)):w;
   
   if(vf->put_image==vf_next_put_image){
       // passthru mode, if the plugin uses the fallback/default put_image() code
@@ -148,12 +148,15 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   }
   if(mpi){
     mpi->type=mp_imgtype;
-    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
-    mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH|MP_IMGFLAG_ALIGNED_STRIDE|MP_IMGFLAG_DRAW_CALLBACK);
+    // keep buffer allocation status & color flags only:
+//    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
+    mpi->flags&=MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_TYPE_DISPLAYED|MP_IMGFLAGMASK_COLORS;
+    // accept restrictions & draw_slice flags only:
+    mpi->flags|=mp_imgflag&(MP_IMGFLAGMASK_RESTRICTIONS|MP_IMGFLAG_DRAW_CALLBACK);
     if(!vf->draw_slice) mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
     if((mpi->width!=w2 || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	mpi->width=w2;
-	mpi->height=h;
+	mpi->width=w2; mpi->chroma_width=w2>>mpi->chroma_x_shift;
+	mpi->height=h; mpi->chroma_height=h>>mpi->chroma_y_shift;
 	if(mpi->flags&MP_IMGFLAG_ALLOCATED){
 	    // need to re-allocate buffer memory:
 	    free(mpi->planes[0]);
@@ -168,6 +171,16 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocated image. allocate it!
+	  
+	  // check if codec prefer aligned stride:  
+	  if(mp_imgflag&MP_IMGFLAG_PREFER_ALIGNED_STRIDE){
+	      int align=(mpi->flags&MP_IMGFLAG_PLANAR &&
+	                 mpi->flags&MP_IMGFLAG_YUV) ?
+			 (8<<mpi->chroma_x_shift)-1 : 15; // -- maybe FIXME
+	      mpi->width=w2=((w+align)&(~align));
+	      mpi->chroma_width=w2>>mpi->chroma_x_shift;
+	  }
+	  
 	  // IF09 - allocate space for 4. plane delta info - unused
 	  if (mpi->imgfmt == IMGFMT_IF09)
 	  {
