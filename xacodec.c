@@ -1,8 +1,8 @@
 /*
-  xacodec.c
-  XAnim Video Codec DLL support
+  xacodec.c -- XAnim Video Codec DLL support
 
   (C) 2001 Alex Beregszaszi <alex@naxine.org>
+       and Arpad Gereoffy <arpi@thot.banki.hu>
 */
 
 #include <stdio.h>
@@ -78,7 +78,7 @@ int XA_Print(char *fmt, ...)
 }
 
 /* 0 is no debug (needed by 3ivX) */
-long xa_debug = 2;
+long xa_debug = 0;
 
 int TheEnd1(char *err_mess)
 {
@@ -88,8 +88,8 @@ int TheEnd1(char *err_mess)
 
 int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
 {
-    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
-	    anim_hdr, function);
+//    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
+//	    anim_hdr, function);
     xacodec_driver->close_func[xa_close_func] = function;
     if (xa_close_func+1 < XA_CLOSE_FUNCS)
 	xa_close_func++;
@@ -197,11 +197,13 @@ int xacodec_query(xacodec_driver_t *codec_driver, XA_CODEC_HDR *codec_hdr)
 		codec_hdr->description, codec_hdr->decoder);
 	    return(1);
 	case CODEC_UNSUPPORTED:
-	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec is unsupported by driver\n");
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec (%s) is unsupported by driver\n",
+		codec_hdr->description);
 	    return(0);
 	case CODEC_UNKNOWN:
 	default:
-	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec is unknown by driver\n");
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec (%s) is unknown by driver\n",
+		codec_hdr->description);
 	    return(0);
     }
 }
@@ -311,16 +313,12 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->image.height=codec_hdr.y;
     xacodec_driver->image.mem=malloc(codec_hdr.y * ((codec_hdr.x+3)&(~3)) * ((codec_hdr.depth+7)/8));
 
-//    printf("out_buf size: %d\n", codec_hdr.y * codec_hdr.x * codec_hdr.depth);
-
-#if 0
-    if (vidinfo->our_out_buffer == NULL)
+    if (xacodec_driver->image.mem == NULL)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, "cannot allocate memory for output: %s",
 	    strerror(errno));
 	return(0);
     }
-#endif
 
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "extra: %08x - %dx%d %dbit\n", codec_hdr.extra,
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth);
@@ -345,7 +343,7 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
     xacodec_image_t *image=&xacodec_driver->image;
 
     if (skip_flag > 0)
-	printf("frame will be dropped..\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "frame will be dropped..\n");
 
     xacodec_driver->decinfo->skip_flag = skip_flag;
 
@@ -370,19 +368,10 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 
 //    printf("ret: %lu : ", ret);
     
-#if 0
-    for (i = 0; i < 10; i++)
-    {
-	if (frame[i] != dest[i])
-	    printf("%d: [%02x] != [%02x] ", i, frame[i], dest[i]);
-	else
-	    printf("%d: [%02x] ", frame[i]);
-    }
-#endif
 
     if (ret == ACT_DLT_NORM)
     {
-	printf("norm\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "norm\n");
 	return &xacodec_driver->image;
     }
 
@@ -398,32 +387,31 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 
     if (ret & ACT_DLT_NOP)
     {
-	printf("nop\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "nop\n");
 	return NULL; /* dst = 0 */
     }
 
     if (ret & ACT_DLT_DROP) /* by skip frames and errors */
     {
-	printf("drop\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "drop\n");
 	return NULL;
     }
 
-
     if (ret & ACT_DLT_BAD)
     {
-	printf("bad\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "bad\n");
 	return NULL;
     }
 
     if (ret & ACT_DLT_BODY)
     {
-	printf("body\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "body\n");
 	return NULL;
     }
     
     if (ret & ACT_DLT_XOR)
     {
-	printf("xor\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "xor\n");
 	return &xacodec_driver->image;
     }
 
@@ -441,20 +429,16 @@ int xacodec_exit()
 	    close_func = xacodec_driver->close_func[i];
 	    close_func();
 	}
-//    if (xacodec_driver->close_func)
-//	xacodec_driver->close_func();
     dlclose(xacodec_driver->file_handler);
     if (xacodec_driver->decinfo != NULL)
 	free(xacodec_driver->decinfo);
-    if (xacodec_driver != NULL)
-	free(xacodec_driver);
+    free(xacodec_driver);
     return(TRUE);
 }
 
 
 /* *** XANIM SHIT *** */
 /* like loader/win32.c - mini XANIM library */
-
 
 unsigned long XA_Time_Read()
 {
