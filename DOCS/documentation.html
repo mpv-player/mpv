@@ -56,12 +56,13 @@
         <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg files</A></LI>
         <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM files</A></LI>
         <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.12">2.1.1.12 OGG files</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
       <UL>
         <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 MP3 files</A></LI>
         <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 WAV files</A></LI>
-        <LI><A HREF="formats.html#2.1.2.3">2.1.2.3 OGG files (Vorbis)</A></LI>
+        <LI><A HREF="formats.html#2.1.1.12">2.1.2.3 OGG files (Vorbis)</A></LI>
         <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 WMA/ASF files</A></LI>
         <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 MP4 files</A></LI>
       </UL>
@@ -419,6 +420,8 @@ will take some time, but it DOES worth it.</P>
     Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B>.</LI>
+  <LI><B>libogg</B> - optional, needed for playing OGG file format.</LI>
+  <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
 </UL>
 
 <P><B><I>CODECS</I></B></P>
@@ -595,10 +598,6 @@ For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
 <P><B><I>FEATURES</I></B></P>
 
 <UL>
-<LI>For DVD support, you'll have to compile libdvdcss and libdvdread, and
-in this order!
-See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
-
 <LI>Decide if you need GUI. If you do, see the <A HREF=#1.4>1.4 section</A>
 before compiling.</LI>
 

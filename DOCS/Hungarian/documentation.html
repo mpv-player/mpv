@@ -46,22 +46,23 @@
       <LI><A HREF="formats.html#2.1.1">2.1.1 Video</A></LI>
       <UL>
         <LI><A HREF="formats.html#2.1.1.1">2.1.1.1 MPG, VOB, DAT file-ok</A></LI>
-        <LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI file-ok</A></LI>          
+        <LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI file-ok</A></LI>
         <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV file-ok</A></LI>
-        <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV file-ok</A></LI> 
-        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIV file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 FLI file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM file-ok</A></LI>   
-        <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ file-ok</A></LI>   
+        <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIV file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 FLI file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ file-ok</A></LI>
+        <LI><A HREF="formats.html#2.1.1.12">2.1.1.12 OGG file-ok</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
       <UL>
         <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 MP3 file-ok</A></LI>
         <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 WAV file-ok</A></LI>    
-        <LI><A HREF="formats.html#2.1.2.3">2.1.2.3 OGG file-ok (Vorbis)</A></LI>
+        <LI><A HREF="formats.html#2.1.1.12">2.1.2.3 OGG file-ok (Vorbis)</A></LI>
         <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 WMA/ASF file-ok</A></LI>     
         <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 MP4 file-ok</A></LI>
       </UL>
@@ -404,6 +405,10 @@ problémákba ütközni:<BR>
     <B>MEncoder</B>hez, ha JPEG file-okkal is akarsz dolgozni.</LI>
   <LI><B>libpng</B> - opcionális (M)PNG dekóder. Kell a GUI-hoz is. Hasznos
     mind az <B>MPlayer</B>hez, mind a <B>MEncoder</B>hez.</LI>
+  <LI><B>libogg</B> - opcionális, szükséges az OGG fileformátum
+    lejátszásához.</LI>
+  <LI><B>libvorbis</B> - opcionális, szükséges az OGG Vorbis formátumú audio
+    lejátszásához.</LI>
 </UL>
 </P>
 
@@ -596,10 +601,6 @@ meghajtókat érdemes kipróbálni :
 <P><B><I>EGYÉB FUNKCIÓK</I></B></P>
 
 <UL>
-<LI>A DVD támogatáshoz le kell fordítanod a libdvdcss-t és a libdvdread-et,
-  méghozzá ilyen sorrendben!
-  Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
-
 <LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#1.4>1.4-es fejezetet</A>
   mielõtt még belekezdenél a fordításba.</LI>
 
