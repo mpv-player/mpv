@@ -408,6 +408,54 @@ int af_inputlen(af_stream_t* s, int len)
   return t * (((len/t) * mul.d - 1)/mul.n);
 }
 
+/* Calculate how long the input IN to the filters should be to produce
+   a certain output length OUT but with the following three constraints:
+   1. IN <= max_insize, where max_insize is the maximum possible input
+      block length
+   2. OUT <= max_outsize, where max_outsize is the maximum possible
+      output block length
+   3. If possible OUT >= len. 
+   Return -1 in case of error */ 
+int af_calc_insize_constrained(af_stream_t* s, int len,
+			       int max_outsize,int max_insize)
+{
+  int t   = s->input.bps*s->input.nch;
+  int in  = 0;
+  int out = 0;
+  af_instance_t* af=s->first; 
+  register frac_t mul = {1,1};
+  // Iterate through all filters and calculate total multiplication factor
+  do{
+    mul.n *= af->mul.n;
+    mul.d *= af->mul.d;
+    af=af->next;
+  }while(af);
+  in = t * (((len/t) * mul.d)/mul.n);
+
+  // Try to meet constraint nr 3. 
+  out = t * (((in/t)*mul.n + 1)/mul.d);
+  while(in <= max_insize && out <= max_outsize){
+    printf("debug in = %i out = %i  \n",in,out);
+
+    if(out > len)
+      return in;
+    out = t * (((in/t)*mul.n + 1)/mul.d);
+    in+=t;
+  }
+  
+  // Could no meet constraint nr 3.
+  while((out > max_outsize || in > max_insize) && in > 1)
+  {
+    in-=t;
+    out = t * (((in/t)*mul.n + 1)/mul.d);
+  }
+  if(in > 1)
+    return in;
+
+  // Input parameters are probably incorrect
+  return -1;
+}
+
 /* Helper function called by the macro with the same name this
    function should not be called directly */
 inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
