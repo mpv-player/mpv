@@ -379,6 +379,12 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;	// nomatching in-fmt
 }
 
+static void uninit(struct vf_instance_s *vf){
+    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+    if(vf->priv->palette) free(vf->priv->palette);
+    free(vf->priv);
+}
+
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->start_slice=start_slice;
@@ -386,6 +392,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->control= control;
+    vf->uninit=uninit;
     if(!vf->priv) {
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
