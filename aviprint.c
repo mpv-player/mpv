@@ -33,7 +33,6 @@ void print_strh(AVIStreamHeader *h){
 void print_wave_header(WAVEFORMATEX *h){
 
   printf("======= WAVE Format =======\n");
-  
   printf("Format Tag: %d (0x%X)\n",h->wFormatTag,h->wFormatTag);
   printf("Channels: %d\n",h->nChannels);
   printf("Samplerate: %d\n",h->nSamplesPerSec);
@@ -41,21 +40,6 @@ void print_wave_header(WAVEFORMATEX *h){
   printf("Block align: %d\n",h->nBlockAlign);
   printf("bits/sample: %d\n",h->wBitsPerSample);
   printf("cbSize: %d\n",h->cbSize);
-  
-  switch(h->wFormatTag){
-      case 0x01:        printf("Audio in PCM format\n");break;
-      case 0x50:        printf("Audio in MPEG Layer 1/2 format\n");break;
-      case 0x55:        printf("Audio in MPEG Layer-3 format\n");break; // ACM
-      case 0x02:        printf("Audio in MS ADPCM format\n");break;  // ACM
-      case 0x11:        printf("Audio in IMA ADPCM format\n");break; // ACM
-      case 0x31:
-      case 0x32:        printf("Audio in MS GSM 6.10 format\n");break; // ACM
-      case 0x75:        printf("Audio in VoxWare format\n");break; // DShow
-      case 0x160:
-      case 0x161:       printf("Audio in DivX WMA format\n");break; // ACM
-      default:          printf("Audio in UNKNOWN (id=0x%X) format\n",h->wFormatTag);
-  }
-
 }
 
 
