@@ -2539,6 +2539,12 @@ Number of lines copied to texture in one piece (default: 4).
 .IPs (no)osd
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
 Mostly for testing, you should use \-osdlevel 0 to disable OSD.
+.IPs (no)scaled-osd
+Changes the way the OSD behaves when the size of the 
+window changes (default: disabled).
+When enabled behaves more like the other vos, better for fixed-size fonts.
+Disabled looks much better with freetype fonts and uses the
+borders in fullscreen mode.
 .IPs (no)aspect
 Enable or disable aspect scaling and pan and scan support (default: enabled).
 Disabling might increase speed.

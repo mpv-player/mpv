@@ -44,6 +44,7 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        None };
 
 static int use_osd;
+static int scaled_osd;
 #define MAX_OSD_PARTS 20
 static GLuint osdtex[MAX_OSD_PARTS];
 #ifndef FAST_OSD
@@ -90,11 +91,13 @@ static void resize(int x,int y){
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
+  if (!scaled_osd) {
 #ifdef HAVE_FREETYPE
   // adjust font size to display size
   force_load_font = 1;
 #endif
-  vo_osd_changed(1);
+  vo_osd_changed(OSDTYPE_OSD);
+  }
 }
 
 static int find_gl_format (uint32_t format)
@@ -325,6 +328,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
   GLfloat xcov, ycov;
+  GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   char *clearTexture;
   while (sx < w) sx *= 2;
   while (sy < h) sy *= 2;
@@ -345,8 +349,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sx, sy, 0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, scale_type);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, scale_type);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_LUMINANCE,
                     GL_UNSIGNED_BYTE, src);
 
@@ -355,8 +359,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   glBindTexture(GL_TEXTURE_2D, osdatex[osdtexCnt]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, sx, sy, 0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, scale_type);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, scale_type);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_ALPHA,
                     GL_UNSIGNED_BYTE, srca);
 #endif
@@ -405,6 +409,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 static void draw_osd(void)
 {
   int i;
+  int osd_h, osd_w;
   if (!use_osd) return;
   if (vo_osd_changed(0)) {
     for (i = 0; i < osdtexCnt; i++) {
@@ -415,8 +420,10 @@ static void draw_osd(void)
       glDeleteLists(osdDispList[i], 1);
     }
     osdtexCnt = 0;
-    // draw OSD with full resolution
-    vo_draw_text(vo_dwidth, vo_dheight, create_osd_texture);
+
+    osd_w = (scaled_osd) ? image_width : vo_dwidth;
+    osd_h = (scaled_osd) ? image_height : vo_dheight;
+    vo_draw_text(osd_w, osd_h, create_osd_texture);
   }
 }
 
@@ -437,15 +444,18 @@ flip_page(void)
 
   if (osdtexCnt > 0) {
     // set special rendering parameters
+    if (!scaled_osd) {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
     glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
+    }
     glEnable(GL_BLEND);
     // draw OSD
     glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
     // set rendering parameters back to defaults
     glDisable (GL_BLEND);
+    if (!scaled_osd)
     glPopMatrix();
     glBindTexture(GL_TEXTURE_2D, 0);
   }
@@ -518,6 +528,7 @@ static uint32_t preinit(const char *arg)
     unsigned int parse_pos = 0;
     many_fmts = 0;
     use_osd = 1;
+    scaled_osd = 0;
     use_aspect = 1;
     slice_height = 4;
     if(arg) 
@@ -535,6 +546,12 @@ static uint32_t preinit(const char *arg)
             } else if (strncmp (&arg[parse_pos], "noosd", 5) == 0) {
                 parse_pos += 5;
                 use_osd = 0;
+            } else if (strncmp (&arg[parse_pos], "scaled-osd", 10) == 0) {
+                parse_pos += 10;
+                scaled_osd = 1;
+            } else if (strncmp (&arg[parse_pos], "noscaled-osd", 12) == 0) {
+                parse_pos += 12;
+                scaled_osd = 0;
             } else if (strncmp (&arg[parse_pos], "aspect", 6) == 0) {
                 parse_pos += 6;
                 use_aspect = 1;
