@@ -139,6 +139,11 @@ A: Make the mplayer binary SUID root. Become root and type the following:
    'chmod 750 /usr/local/bin/mplayer'
    'chmod +s /usr/local/bin/mplayer'
    Now it works as a simple user, too.
+   !!!! BUT STAY TUNED !!!!
+   This is a BIG security risk! Never do this on a server or on a computer
+   can be accessed by more people than only you because they can gain root
+   privilegies through suid root mplayer.
+   !!!! SO YOU HAVE BEEN WARNED ... !!!!
 
 Q: The fsdga driver doesn't work with my xyz.avi file. Why is that?
 A: Because it only works with MPEG. (yet)
