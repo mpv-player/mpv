@@ -1,5 +1,5 @@
-.\" synced with 1.460
-.\" MPlayer (C) 2000-2003 Arpad Gereoffy
+.\" synced with 1.465
+.\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
 .\" 
@@ -385,7 +385,8 @@ solo video (puede ver esto como un valor infinito de fps).
 .B \-colorkey <número>
 Cambia el colorkey a un valor RGB de su elección.
 0x000000 es negro y 0xffffff es blanco.
-Solo soportado por los controladores de salida de video xmga, xvidix y xover.
+Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
+vesa, winvidix, xmga, xvidix y xover.
 .TP
 .B \-edl <nombredearchivo>
 Habilita acciones de edición de lista de decisión (EDL)  durante la reproducción.
@@ -485,6 +486,11 @@ Usa un menu.conf alternativo.
 .TP
 .B \-menu-root <valor> (CÓDIGO BETA)
 Especifica el menú principal.
+.TP
+.B \-nocolorkey
+Deshabilita el colorkeying.
+Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
+vesa, winvidix, xvidix y xover.
 .TP
 .B \-nojoystick
 Desactiva el soporte de joystick.
@@ -819,6 +825,9 @@ Siempre se intenta comprobar la selección por el contenido del archivo.
 .B \-passwd <contraseña> (vea también la opción \-user)
 Especifica una contraseña para autenticación http.
 .TP
+.B \-user-agent <texto>
+Usa texto como el agente de usuario (User-Agent) para el flujo HTTP.
+.TP
 .B \-prefer-ipv4
 Usa IPv4 en las conexiones de red.
 Si falla, usa IPv6 automáticamente.
@@ -908,10 +917,22 @@ se posiciona en 1\ hora 10\ minutos
 .PD 1
 .
 .TP
+.B \-tskeepbroken
+Le dice a MPlayer que no descarte paquetes TS detectados como no válidos
+en el medio que se esté reproduciendo. Algunas veces es necesario para
+reproducir archivos MPEG-TS corruptos.
+.
+.TP
 .B \-tsprog <1\-65534>
 Mientras se reproducen flujos MPEG-TS, puede especificar con ésta
 opción que programa (si está presente) desea reproducir. Puede ser
 usada con \-vid y \-aid.
+.
+.TP
+.B \-tsprobe <posición\ byte>
+Durante la reproducción de MPEG-TS, esta opción le permite especificar
+cuántos bytes quiere que MPlayer busque para los pids de audio y video
+deseados.
 .
 .TP
 .B \-tv <opción1:opción2:...>
@@ -2159,7 +2180,15 @@ Solo tiene efecto con los codecs libmpeg2 y libavcodec.
 No reproduce/\:codifica sonido.
 .TP
 .B \-novideo
-Do not play/\:encode video.
+No reproduce/\:codifica video.
+.TP
+.B \-oldpp <calidad> (OBSOLETO)
+Usa el código de postprocesado opendivx en lugar del interno.
+Ahora ha pasado a ser \-pp, el postprocesado interno ofrece mejor
+calidad y rendimiento.
+
+El rango válido de los valores para \-oldpp varían con el codec,
+la mayoría de las veces es 0\-6, donde 0=desactivado 6=lento/\:el mejor.
 .TP
 .B \-pp <calidad> (¡vea también la opción \-vf pp!)
 Establece el nivel de postprocesado de la DLL.
@@ -3288,7 +3317,9 @@ Donde <codec> puede ser: lavc, xvidenc, divx4, lame
 
 
 .SS divx4 (\-divx4opts)
-
+divx4 está obsoleto y solo tiene soporte por completitud.
+Para detalles acerca de las opciones para divx4, lea el código, la
+mayoría de las opciones no se describen aquí.
 .TP
 .B help\ \ \ 
 obtener ayuda
@@ -3462,7 +3493,8 @@ imprime opciones adicionales e información en la configuración preestablecida.
 
 
 .SS lavc (\-lavcopts)
-
+lavc tiene muchas opciones que no están descritas aquí.
+Para una lista de detalles completa lea el código.
 .I EJEMPLO:
 .PD 0
 .RSs
@@ -3918,6 +3950,10 @@ entero con precisión
 mmx
 .IPs 4
 mlib
+.IPs 5
+altivec
+.IPs 6
+AAN en coma flotante
 .RE
 .PD 1
 .TP
@@ -3939,10 +3975,14 @@ simplemmx
 libmpeg2mmx (impreciso, NO USAR para codificación con keyint >100)
 .IPs 5
 ps2
-.IPs 6:
+.IPs 6
 mlib
 .IPs 7
 arm
+.IPs 8
+altivec
+.IPs 9
+sh4
 .RE
 .PD 1
 .TP
