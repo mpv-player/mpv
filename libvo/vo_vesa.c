@@ -72,7 +72,7 @@ static uint32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
 static struct win_frame win; /* real-mode window to video memory */
-static void *temp_buffer = NULL; /* for yuv2rgb and sw_scaling */
+static void *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
 static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 
@@ -106,7 +106,7 @@ static void vesa_term( void )
   int err;
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
-  free(temp_buffer);
+  free(yuv_buffer);
   vbeDestroy();
 }
 
@@ -222,9 +222,10 @@ static void __vbeCopyData(uint8_t *image)
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-	yuv2rgb(temp_buffer, image[0], image[1], image[2], w, h, image_width * ((video_mode_info.BitsPerPixel+7)/8),
+	yuv2rgb(yuv_buffer, image[0], image[1], image[2], w, h,
+		image_width * ((video_mode_info.BitsPerPixel+7)/8),
 		stride[0], stride[1]);
-	__vbeCopyData((uint8_t *)temp_buffer);
+	__vbeCopyData((uint8_t *)yuv_buffer);
 	return 0;
 }
 
@@ -274,6 +275,24 @@ static uint32_t query_format(uint32_t format)
 	return retval;
 }
 
+static char *model2str(unsigned char type)
+{
+  char *retval;
+  switch(type)
+  {
+    case memText: retval = "Text"; break;
+    case memCGA:  retval="CGA"; break;
+    case memHercules: retval="Hercules"; break;
+    case memPL: retval="Planar"; break;
+    case memPK: retval="Packed pixel"; break;
+    case mem256: retval="256"; break;
+    case memRGB: retval="Direct color RGB"; break;
+    case memYUV: retval="Direct color YUV"; break;
+    default: retval="Unknown"; break;
+  }
+  return retval;
+}
+
 /* fullscreen:
  * bit 0 (0x01) means fullscreen (-fs)
  * bit 1 (0x02) means mode switching (-vm)
@@ -294,11 +313,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(fullscreen & (0x1|0x4|0x8))
 	{
 	  printf("vo_vesa: switches: -fs, -zoom, -flip are not supported\n");
-	}
-	if(!(temp_buffer = malloc(width*height*4)))
-	{
-	  printf("vo_vesa: Can't allocate temporary buffer\n");
-	  return -1;
 	}
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
@@ -371,14 +385,14 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
 			return -1;
 		}
-		if(vmib.XResolution > image_width &&
-		   vmib.YResolution > image_height &&
+		if(vmib.XResolution >= image_width &&
+		   vmib.YResolution >= image_height &&
 		   (vmib.ModeAttributes & MOVIE_MODE) == MOVIE_MODE &&
 		   vmib.BitsPerPixel == bpp &&
 		   vmib.MemoryModel == memRGB)
 		   {
-			if(vmib.XResolution < best_x &&
-			   vmib.YResolution < best_y)
+			if(vmib.XResolution <= best_x &&
+			   vmib.YResolution <= best_y)
 			   {
 				best_x = vmib.XResolution;
 				best_y = vmib.YResolution;
@@ -387,12 +401,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		   }
 		if(verbose)
 		{
-		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%u\n"
-		  	 "vo_vesa:             #planes=%u model=%u #pages=%u\n"
-		  	 "vo_vesa:             winA=%X(attr=%u) winB=%X(attr=%u) winSize=%u winGran=%u\n"
-		  	 "vo_vesa:             direct_color=%u DGA_phys_addr=%08X\n"
+		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%x\n"
+			 "vo_vesa:             #planes=%u model=%u(%s) #pages=%u\n"
+			 "vo_vesa:             winA=%X(attr=%u) winB=%X(attr=%u) winSize=%u winGran=%u\n"
+			 "vo_vesa:             direct_color=%u DGA_phys_addr=%08X\n"
 			 ,i,mode_ptr[i],vmib.XResolution,vmib.YResolution,vmib.BitsPerPixel,vmib.ModeAttributes
-			 ,vmib.NumberOfPlanes,vmib.MemoryModel,vmib.NumberOfImagePages
+			 ,vmib.NumberOfPlanes,vmib.MemoryModel,model2str(vmib.MemoryModel),vmib.NumberOfImagePages
 			 ,vmib.WinASegment,vmib.WinAAttributes,vmib.WinBSegment,vmib.WinBAttributes,vmib.WinSize,vmib.WinGranularity
 			 ,vmib.DirectColorModeInfo,vmib.PhysBasePtr);
 		  if(vmib.MemoryModel == 6 || vmib.MemoryModel == 7)
@@ -416,6 +430,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		{
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
 			return -1;
+		}
+		if(!(yuv_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*4)))
+		{
+		  printf("vo_vesa: Can't allocate temporary buffer\n");
+		  return -1;
 		}
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
