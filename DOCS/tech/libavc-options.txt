@@ -217,6 +217,7 @@ bug	manual workaround encoder bugs (cant be easily detected automatically)
 	1 for msmpeg4v3	workaround for some old lavc generated msmpeg4v3 files
 	1 for mpeg4	workaround some opendivx? files 
 			see http://heroinewarrior.com for some samples
+	2 for mpeg4	workaround xvid interlacing bug
 
 gray	grayscale only decoding (a bit faster than with color ...)
 
