@@ -365,7 +365,7 @@ NoPause:
         mplPause();
         break;
 
-   case evStop: guiIntfStruct.Playing=guiSetStop; break;
+   case evStop: guiIntfStruct.Playing=guiSetStop; mplState(); break;
 
    case evLoadPlay:
         mplMainAutoPlay=1;
