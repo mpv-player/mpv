@@ -490,6 +490,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache w³±cz/wy³±cz"
 #define MSGTR_PREFERENCES_LoadFullscreen "Rozpocznij na pe³nym ekranie"
 #define MSGTR_PREFERENCES_CacheSize "Wielko¶æ cache: "
+#define MSGTR_PREFERENCES_XSCREENSAVER "Zatrzymaj Wygaszacz Ekranu"
+#define MSGTR_PREFERENCES_AutoSync "Autosynchronizacja w³±cz/wy³±cz"
+#define MSGTR_PREFERENCES_AutoSyncValue "Autosynchronizacja: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
