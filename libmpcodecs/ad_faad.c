@@ -42,7 +42,7 @@ static faacDecFrameInfo faac_finfo;
 
 static int preinit(sh_audio_t *sh)
 {
-  sh->audio_out_minsize=2048*FAAD_MAX_CHANNELS;
+  sh->audio_out_minsize=8192*FAAD_MAX_CHANNELS;
   sh->audio_in_minsize=FAAD_BUFFLEN;
   return 1;
 }
