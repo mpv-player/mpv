@@ -305,12 +305,10 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <option>-autosync 100</option>. If some of these options help you, you
   may want to put them in your config file.</para>
 
-<para>There are precompiled binary versions made by Sascha Sommer available for
-  download from
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">our homepage</ulink>.
-  Joey Parrish has been making
-  <ulink url="http://joey.nicewarrior.org/cygmp/">unofficial Windows packages</ulink>
-  complete with installer.</para>
+<para>Sascha Sommer releases official Windows binaries from time to time,
+  Joey Parrish makes unofficial Windows packages complete with installer.
+  Look for these in the Windows section of
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">our projects page</ulink>.</para>
 
 <sect2 id="cygwin">
 <title>Cygwin</title>
