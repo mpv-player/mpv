@@ -769,7 +769,7 @@ extension=NULL;
 						// If content-type == video/nsv we most likely have a winamp video stream 
 						// otherwise it should be mp3. if there are more types consider adding mime type 
 						// handling like later
-						if( !strcmp((field_data = http_get_field(http_hdr, "content-type")),"video/nsv"))
+				                if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && !strcmp(field_data, "video/nsv"))
 							*file_format = DEMUXER_TYPE_NSV;
 						else
 							*file_format = DEMUXER_TYPE_AUDIO;
