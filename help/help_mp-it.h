@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.73
+// Updated to help_mp-en.h v1.77
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -138,6 +138,24 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Impossibile inizializzare i filtri video (-vop) o l'output video (-vo)!\n"
 #define MSGTR_Paused "\n------ IN PAUSA -------\r"
 #define MSGTR_PlaylistLoadUnable "\nImpossibile caricare la playlist %s\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
+"  Potrebbe essere un errore nel codice di rilevazione del tipo di processore...\n"\
+"  leggi DOCS/bugreports.html\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
+"  Solitamente questo avviene quando si esegue il programma su un processore\n"\
+"  diverso da quello per cui è stato compilato/ottimizzato. Verificalo!"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer è stato interrotto per un errore nell'uso della CPU/FPU/RAM.\n"\
+"  Ricompila MPlayer con --enable-debug e crea un baktrace ed un disassemblato\n"\
+"  con 'gdb'. Per i dettagli, leggi DOCS/bugreports.html sezione 5.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
+"  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\
+"  versione di gcc. Se ritieni sia colpa di MPlayer, leggi DOCS/bugreports.html\n"\
+"  e segui le istruzioni. Non possiamo aiutarti, e non lo faremo, se non\n"\
+"  fornisci queste informazioni quando segnali un possibile problema.\n"
 
 // mencoder.c:
 
@@ -162,6 +180,56 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Il bitrate video consigliato per %s CD è: %d\n"
 #define MSGTR_VideoStreamResult "\nFlusso video : %8.3f kbit/s  (%d bps)  dimensione: %d byte  %5.3f secondi  %d frame\n"
 #define MSGTR_AudioStreamResult "\nFlusso audio : %8.3f kbit/s  (%d bps)  dimensione: %d byte  %5.3f secondi\n"
+
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     metodo bitrate variabile\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(default)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           bitrate medio\n"\
+"\n"\
+" cbr           bitrate costante\n"\
+"               Forza il metodo CBR anche sui successivi preset ABR\n"\
+"\n"\
+" br=<0-1024>   specica il bitrate in kBit (solo CBR e ABR)\n"\
+"\n"\
+" q=<0-9>       qualità (0-massima, 9-minima) (solo per VBR)\n"\
+"\n"\
+" aq=<0-9>      qualità algoritmo (0-migliore/più lento, 9-peggiore/più veloce)\n"\
+"\n"\
+" ratio=<1-100> rapporto di compressione\n"\
+"\n"\
+" vol=<0-10>    imposta il guadagno dell'ingresso audio\n"\
+"\n"\
+" mode=<0-3>    (default: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: due canali indipendenti\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: no\n"\
+"                1: tutto\n"\
+"                2: regola\n"\
+"\n"\
+" fast          attiva la codifica più veloce sui successivi preset VBR,\n"\
+"               qualità leggermente inferiore ai bitrate più alti.\n"\
+"\n"\
+" preset=<value> fornisce le migliori impostazioni possibili di qualità.\n"\
+"                 medium: codifica VBR, buona qualità\n"\
+"                 (intervallo bitrate 150-180 kbps)\n"\
+"                 standard:  codifica VBR, qualità alta\n"\
+"                 (intervallo bitrate 170-210 kbps)\n"\
+"                 extreme: codifica VBR, qualità molto alta\n"\
+"                 (intervallo bitrate 200-240 kbps)\n"\
+"                 insane:  codifica CBR, massima qualità via preset\n"\
+"                 (bitrate 320 kbps)\n"\
+"                 <8-320>: codifica ABR con bitrate medio impostato in kbps.\n\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo CD-ROM '%s' non trovato!\n"
@@ -434,6 +502,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Timer e indicatori"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, percentuale e tempo totale"
 #define MSGTR_PREFERENCES_OSDProgress "Solo progressbars"
 #define MSGTR_PREFERENCES_Subtitle "Sottotitolo:"
 #define MSGTR_PREFERENCES_SUB_Delay "Ritardo: "
