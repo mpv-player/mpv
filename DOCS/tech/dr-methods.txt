@@ -8,20 +8,20 @@ At first, there are 2 different way, both called direct rendering.
 The main point is the same, but they work different.
 
 method 1: decoding directly to externally provided buffers.
-so, the codec decodes macroblocks directly to the buffer provided by teh
+so, the codec decodes macroblocks directly to the buffer provided by the
 caller. as this buffer will be readed later (for MC of next frame) it's not
 a good idea to place such buffers in slow video ram. but.
 there are many video out drivers using buffers in system ram, and using some
-way of memcpy or DMA to blit it to vieo ram at display time.
+way of memcpy or DMA to blit it to video ram at display time.
 for example, Xv and X11 (normal and Shm too) are such thingie.
 XImage will be a buffer in system ram (!) and X*PutImage will copy it to
 video ram. Only nvidia and ati rage128 Xv drivers use DMA, others just
 memcpy it. Also some opengl drivers (including Matrox) uses DMA to copy from
-subteximage to video ram.
-The current mpalyer way mean: codec allocates some buffer, and decode image
+texsubimage to video ram.
+The current mplayer way mean: codec allocates some buffer, and decode image
 to that buffer. then this buffer is copied to X11's buffer. then Xserver
 copies this buffer to video ram. So one more memcpy than required...
-direct rendering can remove this extar memcpy, and use the Xserver's memory
+direct rendering can remove this extra memcpy, and use Xserver's memory
 buffers for decoding buffer. Note again: it helps only if the external
 buffer is in fast system ram.
 
@@ -47,10 +47,19 @@ yv12 blocks (copied 3 blocks to 3 different (Y,U,V) buffers) than doing
 so, divx4 codec (with -vc divx4 api) converts from its internal yv12 buffer
 to the external yuy2.
 
+method 2a:
 libmpeg2 already uses simplified variation of this: when it finish decoding a
 slice (a horizontal line of MBs) it copies it to external (video ram) buffer
 (using callback to libvo), so at least it copies from L2 cache instead of
-slow ram. it gave me 23% -> 20% VOB decoding speedup on p3.
+slow ram. for non-predictive (B) frames it can re-use this cached memory
+for the next slice - so it uses less memory and has better cache utilization:
+it gave me 23% -> 20% VOB decoding speedup on p3. libavcodec supports
+per-slice callbacks too, but no slice-memory reusing for B frames yet.
+
+method 2b:
+some codecs (indeo vfw 3/4 using IF09, and libavcodec) can export the 'bitmap'
+of skipped macroblocks - so libvo driver can do selective blitting: copy only
+the changed macroblocks to slow vram.
 
 so, again: the main difference between method 1 and 2:
 method1 stores decoded data only once: in the external read/write buffer.
@@ -69,16 +78,16 @@ i hope it is clear now.
 and i hope even nick understand what are we talking about...
 
 ah, and at the end, the abilities of codecs:
-libmpeg2: can do method 1 and 2 (but slice level copy, not MB level)
+libmpeg2,libavcodec: can do method 1 and 2 (but slice level copy, not MB level)
 vfw, dshow: can do method 2, with static or variable address external buffer
 odivx, and most native codecs like fli, cvid, rle: can do method 1
 divx4: can do method 2 (with old odivx api it does method 1)
-libavcodec, xanim: they currently can't do DR, but they exports their
+xanim: they currently can't do DR, but they exports their
 internal buffers. but it's very easy to implement menthod 1 support,
 and a bit harder but possible without any rewrite to do method 2.
 
 so, dshow and divx4 already implements all requirements of method 2.
-libmpeg2 implements method 1, and it's easy to add to libavcodec.
+libmpeg2 and libavcodec implements method 1 and 2a (lavc 2b too)
 
 anyway, in the ideal world, we need all codecs support both methods.
 anyway 2: in ideal world, there are no libvo drivers having buffer in system
@@ -99,7 +108,7 @@ steps of decoding with libmpcodecs:
    - it it can not -> allocate system ram area with memalign()/malloc()
    Note: codec may request EXPORT buffer, it means buffer allocation is 
    done inside the codec, so we cannot do DR :(
-4. codec decodes frame to the mpi struct (system ram or direct rendering)
+4. codec decodes one frame to the mpi struct (system ram or direct rendering)
 5. if it isn't DR, we call libvo's draw functions to blit image to video ram
 
 current possible buffer setups:
@@ -113,7 +122,7 @@ current possible buffer setups:
   rendering with variable buffer address (vfw, dshow, divx4).
 - IP - codec requires 2 (or more) read/write buffers. it's for codecs supporting
   method-1 direct rendering but using motion compensation (ie. reading from
-  previous frame buffer). could be used for libavcodec (divx3/4,h263) later.
+  previous frame buffer). could be used for libavcodec (divx3/4,h263).
   IP buffer stays from 2 (or more) STATIC buffers.
 - IPB - similar to IP, but also have one (or more) TEMP buffers for B frames.
   it will be used for libmpeg2 and libavcodec (mpeg1/2/4).
