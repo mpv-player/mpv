@@ -1961,6 +1961,11 @@ int WINAPI expLoadLibraryA(char* name)
     // we skip to the last backslash
     // this is effectively eliminating weird characters in
     // the text output windows
+    
+    if (strcmp(name, "KERNEL32") == 0){
+	printf("expLoadLibraryA('%s')\n",name);
+	return (int) LookupExternal(name, 0);
+    }
 
     lastbc = strrchr(name, '\\');
     if (lastbc)
@@ -2307,6 +2312,12 @@ int expstrcpy(char* str1, const char* str2)
 int expstrcmp(const char* str1, const char* str2)
 {
     int result=strcmp(str1, str2);
+    dbgprintf("strcmp(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
+    return result;
+}
+int expstrncmp(const char* str1, const char* str2,int x)
+{
+    int result=strncmp(str1, str2,x);
     dbgprintf("strcmp(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
     return result;
 }
@@ -3135,6 +3146,7 @@ FF(strchr, -1)
 FF(strlen, -1)
 FF(strcpy, -1)
 FF(strcmp, -1)
+FF(strncmp, -1)
 FF(strcat, -1)
 FF(isalnum, -1)
 FF(memmove, -1)
