@@ -53,7 +53,7 @@ I. TECH SIDE:
 
   Do not use comments such as: "bug fix." or "files changed" or "dunno".
   You don't have to include the filename in the comment, as comments are linked
-  to files. If you have different comments for different files, commit them
+  to files. If you have made several independent changes, commit them
   separately, not at the same time. If you leave out -m at the command line you
   will be prompted for a comment in an editor (usually vi).
 
@@ -170,7 +170,7 @@ II. POLICY / RULES:
    unsure about this, send a patch to dev-eng, the documentation maintainers
    will review and commit your stuff.
 
-Also read patches.txt !!!!
+Also read DOCS/tech/patches.txt !!!!
 
 We think our rules are not too hard. If you have comments, contact us.
 
