@@ -36,7 +36,11 @@ static ao_info_t info =
 LIBAO_EXTERN(sdl)
 
 // Samplesize used by the SDLlib AudioSpec struct
+#ifdef WIN32
 #define SAMPLESIZE 2048
+#else
+#define SAMPLESIZE 1024
+#endif
 
 // General purpose Ring-buffering routines
 
