@@ -28,7 +28,7 @@ fi
 
 echo "Searching for stylesheets..."
 echo "Searching for html/chunk.xsl..."
-for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl
+for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/chunk.xsl
 do
   if test -f "$_try_chunk_xsl"
   then
@@ -47,7 +47,7 @@ else
 fi
 
 echo "Searching for html/docbook.xsl..."
-for _try_docbook_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/share/docbook-xsl/html/docbook.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl
+for _try_docbook_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/share/docbook-xsl/html/docbook.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/docbook.xsl
 do
   if test -f "$_try_docbook_xsl"
   then
@@ -95,7 +95,7 @@ cat > html-single.xsl << EOF
 EOF
 
 echo "Searching for DTD..."
-for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd
+for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd
 do
   if test -f "$_try_dtd"
   then
