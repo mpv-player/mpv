@@ -298,7 +298,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <application>MPlayer</application>, but only on some systems. Try making
   them writable if you have problems. QuickTime DLLs also work, but you will
   have to put them in your Windows system directory
-  (<filename class="directory">C:\Windows\system\</filename> or similar).</para>
+  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
+  or similar).</para>
 
 <para>The <application>Cygwin</application>/<application>MinGW</application>
   console is rather slow. Redirecting output or using the
@@ -341,7 +342,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
   of your DVD-ROM:</para>
 
-<screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device '\\.\<replaceable>d</replaceable>:'</screen>
 
 </sect2>
 
@@ -368,7 +369,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
-<screen>mplayer dvd://&lt;title&gt; -dvd-device /d/</screen>
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device /<replaceable>d</replaceable>/</screen>
 
 </sect2>
 
