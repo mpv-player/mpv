@@ -1871,6 +1871,17 @@ static long WINAPI expQueryPerformanceCounter(long long* z)
 }
 
 /*
+ * dummy function RegQueryInfoKeyA(), required by vss codecs
+ */
+static DWORD WINAPI expRegQueryInfoKeyA( HKEY hkey, LPSTR class, LPDWORD class_len, LPDWORD reserved,
+                                         LPDWORD subkeys, LPDWORD max_subkey, LPDWORD max_class,
+                                         LPDWORD values, LPDWORD max_value, LPDWORD max_data,
+                                         LPDWORD security, FILETIME *modif )
+{
+    return;
+}
+
+/*
  * return CPU clock (in kHz), using linux's /proc filesystem (/proc/cpuinfo)
  */
 static double linux_cpuinfo_freq()
@@ -4869,6 +4880,7 @@ struct exports exp_advapi32[]={
     FF(RegOpenKeyExA, -1)
     FF(RegQueryValueExA, -1)
     FF(RegSetValueExA, -1)
+    FF(RegQueryInfoKeyA, -1)
 };
 struct exports exp_gdi32[]={
     FF(CreateCompatibleDC, -1)
