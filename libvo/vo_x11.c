@@ -45,6 +45,8 @@ LIBVO_EXTERN( x11 )
 
 #include "../mp_msg.h"
 
+#include "../mp_image.h"
+
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",
@@ -243,10 +245,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  static uint32_t vm_height;
 #endif
 
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif   
-    if( !vo_init() ) return -1; // Can't open X11
 
 
  if (!title)
@@ -526,20 +524,55 @@ static uint32_t draw_frame( uint8_t *src[] ){
       return draw_slice(src, stride, srcW, srcH, 0, 0);
 }
 
+static uint32_t get_image(mp_image_t *mpi)
+{
+    if (zoomFlag ||
+	!IMGFMT_IS_BGR(mpi->imgfmt) ||
+	((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
+	(mpi->flags & MP_IMGFLAG_PLANAR) ||
+	(mpi->flags & MP_IMGFLAG_YUV) ||
+	(mpi->width != image_width) ||
+	(mpi->height != image_height)
+    )
+	return(VO_FALSE);
+
+    if (Flip_Flag)
+    {
+	mpi->stride[0] = -image_width*((bpp+7)/8);
+	mpi->planes[0] = ImageData - mpi->stride[0]*(image_height-1);
+    }
+    else
+    {
+	mpi->stride[0] = image_width*((bpp+7)/8);
+	mpi->planes[0] = ImageData;
+    }
+    mpi->flags |= MP_IMGFLAG_DIRECT;
+    
+    return(VO_TRUE);
+}
+
 static uint32_t query_format( uint32_t format )
 {
-  //if( !vo_init() ) return 0; // Can't open X11
+    if (IMGFMT_IS_BGR(format))
+    {
+	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
+	    return 0x1|0x2|0x4;
+	else
+	    return 0x1|0x4;
+    }
 
  switch( format )
   {
-   case IMGFMT_BGR15:
-   case IMGFMT_BGR16:
-   case IMGFMT_BGR24:
-   case IMGFMT_BGR32:
+//   case IMGFMT_BGR15:
+//   case IMGFMT_BGR16:
+//   case IMGFMT_BGR24:
+//   case IMGFMT_BGR32:
+//    return 0x2;
 //   case IMGFMT_YUY2: 
    case IMGFMT_I420:
    case IMGFMT_IYUV:
-   case IMGFMT_YV12: return 1;
+   case IMGFMT_YV12:
+    return 0x1|0x4;
   }
  return 0;
 }
@@ -567,14 +600,22 @@ static uint32_t preinit(const char *arg)
 	printf("vo_x11: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+
+#ifdef HAVE_NEW_GUI
+    if ( vo_window == None )
+#endif   
+	if( !vo_init() ) return -1; // Can't open X11
+
     return 0;
 }
 
+#if 0
 /* for runtime fullscreen switching */
 static int vo_fs_oldx = -1;
 static int vo_fs_oldy = -1;
 static int vo_fs_oldwidth = -1;
 static int vo_fs_oldheight = -1;
+#endif
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
@@ -583,6 +624,8 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
+  case VOCTRL_GET_IMAGE:
+    return get_image(data);
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
 /*
