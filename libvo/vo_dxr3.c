@@ -123,7 +123,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
     /* Calculate screen res */    
     aspect_save_orig(v_width,v_height);
     aspect_save_prescale(scr_width,scr_height);
-    aspect_save_screenres(720,576); /* Reference values from DVD spec */
+    aspect_save_screenres(702,575); /* Reference values from DVD spec (711,483) (702,575) */
     aspect(&s_width,&s_height,A_NOZOOM);
     s_width = (scr_width+15)/16; s_width*=16;
     s_height = (scr_height+15)/16; s_height*=16;
