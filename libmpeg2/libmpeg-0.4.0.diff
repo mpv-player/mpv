@@ -1,6 +1,18 @@
+diff -ur libmpeg2/attributes.h libmpeg2/attributes.h
+--- libmpeg2/attributes.h	2003-01-09 08:48:40.000000000 +0100
++++ libmpeg2/attributes.h	2004-08-25 20:59:47.000000000 +0200
+@@ -25,7 +25,7 @@
+ #ifdef ATTRIBUTE_ALIGNED_MAX
+ #define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < align) ? ATTRIBUTE_ALIGNED_MAX : align)))
+ #else
+-#define ATTR_ALIGN(align)
++#define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((16 < align) ? 16 : align)))
+ #endif
+ 
+ #ifdef HAVE_BUILTIN_EXPECT
 diff -ur libmpeg2/cpu_accel.c libmpeg2/cpu_accel.c
 --- libmpeg2/cpu_accel.c	2003-10-06 04:31:52.000000000 +0200
-+++ libmpeg2/cpu_accel.c	2004-02-18 13:48:26.000000000 +0100
++++ libmpeg2/cpu_accel.c	2004-08-15 15:37:41.000000000 +0200
 @@ -108,7 +108,7 @@
  }
  #endif /* ARCH_X86 */
@@ -30,7 +42,7 @@ diff -ur libmpeg2/cpu_accel.c libmpeg2/cpu_accel.c
  #endif /* ACCEL_DETECT */
 diff -ur libmpeg2/cpu_state.c libmpeg2/cpu_state.c
 --- libmpeg2/cpu_state.c	2003-08-21 10:00:49.000000000 +0200
-+++ libmpeg2/cpu_state.c	2004-02-18 13:48:29.000000000 +0100
++++ libmpeg2/cpu_state.c	2004-08-02 13:27:37.000000000 +0200
 @@ -120,7 +120,7 @@
  	mpeg2_cpu_state_restore = state_restore_mmx;
      }
@@ -42,7 +54,7 @@ diff -ur libmpeg2/cpu_state.c libmpeg2/cpu_state.c
  	mpeg2_cpu_state_restore = state_restore_altivec;
 diff -ur libmpeg2/decode.c libmpeg2/decode.c
 --- libmpeg2/decode.c	2003-12-22 12:59:34.000000000 +0100
-+++ libmpeg2/decode.c	2004-02-18 14:19:01.000000000 +0100
++++ libmpeg2/decode.c	2004-08-02 13:27:37.000000000 +0200
 @@ -351,6 +351,15 @@
      fbuf->buf[1] = buf[1];
      fbuf->buf[2] = buf[2];
@@ -61,7 +73,7 @@ diff -ur libmpeg2/decode.c libmpeg2/decode.c
  void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
 diff -ur libmpeg2/header.c libmpeg2/header.c
 --- libmpeg2/header.c	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/header.c	2004-08-02 18:07:50.000000000 +0200
++++ libmpeg2/header.c	2004-08-24 22:25:07.000000000 +0200
 @@ -100,6 +100,9 @@
      mpeg2dec->decoder.convert = NULL;
      mpeg2dec->decoder.convert_id = NULL;
@@ -84,13 +96,13 @@ diff -ur libmpeg2/header.c libmpeg2/header.c
  	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
  	for (i = 0; i < 32; i++) {
  	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
-+	    decoder->quantizer_scale = k;
++	    decoder->quantizer_scales[i] = k;
  	    for (j = 0; j < 64; j++)
  		decoder->quantizer_prescale[index][i][j] =
  		    k * mpeg2dec->quantizer_matrix[index][j];
 diff -ur libmpeg2/idct_alpha.c libmpeg2/idct_alpha.c
 --- libmpeg2/idct_alpha.c	2003-09-19 11:26:42.000000000 +0200
-+++ libmpeg2/idct_alpha.c	2004-02-18 13:48:29.000000000 +0100
++++ libmpeg2/idct_alpha.c	2004-08-02 13:27:37.000000000 +0200
 @@ -59,7 +59,7 @@
  } while (0)
  #endif
@@ -127,7 +139,7 @@ diff -ur libmpeg2/idct_alpha.c libmpeg2/idct_alpha.c
  {
 diff -ur libmpeg2/idct.c libmpeg2/idct.c
 --- libmpeg2/idct.c	2003-09-19 11:26:42.000000000 +0200
-+++ libmpeg2/idct.c	2004-02-18 14:30:15.000000000 +0100
++++ libmpeg2/idct.c	2004-08-02 13:27:37.000000000 +0200
 @@ -66,7 +66,7 @@
  } while (0)
  #endif
@@ -164,7 +176,7 @@ diff -ur libmpeg2/idct.c libmpeg2/idct.c
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
 diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
 --- libmpeg2/motion_comp.c	2003-10-06 04:31:52.000000000 +0200
-+++ libmpeg2/motion_comp.c	2004-02-18 13:48:37.000000000 +0100
++++ libmpeg2/motion_comp.c	2004-08-15 15:37:41.000000000 +0200
 @@ -43,20 +43,24 @@
      else
  #endif
@@ -190,25 +202,56 @@ diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
  	mpeg2_mc = mpeg2_mc_c;
  }
  
+diff -ur libmpeg2/mpeg2.h libmpeg2/mpeg2.h
+--- libmpeg2/mpeg2.h	2003-12-22 13:13:35.000000000 +0100
++++ libmpeg2/mpeg2.h	2004-08-02 13:27:37.000000000 +0200
+@@ -82,6 +82,7 @@
+ #define PIC_FLAG_COMPOSITE_DISPLAY 32
+ #define PIC_FLAG_SKIP 64
+ #define PIC_FLAG_TAGS 128
++#define PIC_FLAG_REPEAT_FIRST_FIELD 256
+ #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
+ 
+ typedef struct mpeg2_picture_s {
 diff -ur libmpeg2/mpeg2_internal.h libmpeg2/mpeg2_internal.h
 --- libmpeg2/mpeg2_internal.h	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/mpeg2_internal.h	2004-08-02 18:09:17.000000000 +0200
-@@ -144,6 +144,11 @@
++++ libmpeg2/mpeg2_internal.h	2004-08-24 22:25:07.000000000 +0200
+@@ -144,6 +144,12 @@
      int second_field;
  
      int mpeg1;
 +
 +    /* for MPlayer: */
++    int quantizer_scales[32];
 +    int quantizer_scale;
 +    char* quant_store;
 +    int quant_stride;
  };
  
  typedef struct {
+@@ -214,6 +220,10 @@
+     int8_t q_scale_type, scaled[4];
+     uint8_t quantizer_matrix[4][64];
+     uint8_t new_quantizer_matrix[4][64];
++
++    /* for MPlayer: */
++    unsigned char *pending_buffer;
++    int pending_length;
+ };
+ 
+ typedef struct {
 diff -ur libmpeg2/slice.c libmpeg2/slice.c
 --- libmpeg2/slice.c	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/slice.c	2004-08-02 18:07:50.000000000 +0200
-@@ -1564,6 +1564,9 @@
++++ libmpeg2/slice.c	2004-08-24 22:25:07.000000000 +0200
+@@ -142,6 +142,7 @@
+ 
+     quantizer_scale_code = UBITS (bit_buf, 5);
+     DUMPBITS (bit_buf, bits, 5);
++    decoder->quantizer_scale = decoder->quantizer_scales[quantizer_scale_code];
+ 
+     decoder->quantizer_matrix[0] =
+ 	decoder->quantizer_prescale[0][quantizer_scale_code];
+@@ -1564,6 +1565,9 @@
  
  #define NEXT_MACROBLOCK							\
  do {									\
@@ -218,14 +261,3 @@ diff -ur libmpeg2/slice.c libmpeg2/slice.c
      decoder->offset += 16;						\
      if (decoder->offset == decoder->width) {				\
  	do { /* just so we can use the break statement */		\
-diff -ur include/mpeg2.h include/mpeg2.h
---- include/mpeg2.h	2003-12-22 13:13:35.000000000 +0100
-+++ include/mpeg2.h	2004-02-18 13:50:13.000000000 +0100
-@@ -82,6 +82,7 @@
- #define PIC_FLAG_COMPOSITE_DISPLAY 32
- #define PIC_FLAG_SKIP 64
- #define PIC_FLAG_TAGS 128
-+#define PIC_FLAG_REPEAT_FIRST_FIELD 256
- #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
- 
- typedef struct mpeg2_picture_s {
