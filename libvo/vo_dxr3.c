@@ -502,10 +502,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		em8300_overlay_screen_t ovlscr;
 		em8300_attribute_t ovlattr;
 
+		vo_dx = (vo_screenwidth - d_width) / 2;
+		vo_dy = (vo_screenheight - d_height) / 2;
+		vo_dwidth = d_width;
+		vo_dheight = d_height;
 #ifdef HAVE_NEW_GUI
 		if (use_gui) {
 			guiGetEvent(guiSetShVideo, 0);
 			XSetWindowBackground(mDisplay, vo_window, KEY_COLOR);
+			XClearWindow(mDisplay, vo_window);
 			XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &xwin_attribs);
 			depth = xwin_attribs.depth;
 			if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
@@ -524,10 +529,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			xswa.background_pixel = KEY_COLOR;
 			xswa.border_pixel = 0;
 			xswamask = CWBackPixel | CWBorderPixel;
-			hint.y = (vo_screenheight - d_height) / 2;
-			hint.x = (vo_screenwidth - d_width) / 2;
-			hint.base_width = hint.width = vo_dwidth = d_width;
-			hint.base_height = hint.height = vo_dheight = d_height;
+			hint.y = vo_dy;
+			hint.x = vo_dx;
+			hint.base_width = hint.width = vo_dwidth;
+			hint.base_height = hint.height = vo_dheight;
 			hint.flags = PPosition | PSize;
 			vo_window = XCreateWindow(mDisplay, mRootWin, hint.x, hint.y, hint.width, hint.height, 0, depth, CopyFromParent, vinfo.visual, xswamask, &xswa);
 			vo_x11_classhint(mDisplay, vo_window, "Viewing Window");
@@ -564,12 +569,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		}
 		
 		acq_color = ((key_color.red / 256) << 16) | ((key_color.green / 256) << 8) | key_color.blue;
-		if (acq_color != KEY_COLOR) {
-			printf("VO: [dxr3] Unable to allocate exact keycolor, using closest match (%0x)\n", acq_color);	
+		if (key_color.pixel != KEY_COLOR) {
+			printf("VO: [dxr3] Unable to allocate exact keycolor, using closest match (%0x)\n", key_color.pixel);	
 		}
 		
 		/* Set keycolor and activate overlay */
-		overlay_set_keycolor(overlay_data, acq_color);
+		XSetWindowBackground(mDisplay, vo_window, key_color.pixel);
+		XClearWindow(mDisplay, vo_window);
+		overlay_set_keycolor(overlay_data, key_color.pixel);
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OVERLAY);
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_RECTANGLE);
 	}
@@ -871,14 +878,13 @@ static uint32_t preinit(const char *arg)
 		overlay_t *ov;
 		XWindowAttributes attribs;
 		
-		ioval = open("/dev/em8300-0", fdflags);
 		dpy = XOpenDisplay(NULL);
 	    	if (!dpy) {
 			printf("VO: [dxr3] Unable to open display during overlay hack setup!\n");
 			return -1;
 		}
 		XGetWindowAttributes(dpy, RootWindow(dpy, DefaultScreen(dpy)), &attribs);
-		ov = overlay_init(ioval);
+		ov = overlay_init(fd_control);
 		overlay_set_screen(ov, attribs.width, attribs.height, PlanesOfScreen(ScreenOfDisplay(dpy, 0)));
 		overlay_read_state(ov, NULL);
 		overlay_set_keycolor(ov, KEY_COLOR);
@@ -886,7 +892,6 @@ static uint32_t preinit(const char *arg)
 		overlay_set_mode(ov, EM8300_OVERLAY_MODE_RECTANGLE);
 		overlay_release(ov);
 		XCloseDisplay(dpy);
-		close(ioval);
 		/* End of fucked up hack */
 		
 		/* Initialize overlay and X11 */
