@@ -121,6 +121,7 @@ int fntTextHeight( int id,char * str )
 txSample * fntRender( int id,int px,int sx,char * fmt,... )
 {
  txSample      * tmp = NULL;
+ txSample 	 tmp2;
  char            p[512];
  va_list         ap;
  unsigned long * ibuf;
@@ -147,7 +148,7 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
  ibuf=(unsigned long *)Fonts[id]->Bitmap.Image;
  for ( i=0;i < (int)strlen( p );i++ )
   {
-   int c = (int)p[i];
+   char c = p[i];
    if ( Fonts[id]->Fnt[c].x == -1 ) c=32;
    for ( oy=0,y=Fonts[id]->Fnt[c].y;y < Fonts[id]->Fnt[c].y + Fonts[id]->Fnt[c].sy; y++,oy++ )
     for ( ox=0,x=Fonts[id]->Fnt[c].x;x < Fonts[id]->Fnt[c].x + Fonts[id]->Fnt[c].sx; x++,ox++ )
@@ -159,7 +160,6 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
 
  if ( ( sx > 0 )&&( sx < tmp->Width ) )
   {
-   txSample tmp2;
    tmp2.ImageSize=sx * tmp->Height * 4;
    if ( ( tmp2.Image=malloc( tmp2.ImageSize ) ) ==  NULL ) { free( tmp->Image ); return NULL; }
 
