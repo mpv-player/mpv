@@ -156,11 +156,7 @@ void decode_cinepak(
   void *context,
   unsigned char *buf,
   int size,
-  unsigned char *frame,
-  unsigned int width,
-  unsigned int height,
-  int bit_per_pixel,
-  int stride);
+  mp_image_t *mpi);
 
 void decode_cyuv(
   unsigned char *buf,
@@ -865,9 +861,8 @@ switch(sh_video->codec->driver){
      blit_frame = 0;
    else
    {
-     decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
-       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YV12)?12:(out_fmt==IMGFMT_YUY2)?16:(out_fmt&255), 0);
-     blit_frame = 3;
+     decode_cinepak(sh_video->context, start, in_size, mpi);
+     blit_frame = 2;
    }
    break;
 #ifdef USE_XANIM

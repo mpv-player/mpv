@@ -22,6 +22,9 @@
 #include "config.h"
 #include "mp_msg.h"
 
+#include "libvo/img_format.h"
+#include "mp_image.h"
+
 #define DBUG	0
 #define MAX_STRIPS 32
 
@@ -136,83 +139,90 @@ int y_uv;
 
 /* ---------------------------------------------------------------------- */
 
-static unsigned char *yv12_y_plane = NULL;
-static unsigned char *yv12_v_plane = NULL;
-static unsigned char *yv12_u_plane = NULL;
+//static unsigned char *yv12_y_plane = NULL;
+//static unsigned char *yv12_v_plane = NULL;
+//static unsigned char *yv12_u_plane = NULL;
 
-inline void cvid_v1_yv12(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
+inline void cvid_v1_yv12(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
-int uv_offset = (frm - yv12_y_plane) / 4;
-int row_inc = stride / sizeof(unsigned long);
-unsigned long *y_ptr = (unsigned long *)frm;
-unsigned char *v_ptr = yv12_v_plane + uv_offset;
-unsigned char *u_ptr = yv12_u_plane + uv_offset;
-int uv_stride = stride / 2;
+//int uv_offset = (frm - yv12_y_plane) / 4;
+//int row_inc = stride / sizeof(unsigned long);
+//unsigned long *y_ptr = (unsigned long *)frm;
+//unsigned char *v_ptr = yv12_v_plane + uv_offset;
+//unsigned char *u_ptr = yv12_u_plane + uv_offset;
+//int uv_stride = stride / 2;
+unsigned char *p;
+int stride;
+
+	if(y+3>=mpi->height) return; // avoid sig11
 
 	// take care of the luminance
-	if(y_ptr > (unsigned long *)end) return;
-	*y_ptr = cb->yv12_v1_u;
-	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
-	*y_ptr = cb->yv12_v1_u;
-	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
-	*y_ptr = cb->yv12_v1_l;
-	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
-	*y_ptr = cb->yv12_v1_l;
+	stride = mpi->stride[0];
+	p = mpi->planes[0]+y*stride+x;
+	*((unsigned int*)p)=cb->yv12_v1_u;
+	*((unsigned int*)(p+stride))=cb->yv12_v1_u;
+	*((unsigned int*)(p+stride*2))=cb->yv12_v1_l;
+	*((unsigned int*)(p+stride*3))=cb->yv12_v1_l;
 
 	// now for the chrominance
-	v_ptr[0] = cb->v;
-	v_ptr[1] = cb->v;
-	v_ptr += uv_stride;
-	v_ptr[0] = cb->v;
-	v_ptr[1] = cb->v;
+	x/=2; y/=2;
 
-	u_ptr[0] = cb->u;
-	u_ptr[1] = cb->u;
-	u_ptr += uv_stride;
-	u_ptr[0] = cb->u;
-	u_ptr[1] = cb->u;
+	stride = mpi->stride[1];
+	p = mpi->planes[1]+y*stride+x;
+	p[0]=p[1]=p[stride]=p[stride+1]=cb->u;
+
+	stride = mpi->stride[2];
+	p = mpi->planes[2]+y*stride+x;
+	p[0]=p[1]=p[stride]=p[stride+1]=cb->v;
+
 }
 
 /* ---------------------------------------------------------------------- */
-inline void cvid_v4_yv12(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
+inline void cvid_v4_yv12(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-int uv_offset = (frm - yv12_y_plane) / 4;
-int row_inc = stride / sizeof(unsigned short);
-unsigned short *y_ptr = (unsigned short *)frm;
-unsigned char *v_ptr = yv12_v_plane + uv_offset;
-unsigned char *u_ptr = yv12_u_plane + uv_offset;
-int uv_stride = stride / 2;
+//int uv_offset = (frm - yv12_y_plane) / 4;
+//int row_inc = stride / sizeof(unsigned short);
+//unsigned short *y_ptr = (unsigned short *)frm;
+//unsigned char *v_ptr = yv12_v_plane + uv_offset;
+//unsigned char *u_ptr = yv12_u_plane + uv_offset;
+//int uv_stride = stride / 2;
+
+unsigned char *p;
+int stride;
+
+	if(y+3>=mpi->height) return; // avoid sig11
 
 	// take care of the luminance
-	if(y_ptr > (unsigned short *)end) return;
-	y_ptr[0] = cb0->yv12_v4_u;
-	y_ptr[1] = cb1->yv12_v4_u;
-	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
-	y_ptr[0] = cb0->yv12_v4_l;
-	y_ptr[1] = cb1->yv12_v4_l;
-	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
-	y_ptr[0] = cb2->yv12_v4_u;
-	y_ptr[1] = cb3->yv12_v4_u;
-	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
-	y_ptr[0] = cb2->yv12_v4_l;
-	y_ptr[1] = cb3->yv12_v4_l;
+	stride = mpi->stride[0];
+	p = mpi->planes[0]+y*stride+x;
+	((unsigned short*)p)[0]=cb0->yv12_v4_u;
+	((unsigned short*)p)[1]=cb1->yv12_v4_u;
+	((unsigned short*)(p+stride))[0]=cb0->yv12_v4_l;
+	((unsigned short*)(p+stride))[1]=cb1->yv12_v4_l;
+	((unsigned short*)(p+stride*2))[0]=cb2->yv12_v4_u;
+	((unsigned short*)(p+stride*2))[1]=cb3->yv12_v4_u;
+	((unsigned short*)(p+stride*3))[0]=cb2->yv12_v4_l;
+	((unsigned short*)(p+stride*3))[1]=cb3->yv12_v4_l;
 
 	// now for the chrominance
-	v_ptr[0] = cb0->v;
-	v_ptr[1] = cb1->v;
-	v_ptr += uv_stride;
-	v_ptr[0] = cb2->v;
-	v_ptr[1] = cb3->v;
+	x/=2; y/=2;
 
-	u_ptr[0] = cb0->u;
-	u_ptr[1] = cb1->u;
-	u_ptr += uv_stride;
-	u_ptr[0] = cb2->u;
-	u_ptr[1] = cb3->u;
+	stride = mpi->stride[1];
+	p = mpi->planes[1]+y*stride+x;
+	p[0]=cb0->u; p[1]=cb1->u;
+	p[stride]=cb2->u; p[stride+1]=cb3->u;
+
+	stride = mpi->stride[2];
+	p = mpi->planes[2]+y*stride+x;
+	p[0]=cb0->v; p[1]=cb1->v;
+	p[stride]=cb2->v; p[stride+1]=cb3->v;
+
 }
 
 /* ---------------------------------------------------------------------- */
+
+#if 0
 
 #define PACK_YUYV(cb,y0,y1,u,v) ((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0))
 
@@ -307,7 +317,6 @@ int row_inc = stride/4;
 	vptr[0] = cb2->yuyv_v4_l;
 	vptr[1] = cb3->yuyv_v4_l;
 }
-
 
 /* ---------------------------------------------------------------------- */
 static inline void read_codebook_32(cvid_codebook *c, int mode)
@@ -492,6 +501,7 @@ int row_inc = stride-4*3;
 	*vptr++ = cb3->b[3]; *vptr++ = cb3->g[3]; *vptr++ = cb3->r[3];
 }
 
+#endif
 
 /* ------------------------------------------------------------------------
  * Call this function once at the start of the sequence and save the
@@ -542,7 +552,7 @@ int i, x;
  *     16: YUYV
  *     12: YV12
  */
-void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, unsigned int width, unsigned int height, int bit_per_pixel, int stride_)
+void decode_cinepak(void *context, unsigned char *buf, int size, mp_image_t *mpi)
 {
 cinepak_info *cvinfo = (cinepak_info *)context;
 cvid_codebook *v4_codebook, *v1_codebook, *codebook = NULL;
@@ -550,12 +560,12 @@ unsigned long x, y, y_bottom, frame_flags, strips, cv_width, cv_height, cnum,
 	strip_id, chunk_id, x0, y0, x1, y1, ci, flag, mask;
 long len, top_size, chunk_size;
 unsigned char *frm_ptr, *frm_end;
-unsigned int i, cur_strip, d0, d1, d2, d3, frm_stride, bpp = 3;
+unsigned int i, cur_strip, d0, d1, d2, d3;
 int modulo;
-void (*read_codebook)(cvid_codebook *c, int mode) = read_codebook_24;
-void (*cvid_v1)(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb) = cvid_v1_24;
-void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
-	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3) = cvid_v4_24;
+void (*read_codebook)(cvid_codebook *c, int mode) = NULL;
+void (*cvid_v1)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb) = NULL;
+void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
+	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3) = NULL;
 
 	x = y = 0;
 	y_bottom = 0;
@@ -566,41 +576,39 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 	len |= get_byte() << 8;
 	len |= get_byte();
 
-	switch(bit_per_pixel)
+	switch(mpi->imgfmt)
 		{
-		case 12:  // YV12
-			bpp = 1;  // for the purposes of stride
+		case IMGFMT_YV12:  // YV12
 			read_codebook = read_codebook_yv12;
 			cvid_v1 = cvid_v1_yv12;
 			cvid_v4 = cvid_v4_yv12;
-			yv12_y_plane = frame;
-			yv12_v_plane = frame + width * height;
-			yv12_u_plane = frame + (width * height) +
-				(width * height / 4);
+//			yv12_y_plane = frame;
+//			yv12_v_plane = frame + width * height;
+//			yv12_u_plane = frame + (width * height) +
+//				(width * height / 4);
 			break;
-		case 16:  // YUYV
-			bpp = 2;
+/*
+		case IMGFMT_YUY2:  // YUYV
 			read_codebook = read_codebook_yuy2;
 			cvid_v1 = cvid_v1_yuy2;
 			cvid_v4 = cvid_v4_yuy2;
 			break;
-		case 24:  // BGR24
-			bpp = 3;
+		case IMGFMT_BGR24:  // BGR24
 			read_codebook = read_codebook_24;
 			cvid_v1 = cvid_v1_24;
 			cvid_v4 = cvid_v4_24;
 			break;
-		case 32:  // BGR32
-			bpp = 4;
+		case IMGFMT_BGR32:  // BGR32
 			read_codebook = read_codebook_32;
 			cvid_v1 = cvid_v1_32;
 			cvid_v4 = cvid_v4_32;
 			break;
+*/
 		}
 
-	frm_stride = stride_ ? stride_ : width * bpp;
-	frm_ptr = frame;
-	frm_end = frm_ptr + width * height * bpp;
+//	frm_stride = stride_ ? stride_ : width * bpp;
+//	frm_ptr = frame;
+//	frm_end = frm_ptr + width * height * bpp;
 
 	if(len != size)
 		{
@@ -666,9 +674,9 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 		y_bottom += y1;
 		top_size -= 12;
 		x = 0;
-		if(x1 != width) 
-			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, width);
-x1 = width;
+		if(x1 != mpi->width) 
+			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, mpi->width);
+x1 = mpi->width;
 #if DBUG
 	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "   %d) %04lx %04ld <%ld,%ld> <%ld,%ld> yt %ld  %d\n",
 		cur_strip, strip_id, top_size, x0, y0, x1, y1, y_bottom);
@@ -772,16 +780,16 @@ x1 = width;
 								d2 = get_byte();
 								d3 = get_byte();
 								chunk_size -= 4;
-								cvid_v4(frm_ptr + (y * frm_stride + x * bpp), frm_end, frm_stride, v4_codebook+d0, v4_codebook+d1, v4_codebook+d2, v4_codebook+d3);
+								cvid_v4(mpi, x, y, v4_codebook+d0, v4_codebook+d1, v4_codebook+d2, v4_codebook+d3);
 								}
 							else		/* 1 byte per block */
 								{
-								cvid_v1(frm_ptr + (y * frm_stride + x * bpp), frm_end, frm_stride, v1_codebook + get_byte());
+								cvid_v1(mpi, x, y, v1_codebook + get_byte());
 								chunk_size--;
 								}
 
 							x += 4;
-							if(x >= width)
+							if(x >= mpi->width)
 								{
 								x = 0;
 								y += 4;
@@ -820,18 +828,18 @@ x1 = width;
 									d2 = get_byte();
 									d3 = get_byte();
 									chunk_size -= 4;
-									cvid_v4(frm_ptr + (y * frm_stride + x * bpp), frm_end, frm_stride, v4_codebook+d0, v4_codebook+d1, v4_codebook+d2, v4_codebook+d3);
+									cvid_v4(mpi, x, y, v4_codebook+d0, v4_codebook+d1, v4_codebook+d2, v4_codebook+d3);
 									}
 								else		/* V1 */
 									{
 									chunk_size--;
-									cvid_v1(frm_ptr + (y * frm_stride + x * bpp), frm_end, frm_stride, v1_codebook + get_byte());
+									cvid_v1(mpi, x, y, v1_codebook + get_byte());
 									}
 								}		/* else SKIP */
 
 							mask >>= 1;
 							x += 4;
-							if(x >= width)
+							if(x >= mpi->width)
 								{
 								x = 0;
 								y += 4;
@@ -845,10 +853,10 @@ x1 = width;
 				case 0x3200:		/* each byte is a V1 codebook */
 					while((chunk_size > 0) && (y < y_bottom))
 						{
-						cvid_v1(frm_ptr + (y * frm_stride + x * bpp), frm_end, frm_stride, v1_codebook + get_byte());
+						cvid_v1(mpi, x, y, v1_codebook + get_byte());
 						chunk_size--;
 						x += 4;
-						if(x >= width)
+						if(x >= mpi->width)
 							{
 							x = 0;
 							y += 4;
