@@ -6721,7 +6721,7 @@ Diese Einstellung hat signifikante Auswirkung auf die Geschwindigkeit.
 .TP
 .B psnr\ \ \ 
 Gibt den maximalen Signal-zu-Rauschabstand (peak signal to noise ratio) für
-das komlpette Video nach dem Encodieren aus und speichert die PSNR-Werte für
+das komplette Video nach dem Encodieren aus und speichert die PSNR-Werte für
 jedes Bild in einer Datei der Form 'psnr_hhmmss.log'.
 Ausgegebene Werte haben die Einheit dB (Dezibel), je höher desto besser.
 .
@@ -6746,8 +6746,87 @@ alternativer "inter vlc" für H.263+
 unbegrenzte Motion-Vectors (unlimited MVs) (nur bei H.263+)
 .br
 Erlaubt die Encodierung von beliebig langen Motion-Vectors.
-.\" man page is synced from top down to this option.
+.
+.TP
+.B ibias=<-256\-256>
+Intra-Quantisierungsverzerrung (256 entspricht 1.0,
+MPEG-Quantisierungsstandard: 96, H.263-Quantisierungsstandard: 0)
+.br
+.I ANMERKUNG:
+Die H.263-MMX-Quantisierung kann positive Verzerrungen nicht verarbeiten
+(setze vfdct=1 oder 2), die MPEG-MMX-Quantisierung kann negative Verzerrungen
+nicht verarbeiten (setze vfdct=1 oder 2).
+.
+.TP
+.B pbias=<-256\-256>
+Inter-Quantisierungsverzerrung (256 entspricht 1.0,
+MPEG-Quantisierungsstandard: 0, H.263-Quantisierungsstandard: -64)
+.br
+.I ANMERKUNG:
+Die H.263-MMX-Quantisierung kann positive Verzerrungen nicht verarbeiten
+(setze vfdct=1 oder 2), die MPEG-MMX-Quantisierung kann negative Verzerrungen
+nicht verarbeiten (setze vfdct=1 oder 2).
+.br
+.I TIP:
+Eine eher positive Verzerrung (-32 bis -16 anstelle -64) scheint den
+PSNR-Wert zu verbessern.
+.
+.TP
+.B nr=<0\-100000>
+Rauschunterdrückung (noise reduction), 0 bedeutet deaktiviert.
+.
+.TP
+.B qns=<0\-3>
+"Quantizer noise shaping", Rauschanpassung des Quantisierungsparameters.
+Anstatt die Quantisierung so zu wählen, dass dem Quellvideo im Sinne von PSNR
+am besten entsprochen wird, wählt die Rauschanpassung die Quantisierung so,
+dass Rauschen (normalerweise Ringbildungen) durch ähnlichfrequenten Inhalt im
+Bild maskiert wird.
+Größere Werte sind langsamer, können aber zu besserer Qualität führen.
+Dies kann und sollte zusammen mit der Trellis-Quantisierung benutzt werden, in
+welchem Falle diese (optimal für konstante Gewichtung) als Einstiegspunkt für
+die iterative Suche benutzt wird.
+.PD 0
+.RSs
+.IPs 0
+deaktiviert (Standard)
+.IPs 1
+Verringere nur die absoluten Werte der Koeffizienten.
+.IPs 2
+Ändere Koeffizienten nur vor dem letzten von 0 verschiedenen Koeffizient + 1.
+.IPs 3
+Versuche alle.
 .RE
+.PD 1
+.
+.TP
+.B inter_matrix=<kommaseparierte Matrix>
+Benutze eine eigene Intermatrix.
+Braucht eine kommaseparierte Zeichenkette von 64 Integerwerten.
+.
+.TP
+.B intra_matrix=<kommaseparierte Matrix>
+Benutze eine eigene Intramatrix.
+Braucht eine kommaseparierte Zeichenkette von 64 Integerwerten.
+.
+.TP
+.B vqmod_amp
+experimentelle Modulation des Quantisierungsparameters
+.
+.TP
+.B vqmod_freq
+experimentelle Modulation des Quantisierungsparameters
+.
+.TP
+.B dc\ \ \ \ \ 
+Intra-DC-Genauigkeit in Bits (Standard: 8).
+Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
+.
+.TP
+.B cgop\ \ \ 
+Schließt alle GOPs.
+Funktioniert momentan nicht.
+.\" man page is synced from top down to this option.
 .
 .
 .SS xvidenc (\-xvidencopts)
