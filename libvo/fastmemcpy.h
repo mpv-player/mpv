@@ -126,25 +126,12 @@ inline static void * fast_memcpy(void * to, const void * from, unsigned len)
 	/*
 	 *	Now do the tail of the block
 	 */
-#if 0
 	small_memcpy(to, from, len);
-#else
-        __asm__ __volatile__ (
-                "shrl $1,%%ecx\n"
-                "jnc 1f\n"
-                "movsb\n"
-                "1:\n"
-                "shrl $1,%%ecx\n"
-                "jnc 2f\n"
-                "movsw\n"
-                "2:\n"
-                "rep ; movsl\n"
-        	::"D" (to), "S" (from),"c" (len)
-        	: "memory");
-#endif
 	return p;
 }
 #define memcpy(a,b,c) fast_memcpy(a,b,c)
+
+#undef small_memcpy
 
 #endif
 
