@@ -322,28 +322,35 @@ Jindrich Makovicka <makovick@KMLinux.fjfi.cvut.cz>
     * freetype2 font rendering support
 
 D Richard Felker III <dalias@aerifal.cx>
-    * various bugfixes
+    * lots of work on inverse telecine including initial support
+    * improved MEncoder (getting rid of divx4 dependency, seeking, ...)
+    * antialiased DVD subtitles
+    * misc bugfixes and improvements, esp. in video filter/output system
+    * tech docs on encoding
     * eq, halfpack, dint, detc, field, decimate, dsize, ilpack, ivtc,
       tfields, pullup video filters
 
 Dominik Mierzejewski <dominik@rangers.eu.org>
     * compiler warning fixes
     * official RPM packages
+    * Polish documentation translation
 
 Diego Biurrun <diego@biurrun.de>
     * documentation reviewer and co-maintainer
     * console output translation (help_mp-XX.h) maintainer
-    * README
+    * README, translations.txt
     * random trivial fixes
     * testing, bug reports
     * homepage improvements
     * head of the Ministry for English Composition
+    * skin overhaul
 
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
     * windows waveout AO driver
     * quicktime audio+video decoding, video encoding (using win32 DLLs) support
-    * MinGW port
+    * MinGW port, Cygwin fixes
+    * winvidix driver
     * nvidia_vid driver
 
 Sidik Isani <lksi@cfht.hawaii.edu>
@@ -538,6 +545,12 @@ Arwed v. Merkatz <v.merkatz@gmx.net>
 Daniele Forghieri <guru@digitalfantasy.it>
     * TGA output driver
     * framestep & tile filters
+
+David Kühling <dvdkhlng@gmx.de>
+    * libtheora support, ogg/theora demuxing changes
+
+Romain Dolbeau <romain@dolbeau.org>
+    * random AltiVec (PowerPC multimedia extensions) stuff
 
 MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
 Translation from scratch:
