@@ -1,4 +1,5 @@
-		nut format draft 0.02
+		NUT Open Container Format DRAFT 20030906
+		----------------------------------------
 
 
                 
@@ -114,7 +115,6 @@ video_stream_header:
 	sample_width				v
 	sample_height				v
 	colorspace_type				v
-	depth					v
 	reserved_bytes
 	checksum				u(32)
 
@@ -227,10 +227,10 @@ version
 	0 for now
 
 file_size
-	size in bytes, can be 0 if not meaningfull (realtime streams, ...)
+	size in bytes. 0 invalidates the field
 
 length_in_msec
-	length of the file in milli seconds (can be 0 if realtime or such)
+	length of the file in milli seconds (0 invalidates the field)
  
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
@@ -248,9 +248,9 @@ stream_class
 fourcc
 	identification for the codec
 	example: "H264"
-	MUST contain 4 bytes, note, this might be increased in the future if
-	needed
-        
+	MUST contain 2 or 4 bytes, note, this might be increased in the future
+	if needed
+      
 language_code 
 	ISO 639 and ISO 3166 for language/country code
 	something like "usen" (US english), can be 0
@@ -289,7 +289,7 @@ index_flag
 	Note, all streams SHOULD have an index
 
 codec_specific_data_type
-	0	end
+	0	none/end
 	1	native
 	2	bitmapinfoheader
 	3	waveformatex
@@ -371,9 +371,6 @@ sample_width/sample_height (aspect ratio)
 	sample_width and sample_height MUST be relative prime if not zero
 	MUST be 0 if unknown
         
-depth
-	for compatibility with some win32 codecs
-
 colorspace_type
 	0	unknown
 	1	ITU Rec 624 / ITU Rec 601 Y range: 16..235 Cb/Cr range: 16..240
@@ -494,6 +491,7 @@ headers may be repated, but if they are then they MUST all be repeated together
 and repeated headers MUST be identical
 
 headers MUST be repeated every 10sec at least ? FIXME
+headers MUST be repeated BEFORE keyframes
 headers MUST be repeated at least twice (so they exist 3 times in a file)
 
 		Index
