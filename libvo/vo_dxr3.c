@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-04-15:
+ *  The spuenc code isn't 100% stable yet, therefore I'm disabling
+ *  it due to the upcoming stable release.
+ *
  * 2002-04-03:
  *  Carl George added spuenc support
  *
@@ -475,7 +479,7 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-	int lx, ly, bx;
+	/*int lx, ly, bx;
 	unsigned char *buf;
 	buf = &osdpicbuf[(y * osdpicbuf_w) + x];
 	if (img_format == IMGFMT_MPEGPES) {
@@ -489,7 +493,7 @@ static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned 
 			}
 		}	
 		pixbuf_encode_rle(x, y, osdpicbuf_w, osdpicbuf_h - 1, osdpicbuf, osdpicbuf_w, spued);
-	} else {
+	} else*/ {
 #if defined(USE_LIBAVCODEC) || defined(USE_LIBFAME)
 	vo_draw_alpha_yv12(w, h, src, srca, srcstride,
 		picture_data[0] + x + y * picture_linesize[0], picture_linesize[0]);
@@ -501,25 +505,27 @@ static void draw_osd(void)
 {
 	if (img_format != IMGFMT_MPEGPES) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
-	} else if ((disposd % 15) == 0) {
+	} /*else if ((disposd % 15) == 0) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
 		memset(osdpicbuf, 0, s_width * s_height);
-
+*/
 		/* could stand some check here to see if the subpic hasn't changed
 		 * as if it hasn't and we re-send it it will "blink" as the last one
 		 * is turned off, and the new one (same one) is turned on
 		 */
-		if (!noprebuf) {
+		/*if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
 		write(fd_spu, spued->data, spued->count);
 	}
-	disposd++;
+	disposd++;*/
 }
 
 
 static uint32_t draw_frame(uint8_t * src[])
 {
+	char *pData;
+	int pSize;
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
@@ -726,6 +732,7 @@ static uint32_t preinit(const char *arg)
 	strcpy(fdv_name, devname);
 	
 	/* Open the subpicture interface */
+	fdflags |= O_NONBLOCK;
 	if (arg && !noprebuf) {
 		sprintf(devname, "/dev/em8300_sp-%s", arg);
 	} else {
