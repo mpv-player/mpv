@@ -11,6 +11,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
 
 #include "mp_msg.h"
 #include "stream.h"
@@ -256,7 +261,7 @@ static int seek(stream_t *s,off_t newpos) {
   if(select(p->handle+1, &fds, NULL, NULL, &tv) > 0) {
     if(readresp(p,rsp_txt) != 2)
       mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] Warning the server didn't finished the transfert correctly: %s\n",rsp_txt);
-    close(s->fd);
+    closesocket(s->fd);
     s->fd = -1;
   }
 
@@ -266,7 +271,7 @@ static int seek(stream_t *s,off_t newpos) {
     //int fl;
     
     // First close the fd
-    close(s->fd);
+    closesocket(s->fd);
     s->fd = 0;
     
     // Send send the telnet sequence needed to make the server react
@@ -334,13 +339,13 @@ static void close_f(stream_t *s) {
   if(!p) return;
 
   if(s->fd > 0) {
-    close(s->fd);
+    closesocket(s->fd);
     s->fd = 0;
   }
 
   FtpSendCmd("QUIT\r\n",p,NULL);
 
-  if(p->handle) close(p->handle);
+  if(p->handle) closesocket(p->handle);
   if(p->buf) free(p->buf);
 
   m_struct_free(&stream_opts,p);
