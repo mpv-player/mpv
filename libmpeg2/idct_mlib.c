@@ -1,6 +1,6 @@
 /*
  * idct_mlib.c
- * Copyright (C) 1999-2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
+ * Copyright (C) 1999-2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  * See http://libmpeg2.sourceforge.net/ for updates.

@@ -1,6 +1,6 @@
 /*
  * cpu_accel.c
- * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
@@ -126,20 +126,27 @@ static RETSIGTYPE sigill_handler (int sig)
 
 static inline uint32_t arch_accel (void)
 {
-    signal (SIGILL, sigill_handler);
+    static RETSIGTYPE (* oldsig) (int);
+
+    oldsig = signal (SIGILL, sigill_handler);
     if (sigsetjmp (jmpbuf, 1)) {
-	signal (SIGILL, SIG_DFL);
+	signal (SIGILL, oldsig);
 	return 0;
     }
 
     canjump = 1;
 
+#ifdef HAVE_ALTIVEC_H	/* gnu */
+#define VAND(a,b,c) "vand " #a "," #b "," #c "\n\t"
+#else			/* apple */
+#define VAND(a,b,c) "vand v" #a ",v" #b ",v" #c "\n\t"
+#endif
     asm volatile ("mtspr 256, %0\n\t"
-		  "vand %%v0, %%v0, %%v0"
+		  VAND (0, 0, 0)
 		  :
 		  : "r" (-1));
 
-    signal (SIGILL, SIG_DFL);
+    signal (SIGILL, oldsig);
     return MPEG2_ACCEL_PPC_ALTIVEC;
 }
 #endif /* ARCH_PPC */
