@@ -338,6 +338,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	codecs_t *codec = NULL; // current codec
 	codecs_t **codecsp = NULL;// points to audio_codecs or to video_codecs
 	static codecs_t *ret_codecs[2] = {NULL,NULL};
+	char *endptr;	// strtoul()...
 	int *nr_codecsp;
 	int codec_type;		/* TYPE_VIDEO/TYPE_AUDIO */
 	int tmp, i;
@@ -454,15 +455,19 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "guid")) {
 			if (get_token(11, 11) < 0)
 				goto err_out_parse_error;
-#warning GUID-nak szammal kell kezdodni!!!!!!!! ez igy ok?
-			for (i = 0; i < 11; i++)
-				if (!isdigit(*token[i]))
-					goto err_out_parse_error;
-                        codec->guid.f1=strtoul(token[0],NULL,0);
-                        codec->guid.f2=strtoul(token[1],NULL,0);
-                        codec->guid.f3=strtoul(token[2],NULL,0);
+                        codec->guid.f1=strtoul(token[0],&endptr,0);
+			if (*endptr != '\0' && *endptr != ',')
+				goto err_out_parse_error;
+                        codec->guid.f2=strtoul(token[1],&endptr,0);
+			if (*endptr != '\0' && *endptr != ',')
+				goto err_out_parse_error;
+                        codec->guid.f3=strtoul(token[2],&endptr,0);
+			if (*endptr != '\0' && *endptr != ',')
+				goto err_out_parse_error;
 			for (i = 0; i < 8; i++) {
-                            codec->guid.f4[i]=strtoul(token[i + 3],NULL,0);
+                            codec->guid.f4[i]=strtoul(token[i + 3],&endptr,0);
+				if (*endptr != '\0' && *endptr != ',')
+					goto err_out_parse_error;
 			}
 		} else if (!strcmp(token[0], "out")) {
 			if (get_token(1, 2) < 0)
