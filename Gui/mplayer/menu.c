@@ -82,9 +82,9 @@ void mplShowMenu( int mx,int my )
  if ( !appMPlayer.menuIsPresent || !appMPlayer.menuBase.Bitmap.Image ) return;
 
  x=mx;
- if ( x + appMPlayer.menuWindow.Width > wsMaxX ) x=wsMaxX - appMPlayer.menuWindow.Width - 1;
+ if ( x + appMPlayer.menuWindow.Width > wsMaxX ) x=wsMaxX - appMPlayer.menuWindow.Width - 1 + wsOrgX;
  y=my;
- if ( y + appMPlayer.menuWindow.Height > wsMaxY ) y=wsMaxY - appMPlayer.menuWindow.Height - 1;
+ if ( y + appMPlayer.menuWindow.Height > wsMaxY ) y=wsMaxY - appMPlayer.menuWindow.Height - 1 + wsOrgY;
 
  mplMenuX=x; mplMenuY=y;
 

@@ -169,6 +169,8 @@ typedef struct
 
 extern int                  wsMaxX;
 extern int                  wsMaxY;
+extern int                  wsOrgX;
+extern int                  wsOrgY;
 
 extern Display            * wsDisplay;
 extern int                  wsScreen;

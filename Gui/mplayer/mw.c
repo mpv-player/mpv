@@ -282,8 +282,8 @@ set_volume:
         if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
-          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth * 2 ) / 2;
-          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight * 2 ) / 2;
+          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth * 2 ) / 2 + wsOrgX;
+          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight * 2 ) / 2 + wsOrgY;
           appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth * 2; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight * 2;
           wsFullScreen( &appMPlayer.subWindow );
 	  vo_fs=0;
@@ -294,8 +294,8 @@ set_volume:
         if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
-          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth ) / 2;
-          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2;
+          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth ) / 2 + wsOrgX;
+          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2 + wsOrgY;
           appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight;
           wsFullScreen( &appMPlayer.subWindow );
 	  vo_fs=0;

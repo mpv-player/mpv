@@ -33,10 +33,18 @@
 #include <X11/extensions/shape.h>
 #endif
 
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
+
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
 #undef ENABLE_DPMS 
+
+#ifdef HAVE_XINERAMA
+extern int xinerama_screen;
+#endif
 
 typedef struct
 {
@@ -51,6 +59,8 @@ Atom                 wsMotifHints;
 
 int                  wsMaxX         = 0; // Screen width.
 int                  wsMaxY         = 0; // Screen height.
+int                  wsOrgX         = 0; // Screen origin x.
+int                  wsOrgY         = 0; // Screen origin y.
 
 Display            * wsDisplay;
 int                  wsScreen;
@@ -227,8 +237,29 @@ wsXDNDInitialize();
 
  wsScreen=DefaultScreen( wsDisplay );
  wsRootWin=RootWindow( wsDisplay,wsScreen );
+#ifdef HAVE_XINERAMA
+ if(XineramaIsActive(wsDisplay))
+  {
+  XineramaScreenInfo *screens;
+  int num_screens;
+
+  screens = XineramaQueryScreens(wsDisplay, &num_screens);
+  if(xinerama_screen >= num_screens) xinerama_screen = 0;
+  wsOrgX = screens[xinerama_screen].x_org;
+  wsOrgY = screens[xinerama_screen].y_org;
+  wsMaxX=screens[xinerama_screen].width;
+  wsMaxY=screens[xinerama_screen].height;
+  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] screens %d Max %d, %d Org %d,%d\n", 
+    num_screens, wsMaxX, wsMaxY, wsOrgX, wsOrgY);
+  XFree(screens);
+  }
+  else
+#endif
+ {
+ wsOrgX = wsOrgY = 0;
  wsMaxX=DisplayWidth( wsDisplay,wsScreen );
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
+ }
 
  wsGetDepthOnScreen();
 #ifdef DEBUG
@@ -236,6 +267,9 @@ wsXDNDInitialize();
    int minor,major,shp;
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Screen depth: %d\n",wsDepthOnScreen );
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  size: %dx%d\n",wsMaxX,wsMaxY );
+#ifdef HAVE_XINERAMA
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  origin: +%d+%d\n",wsOrgX,wsOrgY );
+#endif
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  red mask: 0x%x\n",wsRedMask );
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  green mask: 0x%x\n",wsGreenMask );
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  blue mask: 0x%x\n",wsBlueMask );
@@ -318,14 +352,14 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
 // The window position and size.
  switch ( X )
   {
-   case -1: win->X=( wsMaxX / 2 ) - ( wX / 2 ); break;
-   case -2: win->X=wsMaxX - wX - 1; break;
+   case -1: win->X=( wsMaxX / 2 ) - ( wX / 2 ) + wsOrgX; break;
+   case -2: win->X=wsMaxX - wX - 1 + wsOrgX; break;
    default: win->X=X; break;
   }
  switch ( Y )
   {
-   case -1: win->Y=( wsMaxY / 2 ) - ( hY / 2 ); break;
-   case -2: win->Y=wsMaxY - hY - 1; break;
+   case -1: win->Y=( wsMaxY / 2 ) - ( hY / 2 ) + wsOrgY; break;
+   case -2: win->Y=wsMaxY - hY - 1 + wsOrgY; break;
    default: win->Y=Y; break;
   }
  win->Width=wX;
@@ -740,7 +774,7 @@ void wsFullScreen( wsTWindow * win )
    {
     win->OldX=win->X; win->OldY=win->Y;
     win->OldWidth=win->Width; win->OldHeight=win->Height;
-    win->X=0; win->Y=0;
+    win->X=wsOrgX; win->Y=wsOrgY;
     win->Width=wsMaxX; win->Height=wsMaxY;
     win->isFullScreen=True;
 #ifdef ENABLE_DPMS
@@ -811,14 +845,14 @@ void wsMoveWindow( wsTWindow * win,int b,int x, int y )
   {
    switch ( x )
     {
-     case -1: win->X=( wsMaxX / 2 ) - ( win->Width / 2 ); break;
-     case -2: win->X=wsMaxX - win->Width; break;
+     case -1: win->X=( wsMaxX / 2 ) - ( win->Width / 2 ) + wsOrgX; break;
+     case -2: win->X=wsMaxX - win->Width + wsOrgX; break;
      default: win->X=x; break;
     }
    switch ( y )
     {
-     case -1: win->Y=( wsMaxY / 2 ) - ( win->Height / 2 ); break;
-     case -2: win->Y=wsMaxY - win->Height; break;
+     case -1: win->Y=( wsMaxY / 2 ) - ( win->Height / 2 ) + wsOrgY; break;
+     case -2: win->Y=wsMaxY - win->Height + wsOrgY; break;
      default: win->Y=y; break;
     }
   }

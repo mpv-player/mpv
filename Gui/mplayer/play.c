@@ -43,14 +43,14 @@ void mplFullScreen( void )
     appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight; 
     switch ( appMPlayer.sub.x )
      {
-      case -1: appMPlayer.subWindow.OldX=( wsMaxX / 2 ) - ( appMPlayer.subWindow.OldWidth / 2 ); break;
-      case -2: appMPlayer.subWindow.OldX=wsMaxX - appMPlayer.subWindow.OldWidth; break;
+      case -1: appMPlayer.subWindow.OldX=( wsMaxX / 2 ) - ( appMPlayer.subWindow.OldWidth / 2 ) + wsOrgX; break;
+      case -2: appMPlayer.subWindow.OldX=wsMaxX - appMPlayer.subWindow.OldWidth + wsOrgX; break;
       default: appMPlayer.subWindow.OldX=appMPlayer.sub.x; break;
      }
     switch ( appMPlayer.sub.y )
      {
-      case -1: appMPlayer.subWindow.OldY=( wsMaxY / 2 ) - ( appMPlayer.subWindow.OldHeight / 2 ); break;
-      case -2: appMPlayer.subWindow.OldY=wsMaxY - appMPlayer.subWindow.OldHeight; break;
+      case -1: appMPlayer.subWindow.OldY=( wsMaxY / 2 ) - ( appMPlayer.subWindow.OldHeight / 2 ) + wsOrgY; break;
+      case -2: appMPlayer.subWindow.OldY=wsMaxY - appMPlayer.subWindow.OldHeight + wsOrgY; break;
       default: appMPlayer.subWindow.OldY=appMPlayer.sub.y; break;
      }
    }
