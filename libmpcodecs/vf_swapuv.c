@@ -1,0 +1,106 @@
+/*
+    Copyright (C) 2002 Michael Niedermayer <michaelni@gmx.at>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <assert.h>
+
+#include "../config.h"
+#include "../mp_msg.h"
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
+#include "img_format.h"
+#include "mp_image.h"
+#include "vf.h"
+#include "../libvo/fastmemcpy.h"
+
+
+//===========================================================================//
+
+
+struct vf_priv_s {
+};
+
+
+/***************************************************************************/
+
+
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt){
+
+	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+}
+
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+	mp_image_t *dmpi= vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
+	
+	assert(mpi->flags&MP_IMGFLAG_PLANAR);
+	
+	dmpi->planes[0]=mpi->planes[0];
+	dmpi->planes[1]=mpi->planes[2];
+	dmpi->planes[2]=mpi->planes[1];
+	dmpi->stride[0]=mpi->stride[0];
+	dmpi->stride[1]=mpi->stride[2];
+	dmpi->stride[2]=mpi->stride[1];
+    
+	return vf_next_put_image(vf,dmpi);
+}
+
+//===========================================================================//
+
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+	switch(fmt)
+	{
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	case IMGFMT_YVU9:
+	case IMGFMT_444P:
+	case IMGFMT_422P:
+	case IMGFMT_411P:
+		return vf_next_query_format(vf, fmt);
+	}
+	return 0;
+}
+
+static int open(vf_instance_t *vf, char* args){
+    vf->config=config;
+    vf->put_image=put_image;
+//    vf->get_image=get_image;
+    vf->query_format=query_format;
+    vf->priv=malloc(sizeof(struct vf_priv_s));
+    memset(vf->priv, 0, sizeof(struct vf_priv_s));
+
+    return 1;
+}
+
+vf_info_t vf_info_swapuv = {
+    "UV swaper",
+    "swapuv",
+    "Michael Niedermayer",
+    "",
+    open
+};
+
+//===========================================================================//
