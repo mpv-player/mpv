@@ -37,29 +37,21 @@
 #include "vf.h"
 #include "../libvo/fastmemcpy.h"
 
+#include "m_option.h"
+#include "m_struct.h"
+
 //===========================================================================//
 
-struct vf_priv_s {
+static struct vf_priv_s {
     unsigned int outfmt;
     int xoff, yoff, lw, lh, band, show;
+} vf_priv_dflt = {
+    0,
+    0, 0, 0, 0, 0, 0
 };
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-    int i;
-    void *retval = dst;
-
-    for (i = 0; i < height; i++) {
-	memcpy(dst, src, bytesPerLine);
-	src += srcStride;
-	dst += dstStride;
-    }                                    
-
-    return retval;
-}
 
 static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
 		   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show, int direct) {
@@ -85,7 +77,7 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
     topright = src+logo_x1*srcStride+logo_x2-1;
     botleft = src+(logo_y2-1)*srcStride+logo_x1;
 
-    if (!direct) my_memcpy_pic(dst, src, width, height, dstStride, srcStride);
+    if (!direct) memcpy_pic(dst, src, width, height, dstStride, srcStride);
 
     dst += (logo_y1+1)*dstStride;
     src += (logo_y1+1)*srcStride;
@@ -216,24 +208,25 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
+    if (!vf->priv)
+    {
+        vf->priv=malloc(sizeof(struct vf_priv_s));
+	memset(vf->priv, 0, sizeof(struct vf_priv_s));
+    }
 
     if (args) res = sscanf(args, "%d:%d:%d:%d:%d",
 			   &vf->priv->xoff, &vf->priv->yoff,
 			   &vf->priv->lw, &vf->priv->lh,
 			   &vf->priv->band);
-
-    if (res != 5) {
-	mp_msg(MSGT_VFILTER, MSGL_ERR, "deLogo: syntax is \"delogo=xoff:yoff:width:height:band\"\n");
+    if (args && (res != 5)) {
 	uninit(vf);
-	return 0;
+	return 0; // bad syntax
     }
 
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "deLogo: %d x %d, %d ; %d ; band = %d\n",
-	   &vf->priv->lw, &vf->priv->lh,
-	   &vf->priv->xoff, &vf->priv->yoff,
-	   &vf->priv->band);
+    mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d x %d, %d x %d, band = %d\n",
+	   vf->priv->xoff, vf->priv->yoff,
+	   vf->priv->lw, vf->priv->lh,
+	   vf->priv->band);
 
     vf->priv->show = 0;
 
@@ -259,13 +252,31 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+    { "x", ST_OFF(xoff), CONF_TYPE_INT, 0, 0, 0, NULL },
+    { "y", ST_OFF(yoff), CONF_TYPE_INT, 0, 0, 0, NULL },
+    { "w", ST_OFF(lw), CONF_TYPE_INT, 0, 0, 0, NULL },
+    { "h", ST_OFF(lh), CONF_TYPE_INT, 0, 0, 0, NULL },
+    { "t", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL },
+    { "band", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL }, // alias
+    { NULL, NULL, 0, 0, 0, 0, NULL }
+};
+
+static m_struct_t vf_opts = {
+    "delogo",
+    sizeof(struct vf_priv_s),
+    &vf_priv_dflt,
+    vf_opts_fields
+};
+
 vf_info_t vf_info_delogo = {
     "simple logo remover",
     "delogo",
-    "Jindrich Makovicka",
+    "Jindrich Makovicka, Alex Beregszaszi",
     "",
     open,
-    NULL
+    &vf_opts
 };
 
 //===========================================================================//
