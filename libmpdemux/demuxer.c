@@ -1642,6 +1642,7 @@ extern int demux_audio_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_ogg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_real_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1678,6 +1679,8 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
         case DEMUXER_TYPE_LAVF:
 	    return demux_lavf_control(demuxer, cmd, arg);
 #endif
+        case DEMUXER_TYPE_MOV:
+   	    return demux_mov_control(demuxer, cmd, arg);
 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
@@ -1695,10 +1698,11 @@ unsigned long demuxer_get_time_length(demuxer_t *demuxer){
 }
 
 int demuxer_get_percent_pos(demuxer_t *demuxer){     
-    int ans;     
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans)<=0)  {
-        ans=0;     
-    }
+    int ans = 0;
+    int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
+    int len = (demuxer->movi_end - demuxer->movi_start) / 100;
+    if (res == DEMUXER_CTRL_NOTIMPL && len > 0)
+      ans = (demuxer->filepos - demuxer->movi_start) / len;
     if (ans>100 || ans<0) ans=0;
     return ans;
 }

@@ -3754,11 +3754,10 @@ if(rel_seek_secs || abs_seek_pos){
 #else
 	  if( 1 ) { // Let the compiler optimize this out
 #endif
-	  int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-	  if (len>0 && sh_video){
+	  if (sh_video) {
 	    osd_visible=sh_video->fps; // 1 sec
 	    vo_osd_progbar_type=0;
-	    vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	    vo_osd_progbar_value=demuxer_get_percent_pos(demuxer) * 256 / 100;
 	    vo_osd_changed(OSDTYPE_PROGBAR);
 	  }
 	}
