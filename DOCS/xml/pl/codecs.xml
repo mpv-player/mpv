@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.47 -->
 <sect1 id="codecs">
 <title>Wspierane kodeki</title>
 
@@ -503,7 +503,7 @@ mają to samo pochodzenie.
   <screen>./configure</screen>
   Możesz potrzebować dodać jakieś opcje (przejrzyj wyjście
   poniższej komendy).
-  <screen>./configure --help</screen>
+  <command>./configure --help</command>
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
@@ -548,7 +548,7 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 
 <procedure>
 <title>KOMPILOWANIE MPLAYERA ZE WSPARCIEM DLA BIBLIOTEK QUICKTIME</title>
-<note><para>Aktualnie wspierane są tylko 32bitowe platformy Intela.</para></note>
+<note><para>Aktualnie wspierane są tylko 32-bitowe platformy Intela.</para></note>
 <step><para>ściągnij <application>MPlayera</application> z CVSu</para></step>
 <step><para>pobierz pakiet QuickTime DLL z
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
@@ -574,7 +574,7 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   kod, z optymalizacją dla MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 i 8 (aka WMAv1 i WMAv2) (<emphasis role="bold">natywny</emphasis> kod, z
+  Windows Media Audio 7 i 8 (AKA WMAv1 i WMAv2) (<emphasis role="bold">natywny</emphasis> kod, z
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
