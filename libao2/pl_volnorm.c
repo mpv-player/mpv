@@ -31,6 +31,7 @@
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
 #include "afmt.h"
+#include "../config.h"
 
 static ao_info_t info = {
         "Volume normalizer",
@@ -116,7 +117,11 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(){
   switch(ao_plugin_data.format){
+#ifndef WORDS_BIGENDIAN
     case(AFMT_S16_LE):
+#else
+    case(AFMT_S16_BE):
+#endif
       break;
     default:
       fprintf(stderr,"[pl_volnorm] Audio format not yet supported.\n");
@@ -142,7 +147,11 @@ static void reset(){
   int i;
   mul = MUL_INIT;
   switch(ao_plugin_data.format) {
+#ifndef WORDS_BIGENDIAN
     case(AFMT_S16_LE):
+#else
+    case(AFMT_S16_BE):
+#endif
 #if AVG==1
       lastavg = MID_S16;
 #elif AVG==2
@@ -165,8 +174,11 @@ static void reset(){
 static int play(){
 
   switch(pl_volnorm.format){
+#ifndef WORDS_BIGENDIAN
   case(AFMT_S16_LE): {
-
+#else
+  case(AFMT_S16_BE): {
+#endif
 #define CLAMP(x,m,M) do { if ((x)<(m)) (x) = (m); else if ((x)>(M)) (x) = (M); } while(0)
 
     int16_t* data=(int16_t*)ao_plugin_data.data;
