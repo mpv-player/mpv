@@ -837,6 +837,7 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_MOBILITY_M72,
  DEVICE_ATI_RADEON_MOBILITY_M6,
  DEVICE_ATI_RADEON_MOBILITY_M62,
+ DEVICE_ATI_RADEON_MOBILITY_U1,
  DEVICE_ATI_RADEON_R200_BB,
  DEVICE_ATI_RADEON_R200_QH,
  DEVICE_ATI_RADEON_R200_QI,
@@ -947,6 +948,7 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RADEON_VE_QZ:
             case DEVICE_ATI_RADEON_MOBILITY_M6:
             case DEVICE_ATI_RADEON_MOBILITY_M62:
+	    case DEVICE_ATI_RADEON_MOBILITY_U1:
               RadeonFamily = 120;
               break;
               
