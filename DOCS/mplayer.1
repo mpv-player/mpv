@@ -59,6 +59,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-vfm\ video\ codec\ family ]
 .RB [ \-afm\ audio\ codec\ family ]
 .RB [ \-frames\ number ]
+.RB [ \-autoq\ quality ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -139,9 +140,12 @@ The supported formats and settings are:
 
 .I NOTE
 Maybe less/more.
-
-.I NOTE
-You can use this with OpenDivX encoding too! See ALPHA/BETA CODE section.
+.TP
+.B \-autoq\ quality
+dynamically changes the level of postprocess, depending on spare CPU
+time available. Uses the same value ranges as -pp . The number you
+specify will be the maximum level used. Usually you can use some big
+number.
 .TP
 .B \-ffactor\ number
 resample alphamap of the font. Can be:
