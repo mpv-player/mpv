@@ -164,7 +164,7 @@ extern int vo_gamma_blue_intense;
 
 vidix_video_eq_t vid_eq;
 
-void vidix_start(void)
+int vidix_start(void)
 {
     int err;
 
@@ -188,7 +188,7 @@ void vidix_start(void)
     if((err=vdlPlaybackOn(vidix_handler))!=0)
     {
 	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
-	return;
+	return -1;
     }
     vid_eq.brightness = vo_gamma_brightness;
     vid_eq.saturation = vo_gamma_saturation;
@@ -199,16 +199,18 @@ void vidix_start(void)
     vid_eq.blue_intense = vo_gamma_blue_intense;
     vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
     vdlPlaybackSetEq(vidix_handler,&vid_eq);
-    return;
+    return 0;
 }
 
-void vidix_stop(void)
+int vidix_stop(void)
 {
     int err;
     if((err=vdlPlaybackOff(vidix_handler))!=0)
     {
 	printf("vosub_vidix: Can't stop playback: %s\n",strerror(err));
+	return -1;
     }
+    return 0;
 }
 
 void vidix_term( void )
