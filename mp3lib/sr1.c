@@ -271,8 +271,9 @@ switch(fr->lay){
     MP3_samplerate=freqs[fr->sampling_frequency];
     fr->framesize  = (long) MP3_bitrate * 12000;
     fr->framesize /= MP3_samplerate;
-    MP3_framesize  = fr->framesize;
-    fr->framesize  = ((fr->framesize+fr->padding)<<2)-4;
+    MP3_framesize  = ((fr->framesize+fr->padding)<<2);
+    fr->framesize  = MP3_framesize-4;
+    printf("framesize=%d\n",fr->framesize);
     break;
   default:
     MP3_framesize=fr->framesize=0;
@@ -375,6 +376,7 @@ int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 
 #include "layer2.c"
 #include "layer3.c"
+#include "layer1.c"
 
 /******************************************************************************/
 /*           PUBLIC FUNCTIONS                  */
@@ -516,9 +518,7 @@ int MP3_DecodeFrame(unsigned char *hova,short single){
    switch(fr.lay){
      case 2: do_layer2(&fr,single);break;
      case 3: do_layer3(&fr,single);break;
-     case 1:
-         printf("mp3lib: layer-1 audio not yet supported!\n");
-	 return 4608;
+     case 1: do_layer1(&fr,single);break;
      default:
          return 0;	// unsupported
    }
