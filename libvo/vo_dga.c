@@ -23,6 +23,12 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.22  2001/05/07 19:16:04  acki2
+ * - now chooses mode with highest ymax (enables doublebuffering in some cases
+ *   it didn't work before)
+ * - use my own memcopy() on non MMX machines again
+ * - do memcpy() in one single block if stride==0
+ *
  * Revision 1.21  2001/05/03 22:39:38  acki2
  * - finally: 15to16 conversion included!!!
  *
@@ -378,6 +384,16 @@ __asm__ __volatile__( \
 		    "d" (numwords) \
                   : "memory" )
 
+// quick & dirty - for debugging only 
+
+void fillblock(char *strt, int yoff, int lines, int val){
+  char *i;
+  for(i = strt + yoff * vo_dga_width *HW_MODE.vdm_bytespp; 
+      i< strt + (lines+yoff) * vo_dga_width *HW_MODE.vdm_bytespp;  ){
+    *i++ = val;
+  }
+}
+
 
 //---------------------------------------------------------
 
@@ -394,17 +410,38 @@ static uint32_t draw_frame( uint8_t *src[] ){
   
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
-  {int i;
-   for(i=0; i< vo_dga_lines; i++){
+
+#ifdef HAVE_MMX
+    // use the code from fastmemcpy.h
+    if(vo_dga_vp_skip){
+      // use some stride ...
+      int i;
+      for(i=0; i< vo_dga_lines; i++){
         memcpy(d, s, vo_dga_bytes_per_line);
 	d+=vo_dga_vp_skip;
 	d+=vo_dga_bytes_per_line;
 	s+=vo_dga_bytes_per_line;
-   }
-  }	  
+      }
+    }else{
+      // no stride, cool + fast ...
+      memcpy(d,s, vo_dga_bytes_per_line * vo_dga_lines);
+    }	  
+#else
+    // use some homebrewn assembly code ...
+    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
+#endif
 	  
-	  
-	  //    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
+  // DBG-COde
+
+#if 0
+  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+  fillblock(d, 0, 10, 0x800000ff);
+  fillblock(d, 10, 10, 0x8000ff00);
+  fillblock(d, 20, 10, 0x80ff0000);
+  fillblock(d, 30, 10, 0xff0000ff);
+  fillblock(d, 40, 10, 0x800000ff);
+  fillblock(d, 50, 10, 0x0f0000ff);
+#endif	  
     break;
   case VDM_CONV_15TO16:
         {
@@ -435,9 +472,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
 	for(k = 0; k< vo_dga_src_width; k+=2 ){
           l = *(((uint32_t *)s)++);
           m = (l & 0xff000000)>> 24 ;
-          *(((uint32_t *)d)++) = l & 0x00ffffff;
+          *(((uint32_t *)d)++) = (l & 0x00ffffff); // | 0x80000000;
           m |= *(((uint16_t *)s)++) << 8;           
-          *(((uint32_t *)d)++) = m;
+          *(((uint32_t *)d)++) = m; // | 0x80000000 ;
 	}
         d+= vp_skip;
       }
@@ -641,8 +678,8 @@ uninit(void)
 // (useful for double buffering!!!)
 
 int check_res( int num, int x, int y, int bpp,  
-                int new_x, int new_y, int new_vbi, 
-                int *old_x, int *old_y, int *old_vbi){
+	       int new_x, int new_y, int new_vbi, int new_maxy,
+                int *old_x, int *old_y, int *old_vbi, int *old_maxy){
 
   vd_printf(VD_RES, "vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ depth %2d ..",
           num, new_x, new_y, new_vbi, bpp );
@@ -685,12 +722,22 @@ int check_res( int num, int x, int y, int bpp,
 	  new_vbi >= 50
 	 )
 	)
+        ||
+        // if everything is equal, then use the mode with the lower 
+        // stride 
+        (
+	 (new_x == *old_x) &&
+	 (new_y == *old_y) &&
+         (new_vbi == *old_vbi) &&
+         (new_maxy > *old_maxy)
+        )
        )
       )
      )  
     {
       *old_x = new_x;
       *old_y = new_y;
+      *old_maxy = new_maxy;
       *old_vbi = new_vbi;
       vd_printf(VD_RES, ".ok!!\n");
       return 1;
@@ -714,7 +761,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
 #ifdef HAVE_DGA2
   // needed to change DGA video mode
-  int modecount, mX=100000, mY=100000 , mVBI=100000, i,j=0;
+  int modecount, mX=100000, mY=100000 , mVBI=100000, mMaxY=0, i,j=0;
   int dga_modenum;
   XDGAMode   *modelines=NULL;
   XDGADevice *dgadevice;
@@ -724,7 +771,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   unsigned int vm_event, vm_error;
   unsigned int vm_ver, vm_rev;
   int i, j=0, have_vm=0;
-  int modecount, mX=100000, mY=100000, mVBI=100000, dga_modenum;  
+  int modecount, mX=100000, mY=100000, mVBI=100000, mMaxY=0, dga_modenum;  
 #endif
   int bank, ram;
 #endif
@@ -803,8 +850,9 @@ static uint32_t init( uint32_t width,  uint32_t height,
        if ( check_res(i, wanted_width, wanted_height, modelines[i].depth,  
                   modelines[i].viewportWidth, 
                   modelines[i].viewportHeight, 
-                  (unsigned) modelines[i].verticalRefresh,
-                   &mX, &mY, &mVBI )) j = i;
+                  (unsigned) modelines[i].verticalRefresh, 
+		  modelines[i].maxViewportY,
+                   &mX, &mY, &mVBI, &mMaxY )) j = i;
      }
   }
   vd_printf(VD_INFO, 
@@ -857,7 +905,8 @@ static uint32_t init( uint32_t width,  uint32_t height,
 			GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
 				     vo_dga_vidmodes[i]->htotal,
 				     vo_dga_vidmodes[i]->vtotal),
-			&mX, &mY, &mVBI )) j = i;
+		        0,
+			&mX, &mY, &mVBI, &mMaxY )) j = i;
       }
     
       vd_printf(VD_INFO, 
