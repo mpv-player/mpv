@@ -153,17 +153,17 @@ static void uninit(void)
 
 static void clear_screen()
 {
-  /* There needs to be some sort of delay here or else things seriously screw up.
-     Causes the image to not be the right size on screen if this isn't like this.
-     A printf before the memset call also seems to work, but this made more sense
-     since it actually checks the status of the card. 
-  */
-  /* first wait for the card to be ready, do not try to write every time - alex */
-//  do {} while((reg_IO->status & 0x1f) < 1);
-  usec_sleep(10*1000);
-  memset(vidpage, 0, screenwidth * screenheight * screendepth);
-  
-  	if(vo_doublebuffering) {
+	/* There needs to be some sort of delay here or else things seriously
+	 * screw up.  Causes the image to not be the right size on screen if
+	 * this isn't like this.  A printf before the memset call also seems to
+	 * work, but this made more sense since it actually checks the status of
+	 * the card.
+	 */
+	if(vo_doublebuffering) {
+		/* first wait for the card to be ready, do not try to write
+		 * every time - alex */
+		do {} while((reg_IO->status & 0x1f) < 1);
+		memset(vidpage, 0, screenwidth * screenheight * screendepth);
 		memset(hidpage, 0, screenwidth * screenheight * screendepth);
 	}
 }
@@ -180,14 +180,9 @@ static void setup_screen(uint32_t full)
 
 		if(screenwidth / ratio <= screenheight)
 			vidheight = (double)screenwidth / ratio;
-		/* Is this really needed?  This causes movies that are encoded at YxY 
-		   sizes to not be displayed properly (they're squished horizontally).
-		This might cause problems with videos that are taller than they are wide 
-		but I haven't really seen many of those so we won't worry about it for now. */
-#if 0		
 		else
 			vidwidth = (double)screenheight * ratio;
-#endif 
+
 		vidx = (screenwidth - vidwidth) / 2;
 		vidy = (screenheight - vidheight) / 2;
 	} else {					/* Reset to normal size */
@@ -199,7 +194,7 @@ static void setup_screen(uint32_t full)
 		vidheight = r_height;
 		vidx = vidy = 0;
 	}
-	
+
 	clear_screen();
 }
 
@@ -279,11 +274,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	in_voodoo_format |= in_width * in_depth;
 
-	/* Put the image pages off the console screen so they don't get console messages  */
-	/* This used to place single buffered movies onto the main console screen */
-	vidpageoffset = hidpageoffset = screenwidth * screenheight * screendepth;
-	if(vo_doublebuffering)
-	  hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	/* Linux lives in the first frame */
+	if(vo_doublebuffering) {
+		vidpageoffset = screenwidth * screenheight * screendepth;
+		hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	} else
+		vidpageoffset = hidpageoffset = 0;              /* Console background */
+
 
 	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
@@ -364,7 +361,7 @@ static void flip_page(void)
 	reg_2d->dstXY = XYREG(vidx, vidy);
 	reg_2d->dstFormat = vid_voodoo_format;
 	/* The XYREG macro doesn't seem to work for this line so build the register contents very explicitly */
-	reg_2d->dstSize = ((((unsigned long)vidheight) & 0x0000FFFF) << 16) | (((unsigned long) vidwidth) & 0x0000FFFF);  
+	reg_2d->dstSize = XYREG(vidwidth, vidheight);
 	reg_2d->command = S2S_STRECH_BLT | S2S_IMMED | S2S_ROP;
 
 	/* Wait for the command to finish (If we don't do this, we get wierd

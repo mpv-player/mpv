@@ -316,7 +316,7 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define TDFXF_HSYNC_MASK		0x03
 #define TDFXF_VSYNC_MASK		0x0c
 
-#define XYREG(x,y)		(((y) << 16) | (x))
+#define XYREG(x,y)		(((((unsigned long)y) & 0xFFFF) << 16) | (((unsigned long)x) & 0xFFFF))
 
 //#define TDFXFB_DEBUG 
 #ifdef TDFXFB_DEBUG
