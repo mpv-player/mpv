@@ -62,7 +62,8 @@ evName evNames[] =
   { evSetURL,		 "evSetURL"	       },
   { evLoadAudioFile,	 "evLoadAudioFile"     },
   { evDropSubtitle,      "evDropSubtitle"      },
-  { evSetAspect,	 "evSetAspect"	       }
+  { evSetAspect,	 "evSetAspect"	       },
+  { evSetAudio,		 "evSetAudio"	       }
  };
 
 int evBoxs = sizeof( evNames ) / sizeof( evName );

@@ -1350,6 +1350,7 @@ fflush(stdout);
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
      guiGetEvent( guiSetFileFormat,(char *)demuxer->file_format );
      if ( guiGetEvent( guiSetValues,(char *)sh_video ) ) goto goto_next_file;
+     guiGetEvent( guiSetDemuxer,(char *)demuxer );
     }
 #endif
 

@@ -14,6 +14,8 @@
 #include "../widgets.h"
 #include "../app.h"
 
+#include "../../../libmpdemux/demuxer.h"
+
 void ActivateMenuItem( int Item )
 {
 // fprintf( stderr,"[menu] item: %d.%d\n",Item&0xffff,Item>>16 );
@@ -411,11 +413,29 @@ GtkWidget * create_PopUpMenu( void )
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
 #endif
-  AspectMenu=AddSubMenu( Menu,MSGTR_MENU_AspectRatio );
-  AddMenuItem( AspectMenu,MSGTR_MENU_Original,( 1 << 16 ) + evSetAspect );
-  AddMenuItem( AspectMenu,"16:9",( 2 << 16 ) + evSetAspect );
-  AddMenuItem( AspectMenu,"4:3",( 3 << 16 ) + evSetAspect );
-  AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
+
+  if ( guiIntfStruct.Playing )
+   {
+    AspectMenu=AddSubMenu( Menu,MSGTR_MENU_AspectRatio );
+    AddMenuItem( AspectMenu,MSGTR_MENU_Original,( 1 << 16 ) + evSetAspect );
+    AddMenuItem( AspectMenu,"16:9",( 2 << 16 ) + evSetAspect );
+    AddMenuItem( AspectMenu,"4:3",( 3 << 16 ) + evSetAspect );
+    AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
+   }
+
+  if ( guiIntfStruct.demuxer )
+   {
+    int i,c = 0;
+    
+    for ( i=0;i < MAX_A_STREAMS;i++ )
+     if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
+      {
+       char tmp[32];
+       snprintf( tmp,32,"Track %d",i );
+       if ( !c ) { SubMenu=AddSubMenu( Menu, "Audio track" ); c=1; }
+       AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetAudio );
+      }
+   }
 
   AddSeparator( Menu );
   MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_Mute,muted,evMute );
@@ -424,11 +444,11 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
   AddMenuItem( Menu,MSGTR_Equalizer, evEqualizer );
-  AddSeparator( Menu );
 
   if ( guiIntfStruct.NoWindow == False )
    {
     int b1 = 0, b2 = 0;
+    AddSeparator( Menu );
     if ( !appMPlayer.subWindow.isFullScreen && guiIntfStruct.Playing )
      {
       if ( ( appMPlayer.subWindow.Width == guiIntfStruct.MovieWidth * 2 )&& 
@@ -439,12 +459,6 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
     AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
    }
-   else
-    {
-     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",0,evNormalSize ); gtk_widget_set_sensitive( MenuItem,FALSE );
-     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,0,evDoubleSize );         gtk_widget_set_sensitive( MenuItem,FALSE );
-     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,0,evFullScreen );         gtk_widget_set_sensitive( MenuItem,FALSE );
-    }
 
   AddSeparator( Menu );
   AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );

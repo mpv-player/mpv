@@ -59,6 +59,7 @@ typedef struct
    guiUnknowErrorStruct error;
    
    void * sh_video;
+   void * demuxer;
    void * event_struct;
 
    int    DiskChanged;
@@ -123,6 +124,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetDefaults	    12
 #define guiSetValues	    13
 #define guiSetFileFormat    14
+#define guiSetDemuxer       15
 
 #define guiSetStop  0
 #define guiSetPlay  1

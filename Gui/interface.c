@@ -454,6 +454,9 @@ int guiGetEvent( int type,char * arg )
    case guiReDrawSubWindow:
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
+   case guiSetDemuxer:
+	guiIntfStruct.demuxer=(void *)arg;
+	break;
    case guiSetShVideo:
 	 {
 	  if ( !appMPlayer.subWindow.isFullScreen )

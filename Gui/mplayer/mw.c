@@ -270,6 +270,13 @@ void mplEventHandling( int msg,float param )
    case evSetURL:
         gtkShow( evPlayNetwork,NULL );
 	break;
+
+   case evSetAudio:
+        if ( !guiIntfStruct.demuxer ) break;
+	audio_id=(int)param;
+	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play;
+	guiIntfStruct.FilenameChanged=1;
+	break;
 	
 #ifdef HAVE_VCD
    case evSetVCDTrack:
