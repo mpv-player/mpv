@@ -22,6 +22,9 @@ YV12,I420  12   YUV 4:2:0  Y: w * h  U,V: (w/2) * (h/2)  [MPEG, h263]
 411P       12   YUV 4:1:1  Y: w * h  U,V: (w/4) * h      [DV-NTSC, CYUV]
 YVU9,IF09   9   YUV 4:1:0  Y: w * h  U,V: (w/4) * (h/4)  [Sorenson, Indeo]
 
+The YUV a:b:c naming style means: for <a> samples of Y there are <b> samples
+of UV in odd lines and <c> samples of UV in even lines.
+
 conversion: (some cut'n'paste from www and maillist)
 
 RGB to YUV Conversion:
