@@ -5,4 +5,4 @@ if [ $? -ne 0 ]; then
 	# probably no gnu date installed(?), use current date
 	last_cvs_update=`date +%y%m%d-%H:%M`
 fi
-echo "#define VERSION \"0.17cvs-${last_cvs_update}\"" >version.h
+echo "#define VERSION \"CVS-${last_cvs_update}\"" >version.h
