@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
  */
 
-/**
+/*
  * \mainpage libdvdcss developer documentation
  *
  * \section intro Introduction

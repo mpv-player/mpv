@@ -304,7 +304,7 @@ uninstall:
 clean:
 	-rm -f *.o *~ $(OBJS) codecs.conf.h
 
-distclean:
+distclean: doxygen_clean
 	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
 	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
@@ -337,6 +337,12 @@ ifeq ($(wildcard .developer),)
 	$(MAKE) distclean
 endif
 	$(MAKE) depend
+
+doxygen:
+	doxygen DOCS/tech/Doxyfile
+
+doxygen_clean:
+	-rm -rf DOCS/tech/doxygen
 
 # rebuild at every CVS update or config/makefile change:
 ifeq ($(wildcard .developer),)
