@@ -126,10 +126,14 @@ static int find_gl_format (uint32_t format)
       gl_type = GL_UNSIGNED_BYTE;
       break;
 #ifdef GL_VERSION_1_2
+#if 0
+    // we do not support palettized formats, although the format the
+    // swscale produces works
     case IMGFMT_RGB8:
       gl_format = GL_RGB;
       gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
       break;
+#endif
     case IMGFMT_RGB15:
       gl_format = GL_RGBA;
       gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
@@ -138,6 +142,7 @@ static int find_gl_format (uint32_t format)
       gl_format = GL_RGB;
       gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
       break;
+#if 0
     case IMGFMT_BGR8:
       // special case as red and blue have a differen number of bits.
       // GL_BGR and GL_UNSIGNED_BYTE_3_3_2 isn't supported at least
@@ -146,6 +151,7 @@ static int find_gl_format (uint32_t format)
       gl_format = GL_RGB;
       gl_type = GL_UNSIGNED_BYTE_3_3_2;
       break;
+#endif
     case IMGFMT_BGR15:
       gl_format = GL_BGRA;
       gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
