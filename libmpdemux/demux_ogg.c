@@ -313,7 +313,7 @@ static  int demux_ogg_get_page_stream(ogg_demuxer_t* ogg_d,ogg_stream_state** os
 
 }
 
-static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,void *context,float* pts,int* flags) {
+static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,void *context,float* pts,int* flags, int samplesize) {
   unsigned char* data;
 
   *pts = 0;
@@ -328,7 +328,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
        vorbis_info *vi = &((ov_struct_t*)context)->vi;
 
        // When we dump the audio, there is no vi, but we don't care of timestamp in this case
-       int32_t blocksize = vorbis_packet_blocksize(vi,pack) / vi->channels;
+       int32_t blocksize = vorbis_packet_blocksize(vi,pack) / samplesize;
        // Calculate the timestamp if the packet don't have any
        if(pack->granulepos == -1) {
 	  pack->granulepos = os->lastpos;
@@ -470,6 +470,7 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
   float pts = 0;
   int flags = 0;
   void *context = NULL;
+  int samplesize = 1;
 
   // If packet is an comment header then we try to get comments at first
   if (pack->bytes >= 7 && !memcmp(pack->packet, "\003vorbis", 7))
@@ -501,11 +502,13 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
 
   // For vorbis packet the packet is the data, for other codec we must jump
   // the header
-  if(ds == d->audio && ((sh_audio_t*)ds->sh)->format == 0xFFFE)
+  if(ds == d->audio && ((sh_audio_t*)ds->sh)->format == 0xFFFE) {
      context = ((sh_audio_t *)ds->sh)->context;
+     samplesize = ((sh_audio_t *)ds->sh)->samplesize;
+  }
   if (ds == d->video && ((sh_audio_t*)ds->sh)->format == 0xFFFC)
      context = ((sh_video_t *)ds->sh)->context;
-  data = demux_ogg_read_packet(os,pack,context,&pts,&flags);
+  data = demux_ogg_read_packet(os,pack,context,&pts,&flags,samplesize);
   if(d->video->id < 0)
       ((sh_audio_t*)ds->sh)->delay = pts;
 
@@ -537,7 +540,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   ogg_stream_state* oss;
   ogg_stream_t* os;
   ogg_packet op;
-  int np,sid,p;
+  int np,sid,p,samplesize=1;
   void *context = NULL;
   off_t pos, last_pos;
   pos = last_pos = demuxer->movi_start;
@@ -561,8 +564,10 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   else {
     sid = demuxer->audio->id;
     /* demux_ogg_read_packet needs decoder context for Vorbis streams */
-    if(((sh_audio_t*)demuxer->audio->sh)->format == 0xFFFE)
+    if(((sh_audio_t*)demuxer->audio->sh)->format == 0xFFFE) {
       context = ((sh_audio_t*)demuxer->audio->sh)->context;
+      samplesize = ((sh_audio_t*)demuxer->audio->sh)->samplesize;
+    }
   }
   os = &ogg_d->subs[sid];
   oss = &os->stream;
@@ -597,7 +602,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
     while(ogg_stream_packetout(oss,&op) == 1) {
       float pts;
       int flags;
-      demux_ogg_read_packet(os,&op,context,&pts,&flags);
+      demux_ogg_read_packet(os,&op,context,&pts,&flags,samplesize);
       if(op.granulepos >= 0) ogg_d->final_granulepos = op.granulepos;
       if(index_mode == 2 && (flags || (os->vorbis && op.granulepos >= 0))) {
 	ogg_d->syncpoints = (ogg_syncpoint_t*)realloc(ogg_d->syncpoints,(ogg_d->num_syncpoint+1)*sizeof(ogg_syncpoint_t));
@@ -1185,6 +1190,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   int is_gp_valid;
   float pts;
   int is_keyframe;
+  int samplesize=1;
 
   if(demuxer->video->id >= 0) {
     ds = demuxer->video;
@@ -1199,6 +1205,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       context = ((sh_audio_t*)demuxer->audio->sh)->context;
     vi = &((ov_struct_t*)((sh_audio_t*)ds->sh)->context)->vi;
     rate = (float)vi->rate;
+    samplesize = ((sh_audio_t*)ds->sh)->samplesize;
   }
 
   os = &ogg_d->subs[ds->id];
@@ -1300,7 +1307,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
         break;
       }
       is_gp_valid = (op.granulepos >= 0);
-      demux_ogg_read_packet(os,&op,context,&pts,&is_keyframe);
+      demux_ogg_read_packet(os,&op,context,&pts,&is_keyframe,samplesize);
       if (precision && is_gp_valid) {
         precision--;
         if (abs(gp - op.granulepos) > rate && (op.granulepos != old_gp)) {
