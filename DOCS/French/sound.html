@@ -67,7 +67,7 @@
 <UL>
   <LI>Si vous avez un pilote OSS, essayez d'abord avec l'option <CODE>-ao oss</CODE>
     (utilisé par défaut). Si vous obtenez des scratchs ou une sonorité anormale, 
-    essayez l'option <CODE>-ao sdl</CODE>(NOTE: vous devez bien sûr avoir installé 
+    essayez l'option <CODE>-ao sdl</CODE> (NOTE: vous devez bien sûr avoir installé 
     les librairies SDL ainsi que leurs fichiers d'entête). Le pilote audio SDL est plus 
     efficace dans de nombreux cas et supporte également ESD et ARTS. (ESD est le le 
     démon son de GNOME, ARTS celui de KDE).</LI>
@@ -386,7 +386,7 @@
     qu'en dernier recours.</DD>
 </DL>
 
-<P>Example:<BR>
+<P>Exemple:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af volume=10.1:0 media.avi</CODE></P>
 
 <P>amplifierait le son de 10.1dB et bloque le volume si il est trop haut.</P>
@@ -454,7 +454,7 @@
   sortie:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
   <DD>est un entier compris entre 1 et 6 et est utilisé pour définir le nombre de canaux
     de sortie. Cette option est requise, la laisser vide provoquera une erreur à 
     l'éxecution.</DD>
@@ -468,6 +468,71 @@
   &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
 
 <P>down-mixerait de stéréo vers mono.</P>
+
+<P>Exemple 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</CODE></P>
+
+<P>produirait une sortie à trois canaux en laissant les canaux 0 et 1 intacts,
+  et mixerait les canaux 0 et 1 dans le canal 2 (qui pourrait être envoyé à un
+  sub-woofer par exemple).</P>
+
+
+<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+
+<P>Ce filtre ajoute un canal de sub woofer au flux audio. Les données audio
+  utilisées pour créer le canal sub-woofer sont une moyenne des canaux 0 et 1.
+  Le fréquences basses sont ensuites filtrées par un filtre Butterworth de 4ème
+  ordre avec une fréquence de cutoff par défaut de 60Hz et ajoutées à
+  un canal séparé du flux audio. Attention: Désactivez ce filtre quand vous lisez
+  des DVDs en son Dolby Digital 5.1, sinon ce filtre empèchera l'envoi du son au
+  sub-woofer. Ce filtre a deux paramètres:</P>
+
+<DL>
+  <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
+  <DD>est un nombre à virgule optionnel utilisé pour définir la fréquence decutoff
+    du filtre en Hz. L'intervalle valide est de 20Hz à 300Hz. Pour les meilleurs
+    résultats essayez de fixer la fréquence de cutoff le plus bas possible. Cela
+    améliorera la stéréo ou le son surround. La fréquence de cutoff par défaut est
+    60Hz.</DD>
+
+  <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
+  <DD>est un entier optionnel entre <CODE>0</CODE> et <CODE>5</CODE> qui
+    détermine le nombre de canaux à insérer dans le sous-canal audio.
+    Par défaut c'est le canal numéro <CODE>5</CODE>. Notez que le nombre de canaux
+    sera automatiquement augmenté à <CODE>ch</CODE> si nécessaire.</DD>
+</DL>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
+
+<P>ajouterait un canal sub-woofer avec une fréquence de cutoff de 100Hz au canal
+  de sortie 4.</P>
+
+<H5><A NAME="af_surround">2.3.2.3.9 Décodeur de son surround</A></H5>
+
+<P>Ce filtre est un décodeur pour le son surround encodé en matrice.
+  Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
+  avec deux canaux audio contiennent actuellement du son surround matricié.
+  Pour utiliser cette fonction vous avez besoin d'une carte son supportant
+  au moins 4 canaux. Ce filtre a un paramètre:</P>
+
+<DL>
+  <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
+  <DD>est un nombre à virgule optionnel entre <CODE>0</CODE> and
+    <CODE>1000</CODE> utilisé pour définir le décalage en ms pour les haut-parleurs rear
+    arrières. Ce décalage devrait être défini comme ceci: si d1 est la distance entre
+    la position d'écoute et les haut-parleurs de devant et d2 la distance entre
+    la position d'écoute et les haut-parleurs de derrière, alors le décalage <CODE>d</CODE>
+    peut être fixé à 15ms si d1 &lt;= d2 et à 15 + 5*(d1-d2) si d1 &gt; d2.
+    La valeur par défaut pour <CODE>d</CODE> est 20ms.</DD>
+</DL>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
+
+<P>ajouterait un décodage de son surround avec un décalage de 15ms pour le son des
+  haut-parleurs arrière.</P>
+
 
 
 <H2><STRONG>Note: Les plugins audio ont été remplacés par les filtres audio et seront
