@@ -981,6 +981,9 @@ echores "$_kstat"
 
 
 echocheck "posix4"
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
 _posix4=no
 cc_check -lposix4 && _posix4=yes
 if test "$_posix4" = yes ; then
@@ -1101,12 +1104,12 @@ echores "$_sys_soundcard"
 
 
 echocheck "termcap"
-if test "$termcap" = auto ; then
+if test "$_termcap" = auto ; then
   _termcap=no
   cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
-  cc_check  -ltermcap && _termcap=yes
+  cc_check -ltermcap && _termcap=yes
 else
   _termcap=no
 fi
@@ -1562,6 +1565,10 @@ if test -z "$_sdlconfig" ; then
   fi
 fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
+  cat > $TMPC << EOF
+#include <SDL.h>
+int main(void) { return 0; }
+EOF
   _sdl=no
   if "$_sdlconfig" --version >/dev/null 2>&1 ; then
     if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` ; then
