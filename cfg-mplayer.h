@@ -65,6 +65,7 @@ extern int vo_gamma_hue;
 extern char *vo_geometry;
 extern int vo_ontop;
 extern int vo_keepaspect;
+extern int vo_rootwin;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
@@ -85,10 +86,6 @@ extern int stop_xscreensaver;
 extern char **vo_fstype_list;
 extern int vo_nomouse_input;
 extern int WinID;
-#endif
-
-#ifdef MACOSX
-extern int vo_rootwin;
 #endif
 
 #ifdef HAVE_AA
@@ -187,6 +184,7 @@ m_option_t mplayer_opts[]={
 	{"nofixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL, 0, 0, NULL},
 	{"ontop", &vo_ontop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
@@ -302,11 +300,6 @@ m_option_t mplayer_opts[]={
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
-	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
-#endif
-
-#ifdef MACOSX
-	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA
