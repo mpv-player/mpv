@@ -85,3 +85,10 @@ sub saveolddata {
 sub debug {
   print STDERR @_, "\n";
 }
+
+
+# pass control to debhelper scripts..
+#
+system <<EODEBHELPER;
+#DEBHELPER#
+EODEBHELPER
