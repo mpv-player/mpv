@@ -146,7 +146,10 @@ PROFILE_START();
             if(srca[2*x+0]) dstbase[4*x+0]=src[2*x+0];
             if(srca[2*x+1]) dstbase[4*x+2]=src[2*x+1];
 #else
-            if(srca[x]) dstbase[2*x]=((dstbase[2*x]*srca[x])>>8)+src[x];
+            if(srca[x]) {
+               dstbase[2*x]=((dstbase[2*x]*srca[x])>>8)+src[x];
+               dstbase[2*x+1]=((((signed)dstbase[2*x+1]-128)*srca[x])>>8)+128;
+           }
 #endif
         }
 #endif
