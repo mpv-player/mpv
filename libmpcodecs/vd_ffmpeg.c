@@ -329,21 +329,28 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice(struct AVCodecContext *s,
-                	uint8_t **src, int linesize,
+#if LIBAVCODEC_BUILD >= 4670
+                	AVFrame *src, int offset[4],
+#else
+                        uint8_t **src, int linesize,
+#endif                        
                 	int y, int width, int height){
     sh_video_t * sh = s->opaque;
-    int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
-
+#if LIBAVCODEC_BUILD >= 4670
+    uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
+#else
+    int stride[3];
     stride[0]=linesize;
     if(s->coded_frame->linesize[1]){
         stride[1]= s->coded_frame->linesize[1];
         stride[2]= s->coded_frame->linesize[2];
     }else
         stride[1]=stride[2]=stride[0]/2;
+#endif
 #if 0
     if(s->pict_type!=B_TYPE){
         for(i=0; i*16<width+16; i++){ 
@@ -361,8 +368,13 @@ static void draw_slice(struct AVCodecContext *s,
         }
     }else
 #endif
+#if LIBAVCODEC_BUILD >= 4670
+        mpcodecs_draw_slice (sh, source, src->linesize, width, height, 0, y);
+#else
         mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
+#endif
 }
+
 
 static int init_vo(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -389,7 +401,7 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
-	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
+	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
 #ifdef HAVE_XVMC
 	case PIX_FMT_XVMC: //ctx->best_csp=IMGFMT_XVMC_MPEG2;
 	   ctx->best_csp=sh->codec->outfmt[sh->outfmtidx];//!!maybe!!??
