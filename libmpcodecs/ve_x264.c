@@ -269,6 +269,7 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
     int i_nal;
     x264_nal_t *nal;
     int i;
+    int i_size = 0;
     
     int csp=mod->pic.img.i_csp;
     memset(&mod->pic, 0, sizeof(x264_picture_t));
@@ -285,7 +286,6 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
         return 0;
     }
     
-    int i_size = 0;
     for(i=0; i < i_nal; i++) {
         int i_data = mod->mux->buffer_size - i_size;
         i_size += x264_nal_encode(mod->mux->buffer + i_size, &i_data, 1, &nal[i]);
@@ -305,6 +305,8 @@ static void uninit(struct vf_instance_s *vf)
 }
 
 static int vf_open(vf_instance_t *vf, char *args) {
+    h264_module_t *mod;
+
     vf->config = config;
     vf->control = control;
     vf->query_format = query_format;
@@ -312,7 +314,7 @@ static int vf_open(vf_instance_t *vf, char *args) {
     vf->uninit = uninit;
     vf->priv = malloc(sizeof(h264_module_t));
 
-    h264_module_t *mod=(h264_module_t*)vf->priv;
+    mod=(h264_module_t*)vf->priv;
     mod->mux = (muxer_stream_t*)args;
     mod->mux->bih = malloc(sizeof(BITMAPINFOHEADER));
     memset(mod->mux->bih, 0, sizeof(BITMAPINFOHEADER));
