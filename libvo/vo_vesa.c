@@ -794,7 +794,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if(use_scaler || fs_mode)
 		{
 		      /* software scale */
-		      if(use_scaler > 1)
+		      if(use_scaler > 1
+#ifdef CONFIG_VIDIX
+				|| vidix_name
+#endif			  
+			  )
 		      {
 		        aspect_save_orig(width,height);
 			aspect_save_prescale(d_width,d_height);
