@@ -5,6 +5,7 @@
 #include "stream.h"
 #include "../m_option.h"
 #include "../m_struct.h"
+#include "../bswap.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -253,6 +254,11 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   int i;
   
   buf = paranoia_read(p->cdp,cdparanoia_callback);
+
+#ifdef WORDS_BIGENDIAN 
+  for(i=0;i<CD_FRAMESIZE_RAW/2;i++)
+          buf[i]=le2me_16(buf[i]);
+#endif
 
   p->sector++;
   s->pos = p->sector*CD_FRAMESIZE_RAW;
