@@ -147,9 +147,9 @@ A: It works only if running as root! It's a DGA limitation.
        'chmod 750 /usr/local/bin/mplayer'
        'chmod +s /usr/local/bin/mplayer'
    !!!! BUT STAY TUNED !!!!
-   This is a BIG security risk! Never do this on a server or on a computer
+   This is a *BIG* security risk! *NEVER* do this on a server or on a computer
    can be accessed by more people than only you because they can gain root
-   privilegies through suid root mplayer.
+   privilegies through suid root mplayer!!!
    !!!! SO YOU HAVE BEEN WARNED ... !!!!
 
 Q: The fsdga driver doesn't work with my xyz.avi file. Why is that?
@@ -172,3 +172,7 @@ Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
     ...
 A: Your driver is old, update it. The new driver also supports YUY2 required
    for DivX.
+
+Q: I've downloaded an ASF with asfrecorder, but MPlayer can't play it !
+A: There were/are some known issues with asfrecorder, and the ASF format is
+   a big crap itself. Please contact us, so the bug can be fixed.
