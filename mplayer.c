@@ -359,8 +359,8 @@ int f; // filedes
 int stream_type;
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
-int has_audio=1; // audio  0=no 1=mpeg 2=pcm 3=ac3 4=ACM 5=alaw 6=msgsm 7=DShow
-int has_video=1; // video  0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
+int has_audio=1;
+//int has_video=1;
 //
 int audio_format=0; // override
 #ifdef ALSA_TIMER
@@ -820,9 +820,9 @@ if(has_audio){
 
 if(has_audio){
   if(verbose) printf("Initializing audio codec...\n");
-  has_audio=init_audio(sh_audio);
-  if(!has_audio){
+  if(!init_audio(sh_audio)){
     printf("Couldn't initialize audio codec! -> nosound\n");
+    has_audio=0;
   } else {
     printf("AUDIO: samplerate=%d  channels=%d  bps=%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
   }
@@ -836,7 +836,7 @@ if(!sh_video->codec){
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
     exit(1);
 }
-has_video=sh_video->codec->driver;
+//has_video=sh_video->codec->driver;
 
 printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
@@ -850,7 +850,7 @@ if(i>=CODECS_MAX_OUTFMT){
 }
 sh_video->outfmtidx=i;
 
-switch(has_video){
+switch(sh_video->codec->driver){
  case 2: {
    if(!init_video_codec(out_fmt)) exit(1);
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
@@ -1176,7 +1176,7 @@ while(has_audio){
   // Update buffer if needed
   unsigned int t=GetTimer();
   current_module="decode_audio";   // Enter AUDIO decoder module
-  sh_audio->codec->driver=has_audio; // FIXME!
+  //sh_audio->codec->driver=has_audio; // FIXME!
   while(sh_audio->a_buffer_len<OUTBURST && !d_audio->eof){
     int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],sh_audio->a_buffer_size-sh_audio->a_buffer_len);
     if(ret>0) sh_audio->a_buffer_len+=ret; else break;
@@ -1260,7 +1260,7 @@ if(1)
     current_module="decode_video";
 
   //--------------------  Decode a frame: -----------------------
-switch(has_video){
+switch(sh_video->codec->driver){
   case 3: {
     // OpenDivX
     unsigned int t=GetTimer();
@@ -1764,7 +1764,7 @@ switch(file_format){
         
         current_module="resync_audio";
 
-        switch(has_audio){
+        switch(sh_audio->codec->driver){
         case 1:
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
@@ -1789,7 +1789,7 @@ switch(file_format){
           
           } else {
             while(d_video->pts > d_audio->pts){
-              switch(has_audio){
+              switch(sh_audio->codec->driver){
                 case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
                 case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
                 default: ds_fill_buffer(d_audio);  // skip PCM frame
