@@ -235,31 +235,30 @@
 
 <H4><A NAME="gif">2.1.1.15 GIF files</A></H4>
 
-<P>The <B>GIF</B> format is a common format for web graphics.  There are two
-  versions of the GIF spec, GIF87a and GIF89a.  The main difference is that
-  GIF89a allows for animation.  MPlayer supports both formats through use
-  of libungif or another libgif-compatible library.  Non-animated GIFs will
-  be displayed as single frame videos.  (Use the <CODE>-loop</CODE> and
+<P>The <B>GIF</B> format is a common format for web graphics. There are two
+  versions of the GIF spec, GIF87a and GIF89a. The main difference is that
+  GIF89a allows for animation. MPlayer supports both formats through use
+  of libungif or another libgif-compatible library. Non-animated GIFs will
+  be displayed as single frame videos. (Use the <CODE>-loop</CODE> and
   <CODE>-fixed-vo</CODE> options to display these longer.)</P>
 
-<P>MPlayer currently does not support seeking in GIF files.  GIF files do
-  not necessarily have a fixed frame size, nor a fixed framerate.  Rather,
-  each frame is of independant size and is supposed to be positioned in a
-  certain place on a field of fixed-size.  The framerate is controlled by
-  an optional block before each frame that specifies a next frame's delay
+<P>MPlayer currently does not support seeking in GIF files. GIF files do
+  not necessarily have a fixed frame size, nor a fixed framerate. Rather,
+  each frame is of independent size and is supposed to be positioned in a
+  certain place on a field of fixed-size. The framerate is controlled by
+  an optional block before each frame that specifies the next frame's delay
   in centiseconds.</P>
 
 <P>Standard GIF files contain 24-bit RGB frames with at most an 8-bit
-  indexed pallete.  These frames are usually LZW-compressed, although
+  indexed pallete. These frames are usually LZW-compressed, although
   some GIF encoders produce uncompressed frames to avoid patent issues
   with LZW compression.</P>
   
-<P>Though many common Linux distributions come with libungif, you can
-  download a copy from the following address:
-  <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml</A></P>
+<P>If your distribution does not come with libungif, download a copy from the
+  <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">libungif homepage</A>.
+  For detailed technical information, have a look at the
+  <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specification</A>.</P>
 
-<P>The GIF specification can be downloaded from the following address:
-  <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">http://www.w3.org/Graphics/GIF/spec-gif89a.txt</A></P>
 
 <H3><A NAME="audio_formats">2.1.2 Audio formats</A></H3>
 
