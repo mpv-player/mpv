@@ -172,7 +172,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
     OSErr cres;
     long framesizemax;
-    UInt8 similarity;
+    UInt8 similarity=0;
     long compressedsize;
     int in_format=kYUVSPixelFormat;
     int width = mpi->width;
@@ -216,6 +216,7 @@ if(!codec_inited){
        &framesizemax );
     printf("GetMaxCompressionSize returned:%i : MaxSize:%i\n",cres&0xFFFF,framesizemax);
     frame_comp=malloc(framesizemax);
+
     desc = (ImageDescriptionHandle)NewHandleClear(MAX_IDSIZE); //memory where the desc will be stored
     (*desc)->idSize=MAX_IDSIZE;
 
@@ -230,7 +231,7 @@ if(!codec_inited){
        compressor,  // codec component
        codecNormalQuality, //codecNormalQuality,
        codecMaxQuality, //codecNormalQuality,
-       10*25, // keyframe rate
+       10*30, // keyframe rate
        0,
        0,
        desc);
@@ -251,11 +252,11 @@ if(!codec_inited){
         0);
 
     if(cres&0xFFFF)printf("CompressSequenceFrame returned:%i\n",cres&0xFFFF);
-    printf("Size %i->%i   \n",stride*height,compressedsize);
 #if 0
+    printf("Size %i->%i   \n",stride*height,compressedsize);
     printf("Ratio: %i:1\n",(stride*height)/compressedsize);
 #endif
-    mencoder_write_chunk(mux_v, compressedsize , 0x10);
+    mencoder_write_chunk(mux_v, compressedsize , similarity?0:0x10);
 
     if(((*desc)->idSize)>MAX_IDSIZE){
 	printf("FATAL! idSize=%d too big, increase MAX_IDSIZE in ve_qtvideo.c!\n",((*desc)->idSize));
