@@ -361,9 +361,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 #ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-  {
+  if(use_gui)
+    guiGetEvent( guiSetShVideo,0 ); // let the GUI to setup/resize our window
+  else
 #endif
+  {
    hint.x = 0;
    hint.y = 0;
    hint.width = d_width;
@@ -453,9 +455,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
       XSetInputFocus(mDisplay, vo_window, RevertToNone, CurrentTime);
      }
 #endif
-#ifdef HAVE_NEW_GUI
-  } else if(use_gui) guiGetEvent( guiSetShVideo,0 );
-#endif
+  }
 
      mp_msg(MSGT_VO,MSGL_V, "using Xvideo port %d for hw scaling\n",xv_port );
        

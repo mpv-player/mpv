@@ -250,10 +250,13 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
   inited=1;
 
  aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
+
 #ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-  {
+  if(use_gui)
+    guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
+  else
 #endif
+  {
    if ( vo_fs )
     {
      vo_dwidth=vo_screenwidth;
@@ -298,9 +301,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
    vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
-#ifdef HAVE_NEW_GUI
-  } else if(use_gui) guiGetEvent( guiSetShVideo,0 );
-#endif
+  }
 
  set_window();
 
