@@ -244,6 +244,7 @@ int demux_open_lavf(demuxer_t *demuxer){
     }
     
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
+    mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
     if(!priv->audio_streams) demuxer->audio->id=-2;  // nosound
 //    else if(best_audio > 0 && demuxer->audio->id == -1) demuxer->audio->id=best_audio;
     if(!priv->video_streams){
