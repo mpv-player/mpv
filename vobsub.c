@@ -82,7 +82,13 @@ rar_open(const char *const filename, const char *const mode)
 	    strcpy(rar_filename, filename);
 	    strcat(rar_filename, ".rar");
 	}
-	rc = urarlib_get(&stream->data, &stream->size, (char*) filename, rar_filename, "");
+	/* get rid of the path if there is any */
+	if ((p = strrchr(filename, '/')) == NULL) {
+		p = filename;
+	} else {
+		p++;
+	}
+	rc = urarlib_get(&stream->data, &stream->size, (char*) p, rar_filename, "");
 	free(rar_filename);
 	if (!rc) {
 	    free(stream);
