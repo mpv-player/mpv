@@ -261,6 +261,7 @@ float sub_fps=0;
 int   sub_auto = 1;
 char *vobsub_name=NULL;
 /*DSP!!char *dsp=NULL;*/
+int   subcc_enabled=0;
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;

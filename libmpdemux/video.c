@@ -19,6 +19,9 @@
 #include "parse_es.h"
 #include "mpeg_hdr.h"
 
+/* sub_cc (closed captions)*/
+#include "../sub_cc.h"
+
 /* biCompression constant */
 #define BI_RGB        0L
 
@@ -184,11 +187,19 @@ return 1;
 
 static void process_userdata(unsigned char* buf,int len){
     int i;
+    if(!memcmp(buf,"CC",2)) /* if the user data starts with "CC", assume it is a CC info packet */
+    {
+    	if(verbose)printf("video.c: process_userdata() detected Closed Captions!\n");
+	if(subcc_enabled) subcc_process_data(buf+2,len-2);
+    }
+    if(verbose)
+    {
     printf( "user_data: len=%3d  %02X %02X %02X %02X '",
 	    len, buf[0], buf[1], buf[2], buf[3]);
     for(i=0;i<len;i++)
 	if(buf[i]>=32 && buf[i]<127) putchar(buf[i]);
     printf("'\n");
+    }
 }
 
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps){
@@ -234,7 +245,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	  switch(i){
 	      case 0x1B3: mp_header_process_sequence_header (&picture, &videobuffer[start]);break;
 	      case 0x1B5: mp_header_process_extension (&picture, &videobuffer[start]);break;
-	      case 0x1B2: if(verbose) process_userdata (&videobuffer[start], videobuf_len-start);break;
+	      case 0x1B2: process_userdata (&videobuffer[start], videobuf_len-start);break;
 	  }
         }
         

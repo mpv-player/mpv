@@ -171,6 +171,7 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 0;
+int   subcc_enabled=0;
 
 #ifdef USE_SUB
 static subtitle* subtitles=NULL;
