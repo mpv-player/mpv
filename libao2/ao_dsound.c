@@ -115,6 +115,9 @@ static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stre
 static int buffer_size = 0;               ///size in bytes of the direct sound buffer   
 static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
 static int min_free_space = 0;            ///if the free space is below this value get_space() will return 0
+                                          ///there will always be at least this amout of free space to prevent
+                                          ///get_space() from returning wrong values when buffer is 100% full.
+                                          ///will be replaced with nBlockAlign in init()
 static int device_num = 0;                ///wanted device number
 static GUID device;                       ///guid of the device 
 
@@ -482,6 +485,7 @@ static int init(int rate, int channels, int format, int flags)
 	dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
 	buffer_size = dsbdesc.dwBufferBytes;
 	write_offset = 0;
+	min_free_space = wformat.Format.nBlockAlign;
 	ao_data.outburst = wformat.Format.nBlockAlign * 512;
 
 	// create primary buffer and set its format
@@ -579,7 +583,7 @@ static int get_space()
 	// write_offset is the postion where we actually write the data to
 	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
 	if(space < min_free_space)return 0;
-	return space;
+	return space-min_free_space;
 }
 
 /**
