@@ -343,6 +343,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     if(out_fmt==IMGFMT_I420) break;
     if(out_fmt==IMGFMT_IYUV) break;
     if(out_fmt==IMGFMT_YUY2) break;
+    if(out_fmt==IMGFMT_UYVY) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_VOincompCodec);
