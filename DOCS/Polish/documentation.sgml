@@ -19,7 +19,7 @@ MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
  <name>t³umaczenie i migracja do linuxdoc Dariush Pietrzak<tt/&lt;eyck@ghost.anime.pl/&gt;
        <newline></name>
 </author>
-<date> miejsce na ID jak wejdzie do cvsa$Id$</date>
+<date>$Id$</date>
 
 <abstract>
 Dokument ten opisuje odgrywarke MPlayer, dokument jest w fazie testów.
@@ -191,8 +191,132 @@ niego obs³ugê.
 
 
 <sect1>
- <heading> </>
+ <heading>Obs³ugiwane wyj¶cia video </>
 <p>
+
+Ogólne:
+<itemize>
+<item>x11:	X11 z opcjonalnym rozszerzeniem SHM
+<item>xv:	X11 u¿ywaj±ce rozszerzenia XVideo (sprzêtowe YUV oraz skalowanie)
+<item>gl:	renderer OpenGL, jak do tej pory dzia³a jedynie z:
+	<itemize>
+	<item>wszystkie karty z Utah-GLX
+	<item>Karty Matroxa z X/DRI >=4.0.3
+	<item>Radeon z X/DRI CVS
+	</itemize>
+<item>dga:	rozszerzenie X11 DGA 
+<item>fbdev:Wyj¶cie na framebuffer
+<item>svga: Wyj¶cie do SVGAlib
+<item>sdl:	1.1.7 : osb³uguje softwarowe skalowanie
+	1.1.8 : obs³uguje Xvideo (sprzêtowe skalowanie/fullscreen)
+	1.2.0 : obs³uguje aalib (tryb textowy!)
+<item>ggi: podobne do SDL
+</itemize>
+Specyficzne dla kart:
+<itemize>
+<item>mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
+<item>xmga:	Matrox G200/G400 overlay (mga_vid) in X11 window
+	(Xv emulation on X 3.3.x !)
+<item>syncfb: Matrox G400 YUV support on framebuffer (obsoleted, use mga/xmga)
+<item>3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
+</itemize>
+
+Specjalne:
+<itemize>
+<item>png:  PNG files output (use -z switch to set compression)
+<item>pgm:	PGM files output (for testing purposes or ffmpeg encoding)
+<item>md5:	MD5sum output (for MPEG conformance tests)
+<item>odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
+<item>null:	Null output (for speed tests/benchmarking)
+</itemize>
+
+UWAGA: sprawd¼ DOCS/VIDEOCARDS po szczególy i wymagania!
+</p>
+</sect1>
+
+<sect1>
+ <heading>Obs³ugiwane urz±dzenia audio </>
+<p>
+
+<itemize>
+<item>OSS (ioctl) driver
+<item>SDL driver (supports up/downsampling, esd, arts etc)
+<item>native ALSA 0.5 driver
+<item>native ALSA 0.9 driver (buggy, use OSS emulation!)
+<item>native ESD driver (under development?)
+<item>SUN audio driver (/dev/audio) for BSD and Solaris8 users
+</itemize>
+UWAGA: sprawd¼ DOCS/SOUNDCARDS po szczególy!
+
+</p>
+</sect1>
+<sect1>
+ <heading>Prêdko¶æ </>
+<p>
+Wiêkszo¶æ krytycznych czê¶ci jest optymalizowana dla MMX/MMXext/SSE/3DNow!/3DNow!Ex.
+Mo¿esz poprawiæ prêdko¶æ rednerowania ustawiaj±æ rejestry MTRR, patrz dokumentacja w MTRR.
+*Stare* benchmarki mo¿na znale¼æ w pliku DOCS/SPEED
+</p>
+</sect1>
+</sect>
+
+
+<sect>
+<heading> U¿ytkowanie </>
+
+<p>
+<verb>
+  plik:  mplayer [options] [path/]filename
+  VCD:   mplayer [options] -vcd trackno /dev/cdrom
+  DVD:   mplayer [options] -dvdauth /dev/dvd filename.VOB
+  sieæ:   mplayer [options] http://site.com/file.[mpg|avi]
+</verb>
+</p>
+<sect1>
+ <heading>Opcje </>
+<p>
+<verb>
+    patrz  `mplayer -h'  dla opcji
+    patrz  `mplayer -vo help'  by zobaczyæ listê dostêpnych urz±dzeñ video
+    patrz  `mplayer -ao help'  by zobaczyæ listê dostêpnych urz±dzeñ audio
+</verb>
+</p>
+</sect1>
+
+<sect1>
+ <heading>Klawisze </>
+<p>
+<verb>
+    &lt;-  lub  -&gt;      wyszukiwanie wprzód/wstecz o 10 sekund
+    up lub down      seek backward/forward 1 minute
+    p lub SPACE      pause movie (press any key to continue)
+    q  lub  ^C       stop playing and quit program
+    o               toggle OSD : none / seek / seek+timer
+    /  oraz *        decrease/increase volume
+    m               toggle using master/pcm channel for volume setting
+    f               toggle fullscreen (only with -vo sdl)
+
+</verb>
+
+</p>
+</sect1>
+<sect1>
+ <heading>Przyk³ady </>
+<p>
+<tscreen><verb>
+    mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
+    mplayer -vcd 2 /dev/cdrom
+    mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
+    mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
+    mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
+</verb></tscreen>
+
+<bf>
+  Uwaga: aby u¿yæ urz±dzenia YUV Matroxa (-vo mga or xmga), bêdziesz najpierw musia³
+         za³adowaæ sterownik do kernela: patrz DOCS/VIDEOCARDS .
+</bf>
+
+
 </p>
 </sect1>
 
@@ -207,6 +331,8 @@ niego obs³ugê.
 </p>
 </sect1>
 </sect>
+
+
 
 
 </article>
