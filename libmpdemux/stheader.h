@@ -71,3 +71,5 @@ typedef struct {
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id);
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id);
 
+int video_read_properties(sh_video_t *sh_video);
+int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps);

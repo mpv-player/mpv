@@ -408,11 +408,14 @@ switch(sh_video->codec->driver){
 
  case VFM_MPEG: {
    // init libmpeg2:
+   mpeg2_init();
 #ifdef MPEG12_POSTPROC
    picture->pp_options=divx_quality;
 #else
    if(divx_quality) mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_MpegPPhint);
 #endif
+   // send seq header to the decoder:
+   mpeg2_decode_data(NULL,videobuffer,videobuffer+videobuf_len,0);
    mpeg2_allocate_image_buffers (picture);
    break;
  }
@@ -707,119 +710,4 @@ case 2:
 
   return blit_frame;
 }
-
-
-int video_read_properties(sh_video_t *sh_video){
-demux_stream_t *d_video=sh_video->ds;
-
-// Determine image properties:
-switch(d_video->demuxer->file_format){
- case DEMUXER_TYPE_AVI:
- case DEMUXER_TYPE_ASF: {
-  // display info:
-    sh_video->format=sh_video->bih->biCompression;
-    sh_video->disp_w=sh_video->bih->biWidth;
-    sh_video->disp_h=abs(sh_video->bih->biHeight);
-  break;
- }
- case DEMUXER_TYPE_MPEG_ES:
- case DEMUXER_TYPE_MPEG_PS: {
-   // Find sequence_header first:
-   videobuf_len=0; videobuf_code_len=0;
-   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence header... ");fflush(stdout);
-   while(1){
-      int i=sync_video_packet(d_video);
-      if(i==0x1B3) break; // found it!
-      if(!i || !skip_video_packet(d_video)){
-        if(verbose)  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MpegNoSequHdr);
-	return 0;
-      }
-   }
-   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
-//   sh_video=d_video->sh;sh_video->ds=d_video;
-   mpeg2_init();
-   // ========= Read & process sequence header & extension ============
-   if(!videobuffer) videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE);
-   if(!videobuffer){ 
-     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
-     return 0;
-   }
-   
-   if(!read_video_packet(d_video)){ 
-     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdr);
-     return 0;
-   }
-   if(header_process_sequence_header (picture, &videobuffer[4])) {
-     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdr); 
-     return 0;
-   }
-   if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
-//    videobuf_len=0;
-    int pos=videobuf_len;
-    if(!read_video_packet(d_video)){ 
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdrEx);
-      return 0;
-    }
-    if(header_process_extension (picture, &videobuffer[pos+4])) {
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdrEx);
-      return 0;
-    }
-   }
-   // fill aspect info:
-   switch(picture->aspect_ratio_information){
-     case 2:  // PAL/NTSC SVCD/DVD 4:3
-     case 8:  // PAL VCD 4:3
-     case 12: // NTSC VCD 4:3
-       sh_video->aspect=4.0/3.0;
-     break;
-     case 3:  // PAL/NTSC Widescreen SVCD/DVD 16:9
-       sh_video->aspect=16.0/9.0;
-     break;
-     default:
-       fprintf(stderr,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
-               "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
-               "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
-               " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
-               picture->aspect_ratio_information);
-     case 1:  // VGA 1:1 - do not prescale
-       sh_video->aspect=0.0;
-     break;
-   }
-   // display info:
-   sh_video->format=picture->mpeg1?0x10000001:0x10000002; // mpeg video
-   sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-   if(!sh_video->fps){
-//     if(!force_fps){
-//       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
-//       return 0;
-//     }
-     sh_video->frametime=0;
-   } else {
-     sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
-   }
-   sh_video->disp_w=picture->display_picture_width;
-   sh_video->disp_h=picture->display_picture_height;
-   // bitrate:
-   if(picture->bitrate!=0x3FFFF) // unspecified/VBR ?
-       sh_video->i_bps=1000*picture->bitrate/16;
-   // info:
-   mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
-   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    picture->mpeg1?"MPEG1":"MPEG2",
-    sh_video->disp_w,sh_video->disp_h,
-    picture->aspect_ratio_information,
-    sh_video->fps,
-    picture->bitrate*0.5f,
-    picture->bitrate/16.0f );
-  break;
- }
-} // switch(file_format)
-
-return 1;
-}
-
-
-
-
 

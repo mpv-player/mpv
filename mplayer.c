@@ -100,6 +100,7 @@ static int max_framesize=0;
 #include "dec_audio.h"
 #include "dec_video.h"
 
+#if 0
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
 int frameratecode2framerate[16] = {
@@ -109,6 +110,7 @@ int frameratecode2framerate[16] = {
   // libmpeg3's "Unofficial economy rates":
   1*10000,5*10000,10*10000,12*10000,15*10000,0,0
 };
+#endif
 
 //**************************************************************************//
 //**************************************************************************//
@@ -1097,7 +1099,7 @@ InitTimer();
 total_time_usage_start=GetTimer();
 
 while(!eof){
-    unsigned int aq_total_time=GetTimer();
+//    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
 
     if(play_n_frames>=0){
@@ -1167,88 +1169,26 @@ cvideo_base_vtime=video_time_usage;
 if(1)
   while(1){
   
-    float frame_time=1;
-    float pts1=d_video->pts;
+    float frame_time=0;
     int blit_frame=0;
-
-    current_module="decode_video";
     
-  //--------------------  Decode a frame: -----------------------
-
-  vdecode_time=video_time_usage;
-
-  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS){
-        int in_frame=0;
-        float newfps;
-        //videobuf_len=0;
-        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
-          int i=sync_video_packet(d_video);
-	  void* buffer=&videobuffer[videobuf_len+4];
-          if(in_frame){
-            if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
-#if 1
-              // send END OF FRAME code:
-              videobuffer[videobuf_len+0]=0;
-              videobuffer[videobuf_len+1]=0;
-              videobuffer[videobuf_len+2]=1;
-              videobuffer[videobuf_len+3]=0xFF;
-              videobuf_len+=4;
-#endif
-              if(!i) eof=2; // EOF
-              break;
-            }
-          } else {
-            //if(i==0x100) in_frame=1; // picture startcode
-            if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
-            else if(!i){ eof=3; break;} // EOF
-          }
-	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
-          if(!read_video_packet(d_video)){ eof=4; break;} // EOF
-          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
-	  if(sh_video->codec->driver!=VFM_MPEG){
-	    // if not libmpeg2:
-	    switch(i){
-	      case 0x1B3: header_process_sequence_header (picture, buffer);break;
-	      case 0x1B5: header_process_extension (picture, buffer);break;
-	    }
-	  }
-        }
-        
-        if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
-        //printf("--- SEND %d bytes\n",videobuf_len);
-	if(grab_frames==1){
-	      FILE *f=fopen("grab.mpg","ab");
-	      fwrite(videobuffer,videobuf_len-4,1,f);
-	      fclose(f);
-	}
-
-    blit_frame=decode_video(video_out,sh_video,videobuffer,videobuf_len,drop_frame);
-
-    // get mpeg fps:
-    newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-    if(ABS(sh_video->fps-newfps)>0.01f) if(!force_fps){
-            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,newfps,sh_video->fps-newfps,picture->frame_rate_code);
-            sh_video->fps=newfps;
-            sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
+    //--------------------  Decode a frame: -----------------------
+    vdecode_time=video_time_usage;
+    {   unsigned char* start=NULL;
+	int in_size;
+	// get it!
+	current_module="video_read_frame";
+        in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
+	if(in_size<0){ eof=1; break; }
+	if(in_size>max_framesize) max_framesize=in_size; // stats
+	// decode:
+	current_module="decode_video";
+//	printf("Decode! %p  %d  \n",start,in_size);
+	blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
     }
-
-    // fix mpeg2 frametime:
-    frame_time=(picture->display_time)*0.01f;
-    picture->display_time=100;
-    videobuf_len=0;
-
-  } else {
-      // frame-based file formats: (AVI,ASF,MOV)
-    unsigned char* start=NULL;
-    int in_size=ds_get_packet(d_video,&start);
-    if(in_size<0){ eof=5;break;}
-    if(in_size>max_framesize) max_framesize=in_size;
-    blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
-  }
-
-  vdecode_time=video_time_usage-vdecode_time;
-
-//------------------------ frame decoded. --------------------
+    vdecode_time=video_time_usage-vdecode_time;
+    //------------------------ frame decoded. --------------------
+    
 //------------------------ add OSD to frame contents ---------
 #ifndef USE_LIBVO2
     current_module="draw_osd";
@@ -1257,32 +1197,9 @@ if(1)
 
     current_module="av_sync";
 
-    // Increase video timers:
-    sh_video->num_frames+=frame_time;
-    ++sh_video->num_frames_decoded;
-    frame_time*=sh_video->frametime;
-    if(demuxer->file_format==DEMUXER_TYPE_ASF && !force_fps){
-        // .ASF files has no fixed FPS - just frame durations!
-        float d=d_video->pts-pts1;
-        if(d>=0 && d<5) frame_time=d;
-        if(d>0){
-          if(verbose)
-            if((int)sh_video->fps==1000)
-              mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\rASF framerate: %d fps             \n",(int)(1.0f/d));
-          sh_video->frametime=d; // 1ms
-          sh_video->fps=1.0f/d;
-        }
-    } else
-    if(demuxer->file_format==DEMUXER_TYPE_MOV && !force_fps){
-        // .MOV files has no fixed FPS - just frame durations!
-        float d=d_video->pts-pts1;
-	frame_time=d;
-    }
     sh_video->timer+=frame_time;
     time_frame+=frame_time;  // for nosound
 
-    if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
-    
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
 
     if(drop_frame){
@@ -1302,9 +1219,7 @@ if(1)
 	  }
       }
 #ifdef HAVE_NEW_GUI
-      if(use_gui){
-	EventHandling();
-      }
+      if(use_gui) EventHandling();
 #endif
       video_out->check_events(); // check events AST
     } else {
