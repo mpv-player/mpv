@@ -185,6 +185,8 @@
     <A HREF="http://xanim.va.pubnix.com">XAnim honlapjáról</A>.
     A <B>3ivx</B> codec-et nem találod meg ott, így azt töltsd le a
     <A HREF="http://www.3ivx.com">3ivx honlapjáról</A>.</LI>
+  <LI>a codec csomag letölthetõ az <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">MPlayer codec-ek</A>
+    lapjáról.</LI>
   <LI>a <CODE>--with-xanimlibdir</CODE> opcióval mondd meg a configure-nak hogy
     hol vannak az xanim codec-ek. Magától az
     <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods, /usr/lib/xanim</CODE>
@@ -233,6 +235,7 @@ lehetséges.</P>
 <H4><A NAME=cinepak>2.2.1.7  Cinepak CVID</A></H4>
 
 <P>Az <B>MPlayer</B> a saját nyílt forrású, többplatformos Cinepak dekóderét
+  (<A HREF="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</A> munkája)
   használja Cinepak filmekhez. Ez a dekóder támogatja a YUV kimenetet, így a
   hardveres gyorsítást is ha az adott video kimeneti meghajtó lehetõvé teszi
   azt.</P>
@@ -254,12 +257,13 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   configure-nak a helyet a <CODE>--with-reallibdir</CODE> opcióval.</P
 
 <P><B>Megj.:</B> a RealPlayer könyvtárak jelenleg csak <B>Linux, FreeBSD,
-  NetBSD és Cygwin rendszereken mûködnek, x86 és Alpha platformokon.</B></P>
+  NetBSD és Cygwin rendszereken mûködnek, x86, Alpha, és PowerPC
+  platformokon (csak a Linux/Alpha és Linux/PowerPC van tesztelve).</B></P>
 
 
 <H4><A NAME=xvid>2.2.1.9  XViD</A></H4>
 
-<P>Az <B>XViD</B> az OpenDivX kód továbbfejlesztése. 2001 áprilisában
+<P>Az <A HREF="http://www.xvid.org">XViD</A> az OpenDivX kód továbbfejlesztése. 2001 áprilisában
   az OpenDivX-et fejlesztõ ProjectMayo úgy döntött hogy zárt forrásúvá
   teszi a codec-et, és DivX4 néven készíti tovább. A nekik "bedolgozók"
   erre a lépésre úgy döntöttek, hogy majd õk folytatják (nyitottan) az
@@ -278,7 +282,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 <P><B>Hátrányai</B>:</P>
 <UL>
   <LI>jelenleg nem minden DivX/DivX4 file-t <B>dekódol</B> helyesen
-    (de kit érdekel. A libavcodec kenterbe ver mindent.)</LI>
+    (de kit érdekel. A <A HREF="#libavcodec">libavcodec</A> kenterbe ver mindent.)</LI>
   <LI>nem lehet egyszerre DivX4 <B>ÉS</B> XViD támogatással fordítani
     az <B>MPlayer</B>-t. Ezt fordításkor kell eldönteni.</LI>
   <LI>fejlesztés alatt</LI>
