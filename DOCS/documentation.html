@@ -198,7 +198,8 @@
       <LI><A HREF="#tv">2.5 TV input</A>
         <UL>
           <LI><A HREF="#tv_compilation">2.5.1 Compilation</A></LI>
-          <LI><A HREF="#tv_examples">2.5.2 Examples</A></LI>
+          <LI><A HREF="#tv_tips">2.5.2 Usage tips</A></LI>
+          <LI><A HREF="#tv_examples">2.5.3 Examples</A></LI>
         </UL>
       </LI>
     </UL>
@@ -942,10 +943,6 @@ It's a clear way for everyone to become root.
 TV tuner</B>. See the man page for a description of TV options and keyboard
 controls.</P>
 
-<P><B>THIS CODE IS CURRENTLY NOT BEING WORKED ON! Do not expect it to work
-  without tweaking/experimenting!</B></P>
-
-
 <H3><A NAME="tv_compilation">2.5.1 Compilation</A></H3>
 
 <OL>
@@ -957,28 +954,127 @@ controls.</P>
     xawtv.</LI>
 </OL>
 
-<BLOCKQUOTE>
-  <B>Hint</B><BR>
-  Are the colors messed up? Then your tuner cannot display
-  in YV12 colorspace. Try I420 (<CODE>-vc rawi420</CODE>) or YUY2, UYVY, RGB32
-  (<CODE>-vo sdl</CODE>) colorspaces.
-  You can specify these with the <CODE>outfmt=YV12</CODE> option, see below.
-</BLOCKQUOTE>
+<H3><A NAME="tv_tips">2.5.2 Usage tips</A></H3>
 
+The full listing of the options is available on the manual page. Here
+are just a few tips:
 
-<H3><A NAME="tv_examples">2.5.2 Examples</A></H3>
+<UL>
+
+<LI>
+Choose some sane image dimensions. The dimensions of the resulting
+image should be divisible by 16.
+</LI>
+
+<LI>If you capture the video with the vertical resolution higher than
+half of the full resolution (i.e. 288 for PAL or 240 for NTSC), make
+sure you turned deinterlacing on. Otherwise you'll get a movie which
+is distorted during fast-motion scenes and the bitrate controller will
+be probably even unable to retain the specified bitrate as the
+interlacing artifacts produce high amount of detail and thus consume
+lot of bandwidth. You can enable deinterlacing with <CODE>-vop
+pp=DEINT_TYPE</CODE>. Usually <CODE>pp=lb</CODE> does a good
+job, but it can be matter of personal preference. See other
+deinterlacing algorithms in the manual and give it a try.</LI>
+
+<LI>
+Crop out the dead space. When you capture the video, the areas at the
+edges are usually black or contain some noise. These again consume
+lots of unnecessary bandwidth. More precisely it's not the black
+areas themselves but the sharp transitions between the black and the
+brighter video image which do but that's not important for now. Before
+you start capturing, adjust the arguments of the <CODE>crop</CODE>
+option so that all the crap at the margins is cropped out. Again,
+don't forget to keep the resulting dimensions sane.
+</LI>
+
+<LI>
+Watch out for CPU load. It shouldn't cross the 90% boundary for most
+of the time. If you have a large capture buffer, MEncoder can survive
+an overload for few seconds but nothing more. It's better to turn off
+the 3D OpenGL screensavers and similar stuff.
+</LI>
+
+<LI>
+Don't mess with the system clock. MEncoder uses the system clock for
+doing A/V sync. If you adjust the system clock (especially backwards
+in time), MEncoder gets confused and you will lose frames. This is an
+important issue if you are hooked to a network and run some time
+synchronization software like NTP. You have to turn NTP off during the
+capture process if you want to capture reliably.
+</LI>
+
+<LI>
+Don't change the <CODE>outfmt</CODE> unless you know what you are
+doing or your card/driver really doesn't support the default (YV12
+colorspace) . In the older versions of MPlayer/MEncoder it was necessary
+to specify the output format. This issue should be fixed in the
+current releases and <CODE>outfmt</CODE> isn't required anymore, and
+the default suits the most purposes. For example, if you are capturing
+into DivX using libavcodec and specify <CODE>outfmt=RGB24</CODE> in
+order to increase the quality of the captured images, the captured
+image will be actually later converted back into YV12 so the only
+thing you achieve is a massive waste of CPU power.
+</LI>
+
+<LI>
+To specify the I420 colorspace (<CODE>outfmt=i420</CODE>), you have to
+add an option <CODE>-vc rawi420</CODE> due to a fourcc conflict with
+an Intel Indeo video codec.
+</LI>
+
+<LI>
+If MEncoder cannot open the audio device, make sure that it is really
+available. There can be some trouble with the sound servers like arts
+(KDE) or esd (GNOME). If you have a full duplex soundcard (almost any
+decent card supports it today), and you are using KDE, try to check
+the "full duplex" option in the sound server preference menu.
+</LI>
+
+</UL>
+
+<H3><A NAME="tv_examples">2.5.3 Examples</A></H3>
 
 <P>Dummy output, to AAlib :)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
   <BR>
   Input from standard V4L<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv
+on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
+  <BR>
 
-<P><B>Note:</B><BR>
-  If you have a TV card with an external audio device and get only a black
-  screen, although input works with xawtv or similar, then try to use the
-  <CODE>-noaudio</CODE> option. For the example above this would be:<BR> 
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE></P>
+  A more sophisticated example. This makes MEncoder capture the full
+  PAL image, crop the margins, and deinterlace the picture using
+  a linear blend algorithm. Audio is compressed with a constant
+  bitrate of 64kbps, using LAME codec. This setup is suitable for
+  capturing movies.<BR> <CODE> &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv
+  on:driver=v4l:width=768:height=576 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts
+  vcodec=mpeg4:vbitrate=900 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-oac
+  mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vop
+  pp=lb,crop=720:540:24:18 -o output.avi </CODE><BR>
+
+  <BR>
+  This will additionally rescale the image to 384x288 and compresses
+  the video with the bitrate of 350kbps in high quality mode. The
+  vqmax option looses the quantizer and allows the video compressor to
+  actualy reach so low bitrate even at the expense of the
+  quality. This can be used for capturing long TV series, where the
+  video quality isn't so important.<BR>
+  <CODE>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi
+  </CODE><BR>
+
+  It's also possible to specify smaller image dimensions in the
+  <CODE>-tv</CODE> option and omit the software scaling but this
+  approach uses the maximum available information and is a little more
+  resistant to noise. The bt8x8 chips can do the pixel averaging only
+  in the horizontal direction due to a hardware limitation.
+
+</P>
 
 
 
