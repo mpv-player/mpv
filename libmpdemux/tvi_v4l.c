@@ -1377,7 +1377,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     interval = (double)priv->video_timebuffer[priv->video_head]*1e-6;
     memcpy(buffer, priv->video_ringbuffer[priv->video_head], len);
     priv->video_cnt--;
-    priv->video_head = (++priv->video_head)%priv->video_buffer_size_current;
+    priv->video_head = (priv->video_head+1)%priv->video_buffer_size_current;
     pthread_mutex_unlock(&priv->video_buffer_mutex);
     return interval;
 }
@@ -1447,7 +1447,7 @@ static void *audio_grabber(void *data)
 	    mp_msg(MSGT_TV, MSGL_ERR, "\ntoo bad - dropping audio frame !\n");
 	    priv->audio_drop++;
 	} else {
-	    priv->audio_tail = (++priv->audio_tail) % priv->audio_buffer_size;
+	    priv->audio_tail = (priv->audio_tail+1) % priv->audio_buffer_size;
 	    priv->audio_cnt++;
 	}
     }
@@ -1471,7 +1471,7 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 	usleep(10000);
     }
     memcpy(buffer, priv->audio_ringbuffer+priv->audio_head*priv->audio_in.blocksize, len);
-    priv->audio_head = (++priv->audio_head) % priv->audio_buffer_size;
+    priv->audio_head = (priv->audio_head+1) % priv->audio_buffer_size;
     priv->audio_cnt--;
     priv->audio_sent_blocks_total++;
     return (double)priv->audio_sent_blocks_total*priv->audio_secs_per_block;
