@@ -5,29 +5,18 @@ TODO:
 FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
+AVI demuxer:
+- fix AVI index offset base position handling ('no video steram found' bug)
+- implement hardcore bruteforce avi re-sync for broken files (-forceidx)
+- fix for growing avi files (movi_end pos > stream->end_pos)
+- implement forward seeking in indexed avi streams
+
 URGENT:
-- prebuffering to cache2 (req. for MMS) - URGENT!
-- mencoder: implement VBR audio copy
-- mencoder: Estimated Size and Time
-
-decoders:
-- fix cvid on ppc
-- getting mss1 (Windows Screen Video) DLL codec working... - kabi
-- getting PIM1 codec (DLL) working... - kabi
-- getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
-- optimize liba52 (downmix.c in 3dnow, imdct 3dnowex runtime detection?)
-      i dont have a 3dnow(ex) cpu so i dont want to do it (michael)
-- fix seeking with libmad audio codec (codec lost sync and can't resync?)
-
-mencoder:
-- mencoder: image cut/crop/extend filter
-- add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
-- add a endpoint for encoding, like above
-- finish 3-pass encoding (audio, video1, video2)
-- add win32 encoders support
-
-other:
-- fix DVB a-v sync problems, switch to mp1e
+- finish mencoder -ovc vfw (bitrate setting, codec selection etc)
+- mencoder: image cut/crop/extend filter, colorspace conversion
+- codec priority option
+- implement software scaling to vo_mpegpes
+- ./configure support for XviD
 
 runtime:
 - add --enable-runtime or something (should change VERSION header and enable
@@ -36,19 +25,22 @@ runtime:
      vo_dga.c (asm stuff may be removed and replaced by fastmemcpy?)
      libac3 (should be ported to liba52)
 - test(fix?) mp3lib cpu detection code
-     
 
 FUTURE:
 ~~~~~~~
 
+decoders:
+- fix cvid on ppc
+- getting mss1 (Windows Screen Video) DLL codec working... - kabi
+- getting PIM1 codec (DLL) working... - kabi
+- fix seeking with libmad audio codec (codec lost sync and can't resync?)
+
 demuxer:
-- implement forward seeking in indexed avi streams
-- implement brute-force broken avi fixer
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_, NuppelVideo and Real
+- implement Ogg demuxer
 
 decoders:
-- check and import videodecoding.de stuff
 - qtx support?
 - define some common api for native audio and video codecs
   and move them to seperated place (hopefully will allow adding new
