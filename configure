@@ -228,7 +228,7 @@ Advanced options:
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
-  --enable-i18n          _experimental_ gnu gettext() support [disable]
+  --enable-i18n          _experimental_ gnu gettext() support [autodetect]
 
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
@@ -994,7 +994,7 @@ _largefiles=no
 _language=en
 _shm=auto
 _linux_devfs=no
-_i18n=no
+_i18n=auto
 _setlocale=auto
 _sighandler=yes
 _libdv=auto
