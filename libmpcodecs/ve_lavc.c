@@ -499,6 +499,7 @@ static int config(struct vf_instance_s* vf,
     	    return 0;
     }
 
+    if(!stats_file) {
     /* lavc internal 2pass bitrate control */
     switch(lavc_param_vpass){
     case 1: 
@@ -528,6 +529,7 @@ static int config(struct vf_instance_s* vf,
             return 0;
 	}        
 	break;
+    }
     }
 
     lavc_venc_context->me_method = ME_ZERO+lavc_param_vme;
