@@ -267,12 +267,48 @@ int a52_resample(float * _f, int16_t * s16)
     case A52_CHANNEL | A52_LFE:
     case A52_STEREO | A52_LFE:
     case A52_DOLBY | A52_LFE:
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"pxor %%mm6, %%mm6		\n\t"
+		"1:				\n\t"
+		"movq 1024(%1, %%esi), %%mm0	\n\t"
+		"movq 2048(%1, %%esi), %%mm1	\n\t"
+		"movq (%1, %%esi), %%mm5	\n\t" 
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm5		\n\t"
+		"leal (%%esi, %%esi, 2), %%edi	\n\t"
+		
+		"pxor %%mm4, %%mm4		\n\t"
+		"packssdw %%mm5, %%mm0		\n\t" // FfAa
+		"packssdw %%mm4, %%mm1		\n\t" // 00Bb
+		"punpckhwd %%mm0, %%mm4		\n\t" // F0f0
+		"punpcklwd %%mm1, %%mm0		\n\t" // BAba
+		"movq %%mm0, %%mm1		\n\t" // BAba
+		"punpckldq %%mm4, %%mm3		\n\t" // f0XX
+		"punpckldq %%mm6, %%mm0		\n\t" // 00ba
+		"punpckhdq %%mm1, %%mm3		\n\t" // BAf0
+		
+		"movq %%mm0, (%0, %%edi)	\n\t" // 00ba
+		"punpckhdq %%mm4, %%mm0		\n\t" // F000
+		"movq %%mm3, 8(%0, %%edi)	\n\t" // BAf0
+		"movq %%mm0, 16(%0, %%edi)	\n\t" // F000
+		"addl $8, %%esi			\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1536), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
+#else
 	for (i = 0; i < 256; i++) {
 	    s16[6*i] = convert (f[i+256]);
 	    s16[6*i+1] = convert (f[i+512]);
 	    s16[6*i+2] = s16[6*i+3] = s16[6*i+4] = 0;
 	    s16[6*i+5] = convert (f[i]);
 	}
+#endif
 	break;
     case A52_3F | A52_LFE:
 	for (i = 0; i < 256; i++) {
