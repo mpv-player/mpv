@@ -86,28 +86,20 @@ struct vf_priv_s {
 static inline void requantize(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
 	int i; 
 	const int qmul= qp<<1;
-	const int qadd= (qp-1)|1;
-	const int qinv= ((1<<(SHIFT-3)) + qmul/2)/ qmul;
 	int bias= 0; //FIXME
 	unsigned int threshold1, threshold2;
-
-	threshold1= (1<<SHIFT) - bias - 1;
+	
+	threshold1= qmul*((1<<3) - bias) - 1;
 	threshold2= (threshold1<<1);
         
 	memset(dst, 0, 64*sizeof(DCTELEM));
-	dst[0]= (src[0] + 4)>>3;;
+	dst[0]= (src[0] + 4)>>3;
 
-	for(i=1; i<64; i++){
-		int level= qinv*src[i];
+        for(i=1; i<64; i++){
+		int level= src[i];
 		if(((unsigned)(level+threshold1))>threshold2){
 			const int j= permutation[i];
-			if(level>0){
-				level= (bias + level)>>SHIFT;
-				dst[j]= level*qmul + qadd;
-			}else{
-				level= (bias - level)>>SHIFT;
-				dst[j]= -level*qmul - qadd;
-			}
+			dst[j]= (level + 4)>>3;
 		}
 	}
 }
