@@ -15,6 +15,9 @@ mplayer (1.0)
     * support for VAX (tested on VAXstation 4000/VLC) -- really, believe me!
     * optimizing for specific MIPS CPUs under IRIX
     * AMD64 detection under BSDs
+    * working fbdev and matrox drivers under Linux 2.6 series
+    * support for ELF only OpenBSD
+    * optimizing for PPC 970 (aka G5)
 
     Demuxers:
     * Matroska containing RealVideo works better
@@ -23,6 +26,10 @@ mplayer (1.0)
     * UYVY support in tvi/v4l2
     * tvi/bsdbt848 now working under FreeBSD 5.2-CURRENT
     * tvi/bsdbt848 audio part working under NetBSD
+    * LIVE.COM demuxer updated to conform with latest libraries
+    * New, independent, C implementation of the Matroska demuxer
+    * fix for rare Real files
+    * MPEG Aspect code 4 fixed
 
     Decoders:
     * removed zlib dependency in vd/lcl
@@ -30,6 +37,8 @@ mplayer (1.0)
       vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
     * workaround for buggy codecs in ad/acm (support for Sharp G.726)
     * synced to original FLAC sources
+    * fixed chrom-swapping in Hauppauge Macroblock decoder
+    * Altivec optimized resampler in liba52
 
     Filters:
     * vf/bmovl bugfixes
@@ -42,6 +51,11 @@ mplayer (1.0)
     Drivers:
     * ao/esd behaves better over network now
     * support for Radeon 9600 Pro in VIDIX
+    * -mixer support for alsa9
+    * fixed OSS audio grabber module with hardware not supporting 44khz
+    * native ALSA 1.x support (not through 0.9 emulation)
+    * better multibuffer support in VIDIX NVidia driver
+    * pan & scan support in VIDIX NVidia driver
 
     FFmpeg/libavcodec:
     * H.263 AIC and MQ encoding support
@@ -63,6 +77,24 @@ mplayer (1.0)
     * fixed never-before-tested embedded string decoder in SVQ1
     * optimized quantization (including the trellis way)
     * Sierra VMD video decoder
+    * MMX and SSE2 optimized H.263 denoiser
+    * better SVCD compilance (encoder side)
+    * MMX and MMX2 optimized interlaced DCT decision
+    * various cleanup, memleak and segfault fixes
+    * slightly optimized (2x faster) the MPEG layer 3 decoder
+    * grayscale coded MJPEG decoding support
+    * avimszh and avizlib decoders
+    * "packed" XVID decoding
+    * fixed some bugs in RV20 B-frames decoding
+    * closed GOP encoding
+    
+    Others:
+    * -codecs-file option for specifying alternative codecs.conf files
+    * fixed some minor bugs in the GUI
+    * prevent sig11 when $HOME is not set
+    * fix some commandline handling corruptions
+    * swedish and polish yes/no options in config files
+    * support binding F11 and F12 keys
 
 
   pre3: "The Real Counter"
