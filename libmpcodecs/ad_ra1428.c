@@ -52,10 +52,10 @@ static int preinit(sh_audio_t *sh) {
 static int init(sh_audio_t *sh) {
 	switch (sh->format) {
 		case mmioFOURCC('1','4','_','4'):
-			(Real_144*)sh->context = init_144();
+			sh->context = init_144();
 		  break;
 		case mmioFOURCC('2','8','_','8'):
-			(Real_288*)sh->context = init_288();
+			sh->context = init_288();
 	  	break;
 		default:
 			mp_msg(MSGT_DECAUDIO,MSGL_ERR,"[ra1428] Unhandled format in init: %x\n", sh->format);
