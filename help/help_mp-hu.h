@@ -77,17 +77,18 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nem tudom megnyitni a dump file-t!\n"
 #define MSGTR_CoreDumped "Kinyomattam a cuccost, jól.\n"
 #define MSGTR_FPSnotspecified "Az FPS (képkocka/mp) érték nincs megadva, vagy hibás! Használd az -fps opciót!\n"
-#define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %d audio codec-családot használni ...\n"
+#define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %s audio codec-családot használni ...\n"
 #define MSGTR_CantFindAfmtFallback "A megadott audio codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
 #define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/CODECS-et!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/codecs.html-t!\n"
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
-#define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %d video codec-családot használni ...\n"
+#define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %s video codec-családot használni ...\n"
 #define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"
 #define MSGTR_VOincompCodec "A kiválasztott video_out meghajtó inkompatibilis ezzel a codec-kel.\n"
 #define MSGTR_CannotInitVO "VÉGZETES HIBA: Nem tudom elindítani a video-meghajtót!\n"
 #define MSGTR_CannotInitAO "nem tudom megnyitni az audio-egységet -> NOSOUND\n"
 #define MSGTR_StartPlaying "Lejátszás indítása...\n"
+
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ***************************************\n"\
 "         **** A rendszered túl LASSÚ ehhez! ****\n"\
@@ -137,7 +138,7 @@ static char help_text[]=
 #define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (lásd DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Pass3 file használata: %s\n"
 #define MSGTR_MissingFilename "\nHiányzó filenév!\n\n"
-#define MSGTR_CannotOpenFile_Device "File/eszköz megnyítása sikertelen\n"
+#define MSGTR_CannotOpenFile_Device "File/eszköz megnyitása sikertelen\n"
 #define MSGTR_ErrorDVDAuth "Hiba a DVD authentikáció közben...\n"
 #define MSGTR_CannotOpenDemuxer "Demuxer meghívása sikertelen\n"
 #define MSGTR_NoAudioEncoderSelected "\nNem választottál ki audio enkódert (-oac)! Válassz egyet, vagy használd a -nosound opciót. Lásd -oac help!\n"
@@ -177,8 +178,8 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Vigyázat! Többszörösen definiált Audio-folyam! (Hibás file?)\n"
-#define MSGTR_VideoStreamRedefined "Vigyázat! Többszörösen definiált Video-folyam! (Hibás file?)\n"
+#define MSGTR_AudioStreamRedefined "Vigyázat! Többszörösen definiált Audio-folyam: %d (Hibás file?)\n"
+#define MSGTR_VideoStreamRedefined "Vigyázat! Többszörösen definiált Video-folyam: %d (Hibás file?)\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) audio-csomag a pufferben!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) video-csomag a pufferben!\n"
 #define MSGTR_MaybeNI "(talán ez egy nem összefésült (interleaved) file vagy a CODEC nem mûködik jól)\n"
@@ -256,7 +257,6 @@ static char help_text[]=
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit nem sikerült :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: %d byte allokálása bemeneti buffernek\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: %d + %d = %d byte allokálása bemeneti buffernek\n"
-
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "lirc támogatás indítása...\n"
