@@ -722,6 +722,8 @@ static uint32_t query_format(uint32_t format)
 	if (!fb_works)
 		return 0;
 
+	if (verbose > 0)
+		printf("fb: query_format(%#lx(%.4s))\n", format, &format);
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 		if (bpp == fb_bpp)
