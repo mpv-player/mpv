@@ -200,7 +200,7 @@ struct config conf[]={
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000},
-	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 11}, // keep ranges in sync
+	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 13}, // keep ranges in sync
 	{"vfm", &video_family, CONF_TYPE_INT, CONF_RANGE, 0, 10}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
