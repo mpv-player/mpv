@@ -1,4 +1,4 @@
-.\" synced with 1.658
+.\" synced with 1.663
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -70,7 +70,7 @@ mencoder \- enkoder (koder) filmów
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[tytu³ | [tytu³_pocz±tkowy]-tytu³_koñcowy ]
+.I dvd://[tytu³ | [tytu³_pocz±tkowy]\-tytu³_koñcowy ]
 [opcje]
 .br
 .in
@@ -901,7 +901,7 @@ Je¶li siê nie da, automatycznie przestawia na IPv4.
 .TP
 .B \-rawaudio <opcja1:opcja2:...>
 Pozwala na odtwarzanie surowych zbiorów audio.
-Mo¿e te¿ byæ u¿yta ¿eby odtworzyæ CD z d¼wiêkiem innym ni¿ 44KHz 16bit stereo.
+Mo¿e te¿ byæ u¿yta ¿eby odtworzyæ CD z d¼wiêkiem innym ni¿ 44KHz 16-bit stereo.
 Do odtwarzania surowych strumieni AC3 u¿yj \-rawaudio on:format=0x2000.
 .sp 1
 Dostêpne s± opcje:
@@ -2452,6 +2452,13 @@ kartê em8300.
 .TP
 .B mpegpes (tylko DVB)
 Sterownik przeznaczony dla DVB.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¶li masz wiêcej ni¿ jedn±
+kartê DVB (tylko API V3, tak jak sterowniki z serii 1.x.y).
+.RE
+.PD 1
 .TP
 .B zr (patrz te¿ \-zr* i \-zrhelp)
 Sterownik przeznaczony dla wielu kart przechwytuj±cych/odtwarzaj±cych MJPEG.
@@ -2533,7 +2540,7 @@ Dostêpne s± filtry:
 .RSs
 .IPs resample[=czprób[:sloppy][:type]]
 Zmienia czêstotliwo¶æ próbkowania strumienia audio na podan± (w Hz) liczbê.
-Obs³uguje tylko format 16 bit little endian.
+Obs³uguje tylko format 16-bit little-endian.
 .IPs channels[=il]
 Zmienia ilo¶æ kana³ów wyj¶cia na il.
 Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿ liczba kana³ów wej¶ciowych,
@@ -2553,7 +2560,7 @@ float lub int
 .br
 unsigned lub signed
 .br
-le be (little lub big endian)
+le be (little- lub big-endian)
 .br
 .IPs volume[=v:sc]
 Wybiera g³o¶no¶æ wyj¶cia.
@@ -4758,9 +4765,9 @@ huffyuv:
 .PD 0
 .RSs
 .IPs "pierwsze przej¶cie"
-zachowuje statystyki
+Zachowuje statystyki.
 .IPs "drugie przej¶cie"
-koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
+Koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
 .RE
 .PD 1
 .TP
@@ -5689,6 +5696,13 @@ Ten parametr w³±cza wykorzystanie przestrzeni barw do przewidywania ruchu.
 .TP
 .B chroma_opt
 Uruchamia prefiltr optymalizacji barw.
+Poczaruje to trochê nad danymi o kolorach ¿eby zmniejszyæ widoczny na
+krawêdziach efekt schodów.
+Poprawia jako¶æ kosztem prêdko¶ci kodowania.
+Z natury zmniejsza PSNR, jako ¿e podnosi matematyczne odchylenie od
+oryginalnego obrazu, ale poprawia subiektywn± jako¶æ obrazu.
+Jako ¿e dzia³a na informacji o kolorach, mo¿esz chcieæ to wy³±czyæ je¶li
+kodujesz w skali szaro¶ci.
 .TP
 .B reduced
 W³±cza kodowanie klatek o zmniejszonej rozdzielczo¶ci.
