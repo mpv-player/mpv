@@ -13,9 +13,10 @@ decoders:
 - getting vivo audio DLL codec working...
 - getting mss1 (Windows Screen Video) DLL codec working...
 - getting PIM1 codec working...
-- finish and switch to C directshow code
+- optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
 
 mencoder:
+- finish 3-pass encoding (audio, video1, video2)
 - add ffmpeg encoders support
 - add win32 encoders support
 - add raw video out
