@@ -1,18 +1,12 @@
 #define DISP
 
 /* 
- * video_out_pgm.c, pgm interface
+ * vo_png.c, Portable Network Graphics Renderer for Mplayer
  *
+ * Copyright 2001 by Felix Buenemann <atmosfear@users.sourceforge.net>
  *
- * Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. 
+ * Uses libpng (which uses zlib), so see according licenses.
  *
- * Hacked into mpeg2dec by
- * 
- * Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
- *
- * 15 & 16 bpp support added by Franck Sicard <Franck.Sicard@solsoft.fr>
- *
- * Xv image suuport by Gerd Knorr <kraxel@goldbach.in-berlin.de>
  */
 
 #include <stdio.h>
