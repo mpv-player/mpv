@@ -74,11 +74,13 @@ Eddig kb. tiszta ügy, ezt akarom majd átrakni külön lib-be.
 na nézzuk tovább:
 
 3. mplayer.c - igen, õ a fõnök :)
-   az idõzítes élég érdekesen van megoldva, fõleg azért mert minden file-
-	 formátumnál másképp kell/célszerû, és néha többféle képpen is lehet.
 
-	 van egy a_frame és egy v_frame nevû float változó, ez tárolja az épp
-	 látható/hallható a/v pozícióját másodpercben.
+    Fõ feladata a különbözõ modulok összekapcsolása, illetve az A-V
+    szinkron biztosítása.
+
+    Az adott stream aktuális pozíciója a megfelelo stream header
+    (sh_audio / sh_video) timer field-ben van.
+    (Régen ez volt az a_frame és egy v_frame nevû float változó)
 
 	 A lejátszó ciklus felépítése:
 	 while(not EOF) {
@@ -132,19 +134,29 @@ na nézzuk tovább:
 
 	 Avi-nál sem egyszerû az élet. Ott a 'hivatalos' idõzítési mód a
 	 BPS-alapú, azaz a headerben le van tárolva, hány tömörített audio
-	 byte tartozik egy másodpercnyi (fps darab) képhez.
-	 ez persze nem mindig mûködik... miért is mûködne :)
-	 Ezért én megcsináltam, hogy az mpeg-nél használatos sectoronkénti
-	 PTS értéket emulálom avi-ra is, azaz az AVI parser minden beolvasott
-	 chunk-nál számol egy kamu PTS-t a frame-ek típusa alapján, és ez
-	 alapjan idozitek. És van amikor ez mûködik jobban.
-	 Persze itt még bejátszik az is, hogy AVI-nál általában elõre
-	 letárolnak egy nagyobb adag hangot, és csak utána kezdõdik a kép.
-	 Ezt persze bele kell számolni a késleltetésbe, ez az Initial PTS delay.
-	 Ilyen persze 2 is van, az egyik a headerben le is van írva, és
-	 nem nagyon használják. :) A másik sehol nincs leírva, de használják,
-	 ezt csak mérni lehet...
-
+	 byte vagy chunk tartozik egy másodpercnyi (fps darab) képhez.
+	 Az AVI stream headerben van 2 fontos mezo, a dwSampleSize, es
+	 a dwRate/dwScale aránypár:
+	 - Ha a dwSampleSize 0, akkor VBR stream, tehat nem konstans a
+	 bitrate. Ilyenkor 1 chunk tarol 1 sample-t, es a masodpercenkenti
+	 chunkok szamat adja a dwRate/dwScale.
+	 - Ha a dwSampleSize>0, akkor constant bitrate van, es az ido igy
+	 szamolhato:  time = (bytepos/dwSampleSize) / (dwRate/dwScale)
+	 (tehat a sample sorszamat elosztjuk a samplerate-el)
+	 Ilyenkor stream-kent kezelheto az audio, ami tetszolegesen
+	 chunk-okra van darabolva, de lehet akar 1 db chunk is az egesz.
+	 
+	 A másik lehetõség csak az interleaved fileoknál használható: a
+	 chunk-ok sorrendjébõl számolható egy timestamp (PTS) érték.
+	 A video chunkok PTS-e egyszerû: chunk száma * fps
+	 Az audio pedig az elõtte levõ video chunk-éval azonos.
+	 Ilyenkor viszont szamolni kell az ugynev. "audio preload"-al is,
+	 azaz van egy fix kesleltetes az audio es video stream-ek kozott.
+	 Ez altalaban 0.5-1.0 sec, de van amikor egeszen mas.
+	 A pontos erteket regen mertuk, most a demux_avi.c kezeli le:
+	 az elso video utani audio chunknal kiszamolja az A-V elterest,
+	 es ezt veszi az audio preload mertekenek.
+	 
 3.a. audio playback:
 	 pár szó az audio lejátszásról:
 	 az egészben nem maga a lejátszás a nehéz, hanem:
@@ -168,18 +180,11 @@ na nézzuk tovább:
 
 4. codecek. ezek különbözõ lib-ek szanaszét mindenfelõl.
    mint pl. libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
-	 az mplayer.c hívogatja õket, amikor egy-egy darab hangot vagy frame-et
-	 kell lejátszani (lásd 3. pont elején).
-	 ezek pedig hívják a megfelelõ demuxert, hogy megkapják a tömörített
-	 adatokat (lásd 2. pont).
-	 paraméterként a megfelelõ stream headert (sh_audio/sh_video) kell
-	 átadni, ez elvileg tartalmaz minden infót, ami szükséges a
-	 dekódoláshoz (többek között a demuxert is: sh->ds).
-   A codecek szeparálasa folyamatban van, az audio már el van különítve
-   (lásd. dec_audio.c), a videon még dolgozunk. Cél, hogy ne az mplayer.c
-   kelljen tudja, milyen codecek vannak és hogy kell õket használni, hanem
-   egy közös init/decode audio/video functiont kelljen csak meghívnia.
-
+   
+   Az mplayer.c nem kozvetlenul hivja oket, hanem a dec_audio.c es a
+   dec_video.c fileokon keresztul, igy az mplayer.c-nek nem kell semmit
+   sem tudnia a codecrol. 
+   
 5. libvo: ez végzi a kép kirakását.
 
   Az img_format.h-ban definiálva vannak konstansok a különbözõ pixel-
