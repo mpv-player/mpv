@@ -164,6 +164,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+	config.version = MGA_VID_VERSION;
 	config.src_width = SRC_IMAGE_WIDTH;
 	config.src_height= SRC_IMAGE_HEIGHT;
 	config.dest_width = SRC_IMAGE_WIDTH;
@@ -172,6 +173,8 @@ main(int argc, char *argv[])
 	config.y_org= 10;
 	config.colkey_on = 0;
         config.format = MGA_VID_FORMAT_YV12;
+	config.frame_size=SRC_IMAGE_WIDTH*SRC_IMAGE_HEIGHT*2;
+	config.num_frames=1;
 
 	if (ioctl(f,MGA_VID_CONFIG,&config))
 	{
