@@ -55,6 +55,7 @@ extern vf_info_t vf_info_perspective;
 extern vf_info_t vf_info_down3dright;
 extern vf_info_t vf_info_field;
 extern vf_info_t vf_info_denoise3d;
+extern vf_info_t vf_info_hqdn3d;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -103,6 +104,7 @@ static vf_info_t* filter_list[]={
     &vf_info_down3dright,
     &vf_info_field,
     &vf_info_denoise3d,
+    &vf_info_hqdn3d,
     NULL
 };
 
