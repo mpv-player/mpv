@@ -180,15 +180,6 @@ char *video_codec=NULL; // override video codec
 char *audio_fm=NULL;    // override audio codec family 
 char *video_fm=NULL;    // override video codec family 
 
-// IMHO this stuff is no longer of use, or is there a special
-// reason why dshow should be completely disabled? - atmos ::
-// yes, people without working c++ compiler can disable it - A'rpi
-#ifdef USE_DIRECTSHOW
-int allow_dshow=1;
-#else
-int allow_dshow=0;
-#endif
-
 // streaming:
 int audio_id=-1;
 int video_id=-1;
@@ -1874,7 +1865,6 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
-    int pkey=-1;
     mp_cmd_t* cmd;
       if(!quiet) {
 	mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
@@ -1891,7 +1881,6 @@ if(auto_quality>0){
 
       while( (cmd = mp_input_get_cmd(20,1)) == NULL) {
 	     if(sh_video && video_out && vo_config_count) video_out->check_events();
-             if((pkey=mplayer_get_key()) > 0) break;
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
@@ -1915,8 +1904,6 @@ if(auto_quality>0){
         guiGetEvent( guiCEvent,(char *)guiSetPlay );
        }
 #endif
-      if(pkey!=32 && pkey!=112 && pkey!=-1)
-        mplayer_put_key(pkey); // pass on the key
   }
 
 // handle -sstep
