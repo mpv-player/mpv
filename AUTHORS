@@ -424,6 +424,7 @@ Nicolas Le Gaillart <n@tourmentine.com>
 Lu Ran <hephooey@fastmail.fm>
     * Chinese documentation translation
     * Various VOBSUB-related patches
+    * improved seeking in realmedia format
 
 András Mohari <mayday@varoshaza.nagyatad.hu>
     * skin documentation
