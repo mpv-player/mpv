@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.42 -->
+<!-- synced with 1.44 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -24,7 +24,7 @@
   </simpara></listitem>
 <listitem><simpara>
   "родные" декодеры для <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5.01, 3ivX, M$ MPEG4</emphasis> v1, v2 и других вариантов MPEG4.
+  DivX (Pro), 3ivX, M$ MPEG4</emphasis> v1, v2 и других вариантов MPEG4.
   </simpara></listitem>
 <listitem><simpara>
   "родной" декодер для <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -755,8 +755,7 @@ make install
 Бинарии отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
 пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
 Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
-с <ulink url="http://greysector.rangers.eu.org/">домашней страницы Dominik
-Mierzejewski</ulink>.
+с <ulink url="http://greysector.rangers.eu.org/">Grey Sector[Серый Сектор]</ulink>.
 </para>
 </sect3>
 
