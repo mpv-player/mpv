@@ -229,6 +229,14 @@ static int init(sh_video_t *sh){
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
     }
+    if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
+	(sh->format == mmioFOURCC('M','4','S','2') ||
+	 sh->format == mmioFOURCC('M','P','4','S')))
+    {
+	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+	avctx->extradata = malloc(avctx->extradata_size);
+	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
+    }
 
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
