@@ -585,6 +585,9 @@ play_next_file:
 	usleep(20000);
 	wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
       }
+      if(gui_no_filename){
+        filename=mplShMem->Filename;
+      }
     }
 #endif
 
@@ -1777,7 +1780,7 @@ if(rel_seek_secs || abs_seek_pos){
 	  mplShMem->Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
 	mplShMem->TimeSec=d_video->pts; 
-	printf("mplShMem->Playing=%d  \n",mplShMem->Playing);
+//	printf("mplShMem->Playing=%d  \n",mplShMem->Playing);
 	if(mplShMem->Playing==0) break; // STOP
 	if(mplShMem->Playing==2) osd_function=OSD_PAUSE;
       }
@@ -1832,7 +1835,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 }
 
 
-if(curr_filename+1<num_filenames){
+if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
 
   // restore terminal:
@@ -1852,8 +1855,7 @@ if(curr_filename+1<num_filenames){
 }
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
-    ++curr_filename;
-if(curr_filename<num_filenames){
+if(use_gui || ++curr_filename<num_filenames){
 
   current_module="uninit_vcodec";
   if(sh_video) uninit_video(sh_video);
