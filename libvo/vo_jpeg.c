@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <math.h>               /* for log10() */
 
 /* ------------------------------------------------------------------------- */
 
@@ -305,6 +306,193 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
+    char *buf;      /* buf is used to store parsed string values */
+    int length;     /* length is used when calculating the length of buf */
+    int value;      /* storage for parsed integer values */
+
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                                            MSGTR_VO_JPEG_ParsingSuboptions);
+    
+    if (arg) {
+
+        while (*arg != '\0') {
+            if (!strncmp(arg, ":", 1)) {
+                arg++;
+                continue;   /* multiple ':' is not really an error */
+            } if (!strncmp(arg, "progressive", 11)) {
+                arg += 11;
+                jpeg_progressive_mode = 1;
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                        MSGTR_VO_JPEG_ProgressiveJPEG);
+            } else if (!strncmp(arg, "noprogressive", 13)) {
+                arg += 13;
+                jpeg_progressive_mode = 0;
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                        MSGTR_VO_JPEG_NoProgressiveJPEG);
+            } else if (!strncmp(arg, "baseline", 8)) {
+                arg += 8;
+                jpeg_baseline = 1;
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                        MSGTR_VO_JPEG_BaselineJPEG);
+            } else if (!strncmp(arg, "nobaseline", 10)) {
+                arg += 10;
+                jpeg_baseline = 0;
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                        MSGTR_VO_JPEG_NoBaselineJPEG);
+            } else if (!strncmp(arg, "optimize=", 9)) {
+                arg += 9;
+                if (sscanf(arg, "%d", &value) == 1) {
+                    if ( (value < 0 ) || (value > 100) ) {
+                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
+                                info.short_name, "optimize",
+                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                        exit_player(MSGTR_Exit_error);
+                    } else {
+                        jpeg_optimize = value;
+                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
+                                info.short_name, "optimize", value);
+                    }
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "optimize",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+                /* only here if value is set and sane */
+                if (value) {
+                    arg += (int)log10(value) + 1;
+                } else {
+                    arg++;  /* log10(0) fails */
+                }
+            } else if (!strncmp(arg, "smooth=", 7)) {
+                arg += 7;
+                if (sscanf(arg, "%d", &value) == 1 ) {
+                    if ( (value < 0) || (value > 100) ) {
+                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
+                                info.short_name, "smooth",
+                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                        exit_player(MSGTR_Exit_error);
+                    } else {
+                        jpeg_smooth = value;
+                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
+                                info.short_name, "smooth", value);
+                    }
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "smooth",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+                /* only here if value is set and sane */
+                if (value) {
+                    arg += (int)log10(value) + 1;
+                } else {
+                    arg++;  /* log10(0) fails */
+                }
+            } else if (!strncmp(arg, "quality=", 8)) {
+                arg += 8;
+                if (sscanf(arg, "%d", &value) == 1) {
+                    if ( (value < 0) || (value > 100) ) {
+                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
+                                info.short_name, "quality",
+                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                        exit_player(MSGTR_Exit_error);
+                    } else {
+                        jpeg_quality = value;
+                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
+                                info.short_name, "quality", value);
+                    }
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "quality",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+                /* only here if value is set and sane */
+                if (value) {
+                    arg += (int)log10(value) + 1;
+                } else {
+                    arg++;  /* log10(0) fails */
+                }
+            } else if (!strncmp(arg, "outdir=", 7)) {
+                arg += 7;
+                buf = malloc(strlen(arg)+1); /* maximum length possible */
+                if (!buf) {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
+                            MSGTR_MemAllocFailed);
+                    exit_player(MSGTR_Exit_error);
+                }
+                if (sscanf(arg, "%[^:]", buf) == 1) {
+                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
+                            info.short_name, "outdir", buf);
+                    length = strlen(buf);
+                    arg += length;
+                    jpeg_outdir = malloc(length+1);
+                    strncpy(jpeg_outdir, buf, length+1);
+                    free(buf);
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "outdir",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+            } else if (!strncmp(arg, "subdirs=", 8)) {
+                arg += 8;
+                buf = malloc(strlen(arg)+1); /* maximum length possible */
+                if (!buf) {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
+                            MSGTR_MemAllocFailed);
+                    exit_player(MSGTR_Exit_error);
+                }
+                if (sscanf(arg, "%[^:]", buf) == 1) {
+                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
+                            info.short_name, "subdirs", buf);
+                    length = strlen(buf);
+                    arg += length;
+                    jpeg_subdirs = malloc(length+1);
+                    strncpy(jpeg_subdirs, buf, length+1);
+                    free(buf);
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "subdirs",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+            } else if (!strncmp(arg, "maxfiles=", 9)) {
+                arg += 9;
+                if (sscanf(arg, "%d", &value) == 1) {
+                    if (value < 1) {
+                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
+                                info.short_name, "maxfiles",
+                                MSGTR_VO_JPEG_ValueOutOfRange, ">=1");
+                        exit_player(MSGTR_Exit_error);
+                    } else {
+                        jpeg_maxfiles = value;
+                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
+                                info.short_name, "maxfiles", value);
+                    }
+                } else {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
+                            info.short_name, "maxfiles",
+                            MSGTR_VO_JPEG_NoValueSpecified);
+                    exit_player(MSGTR_Exit_error);
+                }
+                /* only here if value is set and sane */
+                if (value) {
+                    arg += (int)log10(value) + 1;
+                } else {
+                    arg++;  /* log10(0) fails */
+                }
+            } else {
+                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %-20s...\n", info.short_name,
+                        MSGTR_VO_JPEG_UnknownOptions, arg);
+                exit_player(MSGTR_Exit_error);
+            }
+        } /* end while */
+    } /* endif */
+    
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
+                                            MSGTR_VO_JPEG_SuboptionsParsedOK);
     return 0;
 }
 

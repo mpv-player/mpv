@@ -29,16 +29,6 @@ extern char *dfb_params;
 #ifdef HAVE_PNG
 extern int z_compression;
 #endif
-#ifdef HAVE_JPEG
-extern int jpeg_baseline;
-extern int jpeg_progressive_mode;
-extern int jpeg_optimize;
-extern int jpeg_smooth;
-extern int jpeg_quality;
-extern char * jpeg_outdir;
-extern char * jpeg_subdirs;
-extern int jpeg_maxfiles;
-#endif
 #ifdef HAVE_SDL
 //extern char *sdl_driver;
 extern int sdl_noxv;
@@ -144,22 +134,6 @@ m_option_t ao_plugin_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#ifdef HAVE_JPEG
-m_option_t jpeg_conf[]={
-	{"progressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noprogressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"baseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nobaseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"optimize", &jpeg_optimize, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"smooth", &jpeg_smooth, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"quality", &jpeg_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"outdir", &jpeg_outdir, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"subdirs", &jpeg_subdirs, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"maxfiles", &jpeg_maxfiles, CONF_TYPE_INT, CONF_MIN, 1, 0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
-#endif
-
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
@@ -228,7 +202,8 @@ m_option_t mplayer_opts[]={
 #endif
 	// -vo jpeg only:
 #ifdef HAVE_JPEG
-	{"jpeg", jpeg_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
+	{"jpeg", "-jpeg is deprecated. Use -vo jpeg:options instead.\n",
+	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	// -vo sdl only:
 #ifdef HAVE_SDL

@@ -758,4 +758,13 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_DirExistsAndIsWritable "Output directory already exists and is writable."
 #define MSGTR_VO_JPEG_CantCreateDirectory "Unable to create ouput directory."
 #define MSGTR_VO_JPEG_DirectoryCreateSuccess "Output directory successfully created."
+#define MSGTR_VO_JPEG_ParsingSuboptions "Parsing suboptions."
+#define MSGTR_VO_JPEG_SuboptionsParsedOK "Suboptions parsed OK."
+#define MSGTR_VO_JPEG_ProgressiveJPEG "Progressive JPEG enabled."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG disabled."
+#define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG enabled."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG disabled."
+#define MSGTR_VO_JPEG_ValueOutOfRange "Value out of range"
+#define MSGTR_VO_JPEG_NoValueSpecified "No value specified."
+#define MSGTR_VO_JPEG_UnknownOptions "Unknown option(s)"
 
