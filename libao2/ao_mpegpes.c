@@ -20,6 +20,8 @@ extern int vo_mpegpes_fd;
 extern int vo_mpegpes_fd2;
 #endif
 
+#include <errno.h>
+
 static ao_info_t info = 
 {
 #ifdef HAVE_DVB
