@@ -49,7 +49,7 @@ extern "C"
 /* ************************************************************************ */
 
 
-#define _DEBUG_LOG                          /* generate debug messages      */
+/*#define _DEBUG_LOG*/                         /* generate debug messages      */
 
 #define _DO_CRC32_CHECK                     /* perform cyclical redundancy  */
                                             /* check (CRC32) - disable this */
