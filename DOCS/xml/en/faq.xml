@@ -1298,8 +1298,8 @@ All attempts have failed so far, but patches are welcome.
 I'd like to seek +/- 1 frames instead of 10 seconds.
 </para></question>
 <answer><para>
-This won't be done. It was, but then it messed up A/V sync.
-Feel free to implement it, and send a patch. Don't ask for it.
+You can step forward by pressing <keycap>.</keycap> when the movie is paused.
+Stepping backwards is unlikely to be implemented anytime soon.
 </para></answer>
 </qandaentry>
 
