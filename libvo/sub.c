@@ -367,7 +367,7 @@ static int draw_alpha_init_flag=0;
 
 extern void vo_draw_alpha_init();
 
-static mp_osd_obj_t* vo_osd_list=NULL;
+       mp_osd_obj_t* vo_osd_list=NULL;
 
 mp_osd_obj_t* new_osd_obj(int type){
     mp_osd_obj_t* osd=malloc(sizeof(mp_osd_obj_t));

@@ -99,6 +99,7 @@
 #include "aspect.h"
 #include "cpudetect.h"
 #include "spuenc.h"
+#include "sub.h"
 
 #define SPU_SUPPORT
 
@@ -132,6 +133,7 @@ static int osdpicbuf_w;
 static int osdpicbuf_h;
 static int disposd = 0;
 static encodedata *spued;
+static encodedata *prebuf;
 #endif
 
 /* Static variable used in ioctl's */
@@ -318,13 +320,24 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
 
 #ifdef SPU_SUPPORT
-	osdpicbuf = malloc(s_width * s_height);
+	s_width*=2;
+	s_height*=2;
+
+	osdpicbuf = calloc( 1,s_width * s_height);
 	if (osdpicbuf == NULL) {
 		printf("vo_dxr3: out of mem\n");
 		return -1;
 	}
 	spued = (encodedata *) malloc(sizeof(encodedata));
 	if (spued == NULL) {
+	        free( osdpicbuf );
+		printf("vo_dxr3:out of mem\n");
+		return -1;
+	}
+	prebuf = (encodedata *) malloc(sizeof(encodedata));
+	if (prebuf == NULL) {
+	        free( osdpicbuf );
+		free( spued );
 		printf("vo_dxr3:out of mem\n");
 		return -1;
 	}
@@ -332,6 +345,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	osd_h = s_height;
 	osdpicbuf_w = s_width;
 	osdpicbuf_h = s_height;
+	
+	prebuf->count=0;
+	pixbuf_encode_rle( 0,0,osdpicbuf_w,osdpicbuf_h - 1,osdpicbuf,osdpicbuf_w,prebuf );
+
 #endif
 
 	return 0;
@@ -345,38 +362,71 @@ static const vo_info_t* get_info(void)
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
 #ifdef SPU_SUPPORT
-	int lx, ly, bx;
 	unsigned char *buf = &osdpicbuf[(y * osdpicbuf_w) + x];
-	for (ly = 0; ly < h - 1; ly++) {
-		for(lx = 0; lx < w; lx++) {
-			if ((srca[(ly * srcstride) + lx] != 0) && (src[(ly * srcstride) + lx] != 0)) {
-				if(src[(ly * srcstride) + lx] >= 128) {
-					buf[ly * osdpicbuf_w + lx] = 3;
-				}
-			}
-		}
+	int by = 0;
+	register int lx, ly;
+	register int stride = 0;
+	
+	for (ly = 0; ly < h - 1; ly++) 
+	 {
+	  for(lx = 0; lx < w; lx++ )
+	   if ( ( srca[stride + lx] )&&( src[stride + lx] >= 128 ) ) buf[by + lx] = 3;
+	  by+=osdpicbuf_w;
+	  stride+=srcstride;
 	}
 	pixbuf_encode_rle(x, y, osdpicbuf_w, osdpicbuf_h - 1, osdpicbuf, osdpicbuf_w, spued);
 #endif
 }
 
+extern int vo_osd_changed_flag;
+extern mp_osd_obj_t* vo_osd_list;
+
 static void draw_osd(void)
 {
 #ifdef SPU_SUPPORT
-	if ((disposd % 15) == 0) {
-		vo_draw_text(osd_w, osd_h, draw_alpha);
-		memset(osdpicbuf, 0, s_width * s_height);
+ static int cleared = 0;
+        int changed = 0;
+
+	if ((disposd % 15) == 0) 
+	{
+		{
+		 mp_osd_obj_t* obj = vo_osd_list;
+		 vo_update_osd( osd_w,osd_h );
+		 while( obj )
+		  {
+		   if ( obj->flags & OSDFLAG_VISIBLE ) { changed=1; break; }
+		   obj=obj->next;
+		  }
+		}
+		if ( changed )
+		 {
+		  vo_draw_text(osd_w, osd_h, draw_alpha);
+		  memset(osdpicbuf, 0, s_width * s_height);
+		  cleared=0;
+		 }
+		  else
+		   {
+		    if ( !cleared )
+		     {
+		      spued->count=prebuf->count;
+		      memcpy( spued->data,prebuf->data,DATASIZE );
+		      cleared=1;
+		     }
+		   }
+
 
 		/* could stand some check here to see if the subpic hasn't changed
 		 * as if it hasn't and we re-send it it will "blink" as the last one
 		 * is turned off, and the new one (same one) is turned on
 		 */
 /*		Subpics are not stable yet =(
-		expect lockups if you enable		
+		expect lockups if you enable */
+#if 1
 		if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
-		write(fd_spu, spued->data, spued->count);*/
+		write(fd_spu, spued->data, spued->count);
+#endif
 	}
 	disposd++;
 #endif
