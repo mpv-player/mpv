@@ -31,6 +31,10 @@ LIBVD_EXTERN(ffmpeg)
 
 int avcodec_inited=0;
 
+#ifdef FF_POSTPROCESS
+int quant_store[MBR+1][MBC+1];
+#endif
+
 typedef struct {
     AVCodecContext *avctx;
     int last_aspect;
@@ -196,6 +200,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mpi->stride[1]*=2;
 	mpi->stride[2]*=2;
     }
+    
+#ifdef FF_POSTPROCESS
+    mpi->qscale=&quant_store[0][0];
+    mpi->qstride=MBC+1;
+#endif
     
     return mpi;
 }
