@@ -467,10 +467,10 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		otp = tmp_otp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
 		tmp_otp->ott = osl;
 		for (tmp_ott = tmp_otp->ott; exit == 0; ) {
-		    while ((tmp_ott != NULL) && (value + tmp_ott->osd_kerning + tmp_ott->osd_length <= xlimit)) {
+		    do {
 			value += tmp_ott->osd_kerning + tmp_ott->osd_length;
 			tmp_ott = tmp_ott->next;
-		    }
+		    } while ((tmp_ott != NULL) && (value + tmp_ott->osd_kerning + tmp_ott->osd_length <= xlimit));
 		    if (tmp_ott != NULL) {
 			struct osd_text_p *tmp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
 
