@@ -494,6 +494,11 @@ to gain root.</LI>
     make
     make install</PRE>
 
+<P>At this point, <B>MPlayer</B> is ready to use. The directory
+<CODE>/usr/local/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
+file, which is used to tell the program all the codecs and their capabilities.
+This file should always be kept uptodate together with the main binary !</P>
+
 <P><B>Debian users</B> can build a .deb package for themselves, it's very
 simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
 root dir. Detailed instructions can be found <A HREF="documentation.html#6.1">here</A>.</P>
@@ -511,11 +516,6 @@ OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optiona
     cd ~/.mplayer/font
     unzip mp-arial-iso-8859-1.zip</PRE>
 
-<P>Only one thing remains: copy the <B>codecs.conf</B> file from the <CODE>etc</CODE>
-directory (relative to the <B>MPlayer</B> tree) to <CODE>$HOME/.mplayer/codecs.conf</CODE> .
-You should also check the manpage and <CODE>example.conf</CODE> for available options, and insert them
-into your config file, <CODE>$HOME/.mplayer/config</CODE> .</P>
-
 
 <P><B><A NAME=1.4>1.4. What about the GUI?</A></B></P>
 
@@ -530,6 +530,9 @@ Then, to turn on GUI mode, you either
   and call <CODE>gmplayer</CODE> instead.
 </UL>
 </P>
+
+<P>HINT: use the middle button (on 2 button mice press left and right
+simultaneously) for a popup GTK menu, with DVD playing option!</P>
 
 <P>As <B>MPlayer</B> doesn't have a skin included, you have to download them
 if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.

@@ -101,7 +101,7 @@ commands are needed :<BR>
   AVI (DivX) files, you have be aware that AVI headers don't store this
   value. Thus, the only solution is rescaling.</P>
 
-<P><B>MEncoder can scale input images if they come in YV12 format (for example:
+<P><B>MEncoder</B> can scale input images if they come in YV12 format (for example:
   ffdivx, odivx drivers, or mpeg1/2). The output size is specified with the
   <CODE>-x</CODE>, and <CODE>-y</CODE> options.  Furthermore, there are 3
   rescaling filters in <B>MEncoder</B>, <I>0
@@ -141,9 +141,9 @@ the video and/or audio streams.</P>
 
 <P><B><A NAME=2.4.3.5>2.4.3.5.  Encoding with the <I>libavcodec</I> codec family</B></P>
 
-<P>libavcodec provides simple encoding to a lot of interesting video and audio
-formats (currently its audio codecs are unsupported). You can encode to the
-following codecs :</P>
+<P><A HREF="codecs.html#2.2.1.2">libavcodec</A> also provides simple encoding
+to a lot of interesting video and audio formats (currently its audio codecs are
+unsupported by us). Currently you can encode to the following codecs :</P>
 
 <P>
 <UL>
@@ -159,6 +159,9 @@ following codecs :</P>
 
 <P>The first column contains the codec names that should be passed after the
   <CODE>vcodec</CODE> config, like : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
+
+<P>An example, with MJPEG compression :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
 
 <P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 

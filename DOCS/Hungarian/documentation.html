@@ -514,6 +514,12 @@ gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 	make
 	make install</PRE>
 
+<P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
+<CODE>/usr/local/share/mplayer</CODE> könyvtár tartalmazza a
+<CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
+codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
+együtt kell frissíteni !</P>
+
 <P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
 csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
 <B>MPlayer</B> forrás gyökérkönyvtárában. Részletes információ <A
@@ -551,6 +557,10 @@ bekapcsolásához :
   <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
   és a <CODE>gmplayer</CODE> file-t indítsd.
 </UL>
+
+<P>TIPP: az egér középsõ gombjának megnyomása (2 gombos egereken a bal és
+jobb gombok együttes megnyomása) egy GTK-s menût hoz elõ, amiben megtalálható
+a DVD lejátszás is.</P>
 
 <P>Mivel az <B>MPlayer</B> alapban nem tartalmaz skineket, ezeket külön kell
 letöltened. Lásd <A HREF="http://www.mplayerhq.hu/homepage/dload.html">itt</A>.

@@ -101,6 +101,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-tv\ suboptions ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
+.RB [ \-rootwin ]
 .I < - | file | URL | device >
 .PP
 .SH DESCRIPTION
@@ -312,6 +313,10 @@ mixer channel when setting the volume, and "no" means the PCM channel.
 .B \-tv\ suboptions
 this option enables the TV grabbing feature of MPlayer. For complete
 documentation, please see documentation.html chapter 2.5
+.TP
+.B \-rootwin
+play movie in the root window (desktop background) instead of opening
+a new one. Works only with the xv and xmga drivers.
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
