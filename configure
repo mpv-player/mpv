@@ -168,6 +168,7 @@ Optional features:
   --enable-xmmp          use XMMP audio drivers [disable]
   --enable-lirc          enable LIRC (remote control) support [disable]
   --enable-gui           enable GUI [disable]
+  --enable-tv            enable TV Interface (tv/dvb grabbers) [disable]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support (if no C++ compiler and
                          libs are available or find the dshow codecs slower 
@@ -611,6 +612,8 @@ _dxr3lib=
 _select='#define HAVE_AUDIO_SELECT'
 
 _gui=no
+
+_tv=no
 
 _alsa=yes
 _esd=yes
@@ -1414,6 +1417,9 @@ for ac_option do
   --enable-gui)
   	_gui=yes
 	;;
+  --enable-tv)
+	_tv=yes
+	;;
   --enable-streaming)
   	_streaming=yes
 	;;
@@ -1535,6 +1541,9 @@ for ac_option do
 	;;
   --disable-gui)
   	_gui=no
+	;;
+  --disable-tv)
+	_tv=no
 	;;
   --disable-alsa)
 	_alsaver='notfound'
@@ -1855,6 +1864,7 @@ echo "Checking for libavcodec ... $_libavcodec"
 echo "Checking for libffmpeg.so ... $_libavcodec_so"
 echo "Checking for divx4linux ... $_divx4linux"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
+echo "Checking for TV Interface ... $_tv"
 echo "Extra libs : $_extralibdir"
 echo "Extra headers : $_extraincdir"
 # write conf files.
@@ -2448,6 +2458,12 @@ else
  _have_dvb='#undef HAVE_DVB'
 fi
 
+if test "$_tv" = yes ; then
+ _tv='#define USE_TV'
+else
+ _tv='#undef USE_TV'
+fi
+
 if test "$_dxr3" = yes ; then
  _dxr3='#define HAVE_DXR3'
  _dxr3lib='-ldxr3'
@@ -2695,6 +2711,9 @@ $_sgiaudio
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD
 #undef FAST_OSD_TABLE
+
+/* Enable TV Interface support */
+$_tv
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
