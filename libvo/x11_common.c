@@ -154,7 +154,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 }
 #endif
 
-static void x11_errorhandler(Display *display, XErrorEvent *event)
+static int x11_errorhandler(Display *display, XErrorEvent *event)
 {
 #define MSGLEN 60
     char msg[MSGLEN];
@@ -369,7 +369,12 @@ int vo_init( void )
 
 void vo_uninit( void )
 {
- if( !vo_depthonscreen ) return;
+ if (!mDisplay)
+ {
+    mp_msg(MSGT_VO, MSGL_V, "vo: x11 uninit called but X11 not inited..\n");
+    return;
+ }
+// if( !vo_depthonscreen ) return;
  printf("vo: uninit ...\n" );
  XSetErrorHandler(NULL);
  XCloseDisplay( mDisplay );
