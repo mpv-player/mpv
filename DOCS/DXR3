@@ -1,7 +1,14 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
-2001-11-29: thanks to Felix Buenemann I managed to
+2001-12-04: Thanks to Inaki Garci'a Etxebarria of
+	    zapping.sourceforge.net we have now
+	    abandoned rte since it caused problems for
+	    users who didn't rtfm and compiled it with
+	    ffmpeg support. Instead we are now using
+	    libmp1e which is a modified version of mp1e.
+	    
+2001-11-29: Thanks to Felix Buenemann I managed to
 	    optimize the odivx playback as well as add
 	    support for the rest of the codecs!
 	    
@@ -10,11 +17,6 @@ DXR3/H+ video/audio output plugins manual by David Holm
 	    goes out to Ivan Kalvachev for helping me
 	    fix the final mp1e bugs (and contributing
 	    to the libvo2 development)
-	    
-2001-11-27: -ao dxr3 now works, still a few bugs though
-            you might have to reload the em8300 modules
-	    after a playback or you might get static the
-	    next time you use the dxr3 audio interface.
 	    
 1. Introduction
 
@@ -44,26 +46,15 @@ These days, you have two uses for this card:
 2. You discover what I have done with the implementation of this as
    an audio/video output device for mplayer (read on and you'll find
    out).
-   
+
 
 
 2. Requirements
 
- * First of all you will need the DXR3/H+ drivers properly installed,
-   including the dev-api.
-   These can be downloaded from dxr3.sourceforge.net (I suggest using
-   the CVS version since most of the time I use the latest features
-   which are only available through cvs)
+ * First of all you will need the DXR3/H+ drivers properly installed.
+   Version 0.9.0 or later
 
- * Second, if you want to be able to play back anything other than 
-   mpeg12 (vcd/dvd) through your dxr3 you need to install RTE from 
-   zapping.sourceforge.net compile and install it BEFORE running 
-   configure in the mplayer dir. With RTE you should be able to play
-   any movie supported by MPlayer.
-   
- * Run <mplayerdir>/configure and make sure that DXR3/H+ support =yes
-   and optionally that mp1e rte = yes, if it's = no, please mail me
-   your configure.log and I'll fix it.
+ * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
    
  From here on compilation (of at least my code ;) should go without any
  problems.
@@ -94,6 +85,11 @@ I've switched to mp1e from ffmpeg so it should be lightning fast now.
 Other codecs:
 No "-vc <codec>" switches should be required as mplayer will autodetect.
 If you find an unsupported codec please contact me!
+
+* Avoid running mplayer as root or setuid root as rtc timing seems to
+  slow down playback on the dxr3 for some users. I will look into this
+  at a later point as this hardly qualifies as a severe bug *
+
 
  
 4. Contacting me
