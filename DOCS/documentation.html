@@ -1127,9 +1127,12 @@ Anyone has closer info?</P>
 
 <P><B><A NAME=6.6>6.6. QNX</A></B></P>
 
-<P>Works. Only has <CODE>-vo x11</CODE> output which is even much slower
-than on Linux, since QNX has only X <I>emulation</I> which is VERY slow.
-No closer info yet.</P>
+<P>Works. You'll need to download SDL for QNX, and install it. Then run
+  <B>MPlayer</B> with <CODE>-vo sdl:photon</CODE> and <CODE>-ao sdl:nto</CODE>
+  options, and it should be fast.</P>
+
+<P>The <CODE>-vo x11</CODE> output will be even slower than on Linux, since
+  QNX has only X <I>emulation</I> which is VERY slow. Use SDL.
 
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
@@ -1295,7 +1298,7 @@ No closer info yet.</P>
   <LI>SPDIF AC3 output for SBLive!</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariush Pietrzak (Eyck)</A></B>
+<LI><B><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariusz Pietrzak (Eyck)</A></B>
 <UL>
   <LI>debian packaging support (see debian/* and this documentation)</LI>
   <LI>support for vplayer subtitle format</LI>
@@ -1456,7 +1459,7 @@ No closer info yet.</P>
 <UL>
   <LI>german docs translation</LI>
   <LI>some improvements in configure, small patches</LI>
-  <LI>found somebody (Thilo Wunderlich) how send a DVB card</LI>
+  <LI>found somebody (Thilo Wunderlich) who sent a DVB card</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
@@ -1578,14 +1581,14 @@ other technical help from:</P>
   <LI><B>French</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (outdated)
   <LI><B>Spanish</B>: TeLeNiEkO (outdated)
   <LI><B>Russian</B>: Nick Kurshev (outdated)
-  <LI><B>Polish</B>: Darius Pietrzak (old translation in non-hierachic ascii
+  <LI><B>Polish</B>: Dariusz Pietrzak (old translation in non-hierachic ascii
     version) <A HREF="mailto:nell@skrzynka.pl">Justyna Biala</A>(current html
     version)
 
 </UL></P>
 <P>Platforms/ports
 <UL>
-  <LI><B>DEBIAN packaging</B>: Dariush Pietrzak
+  <LI><B>DEBIAN packaging</B>: Dariusz Pietrzak
   <LI><B>FreeBSD support</B>: Vladimir Kushnir
   <LI><B>Solaris 8 support</B>: Jürgen Keil
   <LI><B>MIPS support</B>: Oliver Schoenbrunner
