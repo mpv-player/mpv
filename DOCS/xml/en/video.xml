@@ -164,7 +164,7 @@ Older 3dfx drivers were known to have problems with XVideo acceleration, it
 didn't support either YUY2 or YV12, and so. Verify that you have XFree86
 version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous
 versions, including 4.1.0, <emphasis role="bold">crashes with YV12</emphasis>.
-If you experience strange effects using -vo xv, try SDL (it has XVideo too) and
+If you experience strange effects using <option>-vo xv</option>, try SDL (it has XVideo too) and
 see if it helps. Check the <link linkend="sdl">SDL section</link> for details.
 </para>
 
@@ -384,9 +384,9 @@ Now it works as a simple user, too.
 <caution>
 <title>Security risk</title>
 <para>
-This is a <emphasis role="bold">big</emphasis> security risk! Never do this
-on a server or on a computer can be accessed by other people because they
-can gain root privileges through SUID root
+This is a <emphasis role="bold">big</emphasis> security risk!
+<emphasis role="bold">Never</emphasis> do this on a server or on a computer can be
+accessed by other people because they can gain root privileges through SUID root
 <application>MPlayer</application>.
 </para>
 </caution>
@@ -586,7 +586,7 @@ with every chipset driver for XFree out there.
 <title>SDL</title>
 
 <para>
-SDL (Simple Directmedia Layer) is basically a unified
+<acronym>SDL</acronym> (Simple Directmedia Layer) is basically a unified
 video/audio interface. Programs that use it know only about SDL, and not
 about what video or audio driver does SDL actually use.  For example a Doom
 port using SDL can run on svgalib, aalib, X, fbdev, and others, you only
@@ -757,7 +757,7 @@ filter, see the man page for exact parameters.
 
 <para>
 Whether to build the FBdev target is autodetected during
-<filename>./configure</filename>.  Read the framebuffer documentation in
+<filename>./configure</filename>. Read the framebuffer documentation in
 the kernel sources (<filename>Documentation/fb/*</filename>) for more
 information.
 </para>
@@ -970,7 +970,7 @@ instructions.
 AAlib is a library for displaying graphics in text mode, using powerful
 ASCII renderer. There are <emphasis>lots</emphasis> of programs already
 supporting it, like Doom, Quake, etc. <application>MPlayer</application>
-contains a very usable driver for it.  If <filename>./configure</filename>
+contains a very usable driver for it. If <filename>./configure</filename>
 detects aalib installed, the aalib libvo driver will be built.
 </para>
 
@@ -1071,7 +1071,7 @@ The rendering is very CPU intensive, especially when using AA-on-X
 (using aalib on X), and it's least CPU intensive on standard,
 non-framebuffer console. Use SVGATextMode to set up a big textmode,
 then enjoy! (secondary head Hercules cards rock :)) (but imho you
-can use -vf 1bpp option to get graphics on hgafb:)
+can use <option>-vf 1bpp</option> option to get graphics on hgafb:)
 </para>
 </note>
 
@@ -1154,6 +1154,13 @@ at least.)
   <emphasis role="bold">and</emphasis> TV output at the same time!
   (Recommended for ATI cards.)
   </simpara></listitem>
+<listitem><simpara>
+  If you have VESA VBE 3.0+, and you had specified
+  <systemitem>monitor_hfreq, monitor_vfreq, monitor_dotclock</systemitem> somewhere
+  (config file, or commandline) you will get the highest possible refresh rate.
+  (Using General Timing Formula). To enable this feature you have to specify
+  <emphasis role="bold">all</emphasis> your monitor options.
+  </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
@@ -1183,8 +1190,9 @@ It won't work!
   <listitem><simpara>
     currently recognized: <literal>dga</literal> to force dga mode and
     <literal>nodga</literal> to disable dga mode. In dga mode you can enable
-    double buffering via the -double option. Note: you may omit these parameters
-    to enable <emphasis role="bold">autodetection</emphasis> of dga mode.
+    double buffering via the <option>-double</option> option. Note: you may omit
+    these parameters to enable <emphasis role="bold">autodetection</emphasis> of
+    dga mode.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1209,9 +1217,9 @@ It won't work!
   be activated anyway and you will need restart your computer.
   </simpara></listitem>
 <listitem><simpara>
-  Often after terminating VESA driver you get black screen. To return your
-  screen to original state - simply switch to other console (by pressing
-  <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
+  Often after terminating VESA driver you get <emphasis role="bold">black</emphasis>
+  screen. To return your screen to original state - simply switch to other console
+  (by pressing <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
   then switch to your previous console by the same way.
   </simpara></listitem>
 <listitem><simpara>
@@ -1277,7 +1285,7 @@ video modes.
 <formalpara>
 <title>PREAMBLE</title>
 <para>
-VIDIX is the abbreviation for <emphasis role="bold">VID</emphasis>eo
+<acronym>VIDIX</acronym> is the abbreviation for <emphasis role="bold">VID</emphasis>eo
 <emphasis role="bold">I</emphasis>nterface for *ni<emphasis role="bold">X</emphasis>.
 VIDIX was designed and introduced as an interface for fast user-space drivers
 providing such video performance as mga_vid does for Matrox cards. It's also very
@@ -1339,9 +1347,9 @@ Indeed it doesn't matter which video output driver is used with
 <formalpara>
 <title>USAGE METHODS</title>
 <para>
-When VIDIX is used as <emphasis>subdevice</emphasis> (<option>-vo
+When VIDIX is used as <emphasis role="bold">subdevice</emphasis> (<option>-vo
 vesa:vidix</option>) then video mode configuration is performed by video
-output device (<emphasis>vo_server</emphasis> in short). Therefore you can
+output device (<emphasis role="bold">vo_server</emphasis> in short). Therefore you can
 pass into command line of <application>MPlayer</application> the same keys
 as for vo_server. In addition it understands <option>-double</option> key
 as globally visible parameter. (I recommend using this key with VIDIX at
@@ -1376,7 +1384,7 @@ systems where X11 does.
 <para>
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
-(<emphasis role="bold">Warning: This is a security risk!</emphasis>
+(<emphasis role="bold">Warning: This is a security risk!</emphasis>).
 Alternatively, you can use a special kernel module, like this:
 </para>
 
@@ -1390,6 +1398,7 @@ Alternatively, you can use a special kernel module, like this:
   </para></step>
 <step><para>
   Compile the module in the <filename class="directory">svgalib_helper</filename>
+  directory (it can be found inside the <filename class="directory">svgalib-1.9.17/kernel/</filename>
   directory if you've downloaded the source from the svgalib site) and insmod it.
   </para></step>
 <step><para>
@@ -1443,8 +1452,8 @@ can be found on VIA Epia motherboards.
 The driver was written and is maintained by Alastair M. Robinson, who
 offers the very latest driver versions for download from his
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">homepage</ulink>.
-The drivers are added to MPlayer with only a short delay, so CVS should always
-be up to date.
+The drivers are added to <application>MPlayer</application> with only a short
+delay, so CVS should always be up to date.
 </para>
 </sect5>
 
@@ -1468,9 +1477,10 @@ of resource usage and overhead.&quot; - quoted from <ulink url="http://www.direc
 <para>I'll exclude DirectFB features from this section.</para>
 
 <para>
-Though MPlayer is not supported as a &quot;video provider&quot; in DirectFB, this
-output driver will enable video playback through DirectFB. It will - of course -
-be accelerated, on my Matrox G400 DirectFB's speed was the same as XVideo.
+Though <application>MPlayer</application> is not supported as a &quot;video
+provider&quot; in DirectFB, this output driver will enable video playback through
+DirectFB. It will - of course - be accelerated, on my Matrox G400 DirectFB's speed
+was the same as XVideo.
 </para>
 
 <para>
@@ -1527,7 +1537,7 @@ Configure should detect your DVB card. If it did not, force detection with
 
 <para>If you have ost headers at a non-standard path, set the path with</para>
 
-<para><screen>./configure --with-extraincdir=&lt;DVB source directory&gt;/ost/include
+<para><screen>./configure --with-extraincdir=<replaceable>DVB source directory</replaceable>/ost/include
 </screen></para>
 
 <para>Then compile and install as usual.</para>
@@ -1601,7 +1611,7 @@ while keeping the right aspect ratio), use the new dvbscale filter:
 </para>
 
 <para><screen>
-for  3:4 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+for  4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 for 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
@@ -1674,15 +1684,15 @@ both use the em8300 MPEG decoder chip from Sigma Designs.
 First of all you will need properly installed DXR3/H+ drivers, version 0.12.0
 or later. You can find the drivers and installation instructions at the
 <ulink url="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>
-site. Configure should detect your card automatically, compilation should go
-without problems.
+site. <filename>configure</filename> should detect your card automatically,
+compilation should go without problems.
 </para>
 
 <!-- FIXME: find a more clear presentation -->
 <variablelist>
 <title>USAGE</title>
 <varlistentry>
-<term><option>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</option></term>
+<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem><para>
 <option>overlay</option> activates the overlay instead of TVOut. It requires
 that you have a properly configured overlay setup to work right. The easiest
@@ -1690,7 +1700,7 @@ way to configure the overlay is to first run autocal. Then run mplayer with
 dxr3 output and without overlay turned on, run dxr3view. In dxr3view you can
 tweak the overlay settings and see the effects in realtime, perhaps this feature
 will be supported by the MPlayer GUI in the future. When overlay is properly set
-up you will no longer need to use dxr3view.&#x0d;
+up you will no longer need to use dxr3view.
 <option>prebuf</option> turns on prebuffering. Prebuffering is a feature of the
 em8300 chip that enables it to hold more than one frame of video at a time. This
 means that when you are running with prebuffering MPlayer will try to keep the
@@ -1713,7 +1723,7 @@ for external tools like em8300setup. Valid norms are 5 = NTSC, 4 = PAL-60,
 3 = PAL. Special norms are 2 (auto-adjust using PAL/PAL-60) and 1 (auto-adjust
 using PAL/NTSC) because they decide which norm to use by looking at the frame
 rate of the movie. norm = 0 (default) does not change the current norm.
-<option>&lt;device&gt;</option> = device number to use if you have more than one em8300
+<option><replaceable>device</replaceable></option> = device number to use if you have more than one em8300
 card.
 Any of these options may be left out.
 <option>:prebuf:sync</option> seems to work great when playing DivX movies. People
@@ -1751,7 +1761,7 @@ that you use that unless you have problems with it. See the man page for further
 info about <option>-vf lavc/fame</option>.
 Using lavc is highly recommended. Currently there is no way of setting the fps
 of the em8300 which means that it is fixed to 29.97fps. Because of this it is
-highly recommended that you use <option>-vf lavc=&lt;quality&gt;:25</option>
+highly recommended that you use <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
 especially if you are using prebuffering. Then why 25 and not 29.97? Well, the
 thing is that when you use 29.97 the picture becomes a bit jumpy. The reason for
 this is unknown to us. If you set it to somewhere between 25 and 27 the picture
@@ -1838,7 +1848,7 @@ then you would issue the following command
 </para>
 
 <para>
-if you want to use the <systemitem>crop</systemitem> filter, you would do
+if you want to use the <option>crop</option> filter, you would do
 <screen>mplayer -vo zr -vf crop=720:320:80:0 benhur.avi</screen>
 </para>
 
@@ -1866,7 +1876,7 @@ participating in <emphasis>cinerama</emphasis> is four, so you can build a
 </para>
 
 <para>
-inally an important remark: Do not start or stop XawTV on the playback device
+Finally an important remark: Do not start or stop XawTV on the playback device
 during playback, it will crash your computer. It is, however, fine to
 <emphasis role="bold">FIRST</emphasis> start XawTV, <emphasis role="bold">THEN</emphasis>
 start MPlayer, wait for MPlayer to finish and <emphasis role="bold">THEN</emphasis>
@@ -1917,8 +1927,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     -zoom</option> options, but it will be <emphasis role="bold">SLOW</emphasis>,
     and has <emphasis role="bold">Macrovision</emphasis> copy protection enabled
     (you can "workaround" Macrovision using this
-    <ulink url="http://avifile.sourceforge.net/mgamacro.pl">perl
-    script</ulink>.
+    <ulink url="http://avifile.sourceforge.net/mgamacro.pl">perl script</ulink>).
     </para></listitem>
 </varlistentry>
 <varlistentry>
@@ -1953,8 +1962,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
       Next, EDIT and run the <filename>./matroxtv</filename> script. This will
       present you to a very simple menu. Press <keycap>2</keycap> and
       <keycap>Enter</keycap>. Now you should have the same picture on your
-      monitor, and TV. The 3rd option will turn on independent display, but
-      then you <emphasis>can't use X!</emphasis> If the TV (PAL by default)
+      monitor, and TV. If the TV (PAL by default)
       picture has some weird stripes on it, the script wasn't able to set the
       resolution correctly (to 640x512 by default). Try other resolutions
       from the menu and/or experiment with fbset.
@@ -2107,7 +2115,7 @@ Check <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</ulin
 </sect4>
 
 <sect4 id="tvout-nvidia">
-<title>Voodoo 3</title>
+<title>nVidia</title>
 <para>
 First, you MUST download the closed-source drivers from <ulink url="http://nvidia.com"/>.
 I will not describe the installation and configuration process because it does not cover

@@ -199,6 +199,22 @@ end
 </para>
 
 <para>
+Currently there is only one application, so you need only one section: its name is
+<emphasis role="bold">movieplayer</emphasis>.
+</para>
+
+<para>
+Within this section each window is described by a block of the following form:
+<programlisting>
+window = <replaceable>window name</replaceable>
+.
+.
+.
+end
+</programlisting>
+</para>
+
+<para>
 where <replaceable>window name</replaceable> can be one of these strings:
 <itemizedlist>
 <listitem><para><emphasis role="bold">main</emphasis> - for the main window</para></listitem>
@@ -434,7 +450,7 @@ since you cannot see where the <literal>potmeter</literal> is set.
   <listitem><para>
 Defines a font. <literal>fontfile</literal> is the name of a font description file
 with a <filename>.fnt</filename> extension (do not specify the extension here).
-fontid is used to refer to the font (see <link linkend="skin-dlabel">dlabel</link>
+<literal>fontid</literal> is used to refer to the font (see <link linkend="skin-dlabel">dlabel</link>
 and <link linkend="skin-slabel">slabel</link>). Up to 25 fonts can be defined.
     </para></listitem>
 </varlistentry>

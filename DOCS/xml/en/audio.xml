@@ -55,7 +55,7 @@ playing MP3s or sound effects.
 
 <para>
 Other media players like <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
-or <ulink url="http://xine.sourceforge.net">xine</ulink> possibly work
+or <ulink url="http://xine.sourceforge.net">Xine</ulink> possibly work
 out-of-the-box with these drivers because they use "simple" methods
 with internal timing. Measuring showed that their methods are not as
 efficient as <application>MPlayer</application>'s.
@@ -596,7 +596,7 @@ contain silence but 0 and 1 would still be swapped.
 </para>
 
 <para>
-Exemple 2:
+Example 2:
 <screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
 would change the number of channels to 6 and set up 4 routes that copy
 channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
@@ -643,7 +643,7 @@ would set the output format to 4 bytes per sample floating point data.
 <sect4 id="af_delay">
 <title>Delay</title>
 <para>
-The <option>delay</option>  filter delays the sound to the loudspeakers such that
+The <option>delay</option> filter delays the sound to the loudspeakers such that
 the sound from the different channels arrives at the listening position
 simultaneously.
 It is only useful if you have more than 2 loudspeakers. This filter has a
@@ -677,7 +677,7 @@ Subtract the distances s1 to s5 from the maximum distance i.e.
     s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 <listitem><para>
-alculated the required delays in ms as
+Calculated the required delays in ms as
     d[i] = 1000*s[i]/342; i = 1...5
     s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
@@ -863,7 +863,7 @@ sub-woofer for example).
 <sect4 id="af_sub">
 <title>Sub-woofer</title>
 <para>
-The <option>sub</option>  filter adds a sub woofer channel to the audio
+The <option>sub</option> filter adds a sub woofer channel to the audio
 stream. The audio data used for creating the sub-woofer channel is an
 average of the sound in channel 0 and channel 1. The resulting sound is
 then low-pass filtered by a 4th order Butterworth filter with a default
@@ -1108,8 +1108,8 @@ mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
 
 <para>
 This plugin (linearly) increases the difference between left and right
-channels (like the XMMS extrastereo plugin) which gives some sort of "live"
-effect to playback.
+channels (like the <application>XMMS</application> extrastereo plugin) which gives some
+sort of "live" effect to playback.
 </para>
 
 <para>

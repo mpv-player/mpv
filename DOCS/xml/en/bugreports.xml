@@ -77,9 +77,9 @@ and send your bug report to:
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>
 </para>
 <para>
-The language of this list is English. Please follow the standard
+The language of this list is <emphasis role="bold">English</emphasis>. Please follow the standard
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Guidelines</ulink> and
-do not send HTML mail to any of our mailing lists. You will only get ignored or
+<emphasis role="bold">do not send HTML mail</emphasis> to any of our mailing lists. You will only get ignored or
 banned. If you do not know what HTML mail is or why it is evil, read this
 <ulink url="http://expita.com/nomime.html">fine document</ulink>. It explains all
 the details and has instructions for turning HTML off. Also note that we will not
@@ -123,6 +123,12 @@ gcc and ld versions:
 <screen>
 gcc -v
 ld -v
+</screen>
+</para></listitem>
+<listitem><para>
+binutils version:
+<screen>
+as --version
 </screen>
 </para></listitem>
 <listitem><para>

@@ -8,15 +8,15 @@
 <formalpara>
 <title>The background:</title>
 <para>
-The GCC <emphasis>2.95</emphasis> series is an official GNU release and
+The GCC <emphasis role="bold">2.95</emphasis> series is an official GNU release and
 version 2.95.3 of GCC is the most bug-free in that series.  We have never
 noticed compilation problems that we could trace to gcc-2.95.3. Starting
-with Red Hat Linux 7.0, <emphasis>Red Hat</emphasis> included a heavily
+with Red Hat Linux 7.0, <emphasis role="bold">Red Hat</emphasis> included a heavily
 patched CVS version of GCC in their distribution and named it
-<emphasis>2.96</emphasis>. Red Hat included this version in the
+<emphasis role="bold">2.96</emphasis>. Red Hat included this version in the
 distribution because GCC 3.0 was not finished at the time, and they needed
 a compiler that worked well on all of their supported platforms, including
-IA64 and s390. The Linux distributor <emphasis>Mandrake</emphasis> also
+IA64 and s390. The Linux distributor <emphasis role="bold">Mandrake</emphasis> also
 followed Red Hat's example and started shipping GCC 2.96 with their
 Linux-Mandrake 8.0 series.
 </para>
@@ -27,7 +27,7 @@ Linux-Mandrake 8.0 series.
 <para>
 The GCC team disclaimed any link with GCC 2.96 and issued an
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">official response</ulink>
-to GCC 2.96.  Many developers around the world began having problems with
+to GCC 2.96. Many developers around the world began having problems with
 GCC 2.96, and started recommending other compilers. Examples are
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
 <ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
@@ -66,7 +66,7 @@ disappear with a different compiler. In any case it does not matter any
 longer. Hopefully a maturing GCC 3.x will solve the issue for good.  If you
 want to compile with 2.96 give the <option>--disable-gcc-checking</option>
 flag to <filename>configure</filename>. Remember that you are on your own
-and <emphasis>do not report any bugs</emphasis>. If you do, you will only
+and <emphasis role="bold">do not report any bugs</emphasis>. If you do, you will only
 get banned from our mailing list because we have had more than enough flame
 wars over GCC 2.96. Please let the matter rest.
 </para>
@@ -80,22 +80,22 @@ get <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 packages</
 (unofficial, but working fine)
 and you can install them along the gcc-2.96 you already have. MPlayer will
 detect it and use 3.2 instead of 2.96. If you do not want to or cannot use
-the binary packages, here is how you can compile GCC 3.x from source:
+the binary packages, here is how you can compile GCC 3 from source:
 </para>
 
 <procedure>
 <step><para>
   Go to the
-  <ulink url="http://gcc.gnu.org/mirrors.html">GCC mirrors</ulink>
-  page and download <filename>gcc-core-XXX.tar.gz</filename> where XXX is
-  the version number.  This includes the complete C compiler and is sufficient for
-  <application>MPlayer</application>. If you also want C++, Java or some of
-  the other advanced GCC features <filename>gcc-XXX.tar.gz</filename> may
-  better suit your needs.
+  <ulink url="http://gcc.gnu.org/mirrors.html">GCC mirrors page</ulink>
+  page and download <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename>
+  where <replaceable>XXX</replaceable> is the version number. This includes the complete
+  C compiler and is sufficient for <application>MPlayer</application>. If you also want
+  C++, Java or some of the other advanced GCC features
+  <filename>gcc-<replaceable>XXX</replaceable>.tar.gz</filename> may better suit your needs.
   </para></step>
 <step><para>
   Extract the archive with
-  <screen>tar -xvzf gcc-core-XXX.tar.gz</screen>
+  <screen>tar -xvzf gcc-core-<replaceable>XXX</replaceable>.tar.gz</screen>
   </para></step>
 <step><para>
   GCC is not built inside the source directory itself like most programs,
@@ -108,7 +108,7 @@ the binary packages, here is how you can compile GCC 3.x from source:
   need the configure from the source directory:
   <screen>
 cd gcc-build
-../gcc-3.XXX/configure</screen>
+../gcc-3.<replaceable>XXX</replaceable>/configure</screen>
   </para></step>
 <step><para>
   Compile GCC by issuing this command in the build directory:
@@ -136,10 +136,10 @@ see fit.
 
 <para>
 Another impediment to binary redistribution was compiletime optimizations
-for CPU architecture.  <application>MPlayer</application> now supports
+for CPU architecture. <application>MPlayer</application> now supports
 runtime CPU detection (specify the
 <option>--enable-runtime-cpudetection</option> option when compiling). It
-is disabled by default because it implies a small speed sacrifice, but it is
+is disabled by default because it implies a small speed sacrifice, it is
 now possible to create binaries that run on different members of the Intel
 CPU family.
 </para>
@@ -187,15 +187,15 @@ incomplete and insulting. You be the judge.
 He went on to mention <application>MPlayer</application> negatively in his
 <ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 Linux predictions for 2002</ulink>.
 In a followup
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</ulink>
+<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of Xine</ulink>
 he continued stirring up controversy. Ironically at the end of that article
-he quotes his exchange with Günter Bartsch, the original author of xine,
+he quotes his exchange with Günter Bartsch, the original author of <application>Xine</application>,
 that perfectly summarizes the whole situation:
 
 <blockquote><para>
 However, he also went on to say that he was "surprised" by my column about
-Mplayer and thought it was unfair, reminding me that it is a free software
-project. "If you don't like it," Bartsch said, "you're free not to use it." 
+<application>MPlayer</application> and thought it was unfair, reminding me that it is
+a free software project. "If you don't like it," Bartsch said, "you're free not to use it."
 </para></blockquote>
 </para>
 
@@ -208,7 +208,7 @@ your own opinion:
 <para>
 Marc Rassbach has
 <ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">something to say</ulink>
-about the man
+about the man.
 
 <blockquote><para>
 You may all remember the LinuxWorld 2000, when he claimed that Linus T said
