@@ -895,12 +895,14 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  * memory below %esp;  it segfaults.
  * The extend_stack_for_dll_alloca() routine just preallocates a big chunk
  * of memory on the stack, for use by the DLLs alloca routine.
+ * Added the noinline attribute as e.g. gcc 3.2.2 inlines this function
+ * in a way that breaks it.
  */
-static void extend_stack_for_dll_alloca(void)
+static void __attribute__((noinline)) extend_stack_for_dll_alloca(void)
 {
 #ifndef __FreeBSD__
-    void* mem=alloca(0x20000);
-    *(int*)mem=0x1234;
+    volatile int* mem=alloca(0x20000);
+    *mem=0x1234;
 #endif
 }
 
