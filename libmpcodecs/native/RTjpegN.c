@@ -554,8 +554,8 @@ void RTjpeg_quant_init(void)
  for(i=0; i<64; i++)qtbl[i]=(__s16)RTjpeg_cqt[i];
 }
 
-static mmx_t RTjpeg_ones=(mmx_t)(long long)0x0001000100010001LL;
-static mmx_t RTjpeg_half=(mmx_t)(long long)0x7fff7fff7fff7fffLL;
+static mmx_t RTjpeg_ones={0x0001000100010001LL};
+static mmx_t RTjpeg_half={0x7fff7fff7fff7fffLL};
 
 void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
@@ -611,11 +611,11 @@ void RTjpeg_quant(__s16 *block, __s32 *qtbl)
  * Perform the forward DCT on one block of samples.
  */
 #ifdef MMX
-static mmx_t RTjpeg_C4   =(mmx_t)(long long)0x2D412D412D412D41LL;
-static mmx_t RTjpeg_C6   =(mmx_t)(long long)0x187E187E187E187ELL;
-static mmx_t RTjpeg_C2mC6=(mmx_t)(long long)0x22A322A322A322A3LL;
-static mmx_t RTjpeg_C2pC6=(mmx_t)(long long)0x539F539F539F539FLL;
-static mmx_t RTjpeg_zero =(mmx_t)(long long)0x0000000000000000LL;
+static mmx_t RTjpeg_C4   ={0x2D412D412D412D41LL};
+static mmx_t RTjpeg_C6   ={0x187E187E187E187ELL};
+static mmx_t RTjpeg_C2mC6={0x22A322A322A322A3LL};
+static mmx_t RTjpeg_C2pC6={0x539F539F539F539FLL};
+static mmx_t RTjpeg_zero ={0x0000000000000000LL};
 
 #else
 
@@ -1572,11 +1572,11 @@ void RTjpeg_idct(__u8 *odata, __s16 *data, int rskip)
 {
 #ifdef MMX
 
-static mmx_t fix_141			= (mmx_t)(long long)0x5a825a825a825a82LL;
-static mmx_t fix_184n261	= (mmx_t)(long long)0xcf04cf04cf04cf04LL;
-static mmx_t fix_184			= (mmx_t)(long long)0x7641764176417641LL;
-static mmx_t fix_n184		= (mmx_t)(long long)0x896f896f896f896fLL;
-static mmx_t fix_108n184	= (mmx_t)(long long)0xcf04cf04cf04cf04LL;
+static mmx_t fix_141			= {0x5a825a825a825a82LL};
+static mmx_t fix_184n261	= {0xcf04cf04cf04cf04LL};
+static mmx_t fix_184			= {0x7641764176417641LL};
+static mmx_t fix_n184		= {0x896f896f896f896fLL};
+static mmx_t fix_108n184	= {0xcf04cf04cf04cf04LL};
 
   mmx_t workspace[64];
   mmx_t *wsptr = workspace;
@@ -3149,7 +3149,7 @@ int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
  mmx_t *mold=(mmx_t *)old;
  mmx_t *mblock=(mmx_t *)RTjpeg_block;
  volatile mmx_t result;
- static mmx_t neg=(mmx_t)(unsigned long long)0xffffffffffffffffULL;
+ static mmx_t neg={0xffffffffffffffffULL};
  
  movq_m2r(*mask, mm7);
  movq_m2r(neg, mm6);
