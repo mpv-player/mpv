@@ -1085,8 +1085,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	case IMGFMT_BGR32:
 		if(priv->dblit) {
 			SDL_SRF_LOCK(priv->surface, -1)
-            dst = (uint8_t *) priv->surface->pixels + priv->y*priv->surface->pitch;
-            
+			dst = (uint8_t *) priv->surface->pixels + priv->y*priv->surface->pitch;
 			if(priv->flip) {
 				mysrc+=priv->framePlaneRGB;
 				for(i = 0; i < priv->height; i++) {
@@ -1139,54 +1138,29 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     y += priv->y;
     
     dst = priv->overlay->pixels[0] + priv->overlay->pitches[0]*y + x;
-
-        src = image[0];
-        for(i=0;i<h;i++){
-            memcpy(dst,src,w);
-            src+=stride[0];
-        dst += priv->overlay->pitches[0];
-        }
-        
-        x/=2;y/=2;w/=2;h/=2;
+    memcpy_pic(dst, image[0], w, h, priv->overlay->pitches[0], stride[0]);
+    x/=2;y/=2;w/=2;h/=2;
 
     switch(priv->format) {
     case IMGFMT_YV12:
         dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
-        src = image[1];
-        for(i=0;i<h;i++){
-            memcpy(dst,src,w);
-            src+=stride[2];
-            dst += priv->overlay->pitches[2];
-        }
-        
+	memcpy_pic(dst, image[1], w, h, priv->overlay->pitches[2], stride[1]);
+
         dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
-        src = image[2];
-        for(i=0;i<h;i++){
-            memcpy(dst,src,w);
-            src+=stride[1];
-            dst += priv->overlay->pitches[1];
-        }
+	memcpy_pic(dst, image[2], w, h, priv->overlay->pitches[1], stride[2]);
+
     break;
+    case IMGFMT_I420:
     case IMGFMT_IYUV:
         dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
-        src = image[1];
-        for(i=0;i<h;i++){
-            memcpy(dst,src,w);
-            src+=stride[1];
-            dst += priv->overlay->pitches[1];
-        }
+	memcpy_pic(dst, image[1], w, h, priv->overlay->pitches[1], stride[1]);
 
         dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
-        src = image[2];
-        for(i=0;i<h;i++){
-            memcpy(dst,src,w);
-            src+=stride[2];
-            dst += priv->overlay->pitches[2];
-        }
-        
+	memcpy_pic(dst, image[2], w, h, priv->overlay->pitches[2], stride[2]);
+
     break;
     default:
-    printf("SDL: unsupported image format in draw_slice, contact MPlayer developers!\n");
+	printf("SDL: unsupported image format in draw_slice, contact MPlayer developers!\n");
     }
 
 	SDL_OVR_UNLOCK
