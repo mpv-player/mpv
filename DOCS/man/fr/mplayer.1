@@ -1,4 +1,4 @@
-.\" synced with 1.845
+.\" synced with 1.846
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "06 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "07 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -7622,16 +7622,17 @@ directs dans les trames-B.
 .IPs 0
 Aucun\ : les macro-blocs directs ne sont pas utilisés.
 .IPs 1
-Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
-suivante (par défaut).
-.IPs 2
 Spatial\ : les vecteur de mouvements sont extrapolés d'après les blocs
 adjacents.
+.IPs 2
+Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
+suivante (par défaut).
 .RE
 .PD 1
-Les prédicteurs spatiaux et temporels sont approximativement de la même
-vitesse, et aucun n'est strictement meilleur que l'autre.
 Le meilleur choix dépend de chaque film.
+Les prédicteurs spatiaux et temporels sont approximativement de la même
+vitesse, produisent un PSNR similaire, mais les temporels sont souvent
+plus jolis.
 direct_pred=0 est généralement lent et de qualité moindre.
 .
 .TP
@@ -7656,24 +7657,22 @@ qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 4x4mv n'est recommandé que si subq >=3.
 .
  .TP
-.B subq=<0\-5>
+.B subq=<1\-5>
 Ajuste la qualité d'affinement de subpel.
-Ce paramètre contrôle le compromis qualité/\:vitesse liées aux décisions du
+Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
 Utilisé correctement, cela peut améliorer la qualité de façon significative.
 .RSs
-0: halfpel uniquement (précision d'un demi-pixel)
+1: fullpixel mode decision, 1 itération qpel sur le candidat vainqueur
+(rapide)
 .br
-1: 1 itération qpel sur le candidant vainqueur
+2: fullpixel mode decision, 2 itérations qpel sur le candidat vainqueur
 .br
-2: 2 itérations qpel sur le candidant vainqueur
+3: halfpel mode decision, qpel sur le vainqueur
 .br
-3: halfpel sur tous les types de macro-blocs, qpel sur le vainqueur
-(par défaut)
+4: qpel mode decision
 .br
-4: qpel partout
-.br
-5: plus d'itétations qpel
+5: qpel mode decision, plus d'itérations (meilleur, par défaut)
 .REss
 .
 .TP
