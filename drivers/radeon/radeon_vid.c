@@ -14,7 +14,7 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "1.0.0"
+#define RADEON_VID_VERSION "1.0.1"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -29,9 +29,7 @@
   Highest priority: fbvid.h compatibility
   High priority: RGB/BGR 2-32, YVU9, IF09 support
   Middle priority:
-    OV0_COLOUR_CNTL         brightness saturation 
      SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
-    OV0_GRAPHICS_KEY_CLR    color key 
     OV0_AUTO_FLIP_CNTL
     OV0_FILTER_CNTL
     OV0_VIDEO_KEY_CLR
@@ -130,12 +128,16 @@ typedef struct bes_registers_s
   uint32_t exclusive_horz;
   uint32_t auto_flip_cntl;
   uint32_t filter_cntl;
-  int brightness;
-  int saturation;
   uint32_t graphics_key_msk;
-  uint32_t graphics_key_clr;
   uint32_t key_cntl;
   uint32_t test;
+  /* Configurable stuff */
+  int double_buff;
+  int brightness;
+  int saturation;
+  uint32_t graphics_key_clr;
+  int deinterlace_on;
+  uint32_t deinterlace_pattern;
 } bes_registers_t;
 
 typedef struct video_registers_s
@@ -187,7 +189,6 @@ static uint32_t radeon_vid_in_use = 0;
 static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
-static int radeon_double_buff=1;
 static uint32_t radeon_ram_size = 0;
 
 static mga_vid_config_t radeon_config; 
@@ -276,13 +277,6 @@ static void radeon_vid_stop_video( void )
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
     OUTREG(OV0_FILTER_CNTL, 0x0000000f);
-/*
-    OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
-			    (saturation << 8) |
-			    (saturation << 16));
-    OUTREG(OV0_GRAPHICS_KEY_MSK, (1 << depth) - 1);
-    OUTREG(OV0_GRAPHICS_KEY_CLR, colorKey);
-*/
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
     OUTREG(OV0_TEST, 0);
 }
@@ -303,7 +297,7 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
 
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
-    OUTREG(OV0_DEINTERLACE_PATTERN,0x900AAAAA);
+    OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -335,10 +329,10 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     OUTREG(OV0_P23_V_ACCUM_INIT,	besr.p23_v_accum_init);
 
     bes_flags = SCALER_ENABLE |
-                SCALER_ADAPTIVE_DEINT |
                 SCALER_SMART_SWITCH |
                 SCALER_HORZ_PICK_NEAREST;
-    if(radeon_double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
+    if(besr.double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
+    if(besr.deinterlace_on) bes_flags |= SCALER_ADAPTIVE_DEINT;
 #ifdef RAGE128
     bes_flags |= SCALER_BURST_PER_PLANE;
 #endif
@@ -366,16 +360,6 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     }
 RTRACE(RVID_MSG"OV0: SCALER=%x\n",bes_flags);
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
-/*
- TODO:
- brightness: -64 : +63
- saturation: 0 : 31
- 	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
-				(saturation << 8) |
-				(saturation << 16));
-	OUTREG(OV0_GRAPHICS_KEY_CLR, colkey_red | colkey_green << 8 | colkey_blue << 16);
-
-*/
     OUTREG(OV0_REG_LOAD_CNTL,		0);
 }
 
@@ -550,7 +534,7 @@ RTRACE(RVID_MSG"BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 static void radeon_vid_frame_sel(int frame)
 {
     uint32_t off0,off1,off2;
-    if(!radeon_double_buff) return;
+    if(!besr.double_buff) return;
     if(frame%2)
     {
       off0 = besr.vid_buf3_base_adrs;
@@ -571,12 +555,23 @@ static void radeon_vid_frame_sel(int frame)
     OUTREG(OV0_REG_LOAD_CNTL,		0);
 }
 
+static void radeon_vid_make_default(void)
+{
+  besr.deinterlace_pattern = 0x900AAAAA;
+  OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
+  besr.deinterlace_on=1;
+  besr.double_buff=1;
+}
+
+
 static void radeon_vid_preset(void)
 {
   unsigned tmp;
   tmp = INREG(OV0_COLOUR_CNTL);
   besr.saturation = (tmp>>8)&0x1f;
   besr.brightness = tmp & 0x7f;
+  besr.graphics_key_clr = INREG(OV0_GRAPHICS_KEY_CLR);
+  besr.deinterlace_pattern = INREG(OV0_DEINTERLACE_PATTERN);
 }
 
 static int video_on = 0;
@@ -777,6 +772,9 @@ static int radeon_vid_config_card(void)
 #define PARAM_BRIGHTNESS "brightness="
 #define PARAM_SATURATION "saturation="
 #define PARAM_DOUBLE_BUFF "double_buff="
+#define PARAM_COLOUR_KEY "colour_key="
+#define PARAM_DEINTERLACE "deinterlace="
+#define PARAM_DEINTERLACE_PATTERN "deinterlace_pattern="
 
 static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_t *ppos)
 {
@@ -787,11 +785,15 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
     len = 0;
     len += sprintf(&buf[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
     len += sprintf(&buf[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
-    len += sprintf(&buf[len],"MMIO: %p\n",radeon_mmio_base);
+    len += sprintf(&buf[len],"MMIO: %p\n\n",radeon_mmio_base);
     len += sprintf(&buf[len],"Configurable stuff:\n");
-    len += sprintf(&buf[len],PARAM_DOUBLE_BUFF"%s\n",radeon_double_buff?"on":"off");
+    len += sprintf(&buf[len],"~~~~~~~~~~~~~~~~~~~\n");
+    len += sprintf(&buf[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
     len += sprintf(&buf[len],PARAM_BRIGHTNESS"%i\n",brightness);
     len += sprintf(&buf[len],PARAM_SATURATION"%u\n",saturation);
+    len += sprintf(&buf[len],PARAM_COLOUR_KEY"%X\n",besr.graphics_key_clr);
+    len += sprintf(&buf[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
+    len += sprintf(&buf[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
     return len;
 }
 
@@ -803,8 +805,8 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
       brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
       if(brightness >= -64 && brightness <= 63)
 	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
-				     (besr.saturation << 8) |
-				     (besr.saturation << 16));
+				(besr.saturation << 8) |
+				(besr.saturation << 16));
     }
     else
     if(memcmp(buf,PARAM_SATURATION,min(count,strlen(PARAM_SATURATION))) == 0)
@@ -813,14 +815,34 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
       saturation=simple_strtol(&buf[strlen(PARAM_SATURATION)],NULL,10);
       if(saturation >= 0 && saturation <= 31)
 	OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
-				     (saturation << 8) |
-				     (saturation << 16));
+				(saturation << 8) |
+				(saturation << 16));
     }
     else
     if(memcmp(buf,PARAM_DOUBLE_BUFF,min(count,strlen(PARAM_DOUBLE_BUFF))) == 0)
     {
-      if(memcmp(&buf[strlen(PARAM_DOUBLE_BUFF)],"on",2) == 0) radeon_double_buff = 1;
-      else radeon_double_buff = 0;
+      if(memcmp(&buf[strlen(PARAM_DOUBLE_BUFF)],"on",2) == 0) besr.double_buff = 1;
+      else besr.double_buff = 0;
+    }
+    else
+    if(memcmp(buf,PARAM_COLOUR_KEY,min(count,strlen(PARAM_COLOUR_KEY))) == 0)
+    {
+      long ckey;
+      ckey=simple_strtol(&buf[strlen(PARAM_COLOUR_KEY)],NULL,16);
+	OUTREG(OV0_GRAPHICS_KEY_CLR, ckey);
+    }
+    else
+    if(memcmp(buf,PARAM_DEINTERLACE,min(count,strlen(PARAM_DEINTERLACE))) == 0)
+    {
+      if(memcmp(&buf[strlen(PARAM_DEINTERLACE)],"on",2) == 0) besr.deinterlace_on = 1;
+      else besr.deinterlace_on = 0;
+    }
+    else
+    if(memcmp(buf,PARAM_DEINTERLACE_PATTERN,min(count,strlen(PARAM_DEINTERLACE_PATTERN))) == 0)
+    {
+      long dpat;
+      dpat=simple_strtol(&buf[strlen(PARAM_DEINTERLACE_PATTERN)],NULL,16);
+	OUTREG(OV0_DEINTERLACE_PATTERN, dpat);
     }
     radeon_vid_preset();
     return count;
@@ -922,6 +944,7 @@ static int radeon_vid_initialize(void)
 		return -EINVAL;
 	}
 	radeon_vid_save_state();
+	radeon_vid_make_default();
 	radeon_vid_preset();
 	return(0);
 }
