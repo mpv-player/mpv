@@ -37,6 +37,7 @@ extern char *lirc_configfile;
 
 #ifndef USE_LIBVO2
 extern int vo_doublebuffering;
+extern int vo_vsync;
 extern int vo_fsmode;
 extern int vo_dbpp;
 /* gamma correction */
@@ -248,6 +249,8 @@ static config_t mplayer_opts[]={
 	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"brightness",&vo_gamma_brightness, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},

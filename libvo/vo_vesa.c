@@ -114,7 +114,7 @@ static char * vbeErrToStr(int err)
   static char sbuff[80];
   if((err & VBE_VESA_ERROR_MASK) == VBE_VESA_ERROR_MASK)
   {
-    sprintf(sbuff,"VESA failed = 0x4f%x",(err & VBE_VESA_ERRCODE_MASK)>>8);
+    sprintf(sbuff,"VESA failed = 0x4f%02x",(err & VBE_VESA_ERRCODE_MASK)>>8);
     retval = sbuff;
   }
   else
@@ -361,7 +361,7 @@ static void flip_page(void)
   if(vo_doublebuffering && multi_size > 1)
   {
     int err;
-    if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
+    if((err=vbeSetDisplayStart(multi_buff[multi_idx],vo_vsync)) != VBE_OK)
     {
       vesa_term();
       PRINT_VBE_ERR("vbeSetDisplayStart",err);
@@ -375,10 +375,10 @@ static void flip_page(void)
   else
   if(tripple_buffering)
   {
-   vbeSetScheduledDisplayStart(multi_buffer[multi_idx],1);
+   vbeSetScheduledDisplayStart(multi_buff[multi_idx],vo_vsync);
    multi_idx++;
    if(multi_idx > 2) multi_idx = 0;
-   win.ptr = dga_buffer = video_base + multi_buffer[multi_idx];
+   win.ptr = dga_buffer = video_base + multi_buff[multi_idx];
   }
 */
 }

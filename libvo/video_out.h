@@ -177,6 +177,7 @@ extern int vo_dheight;
 extern int vo_dbpp;
 
 extern int vo_doublebuffering;
+extern int vo_vsync;
 extern int vo_fsmode;
 
 extern int vo_pts;
