@@ -102,6 +102,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
 
 int init_video_codec(){
   HRESULT ret;
+  int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
   if(verbose) printf("======= Win32 (VFW) VIDEO Codec init =======\n");
@@ -146,6 +147,7 @@ int init_video_codec(){
   case IMGFMT_I420:
   case IMGFMT_IYUV:
       sh_video->o_bih.biBitCount=12;
+      yuv=1;
       break;
 
 /* packed format */
@@ -153,6 +155,7 @@ int init_video_codec(){
   case IMGFMT_UYVY:
   case IMGFMT_YVYU:
       sh_video->o_bih.biBitCount=16;
+      yuv=1;
       break;
 
 /* rgb/bgr format */
@@ -189,7 +192,7 @@ int init_video_codec(){
       sh_video->o_bih.biHeight=-sh_video->bih->biHeight; // flip image!
   }
 
-  if(!(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
+  if(yuv && !(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
 	 sh_video->o_bih.biCompression = outfmt;
 
   if(verbose) {
@@ -244,7 +247,7 @@ int init_video_codec(){
     return 0;
   }
 
-  if(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK)
+  if(yuv && sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK)
     sh_video->o_bih.biCompression = outfmt;
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!
