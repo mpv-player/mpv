@@ -86,7 +86,7 @@ you can get the list of available drivers executing
 .B \-ao\ <driver>[:<subdriver>]
 select audio output driver. "subdriver" is valid only when you specify
 SDL as driver, which uses alternative means to produce audio.
-Like: -vo sdl:esd (or arts)
+Like: -ao sdl:esd (or arts)
 
 If using OSS, you can specify which sound device to use like this :
 -ao oss:/dev/dsp0
@@ -318,8 +318,6 @@ q or ESC        stop playing and quit program
 o               toggle OSD: none / seek / seek+timer
 
 m               toggle using master/pcm volume
-
-d               toggle frame dropping: no / on / hard(debug)
 
 z or x          adjust subtitle delay by +/- 0.1 second
 .IP
