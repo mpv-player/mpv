@@ -48,7 +48,7 @@ function TVdefaultmode {
 }
 
 function SetTVstandard {
-	matroxset 128		# PAL
+	matroxset 1		# PAL
 	# matroxset 2		# NTSC
 }
 
@@ -139,7 +139,6 @@ read ABC
 
 case "$ABC" in
 	0)
-	mappingreset
 	clear
 	setterm -cursor off
 	setterm -blank 0
