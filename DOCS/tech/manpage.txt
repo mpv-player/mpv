@@ -161,6 +161,7 @@ General:
       (\-fs), stdin (\-) or a dash (mplayer  \- Movie Player for Linux).
       Use just '-' if it is a hyphen (A-V) or a minus (-1). Please note that
       it should be \-dvd-device and not \-dvd\-device.
+    - Don't start a line with "'" or ".", nroff treats them specially.
 
 
 Option descriptions:
