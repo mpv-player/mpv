@@ -1,0 +1,43 @@
+About:
+~~~~~~
+`subfont' program renders antialiased fonts for mplayer using freetype library.
+Should work with TrueType, Type1 and any other font supported by libfreetype.
+
+Goals:
+ - internationalization: supports any 8 bit encoding (uses iconv).
+ - nice look: creates glyph `shadows' using algorithm derived from gaussian blur (slow!).
+
+
+Note:
+~~~~~
+Starting x position of each char and the bitmap width is aligned to multiple of 8
+(required for under-development MMX renderer).
+
+
+Usage:
+~~~~~~
+Usage: subfont encoding ppem font [alphaFactor [minAlpha [radius]]]
+  Program creates 3 files: font.desc, <encoding>-a.raw, <encoding>-b.raw.
+  You should append font.desc.tail (desc for OSD characters by a'rpi & chass) to font.desc,
+  and copy font.desc and all *.raw files to ~/.mplayer/font/ directory.
+
+  encoding     must be 8 bit encoding, like iso-8859-2.
+               To list encodings available on your system use iconv -l.
+  ppem         Font size in pixels (e.g. 24).
+  font         Font file path. Any format supported by freetype library (*.ttf, *.pf?, *).
+  alphaFactor  Alpha map scaling factor (default is 1.0), float.
+  minAlpha     Alpha map minimum value (default is 1.0, max is 255), float.
+  radius       Alpha map blur radius (default is 6 pixels), integer.
+
+
+Example:
+~~~~~~~~
+make
+./subfont iso-8859-2 20 verdana.ttf
+cat font.desc.tail >> font.desc
+cp font.desc *.raw ~/.mplayer/font/
+
+
+Author:
+~~~~~~~
+Artur Zaprzala <zybi@fanthom.irc.pl>

@@ -1,0 +1,170 @@
+
+;
+; Mplayer subtitle font description file - HighreS ONE
+; font created by a'rpi & chass
+; .desc created by chass & atmosfear
+; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;
+;
+; This file contains the data for Mplayer to build up the font
+; table from the bitmap files. These fonts are used for the OSD
+; (On Screen Display) and for the subtitles.
+;
+;
+; A few words for the novice user about the fonts:
+; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;
+; Mplayer uses antialiased bitmap fonts, which look far better
+; then the TTF rendering used by other players. A letter consists
+; of two main parts: the Bitmap and the Alpha chanel. The bitmap
+; is what you see on the screen, and the Aplha chanel makes the 
+; Font fade smoothly ito the background. And in this font we use
+; the alpha to get a smooth black outline of the letters, which 
+; makes them visible even on white areas of the movie.
+;
+; Mplayer needs at least two seperate 8bit/pixel format bitmap 
+; files and a .desc file to be able to use the font. One of the
+; files is the bitmap the other is the alpha. The .desc (like this
+; one) gives Mplayer the information needed to convert a bitmap
+; to characters. But the .desc allows to use more bitmap and alpha
+; files: this feature is useful when one wants to add local language
+; support for the subtitles.
+;
+; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;
+; ABOUT THE .DESC
+;
+; [1],File layout: the file consists of several sections,
+; the sections are marked like [XXX] where XXX is the section
+; name. The three main sections:
+;
+;  [info]: gives general information about the font, like the
+;          version of the .desc, the author's name and general 
+;          rendering options like kerning.
+;
+;  [files] & [characters] : they go togeather, they describe
+;                           the place of characters in the bitmap.
+;                           Up to 16 is allowed per .desc
+;
+; [2],The variables:
+;
+; [info]
+;    name        string            name of the font, and misc information
+;    desc        int               Version of this file
+;    spacewidth  int               num of pixels for #32
+;    charspace   int               the distance between chars
+;    height      int               the distance between rows
+; [files]
+;    alpha       string            name of alpha map file
+;    bitmap      string            name of bitmap file
+; [character]
+;                string int int    the positon of a character
+;
+;
+; MPlayer can build up it's font table from up to 16*2 files (16 bitmap
+; and 16 alpha channels).
+;                           
+
+
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;informations about the font
+
+;[info]
+
+;the author and other stuff
+;name "HighreS ONE - created by A'rpi and cHaSS - pre-alpha version"
+
+;version number of the file (if greater than version MPlayer can
+;handle, then ignores the unknown variables)
+
+;descversion 1
+
+;the length of #32 in pixels
+
+;spacewidth 13
+
+;the distance between chars. the alpha renderer can handle
+;negative numbers too
+
+;charspace -3
+
+;height 26
+;height 35
+
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;file section
+
+;[files]
+
+;the name of the alpha file used for the next [characters]
+;section 
+
+;alpha arpi_a.raw
+;alpha nfont_a.raw
+
+;the name of the bitmap file used for the next [characters]
+;section 
+
+;bitmap arpi_b.raw
+;bitmap nfont_b.raw
+
+
+
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;the description of the characters: 
+;each row specifies one character: first, the char (between " or ')
+;then the x-coordinate of the beginning and the end.
+
+
+;[characters]
+
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+[files]
+alpha arpi_osd_a.raw
+bitmap arpi_osd_b.raw
+
+[characters]
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;Symbols for the OSD
+; range form 01 to 1F
+
+;play
+0x01 0 36
+;pause
+0x02 35 71
+;stop
+0x03 70 106
+;rewind
+0x04 116 152
+;fast forward
+0x05 164 200
+;clock symbol for the OSD
+0x06 209 245
+;contrast
+0x07 256 292
+;stauration
+0x08 305 342
+;volume
+0x09 354 400
+;brightness
+0x0A 407 442
+;Hue
+0x0B 457 494
+
+;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+;OSD progress bar characters
+;
+[files]
+
+alpha arpi_progress_a.raw
+bitmap arpi_progress_b.raw
+
+[characters]
+; [ character
+0x10 4 21
+; | character
+0x11 30 41
+; ] character
+0x12 50 66
+; . char
+0x13 74 85
