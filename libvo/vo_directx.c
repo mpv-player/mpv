@@ -38,6 +38,7 @@
 #include "../input/input.h"
 #include "../linux/keycodes.h"
 #include "../mp_msg.h"
+#include "aspect.h"
 
 static LPDIRECTDRAW2        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
@@ -393,30 +394,17 @@ static RECT Directx_Fullscreencalc()
 {
 	uint32_t        xscreen = GetSystemMetrics(SM_CXSCREEN);
     uint32_t        yscreen = GetSystemMetrics(SM_CYSCREEN);
-	uint32_t        xstretch1000,ystretch1000; 
 	RECT            rd_window;
-	rd.top = 0;
-	rd.left=0;
-	rd.right = xscreen;
-	rd.bottom = yscreen;
-	rd_window=rd;
-    xstretch1000 = (xscreen*1000)/d_image_width;           
-    ystretch1000 = (yscreen*1000)/d_image_height;
-    if(xstretch1000 > ystretch1000)
-	{
-		rd.bottom=yscreen;
-		rd.right=(d_image_width*ystretch1000)/1000;
-	}
-	else
-	{
-		rd.right=xscreen;
-		rd.bottom=(d_image_height*xstretch1000)/1000;
-	}
-	//printf("%i,%i,%i,%i,%i,%i\n",xstretch1000,ystretch1000,d_image_height,d_image_width,rd.bottom,rd.right);
-	rd.left = (xscreen-rd.right)/2;
-	rd.right= rd.right+rd.left;
-	rd.top = (yscreen-rd.bottom)/2;
-	rd.bottom = rd.bottom + rd.top;
+	int32_t         width,height;
+	rd_window.top = 0;
+	rd_window.left = 0;
+	rd_window.right = xscreen;
+	rd_window.bottom = yscreen;
+	aspect(&width,&height,A_ZOOM);
+	rd.left = (xscreen-width)/2;
+	rd.right = rd.left+width;
+	rd.top = (yscreen-height)/2;
+	rd.bottom = rd.top + height;
     return rd_window;
 }
 
@@ -1034,7 +1022,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 static void flip_page(void)
 {
    	HRESULT dxresult;
-	//bufferflipping is slow on my system?
+	g_lpddsBack->lpVtbl->Unlock (g_lpddsBack,NULL);
 	if (vo_doublebuffering) 
     {
 		// flip to the next image in the sequence  
@@ -1047,7 +1035,6 @@ static void flip_page(void)
 		}
 		if(dxresult != DD_OK)mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>can't flip page\n");
     }
-	g_lpddsBack->lpVtbl->Unlock (g_lpddsBack,NULL);
 	if(nooverlay) 
 	{
 		DDBLTFX  ddbltfx;
@@ -1137,24 +1124,24 @@ static uint32_t put_image(mp_image_t *mpi){
               s+=mpi->stride[0];
               d+=dstride;
 			}
-            w/=4;h/=4;x/=4;y/=4; dstride/=4;
+            w/=4;h/=4;x/=4;y/=4;
     	    // copy V
-            d=image+image_width*image_height + dstride*y+x;
+            d=image+dstride*image_height + dstride*y/4+x;
             if(swap)s=mpi->planes[2];
 	        else s=mpi->planes[1];
 		    for(i=0;i<h;i++){
 			  memcpy(d,s,w);
               s+=mpi->stride[1];
-              d+=dstride;
+              d+=dstride/4;
 			}
   	        // copy U
-            d=image+image_width*image_height +image_width*image_height/16 + dstride*y+x;
+            d=image+dstride*image_height + dstride*image_height/16 + dstride/4*y+x;
             if(swap)s=mpi->planes[1];
 		    else s=mpi->planes[2];
             for(i=0;i<h;i++){
 			  memcpy(d,s,w);
               s+=mpi->stride[2];
-              d+=dstride;
+              d+=dstride/4;
 			}
 		}
 	}
@@ -1174,13 +1161,15 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	vm = options & 0x02;
 	if(vm)fs=1;
 	image_format =  format;
-	d_image_width = d_width;
-	d_image_height = d_height;
 	image_width = width;
 	image_height = height;
-	//printf("<vo_directx><INFO>config entered\n");
-	//printf("width:%i\nheight:%i\nd_width:%i\nd_height%i\n",width,height,d_width,d_height);
-    SetWindowText(hWnd,"");
+	d_image_width = d_width;
+	d_image_height = d_height;
+    aspect_save_orig(image_width,image_height);
+    aspect_save_prescale(d_image_width,d_image_height);
+    aspect_save_screenres(GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN));
+	aspect(&d_image_width,&d_image_height,A_NOZOOM);
+	SetWindowText(hWnd,"");
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
 	if(vo_doublebuffering)
