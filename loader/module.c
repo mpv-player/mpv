@@ -15,6 +15,11 @@
 
 #include <sys/mman.h>
 #include <sys/types.h>
+#ifdef HAVE_LIBDL
+#include <wine/elfdll.h>
+#include <dlfcn.h>
+#endif
+
 /*
 #ifdef __linux__
 #include <asm/unistd.h>
@@ -48,6 +53,7 @@ struct modify_ldt_ldt_s {
 #include <wine/module.h>
 #include <wine/pe_image.h>
 #include <wine/debugtools.h>
+#include "win32.h"
 
 struct modref_list_t;
 
@@ -79,7 +85,7 @@ WINE_MODREF *MODULE_FindModule(LPCSTR m)
     return list->wm;
 }    
 
-void MODULE_RemoveFromList(WINE_MODREF *mod)
+static void MODULE_RemoveFromList(WINE_MODREF *mod)
 {
     modref_list* list=local_wm;
     if(list==0)
@@ -478,7 +484,7 @@ FARPROC MODULE_GetProcAddress(
 	return retproc;
 #ifdef HAVE_LIBDL	
     case MODULE32_ELF:
-	retproc = (FARPROC) dlsym( wm->module, function);
+	retproc = (FARPROC) dlsym( (void*)wm->module, function);
 	if (!retproc) SetLastError(ERROR_PROC_NOT_FOUND);
 	return retproc;
 #endif

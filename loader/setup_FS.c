@@ -10,7 +10,7 @@
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>
-#else
+#else /* !__linux__ */
 
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <machine/sysarch.h>
@@ -22,7 +22,9 @@
 /* solaris x86: add missing prototype for sysi86() */
 extern int sysi86(int, void*);
 #define       TEB_SEL_IDX     NUMSYSLDTS
-#endif
+#endif /* __svr4__ */
+
+
 
 #define LDT_ENTRIES     8192
 #define LDT_ENTRY_SIZE  8
@@ -42,7 +44,10 @@ struct modify_ldt_ldt_s {
 #define MODIFY_LDT_CONTENTS_DATA        0
 #define MODIFY_LDT_CONTENTS_STACK       1
 #define MODIFY_LDT_CONTENTS_CODE        2
-#endif
+#endif /* !__linux__ */
+
+#include "setup_FS.h"
+
 
 
 /* user level (privilege level: 3) ldt (1<<2) segment selector */

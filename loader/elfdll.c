@@ -9,9 +9,9 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-#include <wine/config.h>
 #include <wine/windef.h>
 //#include <wine/global.h>
 //#include <wine/process.h>

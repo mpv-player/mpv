@@ -6,10 +6,10 @@
  *
  ********************************************************/
 #include <config.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#else
-#include <stdlib.h>
 #endif
 #include <unistd.h>
 #include <sys/mman.h>
@@ -18,7 +18,11 @@
 #include <string.h>
 #include <stdarg.h>
 #include <wine/windef.h>
-//#include <wine/winbase.h>
+#include <wine/winbase.h>
+#include <wine/debugtools.h>
+#include <wine/heap.h>
+#include "ext.h"
+
 int dbg_header_err( const char *dbg_channel, const char *func )
 {
     return 0; 
@@ -35,7 +39,7 @@ int dbg_header_trace( const char *dbg_channel, const char *func )
 {
     return 0; 
 }
-int dbg_vprintf( const char *format, ... )
+int dbg_vprintf( const char *format, va_list args )
 {
     return 0; 
 }
@@ -50,12 +54,12 @@ int __vprintf( const char *format, ... )
     return 0; 
 }
     
-int GetProcessHeap()
+HANDLE WINAPI GetProcessHeap(void)
 {
     return 1;
 }
 
-void* HeapAlloc(int heap, int flags, int size)
+LPVOID WINAPI HeapAlloc(HANDLE heap, DWORD flags, DWORD size)
 {
     if(flags & 0x8)
 	return calloc(size, 1);
@@ -63,7 +67,7 @@ void* HeapAlloc(int heap, int flags, int size)
 	return malloc(size);
 }
 
-int HeapFree(int heap, int flags, void* mem)
+WIN_BOOL WINAPI HeapFree(HANDLE heap, DWORD flags,LPVOID mem)
 {
     if (mem) free(mem);
     return 1;
@@ -71,34 +75,34 @@ int HeapFree(int heap, int flags, void* mem)
 
 static int last_error;
 
-int GetLastError()
+DWORD WINAPI GetLastError(void)
 {
     return last_error;
 }
 
-int SetLastError(int error)
+VOID WINAPI SetLastError(DWORD error)
 { 
-    return last_error=error;
+    last_error = error;
 }    
 
-int ReadFile(int handle, void* mem, unsigned long size, long* result, long flags)
+WIN_BOOL WINAPI ReadFile(HANDLE handle,LPVOID mem, DWORD size, LPDWORD result, LPOVERLAPPED flags)
 {
     *result=read(handle, mem, size);
     return *result;
 }    
-int lstrcmpiA(const char* c1, const char* c2)
+int WINAPI lstrcmpiA(const char* c1, const char* c2)
 {
     return strcasecmp(c1,c2);
 }
-int lstrcpynA(char* dest, const char* src, int num)
+LPSTR WINAPI lstrcpynA(LPSTR dest, LPCSTR src, INT num)
 {
-    return strncmp(dest,src,num);
+    return strncpy(dest,src,num);
 }
-int lstrlenA(const char* s)
+int WINAPI lstrlenA(const char* s)
 {
     return strlen(s);
 }   
-int lstrlenW(const short* s)
+INT WINAPI lstrlenW(LPCWSTR s)
 {
     int l;
     if(!s)
@@ -108,8 +112,9 @@ int lstrlenW(const short* s)
 	l++;
      return l;
 }
-int lstrcpynWtoA(char* dest, const char* src, int count)
+LPSTR WINAPI lstrcpynWtoA(LPSTR dest, LPCWSTR src, INT count)
 {
+    LPSTR rval = dest;
     int moved=0;
     if((dest==0) || (src==0))
 	return 0;
@@ -118,10 +123,11 @@ int lstrcpynWtoA(char* dest, const char* src, int count)
         *dest=*src;
 	moved++;
 	if(*src==0)
-	    return moved;
+	    break;
 	src++;
 	dest++;
     }
+    return rval;
 }
 int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n)
 {
@@ -147,7 +153,7 @@ int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n)
 }			
 		
 		
-int IsBadReadPtr(void* data, int size)
+WIN_BOOL WINAPI IsBadReadPtr(LPCVOID data, UINT size)
 {
     if(size==0)
 	return 0;
@@ -155,14 +161,14 @@ int IsBadReadPtr(void* data, int size)
         return 1;
     return 0;
 }   
-char* HEAP_strdupA(const char* string)
+LPSTR HEAP_strdupA(HANDLE heap, DWORD flags, LPCSTR string)
 {
 //    return strdup(string);
     char* answ=malloc(strlen(string)+1);
     strcpy(answ, string);
     return answ;
 }
-short* HEAP_strdupAtoW(void* heap, void* hz, const char* string)
+LPWSTR HEAP_strdupAtoW(HANDLE heap, DWORD flags, LPCSTR string)
 {
     int size, i;
     short* answer;
@@ -174,7 +180,7 @@ short* HEAP_strdupAtoW(void* heap, void* hz, const char* string)
 	answer[i]=(short)string[i];
     return answer;	
 }
-char* HEAP_strdupWtoA(void* heap, void* hz, const short* string)
+LPSTR HEAP_strdupWtoA(HANDLE heap, DWORD flags, LPCWSTR string)
 {
     int size, i;
     char* answer;
@@ -322,9 +328,12 @@ static file_mapping* fm=0;
 #define	PAGE_GUARD		0x100
 #define	PAGE_NOCACHE		0x200
 
-HANDLE CreateFileMappingA(int hFile, void* lpAttr,
-DWORD flProtect, DWORD dwMaxHigh, DWORD dwMaxLow, const char* name)
+HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
+				 DWORD flProtect,
+				 DWORD dwMaxHigh, DWORD dwMaxLow,
+				 LPCSTR name)
 {
+    int hFile = (int)handle;
     unsigned int len;
     HANDLE answer;
     int anon=0;
@@ -381,7 +390,7 @@ DWORD flProtect, DWORD dwMaxHigh, DWORD dwMaxLow, const char* name)
     }
     return (HANDLE)0;
 }        
-int UnmapViewOfFile(HANDLE handle)
+WIN_BOOL WINAPI UnmapViewOfFile(LPVOID handle)
 {
     file_mapping* p;
     int result;
@@ -389,7 +398,7 @@ int UnmapViewOfFile(HANDLE handle)
 	return (HANDLE)0;
     for(p=fm; p; p=p->next)
     {
-	if(p->handle==handle)
+	if(p->handle==(HANDLE)handle)
 	{
 	    result=munmap((void*)handle, p->mapping_size);
 	    if(p->next)p->next->prev=p->prev;
@@ -418,7 +427,7 @@ static virt_alloc* vm=0;
 #define MEM_COMMIT              0x00001000
 #define MEM_RESERVE             0x00002000
 
-void* VirtualAlloc(void* address, DWORD size, DWORD type,  DWORD protection)
+void* WINAPI VirtualAlloc(void* address, DWORD size, DWORD type,  DWORD protection)
 {
     void* answer;
     int fd=open("/dev/zero", O_RDWR);
@@ -488,7 +497,7 @@ void* VirtualAlloc(void* address, DWORD size, DWORD type,  DWORD protection)
         return answer;
     }	
 }    	
-int VirtualFree(void*  address, int t1, int t2)//not sure
+WIN_BOOL WINAPI VirtualFree(LPVOID address, DWORD t1, DWORD t2)//not sure
 {
     virt_alloc* str=vm;
     int answer;
@@ -509,8 +518,10 @@ int VirtualFree(void*  address, int t1, int t2)//not sure
     return -1;
 }
 
-int WideCharToMultiByte(unsigned int codepage, long flags, const short* src,
-     int srclen,char* dest, int destlen, const char* defch, int* used_defch)
+INT WINAPI WideCharToMultiByte(UINT codepage, DWORD flags, 
+			       LPCWSTR src, INT srclen,
+			       LPSTR dest, INT destlen,
+			       LPCSTR defch, WIN_BOOL*used_defch)
 {
     int i;
     if(src==0)
@@ -541,12 +552,13 @@ int WideCharToMultiByte(unsigned int codepage, long flags, const short* src,
     }	    
     return min(srclen, destlen);
 }
-int MultiByteToWideChar(unsigned int codepage,long flags, const char* src, int srclen,
-    short* dest, int destlen)
+INT WINAPI MultiByteToWideChar(UINT codepage, DWORD flags,
+			       LPCSTR src, INT srclen,
+			       LPWSTR dest, INT destlen)
 {
     return 0;
 }
-HANDLE OpenFileMappingA(long access, long prot, char* name)
+HANDLE WINAPI OpenFileMappingA(DWORD access, WIN_BOOL prot, LPCSTR name)
 {
     file_mapping* p;
     if(fm==0)

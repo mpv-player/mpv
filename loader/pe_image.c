@@ -34,16 +34,19 @@
  *   to 4096 byte boundaries on disk.
  */
 #include <config.h>
-#include <wine/config.h>
 
 #include <errno.h>
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -54,6 +57,7 @@
 #include <wine/pe_image.h>
 #include <wine/module.h>
 #include <wine/debugtools.h>
+#include <ext.h>
 
 #include "win32.h"
 
@@ -64,7 +68,7 @@
 extern void* LookupExternal(const char* library, int ordinal);
 extern void* LookupExternalByName(const char* library, const char* name);
 
-void dump_exports( HMODULE hModule )
+static void dump_exports( HMODULE hModule )
 { 
   char		*Module;
   int		i, j;
@@ -236,7 +240,7 @@ FARPROC PE_FindExportedFunction(
 	}
 }
 
-DWORD fixup_imports( WINE_MODREF *wm )
+static DWORD fixup_imports( WINE_MODREF *wm )
 {
     IMAGE_IMPORT_DESCRIPTOR	*pe_imp;
     PE_MODREF			*pem;
@@ -561,7 +565,6 @@ HMODULE PE_LoadImage( int handle, LPCSTR filename, WORD *version )
         }
     }
 
-
     
     load_addr = nt->OptionalHeader.ImageBase;
     vma_size = calc_vma_size( hModule );
@@ -881,17 +884,26 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  * due to the PROCESS_Create stuff.
  */
 
+#if	0
+/*
+ * so this is a dirty hack.
+ * Why do we need it?
+ *
+ * Disable it for now, let's see if it breaks something
+ */
+static void This_Is_Dirty_Hack(void)
+{
+    void* mem=alloca(0x20000);
+    *(int*)mem=0x1234;
+}
+#endif
+
+
 /* Called if the library is loaded or freed.
  * NOTE: if a thread attaches a DLL, the current thread will only do
  * DLL_PROCESS_ATTACH. Only new created threads do DLL_THREAD_ATTACH
  * (SDK)
  */
-extern void This_Is_Dirty_Hack()
-{
-    void* mem=alloca(0x20000);
-    *(int*)mem=0x1234;
-}
-
 WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 {
     WIN_BOOL retv = TRUE;
@@ -927,7 +939,9 @@ WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 		break;
 	}	
 	TRACE("for %s\n", wm->filename);
+#if 0
 	This_Is_Dirty_Hack();
+#endif
         retv = entry( wm->module, type, lpReserved );
     }
 

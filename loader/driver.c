@@ -1,29 +1,38 @@
 #include <config.h>
 #include <stdio.h>
-
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#else
+#endif
 #include <stdlib.h>
+#ifdef __FreeBSD__
+#include <sys/time.h>
 #endif
 
+#include <win32.h>
 #include <wine/driver.h>
 #include <wine/pe_image.h>
 #include <wine/winreg.h>
 #include <wine/vfw.h>
 #include <registry.h>
-
-//#include "com.h"
-//typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
-
-
-#ifdef __FreeBSD__
-#include <sys/time.h>
-#endif
+#include <setup_FS.h>
+#include "driver.h"
 
 
+#if 1
+/*
+ * STORE_ALL/REST_ALL seems like an attempt to workaround problems due to
+ * WINAPI/no-WINAPI bustage.
+ *
+ * There should be no need for the STORE_ALL/REST_ALL hack once all 
+ * function definitions agree with their prototypes (WINAPI-wise) and
+ * we make sure, that we do not call these functions without a proper
+ * prototype in scope.
+ */
+#define	STORE_ALL	/**/
+#define	REST_ALL	/**/
+#else
 #define STORE_ALL \
-    __asm__ ( \
+    __asm__( \
     "push %%ebx\n\t" \
     "push %%ecx\n\t" \
     "push %%edx\n\t" \
@@ -31,25 +40,16 @@
     "push %%edi\n\t"::)
 
 #define REST_ALL \
-    __asm__ ( \
+    __asm__( \
     "pop %%edi\n\t" \
     "pop %%esi\n\t" \
     "pop %%edx\n\t" \
     "pop %%ecx\n\t" \
     "pop %%ebx\n\t"::)
+#endif
 
 
 
-typedef struct {
-    UINT             uDriverSignature;
-    HINSTANCE        hDriverModule;
-    DRIVERPROC       DriverProc;
-    DWORD            dwDriverID;
-} DRVR;
-
-typedef DRVR  *PDRVR;
-typedef DRVR  *NPDRVR;
-typedef DRVR  *LPDRVR;
     
 static DWORD dwDrvID = 0;
 
@@ -119,10 +119,9 @@ void DrvClose(HDRVR hdrvr)
 }
 
 
-extern char* def_path; //=WIN32_PATH;    // path to codecs
 char* win32_codec_name=NULL;  // must be set before calling DrvOpen() !!!
 
-HDRVR
+HDRVR VFWAPI
 DrvOpen(LPARAM lParam2)
 {
     ICOPEN *icopen=(ICOPEN *) lParam2;

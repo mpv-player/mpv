@@ -28,6 +28,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
+#if HAVE_LIBKSTAT
+#include <kstat.h>
+#endif
 
 #include <wine/winbase.h>
 #include <wine/winreg.h>
@@ -77,8 +80,6 @@ static void c_longcount_tsc(long long* z)
     "popl %%ebx\n\t"
     ::"a"(z));
 }    
-#include <sys/time.h>
-#include <unistd.h>
 static unsigned int c_localcount_notsc()
 {
     struct timeval tv;
@@ -100,12 +101,13 @@ static void c_longcount_notsc(long long* z)
     result+=limit*tv.tv_usec;
     *z=result;
 }
-static unsigned int localcount_stub();
-static void longcount_stub(long long*);
+
+static unsigned int localcount_stub(void);
+static void longcount_stub(long long* z);
 static unsigned int (*localcount)()=localcount_stub;
 static void (*longcount)(long long*)=longcount_stub;
 
-static unsigned int localcount_stub()
+static unsigned int localcount_stub(void)
 {
     unsigned int regs[4];
     do_cpuid(regs);
@@ -139,7 +141,7 @@ static void longcount_stub(long long* z)
 }
 
 int LOADER_DEBUG=1;
-inline void dbgprintf(char* fmt, ...)
+static inline void dbgprintf(char* fmt, ...)
 {
 #ifdef DETAILED_OUT
     if(LOADER_DEBUG)
@@ -168,7 +170,7 @@ char export_names[500][30]={
 
 static unsigned char* heap=NULL; 
 static int heap_counter=0;
-void test_heap()
+static void test_heap()
 {
     int offset=0;	
     if(heap==0)
@@ -326,7 +328,7 @@ extern int unk_exp1;
 char extcode[20000];// place for 200 unresolved exports
 int pos=0;
 
-int WINAPI ext_unknown()
+int WINAPI ext_unknown(void)
 {
     printf("Unknown func called\n");
     return 0;
@@ -403,18 +405,13 @@ int CDECL exp_initterm(int v1, int v2)
     return 0;
 }    
 
-typedef struct {
-    unsigned int     	uDriverSignature;
-    void*        	hDriverModule;
-    void*    		DriverProc;
-    unsigned int        dwDriverID;
-} DRVR;
-
 void* WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 {
     void* result;
-    if (pdrv==NULL) result=NULL;
-    result=pdrv->hDriverModule;
+    if (pdrv==NULL)
+	result=NULL;
+    else
+	result=(void*) pdrv->hDriverModule;
     dbgprintf("GetDriverModuleHandle(0x%x) => 0x%x\n", pdrv, result);
     return result;
 }
@@ -992,15 +989,14 @@ int WINAPI expGetCurrentProcess()
     dbgprintf("GetCurrentProcess() => %d\n", getpid());
     return getpid();
 }                  
-struct tls_s;
-typedef struct tls_s
+
+struct tls_s
 {
     void* value;
     int used;
     struct tls_s* prev;
     struct tls_s* next;
-}tls_t;
-
+};
 tls_t* g_tls=NULL;    
     
 void* WINAPI expTlsAlloc()
@@ -1131,12 +1127,12 @@ long WINAPI expMultiByteToWideChar(long v1, long v2, char* s1, long siz1, short*
     result=i;
     }
     if(s1)
-    dbgprintf("MultiByteToWideChar(codepage %d, flags 0x%x, string 0x%x='%s',
-	size %d, dest buffer 0x%x, dest size %d) => %d\n",
+    dbgprintf("MultiByteToWideChar(codepage %d, flags 0x%x, string 0x%x='%s', "
+	"size %d, dest buffer 0x%x, dest size %d) => %d\n",
 	    v1, v2, s1, s1, siz1, s2, siz2, result);
     else
-    dbgprintf("MultiByteToWideChar(codepage %d, flags 0x%x, string NULL,
-	size %d, dest buffer 0x%x, dest size %d) =>\n",
+    dbgprintf("MultiByteToWideChar(codepage %d, flags 0x%x, string NULL, "
+	"size %d, dest buffer 0x%x, dest size %d) =>\n",
 	    v1, v2, siz1, s2, siz2, result);
     return result;
 }
@@ -1305,7 +1301,86 @@ long WINAPI expQueryPerformanceCounter(long long* z)
     return 1; 
 }
 
-static double old_freq()
+/*
+ * return CPU clock (in kHz), using linux's /proc filesystem (/proc/cpuinfo)
+ */
+static double linux_cpuinfo_freq()
+{
+    double freq=-1;
+    FILE *f;
+    char line[200];
+    char *s,*value;
+	
+    f = fopen ("/proc/cpuinfo", "r");
+    if (f != NULL) {
+	while (fgets(line,sizeof(line),f)!=NULL) {
+	    /* NOTE: the ':' is the only character we can rely on */
+	    if (!(value = strchr(line,':')))
+		continue;
+	    /* terminate the valuename */
+	    *value++ = '\0';
+	    /* skip any leading spaces */
+	    while (*value==' ') value++;
+	    if ((s=strchr(value,'\n')))
+		*s='\0';
+
+	    if (!strncasecmp(line, "cpu MHz",strlen("cpu MHz"))
+		&& sscanf(value, "%lf", &freq) == 1) {
+		freq*=1000;
+		break;
+	    }		
+	}
+	fclose(f);
+    }
+    return freq;
+}
+
+
+static double
+solaris_kstat_freq()
+{
+#if	HAVE_LIBKSTAT
+    /*
+     * try to extract the CPU speed from the solaris kernel's kstat data
+     */
+    kstat_ctl_t   *kc;
+    kstat_t       *ksp;
+    kstat_named_t *kdata;
+    int            mhz = 0;
+
+    kc = kstat_open();
+    if (kc != NULL)
+    {
+	ksp = kstat_lookup(kc, "cpu_info", 0, "cpu_info0");
+
+	/* kstat found and name/value pairs? */
+	if (ksp != NULL && ksp->ks_type == KSTAT_TYPE_NAMED)
+	{
+	    /* read the kstat data from the kernel */
+	    if (kstat_read(kc, ksp, NULL) != -1)
+	    {
+		/*
+		 * lookup desired "clock_MHz" entry, check the expected
+		 * data type
+		 */
+		kdata = (kstat_named_t *)kstat_data_lookup(ksp, "clock_MHz");
+		if (kdata != NULL && kdata->data_type == KSTAT_DATA_INT32)
+		    mhz = kdata->value.i32;
+	    }
+	}
+	kstat_close(kc);
+    }
+
+    if (mhz > 0)
+	return mhz * 1000.;
+#endif	/* HAVE_LIBKSTAT */
+    return -1;		// kstat stuff is not available, CPU freq is unknown
+}
+
+/*
+ * Measure CPU freq using the pentium's time stamp counter register (TSC)
+ */
+static double tsc_freq()
 {
     static double ofreq=0.0;
     int i;
@@ -1320,48 +1395,18 @@ static double old_freq()
     ofreq = (double)(y-x)/1000.;
     return ofreq;
 }
+
 static double CPU_Freq()
 {
-//#ifdef USE_TSC
-	FILE *f = fopen ("/proc/cpuinfo", "r");
-	char line[200];
-	char model[200]="unknown";
-	char flags[500]="";
-	char	*s,*value;
-	double freq=-1;
+    double freq;
 	
-	if (!f)
-	{
-	    //printf("Can't open /proc/cpuinfo for reading\n");
-	    return old_freq();
-	}    
-	while (fgets(line,200,f)!=NULL) 
-	{
-		/* NOTE: the ':' is the only character we can rely on */
-		if (!(value = strchr(line,':')))
-			continue;
-		/* terminate the valuename */
-		*value++ = '\0';
-		/* skip any leading spaces */
-		while (*value==' ') value++;
-		if ((s=strchr(value,'\n')))
-			*s='\0';
-
-		if (!strncasecmp(line, "cpu MHz",strlen("cpu MHz"))) 
-		{
-		    sscanf(value, "%lf", &freq);
-		    freq*=1000;
-		    break;
-		}
-		continue;
-		
-	}
-	fclose(f);
-	if(freq<0)return old_freq();
+    if ((freq = linux_cpuinfo_freq()) > 0)
 	return freq;
-//#else
-//	return old_freq();
-//#endif    	
+
+    if ((freq = solaris_kstat_freq()) > 0)
+	return freq;
+
+    return tsc_freq();	
 }
 
 long WINAPI expQueryPerformanceFrequency(long long* z)
@@ -1658,12 +1703,12 @@ long WINAPI expCreateFileMappingA(int hFile, void* lpAttr,
 {
     long result=CreateFileMappingA(hFile, lpAttr, flProtect, dwMaxHigh, dwMaxLow, name);
     if(!name)
-    dbgprintf("CreateFileMappingA(file 0x%x, lpAttr 0x%x, 
-	flProtect 0x%x, dwMaxHigh 0x%x, dwMaxLow 0x%x, name 0) => %d\n",
+    dbgprintf("CreateFileMappingA(file 0x%x, lpAttr 0x%x, "
+	"flProtect 0x%x, dwMaxHigh 0x%x, dwMaxLow 0x%x, name 0) => %d\n",
 	    hFile, lpAttr, flProtect, dwMaxHigh, dwMaxLow, result);
     else
-    dbgprintf("CreateFileMappingA(file 0x%x, lpAttr 0x%x, 
-	flProtect 0x%x, dwMaxHigh 0x%x, dwMaxLow 0x%x, name 0x%x='%s') => %d\n",
+    dbgprintf("CreateFileMappingA(file 0x%x, lpAttr 0x%x, "
+	"flProtect 0x%x, dwMaxHigh 0x%x, dwMaxLow 0x%x, name 0x%x='%s') => %d\n",
 	    hFile, lpAttr, flProtect, dwMaxHigh, dwMaxLow, name, name, result);    
     return result;
 }    
@@ -2746,7 +2791,7 @@ void* LookupExternalByName(const char* library, const char* name)
 //    return (void*)ext_unknown;
 }
 
-int my_garbagecollection()
+int my_garbagecollection(void)
 {
 #ifdef GARBAGE
     alc_list* pp,*ppsv;

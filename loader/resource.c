@@ -7,6 +7,7 @@
 #include <config.h>
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -20,6 +21,8 @@
 #include <wine/module.h>
 #include <wine/debugtools.h>
 #include <wine/winerror.h>
+#include <loader.h>
+
 #define CP_ACP					0
 
 WORD WINE_LanguageId=0x409;//english

@@ -22,7 +22,10 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "win32.h"
 
 #include <wine/winbase.h>
 #include <wine/windef.h>
@@ -34,11 +37,13 @@
 #include <wine/msacm.h>
 #include <wine/msacmdrv.h>
 #include "wineacm.h"
-#pragma pack(1)
+#include "ext.h"
+#include "driver.h"
+
 #define OpenDriverA DrvOpen
-extern HDRVR VFWAPI DrvOpen(long);
 #define CloseDriver DrvClose
-extern HDRVR VFWAPI DrvClose(long);
+
+#pragma pack(1)
 
 static PWINE_ACMSTREAM	ACM_GetStream(HACMSTREAM has)
 {
@@ -394,6 +399,8 @@ MMRESULT WINAPI acmStreamOpen(PHACMSTREAM phas, HACMDRIVER had, PWAVEFORMATEX pw
     int			wfxSrcSize;
     int			wfxDstSize;
     
+    //printf("gcc-3.0 bug, pwfxSrc=%p, pwfxSrc->cbSize=%d\n", pwfxSrc, pwfxSrc->cbSize);
+
     TRACE("(%p, 0x%08x, %p, %p, %p, %ld, %ld, %ld)\n",
 	  phas, had, pwfxSrc, pwfxDst, pwfltr, dwCallback, dwInstance, fdwOpen);
 

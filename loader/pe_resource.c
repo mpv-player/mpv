@@ -22,6 +22,7 @@
 //#include "process.h"
 //#include "stackframe.h"
 #include <wine/debugtools.h>
+#include <ext.h>
 
 /**********************************************************************
  *  HMODULE32toPE_MODREF 

@@ -1,18 +1,25 @@
 include ../config.mak
 
 # Generated automatically from Makefile.in by configure.
-DEFINES=-rdynamic -fPIC $(WIN32_PATH) $(CDOPT) -D__WINE__ -Ddbg_printf=__vprintf \
+DEFINES=$(WIN32_PATH) -D__WINE__ -Ddbg_printf=__vprintf \
 	-DTRACE=__vprintf # -DDETAILED_OUT
 
 LIB_OBJECTS= setup_FS.o pe_image.o module.o \
 ext.o win32.o driver.o pe_resource.o \
 resource.o registry.o elfdll.o afl.o vfl.o
 
-CFLAGS=-g -I.
+# gcc-3.0 produces buggy code for acmStreamOpen() with
+# "-O3 -fomit-frame-pointer" or "-O2 -fomit-frame-pointer
+# -finline-functions -frename-registers" (code is OK with sole -O2),
+# the bad code accesses parameters via %ebp without setting up a
+# propper %ebp first!
+# -fno-omit-frame-pointer works around this gcc-3.0 bug.  gcc-2.95.2 is OK.
+WARN_FLAGS = -Wmissing-prototypes -Wimplicit-function-declaration
+CFLAGS=-I. -I.. $(OPTFLAGS) $(EXTRA_INC) $(WARN_FLAGS) -fno-omit-frame-pointer
+#CFLAGS=-I. -I.. -O $(WARN_FLAGS) -g #-fno-omit-frame-pointer
 
-CDOPT=-g
 all: libloader.a
-    
+
 clean:
 	-rm -f *.o libloader.a
 

@@ -279,7 +279,8 @@ MMRESULT WINAPI acmStreamUnprepareHeader(
 );
 void MSACM_RegisterAllDrivers(void);
 
-int WINAPI LoadStringA(long instance, long  id, void* buf, long size);
+INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,
+                            LPSTR buffer, INT buflen );
 
 #ifdef __cplusplus
 }

@@ -1,7 +1,9 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
 
@@ -11,6 +13,8 @@
 #include <wine/winerror.h>
 
 #include <registry.h>
+#include <ext.h>
+
 //#undef TRACE
 //#define TRACE printf
 struct reg_value
@@ -40,14 +44,14 @@ static reg_handle_t* head=0;
 
 extern char *get_path(char *);
 
-static void create_registry();
-static void open_registry();
-static void save_registry();
+static void create_registry(void);
+static void open_registry(void);
+static void save_registry(void);
 
 
 
 
-static void create_registry(){
+static void create_registry(void){
     if(regs)
     {
 	printf("Logic error: create_registry() called with existing registry\n");
@@ -65,7 +69,7 @@ static void create_registry(){
     reg_size=2;
     save_registry();
 }
-static void open_registry()
+static void open_registry(void)
 {
 	int fd;
 	int i;
@@ -120,7 +124,7 @@ error:
 	return;
 }
 
-static void save_registry()
+static void save_registry(void)
 {
 	int fd, i, len;
 //         struct passwd* pwent;
@@ -227,7 +231,7 @@ static char* build_keyname(long key, const char* subkey)
 	strcat(full_name, subkey);
 	return full_name;
 }
-struct reg_value* insert_reg_value(int handle, const char* name, int type, const void* value, int len)
+static struct reg_value* insert_reg_value(int handle, const char* name, int type, const void* value, int len)
 {
 	reg_handle_t* t;
 	struct reg_value* v;
@@ -263,7 +267,7 @@ struct reg_value* insert_reg_value(int handle, const char* name, int type, const
 	return v;
 }
 
-static void init_registry()
+static void init_registry(void)
 {
 #ifdef DETAILED_OUT
 	printf("Initializing registry\n");
