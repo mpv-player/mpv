@@ -17,23 +17,41 @@ mplayer (1.0)
     * fixed compilation of Matroska on MinGW32/Cygwin
     * support for detecting non-Intel CPUs under Cygwin
     * sub autoloading under Windows
+    * removed pthread dependancy (compiles out of the box on a default NetBSD
+      install)
+    * more 64bit fixes
+    * lot of Mac OS X fixes
+    * prefer our cpuinfo routines over linuxemu's proc/cpuinfo under FreeBSD/x86
 
     Codecs and demuxers:
     * better support for (buggy) MEncoder created streams in libmpeg2
-    * better AC3 detection in Matroska
-    * support for (uncompressed) VobSubs inside Matroska
-    * support for MP2 inside Matroska
     * MPEG-TS demuxer updates
     * fixed the MPEG muxer
     * fixed tons of bugs in MMS streaming
     * user settable http user-agent field
-    * improved seeking in realmedia format
+    * improved (now working) seeking in realmedia format
+    * saveable and loadable mplayer index files (workaround for formats not
+      supporting files over 2GB)
+    * Ultimotion VfW decoder
+    * support for MMS streams with UTF urls
+    * big DVB demuxer update
+    * fixed MOV demuxer to always read ImageDesc (fixes ffsvq3 bugs)
+    * fixed an old bug in AVI/Waveformatex size calculation
+    * XviD API-4 support
+    * improved FLAC-in-Ogg support
+    * Matroska: better AC3 detection
+    * Matroska: VobSubs, MP2, FLAC, AAC and HE-AAC support
+    * improved detection of Real RTSP through analyzing the URL
+    * fixed stereo 16 bit TWOS
     
     Filters:
     * some fixes in the delogo filter 
     * optimized eq2 filter
     * weighted gamma support in the eq2 filter
     * new filters: hue, spp, fil
+    * alternative postprocessing filter (spp)
+    * big scale filter updates
+    * zrmjpeg filter, a kick-ass mjpeg encoder using FFmpeg/libavcodec
     
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
@@ -59,6 +77,30 @@ mplayer (1.0)
     * support for IBM's XLC compiler
     * support for SAR (sample aspect ratio)
     * floating point AAN DCT
+    * dynamically alloc big data fields (lower memory consumption for most cases!)
+    * fixed stereo IMA-ADPCM encoding
+    * inline vs always_inline - some speedups
+    * MMX2 optimized FDCT
+    * accurate 2-4-8 DCT
+    * much faster DV encoding (it beats libdv)
+    * support Cinepak files with funky (not divisible by 4) resolutions
+    * Altivec optimized FDCT
+    * XvMC speedups
+    * initial ZyGoVideo decoding
+    * RGB support in FFV1
+    * new Palette API, all codecs updated
+    * Noise reduction of DCT coefficients
+    * "av_log" logging API
+    * support for buffer hints from codecs
+    * bgr24, rgb555 and pal8 image formats
+    * 8bps, msrle, msvidc, qtrpza, smc, flic and truemotion1 decoders
+    * 16x8 MV visualisation support
+    * H.263 overlapped block motion compensation (OBMC), 4MV support
+    * H.263 alternative inter vlc support
+    * H.263 deblocking filter (MMX optimized)
+    * H.263 modified quantization support
+    * H.263 slice structured mode support
+    * Real RV20 decoder (with B-frame support)
     
     Drivers:
     * VIDIX equalizer support in fbdev
@@ -72,12 +114,18 @@ mplayer (1.0)
     * tdfxfb fixed on gcc 3.x
     * dfbmga updated, G200 support
     * colorkeying can be disabled
+    * Radeon 9800 (R350) support in VIDIX
+    * proper fix for buffer size workarounds in vo_zr
+    * new vo_zr2 driver, which uses the advantages of the filter layer
+    * fixed vesa when used together with pthread
+    * runtime stay-on-top functionality (in almost all output drivers)
     
     SWScaler:
     * updated MLib (Sun VIS) support
     * more accurate filters (rounding fixes)
     * MMX optimized UYVY output
-    
+    * eliminated chroma scaling bugs
+
     Others:
     * Darwin XMMS libs supported
     * support newer Darwin versions in Altivec detection code
@@ -87,6 +135,11 @@ mplayer (1.0)
     * MTRR detection added to TOOLS/cpuinfo
     * FAAD detection in configure fixed/improved
     * improved FLAC configure detection
+
+    MEncoder:
+    * FFmpeg/libavcodec audio encoding support
+    * exit if there's no video stream (no more unexpected segfaults in that case)
+    * huge bug fixed (missing InitTimer call), which screwed up timers in some cases
 
 
   pre2:
