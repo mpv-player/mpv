@@ -1247,6 +1247,7 @@ fi
 _esdd='#undef HAVE_ESD'
 if [ $_esd == 'yes' ]; then
  _esdd='#undef HAVE_ESD'
+ # _aosrc="$ao_src ao_esd.c"
 fi
    
 cat > $CCONF << EOF
