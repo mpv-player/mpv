@@ -1681,9 +1681,9 @@ For ALSA you can use the names e.g.\& alsamixer displays, like
 .br
 .I NOTE:
 ALSA mixer channel names followed by a number must be specified in the
-<name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
+<name,number> format, i.e.\& a channel labeled 'PCM 1' in alsamixer must
 be converted to
-.B PCM,1.
+.BR PCM,1 .
 .
 .TP
 .B \-nowaveheader (\-ao pcm only)
@@ -5111,22 +5111,21 @@ print additional options and informations on presets settings.
 .SS toolame (\-toolameopts)
 .
 .TP
-.B br=<0\-384>
-specify bitrate in kBit (CBR only)
+.B br=<0\-384> (CBR only)
+Specify bitrate in kBit.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (default: mono for 1-channel audio, stereo otherwise)
 .TP
 .B psy=<0\-3>
-psychoacoustic model, default is 2
+psychoacoustic model (default: 2)
 .TP
 .B errprot=<0 | 1>
-include error protection
+Include error protection.
 .TP
 .B debug=<0\-10>
 debug level
 .RE
-
 .PD 1
 .
 .
@@ -5820,7 +5819,7 @@ sane range
 .B dark_mask=<0.0\-1.0>
 Darkness masking is a 'psychosensory' setting that is supposed to
 make use of the fact that the human eye tends to notice less details
-in very drak parts of the picture.
+in very dark parts of the picture.
 Darkness masking compresses dark areas stronger than medium ones,
 so it will save bits that can be spent again on other frames, raising
 overall subjective quality, while possibly reducing PSNR.
