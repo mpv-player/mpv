@@ -17,11 +17,12 @@ ifeq ($(MACOSX),yes)
 timer = timer-macosx.c
 endif
 ifeq ($(TARGET_CYGWIN),yes)
-timer = timer-win.c
+timer = timer-win2.c
 endif
 ifeq ($(TARGET_MINGW32),yes)
-timer = timer-win.c
+timer = timer-win2.c
 getch = getch2-win.c
+SRCS += glob-win.c
 endif
 SRCS += $(timer)
 SRCS += $(getch)

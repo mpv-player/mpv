@@ -99,7 +99,7 @@ int getch2(int time){
 
 
 void getch2_enable(){
-	int retval;
+	DWORD retval;
     stdin = GetStdHandle(STD_INPUT_HANDLE);
    	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
 	{
