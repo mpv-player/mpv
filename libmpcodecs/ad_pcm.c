@@ -32,6 +32,8 @@ static int init(sh_audio_t *sh_audio)
     case 0x736F7774: // 'twos'
     case 0x74776F73: // 'swot'
        if(sh_audio->samplesize==1) sh_audio->sample_format=AFMT_S8;
+       sh_audio->ds->ss_div= sh_audio->samplesize;
+       sh_audio->ds->ss_mul= sh_audio->samplesize * sh_audio->channels;
        break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AFMT_U8;
   }
