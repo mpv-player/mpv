@@ -1595,8 +1595,8 @@ switch(sh_video->codec->driver){
     if(eof) break;
     if(force_redraw){
       --force_redraw;
+      if(!force_redraw) osd_function=OSD_PLAY;
     }
-    if(!force_redraw) osd_function=OSD_PLAY;
 
 //    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,a_frame);
 //    fflush(stdout);
