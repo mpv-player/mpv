@@ -83,9 +83,6 @@ stream_t* open_stream(char* filename,int vcd_track,int* file_format){
 stream_t* stream=NULL;
 int f=-1;
 off_t len;
-#ifdef VCD_CACHE
-int vcd_cache_size=128;
-#endif
 #ifdef __FreeBSD__
 int bsize = VCD_SECTOR_SIZE;
 #endif
@@ -111,9 +108,6 @@ if(vcd_track){
   if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");return NULL;}
 //  seek_to_byte+=ret;
   mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
-#ifdef VCD_CACHE
-  vcd_cache_init(vcd_cache_size);
-#endif
 #ifdef __FreeBSD__
   if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {
         perror ( "Error in CDRIOCSETBLOCKSIZE");

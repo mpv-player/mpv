@@ -199,61 +199,6 @@ static int sun_vcd_read(int fd, int *offset)
 }
 #endif	/*sun*/
 
-
-//================== VCD CACHE =======================
-#ifdef VCD_CACHE
-
-static int vcd_cache_size=0;
-static char *vcd_cache_data=NULL;
-static int *vcd_cache_sectors=NULL;
-static int vcd_cache_index=0; // index to first free (or oldest) cache sector
-static int vcd_cache_current=-1;
-
-void vcd_cache_init(int s){
-  vcd_cache_size=s;
-  vcd_cache_sectors=malloc(s*sizeof(int));
-  vcd_cache_data=malloc(s*VCD_SECTOR_SIZE);
-  memset(vcd_cache_sectors,255,s*sizeof(int));
-}
-
-static inline void vcd_cache_seek(int sect){
-  vcd_cache_current=sect;
-}
-
-int vcd_cache_read(int fd,char* mem){
-  int i;
-  char* vcd_buf;
-
-  for(i=0;i<vcd_cache_size;i++)
-    if(vcd_cache_sectors[i]==vcd_cache_current){
-      // found in the cache! :)
-      vcd_buf=&vcd_cache_data[i*VCD_SECTOR_SIZE];
-      ++vcd_cache_current;
-      memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
-      return VCD_SECTOR_DATA;
-    }
-  // NEW cache entry:
-  vcd_buf=&vcd_cache_data[vcd_cache_index*VCD_SECTOR_SIZE];
-  vcd_cache_sectors[vcd_cache_index]=vcd_cache_current;
-  ++vcd_cache_index;if(vcd_cache_index>=vcd_cache_size)vcd_cache_index=0;
-  // read data!
-  vcd_set_msf(vcd_cache_current);
-#if	defined(linux) || defined(__bsdi__)
-  memcpy(vcd_buf,&vcd_entry.cdte_addr.msf,sizeof(struct cdrom_msf));
-  if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; // EOF?
-  memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
-#elif	defined(sun)
-  {
-    int offset;
-    if (sun_vcd_read(fd, &offset) <= 0) return 0;
-    memcpy(mem,&vcd_buf[offset],VCD_SECTOR_DATA);
-  }
-#endif
-  ++vcd_cache_current;
-  return VCD_SECTOR_DATA;
-}
-#endif
-
 #else /* linux || sun || __bsdi__ */
 
 #error vcd is not yet supported on this arch...

@@ -69,11 +69,7 @@ int stream_fill_buffer(stream_t *s){
 #endif
 #ifdef HAVE_VCD
   case STREAMTYPE_VCD:
-#ifdef VCD_CACHE
-    len=vcd_cache_read(s->fd,s->buffer);break;
-#else
     len=vcd_read(s->fd,s->buffer);break;
-#endif
 #endif
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
@@ -89,13 +85,6 @@ int stream_fill_buffer(stream_t *s){
 	len=2048; // full sector
 	s->pos=2048*pos-len;
     } else len=-1; // error
-    break;
-  }
-#endif
-#ifdef USE_TV
-  case STREAMTYPE_TV:
-  {
-    len = 0;
     break;
   }
 #endif
@@ -154,11 +143,7 @@ if(newpos==0 || newpos!=s->pos){
 #ifdef HAVE_VCD
   case STREAMTYPE_VCD:
     s->pos=newpos; // real seek
-#ifdef VCD_CACHE
-    vcd_cache_seek(s->pos/VCD_SECTOR_DATA);
-#else
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
-#endif
     break;
 #endif
 #ifdef HAVE_CDDA

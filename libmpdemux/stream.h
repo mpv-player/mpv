@@ -30,10 +30,6 @@
 int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 
-#ifdef VCD_CACHE
-void vcd_cache_init(int s);
-#endif
-
 typedef struct {
   int fd;
   int type; // 0=file 1=VCD
