@@ -24,6 +24,8 @@
 #define MP_IMGFLAG_YUV 0x200
 // set if it's swapped plane/byteorder
 #define MP_IMGFLAG_SWAPPED 0x400
+// type displayed (do not set this flag - it's for internal use!)
+#define MP_IMGFLAG_TYPE_DISPLAYED 0x800
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:
