@@ -6,6 +6,10 @@
 #
 # Changes in reversed order:
 #
+#
+# 2001/06/05 by Nick Kurshev
+# - added checking of kernel version
+#
 # 2001/06/04 by Nick Kurshev
 # - added hard checking of gcc and soft of assembler
 #
@@ -879,22 +883,22 @@ fi
 
 # Checking kernel version...
 _k_verc_problem=no
-kernel_name=`uname -s 2>&1`
+system_name=`uname -s 2>&1`
 kernel_version=`uname -r 2>&1`
-echo -n "Checking $kernel_name kernel version ... $kernel_version, "
+echo -n "Checking $system_name kernel version ... "
 case $kernel_version in
     '') kernel_version="?.??"; _k_verc_fail=yes;;
-    2.0.[0-99]|2.2.[0-99])
+    [0-1].[0-99].[0-99]|2.[0-3].[0-99])
 	_k_verc_problem=yes;;
 esac
 if [ $_k_verc_problem = 'yes' ] && [ $_sse = 'yes' ]; then
 _k_verc_fail=yes
 fi
 if ! test -z "$_k_verc_fail"; then
-echo "fail"
+echo "$kernel_version, fail"
 echo "WARNING! You want to run mplayer on this system then be prepared for problems"
 else
-echo "ok"
+echo "$kernel_version, ok"
 fi
 
 if [ $_x11 = 'yes' ]; then
