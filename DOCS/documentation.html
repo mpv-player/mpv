@@ -183,6 +183,7 @@
               <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Fixing AVIs with broken index</A></LI>
               <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Encoding with the libavcodec codec family</A></LI>
               <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Encoding from multiple input image files (MJPEG/MPNG)</A></LI>
+              <LI><A HREF="encoding.html#2.4.3.7">2.4.3.7 Extracting DVD subtitles to Vobsub file</A></LI>
             </UL>
           </LI>
           <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
@@ -765,7 +766,7 @@ if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dl
 They should be extracted to the usual system-wide directory (<CODE>$PREFIX/share/mplayer/Skin</CODE>),
 or to <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> by default looks in
 these directories for a <I>default</I> named directory, but you can use the
-<I>-skin newskin</I> option, or the <I>skin=newskin</I> config file
+<CODE>-skin newskin</CODE> option, or the <CODE>skin=newskin</CODE> config file
 directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
@@ -834,19 +835,19 @@ It was designed by me (Gabucino). Basically its main feature is being
 # second number : display the current subtitle for this many seconds<BR>
 <BR>
 15 3<BR>
-A long, long time ago...<BR>
+A long time ago...<BR>
 <BR>
 0 3<BR>
-in a galaxy far away...<BR>
+in a galaxy far, far away...<BR>
 <BR>
 0 3<BR>
-Naboo was under an attack.<BR>
+Naboo was under attack.<BR>
 </I></CODE></P>
 
 <P>So you see, the main goal was to <B>make subtitle editing/timing/joining/cutting easy</B>. And,
 if you - say - get an SSA subtitle but it's badly timed/delayed to your
-version of the movie, you simply do a <I>mplayer dummy.avi -sub source.ssa
--dumpmpsub</I> . A <CODE>dump.mpsub</CODE> file will be created in the
+version of the movie, you simply do a <CODE>mplayer dummy.avi -sub source.ssa
+-dumpmpsub</CODE> . A <CODE>dump.mpsub</CODE> file will be created in the
 current directory, which will contain the source subtitle's text, but in
 <B>MPsub</B> format. Then you can freely add/subtract seconds to/from the
 subtitle.</P>
@@ -949,20 +950,20 @@ TV tuner</B>.</P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>on</I></TD>
+  <TD><CODE>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>use TV
   input</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>noaudio</I></TD>
+  <TD><CODE>noaudio</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>thanks, no sound</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>driver</I></TD>
+  <TD><CODE>driver</I></TD>
   <TD></TD>
   <TD>    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
     input.<BR>
@@ -971,14 +972,14 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>device</I></TD>
+  <TD><CODE>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>specify other
   device than the default <CODE>/dev/video0</CODE></TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>input</I></TD>
+  <TD><CODE>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>give from which
   input of the TV tuner you wish to grab from (e.g. <B>television</B>,
@@ -987,14 +988,14 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>freq</I></TD>
+  <TD><CODE>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>specify the
   frequency to set the tuner (e.g. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>outfmt</I></TD>
+  <TD><CODE>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>in which output
   format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
@@ -1003,31 +1004,31 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>width</I></TD>
+  <TD><CODE>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  the width of the output window, in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>height</I></TD>
+  <TD><CODE>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  the height of the output window, in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>norm</I></TD>
+  <TD><CODE>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  available: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>channel</I></TD>
+  <TD><CODE>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  set the tuner to the given channel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><I>chanlist</I></TD>
+  <TD><CODE>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
 </TR>
@@ -1082,8 +1083,9 @@ Input from standard V4L<BR>
 
 <P>This sets up a filter pipeline (you can use any number of filters). Their
   parameters are optional and if omitted, some of them are set to default
-  values, like <I>x and y</I> are both set to the center of the screen, and
-  <I>width and height</I> will be set to the movie's width and height.</P>
+  values, like <CODE>x</CODE> and <CODE>y</CODE> are both set to the center of
+  the screen, and <CODE>width</CODE> and <CODE>height</CODE>> will be set to
+  the movie's width and height.</P>
 
 <P>Filters are queued starting from libvo, so <CODE>filter1</CODE> will be the
   last called filter (after that libvo comes, or when using <B>MEncoder</B>,
@@ -1110,7 +1112,7 @@ Input from standard V4L<BR>
 <P><B><U>Description</U></B>:</P>
 
 <P>Expands (NOT scales) movie resolution to the given value, and places the
-  unscaled original to <I>x</I> <I>y</I>. For movies that don't contain
+  unscaled original to <CODE>x</CODE> <CODE>y</CODE>. For movies not containing
   black bands, this can be used to add them.  This is good when creating SVCDs,
   or using with the
   <A HREF="video.html#2.3.1.4">SDL video output</A> which can place
@@ -1153,7 +1155,7 @@ Input from standard V4L<BR>
 
 <P>This filter is NOT image format converter. It just forces the next filter
   (or libvo) which image format to use. Useful for cards with slow YV12, like
-  tdfx and Savage4. For real conversion, use the <I>Scale</I> filter.</P>
+  tdfx and Savage4. For real conversion, use the <CODE>Scale</CODE> filter.</P>
 
 <P><B><U>Usage</U></B>:</P>
 
