@@ -186,8 +186,8 @@ int allow_dshow=0;
 #endif
 
 // streaming:
-static int audio_id=-1;
-static int video_id=-1;
+int audio_id=-1;
+int video_id=-1;
 static int dvdsub_id=-1;
 static int vcd_track=0;
 
