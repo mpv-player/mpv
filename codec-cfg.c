@@ -732,7 +732,7 @@ int main(void)
 		printf("no audioconfig.\n");
 
         f1=fopen("DOCS/codecs-in.html","rb"); if(!f1) exit(1);
-        f2=fopen("DOCS/codecs.html","wb"); if(!f2) exit(1);
+        f2=fopen("DOCS/codecs-status.html","wb"); if(!f2) exit(1);
         
         while((c=fgetc(f1))>=0){
             if(c!='%'){
