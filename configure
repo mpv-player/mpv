@@ -555,21 +555,26 @@ if test "$_as" = auto ; then
   test -z "$_as" && _as=as
 fi
 
-# Try to find the available options for the current CPU
-if x86 || ppc; then
-  if test -r /proc/cpuinfo ; then
-    # Linux with /proc mounted, extract CPU information from it
-    _cpuinfo="cat /proc/cpuinfo"
-  elif test -r /compat/linux/proc/cpuinfo ; then
-    # FreeBSD with Linux emulation /proc mounted,
-    # extract CPU information from it
-    _cpuinfo="cat /compat/linux/proc/cpuinfo"
-  elif x86; then
-    # all other OSes try to extract CPU information from a small helper
-    # program TOOLS/cpuinfo instead
-    $_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
-    _cpuinfo="TOOLS/cpuinfo"
-  fi
+# XXX: this should be ok..
+_cpuinfo="echo"
+if test -r /proc/cpuinfo ; then
+  # Linux with /proc mounted, extract CPU information from it
+  _cpuinfo="cat /proc/cpuinfo"
+elif test -r /compat/linux/proc/cpuinfo ; then
+  # FreeBSD with Linux emulation /proc mounted,
+  # extract CPU information from it
+  _cpuinfo="cat /compat/linux/proc/cpuinfo"
+elif x86; then
+  # all other OSes try to extract CPU information from a small helper
+  # program TOOLS/cpuinfo instead
+  $_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
+  _cpuinfo="TOOLS/cpuinfo"
+fi
+
+case "$host_arch" in
+  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
+  _def_arch="#define ARCH_X86 1"
+  _target_arch="TARGET_ARCH_X86 = yes"
 
   pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -1`
   pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -1`
@@ -589,14 +594,12 @@ if x86 || ppc; then
   _sse=no
   _sse2=no
   _mtrr=no
-  _altivec=no
 
   for i in $pparam ; do
     case "$i" in
     3dnow)        _3dnow=yes               ;;
     3dnowext)     _3dnow=yes  _3dnowex=yes ;;
     mmx)          _mmx=yes                 ;;
-    altivec)      _altivec=yes             ;;
     mmxext)       _mmx2=yes                ;;
     mtrr|k6_mtrr|cyrix_arr)   _mtrr=yes    ;;
     xmm|sse|kni)  _sse=yes    _mmx2=yes    ;;
@@ -609,54 +612,6 @@ if x86 || ppc; then
 
   echocheck "CPU type"
   echores "$pname"
-
-  # leaving this here because of the non-x86 optimizations
-  if test "$_runtime_cpudetection" = yes ; then
-    if x86; then
-      _mmx=yes
-      _3dnow=yes
-      _3dnowex=yes
-      _mmx2=yes
-      _sse=yes
-      _sse2=yes
-      _mtrr=yes
-    fi
-    _optimizing="Runtime CPU-Detection enabled"
-  fi
-
-fi
-
-
-if [ "$host_arch" = alpha ]; then
-  echocheck "CPU type"
-cat > $TMPC << EOF
-int main() {
-    unsigned long ver, mask;
-    asm ("implver %0" : "=r" (ver));
-    asm ("amask %1, %0" : "=r" (mask) : "r" (-1));
-    printf("%ld-%x\n", ver, ~mask);
-    return 0;
-}
-EOF
-  $_cc -o "$TMPO" "$TMPC"
-  case `"$TMPO"` in
-    0-0) proc="ev4" ;;
-    1-0) proc="ev5" ;;
-    1-1) proc="ev56" ;;
-    1-101) proc="pca56" ;;
-    2-303) proc="ev6" ;;
-    2-307) proc="ev67" ;;
-    2-1307) proc="ev68" ;;
-  esac
-  echores "$proc"
-fi
-
-
-# x86/x86pc is used by QNX
-case "$host_arch" in
-  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _def_arch="#define ARCH_X86 1"
-  _target_arch="TARGET_ARCH_X86 = yes"
 
   case "$pvendor" in
   AuthenticAMD)
@@ -829,6 +784,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   x86_64)
@@ -838,6 +794,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   sparc)
@@ -847,15 +804,17 @@ EOF
     proc='v8'
     _march=''
     _mcpu="-mcpu=$proc"
+    _optimizing="$proc"
     ;;
 
   arm|armv4l|armv5tel)
     _def_arch='#define ARCH_ARMV4L 1'
     _target_arch='TARGET_ARCH_ARMV4L = yes'
-    iproc=arm
+    iproc='arm'
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   ppc)
@@ -865,14 +824,11 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _altivec=no
     _altivec_gcc_flags=''
-    # XXX: this should be removed imho...
-    cpu750=`$_cpuinfo | grep "cpu.*750"`
-    if test -n "$cpu750"; then
-	_march='-mcpu=750'
-	_mcpu='-mtune=750'
-    fi
-    if linux ; then
+
+    echocheck "CPU type"
+    if linux && test -n "$_cpuinfo"; then
 	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
 	    _altivec=yes
@@ -885,6 +841,9 @@ EOF
             _altivec_gcc_flags='-faltivec'
  	fi
     fi
+    echores "$proc"
+
+    echocheck "GCC & CPU optimization abilities"
     if test -n "$proc"; then
         case "$proc" in
 	    601) _march='-mcpu=601' _mcpu='-mtune=601' ;;
@@ -904,6 +863,10 @@ EOF
     	    esac
 	fi
     fi
+    echores "$proc"
+    
+    _optimizing="$proc"
+
     _mcpu="$_mcpu $_altivec_gcc_flags"
     ;;
 
@@ -912,6 +875,29 @@ EOF
     _target_arch='TARGET_ARCH_ALPHA = yes'
     iproc='alpha'
     _march=''
+    
+    echocheck "CPU type"
+    cat > $TMPC << EOF
+int main() {
+    unsigned long ver, mask;
+    asm ("implver %0" : "=r" (ver));
+    asm ("amask %1, %0" : "=r" (mask) : "r" (-1));
+    printf("%ld-%x\n", ver, ~mask);
+    return 0;
+}
+EOF
+    $_cc -o "$TMPO" "$TMPC"
+    case `"$TMPO"` in
+	0-0) proc="ev4" ;;
+	1-0) proc="ev5" ;;
+	1-1) proc="ev56" ;;
+	1-101) proc="pca56" ;;
+	2-303) proc="ev6" ;;
+	2-307) proc="ev67" ;;
+	2-1307) proc="ev68" ;;
+    esac
+    echores "$proc"
+    
     echocheck "GCC & CPU optimization abilities"
     if test "$proc" = "ev68" ; then
       cc_check -mcpu=$proc || proc=ev67
@@ -921,6 +907,8 @@ EOF
     fi
     _mcpu="-mcpu=$proc"
     echores "$proc"
+    
+    _optimizing="$proc"
 
     echocheck "MVI instruction support in GCC"
     if test "$_cc_major" -ge "3"; then
@@ -939,6 +927,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   hppa)
@@ -948,6 +937,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   s390)
@@ -957,6 +947,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   s390x)
@@ -966,6 +957,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     ;;
 
   *)
@@ -975,6 +967,18 @@ EOF
     ;;
 esac
 
+if test "$_runtime_cpudetection" = yes ; then
+  if x86; then
+    _mmx=yes
+    _3dnow=yes
+    _3dnowex=yes
+    _mmx2=yes
+    _sse=yes
+    _sse2=yes
+    _mtrr=yes
+  fi
+  _optimizing="Runtime CPU-Detection enabled"
+fi
 
 if x86 && test "$_runtime_cpudetection" = no ; then
   extcheck() {
