@@ -932,7 +932,7 @@ Spécifie dans quel mode OSD démarrer.
 volume + position (par défaut)
 .IPs 2
 volume + position + compteur + pourcentage
-.IPs 4
+.IPs 3
 volume + position + compteur + pourcentage + temps total
 .RE
 .PD 1
@@ -1077,8 +1077,13 @@ La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .B \-unicode
 Indique à MPlayer de traiter le fichier de sous-titre au format UNICODE.
 .TP
-.B \-utf8 \ \
+.B \-utf8
 Indique à MPlayer de traiter le fichier de sous-titre au un format UTF8.
+.TP
+.B \-sub-no-text-pp
+Désactive tout type de post-processing appliquable sur le texte après avoir 
+chargé les sous-titres.
+Utilisé pour déboguage.
 .TP
 .B \-vobsub <fichier\ vobsub\ sans\ extension>
 Spécifie le fichier VobSub qui sera utilisé pour les sous-titres.
