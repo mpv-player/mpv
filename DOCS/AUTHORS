@@ -136,16 +136,20 @@ Michel Lespinasse:  <walken@zoy.org>
 Eugene Kuznetsov:  <divx@euro.ru>
 - avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]
 - technical help about AVI and ASF formats, and how to get YUV using VfW...
+- divx4linux techical support
 
 Zdenek Kabelac:  <kabi@informatics.muni.cz>
 - current avifile maintainer(?)
 - some technical help about the win32 stuff and timers
 
+Gerard Lantau: <glantau@yahoo.fr>
+- ffmpeg/libavcodec author,maintainer  (opensource mpeg & divx en/decoder)
+
 Project Mayo:  [http://www.projectmayo.com]
 - the OpenDivX codec authors
 
 Michael Hipp:
-- mpglib author   [isn't used directly but in mp3lib]
+- mpglib author   [isn't used directly but some parts in mp3lib]
 
 Mark Podlipec:
 - xa_gsm.c author  [MS-GSM audio codec]

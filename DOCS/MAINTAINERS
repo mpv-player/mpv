@@ -7,12 +7,14 @@ Homepage:
    Design:  Chass
    Content: Gabucino
 English docs:
-   tech-*.txt, BUGS: A'rpi
+   tech-*.txt, BUGS, BUGREPORTS: A'rpi
    others: Gabucino
 DOCS translations:
    Hungarian:  Gabucino & Tibcu
    Spanish:    TeLeNiEkO
    Russian:    Nick Kurshev
+   Polish:     maintainer: Dariush Pietrzak
+   German:     maintainer: Atmos
 
 Platforms/ports:
 ~~~~~~~~~~~~~~~~
@@ -31,12 +33,17 @@ config files & commandline parser: Szabi
 fastmemcpy: Nick
 LIRC support: Acki
 
+libavcodec:
+~~~~~~~~~~~
+author/maintainer: Gerard Lantau
+asm optimizaton: Nick
+
 libvo drivers:
 ~~~~~~~~~~~~~~
-vo_3dfx.c   - OBSOLOTED, use xv
+vo_3dfx.c   - OBSOLETED, use xv
 vo_dga.c    - Acki
 vo_fbdev.c  - Szabi
-vo_fsdga.c  - OBSOLOTED, use dga
+vo_fsdga.c  - OBSOLETED, use dga
 vo_ggi.c    - al3x
 vo_gl.c     - A'rpi
 vo_md5.c    - A'rpi
@@ -47,7 +54,7 @@ vo_pgm.c    - A'rpi
 vo_png.c    - Atmos
 vo_sdl.c    - Atmos
 vo_svga.c   - se7en
-vo_syncfb.c - OBSOLOTED, use mga
+vo_syncfb.c - OBSOLETED, use mga
 vo_x11.c    - Pontscho
 vo_xmga.c   - Pontscho
 vo_xv.c     - Pontscho
@@ -55,7 +62,7 @@ vo_xv.c     - Pontscho
 libao2 drivers:
 ~~~~~~~~~~~~~~~
 ao_alsa5.c  - al3x
-ao_alsa9.c  - al3x
+ao_alsa9.c  - al3x (BUGGY, use oss)
 ao_null.c   - A'rpi
 ao_oss.c    - A'rpi
 ao_pcm.c    - Atmos
