@@ -28,6 +28,9 @@ LIBVO_EXTERN( x11 )
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XShm.h>
+#ifdef HAVE_XF86VM
+#include <X11/extensions/xf86vmode.h>
+#endif
 #include <errno.h>
 #include "yuv2rgb.h"
 
@@ -49,6 +52,10 @@ int XShmGetEventBase( Display* );
 
 /* local data */
 static unsigned char *ImageData;
+
+#ifdef HAVE_XF86VM
+XF86VidModeModeInfo **vidmodes=NULL;
+#endif
 
 /* X11 related variables */
 static Display *mDisplay;
@@ -138,6 +145,54 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  hint.y=0;
  hint.width=image_width;
  hint.height=image_height;
+
+#ifdef HAVE_XF86VM
+ if (fullscreen) {
+    unsigned int modeline_width, modeline_height, vm_event, vm_error;
+    unsigned int vm_ver, vm_rev;
+    int i,j,k,have_vm=0,X,Y;
+
+    int modecount;
+
+    if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
+        XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
+        printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+        have_vm=1;
+    } else
+        printf("XF86VidMode Extenstion not available.\n");
+
+    if (have_vm) {
+      if (vidmodes==NULL)
+        XF86VidModeGetAllModeLines(mDisplay,screen,&modecount,&vidmodes);
+      j=0;
+      modeline_width=vidmodes[0]->hdisplay;
+      modeline_height=vidmodes[0]->vdisplay;
+      if ((d_width==0) && (d_height==0))
+        { X=image_width; Y=image_height; }
+      else
+        { X=d_width; Y=d_height; }
+
+      for (i=1; i<modecount; i++)
+        if ((vidmodes[i]->hdisplay >= X) && (vidmodes[i]->vdisplay >= Y))
+          if ( (vidmodes[i]->hdisplay < modeline_width ) && (vidmodes[i]->vdisplay < modeline_height) )
+          {
+             modeline_width=vidmodes[i]->hdisplay;
+             modeline_height=vidmodes[i]->vdisplay;
+             j=i;
+          }
+
+      printf("XF86VM: Selected video mode %dx%d for image size %dx%d.\n",modeline_width, modeline_height, image_width, image_height);
+      XF86VidModeLockModeSwitch(mDisplay,screen,0);
+      XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[j]);
+      XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[j]);
+      X=(vo_screenwidth-modeline_width)/2;
+      Y=(vo_screenheight-modeline_height)/2;
+      XF86VidModeSetViewPort(mDisplay,screen,X,Y);
+    }
+  }
+#endif
+
+
  if ( fullscreen )
   {
    hint.width=vo_screenwidth;
@@ -468,6 +523,16 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
+#ifdef HAVE_XF86VM
+        if (vidmodes!=NULL)
+        {
+          int screen; screen=DefaultScreen( mDisplay );
+          XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[0]);
+          XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[0]);
+          free(vidmodes);
+        }
+#endif
+
 printf("vo: uninit!\n");
 }
 
