@@ -32,10 +32,11 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
   // Map known video MIME types to the BITMAPINFOHEADER parameters
   // that this program uses.  (Note that not all types need all
   // of the parameters to be set.)
-  if (strcmp(subsession->codecName(), "MPV") == 0 ||
-      strcmp(subsession->codecName(), "MP1S") == 0 ||
-      strcmp(subsession->codecName(), "MP2T") == 0) {
+  if (strcmp(subsession->codecName(), "MPV") == 0) {
     flags |= RTPSTATE_IS_MPEG12_VIDEO;
+  } else if (strcmp(subsession->codecName(), "MP1S") == 0 ||
+	     strcmp(subsession->codecName(), "MP2T") == 0) {
+    flags |= RTPSTATE_IS_MPEG12_VIDEO|RTPSTATE_IS_MULTIPLEXED;
   } else if (strcmp(subsession->codecName(), "H263") == 0 ||
 	     strcmp(subsession->codecName(), "H263-1998") == 0) {
     bih->biCompression = sh_video->format
@@ -116,6 +117,16 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
   } else if (strcmp(subsession->codecName(), "AC3") == 0) {
     wf->wFormatTag = sh_audio->format = 0x2000;
     wf->nSamplesPerSec = 0; // sample rate is deduced from the data
+  } else if (strcmp(subsession->codecName(), "L16") == 0) {
+    wf->wFormatTag = sh_audio->format = 0x736f7774; // "twos"
+    wf->nBlockAlign = 1;
+    wf->wBitsPerSample = 16;
+    wf->cbSize = 0;
+  } else if (strcmp(subsession->codecName(), "L8") == 0) {
+    wf->wFormatTag = sh_audio->format = 0x20776172; // "raw "
+    wf->nBlockAlign = 1;
+    wf->wBitsPerSample = 8;
+    wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "PCMU") == 0) {
     wf->wFormatTag = sh_audio->format = 0x7;
     wf->nAvgBytesPerSec = 8000;
