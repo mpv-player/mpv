@@ -1416,14 +1416,14 @@ static void mga_param_buff_fill( void )
 {
     unsigned len;
     len = 0;
-    len += sprintf(&mga_param_buff[len]-len,"Interface version: %04X\n",MGA_VID_VERSION);
-    len += sprintf(&mga_param_buff[len]-len,"Memory: %x:%dM\n",mga_mem_base,(unsigned int) mga_ram_size);
-    len += sprintf(&mga_param_buff[len]-len,"MMIO: %p\n",mga_mmio_base);
-    len += sprintf(&mga_param_buff[len]-len ,"Configurable stuff:\n");
-    len += sprintf(&mga_param_buff[len]-len,"~~~~~~~~~~~~~~~~~~~\n");
-    len += sprintf(&mga_param_buff[len]-len,PARAM_BRIGHTNESS"%d\n",mga_brightness);
-    len += sprintf(&mga_param_buff[len]-len,PARAM_CONTRAST"%d\n",mga_contrast);
-    len += sprintf(&mga_param_buff[len]-len,PARAM_BLACKIE"%s\n",regs.blackie?"on":"off");
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,"Interface version: %04X\n",MGA_VID_VERSION);                                                                                                       
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,"Memory: %x:%dM\n",mga_mem_base,(unsigned int) mga_ram_size);                                                                                       
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,"MMIO: %p\n",mga_mmio_base);                                                                                                                        
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,"Configurable stuff:\n");                                                                                                                           
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,"~~~~~~~~~~~~~~~~~~~\n");                                                                                                                           
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,PARAM_BRIGHTNESS"%d\n",mga_brightness);                                                                                                             
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,PARAM_CONTRAST"%d\n",mga_contrast);                                                                                                                 
+    len += snprintf(&mga_param_buff[len],PARAM_BUFF_SIZE-len,PARAM_BLACKIE"%s\n",regs.blackie?"on":"off");   
     mga_param_buff_len = len;
     // check boundaries of mga_param_buff before writing to it!!!
 }
