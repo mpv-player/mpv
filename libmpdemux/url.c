@@ -17,6 +17,7 @@ url_new(const char* url) {
 	int pos1, pos2;
 	URL_t* Curl;
 	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL;
+	int jumpSize = 3;
 
 	if( url==NULL ) return NULL;
 	
@@ -40,9 +41,15 @@ url_new(const char* url) {
 	// extract the protocol
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
-		url_free(Curl);
-		return NULL;
+	        // Check for a special case: "sip:" (without "//"):
+	        if (strstr(url, "sip:") == url) {
+		        ptr1 = &url[3]; // points to ':'
+			jumpSize = 1;
+		} else {
+		        mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
+		        url_free(Curl);
+			return NULL;
+		}
 	}
 	pos1 = ptr1-url;
 	Curl->protocol = (char*)malloc(pos1+1);
@@ -55,8 +62,8 @@ url_new(const char* url) {
 	Curl->protocol[pos1] = '\0';
 
 	// jump the "://"
-	ptr1 += 3;
-	pos1 += 3;
+	ptr1 += jumpSize;
+	pos1 += jumpSize;
 
 	// check if a username:password is given
 	ptr2 = strstr(ptr1, "@");
