@@ -60,7 +60,7 @@ binary-arch: build
 
 
 	dh_installdebconf	
-	dh_installdocs DOCS/*
+	dh_installdocs --exclude=CVS DOCS/*
 	dh_installexamples etc/example.conf
 	dh_installmenu
 #	dh_installmime
