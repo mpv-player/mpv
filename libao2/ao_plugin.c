@@ -25,16 +25,19 @@ LIBAO_EXTERN(plugin)
 // local data 
 typedef struct ao_plugin_local_data_s
 {
-  ao_functions_t* driver;      // Output driver set in mplayer.c
+  void* buf;					 // Output data buffer
+  int len;					 // Amount of data in buffer
+  float bps;					 // Bytes per second out
+  ao_functions_t* driver;      			 // Output driver
   ao_plugin_functions_t** plugins;               // List of used plugins
   ao_plugin_functions_t* available_plugins[NPL]; // List of available plugins
 } ao_plugin_local_data_t;
 
-static ao_plugin_local_data_t ao_plugin_local_data={NULL,NULL,AO_PLUGINS};
+static ao_plugin_local_data_t ao_plugin_local_data={NULL,0,0.0,NULL,NULL,AO_PLUGINS};
 
-// gloabal data 
-volatile ao_plugin_data_t ao_plugin_data; // data used by the plugins
-volatile ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS;  // cfg data set in cfg-mplayer.h
+// global data 
+volatile ao_plugin_data_t ao_plugin_data; // Data used by the plugins
+volatile ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS; // Set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -102,7 +105,7 @@ int add_plugin(int i,char* cfg){
 static int init(int rate,int channels,int format,int flags){
   int ok=1;
 
-  /* Create list of plugins from cfg option */
+  // Create list of plugins from cfg option
   int i=0; 
   if(ao_plugin_cfg.plugin_list){
     if(!add_plugin(i,ao_plugin_cfg.plugin_list))
@@ -124,6 +127,20 @@ static int init(int rate,int channels,int format,int flags){
   
   if(!ok) return 0;
 
+  // Calculate bps
+  ao_plugin_local_data.bps=(float)(ao_plugin_data.rate * 
+				   ao_plugin_data.channels);
+
+  if(ao_plugin_data.format == AFMT_S16_LE ||
+     ao_plugin_data.format == AFMT_S16_BE ||
+     ao_plugin_data.format == AFMT_U16_LE ||
+     ao_plugin_data.format == AFMT_U16_BE)
+    ao_plugin_local_data.bps *= 2;
+
+  if(ao_plugin_data.format == AFMT_S32_LE ||
+     ao_plugin_data.format == AFMT_S32_BE)
+    ao_plugin_local_data.bps *= 4;
+
   // This should never happen but check anyway 
   if(NULL==ao_plugin_local_data.driver)
     return 0;
@@ -142,6 +159,13 @@ static int init(int rate,int channels,int format,int flags){
 
   if(!ok) return 0;
 
+  // Allocate output buffer */
+  if(ao_plugin_local_data.buf)
+    free(ao_plugin_local_data.buf);
+  ao_plugin_local_data.buf=malloc(MAX_OUTBURST);
+
+  if(!ao_plugin_local_data.buf) return 0;
+
   return 1;
 }
 
@@ -153,6 +177,8 @@ static void uninit(){
     plugin(i++)->uninit();
   if(ao_plugin_local_data.plugins)
     free(ao_plugin_local_data.plugins);
+  if(ao_plugin_local_data.buf)
+    free(ao_plugin_local_data.buf);
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -161,6 +187,7 @@ static void reset(){
   driver()->reset();
   while(plugin(i))
     plugin(i++)->reset();
+  ao_plugin_local_data.len=0;
 }
 
 // stop playing, keep buffers (for pause)
@@ -176,6 +203,8 @@ static void audio_resume(){
 // return: how many bytes can be played without blocking
 static int get_space(){
   double sz=(double)(driver()->get_space());
+  if(sz+(double)ao_plugin_local_data.len > (double)MAX_OUTBURST)
+    sz=(double)MAX_OUTBURST-(double)ao_plugin_local_data.len;
   sz*=ao_plugin_data.sz_mult;
   sz+=ao_plugin_data.sz_fix;
   return (int)(sz);
@@ -184,22 +213,25 @@ static int get_space(){
 // plays 'len' bytes of 'data'
 // return: number of bytes played
 static int play(void* data,int len,int flags){
-  int i=0;
-  /* Due to constant buffer sizes in plugins limit length */
-  int tmp = get_space();
+  int l,i=0;
+  // Limit length to avoid over flow in plugins
+  int tmp = driver()->get_space();
   int ret_len =(tmp<len)?tmp:len;
-  /* Filter data */
-  ao_plugin_data.len=ret_len;  
+  // Filter data
+  ao_plugin_data.len=ret_len;
   ao_plugin_data.data=data;
   while(plugin(i))
     plugin(i++)->play();
-  /* Send data to output */
-  //fprintf(stderr, "ao_plugin: ret_len=%d, len=%d\n", ret_len, len);
-  len=driver()->play(ao_plugin_data.data,ao_plugin_data.len,flags);
-  //fprintf(stderr, "ao_plugin: returned len=%d\n", len);
-
-  if(len!=ao_plugin_data.len)
-    fprintf(stderr,"[ao_plugin] Warning under or over flow in sound plugin\n");
+  // Copy data to output buffer
+  memcpy(ao_plugin_local_data.buf+ao_plugin_local_data.len,
+	 ao_plugin_data.data,ao_plugin_data.len);
+  // Send data to output
+  l=driver()->play(ao_plugin_local_data.buf,
+		   ao_plugin_data.len+ao_plugin_local_data.len,flags);
+  // Save away unsent data
+  ao_plugin_local_data.len=ao_plugin_data.len+ao_plugin_local_data.len-l;
+  memcpy(ao_plugin_local_data.buf,ao_plugin_local_data.buf+l,
+	 ao_plugin_local_data.len);
   
   return ret_len;
 }
@@ -207,6 +239,7 @@ static int play(void* data,int len,int flags){
 // return: delay in seconds between first and last sample in buffer
 static float get_delay(){
   float delay=driver()->get_delay();
+  delay+=(float)ao_plugin_local_data.len/ao_plugin_local_data.bps;
   delay*=ao_plugin_data.delay_mult;
   delay+=ao_plugin_data.delay_fix;
   return delay;
