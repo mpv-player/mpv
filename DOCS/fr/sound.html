@@ -219,7 +219,7 @@
   <TR>
     <TD><B>Cartes C-Media (lesquelles ?)</B></TD>
     <TD>pas OK (hissing) (?)</TD>
-    <TD>OK (?)</TD>
+    <TD>OK</TD>
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
@@ -360,7 +360,7 @@
 </DL>
 
 
-<H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
+<H4><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H4>
 
 <P>MPlayer supporte pleinement l'up/down-sampling du son par l'intermédiaire du filtre
    <CODE>resample</CODE>. Ce filtre peut être utilisé
@@ -401,7 +401,7 @@
   de fréquence exacte et l'interpolation linéaire.</P>
 
 
-<H5><A NAME="af_channels">2.3.2.3.2 Changer le nombre de canaux</A></H5>
+<H4><A NAME="af_channels">2.3.2.3.2 Changer le nombre de canaux</A></H4>
 
 <P>Le filtre <CODE>channels</CODE> peut être utilisé pour ajouter ou retirer 
   des canaux, il peut aussi être utilisé pour le routage ou la copie de canaux. Il est
@@ -445,14 +445,14 @@
   dans les canaux 0 à 3. Les canaux 4 et 5 contiendront du silence.</P>
 
 
-<H5><A NAME="af_format">2.3.2.3.3 Convertisseur de format de sample</A></H5>
+<H4><A NAME="af_format">2.3.2.3.3 Convertisseur de format de sample</A></H4>
 
-<P>Le filtre <CODE>format</CODE> fait la conversion entre les différents formats de sample. 
+<P>Le filtre <CODE>format</CODE> fait la conversion entre les différents formats de sample.
   Il est automatiquement activé si requis par la carte son ou un autre filtre.</P>
 
 <DL>
   <DT><CODE>bps &lt;number&gt;</CODE></DT>
-  <DD>peut être <CODE>1</CODE>, <CODE>2</CODE> ou <CODE>4</CODE> et définie le nombre 
+  <DD>peut être <CODE>1</CODE>, <CODE>2</CODE> ou <CODE>4</CODE> et définie le nombre
     d'octets par sample. Cette option est requise, la laisser vide provoquera une erreur à l'exécution.</DD>
 
   <DT><CODE>f &lt;format&gt;</CODE></DT>
@@ -460,7 +460,7 @@
     concaténé de: <CODE>alaw</CODE>, <CODE>mulaw</CODE> ou
     <CODE>imaad</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
     <CODE>unsigned</CODE> ou <CODE>signed</CODE>, <CODE>le</CODE> ou
-    <CODE>be</CODE> (little ou big endian). Cette option est requise, la laisser vide 
+    <CODE>be</CODE> (little ou big endian). Cette option est requise, la laisser vide
     provoquera une erreur à l'exécution.</DD>
 </DL>
 
@@ -470,7 +470,7 @@
 <P>initialiserait le format de sortie en données à virgule de 4 octets par sample.</P>
 
 
-<H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
+<H4><A NAME="af_delay">2.3.2.3.4 Delay</A></H4>
 
 <P>Le filtre <CODE>delay</CODE> décale le son vers les haut-parleurs de façon a faire arriver le son dans les 
   différents canaux au même moment dans la position d'écoute. Cela n'est utile que si
@@ -503,7 +503,7 @@
   caisson de 0ms et le canal central de 7ms.</P>
 
 
-<H5><A NAME="af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
+<H4><A NAME="af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></H4>
 
 <P>Le contrôle de volume logiciel est implémenté par le filtre audio <CODE>volume</CODE>. 
   Utilisez ce filtre avec précaution 
@@ -540,7 +540,7 @@
   le niveau de son dans MEncoder pour que l'intervalle dynamique maximum soit utilisé.</P>
 
 
-<H5><A NAME="af_equalizer">2.3.2.3.6 Egaliseur</A></H5>
+<H4><A NAME="af_equalizer">2.3.2.3.6 Egaliseur</A></H4>
 
 <P>Le filtre <CODE>equalizer</CODE> est un égaliseur graphique à 10 bandes, implémenté en utilisant 10 filtres
   IIR de bande passante. Cela signifie qu'il fonctionne quel que soit le type d'audio
@@ -582,7 +582,7 @@
   les annulant presque complètement autour de 1kHz.</P>
 
   
-<H5><A NAME="af_panning">2.3.2.3.7 Filtre panoramique</A></H5>
+<H4><A NAME="af_panning">2.3.2.3.7 Filtre panoramique</A></H4>
 
 <P>Utilisez le filtre <CODE>pan</CODE> pour mixer les canaux arbitrairement. Fondamentalement
   c'est une combinaison des filtres volume control et channels. Il y a deux utilisations
@@ -623,7 +623,7 @@
   sub-woofer par exemple).</P>
 
 
-<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+<H4><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H4>
 
 <P>Le filtre <CODE>sub</CODE> ajoute un canal de sub woofer au flux audio. 
   Les données audio
@@ -655,7 +655,7 @@
 <P>ajouterait un canal sub-woofer avec une fréquence de cut-off de 100Hz au canal
   de sortie 4.</P>
 
-<H5><A NAME="af_surround">2.3.2.3.9 Décodeur de son surround</A></H5>
+<H4><A NAME="af_surround">2.3.2.3.9 Décodeur de son surround</A></H4>
 
 <P>Le son surround encodé en matrice peut être décodé par le filtre <CODE>surround</CODE>.
   Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
@@ -711,7 +711,7 @@
 <P>Actuellement les plugins audio ne peuvent pas être utilisés dans MEncoder.</P>
 
 
-<H5><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H5>
+<H4><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H4>
 
 <P>Mplayer supporte pleinement l'up/downsampling du son. Ce plugin peut
   être utilisé si vous avez une carte son à fréquence fixe ou que vous
@@ -729,7 +729,7 @@
   en slow motion assortie d'une distorsion audio.</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.4.2 Décodage son surround</A></H5>
+<H4><A NAME="surround_decoding">2.3.2.4.2 Décodage son surround</A></H4>
 
 <P>MPlayer a un plugin audio qui peut décoder le son surround encodé en matrice.
   Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
@@ -741,7 +741,7 @@
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME="format">2.3.2.3.3 Convertisseur de format de sample</A></H5>
+<H4><A NAME="format">2.3.2.3.3 Convertisseur de format de sample</A></H4>
 
 <P>Si votre carte son ne supporte pas le format de données <CODE>int</CODE> 16bit signé,
   ce plugin peut être utilisé pour le changer dans un format que votre carte son
@@ -755,19 +755,19 @@
   list=format:format=&lt;format de sortie requis&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.4.4 Décalage</A></H5>
+<H4><A NAME="delay">2.3.2.4.4 Décalage</A></H4>
 
 <P>Ce plugin décale le son est n'est là que comme exemple pour démontrer comment
   développer de nouveaux plugins. Il ne peut être utilisé pour rien d'utile d'un
   point de vue utilisateur et n'est mentionné ici que pour l'amour de l'exhaustivité.
   N'utilisez pas ce plugin à moins que vous soyez un développeur.</P>
 
-<P>Si vous avez un fichier avec des pertes de synchro A/V ponctuelles, utilisez à la place 
+<P>Si vous avez un fichier avec des pertes de synchro A/V ponctuelles, utilisez à la place
   les touches <CODE>+/-</CODE> pour ajuster la synchro à la volée. L'utilisation de l'OSD
   est recommandé pour simplifier cette tâche.</P>
-  
-   
-<H5><A NAME="volume">2.3.2.4.5 Contrôle de volume logiciel</A></H5>
+
+
+<H4><A NAME="volume">2.3.2.4.5 Contrôle de volume logiciel</A></H4>
 
 <P>Ce plugin est un remplacement logiciel pour le contrôleur de volume,
   et peut être utilisé sur des machines avec un périphérique mixeur endommagé.
@@ -779,9 +779,9 @@
   régler le volume MASTER au maximum, laisser ce plugin, et contrôler le niveau de sortie
   sur vos haut-parleurs avec le bouton principal du mixeur. Au cas où votre carte son
   ait un mixeur numérique au lieu d'un analogique, utilisez le contrôle mixeur MASTER
-  à la place. Si il y a un ampli externe connecté à votre ordinateur (c'est la plupart 
-  du temps le cas), le niveau de bruit peut être minimisé en ajustant le niveau 
-  principal et la molette du volume de l'ampli jusqu'à ce que le bruit résiduel soit 
+  à la place. Si il y a un ampli externe connecté à votre ordinateur (c'est la plupart
+  du temps le cas), le niveau de bruit peut être minimisé en ajustant le niveau
+  principal et la molette du volume de l'ampli jusqu'à ce que le bruit résiduel soit
   parti.</P>
 
 <P>Utilisation:<BR>
@@ -798,7 +798,7 @@
   list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H5>
+<H4><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H4>
 
 <P>Ce plugin augmente (linéairement) la différence entre les canaux gauche et
   droit (comme le plugin extrastereo de XMMS) qui donne une sorte d'effet "live"
@@ -814,7 +814,7 @@
   -1.0, les canaux gauche et droit seront inversés.</P>
 
 
-<H5><A NAME="normalizer">2.3.2.4.7 Volume normalizer</A></H5>
+<H4><A NAME="normalizer">2.3.2.4.7 Volume normalizer</A></H4>
 
 <P>Ce plugin maximise le volume sans distordre le son.</P>
 

@@ -239,6 +239,10 @@ dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur
 peut régler plus finement les entrées EDL plus tard. 
 Voir DOCS/documentation.html#edl pour les détails.
 .TP
+.B \-enqueue (GUI uniquement)
+Ajoute les fichiers donnés en ligne de commande à la liste de lecture au lieu
+de les jouer immédiatement.
+.TP
 .B \-fixed-vo (CODE BETA!)
 force un système de vidéo fixe pour des fichiers multiples (une 
 (dès)initialisation pour pour tous les fichiers).
@@ -1169,8 +1173,7 @@ chaque flux audio.
 .RSss
 v: gain désiré en dB pour tous les canaux du flux. 
 Le gain peut être initialisé avec de -200dB à +40dB (où -200dB coupe le son 
-complètement et +40dB équivaut à un gain de 1000). 
-Le gain par défaut est -20dB.
+complètement et +40dB équivaut à un gain de 1000).
 .br
 sc: active la coupure douce.
 .REss
@@ -1472,7 +1475,19 @@ tous).
 Voir aussi \-zoom.
 .TP
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (utiliser l'option \-fs)
-Essayez cette option si vous avez encode des problème en plein écran.
+Essayez cette option si vous avez encore des problèmes en plein écran.
+.TP
+.B \-fstype <type1,type2,...>
+Spécifie une liste de priorité des couches de paramètres plein-écran à utiliser.
+
+L'ordre par défaut est "layer,stays_on_top,above,fullscreen". Ce sera utilisé
+pour se rabattre au cas où un mode incorrect ou insupporté soit indiqué.
+.br
+Si des fenêtres recouvrent le plein écran, essayez un ordre différent.
+
+.I NOTE:
+.br
+Voir \-fstype help pour une liste complète des modes disponibles.
 .TP
 .B \-geometry x[%][:y[%]] ou [WxH][+x+y]
 Ajuste la position d'origine sur l'écran de la sortie.
@@ -1501,6 +1516,11 @@ Place la fenêtre en bas à gauche de l'écran
 .RE
 .PD 1
 .
+.TP
+.B \-guiwid <id\ fenêtre>
+Indique à la GUI d'utiliser également une fenêtre X11 et de se fixer au bas de
+la vidéo, ce qui est utile pour embarquer une mini-GUI dans un navigateur (avec
+mplayerplug-in par exemple).
 .TP
 .B \-hue <\-100\-100>
 Ajuste la couleur (hue) du signal vidéo (0 par défaut).
@@ -3218,9 +3238,9 @@ quantizer min & max pour toutes les trames (défaut=2\-31, mode CBR)
 .br
 quantizer min & max pour trames I/P (défaut=2\-31/2\-31, mode 2passes)
 .IPs min_key_interval=<valeur>
-interval minimum entre les trames-clé (défaut=0, 2passes uniquement)
+intervalle minimum entre les trames-clé (défaut=0, 2passes uniquement)
 .IPs max_key_interval=<valeur>
-interval maximum entre les trames-clé (défaut=10*fps)
+intervalle maximum entre les trames-clé (défaut=10*fps)
 .IPs mpeg_quant
 utilise les quantizers MPEG au lieu de H.263 (défaut=off)
 .IPs mod_quant
