@@ -475,6 +475,7 @@ char* video_driver=NULL; //"mga"; // default
 int fullscreen=0;
 int vidmode=0;
 int softzoom=0;
+int flip=0;
 int screen_size_x=0;//SCREEN_SIZE_X;
 int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
@@ -1223,20 +1224,22 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    }
 
    { const vo_info_t *info = video_out->get_info();
-     printf("VO: [%s] %dx%d => %dx%d %s%s%s ",info->short_name,
+     printf("VO: [%s] %dx%d => %dx%d %s%s%s%s ",info->short_name,
          sh_video->disp_w,sh_video->disp_h,
          screen_size_x,screen_size_y,
          fullscreen?"fs ":"",
          vidmode?"vm ":"",
-         softzoom?"zoom ":""
-//         fullscreen|(vidmode<<1)|(softzoom<<2)
+         softzoom?"zoom ":"",
+         flip?"flip ":""
+//         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
      if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_BGR)
        printf("BGR%d\n",out_fmt&255); else
-     if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_RGB)
+     if((out_fmt&IMGFMT_RGB_MASK)==IMGFMT_RGB)
        printf("RGB%d\n",out_fmt&255); else
      if(out_fmt==IMGFMT_YUY2) printf("YUY2\n"); else
      if(out_fmt==IMGFMT_UYVY) printf("UYVY\n"); else
+     if(out_fmt==IMGFMT_YVYU) printf("YVYU\n"); else
      if(out_fmt==IMGFMT_I420) printf("I420\n"); else
      if(out_fmt==IMGFMT_IYUV) printf("IYUV\n"); else
      if(out_fmt==IMGFMT_YV12) printf("YV12\n");
@@ -1248,7 +1251,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
-                      fullscreen|(vidmode<<1)|(softzoom<<2),
+                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt);
 
 if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
@@ -1264,7 +1267,7 @@ if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
 
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
-                      fullscreen|(vidmode<<1)|(softzoom<<2),
+                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt)){
      printf("FATAL: Cannot initialize video driver!\n");
      GUI_MSG( mplCantInitVideoDriver )
