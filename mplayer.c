@@ -2350,6 +2350,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_VF_CHANGE_RECTANGLE:
 	set_rectangle(sh_video, cmd->args[0].v.i, cmd->args[1].v.i);
 	break;
+	
+    case MP_CMD_GET_TIME_LENGTH : {
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
+    } break;
+
+    case MP_CMD_GET_PERCENT_POS : {
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
+    } break;
+
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV_EVENT: {
       dvdnav_priv_t * dvdnav_priv = (dvdnav_priv_t*)(stream->priv);

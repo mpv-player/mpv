@@ -67,6 +67,8 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_POS, "sub_pos", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SUB_VISIBILITY, "sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_VOBSUB_LANG, "vobsub_lang", 0, { {-1,{0}} } },
+  { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
+  { MP_CMD_GET_TIME_LENGTH, "get_time_length", 0, { {-1,{0}} } },
 #ifdef USE_TV
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_TV_STEP_NORM, "tv_step_norm",0, { {-1,{0}} }  },
