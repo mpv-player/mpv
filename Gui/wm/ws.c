@@ -489,7 +489,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   for ( i=0;i < wsWLCount;i++ )
    if ( wsWindowList[i] == NULL ) break;
   if ( i == wsWLCount )
-   { printf( "!!! tul sok nyitott ablak van.\n" ); exit( 1 ); }
+   {  mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] there are too many open windows\n" ); exit( 0 ); }
   wsWindowList[i]=win;
  }
 
