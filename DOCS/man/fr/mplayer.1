@@ -1,4 +1,4 @@
-.\" synced with 1.794
+.\" synced with 1.798
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "27 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "30 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -501,6 +501,13 @@ xvidix et xover uniquement.
 Désactive la couleur de transparence.
 Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
+.
+.TP
+.B \-crash-debug (CODE DE DÉBOGUAGE)
+Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
+N'est géré que si MPlayer a été compilé avec l'option de
+configuration \--enable-crash-debug ou si un fichier .developer était
+présent dans le répertoire source.
 .
 .TP
 .B \-edl <nomfichier> (EDL uniquement)
@@ -2611,7 +2618,7 @@ avec par ex.\& \-vf format=yuy2
 .IPs device_id=<numéro>
 Choisir le moniteur à utiliser en plein-écran.
 .IPs fs_res=<largeur>:<hauteur>
-Choisir la résolution du mode plein-écran (utile sur les systèmes plus lent)
+Choisir la résolution du mode plein-écran (utile sur les systèmes plus lent).
 .RE
 .PD 1
 .
@@ -4045,9 +4052,9 @@ Filtrage de la luminance uniquement (pas de la chrominance).
 .PD 0
 .RSs
 .IPs "\-vf pp=hb/vb/dr/al"
-Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
+Déblocage horizontal et vertical, "deringing" et luminosité/\:contraste auto
 .IPs "\-vf pp=hb/vb/dr/al/lb"
-Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
+Déblocage horizontal et vertical, "deringing" et luminosité/\:contraste auto
 et désentrelacement "linear blend"
 .IPs "\-vf pp=de/-al"
 Filtres par défaut sans correction de luminosité/\:contraste
@@ -6608,7 +6615,7 @@ FIXME: N'explique pas grand-chose.
 .TP
 .B umv
 Vecteurs de Mouvement illimités (H.263+ uniquement)
-Autorise l'encodages de VMs de longueur arbitraire.
+Autorise l'encodage de Vecteurs de Mouvements de longueur arbitraire.
 .
 .TP
 .B ibias=<-256\-256>
@@ -7231,7 +7238,7 @@ Contrôle avec quelle insistance on insère les trames-I en plus, par exemple
 lors des changements de scène.
 (par défaut\ 40).
 Avec une valeur de scenecut faible, le codec aura tendance à ne mettre des
-trames-I que toutes les keyint trames.
+trames-I que toutes les <keyint> trames.
 Une bonne valeur de scenecut est celle qui place une trame-I de façon la
 plus optimale.
 Avec une valeur trop grande, il sera choisi plus de trames-I, ce qui
