@@ -201,6 +201,11 @@
       <LI><A HREF="#tv_tips">2.5.2 Tippek a használathoz</A></LI>
       <LI><A HREF="#tv_examples">2.5.3 Példák</A></LI>
     </UL>
+    <LI><A HREF="#edl">2.6 Edit Decision Lists (EDL)</A></LI>
+    <UL>
+       <LI><A HREF="#edl_using">2.6.1 Using an EDL file</A></LI>
+       <LI><A HREF="#edl_making">2.6.2 Making an EDL file</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#usage">3. Használat</A></LI>
     <UL>
@@ -416,6 +421,10 @@
 <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> Nov 11, 2002<BR>
     Bár ez nem egy release azért megemlítem, tekintve hogy pont az MPlayer
     2 éves évfordulóján jött ki. Boldog szülinapot, MPlayer!</LI>
+<LI><B>MPlayer 0.90rc1 "The CodecCounter"</B> Dec 7, 2002<BR>
+    Megintcsak nem release, de most hogy bekerült a Sorenson 3 (QuickTime) és
+    a Windows Media 9 támogatás, az MPlayer a világ elsõ lejátszója mely
+    egyszerre támogatja az összes videoformátumot!</LI>
 <LI><B>MPlayer 0.90 "???"</B> Dátum egyelõre ismeretlen<BR>
     </LI>
 </UL>
@@ -832,11 +841,15 @@
 <P>Ezek a feliratok több fileból állnak: mindig van egy nagy méretû .SUB file,
   továbbá opcionálisan egy .IDX és/vagy .IFO file.
   Használatuk: például <CODE>sample.sub</CODE>,
-  <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> file-ok esetén a
+  <CODE>sample.ifo</CODE> (opcionális), <CODE>sample.idx</CODE> file-ok esetén a
   <CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE> opciókat kell megadni
   (opcionálisan természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a
   DVD-knél használható <CODE>-sid</CODE> opció VobSub-os megfelelõje, azaz a
-  rendelkezésre álló nyelvek közül lehet vele választani.</P>
+  rendelkezésre álló nyelvek közül lehet vele választani. Ha ez az opció nincs
+  megadva, a <CODE>-slang</CODE> opció által megadott nyelvek lesznek
+  kiválasztva. A fennmaradó esetekben az .IDX file <CODE>langidx</CODE>
+  változója a meghatározó. Ha ez is sikertelen, nem lesz felirat
+  megjelenítve.</P>
 
 <H4>Egyéb feliratok</H4>
 
@@ -859,6 +872,10 @@
   formátum abszolut képkockában adja meg az idõzítést, a <CODE>-subfps</CODE>
   opció hatástalan. Az MPlayer FTP site <CODE>contrib/</CODE> könyvtárában
   van egy egyszerû perl script az FPS konverzió elvégzéséhez.</P>
+
+<P>Az MPlayer megpróbálja megtalálni a szükséges feliratfile-t. Legtöbb
+  esetben a film és a felirat file neve azonos, így nem szükséges a felirat
+  bekapcsolásához semmiféle opció.</P>
 
 <P>A DVD feliratok használatához olvasd el a <A HREF="cd-dvd.html#dvd">DVD
   fejezetet.</A></P>
@@ -1135,6 +1152,17 @@ Teszt kimenet, AAlib-re :)<BR>
 Szabványos V4L-rõl bemenet<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
 </P>
+
+
+<H2><A NAME="edl">2.6 Edit Decision Lists (EDL)</A></H2>
+
+<P>TODO</P>
+
+
+<H3><A NAME="edl_using">2.6.1 Using an EDL file</A></H3>
+
+
+<H3><A NAME="edl_making">2.6.2 Making an EDL file</A></H3>
 
 
 <H1><A NAME=usage>3.  Használat</A></H1>

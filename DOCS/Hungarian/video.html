@@ -854,41 +854,6 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   binárison.
 </P>
 
-<P><B><I>VIDEO EQUALIZER</I></B></P>
-
-<P>
-  A Vidix tartalmaz tartalmaz egy video equalizert, ami vagy a szokásos
-  <B>1-8</B> billentyûkkel (lásd a manpage-t), vagy parancssori opciókkal
-  szabályozható. Az <B>MPlayer</B> a következõ opciókat ismeri fel :
-</P>
-
-<P>
-  &nbsp;&nbsp;<CODE>-brightness</CODE> - <B>FÉNYERÕ</B> állítása.<BR>
-  &nbsp;&nbsp;<CODE>-contrast</CODE> - <B>KONTRASZT</B> állítása.<BR>
-  &nbsp;&nbsp;<CODE>-saturation</CODE> - <B>SZATURÁCIÓ</B> állítása. Lehet
-  fekete-fehér képet is elõállítani vele.<BR>
-  &nbsp;&nbsp;<CODE>-hue</CODE> - <B>HUE</B> állítása.<BR>
-  &nbsp;&nbsp;<CODE>-red_intensity</CODE> - <B>VÖRÖS</B> komponens állítása.<BR>
-  &nbsp;&nbsp;<CODE>-green_intensity</CODE> - <B>ZÖLD</B> komponens állítása.<BR>
-  &nbsp;&nbsp;<CODE>-blue_intensity</CODE> - <B>KÉK</B> komponens állítása.<BR>
-</P>
-<P>
-  Mindegyik opció egy -1000-tõl +1000-ig terjedõ számot fogad el
-  paraméterként.<BR> Az alapértelmezett a <B>0</B>.
-</P>
-<P> 
-  <B>Megj.:</B> Nem mindegyik meghajtó támogatja ezeket az opciókat. Jelenleg
-  csak a <B>radeon_vid.so</B> nyújt teljeskörû támogatást a video
-  equalizinghez.
-</P>
-<P><B>Példák:</B><BR>
-  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
-  filenév.avi</CODE><BR>
-  vagy<BR>
-  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
-  filenév.vob</CODE>
-</P>
-
 
 <H4><A NAME=directfb>2.3.1.2.13 DirectFB</A></H4>
 

@@ -49,6 +49,10 @@
 
 <P>Kísérletezz a <CODE>/proc/ide/[meghajtó]/settings</CODE> file-lal további tuning céljából.</P>
 
+<P>Az SCSI meghajtóknak nincs ilyen egységes felülete ezen paraméterek
+  állításához. <A HREF="http://das.ist.org/~georg/">Plextor SCSI
+  meghajtókhoz</A> viszont rendelkezésre áll egy program.</P>
+
 <P>FreeBSD:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;Speed: <CODE>cdcontrol [-f meghajtó] speed [sebesség]</CODE></P>
@@ -170,7 +174,7 @@
   DVD lejátszókkal tudják korlátozni, az RPC-2 meghajtók hardveresen
   vannak limitálva 5 változtatásra. Ajánlott lehet a firmware-t RPC-1-re
   upgradelni, ha RPC-2-es meghajtód van. Ezek az upgrade-k
-  <A HREF="http://perso.club-internet.fr/farzeno/firmware/">itt</A>
+  <A HREF="http://www.firmware-flash.com">itt</A>
   találhatóak. Ha nincs firmware upgrade a meghajtódhoz, használd a
   <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset</A>
   parancsot hogy Linux alatt is át tudd állítani a meghajtód régiókódját.
@@ -211,6 +215,14 @@
 <P>Az alapértelmezett VCD egység a <CODE>/dev/cdrom</CODE>. Ha a beállításod
   ettõl eltér, készíts egy symlink-et, vagy add meg paraméterként
   a <CODE>-cdrom-device</CODE> opcióval.</P>
+
+<P><B>Megjegyzés:</B> legalábbis a Plextor és Toshiba SCSI CD-ROM meghajtókról
+  ismert hogy nagyon lassan játszanak le VCD-ket. Ennek oka, hogy a
+  CDROMREADRAW ioctl nincs teljesen implementálva ezeken a meghajtókon. Ha
+  értesz az SCSI programozásához, <A HREF="tech/patches.txt">segíts</A>
+  a VCD-k SCSI-n történõ támogatásában.</P>
+
+<P>TODO FORDITANI</P>
 
 </BODY>
 
