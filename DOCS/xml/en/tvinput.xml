@@ -195,7 +195,7 @@ capturing long TV series, where the video quality isn't so important.
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
+     -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
 </screen>
 It's also possible to specify smaller image dimensions in the <option>-tv</option>
 option and omit the software scaling but this approach uses the maximum available
