@@ -199,7 +199,7 @@ extern int cache_fill_status;
 #endif
 
 // dump:
-static char *stream_dump_name=NULL;
+static char *stream_dump_name="stream.dump";
 static int stream_dump_type=0;
 
 // A-V sync:
@@ -775,13 +775,33 @@ play_next_file:
     }
   }
 
-    
-
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) goto goto_next_file;//  exit_player(MSGTR_Exit_error); // error...
   inited_flags|=INITED_STREAM;
   stream->start_pos+=seek_to_byte;
+
+if(stream_dump_type==5){
+  unsigned char buf[4096];
+  int len;
+  FILE *f;
+  current_module="dump";
+  stream_reset(stream);
+  stream_seek(stream,stream->start_pos);
+  f=fopen(stream_dump_name,"wb");
+  if(!f){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
+    exit_player(MSGTR_Exit_error);
+  }
+  while(!stream->eof){
+      len=stream_read(stream,buf,4096);
+      if(len>0) fwrite(buf,len,1,f);
+  }
+  fclose(f);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
+  exit_player(MSGTR_Exit_eof);
+}
+
 
 #ifdef USE_DVDREAD
   current_module="spudec";
@@ -815,6 +835,7 @@ play_next_file:
 #endif
 
 //============ Open & Sync stream and detect file format ===============
+
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
@@ -850,7 +871,7 @@ if(stream_dump_type){
   if(d_video && d_video!=ds) {ds_free_packs(d_video); d_video->id=-2; }
   if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
   // let's dump it!
-  f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
+  f=fopen(stream_dump_name,"wb");
   if(!f){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
     exit_player(MSGTR_Exit_error);
