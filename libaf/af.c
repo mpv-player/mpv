@@ -287,7 +287,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
     }
     // Check if there are any filters left in the list
     if(NULL == af){
-      if(!af_append(s,s->first,"dummy")) 
+      if(!(af=af_append(s,s->first,"dummy"))) 
 	return -1; 
     }
     else

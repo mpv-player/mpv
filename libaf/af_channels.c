@@ -20,7 +20,7 @@ typedef struct af_channels_s{
 }af_channels_t;
 
 // Local function for copying data
-void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, int bps)
+static void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, int bps)
 {
   switch(bps){
   case 1:{
@@ -86,7 +86,7 @@ static int check_routes(af_channels_t* s, int nin, int nout)
 {
   int i;
   if((s->nr < 1) || (s->nr > AF_NCH)){
-    af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs musst be" 
+    af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs must be" 
 	   " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
     return AF_ERROR;
   }
@@ -149,14 +149,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       int ch = 0;
       // Sanity check
       if((s->nr < 1) || (s->nr > AF_NCH)){
-	af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs musst be" 
+	af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs must be" 
 	     " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
       }	
       s->router = 1;
       // Scan for pairs on commandline
       while((*cp == ':') && (ch < s->nr)){
 	sscanf(cp, ":%i:%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
-	af_msg(AF_MSG_DEBUG0,"[channels] Routing from channel %i to" 
+	af_msg(AF_MSG_VERBOSE,"[channels] Routing from channel %i to" 
 	       " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
 	cp = &cp[n];
 	ch++;

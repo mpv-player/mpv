@@ -132,7 +132,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     size_t 	   tsz = (s->type==TYPE_INT) ? sizeof(int16_t) : sizeof(float);
 
     // Make sure this filter isn't redundant 
-    if(af->data->rate == n->rate)
+    if((af->data->rate == n->rate) || (af->data->rate == 0))
       return AF_DETACH;
 
     // If linear interpolation 
