@@ -55,8 +55,8 @@ A setting of 4 should look readable. Here's an overview again:
 
     - groff:     Groff is the "official" tool to convert man pages.
                  To get good results you need a recent version (1.18.2).
-                 groff -m man -T html mplayer.1 > man_page.html
-                 groff -m man -T latin1 -rLL=78n mplayer.1 | col -bx > man_page.txt
+                 groff -m man -T html mplayer.1 > mplayer.1.html
+                 groff -m man -T latin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
                  The groff man page lists other output formats to use with -T.
 
     - man2html:  You can view it through a CGI script:
