@@ -434,14 +434,14 @@ Z t± opcj± MPlayer ignoruje czas trwania ramki, je¶li odtwarza tylko video
 .
 .TP
 .B \-colorkey <numer>
-Zmienia kolor kluczowy (colorkey) na wybran± warto¶æ RGB.
+Zmienia klucz koloru (colorkey) na wybran± warto¶æ RGB.
 0x000000 to czarny a 0xffffff to bia³y.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
 winvidix, xmga, xvidix i xover.
 .
 .TP
 .B \-nocolorkey
-Wy³±cza kolor kluczowy.
+Wy³±cza klucz koloru.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
 winvidix, xmga, xvidix i xover.
 .
@@ -524,7 +524,7 @@ Lista wszystkich klawiszy, które mog± byæ przypisane do komend.
 Lista wszystkich komendy, które mog± byæ przypisane do klawiszy.
 .IPs js-dev
 Wybiera u¿ywany joystick (domy¶lnie: /dev/\:input/\:js0).
-.IPs plik\ 
+.IPs file\ 
 Czyta polecenia z podanego zbioru.
 Opcja g³ównie przydatna przy kolejce FIFO.
 .br
@@ -2808,7 +2808,7 @@ zbioru.
 Przydatne przy debugowaniu.
 .PD 0
 .RSs
-.IPs filename
+.IPs nazwa\ pliku
 Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
 .RE
 .PD 1
@@ -3474,7 +3474,7 @@ Sprawd¼ równie¿ \-vf noise.
 .RSs
 .IPs warto¶æ<=8
 Skaluje obraz o wspó³czynnik <warto¶æ>.
-.IPs value>8
+.IPs warto¶æ>8
 Ustawia szeroko¶æ na <warto¶æ> i oblicza wysoko¶æ tak, by utrzymaæ prawid³owe
 proporcje.
 .RE
@@ -4038,7 +4038,7 @@ naprawy filmów w których nieprawid³owo odwrócono telecine.
 .
 .TP
 .B dint[=czu³o¶æ:poziom]
-Wykrywa i usuwa pierwsz± z szerego klatek z przeplotem w strumieniu video.
+Wykrywa i usuwa pierwsz± z szeregu klatek z przeplotem w strumieniu video.
 Warto¶ci mog± byæ z zakresu 0.0 do 1.0 \- pierwszy (domy¶lnie 0.1) jest wzglêdn±
 ró¿nic± pomiêdzy s±siaduj±cymi pikselami, drugi (domy¶lnie 0.15) okre¶la w
 jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
@@ -4074,7 +4074,7 @@ maska zmiêkczaj±ca / rozmycie gaussa
 Stosuje efekty na sk³adowej jasno¶ci.
 .IPs c\ \ \ \
 Stosuje efekty na sk³adowych koloru.
-.IPs <wysoko¶æ>x<szeroko¶æ> (WxH)
+.IPs WxH
 szeroko¶æ i wysoko¶æ macierzy, nieparzysty rozmiar w obu kierunkach
 (min = 3x3, max = 13x11 lub 11x13, zazwyczaj co¶ pomiêdzy 3x3 i 7x7)
 .IPs ilo¶æ
@@ -4573,13 +4573,13 @@ Komendy FIFO:
 .RE
 .PD 0
 .RSs
-.IPs "RGBA32 szeroko¶æ wysoko¶æ xpoz ypoz alfa czy¶æ"
+.IPs "RGBA32 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych RGBA32.
-.IPs "ABGR32 szeroko¶æ wysoko¶æ xpoz ypoz alfa czy¶æ"
+.IPs "ABGR32 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych ABGR2.
-.IPs "RGB24 szeroko¶æ wysoko¶æ xpoz ypoz alfa czy¶æ"
+.IPs "RGB24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych RGB32.
-.IPs "BGR24 szeroko¶æ wysoko¶æ xpoz ypoz alfa czy¶æ"
+.IPs "BGR24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych BGR32.
 .IPs "ALPHA szeroko¶æ wysoko¶æ xpoz ypoz alfa"
 zmienia kana³ alfa dla obszaru
@@ -4616,7 +4616,7 @@ przenikania ! ;)
 .br
 -255: zmienia wszystko na przezroczyste
 .REss
-.IPs czy¶æ
+.IPs clear
 czy¶ci bufor przed blittingiem
 .RSss
 0: Obraz bêdzie po prostu blittowany na wierzchu starego, wiêc nie bêdziesz
