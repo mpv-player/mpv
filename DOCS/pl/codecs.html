@@ -358,6 +358,7 @@ MPlayer wspiera dekodowanie wszystkich wersji RealVideo:
   <LI>d¼wiêk VIVO audio (g723, Vivo Siren)</LI>
   <LI>d¼wiêk Voxware (u¿ywaj±cy DirectShow DLL)</LI>
   <LI>formaty alaw i ulaw, ró¿ne gsm, adpcm i pcm i inne proste, stare kodeki audio</LI>
+  <LI>AAC</LI>
 </UL>
 
 
@@ -439,6 +440,34 @@ MPlayer wspiera dekodowanie prawie wszystkich wersji RealAudio:
 <P>Strumienie audio Qualcomm (fourcc: <I>Qclp</I>) znajduj± siê z plikach MOV/QT.
   Mog± byæ dekodowane bibliotekami QuickTime. Po instrukcjê instalacji, prosimy zobacz sekcjê <A HREF="#sorenson">kodeki wideo
   Sorenson</A>.</P>
+
+
+<H4><A NAME="aac">2.2.2.8 Kodek AAC</A></H4>
+
+<P>AAC (Advanced Audio Coding) jest kodekiem audio czasami znajdowanym w plikach
+  MOV i MP4. Dekoder open source FAAD jest dostêpny na
+  <A HREF="http://www.audiocoding.com/">AudioCoding.com</A>.
+  Mo¿esz pobraæ drug± generacjê kodeka FAAD2 na ich
+  <A HREF="http://www.audiocoding.com/download.php">stronie download</A>.
+  Niestety FAAD2 1.1 nie kompiluje siê na Linuksie, wiêc musisz u¿yæ wersji
+  z CVS. Poni¿ej instrukcja jak:</P>
+
+<OL>
+  <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
+  <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
+  <LI>cd faad2/</LI>
+  <LI>chmod +x bootstrap</LI>
+  <LI>./bootstrap</LI>
+  <LI>make</LI>
+  <LI>make install</LI>
+</OL>
+
+<P>Pakiety nie s± dostêpne na audiocoding.com, ale mo¿esz je pobraæ (apt-get)
+  pakiety Debiana
+  <A HREF="http://marillat.free.fr/">Christian Marillat's homepage</A>
+  i RPMy Mandrake'a z
+  <A HREF="http://plf.zarb.org/">P.L.F</A>.</P>
+
 
 
 <H3><A NAME="importing">2.2.3 HOWTO importowania kodeków Win32</A></H3>
