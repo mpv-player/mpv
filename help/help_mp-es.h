@@ -4,7 +4,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>
 // Andoni Zubimendi <andoni at lpsat.net>
 
-// Updated to help_mp-en.h v1.96
+// Updated to help_mp-en.h v1.97
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
@@ -562,7 +562,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Occidental (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Occidental con euro (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Centroeuropeo (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Eslavo/Centroeuropeo (ISO-8859-2)"
 #define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Gallego, Maltés, Turco (ISO-8859-3)"
 #define MSGTR_PREFERENCES_FontEncoding6 "Báltico (ISO-8859-4)"
 #define MSGTR_PREFERENCES_FontEncoding7 "Cirílico (ISO-8859-5)"
@@ -580,6 +580,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Coreano (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cirílico (Windows) (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Eslavo/Centroeuropeo (Windows) (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Sin autoescalado"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporcional a la anchura de película"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporcional a la altura de película"
