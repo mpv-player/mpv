@@ -35,8 +35,10 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...)
     {
 	case VDCTRL_QUERY_FORMAT:
 	{
-	    *((int*)arg) = IMGFMT_BGR24;
-	    return(CONTROL_TRUE);
+	    if (*((int*)arg) == IMGFMT_BGR24)
+		return(CONTROL_TRUE);
+	    else
+		return(CONTROL_FALSE);
 	}
     }
     return(CONTROL_UNKNOWN);
