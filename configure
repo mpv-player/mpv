@@ -124,10 +124,10 @@ params:
 	--enable-xmmp	        use XMMP audio drivers
 	--enable-lirc	        enable LIRC (remote control) support
 
-        --disable-oss           disable OSS sound support [autodetect]
+        --disable-ossaudio      disable OSS sound support [autodetect]
         --disable-alsa          disable alsa sound support [autodetect]
 	--disable-esd           disable esd sound support [autodetect]
-        --disable-sun           disable Sun sound support [autodetect]
+        --disable-sunaudio      disable Sun sound support [autodetect]
 		
 	--disable-gcc-checking  disable gcc version checking
 
@@ -630,11 +630,23 @@ rm -f $TMPC $TMPO
 # ---
 # try to detect type of audio supported on this machine
 
+cat > $TMPC << EOF
+#include <sys/soundcard.h>
+int main( void ) {  int arg = SNDCTL_DSP_SETFRAGMENT; }
+EOF
+
 _oss_audio=no
-[ -c /dev/dsp ] && _oss_audio=yes
+$_cc -o $TMPO $TMPC 2> /dev/null && _oss_audio=yes
+
+
+cat > $TMPC << EOF
+#include <sys/audioio.h>
+int main( void ) {  audio_info_t info; AUDIO_INITINFO(&info); }
+EOF
 
 _sun_audio=no
-[ -c /dev/audio -a -c /dev/audioctl ] && _sun_audio=yes
+$_cc -o $TMPO $TMPC 2> /dev/null && _sun_audio=yes
+
 
 # ---
 

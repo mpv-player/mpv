@@ -1,4 +1,4 @@
-#include "config.h"
+//#include "config.h"
 #ifdef HAVE_LIBCSS
 #ifndef _MPLAYER_CSS_H
 #define _MPLAYER_CSS_H
@@ -9,7 +9,7 @@ extern unsigned char key_title[];
 extern unsigned char *dvdimportkey;
 extern int descrambling;
 
-int dvd_auth ( char *, int );
+int dvd_auth ( char *, char * );
 int dvd_import_key ( unsigned char * );
 
 #endif

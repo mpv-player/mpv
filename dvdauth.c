@@ -7,18 +7,55 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/cdrom.h>
-// FIXME #include <string.h> conflicts with #include <linux/fs.h> (below)
-//#include <string.h>  // FIXME this conflicts with #include <linux/fs.h>
+//#include <string.h>      // FIXME: conflicts with fs.h
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-
 #include <css.h>
+#if CSS_MAJOR_VERSION > 0 || (CSS_MAJOR_VERSION == 0 && CSS_MINOR_VERSION > 1)
+# include <dvd.h>
+# undef	 OLD_CSS_API
+#else
+# if defined(__NetBSD__) || defined(__OpenBSD__)
+#  include <sys/dvdio.h>
+# elif defined(__linux__)
+#  include <linux/cdrom.h>
+# elif defined(__sun)
+#  include <sun/dvdio.h>
+# else
+#  error "Need the DVD ioctls"
+# endif
+# define OLD_CSS_API 1
+#endif
 
 #include "dvdauth.h"
+
+
+#if	OLD_CSS_API
+/*
+ * provide some backward compatibiliy macros to compile this
+ * code using the old libcss-0.1
+ */
+#define	DVDHandle		int
+#define	DVDOpenFailed		(-1)
+
+#define	DVDAuth(hdl, s)		ioctl(hdl, DVD_AUTH, s)
+#define	DVDOpenDevice(path)	open(path, O_RDONLY)
+#define	DVDCloseDevice(hdl)	close(hdl)
+#define	CSSDVDisEncrypted(hdl)	CSSisEncrypted(hdl)
+#define	CSSDVDAuthDisc		CSSAuthDisc
+#define	CSSDVDAuthTitlePath(hdl,key_title,path) \
+		CSSAuthTitle(hdl,key_title,path_to_lba(path))
+
+#else	/*OLD_CSS_API*/
+
+#define DVDHandle		struct dvd_device *
+#define	DVDOpenFailed		NULL
+
+#endif	/*OLD_CSS_API*/
+
 
 char *dvd_auth_device=NULL;
 unsigned char key_disc[2048];
@@ -27,28 +64,51 @@ unsigned char *dvdimportkey=NULL;
 int descrambling=0;
 
 
+#if OLD_CSS_API
+/*
+ * With the old libcss-0.1 api, we have to find out the LBA for
+ * a title for title authentication.
+ */
+#ifdef __linux__
 #include <linux/fs.h>
+#include <errno.h>
 
 #ifndef FIBMAP
 #define FIBMAP 1
 #endif
 
-
-static int path_to_lba ( int fd )
+static int path_to_lba (char *path)
 {
-        int lba = 0;
-        if (ioctl(fd, FIBMAP, &lba) < 0) {
-	        perror ("ioctl FIBMAP");
-		fprintf(stderr,"Hint: run mplayer as root!\n");
-//	        close(fd);
-	        return -1;
-	}
-	return lba;
+    int fd, lba = 0;
+
+    if ((fd = open(path, O_RDONLY)) == -1) {
+        fprintf(stderr, "Cannot open file %s: %s",
+		path ? path : "(NULL)", strerror(errno));
+        return -1;
+    }
+    if (ioctl(fd, FIBMAP, &lba) != 0) {
+        perror ("ioctl FIBMAP");
+	fprintf(stderr,"Hint: run mplayer as root!\n");
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
+
+    return lba;
 }
+#else /*linux*/
+static int path_to_lba (char *path)
+{
+#warning translating pathname to iso9660 LBA is not supported on this platform
+    fprintf(stderr, "Translating pathname to iso9660 LBA is not supported on this platform\n");
+    return -1;
+}
+#endif /*linux*/
+#endif /*OLD_CSS_API*/
 
 
-
-static void reset_agids ( int fd )
+static void reset_agids ( DVDHandle dvd )
 {
         dvd_authinfo ai;
         int i;
@@ -56,7 +116,7 @@ static void reset_agids ( int fd )
 	        memset(&ai, 0, sizeof(ai));
 	        ai.type = DVD_INVALIDATE_AGID;
 	        ai.lsa.agid = i;
-	        ioctl(fd, DVD_AUTH, &ai);
+		DVDAuth(dvd, &ai);
 	}
 }
 
@@ -87,49 +147,45 @@ int dvd_import_key ( unsigned char *hexkey )
 
 
 
-int dvd_auth ( char *dev , int fd )
+int dvd_auth ( char *dev , char *filename )
 {
-        int devfd;  /* FD of DVD device */
-        int lba;
+    	DVDHandle dvd;  /* DVD device handle */
 
-
-	if ((devfd=open(dev,O_RDONLY))<0) {
+	if ((dvd=DVDOpenDevice(dev)) == DVDOpenFailed) {
 		fprintf(stderr,"DVD: cannot open DVD device \"%s\".\n",dev);
 		return 1;
 	}
 	
-	if (!CSSisEncrypted(devfd)) {
+	if (!CSSDVDisEncrypted(dvd)) {
 		printf("DVD is unencrypted! Skipping authentication!\n(note: you should not use -dvd switch for unencrypted discs!)\n");
+		DVDCloseDevice(dvd);
 		return 0;
 	} else printf("DVD is encrypted, issuing authentication ...\n");
 
 	/* reset AGIDs */
-	reset_agids(devfd);
+	reset_agids(dvd);
 
 	/* authenticate disc */
-	if (CSSAuthDisc(devfd,key_disc)) {
-		fprintf(stderr,"DVD: CSSAuthDisc() failed.\n");
+	if (CSSDVDAuthDisc(dvd,key_disc)) {
+		fprintf(stderr,"DVD: CSSDVDAuthDisc() failed.\n");
+		DVDCloseDevice(dvd);
 		return 1;
 	}
 
-	/* authenticate title */
-        lba=path_to_lba(fd);
-	if (lba==-1) {
-		fprintf(stderr,"DVD: path_to_lba() failed.\n");
-		return 1;
-	}
-        if (CSSAuthTitle(devfd,key_title,lba)) {
-		fprintf(stderr,"DVD: CSSAuthTitle() failed.\n");
+        if (CSSDVDAuthTitlePath(dvd,key_title,filename)) {
+		fprintf(stderr,"DVD: CSSDVDAuthTitle() failed.\n");
+		DVDCloseDevice(dvd);
 		return 1;
 	}
 
 	/* decrypting title */
         if (CSSDecryptTitleKey (key_title, key_disc) < 0) {
                 fprintf(stderr,"DVD: CSSDecryptTitleKey() failed.\n");
+		DVDCloseDevice(dvd);
 		return 1;
 	}
 
-	close(devfd);
+	DVDCloseDevice(dvd);
 	printf("DVD title key is: %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
 	descrambling=1;
 	return 0;

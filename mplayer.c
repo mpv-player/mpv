@@ -70,11 +70,9 @@
 #include "opendivx/decore.h"
 
 
-//extern int vo_screenwidth;
-
-int audio_fd=-1;
-
+#ifdef X11_FULLSCREEN
 extern int vo_screenwidth;
+#endif
 
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
@@ -666,8 +664,8 @@ if(vcd_track){
     printf("DVD command line requested key is stored for descrambling.\n");
   }
   if (dvd_auth_device) {
-    if (dvd_auth(dvd_auth_device,f)) {
-//    if (dvd_auth(dvd_auth_device,filename)) {
+//  if (dvd_auth(dvd_auth_device,f)) {
+    if (dvd_auth(dvd_auth_device,filename)) {
         GUI_MSG( mplErrorDVDAuth )
         exit(0);
       } 

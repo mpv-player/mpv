@@ -3,3 +3,21 @@ Notes for Solaris users
 
 1. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
 native Solaris make will not work.
+
+2. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
+   capacity >4GB: 
+
+   - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
+     disk block >4GB on a device using a logical blocksize != DEV_BSIZE
+     (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
+     address modulo 4GB is accessed.
+     (http://groups.yahoo.com/group/solarisonintel/message/22516)
+
+   - The similar bug is present in the hsfs(7FS) filesystem code (aka ISO9660),
+     hsfs currently does not support partitions/disks >4GB,  all data is
+     accessed modulo 4GB
+     (http://groups.yahoo.com/group/solarisonintel/message/22592)
+
+--
+Jürgen Keil
+
