@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-30" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2005-01-07" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -4523,18 +4523,19 @@ input file (23.976 if the input is 29.97fps).
 The options are:
 .RSs
 .IPs pass=1|2
-Use two-pass mode.
+Use two pass mode.
 This produces best results.
-Pass 1 analyzes the video and writes the results to a log file.
-Pass 2 then reads this log file and uses the information to do the actual work.
+Pass one analyzes the video and writes the results to a log file.
+Pass two then reads this log file and uses the information to do
+the actual work.
 Note that these passes do
 .B not
-correspond to pass 1 and 2 of the encoding process.
-In order to use divtc two-pass with two-pass video encoding, you must perform
-three passes: first divtc pass 1 and encoder pass 1, then divtc pass 2 and
-encoder pass 1, and finally divtc pass 2 and encoder pass 2.
+correspond to pass one and two of the encoding process.
+In order to use divtc two pass with two pass video encoding, you must perform
+three passes: first divtc pass one and encoder pass one, then divtc pass two
+and encoder pass two, and finally divtc pass two and encoder pass two.
 .IPs file=filename
-Set the 2-pass log filename (default: "framediff.log").
+Set the two pass log filename (default: "framediff.log").
 .IPs threshold=value
 Set the minimum strength the telecine pattern must have for the filter to
 believe in it (default: 0.5).
@@ -4545,19 +4546,19 @@ Set the number of past frames to look at when searching for pattern
 (default: 30).
 Longer window improves the reliability of the pattern search, but shorter
 window improves the reaction time to the changes in the telecine phase.
-This only affects the one-pass mode.
-The two-pass mode currently uses fixed window that extends to both future
+This only affects the one pass mode.
+The two pass mode currently uses fixed window that extends to both future
 and past.
 .IPs phase=0|1|2|3|4
-Sets the initial telecine phase for one-pass mode (default: 0).
-The two-pass mode can see the future, so it is able to use the correct
-phase from the beginning, but one-pass mode can only guess.
+Sets the initial telecine phase for one pass mode (default: 0).
+The two pass mode can see the future, so it is able to use the correct
+phase from the beginning, but one pass mode can only guess.
 It catches the correct phase when it finds it, but this option can be used
 to fix the possible juddering at the beginning.
-The first pass of the two-pass mode also uses this, so if you save the output
+The first pass of the two pass mode also uses this, so if you save the output
 from the first pass, you get constant phase result.
 .IPs deghost=value
-Set the deghosting threshold (0\-255 for one-pass mode, -255\-255 for two-pass
+Set the deghosting threshold (0\-255 for one pass mode, -255\-255 for two pass
 mode, default 0).
 If nonzero, deghosting mode is used.
 This is for video that has been deinterlaced by blending the fields
@@ -4565,7 +4566,7 @@ together instead of dropping one of the fields.
 Deghosting amplifies any compression artifacts in the blended frames, so the
 parameter value is used as a threshold to exclude those pixels from
 deghosting that differ from the previous frame less than specified value.
-If two-pass mode is used, then negative value can be used to make the
+If two pass mode is used, then negative value can be used to make the
 filter analyze the whole video in the beginning of pass-2 to determine
 whether it needs deghosting or not and then select either zero or the
 absolute value of the parameter.
@@ -5101,7 +5102,7 @@ Encode with a libavcodec codec.
 .TP
 .B \-passlogfile <filename>
 Dump first pass information to <filename> instead of the default divx2pass.log
-in 2-pass encoding mode.
+in two pass encoding mode.
 .
 .TP
 .B \-skiplimit <value>
@@ -5193,7 +5194,7 @@ Specify crispness/\:smoothness.
 .
 .TP
 .B pass=<1\-2>
-With this you can encode 2pass DivX4 files.
+With this you can encode two pass DivX4 files.
 First encode with pass=1, then do another encode with the
 same parameters and pass=2.
 .
@@ -5674,8 +5675,8 @@ from the first pass.
 .PD 1
 .
 .TP
-.B turbo (2-pass only)
-Dramatically speeds up pass 1 using faster algorithms and disabling
+.B turbo (two pass only)
+Dramatically speeds up pass one using faster algorithms and disabling
 CPU-intensive options.
 This will probably reduce global PSNR a little bit (around 0.01dB) and
 change individual frame type and PSNR little bit more (up to 0.03dB).
@@ -5786,7 +5787,7 @@ I/\:P- and B-frames you can use:
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
 .TP
-.B vqblur=<0.0\-1.0> (pass 1)
+.B vqblur=<0.0\-1.0> (pass one)
 Quantizer blur (default: 0.5), larger values will average the
 quantizer more over time (slower change).
 .PD 0
@@ -5799,7 +5800,7 @@ Average the quantizer over all previous frames.
 .PD 1
 .
 .TP
-.B vqblur=<0.0\-99.0> (pass 2)
+.B vqblur=<0.0\-99.0> (pass two)
 Quantizer gaussian blur (default: 0.5), larger values will average
 the quantizer more over time (slower change).
 .
@@ -6590,11 +6591,11 @@ Enable RTJPEG encoding (default).
 .SS xvidenc (\-xvidencopts)
 .
 There are three modes available: constant bitrate (CBR), fixed quantizer and
-2pass.
+two pass.
 .
 .TP
 .B pass=<1|2>
-Specify the pass in 2pass mode.
+Specify the pass in two pass mode.
 .
 .TP
 .B bitrate=<value>
@@ -6602,7 +6603,7 @@ Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
 If <value> is negative, XviD will use its absolute value as the target size
 (in kbytes) of the video and compute the associated bitrate automagically.
-(CBR or 2pass mode, default: 687 kbits/\:s)
+(CBR or two pass mode, default: 687 kbits/\:s)
 .
 .TP
 .B fixed_quant=<1\-31>
@@ -6658,7 +6659,7 @@ size of the rate control buffer
 .B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
 CBR mode: min & max quantizer for all frames (default: 2\-31)
 .br
-2pass mode: min & max quantizer for I/\:P-frames (default: 2\-31/\:2\-31)
+two pass mode: min & max quantizer for I/\:P-frames (default: 2\-31/\:2\-31)
 .br
 .I WARNING:
 As of XviD-1.0.x, this option is replaced by the
@@ -6666,7 +6667,7 @@ As of XviD-1.0.x, this option is replaced by the
 .
 .TP
 .B min_key_interval=<value>
-minimum interval between keyframes (default: 0, 2pass only)
+minimum interval between keyframes (default: 0, two pass only)
 .
 .TP
 .B max_key_interval=<value>
@@ -6685,7 +6686,7 @@ As of XviD-1.0.x, this option is replaced by the quant_type option.
 .TP
 .B mod_quant
 Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
-(2pass mode only).
+(two pass mode only).
 .br
 .I WARNING:
 This will generate an illegal bitstream, and most likely not be decodable
@@ -6698,11 +6699,11 @@ As of XviD-1.0.x, this option is no longer available.
 .B keyframe_boost=<0\-1000>
 Shift some bits from the pool for other frame types to intra frames,
 thus improving keyframe quality.
-(default: 0, 2pass mode only)
+(default: 0, two pass mode only)
 .
 .TP
 .B kfthreshold=<value>
-(default: 10, 2pass mode only)
+(default: 10, two pass mode only)
 .
 .TP
 .B kfreduction=<0\-100>
@@ -6711,7 +6712,7 @@ you consider too close to the first (in a row).
 kfthreshold sets the range in which keyframes are reduced, and
 kfreduction determines the bitrate reduction they get.
 The last I-frame will get treated normally.
-(default: 30, 2pass mode only)
+(default: 30, two pass mode only)
 .
 .TP
 .B divx5bvop
@@ -6729,7 +6730,7 @@ from being written in the last stage of encoding.
 .
 .TP
 .B debug\ \ 
-Save per-frame statistics in ./xvid.dbg. (This is not the 2pass control
+Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
 file.)
 .RE
 .
@@ -6938,7 +6939,7 @@ still blocky (default: 0).
 .
 .TP
 .B overflow_control_strength=<0\-100>
-During pass 1 of 2-pass encoding, a scaled bitrate curve is computed.
+During pass one of two pass encoding, a scaled bitrate curve is computed.
 The difference between that expected curve and the result obtained during
 encoding is called overflow.
 Obviously, the two pass rate controller tries to compensate for that overflow,
@@ -7218,20 +7219,20 @@ directly affect distortion.
 .REss
 .
 .TP
-.B qp_min=<1\-51> (CBR or 2 pass)
+.B qp_min=<1\-51> (CBR or two pass)
 Minimum quantizer, 10\-35 seems to be a useful range (default: 10).
 .
 .TP
-.B qp_max=<1\-51> (CBR or 2 pass)
+.B qp_max=<1\-51> (CBR or two pass)
 maximum quantizer (default: 51)
 .
 .TP
-.B qp_step=<1\-50> (CBR or 2 pass)
+.B qp_step=<1\-50> (CBR or two pass)
 Maximum Value by which the quantizer may be incremented/decremented between
 frames (default: 1).
 .
 .TP
-.B rc_buffer_size=<value> (CBR or 2 pass)
+.B rc_buffer_size=<value> (CBR or two pass)
 ratecontrol buffer size, in kbit (default: 1 second's worth at the bitrate you
 specified)
 .
@@ -7252,13 +7253,13 @@ quantizer factor between I- and P-frames (default: 1.4)
 quantizer factor between P- and B-frames (default: 1.3)
 .
 .TP
-.B qcomp=<0\-1> (2 pass only)
+.B qcomp=<0\-1> (two pass only)
 quantizer compression (default: 0.6).
 A lower value makes the bitrate more constant,
 while a higher value makes the quantization parameter more constant.
 .
 .TP
-.B cplx_blur=<0\-999> (2 pass only)
+.B cplx_blur=<0\-999> (two pass only)
 Temporal blur of the estimated frame complexity, before curve compression
 (default: 20).
 Lower values allow the quantizer value to jump around more,
@@ -7268,7 +7269,7 @@ P-frames, and ensures that alternating high and low complexity frames
 (e.g. low fps animation) do not waste bits on fluctuating quantizer.
 .
 .TP
-.B qblur=<0\-99> (2 pass only)
+.B qblur=<0\-99> (two pass only)
 Temporal blur of the quantization parameter, after curve compression
 (default: 0.5).
 Lower values allow the quantizer value to jump around more,
