@@ -100,7 +100,6 @@ static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpeg2dec_t * mpeg2dec = sh->context;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
-    mp_image_t* mpi=NULL;
     int drop_frame, framedrop=flags&3;
 
     //MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
@@ -128,11 +127,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	switch(state){
 	case STATE_BUFFER:
 	    if (mpeg2dec->pending_length) {
+		// just finished the pending data, continue with processing of the passed buffer
 		mpeg2dec->pending_length = 0;
     		mpeg2_buffer (mpeg2dec, data, data+len);
     	    } else {
 	        // parsing of the passed buffer finished, return.
-//		if(!mpi) fprintf(stderr, "\nNO PICTURE!\n");
 		return 0;
 	    }
 	    break;
@@ -165,8 +164,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		(info->sequence->picture_width+15)&(~15),
 		(info->sequence->picture_height+15)&(~15) );
 	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
-//	    if (mpi_new == mpi)
-//		fprintf(stderr, "AIEEEEEEEEEE\n");;
 	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
 	    if (info->current_picture->flags&PIC_FLAG_TOP_FIELD_FIRST)
 		mpi_new->fields |= MP_IMGFIELD_TOP_FIRST;
@@ -200,13 +197,21 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	case STATE_END:
 	case STATE_INVALID_END:
 	    // decoding done:
-	    if(mpi) printf("AJAJJJJJJJJ2!\n");
 	    if(info->display_fbuf) {
-		mpi=info->display_fbuf->id;
+		mp_image_t* mpi = info->display_fbuf->id;
+		if (mpeg2dec->pending_length == 0) {
 		mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
-//		fprintf(stderr, "pending = %d\n", pending);
 		mpeg2dec->pending_buffer = realloc(mpeg2dec->pending_buffer, mpeg2dec->pending_length);
 		memcpy(mpeg2dec->pending_buffer, mpeg2dec->buf_start, mpeg2dec->pending_length);
+		} else {
+		    // still some data in the pending buffer, shouldn't happen
+		    mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
+		    memmove(mpeg2dec->pending_buffer, mpeg2dec->buf_start, mpeg2dec->pending_length);
+		    mpeg2dec->pending_buffer = realloc(mpeg2dec->pending_buffer, mpeg2dec->pending_length + len);
+		    memcpy(mpeg2dec->pending_buffer+mpeg2dec->pending_length, data, len);
+		    mpeg2dec->pending_length += len;
+		}
+//		fprintf(stderr, "pending = %d\n", mpeg2dec->pending_length);
 		return mpi;
 	    }
 	}
