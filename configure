@@ -1842,7 +1842,8 @@ echores "$_vorbis"
 echocheck "Win32 DLL support"
 if test "$_win32" = auto ; then
   _win32=no
-  if test "$host_arch" = i386 ; then
+  if test "$host_arch" = i386 || test "$host_arch" = i486 ||
+     test "$host_arch" = i586 || test "$host_arch" = i686; then
     if test -z "$_win32libdir" ; then
       for I in /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
@@ -1916,7 +1917,8 @@ echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
   _xanim=no
   if test "$_dl" = yes ; then
-    if test "$host_arch" = i386 ; then
+    if test "$host_arch" = i386 || test "$host_arch" = i486 ||
+       test "$host_arch" = i586 || test "$host_arch" = i686; then
       if test -z "$_xanimlibdir" ; then
         for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
           if test -d "$I" ; then
