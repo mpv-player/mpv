@@ -172,4 +172,8 @@ extern void appCopy( listItems * item1,listItems * item2 );
 extern int appFindMessage( unsigned char * str );
 extern int appFindKey( unsigned char * name );
 
+extern void btnModify( int event,float state );
+extern float btnGetValue( int event );
+extern void btnSet( int event,int set );
+
 #endif

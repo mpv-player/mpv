@@ -196,6 +196,7 @@ void mplMainDraw( void )
    for( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
     {
      item=&appMPlayer.Items[i];
+    if ( !item->disabled )
      switch( item->type )
       {
        case itButton:

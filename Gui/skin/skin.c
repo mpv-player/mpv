@@ -635,33 +635,3 @@ int skinRead( char * dname )
   }
  return 0;
 }
-
-void btnModify( int event,float state )
-{
- int j;
- for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-  if ( appMPlayer.Items[j].msg == event )
-   {
-    switch ( appMPlayer.Items[j].type )
-     {
-      case itButton:
-           appMPlayer.Items[j].pressed=(int)state;
-           appMPlayer.Items[j].tmp=(int)state;
-           break;
-      case itPotmeter:
-      case itHPotmeter:
-           if ( state < 0.0f ) state=0.0f;
-           if ( state > 100.f ) state=100.0f;
-           appMPlayer.Items[j].value=state;
-           break;
-     }
-   }
-}
-
-float btnGetValue( int event )
-{
- int j;
- for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-  if ( appMPlayer.Items[j].msg == event ) return appMPlayer.Items[j].value;
- return 0;
-}
