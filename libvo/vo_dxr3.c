@@ -118,7 +118,6 @@
 #include "aspect.h"
 #include "spuenc.h"
 #include "sub.h"
-#include "../vidix/vidix.h"
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
 #endif
@@ -175,9 +174,6 @@ static encodedata *spubuf;
 static int ioval = 0;
 static int prev_pts = 0;
 static int pts_offset = 0;
-
-static int get_video_eq(vidix_video_eq_t *info);
-static int set_video_eq(vidix_video_eq_t *info);
 
 
 /* Begin overlay.h */
