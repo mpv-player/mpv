@@ -442,6 +442,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode subtitle"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Convert the given subtitle to MPlayer's subtitle format"
 #define MSGTR_PREFERENCES_SUB_SRT "Convert the given subtitle to the time based SubViewer (SRT) format"
+#define MSGTR_PREFERENCES_SUB_Overlap "Toggle subtitle overlapping"
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Enable postprocessing"

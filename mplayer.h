@@ -32,6 +32,7 @@ extern int    sub_pos;
 extern int    sub_unicode;
 extern subtitle* subtitles;
 extern subtitle* vo_sub;
+extern int    suboverlap_enabled;
 
 extern char * filename;
 

@@ -60,6 +60,7 @@ static GtkWidget * CBIndex;
 static GtkWidget * CBFlip;
 static GtkWidget * CBNoAutoSub;
 static GtkWidget * CBSubUnicode;
+static GtkWidget * CBSubOverlap;
 static GtkWidget * CBDumpMPSub;
 static GtkWidget * CBDumpSrt;
 static GtkWidget * CBPostprocess;
@@ -245,6 +246,7 @@ void ShowPreferences( void )
  }
 
 // -- 3. page
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubOverlap ),suboverlap_enabled );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ),!sub_auto );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ),gtkSubDumpMPSub );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpSrt ),gtkSubDumpSrt );
@@ -340,6 +342,7 @@ void ShowPreferences( void )
 #ifndef USE_SUB
  gtk_widget_set_sensitive( AConfig,FALSE );
  gtk_widget_set_sensitive( CBNoAutoSub,FALSE );
+ gtk_widget_set_sensitive( CBSubOverlap,FALSE );
  gtk_widget_set_sensitive( CBSubUnicode,FALSE );
  gtk_widget_set_sensitive( CBDumpMPSub,FALSE );
  gtk_widget_set_sensitive( CBDumpSrt,FALSE );
@@ -463,6 +466,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) ) ) flip=1;
 	
 	// -- 3. page
+	suboverlap_enabled=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubOverlap ) );
 	sub_auto=!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ) );
 	gtkSubDumpMPSub=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ) );
 	gtkSubDumpSrt=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpSrt ) );
@@ -872,6 +876,7 @@ GtkWidget * create_Preferences( void )
 
   vbox9=AddVBox( vbox8,0 );
 
+  CBSubOverlap=AddCheckButton( MSGTR_PREFERENCES_SUB_Overlap,vbox9 );
   CBNoAutoSub=AddCheckButton( MSGTR_PREFERENCES_SUB_AutoLoad,vbox9 );
   CBSubUnicode=AddCheckButton( MSGTR_PREFERENCES_SUB_Unicode,vbox9 );
   CBDumpMPSub=AddCheckButton( MSGTR_PREFERENCES_SUB_MPSUB,vbox9 );
