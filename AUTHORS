@@ -87,6 +87,8 @@ Alex Beregszaszi (al3x) <alex@naxine.org>
     * XVidix video output driver
     * and other various stuff (in libvo, libmad syncing, dec_audio/video and
       loader)
+    * libmpcodecs / libmpdemux hacking
+    * co-patch-maintainer
 
 Andreas Ackermann (Acki) <asackerm@stud.informatik.uni-erlangen.de>
     * LIRC support (see documentation)
