@@ -1,0 +1,62 @@
+
+Videocards with hardware acceleration:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* read DOCS/MTRR too!
+
+  "Hardware acceleration" usually means hardware YUV conversion, scaling,
+bilinear filtering. Under Linux and XFree86, this is done by the XVideo
+extension, this is what the option '-vo xv' uses.
+  In order to make this work, be sure to check the following:
+1. your card actually supports harware acceleration
+2. you use XFree86 4.0.2 or newer (former versions don't have XVideo)
+3. X loads the XVideo extension, it's something like this:
+   (II) Loading extension XVideo
+   in /var/log/XFree86.0.log
+   NOTE : this loads only the XFree86 support. In a good install, this is
+          always loaded, and doesn't mean that the _card's_ XVideo support is
+          loaded!
+4. The XVideo extensions can use your card. Try 'xvinfo' which is the part of
+   the XFree86 distribution. It should display a long text, similar to this:
+
+	X-Video Extension version 2.2
+	screen #0
+	  Adaptor #0: "Savage Streams Engine"
+	    number of ports: 1
+	    port base: 43
+	    operations supported: PutImage 
+	    supported visuals:
+	      depth 16, visualID 0x22
+	      depth 16, visualID 0x23
+	    number of attributes: 5
+	(...etc...)
+5. Be sure MPlayer is compiled with the "xv" target. "./configure" should say:
+	Checking for Xv ... yes
+6. If all is fine, try the option '-vo xv' . It should work.
+   (if it doesn't, send us a bugreport. See the README on how to do this.)
+
+
+
+  There are additional drivers for the Matrox cards, which are usually
+better than XVideo, consume much less CPU, and some doesn't even need X.
+(Arpi please complete this section somewhat :) I'll correct your english:)
+
+
+
+  If your card lacks hardware acceleration, you can still boost your fps by
+using the DGA driver.
+1. Make sure X loads the DGA extension:
+	(II) Loading extension XFree86-DGA
+2. MPlayer's DGA driver is autodetected on ./configure, or you can force it
+   with --enable-dga.
+3. Be sure to use 24/32bpp mode, since there is no converter right now.. :(
+4. Install MPlayer SUID root.
+   (see the FAQ on how to do this, and... heed the warning!)
+5. Use '-vo dga' option, and there you go! (hope so:)
+
+
+
+  (section describing OpenGL support? I don't have any:)
+
+	Gabucino
+
