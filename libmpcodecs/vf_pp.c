@@ -12,11 +12,17 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#define EMU_OLD
+
 #include "../postproc/postprocess.h"
+
+#ifdef EMU_OLD
+#include "../postproc/postprocess_internal.h"
+#endif
 
 struct vf_priv_s {
     int pp;
-    PPMode ppMode[GET_PP_QUALITY_MAX+1];
+    pp_mode_t *ppMode[GET_PP_QUALITY_MAX+1];
     void *context;
     mp_image_t *dmpi;
     unsigned int outfmt;
@@ -37,6 +43,11 @@ static int config(struct vf_instance_s* vf,
 }
 
 static void uninit(struct vf_instance_s* vf){
+    int i;
+    for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+        if(vf->priv->ppMode[i])
+	    pp_free_mode(vf->priv->ppMode[i]);
+    }
     if(vf->priv->context) pp_free_context(vf->priv->context);
 }
 
@@ -99,7 +110,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    vf->priv->dmpi->planes,vf->priv->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
-		    &vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
+		    vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
 		    mpi->pict_type);
     }
     return vf_next_put_image(vf,vf->priv->dmpi);
@@ -150,29 +161,35 @@ static int open(vf_instance_t *vf, char* args){
         name="de";
     }
 
+#ifdef EMU_OLD
     if(name){
-        for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+#endif
+	for(i=0; i<=GET_PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
-            if(vf->priv->ppMode[i].error) return -1;
+            if(vf->priv->ppMode[i]==NULL) return -1;
         }
+#ifdef EMU_OLD
     }else{
         /* hex mode for compatibility */
         for(i=0; i<=GET_PP_QUALITY_MAX; i++){
-	    PPMode ppMode;
+	    PPMode *ppMode;
 	    
-	    ppMode.lumMode= hex_mode;
-	    ppMode.chromMode= ((hex_mode&0xFF)>>4) | (hex_mode&0xFFFFFF00);
-	    ppMode.maxTmpNoise[0]= 700;
-	    ppMode.maxTmpNoise[1]= 1500;
-	    ppMode.maxTmpNoise[2]= 3000;
-	    ppMode.maxAllowedY= 234;
-	    ppMode.minAllowedY= 16;
-	    ppMode.baseDcDiff= 256/4;
-	    ppMode.flatnessThreshold=40;
+	    ppMode= (PPMode*)memalign(8, sizeof(PPMode));
+	    
+	    ppMode->lumMode= hex_mode;
+	    ppMode->chromMode= ((hex_mode&0xFF)>>4) | (hex_mode&0xFFFFFF00);
+	    ppMode->maxTmpNoise[0]= 700;
+	    ppMode->maxTmpNoise[1]= 1500;
+	    ppMode->maxTmpNoise[2]= 3000;
+	    ppMode->maxAllowedY= 234;
+	    ppMode->minAllowedY= 16;
+	    ppMode->baseDcDiff= 256/4;
+	    ppMode->flatnessThreshold=40;
     
             vf->priv->ppMode[i]= ppMode;
         }
     }
+#endif
     
     vf->priv->pp=GET_PP_QUALITY_MAX; //divx_quality;
     return 1;
