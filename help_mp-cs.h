@@ -18,9 +18,9 @@ static char help_text[]=
 #endif
 "\n"
 "Pøepínaèe:\n"
-" -vo <drv[:dev]> výbìr výstupního video ovladaè&zaøízení ('-vo help' pro seznam)\n"
-" -ao <drv[:dev]> výbìr výstupního audio ovladaè&zaøízení ('-ao help' pro seznam)\n"
-" -vcd <trackno>  pøehrát VCD (video cd) stopu ze zaøízení místo souboru\n"
+" -vo <drv[:dev]> výbìr výstupního video ovladaèe&zaøízení (-vo help pro seznam)\n"
+" -ao <drv[:dev]> výbìr výstupního audio ovladaèe&zaøízení (-ao help pro seznam)\n"
+" -vcd <trackno>  pøehrát VCD (video cd) stopu ze zaøízení místo ze souboru\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urèení DVD zaøízení pro authentifikaci (pro kódované disky)\n"
 #endif
@@ -51,7 +51,7 @@ static char help_text[]=
 " * nebo /        pøidat nebo ubrat hlasitost (stiskem 'm' výbìr master/pcm)\n"
 " z nebo x        upravit zpo¾dìní titulkù v krocích +/- 0.1 sekundy\n"
 "\n"
-" * * * * PØEÈTÌTE SI STRÁNY MAN PRO DETAILY (DAL©Í VOLBY A KLÁVESY)! * * * * \n"
+" * * * * PØEÈTÌTE SI STRÁNKY MAN PRO DETAILY (DAL©Í VOLBY A KLÁVESY)! * * * *\n"
 "\n";
 #endif
 
