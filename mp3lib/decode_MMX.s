@@ -3,8 +3,14 @@
 # See ChangeLog of mpg123-0.59s-pre.1 for detail
 # Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 #
-# TODO: Partial loops unrolling and removing MOVW insn.
+# Local ChangeLog:
+# - Partial loops unrolling and removing MOVW insn from loops
 #
+
+.data
+.align 8
+null_one: .long 0x0000ffff, 0x0000ffff
+one_null: .long 0xffff0000, 0xffff0000
 
 .text
 
@@ -49,9 +55,62 @@ synth_1to1_MMX_s:
         addl $12,%esp
 	leal 1(%ebx), %ecx
         subl %ebp,%ebx                
-
+	pushl %ecx
 	leal decwins(%ebx,%ebx,1), %edx
+	shrl $1, %ecx
+.align 16
 .L3: 
+        movq  (%edx),%mm0
+        movq  64(%edx),%mm4
+        pmaddwd (%esi),%mm0
+        pmaddwd 32(%esi),%mm4
+        movq  8(%edx),%mm1
+        movq  72(%edx),%mm5
+        pmaddwd 8(%esi),%mm1
+        pmaddwd 40(%esi),%mm5
+        movq  16(%edx),%mm2
+        movq  80(%edx),%mm6
+        pmaddwd 16(%esi),%mm2
+        pmaddwd 48(%esi),%mm6
+        movq  24(%edx),%mm3
+        movq  88(%edx),%mm7
+        pmaddwd 24(%esi),%mm3
+        pmaddwd 56(%esi),%mm7
+        paddd %mm1,%mm0
+        paddd %mm5,%mm4
+        paddd %mm2,%mm0
+        paddd %mm6,%mm4
+        paddd %mm3,%mm0
+        paddd %mm7,%mm4
+        movq  %mm0,%mm1
+        movq  %mm4,%mm5
+        psrlq $32,%mm1
+        psrlq $32,%mm5
+        paddd %mm1,%mm0
+        paddd %mm5,%mm4
+        psrad $13,%mm0
+        psrad $13,%mm4
+        packssdw %mm0,%mm0
+        packssdw %mm4,%mm4
+
+	movq	(%edi), %mm1
+	punpckldq %mm4, %mm0
+	pand   one_null, %mm1
+	pand   null_one, %mm0
+	por    %mm0, %mm1
+	movq   %mm1,(%edi)
+
+        leal 64(%esi),%esi
+        leal 128(%edx),%edx
+        leal 8(%edi),%edi                
+
+	decl %ecx
+        jnz  .L3
+
+	popl %ecx
+	andl $1, %ecx
+	jecxz .next_loop
+
         movq  (%edx),%mm0
         pmaddwd (%esi),%mm0
         movq  8(%edx),%mm1
@@ -70,17 +129,65 @@ synth_1to1_MMX_s:
         packssdw %mm0,%mm0
         movd %mm0,%eax
 	movw %ax, (%edi)
-
         leal 32(%esi),%esi
         leal 64(%edx),%edx
         leal 4(%edi),%edi                
-	decl %ecx
-        jnz  .L3
-
-
+	
+.next_loop:
         subl $64,%esi                    
-        movl $15,%ecx
+        movl $7,%ecx
+.align 16
 .L4: 
+        movq  (%edx),%mm0
+        movq  64(%edx),%mm4
+        pmaddwd (%esi),%mm0
+        pmaddwd -32(%esi),%mm4
+        movq  8(%edx),%mm1
+        movq  72(%edx),%mm5
+        pmaddwd 8(%esi),%mm1
+        pmaddwd -24(%esi),%mm5
+        movq  16(%edx),%mm2
+        movq  80(%edx),%mm6
+        pmaddwd 16(%esi),%mm2
+        pmaddwd -16(%esi),%mm6
+        movq  24(%edx),%mm3
+        movq  88(%edx),%mm7
+        pmaddwd 24(%esi),%mm3
+        pmaddwd -8(%esi),%mm7
+        paddd %mm1,%mm0
+        paddd %mm5,%mm4
+        paddd %mm2,%mm0
+        paddd %mm6,%mm4
+        paddd %mm3,%mm0
+        paddd %mm7,%mm4
+        movq  %mm0,%mm1
+        movq  %mm4,%mm5
+        psrlq $32,%mm1
+        psrlq $32,%mm5
+        paddd %mm0,%mm1
+        paddd %mm4,%mm5
+        psrad $13,%mm1
+        psrad $13,%mm5
+        packssdw %mm1,%mm1
+        packssdw %mm5,%mm5
+        psubd %mm0,%mm0
+        psubd %mm4,%mm4
+        psubsw %mm1,%mm0
+        psubsw %mm5,%mm4
+
+	movq	(%edi), %mm1
+	punpckldq %mm4, %mm0
+	pand   one_null, %mm1
+	pand   null_one, %mm0
+	por    %mm0, %mm1
+	movq   %mm1,(%edi)
+
+        subl $64,%esi
+        addl $128,%edx
+        leal 8(%edi),%edi                
+        decl %ecx
+	jnz  .L4
+
         movq  (%edx),%mm0
         pmaddwd (%esi),%mm0
         movq  8(%edx),%mm1
@@ -102,11 +209,6 @@ synth_1to1_MMX_s:
         movd %mm0,%eax
 	movw %ax,(%edi)
 
-        subl $32,%esi
-        addl $64,%edx
-        leal 4(%edi),%edi                
-        decl %ecx
-	jnz  .L4
 	emms
         popl %ebx
         popl %esi
