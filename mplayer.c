@@ -2508,7 +2508,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_SEEK : {
       int v,abs;
       osd_show_percentage = 25;
-      if ( stream->type == STREAMTYPE_STREAM ) break;
       v = cmd->args[0].v.i;
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
       if(abs==2) { /* Absolute seek to a specific timestamp in seconds */
