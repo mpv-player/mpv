@@ -147,7 +147,7 @@ int c;
 unsigned int head=-1;
 int pos=0;
 int frames=0;
-FILE *f=fopen("GB1.viv","rb");
+FILE *f=fopen("paulvandykforanangel.viv","rb");
 FILE *f2=fopen("GB1.avi","wb");
 aviwrite_t* avi=aviwrite_new_muxer();
 aviwrite_stream_t* mux=aviwrite_new_stream(avi,AVIWRITE_TYPE_VIDEO);
@@ -156,6 +156,7 @@ int i,len;
 int v_id=0;
 int flag=0;
 int flag2=0;
+int prefix=0;
 
 mux->buffer_size=0x200000;
 mux->buffer=malloc(mux->buffer_size);
@@ -181,7 +182,15 @@ for(i=0;i<len;i++) fgetc(f);
 
 while((c=fgetc(f))>=0){
 
-//    printf("%02X\n",c);
+    printf("%08X  %02X\n",ftell(f),c);
+
+    prefix=0;
+    if(c==0x82){
+	prefix=1;
+	//continue;
+	c=fgetc(f);
+	printf("%08X  %02X\n",ftell(f),c);
+    }
 
     if(c==0x00){
 	// header
@@ -195,14 +204,18 @@ while((c=fgetc(f))>=0){
 
     if((c&0xF0)==0x40){
 	// audio
-	printf("audio: %02X (24)\n",c);
-	for(i=0;i<24;i++) fgetc(f);
+	len=24;
+	if(prefix) len=fgetc(f);
+	printf("audio: %02X (%d)\n",c,len);
+	for(i=0;i<len;i++) fgetc(f);
 	continue;
     }
     if((c&0xF0)==0x30){
 	// audio
-	printf("audio: %02X (40)\n",c);
-	for(i=0;i<40;i++) fgetc(f);
+	len=40;
+	if(prefix) len=fgetc(f);
+	printf("audio: %02X (%d)\n",c,len);
+	for(i=0;i<len;i++) fgetc(f);
 	continue;
     }
     if(flag2 || (((c&0xF0)==0x10 || (c&0xF0)==0x20) && (c&0x0F)!=(v_id&0xF))){
@@ -214,13 +227,15 @@ while((c=fgetc(f))>=0){
 	
 	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);
     }
-    v_id=c;
     flag2=0;
     if((c&0xF0)==0x10){
 	// 128 byte
-	printf("video: %02X (128)\n",c);
-	fread(mux->buffer+mux->buffer_len,128,1,f);
-	mux->buffer_len+=128;
+	len=128;
+	if(prefix) len=fgetc(f);
+	printf("video: %02X (%d)\n",c,len);
+	fread(mux->buffer+mux->buffer_len,len,1,f);
+	mux->buffer_len+=len;
+    v_id=c;
 	continue;
     }
     if((c&0xF0)==0x20){
@@ -229,9 +244,11 @@ while((c=fgetc(f))>=0){
 	fread(mux->buffer+mux->buffer_len,len,1,f);
 	mux->buffer_len+=len;
 	flag2=1;
+    v_id=c;
 	continue;
     }
     printf("error: %02X!\n",c);
+    exit(1);
 }
 
 if(!width) width=320;
