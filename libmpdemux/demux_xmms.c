@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 
 #include "../m_option.h"
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -68,32 +68,32 @@ static int disk_get_output_time(void) {
 static int disk_open(AFormat fmt, int rate, int nch) {
     switch (fmt) {
 	case FMT_U8:
-	    xmms_afmt=AFMT_U8;
+	    xmms_afmt=AF_FORMAT_U8;
 	    break;
 	case FMT_S8:
-	    xmms_afmt=AFMT_S8;
+	    xmms_afmt=AF_FORMAT_S8;
 	    break;
 	case FMT_U16_LE:
-	    xmms_afmt=AFMT_U16_LE;
+	    xmms_afmt=AF_FORMAT_U16_LE;
 	    break;
 	case FMT_U16_NE:
 #if WORDS_BIGENDIAN
-	    xmms_afmt=AFMT_U16_BE;
+	    xmms_afmt=AF_FORMAT_U16_BE;
 #else
-	    xmms_afmt=AFMT_U16_LE;
+	    xmms_afmt=AF_FORMAT_U16_LE;
 #endif
 	    break;
 	case FMT_U16_BE:
-	    xmms_afmt=AFMT_U16_BE;
+	    xmms_afmt=AF_FORMAT_U16_BE;
 	    break;
 	case FMT_S16_NE:
-	    xmms_afmt=AFMT_S16_NE;
+	    xmms_afmt=AF_FORMAT_S16_NE;
 	    break;
 	case FMT_S16_LE:
-	    xmms_afmt=AFMT_S16_LE;
+	    xmms_afmt=AF_FORMAT_S16_LE;
 	    break;
 	case FMT_S16_BE:
-	    xmms_afmt=AFMT_S16_BE;
+	    xmms_afmt=AF_FORMAT_S16_BE;
 	    break;
     }
     xmms_samplerate=rate;
@@ -251,10 +251,10 @@ int demux_xmms_open(demuxer_t* demuxer) {
   }
   sh_audio->sample_format= xmms_afmt;
   switch (xmms_afmt) {
-    case AFMT_S16_LE:
-    case AFMT_S16_BE:
-    case AFMT_U16_LE:
-    case AFMT_U16_BE:
+    case AF_FORMAT_S16_LE:
+    case AF_FORMAT_S16_BE:
+    case AF_FORMAT_U16_LE:
+    case AF_FORMAT_U16_BE:
         sh_audio->samplesize = 2;
 	break;
     default:
