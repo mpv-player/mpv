@@ -2274,8 +2274,8 @@ Uses the DirectX driver with acceleration features turned off.
 .PD 1
 .sp 1
 FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
-fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+tdfxfb, dxr2, dxr3, mpegpes, zr, zr2.
 .sp 1
 Available video output drivers are:
 .
@@ -2481,6 +2481,7 @@ Supports OSD and videos larger than the maximum texture size.
 .B null\ \ \ 
 Produces no video output.
 Useful for benchmarking.
+Actually there are no suboptions available.
 .
 .TP
 .B aa\ \ \ \ \ 
@@ -2683,11 +2684,37 @@ images and stores it in a file called 'stream.yuv' in the current
 directory.
 The format is the same as the one employed by mjpegtools, so this is
 useful if you want to process the video with the mjpegtools suite.
+It support the YV12, RGB (24 bpp) and BGR (24 bpp) format.
+.PD 0
+.RSs
+.IPs interlaced
+Write the output as interlaced frames, top field first.
+.IPs interlaced_bf
+Write the output as interlaced frames, bottom field first.
+.RE
+.PD 1
+.br
+.I NOTE:
+If you don't specify any option the output is progressive (ie. no interlace).
+You must specify only one option.
 .
 .TP
 .B gif89a\ 
-Output each frame into a GIF file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
+Output each frame into a single animated GIF file in the current directory.
+It support only RGB format with 24 bpp and the output is converted to 256
+colors.
+.PD 0
+.RSs
+.IPs fps\ \ \ 
+Float value to specify framerate (default: 5).
+.IPs filename
+Specify the output filename (default: out.gif).
+.RE
+.PD 1
+.br
+.I NOTE:
+You must specify the framerate before the filename or the framerate will
+be part of the filename.
 .
 .TP
 .B jpeg\ \ \ 
@@ -2724,16 +2751,33 @@ Must be equal to or larger than 1 (default: 1000).
 .B pgm\ \ \ \ 
 Output each frame into a PGM file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
+It support only YV12 format.
+The resulting image is (width) * (height * 1.5) of the original
+image.
+At coordinate 0,0 for w,h you have the Y plane, at coordinate 0,h for
+w/2,h/2 you have the U plane and at w/2,h for w/2,h/2 you have the V plane.
+Actually there are no suboptions available.
 .
 .TP
 .B png\ \ \ \ 
 Output each frame into a PNG file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
+It support RGB and BGR format with 24 bpp.
+Actually there are no suboptions available but you can specify
+the compression level with the -z option, ranging from 0 (no
+compression) to 9 (maximum compression).
 .
 .TP
 .B tga\ \ \ \ 
 Output each frame into a Targa file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
+The reason for this output video driver is to have a simple lossless
+image writer to use without any external library.
+It support BGR[A] color format, with 15, 24 and 32 bpp.
+To force a particular format use the -vf format filter, e.g.\&
+-vf format=bgr15 to save images with 2 bytes per pixel.
+Actually there are no suboptions available.
+
 .
 .
 .
