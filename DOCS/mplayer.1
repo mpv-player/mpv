@@ -1426,6 +1426,20 @@ See also \-zoom.
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (use \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
+.B \-fstype <type1,type2,...>
+Specify a priority list of fullscreen layer setting modes to be
+used.
+
+The default order is "layer,stays_on_top,above,fullscreen". It will be used
+as a fallback in case of specifying incorrect or unsupported modes.
+.br
+If you experience problems with fullscreen window being covered by other
+windows try using different order.
+
+.I NOTE:
+.br
+See \-fstype help for a full list of available modes.
+.TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Adjust where the output is on the screen initially.
 The x and y specifications are in pixels measured from the top-right of the

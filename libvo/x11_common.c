@@ -153,15 +153,13 @@ void fstype_help(void)
 {
  mp_msg(MSGT_VO, MSGL_INFO, MSGTR_AvailableFsType);
  
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "none", "don't set fullscreen window layer");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "layer", "use _WIN_LAYER hint with default layer");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "layer=<0..15>", "use _WIN_LAYER hint with a given layer number");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "above", "use _NETWM_STATE_ABOVE hint if available");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "below", "use _NETWM_STATE_BELOW hint if vailable");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "fullscreen", "use _NETWM_STATE_FULLSCREEN hint if availale");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP hint if available");
- 
- mp_msg(MSGT_VO, MSGL_INFO, MSGTR_DefaultFsType, WIN_LAYER_ABOVE_DOCK);
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "none", "don't set fullscreen window layer");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer", "use _WIN_LAYER hint with default layer");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer=<0..15>", "use _WIN_LAYER hint with a given layer number");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "above", "use _NETWM_STATE_ABOVE hint if available");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below", "use _NETWM_STATE_BELOW hint if vailable");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "fullscreen", "use _NETWM_STATE_FULLSCREEN hint if availale");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP hint if available");
 }
  
 int net_wm_support_state_test( Atom atom )
