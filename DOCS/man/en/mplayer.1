@@ -3808,6 +3808,13 @@ Try this option if you have display problems.
 .TP
 .B quartz (Mac OS X only)
 Mac OS X Quartz output driver.
+
+You can choose the display device to use in full-screen with the
+sub-option device_id=[id]
+
+EXAMPLE:
+mplayer -vo quartz:device_id=2 ...
+
 Under some circumstances, it might be more efficient to force a
 packed YUV output format, with e.g. \-vf format=yuy2
 .TP
