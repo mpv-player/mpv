@@ -4,7 +4,7 @@ LIBNAME = libmpeg2.a
 include ../config.mak
 
 SRCS	= header.c idct.c idct_mmx.c motion_comp.c motion_comp_mmx.c slice.c stats.c decode.c
-OBJS	= header.o idct.o idct_mmx.o motion_comp.o motion_comp_mmx.o slice.o stats.o decode.o
+OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I. -I../libvo -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
@@ -30,7 +30,7 @@ dep:    depend
 depend: .depend
 
 .depend: Makefile ../config.mak ../config.h
-	makedepend -f- -- $(CFLAGS) -- $(SRCS) 1>.depend 2>/dev/null
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
 # include dependency files if they exist

@@ -3,6 +3,7 @@ include config.mak
 
 SRCS = sr1.c d_cpu.s decode_i586.s $(OPTIONAL_SRCS)
 OBJS = sr1.o d_cpu.o decode_i586.o $(OPTIONAL_OBJS)
+# OBJS = $(SRCS:.c,.s=.o)
 CFLAGS  = $(OPTFLAGS)
 
 .SUFFIXES: .c .o
@@ -36,7 +37,7 @@ dep:    depend
 depend: .depend
 
 .depend: Makefile config.mak ../config.mak ../config.h
-	makedepend -f- -- $(CFLAGS) -- $(SRCS) 1>.depend 2>/dev/null
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
 # include dependency files if they exist

@@ -4,7 +4,9 @@ LIBNAME = libDS_Filter.a
 include ../../config.mak
 
 SRCS	= DS_AudioDec.cpp DS_VideoDec.cpp DS_Filter.cpp allocator.cpp cmediasample.cpp guids.cpp inputpin.cpp outputpin.cpp
-OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
+OBJS = $(SRCS:.cpp=.o)
+
+# OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
 
 INCLUDE = -I. -I.. -I../wine
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
@@ -34,7 +36,7 @@ dep:    depend
 depend: .depend
 
 .depend: Makefile ../../config.mak
-	makedepend -f- -- $(CFLAGS) -- $(SRCS) 1>.depend 2>/dev/null
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
 # include dependency files if they exist

@@ -21,9 +21,7 @@ prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
 SRCS = asf_streaming.c find_sub.c aviprint.c dll_init.c dec_audio.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c
-#BB: IMHO It's simplier to use the following rule:
-#OBJS = $(SRCS:.c=.o)
-OBJS = asf_streaming.o find_sub.o aviprint.o dll_init.o dec_audio.o aviwrite.o aviheader.o asfheader.o demux_avi.o demux_asf.o demux_mpg.o demuxer.o stream.o codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o mixer.o dvdauth.o spudec.o
+OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
@@ -99,7 +97,7 @@ depend: .depend
 	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
 
 .depend: Makefile config.mak config.h
-	makedepend -f- -- $(CFLAGS) -- mplayer.c mplayerHQ.c aviparse.c tvision.c $(SRCS) 1>.depend 2>/dev/null
+	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
 
 # ./configure must be run if it changed in CVS
 config.h: configure
