@@ -6,7 +6,7 @@ extern "C" {
 #endif
 #ifndef __WINE_WINGDI_H
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     short    bfType;
     long   bfSize;
@@ -17,7 +17,7 @@ typedef struct
 
 #ifndef _BITMAPINFOHEADER_
 #define _BITMAPINFOHEADER_
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     long 	biSize;
     long  	biWidth;
