@@ -21,6 +21,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include <libmp1e.h>
 
 #include "../postproc/rgb2rgb.h"
 #ifdef HAVE_MMX
@@ -29,10 +30,8 @@
 
 LIBVO_EXTERN (dxr3)
 
-#ifdef USE_MP1E
-#include <rte.h>
-rte_context* mp1e_context = NULL;
-rte_codec* mp1e_codec = NULL;
+rte_context *mp1e_context = NULL;
+rte_codec *mp1e_codec = NULL;
 rte_buffer mp1e_buffer;
 struct { uint16_t Y,U,V; } YUV_s;
 #define RGBTOY(R,G,B) (uint16_t)( (0.257 * R) + (0.504 * G) + (0.098 * B) + 16 )
@@ -41,36 +40,19 @@ struct { uint16_t Y,U,V; } YUV_s;
 #define RGBTOYUV(R,G,B) YUV_s.Y = RGBTOY(R,G,B); \
 			YUV_s.U = RGBTOU(R,G,B); \
 			YUV_s.V = RGBTOV(R,G,B);
-#endif
 
 static unsigned char *picture_data[3];
 static unsigned int picture_linesize[3];
+
 static int v_width,v_height;
 static int s_width,s_height;
 static int c_width,c_height;
 static int s_pos_x,s_pos_y;
 static int d_pos_x,d_pos_y;
 static int osd_w,osd_h;
+
 static int img_format = 0;
-static uint32_t palette[] =
-    {
-	0x00505050,
-	0x00000000,
-	0x00808080,
-	0xffffffff,
-	0x00005555,
-	0x0000ff00,
-	0x00cc2255,
-	0x00cc0055,
-	0x00404040,
-	0x00202020,
-	0x00b0b0b0,
-	0x00d0d0d0,
-	0x60606000,
-	0x70707000,
-	0x80808000,
-	0x60606000,
-    };
+
 static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
@@ -84,14 +66,12 @@ static vo_info_t vo_info =
 	""
 };
 
-#ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
     if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
 	printf( "VO: [dxr3] Unable to set video PTS\n" );
     write( fd_video, data, size );
 }
-#endif
 
 static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
@@ -123,12 +103,6 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	printf( "VO: [dxr3] Unable to set subpicture mode!\n" );
 	return -1;
     }
-    
-    if( ioctl( fd_spu, EM8300_IOCTL_SPU_SETPALETTE, palette ) < 0 )
-    {
-	printf( "VO: [dxr3] Unable to set subpicture palette!\n" );
-	return -1;
-    }
 
     ioval = EM8300_PLAYMODE_PLAY;
     if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
@@ -144,13 +118,12 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 
     if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 || format == IMGFMT_BGR24 )
     {
-#ifdef USE_MP1E
 	int size;
 	enum rte_frame_rate frame_rate;
 
 	if( !rte_init() )
 	{
-	    printf( "VO: [dxr3] Unable to initialize RTE!\n" );
+	    printf( "VO: [dxr3] Unable to initialize MP1E!\n" );
 	    return -1;
 	}
 	
@@ -174,7 +147,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
           c_height=576;
         }
 	
-	mp1e_context = rte_context_new( c_width, c_height, "mp1e", (void*)0xdeadbeef );
+	mp1e_context = rte_context_new( c_width, c_height, NULL );
 	rte_set_verbosity( mp1e_context, 0 );
 	
 	printf( "VO: [dxr3] %dx%d => %dx%d\n", v_width, v_height, c_width, c_height );
@@ -208,7 +181,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 					mp1e_context->height, frame_rate,
 					3e6, "I" ) )
         {
-            printf( "VO: [dxr3] Unable to set RTE context!\n" );
+            printf( "VO: [dxr3] Unable to set mp1e context!\n" );
 	    rte_context_destroy( mp1e_context );
 	    return -1;
 	}
@@ -218,7 +191,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	
 	if( !rte_init_context( mp1e_context ) )
 	{
-	    printf( "VO: [dxr3] Unable to init RTE context!\n" );
+	    printf( "VO: [dxr3] Unable to init mp1e context!\n" );
 	    rte_context_delete( mp1e_context );
 	    return -1;
 	}
@@ -264,8 +237,6 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	}
 
 	return 0;
-#endif
-	return -1;    
     }
     else if(format==IMGFMT_MPEGPES)
     {
@@ -273,7 +244,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	return 0;
     }
 
-    printf( "VO: [dxr3] Format: Unsupported\n" );
+    printf( "VO: [dxr3] Format: Unsuppomp1ed\n" );
     return -1;
 }
 
@@ -306,7 +277,6 @@ static uint32_t draw_frame(uint8_t * src[])
 
 	return 0;
     }
-#ifdef USE_MP1E
     else if( img_format == IMGFMT_YUY2 )
     {
 	int w=v_width,h=v_height;
@@ -377,7 +347,6 @@ static uint32_t draw_frame(uint8_t * src[])
 	
 	return 0;
     }
-#endif
 
     return -1;
 }
@@ -397,7 +366,6 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 {
     if( img_format == IMGFMT_YV12 )
     {
-#ifdef USE_MP1E
 	int y;
 	unsigned char *s,*s1;
 	unsigned char *d,*d1;
@@ -432,7 +400,6 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 	}
 
 	return 0;
-#endif
     }
 
     return -1;
@@ -442,17 +409,11 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 1;
-#ifdef USE_MP1E
-    if(format==IMGFMT_YV12) return 1;
-    if(format==IMGFMT_YUY2) return 1;
-    if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 1; }
-#else
-    if(format==IMGFMT_YV12) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
-    if(format==IMGFMT_YUY2) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
-    if(format==IMGFMT_BGR24) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
-#endif
-    else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
+    if(format==IMGFMT_MPEGPES) return 0x2;0x4;
+    if(format==IMGFMT_YV12) return 0x1|0x4;
+    if(format==IMGFMT_YUY2) return 0x1|0x4;
+    if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 0x1|0x4; }
+    else printf( "VO: [dxr3] Format unsuppomp1ed, mail dholm@iname.com\n" );
     return 0;
 }
 
