@@ -269,8 +269,9 @@ Turns off xscreensaver at startup and turns it on again on exit.
 .SH "DEMUXER/STREAM OPTIONS"
 .TP
 .B \-aid <id> (also see \-alang option)
-Select audio channel [MPG/SUB: 0\-31 AVI/OGM: 1\-99 ASF/RM: 0\-127
-VOB: 128\-159 LPCM: 160\-191]
+Select audio channel [MPEG: 0\-31 AVI/OGM: 1\-99 ASF/RM: 0\-127
+VOB(AC3): 128\-159 VOB(LPCM): 160\-191]
+MPlayer prints the available IDs when running in verbose (-v) mode.
 .TP
 .B \-alang <two letter\ country\ code> (also see \-aid option)
 Works only for DVD playback! Selects DVD audio language. It always tries
@@ -642,7 +643,7 @@ If FreeType support is enabled, the old font support can't be used.
 .
 .TP
 .B \-noautosub
-Turns off automatic subtitles.
+Turns off automatic loading of subtitle files.
 .TP
 .B \-osdlevel <0\-2> (MPLAYER only)
 Specifies which mode the OSD should start in (0: none, 1: seek, 2: seek+timer,
@@ -792,7 +793,7 @@ specifies the SDL subdriver
 .B \-aofile <filename>
 Filename for \-ao pcm.
 .TP
-.B \-aop <plugin1:plugin2:...>
+.B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
 Specify audio plugin(s) and their options (see documentation too).
 Available options are:
 .
@@ -944,7 +945,7 @@ Force using XVideo.
 .B \-fs \ \ \ 
 Fullscreen playing (centers movie, and makes black
 bands around it). Toggle it with the 'f' key (not all video
-outputs support it).
+outputs support it). See also -zoom.
 .TP
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (use \-fs option)
 Try this option if you still experience fullscreen problems.
@@ -1211,13 +1212,19 @@ manual workaround encoder bugs:
 .RSss
 0: default
 .br
-1: workaround for some old lavc generated msmpeg4v3 files
+1: workaround for some old lavc generated msmpeg4v3 and some opendivx files
+.br
+2: workaround XviD interlacing bug
+.br
+3: workaround UMP4 bugs
 .REss
+.IPs gray
+grayscale only decoding (a bit faster than with color)
 .RE
 .
 .TP
 .B \-noaspect
-Disable aspect compensation.
+Disable automatic aspect compensation.
 .TP
 .B \-nosound
 Do not play/encode sound.
@@ -1295,7 +1302,7 @@ deblocking filter (for DivX)
 .PD 1
 .
 .TP
-.B \-ssf <mode> (BETA CODE)
+.B \-ssf <mode>
 Specifies SwScaler parameters.
 
 .I EXAMPLE
@@ -1393,15 +1400,15 @@ See \-vc help for a full list of available codecs.
 .PD 0
 .RSs
 .IPs "\-vc divx"
-use VFW DivX codec
+use Win32/VFW DivX codec
 .IPs "\-vc divxds"
-use DirectShow DivX codec
+use Win32/DShow DivX codec
 .IPs "\-vc ffdivx"
 use libavcodec's DivX codec
 .IPs "\-vc ffmpeg12"
 use libavcodec's MPEG1/2 codec
 .IPs "\-vc divx4"
-use Project Mayo's DivX codec
+use divx4linux codec
 .RE
 .PD 1
 .
