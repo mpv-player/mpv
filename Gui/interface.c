@@ -30,11 +30,7 @@
 #include <sys/types.h>
 
 #ifdef USE_ICONV
- #ifdef __FreeBSD__
-  #include <giconv.h>
- #else
-  #include <iconv.h>
- #endif
+#include <iconv.h>
 #endif
 
 #include "../libmpdemux/stream.h"

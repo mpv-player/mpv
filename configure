@@ -3527,11 +3527,8 @@ fi
 
 echocheck "iconv"
 if test "$_iconv" = auto ; then
-  if freebsd ; then
-    _iconv_tmp='#include <giconv.h>'
-  else
-    _iconv_tmp='#include <iconv.h>'
-  fi
+  _iconv_tmp='#include <iconv.h>'
+
   cat > $TMPC << EOF
 #include <stdio.h>
 #include <unistd.h>
@@ -3564,9 +3561,7 @@ int main(void) {
 }
 EOF
   _iconv=no
-  if freebsd ; then
-    cc_check  -lm -lgiconv && _iconv=yes
-  elif bsdos || openbsd ; then
+  if freebsd || bsdos || openbsd ; then
     cc_check  -lm -liconv && _iconv=yes
   else
     cc_check -lm && _iconv=yes
@@ -3574,7 +3569,7 @@ EOF
 fi
 if test "$_iconv" = yes ; then
   _def_iconv='#define USE_ICONV 1'
-  freebsd && _ld_iconv='-lgiconv'
+  freebsd && _ld_iconv='-liconv'
   bsdos && _ld_iconv='-liconv'
   openbsd && _ld_iconv='-liconv'
 else
