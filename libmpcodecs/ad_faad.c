@@ -148,56 +148,55 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 {
-	int j = 0, len = 0;	      
-	void *faac_sample_buffer;
-	//memset(sh->a_buffer,0,sh->a_buffer_size); // XXX: check if needed.
+  int j = 0, len = 0;	      
+  void *faac_sample_buffer;
 
-	while(len < minlen) {
-	  /* update buffer */
-          if(sh->a_in_buffer_len < sh->a_in_buffer_size){
-            sh->a_in_buffer_len +=
-              demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
-              sh->a_in_buffer_size - sh->a_in_buffer_len);
-          }
+  while(len < minlen) {
+    /* update buffer */
+    if(sh->a_in_buffer_len < sh->a_in_buffer_size){
+      sh->a_in_buffer_len +=
+	demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
+	sh->a_in_buffer_size - sh->a_in_buffer_len);
+    }
 	  
 #ifdef DUMP_AAC_COMPRESSED
-	  {int i;
-	  for (i = 0; i < 16; i++)
-	    printf ("%02X ", sh->a_in_buffer[i]);
-	  printf ("\n");}
+    {int i;
+    for (i = 0; i < 16; i++)
+      printf ("%02X ", sh->a_in_buffer[i]);
+    printf ("\n");}
 #endif
-	  do {
-	    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j);
-	    /* update buffer index after faacDecDecode */
-            if(faac_finfo.bytesconsumed >= sh->a_in_buffer_len){
-              sh->a_in_buffer_len=0;
-	    } else {
-	      sh->a_in_buffer_len-=faac_finfo.bytesconsumed;
-	      memcpy(sh->a_in_buffer,&sh->a_in_buffer[faac_finfo.bytesconsumed],sh->a_in_buffer_len);
-	    }
+  do {
+    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j);
+    /* update buffer index after faacDecDecode */
+    if(faac_finfo.bytesconsumed >= sh->a_in_buffer_len) {
+      sh->a_in_buffer_len=0;
+    } else {
+      sh->a_in_buffer_len-=faac_finfo.bytesconsumed;
+      memcpy(sh->a_in_buffer,&sh->a_in_buffer[faac_finfo.bytesconsumed],sh->a_in_buffer_len);
+    }
 
-	    if(faac_finfo.error > 0) {
-	      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Trying to resync!\n");
-	      j++;
-	    } else
-	      break;
-	  } while(j < FAAD_BUFFLEN);	  
+    if(faac_finfo.error > 0) {
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Trying to resync!\n");
+      j++;
+    } else
+      break;
+    } while(j < FAAD_BUFFLEN);	  
 
-	  if(faac_finfo.error > 0) {
-	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to decode frame: %s \n",
-	      faacDecGetErrorMessage(faac_finfo.error));
-	  } else if (faac_finfo.samples == 0)
-	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Decoded zero samples!\n");
-	  else {
-	    /* XXX: samples already multiplied by channels! */
-	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%d Bytes)!\n",
-	       sh->samplesize*faac_finfo.samples);
-	    memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
-	    len += sh->samplesize*faac_finfo.samples;
-	    //printf("FAAD: buffer: %d bytes  consumed: %d \n", k, faac_finfo.bytesconsumed);
-	  }
-	}
-   return len;
+    if(faac_finfo.error > 0) {
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to decode frame: %s \n",
+      faacDecGetErrorMessage(faac_finfo.error));
+    } else if (faac_finfo.samples == 0) {
+      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Decoded zero samples!\n");
+    } else {
+      /* XXX: samples already multiplied by channels! */
+      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%d Bytes)!\n",
+      sh->samplesize*faac_finfo.samples);
+      memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
+      len += sh->samplesize*faac_finfo.samples;
+    //printf("FAAD: buffer: %d bytes  consumed: %d \n", k, faac_finfo.bytesconsumed);
+    }
+  }
+  return len;
 }
 
 #endif /* !HAVE_FAAD */
