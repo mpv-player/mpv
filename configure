@@ -4205,9 +4205,9 @@ echocheck "streaming"
 if test "$_streaming" != no ; then
   _def_streaming='#define STREAMING 1'
   _ld_streaming="$_ld_sock"
-  _inputmodules="network $_inputmodules"
+  _inputmodules="streaming $_inputmodules"
 else
-  _noinputmodules="network $_noinputmodules"
+  _noinputmodules="streaming $_noinputmodules"
   _def_streaming='#undef STREAMING'
 fi
 echores "$_streaming"
