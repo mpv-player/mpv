@@ -263,6 +263,13 @@ extern "C" int demux_is_mpeg_rtp_stream(demuxer_t* demuxer) {
   return (rtpState->flags&RTPSTATE_IS_MPEG12_VIDEO) != 0;
 }
 
+extern "C" int demux_is_multiplexed_rtp_stream(demuxer_t* demuxer) {
+  // Get the RTP state that was stored in the demuxer's 'priv' field:
+  RTPState* rtpState = (RTPState*)(demuxer->priv);
+
+  return (rtpState->flags&RTPSTATE_IS_MULTIPLEXED) != 0;
+}
+
 static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
 				 Boolean mustGetNewData,
 				 float& ptsBehind); // forward
