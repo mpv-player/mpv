@@ -13,6 +13,6 @@ extern char *vobsub_get_id(void * /* vobhandle */, unsigned int /* index */);
 extern void *vobsub_out_open(const char *basename, const unsigned int *palette, unsigned int orig_width, unsigned int orig_height, const char *id, unsigned int index);
 extern void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);
 extern void vobsub_out_close(void *me);
-
+extern int vobsub_set_from_lang(void *vobhandle, unsigned char * lang);
 #endif /* MPLAYER_VOBSUB_H */
 

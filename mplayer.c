@@ -1039,6 +1039,7 @@ if(!use_stdin && !slave_mode){
     if(vo_vobsub){
       sub_auto=0; // don't do autosub for textsubs if vobsub found
       inited_flags|=INITED_VOBSUB;
+      vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
     }
 
 //============ Open & Sync STREAM --- fork cache2 ====================

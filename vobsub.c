@@ -1151,6 +1151,25 @@ vobsub_get_id(void *vobhandle, unsigned int index)
 }
 
 int
+vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
+{
+    int i;
+    vobsub_t *vob= (vobsub_t *) vobhandle;
+    while(lang && strlen(lang) >= 2){
+      for(i=0; i < vob->spu_streams_size; i++)
+        if (vob->spu_streams[i].id)
+          if ((strncmp(vob->spu_streams[i].id, lang, 2)==0)){
+	    vobsub_id=i;
+	    mp_msg(MSGT_VOBSUB, MSGL_INFO, "Selected VOBSUB language: %d language: %s\n", i, vob->spu_streams[i].id);
+	    return;
+	  }
+      lang+=2;while (lang[0]==',' || lang[0]==' ') ++lang;
+    }
+    mp_msg(MSGT_VOBSUB, MSGL_WARN, "No matching VOBSUB languge found!\n");
+    return -1;
+}
+    
+int
 vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
   vobsub_t *vob = (vobsub_t *)vobhandle;
   unsigned int pts100 = 90000 * pts;
