@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.20 -->
+<!-- synced with 1.21 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów</title>
@@ -11,6 +11,7 @@
   <year>2002</year>
   <year>2003</year>
   <year>2004</year>
+  <year>2005</year>
   <holder>Załoga MPlayera</holder>
 </copyright>
 <!--
