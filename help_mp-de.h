@@ -209,11 +209,11 @@ static char help_text[]=
 #define MSGTR_UnknownAudio "Unbekanntes/fehlendes Audioformat -> kein Ton\n"
 
 // LIRC:
-#define MSGTR_SettingUpLIRC "LIRC-Unterstützung wird eingerichtet...\n"
-#define MSGTR_LIRCdisabled "Es wird nicht möglich, deine Fernbedienung zu benutzen\n"
-#define MSGTR_LIRCopenfailed "Öffnen der LIRC-Unterstützung fehlgeschlagen!\n"
-#define MSGTR_LIRCsocketerr "Etwas ist falsch mit dem LIRC Socket: %s\n"
-#define MSGTR_LIRCcfgerr "Lesen der LIRC Konfigurationsdatei %s fehlgeschlagen!\n"
+#define MSGTR_SettingUpLIRC "Initialisiere Lirc Unterstützung...\n"
+#define MSGTR_LIRCdisabled "Verwenden der Fernbedienung nicht möglich\n"
+#define MSGTR_LIRCopenfailed "Fehler beim Öffnen der LIRC Unterstützung!\n"
+#define MSGTR_LIRCsocketerr "Fehler im LIRC Socket: %s\n"
+#define MSGTR_LIRCcfgerr "Kann LIRC Konfigurationsdatei nicht lesen %s !\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -223,8 +223,10 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "Über ..."
 #define MSGTR_FileSelect "Wähle Datei ..."
+#define MSGTR_SubtitleSelect "Wähle Untertitel ..."
+#define MSGTR_OtherSelect "Wähle ..."
 #define MSGTR_MessageBox "Message-Box"
-#define MSGTR_PlayList "Playliste"
+#define MSGTR_PlayList "Playlist"
 #define MSGTR_SkinBrowser "Skin Browser"
 
 // --- buttons ---
