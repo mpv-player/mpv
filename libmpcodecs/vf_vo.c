@@ -110,6 +110,12 @@ static int put_image(struct vf_instance_s* vf,
   return 1;
 }
 
+static void start_slice(struct vf_instance_s* vf,
+		       mp_image_t *mpi) {
+    if(!vo_config_count) return; // vo not configured?
+    video_out->control(VOCTRL_START_SLICE,mpi);
+}
+
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     if(!vo_config_count) return; // vo not configured?
@@ -125,6 +131,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->draw_slice=draw_slice;
+    vf->start_slice=start_slice;
     vf->priv=(void*)args; // video_out
     if(!video_out) return 0; // no vo ?
 //    if(video_out->preinit(args)) return 0; // preinit failed

@@ -53,6 +53,7 @@
 /* Frame duplication */
 #define VOCTRL_DUPLICATE_FRAME 20
 // ... 21
+#define VOCTRL_START_SLICE 21
 
 
 #define VO_TRUE		1
