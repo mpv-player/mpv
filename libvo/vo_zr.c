@@ -25,6 +25,8 @@
 #include "../cfgparser.h"
 #include "fastmemcpy.h"
 
+#include "jpeg_enc.h"
+
 LIBVO_EXTERN (zr)
 
 static vo_info_t vo_info = 
@@ -47,7 +49,9 @@ static int bw = 0; /* if bw == 1, then display in black&white */
 static int vdec = 1;
 static int hdec = 1;
 static int size;
-static int quality = 1;
+static int quality = 2;
+static unsigned char *y_data, *u_data, *v_data;
+static int y_stride, u_stride, v_stride;
 
 typedef struct {
 	int width;
@@ -61,6 +65,7 @@ geo g = {0, 0, 0, 0, 0};
 static uint8_t *image=NULL;
 static uint8_t *buf=NULL;
 
+static jpeg_enc_t *j;
 
 /* Variables needed for Zoran */
 
@@ -79,13 +84,6 @@ int norm = VIDEO_MODE_AUTO;
 #define VO_ZR_DEFAULT_DEVICE "/dev/video"
 #endif
 char *device = NULL;
-
-
-extern int mjpeg_encode_frame(char *bufr, int field);
-extern void mjpeg_encoder_init(int w, int h, unsigned char *y,
-		int y_psize, int y_rsize, unsigned char *u,
-		int u_psize, int u_rsize, unsigned char *v,
-		int v_psize, int v_rsize, int f, int cu, int q, int b);
 
 int zoran_getcap() {
 	char* dev = device ? device : VO_ZR_DEFAULT_DEVICE;
@@ -197,7 +195,7 @@ void uninit_zoran(void) {
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
 	uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
-	int j, stretchx, stretchy;
+	int i, stretchx, stretchy;
 	/* this allows to crop parts from incoming picture,
 	 * for easy 512x240 -> 352x240 */
 	/* These values must be multples of 2 */
@@ -294,17 +292,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	 * width 720 (exactly right for the Buz) after decimation 360,
 	 * after padding up to a multiple of 16 368, display 736 -> too
 	 * large). In these situations we auto(re)crop. */
-	j = 16*((g.width - 1)/(hdec*16) + 1);
-	if (stretchx*j > vc.maxwidth) {
-		g.xoff += 2*((g.width - hdec*(j-16))/4);
+	i = 16*((g.width - 1)/(hdec*16) + 1);
+	if (stretchx*i > vc.maxwidth) {
+		g.xoff += 2*((g.width - hdec*(i-16))/4);
 		/* g.off must be a multiple of 2 */
-		g.width = hdec*(j - 16);
+		g.width = hdec*(i - 16);
 		g.set = 0; /* we abuse this field to report that g has changed*/
 	}
-	j = 8*fields*((g.height - 1)/(vdec*fields*8) + 1);
-	if (stretchy*j > vc.maxheight) {
-		g.yoff += 2*((g.height - vdec*(j - 8*fields))/4);
-		g.height = vdec*(j - 8*fields);
+	i = 8*fields*((g.height - 1)/(vdec*fields*8) + 1);
+	if (stretchy*i > vc.maxheight) {
+		g.yoff += 2*((g.height - vdec*(i - 8*fields))/4);
+		g.height = vdec*(i - 8*fields);
 		g.set = 0;
 	}
 	if (!g.set) 
@@ -338,31 +336,53 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 			memset(image, 0, image_width*image_height);
 			memset(image + size, 0x80, image_width*image_height/4);
 			memset(image + 3*size/2, 0x80, image_width*image_height/4);
-			mjpeg_encoder_init(image_width/hdec, image_height,
-					image, hdec, image_width,
-					image + image_width*image_height, 
-					hdec, image_width/2,
-					image + 3*image_width*image_height/2, 
-					hdec, image_width/2, fields, 1, 
-					quality, bw);
+			y_data = image;
+			u_data = image + image_width*image_height;
+			v_data = image + 3*image_width*image_height/2;
+			
+			y_stride = image_width;
+			u_stride = image_width/2;
+			v_stride = image_width/2;
+
+			j = jpeg_enc_init(image_width/hdec, 
+					image_height/fields,
+					hdec, y_stride*fields,
+					hdec, u_stride*fields,
+					hdec, v_stride*fields, 
+					1, quality, bw);
 			break;
 		case IMGFMT_YUY2:
-			for (j = 0; j < 2*size; j+=4) {
-				image[j] = 0;
-				image[j+1] = 0x80;
-				image[j+2] = 0;
-				image[j+3] = 0x80;
+			for (i = 0; i < 2*size; i+=4) {
+				image[i] = 0;
+				image[i+1] = 0x80;
+				image[i+2] = 0;
+				image[i+3] = 0x80;
 			}
-			mjpeg_encoder_init(image_width/hdec, image_height,
-					image, hdec*2, image_width*2,
-					image + 1, hdec*4, image_width*2,
-					image + 3, hdec*4, image_width*2,
-					fields, 0, quality, bw);
+
+			y_data = image;
+			u_data = image + 1;
+			v_data = image + 3;
+
+			y_stride = 2*image_width;
+			u_stride = 2*image_width;
+			v_stride = 2*image_width;
+
+			j = jpeg_enc_init(image_width/hdec, 
+					image_height/fields,
+					hdec*2, y_stride*fields,
+					hdec*4, u_stride*fields,
+					hdec*4, v_stride*fields,
+					0, quality, bw);
 			break;
 		default:
 			mp_msg(MSGT_VO, MSGL_FATAL, "internal inconsistency in vo_zr\n");
 	}
 
+
+	if (j == NULL) {
+		mp_msg(MSGT_VO, MSGL_ERR, "Error initializing the jpeg encoder\n");
+		return 1;
+	}
 
 	if (init_zoran(stretchx, stretchy)) {
 		return 1;
@@ -379,9 +399,9 @@ static void draw_osd(void) {
 }
 
 static void flip_page (void) {
-	int i, j, k;
-	/*FILE *fp;
-	char filename[100];*/
+	int i, k;
+	//FILE *fp;
+	//char filename[100];
 	/* do we have a free buffer? */
 	if (queue-synco < zrq.count) {
 		frame = queue;
@@ -393,9 +413,12 @@ static void flip_page (void) {
 	}
 	k=0;
 	for (i = 0; i < fields; i++) 
-		k+=mjpeg_encode_frame(buf+frame*zrq.size+k, i);
-	/* Warning, Quantization and Huffman tables are only
-	 * written in the first frame by default (to preserver bandwidth) */
+		k+=jpeg_enc_frame(j, y_data + i*y_stride, 
+				u_data + i*u_stride, v_data + i*v_stride, 
+				buf+frame*zrq.size+k);
+	/* Warning: Only the first jpeg image contains huffman- and 
+	 * quantisation tables, so don't expect files other than
+	 * test0001.jpg to be readable */
 	/*sprintf(filename, "test%04d.jpg", framenum);
 	fp = fopen(filename, "w");
 	if (!fp) exit(1);
@@ -418,7 +441,7 @@ static uint32_t draw_frame(uint8_t * src[]) {
 	int i;
 	char *source, *dest;
 	//printf("draw frame called\n");
-	source = src[0] + 2*g.yoff*image_width + 2*g.xoff;
+	source = src[0] + 2*g.yoff*vdec*stride + 2*g.xoff;
 	dest = image + 2*off_y;
 	for (i = 0; i < g.height/vdec; i++) {
 		memcpy(dest, source, image_width*2);
@@ -435,6 +458,7 @@ static uint32_t query_format(uint32_t format) {
 }
 
 static void uninit(void) {
+	jpeg_enc_uninit(j);
 	uninit_zoran();
 }
 
@@ -563,7 +587,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 	return 1;
     }else if (!strcasecmp(opt, "zrquality")) {
         i = atoi(param);
-	if (i < 1 || i > 20) return ERR_OUT_OF_RANGE;
+	if (i < 2 || i > 20) return ERR_OUT_OF_RANGE;
 	quality = i;
 	return 1;
     }else if (!strcasecmp(opt, "zrnorm")) {
@@ -595,7 +619,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 		    "              this switch allows you to see the effects\n"
 		    "              of too much decimation\n"
 		    "  -zrbw       display in black&white (speed increase)\n"
-		    "  -zrquality  jpeg compression quality [BEST] 1 - 20 [VERY BAD]\n"
+		    "  -zrquality  jpeg compression quality [BEST] 2 - 20 [VERY BAD]\n"
 		    "  -zrdev      playback device (example -zrdev /dev/video1\n"
 		    "  -zrnorm     specify norm PAL/NTSC [dev: leave at current setting]\n"
 		    "\n"
@@ -623,7 +647,7 @@ void vo_zr_revertoption(config_t* opt,char* param) {
   else if (!strcasecmp(param, "zrvdec"))
     vdec = 1;
   else if (!strcasecmp(param, "zrquality"))
-    quality = 1;
+    quality = 2;
   else if (!strcasecmp(param, "zrnorm"))
     norm = VIDEO_MODE_AUTO;
 
