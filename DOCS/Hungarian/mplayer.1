@@ -101,6 +101,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
+.RB [ \-font\ <útvonal\ a\ font.desc\ file-hoz> ]
 .I < - | file | URL | eszköz >
 .PP
 .SH LEÍRÁS
@@ -321,8 +322,16 @@ a PCM csatorna használatát eredményezi.
 Ez az opció TV-nézõ üzemmódba kapcsolja az MPlayer-t. A további dokumentáció
 a documentation.html file 2.5-ös fejezetében található.
 .TP
+.B \-rootwin
 új ablak megnyitása helyett a desktop hátterében (root window) történik a
 lejátszás. Csak az xv és xmga meghajtókkal mûködik.
+.TP
+.B \-font\ <útvonal\ a\ font.desc\ file-hoz>
+az alapértelmezettol eltéro betutipus használata (alap:
+~/.mplayer/font/font.desc).
+Például:
+
+    -font ~/.mplayer/arial-14/font.desc
 .IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP

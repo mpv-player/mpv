@@ -102,6 +102,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
+.RB [ \-font\ <path\ to\ font.desc\ file> ]
 .I < - | file | URL | device >
 .PP
 .SH DESCRIPTION
@@ -317,6 +318,12 @@ documentation, please see documentation.html chapter 2.5
 .B \-rootwin
 play movie in the root window (desktop background) instead of opening
 a new one. Works only with the xv and xmga drivers.
+.TP
+.B \-font\ <path\ to\ font.desc\ file>
+search for the OSD/SUB fonts in an alternative directory (default :
+~/.mplayer/font/font.desc). For example:
+
+    -font ~/.mplayer/arial-14/font.desc
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -393,8 +400,9 @@ it (fbdev, dga2, svga, vesa).
 .TP
 .B \-pp\ <quality>
 apply postprocess filter on decoded image.
-Postprocessing effect depends on the codec and works only for MPEG, OpenDivX,
-DivX4, DivX. Quality is an hexadecimal number built as below:
+Postprocessing effect depends on the codec and works only for MPEG1/2,
+libavcodec codecs (ff*). It doesn't work for Win32/XAnim codecs.
+Quality is an hexadecimal number built as below:
 
 0x 00 TX hv YZ
       ^^ ^^ ^^
