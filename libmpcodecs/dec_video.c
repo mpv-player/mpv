@@ -78,8 +78,12 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 {
     vf_instance_t* vf=sh_video->vfilter;
     
-    if (vf->control(vf, VFCTRL_SET_EQUALIZER, item, (int *)value) == CONTROL_TRUE)
-	return 1;
+    if (vf)
+    {
+	int ret =  vf->control(vf, VFCTRL_SET_EQUALIZER, item, (int *)value);
+	if (ret == CONTROL_TRUE)
+	    return(1);
+    }
     /* try software control */
     if(mpvdec) return mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value);
     return 0;
