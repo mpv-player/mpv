@@ -1900,10 +1900,12 @@ coordinates over the image (used to test crop).
 (default: maximum w/\:h, upper left x/\:y position)
 .IPs expand[=w:h:x:y:o]
 Expands (not scales) movie resolution to the given value and places the
-unscaled original at coordinates x y.
+unscaled original at coordinates x y. Negative values for w and h are
+treated as offsets to the original size. For example, expand=0:-50:0:0
+adds a 50 pixel border to the bottom of the picture.
 Can be used for placing subtitles/\:OSD in the resulting black bands (default:
 original w/\:h, centered x/\:y).
-The last parameter (de)activates OSD rendering (default: 0).
+The last parameter (de)activates OSD rendering (default: 0=disabled).
 .IPs flip
 Flips the image upside down.
 See also option \-flip.
