@@ -1077,7 +1077,7 @@ _vorbis=auto
 _theora=auto
 _matroska=auto
 _tremor=no
-_faad=auto
+_faad=yes
 _xmms=no
 _css=auto
 # dvdnav disabled, it does not work
@@ -4279,17 +4279,18 @@ echores "$_matroska"
 
 
 echocheck "faad2 (AAC) support"
-if test "$_faad" = auto ; then
-  _faad=no
-  cat > $TMPC << EOF
-#include <faad.h>
-int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
-EOF
-  cc_check -lfaad -lm && _faad=yes
-fi
+#if test "$_faad" = auto ; then
+#  _faad=no
+#  cat > $TMPC << EOF
+##include <faad.h>
+#int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
+#EOF
+#  cc_check -lfaad -lm && _faad=yes
+#fi
 if test "$_faad" = yes ; then
   _def_faad='#define HAVE_FAAD 1'
-  _ld_faad='-lfaad'
+  _inc_faad="-I`pwd`"
+#  _ld_faad='-lfaad'
   _codecmodules="faad2 $_codecmodules"
 else
   _def_faad='#undef HAVE_FAAD'
@@ -4298,7 +4299,8 @@ fi
 
 if test "$_faad" = yes; then
 cat > $TMPC <<EOF
-#include <faad.h>
+//#include <faad.h>
+#include "libfaad2/faad.h"
 #ifndef FAAD_MIN_STREAMSIZE
 #error Too old version
 #endif
@@ -4311,7 +4313,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
     _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"

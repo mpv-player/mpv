@@ -36,11 +36,11 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) 
 AO_LIBS = $(ARTS_LIB) $(ESD_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
 CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB) $(MATROSKA_LIB) 
-COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB)
+COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libfaad2/libfaad2.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) # -Wall
 
-PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers osdep postproc input libvo libaf
+PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers osdep postproc input libvo libaf libfaad2
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -72,7 +72,7 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
+COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a libfaad2/libfaad2.a mp3lib/libMP3.a libmpeg2/libmpeg2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -148,6 +148,9 @@ libao2/libao2.a:
 
 liba52/liba52.a:
 	$(MAKE) -C liba52
+
+libfaad2/libfaad2.a:
+	$(MAKE) -C libfaad2
 
 mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
