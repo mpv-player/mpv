@@ -14,14 +14,6 @@
 #include "../bswap.h"
 #include "../libvo/fastmemcpy.h"
 
-// Integer to float conversion through lrintf()
-#ifdef HAVE_LRINTF
-#define __USE_ISOC99 1
-#include <math.h>
-#else
-#define lrintf(x) ((int)(x))
-#endif
-
 /* Functions used by play to convert the input audio to the correct
    format */
 
@@ -502,19 +494,19 @@ static void float2int(void* in, void* out, int len, int bps)
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((int8_t*)out)[i]=(int8_t)lrintf(SCHAR_MAX*((float*)in)[i]);
+      ((int8_t*)out)[i] = (int)(127.0 * (1.0+((float*)in)[i])) - 127;
     break;
   case(2): 
     for(i=0;i<len;i++)
-      ((int16_t*)out)[i]=(int16_t)lrintf(SHRT_MAX*((float*)in)[i]);
+      ((int16_t*)out)[i] = (int)(32767.0 * (1.0+((float*)in)[i])) - 32767;
     break;
   case(3):
     for(i=0;i<len;i++)
-      store24bit(out, i, (int32_t)lrintf(INT_MAX*((float*)in)[i]));
+      store24bit(out, i, (int)(2147483647.0 * (1.0+((float*)in)[i])) - 2147483647);
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((int32_t*)out)[i]=(int32_t)lrintf(INT_MAX*((float*)in)[i]);
+      ((int32_t*)out)[i] = (int)(2147483647.0 * (1.0+((float*)in)[i])) - 2147483647;
     break;
   }	
 }
@@ -525,19 +517,19 @@ static void int2float(void* in, void* out, int len, int bps)
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/SCHAR_MAX)*((float)((int8_t*)in)[i]);
+      ((float*)out)[i]=(1.0/128.0)*((float)((int8_t*)in)[i]);
     break;
   case(2):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/SHRT_MAX)*((float)((int16_t*)in)[i]);
+      ((float*)out)[i]=(1.0/32768.0)*((float)((int16_t*)in)[i]);
     break;
   case(3):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/INT_MAX)*((float)((int32_t)load24bit(in, i)));
+      ((float*)out)[i]=(1.0/2147483648.0)*((float)((int32_t)load24bit(in, i)));
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/INT_MAX)*((float)((int32_t*)in)[i]);
+      ((float*)out)[i]=(1.0/2147483648.0)*((float)((int32_t*)in)[i]);
     break;
   }	
 }
