@@ -70,6 +70,8 @@ XMM_PluginSound *pSound=NULL;
 
 #ifdef HAVE_FBDEV
 extern char *fb_dev_name;
+extern char *fb_mode_cfgfile;
+extern char *fb_mode_name;
 #endif
 
 extern int vo_screenwidth;
