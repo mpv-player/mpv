@@ -35,6 +35,10 @@ LIBAO_EXTERN(sdl)
 // ao_outburst
 // ao_buffersize
 
+extern int verbose;
+/* audio driver to be used by SDLlib */
+char *sdl_adriver;
+
 // Samplesize used by the SDLlib AudioSpec struct
 #define SAMPLESIZE 512
 
@@ -121,9 +125,15 @@ static int init(int rate,int channels,int format,int flags){
 	
 	int i;
 	/* Allocate ring-buffer memory */
-	for(i=0;i<NUM_BUFS;i++) buffer[i]=malloc(BUFFSIZE);
+	for(i=0;i<NUM_BUFS;i++) buffer[i]=(unsigned char *) malloc(BUFFSIZE);
 
 	printf("SDL: Samplerate: %iHz Channels: %s Format %iBit\n", rate, (channels > 1) ? "Stereo" : "Mono", format);
+
+	if(sdl_adriver) {
+		setenv("SDL_AUDIODRIVER", sdl_adriver, 1);
+		printf("SDL: using %s audio driver\n", sdl_adriver);
+	}	
+	
 	
 	/* The desired audio frequency in samples-per-second. */
 	aspec.freq     = rate;
@@ -156,7 +166,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
         	return(0);
 	} 
 	
-	printf("SDL buf size = %d\n",aspec.size);
+	if(verbose) printf("SDL: buf size = %d\n",aspec.size);
 	if(ao_buffersize==-1) ao_buffersize=aspec.size;
 	
 	/* unsilence audio, if callback is ready */
@@ -167,6 +177,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 // close audio device
 static void uninit(){
+	if(verbose) printf("SDL: Audio Subsystem shutting down!\n");
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
@@ -195,7 +206,7 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 
-#if 0	
+#if 1	
 	int ret;
 
 	/* Audio locking prohibits call of outputaudio */
