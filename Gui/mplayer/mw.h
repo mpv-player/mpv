@@ -444,7 +444,8 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
             case itHPotmeter:
                  item->value=(float)( X - item->x ) / item->width * 100.0f;
 potihandled:
-                 btnModify( item->msg,item->value );
+		 if ( item->value > 100.0f ) item->value=100.0f;
+		 if ( item->value < 0.0f ) item->value=0.0f;
                  if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplMsgHandle( item->msg,item->value );
                  mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
