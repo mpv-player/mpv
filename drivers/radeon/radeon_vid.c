@@ -17,7 +17,7 @@
  * Rage128(pro) stuff of this driver.
  */
 
-#define RADEON_VID_VERSION "1.1.2"
+#define RADEON_VID_VERSION "1.2.0"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -108,6 +108,14 @@ static int swap_fourcc __initdata = 0;
 #define RTRACE		printk
 #else
 #define RTRACE(...)	((void)0)
+#endif
+
+#if !defined( RAGE128 ) && !defined( AVOID_FPU )
+#define RADEON_FPU 1
+#endif
+
+#ifdef RADEON_FPU
+#include <math.h>
 #endif
 
 typedef struct bes_registers_s
@@ -454,6 +462,135 @@ static void radeon_vid_dump_regs( void )
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
 	printk(RVID_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
   printk(RVID_MSG"*** End of OV0 registers dump ***\n");
+}
+#endif
+
+#ifdef RADEON_FPU
+/* Reference color space transform data */
+typedef struct tagREF_TRANSFORM
+{
+	float RefLuma;
+	float RefRCb;
+	float RefRCr;
+	float RefGCb;
+	float RefGCr;
+	float RefBCb;
+	float RefBCr;
+} REF_TRANSFORM;
+
+/* Parameters for ITU-R BT.601 and ITU-R BT.709 colour spaces */
+REF_TRANSFORM trans[2] =
+{
+	{1.1678, 0.0, 1.6007, -0.3929, -0.8154, 2.0232, 0.0}, /* BT.601 */
+	{1.1678, 0.0, 1.7980, -0.2139, -0.5345, 2.1186, 0.0}  /* BT.709 */
+};
+/****************************************************************************
+ * SetTransform                                                             *
+ *  Function: Calculates and sets color space transform from supplied       *
+ *            reference transform, gamma, brightness, contrast, hue and     *
+ *            saturation.                                                   *
+ *    Inputs: bright - brightness                                           *
+ *            cont - contrast                                               *
+ *            sat - saturation                                              *
+ *            hue - hue                                                     *
+ *            ref - index to the table of refernce transforms               *
+ *   Outputs: NONE                                                          *
+ ****************************************************************************/
+
+static void radeon_set_transform(float bright, float cont, float sat,
+				 float hue, unsigned ref)
+{
+	float OvHueSin, OvHueCos;
+	float CAdjLuma, CAdjOff;
+	float CAdjRCb, CAdjRCr;
+	float CAdjGCb, CAdjGCr;
+	float CAdjBCb, CAdjBCr;
+	float OvLuma, OvROff, OvGOff, OvBOff;
+	float OvRCb, OvRCr;
+	float OvGCb, OvGCr;
+	float OvBCb, OvBCr;
+	float Loff = 64.0;
+	float Coff = 512.0f;
+
+	u32 dwOvLuma, dwOvROff, dwOvGOff, dwOvBOff;
+	u32 dwOvRCb, dwOvRCr;
+	u32 dwOvGCb, dwOvGCr;
+	u32 dwOvBCb, dwOvBCr;
+
+	if (ref >= 2) return;
+
+	OvHueSin = sin((double)hue);
+	OvHueCos = cos((double)hue);
+
+	CAdjLuma = cont * trans[ref].RefLuma;
+	CAdjOff = cont * trans[ref].RefLuma * bright * 1023.0;
+
+	CAdjRCb = sat * -OvHueSin * trans[ref].RefRCr;
+	CAdjRCr = sat * OvHueCos * trans[ref].RefRCr;
+	CAdjGCb = sat * (OvHueCos * trans[ref].RefGCb - OvHueSin * trans[ref].RefGCr);
+	CAdjGCr = sat * (OvHueSin * trans[ref].RefGCb + OvHueCos * trans[ref].RefGCr);
+	CAdjBCb = sat * OvHueCos * trans[ref].RefBCb;
+	CAdjBCr = sat * OvHueSin * trans[ref].RefBCb;
+    
+#if 0 /* default constants */
+        CAdjLuma = 1.16455078125;
+
+	CAdjRCb = 0.0;
+	CAdjRCr = 1.59619140625;
+	CAdjGCb = -0.39111328125;
+	CAdjGCr = -0.8125;
+	CAdjBCb = 2.01708984375;
+	CAdjBCr = 0;
+#endif
+	OvLuma = CAdjLuma;
+	OvRCb = CAdjRCb;
+	OvRCr = CAdjRCr;
+	OvGCb = CAdjGCb;
+	OvGCr = CAdjGCr;
+	OvBCb = CAdjBCb;
+	OvBCr = CAdjBCr;
+	OvROff = CAdjOff -
+		OvLuma * Loff - (OvRCb + OvRCr) * Coff;
+	OvGOff = CAdjOff - 
+		OvLuma * Loff - (OvGCb + OvGCr) * Coff;
+	OvBOff = CAdjOff - 
+		OvLuma * Loff - (OvBCb + OvBCr) * Coff;
+#if 0 /* default constants */
+	OvROff = -888.5;
+	OvGOff = 545;
+	OvBOff = -1104;
+#endif 
+   
+	dwOvROff = ((int)(OvROff * 2.0)) & 0x1fff;
+	dwOvGOff = (int)(OvGOff * 2.0) & 0x1fff;
+	dwOvBOff = (int)(OvBOff * 2.0) & 0x1fff;
+	if(!IsR200)
+	{
+		dwOvLuma =(((int)(OvLuma * 2048.0))&0x7fff)<<17;
+		dwOvRCb = (((int)(OvRCb * 2048.0))&0x7fff)<<1;
+		dwOvRCr = (((int)(OvRCr * 2048.0))&0x7fff)<<17;
+		dwOvGCb = (((int)(OvGCb * 2048.0))&0x7fff)<<1;
+		dwOvGCr = (((int)(OvGCr * 2048.0))&0x7fff)<<17;
+		dwOvBCb = (((int)(OvBCb * 2048.0))&0x7fff)<<1;
+		dwOvBCr = (((int)(OvBCr * 2048.0))&0x7fff)<<17;
+	}
+	else
+	{
+		dwOvLuma = (((int)(OvLuma * 256.0))&0x7ff)<<20;
+		dwOvRCb = (((int)(OvRCb * 256.0))&0x7ff)<<4;
+		dwOvRCr = (((int)(OvRCr * 256.0))&0x7ff)<<20;
+		dwOvGCb = (((int)(OvGCb * 256.0))&0x7ff)<<4;
+		dwOvGCr = (((int)(OvGCr * 256.0))&0x7ff)<<20;
+		dwOvBCb = (((int)(OvBCb * 256.0))&0x7ff)<<4;
+		dwOvBCr = (((int)(OvBCr * 256.0))&0x7ff)<<20;
+	}
+
+	OUTREG(OV0_LIN_TRANS_A, dwOvRCb | dwOvLuma);
+	OUTREG(OV0_LIN_TRANS_B, dwOvROff | dwOvRCr);
+	OUTREG(OV0_LIN_TRANS_C, dwOvGCb | dwOvLuma);
+	OUTREG(OV0_LIN_TRANS_D, dwOvGOff | dwOvGCr);
+	OUTREG(OV0_LIN_TRANS_E, dwOvBCb | dwOvLuma);
+	OUTREG(OV0_LIN_TRANS_F, dwOvBOff | dwOvBCr);
 }
 #endif
 
@@ -1073,9 +1210,14 @@ static int __init radeon_vid_config_card(void)
 
 #define PARAM_BRIGHTNESS "brightness="
 #define PARAM_SATURATION "saturation="
+#define PARAM_CONTRAST "contrast="
+#define PARAM_HUE "hue="
 #define PARAM_DOUBLE_BUFF "double_buff="
 #define PARAM_DEINTERLACE "deinterlace="
 #define PARAM_DEINTERLACE_PATTERN "deinterlace_pattern="
+#ifdef RADEON_FPU
+static int ovBrightness=0, ovSaturation=0, ovContrast=0, ovHue=0, ov_trans_idx=0;
+#endif
 
 static void radeon_param_buff_fill( void )
 {
@@ -1105,6 +1247,13 @@ static void radeon_param_buff_fill( void )
 #ifdef RAGE128
     len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",(int)brightness);
     len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
+#else
+#ifdef RADEON_FPU
+    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",ovBrightness);
+    len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%i\n",ovSaturation);
+    len += sprintf(&radeon_param_buff[len],PARAM_CONTRAST"%i\n",ovContrast);
+    len += sprintf(&radeon_param_buff[len],PARAM_HUE"%i\n",ovHue);
+#endif
 #endif
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
@@ -1122,6 +1271,11 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
     *ppos += size;
     return size;
 }
+
+#define RTFSaturation(a)   (1.0 + ((a)*1.0)/1000.0)
+#define RTFBrightness(a)   (((a)*1.0)/2000.0)
+#define RTFContrast(a)   (1.0 + ((a)*1.0)/1000.0)
+#define RTFHue(a)   (((a)*3.1416)/1000.0)
 
 static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
@@ -1149,6 +1303,37 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
 				(saturation << 16));
     }
     else
+#else
+#ifdef RADEON_FPU
+    if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
+    {
+      ovBrightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
+      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
+			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+    }
+    else
+    if(memcmp(buf,PARAM_SATURATION,min(count,strlen(PARAM_SATURATION))) == 0)
+    {
+      ovSaturation=simple_strtol(&buf[strlen(PARAM_SATURATION)],NULL,10);
+      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
+			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+    }
+    else
+    if(memcmp(buf,PARAM_CONTRAST,min(count,strlen(PARAM_CONTRAST))) == 0)
+    {
+      ovContrast=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
+      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
+			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+    }
+    else
+    if(memcmp(buf,PARAM_HUE,min(count,strlen(PARAM_HUE))) == 0)
+    {
+      ovHue=simple_strtol(&buf[strlen(PARAM_HUE)],NULL,10);
+      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
+			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+    }
+    else
+#endif
 #endif
     if(memcmp(buf,PARAM_DOUBLE_BUFF,min(count,strlen(PARAM_DOUBLE_BUFF))) == 0)
     {

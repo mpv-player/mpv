@@ -65,9 +65,15 @@ cat /dev/radeon_vid
 List of parameters:
 ~~~~~~~~~~~~~~~~~~~
 if you have rage128 chip:
-brightness=decval          (-64:+63) doesn't work on radeons
-saturation=decval          (0:+31) doesn't work on radeons
-endif
+brightness=decval          (-64:+63) changes brightness
+saturation=decval          (0:+31) changes saturation 0 == grayscaled mode
+else - if you have radeon:
+brightness=decval          (-1000:+1000) -1000 == black screen 
+saturation=decval          (-1000:+1000) -1000 == grayscaled mode
+contrast=decval            (-1000:+1000) -1000 == black screen
+hue=decval                 (-1000:+1000) -1000 == +1000 (full circle)
+                           all other values are within this range
+Note: 0 is default value for every parameter on radeons
 
 double_buff=on/off         enables/disables double buffering
 deinterlace=on/off         enables/disables adaprive deinterlacing
