@@ -23,7 +23,7 @@ Small improvements:
 
  * Debian package creates mplayer.conf.1 .2 ...
 
- * -vo fbdev -fb device ---> -fbdev:device
+ * -vo fbdev -fb device ---> -vo fbdev:device
 
  * make -geometry work with all vo drivers
 
@@ -110,6 +110,8 @@ Enhancements:
  * hardware MPEG encoding support (Ati cards)
 
  * automatically display subtitles in black bands
+
+ * nsc playlist support
 
 
 
