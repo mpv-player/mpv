@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.19  2002/08/05 03:13:45  arpi
+    fixed 'eof at 66s' bug
+
     Revision 1.18  2002/06/14 00:49:56  arpi
     fixed playback speed and a-v sync issues
 
@@ -398,18 +401,27 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int stream_id;
     int i;
     int flags;
+    int version;
+    int reserved;
 
 loop:
     /* also don't check if no num_of_packets was defined in header */
     if ((priv->current_packet > priv->num_of_packets) &&
-	(priv->num_of_packets != -10))
+	(priv->num_of_packets != -10)){
+	printf("num_of_packets reached!\n");
 	return 0; /* EOF */
-    stream_skip(demuxer->stream, 2); /* version */
+    }
+    demuxer->filepos = stream_tell(demuxer->stream);
+    version = stream_read_word(demuxer->stream); /* version */
     len = stream_read_word(demuxer->stream);
-    if (len == -256) /* EOF */
+    
+    if (len == -256){ /* EOF */
+	printf("len==-256!\n");
 	return 0;
+    }
     if (len < 12)
     {
+	printf("%08X: packet v%d len=%d  \n",(int)demuxer->filepos,(int)version,(int)len);
 	printf("bad packet len (%d)\n", len);
 	stream_skip(demuxer->stream, len);
 	goto loop;
@@ -417,16 +429,20 @@ loop:
     stream_id = stream_read_word(demuxer->stream);
     timestamp = stream_read_dword(demuxer->stream);
 
-    stream_skip(demuxer->stream, 1); /* reserved */
+    reserved = stream_read_char(demuxer->stream);
     flags = stream_read_char(demuxer->stream);
     /* flags:		*/
     /*  0x1 - reliable  */
     /* 	0x2 - keyframe	*/
 
+//    printf("%08X: packet v%d len=%4d  id=%d  pts=%6d  rvd=%d  flags=%d  \n",
+//	(int)demuxer->filepos,(int)version,(int)len, stream_id,
+//	(int) timestamp, reserved, flags);
+
 // debug re-enabled (FS)
     mp_dbg(MSGT_DEMUX,MSGL_DBG2, "len:%d\n", len);
-    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "packet#%d: pos: 0x%0x, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
-	priv->current_packet, (int)(stream_tell(demuxer->stream)-12), len, stream_id, timestamp, flags);
+    mp_dbg(MSGT_DEMUX,MSGL_V,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %d, flags: %x rvd:%d\n",
+	priv->current_packet, (int)demuxer->filepos, len, stream_id, timestamp, flags, reserved);
 
     priv->current_packet++;
     len -= 12;    
@@ -470,7 +486,6 @@ loop:
 	goto loop;	
     }
 
-    demuxer->filepos = stream_tell(demuxer->stream);
 #if 0
     ds_read_packet(ds, demuxer->stream, len, timestamp/90000.0f,
 	demuxer->filepos, (flags & 0x2) ? 0x10 : 0);
@@ -514,7 +529,9 @@ loop:
 		unsigned int* extra;
 		
 
-	    while(len>0){
+	    while(len>2){
+
+//		printf("xxx len=%d  \n",len);
 
 		// read packet header
 		// bit 7: 1=last block in block chain
@@ -544,9 +561,10 @@ loop:
 		    vpkg_length=stream_read_word(demuxer->stream);
 		    len-=2;
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l: %0.2X %0.2X ",vpkg_length>>8,vpkg_length&0xff);
-		    if (vpkg_length==0) {
-		        vpkg_length=stream_read_word(demuxer->stream);
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l+: %0.2X %0.2X ",vpkg_length>>8,vpkg_length&0xff);
+		    if (!(vpkg_length&0xC000)) {
+			vpkg_length<<=16;
+		        vpkg_length|=stream_read_word(demuxer->stream);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l+: %0.2X %0.2X ",(vpkg_length>>8)&0xff,vpkg_length&0xff);
 	    	        len-=2;
 		    } else
 		    vpkg_length&=0x3fff;
@@ -557,9 +575,10 @@ loop:
 		    vpkg_offset=stream_read_word(demuxer->stream);
 	            len-=2;
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o: %0.2X %0.2X ",vpkg_offset>>8,vpkg_offset&0xff);
-		    if (vpkg_offset==0) {
-		        vpkg_offset=stream_read_word(demuxer->stream);
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o+: %0.2X %0.2X ",vpkg_offset>>8,vpkg_offset&0xff);
+		    if (!(vpkg_offset&0xC000)) {
+			vpkg_offset<<=16;
+		        vpkg_offset|=stream_read_word(demuxer->stream);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o+: %0.2X %0.2X ",(vpkg_offset>>8)&0xff,vpkg_offset&0xff);
 	    	        len-=2;
 		    } else
 		    vpkg_offset&=0x3fff;
@@ -615,6 +634,7 @@ loop:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  offset=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,len,vpkg_length);
             		stream_read(demuxer->stream, dp->buffer + dp->len, len);
 			dp->len+=len;
+			len=0;
 			break; // no more fragments in this chunk!
 		    }
 		}
@@ -635,6 +655,7 @@ loop:
 		    dp->len=len;
 		    stream_read(demuxer->stream, dp->buffer, dp->len);
 		    ds->asf_packet=dp;
+		    len=0;
 		    break;
 		}
 		// whole packet (not fragmented):
@@ -645,6 +666,11 @@ loop:
 		ds_add_packet(ds,dp);
 
 	    } // while(len>0)
+	    
+	    if(len){
+		printf("\n******** !!!!!!!! BUG!! len=%d !!!!!!!!!!! ********\n",len);
+		if(len>0) stream_skip(demuxer->stream, len);
+	    }
 
 	    } else {
 		// old video stream type
