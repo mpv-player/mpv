@@ -6,6 +6,25 @@
 
 #include <windows.h>
 #include "keycodes.h"
+#include "../input/input.h"
+
+int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
+  DWORD i,retval;
+  int x=0;
+  HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
+  INPUT_RECORD eventbuffer[250];
+  if(!GetNumberOfConsoleInputEvents(stdin,&retval) || !retval)return MP_INPUT_NOTHING;
+  ReadConsoleInput(stdin,eventbuffer,250,&retval);
+  for(i = 0; i < retval; i++){
+    if(eventbuffer[i].EventType==KEY_EVENT&&eventbuffer[i].Event.KeyEvent.bKeyDown== TRUE){
+      if(eventbuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_RETURN)dest[x]='\n';
+      else dest[x]=eventbuffer[i].Event.KeyEvent.uChar.AsciiChar;
+      ++x;
+    }
+  }
+  if(x)return x;
+  return MP_INPUT_NOTHING;
+}
 
 int screen_width=80;
 int screen_height=24;

@@ -13,6 +13,7 @@
 #define	SIGQUIT	3	/* quit */
 #define	SIGKILL	9	/* kill (cannot be caught or ignored) */
 #define	SIGBUS	10	/* bus error */
+extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #endif
 
 #include <sys/time.h>
@@ -1121,7 +1122,11 @@ if(keyb_fifo_get > 0)
   mp_input_add_key_fd(-1,0,mplayer_get_key,NULL);
 #endif
 if(slave_mode)
+#ifndef __MINGW32__
    mp_input_add_cmd_fd(0,1,NULL,NULL);
+#else
+  mp_input_add_cmd_fd(0,0,mp_input_win32_slave_cmd_func,NULL);
+#endif
 else if(!use_stdin)
 #ifndef HAVE_NO_POSIX_SELECT
   mp_input_add_key_fd(0,1,NULL,NULL);
