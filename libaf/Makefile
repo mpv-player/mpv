@@ -7,6 +7,11 @@ SRCS=af.c af_mp.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c 
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -I. -Wall $(EXTRA_INC)
+
+ifeq ($(TARGET_MINGW32),yes)
+CFLAGS += -D_IO_H_
+endif
+
 .SUFFIXES: .c .o
 
 .c.o:
