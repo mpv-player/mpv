@@ -228,7 +228,7 @@ toggle stay-on-top.
 Supported by video out drivers which use X11, except SDL, as well as directx
 and gl2 under Windows.
 .IPs "w and e"
-decrease/\:increase panscan range
+decrease/\:increase pan and scan range
 .IPs o\ \ \ \ 
 toggle OSD states: none / seek / seek + timer / seek + timer + total time
 .IPs d\ \ \ \ 
@@ -492,7 +492,7 @@ Prints all keys that can be bound to commands.
 .IPs cmdlist
 Prints all commands that can be bound to keys.
 .IPs js-dev
-Specifies the joystick device to use (default is /dev/\:input/\:js0).
+Specifies the joystick device to use (default: /dev/\:input/\:js0).
 .IPs file\ 
 Read commands from the given file.
 Mostly useful with a fifo.
@@ -582,6 +582,8 @@ and afterwards ~/.mplayer/Skin/fittyfene.
 .B \-slave (also see \-input)
 Switches on slave mode, in which MPlayer works as a backend for other programs.
 Instead of intercepting keyboard events, MPlayer will read commands from stdin.
+.br
+.I NOTE:
 See DOCS/tech/slave.txt and \-input cmdlist for a list of slave commands.
 .TP
 .B \-softsleep
@@ -1376,7 +1378,7 @@ specify the subtitle codepage.
 .B \-subcp enca:<language>:<fallback codepage> (ENCA only)
 You can specify your language using a two letter language code to
 make ENCA detect the codepage automatically.
-If unsure, enter anything and watch mplayer -v output for available
+If unsure, enter anything and watch mplayer \-v output for available
 languages.
 Fallback codepage specifies the codepage to use, when the
 autodetection fails.
@@ -1685,20 +1687,19 @@ You can get a list of available cards when you run this option with \-v.
 Works currently only with \-vo directx.
 .TP
 .B \-bpp <depth>
-Use different color depth than autodetect.
-Not all \-vo drivers support it (fbdev, dga2, svga, vesa).
+Override the autodetected color depth.
+Only supported by the fbdev, dga, svga, vesa video output drivers.
 .TP
 .B \-brightness <-100\-100>
-Adjust brightness of video output (default 0).
-It changes intensity of RGB components of video signal from black to white
-screen.
+Adjust the brightness of the video signal (default: 0).
+Not supported by all video output drivers.
 .TP
 .B \-contrast <-100\-100>
-Adjust contrast of video output (default 0).
-Works in similar manner as brightness.
+Adjust the contrast of the video signal (default: 0).
+Not supported by all video output drivers.
 .TP
 .B \-dfbopts <value> (\-vo directfb only)
-Specify a parameter list for the directfb driver.
+Specify a parameter list for the directfb video output driver.
 .TP
 .B \-display <name> (X11 only)
 Specify the hostname and display number of the X server you want to display
@@ -1713,10 +1714,10 @@ on.
 .
 .TP
 .B \-double
-Enables doublebuffering.
+Enables double buffering.
 Fixes flicker by storing two frames in memory, and displaying one while
 decoding another.
-Can affect OSD.
+Can affect OSD negatively, but often it removes OSD flickering.
 Needs twice the memory of a single buffer, so it won't work on cards with
 very little video memory.
 .TP
@@ -1727,15 +1728,15 @@ Turns on direct rendering (not supported by all codecs and video outputs)
 May cause OSD/\:SUB corruption!
 .TP
 .B \-dxr2 <option1:option2:...>
-This option is used to control the dxr2 driver.
+This option is used to control the dxr2 video output driver.
 .
 .RSs
 .IPs ar-mode=<value>
-aspect ratio mode (0 = normal, 1 = pan scan, 2 = letterbox (default))
+aspect ratio mode (0 = normal, 1 = pan and scan, 2 = letterbox (default))
 .IPs iec958-encoded
-iec958 output mode
+Set iec958 output mode to encoded.
 .IPs iec958-decoded
-set iec958 output mode to decoded (default)
+Set iec958 output mode to decoded (default).
 .IPs macrovision=<value>
 macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
@@ -1748,7 +1749,7 @@ path to the microcode
 .RE
 .RS
 .sp 1
-.I TV Out
+.I TV output
 .RE
 .RSs
 .IPs 75ire
@@ -1772,111 +1773,110 @@ set pixel mode to ccir601
 .RE
 .RS
 .sp 1
-.I Overlay
+.I overlay
 .RE
 .RSs
 .IPs cr-left=<0\-500>
-set the left cropping value (default: 50)
+Set the left cropping value (default: 50).
 .IPs cr-right=<0\-500>
-set the right cropping value (default: 300)
+Set the right cropping value (default: 300).
 .IPs cr-top=<0\-500>
-set the top cropping value (default: 0)
+Set the top cropping value (default: 0).
 .IPs cr-bottom=<0\-500>
-set the bottom cropping value (default: 0)
+Set the bottom cropping value (default: 0).
 .IPs ck-[r|g|b]=<0\-255>
-set the r(ed), g(reen) or b(lue) gain of the overlay color-key
+Set the r(ed), g(reen) or b(lue) gain of the overlay color-key.
 .IPs ck-[r|g|b]min=<0\-255>
 minimum value for the respective color key
 .IPs ck-[r|g|b]max=<0\-255>
 maximum value for the respective color key
 .IPs ignore-cache
-ignore cached overlay settings
+Ignore cached overlay settings.
 .IPs update-cache
-update cached overlay settings
+Update cached overlay settings.
 .IPs ol-osd
-enable overlay onscreen display
+Enable overlay onscreen display.
 .IPs nool-osd
-disable overlay onscreen display (default)
+Disable overlay onscreen display (default).
 .IPs ol[h|w|x|y]-cor=<-20\-20>
-adjust the overlay size (h,w) and position (x,y) in case it doesn't match the
-window perfectly (default: 0)
+Adjust the overlay size (h,w) and position (x,y) in case it does not
+match the window perfectly (default: 0).
 .IPs overlay
-activate overlay (default)
+Activate overlay (default).
 .IPs nooverlay
-activate TVout
+Activate TVout.
 .IPs overlay-ratio=<1\-2500>
-tune the overlay (default 1000)
+Tune the overlay (default: 1000).
 .RE
 .
 .TP
-.B \-fb <device> (fbdev or DirectFB only) (OBSOLETE)
-Specifies the framebuffer device to use.
-By default it uses /dev/\:fb0.
+.B \-fb <device> (\-vo fbdev or directfb only) (OBSOLETE)
+Specifies the framebuffer device to use (default: /dev/\:fb0).
 .TP
-.B \-fbmode <modename> (fbdev only)
-Change video mode to the one that is labelled as <modename> in
+.B \-fbmode <modename> (\-vo fbdev only)
+Change video mode to the one that is labeled as <modename> in
 /etc/\:fb.modes.
 .br
 .I NOTE:
 VESA framebuffer doesn't support mode changing.
 .TP
-.B \-fbmodeconfig <filename> (fbdev only)
-Use this configuration file instead of the default /etc/\:fb.modes.
-Only valid for the fbdev driver.
+.B \-fbmodeconfig <filename> (\-vo fbdev only)
+Override framebuffer mode configuration file (default: /etc/\:fb.modes).
 .TP
-.B \-forcexv (SDL only)
-Force using XVideo.
+.B \-forcexv (\-vo SDL only)
+Force using XVideo through the sdl video output driver.
 .TP
-.B \-fs \ \ \ 
-Fullscreen playing (centers movie, and makes black
-bands around it).
-Toggle it with the 'f' key (not all video outputs support it).
-See also \-zoom.
+.B \-fs (also see \-zoom)
+Fullscreen playback (centers movie, and paints black bands around it).
+Not supported by all video output drivers.
 .TP
 .B \-fsmode-dontuse <0\-31> (OBSOLETE, use the \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
 .B \-fstype <type1,type2,...> (X11 only)
-Specify a priority list of fullscreen layer setting modes to be
-used.
+Specify a priority list of fullscreen modes to be used.
+You can negate the modes by prefixing them with '\-'.
+.br
+If you experience problems like the fullscreen window being covered
+by other windows try using a different order.
+.br
+.I NOTE:
+See \-fstype help for a full list of available modes.
+.sp 1
 The available types are:
 .sp 1
 .PD 0
 .RSs
 .IPs above
-Use _NETWM_STATE_ABOVE hint if available.
+Use the _NETWM_STATE_ABOVE hint if available.
 .IPs below
-Use _NETWM_STATE_BELOW hint if available.
+Use the _NETWM_STATE_BELOW hint if available.
 .IPs fullscreen
-Use _NETWM_STATE_FULLSCREEN hint if available.
+Use the _NETWM_STATE_FULLSCREEN hint if available.
 .IPs layer
-Use _WIN_LAYER hint with default layer.
+Use the _WIN_LAYER hint with the default layer.
 .IPs layer=<0..15>
-Use _WIN_LAYER hint with layer number.
+Use the _WIN_LAYER hint with the given layer number.
 .IPs netwm
 Force NETWM style.
 .IPs none\ 
-Don't set fullscreen window layer.
+Do not set fullscreen window layer.
 .IPs stays_on_top
 Use _NETWM_STATE_STAYS_ON_TOP hint if available.
-.RE
-.PD 1
+.REss
+.\" This is a hack to keep EXAMPLE indented. Fix someday..
 .TP
 .B \ 
-You can negate the modes by prefixing them with '-'.
-.br
-The default order is layer,stays_on_top,above,fullscreen.
-It will be used as a fallback in case of specifying incorrect
-or unsupported modes.
-.br
-OpenBox 1.x users have to use \-fstype \-fullscreen
-to achieve working fs switching.
-.br
-If you experience problems with fullscreen window being covered by other
-windows try using a different order.
-.br
-.I NOTE:
-See \-fstype help for a full list of available modes.
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs layer,stays_on_top,above,fullscreen
+Default order, will be used as a fallback if incorrect or
+unsupported modes are specified.
+.IPs \-fullscreen
+Fixes fullscreen switching on OpenBox 1.x.
+.RE
+.PD 1
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Adjust where the output is on the screen initially.
@@ -1884,13 +1884,11 @@ The x and y specifications are in pixels measured from the top-left of the
 screen to the top-left of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
 screen size in that direction.
-It also supports the standard option format to the standard X \-geometry
-option.
-The values given must be integers.
+It also supports the standard X11 \-geometry option format.
 .br
 .I NOTE:
-This option is only supported by vo x11, xmga, xv, xvmc, xvidix,
-directx and tdfxfb.
+This option is only supported by the x11, xmga, xv, xvmc, xvidix,
+directx and tdfxfb video output drivers.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -1907,17 +1905,18 @@ Places the window at the bottom right corner of the screen.
 .PD 1
 .
 .TP
-.B \-guiwid <window\ id> (GUI only)
+.B \-guiwid <window\ id> (also see \-wid) (GUI only)
 This tells the GUI to also use an X11 window and stick itself to the bottom
 of the video, which is useful to embed a mini-GUI in a browser (with the
 MPlayer plugin for instance).
 .TP
 .B \-hue <-100\-100>
-Adjust hue of video signal (default: 0).
-You can get colored negative of image with this option.
+Adjust the hue of the video signal (default: 0).
+You can get a colored negative of the image with this option.
+Not supported by all video output drivers.
 .TP
 .B \-jpeg <option1:option2:...> (\-vo jpeg only)
-Specify options for the JPEG output.
+Specify options for the jpeg video output driver.
 .br
 Available options are:
 .sp 1
@@ -1928,29 +1927,28 @@ Specify standard or progressive JPEG.
 .IPs [no]baseline
 Specify use of baseline or not.
 .IPs optimize=<value>
-Optimization factor [0\-100]
+optimization factor [0\-100]
 .IPs smooth=<value>
-Smooth factor [0\-100]
+smooth factor [0\-100]
 .IPs quality=<value>
-Quality factor [0\-100]
+quality factor [0\-100]
 .IPs outdir=<value>
-Directory to save the JPEG files
+directory to save the JPEG files
 .RE
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <range[,range,...]> (fbdev and vesa only)
+.B \-monitor-dotclock <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the dotclock or pixelclock range of the monitor.
 .TP
-.B \-monitor-hfreq <range[,range,...]> (fbdev and vesa only)
+.B \-monitor-hfreq <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the horizontal frequency range of the monitor.
 .TP
-.B \-monitor-vfreq <range[,range,...]> (fbdev and vesa only)
+.B \-monitor-vfreq <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the vertical frequency range of the monitor.
 .TP
-.B \-monitoraspect <ratio>
-Set aspect ratio of your monitor or TV screen.
-See also \-aspect for movie aspect.
+.B \-monitoraspect <ratio> (also see \-aspect)
+Set the aspect ratio of your monitor or TV screen.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -1963,91 +1961,83 @@ See also \-aspect for movie aspect.
 .
 .TP
 .B \-nograbpointer
-Do not grab mouse pointer after VidMode change (\-vm), useful for multihead
-setup.
+Do not grab the mouse pointer after a video mode change (\-vm).
+Useful for multihead setups.
 .TP
 .B \-nokeepaspect
-Do not keep window aspect ratio when resizing windows (Works currently only
-with \-vo x11, xv, xmga, xvidix, directx and under X11 your window manager
-needs to understand window aspect hints.).
+Do not keep window aspect ratio when resizing windows.
+Only works with the x11, xv, xmga, xvidix, directx video output drivers.
+Furthermore under X11 your window manager has to honor window aspect hints.
 .TP
-.B \-noxv (SDL only)
-Disables XVideo SDL driver.
+.B \-noxv (\-vo SDL only)
+Disables using XVideo through the sdl video output driver.
 .TP
 .B \-ontop
 Makes the player window stay on top other windows.
 Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
 .TP
 .B \-panscan <0.0\-1.0>
-Enables Pan & Scan functionality, i.e.\& in order to display a 16:9 movie
-on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
-which fits the screen.
-This function works only with the xv, xmga, mga and xvidix video out drivers.
-.br
+Enables pan and scan functionality (cropping the sides of e.g.\& a 16:9
+movie to make it fit a 4:3 display without black bands).
 The range controls how much of the image is cropped.
+Only works with the xv, xmga, mga and xvidix video output drivers.
 .TP
 .B \-refreshrate <Hz>
 Set the monitor refreshrate in Hz.
 Currently only supported by \-vo directx combined with the \-vm option.
 .TP
 .B \-rootwin
-Play movie in the root window (desktop background) instead of opening
-a new one.
-Works only with the x11, xv, xmga, xvidix and quartz video output drivers.
+Play movie in the root window (desktop background).
+Desktop background images may cover the movie window, though.
+Only works with the x11, xv, xmga, xvidix and quartz video output drivers.
 .TP
 .B \-saturation <-100\-100>
-Adjust saturation of video output (default: 0).
+Adjust the saturation of the video signal (default: 0).
 You can get grayscale output with this option.
+Not supported by all video output drivers.
 .TP
-.B \-screenh <pixels> \-screenw <pixels>
-If you use an output driver which can't know the resolution of the screen
-(fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
-vertical resolution.
+.B \-screenh <pixels>
+Specify the vertical screen resolution for video output drivers which
+do not know the screen resolution like fbdev, x11 and TVout.
+.TP
+.B \-screenw <pixels>
+Specify the horizontal screen resolution for video output drivers which
+do not know the screen resolution like fbdev, x11 and TVout.
 .TP
 .B \-stop-xscreensaver (X11 only)
 Turns off xscreensaver at startup and turns it on again on exit.
 .TP
 .B \-vm \ \ \ 
-Try to change to a better video mode.
-dga, x11/\:xv (XF86VidMode) and sdl output drivers support it.
-If it is used with the directx video output driver the \-screenw,
+Try to change to a different video mode.
+Supported by the dga, x11/\:xv (XF86VidMode) and sdl video output drivers.
+If used with the directx video output driver the \-screenw,
 \-screenh, \-bpp and \-refreshrate options can be used to set
 the new display mode.
 .TP
 .B \-vsync \ \ 
-Enables VBI for vesa.
+Enables VBI for the vesa, dfbmga and svga video output drivers.
 .TP
-.B \-wid <window\ id> (X11 only)
-This tells MPlayer to use a X11 window, which is useful to embed MPlayer in a
-browser (with the plugger extension for instance).
+.B \-wid <window\ id> (also see \-guiwid) (X11 only)
+This tells MPlayer to attach to an existing X11 window.
+Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .TP
 .B \-xineramascreen <0\-...>
 In Xinerama configurations (i.e.\& a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display movie on.
 .TP
-.B \-z <0\-9> (-vo png only)
-Specifies compression level for PNG output.
-.
-.PD 0
-.RSs
-.IPs 0
-no compression
-.IPs 9
-max compression
-.RE
-.PD 1
-.
+.B \-z <0\-9> (\-vo png only)
+Specifies the compression level of the png video output driver.
+0 is no compression, 9 is the maximum compression.
 .TP
 .B \-zrbw (\-vo zr only)
-Display in black and white (for optimal performance, this option can be
-combined with the 'decode only in black and white' option for codecs
-belonging to the FFmpeg family).
+Display in black and white.
+For optimal performance, this can be combined with '\-lavdopts gray'.
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
-Select a part of the input image for display, multiple occurences of this
-option switch on cinerama mode.
-In cinerama mode the movie is distributed over more than one TV (or beamer) to
-create a larger screen.
+Select a part of the input image to display, multiple occurences
+of this option switch on cinerama mode.
+In cinerama mode the movie is distributed over more than one TV
+(or beamer) to create a larger image.
 Options appearing after the n-th \-zrcrop apply to the n-th MJPEG card, each
 card should at least have a \-zrdev in addition to the \-zrcrop.
 For examples, see the output of \-zrhelp and the Zr section of the
@@ -2055,33 +2045,40 @@ documentation.
 .TP
 .B \-zrdev <device> (\-vo zr only)
 Specify the device special file that belongs to your MJPEG card, by default
-this driver takes the first v4l device it can find.
+the zr video output driver takes the first v4l device it can find.
 .TP
 .B \-zrfd (\-vo zr only)
 Force decimation: Decimation, as specified by \-zrhdec and \-zrvdec, only
 happens if the hardware scaler can stretch the image to its original size.
 Use this option to force decimation.
 .TP
+.B \-zrhdec <1,2,4> (\-vo zr only)
+Horizontal decimation: Ask the driver to send only every 2nd or 4th
+line/\:pixel of the input image to the MJPEG card and use the scaler
+of the MJPEG card to stretch the image to its original size.
+.TP
 .B \-zrhelp (\-vo zr only)
-Display a list of all \-zr* options, their default values and an example of
-cinerama mode.
+Display a list of all \-zr* options, their default values and a
+cinerama mode example.
 .TP
 .B \-zrnorm <norm> (\-vo zr only)
-Specify norm PAL/\:NTSC, the default is 'no change'.
+Specify the TV norm as PAL orNTSC (default: no change).
 .TP
 .B \-zrquality <1\-20> (\-vo zr only)
-A number from 1 to 20 representing the jpeg encoding quality.
-1 gives the best quality and 20 gives very bad quality.
+A number from 1 (best) to 20 (worst) representing the JPEG encoding quality.
 .TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr only)
-Vertical/\:horizontal decimation: Ask the driver to send only every 2nd or 4th
-line/\:pixel of the input image to the MJPEG card and use the scaler of the
-MJPEG card to strech the image to its original size.
+.B \-zrvdec <1,2,4> (\-vo zr only)
+Vertical decimation: Ask the driver to send only every 2nd or 4th
+line/\:pixel of the input image to the MJPEG card and use the scaler
+of the MJPEG card to stretch the image to its original size.
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr only)
-If the movie is smaller than the TV screen, these options control the position
-of the movie relative to the upper left corner of the screen.
-The movie is centered by default.
+.B \-zrxdoff <x display offset> (\-vo zr only)
+If the movie is smaller than the TV screen, this option specifies the x
+offset from the upper-left corner of the TV screen (default: centered).
+.TP
+.B \-zrydoff <y display offset> (\-vo zr only)
+If the movie is smaller than the TV screen, this option specifies the y
+offset from the upper-left corner of the TV screen (default: centered).
 .
 .
 .SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
@@ -2600,8 +2597,8 @@ Same as \-af (see \-af option).
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Specify a priority list of audio drivers to be used, according to their driver
-name in codecs.conf.
+Specify a priority list of audio codec families to be used, according
+to their codec name in codecs.conf.
 It falls back to default if none is OK.
 .br
 .I NOTE:
@@ -2905,8 +2902,8 @@ Try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others.
 .
 .TP
 .B \-vfm <driver1,driver2,...>
-Specify a priority list of video codecs to be used, according to their
-names in codecs.conf.
+Specify a priority list of video codec families to be used, according
+to their names in codecs.conf.
 It falls back to default if none is OK.
 .br
 .I NOTE:
@@ -5784,10 +5781,10 @@ mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Playback on Zoran card (old style, deprecated)
-mplayer -vo zr -vf scale=352:288 file.avi
+mplayer \-vo zr \-vf scale=352:288 file.avi
 .TP
 .B Playback on Zoran card (new style)
-mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
+mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Encoding DVD title #2, only selected chapters
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
