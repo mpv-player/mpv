@@ -928,117 +928,114 @@ of the movie (switch it off with the "o" key).</P>
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>.</P>
 
-<P><B>THIS CODE IS CURRENTLY NOT-WORKED ON! Don't expect it to work without
-  tweaking/experimenting!</B></P>
+<P><B>THIS CODE IS CURRENTLY NOT BEING WORKED ON! Do not expect it to work
+  without tweaking/experimenting!</B></P>
 
 
 <P><A NAME=2.5.2><B>2.5.2.  Compilation</B></A></P>
 
 <UL>
-  <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect kernel headers
-    of v4l stuff, and the existence of /dev/video* entries. If they exist,
-    TV support will be built (see configure's output!).</LI>
-  <LI>make sure your tuner works with another TV softwares in Linux, for example
+  <LI>First, you have to recompile. <CODE>./configure</CODE> will autodetect
+    kernel headers of v4l stuff and the existence of <CODE>/dev/video*</CODE>
+    entries. If they exist, TV support will be built (see the output of
+    <CODE>./configure</CODE>).</LI>
+  <LI>Make sure your tuner works with another TV software in Linux, for example
     xawtv.</LI>
 </UL>
 
-<P><B>Hint</B> : are the colors messed up? Then your tuner can't display
-  in YV12 colorspace. Try I420 (you must use the <CODE>-vc rawi420</CODE> option too!), or YUY2, UYVY, RGB32 (this one
-  with <CODE>-vo sdl</CODE>) colorspaces.
-  You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
+<P><B>Hint:</B> Are the colors messed up? Then your tuner cannot display
+  in YV12 colorspace. Try I420 (<CODE>-vc rawi420</CODE>) or YUY2, UYVY, RGB32
+  (<CODE>-vo sdl</CODE>) colorspaces.
+  You can specify these with the <CODE>outfmt=YV12</CODE> option, see below.</P>
 
 <P><A NAME=2.5.3><B>2.5.3.  Available options</B></A></P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>on</CODE></TD>
+  <TD VALIGN="top"><CODE>on</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>use TV
-  input</TD>
+  <TD>Use TV input.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>noaudio</CODE></TD>
+  <TD VALIGN="top"><CODE>noaudio</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>thanks, no sound</TD>
+  <TD>No sound, thanks.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>driver</CODE></TD>
+  <TD VALIGN="top"><CODE>driver</CODE></TD>
   <TD></TD>
   <TD>    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
     input.<BR>
-    <B>v4l</B> - captures images from standard V4L interface (default
-    <CODE>/dev/video0</CODE>)</TD>
+    <B>v4l</B> - Captures images from standard V4L interface (default
+    <CODE>/dev/video0</CODE>).</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>device</CODE></TD>
+  <TD VALIGN="top"><CODE>device</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>specify other
-  device than the default <CODE>/dev/video0</CODE></TD>
+  <TD>Specify a device other than the default <CODE>/dev/video0</CODE>.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>input</CODE></TD>
+  <TD VALIGN="top"><CODE>input</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>give from which
-  input of the TV tuner you wish to grab from (e.g. <B>television</B>,
-  <B>s-video</B>, <B>composite</B>, ...)<BR>
+  <TD>Specify from which input of the TV tuner you wish to grab
+    (e.g. <B>television</B>, <B>s-video</B>, <B>composite</B>, ...)<BR>
     Prints the available ones during init.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>freq</CODE></TD>
+  <TD VALIGN="top"><CODE>freq</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>specify the
-  frequency to set the tuner (e.g. <B>511.250</B>)</TD>
+  <TD>Specify the frequency to set the tuner to (e.g. <B>511.250</B>).</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>outfmt</CODE></TD>
+  <TD VALIGN="top"><CODE>outfmt</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>in which output
-  format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
-  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc rawi420</CODE>
-  option, because of a fourcc conflict))</TD>
+  <TD>Specify the output format the tuner should use to transport images to us
+    (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (for i420
+    you have to pass the <CODE>-vc rawi420</CODE> option, because of a fourcc
+    conflict)).</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>width</CODE></TD>
+  <TD VALIGN="top"><CODE>width</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>  the width of the output window, in pixels</TD>
+  <TD>width of the output window in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>height</CODE></TD>
+  <TD VALIGN="top"><CODE>height</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>  the height of the output window, in pixels</TD>
+  <TD>height of the output window in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>norm</CODE></TD>
+  <TD VALIGN="top"><CODE>norm</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>  available: PAL, SECAM, NTSC</TD>
+  <TD>available: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>channel</CODE></TD>
+  <TD VALIGN="top"><CODE>channel</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>  set the tuner to the given channel</TD>
+  <TD>Set the tuner to the given channel.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>chanlist</CODE></TD>
+  <TD VALIGN="top"><CODE>chanlist</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>  available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
+  <TD>available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
 </TR>
 </TABLE>
 
 <P><A NAME=2.5.4><B>2.5.4.  Keyboard control</B></A></P>
 
 <TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>h / k</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
 <TR><TD></TD><TD>n</TD><TD></TD><TD>change norm</TD></TR>
 <TR><TD></TD><TD>b</TD><TD></TD><TD>change channel list</TD></TR>
 </TABLE>
@@ -1051,6 +1048,14 @@ Dummy output, to AAlib :)<BR>
 <BR>
 Input from standard V4L<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
+</P>
+
+<P>
+<B>Note:</B><BR>
+If you have a TV card with an external audio device and get only a black
+screen, although input works with xawtv or similar, then try to use the
+<CODE>-noaudio</CODE> option. For the example above this would be:<BR> 
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE>
 </P>
 
 
