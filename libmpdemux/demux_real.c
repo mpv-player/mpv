@@ -599,8 +599,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 //	(int)demuxer->filepos,(int)version,(int)len, stream_id,
 //	(int) timestamp, reserved, flags);
 
-    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "len:%d\n", len);
-    mp_dbg(MSGT_DEMUX,MSGL_V,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %d, flags: %x rvd:%d\n",
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %d, flags: %x rvd:%d\n",
 	priv->current_packet, (int)demuxer->filepos, len, stream_id, timestamp, flags, reserved);
 
     priv->current_packet++;
