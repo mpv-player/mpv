@@ -636,6 +636,25 @@ if(lang){
 return d->nr_of_channels ? d->audio_streams[0].id : -1;
 }
 
+int dvd_number_of_subs(stream_t *stream)
+{
+  dvd_priv_t *d;
+  if (!stream) return -1;
+  d = stream->priv;
+  if (!d) return -1;
+  return d->nr_of_subtitles;
+}
+
+int dvd_lang_from_sid(stream_t *stream, int id)
+{
+  dvd_priv_t *d;
+  if (!stream) return 0;
+  d = stream->priv;
+  if (!d) return 0;
+  if (id >= d->nr_of_subtitles) return 0;
+  return d->subtitles[id].language;
+}
+
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang){
 dvd_priv_t *d=stream->priv;
 int code,i;

@@ -655,12 +655,18 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
 extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_video_header(BITMAPINFOHEADER *h);
 
+static int n_text = 0;
+static int *text_ids = NULL;
+
+int demux_ogg_num_subs() { return n_text; }
+int demux_ogg_sub_id(int index) { return (index < 0) ? index : text_ids[index]; }
+
 /// Open an ogg physical stream
 int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
   stream_t *s;
   char* buf;
-  int np,s_no, n_audio = 0, n_video = 0, n_text = 0;
+  int np,s_no, n_audio = 0, n_video = 0;
   int audio_id = -1, video_id = -1, text_id = -1;
   ogg_sync_state* sync;
   ogg_page* page;
@@ -902,6 +908,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
           if (demuxer->sub->id == n_text)
             text_id = ogg_d->num_sub;
           n_text++;
+          text_ids = (int *)realloc(text_ids, sizeof(int) * n_text);
+          text_ids[n_text - 1] = ogg_d->num_sub;
           demux_ogg_init_sub();
 	//// Unknown header type
       } else

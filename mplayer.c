@@ -1587,7 +1587,7 @@ if(!sh_video && !sh_audio){
 demux_info_print(demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
-if(d_dvdsub->id >= 0 && vo_spudec==NULL && sh_video){
+if(vo_spudec==NULL && sh_video && stream->type==STREAMTYPE_DVD){
 
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
@@ -3115,19 +3115,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	}
 #endif
 	} break;
-    case MP_CMD_VOBSUB_LANG:
-    if (vo_vobsub)
-    {
-	int new_id = vobsub_id + 1;
-	if (vobsub_id < 0)
-	    new_id = 0;
-	if ((unsigned int) new_id >= vobsub_get_indexes_count(vo_vobsub))
-	    new_id = -1;
-        if(new_id != vobsub_id)
-	    osd_show_vobsub_changed = 9;
-	vobsub_id = new_id;
-    }
-        break;
     case MP_CMD_SUB_SELECT:
 #ifdef USE_SUB  
     if (set_of_sub_size > 0){ //change subtitle file  
@@ -3138,6 +3125,41 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_osd_changed(OSDTYPE_SUBTITLE); 
     }
 #endif
+    if (vo_vobsub)
+    {
+	int new_id = vobsub_id + 1;
+	if (vobsub_id < 0)
+	    new_id = 0;
+	if ((unsigned int) new_id >= vobsub_get_indexes_count(vo_vobsub))
+	    new_id = -1;
+        if(new_id != vobsub_id)
+	    osd_show_vobsub_changed = sh_video->fps;
+	vobsub_id = new_id;
+    }
+    if (vo_spudec && stream->type == STREAMTYPE_DVD)
+    {
+	int new_id = dvdsub_id + 1;
+	if (dvdsub_id < 0)
+	    new_id = 0;
+	if ((unsigned int) new_id >= dvd_number_of_subs(stream))
+	    new_id = -1;
+	if(new_id != dvdsub_id)
+	    osd_show_vobsub_changed = sh_video->fps;
+	d_dvdsub->id = dvdsub_id = new_id;
+	spudec_reset(vo_spudec);
+    }
+    if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG)
+    {
+	int new_id = dvdsub_id + 1;
+	if (dvdsub_id < 0)
+	    new_id = 0;
+	if ((unsigned int) new_id >= demux_ogg_num_subs())
+	    new_id = -1;
+	if (new_id != dvdsub_id)
+	    osd_show_vobsub_changed = sh_video->fps;
+	dvdsub_id = new_id;
+	d_dvdsub->id = demux_ogg_sub_id(new_id);
+    }
         break;
     case MP_CMD_SUB_FORCED_ONLY:
       if (vo_spudec) {
@@ -3560,10 +3582,28 @@ if(rel_seek_secs || abs_seek_pos){
 	  osd_show_sub_visibility--;
       } else
       if (osd_show_vobsub_changed) {
-	  const char *language = "none";
-	  if (vo_vobsub && vobsub_id >= 0)
+	  if (vo_vobsub && vobsub_id >= 0) {
+	      const char *language = "none";
 	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
 	  snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
+	  }
+	  if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG) {
+	      if (dvdsub_id < 0)
+		snprintf(osd_text_tmp, 63, "Subtitles: (off)");
+	      else
+		snprintf(osd_text_tmp, 63, "Subtitles: (%d)", dvdsub_id);
+	  }
+	  if (vo_spudec) {
+	      char lang[5] = "none";
+	      int code = 0;
+	      if (dvdsub_id >= 0) code = dvd_lang_from_sid(stream, dvdsub_id);
+	      if (code) {
+	         lang[0] = code >> 8;
+	         lang[1] = code;
+	         lang[2] = 0;
+	      }
+	      snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+	  }
 	  osd_show_vobsub_changed--;
       } else
 #ifdef USE_SUB

@@ -71,8 +71,13 @@ sub_visibility
 get_sub_visibility
     Print out subtitle visibility (1 == on, 0 == off).
 
+sub_select
+    Cycle through the subtitle set.  Supported subtitle sources are -sub
+    options on the command line, VOBSubs, DVD subtitles, and OGG text
+    streams.
+
 vobsub_lang
-    Switch the subtitle language when using VOBSub subtitles.
+    This is a stub linked to sub_select for backwards compatibility.
 
 get_percent_pos
     Print out the current position in the file, in integer percentage [0-100).
