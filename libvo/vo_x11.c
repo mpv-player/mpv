@@ -431,16 +431,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 static const vo_info_t* get_info( void )
 { return &vo_info; }
 
-static void Terminate_Display_Process( void )
-{
- getchar();      /* wait for enter to remove window */
- 
- freeMyXImage();
- 
- XDestroyWindow( mDisplay,mywindow );
- XCloseDisplay( mDisplay );
-}
-
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {
 #ifdef DISP
@@ -593,19 +583,14 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
+ freeMyXImage();
  saver_on(mDisplay); // screen saver back on
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif
- {
-  XDestroyWindow( mDisplay,mywindow );
- } 
 
 #ifdef HAVE_XF86VM
  vo_vm_close(mDisplay);
 #endif
 
-printf("vo: uninit!\n");
+ vo_x11_uninit(mDisplay, mywindow);
 }
 
 static uint32_t preinit(const char *arg)
@@ -617,3 +602,4 @@ static void query_vaa(vo_vaa_t *vaa)
 {
   memset(vaa,0,sizeof(vo_vaa_t));
 }
+
