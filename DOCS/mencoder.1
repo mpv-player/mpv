@@ -32,6 +32,9 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ofps\ <fps> ]
 .RB [ \-o\ <filename> ]
 .RB [ \-frames\ <number> ]
+.RB [ \-x\ <rescale\ width> ]
+.RB [ \-y\ <rescale\ height> ]
+.RB [ \-sws\ <0-2> ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -194,7 +197,20 @@ Outputs to the given filename, instead of the default 'test.avi' .
 .TP
 .B \-frames <number>
 Encode only given number of frames.
-.IP
+.TP
+.B \-x <rescale width>
+Rescale output movie to given pixels wide.
+.TP
+.B \-y <rescale height>
+Rescale output movie to given pixels tall.
+.TP
+.B \-sws (0-2>
+Type of scaling method
+
+    0            fast bilinear
+    1            bilinear
+    2            bicubic (best quality)
+
 .SH FILES AND DIRECTORIES
 .IP
 .SH "EXAMPLES"
