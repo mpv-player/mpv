@@ -56,6 +56,29 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 	}
 }
 
+static void qpelup(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss)
+{
+	int i, j;
+	memcpy(d, s, w);
+	for (i=h-1; i; i--) {
+		d += ds;
+		s += ss;
+		for (j=0; j<w; j++)
+			d[j] = (s[j-ss] + 3*s[j])>>2;
+	}
+}
+
+static void qpeldown(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss)
+{
+	int i, j;
+	for (i=h-1; i; i--) {
+		for (j=0; j<w; j++)
+			d[j] = (3*s[j] + s[j+ss])>>2;
+		d += ds;
+		s += ss;
+	}
+	memcpy(d, s, w);
+}
 
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
@@ -128,6 +151,33 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height, 1);
 		}
 		return vf_next_put_image(vf, dmpi) || ret;
+	case 2:
+		dmpi = vf_get_image(vf->next, mpi->imgfmt,
+			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+			mpi->width, mpi->height/2);
+		qpeldown(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h/2,
+			dmpi->stride[0], mpi->stride[0]*2);
+		if (mpi->flags & MP_IMGFLAG_PLANAR) {
+			qpeldown(dmpi->planes[1], mpi->planes[1],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[1], mpi->stride[1]*2);
+			qpeldown(dmpi->planes[2], mpi->planes[2],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[2], mpi->stride[2]*2);
+		}
+		ret = vf_next_put_image(vf, dmpi);
+		
+		qpelup(dmpi->planes[0], mpi->planes[0] + mpi->stride[0],
+			mpi->w, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2);
+		if (mpi->flags & MP_IMGFLAG_PLANAR) {
+			qpelup(dmpi->planes[1], mpi->planes[1] + mpi->stride[1],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[1], mpi->stride[1]*2);
+			qpelup(dmpi->planes[2], mpi->planes[2] + mpi->stride[2],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[2], mpi->stride[2]*2);
+		}
+		return vf_next_put_image(vf, dmpi) || ret;
 	}
 	return 0;
 }
@@ -150,6 +200,7 @@ static int config(struct vf_instance_s* vf,
 {
 	switch (vf->priv->mode) {
 	case 0:
+	case 2:
 		return vf_next_config(vf,width,height/2,d_width,d_height,flags,outfmt);
 	case 1:
 		return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
