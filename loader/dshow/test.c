@@ -29,9 +29,10 @@ int main(int argc,char* argv[]){
 //    DS_VideoDecoder_SetDestFmt(16,fccYUY2);
     DS_VideoDecoder_SetDestFmt(24,0);
 
+    printf("DivX setting result = %d\n", DS_SetAttr_DivX("Quality",4) );
+
     DS_VideoDecoder_Start();
 
-    printf("DivX setting result = %d\n", DS_SetValue_DivX("Quality",100) );
     printf("DivX setting result = %d\n", DS_SetValue_DivX("Brightness",60) );
 
     DS_VideoDecoder_DecodeFrame(src, len, 1, 1);
