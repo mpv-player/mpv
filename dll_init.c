@@ -319,8 +319,8 @@ printf("\n");
       ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressQuery failed: Error %d\n", (int)ret);
-    return 0;
-  }
+//    return 0;
+  } else
   mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressQuery OK\n");
 
   ret = ex ?
