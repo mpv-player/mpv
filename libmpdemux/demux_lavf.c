@@ -34,7 +34,6 @@
 #include "avi.h"
 
 #define PROBE_BUF_SIZE 2048
-//#define IO_BUFFER_SIZE 32768
 
 typedef struct lavf_priv_t{
     AVInputFormat *avif;
@@ -53,9 +52,15 @@ static int mp_open(URLContext *h, const char *filename, int flags){
 
 static int mp_read(URLContext *h, unsigned char *buf, int size){
     stream_t *stream = (stream_t*)h->priv_data;
+    int ret;
+
     if(stream_eof(stream)) //needed?
         return -1;
-    return stream_read(stream, buf, size);
+    ret=stream_read(stream, buf, size);
+    if(ret>0)
+        stream->eof=0;
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, h, buf, size, stream->eof);
+    return ret;
 }
 
 static int mp_write(URLContext *h, unsigned char *buf, int size){
@@ -64,7 +69,8 @@ static int mp_write(URLContext *h, unsigned char *buf, int size){
 
 static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
     stream_t *stream = (stream_t*)h->priv_data;
-mp_msg(MSGT_HEADER,MSGL_DBG2,"file_seek(%p, %d, %d)\n", h, (int)pos, whence);
+    
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", h, (int)pos, whence);
     if(whence == SEEK_CUR)
         pos +=stream_tell(stream);
     else if(whence == SEEK_END)
@@ -74,6 +80,8 @@ mp_msg(MSGT_HEADER,MSGL_DBG2,"file_seek(%p, %d, %d)\n", h, (int)pos, whence);
 
     if(stream_seek(stream, pos)==0)
         return -1;
+    if(pos==stream->end_pos)
+        stream->eof=0;
     return pos;
 }
 
