@@ -21,33 +21,36 @@ BINDIR = ${prefix}/bin
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_MENCODER = libao2/afmt.c divx4_vbr.c mencoder.c libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c fli.c codec-cfg.c cfgparser.c my_profile.c
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+SRCS_COMMON = ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c fli.c codec-cfg.c cfgparser.c my_profile.c
+SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/img_format.c
+SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c spudec.c
 
-SRCS_MPLAYER = mplayer.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c msvidc.c fli.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c my_profile.c
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) # -Wall
-VO_LIBS = -Llibvo -lvo $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 ifeq ($(VO2),yes)
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) # -Wall
-VO_LIBS = -Llibvo2 -lvo2 $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB)
+VO_LIBS = -Llibvo2 -lvo2
+VO_INC = -Ilibvo2
+else
+VO_LIBS = -Llibvo -lvo
+VO_INC = -Ilibvo
 endif
+V_LIBS = $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
+AO_LIBS = -Llibao2 -lao2
+A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
-OSDEP_LIBS = -Llinux -losdep
-PP_LIBS = -Lpostproc -lpostproc
-XA_LIBS = -Lxa -lxa
+CODEC_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 -Llibmp1e -lmp1e $(AV_LIB)
+COMMON_LIBS = -Llinux -losdep -Lpostproc -lpostproc
 
-# SRCS = $(SRCS_MENCODER) $(SRCS_MPLAYER)
-# OBJS = $(OBJS_MENCODER) $(OBJS_MPLAYER)
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
+PARTS = libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa
 ifeq ($(VO2),yes)
-PARTS = libmpdemux mp3lib libac3 libmp1e libmpeg2 opendivx libavcodec libvo2 libao2 drivers drivers/syncfb linux postproc xa
+PARTS += libvo2
+else
+PARTS += libvo
 endif
-
 
 ifeq ($(GUI),yes)
 PARTS += Gui
@@ -81,9 +84,12 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMON_DEPS = libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+
 ifeq ($(VO2),yes)
-COMMONLIBS = libmpdemux/libmpdemux.a libvo2/libvo2.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMON_DEPS += libvo2/libvo2.a
+else
+COMMON_DEPS += libvo/libvo.a
 endif
 
 loader/libloader.a:
@@ -143,34 +149,25 @@ xa/libxa.a:
 g72x/libg72x.a:
 	$(MAKE) -C libg72x
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS) 
-MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS)
+MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(AV_DEP) $(COMMON_DEPS) 
+MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(AV_DEP) $(COMMON_DEPS)
 
 ifeq ($(GUI),yes)
 MPLAYER_DEP += Gui/libgui.a
 MENCODER_DEP += Gui/libgui.a
+GUI_LIBS = -LGui -lgui
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(AV_LIB) $(EXTRA_LIB) $(LIRC_LIB) $(LIB_LOADER) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(TERMCAP_LIB) -Llibmp1e -lmp1e $(STATIC_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux -Llibmp1e -lmp1e $(X_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
-
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
 endif
-
-# $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-# 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(LIRC_LIB) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
-
-# $(PRG_AVIP):	depfile aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
-# 	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
-
-#$(PRG_TV):	depfile tvision.o $(OBJS) $(COMMONLIBS)
-#	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 # Every mplayer dependancy depends on version.h, to force building version.h
 # first (in serial mode) before any other of the dependancies for a parallel make
