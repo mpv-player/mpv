@@ -91,7 +91,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(muxer_stream_t*)args;
     
-    vf->priv->enc=dv_encoder_new(1,1,1); // FIXME, parse some options!
+    vf->priv->enc=dv_encoder_new(0,1,1); // FIXME, parse some options!
     if(!vf->priv->enc) return 0;
     
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
