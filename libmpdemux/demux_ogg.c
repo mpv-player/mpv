@@ -1213,6 +1213,7 @@ int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
   ogg_demuxer_t* ogg_d = demuxer->priv;
   ogg_stream_t* os;
   float rate;
+
   if(demuxer->video->id >= 0) {
     os = &ogg_d->subs[demuxer->video->id];
     rate = os->samplerate;
@@ -1225,8 +1226,7 @@ int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
-        unsigned long length = ogg_d->final_granulepos / rate;
-	    *((unsigned long *)arg)=length;
+	    *((unsigned long *)arg)=ogg_d->final_granulepos / rate;
 	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
