@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "spudec.h"
 
 typedef struct {
