@@ -444,7 +444,7 @@ void MP3_Init(){
     {
 	synth_func=synth_1to1_MMX;
 	dct36_func=dct36_3dnowex;
-	dct64_MMX_func=dct64_MMX_3dnowex;
+	dct64_MMX_func= (accel & MM_ACCEL_X86_MMXEXT) ? dct64_MMX_3dnowex : dct64_MMX_3dnow;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
