@@ -193,6 +193,7 @@ extern char * gstrdup( char * str );
 extern int    gstrcmp( char * a,char * b );
 extern void   gfree( void ** p );
 extern void   gaddlist( char *** list,char * entry );
+extern char * gstrchr( char * str,int c );
 
 #define guiSetFilename( s,n ) { gfree( (void **)&s ); s=gstrdup( n ); }
 

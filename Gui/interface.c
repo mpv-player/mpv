@@ -77,6 +77,12 @@ char * gstrdup( char * str )
  return strdup( str );
 }
 
+char * gstrchr( char * str,int c )
+{
+ if ( !str ) return NULL;
+ return strchr( str,c );
+}
+
 void gfree( void ** p )
 {
  if ( *p == NULL ) return;
@@ -541,6 +547,9 @@ int guiGetEvent( int type,char * arg )
 	
 	if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM ) btnSet( evSetMoviePosition,1 );
 	 else btnSet( evSetMoviePosition,0 );
+	 
+	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
+	 else stream_cache_size=-1;
 
 // -- audio
         if ( audio_out )

@@ -177,9 +177,10 @@ void ShowPreferences( void )
     if ( audio_driver_list )
      {
       char * name = gstrdup( audio_driver_list[0] );
-      char * sep = strchr( audio_driver_list[0],':' );
+      char * sep = gstrchr( audio_driver_list[0],':' );
       if ( sep ) *sep=0;
       if ( !gstrcmp( name,(char *)info->short_name ) ) old_audio_driver=i - 1;
+      free( name );
      }
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
@@ -311,11 +312,9 @@ void ShowPreferences( void )
  }
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
- if ( stream_cache_size > 0 )
-  {
-   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),1 );
-   gtk_adjustment_set_value( SBCacheadj,(float)stream_cache_size );
-  } else gtk_widget_set_sensitive( SBCache,FALSE );
+ gtk_adjustment_set_value( SBCacheadj,(float)gtkCacheSize );
+ if ( !gtkCacheOn ) gtk_widget_set_sensitive( SBCache,FALSE );
+  else gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),1 );
 
 // -- disables
 #ifndef USE_SUB
@@ -479,8 +478,8 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) stream_cache_size=(int)SBCacheadj->value;
-	 else stream_cache_size=-1;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) { gtkCacheSize=(int)SBCacheadj->value; gtkCacheOn=1; }
+	 else gtkCacheOn=0;
 
 	{
 	 int i;

@@ -17,6 +17,9 @@ extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSDevice;
 extern char * gtkDXR3Device;
 
+extern int    gtkCacheOn;
+extern int    gtkCacheSize;
+
 extern int    gtkSubDumpMPSub;
 extern int    gtkSubDumpSrt;
 

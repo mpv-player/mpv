@@ -39,6 +39,9 @@ float  gtkAOExtraStereoMul = 1.0;
 char * gtkAOOSSMixer;
 char * gtkAOOSSDevice;
 
+int    gtkCacheOn = 0;
+int    gtkCacheSize = 2048;
+
 #ifdef HAVE_DXR3
  char * gtkDXR3Device;
 #endif
@@ -107,7 +110,9 @@ static config_t gui_opts[] =
  { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
 #endif
 
- { "cache",&stream_cache_size,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
+ { "cache",&gtkCacheOn,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
+ { "cache_size",&gtkCacheSize,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
+ 
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
