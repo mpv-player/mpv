@@ -1484,11 +1484,13 @@ void vo_x11_fullscreen(void)
         vo_x11_sizehint(x, y, w, h, 0);
         vo_x11_setlayer(mDisplay, vo_window, vo_fs);
 
-        if ((!(vo_fs)) & vo_ontop)
-            vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
         XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
     }
+    /* some WMs lose ontop after fullscreeen */
+    if ((!(vo_fs)) & vo_ontop)
+        vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
 #ifdef HAVE_XINERAMA
     vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
