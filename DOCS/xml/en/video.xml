@@ -214,10 +214,9 @@ Complain to nVidia.
 </para>
 
 <para>
-However, MPlayer contains a <link linkend="vidix">VIDIX</link> driver
-(<link linkend="vidix-nvidia">nvidia_vid</link>) for most nVidia cards.
-Currently it is in beta stage, and has some drawbacks. For more information,
-<link linkend="vidix-nvidia">click here</link>.
+However, MPlayer contains a <link linkend="vidix">VIDIX</link> driver for most
+nVidia cards. Currently it is in beta stage, and has some drawbacks.  For more
+information, see <link linkend="vidix-nvidia">nVidia VIDIX</link> section.
 </para>
 </sect5>
 
@@ -362,7 +361,7 @@ First make sure X loads the DGA extension, see in
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
 
-See, XFree86 4.0.x or greater is VERY RECOMMENDED!
+See, XFree86 4.0.x or greater is <emphasis role="bold">highly recommended</emphasis>!
 <application>MPlayer</application>'s DGA driver is autodetected by
 <filename>./configure</filename>, or you can force it
 with <option>--enable-dga</option>.
@@ -2113,21 +2112,20 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
 
     <procedure>
     <step><para>
-      Enter <filename class="directory">TVout/matroxset</filename> and type
-      <command>make</command>. Install <filename class="directory">matroxset</filename> into
-      somewhere in your <envar>PATH</envar>.
+      Enter <filename class="directory">TVout</filename> and type
+      <command>./compile.sh</command>. Install
+      <filename class="directory">TVout/matroxset/matroxset</filename>
+      into somewhere in your <envar>PATH</envar>.
       </para></step>
     <step><para>
-      If you don't have <command>fbset</command> installed, enter
-      <filename class="directory">TVout/fbset</filename> and type <command>make</command>.
-      Install <filename class="directory">fbset</filename> into somewhere in your
-      <envar>PATH</envar>.
+      If you don't have <command>fbset</command> installed, put
+      <filename class="directory">TVout/fbset/fbset</filename>
+      into somewhere in your <envar>PATH</envar>.
       </para></step>
     <step><para>
-      If you don't have <command>con2fb</command> installed, enter
-      <filename class="directory">TVout/con2fb</filename> and type <command>make</command>.
-      Install <filename class="directory">con2fb</filename> into somewhere in your
-      <envar>PATH</envar>.
+      If you don't have <command>con2fb</command> installed, put
+      <filename class="directory">TVout/con2fb/con2fb</filename>
+      into somewhere in your <envar>PATH</envar>.
       </para></step>
     <step><para>
       Then enter into the <filename class="directory">TVout/</filename> directory
