@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  pre5: "Linuxtag release" July 1, 2004
+  pre5: "LinuxTag release" July 14, 2004
 
     Name:
     * It's "MPlayer - The Movie Player" instead of
@@ -28,29 +28,30 @@ MPlayer (1.0)
     * AC3 passthrough for ao_win32
     * improved vo_quartz (YUV, multiple screens support)
     * vo_quartz made default on Mac OS X
-    * ao_macosx fixed
-    * RealVideo binary codecs support on MacOS X (still buggy)
+    * ao_macosx fixed and made default again on Mac OS X
+    * RealVideo binary codecs support on Mac OS X (still buggy)
     * bigendian fixes in vf.c, vo_tga
+    * OpenBSD portability fixes
+    * OpenBSD VCD support
     * OpenBSD/VAX support
     * AMD64 support
 
     Drivers:
     * support for more Radeons (9800 XT among them) in VIDIX
     * Radeon related bug fixes in VIDIX
-    * gl2 vo now supports GUI, fix for flickering borders in fullscreen
+    * vo_gl2 now supports GUI, fix for flickering borders in fullscreen
     * support 24 and 32 bit PCM files, bigendian fixes
     * ao_sdl now converts unsupported formats instead of quitting
     * ENCA support
     * merged ao_alsa9 and ao_alsa1x drivers into ao_alsa
     * NeoMagic TV-out support through VESA
     * JACK audio output driver
-    * vo_sdl fixes (wrong flags)
+    * vo_sdl fixes (wrong flags and screensaver disabling)
     * vo_directx fixes
 
     Decoders:
     * MSZH/ZLIB, FLI, QTRLE, RoQ video and RoQ audio support moved to FFmpeg
     * FFmpeg Cinepak and CYUV decoders preferred
-    * paletted Cinepak support
     * audio format 0xff support (is AAC)
     * "raw" audio in MOV supported
     * Indeo audio (iac25) support via binary codec
@@ -67,19 +68,45 @@ MPlayer (1.0)
     Streaming:
     * ASF, MMST streaming fixes
     * URL escaping fixed
-    * NSA streaming support
+    * NSA (Nullsoft audio) streaming support
     * embedded RAM playlist support
     * multibyte URL support
+    * rtp:// now supported even with LIVE.COM compiled in
     * miscellaneous bug fixes
 
     Filters:
     * vf_softskip: frame skipping filter for MEncoder
     * vf_harddup: frame duplication filter for MEncoder
-    * vf_pullup minor fixes and improvments
+    * vf_pullup minor fixes and improvements
     * AltiVec-optimized YUV to RGB converter
 
+    FFmpeg/libavcodec:
+    * dc_precision=11 fixed
+    * Cinepak fixes and palette support
+    * support skipping of MB rows during decoding
+    * Vorbis in NUT fixed
+    * segfault and artifact fixes in SVQ3 decoder
+    * coefficient saturation fix in H.263
+    * NUT updated to latest specification
+    * motion estimation code: overflow and chroma fixes
+    * fixed memory overwrite in truemotion decoder
+    * clip input motion vectors, better error tolerance on bad vectors
+    * FLAC decoder cleanup (partial demuxer/decoder separation)
+    * noise preserving sum of squares comparison function in ME code
+    * memalign hack for SSE/SSE2 on that alternative OS :)
+    * lots of AltiVec optimizations
+    * qscale + qprd fix
+    * change qscale -> lambda for the motion estimation
+    * QTrle4 support
+    * H.261 decoder
+    * per line lowpass filter in MMX and faster C lowpass filter
+    * SVQ1 encoder
+    * dc clipping fix, intra_dc_precision > 0 support
+    * H.263 MCBPC fix
+    * as usual, lots of bug fixes and optimizations
+
     Others:
-    * Metacity fullscreen fixes
+    * fullscreen fixes for many window managers
     * fix crash on original Pentiums and older
     * dvd://start-end support
     * netstream (mpst://) support fixed
