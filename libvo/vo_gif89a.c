@@ -226,9 +226,10 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
+	return VFCAP_CSP_SUPPORTED | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
-        return 1 | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_TIMER;
     }
     return 0;
 }

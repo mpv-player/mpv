@@ -799,7 +799,7 @@ return 0;
 
 static uint32_t query_format(uint32_t format)
 {
-	int ret = 0x4; /* osd/sub is supported on every bpp */
+	int ret = VFCAP_CSP_SUPPORTED|VFCAP_OSD; /* osd/sub is supported on every bpp */
 
 //        preinit(NULL);
 
@@ -811,27 +811,28 @@ static uint32_t query_format(uint32_t format)
 
 // Just support those detected by preinit
                 case IMGFMT_RGB32:
-                case IMGFMT_BGR32: if (modes[3].valid) return ret|0x2;
+                case IMGFMT_BGR32: if (modes[3].valid) return ret;
                                    break;
                 case IMGFMT_RGB24:
-                case IMGFMT_BGR24: if (modes[2].valid) return ret|0x2;
+                case IMGFMT_BGR24: if (modes[2].valid) return ret;
                                    break;
                 case IMGFMT_RGB16:
                 case IMGFMT_BGR16:
                 case IMGFMT_RGB15:
-                case IMGFMT_BGR15: if (modes[1].valid) return ret|0x2;
+                case IMGFMT_BGR15: if (modes[1].valid) return ret;
                                    break;
                 case IMGFMT_YUY2: if (videolayerpresent) {
 				    if (videolayercaps.yuy2) {
-					return ret|0x2|0x1;
+					return ret|VFCAP_CSP_SUPPORTED_BY_HW;
 				    } else {
-				    	return ret|0x1;
+				    	return ret;
 				    };
 				   };				    
                                    break;
         	case IMGFMT_YV12:  if ((videolayerpresent) &&
 				       (videolayercaps.i420 || videolayercaps.iv12))
-				    return ret|0x2|0x1; else return ret|0x1;
+				    return ret|VFCAP_CSP_SUPPORTED_BY_HW;
+				    else return ret;
                                    break;
   // YV12 should work in all cases
  	}

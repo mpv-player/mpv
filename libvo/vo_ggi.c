@@ -467,24 +467,25 @@ static uint32_t query_format(uint32_t format)
     {
 	if (ggi_conf.directbuffer)
 #ifdef GGI_FLIP
-	    return(3|VFCAP_OSD|VFCAP_FLIP);
+	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|
+		VFCAP_OSD|VFCAP_FLIP);
 #else
-	    return(3|VFCAP_OSD);
+	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD);
 #endif
 	else
-	    return(3);
+	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW);
     }
     
     if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format))
     {
 	if (ggi_conf.directbuffer)
 #ifdef GGI_FLIP
-	    return(1|VFCAP_OSD|VFCAP_FLIP);
+	    return(VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_FLIP);
 #else
-	    return(1|VFCAP_OSD);
+	    return(VFCAP_CSP_SUPPORTED|VFCAP_OSD);
 #endif
 	else
-	    return(1);
+	    return(VFCAP_CSP_SUPPORTED);
     }
 
     return(0);
