@@ -459,7 +459,7 @@ static int sdl_close (void)
 
 	/* Free RGB Surface */
 	if (priv->rgbsurface)
-		SDL_FreeSurface(priv->rgbsurface);	
+		SDL_FreeSurface(priv->rgbsurface);
 
 	/* Free our blitting surface */
 	if (priv->surface)
@@ -543,10 +543,11 @@ static void set_fullmode (int mode)
 	
 	/* if we were successfull hide the mouse cursor and save the mode */
 	if (newsurface) {
+		if (priv->surface)
+	    	    SDL_FreeSurface(priv->surface);
 		priv->surface = newsurface;
 		SDL_ShowCursor(0);
 	}
-	//TODO: check if this produces memhole! (no surface freeing)
 }
 #endif
 
@@ -575,11 +576,13 @@ static void set_fullmode (int mode) {
 	
 	/* if creation of new surface was successfull, save it and hide mouse cursor */
 	if(newsurface) {
+		if (priv->surface)
+	    	    SDL_FreeSurface(priv->surface);
 		priv->surface = newsurface;
 		SDL_ShowCursor(0);
 	}		
 }
-	
+
 
 /**
  * Initialize an SDL surface and an SDL YUV overlay.
@@ -674,7 +677,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	    return -1;
 
 	/* Set output window title */
-	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "SDL Video Out");
+	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "MPlayer's SDL Video Out");
 	//SDL_WM_SetCaption (title, title);
 
 	/* Save the original Image size */
@@ -710,6 +713,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&FS) {
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		printf("SDL: Info - please use -vm (unscaled) or -zoom (scaled) for best fullscreen experience\n");
+		if (priv->surface)
+		    SDL_FreeSurface(priv->surface);
           	priv->surface = NULL;
 		priv->fulltype = FS;
 		set_fullmode(priv->fullmode);
@@ -719,7 +724,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&VM) {
 	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -zoom switch to scale video\n");
-		
+		if (priv->surface)
+		    SDL_FreeSurface(priv->surface);
           	priv->surface = NULL;
 		priv->fulltype = VM;
 		set_fullmode(priv->fullmode);
@@ -729,7 +735,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(flags&ZOOM) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
-		
+		if (priv->surface)
+		    SDL_FreeSurface(priv->surface);
           	priv->surface = NULL;
 		priv->fulltype = ZOOM;
 		set_fullmode(priv->fullmode);
@@ -746,7 +753,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 			printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
-			
+			if (priv->surface)
+			    SDL_FreeSurface(priv->surface);
 			priv->surface = NULL;
 			priv->fulltype = ZOOM;
 			set_fullmode(priv->fullmode);
@@ -768,48 +776,64 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		// 15 bit: r:111110000000000b g:000001111100000b b:000000000011111b
 		// FIXME: colorkey detect based on bpp, FIXME static bpp value, FIXME alpha value correct?
 	    case IMGFMT_RGB15:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31, 992, 31744, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR15:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31744, 992, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB16:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 31, 2016, 63488, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR16:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 63488, 2016, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB24:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR24:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB32:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR32:
+		if (priv->rgbsurface)
+			SDL_FreeSurface(priv->rgbsurface);
 		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
@@ -817,6 +841,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	    break;	
 	    default:
 		/* Initialize and create the YUV Overlay used for video out */
+		if (priv->overlay)
+			SDL_FreeYUVOverlay(priv->overlay);
 		if (!(priv->overlay = SDL_CreateYUVOverlay (width, height, sdl_format, priv->surface))) {
 			printf ("SDL: Couldn't create a YUV overlay: %s\n", SDL_GetError());
 			return -1;
