@@ -91,14 +91,13 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice (vo_frame_t * frame, uint8_t ** src){
-    vo_functions_t * output = frame->vo;
     int stride[3];
     int y=picture->slice<<4;
 
     stride[0]=picture->coded_picture_width;
     stride[1]=stride[2]=stride[0]/2;
 
-    output->draw_slice (src,
+    mpcodecs_draw_slice(frame->vo, src,
 		stride, picture->display_picture_width,
 		(y+16<=picture->display_picture_height) ? 16 :
 		    picture->display_picture_height-y,
@@ -205,7 +204,7 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		    mpi, (mpi->flags&MP_IMGFLAG_DIRECT)?"DR!":"");
 	    }
 
-	    picture->current_frame->vo=sh->video_out;
+	    picture->current_frame->vo=sh;
 	    picture->slice=0;
 
 	}
