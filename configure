@@ -2572,7 +2572,7 @@ if test "$host_arch" = "i386" ; then
 Failed to find a WIN32 codecs dir at $_win32libdir!
 Create it and copy the DLL files there! (You can get them from your windows
 directory or download them from:
-  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip
+  ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
 EOF
   else
     echo "Ok, found Win32 codecs directory at $_win32libdir."
