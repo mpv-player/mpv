@@ -2264,8 +2264,8 @@ cat > $TMPC << EOF
 #include <string.h>
 int main(void) {
   printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
-  printf("libpng: %s\n", png_get_libpng_ver(NULL));
-  return (strcmp(PNG_LIBPNG_VER_STRING, png_get_libpng_ver(NULL)));
+  printf("libpng: %s\n", png_libpng_ver);
+  return (strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver));
 }
 EOF
     if cc_check -lpng -lz -lm ; then
