@@ -454,9 +454,10 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
+	return VFCAP_CSP_SUPPORTED;
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
-        return 1;
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     }
     return 0;
 }

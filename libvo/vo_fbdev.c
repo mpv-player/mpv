@@ -1168,7 +1168,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t query_format(uint32_t format)
 {
-	int ret = 0x4; /* osd/sub is supported on every bpp */
+	int ret = VFCAP_OSD|VFCAP_CSP_SUPPORTED; /* osd/sub is supported on every bpp */
 
 	if (!fb_preinit())
 		return 0;
@@ -1176,14 +1176,14 @@ static uint32_t query_format(uint32_t format)
 		int bpp = format & 0xff;
 
 		if (bpp == fb_bpp)
-			return ret|0x2;
+			return ret|VFCAP_CSP_SUPPORTED_BY_HW;
 		else if (bpp == 15 && fb_bpp == 16)
-			return ret|0x1;
+			return ret;
 		else if (bpp == 24 && fb_bpp == 32)
-			return ret|0x1;
+			return ret;
 	}
 	if (format == IMGFMT_YV12)
-		return ret|0x1;
+		return ret;
 	return 0;
 }
 

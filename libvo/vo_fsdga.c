@@ -1,4 +1,3 @@
-#define DISP
 
 /*
  * video_out_dga.c, X11 interface
@@ -281,9 +280,9 @@ static uint32_t query_format( uint32_t format )
  if( !vo_init() ) return 0; // Can't open X11
  printf("Format: %lx\n", (unsigned long) format);
 
- if( format==IMGFMT_YV12 ) return 1;
+ if( format==IMGFMT_YV12 ) return VFCAP_CSP_SUPPORTED;
  if( ( format&IMGFMT_BGR_MASK )==IMGFMT_BGR && 
-     ( format&0xFF )==vo_depthonscreen ) return 1;
+     ( format&0xFF )==vo_depthonscreen ) return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
  return 0;
 }
 

@@ -216,7 +216,7 @@ uint32_t control(uint32_t request, void *data, ...)
 		switch (*((uint32_t*)data)) {	
 		case IMGFMT_MPEGPES:
 			/* Hardware accelerated | Hardware supports subpics */
-			flag = 0x2 | 0x8;
+			flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_SPU;
 			break;
 #if defined(USE_LIBFAME) || defined(USE_LIBAVCODEC)
 		case IMGFMT_YV12:
@@ -224,7 +224,7 @@ uint32_t control(uint32_t request, void *data, ...)
 		case IMGFMT_RGB24:
 		case IMGFMT_BGR24:
 			/* Conversion needed | OSD Supported */
-			flag = 0x1 | 0x4;
+			flag = VFCAP_CSP_SUPPORTED | VFCAP_OSD;
 			break;
 #else
 		default:
@@ -234,7 +234,7 @@ uint32_t control(uint32_t request, void *data, ...)
 		if (noprebuf) {
 			return flag;
 		} else {
-			return (flag | 0x100);
+			return (flag | VFCAP_TIMER);
 		}
 	}
 	return VO_NOTIMPL;
