@@ -593,15 +593,14 @@ I cannot pinpoint the cause of some strange playback problem.
 Do you have a stray <filename>codecs.conf</filename> file in
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> or a similar location? Remove it,
-outdated <filename>codecs.conf</filename> files can cause obscure problems
-and is intended for use only by developers.
-For instance, the FourCC for Vobis has been changed recently.
-If you have an old <filename>codecs.conf</filename> lying around somewhere
-then it doesn't contain this new FourCC.
-Therefore no playback.
-Unless you intend to get involved in developing <application>MPlayer</application>,
-it cannot do you any good and should be deleted.
-<application>MPlayer</application> will use its built-in one instead.
+an outdated <filename>codecs.conf</filename> file can cause obscure
+problems and is intended for use only by developers working on codec
+support. It overrides <application>MPlayer</application>'s internal
+codec settings, which will wreak havoc if incompatible changes are
+made in newer program versions. Unless used by experts it is a recipe
+for disaster in the form of seemingly random and very hard to localize
+crashes and playback problems. If you still have it somewhere on your
+system, you should remove it now.
 </para></answer>
 </qandaentry>
 
