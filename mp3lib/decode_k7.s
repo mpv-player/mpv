@@ -17,8 +17,9 @@
 ///       superscalar ones instruction order is not significand for them.
 ///
 /// Benchmark: measured by mplayer on Duron-700:
-///      3dNow! optimized code - 1.5% of cpu usage
-///      k7 optimized code     - 1.1% of cpu usage
+///      3dNow! optimized code                              - 1.4% of cpu usage
+///      k7 optimized code (without partial loop unrolling) - 1.3% of cpu usage
+///      k7 optimized code                                  - 1.1% of cpu usage
 /// Note: K6-2 users have an chance with partial loops unrolling
 ///
 /// Modified by Nick Kurshev <nickols_k@mail.ru>
