@@ -26,7 +26,7 @@ for(i=0;i<256;i++){
   if((i&7)==7) printf("\n");
 }
 fclose(f);
-printf("}\n");
+printf("};\n");
 
 system("sox -t raw -U -r 8000 -b alaw.dat -t sw alaw.out");
 
@@ -41,7 +41,7 @@ for(i=0;i<256;i++){
   if((i&7)==7) printf("\n");
 }
 fclose(f);
-printf("}\n");
+printf("};\n");
 
 
 }
