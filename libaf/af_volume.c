@@ -208,13 +208,10 @@ static int open(af_instance_t* af){
   af->setup=calloc(1,sizeof(af_volume_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;
-  /* Enable volume control and set initial volume to 0.1 this is a
-     safety measure to ensure that the user doesn't blow his
-     speakers. If the user isn't happy with this he can use the
-     command-line parameters to set the initial volume */
+  // Enable volume control and set initial volume to 0dB.
   for(i=0;i<AF_NCH;i++){
     ((af_volume_t*)af->setup)->enable[i] = 1;
-    ((af_volume_t*)af->setup)->level[i]  = 0.1;
+    ((af_volume_t*)af->setup)->level[i]  = 1.0;
   }
   return AF_OK;
 }
