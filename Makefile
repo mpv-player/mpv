@@ -136,6 +136,13 @@ ifeq ($(CSS_USE),yes)
 	-install -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 endif
 
+uninstall:
+	rm -f $(BINDIR)/$(PRG)
+	rm -f $(BINDIR)/gmplayer
+	rm -f $(prefix)/man/man1/mplayer.1
+	rm -f $(BINDIR)/$(PRG_FIBMAP)
+	@echo "Uninstall completed"
+
 clean:
 	rm -f *.o *~ $(OBJS)
 
