@@ -397,6 +397,12 @@ static void uninit(void)
 {
     if ( !vo_config_count ) return;
     vidix_term();
+    
+    if (vidix_name)
+    {
+	free(vidix_name);
+	vidix_name = NULL;
+    }
 
     saver_on(mDisplay); /* screen saver back on */
     vo_x11_uninit();
