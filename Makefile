@@ -21,7 +21,7 @@ BINDIR = ${prefix}/bin
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_MENCODER = libao2/afmt.c divx4_vbr.c mencoder.c libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c codec-cfg.c cfgparser.c my_profile.c
+SRCS_MENCODER = libao2/afmt.c divx4_vbr.c mencoder.c libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c fli.c codec-cfg.c cfgparser.c my_profile.c
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
 SRCS_MPLAYER = mplayer.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c msvidc.c fli.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c my_profile.c
