@@ -31,6 +31,9 @@ void *__builtin_new(unsigned long size) {
 	return malloc(size);
 }
 
+#ifdef __FreeBSD__
+void* __ctype_b=NULL;
+#endif
 
 static ulong (*raCloseCodec)(ulong);
 static ulong (*raDecode)(ulong,ulong,ulong,ulong,ulong,ulong);
