@@ -8,6 +8,7 @@
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
 #define ACODEC_VBRMP3 2
+#define ACODEC_NULL 3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1425,6 +1426,12 @@ aviwrite_write_index(muxer,muxer_f);
 printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
+
+if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
+    printf("Suggested video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-ftell(muxer_f))/mux_v->timer/125));
+    printf("Suggested video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-ftell(muxer_f))/mux_v->timer/125));
+}
+
 fclose(muxer_f);
 
 printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
