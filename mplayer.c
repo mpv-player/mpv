@@ -298,89 +298,6 @@ extern void avi_fixate();
  #define GUI_MSG(x)
 #endif
 
-void exit_player(char* how){
-
- total_time_usage_start=GetTimer()-total_time_usage_start;
-
-#ifdef HAVE_GUI
- if ( !nogui )
-  {
-   if ( how != NULL )
-    {
-     if ( !strcmp( how,"Quit" ) ) mplSendMessage( mplEndOfFile );
-     if ( !strcmp( how,"End of file" ) ) mplSendMessage( mplEndOfFile );
-     if ( !strcmp( how,"audio_init" ) ) mplSendMessage( mplAudioError );
-    }
-    else mplSendMessage( mplUnknowError );
-  }
-#endif
-
-  if(how) printf("\nExiting... (%s)\n",how);
-  if(verbose) printf("max framesize was %d bytes\n",max_framesize);
-  if(benchmark){
-      double tot=video_time_usage+vout_time_usage+audio_time_usage;
-      double total_time_usage=(float)total_time_usage_start*0.000001;
-      printf("BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
-          video_time_usage,vout_time_usage,audio_time_usage,
-	  total_time_usage-tot,total_time_usage);
-      if(total_time_usage>0.0)
-      printf("BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
-          100.0*video_time_usage/total_time_usage,
-	  100.0*vout_time_usage/total_time_usage,
-	  100.0*audio_time_usage/total_time_usage,
-	  100.0*(total_time_usage-tot)/total_time_usage,
-	  100.0);
-  }
-  // restore terminal:
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     getch2_disable();
-  video_out->uninit();
-//  audio_out->reset();
-  if(audio_out) audio_out->uninit();
-  if(encode_name) avi_fixate();
-#ifdef HAVE_LIRC
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-  lirc_mp_cleanup();
-#endif
-  //if(play_in_bg) system("xsetroot -solid \\#000000");
-  exit(1);
-}
-
-static char* current_module=NULL; // for debugging
-
-void exit_sighandler(int x){
-  static int sig_count=0;
-  ++sig_count;
-  if(sig_count==2) exit(1);
-  if(sig_count>2){
-    // can't stop :(
-    kill(getpid(),SIGKILL);
-  }
-  printf("\nMPlayer interrupted by signal %d in module: %s \n",x,
-      current_module?current_module:"unknown"
-  );
-  #ifdef HAVE_GUI
-   if ( !nogui )
-    {
-     mplShMem->items.error.signal=x;
-     strcpy( mplShMem->items.error.module,current_module?current_module:"unknown" );
-    }
-  #endif
-  exit_player(NULL);
-}
-
-extern int vcd_get_track_end(int fd,int track);
-extern int init_audio(sh_audio_t *sh_audio);
-extern int init_video_codec(sh_video_t *sh_video);
-extern void mpeg2_allocate_image_buffers(picture_t * picture);
-extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
-extern int vo_init(void);
-extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
-
 // options:
 int osd_level=2;
 int divx_quality=0;
@@ -443,10 +360,92 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
-
 char *dsp=NULL;
 
 float rel_seek_secs=0;
+
+
+void exit_player(char* how){
+ total_time_usage_start=GetTimer()-total_time_usage_start;
+
+#ifdef HAVE_GUI
+ if ( !nogui )
+  {
+   if ( how != NULL )
+    {
+     if ( !strcmp( how,"Quit" ) ) mplSendMessage( mplEndOfFile );
+     if ( !strcmp( how,"End of file" ) ) mplSendMessage( mplEndOfFile );
+     if ( !strcmp( how,"audio_init" ) ) mplSendMessage( mplAudioError );
+    }
+    else mplSendMessage( mplUnknowError );
+  }
+#endif
+
+  if(how) printf("\nExiting... (%s)\n",how);
+  if(verbose) printf("max framesize was %d bytes\n",max_framesize);
+  if(benchmark){
+      double tot=video_time_usage+vout_time_usage+audio_time_usage;
+      double total_time_usage=(float)total_time_usage_start*0.000001;
+      printf("BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+          video_time_usage,vout_time_usage,audio_time_usage,
+	  total_time_usage-tot,total_time_usage);
+      if(total_time_usage>0.0)
+      printf("BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+          100.0*video_time_usage/total_time_usage,
+	  100.0*vout_time_usage/total_time_usage,
+	  100.0*audio_time_usage/total_time_usage,
+	  100.0*(total_time_usage-tot)/total_time_usage,
+	  100.0);
+  }
+  // restore terminal:
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     getch2_disable();
+  if(video_out) video_out->uninit();
+  if(audio_out && has_audio) audio_out->uninit();
+  if(encode_name) avi_fixate();
+#ifdef HAVE_LIRC
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+  lirc_mp_cleanup();
+#endif
+  //if(play_in_bg) system("xsetroot -solid \\#000000");
+  exit(1);
+}
+
+static char* current_module=NULL; // for debugging
+
+void exit_sighandler(int x){
+  static int sig_count=0;
+  ++sig_count;
+  if(sig_count==2) exit(1);
+  if(sig_count>2){
+    // can't stop :(
+    kill(getpid(),SIGKILL);
+  }
+  printf("\nMPlayer interrupted by signal %d in module: %s \n",x,
+      current_module?current_module:"unknown"
+  );
+  #ifdef HAVE_GUI
+   if ( !nogui )
+    {
+     mplShMem->items.error.signal=x;
+     strcpy( mplShMem->items.error.module,current_module?current_module:"unknown" );
+    }
+  #endif
+  exit_player(NULL);
+}
+
+extern int vcd_get_track_end(int fd,int track);
+extern int init_audio(sh_audio_t *sh_audio);
+extern int init_video_codec(sh_video_t *sh_video);
+extern void mpeg2_allocate_image_buffers(picture_t * picture);
+extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
+extern int vo_init(void);
+extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
+
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -1942,7 +1941,8 @@ switch(sh_video->codec->driver){
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
-      audio_out->pause();	// pause audio, keep data if possible
+      if (audio_out && has_audio)
+         audio_out->pause();	// pause audio, keep data if possible
 #ifdef HAVE_GUI
       if ( nogui )
         {
@@ -1959,7 +1959,8 @@ switch(sh_video->codec->driver){
 #ifdef HAVE_GUI
         } else while( osd_function != OSD_PLAY ) usec_sleep( 1000 );
 #endif
-      audio_out->resume();	// resume audio
+      if (audio_out && has_audio)
+        audio_out->resume();	// resume audio
   }
 
 
