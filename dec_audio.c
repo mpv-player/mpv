@@ -278,12 +278,15 @@ case AFM_GSM:
   // MS-GSM audio codec:
   sh_audio->audio_out_minsize=4*320;
   break;
-case AFM_IMA4:
-case AFM_ADPCM:
-  // IMA-ADPCM 4:1 audio codec:
+case AFM_IMAADPCM:
   sh_audio->audio_out_minsize=4096;
   sh_audio->ds->ss_div=IMA_ADPCM_SAMPLES_PER_BLOCK;
   sh_audio->ds->ss_mul=IMA_ADPCM_BLOCK_SIZE;
+  break;
+case AFM_MSADPCM:
+  sh_audio->audio_out_minsize=4096;
+  sh_audio->ds->ss_div=MS_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=MS_ADPCM_BLOCK_SIZE;
   break;
 case AFM_MPEG:
   // MPEG Audio:
@@ -503,15 +506,19 @@ case AFM_GSM: {
   sh_audio->i_bps=65*(sh_audio->channels*sh_audio->samplerate)/320;  // 1:10
   break;
 }
-case AFM_ADPCM:
-case AFM_IMA4: {
+case AFM_IMAADPCM:
   // IMA-ADPCM 4:1 audio codec:
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   // decodes 34 byte -> 64 short
   sh_audio->i_bps=IMA_ADPCM_BLOCK_SIZE*(sh_audio->channels*sh_audio->samplerate)/IMA_ADPCM_SAMPLES_PER_BLOCK;  // 1:4
   break;
-}
+case AFM_MSADPCM:
+  sh_audio->channels=sh_audio->wf->nChannels;
+  sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+  sh_audio->i_bps=MS_ADPCM_BLOCK_SIZE*
+    (sh_audio->channels*sh_audio->samplerate)/MS_ADPCM_SAMPLES_PER_BLOCK;
+  break;
 case AFM_MPEG: {
   // MPEG Audio:
   dec_audio_sh=sh_audio; // save sh_audio for the callback:
@@ -906,15 +913,22 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	memcpy(buf,g72x_data.samples,len);
         break;
       }
-      case AFM_ADPCM:
-      case AFM_IMA4: // IMA-ADPCM 4:1 audio codec:
+      case AFM_IMAADPCM:
       { unsigned char ibuf[IMA_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
         if (demux_read_data(sh_audio->ds, ibuf,
-          IMA_ADPCM_BLOCK_SIZE *  sh_audio->wf->nChannels) != 
+          IMA_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) != 
           IMA_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
           break; // EOF
         len=2*ima_adpcm_decode_block((unsigned short*)buf,ibuf, sh_audio->wf->nChannels);
-//        len=2*ima4_decode_block((unsigned short*)buf,ibuf,2*IMA_ADPCM_SAMPLES_PER_BLOCK);
+        break;
+      }
+      case AFM_MSADPCM:
+      { unsigned char ibuf[MS_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
+        if (demux_read_data(sh_audio->ds, ibuf,
+          MS_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) != 
+          MS_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
+          break; // EOF
+        len=2*ms_adpcm_decode_block((unsigned short*)buf,ibuf, sh_audio->wf->nChannels);
         break;
       }
       case AFM_AC3: // AC3 decoder

@@ -212,10 +212,10 @@ static short get_driver(char *s,int audioflag)
 		"libvorbis",
 		"ffmpeg",
 		"libmad",
-		"ima4",
+		"msadpcm",
 		"liba52",
 		"g72x",
-		"adpcm",
+		"imaadpcm",
 		NULL
 	};
 	static char *videodrv[] = {
