@@ -1,0 +1,76 @@
+
+MPlayer was originally written by Árpád Gereöffy and has been extended and
+worked on by many more since then, see the AUTHORS file for an (incomplete)
+list. You are free to use it under the terms of the GNU General Public License,
+as described in the LICENSE file.
+
+MPlayer as a whole is copyrighted by the MPlayer team. Individual copyright
+notices can be found in the file headers. Furthermore, MPlayer includes code
+from several external sources:
+
+Name:       FFmpeg
+Version:    CVS snapshot
+Homepage:   http://www.ffmpeg.org
+Directory:  libavcodec
+License:    GNU Lesser General Public License
+
+Name:       FAAD2
+Version:    2.0 RC1, updated to CVS from 20031003
+Homepage:   http://www.audiocoding.com
+Directory:  libfaad2
+License:    GNU General Public License
+
+Name:       FLAC
+Version:    1.1.0
+Homepage:   http://flac.sourceforge.net/
+Directory:  libmpflac
+License:    X11 style, see libmpflac/COPYING.Xiph
+
+Name:       liba52
+Version:    0.7.1b + patches
+Homepage:   http://liba52.sourceforge.net/
+Directory:  liba52
+License:    GNU General Public License
+
+Name:       libdvdcss
+Version:    1.2.8
+Homepage:   http://developers.videolan.org/libdvdcss/
+Directory:  libmpdvdkit2
+License:    GNU General Public License
+
+Name:       libdvdread
+Version:    0.9.3 + patches
+Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
+Directory:  libmpdvdkit2
+License:    GNU General Public License
+
+Name:       libmpeg2
+Version:    0.3.1 + patches
+Homepage:   http://libmpeg2.sourceforge.net/
+Directory:  libmpeg2
+License:    GNU General Public License
+
+Name:       mpglib (part of mpg123)
+Version:    0.59s
+Homepage:   http://www.mpg123.de/
+Directory:  mp3lib
+License:    GNU Lesser General Public License
+
+Name:       avifile DLL loader
+Version:    0.47 + patches + CVS updates
+Homepage:   http://avifile.sourceforge.net/
+Directory:  loader/
+License:    GNU General Public License
+
+Name:       fbset
+Version:    2.1
+Homepage:   http://home.tvd.be/cr26864/Linux/fbdev/
+Directory:  TVout/fbset
+License:    GNU General Public License
+
+Name:       matroxset
+Version:    0.3
+Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
+Directory:  TVout/matroxset
+License:    GNU General Public License
+
