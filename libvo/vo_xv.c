@@ -253,8 +253,43 @@ static void check_events(void)
   }
 }
 
+
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    int x,y;
+
+  if (xv_format==IMGFMT_YV12){
+
+    for(y=0;y<h;y++){
+	uint8_t *dst = xvimage[0]->data + image_width * (y+y0) + x0;
+        for(x=0;x<w;x++){
+//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
+            if(srca[x])
+            dst[x]=(dst[x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+        }
+        src+=stride;
+        srca+=stride;
+    }
+
+  } else {
+
+    for(y=0;y<h;y++){
+	uint8_t *dst = xvimage[0]->data + 2*(image_width * (y+y0) + x0);
+        for(x=0;x<w;x++){
+//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
+            if(srca[x])
+            dst[2*x]=(dst[2*x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+        }
+        src+=stride;
+        srca+=stride;
+    }
+
+  }
+
+}
+
 static void flip_page(void)
 {
+ vo_draw_text(image_width,image_height,draw_alpha);
  check_events();
  XvShmPutImage(mydisplay, xv_port, mywindow, mygc, xvimage[0],
          0, 0,  image_width, image_height,
@@ -263,6 +298,8 @@ static void flip_page(void)
  XFlush(mydisplay);
  return;
 }
+
+
 
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
