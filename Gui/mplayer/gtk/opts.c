@@ -214,7 +214,8 @@ void ShowPreferences( void )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 
      if ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)video_out_drivers[i - 1]->info->short_name ) ) old_video_driver=c; c++;
-     tmp[0]=(char *)video_out_drivers[i - 1]->info->short_name; tmp[1]=(char *)video_out_drivers[i - 1]->info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
+     tmp[0]=(char *)video_out_drivers[i - 1]->info->short_name; tmp[1]=(char *)video_out_drivers[i - 1]->info->name; 
+     gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLVDrivers ),old_video_driver,0,(char **)&vo_driver );
@@ -539,8 +540,8 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
    case 4: // sub position
         sub_pos=(int)HSSubPositionadj->value;
 	break;
-   case 5: // font factor
 #ifndef HAVE_FREETYPE
+   case 5: // font factor
         gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
 	break;
 #else
@@ -613,44 +614,47 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
   } 
 }
 
+GtkWidget * AddFrame( char * title,int type,GtkWidget * parent,int add )
+{
+ GtkWidget * frame = NULL;
+ frame=gtk_frame_new( title );
+ gtk_widget_set_name( frame,"frame" );
+ gtk_widget_ref( frame );
+ gtk_widget_show( frame );
+ if ( add ) gtk_container_add( GTK_CONTAINER( parent ),frame );
+  else gtk_box_pack_start( GTK_BOX( parent ),frame,FALSE,FALSE,0 );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame ),type );
+ return frame;
+}
+
 GtkWidget * create_Preferences( void )
 {
-  GtkWidget * frame1;
-  GtkWidget * frame2;
-  GtkWidget * frame3;
-  GtkWidget * frame4;
   GtkWidget * vbox1;
   GtkWidget * notebook1;
   GtkWidget * hbox1;
-  GtkWidget * frame9;
   GtkWidget * vbox2;
   GtkWidget * scrolledwindow3;
   GtkWidget * label8;
   GtkWidget * hbuttonbox2;
-  GtkWidget * frame10;
   GtkWidget * vbox3;
   GtkWidget * hseparator2;
   GtkWidget * hbox8;
   GtkWidget * label17;
   GtkWidget * label1;
   GtkWidget * hbox2;
-  GtkWidget * frame7;
   GtkWidget * vbox4;
   GtkWidget * scrolledwindow2;
   GtkWidget * label7;
   GtkWidget * hbuttonbox3;
-  GtkWidget * frame8;
   GtkWidget * vbox5;
   GtkWidget * hbox3;
   GtkWidget * label9;
   GtkWidget * label2;
   GtkWidget * vbox6;
-  GtkWidget * frame5;
   GtkWidget * vbox600;
   GSList    * OSD_group = NULL;
   GSList    * Font_group = NULL;
   GList     * CBFontEncoding_items = NULL;
-  GtkWidget * frame6;
   GtkWidget * vbox7;
   GtkWidget * vbox8;
   GtkWidget * table1;
@@ -658,7 +662,6 @@ GtkWidget * create_Preferences( void )
   GtkWidget * label12;
   GtkWidget * label13;
   GtkWidget * vbox9;
-  GtkWidget * frame12;
   GtkWidget * vbox603;
   GtkWidget * hbox6;
   GtkWidget * label15;
@@ -669,7 +672,6 @@ GtkWidget * create_Preferences( void )
   GtkWidget * label16;
   GtkWidget * label3;
   GtkWidget * vbox601;
-  GtkWidget * frame11;
   GtkWidget * vbox602;
   GtkWidget * hbox5;
   GtkWidget * label14;
@@ -692,45 +694,18 @@ GtkWidget * create_Preferences( void )
   gtk_widget_realize( Preferences );
   gtkAddIcon( Preferences );
 
-  frame1=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame1,"frame1" );
-  gtk_widget_ref( frame1 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame1",frame1,     (GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame1 );
-  gtk_container_add( GTK_CONTAINER( Preferences ),frame1 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame1 ),1 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
-
-  frame2=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame2,"frame2" );
-  gtk_widget_ref( frame2 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame2 );
-  gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
-
-  frame3=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame3,"frame3" );
-  gtk_widget_ref( frame3 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame3 );
-  gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame4=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame4,"frame4" );
-  gtk_widget_ref( frame4 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame4 );
-  gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
+  frame=AddFrame( NULL,GTK_SHADOW_IN,Preferences,1 );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox1=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox1,"vbox1" );
   gtk_widget_ref( vbox1 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox1",vbox1,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox1 );
-  gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox1 );
 
   notebook1=gtk_notebook_new();
   gtk_widget_set_name( notebook1,"notebook1" );
@@ -746,22 +721,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox1 );
   gtk_container_add( GTK_CONTAINER( notebook1 ),hbox1 );
 
-  frame9=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame9,"frame9" );
-  gtk_widget_ref( frame9 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame9",frame9,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame9 );
-  gtk_box_pack_start( GTK_BOX( hbox1 ),frame9,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame9 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame9 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox2=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox2,"vbox2" );
@@ -813,23 +774,9 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( AConfig );
   gtk_container_add( GTK_CONTAINER( hbuttonbox2 ),AConfig );
 
-  frame10=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame10,"frame10" );
-  gtk_widget_ref( frame10 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame10",frame10,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame10 );
-  gtk_box_pack_start( GTK_BOX( hbox1 ),frame10,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame10 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame10 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
-
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
+  
   vbox3=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox3,"vbox3" );
   gtk_widget_ref( vbox3 );
@@ -949,22 +896,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox2 );
   gtk_container_add( GTK_CONTAINER( notebook1 ),hbox2 );
 
-  frame7=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame7,"frame7" );
-  gtk_widget_ref( frame7 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame7",frame7,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame7 );
-  gtk_box_pack_start( GTK_BOX( hbox2 ),frame7,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame7 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame7 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox4=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox4,"vbox4" );
@@ -1016,22 +949,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( VConfig );
   gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),VConfig );
 
-  frame8=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame8,"frame8" );
-  gtk_widget_ref( frame8 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame8",frame8,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame8 );
-  gtk_box_pack_start( GTK_BOX( hbox2 ),frame8,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame8 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame8 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox5=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox5,"vbox5" );
@@ -1117,22 +1036,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( vbox6 );
   gtk_container_add( GTK_CONTAINER( notebook1 ),vbox6 );
 
-  frame5=gtk_frame_new( MSGTR_PREFERENCES_FRAME_OSD_Level );
-  gtk_widget_set_name( frame5,"frame5" );
-  gtk_widget_ref( frame5 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame5",frame5,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame5 );
-  gtk_box_pack_start( GTK_BOX( vbox6 ),frame5,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame5 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame5 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_OSD_Level,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox600=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox600,"vbox600" );
@@ -1166,22 +1071,8 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox600 ),RBOSDIndicator,FALSE,FALSE,0 );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ),TRUE );
 
-  frame6=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Subtitle );
-  gtk_widget_set_name( frame6,"frame6" );
-  gtk_widget_ref( frame6 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame6",frame6,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame6 );
-  gtk_box_pack_start( GTK_BOX( vbox6 ),frame6,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame6 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame6 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Subtitle,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox7=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox7,"vbox7" );
@@ -1334,23 +1225,9 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( CBDumpSrt );
   gtk_box_pack_start( GTK_BOX( vbox9 ),CBDumpSrt,FALSE,FALSE,0 );
 
-  frame12=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Font );
-  gtk_widget_set_name( frame12,"frame12" );
-  gtk_widget_ref( frame12 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame12",frame12,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame12 );
-  gtk_box_pack_start( GTK_BOX( vbox6 ),frame12,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame12 ),GTK_SHADOW_ETCHED_OUT );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame12 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
-  
   vbox603=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox603,"vbox603" );
   gtk_widget_ref( vbox603 );
@@ -1400,6 +1277,7 @@ GtkWidget * create_Preferences( void )
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),BLoadFont );
 
 #ifndef HAVE_FREETYPE
+
   hbox7=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox7,"hbox7" );
   gtk_widget_ref( hbox7 );
@@ -1425,10 +1303,8 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox7 ),HSFontFactor,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( HSFontFactor ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSFontFactor ),2 );
-#else
 
-  
-//	static GtkWidget     * RBFontNoAutoScale, * BRFontAutoScaleWidth, * RBFontAutoScaleHeight, * RBFontAutoScaleDiagonal;
+#else
 
   RBFontNoAutoScale=gtk_radio_button_new_with_label( Font_group,MSGTR_PREFERENCES_FontNoAutoScale );
   Font_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBFontNoAutoScale ) );
@@ -1589,22 +1465,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( vbox601 );
   gtk_container_add( GTK_CONTAINER( notebook1 ),vbox601 );
 
-  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_PostProcess );
-  gtk_widget_set_name( frame11,"frame11" );
-  gtk_widget_ref( frame11 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame11 );
-  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_PostProcess,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
@@ -1647,22 +1509,8 @@ GtkWidget * create_Preferences( void )
   gtk_scale_set_value_pos( GTK_SCALE( HSPPQuality ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSPPQuality ),0 );
 
-  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_CodecDemuxer );
-  gtk_widget_set_name( frame11,"frame11" );
-  gtk_widget_ref( frame11 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame11 );
-  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_CodecDemuxer,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
@@ -1743,22 +1591,8 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EAFM",EAFM,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EAFM );
 
-  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Cache );
-  gtk_widget_set_name( frame11,"frame11" );
-  gtk_widget_ref( frame11 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame11 );
-  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Cache,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
@@ -1797,22 +1631,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( SBCache );
   gtk_box_pack_start( GTK_BOX( hbox5 ),SBCache,TRUE,TRUE,0 );
 
-  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Misc );
-  gtk_widget_set_name( frame11,"frame11" );
-  gtk_widget_ref( frame11 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame11 );
-  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame,"frame" );
-  gtk_widget_ref( frame );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame );
-  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
