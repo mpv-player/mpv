@@ -483,11 +483,19 @@ esac
 echo "$cc_version"
 if test "$cc_verc_fail" ; then
 cat <<EOF
-Please downgrade/upgrade gcc compiler to gcc-2.95.x or gcc-3.x version!
 
-Note: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only in RedHat,
-Mandrake sites or distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
-UNSUPPORTED by us. *** For details please read DOCS/gcc-2.96-3.0.html ***
+*** Please downgrade/upgrade C compiler to gcc-2.95.x or gcc-3.x version! ***
+
+You're using a different compiler than us, and we don't have the time to make
+sure everything works with every compiler out there. Please either use the
+same compiler we do, or use --disable-gcc-checking but DO *NOT* report bugs
+unless you can reproduce them after recompiling with 2.95.x or 3.x version!
+
+Note for gcc 2.96 users: there were and are problems with this version!
+If you get compile errors, first upgrade to the latest 2.96 release
+(but minimum 2.96-85) and try again. If the problem still exists, try with
+gcc 3.x (or 2.95.x) *BEFORE* reporting bugs! gcc 2.96 is TOTALLY UNSUPPORTED
+by us!   *** For details please read DOCS/gcc-2.96-3.0.html ***
 
 EOF
 die "Bad gcc version"
@@ -497,24 +505,18 @@ else
 
 cat <<EOF
 
+******************************************************************************
 
+Hmm. You really want to compile MPlayer with an *UNSUPPORTED* C compiler?
+Ok. You know. Do it. But did you already read DOCS/gcc-2.96-3.0.html ???
 
-
-Hmm. You really want to compile MPlayer with gcc 2.96? Ok. You know. Do it.
-
-But did you already read DOCS/gcc-2.96-3.0.html ???
-
-    *** BUT WE DO NOT RECOMMEND SENDING ANY MAIL TO THE ***
-       *** MAILING LISTS OR DIRECTLY TO THE AUTHORS! ***
-
-       *** gcc 2.96 is broken. nobody will help you! ***
-
-If you have any problem, then install 2.95.x or 3.0 version and try again.
-If the problem _still_ exists, then read DOCS/bugreports.html.
-
-DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* fault! (exactly gcc 2.96's)
+DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* fault! (exactly compiler's)
 Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
 
+If you have any problem, then install GCC 2.95.x or 3.x version and try again.
+If the problem _still_ exists, then read DOCS/bugreports.html !
+
+******************************************************************************
 
 EOF
 
