@@ -99,7 +99,6 @@ static inline void requantize(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t 
 
 	for(i=1; i<64; i++){
 		int level= qinv*src[i];
-
 		if(((unsigned)(level+threshold1))>threshold2){
 			const int j= permutation[i];
 			if(level>0){
@@ -163,7 +162,6 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 				const int x1= x + offset[i][0];
 				const int y1= y + offset[i][1];
 				const int index= x1 + y1*stride;
-
 				p->dsp.get_pixels(block, p->src + index, stride);
 				p->dsp.fdct(block);
 				requantize(block2, block, qp, p->dsp.idct_permutation);
@@ -173,20 +171,36 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 		}
 	}
 
+#define STORE(pos) \
+	temp= ((p->temp[index + pos]<<log2_scale) + d[pos])>>6;\
+	if(temp & 0x100) temp= ~(temp>>31);\
+	dst[x + y*dst_stride + pos]= temp;
+
 	for(y=0; y<height; y++){
 		uint8_t *d= dither[y&7];
 		for(x=0; x<width; x+=8){
 			const int index= 8 + 8*stride + x + y*stride;
-			dst[x + y*src_stride + 0]= ((p->temp[index + 0]<<log2_scale) + d[0])>>6;
-			dst[x + y*src_stride + 1]= ((p->temp[index + 1]<<log2_scale) + d[1])>>6;
-			dst[x + y*src_stride + 2]= ((p->temp[index + 2]<<log2_scale) + d[2])>>6;
-			dst[x + y*src_stride + 3]= ((p->temp[index + 3]<<log2_scale) + d[3])>>6;
-			dst[x + y*src_stride + 4]= ((p->temp[index + 4]<<log2_scale) + d[4])>>6;
-			dst[x + y*src_stride + 5]= ((p->temp[index + 5]<<log2_scale) + d[5])>>6;
-			dst[x + y*src_stride + 6]= ((p->temp[index + 6]<<log2_scale) + d[6])>>6;
-			dst[x + y*src_stride + 7]= ((p->temp[index + 7]<<log2_scale) + d[7])>>6;
+			int temp;
+			STORE(0);
+			STORE(1);
+			STORE(2);
+			STORE(3);
+			STORE(4);
+			STORE(5);
+			STORE(6);
+			STORE(7);
 		}
 	}
+#if 0
+	for(y=0; y<height; y++){
+		for(x=0; x<width; x++){
+			if((((x>>6) ^ (y>>6)) & 1) == 0)
+				dst[x + y*dst_stride]= p->src[8 + 8*stride  + x + y*stride];
+			if((x&63) == 0 || (y&63)==0)
+				dst[x + y*dst_stride] += 128;
+                }
+	}
+#endif
 	//FIXME reorder for better caching
 }
 
