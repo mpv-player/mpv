@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.68
+// Updated to help_mp-en.h v1.73
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -73,6 +73,7 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Nome del diver video di output non valido: %s\nUsa '-vo help' per avere una lista dei driver video disponibili.\n"
 #define MSGTR_InvalidAOdriver "Nome del diver audio di output non valido: %s\nUsa '-ao help' per avere una lista dei driver audio disponibili.\n"
 #define MSGTR_CopyCodecsConf "(copia/collega etc/codecs.conf (dall\'albero dei sorgenti di MPlayer) a ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "Utilizzo la versione interna predefinita di codecs.conf\n"
 #define MSGTR_CantLoadFont "Impossibile caricare i font: %s\n"
 #define MSGTR_CantLoadSub "Impossibile caricare i sottotitoli: %s\n"
 #define MSGTR_ErrorDVDkey "Errore di elaborazione della chiave del DVD.\n"
@@ -304,6 +305,7 @@ static char help_text[]=
 #define MSGTR_Network "Flusso dati dalla rete ..."
 #define MSGTR_Preferences "Preferenze"
 #define MSGTR_OSSPreferences "Configurazione driver OSS"
+#define MSGTR_SDLPreferences "Configurazione driver SDL"
 #define MSGTR_NoMediaOpened "nessun media aperto"
 #define MSGTR_VCDTrack "Traccia VCD %d"
 #define MSGTR_NoChapter "nessun capitolo"
@@ -441,6 +443,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Sottotitoli unicode"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Converti i sottotitoli nel formato sottotitolo di MPlayer"
 #define MSGTR_PREFERENCES_SUB_SRT "Converti i sottotitoli nel formato SubViewer (SRT) basato sul tempo"
+#define MSGTR_PREFERENCES_SUB_Overlap "Attiva/Disattiva sovrapposizione sottotitoli"
 #define MSGTR_PREFERENCES_Font "Carattere:"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Abilita postprocessing"
@@ -458,6 +461,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Misc "Varie"
 #define MSGTR_PREFERENCES_OSS_Device "Dispositivo:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_SDL_Driver "Driver:"
 #define MSGTR_PREFERENCES_Message "Ricorda che devi riavviare la riproduzione affinché alcune opzioni abbiano effetto!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usa LAVC (ffmpeg)"
