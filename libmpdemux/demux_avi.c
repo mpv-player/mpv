@@ -192,7 +192,7 @@ do{
     }
 
     pos=idx->dwChunkOffset+priv->idx_offset;
-    if(pos<demux->movi_start || pos>=demux->movi_end){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
     }
@@ -224,7 +224,7 @@ do{
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else {
     demux->filepos=stream_tell(demux->stream);
-    if(demux->filepos>=demux->movi_end){
+    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start){
           demux->stream->eof=1;
           return 0;
     }
@@ -284,7 +284,7 @@ do{
     }
 
     pos=idx->dwChunkOffset+priv->idx_offset;
-    if(pos<demux->movi_start || pos>=demux->movi_end){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
       continue;
     }
@@ -347,7 +347,7 @@ int *fpos=NULL;
 do{
 
   demux->filepos=stream_tell(demux->stream);
-  if(demux->filepos>=demux->movi_end){
+  if(demux->filepos>=demux->movi_end && (demux->movi_end>demux->movi_start)){
           demux->stream->eof=1;
           return 0;
   }
