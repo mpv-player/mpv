@@ -190,6 +190,13 @@ static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *
 	p->pm = m;
 
 	if (p->frame == 4) {
+		/* We need to break at scene changes, but is this a valid test? */
+		if ((m.even > p->thres[2]) && (m.odd > p->thres[2]) && (m.temp > p->thres[3])
+			&& (m.temp > 5*pm.temp) && (m.temp*2 > m.noise)) {
+			mp_msg(MSGT_VFILTER, MSGL_V, "scene change breaking telecine!\n");
+			p->frame = -1;
+			return TC_DROP;
+		}
 		/* Thres. is to compensate for quantization errors when noise is low */
 		if (m.noise - m.temp > -p->thres[4]) {
 			if (COMPARABLE(m.even, pm.odd)) {
