@@ -9,9 +9,9 @@
 #define TEMP_BUF_SIZE (720*576)
 
 static vd_info_t info = {
-	"Hauppauge Macroblock/NV12 Decoder",
+	"Hauppauge Macroblock/NV12/NV21 Decoder",
 	"hmblck",
-	"Alex <d18c7db@hotmail.com>, A'rpi",
+	"Alex <d18c7db@hotmail.com>, A'rpi, Alex Beregszaszi",
 	"Alex <d18c7db@hotmail.com>",
 	"uncompressed"
 };
@@ -59,13 +59,13 @@ static void de_macro_uv(unsigned char* dstu,unsigned char* dstv,unsigned char* s
 /*************************************************************************
  * convert a nv12 buffer to yv12
  */
-static int nv12_to_yv12(void *data, int len, mp_image_t* mpi) {
+static int nv12_to_yv12(void *data, int len, mp_image_t* mpi, int swapped) {
     unsigned int Y_size  = mpi->width * mpi->height;
     unsigned int UV_size = mpi->chroma_width * mpi->chroma_height;
     unsigned int idx;
     unsigned char *dst_Y = mpi->planes[0];
-    unsigned char *dst_U = mpi->planes[1];
-    unsigned char *dst_V = mpi->planes[2];
+    unsigned char *dst_U = swapped?mpi->planes[2]:mpi->planes[1];
+    unsigned char *dst_V = swapped?mpi->planes[1]:mpi->planes[2];
     unsigned char *src   = data + Y_size;
 
     // sanity check raw stream
@@ -130,7 +130,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	de_macro_y(mpi->planes[0],data,mpi->stride[0],mpi->w,mpi->h);
 	de_macro_uv(mpi->planes[1],mpi->planes[2],data+mpi->w*mpi->h,mpi->stride[1],mpi->w/2,mpi->h/2);
     } else {
-	if(!nv12_to_yv12(data, len, mpi)) return NULL;
+	if(!nv12_to_yv12(data, len, mpi,(sh->format == IMGFMT_NV12))) return NULL;
     }
 
     return mpi;
