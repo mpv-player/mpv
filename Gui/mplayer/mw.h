@@ -665,26 +665,42 @@ void mplDandDHandler(int num,const char** files)
 
   /* now fill it with new items */
   for(f=0; f < num; f++){
-    char* str = files[f];
+    char* str = strdup( files[f] );
     plItem* item;
+
+    if ( strchr( str,'%' ) )
+     {
+      char * t = calloc( 1,strlen( str ) );
+      int    i,c = 0;
+      for ( i=0;i < strlen( str );i++ )
+       if ( str[i] != '%' ) t[c++]=str[i];
+        else
+	 {
+	  char tmp[4] = "0xXX"; 
+//	  if ( str[++i] == '%' ) { t[c++]='%'; continue; };
+	  tmp[2]=str[++i]; tmp[3]=str[++i]; t[c++]=(char)strtol( tmp,(char **)NULL,16 );
+	 }
+      free( str ); str=t;
+     }
+
     if(stat(str,&buf) == 0 && S_ISDIR(buf.st_mode) == 0) {
       /* this is not a directory so try to play it */
       printf("Received D&D %s\n",str);
       item = calloc(1,sizeof(plItem));
+      
       /* FIXME: decompose file name ? */
       /* yes -- Pontscho */
       if ( strrchr( str,'/' ) )
        {
-        char * t = strdup( str );
-	char * s = strrchr( t,'/' ); *s=0; s++;
+	char * s = strrchr( str,'/' ); *s=0; s++;
         item->name = gstrdup( s );
-        item->path = gstrdup( t );
-	free( t );
+        item->path = gstrdup( str );
        } else { item->name = strdup(str); item->path = strdup(""); }
       gtkSet(gtkAddPlItem,0,(void*)item);
     } else {
       printf("Received not a file: %s !\n",str);
     }
+    free( str );
   }
 
   mplSetFileName( NULL,files[0] );

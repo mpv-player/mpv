@@ -22,6 +22,7 @@ Atom _XA_XdndStatus;
 Atom _XA_XdndActionCopy;
 Atom _XA_XdndSelection;
 Atom _XA_XdndFinished;
+Atom _XA_XdndTypeList;
 
 Atom atom_support;
 
@@ -37,6 +38,7 @@ void wsXDNDInitialize()
     _XA_XdndActionCopy = XInternAtom(wsDisplay, "XdndActionCopy", False);
     _XA_XdndSelection = XInternAtom(wsDisplay, "XdndSelection", False);
     _XA_XdndFinished = XInternAtom(wsDisplay, "XdndFinished", False);
+    _XA_XdndTypeList = XInternAtom(wsDisplay, "XdndTypeList", False);
 }
 
 void wsXDNDMakeAwareness(wsTWindow* window) {
@@ -87,9 +89,7 @@ wsXDNDProcessSelection(wsTWindow* wnd, XEvent *event)
       char * retain = delme;
       char * files[MAX_DND_FILES];
       int num = 0;
-      /*
-      printf("Got: %s\n",delme);
-      */
+
       while(retain < delme + ret_items) {
 	if (!strncmp(retain,"file:",5)) {
 	  /* add more 2 chars while removing 5 is harmless */
@@ -152,7 +152,40 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
 	printf("This doesn't seem as a file...\n");
       }
     } else {
-      /* FIXME: need something else here */
+      /* need to check the whole list here */
+      int ret_left = 1;
+      int offset = 0;
+      Atom* ret_buff;
+      int ret_type,ret_format,ret_items;
+      /* while there is data left...*/
+      while(ret_left){
+	XGetWindowProperty(wsDisplay,event->data.l[0],_XA_XdndTypeList,
+			   offset,256,False,XA_ATOM,&ret_type,
+			   &ret_format,&ret_items,&ret_left,
+			   (unsigned char**)&ret_buff);
+	
+	/* sanity checks...*/
+	if(ret_buff == NULL || ret_type != XA_ATOM || ret_format != 8*sizeof(Atom)){
+	  XFree(ret_buff);
+	  break;
+	}
+	/* now chek what we've got */
+	{
+	  int i;
+	  for(i=0; i<ret_items; i++){
+	    if(ret_buff[i] == ok){
+	      atom_support = ok;
+	      break;
+	    }
+	  }
+	  /* found it ! */
+	  if (atom_support != None)
+	    break;
+	}
+	/* maybe next time ... */
+	XFree(ret_buff);
+	offset += 256;
+      }
     }
     return True;
   }
@@ -163,7 +196,7 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
   
   if (event->message_type == _XA_XdndDrop) {
     if (event->data.l[0] != XGetSelectionOwner(wsDisplay, _XA_XdndSelection)){
-      puts("wierd selection owner? QT?");
+      puts("Wierd selection owner... QT?");
     }
     if (atom_support != None) {
       XConvertSelection(wsDisplay, _XA_XdndSelection, atom_support,
