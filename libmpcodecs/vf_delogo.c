@@ -74,7 +74,7 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
     logo_y2 = logo_y + logo_h - yclipb;
 
     topleft = src+logo_y1*srcStride+logo_x1;
-    topright = src+logo_x1*srcStride+logo_x2-1;
+    topright = src+logo_y1*srcStride+logo_x2-1;
     botleft = src+(logo_y2-1)*srcStride+logo_x1;
 
     if (!direct) memcpy_pic(dst, src, width, height, dstStride, srcStride);
