@@ -521,11 +521,13 @@
 #	define SCALER_SURFAC_FORMAT            0x00000f00L
 #	define SCALER_SOURCE_15BPP             0x00000300L
 #	define SCALER_SOURCE_16BPP             0x00000400L
+#	define SCALER_SOURCE_24BPP             0x00000500L
 #	define SCALER_SOURCE_32BPP             0x00000600L
 #	define SCALER_SOURCE_YUV9              0x00000900L
 #	define SCALER_SOURCE_YUV12             0x00000A00L
 #	define SCALER_SOURCE_VYUY422           0x00000B00L
 #	define SCALER_SOURCE_YVYU422           0x00000C00L
+#	define SCALER_ADAPTIVE_DEINT           0x00001000L
 #	define SCALER_SMART_SWITCH             0x00008000L
 #	define SCALER_BURST_PER_PLANE          0x00ff0000L
 #	define SCALER_DOUBLE_BUFFER            0x01000000L
@@ -566,7 +568,17 @@
 #define OV0_VID_BUF5_BASE_ADRS                 0x0454
 #define OV0_VID_BUF_PITCH0_VALUE               0x0460
 #define OV0_VID_BUF_PITCH1_VALUE               0x0464  
-#define OV0_AUTO_FLIP_CNTRL                    0x0470  
+#define OV0_AUTO_FLIP_CNTL                     0x0470  
+#	define OV0_AUTO_FLIP_CNTL_SOFT_BUF_NUM        0x00000007
+#	define OV0_AUTO_FLIP_CNTL_SOFT_REPEAT_FIELD   0x00000008
+#	define OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD        0x00000010
+#	define OV0_AUTO_FLIP_CNTL_IGNORE_REPEAT_FIELD 0x00000020
+#	define OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE     0x00000040
+#	define OV0_AUTO_FLIP_CNTL_VID_PORT_SELECT     0x00000300
+#	define OV0_AUTO_FLIP_CNTL_P1_FIRST_LINE_EVEN  0x00010000
+#	define OV0_AUTO_FLIP_CNTL_SHIFT_EVEN_DOWN     0x00040000
+#	define OV0_AUTO_FLIP_CNTL_SHIFT_ODD_DOWN      0x00080000
+#	define OV0_AUTO_FLIP_CNTL_FIELD_POL_SOURCE    0x00800000
 #define OV0_DEINTERLACE_PATTERN                0x0474  
 #define OV0_SUBMIT_HISTORY                     0x0478  
 #define OV0_H_INC                              0x0480  
@@ -583,11 +595,11 @@
 #define OV0_FOUR_TAP_COEF_3                    0x04BC
 #define OV0_FOUR_TAP_COEF_4                    0x04C0
 #define OV0_FLAG_CNTRL                         0x04DC  
-#define OV0_SLICE_CNTL                         0x04E0  
+#define OV0_COLOUR_CNTL                        0x04E0
 #define OV0_VID_KEY_CLR_LOW                    0x04E4  
 #define OV0_VID_KEY_CLR_HIGH                   0x04E8  
-#define OV0_GRPH_KEY_CLR_LOW                   0x04EC  
-#define OV0_GRPH_KEY_CLR_HIGH                  0x04F0  
+#define OV0_GRAPHICS_KEY_CLR                   0x04EC
+#define OV0_GRAPHICS_KEY_MSK                   0x04F0
 #define OV0_KEY_CNTL                           0x04F4  
 #	define VIDEO_KEY_FN_MASK               0x00000007L
 #	define VIDEO_KEY_FN_FALSE              0x00000000L
