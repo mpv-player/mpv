@@ -118,7 +118,7 @@ esac
 # LGB: Help moved here.
 
 for parm in "$@" ; do
-if [ "$parm" = "--help" -o "$parm" = "-help" -o "$parm" = "-h" ]; then
+if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
 cat << EOF
 
 usage: $0 [options]
@@ -200,7 +200,7 @@ exit 0
 fi
 done # for parm in ...
 
-if [ "$CC" != "" ]; then
+if test "$CC" ; then
   _cc=$CC
 else
   _cc=gcc
@@ -259,7 +259,7 @@ echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
 
 # Determine our OS name and CPU architecture
-if [ "$_target" = "" ]; then
+if test -z "$_target" ; then
    system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, OpenBSD, SunOS
    host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 
@@ -300,9 +300,9 @@ echo "Detected host architecture: $host_arch"
 # Determine OS dependent libs
 _confcygwin="TARGET_CYGWIN=no"
 _confwin32=
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" -o "$system_name" = "BSD/OS" ]; then
+if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" || test "$system_name" = "BSD/OS" ; then
     _archlibs="-rdynamic -pthread"
-elif [ `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ]; then
+elif test `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ; then
     _confcygwin="TARGET_CYGWIN=yes"
     _confwin32="#define WIN32"
     _archlibs="-lpthread"
@@ -310,7 +310,7 @@ else
     _archlibs="-ldl -lpthread"
 fi
 
-if [ "$system_name" = "BSD/OS" ]; then
+if test "$system_name" = "BSD/OS" ; then
 	_archlibs="$_archlibs -ldvd"
 fi
 
@@ -321,12 +321,12 @@ TMPCPP="mplayer-conf-${RANDOM}-$$-${RANDOM}.cpp"
 TMPO="mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
 TMPS="mplayer-conf-${RANDOM}-$$-${RANDOM}.S"
 
-if [ ! -z "$TMPDIR" ]; then
+if test "$TMPDIR" ; then
 	TMPC="${TMPDIR}/${TMPC}"
 	TMPCPP="${TMPDIR}/${TMPCPP}"
 	TMPO="${TMPDIR}/${TMPO}"
 	TMPS="${TMPDIR}/${TMPS}"
-elif [ ! -z "$TEMPDIR" ]; then
+elif test "$TEMPDIR" ; then
 	TMPC="${TEMPDIR}/${TMPC}"
 	TMPCPP="${TEMPDIR}/${TMPCPP}"
 	TMPO="${TEMPDIR}/${TMPO}"
@@ -350,37 +350,37 @@ MCONF='config.mak'
 CHELP='help_mp.h'
 # ---  Check for C compiler:
 
-if [ "$_x11libdir" = "" ]; then
-   if [ -d /usr/X11R6 ]; then
+if test -z "$_x11libdir" ; then
+   if test -d /usr/X11R6 ; then
       _x11libdir=-L/usr/X11R6/lib
    else
-      if [ -d /usr/X11 ]; then
+      if test -d /usr/X11 ; then
          _x11libdir=-L/usr/X11/lib
       fi
    fi
 fi
 
-if [ "$_x11incdir" = "" ]; then
-   if [ -d /usr/include/X11 ]; then
+if test -z "$_x11incdir" ; then
+   if test -d /usr/include/X11 ; then
       _x11incdir=
-   elif [ -d /usr/X11R6 ]; then
+   elif test -d /usr/X11R6 ; then
       _x11incdir=-I/usr/X11R6/include
-   elif [ -d /usr/X11 ]; then
+   elif test -d /usr/X11 ; then
       _x11incdir=-I/usr/X11/include
    fi
 fi
 
 # Lots of stuff are installed under /usr/local
 
-if [ "$_extralibdir" = "" ]; then
+if test -z "$_extralibdir" ; then
 _extralibdir=-L/usr/local/lib
 fi
-if [ "$_extraincdir" = "" ]; then
+if test -z "$_extraincdir" ; then
 _extraincdir=-I/usr/local/include
 fi
 
-if [ "$_sdlconfig" = "" ]; then
-   if [ "$system_name" = "FreeBSD" ]; then
+if test -z "$_sdlconfig" ; then
+   if test "$system_name" = "FreeBSD" ; then
       _sdlconfig='sdl11-config'
    else
       _sdlconfig='sdl-config'
@@ -394,7 +394,7 @@ fi
 # A: same as with agcc! These compilers always were introduced as experimental
 # ones. Now gcc-3.0 should introduce all features of these compilers.
 # Since 3.0 is almost released we don't need to support them. - Nick 05 jun 2001
-if test "$_skip_cc_check" != "yes"; then
+if test "$_skip_cc_check" != yes ; then
 echo $_echo_n "Checking version of $_cc ... $_echo_c"
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 case $cc_version in
@@ -404,7 +404,7 @@ case $cc_version in
     *) cc_version="$cc_version, bad"; cc_verc_fail=yes;;
 esac
 echo "$cc_version"
-if [ ! -z "$cc_verc_fail" ] ; then
+if test "$cc_verc_fail" ; then
 cat <<EOF
 Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version!
 
@@ -440,7 +440,7 @@ EOF
 echo -n "Enter keyword to continue: "
 read _answer
 
-if [ "$_answer" != "gcc 2.96 is broken" ]; then
+if test "$_answer" != "gcc 2.96 is broken" ; then
 cat <<EOF
 
 Wrong answer. Next time try 'gcc 2.96 is broken'. But you'd better to downgrade.
@@ -454,18 +454,18 @@ fi
 
 # now that we know what compiler should be used for compilation, try to find
 # out which assembler is used by the $_cc compiler
-if [ "$_as" = auto ]; then
+if test "$_as" = auto ; then
   _as=`$_cc -print-prog-name=as`
-  if [ "$_as" = "" ]; then
+  if test -z "$_as" ; then
     _as=as
   fi
 fi
 
-if [ "$host_arch" = i386 ]; then
-    if [ -r /proc/cpuinfo ]; then
+if test "$host_arch" = i386 ; then
+    if test -r /proc/cpuinfo ; then
 	# linux with /proc mounted, extract cpu information from it
 	_cpuinfo="cat /proc/cpuinfo"
-    elif [ -r /compat/linux/proc/cpuinfo ]; then
+    elif test -r /compat/linux/proc/cpuinfo ; then
         # FreeBSD with linux emulation /proc mounted, 
 	# extract cpu information from it
         _cpuinfo="cat /compat/linux/proc/cpuinfo"
@@ -478,7 +478,7 @@ if [ "$host_arch" = i386 ]; then
 
     pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -1`
     pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2 | head -1`
-    if [ -z "$pparam" ]; then
+    if test -z "$pparam" ; then
 	pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2 | head -1`
     fi
     pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -1`
@@ -516,12 +516,12 @@ _dga=no
 _dga2=no
 _svga=no
 _fbdev=no
-[ "$system_name" = Linux ] && _fbdev=yes
+test "$system_name" = Linux && _fbdev=yes
 _lirc=no
 _css=no
 _dvdread=no
 _win32dll=yes _dshow=yes
-[ "$host_arch" != i386 ] && _dshow=no _win32dll=no
+test "$host_arch" != i386 && _dshow=no _win32dll=no
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
@@ -576,10 +576,10 @@ done
 
 
 _win32libdirnotify=no
-if [ $_win32dll = yes ]; then
-    if [ -d /usr/lib/win32 ]; then
+if test "$_win32dll" = yes ; then
+    if test -d /usr/lib/win32 ; then
 	_win32libdir=/usr/lib/win32
-    elif [ -d /usr/local/lib/win32 ]; then
+    elif test -d /usr/local/lib/win32 ; then
 	_win32libdir=/usr/local/lib/win32
     else
 	# This is our default:
@@ -589,12 +589,12 @@ if [ $_win32dll = yes ]; then
 fi
 
 
-if [ -d libavcodec -a -f libavcodec/Makefile ]; then
+if test -d libavcodec && test -f libavcodec/Makefile ; then
     _libavcodec=yes
 fi
 
 
-if [ -c /dev/mga_vid ]; then
+if test -c /dev/mga_vid ; then
  _mga=yes
  _syncfb=yes
 fi
@@ -621,7 +621,7 @@ i386)
 	    iproc=486
 	    ;;
 	5)
-	    if [ $pmodel -ge 6 ]; then	# LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3 
+	    if test "$pmodel" -ge 6 ; then	# LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3 
 		proc=k6
 	    else
 		proc=k5
@@ -689,43 +689,43 @@ i386)
     # to fall back till 386.
 
     #echo -n "Checking your GCC CPU optimalization abilities: "
-    if [ "$proc" = "k7" ]; then
+    if test "$proc" = "k7" ; then
 	#echo -n "trying k7  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=athlon
     fi
-    if [ "$proc" = "athlon" ]; then
+    if test "$proc" = "athlon" ; then
 	#echo -n "trying athlon  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
     fi
-    if [ "$proc" = "k6" ]; then
+    if test "$proc" = "k6" ; then
 	#echo -n "trying k6  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k5
     fi
-    if [ "$proc" = "k5" ]; then
+    if test "$proc" = "k5" ; then
 	#echo -n "trying k5  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
     fi
-    if [ "$proc" = "i686" ]; then
+    if test "$proc" = "i686" ; then
 	#echo -n "trying i686  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
     fi
-    if [ "$proc" = "pentiumpro" ]; then
+    if test "$proc" = "pentiumpro" ; then
 	#echo -n "trying pentiumpro  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
     fi
-    if [ "$proc" = "pentium" ]; then
+    if test "$proc" = "pentium" ; then
 	#echo -n "trying pentium  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i486
     fi
-    if [ "$proc" = "i486" ]; then
+    if test "$proc" = "i486" ; then
 	#echo -n "trying i486  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i386
     fi
-    if [ "$proc" = "i386" ]; then
+    if test "$proc" = "i386" ; then
 	#echo -n "trying i386  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=error
     fi
-    if [ "$proc" = "error" ]; then
+    if test "$proc" = "error" ; then
 	echo
 	echo "Your gcc does not support even \"i386\" for '-march' and '-mcpu'." >&2
 	rm -f $TMPC $TMPO $TMPS
@@ -788,12 +788,12 @@ esac
 # ---
 
 # Checking for localization ...
-if test -z "$LINGUAS"; then
+if test -z "$LINGUAS" ; then
 LINGUAS="en"
 fi
 echo Checking for language ... "$LINGUAS"
 _mp_help="help_mp-"$LINGUAS".h"
-if test ! -f "$_mp_help"; then
+if test ! -f "$_mp_help" ; then
 echo "Language file ("$_mp_help") not found!"
 LINGUAS="en"
 _mp_help="help_mp-"$LINGUAS".h"
@@ -802,7 +802,7 @@ echo Using ... "$_mp_help" file
 
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" -o "$system_name" = "BSD/OS" ]; then
+if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" || test "$system_name" = "BSD/OS" ; then
 $_cc $TMPC -o $TMPO -pthread > /dev/null 2>&1 || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
 else
@@ -812,12 +812,11 @@ fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if test ! -z "`($_sdlconfig --version) 2>/dev/null`" ; then
+if test "`($_sdlconfig --version) 2>/dev/null`" ; then
 if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2>&1 ; then
 	_sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
 	if test "$_sdlversion" -gt 116 ; then
 		if test "$_sdlversion" -lt 121 ; then
-
 			_sdlbuggy='#define BUGGY_SDL'
 		else	
 			_sdlbuggy='#undef BUGGY_SDL'
@@ -884,12 +883,12 @@ _socklib=
 $_cc $TMPC -o $TMPO $_socklib -lsocket >/dev/null 2>&1 && _socklib="$_socklib -lsocket"
 $_cc $TMPC -o $TMPO $_socklib -lnsl >/dev/null 2>&1 && _socklib="$_socklib -lnsl"
 
-if [ $_x11 = auto ]; then
+if test "$_x11" = auto ; then
   _x11=no
   $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext $_socklib > /dev/null 2>&1 && _x11=yes
 fi
 
-if [ $_x11 = yes ]; then
+if test "$_x11" = yes ; then
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms_3=yes
 nm `echo $_x11libdir|cut -c 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
@@ -898,7 +897,7 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXinerama $_socklib > /dev/null 2>&1 && _xinerama=yes
 
 # this is not yet checked with OpenBSD - atmos
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
+if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 && _gl=yes
 else
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1 && _gl=yes
@@ -938,7 +937,7 @@ main()
 
 EOF
 _iconv=yes
-if [ "$system_name" = "FreeBSD" ]; then
+if test "$system_name" = "FreeBSD" ; then
 $_cc $_extraincdir $TMPC -o $TMPO $_extralibdir -lm -liconv > /dev/null 2>&1 || \
  { _iconv=no ; echo "iconv(3) function not detected!" ;}
 else
@@ -950,7 +949,7 @@ cat > $TMPC << EOF
 int main( void ) { return 0; }
 EOF
 # this is not yet checked with OpenBSD - atmos
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
+if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
 $_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
 else
@@ -1068,7 +1067,7 @@ EOF
 _memalign_def='/* #define memalign(a,b) malloc(b) */'
 _memalign=yes
 $_cc -o $TMPO $TMPC 2> /dev/null || _memalign=no 
-if [ "$_memalign" = "no" ]; then
+if test "$_memalign" = no ; then
 _memalign_def='#define memalign(a,b) malloc(b)'
 fi
 fi
@@ -1141,20 +1140,20 @@ cat > $TMPC << EOF
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==5)return 0; return 1; }
 EOF
 
-_alsaver='no'
+_alsaver=no
 $_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
-[ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.5.x'; }
+test "$_alsa" = yes && $TMPO && { _alsaver='0.5.x'; }
 
-if [ "$_alsaver" = 'no' ]; then
+if test "$_alsaver" = no ; then
 cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
 int main( void ) { if(SND_LIB_MAJOR==0&&SND_LIB_MINOR==9)return 0; return 1; }
 EOF
 
-_alsaver='no'
+_alsaver=no
 $_cc -o $TMPO -lasound -ldl -lpthread $TMPC 2> /dev/null || _alsa=no
-[ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.9.x'; }
+test $_alsa = yes && $TMPO && { _alsaver='0.9.x'; }
 fi
 
 # ---
@@ -1419,11 +1418,11 @@ for ac_option do
         ;;
   --with-csslibdir=*)
         _csslibdir=`echo $ac_option | cut -d '=' -f 2`
-	_css='yes';
+	_css=yes;
 	;;
   --with-cssincdir=*)
         _cssincdir=`echo $ac_option | cut -d '=' -f 2`
-        _css='yes';
+        _css=yes;
         ;;
   --with-mlibdir=*)
         _mlibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -1457,7 +1456,7 @@ for ac_option do
 done
 
 # Atmos: moved this here, to be correct, if --prefix is specified
-if test x"$_datadir" = x; then
+if test -z "$_datadir" ; then
 	_datadir=$_prefix"/share/mplayer"
 fi
 
@@ -1476,41 +1475,41 @@ cat > $TMPS <<EOF
 nop
 EOF
 
-if [ $_mmx = 'yes' ]; then
+if test "$_mmx" = yes ; then
 cat >> $TMPS <<EOF
 emms
 EOF
 fi
 
-if [ $_3dnow = 'yes' ]; then
+if test "$_3dnow" = yes ; then
 _pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 femms
 EOF
 fi
 
-if [ $_3dnowex = 'yes' ]; then
+if test "$_3dnowex" = yes ; then
 _pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 pswapd %mm0, %mm0
 EOF
 fi
 
-if [ $_mmx2 = 'yes' ]; then
+if test "$_mmx2" = yes ; then
 _pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 movntq	%mm0, (%eax)
 EOF
 fi
 
-if [ $_sse = 'yes' ]; then
+if "$_sse" = yes ; then
 _pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 xorps %xmm0, %xmm0
 EOF
 fi
 # Note: for SSE2 assembler v2.11 should be preferred --Nick
-#if [ $_sse2 = 'yes' ]; then
+#if test "$_sse2" = yes ; then
 #_pref_as_version='2.11'
 #cat >> $TMPS <<EOF
 #xorpd %xmm0, %xmm0
@@ -1519,12 +1518,12 @@ fi
 $_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
 rm -f $TMPS $TMPO $TMPC
 
-if test "$as_verc_fail" != "yes"; then
+if test "$as_verc_fail" != yes ; then
   echo "ok"
 else
   echo "failed"
   echo "Please upgrade(downgrade) binutils to "$_pref_as_version"..."
-  if [ "$_skip_as_check" != "yes" ]; then
+  if test "$_skip_as_check" != yes ; then
     exit
   else
     echo "YOU'VE SELECTED '--disable-as-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
@@ -1533,7 +1532,7 @@ fi
 
 # Atmosfear: Checking kernel support for cpu extensions ...
 extcheck() {
-if test "$1" = "yes" ; then
+if test "$1" = yes ; then
 echo $_echo_n "Checking $2 support in Kernel ... $_echo_c"
 cat > $TMPC <<EOF
 int main(void){__asm__ __volatile__ ("$3":::"memory");return(0);}
@@ -1550,7 +1549,7 @@ fi
 fi
 return 1
 }
-if [ "$_kernelextcheck" = "yes" ];then
+if test "$_kernelextcheck" = yes ; then
 if extcheck $_mmx "mmx" "emms" ; then _mmx=no ; fi
 if extcheck $_3dnow "3dnow" "femms" ; then _3dnow=no ; fi
 if extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" ; then _3dnowex=no ; fi
@@ -1561,7 +1560,7 @@ rm -f $TMPS $TMPO $TMPC
 fi
 
 # Checking kernel version...
-if [ "$system_name" = "Linux" ];then
+if test "$system_name" = "Linux" ; then
     _k_verc_problem=no
     kernel_version=`uname -r 2>&1`
     echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
@@ -1570,10 +1569,10 @@ if [ "$system_name" = "Linux" ];then
 	[0-1].[0-9].[0-9]*|2.[0-3].[0-9]*)
 	    _k_verc_problem=yes;;
     esac
-    if [ $_k_verc_problem = 'yes' ] && [ "$_sse" = 'yes' ]; then
+    if test "$_k_verc_problem" = yes && test "$_sse" = yes ; then
 	_k_verc_fail=yes
     fi
-    if [ ! -z "$_k_verc_fail" ]; then
+    if test "$_k_verc_fail" ; then
 	echo "$kernel_version, fail"
 	echo "WARNING! If you want to run mplayer on this system, be prepared for problems!"
 	echo "(SSE support of 2.2.x series is limited. Upgrade kernel or use --disable-sse)"
@@ -1582,8 +1581,8 @@ if [ "$system_name" = "Linux" ];then
     fi
 fi
 
-if [ "$_xmga" = "autodetect" ]; then
- if [ $_x11 = 'yes' ] && [ $_mga = 'yes' ]; then
+if test "$_xmga" = "autodetect" ; then
+ if test "$_x11" = yes && test "$_mga" = yes ; then
   _xmga=yes
  else
   _xmga=no
@@ -1593,12 +1592,12 @@ fi
 # to screen.
 echo "Install prefix: $_prefix"
 echo "Data directory: $_datadir"
-if [ "$host_arch" = i386 ]; then
+if test "$host_arch" = i386 ; then
     echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
     echo "Checking for cpu type ... $pname"
 fi
 echo "Optimizing to ... $proc"
-if [ "$host_arch" = i386 ]; then
+if test "$host_arch" = i386 ; then
     echo "Checking for mmx support ... $_mmx"
     echo "Checking for mmx2 support ... $_mmx2"
     echo "Checking for 3dnow support ... $_3dnow"
@@ -1637,7 +1636,7 @@ echo "Checking for DirectShow ... $_dshow"
 echo "Checking for iconv function ... $_iconv"
 
 # check if compiler supports C++ and C++-libs are installed correctly
-if [ $_win32dll = yes -a $_dshow = yes ] ; then
+if test "$_win32dll" = yes && test "$_dshow" = yes ; then
 cat > $TMPCPP << EOF
 /* very useful C++ test program by atmos */
 #include <string>
@@ -1661,12 +1660,12 @@ int main(void) {
 EOF
 echo $_echo_n "Checking if your compiler '$_cc' supports C++ ... $_echo_c"
 if $_cc $TMPCPP -o $TMPO > /dev/null 2>&1 ; then
-  echo "yes"
+  echo yes
   echo $_echo_n "Checking for proper C++ runtime enviroment ... $_echo_c"
   if $TMPO ; then
-    echo "yes"
+    echo yes
   else
-    echo "no"
+    echo no
     cat << EOF
 Your C++ runtime enviroment is broken, make sure you correctly install the
 C++ libraries (libstdc++) and that the library path containing them is in
@@ -1679,7 +1678,7 @@ EOF
     exit
   fi
 else
-  echo "no"
+  echo no
   cat << EOF
 Your C++ compiler does not support C++, make sure you have enabled it on
 compiler compilation or for binary packages, make sure the appropriate
@@ -1701,39 +1700,39 @@ echo "Extra libs : $_extralibdir"
 echo "Extra headers : $_extraincdir"
 # write conf files.
 
-if [ $_gui = yes ]; then
+if test "$_gui" = yes ; then
 # --------------- GUI begin -------------------
 
 echo
 echo $_echo_n "Checking for gtk version ... $_echo_c"
 _gtk=`gtk-config --version 2>&1`
-[ -z "$_gtk" ] && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtk" && { echo 'gtk not found.'; exit 1; }
 echo "$_gtk"
 
 echo $_echo_n "Checking for gtk includes ... $_echo_c"
 _gtkinc=`gtk-config --cflags 2>&1`
-[ -z "$_gtkinc" ] && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtkinc" && { echo 'gtk not found.'; exit 1; }
 echo "done"
 
 echo $_echo_n "Checking for gtk libs ... $_echo_c"
 _gtklib=`gtk-config --libs 2>&1`
-[ -z "$_gtklib" ] && { echo 'gtk not found.'; exit 1; }
+test -z "$_gtklib" && { echo 'gtk not found.'; exit 1; }
 echo "done"
 
 echo
 echo $_echo_n "Checking for glib version ... $_echo_c"
 _glib=`glib-config --version 2>&1`
-[ -z "$_glib" ] && { echo 'glib not found.'; exit 1; }
+test -z "$_glib" && { echo 'glib not found.'; exit 1; }
 echo "$_glib"
 
 echo $_echo_n "Checking for glib includes ... $_echo_c"
 _glibinc=`glib-config --cflags 2>&1`
-[ -z "$_glibinc" ] && { echo 'glib not found.'; exit 1; }
+test -z "$_glibinc" && { echo 'glib not found.'; exit 1; }
 echo "done"
 
 echo $_echo_n "Checking for glib libs ... $_echo_c"
 _gliblib=`glib-config --libs 2>&1`
-[ -z "$_gliblib" ] && { echo 'glib not found.'; exit 1; }
+test -z "$_gliblib" && { echo 'glib not found.'; exit 1; }
 echo "done"
 
 cat > Gui/config.mak << EOF
@@ -1751,16 +1750,16 @@ EOF
 fi
 
 _streamingdef='#undef STREAMING'
-if [ $_streaming = yes ]; then
+if test "$_streaming" = yes ; then
    _streamingsrcs='asf_streaming.c network.c url.c http.c'
    _streamingdef='#define STREAMING'
 fi
 
-if [ $_gl = yes ]; then
+if test "$_gl" = yes ; then
    # niot yet etsted on OpenBSD - atmos	
-   if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
+   if test "$system_name" = "FreeBSD" || test "$system_name" = "OpenBSD" ; then
       # Under XFree86 4.x GL port is poorly designed
-      if [ -r /usr/X11R6/bin/XFree86 ]; then
+      if test -r /usr/X11R6/bin/XFree86 ; then
          _gllib='-lGL -pthread'
       else
          _gllib='-lGL'
@@ -1774,21 +1773,21 @@ _cssdef='#undef HAVE_LIBCSS'
 _csslib=''
 _cssinc=''
 
-if [ $_dvdread = yes ]; then
+if test "$_dvdread" = yes ; then
    _csslib='-ldvdread'
    _dvdreaddef='#define USE_DVDREAD'
-   _css='no'
+   _css=no
 else
    _dvdreaddef='#undef USE_DVDREAD'
 
-if [ $_css = yes ]; then
-   if [ ! -z "$_csslibdir" ]; then
+if test "$_css" = yes ; then
+   if test "$_csslibdir" ; then
      _csslib="-L${_csslibdir} -lcss"
    else
      _csslib='-lcss'
    fi
    _cssdef='#define HAVE_LIBCSS'
-   if [ ! -z "$_cssincdir" ]; then
+   if test "$_cssincdir" ; then
      _cssinc="-I${_cssincdir}"
    else
      _cssinc=""
@@ -1798,11 +1797,11 @@ fi
 fi
 
 
-if [ $_win32dll = yes ]; then
+if test "$_win32dll" = yes ; then
     _win32dll='#define USE_WIN32DLL 1'
     _win32lib='-Lloader -lloader'
     _win32dep='loader/libloader.a'
-    if [ $_dshow = yes ]; then
+    if test "$_dshow" = yes ; then
 	_dshow='#define USE_DIRECTSHOW'
 	_dshowlib='-Lloader/DirectShow -lDS_Filter -lstdc++'
 	_dshowdep='loader/DirectShow/libDS_Filter.a'
@@ -1815,7 +1814,7 @@ else
 fi
 
 
-if [ $_libavcodec = yes ]; then
+if test "$_libavcodec" = yes ; then
    _lavclib='-Llibavcodec -lavcodec'
    _lavcdep='libavcodec/libavcodec.a'
    _libavcodec='#define USE_LIBAVCODEC'
@@ -1825,17 +1824,17 @@ else
    _libavcodec='#undef USE_LIBAVCODEC'
 fi
 
-if [ $_fastmemcpy = yes ]; then
+if test "$_fastmemcpy" = yes ; then
    _fastmemcpy='#define USE_FASTMEMCPY'
 else
    _fastmemcpy='#undef USE_FASTMEMCPY'
 fi
 
-if [ $_x11 = yes ]; then
-  if [ $_xdpms_3 = yes ]; then
+if test "$_x11" = yes ; then
+  if test "$_xdpms_3" = yes ; then
     _x11lib='-lX11 -lXext -lXdpms'
     _have_xdpms='#define HAVE_XDPMS 1'
-  elif [ $_xdpms_4 = yes ]; then
+  elif test "$_xdpms_4" = yes ; then
     _x11lib='-lX11 -lXext'
     _have_xdpms='#define HAVE_XDPMS 1'
   else
@@ -1844,36 +1843,36 @@ if [ $_x11 = yes ]; then
   fi
 fi
 
-if [ $_xv = yes ]; then
+if test "$_xv" = yes ; then
   _xvlib='-lXv'
 fi
 
-if [ $_xinerama = yes ]; then
+if test "$_xinerama" = yes ; then
   _xineramalib='-lXinerama'
 fi
 
-if [ $_sdl = yes ]; then
+if test "$_sdl" = yes ; then
   _sdllib=`$_sdlconfig --libs` 
   _sdlcflags=`$_sdlconfig --cflags` 
 fi
 
-if [ $_ggi = yes ]; then
+if test "$_ggi" = yes ; then
   _ggilib='-lggi'
 fi
 
-if [ $_dga = yes ]; then
+if test "$_dga" = yes ; then
   _dgalib='-lXxf86dga'
 fi
 
-if [ $_svga = yes ]; then
+if test "$_svga" = yes ; then
   _svgalib='-lvgagl -lvga'
 fi
 
-if [ $_vm = yes ]; then
+if test "$_vm" = yes ; then
   _vmlib='-lXxf86vm'
 fi
 
-if [ "$_termcap" = "yes" ]; then
+if test "$_termcap" = yes ; then
  _termcap='#define USE_TERMCAP'
  _libtermcap='-ltermcap'
 else
@@ -1881,26 +1880,26 @@ else
  _libtermcap=''
 fi
 
-if [ "$_kstat" = "yes" ]; then
+if test "$_kstat" = yes ; then
   _have_libkstat="#define HAVE_LIBKSTAT 1"
 else
   _have_libkstat="#undef HAVE_LIBKSTAT"
 fi
 
-if [ "$_xmmp" = "yes" ]; then
+if test "$_xmmp" = yes ; then
  _xmmpaudio='#define USE_XMMP_AUDIO'
  _xmmplibs='-Llibxmm -lxmm'
 else
  _xmmpaudio='#undef USE_XMMP_AUDIO'
 fi
 
-if [ "$_iconv" = "yes" ]; then
+if test "$_iconv" = yes ; then
 _iconv='#define USE_ICONV'
 else
 _iconv='#undef USE_ICONV'
 fi
 
-if [ "$_lirc" = "yes" ]; then
+if test "$_lirc" = yes ; then
  _lircdefs='#define HAVE_LIRC'
  _lirclibs='-llirc_client'
 else
@@ -1908,11 +1907,11 @@ else
  _lirclibs=''
 fi
 
-if [ $_png = yes ]; then
+if test "$_png" = yes ; then
    _libpng='-lpng -lz'
 fi
 
-if [ $_vorbis = yes ]; then
+if test "$_vorbis" = yes ; then
    _vorbis='#define HAVE_OGGVORBIS'
    _libvorbis='-lvorbis -lm'
 else
@@ -1923,63 +1922,63 @@ _aosrc=''
 
 _alsa5='#undef HAVE_ALSA5'
 _alsa9='#undef HAVE_ALSA9'
-if [ $_alsa = 'yes' ]; then
- [ $_alsaver = '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
- [ $_alsaver = '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
+if test "$_alsa" = yes ; then
+ test "$_alsaver" = '0.5.x' && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
+ test "$_alsaver" = '0.9.x' && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
 fi
   
 _esdd='#undef HAVE_ESD'
-#if [ $_esd = 'yes' ]; then
+#if test "$_esd" = yes ; then
 # _esdd='#define HAVE_ESD'
 # _aosrc="$_aosrc ao_esd.c"
 # _esdlib='-lesd'
 #fi
 
-if [ "$_oss_audio" = "yes" ]; then
+if test "$_oss_audio" = yes ; then
  _ossaudio='#define USE_OSS_AUDIO'
  _aosrc="$_aosrc ao_oss.c"
 else
  _ossaudio='#undef USE_OSS_AUDIO'
 fi
 
-if [ "$_sun_audio" = "yes" ]; then
+if test "$_sun_audio" = yes ; then
  _sunaudio='#define USE_SUN_AUDIO'
  _aosrc="$_aosrc ao_sun.c"
 else
  _sunaudio='#undef USE_SUN_AUDIO'
 fi
 
-if [ "$_sys_soundcard_h" = "yes" ]; then
+if test "$_sys_soundcard_h" = yes ; then
  _have_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 1'
 else
  _have_soundcard_h='#undef  HAVE_SYS_SOUNDCARD_H'
 fi
 
-if [ "$_malloc_h" = "yes" ]; then
+if test "$_malloc_h" = yes ; then
  _have_malloc_h='#define HAVE_MALLOC_H 1'
 else
  _have_malloc_h='#undef  HAVE_MALLOC_H'
 fi
 
-if [ "$_memalign" = "yes" ]; then
+if test "$_memalign" = yes ; then
  _have_memalign='#define HAVE_MEMALIGN 1'
 else
  _have_memalign='#undef  HAVE_MEMALIGN'
 fi
 
-if [ "$_alloca_h" = "yes" ]; then
+if test "$_alloca_h" = yes ; then
  _have_alloca_h='#define HAVE_ALLOCA_H 1'
 else
  _have_alloca_h='#undef  HAVE_ALLOCA_H'
 fi
 
-if [ "$_sys_mman_h" = "yes" ]; then
+if test "$_sys_mman_h" = yes ; then
  _have_mman_h='#define HAVE_SYS_MMAN_H 1'
 else
  _have_mman_h='#undef  HAVE_SYS_MMAN_H'
 fi
 
-if [ "$_libdl" = "yes" ]; then
+if test "$_libdl" = yes ; then
  _have_libdl='#define HAVE_LIBDL 1'
 else
  _have_libdl='#undef  HAVE_LIBDL'
@@ -1987,28 +1986,28 @@ fi
 
 
 # Checking for CFLAGS
-if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
+if test "$_profile" || test "$_debug" ; then
  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
 else
-if test -z "$CFLAGS"; then
+if test -z "$CFLAGS" ; then
  CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
 fi
 fi
 # Under FreeBSD (maybe other systems as well?) we have to add to CFLAGS
 # for MT applications: 
-if [ "$system_name" = "FreeBSD" ]; then
+if test "$system_name" = "Linux" || test "$system_name" =  "FreeBSD" ; then
 CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
 
-if [ "$system_name" = "FreeBSD" ] && [ "$_iconv" = "#define USE_ICONV" ]; then
+if test "$system_name" = "FreeBSD" && test "$_iconv" = "#define USE_ICONV" ; then
 _iconvlib="-liconv"
 fi
 
 
 # 64 bit file offsets?
-if [ "$_largefiles" = "yes" -o "$system_name" = "FreeBSD" ]; then
+if test "$_largefiles" = yes || test "$system_name" = "FreeBSD" ; then
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  if [ "$_dvdread" = "yes" ]; then
+  if test "$_dvdread" = yes ; then
   # dvdread support requires this (for off64_t)
   CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
   fi
@@ -2018,44 +2017,44 @@ fi
 
 echo "Creating $CCONF"
 
-if [ "$_mmx" = "yes" ]; then
+if test "$_mmx" = yes ; then
  _mmx='#define HAVE_MMX'
- _cfg_mmx='yes'
+ _cfg_mmx=yes
 else
  _mmx='#undef HAVE_MMX'
- _cfg_mmx='no'
+ _cfg_mmx=no
 fi
 
-if [ "$_mmx2" = "yes" ]; then
+if test "$_mmx2" = yes ; then
  _mmx2='#define HAVE_MMX2'
- _cfg_mmx2='yes'
+ _cfg_mmx2=yes
 else
  _mmx2='#undef HAVE_MMX2'
- _cfg_mmx2='no'
+ _cfg_mmx2=no
 fi
 
-if [ $_3dnow = yes ]; then
+if test "$_3dnow" = yes ; then
  _3dnowm='#define HAVE_3DNOW'
- _cfg_3dnow='yes'
+ _cfg_3dnow=yes
 else
  _3dnowm='#undef HAVE_3DNOW'
- _cfg_3dnow='no'
+ _cfg_3dnow=no
 fi
 
-if [ $_3dnowex = yes ]; then
+if test "$_3dnowex" = yes ; then
  _3dnowexm='#define HAVE_3DNOWEX'
- _cfg_3dnowex='yes'
+ _cfg_3dnowex=yes
 else
  _3dnowexm='#undef HAVE_3DNOWEX'
- _cfg_3dnowex='no'
+ _cfg_3dnowex=no
 fi
 
-if [ $_sse = yes ]; then
+if test "$_sse" = yes ; then
  _ssem='#define HAVE_SSE'
- _cfg_sse='yes'
+ _cfg_sse=yes
 else
  _ssem='#undef HAVE_SSE'
- _cfg_sse='no'
+ _cfg_sse=no
 fi
 
 # ---
@@ -2063,7 +2062,7 @@ fi
 _vosrc=''
 #_aosrc=''
 
-if [ $_aa = yes ]; then
+if test "$_aa" = yes ; then
  _aa='#define HAVE_AA'
  _vosrc=$_vosrc' vo_aa.c'
  _aalib='-laa'
@@ -2072,7 +2071,7 @@ else
  _aalib=''
 fi
 
-if [ $_png = yes ]; then
+if test "$_png" = yes ; then
  _png='#define HAVE_PNG'
  _vosrc=$_vosrc' vo_png.c'
 else
@@ -2080,7 +2079,7 @@ else
 fi
 
 
-if [ $_mlib = yes ]; then
+if test "$_mlib" = yes ; then
  _mlibdef='#define HAVE_MLIB'
  _mlibinc="-I$_mlibdir/include"
  _mliblib="-L$_mlibdir/lib -R$_mlibdir/lib -lmlib"
@@ -2092,14 +2091,14 @@ fi
 
 # ---
 
-if [ $_gl = yes ]; then
+if test "$_gl" = yes ; then
  _gl='#define HAVE_GL'
  _vosrc=$_vosrc' vo_gl.c vo_gl2.c'
 else
  _gl='#undef HAVE_GL'
 fi
 
-if [ $_sdl = yes ]; then
+if test "$_sdl" = yes ; then
  _sdldef='#define HAVE_SDL'
  _vosrc=$_vosrc' vo_sdl.c'
  _aosrc=$_aosrc' ao_sdl.c'
@@ -2107,34 +2106,34 @@ else
  _sdldef='#undef HAVE_SDL'
 fi
 
-if [ $_ggi = yes ]; then
+if test "$_ggi" = yes ; then
  _ggi='#define HAVE_GGI'
  _vosrc=$_vosrc' vo_ggi.c'
 else
  _ggi='#undef HAVE_GGI'
 fi
 
-if [ $_x11 = yes ]; then
+if test "$_x11" = yes ; then
  _x11='#define HAVE_X11'
  _vosrc=$_vosrc' vo_x11.c'
 else
  _x11='#undef HAVE_X11'
 fi
 
-if [ $_xv = yes ]; then
+if test "$_xv" = yes ; then
  _xv='#define HAVE_XV'
  _vosrc=$_vosrc' vo_xv.c'
 else
  _xv='#undef HAVE_XV'
 fi
 
-if [ $_vm = yes ]; then
+if test "$_vm" = yes ; then
  _vm='#define HAVE_XF86VM'
 else
  _vm='#undef HAVE_XF86VM'
 fi
 
-if [ $_xinerama = yes ]; then
+if test "$_xinerama" = yes ; then
  _xinerama='#define HAVE_XINERAMA'
 else
  _xinerama='#undef HAVE_XINERAMA'
@@ -2142,49 +2141,49 @@ fi
 
 # ---
 
-if [ $_mga = yes ]; then
+if test "$_mga" = yes ; then
  _mga='#define HAVE_MGA'
  _vosrc=$_vosrc' vo_mga.c'
 else
  _mga='#undef HAVE_MGA'
 fi
 
-if [ $_xmga = yes ]; then
+if test "$_xmga" = yes ; then
  _vosrc=$_vosrc' vo_xmga.c'
  _xmga='#define HAVE_XMGA'
 else
  _xmga='#undef HAVE_XMGA' 
 fi
 
-if [ $_syncfb = yes ]; then
+if test "$_syncfb" = yes ; then
  _syncfb='#define HAVE_SYNCFB'
  _vosrc=$_vosrc' vo_syncfb.c'
 else
  _syncfb='#undef HAVE_SYNCFB'
 fi
 
-if [ $_3dfx = yes ]; then
+if test "$_3dfx" = yes ; then
  _3dfx='#define HAVE_3DFX'
  _vosrc=$_vosrc' vo_3dfx.c'
 else
  _3dfx='#undef HAVE_3DFX'
 fi
 
-if [ $_tdfxfb = yes ]; then
+if test "$_tdfxfb" = yes ; then
  _tdfxfb='#define HAVE_TDFXFB'
  _vosrc=$_vosrc' vo_tdfxfb.c'
 else
  _tdfxfb='#undef HAVE_TDFXFB'
 fi
 
-if [ $_svga = yes ]; then
+if test "$_svga" = yes ; then
  _svga='#define HAVE_SVGALIB'
  _vosrc=$_vosrc' vo_svga.c'
 else
  _svga='#undef HAVE_SVGALIB'
 fi
 
-if [ $_dga = yes ]; then
+if test "$_dga" = yes ; then
  _dga='#define HAVE_DGA'
 # _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
  _vosrc=$_vosrc' vo_dga.c'
@@ -2192,7 +2191,7 @@ else
  _dga='#undef HAVE_DGA'
 fi
 
-if [ $_dga2 = yes ]; then
+if test "$_dga2" = yes ; then
  _dga2='#define HAVE_DGA2'
 # _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
  _vosrc=$_vosrc' vo_dga.c'
@@ -2200,20 +2199,20 @@ else
  _dga2='#undef HAVE_DGA2'
 fi
 
-if [ "$_xshape" = "yes" ]; then
+if test "$_xshape" = yes ; then
  _xshape_def='#define HAVE_XSHAPE'
 else
  _xshape_def='#undef HAVE_XSHAPE'
 fi
 
-if [ $_fbdev = yes ]; then
+if test "$_fbdev" = yes ; then
  _fbdev='#define HAVE_FBDEV'
  _vosrc=$_vosrc' vo_fbdev.c'
 else
  _fbdev='#undef HAVE_FBDEV'
 fi
 
-if [ $_gui = yes ]; then
+if test "$_gui" = yes ; then
 # _gui_def='#define HAVE_GUI'
  _gui_def='#define HAVE_NEW_GUI'
  _gui_lib='-LGui -lgui $(GTKLIB) $(GLIBLIB)'
@@ -2222,7 +2221,7 @@ else
  _gui_lib=''
 fi
 
-if [ $_divx4linux = yes ]; then
+if test "$_divx4linux" = yes ; then
  _divx4def='#define NEW_DECORE'
  _decorelibs='-ldivxdecore opendivx/postprocess.o'
 else
@@ -2230,7 +2229,7 @@ else
  _decorelibs='-Lopendivx -ldecore'
 fi
 
-if [ "$_debug" != "" ]; then
+if test "$_debug" ; then
  _debugdef='#define MP_DEBUG'
 else
  _debugdef='#undef MP_DEBUG'
@@ -2556,12 +2555,12 @@ cat > $CHELP << EOF
 #include "$_mp_help"
 EOF
 
-if [ $_mtrr = yes ]; then
+if test "$_mtrr" = yes ; then
  echo "Please check mtrr settings at /proc/mtrr (see DOCS/video.html#2.2.1.1)"
  echo
 fi
 
-if [ $_sdl = outdated ]; then
+if test "$_sdl" = "outdated" ; then
  echo "You have an outdated version of libSDL installed (older than v1.1.7)"
  echo "and SDL support has therefore been disabled. Please upgrade to a more"
  echo "recent version (v1.1.8 and v1.2.[0-1] are known to work) from:"
@@ -2571,8 +2570,8 @@ if [ $_sdl = outdated ]; then
  echo "version might work. Use --enable-sdl to force usage of libSDL."
 fi
 
-if [ "$host_arch" = i386 ]; then
-    if [ $_win32libdirnotify = yes ]; then
+if test "$host_arch" = "i386" ; then
+    if test "$_win32libdirnotify" = yes ; then
 	echo "Failed to find a WIN32 codecs dir at $_win32libdir!"
 	echo "Create it and copy the DLL files there! (You can get them from your windows"
 	echo "directory or download them from:"
