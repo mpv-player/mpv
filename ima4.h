@@ -2,7 +2,18 @@
 #define QUICKTIME_IMA4_H
 
 //#include "quicktime.h"
-#include "inttypes.h"
+//#include "inttypes.h"
+
+/* Known by divine revelation */
+
+#define IMA4_BLOCK_SIZE 0x22
+#define IMA4_SAMPLES_PER_BLOCK 0x40
+
+// in:  out buffer, in buffer (IMA4_BLOCK_SIZE bytes), outbuf max size
+// return: number of samples decoded
+int ima4_decode_block(unsigned short *output, unsigned char *input, int maxlen);
+
+#if 0
 
 typedef struct
 {
@@ -24,5 +35,6 @@ typedef struct
 	long read_size;     /* Size of read buffer. */
 } quicktime_ima4_codec_t;
 
+#endif
 
 #endif

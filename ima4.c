@@ -23,11 +23,6 @@ static int quicktime_ima4_index[16] =
     -1, -1, -1, -1, 2, 4, 6, 8
 };
 
-/* Known by divine revelation */
-
-#define BLOCK_SIZE 0x22
-#define SAMPLES_PER_BLOCK 0x40
-
 /* ================================== private for ima4 */
 
 
@@ -66,7 +61,7 @@ void ima4_decode_sample(int *predictor, int *nibble, int *index, int *step)
 	*step = quicktime_ima4_step[*index];
 }
 
-int ima4_decode_block(int16_t *output, unsigned char *input, int maxlen)
+int ima4_decode_block(unsigned short *output, unsigned char *input, int maxlen)
 {
 	int predictor;
 	int index;
@@ -74,7 +69,7 @@ int ima4_decode_block(int16_t *output, unsigned char *input, int maxlen)
 	int i, nibble, nibble_count, block_size;
 	int olen = 0;
 	unsigned char *block_ptr;
-	unsigned char *input_end = input + BLOCK_SIZE;
+	unsigned char *input_end = input + IMA4_BLOCK_SIZE;
 //	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
 
 /* Get the chunk header */

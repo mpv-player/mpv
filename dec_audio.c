@@ -32,6 +32,8 @@ int fakemono=0;
 
 #include "ac3-iec958.h"
 
+#include "ima4.h"
+
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_AudioDec.h"
 #endif
@@ -227,6 +229,12 @@ case AFM_GSM:
   // MS-GSM audio codec:
   sh_audio->audio_out_minsize=4*320;
   break;
+case AFM_IMA4:
+  // IMA-ADPCM 4:1 audio codec:
+  sh_audio->audio_out_minsize=4096; //4*IMA4_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_div=IMA4_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=IMA4_BLOCK_SIZE;
+  break;
 case AFM_MPEG:
   // MPEG Audio:
   sh_audio->audio_out_minsize=4608;
@@ -410,6 +418,14 @@ case AFM_GSM: {
   // 1 sec: sh_audio->channels*sh_audio->samplerate  samples
   // 1 frame: 320 samples
   sh_audio->i_bps=65*(sh_audio->channels*sh_audio->samplerate)/320;  // 1:10
+  break;
+}
+case AFM_IMA4: {
+  // IMA-ADPCM 4:1 audio codec:
+  sh_audio->channels=sh_audio->wf->nChannels;
+  sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+  // decodes 34 byte -> 64 short
+  sh_audio->i_bps=IMA4_BLOCK_SIZE*(sh_audio->channels*sh_audio->samplerate)/IMA4_SAMPLES_PER_BLOCK;  // 1:4
   break;
 }
 case AFM_MPEG: {
@@ -773,11 +789,17 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         break;
       }
       case AFM_GSM:  // MS-GSM decoder
-      { unsigned char buf[65]; // 65 bytes / frame
-        if(demux_read_data(sh_audio->ds,buf,65)!=65) break; // EOF
-        XA_MSGSM_Decoder(buf,(unsigned short *) buf); // decodes 65 byte -> 320 short
+      { unsigned char ibuf[65]; // 65 bytes / frame
+        if(demux_read_data(sh_audio->ds,ibuf,65)!=65) break; // EOF
+        XA_MSGSM_Decoder(ibuf,(unsigned short *) buf); // decodes 65 byte -> 320 short
 //  	    XA_GSM_Decoder(buf,(unsigned short *) &sh_audio->a_buffer[sh_audio->a_buffer_len]); // decodes 33 byte -> 160 short
         len=2*320;
+        break;
+      }
+      case AFM_IMA4: // IMA-ADPCM 4:1 audio codec:
+      { unsigned char ibuf[IMA4_BLOCK_SIZE]; // bytes / frame
+        if(demux_read_data(sh_audio->ds,ibuf,IMA4_BLOCK_SIZE)!=IMA4_BLOCK_SIZE) break; // EOF
+        len=2*ima4_decode_block(buf,ibuf,2*IMA4_SAMPLES_PER_BLOCK);
         break;
       }
       case AFM_AC3: // AC3 decoder
