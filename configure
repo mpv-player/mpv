@@ -666,6 +666,7 @@ _divx4linux=auto
 _lirc=auto
 _gui=no
 _termcap=auto
+_termios=auto
 _3dfx=no
 _tdfxfb=no
 _largefiles=no
@@ -758,6 +759,8 @@ for ac_option do
   --disable-gui)	_gui=no		;;
   --enable-termcap)	_termcap=yes	;;
   --disable-termcap)	_termcap=no	;;
+  --enable-termios)	_termios=yes    ;;
+  --disable-termios)    _termios=no     ;;
   --enable-3dfx)	_3dfx=yes	;;
   --disable-3dfx)	_3dfx=no	;;
   --enable-tdfxfb)	_tdfxfb=yes	;;
@@ -1135,10 +1138,30 @@ fi
 echores "$_termcap"
 
 
+echocheck "termios"
+if test "$_termios" = auto ; then
+  _termios=no
+  cat > $TMPC <<EOF
+#include <sys/termios.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _termios=yes
+else
+  _termios=no
+fi
+if test "$_termios" = yes ; then
+  _def_termios='#define USE_TERMIOS 1'
+ else
+  _def_termios='#undef USE_TERMIOS'
+fi
+echores "$_termios"
+
+
 echocheck "shm"
 if test "$_shm" = auto ; then
   _shm=no
   cat > $TMPC << EOF
+#include <sys/types.h>
 #include <sys/shm.h>
 int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
 EOF
@@ -2553,6 +2576,9 @@ $_def_linux
 
 /* termcap flag for getch2.c */
 $_def_termcap
+
+/* termios flag for getch2.c */
+$_def_termios
 
 /* enable PNG support */
 $_def_png
