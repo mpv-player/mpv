@@ -707,102 +707,70 @@ your PC since video BIOS initializes itself only once during POST procedure.
 
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1. Matrox cards</A></B></P>
 
-<P><I> What I'd love to see in mplayer is the the same feature that I see in my
-windows box. When I start a movie in windows (in a window or in full screen)
-the movie is also redirected to the tv-out and I can also see it full screen
-on my tv. I love this feature and was wondering how hard it would be to add
-such a feature to mplayer.</I></P>
-
-<P>It's a driver limitation. BES (Back-End Scaler, it's the overlay generator
-and YUV scaling engine of G200/G400/G450/G550 cards) works only with CRTC1.
-Normally, CRTC1 (textmode, every bpp gfx and BES) is routed to HEAD1,
-and CRTC2 (only 16/32bpp gfx) is routed to HEAD2 (TV-out).</P>
-
-<P>Under linux, you have two choices to get TV-out working:</P>
-
-<P><UL>
-<LI>Using X 4.0.x + the HAL driver from matrox, so you'll get dual-head
-support, and you'll be able to redirect second output to the TV.
-Unfortunately it has Macrovision encryption enabled, so it will
-only work on directly-connected TV, no through VCR.
-Other problem is that Xv doesn't work on the second head.
-(I don't know how Windows solve it, maybe it swaps the CRTCs between
-the heads, or just uses YUV framebuffer of second DAC with some trick)
-<LI>Using matroxfb with dual-head support enabled (2.4.x kernels).
-You'll be able to get a framebuffer console (using CRTC2, so it's
-slow), and TV-out (using CRTC1, with BES support).
-You have to forget X while using this kind of TV-out! :(
-</UL></P>
-
-<P>Follow these instructions:</P>
-
-<P><UL>
-<LI>Compile all the matrox-related things to modules in the kernel.
-(you MUST compile them to modules, at least I couldn't get them
-working built-in yet)
-[reboot to new kernel & install modules, but don't load them yet!]
-<P><CODE>
-&nbsp;&nbsp;cd TVout<BR>
-&nbsp;&nbsp;./compile.sh</CODE></P>
-<LI>Run the 'modules' script from the TV-out directory of mplayer.
-It will switch your console to framebuffer.
-Change to tty1 (ALT+F1)!
-Now run the script 'independent', it will set up your tty's:
-<P>tty 1,2:      fb console, CRTC2, head 1 (monitor)<BR>
-tty 3,4,5...: framebuffer+BES, CRTC1, head 2 (TV-out)</P>
-You should run the scripts TV-* and Mon-* to set up resolutions:
-<P>change to tty1 (ALT+F1), and run Mon-* (one of them)<BR>
-change to tty3 (ALT+F3) and then back to tty1 (ALT+F1)</P>
-(this change will select tty3 on /dev/fb1 - tricky)<BR>
-<P>run TV-* (one of them)</P>
-(now you'll get a console on your PAL TV - don't know about NTSC)
-<P>Now if you start mplayer (on tty1), the picture will show up on
-the tty3, so you'll see it on your TV or second monitor.</P>
-</UL></P>
-
-You should edit your config file, to contain the <CODE>screenw</CODE> and
-<CODE>screenh</CODE> options (the first should be set to the horizontal
-resolution of the framebuffer, and the latter to the vertical. See
-<CODE>example.conf</CODE>). This is required for fullscreen playing, and for
-the aspect code to work.</P>
-
-<P>Yes, it is a bit 'hack' now. But I'm waiting for the marvel
-project to be finished, it will provide real TV-out drivers, I hope.</P>
-
-<P>My current problem is that BES is working only with CRTC1. So picture
-will always shown up on head routed to CRTC1 (normaly the monitor),
-so i have to swap CRTC's, but this way your console will framebuffer
-(CRTC2 can't do text-mode) and a bit slow (no acceleration). :(</P>
-
-<P><I>Anyway i also just get monochrome output on the tv ...</I><BR>
-Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.</P>
-
-
-<P><B><A NAME=2.2.1.A.1a>2.2.1.A.1a. Matrox cards (method 2 - the XFree approach)</A></B></P>
-
-<P>The previous method doesn't work very good for X users, since either they
-have to shutdown it, or it becomes uselessly messy. This section is for them.</P>
+<P>Under Linux you have 2 methods to get TV out working :</P>
 
 <P>
-<LI>compile the matroxfb stuff to modules</LI>
-<LI>load modules with the <CODE>./modules</CODE> script</LI>
-<LI>turn on display cloning with <CODE>./cloning</CODE> . This way CRTC2
-won't be used, CRTC1 will display on <I>both</I> heads.
-<LI>execute <CODE>./TV-640x512</CODE> or whichever resolution you
-wish to use</LI>
+<UL>
+  <LI><B>XFree86</B>: using the driver and the HAL module, available from
+    <A HREF="http://www.matrox.com">Matrox's site</A>. This will give you X on
+    the TV.<BR> <B>This method doesn't give you accelerated playback</B> as
+    under Windoze! The second head has only YUV framebuffer, the <I>BES</I>
+    (Back End Scaler, the YUV scaler on G200/G400/G450/G550 cards) doesn't work
+    on it!  The windows driver somehow workarounds this, probably by using the
+    3D engine to zoom, and the YUV framebuffer to display the zoomed
+    image. If you really want to use X, use the <CODE>-vo x11 -zoom</CODE>
+    options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copyprotection
+    enabled.</LI>
+  <LI><B>Framebuffer</B>: using the <B>matroxfb modules</B> in the 2.4 kernels.
+    2.2 kernels don't have the TVout feature in them, thus unusable for this.
+    You have to enable ALL matroxfb-specific feature during compilation, and
+    compile them into <B>modules</B>!
+    <UL>
+      <LI>
+	Enter <CODE>TVout/matroxset</CODE> and type <CODE>make</CODE>. Install
+        <CODE>matroxset</CODE> into somewhere in your PATH.</LI>
+      <LI>
+	If you don't have <CODE>fbset</CODE> installed, enter
+        <CODE>TVout/fbset</CODE> and type <CODE>make</CODE>. Install
+        <CODE>fbset</CODE> into somewhere in your PATH.</LI>
+      <LI>
+        Then enter into the <CODE>TVout/</CODE> directory in the <B>MPlayer</B>
+        source, and execute <CODE>./modules</CODE> as root. Your text-mode console
+        will enter into framebuffer mode (no way back!).</LI>
+      <LI>Next, run the <CODE>./matroxtv</CODE> script. This will present you
+        to a very simple menu. Press <B>2</B> and <B>ENTER</B>. Now you should
+	have the same picture on your monitor, and TV. The <B>3.</B> option
+        will turn on independent display, but then you <B>can't use X</B>! If
+	the TV picture has some weird stripes on it, the script wasn't able to
+	set the resolution correctly (to 640x512 by default). Use other menu
+	items randomly and it'll be OK :)</LI>
+    </UL>
+
+    <P>
+    Yoh. Next task is to make the cursor on tty1 (or whatever) to disappear,
+    and turn off screen blanking. Execute the following commands:</P>
+
+    <P>
+      <CODE>echo -e '\033[?25l'<BR>
+      setterm -blank 0</CODE>
+    </P>
+
+    <P>
+    You possibly want to put the above into a script, and also clear
+    the screen.. To turn the cursor back :<BR><CODE>echo -e '\033[?25h'</CODE>
+    </P>
+
+    <P>Yeah kewl. Start movie playing with <CODE>mplayer -vo mga -fs -screenw 640
+    -screenh 512 &lt;filename&gt;</CODE><BR>
+    (if you use X, now change to matroxfb with for example CTRL-ALT-F1 !)<BR>
+    Change 640x512 if you set the resolution to other..<BR>
+    <B>Enjoy the ultra-fast ultra-featured Matrox TV output (better than Xv) !</B>
+    </P>
+  </LI>
+</LI>
+</UL>
 </P>
 
-<P>Now you should have a clean picture on the TV, and maybe a somewhat strange
-picture on the monitor. But monitor doesn't matter, start X. Your TV
-goes black or have strange stripes, but monitor/X is fine !<BR>
-
-<P>
-So, anytime you want to start watching something on TV, just start
-<B>MPlayer</B> in X with the <CODE>-vo mga -screenw XXX -screenh XXX</CODE>
-(write the horizontal and vertical resolution of your framebuffer to the XXX's,
-respectively) options, change to tty1 (with ctrl-alt-f1), and turn off the
-monitor.
-</P>
 
 <P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI cards</A></B></P>
 
@@ -853,8 +821,8 @@ movies on their TV</b> through <a href=#2.2.1.12>VESA drivers</a>.
 </P>
 
 <P>
-I should say good words into address of ATI Inc. too:<br>
-<b>it produces top quality BIOSes.</b>
+I should say good words to ATI Inc. too:<br>
+<b>they produce top quality BIOSes.</b>
 </P>
 
 <P>
@@ -865,7 +833,7 @@ chips with 64 - 128-bit access) so it's not bottleneck for them. There are no
 limitations on which video mode can be displayed on your TV (like on other
 cards) so you can use <b>any video mode</b> on your <b>TV</b> (from
 <b>320x200</b> up to <b>1024x768</b>).<br>
-Only thing you need to do - <b>have plugged tv-connector in before booting your
+Only thing you need to do - <b>have TV connector plugged in before booting your
 PC</b> since video BIOS initializes itself only once during POST procedure.
 </P>
 
