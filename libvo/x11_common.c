@@ -696,9 +696,13 @@ void vo_x11_setlayer( int layer )
    arg2=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
    if ( Success == XGetWindowProperty( mDisplay,vo_window,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 && format == 32) {
        for (i = 0; i < nitems; i++) {
-	   if (((Atom)args[i] == arg1) || ((Atom)args[i] == arg2)) return;
+	   if (((Atom)args[i] == arg1) || ((Atom)args[i] == arg2)) {
+	       XFree( args );
+	       return;
+	   }
        }
    }
+   XFree( args );
    // State was not set, continue with GNOME hints
   }
  
