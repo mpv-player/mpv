@@ -3902,6 +3902,17 @@ EOF
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x-alsa'
+
+  cat > $TMPC << EOF
+#include <sys/asoundlib.h>
+int main(void) { return (!(SND_LIB_MAJOR==1 && SND_LIB_MINOR==0)); }
+EOF
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='1.0.x-sys'
+  cat > $TMPC << EOF
+#include <alsa/asoundlib.h>
+int main(void) { return (!(SND_LIB_MAJOR==1 && SND_LIB_MINOR==0)); }
+EOF
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='1.0.x-alsa'
 fi
 _def_alsa5='#undef HAVE_ALSA5'
 _def_alsa9='#undef HAVE_ALSA9'
@@ -3926,6 +3937,22 @@ if test "$_alsaver" ; then
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     echores "yes (using alsa 0.9.x and alsa/asoundlib.h)"
+  elif test "$_alsaver" = '1.0.x-sys' ; then
+    _aosrc="$_aosrc ao_alsa9.c"
+    _aomodules="alsa9 $_aomodules"
+    _def_alsa9="#define ALSA_PCM_OLD_HW_PARAMS_API 1
+#define ALSA_PCM_OLD_SW_PARAMS_API 1
+#define HAVE_ALSA9 1"
+    _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
+    echores "yes (using alsa 1.0.x and sys/asoundlib.h)"
+  elif test "$_alsaver" = '1.0.x-alsa' ; then
+    _aosrc="$_aosrc ao_alsa9.c"
+    _aomodules="alsa9 $_aomodules"
+    _def_alsa9="#define ALSA_PCM_OLD_HW_PARAMS_API 1
+#define ALSA_PCM_OLD_SW_PARAMS_API 1
+#define HAVE_ALSA9 1"
+    _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
+    echores "yes (using alsa 1.0.x and alsa/asoundlib.h)"
   fi
   _ld_alsa="-lasound $_ld_dl $_ld_pthread"
 else
