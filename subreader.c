@@ -1860,7 +1860,7 @@ char** sub_filenames(char* path, char *fname)
 #else
 		for (i = 0; sub_exts[i]; i++) {
 #endif
-		    if (strcmp(sub_exts[i], tmp_fname_ext) == 0) {
+		    if (strcasecmp(sub_exts[i], tmp_fname_ext) == 0) {
 			found = 1;
 			break;
 		    }
