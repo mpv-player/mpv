@@ -43,7 +43,7 @@ static void state_restore_mmx (cpu_state_t * state)
 }
 #endif
 
-#ifdef ARCH_PPC
+#if defined( ARCH_PPC ) && defined( HAVE_ALTIVEC )
 #ifdef HAVE_ALTIVEC_H	/* gnu */
 #define LI(a,b) "li " #a "," #b "\n\t"
 #define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
