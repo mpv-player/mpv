@@ -14,10 +14,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define ERR_NOT_AN_OPTION	-1
-#define ERR_MISSING_PARAM	-2
-#define ERR_OUT_OF_RANGE	-3
-#define ERR_FUNC_ERR		-4
 
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
@@ -65,6 +61,14 @@ static int read_option(char *opt, char *param)
 	char *endptr;
 
 	for (i = 0; i < nr_options; i++) {
+		int namelength;
+		/* allow 'aa*' in config.name */
+		namelength=strlen(config[i].name);
+		if ( (config[i].name[namelength-1]=='*') && 
+			    !memcmp(opt, config[i].name, namelength-1))
+		        break;
+	    
+	    
 		if (!strcasecmp(opt, config[i].name))
 			break;
 	}
@@ -93,6 +97,7 @@ static int read_option(char *opt, char *param)
 				    !strcasecmp(param, "si") ||
 				    !strcasecmp(param, "igen") ||
 				    !strcasecmp(param, "y") ||
+				    !strcasecmp(param, "j") ||
 				    !strcasecmp(param, "i") ||
 				    !strcmp(param, "1"))
 					*((int *) config[i].p) = config[i].max;
@@ -201,6 +206,17 @@ static int read_option(char *opt, char *param)
 				goto out;
 			}
 			ret = 1;
+			break;
+		case CONF_TYPE_FUNC_FULL:
+			if (param!=NULL && param[0]=='-'){
+			    ret=((cfg_func_arg_param_t) config[i].p)(config + i, opt, NULL);
+			    if (ret>=0) ret=0;
+			    /* if we return >=0: param is processed again (if there is any) */
+			}else{
+			    ret=((cfg_func_arg_param_t) config[i].p)(config + i, opt, param);
+			    /* if we return 0: need no param, precess it again */
+			    /* if we return 1: accepted param */
+			}
 			break;
 		case CONF_TYPE_FUNC:
 			if ((((cfg_func_t) config[i].p)(config + i)) < 0) {

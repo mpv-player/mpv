@@ -12,6 +12,15 @@
 #define CONF_TYPE_FUNC		4
 #define CONF_TYPE_FUNC_PARAM	5
 #define CONF_TYPE_PRINT		6
+#define CONF_TYPE_FUNC_FULL	7
+
+
+#define ERR_NOT_AN_OPTION	-1
+#define ERR_MISSING_PARAM	-2
+#define ERR_OUT_OF_RANGE	-3
+#define ERR_FUNC_ERR		-4
+
+
 
 #define CONF_MIN		(1<<0)
 #define CONF_MAX		(1<<1)
@@ -27,6 +36,7 @@ struct config {
 	float min,max;
 };
 
+typedef int (*cfg_func_arg_param_t)(struct config *, char *, char *);
 typedef int (*cfg_func_param_t)(struct config *, char *);
 typedef int (*cfg_func_t)(struct config *);
 

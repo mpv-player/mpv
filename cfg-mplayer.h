@@ -2,6 +2,7 @@
  * config for cfgparser
  */
 
+
 #ifdef HAVE_FBDEV
 extern char *fb_dev_name;
 extern char *fb_mode_cfgfile;
@@ -50,11 +51,21 @@ extern char *mDisplayName;
 #endif
 
 #ifdef HAVE_AA
-extern int  aaopt_osdcolor;
-extern int  aaopt_extended;
-extern int  aaopt_eight;
-extern char aaopt_driver;
+extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
 #endif
+
+/*
+ * CONF_TYPE_FUNC_FULL :
+ * allows own implemtations for passing the params
+ * 
+ * the function receives parameter name and argument (if it does not start with - )
+ * useful with a conf.name like 'aa*' to parse several parameters to a function
+ * return 0 =ok, but we didn't need the param (could be the filename)
+ * return 1 =ok, we accepted the param
+ * negative values: see cfgparser.h, ERR_XXX
+ *
+ * by Folke
+ */
 
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
@@ -203,10 +214,7 @@ struct config conf[]={
 #endif
 
 #ifdef HAVE_AA
-	{"aaosdfont", &aaopt_osdcolor, CONF_TYPE_INT, CONF_RANGE, 0, 5 }, 
-	{"aaextended", &aaopt_extended, CONF_TYPE_FLAG, 0, 0, 1 },
-	{"aaeight", &aaopt_eight, CONF_TYPE_FLAG, 0, 0, 1 },
-	{"aadriver", &aaopt_driver, CONF_TYPE_STRING, 0, 0, 0 },
+	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 },
 #endif
 
       
