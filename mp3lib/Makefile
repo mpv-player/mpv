@@ -20,11 +20,11 @@ endif
 #OBJS += dct64_sse.o
 #endif
 ifeq ($(TARGET_3DNOW),yes)
-SRCS += dct36_3dnow.s dct64_3dnow.s
+SRCS += dct36_3dnow.s dct64_3dnow.c
 OBJS += dct36_3dnow.o dct64_3dnow.o
 endif
 ifeq ($(TARGET_3DNOWEX),yes)
-SRCS += dct36_k7.s dct64_k7.s
+SRCS += dct36_k7.s dct64_k7.c
 OBJS += dct36_k7.o dct64_k7.o
 endif
 endif
