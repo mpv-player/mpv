@@ -23,9 +23,6 @@ typedef struct {
 // Check if a file is a BMP file depending on whether starts with 'BM'
 int bmp_check_file(demuxer_t *demuxer)
 {
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
-
   if (stream_read_word(demuxer->stream) == (('B' << 8) | 'M'))
     return 1;
   else

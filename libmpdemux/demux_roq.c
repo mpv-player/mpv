@@ -50,9 +50,6 @@ typedef struct roq_data_t
 //  84 10 FF FF FF FF xx xx
 int roq_check_file(demuxer_t *demuxer)
 {
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
-
   if ((stream_read_dword(demuxer->stream) == 0x8410FFFF) &&
       ((stream_read_dword(demuxer->stream) & 0xFFFF0000) == 0xFFFF0000))
     return 1;

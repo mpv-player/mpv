@@ -68,8 +68,6 @@ int rawdv_check_file(demuxer_t *demuxer)
 
    mp_msg(MSGT_DEMUX,MSGL_V,"Checking for DV\n");
 
-   stream_reset(demuxer->stream);
-   stream_seek(demuxer->stream, 0);
    bytes_read=stream_read(demuxer->stream,tmp_buffer,DV_PAL_FRAME_SIZE);
    if ((bytes_read!=DV_PAL_FRAME_SIZE) && (bytes_read!=DV_NTSC_FRAME_SIZE))
       return 0;
