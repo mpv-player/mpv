@@ -1,5 +1,6 @@
-// Last sync on 2004-10-20 with help_mp-en.h 1.147
-// Translated by:  Carl Fürstenberg <azatoth@gmail.com>
+// Last sync on 2004-10-20 with help_mp-en.h 1.148
+// Translated by:  Carl Fürstenberg &#60;azatoth&#64;gmail&#46;com&#62;
+// Helped by: Jan Knutar &#60;jknutar&#64;nic&#46;fi&#62;
 // ========================= MPlayer hjälp ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -195,24 +196,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavCellChange "DVDNAV-händelse: 'Nav Cell' ändrad\n"
 #define MSGTR_DvdnavNavSpuClutChange "DVDNAV-händelse: 'Nav SPU CLUT' ändrad\n"
 #define MSGTR_DvdnavNavSeekDone "DVDNAV-händelse: 'Nav Seek' ändrad\n"
-/*
- * FIXME A lot of shorted words, not translating atm
- */
-
-#define MSGTR_DvdnavNullEvent "DVDNAV-hÃ¤ndelse NULL?!\n"
-#define MSGTR_DvdnavHighlightEventBroken "DVDNAV-hÃ¤ndelse: Highlight-hÃ¤ndelse trasig\n" // FIXME highlight
-#define MSGTR_DvdnavEvent "DVDNAV-hÃ¤ndelse Event: %s\n"
-#define MSGTR_DvdnavHighlightHide "DVDNAV-hÃ¤ndelse: Highlight gÃ¶md\n"
-#define MSGTR_DvdnavStillFrame "######################################## DVDNAV-hÃ¤ndelse: Fortfarande bildruta: %d sekunder\n"
-#define MSGTR_DvdnavNavStop "DVDNAV-hÃ¤ndelse: Nav Stop\n" // FIXME Nav Stop?
-#define MSGTR_DvdnavNavNOP "DVDNAV-hÃ¤ndelse: Nav NOP\n"
-#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV-hÃ¤ndelse: 'Nav SPU'-strÃ¶mningsÃ¤ndring: fysisk: %d/%d/%d logisk: %d\n"
-#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV-hÃ¤ndelse: 'Nav SPU'-strÃ¶mningsÃ¤ndring: fysisk: %d logisk: %d\n"
-#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV-hÃ¤ndelse: 'Nav Audio'-strÃ¶mningsÃ¤ndring: fysisk: %d logisk: %d\n"
-#define MSGTR_DvdnavNavVTSChange "DVDNAV-hÃ¤ndelse: 'Nav VTS' Ã¤ndrad\n"
-#define MSGTR_DvdnavNavCellChange "DVDNAV-hÃ¤ndelse: 'Nav Cell' Ã¤ndrad\n"
-#define MSGTR_DvdnavNavSpuClutChange "DVDNAV-hÃ¤ndelse: 'Nav SPU CLUT' Ã¤ndrad\n"
-#define MSGTR_DvdnavNavSeekDone "DVDNAV-hÃ¤ndelse: 'Nav Seek' Ã¤ndrad\n"
 /*
  * FIXME A lot of shorted words, not translating atm
  */
@@ -444,6 +427,26 @@ static char help_text[]=
 #define MSGTR_AudioVideoCodecTotals "%d audio & %d video codecs\n"
 #define MSGTR_CodecDefinitionIncorrect "Codec är inte definerad korrekt."
 #define MSGTR_OutdatedCodecsConf "Denna codecs.conf är för gammal och inkompatibel med denna MPlayer version!" // release is more like 'släpp', sounds wrong, using version instead
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "slut på minne"
+
+// FIXME chip? chips or kort?
+#define MSGTR_OverridingTooLowBitrate "Specifierad bitrate är för låg för detta chips.\n"\
+"Minimal möjlig bitrate för detta chips är %.0f Kbps. Skriver över\n"\
+"användarspecificerade värden.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Kan inte skapa en PIPE!\n" // FIXME make? 
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Allt för gammal sparningsslottar funna från nivå %d: %d !!!\n" // FIXME slot?
+#define MSGTR_InvalidCfgfileOption "Alternativ %s kan inte användas i en konfigurationsfil\n"
+#define MSGTR_InvalidCmdlineOption "Alternativ %s kan inte bli används som ett kommandoradsargument\n"
+#define MSGTR_InvalidSuboption "Fel: alternativ '%s' har inga underalternativ '%s'\n" // FIXME suboption?
+#define MSGTR_MissingSuboptionParameter "Fel: underalternativ '%s' av '%s' måste ha en parameter!\n" // FIXME Don't know what seccond %s is, perhaps totaly wrong to have 'av' there 
+#define MSGTR_MissingOptionParameter "Fel: alternativ '%s' måste ha en parameter!\n"
+#define MSGTR_OptionListHeader "\n Namn                 Typ             Min        Max      Global  CL    Cfg\n\n" // TODO why static tabs?
+#define MSGTR_TotalOptions "\nTotalt: %d alternativ\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-enhet '%s' ej funnet.\n"
