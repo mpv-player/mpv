@@ -697,7 +697,7 @@ play_next_file:
   if (dvd_auth_device) {
 //  if (dvd_auth(dvd_auth_device,f)) {
     if (dvd_auth(dvd_auth_device,filename)) {
-        GUI_MSG( mplErrorDVDAuth )
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
 	exit_player(MSGTR_Exit_error);
       } 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
