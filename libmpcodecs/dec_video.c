@@ -206,6 +206,8 @@ if(benchmark)
     cur_video_time_usage=tt;
 }
 
+if(drop_frame) return 0;
+
 if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
     if(mpi->flags&MP_IMGFLAG_PLANAR)
