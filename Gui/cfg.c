@@ -106,6 +106,9 @@ static config_t gui_opts[] =
 #ifdef HAVE_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
+
+ { "dvd_device",&dvd_device,CONF_TYPE_STRING,0,0,0,NULL },
+ { "cdrom_device",&cdrom_device,CONF_TYPE_STRING,0,0,0,NULL },
  
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },

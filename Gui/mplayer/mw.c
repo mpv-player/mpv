@@ -238,9 +238,7 @@ void mplMainDraw( void )
 }
 
 extern void exit_player(char* how);
-extern char * dvd_device;
 extern int vcd_track;
-extern char * cdrom_device;
 extern int osd_visible;
 
 void mplEventHandling( int msg,float param )
@@ -314,7 +312,7 @@ play:
 #ifdef HAVE_VCD
           case STREAMTYPE_VCD:
 	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiVCD - guiFilenames) );
-	       if ( !cdrom_device ) cdrom_device=DEFAULT_CDROM_DEVICE;
+	       if ( !cdrom_device ) cdrom_device=gstrdup( DEFAULT_CDROM_DEVICE );
 	       mplSetFileName( NULL,cdrom_device,STREAMTYPE_VCD );
 	       if ( guiIntfStruct.Playing != 2 )
 	        {
@@ -330,7 +328,7 @@ play:
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
 	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiDVD - guiFilenames) );
-	       if ( !dvd_device ) dvd_device=DEFAULT_DVD_DEVICE;
+	       if ( !dvd_device ) dvd_device=gstrdup( DEFAULT_DVD_DEVICE );
 	       mplSetFileName( NULL,dvd_device,STREAMTYPE_DVD );
 	       if ( guiIntfStruct.Playing != 2 )
 	        {

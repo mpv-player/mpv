@@ -9,6 +9,9 @@ extern int use_gui;
 extern char* current_module;
 extern int vcd_track;
 
+extern char * dvd_device;
+extern char * cdrom_device;
+
 extern char ** audio_fm_list;
 extern char ** video_fm_list;
 extern char ** video_driver_list;

@@ -40,6 +40,8 @@ static GtkWidget * CLVDrivers;
 
 //static GtkWidget * ESubtitleName;
        GtkWidget * prEFontName;
+       GtkWidget * prEDVDDevice;
+       GtkWidget * prECDRomDevice;
 static GtkWidget * EVFM;
 static GtkWidget * EAFM;
 
@@ -337,6 +339,11 @@ void ShowPreferences( void )
  if ( !gtkAutoSyncOn ) gtk_widget_set_sensitive( SBAutoSync,FALSE );
   else gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBAutoSync ),TRUE );
 
+ if ( dvd_device ) gtk_entry_set_text( GTK_ENTRY( prEDVDDevice ),dvd_device );
+  else gtk_entry_set_text( GTK_ENTRY( prEDVDDevice ),DEFAULT_DVD_DEVICE );
+ if ( cdrom_device ) gtk_entry_set_text( GTK_ENTRY( prECDRomDevice ),cdrom_device );
+  else gtk_entry_set_text( GTK_ENTRY( prECDRomDevice ),DEFAULT_CDROM_DEVICE );
+
 // -- disables
 #ifndef USE_SUB
  gtk_widget_set_sensitive( AConfig,FALSE );
@@ -521,6 +528,9 @@ void prButton( GtkButton * button,gpointer user_data )
           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
 	   { gaddlist( &audio_fm_list,(char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
 	}
+
+	guiSetFilename( dvd_device,gtk_entry_get_text( GTK_ENTRY( prEDVDDevice ) ) );
+	guiSetFilename( cdrom_device,gtk_entry_get_text( GTK_ENTRY( prECDRomDevice ) ) );
 
    case bCancel:
 	HidePreferences();
@@ -1053,6 +1063,29 @@ GtkWidget * create_Preferences( void )
   SBAutoSync=gtk_spin_button_new( GTK_ADJUSTMENT( SBAutoSyncadj ),1,0 );
   gtk_widget_show( SBAutoSync );
   gtk_box_pack_start( GTK_BOX( hbox5 ),SBAutoSync,TRUE,TRUE,0 );
+
+  AddHSeparator( vbox602 );
+
+  table1=gtk_table_new( 2,2,FALSE );
+    gtk_widget_set_name( table1,"table1" );
+    gtk_widget_show( table1 );
+    gtk_box_pack_start( GTK_BOX( vbox602 ),table1,FALSE,FALSE,0 );
+
+  label=AddLabel( MSGTR_PREFERENCES_DVDDevice,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  prEDVDDevice=gtk_entry_new();
+    gtk_widget_set_name( prEDVDDevice,"prEDVDDevice" );
+    gtk_widget_show( prEDVDDevice );
+    gtk_table_attach( GTK_TABLE( table1 ),prEDVDDevice,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+  label=AddLabel( MSGTR_PREFERENCES_CDROMDevice,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  prECDRomDevice=gtk_entry_new();
+    gtk_widget_set_name( prECDRomDevice,"prECDRomDevice" );
+    gtk_widget_show( prECDRomDevice );
+    gtk_table_attach( GTK_TABLE( table1 ),prECDRomDevice,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+//  AddHSeparator( vbox602 );
 
   label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );

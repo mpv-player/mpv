@@ -571,6 +571,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-Rom device:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD device:"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
