@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "codec-cfg.h"
+
+#include "config.h"
+#include "mp_msg.h"
+
+#include "../libvo/img_format.h"
+
+#include "stream.h"
+#include "demuxer.h"
+#include "stheader.h"
+
+#include "vd.h"
+#include "vd_internal.h"
+
+static vd_info_t info = {
+	"Cinepak Video decoder",
+	"cinepak",
+	0,
+	"A'rpi",
+	"Dr. Tim Ferguson, http://www.csse.monash.edu.au/~timf/videocodec.html",
+	"native codec"
+};
+
+LIBVD_EXTERN(cinepak)
+
+// to set/get/query special features/parameters
+static int control(sh_video_t *sh,int cmd,void* arg,...){
+    return CONTROL_UNKNOWN;
+}
+
+//int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
+void *decode_cinepak_init(void);
+
+// init driver
+static int init(sh_video_t *sh){
+    sh->context = decode_cinepak_init();
+    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
+    return 1;
+}
+
+// uninit driver
+static void uninit(sh_video_t *sh){
+}
+
+//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
+
+void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel, int stride_);
+
+// decode a frame
+static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
+    mp_image_t* mpi;
+    if(len<=0) return NULL; // skipped frame
+    
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE | MP_IMGFLAG_ACCEPT_STRIDE, sh->disp_w, sh->disp_h);
+    
+    if(!mpi){	// temporary!
+	printf("couldn't allocate image for cinepak codec\n");
+	return NULL;
+    }
+    
+    decode_cinepak(sh->context, data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
+	(mpi->flags&MP_IMGFLAG_YUV)?16:(mpi->imgfmt&255), mpi->stride[0]);
+    
+    return mpi;
+}
+
