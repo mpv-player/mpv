@@ -11,9 +11,9 @@ easier now. If you find a bug in that, please contact us:
 ~~~~~~~~~~~~~~
   ./configure
 [* check config.h and config.mak files! *]
-  make dep
   make
   make install
+[* if you compiled DGA in, check VIDEOCARDS! *]
 
 2. Drivers: (mga_vid.o)
 ~~~~~~~~~~~~~~~~~~~~~~~
