@@ -20,6 +20,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-vfm\ <video\ codec\ family> ]
 .RB [ \-afm\ <audio\ codec\ family> ]
 .RB [ \-include\ <configfile> ]
+.RB [ \-mc\ seconds/5f ]
 .RB [ \-v ]
 .RB [ \-mp3file\ <filename> ]
 .RB [ \-ac3file\ <filename> ]
@@ -90,7 +91,11 @@ Force decoding by using a specific codec FAMILY, and FALLBACK to default
 if failed.  For examples see MPlayer manpage.
 .TP
 .B \-include
-Include what? Configfile.
+specify config file to be parsed after the default
+.TP
+.B \-mc\ seconds/5frame
+maximum sync correction per 5 frames (in seconds).
+Use -mc 0 to disable input A/V sync.
 .TP
 .B \-v
 Increase verbosity.
