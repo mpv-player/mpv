@@ -1,3 +1,5 @@
+// Translated by:  Bohdan Horst <nexus@hoth.amu.edu.pl>
+
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC

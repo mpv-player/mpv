@@ -1,3 +1,5 @@
+// Translated by:  Gabucino <gabucino@mplayerhq.hu>
+
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
