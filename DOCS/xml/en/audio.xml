@@ -684,9 +684,8 @@ Subtract the distances s1 to s5 from the maximum distance i.e.
     s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 <listitem><para>
-Calculated the required delays in ms as
+Calculate the required delays in ms as
     d[i] = 1000*s[i]/342; i = 1...5
-    s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 </orderedlist>
 
