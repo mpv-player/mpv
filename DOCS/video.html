@@ -686,6 +686,28 @@ so i have to swap CRTC's, but this way your console will framebuffer
 Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.</P>
 
 
+<P><B><A NAME=2.2.1.A.1a>2.2.1.A.1a. Matrox cards (method 2 - the XFree approach)</A></B></P>
+
+<P>The previous method doesn't work very good for X users, since either they
+have to shutdown it, or it becomes uselessly messy. This section is for them.</P>
+
+<P>
+<LI>compile the matroxfb stuff to modules</LI>
+<LI>load modules with the <CODE>./modules</CODE> script</LI>
+<LI>turn on display cloning with <CODE>./cloning</CODE></LI>
+<LI>execute <CODE>./TV-640x512</CODE> or whichever resolution you
+wish to use</LI>
+</P>
+
+<P>Now you should have a clean picture on the TV, and maybe a somewhat strange
+picture on the console. But console doesn't matter, start X. Your TV
+goes black or have strange stripes, but monitor/X is fine !<BR>
+So, anytime you want to start watching something on TV, just start
+<B>MPlayer</B> in X (<CODE>-vo mga</CODE> of course, and calculate
+<CODE>-x</CODE> and <CODE>-y</CODE> values by hand), change to tty1 (with
+ctrl-alt-f1), and turn off the monitor.
+</P>
+
 <P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI cards</A></B></P>
 
 <P>
