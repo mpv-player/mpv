@@ -672,6 +672,12 @@ sh_video->codec=NULL;
 if(out_video_codec>1){
 
 sh_video->vfilter=vf_open_filter(NULL,"vo",&video_out);
+// Dirty hack to fix mencoder until someone does all the new filter/vo stuff right :)
+if (out_video_codec == VCODEC_LIBAVCODEC || out_video_codec == VCODEC_DIVX4)
+{
+    sh_video->vfilter=vf_open_filter(sh_video->vfilter, "format", "yv12");
+    out_fmt = IMGFMT_YV12;
+}
 sh_video->vfilter=append_filters(sh_video->vfilter);
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
