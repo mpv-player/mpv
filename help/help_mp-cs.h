@@ -18,7 +18,7 @@ static char help_text[]=
 " -vcd <èíslo>     pøehrát VCD (Video CD) stopu ze zaøízení místo ze souboru\n"
 #endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <zaø>   urèení DVD zaøízení pro autentikaci (pro kódované disky)\n"
+" -dvdauth <zaø>   urèení DVD zaøízení pro autentizaci (pro kódované disky)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <èíslo>     pøehrát DVD titul ze zaøízení (mechaniky), místo ze souboru\n"
@@ -115,8 +115,8 @@ static char help_text[]=
 #define MSGTR_Playing "Pøehrávám %s\n"
 #define MSGTR_NoSound "Audio: beze zvuku!!!\n"
 #define MSGTR_FPSforced "FPS vynuceno na hodnotu %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU ZA BÌHU - upozornìní, toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøeolo¾te znovu mplayer ze zdrojového kódu\ns úpøepínaèem --disable-runtime-cpudetection\n"
-#define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro CPU x86 s roz¹íøenímy:"
+#define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU ZA BÌHU - upozornìní, toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøelo¾te znovu mplayer ze zdrojového kódu\ns pøepínaèem --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro CPU x86 s roz¹íøeními:"
 #define MSGTR_AvailableVideoOutputPlugins "Dostupné zásuvné video moduly:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Dostupné ovladaèe pro video:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Dostupné ovladaèe pro audio:\n"
