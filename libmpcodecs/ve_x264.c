@@ -49,6 +49,10 @@
 
 #include <x264.h>
 
+#if X264_BUILD < 0x000c
+#error We do not support old versions of x264. Get the latest from SVN.
+#endif
+
 typedef struct _h264_module_t {
     muxer_stream_t *mux;
     x264_param_t    param;
@@ -70,9 +74,9 @@ static int deblockalpha = 0;
 static int deblockbeta = 0;
 static int cabac = 1;
 static int cabacidc = -1;
-static int fullinter = 0;
-static float ip_factor = 2.0;
-static float pb_factor = 2.0;
+static int p4x4mv = 0;
+static float ip_factor = 1.4;
+static float pb_factor = 1.4;
 static int rc_buffer_size = -1;
 static int rc_init_buffer = -1;
 static int rc_sens = 4;
@@ -82,7 +86,8 @@ static int qp_step = 1;
 static int pass = 0;
 static float qcomp = 0.6;
 static float qblur = 0.5;
-static char *rc_eq = "(tex^qComp)*(avgTex^(1-qComp))";
+static float complexity_blur = 20;
+static char *rc_eq = "tex*blurTex^(qComp-1)";
 static int subq = 1;
 static int psnr = 0;
 static int log_level = 2;
@@ -102,8 +107,8 @@ m_option_t x264encopts_conf[] = {
     {"cabac", &cabac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nocabac", &cabac, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"cabacidc", &cabacidc, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
-    {"fullinter", &fullinter, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nofullinter", &fullinter, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"no4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -116,6 +121,7 @@ m_option_t x264encopts_conf[] = {
     {"rc_eq", &rc_eq, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
+    {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -153,6 +159,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.rc.psz_rc_eq = rc_eq;
     mod->param.rc.f_qcompress = qcomp;
     mod->param.rc.f_qblur = qblur;
+    mod->param.rc.f_complexity_blur = complexity_blur;
     mod->param.analyse.i_subpel_refine = subq;
     mod->param.rc.psz_stat_out = passtmpfile;
     mod->param.rc.psz_stat_in = passtmpfile;
@@ -191,7 +198,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         mod->param.rc.i_rc_init_buffer = rc_init_buffer;
         mod->param.rc.i_rc_sens = rc_sens;
     }
-    if(fullinter)
+    if(p4x4mv)
         mod->param.analyse.inter = X264_ANALYSE_I4x4 | X264_ANALYSE_PSUB16x16 | X264_ANALYSE_PSUB8x8;
     mod->param.rc.f_ip_factor = ip_factor;
     mod->param.rc.f_pb_factor = pb_factor;

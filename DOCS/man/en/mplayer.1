@@ -7091,11 +7091,11 @@ ratecontrol sensitivity (default: 4)
 .
 .TP
 .B ip_factor=<value>
-quantizer factor between I- and P-frames (default: 2.0)
+quantizer factor between I- and P-frames (default: 1.4)
 .
 .TP
 .B pb_factor=<value>
-quantizer factor between P- and B-frames (default: 2.0)
+quantizer factor between P- and B-frames (default: 1.4)
 .
 .TP
 .B pass=<1\-3>
@@ -7147,18 +7147,29 @@ bitrate more constant, while a higher value makes the quantization parameter
 more constant.
 .
 .TP
+.B cplx_blur=<0\-999>
+Temporal blur of the estimated frame complexity, before curve compression
+(default: 20).
+Lower values allow the quantizer value to jump around more,
+higher values force it to vary more smoothly.
+cplx_blur ensures that each I-frame has quality comparable to the following
+P-frames, and ensures that alternating high and low complexity frames
+(e.g. low fps animation) do not waste bits on fluctuating quantizer.
+.
+.TP
 .B qblur=<0\-99>
-Temporal blur of the quantization parameter (default: 0.5).
+Temporal blur of the quantization parameter, after curve compression
+(default: 0.5).
 Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
 .
 .TP
-.B (no)fullinter
+.B (no)4x4mv
 Use all available interframe macroblock types (i16x16, i4x4, p16x16,
-p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip)
+p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip)
 The idea is to find the type and size that best describe a certain area
 of the picture, i.e.\& very effective for Anime, which usually contains
-large areas of the same color (default: i16x16, i4x4, p16x16-8x8).
+large areas of the same color (default: i16x16, i4x4, p16x16-8x8, skip).
 Depending on the source material, it can improve or degrade quality, use
 it with care.
 .
