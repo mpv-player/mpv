@@ -11,6 +11,7 @@
 #include "../../libvo/video_out.h"
 
 #include "cfg.h"
+#include "app.h"
 #include "interface.h"
 #include "mplayer/play.h"
 
@@ -92,6 +93,8 @@ static config_t gui_opts[] =
  { "sub_pos",&gtkSubPos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "font_factor",&gtkSubFFactor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
  { "font_name",&guiIntfStruct.Fontname,CONF_TYPE_STRING,0,0,0,NULL },
+ 
+ { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
  { "equ_channel_1",&gtkEquChannel1,CONF_TYPE_STRING,0,0,0,NULL },
  { "equ_channel_2",&gtkEquChannel2,CONF_TYPE_STRING,0,0,0,NULL },

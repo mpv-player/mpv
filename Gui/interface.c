@@ -85,6 +85,9 @@ void guiInit( void )
  cfg_read();
  appInit( (void*)mDisplay );
  if ( plCurrent ) mplSetFileName( plCurrent->path,plCurrent->name );
+#if defined( USE_OSD ) || defined( USE_SUB )
+ guiLoadFont();
+#endif
 }
 
 void guiDone( void )
@@ -324,7 +327,7 @@ void guiGetEvent( int type,char * arg )
 // --- video opts	 
        if ( !gtkVODriver )
 	{
-         int i = 0, c = 0;
+         int i = 0;
          while ( video_out_drivers[i++] )
 	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	   {
