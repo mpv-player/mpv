@@ -362,7 +362,7 @@ void exit_player(char* how){
 
   current_module="exit_player";
 
-  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
+  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,mp_gettext(how));
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
   exit(1);
@@ -377,7 +377,7 @@ void exit_sighandler(int x){
     kill(getpid(),SIGKILL);
   }
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_IntBySignal,x,
-      current_module?current_module:"unknown"
+      current_module?current_module:mp_gettext("unknown")
   );
   exit_player(NULL);
 }
@@ -502,7 +502,7 @@ int gui_no_filename=0;
 
   mp_msg_init(MSGL_STATUS);
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
 //  memset(&vtune,0,sizeof(vo_tune_info_t));
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
@@ -1186,7 +1186,8 @@ if(sh_audio){
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
     else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",
+	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     break;
   }
 }
@@ -1252,7 +1253,8 @@ if(bestprio!=-1) {
 
 } /* end local vars */
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
 
 sh_video->video_out=video_out;
 
