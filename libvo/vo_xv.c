@@ -138,6 +138,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
  hint.x, hint.y, hint.width, hint.height,
  0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+ vo_hidecursor(mydisplay,mywindow);
 
  XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
  XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);

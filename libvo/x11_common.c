@@ -24,6 +24,23 @@ int vo_dheight=0;
 static int dpms_disabled=0;
 static int timeout_save=0;
 
+
+void vo_hidecursor ( Display *disp , Window win )
+{
+	Cursor no_ptr;
+	Pixmap bm_no;
+	XColor black,dummy;
+	Colormap colormap;
+	static unsigned char bm_no_data[] = { 0,0,0,0, 0,0,0,0  };
+	
+	colormap = DefaultColormap(disp,DefaultScreen(disp));
+	XAllocNamedColor(disp,colormap,"black",&black,&dummy);	
+	bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8,8);    
+	no_ptr=XCreatePixmapCursor(disp, bm_no, bm_no,&black, &black,0, 0);									          
+	XDefineCursor(disp,win,no_ptr);
+}
+
+
 int vo_init( void )
 {
  int       CompletionType = -1;

@@ -183,6 +183,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
   mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
     hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
+  vo_hidecursor(mydisplay,mywindow);
 
   wsGLXContext=glXCreateContext( mydisplay,vinfo,NULL,True );
 //  XStoreName( wsDisplay,wsMyWin,wsSysName );
