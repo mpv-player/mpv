@@ -35,7 +35,7 @@ cc_check() {
   TMP="$?"
   echo >> "$TMPLOG"
   echo "ldd $TMPO" >> "$TMPLOG"
-  ( ldd "$TMPO" ) >> "$TMPLOG" 2>&1
+  ( $_ldd "$TMPO" ) >> "$TMPLOG" 2>&1
   echo >> "$TMPLOG"
   return "$TMP"
 }
@@ -458,6 +458,10 @@ if freebsd ; then
   _inc_extra="$_inc_extra -I/usr/local/include"
 fi
 
+_ldd=ldd
+if darwin; then
+  _ldd="otool -L"
+fi
 
 # Checking CC version...
 if test "$_skip_cc_check" != yes ; then
