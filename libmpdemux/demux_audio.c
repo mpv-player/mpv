@@ -158,7 +158,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     WAVEFORMATEX* w;
     int l;
     l = stream_read_dword_le(s);
-    if(l < sizeof(WAVEFORMATEX)) {
+    if(l < 16) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too short (%d)!!!\n",l);
       free_sh_audio(sh_audio);
       return 0;
@@ -170,8 +170,10 @@ int demux_audio_open(demuxer_t* demuxer) {
     w->nAvgBytesPerSec = stream_read_dword_le(s);
     w->nBlockAlign = stream_read_word_le(s);
     w->wBitsPerSample = sh_audio->samplesize = stream_read_word_le(s);
+    l -= 16;
+    if (l > 0) {
     w->cbSize = stream_read_word_le(s);
-    l -= sizeof(WAVEFORMATEX);
+    l -= 2;
     if (w->cbSize > 0)
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
@@ -182,6 +184,7 @@ int demux_audio_open(demuxer_t* demuxer) {
         stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
         l -= w->cbSize;
       }
+    }
 
     if(verbose>0) print_wave_header(w);
     if(l)
