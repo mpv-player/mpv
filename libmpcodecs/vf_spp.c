@@ -218,6 +218,82 @@ static void hardthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *pe
 	);
 	dst[0]= (src[0] + 4)>>3;
 }
+
+static void softthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *permutation){
+	int bias= 0; //FIXME
+	unsigned int threshold1;
+
+	threshold1= qp*((1<<4) - bias) - 1;
+	
+        asm volatile(
+#undef REQUANT_CORE
+#define REQUANT_CORE(dst0, dst1, dst2, dst3, src0, src1, src2, src3) \
+		"movq " #src0 ", %%mm0	\n\t"\
+		"movq " #src1 ", %%mm1	\n\t"\
+		"pxor %%mm6, %%mm6	\n\t"\
+		"pxor %%mm7, %%mm7	\n\t"\
+		"pcmpgtw %%mm0, %%mm6	\n\t"\
+		"pcmpgtw %%mm1, %%mm7	\n\t"\
+		"pxor %%mm6, %%mm0	\n\t"\
+		"pxor %%mm7, %%mm1	\n\t"\
+		"psubusw %%mm4, %%mm0	\n\t"\
+		"psubusw %%mm4, %%mm1	\n\t"\
+		"pxor %%mm6, %%mm0	\n\t"\
+		"pxor %%mm7, %%mm1	\n\t"\
+		"movq " #src2 ", %%mm2	\n\t"\
+		"movq " #src3 ", %%mm3	\n\t"\
+		"pxor %%mm6, %%mm6	\n\t"\
+		"pxor %%mm7, %%mm7	\n\t"\
+		"pcmpgtw %%mm2, %%mm6	\n\t"\
+		"pcmpgtw %%mm3, %%mm7	\n\t"\
+		"pxor %%mm6, %%mm2	\n\t"\
+		"pxor %%mm7, %%mm3	\n\t"\
+		"psubusw %%mm4, %%mm2	\n\t"\
+		"psubusw %%mm4, %%mm3	\n\t"\
+		"pxor %%mm6, %%mm2	\n\t"\
+		"pxor %%mm7, %%mm3	\n\t"\
+\
+		"paddsw %%mm5, %%mm0	\n\t"\
+		"paddsw %%mm5, %%mm1	\n\t"\
+		"paddsw %%mm5, %%mm2	\n\t"\
+		"paddsw %%mm5, %%mm3	\n\t"\
+		"psraw $3, %%mm0	\n\t"\
+		"psraw $3, %%mm1	\n\t"\
+		"psraw $3, %%mm2	\n\t"\
+		"psraw $3, %%mm3	\n\t"\
+\
+		"movq %%mm0, %%mm7	\n\t"\
+		"punpcklwd %%mm2, %%mm0	\n\t" /*A*/\
+		"punpckhwd %%mm2, %%mm7	\n\t" /*C*/\
+		"movq %%mm1, %%mm2	\n\t"\
+		"punpcklwd %%mm3, %%mm1	\n\t" /*B*/\
+		"punpckhwd %%mm3, %%mm2	\n\t" /*D*/\
+		"movq %%mm0, %%mm3	\n\t"\
+		"punpcklwd %%mm1, %%mm0	\n\t" /*A*/\
+		"punpckhwd %%mm7, %%mm3	\n\t" /*C*/\
+		"punpcklwd %%mm1, %%mm7	\n\t" /*B*/\
+		"punpckhwd %%mm2, %%mm1	\n\t" /*D*/\
+\
+		"movq %%mm0, " #dst0 "	\n\t"\
+		"movq %%mm7, " #dst1 "	\n\t"\
+		"movq %%mm3, " #dst2 "	\n\t"\
+		"movq %%mm1, " #dst3 "	\n\t"
+                
+		"movd %2, %%mm4		\n\t"
+		"movd %3, %%mm5		\n\t"
+		"packssdw %%mm4, %%mm4	\n\t"
+		"packssdw %%mm5, %%mm5	\n\t"
+		"packssdw %%mm4, %%mm4	\n\t"
+		"packssdw %%mm5, %%mm5	\n\t"
+		REQUANT_CORE(  (%1),  8(%1), 16(%1), 24(%1),  (%0), 8(%0), 64(%0), 72(%0))
+		REQUANT_CORE(32(%1), 40(%1), 48(%1), 56(%1),16(%0),24(%0), 48(%0), 56(%0))
+		REQUANT_CORE(64(%1), 72(%1), 80(%1), 88(%1),32(%0),40(%0), 96(%0),104(%0))
+		REQUANT_CORE(96(%1),104(%1),112(%1),120(%1),80(%0),88(%0),112(%0),120(%0))
+		: : "r" (src), "r" (dst), "g" (threshold1), "rm" (4) //FIXME maybe more accurate then needed?
+	);
+
+	dst[0]= (src[0] + 4)>>3;
+}
 #endif
 
 static inline void add_block(int16_t *dst, int stride, DCTELEM block[64]){
@@ -516,7 +592,7 @@ static int open(vf_instance_t *vf, char* args){
 	store_slice= store_slice_mmx;
 	switch(vf->priv->mode){
 	    case 0: requantize= hardthresh_mmx; break;
-	    //case 1: requantize= softthresh_mmx; break;
+	    case 1: requantize= softthresh_mmx; break;
 	}
     }
 #endif
