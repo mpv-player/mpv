@@ -196,7 +196,7 @@
     </LI>
   <LI>Use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
     to find the XAnim codecs. By default, it looks for them at
-    <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>.
+    <CODE>/usr/local/lib/codecs, /usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>.
     Alternatively you can set the environment variable <I>XANIM_MOD_DIR</I> to
     the directory of the XAnim codecs.</LI>
   <LI>Rename/symlink the files, cutting out the architecture stuff, so they will
@@ -259,6 +259,11 @@ MPlayer supports decoding all versions of RealVideo:
   RealPlayer libraries in the standard locations of a full installation. If it
   does not, tell configure where to look with the
   <CODE>--with-reallibdir</CODE> option.</P>
+
+<P>As a second chance you can download the codecs from 
+  <a href="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</a>.
+  After downloading the Real codecs package, extract it to the /usr/local/lib/codecs
+  directory, or you can specify a unique path with the <CODE>--with-reallibdir</CODE> option.</P>
 
 <P><B>Note:</B> RealPlayer libraries currently <B>only work with Linux, FreeBSD,
   NetBSD and Cygwin on the x86, Alpha and PowerPC (Linux/Alpha and Linux/PowerPC
@@ -339,7 +344,7 @@ MPlayer supports decoding all versions of RealVideo:
 <OL>
   <LI>download MPlayer CVS</LI>
   <LI>compile MPlayer with:<BR>
-    <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
+    <CODE>$ ./configure --enable-qtx</CODE></LI>
   <LI>download QuickTime DLL pack from
     <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</A></LI>
   <LI>extract QuickTime DLL pack to your Win32 codecs directory (default:

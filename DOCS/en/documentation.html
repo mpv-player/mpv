@@ -449,12 +449,12 @@
 
 <H2><A NAME="history">1.1 History</A></H2>
 
-<P>This began a year ago...
-  I (A'rpi) have tried lots of players under linux (mtv,xmps,dvdview,livid/oms,videolan,
+<P><I>"This began a year ago...
+  I have tried lots of players under linux (mtv,xmps,dvdview,livid/oms,videolan,
   xine,xanim,avifile,xmmp) but they all have some problem. Mostly with special
   files or with audio/video sync. Most of them is unable to play both MPEG1,
   MPEG2 and AVI (DivX) files. Many players have image quality or speed problems
-  too. So I've decided to write/modify one...</P>
+  too. So I've decided to write/modify one..."</I> A'rpi, 2001</P>
 
 <UL>
   <LI><B>mpg12play v0.1-v0.3:</B> Sep 22-25, 2000<BR>
@@ -463,7 +463,7 @@
     but there were image quality and speed problems with it.</LI>
   <LI><B>mpg12play v0.5-v0.87:</B> Sep 28-Oct 20, 2000<BR>
     Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
-    but it was slow and was written in C++ (I hate C++!!!)</LI>
+    but it was slow and was written in C++ (A'rpi hates C++!)</LI>
   <LI><B>mpg12play v0.9-v0.95pre5:</B> Oct 21-Nov 2, 2000<BR>
     Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman &amp; Michel Lespinasse.
     It's great, optimized very fast C code with perfect image quality and
@@ -1814,8 +1814,8 @@ end
 <H2><A NAME="cygwin">6.6 Cygwin</A></H2>
 
 <P>The Cygwin port is still in its infancy. Currently there is no support for
-  Win32 DLLs or OpenGL. SDL is known to distort sound and image or crash
-  on some systems. <A HREF="../tech/patches.txt">Patches</A> are always welcome.
+  OpenGL. SDL is known to distort sound and image or crash on some systems.
+  <A HREF="../tech/patches.txt">Patches</A> are always welcome.
   Best results are achieved with the native DirectX video output driver
   (<CODE>-vo directx</CODE>) and the native Windows waveout audio driver
   (<CODE>-ao win32</CODE>). You should also check out the
@@ -1852,7 +1852,7 @@ end
 <P><CODE>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>QuickTime DLLs have also been reported to work. Compile with
-  <CODE>--enable-qtx-codecs</CODE> and put the codecs into the
+  <CODE>--enable-qtx</CODE> and put the codecs into the
   default Windows DLL location, <CODE>C:\WINNT\system32</CODE> or
   <CODE>C:\Windows\system</CODE> depending on your Windows version.</P>
 
