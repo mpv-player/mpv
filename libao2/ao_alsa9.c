@@ -59,7 +59,7 @@ static int alsa_fragsize = 4096;
 static int alsa_fragcount = 16;
 static int chunk_size = 1024; //is alsa_fragsize / 4
 
-static size_t bits_per_sample, bits_per_frame;
+static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
 int ao_mmap = 0;
@@ -222,7 +222,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     ao_data.samplerate = rate_hz;
-    ao_data.bps = channels; /* really this is bytes per frame so bad varname */
+    ao_data.bps = channels * rate_hz;
     ao_data.format = format;
     ao_data.channels = channels;
     ao_data.outburst = OUTBURST;
@@ -283,7 +283,8 @@ static int init(int rate_hz, int channels, int format, int flags)
       default:
 	break;	    
       }
-    
+    bytes_per_sample = ao_data.bps / ao_data.samplerate;
+
     if (ao_subdevice) {
       //start parsing ao_subdevice, ugly and not thread safe!
       //maybe there's a better way?
@@ -672,7 +673,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
 
       printf("alsa9: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-	     ao_data.samplerate, ao_data.channels, ao_data.bps, ao_data.buffersize,
+	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 
     } // end switch alsa_handler (spdif)
@@ -847,8 +848,8 @@ static int play(void* data, int len, int flags)
 static int play_normal(void* data, int len)
 {
 
-  //ao_data.bps is always 4 for 2 chn S16_LE
-  int num_frames = len / ao_data.bps;
+  //bytes_per_sample is always 4 for 2 chn S16_LE
+  int num_frames = len / bytes_per_sample;
   signed short *output_samples=data;
   snd_pcm_sframes_t res = 0;
 
@@ -932,7 +933,7 @@ static int play_mmap(void* data, int len)
   outbuffer = alloca(ao_data.buffersize);
 
   //don't trust get_space() ;)
-  frames_available = snd_pcm_avail_update(alsa_handler) * ao_data.bps;
+  frames_available = snd_pcm_avail_update(alsa_handler) * bytes_per_sample;
   if (frames_available < 0)
     xrun("play");
 
@@ -948,11 +949,11 @@ static int play_mmap(void* data, int len)
   }
 
   /* len is simply the available bufferspace got by get_space() 
-   * but real avail_buffer in frames is ab/ao_data.bps */
-  size = len / ao_data.bps;
+   * but real avail_buffer in frames is ab/bytes_per_sample */
+  size = len / bytes_per_sample;
 
   //if (verbose)
-  //printf("len: %i size %i, f_avail %i, bps %i ...\n", len, size, frames_available, ao_data.bps);
+  //printf("len: %i size %i, f_avail %i, bps %i ...\n", len, size, frames_available, bytes_per_sample);
 
   frames_transmit = size;
 
@@ -966,7 +967,7 @@ static int play_mmap(void* data, int len)
   outbuffer = ((char *) area->addr + (area->first + area->step * offset) / 8); //8
 
   //write data
-  memcpy(outbuffer, data, (frames_transmit * ao_data.bps));
+  memcpy(outbuffer, data, (frames_transmit * bytes_per_sample));
 
   commitres = snd_pcm_mmap_commit(alsa_handler, offset, frames_transmit);
 
@@ -988,7 +989,7 @@ static int play_mmap(void* data, int len)
 
 
   //calculate written frames!
-  result = commitres * ao_data.bps;
+  result = commitres * bytes_per_sample;
 
 
   /* if (verbose) { */
@@ -1038,14 +1039,14 @@ static int get_space()
       if (str_status != "open") {
 	str_status = "prepared";
 	first = 1;
-	ret = snd_pcm_status_get_avail(status) * ao_data.bps;
+	ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
 	if (ret == 0) //ugly workaround for hang in mmap-mode
 	  ret = 10;
 	break;
       }
     case SND_PCM_STATE_RUNNING:
-      ret = snd_pcm_status_get_avail(status) * ao_data.bps;
-      //avail_frames = snd_pcm_avail_update(alsa_handler) * ao_data.bps;
+      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
+      //avail_frames = snd_pcm_avail_update(alsa_handler) * bytes_per_sample;
       if (str_status != "open" && str_status != "prepared")
 	str_status = "running";
       break;
@@ -1062,7 +1063,7 @@ static int get_space()
       break;
     default:
       str_status = "undefined";
-      ret = snd_pcm_status_get_avail(status) * ao_data.bps;
+      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
       if (ret <= 0) {
 	xrun("space");
       }
