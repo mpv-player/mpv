@@ -1,8 +1,5 @@
 mplayer (1.0)
-  pre1:  "Stalled"
-    # Stalled because the development slowed down a lot -- all the devs
-      are on summer holiday, or dunno.
-  
+  pre1:  "Development" on the beach
     NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
     0.90-rc5 (and later 0.90 releases) changes are independent!
     (it also means that there are main-only and 0_90-only changes)
@@ -55,7 +52,8 @@ mplayer (1.0)
     * MPEG-TS (Transport Stream) and TIVO demuxers
     * DVB (Digital Video Broadcasting) input driver
     * hwac3: DTS passthru support
-    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize, tinterlace
+    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize, tinterlace,
+      pullup (mmx optimized!), framestep, tile
     * vf layer: slices support (crop, expand, swscale only)
     * vf scale aspect fixes
     * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm, -fPIC compileable
