@@ -1074,7 +1074,7 @@ echo "$kernel_version, ok"
 fi
 fi
 
-if [ "$_xmga" == "autodetect" ]; then
+if [ "$_xmga" = "autodetect" ]; then
  if [ $_x11 = 'yes' ] && [ $_mga = 'yes' ]; then
   _xmga=yes
  else
