@@ -24,7 +24,7 @@ The MPlayer project
     * MPEG PES output & DVB card support
     * libmpcodecs design, porting video decoders, filters
 
-Zoltán Ponekker (Pontscho/Fresh!) <pontscho@makacs.poliod.hu>
+Zoltán Ponekker (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compile
     * GUI system
     * 3DNow! support into mp3lib and fastmemcpy.h
