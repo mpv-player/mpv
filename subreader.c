@@ -815,8 +815,8 @@ void dump_mpsub(subtitle* subs, float fps){
 			else
 			fprintf (fd, " %.2f\n",b);
 		} else {
-			fprintf (fd, "%ld %ld\n", egysub->start-mpsub_position,
-					egysub->end-egysub->start);
+			fprintf (fd, "%ld %ld\n", (egysub->start)-((long)mpsub_position),
+					(egysub->end)-(egysub->start));
 		}
 
 		mpsub_position = egysub->end;
@@ -826,7 +826,7 @@ void dump_mpsub(subtitle* subs, float fps){
 		fprintf (fd, "\n");
 	}
 	fclose (fd);
-	printf ("Subtitles dumped in \'dump.mpsub\'.\n");
+	printf ("SUB: Subtitles dumped in \'dump.mpsub\'.\n");
 }
 
 void sub_free( subtitle * subs )
