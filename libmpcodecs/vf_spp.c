@@ -433,10 +433,12 @@ static int open(vf_instance_t *vf, char* args){
 
     vf->priv->avctx= avcodec_alloc_context();
     dsputil_init(&vf->priv->dsp, vf->priv->avctx);
+#ifdef HAVE_MMX
     if(gCpuCaps.hasMMX){
 	store_slice= store_slice_mmx;
 	requantize= requantize_mmx;
     }
+#endif
     
     vf->priv->log2_count= 6;
     
