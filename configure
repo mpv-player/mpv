@@ -248,7 +248,7 @@ Video output:
   --enable-xmga          build with mga_vid X Window support
                          (check for X & /dev/mga_vid) [autodetect]
   --enable-xv            build with Xv render support for X 4.x [autodetect]
-  --enable-xvmc          build with XvMC acceleration for X 4.x [autodetect]
+  --enable-xvmc          build with XvMC acceleration for X 4.x [disable]
   --enable-vm            build with XF86VidMode support for X11 [autodetect]
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
