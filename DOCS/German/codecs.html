@@ -20,6 +20,7 @@ täglich generierte Liste!!!</P>
 <LI>MJPEG, ASV2 und andere Hardwareformate</LI>
 <LI>XAnim Codecs</LI>
 <LI>VIVO</LI>
+<LI>FLI</LI>
 </UL></P>
 
 <P>Wenn du einen Codec hast, der nicht gelistet ist, und noch nicht unterstützt
@@ -155,7 +156,7 @@ Option verwenden um <B>MPlayer</B> zu sagen, dass er sie verwenden soll, wenn mö
 
 <P><B>MPlayer</B> kann VIVO (1.0 und 2.0) Videos abspielen. Der beste Codec für
 1.0-Dateien ist FFmpegs H263 Dekoder, du kannst ihn mit der <CODE>-vc ffh263</CODE>
-Option aufrufen (du wirdst die neuesten libavcodecs benötigen !). Für 2.0-Dateien verwende
+Option aufrufen (standard) (du wirdst die neuesten libavcodecs benötigen!). Für 2.0-Dateien verwende
 die <CODE>ivvideo.dll</CODE> DLL-Datei (von <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">
 hier</A>) und installiere sie unter <CODE>/usr/lib/win32</CODE> oder wo du deine Win32 Codecs speicherst.
 Der letztgenannte Codec unterstützt weder YV12 noch YUY2, nur BGR-Modie, was normalerweise
@@ -196,6 +197,7 @@ YUY2 Ausgabe, im Gegenteil zum Win32-Codec, der mit RGB unterstützt.</P>
 	<LI>Ogg Vorbis Audiocodec (<B>eingebaute</B> lib)</LI>
 	<LI>Voxware Audio (Verwendung der DirectShow DLL)</LI>
 	<LI>alaw, MSGSM, PCM und andere einfache, alte Audioformate</LI>
+	<LI>VIVO Audio (G723, Vivo Siren)</LI>
 </UL></P>
 
 <P><B><A NAME=2.2.2.1>2.2.2.1. Softwaremäßige AC3 Dekodierung</A></B></P>
@@ -243,8 +245,9 @@ auch nicht brauchen.</P>
 <P><B><A NAME=2.2.2.4>2.2.2.4. VIVO Audio</A></B></P>
 
 <P>Der verwendete Audiocodec in VIVO-Dateien hängt davon ab, ob es eine VIVO/1.0 oder VIVO/2.0 Datei ist.
-VIVO/1.0 Dateien verwenden <B>g.723</B> Audio und VIVO/2.0 Dateien <B>Vivo Siren</B>. Zur Zeit werden
-keine der beider unterstützt, aber du kannst dir den g.723 Codec von <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">hier</A>
+VIVO/1.0 Dateien verwenden <B>g.723</B> Audio und VIVO/2.0 Dateien <B>Vivo Siren</B>. Beide werden
+<U>unterstützt</U>. Du kannst dir den g.723 Codec von 
+<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">hier</A>
 downloaden und in in das <CODE>/usr/lib/win32</CODE> Verzeichnis (oder wo deine Win32-Codecs sich befinden)
 kopieren.</P>
 
