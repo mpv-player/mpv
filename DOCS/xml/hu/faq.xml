@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.61 -->
+<!-- synced with 1.62 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -768,7 +768,7 @@ ahol a &quot;?&quot; helyén bármilyen szám áll, akkor jó, a hiba nem ott van. Ha
 akkor a probléma a kerneleddel/libc-ddel van. Talán valamilyen biztonsági javítást
 használsz (például Solar Designer OpenWall patch-e) ami a függvény könyvtárakat nagyon
 alacsony címre tölti be. Mivel az <filename>l3codeca.acm</filename> egy nem újraallokálható
-DLL, muszály a <literal>0x00400000</literal> címre betölteni, ezt nem változtathatjuk meg.
+DLL, muszáj a <literal>0x40000000</literal> címre betölteni, ezt nem változtathatjuk meg.
 Javítás nélküli kernelt kellene használnod, vagy használd az <application>MPlayer</application>
 <option>-afm 1</option> kapcsolóját, hogy letiltsd az <filename>l3codeca.acm</filename> használatát.
 </para></answer>
@@ -1190,7 +1190,7 @@ Használd a <ulink url="http://linvdr.org/projects/regionset/">regionset eszközt<
 
 <qandaentry>
 <question><para>
-Muszály (setuid) root-nak lennem, hogy DVD-t nézhessek?
+Muszáj (setuid) root-nak lennem, hogy DVD-t nézhessek?
 </para></question>
 <answer><para>
 Nem. De megfelelő jogokkal kell rendelkezned a DVD eszköz bejegyzésére
