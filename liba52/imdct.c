@@ -79,8 +79,6 @@ static uint8_t bit_reverse_256[] = {
 // NOTE: SSE needs 16byte alignment or it will segfault 
 // 
 static complex_t __attribute__((aligned(16))) buf[128];
-static float __attribute__((aligned(16))) sseSinCos1a[256];
-static float __attribute__((aligned(16))) sseSinCos1b[256];
 static float __attribute__((aligned(16))) sseSinCos1c[256];
 static float __attribute__((aligned(16))) sseSinCos1d[256];
 static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
@@ -388,17 +386,20 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"pushl %%ebp				\n\t" //use ebp without telling gcc
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movaps (%0, %%esi), %%xmm0		\n\t"
-		"movaps (%0, %%edi), %%xmm1		\n\t"
-		"shufps $0xA0, %%xmm0, %%xmm0		\n\t"
-		"shufps $0x5F, %%xmm1, %%xmm1		\n\t"
-		"mulps sseSinCos1a(%%esi), %%xmm0	\n\t"
-		"mulps sseSinCos1b(%%esi), %%xmm1	\n\t"
-		"addps %%xmm1, %%xmm0			\n\t"
+		"movlps (%0, %%esi), %%xmm0		\n\t" // XXXI
+		"movhps 8(%0, %%edi), %%xmm0		\n\t" // RXXI
+		"movlps 8(%0, %%esi), %%xmm1		\n\t" // XXXi
+		"movhps (%0, %%edi), %%xmm1		\n\t" // rXXi
+		"shufps $0x33, %%xmm1, %%xmm0		\n\t" // irIR
+		"movaps sseSinCos1c(%%esi), %%xmm2	\n\t"
+		"mulps %%xmm0, %%xmm2			\n\t"
+		"shufps $0xB1, %%xmm0, %%xmm0		\n\t" // riRI
+		"mulps sseSinCos1d(%%esi), %%xmm0	\n\t"
+		"subps %%xmm0, %%xmm2			\n\t"
 		"movzbl (%%eax), %%edx			\n\t"
 		"movzbl 1(%%eax), %%ebp			\n\t"
-		"movlps %%xmm0, (%1, %%edx,8)		\n\t"
-		"movhps %%xmm0, (%1, %%ebp,8)		\n\t"
+		"movlps %%xmm2, (%1, %%edx,8)		\n\t"
+		"movhps %%xmm2, (%1, %%ebp,8)		\n\t"
 		"addl $16, %%esi			\n\t"
 		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
 		"subl $16, %%edi			\n\t"
@@ -831,11 +832,6 @@ void imdct_init (uint32_t mm_accel)
 	}
 #ifdef ARCH_X86
 	for (i = 0; i < 128; i++) {
-	    sseSinCos1a[2*i+0]= -xsin1[i];
-	    sseSinCos1a[2*i+1]= -xcos1[i];
-	    sseSinCos1b[2*i+0]= xcos1[i];
-	    sseSinCos1b[2*i+1]= -xsin1[i];
-
 	    sseSinCos1c[2*i+0]= xcos1[i];
 	    sseSinCos1c[2*i+1]= -xcos1[i];
 	    sseSinCos1d[2*i+0]= xsin1[i];
