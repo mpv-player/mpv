@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <limits.h>
 #include <math.h>
@@ -39,8 +41,6 @@
 #define MESSAGE_SIZE 512
 #define MESSAGE_DEKO " +++ %s +++ "
 
-
-
 LIBVO_EXTERN(aa)
 
 	static vo_info_t vo_info = {
@@ -65,18 +65,20 @@ static int bppmul;
 
 /* osd stuff */
 time_t stoposd = 0;
-static int showosd = 0;
-char osdtext[MESSAGE_SIZE];
+static int showosdmessage = 0;
+char osdmessagetext[MESSAGE_SIZE];
 char posbar[MESSAGE_SIZE];
 static int osdx, osdy;
-
+int aaconfigmode=1;
 /* for resizing/scaling */
 static int *stx;
 static int *sty;
 double accum;
+#ifdef USE_OSD
+char * osdbuffer=NULL;
+#endif
 
 /* our version of the playmodes :) */
-static char * osdmodes[] ={ "|>", "||", "[]", "<<" , ">>" };
 
 extern void mplayer_put_key(int code);
 
@@ -101,7 +103,7 @@ resize(void){
     int i;
     aa_resize(c);
 
-    showosd=0;
+    showosdmessage=0;
     osdy=aa_scrheight(c) - ( aa_scrheight(c)/10 );
 
     /* now calculating the needed values for resizing */
@@ -126,6 +128,10 @@ resize(void){
 	sty[i] = got;
 	accum -= got;
     }
+#ifdef USE_OSD
+    if (osdbuffer!=NULL) free(osdbuffer);
+    osdbuffer=malloc(aa_scrwidth(c) * aa_scrheight(c));
+#endif
 }
 
 void
@@ -140,11 +146,11 @@ osdmessage(int duration, int deko, char *fmt, ...)
     va_start(ar, fmt);
     vsprintf(m, fmt, ar);
     va_end(ar);
-    if (deko==1) sprintf(osdtext, MESSAGE_DEKO , m);
-    else strcpy(osdtext, m);
-    showosd=1;
+    if (deko==1) sprintf(osdmessagetext, MESSAGE_DEKO , m);
+    else strcpy(osdmessagetext, m);
+    showosdmessage=1;
     stoposd = time(NULL) + duration;
-    osdx=(aa_scrwidth(c) / 2) - (strlen(osdtext) / 2 ) ;
+    osdx=(aa_scrwidth(c) / 2) - (strlen(osdmessagetext) / 2 ) ;
     posbar[0]='\0';
 }
 
@@ -158,11 +164,13 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
     int where;
     char m[MESSAGE_SIZE];
     int i;
+
+    
     step=(float)aa_scrwidth(c) /(float)(max-min);
     where=(val-min)*step;
     sprintf(m,"%s: %i%s",desc, val, unit);
-    if (deko==1) sprintf(osdtext, MESSAGE_DEKO , m);
-    else strcpy(osdtext, m);
+    if (deko==1) sprintf(osdmessagetext, MESSAGE_DEKO , m);
+    else strcpy(osdmessagetext, m);
     posbar[0]='|';
     posbar[aa_scrwidth(c)-1]='|';
     for (i=0;i<aa_scrwidth(c);i++){
@@ -173,11 +181,28 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
     if (where!=(aa_scrwidth(c)-1) ) posbar[aa_scrwidth(c)-1]='|';
     /* snipp */
     posbar[aa_scrwidth(c)]='\0';
-    showosd=1;
+    showosdmessage=1;
     stoposd = time(NULL) + duration;
-    osdx=(aa_scrwidth(c) / 2) - (strlen(osdtext) / 2 ) ;
+    osdx=(aa_scrwidth(c) / 2) - (strlen(osdmessagetext) / 2 ) ;
 }
 
+void
+printosdtext()
+{
+    /* 
+     * places the mplayer status osd
+     */
+    if (vo_osd_text)
+	aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", osd_names_short[vo_osd_text[0]], vo_osd_text+1);
+}
+
+void
+printosdprogbar(){
+    /* print mplayer osd-progbar */
+    if (vo_osd_progbar_type!=-1){
+	osdpercent(1,1,0,255,vo_osd_progbar_value, osd_names[vo_osd_progbar_type], "");	
+    }
+}
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width,
 	    uint32_t d_height, uint32_t fullscreen, char *title, 
@@ -186,6 +211,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
      * main init
      * called by mplayer
      */
+    FILE * fp;
+    char fname[12];
+    int fd, vt, major, minor;
+    struct stat sbuf;
+    char * hidis;
+    int i;
 
     switch(format) {
 	case IMGFMT_BGR24:
@@ -207,13 +238,25 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     
 
     /* initializing of aalib */
-    /*
-    TODO check /dev/vcsa
-    aa_recommendhidisplay("curses");
-    aa_recommendhidisplay("X11");
-    aa_recommendlowdisplay("linux");
-    */
     
+    hidis=aa_getfirst(&aa_displayrecommended);
+    if ( hidis==NULL || strcasecmp(hidis, "linux")){
+	/* check /dev/vcsa<vt> */
+	/* check only, if driver linux not explicit set */
+	fd = dup (fileno (stderr));
+	fstat (fd, &sbuf);
+	major = sbuf.st_rdev >> 8;
+	vt = minor = sbuf.st_rdev & 0xff;
+	close (fd);
+	sprintf (fname, "/dev/vcsa%i", vt);
+	fp = fopen (fname, "w+");
+	fprintf(stderr,"X\n");
+	if (fp==NULL){
+	    fprintf(stderr,"VO: [aa] cannot open %s for writing, so we'll not use linux driver\n", fname);
+    	    aa_recommendhidisplay("curses");
+    	    aa_recommendhidisplay("X11");
+	}else fclose(fp);
+    }
     c = aa_autoinit(&aa_defparams);
     aa_resizehandler(c, (void *)resize);
 
@@ -239,6 +282,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
 	freopen("/dev/null", "w", stderr);
 	quiet=1; /* disable mplayer outputs */
+	/* disable console blanking */
+	printf("\033[9;0]");
     }
     
     image_height = height;
@@ -251,6 +296,22 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 
     /* nothing will change its size, be we need some values initialized */
     resize();
+
+    /* now init out own 'font' (to use vo_draw_text_sub without edit them) */
+    vo_font->spacewidth=1;
+    vo_font->charspace=0;
+    vo_font->height=1;
+    vo_font->pic_a[1]->bmp=malloc(255);
+    vo_font->pic_b[1]->bmp=malloc(255);
+    vo_font->pic_a[1]->w=1;
+    vo_font->pic_a[1]->h=1;
+    for (i=1; i<256; i++){
+	vo_font->width[i]=1;
+	vo_font->font[i]=1;
+	vo_font->start[i]=i;
+	vo_font->pic_a[1]->bmp[i]=i;
+	vo_font->pic_b[1]->bmp[i]=i;
+    };
 
     /* say hello */
     osdmessage(5, 1, "Welcome to ASCII ARTS MPlayer");  
@@ -267,14 +328,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 		"\t-aadriver    set recommended aalib driver (X11,curses,linux)\n"
 		"\t-aahelp      to see all options provided by aalib\n"
 		"\n"
-		"AA-MPlayer Keys:\n"
-		"\t1 : fast rendering\n"
-		"\t2 : dithering\n"
-		"\t3 : invert image\n"
-		"\t4 : contrast -\n"
-		"\t5 : contrast +\n"
-		"\t6 : brightness -\n"
-		"\t7 : brightness +\n"
+		"AA-MPlayer Keys\n"
+		"\t1 : contrast -\n"
+		"\t2 : contrast +\n"
+		"\t3 : brightness -\n"
+		"\t4 : brightness +\n"
+		"\t5 : fast rendering\n"
+		"\t6 : dithering\n"
+		"\t7 : invert image\n"
+	        "\ta : toggles between aa and mplayer control\n"
+
 		"\n"
 		"All other keys are MPlayer defaults.\n"
 
@@ -342,26 +405,14 @@ prepare_image(uint8_t *data, int inx, int iny, int outx, int outy){
     return 0;
 }
 
-void
-printosd()
-{
-    /* 
-     * places the mplayer status osd
-     */
-    if (vo_osd_text){
-	if (vo_osd_text[0]-1<=5)
-	  aa_puts(c, 0,0, aaopt_osdcolor, osdmodes[vo_osd_text[0]-1]);
-	else aa_puts(c, 0,0, aaopt_osdcolor, "?");
-	aa_puts(c,2,0, aaopt_osdcolor, vo_osd_text+1);
-	aa_puts(c,strlen(vo_osd_text)+1,0, aaopt_osdcolor, " ");
-    }
-}
-
 void 
 show_image(uint8_t * src){
     /*
      * every frame (flip_page/draw_frame) we will be called
      */
+#ifdef USE_OSD
+    int i;
+#endif
 
     /* events? */
     check_events();
@@ -376,18 +427,27 @@ show_image(uint8_t * src){
     else
       aa_render(c, p, 0, 0, aa_scrwidth(c),  aa_scrheight(c));
 
-    /* do we have to put our osd to aa's txtbuf ? */
-    if (showosd)
+    /* do we have to put *our* (messages, progbar) osd to aa's txtbuf ? */
+    if (showosdmessage)
       {
-	if (time(NULL)>=stoposd ) showosd=0;
+	if (time(NULL)>=stoposd ) showosdmessage=0;
 	/* update osd */
-	aa_puts(c, osdx, osdy, AA_SPECIAL, osdtext);
+	aa_puts(c, osdx, osdy, AA_SPECIAL, osdmessagetext);
 	/* posbar? */
 	if (posbar[0]!='\0')
 	  aa_puts(c, 0, osdy + 1, AA_SPECIAL, posbar);
       }
-    /* and the real OSD, but only the time & playmode */
-    printosd();
+    /* OSD time & playmode , subtitles */
+#ifdef USE_OSD
+    printosdtext();
+    /* now write the subtitle osd buffer */
+    for (i=0;i<aa_scrwidth(c)*aa_scrheight(c);i++){
+	if (osdbuffer[i]){
+	    c->textbuffer[i]=osdbuffer[i];
+	    c->attrbuffer[i]=aaopt_subcolor;
+	}
+    }
+#endif
 
     /* print out */
     aa_flush(c);
@@ -397,7 +457,7 @@ static uint32_t
 draw_frame(uint8_t *src[]) {
     /*
      * RGB-Video's Only
-     * src[0] is handled bu prepare_image
+     * src[0] is handled by prepare_image
      */
     show_image(src[0]);
     return 0;
@@ -465,55 +525,61 @@ check_events(void) {
 		    break;
 	    }
 	}
-	switch (key) {
-	    /* AA image controls */
-	    case '1':
-		fast=!fast;
-		osdmessage(MESSAGE_DURATION, 1, "Fast mode is now %s", fast==1 ? "on" : "off");
-		break;
-	    case '2':
-		if (p->dither==AA_FLOYD_S){
-		    p->dither=AA_NONE;
-		    osdmessage(MESSAGE_DURATION, 1, "Dithering: Off");
-		}else if (p->dither==AA_NONE){
-		    p->dither=AA_ERRORDISTRIB;
-		    osdmessage(MESSAGE_DURATION, 1, "Dithering: Error Distribution");
-		}else if (p->dither==AA_ERRORDISTRIB){
-		    p->dither=AA_FLOYD_S;
-		    osdmessage(MESSAGE_DURATION, 1, "Dithering: Floyd Steinberg");
-		}
-		break;
-	    case '3':
-		p->inversion=!p->inversion;
-		osdmessage(MESSAGE_DURATION, 1, "Invert mode is now %s",
-			    p->inversion==1 ? "on" : "off");
-		break;
-
-	    case '4':		/* contrast */
-		DO_DEC(p->contrast,0,1);
-		osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
-
-		break;
-	    case '5':		/* contrast */
-		DO_INC(p->contrast,255,1);
-		osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
-		break;
-	    case '6':		/* brightness */
-		DO_DEC(p->bright,0,1);
-		osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
-		break;
-	    case '7':		/* brightness */
-		DO_INC(p->bright,255,1);
-		osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
-		break;
-
-	    default :
-		/* nothing if we're interested in?
-		 * the mplayer should handle it!
-		 */
-		mplayer_put_key(key);
-		break;
+	if (key=='a' || key=='A'){
+	    aaconfigmode=!aaconfigmode;
+	    osdmessage(MESSAGE_DURATION, 1, "aa config mode is now %s",
+		    aaconfigmode==1 ? "on. use keys 1-7" : "off");
 	}
+	if (aaconfigmode==1) {
+	    switch (key) {
+		/* AA image controls */
+		case '1':		/* contrast */
+		    DO_DEC(p->contrast,0,1);
+		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
+		    break;
+		case '2':		/* contrast */
+		    DO_INC(p->contrast,255,1);
+		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
+		    break;
+		case '3':		/* brightness */
+		    DO_DEC(p->bright,0,1);
+		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
+		    break;
+		case '4':		/* brightness */
+		    DO_INC(p->bright,255,1);
+		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
+		    break;
+		case '5':
+		    fast=!fast;
+		    osdmessage(MESSAGE_DURATION, 1, "Fast mode is now %s", fast==1 ? "on" : "off");
+		    break;
+		case '6':
+		    if (p->dither==AA_FLOYD_S){
+			p->dither=AA_NONE;
+			osdmessage(MESSAGE_DURATION, 1, "Dithering: Off");
+		    }else if (p->dither==AA_NONE){
+			p->dither=AA_ERRORDISTRIB;
+			osdmessage(MESSAGE_DURATION, 1, "Dithering: Error Distribution");
+		    }else if (p->dither==AA_ERRORDISTRIB){
+			p->dither=AA_FLOYD_S;
+			osdmessage(MESSAGE_DURATION, 1, "Dithering: Floyd Steinberg");
+		    }
+		    break;
+		case '7':
+		    p->inversion=!p->inversion;
+		    osdmessage(MESSAGE_DURATION, 1, "Invert mode is now %s",
+				p->inversion==1 ? "on" : "off");
+		    break;
+
+		default :
+		    /* nothing if we're interested in?
+		     * the mplayer should handle it!
+		     */
+		    mplayer_put_key(key);
+		    break;
+	    }
+	}// aaconfigmode
+	else mplayer_put_key(key);
     }
 }
 
@@ -522,18 +588,47 @@ uninit(void) {
     /*
      * THE END
      */ 
-    aa_close(c);
-    free(stx);
-    free(sty);
-    if (convertbuf!=NULL) free(convertbuf);
     if (strstr(c->driver->name,"Curses") || strstr(c->driver->name,"Linux")){
 	freopen("/dev/tty", "w", stderr);
 	quiet=0; /* enable mplayer outputs */
     }
+#ifdef USE_OSD
+    if (osdbuffer!=NULL) free(osdbuffer);
+#endif
+    aa_close(c);
+    free(stx);
+    free(sty);
+    if (convertbuf!=NULL) free(convertbuf);
 }
+
+#ifdef USE_OSD
+static void draw_alpha(int x,int y, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    /* alpha, hm, grr, only the char into our osdbuffer */
+    int pos;
+    pos=(x)+(y)*(aa_scrwidth(c));
+    osdbuffer[pos]=src[0];
+}
+
+
+
+#endif
 
 static void
 draw_osd(void){
+#ifdef USE_OSD
+    /* 
+     * the subtiles are written into a own osdbuffer
+     * because draw_osd is called after show_image/flip_page
+     * the osdbuffer is written the next show_image/flip_page
+     * into aatextbuf
+     */
+    memset(osdbuffer,0,aa_scrwidth(c)*aa_scrheight(c));
+    printosdprogbar();
+    /* let vo_draw_text only write subtitle */
+    vo_osd_text=0;
+    vo_osd_progbar_type=-1;
+    vo_draw_text(aa_scrwidth(c), aa_scrheight(c), draw_alpha);
+#endif
 }
 
 int
@@ -573,7 +668,7 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 	help=strdup(aa_help); /* aa_help is const :( */
 	x=strtok(help,"-");
 	printf(x);
-	while (x=strtok(NULL, "-")){
+	while ((x=strtok(NULL, "-"))){
 	    if (*(x-2)==' ') printf("-aa");
 	      else printf("-");
 	    printf("%s", x);
@@ -622,10 +717,10 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 	}
 	if (pseudoargv[1]!=NULL){
 	    /* aalib has given param back */
-	    fprintf(stderr," Parameter -%s accepted\n", opt, param);
+	    fprintf(stderr," Parameter -%s accepted\n", opt);
 	    return 0; /* param could be the filename */
 	}
-	fprintf(stderr," Parameter -%s %s accepted\n", opt, param==NULL ? "" : param);
+	fprintf(stderr," Parameter -%s %s accepted\n", opt, ((param==NULL) ? "" : param) );
 	return 1; /* all opt & params accepted */
 
     }
