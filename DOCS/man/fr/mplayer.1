@@ -2183,40 +2183,6 @@ Vous pouvez obtenir un négatif de l'image avec cette option.
 Non géné par tous les pilotes de sortie vidéo.
 .
 .TP
-.B \-jpeg <option1:option2:...> (\-vo jpeg uniquement)
-Spécifie les option du pilote de sortie vidéo jpeg.
-.sp 1
-Les options disponibles sont:
-.sp 1
-.PD 0
-.RSs
-.IPs [no]progressive
-Fichiers JPEG standards ou progressifs (par défaut\ : non progressifs).
-.IPs [no]baseline
-Utilisation de baseline ou pas (par défaut\ : baseline).
-.IPs optimize=<0\-100>
-facteur d'optimisation (par défaut\ : 100)
-.IPs smooth=<0\-100>
-facteur d'adoucissement (par défaut\ : 0)
-.IPs quality=<0\-100>
-facteur de qualité (par défaut\ : 75)
-.IPs outdir=<chemin>
-Défini le répertoire où sauver les fichiers JPEG.
-Si non défini, tous les fichiers JPEG seront écrits dans le répertoire
-courant.
-.IPs subdirs=<préfixe>
-Si défini, MPlayer créera des sous-répertoires numérotés et préfixés de
-<préfixe>.
-Si non  défini, aucun sous-répertoire ne sera créé et tous les fichiers JPEG
-seront écrits dans le même répertoire.
-.IPs maxfiles=<valeur>
-Nombre maximum de fichier JPEG à créer par sous-répertoire dans le cas où
-l'option subdirs est définie.
-<valeur> doit être plus grand ou égal à 1 (par défaut\ : 1000).
-.RE
-.PD 1
-.
-.TP
 .B \-monitor-dotclock <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
 Définit les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
@@ -2860,6 +2826,33 @@ des zéros.
 sépare chaque trame dans un fichier JPEG du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
+.PD 0
+.RSs
+.IPs [no]progressive
+Fichiers JPEG standards ou progressifs (par défaut\ : non progressifs).
+.IPs [no]baseline
+Utilisation de baseline ou pas (par défaut\ : baseline).
+.IPs optimize=<0\-100>
+facteur d'optimisation (par défaut\ : 100)
+.IPs smooth=<0\-100>
+facteur d'adoucissement (par défaut\ : 0)
+.IPs quality=<0\-100>
+facteur de qualité (par défaut\ : 75)
+.IPs outdir=<chemin>
+Défini le répertoire où sauver les fichiers JPEG.
+Si non défini, tous les fichiers JPEG seront écrits dans le répertoire
+courant.
+.IPs subdirs=<préfixe>
+Si défini, MPlayer créera des sous-répertoires numérotés et préfixés de
+<préfixe>.
+Si non  défini, aucun sous-répertoire ne sera créé et tous les fichiers JPEG
+seront écrits dans le même répertoire.
+.IPs maxfiles=<valeur>
+Nombre maximum de fichier JPEG à créer par sous-répertoire dans le cas où
+l'option subdirs est définie.
+<valeur> doit être plus grand ou égal à 1 (par défaut\ : 1000).
+.RE
+.PD 1
 .
 .TP
 .B pgm\ \ \ \ 
@@ -2954,7 +2947,7 @@ sc: Active le découpage logiciel.
 Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:devices.html#audio-dev
 pour les détails.
 .RSss
-n: nombre de canaux de sortie (1\-6)
+n: nombre de canaux de d'entrée (1\-6)
 .br
 lij: Combien du canal j est mixé dans le canal de sortie i.
 .REss
@@ -3636,11 +3629,10 @@ Utilisez de préférence le zoom logiciel.
 .B yuvcsp\ 
 Calle les valeurs de couleurs YUV sur l'intervalle CCIR 601 sans conversion
 réelle.
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B rgb2bgr[=swap]
-Conversion de palette RGB 24/\:32 <\-> BGR 24/\:32
+Conversion d'espace de couleur RGB 24/\:32 <\-> BGR 24/\:32
 .PD 0
 .RSs
 .IPs swap
@@ -3650,10 +3642,11 @@ Conversion de palette RGB 24/\:32 <\-> BGR 24/\:32
 .
 .TP
 .B palette
-Conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant
-palette.
+Conversion d'espace de couleur RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en
+utilisant palette.
 .
 .TP
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .B format[=fourcc]
 Restreint l'espace de couleur pour le prochain filtre sans faire de conversion.
 Utilisez-le avec le filtre scale pour une véritable conversion.
