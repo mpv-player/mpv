@@ -38,8 +38,8 @@ struct _CInputPin
 {
     IPin_vt* vt;
     DECLARE_IUNKNOWN();
-    AM_MEDIA_TYPE type;
     CBaseFilter* parent;
+    AM_MEDIA_TYPE type;
     GUID interfaces[1];
 };
 

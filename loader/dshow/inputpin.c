@@ -17,11 +17,11 @@ static int unimplemented(const char* s, void* p)
 typedef struct
 {
     IEnumPins_vt* vt;
+    DECLARE_IUNKNOWN();
     IPin* pin1;
     IPin* pin2;
     int counter;
     GUID interfaces[2];
-    DECLARE_IUNKNOWN();
 } CEnumPins;
 
 static long STDCALL CEnumPins_Next(IEnumPins* This,
@@ -101,12 +101,20 @@ static CEnumPins* CEnumPinsCreate(IPin* p, IPin* pp)
 {
     CEnumPins* This = (CEnumPins*) malloc(sizeof(CEnumPins));
 
+    if (!This)
+        return NULL;
+
+    This->refcount = 1;
     This->pin1 = p;
     This->pin2 = pp;
     This->counter = 0;
-    This->refcount = 1;
 
     This->vt = (IEnumPins_vt*) malloc(sizeof(IEnumPins_vt));
+    if (!This->vt)
+    {
+	free(This);
+        return NULL;
+    }
     This->vt->QueryInterface = CEnumPins_QueryInterface;
     This->vt->AddRef = CEnumPins_AddRef;
     This->vt->Release = CEnumPins_Release;
@@ -261,11 +269,21 @@ CInputPin* CInputPinCreate(CBaseFilter* p, const AM_MEDIA_TYPE* amt)
 {
     CInputPin* This = (CInputPin*) malloc(sizeof(CInputPin));
 
-    This->parent = p;
+    if (!This)
+        return NULL;
+
     This->refcount = 1;
+    This->parent = p;
     This->type = *amt;
 
     This->vt= (IPin_vt*) malloc(sizeof(IPin_vt));
+
+    if (!This->vt)
+    {
+	free(This);
+	return NULL;
+    }
+
     This->vt->QueryInterface = CInputPin_QueryInterface;
     This->vt->AddRef = CInputPin_AddRef;
     This->vt->Release = CInputPin_Release;
@@ -395,9 +413,12 @@ static IPin* CBaseFilter_GetUnusedPin(CBaseFilter* This)
 
 static void CBaseFilter_Destroy(CBaseFilter* This)
 {
-    free(This->vt);
-    This->pin->vt->Release((IUnknown*)This->pin);
-    This->unused_pin->vt->Release((IUnknown*)This->unused_pin);
+    if (This->vt)
+	free(This->vt);
+    if (This->pin)
+	This->pin->vt->Release((IUnknown*)This->pin);
+    if (This->unused_pin)
+	This->unused_pin->vt->Release((IUnknown*)This->unused_pin);
     free(This);
 }
 
@@ -406,12 +427,21 @@ IMPLEMENT_IUNKNOWN(CBaseFilter)
 CBaseFilter* CBaseFilterCreate(const AM_MEDIA_TYPE* type, CBaseFilter2* parent)
 {
     CBaseFilter* This = (CBaseFilter*) malloc(sizeof(CBaseFilter));
+    if (!This)
+	return NULL;
+
     This->refcount = 1;
 
     This->pin = (IPin*) CInputPinCreate(This, type);
     This->unused_pin = (IPin*) CRemotePinCreate(This, parent->GetPin(parent));
 
     This->vt = (IBaseFilter_vt*) malloc(sizeof(IBaseFilter_vt));
+    if (!This->vt || !This->pin || !This->unused_pin)
+    {
+        CBaseFilter_Destroy(This);
+        return NULL;
+    }
+
     This->vt->QueryInterface = CBaseFilter_QueryInterface;
     This->vt->AddRef = CBaseFilter_AddRef;
     This->vt->Release = CBaseFilter_Release;
@@ -541,8 +571,10 @@ static IPin* CBaseFilter2_GetPin(CBaseFilter2* This)
 static void CBaseFilter2_Destroy(CBaseFilter2* This)
 {
     Debug printf("CBaseFilter2_Destroy(%p) called\n", This);
-    This->pin->vt->Release((IUnknown*) This->pin);
-    free(This->vt);
+    if (This->pin)
+	This->pin->vt->Release((IUnknown*) This->pin);
+    if (This->vt)
+	free(This->vt);
     free(This);
 }
 
@@ -559,10 +591,20 @@ CBaseFilter2* CBaseFilter2Create()
 {
     CBaseFilter2* This = (CBaseFilter2*) malloc(sizeof(CBaseFilter2));
 
+    if (!This)
+	return NULL;
+
     This->refcount = 1;
     This->pin = (IPin*) CRemotePin2Create(This);
 
     This->vt = (IBaseFilter_vt*) malloc(sizeof(IBaseFilter_vt));
+
+    if (!This->pin || !This->vt)
+    {
+	CBaseFilter2_Destroy(This);
+        return NULL;
+    }
+
     memset(This->vt, 0, sizeof(IBaseFilter_vt));
     This->vt->QueryInterface = CBaseFilter2_QueryInterface;
     This->vt->AddRef = CBaseFilter2_AddRef;
@@ -646,6 +688,10 @@ IMPLEMENT_IUNKNOWN(CRemotePin)
 CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin)
 {
     CRemotePin* This = (CRemotePin*) malloc(sizeof(CRemotePin));
+
+    if (!This)
+        return NULL;
+
     Debug printf("CRemotePinCreate() called -> %p\n", This);
 
     This->parent = pt;
@@ -653,6 +699,13 @@ CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin)
     This->refcount = 1;
 
     This->vt = (IPin_vt*) malloc(sizeof(IPin_vt));
+
+    if (!This->vt)
+    {
+	free(This);
+	return NULL;
+    }
+
     memset(This->vt, 0, sizeof(IPin_vt));
     This->vt->QueryInterface = CRemotePin_QueryInterface;
     This->vt->AddRef = CRemotePin_AddRef;
@@ -698,12 +751,23 @@ IMPLEMENT_IUNKNOWN(CRemotePin2)
 CRemotePin2* CRemotePin2Create(CBaseFilter2* p)
 {
     CRemotePin2* This = (CRemotePin2*) malloc(sizeof(CRemotePin2));
+
+    if (!This)
+        return NULL;
+
     Debug printf("CRemotePin2Create() called -> %p\n", This);
 
     This->parent = p;
     This->refcount = 1;
 
     This->vt = (IPin_vt*) malloc(sizeof(IPin_vt));
+
+    if (!This->vt)
+    {
+	free(This);
+        return NULL;
+    }
+
     memset(This->vt, 0, sizeof(IPin_vt));
     This->vt->QueryInterface = CRemotePin2_QueryInterface;
     This->vt->AddRef = CRemotePin2_AddRef;

@@ -16,9 +16,12 @@ struct _CMediaSample
     char* own_block;
     int isPreroll;
     int isSyncPoint;
+    int isDiscontinuity;
+    LONGLONG time_start;
+    LONGLONG time_end;
     AM_MEDIA_TYPE media_type;
     int type_valid;
-    void ( *SetPointer) (CMediaSample* This,char* pointer);
+    void ( *SetPointer) (CMediaSample* This, char* pointer);
     void ( *ResetPointer) (CMediaSample* This); // FIXME replace with Set & 0
 };
 

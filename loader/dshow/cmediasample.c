@@ -45,10 +45,11 @@ void CMediaSample_Destroy(CMediaSample* This)
 
 static long STDCALL CMediaSample_Release(IUnknown* This)
 {
-    CMediaSample* parent=(CMediaSample*)This;
+    CMediaSample* parent = (CMediaSample*)This;
     Debug printf("CMediaSample_Release(%p) called  (new ref:%d)\n",
 		 This, ((CMediaSample*)This)->refcount-1);
-    if (--((CMediaSample*)This)->refcount == 0)
+
+    if (--((CMediaSample*) This)->refcount == 0)
     {
 	parent->all->vt->ReleaseBuffer((IMemAllocator*)(parent->all),
 				       (IMediaSample*)This);
@@ -56,28 +57,27 @@ static long STDCALL CMediaSample_Release(IUnknown* This)
     return 0;
 }
 
-static HRESULT STDCALL CMediaSample_GetPointer(IMediaSample * This,
-					       /* [out] */ BYTE **ppBuffer)
+static HRESULT STDCALL CMediaSample_GetPointer(IMediaSample* This,
+					       /* [out] */ BYTE** ppBuffer)
 {
-    Debug printf("CMediaSample_GetPointer(%p) called\n", This);
+    Debug printf("CMediaSample_GetPointer(%p) called -> %p, size: %d  %d\n", This, ((CMediaSample*) This)->block, ((CMediaSample*)This)->actual_size, ((CMediaSample*)This)->size);
     if (!ppBuffer)
 	return E_INVALIDARG;
-    *ppBuffer=(BYTE *)((CMediaSample*)This)->block;
+    *ppBuffer = (BYTE*) ((CMediaSample*) This)->block;
     return 0;
 }
 
 static long STDCALL CMediaSample_GetSize(IMediaSample * This)
 {
-    Debug printf("CMediaSample_GetSize(%p) called -> %d\n",
-		 This, ((CMediaSample*)This)->size);
-    return ((CMediaSample*)This)->size;
+    Debug printf("CMediaSample_GetSize(%p) called -> %d\n", This, ((CMediaSample*) This)->size);
+    return ((CMediaSample*) This)->size;
 }
 
 static HRESULT STDCALL CMediaSample_GetTime(IMediaSample * This,
 					    /* [out] */ REFERENCE_TIME *pTimeStart,
 					    /* [out] */ REFERENCE_TIME *pTimeEnd)
 {
-    Debug printf("CMediaSample_GetTime(%p) called\n", This);
+    Debug printf("CMediaSample_GetTime(%p) called (UNIMPLIMENTED)\n", This);
     return E_NOTIMPL;
 }
 
@@ -85,7 +85,7 @@ static HRESULT STDCALL CMediaSample_SetTime(IMediaSample * This,
 					    /* [in] */ REFERENCE_TIME *pTimeStart,
 					    /* [in] */ REFERENCE_TIME *pTimeEnd)
 {
-    Debug printf("CMediaSample_SetTime(%p) called\n", This);
+    Debug printf("CMediaSample_SetTime(%p) called (UNIMPLIMENTED)\n", This);
     return E_NOTIMPL;
 }
 
@@ -101,7 +101,7 @@ static HRESULT STDCALL CMediaSample_SetSyncPoint(IMediaSample * This,
 						 long bIsSyncPoint)
 {
     Debug printf("CMediaSample_SetSyncPoint(%p) called\n", This);
-    ((CMediaSample*)This)->isSyncPoint=bIsSyncPoint;
+    ((CMediaSample*)This)->isSyncPoint = bIsSyncPoint;
     return 0;
 }
 
@@ -132,12 +132,19 @@ static long STDCALL CMediaSample_GetActualDataLength(IMediaSample* This)
 static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
 							long __MIDL_0010)
 {
+    CMediaSample* cms = (CMediaSample*)This;
     Debug printf("CMediaSample_SetActualDataLength(%p, %ld) called\n", This, __MIDL_0010);
-    if (__MIDL_0010 > ((CMediaSample*)This)->size)
+    if (__MIDL_0010 > cms->size)
     {
-	printf("%p: ERROR: CMediaSample buffer overflow\n", This);
+        char* c = cms->own_block;
+	Debug printf(" CMediaSample - buffer overflow   %ld %d   %p %p\n",
+		     __MIDL_0010, ((CMediaSample*)This)->size, cms->own_block, cms->block);
+	cms->own_block = realloc(cms->own_block, __MIDL_0010);
+	if (c == cms->block)
+	    cms->block = cms->own_block;
+        cms->size = __MIDL_0010;
     }
-    ((CMediaSample*)This)->actual_size = __MIDL_0010;
+    cms->actual_size = __MIDL_0010;
     return 0;
 }
 
@@ -175,9 +182,14 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
     if (t->pbFormat)
 	CoTaskMemFree(t->pbFormat);
     t = pMediaType;
-    t->pbFormat = (char*)CoTaskMemAlloc(t->cbFormat);
-    memcpy(t->pbFormat, pMediaType->pbFormat, t->cbFormat);
-    ((CMediaSample*)This)->type_valid=1;
+    if (t->cbFormat)
+    {
+	t->pbFormat = (char*)CoTaskMemAlloc(t->cbFormat);
+	memcpy(t->pbFormat, pMediaType->pbFormat, t->cbFormat);
+    }
+    else
+        t->pbFormat = 0;
+    ((CMediaSample*) This)->type_valid=1;
 
     return 0;
 }
@@ -185,14 +197,15 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
 static HRESULT STDCALL CMediaSample_IsDiscontinuity(IMediaSample * This)
 {
     Debug printf("CMediaSample_IsDiscontinuity(%p) called\n", This);
-    return 1;
+    return ((CMediaSample*) This)->isDiscontinuity;
 }
 
 static HRESULT STDCALL CMediaSample_SetDiscontinuity(IMediaSample * This,
 						     long bDiscontinuity)
 {
-    Debug printf("CMediaSample_SetDiscontinuity(%p) called\n", This);
-    return E_NOTIMPL;
+    Debug printf("CMediaSample_SetDiscontinuity(%p) called (%ld)\n", This, bDiscontinuity);
+    ((CMediaSample*) This)->isDiscontinuity = bDiscontinuity;
+    return 0;
 }
 
 static HRESULT STDCALL CMediaSample_GetMediaTime(IMediaSample * This,
@@ -200,7 +213,11 @@ static HRESULT STDCALL CMediaSample_GetMediaTime(IMediaSample * This,
 						 /* [out] */ LONGLONG *pTimeEnd)
 {
     Debug printf("CMediaSample_GetMediaTime(%p) called\n", This);
-    return E_NOTIMPL;
+    if (pTimeStart)
+	*pTimeStart = ((CMediaSample*) This)->time_start;
+    if (pTimeEnd)
+	*pTimeEnd = ((CMediaSample*) This)->time_end;
+    return 0;
 }
 
 static HRESULT STDCALL CMediaSample_SetMediaTime(IMediaSample * This,
@@ -208,9 +225,14 @@ static HRESULT STDCALL CMediaSample_SetMediaTime(IMediaSample * This,
 						 /* [in] */ LONGLONG *pTimeEnd)
 {
     Debug printf("CMediaSample_SetMediaTime(%p) called\n", This);
-    return E_NOTIMPL;
+    if (pTimeStart)
+	((CMediaSample*) This)->time_start = *pTimeStart;
+    if (pTimeEnd)
+        ((CMediaSample*) This)->time_end = *pTimeEnd;
+    return 0;
 }
 
+// extension for direct memory write or decompressed data
 static void CMediaSample_SetPointer(CMediaSample* This, char* pointer)
 {
     Debug printf("CMediaSample_SetPointer(%p) called  -> %p\n", This, pointer);
@@ -228,8 +250,29 @@ static void CMediaSample_ResetPointer(CMediaSample* This)
 
 CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size)
 {
-    CMediaSample* This = (CMediaSample*) malloc(sizeof( CMediaSample ));
+    CMediaSample* This = (CMediaSample*) malloc(sizeof(CMediaSample));
+    if (!This)
+	return NULL;
+
+    // some hack here!
+    // it looks like Acelp decoder is actually accessing
+    // the allocated memory before it sets the new size for it ???
+    // -- maybe it's being initialized with wrong parameters
+    // anyway this is fixes the problem somehow with some reserves
+    //
+    // using different trick for now - in DS_Audio modify sample size
+    //if (_size < 0x1000)
+    //    _size = (_size + 0xfff) & ~0xfff;
+
     This->vt = (IMediaSample_vt*) malloc(sizeof(IMediaSample_vt));
+    This->own_block = (char*) malloc(_size);
+    This->media_type.pbFormat = 0;
+
+    if (!This->vt || !This->own_block)
+    {
+	CMediaSample_Destroy(This);
+	return NULL;
+    }
 
     This->vt->QueryInterface = CMediaSample_QueryInterface;
     This->vt->AddRef = CMediaSample_AddRef;
@@ -255,10 +298,11 @@ CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size)
     This->size = _size;
     This->refcount = 0; // increased by MemAllocator
     This->actual_size = 0;
-    This->media_type.pbFormat = 0;
     This->isPreroll = 0;
+    This->isDiscontinuity = 1;
+    This->time_start = 0;
+    This->time_end = 0;
     This->type_valid = 0;
-    This->own_block = (char*) malloc(This->size);
     This->block = This->own_block;
 
     This->SetPointer = CMediaSample_SetPointer;

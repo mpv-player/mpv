@@ -12,7 +12,7 @@ static void DS_Filter_Start(DS_Filter* This)
 {
     HRESULT hr;
 
-    if (This->m_iState != 1)
+    if (This->m_pAll)
 	return;
 
     //Debug printf("DS_Filter_Start(%p)\n", This);
@@ -30,23 +30,14 @@ static void DS_Filter_Start(DS_Filter* This)
         return;
     }
     This->m_pImp->vt->NotifyAllocator(This->m_pImp, This->m_pAll, 0);
-    This->m_iState = 2;
 }
 
 static void DS_Filter_Stop(DS_Filter* This)
 {
-    if (This->m_iState == 2)
+    if (This->m_pAll)
     {
-	This->m_iState = 1;
 	//Debug	printf("DS_Filter_Stop(%p)\n", This);
-	if (This->m_pFilter)
-	{
-	    //printf("vt: %p\n", m_pFilter->vt);
-	    //printf("vtstop %p\n", m_pFilter->vt->Stop);
-	    This->m_pFilter->vt->Stop(This->m_pFilter); // causes weird crash ??? FIXME
-	}
-	else
-	    printf("WARNING: DS_Filter::Stop() m_pFilter is NULL!\n");
+	This->m_pFilter->vt->Stop(This->m_pFilter); // causes weird crash ??? FIXME
 	This->m_pAll->vt->Release((IUnknown*)This->m_pAll);
 	This->m_pAll = 0;
     }
@@ -55,8 +46,6 @@ static void DS_Filter_Stop(DS_Filter* This)
 void DS_Filter_Destroy(DS_Filter* This)
 {
     This->Stop(This);
-
-    This->m_iState = 0;
 
     if (This->m_pOurInput)
 	This->m_pOurInput->vt->Release((IUnknown*)This->m_pOurInput);
@@ -93,6 +82,9 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 			   AM_MEDIA_TYPE* in_fmt,
 			   AM_MEDIA_TYPE* out_fmt)
 {
+    int init = 0;
+    char eb[250];
+    const char* em = NULL;
     DS_Filter* This = (DS_Filter*) malloc(sizeof(DS_Filter));
     if (!This)
 	return NULL;
@@ -108,7 +100,6 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     This->m_pOurOutput = NULL;
     This->m_pAll = NULL;
     This->m_pImp = NULL;
-    This->m_iState = 0;
 
     This->Start = DS_Filter_Start;
     This->Stop = DS_Filter_Stop;
@@ -127,40 +118,40 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	This->m_iHandle = LoadLibraryA(dllname);
 	if (!This->m_iHandle)
 	{
-	    printf("Could not open DirectShow DLL: %.200s\n", dllname);
+	    em = "could not open DirectShow DLL";
 	    break;
 	}
 	func = (GETCLASS)GetProcAddress(This->m_iHandle, "DllGetClassObject");
 	if (!func)
 	{
-	    printf("Illegal or corrupt DirectShow DLL: %.200s\n", dllname);
+	    em = "illegal or corrupt DirectShow DLL";
 	    break;
 	}
 	result = func(id, &IID_IClassFactory, (void**)&factory);
 	if (result || !factory)
 	{
-	    printf("No such class object\n");
+	    em = "no such class object";
 	    break;
 	}
 	result = factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void**)&object);
 	factory->vt->Release((IUnknown*)factory);
 	if (result || !object)
 	{
-	    printf("Class factory failure\n");
+	    em = "class factory failure";
 	    break;
 	}
 	result = object->vt->QueryInterface(object, &IID_IBaseFilter, (void**)&This->m_pFilter);
 	object->vt->Release((IUnknown*)object);
 	if (result || !This->m_pFilter)
 	{
-	    printf("Object does not have IBaseFilter interface\n");
+	    em = "object does not have IBaseFilter interface";
             break;
 	}
 	// enumerate pins
 	result = This->m_pFilter->vt->EnumPins(This->m_pFilter, &enum_pins);
 	if (result || !enum_pins)
 	{
-	    printf("Could not enumerate pins\n");
+	    em = "could not enumerate pins";
             break;
 	}
 
@@ -186,12 +177,12 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	}
 	if (!This->m_pInputPin)
 	{
-	    printf("Input pin not found\n");
+	    em = "could not find input pin";
             break;
 	}
 	if (!This->m_pOutputPin)
 	{
-	    printf("Output pin not found\n");
+	    em = "could not find output pin";
             break;
 	}
 	result = This->m_pInputPin->vt->QueryInterface((IUnknown*)This->m_pInputPin,
@@ -199,7 +190,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 						       (void**)&This->m_pImp);
 	if (result)
 	{
-	    printf("Error getting IMemInputPin interface\n");
+	    em = "could not get IMemInputPin interface";
 	    break;
 	}
 
@@ -208,7 +199,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
         result = This->m_pInputPin->vt->QueryAccept(This->m_pInputPin, This->m_pOurType);
 	if (result)
 	{
-	    printf("Source format is not accepted\n");
+	    em = "source format is not accepted";
             break;
 	}
 	This->m_pParentFilter = CBaseFilter2Create();
@@ -221,7 +212,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 							  This->m_pOurType);
 	if (result)
 	{
-	    printf("Error connecting to input pin\n");
+	    em = "could not connect to input pin";
             break;
 	}
 
@@ -232,19 +223,19 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 							   This->m_pDestType);
 	if (result)
 	{
-	    //printf("Tracking ACELP %d  0%x\n", result);
-	    printf("Error connecting to output pin\n");
+	    em = "could not connect to output pin";
             break;
 	}
 
 	printf("Using DirectShow codec: %s\n", dllname);
-	This->m_iState = 1;
+	init++;
         break;
     }
 
-    if (This->m_iState != 1)
+    if (!init)
     {
 	DS_Filter_Destroy(This);
+	printf("Warning: DS_Filter() %s.  (DLL=%.200s)\n", em, dllname);
         This = 0;
     }
     return This;

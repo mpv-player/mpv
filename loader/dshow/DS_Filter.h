@@ -29,7 +29,6 @@ struct _DS_Filter
     AM_MEDIA_TYPE *m_pOurType, *m_pDestType;
     IMemAllocator* m_pAll;
     IMemInputPin* m_pImp;
-    int m_iState;
 
     void ( *Start )(DS_Filter*);
     void ( *Stop )(DS_Filter*);

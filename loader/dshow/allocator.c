@@ -69,6 +69,7 @@ static inline avm_list_t* avm_list_add_tail(avm_list_t* head, void* member)
 static inline avm_list_t* avm_list_del_head(avm_list_t* head)
 {
     avm_list_t* n = 0;
+
     if (head)
     {
 	if (head->next != head)
@@ -77,10 +78,8 @@ static inline avm_list_t* avm_list_del_head(avm_list_t* head)
 	    head->prev->next = head->next;
 	    head->next->prev = head->prev;
 	}
-
 	free(head);
     }
-
     return n;
 }
 
@@ -130,8 +129,12 @@ static HRESULT STDCALL MemAllocator_SetProperties(IMemAllocator * This,
 	return E_FAIL;
     if (me->used_list != 0 || me->free_list != 0)
 	return E_FAIL;
-    me->props = *pRequest;
+
     *pActual = *pRequest;
+    //if (pActual->cbBuffer == 2)
+    //    pActual->cbBuffer = 576;
+
+    me->props = *pActual;
 
     return 0;
 }
@@ -162,8 +165,9 @@ static HRESULT STDCALL MemAllocator_Commit(IMemAllocator * This)
     {
 	CMediaSample* sample = CMediaSampleCreate((IMemAllocator*)me,
 						  me->props.cbBuffer);
+	if (!sample)
+            return E_OUTOFMEMORY;
 	//printf("FREEEEEEEEEEEE ADDED %p\n", sample);
-
 	me->free_list = avm_list_add_tail(me->free_list, sample);
 	//avm_list_print(me->free_list);
     }
@@ -179,10 +183,8 @@ static HRESULT STDCALL MemAllocator_Decommit(IMemAllocator * This)
     //printf("Deleted mem %p: %d  %d\n", me, me->free_list.size(), me->used_list.size());
     while (me->used_list)
     {
-        CMediaSample* sample = (CMediaSample*) me->used_list->member;
-	//printf("****************** Decommiting USED %p\n", sample);
-	//sample->vt->Release((IUnknown*)sample);
-	CMediaSample_Destroy((CMediaSample*)sample);
+	me->free_list = avm_list_add_tail(me->free_list,
+					  (CMediaSample*) me->used_list->member);
 	me->used_list = avm_list_del_head(me->used_list);
     }
 
@@ -192,7 +194,7 @@ static HRESULT STDCALL MemAllocator_Decommit(IMemAllocator * This)
 	//printf("****************** Decommiting FREE %p\n", sample);
 	//sample->vt->Release((IUnknown*)sample);
 	CMediaSample_Destroy((CMediaSample*)sample);
-        me->free_list = avm_list_del_head(me->free_list);
+	me->free_list = avm_list_del_head(me->free_list);
     }
 
     return 0;
@@ -206,8 +208,9 @@ static HRESULT STDCALL MemAllocator_GetBuffer(IMemAllocator * This,
 {
     MemAllocator* me = (MemAllocator*)This;
     CMediaSample* sample;
-    Debug printf("MemAllocator_GetBuffer(%p) called  %d  %d\n", This,
+    Debug printf("MemAllocator_ReleaseBuffer(%p) called   %d  %d\n", This,
 		 avm_list_size(me->used_list), avm_list_size(me->free_list));
+
     if (!me->free_list)
     {
 	Debug printf("No samples available\n");
@@ -217,8 +220,6 @@ static HRESULT STDCALL MemAllocator_GetBuffer(IMemAllocator * This,
     sample = (CMediaSample*) me->free_list->member;
     me->free_list = avm_list_del_head(me->free_list);
     me->used_list = avm_list_add_tail(me->used_list, sample);
-
-    //printf("MemAllocator getbuffer: %p  %d  %d\n", sample, avm_list_size(me->used_list), avm_list_size(me->free_list));
 
     *ppBuffer = (IMediaSample*) sample;
     sample->vt->AddRef((IUnknown*) sample);
@@ -236,24 +237,24 @@ static HRESULT STDCALL MemAllocator_GetBuffer(IMemAllocator * This,
 static HRESULT STDCALL MemAllocator_ReleaseBuffer(IMemAllocator* This,
 						  /* [in] */ IMediaSample* pBuffer)
 {
+    avm_list_t* l;
     MemAllocator* me = (MemAllocator*)This;
     Debug printf("MemAllocator_ReleaseBuffer(%p) called   %d  %d\n", This,
 		 avm_list_size(me->used_list), avm_list_size(me->free_list));
 
-    for (;;)
+    l = avm_list_find(me->used_list, pBuffer);
+    if (l)
     {
-	avm_list_t* l = avm_list_find(me->used_list, pBuffer);
-	if (l)
+	CMediaSample* sample = (CMediaSample*) l->member;
+	if (me->modified_sample == sample)
 	{
-	    CMediaSample* sample = (CMediaSample*) l->member;
-	    me->used_list = avm_list_del_head(me->used_list);
-	    me->free_list = avm_list_add_head(me->free_list, sample);
-	    //printf("****************** RELEASED OK %p  %p\n", me->used_list, me->free_list);
-
-            return 0;
+	    me->modified_sample->ResetPointer(me->modified_sample);
+	    me->modified_sample = 0;
 	}
-	else
-            break;
+	me->used_list = avm_list_del_head(me->used_list);
+	me->free_list = avm_list_add_head(me->free_list, sample);
+	//printf("****************** RELEASED OK %p  %p\n", me->used_list, me->free_list);
+	return 0;
     }
     Debug printf("MemAllocator_ReleaseBuffer(%p) releasing unknown buffer!!!! %p\n", This, pBuffer);
     return E_FAIL;
@@ -288,6 +289,10 @@ IMPLEMENT_IUNKNOWN(MemAllocator)
 MemAllocator* MemAllocatorCreate()
 {
     MemAllocator* This = (MemAllocator*) malloc(sizeof(MemAllocator));
+
+    if (!This)
+        return NULL;
+
     Debug printf("MemAllocatorCreate() called -> %p\n", This);
 
     This->refcount = 1;
@@ -296,6 +301,13 @@ MemAllocator* MemAllocatorCreate()
     This->props.cbAlign = This->props.cbPrefix = 0;
 
     This->vt = (IMemAllocator_vt*) malloc(sizeof(IMemAllocator_vt));
+
+    if (!This->vt)
+    {
+        free(This);
+	return NULL;
+    }
+
     This->vt->QueryInterface = MemAllocator_QueryInterface;
     This->vt->AddRef = MemAllocator_AddRef;
     This->vt->Release = MemAllocator_Release;
@@ -309,8 +321,8 @@ MemAllocator* MemAllocatorCreate()
     This->SetPointer = MemAllocator_SetPointer;
     This->ResetPointer = MemAllocator_ResetPointer;
 
-    This->new_pointer = 0;
     This->modified_sample = 0;
+    This->new_pointer = 0;
     This->used_list = 0;
     This->free_list = 0;
 

@@ -84,13 +84,17 @@ typedef struct IEnumPins_vt
 {
     INHERIT_IUNKNOWN();
 
+    // retrieves a specified number of pins in the enumeration sequence..
     HRESULT STDCALL ( *Next )(IEnumPins* This,
 			      /* [in] */ unsigned long cPins,
 			      /* [size_is][out] */ IPin** ppPins,
 			      /* [out] */ unsigned long* pcFetched);
+    // skips over a specified number of pins.
     HRESULT STDCALL ( *Skip )(IEnumPins* This,
 			      /* [in] */ unsigned long cPins);
+    // resets the enumeration sequence to the beginning.
     HRESULT STDCALL ( *Reset )(IEnumPins* This);
+    // makes a copy of the enumerator with the same enumeration state.
     HRESULT STDCALL ( *Clone )(IEnumPins* This,
 			       /* [out] */ IEnumPins** ppEnum);
 } IEnumPins_vt;
@@ -111,25 +115,46 @@ typedef struct IMediaSample_vt
     HRESULT STDCALL ( *SetTime )(IMediaSample* This,
 				 /* [in] */ REFERENCE_TIME* pTimeStart,
 				 /* [in] */ REFERENCE_TIME* pTimeEnd);
+
+    // sync-point property. If true, then the beginning of this
+    // sample is a sync-point. (note that if AM_MEDIA_TYPE.bTemporalCompression
+    // is false then all samples are sync points). A filter can start
+    // a stream at any sync point.  S_FALSE if not sync-point, S_OK if true.
     HRESULT STDCALL ( *IsSyncPoint )(IMediaSample* This);
     HRESULT STDCALL ( *SetSyncPoint )(IMediaSample* This,
 				      long bIsSyncPoint);
+
+    // preroll property.  If true, this sample is for preroll only and
+    // shouldn't be displayed.
     HRESULT STDCALL ( *IsPreroll )(IMediaSample* This);
     HRESULT STDCALL ( *SetPreroll )(IMediaSample* This,
 				    long bIsPreroll);
+
     LONG    STDCALL ( *GetActualDataLength )(IMediaSample* This);
     HRESULT STDCALL ( *SetActualDataLength )(IMediaSample* This,
 					     long __MIDL_0010);
+
+    // these allow for limited format changes in band - if no format change
+    // has been made when you receive a sample GetMediaType will return S_FALSE
     HRESULT STDCALL ( *GetMediaType )(IMediaSample* This,
 				      AM_MEDIA_TYPE** ppMediaType);
     HRESULT STDCALL ( *SetMediaType )(IMediaSample* This,
 				      AM_MEDIA_TYPE* pMediaType);
+
+    // returns S_OK if there is a discontinuity in the data (this frame is
+    // not a continuation of the previous stream of data
+    // - there has been a seek or some dropped samples).
     HRESULT STDCALL ( *IsDiscontinuity )(IMediaSample* This);
     HRESULT STDCALL ( *SetDiscontinuity )(IMediaSample* This,
 					  long bDiscontinuity);
+
+    // get the media times for this sample
     HRESULT STDCALL ( *GetMediaTime )(IMediaSample* This,
 				      /* [out] */ long long* pTimeStart,
 				      /* [out] */ long long* pTimeEnd);
+    // Set the media times for this sample
+    // pTimeStart==pTimeEnd==NULL will invalidate the media time stamps in
+    // this sample
     HRESULT STDCALL ( *SetMediaTime )(IMediaSample* This,
 				      /* [in] */ long long* pTimeStart,
 				      /* [in] */ long long* pTimeEnd);
@@ -180,18 +205,24 @@ typedef struct IMemAllocator_vt
 {
     INHERIT_IUNKNOWN();
 
+    // specifies the number of buffers to allocate and the size of each buffer.
     HRESULT STDCALL ( *SetProperties )(IMemAllocator* This,
 				       /* [in] */ ALLOCATOR_PROPERTIES *pRequest,
 				       /* [out] */ ALLOCATOR_PROPERTIES *pActual);
+    // retrieves the number of buffers that the allocator will create, and the buffer properties.
     HRESULT STDCALL ( *GetProperties )(IMemAllocator* This,
 				       /* [out] */ ALLOCATOR_PROPERTIES *pProps);
+    // allocates the buffer memory.
     HRESULT STDCALL ( *Commit )(IMemAllocator* This);
+    // releases the memory for the buffers.
     HRESULT STDCALL ( *Decommit )(IMemAllocator* This);
+    // retrieves a media sample that contains an empty buffer.
     HRESULT STDCALL ( *GetBuffer )(IMemAllocator* This,
 				   /* [out] */ IMediaSample** ppBuffer,
 				   /* [in] */ REFERENCE_TIME* pStartTime,
 				   /* [in] */ REFERENCE_TIME* pEndTime,
 				   /* [in] */ unsigned long dwFlags);
+    // releases a media sample.
     HRESULT STDCALL ( *ReleaseBuffer )(IMemAllocator* This,
 				       /* [in] */ IMediaSample* pBuffer);
 } IMemAllocator_vt;
