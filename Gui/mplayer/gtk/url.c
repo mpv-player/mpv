@@ -73,7 +73,7 @@ static void on_Button_pressed( GtkButton * button,gpointer user_data )
 
    if ( str )
     {
-     if ( strncmp( str,"http://",7 ) && strncmp( str,"ftp://",6 ) && !strncmp( str,"mms://",6 ) )
+     if ( strncmp( str,"http://",7 ) && strncmp( str,"ftp://",6 ) && strncmp( str,"mms://",6 ) )
       {
        gchar * tmp;
        tmp=malloc( strlen( str ) + 8 );
