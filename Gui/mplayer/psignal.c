@@ -156,7 +156,10 @@ void mplMainSigHandler( int s )
         break;
    case evSkinBrowser: mplShMem->SkinChange=1; break;
    case evFileLoaded:
-        strcpy( mplShMem->Filename,gtkShMem->fs.dir ); strcat( mplShMem->Filename,"/" ); strcat( mplShMem->Filename,gtkShMem->fs.filename );
+        strcpy( mplShMem->Filename,gtkShMem->fs.dir ); 
+	strcat( mplShMem->Filename,"/" ); 
+	strcat( mplShMem->Filename,gtkShMem->fs.filename );
+	printf( "%%%%%%%% Playing file: %s\n",mplShMem->Filename );
 	mplShMem->FilenameChanged=1;
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
         break;

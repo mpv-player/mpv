@@ -48,9 +48,6 @@ extern int mplSubRender;
 void mplStop()
 {
  if ( !mplShMem->Playing ) return;
-// ---
-printf("%%%%%% STOP  \n");
-// ---
  mplShMem->Playing=0;
  mplShMem->TimeSec=0;
  if ( !appMPlayer.subWindow.isFullScreen )
@@ -67,34 +64,27 @@ void mplPlay( void )
  if ( ( mplShMem->Filename[0] == 0 )||
       ( mplShMem->Playing == 1 ) ) return;
  if ( mplShMem->Playing == 2 ) { mplPause(); return; }
-// ---
-//printf("%%%%%% PLAY  \n");
-// ---
  mplShMem->Playing=1;
-// wsPostRedisplay( &appMPlayer.subWindow );
+ wsClearWindow( appMPlayer.subWindow );
  mplSubRender=0;
 }
 
 void mplPause( void )
 {
-// ---
-//printf("%%%%%% PAUSE  \n");
-// ---
  switch( mplShMem->Playing )
   {
    case 1: // playing
         mplShMem->Playing=2;
 	btnModify( evPlaySwitchToPause,btnReleased );
 	btnModify( evPauseSwitchToPlay,btnDisabled );
-        mplSubRender=0;
 	break;
     case 2: // paused
 	mplShMem->Playing=1;
 	btnModify( evPlaySwitchToPause,btnDisabled );
 	btnModify( evPauseSwitchToPlay,btnReleased );
-        mplSubRender=0;
 	break;
   }
+ mplSubRender=0;
 }
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
@@ -124,18 +114,12 @@ float mplGetPosition( void )
 
 void mplRelSeek( float s )
 { // -+s
-// ---
-//printf("%%%%%% RelSEEK=%5.3f  \n",s);
-// ---
  rel_seek_secs=s; abs_seek_pos=0;
 }
 
 void mplAbsSeek( float s )
 { // 0.0 ... 100.0
-// ---
-//printf("%%%%%% AbsSEEK=%5.3f  \n",s);
  rel_seek_secs=0.01*s; abs_seek_pos=3;
-// ---
 }
 
 listItems tmpList;

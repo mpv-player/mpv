@@ -50,18 +50,15 @@ void mplSubDraw( wsParamDisplay )
 
  if ( ( mplShMem->Playing ) )//&&( appMPlayer.subWindow.State == wsWindowExpose ) )
   { 
-printf( "------> redraw volib.\n" );   
-   wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
-   wsClearWindow( appMPlayer.subWindow );
    vo_expose=1; 
    mplSubRender=0;
   }
 
  if ( mplSubRender )
   {
-printf( "------> redraw video.\n" );   
-   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
-   wsClearWindow( appMPlayer.subWindow );
+   wsSetForegroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+   XFillRectangle( wsDisplay,appMPlayer.subWindow.WindowID,appMPlayer.subWindow.wGC,0,0,
+    appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
    if ( appMPlayer.sub.Bitmap.Image ) 
     {
      wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
