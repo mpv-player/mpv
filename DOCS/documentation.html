@@ -363,6 +363,7 @@ kernel bugs, etc) so they are discouraged.</P>
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
 <UL>
   <LI>you can <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B></LI>
+  <LI>RealVideo 1.0/MJPEG/h263/others playing and encoding</LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4
 movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
 </UL>
@@ -381,14 +382,12 @@ package! However, you can use our codecs package with avifile. Features :<BR>
 </LI>
 
 <LI><B>DivX4</B> : information about this codec is available in the
-<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. If you don't want to use
-<B>MEncoder</B>, you possibly don't want this codec as <B>libavcodec</B> (see
-above) is much faster than this.<BR>
+<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. You possibly don't want this
+codec as <B>libavcodec</B> (see above) is much faster than this.<BR>
 Features :<UL>
   <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
     slower than <B>libavcodec</B> !</LI>
   <LI>it's closed-source, and only an x86 version is available.</LI>
-  <LI><I>You also need this codec for <B>MEncoder</B>, see below !</I></LI>
 </UL>
 </LI>
 
@@ -443,9 +442,9 @@ support.</LI>
 
 <LI><B>Nvidia cards</B> : very bad choice for video playing (NVidia has
 <A HREF="users_against_developers.html#nvidia">different opinion</A>!).
-Nvidia's cards are manufactured on the far-east, and have very cheap and bad
+Nvidia's cards have very cheap and bad
 quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration!</U> You have to download
+contain support for hardware YUV acceleration for all NVidia cards !</U> You have to download
 Nvidia's closed-source drivers from nvidia.com . See details in <A
 HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
 
@@ -1293,6 +1292,11 @@ No closer info yet.</P>
   <LI>network streaming support</LI>
 </UL></LI>
 
+<LI><B><A HREF="mailto:albeu@free.fr">Alban Bedel</A> <A HREF="mailto:djw@flinthills.com">Derek J Witt</A></B>
+<UL>
+  <LI>MMS network streaming patches</LI>
+</UL></LI>
+
 <LI><B><A HREF="mailto:zybi@fanthom.irc.pl">Artur Zaprzala</A></B>
 <UL>
   <LI>Complete font generator prog + OSD font (TOOLS/subfont-c)</LI>
@@ -1563,7 +1567,6 @@ other technical help from:</P>
   <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A>
   <LI><B>vo_dga.c</B> - Acki
   <LI><B>vo_fbdev.c</B> - Szabi
-  <LI><B>vo_fsdga.c</B> - OBSOLETED, use dga
   <LI><B>vo_ggi.c</B> - al3x
   <LI><B>vo_gl.c</B> - A'rpi
   <LI><B>vo_gl2.c</B> - <A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A>

@@ -357,6 +357,8 @@ problémákba ütközni:<BR>
   <UL>
     <LI>szükséged lesz erre a codecre ha <B><I>DivX/DivX4</I></B> filmeket akarsz nem-x86
     gépen lejátszani</LI>
+    <LI>RealVideo 1.0/MJPEG/h263 és még sok más codec, mind lejátszáshoz,
+    mind enkódoláshoz!</LI>
     <LI>ezzel a codec-kel értheted el a DivX/DivX4 filmek <B>leggyorsabb
     dekódolását</B> (még az eredeti DivX4-nél is gyorsabb) !</LI>
   </UL>
@@ -375,16 +377,14 @@ problémákba ütközni:<BR>
 
 <LI><B>DivX4</B> : errõl a codecrõl a
   <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>-es fejezetben található információ.
-  Ha nem akarsz <B>MEncoder-t</B> használni, ez a codec szükségtelen, tekintve
-  hogy a <B>libavcodec</B> (lásd fent) sokkal gyorsabb nála.<BR>
+  Ez a codec eléggé szükségtelen, tekintve hogy a <B>libavcodec</B> (lásd fent)
+  sokkal gyorsabb nála.<BR>
   A DivX4 tulajdonságai :
   <UL>
     <LI>gyorsabban játszik le <B>DivX3</B> filmeket mint a Win32-es DLL-ek,
       de lassabban mint a <B>libavcodec</B> !</LI>
     <LI>A codec maga zárt forráskódú, és egyelõre csak x86-os
       gépeken futtatható.</LI>
-    <LI><I>Ez a codec szükséges a <B>MEncoder</B>-hez is,
-      lásd lent !</I></LI>
   </UL>
 </LI>
 
@@ -1137,7 +1137,7 @@ Ne növeljük a lista forgalmát.</P>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
 <P><UL>
 <LI>ide küldj bugreport-ot (miután elolvastad az EGÉSZ dokumentációt)</LI>
-<LI>feature kérést (miután elolvastad DOCS/TODO)</LI>
+<LI>feature kérést (miután elolvastad DOCS/tech/TODO)</LI>
 <LI>felhasználói kérdéseket (miután elolvastad ezt az egész dokumentációt.)</LI>
 </UL></P>
 
