@@ -30,7 +30,7 @@ type of this entry (Node, file, dvd, vcd ot tv).
 
 An entry can hold more than one file, why ?
 
-Because an entry can be a network stream and usally you have more than
+Because an entry can be a network stream and usually you have more than
 one server. But all send the same thing, so it's only on entry with sevral
 sources.
 
@@ -98,8 +98,8 @@ to the arguments.
 Then when your iter returned PLAY_TREE_ITER_ENTRY you can use
 play_tree_iter_get_file to get the file. If you call it more than one time
 it will return the next file for this entry or loop trough the list if no more
-file are avaible. You can now how many files are avaible using iter->num_files
-and wich one it returned using iter->file.
+file are available. You can now how many files are available using
+iter->num_files and wich one it returned using iter->file.
 In case the entry is a DVD, VCD or TV channel the returned string is not a filename
 but "DVD title x", "VCD track x" or "TV channel x".
 To distinc those case from a normal file you can check iter->tree->entry_type.
