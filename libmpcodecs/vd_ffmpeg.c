@@ -36,6 +36,15 @@ LIBVD_EXTERN(ffmpeg)
 #error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
+#if LIBAVCODEC_BUILD < 4645
+#warning your version of libavcodec is old, u might want to get a newer one
+#endif
+
+#if LIBAVCODEC_BUILD < 4645
+#define AVFrame AVVideoFrame
+#define coded_frame coded_picture
+#endif
+
 int avcodec_inited=0;
 
 #if defined(FF_POSTPROCESS) && defined(MBR)
@@ -44,7 +53,7 @@ int quant_store[MBR+1][MBC+1];
 
 typedef struct {
     AVCodecContext *avctx;
-    AVVideoFrame *pic;
+    AVFrame *pic;
     float last_aspect;
     int do_slices;
     int do_dr1;
@@ -64,8 +73,8 @@ typedef struct {
 
 #include "cfgparser.h"
 
-static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
-static void release_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
+static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
+static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
 static int lavc_param_error_resilience=2;
@@ -149,7 +158,11 @@ static int init(sh_video_t *sh){
         ctx->do_dr1=0;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
 
+#if LIBAVCODEC_BUILD >= 4645
+    ctx->pic = avcodec_alloc_frame();
+#else
     ctx->pic = avcodec_alloc_picture();
+#endif
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
 
@@ -255,8 +268,8 @@ static void uninit(sh_video_t *sh){
             printf("QP: %d, count: %d\n", i, ctx->qp_stat[i]);
         }
         printf("Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n", 
-            ctx->qp_sum / avctx->coded_picture->coded_picture_number,
-            1.0/(ctx->inv_qp_sum / avctx->coded_picture->coded_picture_number)
+            ctx->qp_sum / avctx->coded_frame->coded_picture_number,
+            1.0/(ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number)
             );
     }
 
@@ -285,13 +298,13 @@ static void draw_slice(struct AVCodecContext *s,
     int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
-    UINT8 *skip= &s->coded_picture->mbskip_table[(y>>4)*skip_stride];
-    int threshold= s->coded_picture->age;
+    UINT8 *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
+    int threshold= s->coded_frame->age;
 
     stride[0]=linesize;
-    if(s->coded_picture->linesize[1]){
-        stride[1]= s->coded_picture->linesize[1];
-        stride[2]= s->coded_picture->linesize[2];
+    if(s->coded_frame->linesize[1]){
+        stride[1]= s->coded_frame->linesize[1];
+        stride[2]= s->coded_frame->linesize[2];
     }else
         stride[1]=stride[2]=stride[0]/2;
 #if 0
@@ -349,7 +362,7 @@ static int init_vo(sh_video_t *sh){
     return 0;
 }
 
-static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic){
+static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     sh_video_t * sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t* mpi=NULL;
@@ -449,7 +462,7 @@ else
     return 0;
 }
 
-static void release_buffer(struct AVCodecContext *avctx, AVVideoFrame *pic){
+static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
     int i;
     
 #if LIBAVCODEC_BUILD >= 4644
@@ -476,7 +489,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int got_picture=0;
     int ret;
     vd_ffmpeg_ctx *ctx = sh->context;
-    AVVideoFrame *pic= ctx->pic;
+    AVFrame *pic= ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
     int dr1= ctx->do_dr1;
@@ -528,7 +541,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         static long long int all_len=0;
         static int frame_number=0;
         static double all_frametime=0.0;
-        AVVideoFrame *pic= avctx->coded_picture;
+        AVFrame *pic= avctx->coded_frame;
 
         if(!fvstats) {
             time_t today2;

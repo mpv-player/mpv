@@ -41,8 +41,13 @@ extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags
 #error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
-#if LIBAVCODEC_BUILD < 4624
+#if LIBAVCODEC_BUILD < 4645
 #warning your version of libavcodec is old, u might want to get a newer one
+#endif
+
+#if LIBAVCODEC_BUILD < 4645
+#define AVFrame AVVideoFrame
+#define coded_frame coded_picture
 #endif
 
 extern int avcodec_inited;
@@ -121,7 +126,7 @@ struct config lavcopts_conf[]={
 	{"vmax_b_frames", &lavc_param_vmax_b_frames, CONF_TYPE_INT, CONF_RANGE, 0, FF_MAX_B_FRAMES, NULL},
 	{"vpass", &lavc_param_vpass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 	{"vrc_strategy", &lavc_param_vrc_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
-	{"vb_strategy", &lavc_param_vb_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
+	{"vb_strategy", &lavc_param_vb_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"vb_qoffset", &lavc_param_vb_qoffset, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 31.0, NULL},
 	{"vlelim", &lavc_param_luma_elim_threshold, CONF_TYPE_INT, CONF_RANGE, -99, 99, NULL},
 	{"vcelim", &lavc_param_chroma_elim_threshold, CONF_TYPE_INT, CONF_RANGE, -99, 99, NULL},
@@ -168,7 +173,7 @@ struct config lavcopts_conf[]={
 struct vf_priv_s {
     aviwrite_stream_t* mux;
     AVCodecContext *context;
-    AVVideoFrame *pic;
+    AVFrame *pic;
     AVCodec *codec;
     FILE *stats_file;
 };
@@ -420,7 +425,7 @@ static double psnr(double d){
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     int out_size;
-    AVVideoFrame *pic= vf->priv->pic;
+    AVFrame *pic= vf->priv->pic;
 
     pic->data[0]=mpi->planes[0];
     pic->data[1]=mpi->planes[1];
@@ -432,8 +437,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
-    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->coded_picture->key_frame?0x10:0);
-    
+    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0);
+        
 #if LIBAVCODEC_BUILD >= 4643
     /* store psnr / pict size / type / qscale */
     if(lavc_param_psnr){
@@ -442,7 +447,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         static long long int all_len=0;
         static int frame_number=0;
         static double all_frametime=0.0;
-        AVVideoFrame *pic= lavc_venc_context->coded_picture;
+        AVFrame *pic= lavc_venc_context->coded_frame;
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
 
         if(!fvstats) {
@@ -461,14 +466,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         }
 
         fprintf(fvstats, "%6d, %2.2f, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
-            lavc_venc_context->coded_picture->coded_picture_number,
-            lavc_venc_context->coded_picture->quality,
+            lavc_venc_context->coded_frame->coded_picture_number,
+            lavc_venc_context->coded_frame->quality,
             out_size,
-            psnr(lavc_venc_context->coded_picture->error[0]/f),
-            psnr(lavc_venc_context->coded_picture->error[1]*4/f),
-            psnr(lavc_venc_context->coded_picture->error[2]*4/f),
-            psnr((lavc_venc_context->coded_picture->error[0]+lavc_venc_context->coded_picture->error[1]+lavc_venc_context->coded_picture->error[2])/(f*1.5)),
-            pict_type_char[lavc_venc_context->coded_picture->pict_type]
+            psnr(lavc_venc_context->coded_frame->error[0]/f),
+            psnr(lavc_venc_context->coded_frame->error[1]*4/f),
+            psnr(lavc_venc_context->coded_frame->error[2]*4/f),
+            psnr((lavc_venc_context->coded_frame->error[0]+lavc_venc_context->coded_frame->error[1]+lavc_venc_context->coded_frame->error[2])/(f*1.5)),
+            pict_type_char[lavc_venc_context->coded_frame->pict_type]
             );
     }
 #endif    
@@ -485,7 +490,7 @@ static void uninit(struct vf_instance_s* vf){
     if(lavc_param_psnr){
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
         
-        f*= lavc_venc_context->coded_picture->coded_picture_number;
+        f*= lavc_venc_context->coded_frame->coded_picture_number;
         
         printf("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n",
             psnr(lavc_venc_context->error[0]/f),
@@ -586,7 +591,11 @@ static int vf_open(vf_instance_t *vf, char* args){
 	return 0;
     }
 
+#if LIBAVCODEC_BUILD >= 4645
+    vf->priv->pic = avcodec_alloc_frame();
+#else
     vf->priv->pic = avcodec_alloc_picture();
+#endif
     vf->priv->context = avcodec_alloc_context();
 
     return 1;

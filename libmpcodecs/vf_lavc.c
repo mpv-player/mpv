@@ -25,13 +25,22 @@
 #error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
+#if LIBAVCODEC_BUILD < 4645
+#warning your version of libavcodec is old, u might want to get a newer one
+#endif
+
+#if LIBAVCODEC_BUILD < 4645
+#define AVFrame AVVideoFrame
+#define coded_frame coded_picture
+#endif
+
 extern int avcodec_inited;
 
 struct vf_priv_s {
     unsigned char* outbuf;
     int outbuf_size;
     AVCodecContext* context;
-    AVVideoFrame* pic;
+    AVFrame* pic;
     AVCodec* codec;
     vo_mpegpes_t pes;
 };
@@ -85,7 +94,7 @@ static int config(struct vf_instance_s* vf,
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t* dmpi;
     int out_size;
-    AVVideoFrame *pic= vf->priv->pic;
+    AVFrame *pic= vf->priv->pic;
 
     pic->data[0]=mpi->planes[0];
     pic->data[1]=mpi->planes[1];
@@ -148,7 +157,11 @@ static int open(vf_instance_t *vf, char* args){
     }
     
     vf->priv->context=avcodec_alloc_context();
-    vf->priv->pic=avcodec_alloc_picture();
+#if LIBAVCODEC_BUILD >= 4645
+    vf->priv->pic = avcodec_alloc_frame();
+#else
+    vf->priv->pic = avcodec_alloc_picture();
+#endif
 
     // TODO: parse args ->
     if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
