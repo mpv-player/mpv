@@ -219,13 +219,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 //===========================================================================//
 
-//  supported Input formats: YV12, I420, IYUV, YUY2, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
+//  supported Input formats: YV12, I420, IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     switch(fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
+    case IMGFMT_UYVY:
     case IMGFMT_YUY2:
     case IMGFMT_BGR32:
     case IMGFMT_BGR24:
