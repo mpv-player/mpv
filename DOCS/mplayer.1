@@ -2,7 +2,7 @@
 .\" This manpage was/is done by Gabucino <sendmail@to.mplayer-users>
 .\" (Patches done by Jonas Jermann <sendmail@to.mplayer-users>)
 .\" 
-.TH "MPlayer" "1" "2002-05-05"
+.TH "MPlayer" "1" "2002-05-13"
 
 .SH "NAME"
 mplayer \- Movie Player for Linux
@@ -23,7 +23,7 @@ mencoder \- Movie Encoder for Linux
 .RB [dvd|vcd|tv]://[title]\ [options]
 .br
 .B mplayer
-.RB [mms|http|http_proxy|rtp]://URL[:port]\ [options]
+.RB [mms|mmst|http|http_proxy|rtp|rtsp]://URL[:port]\ [options]
 .br
 .B mencoder
 .RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ file]
@@ -34,30 +34,29 @@ mencoder \- Movie Encoder for Linux
 .SH "DESCRIPTION"
 .B mplayer
 is a movie player for LINUX (runs on many other Unices, and non\-x86
-CPUs, see DOCS section 6). It plays most MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI,
-RM, NuppelVideo, yuv4mpeg, FILM, RoQ files, supported by many native, XAnim, and
-Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 and even WMV movies too
-(and you don't need the avifile library at all!).
+CPUs, see the documentation). It plays most MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV,
+FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ files, supported by many native, XAnim, and
+Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx and even DivX movies too (and
+you don't need the avifile library at all!).
 
 Another big feature of mplayer is the wide range of supported output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, but you can use
-GGI and SDL (and this way all their drivers) and some lowlevel card-specific drivers
-(for Matrox G-series, 3Dfx Banshee/Voodoo3 and ATI cards) too!
+GGI, SDL (and this way all their drivers), VESA (on every VESA compatible card, even 
+without X!) and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too!
 .br
 Most of them supports software or hardware scaling, so you can enjoy movies in fullscreen.
-MPlayer supports displaying through some hardware MPEG decoder boards, such as the Siemens DVB and
-DXR3/Hollywood+!
+MPlayer supports displaying through some hardware MPEG decoder boards, such as the Siemens
+DVB, DXR2 and DXR3/Hollywood+!
 
 Nice big antialiased shaded subtitles with european/ISO 8859-1,2 (hungarian, english, czech, 
-etc), cyrillic, korean fonts are supported (10 supported subtitle formats: MicroDVD, SubRip, 
-SubViewer, SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, VobSub, and our 
-own: MPsub).
+etc), cyrillic, korean fonts are supported (10 supported subtitle formats: VobSub, MicroDVD,
+SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub).
 
 .B mencoder
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to
-encode MPlayer-playable movies (AVI/DVD/VCD/VOB/MPG/MOV/VIV/VIV/FLI/RM/NUV/NET)
+encode MPlayer-playable movies (AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET)
 to other MPlayer-playable formats (see below).  It encodes to DivX4 
-(1, 2 or 3 passes), xvid, codecs of libavcodec, PCM/MP3/VBRMP3 audio. 
+(1, 2 or 3 passes), XviD, codecs of libavcodec, PCM/MP3/VBRMP3 audio. 
 Also has stream copying abilities, a powerfull plugin system
 (crop, expand, flip, postprocess, rotate, scale, rgb/yuv conversion) and more.
 
@@ -399,9 +398,9 @@ Available plugins are:
 
  crop[=w:h:x:y]     cropping
  expand[=w:h:x:y:o] expanding and OSD
- flip               flips upside-down
+ flip               vertical mirroring
  mirror             horizontal mirroring
- rotate[=direction] rotate image
+ rotate[=<0-3>]     rotate image +- 90 degrees
  scale[=w:h]        software scaling
  yuy2               YV12/I420 \-> YUY2
  rgb2bgr[=swap]     RGB 24/32 <\-> BGR 24/32
@@ -410,6 +409,10 @@ Available plugins are:
  pp[=flags]         postprocessing (see \-pp)
  lavc[=quality:fps] YV12\->MPEG1 (libavcodec)
  fame               YV12\->MPEG1 (libfame)
+ dvbscale[=aspect]  optimal scaling for DVB cards
+                    (aspect=DVB_HEIGHT*ASPECTRATIO)
+ cropdetect         detection of black borders
+                    (print crop values to stdout)
 
 .I parameters:
 .br
@@ -635,17 +638,8 @@ Fullscreen playing (centers movie, and makes black
 bands around it). Toggle it with the 'f' key (not all video
 outputs support it).
 .TP
-.B \-fsmode <mode>
-This option workarounds some problems when using specific windowmanagers and
-fullscreen mode. If you experience fullscreen problems, try changing this
-value between 0 and 7.
-
-    \-fsmode 0      new method
-    \-fsmode 1      ICCCWM patch
-                   (for KDE2/icewm)
-    \-fsmode 2      old method
-    \-fsmode 3      ICCCWM patch
-                   plus Motif method
+.B \-fsmode-dontuse <0-31> (OBSOLETE) (use -fs option)
+Try this option if you still experience fullscreen problems.
 .TP
 .B \-green_intensity <\-1000\ \-\ 1000>
 Adjust intensity of green component of video signal (default 0).
@@ -1286,6 +1280,9 @@ Input bindings. See '\-input keylist' for full keylist!
 .br
 .BR ~/.mplayer/font/\ \ \ \ \ \ 
 Font directory. There must be a font.desc file and files with .RAW extension.
+.br
+.BR ~/.mplayer/DVDkeys/\ \ \ 
+Cracked CSS keys
 .br
 
 .I Subtitles
