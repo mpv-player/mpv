@@ -2077,14 +2077,17 @@ time:	temporal strength (default = 6)
 Activates the software equalizer with interactive controls like the hardware
 eq controls.
 The values can be from -100 to 100.
-.IPs eq2[=gamma:cont:bright]
+.IPs eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
 Alternative software equalizer that uses lookup tables (very slow),
-allowing gamma correction in addition to simple brightness and
-contrast adjustment.
+allowing gamma correction in addition to simple brightness,
+contrast and saturation adjustment. Note, that it uses the same MMX
+optimized code as -vop eq if all gamma values are 1.0!
 The parameters are given as floating point values.
-Defaults are gamma=1.0, contrast=1.0, and brightness=0.0.
-The values are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
-in negative image) and -1\-1 for brightness.
+Defaults are gamma=1.0, contrast=1.0, brightness=0.0 and stauration=1.0.
+Parameters rg, gg, bg are the independent gamma values for the Red, Green
+and Blue components, all defaults to 1.0
+The values are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
+in negative image) -1\-1 for brightness and 0\-3 for saturation.
 .IPs halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
