@@ -45,6 +45,7 @@ static char help_text[]=
 "Basic keys: (see the manpage for the complete list, check the input.conf too)\n"
 " <-  or  ->      seek backward/forward 10 seconds\n"
 " up or down      seek backward/forward  1 minute\n"
+" pgup or pgdown  seek backward/forward 10 minutes\n"
 " < or >          step backward/forward in playlist\n"
 " p or SPACE      pause movie (press any key to continue)\n"
 " q or ESC        stop playing and quit program\n"
