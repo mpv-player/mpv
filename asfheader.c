@@ -16,6 +16,10 @@ extern int verbose; // defined in mplayer.c
 #include "codec-cfg.h"
 #include "stheader.h"
 
+#include "asf.h"
+
+// BB: Moved to asf.h  --------------------- FROM HERE -------------------
+#ifdef 0
 typedef struct __attribute__((packed)) {
   unsigned char guid[16];
   unsigned long long size;
@@ -60,6 +64,8 @@ typedef struct  __attribute__((packed)) {
   unsigned short comment_size;
   unsigned short rating_size;
 } ASF_content_description_t;
+#endif
+// BB: Moved to asf.h  --------------------- TO HERE -------------------
 
 static ASF_header_t asfh;
 static ASF_obj_header_t objh;
@@ -75,13 +81,19 @@ int asf_packetsize=0;
 
 //int i;
 
-void print_asf_string(const char* name, char* string, int length){
-  int i;
-  printf("%s", name);
-  for(i=0;i<length && string[i]!='\0';i+=2){
-    printf("%c", string[i]);
+// the variable string is modify in this function
+void pack_asf_string(char* string, int length) {
+  int i,j;
+  for( i=0, j=0; i<length && string[i]!='\0'; i+=2, j++) {
+    string[j]=string[i];
   }
-  printf("\n");
+  string[j]='\0';
+}
+
+// the variable string is modify in this function
+void print_asf_string(const char* name, char* string, int length) {
+  pack_asf_string(string, length);
+  printf("%s%s\n", name, string);
 }
 
 static char* asf_chunk_type(unsigned char* guid){
