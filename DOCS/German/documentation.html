@@ -126,14 +126,17 @@ eingebauten und einigen Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
 Ein anderes großes Feature von
 <B>MPlayer</B> ist die große Weite von unterstützten Ausgabetreibern. Es
 funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, aber du kannst SDL
-verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level
-grafikkartenabhängige Treiber (für Matrox). Die meinsten von ihnen unterstützen
+verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level grafikkartenabhängige
+Treiber (für Matrox, 3Dfx und Radeon). Die meinsten von ihnen unterstützen
 Software oder Hardware-Scaling, also kannst du die Videos in Vollbild geniesen.
 Und was meinst du über die großen, antialiase schattierten Untertitel (7
-unterstützte Typen!!!) mit ungarischen, englischen, cyrillischen, tschechischen,
-koreanischen Schriften und OSD?</P>
+unterstützte Typen!!!) mit europäischen/ISO 8859-1,2 (ungarische, englische,
+tschechische, usw.), kyrillischen und koreanischen Schriften und OSD?</P>
 
-<P>MPlayer kann unter den Bedienungen der <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A> verbreitet werden, AUSSER dem OpenDivX Code.</P>
+<P>MPlayer könnte nach den Bedienungen der <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A> verbreitet werden,
+jedoch das Verbreiten in Binärer Form ist <B>verboten</B> und das MPlayer-Team
+ignoniert Fehlerberichte, wenn sie von solch einer Version sind! Dem OpenDivX
+Code hat seine eigene Lizenz.</P>
 
 <P>Ich schreibe keine Codecs, nur einen Player. Stattdessen verbringe ich eine
 menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (beides MPEG
@@ -222,6 +225,11 @@ auch immer, du kannst auch unserer Paket für avifile nutzen.</LI>
 Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die Matrox-spezifische Unterstützung nicht eingebaut.</LI>
 
+<LI>Wenn du eine 3Dfx Karte (welche Modelle?) verwendest, bitte schau auf die
+<A HREF="video.html#2.2.1.9">Sektion 2.2.1.9</A> um einen großen Geschwindigkeitsvorteil zu erhalten.
+Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
+machst, ansonsten wird die 3Dfx Unterstützung nicht eingebaut.</LI>
+
 <LI>Wenn du den ProjectMayos <B>DivX4</B> Codec verwenden willst, siehe
 <A HREF="codecs.html#2.1.2.1">Sektion 2.1.2.1</A> vor dem Kompilieren. Dieser Codec kann
 <B>DivX</B> Filme um einiges schneller als die Win32 DLLs und auch ffmpeg abspielen.
@@ -234,6 +242,9 @@ einen Vorteil im Vergleich mit dem Win32 Codec in der Geschwingkeit zu schaffen.
 
 <LI>Für DVD-Unterstützung musst libdvdread und libdvdcss kompilieren. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
+
+<LI>Entscheinde, ob du GUI brauchst. Wenn du es braucht schaue auf die
+<A HREF=#1.4>Sektion 1.4</A> vor dem Kompilieren.</LI>
 
 </UL>
 
@@ -273,7 +284,16 @@ Um MPlayer im GUI-Modus zu betreiben kannst du entweder
   <CODE>gmplayer</CODE> stattdessen aufrufen.
 </UL>
 </P>
+
+<P>Da <B>MPlayer</B> keine Skins enthält musst du dir welche downloaden, wenn du
+das GUI verwenden willst. Schau dazu auf die <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>.
+Diese sollten in der normale systemweite Verzeichnis (<CODE>/usr/local/share/mplayer/Skin</CODE>)
+oder nach <CODE>$HOME/.mplayer/Skin</CODE> extrahiert werden. <B>Mplayer</B>
+sucht standardmäßig nach einem Verzeichnis namens <I>default</I>, aber du kannst
+mit der Option <I>-skin neuerskin</I> oder dem Eintrag <I>skin=neuerskin</I> in
+der Konfigurationsdatei den Skin <CODE>*/Skin/newskin</CODE> auswählen.
   
+
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
 <P>Ja, <B>MPlayer</B> unterstützt auch mehrere Arten von Untertiteln. Zur Zeit
@@ -457,7 +477,7 @@ HTTP, noch mit MMS.</P>
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT genannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | m
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | m</CODE></P>
 
 <P><B><A NAME=4>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
 
@@ -908,7 +928,7 @@ other technical help from:</P>
 <P>libao2 Treiber:
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x
-  <LI><B>ao_alsa9.c</B>  - al3x (FEHLERHAFT, verwende oss)
+  <LI><B>ao_alsa9.c</B>  - al3x (gefixt von <A HREF="mailto:joy@pingfm.org>joy_ping</A>)
   <LI><B>ao_null.c</B>   - A'rpi
   <LI><B>ao_oss.c</B>    - A'rpi
   <LI><B>ao_pcm.c</B>    - Atmos
@@ -930,13 +950,7 @@ other technical help from:</P>
 Anmelden kann man sich unter den folgenden Adressen:</P>
 
 <P><UL>
-<LI>MPlayer Haupt-/Ungarische-Entwicker Liste:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
-<P>Es ist die FLAME Liste in ungarischer Sprache :) Es wird auch
-über MPlayer Hauptteam interne Sachen, wie MPlayer Partys, Sponsoren
-usw. gesprochen.</P>
-
-</LI><LI>MPlayer Entwickler Liste:<BR>
+<LI>MPlayer Entwickler Liste:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
 <P>Diese Liste ist über MPlayer Entwicklung! Es wird geprochen über Interface/API
 Änderungen, neue Librarys, Code-Optimierungencode, ./configure Änderungen und
@@ -1032,8 +1046,8 @@ Lösung: versuche -framedrop</LI>
 Audio verschiebt sich / verliert die Synchronisation bei einer oder mehreren Dateien<BR>
 <UL>
 <LI>defekte Datei (bitten uploaden, das wir das prüfen und korrigieren können<BR>
-Abhilfe: -ni oder -bps Option (für nicht-interlaced oder defekte Dateien)<BR>
--mc 0 (erforderlich bei Dateien mit VBR-Audio)<BR>
+Abhilfe: -ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR>
+-mc 0 (erforderlich bei Dateien mit schlechtem Interleave und VBR-Audio)<BR>
 -Delay-Einstellung oder +/- Tasten bei Abspielen</LI>
 <LI>deine Soundkarte unterstützt keine 48KHz Wiedergabe<BR>
 Abhilfe: kaufe eine bessere Soundkarte... oder versuche die Bilder/Sekunde um 10% zu vermindern (verwende -fps 27 bei 30fps-Filmen)</LI>
