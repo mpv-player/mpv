@@ -110,6 +110,7 @@ int vbeInit( void )
    retval = vbeGetProtModeInfo(&vbe_pm_info);
    if(retval != VBE_OK) return retval;
    i = 0;
+   if(vbe_pm_info.iopl_ports) /* Can be NULL !!!*/
    while((iopl_port=vbe_pm_info.iopl_ports[i]) != 0xFFFF
 	 && vbe_pm_info.iopl_ports[i++] > 1023) ioperm(iopl_port,1,1);
    iopl(3);
@@ -624,10 +625,12 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
     if(verbose > 1) printf("vbelib:  SetPaletteData=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetPaletteData,pm_info->SetPaletteData);
 #endif
     pm_info->iopl_ports      = PhysToVirtSO(r.es,info_offset+rm_info->iopl_ports);
+    if(!rm_info->iopl_ports) pm_info->iopl_ports = NULL;
+    else
     if(!check_wrd(pm_info->iopl_ports))
     {
 	pm_info->iopl_ports = NULL;
-	retval = VBE_BROKEN_BIOS;
+/*	retval = VBE_BROKEN_BIOS; <- It's for broken BIOSes only */
     }   
 #ifdef HAVE_VERBOSE_VAR
     if(verbose > 1)
