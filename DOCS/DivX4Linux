@@ -18,11 +18,11 @@ How to enable DivX4Linux support?
    Change DECORE_LIBS in config.mak to be:
       DECORE_LIBS=-L/usr/local/lib -ldivxdecore
 
-4. Compile mplayer
+4. Compile mplayer  (make;make install)
 
 5. How to enable it?
  It's a bit tricky. As it conflicts with opendivx (it's API is very
- similar to opendivx's), opendivx code is disabled, and teh opendivx
+ similar to opendivx's), opendivx code is disabled, and the opendivx
  driver calls this library too.
  You have 2 choices:
    -vc odivx : using divx4 codec as a new version of opendivx.
