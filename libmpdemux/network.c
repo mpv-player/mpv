@@ -32,6 +32,11 @@
 extern int verbose;
 extern m_config_t *mconfig;
 
+/* Variables for the command line option -user & -pass */
+char *network_username;
+char *network_password;
+
+
 static struct {
 	char *mime_type;
 	int demuxer_type;
@@ -335,10 +340,12 @@ http_read_response( int fd ) {
 
 int
 http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
-	char username[50], password[50];
 	char *aut;
-	if( *auth_retry>3 ) {
+	int ret;
+	if( *auth_retry==1 ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -pass to provide your username/password for a list of URLs,\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
 		return -1;
 	}
 	if( *auth_retry>0 ) {
@@ -351,24 +358,21 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 			url->password = NULL;
 		}
 	}
+
 	aut = http_get_field(http_hdr, "WWW-Authenticate");
 	if( aut!=NULL ) {
 		char *aut_space;
 		aut_space = strstr(aut, "realm=");
 		if( aut_space!=NULL ) aut_space += 6;
-//		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s, please enter:\n", aut_space);
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s\n", aut_space);
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authentication required for %s\n", aut_space);
 	} else {
-//		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required, please enter:\n");
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required\n");
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authentication required\n");
 	}
-return -1;
-	if( url->username==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"username: ");
-		// FIXME
-		scanf("%s", username);
-		printf("%s\n", username);
-
+	ret = m_config_is_option_set(mconfig,"user");
+	if( ret==1 ) {
+		char *username;
+		username = *((char**)m_config_get_option_ptr(mconfig, "user"));
+		if( username==NULL ) return -1;
 		url->username = (char*)malloc(strlen(username)+1);
 		if( url->username==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
@@ -376,22 +380,25 @@ return -1;
 		}
 		strcpy(url->username, username);
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"%s ", url->username );
-	}
-	mp_msg(MSGT_NETWORK,MSGL_INFO,"password: ");
-	// FIXME
-	scanf("%s", password);
-	printf("%s\n", password);
-	if( url->password ) {
-		free( url->password );
-		url->password = NULL;
-	}
-	url->password = (char*)malloc(strlen(password)+1);
-	if( url->password==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to read the username\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -pass to provide your username/password for a list of URLs,\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
 		return -1;
 	}
-	strcpy(url->password, password);
+	ret = m_config_is_option_set(mconfig,"pass");
+	if( ret==1 ) {
+		char *password;
+		password = *((char**)m_config_get_option_ptr(mconfig, "pass"));
+		if( password==NULL ) return -1;
+		url->password = (char*)malloc(strlen(password)+1);
+		if( url->password==NULL ) {
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+			return -1;
+		}
+		strcpy(url->password, password);
+	} else {
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"No password provided, trying blank password\n");
+	}
 	(*auth_retry)++;
 	return 0;
 }
@@ -557,7 +564,7 @@ extension=NULL;
 						redirect = 1;	
 					}
 					break;
-				case 401: // Authorization required
+				case 401: // Authentication required
 					if( http_authenticate(http_hdr, url, &auth_retry)<0 ) return -1;
 					redirect = 1;
 					break;
