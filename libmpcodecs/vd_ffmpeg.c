@@ -251,7 +251,9 @@ static int init(sh_video_t *sh){
 #endif
     }
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
-       || sh->format == mmioFOURCC('R', 'V', '1', '3')){
+       || sh->format == mmioFOURCC('R', 'V', '1', '3')
+       || sh->format == mmioFOURCC('R', 'V', '2', '0')
+       ){
         avctx->extradata_size= 8;
         avctx->extradata = malloc(avctx->extradata_size);
         if(sh->bih->biSize!=sizeof(*sh->bih)+8){
@@ -677,7 +679,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 //    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
-       || sh->format == mmioFOURCC('R', 'V', '1', '3'))
+       || sh->format == mmioFOURCC('R', 'V', '1', '3')
+       || sh->format == mmioFOURCC('R', 'V', '2', '0'))
     if(sh->bih->biSize==sizeof(*sh->bih)+8){
         int i;
         dp_hdr_t *hdr= (dp_hdr_t*)data;
