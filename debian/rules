@@ -38,7 +38,7 @@ clean:
 #	-rm -f build
 	-$(MAKE) distclean
 #	-rm -f `find . -name "*~"`
-	-rm -rf debian/tmp debian/files* core debian/substvars
+#	-rm -rf debian/tmp debian/files* core debian/substvars
 	dh_clean
 
 
@@ -52,7 +52,7 @@ install: build
 	# Add here commands to install the package into debian/<packagename>
 #	$(MAKE) prefix=`pwd`/debian/`dh_listpackages`/usr install
 #	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
-	install -d $(CURDIR)/debian/tmp/usr/bin
+#	install -d $(CURDIR)/debian/tmp/usr/bin
 	install -m 755 -s mplayer $(CURDIR)/debian/tmp/usr/bin/mplayer
 #Do we really need this?:	
 #	       install -o root -g root -m 4755 fibmap_mplayer usr/bin/fibmap_mplayer
