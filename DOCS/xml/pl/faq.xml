@@ -412,10 +412,8 @@ Gdy zaczynam odtwarzanie wyświetla się następujący komunikat lecz wszystko w
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Porzebujesz uprawnień roota lub specjalnie ustawionego jądra, aby używać
+Potrzebujesz uprawnień roota lub specjalnie ustawionego jądra, aby używać
 nowego kodu taktowania.
-<!--frogu: timing code???-->
-<!--Torinthiel: Czemu nie? Sens oddaje -->
 Aby uzyskać szczegóły, spójrz do sekcji <link linkend="rtc">RTC</link> w dokumentacji.
 </para></answer>
 </qandaentry>
@@ -444,7 +442,7 @@ Naciśnij <keycap>o</keycap> oraz wypróbuj opcję <option>-osdlevel</option>.
 Opcja <option>-xy</option> lub <option>-fs</option> nie działa ze sterownikiem x11 (<option>-vo x11</option>)...
 </para></question>
 <answer><para>
-Działa, lecz musisz osobno zażądać skalowania sprzętowego (bardzo wolne)
+Działa, lecz musisz osobno zażądać skalowania programowego (bardzo wolne)
 opcją <option>-zoom</option>. Lepiej skorzystaj z obsługi trybu XF86VidMode: musisz
 zadać opcje <option>-vm</option> oraz <option>-fs</option> i to wszystko.
 Upewnij się, że masz odpowiednie linie trybów (modelines) w swoim pliku 
@@ -457,7 +455,7 @@ działa - używaj go. Działa jeszcze szybciej.
 
 <qandaentry>
 <question><para>
-Co oznaczają te liczby w linii statusu?
+Co oznaczają te liczby w wierszu stanu?
 </para></question>
 <answer><para>
 Przykład:
@@ -573,7 +571,7 @@ i zamień <systemitem>#undef FAST_OSD</systemitem> na
 OSD (Wyświetlanie na Ekranie) migocze!
 </para></question>
 <answer><para>
-Używasz sterownika vo z pojedynczym buforowaniem (x11, xv). Przy 
+Używasz sterownika wyjścia video z pojedynczym buforowaniem (x11, xv). Przy 
 xv użyj opcji <option>-double</option>. Spróbuj także 
 <option>-vf expand</option>.
 </para></answer>
@@ -644,8 +642,8 @@ Jak mogę określić ścieżkę audio/napisów z pliku  OGM, Matroska, NUT lub D
 </para></question>
 <answer><para>
 Musisz użyć <option>-aid</option> (ID audio) lub <option>-alang</option>
-(język audio), <option>-sid</option>(ID napisów) lub <option>-slang</option>
-(język napisów), na przykłąd:
+(język audio), <option>-sid</option> (ID napisów) lub <option>-slang</option>
+(język napisów), na przykład:
 <screen>
 mplayer przykład.mkv -alang eng -slang eng
 mplayer przykład.mkv -aid 1 -sid 1
@@ -753,7 +751,7 @@ na dwa tygodnie)
 <para>
 <application>MPlayer</application> próbuje załadować windowsowy DLL pod
 określony adres (0x400000). Jeżeli znajduje się tam już ważna biblioteka
-systemowa, <application>MPlayer</application> się wykrzaczy. (typowym objawem
+systemowa, <application>MPlayer</application> się wykrzaczy. (Typowym objawem
 jest błąd naruszenia ochrony pamięci (segfault) przy próbie odtwarzania plików
 Windows Media 9.)
 </para>
@@ -784,7 +782,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 (To ponownie linkuje wszystkie aplikacje i zajmuje sporo czasu.)
 </para></listitem>
 <listitem>
-<para><command>execstack -s <replaceable>/ścierzka/do/</replaceable>mplayer</command>
+<para><command>execstack -s <replaceable>/ścieżka/do/</replaceable>mplayer</command>
 (To wyłącza exec-shield dla binarki <application>MPlayera</application>.)
 </para>
 </listitem>
@@ -892,7 +890,7 @@ Masz starą wersję <filename>codecs.conf</filename> w
 <filename class="directory">/usr/local/etc/</filename> lub podobnym miejscu.
 Usuń go, nie jest już potrzebny.
 <emphasis role="bold">LUB</emphasis> masz opcję <option>vc=</option> albo coś
-podobnego w swoim pliku(ach) konfiguracyjnych.
+podobnego w swoim pliku(ach) konfiguracyjnym(ch).
 </para></answer>
 </qandaentry>
 
@@ -1060,11 +1058,11 @@ Musisz użyć <option>-rawaudio on:format=0x50</option>.
 
 
 <qandadiv id="faq-driver">
-<title>Problemy ze sterownikami video/audio (vo/ao)</title>
+<title>Problemy ze sterownikami wyjścia video/audio (vo/ao)</title>
 
 <qandaentry>
 <question><para>
-Jak użyć  <application>dmix</application> z
+Jak użyć <application>dmix</application> z
 <application>MPlayerem</application>?
 </para></question>
 <answer><para>
@@ -1215,7 +1213,7 @@ tym martwić... Zauważ że z SDL możesz wymusić/wyłączyć używanie Xv popr
 <title>Odtwarzanie DVD</title>
 <qandaentry>
 <question><para>
-Co z nawigacją po DVD?
+Co z nawigacją/menu DVD?
 </para></question>
 <answer><para>
 <application>MPlayer</application> nie obsługuje menu DVD ze względu na poważne 
@@ -1224,7 +1222,7 @@ i treści interaktywnej. Jeżeli chcesz mieć fajne menu, będziesz musiał uży
 odtwarzacza, takiego jak <application>xine</application>, 
 <application>vlc</application> lub <application>Ogle</application>.
 Jeżeli chcesz nawigacji DVD w <application>MPlayerze</application>, to będziesz musiał 
-sam ją zaimplementować. Zwróć uwagę na to, że jest to poważne przedsięwzięcie.
+sam ją zaimplementować. Bierz jednak pod uwagę, że jest to poważne przedsięwzięcie.
 </para></answer>
 </qandaentry>
 
@@ -1299,7 +1297,7 @@ Wspomniane paczki znajdują się na <ulink url="http://www.dtek.chalmers.se/grou
 Czy jest możliwe odtwarzanie/kodowanie tylko wybranych rozdziałów?
 </para></question>
 <answer><para>
-Tak,spróbuj użyć opcji <option>-chapter</option>.
+Tak, spróbuj użyć opcji <option>-chapter</option>.
 </para></answer>
 </qandaentry>
 
@@ -1313,6 +1311,7 @@ dla napędu DVD, używając narzędzia <command>hdparm</command> (opisane w rozd
 <link linkend="drives">CD</link>).
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Skopiowałem DVD używając vobcopy. Jak mogę je odtworzyć/zakodować z dysku 
@@ -1488,7 +1487,7 @@ Jak mogę wstawić napisy do pliku wynikowego?
 </para></question>
 <answer><para>
 Po prostu przekaż opcję <option>-sub &lt;nazwa_pliku&gt;</option> 
-(lub odpowiednio <option>-sid</option> do <application>MEncodera</application>.
+(lub odpowiednio <option>-sid</option>) do <application>MEncodera</application>.
 </para></answer>
 </qandaentry>
 
