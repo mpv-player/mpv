@@ -82,5 +82,4 @@ void guiEventHandling( void )
  if ( use_gui && !guiIntfStruct.Playing ) wsHandleEvents();
  gtkEventHandling();
  mplTimerHandler(); // handle GUI timer events
- mplState();
 }

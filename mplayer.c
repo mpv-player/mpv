@@ -1104,26 +1104,6 @@ if((stream_dump_type)&&(stream_dump_type!=4)){
 sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
-#ifdef HAVE_NEW_GUI
-#ifdef USE_DVDREAD
-if ( use_gui && stream->type == STREAMTYPE_DVD )
- {
-  dvd_priv_t * dvdp = stream->priv;
-  guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
-  guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
-  guiIntfStruct.DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
-  guiIntfStruct.DVD.nr_of_audio_channels=dvdp->nr_of_channels;
-  memcpy( guiIntfStruct.DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
-  guiIntfStruct.DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
-  memcpy( guiIntfStruct.DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
-  guiIntfStruct.DVD.current_title=dvd_title + 1;
-  guiIntfStruct.DVD.current_chapter=dvd_chapter + 1;
-  guiIntfStruct.DVD.current_angle=dvd_angle + 1;
-  guiIntfStruct.Track=dvd_title + 1;
- } 
-#endif
-#endif
-
 current_module="video_read_properties";
 
 if(sh_video){
