@@ -2079,7 +2079,7 @@ for i in $_language ; do
     break
   else
     echo -n "$i not found, "
-    _language=`echo $_language | sed "s/$i *//g"`
+    _language=`echo $_language | sed "s/$i *//"`
   fi
 done
 test -z "$_language" && _language=en
@@ -2087,7 +2087,7 @@ for i in $LANGUAGES ; do
   if test -f "DOCS/man/$i/mplayer.1" ; then
     LANGUAGES=`echo $LANGUAGES | sed "s/$i *//2" | sed 's/ *$//'`
   else
-    LANGUAGES=`echo $LANGUAGES | sed "s/$i *//g" | sed 's/ *$//'`
+    LANGUAGES=`echo $LANGUAGES | sed "s/$i *//" | sed 's/ *$//'`
   fi
 done
 echores "using $_language (man pages: $LANGUAGES)"
