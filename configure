@@ -4279,6 +4279,7 @@ LIBDIR = \$(DESTDIR)$_libdir
 #AR = ar
 CC = $_cc
 AWK = $_awk
+RANLIB = ranlib
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
