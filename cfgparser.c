@@ -72,6 +72,7 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
 
   switch(conf->type) {
   case CONF_TYPE_PRINT :
+  case CONF_TYPE_PRINT_INDIRECT :
   case CONF_TYPE_SUBCONFIG :
     return;
   default :
@@ -760,6 +761,9 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 		    }
 		case CONF_TYPE_PRINT:
 			mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) conf[i].p);
+			exit(1);
+		case CONF_TYPE_PRINT_INDIRECT:
+			mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", *(char **) conf[i].p);
 			exit(1);
 		case CONF_TYPE_POSITION:
 			if (param == NULL)
@@ -1490,6 +1494,7 @@ static void m_config_print_option_list(char* prefix, config_t* opt_list) {
       type = "Function";
       break;
     case CONF_TYPE_PRINT:
+    case CONF_TYPE_PRINT_INDIRECT:
       type = "Print";
       break;
     case CONF_TYPE_STRING_LIST:
