@@ -15,14 +15,23 @@
 #include "vd_internal.h"
 
 static vd_info_t info = {
+#ifdef BUILD_VFWEX
+	"Win32/VfWex video codecs",
+	"vfwex",
+#else
 	"Win32/VfW video codecs",
 	"vfw",
-	"A'rpi",
+#endif
 	"A'rpi & Alex",
+	"avifile.sf.net",
 	"win32 codecs"
 };
 
+#ifdef BUILD_VFWEX
+LIBVD_EXTERN(vfwex)
+#else
 LIBVD_EXTERN(vfw)
+#endif
 
 typedef struct {
     BITMAPINFOHEADER *o_bih;
@@ -112,7 +121,11 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
       {
 	HRESULT ret;
 	set_csp(priv->o_bih,*((int*)arg));
+#ifdef BUILD_VFWEX
+	ret = ICDecompressQueryEx(priv->handle, sh->bih, priv->o_bih);
+#else
 	ret = ICDecompressQuery(priv->handle, sh->bih, priv->o_bih);
+#endif
 	if (ret)
 	{
 	    mp_msg(MSGT_WIN32, MSGL_DBG2, "ICDecompressQuery failed:: Error %d\n", (int)ret);
@@ -189,7 +202,11 @@ static int init(sh_video_t *sh){
 
     // sanity check:
 #if 1
+#ifdef BUILD_VFWEX
+    ret = ICDecompressQueryEx(priv->handle, sh->bih, priv->o_bih);
+#else
     ret = ICDecompressQuery(priv->handle, sh->bih, priv->o_bih);
+#endif
     if (ret)
     {
 	mp_msg(MSGT_WIN32,MSGL_WARN,"ICDecompressQuery failed: Error %d\n", (int)ret);
@@ -198,7 +215,11 @@ static int init(sh_video_t *sh){
 	mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressQuery OK\n");
 #endif
 
+#ifdef BUILD_VFWEX
+    ret = ICDecompressBeginEx(priv->handle, sh->bih, priv->o_bih);
+#else
     ret = ICDecompressBegin(priv->handle, sh->bih, priv->o_bih);
+#endif
     if (ret)
     {
 	mp_msg(MSGT_WIN32,MSGL_WARN,"ICDecompressBegin failed: Error %d\n", (int)ret);
@@ -218,7 +239,7 @@ static int init(sh_video_t *sh){
     ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality) ,NULL);
 
     // don't do this palette mess always, it makes div3 dll crashing...
-    if((sh->codec->outflags[sh->outfmtidx]==IMGFMT_BGR8) &&
+    if((sh->codec->outfmt[sh->outfmtidx]==IMGFMT_BGR8) &&
        (!ICDecompressGetPalette(priv->handle, sh->bih, priv->o_bih)))
     {
 	priv->palette = ((unsigned char*)priv->o_bih) + sh->bih->biSize;
@@ -234,7 +255,11 @@ static void uninit(sh_video_t *sh){
     HRESULT ret;
     vd_vfw_ctx *priv = sh->context;
     
+#ifdef BUILD_VFWEX
+    ret = ICDecompressEndEx(priv->handle);
+#else
     ret = ICDecompressEnd(priv->handle);
+#endif
     if (ret)
     {
 	mp_msg(MSGT_WIN32, MSGL_WARN, "ICDecompressEnd failed: %d\n", ret);
@@ -275,7 +300,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     sh->bih->biSizeImage = len;
     
+#ifdef BUILD_VFWEX
+    ret = ICDecompressEx(priv->handle, 
+#else
     ret = ICDecompress(priv->handle, 
+#endif
 	  ( (sh->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
 	  ( ((flags&3)==2 && !(sh->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ),
 	   sh->bih, data, priv->o_bih, (flags&3) ? 0 : mpi->planes[0]);
@@ -286,7 +315,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
     // export palette:
-    if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	if (priv->palette)
 	{
 	    mpi->planes[1] = priv->palette;
@@ -295,7 +323,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	}
 	else
 	    mpi->planes[1]=NULL;
-    }
     
     return mpi;
 }
