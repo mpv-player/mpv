@@ -356,21 +356,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 }
 
-// check font
-#ifdef USE_OSD
-  if(font_name){
-       vo_font=read_font_desc(font_name,font_factor,verbose>1);
-       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
-  } else {
-      // try default:
-       vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
-       if(!vo_font)
-       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
-  }
-#endif
-
-  vo_init_osd();
-
   // FIXME: get rid of -dvd and other tricky options and config/playtree
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
@@ -403,6 +388,21 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 
   mp_msg_set_level(verbose+MSGL_STATUS);
+
+// check font
+#ifdef USE_OSD
+  if(font_name){
+       vo_font=read_font_desc(font_name,font_factor,verbose>1);
+       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
+  } else {
+      // try default:
+       vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
+       if(!vo_font)
+       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
+  }
+#endif
+
+  vo_init_osd();
 
   stream=open_stream(filename,vcd_track,&file_format);
 
