@@ -17,8 +17,8 @@
 #
 # GOTCHAS:
 #  - config files are currently:
-#    config2.h config2.mak libvo/config2.mak libao2/config2.mak
-#    Gui/config2.mak libvo2/config2.mak
+#    config.h config.mak libvo/config.mak libao2/config.mak
+#    Gui/config.mak libvo2/config.mak
 #  - removed xmmp/esd
 #  - removed dvbincdir/madincdir/cssincdir: add them to extraincdir
 #
@@ -54,6 +54,7 @@ netbsd()  { test "$system_name" = "NetBSD"  ; return "$?" ; }
 bsdos()   { test "$system_name" = "BSD/OS"  ; return "$?" ; }
 openbsd() { test "$system_name" = "OpenBSD" ; return "$?" ; }
 bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
+qnx()     { test "$system_name" = "QNX"     ; return "$?" ; }
 
 # Use this before starting a check
 echocheck() {
@@ -209,7 +210,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`( uname -s ) 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX)
     ;;
   IRIX*)
     system_name=IRIX
@@ -236,12 +237,12 @@ if test -z "$_target" ; then
       # recognize.
 
       case "`( uname -m ) 2>&1`" in
-      i[3-9]86)	host_arch=i386		;;
-      ppc)	host_arch=ppc		;;
-      alpha)	host_arch=alpha		;;
-      sparc*)	host_arch=sparc		;;
-      arm*)	host_arch=arm		;;
-      *)	host_arch=UNKNOWN	;;
+      i[3-9]86|x86*) host_arch=i386 ;;
+      ppc) host_arch=ppc ;;
+      alpha) host_arch=alpha ;;
+      sparc*) host_arch=sparc ;;
+      arm*) host_arch=arm ;;
+      *) host_arch=UNKNOWN ;;
     esac
     ;;
   esac
@@ -258,10 +259,7 @@ for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
   test "$I" && break
 done
 
-# FIXME use this when debug phases is over:
-# TMPLOG="$I/configure2-$RANDOM-$$.log"
-TMPLOG="configure2.log"
-rm -f "$TMPLOG"
+TMPLOG="$I/configure-$RANDOM-$$.log"
 TMPC="$I/mplayer-conf-$RANDOM-$$.c"
 TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
 TMPO="$I/mplayer-conf-$RANDOM-$$.o"
@@ -599,17 +597,6 @@ EOF
   echocheck "mtrr support"
   echores "$_mtrr"
 
-fi
-
-
-# Checking for posix threads lib...
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-if bsd ; then
-  cc_check -pthread || die "Lib pthread not found."
-else
-  cc_check -lpthread || die "Lib pthread not found."
 fi
 
 
@@ -1053,19 +1040,38 @@ fi
 echores "$_mman"
 
 
-echocheck "dlfcn.h"
+echocheck "dynamic loader"
 cat > $TMPC << EOF
 #include <dlfcn.h>
-int main(void) {  return 0; }
+int main(void) { dlopen(0, 0); dlclose(0); dlsym(0, 0); return 0; }
 EOF
 _dl=no
-cc_check -ldl && _dl=yes
+if cc_check ; then
+  _dl=yes
+elif cc_check -ldl ; then
+  _dl=yes
+  _ld_dl='-ldl'
+fi
 if test "$_dl" = yes ; then
  _def_dl='#define HAVE_LIBDL 1'
 else
  _def_dl='#undef HAVE_LIBDL'
 fi
 echores "$_dl"
+
+
+echocheck "pthread"
+cat > $TMPC << EOF
+int main(void) { (void) pthread_create (0, 0, 0, 0); return 0; }
+EOF
+if cc_check -lpthread ; then
+  _ld_pthread='-lpthread'
+elif cc_check -pthread ; then
+  _ld_pthread='-pthread'
+else
+  die "Lib pthread not found."
+fi
+echores "using $_ld_pthread"
 
 
 echocheck "sys/soundcard.h"
@@ -1363,7 +1369,7 @@ int main(void) { return 0; }
 EOF
   _gl=no
   if bsd ; then
-    cc_check $_inc_x11 $_ld_x11 -lGL -lm -pthread $_ld_sock && _gl=yes
+    cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread $_ld_sock && _gl=yes
   else
     cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_sock && _gl=yes
   fi
@@ -1372,7 +1378,7 @@ if test "$_gl" = yes ; then
   _ld_gl='-lGL'
   # FIXME check this for OpenBSD & BSD/OS
   # Under XFree86 4.x GL port is poorly designed
-  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl='-lGL -pthread'
+  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl="-lGL $_ld_pthread"
   _def_gl='#define HAVE_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c"
 else
@@ -1628,14 +1634,14 @@ if test "$_alsa" = auto || test "$_alsa" = yes; then
 #include <sys/soundcard.h>
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==5)); }
 EOF
-  cc_check -lasound -ldl -lpthread && $TMPO && _alsaver='0.5.x'
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.5.x'
 
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
 EOF
-  cc_check -lasound -ldl -lpthread && $TMPO && _alsaver='0.9.x'
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x'
   if test "$_alsaver" ; then
     _alsa=yes
     echores "yes ($_alsaver)"
@@ -1886,12 +1892,8 @@ fi
 
 echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
-  # xanim only requires dlopen() and/or libdl
-  cat > $TMPC << EOF
-int main(void) { (void) dlopen(0, 0); return 0; } 
-EOF
   _xanim=no
-  if cc_check || test "$_dl" = yes ; then
+  if test "$_dl" = yes ; then
     if test "$host_arch" = i386 ; then
       if test -z "$_xanimlibdir" ; then
         for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
@@ -1904,10 +1906,10 @@ EOF
       test "$_xanimlibdir" && _xanim=yes
       echores "yes"
     else
-      echores "not supported non x86"
+      echores "not supported on non x86"
     fi
   else
-    echores "libdl needed"
+    echores "dl support needed"
   fi
 else
   echores "$_xanim"
@@ -2064,7 +2066,7 @@ echores "$_lirc"
 
 
 echocheck "fastmemcpy"
-# FIXME fastmemcpy check
+# fastmemcpy check is done earlier with tests of CPU & binutils features
 if test "$_fastmemcpy" = yes ; then
   _def_fastmemcpy='#define USE_FASTMEMCPY 1'
 else
@@ -2169,8 +2171,8 @@ EOF
   _def_gui='#define HAVE_NEW_GUI 1'
   _ld_gui='-LGui -lgui $(GTKLIB) $(GLIBLIB)'
 
-  cat > Gui/config2.mak << EOF
-# -------- Generated by configure2 -----------
+  cat > Gui/config.mak << EOF
+# -------- Generated by configure -----------
 
 GTKINC = $_inc_gtk
 GTKLIBS = $_ld_gtk
@@ -2227,17 +2229,15 @@ if test "$_largefiles" = yes || freebsd ; then
 fi
 
 # Determine OS dependent libs
-_confcygwin="TARGET_CYGWIN = no"
-if bsd ; then
-  _ld_arch="-rdynamic -pthread"
-elif cygwin ; then
-  _confcygwin="TARGET_CYGWIN = yes"
-  _def_confwin32="#define WIN32"
-  _ld_arch="-lpthread"
+if cygwin ; then
+  _confcygwin='TARGET_CYGWIN = yes'
+  _def_confwin32='#define WIN32'
 else
-  _ld_arch="-ldl -lpthread"
+  _confcygwin="TARGET_CYGWIN = no"
 fi
 
+_ld_arch="$_ld_pthread $_ld_dl"
+bsd && _ld_arch="-rdynamic $_ld_arch"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 
 _def_debug='#undef MP_DEBUG'
@@ -2248,9 +2248,9 @@ linux && _def_linux='#define TARGET_LINUX 1'
 
 
 #############################################################################
-echo "Creating config2.mak"
-cat > config2.mak << EOF
-# -------- Generated by ./configure2 -----------
+echo "Creating config.mak"
+cat > config.mak << EOF
+# -------- Generated by configure -----------
 
 LANG = C
 TARGET_OS = $system_name
@@ -2315,9 +2315,9 @@ DEBUG = -DDEBUG
 EOF
 
 #############################################################################
-echo "Creating config2.h"
-cat > config2.h << EOF
-/* -------- Generated by configure2 ----------- */
+echo "Creating config.h"
+cat > config.h << EOF
+/* -------- Generated by configure ----------- */
 
 #define USE_OSD 1
 #define USE_SUB 1
@@ -2557,9 +2557,9 @@ EOF
 
 #############################################################################
 
-echo "Creating libvo/config2.mak"
+echo "Creating libvo/config.mak"
 _voobj=`echo $_vosrc | sed -e 's/\.c/\.o/g'`
-cat > libvo/config2.mak << EOF
+cat > libvo/config.mak << EOF
 include ../config.mak
 OPTIONAL_SRCS = $_vosrc
 OPTIONAL_OBJS = $_voobj
@@ -2567,9 +2567,9 @@ EOF
 
 #############################################################################
 
-echo "Creating libvo2/config2.mak"
+echo "Creating libvo2/config.mak"
 _vo2obj=`echo $_vo2src | sed -e 's/\.c/\.o/g'`
-cat > libvo2/config2.mak << EOF
+cat > libvo2/config.mak << EOF
 include ../config.mak
 OPTIONAL_SRCS = $_vo2src
 OPTIONAL_OBJS = $_vo2obj
@@ -2577,9 +2577,9 @@ EOF
 
 #############################################################################
 
-echo "Creating libao2/config2.mak"
+echo "Creating libao2/config.mak"
 _aoobj=`echo $_aosrc | sed -e 's/\.c/\.o/g'`
-cat > libao2/config2.mak << EOF
+cat > libao2/config.mak << EOF
 include ../config.mak
 OPTIONAL_SRCS = $_aosrc
 OPTIONAL_OBJS = $_aoobj
@@ -2663,8 +2663,8 @@ fi
 
 cat <<EOF
 
-If you cannot understand why a test failed please check $TMPLOG
-If you believe it is a bug in configure2 please report it.
+If you cannot understand why a test failed please check $TMPLOG.
+If you believe it is a bug in configure, please report it.
 
 EOF
 
