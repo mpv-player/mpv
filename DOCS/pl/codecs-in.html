@@ -1,231 +1,374 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
 <HTML>
+  <HEAD>
+    <TITLE>Tablica Stanu Kodeków - MPlayer - Odtwarzacz Filmów dla
+    Linuksa</TITLE>
+    <LINK rel="stylesheet" type="text/css" href="default.css">
+    <META http-equiv="Content-Type" content=
+    "text/html; charset=iso-8859-2">
+  </HEAD>
 
-<HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
-<TITLE>mplayer - codec status table</TITLE>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2" />
-</HEAD>
+  <BODY text="#000000" link="#666666" vlink="#666666" alink=
+  "#666666">
+    <TABLE width="750" border="0">
+      <TR>
+        <TD align="right">
+          <P> </P>
 
-<BODY BGCOLOR=#FFFFFF text="#000000" link="#666666" vlink="#666666" alink="#666666" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-<table width=750 border="0">
-  <tr> 
-    <td align="right"> 
-      <p>&nbsp;</p>
+          <P><B>Stan wspierania kodeków</B></P>
+        </TD>
+      </TR>
 
-      <p><b><FONT CLASS="text">Stan obsługi kodeków</font></b></p>
-    </td>
-  </tr>
-    <td>
-      <p><FONT CLASS="text"><a href="#vc">Kodeki video</a><br><a href="#ac">Kodeki audio</a><br></font></p>
-    </td>
-  </tr>
-  <tr> 
-    <td align="center"> 
-      <b><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a name="vc">Kodeki video</a></font></b><br><br>
+      <TR>
+        <TD>
+          <P><A href="#vc">Kodeki video</A><BR>
+           <A href="#ac">Kodeki audio</A><BR>
+          </P>
+        </TD>
+      </TR>
 
-      <table width="100%" border="1" cellspacing="0" cellpadding="5" bordercolor=#DDDDDD>
+      <TR>
+        <TD align="center">
+          <B><A name="vc"><FONT face=
+          "Verdana, Arial, Helvetica, sans-serif" size="5">Kodeki
+          wideo:</FONT></A></B><BR>
+          <BR>
+           
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Wbudowane własne kodeki</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">fourcc</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td width=40 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">wyjście</font></b></td>
-          <td align=center colspan=2><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">komentarze</font></b></td>
-        </tr>
-<!-- %0 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%F</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%Y</b></font></td>
-          <td align=center colspan=2><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+          <TABLE width="100%" border="1" cellspacing="0"
+          cellpadding="5">
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Działające
+              kodeki wideo</B></TD>
+            </TR>
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>W pełni funkcjonalne kodeki Win32 VfW/DShow</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">fourcc</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td width=40 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">wyjście</font></b></td>
-          <td align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">DShow</font></b></td>
-          <td align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">komentarze</font></b></td>
-        </tr>
-<!-- %1 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%F</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%Y</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%D</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
 
-        <tr>
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Problematyczne kodeki</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">fourcc</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %2 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%F</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">fourcc</FONT></B></TD>
 
-        <tr>
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Kodeki jeszcze nie działające</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">fourcc</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %3 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%F</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
 
-        <tr>
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Kodeki jeszcze nie testowane</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">fourcc</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">codecfile</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %4 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%F</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD width="40" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">wyjście</FONT></B></TD>
 
-      </table>
+              <TD align="center" colspan="2"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">komentarze</FONT></B></TD>
+            </TR>
+            <!-- %0 -->
 
-      <br><b><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a name="ac">Kodeki audio</a></font></b><br><br>
+            <TR>
+              <TD align="center"><B>%i</B></TD>
 
-      <table width="100%" border="1" cellspacing="0" cellpadding="5" bordercolor=#DDDDDD>
+              <TD align="center"><B>%F</B></TD>
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Wbudowane własne kodeki</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">format</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td align=center colspan=3><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">komentarze</font></b></td>
-        </tr>
-<!-- %5 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%f</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD align="center"><B>%d</B></TD>
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>W pełni funkcjonalne kodeki Win32 ACM/DShow</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">format</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td width=40 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">DShow</font></b></td>
-          <td align=center colspan=2><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">komentarze</font></b></td>
-        </tr>
-<!-- %6 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%f</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%D</b></font></td>
-          <td align=center colspan=2><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD align="center"><B>%Y</B></TD>
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>kodeki problematyczne</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">format</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %7 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%f</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+              <TD align="center" colspan="2"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Kodeki jeszcze nei działające</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">format</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %8 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%f</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Nowe /
+              Nieprzetestowane kodeki</B></TD>
+            </TR>
 
-        <tr> 
-          <td colspan=6 bgcolor=#CCCCCC><FONT CLASS="text"><b>Kodeki jeszcze nie testowane</b></font></td>
-        </tr>
-        <tr> 
-          <td width=150 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">nazwa kodeka</font></b></td>
-          <td width=70 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">format</font></b></td>
-          <td width=120 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">plik</font></b></td>
-          <td colspan=3 align=center><b><font color="#AAAAAA" face="Verdana, Arial, Helvetica, sans-serif" size="2">problem</font></b></td>
-        </tr>
-<!-- %9 -->
-        <tr> 
-          <td align=center><FONT CLASS="text"><b>%i</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%f</b></font></td>
-          <td align=center><FONT CLASS="text"><b>%d</b></font></td>
-          <td align=center colspan=3><FONT CLASS="text"><b>%c</b></font></td>
-        </tr>
-<!-- %. -->
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
 
-      </table>
-    </td>
-  </tr>
-</table>
-</BODY>
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">fourcc</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %4 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%F</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Kodeki, z
+              którymi są problemy</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">fourcc</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %2 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%F</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Jeszcze nie
+              działające kodeki:</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">fourcc</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %3 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%F</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+          </TABLE>
+          <BR>
+           <B><A name="ac"><FONT face=
+          "Verdana, Arial, Helvetica, sans-serif" size="5">Kodeki
+          audio:</FONT></A></B><BR>
+          <BR>
+           
+
+          <TABLE width="100%" border="1" cellspacing="0"
+          cellpadding="5">
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Działające
+              kodeki audio</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">format</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD align="center" colspan="3"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">komentarze</FONT></B></TD>
+            </TR>
+            <!-- %5 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%f</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Nowe /
+              Nieprzetestowane kodeki</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">format</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %9 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%f</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Kodeki, z
+              którymi są problemy</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">format</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %7 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%f</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+
+            <TR>
+              <TD colspan="6" bgcolor="#CCCCCC"><B>Jeszcze nie
+              działające kodeki</B></TD>
+            </TR>
+
+            <TR>
+              <TD width="150" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">nazwa kodeka</FONT></B></TD>
+
+              <TD width="70" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">format</FONT></B></TD>
+
+              <TD width="120" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size="2">plik
+              kodeka</FONT></B></TD>
+
+              <TD colspan="3" align="center"><B><FONT color=
+              "#AAAAAA" face=
+              "Verdana, Arial, Helvetica, sans-serif" size=
+              "2">problem</FONT></B></TD>
+            </TR>
+            <!-- %8 -->
+
+            <TR>
+              <TD align="center"><B>%i</B></TD>
+
+              <TD align="center"><B>%f</B></TD>
+
+              <TD align="center"><B>%d</B></TD>
+
+              <TD align="center" colspan="3"><B>%c</B></TD>
+            </TR>
+            <!-- %. -->
+          </TABLE>
+        </TD>
+      </TR>
+    </TABLE>
+  </BODY>
 </HTML>
+
