@@ -143,12 +143,8 @@ el akarom indítani, ezt írja ki :
 <CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory</CODE><BR>
 Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Mit keresel te Linuxon? Nem tudsz feltenni egy könyvtárat? Miért
-kapunk ilyen kérdéseket? Egyáltalán nem <B>MPlayer</B> specifikus!
 Add hozzá az /usr/local/lib-et a <B>/etc/ld.so.conf</B>-hoz, és
-futtasd az <B>ldconfig</B>-ot . Vagy installálj /usr/lib-be, mert
-ha nem tudod magadtól megoldani ezt a problémát, biztos hajlamos vagy
-más ilyen ostobaságokra is.
+futtasd az <B>ldconfig</B>-ot.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
