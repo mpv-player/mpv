@@ -394,9 +394,13 @@ void MP3_Init(){
       _CpuID = _i586 = _3dnow = _isse = _has_mmx = 0;
       printf( "mp3lib: Using generic decore.\n");
 #endif
+#ifdef HAVE_MMX
 /* Use it for any MMX cpu */
-   if(_has_mmx)	make_decode_tables_MMX(outscale);
-   else		make_decode_tables(outscale);
+   if(_has_mmx)
+	make_decode_tables_MMX(outscale);
+   else
+#endif
+	make_decode_tables(outscale);
 #ifdef USE_FAKE_MONO
     if (fakemono == 1)
         fr.synth=synth_1to1_l;
