@@ -235,15 +235,20 @@ static char help_text[]=
 #define MSGTR_FileSelect "Seleziona il file ..."
 #define MSGTR_SubtitleSelect "Seleziona il sottotitolo ..."
 #define MSGTR_OtherSelect "Seleziona ..."
+#define MSGTR_AudioFileSelect "Seleziona canale audio esterno ..."
 #define MSGTR_MessageBox "Finestra dei messaggi"
 #define MSGTR_PlayList "PlayList"
-#define MSGTR_SkinBrowser "Skin Browser"
-
+#define MSGTR_Equalizer "Equalizzatore"			 
+#define MSGTR_SkinBrowser "Gestore Skin"
+#define MSGTR_Network "Flusso dati dalla rete ..."
+			 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Annulla"
 #define MSGTR_Add "Aggiungi"
 #define MSGTR_Remove "Rimuovi"
+#define MSGTR_Clear "Pulisci"
+#define MSGTR_Config "Configura"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Mi dispiace, non c'è sufficiente memoria per il buffer di disegno."
@@ -282,6 +287,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Riproduci il DVD ..."
 #define MSGTR_MENU_PlayURL "Riproduci la URL ..."
 #define MSGTR_MENU_LoadSubtitle "Carica i sottotitoli ..."
+#define MSGTR_MENU_LoadExternAudioFile "Carica file audio esterni ..."
 #define MSGTR_MENU_Playing "Riproduzione"
 #define MSGTR_MENU_Play "Riproduci"
 #define MSGTR_MENU_Pause "Pausa"
@@ -307,6 +313,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skin browser"
 #define MSGTR_MENU_Preferences "Preferenze"
 #define MSGTR_MENU_Exit "Uscita ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Audio"
+#define MSGTR_EQU_Video "Video"
+#define MSGTR_EQU_Contrast "Contrasto: "
+#define MSGTR_EQU_Brightness "Luminosità: "
+#define MSGTR_EQU_Hue "Tonalità: "
+#define MSGTR_EQU_Saturation "Saturazione: "
+#define MSGTR_EQU_Front_Left "Anteriore Sinistro"
+#define MSGTR_EQU_Front_Right "Anteriore Destro"
+#define MSGTR_EQU_Back_Left "Posteriore Sinistro"
+#define MSGTR_EQU_Back_Right "Posteriore Destro"
+#define MSGTR_EQU_Center "Centro"
+#define MSGTR_EQU_Bass "Bassi"
+#define MSGTR_EQU_All "Tutti"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "errore fatale ..."
