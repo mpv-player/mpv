@@ -160,8 +160,7 @@ parse_textplain(play_tree_parser_t* p) {
       if(r < 0) {
 	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't read from stream r=%d\n",r);
 	return NULL;
-      } else if(r == 0)
-	eof = 1;
+      }
     p->buffer_end += r;
     p->buffer[p->buffer_end] = '\0';
     } else eof = 1;
