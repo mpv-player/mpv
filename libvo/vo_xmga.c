@@ -62,7 +62,7 @@ static vo_info_t vo_info =
  ""
 };
 
-static Display              * mDisplay;
+//static Display              * mDisplay;
 static Window                 mWindow;
 static GC                     mGC;
 static XGCValues              wGCV;
@@ -225,17 +225,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
  if ( X_already_started ) return -1;
 
- vo_init();
-
- if ( getenv( "DISPLAY" ) ) name=getenv( "DISPLAY" );
- mDisplay=XOpenDisplay(name);
- if ( mDisplay == NULL )
-  {
-   printf( "Can not open X11 display\n" );
-   return -1;
-  }
-
- mScreen=DefaultScreen( mDisplay );
+ if (!vo_init()) return -1;
 
  mvWidth=width; mvHeight=height;
 

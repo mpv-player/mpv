@@ -32,6 +32,7 @@ Gábor Lénárt (LGB): <lgb@lgb.hu>
 - Makefile improvements
 - prelimenary DVD support
 - another GUI code (is that so..?)
+- various X11 cleanups and fixes
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer

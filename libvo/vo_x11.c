@@ -61,7 +61,7 @@ XF86VidModeModeInfo **vidmodes=NULL;
 #endif
 
 /* X11 related variables */
-static Display *mDisplay;
+//static Display *mDisplay;
 static Window mywindow;
 static GC mygc;
 static XImage *myximage;
@@ -120,7 +120,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
  char *hello=( title == NULL ) ? "X11 render" : title;
- char *name=":0.0";
+// char *name=":0.0";
  XSizeHints hint;
  XVisualInfo vinfo;
  XEvent xev;
@@ -135,17 +135,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
  if ( X_already_started ) return -1;
  if( !vo_init() ) return 0; // Can't open X11
-
- if( getenv( "DISPLAY" ) ) name=getenv( "DISPLAY" );
-
- mDisplay=XOpenDisplay( name );
-
- if ( mDisplay == NULL )
-  {
-   printf( "Can not open display\n" );
-   return -1;
-  }
- screen=DefaultScreen( mDisplay );
 
  hint.x=0;
  hint.y=0;
@@ -172,7 +161,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
     if (have_vm) {
       if (vidmodes==NULL)
-        XF86VidModeGetAllModeLines(mDisplay,screen,&modecount,&vidmodes);
+        XF86VidModeGetAllModeLines(mDisplay,mScreen,&modecount,&vidmodes);
       j=0;
       modeline_width=vidmodes[0]->hdisplay;
       modeline_height=vidmodes[0]->vdisplay;
@@ -191,12 +180,12 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
           }
 
       printf("XF86VM: Selected video mode %dx%d for image size %dx%d.\n",modeline_width, modeline_height, image_width, image_height);
-      XF86VidModeLockModeSwitch(mDisplay,screen,0);
-      XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[j]);
-      XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[j]);
+      XF86VidModeLockModeSwitch(mDisplay,mScreen,0);
+      XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
+      XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
       X=(vo_screenwidth-modeline_width)/2;
       Y=(vo_screenheight-modeline_height)/2;
-      XF86VidModeSetViewPort(mDisplay,screen,X,Y);
+      XF86VidModeSetViewPort(mDisplay,mScreen,X,Y);
     }
   }
 #endif
@@ -211,16 +200,16 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  vo_dheight=hint.height;
  hint.flags=PPosition | PSize;
 
- bg=WhitePixel( mDisplay,screen );
- fg=BlackPixel( mDisplay,screen );
+ bg=WhitePixel( mDisplay,mScreen );
+ fg=BlackPixel( mDisplay,mScreen );
 
  XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
  depth=attribs.depth;
 
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
- XMatchVisualInfo( mDisplay,screen,depth,TrueColor,&vinfo );
+ XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- theCmap  =XCreateColormap( mDisplay,RootWindow( mDisplay,screen ),
+ theCmap  =XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),
  vinfo.visual,AllocNone );
 
  xswa.background_pixel=0;
@@ -228,7 +217,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  xswa.colormap=theCmap;
  xswamask=CWBackPixel | CWBorderPixel |CWColormap;
 
- mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,screen ),
+ mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
@@ -248,7 +237,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  mygc=XCreateGC( mDisplay,mywindow,0L,&xgcv );
 
 #ifdef SH_MEM
- if ( XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
+ if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
   else
    {
     Shmem_Flag=0;

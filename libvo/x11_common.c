@@ -22,6 +22,12 @@
 static int dpms_disabled=0;
 static int timeout_save=0;
 
+char* mDisplayName=NULL;
+Display* mDisplay;
+Window   mRootWin;
+int mScreen;
+int mLocalDisplay;
+
 
 void vo_hidecursor ( Display *disp , Window win )
 {
@@ -42,21 +48,24 @@ void vo_hidecursor ( Display *disp , Window win )
 int vo_init( void )
 {
  int       CompletionType = -1;
- int       mScreen;
+// int       mScreen;
  int bpp;
- char    * DisplayName = ":0.0";
- Display * mDisplay;
+// char    * DisplayName = ":0.0";
+// Display * mDisplay;
  XImage  * mXImage;
- Window    mRootWin;
+// Window    mRootWin;
  static XWindowAttributes attribs;
 
  if(vo_depthonscreen) return 1; // already called
 
- if ( getenv( "DISPLAY" ) ) DisplayName=getenv( "DISPLAY" );
- mDisplay=XOpenDisplay( DisplayName );
+ if (!mDisplayName)
+   if (!(mDisplayName=getenv("DISPLAY")))
+     mDisplayName=strdup(":0.0");
+
+ mDisplay=XOpenDisplay(mDisplayName);
  if ( !mDisplay )
   {
-   printf( "vo: couldn't open the X11 display!\n" );
+   printf( "vo: couldn't open the X11 display (%s)!\n",mDisplayName );
    return 0;
   }
  mScreen=DefaultScreen( mDisplay );     // Screen ID.
@@ -72,8 +81,10 @@ int vo_init( void )
    bpp=mXImage->bits_per_pixel;
    XDestroyImage( mXImage );
  if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
- XCloseDisplay( mDisplay );
- printf("X11 running at %dx%d depth: %d\n",vo_screenwidth,vo_screenheight,vo_depthonscreen);
+// XCloseDisplay( mDisplay );
+#warning Better local display detection method is needed. 
+ if (*mDisplayName==':') mLocalDisplay=1; else mLocalDisplay=0;
+ printf("X11 running at %dx%d depth: %d (\"%s\" => %s display)\n",vo_screenwidth,vo_screenheight,vo_depthonscreen,mDisplayName,mLocalDisplay?"local":"remote");
  return 1;
 }
 

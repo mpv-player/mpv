@@ -48,7 +48,7 @@ int XShmGetEventBase(Display*);
 static unsigned char *ImageData;
 
 /* X11 related variables */
-static Display *mydisplay;
+//static Display *mydisplay;
 static Window mywindow;
 static GC mygc;
 static XImage *myximage;
@@ -95,9 +95,9 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
  */
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
- int screen;
+// int screen;
  char *hello = (title == NULL) ? "Xv render" : title;
- char *name = ":0.0";
+// char *name = ":0.0";
  XSizeHints hint;
  XVisualInfo vinfo;
  XEvent xev;
@@ -112,18 +112,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
  mFullscreen=flags&1;
  dwidth=d_width; dheight=d_height;
-
- if(getenv("DISPLAY")) name = getenv("DISPLAY");
-
- mydisplay = XOpenDisplay(name);
-
- if (mydisplay == NULL)
-  {
-   printf("Can't open display\n");
-   return -1;
-  }
-
- screen = DefaultScreen(mydisplay);
+ 
+ if (!vo_init()) return -1;
 
 #ifdef HAVE_GUI
  if ( vo_window == None )
@@ -139,26 +129,26 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
      hint.height=vo_screenheight;
     }
    hint.flags = PPosition | PSize;
-   XGetWindowAttributes(mydisplay, DefaultRootWindow(mydisplay), &attribs);
+   XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
    if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
-   XMatchVisualInfo(mydisplay, screen, depth, TrueColor, &vinfo);
+   XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
 
    xswa.background_pixel = 0;
    xswa.border_pixel     = 0;
    xswamask = CWBackPixel | CWBorderPixel;
 
-   mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
+   mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
    hint.x, hint.y, hint.width, hint.height,
    0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
-   vo_hidecursor(mydisplay,mywindow);
+   vo_hidecursor(mDisplay,mywindow);
 
-   XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
-   XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
-   if ( mFullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
-   XMapWindow(mydisplay, mywindow);
-   XFlush(mydisplay);
-   XSync(mydisplay, False);
+   XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask );
+   XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
+   if ( mFullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
+   XMapWindow(mDisplay, mywindow);
+   XFlush(mDisplay);
+   XSync(mDisplay, False);
 #ifdef HAVE_GUI
   }
   else
@@ -167,20 +157,20 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
      mygc=vo_gc;
      if ( vo_screenwidth != d_width )
       {
-       XMoveWindow( mydisplay,mywindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
-       XResizeWindow( mydisplay,mywindow,d_width,d_height );
+       XMoveWindow( mDisplay,mywindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
+       XResizeWindow( mDisplay,mywindow,d_width,d_height );
       }
       else mFullscreen=1;
     }
 #endif
 
- mygc = XCreateGC(mydisplay, mywindow, 0L, &xgcv);
+ mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
 
  xv_port = 0;
- if (Success == XvQueryExtension(mydisplay,&ver,&rel,&req,&ev,&err))
+ if (Success == XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err))
   {
    /* check for Xvideo support */
-   if (Success != XvQueryAdaptors(mydisplay,DefaultRootWindow(mydisplay), &adaptors,&ai))
+   if (Success != XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay), &adaptors,&ai))
     {
      printf("Xv: XvQueryAdaptors failed");
      return -1;
@@ -193,7 +183,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    /* check image formats */
    if (xv_port != 0)
     {
-     fo = XvListImageFormats(mydisplay, xv_port, (int*)&formats);
+     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
      xv_format=0;
      for(i = 0; i < formats; i++)
       {
@@ -216,9 +206,9 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
      current_buf=0;
 
-     XGetGeometry( mydisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+     XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
-     XTranslateCoordinates( mydisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+     XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
      printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
      if ( mFullscreen )
@@ -232,7 +222,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
        printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
 
-     saver_off(mydisplay);  // turning off screen saver
+     saver_off(mDisplay);  // turning off screen saver
      return 0;
     }
   }
@@ -251,15 +241,15 @@ static void allocate_xvimage(int foo)
   * allocate XvImages.  FIXME: no error checking, without
   * mit-shm this will bomb...
   */
- xvimage[foo] = XvShmCreateImage(mydisplay, xv_port, xv_format, 0, image_width, image_height, &Shminfo[foo]);
+ xvimage[foo] = XvShmCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height, &Shminfo[foo]);
 
  Shminfo[foo].shmid    = shmget(IPC_PRIVATE, xvimage[foo]->data_size, IPC_CREAT | 0777);
  Shminfo[foo].shmaddr  = (char *) shmat(Shminfo[foo].shmid, 0, 0);
  Shminfo[foo].readOnly = False;
 
  xvimage[foo]->data = Shminfo[foo].shmaddr;
- XShmAttach(mydisplay, &Shminfo[foo]);
- XSync(mydisplay, False);
+ XShmAttach(mDisplay, &Shminfo[foo]);
+ XSync(mDisplay, False);
  shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
  memset(xvimage[foo]->data,128,xvimage[foo]->data_size);
  return;
@@ -267,12 +257,12 @@ static void allocate_xvimage(int foo)
 
 static void check_events(void)
 {
- int e=vo_x11_check_events(mydisplay);
+ int e=vo_x11_check_events(mDisplay);
  if(e&VO_EVENT_RESIZE)
   {
-   XGetGeometry( mydisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+   XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
    drwX=0; drwY=0;
-   XTranslateCoordinates( mydisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+   XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
    #ifdef HAVE_GUI
@@ -327,11 +317,11 @@ static void flip_page(void)
 {
  vo_draw_text(image_width,image_height,draw_alpha);
  check_events();
- XvShmPutImage(mydisplay, xv_port, mywindow, mygc, xvimage[current_buf],
+ XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf],
          0, 0,  image_width, image_height,
          drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
          False);
- XFlush(mydisplay);
+ XFlush(mDisplay);
  current_buf=(current_buf+1)%NUM_BUFFERS;
  return;
 }
@@ -436,7 +426,7 @@ static uint32_t query_format(uint32_t format)
 }
 
 static void uninit(void) {
-    saver_on(mydisplay); // screen saver back on
+    saver_on(mDisplay); // screen saver back on
 }
 
 

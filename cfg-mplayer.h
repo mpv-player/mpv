@@ -26,6 +26,10 @@ extern int vo_dbpp;
 extern int osd_level;
 extern int sub_unicode;
 
+#ifdef HAVE_X11
+extern char *mDisplayName;
+#endif
+
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
@@ -34,6 +38,9 @@ struct config conf[]={
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
+#ifdef HAVE_X11
+	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
+#endif
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
 #ifdef HAVE_LIBCSS
