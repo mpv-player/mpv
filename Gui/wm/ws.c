@@ -961,30 +961,30 @@ void wsIconify( wsTWindow win )
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
 {
- if ( wsWMType == wsWMIceWM )
+ switch ( wsWMType )
   {
-   XUnmapWindow( wsDisplay,win->WindowID );
-   XMapWindow( wsDisplay,win->WindowID );
-   return;
+   case wsWMIceWM:
+	  XUnmapWindow( wsDisplay,win->WindowID );
+	  XMapWindow( wsDisplay,win->WindowID );
+	  break;
+   case wsWMNetWM:
+   case wsWMKDE:
+	 {
+	  XEvent e;
+	  e.xclient.type=ClientMessage;
+	  e.xclient.message_type=XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False );
+	  e.xclient.display=wsDisplay;
+	  e.xclient.window=win->WindowID;
+	  e.xclient.format=32;
+	  e.xclient.data.l[0]=0;
+	  XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
+	  break;
+	 }
+   default:
+         XMapRaised( wsDisplay,win->WindowID );
+	 XRaiseWindow( wsDisplay,win->WindowID );
+         break;
   }
-/*  
- if ( XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False ) != None )
-  {
-   XEvent e;
-
-   e.xclient.type=ClientMessage;
-   e.xclient.message_type=XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False );
-   e.xclient.display=wsDisplay;
-   e.xclient.window=win->WindowID;
-   e.xclient.format=32;
-   e.xclient.data.l[0]=0;
-   XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
-  }
-   else */
-    {
-     XMapRaised( wsDisplay,win->WindowID );
-     XRaiseWindow( wsDisplay,win->WindowID );
-    }
 }
 
 // ----------------------------------------------------------------------------------------------

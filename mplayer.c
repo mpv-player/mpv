@@ -354,6 +354,7 @@ void uninit_player(unsigned int mask){
 void exit_player(char* how){
 
   uninit_player(INITED_ALL);
+  vo_uninit();
 
   current_module="exit_player";
 

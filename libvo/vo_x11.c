@@ -45,6 +45,11 @@ LIBVO_EXTERN( x11 )
 
 #include "../mp_msg.h"
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#include "../mplayer.h"
+#endif
+
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",
@@ -90,6 +95,9 @@ static uint32_t out_format=0;
 static int srcW=-1;
 static int srcH=-1;
 static int aspect; // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
+
+static int old_vo_dwidth=-1;
+static int old_vo_dheight=-1;
 
 static void check_events(){
   int ret = vo_x11_check_events(mDisplay);
@@ -243,6 +251,9 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
 
  vo_mouse_autohide=1;
+ old_vo_dwidth=-1;
+ old_vo_dheight=-1;
+
  if (!title)
     title = strdup("MPlayer X11 (XImage/Shm) render");
 
@@ -260,7 +271,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  
 //printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
- XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
+ XGetWindowAttributes( mDisplay,mRootWin,&attribs );
  depth=attribs.depth;
 
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
@@ -275,18 +286,19 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
 #ifdef HAVE_NEW_GUI
- if ( vo_window == None )
+ if(use_gui) guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
+  else
 #endif   
    {
     hint.x=0;
     hint.y=0;
-    if(zoomFlag){
-	hint.width=d_width;
-	hint.height=d_height;
-    }else{
-	hint.width=width;
-	hint.height=height;
-    }
+//    if(zoomFlag){
+//	hint.width=d_width;
+//	hint.height=d_height;
+//    }else{
+//	hint.width=width;
+//	hint.height=height;
+//    }
  
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -468,8 +480,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 {
   uint8_t *dst[3];
   int dstStride[3];
-  static int old_vo_dwidth=-1;
-  static int old_vo_dheight=-1;
   
   if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) /*&& y==0*/ && zoomFlag)
   {
@@ -602,6 +612,7 @@ uninit(void)
  vo_vm_close(mDisplay);
 #endif
 
+ zoomFlag=0;
  vo_x11_uninit(mDisplay, vo_window);
 
  freeSwsContext(swsContext);
@@ -616,7 +627,7 @@ static uint32_t preinit(const char *arg)
     }
 
 #ifdef HAVE_NEW_GUI
-    if ( vo_window == None )
+    if ( !use_gui )
 #endif   
 	if( !vo_init() ) return -1; // Can't open X11
 

@@ -113,6 +113,8 @@ Installation directories:
                          data files (fonts, skins) [PREFIX/share/mplayer]
   --confdir=DIR          use this prefix for installing configuration files
                          [same as datadir]
+  --libdir=DIR           use this prefix for object code libraries
+                         [PREFIX/lib]
 
 Optional features:
   --disable-mencoder     disable mencoder [autodetect]
@@ -1066,7 +1068,9 @@ for ac_option do
   --confdir=*)
     _confdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-
+  --libdir=*)
+    _libdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
 
   *)
     echo "Unknown parameter: $ac_option"

@@ -37,6 +37,7 @@
 
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
+#include "../mplayer.h"
 #endif
 
 /*
@@ -355,6 +356,12 @@ int vo_init( void )
  return 1;
 }
 
+void vo_uninit( void )
+{
+ printf("vo: uninit ...\n" );
+ if( !vo_depthonscreen ) return;
+ XCloseDisplay( mDisplay );
+}
 
 #include "../linux/keycodes.h"
 #include "wskeys.h"
@@ -507,14 +514,14 @@ int vo_x11_uninit(Display *display, Window window)
 
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
-    if (vo_window == None)
+    if ( !use_gui )
 #endif
     {
 	/* and -wid is set */
 	if (!(WinID > 0))
 	    XDestroyWindow(display, window);
-	XCloseDisplay(display);
 	vo_depthonscreen = 0;
+	vo_fs=0;
     }
     return(1);
 }
@@ -721,7 +728,7 @@ void vo_x11_fullscreen( void )
 //          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
 	  break;
    case vo_wm_Unknown:
-          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
+//          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
 	  XUnmapWindow( mDisplay,vo_window );
 	  break;
    case vo_wm_IceWM:

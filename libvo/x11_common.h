@@ -25,14 +25,15 @@ extern int WinID;
 extern int vo_mouse_timer_const;
 extern int vo_mouse_autohide;
 
-int vo_init( void );
-int vo_hidecursor ( Display* , Window );
+extern int vo_init( void );
+extern void vo_uninit( void );
+extern int vo_hidecursor ( Display* , Window );
 extern void vo_showcursor( Display *disp, Window win );
-void vo_x11_decoration( Display * vo_Display,Window w,int d );
-void vo_x11_classhint( Display * display,Window window,char *name );
-void vo_x11_sizehint( int x, int y, int width, int height, int max );
-int vo_x11_check_events(Display *mydisplay);
-void vo_x11_fullscreen( void );
+extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
+extern void vo_x11_classhint( Display * display,Window window,char *name );
+extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
+extern int vo_x11_check_events(Display *mydisplay);
+extern void vo_x11_fullscreen( void );
 #endif
 
 extern Window     vo_window;
