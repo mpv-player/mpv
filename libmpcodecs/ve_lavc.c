@@ -142,6 +142,12 @@ static int config(struct vf_instance_s* vf,
     else
 	lavc_venc_context.flags = 0;
 
+     /* 4mv is currently buggy with B frames */
+    if (lavc_param_vmax_b_frames > 0 && lavc_param_v4mv) {
+        printf("4MV with B-Frames not yet supported -> 4MV disabled\n");
+        lavc_param_v4mv = 0;
+    }
+
     lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
 
     /* lavc internal 2pass bitrate control */
@@ -170,8 +176,7 @@ static int config(struct vf_instance_s* vf,
 	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
 	    pass=0;
-	} else
-	    lavc_venc_context.flags &= ~CODEC_FLAG_HQ;
+	}
 	break;
     case 2:
         if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
