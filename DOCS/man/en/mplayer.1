@@ -6832,7 +6832,7 @@ Enable 2-pass mode.
 The first pass saves statistics.
 .
 .TP
-.B qcompress=<0\-1>
+.B qcomp=<0\-1>
 quantizer compression (default: 0.6).
 This affects the ratecontrol: a lower value makes the
 bitrate more constant, while a higher value makes the quantization parameter
@@ -6865,6 +6865,25 @@ Adjust the amount of logging info printed to the screen.
 (default)
 .br
  3: PSNR, QP, frametype, size, and other stats for every frame
+.REss
+.
+.TP
+.B subq=<0\-5>
+Adjust subpel refinement quality.
+This parameter controls quality versus speed tradeoffs involved in the motion
+estimation decision process.
+.RSs
+0: halfpel only
+.br
+1: 1 iteration of qpel on the winning candidate (default)
+.br
+2: 2 iterations of qpel on the winning candidate
+.br
+3: halfpel on all MB types, qpel on the winner
+.br
+4: qpel on all
+.br
+5: more iterations of qpel
 .REss
 .
 .TP

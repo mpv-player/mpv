@@ -82,6 +82,7 @@ static int pass = 0;
 static float qcomp = 0.6;
 static float qblur = 0.5;
 static char *rc_eq = "(tex^qComp)*(avgTex^(1-qComp))";
+static int subq = 1;
 static int psnr = 0;
 static int log_level = 2;
 
@@ -110,6 +111,7 @@ m_option_t x264encopts_conf[] = {
     {"rc_eq", &rc_eq, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
+    {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -144,6 +146,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.rc.psz_rc_eq = rc_eq;
     mod->param.rc.f_qcompress = qcomp;
     mod->param.rc.f_qblur = qblur;
+    mod->param.analyse.i_subpel_refine = subq;
     mod->param.rc.psz_stat_out = passtmpfile;
     mod->param.rc.psz_stat_in = passtmpfile;
     if((pass & 2) && bitrate <= 0)
