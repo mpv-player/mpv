@@ -76,6 +76,13 @@ x86() {
   esac
 }
 
+ppc() {
+  case "$host_arch" in
+    ppc) return 0;;
+    *) return 1;;
+  esac
+}
+
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
@@ -455,7 +462,7 @@ if test "$_as" = auto ; then
 fi
 
 # Try to find the available options for the current CPU
-if x86 ; then
+if x86 || ppc; then
   if test -r /proc/cpuinfo ; then
     # linux with /proc mounted, extract cpu information from it
     _cpuinfo="cat /proc/cpuinfo"
@@ -707,6 +714,11 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    cpu750=`$_cpuinfo | grep "cpu.*750"`
+    if test -n "$cpu750"; then
+	_march=''
+	_mcpu='-mcpu=750'
+    fi
     ;;
 
   alpha)
