@@ -8,6 +8,7 @@
    read brightness from the IFO.
 
    For information on SPU format see <URL:http://sam.zoy.org/doc/dvd/subtitles/>
+   and <URL:http://members.aol.com/mpucoder/DVD/spu.html>
 
  */
 #include "config.h"
@@ -33,7 +34,7 @@ typedef struct {
   int start_pts, end_pts;
   int start_col, end_col;
   int start_row, end_row;
-  int width, height;
+  int width, height, stride;
   int current_nibble[2];	/* next data nibble (4 bits) to be
                                    processed (for RLE decoding) for
                                    even and odd lines */
@@ -94,32 +95,41 @@ static inline int mkalpha(int i)
 static void spudec_process_data(spudec_handle_t *this)
 {
   int cmap[4], alpha[4];
-  int i;
-  int y = 0, x = 0;
+  int i, x, y;
 
   for (i = 0; i < 4; ++i) {
     alpha[i] = mkalpha(this->alpha[i]);
     if (alpha[i] == 0)
       cmap[i] = 0;
     else {
-      cmap[i] = ((this->dvd_info->vts_file->vts_pgcit->pgci_srp[0].pgc->palette[this->palette[i]] >> 16) & 0xff) - alpha[i];
+      cmap[i] = ((this->dvd_info->cur_pgc->palette[this->palette[i]] >> 16) & 0xff) - alpha[i];
       if (cmap[i] < 0)
 	cmap[i] = 0;
     }
   }
 
-  if (this->image_size < this->width * this->height) {
-    if (this->image != NULL)
+  if (this->image_size < this->stride * this->height) {
+    if (this->image != NULL) {
       free(this->image);
-    this->image = malloc(2 * this->width * this->height);
+      this->image_size = 0;
+    }
+    this->image = malloc(2 * this->stride * this->height);
     if (this->image) {
-      this->image_size = this->width * this->height;
+      this->image_size = this->stride * this->height;
       this->aimage = this->image + this->image_size;
     }
   }
   if (this->image == NULL)
     return;
+
+  /* Kludge: draw_alpha needs width multiple of 8. */
+  if (this->width < this->stride)
+    for (y = 0; y < this->height; ++y)
+      memset(this->aimage + y * this->stride + this->width, 0, this->stride - this->width);
+
   i = this->current_nibble[1];
+  x = 0;
+  y = 0;
   while (this->current_nibble[0] < i
 	 && this->current_nibble[1] / 2 < this->control_start
 	 && y < this->height) {
@@ -139,11 +149,11 @@ static void spudec_process_data(spudec_handle_t *this)
     }
     color = 3 - (rle & 0x3);
     len = rle >> 2;
-    if (len > this->width - x)
+    if (len > this->width - x || len == 0)
       len = this->width - x;
     /* FIXME have to use palette and alpha map*/
-    memset(this->image + y * this->width + x, cmap[color], len);
-    memset(this->aimage + y * this->width + x, alpha[color], len);
+    memset(this->image + y * this->stride + x, cmap[color], len);
+    memset(this->aimage + y * this->stride + x, alpha[color], len);
     x += len;
     if (x >= this->width) {
       next_line(this);
@@ -213,6 +223,7 @@ static void spudec_process_control(spudec_handle_t *this)
 	this->start_col = a >> 12;
 	this->end_col = a & 0xfff;
 	this->width = this->end_col - this->start_col + 1;
+	this->stride = (this->width + 7) & ~7; /* Kludge: draw_alpha needs width multiple of 8 */
 	this->start_row = b >> 12;
 	this->end_row = b & 0xfff;
 	this->height = this->end_row - this->start_row /* + 1 */;
@@ -235,13 +246,12 @@ static void spudec_process_control(spudec_handle_t *this)
 	return;
 	break;
       default:
-	printf("spudec: Error determining control type 0x%02x.\n",type);
-	return;
-	break;
+	printf("spudec: Error determining control type 0x%02x.  Skipping %d bytes.\n",
+	       type, next_off - off);
+	goto next_control;
       }
-
-      /* printf("spudec: Processsed control type 0x%02x.\n",type); */
     }
+  next_control:
   }
 }
 
@@ -296,7 +306,7 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
     spudec_handle_t *spu = (spudec_handle_t *)this;
     if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts && spu->image)
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
-		   spu->image, spu->aimage, spu->width);
+		   spu->image, spu->aimage, spu->stride);
 }
 
 void *spudec_new(dvd_priv_t *dvd_info)
