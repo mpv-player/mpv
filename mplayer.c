@@ -1639,13 +1639,8 @@ if(!sh_video) {
 	      // printf ("audio slp req: %.3f TF: %.3f delta: %.3f (v: %.3f a: %.3f) | ", i, time_frame,
 	      //	    i - time_frame, sh_video->timer, sh_audio->timer - (float)((float)delay / (float)sh_audio->o_bps));
 	      if(SH_AV_delay<-2*frame_time){
-		  static int drop_message=0;
 	          drop_frame=frame_dropping; // tricky!
 	          ++drop_frame_cnt;
-		  if(drop_frame_cnt>50 && AV_delay>0.5 && !drop_message){
-	    	      drop_message=1;
-	    	      mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
-	         }
 		mp_msg(MSGT_AVSYNC,MSGL_INFO,"A-V SYNC: FRAMEDROP (SH_AV_delay=%.3f)!\n", SH_AV_delay);
 	        mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	        /* go into unlimited-TF cycle */
@@ -1792,8 +1787,13 @@ if(time_frame>0.001 && !(vo_flags&256)){
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       if(delay_corrected){
+	static int drop_message=0;
         float x;
 	AV_delay=(a_pts-delay-audio_delay)-v_pts;
+	if(drop_frame_cnt>50+drop_message*250 && AV_delay>0.5){
+	  ++drop_message;
+	  mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+	}
         x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
