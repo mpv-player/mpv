@@ -67,8 +67,8 @@ u(x)	unsigned number encoded in x bits in MSB first order
 
 		Bitstream syntax:
 packet header
-	backward ptr				v
 	forward ptr				v
+	backward ptr				v
 
 align_byte
 	while(not byte aligned)
@@ -88,12 +88,21 @@ main header:
 	version					v
 	stream_count				v
 	checksum_threshold			v
-	for(i=0; i<256; i++){
-		flags[i]			v
-		if(flags&64){
-			stream_id[i]		v
-			lsb_size[i]		v
-			data_size_mul[i]	v
+	for(i=0; i<256; ){
+		tmp_flag			v
+		tmp_stream			v
+		tmp_mul				v
+		tmp_size			v
+		count				v
+		for(j=0; j<count; j++, i++){
+			flags[i]= tmp_flag;
+			stream_id_plus1[i]= tmp_stream;
+			data_size_mul[i]= tmp_mul;
+			data_size_lsb[i]= tmp_size;
+			if(++tmp_size >= tmp_mul){
+				tmp_size=0;
+				tmp_stream++;
+			}
 		}
 	}
 	reserved_bytes
@@ -110,7 +119,7 @@ stream_header:
 	time_base_nom				v
 	time_base_denom				v
 	msb_timestamp_shift			v
-	inital_timestamp_predictor		v(3)
+	initial_timestamp_predictor		v(3)
 	initial_data_size_predictor		v(2)
 	fixed_fps				u(1)
 	index_flag				u(1)
@@ -148,14 +157,15 @@ frame
 	if(flags[frame_code]&1){
 		packet header
 	}       
-	if(stream_id[frame_code]==stream_count){
+	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
 	}
-	if(frame_type == 2){
-		msb_timestamp			v
-	}
-	if((flags[frame_code]&12) == 12){
-		lsb_timestamp			v
+	if(flags[frame_code]&16){
+		if(flags[frame_code]&4){
+			timestamp		v
+		}else{
+			lsb_timestamp		v
+		}
 	}
 	if(flags[frame_code]&2){
 		data_size_msb			v
@@ -302,30 +312,29 @@ frame_code
 	different from the first byte of any startcode
 
 flags[frame_code]
-	the bits of the flags from MSB to LSB are CKKTTDP
+	the bits of the flags from MSB to LSB are KKTTTDP
 	P is 1 for type 1 and 2 packets, 0 for type 0 packets
-	TT is the timestamp_code 00,01,10 use the last timestamp + the first,
-		second and third last unique timestamp difference, so if the
-		timestamp differences, are +3,+1,+2,+2,+1 then last diff is 
+	TTT is the timestamp_code, 000,001,010 use the last timestamp + the
+		first, second and third last unique timestamp difference, so if
+		the timestamp differences, are +3,+1,+2,+2,+1 then last diff is
 		+1, second is +2 and third is +3
-		if TT is 11, then the timestamp is calculated by
+		100,101 mean that the lsb or full timestamp is coded
+		if TTT is 100, then the timestamp is calculated by
 		mask = (1<<msb_timestamp_shift)-1;
 		delta= last_timestamp - mask/2
 		timestamp= ((timestamp_lsb-delta)&mask) + delta
-		TT must be 11 if packet_type is not 0
+		TTT must be 100 or 101 if the packet_type is not 0
 		the last timestamp differences are reset to the default values
 		from the stream header if a packet of type not 0 in encountered
-	if D is 1 then the data_size_msb is coded otherwise data_size_msb is 0
+	if D is 1 then data_size_msb is coded, otherwise its 0
 	KK is the keyframe_type 
 		00-> no keyframe, 
 		01-> keyframe, 
 		10-> equal to last of the same stream, 
 		11-> opposite from last of the same stream
 		KK must be 00 or 01 if the packet_type is not 0
-	if C is 1 then stream_id, data_size_mul and data_size_lsb are not
-		stored, but predicted from the last ones
-	the value 1000001 (65) is used to mark illegal frame_code bytes, at
-	least flags[78] must be 65
+	flags=1 can be used to mark illegal frame_code bytes
+	frame_code=78 must have flags=1
 
 frame_type
 	0       is indicated by (flags[frame_code]&1)==0
@@ -334,22 +343,17 @@ frame_type
 	there SHOULD not be more then 0.5 seconds or 16kbyte of type 0 frames
 	wihout a intervening frame of different frame_type
                 
-stream_id[frame_code]
-	if its not coded in the main_header then its equal to the last one
-	from the main header
+stream_id_plus1[frame_code]
 	must be <250
+	if its 0 then the stream_id is coded in the frame
 
 data_size_mul[frame_code]
-	if its not coded in the main_header then its equal to the last one
-	from the main header
 	must be <250
 
 data_size_lsb[frame_code]
-	if its not coded in the main_header then its equal to the last one
-	from the main header + 1
 	must be <250
 
-data_size
+data_size       
 	if(data_size_lsb == data_size_mul)
 		data_size= last;
 	else if(data_size_lsb == data_size_mul+1)
@@ -360,18 +364,15 @@ data_size
 	last and next last are reset to the values stored in the stream header
 	if an frame with type > 0 is encountered
 
-msb_timestamp
-	most significant bits of the timestamp, SHOULD be 0 for the first frame
- 
 lsb_timestamp
 	least significant bits of the timestamp in time_base precission
         Example: IBBP display order
-		keyframe msb_timestamp=0 lsb_timestamp=0 -> timestamp=0
+		keyframe timestamp=0                     -> timestamp=0
 		frame                    lsb_timestamp=3 -> timestamp=3
 		frame                    lsb_timestamp=1 -> timestamp=1
 		frame                    lsb_timestamp=2 -> timestamp=2
 		...
-		keyframe msb_timestamp=1 lsb_timestamp=1 -> timestamp=257
+		keyframe msb_timestamp=257               -> timestamp=257
 		frame                    lsb_timestamp=255->timestamp=255
 		frame                    lsb_timestamp=0 -> timestamp=256
 		frame                    lsb_timestamp=4 -> timestamp=260
