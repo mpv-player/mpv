@@ -404,6 +404,14 @@ Ennek több oka is lehet.<BR>
   <LI>az AVI-nak rossz fejléce van, próbáld meg a <I>-nobps</I> és/vagy az <I>-mc 0</I> opcióval .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Van egy MJPEG file-om ami mûködik más lejátszókban, de az MPlayer csak
+fekete képet játszik le.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Töröld ki az MJPEG windows DLL-t a <CODE>codecs.conf</CODE>-ból, vagy
+használd a <CODE>-vc ffmjpeg</CODE> opciót (libavcodec szükséges).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3><P><B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4.  Video/audio meghajtó problémák (vo/ao)</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 

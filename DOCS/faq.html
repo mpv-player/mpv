@@ -450,6 +450,14 @@ This can have multiple reasons.<BR>
   <LI>the AVI has shit header, try with the <I>-nobps</I> option, and/or <I>-mc 0</I> .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+I have an MJPEG file which works with other players but displays only black
+image in MPlayer.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Disable the Windows DLL in <CODE>codecs.conf</CODE>, or use <CODE>-vc ffmjpeg</CODE> option (you have to
+compile MPlayer with libavcodec).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
 <B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4. Video/audio driver problems (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
