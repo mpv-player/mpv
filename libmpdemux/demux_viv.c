@@ -644,12 +644,11 @@ if (demuxer->audio->id >= -1){
 			priv->audio_codec = VIVO_AUDIO_SIREN;
 		}
 
-		sh->format = -1;
 		if (priv->audio_codec == VIVO_AUDIO_G723)
 		    sh->format = 0x111;
-		if (priv->audio_codec == VIVO_AUDIO_SIREN)
+		else if (priv->audio_codec == VIVO_AUDIO_SIREN)
 		    sh->format = 0x112;
-		if (sh->format == -1)
+		else
 		{
 		    mp_msg(MSGT_DEMUX, MSGL_ERR, "VIVO: Not support audio codec (%d)\n",
 			priv->audio_codec);
@@ -714,7 +713,7 @@ if (demuxer->audio->id >= -1){
 		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 nosound:
-		;
+		free_sh_audio(sh);
 }
 }
 
