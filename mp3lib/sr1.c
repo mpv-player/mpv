@@ -367,6 +367,7 @@ static int tables_done_flag=0;
 extern void dct64_MMX( void );
 extern void dct64_MMX_3dnow( void );
 extern void dct64_MMX_3dnowex( void );
+extern void dct64_MMX_sse( void );
 void (*dct64_MMX_func)( void );
 
 // Init decoder tables.  Call first, once!
@@ -405,8 +406,8 @@ void MP3_Init(){
        Note: It's ok, Since K8 will have SSE2 support and will much faster
        of P4 ;) 
      */
-//      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
-      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
+      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
+//      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
     else
     if(_3dnow)
       printf( "mp3lib: Using AMD 3dnow%s! optimized decore.\n",(_3dnow>1?"-dsp(k7)":""));
@@ -443,7 +444,7 @@ void MP3_Init(){
   if(_isse)
   {
     synth_func=synth_1to1_MMX;
-    dct64_MMX_func=dct64_MMX;
+    dct64_MMX_func=dct64_MMX_sse;
   }    
   else
 #endif
