@@ -998,7 +998,7 @@ pnm_streaming_start( stream_t *stream ) {
 	if(fd<0) return -1;
 	
 	pnm = pnm_connect(fd,stream->streaming_ctrl->url->file);
-	if(!pnm) return -1;
+	if(!pnm) return -2;
 
 	stream->fd=fd;
 	stream->streaming_ctrl->data=pnm;
@@ -1250,6 +1250,10 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "pnm")) {
 		stream->fd = -1;
 		ret = pnm_streaming_start( stream );
+		if (ret == -1) {
+		    mp_msg(MSGT_NETWORK,MSGL_INFO,"Can't connect with pnm, retrying with http.\n");
+		    goto stream_switch;
+		}
 	} else
 	
 	if( (!strcasecmp( stream->streaming_ctrl->url->protocol, "rtsp")) &&
@@ -1259,7 +1263,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		    mp_msg(MSGT_NETWORK,MSGL_INFO,"Not a Realmedia rtsp url. Trying standard rtsp protocol.\n");
 #ifdef STREAMING_LIVE_DOT_COM
 		    *demuxer_type =  DEMUXER_TYPE_RTP;
-		    goto try_livedotcom;
+		    goto stream_switch;
 #else
 		    mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n");
 		    return -1;
@@ -1268,7 +1272,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	} else
 
 	// For connection-oriented streams, we can usually determine the streaming type.
-try_livedotcom:
+stream_switch:
 	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
 			// Send the appropriate HTTP request
