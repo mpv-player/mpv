@@ -451,9 +451,8 @@ nop_streaming_start( stream_t *stream ) {
 				fd = -1;
 		}
 		stream->fd = fd;
+		http_free( http_hdr );
 	}
-
-	http_free( http_hdr );
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
 	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
@@ -543,7 +542,7 @@ rtp_streaming_start( stream_t *stream ) {
 	streaming_ctrl_t *streaming_ctrl;
 	int fd;
 
-	if( streaming_ctrl==NULL ) return -1;
+	if( stream==NULL ) return -1;
 	streaming_ctrl = stream->streaming_ctrl;
 	fd = stream->fd;
 	
