@@ -3,8 +3,24 @@ mplayer (1.0)
   pre3:
 
     DOCS:
-    * Support for building incomplete XML documentation.
+    * Support for building incomplete XML documentation
+    * HTML documentation got obsolete
 
+    Codecs and demuxers:
+    * improved FLAC configure detection
+    
+    Filters:
+    * some fixes in the delogo filter 
+    
+    FFmpeg/libavcodec:
+    * langrange multipliers instead qscale, improved the encoding quality alot
+    
+    Drivers:
+    * VIDIX equalizer support in fbdev
+    * new SiS 650/651/740/etc VIDIX driver
+    
+    Others:
+    * swscaler fixed on mlib
 
   pre2:
 
