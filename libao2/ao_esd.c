@@ -16,8 +16,6 @@
  *   most likely a linux sound card driver problem)
  */
 
-#include "config.h"
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>

@@ -1,7 +1,5 @@
 #include <assert.h>
 
-#include "config.h"
-
 #include <polyp/polyplib.h>
 #include <polyp/polyplib-error.h>
 #include <polyp/mainloop.h>
