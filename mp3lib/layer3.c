@@ -44,10 +44,10 @@ struct bandInfoStruct {
   int shortDiff[13];
 };
 
-int longLimit[9][23];
-int shortLimit[9][14];
+static int longLimit[9][23];
+static int shortLimit[9][14];
 
-struct bandInfoStruct bandInfo[9] = { 
+static struct bandInfoStruct bandInfo[9] = { 
 
 /* MPEG 1.0 */
  { {0,4,8,12,16,20,24,30,36,44,52,62,74, 90,110,134,162,196,238,288,342,418,576},
@@ -110,7 +110,7 @@ static real pow1_1[2][16],pow2_1[2][16],pow1_2[2][16],pow2_2[2][16];
 /*
  * init tables for layer-3
  */
-void init_layer3(int down_sample_sblimit)
+static void init_layer3(int down_sample_sblimit)
 {
   int i,j,k,l;
 

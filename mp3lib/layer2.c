@@ -274,7 +274,7 @@ static void II_select_table(struct frame *fr)
 }
 
 
-int do_layer2(struct frame *fr,int outmode)
+static int do_layer2(struct frame *fr,int outmode)
 {
   int clip=0;
   int i,j;
@@ -314,5 +314,3 @@ int do_layer2(struct frame *fr,int outmode)
 
   return clip;
 }
-
-

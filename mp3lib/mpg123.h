@@ -107,13 +107,8 @@ struct III_sideinfo
   } ch[2];
 };
 
-static long freqs[9];
 extern real mp3lib_decwin[(512+32)];
-extern real *pnts[];
-
-static int do_layer2(struct frame *fr,int single);
-static int do_layer3(struct frame *fr,int single);
-static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt);
+extern real *mp3lib_pnts[];
 
 extern int synth_1to1_pent( real *,int,short * );
 extern void make_decode_tables_MMX(long scaleval);

@@ -79,7 +79,7 @@ void dct64_altivec(real *a,real *b,real *c)
 #ifdef ALTIVEC_USE_REFERENCE_C_CODE
   
   {
-    register real *costab = pnts[0];
+    register real *costab = mp3lib_pnts[0];
 
     b1[0x00] = samples[0x00] + samples[0x1F];
     b1[0x01] = samples[0x01] + samples[0x1E];
@@ -116,7 +116,7 @@ void dct64_altivec(real *a,real *b,real *c)
 
   }
   {
-    register real *costab = pnts[1];
+    register real *costab = mp3lib_pnts[1];
 
     b2[0x00] = b1[0x00] + b1[0x0F];
     b2[0x01] = b1[0x01] + b1[0x0E];
@@ -154,7 +154,7 @@ void dct64_altivec(real *a,real *b,real *c)
   }
 
   {
-    register real *costab = pnts[2];
+    register real *costab = mp3lib_pnts[2];
 
     b1[0x00] = b2[0x00] + b2[0x07];
     b1[0x01] = b2[0x01] + b2[0x06];
@@ -207,7 +207,7 @@ void dct64_altivec(real *a,real *b,real *c)
       temp1, temp2;
 
     {
-      register real *costab = pnts[0];
+      register real *costab = mp3lib_pnts[0];
 
       register vector float
         samplesv1, samplesv2, samplesv3, samplesv4,
@@ -300,7 +300,7 @@ void dct64_altivec(real *a,real *b,real *c)
         b2v0, b2v1, b2v2, b2v3,
         b2v4, b2v5, b2v6, b2v7;
       {
-        register real *costab = pnts[1];
+        register real *costab = mp3lib_pnts[1];
         register vector float costabv1r, costabv2r, costabv1, costabv2, costabv3;
         register vector unsigned char costab_perm = vec_lvsl(0, costab);
 
@@ -343,7 +343,7 @@ void dct64_altivec(real *a,real *b,real *c)
       }
 
       {
-        register real *costab = pnts[2];
+        register real *costab = mp3lib_pnts[2];
 
     
         vector float costabv1r, costabv1, costabv2;
@@ -385,8 +385,8 @@ void dct64_altivec(real *a,real *b,real *c)
 #endif /* ALTIVEC_USE_REFERENCE_C_CODE */
 
   {
-    register real const cos0 = pnts[3][0];
-    register real const cos1 = pnts[3][1];
+    register real const cos0 = mp3lib_pnts[3][0];
+    register real const cos1 = mp3lib_pnts[3][1];
 
     b2[0x00] = b1[0x00] + b1[0x03];
     b2[0x01] = b1[0x01] + b1[0x02];
@@ -423,7 +423,7 @@ void dct64_altivec(real *a,real *b,real *c)
   }
 
   {
-    register real const cos0 = pnts[4][0];
+    register real const cos0 = mp3lib_pnts[4][0];
 
     b1[0x00] = b2[0x00] + b2[0x01];
     b1[0x01] = (b2[0x00] - b2[0x01]) * cos0;

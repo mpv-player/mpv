@@ -86,8 +86,8 @@ static int bitindex;
 static unsigned char *wordpointer;
 static int bitsleft;
 
-unsigned char *pcm_sample;   /* outbuffer address */
-int pcm_point = 0;           /* outbuffer offset */
+static unsigned char *pcm_sample;   /* outbuffer address */
+static int pcm_point = 0;           /* outbuffer offset */
 
 static struct frame fr;
 
@@ -372,7 +372,7 @@ retry1:
   return frames;
 }
 
-int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
+static int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 
 #include "layer2.c"
 #include "layer3.c"
