@@ -72,6 +72,14 @@ else
 	ldconfig
 endif
 
+uninstall:
+	rm -f $(prefix)/lib/libdha.so $(prefix)/lib/$(SHORTNAME) $(prefix)/lib/$(LIBNAME)
+ifeq ($(TARGET_OS),OpenBSD)
+	ldconfig -R
+else
+	ldconfig
+endif
+
 #
 # include dependency files if they exist
 #
