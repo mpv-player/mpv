@@ -41,6 +41,8 @@ void (*upmix)(sample_t * samples, int acmod, int output)= NULL;
 
 static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev);
+static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev);
 static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev);
 static void upmix_MMX (sample_t * samples, int acmod, int output);
@@ -53,6 +55,7 @@ void downmix_accel_init(uint32_t mm_accel)
 #ifdef ARCH_X86    
     if(mm_accel & MM_ACCEL_X86_MMX) upmix= upmix_MMX;
     if(mm_accel & MM_ACCEL_X86_SSE) downmix= downmix_SSE;
+    if(mm_accel & MM_ACCEL_X86_3DNOW) downmix= downmix_3dnow;
 #endif
 }
    
@@ -685,6 +688,7 @@ static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 	"movlps %2, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps (%0, %%esi), %%xmm0	\n\t" 
 	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
@@ -707,6 +711,7 @@ static void mix3to1_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps (%0, %%esi), %%xmm0	\n\t" 
 	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
@@ -727,6 +732,7 @@ static void mix4to1_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps (%0, %%esi), %%xmm0	\n\t" 
 	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
@@ -748,6 +754,7 @@ static void mix5to1_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps (%0, %%esi), %%xmm0	\n\t" 
 	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
@@ -770,6 +777,7 @@ static void mix3to2_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
 	"addps %%xmm7, %%xmm0		\n\t" //common
@@ -792,6 +800,7 @@ static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
 		"movlps %2, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps 1024(%1, %%esi), %%xmm0	\n\t" 
 		"addps %%xmm7, %%xmm0		\n\t" //common
@@ -814,6 +823,7 @@ static void mix21toS_SSE (sample_t * samples, sample_t bias)
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  // surround
 		"movaps (%0, %%esi), %%xmm1	\n\t" 
@@ -837,6 +847,7 @@ static void mix31to2_SSE (sample_t * samples, sample_t bias)
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
 		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
@@ -860,6 +871,7 @@ static void mix31toS_SSE (sample_t * samples, sample_t bias)
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
 		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
@@ -885,6 +897,7 @@ static void mix22toS_SSE (sample_t * samples, sample_t bias)
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
 		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
@@ -909,6 +922,7 @@ static void mix32to2_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
 	"addps %%xmm7, %%xmm0		\n\t" // common
@@ -932,6 +946,7 @@ static void mix32toS_SSE (sample_t * samples, sample_t bias)
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"movl $-1024, %%esi		\n\t"
+	".balign 16\n\t"
 	"1:				\n\t"
 	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
 	"movaps 3072(%0, %%esi), %%xmm2	\n\t" 
@@ -958,6 +973,7 @@ static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
 		"movlps %2, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"movl $-1024, %%esi		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movaps (%0, %%esi), %%xmm0	\n\t"  
 		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
@@ -979,6 +995,7 @@ static void zero_MMX(sample_t * samples)
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"pxor %%mm0, %%mm0		\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movq %%mm0, (%0, %%esi)	\n\t"
 		"movq %%mm0, 8(%0, %%esi)	\n\t"
@@ -992,6 +1009,38 @@ static void zero_MMX(sample_t * samples)
 	);
 }
 
+/*
+ I hope dest and src will be at least 8 byte aligned and size
+ will devide on 8 without remain
+ Note: untested and unused.
+*/
+static void copy_MMX(void *dest,const void *src,unsigned size)
+{
+  unsigned i;
+  size /= 64;
+	for(i=0;i<size;i++)
+	{
+	    __asm __volatile(
+		"movq	%0,   %%mm0\n\t"
+		"movq	8%0,  %%mm1\n\t"
+		"movq	16%0, %%mm2\n\t"
+		"movq	24%0, %%mm3\n\t"
+		"movq	32%0, %%mm4\n\t"
+		"movq	40%0, %%mm5\n\t"
+		"movq	48%0, %%mm6\n\t"
+		"movq	56%0, %%mm7\n\t"
+		"movq	%%mm0, %1\n\t"
+		"movq	%%mm1, 8%1\n\t"
+		"movq	%%mm2, 16%1\n\t"
+		"movq	%%mm3, 24%1\n\t"
+		"movq	%%mm4, 32%1\n\t"
+		"movq	%%mm5, 40%1\n\t"
+		"movq	%%mm6, 48%1\n\t"
+		"movq	%%mm7, 56%1\n\t"
+		:
+		:"m"(src),"m"(dest));
+	}
+}
 
 static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev)
@@ -1199,4 +1248,569 @@ static void upmix_MMX (sample_t * samples, int acmod, int output)
 	goto mix_31to21_MMX;
     }
 }
+
+static void mix2to1_3dnow (sample_t * dest, sample_t * src, sample_t bias)
+{
+	asm volatile(
+	"movd  %2, %%mm7	\n\t"
+	"punpckldq %2, %%mm7	\n\t"
+	"movl  $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq  (%0, %%esi), %%mm0	\n\t" 
+	"movq  8(%0, %%esi), %%mm1	\n\t"
+	"movq  16(%0, %%esi), %%mm2	\n\t" 
+	"movq  24(%0, %%esi), %%mm3	\n\t"
+	"pfadd (%1, %%esi), %%mm0	\n\t" 
+	"pfadd 8(%1, %%esi), %%mm1	\n\t"
+	"pfadd 16(%1, %%esi), %%mm2	\n\t" 
+	"pfadd 24(%1, %%esi), %%mm3	\n\t"
+	"pfadd %%mm7, %%mm0		\n\t"
+	"pfadd %%mm7, %%mm1		\n\t"
+	"pfadd %%mm7, %%mm2		\n\t"
+	"pfadd %%mm7, %%mm3		\n\t"
+	"movq  %%mm0, (%1, %%esi)	\n\t"
+	"movq  %%mm1, 8(%1, %%esi)	\n\t"
+	"movq  %%mm2, 16(%1, %%esi)	\n\t"
+	"movq  %%mm3, 24(%1, %%esi)	\n\t"
+	"addl $32, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix3to1_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movd  %1, %%mm7	\n\t"
+	"punpckldq %1, %%mm7	\n\t"
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq  (%0, %%esi), %%mm0	\n\t" 
+	"movq  8(%0, %%esi), %%mm1	\n\t"
+	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+	"movq  1032(%0, %%esi), %%mm3	\n\t"
+	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
+	"pfadd %%mm7, %%mm0		\n\t"
+	"pfadd %%mm7, %%mm1		\n\t"
+	"pfadd %%mm2, %%mm0		\n\t"
+	"pfadd %%mm3, %%mm1		\n\t"
+	"movq  %%mm0, (%0, %%esi)	\n\t"
+	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix4to1_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movd  %1, %%mm7	\n\t"
+	"punpckldq %1, %%mm7	\n\t"
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq  (%0, %%esi), %%mm0	\n\t" 
+	"movq  8(%0, %%esi), %%mm1	\n\t"
+	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+	"movq  1032(%0, %%esi), %%mm3	\n\t"
+	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
+	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
+	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
+	"pfadd %%mm7, %%mm0		\n\t"
+	"pfadd %%mm7, %%mm1		\n\t"
+	"pfadd %%mm2, %%mm0		\n\t"
+	"pfadd %%mm3, %%mm1		\n\t"
+	"movq  %%mm0, (%0, %%esi)	\n\t"
+	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix5to1_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movd  %1, %%mm7	\n\t"
+	"punpckldq %1, %%mm7	\n\t"
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq  (%0, %%esi), %%mm0	\n\t" 
+	"movq  8(%0, %%esi), %%mm1	\n\t"
+	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+	"movq  1032(%0, %%esi), %%mm3	\n\t"
+	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
+	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
+	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
+	"pfadd %%mm7, %%mm0		\n\t"
+	"pfadd %%mm7, %%mm1		\n\t"
+	"pfadd 4096(%0, %%esi), %%mm2	\n\t" 
+	"pfadd 4104(%0, %%esi), %%mm3	\n\t"
+	"pfadd %%mm2, %%mm0		\n\t"
+	"pfadd %%mm3, %%mm1		\n\t"
+	"movq  %%mm0, (%0, %%esi)	\n\t"
+	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix3to2_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movd  %1, %%mm7	\n\t"
+	"punpckldq %1, %%mm7	\n\t"
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq   1024(%0, %%esi), %%mm0	\n\t" 
+	"movq   1032(%0, %%esi), %%mm1	\n\t"
+	"pfadd  %%mm7, %%mm0		\n\t" //common
+	"pfadd  %%mm7, %%mm1		\n\t" //common
+	"movq   (%0, %%esi), %%mm2	\n\t" 
+	"movq   8(%0, %%esi), %%mm3	\n\t"
+	"movq   2048(%0, %%esi), %%mm4	\n\t"
+	"movq   2056(%0, %%esi), %%mm5	\n\t"
+	"pfadd  %%mm0, %%mm2		\n\t"
+	"pfadd  %%mm0, %%mm3		\n\t"
+	"pfadd  %%mm0, %%mm4		\n\t"
+	"pfadd  %%mm0, %%mm5		\n\t"
+	"movq   %%mm2, (%0, %%esi)	\n\t"
+	"movq   %%mm3, 8(%0, %%esi)	\n\t"
+	"movq   %%mm4, 1024(%0, %%esi)	\n\t"
+	"movq   %%mm5, 1032(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix21to2_3dnow (sample_t * left, sample_t * right, sample_t bias)
+{
+	asm volatile(
+		"movd  %2, %%mm7	\n\t"
+		"punpckldq %2, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq  1024(%1, %%esi), %%mm0	\n\t" 
+		"movq  1032(%1, %%esi), %%mm1	\n\t"
+		"pfadd %%mm7, %%mm0		\n\t" //common
+		"pfadd %%mm7, %%mm1		\n\t" //common
+		"movq  (%0, %%esi), %%mm2	\n\t" 
+		"movq  8(%0, %%esi), %%mm3	\n\t"
+		"movq  (%1, %%esi), %%mm4	\n\t"
+		"movq  8(%1, %%esi), %%mm5	\n\t"
+		"pfadd %%mm0, %%mm2		\n\t"
+		"pfadd %%mm1, %%mm3		\n\t"
+		"pfadd %%mm0, %%mm4		\n\t"
+		"pfadd %%mm1, %%mm5		\n\t"
+		"movq  %%mm2, (%0, %%esi)	\n\t"
+		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+		"movq  %%mm4, (%1, %%esi)	\n\t"
+		"movq  %%mm5, 8(%1, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (left+256), "r" (right+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix21toS_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movd  %1, %%mm7	\n\t"
+		"punpckldq %1, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq  2048(%0, %%esi), %%mm0	\n\t"  // surround
+		"movq  2056(%0, %%esi), %%mm1	\n\t"  // surround
+		"movq  (%0, %%esi), %%mm2	\n\t" 
+		"movq  8(%0, %%esi), %%mm3	\n\t"
+		"movq  1024(%0, %%esi), %%mm4	\n\t"
+		"movq  1032(%0, %%esi), %%mm5	\n\t"
+		"pfadd %%mm7, %%mm2		\n\t"
+		"pfadd %%mm7, %%mm3		\n\t"
+		"pfadd %%mm7, %%mm4		\n\t"
+		"pfadd %%mm7, %%mm5		\n\t"
+		"pfsub %%mm0, %%mm2		\n\t"
+		"pfsub %%mm1, %%mm3		\n\t"
+		"pfadd %%mm0, %%mm4		\n\t"
+		"pfadd %%mm1, %%mm5		\n\t"
+		"movq  %%mm2, (%0, %%esi)	\n\t"
+		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix31to2_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movd  %1, %%mm7	\n\t"
+		"punpckldq %1, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq  1024(%0, %%esi), %%mm0	\n\t"  
+		"movq  1032(%0, %%esi), %%mm1	\n\t"
+		"pfadd 3072(%0, %%esi), %%mm0	\n\t"  
+		"pfadd 3080(%0, %%esi), %%mm1	\n\t"
+		"pfadd %%mm7, %%mm0		\n\t" // common
+		"pfadd %%mm7, %%mm1		\n\t" // common
+		"movq  (%0, %%esi), %%mm2	\n\t" 
+		"movq  8(%0, %%esi), %%mm3	\n\t"
+		"movq  2048(%0, %%esi), %%mm4	\n\t"
+		"movq  2056(%0, %%esi), %%mm5	\n\t"
+		"pfadd %%mm0, %%mm2		\n\t"
+		"pfadd %%mm1, %%mm3		\n\t"
+		"pfadd %%mm0, %%mm4		\n\t"
+		"pfadd %%mm1, %%mm5		\n\t"
+		"movq  %%mm2, (%0, %%esi)	\n\t"
+		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix31toS_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movd  %1, %%mm7	\n\t"
+		"punpckldq %1, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq   1024(%0, %%esi), %%mm0	\n\t"  
+		"movq   1032(%0, %%esi), %%mm1	\n\t"
+		"pfadd  %%mm7, %%mm0		\n\t" // common
+		"pfadd  %%mm7, %%mm1		\n\t" // common
+		"movq   (%0, %%esi), %%mm2	\n\t" 
+		"movq   8(%0, %%esi), %%mm3	\n\t"
+		"movq   2048(%0, %%esi), %%mm4	\n\t"
+		"movq   2056(%0, %%esi), %%mm5	\n\t"
+		"pfadd  %%mm0, %%mm2		\n\t"
+		"pfadd  %%mm1, %%mm3		\n\t"
+		"pfadd  %%mm0, %%mm4		\n\t"
+		"pfadd  %%mm1, %%mm5		\n\t"
+		"movq   3072(%0, %%esi), %%mm0	\n\t" // surround
+		"movq   3080(%0, %%esi), %%mm1	\n\t" // surround
+		"pfsub  %%mm0, %%mm2		\n\t"
+		"pfsub  %%mm1, %%mm3		\n\t"
+		"pfadd  %%mm0, %%mm4		\n\t"
+		"pfadd  %%mm1, %%mm5		\n\t"
+		"movq   %%mm2, (%0, %%esi)	\n\t"
+		"movq   %%mm3, 8(%0, %%esi)	\n\t"
+		"movq   %%mm4, 1024(%0, %%esi)	\n\t"
+		"movq   %%mm5, 1032(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix22toS_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movd  %1, %%mm7	\n\t"
+		"punpckldq %1, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq  2048(%0, %%esi), %%mm0	\n\t"  
+		"movq  2056(%0, %%esi), %%mm1	\n\t"
+		"pfadd 3072(%0, %%esi), %%mm0	\n\t" // surround
+		"pfadd 3080(%0, %%esi), %%mm1	\n\t" // surround
+		"movq  (%0, %%esi), %%mm2	\n\t" 
+		"movq  8(%0, %%esi), %%mm3	\n\t"
+		"movq  1024(%0, %%esi), %%mm4	\n\t"
+		"movq  1032(%0, %%esi), %%mm5	\n\t"
+		"pfadd %%mm7, %%mm2		\n\t"
+		"pfadd %%mm7, %%mm3		\n\t"
+		"pfadd %%mm7, %%mm4		\n\t"
+		"pfadd %%mm7, %%mm5		\n\t"
+		"pfsub %%mm0, %%mm2		\n\t"
+		"pfsub %%mm1, %%mm3		\n\t"
+		"pfadd %%mm0, %%mm4		\n\t"
+		"pfadd %%mm1, %%mm5		\n\t"
+		"movq  %%mm2, (%0, %%esi)	\n\t"
+		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix32to2_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movd  %1, %%mm7	\n\t"
+	"punpckldq %1, %%mm7	\n\t"
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movq   1024(%0, %%esi), %%mm0	\n\t" 
+	"movq   1032(%0, %%esi), %%mm1	\n\t"
+	"pfadd  %%mm7, %%mm0		\n\t" // common
+	"pfadd  %%mm7, %%mm1		\n\t" // common
+	"movq   %%mm0, %%mm2		\n\t" // common
+	"movq   %%mm1, %%mm3		\n\t" // common
+	"pfadd  (%0, %%esi), %%mm0	\n\t" 
+	"pfadd  8(%0, %%esi), %%mm1	\n\t"
+	"pfadd  2048(%0, %%esi), %%mm2	\n\t" 
+	"pfadd  2056(%0, %%esi), %%mm3	\n\t"
+	"pfadd  3072(%0, %%esi), %%mm0	\n\t" 
+	"pfadd  3080(%0, %%esi), %%mm1	\n\t"
+	"pfadd  4096(%0, %%esi), %%mm2	\n\t" 
+	"pfadd  4104(%0, %%esi), %%mm3	\n\t"
+	"movq   %%mm0, (%0, %%esi)	\n\t"
+	"movq   %%mm1, 8(%0, %%esi)	\n\t"
+	"movq   %%mm2, 1024(%0, %%esi)	\n\t"
+	"movq   %%mm3, 1032(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+/* todo: should be optimized better */
+static void mix32toS_3dnow (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movl $-1024, %%esi	\n\t"
+	".balign 16\n\t"
+	"1:			\n\t"
+	"movd  %1, %%mm7		\n\t"
+	"punpckldq %1, %%mm7		\n\t"
+	"movq  1024(%0, %%esi), %%mm0	\n\t" 
+	"movq  1032(%0, %%esi), %%mm1	\n\t"
+	"movq  3072(%0, %%esi), %%mm4	\n\t" 
+	"movq  3080(%0, %%esi), %%mm5	\n\t"
+	"pfadd %%mm7, %%mm0		\n\t" // common
+	"pfadd %%mm7, %%mm1		\n\t" // common
+	"pfadd 4096(%0, %%esi), %%mm4	\n\t" // surround	
+	"pfadd 4104(%0, %%esi), %%mm5	\n\t" // surround
+	"movq  (%0, %%esi), %%mm2	\n\t" 
+	"movq  8(%0, %%esi), %%mm3	\n\t"
+	"movq  2048(%0, %%esi), %%mm6	\n\t" 
+	"movq  2056(%0, %%esi), %%mm7	\n\t"
+	"pfsub %%mm4, %%mm2		\n\t"	
+	"pfsub %%mm5, %%mm3		\n\t"
+	"pfadd %%mm4, %%mm6		\n\t"	
+	"pfadd %%mm5, %%mm7		\n\t"
+	"pfadd %%mm0, %%mm2		\n\t"	
+	"pfadd %%mm1, %%mm3		\n\t"
+	"pfadd %%mm0, %%mm6		\n\t"	
+	"pfadd %%mm1, %%mm7		\n\t"
+	"movq  %%mm2, (%0, %%esi)	\n\t"
+	"movq  %%mm3, 8(%0, %%esi)	\n\t"
+	"movq  %%mm6, 1024(%0, %%esi)	\n\t"
+	"movq  %%mm7, 1032(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void move2to1_3dnow (sample_t * src, sample_t * dest, sample_t bias)
+{
+	asm volatile(
+		"movd  %2, %%mm7	\n\t"
+		"punpckldq %2, %%mm7	\n\t"
+		"movl $-1024, %%esi	\n\t"
+		".balign 16\n\t"
+		"1:			\n\t"
+		"movq  (%0, %%esi), %%mm0	\n\t"  
+		"movq  8(%0, %%esi), %%mm1	\n\t"
+		"movq  16(%0, %%esi), %%mm2	\n\t"  
+		"movq  24(%0, %%esi), %%mm3	\n\t"
+		"pfadd 1024(%0, %%esi), %%mm0	\n\t"
+		"pfadd 1032(%0, %%esi), %%mm1	\n\t"
+		"pfadd 1040(%0, %%esi), %%mm2	\n\t"
+		"pfadd 1048(%0, %%esi), %%mm3	\n\t"
+		"pfadd %%mm7, %%mm0		\n\t"
+		"pfadd %%mm7, %%mm1		\n\t"
+		"pfadd %%mm7, %%mm2		\n\t"
+		"pfadd %%mm7, %%mm3		\n\t"
+		"movq  %%mm0, (%1, %%esi)	\n\t"
+		"movq  %%mm1, 8(%1, %%esi)	\n\t"
+		"movq  %%mm2, 16(%1, %%esi)	\n\t"
+		"movq  %%mm3, 24(%1, %%esi)	\n\t"
+		"addl $32, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev)
+{
+    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
+
+    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
+	memcpy (samples, samples + 256, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_CHANNEL, A52_MONO):
+    case CONVERT (A52_STEREO, A52_MONO):
+    mix_2to1_3dnow:
+	mix2to1_3dnow (samples, samples + 256, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_MONO):
+	if (slev == 0)
+	    goto mix_2to1_3dnow;
+    case CONVERT (A52_3F, A52_MONO):
+    mix_3to1_3dnow:
+	mix3to1_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_MONO):
+	if (slev == 0)
+	    goto mix_3to1_3dnow;
+    case CONVERT (A52_2F2R, A52_MONO):
+	if (slev == 0)
+	    goto mix_2to1_3dnow;
+	mix4to1_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_MONO):
+	if (slev == 0)
+	    goto mix_3to1_3dnow;
+	mix5to1_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_MONO, A52_DOLBY):
+	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F, A52_STEREO):
+    case CONVERT (A52_3F, A52_DOLBY):
+    mix_3to2_3dnow:
+	mix3to2_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_STEREO):
+	if (slev == 0)
+	    break;
+	mix21to2_3dnow (samples, samples + 256, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_DOLBY):
+	mix21toS_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_STEREO):
+	if (slev == 0)
+	    goto mix_3to2_3dnow;
+	mix31to2_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_DOLBY):
+	mix31toS_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_2F2R, A52_STEREO):
+	if (slev == 0)
+	    break;
+	mix2to1_3dnow (samples, samples + 512, bias);
+	mix2to1_3dnow (samples + 256, samples + 768, bias);
+	break;
+
+    case CONVERT (A52_2F2R, A52_DOLBY):
+	mix22toS_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_STEREO):
+	if (slev == 0)
+	    goto mix_3to2_3dnow;
+	mix32to2_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_DOLBY):
+	mix32toS_3dnow (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_3F):
+	if (slev == 0)
+	    break;
+	mix21to2_3dnow (samples, samples + 512, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F):
+	if (slev == 0)
+	    break;
+	mix2to1_3dnow (samples, samples + 768, bias);
+	mix2to1_3dnow (samples + 512, samples + 1024, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_2F1R):
+	mix3to2_3dnow (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_2F2R, A52_2F1R):
+	mix2to1_3dnow (samples + 512, samples + 768, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_2F1R):
+	mix3to2_3dnow (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
+	move2to1_3dnow (samples + 768, samples + 512, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F1R):
+	mix2to1_3dnow (samples + 768, samples + 1024, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_2F2R):
+	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F1R, A52_2F2R):
+	mix3to2_3dnow (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F2R, A52_2F2R):
+	mix3to2_3dnow (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	memcpy (samples + 768, samples + 1024, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F1R, A52_3F2R):
+	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
+	break;
+    }
+    __asm __volatile("femms":::"memory");
+}
+
 #endif //ARCH_X86
