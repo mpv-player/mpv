@@ -132,27 +132,8 @@ int __base( char * in )
    defList->main.width=defList->main.Bitmap.Width;
    defList->main.height=defList->main.Bitmap.Height;
    #ifdef HAVE_XSHAPE
-/*
-    defList->main.Mask.Width=defList->main.Bitmap.Width;
-    defList->main.Mask.Height=defList->main.Bitmap.Height;
-    defList->main.Mask.BPP=1;
-    defList->main.Mask.ImageSize=defList->main.Mask.Width * defList->main.Mask.Height / 8;
-    defList->main.Mask.Image=(char *)calloc( 1,defList->main.Mask.ImageSize );
-    if ( defList->main.Mask.Image == NULL ) message( True,MSGTR_NEMFMM );
-    {
-     int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
-     buf=(unsigned long *)defList->main.Bitmap.Image;
-     for ( b=0,i=0;i < defList->main.Mask.Width * defList->main.Mask.Height;i++ )
-      {
-       if ( buf[i] != 0x00ff00ff ) tmp=( tmp >> 1 )|128;
-        else { tmp=tmp >> 1; buf[i]=nothaveshape=0; }
-       if ( b++ == 7 ) { defList->main.Mask.Image[c++]=tmp; tmp=b=0; }
-      }
-     if ( b ) defList->main.Mask.Image[c]=tmp;
-//     if ( nothaveshape ) { free( defList->main.Mask.Image ); defList->main.Mask.Image=NULL; }
-    }
-*/
     Convert32to1( &defList->main.Bitmap,&defList->main.Mask,0x00ff00ff );
+#if 0    
     {
      if ( defList->main.Mask.Image != NULL )
       {
@@ -161,6 +142,7 @@ int __base( char * in )
        tgaWriteTexture( "debug.tga",&d );
       }
     }
+#endif
     #ifdef DEBUG
      dbprintf( 3,"[skin]  mask: %dx%d\n",defList->main.Mask.Width,defList->main.Mask.Height );
     #endif
