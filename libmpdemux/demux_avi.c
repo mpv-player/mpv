@@ -14,6 +14,9 @@
 
 #include "aviheader.h"
 
+// PTS:  0=interleaved  1=BPS-based
+int pts_from_bps=1;
+
 // Select ds from ID
 demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   int stream_id=avi_stream_id(id);
@@ -32,15 +35,20 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   if(stream_id==demux->audio->id){
       if(!demux->audio->sh){
         sh_audio_t* sh;
+	avi_priv_t *priv=demux->priv;
         sh=demux->audio->sh=demux->a_streams[stream_id];
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected AVI audio ID = %d\n",demux->audio->id);
 	if(sh->wf){
-	  demux->audio->block_size=sh->wf->nBlockAlign;
-	  if(!demux->audio->block_size){
+	  priv->audio_block_size=sh->wf->nBlockAlign;
+	  if(!priv->audio_block_size){
 	    // for PCM audio we can calculate the blocksize:
-	    if(sh->format==1) demux->audio->block_size=sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
-	    if(!demux->audio->block_size) demux->audio->block_size=1; // bug!
+	    if(sh->format==1)
+		priv->audio_block_size=sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
+	    else
+		priv->audio_block_size=1; // hope the best...
 	  }
+	} else {
+	  priv->audio_block_size=sh->audio.dwSampleSize;
 	}
 	//printf("&&&&& setting blocksize to %d &&&&&\n",demux->audio->block_size);
       }
@@ -88,12 +96,10 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
   avi_priv_t *priv=demux->priv;
   int skip;
   float pts=0;
-//  demux_stream_t *ds=demux_avi_select_stream(demux,id);
   
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"demux_avi.read_packet: %X\n",id);
 
   if(ds==demux->audio){
-
       if(priv->pts_corrected==0){
 //          printf("\rYYY-A  A: %5.3f  V: %5.3f  \n",priv->avi_audio_pts,priv->avi_video_pts);
           if(priv->pts_has_video){
@@ -107,10 +113,18 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
 	      priv->avi_audio_pts+=priv->pts_correction;
 	      priv->pts_corrected=1;
 	  } else
-          priv->pts_corr_bytes+=len;
+	      priv->pts_corr_bytes+=len;
       }
-            pts=priv->avi_audio_pts; //+priv->pts_correction;
-            priv->avi_audio_pts=0;
+      if(pts_from_bps){
+	  pts = priv->audio_block_no *
+	    (float)((sh_audio_t*)demux->audio->sh)->audio.dwScale /
+	    (float)((sh_audio_t*)demux->audio->sh)->audio.dwRate;
+      } else
+          pts=priv->avi_audio_pts; //+priv->pts_correction;
+      priv->avi_audio_pts=0;
+      // update blockcount:
+      priv->audio_block_no+=priv->audio_block_size ?
+	((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
   } else 
   if(ds==demux->video){
      // video
@@ -118,36 +132,21 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
        // drop frame (seeking)
        --priv->skip_video_frames;
        ds=NULL;
-//     } else {
-//       pts=priv->avi_video_pts;
      }
-     // ezt a 2 sort lehet hogy fell kell majd cserelni:
-     //priv->avi_video_pts+=avi_pts_frametime;
-     //priv->avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
-     //priv->avi_video_pts+=((sh_video_t*)ds->sh)->frametime;
-// FIXME!!!
-#if 1
-//       printf("ds=0x%X\n",ds);
-//       printf("packno=%d\n",ds->pack_no);
-//    printf("### pack_no=%d\n",demux->video->pack_no+demux->video->packs);
-       priv->avi_video_pts = (demux->video->pack_no+demux->video->packs) *
+
+     pts = priv->avi_video_pts = priv->video_pack_no *
          (float)((sh_video_t*)demux->video->sh)->video.dwScale /
 	 (float)((sh_video_t*)demux->video->sh)->video.dwRate;
-#else
-     priv->avi_video_pts+=(float)((sh_video_t*)(demux->video->sh))->video.dwScale/(float)((sh_video_t*)(demux->video->sh))->video.dwRate;
-//     priv->avi_video_pts+=avi_video_ftime;
-#endif
 //          printf("\rYYY-V  A: %5.3f  V: %5.3f  \n",priv->avi_audio_pts,priv->avi_video_pts);
+
      priv->avi_audio_pts=priv->avi_video_pts+priv->pts_correction;
      priv->pts_has_video=1;
 
-     pts=priv->avi_video_pts;
+     if(ds) ++priv->video_pack_no;
 
      //printf("read  pack_no: %d  pts %5.3f  \n",demux->video->pack_no+demux->video->packs,pts);
-
   }
   
-//  len=stream_read_dword_le(demux->stream);
   skip=(len+1)&(~1); // total bytes in this chunk
   
   if(ds){
@@ -341,8 +340,6 @@ do{
           if(!valid_fourcc(id)) continue; // drop chunk if both id and idx bad
     }
     len=stream_read_dword_le(demux->stream);
-//    if((len&(~1))!=(idx->dwChunkLength&(~1))){
-//    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
       if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
@@ -417,22 +414,9 @@ do{
   return 1;
 }
 
-//extern int audio_id;
-//extern int video_id;
-//extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
-//extern int force_ni;
-//extern int pts_from_bps;
-
 // AVI demuxer parameters:
 int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
 int force_ni=0;     // force non-interleaved AVI parsing
-
-// PTS:  0=interleaved  1=BPS-based
-#ifdef AVI_SYNC_BPS
-int pts_from_bps=1;
-#else
-int pts_from_bps=0;
-#endif
 
 void read_avi_header(demuxer_t *demuxer,int index_mode);
 
@@ -449,6 +433,9 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   priv->skip_video_frames=0;
   priv->pts_corr_bytes=0;
   priv->pts_has_video=priv->pts_corrected=0;
+  priv->video_pack_no=0;
+  priv->audio_block_no=0;
+  priv->audio_block_size=0;
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
@@ -636,6 +623,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
           int id=((AVIINDEXENTRY *)priv->idx)[i].ckid;
           if(avi_stream_id(id)==d_video->id) ++d_video->pack_no;
       }
+      priv->video_pack_no=
       sh_video->num_frames=sh_video->num_frames_decoded=d_video->pack_no;
       priv->avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
       d_video->pos=video_chunk_pos;
@@ -645,7 +633,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 // ------------ STEP 2: seek audio, find the right chunk & pos ------------
 
       d_audio->pack_no=0;
-      d_audio->block_no=0;
+//      d_audio->block_no=0;
+      priv->audio_block_no=0;
       d_audio->dpos=0;
 
       if(sh_audio){
@@ -677,11 +666,12 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
             int id=((AVIINDEXENTRY *)priv->idx)[i].ckid;
             if(avi_stream_id(id)==d_audio->id){
                 len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
-                ++d_audio->pack_no;
-		d_audio->block_no+=(len+d_audio->block_size-1)/d_audio->block_size;
                 if(d_audio->dpos<=curr_audio_pos && curr_audio_pos<(d_audio->dpos+len)){
                   break;
                 }
+                ++d_audio->pack_no;
+                priv->audio_block_no+=priv->audio_block_size ?
+		    ((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
                 d_audio->dpos+=len;
             }
           }
@@ -705,12 +695,14 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 		  skip_audio_bytes+=len;
 		} else {
 		  ++d_audio->pack_no;
-		  d_audio->block_no+=(len+d_audio->block_size-1)/d_audio->block_size;
+                  priv->audio_block_no+=priv->audio_block_size ?
+		    ((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
                   d_audio->dpos+=len;
 		  audio_chunk_pos=i;
 		}
 //		--chunks;
-		chunks-=(len+d_audio->block_size-1)/d_audio->block_size;
+		if(priv->audio_block_size)
+		    chunks-=(len+priv->audio_block_size-1)/priv->audio_block_size;
             }
           }
 	  //if(audio_chunk_pos>chunk_max) audio_chunk_pos=chunk_max;
@@ -742,6 +734,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
             }
             // requires for correct audio pts calculation (demuxer):
             priv->avi_video_pts-=priv->skip_video_frames*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+	    priv->avi_audio_pts=priv->avi_video_pts;
+	    // set index position:
 	    priv->idx_pos_a=priv->idx_pos_v=priv->idx_pos=audio_chunk_pos;
 	  }
 	} else {

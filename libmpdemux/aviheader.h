@@ -93,6 +93,10 @@ typedef struct {
   off_t idx_pos_a;
   off_t idx_pos_v;
   off_t idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
+  // bps-based PTS stuff:
+  int video_pack_no;
+  int audio_block_size;
+  off_t audio_block_no;
   // interleaved PTS stuff:
   int skip_video_frames;
   int audio_streams;

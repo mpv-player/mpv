@@ -647,7 +647,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
-if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
+//if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 
 // ============= AUDIO ===============
 if(sh_audio){
@@ -1053,6 +1053,7 @@ if(skip_flag>0){
 if(sh_audio && !demuxer2){
     float AV_delay,x;
     // A-V sync!
+#if 0
     if(pts_from_bps){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
@@ -1060,7 +1061,9 @@ if(sh_audio && !demuxer2){
 //	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
-    } else {
+    } else 
+#endif
+    {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
@@ -1103,10 +1106,12 @@ if(sh_audio && !demuxer2){
     {	float t=(GetTimerMS()-timer_start)*0.001f;
 	float len=(demuxer->movi_end-demuxer->movi_start);
 	float p=len>1000 ? (float)(demuxer->filepos-demuxer->movi_start) / len : 0;
+#if 0
 	if(!len && sh_audio && sh_audio->audio.dwLength>100){
 	    p=(sh_audio->audio.dwSampleSize? ds_tell(sh_audio->ds)/sh_audio->audio.dwSampleSize : sh_audio->ds->block_no)
 	     / (float)(sh_audio->audio.dwLength);
 	}
+#endif
 #if 0
 	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"%d < %d < %d  \r",
 	    (int)demuxer->movi_start,

@@ -1369,7 +1369,7 @@ if(!sh_video){
 if (!sh_video && !sh_audio)
     goto goto_next_file;
 
-if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
+//if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps && sh_video){
   vo_fps = sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
@@ -1697,6 +1697,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
       delay+=(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
     }
 
+#if 0
     if(pts_from_bps){
 	// PTS = sample_no / samplerate
         unsigned int samples=
@@ -1707,7 +1708,9 @@ if(time_frame>0.001 && !(vo_flags&256)){
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
 	delay_corrected=1;
 	a_pts-=(sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    } else {
+    } else 
+#endif
+    {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
