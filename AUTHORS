@@ -147,6 +147,7 @@ Jürgen Keil <jk@tools.de>
     * various fixes (win32, configure, etc)
     * SUN audio driver in libao2
     * mediaLib support in libavcodec
+    * esd driver in libao2
 
 Vladimir Kushnir <vkushnir@Alfacom.net>
     * patched MPlayer to work on FreeBSD x86
@@ -170,6 +171,7 @@ Alban Bedel <albeu@free.fr>
     * vo_aa improvements
     * CDDA support
     * OSD menu
+    * New modular config/commandline parser code
 
 Artur Zaprzala <zybi@fanthom.irc.pl>
     * Complete font generator prog + OSD font (TOOLS/subfont-c)
@@ -271,7 +273,7 @@ Brian Kuschak <bkuschak@yahoo.com>
 
 Stephen Davies <steve@daviesfam.org>
     * support for large video files (>2^32 bytes in size)
-    * surround sound
+    * surround sound aop plugin
 
 Rik Snel <rsnel@cube.dyndns.org>
     * zr video output driver
@@ -287,6 +289,7 @@ Roberto Togni <rtogni@freemail.it>
 
 Wojtek Kaniewski <wojtekka@bydg.pdi.net>
     * Mouse wheel support
+    * got the freetype+RAW font support work together
 
 Fredrik Kuivinen <freku045@student.liu.se>
     * OSD/subtitles outside movie - for SDL
@@ -317,7 +320,7 @@ Diego Biurrun <diego@biurrun.de>
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
     * windows waveout AO driver
-    * quicktime audio decoding (using win32 DLLs) support
+    * quicktime audio+video decoding, video encoding (using win32 DLLs) support
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
@@ -341,6 +344,7 @@ Uwe Reder <Uwe.Reder@3SOFT.de>
 
 Andriy N. Gritsenko <andrej@lucky.net>
     * skip-deinterlace video filter
+    * MUXER layer, and new MPEG-PS muxer
 
 Joey Parrish <joey@yunamusic.com>
     * various fixes
@@ -417,7 +421,7 @@ Dénes Balatoni <pnis@coder.hu>
       make mplayer work better on my pda
 
 Oskar Liljeblad <oskar@osk.mine.nu>
-    * OSD related patches
+    * various OSD related patches
 
 Bernd Ernesti <mplayer@lists.veego.de>
     * NetBSD support patches
@@ -427,6 +431,7 @@ Michael Halcrow <mah69@email.byu.edu>
 
 Eviv Bulgroz <ebulgroz@yahoo.com>
     * Presets support for mp3lame encoding
+    * AVI demuxer time/bitrate calculation fixes
     * various bugfixes
 
 Matan Ziv-Av <matan@svgalib.org>
@@ -440,6 +445,33 @@ Puk Madick <pingy@swirvemail.com>
 Tomas Hurka <tom@hukatronic.cz>
     * Darwin DVD support (mpdvdkit2)
     * various fixes
+
+Moritz Bunkus <moritz@bunkus.org>
+    * various OGM hacks/fixes
+    * author of ogm-tools
+
+Filip Kalinski <filon@pld.org.pl>
+    * X11 fulscreen switching fixes/cleanup
+
+Christian Ohm <chr.ohm@gmx.net>
+    * various small bugfixes
+
+Alexander Gottwald <Alexander.Gottwald@informatik.tu-chemnitz.de>
+    * various small bugfixes
+
+Andreas Hess <jaska@gmx.net>
+    * upgrading libdvdcss to 1.2.4 in libmpdvdkit2
+    * various small bugfixes
+
+Salvador Eduardo Tropea <salvador@inti.gov.ar>
+    * subtitle parsing/displaying related patches
+
+Marcus Blomenkamp <Marcus.Blomenkamp@epost.de>
+    * VIDIX patches (rage128, radeon 7000)
+    * OSS AC3 passthru. fix
+
+Alan Young <ayoung@teleport.com>
+    * fixed support of RealMedia & Xanim binary plugins on Alpha
     
 
 NOTE: If you think you are missing here, feel free to send a patch.
