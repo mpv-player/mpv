@@ -287,5 +287,6 @@ af_info_t af_info_format = {
   "format",
   "Anders",
   "",
+  AF_FLAGS_REENTRANT,
   open
 };

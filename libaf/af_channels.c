@@ -168,5 +168,6 @@ af_info_t af_info_channels = {
   "channels",
   "Anders",
   "",
+  AF_FLAGS_REENTRANT,
   open
 };

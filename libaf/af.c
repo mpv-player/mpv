@@ -41,8 +41,23 @@ af_info_t* af_find(char*name)
   return NULL;
 } 
 
+/* Find filter in the dynamic filter list using it's name This
+   function is used for finding already initialized filters */
+af_instance_t* af_get(af_stream_t* s, char* name)
+{
+  af_instance_t* af=s->first; 
+  // Find the filter
+  while(af != NULL){
+    printf("%s\n",af->info->name);
+    if(!strcmp(af->info->name,name))
+      return af;
+    af=af->next;
+  }
+  return NULL;
+}
+
 // Function for creating a new filter of type name
-af_instance_t* af_create(char* name)
+af_instance_t* af_create(af_stream_t* s, char* name)
 {
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
@@ -53,10 +68,20 @@ af_instance_t* af_create(char* name)
   memset(new,0,sizeof(af_instance_t));
 
   // Find filter from name
-  new->info=af_find(name);
-    
+  if(NULL == (new->info=af_find(name)))
+    return NULL;
+
+  // Make sure that the filter is not already in the list if it is non-reentrant
+  if(new->info->flags & AF_FLAGS_NOT_REENTRANT){
+    if(af_get(s,name)){
+      mp_msg(MSGT_AFILTER,MSGL_ERR,"There can only be one instance of the filter '%s' in each stream\n",name);  
+      free(new);
+      return NULL;
+    }
+  }
+
   // Initialize the new filter
-  if(new->info && (AF_OK==new->info->open(new))) 
+  if(AF_OK==new->info->open(new)) 
     return new;
 
   free(new);
@@ -70,7 +95,7 @@ af_instance_t* af_create(char* name)
 af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
 {
   // Create the new filter and make sure it is OK
-  af_instance_t* new=af_create(name);
+  af_instance_t* new=af_create(s,name);
   if(!new)
     return NULL;
   // Update pointers
@@ -94,7 +119,7 @@ af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
 af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
 {
   // Create the new filter and make sure it is OK
-  af_instance_t* new=af_create(name);
+  af_instance_t* new=af_create(s,name);
   if(!new)
     return NULL;
   // Update pointers
@@ -211,19 +236,6 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
     af=af->next;
   }while(af);
   return AF_OK;
-}
-
-/* Find filter in the dynamic filter list using it's name This
-   function is used for finding already initialized filters */
-af_instance_t* af_get(af_stream_t* s, char* name)
-{
-  af_instance_t* af=s->first; 
-  while(af->next != NULL){
-    if(!strcmp(af->info->name,name))
-      return af;
-    af=af->next;
-  }
-  return NULL;
 }
 
 // Uninit and remove all filters

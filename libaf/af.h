@@ -21,6 +21,10 @@ typedef struct frac_s
   int d; // Denominator
 } frac_t;
 
+// Flags used for defining the behavour of an audio filter
+#define AF_FLAGS_REENTRANT 	0x00000000
+#define AF_FLAGS_NOT_REENTRANT 	0x00000001
+
 /* Audio filter information not specific for current instance, but for
    a specific filter */ 
 typedef struct af_info_s 
@@ -29,6 +33,7 @@ typedef struct af_info_s
   const char *name;
   const char *author;
   const char *comment;
+  const int flags;
   int (*open)(struct af_instance_s* vf);
 } af_info_t;
 

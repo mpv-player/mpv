@@ -140,6 +140,7 @@ af_info_t af_info_delay = {
     "delay",
     "Anders",
     "",
+    AF_FLAGS_REENTRANT,
     open
 };
 

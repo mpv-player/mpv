@@ -56,5 +56,6 @@ af_info_t af_info_dummy = {
     "dummy",
     "Anders",
     "",
+    AF_FLAGS_REENTRANT,
     open
 };

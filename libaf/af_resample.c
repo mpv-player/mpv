@@ -331,6 +331,7 @@ af_info_t af_info_resample = {
   "resample",
   "Anders",
   "",
+  AF_FLAGS_REENTRANT,
   open
 };
 
