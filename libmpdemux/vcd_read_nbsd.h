@@ -1,6 +1,8 @@
 
 #include <sys/types.h>
+#ifdef __NetBSD__
 #include <sys/inttypes.h>
+#endif
 #include <sys/cdio.h>
 #include <sys/scsiio.h>
 
