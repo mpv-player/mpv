@@ -166,4 +166,42 @@ play_tree_cleanup(play_tree_t* pt);
 play_tree_t*
 parse_playlist_file(char* file);
 
+// Highlevel API with pt-suffix to different from low-level API
+// by Fabian Franz (mplayer@fabian-franz.de)
+
+// Cleanups pt and creates a new iter
+play_tree_iter_t* pt_iter_create(play_tree_t** pt, struct m_config* config);
+
+// Frees the iter
+void pt_iter_destroy(play_tree_iter_t** iter);
+
+// Gets the next available file in the direction (d=-1 || d=+1)
+char* pt_iter_get_file(play_tree_iter_t* iter, int d);
+
+// Two Macros that implement forward and backward direction
+#define pt_iter_get_next_file(iter) pt_iter_get_file(iter, 1)
+#define pt_iter_get_prev_file(iter) pt_iter_get_file(iter, -1)
+
+// Inserts entry into the playtree
+void pt_iter_insert_entry(play_tree_iter_t* iter, play_tree_t* entry);
+
+//Replaces current entry in playtree with entry
+//by doing insert and remove
+void pt_iter_replace_entry(play_tree_iter_t* iter, play_tree_t* entry);
+
+// Adds a new file to the playtree, 
+// if it is not valid it is created
+void pt_add_file(play_tree_t** ppt, char* filename);
+
+// Performs a convert to playtree-syntax, by concat path/file
+// and performs pt_add_file
+void pt_add_gui_file(play_tree_t** ppt, char* path, char* file);
+
+//Two macros to use only the iter and not the other things
+#define pt_iter_add_file(iter, filename) pt_add_file(&iter->tree, filename)
+#define pt_iter_add_gui_file(iter, path, name) pt_add_gui_file(&iter->tree, path, name)
+
+// Resets the iter and goes back to head
+void pt_iter_goto_head(play_tree_iter_t* iter);
+
 #endif
