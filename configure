@@ -2336,6 +2336,10 @@ echocheck "GUI"
 echo "$_gui"
 if test "$_gui" = yes ; then
 
+  # Required libraries
+  test "$_png" != yes && die "PNG support required for GUI compilation"
+  test "$_x11" != yes && die "X11 support required for GUI compilation"
+
   echocheck "XShape extension"
   _xshape=no
   if test "$_x11" = yes ; then
