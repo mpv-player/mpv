@@ -563,10 +563,12 @@ case AFM_A52: {
 	driver=0;break;
   }
   // 'a52 cannot upmix' hotfix:
-  sh_audio->channels=a52_printinfo(sh_audio);
-  if(audio_output_channels<sh_audio->channels)
-      sh_audio->channels=audio_output_channels;
+  a52_printinfo(sh_audio);
+//  if(audio_output_channels<sh_audio->channels)
+//      sh_audio->channels=audio_output_channels;
   // channels setup:
+  sh_audio->channels=audio_output_channels;
+while(sh_audio->channels>0){
   switch(sh_audio->channels){
 	    case 1: a52_flags=A52_MONO; break;
 //	    case 2: a52_flags=A52_STEREO; break;
@@ -586,7 +588,10 @@ case AFM_A52: {
   }
   mp_msg(MSGT_DECAUDIO,MSGL_V,"A52 flags after a52_frame: 0x%X\n",flags);
   // frame decoded, let's init resampler:
-  if(!a52_resample_init(a52_accel,flags,sh_audio->channels)){
+  if(a52_resample_init(a52_accel,flags,sh_audio->channels)) break;
+  --sh_audio->channels; // try to decrease no. of channels
+}
+  if(sh_audio->channels<=0){
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: no resampler. try different channel setup!\n");
     driver=0;break;
   }
