@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.7 -->
 <appendix id="skin">
 <title>Format skórki <application>MPlayera</application></title>
 <para>
 Celem tego dokumentu jest opisanie formatu skórki
 <application>MPlayera</application>.
-Informacje zawarte tutaj mogą być niedokładne ponieważ
+Informacje zawarte tutaj mogą być niedokładne, ponieważ:
 <orderedlist>
-<listitem><para>Nie jestem tym, który pisał GUI.</para></listitem>
+<listitem><para>To nie ja napisałem GUI.</para></listitem>
 <listitem><para>GUI nie jest ukończone.</para></listitem>
 <listitem><para>Mogę się mylić.</para></listitem>
 </orderedlist>
-A więc nie bądź zaskoczony jeśli coś nie będzie działać tak, jak przedstawiono
-tutaj.
+A więc nie bądź zaskoczony, jeśli coś nie będzie działać tak, jak przedstawiono
+to tutaj.
 </para>
 
-<para>Podziękowania <emphasis>Zoltánowi Ponekkerowi</emphasis> za jego
+<para>Podziękowania dla <emphasis>Zoltána Ponekkera</emphasis> za jego
 pomoc.</para>
 
 <para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
@@ -25,8 +25,8 @@ pomoc.</para>
 <para>
 W zasadzie nie ma to żadnego związku z formatem skórki, ale powinieneś
 wiedzieć, że <application>MPlayer</application> <emphasis role="bold">nie</emphasis>
-posiada wbudowanej skórki, w związku z tym <emphasis role="bold"> co najmniej
-jedna skórka musi być zainstalowana, aby była możliwość używania GUI.</emphasis>
+ma wbudowanej skórki, w związku z tym <emphasis role="bold"> co najmniej
+jedna skórka musi być zainstalowana, abyś miał możliwość korzystania z GUI.</emphasis>
 </para>
 
 <sect2 id="skin-overview-directories">
@@ -47,27 +47,27 @@ Skórki są szukane w następujących katalogach (w kolejności):
 </para>
 
 <para>
-Zauważ, że pierwsza ścieżka może się różnić w zależności od sposobu w jaki
-<application>MPlayer</application> był skonfigurowany
+Zauważ, że pierwsza ścieżka może się różnić, w zależności od sposobu w jaki
+<application>MPlayer</application> został skonfigurowany
 (zobacz argumenty <option>--prefix</option> oraz <option>--datadir</option>
 w skrypcie <command>configure</command>).
 </para>
 
 <para>
-Każda skórka jest instalowana w swoim własnym katalogu, w jednym z
-katalogów wyżej wymienionych, na przykład:
+Każda skórka jest instalowana w swoim własnym katalogu, w jednej z wyżej
+wymienionych lokacji, na przykład:
 <screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
 </para>
 </sect2>
 
 <sect2 id="skin-overview-formats">
 <title>Formaty obrazków</title>
-<para>Obrazki muszą być w formacie PNG truecolor (24 lub 32 bpp).</para>
+<para>Obrazki muszą być zapisane w formacie PNG (paleta truecolor - 24 lub 32 bpp).</para>
 <para>
 W głównym oknie oraz na panelu odtwarzania (zobacz niżej) możesz użyć
 obrazków z 'przezroczystością': obszary wypełnione kolorem #FF00FF (magenta) są
 w pełni przezroczyste dla <application>MPlayera</application>. Oznacza to, że
-możesz mieć okna o różnych kształtach jeśli Twój X Server posiada rozszerzenie
+możesz mieć okna o różnych kształtach jeśli Twój X Server ma rozszerzenie
 XShape.
 </para>
 </sect2>
@@ -75,8 +75,9 @@ XShape.
 <sect2 id="skin-overview-components">
 <title>Składniki skórki</title>
 <para>
-Skórki są całkowicie konfigurowalne (w odróżnieniu od skórek np. Winampa/XMMS),
-a więc zależy to od Ciebie, czy stworzysz coś wspaniałego.
+Skórki są całkowicie konfigurowalne (w odróżnieniu od skórek np. 
+<application>Winampa</application>/<application>XMMS</application>),
+a więc zależy to wyłącznie od Ciebie, czy stworzysz coś wspaniałego.
 </para>
 
 <para>
@@ -90,8 +91,8 @@ aktywowane prawym przyciskiem myszy).
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Okno główne</emphasis> i/lub
-  <emphasis role="bold">panel odtwarzania</emphasis> to miejsca, gdzie można
-  sterować programem <application>MPlayer</application>.
+  <emphasis role="bold">panel odtwarzania</emphasis> to miejsca, gdzie możesz
+  sterować <application>MPlayerem</application>.
   Tłem tego okna jest obrazek. Różne elementy mogą (i muszą) być umieszczone
   w tym oknie: <emphasis>przyciski</emphasis>, <emphasis>potencjometry</emphasis>
   (suwaki) i <emphasis>etykiety</emphasis>. Dla każdego elementu musisz określić
@@ -105,7 +106,7 @@ aktywowane prawym przyciskiem myszy).
   <emphasis role="bold">Potencjometr (suwak)</emphasis> (wykorzystywany głównie
   jako pasek przewijania i kontrolka głośności/balansu) może składać się z
   każdej liczby stanów poprzez podzielenie jego obrazka na wiele części, z
-  których jedna poprzedza drugą. Zobacz
+  których jedna jest pod drugą. Zobacz
   <link linkend="skin-hpotmeter">hpotmeter</link> oraz
   <link linkend="skin-potmeter">potmeter</link>, by dowiedzieć się więcej.
 </para><para>
@@ -115,7 +116,7 @@ aktywowane prawym przyciskiem myszy).
   <link linkend="skin-fonts">plik opisu czcionek</link>. Jest to plik, który za
   pomocą czystego tekstu określa współrzędne x, y oraz wielkość każdego znaku
   umieszczonego na obrazku (plik graficzny i jego plik opisu tworzą
-  <emphasis>razem</emphasis> zestaw czcionek).
+  <emphasis>razem</emphasis> czcionkę).
   Zobacz <link linkend="skin-dlabel">dlabel</link>
   oraz <link linkend="skin-slabel">slabel</link>, by dowiedzieć się więcej.
 </para>
@@ -128,8 +129,8 @@ taką możliwość, szerokość obrazka tła głównego okna musi być podzielna przez 8.
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">Okno ekranu</emphasis> to miejsce odtwarzania filmu.
-  Może ono wyświetlać określony obrazek jeśli żaden film nie jest uruchomiony
+  <emphasis role="bold">Okno ekranu</emphasis> to miejsce, gdzie odtwarzany jest
+  film. Może ono wyświetlać określony obrazek, jeśli żaden film nie jest uruchomiony
   (to dość nudne mieć puste okno :-)) <emphasis role="bold">Uwaga:</emphasis>
   przezroczystość <emphasis role="bold">nie jest</emphasis> tutaj dostępna.
 </para></listitem>
@@ -137,12 +138,12 @@ taką możliwość, szerokość obrazka tła głównego okna musi być podzielna przez 8.
 <listitem><para>
   <emphasis role="bold">Menu skórki</emphasis> to po prostu jeden ze sposobów na
   kontrolowanie <application>MPlayera</application> poprzez wpisy w menu. Dwa
-  obrazki są wymagane dla tego menu: pierwszy z nich jest obrazkiem podstawowym,
+  obrazki są do tego potrzebne: pierwszy z nich jest obrazkiem podstawowym,
   który pokazuje zwykły stan menu, drugi zaś służy do wyświetlenia zaznaczonych
   obszarów. Gdy uaktywnisz menu, zostanie pokazany pierwszy obrazek. Jeśli
   przesuniesz mysz nad któryś z jego wpisów, wówczas zaznaczony element jest
   kopiowany z drugiego obrazka w miejsce, na które wskazuje kursor myszy (drugi
-  obrazek nigdy nie jest wyświetlany jako całość).
+  obrazek nigdy nie jest wyświetlany w całości).
 </para><para>
  Wpis w menu jest określony przez jego pozycję oraz rozmiar na obrazku (zobacz
  sekcję <link linkend="skin-file-menu">menu skórki</link> by dowiedzieć się
@@ -156,37 +157,37 @@ taką możliwość, szerokość obrazka tła głównego okna musi być podzielna przez 8.
   <application>MPlayer</application> musi wiedzieć co zrobić w momencie
   kliknięcia na przyciski, potencjometry i wpisy w menu, aby zadziałały. Zostało
   to zrobione za pomocą <link linkend="skin-gui">sygnałów</link> (zdarzeń). Dla
-  tych elementów musisz zdefiniować sygnały, które mają być generowane podczas
-  ich kliknięcia.
+  tych elementów musisz zdefiniować sygnały, które mają być wysłane podczas
+  kliknięcia na nie.
 </para>
 </sect2>
 
 <sect2 id="skin-files">
 <title>Pliki</title>
 <para>
-Potrzebne są następujące pliki podczas tworzenia skórki:
+Potrzebujesz następujących plików do stworzenia skórki:
 <itemizedlist>
 <listitem><para>
-  Plik konfiguracyjny o nazwie <link linkend="skin-file">skin</link>, mówiący
-  programowi <application>MPlayer</application> jak połączyć różne części skórki
-  razem i co zrobić, gdy nastąpi kliknięcie w którymś obszarze okna.
+  Plik konfiguracyjny o nazwie <link linkend="skin-file">skin</link> mówi
+  <application>MPlayerowi</application> jak połączyć różne części skórki
+  w jedną całość i co zrobić, gdy kliknie się gdzieś na obszarze okna.
 </para></listitem>
 <listitem><para>
   Plik graficzny tła w oknie głównym.
 </para></listitem>
 <listitem><para>
   Obrazki dla elementów w głównym oknie (zawierające jeden lub
-  więcej plików opisu czcionek, potrzebnych do rysowania etykiet).
+  więcej plików opisu czcionek potrzebnych do rysowania etykiet).
 </para></listitem>
 <listitem><para>
   Obrazek wyświetlany w oknie ekranu (opcjonalnie)
 </para></listitem>
 <listitem><para>
-  Dwa obrazki dla menu skórki (potrzebne są tylko wtedy, gdy chcesz tworzyć
+  Dwa obrazki dla menu skórki (potrzebne są tylko wtedy, gdy chcesz stworzyć
   takie menu).
 </para></listitem>
 </itemizedlist>
-  Za wyjątkiem pliku konfiguracyjnego skórki możesz nazwać wszystkie pliki
+  Za wyjątkiem pliku konfiguracyjnego skórki, możesz nazwać wszystkie pliki
   tak, jak tego chcesz (ale weź pod uwagę, że pliki opisu czcionek muszą mieć
   rozszerzenie <filename>.fnt</filename> ).
 </para>
@@ -217,7 +218,7 @@ end
 
 <para>
 Obecnie jest tylko jedna aplikacja, a więc potrzebujesz tylko jedną sekcję
-'section': nazwa tej sekcji to <emphasis role="bold">movieplayer</emphasis>.
+'section' - jej nazwa to <emphasis role="bold">movieplayer</emphasis>.
 </para>
 
 <para>
@@ -232,7 +233,7 @@ end
 </para>
 
 <para>
-gdzie <replaceable>nazwa okna</replaceable>może być jednym z poniższych łańcuchów:
+gdzie <replaceable>nazwa okna</replaceable> może być jednym z poniższych łańcuchów:
 <itemizedlist>
 <listitem><para><emphasis role="bold">main</emphasis> - dla okna głównego</para></listitem>
 <listitem><para><emphasis role="bold">sub</emphasis> - dla okna ekranu</para></listitem>
@@ -247,7 +248,7 @@ dla okna ekranu)
 </para>
 
 <para>
-Wewnątrz bloku 'window' możesz definiować każdy element okna wpisując linijkę
+Wewnątrz bloku 'window' możesz definiować każdy element okna, wpisując linijkę
 tej postaci: <programlisting>item = parametr</programlisting>
 Gdzie <literal>item</literal> jest łańcuchem, kóry identyfikuje typ elementu
 GUI, <literal>parametr</literal> jest wartością numeryczną lub tekstową (lub
@@ -282,18 +283,18 @@ Nazwa pliku graficznego musi zostać podana bez żadnych nazw katalogów - obrazki
 są szukane w katalogu <filename class="directory">Skin</filename>.
 Możesz (ale nie musisz) określić rozszerzenia tego pliku. Jeśli plik taki nie
 istnieje, <application>MPlayer</application>
-próbuje wczytać plik <filename>&lt;nazwa pliku&gt;.&lt;rozszerzenie&gt;</filename>,
-gdzie <literal>png</literal> oraz <literal>PNG</literal> są próbowane jako
+spróbuje wczytać plik <filename>&lt;nazwa pliku&gt;.&lt;rozszerzenie&gt;</filename>,
+gdzie <literal>png</literal> oraz <literal>PNG</literal> są brane jako
 <filename>&lt;rozszerzenie&gt;</filename> (w tej właśnie kolejności). Pierwszy
 pasujący plik będzie użyty.
 </para>
 
 <para>
-Na koniec kilka słów na temat pozycjonowania. Okno główne oraz okno ekranu może
-zostać umieszczone w różnych narożnikach ekranu poprzez ustawienie współrzędnych
+Na koniec kilka słów na temat pozycjonowania. Okno główne oraz okno ekranu możesz
+umieścić w różnych narożnikach ekranu poprzez ustawienie współrzędnych
 <literal>X</literal> i <literal>Y</literal>. <literal>0</literal> to góra lub
 lewa strona, <literal>-1</literal> to środek, <literal>-2</literal> to strona
-prawa lub dół, tak jak przedstawiono na poniższej ilustracji:
+prawa, lub dół, tak jak przedstawiono na poniższej ilustracji:
 </para>
 <informalfigure>
 <screen>
@@ -311,7 +312,7 @@ prawa lub dół, tak jak przedstawiono na poniższej ilustracji:
 Oto przykład wyjaśniający to lepiej. Przypuśćmy, że masz obrazek nazwany
 <filename>main.png</filename>, który został użyty dla okna głównego:
 <programlisting>base = main, -1, -1</programlisting>
-<application>MPlayer</application> próbuje wczytać pliki
+<application>MPlayer</application> spróbuje wczytać pliki
 <filename>main</filename>, <filename>main.png</filename>,
 <filename>main.PNG</filename>.
 </para>
@@ -321,7 +322,7 @@ Oto przykład wyjaśniający to lepiej. Przypuśćmy, że masz obrazek nazwany
 <title>Okno główne i panel odtwarzania</title>
 <para>
 Poniżej znajduje się lista wpisów, które mogą być użyte w blokach
-'<literal>window = main</literal>'...'<literal>end</literal>',
+'<literal>window = main</literal>'...'<literal>end</literal>'
 oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
 </para>
 
@@ -331,13 +332,13 @@ oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <anchor id="skin-main-base"/>base = obrazek, X, Y
   </literal></term>
   <listitem><para>
-  Pozwala określić obrazek tła, który będzie używany w oknie głównym
-  Okno będzie widoczne w pozycji <literal>X, Y</literal> na ekranie. Okno
+  Możesz określić obrazek tła, który będzie używany w oknie głównym.
+  Okno będzie widoczne na ekranie na współrzędnych <literal>X, Y</literal>. Okno
   będzie wielkości tego obrazka.
     </para>
     <note><para>Współrzędne te nie działają na razie dla okna ekranu.</para></note>
     <warning><para>Obszary przezroczystości obrazka (kolor #FF00FF) będą
-    widoczne jako czarne pod X serwerami nieposiadającymi rozszerzenia
+    widoczne jako czarne pod X serwerami niemającymi rozszerzenia
     XShape. Szerokość obrazka musi być podzielna przez 8.</para></warning>
     </listitem>
 </varlistentry>
@@ -347,8 +348,8 @@ oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <anchor id="skin-button"/>button = obrazek, X, Y, szerokość, wysokość, sygnał
   </literal></term>
   <listitem><para>
-Umieszcza przycisk o rozmiarze <literal>szerokość</literal> *
-<literal>wysokość</literal> w pozycji <literal>X</literal>,
+Umieści przycisk o rozmiarze <literal>szerokość</literal> *
+<literal>wysokość</literal> na pozycji <literal>X</literal>,
 <literal>Y</literal>. Określony <literal>sygnał</literal> jest generowany
 podczas kliknięcia na przycisk. Obrazek ten opisany przez
 <literal>obrazek</literal> musi składać się z trzech części jedna pod drugą
@@ -370,7 +371,7 @@ podczas kliknięcia na przycisk. Obrazek ten opisany przez
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-decoration"/>decoration = enable|disable (włączona|wyłaczona)
+  <anchor id="skin-decoration"/>decoration = enable|disable (włączona|wyłączona)
   </literal></term>
   <listitem><para>
 Włącza lub wyłącza dekorację menedżera okna w oknie głównym.
@@ -410,7 +411,7 @@ Jego parametry to:
     <listitem><para><literal>szer_przycisku</literal>, <literal>wys_przycisku</literal> - wielkość przycisku
     </para></listitem>
    <listitem><para><literal>fazy</literal> - obrazek używany do określenie faz
-   dla hpotmeter. Wartość specjalna <literal>NULL</literal> może być użyta
+   dla hpotmeter. Wartość specjalna <literal>NULL</literal> może być użyta,
    jeśli nie chcesz żadnego obrazka. Obrazek musi być podzielony w pionie
    na <literal>fragmenty poszczególnych faz</literal> tak, jak poniżej:
     </para>
@@ -464,8 +465,8 @@ jest to zupełnie bezużyteczne, gdyż nie widać wtedy położenia potencjometru.
   <anchor id="skin-font"/>font = plik_czcionek, id_czcionki
   </literal></term>
   <listitem><para>
-Definiuje czcionki. <literal>plik_czcionek</literal> jest nazwą pliku opisu
-czcionek z rozszerzeniem <filename>.fnt</filename> (nie podawaj rozszerzenia w
+Definiuje czcionkę. <literal>plik_czcionek</literal> jest nazwą pliku opisu
+czcionki z rozszerzeniem <filename>.fnt</filename> (nie podawaj rozszerzenia w
 tym miejscu). <literal>id_czcionki</literal> jest używany do wskazywania
 konkretnej czcionki (zobacz <link linkend="skin-dlabel">dlabel</link>
 oraz <link linkend="skin-slabel">slabel</link>). Można zdefiniować do 25
@@ -479,11 +480,11 @@ czcionek.
   </literal></term>
   <listitem><para>
 Umieszcza statyczną etykietę w pozycji <literal>X,Y</literal>.
-<literal>tekst</literal> jest wyświetlany za pomocą czcionek wskazywanych przez
+<literal>tekst</literal> jest wyświetlany za pomocą czcionki wskazywanych przez
 <literal>id_czcionki</literal>. Tekst jest po prostu zwykłym łańcuchem znaków
-(zmienne <literal>$x</literal> nie działają), które muszą być umieszczone
-pomiędzy podwójnym cudzysłowem (a znak &quot; nie może być częścią tekstu).
-Etykieta wyświetlana jest za pomocą czcionek, na które wskazuje
+(zmienne <literal>$x</literal> nie działają), któru musi być umieszczony
+pomiędzy podwójnym cudzysłowem (znak &quot; nie może być częścią tekstu).
+Etykieta wyświetlana jest za pomocą czcionki, na którą wskazuje
 <literal>id_czcionki</literal>.
     </para></listitem>
 </varlistentry>
@@ -495,9 +496,9 @@ Etykieta wyświetlana jest za pomocą czcionek, na które wskazuje
   <listitem>
 <para>
 Umieszcza dynamiczną etykietę w pozycji <literal>X,Y</literal>. Etykieta jest
-nazywana dynamiczną ponieważ jej tekst jest cyklicznie odświeżany. Maksymalna
+nazywana dynamiczną, ponieważ jej tekst jest cyklicznie odświeżany. Maksymalną
 długość etykiety określa parametr <literal>długość</literal> (jej wysokość
-określa wysokość czcionek). Jeśli tekst jest szerszy niż zdefiniowana długość,
+określa wysokość czcionki). Jeśli tekst jest szerszy niż zdefiniowana długość,
 będzie on przewijany, w przeciwnym wypadku będzie wyrównany w miejscu określonym
 przez wartość parametru <literal>wyrównanie</literal>: <literal>0</literal>
 oznacza do prawej, <literal>1</literal> to wyśrodkowanie, <literal>2</literal>
@@ -505,8 +506,8 @@ to wyrównanie do lewej.
 </para>
 <para>
 Wyświetlany tekst jest określony przez zmienną <literal>tekst</literal>: musi
-być zawarty pomiędzy podwójnymi cudzysłowami (a znak &quot; nie może być częścią
-tekstu). Etykieta wyświetlana jest za pomocą czcionek, na które wskazuje
+być zawarty pomiędzy podwójnymi cudzysłowami (znak &quot; nie może być częścią
+tekstu). Etykieta wyświetlana jest za pomocą czcionki, na którą wskazuje
 parametr <literal>id_czcionki</literal>. Możesz użyć następujących zmiennych w
 tekście:
 </para>
@@ -728,19 +729,19 @@ podczas zwolnienia przycisku myszy nad obszarem.
 <title>Czcionki</title>
 <para>
 Jak wspomniano w sekcji na temat fragmentów skórki, czcionka jest definiowana
-przez obrazek i plik opisujący. Możesz umieścić znak gdziekolwiek na obrazku,
-ale miej pewność, że jego pozycja i rozmiar jest podana właściwie w pliku
+przez obrazek i plik opisujący. Możesz umieścić znaki gdziekolwiek na obrazku,
+ale miej pewność, żeich pozycja i rozmiar jest dokładnie podana w pliku
 opisującym.
 </para>
 
 <para>
-Plik opisujący czcionki (o rozszerzeniu <filename>.fnt</filename>) może posiadać
+Plik opisujący czcionkę (o rozszerzeniu <filename>.fnt</filename>) może posiadać
 linie komentarzy zaczynające się znakiem '<literal>;</literal>'. Plik musi
 zawierać linie w postaci:
 <anchor id="skin-font-image"/>
 <programlisting>image = <replaceable>obrazek</replaceable></programlisting>
 Gdzie <literal><replaceable>obrazek</replaceable></literal> jest nazwą pliku
-graficznego, który zawiera czcionki (nie musisz dopisywać jego rozszerzenia).
+graficznego, który zawiera czcionkę (nie musisz dopisywać jego rozszerzenia).
 <anchor id="skin-font-char"/>
 <programlisting>&quot;char&quot; = X, Y, szerokość, wysokość</programlisting>
 <literal>X</literal> oraz <literal>Y</literal> określają pozycję znaku
@@ -821,10 +822,10 @@ Przejdź do następnej pozycji na liście odtwarzania.
   <term><emphasis role="bold">evPause</emphasis></term>
   <listitem><para>
   Tworzy przełącznik razem z <literal>evPlaySwitchToPause</literal>.
-  Mogą być użyte do utworzenia wspólnego przycisku dla odtwarzania/pauzy.
-  Oba sygnały powinny być powiązane z przyciskami wyświetlonymi w tej samej
-  pozycji w oknie. Sygnał wstrzymuje wtedy odtwarzanie i wyświetlanty jest
-  obrazek dla przycisku <literal>evPlaySwitchToPause</literal> (aby zaznaczyć,
+  Mogą być użyte do utworzenia wspólnego przycisku odtwarzania/pauzy.
+  Oba sygnały powinny być powiązane z przyciskami wyświetlonymi na tej samej
+  pozycji w oknie. Sygnał ten wstrzymuje odtwarzanie i wyświetla  obrazek dla
+  przycisku <literal>evPlaySwitchToPause</literal> (aby zaznaczyć,
   że przycisk ten może być użyty do kontynuowania odtwarzania).
     </para></listitem>
 </varlistentry>
@@ -832,7 +833,7 @@ Przejdź do następnej pozycji na liście odtwarzania.
 <varlistentry>
   <term><emphasis role="bold">evPlay</emphasis></term>
   <listitem><para>
-Rozpoczyna odtwarzanie.
+Rozpocznij odtwarzanie.
     </para></listitem>
 </varlistentry>
 
@@ -840,7 +841,7 @@ Rozpoczyna odtwarzanie.
   <term><emphasis role="bold">evPlaySwitchToPause</emphasis></term>
   <listitem><para>
 Przeciwieństwo <literal>evPauseSwitchToPlay</literal>. Ten sygnał zaczyna
-odtwarzanie oraz wyświetlenie obrazka dla przycisku
+odtwarzanie oraz wyświetla obrazek dla przycisku
 <literal>evPauseSwitchToPlay</literal> (aby zaznaczyć, że przycisk ten może być
 użyty ponownie do wstrzymania odtwarzania).
     </para></listitem>
@@ -856,7 +857,7 @@ Przejdź do poprzedniej pozycji na liście odtwarzania.
 <varlistentry>
   <term><emphasis role="bold">evStop</emphasis></term>
   <listitem><para>
-Zatrzymuje odtwarzanie.
+Zatrzymaj odtwarzanie.
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -866,49 +867,49 @@ Zatrzymuje odtwarzanie.
 <varlistentry>
   <term><emphasis role="bold">evBackward10sec</emphasis></term>
   <listitem><para>
-Przewija do tyłu o 10 sekund.
+Przewiń do tyłu o 10 sekund.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward1min</emphasis></term>
   <listitem><para>
-Przewija do tyłu o 1 minutę.
+Przewiń do tyłu o 1 minutę.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward10min</emphasis></term>
   <listitem><para>
-Przewija do tyłu o 10 minut.
+Przewiń do tyłu o 10 minut.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward10sec</emphasis></term>
   <listitem><para>
-Przewija do przodu o 10 sekund.
+Przewiń do przodu o 10 sekund.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward1min</emphasis></term>
   <listitem><para>
-Przewija do przodu o 1 minutę.
+Przewiń do przodu o 1 minutę.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward10min</emphasis></term>
   <listitem><para>
-Przewija do przodu o 10 minut..
+Przewiń do przodu o 10 minut..
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetMoviePosition</emphasis></term>
   <listitem><para>
-Przewija do pozycji (może być wykorzystane przez suwak;
+Przewiń do pozycji (może być wykorzystane przez suwak;
 użyte są względne wartości (0-100%) suwaka).
     </para></listitem>
 </varlistentry>
@@ -919,19 +920,19 @@ użyte są względne wartości (0-100%) suwaka).
 <varlistentry>
   <term><emphasis role="bold">evDoubleSize</emphasis></term>
   <listitem><para>
-Ustawia podwójny rozmiar okna z filmem.
+Ustaw podwójny rozmiar okna z filmem.
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><emphasis role="bold">evFullScreen</emphasis></term>
   <listitem><para>
-Włącza/wyłącza tryb pełnoekranowy.
+Włącz/wyłącz tryb pełnoekranowy.
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><emphasis role="bold">evNormalSize</emphasis></term>
   <listitem><para>
-Ustawia typowy rozmiar okna z filmem.
+Ustaw typowy rozmiar okna z filmem.
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -941,56 +942,56 @@ Ustawia typowy rozmiar okna z filmem.
 <varlistentry>
   <term><emphasis role="bold">evDecAudioBufDelay</emphasis></term>
   <listitem><para>
-Zmniejsza opóźnienie bufora dźwięku.
+Zmniejsz opóźnienie bufora dźwięku.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDecBalance</emphasis></term>
   <listitem><para>
-Zmniejsza balans.
+Zmniejsz balans.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDecVolume</emphasis></term>
   <listitem><para>
-Zmniejsza głośność
+Zmniejsz głośność
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncAudioBufDelay</emphasis></term>
   <listitem><para>
-Zwiększa opóźnienie bufora dźwięku.
+Zwiększ opóźnienie bufora dźwięku.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncBalance</emphasis></term>
   <listitem><para>
-Zwiększa balans.
+Zwiększ balans.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncVolume</emphasis></term>
   <listitem><para>
-Zwiększa głośność.
+Zwiększ głośność.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evMute</emphasis></term>
   <listitem><para>
-Wycisza/przywraca dźwięk.
+Wycisz/przywróć dźwięk.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetBalance</emphasis></term>
   <listitem><para>
-Ustawia balans (może być używane przez suwak;
+Ustawi balans (może być używane przez suwak;
 używana jest wartość względna (0-100%)).
     </para></listitem>
 </varlistentry>
@@ -998,7 +999,7 @@ używana jest wartość względna (0-100%)).
 <varlistentry>
   <term><emphasis role="bold">evSetVolume</emphasis></term>
   <listitem><para>
-Ustawia głośność (może być używane przez suwak;
+Ustaw głośność (może być używane przez suwak;
 używana jest wartość względna (0-100%)).
     </para></listitem>
 </varlistentry>
@@ -1009,42 +1010,42 @@ używana jest wartość względna (0-100%)).
 <varlistentry>
   <term><emphasis role="bold">evAbout</emphasis></term>
   <listitem><para>
-Otwiera okno "o programie".
+Otwórz okno "o programie".
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDropSubtitle</emphasis></term>
   <listitem><para>
-Wyłącza aktualnie używane napisy.
+Wyłącz aktualnie używane napisy.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evEqualizer</emphasis></term>
   <listitem><para>
-Włącza/wyłącza equalizer.
+Włącz/wyłącz korektor.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evExit</emphasis></term>
   <listitem><para>
-Wyłącza program.
+Wyłącz program.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIconify</emphasis></term>
   <listitem><para>
-Minimalizuje okno.
+Minimalizuj okno.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoad</emphasis></term>
   <listitem><para>
-Wczytuje plik (poprzez otwarcie okna przeglądarki plików, gdzie możesz wybrać
+Wczytaj plik (poprzez otwarcie okna przeglądarki plików, gdzie możesz wybrać
 plik).
     </para></listitem>
 </varlistentry>
@@ -1052,7 +1053,7 @@ plik).
 <varlistentry>
   <term><emphasis role="bold">evLoadPlay</emphasis></term>
   <listitem><para>
-Robi to samo co <literal>evLoad</literal>, ale zaczyna automatycznie odtwarzać
+Tto samo co <literal>evLoad</literal>, ale zacznij automatycznie odtwarzać
 zaraz po wyborze pliku.
     </para></listitem>
 </varlistentry>
@@ -1060,14 +1061,14 @@ zaraz po wyborze pliku.
 <varlistentry>
   <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
   <listitem><para>
-Wczytuje plik z napisami (z przeglądarki plików).
+Wczytaj plik z napisami (z przeglądarki plików).
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadAudioFile</emphasis></term>
   <listitem><para>
-Wczytuje plik dźwiękowy (z przeglądarki plików).
+Wczytaj plik dźwiękowy (z przeglądarki plików).
     </para></listitem>
 </varlistentry>
 
@@ -1088,42 +1089,42 @@ Otwórz/zamknij okno listy odtwarzania.
 <varlistentry>
   <term><emphasis role="bold">evPlayDVD</emphasis></term>
   <listitem><para>
-Próbuje odczytać płytę ze wskazanego czytnika DVD.
+Spróbuj odczytać płytę ze wskazanego czytnika DVD.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlayVCD</emphasis></term>
   <listitem><para>
-Próbuje odczytać płytę ze wskazanego czytnika CD.
+Spróbuj odczytać płytę ze wskazanego czytnika CD.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPreferences</emphasis></term>
   <listitem><para>
-Otwiera okno z ustawieniami.
+Otwórz okno z ustawieniami.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetAspect</emphasis></term>
   <listitem><para>
-Ustawia proporcje obrazu.
+Ustaw proporcje obrazu.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetURL</emphasis></term>
   <listitem><para>
-Wyświetla okienko dialogowe URL.
+Wyświetl okienko dialogowe URL.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSkinBrowser</emphasis></term>
   <listitem><para>
-Otwiera okno przeglądarki skórek.
+Otwórz okno przeglądarki skórek.
     </para></listitem>
 </varlistentry>
 </variablelist>
