@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "subreader.h"
 
@@ -27,47 +28,78 @@ int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
 }
 
+static inline void trail_space(char *s) {
+	int i;
+	while (isspace(*s)) strcpy(s, s + 1);
+	i = strlen(s) - 1;
+	while (i > 0 && isspace(s[i])) s[i--] = '\0';
+}
 
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
-    char line[1001];
-    int i;
-    char *s, *p;
+    static char line[1001];
+    static char *s = NULL;
+    char text[1000], *p, *q;
+    int state;
 
-    current->start=0;
-    do {
-	if (! (fgets (line, 1000, fd)))  return 0;
-	s= strstr(line, "Start=");
-	if (s) {
-	    sscanf (s, "Start=%d", &current->start);
-	    if (strstr (s, "<P><br>"))  current->start=0;
-	}
-    } while ( !current->start );
-    
-    if (! (fgets (line, 1000, fd)))  return 0;
-    s=strstr (line, "<P>")+3;
+    current->lines = current->start = current->end = 0;
+    state = 0;
 
-    i=0;
+    /* read the first line */
+    if (!s)
+	    if (!(s = fgets(line, 1000, fd))) return 0;
+
     do {
-	for (p=s; !eol(*p) && strncmp(p,"<br>",4); p++);
-	if (p==s) {
-	    s+=4;
+	switch (state) {
+
+	case 0: /* find "START=" */
+	    s = strstr (s, "Start=");
+	    if (s) {
+		current->start = strtol (s + 6, &s, 0) / 10;
+		state = 1; continue;
+	    }
+	    break;
+ 
+	case 1: /* find "<P" */
+	    if ((s = strstr (s, "<P"))) { s += 2; state = 2; continue; }
+	    break;
+ 
+	case 2: /* find ">" */
+	    if ((s = strchr (s, '>'))) { s++; state = 3; p = text; continue; }
+	    break;
+ 
+	case 3: /* get all text until '<' appears */
+	    if (*s == '\0') { break; }
+	    else if (*s == '<') { state = 4; }
+	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
+	    else if (*s == '\r') { s++; }
+	    else if (!strncasecmp (s, "<br>", 4) || *s == '\n') {
+		*p = '\0'; p = text; trail_space (text);
+		if (text[0] != '\0')
+		    current->text[current->lines++] = strdup (text);
+		if (*s == '\n') s++; else s += 4;
+	    }
+	    else *p++ = *s++;
 	    continue;
-	}
-	current->text[i]=(char *)malloc(p-s+1);
-	strncpy (current->text[i], s, p-s);
-	current->text[i++][p-s]='\0';
-	if (!strncmp(p,"<br>",4)) s=p+4;
-	else s=p;
-    } while (!eol (*p));
-    
-    current->lines=i;
 
-    if (! (fgets (line, 1000, fd)))  return 0;
-    s= strstr(line, "Start=");
-    if (s) {
-        sscanf (s, "Start=%d", &current->end);
-        if (!strstr (s, "<P><br>"))  return ERR;
-    } else return ERR;
+	case 4: /* get current->end or skip <TAG> */
+	    q = strstr (s, "Start=");
+	    if (q) {
+		current->end = strtol (q + 6, &q, 0) / 10 - 1;
+		*p = '\0'; trail_space (text);
+		if (text[0] != '\0')
+		    current->text[current->lines++] = strdup (text);
+		if (current->lines > 0) { state = 99; break; }
+		state = 0; continue;
+	    }
+	    s = strchr (s, '>');
+	    if (s) { s++; state = 3; continue; }
+	    break;
+	}
+
+	/* read next line */
+	if (state != 99 && !(s = fgets (line, 1000, fd))) return 0;
+
+    } while (state != 99);
 
     return current;
 }
@@ -200,7 +232,7 @@ int sub_autodetect (FILE *fd) {
 	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return 2;}
 	if (strstr (line, "<SAMI>"))
-		{sub_uses_time=0; return 3;}
+		{sub_uses_time=1; return 3;}
     }
 
     return -1;  // too many bad lines
@@ -268,12 +300,14 @@ char * sub_filename( char * fname )
  char * sub_name = NULL;
  char * sub_tmp  = NULL;
  int    i;
-#define SUB_EXTS 4
+#define SUB_EXTS 6
  char * sub_exts[SUB_EXTS] = 
   { ".sub",
     ".SUB",
     ".srt",
-    ".SRT" };
+    ".SRT",
+    ".smi",
+    ".SMI"};
  
  if ( fname == NULL ) return NULL;
  for( i=strlen( fname );i>0;i-- ) 

@@ -14,9 +14,9 @@ typedef struct {
 //    char *fname_b;
     raw_file* pic_a[16];
     raw_file* pic_b[16];
-    short font[512];
-    short start[512];
-    short width[512];
+    short font[65536];
+    short start[65536];
+    short width[65536];
 } font_desc_t;
 
 raw_file* load_raw(char *name,int verbose);

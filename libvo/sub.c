@@ -104,19 +104,22 @@ void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,in
         int x=0;
 
         for(j=0;j<len;j++){
-          int w=vo_font->width[text[j]];
-          if(w>100) printf("gazvan: %d (%d=%c)\n",w,text[j],text[j]);
+          int c=text[j];
+          int w = vo_font->width[(c<0x80)?c:(c<<8)+text[++j]];
+          if(w>100) printf("gazvan: %d (%d=%c)\n",w,c,c);
           xsize+=w+vo_font->charspace;
         }
         //printf("text width = %d\n",xsize);
         
-        if(xsize>dxs) printf("Warning! SUB too wide!!! (%d>%d)\n",xsize,dxs);
+        //if(xsize>dxs) printf("Warning! SUB too wide!!! (%d>%d)\n",xsize,dxs);
         
         x=dxs/2-xsize/2;
         
         for(j=0;j<len;j++){
           int c=text[j];
-          int font=vo_font->font[c];
+          int font;
+          if (c>=0x80) c=(c<<8)+text[++j];
+          font = vo_font->font[c];
           if(x>=0 && x+vo_font->width[c]<dxs)
           if(font>=0)
             draw_alpha(x,y,
