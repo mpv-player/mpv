@@ -439,7 +439,7 @@ extension=NULL;
 					if( next_url!=NULL ) {
 						close( fd );
 						url_free( url );
-						url = url_new( next_url );
+						streaming_ctrl->url = url = url_new( next_url );
 						http_free( http_hdr );
 						redirect = 1;	
 					}
