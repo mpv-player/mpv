@@ -57,6 +57,7 @@ static vidix_grkey_t gr_key;
 
 /* VIDIX related */
 static char *vidix_name;
+static vo_tune_info_t vtune;
 
 /* Image parameters */
 static uint32_t image_width;
@@ -73,7 +74,7 @@ static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight, mFullscreen;
 
-static void set_window(int force_update)
+static void set_window(int force_update,const vo_tune_info_t *info)
 {
 #ifdef HAVE_NEW_GUI
     if (vo_window != None)
@@ -154,7 +155,8 @@ static void set_window(int force_update)
 	/* FIXME: implement runtime resize/move if possible, this way is very ugly! */
 	vidix_stop();
 	if (vidix_init(image_width, image_height, window_x, window_y,
-	    window_width, window_height, image_format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
+	    window_width, window_height, image_format, vo_depthonscreen,
+	    vo_screenwidth, vo_screenheight,info) != 0)
         {
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s: %s\n",
 		vidix_name, strerror(errno));
@@ -363,8 +365,9 @@ else
 	vidix_grkey_set(&gr_key);
     }
 
-    set_window(1);
-
+    set_window(1,info);
+    if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
+    else     memset(&vtune,0,sizeof(vo_tune_info_t));
 #ifdef HAVE_NEW_GUI
     if (vo_window == None)
 #endif
@@ -388,7 +391,7 @@ static void check_events(void)
     const int event = vo_x11_check_events(mDisplay);
 
     if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
-	set_window(0);
+	set_window(0,&vtune);
 
     return;
 }

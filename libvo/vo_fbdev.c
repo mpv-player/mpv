@@ -1102,7 +1102,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		else y_offset = 0;
 		if(vidix_init(width,height,x_offset,y_offset,image_width,
 			    image_height,format,fb_bpp,
-			    fb_xres,fb_yres) != 0)
+			    fb_xres,fb_yres,info) != 0)
 		{
 		    printf(FBDEV "Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;

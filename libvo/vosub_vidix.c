@@ -100,7 +100,7 @@ int vidix_preinit(const char *drvname,void *server)
 int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned x_org,unsigned y_org,unsigned dst_width,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp,
-		   unsigned vid_w,unsigned vid_h)
+		   unsigned vid_w,unsigned vid_h,const void *info)
 {
   size_t i,awidth;
   int err;
@@ -166,6 +166,49 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	vidix_play.dest.w = dst_width;
 	vidix_play.dest.h = dst_height;
 	vidix_play.num_frames=NUM_FRAMES;
+	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
+	if(info)
+	{
+	switch(((const vo_tune_info_t *)info)->pitch[0])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.y = ((const vo_tune_info_t *)info)->pitch[0];
+		      break;
+	    default: break;
+	}
+	switch(((const vo_tune_info_t *)info)->pitch[1])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.u = ((const vo_tune_info_t *)info)->pitch[1];
+		      break;
+	    default: break;
+	}
+	switch(((const vo_tune_info_t *)info)->pitch[2])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.v = ((const vo_tune_info_t *)info)->pitch[2];
+		      break;
+	    default: break;
+	}
+	}
 	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
 	{
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
