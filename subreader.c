@@ -404,6 +404,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 		*q='\0';
 		if (strlen(p)) {
 			current->text[num]=strdup(p);
+			printf (">%s<\n",p);
 			current->lines = ++num;
 		} else {
 			if (num) return current;
@@ -481,8 +482,6 @@ int sub_autodetect (FILE *fd) {
 	if ( *line == '<' )
 		{sub_uses_time=1;return 5;}
 
-	// I have only seen only 1 piece of .ssa file.
-	// It may be not correct (tell me if it's not)
 	if (!memcmp(line, "Dialogue: Marked", 16))
 		{sub_uses_time=1; return 6;}
 	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
@@ -747,27 +746,32 @@ void dump_mpsub(subtitle* subs){
 	
 
 	if (sub_uses_time) fprintf (fd,"FORMAT=TIME\n\n");
-	else fprintf (fd, "FORMAT=25");  // FIXME: fps
+	else fprintf (fd, "FORMAT=25\n\n");  // FIXME: fps
 
 	for(j=0;j<sub_num;j++){
-	    subtitle* egysub=&subs[j];
-	    a=((egysub->start-mpsub_position)/100.0);
-	    b=((egysub->end-egysub->start)/100.0);
-	    if ( (float)((int)a) == a)
-		fprintf (fd, "%.0f",a);
-	    else
-		fprintf (fd, "%.2f",a);
-	    
-	    if ( (float)((int)b) == b)
-		fprintf (fd, " %.0f\n",b);
-	    else
-		fprintf (fd, " %.2f\n",b);
-	    
-	    mpsub_position = egysub->end;
-	    for (i=0; i<egysub->lines; i++) {
-		fprintf (fd, "%s\n",egysub->text[i]);
-	    }
-	    fprintf (fd, "\n");
+		subtitle* egysub=&subs[j];
+		if (sub_uses_time) {
+			a=((egysub->start-mpsub_position)/100.0);
+			b=((egysub->end-egysub->start)/100.0);
+			if ( (float)((int)a) == a)
+			fprintf (fd, "%.0f",a);
+			else
+			fprintf (fd, "%.2f",a);
+			    
+			if ( (float)((int)b) == b)
+			fprintf (fd, " %.0f\n",b);
+			else
+			fprintf (fd, " %.2f\n",b);
+		} else {
+			fprintf (fd, "%ld %ld\n", egysub->start-mpsub_position,
+					egysub->end-egysub->start);
+		}
+
+		mpsub_position = egysub->end;
+		for (i=0; i<egysub->lines; i++) {
+			fprintf (fd, "%s\n",egysub->text[i]);
+		}
+		fprintf (fd, "\n");
 	}
 	fclose (fd);
 	printf ("Subtitles dumped in \'dump.mpsub\'.\n");
