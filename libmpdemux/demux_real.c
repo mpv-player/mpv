@@ -8,6 +8,10 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.12  2002/06/08 20:46:14  arpi
+    sub-packet demuxer for rv20/rv30, patch by Florian Schneider <flo-mplayer-dev@gmx.net>
+    (little cleanup and fprintf->mp_msg by me)
+
     Revision 1.11  2002/04/30 23:29:38  alex
     completed real seeking - working very well with audio only files
 
@@ -329,6 +333,8 @@ int real_check_file(demuxer_t* demuxer)
     return 1;
 }
 
+void hexdump(char *, unsigned long);
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -337,6 +343,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *ds = NULL;
     sh_audio_t *sh_audio = NULL;
+    sh_video_t *sh_video = NULL;
     int len;
     int timestamp;
     int stream_id;
@@ -367,8 +374,10 @@ loop:
     /*  0x1 - reliable  */
     /* 	0x2 - keyframe	*/
 
-//    printf("packet#%d: pos: %d, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
-//	priv->current_packet, stream_tell(demuxer->stream)-12, len, stream_id, timestamp, flags);
+// debug re-enabled (FS)
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "len:%d\n", len);
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "packet#%d: pos: 0x%0x, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
+	priv->current_packet, (int)(stream_tell(demuxer->stream)-12), len, stream_id, timestamp, flags);
 
     priv->current_packet++;
     len -= 12;    
@@ -378,7 +387,7 @@ loop:
     {
 	if (priv->a_streams[i] == stream_id)
 	{
-//	    printf("packet is audio (id: %d)\n", stream_id);
+	    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is audio (id: %d)\n", stream_id);
 	    ds = demuxer->audio; /* FIXME */
 	    sh_audio = ds->sh;
 	    priv->current_apacket++;
@@ -390,8 +399,9 @@ loop:
     {
 	if (priv->v_streams[i] == stream_id)
 	{
-//	    printf("packet is video (id: %d)\n", stream_id);
+	    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is video (id: %d)\n", stream_id);
 	    ds = demuxer->video; /* FIXME */
+            sh_video = ds->sh;
 	    priv->current_vpacket++;
 	    break;
 	}
@@ -400,7 +410,7 @@ loop:
     /* id not found */
     if (ds == NULL)
     {
-	printf("unknown stream id (%d)\n", stream_id);
+	mp_msg(MSGT_DEMUX,MSGL_DBG2, "unknown stream id (%d)\n", stream_id);
 	stream_skip(demuxer->stream, len);
 	goto loop;	
     }
@@ -411,11 +421,13 @@ loop:
 	demuxer->filepos, (flags & 0x2) ? 0x10 : 0);
 #else
     {
-	demux_packet_t *dp = new_demux_packet(len);
+	demux_packet_t *dp=NULL;
+// = new_demux_packet(len);
 	
-	stream_read(demuxer->stream, dp->buffer, len);
 	/* if DNET, swap bytes! */
-	if (sh_audio != NULL)
+	if (sh_audio != NULL) {
+            dp = new_demux_packet(len);
+	    stream_read(demuxer->stream, dp->buffer, len);
 	    if (sh_audio->format == 0x2000)
 	    {
 		char *ptr = dp->buffer;
@@ -428,10 +440,154 @@ loop:
 		    ptr += 2;
 		}
 	    }
-	dp->pts = timestamp/90000.0f;
-	dp->pos = demuxer->filepos;
-	dp->flags = (flags & 0x2) ? 0x10 : 0;
-	ds_add_packet(ds, dp);
+	    dp->pts = timestamp/90000.0f;
+	    dp->pos = demuxer->filepos;
+	    dp->flags = (flags & 0x2) ? 0x10 : 0;
+	    ds_add_packet(ds, dp);
+	}
+	if (sh_video != NULL) {
+	    if (sh_video->format==0x30335652 && 1) {
+		// we need a more complicated demuxing
+		// a block may contain multiple packets
+		// as well as a packet may be contained in multiple blocks
+	        int vpkg_header, vpkg_blknum, vpkg_length, vpkg_offset;
+		int vpkg_seqnum=-1, vpkg_oldseqnum=0, vpkg_seqnumread=0;
+		int vpkg_ofs;
+		unsigned int* extra;
+		
+
+	    while(len>0){
+
+		// read packet header
+		// bit 7: 1=last block in block chain
+		// bit 6: 1=short header (only one block?)
+		vpkg_header=stream_read_char(demuxer->stream); --len;
+		mp_dbg(MSGT_DEMUX,MSGL_DBG2, "hdr: %0.2X (len=%d) ",vpkg_header,len);
+
+		if (0x40==(vpkg_header&0xc0)) {
+		    // seems to be a very short header
+	    	    // 2 bytes, purpose of the second byte yet unknown
+	    	    int bummer;
+		    bummer=stream_read_char(demuxer->stream); --len;
+ 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "%0.2X",bummer);
+ 	    	    vpkg_offset=0;
+ 		    vpkg_length=len;
+		} else {
+		
+		    if (0==(vpkg_header&0x40)) {
+			// sub-seqnum (bits 0-6: number of fragment. bit 7: ???)
+		        vpkg_seqnum=stream_read_char(demuxer->stream);
+	                --len;
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "subseq: %0.2X ",vpkg_seqnum);
+	            }
+
+	  	    // size of the complete packet
+		    // bit 14 is always one (same applies to the offset)
+		    vpkg_length=stream_read_word(demuxer->stream);
+		    len-=2;
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "%0.2X %0.2X ",vpkg_length>>8,vpkg_length&0xff);
+		    vpkg_length&=0x3fff;
+
+		    // offset of the following data inside the complete packet
+		    // Note: if (hdr&0xC0)==0x80 then offset is relative to the
+		    // _end_ of the packet, so it's equal to fragment size!!!
+		    vpkg_offset=stream_read_word(demuxer->stream);
+	            len-=2;
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "%0.2X %0.2X ",vpkg_offset>>8,vpkg_offset&0xff);
+		    if (vpkg_offset==0) {
+		        vpkg_offset=stream_read_word(demuxer->stream);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "%0.2X %0.2X ",vpkg_offset>>8,vpkg_offset&0xff);
+	    	        len-=2;
+		    }
+		    vpkg_offset&=0x3fff;
+
+		    vpkg_seqnum=stream_read_char(demuxer->stream); --len;
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "%0.2X ",vpkg_seqnum);
+	        }
+ 		mp_dbg(MSGT_DEMUX,MSGL_DBG2, "\n");
+                mp_dbg(MSGT_DEMUX,MSGL_DBG2, "blklen=%d\n", len);
+		mp_msg(MSGT_DEMUX,MSGL_DBG2, "block: hdr=0x%0x, len=%d, offset=%d, seqnum=%d\n",
+		    vpkg_header, vpkg_length, vpkg_offset, vpkg_seqnum);
+
+		if(ds->asf_packet){
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "we have an incomplete packet (oldseq=%d new=%d)\n",ds->asf_seq,vpkg_seqnum);
+		    // we have an incomplete packet:
+		    if(ds->asf_seq!=vpkg_seqnum){
+			// this fragment is for new packet, close the old one
+			ds_add_packet(ds,ds->asf_packet);
+			ds->asf_packet=NULL;
+		    } else {
+			// append data to it!
+			demux_packet_t* dp=ds->asf_packet;
+			extra=(unsigned int*)(dp->buffer+vpkg_length);
+			++extra[0];
+			if((extra[0]&3)==0){ // increase buffer size, if more than 4 subpackets
+			    mp_msg(MSGT_DEMUX,MSGL_DBG2, "buffer too small!!!!!\n");
+			    dp->buffer=realloc(dp->buffer,vpkg_length+(extra[0]+5)*8);
+			    extra=(unsigned int*)(dp->buffer+vpkg_length);
+			}
+			extra[2+2*extra[0]]=1;
+			extra[3+2*extra[0]]=dp->len;
+			if(0x80==(vpkg_header&0xc0)){
+			    // last fragment!
+			    if(dp->len!=vpkg_length-vpkg_offset)
+				mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,vpkg_length-vpkg_offset);
+            		    stream_read(demuxer->stream, dp->buffer + dp->len, vpkg_offset);
+			    dp->len+=vpkg_offset;
+			    len-=vpkg_offset;
+ 			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
+			    // we know that this is the last fragment -> we can close the packet!
+			    ds_add_packet(ds,dp);
+			    ds->asf_packet=NULL;
+			    // continue parsing
+			    continue;
+			}
+			// non-last fragment:
+			if(dp->len!=vpkg_offset)
+			    mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  offset=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,len,vpkg_length);
+            		stream_read(demuxer->stream, dp->buffer + dp->len, len);
+			dp->len+=len;
+			break; // no more fragments in this chunk!
+		    }
+		}
+		// create new packet!
+		dp = new_demux_packet(vpkg_length+8*5);
+	    	// the timestamp seems to be in milliseconds
+		dp->pts = timestamp/1000.0f; timestamp=0;
+                dp->pos = demuxer->filepos;
+                dp->flags = (flags & 0x2) ? 0x10 : 0;
+		ds->asf_seq = vpkg_seqnum;
+		extra=(unsigned int*)(dp->buffer+vpkg_length);
+		extra[0]=0; // blocks
+		extra[1]=timestamp;
+		extra[2]=1; // sub-1
+		extra[3]=0;
+		if(0x00==(vpkg_header&0xc0)){
+		    // first fragment:
+		    dp->len=len;
+		    stream_read(demuxer->stream, dp->buffer, dp->len);
+		    ds->asf_packet=dp;
+		    break;
+		}
+		// whole packet (not fragmented):
+		dp->len=vpkg_length; len-=vpkg_length;
+		stream_read(demuxer->stream, dp->buffer, dp->len);
+		ds_add_packet(ds,dp);
+
+	    } // while(len>0)
+
+	    } else {
+		// old video stream type
+
+		dp = new_demux_packet(len);
+		stream_read(demuxer->stream, dp->buffer, len);
+		dp->pts = timestamp/90000.0f;
+		dp->pos = demuxer->filepos;
+		dp->flags = (flags & 0x2) ? 0x10 : 0;
+		ds_add_packet(ds, dp);
+	    }
+
+	}
     }
 #endif
 
@@ -448,7 +604,7 @@ void demux_open_real(demuxer_t* demuxer)
     stream_skip(demuxer->stream, 2); /* version */
 //    stream_skip(demuxer->stream, 4);
     i = stream_read_dword(demuxer->stream);
-    printf("File version: %d\n", i);
+    mp_msg(MSGT_DEMUX,MSGL_V, "real: File version: %d\n", i);
     num_of_headers = stream_read_dword(demuxer->stream);
 //    stream_skip(demuxer->stream, 4); /* number of headers */
 
@@ -468,7 +624,7 @@ void demux_open_real(demuxer_t* demuxer)
 	if (chunk_size < 10)
 	    goto fail;
 	
-	printf("Chunk: %.4s (%x) (size: 0x%x, offset: 0x%x)\n",
+	mp_msg(MSGT_DEMUX,MSGL_V, "Chunk: %.4s (%x) (size: 0x%x, offset: 0x%x)\n",
 	    (char *)&chunk_id, chunk_id, chunk_size, chunk_pos);
 	
 	switch(chunk_id)
@@ -484,9 +640,9 @@ void demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* duration */
 		stream_skip(demuxer->stream, 4); /* preroll */
 		priv->index_chunk_offset = stream_read_dword(demuxer->stream);
-		printf("First index chunk offset: 0x%x\n", priv->index_chunk_offset);
+		mp_msg(MSGT_DEMUX,MSGL_V,"First index chunk offset: 0x%x\n", priv->index_chunk_offset);
 		priv->data_chunk_offset = stream_read_dword(demuxer->stream)+10;
-		printf("First data chunk offset: 0x%x\n", priv->data_chunk_offset);
+		mp_msg(MSGT_DEMUX,MSGL_V,"First data chunk offset: 0x%x\n", priv->data_chunk_offset);
 		stream_skip(demuxer->stream, 2); /* nb streams */
 #if 0
 		stream_skip(demuxer->stream, 2); /* flags */
@@ -496,14 +652,14 @@ void demux_open_real(demuxer_t* demuxer)
 		    
 		    if (flags)
 		    {
-		    printf("Flags (%x): ", flags);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"Flags (%x): ", flags);
 		    if (flags & 0x1)
-			printf("[save allowed] ");
+			mp_msg(MSGT_DEMUX,MSGL_V,"[save allowed] ");
 		    if (flags & 0x2)
-			printf("[perfect play (more buffers)] ");
+			mp_msg(MSGT_DEMUX,MSGL_V,"[perfect play (more buffers)] ");
 		    if (flags & 0x4)
-			printf("[live broadcast] ");
-		    printf("\n");
+			mp_msg(MSGT_DEMUX,MSGL_V,"[live broadcast] ");
+		    mp_msg(MSGT_DEMUX,MSGL_V,"\n");
 		    }
 		}
 #endif
@@ -565,7 +721,7 @@ void demux_open_real(demuxer_t* demuxer)
 		int tmp;
 
 		stream_id = stream_read_word(demuxer->stream);
-		printf("Found new stream (id: %d)\n", stream_id);
+		mp_msg(MSGT_DEMUX,MSGL_V,"Found new stream (id: %d)\n", stream_id);
 		
 		stream_skip(demuxer->stream, 4); /* max bitrate */
 		bitrate = stream_read_dword(demuxer->stream); /* avg bitrate */
@@ -592,9 +748,9 @@ void demux_open_real(demuxer_t* demuxer)
 		    int frame_size;
 		    int version;
 		    
-		    printf("Found audio stream!\n");
+		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
-		    printf("version: %d\n", version);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);
 //		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 2);
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
@@ -609,7 +765,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 2); /* 1 */
 //		    stream_skip(demuxer->stream, 2); /* coded frame size */
 		    frame_size = stream_read_word(demuxer->stream);
-		    printf("frame_size: %d\n", frame_size);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"frame_size: %d\n", frame_size);
 		    stream_skip(demuxer->stream, 4);
 		    
 		    if (version == 5)
@@ -618,7 +774,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->samplerate = stream_read_word(demuxer->stream);
 		    stream_skip(demuxer->stream, 4);
 		    sh->channels = stream_read_word(demuxer->stream);
-		    printf("samplerate: %d, channels: %d\n",
+		    mp_msg(MSGT_DEMUX,MSGL_V,"samplerate: %d, channels: %d\n",
 			sh->samplerate, sh->channels);
 
 		    if (version == 5)
@@ -649,11 +805,11 @@ void demux_open_real(demuxer_t* demuxer)
 		    switch (MKTAG(buf[0], buf[1], buf[2], buf[3]))
 		    {
 			case MKTAG('d', 'n', 'e', 't'):
-			    printf("Audio: DNET -> AC3\n");
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
 			    sh->format = 0x2000;
 			    break;
 			case MKTAG('s', 'i', 'p', 'r'):
-			    printf("Audio: SiproLab's ACELP.net\n");
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
 			    /* for buggy directshow loader */
 			    sh->wf = realloc(sh->wf, 18+4);
@@ -673,11 +829,11 @@ void demux_open_real(demuxer_t* demuxer)
 //			    sh->wf[sizeof(WAVEFORMATEX)+4] = 0;
 			    break;
 			case MKTAG('c', 'o', 'o', 'k'):
-			    printf("Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
 			    tmp = 0;
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
-			    printf("Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
 			    sh->format = 0x270;
 
 			    sh->wf->nAvgBytesPerSec = 16537; // 8268
@@ -688,7 +844,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    sh->wf = realloc(sh->wf, 18+sh->wf->cbSize);
 			    break;
 			default:
-			    printf("Audio: Unknown (%s)\n", buf);
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
 			    tmp = 0;
 			    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 		    }
@@ -722,7 +878,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
 
 		    tmp = stream_read_dword_le(demuxer->stream);
-		    printf("video: %.4s (%x)\n", (char *)&tmp, tmp);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"video: %.4s (%x)\n", (char *)&tmp, tmp);
 		    if (tmp != MKTAG('V', 'I', 'D', 'O'))
 		    {
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "Not audio/video stream or unsupported!\n");
@@ -730,7 +886,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    }
 		    
 		    sh->format = stream_read_dword_le(demuxer->stream); /* fourcc */
-		    printf("video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
 		    /* emulate BITMAPINFOHEADER */
 		    sh->bih = malloc(sizeof(BITMAPINFOHEADER));
@@ -753,7 +909,7 @@ void demux_open_real(demuxer_t* demuxer)
 
 		    /* h263 hack */
 		    tmp = stream_read_dword(demuxer->stream);
-		    printf("H.263 ID: %x\n", tmp);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"H.263 ID: %x\n", tmp);
 		    switch (tmp)
 		    {
 			case 0x10000000:
@@ -770,9 +926,12 @@ void demux_open_real(demuxer_t* demuxer)
 			case 0x20100001:
 			    /* codec id: rv20 */
 			    break;
+			case 0x30202002:
+			    /* codec id: rv30 */
+			    break;
 			default:
 			    /* codec id: none */
-			    printf("unknown id: %x\n", tmp);
+			    mp_msg(MSGT_DEMUX,MSGL_V,"unknown id: %x\n", tmp);
 		    }
 		        
 		    /* insert as stream */
@@ -799,7 +958,7 @@ skip_this_chunk:
 		goto header_end;
 	    case MKTAG('I', 'N', 'D', 'X'):
 	    default:
-		printf("Unknown chunk: %x\n", chunk_id);
+		mp_msg(MSGT_DEMUX,MSGL_V,"Unknown chunk: %x\n", chunk_id);
 		stream_skip(demuxer->stream, chunk_size - 10);
 		break;
 	}
@@ -810,7 +969,7 @@ header_end:
 //    stream_skip(demuxer->stream, 4); /* number of packets */
     stream_skip(demuxer->stream, 4); /* next data header */
 
-    printf("Packets in file: %d\n", priv->num_of_packets);
+    mp_msg(MSGT_DEMUX,MSGL_V,"Packets in file: %d\n", priv->num_of_packets);
 
     if (priv->num_of_packets == 0)
 	priv->num_of_packets = -10;
