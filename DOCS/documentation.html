@@ -66,6 +66,7 @@ Table of Contents
 	     <A HREF="#2.2.1.7">2.2.1.7 SiS 6326 framebuffer (sis_vid)</A>
 	     <A HREF="#2.2.1.8">2.2.1.8 3dfx YUV support</A>
 	     <A HREF="#2.2.1.9">2.2.1.9 OpenGL output</A>
+	     <A HREF="#2.2.1.10">2.2.1.10 AAlib - text mode displaying</A>
 	<A HREF="#2.2.2">2.2.2 Audio output devices</A>
 	     <A HREF="#2.2.2.1">2.2.2.1 Soundcard experiences, recommendations</A>
 </P>
@@ -133,8 +134,8 @@ Table of Contents
   supported by many native and Win32 DLL codecs. You can watch VCD, DVD and
   even DivX movies too. The another big feature of mplayer is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
-  but you can use SDL (and this way all drivers of SDL, for example AAlib) and
-  some lowlevel card-specific drivers (for Matrox) too! Most of them supports
+  AAlib, but you can use SDL (and this way all drivers of SDL) and some
+  lowlevel card-specific drivers (for Matrox) too! Most of them supports
   software or hardware scaling, so you can enjoy movies in fullscreen. And what
   about the nice big antialiased shaded subtitles (7 supported types!!!) with
   hungarian, english, cyrillic, czech, korean fonts, and OSD?
@@ -465,8 +466,9 @@ Table of Contents
   - svga: Output to SVGAlib
   - sdl:  1.1.7 : supports software scaling
           1.1.8 : supports Xvideo (hardware scaling/fullscreen)
-          1.2.0 : supports aalib (textmode rendering, very funny!)
+          1.2.0 : supports AAlib (-vo aa is very recommended, see below!)
   - ggi: similar to SDL
+  - aa:  textmode rendering with AAlib
 
   Card specific:
   - mga:  Matrox G200/G400 hardware YUV overlay via the mga_vid device
@@ -817,7 +819,7 @@ Table of Contents
 		W/S mappings for * and / (mixer control)
 
   KNOWN BUGS:
-  - Keys pressed under aalib console driver repeat forever.
+  - Keys pressed under aalib console driver repeat forever. (use -vo aa !)
     It's bug in SDL, I can't change it (tested with SDL 1.2.1).
 
 
@@ -953,6 +955,22 @@ Table of Contents
   XFree86(DRI) >= 4.0.3 supports it only with Matrox, and Radeon cards.
   See <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> for download, and installation instructions.
 
+
+  <A NAME=2.2.1.10>2.2.1.10.  AAlib - text mode displaying
+
+  <B>AAlib</B> is a library for displaying graphics in text mode, using powerful
+  ASCII renderer. There are LOTS of programs already supporting it, like Doom,
+  Quake, etc. MPlayer contains a very usable driver for it.
+  If ./configure detects aalib installed, the aalib libvo driver will be built.
+  It uses some keys to change Fast rendering ON/OFF, dithering mode change,
+  inverse picture, contrast, brightness. Use -vo aa and look out for the help
+  text.
+
+  NOTE: the rendering is very CPU intensive, especially when using AA-on-X
+        (using aalib on X), and it's least CPU intensive on standard,
+        non-framebuffer console. Use SVGATextMode to set up a big textmode,
+        then enjoy! (secondary head Hercules cards rock :)) (anyone can enhance
+        fbdev to do conversion/dithering to hgafb? Would be neat :)
 
   <A NAME=2.2.2>2.2.2.  Audio output devices
 
@@ -1921,7 +1939,6 @@ Gyula László (Chass, Tégla): <chass-@freemail.hu>
 
 Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 - SVGAlib support in libvo
-- native AAlib driver (coming soon)
 
 Alex Beregszaszi (Al3x): <alex@naxine.org>
 - ALSA output driver in libao2
@@ -1976,6 +1993,9 @@ Vladimir Kushnir: <vkushnir@Alfacom.net>
 
 Bertrand BAUDET: <bertrand_baudet@yahoo.com>
 - network streaming support
+
+Folke Ashberg: <folke@ashberg.de
+- native AAlib driver (-vo aa)
 
 Main testers:
   Tibor Balázs (Tibcu)
