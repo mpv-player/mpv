@@ -445,13 +445,19 @@ static int get_space(){
     }
 #endif
 
-#ifndef __OpenBSD__
+#if !defined (__OpenBSD__) && !defined(__NetBSD__)
     ioctl(audio_fd, AUDIO_GETINFO, &info);
     if (queued_bursts - info.play.eof > 2)
 	return 0;
 #endif
 
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+    ioctl(audio_fd, AUDIO_GETINFO, &info);
+    return info.hiwat * info.blocksize - info.play.seek;
+#else
     return ao_data.outburst;
+#endif
+
 }
 
 // plays 'len' bytes of 'data'
@@ -507,7 +513,7 @@ static int play(void* data,int len,int flags){
 static float get_delay(){
     audio_info_t info;
     ioctl(audio_fd, AUDIO_GETINFO, &info);
-#ifdef __OpenBSD__
+#if defined (__OpenBSD__) || defined(__NetBSD__)
     return (float) info.play.seek/ (float)byte_per_sec ;
 #else
     if (info.play.samples && enable_sample_timing == RTSC_ENABLED)
