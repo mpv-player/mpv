@@ -1077,6 +1077,9 @@ línea exterior negra gruesa
 .PD 1
 .
 .TP
+.B \-flip_hebrew
+Activa inversión de subtítulos usando FriBiDi.
+.TP
 .B \-font <ruta\ a\ fichero\ font.desc>
 Búsqueda de tipografías OSB/\:SUB en un directorio alternativo (por defecto
 para tipografías normales: ~/\:.mplayer/\:font/\:font.desc, por defecto para
@@ -1099,19 +1102,13 @@ Las opciones \-subfont-* están disponibles solo con soporte FreeType compilado.
 .PD 1
 .
 .TP
-.B \-ifo <fichero\ vobsub\ ifo>
-Indica el fichero que debe ser usado para cargar el tamaño de paleta y marco
-de subtítulos VOBSUB.
-.TP
 .B \-fribidi_charset <nombre\ de\ conjunto\ de\ caracteres>
 Especifica el conjunto de caracteres que será pasado a FriBiDi
 cuando se decodifiquen subtítulos no-utf8. Por defecto es "ISO8859-8".
 .TP
-.B \-flip_hebrew
-Activa intercambio de subtítulos usando FriBiDi.
-.TP
-.B \-noflip_hebrew
-Desactiva intercambio de subtítulos usando FriBiDi.
+.B \-ifo <fichero\ vobsub\ ifo>
+Indica el fichero que debe ser usado para cargar el tamaño de paleta y marco
+de subtítulos VOBSUB.
 .TP
 .B \-noautosub
 Desactiva carga automática de ficheros de subtítulo.
