@@ -2583,6 +2583,23 @@ This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
 the chroma lines in their proper locations, so that in any given
 scanline, the luma and chroma data both come from the same field.
 .TP
+.B decimate[=max:hi:lo:frac]
+Drops frames that don't differ greatly from the previous frame in
+order to reduce framerate.
+The argument max (if positive) sets the maximum number of consecutive
+frames which can be dropped, or (if negative) the minimum interval
+between dropped frames.
+A frame is a candidate for dropping if no 8x8 region differs by more
+than a threshold of hi, and if not more than frac portion (1 meaning
+the whole image) differs by more than a threshold of lo.
+Values of hi and lo are for 8x8 pixel blocks and represent actual
+pixel value differences, so a threshold of 64 corresponds to 1 unit of
+difference for each pixel, or the same spread out differently over the
+block.
+The main use of this filter is for very-low-bitrate encoding (e.g.
+streaming over dialup modem), but it could in theory be used for
+fixing movies that were inverse-telecined incorrectly.
+.TP
 .B dint[=sense:level]
 Detects and drops first of interlaced frames in video stream.
 Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
