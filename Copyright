@@ -62,6 +62,12 @@ Homepage:   http://www.mpg123.de/
 Directory:  mp3lib
 License:    GNU Lesser General Public License
 
+Name:       LRMI - Linux Real Mode Interface
+Version:    unknown, taken from svgalib
+Homepage:   http://www.svgalib.org/
+Directory:  osdep/lrmi.[ch]
+License:    permissive, see file header 
+
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
 Homepage:   http://avifile.sourceforge.net/
