@@ -1,11 +1,7 @@
 <HTML>
 
 <HEAD>
-<STYLE TYPE="text/css">
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=WHITE>
@@ -435,11 +431,11 @@ will take some time, but it DOES worth it.</P>
 <P><B><I>CODECS</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/MP42/etc
+<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/MP41/MP42/etc
 codec, check the
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
 <UL>
-  <LI>you can <B>gain <I>DivX/DivX4/DivX5/MP42</I> playing on non-x86
+  <LI>you can <B>gain <I>DivX/DivX4/DivX5/MP41/MP42</I> playing on non-x86
     machines</B></LI>
   <LI>RealVideo 1.0/VIVO/MJPEG/h263/others playing and encoding</LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4/DivX5
@@ -457,7 +453,7 @@ package! However, you can use our codecs package with avifile. Features:<BR>
 <UL>
   <LI>you need this if you want to play or encode for example movies recorded
   with various hardware compressors, like tuner cards, digital cameras (example: DV, ATI VCR, MJPEG)</LI>
-  <LI>needed if you want to play <B>WMV movies</B> or older (MP42) ASF's</LI>
+  <LI>needed if you want to play <B>WMV movies</B> or older (MP41/MP42) ASF's</LI>
 </UL>
 </LI>
 
@@ -515,27 +511,30 @@ you get a nice and very fast fullscreen playing.</P>
 
 <P>
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 cards</B> : please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
-section in order to gain big speedup. It is important to do these steps
-<I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
-built. Also check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>
-section. <U><B>If you are non-Linux user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A>
-documentation !</LI>
+<LI><B>Matrox G200/G400/G450/G550 cards</B> : although a
+  <A HREF="video.html#2.3.1.9">Vidix driver</A> is provided, it is recommended
+  to use the old mga_vid kernel module instead, for it works much better.
+  Please see the <A HREF="video.html#2.3.1.7">mga_vid</A> section about its
+  installation and usage. It is important to do these steps <I>before</I>
+  compiling <B>MPlayer</B>, otherwise no mga_vid support will be built. Also
+  check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A> section.
+  <U><B>If you are non-Linux user</B></U>, your only possibility is the Vidix
+  driver: read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee cards</B> : please see the <A
-HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big speedup. It
-is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
-otherwise no 3Dfx support will be built. Also see the <A HREF="video.html#2.3.1.A.3">3dfx
-TV out section</A>. If you use X, use at least 4.2.0, as 3dfx Xv driver was
-broken in 4.1.0, and earlier releases!</LI>
+<LI><B>3Dfx Voodoo3/Banshee cards</B> : please see the
+  <A HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big
+  speedup. It is important to do these steps <I>before</I> compiling
+  <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
+  HREF="video.html#2.3.1.A.3">3dfx TV-out section</A>. If you use X, use at
+  least 4.2.0, as 3dfx Xv driver was broken in 4.1.0, and earlier
+  releases!</LI>
 
-<LI><B>ATI cards</B> : see the <A HREF="video.html#2.3.1.A.2">ATI cards
-section</A> of the TV-out documentation, to know what features of your card is
-supported under Linux/MPlayer. If you have a <B>Radeon</B>, <B>Rage128</B>
-or <B>Mach64</B> (Rage XL/Mobility, Xpert98) card, we have a
-<B>Vidix</B> driver for you, with optional TV out ! Check <A
-HREF="video.html#2.3.1.14">this</A> section ! <U><B>If you are non-Linux
-user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
+<LI><B>ATI cards</B> : <A HREF="video.html#2.3.1.14">Vidix driver</A> is
+  provided for the following cards:
+  <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
+  Also see the <A HREF="video.html#2.3.1.A.2">ATI cards
+  section</A> of the TV-out documentation, to know if you card's TV-out is
+  supported under Linux/MPlayer.</LI>
 
 <LI><B>S3 cards</B> : the Savage and Virge/DX chips have hardware acceleration. Use as
 new XFree86 version as possible, older drivers are buggy. Savage chips
@@ -547,9 +546,13 @@ support.</LI>
 <A HREF="users_against_developers.html#nvidia">different opinion</A>!).
 Nvidia's cards have very cheap and bad
 quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration for all NVidia cards !</U> You have to download
-Nvidia's closed-source drivers from nvidia.com . See details in <A
-HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
+contain support for hardware YUV acceleration for all NVidia cards !</U>
+You have to download Nvidia's closed-source drivers from nvidia.com. See
+details in <A HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
+
+<LI><B>3DLabs GLINT R3 and Permedia3</B> : a Vidix driver is provided
+  (pm3_vid). Please see the <A HREF="video.html#2.3.1.15">Vidix
+  instructions</A>.</LI>
 
 <LI><B>other cards</B> : none of the above?
   <UL>

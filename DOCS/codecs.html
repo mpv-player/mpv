@@ -1,11 +1,7 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=WHITE>
@@ -111,7 +107,7 @@ faster, or even the fastest solution.</P>
 <A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contains an
 <B>open source</B> DivX codec, which is compatible with the traditional DivX.
 <B>MPlayer</B> supports this codec, making it possible to <B>watch
-DivX/DivX4/DivX5/MP42 movies on non-x86 platforms</B>. Furthermore it offers higher
+DivX/DivX4/DivX5/MP41/MP42 movies on non-x86 platforms</B>. Furthermore it offers higher
 decoding speed than the Win32 codecs or the original
 DivX4 library!</P>
 
@@ -340,11 +336,16 @@ then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 <P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
 
-<P>Currently the only supported one is the DNET codec. Actually it is a
-low-bitrate version of the well known AC3 codec. It can be found in both
-old and new RealMedia movies.</P>
+<P><B>MPlayer</B> supports decoding all versions of RealAudio:
+  <UL>
+    <LI>RealAudio DNET - decoding supported by <B>libavcodec</B></LI>
+    <LI>RealAudio Cook - decoding supported by <B>RealPlayer libraries</B></LI>
+    <LI>RealAudio Sipro - decoding supported by <B>RealPlayer libraries</B></LI>
+  </UL>
+</P>
 
-<P>RealAudio libraries from RealPlayer can't be used right now.</P>
+<P>On how to install RealPlayer libraries, see the
+  <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section.</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Win32 codec importing HOWTO</A></B></P>
