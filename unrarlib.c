@@ -711,7 +711,7 @@ int ReadBlock(int BlockType)
 
   if((FILE_HEAD == BlockType) && (Size>0))
   {
-    NewLhd.NameSize=Min(NewLhd.NameSize,sizeof(ArcFileName)-1);
+    ArcFileName=realloc(ArcFileName,NewLhd.NameSize+1);
 #ifdef _USE_MEMORY_TO_MEMORY_DECOMPRESSION
     tread(MemRARFile, ArcFileName, NewLhd.NameSize);
 #else
