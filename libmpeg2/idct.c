@@ -66,12 +66,12 @@ void idct_init (void)
 {
 #ifdef ARCH_X86
     if (config.flags & MM_ACCEL_X86_MMXEXT) {
-	fprintf (stderr, "Using MMXEXT for IDCT transform\n");
+	printf ("libmpeg2: Using MMXEXT for IDCT transform\n");
 	idct_block_copy = idct_block_copy_mmxext;
 	idct_block_add = idct_block_add_mmxext;
 	idct_mmx_init ();
     } else if (config.flags & MM_ACCEL_X86_MMX) {
-	fprintf (stderr, "Using MMX for IDCT transform\n");
+	printf ("libmpeg2: Using MMX for IDCT transform\n");
 	idct_block_copy = idct_block_copy_mmx;
 	idct_block_add = idct_block_add_mmx;
 	idct_mmx_init ();
@@ -79,7 +79,7 @@ void idct_init (void)
 #endif
 #ifdef LIBMPEG2_MLIB
     if (config.flags & MM_ACCEL_MLIB) {
-	fprintf (stderr, "Using mlib for IDCT transform\n");
+	printf ("libmpeg2: Using mlib for IDCT transform\n");
 	idct_block_copy = idct_block_copy_mlib;
 	idct_block_add = idct_block_add_mlib;
     } else
@@ -87,7 +87,7 @@ void idct_init (void)
     {
 	int i;
 
-	fprintf (stderr, "No accelerated IDCT transform found\n");
+	printf ("libmpeg2: No accelerated IDCT transform found\n");
 	idct_block_copy = idct_block_copy_c;
 	idct_block_add = idct_block_add_c;
 	for (i = -384; i < 640; i++)
