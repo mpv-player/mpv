@@ -244,6 +244,8 @@ float sub_last_pts = -303;
 
 static stream_t* stream=NULL;
 static demuxer_t *demuxer=NULL;
+static sh_audio_t *sh_audio=NULL;
+static sh_video_t *sh_video=NULL;
 
 char* current_module=NULL; // for debugging
 
@@ -265,12 +267,13 @@ static unsigned int inited_flags=0;
 #define INITED_AO 2
 #define INITED_GUI 4
 #define INITED_GETCH2 8
-#define INITED_LIRC 16
 #define INITED_SPUDEC 32
 #define INITED_STREAM 64
 #define INITED_INPUT    128
 #define INITED_VOBSUB  256
-#define INITED_DEMUXER  512
+#define INITED_DEMUXER 512
+#define INITED_ACODEC  1024
+#define INITED_VCODEC  2048
 #define INITED_ALL 0xFFFF
 
 static void uninit_player(unsigned int mask){
@@ -278,18 +281,33 @@ static void uninit_player(unsigned int mask){
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
+  if(mask&INITED_ACODEC){
+    inited_flags&=~INITED_ACODEC;
+    current_module="uninit_acodec";
+    if(sh_audio) uninit_audio(sh_audio);
+    sh_audio=NULL;
+  }
+
+  if(mask&INITED_VCODEC){
+    inited_flags&=~INITED_VCODEC;
+    current_module="uninit_vcodec";
+    if(sh_video) uninit_video(sh_video);
+    sh_video=NULL;
+  }
+ 
+  if(mask&INITED_DEMUXER){
+    inited_flags&=~INITED_DEMUXER;
+    current_module="free_demuxer";
+    if(demuxer) free_demuxer(demuxer);
+    demuxer=NULL;
+  }
+
   // kill the cache process:
   if(mask&INITED_STREAM){
     inited_flags&=~INITED_STREAM;
     current_module="uninit_stream";
     if(stream) free_stream(stream);
     stream=NULL;
-  }
-
-  if(mask&INITED_DEMUXER){
-    current_module="uninit_demuxer";
-    if(demuxer) free_demuxer(demuxer);
-    demuxer=NULL;
   }
 
   if(mask&INITED_VO){
@@ -311,7 +329,7 @@ static void uninit_player(unsigned int mask){
   if(mask&INITED_VOBSUB){
     inited_flags&=~INITED_VOBSUB;
     current_module="uninit_vobsub";
-    vobsub_close(vo_vobsub);
+    if(vo_vobsub) vobsub_close(vo_vobsub);
     vo_vobsub=NULL;
   }
 
@@ -321,6 +339,18 @@ static void uninit_player(unsigned int mask){
     spudec_free(vo_spudec);
     vo_spudec=NULL;
   }
+
+#ifdef USE_SUB  
+  if ( subtitles ) 
+   {
+    current_module="sub_free";
+    sub_free( subtitles );
+    if ( sub_name ) free( sub_name );
+    sub_name=NULL;
+    vo_sub=NULL;
+    subtitles=NULL;
+   }
+#endif
 
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
@@ -469,10 +499,6 @@ int main(int argc,char* argv[]){
 static demux_stream_t *d_audio=NULL;
 static demux_stream_t *d_video=NULL;
 static demux_stream_t *d_dvdsub=NULL;
-
-static sh_audio_t *sh_audio=NULL;
-static sh_video_t *sh_video=NULL;
-
 
 // for multifile support:
 play_tree_iter_t* playtree_iter = NULL;
@@ -832,8 +858,10 @@ if(!use_stdin && !slave_mode){
       vo_vobsub=vobsub_open(buf,spudec_ifo,0,&vo_spudec);
       free(buf);
     }
-    if(vo_vobsub)
+    if(vo_vobsub){
       sub_auto=0; // don't do autosub for textsubs if vobsub found
+      inited_flags|=INITED_VOBSUB;
+    }
 
 //============ Open & Sync STREAM --- fork cache2 ====================
 
@@ -956,7 +984,6 @@ current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
 if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
-
 inited_flags|=INITED_DEMUXER;
 
 current_module="demux_open2";
@@ -1112,7 +1139,8 @@ if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
     sh_audio=d_audio->sh=NULL; // failed to init :(
-  }
+  } else
+    inited_flags|=INITED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 }
 
@@ -1142,10 +1170,13 @@ init_best_video_codec(sh_video,video_codec_list,video_fm_list);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(!sh_video->inited){
+    uninit_player(INITED_VO);
     if(!sh_audio) goto goto_next_file;
     sh_video = d_video->sh = NULL;
     goto main; // exit_player(MSGTR_Exit_error);
 }
+
+inited_flags|=INITED_VCODEC;
 
 if(auto_quality>0){
     // Auto quality option enabled
@@ -1245,6 +1276,7 @@ if(sh_audio){
       sh_audio->sample_format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
+    uninit_player(INITED_ACODEC); // close codec
     sh_audio=d_audio->sh=NULL; // -> nosound
   } else {
     // SUCCESS:
@@ -1267,8 +1299,9 @@ if(sh_audio){
 	ao_data.samplerate, ao_data.channels, ao_data.format,
 	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
 	ao_data.outburst*4, ao_data.buffersize)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format, -> nosound\n");
-      sh_audio=d_audio->sh=NULL; // -> nosound
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+//      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
+//      sh_audio=d_audio->sh=NULL; // -> nosound
     }
 #endif
   }
@@ -1284,14 +1317,14 @@ if(!sh_audio){
   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
-  uninit_player(INITED_AO); // close device
+  //uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
    if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
-   uninit_player(INITED_VO);
+   //uninit_player(INITED_VO);
 }
 
 if (!sh_video && !sh_audio)
@@ -2640,7 +2673,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
+uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT));
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
@@ -2687,45 +2720,14 @@ while(playtree_iter != NULL) {
 
 if(use_gui || playtree_iter != NULL){
 
-#ifdef HAVE_FREETYPE
-    current_module="uninit_font";
-    if (vo_font) free_font_desc(vo_font);
-    vo_font = NULL;
-#endif
-
-  current_module="uninit_acodec";
-  if(sh_audio) uninit_audio(sh_audio);
-  sh_audio=NULL;
-
-  current_module="uninit_vcodec";
-  if(sh_video) uninit_video(sh_video);
-  sh_video=NULL;
- 
-  current_module="free_demuxer";
-  if(demuxer) free_demuxer(demuxer);
-  demuxer=NULL;
-
-  current_module="free_stream";
-  if(stream) free_stream(stream);
-  stream=NULL;
-
-#ifdef USE_SUB  
-  current_module="sub_free";
-  if ( subtitles ) 
-   {
-    sub_free( subtitles );
-    if ( sub_name ) free( sub_name );
-    sub_name=NULL;
-    vo_sub=NULL;
-    subtitles=NULL;
-   }
-#endif
-
   eof = 0;
   goto play_next_file;
 }
 
 #ifdef HAVE_FREETYPE
+current_module="uninit_font";
+if (vo_font) free_font_desc(vo_font);
+vo_font = NULL;
 done_freetype();
 #endif
 
