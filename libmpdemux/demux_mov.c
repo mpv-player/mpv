@@ -1350,7 +1350,7 @@ if(trak->samplesize){
 //    printf("X = %d\n", x);
     /* the following stuff is audio related */
     if (trak->type == MOV_TRAK_AUDIO){
-      if(trak->stdata_len>=44 && trak->stdata[9]>=1){
+      if(trak->stdata_len>=44 && trak->stdata[9]>=1 && char2int(trak->stdata,28)>0){
         // stsd version 1 - we have audio compression ratio info:
 	x/=char2int(trak->stdata,28); // samples/packet
 //	x*=char2int(trak->stdata,32); // bytes/packet
