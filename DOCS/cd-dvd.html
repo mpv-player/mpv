@@ -1,207 +1,196 @@
 <HTML>
-
 <BODY>
 
-<PRE>
-
-  <A NAME=4.1>4.1.  CD-ROM drives</A>
-
-  From Linux documentation:
-
-  Some CDROM drives are capable of changing their head-speed. There are several
-  reasons for changing the speed of a CDROM drive. Badly pressed CDROMs may
-  benefit from less-than-maximum head rate. Modern CDROM drives can obtain very
-  high head rates (up to 24-times is common).  It has been reported that these
-  drives can make reading errors at these high speeds, reducing the speed can
-  prevent data loss in these circumstances.  Finally, some of these drives can
-  make an annoyingly loud noise, which a lower speed may reduce.
-
-  The recommended way to do it is with a program called 'setcd' . It's kinda
-  old, but won't be too hard to find on the Net. (UPDATE : new hdparm
-  has an option for this !)
-  Use it with :
-
-
-		setcd -x [speed] [cdrom device]
-
-
-  Also you can try :
-
-
-		echo current_speed:4 >/proc/ide/[cdrom device]/settings
-
-
-  but you'll need root privileges. I use following command too :
-
-
-		echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings
-
-
-  for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
-  It's recommended that you tuneup your CDROM drive also with hdparm :
-
-
-		hdparm -d1 -a8 -u1 (cdrom device)
-
-
-  to enable using DMA access, readahead, and IRQ unmasking.
-  (if you don't understand these, *read the hdparm manpage*)
-
-  Please refer to "/proc/ide/[cdrom device]/settings" for fine-tuning your
-  CDROM.
-
-
-
-  <A NAME=4.2>4.2.  DVD playback</A>
-
-  IMPORTANT NOTE: please _DO_NOT_ require further features for DVD playback. This
-  is extremly experimental hack. Maybe it won't work for you. If you're
-  capable of helping us do it now! First we would like to fix existing problems.
-  Then we can start implementing advanced DVD playback functions of course.
-
-  This means current DVD functions are mainly for developers and not for users!
-
-  First, you must compile and install libcss on your system.
-  Second, you have to recompile <B>MPlayer</B> with libcss support. There is
-  autodetection of libcss, but if it fails, see below :
-
-  Call ./configure script of <B>MPlayer</B> with these options:
-
-  ./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include
-
-  (of course you can append your favourite options as well)
-
-  --with-csslibdir=/usr/local/lib
-	Directory contains libcss.so shared library. This directory should
-	be in your /etc/ld.so.conf as well.
-	
-  --with-cssincdir=/usr/local/include
-	Directory contains header file 'css.h' of libcss.
-
-  mplayer -dvdauth /dev/dvd /mnt/cdrom/video_ts/vts_01_1.vob
-
-  where,
-
-	'-dvdauth /dev/dvd' tells <B>MPlayer</B> the device name of your DVD drive.
-	it's used in disc authentication process
-
-	the filename is simply a VOB file path on the disc
-
-  Note that according to my experiences, disc authentication requires root
-  privileges so you must run <B>MPlayer</B> as root! (see section 'Problems').
-
-  NOTE about the sound:
-	It seems that <B>MPlayer</B> sometimes fails to find the first audio stream.
-	You can specify it with the '-aid 128' option, for example.
-	Please experience with 128,129 and similar values. See section
-	'Problems'.
-
-  On my AMD K6-2 with using hw scaling and colorspace conversion
-  capability of my G400 it's possible to watch DVD with about 70%
-  CPU usage with '-nosound'. Unfortunately with sound my machine is
-  not enough :( Maybe it can be improved somewhat ...
-  Guess, it's not so bad ... According to reports from my friends
-  xine uses 80-90% CPU to play DVD on much more powerful machines
-  like 1GHz Athlon systems (as far as I know, it's said that about
-  300MHz celeron is the minimum to watch DVDs ... using windows
-  DVD viewers).
-
-  Hint: I commented out downmix functions from libac3 (of course in this way I
-  can't get sound) and audio decoding CPU usage became 11% instead of 24 on
-  my machine. This clearly indicates that we should optimize downmix functions
-  (KNI code is no use for my k6-2).
-
-  HOT NEWZ:
-  We have got 3Dnow optimized libac3. Wow ;-)
-
-
-  Problems (TODO)
-
-  * disc authentication (the FIBMAP ioctl) requires root privilegies.
-    this is strange since OMS can do it as user too.
-  * sound. I'm using my only DVD disc (The Matrix) to test <B>MPlayer</B>.
-    some VOB file have English sound, some have Spanish and some have
-    no sound at all.
-    IT SEEMS that if I give '-aid 128' everything works with English sound ...
-  * strange effects but only with SOME vob files (it looks like some interlacing
-    effect, eg: every 2nd line on the screen is from the last frame).
-
-
-  Feature TODO
-
-  * chapter scanner
-  * audio stream scanner and allow to select one on runtime as well
-    (in stage#1 it would be enough to select one on the startup, see
-    'Problems' above)
-  * DVD menu
-    I found (at least on disc 'The Matrix') the menu VOB but I don't
-    know how can it be used.
-    (after some eyeballing on the source of OMS, it seems we would have to
-    parse *.ifo files)
-  * subtitle support
-  * OSD/GUI (?) support for select chapter, subtitle and audio stream
-  * getting some documentation on DVD format, eg: which is the 'root' VOB
-    file on the disc in video_ts directory, which is the menu and so on.
-  * improve performance (see 'Performance' above)
-
-
-  No sound problem (from Matrix DVD, the menu VOB)
-
-  End of packet while searching for PCM header
-
-  DEMUXER: Too many (2048 in 4131540 bytes) video packets in the buffer!
-  (maybe you play a non-interleaved stream/file or video codec failed)
-  MPEG: No Audio stream found...  ->nosound
-
-  However this does not occur if you specify '-aid 128'.
-
-
-  <A NAME=4.3>4.3.  DVD playback FAQ</A>
-
-  <B>Q: I have some problem not mentioned here ...
-  </B>A: Read file 'DVD' as well.
-
-  <B>Q: How can I actually watch DVD with MPlayer?
-  </B>A: Ehh. Go on reading this file as well as 'DVD' (hint: you must have libcss)
-
-  <B>Q: So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
-     under the XYZ#$ paragraph of the--
-  </B>A: Get back asshole, there is no DeCSS code in MPlayer. It links to libcss.
-
-  <B>Q: Seems to work but no sound.
-  </B>A: Use '-aid 128' (or try: 128,129,...) command line switch
-
-  <B>Q: I have got Spanish audio instead of English (or similar problems)
-  </B>A: See the last question/answer.
-
-  <B>Q: MPlayer complains about FIBMAP or something.
-  </B>A: Try to run MPlayer as root.
-
-  <B>Q: some strange effect (interlace like thing) especially when fast moving
-     objects are shown in the movie
-  </B>A: known problem, we try to fix it later
-
-  <B>Q: DVD support in MPlayer is a piece of shit!
-  </B>A: You're probably right :) However please contact us if you can improve it!
-
-  <B>Q: Where can I get libcss package from?
-  </B>A: Maybe from the source of OMS (www.linuxvideo.org).
-
-  <B>Q: How can I ... (insert some expectable DVD player feature here)
-  </B>A: The current implementation is only for viewing VOB files from DVD.
-     Nothing more, like subtitles, menus and so on.
-
-  <B>Q: How can I set the region code of my DVD-Drive ? I don't have windows!
-  </B>A: Use the 'regionset' tool :
-     http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
-
-  <B>Q: MPlayer complains about some renamed option?
-  </B>A: For future development, old '-dvd' option was replaced by '-dvdauth'.
-     Option '-dvd' *WILL* do the 'full disk movie' mplaying mode.
-     But until that, '-dvd' does nothing only prints error message.
-
-</PRE>
+<P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
+
+<P>From Linux documentation:</P>
+
+<P>Some CDROM drives are capable of changing their head-speed. There are several
+reasons for changing the speed of a CDROM drive. Badly pressed CDROMs may
+benefit from less-than-maximum head rate. Modern CDROM drives can obtain very
+high head rates (up to 24-times is common).  It has been reported that these
+drives can make reading errors at these high speeds, reducing the speed can
+prevent data loss in these circumstances.  Finally, some of these drives can
+make an annoyingly loud noise, which a lower speed may reduce.</P>
+
+<P>The recommended way to do it is with a program called 'setcd' . It's kinda
+old, but won't be too hard to find on the Net. (UPDATE : new hdparm
+has an option for this !)
+Use it with :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [speed] [cdrom device]</CODE></P>
+
+<P>Also you can try:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>but you'll need root privileges. I use following command too:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
+It's recommended that you tuneup your CDROM drive also with hdparm:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
+
+<P>to enable using DMA access, readahead, and IRQ unmasking.
+(if you don't understand these, *read the hdparm manpage*)</P>
+
+<P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for fine-tuning your
+CDROM.</P>
+
+<P><B><A NAME=4.2>4.2. DVD playback</A></B></P>
+  
+<P>Yes, the real DVD support has been arrived. You don't need to play VOB files
+manually from disk thinking of the purpose of a file in the video_ts
+directory, you don't need worry it it's an encrypted disk or not (in old
+<B>MPlayer</B> you had to put '-dvdauth /dev/dvd' into the command line in case
+of encrypted discs), and you don't need even mount your disk to be able to
+play :)</P>
+  
+<P>IMPORTANT NOTE: please _DO_NOT_ require further features for DVD playback.
+This is the first version of some real DVD support inside <B>MPlayer</B> and
+we're busy with hunting bugs and implementing basic DVD player features.</P>
+
+<P><B>MPlayer</B> uses libdvdread which has got built in support for IFO parsing,
+reading navi blocks and doing authentication/descrambling. libdvdread
+use the good old libcss to the latter tasks. So you will need libcss and
+libdvdread downloaded, compiled and installed BEFORE you run ./configure
+script of <B>MPlayer</B> which will autodetect libdvdread for you in this way.</P>
+
+<UL>  
+<LI><P><B>Download source of libdvdread and libcss.</B></P>
+  
+<P><I>You can download them from
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
+(click 'download' in the menu at the left, and you can find libcss and
+libdvdread in a table).</I></P></LI>
+  
+<LI><P><B>Compile and install libcss THEN libdvdread.</B></P>
+    
+<P><I>Read documentation of these packages to do this step easily.</I></P></LI>
+  
+<LI><P><B>Recompile MPlayer.</B></P>
+  
+<P><I>Run <CODE>./configure</CODE>. If you install libdvdread correctly, ./configure
+says something similar:<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
+(Of course you can put your favourite configure options into the command
+line when you run ./configure). That's it! Say: <CODE>make</CODE>, then <CODE>make install</CODE>.</I></P></LI>
+</UL>
+
+<P>Of course after installing libcss and libdvdread you don't need recompile
+them at each time when you want to recompile <B>MPlayer</B> (from a new CVS version
+for example) since the needed packages have already been installed on your
+machine.</P>
+
+<P><B>Using MPlayer to play DVDs:</B></P>
+
+
+<TABLE BORDER=0 WIDTH=100%>
+<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD>Enables DVD support and selects title.</TD><TR>
+<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD>Selects DVD chapter (default: play from chapter 1)</TD><TR>
+<TD VALIGN=top>-dvdangle &lt;chapter_id&gt;&nbsp;</TD>
+<TD>Selects camera angle (default: 1)</TD><TR>
+</TABLE>
+
+<P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
+(compile time option), or you can specify it as a filename for <B>MPlayer</B>:
+</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
+
+<P><B><A NAME=4.3>4.3. DVD playback FAQ</A></B></P>
+
+<TABLE BORDER=0 ALIGN=left WIDTH=100%>
+
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+I have some problem not mentioned here ...
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Read section <A HREF="#4.2">DVD playback</A> as well.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+How can I actually watch DVD with MPlayer?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+See the latter question and answer.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Can I compile libdvdread and libcss for example on my sweet Sparc/Solaris?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Who knows ... Please test it and send feedback. But it's said that it
+should work. Please refer documentation of libdvdread and its homepage
+as well. We're not authors of libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+What about subtitles? Can MPlayer decode them?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Yes it can (or at least it would be able to) but there is now DVD subtitle
+displaying functionality inside <B>MPlayer</B> (DVD subs are stored as images,
+not text!). However it's a planned feature (at the time of libvo2).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+I've got no sound / bad sound (Spanish audio and other ugly things).
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+<B>MPlayer</B> currently does not use all of information of IFO blocks from DVD.
+You can adjust the right DVD audio stream with: '-aid 128' command line
+option, where 128 is the stream id of requested audio stream. You can
+experience with numbers of 128,129,... and so on. Of course this problem
+will be solved in the future.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+There is some strange effect (interlace like thing) especially when fast
+moving objects are shown in the movie.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Known problem, we try to fix it later (when we switch to libvo2).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+How can I set the region code of my DVD-Drive ? I don't have windows!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Use the 'regionset' tool:
+http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
+under the XYZ#$ paragraph of the--
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Get back asshole, there is no DeCSS code in <B>MPlayer</B>. <B>MPlayer</B> uses libdvdread
+by linking against it, and libdvdread uses libcss by dynamic loading it.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play DVD?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+No, you don't. This is the past :) However of course you must have got
+the proper rights to the DVD device driver entry (in /dev).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+How can I ... (insert some expectable DVD player feature here)?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+The current implementation is the first implementation of some real DVD
+player functionality. First, we would like to target existing bugs and
+basic features before implementing new features.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Where can I get libdvdread and libcss packages from?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+From the site of Ogle:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+</TABLE>
+
+<BR>
+<HR>MPlayer documentation project
 
 </BODY>
-
 </HTML>

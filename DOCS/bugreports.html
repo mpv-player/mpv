@@ -1,95 +1,101 @@
 <HTML>
-
 <BODY>
 
-<PRE>
+<P><B><A NAME=C>Appendix C - How to report bugs</A></B></P>
 
-  <A NAME=C>Appendix C - How to report bugs</A>
+<P><B>How to report bugs?</B></P>
 
-How to report bugs?
-~~~~~~~~~~~~~~~~~~~
-First read DOCS/BUGS, and other docs. If your problem isn't
-known or isn't solved by our instructions, then report the bug:
+<P>First read DOCS/BUGS, and other docs. If your problem isn't
+known or isn't solved by our instructions, then report the bug:</P>
 
-Where?
-======
-Subscribe to the mplayer-users mailing list:
-   http://lists.sourceforge.net/lists/listinfo/mplayer-users
-and send your bugreport to:
-   mplayer-users@lists.sourceforge.net
-We won't CC: so please subscribe!!!
+<P><B>Where?</B></P>
 
-Don't send bugreports private, directly to author's address!!!
+<P>Subscribe to the mplayer-users mailing list:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>http://lists.sourceforge.net/lists/listinfo/mplayer-users</CODE><BR>
+and send your bugreport to:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@lists.sourceforge.net</CODE><BR>
+We won't CC: so please subscribe!!!</P>
+
+<P>Don't send bugreports private, directly to author's address!!!
 We are working together on code, so everyone is interested in it.
 BTW many times other users know the solution (system config probs,
 bad drivers etc), even when we think it's a bug in our code.
-The language of this list is ENGLISH !
+The language of this list is ENGLISH!</P>
 
-Please describe your problem in details, examples etc, and don't
-forget to include these:
+<P>Please describe your problem in details, examples etc, and don't
+forget to include these:</P>
 
-What?
-=====
+<P><B>What?</B></P>
 
-1. The system info what we always want:
-- linux distribution
-  examples: 
-    RedHat 7.1
-    Slackware 7.0 + devel packs from 7.1 ...
-- kernel version:
-  uname -a
-- libc version:
-  ls -l /lib/libc[.-]*
-- X version:
-  X -version
-- gcc and ld version:
-  gcc -v
-  ld -v
-- binutils version:
-  as --version
+<P><B><I>1. The system info what we always want:</I></B></P>
 
-2. Hardware &amp; drivers:
-- CPU info:
-  cat /proc/cpuinfo
-- video card manufacturer and model
-  examples:
-    ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-    Matrox G400 DH 32MB SGRAM
-- video driver type &amp; version
-  examples:
-    X built-in driver
-    nvidia 0.9.623
-    Utah-GLX CVS 2001-02-17
-    DRI from X 4.0.3
-- sound card type &amp; driver
-  examples:
-    Creative SBLive! Gold with OSS driver from oss.creative.com
-    Creative SB16 with OSS drivers of kernel
-    GUS PnP with ALSA OSS emulation
-- if you are unsure, attach output of lspci -v
+<UL>
+<LI>linux distribution<BR>
+examples:<UL>
+    <LI>RedHat 7.1
+    <LI>Slackware 7.0 + devel packs from 7.1 ...</UL>
+<LI>kernel version:<BR>
+    <CODE>uname -a</CODE>
+<LI>libc version:<BR>
+    <CODE>ls -l /lib/libc[.-]*</CODE>
+<LI>X version:<BR>
+    <CODE>X -version</CODE>
+<LI>gcc and ld version:<BR>
+    <CODE>gcc -v<BR>
+    ld -v</CODE>
+<LI>binutils version:<BR>
+    <CODE>as --version</CODE>
+</UL>
 
-For compiling problems/errors:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-3. output of configure/make:
-     make distclean
-     ./configure &amp;>config.log
-     ./make &amp;>make.log
-4. these files:
-     config.h
-     config.mak
-     libvo/config.mak
+<P><B><I>2. Hardware & drivers:</I></B></P>
 
-For playback problems:
-~~~~~~~~~~~~~~~~~~~~~~
-3. Output of mplayer at verbose level 1 (-v)
-  mplayer -v [options] filename &amp;> mplayer.log
+<UL>
+<LI>CPU info:<BR>
+    <CODE>cat /proc/cpuinfo</CODE>
+<LI>video card manufacturer and model<BR>
+    examples:<BR><UL>
+    <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
+    <LI>Matrox G400 DH 32MB SGRAM</UL>
+<LI>video driver type&version<BR>
+    examples:<UL>
+    <LI>X built-in driver
+    <LI>nvidia 0.9.623
+    <LI>Utah-GLX CVS 2001-02-17
+    <LI>DRI from X 4.0.3</UL>
+<LI>sound card type & driver<BR>
+    examples:<BR><UL>
+    <LI>Creative SBLive! Gold with OSS driver from oss.creative.com
+    <LI>Creative SB16 with OSS drivers of kernel
+    <LI>GUS PnP with ALSA OSS emulation</UL>
+<LI>if you are unsure, attach output of lspci -v
+</UL>
+
+<P><B>For compiling problems/errors</B></P>
+
+<P><B><I>3. output of configure/make:</I></B></P>
+
+<UL><LI><CODE>make distclean</CODE>
+<LI><CODE>./configure &>config.log</CODE>
+<LI><CODE>     ./make &>make.log
+</UL>
+
+<P><B><I>4. these files:</I></B></P>
+<UL><LI>config.h
+<LI>config.mak
+<LI>libvo/config.mak
+</UL>
+
+<P><B>For playback problems:</B></P>
+
+<P><B><I>3. Output of mplayer at verbose level 1 (-v)</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filename &amp;&gt; mplayer.log</CODE></P>
   
-4. If the problem is specific to one or a few files,
-  then please upload that file to:
-    ftp://mplayerhq.hu/MPlayer/incoming/
+<P><B><I>4. If the problem is specific to one or a few files,
+  then please upload that file to:</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
   Usually first 1-5 MB of the file is enough to reproduce
   the problem, but first you should try it:
-    dd if=yourfile of=smallfile bs=1k count=1024
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1k count=1024</CODE></P>
   (it will cut first 1MB of 'yourfile' and save to 'smallfile')
   Then try again on this small file, and if bug still exists
   then it's enough to upload this small file.
@@ -98,44 +104,48 @@ For playback problems:
   If the file is accessible on the net, then sending the
   _exact_ URL is enough!
 
-5. For crashes (segfault, SIGILL, signal 4 etc):
+<P><B><I>5. For crashes (segfault, SIGILL, signal 4 etc):</I></B></P>
 
-If you have coredump of the crash, see 5.a, else see 5.b:
+<P><I>If you have coredump of the crash, see 5.a, else see 5.b:</I></P>
 
-5.a: Please print us coredump (if it was created).
-Howto:
-please create following command file:
+<P><B><I>5.a: Please print us coredump (if it was created).</I></B></P>
 
-disass $eip-32 $eip+32
-printf "eax=%08lX\n",$eax
-printf "ebx=%08lX\n",$ebx
-printf "ecx=%08lX\n",$ecx
-printf "edx=%08lX\n",$edx
-printf "esp=%08lX\n",$esp
-printf "ebp=%08lX\n",$ebp
-printf "edi=%08lX\n",$edi
-printf "esi=%08lX\n",$esi
+<P>Howto:
+please create following command file:</P>
 
-Then simply execute following command line:
-gdb mplayer --core=core -batch --command=command_file >mplayer.bug
+<P><CODE>disass $eip-32 $eip+32<BR>
+printf "eax=%08lX\n",$eax<BR>
+printf "ebx=%08lX\n",$ebx<BR>
+printf "ecx=%08lX\n",$ecx<BR>
+printf "edx=%08lX\n",$edx<BR>
+printf "esp=%08lX\n",$esp<BR>
+printf "ebp=%08lX\n",$ebp<BR>
+printf "edi=%08lX\n",$edi<BR>
+printf "esi=%08lX\n",$esi<BR>
+</CODE></P>
 
-5.b.: run <B>MPlayer</B> in gdb:
-[at root/user shell prompt:]
-  # gdb mplayer
-[at gdb prompt:]
-  > run -v [options-to-mplayer] filename
-  ... (wait until it will crash)
-  > bt
-  > disass $eip-32 $eip+32
+<P>Then simply execute following command line:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file >mplayer.bug</CODE></P>
+
+<P><B><I>5.b.: run MPlayer in gdb:</I></B></P>
+<P>[at root/user shell prompt:]<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
+[at gdb prompt:]<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [options-to-mplayer] filename</CODE><BR>
+  ... (wait until it will crash)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
 Send us the full output of the above things!
+</P>
 
-In general:
-~~~~~~~~~~~
-  If something is big (logs etc) then it's better to upload to the ftp
-  (gzipped), and include only path/filename in the bugreport!
+<P><B>In general:</B></P>
 
-</PRE>
+<P>If something is big (logs etc) then it's better to upload to the ftp
+(gzipped), and include only path/filename in the bugreport!</P>
+
+<BR>
+<HR>
+MPlayer documentation project
 
 </BODY>
-
 </HTML>
