@@ -37,10 +37,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <dlfcn.h>
 #include <math.h>
 #include <inttypes.h>
 
