@@ -2003,7 +2003,7 @@ int main(void) { return 0; }
 EOF
   _dvdread=no
   cc_check  \
-    -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -ldvdread && \
+    -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -ldvdread -ldl && \
     _dvdread=yes
 fi
 if test "$_css" = auto ; then
