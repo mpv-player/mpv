@@ -31,8 +31,8 @@
   <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
   <LI>VIVO 1.0, 2.0, I263 and other h263(+) variants</LI>
   <LI>FLI/FLC</LI>
-  <LI>RealVideo 1.0 codec from libavcodec, and RealVideo 2.0, 3.0 codecs using
-    RealPlayer libraries</LI>
+  <LI>RealVideo 1.0 codec from libavcodec, and RealVideo 2.0, 3.0 and 4.0
+    codecs using RealPlayer libraries</LI>
   <LI>native decoder for HuffYUV</LI>
   <LI>various old simple RLE-like formats</LI>
 </UL>
@@ -122,7 +122,7 @@
   <LI>Compile. Configure should detect problems before compilation.</LI>
 </OL>
 
-<P><B>Note:</B> MPlayer from CVS does contain a libavcodec
+<P><B>Note:</B> <B>MPlayer</B> from CVS does contain a libavcodec
   subdirectory, but it does <B>not</B> contain the source for libavcodec!
   You must follow the steps above to obtain the source for this library.</P>
 
@@ -167,13 +167,10 @@
 
 <P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
   for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
-  ffh263</CODE> option (default) (requires up-to-date libavcodec). For 2.0
-  files, use the
+  ffh263</CODE> option (default). For 2.0 files, use the
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>
   Win32 DLL file, and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
-  Win32 codecs. This latter codec does not support YV12 nor YUY2 only BGR
-  modes, restricting it to the X11 and OpenGL outputs. Hopefully ffh263 will
-  support VIVO 2.0 files in the future.</P>
+  Win32 codecs.</P>
 
 
 <H4><A NAME="mpeg">2.2.1.5  MPEG 1/2 video</A></H4>
@@ -210,8 +207,8 @@
 </UL>
 
 <P>It is recommended to download and install RealPlayer8 or RealONE, because
-  <B>MPlayer</B> can use their libraries to decode files with RealVideo 2.0 or
-  RealVideo 3.0 video.  The <B>MPlayer</B> configure script should detect the
+  <B>MPlayer</B> can use their libraries to decode files with RealVideo 2.0 -
+  4.0 video. The <B>MPlayer</B> configure script should detect the
   RealPlayer libraries in the standard locations of a full installation. If it
   does not, tell configure where to look with the
   <CODE>--with-reallibdir</CODE> switch.</P>
@@ -300,7 +297,7 @@
   <LI>Voxware audio (using DirectShow DLL)</LI>
   <LI>alaw, msgsm, pcm and other simple old audio formats</LI>
   <LI>VIVO audio (g723, Vivo Siren)</LI>
-  <LI>RealAudio: DNET (low bitrate AC3), Cook</LI>
+  <LI>RealAudio: DNET (low bitrate AC3), Cook, Sipro</LI>
 </UL>
 
 
@@ -357,7 +354,7 @@
   VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
   have <B>Vivo Siren</B> audio. Both are supported. You can grab the
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>
-  Win32 DLL from the MPlayer site,
+  Win32 DLL from the <B>MPlayer</B> site,
   then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 
@@ -375,10 +372,10 @@
   <A HREF="formats.html#real">RealMedia file format</A> section.</P>
 
 
-<H3><A NAME="importing">2.2.3 Win32 codec importing HOWTO</A></H3>
+<H3><A NAME="importing">2.2.3  Win32 codec importing HOWTO</A></H3>
 
 
-<H4><A NAME="importing_vfw">2.2.3.1 VFW codecs</A></H4>
+<H4><A NAME="importing_vfw">2.2.3.1  VFW codecs</A></H4>
 
 <P>VFW (Video for Windows) is the old Video API for Windows. Its codecs have
   the .DLL or (rarely) .DRV extension.
@@ -409,49 +406,49 @@
 <P><B>Note:</B> On Windows NT/2000/XP search for this info in the registry, e.g. search for
   "VIDC.HFYU". To find out how to do this, look at the old DirectShow method below.</P>
 
-<H4><A NAME="importing_directshow">2.2.3.2 DirectShow codecs</A></H4>
+<H4><A NAME="importing_directshow">2.2.3.2  DirectShow codecs</A></H4>
 
 <P>DirectShow is the newer Video API, which is even worse than its predecessor.
   Things are harder with DirectShow, since</P>
 
 <UL>
   <LI><CODE>system.ini</CODE> does not contain the needed information, instead it
-    is stored in the registry and
-  <LI>we need the GUID of the codec.
+    is stored in the registry and</LI>
+  <LI>we need the GUID of the codec.</LI>
 </UL>
 
 <P><B>New Method:</B> Using Microsoft GraphEdit (fast)</P>
 
 <OL>
-  <LI>Get GraphEdit from either DirecX SDK or <A HREF="http://doom9.org">Doom9</A>
-  <LI>Start <CODE>graphedit.exe</CODE>
-  <LI>From the menue select Graph -&gt; Insert Filters
-  <LI>Expand item <CODE>DirectShow Filters</CODE>
-  <LI>Select the right codec name and expand item
+  <LI>Get GraphEdit from either DirectX SDK or <A HREF="http://doom9.org">Doom9</A></LI>
+  <LI>Start <CODE>graphedit.exe</CODE></LI>
+  <LI>From the menue select Graph -&gt; Insert Filters</LI>
+  <LI>Expand item <CODE>DirectShow Filters</CODE></LI>
+  <LI>Select the right codec name and expand item</LI>
   <LI>In the entry <CODE>DisplayName</CODE> look at the text in winged brackets
-    after the backslash and write it down (five dash-delimited blocks, the GUID)
-  <LI>The codec binary is the file specified in the <CODE>Filename</CODE> entry
+    after the backslash and write it down (five dash-delimited blocks, the GUID)</LI>
+  <LI>The codec binary is the file specified in the <CODE>Filename</CODE> entry</LI>
 </OL>
 
 <P><B>Note:</B> If there is no <CODE>Filename</CODE> entry and <CODE>DisplayName</CODE>
   contains something like <CODE>device:dmo</CODE>, then it is a DMO-Codec, which are
-  currently not supported by MPlayer.</P>
+  currently not supported by <B>MPlayer</B>.</P>
 
 <P><B>Old Method:</B> Take a deep breath and start searching the registry...</P>
 
 <OL>
-  <LI>Start <CODE>regedit</CODE>.
+  <LI>Start <CODE>regedit</CODE>.</LI>
   <LI>Press <CODE>Ctrl-f</CODE>, disable the first two checkboxes, and enable
-    the third. Type in the fourcc of the codec (e.g. TM20).
+    the third. Type in the fourcc of the codec (e.g. TM20).</LI>
   <LI>You should see a field which contains the path and the filename
-    (e.g. <CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>).
+    (e.g. <CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>).</LI>
   <LI>Now that you have the file, we need the GUID. Try searching again, but
     now search for the codec's name, not the fourcc. Its name can be acquired
     when Media Player is playing the file, by checking File -&gt; Properties
     -&gt; Advanced.
-    If not, you are out of luck. Try guessing (e.g. search for TrueMotion).
+    If not, you are out of luck. Try guessing (e.g. search for TrueMotion).</LI>
   <LI>If the GUID is found you should see a FriendlyName and a CLSID
-    field. Write down the 16 byte CLSID, this is the GUID we need.
+    field. Write down the 16 byte CLSID, this is the GUID we need.</LI>
 </OL>
 
 <P><B>Note:</B> If searching fails, try enabling all the checkboxes. You may have

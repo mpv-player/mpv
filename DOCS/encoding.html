@@ -14,7 +14,7 @@
 
 <P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
   designed to encode MPlayer-playable movies
-  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other
+  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) to other
   MPlayer-playable formats (see below). It can encode with various codecs, like
   <B>DivX4</B> (1 or 2 passes), libavcodec,
   <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> audio. Also has powerful plugin system
@@ -104,10 +104,10 @@
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
     can come from a previous 3-pass encoding (it interferes with current
     one)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts
-    -vcodec=mpeg4:more_options -o movie.avi -pass 1<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options
-    -o movie.avi -pass 2</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+    vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:more_options
+    -oac copy -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -118,7 +118,7 @@
   <LI>Remove conflicting temporary file:
     <P><CODE>rm frameno.avi</CODE></P></LI>
   <LI>First pass:
-    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o frameno.avi</CODE></P>
+    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts vbr=3:more_options -o frameno.avi</CODE></P>
     <P>An audio-only avi file will be created, containing
       <B>only</B> the requested audio stream. Don't forget <CODE>-lameopts</CODE>,
       if you need to set it. If you were encoding a long movie, <B>MEncoder</B>
@@ -126,13 +126,13 @@
       destination sizes, after this pass finishes.</P></LI>
   <LI>Second pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the first pass of DivX4 video encoding. 
       Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
       the previous pass.</P></LI>
   <LI>Third pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the second pass of DivX4 video encoding. 
       Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
       the previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will
@@ -145,10 +145,10 @@
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-    -o frameno.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -o frameno.avi -oac mp3lame -lameopts vbr=3:more_options<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
     -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
     -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>2 or 3-pass encoding using internal libavcodec controller:</B></U>
@@ -190,8 +190,8 @@
   fast bilinear.</P>
 
 <P>Usage:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts
-    vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts
+    vcodec=mpeg4:more_options -vop scale=640:480 -oac copy -o
     output.avi</CODE></P>
 
 
@@ -249,7 +249,7 @@
 
 <P>An example, with MJPEG compression:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
-    -lavcopts vcodec=mjpeg</CODE></P>
+    -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
 <H4><A NAME="image_files">2.4.2.6  Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H4>
@@ -276,27 +276,27 @@ Explanation of the process:
   global <A HREF="#options">Options</A> section and in the man page.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -oac copy -o
   output.avi</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -oac copy -o
   output.avi</CODE></P>
 
 <P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -o output.avi</CODE></P>
+  -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating an uncompressed file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -oac copy -o
   output.avi</CODE></P>
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy -oac copy
   -o output.avi</CODE></P>
 
 <P><I>Creating a Motion TGA (MTGA) file from all the TGA files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy -oac copy
   -o output.avi</CODE></P>
 
 
@@ -330,7 +330,7 @@ Explanation of the process:
 <P><I>Copying two subtitles from a DVD while doing 3-pass encoding</I><BR>
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
   &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
-    -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
+    -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
   &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
   &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>

@@ -149,12 +149,9 @@
   or greater (in case of image problems, try 16bpp). As for S3 Virge.. there is
   xv support, but the card itself is very slow, so you better sell it.</P>
 
-<P><B>NOTE</B>: Savage cards have a slow YV12 image displaying capability (it
-  needs to do YV12 to YUY2 conversion, because the Savage hardware can't display
-  YV12). So when this documentation says at some point "this has YV12 output
-  use this, it's faster", it's not sure. Try
-  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">this
-  driver</A>, it uses MMX2 for this task and is faster than the native X
+<P><B>NOTE</B>: it's currently unclear which Savage models lack YV12 support,
+  and convert by driver (slow). If you suspect your card, get a newer driver,
+  or ask politely on the mplayer-users mailing list for an MMX/3DNow enabled
   driver.</P>
 
 
@@ -207,10 +204,9 @@
 
 <H5><A NAME="xv_trident">2.3.1.2.6 Trident cards</A></H5>
 
-<P>If you want to use xv with a trident card, provided that it doesn't
-  work with 4.1.0, try the latest CVS of XFree or wait for XFree 4.2.0.
-  The latest CVS adds support for fullscreen xv support with the
-  Cyberblade XP card.</P>
+<P>If you want to use xv with a trident card, provided that it doesn't work
+  with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen xv
+  support with the Cyberblade XP card.</P>
 
 
 <H4><A NAME="dga">2.3.1.3 DGA</A></H4>
@@ -489,6 +485,7 @@
 <UL>
   <LI>Keys pressed under sdl:aalib console driver repeat forever. (use -vo aa!)
     It's bug in SDL, I can't change it (tested with SDL 1.2.1).</LI>
+  <LI>DO NOT USE SDL with GUI! It won't work as it should.</LI>
 </UL>
 
 
@@ -772,23 +769,7 @@
   <DT><CODE>-vo vesa:opts</CODE></DT>
   <DD>currently recognized: <B>dga</B> to force dga mode and <B>nodga</B> to
     disable dga mode. Note: you may omit these parameters to enable <B>autodetect</B>
-    of dga mode. (In the future also will specify mode parameters such as refresh
-    rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</DD>
-
-  <DT><CODE>-screenw, -screenh, -bpp</CODE></DT>
-  <DD>force userdefined mode</DD>
-
-  <DT><CODE>-x, -y</CODE></DT>
-  <DD>set userdefined prescaling</DD>
-
-  <DT><CODE>-zoom</CODE></DT>
-  <DD>enables userdefined prescaling</DD>
-
-  <DT><CODE>-fs</CODE></DT>
-  <DD>scales image to fullscreen</DD>
-
-  <DT><CODE>-fs -zoom</CODE></DT>
-  <DD>scales userdefined prescaling to fullscreen</DD>
+    of dga mode.</DD>
 
   <DT><CODE>-double</CODE></DT>
   <DD>enables double buffering mode. (Available only in DGA mode). Should be
@@ -1227,9 +1208,10 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   
   <DT><CODE>-ac hwac3</CODE></DT>
   <DD>The em8300 supports playing back AC3 audio (surround sound) through the
-    digital audio output of the card. Read
-    <A HREF="codecs.html#hardware_ac3">hardware AC3</A> section for further
-    information on AC3.</DD>
+    digital audio output of the card. See the <CODE>-ao oss</CODE> option
+    above, it must be used to specify the DXR3's output instead of
+    a soundcard. Also read <A HREF="codecs.html#hardware_ac3">hardware AC3</A>
+    section for further information on AC3.</DD>
 </DL>
 
 <H4>Overlay</H4>

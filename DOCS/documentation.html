@@ -506,7 +506,7 @@
     <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">source</A>
     (this is a nightly updated tarball of Vorbis CVS).</LI>
   <LI><B>MPlayer</B> can use the libraries of RealPlayer 8 or RealONE to play
-    files with <B>RealVideo 2.0 and 3.0</B> video, and Sipro/Cook audio. See
+    files with <B>RealVideo 2.0 - 4.0</B> video, and Sipro/Cook audio. See
     <A HREF="formats.html#real">RealMedia file format</A> section for
     installation instructions and more information.</LI>
 </UL>
@@ -606,14 +606,15 @@
         series.
         <UL>
           <LI>XFree86 3: works in 8/16bpp modes. However, the driver is
-            dramatically slow and buggy in 800x600@16bpp
+            dramatically slow and buggy in 800x600@16bpp.
             <B>Recommended: 640x480@16bpp</B></LI>
           <LI>XFree86 4: the Xserver freezes soon after start unless
             acceleration is disabled, but then the whole thing gets
             slower than XFree86 3. No XVideo.</LI>
-          <LI>FBdev: the card is only VBE 1.2 capable, so VESA framebuffer
-            can't be used. When tried to workaround with UniVBE, the
-            framebuffer was unusably full of debris.</LI>
+          <LI>FBdev: framebuffer can be turned on with the <CODE>clgenfb</CODE>
+            driver in the kernel, though for me it worked only in 8bpp, thus
+            unusable. The clgenfb source had to be extended with the 7548 ID
+            before compilation.</LI>
           <LI>VESA: the card is only VBE 1.2 capable, so VESA output can't be
             used. Can't be workarounded with UniVBE.</LI>
           <LI>SVGAlib: detects an older Cirrus chip. Usable but slow with
@@ -689,10 +690,10 @@
   <A HREF="#subtitles_osd">Subtitles and OSD</A> section for details.</P>
 
 <PRE>
-    mkdir ~/.mplayer/font
-    cd ~/.mplayer/font
+    mkdir ~/.mplayer
+    cd ~/.mplayer
     unzip mp-arial-iso-8859-1.zip
-    ln -s ~/.mplayer/font/arial-24 font
+    ln -s ~/.mplayer/arial-24 font
 </PRE>
 
 
@@ -710,12 +711,6 @@
 
 <P>Currently you can't use the <CODE>-gui</CODE> option on the command line,
   due to technical reasons.</P>
-
-<BLOCKQUOTE>
-  <B>Hint</B><BR>
-  Press the middle button (on 2 button mice press left and right
-  simultaneously) to open a GTK menu with a DVD playing option.
-</BLOCKQUOTE>
 
 <P>As <B>MPlayer</B> doesn't have a skin included, you have to download them if
   you want to use the GUI. See the
