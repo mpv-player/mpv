@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.40 -->
+<!-- synced with 1.46 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
 
@@ -422,6 +422,16 @@ Aby uzyskać szczegóły, spójrz do sekcji <link linkend="rtc">RTC</link> w dok
 
 <qandaentry>
 <question><para>
+Jak mogę zrobić zrzut ekranu?
+</para></question>
+<answer><para>
+Musisz skożystać ze sterownika wyjścia video, który nie używa video overlay. Pod X11 
+wystarczy użyć <option>-vo x11</option>, pod Windows działa <option>-vo directx:noaccel</option>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 W lewym górnym rogu jest licznik czasu. Jak mogę się go pozbyć?
 </para></question>
 <answer><para>
@@ -627,6 +637,26 @@ Użyj:
 
 <qandadiv id="faq-playback">
 <title>Problemy z odtwarzaniem</title>
+
+<qandaentry>
+<question><para>
+Jak mogę określić ścieżkę audio/napisów z pliku  OGM, Matroska, NUT lub DVD?
+</para></question>
+<answer><para>
+Musisz użyć <option>-aid</option> (ID audio) lub <option>-alang</option>
+(język audio), <option>-sid</option>(ID napisów) lub <option>-slang</option>
+(język napisów), na przykłąd:
+<screen>
+mplayer przykład.mkv -alang eng -slang eng
+mplayer przykład.mkv -aid 1 -sid 1
+</screen>
+Aby zobaczyć jakie są dostępne:
+<screen>
+mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | grep sid
+mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | grep aid
+</screen>
+</para></answer>
+</qandaentry>
 
 <qandaentry>
 <question><para>
@@ -957,8 +987,8 @@ niektóre z podwójną szybkością.
 </para></question>
 <answer><para>
 Masz wadliwą kartę/sterownik dźwięku. Najwyraźniej jest ustawiona na stałe na
-44100Hz i próbujesz odtwarzać plik z dźwiękiem 22050Hz. Wypróbuj wtyczkę zmiany
-częstotliwości próbkowania audio (audio resample plugin).
+44100Hz i próbujesz odtwarzać plik z dźwiękiem 22050Hz. Wypróbuj filtr zmiany
+częstotliwości próbkowania audio (audio resample filter).
 </para></answer>
 </qandaentry>
 
@@ -1031,6 +1061,19 @@ Musisz użyć <option>-rawaudio on:format=0x50</option>.
 
 <qandadiv id="faq-driver">
 <title>Problemy ze sterownikami video/audio (vo/ao)</title>
+
+<qandaentry>
+<question><para>
+Jak użyć  <application>dmix</application> z
+<application>MPlayerem</application>?
+</para></question>
+<answer><para>
+Po ustawieniu 
+<ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
+użyj <option>-ao alsa:device=dmix</option>.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 Podczas odtwarzania filmu nie ma dźwięku i dostaję komunikat podobny do tego:
@@ -1175,11 +1218,13 @@ tym martwić... Zauważ że z SDL możesz wymusić/wyłączyć używanie Xv popr
 Co z nawigacją po DVD?
 </para></question>
 <answer><para>
-Obsługa dvdnav w <application>MPlayerze</application> obecnie jest zepsuta,
-jednakże normalne odtwarzanie działa. Jeżeli chcesz mieć fikuśne menu, będziesz
-musiał użyć innego odtwarzacza takiego jak <application>xine</application> lub
-<application>Ogle</application>. Jeżeli zależy Ci na nawigacji po DVD, przyślij
-<ulink url="../../tech/patches.txt">łatkę</ulink>.
+<application>MPlayer</application> nie obsługuje menu DVD ze względu na poważne 
+ograniczenia konstrukcyjne, które uniemożliwiają poprawną obsługę stałych obrazów
+i treści interaktywnej. Jeżeli chcesz mieć fajne menu, będziesz musiał użyć innego
+odtwarzacza, takiego jak <application>xine</application>, 
+<application>vlc</application> lub <application>Ogle</application>.
+Jeżeli chcesz nawigacji DVD w <application>MPlayerze</application>, to będziesz musiał 
+sam ją zaimplementować. Zwróć uwagę na to, że jest to poważne przedsięwzięcie.
 </para></answer>
 </qandaentry>
 
@@ -1268,6 +1313,20 @@ dla napędu DVD, używając narzędzia <command>hdparm</command> (opisane w rozd
 <link linkend="drives">CD</link>).
 </para></answer>
 </qandaentry>
+<qandaentry>
+<question><para>
+Skopiowałem DVD używając vobcopy. Jak mogę je odtworzyć/zakodować z dysku 
+twardego?
+</para></question>
+<answer><para>
+Użyj opcji <option>-dvd-device</option> aby odwołać się do katalogu zawierającego
+pliki:
+<screen>
+mplayer dvd://1 -dvd-device /ścieżka/do/katalogu
+</screen>
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 
 <qandadiv id="faq-features">
