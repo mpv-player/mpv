@@ -70,8 +70,7 @@ In order to make this work, be sure to check the following:
    sure your card can do YUV conversion,
     - 3dfx voodoo3/banshee users download a new DRI from
       http://dri.sourceforge.net
-    - S3 Savage4 users download the beta Xv driver from
-      ftp://thot.banki.hu
+    - S3 Savage4 users download XFree86 >= 4.0.3
     - nVidia users sell their card.. or download the nVidia driver from
       nVidia's website
 

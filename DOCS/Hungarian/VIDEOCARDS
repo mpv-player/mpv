@@ -74,8 +74,7 @@ Ha mûködésre akarod bírni, a következõket kell figyelembe venned:
    és biztos vagy benne, hogy a kartyád tud YUV konverziót,
     - 3dfx voodoo3/banshee tulajok töltsenek le új DRI-t a
       http://dri.sourceforge.net címrõl
-    - S3 Savage4-esek töltsék le a beta Xv drivert a
-      ftp://thot.banki.hu-ról
+    - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at
     - nVidia felhasználók adják el a kártyájukat... vagy nézzenek el az
       nVidia site-jára
 				    
