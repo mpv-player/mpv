@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with: 1.14 -->
+<chapter id="cd-dvd">
+<title>Použití CD/DVD</title>
+
+<sect1 id="drives">
+<title>CD/DVD mechaniky</title>
+<para>
+Výňatek z Linuxové dokumentace:
+</para>
+
+<para>
+Moderní CD-ROM mechaniky dosahují velmi vysokých otáček a některé z nich
+mohou pracovat i se sníženými otáčkami. Existuje několik důvodů, pro
+které byste mohli chtít změnit rychlost CD-ROM mechaniky:
+</para>
+
+<itemizedlist>
+<listitem><para>
+Byly zprávy o chybách čtení při vysokých rychlostech, zvláště u špatně
+vylisovaných CD-ROMů. Z těchto důvodů může snížení rychlosti působit
+jako prevence ztráty dat.
+</para></listitem>
+
+<listitem><para>
+Mnoho CD-ROM mechanik je nechutně hlučných, nižší rychlost může omezit
+tento hluk.
+</para></listitem>
+</itemizedlist>
+
+<para>
+Můžete snížit rychlost IDE CD-ROM mechanik pomocí <command>hdparm</command> nebo
+programu <command>setcd</command>. Pracuje to asi takto:
+<screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
+<screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
+</para>
+
+<para>
+Pokud máte práva root-a, následující příkaz vám rovněž může pomoci:
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[mechanika cdrom]</replaceable>/settings</screen>
+</para>
+
+<para>
+To nastaví čtení napřed na 2MB, což pomůže při poškrábaných médiích.
+Pokud ji však nastavíte příliš vysoko, bude mechanika stále zrychlovat a
+zpomalovat, což výrazně sníží její výkon.
+Doporučujeme vám rovněž vyladit vaši CD-ROM mechaniku pomocí <command>hdparm</command>:
+<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+</para>
+
+<para>
+To zapne DMA přístup, čtení napřed a odmaskování IRQ (přečtěte si man stránku
+programu <command>hdparm</command> pro podrobné vysvětlení).
+</para>
+
+<para>
+Prostudujte si &quot;<filename>/proc/ide/<replaceable>cdrom zařízení</replaceable>/settings&quot;</filename>
+pro jemné doladění vaší CD-ROM.
+</para>
+
+<para>
+SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů (Znáte nějaký?
+Řekněte nám jej!). Existuje nástroj, který pracuje se
+<ulink url="http://das.ist.org/~georg/">SCSI mechanikami Plextor</ulink>.
+</para>
+
+<para>FreeBSD:</para>
+<para>Rychlost: <command>cdcontrol [-f <replaceable>zařízení</replaceable>] speed <replaceable>rychlost</replaceable></command></para>
+<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect1>
+
+<sect1 id="dvd">
+<title>Přehrávání DVD</title>
+<para>
+Úplný seznam dostupných voleb naleznete v man stránce.
+Syntaxe pro standardní Digital Versatile Disc (DVD) je následující:
+<screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zařízení&gt;</replaceable>]</screen>
+</para>
+
+<para>
+Příklad:
+<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+</para>
+
+<para>
+Výchozím DVD zařízením je <filename>/dev/dvd</filename>. Pokud se vaše nastavení
+liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém řádku
+pomocí volby <option>-dvd-device</option>.
+</para>
+
+<formalpara>
+<title>Nový styl podpory DVD (mpdvdkit2)</title>
+<para>
+<application>MPlayer</application> používá <systemitem>libdvdread</systemitem> a
+<systemitem>libdvdcss</systemitem> pro dekódování a přehrávání DVD. Tyto dvě
+knihovny jsou obsaženy v podadresáři
+<filename class="directory">libmpdvdkit2/</filename> zdrojových kódů
+<application>MPlayer</application>u, nemusíte je tedy instalovat zvlášť
+Zvolili jsme tento způsob, protože jsme museli opravit chybu v
+<systemitem>libdvdread</systemitem> a aplikovat patch, který přidává podporu
+<emphasis role="bold">kešování zlomených CSS klíčů</emphasis>, na
+<systemitem>libdvdcss</systemitem>. To vedlo k výraznému zvýšení rychlosti,
+protože klíče nemusí být nyní lámány pokaždé před přehráváním.
+</para>
+</formalpara>
+
+<para>
+<application>MPlayer</application> umí rovněž použít knihovny
+<systemitem>libdvdread</systemitem> a <systemitem>libdvdcss</systemitem>
+na systémové úrovni, ale toto řešení <emphasis role="bold">nedoporučujeme</emphasis>,
+protože může vést k chybám, nekompatibilitě knihovny a nižší rychlosti.
+</para>
+
+<note><para>
+V případě problémů s dekódováním DVD, zkuste vypnout supermount a podobná udělátka.
+</para></note>
+
+<formalpara>
+<title>Struktura DVD</title>
+<para>
+DVD disky mají 2048 bajtů na sektor s ECC/CRC. Obvykle mají souborový systém UDF
+v jediné stopě, obsahující různé soubory (malé .IFO a .BUK soubory a velké (1GB)
+.VOB soubory). Jsou to reálné soubory a mohou být kopírovány/přehrávány
+z připojeného systému souborů nešifrovaného DVD.
+</para>
+</formalpara>
+
+<para>
+Soubory .IFO obsahují informace pro navigaci ve filmu (kapitola/titul/mapa úhlů,
+tabulka jazyků, atd) a jsou potřeba pro čtení a interpretaci obsahu .VOBu
+(filmu). Soubory .BUK jsou jejich zálohami. Všude používají
+<emphasis role="bold">sektory</emphasis>, takže musíte použít surové (RAW)
+adresování sektorů na disku, abyste se mohli navigovat v DVD, nebo dekryptovat
+jeho obsah.
+</para>
+
+<para>
+Podpora DVD vyžaduje přímý sektorově-orientovaný přístup k zařízení. Naneštěstí
+musíte (pod Linuxem) být root, abyste dostali adresu sektoru souboru.
+To je důvod proč vůbec nepoužíváme modul souborového systému z kernelu a místo
+něj jej implementujeme v uživatelském prostoru. To zajišťují
+<systemitem>libdvdread</systemitem> 0.9.x a <systemitem>libmpdvdkit</systemitem>.
+UDF ovladač z kernelu není potřeba, jelikož tyto knihovny mají zabudován svůj
+vlastní. Rovněž nemusí být DVD přimountováno vzhledem k tomu že používáme
+pouze přímý (raw) přístup.
+</para>
+
+<para>
+Někdy <filename>/dev/dvd</filename> nemůže být čteno uživateli, proto autoři
+<systemitem>libdvdread</systemitem> implementovali emulační vrstvu, která
+převádí sektorové adresy na soubor+offset za účelem emulace raw přístupu
+nad připojeným souborovým systémem nebo dokonce i hard diskem.
+</para>
+
+<para>
+<systemitem>libdvdread</systemitem> dokonce přijme bod připojení (mountpoint)
+místo názvu zařízení pro přímý přístup a podívá se do
+<filename>/proc/mounts</filename> na jméno zařízení. To bylo vyvinuto pro
+Solaris, kde jsou názvy souborů dynamicky alokovány.
+</para>
+
+<para>
+Výchozím DVD zařízením je <filename>/dev/dvd</filename>. Pokud se vaše
+nastavení liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém
+řádku pomocí volby <option>-dvd-device</option>.
+</para>
+
+<formalpara>
+<title>DVD autentifikace</title>
+<para>
+Tato autentifikační a dekryptovací metoda nového stylu podpory DVD je
+zajišťována použitím patchované knihovny <systemitem>libdvdcss</systemitem>
+(viz výš). Metoda může být nastavena pomocí proměnné prostředí
+<envar>DVDCSS_METHOD</envar> nastavené na klíč, disk nebo titul.
+</para>
+</formalpara>
+
+<para>
+Pokud není nastavena, zkouší se následující metody (výchozí: "key",
+"title request"):
+</para>
+
+<orderedlist>
+<listitem><para>
+<emphasis role="bold">bus key</emphasis>: Tento klíč je dohodnut během
+autentifikace (dlouhá směs ioctl volání a výměn různých klíčů, kryptování)
+a je použit pro zašifrování klíčů titulu a disku než jsou odeslány přes
+nechráněnou sběrnici (jako prevence odposlechnutí). Klíč "bus key" je potřeba
+pro předdešifrování šifrovaného klíče disku.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
+se poohlédne po již zlomených klíčích titulu, které jsou uloženy v adresáři
+<filename class="directory">~/.mplayer/DVDKeys</filename> (rychlé ;).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">key</emphasis>: Pokud není k dispozici "cached key",
+<application>MPlayer</application> zkusí rozšifrovat klíč disku pomocí
+sady přiložených klíčů přehrávače.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">disk</emphasis>: Pokud selže "key" metoda,
+(např. nejsou přiloženy klíče přehrávače), <application>MPlayer</application>
+crackne klíč disku algoritmem hrubé síly. Tento proces je náročný na CPU a
+vyžaduje 64 MB paměti (16M 32Bitových položek hash tabulky) pro uložení
+pracovních dat. Tato metoda by měla fungovat vždy (pomalé).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title request</emphasis>: S pomocí klíče disku, požádá
+<application>MPlayer</application> o šifrované klíče titulu, které jsou
+ukryty ve <emphasis>skrytých sektorech</emphasis> pomocí
+<systemitem>ioctl()</systemitem>.
+Ochrana regiony v RPC-2 mechanikách je prováděna v tomto kroku a na některých
+mechanikách může selhat.
+Pokud uspěje, budou klíče titulu (title keys) dekryptovány pomocí klíče disku
+(disk key) a klíče sběrnice (bus key).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title</emphasis>: Tato metoda je použita pokud selže
+požadavek na titul a nespoléhá se na výměnu klíčů s DVD mechanikou.
+Používá se zde kryptografický útok na přímé určení klíče (vyhledáváním
+opakujícího se vzoru v dešifrovaném obsahu VOB a rozhodnutím zda čistý text
+odpovídající prvním šifrovaným bajtům je pokračováním tohoto vzoru).
+Metoda je také známa jako &quot;known plaintext attack&quot;
+nebo &quot;DeCSSPlus&quot;. V nemnoha případech může metoda selhat z důvodu
+nedostatku šifrovaných dat na disku pro provedení statistického útoku, nebo
+protože se klíč mění uprostřed titulu. Tato metoda je jediným způsobem jak
+dekryptovat DVD uložené na harddisku nebo DVD se špatným regionem na
+RPC2 mechanice (pomalé).
+</para></listitem>
+</orderedlist>
+
+<para>
+RPC-1 DVD mechaniky chrání nastavení regionu pouze softwarově. RPC-2 mechaniky
+mají hardwarovou ochranu umožňující pouze 5 změn. Může být potřeba/doporučeno
+provést upgrade firmwaru na RPC-1 pokud máte RPC-2 DVD mechaniku.
+Můžete zkusit najít upgrady firmwaru pro svou mechaniku na internetu,
+<ulink url="http://forum.rpc-1.com/dl_all.php">toto firmwarové fórum</ulink>
+může být dobrým začátkem pro vaše hledání.
+Pokud pro vaši mechaniku není k dispozici upgrade firmwaru, použijte
+<ulink url="http://linvdr.org/projects/regionset/">nástroj regionset</ulink>
+pro nastavení region kódu vaší DVD mechaniky (pod Linux).
+<emphasis role="bold">Varování</emphasis>: Region můžete přenastavit pouze
+pětkrát.
+</para>
+</sect1>
+
+<sect1 id="vcd">
+<title>Přehrávání VCD</title>
+<para>
+Úplný seznam dostupných voleb naleznete v man stránce. Syntaxe pro standardní
+Video CD (VCD) je následující:
+<screen>mplayer vcd://<replaceable>&lt;stopa&gt;</replaceable> [-cdrom-device <replaceable>&lt;zařízení&gt;</replaceable>]</screen>
+Příklad:
+<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+Výchozím VCD zařízením je <filename>/dev/cdrom</filename>. Pokud se vaše nastavení
+liší, vytvořte symlink nebo uveďte správné zařízení na příkazovém řádku pomocí volby
+<option>-cdrom-device</option>.
+</para>
+
+<note><para>
+Minimálně SCSI CD-ROM mechaniky Plextor a Toshiba vykazují mizerný výkon
+při čtení VCD. To proto, že CDROMREADRAW <systemitem>ioctl</systemitem>
+není pro tyto mechaniky plně implementováno. Pokud máte zkušenosti se
+SCSI programováním, prosíme
+<ulink url="../../tech/patches.txt">pomozte nám</ulink>
+implementovat obecnou SCSI podporu pro VCD.
+</para></note>
+
+<para>
+Mezitím můžete extrahovat data z VCD pomocí
+<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
+a výsledný soubor přehrát v <application>MPlayer</application>u.
+</para>
+
+<formalpara>
+<title>Struktura VCD</title>
+
+<para>
+Video CD (VCD) je tvořeno CD-ROM XA sektory, čili stopy CD-ROM mode 2
+třída 1 a 2:</para>
+</formalpara>
+
+<itemizedlist>
+<listitem><para>
+První stopa je ve formátu mode 2 třída 2 což znamená, že používá L2
+korekci chyb. Stopa obsahuje souborový systém ISO-9660 s 2048
+bajty/sektor. Tento souborový systém obsahuje VCD metadata informace,
+stejně jako statické snímky často používané v menu. MPEG segmenty menu
+mohou být rovněž uloženy v této první stopě, ale tyto MPEGy musí být
+rozsekány na série 150 sektorových chunků. Souborový systém ISO-9660
+může obsahovat další soubory, které nejsou potřeba pro operace
+s VCD.
+</para></listitem>
+
+<listitem><para>
+Druhá a ostatní stopy jsou všeobecně surovými MPEG (film) stopami
+s 2324 bajty/sektor, obsahující jeden MPEG PS datový paket na
+sektor. Ty jsou v mode 2 třída 1 formátu, takže obsahují více dat
+v každém sektoru za cenu omezení korekce chyb. Je rovněž možné mít
+CD-DA stopy na VCD za první stopou.
+V některých operačních systémech jsou triky, které umožňují zpřístupnit
+tyto ne-ISO-9660 stopy v systému souborů. V dalších operačních
+systémech jako GNU/Linux to není možné (zatím). Zde MPEG data
+<emphasis role="bold">nemohou být připojena</emphasis>. Protože většina
+filmů je uložena uvnitř tohoto druhu stopy, měli byste nejprve zkusit
+<option>vcd://2</option>.
+</para></listitem>
+
+<listitem><para>
+Existují také VCD disky bez první stopy (jediná stopa bez systému souborů).
+Můžete je přehrát, ale nemohou být namountovány.
+</para></listitem>
+
+<listitem><para> Definice standardu Video CD se nazývá
+Philips "White Book" a není obecně přístupná online, ale musí být zakoupena
+od Philipsu. Podrobnější informace o Video CD můžete nalézt
+<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">v dokumentaci programu vcdimager</ulink>.
+</para></listitem>
+
+</itemizedlist>
+
+<formalpara>
+<title>Pár slov o .DAT souborech</title>
+<para>
+Soubor veliký ~600 MB viditelný v první stopě připojeného VCD není
+skutečným souborem! Je to takzvaná ISO gateway, vytvořená proto,
+aby mohl Windows přistupovat k těmto stopám (Windows vůbec neumožňuje
+aplikacím surový přístup k zařízení).
+Pod Linuxem nemůžete kopírovat nebo přehrávat tyto soubory
+(obsahují jen nesmysly). Pod Windows je to možné, protože jeho iso9660
+ovladač emuluje surový přístup ke stopě v tomto souboru. Abyste mohli
+přehrát .DAT soubor, potřebujete ovladač kernelu který můžete nalézt
+v Linuxové verzi PowerDVD. Obsahuje upravený ovladač systému souborů
+iso9660 (<filename>vcdfs/isofs-2.4.X.o</filename>), který umí emulovat
+surové stopy přes tento stínový .DAT soubor. Pokud připojíte disk
+s pomocí jejich ovladače, můžete kopírovat či dokonce přehrávat .DAT
+soubory <application>MPlayer</application>em. Ale nebude to fungovat
+se standardním iso9660 ovladačem z Linuxového kernelu! Místo toho
+použijte <option>vcd://</option>. Alternativou kopírování VCD je
+nový ovladač do kernelu jménem
+<ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>
+(není součástí oficiálního kernelu), který zobrazuje CD sekce jako
+obrazové soubory a program
+<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, který bit-po-bitu
+grabuje/kopíruje CD.
+</para>
+</formalpara>
+</sect1>
+</chapter>

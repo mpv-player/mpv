@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with: 1.12 -->
+<sect1 id="tv-input" xreflabel="TV vstup">
+<title>TV vstup</title>
+
+<para>
+Tato sekce je zaměřena na zpřístupnění
+<emphasis role="bold">sledování/grabování z V4L kompatibilního TV tuneru
+</emphasis>. Popis voleb k TV a ovládání z klávesnice naleznete v man
+stránce.
+</para>
+
+
+<sect2 id="tv-compilation">
+<title>Kompilace</title>
+
+<procedure>
+<step><para>
+  Zaprvé musíte rekompilovat. <filename>./configure</filename> zdetekuje
+  v4l hlavičkové soubory kernelu a existenci zařízení
+  <filename>/dev/video*</filename>. Pokud existují, bude zabudována
+  podpora pro TV (viz výstup z <filename>./configure</filename>).
+  </para></step>
+<step><para>
+  Ujistěte se, že váš tuner pracuje s jiným Linuxovým TV softwarem,
+  například <application>XawTV</application>.
+  </para></step>
+</procedure>
+</sect2>
+
+<sect2 id="tv-tips">
+<title>Tipy pro používání</title>
+<para>
+Úplný seznam voleb je dostupný v manuálové stránce.
+Zde je jen několik typů:
+</para>
+<itemizedlist>
+<listitem>
+<para>
+Použijte volbu <option>channels</option>. Příklad:
+<screen>-tv channels=26-MTV1,23-TV2</screen>
+Vysvětlení: použití této volby, použitelné budou pouze kanály 26 a 23 a
+bude zde rovněž krásný OSD text po přepnutí kanálů, zobrazující jméno
+kanálu. Mezery ve jméně kanálu musí být nahrazeny znakem
+&quot;_&quot;.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Zvolte rozumné rozměry obrazu. Rozměry výsledného obrazu by měly být
+bezezbytku dělitelné 16.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Pokud zachytáváte video se svislým rozlišením vyšším než polovina plného
+rozlišení (čili 288 pro PAL nebo 240 pro NTSC), ujistěte se, že máte
+zapnuto odstraňování prokladu obrazu. Jinak bude získaný snímek roztřepený
+během rychlých scén a regulátor datového toku nebude pravděpodobně schopen
+ani udržet nastavený datový tok, vzhledem k tomu, že prokladové artefakty
+produkují velké množství detailů, což spotřebovává velké přenosové pásmo.
+Odstraňování prokladu můžete zapnout pomocí volby
+<option>-vf pp=DEINT_TYPE</option>. Dobrou práci obvykle odvede
+<option>pp=lb</option>, ale záleží na osobních preferencích. Prostudujte si
+ostatní možnosti odstraňování prokladu v manuálu a vyzkoušejte je.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Odstřihněte mrtvý prostor. Když zachytáváte video, oblasti na okrajích jsou
+obvykle černé, nebo obsahují nějaký šum. Což opět zbytečně spotřebovává
+přenosové pásmo. Přesněji to nejsou samotné černé oblasti, ale ostrý přechod
+mezi černou a světlejším videem, ale to teď není důležité.
+Než začnete zachytávat, nastavte parametry volby <option>crop</option> tak,
+aby byl veškerý binec na okrajích odstřižen. Opět se snažte zachovat rozumné
+rozměry výsledného obrazu.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Sledujte zatížení CPU. Většinu času by nemělo překročit hranici 90%. Pokud
+máte velkou vyrovnávací paměť pro zachytávání, dokáže
+<application>MEncoder</application> přežít několikasekundové přetížení, ale
+nic víc. Raději vypněte 3D OpenGL spořiče obrazovky a podobné věci.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Nehrajte si se systémovými hodinami. <application>MEncoder</application>
+používá systémové hodiny pro A/V synchronizaci. Pokud přestavíte systémové
+hodiny (zvlášť nazpět), <application>MEncoder</application> bude zmaten a
+vy přijdete o snímky. To je velmi důležité pokud jste připojeni k síti a
+používáte nějaký časový synchronizační software jako je NTP. Musíte vypnout
+NTP během zachytávání, pokud chcete spolehlivě zachytávat.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Neměňte <option>outfmt</option> pokud nevíte co děláte, nebo vaše
+karta/ovladač opravdu nepodporuje výchozí (YV12 barevný prostor).
+Ve starší verzi <application>MPlayer</application>u/
+<application>MEncoder</application>u bylo nutné nastavit výstupní formát.
+Tento problém by měl být v současných verzích vyřešen,
+<option>outfmt</option> již není nadále potřeba a výchozí hodnoty vyhovují
+pro většinu případů. Například pokud zachytáváte do DivX pomocí
+<systemitem class="library">libavcodec</systemitem>u a uvedete
+<option>outfmt=RGB24</option> pro zvýšení kvality zachytávaných snímků,
+stejně budou tyto snímky později konvertovány zpět na YV12, takže jediné co
+tím získáte je spousta vyplýtvaného výkonu CPU.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Chcete-li nastavit barevný prostor I420 (<option>outfmt=i420</option>),
+musíte přidat i volbu <option>-vc rawi420</option> kvůli konfliktu fourcc
+Intel Indeo video kodekem.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Existuje několik cest, jak zachytávat zvuk. Můžete nahrát zvuk buď pomocí
+zvukové karty pomocí externího propojení mezi video kartou a linkovým
+vstupem, nebo použitím vestavěného ADC v čipu bt878. Ve druhém případě
+musíte načíst ovladač <emphasis role="bold">btaudio</emphasis>. Přečtěte si
+soubor <filename>linux/Documentation/sound/btaudio</filename> (ve zdrojácích
+kernelu, nikoli <application>MPlayer</application>u) pro několik instrukcí
+jak použít tento ovladač.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Pokud <application>MEncoder</application> nedokáže otevřít audio zařízení,
+ujistěte se, že je opravdu k dispozici. Můžete mít potíže se zvukovými
+servery jako arts (KDE) nebo esd (GNOME). Pokud máte plně duplexní zvukovou
+kartu (téměř každá slušná karta to již podporuje) a používáte KDE, zkuste
+zaškrtnout volbu "full duplex" v menu nastavení zvukového serveru.
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2 id="tv-examples">
+<title>Příklady</title>
+
+<informalexample>
+<para>
+Modelový výstup do AAlib :)
+<screen>
+mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Vstup ze standardního V4L:
+<screen>
+mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Mnohem sofistikovanější příklad. Zde <application>MEncoder</application>
+zachytává obraz v plném PALu, ořízne okraje a odstraní proklad obrazu pomocí
+lineárního směšovacího algoritmu. Zvuk je komprimován konstantním datovým
+tokem 64kbps LAME kodekem. Toto nastavení je vhodné pro zachytávání filmů.
+<screen>
+     mencoder -tv driver=v4l:width=768:height=576 \
+     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
+     -oac mp3lame -lameopts cbr:br=64 \
+     -vf crop=720:544:24:16,pp=lb -o <replaceable>výstupní.avi</replaceable> tv://
+</screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Toto navíc přeškáluje video na 384x288 a zkomprimuje jej s datovým tokem
+350kbps v režimu vysoké kvality. Volba vqmax uvolňuje kvantizer a umožní
+video kompresoru podržet takto nízký datový tok i za cenu snížení kvality.
+To lze použít pro záznam dlouhých TV seriálů, kde kvalita obrazu není až
+tolik důležitá.
+<screen>
+     mencoder -tv driver=v4l:width=768:height=576 \
+     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
+     -oac mp3lame -lameopts cbr:br=48 \
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>výstupní.avi</replaceable> tv://
+</screen>
+Rovněž můžete nastavit menší rozměry obrazu ve volbě <option>-tv</option>
+a vyhnout se tak softwarovému škálování, ale tento přístup vyžaduje
+maximální množství informací a je trochu odolnější proti šumu. Čipy bt8x8
+umí průměrování pixelů pouze ve svislém směru díky hardwarovým omezením.
+</para>
+</informalexample>
+</sect2>
+</sect1>
