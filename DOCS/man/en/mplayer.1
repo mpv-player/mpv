@@ -4429,19 +4429,19 @@ Translate fields by 1/4 pixel with 4tap filter (higher quality).
 box blur
 .PD 0
 .RSs
-.IPs radius
-size of the filter
-.IPs power
-How often the filter should be applied.
+.IPs <radius>
+blur filter strength
+.IPs <power>
+number of filter applications
 .RE
 .PD 1
 .
 .TP
-.B sab=rad:pf:colorDiff[:rad:pf:colorDiff]
+.B sab=radius:pf:colorDiff[:radius:pf:colorDiff]
 shape adaptive blur
 .PD 0
 .RSs
-.IPs <rad>
+.IPs <radius>
 blur filter strength (~0.1\-4.0) (slower if larger)
 .IPs <pf>\ 
 prefilter strength (~0.1\-2.0)
