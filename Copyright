@@ -81,7 +81,7 @@ Directory:  libmpdemux/realrtsp/
 License:    GNU General Public License
 
 Name:       id3edit
-Version:    1.9
+Version:    1.9 + patches
 Homepage:   http://id3edit.sourceforge.net/
 Directory:  libmpdemux/genres.h
 License:    GNU General Public License
