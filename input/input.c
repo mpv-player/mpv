@@ -363,7 +363,7 @@ mp_input_parse_cmd(char* str) {
   for(i=0; ptr && i < MP_CMD_MAX_ARGS; i++) {
     ptr = strchr(ptr,' ');
     if(!ptr) break;
-    while(ptr[0] == ' ') ptr++;
+    while(ptr[0] == ' ' || ptr[0] == '\t') ptr++;
     if(ptr[0] == '\0') break;	
     switch(cmd_def->args[i].type) {
     case MP_CMD_ARG_INT:
@@ -960,7 +960,7 @@ mp_input_parse_config(char *file) {
 	cmd_binds = binds;
       return 1;
     }
-    
+
     iter = buffer;
 
     if(comments) {
