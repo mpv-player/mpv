@@ -211,11 +211,11 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
     val[ptr2-ptr1] = '\0';
     n_attrib++;
     
-    attribs = (char**)realloc(attribs,2*n_attrib*sizeof(char*)+1);
+    attribs = (char**)realloc(attribs,(2*n_attrib+1)*sizeof(char*));
     attribs[n_attrib*2-2] = attrib;
     attribs[n_attrib*2-1] = val;
     
-    ptr1 = ptr2+2;
+    ptr1 = ptr2+1;
   }
   
   if(n_attrib > 0)
