@@ -341,6 +341,8 @@ int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     return size;
 }
 
+extern void me_register_options(m_config_t* cfg);
+
 //---------------------------------------------------------------------------
 
 static int eof=0;
@@ -443,7 +445,7 @@ divx4_param.rc_reaction_ratio  = 20;
   playtree = play_tree_new();
   mconfig = m_config_new(playtree);
   m_config_register_options(mconfig,mencoder_opts);
-  // TODO : add something to let modules register their options
+  me_register_options(mconfig);
   parse_cfgfiles(mconfig);
 
   if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) mencoder_exit(1, "error parsing cmdline");
