@@ -1256,49 +1256,50 @@ Szabványos V4L-rõl bemenet<BR>
   infravörös távirányítót, hogy irányítsd vele a géped!
   Részletek a <A HREF="http://www.lirc.org">www.lirc.org</A> címen.</P>
 
-<P>Ha felinstalláltad a lirc csomagot, így fordítsd az <B>MPlayer</B>-t :
-  ./configure --enable-lirc</P>
+<P>Ha felinstalláltad a lirc csomagot, az <B>MPlayer</B> fordításnál
+  automatikusan detektálni fogja.</P>
 
 <P>Ha sikerült, az <B>MPlayer</B> ezt fogja kiírni induláskor:
     LIRC init was successful.
   Ha hibát talál, azt is kiírja. Ha semmi LIRC-szerût nem mond, akkor
   nincs belefordítva.</P>
 
-<P>A megadandó programnév - mily' csoda - mplayer_lirc.
-  A következõ parancsokat érti:</P>
+<P>A megadandó programnév - mily' csoda - mplayer.
+  Bármilyen MPlayer parancsot hozzá lehet rendelni a gombokhoz, akár többet is.
+  Utóbbi esetben \n karaktersorozattal kell a parancsokat egymástól
+  elválasztani. Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a
+  .lircrc-ben, ahol van értelme (pl. seek, volume, stb). És itt egy példa:</P>
 
-<P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">lejátszás megállítása. Bármely másik billentyû újraindítja.</TD><TR>
-<TD></TD><TD><FONT CLASS="text">QUIT</TD><TD></TD><TD><FONT CLASS="text">kilépés</TD><TR>
-<TD></TD><TD><FONT CLASS="text">RWND</TD><TD></TD><TD><FONT CLASS="text">10 másodperccel vissza</TD><TR>
-<TD></TD><TD><FONT CLASS="text">FRWND</TD><TD></TD><TD><FONT CLASS="text">60 másodperccel vissza</TD><TR>
-<TD></TD><TD><FONT CLASS="text">FWD</TD><TD></TD><TD><FONT CLASS="text">10 másodperccel elõre</TD><TR>  
-<TD></TD><TD><FONT CLASS="text">FFWD</TD><TD></TD><TD><FONT CLASS="text">60 másodperccel elõre</TD><TR> 
-<TD></TD><TD><FONT CLASS="text">INCVOL</TD><TD></TD><TD><FONT CLASS="text">hangerõ növelése 1 százalékkal</TD><TR>
-<TD></TD><TD><FONT CLASS="text">DECVOL</TD><TD></TD><TD><FONT CLASS="text">hangerõ csökkentése 1 százalékkal</TD><TR>
-<TD></TD><TD><FONT CLASS="text">PCM</TD><TD></TD><TD><FONT CLASS="text">'pcm' mixer csatorna használata</TD><TR>
-</TABLE></P>
+<P><PRE>
+begin   
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+   
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+   
+begin
+    button = CD_PLAY
+    prog = mplayer  
+    config = pause  
+end
 
-<P>Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.
-  Itt egy példa az enyémbõl:</P>
-
-<P><PRE>  begin
-   remote = CU-SX070
-   prog = mplayer_lirc
-   button = Tape_Play
-   repeat = 1
-   config = FFWD
-  end
-
-  begin
-   remote = CU-SX070
-   prog = mplayer_lirc
-   button = Tape_Stop
-   config = QUIT
-  end</PRE></P>
+begin
+    button = CD_STOP
+    prog = mplayer  
+    config = seek 0 1\npause
+end
+</PRE></P>
 
 <P>Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
-  a -lircconf [file-név] kapcsolót.</P>
+  a -lircconf &lt;filenév&gt; kapcsolót.</P>
 
 <P><B><A NAME=3.4>3.4.  Lejátszás hálózatról, vagy pipe-n keresztül</A></B></P>
 
