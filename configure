@@ -238,7 +238,6 @@ for ac_option do
   esac
 done
 
-
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
@@ -626,7 +625,6 @@ _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 echores "$_binutils"
 
-
 if x86 ; then
   extcheck() {
     if test "$1" = yes ; then
@@ -1009,6 +1007,28 @@ if x86 && linux ; then
   fi
 fi
 
+#checking for gawk
+if test "$_vidix" = yes ; then
+_gawk_ver=`echo '' | gawk --version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\).*$/\1/p'`
+  case $_gawk_ver in
+    '')
+      _gawk_ver="v. ?.??, bad"
+      _gawk_verc_fail=yes
+      ;;
+    3.[0-9]|3.[0-9].[0-9])
+      _gawk_ver="$_gawk_ver, ok"
+      ;;
+    *)
+      _gawk_ver="$_gawk_ver, bad"
+      _gawk_verc_fail=yes
+      ;;
+  esac
+echo Checking for gawk ... $_gawk_ver
+if test "$_gawk_verc_fail" ; then
+echo Gawk was not found or has wrong version. gawk-3.0.x is required
+exit
+fi
+fi
 
 
 ######################
