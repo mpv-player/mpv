@@ -739,14 +739,6 @@ void vo_x11_fullscreen( void )
 
  if ( WinID >= 0 ) return;
 
- switch ( vo_wm_type )
-  {
-   case vo_wm_Unknown:
-	  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
-	  XUnmapWindow( mDisplay,vo_window );
-	  break;
-  }
-
  if ( vo_fs )
   { vo_fs=VO_FALSE; x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height; }
    else { vo_fs=VO_TRUE; vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight; }
@@ -754,6 +746,8 @@ void vo_x11_fullscreen( void )
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( vo_fs );
+ if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))
+     XUnmapWindow( mDisplay,vo_window );  // required for MWM
  XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
  XMapRaised( mDisplay,vo_window );
  XRaiseWindow( mDisplay,vo_window );
