@@ -1417,6 +1417,14 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     besr.v_inc = (src_h << 20) / dest_h;
     if(radeon_is_interlace()) besr.v_inc *= 2;
     h_inc = (src_w << 12) / dest_w;
+
+    {
+        unsigned int ecp_div;
+        ecp_div = (INPLL(VCLK_ECP_CNTL) >> 8) & 3;
+        h_inc <<= ecp_div;
+    }
+
+
     step_by = 1;
     while(h_inc >= (2 << 12)) {
 	step_by++;
