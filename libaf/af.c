@@ -7,6 +7,7 @@
 #endif
 
 #include "af.h"
+#include "../config.h"
 
 // Static list of filters
 extern af_info_t af_info_dummy;
@@ -23,21 +24,23 @@ extern af_info_t af_info_surround;
 extern af_info_t af_info_sub;
 extern af_info_t af_info_export;
 
-static af_info_t* filter_list[]={ \
-   &af_info_dummy,\
-   &af_info_delay,\
-   &af_info_channels,\
-   &af_info_format,\
-   &af_info_resample,\
-   &af_info_volume,\
-   &af_info_equalizer,\
-   &af_info_gate,\
-   &af_info_comp,\
-   &af_info_pan,\
-   &af_info_surround,\
-   &af_info_sub,\
-   &af_info_export,\
-   NULL \
+static af_info_t* filter_list[]={ 
+   &af_info_dummy,
+   &af_info_delay,
+   &af_info_channels,
+   &af_info_format,
+   &af_info_resample,
+   &af_info_volume,
+   &af_info_equalizer,
+   &af_info_gate,
+   &af_info_comp,
+   &af_info_pan,
+   &af_info_surround,
+   &af_info_sub,
+#ifdef HAVE_SYS_MMAN_H
+   &af_info_export,
+#endif
+   NULL 
 };
 
 // Message printing
