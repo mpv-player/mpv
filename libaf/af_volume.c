@@ -59,7 +59,7 @@ inline int from_dB(float* in, float* out, float k)
     if(in[i]<MIN_VOL)
       out[i]=0.0;
     else
-       out[i]=pow(10.0,clamp(in[i],MIN_VOL,MAX_VOL)/k);
+      out[i]=pow(10.0,clamp(in[i],MIN_VOL,MAX_VOL)/k);
   }
   return AF_OK;
 }
@@ -131,6 +131,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_VOLUME_ON_OFF:
     s->onoff = (int)arg;
     return AF_OK;
+  case AF_CONTROL_PRE_DESTROY:{
+    float m = 0.0;
+    int i;
+    for(i=0;i<NCH;i++)
+      m=max(m,s->maxpower[i]);
+    af_msg(AF_MSG_INFO,"The maximum volume was %0.2fdB \n",10*log10(m));
+    return AF_OK;
+  }
   }
   return AF_UNKNOWN;
 }
