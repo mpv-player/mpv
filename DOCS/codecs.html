@@ -167,9 +167,9 @@
 <P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
   for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
   ffh263</CODE> option (default) (requires up-to-date libavcodec). For 2.0
-  files, use the <CODE>ivvideo.dll</CODE> Win32 DLL file (from
-  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">here</A>),
-  and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
+  files, use the
+  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>
+  Win32 DLL file, and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
   Win32 codecs. This latter codec does not support YV12 nor YUY2 only BGR
   modes, restricting it to the X11 and OpenGL outputs. Hopefully ffh263 will
   support VIVO 2.0 files in the future.</P>
@@ -358,8 +358,8 @@
 <P>The audio codec used in VIVO files depends on whether it is a VIVO/1.0 or
   VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
   have <B>Vivo Siren</B> audio. Both are supported. You can grab the
-  g.723/Siren Win32 DLL from
-  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">here</A>,
+  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>
+  Win32 DLL from the MPlayer site,
   then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 

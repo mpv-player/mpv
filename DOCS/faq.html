@@ -42,8 +42,8 @@
     </PRE>
   </DT>
   <DD>A: This is a known problem of gcc 3.0.4, upgrade to 3.1 to solve the
-    problem. How to install gcc is described
-    <A HREF="users_against_developers.html#gcc">here</A>.</DD>
+    problem. How to install gcc is described in the
+    <A HREF="users_against_developers.html#gcc">gcc 2.96</A> section.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Configure ends with this text, and MPlayer won't compile!<BR>
@@ -378,7 +378,7 @@
   </DT>
   <DD>A: Probably the audio uses a codec not natively supported by
     <B>MPlayer</B>. Install the Win32 codec package as described in the README
-    or <A HREF="documentation.html#installation">here</A>.</DD>
+    or in the <A HREF="documentation.html#installation">Installation</A> section.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: ... works with avifile/aviplay but doesn't with MPlayer.</DT>
@@ -397,9 +397,9 @@
 
   <DT>Q: MPlayer exits with some error when using l3codeca.acm.</DT>
   <DD>A: Check <CODE>ldd /usr/local/bin/mplayer</CODE> output. If it contains<BR>
-    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x4???????)</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x4???????)</CODE><BR>
     where "?" is any number then it's OK, the error is not here. If it is:<BR>
-    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x00??????)</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x00??????)</CODE><BR>
     then there is a problem with your kernel/libc. Maybe you are using some
     security patches (for example Solar Designer's OpenWall patch) which
     forces loading libraries to very low addresses.
@@ -530,7 +530,7 @@
     <PRE>
     AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
     audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
+    couldn't open/init audio device -&gt; NOSOUND
     Audio: no sound!!!
     Start playing...
     </PRE>
@@ -629,7 +629,7 @@
 
   <DT>Q: While playing a DVD, I encountered this error:<BR>
     <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion
-    nfo_length / sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE></DT>
+    nfo_length / sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.</CODE></DT>
   <DD>A: This is a known libdvdread 0.9.1/0.9.2 bug. Use <B>libmpdvdkit</B>,
     which is present in MPlayer source, and used by default.</DD>
   <DD>&nbsp;</DD>

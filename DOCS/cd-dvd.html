@@ -35,11 +35,11 @@
 
 <P>You can also try</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[cdrom device]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
 
 <P>but you will need root privileges. The following command may also help:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
 
 <P>This sets prefetched file reading to 2MB, which helps with scratched CD-ROMs.
   It is recommended that you also tune your CD-ROM drive with hdparm:</P>

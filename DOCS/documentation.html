@@ -11,8 +11,7 @@
 
 <H1 ALIGN="center">MPlayer - The Movie Player for LINUX</H1>
 
-<H2 ALIGN="center">
-  &copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+<H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
 
 <P ALIGN="center">[ English ]
@@ -436,9 +435,9 @@ Developer Cries
     need it) or don't up/downgrade at all (but in this case, be prepared for
     runtime problems). If you vote for 3.x.x, try to use the latest version,
     early releases had various bugs, so be sure you use at least 3.1, it's
-    tested and working. Detailed information about gcc 2.96's bugs (that are
-    still NOT fixed, they have been WORKED AROUND in <B>MPlayer</B>!) can be
-    found <A HREF="users_against_developers.html">here</A> and in the
+    tested and working. For detailed information about gcc 2.96's bugs (that are
+    still NOT fixed, they have been WORKED AROUND in <B>MPlayer</B>!), see the
+    <A HREF="users_against_developers.html#gcc">gcc 2.96</A> section and the
     <A HREF="faq.html">FAQ</A>.</LI>
   <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.0)</B>.
     Normally, everyone wants this, as starting with XFree86 4.0.2, it contains
@@ -469,7 +468,8 @@ Developer Cries
   <LI><B>libavcodec</B>: This codec package is capable of decoding
     H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams, on
     multiple platforms. It is also known to be the fastest for this task.
-    Details can be found <A HREF="codecs.html#libavcodec">here</A>. Features:<BR>
+    See the <A HREF="codecs.html#libavcodec">libavcodec</A> section for details.
+    Features:<BR>
     <UL>
       <LI>gain decoding of videos mentioned above, on non-x86 machines</LI>
       <LI>encoding with most of the mentioned codecs</LI>
@@ -692,8 +692,9 @@ Developer Cries
 
 <P><B>Debian users</B> can build a <CODE>.deb</CODE> package for themselves,
   it's very simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
-  <B>MPlayer</B>'s root directory. Detailed instructions can be found
-  <A HREF="documentation.html#debian">here</A>.</P>
+  <B>MPlayer</B>'s root directory. See
+  <A HREF="documentation.html#debian">Debian packaging</A> for detailed
+  instructions.</P>
 
 <P><B>Always browse the output of <CODE>./configure</CODE></B>, and the
   <CODE>configure.log</CODE> file, they contain information about what will be
@@ -899,7 +900,7 @@ There are three timing methods in <B>MPlayer</B>.
     RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
     Use this command to enable RTC for normal users:
     <P>
-      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+      <CODE>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</CODE>
     </P>
     If you do not have such a new kernel, you can also change one line in
     <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the
@@ -908,7 +909,7 @@ There are three timing methods in <B>MPlayer</B>.
        * We don't really want Joe User enabling more
        * than 64Hz of interrupts on a multi-user machine.
        */
-      if ((rtc_freq > 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
+      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
     </PRE>
     and change the 64 to 1024. You should really know what you are doing, though.
     <BR>
@@ -1111,7 +1112,7 @@ TV tuner</B>.</P>
 <P>This sets up a filter pipeline (you can use any number of filters). Their
   parameters are optional and if omitted, some of them are set to default
   values, e.g. <CODE>x</CODE> and <CODE>y</CODE> are both set to the center of
-  the screen and <CODE>width</CODE> and <CODE>height</CODE>> will be set to
+  the screen and <CODE>width</CODE> and <CODE>height</CODE> will be set to
   the width and height of the movie.</P>
 
 <P>Filters are queued starting from libvo, so <CODE>filter1</CODE> will be the
@@ -1423,8 +1424,8 @@ LEFT seek -10
 - audio_delay 0.100
 + audio_delay -0.100
 q quit
-> pt_step 1
-< pt_step -1
+&gt; pt_step 1
+&lt; pt_step -1
 ENTER pt_step 1 1
 </PRE>
 
@@ -1517,7 +1518,7 @@ ENTER pt_step 1 1
     <P>Adjust the subtitles delay of +/- val seconds or set it to val seconds
     when abs is non zero.</P></LI>
   <LI><B>osd</B> [(int) level=-1]
-    <P>Toggle osd mode or set it to level when level > 0.</P></LI>
+    <P>Toggle osd mode or set it to level when level &gt; 0.</P></LI>
   <LI><B>volume</B> (int) dir
     <P>Increase/decrease volume</P></LI>
   <LI><B>contrast</B> (int) val [(int) abs=0]</LI>
@@ -1627,11 +1628,11 @@ end
 
 
 
-<H1><A NAME="faq"></A>4. <A HREF="faq.html">FAQ section</A></H1>
+<H1><A NAME="faq">4.</A> <A HREF="faq.html">FAQ section</A></H1>
 
 
 
-<H1><A NAME="cd/dvd"></A>5. <A HREF="cd-dvd.html">CD/DVD section</A></H1>
+<H1><A NAME="cd/dvd">5.</A> <A HREF="cd-dvd.html">CD/DVD section</A></H1>
 
 
 
@@ -1759,7 +1760,7 @@ end
 
 <UL>
   <LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a disk
-    block >4GB on a device using a logical blocksize != DEV_BSIZE (i.e.  CD-ROM
+    block &gt;4GB on a device using a logical blocksize != DEV_BSIZE (i.e.  CD-ROM
     and DVD media).  Due to a 32Bit int overflow, a disk address modulo 4GB is
     accessed.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
@@ -1987,7 +1988,7 @@ end
   <LI><B><A HREF="mailto:hoffmajs@gmx.de">Jens Hoffmann</A></B>
     <UL>
       <LI>Additional YUV formats support</LI>
-      <LI>found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization</LI>
+      <LI>found the big BITMAPINFOHEADER problem -&gt; solved ASV2 pixelization</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:nickols_k@mail.ru">Nick Kurshev</A></B>
@@ -2509,12 +2510,12 @@ end
 <P><B>Note:</B> Unless explicitly stated otherwise the language of the above
   lists is <B>English</B>. Please do not send messages in other languages!</P>
 
-<P><B>Note:</B> You can reach the searchable mailing list archives
-  <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">here</A>.
+<P><B>Note:</B> You can reach the searchable mailing list archives at
+  <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">http://www.mplayerhq.hu/cgi-bin/htsearch</A>.
 
 
 
-<H1><A NAME="bug_reports"></A><A HREF="bugreports.html">Appendix C</A> - How to report bugs</H1>
+<H1><A NAME="bug_reports">Appendix C</A> - <A HREF="bugreports.html">How to report bugs</A></H1>
 
 
 

@@ -150,7 +150,7 @@
   xv support, but the card itself is very slow, so you better sell it.</P>
 
 <P><B>NOTE</B>: Savage cards have a slow YV12 image displaying capability (it
-  needs to do YV12->YUY2 conversion, because the Savage hardware can't display
+  needs to do YV12 to YUY2 conversion, because the Savage hardware can't display
   YV12). So when this documentation says at some point "this has YV12 output
   use this, it's faster", it's not sure. Try
   <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">this
@@ -619,12 +619,12 @@
 
 <P>The <CODE>/dev/mga_vid</CODE> device file can be read (for example by
   <CODE>cat /dev/mga_vid</CODE>) for some info, and written for brightness
-  change: <CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
+  change: <CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
 <H4><A NAME="sis_vid">2.3.1.8 SiS 6326 framebuffer (sis_vid)</A></H4>
 
-<P>SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver</P>
+<P>SiS 6326 YUV Framebuffer driver -&gt; sis_vid kernel driver</P>
 
 <P>Its interface should be compatible with the mga_vid, but the driver was not
   updated after the mga_vid changes, so it's outdated now.  Volunteers
@@ -650,8 +650,8 @@
   <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
   for details about how to install it.</P>
 
-<P>XFree86(DRI) >= 4.0.3 supports OpenGL with Matrox and Radeon cards, >= 4.2
-  supports Rage128. See
+<P>XFree86(DRI) 4.0.3 or later supports OpenGL with Matrox and Radeon cards,
+  4.2.0 or later  supports Rage128. See
   <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>
   for download and installation instructions.</P>
 
@@ -783,7 +783,7 @@
     driver from text-mode then after terminating <B>MPlayer</B> you will have
     <B>ROM font</B> loaded instead of national. You can load national font again
     by using <B><I>setsysfont</I></B> utility from the Mandrake distribution
-    for example.</BR>
+    for example.<BR>
     (<B>Hint:</B> The same utility is used for the localization of fbdev).</LI>
   <LI>Some <B>Linux graphics drivers</B> don't update active <B>BIOS mode</B> in
     DOS memory. So if you have such problem - always use VESA driver only from
@@ -1065,7 +1065,7 @@ Some remarks:
   <CODE>expand=w:h:x:y:1</CODE> (the 5th parameter <CODE>:1</CODE> at the end
   will enable OSD rendering). You may want to move the image up a bit to get a
   bigger black zone for subtitles. You may also want to move subtitles up, if
-  they are outside your TV screen, use the <CODE>-subpos <0-100></CODE> switch
+  they are outside your TV screen, use the <CODE>-subpos &lt;0-100&gt;</CODE> switch
   to adjust this (<CODE>-subpos 80</CODE> is a good choice).</P>
 
 <P>In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
