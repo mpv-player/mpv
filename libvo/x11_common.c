@@ -507,13 +507,17 @@ int vo_x11_check_events(Display *mydisplay){
       case ButtonPress:
            // Ignore mouse whell press event
            if(Event.xbutton.button == 4 || Event.xbutton.button == 5) break;
-	   // Ignor mouse button 1 - 3 under gui 
-	   if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
+	   #ifdef HAVE_NEW_GUI
+	    // Ignor mouse button 1 - 3 under gui 
+	    if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
+	   #endif
            mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
            break;
       case ButtonRelease:
-	   // Ignor mouse button 1 - 3 under gui 
-	   if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
+           #ifdef HAVE_NEW_GUI
+	    // Ignor mouse button 1 - 3 under gui 
+	    if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
+	   #endif
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
 #endif
