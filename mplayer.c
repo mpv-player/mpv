@@ -65,6 +65,13 @@
 #include "DirectShow/DS_AudioDec.h"
 #endif
 
+#ifdef USE_LIBAVCODEC
+#include "libavcodec/avcodec.h"
+    AVCodec *lavc_codec=NULL;
+    AVCodecContext lavc_context;
+    AVPicture lavc_picture;
+#endif
+
 #include "opendivx/decore.h"
 
 
@@ -1279,6 +1286,34 @@ switch(sh_video->codec->driver){
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
    break;
  }
+ case 5: {  // FFmpeg's libavcodec
+#ifndef USE_LIBAVCODEC
+   fprintf(stderr,"MPlayer was compiled WITHOUT libavcodec support!\n");
+   exit(1);
+#else
+   if(verbose) printf("FFmpeg's libavcodec video codec\n");
+    avcodec_init();
+    avcodec_register_all();
+    lavc_codec = avcodec_find_decoder_by_name(sh_video->codec->dll);
+    if(!lavc_codec){
+	fprintf(stderr,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
+	exit(1);
+    }
+    memset(&lavc_context, 0, sizeof(lavc_context));
+    lavc_context.width=sh_video->disp_w;
+    lavc_context.height=sh_video->disp_h;
+    printf("libavcodec.size: %d x %d\n",lavc_context.width,lavc_context.height);
+    /* open it */
+    if (avcodec_open(&lavc_context, lavc_codec) < 0) {
+        fprintf(stderr, "could not open codec\n");
+        exit(1);
+    }
+   
+   if(verbose) printf("INFO: libavcodec init OK!\n");
+   break;
+#endif
+ }
+
  case 1: {
    // init libmpeg2:
 #ifdef MPEG12_POSTPROC
@@ -1709,6 +1744,35 @@ switch(sh_video->codec->driver){
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
     }
+    break;
+  }
+#endif
+#ifdef USE_LIBAVCODEC
+  case 5: {        // libavcodec
+    unsigned char* start=NULL;
+    unsigned int t=GetTimer();
+    unsigned int t2;
+    int got_picture=0;
+    int in_size=ds_get_packet(d_video,&start);
+    if(in_size<0){ eof=1;break;}
+    if(in_size>max_framesize) max_framesize=in_size;
+
+    if(d_video->flags) if(verbose) printf("***keyframe***\n");
+
+    if(drop_frame<2){
+        int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
+	     &got_picture, start, in_size);
+	if(ret<0) fprintf(stderr, "Error while decoding frame!\n");
+    }
+
+    current_module="draw_frame";
+
+    if(!drop_frame && got_picture){
+      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+      video_out->draw_slice(lavc_picture.data,lavc_picture.linesize,sh_video->disp_w,sh_video->disp_h,0,0);
+      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+    }
+    
     break;
   }
 #endif
