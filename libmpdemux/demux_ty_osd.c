@@ -779,15 +779,15 @@ static int ty_XDSdecode( char b1, char b2 )
 #define DST               ( ( TY_XDS[ 3 ][ 4 ][ 0 ] & 0x20 ) >> 5 )
                struct tm tm = 
                {
-                  0,                                 // sec
-                  ( TY_XDS_ptr[ 0 ] & 0x3F ),        // min
-                  ( TY_XDS_ptr[ 1 ] & 0x1F ),        // hour
-                  ( TY_XDS_ptr[ 2 ] & 0x1F ),        // day
-                  ( TY_XDS_ptr[ 3 ] & 0x1f ) - 1,    // month
-                  ( TY_XDS_ptr[ 5 ] & 0x3f ) + 90,   // year
-                  0,                                 // day of week
-                  0,                                 // day of year
-                  0,                                 // DST
+                  .tm_sec = 0,                                // sec
+                  .tm_min = ( TY_XDS_ptr[ 0 ] & 0x3F ),       // min
+                  .tm_hour = ( TY_XDS_ptr[ 1 ] & 0x1F ),      // hour
+                  .tm_mday = ( TY_XDS_ptr[ 2 ] & 0x1F ),      // day
+                  .tm_mon = ( TY_XDS_ptr[ 3 ] & 0x1f ) - 1,   // month
+                  .tm_year = ( TY_XDS_ptr[ 5 ] & 0x3f ) + 90, // year
+                  .tm_wday = 0,                               // day of week
+                  .tm_yday = 0,                               // day of year
+                  .tm_isdst = 0,                              // DST
                };
 
                time_t time_t = mktime( &tm );
