@@ -580,7 +580,7 @@ static int get_capture_buffer_size(priv_t *priv)
 {
     int bufsize, cnt;
 
-    if (tv_param_buffer_size) {
+    if (tv_param_buffer_size >= 0) {
 	bufsize = tv_param_buffer_size*1024*1024;
     } else {
 #ifdef HAVE_SYS_SYSINFO_H
