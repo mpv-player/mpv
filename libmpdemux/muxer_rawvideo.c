@@ -11,10 +11,9 @@
 //#include "stream.h"
 //#include "demuxer.h"
 //#include "stheader.h"
+#include "aviheader.h"
+#include "ms_hdr.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
 #include "bswap.h"
 
 #include "muxer.h"
