@@ -40,11 +40,11 @@ mplayer (1.0)
     * Initial Hitachi SuperH support (SH3/SH4)
     
     Codecs/demuxers support:
-    * realaudio win32 dlls support
+    * realaudio win32 DLLs support
     * various realaudio/realvideo fixes, including WxH bugs, Sipr etc
     * various realmedia a-v sync fixes
     * realaudio v4 demuxer
-    * realaudio 14_4 and 28_8 codecs support (both binary dlls and native code)
+    * realaudio 14_4 and 28_8 codecs support (both binary DLLs and native code)
     * realmedia rtsp:// support (independent from the live.com rtsp stuff!)
     * Matroska demuxer
     * demuxer: enabling mpeg4-es autodetection, h264-es support
@@ -74,7 +74,7 @@ mplayer (1.0)
     * mp3lib: skip trashed first mp3 frame, fixes lot of buggy/misdetected files
     * imported a working FAAD version
     * 8BPS (Planar RGB) support
-    * working DVD (libmpdvdkit) support for Cygwin
+    * working DVD (libmpdvdkit) support for Cygwin/MinGW
 
     FFmpeg/libavcodec:
     * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
@@ -82,7 +82,7 @@ mplayer (1.0)
     * PAL 4:1:1 SMPTE 314M DV streams support, NTSC DV last MB column fix
     * fixing padding bug autodetection for some rare files
     * DspContext.(i)dct_* bitexact cleanup
-    * user setable quantizer bias
+    * user settable quantizer bias
     * mpeg1 slice encoding support
     * msmpeg4 2-pass support
     * H264 video decoding
@@ -91,8 +91,8 @@ mplayer (1.0)
     * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
     * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Video v1) decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
-    * truncated unary binerization, unary k-th order exp golomb binarization :)
-    * FFV1: lossless YUV codec, compress a lot better than huffyuv, but slower
+    * truncated unary binarization, unary k-th order exp golomb binarization :)
+    * FFV1: lossless YUV codec, compresses a lot better than huffyuv, but slower
     * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
     * ATI VCR1 and VCR2 decoding
     * full featured SH4 optimizations
@@ -104,10 +104,10 @@ mplayer (1.0)
     * x11_common: fix detection of metacity
     * x11_common: 10l fix in original layer detection code
     * tdfx_vid driver (3dfx cards overlay with AGP support)
-    * vo_xover: general x11 ovelay driver, currently onl tdfx_vid uses it
+    * vo_xover: general x11 overlay driver, currently only tdfx_vid uses it
     * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
     * new svgalib vo driver
-    * vo_directfb2: triple buffering support,configuration sys changed,fixes
+    * vo_directfb2: triple buffering support, configuration sys changed, fixes
     * OpenGL driver cleanups/fixes (both vo_gl and vo_gl2)
     * vo_fbdev cleanup/partial rewrite, now with real direct rendering
     * vo_xvmc: new driver featuring XvMC (HW MC/IDCT) acceleration
@@ -115,11 +115,12 @@ mplayer (1.0)
 
     Others:
     * gcc can now detect badly called mp_msg()s
-    * lot of config/cmdline parsing fixes (some of them were at least 100000l bugs)
-    * configure: enable vidix for PPC
+    * a lot of config/cmdline parsing fixes (some of them were at least 100000l bugs)
+    * configure: enable VIDIX for PPC
     * configure: full featured PPC optimizations and rewritten architecture handling
     * spudec.c: Fix "invalid fragment" handling, Improved subtitle queueing
     * network streaming layer: IPv6 support
+    * FTP support
     * playtree parsing speedup :)
     * various URL parsing fixes
     * crashing on broken config files finally fixed!
