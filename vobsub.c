@@ -978,6 +978,23 @@ vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
   return -1;
 }
 
+int
+vobsub_get_next_packet(void *vobhandle, void** data, int* timestamp)
+{
+  vobsub_t *vob = (vobsub_t *)vobhandle;
+  if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
+    packet_queue_t *queue = vob->spu_streams + vobsub_id;
+    if (queue->current_index < queue->packets_size) {
+      packet_t *pkt = queue->packets + queue->current_index;
+      ++queue->current_index;
+      *data = pkt->data;
+      *timestamp = pkt->pts100;
+      return pkt->size;
+    }
+  }
+  return -1;
+}
+
 void
 vobsub_reset(void *vobhandle)
 {
