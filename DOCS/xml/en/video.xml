@@ -1743,9 +1743,21 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
+  If you have more than one card type (e.g. Satellitar, Terrestrial and Cable)
+  you can save your channels files as
+  <filename>~/.mplayer/channels.conf.sat</filename>,
+  <filename>~/.mplayer/channels.conf.ter</filename>
+  and <filename>~/.mplayer/channels.conf.cbl</filename>,
+  respectively, so as to implicitly hint <application>MPlayer</application>
+  to use these files rather than <filename>~/.mplayer/channels.conf</filename>,
+  and you only need to specify which card to use.
+</para>
+
+<para>
   Make sure that you have have <emphasis>only</emphasis> Free to Air
   channels in your <filename>channels.conf</filename> file, or
-  <application>MPlayer</application> will hang on the others.
+  <application>MPlayer</application> will try to skip to the next visible one,
+  but it may take long if there are many consecutive encrypted channels.
 </para>
 
 <para>
