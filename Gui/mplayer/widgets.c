@@ -18,7 +18,6 @@
 #include "widgets.h"
 
 #include "./mplayer.h"
-#include "../events.h"
 #include "../app.h"
 #include "../wm/ws.h"
 
@@ -63,7 +62,6 @@ void gtkInit( void )
 {
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] init gtk ...\n" );
  gtk_set_locale();
-// gtk_init( &argc,&argv );
  gtk_init( 0,NULL );
 // gdk_set_use_xshm( TRUE );
 
@@ -83,15 +81,8 @@ void gtkInit( void )
  gtkInited=1;
 }
 
-void gtkDone( void )
-{
-}
-
 void gtkAddIcon( GtkWidget * window )
-{
- GdkWindowPrivate * win = (GdkWindowPrivate *)window->window;
- wsSetIcon( gdk_display,win->xwindow,guiIcon,guiIconMask );
-}
+{ wsSetIcon( gdk_display,GDK_WINDOW_XWINDOW( window->window ),guiIcon,guiIconMask ); }
 
 void gtkClearList( GtkWidget * list )
 { gtk_clist_clear( GTK_CLIST( list ) ); }
@@ -159,16 +150,10 @@ void gtkMessageBox( int type,gchar * str )
 }
 
 void gtkSetLayer( GtkWidget * wdg )
-{
- GdkWindowPrivate * win = (GdkWindowPrivate *)wdg->window;
- wsSetLayer( gdk_display,win->xwindow,appMPlayer.subWindow.isFullScreen );
-}
+{ wsSetLayer( gdk_display,GDK_WINDOW_XWINDOW( wdg->window ),appMPlayer.subWindow.isFullScreen ); }
 
 void gtkActive( GtkWidget * wdg )
-{
- GdkWindowPrivate * win = (GdkWindowPrivate *)wdg->window;
- wsMoveTopWindow( gdk_display,win->xwindow );
-}
+{ wsMoveTopWindow( gdk_display,GDK_WINDOW_XWINDOW( wdg->window )); }
 
 void gtkShow( int type,char * param )
 {

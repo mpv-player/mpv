@@ -11,7 +11,7 @@
 
 #include "url.h"
 #include "../../interface.h"
-#include "../../events.h"
+#include "../../app.h"
 #include "../widgets.h"
 #include "../../help_mp.h"
 
@@ -113,7 +113,7 @@ GtkWidget * create_URL( void )
 
  accel_group=gtk_accel_group_new();
 
- URL=gtk_window_new( GTK_WINDOW_DIALOG );
+ URL=gtk_window_new( GTK_WINDOW_TOPLEVEL );
  gtk_widget_set_name( URL,"URL" );
  gtk_object_set_data( GTK_OBJECT( URL ),"URL",URL );
  gtk_widget_set_usize( URL,384,70 );

@@ -9,7 +9,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../../events.h"
+#include "../../app.h"
 #include "../../cfg.h"
 #include "../../help_mp.h"
 #include "../../../config.h"
@@ -290,7 +290,7 @@ GtkWidget * create_Equalizer( void )
 
   accel_group=gtk_accel_group_new();
 
-  Equalizer=gtk_window_new( GTK_WINDOW_DIALOG );
+  Equalizer=gtk_window_new( GTK_WINDOW_TOPLEVEL );
   gtk_widget_set_name( Equalizer,MSGTR_Equalizer );
   gtk_object_set_data( GTK_OBJECT( Equalizer ),MSGTR_Equalizer,Equalizer );
   gtk_widget_set_usize( Equalizer,550,256 );
@@ -846,7 +846,7 @@ GtkWidget * create_EquConfig( void )
 
   accel_group=gtk_accel_group_new();
 
-  EquConfig=gtk_window_new( GTK_WINDOW_DIALOG );
+  EquConfig=gtk_window_new( GTK_WINDOW_TOPLEVEL );
   gtk_widget_set_name( EquConfig,"EquConfig" );
   gtk_object_set_data( GTK_OBJECT( EquConfig ),"EquConfig",EquConfig );
   gtk_widget_set_usize( EquConfig,350,198 );

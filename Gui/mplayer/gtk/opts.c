@@ -425,7 +425,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkAONorm=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNormalize ) );
 	gtkAONoSound=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoSound ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
-	gtkSet( gtkSetAudioDelay,HSAudioDelayadj->value,NULL );
+	audio_delay=HSAudioDelayadj->value;
 
 	gaddlist( &audio_driver_list,ao_driver[0] );
 	gaddlist( &video_driver_list,vo_driver[0] );
@@ -442,13 +442,13 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) ) ) flip=1;
 	
 	// -- 3. page
-	gtkSet( gtkSetSubAuto,!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ) ),NULL );
+	sub_auto=!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ) );
 	gtkSubDumpMPSub=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ) );
 	gtkSubDumpSrt=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpSrt ) );
 	sub_unicode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubUnicode ) );
-	gtkSet( gtkSetSubDelay,HSSubDelayadj->value,NULL );
-	gtkSet( gtkSetSubFPS,HSSubFPSadj->value,NULL );
-	gtkSet( gtkSetSubPos,HSSubPositionadj->value,NULL );
+	sub_delay=HSSubDelayadj->value;
+	sub_fps=HSSubFPSadj->value;
+	sub_pos=(int)HSSubPositionadj->value;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
@@ -475,8 +475,8 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) gtkSet( gtkSetCacheSize,SBCacheadj->value,NULL );
-	 else gtkSet( gtkSetCacheSize,0,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) stream_cache_size=SBCacheadj->value;
+	 else stream_cache_size=0;
 
 	{
 	 int i;
@@ -529,16 +529,16 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	break;
    case 1: // audio delay
-	gtkSet( gtkSetAudioDelay,HSAudioDelayadj->value,NULL );
+	audio_delay=HSAudioDelayadj->value;
 	break;
    case 2: // panscan
         gtkSet( gtkSetPanscan,HSPanscanadj->value,NULL );
 	break;
    case 3: // sub delay
-        gtkSet( gtkSetSubDelay,HSSubDelayadj->value,NULL );
+        sub_delay=HSSubDelayadj->value;
 	break;
    case 4: // sub position
-        gtkSet( gtkSetSubPos,HSSubPositionadj->value,NULL );
+        sub_pos=(int)HSSubPositionadj->value;
 	break;
    case 5: // font factor
 #ifndef HAVE_FREETYPE
@@ -682,14 +682,9 @@ GtkWidget * create_Preferences( void )
 
   accel_group=gtk_accel_group_new();
 
-  Preferences=gtk_window_new( GTK_WINDOW_DIALOG );
+  Preferences=gtk_window_new( GTK_WINDOW_TOPLEVEL );
   gtk_widget_set_name( Preferences,"Preferences" );
   gtk_object_set_data( GTK_OBJECT( Preferences ),"Preferences",Preferences );
-//#ifndef HAVE_FREETYPE
-//  gtk_widget_set_usize( Preferences,512,400 );
-//#else
-//  gtk_widget_set_usize( Preferences,612,565 );
-//#endif
   gtk_window_set_title( GTK_WINDOW( Preferences ),MSGTR_Preferences );
   gtk_window_set_position( GTK_WINDOW( Preferences ),GTK_WIN_POS_CENTER );
 //  gtk_window_set_policy( GTK_WINDOW( Preferences ),FALSE,FALSE,FALSE );
@@ -2000,7 +1995,7 @@ GtkWidget * create_OSSConfig( void )
 
   accel_group=gtk_accel_group_new();
 
-  OSSConfig=gtk_window_new( GTK_WINDOW_DIALOG );
+  OSSConfig=gtk_window_new( GTK_WINDOW_TOPLEVEL );
   gtk_widget_set_name( OSSConfig,"OSSConfig" );
   gtk_object_set_data( GTK_OBJECT( OSSConfig ),"OSSConfig",OSSConfig );
   gtk_widget_set_usize( OSSConfig,270,92 );
@@ -2184,8 +2179,12 @@ static GtkWidget * DXR3Config;
 static GtkWidget * CBDevice;
 static GtkWidget * CEDXR3Device;
 static GtkWidget * RBVNone;
-static GtkWidget * RBVLavc;
-static GtkWidget * RBVFame;
+#ifdef USE_LIBAVCODEC
+ static GtkWidget * RBVLavc;
+#endif
+#ifdef USE_LIBFAME
+ static GtkWidget * RBVFame;
+#endif
 static GtkWidget * dxr3BOk;
 static GtkWidget * dxr3BCancel;
 
@@ -2201,8 +2200,12 @@ void ShowDXR3Config( void )
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),gtkDXR3Device );
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
+#ifdef USE_LIBAVCODEC
  if ( gtkVopLAVC ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVLavc ),TRUE );
+#endif
+#ifdef USE_LIBFAME
  if ( gtkVopFAME ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVFame ),TRUE );
+#endif
  
  gtk_widget_show( DXR3Config );
  gtkSetLayer( DXR3Config );
@@ -2223,8 +2226,12 @@ static void dxr3Button( GtkButton * button,gpointer user_data )
  {
   case 0: // Ok
        gfree( (void **)&gtkDXR3Device ); gtkDXR3Device=strdup( gtk_entry_get_text( GTK_ENTRY( CEDXR3Device ) ) );
+#ifdef USE_LIBAVCODEC
        gtkVopLAVC=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVLavc ) );
+#endif
+#ifdef USE_LIBFAME
        gtkVopFAME=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVFame ) );
+#endif
   case 2: // Destroy
   case 1: // Cancel
        HideDXR3Config();
@@ -2259,10 +2266,10 @@ GtkWidget * create_DXR3Config( void )
 
  accel_group=gtk_accel_group_new();
 
- DXR3Config=gtk_window_new( GTK_WINDOW_DIALOG );
+ DXR3Config=gtk_window_new( GTK_WINDOW_TOPLEVEL );
  gtk_widget_set_name( DXR3Config,"DXR3Config" );
  gtk_object_set_data( GTK_OBJECT( DXR3Config ),"DXR3Config",DXR3Config );
- gtk_widget_set_usize( DXR3Config,300,156 );
+// gtk_widget_set_usize( DXR3Config,300,156 );
  GTK_WIDGET_SET_FLAGS( DXR3Config,GTK_CAN_DEFAULT );
  gtk_window_set_title( GTK_WINDOW( DXR3Config ),"DXR3/H+" );
  gtk_window_set_position( GTK_WINDOW( DXR3Config ),GTK_WIN_POS_CENTER );
@@ -2357,6 +2364,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( CEDXR3Device );
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),"/dev/em8300" );
 
+#if defined( USE_LIBAVCODEC ) || defined( USE_LIBFAME )
  hseparator2=gtk_hseparator_new();
  gtk_widget_set_name( hseparator2,"hseparator2" );
  gtk_widget_ref( hseparator2 );
@@ -2390,6 +2398,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_box_pack_start( GTK_BOX( vbox3 ),RBVNone,FALSE,FALSE,0 );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
 
+#ifdef USE_LIBAVCODEC
  RBVLavc=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_DXR3_LAVC );
  VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVLavc ) );
  gtk_widget_set_name( RBVLavc,"RBVLavc" );
@@ -2397,7 +2406,9 @@ GtkWidget * create_DXR3Config( void )
  gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"RBVLavc",RBVLavc,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( RBVLavc );
  gtk_box_pack_start( GTK_BOX( vbox3 ),RBVLavc,FALSE,FALSE,0 );
+#endif
 
+#ifdef USE_LIBFAME
  RBVFame=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_DXR3_FAME );
  VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVFame ) );
  gtk_widget_set_name( RBVFame,"RBVFame" );
@@ -2405,6 +2416,8 @@ GtkWidget * create_DXR3Config( void )
  gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"RBVFame",RBVFame,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( RBVFame );
  gtk_box_pack_start( GTK_BOX( vbox3 ),RBVFame,FALSE,FALSE,0 );
+#endif
+#endif
 
  hseparator1=gtk_hseparator_new();
  gtk_widget_set_name( hseparator1,"hseparator1" );
@@ -2431,7 +2444,6 @@ GtkWidget * create_DXR3Config( void )
  gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"dxr3BOk",dxr3BOk,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( dxr3BOk );
  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),dxr3BOk );
-// GTK_WIDGET_UNSET_FLAGS( bOk,GTK_CAN_FOCUS );
 
  dxr3BCancel=gtk_button_new_with_label( MSGTR_Cancel );
  gtk_widget_set_name( dxr3BCancel,"dxr3BCancel" );
@@ -2439,7 +2451,6 @@ GtkWidget * create_DXR3Config( void )
  gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"dxr3BCancel",dxr3BCancel,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( dxr3BCancel );
  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),dxr3BCancel );
-// GTK_WIDGET_UNSET_FLAGS( bCancel,GTK_CAN_FOCUS );
 
  gtk_widget_add_accelerator( dxr3BOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
  gtk_widget_add_accelerator( dxr3BCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );

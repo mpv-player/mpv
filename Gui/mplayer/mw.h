@@ -6,6 +6,8 @@
 #include "../../libvo/sub.h"
 #include "../../mplayer.h"
 
+extern unsigned int GetTimerMS( void );
+
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
 
@@ -195,7 +197,7 @@ void mplMainDraw( wsParamDisplay )
             {
 	     char * t = Translate( item->label );
 	     int    l = fntTextWidth( item->fontid,t );
-             image=fntRender( item->fontid,mplTimer%(l?l:item->width),item->width,"%s",t );
+             image=fntRender( item->fontid,(GetTimerMS() / 20)%(l?l:item->width),item->width,"%s",t );
 	    }
 drawrenderedtext:
             if ( image )

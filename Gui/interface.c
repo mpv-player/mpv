@@ -163,8 +163,21 @@ void guiInit( void )
  fullscreen=gtkLoadFullscreen;       
    
  gtkInit();
+// --- initialize X 
  wsXInit( (void *)mDisplay );
- appInit( (void*)mDisplay );
+// ---
+ skinDirInHome=get_path("Skin");
+ skinMPlayerDir=DATADIR "/Skin";
+ printf("SKIN dir 1: '%s'\n",skinDirInHome);
+ printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
+ if ( !skinName ) skinName=strdup( "default" );
+ switch ( skinRead( skinName ) )
+  {
+   case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
+   case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
+  }
+ mplInit( (void *)mDisplay );
+// ---
 
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
  if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
@@ -175,9 +188,8 @@ void guiInit( void )
 
 void guiDone( void )
 {
- mp_msg( MSGT_GPLAYER,MSGL_V,"[mplayer] exit.\n" );
+ mp_msg( MSGT_GPLAYER,MSGL_V,"[gui] done.\n" );
  cfg_write();
- gtkDone();
  wsXDone();
 }
 
@@ -399,7 +411,7 @@ int guiGetEvent( int type,char * arg )
 		  if ( vcd_seek_to_track( stream->fd,i ) < 0 ) break;
 		vcd_seek_to_track( stream->fd,vcd_track );
 		guiIntfStruct.VCDTracks=--i;
-		mp_msg( MSGT_GPLAYER,MSGL_INFO,"[interface] vcd tracks: %d\n",guiIntfStruct.VCDTracks );
+		mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] vcd tracks: %d\n",guiIntfStruct.VCDTracks );
 		guiIntfStruct.Track=vcd_track;
 	        break;
 	       }
@@ -478,7 +490,14 @@ int guiGetEvent( int type,char * arg )
 	 }
 // -- subtitle
 #ifdef HAVE_DXR3
-	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
+	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS
+#ifdef USE_LIBAVCODEC
+	 && !gtkVopLAVC
+#endif
+#ifdef USE_LIBFAME
+	 && !gtkVopFAME 
+#endif
+	 )
 	 {
 	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVCFAME );
 	  guiIntfStruct.Playing=0;
@@ -524,14 +543,22 @@ int guiGetEvent( int type,char * arg )
 	}
 
 #ifdef HAVE_DXR3
+#ifdef USE_LIBAVCODEC
 	remove_vop( "lavc" );
+#endif
+#ifdef USE_LIBFAME
 	remove_vop( "fame" );
+#endif
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) )
 	 {
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
+#ifdef USE_LIBAVCODEC
 	    if ( gtkVopLAVC ) add_vop( "lavc" );
+#endif
+#ifdef USE_LIBFAME
 	    if ( gtkVopFAME ) add_vop( "fame" );
+#endif
 	   }
 	 }
 #endif
@@ -540,7 +567,6 @@ int guiGetEvent( int type,char * arg )
 	 else remove_vop( "pp" );
 		 
 // --- audio opts
-	audio_delay=gtkAODelay;
 //	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
 	if ( gtkAONorm ) 	       gset( &ao_plugin_cfg.plugin_list,"volnorm" );
 	if ( gtkEnableAudioEqualizer ) gset( &ao_plugin_cfg.plugin_list,"eq" );
@@ -578,14 +604,10 @@ int guiGetEvent( int type,char * arg )
  return False;
 }
 
-extern unsigned int GetTimerMS( void );
-extern int mplTimer;
-
 void guiEventHandling( void )
 {
  if ( !guiIntfStruct.Playing || guiIntfStruct.NoWindow ) wsHandleEvents();
  gtkEventHandling();
- mplTimer=GetTimerMS() / 20;
 }
 
 // --- 
@@ -701,18 +723,6 @@ void * gtkSet( int cmd,float fparam, void * vparam )
          } else { url_item->next=NULL; URLList=url_item; }
         return NULL;
 // --- subtitle
-   case gtkSetSubAuto:
-        sub_auto=(int)fparam;
-	return NULL;
-   case gtkSetSubDelay:
-        sub_delay=fparam;
-        return NULL;   
-   case gtkSetSubFPS:
-        sub_fps=(int)fparam;
-        return NULL;   
-   case gtkSetSubPos:
-        sub_pos=(int)fparam;
-        return NULL;   
 #if defined( USE_OSD ) || defined( USE_SUB )
 #ifndef HAVE_FREETYPE
    case gtkSetFontFactor:
@@ -763,16 +773,10 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	if ( (unsigned int)vparam & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	return NULL;
-   case gtkSetCacheSize:
-        stream_cache_size=(int)fparam;
-	return NULL;
    case gtkSetExtraStereo:
         gtkAOExtraStereoMul=fparam;
 	audio_plugin_extrastereo.control( AOCONTROL_PLUGIN_ES_SET,(int)&gtkAOExtraStereoMul );
         return NULL;
-   case gtkSetAudioDelay:
-        audio_delay=gtkAODelay=fparam;
-	return NULL;
    case gtkSetPanscan:
         {
 	 mp_cmd_t * mp_cmd;

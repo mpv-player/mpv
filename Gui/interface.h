@@ -161,34 +161,28 @@ extern plItem * plLastPlayed;
 
 extern URLItem * URLList;
 
-#define gtkSetContrast     0
-#define gtkSetBrightness   1
-#define gtkSetHue	   2
-#define gtkSetSaturation   3
-#define gtkSetEqualizer    4
-#define gtkAddPlItem       5
-#define gtkGetNextPlItem   6
-#define gtkGetPrevPlItem   7
-#define gtkGetCurrPlItem   8
-#define gtkDelPl           9
-#define gtkSetExtraStereo 10
-#define gtkSetAudioDelay  11
-#define gtkSetPanscan     12
-#define gtkSetSubDelay    13
-#define gtkSetSubFPS      14
-#define gtkSetSubPos      15
-#define gtkSetSubAuto     16
-#define gtkSetFontFactor  17
-#define gtkSetAutoq       18
-#define gtkClearStruct    19
-#define gtkAddURLItem     20
-#define gtkSetFontOutLine 21
-#define gtkSetFontBlur    22
-#define gtkSetFontTextScale 23
-#define gtkSetFontOSDScale  24
-#define gtkSetFontEncoding  25
-#define gtkSetFontAutoScale 26
-#define gtkSetCacheSize     27
+#define gtkSetContrast       0
+#define gtkSetBrightness     1
+#define gtkSetHue	     2
+#define gtkSetSaturation     3
+#define gtkSetEqualizer      4
+#define gtkAddPlItem         5
+#define gtkGetNextPlItem     6
+#define gtkGetPrevPlItem     7
+#define gtkGetCurrPlItem     8
+#define gtkDelPl             9
+#define gtkSetExtraStereo   10
+#define gtkSetPanscan       11
+#define gtkSetFontFactor    12
+#define gtkSetAutoq         13
+#define gtkClearStruct      14
+#define gtkAddURLItem       15
+#define gtkSetFontOutLine   16
+#define gtkSetFontBlur      17
+#define gtkSetFontTextScale 18
+#define gtkSetFontOSDScale  19
+#define gtkSetFontEncoding  20
+#define gtkSetFontAutoScale 21
 
 extern float gtkEquChannels[6][10];
 

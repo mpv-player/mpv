@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "./mplayer.h"
-#include "../events.h"
 #include "../app.h"
 #include "../cfg.h"
 #include "../interface.h"
@@ -34,7 +33,6 @@
 #define mplRedrawTimerConst 5
 
 int mplRedrawTimer = mplRedrawTimerConst;
-int mplTimer = 0;
 
 void mplEventHandling( int msg,float param );
 
@@ -48,20 +46,6 @@ void mplEventHandling( int msg,float param );
 void mplInit( void * disp )
 {
  int i;
-
-#if 0
- // init fields of this struct to default values
- guiIntfStruct.Balance=50.0f;
- guiIntfStruct.StreamType=-1;
-
- gtkInit();
-
- // read gui.conf, gui.pl
- cfg_read();
-
- // opens X display, checks for extensions (XShape, DGA etc)
- wsXInit( disp );
-#endif 
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {

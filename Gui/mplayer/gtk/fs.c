@@ -12,7 +12,7 @@
 #include "mplayer/pixmaps/dir.xpm"
 #include "mplayer/pixmaps/file.xpm"
 
-#include "../../events.h"
+#include "../../app.h"
 #include "../../interface.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"

@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "sb.h"
-#include "../../events.h"
+#include "../../app.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"
 
@@ -135,7 +135,7 @@ GtkWidget * create_SkinBrowser( void )
 
  accel_group = gtk_accel_group_new ();
 
- SkinBrowser=gtk_window_new( GTK_WINDOW_DIALOG );
+ SkinBrowser=gtk_window_new( GTK_WINDOW_TOPLEVEL );
  gtk_widget_set_name( SkinBrowser,MSGTR_SkinBrowser );
  gtk_object_set_data( GTK_OBJECT( SkinBrowser ),MSGTR_SkinBrowser,SkinBrowser );
  gtk_widget_set_usize( SkinBrowser,256,320 );

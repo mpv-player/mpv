@@ -24,11 +24,14 @@
 int    gtkEnableAudioEqualizer = 0;
 
 int    gtkVopPP = 0;
-int    gtkVopLAVC = 0;
-int    gtkVopFAME = 0;
+#ifdef USE_LIBAVCODEC
+ int    gtkVopLAVC = 0;
+#endif
+#ifdef USE_LIBFAME
+ int    gtkVopFAME = 0;
+#endif
 
 int    gtkAONoSound = 0;
-float  gtkAODelay = 0.0f;
 int    gtkAONorm = 0;
 int    gtkAOSurround = 0;
 int    gtkAOExtraStereo = 0;
@@ -73,8 +76,12 @@ static config_t gui_opts[] =
 
  { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
+#ifdef USE_LIBAVCODEC
  { "vf_lavc",&gtkVopLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
+#endif
+#ifdef USE_LIBFAME
  { "vf_fame",&gtkVopFAME,CONF_TYPE_FLAG,0,0,1,NULL },
+#endif
 
  { "ao_driver",&audio_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "ao_nosound",&gtkAONoSound,CONF_TYPE_FLAG,0,0,1,NULL },
@@ -82,7 +89,6 @@ static config_t gui_opts[] =
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo",&gtkAOExtraStereo,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo_coefficient",&gtkAOExtraStereoMul,CONF_TYPE_FLOAT,CONF_RANGE,-10,10,NULL },
- { "ao_delay",&gtkAODelay,CONF_TYPE_FLOAT,CONF_RANGE,-100,100,NULL },
  { "ao_oss_mixer",&gtkAOOSSMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
  

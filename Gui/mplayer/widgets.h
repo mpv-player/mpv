@@ -44,7 +44,6 @@ extern Pixmap	   guiIconMask;
 extern void widgetsCreate( void );
 
 extern void gtkInit( void );
-extern void gtkDone( void );
 extern void gtkAddIcon( GtkWidget * window );
 
 extern int  gtkFillSkinList( gchar * dir );

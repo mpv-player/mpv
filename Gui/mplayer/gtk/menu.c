@@ -7,7 +7,7 @@
 #include "../../../help_mp.h"
 #include "../../../mplayer.h"
 
-#include "../../events.h"
+#include "../../app.h"
 
 #include "menu.h"
 #include "../widgets.h"

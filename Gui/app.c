@@ -1,4 +1,5 @@
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,6 +13,61 @@
 #include "skin/skin.h"
 #include "mplayer/mplayer.h"
 #include "interface.h"
+
+evName evNames[] =
+ {
+  { evNone,              "evNone"              },
+  { evPlay,              "evPlay"              },
+  { evStop,              "evStop"              },
+  { evPause,             "evPause"             },
+  { evPrev,              "evPrev"              },
+  { evNext,              "evNext"              },
+  { evLoad,              "evLoad"              },
+  { evEqualizer,         "evEqualizer"         },
+  { evEqualizer,         "evEqualeaser"        },
+  { evPlayList,          "evPlaylist"          },
+  { evExit,              "evExit"              },
+  { evIconify,           "evIconify"           },
+  { evIncBalance,        "evIncBalance"        },
+  { evDecBalance,        "evDecBalance"        },
+  { evFullScreen,        "evFullScreen"        },
+  { evFName,             "evFName"             },
+  { evMovieTime,         "evMovieTime"         },
+  { evAbout,             "evAbout"             },
+  { evLoadPlay,          "evLoadPlay"          },
+  { evPreferences,       "evPreferences"       },
+  { evSkinBrowser,       "evSkinBrowser"       },
+  { evBackward10sec,     "evBackward10sec"     },
+  { evForward10sec,      "evForward10sec"      },
+  { evBackward1min,      "evBackward1min"      },
+  { evForward1min,       "evForward1min"       },
+  { evBackward10min,     "evBackward10min"     },
+  { evForward10min,      "evForward10min"      },
+  { evIncVolume,         "evIncVolume"         },
+  { evDecVolume,         "evDecVolume"         },
+  { evMute,              "evMute"              },
+  { evIncAudioBufDelay,  "evIncAudioBufDelay"  },
+  { evDecAudioBufDelay,  "evDecAudioBufDelay"  },
+  { evPlaySwitchToPause, "evPlaySwitchToPause" },
+  { evPauseSwitchToPlay, "evPauseSwitchToPlay" },
+  { evNormalSize,        "evNormalSize"        },
+  { evDoubleSize,        "evDoubleSize"        },
+  { evSetMoviePosition,  "evSetMoviePosition"  },
+  { evSetVolume,         "evSetVolume"         },
+  { evSetBalance,        "evSetBalance"        },
+  { evHelp,		 "evHelp"	       },	
+  { evLoadSubtitle,      "evLoadSubtitle"      },
+  { evPlayDVD,		 "evPlayDVD"	       },
+  { evPlayVCD,		 "evPlayVCD"	       },
+  { evSetURL,		 "evSetURL"	       },
+  { evLoadAudioFile,	 "evLoadAudioFile"     },
+  { evDropSubtitle,      "evDropSubtitle"      },
+  { evSetAspect,	 "evSetAspect"	       }
+ };
+
+int evBoxs = sizeof( evNames ) / sizeof( evName );
+
+// ---
 
 extern char *get_path(char *);
 
@@ -97,19 +153,4 @@ int appFindMessage( unsigned char * str )
  for ( i=0;i<evBoxs;i++ )
   if ( !strcmp( evNames[i].name,str ) ) return evNames[i].msg;
  return -1;
-}
-
-void appInit( void * disp )
-{
- skinDirInHome=get_path("Skin");
- skinMPlayerDir=DATADIR "/Skin";
- printf("SKIN dir 1: '%s'\n",skinDirInHome);
- printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
- if ( !skinName ) skinName=strdup( "default" );
- switch ( skinRead( skinName ) )
-  {
-   case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
-   case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
-  }
- mplInit( disp ); // does gtk & ws initialization, create windows
 }
