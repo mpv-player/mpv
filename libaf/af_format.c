@@ -391,6 +391,8 @@ static void endian(void* in, void* out, int len, int bps)
       for(i=0;i<len;i++){
 	s=((uint8_t*)in)[3*i];
 	((uint8_t*)out)[3*i]=((uint8_t*)in)[3*i+2];
+	if (in != out)
+	  ((uint8_t*)out)[3*i+1]=((uint8_t*)in)[3*i+1];
 	((uint8_t*)out)[3*i+2]=s;
       }
       break;
