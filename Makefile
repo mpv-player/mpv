@@ -30,7 +30,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	version.h $(PRG) $(PRG_CFG)
+all:	version.h config.h $(PRG) $(PRG_CFG)
 # $(PRG_AVIP)
 
 .c.o:
@@ -95,6 +95,13 @@ depend: .depend
 
 .depend: Makefile config.mak config.h
 	makedepend -f- -- $(CFLAGS) -- mplayer.c mplayerHQ.c aviparse.c tvision.c $(SRCS) 1>.depend 2>/dev/null
+
+# ./configure must be run if it changed in CVS
+config.h: configure
+	@echo "############################################################"
+	@echo "####### Please run ./configure again - it's changed! #######"
+	@echo "############################################################"
+	@exit 1
 
 # rebuild at every config.h/config.mak change:
 version.h: config.h config.mak Makefile
