@@ -1,5 +1,6 @@
 // Generic alpha renderers for all YUV modes and RGB depths.
 // These are "reference implementations", should be optimized later (MMX, etc)
+// Optimized by Nick and Michael
 
 //#define FAST_OSD
 //#define FAST_OSD_TABLE
@@ -9,14 +10,60 @@
 #include "../mmx_defs.h"
 //#define ENABLE_PROFILE
 #include "../my_profile.h"
+#include <inttypes.h>
+
+#ifndef HAVE_3DNOW
+static const uint64_t bFF  __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
+#endif
 
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
-#ifdef FAST_OSD
+#if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
 #endif
+PROFILE_START();
     for(y=0;y<h;y++){
         register int x;
+#ifdef HAVE_MMX
+    asm volatile(
+	PREFETCHW" %0\n\t"
+	PREFETCH" %1\n\t"
+	PREFETCH" %2\n\t"
+//	"pxor %%mm7, %%mm7\n\t"
+	"pcmpeqb %%mm5, %%mm5\n\t" // F..F
+	"movq %%mm5, %%mm4\n\t"
+	"psllw $8, %%mm5\n\t" //FF00FF00FF00
+	"psrlw $8, %%mm4\n\t" //00FF00FF00FF
+	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
+    for(x=0;x<w;x+=8){
+	asm volatile(
+		"movl %1, %%eax\n\t"
+		"orl 4%1, %%eax\n\t"
+		" jz 1f\n\t"
+		PREFETCHW" 32%0\n\t"
+		PREFETCH" 32%1\n\t"
+		PREFETCH" 32%2\n\t"
+		"movq	%0, %%mm0\n\t" // dstbase
+		"movq	%%mm0, %%mm1\n\t"
+		"pand %%mm4, %%mm0\n\t" 	//0Y0Y0Y0Y
+		"psrlw $8, %%mm1\n\t"		//0Y0Y0Y0Y
+		"movq	%1, %%mm2\n\t" 		//srca HGFEDCBA
+		"paddb	bFF, %%mm2\n\t"
+		"movq %%mm2, %%mm3\n\t"
+		"pand %%mm4, %%mm2\n\t" 	//0G0E0C0A
+		"psrlw $8, %%mm3\n\t"		//0H0F0D0B
+		"pmullw	%%mm2, %%mm0\n\t"
+		"pmullw	%%mm3, %%mm1\n\t"
+		"psrlw	$8, %%mm0\n\t"
+		"pand %%mm5, %%mm1\n\t"
+		"por %%mm1, %%mm0\n\t"
+		"paddb	%2, %%mm0\n\t"
+		"movq	%%mm0, %0\n\t"
+		"1:\n\t"
+		:: "m" (dstbase[x]), "m" (srca[x]), "m" (src[x])
+		: "%eax");
+	}
+#else
         for(x=0;x<w;x++){
 #ifdef FAST_OSD
             if(srca[2*x+0]) dstbase[2*x+0]=src[2*x+0];
@@ -25,20 +72,64 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
             if(srca[x]) dstbase[x]=((dstbase[x]*srca[x])>>8)+src[x];
 #endif
         }
+#endif
         src+=srcstride;
         srca+=srcstride;
         dstbase+=dststride;
     }
+#ifdef HAVE_MMX
+	asm volatile(EMMS:::"memory");
+#endif
+PROFILE_END("vo_draw_alpha_yv12");
     return;
 }
 
 void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
-#ifdef FAST_OSD
+#if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
 #endif
+PROFILE_START();
     for(y=0;y<h;y++){
         register int x;
+#ifdef HAVE_MMX
+    asm volatile(
+	PREFETCHW" %0\n\t"
+	PREFETCH" %1\n\t"
+	PREFETCH" %2\n\t"
+	"pxor %%mm7, %%mm7\n\t"
+	"pcmpeqb %%mm5, %%mm5\n\t" // F..F
+	"movq %%mm5, %%mm4\n\t"
+	"psllw $8, %%mm5\n\t" //FF00FF00FF00
+	"psrlw $8, %%mm4\n\t" //00FF00FF00FF
+	::"m"(*dstbase),"m"(*srca),"m"(*src));
+    for(x=0;x<w;x+=4){
+	asm volatile(
+		"movl %1, %%eax\n\t"
+		"orl %%eax, %%eax\n\t"
+		" jz 1f\n\t"
+		PREFETCHW" 32%0\n\t"
+		PREFETCH" 32%1\n\t"
+		PREFETCH" 32%2\n\t"
+		"movq	%0, %%mm0\n\t" // dstbase
+		"movq	%%mm0, %%mm1\n\t"
+		"pand %%mm4, %%mm0\n\t" 	//0Y0Y0Y0Y
+		"movd	%%eax, %%mm2\n\t"	//srca 0000DCBA
+		"paddb	bFF, %%mm2\n\t"
+		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0D0C0B0A
+		"pmullw	%%mm2, %%mm0\n\t"
+		"psrlw	$8, %%mm0\n\t"
+		"pand %%mm5, %%mm1\n\t" 	//U0V0U0V0
+		"movd %2, %%mm2\n\t"		//src 0000DCBA
+		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0D0C0B0A
+		"por %%mm1, %%mm0\n\t"
+		"paddb	%%mm2, %%mm0\n\t"
+		"movq	%%mm0, %0\n\t"
+		"1:\n\t"
+		:: "m" (dstbase[x*2]), "m" (srca[x]), "m" (src[x])
+		: "%eax");
+	}
+#else
         for(x=0;x<w;x++){
 #ifdef FAST_OSD
             if(srca[2*x+0]) dstbase[4*x+0]=src[2*x+0];
@@ -47,10 +138,15 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
             if(srca[x]) dstbase[2*x]=((dstbase[2*x]*srca[x])>>8)+src[x];
 #endif
         }
-        src+=srcstride;
+#endif
+	src+=srcstride;
         srca+=srcstride;
         dstbase+=dststride;
     }
+#ifdef HAVE_MMX
+	asm volatile(EMMS:::"memory");
+#endif
+PROFILE_END("vo_draw_alpha_yuy2");
     return;
 }
 
@@ -167,6 +263,7 @@ PROFILE_START();
         register int x;
 #ifdef ARCH_X86
 #ifdef HAVE_MMX
+#ifdef HAVE_3DNOW
     asm volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
@@ -203,6 +300,64 @@ PROFILE_START();
 		"movq	%%mm0, %0\n\t"
 		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]));
 	}
+#else //this is faster for intels crap
+    asm volatile(
+	PREFETCHW" %0\n\t"
+	PREFETCH" %1\n\t"
+	PREFETCH" %2\n\t"
+	"pxor %%mm7, %%mm7\n\t"
+	"pcmpeqb %%mm5, %%mm5\n\t" // F..F
+	"movq %%mm5, %%mm4\n\t"
+	"psllw $8, %%mm5\n\t" //FF00FF00FF00
+	"psrlw $8, %%mm4\n\t" //00FF00FF00FF
+	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
+    for(x=0;x<w;x+=4){
+	asm volatile(
+		"movl %1, %%eax\n\t"
+		"orl %%eax, %%eax\n\t"
+		" jz 1f\n\t"
+		PREFETCHW" 32%0\n\t"
+		PREFETCH" 32%1\n\t"
+		PREFETCH" 32%2\n\t"
+		"movq	%0, %%mm0\n\t" // dstbase
+		"movq	%%mm0, %%mm1\n\t"
+		"pand %%mm4, %%mm0\n\t" 	//0R0B0R0B
+		"psrlw $8, %%mm1\n\t"		//0?0G0?0G
+		"movd	%%eax, %%mm2\n\t" 	//srca 0000DCBA
+		"paddb	bFF, %%mm2\n\t"
+		"punpcklbw %%mm2, %%mm2\n\t"	//srca DDCCBBAA
+		"movq %%mm2, %%mm3\n\t"
+		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0B0B0A0A
+		"pmullw	%%mm2, %%mm0\n\t"
+		"pmullw	%%mm2, %%mm1\n\t"
+		"psrlw	$8, %%mm0\n\t"
+		"pand %%mm5, %%mm1\n\t"
+		"por %%mm1, %%mm0\n\t"
+		"movd %2, %%mm2	\n\t"		//src 0000DCBA
+		"punpcklbw %%mm2, %%mm2\n\t" 	//src DDCCBBAA
+		"movq %%mm2, %%mm6\n\t"
+		"punpcklbw %%mm2, %%mm2\n\t"	//src BBBBAAAA
+		"paddb	%%mm2, %%mm0\n\t"
+		"movq	%%mm0, %0\n\t"
+
+		"movq	8%0, %%mm0\n\t" // dstbase
+		"movq	%%mm0, %%mm1\n\t"
+		"pand %%mm4, %%mm0\n\t" 	//0R0B0R0B
+		"psrlw $8, %%mm1\n\t"		//0?0G0?0G
+		"punpckhbw %%mm7, %%mm3\n\t"	//srca 0D0D0C0C
+		"pmullw	%%mm3, %%mm0\n\t"
+		"pmullw	%%mm3, %%mm1\n\t"
+		"psrlw	$8, %%mm0\n\t"
+		"pand %%mm5, %%mm1\n\t"
+		"por %%mm1, %%mm0\n\t"
+		"punpckhbw %%mm6, %%mm6\n\t"	//src DDDDCCCC
+		"paddb	%%mm6, %%mm0\n\t"
+		"movq	%%mm0, 8%0\n\t"
+		"1:\n\t"
+		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x])
+		: "%eax");
+	}
+#endif
 #else /* HAVE_MMX */
     for(x=0;x<w;x++){
         if(srca[x]){
