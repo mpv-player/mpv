@@ -31,14 +31,18 @@ static int mp_msg_levels[MSGT_MAX]; // verbose level of this module
 
 void mp_msg_init(){
 #ifdef USE_I18N
+#ifdef MP_DEBUG
     fprintf(stdout, "Using GNU internationalization\n");
     fprintf(stdout, "Original domain: %s\n", textdomain(NULL));
     fprintf(stdout, "Original dirname: %s\n", bindtextdomain(textdomain(NULL),NULL));
+#endif
     setlocale(LC_ALL, ""); /* set from the environment variables */
     bindtextdomain("mplayer", PREFIX"/share/locale");
     textdomain("mplayer");
+#ifdef MP_DEBUG
     fprintf(stdout, "Current domain: %s\n", textdomain(NULL));
-    fprintf(stdout, "Current dirname: %s\n", bindtextdomain(textdomain(NULL),NULL));
+    fprintf(stdout, "Current dirname: %s\n\n", bindtextdomain(textdomain(NULL),NULL));
+#endif
 #endif
     mp_msg_set_level(MSGL_STATUS);
 }
@@ -90,7 +94,8 @@ void mp_msg_c( int x, const char *format, ... ){
 #endif
 
 #ifdef MSG_USE_COLORS
-#if 1
+/* that's only a silly color test */
+#ifdef MP_DEBUG
     { int c;
       static int flag=1;
       if(flag)
