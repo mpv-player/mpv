@@ -101,20 +101,20 @@ printf("0x%02X\n", stream_chunck->type );
 	printf("  size_confirm: 0x%02X\n", stream_chunck->size_confirm );
 */
 	switch(stream_chunck->type) {
-		case 0x4324:	// $C	Clear ASF configuration
+		case ASF_STREAMING_CLEAR:	// $C	Clear ASF configuration
 			printf("=====> Clearing ASF stream configuration!\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
-		case 0x4424:    // $D	Data follows
+		case ASF_STREAMING_DATA:	// $D	Data follows
 //			printf("=====> Data follows\n");
 			break;
-		case 0x4524:    // $E	Transfer complete
+		case ASF_STREAMING_END_TRANS:	// $E	Transfer complete
 			printf("=====> Transfer complete\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
-		case 0x4824:    // $H	ASF header chunk follows
+		case ASF_STREAMING_HEADER:	// $H	ASF header chunk follows
 			printf("=====> ASF header chunk follows\n");
 			break;
 		default:
@@ -147,13 +147,15 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 		if(i <= 0) return -1;
 		r += i;
 	  }
+	  // Endian handling of the stream chunk
+	  le2me_ASF_stream_chunck_t(&chunk);
 	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
 	  if(r) printf("Warning : drop header ????\n");
 	  if(size < 0){
 	    printf("Error while parsing chunk header\n");
 		return -1;
 	  }
-	  if (chunk.type != 0x4824) {
+	  if (chunk.type != ASF_STREAMING_HEADER) {
 	    printf("Don't got a header as first chunk !!!!\n");
 	    return -1;
 	  }
@@ -283,6 +285,9 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 	}
 	read += r;
       }
+      
+      // Endian handling of the stream chunk
+      le2me_ASF_stream_chunck_t(&chunk);
       chunk_size = asf_streaming( &chunk, &drop_chunk );
       if(chunk_size < 0) {
 	printf("Error while parsing chunk header\n");
@@ -290,7 +295,7 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
       }
       chunk_size -= sizeof(ASF_stream_chunck_t);
 	
-      if(chunk.type != 0x4824 && (!drop_chunk)) {
+      if(chunk.type != ASF_STREAMING_HEADER && (!drop_chunk)) {
 	if (asf_http_ctrl->packet_size < chunk_size) {
 	  printf("Error chunk_size > packet_size\n");
 	  return -1;
