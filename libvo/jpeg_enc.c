@@ -338,6 +338,9 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 		return NULL;
 	}
 
+	/* alloc bogus avctx to keep MPV_common_init from segfaulting */
+	j->s->avctx = calloc(sizeof(*j->s->avctx), 1);
+
 	if (MPV_common_init(j->s) < 0) {
 		free(j->s);
 		free(j);
