@@ -41,8 +41,6 @@ FOR THE v0.90 RELEASE:
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- fix the constant 200-300ms DVD/DVB/VOB audio delay (-delay -0.25)
-  UPDATE: I (A'rpi) could reproduce with the "Metal Jacket" DVD.
 - display OSD and subtitles using DVB card's OSD
 
 mpg demuxer:
@@ -57,7 +55,6 @@ avi demuxer: (needs rewrite)
 
 mencoder:
 - finish mencoder -ovc vfw (bitrate setting, codec selection etc)
-- implement muxer layer (for mpg, ogm, mov support)
 - add ogg/vorbis audio encoder
 - stop/resume
 
@@ -86,8 +83,7 @@ DOCUMENTATION TODO:
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- update the man page with all current options:
-  - muxer layer (-of)
+- update the man page with all current options
 - merge tech/vop.txt and tech/libavc-options.txt into the man page
 - merge tech/encoding-tips.txt into encoding.html
 - finish reviewing all of the docs
