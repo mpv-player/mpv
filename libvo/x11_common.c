@@ -382,8 +382,6 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 
 int vo_x11_uninit(Display *display, Window window)
 {
-    XUnmapWindow(display, window);
-
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
     if (vo_window == None)
@@ -392,9 +390,8 @@ int vo_x11_uninit(Display *display, Window window)
 	/* and -wid is set */
 	if (!(WinID > 0))
 	    XDestroyWindow(display, window);
+	XCloseDisplay(display);
     }
-
-    XCloseDisplay(display);
     return(1);
 }
 
