@@ -200,21 +200,23 @@ on the mplayer-users mailing list for an MMX/3DNow enabled driver.
 <title>nVidia cards</title>
 
 <para>
-nVidia isn't a very good choice under Linux (according to nVidia, this is
-<link linkend="nvidia-opinions">not true</link>)... You'll have to use the
-binary closed-source nVidia driver, available at nVidia's web site. The
-standard XFree86 driver doesn't support XVideo for these cards, due to
-nVidia's closed sources/specifications.
+nVidia isn't always a very good choice under Linux (according to nVidia, this
+is <link linkend="nvidia-opinions">not true</link>)... XFree86's
+open-source driver supports most of these cards, but for some cases, you'll
+have to use the binary closed-source nVidia driver, available at nVidia's web
+site. You'll always need this driver if you want 3D acceleration too.
 </para>
 
 <para>
-As far as I know the latest XFree86 driver contains XVideo support for
-GeForce 2 and 3.
-</para>
-
-<para>
-Riva128 cards don't have XVideo support even with the nVidia driver :(
+Riva128 cards don't have XVideo support with XFree86's nVidia driver :(
 Complain to nVidia.
+</para>
+
+<para>
+However, MPlayer contains a <link linkend="vidix">Vidix</link> driver
+(<link linkend="vidix-nvidia">nvidia_vid</link>) for most nVidia cards.
+Currently it is in beta stage, and has some drawbacks. For more information,
+<link linkend="vidix-nvidia">click here</link>.
 </para>
 </sect5>
 
@@ -1484,11 +1486,35 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
 128, TNT and GeForce2 chipsets, also others have been reported working.
 </para>
 
+<itemizedlist spacing="compact">
+<title>LIMITATIONS</title>
+<listitem><para>
+  It's recommended to use the binary nVidia drivers for X before using this
+  VIDIX driver, because some of the registers which need to be initialized
+  haven't been discovered yet, so it will probably fail with the Open Source
+  XFree86 <filename>nv.o</filename> driver.
+  </para></listitem>
+<listitem><para>
+  Currently only codecs capable of UYVY colorspace output are the only ones
+  that can work in conjuction with this driver. Unfortunately, this excludes
+  every single decoder from the libavcodec family. This leaves us with the
+  following usable popular codecs: <systemitem>cvid, divxds, xvid, divx4,
+  wmv7, wmv8</systemitem> and some others. Please note that this is only
+  a temporal incomfortability. The usage syntax is as follows:
+  <screen>
+    mplayer -vf formay=uyvy -vc divxds divx3file.avi
+  </screen>
+  </para></listitem>
+</itemizedlist>
+
 <para>
-It's recommended to use the binary nVidia drivers for X before using this
-VIDIX driver, because some of the registers which need to be initialized
-haven't been discovered yet, so it will probably fail with the Open Source
-XFree86 <filename>nv.o</filename> driver.
+  An unique feature of the nvidia_vid driver is its ability to display video on
+  <emphasis role="bold">plain, pure, text-only console</emphasis> - with no
+  framebuffer or X magic whatsoever. For this purpose, we'll have to use the
+  <option>cvidix</option> video output, as the following example shows:
+  <screen>
+    mplayer -vf formay=uyvy -vc divxds -vo cvidix example.avi
+  </screen>
 </para>
 
 <para>
