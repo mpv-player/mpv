@@ -457,6 +457,8 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
         else if (id != d->video->id)
           mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", ogg_d->subs[id].id, val);
       }
+      if (ogg_d->subs[id].text)
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] Language for -sid %d is '-slang \"%s\"'\n", ogg_d->subs[id].id, val);
       // copy this language name into the array
       index = demux_ogg_sub_reverse_id(d, id);
       if (index >= 0) {
@@ -907,7 +909,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	ogg_d->subs[ogg_d->num_sub].id = n_video;
 	n_video++;
-	mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream %d is video (old hdr)\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
+	       ogg_d->num_sub,pack.packet[68],pack.packet[69],pack.packet[70],pack.packet[71],n_video-1);
 	if(verbose>0) print_video_header(sh_v->bih);
 	// Old audio header
       } else if(get_uint32(pack.packet+96) == 0x05589F81) {
@@ -931,7 +934,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
-	mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream %d is audio (old hdr)\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
 	if(verbose>0) print_wave_header(sh_a->wf);
       } else
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"Ogg stream %d contains an old header but the header type is unknown\n",ogg_d->num_sub);
@@ -962,7 +965,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	ogg_d->subs[ogg_d->num_sub].id = n_video;
 	n_video++;
-	mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream %d is video (new hdr)\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
+	       ogg_d->num_sub,st->subtype[0],st->subtype[1],st->subtype[2],st->subtype[3],n_video-1);
 	if(verbose>0) print_video_header(sh_v->bih);
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
@@ -988,12 +992,12 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
-	mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream %d is audio (new hdr)\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
 	if(verbose>0) print_wave_header(sh_a->wf);
 
 	/// Check for text (subtitles) header
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
-          mp_msg(MSGT_DEMUX, MSGL_V, "Ogg stream %d is text\n", ogg_d->num_sub);
+          mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] stream %d: subtitles (SRT-like text subtitles), -sid %d\n", ogg_d->num_sub, ogg_d->n_text);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
 	  if (identify)
