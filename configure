@@ -3854,7 +3854,6 @@ if test "$_libavcodecso" = auto ; then
   cat > $TMPC << EOF
 #define FF_POSTPROCESS 1 
 #include <ffmpeg/avcodec.h>
-int quant_store[MBR+1][MBC+1];
 int main(void) { 
     avcodec_find_encoder_by_name("");
     return 0; 
