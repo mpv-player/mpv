@@ -194,7 +194,7 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	regs.top =  y;
 	regs.bottom = config->src_height + y;
 
-	printk("mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d)\n",
+	printk(KERN_DEBUG "mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d)\n",
 	       config->dest_width, config->dest_height, config->x_org, config->y_org, 
 				 config->src_width, config->src_height);
 
@@ -238,15 +238,15 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	{
 		case MGA_VID_CONFIG:
 			//FIXME remove
-			printk("mga_mmio_base = %p\n",mga_mmio_base);
-			printk("mga_mem_base = %08x\n",mga_mem_base);
+			printk(KERN_DEBUG "mga_mmio_base = %p\n",mga_mmio_base);
+			printk(KERN_DEBUG "mga_mem_base = %08x\n",mga_mem_base);
 			//FIXME remove
 
-			printk("mga_vid: Received configuration\n");
+			printk(KERN_DEBUG "mga_vid: Received configuration\n");
 
  			if(copy_from_user(&mga_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
-				printk("mga_vid: failed copy from userspace\n");
+				printk(KERN_ERR "mga_vid: failed copy from userspace\n");
 				return(-EFAULT);
 			}
 
@@ -256,14 +256,14 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 			if (copy_to_user((mga_vid_config_t *) arg, &mga_config, sizeof(mga_vid_config_t)))
 			{
-				printk("mga_vid: failed copy to userspace\n");
+				printk(KERN_ERR "mga_vid: failed copy to userspace\n");
 				return(-EFAULT);
 			}
 			return mga_vid_set_config(&mga_config);	
 		break;
 
 		case MGA_VID_ON:
-			printk("mga_vid: Video ON\n");
+			printk(KERN_DEBUG "mga_vid: Video ON\n");
 			vid_src_ready = 1;
 			if(vid_overlay_on)
 			{
@@ -273,7 +273,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_OFF:
-			printk("mga_vid: Video OFF\n");
+			printk(KERN_DEBUG "mga_vid: Video OFF\n");
 			vid_src_ready = 0;   
 			//regs.besctl &= ~1;
 			mga_vid_write_regs();
@@ -282,7 +282,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		case MGA_VID_FSEL:
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
-				printk("mga_vid: FSEL failed copy from userspace\n");
+				printk(KERN_ERR "mga_vid: FSEL failed copy from userspace\n");
 				return(-EFAULT);
 			}
 
@@ -290,7 +290,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 	        default:
-			printk("mga_vid: Invalid ioctl\n");
+			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
 			return (-EINVAL);
 	}
        
@@ -304,11 +304,11 @@ static int mga_vid_find_card(void)
 
 	if((dev = pci_find_device(PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_6323, NULL)))
 	{
-		printk("sis_vid: Found SiS 6326\n");
+		printk(KERN_DEBUG "sis_vid: Found SiS 6326\n");
 	}
 	else
 	{
-		printk("sis_vid: No supported cards found\n");
+		printk(KERN_ERR "sis_vid: No supported cards found\n");
 		return FALSE;   
 	}
 
@@ -321,8 +321,8 @@ static int mga_vid_find_card(void)
 	mga_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x10000);
 	mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
-	printk("mga_vid: MMIO at 0x%p\n", mga_mmio_base);
-	printk("mga_vid: Frame Buffer at 0x%08x\n", mga_mem_base);
+	printk(KERN_DEBUG "mga_vid: MMIO at 0x%p\n", mga_mmio_base);
+	printk(KERN_DEBUG "mga_vid: Frame Buffer at 0x%08x\n", mga_mem_base);
 
 	//FIXME set ram size properly
 	mga_ram_size = 4;
@@ -357,11 +357,11 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
-	printk("mga_vid: mapping video memory into userspace\n");
+	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
-		printk("mga_vid: error mapping video memory\n");
+		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
 	}
 
@@ -598,16 +598,16 @@ static int mga_vid_initialize(void)
 {
 	mga_vid_in_use = 0;
 
-	printk( "SiS 6326 YUV Video interface v0.01 (c) Aaron Holtzman \n");
+	printk(KERN_DEBUG "SiS 6326 YUV Video interface v0.01 (c) Aaron Holtzman \n");
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
-		printk("sis_vid: unable to get major: %d\n", MGA_VID_MAJOR);
+		printk(KERN_ERR "sis_vid: unable to get major: %d\n", MGA_VID_MAJOR);
 		return -EIO;
 	}
 
 	if (!mga_vid_find_card())
 	{
-		printk("sis_vid: no supported devices found\n");
+		printk(KERN_ERR "sis_vid: no supported devices found\n");
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
 	}
@@ -639,7 +639,7 @@ void cleanup_module(void)
 		iounmap(mga_mmio_base);
 
 	//FIXME turn off BES
-	printk("mga_vid: Cleaning up module\n");
+	printk(KERN_DEBUG "mga_vid: Cleaning up module\n");
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
 
