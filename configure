@@ -4277,14 +4277,14 @@ cat > $TMPC << EOF
 int main(void) { JACK_Init(); return 0; }
 EOF
         # This test only checks the minor version number.
-        if ( ( test ! `bio2jack-config --version | cut -d '.' -f 2` -ge 3 ) ) ; then
-	    _jack=no;
-	elif test -z "$_bio2jackdir" ; then
+    if ( ( test `bio2jack-config --version | cut -d '.' -f 2` -ge 3 ) ) >/dev/null 2>&1 ; then
+      if test -z "$_bio2jackdir" ; then
 		cc_check -lbio2jack `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
 	else
 		cc_check -L "$_bio2jackdir" -lbio2jack `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
 	fi
   fi
+fi
 fi
 
 if test "$_jack" = yes ; then
