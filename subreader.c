@@ -149,6 +149,8 @@ char *sub_readtext(char *source, char **dest) {
     int len=0;
     char *p=source;
     
+//    printf("src=%p  dest=%p  \n",source,dest);
+
     while ( !eol(*p) && *p!= '|' ) {
 	p++,len++;
     }
@@ -358,11 +360,14 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
 	p=line;	p+=plen;i=0;
 	// TODO: I don't know what kind of convention is here for marking multiline subs, maybe <br/> like in xml?
-	next = strstr(line,"<clear/>")+8;i=0;
-	while ((next =sub_readtext (next, &(current->text[i])))) {
+	next = strstr(line,"<clear/>");
+	if(next && strlen(next)>8){
+	  next+=8;i=0;
+	  while ((next =sub_readtext (next, &(current->text[i])))) {
 		if (current->text[i]==ERR) {return ERR;}
 		i++;
 		if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
+	  }
 	}
 			current->lines=i+1;
     }
