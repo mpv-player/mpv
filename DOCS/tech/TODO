@@ -63,7 +63,8 @@ mencoder:
 - stop/resume
 
 DOCS:
-- merge tech/encoding-tips.txt into encoding.html
+- break up 6 level deep sections
+- merge tech/encoding-tips.txt into mencoder.xml
 - finish reviewing all of the docs
   - mplayer.1
   - encoding.html
@@ -71,6 +72,11 @@ DOCS:
   - documentation.html
 - enhance the FAQ
 - man page HTML version
+- document missing lavcopts (vhq, lmin, lmax, vrc_strategy, vqmod_amp,
+  vqmod_freq, vrc_buf_aggressivity, p_mask, debug, mbcmp, me_range,
+  aic, context,)
+- document missing divx4opts (everything in #if ENCORE_MAJOR_VERSION >= 5200,
+  vbrdebug)
 
 
 FUTURE:
@@ -90,9 +96,5 @@ other:
 - X11 Render support into DGA for OSD (from the DOCS;)
 
 DOCS:
-- update the man page with all current options
-  (prefer-ipv4/6, ipv4-only-proxy, tsfastparse, dvbin + subopts, sub-demuxer,
-  (no)autoexpand, oldpp, grabpointer, nuvopts + subopts, remove -aop?)
-- break up 6 level deep sections
 - convert man page to XML
 - write a detailed encoding guide
