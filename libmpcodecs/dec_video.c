@@ -125,7 +125,7 @@ int init_video(sh_video_t *sh_video,int *pitches)
 {
 //unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 int i;
-pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
+//pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
 
 //sh_video->our_out_buffer=NULL;
 //sh_video->our_out_buffer_size=0U;
