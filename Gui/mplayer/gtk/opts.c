@@ -265,6 +265,7 @@ void ShowPreferences( void )
   GList * Items = NULL;
   char  * name = NULL;
 
+  Items=g_list_append( Items,MSGTR_PREFERENCES_None );
   for( i=0;mpcodecs_vd_drivers[i];i++ )
    {
     Items=g_list_append( Items,(char *)mpcodecs_vd_drivers[i]->info->name );
@@ -279,6 +280,7 @@ void ShowPreferences( void )
   GList * Items = NULL;
   char  * name = NULL;
 
+  Items=g_list_append( Items,MSGTR_PREFERENCES_None );
   for( i=0;mpcodecs_ad_drivers[i];i++ )
    {
     Items=g_list_append( Items,(char *)mpcodecs_ad_drivers[i]->info->name );
