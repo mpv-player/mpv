@@ -28,6 +28,8 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
+#include "vosub_vidix.h"
+#include "aspect.h"
 
 LIBVO_EXTERN(fbdev)
 
@@ -39,6 +41,10 @@ static vo_info_t vo_info = {
 };
 
 extern int verbose;
+
+/* Name of VIDIX driver */
+static const char *vidix_name = NULL;
+static int pre_init_err = 0;
 
 /******************************
 *	fb.modes support      *
@@ -724,6 +730,14 @@ struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   return cmap;
 }
 
+static uint32_t parseSubDevice(const char *sd)
+{
+   if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
+   else { printf(FBDEV "Unknown subdevice: '%s'\n", sd); return -1; }
+   return 0;
+}
+
+
 static int fb_preinit(void)
 {
 	static int fb_preinit_done = 0;
@@ -892,7 +906,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (!fb_preinit())
 		return 1;
 
-	if (zoom) {
+	if (zoom && !vidix_name) {
 		printf(FBDEV "-zoom is not supported\n");
 		return 1;
 	}
@@ -1046,27 +1060,72 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 	fb_line_len = fb_finfo.line_length;
 	fb_size = fb_finfo.smem_len;
-	if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
-				MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
+	frame_buffer = NULL;
+	next_frame = NULL;
+	if(vidix_name)
+	{
+	    unsigned image_width,image_height,x_offset,y_offset;
+		image_width=width;
+		image_height=height;
+		if(zoom > 1)
+		{
+		        aspect_save_orig(width,height);
+			aspect_save_prescale(d_width,d_height);
+			aspect_save_screenres(fb_xres,fb_yres);
+			aspect(&image_width,&image_height,A_ZOOM);
+		}
+		else
+		if(fs)
+		{
+			image_width = fb_xres;
+			image_height = fb_yres;
+		}
+		if(fb_xres > image_width)
+		    x_offset = (fb_xres - image_width) / 2;
+		else x_offset = 0;
+		if(fb_yres > image_height)
+		    y_offset = (fb_yres - image_height) / 2;
+		else y_offset = 0;
+		if(vidix_init(width,height,x_offset,y_offset,image_width,
+			    image_height,format,fb_bpp,
+			    fb_xres,fb_yres) != 0)
+		{
+		    printf(FBDEV "Can't initialize VIDIX driver\n");
+		    vidix_name = NULL;
+		    vidix_term();
+		    return -1;
+		}
+		else printf(FBDEV "Using VIDIX\n");
+	    
+	}
+	else
+	{
+	    if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
+				    MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
 		printf(FBDEV "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
 		return 1;
-	}
-	L123123875 = frame_buffer + (out_width - in_width) * fb_pixel_size /
-		2 + (out_height - in_height) * fb_line_len / 2;
+	    }
+	    L123123875 = frame_buffer + (out_width - in_width) * fb_pixel_size /
+		    2 + (out_height - in_height) * fb_line_len / 2;
 
-	if (verbose > 0) {
+	    if (verbose > 0) {
 		if (verbose > 1) {
 			printf(FBDEV "frame_buffer @ %p\n", frame_buffer);
 			printf(FBDEV "L123123875 @ %p\n", L123123875);
 		}
 		printf(FBDEV "pixel per line: %d\n", fb_line_len / fb_pixel_size);
-	}
+	    }
 
-	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
+	    if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
 		printf(FBDEV "Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
-	}
+	    }
+	    if (fs || vm)
+		memset(frame_buffer, '\0', fb_line_len * fb_yres);
 
+	    if (format == IMGFMT_YV12)
+		yuv2rgb_init(fb_bpp, MODE_RGB);
+	}
 	if (vt_doit && (vt_fd = open("/dev/tty", O_WRONLY)) == -1) {
 		printf(FBDEV "can't open /dev/tty: %s\n", strerror(errno));
 		vt_doit = 0;
@@ -1079,22 +1138,27 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (vt_doit)
 		vt_set_textarea(last_row, fb_yres);
 
-	if (fs || vm)
-		memset(frame_buffer, '\0', fb_line_len * fb_yres);
-
-	if (format == IMGFMT_YV12)
-		yuv2rgb_init(fb_bpp, MODE_RGB);
-
 	return 0;
 }
 
 static uint32_t query_format(uint32_t format)
 {
+  static int first = 1;
 	int ret = 0x4; /* osd/sub is supported on every bpp */
 
 	if (!fb_preinit())
 		return 0;
-
+	if(first)
+	{
+	    first = 1;
+	    if(vo_subdevice) parseSubDevice(vo_subdevice);
+	    if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
+	    if(verbose > 2)
+		printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
+	}
+	if(!pre_init_err)
+	    if(vidix_name)
+		return vidix_query_fourcc(format);
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 
@@ -1200,7 +1264,7 @@ static void uninit(void)
 			printf(FBDEV "Can't restore original cmap\n");
 		fb_cmap_changed = 0;
 	}
-	free(next_frame);
+	if(next_frame) free(next_frame);
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
 		printf(FBDEV "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
 	fb_orig_vinfo.xoffset = fb_vinfo.xoffset;
@@ -1215,6 +1279,7 @@ static void uninit(void)
 		vt_set_textarea(0, fb_orig_vinfo.yres);
         close(fb_tty_fd);
 	close(fb_dev_fd);
-	munmap(frame_buffer, fb_size);
+	if(frame_buffer) munmap(frame_buffer, fb_size);
+	if(vidix_name) vidix_term();
 }
 
