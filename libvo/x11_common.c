@@ -667,8 +667,8 @@ void vo_x11_setlayer( int layer )
    e.xclient.window=vo_window;
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
-//   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+//   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
 								   
    XFree( args );
