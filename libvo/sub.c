@@ -1,6 +1,9 @@
 
+#include "config.h"
+#include "video_out.h"
 #include "sub.h"
 
+#include <stdlib.h>
 
 char * __sub_osd_names[]={
     "Seekbar",

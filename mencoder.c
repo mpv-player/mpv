@@ -182,6 +182,10 @@ static int cfg_include(struct config *conf, char *filename){
 #include "cfg-mplayer-def.h"
 #include "cfg-mencoder.h"
 
+#ifdef USE_DVDREAD
+#include "spudec.h"
+#endif
+
 //---------------------------------------------------------------------------
 
 // dummy datas for gui :(
@@ -256,6 +260,19 @@ static uint32_t draw_frame(uint8_t *src[]){
 vo_functions_t video_out;
 
 //---------------------------------------------------------------------------
+
+void *vo_spudec=NULL;
+
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    vo_draw_alpha_yv12(w,h,src,srca,stride,vo_image + vo_w * y0 + x0,vo_w);
+}
+
+static void draw_sub(void) {
+#ifdef USE_DVDREAD
+    if (vo_spudec)
+	spudec_draw_scaled(vo_spudec, vo_w, vo_h, draw_alpha);
+#endif
+}
 
 int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     int size=0;
@@ -559,6 +576,11 @@ if(sh_audio){
 SwScale_Init();
 video_out.draw_slice=draw_slice;
 video_out.draw_frame=draw_frame;
+
+#ifdef USE_DVDREAD
+vo_spudec=spudec_new_scaled(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
+			    sh_video->disp_w, sh_video->disp_h);
+#endif
 
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
@@ -1118,6 +1140,18 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
     ++skip_flag; // skip
   }
 
+#ifdef USE_DVDREAD
+// DVD sub:
+ if(vo_spudec){
+     unsigned char* packet=NULL;
+     int len;
+     while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
+	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
+	 spudec_assemble(vo_spudec,packet,len,100*d_dvdsub->pts);
+     }
+     spudec_heartbeat(vo_spudec,100*d_video->pts);
+ }
+#endif
 
 switch(mux_v->codec){
 case VCODEC_COPY:
@@ -1145,6 +1179,7 @@ case VCODEC_DIVX4:
     return 0; /* FIXME */
 #else
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    draw_sub();
     if(skip_flag>0) break;
     if(!blit_frame){
 	// empty.
