@@ -130,7 +130,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   uint32_t req_w = (d_width > 0 ? d_width : width);
   uint32_t req_h = (d_height > 0 ? d_height : height);
   uint16_t vid_mode = 0;
-  uint8_t widescreen = (((req_w*1.0)/req_h) > (4.0/3)) ? 1 : 0;
+  uint8_t res_widescr, vid_widescr = (((req_w*1.0)/req_h) > (4.0/3)) ? 1 : 0;
   uint16_t buf_w = USHRT_MAX, buf_h = USHRT_MAX;
   vga_modelist_t *list = modelist;
   
@@ -256,6 +256,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      vid_mode = list->modenum;
                      buf_w = list->modeinfo.width;
                      buf_h = list->modeinfo.height;
+		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
 		   }
 		 break;
         case 24: if (list->modeinfo.bytesperpixel == 3)
@@ -263,6 +264,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      vid_mode = list->modenum;
                      buf_w = list->modeinfo.width;
                      buf_h = list->modeinfo.height;
+		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
 		   }
 		 break;
         case 16: if (list->modeinfo.colors == 65536)
@@ -270,6 +272,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      vid_mode = list->modenum;
                      buf_w = list->modeinfo.width;
                      buf_h = list->modeinfo.height;
+		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
 		   }
 		 break;
         case 15: if (list->modeinfo.colors == 32768)
@@ -277,6 +280,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      vid_mode = list->modenum;
                      buf_w = list->modeinfo.width;
                      buf_h = list->modeinfo.height;
+		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
 		   }
 		 break;
       }
@@ -320,8 +324,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
   orig_w = width;
   orig_h = height;
-  if ((fullscreen & 0x04) && (WIDTH != orig_w)) {
-    if (!widescreen) {
+  if ((fullscreen & 0x04) && (WIDTH != orig_w) && (HEIGHT != orig_h)) {
+    if (!vid_widescr || !res_widescr) {
       maxh = HEIGHT;
       scaling = maxh / (orig_h * 1.0);
       maxw = (uint32_t) (orig_w * scaling);
@@ -492,9 +496,6 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
   uint32_t sw, sh;
   
   yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
-//#ifdef HAVE_MMX
-//  emms();
-//#endif
   sw = (uint32_t) (w * scaling);
   sh = (uint32_t) (h * scaling);
   if (scalebuf != NULL) {
