@@ -44,7 +44,6 @@ static struct {
 	{ "video/x-ms-wvx", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wmv", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
-	{ "text/plain", DEMUXER_TYPE_ASF },	// This is the mime type that a web server send when sending a raw asf without streaming encapsulation.
 };
 
 static struct {
@@ -450,16 +449,22 @@ streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 			// Need to filter the network stream.
 			// ASF raw stream is encapsulated.
 			ret = asf_streaming_start( stream );
+			if( ret<0 ) {
+				printf("asf_streaming_start failed\n");
+			}
 			break;
 		case DEMUXER_TYPE_AVI:
 		case DEMUXER_TYPE_MOV:
 		case DEMUXER_TYPE_MPEG_ES:
 		case DEMUXER_TYPE_MPEG_PS:
+		case DEMUXER_TYPE_UNKNOWN:
 			// Generic start, doesn't need to filter
 			// the network stream, it's a raw stream
 			ret = nop_streaming_start( stream );
+			if( ret<0 ) {
+				printf("asf_streaming_start failed\n");
+			}
 			break;
-		case DEMUXER_TYPE_UNKNOWN:
 		default:
 			printf("Unable to detect the streaming type\n");
 			ret = -1;
@@ -467,10 +472,7 @@ streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 
 	if( ret<0 ) {
 		free( stream->streaming_ctrl );
-	} else {
-//		bufferize( stream );
-	}
-
+	} 
 	return ret;
 }
 
