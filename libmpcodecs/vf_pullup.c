@@ -18,6 +18,7 @@ struct vf_priv_s {
 	struct pullup_context *ctx;
 	int init;
 	int fakecount;
+	char *qbuf;
 };
 
 static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
@@ -41,15 +42,18 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	if (mpi->flags & MP_IMGFLAG_PLANAR) {
 		c->format = PULLUP_FMT_Y;
-		c->nplanes = 3;
+		c->nplanes = 4;
 		pullup_preinit_context(c);
 		c->bpp[0] = c->bpp[1] = c->bpp[2] = 8;
 		c->w[0] = mpi->w;
 		c->h[0] = mpi->h;
 		c->w[1] = c->w[2] = mpi->chroma_width;
 		c->h[1] = c->h[2] = mpi->chroma_height;
+		c->w[3] = ((mpi->w+15)/16) * ((mpi->h+15)/16);
+		c->h[3] = 2;
 		c->stride[0] = mpi->width;
 		c->stride[1] = c->stride[2] = mpi->chroma_width;
+		c->stride[3] = c->w[3];
 		c->background[1] = c->background[2] = 128;
 		c->metric_plane = 0;
 	}
@@ -68,6 +72,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 	pullup_init_context(c);
 
 	vf->priv->init = 1;
+	vf->priv->qbuf = malloc(c->w[3]);
 }
 
 
@@ -104,6 +109,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	mp_image_t *dmpi;
 	int ret;
 	int p;
+	int i;
 	
 	if (!vf->priv->init) init_pullup(vf, mpi);
 	
@@ -129,6 +135,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				c->stride[2], mpi->stride[2]);
 		}
 	}
+	if (mpi->qscale) {
+		memcpy(b->planes[3], mpi->qscale, c->w[3]);
+		memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
+	}
 
 	p = mpi->fields & MP_IMGFIELD_TOP_FIRST ? 0 :
 		(mpi->fields & MP_IMGFIELD_ORDERED ? 1 : 0);
@@ -152,6 +162,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		if (f->length < 2) {
 			pullup_release_frame(f);
 			return 0;
+		}
+	}
+
+	/* Average qscale tables from both frames. */
+	if (mpi->qscale) {
+		for (i=0; i<c->w[3]; i++) {
+			vf->priv->qbuf[i] = (f->ofields[0]->planes[3][i]
+				+ f->ofields[1]->planes[3][i+c->w[3]])>>1;
 		}
 	}
 
@@ -188,6 +206,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				dmpi->stride[2]*2, c->stride[2]*2);
 		}
 		pullup_release_frame(f);
+		if (mpi->qscale) {
+			dmpi->qscale = vf->priv->qbuf;
+			dmpi->qstride = mpi->qstride;
+			dmpi->qscale_type = mpi->qscale_type;
+		}
 		return vf_next_put_image(vf, dmpi);
 	}
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
@@ -202,6 +225,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	dmpi->stride[1] = c->stride[1];
 	dmpi->stride[2] = c->stride[2];
 	
+	if (mpi->qscale) {
+		dmpi->qscale = vf->priv->qbuf;
+		dmpi->qstride = mpi->qstride;
+		dmpi->qscale_type = mpi->qscale_type;
+	}
 	ret = vf_next_put_image(vf, dmpi);
 	pullup_release_frame(f);
 	return ret;
