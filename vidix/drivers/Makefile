@@ -58,7 +58,13 @@ SIS_OBJS=sis_vid.o sis_bridge.o
 SIS_LIBS=-L../../libdha -ldha
 SIS_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
-all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID) $(SIS_VID)
+UNICHROME_VID=unichrome_vid.so
+UNICHROME_SRCS=unichrome_vid.c
+UNICHROME_OBJS=unichrome_vid.o
+UNICHROME_LIBS=-L../../libdha -ldha -lm
+UNICHROME_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
+
+all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID) $(SIS_VID) $(UNICHROME_VID)
 
 
 .SUFFIXES: .c .o
@@ -124,6 +130,12 @@ $(SIS_OBJS):    $(SIS_SRCS)
 
 $(SIS_VID):     $(SIS_OBJS)
 	$(CC) -shared $(SIS_OBJS) $(SIS_LIBS) -Wl,-soname,$(SIS_VID) -o $(SIS_VID) 
+
+$(UNICHROME_OBJS):    $(UNICHROME_SRCS)
+	$(CC) -c $(UNICHROME_CFLAGS) -o $@ $<
+
+$(UNICHROME_VID):     $(UNICHROME_OBJS)
+	$(CC) -shared $(UNICHROME_OBJS) $(UNICHROME_LIBS) -Wl,-soname,$(UNICHROME_VID) -o $(UNICHROME_VID)
 
 clean:
 	rm -f *.o *.so *~
