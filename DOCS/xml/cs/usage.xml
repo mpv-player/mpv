@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with: 1.23  -->
+<chapter id="usage">
+<title>Použití</title>
+
+<sect1 id="commandline">
+<title>Příkazový řádek</title>
+
+<para>
+<application>MPlayer</application> využívá komplexní strukturu voleb. Ta sestává
+z globálních voleb uváděných jako první, například:
+
+<screen>mplayer -vfm 5</screen>
+
+a voleb zapisovaných za jménem souboru, které se projeví pouze u tohoto jména
+souboru/URL/čehokoli, například:
+
+<screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
+</para>
+
+<para>
+Můžete seskupovat jména souborů/adresy URL pomocí <literal>{</literal> a
+<literal>}</literal>. Toho se dá využít s volbou <option>-loop</option>:
+
+<screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
+
+Výše uvedený příkaz přehraje soubory v tomto pořadí: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+</para>
+
+<para>
+Přehrávání souboru:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>volby</replaceable>]<!--
+--> [<replaceable>cesta</replaceable>/]<replaceable>soubor</replaceable>
+</synopsis>
+</para>
+
+<para>
+Přehrávání více souborů:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>výchozí volby</replaceable>]<!--
+--> [<replaceable>cesta</replaceable>/]<replaceable>soubor1</replaceable><!--
+--> [<replaceable>volby pro soubor1</replaceable>]<!--
+--> <replaceable>soubor2</replaceable><!--
+--> [<replaceable>volby pro soubor2</replaceable>] ...
+</synopsis>
+</para>
+
+<para>
+Přehrávání VCD:
+<synopsis>
+<command>mplayer</command> [<replaceable>volby</replaceable>]<!--
+--> vcd://<replaceable>číslo_stopy</replaceable><!--
+--> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Přehrávání DVD:
+<synopsis>
+<command>mplayer</command> [<replaceable>volby</replaceable>]<!--
+--> dvd://<replaceable>číslo_titulu</replaceable><!--
+--> [-dvd-device <replaceable>/dev/dvd</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Přehrávání z WWW:
+<synopsis>
+<command>mplayer</command> [<replaceable>volby</replaceable>]<!--
+--> http://<replaceable>doména.com/soubor.asf</replaceable>
+</synopsis>
+(rovněž lze použít playlisty)
+</para>
+
+<para>
+Přehrávání z RTSP:
+<synopsis>
+<command>mplayer</command> [<replaceable>volby</replaceable>]<!--
+--> rtsp://<replaceable>server.priklad.com/JmenoProudu</replaceable>
+</synopsis>
+</para>
+
+<para>
+Příklady:
+<screen>
+mplayer -vo x11 <replaceable>/mnt/Filmy/Kontakt/kontakt2.mpg</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
+mplayer -afm 3 <replaceable>/mnt/DVDtrailery/alien4.vob</replaceable>
+mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
+mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/filmy/test.avi</replaceable><!--
+--></screen>
+</para>
+</sect1>
+
+
+<sect1 id="control">
+<title>Ovládání</title>
+
+<para>
+<application>MPlayer</application> má plně konfigurovatelnou, příkazy řízenou,
+ovládací vrstvu, která vám umožní ovládat <application>MPlayer</application>
+pomocí klávesnice, myši, joysticku nebo dálkového ovládače (používající LIRC).
+Úplný seznam ovládacích prvků na klávesnici naleznete v man stránce.
+</para>
+
+
+<sect2 id="ctrl-cfg">
+<title>Konfigurace ovládání</title>
+
+<para>
+<application>MPlayer</application> umožňuje přiřadit jakoukoli klávesu jakémukoli
+příkazu <application>MPlayer</application>u pomocí jednoduchého konfiguračního
+souboru.
+Syntaxe sestává z názvu klávesy následovaného příkazem. Výchozí umístění
+konfiguračního souboru je
+<filename>$HOME/.mplayer/input.conf</filename> ale můžete jej potlačit použitím
+volby <option>-input <replaceable>konfig</replaceable></option>
+(relativní cesty jsou vztaženy k <filename>$HOME/.mplayer</filename>).
+</para>
+
+<para>
+Úplný seznam podporovaných jmen kláves dostanete příkazem
+<command>mplayer -input keylist</command>
+a úplný seznam dostupných příkazů příkazem
+<command>mplayer -input cmdlist</command>.
+</para>
+
+<example>
+<title>Jednoduchý vstupní ovládací soubor</title>
+<programlisting>
+##
+## Vstupní soubor ovládání MPlayeru
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+&gt; pt_step 1
+&lt; pt_step -1
+ENTER pt_step 1 1<!--
+--></programlisting>
+</example>
+</sect2>
+
+
+<sect2 id="lirc">
+<title>Ovládání z LIRC</title>
+
+<para>
+Linux Infrared Remote Control &ndash; použijte jednoduše vyrobitelný doma udělaný
+IR-přijímač,
+(téměř) libovolný dálkový ovládač a ovládejte jím svůj Linux!
+Více se o tom dovíte na <ulink url="http://www.lirc.org">domácí stánce LIRC</ulink>.
+</para>
+
+<para>
+Pokud máte nainstalován balíček LIRC, <filename>configure</filename> jej zdetekuje.
+Pokud vše dopadne dobře, <application>MPlayer</application> při startu
+vypíše &quot;<systemitem>Nastavuji podporu LIRC...</systemitem>&quot;.
+Pokud dojde k chybě, oznámí vám to. Pokud nevypíše žádnou zprávu o LIRC,
+pak pro něj není podpora zakompilována. To je vše :-)
+</para>
+
+<para>
+Jméno spustitelného souboru <application>MPlayer</application>u je - překvapení -
+<filename>mplayer</filename>. Můžete použít jakýkoli příkaz
+<application>MPlayer</application>u a dokonce i více než jeden, pokud je oddělíte
+znakem <literal>\n</literal>.
+Nezapoměňte zapnout opakovací (repeat) příznak v <filename>.lircrc</filename> tam,
+kde to dává smysl (vyhledávání, hlasitost, atd.).
+Zde je výňatek z demonstračního
+<filename>.lircrc</filename>:
+</para>
+
+<programlisting>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end<!--
+--></programlisting>
+
+<para>
+Pokud se vám nelíbí standardní umístění lirc-config souboru
+(<filename>~/.lircrc</filename>) použijte volbu <option>-lircconf
+<replaceable>soubor</replaceable></option> k určení jiného souboru.
+</para>
+</sect2>
+
+
+<sect2 id="slave-mode">
+<title>Závislý režim</title>
+<para>
+Závislý režim vám umožňuje vytvořit jednoduché ovládací panely (frontendy)
+<application>MPlayer</application>u. Pokud je <application>MPlayer</application>
+spuštěn s volbou <option>-slave</option>, pak bude číst příkazy oddělené novým
+řádkem (\n) ze standardního vstupu.
+Příkazy jsou dokumentovány v souboru
+<ulink url="../../tech/slave.txt">slave.txt</ulink>.
+</para>
+</sect2>
+</sect1>
+
+
+<sect1 id="streaming">
+<title>Přehrávání datových proudů ze sítě nebo rour</title>
+
+<para>
+<application>MPlayer</application> umí přehrávat soubory ze sítě s použitím protokolu
+HTTP, FTP, MMS nebo RTSP/RTP.
+</para>
+
+<para>
+Přehrávání pracuje jednoduše tak, že uvedete URL na příkazovém řádku.
+<application>MPlayer</application> ctí systémovou proměnnou <envar>http_proxy</envar>
+a použije proxy pokud je k dispozici. Proxi může být rovněž vynucena:
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
+</para>
+
+<para>
+<application>MPlayer</application> umí číst ze std. vstupu
+(<emphasis>ne</emphasis> z pojmenovaných rour). To může být například použito
+pro přehrávání z FTP:
+<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+</para>
+
+<note><para>
+Také doporučujeme zapnout <option>-cache</option> při přehrávání
+ze síťe:
+<screen>wget <replaceable>ftp://micorsops.com/cokoli.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
+</para></note>
+</sect1>
+
+<sect1 id="mpst" xreflabel="Remote streams">
+<title>Vzálené datové proudy</title>
+
+<para>
+Vzálené datové proudy umožňují přístup k většině <application>MPlayer</application>em
+podporovaných proudů ze vzdáleného počíteče. Hlavní určení této funkce je umožnit
+přímo použít CD nebo DVD mechaniku jiného počítače na síti (předpokladem je,
+že máte dostatečně rychlé připojení). Na spodní hranici nejsou některé typy datových
+proudů (v současnosti TV a MF) použitelné přes síť protože jsou implementovány na úrovni
+demuxeru. Je to škoda pro MF ale TV proudy by tak jako tak vyžadovaly šíleně
+vysokou rychlost
+</para>
+
+<sect2 id="compile_mpst_server">
+<title>Kompilace serveru</title>
+<para>
+Poté co skompilujete <application>MPlayer</application> běžte do adresáře
+<filename>TOOLS/netstream</filename> a proveďte
+<application>make</application> pro sestavení serverové binárky.
+Potom můžete zkopírovat program <application>netstream</application>
+na správné místo v systému (v Linuxu obvykle
+<filename class="directory">/usr/local/bin</filename>).
+</para>
+</sect2>
+
+<sect2 id="use_mpst">
+<title>Použití vzálených datových proudů</title>
+<para>
+Nejprve spusťte server na počítači na který se chcete připojit ze sítě.
+Server je zatím velmi jednoduchý a nemá žádné volby příkazového řádku,
+proto jen zadejte <filename>netstream</filename>. Teď můžete například
+přehrát druhou stopu na VCD na serveru:
+<screen>
+mplayer -cache 5000 <replaceable>mpst://jméno_serveru/vcd://2</replaceable>
+</screen>
+Taky můžete přistupovat k souborům na tomto serveru:
+<screen>
+mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
+</screen>
+Poznamenejme, že cesty nezačínající / jsou relativní k adresáři kde byl spuštěn server.
+Volba <option>-cache</option> není nutná, ale velmi ji doporučujeme.
+</para>
+
+<para>
+Berte na vědomí že v současnosti není tento server vůbec bezpečný. Nenadávejte
+tedy na množství průniků do systému, které je s ním možné. Místo toho raději
+zašlete (dobrý) patch který by jej vylepšil, nebo napište svůj vlastní server.
+</para>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="edl" xreflabel="Seznamy editačních zásahů (EDL)">
+<title>Seznamy editačních zásahů (EDL)</title>
+
+<para>
+Systém seznamů editačních zásahů (EDL) umožňuje automaticky vynechat nebo vypnout
+zvuk v částech videa při přehrávání, což je zajiťováno pro každý film zvláštním
+EDL konfiguračním souborem.
+</para>
+
+<para>
+Toho se dá využít pro ty, kdo chtějí sledovat film v "rodinném" režimu.
+Můžete vystříhat veškeré násilí, nechutnosti, Jar-Jar Binkse .. z filmu
+podle svých vlastních osobních preferencí. Mimoto jsou zde i jiná využití,
+jako je automatické vystřihávání reklam z videa které sleduješ.
+</para>
+
+<para>
+Formát EDL souboru je poměrně kostrbatý. Jakmile dospěje EDL systém do určité
+úrovně, pravděpodobně bude implementován formát založený na XML
+(ponecháme zpětnou kompatibilitu s předchozími EDL formáty).
+</para>
+
+<para>
+Maximální množství EDL značek současné verze EDL je 1000.
+Pokud se vám stane, že budete potřebovat víc, změňte
+<systemitem>#define MAX_EDL_ENTRIES</systemitem>
+v souboru <filename>edl.h</filename>.
+</para>
+
+<sect2 id="edl_using">
+<title>Použití EDL souboru</title>
+<para>
+Vložte volbu <option>-edl &lt;soubor&gt;</option> při spouštění
+<application>MPlayer</application>, se jménem EDL souboru, který chcete použít
+na video.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>Vytvoření EDL souboru</title>
+<para>
+Současný formát EDL souboru je:
+<programlisting>
+[počáteční sekunda] [koncová sekunda] [akce]
+</programlisting>
+Kde jsou sekundy desetinnými čísly a akce je buď
+<literal>0</literal> pro vynechání nebo <literal>1</literal> pro vypnutí zvuku.
+Příklad:
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+To vynechá část videa mezi sekundami 5.3 a 7.1, pak vypne zvuk na
+15 sekundě, zapne jej na 16.7 sekundy a vynechá část videa mezi sekundami 420 a 422.
+Tyto akce budou provedeny jakmile časovač přehrávání dosáhne hodnoty zadané
+v souboru.
+</para>
+
+<para>
+Pro vytvoření EDL souboru se kterým budete moci začít, použijte volbu
+<option>-edlout &lt;soubor&gt;</option>. Během přehrávání, když budete chtít
+označit předchozí 2 sekundy pro vynechání, stiskněte <keycap>i</keycap>.
+Odpovídající značka bude zapsána do souboru pro tento čas. Můžete se k němu pak
+vrátit a doladit vytvořený EDL soubor.
+</para>
+</sect2>
+
+</sect1>
+
+</chapter>

@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced to: 1.49 -->
+<sect1 id="install">
+<title>Instalace</title>
+
+<para>
+Jednoduchý návod na instalaci naleznete v souboru <filename>README</filename>.
+Přečtěte si nejprve tento soubor a poté se vraťte zde pro další podrobnosti.
+</para>
+
+<para>
+V této části vás provedeme procesem kompilace a konfigurace programu
+<application>MPlayer</application>. Není to snadné, ale nemusí to být nutně těžké.
+Pokud zaznamenáte rozdílné chování, než zde popisuji, prostudujte si prosím
+tuto dokumentaci a naleznete své odpovědi. Pokud narazíte na odkazy, následujte je
+a pečlivě si prostudujte jejich obsah. Bude vás to stát trochu času,  ale STOJÍ to
+za to.
+</para>
+
+<para>
+Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.x.
+</para>
+
+
+<sect2 id="softreq">
+<title>Softwarové požadavky</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">binutils</emphasis> - navrhovaná verze je <emphasis role="bold">2.11.x</emphasis>.
+  Tento program zajišťuje generování MMX/ 3DNow!/atd. instrukcí, které jsou velmi
+  důležité.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">gcc</emphasis> - doporučené verze jsou: <emphasis role="bold">2.95.3</emphasis>
+  (možná <emphasis role="bold">2.95.4</emphasis>) a <emphasis role="bold">3.2+</emphasis>.
+  <emphasis role="bold">Nikdy</emphasis> nepoužívejte 2.96 nebo 3.0.x! Tyto generují vadný kód pro
+  <application>MPlayer</application>. Pokud se rozhodnete vyměnit gcc verze
+  2.96, pak nevolte verzi 3.x jen proto, že je novější! První verze řady
+  3.x byly ještě horší než 2.96. Takže raději downgradujte na 2.95.x
+  (downgradujte také <systemitem class="library">libstdc++</systemitem>, protože
+  ji mohou potřebovat jiné programy) nebo neup/downgradujte vůbec (pak se ale
+  připravte na problémy při běhu). Pokud se rozhodnete pro 3.x, zkuste použít poslední verzi,
+  první verze měly různé chyby, takže se ujistěte, že máte aspoň  3.1, ta je otestovaná
+  a funkční. Pro podrobnější informace o chybách gcc 2.96 (které stále NEJSOU opraveny,
+  byly v <application>MPlayer</application>u pouze OBEJITY!), viz sekci <link linkend="gcc-296">gcc 2.96</link> a <xref linkend="faq"/>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">XFree86</emphasis> - doporučená verze je <emphasis role="bold">vždy ta nejnovější</emphasis> (4.3). Normálně by to měl chtít každý, jelikož od verze
+  XFree86 4.0.2 obsahuje rozšíření <link linkend="xv">XVideo</link>
+  (místy zmiňované jako <emphasis role="bold">Xv</emphasis>)
+  které je nutné k zapnutí hardwarové YUV akcelerace (rychlé vykreslování obrázku)
+  na kartách, které to podporují.
+  Ujistěte se že máte nainstalován i <emphasis role="bold">vývojový (dev) balíček</emphasis>,
+  jinak to nebude pracovat.
+  Pro některé video karty nepotřebujete XFree86. Viz seznam níže.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">make</emphasis> - doporučená verze je
+  <emphasis role="bold">vždy ta nejnovější</emphasis> (aspoň 3.79.x). Obvykle to není důležité.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">SDL</emphasis> - není vyžadována, ale může pomoci v některých
+  případech (špatný zvuk, video karty které se podivně opožďují s xv rozhraním).
+  Vždy použijte nejnovější (počínaje 1.2.x).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libjpeg</emphasis> - volitelný JPEG dekodér, používaný volbou
+  <option>-mf</option> a některými QT MOV soubory. Použitelný pro <application>MPlayer</application>
+  i <application>MEncoder</application> pokud chcete pracovat se soubory JPEG.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libpng</emphasis> - doporučený a výchozí (M)PNG dekodér. Vyžadován pro GUI.
+  Použitelný pro <application>MPlayer</application> i <application>MEncoder</application>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">lame</emphasis> - doporučený, nutný pro enkódování MP3 zvuku
+  v <application>MEncoder</application>u, doporučená verze je
+  <emphasis>vždy ta nejnovější</emphasis> (aspoň 3.90).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">zlib</emphasis> - doporučená, nutná pro komprimovanou
+  MOV hlavičku a podporu PNG.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libogg</emphasis> - volitelná, nutná pro přehrávání souborového formátu OGG.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libvorbis</emphasis> - volitelná, nutná pro přehrávání OGG Vorbis zvuku.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  - volitelná, nutná pro přehrávání RTSP/RTP datových proudů.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">directfb</emphasis> - volitelný, z
+  <ulink url="http://www.directfb.org"/>. Vyžadujeme aspoň 0.9.13.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">cdparanoia</emphasis> - volitelná, pro podporu CDDA
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libfreetype</emphasis> - volitelná, pro podporu TTF fontů.
+  Vyžadujeme aspoň 2.0.9.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libxmms</emphasis> - volitelná, pro podporu XMMS vstupního pluginu.
+  Vyžadujeme aspoň 1.2.7.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libsmb</emphasis> - volitelná, pro podporu Samby.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">bio2jack</emphasis> - volitelný, pro podporu JACK audio výstupu,
+  potřebný pouze při kompilaci. Můžete jej získat z
+  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Protože nemá volbu
+  install, uložte ručně soubor <filename>libbio2jack.a</filename> někam do knihovní vyhledávací
+  cesty  (např. <filename>/usr/local/lib</filename>) nebo volbou
+  <option>--with-bio2jack=DIR</option> sdělte <filename>./configure</filename> kde ten soubor
+  najde.
+  </para></listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2>
+<title>Kodeky</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
+  Tento balík kodeků je schopen dekódovat
+  H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 enkódované
+  video proudy a WMA (Windows Media Audio) v1/v2 zvukové proudy na různých
+  platformách. Je také známý jako nejrychlejší pro tento účel. Podrobnosti viz oddíl
+  <link linkend="ffmpeg">FFmpeg</link>. Vlastnosti:
+  <itemizedlist>
+  <listitem><simpara>
+    umožňuje dekódování výše uvedených druhů videa na ne-x86 strojích
+    </simpara></listitem>
+  <listitem><simpara>
+    enkódování většinou zmíněných kodeků
+    </simpara></listitem>
+  <listitem><simpara>
+    Tento kodek je <emphasis role="bold">nejrychlejší dostupný kodek</emphasis> pro
+    DivX/3/4/5 a ostatní MPEG-4 kodeky. Doporučeno!
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Win32 kodeky</emphasis>: Pokud plánujete používat
+  <application>MPlayer</application> na x86 architektuře, možná je budete potřebovat.
+  Stáhněte si Win32 kodeky z naší
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">kodekové stránky</ulink>
+  a nainstalujte je do <filename class="directory">/usr/local/lib/codecs</filename>
+  <emphasis role="bold">PŘED</emphasis> kompilací <application>MPlayer</application>u,
+  jinak nebude zakompilována podpora pro Win32!
+  <note><para>Projekt avifile má podobný balíček kodeků, ale ten se od našeho liší,
+  takže pokud chcete všechny podporované kodeky, použijte náš balíček
+  (bez obav, avifile s ním pracuje bez problémů).</para>
+  </note>
+  Vlastnosti:
+  <itemizedlist>
+  <listitem><simpara>
+    potřebujete je pokud chcete přehrávat nebo enkódovat například filmy zaznamenané různými
+    hardwarovými kompresory, jako jsou tunerové karty a digitální kamery
+    (například: DV, ATI VCR, MJPEG)
+    </simpara></listitem>
+  <listitem><simpara>
+    potřebné pokud chcete přehrávat <emphasis role="bold">WMV9/WMA9 filmy</emphasis>.
+   </simpara></listitem>
+  <listitem><simpara>
+    Nejsou potřeba pro staré ASF s MP41 nebo MP42 videem (jelikož je v těchto souborech často
+    VoxWare audio, je to prováděno Win32 kodekem), nebo WMV7. Rovněž nejsou potřeba pro
+    WMA (Windows Media Audio), protože
+    <systemitem class="library">libavcodec</systemitem> pro ně obsahuje open source dekodér.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">QuickTime kodeky</emphasis>: na platformně x86 mohou být tyto kodeky
+  použity k dekódování RPZA a ostatního QuickTime videa, jakož i QDesign audio proudů.
+  Návod na instalaci naleznete v části
+  <link linkend="sorenson">Sorensonův video kodek</link>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">DivX4/DivX5</emphasis>: informace o tomto kodeku jsou dostupné
+  v části <link linkend="divx4-5">DivX4/DivX5</link>. Pravděpodobně tento kodek nebudete
+  vůbec potřebovat, protože
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
+  (viz výš) je mnohem rychlejší a dosahuje lepší kvality než on jak při dekódování,
+  tak při enkódování. Vlastnosti:
+  <itemizedlist>
+  <listitem><simpara>
+    jedno nebo dvouprůchodové enkódování pomocí
+    <link linkend="mencoder"><application>MEncoder</application>u</link>
+    </simpara></listitem>
+  <listitem><simpara>
+    umí přehrávat staré <emphasis role="bold">DivX3</emphasis> filmy mnohem rychleji než
+    Win32 DLL ale pomaleji než
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
+    </simpara></listitem>
+  <listitem><simpara>
+    jeho kód je uzavřený a je k dispozici pouze x86 verze.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">XviD</emphasis>: Open source enkódovací alternativa k DivX4Linux.
+  Vlastnosti:
+  <itemizedlist>
+  <listitem><simpara>
+    jedno nebo dvouprůchodové enkódování pomocí
+    <link linkend="mencoder"><application>MEncoder</application>u</link>
+    </simpara></listitem>
+  <listitem><simpara>
+    je open-source, takže je multiplatformní.
+    </simpara></listitem>
+  <listitem><simpara>
+    je zhruba 2 krát rychlejší při enkódování než DivX4 - při odpovídající kvalitě
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold"><link linkend="xanim">XAnim kodeky</link></emphasis>
+  jsou nejlepší (celoobrazovkový, hardwarový YUV zoom) pro dekódování
+  <emphasis role="bold">3ivx</emphasis> a Indeo 3/4/5 filmů, a některých starých
+  formátů. Navíc jsou multiplatformní, takže jsou jedinou možností jak přehrát Indeo na
+  ne-x86 platformách (nehledě na přehrávání XAnim:). Ale například Cinepak filmy
+  jsou nejlépe přehrávány pomocí <application>MPlayer</application>ova vlastního Cinepak dekodéru!
+  </para></listitem>
+<listitem><para>
+  Pro dekódování <emphasis role="bold">Ogg Vorbis</emphasis> audia musíte správně
+  nainstalovat <systemitem class="library">libvorbis</systemitem>. Použijte deb/rpm
+  balíčky, pokud je máte, nebo kompilujte ze
+  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">zdrojových kódů</ulink>
+  (toto je noc co noc updatovaný tarball z Vorbis CVS).
+  </para></listitem>
+<listitem><para>
+  <application>MPlayer</application> může použít knihovny z RealPlayeru 8
+  nebo RealONE k přehrávání souborů s
+  <emphasis role="bold">RealVideo 3.0 a 4.0</emphasis>
+  videem, a Sipro/Cook zvukem. Viz část
+  <link linkend="realmedia">souborový formát RealMedia</link>
+  pro návod na instalaci a více informací.
+  </para></listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2 id="video-cards">
+<title>Video karty</title>
+
+<para>
+Obecně máme dva druhy video karet. Jedny (ty novější) mají podporu pro
+<emphasis role="bold">hardwarové škálování a YUV akceleraci</emphasis>,
+druhé ji nemají.
+</para>
+
+
+<sect3 id="yuv-cards">
+<title>YUV karty</title>
+
+<para>
+Mohou zobrazit a škálovat (zvětšit/zmenšit) obraz na jakoukoli velikost,
+která se jim vejde do paměti, při <emphasis role="bold">nízkém zatížení CPU</emphasis>
+(dokonce i při zoomu), takže je zobrazení na celou obrazovku hezké a velmi rychlé.
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Karty Matrox G200/G400/G450/G550</emphasis>: ačkoli je pro ně
+  <link linkend="vidix">Vidix ovladač</link>, doporučuje se místo něj raději použít
+  modul mga_vid, jelikož pracuje mnohem lépe.
+  Podívejte se do části <link linkend="mga_vid">mga_vid</link> na informace o jeho použití
+  a instalaci. Je důležité provést všechny tyto kroky
+  <emphasis>před</emphasis> kompilací <application>MPlayer</application>u,
+  jinak nebude zabudována podpora pro mga_vid. Rovněž nahlédněte do části
+  <link linkend="tvout-mga-g400">Matrox TV-out</link>.
+  <emphasis role="bold"> Pokud nepoužíváte Linux</emphasis>, je vaší jedinou volbou
+  VIDIX ovladač: přečtěte si sekci <link linkend="vidix">VIDIX</link>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Karty 3Dfx Voodoo3/Banshee</emphasis>: prostudujte si sekci
+  <link linkend="tdfxfb">tdfxfb</link> pokud chcete velké zrychlení.
+  Je důležité provést všechny tyto kroky <emphasis role="bold">před</emphasis>
+  kompilací <application>MPlayer</application>u, jinak  nebude zabudována podpora pro 3Dfx.
+  Rovněž nahlédněte do části <link linkend="tvout-voodoo">3dfx TV-out</link>.
+  Pokud používáte X, použijte alespoň <emphasis role="bold">4.2.0</emphasis>, protože 3dfx Xv
+  ovladač je vadný v 4.1.0 a předchozích.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Karty ATI</emphasis>: <link linkend="vidix">VIDIX</link>
+  ovladač je k dispozici pro následující karty:
+  <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
+  Rovněž nahlédněte do sekce <link linkend="tvout-ati">ATI karet</link> s dokumentací pro
+  TV-out, kde se dozvíte zda je pod Linuxem/<application>MPlayer</application>em podporován
+  TV-out vaší karty.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Karty S3</emphasis>: Savage a Virge/DX čipy mají
+  hardwarovou akceleraci. Použijte tak novou verzi XFree86 jak je jen možné, starší ovladače
+  jsou plné chyb. Čipy Savage mají problémy se zobrazováním YV12, viz sekci
+  <link linkend="s3">S3 Xv</link> 
+  pro více detailů. Starší Trio karty nemají žádnou, nebo jen pomalou hardwarovou podporu.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Karty nVidia</emphasis>: mohou, ale nemusí být dobrou volbou
+  pro přehrávání videa pod Linuxem.
+  Pokud nemáte kartu GeForce2 (nebo novější), nejspíše nebude pracovat bezchybně.
+  <emphasis role="bold">Vestavěný nVidia ovladač v XFree86 nepodporuje
+  hardwarovou YUV akceleraci na všech nVidia kartách.</emphasis> Budete muset stáhnout
+  closed-source ovladače od nVidie z <ulink url="http://nvidia.com">nVidia.com</ulink>.
+  Viz sekci <link linkend="nvidia">nVidia Xv ovladač</link> pro více detailů. Rovněž navštivte
+  sekci <link linkend="tvout-nvidia">nVidia TV-out</link> pokud chcete používat TV.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">3DLabs GLINT R3 a Permedia3</emphasis>: k dispozici máte
+  VIDIX ovladač (pm3_vid). Rovněž nahlédněte do části <link linkend="vidix">VIDIX</link>
+  pro více informací.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Ostatní karty</emphasis>: žádná z výše uvedených?
+  <itemizedlist>
+  <listitem><simpara>
+    Zkuste zda XFree86 ovladač (a vaše karta) podporuje hardwarovou
+    akceleraci. Pro více informací viz sekci <link linkend="xv">Xv</link>.
+    </simpara></listitem>
+  <listitem><simpara>
+    Pokud ne, pak nejsou video vlastnosti vaší karty podporovány vaším operačním
+    systémem:( Jestliže hardwarové škálování pracuje ve Windows, ještě to neznamená,
+    že bude funkční v Linuxu nebo jiném operačním systému. To závisí na ovladačích.
+    Většina výrobců nedodává ovladače pro Linux ani nezveřejnila specifikace svých
+    čipů -- pokud používáte jejich karty pak máte smůlu.
+    Viz <xref linkend="non-yuv-cards"/>.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+</itemizedlist>
+</para>
+</sect3>
+
+
+<sect3 id="non-yuv-cards" xreflabel="Ne-YUV karty">
+<title>Ne-YUV karty</title>
+
+<para>
+Přehrávání na celé obrazovce může být dosaženo buď zapnutím <emphasis role="bold">
+softwarového škálování</emphasis> (použitím volby <option>-zoom</option> nebo <option>-vf</option>,
+ale varuji vás: toto je pomalé), anebo přepnutím do menšího videorežimu, například
+352x288. Pokud nemáte YUV akceleraci, doporučujeme druhou možnost.
+Přepínání videorežimu lze zapnout použitím volby <option>-vm</option>, což pracuje s těmito
+ovladači:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">používáte</emphasis> XFree86: viz detaily v části
+  <link linkend="dga">DGA ovladač</link> a
+  <link linkend="x11">X11 ovladač</link>. Doporučujeme DGA! Vyzkoušejte také DGA přes SDL,
+  někdy je lepší.
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">nepoužíváte</emphasis> XFree86: zkoušejte ovladače v následujícím
+  pořadí:
+  <link linkend="vesa">vesa</link>,
+  <link linkend="fbdev">fbdev</link>,
+  <link linkend="svgalib">svgalib</link>,
+  <link linkend="aalib">aalib</link>.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+</sect3>
+
+<!-- FIXME: find a more logical organization for this section -->
+<sect3 id="cirrus-logic-cards" xreflabel="Karty Cirrus-Logic">
+<title>Karty Cirrus-Logic</title>
+<itemizedlist>
+<listitem><para>
+  GD 7548: byla integrovaná na základní desce a testována v noteboocích řady Compaq Armada 41xx.
+  <itemizedlist>
+  <listitem><simpara>
+    XFree86 3: pracuje v režimech 8/16bpp. Ovladač je ovšem velmi pomalý a nestabilní při
+    800x600@16bpp. <emphasis role="bold">Doporučujeme: 640x480@16bpp</emphasis>
+   </simpara></listitem>
+  <listitem><simpara>
+    XFree86 4: Xserver zamrznul brzy po startu pokud nebyla vypnuta akcelerace,
+    ale pak se vše zpomalilo víc než v XFree86 3. Není XVideo.
+   </simpara></listitem>
+  <listitem><simpara>
+    FBdev: framebuffer lze zapnout pomocí modulu jádra <systemitem>clgenfb</systemitem>.
+    Pracoval ovšem pouze v 8bpp barevné hloubce, což je k ničemu.
+    Zdrojový kód clgenfb musí být rozšířen o ID 7548 před kompilací.
+   </simpara></listitem>
+  <listitem><simpara>
+    VESA: karta podporuje pouze VBE 1.2, takže výstup VESA nelze použít. Nelze to obejít
+    pomocí UniVBE.
+  </simpara></listitem>
+  <listitem><simpara>
+    SVGAlib: detekuje starší Cirrus čip. Použitelné, ale pomalé při <option>-bpp 8</option>.
+  </simpara></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</sect3>
+</sect2>
+
+
+<sect2 id="sound-cards">
+<title>Zvukové karty</title>
+
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Soundblaster Live!</emphasis>: s touto kartou můžete použít 
+  4 nebo 6 (<emphasis role="bold">5.1</emphasis>) kanálové AC3 dekódování místo 2 kanálového.
+  Přečtěte si sekci 
+  <link linkend="swac3">Softwarové dekódování AC3</link>. Pro hardwarové AC3
+  tunelování <emphasis role="bold">musíte</emphasis> použít ALSA 0.9 s OSS emulací!
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">C-Media s S/PDIF výstupem</emphasis>: hardwarové AC3
+  tunelování je s těmito kartami možné, viz sekci
+  <link linkend="hwac3">Hardwarové AC3 dekódování</link>.
+  </simpara></listitem>
+<listitem><simpara>
+  Vlastnosti <emphasis role="bold">ostatních karet</emphasis> nejsou
+  <application>MPlayer</application>em podporovány.
+  <emphasis role="bold">Velmi doporučujeme k přečtení sekci
+  <link linkend="audio">zvukové karty</link>!</emphasis>
+  </simpara></listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2>
+<title>Vlastnosti</title>
+
+<itemizedlist>
+<listitem><para>
+  Rozhodněte se zda potřebujete GUI. Pokud ano, přečtěte si před kompilací
+  sekci <link linkend="gui">GUI</link>.
+  </para></listitem>
+<listitem><para>
+  Pokud chcete nainstalovat <application>MEncoder</application> (náš skvělý
+  všestranný enkodér), přečtěte si sekci
+  <link linkend="mencoder"><application>MEncoder</application></link>.
+  </para></listitem>
+<listitem><para>
+  Pokud máte V4L kompatibilní <emphasis role="bold">TV tuner</emphasis> kartu,
+  a přejete si sledovat/grabovat filmy <application>MPlayer</application>em,
+  přečtěte si sekci <link linkend="tv-input">TV vstup</link>.
+  </para></listitem>
+<listitem><para>
+  Připravena k použití je podpora pěkného <emphasis role="bold">OSD Menu</emphasis>.
+  Přečtěte si sekci <link linkend="subosd">OSD menu</link>.
+  </para></listitem>
+</itemizedlist>
+
+<para>
+  Pak přeložte <application>MPlayer</application>:
+<screen>
+  ./configure
+  make
+  make install</screen>
+</para>
+
+<para>
+  V tuto chvíli máte <application>MPlayer</application> připraven k použití.
+  Adresář <filename class="directory">$PREFIX/share/mplayer</filename>
+  obsahuje soubor <filename>codecs.conf</filename>. Ten se používá pro oznámení všech kodeků a
+  jejich schopností. Tento soubor je potřeba pouze pokud chcete tyto předvolby změnit, protože
+  jeho kopie je součástí vlastního programu.
+  Zjistěte jestli máte v domácím adresáři soubor
+  <filename>codecs.conf</filename> 
+  (<filename>~/.mplayer/codecs.conf</filename>) ze starých verzí <application>MPlayer</application>u
+  a odstraňte ho.
+</para>
+
+<para>
+  Poznamenejme že pokud umístíte <filename>codecs.conf</filename> do
+  <filename>~/.mplayer/</filename>, vestavěný a systémový
+  <filename>codecs.conf</filename> budou zcela ignorovány.
+  Nedělejte to pokud nechcete ošidit přednastavení <application>MPlayer</application>u,
+  což může způsobit mnoho problémů. Pokud jen chcete změnit pořadí vyhledávání kodeků,
+  použijte volby <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
+  nebo <option>-afm</option> v řádku, nebo konfiguračním souboru (viz manuálová stránka).
+</para>
+
+
+<para>
+  Uživatelé Debianu si mohou vyrobit .deb balíček, je to velmi jednoduché.
+  Jen spusťte binárku
+  <screen>fakeroot debian/rules</screen>
+  v <application>MPlayer</application>ově kořenovém adresáři. Podrobnosti viz
+  <link linkend="debian">Balíčkování Debianu</link>.
+</para>
+
+<para>
+  <emphasis role="bold">Vždy si prostudujte výstup skriptu</emphasis>
+  <filename>./configure</filename>, a soubor <filename>configure.log</filename>,
+  které obsahují informace o tom co bude zakompilováno a co ne. Také můžete
+  chtít vidět soubory <filename>config.h</filename> a <filename>config.mak</filename>.
+  Pokud máte některé knihovny nainstalovány, ale nebyly detekovány skriptem
+  <filename>./configure</filename>, pak ověřte, zda máte příslušné hlavičkové soubory
+  (obvykle -dev balíčky) a jejich verze jsou shodné. Soubor
+  <filename>configure.log</filename> vám obvykle prozradí co vám chybí.
+</para>
+
+<para>
+  Ačkoli to není podmínkou, měli byste mít nainstalovány fonty pro funkci OSD a
+  zobrazování titulků. Doporučujeme nainstalovat soubor fontu TTF a nařídit
+  <application>MPlayer</application>u jej používat.
+  Detaily viz sekce <link linkend="subosd">Titulky a OSD</link>.
+</para>
+
+</sect2>
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="gui">
+<title>Chtěli byste GUI?</title>
+
+<para>
+  GUI potřebuje GTK 1.2.x (není plně GTK, ale panely jsou). Skiny jsou uloženy v PNG formátu,
+  takže GTK, <systemitem class="library">libpng</systemitem>
+  (a jejich příslušenství, obvykle nazývané <systemitem class="library">gtk-dev</systemitem>
+  a <systemitem class="library">libpng-dev</systemitem>) musí být nainstalovány.
+  Můžete jej zakompilovat předáním volby <option>--enable-gui</option> skriptu
+  <filename>./configure</filename>. Aktivaci GUI režimu pak provedete spuštěním binárky
+  <command>gmplayer</command>.
+</para>
+
+<para>
+  V současnosti lze také předat volbu <option>-gui</option> na příkazovém řádku,
+  z technických důvodů.
+</para>
+
+<para>
+  Protože <application>MPlayer</application> nemá přibalen žádný skin, budete si muset
+  nějaký stáhnout abyste mohli používat GUI. Viz naši <ulink
+  url="http://www.mplayerhq.hu/homepage/dload.html">download stránku</ulink>.
+  Skiny by měly být rozbaleny do obvyklého systémového adresáře
+  (<filename class="directory">$PREFIX/share/mplayer/Skin</filename>),
+  nebo do <filename class="directory">$HOME/.mplayer/Skin</filename>.
+  <application>MPlayer</application> ve výchozím stavu hledá v těchto adresářích
+  podadresář jménem <filename class="directory">default</filename>, ale
+  můžete použít volbu <option>-skin <replaceable>nový_skin</replaceable></option>
+  nebo direktivu <literal>skin=nový_skin</literal> konfiguračního souboru pro
+  použití skinu v adresáři <filename class="directory">*/Skin/nový_skin</filename>.
+</para>
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="subosd">
+<title>Titulky a OSD</title>
+
+<para>
+<application>MPlayer</application> umí zobrazovat titulky spolu s filmem.
+V současnosti podporuje tyto formáty:
+<itemizedlist>
+<listitem><para>VOBsub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> umí vyextrahovat výše uvedené formáty titulků
+(<emphasis role="bold">s výjimkou prvních třech</emphasis>) do následujících cílových
+formátů zadáním příslušných voleb:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MEncoder</application> umí vyextrahovat DVD titulky do formátu
+<link linkend="menc-feat-extractsub">VOBsub</link>.
+</para>
+
+<para>
+Volby příkazového řádku se mírně liší pro různé formáty:
+</para>
+
+<formalpara>
+<title>VOBsub titulky</title>
+<para>
+VOBsub titulky sestávají z velkého (řádově megabajty) <filename>.SUB</filename> souboru,
+a volitelného <filename>.IDX</filename> a/nebo <filename>.IFO</filename>
+souboru. Pokud máte soubory jako
+<filename><replaceable>příklad.sub</replaceable></filename>,
+<filename><replaceable>příklad.ifo</replaceable></filename> (volitelné),
+<filename><replaceable>příklad.idx</replaceable></filename> - měli byste předat
+<application>MPlayer</application>u volby <option>-vobsub příklad
+[-vobsubid <replaceable>id</replaceable>]</option> (volitelně s plnou cestou).
+Volba <option>-vobsubid</option> je jako volba
+<option>-sid</option> pro DVD, její pomocí si můžete vybrat mezi titulkovými stopami
+(jazyky). Pokud vynecháte <option>-vobsubid</option>, pokusí se
+<application>MPlayer</application> použít jazyky předané volbou
+<option>-slang</option> a v případě selhání se vrátí zpět k <systemitem>langidx</systemitem>
+v souboru <filename>.IDX</filename> pro nastavení jazyku titulků. Pokud i zde selže, nebudou titulky.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Ostatní titulky</title>
+<para>
+Ostatní formáty titulků sestávají z jediného textového souboru obsahujícího časování, umístění
+a text titulků. Použití: Máme-li soubor, například
+<filename><replaceable>příklad.txt</replaceable></filename>,
+měli byste zadat volbu <option>-sub <replaceable>příklad.txt</replaceable></option>
+(volitelně s plnou cestou).
+</para>
+</formalpara>
+
+<variablelist>
+<title>Nastavení časování a umístění titulků:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sek</replaceable></option></term>
+  <listitem><simpara>
+    Zpozdí titulky o <option><replaceable>sek</replaceable></option> sekund.
+    Hodnota může být i záporná.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>RYCHLOST</replaceable></option></term>
+  <listitem><simpara>
+    Nastaví snímkovou rychlost souboru s titulky (desetinné číslo).
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Nastavuje umístění titulků.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+<!-- text odstavce změněn podle pravdy, neodpovídá EN verzi -->
+Pokud se zvětšuje rozdíl mezi filmem a titulky při použití
+titulkového souboru ve formátu MicroDVD, je nejspíš rozdílná snímková rychlost filmu a
+titulků. Poznamenejme, že formát titulků MicroDVD používá absolutní čísla snímků
+pro své časování, ale nemá hlavičku která by stanovovala snímkovou rychlost, proto je nutné
+použít volbu <option>-subfps</option> s tímto formátem, jestliže se rychlost filmu a titulků
+liší. Trvale lze snímkovou rychlost synchronizovat pouze manuální konverzí souboru s titulky.
+Pro tento účel lze použít např. perlový skript, jenž naleznete v adresáři
+<filename class="directory">contrib</filename> na FTP serveru
+<application>MPlayer</application>u.
+</para>
+
+<para>
+Informace o DVD titulcích naleznete v sekci <link linkend="dvd">DVD</link>.
+</para>
+
+
+<sect2 id="mpsub">
+<title>Vlastní formát titulků <application>MPlayer</application>u (MPsub)</title>
+
+<para>
+<application>MPlayer</application> vám představuje nový formát titulků nazvaný
+<emphasis role="bold">MPsub</emphasis>. Ten byl vyvinut Gabucinem.
+Jeho hlavním účelem je být <emphasis>dynamicky</emphasis> časově-orientovaný (ačkoli
+má i snímkový režim).  Příklad (z <ulink
+url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
+<programlisting>
+FORMAT=TIME
+# první číslo  : vyčkej takto dlouho po zmizení předchozího titulku
+# druhé číslo  : Zobrazuj aktuální titulek tolik sekund
+
+15 3
+Před dávnými časy...
+
+0 3
+ve velmi vzdálené galaxii...
+
+0 3
+Planeta Naboo byla napadena.<!--
+--></programlisting>
+</para>
+
+<para>
+Jak vidíte, naším hlavním cílem bylo <emphasis role="bold">udělat
+editaci/časování/spojování/stříhání titulků co nejsnadnější</emphasis>.
+A pokud -řekněme - dostanete SSA titulky, ale špatně časované/opožděné
+vůči vaší verzi filmu, jednoduše proveďte
+<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
+To vytvoří soubor <filename>dump.mpsub</filename> v aktuálním adresáři, který bude obsahovat
+původní text titulků, ale ve formátu 
+<emphasis role="bold">MPsub</emphasis>. Pak můžete dle libosti přidávat a ubírat sekundy
+z jednotlivých titulků.
+</para>
+
+<para>
+Titulky jsou vykreslovány technikou zvanou <emphasis role="bold">'OSD',
+Display na obrazovce</emphasis>.OSD je používáno k zobrazení časové pozice, pruh hlasitosti,
+pruh vyhledávání atd.
+</para>
+</sect2>
+
+
+<sect2 id="mpsub-install">
+<title>Instalace OSD a titulků</title>
+
+<para>
+Potřebujete <application>MPlayer</application>ův balíček s fonty pro použití
+OSD/TIT. Existuje mnoho způsobů jak jej získat:
+</para>
+
+<itemizedlist>
+<listitem><para>
+  Použijte generátor fontů <filename
+  class="directory">TOOLS/subfont-c</filename>. Je to úplný nástroj pro
+  konverzi z TTF/Type1/etc fontu na balíček fontu pro mplayer (podrobnosti si přečtěte v
+  <filename>TOOLS/subfont-c/README</filename>).
+  </para></listitem>
+<listitem><para>
+  Použijte generátor fontu ve verzi pluginu pro <application>GIMP</application> z <filename
+  class="directory">TOOLS/subfont-GIMP</filename> (poznámka: musíte mít také HSI
+  RAW plugin, viz <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+ </para></listitem>
+<listitem><para>
+  použitím TrueType (TTF) fontu, ve smyslu knihovny <systemitem class="library">freetype</systemitem>.
+  Vyžadována je verze 2.0.9 nebo vyšší! Máte pak dvě metody:
+  <itemizedlist>
+    <listitem><para>
+      použijte volbu <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
+      pro výběr fontu při každé příležitosti
+      </para></listitem>
+    <listitem><para>
+      vytvořte symlink:
+      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      </para></listitem>
+      </itemizedlist>
+  Pokud byl <application>MPlayer</application> zkompilován s podporou
+  <systemitem class="library">fontconfig</systemitem>, výše uvedené metody
+  nebudou pracovat, místo toho <option>-font</option> očekává jméno fontu
+  <systemitem class="library">fontconfig</systemitem>
+  a ve výchozím stavu použije bezpatkový (sans-serif) font. Pro seznam fontů známých
+  <systemitem class="library">fontconfig</systemitem>u,
+  použijte <command>fc-list</command>. Příklad: <option>-font
+  <replaceable>'Bitstream Vera Sans'</replaceable></option>
+  </para></listitem>
+<listitem><para>
+  Stáhněte si hotový balíček fontu z <application>MPlayer</application>ova
+  serveru. Poznámka: v současnosti jsou dostupné fonty omezeny na podporu ISO 8859-1/2,
+  ale existují i některé další (včetně Korejských, Ruských, ISO 8859-8 atd) fonty v
+  contrib/font sekci na FTP, vytvořených uživateli.
+  </para><para>
+  <!-- FIXME: this para should be before the list -->
+  Font by měl mít příslušný <filename>font.desc</filename> soubor mapující
+  unicode pozice fontu na aktuální kódovou stránku textu titulků.
+  Další možností je mít titulky kódovány v UTF-8 a použít volbu
+  <option>-utf8</option> anebo pojmenujte soubor s titulky
+  <filename>&lt;jméno_filmu&gt;.utf</filename> a umístěte jej do adresáře s filmem.
+  Záznam z různých kódových stránek do UTF-8 můžete provést použitím
+  programu <command>konwert</command> nebo <command>iconv</command>.
+  </para><para>
+
+  <table>
+  <title>Několik URL</title>
+  <tgroup cols="2">
+  <thead>
+    <row><entry>URL</entry><entry>Komentář</entry></row>
+  </thead>
+  <tbody>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
+    </entry><entry>
+    ISO fonty
+    </entry></row>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
+    </entry><entry>
+    různé fonty od uživatelů
+    </entry></row>
+  <row><entry>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    </entry><entry>
+    Korejské fonty a RAW plugin
+    </entry></row>
+  </tbody>
+  </tgroup>
+  </table>
+
+  </para></listitem>
+</itemizedlist>
+<para>
+Pokud si zvolíte ne-TTF fonty, rozbalte stažený soubor do adresáře <filename
+class="directory">~/.mplayer</filename> nebo <filename
+class="directory">$PREFIX/share/mplayer</filename>. Pak přejmenujte nebo nalinkujte
+jeden z rozbalených adresářů na <filename class="directory">font</filename>,
+například:
+
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
+
+Nyní byste měli vidět časovač v levém horním rohu filmu (vypněte jej klávesou
+<keycap>o</keycap>).
+</para>
+
+<para>
+(titulky jsou <emphasis>vždy zapnuty</emphasis>, pokud je chcete vypnout, přečtěte si
+prosím man stránku)
+</para>
+
+<para>
+OSD má 4 stavy (přepínají se pomocí <keycap>o</keycap>):
+
+<orderedlist>
+<listitem><simpara>
+  pás hlasitosti + pás převíjení (výchozí)
+  </simpara></listitem>
+<listitem><simpara>
+  pás hlasitosti + pás převíjení + časovač + pozice v souboru v procentech při převíjení
+  </simpara></listitem>
+<listitem><simpara>
+  pás hlasitosti + pás převíjení + časovač + celkový čas
+  </simpara></listitem>
+<listitem><simpara>
+  pouze titulky
+  </simpara></listitem>
+</orderedlist>
+
+Výchozí chování můžete změnit nastavením proměnné <varname>osdlevel</varname>
+v konfiguračním souboru, nebo volbou <option>-osdlevel</option> na příkazovém řádku.
+
+</para>
+</sect2>
+
+
+<sect2 id="osdmenu">
+<title>OSD menu</title>
+
+<para>
+<application>MPlayer</application> má plně uživatelsky definovatelné rozhraní OSD Menu (nabídka na obrazovce).
+</para>
+
+<note><simpara>
+Menu Preferences NENÍ v současnosti IMPLEMENTOVÁNO!
+</simpara></note>
+
+<orderedlist>
+<title>Instalace</title>
+<listitem><simpara>
+  zkompilujte <application>MPlayer</application> s volbou <option>--enable-menu</option>
+  předanou do <filename>./configure</filename>
+  </simpara></listitem>
+<listitem><simpara>
+  ujistěte se že máte nainstalován OSD font
+  </simpara></listitem>
+<listitem><simpara>
+  zkopírujte <filename>etc/menu.conf</filename> do svého
+  <filename class="directory">.mplayer</filename> adresáře
+  </simpara></listitem>
+<listitem><simpara>
+  zkopírujte <filename>etc/menu.conf</filename> do svého
+  <filename class="directory">.mplayer</filename> adresáře, nebo do systémového
+  <application>MPlayer</application> konfiguračního adresáře (výchozí:
+  <filename class="directory">/usr/local/etc/mplayer</filename>)
+  </simpara></listitem>
+<listitem><simpara>
+  zkontrolujte a upravte <filename>input.conf</filename>, abyste zapnuli klávesy pro pohyb v menu
+  (to je popsáno zde).
+  </simpara></listitem>
+<listitem><para>
+  spusťte <application>MPlayer</application> podle následujícího příkladu:
+  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
+  </para></listitem>
+<listitem><simpara>
+  stiskněte některou z kláves, kterou jste definovali
+  </simpara></listitem>
+</orderedlist>
+
+</sect2>
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="rtc">
+<title>RTC</title>
+<para>
+V <application>MPlayer</application> jsou zabudovány tři metody časování.
+
+<itemizedlist>
+<listitem><simpara>
+<emphasis role="bold">Abyste použili starou metodu</emphasis>, nemusíte dělat vůbec
+  nic. Ta používá <systemitem>usleep()</systemitem> pro hlídání
+  A/V synchronizace s přesností +/- 10ms. Ačkoli někdy může být synchronizace hlídána
+  ještě jemněji.
+  </simpara></listitem>
+<listitem><para>
+Kód <emphasis role="bold">nového časovače</emphasis> používá pro tento účel RTC
+  (hodiny reálného času), protože mají přesné 1ms časovače. Pokud jsou RTC dostupné,
+  jsou automaticky použity, ale to vyžaduje oprávnění roota, <emphasis>setuid root</emphasis>
+  binárku <application>MPlayer</application>u nebo správně nastavené jádro.
+  Pokud používáte jádro 2.4.19pre8 nebo pozdější, můžete nastavit maximální RTC
+  kmitočet pro normální uživatele pomocí systému souborů <systemitem class="systemname">/proc
+  </systemitem>. Použijte následný příkaz pro zapnutí RTC pro obyčejné uživatele:
+  <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
+  Pokud nemáte tak nové jádro, můžete změnit jeden řádek v
+  <filename>drivers/char/rtc.c</filename> a rekompilovat jádro.
+  Najděte sekci, která začíná
+  <programlisting>
+       * We don't really want Joe User enabling more
+       * than 64Hz of interrupts on a multi-user machine.
+       */
+      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
+   </programlisting>
+   a změňte 64 na 1024. Opravdu byste ovšem měli vědět co děláte.
+   Efektivitu nového časovače uvidíte na stavovém řádku.
+   Funkce power managementu některých notebookových BIOSů s speedstep procesory
+   špatně komunikují s RTC. Audio a video se mohou rozejít. Zdá se že pomáhá připojení
+   vnějšího napájení před zapnutím notebooku.
+   Vždy můžete vypnout podporu RTC volbou <option>-nortc</option>.
+   V některých hardwarových kombinacích (zjištěno během používání ne-DMA DVD mechaniky
+   na ALi1541 boardu) způsobuje použití RTC časování trhavé přehrávání. Pak doporučujeme
+   použít třetí metodu.
+  </para></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Třetí kód časovače</emphasis> se zapíná volbou
+  <option>-softsleep</option>. Je stejně efektní jako RTC, ale nepoužívá RTC.
+  Na druhou stranu více zatěžuje CPU.
+  </simpara></listitem>
+</itemizedlist>
+<note><para><emphasis role="bold">NIKDY neinstalujte setuid root binárku
+<application>MPlayer</application>u na víceuživatelském systému!</emphasis>
+To je nejlepší cesta jak umožnit každému být rootem.
+</para></note>
+</para>
+</sect1>
