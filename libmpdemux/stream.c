@@ -259,6 +259,7 @@ void free_stream(stream_t *s){
     kill(s->cache_pid,SIGKILL);
     waitpid(s->cache_pid,NULL,0);
   }
+  if(s->fd>0) close(s->fd);
   if(s->priv) free(s->priv);
   free(s);
 }
