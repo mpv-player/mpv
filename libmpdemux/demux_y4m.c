@@ -195,11 +195,13 @@ void demux_open_y4m(demuxer_t* demuxer){
 	sh->frametime=1.0f/sh->fps;
 	
 	ratio = y4m_si_get_sampleaspect(priv->si);
-	if (ratio.d != 0 && ratio.n != 0)
-	    sh->aspect = (float)ratio.n/(float)ratio.d;
 
 	sh->disp_w = y4m_si_get_width(priv->si);
 	sh->disp_h = y4m_si_get_height(priv->si);
+
+	if (ratio.d != 0 && ratio.n != 0)
+	    sh->aspect = (float)(sh->disp_w*ratio.n)/(float)(sh->disp_h*ratio.d);
+
     	demuxer->seekable = 0;
     }
 
