@@ -1,4 +1,4 @@
-.\" synced with 1.717
+.\" synced with 1.718
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1735,9 +1735,6 @@ czwarte urz±dzenie
 .RE
 .PD 1
 .sp 1
-FIXME: Udokumentowaæ wszystkie podopcje dla sdl, arts, esd, jack, nas, macosx,
-sgi, sun, dxr2, mpegpes, null, pcm, plugin.
-.sp 1
 Dostêpne sterowniki wyj¶ciowe audio:
 .
 .TP
@@ -1783,6 +1780,12 @@ Ustawia urz±dzenie wyj¶ciowe d¼wiêku (domy¶lnie: /dev/\:dsp).
 .B sdl\ \ \ \ 
 Sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
 Directmedia Layer).
+.PD 0
+.RSs
+.IPs <sterownik>
+Okre¶la, jaki sterownik d¼wiêku ma zostaæ u¿yty przez SDL (domy¶lnie: SDL wybiera).
+.RE
+.PD 1
 .
 .TP
 .B arts\ \ \ 
@@ -1791,6 +1794,13 @@ Przekazuje d¼wiêk przez demona Arts.
 .TP
 .B esd\ \ \ \ 
 Przekazuje d¼wiêk przez demona ESD.
+.PD 0
+.RSs
+.IPs <serwer>
+Okre¶la jaki serwer SDL ma zostaæ u¿yty (domy¶lnie: localhost).
+.RE
+.PD 1
+
 .
 .TP
 .B jack\ \ \ \ 
@@ -1811,6 +1821,12 @@ Rdzenny sterownik SGI.
 .TP
 .B sun (tylko Sun)
 Rdzenny sterownik Sun.
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Okre¶la, jakie urz±dzenie audio ma zostaæ u¿yte (domy¶lnie: /dev/\:audio).
+.RE
+.PD 1
 .
 .TP
 .B win32 (tylko Windows)
@@ -6709,7 +6725,7 @@ Okre¶la, który kwantyzator zostanie u¿yty, 20\-40 to u¿yteczny zakres
 (domy¶lnie: 26).
 Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
 Zauwa¿, ¿e kwantyzacja w H.264 dzia³a inaczej ni¿ w MPEG[124].
-Parametr kwantyzacji (QP)H.264 jest w skali logarytmicznej.
+Parametr kwantyzacji (QP) H.264 jest w skali logarytmicznej.
 Dla przyk³adu, ró¿nica w bitrate pomiêdzy QP=20 a QP=40 to wspó³czynnik
 oko³o 10.
 Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
