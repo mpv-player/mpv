@@ -167,8 +167,8 @@
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
-	{"vop", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
-	{"vf", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
+	{"vop*", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
+	{"vf*", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
 
 	// scaling:
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},

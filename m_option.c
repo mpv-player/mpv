@@ -267,7 +267,7 @@ static int parse_position(m_option_t* opt,char *name, char *param, void* dst, in
 	     (sizeof(off_t) == sizeof(int) ?
 	      "The %s option must be >= %d: %s\n" :
 	      "The %s option must be >= %lld: %s\n"),
-	     (off_t) opt->min, param);
+	     name, (off_t) opt->min, param);
       return M_OPT_OUT_OF_RANGE;
     }
 
@@ -277,7 +277,7 @@ static int parse_position(m_option_t* opt,char *name, char *param, void* dst, in
 	     (sizeof(off_t) == sizeof(int) ?
 	      "The %s option must be <= %d: %s\n" :
 	      "The %s option must be <= %lld: %s\n"),
-	     (off_t) opt->max, param);
+	     name, (off_t) opt->max, param);
       return M_OPT_OUT_OF_RANGE;
     }
 
@@ -446,7 +446,7 @@ static int str_list_del(char** del, int n,void* dst) {
     }
     free(del[i]);
     if(idx < 0 || idx >= ln) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Index %d is out of range\n",idx);
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Index %ld is out of range\n",idx);
       continue;
     } else if(!lst[idx])
       continue;
@@ -1260,20 +1260,135 @@ static int parse_obj_settings(char* opt,char* str,m_obj_list_t* list,
   return 1;
 }
 
+static void free_obj_settings_list(void* dst);
+
+static int obj_settings_list_del(char *opt_name,char *param,void* dst, int src) {
+  char** str_list = NULL;
+  int r,i,idx_max = 0;
+  char* rem_id = "_removed_marker_";
+  m_option_t list_opt = {opt_name , NULL, CONF_TYPE_STRING_LIST,
+			   0, 0, 0, NULL };
+  m_obj_settings_t* obj_list = dst ? VAL(dst) : NULL;
+
+  if(dst && !obj_list) {
+    mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: the list is empty.\n",opt_name);
+    return 1;
+  } else if(obj_list) {
+    for(idx_max = 0 ; obj_list[idx_max].name != NULL ; idx_max++)
+      /* NOP */;
+  }
+
+  r = m_option_parse(&list_opt,opt_name,param,&str_list,src);
+  if(r < 0 || !str_list)
+    return r;
+
+  for(r = 0 ; str_list[r] ; r++) {
+    int id;
+    char* endptr;
+    id = strtol(str_list[r],&endptr,0);
+    if(endptr == str_list[r]) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid parameter. We a list of integer wich are the index of the elements to remove\n",opt_name);
+      m_option_free(&list_opt,&str_list);
+      return M_OPT_INVALID;
+    }
+    if(!obj_list) continue;
+    if(id >= idx_max || id < -idx_max) {
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: index %d is out of range\n",opt_name,id);
+      continue;
+    }
+    if(id < 0)
+      id = idx_max + id;
+    free(obj_list[id].name);
+    free_str_list(&(obj_list[id].attribs));
+    obj_list[id].name = rem_id;
+  }
+
+  if(!dst) {
+    m_option_free(&list_opt,&str_list);
+    return 1;
+  }
+
+  for(i = 0 ; obj_list[i].name ; i++) {
+    while(obj_list[i].name == rem_id) {
+      memmove(&obj_list[i],&obj_list[i+1],sizeof(m_obj_settings_t)*(idx_max - i));
+      idx_max--;
+    }
+  }
+  obj_list = realloc(obj_list,sizeof(m_obj_settings_t)*(idx_max+1));
+  VAL(dst) = obj_list;
+
+  return 1;
+}
 
 static int parse_obj_settings_list(m_option_t* opt,char *name,
 				   char *param, void* dst, int src) {
-  int n = 0,r;
+  int n = 0,r,len = strlen(opt->name);
   char *str;
   char *ptr, *last_ptr;
-  m_obj_settings_t *res = NULL;
+  m_obj_settings_t *res = NULL,*queue = NULL,*head = NULL;
+  int op = OP_NONE;
 
   // We need the objects list
   if(!opt->priv)
     return M_OPT_INVALID;
 
+  if(opt->name[len-1] == '*' && ((int)strlen(name) > len - 1)) {
+    char* n = &name[len-1];
+    if(strcasecmp(n,"-add") == 0)
+      op = OP_ADD;
+    else if(strcasecmp(n,"-pre") == 0)
+      op = OP_PRE;
+    else if(strcasecmp(n,"-del") == 0)
+      op = OP_DEL;
+    else if(strcasecmp(n,"-clr") == 0)
+      op = OP_CLR;
+    else {
+      char prefix[len];
+      strncpy(prefix,opt->name,len-1);
+      prefix[len-1] = '\0';
+      mp_msg(MSGT_VFILTER,MSGL_ERR, "Option %s: unknow posfix %s\n"
+	     "Supported posfix are:\n"
+	     "  %3$s-add\n"
+	     " Append the given list to the current list\n\n"
+	     "  %3$s-pre\n"
+	     " Prepend the given list to the current list\n\n"
+	     "  %3$s-del x,y,...\n"
+	     " Remove the given elements. Take the list element index (starting from 0).\n"
+	     " Neagtive index can be used (ie -1 is the last element)\n\n"
+	     "  %3$s-clr\n"
+	     " Clear the cureent list.\n",name,n,prefix);
+      
+      return M_OPT_UNKNOW;
+    }
+  }
+
+  // Clear the list ??
+  if(op == OP_CLR) {
+    if(dst)
+      free_obj_settings_list(dst);
+    return 0;
+  }
+
   if (param == NULL || strlen(param) == 0)
     return M_OPT_MISSING_PARAM;
+
+  switch(op) {
+  case OP_ADD:
+    if(dst) head = VAL(dst);
+    break;
+  case OP_PRE:
+    if(dst) queue = VAL(dst);
+     break;
+  case OP_DEL:
+    return obj_settings_list_del(name,param,dst,src);
+  case OP_NONE:
+    if(dst && VAL(dst))
+      free_obj_settings_list(dst);
+    break;
+  default:
+    mp_msg(MSGT_VFILTER,MSGL_ERR, "Option %s: FIXME\n",name);
+    return M_OPT_UNKNOW;
+  }
 
   if(!strcmp(param,"help")) {
     m_obj_list_t* ol = opt->priv;
@@ -1314,9 +1429,27 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
       ((opt->flags & M_OPT_MAX) && (n > opt->max)) )
     return M_OPT_OUT_OF_RANGE;
   
-  if(dst)
+  if(dst) {
+    if(queue) {
+      int qsize;
+      for(qsize = 0 ; queue[qsize].name ; qsize++)
+	/* NOP */;
+      res = realloc(res,(qsize+n+1)*sizeof(m_obj_settings_t));
+      memcpy(&res[n],queue,(qsize+1)*sizeof(m_obj_settings_t));
+      n += qsize;
+      free(queue);
+    }
+    if(head) {
+      int hsize;
+      for(hsize = 0 ; head[hsize].name ; hsize++)
+	/* NOP */;
+      head = realloc(head,(hsize+n+1)*sizeof(m_obj_settings_t));
+      memcpy(&head[hsize],res,(n+1)*sizeof(m_obj_settings_t));
+      free(res);
+      res = head;
+    }      
     VAL(dst) = res;
-
+  }
   return 1;
 }
 
@@ -1368,7 +1501,7 @@ m_option_type_t m_option_type_obj_settings_list = {
   "Object settings list",
   "",
   sizeof(m_obj_settings_t*),
-  M_OPT_TYPE_DYNAMIC,
+  M_OPT_TYPE_DYNAMIC|M_OPT_TYPE_ALLOW_WILDCARD,
   parse_obj_settings_list,
   NULL,
   copy_obj_settings_list,
@@ -1613,13 +1746,13 @@ static int parse_custom_url(m_option_t* opt,char *name,
     if( strlen(ptr2)>1 ) {
       // copy the path/filename in the URL container
       if(!m_option_list_find(desc->fields,"filename")) {
-	mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a hostname part part\n");
+	mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a hostname part part\n",name);
 	// skip
       } else {
 	if(dst) {
 	  r = m_struct_set(desc,dst,"filename",ptr2+1);
 	  if(r < 0) {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting filename\n");
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting filename\n",name);
 	    return r;
 	  }
 	}
