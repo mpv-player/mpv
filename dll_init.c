@@ -205,6 +205,8 @@ printf("\n");
   // the sh_video struct content. We call it with an 1024-byte temp space and
   // then copy out the data we need:
   memset(temp,0x77,temp_len);
+//  memcpy(temp,sh_video->bih,sizeof(BITMAPINFOHEADER));
+//  sh_video->o_bih.biSize = temp_len;
 
   ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, temp);
   if(ret < 0){
