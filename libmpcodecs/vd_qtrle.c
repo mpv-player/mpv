@@ -32,7 +32,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	    
 	    /* qtrle24 supports 32bit output too */
 	    if ((req_format == (IMGFMT_BGR|ctx->depth)) ||
-		((IMGFMT_BGR_DEPTH(req_format) == 32) && (ctx->depth == 24)))
+		((IMGFMT_BGR_DEPTH(req_format) == 32) && (ctx->depth == 24)) ||
+		((IMGFMT_BGR_DEPTH(req_format) == 24) && (ctx->depth == 32)))
 		return(CONTROL_TRUE);
 	    else
 		return(CONTROL_FALSE);
@@ -68,6 +69,8 @@ static int init(sh_video_t *sh){
 	case 16:
 	    ctx->depth--; /* this is the trick ;) */
 	    break;
+  case 32:
+      mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[qtrle] 32 bpp file, alpha channel will be ignored.\n");
 	case 24:
 	    break;
 	default:
