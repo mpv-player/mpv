@@ -114,12 +114,13 @@ static inline void requantize(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t 
 }
 
 static inline void add_block(int16_t *dst, int stride, DCTELEM block[64]){
-	int x,y;
+	int y;
 	
 	for(y=0; y<8; y++){
-		for(x=0; x<8; x++){
-			dst[x + y*stride]+= block[x + y*8];
-		}
+		*(uint32_t*)&dst[0 + y*stride]+= *(uint32_t*)&block[0 + y*8];
+		*(uint32_t*)&dst[2 + y*stride]+= *(uint32_t*)&block[2 + y*8];
+		*(uint32_t*)&dst[4 + y*stride]+= *(uint32_t*)&block[4 + y*8];
+		*(uint32_t*)&dst[6 + y*stride]+= *(uint32_t*)&block[6 + y*8];
 	}
 }
 
@@ -290,6 +291,9 @@ static int open(vf_instance_t *vf, char* args){
     vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
+    
+    avcodec_init();
+
     vf->priv->avctx= avcodec_alloc_context();
     dsputil_init(&vf->priv->dsp, vf->priv->avctx);
 
