@@ -54,7 +54,7 @@ Where did you install the SDL library? If you installed in /usr/local
 It doesn't compile, and it misses uint64_t inttypes.h and similar things...
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 copy etc/inttypes.h to <B>MPlayer</B> directory (cp etc/inttypes.h .)
-try again... if fail, contact us
+try again...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -287,14 +287,6 @@ It's a known bug (really it's a bug/limitation of the DLL codec).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-I've got 'MPlayer interrupted by signal 11' in module audio_setup or
-decode_audio.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
-a bug. Possibly it's a damaged file, try with -afm 4.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 MPlayer exits with something error when using l3codeca.acm.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Check 'ldd /usr/local/bin/mplayer' output. If it contains<BR>
@@ -313,9 +305,7 @@ or use <B>MPlayer</B>'s -afm 1 option to disable using l3codeca.acm.
 My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
 sound too slow. When I use -nosound switch, everything is ok (but quiet).
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Those files probably have 48Khz audio, and your soundcard/driver can't play
-it correctly. Audio downsampling isn't implemented in <B>MPlayer</B> (yet).
-Maybe use the SDL driver, with <B>-ao:sdl</B> 
+Ok son, your machine is too slow. RTFM or anything.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
  
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">

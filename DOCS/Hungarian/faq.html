@@ -56,7 +56,7 @@
  Nem fordul, hiányol valami uint64_t inttypes.h és hasonló dolgokat...
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Másold a etc/inttypes.h-t az MPlayer könyvtárába (cp etc/inttypes.h .)
-     Próbáld újra... ha nem megy, írj!
+     Próbáld újra...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -76,8 +76,8 @@
  Vannak rpm/deb/... csomagok az MPlayer-bõl?
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Csinálhatsz magadnak .deb csomagot, lásd a dokumentációt.
-     _ROPPANTUL_ ellene vagyunk az elõrefordított MPlayer csomagok
-     használatának, mivel (jelenleg) _erõsen_ függ a fordításkor
+     <I>nagyon</I> ellene vagyunk az elõrefordított MPlayer csomagok
+     használatának, mivel (jelenleg) erõsen függ a fordításkor
      használt opcióktól és optimalizációktól!
      Elõrefordított csomagokhoz az MPlayer team SEMMILYEN támogatást nem nyújt!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -89,10 +89,10 @@
  ...igen, de nincs fent az X fejlesztõi csomag. Vagy nem helyesen.
      RedHat alatt XFree86-devel* a neve, Debian alatt xlib6g-dev . Nézd meg,
      hogy az /usr/X11 symlink létezik-e (Mandrake rendszereken lehet probléma).
-     Létrehozása a következõ paranccsal történik:
-          $ ln -sf /usr/X11R6 /usr/X11
-     Nézd meg, hogy megvan-e az /usr/include/X11 link :
-          $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     Létrehozása a következõ paranccsal történik:<BR>
+          $ ln -sf /usr/X11R6 /usr/X11<BR>
+     Nézd meg, hogy megvan-e az /usr/include/X11 link :<BR>
+          $ ln -sf /usr/X11R6/include/X11 /usr/include/X11<BR>
      Elképzelhetõ, hogy a disztribúciód eltér a Linux Filesystem Standard-tõl.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -149,7 +149,7 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Mit jelentenek azok a számok a status sorban?
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- lássuk:
+ lássuk:<BR><PRE>
        A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0
      - A: audio pozíció másodpercben
      - V: video pozíció másodpercben
@@ -160,7 +160,7 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
        benne van!)
      - video output cpu használat AVI-nál, MPEG-nél 0 (lásd fent)
      - audio codec cpu használat százalékban
-     - kihagyandó képkockák száma, hogy A-V szinkron megmaradjon
+     - kihagyandó képkockák száma, hogy A-V szinkron megmaradjon</PRE>
      Legtöbbjük hibakeresési célokat szolgál, és hamarosan megszûnik.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -202,7 +202,7 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Nézd meg itt: <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
      és ha nincs benne a te codeced, olvasd el a
-     <A HREF="codecs.html#2.1.4">2.1.4</A>-es fejezetet, és írj nekünk!
+     <A HREF="codecs.html#2.1.4">2.1.4</A>-es fejezetet.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -289,13 +289,6 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Azt írja ki, hogy 'MPlayer interrupted by signal 11'
-  </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Igen valószínûtlen, mióta újraírtuk az mp3lib-et. Írj nekünk, egy bug
-     lehet. Valószínûleg hibás a file, próbáld a '-afm 4' opciót.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
@@ -317,9 +310,7 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
      van, lassan játssza le. Ha -nosound opcióval próbálom, minden ok (csak
      néma).
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Ezeknek a file-oknak valószínûleg 48Khz-es hangjuk van, és a
-     hangkártyád/drivered ezt nem támogatja rendesen. Az audio downsampling
-     (még) nincs benne MPlayer-ben. Talán az SDL driver segít, <B>-ao:sdl</B>
+Jah fiam, hát lassú a géped. Ez van.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -353,7 +344,7 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
  MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
      0x10000001
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a DOCS-ból!
+ Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a main/etc-bõl!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -398,13 +389,13 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:
+ Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:<BR><PRE>
      X Error of failed request:  BadAccess (attempt to access private resource
      denied)
       Major opcode of failed request:  147 (MIT-SHM)
       Minor opcode of failed request:  1 (X_ShmAttach)
       Serial number of failed request:  26
-      Current serial number in output stream:27
+      Current serial number in output stream:27</PRE>
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Régi a drivered, frissítsd! Vagy a DRI (legalább) 0.6-os verzióját használd
      (http://dri.sourceforge.net), vagy a DRI cvs-t fordítsd le!
@@ -413,16 +404,16 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
      Voodoo 3/Banshee-mmel !
-     Azt mondja:
+     Azt mondja:<PRE>
       ...
       Xvideo image format: 0x32315659 (YV12) planar
       Xvideo image format: 0x30323449 (I420) planar 
-      ...
-  </B>A1: Lásd az elõzõ választ.
+      ...</PRE>
+  </B>A1: Lásd az elõzõ választ.<BR>
   A2: A 0.18pre4 verzió óta az MPlayer támogatja a libavcodec-et az ffmpeg
       programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
       A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
-      Fordítsd be a libavcodec supportot.
+      Fordítsd be a libavcodec-et.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
