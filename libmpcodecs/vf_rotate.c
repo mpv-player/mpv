@@ -56,7 +56,13 @@ static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcst
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    
+    if (vf->priv->direction & 4) {
+	if (width<height) vf->priv->direction&=3;
+    }
+    if (vf->priv->direction & 4){
+	vf->put_image=vf_next_put_image; // passthru mode!
+	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+    }
     return vf_next_config(vf,height,width,d_height,d_width,flags,outfmt);
 }
 
