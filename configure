@@ -2280,7 +2280,7 @@ if test "$_ossaudio" = yes ; then
   _aosrc="$_aosrc ao_oss.c"
   _aomodules="oss $_aomodules"
   if test "$_linux_devfs" = yes; then
-    _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dspW"'
+    _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dsp"'
     _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/sound/mixer"'
   else
     _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
