@@ -83,17 +83,17 @@ package management system does not provide specific support for
 internationalization.
 
 Libavcodec MUST always be in the latest development version and it SHOULD
-be linked statically into mplayer binary, because MPlayer requires a
-recent libavcodec snapshot. While some distributions provide ffmpeg
-packages containing shared libavcodec library, they are often based on the
-last "release" version of ffmpeg, which is quite old and will usually not
-function with MPlayer.
+be linked statically into the mplayer binary, because MPlayer requires a
+recent libavcodec snapshot. While some distributions provide FFmpeg
+packages containing a shared libavcodec library, they are often based on the
+last "release" version of FFmpeg, which is quite old and will usually not
+function correctly with MPlayer.
 
 
 File locations
 ~~~~~~~~~~~~~~
 In general, you SHOULD follow your distribution guidelines. For example,
-for RedHat and Fedora RPMs I am using FHS-compliant paths:
+for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 
 /etc/mplayer/                   system-wide configs
 /usr/bin/                       binaries
@@ -113,7 +113,7 @@ One package or many packages?
 Although it is tempting to simply provide a single all-in-one package,
 I think it is best to split MPlayer into several packages. It may be
 a little more troublesome for less clueful users, but it allows you to
-install only what you need. This is the layout I am using for RedHat and
+install only what you need. This is the layout I am using for Red Hat and
 Fedora RPMs:
 
 mencoder         contains MEncoder binary (mencoder)
@@ -125,8 +125,8 @@ mplayer-font-*   contain various bitmap fonts for OSD (obsolete)
 mplayer-gui      contains MPlayer binary with GUI (gmplayer);
                  requires default skin package
 mplayer-skin-*   contain various MPlayer GUI skins
-mplayer-vidix    contains vidix support library for MPlayer
-mplayer-vidix-*  contain vidix drivers for specific cards, one per package
+mplayer-vidix    contains VIDIX support library for MPlayer
+mplayer-vidix-*  contain VIDIX drivers for specific cards, one per package
 
 There is no strict policy for now, just use your common sense.
 
@@ -135,11 +135,11 @@ Compilation
 ~~~~~~~~~~~
 While it is acceptable to provide packages optimized for specific CPUs,
 you MUST provide at least one "lowest common denominator" package set
-that will work on all CPUs. This means it MUST be configured with
+that will work on all CPUs. This means it MUST be configured with the
 --enable-runtime-cpudetection option. Building for specific CPUs requires
 disabling this option, but try to make sure that users cannot accidentally
 install a package not suitable for their CPU. With RPMs, for example, this
-is handled automatically, when building with "--target arch" rpm option.
+is handled automatically, when building with the "--target arch" rpm option.
 
 Compiler flags MUST be set to either configure-generated CFLAGS or something
 as close to them as possible.
@@ -155,7 +155,7 @@ distribution will get binaries with the same dependencies.
 You SHOULD provide an option to rebuild the package with full debug
 information enabled (by passing --enable-debug=3 to ./configure and
 disabling any stripping of binaries and libs during the build process).
-For example my source RPM can be rebuilt with "--with debug" option, which
+For example my source RPM can be rebuilt with a "--with debug" option, which
 does just that, making it easier to supply gdb information along with any
 bug reports, while retaining all benefits of using binary packages.
 
@@ -190,10 +190,10 @@ Creating a mencoder man page linked to mplayer is as simple as:
 
   echo ".so mplayer.1" >> mencoder.1
 
-Similar trick can be used for "man gmplayer". This avoids problems with
+A similar trick can be used for "man gmplayer". This avoids problems with
 gzipped man pages and symbolic links.
 
-Newer RedHat and Fedora distributions keep localized man pages encoded in
+Newer Red Hat and Fedora distributions keep localized man pages encoded in
 UTF-8. If your distribution does the same, make sure you convert MPlayer's
 translated man pages to UTF-8 so that man mplayer works for locales other
 than English.
