@@ -467,7 +467,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   uint8_t              asf_header[8192];
   int                  asf_header_len;
   int                  len, i, packet_length;
-  char                *path;
+  char                *path, *unescpath;
   URL_t *url1 = stream->streaming_ctrl->url;
   int s = stream->fd;
 
@@ -479,9 +479,22 @@ int asf_mmst_streaming_start(stream_t *stream)
   /* parse url */
   path = strchr(url1->file,'/') + 1;
 
+  /* mmst filename are not url_escaped by MS MediaPlayer and are expected as
+   * "plain text" by the server, so need to decode it here
+   */
+  unescpath=malloc(strlen(path)+1);
+  if (!unescpath) {
+	mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+	return -1; 
+  }
+  url_unescape_string(unescpath,path);
+  path=unescpath;
+  
+
   url1->port=1755;
   s = connect2Server( url1->hostname, url1->port, 1);
   if( s<0 ) {
+	  free(path);
 	  return s;
   }
   printf ("connected\n");
@@ -531,6 +544,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   string_utf16 (&data[8], path, strlen(path));
   memset (data, 0, 8);
   send_command (s, 5, 0, 0, strlen(path)*2+10, data);
+  free(path);
 
   get_answer (s);
 
