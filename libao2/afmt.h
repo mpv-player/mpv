@@ -53,3 +53,8 @@
 #ifndef AFMT_FLOAT
 # define AFMT_FLOAT               0x00004000
 #endif
+
+/* for formats that don't have a corresponding AFMT_* type,
+ * use the flags from libaf/af_format.h or'ed with this */
+#define AFMT_AF_FLAGS             0x70000000
+

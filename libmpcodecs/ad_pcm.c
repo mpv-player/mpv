@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "ad_internal.h"
+#include "../libaf/af_format.h"
 
 static ad_info_t info = 
 {
@@ -29,6 +30,9 @@ static int init(sh_audio_t *sh_audio)
        switch (sh_audio->samplesize) {
          case 1: sh_audio->sample_format=AFMT_U8; break;
          case 2: sh_audio->sample_format=AFMT_S16_LE; break;
+         case 3: sh_audio->sample_format=AFMT_AF_FLAGS | AF_FORMAT_I |
+                   AF_FORMAT_LE | AF_FORMAT_SI;
+           break;
          case 4: sh_audio->sample_format=AFMT_S32_LE; break;
        }
        break;

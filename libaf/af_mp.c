@@ -35,6 +35,10 @@ int af_format_decode(int ifmt)
   case(AFMT_FLOAT):
     ofmt = AF_FORMAT_F | AF_FORMAT_NE; break;
   default: 
+    if (ifmt & AFMT_AF_FLAGS == AFMT_AF_FLAGS) {
+      ofmt = ifmt & ~AFMT_AF_FLAGS;
+      break;
+    }
     //This can not happen .... 
     af_msg(AF_MSG_FATAL,"Unrecognized input audio format %i\n",ifmt);
     break;
@@ -75,6 +79,6 @@ int af_format_encode(void* fmtp)
   case AF_FORMAT_AC3:    return AFMT_AC3;
   case AF_FORMAT_IMA_ADPCM: return AFMT_IMA_ADPCM;
   }
-  return AFMT_S16_LE; // shouldn't happen
+  return (fmt->format | AFMT_AF_FLAGS);
 }
 

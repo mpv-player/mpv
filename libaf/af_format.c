@@ -131,9 +131,9 @@ char* fmt2str(int format, char* str, size_t size)
 // Sanity check for bytes per sample
 int check_bps(int bps)
 {
-  if(bps != 4 && bps != 2 && bps != 1){
+  if(bps != 4 && bps != 3 && bps != 2 && bps != 1){
     af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample" 
-	   " must be 1, 2 or 4. Current value is %i \n",bps);
+	   " must be 1, 2, 3 or 4. Current value is %i \n",bps);
     return AF_ERROR;
   }
   return AF_OK;
@@ -349,6 +349,30 @@ af_info_t af_info_format = {
   open
 };
 
+static inline uint32_t load24bit(void* data, int pos) {
+#if WORDS_BIGENDIAN
+  return (((uint32_t)((uint8_t*)data)[3*pos])<<24) |
+	 (((uint32_t)((uint8_t*)data)[3*pos+1])<<16) |
+	 (((uint32_t)((uint8_t*)data)[3*pos+2])<<8);
+#else
+  return (((uint32_t)((uint8_t*)data)[3*pos])<<8) |
+	 (((uint32_t)((uint8_t*)data)[3*pos+1])<<16) |
+	 (((uint32_t)((uint8_t*)data)[3*pos+2])<<24);
+#endif
+}
+
+static inline void store24bit(void* data, int pos, uint32_t expanded_value) {
+#if WORDS_BIGENDIAN
+      ((uint8_t*)data)[3*pos]=expanded_value>>24;
+      ((uint8_t*)data)[3*pos+1]=expanded_value>>16;
+      ((uint8_t*)data)[3*pos+2]=expanded_value>>8;
+#else
+      ((uint8_t*)data)[3*pos]=expanded_value>>8;
+      ((uint8_t*)data)[3*pos+1]=expanded_value>>16;
+      ((uint8_t*)data)[3*pos+2]=expanded_value>>24;
+#endif
+}
+
 // Function implementations used by play
 static void endian(void* in, void* out, int len, int bps)
 {
@@ -359,6 +383,15 @@ static void endian(void* in, void* out, int len, int bps)
       for(i=0;i<len;i++){
 	s=((uint16_t*)in)[i];
 	((uint16_t*)out)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
+      }
+      break;
+    }
+    case(3):{
+      register uint8_t s;
+      for(i=0;i<len;i++){
+	s=((uint8_t*)in)[3*i];
+	((uint8_t*)out)[3*i]=((uint8_t*)in)[3*i+2];
+	((uint8_t*)out)[3*i+2]=s;
       }
       break;
     }
@@ -388,6 +421,10 @@ static void si2us(void* in, void* out, int len, int bps)
     for(i=0;i<len;i++)
       ((uint16_t*)out)[i]=(uint16_t)(SHRT_MAX+((int)((int16_t*)in)[i]));
     break;
+  case(3):
+    for(i=0;i<len;i++)
+      store24bit(out, i, (uint32_t)(INT_MAX+(int32_t)load24bit(in, i)));
+    break;
   case(4):
     for(i=0;i<len;i++)
       ((uint32_t*)out)[i]=(uint32_t)(INT_MAX+((int32_t*)in)[i]);
@@ -407,6 +444,10 @@ static void us2si(void* in, void* out, int len, int bps)
     for(i=0;i<len;i++)
       ((int16_t*)out)[i]=(int16_t)(SHRT_MIN+((int)((uint16_t*)in)[i]));
     break;
+  case(3):
+    for(i=0;i<len;i++)
+      store24bit(out, i, (int32_t)(INT_MIN+(uint32_t)load24bit(in, i)));
+    break;
   case(4):
     for(i=0;i<len;i++)
       ((int32_t*)out)[i]=(int32_t)(INT_MIN+((uint32_t*)in)[i]);
@@ -424,6 +465,10 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
       for(i=0;i<len;i++)
 	((uint16_t*)out)[i]=((uint16_t)((uint8_t*)in)[i])<<8;
       break;
+    case(3):
+      for(i=0;i<len;i++)
+	store24bit(out, i, ((uint32_t)((uint8_t*)in)[i])<<24);
+      break;
     case(4):
       for(i=0;i<len;i++)
 	((uint32_t*)out)[i]=((uint32_t)((uint8_t*)in)[i])<<24;
@@ -436,12 +481,32 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
       for(i=0;i<len;i++)
 	((uint8_t*)out)[i]=(uint8_t)((((uint16_t*)in)[i])>>8);
       break;
+    case(3):
+      for(i=0;i<len;i++)
+	store24bit(out, i, ((uint32_t)((uint16_t*)in)[i])<<16);
+      break;
     case(4):
       for(i=0;i<len;i++)
 	((uint32_t*)out)[i]=((uint32_t)((uint16_t*)in)[i])<<16;
       break;
     }
     break;
+  case(3):
+    switch(outbps){
+    case(1):
+      for(i=0;i<len;i++)
+	((uint8_t*)out)[i]=(uint8_t)(load24bit(in, i)>>24);
+      break;
+    case(2):
+      for(i=0;i<len;i++)
+	((uint16_t*)out)[i]=(uint16_t)(load24bit(in, i)>>16);
+      break;
+    case(4):
+      for(i=0;i<len;i++)
+	((uint32_t*)out)[i]=(uint32_t)load24bit(in, i);
+      break;
+    }
+    break;      
   case(4):
     switch(outbps){
     case(1):
@@ -451,6 +516,10 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
     case(2):
       for(i=0;i<len;i++)
 	((uint16_t*)out)[i]=(uint16_t)((((uint32_t*)in)[i])>>16);
+      break;
+    case(3):
+      for(i=0;i<len;i++)
+        store24bit(out, i, ((uint32_t*)in)[i]);
       break;
     }
     break;      
@@ -468,6 +537,10 @@ static void float2int(void* in, void* out, int len, int bps)
   case(2): 
     for(i=0;i<len;i++)
       ((int16_t*)out)[i]=(int16_t)lrintf(SHRT_MAX*((float*)in)[i]);
+    break;
+  case(3):
+    for(i=0;i<len;i++)
+      store24bit(out, i, (int32_t)lrintf(INT_MAX*((float*)in)[i]));
     break;
   case(4):
     for(i=0;i<len;i++)
@@ -487,6 +560,10 @@ static void int2float(void* in, void* out, int len, int bps)
   case(2):
     for(i=0;i<len;i++)
       ((float*)out)[i]=(1.0/SHRT_MAX)*((float)((int16_t*)in)[i]);
+    break;
+  case(3):
+    for(i=0;i<len;i++)
+      ((float*)out)[i]=(1.0/INT_MAX)*((float)((int32_t)load24bit(in, i)));
     break;
   case(4):
     for(i=0;i<len;i++)
