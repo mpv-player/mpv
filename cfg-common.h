@@ -89,6 +89,7 @@
 #else
 	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0},
 #endif
+	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 
 #else
 
@@ -113,5 +114,27 @@ struct config tvopts_conf[]={
 	{NULL, NULL, 0, 0, 0, 0}
 };
 #endif
+
+/* VIVO demuxer options: */
+extern char *vivo_param_acodec;
+extern int vivo_param_abitrate;
+extern int vivo_param_samplerate;
+extern int vivo_param_bytesperblock;
+extern int vivo_param_width;
+extern int vivo_param_height;
+extern int vivo_param_vformat;
+
+struct config vivoopts_conf[]={
+	/* audio options */
+	{"acodec", &vivo_param_acodec, CONF_TYPE_STRING, 0, 0, 0},
+	{"abitrate", &vivo_param_abitrate, CONF_TYPE_INT, 0, 0, 0},
+	{"samplerate", &vivo_param_samplerate, CONF_TYPE_INT, 0, 0, 0},
+	{"bytesperblock", &vivo_param_bytesperblock, CONF_TYPE_INT, 0, 0, 0},
+	/* video options */
+	{"width", &vivo_param_width, CONF_TYPE_INT, 0, 0, 0},
+	{"height", &vivo_param_height, CONF_TYPE_INT, 0, 0, 0},
+	{"vformat", &vivo_param_vformat, CONF_TYPE_INT, 0, 0, 0},
+	{NULL, NULL, 0, 0, 0, 0}
+};
 
 #endif

@@ -15,6 +15,15 @@
 #include "stheader.h"
 #include "bswap.h"
 
+/* parameters ! */
+char *vivo_param_acodec = NULL;
+int vivo_param_abitrate = -1;
+int vivo_param_samplerate = -1;
+int vivo_param_bytesperblock = -1;
+int vivo_param_width = -1;
+int vivo_param_height = -1;
+int vivo_param_vformat = -1;
+
 /* VIVO audio standards from vivog723.acm:
 
     G.723:
@@ -33,6 +42,8 @@
 	BlockAlign (bytes per block) = 40
 	BitsPerSample = 8
 */
+
+//enum { VIVO_AUDIO_G723, VIVO_AUDIO_SIREN };
 
 #define VIVO_AUDIO_G723 1
 #define VIVO_AUDIO_SIREN 2
@@ -541,7 +552,6 @@ void demux_open_vivo(demuxer_t* demuxer){
 
 		/* viv1, viv2 (for better codecs.conf) */    
 		sh->format = mmioFOURCC('v', 'i', 'v', priv->version);
-//		sh->format=0x6f766976; // "vivo"
 		if(!sh->fps)
 		{
 		    if (priv->fps)
@@ -551,9 +561,22 @@ void demux_open_vivo(demuxer_t* demuxer){
 		}
 		sh->frametime=1.0f/sh->fps;
 
-#warning "FIXME! we can't scale"
+		/* XXX: FIXME: can't scale image. */
+		/* hotfix to disable: */
 		priv->disp_width = priv->width;
 		priv->disp_height = priv->height;
+
+		if (vivo_param_width != -1)
+		    priv->disp_width = priv->width = vivo_param_width;
+
+		if (vivo_param_height != -1)
+		    priv->disp_height = priv->height = vivo_param_height;
+		
+		if (vivo_param_vformat != -1)
+		{
+		    priv->disp_width = priv->width = h263_format[vivo_param_vformat][0];
+		    priv->disp_height = priv->height = h263_format[vivo_param_vformat][1];
+		}
 
 		if (priv->disp_width)
 		    sh->disp_w = priv->disp_width;
@@ -580,9 +603,13 @@ void demux_open_vivo(demuxer_t* demuxer){
 		sh->bih->biBitCount=24;
 		sh->bih->biCompression=sh->format;
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight*3;
-		demuxer->video->sh=sh; sh->ds=demuxer->video;
+
+		/* insert as stream */
+		demuxer->video->sh=sh;
+		sh->ds=demuxer->video;
 		demuxer->video->id=0;
 		
+		/* disable seeking */
 		demuxer->seekable = 0;
 
 		printf("VIVO Video stream %d size: display: %dx%d, codec: %lux%lu\n",
@@ -590,12 +617,14 @@ void demux_open_vivo(demuxer_t* demuxer){
 		    sh->bih->biHeight);
 }
 
-if(demuxer->audio->id>=-1){
+/* AUDIO init */
+if (demuxer->audio->id >= -1){
   if(!ds_fill_buffer(demuxer->audio)){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingAudioStream);
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 
+		/* Select audio codec */
 		if (priv->audio_codec == 0)
 		{
 		    if (priv->version == '2')
@@ -603,59 +632,83 @@ if(demuxer->audio->id>=-1){
 		    else
 			priv->audio_codec = VIVO_AUDIO_G723;
 		}
+		if (vivo_param_acodec != NULL)
+		{
+		    if (!strcasecmp(vivo_param_acodec, "g723"))
+			priv->audio_codec = VIVO_AUDIO_G723;
+		    if (!strcasecmp(vivo_param_acodec, "siren"))
+			priv->audio_codec = VIVO_AUDIO_SIREN;
+		}
 
-//		if (priv->version == '2')
-//		if (priv->audio_bytesperblock == 40)
+		sh->format = -1;
+		if (priv->audio_codec == VIVO_AUDIO_G723)
+		    sh->format = 0x111;
 		if (priv->audio_codec == VIVO_AUDIO_SIREN)
-		    sh->format=0x112; /* Vivo Siren */
-		else
-//		if (priv->version == '1')
-		    sh->format=0x111; /* Vivo G.723 */
+		    sh->format = 0x112;
+		if (sh->format == -1)
+		{
+		    mp_msg(MSGT_DEMUX, MSGL_ERR, "VIVO: Not support audio codec (%d)\n",
+			priv->audio_codec);
+		    goto nosound;
+		}
 
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
 		sh->wf->wFormatTag=sh->format;
-		sh->wf->nChannels=1;
-		/* FIXME bits, samplerate, avgbytes, and blockalign */
+		sh->wf->nChannels=1; /* 1 channels for both Siren and G.723 */
+
+		/* Set bits per sample */
 		if (priv->audio_codec == VIVO_AUDIO_SIREN)
-//		if (priv->audio_len == 40)
-		    sh->wf->wBitsPerSample=16; /* siren */
+		    sh->wf->wBitsPerSample = 16;
 		else
-		    sh->wf->wBitsPerSample=8;
-		if (priv->audio_samplerate)
-		    sh->wf->nSamplesPerSec=priv->audio_samplerate;
+		if (priv->audio_codec == VIVO_AUDIO_G723)
+		    sh->wf->wBitsPerSample = 8;
+
+		/* Set sampling rate */
+		if (priv->audio_samplerate) /* got from header */
+		    sh->wf->nSamplesPerSec = priv->audio_samplerate;
 		else
 		{
 		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
-			sh->wf->nSamplesPerSec=16000;
-		    else
-			sh->wf->nSamplesPerSec=8000;
+			sh->wf->nSamplesPerSec = 16000;
+		    if (priv->audio_codec == VIVO_AUDIO_G723)
+			sh->wf->nSamplesPerSec = 8000;
 		}
-		if (priv->audio_bitrate)
-		    sh->wf->nAvgBytesPerSec=priv->audio_bitrate;
+		if (vivo_param_samplerate != -1)
+		    sh->wf->nSamplesPerSec = vivo_param_samplerate;
+
+		/* Set audio bitrate */
+		if (priv->audio_bitrate) /* got from header */
+		    sh->wf->nAvgBytesPerSec = priv->audio_bitrate;
 		else
 		{
 		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
-//		    if (priv->version == '2')
 			sh->wf->nAvgBytesPerSec = 2000;
-		    else
+		    if (priv->audio_codec == VIVO_AUDIO_G723)
 			sh->wf->nAvgBytesPerSec = 800;
 		}
-//    		    sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
-//		sh->wf->nBlockAlign=2*sh->wf->nChannels;
+		if (vivo_param_abitrate != -1)
+		    sh->wf->nAvgBytesPerSec = vivo_param_abitrate;
+
 		if (!priv->audio_bytesperblock)
 		{
 		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
-//		    if (priv->version == '2')
-			sh->wf->nBlockAlign=40; /* siren */
-		    else
-			sh->wf->nBlockAlign=24;
+			sh->wf->nBlockAlign = 40;
+		    if (priv->audio_codec == VIVO_AUDIO_G723)
+			sh->wf->nBlockAlign = 24;
 		}
 		else
-		    sh->wf->nBlockAlign=priv->audio_bytesperblock;
-		demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+		    sh->wf->nBlockAlign = priv->audio_bytesperblock;
+		if (vivo_param_bytesperblock != -1)
+		    sh->wf->nBlockAlign = vivo_param_bytesperblock;
+		
+sound_ok:
+		/* insert as stream */
+		demuxer->audio->sh=sh;
+		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
+nosound:
 }
 }
 
