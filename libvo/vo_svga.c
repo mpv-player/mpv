@@ -15,10 +15,10 @@ Wrangings:
  -  retrace sync works only in doublebuffer mode.
  -  the retrace sync may slow down decoding a lot - mplayer is blocked while
     waiting for retrace
- -  denoice3d fails to find common colorspace, vf_scale doesn't help - I work on it.
+ -  denoise3d fails to find common colorspace, vf_scale doesn't help - It is 
+    mplayer bug.
    
 TODO:
- - OSD without flicker (w/h & w/o double buffer)
  - let choose_best_mode take aspect into account
  - set palette from mpi->palette or mpi->plane[1]
  - let OSD draw in black bars - need some OSD changes
@@ -361,7 +361,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
  vga_modeinfo *vminfo;
 //int best aspect mode // best linear mode // best normal mode (no modeX)
 
-  prev_badness = req_w * req_h;
+  prev_badness = 0;//take care of special case below
   bestmode = 0; //0 is the TEXT mode
   lastmode = vga_lastmodenumber();
   for(i=1;i<lastmode;i++){
@@ -375,7 +375,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
     if(squarepix) 
       if( vminfo->width*3 != vminfo->height*4 ) continue;
 
-    if( prev_badness >= badness ){//modeX etc...
+    if( bestmode==0 || prev_badness >= badness ){//modeX etc...
       prev_badness=badness;
       bestmode=i;
       if(verbose>3)
@@ -497,6 +497,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
       }
     }
   }//fi force native
+  if(mode_capabilities&CAP_LINEAR){
+    printf("vo_svga: video mode is linear and memcpy could be used for image transfer\n");
+  }
+  if(mode_capabilities&CAP_ACCEL_PUTIMAGE){
+    printf("vo_svga: video mode have hardware acceleration and put_image could be used\n");
+    printf("vo_svga: If it works for you i would like to know \nvo_svga: (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx\n");
+  }
   
 //here is the place to handle strides for accel_ modes;
   mode_stride=modeinfo->linewidth;
@@ -661,8 +668,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
   
   //only modes with bytesperpixel>0 can draw OSD
   if(modeinfo->bytesperpixel==0) return;
-//  if(!(mode_capabilities&CAP_LINEAR)) return;//force_native will remove OSD
-
+  if(!(mode_capabilities&CAP_LINEAR)) return;//force_native will remove OSD
+  if(verbose>3)
+    printf("vo_svga: OSD draw in page %d",cpage);
   base=PageStore[cpage].vbase + y0*mode_stride + x0*modeinfo->bytesperpixel;
   bytelen = modeinfo->width * modeinfo->bytesperpixel;   
   switch (mode_bpp) {
