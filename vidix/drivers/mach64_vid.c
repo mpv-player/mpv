@@ -32,6 +32,8 @@ pciinfo_t pci_info;
 static int probed = 0;
 static int __verbose = 0;
 
+#define VERBOSE_LEVEL 1
+
 typedef struct bes_registers_s
 {
   /* base address of yuv framebuffer */
@@ -366,7 +368,7 @@ static void reset_regs( void )
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
   {
 	mach64_fifo_wait(2);
-	OUTREG(vregs[i].name,-1);
+	OUTREG(vregs[i].name,0);
   }
 }
 
@@ -387,13 +389,13 @@ int vixInit(void)
   else mach64_ram_size = (mach64_ram_size - 7) * 2048;
   mach64_ram_size *= 0x400; /* KB -> bytes */
   if((mach64_mem_base = map_phys_mem(pci_info.base0,mach64_ram_size))==(void *)-1) return ENOMEM;
-//  memset(&besr,0,sizeof(bes_registers_t));
+  memset(&besr,0,sizeof(bes_registers_t));
   mach64_vid_make_default();
   printf("[mach64] Video memory = %uMb\n",mach64_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,mach64_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf("[mach64] Set write-combining type of video memory\n");
   reset_regs();
-  mach64_vid_dump_regs();
+  if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
   return 0;
 }
 
@@ -516,7 +518,7 @@ static void mach64_vid_display_video( void )
     OUTREG(SCALER_BUF1_OFFSET,			besr.vid_buf3_base_adrs);
     OUTREG(SCALER_BUF1_OFFSET_U,		besr.vid_buf4_base_adrs);
     OUTREG(SCALER_BUF1_OFFSET_V,		besr.vid_buf5_base_adrs);
-    OUTREG(OVERLAY_SCALE_CNTL, 0x04000001 | (3<<30));
+    OUTREG(OVERLAY_SCALE_CNTL, 0xC4000003);
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
 
@@ -532,17 +534,16 @@ static void mach64_vid_display_video( void )
 	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xA0000);  break;
         /* 4:2:2 */
         case IMGFMT_YVYU:
-	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, (vf & ~0xF000) | 0xB000); break;
+	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xC0000); break;
 	case IMGFMT_YUY2:
 	default:           OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xB0000); break;
     }
-//    OUTPLL(PLL_SCALER_LOCK_EN, 0);
-    if(__verbose > 1) mach64_vid_dump_regs();
+    if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
 }
 
 static int mach64_vid_init_video( vidix_playback_t *config )
 {
-    uint32_t src_w,src_h,dest_w,dest_h,pitch,h_inc,v_inc,left,leftUV,top,ecp;
+    uint32_t src_w,src_h,dest_w,dest_h,pitch,h_inc,v_inc,left,leftUV,top,ecp,y_pos;
     int is_420,best_pitch,mpitch;
     mach64_vid_stop_video();
     left = config->src.x << 16;
@@ -590,7 +591,6 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 		+(is_420?1:0)
 		)) / dest_h;
     h_inc = (src_w << (12+ecp)) / dest_w;
-    v_inc /= 2;
     /* keep everything in 16.16 */
     config->offsets[0] = 0;
     config->offsets[1] = config->frame_size;
@@ -638,10 +638,18 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     leftUV = (left >> 17) & 15;
     left = (left >> 16) & 15;
     besr.scale_inc = ( h_inc << 16 ) | v_inc;
-    besr.y_x_start = config->dest.y | (config->dest.x << 16);
-    besr.y_x_end = (config->dest.y + dest_h) | ((config->dest.x + dest_w) << 16);
+    y_pos = config->dest.y;
+    if(mach64_is_dbl_scan()) y_pos*=2;
+    else
+    if(mach64_is_interlace()) y_pos/=2;
+    besr.y_x_start = y_pos | (config->dest.x << 16);
+    y_pos =config->dest.y + dest_h;
+    if(mach64_is_dbl_scan()) y_pos*=2;
+    else
+    if(mach64_is_interlace()) y_pos/=2;
+    besr.y_x_end = y_pos | ((config->dest.x + dest_w) << 16);
     besr.height_width = ((src_w - left)<<16) | (src_h - top);
-    besr.vid_buf_pitch = pitch;
+    besr.vid_buf_pitch = pitch/2;
     return 0;
 }
 
@@ -746,7 +754,7 @@ int vixPlaybackFrameSelect(unsigned int frame)
     OUTREG(SCALER_BUF1_OFFSET,		off[3]);
     OUTREG(SCALER_BUF1_OFFSET_U,	off[4]);
     OUTREG(SCALER_BUF1_OFFSET_V,	off[5]);
-    if(__verbose > 1) mach64_vid_dump_regs();
+    if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
     return 0;
 }
 
