@@ -1101,7 +1101,7 @@ if(!use_stdin && !slave_mode){
       while ( guiIntfStruct.Playing != 1 )
        {
         mp_cmd_t* cmd;                                                                                   
-	usleep(20000);
+	usec_sleep(20000);
 	guiEventHandling();
 	guiGetEvent( guiReDraw,NULL );
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
@@ -2230,7 +2230,7 @@ if(auto_quality>0){
 	     if(vf_menu)
 	       vf_menu_pause_update(vf_menu);
 #endif
-             usleep(20000);
+             usec_sleep(20000);
          }
       mp_cmd_free(cmd);
          osd_function=OSD_PLAY;
@@ -2834,7 +2834,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
           printf( "######################################## DVDNAV Event: Still Frame: %d sec(s)\n", still_event->length );
           while (dvdnav_stream_sleeping(dvdnav_priv)) {
-            usleep(1000); /* 1ms */
+            usec_sleep(1000); /* 1ms */
           }
           dvdnav_stream_sleep(dvdnav_priv,still_event->length);
         break;
