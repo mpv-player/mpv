@@ -241,7 +241,7 @@ Finlayson, Ross <finlayson@live.com>
 
 Forghieri, Daniele (xdanny) <guru@digitalfantasy.it>
     * TGA output driver
-    * framestep & tile filters
+    * framestep & tile video filters
     * initial Italian man page translation
 
 Foth, Kilian A. <foth@informatik.uni-hamburg.de>
@@ -289,12 +289,12 @@ Graffam, Michael <mgraffam@idsi.net>
     * video mode switching code to vo_dga
 
 Gritsenko, Andriy N. (AG_LS) <andrej@lucky.net>
-    * skip-deinterlace video filter
-    * MUXER layer, and new MPEG-PS muxer
+    * drop-deinterlace (dint) video filter
+    * muxer layer, and new MPEG-PS muxer
 
 Guyomarch, Rémi (rguyom) <rguyom@pobox.com>
     * various fixes
-    * 'unsharp' video filter
+    * unsharp video filter
     * XviD encoding support
 
 Hammelmann, Jürgen <juergen.hammelmann@gmx.de>
@@ -315,7 +315,7 @@ Hickey, Corey <bugfood-ml@fatooh.org>
     * telecine/interlacing HOWTO for the MEncoder documentation
 
 Hidvégi, Zoltán <mplayer@hzoli.com>
-    * filmdint filter
+    * filmdint video filter
 
 Hoffmann, Jens <hoffmajs@gmx.de>
     * additional YUV formats support
@@ -328,7 +328,7 @@ Horst, Bohdan (Nexus) <nexus@irc.pl>
     * FreeBSD support
 
 Hug, Hampa <hhug@student.ethz.ch>
-    * LUT-based soft eq video filter (-vf eq2)
+    * LUT-based soft eq video filter (vf_eq2)
     * .ogm demuxer endianness fixes
 
 Hurka, Tomas <tom@hukatronic.cz>
@@ -624,7 +624,7 @@ Rune Petersen <runner@mail.tele.dk>
     * adapter selection support for vo_directx
 
 Saari, Ville <vs@iki.fi>
-    * divtc & phase filters
+    * divtc & phase video filters
 
 Sabbi, Nico <nsabbi@tiscali.it>
     * DVB input support
