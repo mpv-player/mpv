@@ -17,7 +17,7 @@ What belongs in the man page?
 -----------------------------
 
     - option descriptions (all)
-    - usage (options, config files, controls)
+    - usage (options, configuration files, controls)
     - basic examples
 
 
@@ -55,18 +55,21 @@ A setting of 4 should look readable. Here's an overview again:
 
     - groff:     Groff is the "official" tool to convert man pages.
                  To get good results you need a recent version (1.18.2).
-                 groff -man -Thtml mplayer.1 > manpage.html
-                 groff -rLL=64n -m man -Tascii mplayer.1 | col -bx > manpage.txt
+                 groff -m man -T html mplayer.1 > man_page.html
+                 groff -m man -T ascii -rLL=78n mplayer.1 | col -bx > man_page.txt
                  The groff man page lists other output formats to use with -T.
+
     - man2html:  You can view it through a CGI script:
                  http://localhost/cgi-bin/man2html?mplayer
                  The output is unusable as the script doesn't seem to support
                  the macro definitions. Maybe manually changing all leads to
                  acceptable results.
-    - rman:      rman -f html mplayer.1 > manpage.rman.html
+
+    - rman:      rman -f html mplayer.1 > man_page.rman.html
                  The output is ugly as rman doesn't understand many of the
                  macros used.
-    - troffcvt:  troff2html -man mplayer.1 > manpage.tcvt.html
+
+    - troffcvt:  troff2html -man mplayer.1 > man_page.tcvt.html
                  The (good) output is similar to groff but simplified...
 
 
@@ -127,6 +130,7 @@ The man page/groff format
 
 Just read this and RTFS:
 
+    man 7 roff
     http://www.tldp.org/HOWTO/mini/Man-Page.html
     man 7 man
     man 7 groff
