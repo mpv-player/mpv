@@ -19,7 +19,7 @@
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
 
-#define MAX_RECURSION_DEPTH	10
+#define MAX_RECURSION_DEPTH	8
 
 #ifdef DEBUG
 #include <assert.h>
