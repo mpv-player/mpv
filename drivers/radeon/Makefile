@@ -23,9 +23,6 @@ dep:
 clean: 
 	rm -f *.o *~
 
-distclean: clean
-	rm -f mga_vid_test
-
 install:
 	@echo Please copy *.o files to '/lib/modules/LINUX_VER/kernel/drivers/video' folder
 
