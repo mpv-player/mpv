@@ -1,4 +1,4 @@
-.\" synced with 1.866
+.\" synced with 1.869
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -700,7 +700,6 @@ Zpomalí nebo zrychlí pøehrávání násobkem zadaným jako parametr.
 Zobrazí jeden snímek ka¾dých <sek> sekund.
 Pou¾itelné pro slideshow.
 To mù¾e být nepøesné, proto¾e MPlayer umí pøevíjet pouze na dal¹í klíèový snímek.
-Vìt¹ina formátù má jeden z klíèových snímkù v rozmezí <sec> a <sec>+20 sekund.
 .
 .
 .SH "VOLBY PRO DEMUXER/\:DATOVÝ PROUD"
@@ -723,7 +722,7 @@ Pøi pøehrávání MPEG-TS proudu, pou¾ije MPlayer/\:Mencoder první program
 (pokud je) se zvoleným audio proudem.
 .
 .TP
-.B \-alang <kód\ jazyka> (viz také volbu \-aid)
+.B \-alang <kód\ jazyka[, kód\ jazyka,...]> (viz také volbu \-aid)
 Nastaví seznam jazykù zvuku k pou¾ití podle priority.
 Rùzné nosné formáty souborù pou¾ívají rùzné kódy jazyka.
 DVD pou¾ívají dvoupísmenné kódy jazyka podle ISO 639-1, Matroska a NUT
@@ -3962,15 +3961,16 @@ jméno formátu jako rgb15, bgr24, yv12, atd (výchozí: yv12)
 .B pp[=filtr1[:volba1[:volba2...]]/\:[-]filtr2...] (viz také volbu \-pphelp)
 Zapíná uvedený øetìzec postprocesních filtrù.
 Filtry musí být oddìleny '/' a mohou být vypnuty pou¾itím '\-'.
-Zamìøení filtru mù¾e být vymezeno pøidáním ':' následované 'a', 'c' nebo 'y'
-(výchozí: c):
+Ka¾dý podfiltr a nìkteré volby mají jak krátký, tak dlouhý název, které mohou
+být zamìòovány. Napøíklad dr/dering jsou stejné.
+V¹echny podfiltry sdílejí spoleèné volby vymezující jejich pùsobnost:
 .PD 0
 .RSs
-.IPs a
+.IPs a/autoq
 Automaticky vypne filtr pokud je procesor pøíli¹ pomalý.
-.IPs c
-Provádí také filtrování barevné slo¾ky (chrominance).
-.IPs y
+.IPs c/chrom
+Provádí také filtrování barevné slo¾ky (chrominance)(výchozí).
+.IPs y/nochrom
 Provádí filtrování pouze jasové (èernobílé) slo¾ky.
 .RE
 .PD 1
@@ -3980,19 +3980,109 @@ Provádí filtrování pouze jasové (èernobílé) slo¾ky.
 .I POZNÁMKA:
 \-pphelp zobrazí seznam dostupných filtrù.
 .sp 1
+Dostupné podfiltry jsou
+.RE
+.RSs
+.IPs hb/hdeblock[:rozdíl[:plochost]]
+horizontální deblokovací filtr
+.RSss
+<rozdíl>: Rozdílová faktor kde vy¹¹í hodnoty znamenají více deblokování
+(výchozí: 32).
+.br
+<plochost>: Práh plochosti kde ni¾¹í hodnoty znamenají více deblokování
+(výchozí: 39).
+.REss
+.IPs vb/vdeblock[:rozdíl[:plochost]]
+vertikální deblokovací filtr
+.RSss
+<rozdíl>: Rozdílová faktor kde vy¹¹í hodnoty znamenají více deblokování
+(výchozí: 32).
+.br
+<plochost>: Práh plochosti kde ni¾¹í hodnoty znamenají více deblokování
+(výchozí: 39).
+.REss
+.IPs ha/hadeblock[:rozdíl[:plochost]]
+vá¾ený horizontální deblokovací filtr
+.RSss
+<rozdíl>: Rozdílová faktor kde vy¹¹í hodnoty znamenají více deblokování
+(výchozí: 32).
+.br
+<plochost>: Práh plochosti kde ni¾¹í hodnoty znamenají více deblokování
+(výchozí: 39).
+.REss
+.IPs va/vadeblock[:rozdíl[:plochost]]
+vá¾ený vertikální deblokovací filtr
+.RSss
+<rozdíl>: Rozdílová faktor kde vy¹¹í hodnoty znamenají více deblokování
+(výchozí: 32).
+.br
+<plochost>: Práh plochosti kde ni¾¹í hodnoty znamenají více deblokování
+(výchozí: 39).
+.REss
+.sp 1
+Horizontální a vertikální deblokovací filtr sdílejí hodnoty rozdílu a
+plochosti, tak¾e nelze nastavit rozdílné horizontální a vertikální prahy.
+.sp 1
+.IPs h1/x1hdeblock
+experimentální horizontální deblokovací filtr
+.IPs v1/x1vdeblock
+experimentální vertikální deblokovací filtr
+.IPs dr/dering
+krou¾kový filtr
+.IPs tn/tmpnoise[:práh1[:práh2[:práh3]]]
+omezovaè promìnného ¹umu
+.RSss
+práh1: vy¹¹í -> silnìj¹í filtrování
+.br
+práh2: vy¹¹í -> silnìj¹í filtrování
+.br
+práh3: vy¹¹í -> silnìj¹í filtrování
+.REss
+.IPs al/autolevels[:f/fullyrange]
+automatická korekce jasu / kontrastu
+.RSss
+f/fullyrange: Roztáhnout jasovou slo¾ku na (0\-255).
+.REss
+.IPs lb/linblenddeint
+Lineární smì¹ovací filtr prokladu odstraòuje proklad daného bloku
+filtrováním v¹ech øádkù pomocí (1 2 1) filtru.
+.IPs li/linipoldeint
+Lineární interpolaèní filtr prokladu odstraòuje proklad daného bloku
+lineární interpolací ka¾dého druhého øádku.
+.IPs ci/cubicipoldeint
+Kubický interpolaèní filtr prokladu odstraòuje proklad daného bloku
+prostorovou interpolací ka¾dého druhého øádku.
+.IPs md/mediandeint
+Mediánový fitr prokladu odstraòuje proklad daného bloku
+pou¾itím mediánového filtru na ka¾dý druhý øádek.
+.IPs fd/ffmpegdeint
+FFmpeg filtr prokladu odstraòuje proklad daného bloku
+filtrováním ka¾dého druhého øádku pomocí (-1 4 2 4 -1) filtru.
+.IPs l5/lowpass5
+Vertikálnì provedený FIR lowpass filtr prokladu odstraòuje proklad
+daného bloku filtrováním v¹ech øádkù pomocí (-1 2 6 2 -1) filtru.
+.IPs fq/forceQuant[:kvantizér]
+Nahradí tabulku kvantizérù ze vstupu pevným, vámi zadaným, kvantizérem.
+.RSss
+<kvantizér>: po¾adovaný kvantizér
+.REss
+.IPs de/default
+výchozí kombinace pp filtrù (hb:a,vb:a,dr:a)
+.IPs fa/fast
+rychlá kombinace pp filtrù (h1:a,v1:a,dr:a)
+.RE
+.RS
+.sp 1
 .I PØÍKLAD:
 .RE
 .PD 0
 .RSs
 .IPs "\-vf pp=hb/\:vb/\:dr/\:al"
 horizontální a vertikální deblokování, dering a automatický jas/\:kontrast
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al/\:lb"
-horizontální a vertikální deblokování, dering, automatický jas/\:kontrast
-a lineárnì smì¹ující odstraòovaè prokladu
 .IPs "\-vf pp=de/\:-al"
 pøednastavené filtry bez korekce jasu/\:kontrastu
-.IPs "\-vf pp=de/\:tn:1:2:3"
-Zapne pøednastavené filtry a filtr zrnìní (temporal denoiser).
+.IPs "\-vf pp=default/\:tmpnoise:1:2:3"
+Zapne pøednastavené filtry a filtr zrnìní (promìnný ¹um).
 .IPs "\-vf pp=hb:y/\:vb:a \-autoq 6"
 Horizontálnì deblokuje pouze luminanci a zapíná nebo vypíná vertikální
 deblokování podle dostupného výkonu CPU.
