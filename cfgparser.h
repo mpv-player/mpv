@@ -9,17 +9,24 @@
 #define CONF_TYPE_INT		1
 #define CONF_TYPE_FLOAT		2
 #define CONF_TYPE_STRING	3
+#define CONF_TYPE_FUNC		4
 
-#define CONF_CHK_MIN		1<<0
-#define CONF_CHK_MAX		1<<1
+#define CONF_CHK_MIN		(1<<0)
+#define CONF_CHK_MAX		(1<<1)
+#define CONF_FUNC_PARAM		(1<<2)
+#define CONF_NOCFG		(1<<3)
+#define CONF_NOCMD		(1<<4)
 
 struct config {
 	char *name;
 	void *p;
-	unsigned int type :2;
-	unsigned int flags:2;
+	unsigned int type :3;
+	unsigned int flags:5;
 	float min,max;
 };
+
+typedef int (*cfg_func_param_t)(struct config *, char *);
+typedef int (*cfg_func_t)(struct config *);
 
 /* parse_config_file returns:
  * 	-1 on error (can't malloc, invalid option...)

@@ -35,6 +35,7 @@
 #include "config.h"
 
 #include "cfgparser.h"
+#include "cfg-mplayer-func.h"
 
 #include "libvo/video_out.h"
 

@@ -14,6 +14,7 @@
 #define ERR_NOT_AN_OPTION	-1
 #define ERR_MISSING_PARAM	-2
 #define ERR_OUT_OF_RANGE	-3
+#define ERR_FUNC_ERR		-4
 
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
@@ -23,8 +24,6 @@
 #endif
 
 #include "cfgparser.h"
-#include "version.h"
-#include "help_mp.h"
 
 static struct config *config;
 static int nr_options;		/* number of options in 'conf' */
@@ -43,7 +42,7 @@ static int init_conf(struct config *conf, int mode)
 	config = conf;
 #ifdef DEBUG
 	if (mode != COMMAND_LINE && mode != CONFIG_FILE) {
-		printf("init_conf: wrong flag!\n");
+		printf("init_conf: wrong mode!\n");
 		return -1;
 	}
 #endif
@@ -63,6 +62,11 @@ static int read_option(char *opt, char *param)
 			break;
 	}
 	if (i == nr_options)
+		return ERR_NOT_AN_OPTION;
+
+	if (config[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE)
+		return ERR_NOT_AN_OPTION;
+	if (config[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE)
 		return ERR_NOT_AN_OPTION;
 
 	switch (config[i].type) {
@@ -141,6 +145,19 @@ static int read_option(char *opt, char *param)
 
 			*((char **) config[i].p) = strdup(param);
 			need_param = 1;
+			break;
+		case CONF_TYPE_FUNC:
+			if (config[i].flags & CONF_FUNC_PARAM) {
+				if (param == NULL)
+					return ERR_MISSING_PARAM;
+				if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0)
+					return ERR_FUNC_ERR;
+				need_param = 1;
+			} else {
+				if ((((cfg_func_t) config[i].p)(config + i)) < 0)
+					return ERR_FUNC_ERR;
+				need_param = 0;
+			}
 			break;
 		default:
 			printf("picsaba\n");
@@ -290,6 +307,12 @@ int parse_config_file(struct config *conf, char *conffile)
 			ret = -1;
 			continue;
 			/* break; */
+		case ERR_FUNC_ERR:
+			PRINT_LINENUM;
+			printf("parser function returned error: %s\n", opt);
+			ret = -1;
+			continue;
+			/* break */
 		}	
 	}
 
@@ -321,7 +344,7 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 		/* remove trailing '-' */
 		opt++;
-
+#if 0
 		/* check for --help, -h, and --version */
 		if (!strcasecmp(opt, "-help") || !strcasecmp(opt, "h")) {
 			printf("%s%s", banner_text, help_text);
@@ -331,6 +354,7 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 			printf("%s", banner_text);
 			continue;
 		}
+#endif
 
 		tmp = read_option(opt, argv[i + 1]);
 
@@ -355,6 +379,10 @@ not_an_option:
 			/* break; */
 		case ERR_OUT_OF_RANGE:
 			printf("parse_command_line: parameter of '%s' is out of range\n", argv[i]);
+			return -1;
+			/* break; */
+		case ERR_FUNC_ERR:
+			printf("parse_command_line: parser function returned error: %s\n", argv[i]);
 			return -1;
 			/* break; */
 		}

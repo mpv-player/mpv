@@ -2,6 +2,8 @@
  * config for cfgparser
  */
 
+#include "cfg-mplayer-func.h"
+
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
@@ -39,5 +41,7 @@ struct config conf[]={
 	{"idx", &no_index, CONF_TYPE_FLAG, 0, 1, 0},
 	{"noidx", &no_index, CONF_TYPE_FLAG, 0, 0, 1},
 	{"v", &verbose, CONF_TYPE_INT, 0, 0, 0},
+	{"-help", &cfg_func_help, CONF_TYPE_FUNC, CONF_NOCFG, 0, 0},
+	{"h", &cfg_func_help, CONF_TYPE_FUNC, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
