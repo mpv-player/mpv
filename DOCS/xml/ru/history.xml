@@ -3,15 +3,17 @@
 <sect1 id="history">
 <title>История</title>
  
-<para>
+<blockquote><para>
 Это началось около года назад...
-Я (A'rpi) попробовал множество плееров под linux (mtv,xmps,dvdview,livid/oms,
+Я попробовал множество плееров под linux (mtv,xmps,dvdview,livid/oms,
 videolan,xine,xanim,avifile,xmmp) но у них у всех были какие-нибудь проблемы.
 По большей части со специальными файлами или аудио.видео синхронизацией.
 Большинство из них было не способно проигрывать как MPEG1, MPEG2, так и AVI
 (DivX) файлы. У многих плееров были проблемы с качеством изображения или
 со скоростью. Поэтому я решил написать/модифицировать свой...
+</para></blockquote><para>A'rpi, 2001</para>
 
+<para>
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.1-v0.3:</emphasis> Sep 22-25, 2000</para>
@@ -23,7 +25,7 @@ videolan,xine,xanim,avifile,xmmp) но у них у всех были какие-нибудь проблемы.
   <emphasis role="bold">mpg12play v0.5-v0.87:</emphasis> Sep 28-Oct 20, 2000</para>
   <para>
   Mpeg кодек заменён на DVDview от Dirk Farin, это был превосходный код,
-  но он был медленный и был написан на C++ (Я ненавижу C++!!!)
+  но он был медленный и был написан на C++ (A'rpi ненавидит C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5:</emphasis> Oct 21-Nov 2, 2000</para>

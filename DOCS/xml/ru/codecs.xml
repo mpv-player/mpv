@@ -299,6 +299,7 @@ author has yet to bring legal action against anyone for codec-related issues.
   Используйте опцию <option>--with-xanimlibdir</option>, чтобы сообщить
   <filename>configure</filename>, где находятся XAnim'овские кодеки.
   По умолчанию, он их ищет в
+  <filename class="directory">/usr/local/lib/codecs</filename>,
   <filename class="directory">/usr/local/lib/xanim/mods</filename>,
   <filename class="directory">/usr/lib/xanim/mods</filename>и
   <filename class="directory">/usr/lib/xanim</filename>.
@@ -402,6 +403,14 @@ RealVideo:
 должен определить <application>RealPlayer</application>'овские библиотеки в
 стандартном местоположении полной установки. Если этого не происходит, сообщите
 <filename>configure</filename>, где их искать опцией <option>--with-reallibdir</option>.
+</para>
+
+<para>
+Также, Вы можете скачать кодеки на
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
+После скаачивания пакета Real'овских кодеков, распакуйте их в каталог
+<filename class="directory">/usr/local/lib/codecs</filename>, или укажите
+путь опцией <option>--with-reallibdir</option>.
 </para>
 
 <note><para>
@@ -526,7 +535,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 платформы.</para></note>
 <step><para>скачайте MPlayer'овский CVS</para></step>
 <step><para>скомпилируйте MPlayer с:
-<screen>$ ./configure --enable-qtx-codecs</screen>
+<screen>$ ./configure --enable-qtx</screen>
 </para></step>
 <step><para>скачайте пакет QuickTime DLL с
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
