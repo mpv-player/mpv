@@ -162,7 +162,7 @@ while(argc>1){
   printf("Converting %s...\n",argv[0]);
   if(pngRead(argv[0],&ize)) continue;
   if(ize.BPP!=8){ printf("Invalid BPP: %d\n",ize.BPP);continue;}
-  sprintf(fname,"%s.raw",argv[0]);
+  snprintf(fname,256,"%s.raw",argv[0]);
   f=fopen(fname,"wb");
   rawhead[8]=ize.Width>>8;
   rawhead[9]=ize.Width&255;

@@ -231,7 +231,7 @@ while(fread(&objh,sizeof(objh),1,f)>0){
 #ifdef SAVE_STREAMS
               if(!streams[sh->streamno&0x7F]){
                 char name[256];
-                sprintf(name,"stream%02X.dat",sh->streamno&0x7F);
+                snprintf(name,256,"stream%02X.dat",sh->streamno&0x7F);
                 streams[sh->streamno&0x7F]=fopen(name,"wb");
               }
               fwrite(p,len,1,streams[sh->streamno&0x7F]);

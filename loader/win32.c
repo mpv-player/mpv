@@ -771,7 +771,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 				}
 			}
 			/* set the CPU type of the current processor */
-			sprintf(buf,"CPU %ld",cachedsi.dwProcessorType);
+			snprintf(buf,20,"CPU %ld",cachedsi.dwProcessorType);
 			continue;
 		}
 		/* old 2.0 method */
@@ -798,7 +798,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 				}
 			}
 			/* set the CPU type of the current processor */
-			sprintf(buf,"CPU %ld",cachedsi.dwProcessorType);
+			snprintf(buf,20,"CPU %ld",cachedsi.dwProcessorType);
 			continue;
 		}
 		if (!lstrncmpiA(line,"fdiv_bug",strlen("fdiv_bug"))) {
@@ -824,7 +824,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 			/* Create a new processor subkey on a multiprocessor
 			 * system
 			 */
-			sprintf(buf,"%d",x);
+			snprintf(buf,20,"%d",x);
 		}
 		if (!lstrncmpiA(line,"stepping",strlen("stepping"))) {
 			int	x;

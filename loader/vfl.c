@@ -121,7 +121,7 @@ ICOpen(long fccType,long fccHandler,unsigned int wMode) {
 	memcpy(type,&fccType,4);type[4]=0;
 	memcpy(handler,&fccHandler,4);handler[4]=0;
 	
-	sprintf(codecname,"%s.%s",type,handler);
+	snprintf(codecname,20,"%s.%s",type,handler);
 
 	/* Well, lParam2 is in fact a LPVIDEO_OPEN_PARMS, but it has the 
 	 * same layout as ICOPEN
@@ -136,7 +136,7 @@ ICOpen(long fccType,long fccHandler,unsigned int wMode) {
 /*
 	if (!hdrv) {
 	    if (!strcasecmp(type,"vids")) {
-		sprintf(codecname,"vidc.%s",handler);
+		snprintf(codecname,20,"vidc.%s",handler);
 		fccType = mmioFOURCC('v','i','d','c');
 	    }
 //	    hdrv=OpenDriverA(codecname,"drivers32",(long)&icopen);

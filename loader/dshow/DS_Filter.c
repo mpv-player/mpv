@@ -79,14 +79,14 @@ void DS_Filter::Create(char*  dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM
 	if (!m_iHandle)
 	{
 	    char e[1024];
-	    sprintf(e, "Could not open DirectShow DLL: %s", dllname);
+	    snprintf(e, 1024, "Could not open DirectShow DLL: %s", dllname);
 	    throw FATAL(e);
 	}
         GETCLASS func=(GETCLASS)GetProcAddress(m_iHandle, "DllGetClassObject");
 	if (!func)
 	{
 	    char e[1024];
-	    sprintf(e, "Illegal or corrupt DirectShow DLL: %s", dllname);
+	    snprintf(e, 1024, "Illegal or corrupt DirectShow DLL: %s", dllname);
 	    throw FATAL(e);
 	}
 
