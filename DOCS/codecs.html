@@ -67,14 +67,7 @@ disadvantage of this codec is that it's currently closed-source. :(</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip">http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip</A></P>
 
-<P>No automatic installing available at this time, so install it manually,
-EXACTLY as described here. Unpack it, and copy files to their place:</P>
-
-<P><CODE>cp libdivxdecore.so.0.0.0 /usr/local/lib/<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
-ldconfig<BR>
-cp decore.h /usr/local/include/</CODE></P>
+<P>Unpack it, and run <CODE>./install.sh</CODE> as root.</P>
 
 <P>Note: do NOT forget to add /usr/local/lib to your /etc/ld.so.conf !</P>
 

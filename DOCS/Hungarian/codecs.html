@@ -67,15 +67,7 @@ jelenleg zárt forráskódú. :(</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip">http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip</A></P>
 
-<P>Jelenleg nem tartalmaz automatikus installáló programot, ígyhát kézzel kell
-feltenni, PONTOSAN úgy ahogy itt áll. Elõször ki kell tömöríteni, majd
-be kell másolni:</P>
-
-<P><CODE>cp libdivxdecore.so.0.0.0 /usr/local/lib/<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
-ldconfig<BR>
-cp decore.h /usr/local/include/</CODE></P>
+<P>Tömörítsd ki, és futtasd a <CODE>./install.sh</CODE> scriptet.</P>
 
 <P>Megj: NE felejtsd el hozzáadni az /usr/local/lib-et az /etc/ld.so.conf
 file végére!</P>
