@@ -550,8 +550,10 @@ esta opción.
 .TP
 .B \-aid <id> (vea también la opción \-alang)
 Selecciona canal de audio [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
-VOB(AC3): 128\-159 VOB(LPCM): 160\-191]
+VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190]
 MPlayer imprime los IDs disponibles cuando se ejecuta en modo prolijo (-v).
+Cuando se reproducen flujos MPEG-TS, MPlayer/Mencoder usará el primer programa
+(si está presente) con el flujo de audio elegido.
 .TP
 .B \-alang <código de país de dos letras> (vea también la opción \-aid)
 Funciona solo con reproducción de DVD.
@@ -895,6 +897,12 @@ se posiciona en 1\ hora 10\ minutos
 .PD 1
 .
 .TP
+.B \-tsprog <1\-65534>
+Mientras se reproducen flujos MPEG-TS, puede especificar con ésta
+opción que programa (si está presente) desea reproducir. Puede ser
+usada con \-vid y \-aid.
+.
+.TP
 .B \-tv <opción1:opción2:...>
 Esta opción ajusta varias propiedades del módulo de captura-tv. Para
 ver la TV con MPlayer, use 'tv://' o 'tv://<número_canal>'
@@ -1036,7 +1044,9 @@ elije la calidad de la compresió jpeg
 Especifica un nombre de usuario para autenticación http.
 .TP
 .B \-vid <id>
-Selecciona el canal de video [MPG: 0\-15 ASF: 0\-255].
+Selecciona el canal de video [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
+Cuando se reproducen flujos MPEG-TS, MPlayer/Mencoder usará el primer
+programa (si está presente) con el flujo de video elegido.
 .TP
 .B \-vivo <sub\-opciones> (CÓDIGO EN PRUEBAS)
 Fuerza parámetros de audio para el demuxer .vivo (para pruebas).
