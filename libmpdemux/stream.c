@@ -5,8 +5,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef __MINGW32__
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <strings.h>
@@ -412,12 +414,14 @@ stream_t* new_stream(int fd,int type){
 
 void free_stream(stream_t *s){
 //  printf("\n*** free_stream() called ***\n");
+#ifdef USE_STREAM_CACHE
   if(s->cache_pid) {
 //    kill(s->cache_pid,SIGTERM);
     kill(s->cache_pid,SIGKILL);
     waitpid(s->cache_pid,NULL,0);
     shmem_free(s->cache_data);
   }
+#endif
   if(s->fd>0) close(s->fd);
   switch(s->type) {
 #ifdef LIBSMBCLIENT
