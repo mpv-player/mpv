@@ -106,6 +106,7 @@
 #include "video_out_internal.h"
 
 #include "fastmemcpy.h"
+#include "sub.h"
 
 LIBVO_EXTERN(sdl)
 
@@ -162,9 +163,6 @@ static struct sdl_priv_s {
  * draw_alpha is used for osd and subtitle display.
  *
  **/
-
-//void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
-//void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 	struct sdl_priv_s *priv = &sdl_priv;
@@ -709,10 +707,6 @@ static void check_events (void)
  *   params : mode == index of the desired fullscreen mode
  *  returns : doesn't return
  **/
-
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
-			int w,int h, unsigned char* src, unsigned char *srca,
-			int stride));
 
 static void flip_page (void)
 {

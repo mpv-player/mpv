@@ -40,6 +40,7 @@ LIBVO_EXTERN(mga)
 #include <sys/mman.h>
 
 #include "drivers/mga_vid.h"
+#include "sub.h"
 
 static vo_info_t vo_info = 
 {
@@ -110,10 +111,6 @@ uninit(void)
  ioctl( f,MGA_VID_OFF,0 );
 printf("vo: uninit!\n");
 }
-
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
-			int w,int h, unsigned char* src, unsigned char *srca,
-			int stride));
 
 static void flip_page(void)
 {

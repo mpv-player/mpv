@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.17  2001/04/24 11:42:04  pontscho
+ * clean up
+ *
  * Revision 1.16  2001/04/24 10:21:12  szabii
  * some warnings killed
  *
@@ -277,18 +280,7 @@ void vd_printf( int level, const char *str, ...){
 
 //---------------------------------------------------------
 
-extern void vo_draw_alpha_rgb24(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb32(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb15(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb16(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
+#include "osd.h"
 
 static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride ){
 
@@ -374,9 +366,7 @@ static void check_events(void)
 
 //---------------------------------------------------------
 
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
-			int w,int h, unsigned char* src, unsigned char *srca,
-			int stride));
+#include "sub.h"
 
 static void flip_page( void ){
 

@@ -42,9 +42,7 @@ static uint32_t query_format(uint32_t format);
 	uninit,\
 };
 
-void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
-void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
-
+#include "osd.h"
 
 
 

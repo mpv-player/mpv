@@ -996,18 +996,7 @@ static const vo_info_t *get_info(void)
 	return &vo_info;
 }
 
-extern void vo_draw_alpha_rgb32(int w, int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb24(int w, int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb16(int w, int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb15(int w, int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
+#include "osd.h"
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
@@ -1088,9 +1077,7 @@ static void put_frame(void)
 	}
 }
 
-extern void vo_draw_text(int dxs, int dys, void (*draw_alpha)(int x0, int y0,
-			int w, int h, unsigned char *src, unsigned char *srca,
-			int stride));
+#include "sub.h"
 
 static void flip_page(void)
 {

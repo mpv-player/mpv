@@ -1,5 +1,4 @@
 
-#include "subreader.h"
 #include "sub.h"
 
 //static int vo_font_loaded=-1;
@@ -88,7 +87,6 @@ void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int 
 //        vo_osd_progbar_value=(vo_osd_progbar_value+1)&0xFF;
 
 }
-
 
 subtitle* vo_sub=NULL;
 

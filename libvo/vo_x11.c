@@ -37,6 +37,7 @@ LIBVO_EXTERN( x11 )
 #include "x11_common.h"
 
 #include "fastmemcpy.h"
+#include "sub.h"
 
 static vo_info_t vo_info =
 {
@@ -387,18 +388,7 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #endif
 }
 
-extern void vo_draw_alpha_rgb24(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb32(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb15(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
-extern void vo_draw_alpha_rgb16(int w,int h, unsigned char* src,
-		unsigned char *srca, int srcstride, unsigned char* dstbase,
-		int dststride);
+#include "osd.h"
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     switch(bpp){
@@ -417,10 +407,6 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
           break;
     }
 }
-
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
-			int w,int h, unsigned char* src, unsigned char *srca,
-			int stride));
 
 static void flip_page( void ){
     vo_draw_text(image_width,image_height,draw_alpha);

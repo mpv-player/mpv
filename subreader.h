@@ -1,4 +1,7 @@
 
+#ifndef __MPLAYER_SUBREADER_H
+#define __MPLAYER_SUBREADER_H
+
 extern int sub_uses_time;
 extern int sub_errs;
 extern int sub_num;         // number of subtitle structs
@@ -18,3 +21,5 @@ typedef struct {
 
 subtitle* sub_read_file (char *filename);
 char * sub_filename( char * fname );
+
+#endif

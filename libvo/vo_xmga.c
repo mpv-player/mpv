@@ -46,6 +46,7 @@ LIBVO_EXTERN( xmga )
 #include <errno.h>
 
 #include "x11_common.h"
+#include "sub.h"
 
 #ifdef SHOW_TIME
 #include "../linux/timer.h"
@@ -141,10 +142,6 @@ static void check_events(void)
     if(e&VO_EVENT_EXPOSE) mDrawColorKey();
 
 }
-
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
-			int w,int h, unsigned char* src, unsigned char *srca,
-			int stride));
 
 static void flip_page(void){
 #ifdef SHOW_TIME
