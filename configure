@@ -1007,26 +1007,23 @@ if x86 && linux ; then
   fi
 fi
 
-#checking for gawk
+# checking for a working awk, I'm using mawk first, because it's fastest - atmos
+_awk=
 if test "$_vidix" = yes ; then
-_gawk_ver=`echo '' | awk -W version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\).*$/\1/p'`
-  case $_gawk_ver in
-    '')
-      _gawk_ver="v. ?.??, bad"
-      _gawk_verc_fail=yes
-      ;;
-    *)
-      _gawk_ver="$_gawk_ver, ok"
-      ;;
-  esac
-echo Checking for awk ... $_gawk_ver
-if test "$_gawk_verc_fail" ; then
-echo "Awk was not found or has wrong version."
-echo "If you have no such one, then the GNU implementation can be downloaded from:"
+_awk_works=no
+for _awk in mawk gawk nawk awk; do
+  if echo 'BEGIN{testme();}function testme(){print"test";}'|$_awk -f/dev/stdin 2>&1 >/dev/null; then
+    _awk_works=yes
+    break
+  fi
+done
+test "$_awk_works" = no && _awk=no
+echo Checking for awk ... $_awk
+if test "$_awk_works" = no; then
+echo "VIDIX needs Awk, but there was no working implementation found!"
+echo "Try the GNU implementation, which can be downloaded from:"
 echo "ftp://ftp.gnu.org/gnu/gawk/"
-echo "Also check - maybe you already have gawk, mawk or nawk."
-echo "If test is successful then make awk symlink. Example: ln -sf gawk awk"
-echo "Or rerun configure with --disable-vidix option."
+echo "If you don't need vidix, you can use configure --disable-vidix instead."
 exit
 fi
 fi
@@ -2774,6 +2771,7 @@ DATADIR = $_datadir
 CONFDIR = $_confdir
 AR = ar
 CC = $_cc
+AWK = $_awk
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
