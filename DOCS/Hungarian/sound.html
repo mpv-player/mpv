@@ -390,9 +390,10 @@ a következõ meghajtókat tartalmazza :</P>
 
 <P>A szoftveres hangerõszabályzást a <CODE>volume</CODE> audio szûrõ
   valósítja meg. Óvatosan használd, mert a jelet egészen a zajszintig lehet
-  vele csökkenteni. A legtöbb esetben érdemes inkább a MASTER hangerõt
+  vele csökkenteni. A legtöbb esetben érdemes inkább a PCM hangerõt
   a maximumra rakni, utána pedig külsõ erõsítõt használni, ezt a filtert
-  pedig mellõzni. Ha külsõ erõsítõt csatlakoztattál a gépedhez (majdnem
+  pedig mellõzni. Amennyiben a hangkártyád PCM mixere digitális és zajosnak
+  érzed, használd helyette a MASTER mixert. Ha külsõ erõsítõt csatlakoztattál a gépedhez (majdnem
   mindig így van), a zajszint a MASTER szint és az erõsítõ hangerõszabályzójának
   együttes állítgatásával lecsökkenthetõ. Két opció van:</P>
 
@@ -645,8 +646,10 @@ hangkártyára+meghajtóra van szükség.</P>
   ami 0 és 255 közötti értékeket vehet fel (az alapértelmezett érték a 101 -
   ez 0dB-nyi erõsítést jelent).
   Óvatosan használd ezt a plugint. A legtöbb esetben sokkal célravezetõbb a
-  hardveres mixeren a MASTER csatorna maximálisra állítása, ezen plugin
-  kihagyása, és a hangerõ "mester" csatornával történõ állítása. Ha külsõ
+  hardveres mixeren a PCM csatorna maximálisra állítása, ezen plugin
+  kihagyása, és a hangerõ MASTER csatornával történõ állítása.
+  Amennyiben a hangkártyád PCM mixere digitális és zajosnak
+  érzed, használd helyette a MASTER mixert. Ha külsõ
   erõsítõ is rá van kapcsolva a hangkártyádra, a zajszint minimálisra
   csökkentése érdekében érdemes a "mester" csatornával és az erõsítõ
   hangerõszabályzójával addig szórakozni amig a háttérben sziszegõ zaj
