@@ -668,7 +668,7 @@ cat > $TMPC << EOF
 #include <libffmpeg/avcodec.h>
 int main( void ) { return 0; }
 EOF
-cc_check $_extraincdir $_extralibdir -lffmpeg && _libavcodec_so=yes
+cc_check $_extraincdir $_extralibdir -lffmpeg -lm && _libavcodec_so=yes
 
 if test -c /dev/mga_vid ; then
  _mga=yes
