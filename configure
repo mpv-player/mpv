@@ -3655,7 +3655,7 @@ else
   echores "no"
 fi # DivX5 check
 fi
-echores "no"
+
 fi # XviD divx4 compatiblity check
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
@@ -3968,7 +3968,9 @@ echores "$_ftello"
 if cygwin ; then
   _confcygwin='TARGET_CYGWIN = yes'
   _def_confwin32='#define WIN32'
-  CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
+  #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
+  # stat.st_size with BIG_TYPES is broken (not set) ::atmos 
+  CFLAGS="$CFLAGS -D__CYGWIN__"
 else
   _confcygwin="TARGET_CYGWIN = no"
 fi
