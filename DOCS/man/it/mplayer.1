@@ -1,4 +1,4 @@
-.\" synced with 1.830
+.\" synced with 1.837
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -492,14 +492,14 @@ secondo, infiniti).
 .B \-colorkey <number>
 Cambia colorkey ad una valore RGB di tua scelta.
 0x000000 e' nero e 0xffffff e' bianco.
-Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover e directx.
+Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix,
+xmga, xvidix, xover e directx.
 .
 .TP
 .B \-nocolorkey
 Disabilita il colorkeying.
-Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix e
-xover.
+Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix
+xover e directx.
 .
 .TP
 .B \-crash-debug (CODICE DI DEBUG)
@@ -1762,10 +1762,6 @@ Specifica l'ID del sottotitolo VOBsub.
 Sovrascrive la ricerca della dimensione del buffer del driver/\:scheda.
 .
 .TP
-.B \-aofile <nomefile>
-Sovrascrive il nome di default del file utilizzato da \-ao pcm.
-.
-.TP
 .B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
 Specifica i plugin audio e le loro opzioni (vedi anche la
 sezione dei plugin audio nella documentazione).
@@ -1863,11 +1859,6 @@ Un valore di 200 ti permette di regolare il volume fino ad un massimo
 di due volte il valore corrente.
 Con valori sotto a 100 il volume iniziale (che e' 100%) sara' sopra al
 massimo, che, p.es.\&, l'OSD non riuscira' a visualizzare correttamente.
-.
-.TP
-.B \-nowaveheader (solo \-ao pcm)
-Non includere l'intestazione wave.
-Utilizzato per raw PCM (dati PCM grezzi).
 .
 .TP
 .B \-volstep <0\-100>
@@ -2009,9 +2000,24 @@ Non produce uscita audio ma mantiene la velocita' di riproduzione video.
 Utilizza \-noosund per i test di velocita' (benchmarking).
 .
 .TP
-.B pcm (vedi anche \-aofile)
+.B pcm
 Driver di uscita grezzo per scrittura di file PCM/\:wave.
-Scrive il suono su ./audiodump.wav.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Inserisce o meno l'intestazione wave (default: intestazione inclusa).
+Se non incluso verra' generato un file grezzo PCM.
+.IPs file=<nomefile>
+Scrive il suono su <nomefile> invece che il default 
+audiodump.wav.
+Se viene specificato nowaveheader il default e' invece audiodump.pcm.
+.REss
+.PD 1
+.RS
+.sp 1
+.I NOTA:
+Controllare cosa viene fatto se nessuna opzione viene specificata.
+.RE
 .
 .TP
 .B plugin\ \ 
@@ -2391,7 +2397,7 @@ le caratteristiche del modo di visualizzazione.
 Abilita il VBI per i driver di uscita video vesa, dfbmga e svga.
 .
 .TP
-.B \-wid <window\ ID> (vedi anche \guiwd) (solo X11 e DirectX)
+.B \-wid <window\ ID> (vedi anche \guiwd, \-geometry) (solo X11 e DirectX)
 Dice ad MPlayer di collegarsi ad una finestra gia' esistente.
 Uile per 'incastrare' MPlayer in un browser (ad esempio con l'estensione
 plugger).
@@ -3820,25 +3826,25 @@ Massimizza il volume senza distorcere il suono.
 .TP
 .B ladspa=file:label[:controlli...]
 Carica un plugin LADSPA (Linux Audio Developer's Simple Plugin API).
-Questo filtro e' rientrante percio' posso venir usati piu' plugin LADSPA
+Questo filtro e' rientrante percio' possono venir usati piu' plugin LADSPA
 contemporaneamente.
 .PD 0
 .RSs
 .IPs file\ 
 Specifica il file di plugin della libreria LADSPA.
-Se e' settato l'environment LADSPA_PATH viene utilizzato nella ricerca del
-file specificato.
+Se e' settato l'environment LADSPA_PATH tale percorso viene utilizzato nella
+ricerca del file specificato.
 In caso contrario devi fornire un percorso completo.
 .IPs label
 Specifica il filtro all'interno della libreria.
-Alcune librerie contengono solo un filtro ma altre invece ne contengono molti.
+Alcune librerie contengono solo un filtro mentre altre invece ne contengono molti.
 Se si specifica 'help' verrano elencati tutti i filtri disponibili all'interno
 della libreria specificata, cosa che elimina l'utilizzo di 'listplugins'
 dall'SDK di LADSPA.
 +.IPs controlli
 Controlli sono zero o piu' valori in floating point che determinano il
 comportamento del plugin caricato (ad esempio ritardo, soglia o guadagno).
-In modalita' verbose (aggiungi \-v alla linea di comando do MPlayer) tutti
+In modalita' verbose (aggiungi \-v alla linea di comando di MPlayer) tutti
 i controlli disponibili, insieme ai loro range validi, vengono stampati.
 Questo elimina l'utilizzo di 'analyseplugin' dall'SDK di LADSPA.
 .RE
@@ -7397,6 +7403,60 @@ Seleziona il bitrate da usare in kbit/\:secondo (default: disabilitato).
 Questo valore e' richiesto se desideri una codifica CBR (Bit Rate costante).
 .
 .TP
+.B qp_constant=<1\-51>
+Questo seleziona il quantizzatore da usare.
+Una gamma utilizzabile e' 20\-40 (default: 26)
+Valore piu' bassi generano una miglior fedelta' ma bitrate piu' alti.
+Nota che la quantizzazione in H.264 funziona diversamente che in MPEG[124].
+Il valore del parametro di quantizzazione (QP) di H.264 e' in scala logaritmica.
+Come esempio la differenza di bitrate tra QP=20 e QP=40 e' di circa 10 volte.
+In H.264 i valori di quantizzazione utili tendono ad essere molto grandi se
+confrontati a quelli di MPEG[124].
+.
+.TP
+.B pass=<1\-3>
+Attiva la modalita' interna a due (o tre) passi.
+Si raccomanda di effettuare la codifica utilizzando sempre 2 o 3 passi
+per ottenere una migliore distribuzione dei bit nel file
+codificato e migliorare di conseguenza la qualita' complessiva.
+.PD 0
+.RSs
+.IPs 1
+primo passo
+.IPs 2
+secondo passo
+.IPs 3
+ennesimo passo (secondo e terzo passo della codifica a 3 passi)
+.RE
+.RS
+Ecco come lavora e come usarlo:
+.br
+Il primo passo (pass=1) scrive il file delle statistiche.
+Puoi voler disattivare qualche opzione molto 'affamata' di CPU, a parte quelle
+che sono attive per default.
+.br
+Nella modalita' a due passi il secondo passaggio (pass=2) legge il file
+delle statistiche e basa le decisioni del controllo della dimensione del
+file su di esso.
+.br
+Nella modalita' a 3 passi il secondo passo (pass=3, non e' un errore di
+battitura) esegue entrambi: prima legge le statistiche poi le sovrascrive.
+Puoi voler salvare il file ./divx2pass.log prima di lanciare MEncoder se
+esiste la possibilita' di bloccarne l'esecuzione.
+Puoi usare tutte le opzione di codifica, eccetto le opzioni veramente 'affamate'
+di CPU.
+.br
+Il terzo passo (pass=3) e' lo stesso che il secondo, eccetto per il fatto che
+ha disponibili le statistiche del passo precedente su cui lavorare.
+Puoi usare tutte le opzioni di codifica, comprese quelle molto 'affamate'.
+.br
+.I NOTA:
+Visto che Il supporto per la codifica a 3 passi con x264 e' molto recente
+in MEncoder, e' estremamente benvenuto ogni tipo di riscontro che puoi
+darci su buone combinazioni di opzioni che permettano di ottenere sia una
+buona velocita' che una buona qualita'.
+.REss
+.
 .B keyint=<valore>
 Seleziona l' intervallo massimo tra due fotogrammi I.
 Valori maggiori permettono di risparmiare bit, incrementando la qualita' a
@@ -7494,19 +7554,8 @@ percentuale, ma non influenza direttamente la distorsione.
 .REss
 .
 .TP
-.B qp_constant=<1\-51>
-Questo seleziona il quantizzatore da usare.
-Una gamma utilizzabile e' 20\-40 (default: 26)
-Valore piu' bassi generano una miglior fedelta' ma bitrate piu' alti.
-Nota che la quantizzazione in H.264 funziona diversamente che in MPEG[124].
-Il valore del parametro di quantizzazione (QP) di H.264 e' in scala logaritmica.
-Come esempio la differenza di bitrate tra QP=20 e QP=40 e' di circa 10 volte.
-In H.264 i valori di quantizzazione utili tendono ad essere molto grandi se
-confrontati a quelli di MPEG[124].
-.
-.TP
 .B qp_min=<2\-51> (CBR o modalita' a 2 passi)
-Valore minimo di quantizzazione. Una gamma utile sembra essere 15\-35
+Valore minimo di quantizzazione. Una gamma utile sembra essere 10\-35
 (default: 10)
 .
 .TP
@@ -7514,19 +7563,19 @@ Valore minimo di quantizzazione. Una gamma utile sembra essere 15\-35
 Valore massimo di quantizzazione (default: 51).
 .
 .TP
-.B qp_step=<valore>
+.B qp_step=<1\-50> (CBR o 2 passi)
 Valore massimo di incremento / decremento del valore di quantizzazione tra
-fotogrammi.
+fotogrammi (default: 1.
 .
 .TP
-.B rc_buffer_size=<value>
-Dimensione del buffer del ratecontrol. (default: dimensione necessaria a riempire
-1 secondo al bitrate che e' stato specificato).
+.B rc_buffer_size=<value> (CBR o 2 passi)
+dimensione del buffer del ratecontrol in kbit (default: dimensione necessaria a riempire
+1 secondo al bitrate che e' stato specificato)
 .
 .TP
-.B rc_init_buffer=<value>
-Seleziona la dimensione iniziale del buffer del ratecontrol (default: 1/4 di
-rc_buffer_size)
+.B rc_init_buffer=<0.0\-1.0> (solo CBR)
+Seleziona la percentuale di riempimento iniziale del buffer del ratecontrol
+(default: 0.25).)
 .
 .TP
 .B rc_sens=<0\-100> (solo CBR)
@@ -7538,61 +7587,17 @@ Fattore di quantizzazione tra i fotogrammi I e P (default: 1.4)
 .
 .TP
 .B pb_factor=<value>
-Fattore di quantizzazione tra i fotogrammi P e B (default: 1.4)
+Fattore di quantizzazione tra i fotogrammi P e B (default: 1.3)
 .
 .TP
-.B pass=<1\-3>
-Attiva la modalita' interna a due (o tre) passi.
-Si raccomanda di effettuare la codifica utilizzando sempre 2 o 3 passi
-per ottenere una migliore distribuzione dei bit nel file
-codificato e migliorare di conseguenza la qualita' complessiva.
-.PD 0
-.RSs
-.IPs 1
-primo passo
-.IPs 2
-secondo passo
-.IPs 3
-ennesimo passo (secondo e terzo passo della codifica a 3 passi)
-.RE
-.RS
-Ecco come lavora e come usarlo:
-.br
-Il primo passo (pass=1) scrive il file delle statistiche.
-Puoi voler disattivare qualche opzione molto 'affamata' di CPU, a parte quelle
-che sono attive per default.
-.br
-Nella modalita' a due passi il secondo passaggio (pass=2) legge il file
-delle statistiche e basa le decisioni del controllo della dimensione del
-file su di esso.
-.br
-Nella modalita' a 3 passi il secondo passo (pass=3, non e' un errore di
-battitura) esegue entrambi: prima legge le statistiche poi le sovrascrive.
-Puoi voler salvare il file ./divx2pass.log prima di lanciare MEncoder se
-esiste la possibilita' di bloccarne l'esecuzione.
-Puoi usare tutte le opzione di codifica, eccetto le opzioni veramente 'affamate'
-di CPU.
-.br
-Il terzo passo (pass=3) e' lo stesso che il secondo, eccetto per il fatto che
-ha disponibili le statistiche del passo precedente su cui lavorare.
-Puoi usare tutte le opzioni di codifica, comprese quelle molto 'affamate'.
-.br
-.I NOTA:
-Visto che Il supporto per la codifica a 3 passi con x264 e' molto recente
-in MEncoder, e' estremamente benvenuto ogni tipo di riscontro che puoi
-darci su buone combinazioni di opzioni che permettano di ottenere sia una
-buona velocita' che una buona qualita'.
-.REss
-.
 .TP
-.B qcomp=<0\-1>
+.B qcomp=<0\-1> (solo 2 passi)
 Compressione del quantizzatore (default: 0.6).
-Questo influenza il ratecontrol: un valore basso
-rende il bitrate piu' costante mentre un valore alto rende il parametro di
-quantizzazione piu' costante.
+Un valore basso rende il bitrate piu' costante mentre un valore alto rende
+il parametro di quantizzazione piu' costante.
 .
 .TP
-.B cplx_blur=<0\-999>
+.B cplx_blur=<0\-999> (solo 2 passi)
 Sfocatura temporale della stima della complessita' dei fotogrammi, prima
 della compressione della curva (default: 20).
 Valori bassi permettono al valore di quantizzazione di mouversi molto, 
@@ -7603,22 +7608,54 @@ e bassa complessita' (p.es.\& animazioni a basso framerate) non perdano bit
 a causa di fluttuazioni del quantizzatore.
 .
 .TP
-.B qblur=<0\-99>
+.B qblur=<0\-99> (solo 2 passi)
 Sfocatura temporale del parametro di quantizzazione, dopo la compressione
 della curva (default: 0.5).
 Valori bassi permettono al quantizzatore di muoversi molto, valori alti lo
 forzano a variazioni piu' lente.
 .
 .TP
+.B direct_pred=<0\-2>
+Determina il tipo di predizione del movimento usato per i macroblocchi
+diretti nei fotogrammi di tipo B.
+.PD 0
+.RSs
+.IPs 0
+Nessuno: i macroblocchi diretti non vengono usati.
+.IPs 1
+Temporale: i vettori di movimento vengono interpolati dai fotogrammi di tipo
+P che seguono (default).
+.IPs 2
+Spaziale: i vettori di movimento sono estrapolati dai blocchi vicini.
+.RE
+.PD 1
+Le due predizioni spaziali e temporali hanno approssimativamente la
+stessa velocita' e nessuno dei due e' nettamente migliore dell'altro.
+La scelta migliore dipende dal filmato che si sta codificando.
+Utilizzare direct_pred=0 generalmente e' piu' lento e genera una qualita'
+peggiore.
+.
+.TP
+.B (no)b8x8mv
+Utilizza, per i fotogrammi di tipo B, anche i tipi di macroblocchi b16x8,
+b8x16, b8x8 (default: abilitato).
+Senza questa opzione i fotogrammi di tipo B utilizzeranno solo i tipi
+i16x16, i4x4, b16x16, skip, direct.
+Vedi 4x4mv per i dettagli.
+.
+.TP
 .B (no)4x4mv
-Utilizza tutti i tipi di macroblocchi interframe disponibili (i16x16, i4x4,
-p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip).
+Utilizza anche i macroblocchi di tipo p8x4, p4x8, p4x4 (default: disabilitato).
+Senza questa opzione i fotogrammi di tipo P utilizzeranno solo i tipi
+i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
+.br
 L'idea e' quella di trovare il tipo e la dimensione che descrive meglio una
-certa area dell'immagine, cioe' molto efficace con i video Anime che normalmente
-contengono larghe aree dello stesso colore (default: i16x16, i4x4, p16x16-8x8,
-skip).
-A seconda del materiale originale puo' migliorare o peggiorare la qualita',
-utilizzalo con cautela.
+certa area dell'immagine.
+Ad esempio una carrellata su tutta la scena viene descritta meglio da blocchi
+16x16 mentre piccoli oggetti in movimento sono rappresentati meglio da blocchi
+piu' piccoli.
+,br
+4x4mv e' raccomandato solo con subq >= 3.
 .
 .TP
 .B subq=<0\-5>
@@ -7629,11 +7666,11 @@ Puo' migliorare la qualita' in modo significativo.
 .RSs
 0: solo halfpel
 .br
-1: 1 iterazione di qpel sul candidato prescelto (default)
+1: 1 iterazione di qpel sul candidato prescelto
 .br
 2: 2 iterazioni di qpel sul candidato prescelto
 .br
-3: halfpel su tutti i tipi di MB, qpel sul candidato prescelto
+3: halfpel su tutti i tipi di MB, qpel sul candidato prescelto (default)
 .br
 4: qpel su tutti
 .br
