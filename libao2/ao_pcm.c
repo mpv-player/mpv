@@ -1,7 +1,9 @@
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "config.h"
 #include "bswap.h"
 #include "afmt.h"
 #include "audio_out.h"
