@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.51 -->
+<!-- synced with 1.52 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -25,12 +25,10 @@ Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> 
 </para>
 
 <para>
-Christian Marillat már évek óta készít nem-hivatalos Debian 
-<application>MPlayer</application>, <application>MEncoder</application> és
-betűtípus csomagokat, melyek akár az apt-get segítségével is telepíthetők
-a <ulink url="ftp://ftp.nerim.net/debian-marillat/index.html">weboldala egyik tükréről</ulink>
-mivel az <ulink url="http://marillat.free.fr/">eredeti weblap</ulink>
-úgy látszik nem megy.
+Christian Marillat már régóta készít nem-hivatalos Debian csomagokat
+az <application>MPlayerből</application>, <application>MEncoderből</application> és
+a betűtípusokból, melyek akár az apt-get segítségével is telepíthetők
+<ulink url="http://hpisi.nerim.net/">a weboldaláról</ulink>.
 </para>
 </sect2>
 
