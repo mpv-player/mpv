@@ -435,8 +435,6 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
   // Try to meet constraint nr 3. 
   out = t * (((in/t)*mul.n + 1)/mul.d);
   while(in <= max_insize && out <= max_outsize){
-    printf("debug in = %i out = %i  \n",in,out);
-
     if(out > len)
       return in;
     out = t * (((in/t)*mul.n + 1)/mul.d);
