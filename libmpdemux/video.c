@@ -164,6 +164,15 @@ switch(d_video->demuxer->file_format){
 return 1;
 }
 
+static void process_userdata(unsigned char* buf,int len){
+    int i;
+    printf( "user_data: len=%3d  %02X %02X %02X %02X '",
+	    len, buf[0], buf[1], buf[2], buf[3]);
+    for(i=0;i<len;i++)
+	if(buf[i]>=32 && buf[i]<127) putchar(buf[i]);
+    printf("'\n");
+}
+
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps){
     demux_stream_t *d_video=sh_video->ds;
     demuxer_t *demuxer=d_video->demuxer;
@@ -180,7 +189,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
         //videobuf_len=0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
-	  void* buffer=&videobuffer[videobuf_len+4];
+	  //void* buffer=&videobuffer[videobuf_len+4];
+	  int start=videobuf_len+4;
           if(in_frame){
             if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
 #if 1
@@ -204,8 +214,9 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
 	  // process headers:
 	  switch(i){
-	      case 0x1B3: mp_header_process_sequence_header (&picture, buffer);break;
-	      case 0x1B5: mp_header_process_extension (&picture, buffer);break;
+	      case 0x1B3: mp_header_process_sequence_header (&picture, &videobuffer[start]);break;
+	      case 0x1B5: mp_header_process_extension (&picture, &videobuffer[start]);break;
+	      case 0x1B2: if(verbose) process_userdata (&videobuffer[start], videobuf_len-start);break;
 	  }
         }
         
