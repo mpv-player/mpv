@@ -339,8 +339,6 @@ csp_again:
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=vf_get_image(sh->vfilter,sh->codec->outfmt[sh->outfmtidx],mp_imgtype,mp_imgflag,w,h);
   mpi->x=mpi->y=0;
-  mpi->w=sh->disp_w;
-  mpi->h=sh->disp_h;
   return mpi;
 }
 
