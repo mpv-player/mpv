@@ -146,10 +146,12 @@ fullscreen playing (centers movie, and makes black
 bands around it)
 .TP
 .B \-vm
-use XF86VidMode extension for mode changing
+try to change to a different video mode. dga2, x11 (XF86VidMode) and sdl
+output drivers support it.
 .TP
 .B \-zoom
-use software scaling, where available (use with -nofs)
+use software scaling, where available (use with -nofs). svga, x11, vesa
+output drivers support it.
 .TP
 .B \-flip
 flip image (useful for example for old Indeo codecs). Supported only(?)
@@ -457,13 +459,11 @@ subtitle format, MPsub. Dumps a dump.mpsub file to current directory.
 .TP
 .B \-screenw\ pixels
 This is for TV-out users! Here you should set the horizontal resolution of your
-Matrox framebuffer. Needed for fullscreen playing on '-vo mga' and '-vo vesa'
-ONLY !
+Matrox framebuffer. Needed for fullscreen playing on -vo mga,vesa,x11 ONLY !
 .TP
 .B \-screenh\ pixels
 This is for TV-out users! Here you should set the vertical resolution of your
-Matrox framebuffer. Needed for fullscreen playing on '-vo mga' and '-vo vesa'
-ONLY !
+Matrox framebuffer. Needed for fullscreen playing on -vo mga,vesa,x11 ONLY !
 .TP
 .B \-cache\ kbytes
 See it below, in the ALPHA/BETA CODE section.
