@@ -1,6 +1,6 @@
 /*
     Realaudio demuxer for MPlayer
-		(c) 2003 Roberto Togni
+		(c) 2003, 2005 Roberto Togni
 */
 
 #include <stdio.h>
@@ -183,8 +183,13 @@ int demux_open_ra(demuxer_t* demuxer)
 		free(buf);
 	}
 
-	if ((i = stream_read_char(demuxer->stream)) != 0)
-		mp_msg(MSGT_DEMUX,MSGL_WARN,"[RealAudio] Last header byte is not zero!\n");
+	if ((i = stream_read_char(demuxer->stream)) != 0) {
+		buf = malloc(i+1);
+		stream_read(demuxer->stream, buf, i);
+		buf[i] = 0;
+		demux_info_add(demuxer, "Comment", buf);
+		free(buf);
+	}
 
 	if (ra_priv->version == 3) {
 		stream_skip(demuxer->stream, 1);
