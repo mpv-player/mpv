@@ -14,7 +14,7 @@
 .\" default indentation is 7, don't change!
 .nr IN 7
 .\" define indentation for suboptions
-.nr SS 4
+.nr SS 5
 .\" add new suboption
 .de IPs
 .IP "\\$1" \n(SS
@@ -293,7 +293,7 @@ toggle subtitle aligment: top/middle/bottom
 adjust subtitle delay by +/\:\- 0.1 second
 .IPs "r and t"
 adjust subtitle position
-.IPs "i"
+.IPs i\ \ \ \ 
 set EDL mark
 
 .PP
@@ -457,7 +457,7 @@ Prints all keys that can be bound.
 Prints all commands that can be bound.
 .IPs js\-dev
 Specifies the joystick device to use (default is /dev/\:input/\:js0).
-.IPs file
+.IPs file\ 
 Read commands from the given file.
 Mostly useful with a fifo.
 .br
@@ -947,7 +947,7 @@ set the color equalizer on the video card.
 set audio capture bitrate
 .IPs forceaudio
 capture audio even if there are no audio sources reported by v4l
-.IPs alsa
+.IPs alsa\ 
 capture from ALSA
 .IPs amode=<0\-3>
 choose an audio mode:
@@ -1062,13 +1062,13 @@ Can be:
 
 .PD 0
 .RSs
-.IPs 0\ \ \ \ 
+.IPs 0
 plain white fonts
-.IPs 0.75\ \ 
+.IPs 0.75
 very narrow black outline (default)
-.IPs 1\ \ \ \ 
+.IPs 1
 narrow black outline
-.IPs 10\ \ \ 
+.IPs 10
 bold black outline
 .RE
 .PD 1
@@ -1488,7 +1488,7 @@ set iec958 output mode to decoded (default)
 .IPs macrovision=<value>
 macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs mute
+.IPs mute\ 
 mute sound output
 .IPs unmute
 unmute sound output
@@ -2068,7 +2068,7 @@ manually work around encoder bugs:
 (see lavcopts)
 For best decoding quality use the same idct algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
-.IPs gray
+.IPs gray\ 
 grayscale only decoding (a bit faster than with color)
 .RE
 .
@@ -2352,11 +2352,11 @@ OSD/subtitle rendering
 .REss
 .RE
 .TP
-.B flip
+.B flip\ \ \ 
 Flips the image upside down.
 See also option \-flip.
 .TP
-.B mirror
+.B mirror\ 
 Mirrors the image on the Y axis.
 .TP
 .B rotate[=<0-7>]
@@ -2414,11 +2414,11 @@ Note that this filter does NOT do any scaling itself; it just affects
 what later scalers (software or hardware) will do when auto-scaling to
 correct aspect.
 .TP
-.B yuy2
+.B yuy2\ \ \ 
 Forces software YV12/\:I420 or 422P to YUY2 conversion.
 Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
 .TP
-.B yvu9
+.B yvu9\ \ \ 
 Forces software YVU9 to YV12 colorspace conversion.
 Deprecated in favor of the software scaler.
 .TP
@@ -2485,7 +2485,7 @@ off automatically depending on available CPU time
 .RE
 .PD 1
 .TP
-.B test
+.B test\ \ \ 
 Generate various test patterns.
 .TP
 .B lavc[=quality:fps]
@@ -2502,7 +2502,7 @@ Faster and of better quality than \-vf fame.
 force output fps (float value) (default: 0, autodetect based on height)
 .RE
 .TP
-.B fame
+.B fame\ \ \ 
 Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
 .TP
 .B dvbscale[=aspect]
@@ -2592,7 +2592,7 @@ The optional parameter f can be 0 to only use even lines, or 1 to only use
 odd lines.
 Any other value for f gives the default (averaging) behavior.
 .TP
-.B ilpack
+.B ilpack\ 
 When interlaced video is stored in YUV 4:2:0 formats, chroma
 interlacing does not line up properly due to vertical downsampling of
 the chroma channels.
@@ -2646,7 +2646,7 @@ Relative amount of sharpness/\:blur to add to the image
 .REss
 .RE
 .TP
-.B swapuv
+.B swapuv\ 
 Swap U & V plane.
 .TP
 .B "il=[d|i][s][:[d|i][s]]"
@@ -2764,9 +2764,9 @@ How often the filter should be applied.
 shape adaptive blur
 .PD 0
 .RSs
-.IPs rad
+.IPs rad\ \ \ 
 blur filter strength (~0.1\-4.0) (slower if larger)
-.IPs pf
+.IPs pf\ \ \ 
 prefilter strength (~0.1\-2.0)
 .IPs colorDiff
 How different the pixels are allowed to be considered.
@@ -2793,15 +2793,15 @@ perspective correction
 .RSs
 .IPs x0,y0,...
 coordinates of the top left, top right, bottom left, bottom right corners
-.IPs t
+.IPs t\ \ \ \ 
 linear (0) or cubic resampling (1)
 .RE
 .PD 1
 .TP
-.B 2xsai
+.B 2xsai\ \ 
 Use the 2x scale and interpolate algorithm for scaling and smoothing images.
 .TP
-.B 1bpp
+.B 1bpp\ \ \ 
 1bpp bitmap to YUV/BGR 8/15/16/32 conversion
 .TP
 .B down3dright[=lines]
@@ -2824,7 +2824,7 @@ Read bitmaps from a FIFO and display them in a window.
 sets the default value of the 'hidden' flag (boolean)
 .IPs opaque
 flag switching between alphablended (transparent) and opaque (fast) mode
-.IPs fifo
+.IPs fifo\ 
 path/filename for the FIFO (named pipe connecting mplayer -vf bmovl to the
 controlling application)
 .RE
@@ -2850,9 +2850,9 @@ clear area
 .IPs OPAQUE
 disable all alpha transparency.
 Send "ALPHA 0 0 0 0 0" to enable it again.
-.IPs HIDE
+.IPs HIDE\ 
 hide bitmap
-.IPs SHOW
+.IPs SHOW\ 
 show bitmap
 .RE
 .PD 1
@@ -2950,7 +2950,7 @@ Specify the info header of the resulting AVI file.
 Available options are:
 .
 .RSs
-.IPs help
+.IPs help\ 
 show this description
 .IPs name=<value>
 title of the subject of the file
@@ -3085,7 +3085,7 @@ Where <codec> may be: lavc, xvidenc, divx4, lame
 .SS divx4 (-divx4opts)
 
 .TP
-.B help
+.B help\ \ \ 
 get help
 .TP
 .B br=<value>
@@ -3147,7 +3147,7 @@ Final (second) pass of two pass encoding.
 .SS lame (-lameopts)
 
 .TP
-.B help
+.B help\ \ \ 
 get help
 .TP
 .B vbr=<0\-4>
@@ -3167,10 +3167,10 @@ mtrh
 .RE
 .PD 1
 .TP
-.B abr\ \ 
+.B abr\ \ \ \ 
 average bitrate
 .TP
-.B cbr\ \ 
+.B cbr\ \ \ \ 
 constant bitrate.
 .br
 Forces also CBR mode encoding on subsequent ABR presets modes
@@ -3217,7 +3217,7 @@ adjust
 .RE
 .PD 1
 .TP
-.B fast
+.B fast\ \ \ 
 switch on faster encoding on subsequent VBR presets modes, slightly lower 
 quality and higher bitrates.
 .TP
@@ -3360,12 +3360,12 @@ X1 (experimental)
 .RE
 .PD 1
 .TP
-.B vhq\ \ 
+.B vhq\ \ \ \ 
 high quality mode, encode each macro block in all modes and choose the best.
 This is slow but results in better quality and file size.
 (default: disabled)
 .TP
-.B v4mv
+.B v4mv\ \ \ 
 Allow 4 motion vectors per macroblock (slightly better quality).
 (default: disabled)
 .TP
@@ -3510,9 +3510,9 @@ main ratecontrol equation (pass\ 1/\:2):
 
 .PD 0
 .RSs
-.IPs 1
+.IPs 1\ \ \ \ 
 constant bitrate
-.IPs tex
+.IPs tex\ \ 
 constant quality
 .IPs 1+(tex/\:avgTex-1)*qComp
 approximately the equation of the old ratecontrol code
@@ -3529,7 +3529,7 @@ infix operators: +,-,*,/,^
 variables:
 .RE
 .RSs
-.IPs tex
+.IPs tex\ \ 
 texture complexity
 .IPs iTex,pTex
 intra, non intra texture complexity
@@ -3543,13 +3543,13 @@ average intra texture complexity in P frames
 average non intra texture complexity in P frames
 .IPs avgBPTex
 average non intra texture complexity in B frames
-.IPs mv
+.IPs mv\ \ \ 
 Bits used for motion vectors
 .IPs fCode
 maximum length of motion vector in log2 scale
 .IPs iCount
 number of intra macro blocks / number of macro blocks
-.IPs var
+.IPs var\ \ 
 spatial complexity
 .IPs mcVar
 temporal complexity
@@ -3557,7 +3557,7 @@ temporal complexity
 qcomp from the command line
 .IPs isI, isP, isB
 is 1 if picture type is I/\:P/\:B else 0
-.IPs Pi,E
+.IPs Pi,E\ 
 see your favorite math book
 .RE
 
@@ -3643,7 +3643,7 @@ played by the official huffyuv codec)
 .RE
 .PD 1
 .TP
-.B vdpart
+.B vdpart\ 
 data partitioning.
 Adds 2 Bytes per video packet, improves error-resistance when transferring over
 unreliable channels (eg.\& streaming over the internet)
@@ -3676,7 +3676,7 @@ disabled (default)
 good choice
 .RE
 .TP
-.B gray
+.B gray\ \ \ 
 grayscale only encoding (faster) (default: disabled)
 .TP
 .B vfdct=<0\-10>
@@ -3761,14 +3761,14 @@ disabled (default)
 sane range
 .RE
 .TP
-.B naq\ \ 
+.B naq\ \ \ \ 
 Normalize adaptive quantization (experimental).
 When using adaptive quantization (*_mask), the average per-MB quantizer may no
 longer match the requested frame-level quantizer.
 Naq will attempt to adjust the per-MB quantizers to maintain the proper
 average.
 .TP
-.B ildct
+.B ildct\ \ 
 use interlaced dct
 .TP
 .B format=<value>
@@ -3781,7 +3781,7 @@ for huffyuv or lossless jpeg
 for lossless jpeg
 .RE
 .TP
-.B pred 
+.B pred
 (for huffyuv)
 .PD 0
 .RSs
@@ -3794,7 +3794,7 @@ median prediction
 .RE
 .PD 1
 .TP
-.B pred 
+.B pred
 (for lossless jpeg)
 .PD 0
 .RSs
@@ -3811,7 +3811,7 @@ mean prediction
 .RE
 .PD 1
 .TP
-.B qpel
+.B qpel\ \ \ 
 use quarter pel motion compensation
 Tip: This seems only useful for high bitrate encodings.
 .TP
@@ -3880,7 +3880,7 @@ normal size=2 diamond
 .fi
 .RE
 .TP
-.B trell
+.B trell\ \ 
 Trellis searched quantization.
 This will find the optimal encoding for each 8x8 block.
 Trellis searched quantization is quite simple a optimal quantization in the PSNR
@@ -3927,7 +3927,7 @@ always
 subpel refinement quality (for qpel) (default: 8).
 Note: This has a significant effect on the speed.
 .TP
-.B psnr
+.B psnr\ \ \ 
 print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
@@ -3936,11 +3936,11 @@ Returned values are in dB (decibel), the higher the better.
 use MPEG quantizers instead of H.263.
 (default: disabled) (i.e.\& use H.263 quantizers)
 .TP
-.B aic
+.B aic\ \ \ \ 
 advanced intra prediction (H.263+ only)
 Note: vqmin should be 8 or larger.
 .TP
-.B umv
+.B umv\ \ \ \ 
 unlimited MVs (H.263+ only)
 Allow encoding of abritarily long MVs.
 .TP
@@ -3990,7 +3990,7 @@ specify the motion detection quality (default=6)
 .B interlacing
 enable support for interlaced content (default=off)
 .TP
-.B 4mv\ \ 
+.B 4mv\ \ \ \ 
 use 4 motion vectors per macro-block, might give better compression at the
 cost of a slower encoding (default=off)
 .TP
@@ -4044,7 +4044,7 @@ version of XviD.
 Be warned that these options are experimental and may
 not work as intended.
 .TP
-.B packed
+.B packed\ 
 create a bitstream that can be decoded delay-free (default=off)
 .br
 .I WARNING:
@@ -4058,10 +4058,10 @@ autodetection of some decoders might be confused
 .B divx5bvop
 generate DivX5 compatible B-frames (default=on)
 .TP
-.B qpel
+.B qpel\ \ \ 
 enable quarter-pixel motion estimation (default=off)
 .TP
-.B gmc\ 
+.B gmc\ \ \ \ 
 enable global motion compensation, may save bits on panning scenes (default=off)
 .TP
 .B chroma_me
@@ -4085,7 +4085,7 @@ quantizer offset between B and non B frames, 100=1.00 (default=100)
 .B bf_threshold=<-255\-255>
 change the probability of a frame to be a bframe (default=0)
 .TP
-.B hq_ac
+.B hq_ac\ \ 
 enable a better prediction of AC component (default=off)
 .TP
 .B vhq=<0\-4>
@@ -4105,7 +4105,7 @@ wide search
 .RE
 .PD 1
 .TP
-.B psnr
+.B psnr\ \ \ 
 print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
