@@ -1763,6 +1763,7 @@ if test "$_vidix" = auto ; then
   # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
   x86 && _vidix=yes
   ppc && linux && _vidix=yes
+  alpha && linux && _vidix=yes
   cygwin && _vidix=no
   mingw32 && _vidix=no
   qnx && _vidix=no
