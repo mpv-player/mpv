@@ -20,11 +20,11 @@
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" Beginn des ersten Levels von Unteroptionen, endet mit .RE
+.\" Beginn des ersten Unteroptionen-Levels, endet mit .RE
 .de RSs
 .RS \n(IN+3
 ..
-.\" Beginn des zweiten Levels von Unteroptionen
+.\" Beginn des zweiten Unteroptionen-Levels
 .de RSss
 .PD 0
 .RS \n(SS+3
@@ -42,9 +42,9 @@
 .TH MPlayer 1 "2004-06-28" "Das MPlayer Projekt"
 .
 .SH NAME
-mplayer  \- Movie Player für Linux
+mplayer  \- Movie Player
 .br
-mencoder \- Movie Encoder für Linux
+mencoder \- Movie Encoder
 
 .\" --------------------------------------------------------------------------
 .\" Synopsis
@@ -146,13 +146,13 @@ mencoder \- Movie Encoder für Linux
 .
 .SH BESCHREIBUNG
 .B mplayer
-ist ein Movieplayer für Linux (der auch auf vielen anderen Unixen und
+ist ein Movie-Player für Linux (der auch auf vielen anderen Unixen und
 nicht\-x86-CPUs läuft, siehe Dokumentation).
 Er spielt die meisten Dateien in den Formaten
 MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
 VIVO, FLI, NuppelVideo, yuv4mpeg, FILM und RoQ ab, unterstützt von vielen
 eingebauten, XAnim- und Win32-DLL-Codecs.
-Es können VideoCDs, SsuperVCDs, DVDs, 3ivx\-, DivX\ 3/\:4/\:5\- und sogar 
+Es können VideoCDs, SuperVCDs, DVDs, 3ivx\-, DivX\ 3/\:4/\:5\- und sogar 
 WMV\-Filme angeschaut werden (ohne dabei die avifile\-Bibliothek zu benutzen).
 .PP
 Ein weiteres großartiges Feature von MPlayer ist die große Auswahl an
@@ -175,7 +175,7 @@ unser eigenes\: MPsub) unterstützt, ebenso wie DVD\-Untertitel (SPU\-Streams,
 VOBsub und Closed Captions).
 .PP
 .B mencoder
-(MPlayer's Movie Encoder) ist ein einfacher Movie-encoder, der so entworfen
+(MPlayer's Movie Encoder) ist ein einfacher Movie-Encoder, der so entworfen
 wurde, dass er alle von MPlayer abspielbaren Filme (siehe oben) in andere
 von MPlayer abspielbare Formate (siehe unten) umwandeln kann.
 Er encodiert nach DivX4, XviD, jeden der libavcodec-Codecs und Audio
@@ -189,7 +189,7 @@ Rauschunterdrückung (denoising), RGB/\:YUV\-Konvertierung und mehr).
 ist die Bezeichnung für MPlayer mit einem graphischen Benutzerinterface. Er 
 verfügt über die gleichen Optionen wie MPlayer.
 .PP
-.B Siehe auch die HTML\-Dokumentation!
+.B Siehe auch die HTML-Dokumentation!
 .
 .
 .\" --------------------------------------------------------------------------
@@ -623,6 +623,7 @@ einer Playlist öffnest, oder vorhast, irgendwann später von stdin
 Slave-Kommandos einzulesen, dann
 .B brauchst
 du diese Option.
+Die Option -idx ist in diesem Falle nicht verfügbar.
 .
 .
 .SH "DEMUXER/STREAM-OPTIONEN"
@@ -1343,7 +1344,7 @@ Sagt MPlayer, dass er die Untertitel als UTF8 behandeln soll.
 Deaktiviert jegliche Textbearbeitung, die normalerweise nach dem Laden der
 Untertitel geschieht. Wird für's Debuggen benutzt.
 .TP
-.B \-vobsub <vobsub\-Datei ohne Erweiterung>
+.B \-vobsub <VOBsub\-Datei ohne Erweiterung>
 Gibt die VOBsub-Dateien an, die als Untertitel angezeigt werden sollen.
 Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 \'.ifo' oder '.sub'.
