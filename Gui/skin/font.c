@@ -119,7 +119,11 @@ int fntTextWidth( int id,char * str )
  if ( ( !Fonts[id] )||( !str[0] ) ) return 0;
 
  for ( i=0;i < (unsigned int)strlen( str );i++ )
-   size+=( Fonts[id]->Fnt[ (unsigned char)str[i] ].sx == -1? Fonts[id]->Fnt[ 32 ].sx : Fonts[id]->Fnt[ (unsigned char)str[i] ].sx );
+  {
+   unsigned char c = (unsigned char)str[i];
+   if ( Fonts[id]->Fnt[c].sx == -1 ) c = ' ';
+   size+= Fonts[id]->Fnt[ c ].sx;
+  }
  return size;
 }
 
@@ -131,7 +135,10 @@ int fntTextHeight( int id,char * str )
 
  for ( i=0;i < (int)strlen( str );i++ )
   {
-   int h = Fonts[id]->Fnt[ (unsigned char)str[i] ].sy;
+   int h;
+   unsigned char c = (unsigned char)str[i];
+   if ( Fonts[id]->Fnt[c].sx == -1 ) c = ' ';
+   h = Fonts[id]->Fnt[c].sy;
    if ( h > max ) max=h;
   }
  return max;
