@@ -87,7 +87,7 @@ There is 3 native drivers for Linux:
   and load it with insmod mga_vid.o. You should verify the memory size
   detection using the 'dmesg' command. If it's bad, use the mga_ram_size
   option (rmmod mga_vid first), specify card's memory size in MB:
-    insmod mga_vid.o mga_ram_size 16
+    insmod mga_vid.o mga_ram_size=16
 
   Using it from MPlayer:  (you should re-compile it with mga_vid support...)
   
