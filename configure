@@ -4030,7 +4030,7 @@ echores "$_vorbis"
 
 
 echocheck "Matroska support"
-if test "$_matroska" = auto ; then
+if test "$_matroska" != no ; then
   _matroska=no
   cat > $TMPC << EOF
 #include <EbmlConfig.h>
