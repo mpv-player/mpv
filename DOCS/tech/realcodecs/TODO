@@ -1,18 +1,18 @@
 TODO:
 
 - more docs are coming as I find the time to write them down
-- USE_REALCODECS is needed in config.h -> configure
+- USE_REALCODECS is needed in config.h -> configure - DONE
 - the original player is doing something I don't know of:
   I compare the input and output data of the original and mplayer.
-  While the input is the same, the ouput differs.
-- the frame rate is incorrect
+  While the input is the same, the ouput differs. - DONE
+- the frame rate is incorrect - WHY?? need sample, can't reproduce
 - use RV20toYUV420Free()
 - rvyuvMain and the two format dwords should be stored inside
   st_context, so we don't use constants in the demuxer and the
-  wrapper
+  wrapper - DONE
 - audio support (mainly for COOK)
-- RV20 support
+- RV20 support - DONE
 - internet streaming support
 - searching
-- get it to work before (they stream) the Bizarre festival
+- get it to work before (they stream) the Bizarre festival :)
 
