@@ -380,21 +380,27 @@ int af_init(af_stream_t* s, int force_output)
     af_instance_t* af = NULL; // New filter
     // Check output frequency if not OK fix with resample
     if(s->last->data->rate!=s->output.rate){
-      if(NULL==(af=af_get(s,"lavcresample")) &&
-          NULL==(af=af_get(s,"resample"))){
+      // try to find a filter that can change samplrate
+      af = af_control_any_rev(s, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
+               &(s->output.rate));
+      if (!af) {
+        char *resampler = "resample";
+#ifdef USE_LIBAVCODEC
+        if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW)
+          resampler = "lavcresample";
+#endif
 	if((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW){
 	  if(!strcmp(s->first->info->name,"format"))
-	    af = af_append(s,s->first,"lavcresample");
+	    af = af_append(s,s->first,resampler);
 	  else
-	    af = af_prepend(s,s->first,"lavcresample");
+	    af = af_prepend(s,s->first,resampler);
 	}		
 	else{
 	  if(!strcmp(s->last->info->name,"format"))
-	    af = af_prepend(s,s->last,"resample");
+	    af = af_prepend(s,s->last,resampler);
 	  else
-	    af = af_append(s,s->last,"resample");
+	    af = af_append(s,s->last,resampler);
 	}
-      }
       // Init the new filter
       if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE_RATE,
 				      &(s->output.rate))))
@@ -402,8 +408,15 @@ int af_init(af_stream_t* s, int force_output)
       // Use lin int if the user wants fast
       if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_FAST) {
         char args[32];
-	sprintf(args, "%d:0:0", s->output.rate);
+	sprintf(args, "%d", s->output.rate);
+#ifdef USE_LIBAVCODEC
+	if (strcmp(resampler, "lavcresample") == 0)
+	  strcat(args, ":1");
+	else
+#endif
+	strcat(args, ":0:0");
 	af->control(af, AF_CONTROL_COMMAND_LINE, args);
+      }
       }
       if(AF_OK != af_reinit(s,af))
       	return -1;
