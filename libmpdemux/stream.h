@@ -21,10 +21,6 @@
 #include "network.h"
 #endif
 
-#ifdef __FreeBSD__
-#include "network.h"
-#endif
-
 int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 

@@ -9,9 +9,10 @@
 #include "url.h"
 #include "http.h"
 #include "asf.h"
-#include "network.h"
 
 #include "stream.h"
+
+#include "network.h"
 
 typedef struct {
 	ASF_StreamType_e streaming_type;
