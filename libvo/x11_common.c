@@ -1081,9 +1081,10 @@ void vo_x11_fullscreen( void )
 	else
 		old_gravity = vo_hint.win_gravity;
  }
- if(vo_wm_type==0 && !(vo_fsmode&16))
-//    XUnmapWindow( mDisplay,vo_window );  // required for MWM
-      XWithdrawWindow(mDisplay,vo_window,mScreen);
+ if(vo_wm_type==0 && !(vo_fsmode&16)) {
+    XUnmapWindow( mDisplay,vo_window );  // required for MWM
+    XWithdrawWindow(mDisplay,vo_window,mScreen);
+ }
 
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
