@@ -10,12 +10,12 @@
 <BODY>
 
 
-<H2><A NAME="encoding">2.4 Encodage avec MEncoder</A></H2>
+<H1><A NAME="encoding">7. Encodage avec MEncoder</A></H1>
 
 <P>Pour avoir la liste complète des options disponibles de MEncoder et des exemples,
   voir la page de man.</P>
 
-<H3><A NAME="2pass">2.4.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></H3>
+<H2><A NAME="2pass">7.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></H2>
 
 <P><U><B>Encodage 2-passes:</B></U> le nom vient du fait que cette méthode encode
   le fichier <I>deux fois</I>. Le premier encodage (<I>passe</I> doublée)
@@ -76,7 +76,8 @@
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
-<H3><A NAME="rescaling">2.4.2 Redimensionnement des films</A></H3>
+
+<H2><A NAME="rescaling">7.2 Redimensionnement des films</A></H2>
 
 <P>Souvent le besoin de redimmensionner les images d'un film se fait sentir.
   Les raisons peuvent être multiples: diminuer la taille du fichier, la bande-passante
@@ -96,7 +97,7 @@
   sortie.avi</CODE></P>
 
 
-<H3><A NAME="copying">2.4.3 Copie de flux</A></H3>
+<H2><A NAME="copying">7.3 Copie de flux</A></H2>
 
 <P>MEncoder peut gérer les flux entrant de deux façons: les <B>encoder</B>
   ou les <B>copier</B>. Cette section parle de la <B>copie</B>.</P>
@@ -117,7 +118,7 @@
 </UL>
 
 
-<H3><A NAME="fixing">2.4.4 Réparer les fichiers AVIs ayant un index défectueux</A></H3>
+<H2><A NAME="fixing">7.4 Réparer les fichiers AVIs ayant un index défectueux</A></H2>
 
 <P>Facile. Nous copions simplement les flux vidéo et audio, et
   MEncoder génère l'index. Bien sûr cela ne peut pas réparer les bogues possibles
@@ -127,7 +128,7 @@
 <P>Commande: <CODE>mencoder -idx entree.avi -ovc copy -oac copy -o sortie.avi</CODE></P>
 
 
-<H3><A NAME="libavcodec">2.4.5 Encodage avec la famille de codecs libavcodec</A></H3>
+<H2><A NAME="libavcodec">7.5 Encodage avec la famille de codecs libavcodec</A></H2>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> permet un encodage simple dans plein
   formats audio et vidéo intéressants (actuellement ses codecs audio ne sont pas
@@ -154,10 +155,10 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H3><A NAME="image_files">2.4.6 Encodage à partir de multiples fichiers image (JPEGs, PNGs ou TGAs)</A></H3>
+<H2><A NAME="image_files">7.6 Encodage à partir de multiples fichiers image (JPEGs, PNGs ou TGAs)</A></H2>
 
 <P>MEncoder est capable de créer des fichiers à partir de un ou plusieurs fichiers JPEG,
-  PNG ou TGA. Avec une simple copie de trame il peut créer des fichiers 
+  PNG ou TGA. Avec une simple copie de trame il peut créer des fichiers
   MJPEG (Motion JPEG), MPNG (Motion PNG) ou MTGA (Motion TGA).</P>
 
 Explication du processus:
@@ -200,7 +201,7 @@ Explication du processus:
   -o sortie.avi</CODE></P>
 
 
-<H3><A NAME="vobsub">2.4.7 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H3>
+<H2><A NAME="vobsub">7.7 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>
 
 <P>MEncoder est capable d'extraire les sous-titres d'un DVD dans des fichiers au format
   VobSub. Ils consistent en une paire de fichiers terminant par <CODE>.idx</CODE> et 
@@ -239,7 +240,7 @@ Explication du processus:
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
-<H3><A NAME="aspect">2.4.8 Préserver l'aspect ratio</A></H3>
+<H2><A NAME="aspect">7.8 Préserver l'aspect ratio</A></H2>
 
 <P>Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur
   d'aspect ratio, qui décrit comment le lecteur devrait dimensionner le flux
