@@ -37,6 +37,7 @@ typedef struct {
   int min_filepos; // buffer contain only a part of the file, from min-max pos
   int max_filepos;
   int offset;      // filepos <-> bufferpos  offset value (filepos of the buffer's first byte)
+  int eof;
   // commands/locking:
   int cmd_lock;   // 1 if we will seek/reset buffer, 2 if we are ready for cmd
   int fifo_flag;  // 1 if we should use FIFO to notice cache about buffer reads.
@@ -67,6 +68,8 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
     if(newb<min_fill) min_fill=newb; // statistics...
 
     if(newb<=0){
+	// eof?
+	if(s->eof) break;
 	// waiting for buffer fill...
 	usleep(10000); // 10ms
 	continue;
@@ -134,7 +137,8 @@ int cache_fill(cache_vars_t* s){
   //len=stream_fill_buffer(s->stream);
   //memcpy(&s->buffer[pos],s->stream->buffer,len); // avoid this extra copy!
   // ....
-  stream_read(s->stream,&s->buffer[pos],space); len=space;
+  len=stream_read(s->stream,&s->buffer[pos],space);
+  if(!len) s->eof=1;
   
   s->max_filepos+=len;
   if(pos+len>=s->buffer_size){
