@@ -7,9 +7,9 @@ typedef struct _CBaseFilter2 CBaseFilter2;
 struct _CBaseFilter2
 {
     IBaseFilter_vt* vt;
+    DECLARE_IUNKNOWN();
     IPin* pin;
     GUID interfaces[5];
-    DECLARE_IUNKNOWN();
 
     IPin* ( *GetPin )(CBaseFilter2* This);
 };
@@ -21,10 +21,10 @@ typedef struct _CBaseFilter CBaseFilter;
 struct _CBaseFilter
 {
     IBaseFilter_vt* vt;
+    DECLARE_IUNKNOWN();  // has to match CBaseFilter2 - INHERITANCE!!
     IPin* pin;
     IPin* unused_pin;
     GUID interfaces[2];
-    DECLARE_IUNKNOWN();
 
     IPin* ( *GetPin )(CBaseFilter* This);
     IPin* ( *GetUnusedPin )(CBaseFilter* This);
@@ -37,10 +37,10 @@ typedef struct _CInputPin CInputPin;
 struct _CInputPin
 {
     IPin_vt* vt;
+    DECLARE_IUNKNOWN();
     AM_MEDIA_TYPE type;
     CBaseFilter* parent;
     GUID interfaces[1];
-    DECLARE_IUNKNOWN();
 };
 
 CInputPin* CInputPinCreate(CBaseFilter* parent, const AM_MEDIA_TYPE* vhdr);
@@ -49,10 +49,10 @@ CInputPin* CInputPinCreate(CBaseFilter* parent, const AM_MEDIA_TYPE* vhdr);
 typedef struct CRemotePin
 {
     IPin_vt* vt;
-    CBaseFilter* parent;
-    IPin* remote_pin;
-    GUID interfaces[1];
     DECLARE_IUNKNOWN();
+    CBaseFilter* parent;
+    GUID interfaces[1];
+    IPin* remote_pin;
 } CRemotePin;
 
 CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin);
@@ -61,9 +61,9 @@ CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin);
 typedef struct CRemotePin2
 {
     IPin_vt* vt;
+    DECLARE_IUNKNOWN();
     CBaseFilter2* parent;
     GUID interfaces[1];
-    DECLARE_IUNKNOWN();
 } CRemotePin2;
 
 CRemotePin2* CRemotePin2Create(CBaseFilter2* parent);

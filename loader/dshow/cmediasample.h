@@ -8,12 +8,12 @@ typedef struct _CMediaSample CMediaSample;
 struct _CMediaSample
 {
     IMediaSample_vt* vt;
+    DECLARE_IUNKNOWN();
     IMemAllocator* all;
     int size;
     int actual_size;
     char* block;
     char* own_block;
-    int refcount;
     int isPreroll;
     int isSyncPoint;
     AM_MEDIA_TYPE media_type;

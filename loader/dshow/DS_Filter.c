@@ -76,7 +76,7 @@ void DS_Filter_Destroy(DS_Filter* This)
     if (This->m_pOurOutput)
 	This->m_pOurOutput->vt->Release((IUnknown*)This->m_pOurOutput);
     if (This->m_pParentFilter)
-	This->m_pSrcFilter->vt->Release((IUnknown*)This->m_pParentFilter);
+	This->m_pParentFilter->vt->Release((IUnknown*)This->m_pParentFilter);
     if (This->m_pSrcFilter)
 	This->m_pSrcFilter->vt->Release((IUnknown*)This->m_pSrcFilter);
 

@@ -26,8 +26,8 @@ typedef struct
 
 static long STDCALL CEnumPins_Next(IEnumPins* This,
 				   /* [in] */ unsigned long cMediaTypes,
-				   /* [size_is][out] */ IPin **ppMediaTypes,
-				   /* [out] */ unsigned long *pcFetched)
+				   /* [size_is][out] */ IPin** ppMediaTypes,
+				   /* [out] */ unsigned long* pcFetched)
 {
     CEnumPins* pin = (CEnumPins*)This;
 
@@ -127,9 +127,9 @@ static CEnumPins* CEnumPinsCreate(IPin* p, IPin* pp)
  * InputPin
  ***********/
 
-static long STDCALL CInputPin_Connect(IPin * This,
-				      /* [in] */ IPin *pReceivePin,
-				      /* [in] */ AM_MEDIA_TYPE *pmt)
+static long STDCALL CInputPin_Connect(IPin* This,
+				      /* [in] */ IPin* pReceivePin,
+				      /* [in] */ AM_MEDIA_TYPE* pmt)
 {
     Debug unimplemented("CInputPin_Connect", This);
     return E_NOTIMPL;
@@ -199,21 +199,21 @@ static long STDCALL CInputPin_QueryId(IPin* This,
 }
 
 static long STDCALL CInputPin_QueryAccept(IPin* This,
-					  /* [in] */ const AM_MEDIA_TYPE *pmt)
+					  /* [in] */ const AM_MEDIA_TYPE* pmt)
 {
     Debug unimplemented("CInputPin_QueryAccept", This);
     return E_NOTIMPL;
 }
 
 static long STDCALL CInputPin_EnumMediaTypes(IPin* This,
-					     /* [out] */ IEnumMediaTypes **ppEnum)
+					     /* [out] */ IEnumMediaTypes** ppEnum)
 {
     Debug unimplemented("CInputPin_EnumMediaTypes", This);
     return E_NOTIMPL;
 }
 
 static long STDCALL CInputPin_QueryInternalConnections(IPin* This,
-						       /* [out] */ IPin **apPin,
+						       /* [out] */ IPin** apPin,
 						       /* [out][in] */ unsigned long *nPin)
 {
     Debug unimplemented("CInputPin_QueryInternalConnections", This);
@@ -234,13 +234,13 @@ static long STDCALL CInputPin_BeginFlush(IPin * This)
 }
 
 
-static long STDCALL CInputPin_EndFlush(IPin * This)
+static long STDCALL CInputPin_EndFlush(IPin* This)
 {
     Debug unimplemented("CInputPin_EndFlush", This);
     return E_NOTIMPL;
 }
 
-static long STDCALL CInputPin_NewSegment(IPin * This,
+static long STDCALL CInputPin_NewSegment(IPin* This,
 					  /* [in] */ REFERENCE_TIME tStart,
 					  /* [in] */ REFERENCE_TIME tStop,
 					  /* [in] */ double dRate)
@@ -360,7 +360,7 @@ static long STDCALL CBaseFilter_FindPin(IBaseFilter* This,
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter_QueryFilterInfo(IBaseFilter * This,
+static long STDCALL CBaseFilter_QueryFilterInfo(IBaseFilter* This,
 						// /* [out] */ FILTER_INFO *pInfo)
 						void* pInfo)
 {
@@ -368,16 +368,16 @@ static long STDCALL CBaseFilter_QueryFilterInfo(IBaseFilter * This,
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter_JoinFilterGraph(IBaseFilter * This,
-						/* [in] */ IFilterGraph *pGraph,
+static long STDCALL CBaseFilter_JoinFilterGraph(IBaseFilter* This,
+						/* [in] */ IFilterGraph* pGraph,
 						/* [string][in] */ const unsigned short* pName)
 {
     Debug unimplemented("CBaseFilter_JoinFilterGraph", This);
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter_QueryVendorInfo(IBaseFilter * This,
-						/* [string][out] */ unsigned short* *pVendorInfo)
+static long STDCALL CBaseFilter_QueryVendorInfo(IBaseFilter* This,
+						/* [string][out] */ unsigned short** pVendorInfo)
 {
     Debug unimplemented("CBaseFilter_QueryVendorInfo", This);
     return E_NOTIMPL;
@@ -443,26 +443,26 @@ CBaseFilter* CBaseFilterCreate(const AM_MEDIA_TYPE* type, CBaseFilter2* parent)
  **************/
 
 
-static long STDCALL CBaseFilter2_GetClassID(IBaseFilter * This,
-					     /* [out] */ CLSID *pClassID)
+static long STDCALL CBaseFilter2_GetClassID(IBaseFilter* This,
+					     /* [out] */ CLSID* pClassID)
 {
     Debug unimplemented("CBaseFilter2_GetClassID", This);
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter2_Stop(IBaseFilter * This)
+static long STDCALL CBaseFilter2_Stop(IBaseFilter* This)
 {
     Debug unimplemented("CBaseFilter2_Stop", This);
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter2_Pause(IBaseFilter * This)
+static long STDCALL CBaseFilter2_Pause(IBaseFilter* This)
 {
     Debug unimplemented("CBaseFilter2_Pause", This);
     return E_NOTIMPL;
 }
 
-static long STDCALL CBaseFilter2_Run(IBaseFilter * This, REFERENCE_TIME tStart)
+static long STDCALL CBaseFilter2_Run(IBaseFilter* This, REFERENCE_TIME tStart)
 {
     Debug unimplemented("CBaseFilter2_Run", This);
     return E_NOTIMPL;
@@ -540,6 +540,7 @@ static IPin* CBaseFilter2_GetPin(CBaseFilter2* This)
 
 static void CBaseFilter2_Destroy(CBaseFilter2* This)
 {
+    Debug printf("CBaseFilter2_Destroy(%p) called\n", This);
     This->pin->vt->Release((IUnknown*) This->pin);
     free(This->vt);
     free(This);
@@ -607,7 +608,7 @@ static long STDCALL CRemotePin_ConnectedTo(IPin* This, /* [out] */ IPin** pPin)
 }
 
 static long STDCALL CRemotePin_QueryDirection(IPin* This,
-					      /* [out] */ PIN_DIRECTION *pPinDir)
+					      /* [out] */ PIN_DIRECTION* pPinDir)
 {
     Debug printf("CRemotePin_QueryDirection(%p) called\n", This);
     if (!pPinDir)
@@ -668,12 +669,12 @@ CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin)
 
 
 /*************
- * CRemotePin
+ * CRemotePin2
  *************/
 
 
-static long STDCALL CRemotePin2_QueryPinInfo(IPin * This,
-				       /* [out] */ PIN_INFO *pInfo)
+static long STDCALL CRemotePin2_QueryPinInfo(IPin* This,
+					     /* [out] */ PIN_INFO* pInfo)
 {
     CBaseFilter2* lparent=((CRemotePin2*)This)->parent;
     Debug printf("CRemotePin2_QueryPinInfo(%p) called\n", This);
@@ -684,6 +685,7 @@ static long STDCALL CRemotePin2_QueryPinInfo(IPin * This,
     return 0;
 }
 
+// FIXME - not being released!
 static void CRemotePin2_Destroy(CRemotePin2* This)
 {
     Debug printf("CRemotePin2_Destroy(%p) called\n", This);

@@ -15,13 +15,13 @@ typedef struct _MemAllocator MemAllocator;
 struct _MemAllocator
 {
     IMemAllocator_vt* vt;
+    DECLARE_IUNKNOWN();
     ALLOCATOR_PROPERTIES props;
     avm_list_t* used_list;
     avm_list_t* free_list;
     char* new_pointer;
     CMediaSample* modified_sample;
     GUID interfaces[2];
-    DECLARE_IUNKNOWN();
 
     void ( *SetPointer )(MemAllocator* This, char* pointer);
     void ( *ResetPointer )(MemAllocator* This);

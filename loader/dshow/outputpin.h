@@ -11,6 +11,7 @@ typedef struct _COutputMemPin COutputMemPin;
 struct _COutputMemPin
 {
     IMemInputPin_vt* vt;
+    DECLARE_IUNKNOWN();
     char** frame_pointer;
     long* frame_size_pointer;
     MemAllocator* pAllocator;
@@ -20,8 +21,8 @@ struct _COutputMemPin
 struct _COutputPin
 {
     IPin_vt* vt;
+    DECLARE_IUNKNOWN();
     COutputMemPin* mempin;
-    int refcount;
     AM_MEDIA_TYPE type;
     IPin* remote;
     void ( *SetFramePointer )(COutputPin*, char** z);

@@ -497,6 +497,7 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
     This->mempin->frame_size_pointer = 0;
     This->mempin->frame_pointer = 0;
     This->mempin->pAllocator = 0;
+    This->mempin->refcount = 1;
     This->mempin->parent = This;
 
     This->SetPointer2 = COutputPin_SetPointer2;
