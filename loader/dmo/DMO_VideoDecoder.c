@@ -85,7 +85,7 @@ static ct check[] = {
     {     24, 24, &MEDIASUBTYPE_RGB24, CAP_NONE },
     {     32, 32, &MEDIASUBTYPE_RGB32, CAP_NONE },
 
-    {0},
+    {0,0,NULL,0},
 };
 
 DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER * format, int flip, int maxauto)
