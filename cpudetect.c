@@ -91,7 +91,8 @@ void GetCpuCaps( CpuCaps *caps)
 		return;*/
 	do_cpuid(0x00000000, regs);
 	printf("CPU vendor name: %.4s%.4s%.4s\n",&regs[1],&regs[3],&regs[2]);
-	if (regs[0]>0x00000001) {
+//	if (regs[0]>0x00000001) 
+	{
 		do_cpuid(0x00000001, regs2);
 		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
 		switch ((regs2[0] >> 8)&0xf) {
@@ -105,7 +106,7 @@ void GetCpuCaps( CpuCaps *caps)
 				caps->cpuType=CPUTYPE_I586;
 				break;
 			case 6:
-				caps->cpuType=CPUTYPE_I586;
+				caps->cpuType=CPUTYPE_I686;
 				break;
 			default:
 				printf("Unknown cpu type, default to i386\n");

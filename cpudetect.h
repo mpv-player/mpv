@@ -3,6 +3,7 @@
 #define CPUTYPE_I386	0
 #define CPUTYPE_I486	1
 #define CPUTYPE_I586	2
+#define CPUTYPE_I686    3
 
 typedef struct cpucaps_s {
 	int cpuType;
