@@ -1759,11 +1759,11 @@ if(rel_seek_secs || abs_seek_pos){
         // Set OSD:
       if(osd_level){
         int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-        if(len>0){
-          osd_visible=sh_video->fps; // 1 sec
-          vo_osd_progbar_type=0;
-	  vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
-        }
+        if (len>0){
+	   osd_visible=sh_video->fps; // 1 sec
+	   vo_osd_progbar_type=0;
+	   vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	}
       }
 #endif
       
