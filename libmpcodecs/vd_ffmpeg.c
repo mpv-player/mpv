@@ -104,6 +104,7 @@ static int lavc_param_vismv=0;
 static int lavc_param_skip_top=0;
 static int lavc_param_skip_bottom=0;
 static int lavc_param_fast=0;
+static int lavc_param_lowres=0;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -119,6 +120,7 @@ m_option_t lavc_decode_opts_conf[]={
 #ifdef CODEC_FLAG2_FAST
         {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
 #endif
+	{"lowres", &lavc_param_lowres, CONF_TYPE_INT, CONF_RANGE, 0, 16, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -255,6 +257,9 @@ static int init(sh_video_t *sh){
 #if LIBAVCODEC_BUILD >= 4717
     avctx->skip_top   = lavc_param_skip_top;
     avctx->skip_bottom= lavc_param_skip_bottom;
+#endif    
+#if LIBAVCODEC_BUILD >= 4722
+    avctx->lowres= lavc_param_lowres;
 #endif    
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     /* AVRn stores huffman table in AVI header */
