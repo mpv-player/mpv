@@ -30,6 +30,8 @@
 #include "sub.h"
 #include "aspect.h"
 
+#include "subopt-helper.h"
+
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
@@ -48,20 +50,12 @@ extern int vo_directrendering;
 extern int vo_verbose;
 
 static int benchmark;
-static int busy_wait;
+static int use_sleep;
 static int use_queue;
+static int xv_port_request = 0;
 
 static int image_width,image_height;
 static uint32_t  drwX,drwY;
-
-static XvPortID xv_port;
-
-#define AUTO_COLORKEY       0
-#define BACKGROUND_COLORKEY 1
-#define AUTOPAINT_COLORKEY  2
-#define MANUALFILL_COLORKEY 3
-static int keycolor_handling;
-static unsigned long keycolor;
 
 #define NO_SUBPICTURE      0
 #define OVERLAY_SUBPICTURE 1
@@ -194,58 +188,6 @@ static void deallocate_xvimage()
 }
 //end of vo_xv shm/xvimage code
 
-
-static void  init_keycolor(){
-Atom xv_atom;
-XvAttribute * attributes;
-int colorkey;
-int rez;
-int attrib_count,i;
-
-   keycolor=2110;
-
-   if(keycolor_handling == AUTO_COLORKEY){
-   //XV_AUTOPING_COLORKEY doesn't work for XvMC yet(NVidia 43.63)
-      attributes = XvQueryPortAttributes(mDisplay, xv_port, &attrib_count);
-      if(attributes!=NULL){
-         for (i = 0; i < attrib_count; i++){
-            if (!strcmp(attributes[i].name, "XV_COLORKEY"))
-            {
-               xv_atom = XInternAtom(mDisplay, "XV_COLORKEY", False);
-               if(xv_atom!=None)
-               {
-                  rez=XvGetPortAttribute(mDisplay,xv_port, xv_atom, &colorkey);
-                  if(rez == Success){
-                     keycolor = colorkey;
-                     keycolor_handling = MANUALFILL_COLORKEY;
-                   }
-               }
-               break;
-            }
-         }
-         XFree(attributes);
-      }
-   }
-}
-
-//from vo_xmga
-static void mDrawColorKey(uint32_t x,uint32_t  y, uint32_t w, uint32_t h)
-{
-   if( (keycolor_handling != AUTOPAINT_COLORKEY) && 
-       (keycolor_handling != MANUALFILL_COLORKEY) ) 
-      return;
-
-   XSetBackground( mDisplay,vo_gc,0 );
-   XClearWindow( mDisplay,vo_window );
-
-   if(keycolor_handling == MANUALFILL_COLORKEY){
-      XSetForeground( mDisplay,vo_gc,keycolor );
-      XFillRectangle( mDisplay,vo_window,vo_gc,x,y,w,h);
-   }
-   XFlush( mDisplay );
-}
-
-
 static int xvmc_check_surface_format(uint32_t format, XvMCSurfaceInfo * surf_info){
    if ( format == IMGFMT_XVMC_IDCT_MPEG2 ){ 
       if( surf_info->mc_type != (XVMC_IDCT|XVMC_MPEG_2) ) return -1;
@@ -350,6 +292,11 @@ XvMCSurfaceInfo * mc_surf_list;
             if( height > mc_surf_list[s].max_height ) continue;
             if( xvmc_check_surface_format(format,&mc_surf_list[s])<0 ) continue;
 //we have match!
+            /* respect the users wish */
+            if ( xv_port_request != 0 && xv_port_request != p )
+            {
+               continue;
+            }
 
             if(!query){
                rez = XvGrabPort(mDisplay,p,CurrentTime);
@@ -401,6 +348,19 @@ static uint32_t preinit(const char *arg){
 int xv_version,xv_release,xv_request_base,xv_event_base,xv_error_base;
 int mc_eventBase,mc_errorBase;
 int mc_ver,mc_rev;
+strarg_t ck_src_arg = { 0, NULL };
+strarg_t ck_method_arg = { 0, NULL };
+opt_t subopts [] =
+{  
+  /* name         arg type      arg var           test */
+  {  "port",      OPT_ARG_INT,  &xv_port_request, (opt_test_f)int_pos },
+  {  "ck",        OPT_ARG_STR,  &ck_src_arg,      xv_test_ck },
+  {  "ck-method", OPT_ARG_STR,  &ck_method_arg,   xv_test_ckm },
+  {  "benchmark", OPT_ARG_BOOL, &benchmark,       NULL },
+  {  "sleep",     OPT_ARG_BOOL, &use_sleep,       NULL },
+  {  "queue",     OPT_ARG_BOOL, &use_queue,       NULL },
+  {  NULL }
+};
 
    //Obtain display handler
    if (!vo_init()) return -1;//vo_xv
@@ -431,40 +391,19 @@ int mc_ver,mc_rev;
    surface_render = NULL;
    xv_port = 0;
    number_of_surfaces = 0;
-   keycolor_handling = AUTO_COLORKEY;
    subpicture_alloc = 0;
    
    benchmark = 0; //disable PutImageto allow faster display than screen refresh
-   busy_wait = 1;
+   use_sleep = 0;
    use_queue = 0;
-   if(arg)
-      while(*arg){
-         if(strncmp(arg,"benchmark",9) == 0){
-            arg+=9;
-            if(*arg == ':') arg++;
-            benchmark = 1;//disable PutImageto allow faster display than screen refresh
-            continue;
-         }
-         if(strncmp(arg,"wait",4) == 0){
-            arg+=4;
-            if(*arg == ':') arg++;
-            busy_wait = 1;
-            continue;
-         }
-         if(strncmp(arg,"sleep",5) == 0){
-            arg+=5;
-            if(*arg == ':') arg++;
-            busy_wait = 0;
-            continue;
-         }
-         if(strncmp(arg,"queue",5) == 0){
-            arg+=5;
-            if(*arg == ':') arg++;
-            use_queue = 1;
-            continue;
-         }
-         break;
-      }
+
+   /* parse suboptions */
+   if ( subopt_parse( arg, subopts ) != 0 )
+   {
+     return -1;
+   }
+
+   xv_setup_colorkeyhandling( ck_method_arg.str, ck_src_arg.str );
 
    return 0;
 }
@@ -505,6 +444,10 @@ static uint32_t vm_height;
    numblocks=((width+15)/16)*((height+15)/16);
 // Find Supported Surface Type
    mode_id = xvmc_find_surface_by_format(format,width,height,&surface_info,0);//false=1 to grab port, not query
+   if ( mode_id == 0 )
+   {
+      return -1;
+   }
 
    rez = XvMCCreateContext(mDisplay, xv_port,mode_id,width,height,XVMC_DIRECT,&ctx);
    if( rez != Success ) return -1;
@@ -635,7 +578,12 @@ found_subpic:
          break;
    }
 
-   init_keycolor();// take keycolor value and choose method for handling it
+//take keycolor value and choose method for handling it
+   if ( !vo_xv_init_colorkey() )
+   {
+     return -1; // bail out, colorkey setup failed
+   }
+
 
 //taken from vo_xv
    panscan_init();
@@ -708,8 +656,8 @@ found_subpic:
    XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
 
    xswa.background_pixel = 0;
-   if (keycolor_handling == BACKGROUND_COLORKEY)
-      xswa.background_pixel = keycolor;// 2110;
+   if (xv_ck_info.method == CK_METHOD_BACKGROUND)
+      xswa.background_pixel = xv_colorkey;
    xswa.border_pixel     = 0;
    xswamask = CWBackPixel | CWBorderPixel;
 
@@ -1034,7 +982,7 @@ int status,rez;
    assert(rez==Success);
    if((status & XVMC_RENDERING) == 0)
       return;//surface is already complete
-   if(!busy_wait){
+   if(use_sleep){
       rez = XvMCFlushSurface(mDisplay, srf);
       assert(rez==Success);
 
@@ -1140,7 +1088,7 @@ int e=vo_x11_check_events(mDisplay);
    }
    if ( e & VO_EVENT_EXPOSE )
    {
-      mDrawColorKey(drwX,drwY,vo_dwidth,vo_dheight);
+      vo_xv_draw_colorkey(drwX,drwY,vo_dwidth,vo_dheight);
       if(p_render_surface_visible != NULL)
          XvMCPutSurface(mDisplay, p_render_surface_visible->p_surface,vo_window,
                      0, 0, image_width, image_height,

@@ -36,6 +36,8 @@ Buffer allocation:
 #include "sub.h"
 #include "aspect.h"
 
+#include "subopt-helper.h"
+
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
@@ -66,7 +68,7 @@ static int Shmem_Flag;
 // FIXME: dynamically allocate this stuff
 static void allocate_xvimage(int);
 static unsigned int ver, rel, req, ev, err;
-static unsigned int formats, adaptors, xv_port, xv_format;
+static unsigned int formats, adaptors, xv_format;
 static XvAdaptorInfo *ai = NULL;
 static XvImageFormatValues *fo=NULL;
 
@@ -270,6 +272,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
 
         xswa.background_pixel = 0;
+        if (xv_ck_info.method == CK_METHOD_BACKGROUND)
+        {
+          xswa.background_pixel = xv_colorkey;
+        }
         xswa.border_pixel = 0;
         xswamask = CWBackPixel | CWBorderPixel;
 
@@ -302,6 +308,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                             vinfo.visual, hint.x, hint.y,
                                             hint.width, hint.height, depth,
                                             CopyFromParent);
+            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
 
             vo_x11_classhint(mDisplay, vo_window, "xv");
             vo_hidecursor(mDisplay, vo_window);
@@ -519,18 +526,8 @@ static void check_events(void)
 {
     int e = vo_x11_check_events(mDisplay);
 
-    if (e & VO_EVENT_EXPOSE && vo_fs)
-        vo_x11_clearwindow(mDisplay, vo_window);
-
     if (e & VO_EVENT_RESIZE)
     {
-        if (vo_fs)
-        {
-            e |= VO_EVENT_EXPOSE;
-            XClearWindow(mDisplay, vo_window);
-            XFlush(mDisplay);
-        }
-
         XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &vo_dwidth,
                      &vo_dheight, &drwBorderWidth, &drwDepth);
         drwX = drwY = 0;
@@ -556,6 +553,11 @@ static void check_events(void)
                    "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n", drwX, drwY,
                    vo_dwidth, vo_dheight);
         }
+    }
+
+    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
+    {
+        vo_xv_draw_colorkey(drwX,drwY,vo_dwidth,vo_dheight);
     }
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause)
@@ -778,21 +780,29 @@ static uint32_t preinit(const char *arg)
     XvPortID xv_p;
     int busy_ports = 0;
     unsigned int i;
+    strarg_t ck_src_arg = { 0, NULL };
+    strarg_t ck_method_arg = { 0, NULL };
+
+    opt_t subopts[] =
+    {  
+      /* name         arg type     arg var         test */
+      {  "port",      OPT_ARG_INT, &xv_port,       (opt_test_f)int_pos },
+      {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
+      {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
+      {  NULL }
+    };
 
     xv_port = 0;
 
-    if (arg)
+    /* parse suboptions */
+    if ( subopt_parse( arg, subopts ) != 0 )
     {
-        if ((strlen(arg) >= 6) && !strncmp(arg, "port=", 5))
-        {
-            xv_port = atoi(arg + 5);
-        } else
-        {
-            mp_msg(MSGT_VO, MSGL_ERR, "vo_xv: Unknown subdevice: %s\n",
-                   arg);
-            return ENOSYS;
-        }
+      return -1;
     }
+
+    /* modify colorkey settings according to the given options */
+    xv_setup_colorkeyhandling( ck_method_arg.str, ck_src_arg.str );
+
     if (!vo_init())
         return -1;
 
@@ -880,20 +890,9 @@ static uint32_t preinit(const char *arg)
         return -1;
     }
 
+    if ( !vo_xv_init_colorkey() )
     {
-        int howmany, i;
-        XvAttribute * const attributes =
-            XvQueryPortAttributes(mDisplay, xv_port, &howmany);
-
-        for (i = 0; i < howmany && attributes; i++)
-            if (!strcmp(attributes[i].name, "XV_AUTOPAINT_COLORKEY"))
-            {
-                const Atom autopaint =
-                    XInternAtom(mDisplay, "XV_AUTOPAINT_COLORKEY", False);
-                XvSetPortAttribute(mDisplay, xv_port, autopaint, 1);
-                break;
-            }
-	XFree(attributes);
+      return -1; // bail out, colorkey setup failed
     }
 
     fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);

@@ -79,8 +79,36 @@ extern GC         vo_gc;
 extern XSizeHints vo_hint;
 
 #ifdef HAVE_XV
+//XvPortID xv_port;
+extern unsigned int xv_port;
+
 extern int vo_xv_set_eq(uint32_t xv_port, char * name, int value);
 extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
+
+/*** colorkey handling ***/
+typedef struct xv_ck_info_s
+{
+  int method; ///< CK_METHOD_* constants
+  int source; ///< CK_SRC_* constants
+} xv_ck_info_t;
+
+#define CK_METHOD_NONE       0 ///< no colorkey drawing
+#define CK_METHOD_BACKGROUND 1 ///< set colorkey as window background
+#define CK_METHOD_AUTOPAINT  2 ///< let xv draw the colorkey
+#define CK_METHOD_MANUALFILL 3 ///< manually draw the colorkey
+#define CK_SRC_USE           0 ///< use specified / default colorkey
+#define CK_SRC_SET           1 ///< use and set specified / default colorkey
+#define CK_SRC_CUR           2 ///< use current colorkey ( get it from xv )
+
+extern xv_ck_info_t xv_ck_info;
+extern unsigned long xv_colorkey;
+
+extern int vo_xv_init_colorkey();
+extern void vo_xv_colorkey(uint32_t x,uint32_t  y, uint32_t w, uint32_t h);
+
+/*** test functions for common suboptions ***/
+int xv_test_ck( void * arg );
+int xv_test_ckm( void * arg );
 #endif
 
 #ifdef HAVE_NEW_GUI

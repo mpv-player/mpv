@@ -46,6 +46,8 @@
 #ifdef HAVE_XV
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
+
+#include "subopt-helper.h"
 #endif
 
 #include "input/input.h"
@@ -2240,6 +2242,315 @@ int vo_xv_get_eq(uint32_t xv_port, char *name, int *value)
             }
         }
     return (VO_FALSE);
+}
+
+/** \brief contains flags changing the execution of the colorkeying code */
+xv_ck_info_t xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR };
+unsigned long xv_colorkey; ///< The color used for manual colorkeying.
+unsigned int xv_port; ///< The selected Xv port.
+
+/**
+ * \brief Interns the requested atom if it is available.
+ *
+ * \param atom_name String containing the name of the requested atom.
+ *
+ * \return Returns the atom if available, else None is returned.
+ *
+ */
+static Atom xv_intern_atom_if_exists( char const * atom_name )
+{
+  XvAttribute * attributes;
+  int attrib_count,i;
+  Atom xv_atom = None;
+
+  attributes = XvQueryPortAttributes( mDisplay, xv_port, &attrib_count );
+  if( attributes!=NULL )
+  {
+    for ( i = 0; i < attrib_count; ++i )
+    {
+      if ( strcmp(attributes[i].name, atom_name ) == 0 )
+      {
+        xv_atom = XInternAtom( mDisplay, atom_name, False );
+        break; // found what we want, break out
+      }
+    }
+    XFree( attributes );
+  }
+
+  return xv_atom;
+}
+/**
+ * \brief Print information about the colorkey method and source.
+ *
+ * \param ck_handling Integer value containing the information about
+ *                    colorkey handling (see x11_common.h).
+ *
+ * Outputs the content of |ck_handling| as a readable message.
+ *
+ */
+void vo_xv_print_ck_info()
+{
+  mp_msg( MSGT_VO, MSGL_V, "[xv common] " );
+
+  switch ( xv_ck_info.method )
+  {
+    case CK_METHOD_NONE:
+      mp_msg( MSGT_VO, MSGL_V, "Drawing no colorkey.\n" ); return;
+    case CK_METHOD_AUTOPAINT:
+      mp_msg( MSGT_VO, MSGL_V, "Colorkey is drawn by Xv." ); break;
+    case CK_METHOD_MANUALFILL:
+      mp_msg( MSGT_VO, MSGL_V, "Drawing colorkey manually." ); break;
+    case CK_METHOD_BACKGROUND:
+      mp_msg( MSGT_VO, MSGL_V, "Colorkey is drawn as window background." ); break;
+  }
+
+  mp_msg( MSGT_VO, MSGL_V, "\n[xv common] " );
+
+  switch ( xv_ck_info.source )
+  {
+    case CK_SRC_CUR:      
+      mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06x).\n",
+              xv_colorkey );
+      break;
+    case CK_SRC_USE:
+      if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
+      {
+        mp_msg( MSGT_VO, MSGL_V,
+                "Ignoring colorkey from MPlayer (0x%06x).\n",
+                xv_colorkey );
+      }
+      else
+      {
+        mp_msg( MSGT_VO, MSGL_V,
+                "Using colorkey from MPlayer (0x%06x)."
+                " Use -colorkey to change.\n",
+                xv_colorkey );
+      }
+      break;
+    case CK_SRC_SET:
+      mp_msg( MSGT_VO, MSGL_V,
+              "Setting and using colorkey from MPlayer (0x%06x)."
+              " Use -colorkey to change.\n",
+              xv_colorkey );
+      break;
+  }
+}
+/**
+ * \brief Init colorkey depending on the settings in xv_ck_info.
+ *
+ * \return Returns 0 on failure and 1 on success.
+ *
+ * Sets the colorkey variable according to the CK_SRC_* and CK_METHOD_*
+ * flags in xv_ck_info.
+ *
+ * Possiblilities:
+ *   * Methods
+ *     - manual colorkey drawing ( CK_METHOD_MANUALFILL )
+ *     - set colorkey as window background ( CK_METHOD_BACKGROUND )
+ *     - let Xv paint the colorkey ( CK_METHOD_AUTOPAINT )
+ *   * Sources
+ *     - use currently set colorkey ( CK_SRC_CUR )
+ *     - use colorkey in vo_colorkey ( CK_SRC_USE )
+ *     - use and set colorkey in vo_colorkey ( CK_SRC_SET )
+ *
+ * NOTE: If vo_colorkey has bits set after the first 3 low order bytes
+ *       we don't draw anything as this means it was forced to off.
+ */
+int vo_xv_init_colorkey()
+{
+  Atom xv_atom;
+  int rez;
+
+  /* check if colorkeying is needed */
+  xv_atom = xv_intern_atom_if_exists( "XV_COLORKEY" );
+
+  /* if we have to deal with colorkeying ... */
+  if( xv_atom != None && !(vo_colorkey & 0xFF000000) )
+  {
+    /* check if we should use the colorkey specified in vo_colorkey */
+    if ( xv_ck_info.source != CK_SRC_CUR )
+    {
+      xv_colorkey = vo_colorkey;
+  
+      /* check if we have to set the colorkey too */
+      if ( xv_ck_info.source == CK_SRC_SET )
+      {
+        xv_atom = XInternAtom(mDisplay, "XV_COLORKEY",False);
+  
+        rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, vo_colorkey );
+        if ( rez != Success )
+        {
+          mp_msg( MSGT_VO, MSGL_FATAL,
+                  "[xv common] Couldn't set colorkey!\n" );
+          return 0; // error setting colorkey
+        }
+      }
+    }
+    else 
+    {
+      int colorkey_ret;
+
+      rez=XvGetPortAttribute(mDisplay,xv_port, xv_atom, &colorkey_ret);
+      if ( rez == Success )
+      {
+         xv_colorkey = colorkey_ret;
+      }
+      else
+      {
+        mp_msg( MSGT_VO, MSGL_FATAL,
+                "[xv common] Couldn't get colorkey!"
+                "Maybe the selected Xv port has no overlay.\n" );
+        return 0; // error getting colorkey
+      }
+    }
+
+    /* should we draw the colorkey ourselves or activate autopainting? */
+    if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
+    {
+      rez = !Success; // reset rez to something different than Success
+      xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );
+ 
+      if ( xv_atom != None ) // autopaint is supported
+      {
+        rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, 1 );
+      }
+
+      if ( rez != Success )
+      {
+        // fallback to manual colorkey drawing
+        xv_ck_info.method = CK_METHOD_MANUALFILL;
+      }
+    }
+  }
+  else // do no colorkey drawing at all
+  {
+    xv_ck_info.method = CK_METHOD_NONE;
+  } /* end: should we draw colorkey */
+
+  /* output information about the curren colorkey settings */
+  vo_xv_print_ck_info();
+
+  return 1; // success
+}
+
+/**
+ * \brief Draw the colorkey on the video window.
+ *
+ * Draws the colorkey depending on the set method ( colorkey_handling ).
+ *
+ * It also draws the black bars ( when the video doesn't fit to the
+ * display in full screen ) seperately, so they don't overlap with the
+ * video area.
+ *
+ */
+inline void vo_xv_draw_colorkey( uint32_t x, uint32_t y,
+                                 uint32_t w, uint32_t h  )
+{
+  if( xv_ck_info.method == CK_METHOD_MANUALFILL )
+  {
+    XSetForeground( mDisplay, vo_gc, xv_colorkey );
+    XFillRectangle( mDisplay, vo_window, vo_gc,
+                    x, y,
+                    w, h );
+  }
+
+  /* draw black bars if needed */
+  if ( vo_fs )
+  {
+    XSetForeground( mDisplay, vo_gc, 0 );
+    if ( y > 0 )
+      XFillRectangle( mDisplay, vo_window, vo_gc,
+                      0, 0,
+                      vo_screenwidth, y);
+    if (x > 0)
+      XFillRectangle( mDisplay, vo_window, vo_gc,
+                      0, y,
+                      x, h );
+    if (x + w < vo_screenwidth)
+      XFillRectangle( mDisplay, vo_window, vo_gc,
+                      x + w, y,
+                      vo_screenwidth - (x + w), h );
+    if (y + h < vo_screenheight)
+      XFillRectangle( mDisplay, vo_window, vo_gc,
+                      0, y + h,
+                      vo_screenwidth, vo_screenheight - (y + h) );
+  }
+
+  XFlush( mDisplay );
+}
+
+/** \brief tests if a valid arg for the ck suboption was given */ 
+int xv_test_ck( void * arg )
+{
+  strarg_t * strarg = (strarg_t *)arg;
+
+  if ( strncmp( "use", strarg->str, 3 ) == 0 ||
+       strncmp( "set", strarg->str, 3 ) == 0 ||
+       strncmp( "cur", strarg->str, 3 ) == 0    )
+  {
+    return 1;
+  }
+
+  return 0;
+}
+/** \brief tests if a valid arg for the ck-method suboption was given */ 
+int xv_test_ckm( void * arg )
+{
+  strarg_t * strarg = (strarg_t *)arg;
+
+  if ( strncmp( "bg", strarg->str, 2 ) == 0 ||
+       strncmp( "man", strarg->str, 3 ) == 0 ||
+       strncmp( "auto", strarg->str, 4 ) == 0    )
+  {
+    return 1;
+  }
+
+  return 0;
+}
+
+/**
+ * \brief Modify the colorkey_handling var according to str
+ *
+ * Checks if a valid pointer ( not NULL ) to the string
+ * was given. And in that case modifies the colorkey_handling
+ * var to reflect the requested behaviour.
+ * If nothing happens the content of colorkey_handling stays
+ * the same.
+ *
+ * \param str Pointer to the string or NULL
+ *
+ */
+void xv_setup_colorkeyhandling( char const * ck_method_str,
+                                char const * ck_str )
+{
+  /* check if a valid pointer to the string was passed */
+  if ( ck_str )
+  {
+    if ( strncmp( ck_str, "use", 3 ) == 0 )
+    {
+      xv_ck_info.source = CK_SRC_USE;
+    }
+    else if ( strncmp( ck_str, "set", 3 ) == 0 )
+    {
+      xv_ck_info.source = CK_SRC_SET;
+    }
+  }
+  /* check if a valid pointer to the string was passed */
+  if ( ck_method_str )
+  {
+    if ( strncmp( ck_method_str, "bg", 2 ) == 0 )
+    {
+      xv_ck_info.method = CK_METHOD_BACKGROUND;
+    }
+    else if ( strncmp( ck_method_str, "man", 3 ) == 0 )
+    {
+      xv_ck_info.method = CK_METHOD_MANUALFILL;
+    }    
+    else if ( strncmp( ck_method_str, "auto", 4 ) == 0 )
+    {
+      xv_ck_info.method = CK_METHOD_AUTOPAINT;
+    }    
+  }
 }
 
 #endif
