@@ -246,9 +246,12 @@ static int mga_src_base = 0;	// YUV buffer position in video memory
 
 static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
+static uint32_t mga_top_reserved = 0;	// reserved space for console font (matroxfb + fastfont)
+
 //static int mga_force_memsize = 0;
 
 MODULE_PARM(mga_ram_size, "i");
+MODULE_PARM(mga_top_reserved, "i");
 
 static struct pci_dev *pci_dev;
 
@@ -1167,7 +1170,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				return(-EFAULT);
 			}
 			
-			mga_src_base = (mga_ram_size*0x100000-mga_config.num_frames*mga_config.frame_size);
+			mga_src_base = (mga_ram_size*0x100000-mga_config.num_frames*mga_config.frame_size-mga_top_reserved);
 			if(mga_src_base<0){
 				printk(KERN_ERR "mga_vid: not enough memory for frames!\n");
 				return(-EFAULT);
