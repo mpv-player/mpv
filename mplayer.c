@@ -114,11 +114,6 @@ m_config_t* mconfig;
              Video accelerated architecture
 **************************************************************************/
 vo_vaa_t vo_vaa;
-int v_hw_equ_cap=0;
-int v_bright=50;
-int v_cont=50;
-int v_hue=50;
-int v_saturation=50;
 
 //**************************************************************************//
 //             Config file
@@ -446,6 +441,11 @@ int osd_last_pts=-303;
 int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
 
+int v_hw_equ_cap=0;
+int v_bright=50;
+int v_cont=50;
+int v_hue=50;
+int v_saturation=50;
 /*
 For future:
 int v_red_intensity=0;
@@ -1327,10 +1327,10 @@ current_module="init_libvo";
 	if(vo_vaa.get_video_eq(&veq) == 0)
 	{
 	    v_hw_equ_cap = veq.cap;
-	    v_bright = veq.brightness/10;
-	    v_cont = veq.contrast/10;
-	    v_hue = veq.hue/10;
-	    v_saturation=veq.saturation/10;
+	    if(veq.cap & VEQ_CAP_BRIGHTNESS) v_bright = veq.brightness/10;
+	    if(veq.cap & VEQ_CAP_CONTRAST) v_cont = veq.contrast/10;
+	    if(veq.cap & VEQ_CAP_HUE) v_hue = veq.hue/10;
+	    if(veq.cap & VEQ_CAP_SATURATION) v_saturation=veq.saturation/10;
 	    /*
 	    v_red_intensity=veq.red_intensity/10;
 	    v_green_intensity=veq.green_intensity/10;
@@ -2097,7 +2097,7 @@ if(step_sec>0) {
 	    if ( ++v_cont > 100 ) v_cont = 100;
         } else {
 	    --v_cont;
-	    if(v_hw_equ_cap)
+	    if(v_hw_equ_cap & VEQ_CAP_CONTRAST)
 	    {
 		if(v_cont < -100) v_cont = -100;
 	    }
@@ -2125,7 +2125,7 @@ if(step_sec>0) {
 	    if ( ++v_bright > 100 ) v_bright = 100;
         } else {
 	    --v_bright;
-	    if(v_hw_equ_cap)
+	    if(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS)
 	    {
 		if(v_bright < -100) v_bright = -100;
 	    }
@@ -2153,7 +2153,7 @@ if(step_sec>0) {
 	    if ( ++v_hue > 100 ) v_hue = 100;
         } else {
 	    --v_hue;
-	    if(v_hw_equ_cap)
+	    if(v_hw_equ_cap & VEQ_CAP_HUE)
 	    {
 		if(v_hue < -100) v_hue = -100;
 	    }
@@ -2181,7 +2181,7 @@ if(step_sec>0) {
 	    if ( ++v_saturation > 100 ) v_saturation = 100;
         } else {
 	    --v_saturation;
-	    if(v_hw_equ_cap)
+	    if(v_hw_equ_cap & VEQ_CAP_SATURATION)
 	    {
 		if(v_saturation < -100) v_saturation = -100;
 	    }

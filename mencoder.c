@@ -88,11 +88,6 @@ int lavc_param_keyint = -1;
              Video accelerated architecture
 **************************************************************************/
 vo_vaa_t vo_vaa;
-int v_hw_equ_cap=0;
-int v_bright=50;
-int v_cont=50;
-int v_hue=50;
-int v_saturation=50;
 
 
 //--------------------------

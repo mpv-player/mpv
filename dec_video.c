@@ -39,11 +39,6 @@ extern int verbose; // defined in mplayer.c
 extern double video_time_usage;
 extern double vout_time_usage;
 extern vo_vaa_t vo_vaa;
-extern int v_hw_equ_cap;
-extern int v_bright;
-extern int v_cont;
-extern int v_hue;
-extern int v_saturation;
 
 extern int frameratecode2framerate[16];
 
@@ -281,22 +276,55 @@ void set_video_quality(sh_video_t *sh_video,int quality){
  }
 }
 
-int set_video_colors(sh_video_t *sh_video,char *item,int value){
-    if(v_hw_equ_cap != 0)
+int set_video_colors(sh_video_t *sh_video,char *item,int value)
+{
+    if(vo_vaa.get_video_eq)
     {
-	if(vo_vaa.set_video_eq)
+	vidix_video_eq_t veq;
+	if(vo_vaa.get_video_eq(&veq) == 0)
 	{
-	    vidix_video_eq_t veq;
-	    veq.cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST | VEQ_CAP_SATURATION | VEQ_CAP_HUE;
-	    veq.brightness = v_bright*10;
-	    veq.contrast = v_cont*10;
-	    veq.saturation = v_saturation*10;
-	    veq.hue = v_hue;
-	    veq.flags = VEQ_FLG_ITU_R_BT_601; /* Fixme please !!! */
-	    vo_vaa.set_video_eq(&veq);
+	    int v_hw_equ_cap = veq.cap;
+	    if(v_hw_equ_cap != 0)
+	    {
+		if(vo_vaa.set_video_eq)
+		{
+		    vidix_video_eq_t veq;
+		    veq.flags = VEQ_FLG_ITU_R_BT_601; /* Fixme please !!! */
+		    if(strcmp(item,"Brightness") == 0)
+		    {
+			if(!(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS)) goto try_sw_control;
+			veq.brightness = value*10;
+			veq.cap = VEQ_CAP_BRIGHTNESS;
+		    }
+		    else
+		    if(strcmp(item,"Contrast") == 0)
+		    {
+			if(!(v_hw_equ_cap & VEQ_CAP_CONTRAST)) goto try_sw_control;
+			veq.contrast = value*10;
+			veq.cap = VEQ_CAP_CONTRAST;
+		    }
+		    else
+		    if(strcmp(item,"Saturation") == 0)
+		    {
+			if(!(v_hw_equ_cap & VEQ_CAP_SATURATION)) goto try_sw_control;
+			veq.saturation = value*10;
+			veq.cap = VEQ_CAP_SATURATION;
+		    }
+		    else
+		    if(strcmp(item,"Hue") == 0)
+		    {
+			if(!(v_hw_equ_cap & VEQ_CAP_HUE)) goto try_sw_control;
+			veq.hue = value*10;
+			veq.cap = VEQ_CAP_HUE;
+		    }
+		    else goto try_sw_control;;
+		    vo_vaa.set_video_eq(&veq);
+		}
+		return 1;
+	    }
 	}
-	return 1;
     }
+    try_sw_control:
 #ifdef USE_DIRECTSHOW
     if(sh_video->codec->driver==VFM_DSHOW){
 	DS_VideoDecoder_SetValue(ds_vdec,item,value);
