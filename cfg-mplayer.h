@@ -109,9 +109,9 @@ extern int readPPOpt(void *conf, char *arg);
  * by Folke
  */
 
-struct config mplayer_opts[]={
+static config_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
-	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL}, /* this must be the first!!! */
+	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this don't need anymore to be the first!!! */
 
 //---------------------- libao/libvo/mplayer options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
@@ -211,8 +211,8 @@ struct config mplayer_opts[]={
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif	
-	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
-	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"x", &opt_screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"y", &opt_screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
@@ -240,7 +240,7 @@ struct config mplayer_opts[]={
 #endif
 
 #ifdef HAVE_LIRC
-	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL}, 
 #endif
 
 #ifdef USE_DVDREAD
@@ -248,19 +248,19 @@ struct config mplayer_opts[]={
 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
-	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
       
 #ifdef HAVE_NEW_GUI
-	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
-	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
 
 #ifdef HAVE_X11
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -275,11 +275,11 @@ struct config mplayer_opts[]={
 #include "cfg-common.h"
 #undef MAIN_CONF
         
-	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0, NULL},
-	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"quiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 100, NULL},
+	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
+	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };

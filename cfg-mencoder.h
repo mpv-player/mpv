@@ -85,9 +85,9 @@ struct config oac_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-struct config mencoder_opts[]={
+static config_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
-	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL}, /* this must be the first!!! */
+	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
 
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -126,8 +126,8 @@ struct config mencoder_opts[]={
 #undef MAIN_CONF
 
 //	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0, NULL},
+	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 100, NULL},
+	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL},
 //	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 //	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 //	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
