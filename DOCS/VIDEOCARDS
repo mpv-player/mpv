@@ -157,7 +157,7 @@ b, You want to use framebuffer...
   read the framebuffer documentation in the kernel sources
   (Documentation/fb/*) !
 
-  ... but don't your card doesn't support VBE 2.0 standard (older ISA/PCI
+  ... but your card doesn't support VBE 2.0 standard (older ISA/PCI
   cards, such as S3 Trio64) :
   Well, VESAfb is still available, but you'll have to load SciTech Display
   Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
