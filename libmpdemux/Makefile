@@ -39,7 +39,7 @@ $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:	$(LIBNAME) test.c
-	$(CC) $(CFLAGS) test.c ../mp_msg.c ../linux/shmem.c -o test -L. -lmpdemux -ldvdread -lz -lpthread
+	$(CC) $(CFLAGS) test.c ../mp_msg.c ../linux/shmem.c -o test ./libmpdemux.a -ldvdread -lz -lpthread
 
 clean:
 	rm -f *.o *.a *~

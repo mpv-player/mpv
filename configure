@@ -2820,7 +2820,7 @@ fi
 if test "$_mp1e" != no ; then
   _mp1e=yes
   _def_mp1e='#define USE_MP1E'
-  _ld_mp1e="-Llibmp1e -lmp1e"
+  _ld_mp1e='libmp1e/libmp1e.a'
   _dep_mp1e='libmp1e/libmp1e.a'
 else
   _mp1e=no
@@ -2854,8 +2854,8 @@ fi
 _def_fame='#undef USE_LIBFAME'
 if test "$_fame" = yes ; then
   _def_fame='#define USE_LIBFAME 1'	
-  _ld_fame='-Llibfame -lfame'	
-fi  
+  _ld_fame='libfame/libfame.a'
+fi
 
 
 #########
@@ -3370,7 +3370,7 @@ if test "$_win32" = auto ; then
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
-  _ld_win32='-Lloader -lloader'
+  _ld_win32='loader/libloader.a'
   _dep_win32='loader/libloader.a'
   _codecmodules="win32 $_codecmodules"
   echores "yes (using $_win32libdir)"
@@ -3430,7 +3430,7 @@ echores "$_dshow"
 
 if test "$_dshow" = yes ; then
   _def_dshow='#define USE_DIRECTSHOW 1'
-  _ld_dshow='-Lloader/dshow -lDS_Filter'
+  _ld_dshow='loader/dshow/libDS_Filter.a'
   _dep_dshow='loader/dshow/libDS_Filter.a'
   _codecmodules="directshow $_codecmodules"
 else
@@ -3652,7 +3652,7 @@ _def_libavcodecso='#undef USE_LIBAVCODEC_SO'
 _def_ffpostprocess='#undef FF_POSTPROCESS'
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
-  _ld_libavcodec='-Llibavcodec -lavcodec'
+  _ld_libavcodec='libavcodec/libavcodec.a'
   _dep_libavcodec='libavcodec/libavcodec.a'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec $_codecmodules"
@@ -3798,7 +3798,7 @@ if cc_check -lm -ldivxdecore -lm ; then
 elif test "$_opendivx" != no ; then
   _divx4linux=no
   _opendivx=yes
-  _ld_decore='-Lopendivx -ldecore'
+  _ld_decore='opendivx/libdecore.a'
   _def_decore='#undef NEW_DECORE'
   _def_divx='#define USE_DIVX'
   _def_divx5='#undef DECORE_DIVX5'

@@ -42,10 +42,10 @@ ifeq ($(TARGET_OS),OpenBSD)
 	./mp3lib_objfix.sh
 endif
 test1:	libMP3.a test.c
-	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. -L. -lMP3 -lm
+	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. ./libMP3.a -lm
 
 test2:	libMP3.a test2.c
-	$(CC) $(CFLAGS) test2.c ../libvo/aclib.c -o test2 -I.. -L. -lMP3 -lm
+	$(CC) $(CFLAGS) test2.c ../libvo/aclib.c -o test2 -I.. ./libMP3.a -lm
 
 all:	libMP3.a
 

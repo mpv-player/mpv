@@ -38,17 +38,17 @@ SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c mp-opt-reg.c
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-VO_LIBS = -Llibvo -lvo
+VO_LIBS = libvo/libvo.a
 VO_INC = -Ilibvo
 V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 
-AO_LIBS = -Llibao2 -lao2
+AO_LIBS = libao2/libao2.a
 A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
-CODEC_LIBS = -Llibmpcodecs -lmpcodecs -Lmp3lib -lMP3 -Lliba52 -la52 -Llibmpeg2 -lmpeg2 $(AV_LIB) $(FAME_LIB) $(XVID_LIB)
-COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  -Linput -linput $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(FREETYPE_LIB) -lm
+CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB) $(XVID_LIB)
+COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a  input/libinput.a $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) postproc/libpostproc.a $(DECORE_LIB) linux/libosdep.a $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(FREETYPE_LIB) -lm
 ifeq ($(VIDIX),yes)
-MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
+MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) # -Wall
 
@@ -181,12 +181,12 @@ MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEP
 ifeq ($(GUI),yes)
 MPLAYER_DEP += Gui/libgui.a
 MENCODER_DEP += Gui/libgui.a
-GUI_LIBS = -LGui -lgui
+GUI_LIBS = Gui/libgui.a
 endif
 
 VIDIX_LIBS =
 ifeq ($(VIDIX),yes)
-VIDIX_LIBS += -Lvidix -lvidix
+VIDIX_LIBS += vidix/libvidix.a
 endif
 
 $(PRG):	$(MPLAYER_DEP)
@@ -199,7 +199,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
 	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpcodecs -lmpencoders $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB)
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB)
 endif
 
 # Every mplayer dependency depends on version.h, to force building version.h
