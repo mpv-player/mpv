@@ -10,6 +10,7 @@
 <A HREF="../Hungarian/documentation.html">[ Ungarisch ]</A>
 <A HREF="../French/documentation.html">[ Französisch ]</A>
 <A HREF="../Polish/documentation.html">[ Polnisch ]</A>
+<A HREF="../Italian/documentation.html">[ Italienisch ]</A>
 </CENTER></P>
 
 <P><HR></P>
@@ -1233,6 +1234,16 @@ anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>
   hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
   einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
 </UL>
+
+<LI>Hässlicher MP2/MP3-Ton auf PPC:<BR>
+  Problem: bekannter gcc Fehlcompilierungs-Bug auf PPC Platformen, 
+  es ist noch keine Fehlerbehebung vorhanden.<BR>
+  Abhilfe: benutze FFmpeg's (langsamen) MP1/MP2/MP3 Decoder (<CODE>-ac
+ffmpeg</CODE>)</LI>
+
+<LI>sig11 in libmpeg2, beim Skalieren und Encodieren:<BR>
+  Problem: bekannter gcc 2.95.2 MMX Bug, aktualisiere auf 2.95.3.</LI>
+ </UL>
 
 <P>Verschiedene A-V Sync- und andere Audio-Probleme</P>
 

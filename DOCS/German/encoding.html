@@ -152,9 +152,9 @@ erforderlich:<BR>
   bedenken, dass der Header von AVI Dateien keine solche Information enthält. Darum ist die einzige Möglichkeit
   das Ändern das Auslösung.</P>
 
-<P>Die Ausgabegröße wird mit der <CODE>-x</CODE> und <CODE>-y</CODE> Option angeben.
-  Zusätzlich gibt es noch 3 verschiedene Filter für Rescaling in <B>MEncoder</B>, <I>0
-  : fast (schnell) 1 : bilinear</I>, <I>2 : bilinear</I>, <I>bicubic</I> (beste Qualität).
+<P><B>MEncoder</B> kann Eingansbilder skalieren, falls diese im YV12-Format kommen (z.B.: ffdivx, odivx Treiber oder mpeg1/2).
+  Die Ausgabegröße wird mit der <CODE>-x</CODE> und <CODE>-y</CODE> Option angeben.
+  Zusätzlich gibt es noch einige Filter für Rescaling in <B>MEncoder</B>, lies dazu in der Manpage !
   Diese können mit der <CODE>-sws</CODE> Option ausgewählt werden. Wenn nichts angeben wird,
   verwendet <B>MEncoder</B> 0 : fast bilinear.</P>
 
