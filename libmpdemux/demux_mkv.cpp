@@ -1520,10 +1520,11 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
   // DO NOT automatically select a subtitle track and behave like DVD
   // playback: only show subtitles if the user explicitely wants them.
-  if (dvdsub_lang != NULL)
-    track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
-  else if (demuxer->sub->id >= 0)
+  track = NULL;
+  if (demuxer->sub->id >= 0)
     track = find_track_by_num(mkv_d, demuxer->sub->id, NULL);
+  else if (dvdsub_lang != NULL)
+    track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
   if (track) {
     if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
         strcmp(track->codec_id, MKV_S_TEXTUTF8))
@@ -1704,7 +1705,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                     dp = new_demux_packet(data.Size());
                     memcpy(dp->buffer, data.Buffer(), data.Size());
                     dp->pts = mkv_d->last_pts;
-                    dp->flags = 0;
+                    dp->flags = (elements_found & 4) == 0 ? 1 : 0; // keyframe
                     ds_add_packet(ds, dp);
                     found_data++;
                   }
