@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-08-27" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-09-19" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -3689,12 +3689,12 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 .B pp[=filter1[:option1[:option2...]]/\:[-]filter2...] (also see \-pphelp)
 Enables the specified chain of postprocessing subfilters.
 Subfilters must be separated by '/' and can be disabled by prepending
-a '\-', appending a ':' followed by 'a', 'c' or 'y' determines its
-scope (default: c):
+a '\-'. A subfilter's scope can be determined by appending a ':' followed
+by 'a', 'c' or 'y' (default: c):
 .PD 0
 .RSs
 .IPs a
-Switch the subfilter off if the CPU is too slow.
+Automatically switch the subfilter off if the CPU is too slow.
 .IPs c
 Do chrominance filtering, too.
 .IPs y
@@ -3722,8 +3722,8 @@ default filters without brightness/\:contrast correction
 .IPs "\-vf pp=de/tn:1:2:3"
 Enable default filters & temporal denoiser.
 .IPs "\-vf pp=hb:y/vb:a"
-Horizontal deblocking on luminance only and switch vertical deblocking on or
-off automatically depending on available CPU time.
+Horizontal deblocking on luminance only, and switch vertical deblocking
+on or off automatically depending on available CPU time.
 .RE
 .PD 1
 .
@@ -3943,7 +3943,7 @@ fixing movies that were inverse-telecined incorrectly.
 .
 .TP
 .B dint[=sense:level]
-Detects and drops first interlaced frame in a video stream.
+Detects and drops the first from a set of interlaced video frames.
 Values can be from 0.0 to 1.0 \- first (default 0.1) is relative difference
 between neighbor pixels, second (default 0.15) is what part of image has to
 be detected as interlaced to drop the frame.
