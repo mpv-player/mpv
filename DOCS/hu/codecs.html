@@ -435,7 +435,34 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   fejezetben található.</P>
 
 
+<H4><A NAME=aac>2.2.2.8. AAC codec</A></H4>
+
+<P>Az AAC (Advanced Audio Coding) egy MOV illetve MP4 file-okban elõforduló
+  audio codec. A FAAD nevû nyílt forráskódú dekóder az
+  <A HREF="http://www.audiocoding.com/">AudioCoding.com</A> címrõl tölthetõ le.
+  A második generációs FAAD2 codec a
+  <A HREF="http://www.audiocoding.com/download.php">letöltési lapon</A>
+  található. Sajnos a FAAD2 1.1 nem fordul le Linux alatt, így a CVS verziót
+  kell használni. Íme ennek útmutatója:</P>
+
+<OL>
+  <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
+  <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
+  <LI>cd faad2/</LI>
+  <LI>chmod +x bootstrap</LI>
+  <LI>./bootstrap</LI>
+  <LI>make</LI>
+  <LI>make install</LI>
+</OL>
+
+<P>Az audiocoding.com címen nem fogsz találni binárisokat. Debian csomagok
+  <A HREF="http://marillat.free.fr/">Christian Marillat honlapján,</A>
+  Mandrake RPM-ek pedig a
+  <A HREF="http://plf.zarb.org/">P.L.F lapján</A> találhatók.</P>
+
+
 <H3><A NAME=importing>2.2.3  Hogyan használj ismeretlen Win32 codec-et</A></H3>
+
 
 <H4><A NAME=importing_vfw>2.2.3.1  VfW</A></H4>
 
