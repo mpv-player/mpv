@@ -153,6 +153,7 @@ extern void demux_close_ogg(demuxer_t* demuxer);
 extern void demux_close_rtp(demuxer_t* demuxer);
 extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
+extern void demux_close_rawdv(demuxer_t* demuxer);
 
 void free_demuxer(demuxer_t *demuxer){
     int i;
@@ -176,6 +177,10 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_fli(demuxer); break;
     case DEMUXER_TYPE_NUV:
       demux_close_nuv(demuxer); break;
+#ifdef HAVE_LIBDV095
+    case DEMUXER_TYPE_RAWDV:
+      demux_close_rawdv(demuxer); break;
+#endif
     case DEMUXER_TYPE_AUDIO:
       demux_close_audio(demuxer); break;
     case DEMUXER_TYPE_OGG:
@@ -261,6 +266,8 @@ int demux_vivo_fill_buffer(demuxer_t *demux);
 int demux_real_fill_buffer(demuxer_t *demuxer);
 int demux_nuv_fill_buffer(demuxer_t *demux);
 int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
+int demux_rawdv_fill_buffer(demuxer_t *demuxer);
+
 #ifdef USE_TV
 #include "tv.h"
 extern tvi_handle_t *tv_handler;
@@ -292,6 +299,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
+#ifdef HAVE_LIBDV095
+    case DEMUXER_TYPE_RAWDV: return demux_rawdv_fill_buffer(demux);
+#endif
     case DEMUXER_TYPE_REAL: return demux_real_fill_buffer(demux);
     case DEMUXER_TYPE_NUV: return demux_nuv_fill_buffer(demux);
 #ifdef USE_TV
@@ -506,6 +516,10 @@ int demux_open_mf(demuxer_t* demuxer);
 int demux_open_film(demuxer_t* demuxer);
 int demux_open_bmp(demuxer_t* demuxer);
 int demux_open_roq(demuxer_t* demuxer);
+#ifdef HAVE_LIBDV095
+int demux_open_rawdv(demuxer_t* demuxer);
+extern int check_file_rawdv(demuxer_t *demuxer);
+#endif
 
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
@@ -780,6 +794,20 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
 }
+#ifdef HAVE_LIBDV095
+//=============== Try to open raw DV file, as produced by dvgrab --format raw =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
+{
+   demuxer=new_demuxer(stream,DEMUXER_TYPE_RAWDV,audio_id,video_id,dvdsub_id);
+   if(check_file_rawdv(demuxer))
+   {
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected RAWDV file format!\n");
+      file_format=DEMUXER_TYPE_RAWDV;
+   }
+   else
+      free_demuxer(demuxer);
+}
+#endif
 //=============== Try to open as multi file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
@@ -821,6 +849,13 @@ d_video=demuxer->video;
 demuxer->file_format=file_format;
 
 switch(file_format){
+#ifdef HAVE_LIBDV095
+ case DEMUXER_TYPE_RAWDV:
+ {
+   if (!demux_open_rawdv(demuxer)) return NULL;
+   break;
+ }
+#endif
  case DEMUXER_TYPE_RAWAUDIO: {
    demux_rawaudio_open(demuxer);
    break;
@@ -1025,7 +1060,6 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
     return vd;
 }
 
-
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
@@ -1036,6 +1070,10 @@ int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
+#ifdef HAVE_LIBDV095
+int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
+#endif
+
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 #ifdef HAVE_OGGVORBIS
@@ -1078,6 +1116,10 @@ if(!demuxer->seekable){
 
 switch(demuxer->file_format){
 
+#ifdef HAVE_LIBDV095
+  case DEMUXER_TYPE_RAWDV:
+      demux_seek_rawdv(demuxer,rel_seek_secs,flags);  break;
+#endif
   case DEMUXER_TYPE_AVI:
       demux_seek_avi(demuxer,rel_seek_secs,flags);  break;
 
