@@ -18,6 +18,7 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
+#include "../../libmpdemux/stream.h"
 
 #define mplMouseTimerConst  10
 #define mplRedrawTimerConst 5
@@ -78,14 +79,15 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
  vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
  
- i=wsHideFrame|wsMaxSize|wsShowWindow;
- if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsShowWindow;
+ i=wsHideFrame|wsMaxSize|wsHideWindow;
+ if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsHideWindow;
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
-
+ wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+ 
  mplMenuInit();
 
  #ifdef DEBUG
