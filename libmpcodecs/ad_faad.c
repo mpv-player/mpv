@@ -45,7 +45,8 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh)
 {
-  unsigned long faac_samplerate, faac_channels;
+  unsigned long faac_samplerate;
+  unsigned char faac_channels;
   int faac_init;
   faac_hdec = faacDecOpen();
 
