@@ -9,6 +9,7 @@ Features / goals:
 
 Simple
 	use the same encoding for nearly all fields
+	simple decoding, so slow cpus can handle it
 Extendible
 	no limit for the possible values for all fields (using universal vlc)
 	allow adding of new headers in the future
@@ -35,6 +36,31 @@ SHOULD	its recommanded to be done that way but its not strictly required
 
 			Syntax:
 
+		Type definitions:
+v
+	value=0
+	do{
+		more_data			u(1)
+		data				u(7)
+		value= 128*value + data
+	}while(more_data)
+	value-=4
+ 
+sz (zero terminated string)
+	for(i=0; next_byte != 0; i++){
+		string[i]			u(8)
+	}
+	zero_byte				f(8)
+Note: the string MUST not be 0 bytes long (only a zero byte coded), instead
+	{'?', 0} should be used instead, this is done to avoid emulating 
+	startcode prefixes (if we allow 0 then there could be 0,0,1 which 
+	is a startcode prefix in mpeg)
+
+f(x)	n fixed bits
+u(x)	unsigned number encoded in x bits in MSB first order
+
+
+		Bitstream syntax:
 packet header
 	forward ptr				v
 	backward ptr				v
@@ -129,32 +155,13 @@ Index:
 info_header: (optional)
 	packet header
 	info_startcode				f(64)
-	title					sz
-	author					sz
-	copyright				sz
-	description				sz
+	entry_count				v
+	for(i=0; i<entry_count; i++){
+		name				sz
+		value				sz
+        }
         checksum				u(32)
         
-v
-	value=0
-	do{
-		more_data			u(1)
-		data				u(7)
-		value= 128*value + data
-	}while(more_data)
-	value-=4
- 
-sz (zero terminated string)
-	for(i=0; next_byte != 0; i++){
-		string[i]			u(8)
-	}
-	zero_byte				f(8)
-Note: the string MUST not be 0 bytes long (only a zero byte coded), instead
-	{'?', 0} should be used instead
-
-f(x)	n fixed bits
-u(x)	unsigned number encoded in x bits in MSB first order
-
 
 forward_ptr
 backward_ptr
@@ -174,7 +181,7 @@ stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
 	so a stream with class 0 MUST allways have a id which is lower then any
 	stream with class > 0
-	if there is a stream with id n>0 then there MUST be a stream with id n-1
+	streams should use low ids 
 
 stream_class
 	0	video
@@ -274,6 +281,14 @@ index_position
 	position in bytes of the first byte of the keyframe header, relative
 	to the last index_position
 
+name
+	the name of the info entry, valid names are
+	"Author","Description","Copyright","Encoder","Title"
+	Note: if someone needs some others, please tell us about them, so we can
+	      add them to the official standard (if they are sane)
+
+value
+	
         
 
 			Structure:
@@ -292,6 +307,9 @@ headers may be repated, but if they are then they MUST all be repeated together
 and repeated headers MUST be identical
 
 headers MUST be repeated every 10sec at least ? FIXME
+
+the info_header can be repeated, it can also contain different names & values
+each time
         
         
 			Sample code (GPL, & untested)
