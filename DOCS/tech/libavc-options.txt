@@ -48,7 +48,7 @@ vme 0-5 (motion estimation)
 	2 log   (not recommanded, lq)
 	3 phods (not recommanded, lq)
 	4 EPZS  (default)
-	5 X1
+	5 X1    (experimantal, might change from time to time or be just broken)
 
 vhq (high quality mode)
 	encode each MB as in all modes and choose the best (this is slow but
@@ -58,7 +58,6 @@ vhq (high quality mode)
 v4mv
 	allow 4 MV per MB (little difference in filesize/quality)
 	disabled by default
-	cannot be used with B frames (should now work in lq mode)
 
 keyint  0-300 (maximum interval between keyframes)
 	keyframes are needed for seeking as seeking is only possible to a
@@ -272,6 +271,20 @@ pred (for huffyuv)
         1 plane/gradient prediction
         2 median prediction
  
+qpel	use quarter pel motion compensation
+	Tip: this seems only usefull for high bitrate encodings
+
+cmp	comparission function for full pel motion estimation
+subcmp	comparission function for sub pel motion estimation
+	0 SAD (sum of absolute differences) (default)
+        1 SSE (sum of squared errors)
+        2 SATD (sum of absolute hadamard transformed differences)
+        3 DCT (sum of absolute dct transformed differences)
+        4 PSNR (sum of the squared quantization errors)
+        7 ZERO (0)
+        +256 (use chroma too, doesnt work with b frames currently)
+        Tip: SAD is fast, SATD is good
+
 lavdopts: (decoder options)
 ---------------------------
 
