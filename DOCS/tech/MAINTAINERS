@@ -94,6 +94,7 @@ demuxers:
 codec support:
     * FFmpeg: Michael Niedermayer
     * XviD: Ivan Kalvachev
+    * x264: Loren Merritt
 
 video filters:
     * general: Richard Felker, Michael Niedermayer
