@@ -4,7 +4,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
 // Andoni Zubimendi <andoni at lpsat.net>
 
-// Updated to help_mp-en.h v1.119
+// Updated to help_mp-en.h v1.123
 
 // ========================= MPlayer help ===========================
 
@@ -367,10 +367,16 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Aspecto es %.2f:1 - prescalando a aspecto correcto.\n"
 #define MSGTR_MovieAspectUndefined "Aspecto de película no es definido - no se ha aplicado prescalado.\n"
 
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Necesita actualizar/instalar el paquete binario con codecs.\n Dirijase a http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Inicialización correcta de codec de vídeo Win32/DShow.\n"
+#define MSGTR_DMOInitOK "INFO: Inicialización correcta de codec de vídeo Win32/DMO.\n"
+
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: ¡No se pudo enviar evento de pantalla completa EWMH!\n"
 
-#define MSGTR_NeedAfVolume "Mixer: Este controlador de salida de audio necesita \"-af volumén\" para cambiar el volumén.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] No mezclador de volumen por hardware, insertando filtro de volumen.\n"
+#define MSGTR_NoVolume "[Mixer] Na hay control de volumen disponible.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -388,8 +394,7 @@ static char help_text[]=
 #define MSGTR_SkinBrowser "Navegador de skins"
 #define MSGTR_Network "Streaming por red..."
 #define MSGTR_Preferences "Preferencias"
-#define MSGTR_OSSPreferences "Configuración del driver OSS"
-#define MSGTR_SDLPreferences "Configuración del driver SDL"
+#define MSGTR_AudioPreferences "Configuración de controlador de Audio"
 #define MSGTR_NoMediaOpened "no se abrió audio/vídeo"
 #define MSGTR_VCDTrack "pista VCD %d"
 #define MSGTR_NoChapter "sin capítulo"
@@ -516,6 +521,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "Ninguno"
+#define MSGTR_PREFERENCES_DriverDefault "controlador por omisión"
 #define MSGTR_PREFERENCES_AvailableDrivers "Drivers disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "No reproducir sonido"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizar sonido"
@@ -556,9 +562,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec y demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Misc"
-#define MSGTR_PREFERENCES_OSS_Device "Dispositivo:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Mezclador:"
-#define MSGTR_PREFERENCES_SDL_Driver "Controlador:"
+#define MSGTR_PREFERENCES_Audio_Device "Dispositivo:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mezclador:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Canal del Mezclador:"
 #define MSGTR_PREFERENCES_Message "Algunas opciones requieren reiniciar la reproducción."
 #define MSGTR_PREFERENCES_DXR3_VENC "Codificador de vídeo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usar LAVC (FFmpeg)"
