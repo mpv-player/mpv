@@ -60,7 +60,7 @@ int first=1;
 desc=malloc(sizeof(font_desc_t));if(!desc) goto fail_out;
 memset(desc,0,sizeof(font_desc_t));
 
-f=fopen(fname,"rt");if(!f){ mp_msg(MSGT_OSD, MSGL_ERR, "font: can't open file: %s\n",fname); goto fail_out;}
+f=fopen(fname,"rt");if(!f){ mp_msg(MSGT_OSD, MSGL_V, "font: can't open file: %s\n",fname); goto fail_out;}
 
 i = strlen (fname) - 9;
 if ((dn = malloc(i+1))){
