@@ -80,8 +80,8 @@ struct config conf[]={
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
 	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0},
-	{"alsa", &alsa, CONF_TYPE_FLAG, 0, 0, 1},
-	{"noalsa", &alsa, CONF_TYPE_FLAG, 0, 1, 0},
+//	{"alsa", &alsa, CONF_TYPE_FLAG, 0, 0, 1},
+//	{"noalsa", &alsa, CONF_TYPE_FLAG, 0, 1, 0},
 	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1},
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0},
 
