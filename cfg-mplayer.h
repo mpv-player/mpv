@@ -57,7 +57,7 @@ extern int vo_fsmode;
 extern int vo_dbpp;
 extern int vo_directrendering;
 extern float vo_panscan;
-/* only used by startup (setting these values from configfile) */
+/* only used at startup (setting these values from configfile) */
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
@@ -160,7 +160,7 @@ extern char* pp_help;
 
 /*
  * CONF_TYPE_FUNC_FULL :
- * allows own implemtations for passing the params
+ * allows own implementations for passing the params
  * 
  * the function receives parameter name and argument (if it does not start with - )
  * useful with a conf.name like 'aa*' to parse several parameters to a function
@@ -175,7 +175,7 @@ m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------
-	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
+	{"o", "Option -o has been renamed to -vo (video-out), use -vo.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"vo", &video_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"ao", &audio_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
@@ -185,7 +185,7 @@ m_option_t mplayer_opts[]={
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -197,16 +197,16 @@ m_option_t mplayer_opts[]={
 	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-	{"alsa", "Option -alsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
+	{"alsa", "-alsa has been removed. Remove it from your config file.\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
+	{"noalsa", "-noalsa has been removed. Remove it from your config file.\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef USE_EDL
 	{"edl", &edl_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 #else
-	{"edl", "MPlayer was compiled without EDL support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"edlout", "MPlayer was compiled without EDL support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"edl", "MPlayer was compiled without EDL support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"edlout", "MPlayer was compiled without EDL support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
 #ifdef HAVE_X11
@@ -223,12 +223,12 @@ m_option_t mplayer_opts[]={
 #endif
 	// -vo sdl only:
 #ifdef HAVE_SDL
-	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
+	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	// -ao sdl only:
-	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver\n",
+	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
@@ -261,7 +261,7 @@ m_option_t mplayer_opts[]={
 	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	// set aspect ratio of monitor - usefull for 16:9 TVout
+	// set aspect ratio of monitor - useful for 16:9 TVout
 	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 	// video mode switching: (x11,xv,dga)
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -270,7 +270,7 @@ m_option_t mplayer_opts[]={
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	// set fullscreen switch method (workaround for buggy WMs)
-	{"fsmode", "option 'fsmode' is obsolete, avoid using it! if you really want it, try -fsmode-dontuse, but don't report bugs with this option used!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
+	{"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
@@ -293,7 +293,7 @@ m_option_t mplayer_opts[]={
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
-	{"icelayer", "Use -fstype layer:<number> instead. -icelayer was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"icelayer", "-icelayer is obsolete. Use -fstype layer:<number> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -315,8 +315,8 @@ m_option_t mplayer_opts[]={
 	// direct rendering (decoding to video out buffer)
 	{"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"vaa_dr", "Use -dr, -vaa_dr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"vaa_nodr", "Use -nodr, -vaa_nodr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"vaa_dr", "-vaa_dr is obsolete, use -dr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"vaa_nodr", "-vaa_nodr is obsolete, use -nodr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
 #ifdef HAVE_AA
 	// -vo aa
@@ -333,11 +333,11 @@ m_option_t mplayer_opts[]={
 #endif
 
 #ifdef STREAMING_LIVE_DOT_COM
-        {"sdp", "-sdp is deprecated, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+        {"sdp", "-sdp is obsolete, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
-	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE.COM Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
 //---------------------- mplayer-only options ------------------------
@@ -349,16 +349,16 @@ m_option_t mplayer_opts[]={
 	{"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"menu-cfg", &menu_cfg, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #else
-	{"menu", "OSD menu support was not compiled in\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
+	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif
 
-	// these should be moved to -common, and suppot in mencoder too
+	// these should be moved to -common, and supported in MEncoder
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
-	// set a-v distance, should be moved to -common and support in mencoder
+	// set a-v distance, should be moved to -common and supported in MEncoder
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
 
 	{"speed", &playback_speed, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 100.0, NULL},
@@ -372,7 +372,7 @@ m_option_t mplayer_opts[]={
 	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	// dump some stream out instead of playing the file
-	// this really should be in mencoder instead of mplayer... -> TODO
+	// this really should be in MEncoder instead of MPlayer... -> TODO
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},
@@ -388,7 +388,7 @@ m_option_t mplayer_opts[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-	{"gui", "Please remove gui=yes from your config and run gmplayer if you want the GUI.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"gui", "Please remove gui=yes from your config file. Run gmplayer if you want the GUI.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 //	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCMD, 0, 1, NULL},
 //	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
       
