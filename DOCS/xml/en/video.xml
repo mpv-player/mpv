@@ -165,8 +165,9 @@ Older 3dfx drivers were known to have problems with XVideo acceleration, it
 didn't support either YUY2 or YV12, and so. Verify that you have XFree86
 version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous
 versions, including 4.1.0, <emphasis role="bold">crashes with YV12</emphasis>.
-If you experience strange effects using <option>-vo xv</option>, try SDL (it has XVideo too) and
-see if it helps. Check the <link linkend="sdl">SDL section</link> for details.
+If you experience strange effects using <option>-vo xv</option>, try SDL
+(it has XVideo, too) and see if it helps. Check the
+<link linkend="sdl">SDL section</link> for details.
 </para>
 
 <para>
@@ -204,7 +205,7 @@ nVidia isn't always a very good choice under Linux (according to nVidia, this
 is <link linkend="nvidia-opinions">not true</link>)... XFree86's
 open-source driver supports most of these cards, but for some cases, you'll
 have to use the binary closed-source nVidia driver, available at nVidia's web
-site. You'll always need this driver if you want 3D acceleration too.
+site. You'll always need this driver if you want 3D acceleration, too.
 </para>
 
 <para>
@@ -213,7 +214,7 @@ Complain to nVidia.
 </para>
 
 <para>
-However, MPlayer contains a <link linkend="vidix">Vidix</link> driver
+However, MPlayer contains a <link linkend="vidix">VIDIX</link> driver
 (<link linkend="vidix-nvidia">nvidia_vid</link>) for most nVidia cards.
 Currently it is in beta stage, and has some drawbacks. For more information,
 <link linkend="vidix-nvidia">click here</link>.
@@ -283,7 +284,7 @@ support with the Cyberblade XP card.
 </para>
 
 <para>
-Alternatively, MPlayer contains a <link linkend="vidix">Vidix</link> driver
+Alternatively, MPlayer contains a <link linkend="vidix">VIDIX</link> driver
 for the Cyberblade/i1 card.
 </para>
 
@@ -1331,7 +1332,7 @@ main goal of this interface is to maximize the speed of video playback.
   the option "XaaNoPixmapCache" in the screen section instead.
   </simpara></listitem>
 <listitem><simpara>
-  There is a console vidix driver: <option>-vo cvidix</option>.
+  There is a console VIDIX driver: <option>-vo cvidix</option>.
   This requires a working and initialized framebuffer for most cards (or else
   you'll just mess up the screen), and you'll have a similar effect as with
   <option>-vo mga</option> or <option>-vo fbdev</option>. nVidia cards however
@@ -1373,7 +1374,7 @@ output device (<emphasis role="bold">vo_server</emphasis> in short). Therefore y
 pass into command line of <application>MPlayer</application> the same keys
 as for vo_server. In addition it understands <option>-double</option> key
 as globally visible parameter. (I recommend using this key with VIDIX at
-least for ATI's card). As for <option>-vo xvidix</option> : currently it
+least for ATI's card). As for <option>-vo xvidix</option>, currently it
 recognizes the following options: <option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>
@@ -1503,12 +1504,12 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   XFree86 <filename>nv.o</filename> driver.
   </para></listitem>
 <listitem><para>
-  Currently only codecs capable of UYVY colorspace output are the only ones
-  that can work in conjuction with this driver. Unfortunately, this excludes
+  Currently only codecs capable of UYVY colorspace output
+  can work in conjunction with this driver. Unfortunately, this excludes
   every single decoder from the libavcodec family. This leaves us with the
   following usable popular codecs: <systemitem>cvid, divxds, xvid, divx4,
   wmv7, wmv8</systemitem> and some others. Please note that this is only
-  a temporal incomfortability. The usage syntax is as follows:
+  a temporal inconvenience. The usage syntax is as follows:
   <screen>
     mplayer -vf formay=uyvy -vc divxds divx3file.avi
   </screen>
