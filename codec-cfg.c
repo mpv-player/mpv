@@ -593,6 +593,7 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 	int i, j;
 	codecs_t *c;
 
+#if 0
 	if (start) {
 		for (/* NOTHING */; start->name; start++) {
 			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
@@ -603,7 +604,9 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 				}
 			}
 		}
-	} else {
+	} else 
+#endif
+        {
 		if (audioflag) {
 			i = nr_acodecs;
 			c = audio_codecs;
@@ -612,6 +615,7 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 			c = video_codecs;
 		}
 		for (/* NOTHING */; i--; c++) {
+                        if(start && c<=start) continue;
 			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
 				if (c->fourcc[j] == fourcc) {
 					if (fourccmap)
