@@ -129,6 +129,7 @@ mplayer (1.0)
     * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
     * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
     * TVout/matroxtv: various improvements
+    * spelling/grammar fixes in numerous files
 
 
 mplayer (0.90)
