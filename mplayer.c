@@ -150,7 +150,9 @@ static int cfg_include(m_option_t *conf, char *filename){
 //             XScreensaver
 //**************************************************************************//
 
+#ifdef HAVE_X11
 void xscreensaver_heartbeat(float time);
+#endif
 
 //**************************************************************************//
 //**************************************************************************//
@@ -449,14 +451,10 @@ static void uninit_player(unsigned int mask){
   current_module=NULL;
 }
 
-#ifdef X11_FULLSCREEN
-extern void vo_uninit( void );
-#endif
-
 static void exit_player_with_rc(char* how, int rc){
 
   uninit_player(INITED_ALL);
-#ifdef X11_FULLSCREEN
+#ifdef HAVE_X11
 #ifdef HAVE_NEW_GUI
   if ( !use_gui )
 #endif
@@ -1518,7 +1516,7 @@ if(sh_video){
       sh_video->frametime=1.0f/sh_video->fps;
     }
     vo_fps = sh_video->fps;
-#ifdef X11_FULLSCREEN
+#ifdef HAVE_X11
     vo_mouse_timer_const=(int)sh_video->fps;
 #endif
 
