@@ -114,6 +114,8 @@ static int lavc_param_pre_dia_size= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
+static int lavc_param_aic= 0;
+static int lavc_param_umv= 0;
 static int lavc_param_last_pred= 0;
 static int lavc_param_pre_me= 1;
 static int lavc_param_me_subpel_quality= 8;
@@ -195,6 +197,10 @@ struct config lavcopts_conf[]={
 	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"subq", &lavc_param_me_subpel_quality, CONF_TYPE_INT, CONF_RANGE, 0, 8, NULL},
 	{"me_range", &lavc_param_me_range, CONF_TYPE_INT, CONF_RANGE, 0, 16000, NULL},
+#ifdef CODEC_FLAG_H263P_AIC
+	{"aic", &lavc_param_aic, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_AIC, NULL},
+	{"umv", &lavc_param_umv, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_UMV, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -367,6 +373,8 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4648
     lavc_venc_context->flags|= lavc_param_trell;
 #endif 
+    lavc_venc_context->flags|= lavc_param_aic;
+    lavc_venc_context->flags|= lavc_param_umv;
     lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
@@ -490,6 +498,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
+           
     muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0);
         
 #if LIBAVCODEC_BUILD >= 4643

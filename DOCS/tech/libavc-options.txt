@@ -346,6 +346,12 @@ subq	(1-8) subpel refinement quality (for qpel)
         
 psnr	will print the psnr for the whole video after encoding and store the per frame psnr
 	in a file with name like "psnr_012345.log"
+        
+aic	advanced intra prediction (H.263+ only)
+	Note: vqmin should be 8 or larger
+
+umv	unlimited MVs (H.263+ only)
+	allow encoding of abritary long MVs
 
 
 lavdopts: (decoder options)
