@@ -3216,13 +3216,12 @@ les codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
 .B \-pphelp (voir aussi \-vf pp)
 Affiche un aperçu des filtres de post-traitement disponibles et de leur
 utilisation.
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B \-ssf <mode>
-Spécifie les paramètres de SwScaler.
-
-.I EXEMPLE
+Définit les paramètres de SwScaler.
+.sp 1
+.I EXEMPLE\ :
 .PD 0
 .RSs
 \-vf scale \-ssf lgb=3.0
@@ -3236,13 +3235,13 @@ Filtre flou gaussien (luma)
 .IPs cgb=<0\-100>
 Filtre flou gaussien (chroma)
 .IPs ls=<0\-100>
-filtre sharpen (luma)
+filtre netteté (sharpen) (luma)
 .IPs cs=<0\-100>
-filtre sharpen (chroma)
+filtre netteté (sharpen) (chroma)
 .IPs chs=<h>
-chroma horizontal shifting
+décalage chroma horizontal
 .IPs cvs=<v>
-chroma vertical shifting
+décalage chroma vertical
 .RE
 .PD 1
 .
@@ -3253,34 +3252,31 @@ Sélectionne le mode de sortie stéréo MP2/\:MP3.
 .PD 0
 .RSs
 .IPs 0
-Stéréo
+stéréo
 .IPs 1
-Canal gauche
+canal gauche
 .IPs 2
-Canal droit
+canal droit
 .RE
 .PD 1
 .
 .TP
-.B \-sws <type\ de\ zoom\ logiciel> (voir aussi \-vf scale)
-Cette fonction fixe la qualité (et la vitesse, respectivement) du zoom logiciel,
-avec l'option \-zoom option.
-Par exemple avec X11 ou d'autres sorties qui manquent d'accélération matérielle.
-Les réglages possibles sont:
+.B \-sws <type\ de\ zoom\ logiciel> (voir aussi \-vf scale et \-zoom)
+Défini l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
+Agit sur les pilotes de sortie vidéo qui ne disposent pas de ce type
+d'accélération logicielle, ex.\& x11.
+.sp 1
+Les types possibles sont\ :
+.sp 1
 .br
-.I NOTE:
-Pour \-sws\ 2 et 7, le sharpness peut être initialisé avec le paramètre de
-zoom (p) de \-vf scale (0 (doux) \- 100 (fort)), pour \-sws 9, il spécifie
-la longueur du filtre (1 \- 10).
-
 .PD 0
 .RSs
 .IPs 0
-fast bilinear (par défaut)
+bilinéaire rapide (par défaut)
 .IPs 1
-bilinear
+bilinéaire
 .IPs 2
-bicubic (bonne qualité)
+bicubique (bonne qualité)
 .IPs 3
 experimental
 .IPs 4
@@ -3288,7 +3284,7 @@ plus proche voisin (mauvaise qualité)
 .IPs 5
 area
 .IPs 6
-luma bicubic / chroma bilinear
+luma bicubique / chroma bilinéaire
 .IPs 7
 gauss
 .IPs 8
@@ -3296,31 +3292,37 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-bicubic spline
+bicubique spline
 .RE
 .PD 1
+.sp 1
+.RS
+.I NOTE\ :
+Pour \-sws\ 2 et 7, la netteté (sharpness) peut être contrôlé avec le
+paramètre de zoom (p) de \-vf scale (0 (doux) \- 100 (net)), pour \-sws 9,
+il définit la longueur du filtre (1 \- 10).
 .
 .TP
 .B \-vc <[-]codec1,[-]codec2,...[,]>
-Spécifie une liste de priorité des codecs vidéo à utiliser, suivant leur nom de
-codec dans codecs.conf.
+Définit une liste de priorité des codecs vidéo à utiliser, suivant leur nom
+de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
-Si la liste à une ',' finale, il se rabattra sur les codecs non-listés.
+Si la liste se termine par ',', il se rabattra sur les codecs non-listés.
 .br
-.I NOTE:
+.I NOTE\ :
 Voir \-vc help pour une liste complète des codecs disponibles.
 .sp 1
-.I EXEMPLE:
+.I EXEMPLE\ :
 .PD 0
 .RSs
 .IPs "\-vc divx"
-force le codec DivX Win32/\:VFW, sans rabattement
+Force le codec DivX Win32/\:VFW, sans rabattement.
 .IPs "\-vc divx4,"
-essaie le codec divx4linux en premier, puis se rabat sur les autres
+Essaie d'abord le codec divx4linux, puis se rabat sur les autres.
 .IPs "\-vc -divxds,-divx,"
-essaie les autres codecs excepté les codecs DivX Win32
+Essaie les autres codecs excepté les codecs DivX Win32.
 .IPs "\-vc ffmpeg12,mpeg12,"
-essaie le codec MPEG1/\:2 de libavcodec, puis libmpeg2, puis les autres
+Essaie le codec MPEG1/\:2 de libavcodec, puis libmpeg2, puis les autres.
 .RE
 .PD 1
 .
@@ -3330,37 +3332,44 @@ Définit une liste de priorité des familles de codecs vidéo à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
-.I NOTE:
-Pour savoir la différence entre eux et quand les utiliser, référez-vous
-à la section DivX4 de la documentation.
+.I NOTE\ :
 Voir \-vfm help pour une liste complète des pilotes disponibles.
 .sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-essaie les codecs libavcodec, puis Directshow, puis VFW et se rabat sur
-les autres, si aucun n'arrive à convenir
+Essaie les codecs libavcodec, puis Directshow, puis VFW et se rabat sur
+les autres, si aucun n'arrive à convenir.
 .IPs "\-vfm xanim"
-essaie les codecs XAnim en premier
+Essaie les codecs XAnim en premier.
 .RE
 .PD 1
 .
 .TP
-.B \-x <x> (MPLAYER uniquement)
-Zoome l'image à la largeur x (si le zoom sw/\:hw est disponible).
+.B \-x <x> (MPlayer uniquement)
+Zoome l'image à la largeur <x> (si un zoom logiciel ou matériel est
+disponible).
 Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
-Spécifie les paramètres additionnels en encodant avec XviD.
-.
+Définit des paramètres additionnels de décodage avec XviD.
 .PD 0
 .RSs
+.IPs deblock-chroma
+Active le filtre de post-traitement de déblocage chroma interne d'XviD.
+Voir aussi \-vf pp, qui est plus rapide que celui d'XviD.
+.IPs deblock-luma
+Active un filtre de post-traitement de déblocage luma interne d'XviD.
+Voir aussi \-vf pp, qui est plus rapide que celui d'XviD.
 .IPs dr2\ \ 
 Active la méthode 2 de rendu direct.
 .IPs nodr2
 Désactive la méthode 2 de rendu direct.
+.IPs filmeffect (Voir aussi \-vf noise)
+Active le filtre d'ajout artificiel de grain d'XviD.
+Peut accroître la qualité subjective, mais dégrade dans l'absolu l'image.
 .RE
 .PD 1
 .
@@ -3369,7 +3378,7 @@ Désactive la méthode 2 de rendu direct.
 .PD 0
 .RSs
 .IPs valeur<=8
-Zoome l'image d'un facteur <x>.
+Zoome l'image d'un facteur <valeur>.
 .IPs valeur>8
 Initialiser la largeur à <valeur> et calculer la hauteur pour garder le
 rapport hauteur/\:largeur.
@@ -3377,20 +3386,22 @@ rapport hauteur/\:largeur.
 .PD 1
 .
 .TP
-.B \-y <y> (MPLAYER uniquement)
-Zoome l'image à la hauteur y (si le zoom sw/\:hw est disponible).
+.B \-y <y> (MPlayer uniquement)
+Zoome l'image à la hauteur <y> (si un zoom logiciel ou matériel est
+disponible).
 Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
-.B \-zoom \ 
+.B \-zoom \ \ 
 Permet le zoom logiciel, si disponible.
 Peut être utilisé pour forcer le zoom avec \-vf scale.
 .br
 .I NOTE:
-\-vf scale IGNORERA les options \-x / \-y / \-xy / \-fs / \-aspect sans
+\-vf scale ignorera les options \-x / \-y / \-xy / \-fs / \-aspect sans
 \-zoom.
 .
 .
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .SH "FILTRES VIDÉO"
 Les filtres vidéo vous permettent de modifier le flux vidéo et ses propriétés.
 La syntaxe est:
@@ -3402,18 +3413,18 @@ Initialise une chaine de filtres vidéo.
 .TP
 .B \-vop <...,filtre3[=paramètres],filtre2,filtre1> (OBSOLÈTE)
 Initialise une chaine de filtres vidéo, à appliquer en ordre
-.B ordre inverse.
+.B inverse.
 Utilisez de préférence \-vf.
 .PP
-Les paramètres sont optionnels et si omis, certains d'entre eux s'initialiseront
-avec des valeurs par défaut.
+Les paramètres sont optionnels et si omis, certains d'entre eux
+s'initialiseront avec des valeurs par défaut.
 Utilisez '-1' pour garder la valeur par défaut.
 Les paramètres l:h signifient largeur x hauteur en pixels, x:y signifient
 position x;y à partir de du coin supérieur gauche de la plus grande image.
 .br
-.I NOTE:
+.I NOTE\ :
 Pour avoir une liste complète des filtres disponibles, voir \-vf help.
-
+.sp 1
 Les filtres sont gérés en listes.
 Il y a quelques commandes pour gérer la liste de filtres.
 .
@@ -3453,7 +3464,7 @@ Les filtres disponibles sont:
 .TP
 .B crop[=l:h:x:y]
 Découpe la partie donnée de l'image et jette le reste.
-Utile pour enlever les bandes noires d'un film écran large.
+Utile pour enlever les bandes noires d'un film en cinémascope.
 .PD 0
 .RSs
 .IPs l,h
@@ -3483,7 +3494,7 @@ Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéo
 .
 .TP
 .B rectangle[=l:h:x:y]
-Ce plugin réponds à la directive 'change_rectangle' de input.conf qui prends
+Ce plugin réponds à la directive 'change_rectangle' de input.conf qui prend
 deux paramètres.
 .PD 0
 .RSs
@@ -3498,7 +3509,7 @@ position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 .
 .TP
 .B expand[=l:h:x:y:o]
-Étends (ne zoom pas) la résolution du film aux valeurs fournies et place
+Étend (ne zoom pas) la résolution du film aux valeurs fournies et place
 l'original non redimensionné aux coordonnées x y.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
 .RSs
@@ -3506,7 +3517,7 @@ Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
 largeur,hauteur étendues (par défaut\ : largeur, hauteur originales)
 Des valeurs négatives pour l et h sont traitées en tant qu'offset de la taille
 originale.
-
+.sp 1
 .I EXEMPLE
 .PD 0
 .RSs
@@ -3532,13 +3543,13 @@ Voir également l'option \-flip.
 .
 .TP
 .B mirror
-Inverse l'image selon l'axe Y.
+Inverse l'image selon l'axe Y, comme dans un miroir.
 .
 .TP
 .B rotate[=<0\-7>]
-Tourne et (éventuellement) inverse l'image de +/\:- 90 degrés. Pour les
-paramètres entre 4\-7 la rotation n'est faite que si la géométrie du film
-est en mode portrait et non en paysage.
+Tourne et (éventuellement) inverse l'image de +/\:- 90 degrés.
+Pour les paramètres entre 4\-7 la rotation n'est faite que si la géométrie
+du film est en mode portrait et non en paysage.
 .
 .TP
 .B scale[=l:h[:interlaced[:chr_drop[:param[:presize]]]]]
@@ -3560,38 +3571,39 @@ d_width/\:d_height !
 -2:   Calcule l/\:h en utilisant l'autre dimension et le rapport
 hauteur/\:largeur redimensionné.
 .br
--3: Calcule l/\:h en utilisant l'autre dimension et le rapport hauteur/\:largeur
-original.
+-3: Calcule l/\:h en utilisant l'autre dimension et le rapport
+hauteur/\:largeur original.
 .REss
 .IPs interlaced
 Bascule le redimmensionnement entrelacé.
 .IPs chr_drop
-saut de chroma
+saute le chroma
 .RSss
-0: utilise toutes les lignes disponibles pour le chroma
+0: utilise toutes les lignes d'entrée disponibles pour le chroma
 .br
-1: n'utilise qu'une ligne sur 2 pour le chroma
+1: n'utilise qu'une ligne d'entrée sur 2 pour le chroma
 .br
-2: n'utilise qu'une ligne sur 4 pour le chroma
+2: n'utilise qu'une ligne d'entrée sur 4 pour le chroma
 .br
-3: n'utilise qu'une ligne sur 8 pour le chroma
+3: n'utilise qu'une ligne d'entrée sur 8 pour le chroma
 .REss
 .IPs param
 paramètres de redimensionnement (dépends de la méthode de redimensionnement
 utilisée)
 .RSss
--sws 2 (bicubique)  est la duretée (0 (doux) \- 100 (dur))
+-sws 2 (bicubique)\ : netteté (0 (doux) \- 100 (dur))
 .br
--sws 7 (gaussien) est la duretée (0 (doux) \- 100 (dur))
+-sws 7 (gaussien)\ : netteté (0 (doux) \- 100 (dur))
 .br
--sws 9 (lanczos)  est la longueur du filtre (1\-10)
+-sws 9 (lanczos)\ : longueur du filtre (1\-10)
 .REss
 IPs presize
+Redimensionne à une taille pré-définie.
 Scale to preset sizes.
 .RSss
-qntsc:   352x240 (NTSC quart d'écran)
+qntsc:   352x240 (quart d'écran NTSC)
 .br
-qpal:    352x288 (PAL quart d'écran)
+qpal:    352x288 (quart d'écran PAL)
 .br
 ntsc:    720x480 (NTSC standard)
 .br
@@ -3607,24 +3619,24 @@ spal:    768x576 (PAL à pixels carrés)
 .B dsize={aspect|l:h}
 Change la taille/\:le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
-Aspect peut être indiqué en tant que fraction (4/\:3) ou en tant que nombre à
-virgule (1.33).
-Vous pouvez également spécifier les largeurs et hauteurs exactes d'affichage
-désirées.
+Aspect peut être donné en tant que fraction (4/\:3) ou que nombre flottant
+(1.33).
+Vous pouvez également spécifier les largeur et hauteur exactes de l'affichage
+désiré.
 Notez que ce filtre ne fait AUCUN redimmensionnement lui-même; il affecte juste
 ce que feront les prochains redimmensionnements (logiciels ou matériels) feront
 en corrigeant le rapport hauteur/\:largeur.
 .
 .TP
-.B yuy2
+.B yuy2\ \ \ 
 Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
 Utile pour les cartes graphiques/\:pilotes qui gèrent YV12 trop lentement mais
-rapide de YUY2.
+YUY2 rapidement.
 .
 .TP
-.B yvu9
-Force la conversion de couleur logicielle de YVU9 en YV12.
-Utiliser de préférence le zoom logiciel à la place.
+.B yvu9\ \ \ 
+Force la conversion logicielle d'espace de couleur de YVU9 en YV12.
+À éviter (deprecated), utiliser de préférence le zoom logiciel.
 .
 .TP
 .B yuvcsp\ 
@@ -3633,21 +3645,22 @@ réelle.
 .
 .TP
 .B rgb2bgr[=swap]
-conversion de palette RGB 24/\:32 <\-> BGR 24/\:32
+Conversion de palette RGB 24/\:32 <\-> BGR 24/\:32
 .PD 0
 .RSs
 .IPs swap
-Échange en plus R <\-> B.
+Échange aussi R <\-> B.
 .RE
 .PD 1
 .
 .TP
 .B palette
-conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant palette.
+Conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant
+palette.
 .
 .TP
 .B format[=fourcc]
-Restreint la palette pour le prochain filtre sans faire de conversion.
+Restreint l'espace de couleur pour le prochain filtre sans faire de conversion.
 Utilisez-le avec le filtre scale pour une véritable conversion.
 Pour avoir une liste des formats disponibles, voir format=fmt=help.
 .PD 0
@@ -3673,12 +3686,11 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .
 .TP
 .B pp[=filtre1[:option1[:option2...]]/\:[-]filtre2...] (voir aussi \-pphelp)
-Cette option active le filtre interne de postprocessing, et propose une
-interface où vous pouvez passer des options au filtre nommé.
+Cette option active le filtre interne de post-traitement de MPlayer, et
+propose une interface où vous pouvez passer des options au filtre nommé.
 Pour obtenir une liste des filtres disponibles, utilisez \-pphelp.
-
 Notez que chaque sous-filtre doit être séparé des autres avec le signe /.
-Chaque filtre est 'c' (chrominance) par défaut.
+Chaque filtre est par défaut à 'c' (chrominance).
 Les mots-clés acceptent un préfixe '-' pour désactiver une option.
 Un ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa portée:
 .PD 0
@@ -3691,9 +3703,9 @@ Filtre également la chrominance.
 Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
 .RE
 .PD 1
-
+.sp 1
 .RS
-.I EXEMPLES:
+.I EXEMPLE\ :
 .RE
 .PD 0
 .RSs
@@ -3713,18 +3725,24 @@ le déblocage vertical suivant la puissance de calcul processeur disponible.
 .PD 1
 .
 .TP
-.B spp[=qualité[:qp]]
+.B spp[=qualité[:qp[:mode]]]
 filtre de postprocessing simple
 .RSs
 .IPs qualité
 0\-6
 .IPs qp\ \ \ 
-paramètre pour forcer la quantisation
+paramètre pour forcer la quantisation (par défaut\ : 0, utilise le qp de
+la video)
+.IPs mode\ \ \ 
+0: fort seuillage (hard thresholding) (par défaut)
+.br
+1: faible seuillage (soft thresholding) (meilleure élimination des parasites,
+mais image plus floue)
 .RE
 .
 .TP
 .B qp=equation
-filtre qp change
+filtre de changement de qp
 .RSs
 .IPs equation
 une équation comme "2+2*sin(PI*qp)"
@@ -3752,12 +3770,12 @@ Plus rapide et de meilleur qualitée que \-vf fame.
 32\-: débit fixe en kBits
 .REss
 .IPs fps
-force les fps de sortie (nombre à virgule) (par défaut\ : 0, autodétection basée
-sur la hauteur)
+force le nombre de trames par seconde en sortie (nombre flottant)
+(par défaut\ : 0, autodétection basée sur la hauteur)
 .RE
 .
 .TP
-.B fame
+.B fame\ \ \ 
 Conversion logicielle YV12 vers MPEG1 rapide avec libfame pour utilisation avec
 DVB/\:DXR3.
 .
@@ -3771,8 +3789,8 @@ Utile uniquement avec expand+scale
 .RSs
 .IPs aspect
 contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci:
-DVB_HAUTEUR*ASPECTRATIO, par défaut\ : 576*4/\:3=768, fixez-le à
-576*(16/\:9)=1024 pour une télé 16:9.
+DVB_HAUTEUR*ASPECTRATIO (par défaut\ : 576*4/\:3=768, fixez-le à
+576*(16/\:9)=1024 pour une télé 16:9).
 .RE
 .
 .TP
@@ -3799,11 +3817,10 @@ mixe du bruit aléatoire avec un motif (semi-)régulier
 .
 .TP
 .B "denoise3d[=luma:chroma:temps]"
-Ce filtre est destiné à réduire le bruit de l'image pour produire des images
-lissées et garder des images réellement fidèles (cela devrait améliorer la
-compatibilité.).
-On peut lui donner de 0 à 3 paramètres. Si vous omettez un paramètre, une valeur
-raisonnable sera insérée.
+Ce filtre est destiné à réduire le bruit de l'image pour que les plans fixes
+soient vraiment fixes (cela devrait améliorer la compressibilité.).
+On peut lui donner de 0 à 3 paramètres.
+Si vous omettez un paramètre, une valeur raisonnable calculée automatiquement.
 .PD 0
 .RSs
 .IPs luma\ 
@@ -3817,78 +3834,105 @@ force temporelle (par défaut\ = 6)
 .
 .TP
 .B "hqdn3d[=luma:chroma:temps]"
-Version de haute précision\/:qualité du filtre denoise3d.
+Version haute précision\/:qualité du filtre denoise3d.
 Les paramètres et le comportement sont les mêmes.
 .
 .TP
 .B eq[=lumi:cont]
-Égaliseur logiciel avec contrôles interactifs comme les ég. matériels. Pour les
-cartes/\:pilotes qui ne permettent pas les contrôles de la luminosité et du
-contraste de façon matérielle.
+Égaliseur logiciel avec contrôles interactifs tout comme les égaliseurs
+matériels, pour les cartes/\:pilotes qui ne permettent pas le contrôle de
+la luminosité et du contraste de façon matérielle.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
-encodés, soit pour réduire légèrement le contraste pour masquer les artefacts et
-s'accomoder de débits plus bas.
+capturés, soit pour réduire légèrement le contraste pour masquer des
+artefacts et s'accomoder de débits plus bas.
 Les valeurs initiales dans l'intervalle -100\- 100 peuvent être fournies en
-ligne de commandes.
+ligne de commande.
+.
+.TP
 .IPs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
-autorisant une correction du gamma en plus d'un simple ajustement de luminosité
-et de contraste.
-Notez que cela utilise le même code MMX optimisé que -vo eq si toutes les
+autorisant une correction du gamma en plus d'un simple ajustement de
+luminosité et de contraste.
+Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
-Les paramètres sont donnés en nombres à virgule.
+Les paramètres sont donnés en nombres flottants.
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
 composants Rouge, Vert et Bleu.
 Le paramètre poids peut être utilisé pour réduire l'effet de hautes valeurs
-de gamma sur les parties claires de l'image, c-a-d. les empécher d'être
+de gamma sur les parties claires de l'image, c-à-d.\& les empécher d'être
 sur-amplifiées et de devenir complètement blanches.
-Une valeur de 0.0 désactive complètement la correction gamma tandis que 1.0 lui
-laisse toute sa force.
+Une valeur de 0.0 désactive complètement la correction gamma tandis que 1.0
+lui laisse toute sa force.
 Les valeurs par défaut sont gamma=1.0, contraste=0.0, luminosité=0.0,
 saturation=1.0, poids=1.0.
 Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
-(les valeurs négatives provoquent une image négative), -1\-1 pour la
+(les valeurs négatives produisent une image négative), -1\-1 pour la
 luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
 .
 .TP
 .B hue[=couleur:saturation]
 Les valeur par défaut sont couleur=0.0, saturation=1.0.
-Les intervalles sont -180\-180 pour couleur, -2\-2 pour saturation (des valeurs
-négatives impliquent un chroma négatif).
+Les intervalles sont -180\-180 pour couleur, -2\-2 pour saturation (des
+valeurs négatives impliquent un chroma négatif).
 .
 .TP
 .B halfpack[=f]
-Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
-mais en gardant les samples chroma.
-Utile quand la sortie est un périphérique à basse résolution quand la diminution
-est de mauvais qualité ou n'est pas disponible.
-Peut également être utilisé comme désentrelaceur primitif pour luma uniquement
-avec une utilisation CPU très basse.
+Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en sous-échantillonnant
+le luma mais en gardant les échantillons chroma.
+Utile quand la sortie est un périphérique à basse résolution et que la
+réduction d'échelle matérielle est de mauvais qualité ou n'existe pas.
+Peut également être utilisé comme désentrelaceur primitif pour luma
+uniquement avec une utilisation CPU très basse.
 Par défaut, halfpack fait une moyenne des paires de lignes pendant le
-downsampling.
+sous-échantillonnage.
 Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .
 .TP
 .B ilpack[=mode]
-Quand de la vidéo entrelacée est stockée aux formats YUV 4:2:0, l'entrelacement
-chroma ne se fait pas proprement à cause du downsampling vertical des canaux
+Quand une vidéo entrelacée est stockée au format YUV 4:2:0, l'entrelacement
+chroma est mal aligné à cause du sous-échantillonnage vertical des canaux
 chroma.
-Ce filtre place les données 4:2:0 au format YUY2 (4:2:2) avec les lignes chroma
-à leur bon emplacement, de façon à ce que à chaque ligne scannée, les données
-luma et chroma proviennent toutes deux du même champs.
+Ce filtre convertit les données 4:2:0 planaire au format YUY2 (4:2:2)
+avec les lignes chroma à leur bon emplacement, de façon à ce que à chaque
+ligne de balayage (scanline), les données luma et chroma proviennent toutes
+deux du même champs.
 L'argument optionnel sélectionne le mode d'échantillonage.
 Par défaut, l'interpolation linéaire (mode 1) est utilisé.
 Le mode 0 utilise un échantillonage 'plus proche voisin' (nearest-neighbor),
 qui est rapide mais incorrect.
 .
 .TP
+.B harddup
+Utile uniquement avec MEncoder.
+Si harddup est utilisé lors de l'encodage, les trames dupliquées seront
+aussi présentes en sortie.
+Cela nécessite un peu plus de place, mais est nécessaire pour les
+fichier de sortie MPEG ou si vous comptez démultiplexer et multiplexer
+le flux vidéo après l'encodage.
+Devrait être mis à la fin (ou presque) de la chaîne de filtres, à moins
+que vous ayez une bonne raison de faire autrement.
+.
+.TP
+.B softskip
+Utile uniquement avec MEncoder.
+Softskip déplace l'étape de saut (skipping) de trame lors de l'encodage
+depuis avant la chaîne de filtres vers quelquepart dans cette même
+chaîne.
+Cela permet aux filtre qui ont besoin de voir toutes les trames
+(téléciné inverse, débruitage temporel, etc.\&) pour fonctionner
+correctement.
+Devrait être placé après les filtres qui ont besoin de voir toutes
+les trames et avant tout filtre gourmant en temps de calcul.
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
+.
+.TP
 .B decimate[=max:haut:bas:frac]
-Saute les trames qui ne différent pas beaucoup de la trame précédente de façon à
-réduire le débit.
-L'argument max (si positif) définit le nombre maximum de trames consécutives qui
-peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
+Saute les trames qui ne différent pas beaucoup de la trame précédente de
+façon à réduire le débit.
+L'argument max (si positif) définit le nombre maximum de trames consécutives
+qui peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
 sautées. Une frame peut être sautée si aucune région 8x8 ne différe de plus de
 la limite de haut, et si pas plus d'une portion de frac (1 signifiant l'image
 entière) ne diffère de plus que la limite de bas.
@@ -4928,6 +4972,7 @@ besoin.
 .TP
 .B threads=<1\-8>
 Nombre maximum de threads à utiliser (par défaut\ : 1).
+Peut avoir un effet néfaste sur l'estimation du mouvement.
 .
 .TP
 .B vcodec=<valeur>
