@@ -2590,7 +2590,11 @@ EOF
 fi
 if test "$_aa" = yes ; then
   _def_aa='#define HAVE_AA 1'
-  _ld_aa='-laa'
+  if cygwin ; then
+    _ld_aa=`aalib-config --libs | cut -d " " -f 2,5,6`
+  else
+    _ld_aa='-laa'
+  fi
   _vosrc="$_vosrc vo_aa.c"
   _vomodules="aa $_vomodules"
 else
@@ -2879,8 +2883,13 @@ EOF
 fi
 if test "$_sdl" = yes ; then
   _def_sdl='#define HAVE_SDL 1'
-  _ld_sdl=`$_sdlconfig --libs`
-  _inc_sdl=`$_sdlconfig --cflags`
+  if cygwin ; then
+    _ld_sdl=`$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`
+    _inc_sdl=`$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`
+  else
+    _ld_sdl=`$_sdlconfig --libs`
+    _inc_sdl=`$_sdlconfig --cflags`
+  fi
   _vosrc="$_vosrc vo_sdl.c"
   _vomodules="sdl $_vomodules"
   _aosrc="$_aosrc ao_sdl.c"
