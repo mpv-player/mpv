@@ -35,9 +35,6 @@
 #ifdef HAVE_MEMALIGN
 /* some systems have memalign() but no declaration for it */
 void * memalign (size_t align, size_t size);
-#else
-/* assume malloc alignment is sufficient */
-#define memalign(align,size) malloc (size)
 #endif
 
 typedef struct {

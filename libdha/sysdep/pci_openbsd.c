@@ -5,6 +5,8 @@
 */
 
 #include <errno.h>
+#include <sys/types.h>
+#include <machine/sysarch.h>
 
 static __inline__ int enable_os_io(void)
 {

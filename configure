@@ -1399,7 +1399,7 @@ else
   _def_malloc='#undef HAVE_MALLOC_H'
 fi
 # malloc.h emits a warning in FreeBSD
-freebsd && _def_malloc='#undef HAVE_MALLOC_H'
+(freebsd || openbsd) && _def_malloc='#undef HAVE_MALLOC_H'
 echores "$_malloc"
 
 

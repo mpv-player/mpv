@@ -102,6 +102,7 @@ extern void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,i
 void vo_init_osd();
 int vo_update_osd(int dxs,int dys);
 int vo_osd_changed(int new_value);
+int vo_osd_check_range_update(int,int,int,int);
 
 extern int vo_osd_changed_flag;
 

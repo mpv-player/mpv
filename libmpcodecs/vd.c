@@ -18,6 +18,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "dec_video.h"
 
 #include "vd.h"
 #include "vf.h"

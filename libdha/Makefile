@@ -15,6 +15,10 @@ SRCS=libdha.c mtrr.c pci.c pci_names.c
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+LIBS = 
+ifeq ($(TARGET_OS),OpenBSD)
+LIBS += -li386
+endif
 
 .SUFFIXES: .c .o
 
@@ -24,7 +28,7 @@ CFLAGS  = $(OPTFLAGS) -fPIC -I. -I.. -Wall -W
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
-	$(CC) -shared -o $(LIBNAME) $(OBJS)
+	$(CC) -shared -o $(LIBNAME) $(OBJS) $(LIBS)
 	ln -sf $(LIBNAME) $(SHORTNAME)
 
 all:    $(LIBNAME) $(SHORTNAME)
@@ -52,8 +56,12 @@ install:
 	mkdir -p $(prefix)/lib
 	install -m 755 -s -p $(LIBNAME) $(prefix)/lib/$(LIBNAME)
 	rm -f $(prefix)/lib/libdha.so
-	ln -sf $(LIBNAME) $(prefix)/lib/libdha.so
+	ln -sf $(LIBNAME) $(prefix)/lib/$(SHORTNAME)
+ifeq ($(TARGET_OS),OpenBSD)
+	ldconfig -R
+else
 	ldconfig
+endif
 
 #
 # include dependency files if they exist
