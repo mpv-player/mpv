@@ -2340,8 +2340,6 @@ if test "$_smbsupport" = auto; then
 #include <libsmbclient.h>
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
-    _ld_smb=" -L/usr/lib -lsmbclient"
-    _inc_smb=" -I/usr/include "
     if cc_check $_ld_smb $_inc_smb ; then 
 # this is not working for me becouse it needs -ldl and some NIS (YP) libs
 # $_ld_dl and -lyp ? should be added
@@ -2350,9 +2348,13 @@ EOF
 fi
 
 if test "$_smbsupport" = yes; then
+    _ld_smb=" -L/usr/lib -lsmbclient"
+    _inc_smb=" -I/usr/include "
     _def_smbsupport="#define LIBSMBCLIENT"
     _inputmodules="smb $_inputmodules"
 else
+    _ld_smb=""
+    _inc_smb=""
     _def_smbsupport="#undef LIBSMBCLIENT"
     _noinputmodules="smb $_noinputmodules"
 fi
