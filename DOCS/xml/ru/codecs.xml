@@ -532,7 +532,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>распакуйте пакет QuickTime DLL в Ваш каталог Win32 кодеков
-(по умолчанию: <filename class="directory">/usr/lib/win32</filename>)
+(по умолчанию: <filename class="directory">/usr/local/lib/codecs</filename>)
 </para></step>
 </procedure>
 

@@ -76,12 +76,12 @@
 Полный список возможных опций можно прочитать в man.
 Синтаксис для стандартных Цифровых Многоцелевых Дисков[Digital Versatile Disc]
 (DVD) таков:
-<screen>mplayer -dvd <replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
+<screen>mplayer dvd://<replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
 </para>
 
 <para>
 Пример:
-<screen>mplayer -dvd 1 -dvd-device /dev/hdc</screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -291,9 +291,9 @@ RPC-2 привод. Обновления прошивок могут быть найдены на
 <para>
 Полный список возможных опций можно прочитать в man. Синтаксис для обычного
 Видео-CD (VCD):
-<screen>mplayer -vcd <replaceable>&lt;дорожка&gt;</replaceable> [-cdrom-device <replaceable>&lt;устройство&gt;</replaceable>]</screen>
+<screen>mplayer vcd://<replaceable>&lt;дорожка&gt;</replaceable> [-cdrom-device <replaceable>&lt;устройство&gt;</replaceable>]</screen>
 Пример:
-<screen>mplayer -vcd 2 -cdrom-device /dev/hdc</screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Устройство VCD по умолчанию &mdash; <filename>/dev/cdrom</filename>. Если Ваши
 настройки отличаются, создайте символическую ссылку добавьте правильное название
 в командной строке после опции <option>-cdrom-device</option>.
@@ -334,7 +334,7 @@ Windows или прочую информацию, вроде картинок или текста.
 одному пакету MPEG PS на сектор вместо файловой системы. Эти дорожки <emphasis
 role="bold">не монтируются</emphasis> (Вы когда-нибудь монтировали аудио диск
 для того, чтобы его воспроизвести?) Так как большинство фильмов именно на этой
-дорожке, попробуй сначала <option>-vcd 2</option>.
+дорожке, попробуй сначала <option>vcd://2</option>.
 </para></listitem>
 
 <listitem><para>
@@ -357,8 +357,8 @@ iso9660 файловой системы (<filename>vcdfs/isofs-2.4.X.o</filename>), который
 способен эмулировать прямой доступ к дорожкам через этот файл. Если Вы
 замонтируете диск, используя их драйвер, Вы можете копировать и даже проигрывать
 .DAT файлы <application>MPlayer</application>'ом. Но это не будет работать со
-стандартным драйвером iso9660 из ядра Linux! Используйте вместо этого опцию
-<option>-vcd</option>. Альтернативами для копирования VCD может послужить новый
+стандартным драйвером iso9660 из ядра Linux! Используйте вместо этого
+<option>vcd://</option>. Альтернативами для копирования VCD может послужить новый
 драйвер <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (не
 входит в официальное ядро) который показывает дорожки[сессии] на диске как файлы
 образов и <ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, приложение для

@@ -138,7 +138,7 @@ WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
   <emphasis role="bold">Win32 кодеки</emphasis>: Если Вы планируете использовать MPlayer на x86 архитектуре,
 они вам вероятно потребуются. Скачайте Win32 кодеки с нашей 
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>
-и установите их в <filename class="directory">/usr/lib/win32</filename> <emphasis role="bold">ДО</emphasis> компиляции <application>MPlayer'а</application>,
+и установите их в <filename class="directory">/usr/local/lib/codecs</filename> <emphasis role="bold">ДО</emphasis> компиляции <application>MPlayer'а</application>,
 иначе поддержка Win32 будет отключена!
 <note><para>У проекта avifile похожий набор кодеков, но он отличается от нашего.
   Если Вы хотите использовать все поддерживаемые кодеки, тогда поставьте наш
