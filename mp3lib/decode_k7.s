@@ -4,6 +4,8 @@
 /// This code based 'decode_3dnow.s' by Syuuhei Kashiyama
 /// <squash@mb.kcom.ne.jp>,only some types of changes have been made:
 ///
+///  - decreased number of opcodes (as it suggested by k7 manual)
+///    (using memory reference as operand of instructions)
 ///  - change function name for support 3DNowEx! automatic detect
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
@@ -100,43 +102,36 @@ synth_1to1_3dnowex:
         movl  $16,%ebp
 
 .L55:
-        movq  (%ecx),%mm4
-        movq  (%ebx),%mm3
-        movq  8(%ecx),%mm0
-        movq  8(%ebx),%mm1
-        pfmul %mm3,%mm4
 
-        movq  16(%ecx),%mm2
-        pfmul %mm1,%mm0
+        movq  (%ecx),%mm4
+        movq  8(%ecx),%mm0
+        pfmul (%ebx),%mm4
+
+        pfmul 8(%ebx),%mm0
         movq  16(%ebx),%mm3
         pfadd %mm0,%mm4
 
         movq  24(%ecx),%mm0
-        pfmul %mm2,%mm3
-        movq  24(%ebx),%mm1
+        pfmul 16(%ecx),%mm3
         pfadd %mm3,%mm4
 
-        movq  32(%ecx),%mm2
-        pfmul %mm1,%mm0
+        pfmul 24(%ebx),%mm0
         movq  32(%ebx),%mm3
         pfadd %mm0,%mm4
 
         movq  40(%ecx),%mm0
-        pfmul %mm2,%mm3
-        movq  40(%ebx),%mm1
+        pfmul 32(%ecx),%mm3
         pfadd %mm3,%mm4
 
-        movq  48(%ecx),%mm2
-        pfmul %mm1,%mm0
+        pfmul 40(%ebx),%mm0
         movq  48(%ebx),%mm3
         pfadd %mm0,%mm4
 
         movq  56(%ecx),%mm0
-        pfmul %mm2,%mm3
-        movq  56(%ebx),%mm1
+        pfmul 48(%ecx),%mm3
         pfadd %mm3,%mm4
 
-        pfmul %mm1,%mm0
+        pfmul 56(%ebx),%mm0
         pfadd %mm0,%mm4
 
         movq  %mm4,%mm0
@@ -158,42 +153,34 @@ synth_1to1_3dnowex:
 / --- end of  loop 1 ---
 
         movd  (%ecx),%mm2
-        movd  (%ebx),%mm1
-        pfmul %mm1,%mm2
+        pfmul (%ebx),%mm2
 
-        movd  8(%ecx),%mm0
         movd  8(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 8(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  16(%ecx),%mm0
         movd  16(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 16(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  24(%ecx),%mm0
         movd  24(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 24(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  32(%ecx),%mm0
         movd  32(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 32(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  40(%ecx),%mm0
         movd  40(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 40(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  48(%ecx),%mm0
         movd  48(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 48(%ecx),%mm1
         pfadd %mm1,%mm2
 
-        movd  56(%ecx),%mm0
         movd  56(%ebx),%mm1
-        pfmul %mm0,%mm1
+        pfmul 56(%ecx),%mm1
         pfadd %mm1,%mm2
 
         pf2id %mm2,%mm2
@@ -211,44 +198,36 @@ synth_1to1_3dnowex:
 .L68:
         psubd %mm0,%mm0
 
-        movq  (%ebx),%mm1
         movq  (%ecx),%mm2
-        pfmul %mm1,%mm2
+        pfmul (%ebx),%mm2
         pfsub %mm2,%mm0
 
-        movq  8(%ebx),%mm3
         movq  8(%ecx),%mm4
-        pfmul %mm3,%mm4
+        pfmul 8(%ebx),%mm4
         pfsub %mm4,%mm0
 
-        movq  16(%ebx),%mm1
         movq  16(%ecx),%mm2
-        pfmul %mm1,%mm2
+        pfmul 16(%ebx),%mm2
         pfsub %mm2,%mm0
 
-        movq  24(%ebx),%mm3
         movq  24(%ecx),%mm4
-        pfmul %mm3,%mm4
+        pfmul 24(%ebx),%mm4
         pfsub %mm4,%mm0
 
-        movq  32(%ebx),%mm1
         movq  32(%ecx),%mm2
-        pfmul %mm1,%mm2
+        pfmul 32(%ebx),%mm2
         pfsub %mm2,%mm0
 
-        movq  40(%ebx),%mm3
         movq  40(%ecx),%mm4
-        pfmul %mm3,%mm4
+        pfmul 40(%ebx),%mm4
         pfsub %mm4,%mm0
 
-        movq  48(%ebx),%mm1
         movq  48(%ecx),%mm2
-        pfmul %mm1,%mm2
+        pfmul 48(%ebx),%mm2
         pfsub %mm2,%mm0
 
-        movq  56(%ebx),%mm3
         movq  56(%ecx),%mm4
-        pfmul %mm3,%mm4
+        pfmul 56(%ebx),%mm4
         pfsub %mm4,%mm0
 
         pfacc %mm0,%mm0
