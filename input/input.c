@@ -76,10 +76,32 @@ static mp_cmd_bind_t key_names[] = {
   { KEY_DOWN, "DOWN" },
   { KEY_UP, "UP" },
 #ifdef HAVE_JOYSTICK
-  { JOY_UP, "JOY_UP" },
-  { JOY_DOWN, "JOY_DOWN" },
-  { JOY_LEFT, "JOY_LEFT" },
-  { JOY_RIGHT, "JOY_RIGHT" },
+  { JOY_AXIS1_PLUS, "JOY_UP" },
+  { JOY_AXIS1_MINUS, "JOY_DOWN" },
+  { JOY_AXIS0_PLUS, "JOY_LEFT" },
+  { JOY_AXIS0_MINUS, "JOY_RIGHT" },
+
+  { JOY_AXIS0_PLUS, "JOY_AXIS0_PLUS" },
+  { JOY_AXIS0_MINUS, "JOY_AXIS0_MINUS" },
+  { JOY_AXIS1_PLUS, " JOY_AXIS1_PLUS" },
+  { JOY_AXIS1_MINUS, "JOY_AXIS1_MINUS" },
+  { JOY_AXIS2_PLUS, "JOY_AXIS2_PLUS" },
+  { JOY_AXIS2_MINUS, "JOY_AXIS2_MINUS" },
+  { JOY_AXIS3_PLUS, " JOY_AXIS3_PLUS" },
+  { JOY_AXIS3_MINUS, "JOY_AXIS3_MINUS" },
+  { JOY_AXIS4_PLUS, "JOY_AXIS4_PLUS" },
+  { JOY_AXIS4_MINUS, "JOY_AXIS4_MINUS" },
+  { JOY_AXIS5_PLUS, " JOY_AXIS5_PLUS" },
+  { JOY_AXIS5_MINUS, "JOY_AXIS5_MINUS" },
+  { JOY_AXIS6_PLUS, "JOY_AXIS6_PLUS" },
+  { JOY_AXIS6_MINUS, "JOY_AXIS6_MINUS" },
+  { JOY_AXIS7_PLUS, " JOY_AXIS7_PLUS" },
+  { JOY_AXIS7_MINUS, "JOY_AXIS7_MINUS" },
+  { JOY_AXIS8_PLUS, "JOY_AXIS8_PLUS" },
+  { JOY_AXIS8_MINUS, "JOY_AXIS8_MINUS" },
+  { JOY_AXIS9_PLUS, " JOY_AXIS9_PLUS" },
+  { JOY_AXIS9_MINUS, "JOY_AXIS9_MINUS" },
+
   { JOY_BTN0, "JOY_BTN0" },
   { JOY_BTN1, "JOY_BTN1" },
   { JOY_BTN2, "JOY_BTN2" },
@@ -498,8 +520,10 @@ mp_input_read_keys(int time,int paused) {
       if(cmd_binds[j].input == code)
 	break;
     }
-    if(cmd_binds[j].cmd == NULL)
+    if(cmd_binds[j].cmd == NULL) {
+      printf("No bind found for key %d\n",code);
       continue;
+    }
     last_loop = i;
     return mp_input_parse_cmd(cmd_binds[j].cmd);
   }
@@ -793,7 +817,7 @@ mp_input_init(void) {
     if(fd < 0)
       printf("Can't init input joystick\n");
     else
-      mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close);
+      mp_input_add_key_fd(fd,1,mp_input_joystick_read,mp_input_joystick_close);
   }
 #endif
 
@@ -809,6 +833,18 @@ mp_input_init(void) {
 
 void
 mp_input_uninit(void) {
+  unsigned int i;
+
+  for(i=0; i < num_key_fd; i++) {
+    if(key_fds[i].close_func)
+      key_fds[i].close_func(key_fds[i].fd);
+  }
+
+  for(i=0; i < num_cmd_fd; i++) {
+    if(cmd_fds[i].close_func)
+      cmd_fds[i].close_func(cmd_fds[i].fd);
+  }
+  
 
 #ifdef HAVE_LIRC
   mp_input_lirc_uninit();

@@ -129,20 +129,45 @@ int mp_input_joystick_read(int fd) {
   ev.type &= ~JS_EVENT_INIT;
   
   if(ev.type & JS_EVENT_BUTTON) {
-    int b = buttons | (ev.value << ev.number);
-    if(b != buttons)
+    if(ev.value != ( 1 & (buttons >> ev.number)))
       return JOY_BTN0+ev.number;      
   } else if(ev.type & JS_EVENT_AXIS) {
     if(ev.value - axis[ev.number] > JOY_AXIS_DELTA)
-      return ev.number == 0 ? JOY_UP : JOY_LEFT;
+      return JOY_AXIS0_MINUS+(2*ev.number);
     else if(axis[ev.number]  - ev.value > JOY_AXIS_DELTA)
-      return ev.number == 0 ? JOY_DOWN : JOY_RIGHT;
+      return JOY_AXIS0_PLUS+(2*ev.number);
   } else {
     printf("Joystick warning unknow event type %d\n",ev.type);
     return MP_INPUT_ERROR;
   }
 
   return MP_INPUT_NOTHING;
+}
+
+void
+mp_input_joystick_close(int fd) {
+  struct js_event ev;
+  int l=0;
+  fd_set fds;
+  struct timeval tv;
+  
+  // Wait to see if there is any stale relaease event in the queue (when we quit we the joystick)
+  FD_SET(fd,&fds);
+  tv.tv_sec = 0;
+  tv.tv_usec = 2000000;
+  if(select(fd+1,&fds,NULL,NULL,&tv) > 0) {
+    while((unsigned int)l < sizeof(struct js_event)) {
+      int r = read(fd,&ev+l,sizeof(struct js_event)-l);
+      if(r <= 0) {
+	if(errno == EINTR)
+	  continue;
+	else
+	  break;
+      } 	
+      l += r;
+    }
+  }
+  close(fd);
 }
 
 #else
@@ -156,6 +181,11 @@ int mp_input_joystick_init(char* dev) {
 int mp_input_joystick_read(int fd) {
   
   return MP_INPUT_NOTHING;
+}
+
+void
+mp_input_joystick_close(int fd) {
+
 }
 
 #endif
