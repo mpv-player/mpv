@@ -2,7 +2,7 @@
 // MPlayer-pl translation team, mplayer-pl.emdej.com
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.156
+// Synced with help_mp-en.h 1.157
 
 // ========================= MPlayer help ===========================
 
@@ -668,6 +668,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Nastêpny strumieñ"
 #define MSGTR_MENU_PrevStream "Poprzedni strumieñ"
 #define MSGTR_MENU_Size "Rozmiar"
+#define MSGTR_MENU_HalfSize   "Po³owa normalnego rozmiaru"
 #define MSGTR_MENU_NormalSize "Normalny rozmiar"
 #define MSGTR_MENU_DoubleSize "Podwójny rozmiar"
 #define MSGTR_MENU_FullScreen "Pe³ny ekran"
