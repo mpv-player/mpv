@@ -1473,11 +1473,11 @@ Specify the VOBsub subtitle ID.
 .
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-abs <value> (OBSOLETE)
-Override audio driver/\:card buffer size detection, \-ao oss only.
+.B \-abs <value> (-ao oss only) (OBSOLETE)
+Override audio driver/\:card buffer size detection.
 .TP
 .B \-aofile <filename>
-Filename for \-ao pcm.
+Override the default filename employed by \-ao pcm.
 .TP
 .B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
 Specify audio plugin(s) and their options (see documentation too).
@@ -1504,7 +1504,7 @@ compressor / 'soft-clipping' capabilities (volume plugin only)
 .
 .TP
 .B \-delay <sec>
-Audio delay in seconds (may be +/\:- float value).
+Audio delay in seconds (positive or negative float value).
 .TP
 .B \-format <0\-8192>
 Select the format used for output from the filter layer (according to the
@@ -1519,17 +1519,17 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-signed 8-bit
-.IPs 16
 unsigned 8-bit
-.IPs 32
-unsigned 16-bit (little-endian)
-.IPs 64
-unsigned 16-bit (big-endian)
-.IPs 128
+.IPs 16
 signed 16-bit (little-endian)
-.IPs 256
+.IPs 32
 signed 16-bit (big-endian)
+.IPs 64
+signed 8-bit
+.IPs 128
+unsigned 16-bit (little-endian)
+.IPs 256
+unsigned 16-bit (big-endian)
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
@@ -1543,8 +1543,7 @@ signed 32-bit (big-endian)
 .
 .TP
 .B \-mixer <device>
-This option will tell MPlayer to use a different device for mixing than
-/dev/\:mixer.
+Use a mixer device different from the default /dev/\:mixer.
 For ALSA this is the mixer name.
 .TP
 .B \-mixer-channel <mixer line> (\-ao oss and \-ao alsa only)
@@ -1559,7 +1558,7 @@ For ALSA you can use the names e.g.\& alsamixer displays, like
 .TP
 .B \-nowaveheader (\-ao pcm only)
 Don't include wave header.
-Used for RAW PCM.
+Used for raw PCM.
 .
 .
 .SH "AUDIO OUTPUT DRIVERS (MPLAYER ONLY)"
@@ -1665,7 +1664,7 @@ DVB specific output driver.
 Produces no audio output but maintains video playback speed.
 Use \-nosound for benchmarking.
 .TP
-.B pcm\ \ \ \ 
+.B pcm (also see -aofile)
 Raw PCM/wave file writer audio output.
 Writes the sound to ./audiodump.wav.
 .TP
@@ -1834,7 +1833,7 @@ bands around it).
 Toggle it with the 'f' key (not all video outputs support it).
 See also \-zoom.
 .TP
-.B \-fsmode-dontuse <0\-31> (OBSOLETE) (use \-fs option)
+.B \-fsmode-dontuse <0\-31> (OBSOLETE, use the \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
 .B \-fstype <type1,type2,...> (X11 only)
@@ -2779,7 +2778,7 @@ Useful for benchmarking.
 .B \-novideo
 Do not play/\:encode video.
 .TP
-.B \-oldpp <quality> (OBSOLETE) (OpenDivX only)
+.B \-oldpp <quality> (OpenDivX only) (OBSOLETE)
 Use the opendivx postprocessing code instead of the internal one.
 Superseded by \-pp, the internal postprocessing offers better
 quality and performance.
