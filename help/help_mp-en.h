@@ -49,7 +49,7 @@ static char help_text[]=
 " p or SPACE       pause movie (press any key to continue)\n"
 " q or ESC         stop playing and quit program\n"
 " + or -           adjust audio delay by +/- 0.1 second\n"
-" o                cycle OSD mode:  none / seekbar / seekbar+timer\n"
+" o                cycle OSD mode:  none / seekbar / seekbar + timer\n"
 " * or /           increase or decrease PCM volume\n"
 " z or x           adjust subtitle delay by +/- 0.1 second\n"
 " r or t           adjust subtitle position up/down, also see -vop expand\n"
