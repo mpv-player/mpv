@@ -67,6 +67,7 @@
  *       adjustment)
  *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 13, 2001
  *    - added keymapping to toggle OSD ('o' key) 
+ *    - added some defines to modify some sdl-out internas (see comments)
  */
 
 #include <stdio.h>
@@ -85,8 +86,12 @@ LIBVO_EXTERN(sdl)
 //#include "log.h"
 //#define LOG if(0)printf
 
-/* Uncomment if you want to force Xv SDL output? */
-/* #define SDL_FORCEXV */
+/* define if you want to force Xv SDL output? */
+#undef SDL_FORCEXV
+/* define to force software-surface (video surface stored in system memory)*/
+#undef SDL_NOHWSURFACE
+/* define to disable usage of the xvideo extension */
+#undef SDL_NOXV
 
 static vo_info_t vo_info = 
 {
@@ -193,12 +198,22 @@ static int sdl_open (void *plugin, void *name)
 	#ifdef SDL_FORCEXV
 		setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
 	#endif
+	#ifdef SDL_NOXV
+		setenv("SDL_VIDEO_YUV_HWACCEL", "0", 1);
+	#endif	
 	
 	/* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
 	priv->fullmode = -2;
 	/* other default values */
-	priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT;
-	priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT;
+	#ifdef SDL_NOHWSURFACE
+		printf("SDL: using software-surface\n");
+		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT;
+		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT;
+	#else	
+		printf("SDL: using hardware-surface\n");
+		priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT; //SDL_HWACCEL
+		priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT; //SDL_HWACCEL
+	#endif	
 	priv->surface = NULL;
 	priv->overlay = NULL;
 	priv->fullmodes = NULL;
