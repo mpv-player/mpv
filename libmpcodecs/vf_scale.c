@@ -56,7 +56,7 @@ static int config(struct vf_instance_s* vf,
     int vo_flags;
     
     if(!best){
-	printf("SwScale: no supported outfmt found :(\n");
+	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
 	return 0;
     }
     
@@ -95,7 +95,7 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->h<0) vf->priv->h=height; else
     if(vf->priv->h==0) vf->priv->h=d_height;
     
-    printf("SwScale scaling %dx%d %s to %dx%d %s  \n",
+    mp_msg(MSGT_VFILTER,MSGL_DBG2,"SwScale: scaling %dx%d %s to %dx%d %s  \n",
 	width,height,vo_format_name(outfmt),
 	vf->priv->w,vf->priv->h,vo_format_name(best));
 
@@ -109,7 +109,7 @@ static int config(struct vf_instance_s* vf,
 	    (best==IMGFMT_I420 || best==IMGFMT_IYUV)?IMGFMT_YV12:best);
     if(!vf->priv->ctx){
 	// error...
-	printf("Couldn't init SwScaler for this setup\n");
+	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
 	return 0;
     }
     vf->priv->fmt=best;
@@ -184,7 +184,7 @@ static int open(vf_instance_t *vf, char* args){
     if(args) sscanf(args, "%d:%d",
     &vf->priv->w,
     &vf->priv->h);
-    printf("SwScale: %d x %d (-1=no scaling)\n",
+    mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
     return 1;

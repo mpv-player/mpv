@@ -46,6 +46,7 @@ static int init(sh_audio_t *sh)
 #endif
   MP3_samplerate=MP3_channels=0;
   sh->a_buffer_len=MP3_DecodeFrame(sh->a_buffer,-1);
+  if(!sh->a_buffer_len) return 0; // unsupported layer/format
   sh->channels=2; // hack
   sh->samplerate=MP3_samplerate;
   sh->i_bps=MP3_bitrate*(1000/8);

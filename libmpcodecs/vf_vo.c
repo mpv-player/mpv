@@ -24,10 +24,10 @@ static int config(struct vf_instance_s* vf,
          width, height,
          d_width, d_height,
 	 vo_format_name(outfmt),
-         (flags&1)?"fs ":"",
-         (flags&2)?"vm ":"",
-         (flags&4)?"zoom ":"",
-         (flags&8)?"flip ":"");
+         (flags&1)?" [fs]":"",
+         (flags&2)?" [vm]":"",
+         (flags&4)?" [zoom]":"",
+         (flags&8)?" [flip]":"");
     mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
     mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
     if(info->comment && strlen(info->comment) > 0)

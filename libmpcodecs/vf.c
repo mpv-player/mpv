@@ -81,7 +81,7 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
     for(y=y0;y<y0+h;y++){
 	unsigned char* dst=mpi->planes[0]+mpi->stride[0]*y+(mpi->bpp>>3)*x0;
 	if(mpi->flags&MP_IMGFLAG_YUV){
-	    unsigned int* p=dst;
+	    unsigned int* p=(unsigned int*) dst;
 	    int size=(mpi->bpp>>3)*w/4;
 	    int i;
 	    if(mpi->flags&MP_IMGFLAG_SWAPPED){
@@ -176,7 +176,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
         }
     }
     if(!(mpi->flags&MP_IMGFLAG_TYPE_DISPLAYED)){
-	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"*** [%s] %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_V,"*** [%s] %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
 		  vf->info->name,
 		  (mpi->type==MP_IMGTYPE_EXPORT)?"Exporting":
 	          ((mpi->flags&MP_IMGFLAG_DIRECT)?"Direct Rendering":"Allocating"),
@@ -220,6 +220,10 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
 }
 
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
+    if(strcmp(name,"vo"))
+    mp_msg(MSGT_VFILTER,MSGL_INFO,
+	args ? "Opening video filter: [%s=%s]\n"
+	     : "Opening video filter: [%s]\n" ,name,args);
     return vf_open_plugin(filter_list,next,name,args);
 }
 
@@ -275,7 +279,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	    return 0; // FAIL
 	}
     }
-    printf("REQ: flags=0x%X  req=0x%X  \n",flags,vf->default_reqs);
+    mp_msg(MSGT_VFILTER,MSGL_V,"REQ: flags=0x%X  req=0x%X  \n",flags,vf->default_reqs);
     miss=vf->default_reqs - (flags&vf->default_reqs);
     if(miss&VFCAP_ACCEPT_STRIDE){
 	// vf requires stride support but vf->next doesn't support it!
@@ -311,7 +315,6 @@ vf_instance_t* append_filters(vf_instance_t* last){
 	char* name=strdup(*plugin_args);
 	char* args=strchr(name,'=');
 	if(args){args[0]=0;++args;}
-	mp_msg(MSGT_VFILTER,MSGL_INFO,"Opening video filter '%s' with args '%s'...\n",name,args);
 	vf=vf_open_filter(last,name,args);
 	if(vf) last=vf;
 	free(name);

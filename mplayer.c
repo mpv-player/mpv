@@ -859,6 +859,7 @@ if(!use_stdin && !slave_mode){
 #endif
 //---------------------------------------------------------------------------
 
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
 //==================== Open VOB-Sub ============================
@@ -1128,7 +1129,7 @@ if(sh_video){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,"Video: can't read properties\n");
     sh_video=d_video->sh=NULL;
   } else {
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+    mp_msg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
 	   demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
 	   sh_video->fps,sh_video->frametime
 	   );
@@ -1238,7 +1239,7 @@ if(sh_audio){
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
     else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] afm:%d (%s)\n",
 	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     break;
   }
@@ -1252,8 +1253,10 @@ if(sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
   } else {
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
-        sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: %d Hz, %d ch, sfmt: 0x%X (%d bps), ratio: %d->%d (%3.1f kbit)\n",
+	sh_audio->samplerate,sh_audio->channels,
+	sh_audio->sample_format,sh_audio->samplesize,
+        sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
   }
 }
 
@@ -1309,8 +1312,8 @@ if(!sh_video->inited){
     goto main; // exit_player(MSGTR_Exit_error);
 }
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%d (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(auto_quality>0){
@@ -1399,10 +1402,10 @@ osd_text_buffer[0]=0;
 if(sh_audio){
   const ao_info_t *info=audio_out->info;
   current_module="setup_audio";
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %s %s\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %dch %s\n",
       info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
-      sh_audio->channels>1?"Stereo":"Mono",
+      sh_audio->channels,
       audio_out_format_name(sh_audio->sample_format)
   );
   mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
@@ -2962,6 +2965,8 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 }
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
+
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 
 if(benchmark){
   double tot=video_time_usage+vout_time_usage+audio_time_usage;

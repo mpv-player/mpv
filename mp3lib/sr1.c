@@ -27,6 +27,7 @@
 #include "bswap.h"
 #include "../cpudetect.h"
 #include "../liba52/mm_accel.h"
+#include "../mp_msg.h"
 
 #include "fastmemcpy.h"
 
@@ -400,7 +401,7 @@ void MP3_Init(){
     {
 	_has_mmx = 1;
 	make_decode_tables_MMX(outscale);
-	printf("mp3lib: made decode tables with MMX optimization\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: made decode tables with MMX optimization\n");
     }
     else
 	make_decode_tables(outscale);
@@ -426,7 +427,7 @@ void MP3_Init(){
     tables_done_flag = 1;
 
     dct36_func = dct36;
-    printf("init layer2&3 finished, tables done\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"init layer2&3 finished, tables done\n");
 
 #ifdef CAN_COMPILE_X86_ASM
 #if 0
@@ -435,7 +436,7 @@ void MP3_Init(){
 	/* SSE version is buggy */
 	synth_func = synth_1to1_MMX;
 	dct64_MMX_func = dct64_MMX_sse;
-	printf("mp3lib: using SSE optimized decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
     }
     else
 #endif
@@ -444,7 +445,7 @@ void MP3_Init(){
 	synth_func=synth_1to1_MMX;
 	dct36_func=dct36_3dnowex;
 	dct64_MMX_func=dct64_MMX_3dnowex;
-	printf("mp3lib: using 3DNow!Ex optimized decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
     if (accel & MM_ACCEL_X86_3DNOW)
@@ -452,29 +453,29 @@ void MP3_Init(){
 	synth_func = synth_1to1_MMX;
 	dct36_func = dct36_3dnow;
 	dct64_MMX_func = dct64_MMX_3dnow;
-	printf("mp3lib: using 3DNow! optimized decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow! optimized decore!\n");
     }
     else
     if (accel & MM_ACCEL_X86_MMX)
     {
         synth_func = synth_1to1_MMX;
 	dct64_MMX_func = dct64_MMX;
-	printf("mp3lib: using MMX optimized decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using MMX optimized decore!\n");
     }
     else
     if (gCpuCaps.cpuType >= CPUTYPE_I586)
     {
 	synth_func = synth_1to1_pent;
-	printf("mp3lib: using Pentium optimized decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using Pentium optimized decore!\n");
     }
     else
     {
 	synth_func = NULL; /* use default c version */
-	printf("mp3lib: using generic decore!\n");
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
     }
 #else /* CAN_COMPILE_X86_ASM */
     synth_func = NULL;
-    printf("mp3lib: using generic decore!\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
 #endif
 
 #ifdef USE_FAKE_MONO
@@ -538,6 +539,8 @@ int MP3_DecodeFrame(unsigned char *hova,short single){
    switch(fr.lay){
      case 2: do_layer2(&fr,single);break;
      case 3: do_layer3(&fr,single);break;
+     default:
+         return 0;	// unsupported
    }
 //   ++MP3_frames;
    return(pcm_point?pcm_point:2);
@@ -548,12 +551,12 @@ void MP3_PrintHeader(){
         static char *modes[4] = { "Stereo", "Joint-Stereo", "Dual-Channel", "Single-Channel" };
         static char *layers[4] = { "???" , "I", "II", "III" };
 
-        printf("\rMPEG %s, Layer %s, %ld Hz %d kbit %s, BPF: %ld\n",
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"\rMPEG %s, Layer %s, %ld Hz %d kbit %s, BPF: %ld\n",
                 fr.mpeg25 ? "2.5" : (fr.lsf ? "2.0" : "1.0"),
                 layers[fr.lay],freqs[fr.sampling_frequency],
     tabsel_123[fr.lsf][fr.lay-1][fr.bitrate_index],
                 modes[fr.mode],fr.framesize+4);
-        printf("Channels: %d, copyright: %s, original: %s, CRC: %s, emphasis: %d\n",
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"Channels: %d, copyright: %s, original: %s, CRC: %s, emphasis: %d\n",
                 fr.stereo,fr.copyright?"Yes":"No",
                 fr.original?"Yes":"No",fr.error_protection?"Yes":"No",
                 fr.emphasis);

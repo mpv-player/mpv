@@ -156,7 +156,7 @@ while(1){
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
       chunksize-=MIN(size2,sizeof(avih));
-      if(verbose) print_avih(&avih); else print_avih_flags(&avih);
+      if(verbose) print_avih(&avih); // else print_avih_flags(&avih);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;

@@ -91,6 +91,7 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
+  if (verbose)
   printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
     audio_out_format_name(format));
 
@@ -109,14 +110,14 @@ static int init(int rate,int channels,int format,int flags){
   audio_fd=open(dsp, O_WRONLY);
 #endif
   if(audio_fd<0){
-    printf("Can't open audio device %s: %s  -> no sound\n", dsp, strerror(errno));
+    printf("Can't open audio device %s: %s\n", dsp, strerror(errno));
     return 0;
   }
 
 #ifdef __linux__
   /* Remove the non-blocking flag */
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
-   printf("Can't make filedescriptor non-blocking: %s -> no sound\n", strerror(errno));
+   printf("Can't make filedescriptor non-blocking: %s\n", strerror(errno));
    return 0;
   }  
 #endif

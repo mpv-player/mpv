@@ -135,7 +135,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
         sh->disp_h=h;
 #endif
 
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d (preferred csp: %s)  \n",
 	w,h,vo_format_name(preferred_outfmt));
 
 //    if(!vf) return 1; // temp hack
@@ -232,24 +232,6 @@ csp_again:
       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
     }
   }
-
-#if 0
-  if(video_out->get_info)
-  { const vo_info_t *info = video_out->get_info();
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
-         sh->disp_w,sh->disp_h,
-         screen_size_x,screen_size_y,
-	 vo_format_name(out_fmt),
-         fullscreen?"fs ":"",
-         vidmode?"vm ":"",
-         softzoom?"zoom ":"",
-         (flip==1)?"flip ":"");
-    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
-    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
-    if(info->comment && strlen(info->comment) > 0)
-        mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
-  }
-#endif
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",

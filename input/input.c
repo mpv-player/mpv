@@ -1236,7 +1236,7 @@ mp_input_init(void) {
     return;
   
   if(! mp_input_parse_config(file))
-    mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) config\n");
+    mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
 
 #ifdef HAVE_JOYSTICK
   if(use_joystick) {

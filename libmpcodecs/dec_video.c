@@ -60,7 +60,7 @@ int get_video_quality_max(sh_video_t *sh_video){
       return ret;
     }
   }
-  mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Sorry, postprocessing is not available\n");
+//  mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Sorry, postprocessing is not available\n");
   return 0;
 }
 
@@ -157,7 +157,7 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	    continue;
 	}
 	// it's available, let's try to init!
-	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Opening Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Opening video decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
 	if(!mpvdec->init(sh_video)){
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDecoder init failed :(\n");
 	    continue; // try next...

@@ -39,7 +39,7 @@ int init_audio(sh_audio_t *sh_audio)
       return 0; // no such driver
   }
   
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Selecting Audio Decoder: [%s] %s\n",mpadec->info->short_name,mpadec->info->name);
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Opening audio decoder: [%s] %s\n",mpadec->info->short_name,mpadec->info->name);
 
   // reset in/out buffer size/pointer:
   sh_audio->a_buffer_size=0;
