@@ -182,8 +182,17 @@ extern int          vo_screenheight;
 static MotifWmHints   vo_MotifWmHints;
 static Atom           vo_MotifHints  = None;
 
+// Note: always d==0 !
 void vo_x11_decoration( Display * vo_Display,Window w,int d )
 {
+
+  if(vo_fsmode&1){
+    XSetWindowAttributes attr;
+    attr.override_redirect = True;
+    XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
+//    XMapWindow(vo_Display], w);
+  }
+
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
   {
@@ -191,9 +200,9 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
    vo_MotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
    vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE;
    if ( d ) d=MWM_DECOR_ALL;
-   vo_MotifWmHints.decorations=d | MWM_DECOR_MENU;
+   vo_MotifWmHints.decorations=d|((vo_fsmode&2)?0:MWM_DECOR_MENU);
    XChangeProperty( vo_Display,w,vo_MotifHints,vo_MotifHints,32,
-                    PropModeReplace,(unsigned char *)&vo_MotifWmHints,5 );
+                    PropModeReplace,(unsigned char *)&vo_MotifWmHints,(vo_fsmode&4)?4:5 );
   }
 }
 
