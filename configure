@@ -1975,6 +1975,25 @@ else
 fi
 echores "$_vsscanf"
 
+echocheck "sys/sysinfo.h"
+cat > $TMPC << EOF
+#include <sys/sysinfo.h>
+int main(void) {
+  struct sysinfo s_info;
+  sysinfo(&s_info);
+  return 0;
+}
+EOF
+_sys_sysinfo=no
+cc_check && _sys_sysinfo=yes
+if test "$_sys_sysinfo" = yes ; then
+  _def_sys_sysinfo='#define HAVE_SYS_SYSINFO_H 1'
+  _inc_sysinfo='#include <sys/sysinfo.h>'
+else
+  _def_sys_sysinfo='#undef HAVE_SYS_SYSINFO_H'
+fi
+echores "$_sys_sysinfo"
+
 
 #########
 # VIDEO #
@@ -4419,6 +4438,9 @@ $_def_sys_soundcard
 /* Define this if your system has the header file for the OSS sound interface
  * in /usr/include */
 $_def_soundcard
+
+/* Define this if your system has the sysinfo header */
+$_def_sys_sysinfo
 
 /* Define this if your system uses ftello() for off_t seeking */
 

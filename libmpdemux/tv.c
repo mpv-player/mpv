@@ -39,9 +39,7 @@ int tv_param_on = 0;
 /* some default values */
 int tv_param_audiorate = 44100;
 int tv_param_noaudio = 0;
-#ifdef HAVE_TV_BSDBT848
 int tv_param_immediate = 0;
-#endif
 char *tv_param_freq = NULL;
 char *tv_param_channel = NULL;
 char *tv_param_norm = "pal";
@@ -53,6 +51,14 @@ int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
 char *tv_param_outfmt = "yv12";
 float tv_param_fps = -1.0;
+#ifdef HAVE_TV_V4L
+int tv_param_mono = 0;
+int tv_param_audio_id = 0;
+#ifdef HAVE_ALSA9
+int tv_param_alsa = 0;
+#endif
+char* tv_param_adevice = NULL;
+#endif
 
 /* ================== DEMUX_TV ===================== */
 /*
@@ -135,6 +141,21 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &picture_format);
 
+    /* set some params got from cmdline */
+    funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
+
+    /* select video norm */
+    if (!strcasecmp(tv_param_norm, "pal"))
+	tvh->norm = TV_NORM_PAL;
+    else if (!strcasecmp(tv_param_norm, "ntsc"))
+	tvh->norm = TV_NORM_NTSC;
+    else if (!strcasecmp(tv_param_norm, "secam"))
+	tvh->norm = TV_NORM_SECAM;
+
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
+    funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm);
+
+    /* limits on w&h are norm-dependent -- JM */
     /* set width */
     if (tv_param_width != -1)
     {
@@ -158,20 +179,6 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tv_param_height);
 	}    
     }
-
-    /* set some params got from cmdline */
-    funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
-
-    /* select video norm */
-    if (!strcasecmp(tv_param_norm, "pal"))
-	tvh->norm = TV_NORM_PAL;
-    else if (!strcasecmp(tv_param_norm, "ntsc"))
-	tvh->norm = TV_NORM_NTSC;
-    else if (!strcasecmp(tv_param_norm, "secam"))
-	tvh->norm = TV_NORM_SECAM;
-
-    mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
-    funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm);
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
     {
@@ -272,14 +279,12 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 
     printf("fps: %f, frametime: %f\n", sh_video->fps, sh_video->frametime);
 
-#ifdef HAVE_TV_BSDBT848
     /* If playback only mode, go to immediate mode, fail silently */
     if(tv_param_immediate == 1)
         {
         funcs->control(tvh->priv, TVI_CONTROL_IMMEDIATE, 0);
         tv_param_noaudio = 1; 
         }
-#endif
 
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
@@ -371,9 +376,16 @@ no_audio:
     return(funcs->start(tvh->priv));	
 }
 
+#if defined(USE_TV) && defined(HAVE_TV_V4L)
+int demux_close_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
+{
+    return(tvh->functions->uninit(tvh->priv));
+}
+#endif
+
 /* ================== STREAM_TV ===================== */
 tvi_handle_t *tvi_init_dummy(char *device);
-tvi_handle_t *tvi_init_v4l(char *device);
+tvi_handle_t *tvi_init_v4l(char *device, char *adevice);
 tvi_handle_t *tvi_init_bsdbt848(char *device);
 
 tvi_handle_t *tv_begin(void)
@@ -382,7 +394,7 @@ tvi_handle_t *tv_begin(void)
 	return tvi_init_dummy(tv_param_device);
 #ifdef HAVE_TV_V4L
     if (!strcmp(tv_param_driver, "v4l"))
-	return tvi_init_v4l(tv_param_device);
+	return tvi_init_v4l(tv_param_device, tv_param_adevice);
 #endif
 #ifdef HAVE_TV_BSDBT848
     if (!strcmp(tv_param_driver, "bsdbt848"))

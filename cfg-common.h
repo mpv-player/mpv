@@ -197,6 +197,14 @@ struct config tvopts_conf[]={
 	{"input", &tv_param_input, CONF_TYPE_INT, 0, 0, 20, NULL},
 	{"outfmt", &tv_param_outfmt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fps", &tv_param_fps, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
+#ifdef HAVE_TV_V4L
+	{"mono", &tv_param_mono, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#ifdef HAVE_ALSA9
+	{"alsa", &tv_param_alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#endif
+	{"adevice", &tv_param_adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"audioid", &tv_param_audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif

@@ -308,7 +308,24 @@ Available options are:
     chanlist=<value>  available: europe-east,
                       europe-west, us-bcast,
                       us-cable, etc
+    audiorate=<value> set audio capture bitrate
+    alsa              capture from ALSA
+    mono              force mono audio
+    adevice=<value>   set an audio device
+                      /dev/... for OSS,
+                      hardware ID for ALSA
+    audioid=<value>   choose an audio output
+                      of the capture card, if it
+                      has more of them
+.TP
+.I NOTE:
+Mplayer doesn't accept colons so type commas instead in the device ID,
+eg. hw,0,0 instead of hw:0:0)
 
+Be advised that although you can select any samplerate when using ALSA,
+the LAME audio codec is able to encode only the "standard" samplerates.
+You'll get an .avi file with no sound when you choose an odd
+samplerate and use this codec.
 .TP
 .B \-vcd <track>
 Play video CD track from device instead of plain file.

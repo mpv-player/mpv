@@ -40,6 +40,11 @@ void mp_msg_set_level(int verbose){
     }
 }
 
+int mp_msg_test(int mod, int lev)
+{
+    return lev <= mp_msg_levels[mod];
+}
+
 void mp_msg_c( int x, const char *format, ... ){
 #if 1
     va_list va;

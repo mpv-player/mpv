@@ -268,6 +268,8 @@ extern char *ao_subdevice;
 
 static stream_t* stream=NULL;
 
+static demuxer_t *demuxer=NULL;
+
 char* current_module=NULL; // for debugging
 
 int vo_gamma_brightness = 1000;
@@ -291,6 +293,7 @@ static unsigned int inited_flags=0;
 #define INITED_STREAM 64
 #define INITED_INPUT    128
 #define INITED_VOBSUB  256
+#define INITED_DEMUXER  512
 #define INITED_ALL 0xFFFF
 
 void uninit_player(unsigned int mask){
@@ -304,6 +307,12 @@ void uninit_player(unsigned int mask){
     current_module="uninit_stream";
     if(stream) free_stream(stream);
     stream=NULL;
+  }
+
+  if(mask&INITED_DEMUXER){
+    current_module="uninit_demuxer";
+    if(demuxer) free_demuxer(demuxer);
+    demuxer=NULL;
   }
 
   if(mask&INITED_VO){
@@ -489,8 +498,6 @@ static subtitle* subtitles=NULL;
 float sub_last_pts = -303;
 #endif
 
-static demuxer_t *demuxer=NULL;
-
 static demux_stream_t *d_audio=NULL;
 static demux_stream_t *d_video=NULL;
 static demux_stream_t *d_dvdsub=NULL;
@@ -565,9 +572,7 @@ int gui_no_filename=0;
 
 #endif
 
-#ifdef HAVE_TV_BSDBT848
   tv_param_immediate = 1;
-#endif
 
   if ( argv[0] )
     if(!strcmp(argv[0],"gmplayer") ||
@@ -1076,6 +1081,8 @@ current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
 if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
+
+inited_flags|=INITED_DEMUXER;
 
 current_module="demux_open2";
 

@@ -23,6 +23,14 @@ extern float tv_param_fps;
 extern int tv_param_noaudio;
 extern int tv_param_immediate;
 extern int tv_param_audiorate;
+#ifdef HAVE_TV_V4L
+extern int tv_param_mono;
+extern int tv_param_audio_id;
+#ifdef HAVE_ALSA9
+extern int tv_param_alsa;
+#endif
+extern char* tv_param_adevice;
+#endif
 
 typedef struct tvi_info_s
 {
@@ -72,9 +80,7 @@ typedef struct tvi_handle_s {
 #define TVI_CONTROL_IS_AUDIO		0x1
 #define TVI_CONTROL_IS_VIDEO		0x2
 #define TVI_CONTROL_IS_TUNER		0x3
-#ifdef HAVE_TV_BSDBT848
-#define TVI_CONTROL_IMMEDIATE       0x4
-#endif
+#define TVI_CONTROL_IMMEDIATE           0x4
 
 /* VIDEO controls */
 #define TVI_CONTROL_VID_GET_FPS		0x101

@@ -155,6 +155,18 @@ extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
 extern void demux_close_rawdv(demuxer_t* demuxer);
 
+#ifdef USE_TV
+#include "tv.h"
+extern tvi_handle_t *tv_handler;
+extern int tv_param_on;
+
+extern int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds, tvi_handle_t *tvh);
+extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
+#if defined(USE_TV) && defined(HAVE_TV_V4L)
+extern void demux_close_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
+#endif
+#endif
+
 void free_demuxer(demuxer_t *demuxer){
     int i;
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing demuxer at %p  \n",demuxer);
@@ -177,6 +189,10 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_fli(demuxer); break;
     case DEMUXER_TYPE_NUV:
       demux_close_nuv(demuxer); break;
+#if defined(USE_TV) && defined(HAVE_TV_V4L)
+    case DEMUXER_TYPE_TV:
+	demux_close_tv(demuxer, tv_handler); break;
+#endif
 #ifdef HAVE_LIBDV095
     case DEMUXER_TYPE_RAWDV:
       demux_close_rawdv(demuxer); break;
@@ -267,15 +283,6 @@ int demux_real_fill_buffer(demuxer_t *demuxer);
 int demux_nuv_fill_buffer(demuxer_t *demux);
 int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 int demux_rawdv_fill_buffer(demuxer_t *demuxer);
-
-#ifdef USE_TV
-#include "tv.h"
-extern tvi_handle_t *tv_handler;
-extern int tv_param_on;
-
-extern int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds, tvi_handle_t *tvh);
-extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
-#endif
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);

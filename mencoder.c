@@ -1126,7 +1126,7 @@ if(sh_audio && !demuxer2){
 	if(verbose) {
 		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/S %d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
-	    	(t>1) ? (int)(decoded_frameno/t) : 0,
+	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
 	    	(p>0.001) ? (int)(ftello(muxer_f)/p/1024/1024) : 0,
 	    	v_pts_corr,
@@ -1138,7 +1138,7 @@ if(sh_audio && !demuxer2){
 	} else
 	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
-	    (t>1) ? (int)(decoded_frameno/t) : 0,
+	    (t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
 	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
 	    v_pts_corr,
@@ -1186,6 +1186,8 @@ if(sh_audio && !demuxer2){
  }
 
 } // while(!at_eof)
+
+if (demuxer) free_demuxer(demuxer);
 
 #ifdef HAVE_MP3LAME
 // fixup CBR mp3 audio header:
