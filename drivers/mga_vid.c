@@ -1302,7 +1302,8 @@ static int mga_vid_find_card(void)
 		    // SDRAM:
 		    case 0x00:
 		    case 0x04:  mga_ram_size = 16; break;
-		    case 0x03:  mga_ram_size = 32; break;
+		    case 0x03:  
+		    case 0x05:  mga_ram_size = 32; break;
 		    // SGRAM:
 		    case 0x10:
 		    case 0x14:  mga_ram_size = 32; break;
@@ -1504,7 +1505,7 @@ static int mga_vid_initialize(void)
 	mga_vid_in_use = 0;
 
 //	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
-	printk(KERN_INFO "Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
+	printk(KERN_INFO "Matrox MGA G200/G400/G450/G550 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
 
 	if (mga_ram_size) {
 		if (mga_ram_size<4 || mga_ram_size>64) {
