@@ -121,7 +121,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Initialize delay queue index
     if(AF_OK != af_from_ms(1, &s->d, &s->wi, af->data->rate, 0.0, 1000.0))
       return AF_ERROR;
-    printf("%i\n",s->wi);
+//    printf("%i\n",s->wi);
     s->ri = 0;
 
     if((af->data->format != ((af_data_t*)arg)->format) || 
