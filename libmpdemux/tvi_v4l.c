@@ -59,7 +59,7 @@ static tvi_info_t info = {
 
 #define MAX_AUDIO_CHANNELS	10
 
-#define VID_BUF_SIZE_IMMEDIATE 3
+#define VID_BUF_SIZE_IMMEDIATE 2
 
 typedef struct {
     /* general */
@@ -107,9 +107,10 @@ typedef struct {
     volatile int                audio_drop;
 
     int                         first;
-    int                         video_buffer_size;
-    unsigned char		*video_ringbuffer;
-    long long			*video_timebuffer;
+    int                         video_buffer_size_max;
+    volatile int                video_buffer_size_current;
+    unsigned char		**video_ringbuffer;
+    long long                   *video_timebuffer;
     volatile int		video_head;
     volatile int		video_tail;
     volatile int		video_cnt;
@@ -120,6 +121,7 @@ typedef struct {
     pthread_t			video_grabber_thread;
     pthread_mutex_t             audio_starter;
     pthread_mutex_t             skew_mutex;
+    pthread_mutex_t             video_buffer_mutex;
 
     long long                   starttime;
     double                      audio_secs_per_block;
@@ -556,6 +558,7 @@ static int uninit(priv_t *priv)
 	pthread_mutex_destroy(&priv->audio_starter);
 	pthread_mutex_destroy(&priv->skew_mutex);
     }
+    pthread_mutex_destroy(&priv->video_buffer_mutex);
     pthread_join(priv->video_grabber_thread, NULL);
     mp_msg(MSGT_TV, MSGL_V, "done\n");
 
@@ -567,8 +570,14 @@ static int uninit(priv_t *priv)
 
     audio_in_uninit(&priv->audio_in);
 
-    if (priv->video_ringbuffer)
+    if (priv->video_ringbuffer) {
+	int i;
+	for (i = 0; i < priv->video_buffer_size_current; i++) {
+	    free(priv->video_ringbuffer[i]);
+	}
 	free(priv->video_ringbuffer);
+    }
+    
     if (priv->video_timebuffer)
 	free(priv->video_timebuffer);
     if (!tv_param_noaudio) {
@@ -721,28 +730,32 @@ static int start(priv_t *priv)
 
     /* setup video parameters */
     if (priv->immediate_mode) {
-	priv->video_buffer_size = VID_BUF_SIZE_IMMEDIATE;
+	priv->video_buffer_size_max = VID_BUF_SIZE_IMMEDIATE;
     } else {
-	priv->video_buffer_size = get_capture_buffer_size(priv);
+	priv->video_buffer_size_max = get_capture_buffer_size(priv);
     }
+    priv->video_buffer_size_current = 0;
 
     if (!tv_param_noaudio) {
-	if (priv->video_buffer_size < 3.0*priv->fps*priv->audio_secs_per_block) {
+	if (priv->video_buffer_size_max < 3.0*priv->fps*priv->audio_secs_per_block) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "Video buffer shorter than 3 times audio frame duration.\n"
 		   "You will probably experience heavy framedrops.\n");
 	}
     }
 
-    mp_msg(MSGT_TV, MSGL_V, "Allocating a ring buffer for %d frames, %d MB total size.\n",
-	   priv->video_buffer_size,
-	   priv->video_buffer_size*priv->height*priv->bytesperline/(1024*1024));
+    mp_msg(MSGT_TV, MSGL_V, "Using a ring buffer for maximum %d frames, %d MB total size.\n",
+	   priv->video_buffer_size_max,
+	   priv->video_buffer_size_max*priv->height*priv->bytesperline/(1024*1024));
 
-    priv->video_ringbuffer = (unsigned char*)malloc(priv->bytesperline * priv->height * priv->video_buffer_size);
+    priv->video_ringbuffer = (unsigned char**)malloc(priv->video_buffer_size_max*sizeof(unsigned char*));
     if (!priv->video_ringbuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
 	return 0;
     }
-    priv->video_timebuffer = (long long*)malloc(sizeof(long long) * priv->video_buffer_size);
+    for (i = 0; i < priv->video_buffer_size_max; i++)
+	priv->video_ringbuffer[i] = NULL;
+    
+    priv->video_timebuffer = (long long*)malloc(sizeof(long long) * priv->video_buffer_size_max);
     if (!priv->video_timebuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
@@ -780,6 +793,7 @@ static int start(priv_t *priv)
 	pthread_mutex_lock(&priv->audio_starter);
 	pthread_create(&priv->audio_grabber_thread, NULL, audio_grabber, priv);
     }
+    pthread_mutex_init(&priv->video_buffer_mutex, NULL);
     /* we'll launch the video capture later, when a first request for a frame arrives */
 
     return(1);
@@ -1206,7 +1220,7 @@ static void *video_grabber(void *data)
 	for (i = 0; i < priv->nbuf && !priv->shutdown; i++, framecount++) {
 
 	    if (priv->immediate_mode) {
-		while ((priv->video_tail+1) % priv->video_buffer_size == priv->video_head) {
+		while (priv->video_cnt == priv->video_buffer_size_max) {
 		    usleep(10000);
                     if (priv->shutdown) {
                       return NULL;
@@ -1274,7 +1288,25 @@ static void *video_grabber(void *data)
 	    prev_skew = skew;
 	    prev_interval = interval;
 	    
-	    if ((priv->video_tail+1) % priv->video_buffer_size == priv->video_head) {
+	    /* allocate a new buffer, if needed */
+	    pthread_mutex_lock(&priv->video_buffer_mutex);
+	    if (priv->video_buffer_size_current < priv->video_buffer_size_max) {
+		if (priv->video_cnt == priv->video_buffer_size_current) {
+		    unsigned char *newbuf = (unsigned char*)malloc(priv->bytesperline * priv->height);
+		    if (newbuf) {
+			memmove(priv->video_ringbuffer+priv->video_tail+1, priv->video_ringbuffer+priv->video_tail,
+			       (priv->video_buffer_size_current-priv->video_tail)*sizeof(unsigned char *));
+			memmove(priv->video_timebuffer+priv->video_tail+1, priv->video_timebuffer+priv->video_tail,
+			       (priv->video_buffer_size_current-priv->video_tail)*sizeof(long long));
+			priv->video_ringbuffer[priv->video_tail] = newbuf;
+			if ((priv->video_head >= priv->video_tail) && (priv->video_cnt > 0)) priv->video_head++;
+			priv->video_buffer_size_current++;
+		    }
+		}
+	    }
+	    pthread_mutex_unlock(&priv->video_buffer_mutex);
+
+	    if (priv->video_cnt == priv->video_buffer_size_current) {
 		if (!priv->immediate_mode) {
 		    mp_msg(MSGT_TV, MSGL_ERR, "\nvideo buffer full - dropping frame\n");
 		}
@@ -1288,8 +1320,8 @@ static void *video_grabber(void *data)
 		    priv->video_timebuffer[priv->video_tail] = interval - skew;
 		}
 		
-		copy_frame(priv, priv->video_ringbuffer+(priv->video_tail)*fsize, priv->mmap+priv->mbuf.offsets[frame]);
-		priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size;
+		copy_frame(priv, priv->video_ringbuffer[priv->video_tail], priv->mmap+priv->mbuf.offsets[frame]);
+		priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size_current;
 		priv->video_cnt++;
 	    }
 
@@ -1308,14 +1340,16 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 	priv->first = 0;
     }
 
-    while (priv->video_head == priv->video_tail) {
+    while (priv->video_cnt == 0) {
 	usleep(10000);
     }
 
+    pthread_mutex_lock(&priv->video_buffer_mutex);
     interval = (double)priv->video_timebuffer[priv->video_head]*1e-6;
-    memcpy(buffer, priv->video_ringbuffer+priv->video_head*priv->bytesperline * priv->height, len);
+    memcpy(buffer, priv->video_ringbuffer[priv->video_head], len);
     priv->video_cnt--;
-    priv->video_head = (++priv->video_head)%priv->video_buffer_size;
+    priv->video_head = (++priv->video_head)%priv->video_buffer_size_current;
+    pthread_mutex_unlock(&priv->video_buffer_mutex);
     return interval;
 }
 
@@ -1329,7 +1363,7 @@ static void *audio_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     struct timeval tv;
     int i, audio_skew_ptr = 0;
-    long long /*tmp,*/ current_time, prev_skew = 0;
+    long long current_time, prev_skew = 0;
 
     pthread_mutex_lock(&priv->audio_starter);
 
