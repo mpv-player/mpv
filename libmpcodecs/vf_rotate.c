@@ -61,6 +61,9 @@ static int config(struct vf_instance_s* vf,
     }
     if (vf->priv->direction & 4){
 	vf->put_image=vf_next_put_image; // passthru mode!
+	if (vf->next->draw_slice) vf->draw_slice=vf_next_draw_slice;
+/* FIXME: this should be in an other procedure in vf.c; that should always check
+     whether the filter after the passthrough one still (not)supports slices */
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
     }
     return vf_next_config(vf,height,width,d_height,d_width,flags,outfmt);

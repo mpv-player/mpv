@@ -390,6 +390,10 @@ int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
     return vf->next->put_image(vf->next,mpi);
 }
 
+void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stride,int w, int h, int x, int y){
+    vf->next->draw_slice(vf->next,src,stride,w,h,x,y);
+}
+
 //============================================================================
 
 vf_instance_t* append_filters(vf_instance_t* last){
