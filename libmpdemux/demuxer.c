@@ -67,6 +67,12 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
 }
 
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
+    if(id > MAX_A_STREAMS-1)
+    {
+	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
+	    id, MAX_A_STREAMS);
+	return NULL;
+    }
     if(demuxer->a_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
     } else {
@@ -85,6 +91,12 @@ void free_sh_audio(sh_audio_t* sh){
 }
 
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
+    if(id > MAX_V_STREAMS-1)
+    {
+	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
+	    id, MAX_V_STREAMS);
+	return NULL;
+    }
     if(demuxer->v_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
     } else {

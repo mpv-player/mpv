@@ -71,6 +71,9 @@ typedef struct demuxer_info_st {
   char *copyright;
 } demuxer_info_t;
 
+#define MAX_A_STREAMS 256
+#define MAX_V_STREAMS 256
+
 typedef struct demuxer_st {
   stream_t *stream;
   int synced;  // stream synced (used by mpeg)
@@ -86,8 +89,8 @@ typedef struct demuxer_st {
   demux_stream_t *sub;   // dvd subtitle buffer/demuxer
 
   // stream headers:
-  void* a_streams[256]; // audio streams (sh_audio_t)
-  void* v_streams[256]; // video sterams (sh_video_t)
+  void* a_streams[MAX_A_STREAMS]; // audio streams (sh_audio_t)
+  void* v_streams[MAX_V_STREAMS]; // video sterams (sh_video_t)
   char s_streams[32];   // dvd subtitles (flag)
   
   void* priv;  // fileformat-dependent data
