@@ -39,7 +39,7 @@ Documentation translations:
     * French: Nicolas Le Gaillart, Guillaume Poirier
     * Russian: Dmitry Baryshkov
     * Polish: Waclaw Schiller
-    * Italian: Daniele Forghieri
+    * Italian: Daniele Forghieri (outdated)
     * Chinese (simplified): Lu Ran (outdated)
     * Spanish: Juan Martin
     * Czech: Jiri Heryan
@@ -54,6 +54,7 @@ Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Solaris 8 support: Jürgen Keil, Pierre Lombard
     * MIPS support: Oliver Schoenbrunner
     * Win32/Cygwin/MinGW support: Sascha Sommer, Joey Parrish, Diego Biurrun
+    * Mac OS X: Nicolas Plourde
 
 MPlayer code:
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi

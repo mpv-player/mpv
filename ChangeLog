@@ -97,6 +97,7 @@ MPlayer (1.0)
     * Creative ADPCM decoder
     * Miro VideoXL decoder
     * Sierra online audio files demuxer and decoder
+    * QPEG video decoder
     * Electronic Arts Game Multimedia format demuxer
     * H.261 fixes, H.261 encoder
     * fix VIS accelerated code
@@ -132,12 +133,14 @@ MPlayer (1.0)
     * as usual, lots of bug fixes and optimizations
 
     Filters:
-    * software volume control when no hardware support, can be controled
+    * software volume control when no hardware support, can be controlled
       with the -softvol and -softvol-max parameters
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
     * missing audio plugins (extrastereo, volnorm) converted to audio filters
     * sine sweep generator audio filter
+    * hrtf audio filter to convert multichannel audio to 2 channel output
+      for headphones, preserving the spatiality of the sound
     * big-endian fixes in rgb2rgb converter
     * yuv2rgb Altivec optimization fixes
 
@@ -147,6 +150,7 @@ MPlayer (1.0)
     * GUI redrawing limited, decreases CPU usage in audio-only case
     * GUI icons for the context menu
     * GUI speedup especially for audio only case
+    * GUI doublesize bug fixed
     * x264 encoder support
     * better EDL support
     * some --disable configure options finally work (mp3lib, liba52, libmpeg2)
@@ -171,6 +175,7 @@ MPlayer (1.0)
     * gcc 4 compilation fixes
     * compilation fixes for many files in the TOOLS directory
     * infamous "stuck mouse button" bug fixed
+    * reduced verbosity of MPlayer's output somewhat
 
 
   pre5: "LinuxTag release" July 15, 2004
