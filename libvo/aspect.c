@@ -1,9 +1,12 @@
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
+#ifndef ASPECT_TEST
+#include "../mp_msg.h"
+#endif
 
 //#define ASPECT_DEBUG
 
-#ifdef ASPECT_DEBUG
+#if defined(ASPECT_DEBUG) || defined(ASPECT_TEST)
 #include <stdio.h>
 #endif
 
@@ -64,10 +67,16 @@ void aspect(int *srcw, int *srch, int zoom){
     else
       tmpw = (int)((float)aspdat.prew
                 * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
-    if(tmpw<=aspdat.scrw && tmpw>=aspdat.orgw){
+    tmpw+= tmpw%2; // round
+    if(tmpw<=aspdat.scrw /*&& tmpw>=aspdat.orgw*/){
       *srch = zoom?aspdat.scrh:aspdat.preh;
       *srcw = tmpw;
-      *srcw+= *srcw%2; // round
+    }else{
+#ifndef ASPECT_TEST
+      mp_msg(MSGT_VO,MSGL_WARN,"aspect: Warning: no suitable new res found!\n");
+#else
+      printf("error: no new size found that fits into res!\n");
+#endif
     }
   }
 #ifdef ASPECT_DEBUG
