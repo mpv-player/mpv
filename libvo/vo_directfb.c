@@ -58,7 +58,12 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
+
 #include "aspect.h"
+
+#ifndef min
+#define min(x,y) (((x)<(y))?(x):(y))
+#endif
 
 LIBVO_EXTERN(directfb)
 
