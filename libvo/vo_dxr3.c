@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-03-25:
+ *  A couple of bugfixes by XorA
+ *
  * 2002-03-23:
  *  Thanks to Marcel Hild <hild@b4mad.net> the jitter-bug experienced
  *  with some videos have been fixed, many thanks goes to him.
@@ -345,7 +348,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			return -1;
 		}
 		avc_context = malloc(sizeof(AVCodecContext));
-		memset(avc_context, 0, sizeof(avc_context));
+		memset(avc_context, 0, sizeof(AVCodecContext));
 		avc_context->width = s_width;
 		avc_context->height = s_height;
 		ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
