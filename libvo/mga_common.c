@@ -2,6 +2,7 @@
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
 #include "../mp_image.h"
+#include "../postproc/rgb2rgb.h"
 
 // mga_vid drawing functions
 
@@ -85,60 +86,10 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
         width/=2;height/=2;x/=2;y/=2;
 
 	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
-	src = image[1];
-	src2 = image[2];
-	
-	for(h=0; h < height; h++)
-	{
-#ifdef HAVE_MMX
-		asm(
-			"xorl %%eax, %%eax		\n\t"
-			"1:				\n\t"
-			PREFETCH" 64(%1, %%eax)		\n\t"
-			PREFETCH" 64(%2, %%eax)		\n\t"
-			"movq (%1, %%eax), %%mm0	\n\t"
-			"movq 8(%1, %%eax), %%mm2	\n\t"
-			"movq %%mm0, %%mm1		\n\t"
-			"movq %%mm2, %%mm3		\n\t"
-			"movq (%2, %%eax), %%mm4	\n\t"
-			"movq 8(%2, %%eax), %%mm5	\n\t"
-			"punpcklbw %%mm4, %%mm0		\n\t"
-			"punpckhbw %%mm4, %%mm1		\n\t"
-			"punpcklbw %%mm5, %%mm2		\n\t"
-			"punpckhbw %%mm5, %%mm3		\n\t"
-			MOVNTQ" %%mm0, (%0, %%eax, 2)	\n\t"
-			MOVNTQ" %%mm1, 8(%0, %%eax, 2)	\n\t"
-			MOVNTQ" %%mm2, 16(%0, %%eax, 2)	\n\t"
-			MOVNTQ" %%mm3, 24(%0, %%eax, 2)	\n\t"
-			"addl $16, %%eax			\n\t"
-			"cmpl %3, %%eax			\n\t"
-			" jb 1b				\n\t"
-			::"r"(dest), "r"(src), "r"(src2), "r" (width-15)
-			: "memory", "%eax"
-		);
-		for(w= (width&(~15)); w < width; w++)
-		{
-			dest[2*w+0] = src[w];
-			dest[2*w+1] = src2[w];
-		}
-#else
-		for(w=0; w < width; w++)
-		{
-			dest[2*w+0] = src[w];
-			dest[2*w+1] = src2[w];
-		}
-#endif
-		dest += bespitch;
-                src += stride[1];
-                src2+= stride[2];
-	}
-#ifdef HAVE_MMX
-	asm(
-		EMMS" \n\t"
-		SFENCE" \n\t"
-		::: "memory"
-		);
-#endif
+
+	interleaveBytes(image[1],image[2],dest,
+		mga_vid_config.src_width, height,
+		stride[1], stride[2], bespitch);
 }
 
 static void
