@@ -211,8 +211,8 @@ Now, go on:
 		      
 	 VOCTRL_QUERY_FORMAT  -  queries if a given pixelformat is supported.
 		return value:   flags:
-		    0x1  -  supported (by hardware or conversion)
-		    0x2  -  supported (by hardware, without conversion)
+		    0x1	 -  supported
+		    0x2  -  supported without conversion (define 0x1 too!)
 		    0x4  -  sub/osd supported (has draw_alpha)
 		    0x8  -  hardware handles subpics
 		    0x100  -  driver/hardware handles timing (blocking)
