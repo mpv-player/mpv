@@ -5469,15 +5469,6 @@ else
 fi
 
 
-if test -z "$_livelibdir" ; then
-    for I in $_libdir/live /usr/lib/live /usr/local/live /usr/local/lib/live; do
-      if test -d "$I" ; then
-        _livelibdir="$I"
-        break;
-      fi;
-    done
-fi
-
 echocheck "LIVE.COM Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
   _TMPC=$TMPC
@@ -5489,10 +5480,26 @@ if test "$_live" = auto  && test "$_network" = yes ; then
 #endif
 int main(void) {}
 EOF
-  if cc_check -I$_livelibdir/liveMedia/include/ -I$_livelibdir/UsageEnvironment/include -I$_livelibdir/groupsock/include; then
-    _live=yes
+
+  _live_dist=no
+  if test -z "$_livelibdir" ; then
+      if cc_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
+	  _live_dist=yes
+      else
+	  for I in $_libdir/live /usr/lib/live /usr/local/live /usr/local/lib/live; do
+	      if test -d "$I" ; then
+		  _livelibdir="$I"
+		  break;
+	      fi;
+	  done
+      fi
+  fi
+
+  if test "$_live_dist" = no && test "$_livelibdir" && cc_check -I$_livelibdir/liveMedia/include/ \
+      -I$_livelibdir/UsageEnvironment/include -I$_livelibdir/groupsock/include; then
+      _live=yes
   else
-    _live=no
+      _live=no
   fi
   TMPC=$_TMPC
 fi
@@ -5505,7 +5512,28 @@ LIVE_LIBS =  \$(LIVE_LIB_DIR)/liveMedia/libliveMedia.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/groupsock/libgroupsock.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/UsageEnvironment/libUsageEnvironment.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
-LIVE_LIBS += -lstdc++"
+LIVE_LIBS += -lstdc++
+LIVE_INCLUDES = -I$\(LIVE_LIB_DIR)/liveMedia/include
+LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/UsageEnvironment/include
+LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/BasicUsageEnvironment/include
+LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/groupsock/include"
+  _ld_live='$(LIVE_LIBS)'
+ _inputmodules="live.com $_inputmodules"
+elif test "$_live_dist" = yes && test "$_network" = yes ; then
+  echores "yes (using distribution version)"
+  _live="yes"
+  _def_live='#define STREAMING_LIVE_DOT_COM 1'
+  _live_libs_def="# LIVE.COM Streaming Media libraries:
+LIVE_LIB_DIR = $_livelibdir
+LIVE_LIBS =  -lliveMedia
+LIVE_LIBS += -lgroupsock
+LIVE_LIBS += -lUsageEnvironment
+LIVE_LIBS += -lBasicUsageEnvironment
+LIVE_LIBS += -lstdc++
+LIVE_INCLUDES = -I/usr/include/liveMedia
+LIVE_INCLUDES += -I/usr/include/UsageEnvironment                                                                          
+LIVE_INCLUDES += -I/usr/include/BasicUsageEnvironment                                                                     
+LIVE_INCLUDES += -I/usr/include/groupsock"
   _ld_live='$(LIVE_LIBS)'
  _inputmodules="live.com $_inputmodules"
 else

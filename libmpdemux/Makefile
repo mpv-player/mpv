@@ -12,10 +12,7 @@ SRCS += asf_streaming.c http.c network.c cookies.c asf_mmst_streaming.c pnm.c rt
 SRCS += realrtsp/asmrp.c realrtsp/real.c realrtsp/rmff.c realrtsp/rtsp.c realrtsp/rtsp_session.c realrtsp/sdpplin.c realrtsp/xbuffer.c
 ifeq ($(STREAMING_LIVE_DOT_COM),yes)
 CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
-CPLUSPLUSINCLUDE = -I$(LIVE_LIB_DIR)/liveMedia/include
-CPLUSPLUSINCLUDE += -I$(LIVE_LIB_DIR)/UsageEnvironment/include
-CPLUSPLUSINCLUDE += -I$(LIVE_LIB_DIR)/BasicUsageEnvironment/include
-CPLUSPLUSINCLUDE += -I$(LIVE_LIB_DIR)/groupsock/include
+CPLUSPLUSINCLUDE = $(LIVE_INCLUDES)
 endif
 endif
 
