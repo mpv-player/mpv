@@ -340,7 +340,10 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
      data = pack->packet;
      os->lastsize = 1;
      
-     if (context != NULL)
+     /* header packets beginn on 1-bit: thus check (*data&0x80).  We don't
+	have theora_state st, until all header packets were passed to the
+	decoder. */
+     if (context != NULL && !(*data&0x80))
      {
 	theora_state *st;
 	int64_t usable_granulepos;
