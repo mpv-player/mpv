@@ -284,8 +284,11 @@ int parse_config_file(struct config *conf, char *conffile)
 		if (line[line_pos] == '\0' || line[line_pos] == '#')
 			continue;
 
-		/* read option. accept char if isalnum(char) */
-		for (opt_pos = 0; isalnum(line[line_pos]); /* NOTHING */) {
+		/* read option. */
+		for (opt_pos = 0; isprint(line[line_pos]) &&
+				line[line_pos] != ' ' &&
+				line[line_pos] != '#' &&
+				line[line_pos] != '='; /* NOTHING */) {
 			opt[opt_pos++] = line[line_pos++];
 			if (opt_pos >= MAX_OPT_LEN) {
 				PRINT_LINENUM;
