@@ -24,6 +24,10 @@ void demux_open_rtp(demuxer_t* demuxer);
 // Test whether a RTP demuxer is for a MPEG stream:
 int demux_is_mpeg_rtp_stream(demuxer_t* demuxer);
 
+// Test whether a RTP demuxer contains combined (multiplexed)
+// audio+video (and so needs to be demuxed by higher-level code):
+int demux_is_multiplexed_rtp_stream(demuxer_t* demuxer);
+
 // Read from a RTP demuxer:
 int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 
