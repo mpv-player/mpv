@@ -494,24 +494,48 @@ static void allocate_xvimage(int foo)
   * allocate XvImages.  FIXME: no error checking, without
   * mit-shm this will bomb...
   */
- xvimage[foo] = XvShmCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height, &Shminfo[foo]);
+ if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag = 1;
+ else
+  {
+   Shmem_Flag = 0;
+   if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xv\n" );
+  }
+ if ( Shmem_Flag ) 
+  {
+   xvimage[foo] = XvShmCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height, &Shminfo[foo]);
 
- Shminfo[foo].shmid    = shmget(IPC_PRIVATE, xvimage[foo]->data_size, IPC_CREAT | 0777);
- Shminfo[foo].shmaddr  = (char *) shmat(Shminfo[foo].shmid, 0, 0);
- Shminfo[foo].readOnly = False;
+   Shminfo[foo].shmid    = shmget(IPC_PRIVATE, xvimage[foo]->data_size, IPC_CREAT | 0777);
+   Shminfo[foo].shmaddr  = (char *) shmat(Shminfo[foo].shmid, 0, 0);
+   Shminfo[foo].readOnly = False;
 
- xvimage[foo]->data = Shminfo[foo].shmaddr;
- XShmAttach(mDisplay, &Shminfo[foo]);
- XSync(mDisplay, False);
- shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
+   xvimage[foo]->data = Shminfo[foo].shmaddr;
+   XShmAttach(mDisplay, &Shminfo[foo]);
+   XSync(mDisplay, False);
+   shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
+  }
+ else
+  {
+    xvimage[foo] = XvCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height);
+    xvimage[foo]->data = malloc(xvimage[foo]->data_size);
+    XSync(mDisplay,False);
+  }
  memset(xvimage[foo]->data,128,xvimage[foo]->data_size);
  return;
 }
 
 static void deallocate_xvimage(int foo)
 {
- XShmDetach( mDisplay,&Shminfo[foo] );
- shmdt( Shminfo[foo].shmaddr );
+ if ( Shmem_Flag )
+  {
+   XShmDetach( mDisplay,&Shminfo[foo] );
+   shmdt( Shminfo[foo].shmaddr );
+  }
+ else
+  {
+   free(xvimage[foo]->data);
+  }
+ XFree(xvimage[foo]);
+ 
  XFlush( mDisplay );
  XSync(mDisplay, False);
  return;
@@ -542,8 +566,16 @@ static void check_events(void)
   }
  if ( e & VO_EVENT_EXPOSE )
   {
-   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
-   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight), False);
+   if ( Shmem_Flag )
+    {
+     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
+     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight), False);
+    }
+   else
+    {
+     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1);
+     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight));
+    }
   }
 }
 
@@ -552,10 +584,19 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
- XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
+ if ( Shmem_Flag )
+  {
+   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
          drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight),
          False);
+  }
+ else
+  {
+   XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
+         0, 0,  image_width, image_height,
+         drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight));
+  }
  if (num_buffers>1){
     current_buf=(current_buf+1)%num_buffers;
     XFlush(mDisplay);
