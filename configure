@@ -2916,18 +2916,18 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lgif"
-  elif cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lungif"
-  elif cc_check -lgif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lgif $_ld_x11"
   elif cc_check -lungif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lungif $_ld_x11"
+  elif cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
+    _gif=yes
+    _ld_gif="-lgif"
+  elif cc_check -lgif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
+    _gif=yes
+    _ld_gif="-lgif $_ld_x11"
   fi
 fi
 
@@ -2963,6 +2963,27 @@ else
   _mkf_gif="no"
 fi
 echores "$_gif"
+
+
+if test "$_gif" = yes ; then
+  echocheck "broken giflib workaround"
+  _def_gif_tvt_hack='#define HAVE_GIF_TVT_HACK 1'
+
+  cat > $TMPC << EOF
+#include <gif_lib.h>
+int main(void) {
+  GifFileType gif;
+  printf("UserData is at address %p\n", gif.UserData);
+  return 0;
+}
+EOF
+  if cc_check "$_ld_gif" && ( "$TMPO" ) >>"$TMPLOG" 2>&1 ; then
+    _def_gif_tvt_hack='#undef HAVE_GIF_TVT_HACK'
+    echores "disabled"
+  else
+    echores "enabled"
+  fi
+fi
 
 
 if test "$_vesa" != no ; then
@@ -5293,6 +5314,7 @@ $_def_jpg
 /* enable GIF support */
 $_def_gif
 $_def_gif_4
+$_def_gif_tvt_hack
 
 /* enable FreeType support */
 $_def_freetype

@@ -24,9 +24,12 @@ static unsigned char *pallete = NULL;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
 
+#ifndef HAVE_GIF_TVT_HACK
+// not supported by certain versions of the library
 int my_read_gif(GifFileType *gif, uint8_t *buf, int len) {
   return stream_read(gif->UserData, buf, len);
 }
+#endif
   
 int gif_check_file(demuxer_t *demuxer)
 {
@@ -156,7 +159,17 @@ demuxer_t* demux_open_gif(demuxer_t* demuxer)
   // go back to the beginning
   stream_seek(demuxer->stream,demuxer->stream->start_pos);
 
+#ifdef HAVE_GIF_TVT_HACK
+  // without the TVT functionality of libungif, a hard seek must be
+  // done to the beginning of the file.  this is because libgif is
+  // unable to use mplayer's cache, and without this lseek libgif will
+  // not read from the beginning of the file and the command will fail.
+  // with this hack enabled, you will lose the ability to stream a GIF.
+  lseek(demuxer->stream->fd, 0, SEEK_SET);
+  gif = DGifOpenFileHandle(demuxer->stream->fd);
+#else
   gif = DGifOpen(demuxer->stream, my_read_gif);
+#endif
   if (!gif) {
     PrintGifError();
     return NULL;
