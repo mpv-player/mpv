@@ -53,8 +53,19 @@ Example (disables adaptive deinterlacing):
 echo "deinterlace=off">/dev/radeon_vid
 
 To know more about these parameters - try read /dev/radeon_vid file ;)
-Note: don't use 'cat' since it can detect EOF during reading such files.
+Note: don't use 'cat' since it can't detect EOF during reading such files.
 (I use midnight commander for that ;)
+or try this:
+head -n 20 /dev/radeon_vid
+
+List of parameters:
+~~~~~~~~~~~~~~~~~~~
+brightness=decval          (-64:+63) doesn't work on radeons
+saturation=decval          (0:+31) doesn't work on radeons
+double_buff=on/off         enables/disables double buffering
+colour_key=hexval          defines colour key
+deinterlace=on/off         enables/disables adaprive deinterlacing
+deinterlace_pattern=hexval defines deinterlacing pattern
 
 Note:
 ~~~~~

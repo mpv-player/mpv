@@ -797,6 +797,7 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
     len += sprintf(&buf[len],PARAM_COLOUR_KEY"%X\n",besr.graphics_key_clr);
     len += sprintf(&buf[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&buf[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
+    ppos += len;
     return len;
 }
 

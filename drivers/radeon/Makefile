@@ -40,7 +40,7 @@ install:
 	depmod -a
 nodes:
 	mknod /dev/radeon_vid c 178 0
-	mknod /dev/rage128_vid c 178 0
+	ln -s /dev/radeon_vid /dev/rage128_vid
 # Stuff below is for me only ;)
 vid:
 	make install
