@@ -57,7 +57,7 @@ int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
 
 int    gtkLoadFullscreen = 0;
-int    gtkEnablePlayBar = 0;
+int    gtkEnablePlayBar = 1;
 
 // ---
 
