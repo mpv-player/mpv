@@ -37,6 +37,7 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
     unsigned int* p=outfmt_list;
     unsigned int best=0;
+    
     // find the best outfmt:
     while(*p){
 	int ret=vf_next_query_format(vf,*p);
@@ -57,6 +58,9 @@ static int config(struct vf_instance_s* vf,
     printf("SwScale scaling %dx%d %s to %dx%d %s  \n",
 	width,height,vo_format_name(outfmt),
 	vf->priv->w,vf->priv->h,vo_format_name(best));
+
+    // free old ctx:
+    if(vf->priv->ctx) freeSwsContext(vf->priv->ctx);
     
     // new swscaler:
     vf->priv->ctx=getSwsContextFromCmdLine(width,height,outfmt,
@@ -108,6 +112,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->ctx=NULL;
