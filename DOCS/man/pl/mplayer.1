@@ -1,4 +1,4 @@
-.\" synced with 1.847
+.\" synced with 1.849
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1911,6 +1911,17 @@ Okre¶la, jakie urz±dzenie audio ma zostaæ u¿yte (domy¶lnie: /dev/\:audio).
 .TP
 .B win32 (tylko Windows)
 Rdzenny sterownik waveout Windows.
+.
+.TP
+.B dsound (tylko Windows)
+Sterownik wyj¶cia d¼wiêkowego Directx DirectSound.
+.PD 0
+.RSs
+.IPs device=<numer\ urz±dzenia>
+Okre¶la numer u¿ywanego urz±dzenia.
+Odtwarzanie pliku z opcj± -v wy¶wietli wszystkie dostêpne urz±dzenia.
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (patrz te¿ \-dxr2) (tylko DXR2)
@@ -7424,18 +7435,34 @@ Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
 Dopasowuje jako¶æ udoskonalenia subpel.
 Ten parametr kontroluje kompromis miêdzy jako¶ci± a szybko¶ci± bior±cy
 udzia³ w procesie podejmowania decyzji dotycz±cych przewidywania ruchu.
-Mo¿e znacznie poprawiæ jako¶æ.
+subq=5 mo¿e skompresowaæ do 10% mocniej ni¿ subq=1
 .RSs
-1: decyzja trybu fullpixel, 1 iteracja qpel na wygrywaj±cym kandydacie (najszybsze)
+1: Korzysta z przewidywania ruchu z prezycj± fullpixel dla wszystkich typów
+kondyduj±cych makrobloków.
+Potem wybiera najlepszy typ.
+Potem poprawia ruch tego typu co do prezycji quarterpixel.
+(najszybsze)
 .br
-2: decyzja trybu fullpixel, 2 iteracje qpel na wygrywaj±cym kandydacie
+2: Podobnie jak 1, ale korzysta z delikatnie wolniejszego przeszukiwania fullpixel i
+delikatnie wolniejszego poprawiania quarterpixel.
 .br
-3: decyzja trybu halfpel, qpel na wygrywaj±cym kandydacie
+3: Korzysta z przewidywania ruchu z prezycj± halfpixel dla wszystkich typów kandyduj±cych
+typów makrobloków.
+Potem wybiera najlepszy typ.
+Potem poprawia ruch tego typu co do prezycji quarterpixel.
 .br
-4: decyzja trybu qpel
+4: Korzysta z szybkiego przewidywania ruchu z precyzj± quarterpixel dla wszystkich
+kondyduj±cych typów makrobloków.
+Potem wybiera najlepszy typ.
+Potem koñczy poprawianie quarterpixel dla tego typu.
 .br
-5: decyzja trybu qpel, wiêcej iteracji (najlepsze, domy¶lne)
+5: Korzysta z najlepszej jako¶ci przewidywania ruchu z prezycj± quarterpixel
+dla wszystkich kandyduj±cych typów makrobloków, przed wyborem najlepszego.
+(najlepsze, domy¶lne)
 .REss
+W powy¿szych parametrach, przez "wszystkich kandydatów" nie nale¿y rozumieæ
+wszystkich aktywnych typów:
+4x4, 4x8, 8x4 s± sprawdzane tylko, je¿eli 8x8 jest lepsy ni¿ 16x16.
 .
 .TP
 .B log=<-1\-3>
