@@ -1234,7 +1234,7 @@ for ac_option do
   --disable-big-endian) _big_endian=no  ;;
   --enable-freetype)    _freetype=yes   ;;
   --disable-freetype)   _freetype=no    ;;
-  --enable-unralib)	_unrarlib=yes	;;
+  --enable-unrarlib)	_unrarlib=yes	;;
   --disable-unrarlib)	_unrarlib=no	;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
