@@ -12,6 +12,9 @@ extern int use_gui;
 #endif
 #include "mp_msg.h"
 
+/* maximum message length of mp_msg */
+#define MSGSIZE_MAX 3072
+
 static int mp_msg_levels[MSGT_MAX]; // verbose level of this module
 
 #if 1
@@ -40,12 +43,12 @@ void mp_msg_set_level(int verbose){
 void mp_msg_c( int x, const char *format, ... ){
 #if 1
     va_list va;
-    char tmp[2048];
+    char tmp[MSGSIZE_MAX];
     
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
-    vsnprintf(tmp, 2048, mp_gettext(format), va);
-    tmp[2047] = 0;
+    vsnprintf(tmp, MSGSIZE_MAX, mp_gettext(format), va);
+    tmp[MSGSIZE_MAX-1] = 0;
 
 #if defined(HAVE_NEW_GUI) && !defined(FOR_MENCODER)
     if(use_gui)
