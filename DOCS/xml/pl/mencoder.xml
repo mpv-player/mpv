@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with 1.11 -->
+<chapter id="mencoder">
+<title>Kodowanie z <application>MEncoderem</application></title>
+
+<para>
+Pełna lista dostępnych opcji <application>MEncodera</application> oraz
+przykłady znajdują sie na stronie man. W pliku <ulink url="../../tech/encoding-tips.txt">encoding-tips</ulink>
+znajduje się dużo przykładów i przewodników skompletowanych z wielu wątków listy dyskusyjnej mplayer-users. W
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archiwum</ulink>
+znajdziesz mnóstwo dyskusji o aspektach i problemach związanych z kodowaniem
+przy pomocy <application>MEncodera</application>.
+</para>
+
+<sect1 id="menc-feat-divx4">
+<title>Kodowanie 2 lub 3-przebiegowe MPEG-4 (&quot;DivX&quot;)</title>
+
+<formalpara>
+<title>Kodowanie 2-przebiegowe</title>
+<para>
+Nazwa pochodzi od faktu, że przy użyciu tej metody plik kodowany jest <emphasis>dwa razy</emphasis>.
+Pierwsze kodowanie (dubbed pass) tworzy pliki tymczasowe
+(<filename>*.log</filename>) o rozmiarze kilku megabajtów, nie kasuj ich odrazu
+(możesz natomiast skasować plik AVI). W drugim przebiegu
+przy pomocy danych o bitrate'cie z plików tymczasowych tworzony jest plik wyjściowy
+2-przebiegu. Plik końcowy będzie miał o wiele lepszą jakość w porównaniu ze standardowym 1-przebiegowym kodowaniem.
+Jeżeli pierwszy raz o tym słyszysz, powinieneś zajrzeć do któregoś z wielu
+przewodników dostępnych w sieci.
+</para>
+</formalpara>
+
+<para>
+Ten przykład pokazuje jak zakodować DVD do 2-przebiegowego MPEG-4 (&quot;DivX&quot;) AVI.
+Będą do tego potrzebne tylko dwie komendy:
+<screen>rm frameno.avi</screen>
+usuń ten plik, który może pochodzić z poprzedniego 3-przebiegowego kodowania (wpływa on na aktualny)
+<screen>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
+</screen>
+</para>
+
+<formalpara>
+<title>Kodowanie 3-przebiegowe</title>
+<para>
+Jest to rozszerzenie kodowania 2-przebiegowego, gdzie dźwięk jest kodowany osobno. Ta metoda wyświetla zalecany bitrate
+taki, aby film zmieścił sie na pojedyńczą płytę CD. Również, dźwięk kodowany jest tylko raz, inaczej niż w trybie 2-przebiegowym.
+Schemat wygląda tak:
+</para>
+</formalpara>
+
+<procedure>
+<step><para>
+  Usuń przeszkadzający plik tymczasowy:
+  <screen>rm frameno.avi</screen>
+  </para></step>
+<step><para>
+  <emphasis>Pierwszy przebieg:</emphasis>
+
+  <screen>mencoder <replaceable>plik/DVD</replaceable> -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</screen>
+
+  Zostanie stworzony plik avi tylko ze scieżką dźwiękową, zawierający
+  <emphasis role="bold">jedynie</emphasis> rządany strumień audio. Nie zapomnij o
+  <option>-lameopts</option>, jeżeli musisz je ustawić. Jeśli kodowałeś długi film, <application>MEncoder</application>,
+  po zakończeniu tego przebiegu, wypisze zalecane wartości bitrate'u dla docelowych pojemności 650Mb, 700Mb, i 800Mb.
+  </para></step>
+<step><para>
+  <emphasis>Drugi przebieg:</emphasis>
+  <screen>
+mencoder <replaceable>plik/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=<replaceable>bitrate</replaceable><!--
+--></screen>
+Jest to pierwszy przebieg kodowania video. Opcjonalnie ustal video bitrate na ten który MEncoder wypisał
+na końcu poprzedniego przebiegu.</para></step>
+<step><para>
+  <emphasis>Trzeci przebieg:</emphasis>
+<screen>
+mencoder <replaceable>plik/DVD</replaceable> -oac copy -pass 2 \
+         -ovc divx4 -divx4opts br=<replaceable>bitrate</replaceable>
+</screen>
+Jest to drugi przebieg kodowania video. Ustal ten sam bitrate co w poprzednim przebiegu, chyba że naprawdę wiesz co robisz.
+W tym przebiegu, dźwięk z <filename>frameno.avi</filename> będzie dołączony do pliku końcowego... i gotowe!
+</para></step>
+</procedure>
+
+<example>
+<title>Przykład 3-przebiegowego kodowania</title>
+<para>
+<screen>rm frameno.avi</screen>
+usuń ten plik, który może pochodzić z poprzedniego 3-przebiegowego kodowania (wpływa on na aktualny)
+<screen>
+mencoder dvd://2 -ovc frameno -o frameno.avi -oac mp3lame -lameopts vbr=3
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
+</screen>
+</para>
+</example>
+</sect1>
+
+<sect1 id="menc-feat-mpeg">
+<title>Kodowanie do formatu MPEG</title>
+<para>
+<application>MEncoder</application> może tworzyć pliki formatu MPEG (MPEG-PS).
+Jest to prawdopodobnie użyteczne tylko z kodekiem <emphasis>mpeg1video</emphasis>
+pochodzącym z <link linkend="ffmpeg">libavcodec</link>, ponieważ odtwarzacze - za wyjątkiem
+<application>MPlayera</application> - oczekują obrazu zakodowanego w MPEG1 i
+strumienia dźwiękowego w MPEG1 warstwa (layer) 2 (MP2) w pliku MPEG.
+</para>
+
+<para>
+Cecha ta nie jest zbytnio przydatna w tej chwili, poza tym zawiera prawdopodobnie wiele błędów, ale najważniejsze jest to,
+że <application>MEncoder</application> w tej chwili nie może kodować 2 warstwy MPEG1 (MP2) audio której oczekują wszystkie odtwarzacze w plikach MPEG.
+</para>
+
+<para>
+Aby zmienić wyjściowy format plików <application>MEncodera</application>, użyj opcji <option>-of mpeg</option>.
+</para>
+
+<para>
+Przykład:
+<screen>
+mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>inne opcje</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>wyjscie.mpg</replaceable>
+</screen>
+</para>
+</sect1>
+
+
+<sect1 id="menc-feat-rescale">
+<title>Przeskalowywanie filmów</title>
+
+<para>
+Najczęściej potrzeba zmiany wielkości obrazu jest nagła. Jej powodów może być wiele:
+zmniejszenie rozmiaru pliku, przepustowość sieci, itd. Wiekszość ludzi stosuje skalowanie
+przy konwertowaniu DVD lub SVCD do DivXa (AVI). To jest <emphasis role="bold">złe</emphasis> rozwiązanie.
+Zamiast tak robić, przeczytaj sekcje <link linkend="aspect">Zachowywanie proporcji obrazu</link>.
+</para>
+
+<para>
+Proces skalowania obsługiwany jest przez filtr video <literal>scale</literal>
+<option>-vf scale=<replaceable>szerokość</replaceable>:<replaceable>wysokość</replaceable></option>.
+Jego jakość może być ustawiona parametrem <option>-sws</option>.
+Jeśli nie jest on podany <application>MEncoder</application> użyje wartości 0: szybki
+bilinearny.
+</para>
+
+<para>
+Przykład:
+<screen>
+mencoder <replaceable>wejscie.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480-o <replaceable>wyjscie.avi</replaceable>
+</screen>
+</para>
+</sect1>
+
+
+<sect1 id="menc-feat-streamcopy">
+<title>Kopiowanie strumienia</title>
+
+<para>
+<application>MEncoder</application> obsługuje strumienie wejściowe na dwa sposoby:
+<emphasis role="bold">koduje</emphasis> lub <emphasis role="bold">kopiuje</emphasis>
+je. Ta sekcja jest o <emphasis role="bold">kopiowaniu</emphasis>.
+</para>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Strumień video</emphasis> (opcja <option>-ovc copy</option>):
+  ładne rzeczy można wyczyniać:) Jak, wstawianie (nie konwertowanie) FLI, VIDO lub MPEG1 video w plik AVI !
+  Oczywiście tylko <application>MPlayer</application> potrafi odtwarzać takie pliki :) I prawdopodobnie nie ma
+  dla tego żadnego sensownego zastosowania. Na zdrowy rozsądek: kopiowanie strumieni video może być przydatne
+  tylko wtedy, gdy np. tylko strumień  audio ma być zakodowany (np. PCM do MP3).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Strumień audio</emphasis> (opcja <option>-oac copy</option>):
+  prosto i przystępnie. Możliwe jest wmiksowanie zewnętrznego źródła (MP3, WAV) do strumienia wyjściowego.
+  Użyj opcji <option>-audiofile <replaceable>nazwa_pliku</replaceable></option> do tego celu.
+  </para></listitem>
+</itemizedlist>
+</sect1>
+
+
+<sect1 id="menc-feat-fix-avi">
+<title>Naprawianie plików AVI ze zniszczonym indeksem lub przeplotem</title>
+
+<para>
+Najprostsza sprawa. Po prostu kopiujemy strumień audio i video, a
+<application>MEncoder</application> generuje indeks. Oczywiście nie
+naprawi to możliwych błęów w strumieniu video i/lub audio, ale za to, naprawi pliki z zepsutym przeplotem,
++tak więc opcja <option>-ni</option> nie będzie tu już potrzebna.
+</para>
+
+<para>
+Komenda:
+<screen>
+mencoder -idx <replaceable>wejscie.avi</replaceable> -ovc copy -oac copy -o <replaceable>wyjscie.avi</replaceable><!--
+--></screen>
+</para>
+
+
+<sect2 id="menc-feat-appending">
+<title>Łącznie wielu plików AVI</title>
+
+<para>
+Efektem ubocznym funkcji naprawiania zepsutych plików AVI jest możliwości łączenia
+2 (lub więcej) plików AVI:
+</para>
+
+<para>
+Komenda:
+<screen>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o <replaceable>wyjscie.avi</replaceable> -</screen>
+</para>
+
+<note><para>
+Komenda ta oczekuje tego, żeby<filename>1.avi</filename> i <filename>2.avi</filename> używały tego
+samego kodeka, rozdzielczości, szybkości strumienia (stream rate), i przynajmniej
+<filename>1.avi</filename> nie może być zepsute. Możliwe, że będziesz musiał naprawić pliki wejściowe,
+jak było opisane
+<link linkend="menc-feat-fix-avi">powyżej</link>.
+</para></note>
+</sect2>
+</sect1>
+
+<sect1 id="menc-feat-enc-libavcodec">
+<title>Kodowanie przy pomocy rodziny kodeków libavcodec</title>
+
+<para>
+<link linkend="ffmpeg">libavcodec</link> umożliwia proste kodowanie do wielu
+interesujących formatów video i audio (narazie kodeki audio nie są obsługiwane).
+Możesz kodować do następujących kodeków (mniej lub bardziej aktualne)
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Nazwa kodeka</entry><entry>Opis</entry></row>
+</thead>
+<tbody>
+<row><entry>mjpeg</entry><entry>
+   Ruchomy JPEG
+  </entry></row>
+<row><entry>ljpeg</entry><entry>
+   Bezstratny JPEG
+  </entry></row>
+<row><entry>h263</entry><entry>
+  H263
+  </entry></row>
+<row><entry>h263p</entry><entry>
+  H263 Plus
+  </entry></row>
+<row><entry>mpeg4</entry><entry>
+  Standtard ISO MPEG-4 (DivX 5, XVID kompatybilne)
+  </entry></row>
+<row><entry>msmpeg4</entry><entry>
+  pierwotny wariant MPEG-4 przez MS, v3 (DivX3)
+  </entry></row>
+<row><entry>msmpeg4v2</entry><entry>
+  pierwotny wariant MPEG-4 przez MS, v2 (używany w starych plikach asf)
+  </entry></row>
+<row><entry>wmv1</entry><entry>
+  Windows Media Video, wersja 1 (WMV7)
+  </entry></row>
+<row><entry>wmv2</entry><entry>
+  Windows Media Video, wersja 2 (WMV8)
+  </entry></row>
+<row><entry>rv10</entry><entry>
+  Stary kodek RealVideo
+  </entry></row>
+<row><entry>mpeg1video</entry><entry>
+  MPEG1 video
+  </entry></row>
+<row><entry>mpeg2video</entry><entry>
+  MPEG2 video
+  </entry></row>
+<row><entry>huffyuv</entry><entry>
+  bezstratna kompresja
+  </entry></row>
+<row><entry>asv1</entry><entry>
+  ASUS Video v1
+  </entry></row>
+<row><entry>asv2</entry><entry>
+  ASUS Video v2
+  </entry></row>
+<row><entry>ffv1</entry><entry>
+  bezstratny kodek video FFmpeg
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+Pierwsza kolumna zawiera nazwę kodeka, która powinna być podana za opcją
+<literal>vcodec</literal>, np: <option>-lavcopts vcodec=msmpeg4</option>
+</para>
+
+<informalexample>
+<para>
+Przykład z kompresją MJPEG:
+<screen>mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
+</para>
+</informalexample>
+</sect1>
+
+
+<sect1 id="menc-feat-enc-images">
+<title>Kodowanie z wielu wejściowych plików obrazkowych (JPEG,PNG lub TGA)</title>
+
+<para>
+<application>MEncoder</application> jest w stanie stworzyć film z jednego
+lub wielu plików JPEG, PNG lub TGA. Poprzez proste kopiowanie ramek może stworzyć pliki MJPEG
+(Motion(ruchomy - przypis tłumacza) JPEG), MPNG (Motion PNG) lub MTGA (Motion TGA).
+</para>
+
+<orderedlist>
+<title>Jak to działa:</title>
+<listitem><para>
+  <application>MEncoder</application> <emphasis>dekoduje</emphasis> wejściowy obrazek/obrazki z pomocą biblioteki
+  <systemitem class="library">libjpeg</systemitem> (w przypadku dekodowania PNG, skorzysta z
+  <systemitem class="library">libpng</systemitem>).
+  </para></listitem>
+<listitem><para>
+  Potem <application>MEncoder</application> kompresuje zdekodowane pliki podanym kompresorem
+  (DivX4, Xvid, ffmpeg msmpeg4, itd.).
+  </para></listitem>
+</orderedlist>
+
+<formalpara>
+<title>Przykłady</title>
+<para>
+Opis i sposób działania funkcji <option>-mf</option> znajdują się na stronie man.
+
+<informalexample>
+<para>
+Tworzenie pliku DivX4 ze wszystkich plików JPEG w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>wyjscie.avi</replaceable> \*.jpg<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Tworzenie pliku DivX4 z wybranych plików JPEG w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>wyjscie.avi</replaceable> <replaceable>ramka001.jpg,ramka002.jpg</replaceable> <!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Tworzenie pliku Motion (ruchomego - przyp. tłum.) JPEG (MJPEG) ze wszystkich plików JPEG w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.jpg<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Tworzenie nieskompresowanego pliku ze wszystkich plików PNG w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o <replaceable>output.avi</replaceable> \*.png<!--
+--></screen>
+</para>
+</informalexample>
+
+<note><para>
+Szerokości musi być liczbą podzielną przez 4, takie są ograniczenia formatu RAW RGB AVI.
+</para></note>
+
+<informalexample>
+<para>
+Tworzenie pliku Motion PNG (MPNG) ze wszystkich plików PNG w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.png<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Tworzenie pliku Motion TGA (MTGA) ze wszystkich plików TGA w aktualnym katalogu:
+<screen>
+mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.tga<!--
+--></screen>
+</para>
+</informalexample>
+
+</para>
+</formalpara>
+</sect1>
+
+
+<sect1 id="menc-feat-extractsub">
+<title>Wyciąganie napisów z DVD do pliku Vobsub</title>
+
+<para>
+<application>MEncoder</application> jest w stanie wyciągnąć napisy z DVD do pliku
+w formacie Vobsub. Tworzy je para plików z rozszerzeniem
+<filename>.idx</filename> i <filename>.sub</filename>, które są zazwyczaj spakowane do
+pojedyńczego archiwum <filename>.rar</filename>.
+<application>MPlayer</application> może je odtwarzać z opcjami
+<option>-vobsub</option> i <option>-vobsubid</option>.
+</para>
+
+<para>
+Podajesz nazwę bazową (tzn. bez rozszerzenia <filename>.idx</filename> lub
+<filename>.sub</filename>) pliku wyjściowego z
+<option>-vobsubout</option> oraz indeks dla tego pliku przez <option>-vobsuboutindex</option>.
+</para>
+
+<para>
+Jeżeli źródłem nie jest, DVD powinieneś użyć opcji <option>-ifo</option>, aby
+wskazać plik <filename>.ifo</filename> potrzebny do stworzenia pliku wynikowego
+<filename>.idx</filename>.
+</para>
+
+<para>
+Jeżeli źródłem nie jest DVD i nie masz pliku <filename>.ifo</filename>, będziesz musiał użyć opcji
+<option>-vobsubid</option>, aby podać id języka, które będzie umieszczone w pliku
+<filename>.idx</filename>.
+</para>
+
+<para>
+Każde uruchomienie dołączy bierzące napisy, jeżeli pliki <filename>.idx</filename>
+i <filename>.sub</filename> istnieją. Więc powinieneś je usunąć przed uruchomieniem.
+</para>
+
+<example>
+<title>Kopiowanie dwóch napisów z DVD podczas 3-przebiegowego kodowania</title>
+<screen>
+rm subtitles.idx subtitles.sub
+mencoder dvd://1 -vobsubout napisy -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno
+mencoder dvd://1 -oac copy -ovc divx4 -pass 1
+mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout napisy -vobsuboutindex 1 -sid 5<!--
+--></screen>
+</example>
+
+<example>
+<title>Kopiowanie francuskich napisów z pliku MPEG</title>
+<screen>
+rm napisy.idx napisy.sub
+mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable>-vobsubout napisy -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
+--></screen>
+</example>
+
+</sect1>
+
+<sect1 id="aspect">
+<title>Utrzymywanie proporcji obrazu (aspect ratio)</title>
+<para>
+Pliki DVD i SVCD (tzn. MPEG1/2) zawierają wartość proporcji obrazu, która
+opisuje, jak odtwarzacz ma skalować strumień video, wiec ludzie nie bedą się męczyć (np.: 480x480 + 4:3 = 640x480).
+Jednak przy kodowaniu plików AVI (DivX), musisz być świadom, że nagłowek AVI nie przechowuje
+tej wartości. Przeskalowywanie jest obrzydliwe i czasochłonne, musi być jakiś lepszy sposób!
+</para>
+
+<para>Jest</para>
+
+<para>
+MPEG4 posiada unikalną cechę: strumień video może posiadać swoją wartość proporcji obrazu.
+Tak, dokładnie jak pliki MPEG1/2 (DVD, SVCD) i H263. Niestety, nie ma
+<emphasis role="bold">żadnych</emphasis> odtwarzaczy video które by wykorzystywały tą
+zaletę MPEG4, oprócz <application>MPlayera</application>.
+</para>
+
+<para>
+Właściwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem> z biblioteki <link linkend="ffmpeg">libavcodec</link>.
+Pamiętaj: chociaż <application>MPlayer</application> poprawnie odtworzy stworzone pliki, inne odtwarzacze
+użyją złych proporcji obrazu (aspect ratio).
+</para>
+
+<para>
+Z pewnością powinieneś wyciąć czarne pasy nad i pod obrazem.
+Zobacz jak używać filtrów <systemitem>cropdetect</systemitem> i <systemitem>crop</systemitem> na stronie man.
+</para>
+
+<para>
+Sposób użycia:
+<screen>
+mencoder <replaceable>przykład-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>wyjscie.avi</replaceable>
+</screen>
+</para>
+</sect1>
+
+<sect1 id="custommatrices"><title>Dowolne inter/intra matryce</title>
+
+<para>
+Ta cecha <link linkend="ffmpeg">libavcodec</link> pozwala ustawić dowolne
+inter (I-ramki/ramki kluczowe) i intra (P-ramki/predicted
+frames) matryce. Funkcja ta jest obsługiwana przez wiele kodeków:
+<systemitem>mpeg1video</systemitem> i <systemitem>mpeg2video</systemitem>
+zgłaszane są jako działające.
+</para>
+
+<para>
+Typowy sposób użycia tej opcji to ustawienie matrycy na specyfikacje preferowane przez
+<ulink url="http://www.kvcd.net/">KVCD</ulink>.
+</para>
+
+<para>
+Matryca Kwantyzacji <emphasis role="bold">KVCD &quot;Notch&quot;:</emphasis>
+</para>
+
+<para>
+Intra:
+<screen>
+ 8  9 12 22 26 27 29 34
+ 9 10 14 26 27 29 34 37
+12 14 18 27 29 34 37 38
+22 26 27 31 36 37 38 40
+26 27 29 36 39 38 40 48
+27 29 34 37 38 40 48 58
+29 34 37 38 40 48 58 69
+34 37 38 40 48 58 69 79
+</screen>
+
+Inter:
+<screen>
+16 18 20 22 24 26 28 30
+18 20 22 24 26 28 30 32
+20 22 24 26 28 30 32 34
+22 24 26 30 32 32 34 36
+24 26 28 32 34 34 36 38
+26 28 30 32 34 36 38 40
+28 30 32 34 36 38 42 42
+30 32 34 36 38 40 42 44
+</screen>
+</para>
+
+<para>
+Sposób użycia:
+<screen>
+$ mencoder <replaceable>wejscie.avi</replaceable> -o <replaceable>wyjscie.avi</replaceable> -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+</screen>
+</para>
+
+<para>
+<screen>
+$ mencoder <replaceable>wejscie.avi</replaceable> -ovc lavc -lavcopts
+vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
+12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,
+29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79
+:inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,
+28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,
+36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o svcd.mpg
+</screen>
+</para>
+</sect1>
+
+</chapter>
