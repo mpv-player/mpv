@@ -54,7 +54,7 @@ A: see:
    - video codec cpu usage in percent (for mpeg it includes video_out too!)
    - video_out cpu usage for avi, 0 for mpg (see above)
    - audio codec cpu usage in percent
-   - dropped bad frames (mpg only)
+   - frames needed to drop to maintain A-V sync
    Most of them are for debug purposes, and will be removed soon.
 
 Q: Why is video_out cpu usage zero (0%) for mpeg files?
@@ -84,7 +84,7 @@ A: MPlayer != avifile
    The codecs (dll) sets, syncronization, demultiplexing etc is totaly
    different and shouldn't be compared.
    If something works with aviplay it doesn't mean that MPlayer should do
-   it and vice versa. You should contact me, I'll fix the bug!
+   it and vice versa.
 
 Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
 A: It's a known bug (really it's a bug/limitation of the DLL codec)
@@ -224,5 +224,8 @@ A: Known problem, icewm sucks.
 Q: I got this playing mpeg files: Can't find codec for video format 0x10000001 !
 A: You have old version of codecs.conf at ~/.mplayer/. Upgrade it from DOCS/
 
-Q: But it works with aviplay/etc !
+Q: But it works with avifile !
 A: So what?
+
+Q: Then avifile is better !
+A: Then use avifile, it has nice GUI and nice C++ code :)

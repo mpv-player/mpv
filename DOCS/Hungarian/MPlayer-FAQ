@@ -56,7 +56,7 @@ A: lássuk:
      benne van!)
    - video output cpu használat AVI-nál, MPEG-nél 0 (lásd fent)
    - audio codec cpu használat százalékban
-   - kihagyott hibás képkockák (MPEG-nél)
+   - kihagyando kepkockak szama, hogy A-V szinkron megmaradjon
    Legtöbbjük hibakeresési célokat szolgál, és hamarosan megszûnik.
 
 Q: A video output CPU használata miért 0% MPEG file-oknál?
@@ -87,7 +87,7 @@ A: MPlayer != avifile
    csomag, szinkronizáció, demultiplexelés, stb. teljesen különbözik és
    nem összehasonlítható.
    Ha valami mûködik aviplay-jel az nem jelenti azt, hogy MPlayer-rel is
-   kellene, és fordítva. Írj nekem, kijavítom a hibát!
+   kellene, és fordítva.
 
 Q: Indeo 3.x/4.x filmek fejjel lefele vannak!!!?
 A: Ismert hiba (tulajdonképp a codec hibája/korlátja)
@@ -231,3 +231,6 @@ A: Tudjuk, az icewm szar.
 
 Q: Dehat aviplay-jel mukodik !
 A: Es?
+
+Q: Akkor az aviplay sokkal jobb !
+A: Hasznald azt, ugyis van szep GUI-ja, meg amugyis jo kis C++ :)
