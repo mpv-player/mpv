@@ -1357,12 +1357,23 @@ GtkWidget * create_OSSConfig( void )
     gtk_table_attach( GTK_TABLE( table2 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   CBOssDevice=AddComboBox( NULL );
-  gtk_table_attach( GTK_TABLE( table2 ),CBOssDevice,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+    gtk_table_attach( GTK_TABLE( table2 ),CBOssDevice,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp0" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp1" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp2" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp3" );
+  if ( gtkAOOSSDevice && !strncmp( gtkAOOSSDevice,"/dev/sound",10 ) )
+   {
+    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp0" );
+    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp1" );
+    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp2" );
+    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp3" );
+   }
+   else
+    {
+     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp0" );
+     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp1" );
+     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp2" );
+     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp3" );
+    }
 #ifdef HAVE_DXR3
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma" );
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-0" );
