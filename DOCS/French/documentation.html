@@ -262,7 +262,12 @@
   </LI>
   <LI><A HREF="#ports">6. Portages</A>
     <UL>
-      <LI><A HREF="#debian">6.1 Paquets Debian</A></LI>
+      <LI><A HREF="#linux">6.1 Linux</A>
+        <UL>
+          <LI><A HREF="#debian">6.1.1 paquets Debian</A></LI>
+          <LI><A HREF="#rpm">6.1.2 paquets RPM</A></LI>
+       </UL>
+      </LI>   
       <LI><A HREF="#freebsd">6.2 *BSD</A></LI>
         <UL>
           <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
@@ -920,7 +925,7 @@ par moi (Gabucino). Son principal avantage est de se baser
 
 <UL>
   <LI>téléchargez des paquetages de plices prêtes à l'emploi depuis le site de MPlayer. 
-    Note: les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais 
+    Note: Les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais 
     il y en a quelques autres (coréen, russe, 8859-8, etc) dans la section contrib/font
     du FTP, créées par les utilisateurs.</BR>
     <BR>
@@ -943,8 +948,7 @@ par moi (Gabucino). Son principal avantage est de se baser
   <LI>Utilisez le plugin générateur de polices de GIMP situé dans TOOLS/subfont-GIMP
     (note: vous devez également avoir le plugin HSI RAW, voir url plus bas)</LI>
   <LI>utiliser une fonte TrueType (TTF), selon la librairie <B>freetype</B>.
-    La version 2.0.9 ou supérieur est obligatoire! Vous devez passer l'option
-    <CODE>--enable-freetype</CODE> à ./configure. Ensuite vous avez deux méthodes:
+    La version 2.0.9 ou supérieur est obligatoire! Ensuite vous avez deux méthodes:
     <UL>
      <LI>utilisez l'option <CODE>-font /chemin/de/arial.ttf</CODE> pour spécifier
       un fichier de polices TrueType pour chaque occasion</LI>
@@ -1203,7 +1207,7 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
 <P>Incluez l'option <CODE>-edl &lt;nomfichier&gt;</CODE> quand vous lancez MPlayer,
   avec le nom du fichier EDL que vous voulez appliquer à la video.</P>
 
-<H3><A NAME="edl_making">2.6.1 Faire un fichier EDL</A></H3>
+<H3><A NAME="edl_making">2.6.2 Faire un fichier EDL</A></H3>
 
 <P>Le format de fichier actuel EDL est:</P>
 
@@ -1512,35 +1516,50 @@ end
 <H1><A NAME="ports">6. Ports</A></H1>
 
 
-<H2><A NAME="debian">6.1 Paquets Debian</A></H2>
+<H2><A NAME="linux">6.1 Linux</A></H2>
 
-<P>Pour construire le paquet, téléchargez la version cvs, ou tgz et décompressez-là,
-  et placer vous dans le répertoire obtenu:</P>
+<P>La plateforme principale de développement est Linux sur x86, bien que MPlayer fonctionne
+  sur de nombreux autres ports Linux.</P>
+  
+  
+<H2><A NAME="debian">6.1.1 Paquets Debian</A></H2>
+
+<P>Pour construire le paquet Debian, lancez la commande suivante dans le répertoire source
+  de MPlayer:</P>
 
 <PRE>
-    cd main
     fakeroot debian/rules binary
 </PRE>
 
-<P>(... mplayer detecte le matériel/les logiciels, ce construit et.. )
-  dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
-
-<P>Et maintenant devenez root et:</P>
+<P>En tant que root installez le paquet <CODE>.deb</CODE> comme d'habitude:</P>
 
 <PRE>
-    dpkg -i ../mplayer_0.90-1_i386.deb en tant que root.
+    dpkg -i ../mplayer_&lt;version&gt;.deb
 </PRE>
 
-<P>Voila à quoi ça ressemble:</P>
+<P>Christian Marillat à construit des paquets Debian non-officiels pour MPlayer, MEncoder
+  et les polices pendant un certain temps, vous pouvez les obtenir (apt-get) depuis sa
+  <A HREF="http://marillat.free.fr/">page web</A>. Ces paquets ne sont vraiment pas 
+  officiels, cependant, car Christian à fait et distribué ces paquets quand MPlayer
+  n'était pas encore completement GPL et que les <A HREF="users_against_developers.html#binary">
+  distributions binaires</A> n'étaient pas autorisées. Christian ignora les demandes d'arréter
+  de distribuer ses paquets, ce qui causa des malentendus avec les développeur de MPlayer.
+  Les distributions binaires ne sont plus un problème, mais nous <B>ne supportons pas</B>
+  ces paquets!</P> 
 
-<PRE>
-	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.90-1_i386.deb
-	Password:
-	(Reading database ... 26946 files and directories currently installed.)
-	Preparing to replace mplayer 0.50-1 (using ../mplayer_0.90-1_i386.deb)
-	Unpacking replacement mplayer ...
-	Setting up mplayer (0.90-1) ...
-</PRE>
+
+<H3><A NAME="rpm">6.1.2 RPM packaging</A></H3>
+
+<P>Dominik Mierzejewski a créé et maintient des paquets Red Hat RPM officiels de
+  MPlayer. Ils sont disponibles sur sa 
+  <A HREF="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">page web</A>.
+  Merci de lire les instructions ici et de lui reporter les problèmes, pas à nous.</P> 
+
+<P>Il y a d'autres versions RPM (SuSE inclus maintenant MPlayer dans sa distribution
+  officielle, des paquets Mandrake de MPlayer sont disponibles sur le 
+  <A HREF="http://plf.zarb.org/">P.L.F</A>), mais aucun d'entre eux n'est
+  officiellement supporté.</P>
+
 
 <H2><A NAME="freebsd">6.2 *BSD</A></H2>
 
@@ -1709,27 +1728,23 @@ end
 
 <H2><A NAME="cygwin">6.7. Cygwin</A></H2>
 
-<P>Le port Cygwin est toujours à ces début et les
-  <A HREF="tech/patches.txt">patches</A> sont toujours bienvenus. Vous devriez aussi jeter
-  un oeil à la liste de diffusion
+<P>Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
+  les DLLs Win32, les VCDs ou OpenGL. SDL est connu pour distordre le son et l'image ou 
+  planter syr certains systèmes. Les <A HREF="tech/patches.txt">patches</A> sont toujours 
+  bienvenus. Les meilleurs résultats peuvent être obtenus avec le pilote SDL natif de 
+  sortie vidéo (<CODE>-vo directx</CODE>) et le pilote Windows waveout natif de sortie
+  audio (<CODE>-ao win32</CODE>). Vous devriez aussi jeter un oeil à la liste de diffusion
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   pour obtenir de l'aide et les dernières informations.</P>
 
+<P>Vous devez copier ou lier <CODE>etc/cygwin_inttypes.h</CODE> depuis le répertoire 
+  source de MPlayer vers <CODE>/usr/include/inttypes.h</CODE> pour que MPlayer compile.</P>
+
 <P>Pour avoir de la vidéo DirectX native (<CODE>-vo directx</CODE>), désarchivez
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">les fichier d'entête DirectX 7</A>
-  dans <CODE>/usr/include/<CODE> ou <CODE>/usr/local/include/<CODE> 
-  et recompilez. Cela , utilisé avec <CODE>-ao win32</CODE> devrait vous donner les meilleurs
-  résultats. Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
+  dans <CODE>/usr/include/<CODE> ou <CODE>/usr/local/include/<CODE> et recompilez. 
+  Si l'image est distordue, essayez de désactiver l'accélération matérielle avec 
   <CODE>-vo directx:noaccel</CODE>.</P>
-
-<P>Vous devrez aller dans le répertoire MPlayer, et copier ou lier
-  <CODE>etc/cygwin_inttypes.h</CODE> vers <CODE>/usr/include/inttypes.h</CODE> pour
-  que MPlayer compile. Sinon il se pleindra à propos d'un
-  <CODE>inttypes.h</CODE> manquant.</P>
-
-<P>Puisqu'il n'y a pas de support pour les DLLs Win32 sous Cygwin et qu'OpenGL et mpdvdkit
-  ne fonctionnent/compilent pas, vous devriez les désactiver dans configure avec
-  <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>.</P>
 
 <P>Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvé sur le
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">site de libsdl</A>.</P>
