@@ -884,7 +884,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   //mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized); // will be done by mplayer.c after fallback to playlist-parsing
   return NULL;
-//  GUI_MSG( mplUnknowFileType )
 }
 //====== File format recognized, set up these for compatibility: =========
 d_audio=demuxer->audio;
@@ -994,7 +993,6 @@ switch(file_format){
       mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
       sh_video=NULL;
       //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
-      //GUI_MSG( mplASFErrorMissingVideoStream )
     } else {
       sh_video=d_video->sh;sh_video->ds=d_video;
       sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms

@@ -506,7 +506,6 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
       if(v_pos==-1){
         mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: " MSGTR_MissingVideoStream);
 	return NULL;
-//        GUI_MSG( mplErrorAVINI )
       }
       if(a_pos==-1){
         mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: " MSGTR_MissingAudioStream);
