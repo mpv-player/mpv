@@ -2,8 +2,12 @@
 ChangeLog:
 ~~~~~~~~~~
 
+v0.17a "IdegCounter++" :
+  - first 0.17 release failed - buggy files outdated docs etc :(
+    it's (hopefully) fixed now.
+    
 v0.17 "IdegCounter" :
-  - TODO, A'rpi
+  - thousands of changes, updates, code cleanups, features etc.
 
 * jumped to 0.17 *
 
