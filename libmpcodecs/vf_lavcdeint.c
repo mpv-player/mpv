@@ -1,0 +1,220 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+
+#include "../config.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
+
+#ifdef USE_LIBAVCODEC
+
+#include "img_format.h"
+#include "mp_image.h"
+#include "vf.h"
+
+//#include "../libvo/fastmemcpy.h"
+
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
+
+extern int avcodec_inited;
+
+struct vf_priv_s 
+{
+  AVPicture pic;
+  UINT8     *outbuf;
+  int       outbuf_size;
+  int       width, height;
+  int       pix_fmt;
+};
+
+#define lavc_venc_context (vf->priv->context)
+
+
+/* Support for avcodec's built-in deinterlacer.
+ * Based on vf_lavc.c
+ */
+
+//===========================================================================//
+
+
+/* Convert mplayer's IMGFMT_* to avcodec's PIX_FMT_* for the supported
+ * IMGFMT's, and return -1 if the deinterlacer doesn't support
+ * that format (-1 because 0 is a valid PIX_FMT).
+ */
+/* The deinterlacer supports planer 4:2:0, 4:2:2, and 4:4:4 YUV */
+static int
+imgfmt_to_pixfmt (int imgfmt)
+{
+  switch(imgfmt)
+    {
+      /* I hope I got all the supported formats */
+
+      /* 4:2:0 */
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+      return PIX_FMT_YUV420P;
+      break;
+
+      /* 4:2:2 */
+    case IMGFMT_UYVY:
+    case IMGFMT_UYNV:
+    case IMGFMT_Y422:
+    case IMGFMT_YUY2:
+    case IMGFMT_YUNV:
+    case IMGFMT_YVYU:
+    case IMGFMT_Y42T:
+    case IMGFMT_V422:
+    case IMGFMT_V655:
+      return PIX_FMT_YUV422P;
+      break;
+
+      /* Are there any _planar_ YUV 4:4:4 formats? */
+
+    default:
+      return -1;
+    }
+}
+
+
+static int 
+config (struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+        unsigned int flags, unsigned int outfmt)
+{
+  struct vf_priv_s *priv = vf->priv;
+
+  priv->pix_fmt = imgfmt_to_pixfmt(outfmt);
+  if(priv->pix_fmt == -1)
+    return 0;
+  
+  /* The deinterlacer will fail if this is false */
+  if ((width & 1) != 0 || (height & 3) != 0)
+    return 0;
+
+  /* If we get here, the deinterlacer is guaranteed not to fail */
+
+  priv->width  = width;
+  priv->height = height;
+
+    
+  if(priv->outbuf) 
+    av_free(priv->outbuf);
+
+  priv->outbuf_size = 
+    avpicture_get_size(priv->pix_fmt, priv->width, priv->height);
+
+  priv->outbuf = av_malloc(priv->outbuf_size); 
+  avpicture_fill(&priv->pic, priv->outbuf, priv->pix_fmt, 
+		 priv->width, priv->height);
+  
+  return vf_next_config(vf,
+			width, height,
+			d_width, d_height,
+			flags, outfmt);
+}
+
+
+static void
+uninit (struct vf_instance_s *vf)
+{
+  if(vf->priv->outbuf)
+    av_free(vf->priv->outbuf);
+}
+
+
+static void 
+put_image (struct vf_instance_s* vf, mp_image_t *mpi)
+{
+  struct vf_priv_s *priv = vf->priv;
+  mp_image_t* dmpi;
+  AVPicture lavc_picture;
+  
+  lavc_picture.data[0]     = mpi->planes[0];
+  lavc_picture.data[1]     = mpi->planes[1];
+  lavc_picture.data[2]     = mpi->planes[2];
+  lavc_picture.linesize[0] = mpi->stride[0];
+  lavc_picture.linesize[1] = mpi->stride[1];
+  lavc_picture.linesize[2] = mpi->stride[2];
+  
+
+  dmpi = vf_get_image(vf->next, mpi->imgfmt,
+		      MP_IMGTYPE_EXPORT, 0,
+		      mpi->w, mpi->h);
+
+  
+  if (avpicture_deinterlace(&priv->pic, &lavc_picture, 
+			    priv->pix_fmt, priv->width, priv->height) < 0)
+    {
+      /* This should not happen -- see config() */
+      return;
+    }
+
+  
+  dmpi->planes[0] = priv->pic.data[0];
+  dmpi->planes[1] = priv->pic.data[1];
+  dmpi->planes[2] = priv->pic.data[2];
+  dmpi->stride[0] = priv->pic.linesize[0];
+  dmpi->stride[1] = priv->pic.linesize[1];
+  dmpi->stride[2] = priv->pic.linesize[2];
+  
+  vf_next_put_image(vf, dmpi);
+}
+
+
+static int 
+query_format (struct vf_instance_s* vf, unsigned int fmt)
+{
+  if(imgfmt_to_pixfmt(fmt) == -1)
+    return 0;
+
+  return vf_next_query_format(vf,fmt);
+}
+
+
+static int 
+open (vf_instance_t *vf, char* args)
+{
+  /* We don't have any args */
+  (void) args;
+
+  vf->config       = config;
+  vf->put_image    = put_image;
+  vf->query_format = query_format;
+  vf->uninit       = uninit;
+  vf->priv         = malloc(sizeof(struct vf_priv_s));
+  memset(vf->priv,0,sizeof(struct vf_priv_s));
+
+  /* This may not technically be necessary just for a deinterlace,
+   * but it seems like a good idea.
+   */
+  if(!avcodec_inited)
+    {
+      avcodec_init();
+      avcodec_register_all();
+      avcodec_inited=1;
+    }
+
+  return 1;
+}
+
+
+vf_info_t vf_info_lavcdeint = {
+    "libavcodec's deinterlacing filter",
+    "lavcdeint",
+    "Joe Rabinoff",
+    "libavcodec's internal deinterlacer, in case you don't like "
+      "the builtin ones (invoked with -pp or -npp)",
+    open
+};
+
+
+//===========================================================================//
+
+#endif /* USE_LIBAVCODEC */
+

@@ -35,6 +35,7 @@ extern vf_info_t vf_info_cropdetect;
 extern vf_info_t vf_info_test;
 extern vf_info_t vf_info_noise;
 extern vf_info_t vf_info_yvu9;
+extern vf_info_t vf_info_lavcdeint;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -59,6 +60,7 @@ static vf_info_t* filter_list[]={
     &vf_info_palette,
 #ifdef USE_LIBAVCODEC
     &vf_info_lavc,
+    &vf_info_lavcdeint,
 #endif
     &vf_info_dvbscale,
     &vf_info_cropdetect,
