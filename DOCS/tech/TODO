@@ -12,6 +12,7 @@ decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
 - optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
+- fix seeking with libmad audio codec (codec lost sync and can't resync?)
 
 mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
