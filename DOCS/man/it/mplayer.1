@@ -1,4 +1,4 @@
-.\" synced with 1.568
+.\" synced with 1.573
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -153,8 +153,8 @@ formato WMV (senza usare la libreria avifile).
 .PP
 Un altra grande caratteristica di MPlayer e' l' ampia gamma di dispositivi di
 uscita gestiti.
-Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, Quartz,
-ma puoi anche usare GGI, SDL (e tutti i loro driver), VESA (su ogni
+Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
+Quartz, ma puoi anche usare GGI, SDL (e tutti i loro driver), VESA (su ogni
 scheda compatibile VESA, anche senza X11), qualche driver a basso livello
 specifico per alcune schede video (per Matrox, 3Dfx e ATI) e qualche scheda
 di decodifica MPEG hardware come la Siemens DVB, DXR2 e DXR3/\:Hollywood+.
@@ -791,8 +791,8 @@ Digitale) di ingresso, per poter sovrascrivere i valori di default:
 Specifica il numero di scheda (1\-4) da usare (default: 1).
 .IPs file=<file>
 Dice a MPlayer di leggere la lista dei canali da <file>.
-Il default e' ~/.mplayer/channels.conf.{sat,ter,cbl} (basato 
-sul tipo di scheda) oppure ~/.mplayer/channels.conf come 
+Il default e' ~/.mplayer/channels.conf.{sat,ter,cbl} (basato
+sul tipo di scheda) oppure ~/.mplayer/channels.conf come
 ultima risorsa.
 .RE
 .PD 1
@@ -1611,7 +1611,7 @@ eseguendo
 .B \-adapter <valore> (solo \-vo directx)
 Seleziona la scheda grafica che ricevera' l' immagine.
 Serve anche l' opzione \-vm per funzionare.
-Puoi avere una lista delle schede disponibili se utilizzi questa 
+Puoi avere una lista delle schede disponibili se utilizzi questa
 opzione insieme a \-v.
 .TP
 .B \-bpp <depth>
@@ -1923,7 +1923,7 @@ Il parametro controlla quanto dell' immagine viene tagliato.
 .TP
 .B \-refreshrate <Hz>
 Attiva la frequenza di rinfresco del monitor in Hz.
-Attualmente e' supportato solo dal driver \-vo directx combinato con 
+Attualmente e' supportato solo dal driver \-vo directx combinato con
 l' opzione \-vm.
 .TP
 .B \-rootwin
@@ -3252,35 +3252,101 @@ molto piu' affidabili.
 Attualmente solo libmpeg2 esporta il flag necessario.
 Se usato su materiale che non setta il flag il filtro non esegue nulla.
 .TP
+.B divtc[=opzioni]
+Telecine inversa per video deinterlacciati.
+Se il video a cui e' stato applicato il processo di telecine (3:2-pulldown) ha
+perso uno dei field oppure e' deinterllaciato utilizzando un metodo che preserva
+un field e interpola l' altro, il risultato e' un video 'saltellante' che ha un
+fotogramma ogni quattro duplicato.
+Questo filtro e' studiato per trovare e scartare questa duplicazione e ripristinare
+la velocita' originale del film.
+Quando si utilizza questo filtro devi specificare un valore di \-ofps che e' 4/5
+della velocita' (in fotogrammi al secondo, fps) del file di ingresso (23.976 se
+l' ingresso e' a 29.97 fps).
+Le opzioni sono:
+.RSs
+.IPs pass=1|2
+Uilizza due passi.
+Questo produce i mugliori risultati.
+Il passo 1 analizza il video e scrive i risultati in un file di log.
+Il passo 2 quindi legge questo file di log e ne utilizza le informazioni per fare
+effettivamente il lavoro.
+Nota che questi passi NON corrispondono ai passi 1 e 2 del processo di codifica.
+Per poter utilizzare la modilita' a due passi di divtc con la codifica a due passi
+devi eseguire tre passi in totale: prima il passo 1 di divtc e il passo 1 di codifica,
+poi il passo 2 di divtc ed il passo 1 di codifica ed infine il passo 2 di divtc ed
+il passo 2 di codifica.
+.IPs file=nomefile
+Imposta il nome del file di log per la modalita' a due passi (default: "framediff.log").
+.IPs threshold=valore
+Imposta il valore minimo della forza che deve avere il modello di telecine per
+permettere al filtro di riconoscerlo (default: 0.5)
+Viene utilizzato pee evitare di riconoscere falsi modelli nella parti di video
+che sono o molto scure o senza molti movimenti.
+.IPs window=numframes
+Imposta il numero di fotogrammi passati da controllare quando si cerca il
+modello (default: 30).
+Finestre piu' lunghe migliorano l' affidabilita' della ricerca del modello
+mentre finestre piu' corte migliorano il tempo di reazione nel caso di
+cambiamenti della fase del telecine.
+Questo influisce solo sulla modalita' ad un passo.
+La modalita' a due passi attualmente utilizza una finestra fissa che si estende
+sia nel futuro che nel passato.
+.IPs phase=0|1|2|3|4
+Imposta il valore iniziale della fase del telecine (default: 0).
+La modalita' a due passi puo' vedere il futuro ed e' percio' capace di
+usare il valore corretto di fase dall' inizio, mentre la modalita' ad un passo
+puo' solo provare ad indovinare.
+Viene utilizzata la fase corretta quando viene trovata, questa opzione puo'
+essere usata per correggere il possibile saltellamento all' inizio.
+Anche il primo passo della modalita' a due passi utilizza questo valore, cosi'
+se salvi i dati dal primo passo ottieni dei risultati costanti di fase.
+.IPs deghost=valore
+Imposta la soglia per il deghosting (eliminazione effetto fantasma) (0\-255 per
+modalita' ad un passo, -255\-255 per la modalita' a due passi, default 0).
+Se diversa da zero si abilita' la modalita' deghost.
+Viene utilizzata per quei video che sono stati deinterlacciati miscelando i due
+field insieme invece di eliminarne solo uno dei due.
+L' applicazione dell' algoritmo di deghost amplifica qualsiasi artefatto dovuto
+alla compressione nel fotogramma miscelato ed il valore del parametro viene usato
+come una soglia che esclude dall' operazione quei punti che differiscono dal
+fotogramma precedente meno del valore specificato.
+Se si utilizza la modalita' a due passi il valore negativo si puo' usare
+per fare analizzare al filtro il video completo all' inizio del passo 2 per
+determinare se necessita o meno dell' applicazione del deghost e poi selezionare
+zero oppure il valore assoluto del parametro.
+Specifica questa opzione nel passo 2, non fa nessuna differenza nel passo 1.
+.RE
+.TP
 .B phase=[t|b|p|a|u|T|B|A|U][:v]
-Ritarda il video interlacciato del tempo di un field in modo da 
+Ritarda il video interlacciato del tempo di un field in modo da
 cambiare l' ordine dei field stessi.
 L' utilizzo previsto e' per sistemare filmati PAL che sono stati catturati
 con l' ordine dei field opposto a quello del trasferimento da film a video.
 Le opzioni sono:
 .RSs
 .IPs t
-Cattura i field in ordine top-first (prima il field superiore), trasferisce 
+Cattura i field in ordine top-first (prima il field superiore), trasferisce
 bottom-first (prima il field inferiore).
 Il filtro ritardera' il field inferiore.
 .IPs b
-Cattura i field in ordine bottom-first, trasferisce 
+Cattura i field in ordine bottom-first, trasferisce
 top-first.
 Il filtro ritardera' il field superiore.
 .IPs p
 Cattura e trasferisce con lo stesso ordine dei field.
 Questa modalita' esiste per permettere alla documentazione delle altre opzioni
-di potervisi riferire ma se, eventualmente, la selezioni il filtro non effettuera' 
+di potervisi riferire ma se, eventualmente, la selezioni il filtro non effettuera'
 assolutamente nulla ;-)
 .IPs a
 L' ordine di cattura dei field e' determinato automaticamente dal flag del field,
 trasferisce l' opposto.
-Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma utilizzando il 
+Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma utilizzando il
 flag del field.
 Se non e' presente nessuna informazione sul field, si comporta come l' opzione u.
 .IPs u
 Cattura sconosciuta o variabile, trasferisce l' opposto.
-Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma analizzando 
+Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma analizzando
 le immagini e selezionando l' alternativa che produce il miglior riscontro
 tra i field.
 .IPs T
@@ -3292,7 +3358,7 @@ Il filtro seleziona la modalita' b o p utilizzando l' analisi dell' immagine.
 .IPs A
 Cattura determinata dal flag del field, trasferisce sconosciuto o variabile.
 Il filtro seleziona tra le modalita' t, b e p utilizzando il flag
-del field e l' analisi dell' immagine.                                       
+del field e l' analisi dell' immagine.
 Se non abbiamo informazioni sui field allora questa modalita' e' uguale alla U.
 Questa e' la modalita' di default.
 .IPs U
@@ -3728,8 +3794,8 @@ Studiato per funzionare anche con l' implementazione OpenGl piu' semplice.
 .IPs manyfmts
 Abilita il supporto per maggiori formati colore (RGB e BGR).
 Necessita di OpenGL con versione >= 1.2, NON FUNZIONA ancora correttamente.
-.IPs <numero>
-Numero di linee copiate sulla texture alla volta.
+.IPs slice-height=<0\-...>
+Numero di linee copiate sulla texture in un blocco unico (default: 4).
 0 per l' immagine intera.
 .RE
 .PD 1
@@ -3744,6 +3810,10 @@ benchmarking (prove di velocita').
 .TP
 .B aa\ \ \ \ \ 
 Driver di uscita ASCII art che funziona su una console di testo.
+.TP
+.B caca\ \ \ 
+Driver di uscita per ASCII Art a Colori (Colour AsCii Art) che funziona su una
+console di testo.
 .TP
 .B bl\ \ \ \ \ 
 Riproduzione video utilizzando il protocollo UDP Blinkenlights.
