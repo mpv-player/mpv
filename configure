@@ -3509,6 +3509,7 @@ test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 netbsd && _ld_arch="$_ld_arch -li386 -lossaudio"
+openbsd && _ld_arch="$_ld_arch -li386 -lossaudio"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" && _def_debug='#define MP_DEBUG 1'

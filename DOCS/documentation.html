@@ -242,6 +242,7 @@
       <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
+      <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
     </UL>
   <LI><A HREF="#A">A. Authors</A></LI>
   <UL>
@@ -1605,6 +1606,28 @@ Anyone has closer info?</P>
 
 <P>The <CODE>-vo x11</CODE> output will be even slower than on Linux, since
   QNX has only X <I>emulation</I> which is VERY slow. Use SDL.</P>
+
+
+<P><B><A NAME=6.7>6.7. OpenBSD</A></B></P> 
+    
+<P>To build the package you will need GNU make (gmake,
+/usr/ports/devel/gmake), native BSD make will not work, and a recent
+binutils (including objcopy).</P>
+
+<P> Presently you must give the option '--disable-mpdvdkit' to 
+configure, else it won't compile. </P>
+
+<P>Due to limitations in different versions of gas (relocation vs mmx)
+, you'll need to compile in two steps: First make sure that the
+non-native as is first in PATH and do a 'gmake -k', then make sure
+that the native version i used an do 'gmake'.</P>
+
+<P>To w32-dll's with <B>MPlayer</B> you will need to re-compile the
+kernel with "option USER_LDT".</P>
+
+<P>If <B>MPlayer</B> complains about not finding '/dev/cdrom' or
+'/dev/dvd' make a symbolic link, eg <CODE>ln -s
+/dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
