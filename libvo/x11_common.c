@@ -641,11 +641,12 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
 
 void vo_x11_setlayer( int layer )
 {
- Atom            type;
+ Atom            type,arg1,arg2;
  int             format;
  unsigned long   nitems, bytesafter;
  Atom *          args = NULL;
-
+ int i;
+ 
  if ( WinID >= 0 ) return;
  
  if ( vo_wm_type == vo_wm_IceWM )
@@ -676,13 +677,31 @@ void vo_x11_setlayer( int layer )
    xev.window=vo_window;
    xev.format=32;
    xev.data.l[0]=layer;
-//   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
    xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
-   XFree( args );
-   return;
-  }
 
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   xev.display=mDisplay;
+   xev.window=vo_window;
+   xev.format=32;
+   xev.data.l[0]=layer;
+   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+   XFree( args );
+
+   type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   arg1=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+   arg2=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+   if ( Success == XGetWindowProperty( mDisplay,vo_window,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 && format == 32) {
+       for (i = 0; i < nitems; i++) {
+	   if (((Atom)args[i] == arg1) || ((Atom)args[i] == arg2)) return;
+       }
+   }
+   // State was not set, continue with GNOME hints
+  }
+ 
  type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
   {
