@@ -8,7 +8,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-//#include <libgen.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -32,9 +31,6 @@
 #define MODE1_2048 30
 #define MODE2_2336 40
 #define UNKNOWN -1
-
-// from libgen:
-extern char *dirname(char *path);
 
 static FILE* fd_cue;
 static int fd_bin = 0;
@@ -293,7 +289,15 @@ int cue_read_cue (char *in_cue_filename)
 
   /* split the filename into a path and filename part */
   s = strdup(in_cue_filename);
-  t = dirname(s);
+  t = strrchr(s, '/');
+  if (t == (char *)NULL)
+     t = ".";
+  else {
+     *t = '\0';
+     t = s;
+     if (*t)
+       strcpy(t, "/");
+  }
   printf ("dirname: %s\n", t);
   strcpy(bincue_path,t);
 
