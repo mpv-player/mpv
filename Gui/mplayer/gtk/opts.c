@@ -316,7 +316,7 @@ void ShowPreferences( void )
 
 // -- 5. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),force_ni );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),index_mode );
+ if ( index_mode == 1 ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),1 );
  {
   int     i;
   GList * Items = NULL;
@@ -570,7 +570,8 @@ void prButton( GtkButton * button,gpointer user_data )
 
 	// -- 5. page
 	force_ni=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
-	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
+	index_mode=-1;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) ) ) index_mode=1;
 
 	{
 	 int i;
