@@ -12,6 +12,7 @@ Medium Priority:
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
 - audio copy/encoding capability
+- support SSA subtitles : http://www.eswat.demon.co.uk
 
 Low Priority:
 - fix X4.0.x/DRI OpenGL - DONE?  mga works with 4.0.3

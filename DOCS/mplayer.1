@@ -294,8 +294,14 @@ Fonts are searched in $HOME/.mplayer/font. There must be a font.desc
 file, and files with .RAW extension.
 .TP
 .I SUBTITLE FILES
-Sub files are searched in $HOME/.mplayer/sub, and in the directory
-of the movie. (TODO)
+MPlayer currently supports 6 subtitle formats : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT.
+Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
+    /mnt/cdrom/movie.sub
+        (SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT)
+    $HOME/.mplayer/sub/movie.sub
+        (SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT)
+    $HOME/.mplayer/default.sub
 .IP
 .SH "EXAMPLES"
 Just launch it! :)
@@ -305,7 +311,7 @@ Probably. Check DOCS.
 
 Bugreports should be addressed to the MPlayer-users mailing list
 (mplayer-users@lists.sourceforge.net) ! If you want to submit a bugreport
-(which we love to receive!), please double-check the README, and
+(which we love to receive!), please double-check the DOCS/BUGREPORTS, and
 tell us all that we need to know to identify your problem.
 
 .LP

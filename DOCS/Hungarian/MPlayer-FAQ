@@ -225,3 +225,6 @@ Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
    üzenettel leáll.
 A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
    Semmiképp se használd másik processzoron, mint amin lefordítottad!
+
+Q: Gondjaim vannak az icewm-el es a teljeskepernyos xv moddal..
+A: Tudjuk, az icewm szar.
