@@ -52,7 +52,7 @@ MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
-PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit libvo
+PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit2 libvo
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -94,13 +94,6 @@ endif
 ifeq ($(FAME),yes)
 COMMON_DEPS += libfame/libfame.a
 endif
-ifeq ($(DVDKIT),yes)
-ifeq ($(DVDKIT_SHARED),yes)
-COMMON_DEPS += libmpdvdkit/libmpdvdkit.so
-else
-COMMON_DEPS += libmpdvdkit/libmpdvdkit.a
-endif
-endif
 ifeq ($(DVDKIT2),yes)
 ifeq ($(DVDKIT_SHARED),yes)
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.so
@@ -108,12 +101,6 @@ else
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 endif
-
-libmpdvdkit/libmpdvdkit.a:
-	$(MAKE) -C libmpdvdkit
-
-libmpdvdkit/libmpdvdkit.so:
-	$(MAKE) -C libmpdvdkit libmpdvdkit.so
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
@@ -135,9 +122,6 @@ libmpcodecs/libmpcodecs.a:
 
 loader/dshow/libDS_Filter.a:
 	$(MAKE) -C loader/dshow
-
-libmp1e/libmp1e.a:
-	$(MAKE) -C libmp1e
 
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec
@@ -246,7 +230,7 @@ endif
 ifeq ($(DVDKIT),yes)
 ifeq ($(DVDKIT_SHARED),yes)
 	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
-	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
+	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit2/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
 endif
 endif
 ifeq ($(CSS_USE),yes)
