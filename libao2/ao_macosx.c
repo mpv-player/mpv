@@ -244,7 +244,7 @@ static int init(int rate,int channels,int format,int flags)
     ao_msg(MSGT_AO,MSGL_V, "%5d ao->buffer_len\n", (int)ao->buffer_len);
 
     ao_data.samplerate = ao->outputStreamBasicDescription.mSampleRate;
-    ao_data.channels = ao->outputStreamBasicDescription.mChannelsPerFrame;
+	ao_data.channels = channels;
     ao_data.outburst = ao_data.buffersize = ao->buffer_len;
     ao_data.bps = 
       ao_data.samplerate * ao->outputStreamBasicDescription.mBytesPerFrame;
