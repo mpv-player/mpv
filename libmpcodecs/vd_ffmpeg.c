@@ -58,7 +58,7 @@ typedef struct {
 static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
 
 static int lavc_param_workaround_bugs=0;
-static int lavc_param_error_resilience=0;
+static int lavc_param_error_resilience=-1;
 static int lavc_param_gray=0;
 static int lavc_param_vstats=0;
 
