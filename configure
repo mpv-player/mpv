@@ -833,26 +833,29 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _optimizing=''
     _altivec=no
-    _altivec_gcc_flags=''
 
     echocheck "CPU type"
     if linux && test -n "$_cpuinfo"; then
 	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
 	    _altivec=yes
-            _altivec_gcc_flags='-maltivec -mabi=altivec'
 	fi
     fi
     if darwin ; then
 	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
 	    _altivec=yes
-            _altivec_gcc_flags='-faltivec'
  	fi
     fi
-    echores "$proc"
+    if test "$_altivec" = yes; then
+        echores "$proc altivec"
+    else
+        echores "$proc"
+    fi
 
     echocheck "GCC & CPU optimization abilities"
+
     if test -n "$proc"; then
         case "$proc" in
 	    601) _march='-mcpu=601' _mcpu='-mtune=601' ;;
@@ -872,11 +875,14 @@ EOF
     	    esac
 	fi
     fi
-    echores "$proc"
-    
-    _optimizing="$proc"
 
-    _mcpu="$_mcpu $_altivec_gcc_flags"
+    if test -n "$_mcpu"; then
+        _optimizing=`echo $_mcpu | cut -c 8-`
+        echores "$_optimizing"
+    else
+        echores "none"
+    fi
+
     ;;
 
   alpha)
@@ -987,7 +993,9 @@ if test "$_runtime_cpudetection" = yes ; then
     _sse2=yes
     _mtrr=yes
   fi
-  _optimizing="Runtime CPU-Detection enabled"
+  if ppc; then
+    _altivec=yes
+  fi
 fi
 
 if x86 && test "$_runtime_cpudetection" = no ; then
@@ -1604,6 +1612,87 @@ if x86 ; then
   fi
 fi
 
+if ppc ; then
+    
+    # check if altivec is supported by the compiler, and how to enable it
+
+    _altivec_gcc_flags=''
+
+    if test "$_altivec" = yes -o "$_runtime_cpudetection" = yes ; then
+        echocheck "GCC altivec support"
+        
+        p=''
+        cat > $TMPC << EOF
+int main() {
+    return 0;
+}
+EOF
+        FSF_flags='-maltivec -mabi=altivec'
+        Darwin_flags='-faltivec'
+
+        if test -z "$p"; then
+            cc_check $FSF_flags && p='FSF'
+        fi
+        if test -z "$p"; then
+            cc_check $Darwin_flags && p='Darwin'
+        fi
+
+        case $p in
+            FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
+            Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
+            *) _altivec=no ;;
+        esac
+
+        if test -z "$p"; then
+            p=none
+        else
+            p="$p-style ($_altivec_gcc_flags)"
+        fi
+
+        echores "$p"
+    fi
+
+    # check if <altivec.h> should be included
+
+    _def_altivec_h='#undef HAVE_ALTIVEC_H'
+    _def_altivec='#undef HAVE_ALTIVEC'
+
+    if test "$_altivec" = yes ; then
+        echocheck "altivec.h"
+        cat > $TMPC << EOF
+#include <altivec.h>
+int main(void) { return 0; }
+EOF
+        _have_altivec_h=no
+         cc_check $_altivec_gcc_flags && _have_altivec_h=yes
+         if test "$_have_altivec_h" = yes ; then
+             _def_altivec_h='#define HAVE_ALTIVEC_H 1'
+             _def_altivec='#define HAVE_ALTIVEC 1'
+         fi
+         echores "$_have_altivec_h"
+    fi
+
+    # disable runtime cpudetection if 
+    # - we cannot generate altivec code
+    # - altivec is disabled by the user
+
+    if test "$_runtime_cpudetection" = yes -a "$_altivec" = no ; then
+        _runtime_cpudetection=no
+    fi
+
+    # show that we are optimizing for altivec (if enabled and supported)
+
+    if test "$_runtime_cpudetection" = no -a "$_altivec" = yes ; then
+	_optimizing="$_optimizing altivec"
+    fi
+
+    # if altivec is enabled, make sure the correct flags turn up in CFLAGS
+
+    if test "$_altivec" = yes ; then
+        _mcpu="$_mcpu $_altivec_gcc_flags"
+    fi
+fi
+
 _def_mmx='#undef HAVE_MMX'
 test "$_mmx" = yes && _def_mmx='#define HAVE_MMX 1'
 _def_mmx2='#undef HAVE_MMX2'
@@ -1616,9 +1705,6 @@ _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
-_def_altivec='#undef HAVE_ALTIVEC'
-test "$_altivec" = yes && _def_altivec='#define HAVE_ALTIVEC 1'
-
 
 # Checking kernel version...
 if x86 && linux ; then
@@ -1796,6 +1882,7 @@ echores "$_sighandler"
 
 echocheck "runtime cpudetection"
 if test "$_runtime_cpudetection" = yes ; then
+  _optimizing="Runtime CPU-Detection enabled"
   _def_runtime_cpudetection='#define RUNTIME_CPUDETECT 1'
 else
   _def_runtime_cpudetection='#undef RUNTIME_CPUDETECT'
@@ -2067,24 +2154,6 @@ else
   _def_mman='#undef HAVE_SYS_MMAN_H'
 fi
 echores "$_mman"
-
-if ppc && test "$_altivec" = "yes" ; then
-echocheck "altivec.h"
-cat > $TMPC << EOF
-#include <altivec.h>
-int main(void) { return 0; }
-EOF
-_have_altivec_h=no
-cc_check $_altivec_gcc_flags && _have_altivec_h=yes
-if test "$_have_altivec_h" = yes ; then
-  _def_altivec_h='#define HAVE_ALTIVEC_H 1'
-else
-  _def_altivec_h='#undef HAVE_ALTIVEC_H'
-fi
-echores "$_have_altivec_h"
-else
-  _def_altivec_h='#undef HAVE_ALTIVEC_H'
-fi
 
 echocheck "dynamic loader"
 cat > $TMPC << EOF
