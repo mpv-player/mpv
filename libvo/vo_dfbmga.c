@@ -92,6 +92,7 @@ static int use_input;
 static int field_parity;
 static int flipping;
 static DFBDisplayLayerBufferMode buffermode;
+static int tvnorm;
 
 static int osd_changed;
 static int osd_dirty;
@@ -242,6 +243,7 @@ preinit( const char *arg )
      osd_max = 2;
 #endif
      flipping = 1;
+     tvnorm = -1;
 
      use_input = !getenv( "DISPLAY" );
 
@@ -308,6 +310,26 @@ preinit( const char *arg )
                          break;
                     }
                     opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "tvnorm=", 7)) {
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice += 7;
+                    if (!strncmp(vo_subdevice, "pal", 3)) {
+                         tvnorm = 0;
+                         vo_subdevice += 3;
+                    } else if (!strncmp(vo_subdevice, "ntsc" , 4)) {
+                         tvnorm = 1;
+                         vo_subdevice += 4;
+                    } else if (!strncmp(vo_subdevice, "auto" , 4)) {
+                         tvnorm = 2;
+                         vo_subdevice += 4;
+                    } else {
+                         show_help = 1;
+                         break;
+                    }
+                    opt_no = 0;
                } else if (!strncmp(vo_subdevice, "no", 2)) {
                     if (opt_no) {
                          show_help = 1;
@@ -344,6 +366,10 @@ preinit( const char *arg )
                        "  fieldparity=(top|bottom)\n"
                        "    top      Top field first\n"
                        "    bottom   Bottom field first\n"
+                       "  tvnorm=(pal|ntsc|auto)\n"
+                       "    pal      Force PAL\n"
+                       "    ntsc     Force NTSC\n"
+                       "    auto     Select according to FPS\n"
                        "\n" );
                return -1;
           }
@@ -365,6 +391,28 @@ preinit( const char *arg )
           DirectFBSetOption( "fbdev", fb_dev_name );
           DirectFBSetOption( "no-cursor", "" );
           DirectFBSetOption( "bg-color", "00000000" );
+
+          switch (tvnorm) {
+          case 0:
+               DirectFBSetOption( "matrox-tv-standard", "pal" );
+               mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Forced TV standard to PAL\n" );
+               break;
+          case 1:
+               DirectFBSetOption( "matrox-tv-standard", "ntsc" );
+               mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Forced TV standard to NTSC\n" );
+               break;
+          case 2:
+               if (vo_fps > 27) {
+                    DirectFBSetOption( "matrox-tv-standard", "ntsc" );
+                    mp_msg( MSGT_VO, MSGL_INFO,
+                            "vo_dfbmga: Selected TV standard based upon FPS: NTSC\n" );
+               } else {
+                    DirectFBSetOption( "matrox-tv-standard", "pal" );
+                    mp_msg( MSGT_VO, MSGL_INFO,
+                            "vo_dfbmga: Selected TV standard based upon FPS: PAL\n" );
+               }
+               break;
+          }
 
           if ((res = DirectFBCreate( &dfb )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
@@ -590,6 +638,18 @@ config( uint32_t width, uint32_t height,
                dlc.options |= DLOP_FIELD_PARITY;
           }
 #endif
+          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Field parity set to: ");
+          switch (field_parity) {
+          case -1:
+               mp_msg( MSGT_VO, MSGL_INFO, "Don't care\n");
+               break;
+          case 0:
+               mp_msg( MSGT_VO, MSGL_INFO, "Top field first\n");
+               break;
+          case 1:
+               mp_msg( MSGT_VO, MSGL_INFO, "Bottom field first\n");
+               break;
+          }
 
           switch (dlc.pixelformat) {
           case DSPF_I420:
