@@ -1,7 +1,5 @@
 #include "../config.h"
 
-#ifdef HAVE_NEW_INPUT
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1346,5 +1344,3 @@ static int mp_input_print_cmd_list(config_t* cfg) {
   }
   exit(0);
 }
-
-#endif /* HAVE_NEW_INPUT */

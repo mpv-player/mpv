@@ -32,10 +32,8 @@
 #include <X11/extensions/xf86vmode.h>
 #endif
 
-#ifdef HAVE_NEW_INPUT
 #include "../input/input.h"
 #include "../input/mouse.h"
-#endif
 
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
@@ -366,6 +364,7 @@ int vo_init( void )
 
  vo_wm_type=vo_wm_detect();
 
+ saver_off(mDisplay);
  return 1;
 }
 
@@ -532,6 +531,7 @@ XSizeHints vo_hint;
 
 void vo_x11_uninit()
 {
+    saver_on(mDisplay);
     if(vo_window!=None) vo_showcursor( mDisplay,vo_window );
 
 #ifdef HAVE_NEW_GUI
@@ -624,7 +624,6 @@ int vo_x11_check_events(Display *mydisplay){
       case MotionNotify:
            if ( vo_mouse_autohide ) { vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const; }
            break;
-#ifdef HAVE_NEW_INPUT
       case ButtonPress:
            if ( vo_mouse_autohide ) { vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const; }
            // Ignore mouse whell press event
@@ -646,7 +645,6 @@ int vo_x11_check_events(Display *mydisplay){
 	   #endif
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
-#endif
       case PropertyNotify: 
     	   {
 	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );

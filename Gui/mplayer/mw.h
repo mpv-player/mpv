@@ -601,35 +601,6 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
     switch ( Key )
      {
       case wsEnter:     msg=evPlay; break;
-#ifndef HAVE_NEW_INPUT
-      case '.':
-      case '>':         msg=evNext; break;
-      case ',':
-      case '<':         msg=evPrev; break;
-
-      case wsEscape:    msg=evExit; break;
-
-      case wsSpace:     msg=evPause; break;
-      case wsa:
-      case wsA:         msg=evAbout; break;
-      case wsb:
-      case wsB:         msg=evSkinBrowser; break;
-      case wse:
-      case wsE:         msg=evEqualizer; break;
-      case wsf:
-      case wsF:         msg=evFullScreen; break;
-      case wsl:
-      case wsL:         msg=evLoad; break;
-      case wsu:
-      case wsU:         msg=evLoadSubtitle; break;
-      case wsm:
-      case wsM:         msg=evMute; break;
-      case wss:
-      case wsS:         msg=evStop; break;
-      case wsp:
-      case wsP:         msg=evPlayList; break;
-#endif
-
       case wsXF86LowerVolume:  msg=evDecVolume; break;
       case wsXF86RaiseVolume:  msg=evIncVolume; break;
       case wsXF86Mute:         msg=evMute; break;

@@ -355,7 +355,6 @@ int guiGetEvent( int type,char * arg )
 #endif
 	 }
 	break;
-#ifdef HAVE_NEW_INPUT
    case guiIEvent:
         printf( "cmd: %d\n",(int)arg );
 	switch( (int)arg )
@@ -370,7 +369,6 @@ int guiGetEvent( int type,char * arg )
 	       mplEventHandling( guiCMDArray[ (int)arg - MP_CMD_GUI_EVENTS - 1 ],0 );
 	 }
 	break;
-#endif
    case guiReDraw:
 	mplEventHandling( evRedraw,0 );
 	break;

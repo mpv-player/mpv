@@ -1,6 +1,3 @@
-
-#ifdef HAVE_NEW_INPUT
-
 // All commands id
 #define MP_CMD_SEEK   0
 #define MP_CMD_AUDIO_DELAY 1
@@ -171,5 +168,3 @@ mp_input_init(void);
 
 void
 mp_input_uninit(void);
-
-#endif /* HAVE_NEW_INPUT */

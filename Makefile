@@ -33,7 +33,7 @@ INSTALL = install
 
 SRCS_COMMON = xacodec.c cpudetect.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c sub_cc.c find_sub.c
 SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c me-opt-reg.c
-SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) lirc_mp.c mixer.c mp-opt-reg.c
+SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c mp-opt-reg.c
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
@@ -51,7 +51,7 @@ AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = -Llibmpcodecs -lmpcodecs -Lmp3lib -lMP3 -Lliba52 -la52 -Llibmpeg2 -lmpeg2 $(AV_LIB) $(FAME_LIB) $(XVID_LIB)
-COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) -lm
+COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  -Linput -linput $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
@@ -221,7 +221,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
 	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpcodecs -lmpencoders $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB)
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpcodecs -lmpencoders $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB)
 endif
 
 # Every mplayer dependency depends on version.h, to force building version.h

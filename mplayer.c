@@ -62,17 +62,11 @@ extern void* mDisplay; // Display* mDisplay;
 
 #include "cpudetect.h"
 
-#ifdef HAVE_LIRC
-#include "lirc_mp.h"
-#endif
-
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
 
-#ifdef HAVE_NEW_INPUT
 #include "input/input.h"
-#endif
 
 int slave_mode=0;
 int verbose=0;
@@ -359,24 +353,13 @@ void uninit_player(unsigned int mask){
   }
 #endif
 
-#ifdef HAVE_NEW_INPUT
   if(mask&INITED_INPUT){
     inited_flags&=~INITED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
   }
-#else
-#ifdef HAVE_LIRC
-  if(mask&INITED_LIRC){
-    inited_flags&=~INITED_LIRC;
-    current_module="uninit_lirc";
-    lirc_mp_cleanup();
-  }
-#endif
-#endif
 
   current_module=NULL;
-
 }
 
 void exit_player(char* how){
@@ -467,7 +450,6 @@ if ((conffile = get_path("")) == NULL) {
 // if the operation fail we use this function to check if it was interrupted by the user.
 // The function return a new value for eof.
 static int libmpdemux_was_interrupted(int eof) {
-#ifdef HAVE_NEW_INPUT
   mp_cmd_t* cmd;
   if((cmd = mp_input_get_cmd(0,0)) != NULL) {
        switch(cmd->id) {
@@ -486,9 +468,6 @@ static int libmpdemux_was_interrupted(int eof) {
        mp_cmd_free(cmd);
   }
   return eof;
-#else
-  return 0;
-#endif
 }
 
 int main(int argc,char* argv[], char *envp[]){
@@ -705,11 +684,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
   vo_init_osd();
 
-#if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
-  lirc_mp_setup();
-  inited_flags|=INITED_LIRC;
-#endif
-
 #ifdef HAVE_RTC
   if(!nortc)
   {
@@ -749,7 +723,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 // Init input system
-#ifdef HAVE_NEW_INPUT
 current_module = "init_input";
 mp_input_init();
 if(keyb_fifo_get > 0)
@@ -760,7 +733,6 @@ else if(!use_stdin)
   mp_input_add_key_fd(0,1,NULL,NULL);
 inited_flags|=INITED_INPUT;
 current_module = NULL;
-#endif
 
 
   //========= Catch terminate signals: ================
@@ -810,15 +782,11 @@ if(!use_stdin && !slave_mode){
       guiGetEvent( guiReDrawSubWindow,0 );
       while ( guiIntfStruct.Playing != 1 )
        {
-#ifdef HAVE_NEW_INPUT
         mp_cmd_t* cmd;                                                                                   
-#endif
 	usleep(20000);
 	guiEventHandling();
 	guiGetEvent( guiReDraw,NULL );
-#ifdef HAVE_NEW_INPUT
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
-#endif
        } 
 
       guiGetEvent( guiSetDefaults,NULL );
@@ -1888,9 +1856,7 @@ if(auto_quality>0){
 
   if(osd_function==OSD_PAUSE){
     int pkey=-1;
-#ifdef HAVE_NEW_INPUT    
     mp_cmd_t* cmd;
-#endif
       if(!quiet) {
 	mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
 	fflush(stdout);
@@ -1904,30 +1870,7 @@ if(auto_quality>0){
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 
-#ifdef HAVE_NEW_INPUT
       while( (cmd = mp_input_get_cmd(20,1)) == NULL) {
-#else /* HAVE_NEW_INPUT */
-      if(slave_mode) {
-        fd_set set;
-        struct timeval timeout;
-        while (1) {
-          usec_sleep(1000);
-          FD_ZERO (&set);
-          FD_SET (STDIN_FILENO, &set);
-          timeout.tv_sec = 0;
-          timeout.tv_usec = 1000;
-          if(1==select(FD_SETSIZE, &set, NULL, NULL, &timeout)) {
-            break;
-          }
-        }
-      } else {
-
-        while(
-#ifdef HAVE_LIRC
-             lirc_mp_getinput()<=0 &&
-#endif
-             (use_stdin || getch2(20)<=0) /* && mplayer_get_key()<=0*/){
-#endif /* HAVE_NEW_INPUT */
 	     if(sh_video && video_out && vo_config_count) video_out->check_events();
              if((pkey=mplayer_get_key()) > 0) break;
 #ifdef HAVE_NEW_GUI
@@ -1938,14 +1881,8 @@ if(auto_quality>0){
              }
 #endif
              usleep(20000);
-#ifdef HAVE_NEW_INPUT
          }
       mp_cmd_free(cmd);
-#else
-             if(use_stdin) usec_sleep(1000); // do not eat the CPU
-         }
-      }
-#endif /* HAVE_NEW_INPUT */ 
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
@@ -1978,330 +1915,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
   current_module="key_events";
 
-#ifndef HAVE_NEW_INPUT
-/* slave mode */ 
- if(slave_mode) {
-   char buffer[1024];
-   fd_set set;
-   struct timeval timeout;
-   int arg;
-   
-   FD_ZERO (&set);
-   FD_SET (STDIN_FILENO, &set);
-   timeout.tv_sec = 0;
-   timeout.tv_usec = 1000;
-  
-   if(1 == select (FD_SETSIZE, &set, NULL, NULL, &timeout)) {
-     fgets(buffer, 1024, stdin);
-     if(!strcmp("play\n", buffer)) {
-       osd_function=OSD_PLAY;
-     } else if(!strcmp("stop\n", buffer)) {
-       osd_function=OSD_PAUSE;
-     } else if(!strncmp("seek ", buffer, 5)) {
-       sscanf(buffer+5, "%d", &arg);
-       rel_seek_secs = arg-d_video->pts;
-     } else if(!strncmp("skip ", buffer, 5)) {
-       sscanf(buffer+5, "%d", &arg);
-       rel_seek_secs = arg;
-     } else if(!strcmp("quit\n", buffer)) {
-       exit_player(MSGTR_Exit_quit);
-     } 
-   } else {
-     osd_function=OSD_PLAY;
-   }
- } else
- 
-/* interactive mode */
-{ int c;
-  while(
-#ifdef HAVE_LIRC
-      (c=lirc_mp_getinput())>0 ||
-#endif
-      (!use_stdin && (c=getch2(0))>0) || (c=mplayer_get_key())>0) switch(c){
-    // seek 10 sec
-    case KEY_RIGHT:
-      osd_function=OSD_FFW;
-      rel_seek_secs+=10;break;
-    case KEY_LEFT:
-      osd_function=OSD_REW;
-      rel_seek_secs-=10;break;
-    // seek 1 min
-    case KEY_UP:
-      osd_function=OSD_FFW;
-      rel_seek_secs+=60;break;
-    case KEY_DOWN:
-      osd_function=OSD_REW;
-      rel_seek_secs-=60;break;
-    // seek 10 min
-    case KEY_PAGE_UP:
-      rel_seek_secs+=600;break;
-    case KEY_PAGE_DOWN:
-      rel_seek_secs-=600;break;
-    // delay correction:
-    case '+':
-      audio_delay+=0.1;  // increase audio buffer delay
-      osd_show_av_delay = 9; // show the A-V delay in OSD
-      if(sh_audio) sh_audio->timer-=0.1;
-      break;
-    case '-':
-      audio_delay-=0.1;  // decrease audio buffer delay
-      osd_show_av_delay = 9; // show the A-V delay in OSD
-      if(sh_audio) sh_audio->timer+=0.1;
-      break;
-    // quit
-    case KEY_ESC: // ESC
-    case 'q': 
-      exit_player(MSGTR_Exit_quit);
-    case KEY_ENTER: // ESC
-      eof=1;  // force jump to next file : quit if no next file
-      break;
-    case 'g': grab_frames=2;break;
-    // pause
-    case 'p':
-    case ' ':
-      osd_function=OSD_PAUSE;
-      break;
-    case KEY_HOME:
-      {
-	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-	if(play_tree_iter_up_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = PT_UP_NEXT;
-	play_tree_iter_free(i);
-      }
-      break;
-    case KEY_END:
-      {
-	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-	if(play_tree_iter_up_step(i,-1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = PT_UP_PREV;
-	play_tree_iter_free(i);
-      }
-      break;
-    case '>':
-      {
-	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-	if(play_tree_iter_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = PT_NEXT_ENTRY;
-	play_tree_iter_free(i);
-      }
-      break;
-    case '<':
-      {
-	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-	if(play_tree_iter_step(i,-1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = PT_PREV_ENTRY;
-	play_tree_iter_free(i);
-      }	
-      break;
-    case KEY_INS:
-      if(playtree_iter->num_files > 1 && playtree_iter->file < playtree_iter->num_files)
-	eof = PT_NEXT_SRC;
-      break;
-    case KEY_DEL:      
-      if(playtree_iter->num_files > 1 && playtree_iter->file > 1)
-	eof = PT_PREV_SRC;
-      break;
-    case 'o':  // toggle OSD
-      if(sh_video)
-	osd_level=(osd_level+1)%3;
-      break;
-    case 'z':
-      sub_delay -= 0.1;
-      osd_show_sub_delay = 9; // show the subdelay in OSD
-      break;
-    case 'x':
-      sub_delay += 0.1;
-      osd_show_sub_delay = 9; // show the subdelay in OSD
-      break;
-    case '9':
-    case '0':
-    case '*':
-    case '/': {
-        if(c=='*' || c=='0'){
-               mixer_incvolume();
-        } else {
-               mixer_decvolume();
-        }
-
-#ifdef USE_OSD
-        if(osd_level){
-          osd_visible=sh_video->fps; // 1 sec
-          vo_osd_progbar_type=OSD_VOLUME;
-          vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
-          vo_osd_changed(OSDTYPE_PROGBAR);
-          //printf("volume: %d\n",vo_osd_progbar_value);
-        }
-#endif
-      }
-      break; 
-
-#if 0  // change to 1 for absolute seeking tests
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-	rel_seek_secs=0.99*(float)(c-'1')/7.0;
-	abs_seek_pos=3;
-	printf ("ABS seek to %5.3f   \n",rel_seek_secs);
-	break;
-#else
-    /* User wants to have screen shot */
-    case 'S':
-    case 's':
-		if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
-		break;
-    // Contrast:
-    case '1':
-    case '2':
-        if(c=='2'){
-	    if ( ++vo_gamma_contrast > 100 ) vo_gamma_contrast = 100;
-        } else {
-	    --vo_gamma_contrast;
-	    if(v_hw_equ_cap & VEQ_CAP_CONTRAST)
-	    {
-		if(vo_gamma_contrast < -100) vo_gamma_contrast = -100;
-	    }
-	    else
-	    {
-    		if ( vo_gamma_contrast < 0 ) vo_gamma_contrast = 0;	    
-	    }
-        }
-	if(set_video_colors(sh_video,"Contrast",vo_gamma_contrast)){
-#ifdef USE_OSD
-    		if(osd_level){
-            	    osd_visible=sh_video->fps; // 1 sec
-	    	    vo_osd_progbar_type=OSD_CONTRAST;
-            	    vo_osd_progbar_value=((vo_gamma_contrast)<<8)/100;
-		    if(v_hw_equ_cap) vo_osd_progbar_value = ((vo_gamma_contrast+100)<<8)/200;
-	            vo_osd_changed(OSDTYPE_PROGBAR);
-		}
-#endif
-	}
-	break;
-
-    // Brightness:
-    case '3':
-    case '4':
-        if(c=='4'){
-	    if ( ++vo_gamma_brightness > 100 ) vo_gamma_brightness = 100;
-        } else {
-	    --vo_gamma_brightness;
-	    if(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS)
-	    {
-		if(vo_gamma_brightness < -100) vo_gamma_brightness = -100;
-	    }
-	    else
-	    {
-    		if ( vo_gamma_brightness < 0 ) vo_gamma_brightness = 0;	    
-	    }
-        }
-	if(set_video_colors(sh_video,"Brightness",vo_gamma_brightness)){
-#ifdef USE_OSD
-    		if(osd_level){
-            	    osd_visible=sh_video->fps; // 1 sec
-	    	    vo_osd_progbar_type=OSD_BRIGHTNESS;
-            	    vo_osd_progbar_value=((vo_gamma_brightness)<<8)/100;
-		    if(v_hw_equ_cap) vo_osd_progbar_value = ((vo_gamma_brightness+100)<<8)/200;
-	            vo_osd_changed(OSDTYPE_PROGBAR);
-		}
-#endif
-	}
-	break;
-
-    // Hue:
-    case '5':
-    case '6':
-        if(c=='6'){
-	    if ( ++vo_gamma_hue > 100 ) vo_gamma_hue = 100;
-        } else {
-	    --vo_gamma_hue;
-	    if(v_hw_equ_cap & VEQ_CAP_HUE)
-	    {
-		if(vo_gamma_hue < -100) vo_gamma_hue = -100;
-	    }
-	    else
-	    {
-    		if ( vo_gamma_hue < 0 ) vo_gamma_hue = 0;	    
-	    }
-        }
-	if(set_video_colors(sh_video,"Hue",vo_gamma_hue)){
-#ifdef USE_OSD
-    		if(osd_level){
-            	    osd_visible=sh_video->fps; // 1 sec
-	    	    vo_osd_progbar_type=OSD_HUE;
-            	    vo_osd_progbar_value=((vo_gamma_hue)<<8)/100;
-		    if(v_hw_equ_cap) vo_osd_progbar_value = ((vo_gamma_hue+100)<<8)/200;
-	            vo_osd_changed(OSDTYPE_PROGBAR);
-		}
-#endif
-	}
-	break;
-
-    // Saturation:
-    case '7':
-    case '8':
-        if(c=='8'){
-	    if ( ++vo_gamma_saturation > 100 ) vo_gamma_saturation = 100;
-        } else {
-	    --vo_gamma_saturation;
-	    if(v_hw_equ_cap & VEQ_CAP_SATURATION)
-	    {
-		if(vo_gamma_saturation < -100) vo_gamma_saturation = -100;
-	    }
-	    else
-	    {
-    		if ( vo_gamma_saturation < 0 ) vo_gamma_saturation = 0;	    
-	    }
-        }
-	if(set_video_colors(sh_video,"Saturation",vo_gamma_saturation)){
-#ifdef USE_OSD
-    		if(osd_level){
-            	    osd_visible=sh_video->fps; // 1 sec
-	    	    vo_osd_progbar_type=OSD_SATURATION;
-            	    vo_osd_progbar_value=((vo_gamma_saturation)<<8)/100;
-		    if(v_hw_equ_cap) vo_osd_progbar_value = ((vo_gamma_saturation+100)<<8)/200;
-	            vo_osd_changed(OSDTYPE_PROGBAR);
-		}
-#endif
-	}
-	break;
-#endif
-
-    case 'd':
-      frame_dropping=(frame_dropping+1)%3;
-      mp_msg(MSGT_CPLAYER,MSGL_V,"== drop: %d ==  \n",frame_dropping);
-      break;
-      
-#ifdef USE_TV
-    case 'h':
-     if (tv_param_on == 1)
-        tv_step_channel(tv_handler, TV_CHANNEL_HIGHER);
-     break;
-    case 'l':
-     if (tv_param_on == 1)
-        tv_step_channel(tv_handler, TV_CHANNEL_LOWER);
-     break;
-    case 'n':
-     if (tv_param_on == 1)
-	 tv_step_norm(tv_handler);
-     break;
-    case 'b':
-     if (tv_param_on == 1)
-        tv_step_chanlist(tv_handler);
-     break;
-#endif
-
-    case 'f':
-	if(vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
-     break;
-  }
-} // keyboard event handler
-
-#else /* HAVE_NEW_INPUT */
 {
   mp_cmd_t* cmd;
   while( (cmd = mp_input_get_cmd(0,0)) != NULL) {
@@ -2863,7 +2476,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     mp_cmd_free(cmd);
   }
 }
-#endif
+
   if (seek_to_sec) {
     int a,b; float d;
     

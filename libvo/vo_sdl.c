@@ -121,10 +121,8 @@
 #include "x11_common.h"
 #endif
 
-#ifdef HAVE_NEW_INPUT
 #include "../input/input.h"
 #include "../input/mouse.h"
-#endif
 
 LIBVO_EXTERN(sdl)
 
@@ -489,6 +487,9 @@ static int sdl_open (void *plugin, void *name)
 			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_HWACCEL/*|SDL_ANYFORMAT*/;
 		//}	
 	#endif	
+	
+	if (vo_doublebuffering)
+	    priv->sdlflags |= SDL_DOUBLEBUF;
 	
 	/* Setup Keyrepeats (500/30 are defaults) */
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
@@ -1208,50 +1209,14 @@ static void check_events (void)
 			break;
 			
 			case SDL_MOUSEBUTTONDOWN:
-#ifdef HAVE_NEW_INPUT
 				if(event.button.button == 4 || event.button.button == 5)
 					mplayer_put_key(MOUSE_BASE+event.button.button-1);
 				else
 					mplayer_put_key((MOUSE_BASE+event.button.button-1) | MP_KEY_DOWN);
-#else
-				switch(event.button.button) {
-					case 1: modifiers |= 1; break;
-					case 2: modifiers |= 2; break;
-					case 3: modifiers |= 4; break;
-					case 4:	/* wheel up */
-						if ((modifiers & 1))
-							mplayer_put_key(KEY_LEFT);
-						else if ((modifiers & 2))
-							mplayer_put_key('/');
-						else if ((modifiers & 4))
-							mplayer_put_key(KEY_PAGE_DOWN);
-						else
-							mplayer_put_key(KEY_DOWN);
-						break;
-					case 5:	/* wheel down */
-						if ((modifiers & 1))
-							mplayer_put_key(KEY_RIGHT);
-						else if ((modifiers & 2))
-							mplayer_put_key('*');
-						else if ((modifiers & 4))
-							mplayer_put_key(KEY_PAGE_UP);
-						else
-							mplayer_put_key(KEY_UP);
-						break;
-				}
-#endif
 				break;			    
 		
 			case SDL_MOUSEBUTTONUP:
-#ifdef HAVE_NEW_INPUT
 				mplayer_put_key(MOUSE_BASE+event.button.button-1);
-#else
-				switch(event.button.button) {
-					case 1: modifiers &= ~1; break;
-					case 2: modifiers &= ~2; break;
-					case 3: modifiers &= ~4; break;
-				}
-#endif
 				break;
 	
 			/* graphics mode selection shortcuts */
