@@ -6,21 +6,25 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+
 #include <dlfcn.h> /* dlsym, dlopen, dlclose */
 #include <stdarg.h> /* va_alist, va_start, va_end */
 #include <errno.h> /* strerror, errno */
 
+#include "config.h"
+#define XACODEC_PATH "/usr/lib/xanim"
+
 #include "mp_msg.h"
-#include "aclib/byteswap.h"
+#include "bswap.h"
 
 #include "stream.h"
 #include "demuxer.h"
 #include "codec-cfg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-#include "wine/mmreg.h"
 #include "stheader.h"
-#include "loader/DirectShow/default.h"
+
+//#include "loader/DirectShow/default.h"
+
 #include "libvo/img_format.h"
 #include "xacodec.h"
 
@@ -247,7 +251,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 		vo_format_name(out_format));
 	    return(0);
     }
-    odprintf(LOG_INFO, "xacodec: querying for %dx%d %dbit [fourcc: %4x] (%s)...\n",
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "xacodec: querying for %dx%d %dbit [fourcc: %4x] (%s)...\n",
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth, codec_hdr.compression,
 	codec_hdr.description);
 
@@ -275,7 +279,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     if (vidinfo->our_out_buffer == NULL)
     {
-	odprintf(LOG_ERROR, "cannot allocate memory for output: %s",
+	mp_msg(MSGT_DECVIDEO,MSGL_ERR,  "cannot allocate memory for output: %s",
 	    strerror(errno));
 	return(0);
     }
