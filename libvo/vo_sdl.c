@@ -463,7 +463,7 @@ static int sdl_open (void *plugin, void *name)
 	#endif	
 
 #ifndef AMIGA
-	sdl->sdlfullflags |= SDL_DOUBLEBUF;	
+	priv->sdlfullflags |= SDL_DOUBLEBUF;	
 	if (vo_doublebuffering)
 	    priv->sdlflags |= SDL_DOUBLEBUF;
 #endif
