@@ -36,7 +36,7 @@ Here are just a few tips:
 <listitem>
 <para>
 Use the <option>channels</option> option. An example:
-<screen>-tv on:channels=26-MTV1,23-TV2</screen>
+<screen>-tv channels=26-MTV1,23-TV2</screen>
 Explanation: using this option, only the 26 and 23 channels will be usable,
 and there will be a nice OSD text upon channel switching, displaying the
 channel's name. Spaces in the channel name must be replaced by the
@@ -152,7 +152,7 @@ check the "full duplex" option in the sound server preference menu.
 <para>
 Dummy output, to AAlib :)
 <screen>
-mplayer -tv on:driver=dummy:width=640:height=480 -vo aa<!--
+mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 --></screen>
 </para>
 </informalexample>
@@ -161,7 +161,7 @@ mplayer -tv on:driver=dummy:width=640:height=480 -vo aa<!--
 <para>
 Input from standard V4L:
 <screen>
-mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv<!--
+mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
 --></screen>
 </para>
 </informalexample>
@@ -173,10 +173,10 @@ image, crop the margins, and deinterlace the picture using a linear blend
 algorithm. Audio is compressed with a constant bitrate of 64kbps, using
 LAME codec. This setup is suitable for capturing movies.
 <screen>
-     mencoder -tv on:driver=v4l:width=768:height=576 \
+     mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vf crop=720:544:24:16,pp=lb -o output.avi
+     -vf crop=720:544:24:16,pp=lb -o output.avi tv://
 </screen>
 </para>
 </informalexample>
@@ -189,10 +189,10 @@ looses the quantizer and allows the video compressor to actualy reach so
 low bitrate even at the expense of the quality. This can be used for
 capturing long TV series, where the video quality isn't so important.
 <screen>
-     mencoder -tv on:driver=v4l:width=768:height=576 \
+     mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi tv://
 </screen>
 It's also possible to specify smaller image dimensions in the <option>-tv</option>
 option and omit the software scaling but this approach uses the maximum available
