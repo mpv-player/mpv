@@ -16,7 +16,7 @@ static char help_text[]=
 " -ao <drv[:dev]> výbìr výstupního audio ovladaèe&zaøízení (-ao help pro seznam)\n"
 " -vcd <trackno>  pøehrát VCD (video cd) stopu ze zaøízení místo ze souboru\n"
 #ifdef HAVE_LIBCSS
-" -dvdauth <dev>  urèení DVD zaøízení pro autentikaci (pro kódované disky)\n"
+" -dvdauth <dev>  urèení DVD zaøízení pro autentizaci (pro kódované disky)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  pøehrát DVD titul/stopu ze zaøízení (mechaniky) místo souboru\n"
@@ -72,7 +72,7 @@ static char help_text[]=
 #define MSGTR_CantLoadSub "Nemohu naèíst titulky: %s\n"
 #define MSGTR_ErrorDVDkey "Chyba pøi zpracování klíèe DVD.\n"
 #define MSGTR_CmdlineDVDkey "DVD klíè po¾adovaný na pøíkazové øádce je uschován pro rozkódování.\n"
-#define MSGTR_DVDauthOk "DVD autentikaèní sekvence vypadá vpoøádku.\n"
+#define MSGTR_DVDauthOk "DVD autentizaèní sekvence vypadá vpoøádku.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: Kritická chyba: po¾adovaný proud chybí!\n"
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump!!!\n"
 #define MSGTR_CoreDumped "jádro vypsáno :)\n"
@@ -141,7 +141,7 @@ static char help_text[]=
 #define MSGTR_UsingPass3ControllFile "Øídící soubor pro tøetí prùbìh (pass3): %s\n"
 #define MSGTR_MissingFilename "\nChybìjící jméno souboru!\n\n"
 #define MSGTR_CannotOpenFile_Device "Nelze otevøít soubor/zaøízení\n"
-#define MSGTR_ErrorDVDAuth "Chyba pøi autentikaci DVD...\n"
+#define MSGTR_ErrorDVDAuth "Chyba pøi autentizaci DVD...\n"
 #define MSGTR_CannotOpenDemuxer "Nemohu otevøít demuxer\n"
 #define MSGTR_NoAudioEncoderSelected "\nNebyl vybrán enkoder zvuku (-oac)! Vyberte jeden nebo pou¾ijte volbu -nosound. Pro nápovìdu pou¾ijte -oac help !\n"
 #define MSGTR_NoVideoEncoderSelected "\nNebyl vybrán enkoder videa (-ovc)! Vyberte jeden. Pro nápovìdu pou¾ijte -ovc help !\n"
@@ -213,7 +213,7 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Nemohu posouvat v tomto souboru!  \n"
 
 #define MSGTR_EncryptedVOB "Kódovaný VOB soubor (pøelo¾eno bez podpory libcss)! Pøeètìte si DOCS/DVD\n"
-#define MSGTR_EncryptedVOBauth "Zakódovaný proud, ale autentikaci jste nepo¾adoval!!\n"
+#define MSGTR_EncryptedVOBauth "Zakódovaný proud, ale autentizaci jste nepo¾adoval!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nejsou (je¹tì) podporovány!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Upozornìní! promìnná FOURCC detekována!?\n"
