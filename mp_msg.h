@@ -59,6 +59,8 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_SPUDEC 26	// spudec.c
 
+#define MSGT_PLAYTREE 27    // Playtree handeling (playtree.c, playtreeparser.c)
+
 #define MSGT_MAX 64
 
 void mp_msg_init(int verbose);
