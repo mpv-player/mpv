@@ -329,6 +329,12 @@ static char help_text[]=
 #define MSGTR_EQU_Bass "Tiefton" // LFE
 #define MSGTR_EQU_All "Alle"
 
+// --- playlist
+#define MSGTR_PLAYLIST_Path "Pfad"
+#define MSGTR_PLAYLIST_Selected "ausgewählte Dateien"
+#define MSGTR_PLAYLIST_Files "Dateien"
+#define MSGTR_PLAYLIST_DirectoryTree "Verzeichnisbaum"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
 #define MSGTR_MSGBOX_LABEL_Error "Fehler ..."
