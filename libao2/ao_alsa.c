@@ -379,7 +379,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	s[3] = IEC958_AES3_CON_FS_48000;
 
 	snprintf(alsa_device, ALSA_DEVICE_SIZE,
-		"iec958:{CARD 0 AES0 0x%2x AES1 0x%2x AES2 0x%2x AES3 0x%2x}", 
+		"iec958:{CARD 0 AES0 0x%02x AES1 0x%02x AES2 0x%02x AES3 0x%02x}", 
  		s[0], s[1], s[2], s[3]);
 	device.str = alsa_device;
 
