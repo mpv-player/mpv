@@ -172,12 +172,17 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- if( flags&0x04 && depth>=24 && format==IMGFMT_YV12 ) {
+ if( flags&0x04 && format==IMGFMT_YV12 ) {
      // software scale
-     scale_xinc=(width << 8) / d_width - 1;  // -1 needed for proper rounding
-     scale_yinc=(height << 16) / d_height;
-     image_width=d_width;
-     image_height=d_height;
+     if(fullscreen){
+         image_width=vo_screenwidth;
+         image_height=vo_screenheight;
+     } else {
+         image_width=d_width&(~3);
+         image_height=d_height;
+     }
+     scale_xinc=(width << 8) / image_width - 1;  // -1 needed for proper rounding
+     scale_yinc=(height << 16) / image_height;
      SwScale_Init();
  }
 
@@ -480,7 +485,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 
 if(scale_xinc){
  SwScale_YV12slice_brg24(src,stride,y,h,
-                         ImageData, image_width*((bpp+7)/8), image_width, ((bpp+7)/8),
+                         ImageData, image_width*((bpp+7)/8), image_width, bpp,
 			 scale_xinc, scale_yinc);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
