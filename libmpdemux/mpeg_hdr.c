@@ -39,11 +39,6 @@ int mp_header_process_sequence_header (mp_mpeg_header_t * picture, unsigned char
     width = ((height >> 12) + 15) & ~15;
     height = ((height & 0xfff) + 15) & ~15;
 
-    if ((width > 768) || (height > 576)){
-	printf("size restrictions for MP@ML or MPEG1 exceeded! (%dx%d)\n",width,height);
-//	return 1;	/* size restrictions for MP@ML or MPEG1 */
-    }
-    
     picture->aspect_ratio_information = buffer[3] >> 4;
     picture->frame_rate_code = buffer[3] & 15;
     picture->fps=frameratecode2framerate[picture->frame_rate_code];
