@@ -417,7 +417,14 @@ void ShowPreferences( void )
 
  gtk_widget_show( Preferences );
  gtkSetLayer( Preferences );
- gtkMessageBox( GTK_MB_WARNING,MSGTR_PREFERENCES_Message );
+ {
+  static int visible = 1;
+  if ( visible ) 
+   {
+    gtkMessageBox( GTK_MB_WARNING,MSGTR_PREFERENCES_Message );
+    visible=0;
+   }
+ }
 }
 
 void HidePreferences( void )
@@ -788,7 +795,7 @@ GtkWidget * create_Preferences( void )
   hbox8=AddHBox( vbox3,1 );
   AddLabel( MSGTR_PREFERENCES_AudioDelay,hbox8 );
 
-  HSAudioDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,0.01,0,0 ) );
+  HSAudioDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10,10,0.01,0,0 ) );
   HSAudioDelay=AddHScaler( HSAudioDelayadj,hbox8,2 );
   label=AddLabel( MSGTR_PREFERENCES_Audio,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label );
