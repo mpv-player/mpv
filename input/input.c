@@ -1484,14 +1484,23 @@ mp_input_init(void) {
   if(!file)
     return;
   
-  if( mp_input_parse_config(file)) {
-    free(file); // release the buffer created by get_path()
-  }
-  else {
+  if( !mp_input_parse_config(file)) {
+    // free file if it was allocated by get_path(),
+    // before it gets overwritten
+    if( file != config_file)
+    {
+      free(file);
+    }
     // Try global conf dir
     file = MPLAYER_CONFDIR "/input.conf";
     if(! mp_input_parse_config(file))
       mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
+  }
+  else
+  {
+    // free file if it was allocated by get_path()
+    if( file != config_file)
+      free(file);
   }
 
 #ifdef HAVE_JOYSTICK
