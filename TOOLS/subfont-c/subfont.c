@@ -614,16 +614,129 @@ void outline1(
 // gaussian blur
 void blur(
 	unsigned char *buffer,
-	unsigned char *tmp,
+	unsigned short *tmp2,
 	int width,
 	int height,
 	int *m,
+	int *m2,
 	int r,
 	int mwidth,
 	unsigned volume) {
 
     int x, y;
 
+#if 0
+    unsigned char  *s = buffer;
+    unsigned short *t = tmp2+1;
+    for(y=0; y<height; y++){
+	memset(t, 0, (width+1)*sizeof(short));
+//	for(x=0; x<width+1; x++)
+//	    t[x]= 128;
+
+	for(x=0; x<r; x++){
+	    const int src= s[x];
+	    if(src){
+		register unsigned short *dstp= t + x-r;
+		int mx;
+		unsigned *m3= m2 + src*mwidth;
+		for(mx=r-x; mx<mwidth; mx++){
+		    dstp[mx]+= m3[mx];
+		}
+	    }
+	}
+	for(; x<width-r; x++){
+	    const int src= s[x];
+	    if(src){
+		register unsigned short *dstp= t + x-r;
+		int mx;
+		unsigned *m3= m2 + src*mwidth;
+		for(mx=0; mx<mwidth; mx++){
+		    dstp[mx]+= m3[mx];
+		}
+	    }
+	}
+	for(; x<width; x++){
+	    const int src= s[x];
+	    if(src){
+		register unsigned short *dstp= t + x-r;
+		int mx;
+		const int x2= r+width -x;
+		const int off= src*mwidth;
+		unsigned *m3= m2 + src*mwidth;
+		for(mx=0; mx<x2; mx++){
+		    dstp[mx]+= m3[mx];
+		}
+	    }
+	}
+	s+= width;
+	t+= width + 1;
+    }
+
+    t = tmp2;
+    for(x=0; x<width; x++){
+	for(y=0; y<r; y++){
+	    unsigned short *srcp= t + y*(width+1) + 1;
+	    int src= *srcp;
+	    if(src){
+		register unsigned short *dstp= srcp - 1 + width+1;
+		const int src2= (src + 128)>>8;
+		unsigned *m3= m2 + src2*mwidth;
+
+		int mx;
+		*srcp= 128;
+		for(mx=r-1; mx<mwidth; mx++){
+		    *dstp += m3[mx];
+		    dstp+= width+1;
+		}
+	    }
+	}
+	for(; y<height-r; y++){
+	    unsigned short *srcp= t + y*(width+1) + 1;
+	    int src= *srcp;
+	    if(src){
+		register unsigned short *dstp= srcp - 1 - r*(width+1);
+		const int src2= (src + 128)>>8;
+		unsigned *m3= m2 + src2*mwidth;
+
+		int mx;
+		*srcp= 128;
+		for(mx=0; mx<mwidth; mx++){
+		    *dstp += m3[mx];
+		    dstp+= width+1;
+		}
+	    }
+	}
+	for(; y<height; y++){
+	    unsigned short *srcp= t + y*(width+1) + 1;
+	    int src= *srcp;
+	    if(src){
+		const int y2=r+height-y;
+		register unsigned short *dstp= srcp - 1 - r*(width+1);
+		const int src2= (src + 128)>>8;
+		unsigned *m3= m2 + src2*mwidth;
+
+		int mx;
+		*srcp= 128;
+		for(mx=0; mx<y2; mx++){
+		    *dstp += m3[mx];
+		    dstp+= width+1;
+		}
+	    }
+	}
+	t++;
+    }
+ 
+    t = tmp2;
+    s = buffer;
+    for(y=0; y<height; y++){
+	for(x=0; x<width; x++){
+	    s[x]= t[x]>>8;
+	}
+	s+= width;
+	t+= width + 1;
+    }
+#else
+    unsigned char *tmp = (unsigned char*)tmp2;
     unsigned char *s = buffer - r;
     unsigned char *t = tmp;
     
@@ -636,12 +749,13 @@ void blur(
 	    int x2 = (x+r>=width) ? (r+width-x):mwidth;
 	    unsigned* mp = m + 256*x1;
 	    int mx;
+
 	    for (mx = x1; mx<x2; ++mx, mp+=256)	sum+= mp[s[mx]];
 	    *t = sum>>16;
 	}
     }
-    tmp -= r*width;
 
+    tmp -= r*width;
     for (x = 0; x<width; ++x, ++tmp, ++buffer) {
 	int y1max=(r<height)?r:height;
 	int y2min=height-r;
@@ -694,6 +808,7 @@ void blur(
 	}
 #endif
     }
+#endif
 }
 
 
@@ -727,31 +842,48 @@ void alpha() {
     int const o_w = 2*o_r+1;		// matrix size
     int const o_size = o_w * o_w;
     double const A = log(1.0/base)/(radius*radius*2);
+    double volume_factor=0.0;
+    double volume_diff;
 
     int mx, my, i;
     unsigned volume = 0;		// volume under Gaussian area is exactly -pi*base/A
 
     unsigned *g = (unsigned*)malloc(g_w * sizeof(unsigned));
     unsigned *gt = (unsigned*)malloc(256 * g_w * sizeof(unsigned));
+    unsigned *gt2 = (unsigned*)malloc(256 * g_w * sizeof(unsigned));
     unsigned *om = (unsigned*)malloc(o_w*o_w * sizeof(unsigned));
     unsigned char *omt = malloc(o_size*256);
     unsigned char *omtp = omt;
+    unsigned short *tmp = malloc((width+1)*height*sizeof(short));
 
-    if (g==NULL || gt==NULL || om==NULL || omt==NULL) ERROR("malloc failed.");
+    if (g==NULL || gt==NULL || gt2==NULL || om==NULL || omt==NULL) ERROR("malloc failed.");
 
-    // gaussian curve
+    // gaussian curve with volume = 256
+    for (volume_diff=10000000; volume_diff>0.0000001; volume_diff*=0.5){
+	volume_factor+= volume_diff;
+	volume=0;
+	for (i = 0; i<g_w; ++i) {
+	    g[i] = (unsigned)(exp(A * (i-g_r)*(i-g_r)) * volume_factor + .5);
+	    volume+= g[i];
+	}
+	if(volume>256) volume_factor-= volume_diff;
+    }
+    volume=0;
     for (i = 0; i<g_w; ++i) {
-	g[i] = (unsigned)(exp(A * (i-g_r)*(i-g_r)) * base + .5);
+	g[i] = (unsigned)(exp(A * (i-g_r)*(i-g_r)) * volume_factor + .5);
 	volume+= g[i];
 	if (DEBUG) eprintf("%3i ", g[i]);
     }
+    
     //volume *= volume;
     if (DEBUG) eprintf("\n");
 
     // gauss table:
     for(mx=0;mx<g_w;mx++){
-	for(i=0;i<256;i++)
+	for(i=0;i<256;i++){
 	    gt[256*mx+i] = (i*g[mx]*65536+(volume/2))/volume;
+	    gt2[mx+i*g_w] = i*g[mx];
+	}
     }
 
     /* outline matrix */
@@ -782,7 +914,7 @@ void alpha() {
 
     ttime=GetTimer();
 //    blur(abuffer, bbuffer, width, height, g, g_r, g_w, volume);
-    blur(abuffer, bbuffer, width, height, gt, g_r, g_w, volume);
+    blur(abuffer, tmp, width, height, gt, gt2, g_r, g_w, volume);
     ttime=GetTimer()-ttime;
     printf("gauss:   %7d us\n",ttime);
 
