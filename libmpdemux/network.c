@@ -38,6 +38,8 @@ static struct {
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming
 	{ "video/mpeg", DEMUXER_TYPE_MPEG_PS },
+	{ "video/x-mpeg", DEMUXER_TYPE_MPEG_PS },
+	{ "video/x-mpeg2", DEMUXER_TYPE_MPEG_PS },
 	// AVI ??? => video/x-msvideo
 	{ "video/x-msvideo", DEMUXER_TYPE_AVI },
 	// MOV => video/quicktime
@@ -53,7 +55,9 @@ static struct {
 	// Playlists
 	{ "audio/x-scpls", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
-	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST }
+	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },
+	// Real Media
+	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL }
 };
 
 static struct {
@@ -72,6 +76,7 @@ static struct {
 	{ "wma", DEMUXER_TYPE_ASF },
 	{ "viv", DEMUXER_TYPE_VIVO },
 	{ "rm", DEMUXER_TYPE_REAL },
+	{ "ra", DEMUXER_TYPE_REAL },
 	{ "y4m", DEMUXER_TYPE_Y4M },
 	{ "mp3", DEMUXER_TYPE_AUDIO },
 	{ "wav", DEMUXER_TYPE_AUDIO },
@@ -797,6 +802,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		}
 		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", cache_size );
 	}
+
 	return ret;
 }
 
