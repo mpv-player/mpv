@@ -870,16 +870,50 @@ static void radeon_vid_display_video( void )
     if(__verbose > 1) radeon_vid_dump_regs();
 }
 
-static unsigned radeon_query_pitch(unsigned fourcc)
+static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 {
-  unsigned pitch;
+  unsigned pitch,spy,spv,spu;
+  spy = spv = spu = 0;
+  switch(spitch->y)
+  {
+    case 16:
+    case 32:
+    case 64:
+    case 128:
+    case 256: spy = spitch->y; break;
+    default: break;
+  }
+  switch(spitch->u)
+  {
+    case 16:
+    case 32:
+    case 64:
+    case 128:
+    case 256: spu = spitch->u; break;
+    default: break;
+  }
+  switch(spitch->v)
+  {
+    case 16:
+    case 32:
+    case 64:
+    case 128:
+    case 256: spv = spitch->v; break;
+    default: break;
+  }
   switch(fourcc)
   {
 	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
-	case IMGFMT_I420: pitch = 32; break;
-	default:	  pitch = 16; break;
+	case IMGFMT_I420:
+		if(spy > 16 && spu == spy/2 && spv == spy/2)	pitch = spy;
+		else						pitch = 32;
+		break;
+	default:
+		if(spy >= 16)	pitch = spy;
+		else		pitch = 16;
+		break;
   }
   return pitch;
 }
@@ -899,7 +933,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
        config->fourcc == IMGFMT_IYUV) is_420 = 1;
     if(config->fourcc == IMGFMT_RGB32 ||
        config->fourcc == IMGFMT_BGR32) is_rgb32 = 1;
-    best_pitch = radeon_query_pitch(config->fourcc);
+    best_pitch = radeon_query_pitch(config->fourcc,&config->src.pitch);
     mpitch = best_pitch-1;
     switch(config->fourcc)
     {
@@ -1032,7 +1066,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 static void radeon_compute_framesize(vidix_playback_t *info)
 {
   unsigned pitch,awidth;
-  pitch = radeon_query_pitch(info->fourcc);
+  pitch = radeon_query_pitch(info->fourcc,&info->src.pitch);
   awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
   switch(info->fourcc)
   {
