@@ -55,7 +55,7 @@ playing MP3s or sound effects.
 
 <para>
 Other media players like <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
-or <ulink url="http://xine.sourceforge.net">Xine</ulink> possibly work
+or <ulink url="http://xine.sourceforge.net">xine</ulink> possibly work
 out-of-the-box with these drivers because they use "simple" methods
 with internal timing. Measuring showed that their methods are not as
 efficient as <application>MPlayer</application>'s.

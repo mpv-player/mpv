@@ -84,7 +84,7 @@ Playing from RTSP:
 
 <para>
 Latest versions of <application>MPlayer</application> also accepts VCD and
-DVD tracks in URL style, just like <application>Xine</application> does:
+DVD tracks in URL style, just like <application>xine</application> does:
 <screen>mplayer dvd://1</screen>
 or
 <screen>mplayer vcd://1</screen>

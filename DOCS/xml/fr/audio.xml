@@ -54,7 +54,7 @@ n'est pas requise pour jouer des MP3 ou des effets sonores.
 
 <para>
 D'autres lecteurs multimédia comme <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
-ou <ulink url="http://xine.sourceforge.net">Xine</ulink> fonctionnent probablement
+ou <ulink url="http://xine.sourceforge.net">xine</ulink> fonctionnent probablement
 autrement avec ces pilotes parce qu'ils utilisent des méthodes "simples" pour leur
 synchro interne. Le temps affichés avec leurs méthodes n'est pas aussi précis que celui
 de <application>MPlayer</application>.

@@ -84,7 +84,7 @@ Lecture à partir de RTSP:
 
 <para>
 Les dernières versions de <application>MPlayer</application> acceptent
-également les pistes VCD et DVD en style URL, comme <application>Xine</application>:
+également les pistes VCD et DVD en style URL, comme <application>xine</application>:
 <screen>mplayer dvd://1</screen>
 ou
 <screen>mplayer vcd://1</screen>
