@@ -169,7 +169,7 @@ Optional features:
   --disable-network      disable network support (for: http/mms/rtp) [enable]
   --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
-  --enable-live          enable LIVE.COM Streaming Media support [disable]
+  --enable-live          enable LIVE.COM Streaming Media support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
@@ -1229,7 +1229,7 @@ _dvdread=auto
 _dvdkit=auto
 _xanim=auto
 _real=auto
-_live=no
+_live=auto
 _xinerama=auto
 _mga=auto
 _xmga=auto
@@ -1573,7 +1573,6 @@ for ac_option do
     ;;
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
-    _live=yes
     ;;
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -5169,11 +5168,21 @@ fi
 
 echocheck "LIVE.COM Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
-  _live=yes
-  test "$_livelibdir" || _live=no
-  # TODO: deeper, more reliable test of libs, and version!
-  # (users may have empty live/ dir or something different there, for
-  # example 'live config files', or they may have old, incompatibel version)
+  _TMPC=$TMPC
+  TMPC=$TMPCPP
+  cat >$TMPC <<EOF
+#include <liveMedia.hh>
+#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1090195200)
+#error Please upgrade to version 2004.07.19 or later of the "LIVE.COM Streaming Media" libraries - available from <www.live.com/liveMedia/>
+#endif
+int main(void) {}
+EOF
+  if cc_check -I$_livelibdir/liveMedia/include/ -I$_livelibdir/UsageEnvironment/include -I$_livelibdir/groupsock/include; then
+    _live=yes
+  else
+    _live=no
+  fi
+  TMPC=$_TMPC
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
   echores "yes (using $_livelibdir)"
