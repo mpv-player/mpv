@@ -881,7 +881,7 @@ Falls back to IPv4 automatically.
 .TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files.
-It may also be used to play audio CDs which are not 44KHz 16Bit stereo.
+It may also be used to play audio CDs which are not 44KHz 16-bit stereo.
 For playing raw AC3 streams use \-rawaudio on:format=0x2000.
 .sp 1
 Available options are:
@@ -2514,7 +2514,7 @@ Available filters are:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
 Changes the sample rate of the audio stream to an integer srate (Hz).
-It only supports the 16 bit little-endian format.
+It only supports the 16-bit little-endian format.
 .IPs channels[=nch]
 Change the number of channels to nch output channels.
 If the number of output channels is bigger than the number of input channels
@@ -4717,7 +4717,8 @@ huffyuv:
 .IPs "pass 1"
 Saves statistics.
 .IPs "pass 2"
-Encodes with an optimal Huffman table based upon pass 1 statistics.
+Encodes with an optimal Huffman table based upon statistics
+from the first pass.
 .RE
 .PD 1
 .TP
@@ -5054,7 +5055,7 @@ sh4
 luminance masking
 .br
 .I WARNING:
-Be careful, too large values can cause disastrous things.
+Be careful, overly large values can cause disastrous things.
 .br
 .I WARNING:
 Large values might look good on some monitors but may look horrible
