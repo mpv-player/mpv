@@ -100,6 +100,32 @@ static int init(sh_video_t *sh){
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
 	avctx->sub_id = 3;
+#if LIBAVCODEC_BUILD >= 4605
+    /* AVRn stores huffman table in AVI header */
+    /* Pegasus MJPEG stores it also in AVI header, but it uses the common
+       MJPG fourcc :( */
+    if ((sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
+	(sh->format == mmioFOURCC('A','V','R','n') ||
+	sh->format == mmioFOURCC('M','J','P','G')))
+    {
+	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
+	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+	avctx->extradata = malloc(avctx->extradata_size);
+	memcpy(avctx->extradata, sh->bih+sizeof(BITMAPINFOHEADER),
+	    avctx->extradata_size);
+
+#if 0
+	{
+	    int x;
+	    uint8_t *p = avctx->extradata;
+	    
+	    for (x=0; x<avctx->extradata_size; x++)
+		printf("[%x] ", p[x]);
+	    printf("\n");
+	}
+#endif
+    }
+#endif
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
@@ -117,6 +143,12 @@ static void uninit(sh_video_t *sh){
 
     if (avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
+
+#if LIBAVCODEC_BUILD >= 4605
+    if (avctx->extradata_size)
+	free(avctx->extradata);
+#endif
+
     if (avctx)
 	free(avctx);
     if (ctx)
