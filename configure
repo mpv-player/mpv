@@ -5509,6 +5509,7 @@ if test "$_network" != no ; then
 else
   _noinputmodules="network $_noinputmodules"
   _def_network='#undef MPLAYER_NETWORK'
+  _ftp=no
 fi
 echores "$_network"
 
