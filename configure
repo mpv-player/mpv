@@ -2815,7 +2815,7 @@ EOF
 fi
 if test "$_directx" = yes ; then
   _def_directx='#define HAVE_DIRECTX 1'
-  _ld_directx='-mcygwin'
+  _ld_directx='-lgdi32'
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
 else

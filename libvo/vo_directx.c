@@ -21,10 +21,6 @@
  * TODO:
  * -fix dr + implement DMA
  * -implement mousehiding
- * -fix undefined symbols when using CreateSolidBrush
- *  necessary for:
- *  -correct colorkeying
- *  -black window background
  * -better exclusive mode
  *
  *****************************************************************************/
@@ -47,7 +43,7 @@ static LPDIRECTDRAW2        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
 static LPDIRECTDRAWSURFACE  g_lpddsOverlay = NULL;  //Overlay Surface
 static LPDIRECTDRAWSURFACE  g_lpddsBack = NULL;     //Back surface
-static LPDIRECTDRAWCLIPPER  g_lpddclipper;          //clipper object, can only be without overlay
+static LPDIRECTDRAWCLIPPER  g_lpddclipper;          //clipper object, can only be used without overlay
 static DDSURFACEDESC		ddsdsf;                 //surface descripiton needed for locking
 static RECT                 rd;                     //rect of our stretched image
 static RECT                 rs;                     //rect of our source image
@@ -62,11 +58,11 @@ static uint32_t fs = 0;                             //display in window or fulls
 static uint32_t dstride;                            //surface stride
 static uint32_t swap = 1;                           //swap u<->v planes set to 1 if you experience bluish faces 
 static uint32_t nooverlay = 1;                      //NonOverlay mode
+static DWORD    destcolorkey;                       //colorkey for our surface
+static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
 
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern int vo_doublebuffering;                      //tribblebuffering    
-
-int          i_colorkey;                            //fix this!!   
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -272,9 +268,6 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 	   return 1;
 	}
     g_lpddsBack = g_lpddsOverlay;
-	//FIX THIS STUFF !!
-	i_colorkey = (DWORD)((( ((int)((HBRUSH)(COLOR_BACKGROUND + 1))) * g_ddpf[i].g_ddpfOverlay.dwRBitMask) / 255)
-                                       & g_ddpf[i].g_ddpfOverlay.dwRBitMask);
 	return 0;
 }
 
@@ -321,9 +314,6 @@ static void uninit(void)
 {
 	if (g_lpddclipper != NULL) g_lpddclipper->lpVtbl->Release(g_lpddclipper);
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>clipper released\n");
-	CloseWindow(hWnd);
-	if(hWnd != NULL)DestroyWindow(hWnd);
-	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>window destroyed\n");
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>back surface released\n");
@@ -335,6 +325,8 @@ static void uninit(void)
 	}
 	if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
     mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>primary released\n");
+	if(hWnd != NULL)DestroyWindow(hWnd);
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>window destroyed\n");
 	if (g_lpdd != NULL) g_lpdd->lpVtbl->Release(g_lpdd);
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>directdrawobject released\n");
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>uninited\n");    
@@ -593,9 +585,24 @@ static uint32_t Directx_DisplayOverlay()
 	    if(!fs)rd_window.right = rd_window.left + (rd_window.right - rd_window.left) & -(signed) (capsDrv.dwAlignSizeDest); //don't forget the window
 	}
     if(!fs)AdjustWindowRect(&rd_window,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,0); //calculate window rect
-	/*if((fs) || (!fs && ontop))hWndafter=HWND_TOPMOST;
-	else hWndafter=HWND_NOTOPMOST;*/
-	hWndafter = HWND_TOPMOST;
+
+    //printf("Window:x:%i,y:%i,w:%i,h:%i\n",rd_window.left,rd_window.top,rd_window.right - rd_window.left,rd_window.bottom - rd_window.top);
+    //printf("Overlay:x1:%i,y1:%i,x2:%i,y2:%i,w:%i,h:%i\n",rd.left,rd.top,rd.right,rd.bottom,rd.right - rd.left,rd.bottom - rd.top);
+    //printf("Source:x1:%i,x2:%i,y1:%i,y2:%i\n",rs.left,rs.right,rs.top,rs.bottom);
+    //printf("Image:x:%i->%i,y:%i->%i\n",image_width,d_image_width,image_height,d_image_height);
+
+    // create an overlay FX structure so we can specify a destination color key
+    ZeroMemory(&ovfx, sizeof(ovfx));
+    ovfx.dwSize = sizeof(ovfx);
+    ovfx.dckDestColorkey.dwColorSpaceLowValue = destcolorkey; 
+    ovfx.dckDestColorkey.dwColorSpaceHighValue = destcolorkey;
+    // set the flags we'll send to UpdateOverlay      //DDOVER_AUTOFLIP|DDOVERFX_MIRRORLEFTRIGHT|DDOVERFX_MIRRORUPDOWN could be usefull?;
+    dwUpdateFlags = DDOVER_SHOW | DDOVER_DDFX;
+    if (capsDrv.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY) dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;
+    else ontop = 1;  //if hardware can't do colorkeying set the window on top
+	//now we have enough information to display the window 
+	if((fs) || (!fs && ontop))hWndafter=HWND_TOPMOST;
+	else hWndafter=HWND_NOTOPMOST;
 	SetWindowPos(hWnd,
                  hWndafter,
                  rd_window.left,
@@ -604,21 +611,7 @@ static uint32_t Directx_DisplayOverlay()
                  rd_window.bottom - rd_window.top,
                  SWP_SHOWWINDOW|SWP_NOOWNERZORDER/*|SWP_NOREDRAW*/);
 
-    //printf("Window:x:%i,y:%i,w:%i,h:%i\n",rd_window.left,rd_window.top,rd_window.right - rd_window.left,rd_window.bottom - rd_window.top);
-    //printf("Overlay:x1:%i,y1:%i,x2:%i,y2:%i,w:%i,h:%i\n",rd.left,rd.top,rd.right,rd.bottom,rd.right - rd.left,rd.bottom - rd.top);
-    //printf("Source:x1:%i,x2:%i,y1:%i,y2:%i\n",rs.left,rs.right,rs.top,rs.bottom);
-    //printf("Image:x:%i->%i,y:%i->%i\n",image_width,d_image_width,image_height,d_image_height);
-   
-    // Create an overlay FX structure so we can specify a source color key.
-    // This information is ignored if the DDOVER_SRCKEYOVERRIDE flag isn't set.
-    ZeroMemory(&ovfx, sizeof(ovfx));
-    ovfx.dwSize = sizeof(ovfx);
-    ovfx.dckSrcColorkey.dwColorSpaceLowValue= i_colorkey;//(int)(HBRUSH)(COLOR_BACKGROUND + 1); 
-    ovfx.dckSrcColorkey.dwColorSpaceHighValue=i_colorkey;///*(HBRUSH) */(COLOR_BACKGROUND + 1);
-    // set the flags we'll send to UpdateOverlay      //DDOVER_AUTOFLIP|DDOVERFX_MIRRORLEFTRIGHT|DDOVERFX_MIRRORUPDOWN could be usefull?;
-    dwUpdateFlags = DDOVER_SHOW | DDOVER_DDFX;
-    if (capsDrv.dwCKeyCaps & DDCKEYCAPS_SRCOVERLAY) dwUpdateFlags |= DDOVER_KEYSRCOVERRIDE;
-    ddrval = g_lpddsOverlay->lpVtbl->UpdateOverlay(g_lpddsOverlay,&rs, g_lpddsPrimary, &rd, dwUpdateFlags, &ovfx);
+	ddrval = g_lpddsOverlay->lpVtbl->UpdateOverlay(g_lpddsOverlay,&rs, g_lpddsPrimary, &rd, dwUpdateFlags, &ovfx);
     if(FAILED(ddrval))
     {
         // on cause might be the driver lied about minimum stretch 
@@ -670,9 +663,6 @@ static uint32_t Directx_DisplayNonOverlay()
 	WINDOWPLACEMENT window_placement;
 	RECT            rd_window;  //rect of the window
     HWND            hWndafter;
-	uint32_t        xscreen = GetSystemMetrics(SM_CXSCREEN);
-    uint32_t        yscreen = GetSystemMetrics(SM_CYSCREEN);
-    uint32_t        xstretch1000,ystretch1000;//zoom factors
 	POINT point_window;
     window_placement.length = sizeof(WINDOWPLACEMENT);
     GetWindowPlacement(hWnd, &window_placement );
@@ -803,6 +793,10 @@ static uint32_t Directx_CheckPrimaryPixelformat()
 	uint32_t i=0;
     uint32_t formatcount = 0;
 	DDPIXELFORMAT	ddpf;
+	DDSURFACEDESC   ddsd;
+    HDC             hdc;
+    HRESULT         hres;
+	COLORREF        rgbT;
 	mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>checking primary surface\n");
 	memset( &ddpf, 0, sizeof( DDPIXELFORMAT ));
     ddpf.dwSize = sizeof( DDPIXELFORMAT );
@@ -826,6 +820,31 @@ static uint32_t Directx_CheckPrimaryPixelformat()
 	   }
 	   i++;
     }
+    //get the colorkey for overlay mode
+	destcolorkey = CLR_INVALID;
+    if (windowcolor != CLR_INVALID && g_lpddsPrimary->lpVtbl->GetDC(g_lpddsPrimary,&hdc) == DD_OK)
+    {
+        rgbT = GetPixel(hdc, 0, 0);     
+        SetPixel(hdc, 0, 0, windowcolor);  
+        g_lpddsPrimary->lpVtbl->ReleaseDC(g_lpddsPrimary,hdc);
+    }
+    // read back the converted color
+    ddsd.dwSize = sizeof(ddsd);
+    while ((hres = g_lpddsPrimary->lpVtbl->Lock(g_lpddsPrimary,NULL, &ddsd, 0, NULL)) == DDERR_WASSTILLDRAWING)
+        ;
+    if (hres == DD_OK)
+    {
+        destcolorkey = *(DWORD *) ddsd.lpSurface;                
+        if (ddsd.ddpfPixelFormat.dwRGBBitCount < 32)
+            destcolorkey &= (1 << ddsd.ddpfPixelFormat.dwRGBBitCount) - 1;  
+        g_lpddsPrimary->lpVtbl->Unlock(g_lpddsPrimary,NULL);
+    }
+    if (windowcolor != CLR_INVALID && g_lpddsPrimary->lpVtbl->GetDC(g_lpddsPrimary,&hdc) == DD_OK)
+    {
+        SetPixel(hdc, 0, 0, rgbT);
+        g_lpddsPrimary->lpVtbl->ReleaseDC(g_lpddsPrimary,hdc);
+    }
+	//release primary
 	g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
 	g_lpddsPrimary = NULL;
 	if(formatcount==0)
@@ -843,8 +862,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     {
 		case WM_DESTROY:
 		{
-			mplayer_put_key('q');
-		    return 0;
+			PostQuitMessage(0);
+			return 0;
 		}
         case WM_CLOSE:
 		{
@@ -854,8 +873,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case WM_WINDOWPOSCHANGED:
 		{
 			//printf("Windowposchange\n");
-			if(nooverlay)Directx_DisplayNonOverlay();
-		    else Directx_DisplayOverlay();
+			if(g_lpddsBack != NULL)  //or it will crash with -vm
+			{
+				if(nooverlay)Directx_DisplayNonOverlay();
+		        else Directx_DisplayOverlay();
+			}
 		    break;
 		}
         case WM_SYSCOMMAND:
@@ -925,7 +947,7 @@ static uint32_t Directx_CreateWindow()
     wc.hInstance     =  hInstance;
     wc.hCursor       =  LoadCursor(NULL,IDC_ARROW);
     wc.hIcon         =  LoadIcon(NULL,IDI_APPLICATION);
-    wc.hbrBackground =  (HBRUSH)(COLOR_BACKGROUND + 1); 
+    wc.hbrBackground =  CreateSolidBrush(windowcolor);
     wc.lpszClassName =  "Mplayer - Movieplayer for Linux";
     wc.lpszMenuName  =  NULL;
     RegisterClass(&wc);
@@ -1139,7 +1161,6 @@ static uint32_t put_image(mp_image_t *mpi){
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, char *title, uint32_t format)
 {
-	DDSURFACEDESC ddsd;
 	//int zoom = options & 0x04;
 	//int flip = options & 0x08;
 	fs = options & 0x01;
