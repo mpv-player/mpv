@@ -76,6 +76,7 @@ char *lavc_param_vcodec = NULL;
 int lavc_param_vbitrate = -1;
 int lavc_param_vrate_tolerance = 1024*8;
 int lavc_param_vhq = 0; /* default is realtime encoding */
+int lavc_param_v4mv = 0;
 int lavc_param_vme = 3;
 int lavc_param_vqscale = 0;
 int lavc_param_vqmin = 3;
@@ -1193,7 +1194,6 @@ case VCODEC_LIBAVCODEC:
     else
 	lavc_venc_context.gop_size = 250; /* default */
 
-    /* ignored by libavcodec? */
     if (lavc_param_vhq)
     {
 	printf("High quality encoding selected (non real time)!\n");
@@ -1201,6 +1201,8 @@ case VCODEC_LIBAVCODEC:
     }
     else
 	lavc_venc_context.flags = 0;
+
+    lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
 
     /* motion estimation (0 = none ... 3 = high quality but slow) */
     /* this is just an extern from libavcodec but it should be in the
