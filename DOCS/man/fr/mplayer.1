@@ -1,4 +1,4 @@
-.\" synced with 1.782
+.\" synced with 1.787
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "17 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "19 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -509,7 +509,7 @@ x11, xmga, xv, xvidix et dfbmga.
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
-Pour les trames B même leur décodage est complétement désactivé.
+Pour les trames-B même leur décodage est complétement désactivé.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -1112,6 +1112,9 @@ erronées au début.
 .B \-srate <Hz>
 Sélectionne  la fréquence d'échantillonnage audio, en ré-échantillonnant si
 nécessaire.
+Le type de ré-échantillonnage peut être contrôlé par l'option \-af-adv.
+Par défaut, un ré-échantillonnage rapide est fait, ce qui peut créer des
+distorsions.
 MEncoder passe cette valeur à LAME pour le ré-échantillonnage.
 .TP
 .B \-ss <temps> (voir aussi \-sb)
@@ -1369,6 +1372,13 @@ bordure noire épaisse
 .TP
 .B \-flip-hebrew (FriBiDi uniquement)
 Active le retournement des sous-titres en utilisant FriBiDi.
+.
+.TP
+.B \-noflip-hebrew-commas
+Change les suppositions de FriBiDi vis-à vis de la place des virgules dans
+les sous-titres.
+À utiliser si les virgules des sous-titres sont affichés au début des
+phrases au lieu de la fin.
 .
 .TP
 .B \-font <chemin\ vers\ le\ fichier\ font.desc> (OSD uniquement)
@@ -2032,7 +2042,7 @@ Cette option est utilisée pour contrôler le pilote de sortie vidéo dxr2.
 .
 .RSs
 .IPs ar-mode=<valeur>
-mode de rapport hauteur/\:largeur (0 = normal, 1 = pan et scan, 2 = letterbox
+mode de rapport hauteur/\:largeur (0 = normal, 1 = pan-and-scan, 2 = letterbox
 (par défaut))
 .IPs iec958-encoded
 Met le mode de sortie iec958 à "encodé".
@@ -2165,7 +2175,7 @@ Utilise l'astuce _NETWM_STATE_BELOW si disponible.
 Utilise l'astuce _NETWM_STATE_FULLSCREEN si disponible.
 .IPs layer
 Utilise l'astuce _WIN_LAYER avec la couche par défaut.
-.IPs layer=<0..15>
+.IPs layer=<0...15>
 Utilise l'astuce _WIN_LAYER avec le numéro de couche.
 .IPs netwm
 Force le style NETWM.
@@ -2283,7 +2293,7 @@ aussi bien que directx et gl2 sous Windows.
 .
 .TP
 .B \-panscan <0.0\-1.0>
-Active la fonctionnalité pan et scan (par ex.\& couper les côtés d'un
+Active la fonctionnalité "pan-and-scan" (par ex.\& couper les côtés d'un
 film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
@@ -2675,7 +2685,7 @@ Avec les polices freetype, le résultat est plus esthétique en le désactivant,
 et en mode plein écran, s'affichera dans les bandes noires.
 .IPs (no)aspect
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
-le "pan and scan" (par défaut\ : activé).
+le "pan-and-scan" (par défaut\ : activé).
 Sa désactivation peut économiser un peu de temps processeur.
 .RE
 .PD 1
@@ -3168,7 +3178,7 @@ et +40dB équivaut à un gain de 1000).
 .br
 sc: Active le découpage logiciel.
 .REss
-.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
+.IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:devices.html#audio-dev
 pour les détails.
 .RSss
@@ -3383,7 +3393,7 @@ vérifications pour détecter les flux endommagés.
 .IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .IPs "idct=<0\-99> (voir \-lavcopts)"
-Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
+Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme IDCT
 pour le décodage et l'encodage.
 Cela dit, vous pouriez y perdre en terme de précision.
 .IPs lowres=<valeur>
@@ -3412,14 +3422,14 @@ vismv:
 .br
 0: désactivé
 .br
-1: visualise les MVs prédits en avant des trames P
+1: Visualise les MVs prédits en avant des trames-P.
 .br
-2: visualise les MVs prédits en avant des trames B
+2: Visualise les MVs prédits en avant des trames-B.
 .br
-4: visualise les MVs prédits en arrière des trames B
+4: Visualise les MVs prédits en arrière des trames-B.
 .REss
 .IPs vstats
-Affiche quelques statistiques et les écrits dans ./vstats_*.log.
+Affiche quelques statistiques et les écrit dans ./vstats_*.log.
 .RE
 .
 .TP
@@ -3599,9 +3609,9 @@ Désactive les calculs de rapport hauteur/\:largeur.
 .B \-xvidopts <option1:option2:...>
 Définit des paramètres additionnels de décodage avec XviD.
 .br NOTE\ :
-Étant donné que le décodage avec XviD a tendance à être plus gourmand en
-temps de calcul que libavcodec, peut-être aurez-vous besoin de l'utiliser
-à la place.
+Étant donné que libavcodec est plus rapide qu'XviD, peut-être aurez-vous
+besoin d'utiliser les filtres de post-traitement de libavcodec (\-vf pp)
+et le décodeur (\-vfm ffmpeg) à la place.
 .sp 1
 Les filtres de post-traitement d'XviD\ :
 .PD 0
@@ -5283,7 +5293,7 @@ Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant.
 .
 .TP
 .B br=<0\-1024>
-bitrate en kBit/s (CBR et ABR uniquement).
+bitrate en kbps (CBR et ABR uniquement).
 .
 .TP
 .B q=<0\-9>
@@ -5392,7 +5402,7 @@ bonne et un équipement HI-FI en rapport.
 .SS toolame (\-toolameopts)
 .TP
 .B br=<0\-384> (CBR uniquement)
-Définit le bitrate (débit binaire) en kBit.
+bitrate (débit binaire) en kbps
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (par défaut\ : mono pour de l'audio mono-canal, stéréo sinon)
@@ -5410,7 +5420,8 @@ niveau de débogage
 .
 .
 .SS lavc (\-lavcopts)
-De nombreuses options de lavc sont très spécialisées et pauvrement documentées.
+De nombreuses options de libavcodec (lavc pour faire plus simple) sont
+très spécialisées et pauvrement documentées.
 Pour avoir tous les détails lisez le source.
 .PP
 .I EXEMPLE:
@@ -5422,14 +5433,14 @@ Pour avoir tous les détails lisez le source.
 .
 .TP
 .B acodec=<value>
-codec audio (par défaut\ : mp2)\ :
+codec audio (par défaut\ : mp2)
 .PD 0
 .RSs
-.IPs mp2
+.IPs mp2\ \ 
 MPEG Layer 2
-.IPs mp3
+.IPs mp3\ \ 
 MPEG Layer 3
-.IPs ac3
+.IPs ac3\ \ 
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits par échantillon, compression 4:1)
@@ -5438,7 +5449,7 @@ IMA Adaptive PCM (4bits par échantillon, compression 4:1)
 .
 .TP
 .B abitrate=<valeur>
-Débit audio en kBit (par défaut\ : 224).
+débit binaire audio en kbps (par défaut\ : 224)
 .
 .TP
 .B atag=<valeur>
@@ -5446,7 +5457,7 @@ Utilise le tag Windows audio spécifié (par ex. atag=0x55).
 .
 .TP
 .B bit_exact
-Utilise uniquement les algorithmes à bit exact (excepté (i)dct).
+Utilise uniquement les algorithmes à bit exact (excepté (I)DCT).
 De plus, bit_exact désactive certaines optimisations, ce qui
 fait que cette option ne devrait être utilisée que pour des
 tests de régression, qui nécessitent des fichiers identiques
@@ -5462,7 +5473,7 @@ Peut avoir un effet néfaste sur l'estimation du mouvement.
 .
 .TP
 .B vcodec=<valeur>
-utilise le codec indiqué (par défaut\ : mpeg4):
+Emploie le codec indiqué (par défaut\ : mpeg4).
 .PD 0
 .RSs
 .IPs mjpeg
@@ -5479,11 +5490,11 @@ DivX 4/\:5
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
-.IPs wmv1
+.IPs wmv1\ 
 Windows Media Video, version 1 (alias WMV7)
 .IPs wmv2
 Windows Media Video, version 2 (alias WMV8)
-.IPs rv10
+.IPs rv10\ 
 un ancien codec RealVideo
 .IPs mpeg1video
 MPEG1 video
@@ -5491,11 +5502,11 @@ MPEG1 video
 MPEG2 video
 .IPs huffyuv
 HuffYUV
-.IPs asv1
+.IPs asv1\ 
 ASUS Video v1
-.IPs asv2
+.IPs asv2\ 
 ASUS Video v2
-.IPs ffv1
+.IPs ffv1\ 
 codec vidéo sans perte de FFmpeg
 .RE
 .PD 1
@@ -5513,20 +5524,20 @@ décodeurs seront incapables de le décoder).
 Recommandé pour l'encodage normal mpeg4/\:mpeg1video (par défaut).
 .IPs 3
 Recommandé pour h263(p)/\:msmpeg4. La raison de préférer 3 à 2 est que
-2 peut conduire à des dépassements (ceci sera corrigé pour h263(p) en changeant
-les quantificateurs par MB dans le futur, msmpeg4 ne peut être corrigé car il
-ne gère pas cela).
+2 peut conduire à des dépassements.
+(Ceci sera corrigé pour h263(p) en changeant les quantificateurs par MB
+dans le futur, msmpeg4 ne peut être corrigé car il ne gère pas cela).
 .RE
 .
 .TP
 .B lmin=<0.01\-255.0>
-Multiplicateur de lagrange minimum pour le contrôleur de débit, qu'il est
+Multiplicateur de Lagrange minimum pour le contrôleur de débit, qu'il est
 conseillé d'avoir égal ou inférieur à vqmin. (par défaut\ : 2.0)
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
-Multiplicateur de lagrange maximum pour le contrôleur de débit.
+Multiplicateur de Lagrange maximum pour le contrôleur de débit.
 (par défault: 31.0)
 .RE
 .
@@ -5539,8 +5550,8 @@ Une valeur basse signifie une meilleur qualité mais de gros fichiers
 .
 .TP
 .B vqmax=<1\-31>
-quantificateur maximum (passe\ 1/\:2) 10\-31 devrait être un intervalle
-raisonable (par défaut\ : 31)
+Quantificateur maximum (passe\ 1/\:2) 10\-31 devrait être un intervalle
+raisonable (par défaut\ : 31).
 .
 .TP
 .B mbqmin=<1\-31>
@@ -5552,16 +5563,16 @@ quantificateur maximum de macro-bloc (passe\ 1/\:2) (par défaut\ : 31)
 .
 .TP
 .B vqdiff=<1\-31>
-différence maximale de quantificateur entre les trames I ou P (passe\ 1/\:2)
+différence maximale de quantificateur entre les trames-I ou -P (passe\ 1/\:2)
 (par défaut\ : 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
-nombre maximum de trames B entre les trames non B\ :
+nombre maximum de trames-B entre les trames-non-B\ :
 .PD 0
 .RSs
 .IPs 0
-pas de trames B (par défaut)
+pas de trames-B (par défaut)
 .IPs 0\-2
 intervalle sensé pour MPEG4
 .RE
@@ -5570,9 +5581,6 @@ intervalle sensé pour MPEG4
 .TP
 .B vme=<0\-5>
 méthode d'estimation du mouvement.
-.I NOTE:
-0\-3 pour l'instant ignorent la quantité de Bits utilisés, donc la qualité
-peut être mauvaise.
 Les méthodes disponibles sont:
 .PD 0
 .RSs
@@ -5591,11 +5599,18 @@ options *dia (par défaut)
 X1 (expérimental, est un alias de EPZS pour le moment)
 .RE
 .PD 1
+.sp 1
+.RS
+.br
+.I NOTE:
+0\-3 pour l'instant ignorent la quantité de Bits utilisés, donc la qualité
+peut être mauvaise.
+.RE
 .
 .TP
 .B me_range=<0\-9999>
-intervalle de recherche de l'estimation de mouvement, 0 (par défaut) signifie
-illimité.
+intervalle de recherche de l'estimation de mouvement
+(par défaut\ : 0 (illimité))
 .
 .TP
 .B mbd=<0\-2>
@@ -5606,11 +5621,11 @@ du fichier.
 .PD 0
 .RSs
 .IPs 0
-utilise mbcmp (par défaut)
+Utilise mbcmp (par défaut).
 .IPs 1
-sélectionne le mode MB qui requiert le moins de bits (=vhq)
+Sélectionne le mode MB qui requiert le moins de bits (=vhq).
 .IPs 2
-sélectionne le mode MB qui est le plus fidèle à l'original
+Sélectionne le mode MB qui est le plus fidèle à l'original.
 .RE
 .PD 1
 .
@@ -5638,7 +5653,9 @@ Ne fait absolument rien pour l'instant.
 .
 .TP
 .B keyint=<0\-300>
-intervalle (en trames) entre les trames-clé (keyframe).
+intervalle (en trames) entre les trames-clé (keyframe)
+(par défaut\ : 250 ou une trame-clé toutes les dix secondes dans un
+film à 25fps)
 Les trames-clé sont indispensables pour les déplacements puisque celui-ci n'est
 possible que d'une trame-clé vers une autre, mais celles-ci prennent plus
 de place que les autres trames.
@@ -5648,8 +5665,6 @@ trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
 mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
 Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
-(par défaut\ : 250 ou une trame-clé toutes les dix secondes dans un
-film à 25fps)
 .
 .TP
 .B sc_threshold=<-1000000\-1000000>
@@ -5661,14 +5676,16 @@ signifie qu'aucun changement de scène ne sera détecté (par défaut\ : 0).
 .
 .TP
 .B vb_strategy=<0\-1>
-stratégie à choisir entre les trames I/\:P/\:B (passe\ 2):
+stratégie à choisir entre les trames-I/\:P/\:B (passe\ 2)\ :
+.PD 0
 .RSs
 .IPs 0
-toujours utiliser le nombre maximum de trames B (par défaut)
+Toujours utiliser le nombre maximum de trames-B (par défaut).
 .IPs 1
-éviter les trames B dans les scènes avec beaucoup de mouvement
-(le débit binaire sera mal prédit/\:non respecté)
+Éviter les trames-B dans les scènes avec beaucoup de mouvement.
+Le débit binaire sera mal prédit/\:non respecté.
 .RE
+.PD 1
 .
 .TP
 .B vpass=<1\-3>
@@ -5732,8 +5749,7 @@ un peu plus le type et le PSNR des trames générées (jusqu'à 0.03dB).
 .B aspect=<x/\:y>
 Stocke le rapport hauteur/\:largeur du film en interne, tout comme les fichiers
 MPEG.
-Solution bien meilleure que le redimensionnement, car la qualité
-n'en est pas diminuée.
+Bien mieux que le redimensionnement, car la qualité n'en est pas diminuée.
 Probablement seul MPlayer sera capable de relire ces fichiers correctement,
 les autres lecteurs l'afficheront avec un mauvais rapport hauteur/\:largeur.
 Le paramètre peut être donné en tant que ratio hauteur/\:largeur ou nombre
@@ -5758,16 +5774,18 @@ l'activer tout le temps.
 .
 .TP
 .B vbitrate=<valeur>
-Définit le débit binaire (bitrate) (passe 1/\:2).
-attention: 1kBit = 1000 Bits
+Définit le débit binaire (bitrate) (passe 1/\:2) (par défaut 800).
+.br
+.I ATTENTION\ :
+1kBit = 1000 Bits
+.PD 0
 .RSs
 .IPs 4\-16000
 (en kbits)
 .IPs 16001\-24000000
 (en bits)
-.IPs 800
-par défaut
 .RE
+.PD 1
 .
 .TP
 .B vratetol=<valeur>
@@ -5809,17 +5827,17 @@ Inutilisé, réservé pour utilisation future.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-facteur des quantificateurs entre les trames B et non B (passe\ 1/\:2)
+facteur des quantificateurs entre les trames-B et non-B (passe\ 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-facteur des quantificateurs entre les trames I et non I (passe\ 1/\:2)
+facteur des quantificateurs entre les trames-I et non-I (passe\ 1/\:2)
 (par défaut\ : 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-offset des quantificateurs entre les trames B et non B (passe\ 1/\:2)
+offset des quantificateurs entre les trames-B et non-B (passe\ 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
@@ -5828,47 +5846,47 @@ offset des quantificateurs entre les trames B et non B (passe\ 1/\:2)
 .br
 si v{b|i}_qfactor > 0
 .br
-I/\:quantificateur Trame-B = quantificateur Trame-P * v{b|i}_qfactor +
+I/\:quantificateur trame-B = quantificateur trame-P * v{b|i}_qfactor +
 v{b|i}_qoffset
 .br
 sinon
 .br
 procède à un contrôle de débit normal (ne verrouille pas le prochain
-quantificateur trame P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
-.
-.TP
-.B \ 
-Astuce: Pour faire de l'encodage avec quantificateur constant avec des
-quantificateurs différents pour les trames I/\:P et B vous pouvez utiliser\ :
-lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>
+quantificateur trame-P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+.br
+.I ASTUCE\ :
+Pour faire de l'encodage avec quantificateur constant avec des
+quantificateurs différents pour les trames-I/\:P et -B vous pouvez utiliser\ :
+lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
 .TP
 .B vqblur=<0.0\-1.0> (passe 1)
-Flou quantificateur, plus la valeur est grande, plus les quantificateurs
-seront semblables d'une trame à l'autre (variations plus basses).
+Flou quantificateur (par défaut\ : 0.5), plus la valeur est grande, plus
+les quantificateurs seront semblables d'une trame à l'autre (variations
+plus basses).
+.PD 0
 .RSs
 .IPs 0.0
-qblur désactivé
-.IPs 0.5
-(par défaut)
+Flou quantificateur désactivé.
 .IPs 1.0
-fait une moyenne du quantificateur d'après toutes les trames précédentes
+Fait une moyenne du quantificateur d'après toutes les trames précédentes.
 .RE
+.PD 1
 .
 .TP
 .B vqblur=<0.0\-99.0> (passe 2)
-Flou gaussien quantificateur, plus la valeur est grande, plus les
-quantificateurs seront semblables d'une trame à l'autre
-(variations plus basses) (par défaut\ : 0.5).
+Flou gaussien quantificateur (par défaut\ : 0.5), plus la valeur est grande,
+plus les quantificateurs seront semblables d'une trame à l'autre
+(variations plus basses).
 .
 .TP
 .B vqcomp=<valeur>
-compression quantificateur, dépend de vrc_eq (passe\ 1/\:2)
-(par défaut\ : 0.5)
+Compression quantificateur, dépend de vrc_eq (passe\ 1/\:2)
+(par défaut\ : 0.5).
 .
 .TP
 .B vrc_eq=<équation>
-équation principale de contrôle de débit (passe\ 1/\:2):
+équation principale de contrôle de débit (passe\ 1/\:2)
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -5882,7 +5900,10 @@ avec qcomp 0.5 ou quelque chose comme ça (par défaut)
 .RE
 .PP
 .RS
-opérateurs infixes\ : +,-,*,/\:,^
+opérateurs infixes\ :
+.RE
+.RSs
+.IPs +,-,*,/\:,^
 .RE
 .PP
 .RS
@@ -5892,17 +5913,17 @@ variables:
 .IPs tex\ \ 
 complexité de la texture
 .IPs iTex,pTex
-complexité de la texture intra, non intra
+complexité de la texture intra, non-intra
 .IPs avgTex
 complexité moyenne de la texture
 .IPs avgIITex
-complexité de la texture intra dans les trames I
+complexité de la texture intra dans les trames-I
 .IPs avgPITex
-complexité de la texture intra dans les trames P
+complexité de la texture intra dans les trames-P
 .IPs avgPPTex
-complexité de la texture non intra dans les trames P
+complexité de la texture non-intra dans les trames-P
 .IPs avgBPTex
-complexité de la texture non intra dans les trames B
+complexité de la texture non-intra dans les trames-B
 .IPs mv\ \ \ 
 Bits utilisés pour les vecteurs de mouvement
 .IPs fCode
@@ -5915,10 +5936,10 @@ complexité spatiale
 complexité temporelle
 .IPs qComp
 qcomp depuis la ligne de commande
-".IPs isI, isP, isB"
-est égal à 1 si le type d'image est I/\:P/\:B sinon 0
+.IPs "isI, isP, isB"
+Est égal à 1 si le type d'image est I/\:P/\:B, 0 sinon.
 .IPs Pi,E\ 
-voir votre livre de maths favori
+Voir votre livre de maths favori.
 .RE
 .PP
 .RS
@@ -5940,15 +5961,17 @@ est égal à 1 si a==b, 0 sinon
 .TP
 .B vrc_override=<options>
 Qualité définie par l'utilisateur pour les parties spécifiques (fin,
-remerciements, ..) (passe\ 1/\:2).
+remerciements, ...) (passe\ 1/\:2).
 Les options sont <trame de début>, <trame de fin>, <qualité>[/\:<trame de
-début>, <trame de fin>, <qualité>[/...]]>:
+début>, <trame de fin>, <qualité>[/...]]:
+.PD 0
 .RSs
 .IPs "qualité (2\-31)"
 quantificateur
 .IPs "qualité (-500\-0)"
 correction de qualité en %
 .RE
+.PD 1
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
@@ -5956,95 +5979,97 @@ complexité initiale (passe\ 1)
 .
 .TP
 .B vqsquish=<0,1>
-définit comment garder le quantificateur entre qmin et qmax (passe\ 1/\:2):
+Définit comment garder le quantificateur entre qmin et qmax (passe\ 1/\:2).
 .PD 0
 .RSs
 .IPs 0
-utilise le découpage (clipping)
+Utilise le découpage (clipping).
 .IPs 1
-utilise une bonne fonction différentiable (par défaut)
+Utilise une bonne fonction différentiable (par défaut).
 .RE
 .PD 1
 .
 .TP
 .B vlelim=<-1000\-1000>
 Définit le coefficient de seuil d'élimination pour la luminance.
-Des valeurs négatives prendront aussi en compte le coefficient dc (qui devrait
+Des valeurs négatives prendront aussi en compte le coefficient DC (qui devrait
 être au moins \-4 ou plus bas pour l'encodage à quant=1):
 .PD 0
 .RSs
 .IPs 0
 désactivé (par défaut)
 .IPs -4
-(recommandation JVT)
+recommandation JVT
 .RE
 .PD 1
 .
 .TP
 .B vcelim=<-1000\-1000>
 Définit le coefficient de seuil d'élimination pour la chrominance.
-Des valeurs négatives prendront aussi en compte le coefficient dc (qui devrait
+Des valeurs négatives prendront aussi en compte le coefficient DC (qui devrait
 être au moins \-4 ou plus bas pour l'encodage à quant=1):
 .PD 0
 .RSs
 .IPs 0
 désactivé (par défaut)
 .IPs 7
-(recommandation JVT)
+recommandation JVT
 .RE
+.PD 1
 .
 .TP
 .B vstrict=<-1,0,1>
 conformité stricte au standard
+.PD 0
 .RSs
 .IPs 0
 désactivé (par défaut)
 .IPs 1
 Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG4 de
-référence
+référence.
 .IPs -1
-permet l'encodage non-standard huffyuv YV12 (fichiers 20% plus petits,
-mais qui ne peuvent pas être relus par le codec huffyuv officiel)
+Permet l'encodage non-standard huffyuv YV12 (fichiers 20% plus petits,
+mais qui ne peuvent pas être relus par le codec huffyuv officiel).
 .RE
 .PD 1
 .
 .TP
 .B vdpart\ 
-partitionnement des données
-Ajoute 2 octets par paquet vidéo, améliore la résistance aux erreurs pendant un
-transfert sur un canal non-fiable(c-à-d.\& streamer sur l'internet)
+Partitionnement des données.
+Ajoute 2 octets par paquet vidéo, améliore la résistance aux erreurs
+pendant un transfert sur un canal non-fiable(c-à-d.\& streamer sur l'internet)
 Chaque paquet vidéo sera encodé dans trois partitions différentes:
 .PD 0
 .RSs
 .IPs "1. MVs"
-(mouvement)
+mouvement
 .IPs "2. coefficients DC"
-(image basse résolution)
+image basse résolution
 .IPs "3. coefficients AC"
-(détails)
+détails
 .RE
 .PD 1
-.
-.TP
-.B \ 
+.RS
 MV & DC sont les plus importants, les perdre est bien pire que de perdre les
 partitions AC et 1. & 2.
-(MV&DC) sont bien plus petites que la partition 3. (AC) ce qui veut dire
+(MV & DC) sont bien plus petites que la partition 3. (AC) ce qui veut dire
 que les erreurs atteindrons la partition AC bien plus souvent que les
-partitions MV&DC.
+partitions MV & DC.
 Ainsi, l'image sera plus belle avec le partitionnement que sans, car sans
 partitionnement une erreur plantera AC/\:DC/\:MV équitablement.
+.RE
 .
 .TP
-.B vpsize=<0\-10000>
-Taille des paquets vidéo, améliore la résistance aux erreurs
-(voir aussi \-vdpart)\ :
+.B vpsize=<0\-10000> (voir aussi \-vdpart)
+Taille des paquets vidéo, améliore la résistance aux erreurs.
+.PD 0
 .RSs
-.IPs 0
+.IPs 0\ \ \ \ 
 désactivé (par défaut)
 .IPs 100-1000
 bon choix
 .RE
+.PD 1
 .
 .TP
 .B ss\ \ \ \ \ 
@@ -6056,7 +6081,7 @@ encodage en niveaux de gris uniquement (plus rapide)
 .
 .TP
 .B vfdct=<0\-10>
-algorithme dct:
+algorithme DCT:
 .PD 0
 .RSs
 .IPs 0
@@ -6066,11 +6091,11 @@ entier rapide
 .IPs 2
 entier précis
 .IPs 3
-mmx
+MMX
 .IPs 4
 mlib
 .IPs 5
-altivec
+Altivec
 .IPs 6
 nombre flottant AAN
 .RE
@@ -6078,21 +6103,21 @@ nombre flottant AAN
 .
 .TP
 .B idct=<0\-99>
-algorithme idct.
+algorithme IDCT.
 .I NOTE:
 À notre connaissance tous ces IDCTs réussissent les tests IEEE1180.
 .PD 0
 .RSs
 .IPs 0
-en sélectionne un bon automatiquement (par défaut)
+En sélectionne un bon automatiquement (par défaut).
 .IPs 1
-jpeg reference integer
+JPEG de référence en entiers
 .IPs 2
 simple
 .IPs 3
 simplemmx
 .IPs 4
-libmpeg2mmx (inadapté, NE PAS UTILISER en encodant avec keyint >100)
+libmpeg2mmx (inadapté, ne pas utiliser en encodant avec keyint >100)
 .IPs 5
 ps2
 .IPs 6
@@ -6100,7 +6125,7 @@ mlib
 .IPs 7
 arm
 .IPs 8
-altivec
+Altivec
 .IPs 9
 sh4
 .RE
@@ -6122,13 +6147,15 @@ désastreux.
 .br
 .I ATTENTION\ :
 De grandes valeurs peuvent paraître bonnes sur certains moniteurs
-mais peuvent être horribles sur d'autres moniteurs\ :
+mais peuvent être horribles sur d'autres moniteurs.
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 désactivé (par défaut)
 .IPs 0.0\-0.3
 intervalle sensé
 .RE
+.PD 1
 .
 .TP
 .B dark_mask=<0.0\-1.0>
@@ -6146,17 +6173,19 @@ désastreux.
 .br
 .I ATTENTION\ :
 De grandes valeurs peuvent paraître bonnes sur certains moniteurs
-mais peuvent être horribles sur d'autres moniteurs / TV / TFT\ :
+mais peuvent être horribles sur d'autres moniteurs / TV / TFT.
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 désactivé (par défaut)
 .IPs 0.0\-0.3
 intervalle sensé
 .RE
+.PD 1
 .
 .TP
 .B tcplx_mask=<0.0\-1.0>
-masquage de la complexité temporelle (par défaut\ : 0.0 (désactivé))
+Masquage de la complexité temporelle (par défaut\ : 0.0 (désactivé)).
 Imaginez une scène avec un oiseau y volant, tcplx_mask va augmenter les
 quantificateurs des macro-blocs décrivant l'oiseau (et donc réduit leur
 qualité) puisque l'oeil humain n'a normalement pas le temps de voir tous
@@ -6183,12 +6212,22 @@ qualité), pour pouvoir distribuer plus de bits au ciel et à la maison.
 .I
 ASTUCE\ :
 Enlevez tous les bords noirs car ils vont réduire la qualité des macro-blocs
-(ce qui est toujours vrai, même sans scplx_mask).
+(ce qui est reste vrai, même sans scplx_mask).
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 désactivé (par défaut)
 .IPs 0.0\-0.5
 intervalle sensé
+.RE
+.PD 1
+.sp 1
+.RS
+.I NOTE\ :
+Cette option n'a pas le même effet que l'usage d'une matrice personnalisée
+qui compresserait plus fort les hautes fréquences, puisque scplx_mask
+réduira la qualité des blocs-P même si seulement le DC change.
+scplx_mask ne rendra pas un résultat aussi bon.
 .RE
 .
 .TP
@@ -6208,7 +6247,7 @@ moyenne correcte.
 .
 .TP
 .B ildct\ \ 
-utilise un dct entrelacé
+Utilise une DCT entrelacée.
 .
 .TP
 .B ilme\ \ \ 
@@ -6216,10 +6255,11 @@ Utilise l'estimation de mouvement entrelacé (mutuellement exclusif avec qpel)
 .
 .TP
 .B alt\ \ \ \ 
-utilise une autre table de scan
+Utilise une autre table de scan.
 .
 .TP
 .B top=<-1\-1>\ \ \ 
+.PD 0
 .RSs
 .IPs -1
 automatique
@@ -6228,25 +6268,28 @@ champ du dessous en premier
 .IPs 1
 champ du dessus en premier
 .RE
+.PD 1
 .
 .TP
 .B format=<valeur>
+.PD 0
 .RSs
-.IPs YV12
+.IPs YV12\ 
 par défaut
-.IPs 444P
+.IPs 444P\ 
 pour ffv1
-.IPs 422P
-pour huffyuv, jpeg sans perte (lossless) et ffv1
+.IPs 422P\ 
+pour HuffYUV, JPEG sans perte (lossless) et ffv1
 .IPs 411P,YVU9
-pour jpeg sans perte et ffv1
+pour JPEG sans perte et ffv1
 .IPs BGR32
-pour jpeg sans perte et ffv1
+pour JPEG sans perte et ffv1
 .RE
+.PD 1
 .
 .TP
 .B pred\ \ \ 
-(pour huffyuv)
+(pour HuffYUV)
 .PD 0
 .RSs
 .IPs 0
@@ -6282,9 +6325,9 @@ prédiction moyenne
 .PD 0
 .RSs
 .IPs 0
-codage vlc (golomb rice)
+codage vlc (Golomb-Rice)
 .IPs 1
-codage arithmétique (cabac)
+codage arithmétique (CABAC)
 .RE
 .PD 1
 .
@@ -6303,7 +6346,9 @@ grand modèle contextuel
 .TP
 .B qpel\ \ \ 
 Utilise la compensation de mouvement d'une précision d'un quart de pixel.
-Astuce\ : Cela ne semble utile que pour les encodages à haut débit.
+.br
+.I ASTUCE\ :
+Cela ne semble utile que pour les encodages à haut débit.
 .
 .TP
 .B mbcmp=<0\-2000>
@@ -6316,11 +6361,11 @@ somme des différences absolues, rapide (par défaut)
 .IPs "1 (SSE)"
 somme des erreurs au carré
 .IPs "2 (SATD)"
-somme des différences absolues de la transformée de hadamard 
+somme des différences absolues de la transformée de Hadamard 
 .IPs "3 (DCT)"
-somme des différences absolues de la transformée dct
+somme des différences absolues de la transformée DCT
 .IPs "4 (PSNR)"
-somme des erreurs de quantisation au carré (ne pas utiliser, mauvaise qualité)
+somme des erreurs de quantisation au carré (éviter, mauvaise qualité)
 .IPs "5 (BIT)"
 nombre de bits requis pour le bloc
 .IPs "6 (RD)"
@@ -6334,14 +6379,14 @@ somme des différences verticales absolues au carré
 .IPs "10 (NSSE)"
 somme des différences au carré préservant le bruit
 .IPs +256\ 
-utilise également chroma, ne fonctionne pas (correctement) avec les trames B
-actuellement
+Utilise également le chroma, ne fonctionne pour le moment pas (correctement)
+avec les trames-B actuellement
 .RE
 .PD 1
 .
 .TP
 .B ildctcmp=<0\-2000>
-Choisit la fonction de comparaison pour la décision dct entrelacé
+Choisit la fonction de comparaison pour la décision DCT entrelacé
 (voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
@@ -6369,7 +6414,7 @@ où de plus grandes valeurs laisseront plus de bruit,
 .
 .TP
 .B predia=<-99\-6>
-Type et taille de diamant pour la pré-passe d'estimation de mouvement.
+type et taille de diamant pour la pré-passe d'estimation de mouvement
 .
 .TP
 .B dia=<-99\-6>
@@ -6423,10 +6468,10 @@ diamant normal de taille=2
 Quantisation par recherche trellis.
 Ceci trouvera l'encodage optimal pour chaque bloc 8x8.
 La quantisation par recherche trellis est en gros une quantisation
-optimale en terme de compromis entre PSNR et bitrate (en supposant qu'il
+optimale en terme de compromis entre PSNR et bitrate (En supposant qu'il
 n'y aurait pas d'erreurs introduites par l'IDCT, ce qui n'est clairement
-pas le cas) il trouve simplement un bloc ayant le minimum d'erreurs et
-lambda*bits.
+pas le cas.).
+Il trouve simplement un bloc ayant le minimum d'erreurs et lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
@@ -6455,14 +6500,14 @@ lambda donné de chaque macrobloc
 .
 .TP
 .B last_pred=<0\-99>
-Quantité de prédicteurs de mouvement à partir de la trame précédente
+quantité de prédicteurs de mouvement à partir de la trame précédente
 .PD 0
 .RSs
 .IPs 0
 (par défaut)
 .IPs a
-utilisera 2a+1 x 2a+1 blocs macro au carré de prédicteurs de vecteur de
-mouvement depuis la trame précédente
+Utilisera 2a+1 x 2a+1 blocs macro au carré de prédicteurs de vecteur de
+mouvement depuis la trame précédente.
 .RE
 .PD 1
 .
@@ -6474,7 +6519,7 @@ pré-passe d'estimation de mouvement
 .IPs 0
 désactivée
 .IPs 1
-uniquement après les trames I (par défaut)
+uniquement après les trames-I (par défaut)
 .IPs 2
 toujours
 .RE
@@ -6499,10 +6544,10 @@ Utilise les quantificateurs MPEG au lieu de H.263.
 .
 .TP
 .B aic\ \ \ \ 
-Prédiction Intra avancée (H.263+ uniquement)
+Prédiction AC (prédiction intra avancée pour H.263+)
 .br
 .I NOTE\ :
-vqmin devrait être égal à 8 ou plus pour AIC H263+.
+vqmin devrait être égal à 8 ou plus pour H263+ AIC.
 .
 .TP
 .B aiv\ \ \ \ 
@@ -6544,7 +6589,7 @@ le PSNR
 .
 .TP
 .B nr=<0\-100000>
-réduction du  bruit, 0 pour désactivé
+Réduction du  bruit, 0 pour désactivé.
 .
 .TP
 .B qns=<0\-3>
@@ -6561,11 +6606,11 @@ utilisée comme point de départ pour la recherche itérative.
 .IPs 0
 désactivé (par défaut)
 .IPs 1
-baisse uniquemement la valeur absolue des coefficients
+Baisse uniquemement la valeur absolue des coefficients.
 .IPs 2
-change uniquement les coefficients avant le coefficient non null + 1
+Change uniquement les coefficients avant le coefficient non null + 1.
 .IPs 3
-essaie tout
+Essaie tout.
 .RE
 .PD 1
 .
@@ -6594,15 +6639,15 @@ Si vous utilisez vcodec=mpeg2video cette valeur peut être 8, 9, 10 ou 11.
 .TP
 .B cgop\ \ \ 
 Ferme tous les GOPs (groupes de trames).
-Ne fonctionne pas (encore).
+Ne fonctionne pas pour le moment.
 .
 .
 .SS nuv (\-nuvopts)
 .
 Nuppel video est basé sur RTJPEG et LZO.
-Par défaut les trames sont d'abord encodées avec RTJPEG et ensuite avec LZO.
-Mais chacune des passes peut être activée ou pas.
-Donc vous pouvez en fait obtenir du i420 brut, du i420 compressé par LZO, du
+Par défaut les trames sont d'abord encodées avec RTJPEG et ensuite avec LZO,
+mais il est possible de désactiver chacune passes, ou les deux.
+Cela vous permet d'obtenir du i420 brut, du i420 compressé par LZO, du
 RTJPEG, ou le RTJPEG compressé par LZO.
 .br
 .I NOTE:
@@ -6618,11 +6663,11 @@ seuil de chrominance (par défaut\ : 1)
 seuil de luminance (par défaut\ : 1)
 .
 .TP
-.B lzo \ 
+.B lzo\ \ \ \ 
 Active la compression LZO (par défaut).
 .
 .TP
-.B nolzo \ 
+.B nolzo\ \ 
 Désactive la compression LZO.
 .
 .TP
@@ -6630,12 +6675,12 @@ Désactive la compression LZO.
 niveau de qualité (par défaut: 255)
 .
 .TP
-.B raw
-Désactive l'encodage RTJPEG (par défaut).
+.B raw\ \ \ 
+Désactive l'encodage RTJPEG.
 .
 .TP
-.B rtjpeg
-Active l'encodage rtjpeg.
+.B rtjpeg\ 
+Active l'encodage RTJPEG (par défaut).
 .
 .
 .SS xvidenc (\-xvidencopts)
@@ -6709,7 +6754,7 @@ Taille du tampon de contrôle du débit.
 mode CBR\ : quantificateur min & max pour toutes les trames
 (par défaut\ : 2\-31)
 .br
-mode 2passes\ : quantificateur min & max pour trames I/\:P
+mode 2passes\ : quantificateur min & max pour trames-I/\:P
 (par défaut\ : 2\-31/\:2\-31)
 .br
 .I ATTENTION\ :
@@ -6799,30 +6844,30 @@ l'autodétection de bogues risque de ne pas fonctionner.
 .
 .TP
 .B divx5bvop
-Génère des trames B compatibles DivX5 (par défaut\ : on).
+Génère des trames-B compatibles DivX5 (par défaut\ : on).
 .
 .TP
 .B max_bframes=<0\-4>
-Nombre maximum de trames B à insérer entre les trames I/\:P (par défaut\ : 0).
+Nombre maximum de trames-B à insérer entre les trames-I/\:P (par défaut\ : 0).
 .
 .TP
 .B bquant_ratio=<0\-1000>
-rapport de quantificateur entre les trames B et non B, 150=1.50
+rapport de quantificateur entre les trames-B et non-B, 150=1.50
 (par défaut\ : 150)
 .
 .TP
 .B bquant_offset=<-1000\-1000>
-offset de quantificateur entre les trames B et non B, 100=1.00
+offset de quantificateur entre les trames-B et non-B, 100=1.00
 (par défaut\ : 100)
 .
 .TP
 .B bf_threshold=<-255\-255>
-Parfois, les trames B dégradent l'image en introduisant des artefacts visuels
+Parfois, les trames-B dégradent l'image en introduisant des artefacts visuels
 lorsque par exemple une scène est globalement statique sauf une petite
 région en mouvement rapide.
-Cette option permet de changer la probabilité qu'une trame soit une trame B.
+Cette option permet de changer la probabilité qu'une trame soit une trame-B.
 Plus la valeur est haute, plus la probabilité que la trame générée soit
-une trame B est forte (par défaut\ : 0).
+une trame-B est forte (par défaut\ : 0).
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
@@ -6926,27 +6971,27 @@ recherche large
 .
 .TP
 .B min_iquant=<0\-31>
-quantificateur minimum pour les trames I (par défaut\ : 2)
+quantificateur minimum pour les trames-I (par défaut\ : 2)
 .
 .TP
 .B max_iquant=<0\-31>
-quantificateur maximum pour les trames I (par défaut\ : 31)
+quantificateur maximum pour les trames-I (par défaut\ : 31)
 .
 .TP
 .B min_pquant=<0\-31>
-quantificateur minimum pour les trames P (par défaut\ : 2)
+quantificateur minimum pour les trames-P (par défaut\ : 2)
 .
 .TP
 .B max_pquant=<0\-31>
-quantificateur maximum pour les trames P (par défaut\ : 31)
+quantificateur maximum pour les trames-P (par défaut\ : 31)
 .
 .TP
 .B min_bquant=<0\-31>
-quantificateur minimum pour les trames B (par défaut\ : 2)
+quantificateur minimum pour les trames-B (par défaut\ : 2)
 .
 .TP
 .B max_bquant=<0\-31>
-quantificateur maximum pour les trames B (par défaut\ : 31)
+quantificateur maximum pour les trames-B (par défaut\ : 31)
 .
 .TP
 .B quant_intra_matrix=<nom_fichier>
@@ -7011,7 +7056,7 @@ Cette option contrôle le pourcentage maximum de diminution par rapport
 à la courbe de bits calculée en première passe (par défaut\ : 5).
 .
 .TP
-.B container_frame_overhead=<0..>
+.B container_frame_overhead=<0...>
 Définit l'overhead moyen par trame, en octets.
 La plupart des utilisateurs indiquent la taille visée de leur vidéo
 sans tenir compte de l'overhead du conteneur vidéo.
@@ -7114,14 +7159,14 @@ paramètre.
 .
 .TP
 .B keyint=<valeur>
-Définit l'intervalle maximum autorisé entre trames I.
+Définit l'intervalle maximum autorisé entre trames-I.
 Un intervalle plus grand fait économiser des bit, et donc améliore la
 qualité, mais rend la navigation moins précise (par défaut\ : 250).
 .
 .TP
 .B idrint=<valeur>
-Une trame sur <valeur> trames-I se trouve une trame-IDR (par défaut\ : 2).
-En H.264, les trames I n'encadrent pas nécessairement un groupe fermé de
+Faire qu'une trame sur <valeur> trames-I soit une trame-IDR (par défaut\ : 2).
+En H.264, les trames-I n'encadrent pas nécessairement un groupe fermé de
 trames prédites (closed GOP) car une trame-P peut aussi être prédite
 à partir d'autres trames que celles la précédant (voir aussi frameref).
 Ainsi, les trames-I ne permettent pas nécessairement une navigation précise
@@ -7259,11 +7304,11 @@ sensibilité du ratecontrol (default: 4)
 .
 .TP
 .B ip_factor=<value>
-facteur de quantification entre les trames I et P (par défaut\ : 2.0)
+facteur de quantification entre les trames-I et -P (par défaut\ : 2.0)
 .
 .TP
 .B pb_factor=<value>
-facteur de quantification entre les trames P et B (par défaut\ : 2.0)
+facteur de quantification entre les trames-P et -B (par défaut\ : 2.0)
 .
 .TP
 .B pass=<1\-2>
