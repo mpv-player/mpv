@@ -14,3 +14,5 @@ if [ "$1" = "purge" ]; then
 		rm -rf /etc/mplayer/
 	fi
 fi
+
+#DEBHELPER#
