@@ -5580,7 +5580,7 @@ May have a slight negative effect on motion estimation.
 Employ the specified codec (default: mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
+.IPs mjpeg (also see: vstrict)
 Motion JPEG
 .IPs ljpeg
 Lossless JPEG
@@ -5606,11 +5606,13 @@ MPEG-1 video
 MPEG-2 video
 .IPs huffyuv
 HuffYUV
+.IPs ffvhuff (also see: vstrict)
+nonstandard 20% smaller HuffYUV using YV12
 .IPs asv1\ 
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1\ 
+.IPs ffv1 (also see: vstrict)
 FFmpeg's lossless video codec
 .RE
 .PD 1
@@ -6111,8 +6113,7 @@ disabled (default)
 Only recommended if you want to feed the output into the
 MPEG-4 reference decoder.
 .IPs -1
-Allows non-standard YV12 HuffYUV encoding (20% smaller files, but cannot be
-played by the official HuffYUV codec).
+Allows some non-standard codecs to work (mjpeg, ffvhuff, ffv1).
 .RE
 .PD 1
 .
