@@ -61,5 +61,8 @@ outdated patches.
    MPlayer developer, you'll get CVS write access.
 
 10. For consistency reasons all option names must use '-' instead of '_'.
+
+11. If you made a nontrivial contribution and wish to be mentioned in the
+    AUTHORS file, include that in your patch.
    
 Thank you!
