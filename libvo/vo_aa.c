@@ -123,11 +123,11 @@ resize(void){
     sws = getSwsContextFromCmdLine(src_width,src_height,image_format,
 				   image_width,image_height,IMGFMT_Y8);
 
-    image[0] = aa_image(c) + image_y * image_width + image_x;
+    image[0] = aa_image(c) + image_y * aa_imgwidth(c) + image_x;
     image[1] = NULL;
     image[2] = NULL;
 
-    image_stride[0] = image_width;
+    image_stride[0] = aa_imgwidth(c);
     image_stride[1] = 0; 
     image_stride[2] = 0;
 
@@ -738,41 +738,40 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static int get_video_eq(vidix_video_eq_t *info) {
-
-  memset(info,0,sizeof(vidix_video_eq_t));
-  
-  info->cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST;
-  
-  info->contrast = (p->contrast - 64) * 1000 / 64;
-  info->brightness = (p->bright - 128) * 1000 / 128;
-
-  return 0;
-}
-
-static int set_video_eq(const vidix_video_eq_t *info) {
-
-  p->contrast = ( info->contrast + 1000 ) * 64 / 1000;
-  p->bright = ( info->brightness + 1000) * 128 / 1000;
-
-  return 0;
-}
-
-static void query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-  vaa->get_video_eq = get_video_eq;
-  vaa->set_video_eq = set_video_eq;
-}
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
+  case VOCTRL_SET_EQUALIZER: {
+    va_list ap;
+    int val;
+
+    va_start(ap, data);
+    val = va_arg(ap, int);
+    va_end(ap);
+
+    if(strcmp((char*)data,"contrast") == 0)
+      p->contrast = ( val + 100 ) * 64 / 100;
+    else if(strcmp((char*)data,"brightness") == 0)
+      p->bright = ( val + 100) * 128 / 100;
     return VO_TRUE;
+  }
+  case VOCTRL_GET_EQUALIZER: {
+    va_list ap;
+    int* val;
+
+    va_start(ap, data);
+    val = va_arg(ap, int*);
+    va_end(ap);
+
+    if(strcmp((char*)data,"contrast") == 0)
+      *val = (p->contrast - 64) * 100 / 64;
+    else if(strcmp((char*)data,"brightness") == 0)
+      *val = (p->bright - 128) * 100 / 128;
+
+    return VO_TRUE;
+  }
   }
   return VO_NOTIMPL;
 }
