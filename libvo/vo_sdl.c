@@ -113,6 +113,7 @@
 
 #include "fastmemcpy.h"
 #include "sub.h"
+#include "aspect.h"
 
 #ifdef HAVE_X11
 #include <X11/Xlib.h>
@@ -487,6 +488,7 @@ static int sdl_close (void)
  *  returns : SDL_Rect structure with new x and y, w and h
  **/
 
+#if 0
 static SDL_Rect aspect(int srcw, int srch, int dstw, int dsth) {
 	SDL_Rect newres;
 	if(verbose > 1) printf("SDL Aspect: src: %ix%i dst: %ix%i\n", srcw, srch, dstw, dsth);
@@ -507,6 +509,7 @@ static SDL_Rect aspect(int srcw, int srch, int dstw, int dsth) {
 
 	return newres;
 }
+#endif
 
 /**
  * Sets the specified fullscreen mode.
@@ -552,25 +555,27 @@ static void set_fullmode (int mode)
 static void set_fullmode (int mode) {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Surface *newsurface = NULL;
-	SDL_Rect newsize;
+	int newwidth = priv->dstwidth,
+	    newheight= priv->dstheight;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	if(mode < 0) 
 		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
 	
 	/* calculate new video size/aspect */
+	if(!priv->mode) {
 	if(priv->fulltype&FS) {
-		newsize = aspect(priv->width, priv->height, priv->XWidth ? priv->XWidth : priv->dstwidth, priv->XHeight ? priv->XHeight : priv->dstheight);
+		aspect(&newwidth, &newheight, priv->XWidth ? priv->XWidth : priv->dstwidth, priv->XHeight ? priv->XHeight : priv->dstheight);
 	} else
 	if(priv->fulltype&VM) {	
-		newsize = aspect(priv->dstwidth, priv->dstheight, priv->dstwidth, priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth));
-	}	
-	else {
-		newsize = aspect(priv->dstwidth, priv->dstheight, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
+		aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
+	} else {
+		aspect(&newwidth, &newheight, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
+	}
 	}
 
 	/* try to change to given fullscreenmode */
-	newsurface = SDL_SetVideoMode(newsize.w, newsize.h, priv->bpp, priv->sdlfullflags);
+	newsurface = SDL_SetVideoMode(newwidth, newheight, priv->bpp, priv->sdlfullflags);
 	
 	/* if creation of new surface was successfull, save it and hide mouse cursor */
 	if(newsurface) {
@@ -598,11 +603,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 {
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
-	SDL_Rect res;
 #ifdef HAVE_X11	
 	static Display *XDisplay;
 	static int XScreen;
 #endif
+	int newwidth, newheight;
 
 	sdl_format = format;
         switch(format){
@@ -679,7 +684,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	    return -1;
 
 	/* Set output window title */
-	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "MPlayer's SDL Video Out");
+	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", title);
 	//SDL_WM_SetCaption (title, title);
 
 	/* Save the original Image size */
@@ -688,18 +693,17 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	priv->height = height;
 	priv->dstwidth  = d_width ? d_width : width;
 	priv->dstheight = d_height ? d_height : height;
+	newwidth  = priv->dstwidth;
+	newheight = priv->dstheight;
 
 	/*priv->width  = res.w;
 	priv->height = res.h;*/
         priv->format = format;
 #ifdef HAVE_X11
-	res = aspect(priv->dstwidth, priv->dstheight, priv->dstwidth, priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth));
-	priv->windowsize.w = res.w;
-  	priv->windowsize.h = res.h;
-#else		
-	priv->windowsize.w = priv->dstwidth;
-  	priv->windowsize.h = priv->dstheight;
+	aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
 #endif
+	priv->windowsize.w = newwidth;
+  	priv->windowsize.h = newheight;
         
 	/* bit 0 (0x01) means fullscreen (-fs)
 	 * bit 1 (0x02) means mode switching (-vm)
@@ -737,11 +741,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
         else {
 		if((strcmp(priv->driver, "x11") == 0) || ((strcmp(priv->driver, "aalib") == 0) && priv->X)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
-#ifdef HAVE_X11		
-          	priv->surface = SDL_SetVideoMode (res.w, res.h, priv->bpp, priv->sdlflags);
-#else			
-          	priv->surface = SDL_SetVideoMode (priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
-#endif
+          	priv->surface = SDL_SetVideoMode (newwidth, newheight, priv->bpp, priv->sdlflags);
 		}
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
@@ -873,7 +873,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	uint8_t *dst;
 	int i;
 	uint8_t *mysrc = src[0];
-	
+
         switch(priv->format){
         case IMGFMT_YV12:
         case IMGFMT_I420:
@@ -1024,7 +1024,7 @@ static void check_events (void)
 
 			/* capture window resize events */
 			case SDL_VIDEORESIZE:
-				priv->surface = SDL_SetVideoMode(event.resize.w, event.resize.h, priv->bpp, priv->sdlflags);
+				if(!priv->dblit) priv->surface = SDL_SetVideoMode(event.resize.w, event.resize.h, priv->bpp, priv->sdlflags);
 
 				/* save video extents, to restore them after going fullscreen */
 			 	//if(!(priv->surface->flags & SDL_FULLSCREEN)) {
