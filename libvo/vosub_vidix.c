@@ -31,8 +31,6 @@
 #define NUM_FRAMES 10 /* Temporary: driver will overwrite it */
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
-static uint32_t frames[NUM_FRAMES];
-
 static VDL_HANDLE vidix_handler = NULL;
 static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
@@ -148,13 +146,11 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		return -1;
 	}
 
-	frames[0] = vidix_play.offsets[0];
-	for(i=1;i<vidix_play.num_frames;i++) frames[i] = vidix_play.offsets[i];
 	next_frame = 0;
 	vidix_mem =vidix_play.dga_addr;
 
 	/*clear the buffer*/
-	memset(vidix_mem + frames[0],0x80,vidix_play.frame_size*vidix_play.num_frames);
+	memset(vidix_mem + vidix_play.offsets[0],0x80,vidix_play.frame_size*vidix_play.num_frames);
 	return 0;  
 }
 
@@ -174,7 +170,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     apitch = vidix_play.dest.pitch.y-1;
     bespitch = (w + apitch) & ~apitch;
 
-    dest = vidix_mem + frames[next_frame] + vidix_play.offset.y;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     dest += bespitch*y + x;
     src = image[0];
     for(i=0;i<h;i++){
@@ -185,7 +181,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
 
     apitch = vidix_play.dest.pitch.v-1;
     bespitch = (w + apitch) & ~apitch;
-    dest = vidix_mem + frames[next_frame] + vidix_play.offset.v;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
     dest += bespitch*y/4 + x;
     src = image[1];
     for(i=0;i<h/2;i++){
@@ -196,7 +192,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     apitch = vidix_play.dest.pitch.u-1;
     bespitch = (w + apitch) & ~apitch;
 
-    dest = vidix_mem + frames[next_frame] + vidix_play.offset.u;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.u;
     dest += bespitch*y/4 + x;
     src = image[2];
     for(i=0;i<h/2;i++){
@@ -215,7 +211,7 @@ uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,
     int i;
     apitch = vidix_play.dest.pitch.y-1;
     bespitch = (w*2 + apitch) & ~apitch;
-    dest = vidix_mem + frames[next_frame] + vidix_play.offset.y;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     dest += bespitch*y + x;
     src = image[0];
     for(i=0;i<h;i++){
@@ -261,8 +257,8 @@ void     vidix_flip_page(void)
   if(verbose > 1) printf("vosub_vidix: vidix_flip_page() was called\n");
   if(vo_doublebuffering)
   {
-	next_frame=(next_frame+1)%vidix_play.num_frames;
 	vdlPlaybackFrameSelect(vidix_handler,next_frame);
+	next_frame=(next_frame+1)%vidix_play.num_frames;
   }	
 }
 
@@ -279,9 +275,11 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-    uint32_t bespitch = vidix_play.src.w + ((vidix_play.dest.pitch.y-1) & ~(vidix_play.dest.pitch.y-1));
+    uint32_t apitch,bespitch;
     void *lvo_mem;
-    lvo_mem = vidix_mem + frames[next_frame] + vidix_play.offset.y;
+    lvo_mem = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (vidix_play.src.w + apitch) & (~apitch);
     switch(vidix_play.fourcc){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
@@ -289,10 +287,10 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         vo_draw_alpha_yv12(w,h,src,srca,stride,lvo_mem+bespitch*y0+x0,bespitch);
         break;
     case IMGFMT_YUY2:
-        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0),bespitch);
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0),2*bespitch);
         break;
     case IMGFMT_UYVY:
-        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0)+1,bespitch);
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0)+1,2*bespitch);
         break;
     default:
         draw_alpha_null(x0,y0,w,h,src,srca,stride);
@@ -303,12 +301,7 @@ void     vidix_draw_osd(void)
 {
   if(verbose > 1) printf("vosub_vidix: vidix_draw_osd() was called\n");
   /* TODO: hw support */
-#if 0
-/* disable this stuff until new fbvid.h interface will be implemented
-  because in different fourcc radeon_vid and rage128_vid have different
-  width alignment */
   vo_draw_text(vidix_play.src.w,vidix_play.src.h,draw_alpha);
-#endif
 }
 
 uint32_t vidix_query_fourcc(uint32_t format)
