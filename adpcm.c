@@ -9,6 +9,7 @@
     (C) 2001 Mike Melanson
 */
 
+#if 0
 #include "config.h"
 #include "bswap.h"
 #include "adpcm.h"
@@ -119,8 +120,69 @@ void decode_nibbles(unsigned short *output,
   }
 }
 
-int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
+int qt_ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int channels)
+{
+  int initial_predictor_l = 0;
+  int initial_predictor_r = 0;
+  int initial_index_l = 0;
+  int initial_index_r = 0;
+  int i;
+
+  initial_predictor_l = BE_16(&input[0]);
+  initial_index_l = initial_predictor_l;
+
+  // mask, sign-extend, and clamp the predictor portion
+  initial_predictor_l &= 0xFF80;
+  SE_16BIT(initial_predictor_l);
+  CLAMP_S16(initial_predictor_l);
+
+  // mask and clamp the index portion
+  initial_index_l &= 0x7F;
+  CLAMP_0_TO_88(initial_index_l);
+
+  // handle stereo
+  if (channels > 1)
+  {
+    initial_predictor_r = BE_16(&input[IMA_ADPCM_BLOCK_SIZE]);
+    initial_index_r = initial_predictor_r;
+
+    // mask, sign-extend, and clamp the predictor portion
+    initial_predictor_r &= 0xFF80;
+    SE_16BIT(initial_predictor_r);
+    CLAMP_S16(initial_predictor_r);
+
+    // mask and clamp the index portion
+    initial_index_r &= 0x7F;
+    CLAMP_0_TO_88(initial_index_r);
+  }
+
+  // break apart all of the nibbles in the block
+  if (channels == 1)
+    for (i = 0; i < IMA_ADPCM_SAMPLES_PER_BLOCK / 2; i++)
+    {
+      output[i * 2 + 0] = input[2 + i] & 0x0F;
+      output[i * 2 + 1] = input[2 + i] >> 4;
+    }  
+  else
+    for (i = 0; i < IMA_ADPCM_SAMPLES_PER_BLOCK / 2 * 2; i++)
+    {
+      output[i * 4 + 0] = input[2 + i] & 0x0F;
+      output[i * 4 + 1] = input[2 + IMA_ADPCM_BLOCK_SIZE + i] & 0x0F;
+      output[i * 4 + 2] = input[2 + i] >> 4;
+      output[i * 4 + 3] = input[2 + IMA_ADPCM_BLOCK_SIZE + i] >> 4;
+    }  
+
+  decode_nibbles(output,
+    IMA_ADPCM_SAMPLES_PER_BLOCK * channels, channels,
+    initial_predictor_l, initial_index_l,
+    initial_predictor_r, initial_index_r);
+
+  return IMA_ADPCM_SAMPLES_PER_BLOCK * channels;
+}
+
+int ms_ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
+  int channels, int block_size)
 {
   int initial_predictor_l = 0;
   int initial_predictor_r = 0;
@@ -439,3 +501,5 @@ int dk3_adpcm_decode_block(unsigned short *output, unsigned char *input)
 
   return out_ptr;
 }
+#endif
+

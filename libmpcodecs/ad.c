@@ -25,7 +25,6 @@ extern ad_functions_t mpcodecs_ad_dvdpcm;
 extern ad_functions_t mpcodecs_ad_alaw;
 extern ad_functions_t mpcodecs_ad_imaadpcm;
 extern ad_functions_t mpcodecs_ad_msadpcm;
-extern ad_functions_t mpcodecs_ad_dk4adpcm;
 extern ad_functions_t mpcodecs_ad_dk3adpcm;
 extern ad_functions_t mpcodecs_ad_roqaudio;
 extern ad_functions_t mpcodecs_ad_dshow;
@@ -47,7 +46,6 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_alaw,
   &mpcodecs_ad_imaadpcm,
   &mpcodecs_ad_msadpcm,
-  &mpcodecs_ad_dk4adpcm,
   &mpcodecs_ad_dk3adpcm,
   &mpcodecs_ad_roqaudio,
   &mpcodecs_ad_msgsm,

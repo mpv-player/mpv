@@ -20,8 +20,10 @@
 // this isn't exact
 #define DK3_ADPCM_SAMPLES_PER_BLOCK 6000
 
-int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
+int qt_ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int channels);
+int ms_ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
+  int channels, int block_size);
 int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int channels, int block_size);
 int dk4_adpcm_decode_block(unsigned short *output, unsigned char *input,
