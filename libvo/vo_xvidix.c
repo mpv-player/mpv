@@ -288,7 +288,7 @@ if (vo_window == None)
         window_depth = 24;
     XMatchVisualInfo(mDisplay, mScreen, window_depth, TrueColor, &vinfo);
 
-    xswa.background_pixel = vo_fs ? BlackPixel(mDisplay, mScreen) : fgColor;
+    xswa.background_pixel = BlackPixel(mDisplay, mScreen);
     xswa.border_pixel     = 0;
     xswa.colormap         = XCreateColormap(mDisplay, RootWindow(mDisplay, mScreen),
 					    vinfo.visual, AllocNone);
