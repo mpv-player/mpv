@@ -75,6 +75,7 @@ static XvImageFormatValues *fo=NULL;
 static int current_buf = 0;
 static int current_ip_buf = 0;
 static int num_buffers = 1;     // default
+static int visible_buf = -1;    // -1 means: no buffer was drawn yet
 static XvImage *xvimage[NUM_BUFFERS];
 
 
@@ -177,6 +178,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_mouse_autohide = 1;
 
     int_pause = 0;
+    visible_buf = -1;
 
     vo_dx = (vo_screenwidth - d_width) / 2;
     vo_dy = (vo_screenheight - d_height) / 2;
@@ -522,6 +524,28 @@ static void deallocate_xvimage(int foo)
     return;
 }
 
+static inline void put_xvimage( XvImage * xvi )
+{
+#ifdef HAVE_SHM
+    if (Shmem_Flag)
+    {
+        XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
+                      xvi, 0, 0, image_width,
+                      image_height, drwX - (vo_panscan_x >> 1),
+                      drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
+                      vo_dheight + vo_panscan_y,
+                      False);
+    } else
+#endif
+    {
+        XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
+                   xvi, 0, 0, image_width, image_height,
+                   drwX - (vo_panscan_x >> 1), drwY - (vo_panscan_y >> 1),
+                   vo_dwidth + vo_panscan_x,
+                   vo_dheight + vo_panscan_y);
+    }
+}
+
 static void check_events(void)
 {
     int e = vo_x11_check_events(mDisplay);
@@ -561,7 +585,14 @@ static void check_events(void)
     }
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause)
-        flip_page();
+    {
+        /* did we already draw a buffer */
+        if ( visible_buf != -1 )
+        {
+          /* redraw the last visible buffer */
+          put_xvimage( xvimage[visible_buf] );
+        }
+    }
 }
 
 static void draw_osd(void)
@@ -573,25 +604,11 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
+    put_xvimage( xvimage[current_buf] );
 
-#ifdef HAVE_SHM
-    if (Shmem_Flag)
-    {
-        XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                      xvimage[current_buf], 0, 0, image_width,
-                      image_height, drwX - (vo_panscan_x >> 1),
-                      drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
-                      vo_dheight + vo_panscan_y,
-                      False);
-    } else
-#endif
-    {
-        XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                   xvimage[current_buf], 0, 0, image_width, image_height,
-                   drwX - (vo_panscan_x >> 1), drwY - (vo_panscan_y >> 1),
-                   vo_dwidth + vo_panscan_x,
-                   vo_dheight + vo_panscan_y);
-    }
+    /* remember the currently visible buffer */
+    visible_buf = current_buf;
+
     if (num_buffers > 1)
     {
         current_buf =
@@ -761,6 +778,7 @@ static void uninit(void)
 
     if (!vo_config_count)
         return;
+    visible_buf = -1;
     XvFreeAdaptorInfo(ai);
     ai = NULL;
     if(fo){
