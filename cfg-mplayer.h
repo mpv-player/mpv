@@ -116,8 +116,8 @@ struct config conf[]={
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
         {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1},
         {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0},
-        {"flip", &flip, CONF_TYPE_FLAG, 0, 0, 1},
-        {"noflip", &flip, CONF_TYPE_FLAG, 0, 1, 0},
+        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1},
+        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0},
        
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
 	
