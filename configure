@@ -117,7 +117,7 @@ Optional features:
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
-  --disable-tv-v4l	 disable Video 4 Linux TV Interface support [autodetect]
+  --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support (if no C++ compiler and
                          libs are available or find the dshow codecs slower
@@ -126,8 +126,10 @@ Optional features:
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --disable-mp1e	 disable libmp1e support (only if it won't compile) [enable]
-  --disable-streaming    disable network streaming support (http/mms/rtp) [ena]
+  --disable-mp1e         disable libmp1e support
+                         (use this option if it does not compile) [enable] 
+  --disable-streaming    disable network streaming support
+                         (support for: http/mms/rtp) [enable]
 
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -136,15 +138,15 @@ Video:
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
-  --enable-dxr3		 build with DXR3/H+ render support [autodetect]
-  --enable-dvb		 build with support for output via DVB-Card [autodetect]
+  --enable-dxr3          build with DXR3/H+ render support [autodetect]
+  --enable-dvb           build with support for output via DVB-Card [autodetect]
   --enable-mga           build with mga_vid support
                          (check for /dev/mga_vid) [autodetect]
   --enable-xmga          build with mga_vid X Window support
                          (check for X & /dev/mga_vid) [autodetect]
   --enable-xv            build with Xv render support for X 4.x [autodetect]
-  --enable-vm            build with XF86VidMode support for x11 driver [autodetect]
-  --enable-xinerama      build with Xinerama support for x11 driver [autodetect]
+  --enable-vm            build with XF86VidMode support for X11 [autodetect]
+  --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
   --enable-fbdev         build with FBDev render support [disable]
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
