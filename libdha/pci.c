@@ -89,6 +89,9 @@
 #include "sysdep/pci_os2.c"
 #elif defined (_WIN32) || defined(__CYGWIN__)
 #include "sysdep/pci_win32.c"
+#ifdef __MINGW32__
+#define ENOTSUP 134		/* Not supported */
+#endif
 #endif
 
 #if 0

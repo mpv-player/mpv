@@ -126,7 +126,6 @@ dev_mem_way:
 mmap:
   return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
 }
-#endif /* Generic mmap (not win32, nor os2) */
 
 void unmap_phys_mem(void *ptr, unsigned long size)
 {
@@ -143,6 +142,8 @@ void unmap_phys_mem(void *ptr, unsigned long size)
   
   return;
 }
+
+#endif /* Generic mmap (not win32, nor os2) */
 
 unsigned char INPORT8(unsigned idx)
 {

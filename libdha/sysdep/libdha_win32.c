@@ -5,7 +5,6 @@
 */
 
 #include <windows.h>
-
 /*
   This is the request structure that applications use
   to request services from the MAPDEV VxD.
@@ -34,7 +33,7 @@ typedef struct _MapDevRequest
     ((DeviceType)<<16) | ((Access)<<14) | ((Function)<<2) | (Method) )
 
 /* Memory Map a piece of Real Memory */
-void *map_phys_mem(unsigned base, unsigned size) {
+void *map_phys_mem(unsigned long base, unsigned long size) {
 
   HANDLE hDevice ;
   PVOID inBuf[1] ;		/* buffer for struct pointer to VxD */
@@ -66,5 +65,4 @@ void *map_phys_mem(unsigned base, unsigned size) {
   return (void*)req.mdr_LinearAddress ;
 }
 
-void unmap_phys_mem(void *ptr, unsigned size) { }
-
+void unmap_phys_mem(void *ptr, unsigned long size) { }

@@ -7,9 +7,9 @@
 #ifndef __ASM_MACROS_X86_H
 #define __ASM_MACROS_X86_H
 
-#if defined (WINNT)
-#error This stuff is not ported on your system
-#else
+//#if defined (WINNT)
+//#error This stuff is not ported on your system
+//#else
 
 #include "config.h"
 
@@ -280,4 +280,4 @@ static __inline__ void intr_enable()
 
 #endif
 
-#endif
+//#endif
