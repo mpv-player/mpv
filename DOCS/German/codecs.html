@@ -19,8 +19,11 @@ täglich generierte Liste!!!</P>
 
 <UL>
   <LI>MPEG1 (VCD) und MPEG2 (DVD) video</LI>
-  <LI>DivX ;-), OpenDivX (DivX4), DivX 5.01, 3ivx, M$ MPEG4 v2 und andere MPEG4 Varianten</LI>
-  <LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien</LI>
+  <LI>eingebauter Dekoder für DivX ;-), OpenDivX (DivX4), DivX 5.01, 3ivX, M$ MPEG4 v1, v2
+    und andere MPEG4 Varianten</LI>
+  <LI>eingebauter Decoder für Windows Media Video 7 (WMV1) und Win32 DLL Decoder für
+    Windows Media Video 8 (WMV2), beide werden in in .wmv Dateien verwendet</LI>
+  <LI><B>native Sorenson (SVQ1) decoder</B></LI>
   <LI>Cinepak und Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 und andere Hardwareformate</LI>
   <LI>XAnim Codecs</LI>
@@ -28,6 +31,7 @@ täglich generierte Liste!!!</P>
   <LI>FLI/FLC</LI>
   <LI>RealVideo 1.0 von ffmpeg und RealVideo 2.0, 3.0 durch
     die RealPlayer Libraries</LI>
+  <LI>eingebauter Decoder für HuffYUV</LI>
   <LI>Verschiedene alte, einfache RLE-ähnliche Formate</LI>
 </UL>
 
@@ -40,10 +44,10 @@ die Unterstützung hinzuzufügen!</P>
 
 <P>Diese Sektion enthält Informationen über den DivX4 Codec von
 <A HREF="http://www.projectmayo.com">Project Mayo</A>. Ihre ersten verfügbaren alpha-Versionen
-waren OpenDivX 4.0 alpha 47 und 48. Unterstützung dafür wurde standardgemäß in
-<B>MPlayer</B> eingebaut. Früher verwendeten wir deren postprocessing Code,
+waren OpenDivX 4.0 alpha 47 und 48. Unterstützung dafür war früher standardgemäß in
+<B>MPlayer</B> eingebaut. Es wured auch deren postprocessing Code verwendet,
 um optional die Bildqualität von MPEG1/2-Filmen zu verbessern. Nun benutzen wir
-unseren eigenen.</P>
+unseren eigenen für alle Dateitypen.</P>
 
 <P>Die neue Version dieses Codecs heisst DivX4Linux und kann sogar Filme
 decodieren, die mit diesen relativ unbekannten DivX-Codecs erzeugt wurden! 
@@ -67,21 +71,16 @@ verwenden. Ein Nachteil diese Codecs ist, dass er zur Zeit Closed-Source ist.</P
 wie gewöhnlich. Wenn es nicht erkannt wird, wurde es nicht korrekt installiert 
 oder konfiguriert.</P>
 
-<P>DivX4Linux steht in Konflikt mit derm alten OpenDivX, da die APIs von
-beiden sich ähnlich aber inkompatibel sind. Desshalb kann nur einer davon
-zur gleichen Zeit in <B>MPlayer</B> einkompiliert werden.</P>
-
-<P>DivX4Linux bietet einen OpenDivX-Kompatibilitäts Modus, so dass man
-bei der Verwendung des Codecs folgende Optionen auswählen kann:</P>
+<P>DivX4Linux arbeitet mit 2 Methoden:</P>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
     <TD>Verwendet den Codec nach OpenDivX-Art. 
     In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
-    <B>MPlayer</B> führt die Colorspace-Konversion via libvo durch (<B>EMPFOHLEN</B>).</TD></TR>
+    <B>MPlayer</B> führt die Colorspace-Konversion via libvo durch (<B>SCHNELL, EMPFOHLEN</B>).</TD></TR>
   <TR><TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
     <TD>verwendet die Colorspace-Konversion des Codecs. 
-    In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD></TR>
+    In diesem Fall kannst du auch YUY2/UYVY verwenden (<B>LANGSAM</B>).</TD></TR>
 </TABLE>
 
 <P>Die <CODE>-vc odivx</CODE> Methode ist normalerweise schneller, da es die Daten in einem YV12
@@ -94,18 +93,6 @@ von deiner momentanen Farbtiefe ab.</P>
 <CODE>-vc divx4</CODE> wahrscheinlich die schnellere oder sogar die 
 schnellste Lösung.</P>
 
-<P>Hinweis: Das <B>ALTE</B> OpenDivX unterstützt auch Postprocessing via die
-Option <CODE>-oldpp</CODE>. Der Bereich der Werte ist jedoch seltsam:</P>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>0</TD>
-    <TD>&nbsp;&nbsp;</TD><TD>kein Postprocessing</TD></TR>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>10 .. 20</TD>
-    <TD>&nbsp;&nbsp;</TD><TD>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD></TR>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>30 .. 60</TD>
-    <TD>&nbsp;&nbsp;</TD><TD>starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD></TR>
-</TABLE>
-
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. FFmpeg's DivX/libavcodec</A></B></P>
 
@@ -116,8 +103,8 @@ DivX-Codec, welcher kompatibel mit dem traditionellen DivX ist.
 nicht-x86 Platformen zu sehen!</B>. Des weiteren besitzt er eine schnellere
 Decodierungs-Geschwindigkeit als der Win32-Codec oder die orginale DivX4-Library!</P>
 
-<P>Er beinhaltet auch viele nette Codecs, wie RealVideo 1.0, MJPEG, h263,
-h263+, etc.</P>
+<P>Er beinhaltet auch viele nette Codecs, wie RealVideo 1.0, WMV7, MJPEG,
+h263, h263+, etc.</P>
 
 <P>Wenn ein <B>MPlayer</B> Release verwendet wird, befindet sich libavcodec 
 bereits im Paket, welches normal kompiliert werden kann. Wenn <B>MPlayer</B>
@@ -141,8 +128,6 @@ Um dies zu erreichen, sollten folgende Schritte vollzogen werden:</P>
 Unterverzeichnis, es enthält jedoch NICHT den Quellcode von libavcodec!
 Es muss der obrigen Anleitung gefolgt werden, um den Quellcode für diese
 Bibliothek (library) zu erhalten.</P>
-
-<P>Der Codec <B>unterstützt auch Postprocessing</B>!</P>
 
 <P>Mit FFmpeg und meiner Matrox G400 kann ich sogar DivX-Filme in hoher 
 Auflösung auf meinem K6/2 500 ohne Framedrops betrachten.</P>
@@ -232,8 +217,10 @@ Videoausgabetreiber unterstützt wird.</P>
 
 <P><B><A NAME=2.2.1.9>2.2.1.9. XViD</A></B></P>
 
-<P><B>XViD</B> ist eine weitere Entwicklung von der OpenDivX-Gruppe
-(deren erste Entwicklung war DivX4).</P>
+<P><B>XViD</B> ist eine abgespaltene (forked) Entwicklung des OpenDivX Codec. Es geschah, als
+ProjectMayo OpenDivX in das DivX4 Projekt mit geschlossenen Quellen änderte und die nicht-ProjectMayo,
+welche an OpenDivX arbeiteten wütend wurden und XViD starteten. Es besitzen also beide Projekte
+denselben Ursprung.</P>
 
 <P><B>Vorteile:</B></P>
 
@@ -270,6 +257,24 @@ Videoausgabetreiber unterstützt wird.</P>
 </OL>
 
 
+<P><B><A NAME=2.2.1.10>2.2.1.10.  Sorenson</A></B></P>
+
+<P><B>Sorenson</B> ist ein von Apple entwickelter Videocodec. Wir sind momentan fähig,
+  die erste Version davon mit einem eingebautem Decoder zu decodieren (SVQ1).</P>
+
+<P><B>Vorteile:</B></P>
+  <UL>
+    <LI>alt, langsame Macintosh Maschinen waren fähig den Codec zu decodieren</LI>
+  </UL>
+
+<P><B>Nachteile:</B></P>
+  <UL>
+    <LI>SVQ3 wurde immer noch nicht "reverse-engineered"</LI>
+  </UL>
+
+<P><B>Installation:</B> Es wird standardmässig kompiliert und verwendet.</P>
+
+
 <P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
 
 <P>Die wichtigsten Audiocodecs als erstes:</P>
@@ -282,7 +287,7 @@ Videoausgabetreiber unterstützt wird.</P>
   <LI>Voxware Audio (Verwendung der DirectShow DLL)</LI>
   <LI>alaw, MSGSM, PCM und andere einfache, alte Audioformate</LI>
   <LI>VIVO Audio (G723, Vivo Siren)</LI>
-  <LI>RealAudio: DNET (AC3 mit tiefer Bitrate)</LI>
+  <LI>RealAudio: DNET (AC3 mit tiefer Bitrate), Cook, Sipro</LI>
 </UL>
 
 
@@ -344,7 +349,7 @@ kopieren.</P>
 <P><B>MPlayer</B> unterstützt die Dekodierung aller RealAudio Versionen:</P>
 
 <UL>
-  <LI>RealAudio DNET - Dekodierung durch <B>libavcodec</B></LI>
+  <LI>RealAudio DNET - Dekodierung durch <B>liba52</B></LI>
   <LI>RealAudio Cook - Dekodierung durch <B>RealPlayer Libraries</B></LI>
   <LI>RealAudio Sipro - Dekodierung durch <B>RealPlayer Libraries</B></LI>
 </UL>

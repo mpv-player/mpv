@@ -136,9 +136,9 @@ bei diesen Dateien die Video- und Audio-Streams richtige MPG- und AAC-Dateien. M
 Option kannst du sie sogar extrahieren.).</P>
 
 <P><B>Codecs</B>: alle Codecs erlaubt, beides, CBR und VBR. Bedenke das die meisten neuen
-Quicktime-Dateien <B>Sorenson</B> Video und QDesign Music Audio verwenden. Diese Formate wurden 
-nicht enthüllt und werden wahrscheinlich auch in Zukunft so bleiben, was Apple's QuickTime Player
-zum einzigen Player macht, der fähig ist, diese Dateien abzuspielen (aber nur auf Win/Mac).</P>
+Quicktime-Dateien <B>Sorenson</B> Video und QDesign Music Audio verwenden. Lies unsere
+<A HREF="codecs.html#2.2.1.10">Sorenson</A> Codec Sektion. QDesign Music Audio kann momentan
+nicht wiedergegeben werden.</P>
 
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. VIVO Dateien</A></B></P>
@@ -176,8 +176,15 @@ funktioniert, muss jedoch durch die <CODE>-forceidx</CODE> Option erzwungen werd
 <B>MPlayer</B> deren Libraries zur Dekodierung von RealVideo 2.0 oder
 RealVideo 3.0 Dateien verwenden kann!</P>
 
-<P>HINWEIS: RealPlayer Libraries <B>können momentan nur mit Linux oder FreeBSD
-auf der x86 Plattform verwendet werden</B>!</P>
+<P><B>MPlayers</B> configure Script sollte die RealPlayer Bibliotheken an ihrer gewöhnlichen
+Stelle finden. Falls nicht, kann configure mit der Option <CODE>--with-reallibdir</CODE> mitgeteilt
+werden, wo diese sich befinden.</P>
+
+<P>Es ist auch möglich, die RealPlayer Bibliotheken einfach in ein geeignetes Verzeichnis wie
+<CODE>/usr/lib/real</CODE> oder <CODE>$LIBDIR/real</CODE> zu kopieren.</P>
+
+<P>HINWEIS: RealPlayer Libraries <B>funktionieren momentan nur mit Linux, FreeBSD, NetBSD und Cygwin
+auf der x86 Plattform</B>!</P>
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo Dateien</A></B></P>

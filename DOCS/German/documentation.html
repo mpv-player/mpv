@@ -67,7 +67,7 @@
           <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A>
             <UL>
               <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4/DivX5</A></LI>
-              <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpegs DivX/libavcodec</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 FFmpegs DivX/libavcodec</A></LI>
               <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim Codecs</A></LI>
               <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO Video</A></LI>
               <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 Video</A></LI>
@@ -75,6 +75,7 @@
 	      <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
               <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
 	      <LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.10">2.2.1.10 Sorenson</A></LI>
             </UL></LI>
           <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A>
             <UL>
@@ -128,7 +129,7 @@
 	      <LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - Textmodus-Anzeige</A></LI>
 	      <LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - zum VESA BIOS</A></LI>
 	      <LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	      <LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (VERALTET - siehe Vidix!)</A></LI>
+	      <LI><A HREF="video.html#2.3.1.14">2.3.1.14 (nicht mehr existierende Sektion)</A></LI>
               <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
               <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme-/Wiedergabe-Karten)</A></LI>
        	      <LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A>
@@ -289,22 +290,25 @@ Entwicklerschreie (Englisch)
 anderen Unix-Systemen und <B>nicht-x86</B> CPUs, siehe <A HREF="#6">Sektion
 6</A>). Er spielt die meisten MPEG, VOB, AVI, OGG, VIVO, ASF/WMF, QT/MOV, FLI, RM, 
 NuppelVideo, yuv4mpeg, FILM und RoQ Dateien ab, unterstützt von einigen
-eingebauten, Xanim und Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
-<B>DVD</B>, <B>3ivx</B> und auch <B>DivX</B> Filme sehen (und du brauchst die
-avifile-Bibliotek nicht einmal!). Ein weiteres großes Feature von <B>MPlayer</B>
-ist die große Weite von unterstützten Ausgabetreibern. Es funktioniert mit X11,
-Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib und DirectFB. Du kannst aber auch GGI und SDL 
-(und dadurch alle deren Treiber) und einigen Low-Level grafikkartenabhängige
-Treiber (für Matrox, 3Dfx und Radeon) verwenden. 
-Die meinsten von ihnen unterstützen Software- oder Hardware-Scaling, also kannst
-du die meinsten deiner Videos in Vollbild geniesen.
+eingebauten, Xanim, RealPlayer und Win32 DLL Codecs. Du kannst <B>VideoCD</B>,
+<B>SVCD</B>, <B>DVD</B>, <B>3ivx</B>, <B>RealMedia</B> und auch <B>DivX</B> Filme sehen
+(und du brauchst die avifile-Bibliotek nicht einmal!). Ein weiteres großes Feature
+von <B>MPlayer</B> ist die große Weite von unterstützten Ausgabetreibern. Es
+funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib und DirectFB.
+Du kannst aber auch GGI und SDL (und dadurch alle deren Treiber) und einigen
+Low-Level grafikkartenabhängige Treiber (für Matrox, 3Dfx und Radeon, Mach64, Permedia3)
+verwenden. Die meinsten von ihnen unterstützen Software- oder Hardware-Scaling,
+also kannst du die meinsten deiner Videos in Vollbild geniesen.
 <B>MPlayer</B> unterstützt auch die Wiedergabe via hardwarehäßiger MPEG-Decoder-Karten,
 wie <B><A HREF="DVB">DVB</A></B> und <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !
 Und was meinst du zu den großen, antialias-schattierten Untertiteln (<B>10
 unterstützte Typen!!!</B>) mit europäischen/ISO 8859-1,2 (ungarische, englische,
-tschechische, usw.), kyrillischen und koreanischen Schriften? Und der OSD?</P>
+tschechische, usw.), kyrillischen und koreanischen Schriften? Und das onscreen display
+(OSD)?</P>
 
-<P>Mein Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
+<P><B>MPlayer</B> steht unter der GPL v2 Lizenz.</P>
+
+<P>Der Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
 schlechte AVI-Dateien, welche auch mit dem bekannten Windows Media Player
 nicht mehr abspielbar sind, ab. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
 Index entweder kurzfristig mit der -idx Option wiederherstellen oder permanent mit
@@ -360,7 +364,7 @@ So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
     MOV/VIVO/RM/FLI/NUV Dateiformat-Unterstützung, native CRAM, Cinepak, ADPCM Codecs
     und Support für die Binary-Codecs von XAnim; DVD Untertitel-Unterstützung, erstes
     Release des MEncoders, TV-Grabbing, Cache, liba52, unzählbare Fehlerbehebungen.</LI>           
-  <LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
+  <LI><B>MPlayer 0.90 "?"</B> Jul? ??, 2002<BR>
     </LI>
 </UL>
 
@@ -376,21 +380,22 @@ es zahlt sich aus.</P>
 
 <P>Du brauchst erstmals ein aktuelles System. Unter Linux sind 2.4.x Kernel empfohlen.</P>
 
-<P><B><I>SOFTWARE VORAUSSETZUNGEN</I></B><BR>
+<P><B>SOFTWARE VORAUSSETZUNGEN</B><BR>
 
 <UL>
   <LI><B>binutils</B> - vorgeschlagene Version ist <B>2.11.x</B>. Diese Programm ist
     verantwortlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
-  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B> bis <B>2.95.4</B>.
-    Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
-    Wenn du dich entscheidest von 2.96 zu wechseln entscheide dich nicht für 3.0 nur weil
-    er neuer ist! In manchen Fällen ist er schlechter als 2.96, downgrade also zu 2.95.x
-    (downgrade auch die libstdc++ !) oder up-/downgrade überhaupt nicht (sei aber in manchen
-    Fällen vorbereitet auf Laufzeitfehler). 
-    Wenn der 3.x verwendet werden soll, sollte dies mit neuste Version versucht werden. 
-    Ältere hatten verschiedene Fehler, es sollte also darauf geachtet werden, dass immerhin
-    der 3.0.3 oder 3.1 verwendet wird. Detaillierte Information über die Bugs von gcc 2.96 können 
-    <A HREF="users_against_developers.html"><B><I>hier</I></B></A> und in den
+  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B> bis <B>2.95.4</B> und
+    <B>3.1</B>. Verwende <B>NIEMALS</B> 2.96 oder 3.0.x !!! Sie erzeugen für <B>MPlayer</B>
+    fehlerhaften Code. Wenn du dich entscheidest von 2.96 zu wechseln entscheide dich nicht für
+    3.0.x nur weil er neuer ist! Früheren Versionen waren sogar schlechter als 2.96, downgrade
+    also zu 2.95.x (downgrade auch die libstdc++, sie wird vielleicht von anderen Programmen benötigt)
+    oder up-/downgrade überhaupt nicht (sei aber in diesem Falle auf Laufzeitfehler vorbereitet).
+    Wenn der 3.x,x verwendet werden soll, sollte die neuste Version versucht werden. Ältere hatten
+    verschiedene Fehler, es sollte also darauf geachtet werden, dass wenigstens 3.1 verwendet wird,
+    da diese Version getestet wurde und funktionieren sollte. Detaillierte Information über die
+    Bugs von gcc 2.96 (sie sind immer noch NICHT behoben, sondern wurden in <B>MPlayer</B>
+    UMGANGEN!) können <A HREF="users_against_developers.html"><B><I>hier</I></B></A> und in den
     <A HREF="faq.html">FAQ</A> gefunden werden!</I></B></LI>
   <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.2.0)</B>, aber
     normalerweise will das jeder. Seit XFree86 4.0.2 enthält es die <A HREF="video.html#2.3.1.2">XVideo</A>
@@ -404,21 +409,23 @@ es zahlt sich aus.</P>
   <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in einigen Fällen 
     (schlechter Ton oder Videokarten, welche mit Probleme mit dem Xv-Treiber haben).
     Verwende immer die aktuellste Version (beginnend bei 1.2.x).</LI>
-  <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigen qt mov Dateien. 
+  <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigen QT MOV Dateien. 
     Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
   <LI><B>libpng</B> - empfohlen und standard (M)PNG Decoder. Benötigt für das GUI.
     Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
+  <LI><B>lame</B> - empfohlen, wird benötigt, um mit MEncoder MP3 Audio zu codieren,
+     die empfohlene Version ist <B>immer die neuste</B> (wenigstens 3.90).</LI>
   <LI><B>libogg</B> - optional, wird benötigt für OGG Dateiformat.</LI>
   <LI><B>libvorbis</B> - optional, wird benötigt für OGG Vorbis Audio.</LI>
 </UL>
 	  
-<P><B><I>CODECS</I></B></P>
+<P><B>CODECS</B></P>
 
 <UL>
   <LI><B>libavcodec</B>: Wenn du diese DivX3/DivX4/DivX5/MP41/MP42/usw Codecs verwenden willst schau dir die Sektion
     <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:
     <UL>
-      <LI><B><I>DivX/DivX4/DivX5/MP41/MP42</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
+      <LI><B>DivX/DivX4/DivX5/MP41/MP42-Wiedergabe auf nicht-x86 Maschinen</B></LI>
       <LI>Wiedergabe von RealVideo 1.0/VIVO/MJPEG/h263/andere und Encodierung</LI>
       <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Decodieren</B> von DivX/DivX4/DivX5
         Filmen (auch schneller als der originale DivX4-Codec) !</LI>
@@ -431,7 +438,9 @@ es zahlt sich aus.</P>
     <UL>
       <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
         wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu enkodieren</LI>
-      <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP41/MP42) ASFs abzuspielen</LI>
+      <LI>erforderlich um <B>WMV8 Filme</B>. Es wird nicht benötigt für alte ASF's mit MP41 oder MP42
+        Video (obgleich VoxWare Audio für diese Dateien häufig anzutreffen ist - dies wird von den Win32
+        Codecs behandelt), oder WMV7.</LI>
     </UL></LI>
   <LI><B>DivX4/DivX5</B>: Informationen zu diesem Codec sind in der Sektion <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>
     erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
@@ -442,7 +451,7 @@ es zahlt sich aus.</P>
         als <B>libavcodec</B></LI>
       <LI>es ist Closed-Source und nur in einer x86-Version verfügbar.</LI>
     </UL></LI>
-  <LI><B>XviD</B>: Opensource Enkodierungs-Alternative zu Divx4Linux<BR>
+  <LI><B>XviD</B>: Open source Enkodierungs-Alternative zu Divx4Linux<BR>
     Features:
     <UL>
       <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
@@ -459,16 +468,17 @@ es zahlt sich aus.</P>
     oder <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese Sourcen</A>
     kompiliert werden (dies ist eine täglich erneuerter tarball des Vorbis CVS).</LI>
   <LI><B>MPlayer</B> kann die Libraries von RealPlayer 8 oder RealONE verwenden, um
-    <B>RealVideo 2.0 und 3.0</B> Dateien wiederzugeben. Eine Installationsanleitung und weitere
-    Informationen finden sich in der Sektion <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A>!</LI>
+    Dateien mit <B>RealVideo 2.0 und 3.0</B> Video und Sipro/Cook Audio wiederzugeben. Eine
+    Installationsanleitung und weitere Informationen finden sich in der Sektion
+    <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A>!</LI>
 </UL>
 
-<P><B><I>VIDEOKARTEN</I></B></P>
+<P><B>VIDEOKARTEN</B></P>
 
 <P>Es gibt allgemein gesprochen zwei Arten von Grafikkarten. Die eine Art (und die neueren Karten) besitzen
 <B>Hardware Scaling und YUV Beschleunigung</B>, die anderen nicht.</P>
 
-<P><B><I>YUV Karten</I></B></P>
+<P><B>YUV Karten</B></P>
 
 <P>Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
 auch noch mit <B>geringer CPU Auslastung</B> (Zoomen erhöht sie nicht!), darum bekommst du
@@ -512,7 +522,7 @@ auch ein nettes und sehr schnelle Vollbild.</P>
     <U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
     für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von
     nvidia.com downloaden. Nähere Details finden sich in der
-    <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
+    <A HREF="video.html#2.3.1.2.3">nVidia Xv Treiber</A> Sektion.</LI>
   <LI><B>3DLabs GLINT R3 und Permedia3</B>: Ein Vidix-Treiber steht zur Verfügung
     (pm3_vid). Es sollten auch die
     <A HREF="video.html#2.3.1.15">Vidix Instruktionen</A> gelesen werden.</LI>
@@ -528,7 +538,7 @@ auch ein nettes und sehr schnelle Vollbild.</P>
     </UL></LI>
 </UL>
 			
-<P><B><I>Nicht-YUV Karten</I></B></P>
+<P><B>Nicht-YUV Karten</B></P>
 			
 <P>Vollbild kann durch Zoomen <B>per Software</B> (benutze die Option -zoom, aber sei gewarnt: Es ist laaaangsam!)
 oder durch den Wechsel in einen kleineren Videomodus erreicht werden, z.B. zu 352x288. Wenn du keine YUV Beschleunigung
@@ -548,7 +558,7 @@ der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werde
     <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
 </UL>
 
-<P><B><I>SOUNDKARTEN</I></B></P>
+<P><B>SOUNDKARTEN</B></P>
 
 <UL>
   <LI><B>Soundblaster Live!</B>: Diese Karte kann 4 oder 6 (<B>5.1</B>) Kanäle (von AC3)
@@ -561,7 +571,7 @@ der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werde
     <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U></LI>
 </UL>
     
-<P><B><I>FEATURES</I></B></P>
+<P><B>FEATURES</B></P>
 
 <UL>
   <LI>Entscheide dich, ob du das GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
@@ -570,22 +580,46 @@ der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werde
     siehe <A HREF="encoding.html#2.4">MEncoder Sektion</A> .</LI>
   <LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B> Karte hast und du mit <B>MPlayer</B>
     fernsehen oder encodieren willst, siehe in der <A HREF="#2.5">TV-Input</A> Sektion.</LI>
-  <LI>Es gibt 3 Methoden der Zeitmessung in <B>MPlayer</B>.<BR><BR>
-    <B>Um die alte Methode zu verwenden</B>, muss nichts getan werden. <B>MPlayer</B> verwendet
-    <CODE>usleep()</CODE> um die A/V Sync einzustellen, mit +/- 10ms Abweichung. Wie auch immer,
-    manchmal muss die Synchronisation einfach feiner eingestellt werden.<BR>
-    <B>Der neue Timercode</B> verwendet die RTC (Real Time Clock [Echtzeituhr]) für diese
-    Aufgabe, da er Timer mit genau 1ms Abweichung erzeugen kann. Dies erfordert Root-Privilegien
-    oder <I>setuid root</I>-Binary von <B>MPlayer</B> (oder ein wenig Kernel-Hacking). Man kann
-    die Effizienz des neuen Timers in der Statusleiste sehen. In einigen Hardwarekombinationen
-    (bestätigt durch die Verwendung eines nicht-DMA DVD-Laufwerkes auf einem ALi1541-Board)
-    verursacht der RTC-Timer eine rucklige Wiedergabe. Es wird empfohlen die folgende Methode in
-    diesen Fällen zu verwenden.<BR>
-    <B>Der dritte Timercode</B> wird mit der Option <CODE>-softsleep</CODE> aktiviert. Er besitzt
-    dieselbe Effizienz wie die RTC, braucht jedoch kein RTC. Er braucht jedoch auch mehr CPU-Leistung.<BR>
-    Hinweis: <B>Installiere NIE eine setuid-Binary von MPlayer auf einem Multiuser-System!</B>.
-    Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
+  <LI>Es gibt 3 Methoden der Zeitmessung in <B>MPlayer</B>.
+    <UL>
+      <LI><B>Um die alte Methode zu verwenden</B>, muss nichts getan werden. <B>MPlayer</B> verwendet
+        <CODE>usleep()</CODE> um die A/V Sync einzustellen, mit +/- 10ms Abweichung. Wie auch immer,
+        manchmal muss die Synchronisation einfach feiner eingestellt werden.</LI>
+      <LI><B>Der neue Timercode</B> verwendet die RTC (Real Time Clock [Echtzeituhr]) für diese
+        Aufgabe, da er Timer mit genau 1ms Abweichung erzeugen kann. Dies wird automatisch aktiviert, falls
+        verfügbar, erfordert jedoch Root-Privilegien, ein <I>setuid root</I> <B>MPlayer</B> Binary oder
+        einen passend eingerichteten Kernel.<BR>
+        Wenn der Kernel 2.4.19pre8 oder später verwendet wird,
+        kann die maximale RTC Frequenz für normale Benutzer über das <CODE>/proc</CODE> Filesystem
+        angepasst werden. Es kann folgender Befehl verwendet werden, um RTC für alle normalen Benutzer
+        zu aktivieren:
+        <P><CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE></P>
+        Wenn kein solcher Kernel verwendet wird, kann auch eine Linie in
+        <CODE>drivers/char/rtc.c</CODE> verändert und der Kernel neu kompiliert werden. Es muss dazu
+        folgender Abschnitt gesucht werden:
+<PRE>
+  * We don't really want Joe User enabling more
+  * than 64Hz of interrupts on a multi-user machine.
+  */
+ if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))
+</PRE>
+        Dann sollte 64 in 1024 geändert werden. Man sollte dabei allerdings wirklich wissen, was man tut.<BR>
+        Man kann die Effizienz des neuen Timers in der Statusleiste sehen.<BR>
+        Die Energieverwaltungs-Funktionen einiger Notebook-BIOSs mit Speedstep CPUs
+        verhalten sich störend mit RTC. Audio und Video können dadurch aus der Synchronisation fallen.
+        Das einstecken des externen Stromsteckers vor dem Booten soll scheinbar helfen.
+        RTC kann jedoch jederzeit mit der Option <CODE>-nortc</CODE> deaktiviert werden.
+        In einigen Hardwarekombinationen (bestätigt durch die Verwendung eines nicht-DMA DVD-Laufwerkes
+        auf einem ALi1541-Board) verursacht der RTC-Timer eine rucklige Wiedergabe.
+        
+        Es wird empfohlen die folgende Methode in diesen Fällen zu verwenden.</LI>
+      <LI><B>Der dritte Timercode</B> wird mit der Option <CODE>-softsleep</CODE> aktiviert. Er besitzt
+        dieselbe Effizienz wie die RTC, braucht jedoch kein RTC. Er braucht jedoch auch mehr CPU-Leistung.</LI>
+    </UL></LI>
 </UL>
+
+<P>Hinweis: <B>Es sollte NIE ein setuid root Binary von MPlayer auf einem Multiuser-System
+installiert werden!</B>. Es wäre für jeden ein einfacher Weg Root zu werden.</P>
 
 <P>Nun kompiliere <B>MPlayer</B>:</P>
 
@@ -607,7 +641,7 @@ gelöscht werden!</P>
 Man muss bloss <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s Basisverzeichnis 
 ausführen. Genauere Anleitungen können <A HREF="documentation.html#6.1">hier</A> gefunden werden.</P>
 
-<P><B><I>Schau dir IMMER die Ausgabe von ./configure</I></B> und der
+<P><B>Schau dir IMMER die Ausgabe von ./configure</B> und der
 <CODE>configure.log</CODE>-Datei an, es enthält Infos darüber,
 was eingebaut wird, und was nicht. Du kannst dir auch die config.h und config.mak
 Dateien ansehen.<BR>
@@ -698,12 +732,12 @@ Untertitel-Datei unterschiedlich.<BR>
 Hinweis: Das MicroDVD Untertitel-Format verwendet eine absolute Framenummer für sein Timing, desshalb
 kann die <CODE>-subfps</CODE> Option nicht für dieses Format verwendet werden. Da <B>MPlayer</B> keine
 Möglichkeit besitzt die Framerate einer Untertitel-Datei zu erraten, muss die Framerate manuell konvertiert
-werden. Im <CODE>contrib</CODE> Verzeichnis der MPlayer ftp-Seite befindet sich ein kleines Perl-Script,
+werden. Im <CODE>contrib</CODE> Verzeichnis der MPlayer FTP-Seite befindet sich ein kleines Perl-Script,
 das diese Konvertierung für dich vornimmt.</P>
 
 <P>Für DVD Untertitel lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A>.</P>
 
-<P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B><I>MPsub</I></B>.
+<P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B>MPsub</B>.
 Es wurde von mir (Gabucino) entwickelt. Das Haupt-Feature ist grundsätzlich <I>dynamisch</I>
 zeitabhängig (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (von
 <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):</P>
@@ -747,7 +781,7 @@ verwenden kannt. Es gibt mehrere Möglichkeiten um eines zu bekommen:</P>
     Unicode-Schrift an die aktuelle Codepage und den Untertitel-Text anpasst. Eine andere Lösung
     ist, dass man die Untertitel im UTF8 Format encodiert und die -utf8 Option verwendet
     oder die Untertitel-Datei in &lt;video_name&gt;.utf umbenennt. Das Neu-Kodieren von
-    verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (RedHat)
+    verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (Red Hat)
     Programm gemacht werden.<BR>
     Einige URLs:
     <UL>
@@ -792,7 +826,7 @@ in der Konfigurationsdatei einstellen.</P>
 
 <P><A NAME=2.5><B>2.5. TV input</B></A></P>
 
-<P><A NAME=2.5.1><P><B><I>2.5.1.  Übersicht</I></B></A></P>
+<P><A NAME=2.5.1><P><B>2.5.1.  Übersicht</B></A></P>
 
 <P>Dieser Teil der Docs zeigt wie man <B>das Sehen/Grabben über einen V4L-kompatiblen
 TV-Tuner ermöglicht</B>.</P>
@@ -801,7 +835,7 @@ TV-Tuner ermöglicht</B>.</P>
   Bearbeiten/Experimentieren zu erwarten!</B></P>
 
 
-<P><A NAME=2.5.2><P><B><I>2.5.2.  Kompilierung</I></B></A></P>
+<P><A NAME=2.5.2><P><B>2.5.2.  Kompilierung</B></A></P>
 
 <UL>
    <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
@@ -817,7 +851,7 @@ Versuche I420 (verwende die auch die <CODE>-vc rawi420</CODE> Option!), YUY2, UY
 Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
 
 
-<P><A NAME=2.5.3><P><B><I>2.5.3.  Verfügbare Optionen</I></B></A></P>
+<P><A NAME=2.5.3><P><B>2.5.3.  Verfügbare Optionen</B></A></P>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD>
@@ -880,7 +914,7 @@ Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten
 </TABLE>
 
 
-<P><A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></A></P>
+<P><A NAME=2.5.4><P><B>2.5.4.  Tastatursteuerung</B></A></P>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>wählt
@@ -890,7 +924,7 @@ Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten
 </TABLE>
 
 
-<P><A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></A></P>
+<P><A NAME=2.5.5><P><B>2.5.5.  Beispiele</B></A></P>
 
 <P>Dummy Ausgabe zu AAlib :)<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR><BR>
@@ -898,9 +932,9 @@ Eingabe von Standard-V4L<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR></P>
 
 
-<P><A NAME=2.6><P><B><I>2.6.  Videofilter</I></B></A></P>
+<P><A NAME=2.6><P><B>2.6.  Videofilter</B></A></P>
 
-<P><A NAME=2.6.1><P><B><I>2.6.1.  Übersicht</I></B></A></P>
+<P><A NAME=2.6.1><P><B>2.6.1.  Übersicht</B></A></P>
 
 <P>Beide, <B>MPlayer</B> und <B>MEncoder</B>, unterstützen die Benutzung einer
 universalen Video-Filterschicht (video filter layer), welche eine grosse Anzahl
@@ -923,7 +957,7 @@ Geschwindigkeit zu maximieren.</P>
 Dies wird später erklärt.</P>
 
 
-<P><A NAME=2.6.2><P><B><I>2.6.2.  Verwendung</I></B></A></P>
+<P><A NAME=2.6.2><P><B>2.6.2.  Verwendung</B></A></P>
 
 <P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE></P>
 
@@ -941,7 +975,7 @@ verwendet werden:<BR>
 <CODE>mplayer -vop help</CODE></P>
 
 
-<P><A NAME=2.6.3><P><B><I>2.6.3.  Schneiden (crop)</I></B></A></P>
+<P><A NAME=2.6.3><P><B>2.6.3.  Schneiden (crop)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -953,7 +987,7 @@ die schwarzen Ränder auf Breitbild-Filmen zu löschen.</P>
 <P><CODE>&nbsp;&nbsp;-vop crop[=höhe:breite:x:y]</CODE></P>
 
 
-<P><A NAME=2.6.4><P><B><I>2.6.4.  Erweitern (expand)</I></B></A></P>
+<P><A NAME=2.6.4><P><B>2.6.4.  Erweitern (expand)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
   
@@ -967,7 +1001,7 @@ in diesen Rändern unterbringen können.</P>
 
 <P><CODE>&nbsp;&nbsp;-vop expand[=höhe:breite:x:y]</CODE></P>
 
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
+<A NAME=2.6.5><P><B>2.6.5.  Fame/Lavc</B></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -980,7 +1014,7 @@ in diesen Rändern unterbringen können.</P>
 <P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
-<P><A NAME=2.6.6><P><B><I>2.6.6.  Spiegeln (flip)</I></B></A></P>
+<P><A NAME=2.6.6><P><B>2.6.6.  Spiegeln (flip)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -992,7 +1026,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
 
-<P><A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></A></P>
+<P><A NAME=2.6.7><P><B>2.6.7.  Format</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1007,7 +1041,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <CODE>format</CODE> z.B. dies sein kann: rgb32, yuy2, etc...)</P>
 
 
-<P><A NAME=2.6.8><P><B><I>2.6.8.  Nachbearbeiten (postprocess)</I></B></A></P>
+<P><A NAME=2.6.8><P><B>2.6.8.  Nachbearbeiten (postprocess)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1020,7 +1054,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop pp[=postprocess Optionen/Schlüsselwörter]</CODE></P>
 
 
-<P><A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></A></P>
+<P><A NAME=2.6.9><P><B>2.6.9.  RGB2BGR</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1033,7 +1067,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
 
 
-<P><A NAME=2.6.10><P><B><I>2.6.10.  Drehen (rotate)</I></B></A></P>
+<P><A NAME=2.6.10><P><B>2.6.10.  Drehen (rotate)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1045,7 +1079,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 
-<P><A NAME=2.6.11><P><B><I>2.6.11.  Skalieren (scale)</I></B></A></P>
+<P><A NAME=2.6.11><P><B>2.6.11.  Skalieren (scale)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1064,7 +1098,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop scale[=höhe:breite]</CODE></P>
 
 
-<P><A NAME=2.6.12><P><B><I>2.6.12.  YUY2</I></B></A></P>
+<P><A NAME=2.6.12><P><B>2.6.12.  YUY2</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1075,7 +1109,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<P><A NAME=2.6.13><P><B><I>2.6.13.  Spiegeln (mirror)</I></B></A></P>
+<P><A NAME=2.6.13><P><B>2.6.13.  Spiegeln (mirror)</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1086,7 +1120,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
 
 
-<P><A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></A></P>
+<P><A NAME=2.6.14><P><B>2.6.14.  DVBscale</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1097,7 +1131,7 @@ echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</
 <P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
 
 
-<P><A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></A></P>
+<P><A NAME=2.6.15><P><B>2.6.15.  Cropdetect</B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1427,10 +1461,10 @@ Der Proxygebrauch kann auch erzwungen werden:</P>
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT benannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
 
-<P><CODE>wget ftp://micorsops.com/etwas.avi -O - | mplayer -</CODE></P>
+<P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/etwas.avi -O - | mplayer -</CODE></P>
 <P>Hinweis: Bei der Wiedergabe übers Netzwerk empfiehlt sich, den CACHE zu 
 aktivieren:</P> 
-<P><CODE>wget ftp://micorsops.com/etwas.avi -O - | mplayer -cache 8192 -</CODE></P>
+<P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/etwas.avi -O - | mplayer -cache 8192 -</CODE></P>
 
 
 <P><B><A NAME=4></A>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
@@ -1450,23 +1484,23 @@ und wechsle in das Programm-Verzeichnis:</P>
 </PRE>
 
 <P>(... MPlayer stellt die Hard-/Software fest, kompiliert sich und.. )
-  dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
+  dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
 
 <P>Und nun einfach root werden und:</P>
 
 <PRE>
-	dpkg -i ../mplayer_0.18-1_i386.deb als root.
+	dpkg -i ../mplayer_0.90-1_i386.deb als root.
 </PRE>
 
 <P>So sieht es dann aus:</P>
 
 <PRE>
-    eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+    eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.90-1_i386.deb 
     Password:
     (Reading database ... 26946 files and directories currently installed.)
-    Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
+    Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.50-1_i386.deb)
     Unpacking replacement mplayer ...
-    Setting up mplayer (0.18-1) ...
+    Setting up mplayer (0.90-1) ...
 </PRE>
 
 
@@ -1501,7 +1535,7 @@ sollten funktionieren, unter Verwendung von libavcodec.</P>
 <P>Bei <B>UltraSPARC</B>s kann <B>MPlayer</B> die Vorteile der <B>VIS</B>-Erweiterungen
 (vergleichbar mit MMX) verwenden, zur Zeit jedoch erst in <I>libmpeg2</I>,
 <I>libvo</I> und <I>libavcodec</I>, jedoch nicht in mp3lib. Du kannst eine VOB-Datei
-auf einer 400Mhz CPU ansehen. Du musst dazu <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>
+auf einer 400MHz CPU ansehen. Du musst dazu <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>
 installiert haben.</P>
 
 <P>Um dieses Paket zu kompilieren brauchst du GNU Make (gmake, /opt/sfw/gmake),
@@ -1562,7 +1596,7 @@ einer Speicherkapazität von mehr als 4GB zu verwenden:</P>
 <UL>
   <LI>Der sd(7D) Treiber von Solaris 8 x86 hat eine Fehler beim Zugriff auf
     einen Dateiblock >4GB auf einem Gerät, dass eine logische Blockgröße != DEV_BSIZE
-    (z.B. CDROM und DVD Medien) aufweist. Beim Zugriff auf eine Adresse >4 GB gibt
+    (z.B. CD-ROM und DVD Medien) aufweist. Beim Zugriff auf eine Adresse >4 GB gibt
     es also einen  32bit Int Overflow.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)</LI>
   <LI>Ein ähnlicher Bug existiert im hsfs(7FS) Dateisystem-Code (ISO9660), hsfs
@@ -1592,7 +1626,7 @@ kann. Verwende die folgende Kommandozeile:</P>
 
 <P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
 
-<P>Funktion wurde berichtet... Du musst möglicherweise den <I>sgi</I> ao-Treiber verwenden.
+<P>Funktion wurde berichtet... Du musst möglicherweise den <I>SGI</I> ao-Treiber verwenden.
 Hat jemand genauere Infos ?</P>
 
 
@@ -1701,9 +1735,10 @@ anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>
     Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
     Abhilfe: ./configure --disable-sse usw.</LI> 
   <LI>"Internal buffer inconsistency" wird während der Verwendung von MEncoder:<BR>
-    Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
-    hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
-    einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
+    Problem: bekanntes Problem, wenn lame &lt; 3.90 mit gcc 2.96 oder 3.x.x kompiliert wurde.<BR>
+    Endlösung: es sollte lame &gt;=3.90 verwendet werden.<BR>
+    Abhilfe: kompiliere lame mit gcc 2.95.x und deinstalliere alle installierten
+    lame Pakete, welche mit gcc 2.96 kompiliert worden sein könnten.</LI>
   <LI>Hässlicher MP2/MP3-Ton auf PPC:<BR>
     Problem: bekannter gcc Fehlcompilierungs-Bug auf PPC Platformen, 
     es ist noch keine Fehlerbehebung vorhanden.<BR>

@@ -29,18 +29,19 @@ Er verfügt auch über eine stream-copy-Funktion und kann die Grösse der Videos än
     und installiere sie RICHTIG. Es wird benötigt für das DivX4 (1/2 Pass) encodieren. 
     Weil er (zur Zeit) noch davon abhängig ist, ist MEncoder auf Linux beschränkt.</LI>
   <LI><B>OPTIONAL</B> - <A HREF="codecs.html#2.2.1.9">downloade und installiere
-    <B>XViD</B></A>. Sehr nützlich für nicht-Linux Kisten und/oder wenn eine schnellere Encodierung
-    als DivX4 benötigt wird mit der annähernd gleichen Qualität.</LI>
+    <B>XViD</B></A>. Nicht sehr nützlich, libavcodec's <I>mpeg4</I> Codec
+    kann viel schneller UND in besserer Qualität codieren als XViD oder DivX4/5.</LI>
   <LI><B>OPTIONAL</B> - für libavcodec Support, installiere libavcodec wie beschrieben in
     <A HREF="codecs.html#2.2.1.2">ffmpegs DivX/libavcodec</A>.</LI>
   <LI><B>OPTIONAL</B> - Downloade und kompiliere <B>libmp3lame</B> (von lame 3.89beta oder lame CVS).<BR>
-    <B>WARNUNG: KOMPILIERE LAME AUF KEINEN FALL MIT <U>GCC 2.96</U>! Es wird nicht funktionieren!</B><BR>
+    <B>WARNUNG: KOMPILIERE LAME &lt; 3.90 AUF KEINEN FALL MIT <U>GCC 2.96</U>! Es wird nicht funktionieren!</B><BR>
     Dies wird für die CBR/VBR MP3 Audio Encodierung benötigt. Bedenke dass die <CODE>lame</CODE>
     Binary allein nicht genug ist. Übrigens: je weniger Optimierungen du für lame
     verwendest, desto besser wird die Qualität. Du kannst die Qualität mit <CODE>make test</CODE>
     nach dem Kompilieren von lame testen. Das Ergebnis (eine Zahl) sollte kleiner als <B>30</B> sein.
     Aber keine Panik wenn sie <B>400</B> oder ähnlich ist, du solltest keine mindere Qualität bemerken können.
-    Oh, und wenn dein Compiler <CODE>make test</CODE> nicht ausführt ... dann lösche <B>GCC 2.96</B>.</LI>
+    Oh, und wenn dein Compiler <CODE>make test</CODE> nicht ausführt ... dann lösche <B>GCC 2.96</B>
+    oder upgrade Lame auf mindestens <B>3.90</B>.</LI>
   <LI><B>OPTIONAL</B> - <CODE>libjpeg</CODE> und <CODE>libpng</CODE> -
     wie in der <A HREF="documentation.html#1.3">Installation</A>
     Sektion beschrieben</LI>

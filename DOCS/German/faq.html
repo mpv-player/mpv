@@ -33,13 +33,11 @@ mw.h: In function `mplMainDraw':
 mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
 Please submit a full bug report,
 with preprocessed source if appropriate.
-See http://bugzilla.redhat.com/bugzilla/ for instructions.
 </PRE></B></TD></TR>
 
 <TR><TD></TD><TD VALIGN=top>A:</TD>
-  <TD>Dies ist, wie die Fehlermeldung schon sagt, ein Compiler-Problem.
-  Der Compiler sollte aktualisiert werden und das Problem dem Verkäufer
-  oder Autor des Compilers gemeldet werden.</TD></TR>
+  <TD>Dies ist ein bekanntes Problem des gcc 3.0.4, upgrade auf 3.1 um es zu lösen. Wie gcc
+  installiert werden sollte, ist <A HREF="users_against_developers.html">hier</A> beschrieben.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
   Configure beendet sich mit diesem Text und MPlayer kann nicht kompiliert werden!<BR>
@@ -65,9 +63,8 @@ See http://bugzilla.redhat.com/bugzilla/ for instructions.
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Großartig, ich habe gcc 3.0.1 von Red Hat/Mandrake, dann ist alles fein!</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
-  <TD>Nein. Auch damit gibt/gab es Probleme.<BR>
-  Verwende die 2.95.x Serie, diese sind zuverlässiger (auf keine Fall <A HREF="../users_against_developers.html#gcc">2.96</A>).
-  Wenn du wirklich 3.x verwenden willst, verwende immer die neueste Version (ab 3.0.4).</TD></TR>
+Der Status der momentanen Kompiler Unterstützung findet sich in der
+<A HREF="documentation.html#1.3">Installation</A> Sektion.
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ich habe versucht MPlayer zu kompilieren, aber ich bekommen folgende Ausgabe:
@@ -169,13 +166,14 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <TD WIDTH="100%"><B>Gibt es rpm/deb/... Pakete von <B>MPlayer</B>?</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Du kannst ein .deb Paket für dich selbst machen, lies Sektion <A HREF="documentation.html#6.1">6.1</A>.
-  Es gibt RPM-Packete auf der Homepage, verwende keine anderen Quellen!</TD></TR>
+  Es gibt Links zu offiziellen Red Hat RPM Paketen, sie sind auf der
+  <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download Seite</A> zu finden.
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Während 'make', beschwert sich MPlayer über die X11 Librarys. Ich verstehe das nicht, ich habe X installiert!?</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>... aber du hast die X Development Pakete nicht installiert. Oder nicht richtig.
-  Diese heissen unter Red Hat XFree86-devel* und unter Debian xlib6g-dev* .
+  Diese heissen unter Red Hat XFree86-devel* und unter Debian xlibs-dev* .
   Prüfe auch, ob die symbolischen Links <CODE>/usr/X11</CODE> und <CODE>/usr/include/X11</CODE> existiert
   (dies kann ein Problem auf Mandrake-Systemen sein). Diese können mit diesen Befehlen erzeugt werden: <BR>
   &nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6 /usr/X11</CODE><BR>
@@ -211,6 +209,10 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <TD>Dies ist ein Linker Problem. Ein Upgrade deiner binutils sollte helfen (2.11.92.* oder neuer
   wäre gut). Melde den Fehler <B>nicht</B>, da er nicht von uns ist!</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>MPlayer bricht mit einem segmentation fault bei der
+  pthread Überprüfung ab!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>chmod 644 /usr/lib/libc.so
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ich möchte gerne <B>MPlayer</B> auf Minix kompilieren!</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
@@ -261,10 +263,13 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Warum ist die Video-Ausgabe CPU-Auslastung null (0%) für einige Dateien?</B></TD></TR>
-<TR><TD></TD><TD VALIGN=top>A:</TD>
+<TR><TD></TD><TD VALIGN=top>A1:</TD>
   <TD>Es ist nicht null, aber es wird vom Codec aufgerufen, kann also nicht extra gemessen werden.
   Du solltest versuches die Datei mit <CODE>-vo null</CODE> und dann mit <CODE>-vo</CODE> ...
-  zu spielen und die Geschwindigkeit ist die Video-Ausgabe ...</TD></TR>
+  zu spielen und die Geschwindigkeit ist die Video-Ausgabe ...</TD>
+<TR><TD></TD><TD VALIGN=top>A2:</TD><TD>Du verwendest Direct Rendering,
+  der Codec rendert also selbst in den Videospeicher. In diesem Fall beinhaltet die
+  Decodierungs-Prozentrate auch die Wiedergabe-Prozentrate.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ich habe Fehlermeldunge über "file not found <CODE>/usr/lib/win32/</CODE> ..."</B></TD></TR>
@@ -321,7 +326,7 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   in <CODE>#define FAST_OSD</CODE>, kompiliere MPlayer danach neu.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
-  <TD WIDTH="100%"><B>Das OSD flackert!</B></TD></TR>
+  <TD WIDTH="100%"><B>Das OSD (onscreen display) flackert!</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Du verwendest einen vo-Treiber mit einfachem-Buffering (x11,xv). Bei xv,
   verwende die <CODE>-double</CODE> Option. Versuche auch <CODE>-vop expand</CODE>.</TD></TR>
@@ -371,7 +376,7 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   auch funktionieren wird (und umgekehrt).</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
-  <TD WIDTH="100%"><B>Audio verliert die Synchronisation beim Spielen einer .avi-Datei.</B></TD></TR>
+  <TD WIDTH="100%"><B>Audio verliert die Synchronisation beim Spielen einer AVI-Datei.</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Versuche die <CODE>-bps</CODE> und <CODE>-nobps</CODE> Option. Lies <A HREF="bugreports.html">dies</A>,
   falls es zu keiner Verbesserung führt und lade die Datei auf den FTP-Server.</TD></TR>
@@ -404,8 +409,9 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   MPlayer beendet sich mit "MPlayer interrupted by signal 4 in module: decode_video".</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Versuche <B>MPlayer</B> auf dem Computer zu starten, auf dem es kompiliert wurde.
-  Oder Kompiliere es neu. Verwende <B>MPlayer</B> nicht auf einen anderen CPU
-  als für die es kompiliert wurde.</TD></TR>
+  Oder Kompiliere <B>MPlayer</B> neu mit Laufzeit CPU-Erkennung (runtime CPU detection).
+  (<CODE>./configure --enable-runtime-cpudetection</CODE>). Verwende <B>MPlayer</B> auf keiner
+  anderen CPU als auf der, wo <B>MPlayer</B> kompiliert wurde ohne dieses Feature zu aktivieren.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ich habe Probleme mit [dein Windows-Manager] und Vollbild xv/xmga/sdl/x11.</B></TD></TR>
@@ -481,8 +487,8 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <TD WIDTH="100%"><B>Wenn ich beginne abzuspielen bekomme ich diese Meldung, aber die Wiedergabe ist gut:<BR>
   <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
-  <TD>Du benötigst root Privilegien um den neuen Timingcode zu verwenden. Lies in der
-  <A HREF="documentation.html#1.3">Installations Sektion</A> der Dokumentation um mehr Details zu erhalten.</TD></TR>
+  <TD>Du benötigst root Privilegien oder einen speziell vorbereiteten Kernel, um den neuen Timing-Code zu verwenden.
+  Für Details sollte die <A HREF="documentation.html#1.3">Installations Sektion</A> der Dokumentation gelesen werden.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ich habe A/V Sync-Probleme. Einige meiner AVIs spielen problemlos aber
@@ -603,15 +609,17 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
   sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE></B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
-  <TD>Dies ist ein bekannter libdvdread 0.9.1 Bug, er sollte bereits in 0.9.2 und
-  libmpdvdkit gefixt sein, verwende letzteres.</TD></TR>
+  <TD>Dies ist ein bekannter libdvdread 0.9.1 Bug.
+  Verwende <B>libmpdvdkit</B>, welches sich in den <B>MPlayer</B> Sourcen befindet
+  und standardmässig verwendet wird.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Kann ich libdvdread und libdvdcss z.B. auf meinem süssen Sparc/Solaris kompilieren?</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Wer weiss ... Bitte teste es und sag uns bescheid. Aber es wird gesagt, dass es
   funktionieren sollte. Bitte lese auch die Documentation von libdvdread und seiner
-  homepage. Wir sind nicht die Autoren von libdvdread.</TD></TR>
+  homepage. Wir sind nicht die Autoren von libdvdread. Verwende <B>libmpdvdkit</B>,
+  welches sich in den <B>MPlayer</B> Sourcen befindet und standardmdssig verwendet wird.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Was ist mit den Untertiteln? Kann MPlayer sie anzeigen?</B></TD></TR>
@@ -633,8 +641,9 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Wo kann ich die libdvdread und libcss Pakete bekommen?</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
-  <TD>Von der Seite von Ogle:
-  <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.</TD></TR>
+  Die werden nicht benötigt, verwende <B>libmpdvdkit</B>, welches sich in den <B>MPlayer</B>
+  Sourcen befindet und standardmdssig verwendet wird. Wie auch immer, die erwähnten Pakete können
+  von der <A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle Seite</A> heruntergeladen werden.</TD></TR>
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
   <TD WIDTH="100%"><B>Ist es möglich nur ausgewählte Kapitell abzuspielen?</B></TD></TR>
@@ -662,10 +671,13 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <TD WIDTH="100%"><B>Wo ist die Windows Version?</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A:</TD>
   <TD>Sie ist nicht erschienen und wird auch nicht erscheinen. Schau dich in der Windows Szene um (Opensource
-  ASF Parser, Opensource ASF Encoders, usw) und du weisst warum. Wir wollen nicht eingesperrt werden.</TD></TR>
+  ASF Parser, Opensource ASF Encoders, usw) und du weisst warum. Wir wollen nicht eingesperrt werden.
+  Du kannst es nebenbei für dich kompilieren, eine Anleitung findet sich unter
+  <A HREF="documentation.html#6.8">Cygwin</A>.</TD></TR>
+
 <TR><TD COLSPAN=3>&nbsp;</TD></TR>
 <TR><TD></TD><TD VALIGN=top>Q:</TD>
-  <TD WIDTH="100%"><B>Welche Karte ratet ihr mir zum Kauf?</B></TD></TR>
+  <TD WIDTH="100%"><B>Welche Karte ratet ihr mir zum Kauf? (!! VERALTET !!)</B></TD></TR>
 <TR><TD></TD><TD VALIGN=top>A0:</TD>
   <TD>Das ist deine Entscheidung, aber unsere Kriterien sind:</TD></TR>
 <TR><TD></TD><TD VALIGN=top>A1:</TD>

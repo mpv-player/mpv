@@ -22,7 +22,7 @@ können eine großen Geschwindigkeits-Schub bringen.</P>
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
 reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1</CODE></P>
 
-<P>Dies ist richtig, es zeigt meine Matrox G400 mit 16Mb Speicher. Ich habe die Einstellung
+<P>Dies ist richtig, es zeigt meine Matrox G400 mit 16MB Speicher. Ich habe die Einstellung
 von XFree 4.x.x, was die MTRR Register automatisch einstellt.</P>
 
 <P>Wenn nichts funktioniert, muss du es manuell setzen. Als erstes musst du die
@@ -57,7 +57,7 @@ Zum Beispiel für die Matrox Karte von oben (base=0xd8000000) mit 32MB RAM
 
 <P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
 
-<P>Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2's [z.B. 266Mhz,
+<P>Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2's [z.B. 266MHz,
 stepping 0] unterstützen kein MTRR, aber stepping 12 CPUs tuen es
 ('<CODE>cat /proc/cpuinfo</CODE>' um zu überprüfen').</P>
 
@@ -146,17 +146,17 @@ es ist schneller", ist es nicht sicher. Versuche es mit
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia Karten</A></B></P>
 
-<P>nVidia ist keine gute Wahl für Linux (nach NVidia, ist dies 
+<P>nVidia ist keine gute Wahl für Linux (nach nVidia, ist dies 
 <A HREF="users_against_developers.html#nvidia">nicht wahr</A>). Du musst dazu den binären nVidia-
 Treiber, verfügbar auf der nVidia Website, verwenden. Der Standard X-Treiber
 unterstützt kein XVideo für diese Karten, aufgrund der von nVidia geschlossenen
 Sources/Spezifikationen.</P>
 
-<P>Soweit ich weiss enthält der neuste XFree86 Treiber XVideo Unterstützung für Geforce 2 und 3.</P>
+<P>Soweit ich weiss enthält der neuste XFree86 Treiber XVideo Unterstützung für GeForce 2 und 3.</P>
 
 <P>Riva128 Karten haben keine XVideo Unterstützung, auch nicht mit dem
 nVidia-Treiber :(
-Wende dich an NVidia.</P>
+Wende dich an nVidia.</P>
 
 
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI Karten</A></B></P>
@@ -196,7 +196,7 @@ EndSection</CODE></P>
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident Karten</A></B></P>
 
 <P>Wenn du xv mit einer Trident Karte benutzen willst, vorausgesetzt, dass es nicht
-mit 4.1.0 läuft, probier die neuste cvs von Xfree oder warte auf Xfree 4.2.0.
+mit 4.1.0 läuft, probier die neuste cvs von XFree oder warte auf XFree 4.2.0.
 Das neuste cvs enthält Unterstützung für Fullscreen xv mit der Cyberblade XP card.</P>
 
 
@@ -205,7 +205,7 @@ Das neuste cvs enthält Unterstützung für Fullscreen xv mit der Cyberblade XP car
 <P><B><A NAME=2.3.1.3.1>2.3.1.3.1. Zusammenfassung</A></B></P>
 
 <P>Dieses Dokument versucht mit einigen Worten zu beschreiben, was DGA allgemein
-ist und was man mit dem DGA Video-Ausgabetreiber für MPlayer alles machen kann
+ist und was man mit dem DGA Video-Ausgabetreiber für <B>MPlayer</B> alles machen kann
 (und was es nicht kann).</P>
 
 
@@ -227,11 +227,11 @@ Für das Ändern der Farbtiefe eines Video-Signals muss man auf die XVidMode
 Erweiterung zurückgeifen.</P>
 
 <P>DGA2 arbeitet mit dem Feature der XVidMode Erweiterung zusammen und erlaubt
-auch das Ändern der Farbtiefe. So kannst du dem XServer allgemein auf einer
+auch das Ändern der Farbtiefe. So kannst du dem X Server allgemein auf einer
 32 Bit Auflösung betreiben und die Farbtiefe damit auf 15 Bits verringern.</P>
 
 <P>Wie auch immer, DGA hat auch einige Nachteile. Es scheint, als ob es irgendwie
-abhängig vom Grafik-Chip ist und von der Implementation des XServer Video-Treibers,
+abhängig vom Grafik-Chip ist und von der Implementation des X Server Video-Treibers,
 welcher den Chip kontrolliert. Also funktioniert es nicht auf jedem System ...</P>
 
 
@@ -274,11 +274,11 @@ Es ist um einiges schneller!!!</P>
 <P>Der DGA Treiber erlaubt das Ändern der Auflösung des Ausgabe-Signals. Es erspart
 die Verwendung von (langsamem) softwaremäßigem Scaling und ermöglicht zur
 selben Zeit Vollbild-Grafiken. Ideal wäre es, wenn man auf die genaue Auflösung
-des Videos (würde die richtige Rate voraussetzen) schalten könnte, aber der XServer
+des Videos (würde die richtige Rate voraussetzen) schalten könnte, aber der X Server
 erlaubt nur das Änderen in eine Auflösung, die in <CODE>/etc/X11/XF86Config</CODE>
 (<CODE>/etc/X11/XF86Config-4</CODE> bei XFree 4.0.X) vordefiniert ist.
 Dies sind so genannte "Modelines" und sind von den Fähigkeiten deiner
-Video-Hardware abhängig. Der XServer scannt die Konfigurationsdatei beim Starten und
+Video-Hardware abhängig. Der X Server scannt die Konfigurationsdatei beim Starten und
 schaltet die Modelines aus, die nicht zu der Hardware passen. Du kannst die
 funktionierenden Modelines mithilfe der X11-Logdatei herausfinden. Sie kann
 unter <CODE>/var/log/XFree86.0.log</CODE> gefunden werden.</P>
@@ -340,7 +340,7 @@ möglichen Vollbildes. Die prozentuelle Geschwindigkeitsangaben von MPlayer
 sollten aber mit Vorsicht genossen werden, denn zum Beispiel wird beim X11-Treiber
 die Zeit, die vom X-Server benötigt wird um das Bild aufzubauen, nicht eingerechnet.
 Logge dich via ein Terminal über eine serielle Verbindung in deine Box ein und
-starte MPlayer damit du wirklich siehst, was los ist ...</P>
+starte <B>MPlayer</B> damit du wirklich siehst, was los ist ...</P>
 
 <P>Allgemein gesprochen ist der Geschwindigkeitsvorteil von DGA im Vergleich
 zur normalen Verwendung von X11 stark abhängig von der Grafikkarte und wie gut
@@ -401,13 +401,13 @@ ist noch nicht immer fehlerfrei mit jedem Chipset-Treiber von XFree.</P>
 </PRE>
 
 <P>Diese Einstellungen funktionieren sehr gut mit meinem Riva128 Chip unter Verwendung
-des nv.o XServer Treibermodules.</P>
+des nv.o X Server Treibermodules.</P>
 
 
 <P><B><A NAME=2.3.1.3.B>2.3.1.3.B. Fehlerberichte</A></B></P>
 
 <P>Wenn du Probleme mit dem DGA-Treibers hast, sende einen Fehlerbericht
-(e-Mail Adresse siehe untern). Bitte starte MPlayer mit der -v Option und
+(e-Mail Adresse siehe untern). Bitte starte <B>MPlayer</B> mit der -v Option und
 sende alle Zeilen beginnend mit vo_dga: in dem Fehlerbericht.</P>
  
 <P>Bitte schreibe auch, welche Version von X11 du verwendest, die Grafikkarte
@@ -633,7 +633,7 @@ und Installations-Anweisungen.</P>
 
 <P><B>AAlib</B> ist eine Bibliothek für die Anzeige im Textmodus, unter Verwendung
 des ASCII Renderer. Es gibt EINE GROSSE ANZAHL von Programmen die es bereits
-unterstützen, wie Doom, Quake, usw. MPlayer enthält einen sehr gut brauchbaren
+unterstützen, wie Doom, Quake, usw. <B>MPlayer</B> enthält einen sehr gut brauchbaren
 Treiber dafür.
 Wenn ./configure erkennt, dass aalib installiert ist, wird der aalib libvo
 Treiber eingebaut.</P>
@@ -645,16 +645,16 @@ Treiber eingebaut.</P>
   <TR><TD></TD><TD>3</TD><TD></TD><TD>verringert Schärfe</TD></TR>
   <TR><TD></TD><TD>4</TD><TD></TD><TD>erhöht Schärfe</TD></TR>
   <TR><TD></TD><TD>5</TD><TD></TD><TD>schaltet schnelles Rendern ein/aus</TD></TR>
-  <TR><TD></TD><TD>6</TD><TD></TD><TD>wählt das Farbmischungs-Modus (keine, error dithering, floyd steinberg)</TD></TR>
+  <TR><TD></TD><TD>6</TD><TD></TD><TD>wählt das Farbmischungs-Modus (keine, error dithering, Floyd Steinberg)</TD></TR>
   <TR><TD></TD><TD>7</TD><TD></TD><TD>invertiert Bild</TD></TR>
-  <TR><TD></TD><TD>a</TD><TD></TD><TD>wechselt zwischen AA und MPlayer Kontrolle)</TD></TR>
+  <TR><TD></TD><TD>a</TD><TD></TD><TD>wechselt zwischen AA und <B>MPlayer</B> Kontrolle)</TD></TR>
   <TR><TD COLSPAN=4><P><B>Die folgenden Kommandozeilen-Optionen können verwendet werden:</B></P></TD></TR>
   <TR><TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>ändert OSD-Farbe</TD></TR>
   <TR><TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>ändert Untertitel-Farbe</TD></TR>
   <TR><TD COLSPAN=3></TD><TD><P><I>wobei V sein kann: (0/Normal, 1/Dunkel, 2/Fett, 3/Fettschift, 4/Rückwärts, 5/Spezial)</P></TD></TR>
   <TR><TD COLSPAN=4><P><B>AAlib selbst unterstützt eine größe Summe von Optionen.
     Hier einige wichtige:</P></B></TD></TR>
-  <TR><TD></TD><TD>-aadriver</TD><TD></TD><TD>setzt erforderlichen AA Treiber (X11, curses, linux)</TD></TR>
+  <TR><TD></TD><TD>-aadriver</TD><TD></TD><TD>setzt erforderlichen AA Treiber (X11, curses, Linux)</TD></TR>
   <TR><TD></TD><TD>-aaextended</TD><TD></TD><TD>verwende alle 256 Zeichen</TD></TR>
   <TR><TD></TD><TD>-aaeight</TD><TD></TD><TD>verwendet acht-bit ASCII</TD></TR>
   <TR><TD></TD><TD>-aahelp</TD><TD></TD><TD>gibt alle AAlib-Optionen aus</TD></TR>
@@ -681,8 +681,8 @@ für zusätzliche Tuning-Möglichkeiten.</P>
 <P><B><A NAME=2.3.1.12>2.3.1.12.  VESA - output to VESA BIOS</A></B></P>
 
 <P>Dieser Treiber wurde <B>als allgemeiner Treiber</B>entworfen und eingeführt, für jede
-Grafikkarte, die ein VESA VBE 2.0 kompatibles BIOS besitzt. Aber es gibt nur einen Grund
-für die Entwicklung dieses Treibers - die vielseiten Probleme bei der Wiedergabe am TV.<BR>
+Grafikkarte, die ein VESA VBE 2.0 kompatibles BIOS besitzt. Ein weiterer Vorteil dieses
+Treibers ist, dass er versucht, die TV Ausgabe zu erzwingen.<BR>
 <B>VESA BIOS EXTENSION (VBE) Version 3.0 Date: September 16, 1998</B> (Seite 70) sagt:</P>
 
 <BLOCKQUOTE>
@@ -711,19 +711,16 @@ für die Entwicklung dieses Treibers - die vielseiten Probleme bei der Wiedergabe
   <LI>Du hast Chancen den <B>TV-Out einzuschalten</B>. (Bis jetzt nur von ATI-Karten bekannt).</LI>
   <LI>Dieser Treiber verwendet <B>int 10h</B> Handler, das heisst es ist kein Emulator - es ruft
     <B>echte</B> Befehle des <B>echten</B> BIOS im <B>Real</B>-Mode aus. (im vm86 Modus).</LI>
-  <LI>Am wichtigesten :) Du kannst <B>DVD mit 320x200</B> ansehen ohne einer leistungsfähigen CPU.</LI>
+  <LI>Du kannst Vidix damit verwenden und dadurch eine beschleunigte Videowiedergabe
+    <B>UND</B> den TV Ausgang gleichzeitig verwenden! (empfohlen für ATI Karten)</LI>
 </UL>
 
 <P><B>Was sind die Nachteile:</B></P>
 
 <UL>
   <LI>Es funktioniert nut auf <B>x86 Systemen</B>.</LI>
-  <LI><B>Es ist der langsamste Treiber</B> von allen verfügbaren für MPlayer.</LI>
-   (Aber nur, falls deine Karte keinen <B>DGA Modus</B> unterstützt - Ansonsten ist die Geschwindigkeit
-   dieses Treibers mit denen von <B>-vo dga</B> und <B>-vo fbdev</B> zu vergleichen.</LI>
   <LI>Es kann nur als <B>ROOT</B> verwendet werden.</LI>
   <LI>Zur Zeit ist es nur für <B>Linux</B> verfügbar.</LI>
-  <LI>Es <B>verwendet keine Hardwarebeschleunigung</B> (wie YUV-Overlay oder HW-Scaling).</LI>
 </UL>
 
 <P>Verwende diesen Treiber nicht mit <B>GCC 2.96</B>! Es wird nicht funktionieren!</P>
@@ -747,10 +744,10 @@ für die Entwicklung dieses Treibers - die vielseiten Probleme bei der Wiedergabe
 
 <UL>
   <LI>Wenn die <B>NLS</B> Schrift auf deinem Linux Rechner installiert hast und den VESA-Treiber
-    auf einer Textmode-Konsole verwendst wird nach dem Beenden von MPlayer die <B>ROM-Schrift</B>
+    auf einer Textmode-Konsole verwendst wird nach dem Beenden von <B>MPlayer<B> die <B>ROM-Schrift</B>
     erscheinen anstatt der nationalen. Du kannst die nationale Schrift wieder durch das z.B.
     <B><I>setsysfont</I></B>-Tool bei einer Mandrake Distribution laden.<BR>
-    (<B>Hinweis</B>: Das selbe Tool wird zum Loklisieren von fbdev verwendet).</LI>
+    (<B>Hinweis</B>: Das selbe Tool wird zum Lokalisieren von fbdev verwendet).</LI>
   <LI>Einige <B>Grafikkartentreiber für Linux</B> aktivieren den <B>BIOS Modus</B> im DOS-Speicher
     nicht. Wenn du solche Probleme hast - verwende den VESA-Treiber im <B>Textmodus</B>. Andernfalls
     wird der Textmodus (#03) einfach aktiviert und du musst deinen Computer neu starten.</LI>
@@ -792,57 +789,33 @@ deiner XF86Config an.</P>
 können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefen Auflösungs-Modus zu verwenden.</P>
 
 
-<P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon Video Overlay (radeon_vid)</A></B></P>
-
-<P>Diese Abteilung ist VERALTET! Verwende Vidix!</P>
-
-
-<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+<P><B><A NAME=2.3.1.15>2.3.1.15. Vidix</A></B></P>
 
 <P><B>WAS IST VIDIX?</B></P>
 
 <P>VIDIX ist di abkürzung für <B>VID</B>eo <B>I</B>nterface für
 *ni<B>X</B>.<BR>
 VIDIX wurde entworfen und eingeführt als ein Interface für schnelle user-space Treiber,
-welches <B>DGA</B> überall, wo die Möglichkeit besteht, zur Verfügung stellt.
-(<B>im Gegensatz zu X11</B>). Ich hoffe, dass diese Treiber genauso portierbar sind, wie X11
-(<B>nicht nur auf *nix</B>).<BR>
-Was ist es:</P>
-
-<UL>
-  <LI>Es ist ein portabler Nachfolger der mga_vid Technologie, welcher jedoch als user-space 
-    Treiber angesiedelt ist</LI>
-  <LI>Im Gegensatz zu X11 stellt es DGA überall, wo möglich, zur Verfügung</LI>
-  <LI>Im Gegensatz zu v4l stellt es ein Interface für Videowiedergabe zur Verfügung</LI>
-  <LI>Im Gegensatz zu den Treibern von Linux benutzt es Mathematik-Bibliotheken</LI>
-</UL>
-
-<P>Ich kann es dir auch in fetten Grossbuchstaben sagen:<BR>
-<B>VIDIX STELLT EINEN DIREKTEN GRAFIKZUGRIFF ZUM BES YUV MEMORY ZUR VERFÜGUNG.</B></P>
-
-<P><I>Nun ja (es ist in meinem todo) - implementiert einen DGA zu MPEG2 Dekoder.</I></P>
+welches Videoleistungen wie mga_vid von Matrox Karten zur Verfügung stellt. Die Treiber sind
+auch sehr portierbar.</P>
 
 <P>Dieses Interface wurde als Versuch entworfen, die existierenden Videobeschleunigungs-Interfaces
-(bekannt als mga_vid, mga_yuv, radeon_vid) in ein festest Schema zu bringen.
+(bekannt als mga_vid, rage128_vid, radeon_vid, pm3_vid) in ein festest Schema zu bringen.
 Es stellt ein Interface auf hohem Level (highlevel) für Chips zur Verfügung, welche als
 BES (BackEnd scalers) oder OV (Video Overlays) bekannt sind. Es stellt kein lowlevel 
 Interface zur Verfügung für Dinge, welche als Grafikserver bekannt sind (Ich will nicht mit
 dem X11 Team im Grafikmodus-Wechsel konkurrieren). Das Hauptziel dieses Interface ist es, 
-eine maximale Wiedergabe-Geschwindigkeit zur Verfügung zu stellen und nicht Videosignale 
-auf deinen TV-, Tape- oder VCR-Bildschirm zu tun. Allerdings sind diese Dinge auch sehr
-wichtig - es ist jedoch eine perfekte neue Aufgabe. Wie auch immer, ich denke, es wäre möglich 
-so etwas wie ein mini-X (nicht mit Minix zu verwechseln ;) in Zukunft einzubauen, 
-wenn sich eine Anzahl Freiwilliger finden lässt.</P>
+eine maximale Wiedergabe-Geschwindigkeit zur Verfügung zu stellen.</P>
 
 <P><B>VERWENDUNG</B></P>
 
 <UL>
   <LI>Du kannst den selbständigen Videoausgabe-Treiber verwenden: <CODE>-vo xvidix</CODE><BR>
     Dieser Treiber wurde als ein X11 Frontend zu der VIDIX Technologie entwickelt. Er benötigt 
-    einen XServer und kann nur unter diesem arbeiten.</LI>
+    einen X Server und kann nur unter diesem arbeiten.</LI>
   <LI>Du kannst das VIDIX dem Vidix unterstellte Gerät (subdevice) verwenden, welches zu vielen 
     Videoausgabe-Treibern hinzugefügt wurde, wie z.B.:<BR>
-    <CODE>-vo vesa:vidix</CODE> und <CODE>-vo fbdev:vidix</CODE></LI>
+    <CODE>-vo vesa:vidix</CODE> (<B>NUR LINUX</B>) und <CODE>-vo fbdev:vidix</CODE></LI>
 </UL>
 
 <P>Allerdings spielt es keine Rolle, welche Videoausgabe-Treiber mit <B>VIDIX</B> verwendet werden.</P>
@@ -891,7 +864,7 @@ die Hoffnung, dass es auf den Systemen laufen wird, auf denen X11 läuft.</P>
 
 <P>Und die letzte <B>WARNUNG</B>: (un)glücklicherweise <B>MUST</B> du aufgrund des
 direkten Hardwarezugriffs <B>ROOT</B> Privilegien besitzen um VIDIX zu benützen. 
-Setze wenigstens das <B>suid</B> bit auf den <B>MPlayer</B>.</P>
+Setze wenigstens das <B>SUID</B> bit auf den <B>MPlayer</B>.</P>
 
 <P><B>VIDEO EQUALIZER</B></P>
 
@@ -1028,66 +1001,26 @@ Du must diese also erst zum Laufen bringen. Kompiliere <B>MPlayer</B> danach neu
 
 <P><B><A NAME=2.3.1.A.2>2.3.1.A.2. ATI Karten</A></B></P>
 
-<P><B>Einige Worte über ATI's TV-Out:</B><BR>
-Zur Zeit will ATI keine Unterstützung für TV-Out Chipsets unter Linux bieten.
-Hier ist die offzielle Antwort von ATI Inc.:</P>
+<P><B><U>EINLEITUNG</U></B><BR>
+ATI will momentan keine ihrer TV-out Chips unter Linux unterstützen, auf Grund
+ihrer lizenzierten Macrovision Technologie.</P>
 
-<BLOCKQUOTE>
-  &gt; Hallo!<BR>
-  &gt;<BR>
-  &gt; Auf eurer Seite steht, dass ihr Linux-Entwickler unterstützt.<BR>
-  &gt; Zur Zeit beteilige ich mich am MPlayer Projekt (www.mplayerhq.hu).<BR>
-  &gt; Ich bin interessiert am Aktivieren des TV-Outs bei Radeon VE-Chips während<BR>
-  &gt; Video-Wiedergabe. Ich würde dieses Feature dem radeonfb-Treiber hinzufügen<BR>
-  &gt; (kann man im CVS-Tree vom MPlayer-Projekt unter main/drivers/radeon finden).<BR>
-  &gt; Ich hab eine Chance eine offizielle Dokumentation zu erhalten?<BR>
-  Wir können aufgrund des Macrovision-Konzerns keine Dokumente im Bezug auf TV-Out<BR>
-  veröffentlichen. Auch Dokumentationen für das MPEG2-Decoding ist etwas das wir<BR>
-  MÖGLICHWEISE in der Zukunft veröffentlichen, aber zur Zeit nicht. Dies ist ebenfall<BR>
-  aufgrund einen Eigentümer und einer 3. Partei.
-</BLOCKQUOTE>
-
-<P>Bemitleidenswert, nicht?</P>
-
-<P><CODE><B>Q: Was ist Macrovision?</B><BR>
-A: Es ist ein Kopierschutz-Mechanismus.</CODE></P>
-
-<P>Dies bedeutet, wenn sie die TV-Out anbelangenden Informationen veröffentlichen, das
-Hacker es ermöglicht werden könnte, den Kopierschutz ihrer Chips zu umgehen. Deshalb gibt
-es keine Möglichkeit den TV-Out bei ATI-Karten zu aktivieren.</P>
-
-<P>Wie ist der Status von ATI TV-Out-Chips unter Linux:</P>
+<P><B><U>STATUS DER ATI TV-OUT KARTEN UNTER LINUX</U></B></P>
 
 <UL>
-  <LI><B>ATI Mach64</B> verwendet <I>ImpacTV</I>, welcher von Gatos unterstützt wird.</LI>
-  <LI><B>ASIC Radeon VIVO</B> verwendet <I>Rage Theatre</I>, welcher von Gatos unterstützt wird.</LI>
-  <LI><B>Radeon VE</B> und <B>Rage PRO LT</B> verwenden <I>ImpacTV2+</I>, welcher unter Linux nicht
-    unterstützt wird.</LI>
-  <LI>Aber mit <B>MPlayer</B> erhältst du <B>vollständige Hardware-Beschleunigung</B> 
-    und <B>TV Ausgabe</B> für Radeon Karten! Lies die <A HREF="#2.3.1.12">VESA Treiber</A> und 
-    <A HREF="#2.3.1.14">Radeon Beschleunigung</A> Abschnitte.</LI>
+  <LI><B>ATI Mach64</B>: unterstützt von <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+  <LI><B>ASIC Radeon VIVO</B>: unterstütz von <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+  <LI><B>Radeon</B> und <B>Rage128</B>: unterstützt von <B>MPlayer</B>!
+    Es sollte die <a href="#2.3.1.12">VESA Treiber</a> und <A HREF="#2.3.1.15">Vidix</A>
+    Sektion überprüft werden.</LI>
 </UL>
 
-<P>Glücklicherweise können Benutzer mit genügend schnellen CPUs (Duron, Celeron2 und besser) 
-filme auf ihrem TV durch <A HREF="#2.3.1.12">VESA Treiber</A> sehen.</P>
+<P>Auf anderen Karten sollten bloss die <A HREF="#2.3.1.12">VESA Treiber</A>, ohne
+Vidix verwendet werden. Es wird jedoch eine leistungsfähige CPU benötigt.</P>
 
-<P>Ich könnte auch gute Worte zu ATI Inc. sagen:<BR>
-<B>Sie produzieren BIOSs von höchster Qualität.</B></P>
-
-<P><B>VESA Treiber</B> benutzen keine Harware-Beschleunigung, simulieren jedoch <B>DGA</B> 
-durch ein 64K Fenster, das durch 32-bit Modus Funktionen des BIOS konfiguriert wird.
-ATI Karten haben genug <B>schnellen Videospeicher</B> (DIMM oder DDR
-Chips mit 64 - 128-bit Zugriff). Es existieren keine Beschränkungen, welcher Videomodus
-auf deinem TV dargestellt werden kann (wie bei anderen Karten). Du kannst also 
-<B>irgendeinen Videomodus</B> auf deinem <B>TV</B> benutzen (von <B>320x200</B> bis zu 
-<B>1024x768</B>).<BR>
-Auf der anderen Seite (Es ist mindestens für <B>Radeon</B> Karten bekannt) gibt es einen <B>DGA</B>
-Modus, welcher automatisch erkannt wird und in diesem Fall vergleichbare Geschwindigkeiten wie
-die <B>-vo dga</B> und <B>-vo fbdev</B> Treiber liefert.<BR> 
-Das einzige, was du zu tun hast - <B>hab den TV-Anschluss eingesteckt bevor du deinen PC
-startest</B> denn das Video BIOS initialisiert sich selbst nur einmal während der POST Prozedure.</P>
-
-<P>Lies in der <A HREF="video.html#2.3.1.12">VESA</A> Sektion dieser Dokumentation um mehr Details zu erhalten.</P>
+<P>Das einzige, was zu tun ist - <B>den TV Stecker eingesteckt haben, bevor man
+den PC bootet</B>, da das Video BIOS sich nur einmal während der POST Prozedur
+initialisiert.</P>
 
 
 <P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>
