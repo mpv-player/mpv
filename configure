@@ -139,6 +139,7 @@ Optional features:
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
+  --enable-vesa          build with VESA support [autodetect]
   --enable-svga          build with SVGAlib support [autodetect]
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
@@ -719,6 +720,7 @@ _gl=auto
 _ggi=auto
 _aa=auto
 _svga=auto
+_vesa=auto
 _fbdev=auto
 _fbdev_nocopy=no
 _dvb=auto
@@ -799,6 +801,8 @@ for ac_option do
   --disable-aa)		_aa=no		;;
   --enable-svga)	_svga=yes	;;
   --disable-svga)	_svga=no	;;
+  --enable-vesa)	_vesa=yes	;;
+  --disable-vesa)	_vesa=no	;;
   --enable-fbdev)	_fbdev=yes	;;
   --enable-fbdev=nocopy) _fbdev=yes; _fbdev_nocopy=yes	;;
   --disable-fbdev)	_fbdev=no	;;
@@ -1921,6 +1925,7 @@ else
 fi
 
 
+if test "$_vesa" != no ; then
 echocheck "VESA support"
 if x86 && linux ; then
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
@@ -1928,6 +1933,7 @@ if x86 && linux ; then
   echores "yes"
 else
   echores "no (not supported on this OS/architecture)"
+fi
 fi
 
 
