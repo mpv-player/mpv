@@ -1,19 +1,21 @@
+
 ChangeLog:
 ~~~~~~~~~~
 
-v0.12-pre1:  [ not yet released ]
-  - ffmpeg included into source tree
+*** 0.11 release is coming SOON!??? ***
 
-*** 0.11 release is coming soon ***
-
-v0.11-CVS:
-  - added DirectShow support for DivX
-  - added config file parser
-  - new timing code (in mplayerHQ)
-  - Spanish translation of DOCS
-  - updated libmpeg2 source to libmpeg2-0.2.0 version
+v0.11-pre27-CVS:
+  - updated libmpeg2 source to libmpeg2-0.2.1-CVS version
   - updated OpenDivX encore/decore to 4.0 alpha48
-  - added fsdga driver : fullscreen scaling+dga driver
+  - cmdline/configfile handler by szabi
+  - added DirectShow support (now DivX-only)
+  - bugfix: stream.c/stream_new() uninitialized variables
+
+v0.11-pre26-CVS:
+  - updated libmpeg2 source to libmpeg2-0.2.0 version
+  - small fixes
+
+v0.11-pre25-CVS:  yeah, we moved to SourceForge CVS!
   - DOCS updated (email address changed from arpi@* -> maillist)
   - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
   - stream.c: unsigned int fixes, required for some strange .asf files
