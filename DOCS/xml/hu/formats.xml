@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.17 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -178,7 +178,7 @@ manapság <filename>.WMA</filename> vagy <filename>.WMV</filename> kiterjesztésűe
 </sect3>
 
 
-<sect3 id="qt-mov">
+<sect3 id="mov">
 <title>QuickTime/MOV fájlok</title>
 
 <para>
