@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,7 +5,7 @@
 
 #include "config.h"
 
-#ifdef USE_WIN32DLL
+#ifdef USE_QTX_CODECS
 
 #include "ad_internal.h"
 #include "bswap.h"
@@ -165,7 +164,7 @@ static int preinit(sh_audio_t *sh){
     printf("loader_init DONE!\n");
 
 #if 1
-    error = InitializeQTML(0L);
+    error = InitializeQTML(6+16);
     printf("InitializeQTML:%i\n",error);
     if(error) return 0;
     
@@ -174,7 +173,8 @@ static int preinit(sh_audio_t *sh){
 	OutputFormatInfo.buffer = InputFormatInfo.buffer = NULL;
 	OutputFormatInfo.reserved = InputFormatInfo.reserved = 0;
 	OutputFormatInfo.numChannels = InputFormatInfo.numChannels = sh->wf->nChannels;
-	OutputFormatInfo.sampleSize = InputFormatInfo.sampleSize = sh->wf->wBitsPerSample;
+	InputFormatInfo.sampleSize = sh->wf->wBitsPerSample;
+	OutputFormatInfo.sampleSize = 16;
 	OutputFormatInfo.sampleRate = InputFormatInfo.sampleRate = sh->wf->nSamplesPerSec;
 	InputFormatInfo.format =  bswap_32(sh->format); //1363430706;///*1768775988;//*/1902406962;//qdm2//1768775988;//FOUR_CHAR_CODE('ima4');
 	OutputFormatInfo.format = 1313820229;// FOUR_CHAR_CODE('NONE');
@@ -212,12 +212,24 @@ static int preinit(sh_audio_t *sh){
   
     sh->channels=sh->wf->nChannels;
     sh->samplerate=sh->wf->nSamplesPerSec;
-    sh->samplesize=(sh->wf->wBitsPerSample+7)/8;
+    sh->samplesize=2; //(sh->wf->wBitsPerSample+7)/8;
 
     sh->i_bps=sh->wf->nAvgBytesPerSec;
 //InputBufferSize*WantedBufferSize/OutputBufferSize;
 
 #endif
+
+   if(sh->format==0x3343414D){
+       // MACE 3:1
+       sh->ds->ss_div = 2*3; // 1 samples/packet
+       sh->ds->ss_mul = sh->channels*2*1; // 1 bytes/packet
+   } else
+   if(sh->format==0x3643414D){
+       // MACE 6:1
+       sh->ds->ss_div = 2*6; // 1 samples/packet
+       sh->ds->ss_mul = sh->channels*2*1; // 1 bytes/packet
+   }
+
   return 1; // return values: 1=OK 0=ERROR
 }
 
@@ -256,8 +268,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
     InputBufferSize=FramesToGet*InFrameSize;
 
-    printf("FramesToGet = %li  (%li -> %li bytes)\n",FramesToGet,
-	InputBufferSize, FramesToGet*OutFrameSize);
+//    printf("FramesToGet = %li  (%li -> %li bytes)\n",FramesToGet,
+//	InputBufferSize, FramesToGet*OutFrameSize);
 
     if(InputBufferSize>sh->a_in_buffer_len){
 	int x=demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
@@ -267,11 +279,13 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	    FramesToGet=sh->a_in_buffer_len/InFrameSize; // not enough data!
     }
     
+//    printf("\nSoundConverterConvertBuffer(myConv=%p,inbuf=%p,frames=%d,outbuf=%p,&convframes=%p,&convbytes=%p)\n",
+//	myConverter,sh->a_in_buffer,FramesToGet,buf,&ConvertedFrames,&ConvertedBytes);
     error = SoundConverterConvertBuffer(myConverter,sh->a_in_buffer,
 	FramesToGet,buf,&ConvertedFrames,&ConvertedBytes);
-    printf("SoundConverterConvertBuffer:%i\n",error);
-    printf("ConvertedFrames = %li\n",ConvertedFrames);
-    printf("ConvertedBytes = %li\n",ConvertedBytes);
+//    printf("SoundConverterConvertBuffer:%i\n",error);
+//    printf("ConvertedFrames = %li\n",ConvertedFrames);
+//    printf("ConvertedBytes = %li\n",ConvertedBytes);
     
     InputBufferSize=(ConvertedBytes/OutFrameSize)*InFrameSize; // FIXME!!
     sh->a_in_buffer_len-=InputBufferSize;
