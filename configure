@@ -1573,6 +1573,21 @@ echocheck "linux devfs"
 echores "$_linux_devfs"
 
 
+echocheck "strsep()"
+cat > $TMPC << EOF
+#include <string.h>
+int main (void) { char *s = "Hello, world!"; (void) strsep(&s, ","); return 0; }
+EOF
+_strsep=no
+cc_check && _strsep=yes
+if test "$_strsep" = yes ; then
+ _def_strsep='#define HAVE_STRSEP 1'
+else
+ _def_strsep='#undef HAVE_STRSEP'
+fi
+echores "$_strsep"
+
+
 echocheck "vsscanf()"
 cat > $TMPC << EOF
 #include <stdarg.h>
@@ -3483,6 +3498,9 @@ $_def_zlib
 
 /* Define this if you have shm support */
 $_def_shm
+
+/* Define this if your system has strsep */
+$_def_strsep
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
