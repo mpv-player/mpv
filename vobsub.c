@@ -1278,7 +1278,7 @@ void vobsub_seek(void * vobhandle, float pts)
     queue->current_index = 0;
     while ((queue->packets + queue->current_index)->pts100 < seek_pts100)
       ++queue->current_index;
-    if (queue->current_index > 0);
+    if (queue->current_index > 0)
       --queue->current_index;
   }
 }
