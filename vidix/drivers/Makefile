@@ -29,18 +29,6 @@ MACH64_OBJS=mach64_vid.o
 MACH64_LIBS=-L../../libdha -ldha
 MACH64_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
 
-NVIDIA_VID=nvidia_vid.so
-NVIDIA_SRCS=nvidia_vid.c
-NVIDIA_OBJS=nvidia_vid.o
-NVIDIA_LIBS=-L../../libdha -ldha -lm
-NVIDIA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
-
-GENFB_VID=genfb_vid.so
-GENFB_SRCS=genfb_vid.c
-GENFB_OBJS=genfb_vid.o
-GENFB_LIBS=-L../../libdha -ldha -lm
-GENFB_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
-
 MGA_VID=mga_vid.so
 MGA_SRCS=mga_vid.c
 MGA_OBJS=mga_vid.o
