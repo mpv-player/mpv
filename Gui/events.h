@@ -13,35 +13,38 @@
 #define evLoad              8
 #define evEqualeaser        9
 #define evPlayList          10
-#define evPlusVideo         11
-#define evMinusVideo        12
-#define evIconify           13
-#define evPlusBalance       14
-#define evMinusBalance      15
-#define evFullScreen        16
-#define evAbout             18
-#define evLoadPlay          19
-#define evPreferences       20
-#define evSkinBrowser       21
-#define evBackward10sec     22
-#define evForward10sec      23
-#define evBackward1min      24
-#define evForward1min       25
-#define evIncVolume         26
-#define evDecVolume         27
-#define evMute              28
-#define evIncAudioBufDelay  29
-#define evDecAudioBufDelay  30
-#define evPlaySwitchToPause 31
-#define evPauseSwitchToPlay 32
-#define evNormalSize        33
-#define evDoubleSize        34
+#define evIconify           11
+#define evAbout             12
+#define evLoadPlay          13
+#define evPreferences       14
+#define evSkinBrowser       15
+#define evPlaySwitchToPause 16
+#define evPauseSwitchToPlay 17
 
-#define evSetMoviePosition  35
-#define evSetVolume         36
-#define evSetBalance        37
+#define evBackward10sec     18
+#define evForward10sec      19
+#define evBackward1min      20
+#define evForward1min       21
+#define evBackward10min     22
+#define evForward10min      23
 
-#define evHelp              38
+#define evNormalSize        24
+#define evDoubleSize        25
+#define evFullScreen        26
+
+#define evSetMoviePosition  27
+#define evSetVolume         28
+#define evSetBalance        29
+#define evMute              30
+
+#define evIncVolume         31
+#define evDecVolume         32
+#define evIncAudioBufDelay  33
+#define evDecAudioBufDelay  34
+#define evIncBalance        35
+#define evDecBalance        36
+
+#define evHelp              37
 
 #define evExit              1000
 

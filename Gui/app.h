@@ -50,6 +50,7 @@ typedef struct
 {
  wItem           main;
  wsTWindow       mainWindow;
+ int		 mainDecoration;
 
  wItem           sub;
  wsTWindow       subWindow;
@@ -72,13 +73,10 @@ typedef struct
 } listItems;
 
 extern listItems   appMPlayer;
-extern listItems   appTV;
-extern listItems   appRadio;
 
-//extern char      * appMPlayerDirInHome;
-//extern char      * appMPlayerDir;
 extern char      * skinDirInHome;
 extern char      * skinMPlayerDir;
+extern char      * skinName;
 
 extern void appInit( int argc,char* argv[], char *envp[], void* disp );
 extern void appInitStruct( listItems * item );

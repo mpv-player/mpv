@@ -12,12 +12,10 @@
 
 #include "../skin/skin.h"
 #include "../wm/ws.h"
-#include "../config.h"
 #include "../error.h"
 #include "../language.h"
 
 #include "../../config.h"
-
 #include "../../libvo/x11_common.h"
 //#include "../../libvo/sub.h"
 
@@ -69,7 +67,7 @@ void gtkSigHandler( int s )
         if ( !gtkFillSkinList( sbMPlayerPrefixDir ) ) break;
         if ( gtkFillSkinList( sbMPlayerDirInHome ) )
          {
-          gtkSetDefaultToCList( SkinList,cfgSkin );
+          gtkSetDefaultToCList( SkinList,skinName );
           gtk_widget_show( SkinBrowser );
           gtkVisibleSkinBrowser=1;
           gtkShow( evSkinBrowser );

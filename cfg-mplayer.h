@@ -60,6 +60,10 @@ extern int dvd_chapter;
 extern int dvd_angle;
 #endif
 
+#ifdef HAVE_NEW_GUI
+extern char * skinName;
+#endif
+
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implemtations for passing the params
@@ -236,6 +240,10 @@ struct config conf[]={
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2},
+	
+#ifdef HAVE_NEW_GUI
+	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0},
+#endif
         
 	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},

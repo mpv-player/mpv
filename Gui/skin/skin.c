@@ -10,12 +10,7 @@
 #include "../language.h"
 #include "../../config.h"
 
-//char            SkinDir[] = "/.mplayer/Skin/";
-//char          * Skin;
-
 listItems     * skinAppMPlayer = &appMPlayer;
-//listItems     * skinAppTV      = &appTV;
-//listItems     * skinAppRadio   = &appRadio;
 
 int             linenumber;
 
@@ -549,6 +544,27 @@ int __dlabel( char * in )
  return 0;
 }
 
+int __decoration( char * in )
+{
+ char    tmp[512];
+
+ CHECKDEFLIST( "decoration" );
+ CHECKWINLIST( "decoration" );
+
+ #ifdef DEBUG
+  dbprintf( 0,"\n[skin] window decoration is %s\n",in );
+ #endif
+ cutItem( in,tmp,',',0 );
+ if ( strcmp( tmp,"enable" )&&strcmp( tmp,"disable" ) ) { ERRORMESSAGE( "unknown parameter.\n" ); return 1; }
+ if ( strcmp( tmp,"enable" ) ) defList->mainDecoration=0;
+  else defList->mainDecoration=1;
+
+ #ifdef DEBUG
+  dbprintf( 3,"\n[skin] window decoration is %s\n",(defList->mainDecoration?"enabled":"disabled") );
+ #endif
+ return 0;
+}
+
 typedef struct
 {
  char * name;
@@ -569,6 +585,7 @@ _item skinItem[] =
   { "font",        __font        },
   { "slabel",      __slabel      },
   { "dlabel",      __dlabel      },
+  { "decoration",  __decoration  },
   { "menu",        __menu        }
  };
 

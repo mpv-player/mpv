@@ -15,7 +15,6 @@
 #include "../timer.h"
 #include "../language.h"
 #include "../error.h"
-#include "../config.h"
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
@@ -52,10 +51,11 @@ void mplTimerHandler( int signum )
 
 void mplInit( int argc,char* argv[], char *envp[], void* disp )
 {
+ int i;
  // allocates shmem to gtkShMem
  // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit( argc,argv,envp );
- strcpy( gtkShMem->sb.name,cfgSkin ); 
+ strcpy( gtkShMem->sb.name,skinName ); 
 
  // allocates shmem to mplShMem
  // init fields of this struct to default values
@@ -79,9 +79,11 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
  vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
  
+ i=wsHideFrame|wsMaxSize|wsShowWindow;
+ if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsShowWindow;
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
-  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsMaxSize|wsShowWindow,"MPlayer" ); //wsMinSize|
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
 

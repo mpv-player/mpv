@@ -45,7 +45,7 @@ dep:    depend
 
 depend: .depend
 
-.depend: Makefile config.mak config.h gui.mak bitmap/bitmap.mak
+.depend: Makefile config.mak gui.mak bitmap/bitmap.mak
 	$(MAKE) -C mplayer depend
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 

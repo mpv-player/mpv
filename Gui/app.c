@@ -5,20 +5,16 @@
 
 #include "app.h"
 #include "../config.h"
-#include "config.h"
 #include "error.h"
 #include "wm/wskeys.h"
 #include "skin/skin.h"
 #include "mplayer/mplayer.h"
 
 listItems   appMPlayer;
-listItems   appTV;
-listItems   appRadio;
 
-//char      * appMPlayerDirInHome=NULL;
-//char      * appMPlayerDir=NULL;
 char      * skinDirInHome=NULL;
 char      * skinMPlayerDir=NULL;
+char      * skinName = NULL;
 
 void appClearItem( wItem * item )
 {
@@ -71,6 +67,7 @@ void appInitStruct( listItems * item )
  memset( item->MenuItems,0,32 * sizeof( wItem ) );
 
  appClearItem( &item->main );
+ item->mainDecoration=0;
  appClearItem( &item->sub );
  item->sub.Bitmap.Width=384; item->sub.Bitmap.Height=384;
  item->sub.width=384; item->sub.height=384;
@@ -104,12 +101,13 @@ void appInit( int argc,char* argv[], char *envp[], void* disp )
  skinMPlayerDir=DATADIR "/Skin";
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
-
+ if ( !skinName )
+  {
+   if ( ( skinName=(char *)calloc( 1,7 ) ) == NULL ) { dbprintf( 0,"[config] Not enough memory.\n" ); exit( 1 ); }
+   strcpy( skinName,"default" );
+  }
  initDebug(NULL); // write messages to stderr
-
- cfgDefaults(); // set skin to "default"
- cfgRead();     // empty function - NOP
- switch ( skinRead( cfgSkin ) )
+ switch ( skinRead( skinName ) )
   {
    case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
    case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
