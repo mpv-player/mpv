@@ -111,7 +111,30 @@ Short description of video path:
    filter have to implement the whole filter api.
    Leaf filters are now: vf_vo.c (wrapper over libvo) and ve_XXX.c (video
    encoders used by mencoder).
+
    
+Video Filters
+=============
+
+Video filters are plugin-like code modules implementing the interface
+defined in vf.h.
+
+Basically it means video output manipulation, i.e. these plugins can
+modify the image and the image properties (size, colorspace etc) between
+the video decoders (vd.h) and the output layer (libvo or video encoders).
+
+The actual API is a mixture of the video decoder (vd.h) and libvo
+(video_out.h) APIs.
+
+main differences:
+- vf plugins may be "loaded" multiple times, with different parameters
+  and context - it's new in MPlayer, old APIs weren't reentrant.
+- vf plugins don't have to implement all functions - all functions have a
+  'fallback' version, so the plugins only override these if wanted.
+- Each vf plugin has its own get_image context, and they can interchange
+  images/buffers using these get_image/put_image calls.
+
+
 The VIDEO FILTER API:
 =====================
 filename: vf_FILTERNAME.c
@@ -347,6 +370,7 @@ the automatic colorspace/stride matching code (vf_next_config()).
 btw, u should avoid using global or static variables, to store filter instance 
 specific stuff, as filters might be used multiple times & in the future even
 multiple streams might be possible
+
 
 The AUDIO path:
 ===============
