@@ -1,5 +1,5 @@
 /* (C)2001 by LGB (Gabor Lenart), based on example programs in libcss
-   Some TODO: root privilegies really needed??  */
+           lgb@lgb.hu                                                        */
 
 /* don't do anything with this source if css support was not requested */
 #include "config.h"
@@ -86,17 +86,22 @@ int dvd_import_key ( unsigned char *hexkey )
 }
 
 
+
 int dvd_auth ( char *dev , int fd )
 {
         int devfd;  /* FD of DVD device */
         int lba;
 
-//	printf("DVD: auth fd=%d on %s.\n",fd,dev);
 
 	if ((devfd=open(dev,O_RDONLY))<0) {
 		fprintf(stderr,"DVD: cannot open DVD device \"%s\".\n",dev);
 		return 1;
 	}
+	
+	if (!CSSisEncrypted(devfd)) {
+		printf("DVD is unencrypted! Skipping authentication!\n(note: you should not use -dvd switch for unencrypted discs!)\n");
+		return 0;
+	} else printf("DVD is encrypted, issuing authentication ...\n");
 
 	/* reset AGIDs */
 	reset_agids(devfd);
