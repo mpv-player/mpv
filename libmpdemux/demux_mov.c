@@ -1889,6 +1889,8 @@ void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
 	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
 	//if(!(flags&1)) pts+=ds->pts;
 	ds->pts=mov_seek_track(trak,pts,flags);
+	if (demuxer->video->id < 0)
+	  ((sh_audio_t*)ds->sh)->delay = ds->pts;
     }
 
 }
