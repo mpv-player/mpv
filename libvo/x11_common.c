@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 #ifdef X11_FULLSCREEN
 
@@ -304,7 +305,7 @@ int vo_init( void )
   type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
   if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
    {
-    mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
+    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
     XFree( args );
     vo_wm_type=vo_wm_NetWM;
    }
@@ -570,17 +571,17 @@ int vo_x11_check_events(Display *mydisplay){
 	    
             if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
 	      {
-	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" );
+	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" );
 	       vo_wm_type=vo_wm_IceWM;
 	      }
 	    if ( !strncmp( name,"_KDE_",5 ) )
 	      {
-	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is KDE.\n" );
+	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" );
 	       vo_wm_type=vo_wm_KDE;
 	      }
 	    if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
 	      {
-	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" );
+	       mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" );
 	       vo_wm_type=vo_wm_WMakerStyle;
 	     }
 

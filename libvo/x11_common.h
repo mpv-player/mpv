@@ -43,9 +43,6 @@ extern XSizeHints vo_hint;
  extern void vo_setwindow( Window w,GC g );
  extern void vo_x11_putkey(int key);
 #endif
-#ifdef HAVE_GUI
- extern Display * vo_display;
-#endif
 
 void saver_off( Display * );
 void saver_on( Display * );
