@@ -210,25 +210,18 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
 
         //   bytes 8-11   audio codec fourcc
         // PCM fourcc needs extra parsing for every audio chunk, yet to implement
-        if( strncmp(hdr+8,"NONE", 4)){//&&strncmp(hdr+8,"VLB ", 4)){
+        if((demuxer->audio->id != -2) && strncmp(hdr+8,"NONE", 4)){//&&strncmp(hdr+8,"VLB ", 4)){
             sh_audio = new_sh_audio ( demuxer, 0 );
             demuxer->audio->sh = sh_audio;
             sh_audio->format=mmioFOURCC(hdr[8],hdr[9],hdr[10],hdr[11]);
             sh_audio->ds = demuxer->audio;
+            priv->a_format=mmioFOURCC(hdr[8],hdr[9],hdr[10],hdr[11]);
         }
-        priv->a_format=mmioFOURCC(hdr[8],hdr[9],hdr[10],hdr[11]);
 
-        // !!!!!!!!!!!!!!!!!!!!
-        // RemoveMe!!! This is just to avoid lot of bugreports!
-        // !!!!!!!!!!!!!!!!!!!!
-        if(priv->a_format==mmioFOURCC('V','L','B',' '))
-            mp_msg(MSGT_DEMUX,MSGL_WARN,"demux_nsv: VLB audio does not work yet. Expect problems.\n");
-
-        
         // store hdr fps 
         priv->fps=hdr[16];
             
-        if (strncmp(hdr+4,"NONE", 4)) {
+        if ((demuxer->video->id != -2) && strncmp(hdr+4,"NONE", 4)) {
             /* Create a new video stream header */
             sh_video = new_sh_video ( demuxer, 0 );
 
