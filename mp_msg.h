@@ -83,6 +83,8 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_AFILTER 37  // Audio filter messages
 
+#define MSGT_NETST 38 // Netstream
+
 #define MSGT_MAX 64
 
 void mp_msg_init();
