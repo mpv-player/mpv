@@ -130,7 +130,7 @@ static inline void encode_dc(MpegEncContext *s, int val,
     int mant, nbits;
 
     if (val == 0) {
-        jput_bits(&s->pb, huff_size[0], huff_code[0]);
+        put_bits(&s->pb, huff_size[0], huff_code[0]);
     } else {
         mant = val;
         if (val < 0) {
@@ -145,9 +145,9 @@ static inline void encode_dc(MpegEncContext *s, int val,
             nbits++;
         }
             
-        jput_bits(&s->pb, huff_size[nbits], huff_code[nbits]);
+        put_bits(&s->pb, huff_size[nbits], huff_code[nbits]);
         
-        jput_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
+        put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
     }
 }
 
@@ -185,7 +185,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
             run++;
         } else {
             while (run >= 16) {
-                jput_bits(&s->pb, huff_size_ac[0xf0], huff_code_ac[0xf0]);
+                put_bits(&s->pb, huff_size_ac[0xf0], huff_code_ac[0xf0]);
                 run -= 16;
             }
             mant = val;
@@ -202,16 +202,16 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
             }
             code = (run << 4) | nbits;
 
-            jput_bits(&s->pb, huff_size_ac[code], huff_code_ac[code]);
+            put_bits(&s->pb, huff_size_ac[code], huff_code_ac[code]);
         
-            jput_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
+            put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
             run = 0;
         }
     }
 
     /* output EOB only if not already 64 values */
     if (last_index < 63 || run != 0)
-        jput_bits(&s->pb, huff_size_ac[0], huff_code_ac[0]);
+        put_bits(&s->pb, huff_size_ac[0], huff_code_ac[0]);
 }
 
 static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block, int last_index)
@@ -244,14 +244,14 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 	encode_block(j->s, j->s->block[1], 1);
 	if (j->bw) {
 		/* U */
-		jput_bits(&j->s->pb, m->huff_size_dc_chrominance[0],
+		put_bits(&j->s->pb, m->huff_size_dc_chrominance[0],
 				m->huff_code_dc_chrominance[0]);
-		jput_bits(&j->s->pb, m->huff_size_ac_chrominance[0],
+		put_bits(&j->s->pb, m->huff_size_ac_chrominance[0],
 				m->huff_code_ac_chrominance[0]);
 		/* V */
-		jput_bits(&j->s->pb, m->huff_size_dc_chrominance[0],
+		put_bits(&j->s->pb, m->huff_size_dc_chrominance[0],
 				m->huff_code_dc_chrominance[0]);
-		jput_bits(&j->s->pb, m->huff_size_ac_chrominance[0],
+		put_bits(&j->s->pb, m->huff_size_ac_chrominance[0],
 				m->huff_code_ac_chrominance[0]);
     	} else {
 		/* we trick encode_block here so that it uses
@@ -381,6 +381,8 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 	init_put_bits(&j->s->pb, bufr, 1024*256, NULL, NULL);
 
 	mjpeg_picture_header(j->s);
+
+	j->s->header_bits = get_bit_count(&j->s->pb);
 
 	j->s->last_dc[0] = 128; 
 	j->s->last_dc[1] = 128; 
