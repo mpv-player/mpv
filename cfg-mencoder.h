@@ -42,9 +42,7 @@ extern struct config lavcopts_conf[];
 #endif
 
 #ifdef USE_WIN32DLL
-struct config vfwopts_conf[]={
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
+extern struct config vfwopts_conf[];
 #endif
 
 struct config ovc_conf[]={
