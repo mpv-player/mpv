@@ -1404,7 +1404,12 @@ static void *audio_grabber(void *data)
 	// stress testing by dropping half of the audio frames ;)
 	// especially when using ALSA with large block sizes
 	// where audio_skew remains a long while behind
-	priv->audio_skew_factor = (double)(priv->audio_skew-prev_skew)/(current_time - priv->audio_skew_measure_time);
+	if ((priv->audio_skew_measure_time != 0) && (current_time - priv->audio_skew_measure_time != 0)) {
+	    priv->audio_skew_factor = (double)(priv->audio_skew-prev_skew)/(current_time - priv->audio_skew_measure_time);
+	} else {
+	    priv->audio_skew_factor = 0.0;
+	}
+	
 	priv->audio_skew_measure_time = current_time;
 	prev_skew = priv->audio_skew;
 	pthread_mutex_unlock(&priv->skew_mutex);
