@@ -24,6 +24,7 @@ Ackermann, Andreas (Acki) <asackerm@stud.informatik.uni-erlangen.de>
 adland <adland123@yahoo.com>
     * support for various Windows DLL codecs (LCW2, ASLC)
     * smil playlist parser
+    * many streaming bug fixes and improvements
 
 Anholt, Eric <eanholt@gladstone.uoregon.edu>
     * CPU detection code
@@ -458,7 +459,7 @@ MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Piotr Michniewski (Cobra) <cobra_666@poczta.onet.pl>
     * Marcin Biernat (Boski Cinek) <boski_cinek@o2.pl>
     * Marek Jarycki (Emdej) <emdej@emdej.com>
-    * (Flex) <flex@tenbit.pl>
+    * Leszek Kaplita (Flex) <flex@tenbit.pl>
 
 Niedermayer, Michael (michaelni) <michaelni@gmx.at>
     * new, GPL postprocessing code (with deinterlacing etc...)
