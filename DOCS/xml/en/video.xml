@@ -1153,8 +1153,8 @@ at least.)
 <listitem><simpara>
   This driver calls <function>int 10h</function> handler thus it's not
   an emulator - it calls <emphasis role="bold">real</emphasis> things of
-  <emphasis>real</emphasis> BIOS in <emphasis>real-mode</emphasis>.
-  (Finely - in vm86 mode).
+  <emphasis>real</emphasis> BIOS in <emphasis>real-mode</emphasis>
+  (actually in vm86 mode).
   </simpara></listitem>
 <listitem><simpara>
   You can use VIDIX with it, thus getting accelerated video display
