@@ -193,10 +193,11 @@ A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
 Q: LIRC doesn't work, because ...
 A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
 
-Q: MPlayer exits with error XYZ
+Q: MPlayer exits with error [anything] when using l3codeca.acm .
 A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
         libc.so.6 => /lib/libc.so.6 (0x4???????)
    where "?" is any number then it's ok, the error is not here. If it is:
 	libc.so.6 => /lib/libc.so.6 (0x001?????)
    Then contact us, this is a (yet unknown) bug with some systems/kernels/
-   C compilers.
+   C compilers. Send us a standard bugreport as in DOCS/BUGREPORT, and send us
+   all your kernel patches' list.
