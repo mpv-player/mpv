@@ -39,13 +39,6 @@ rte_context *mp1e_context = NULL;
 rte_codec *mp1e_codec = NULL;
 rte_buffer mp1e_buffer;
 #endif
-struct { uint16_t Y,U,V; } YUV_s;
-#define RGBTOY(R,G,B) (uint16_t)( (0.257 * R) + (0.504 * G) + (0.098 * B) + 16 )
-#define RGBTOU(R,G,B) (uint16_t)( -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128 )
-#define RGBTOV(R,G,B) (uint16_t)( (0.439 * R) - (0.368 * G) - (0.071 * B) + 128 )
-#define RGBTOYUV(R,G,B) YUV_s.Y = RGBTOY(R,G,B); \
-			YUV_s.U = RGBTOU(R,G,B); \
-			YUV_s.V = RGBTOV(R,G,B);
 
 static unsigned char *picture_data[3];
 static unsigned int picture_linesize[3];
@@ -193,7 +186,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    pixel_format = RTE_YUV420;
         if( !rte_set_video_parameters( mp1e_context, pixel_format, mp1e_context->width,
 					mp1e_context->height, frame_rate,
-					3e6, "I" ) )
+					3e6, "IPP" ) )
         {
             printf( "VO: [dxr3] Unable to set mp1e context!\n" );
 	    rte_context_destroy( mp1e_context );
@@ -230,18 +223,21 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
                 
         size = s_width*s_height;
 
-        picture_data[0] = malloc((size * 3)/2);
-	picture_data[1] = picture_data[0] + size;
-	picture_data[2] = picture_data[1] + size / 4;
-	picture_linesize[0] = s_width;
-	picture_linesize[1] = s_width / 2;
-	picture_linesize[2] = s_width / 2;
+	if( format == IMGFMT_YUY2 )
+	{
+	    picture_data[0] = NULL;
+	    picture_linesize[0] = s_width * 2;
+	}
+	else
+	{
+    	    picture_data[0] = malloc((size * 3)/2);
+	    picture_data[1] = picture_data[0] + size;
+	    picture_data[2] = picture_data[1] + size / 4;
+	    picture_linesize[0] = s_width;
+	    picture_linesize[1] = s_width / 2;
+	    picture_linesize[2] = s_width / 2;
+	}
 
-	// Set the border colorwou
-	RGBTOYUV(0,0,0)
-        memset( picture_data[0], YUV_s.Y, size );
-        memset( picture_data[1], YUV_s.U, size/4 );
-        memset( picture_data[2], YUV_s.V, size/4 );
 	
 	if( !rte_start_encoding( mp1e_context ) )
 	{
@@ -272,10 +268,21 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
+    switch(img_format)
+    {
+    case IMGFMT_BGR24:
+    case IMGFMT_YV12:
+	vo_draw_alpha_yv12(w,h,src,srca,srcstride,picture_data[0]+(x0+d_pos_x)+(y0+d_pos_y)*picture_linesize[0],picture_linesize[0]);
+	break;
+    case IMGFMT_YUY2:
+	vo_draw_alpha_yuy2(w,h,src,srca,srcstride,picture_data[0]+(x0+d_pos_x)*2+(y0+d_pos_y)*picture_linesize[0],picture_linesize[0]);
+	break;
+    }
 }
 
 static void draw_osd(void)
 {
+    vo_draw_text(osd_w,osd_h,draw_alpha);
 }
 
 static uint32_t draw_frame(uint8_t * src[])
@@ -296,10 +303,7 @@ static uint32_t draw_frame(uint8_t * src[])
 #ifdef USE_MP1E
     else if( img_format == IMGFMT_YUY2 )
     {
-	mp1e_buffer.data = src[0];
-	mp1e_buffer.time = vo_pts/90000.0;
-	mp1e_buffer.user_data = NULL;
-	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
+        picture_data[0] = src[0];
 	return 0;
     }
     else if( img_format == IMGFMT_BGR24 )
@@ -321,6 +325,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	mp1e_buffer.data = picture_data[0];
 	mp1e_buffer.time = vo_pts/90000.0;
 	mp1e_buffer.user_data = NULL;
+	vo_draw_text(osd_w,osd_h,draw_alpha);
 	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
 	
 	return 0;
@@ -338,6 +343,13 @@ static void flip_page (void)
 	mp1e_buffer.time = vo_pts/90000.0;
 	mp1e_buffer.user_data = NULL;
 	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
+    }
+    else if( img_format == IMGFMT_YUY2 )
+    {
+	mp1e_buffer.data = picture_data[0];
+	mp1e_buffer.time = vo_pts/90000.0;
+	mp1e_buffer.user_data = NULL;
+    	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
     }
 #endif
 }
