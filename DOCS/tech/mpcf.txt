@@ -233,6 +233,7 @@ length_in_msec
 index_flag
 	1 indicates that this file has an index
 	Note, all files SHOULD have an index at the end except, (realtime) streams 
+	Note, all streams SHOULD have an index
 
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
@@ -487,7 +488,8 @@ headers MUST be repeated every 10sec at least ? FIXME
 headers MUST be repeated at least twice (so they exist 3 times in a file)
 
 		Index
-the index can be repeated but there SHOULD be at least one at the end
+the index can be repeated but there SHOULD be at least one for each stream at
+the end
 Note: in case of realtime streaming there is no end, so no index there either
 
 		Info packets
