@@ -35,9 +35,9 @@
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  * LIMITATIONS: on dualhead Radeons (VE, M6, M7) driver doesn't work in
- * dual monitor configuration. TVout is not supported too. M7 chips currently
- * are not supported (Need volunteers to test its work). Probably these bugs
- * can be solved by importing XFree86 code, which has ATI's support.
+ * dual monitor configuration. TVout is not supported too.
+ * Probably these problems can be solved by importing XFree86 code, which
+ * has ATI's support.
  *
  * Mini-HOWTO: This driver doesn't accept any options. It only switches your
  * video card to graphics mode. Standard way to change video modes and other
