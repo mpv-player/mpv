@@ -2589,6 +2589,11 @@ if test "$_dvdkit" = yes ; then
   else
    _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
   fi
+  if linux ; then
+   _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
+  else
+   _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
+  fi
 else
   _noinputmodules="mpdvdkit $_noinputmodules"
 fi
@@ -3643,6 +3648,7 @@ $_def_cdio
 $_def_dvdio
 $_def_bsdi_dvd
 $_def_dvd_bsd
+$_def_dvd_linux
 $_def_sol_scsi_h
 $_def_stddef
 
