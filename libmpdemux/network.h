@@ -38,13 +38,7 @@ typedef struct streaming_control {
 	void *data;
 } streaming_ctrl_t;
 
-streaming_ctrl_t *streaming_ctrl_new();
-void streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl );
-
-int autodetectProtocol( streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_format );
-URL_t* check4proxies( URL_t *url );
-
-//int streaming_start( stream_t *stream, int demuxer_type );
+//int streaming_start( stream_t *stream, int demuxer_type, URL_t *url );
 
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 

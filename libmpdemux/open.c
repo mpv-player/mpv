@@ -374,24 +374,13 @@ tv_err:
 #ifdef STREAMING
   url = url_new(filename);
   if(url) {
-	streaming_ctrl_t *streaming_ctrl;
-	streaming_ctrl = streaming_ctrl_new();
-	if( streaming_ctrl==NULL ) return NULL;
-	url = check4proxies( url );
-	streaming_ctrl->url = url_copy( url );
-	if( autodetectProtocol( streaming_ctrl, &f, file_format )<0 ) {
-		mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_UnableOpenURL, filename );
-		return NULL;
-	}
-        mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
-	stream->streaming_ctrl = streaming_ctrl;
-	//if( streaming_start( stream , url, *file_format )<0){
-	if( streaming_start( stream, *file_format )<0){
+	if( streaming_start( stream, *file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
-          url_free(url);
+	  url_free(url);
 	  return NULL;
 	}
+        mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
 	url_free(url);
 	return stream;
   }

@@ -83,6 +83,9 @@ streaming_ctrl_new( ) {
 void
 streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 	if( streaming_ctrl==NULL ) return;
+	if( streaming_ctrl->url ) url_free( streaming_ctrl->url );
+	if( streaming_ctrl->buffer ) free( streaming_ctrl->buffer );
+	if( streaming_ctrl->data ) free( streaming_ctrl->data );
 	free( streaming_ctrl );
 }
 
@@ -177,6 +180,7 @@ connect2Server(char *host, int port) {
 
 URL_t*
 check4proxies( URL_t *url ) {
+	if( url==NULL ) return NULL;
 	if( !strcasecmp(url->protocol, "http_proxy") ) {
 			printf("Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
 			return url;
@@ -207,7 +211,7 @@ check4proxies( URL_t *url ) {
 			sprintf( new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url);
 			tmp_url = url_new( new_url );
 			if( tmp_url==NULL ) {
-					return url;
+				return url;
 			}
 			url_free( url );
 			url = tmp_url;
@@ -444,7 +448,7 @@ extension=NULL;
 
 int
 streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size) {
-printf("streaming_bufferize\n");
+//printf("streaming_bufferize\n");
 	streaming_ctrl->buffer = (char*)malloc(size);
 	if( streaming_ctrl->buffer==NULL ) {
 		printf("Memory allocation failed\n");
@@ -461,19 +465,19 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 //printf("nop_streaming_read\n");
 	if( stream_ctrl->buffer_size!=0 ) {
 		int buffer_len = stream_ctrl->buffer_size-stream_ctrl->buffer_pos;
-printf("%d bytes in buffer\n", stream_ctrl->buffer_size);
+//printf("%d bytes in buffer\n", stream_ctrl->buffer_size);
 		len = (size<buffer_len)?size:buffer_len;
 		memcpy( buffer, (stream_ctrl->buffer)+(stream_ctrl->buffer_pos), len );
 		stream_ctrl->buffer_pos += len;
-printf("buffer_pos = %d\n", stream_ctrl->buffer_pos );
+//printf("buffer_pos = %d\n", stream_ctrl->buffer_pos );
 		if( stream_ctrl->buffer_pos>=stream_ctrl->buffer_size ) {
 			free( stream_ctrl->buffer );
 			stream_ctrl->buffer = NULL;
 			stream_ctrl->buffer_size = 0;
 			stream_ctrl->buffer_pos = 0;
-printf("buffer cleaned\n");
+//printf("buffer cleaned\n");
 		}
-printf("read %d bytes from buffer\n", len );
+//printf("read %d bytes from buffer\n", len );
 	}
 
 	if( len<size ) {
@@ -529,6 +533,7 @@ nop_streaming_start( stream_t *stream ) {
 		if( http_hdr->body_size>0 ) {
 			if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
 				http_free( http_hdr );
+				stream->streaming_ctrl->data = NULL;
 				return -1;
 			}
 		}
@@ -651,9 +656,20 @@ rtp_streaming_start( stream_t *stream ) {
 }
 
 int
-streaming_start(stream_t *stream, int demuxer_type) {
-	int ret=-1;
+streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
+	int ret;
 	if( stream==NULL ) return -1;
+
+	stream->streaming_ctrl = streaming_ctrl_new();
+	if( stream->streaming_ctrl==NULL ) {
+		return -1;
+	}
+	stream->streaming_ctrl->url = check4proxies( url_copy(url) );
+	ret = autodetectProtocol( stream->streaming_ctrl, &stream->fd, &demuxer_type );
+	if( ret<0 ) {
+		return -1;
+	}
+	ret = -1;
 	
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
@@ -693,7 +709,8 @@ streaming_start(stream_t *stream, int demuxer_type) {
 	}
 
 	if( ret<0 ) {
-		free( stream->streaming_ctrl );
+		streaming_ctrl_free( stream->streaming_ctrl );
+		stream->streaming_ctrl = NULL;
 	} 
 	return ret;
 }
