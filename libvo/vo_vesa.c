@@ -34,6 +34,7 @@
 #include "sub.h"
 #include "linux/vbelib.h"
 #include "bswap.h"
+#include "aspect.h"
 
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
@@ -414,23 +415,6 @@ static uint32_t query_format(uint32_t format)
 	return retval;
 }
 
-static void vesa_aspect(uint32_t width,uint32_t height,  
-		    	uint32_t xres,uint32_t yres,
-			uint32_t *image_width,uint32_t *image_height)
-{
-  float aspect_factor;
-  aspect_factor = (float)width / height;
-  *image_width = xres;
-  *image_height = xres /aspect_factor;
-  if(verbose) printf("vo_vesa: aspect factor = %f(%ux%u) *image=%ux%u screen=%ux%u\n",aspect_factor,width,height,*image_width,*image_height,xres,yres);
-  if((*image_height) > yres)
-  {
-    *image_height = yres;
-    *image_width = yres * aspect_factor;
-    if(verbose) printf("vo_vesa: Y > X therefore *image=%ux%u\n",*image_width,*image_height);
-  }
-}
-
 static void paintBkGnd( void )
 {
     int x_res = video_mode_info.XResolution;
@@ -686,9 +670,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  {
 		      /* software scale */
 		      if(vesa_zoom > 1)
-		      vesa_aspect(image_width,image_height,  
-		    		  video_mode_info.XResolution,video_mode_info.YResolution,
-				  &image_width,&image_height);
+		      {
+		        aspect_save_orig(width,height);
+			aspect_save_prescale(d_width,d_height);
+			aspect_save_screenres(video_mode_info.XResolution,video_mode_info.YResolution);
+			aspect(&image_width,&image_height,A_ZOOM);
+		      }
 		      else
 		      if(fs_mode)
 		      {
