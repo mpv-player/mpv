@@ -207,8 +207,8 @@ int attrib_count,i;
    if(keycolor_handling == AUTO_COLORKEY){
    //XV_AUTOPING_COLORKEY doesn't work for XvMC yet(NVidia 43.63)
       attributes = XvQueryPortAttributes(mDisplay, xv_port, &attrib_count);
-      if(attributes!=NULL)
-         for (i = 0; i < attrib_count; i++)
+      if(attributes!=NULL){
+         for (i = 0; i < attrib_count; i++){
             if (!strcmp(attributes[i].name, "XV_AUTOPAINT_COLORKEY"))
             {
                xv_atom = XInternAtom(mDisplay, "XV_AUTOPAINT_COLORKEY", False);
@@ -220,7 +220,9 @@ int attrib_count,i;
                }
                break;
             }
+	 }
          XFree(attributes);
+      }
    }
 
    xv_atom = XInternAtom(mDisplay, "XV_COLORKEY",False);
