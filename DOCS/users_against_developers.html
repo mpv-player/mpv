@@ -99,17 +99,18 @@
 
 <H2><A NAME="binary">Binary distribution</A></H2>
 
-<P>This was the second big problem but has been solved as of version
-  0.90-pre1. MPlayer previously contained source from the OpenDivX project,
-  which disallows binary redistribution. This code has been removed and you are now
-  welcome to create binary packages as you see fit.</P>
+<P>MPlayer previously contained source from the OpenDivX project, which
+  disallows binary redistribution. This code has been removed in version
+  0.90-pre1 and the remaining file <CODE>divx_vbr.c</CODE> that is derived
+  from OpenDivX sources has been put under the GPL by its authors as of version
+  0.90pre9. You are now welcome to create binary packages as you see fit.</P>
 
-<P>Another impediment to binary redistribution was compiletime optimizations
-  for CPU architecture.  MPlayer now supports runtime CPU detection
-  (specify the <CODE>--enable-runtime-cpudetection</CODE> option when
-  compiling). It is disabled by default because it implies a small speed
-  sacrifice, it is now possible to create binaries that run on different
-  members of the Intel CPU family.</P>
+<P>Another impediment to binary redistribution were compiletime optimizations
+  for CPU architecture. MPlayer now supports runtime CPU detection (specify
+  the <CODE>--enable-runtime-cpudetection</CODE> option when configuring). It
+  is disabled by default because it implies a small speed sacrifice, but it is
+  now possible to create binaries that run on different members of the Intel
+  CPU family.</P>
 
 
 <H2><A NAME="nvidia">nVidia</A></H2>
