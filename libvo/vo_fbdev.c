@@ -1039,6 +1039,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		image_width=width;
 		image_height=height;
 	    }
+
+		if(fb_xres > image_width)
+		    x_offset = (fb_xres - image_width) / 2;
+		else x_offset = 0;
+		if(fb_yres > image_height)
+		    y_offset = (fb_yres - image_height) / 2;
+		else y_offset = 0;
 		geometry(&x_offset,&y_offset,fb_xres,fb_yres,image_width,image_height);
 
 		if(vidix_init(width,height,x_offset,y_offset,image_width,
@@ -1056,7 +1063,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	else
 #endif
 	{
-	    int x_offset,y_offset;
+	    int x_offset=0,y_offset=0;
 	    if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
 				    MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
 		printf(FBDEV "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
