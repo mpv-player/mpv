@@ -3420,6 +3420,8 @@ use the specified codec (there is no default, you must specify it):
 .RSs
 .IPs mjpeg
 Motion JPEG
+.IPs ljpeg
+Lossless JPEG
 .IPs h263
 H263
 .IPs h263p
@@ -3431,15 +3433,23 @@ DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
 .IPs wmv1
-Windows Media Video 7
+Windows Media Video, version 1 (aka WMV7)
 .IPs wmv2
-Windows Media Video 8
+Windows Media Video, version 2 (aka WMV8)
 .IPs rv10
 an old RealVideo codec
 .IPs mpeg1video
-MPEG1 video :)
+MPEG1 video
+.IPs mpeg2video
+MPEG2 video
 .IPs huffyuv
 HuffYUV
+.IPs asv1
+ASUS Video v1
+.IPs asv2
+ASUS Video v2
+.IPs ffv1
+FFmpeg's lossless video codec
 .RE
 .PD 1
 .TP
@@ -3932,12 +3942,16 @@ use interlaced dct
 .TP
 .B format=<value>
 .RSs
-.IPs YV12\ 
+.IPs YV12
 default
-.IPs 422P\ \ 
-for huffyuv or lossless jpeg
-.IPs 411P,410P,BGR32
-for lossless jpeg
+.IPs 444P
+for ffv1
+.IPs 422P
+for huffyuv, lossless jpeg and ffv1
+.IPs 411P,YVU9
+for lossless jpeg and ffv1
+.IPs BGR32
+for lossless jpeg only
 .RE
 .TP
 .B pred
@@ -4124,6 +4138,12 @@ Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
       the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
 .br
 Tip: a more positive bias (-32 - -16 instead of -64) seems to improve the PSNR
+.TP
+.B inter_matrix=<comma separated matrix>
+Use custom inter matrix. It needs a comma separated string of 64 integers.
+.TP
+.B intra_matrix=<comma separated matrix>
+Use custom intra matrix. It needs a comma separated string of 64 integers.
 .RE
 
 .SS nuv (-nuvopts)
