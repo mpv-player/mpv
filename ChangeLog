@@ -33,6 +33,21 @@ MPlayer (1.0)
     * libmpeg2 updated to 0.4.0b
     * libfaad2 updated to 2.1beta CVS snapshot
     * DTS decoding via lavc
+    * Windows Media Audio 9 Voice support via binary codec
+    * Windows Media Video 9 Advanced support via binary codec
+    * Windows Media Screen Codec 2 support via binary codec
+    * Windows Media Picture Codec support via binary codec
+    * VDOWave video support via binary codec
+    * Miro VideoXL video support via lavc
+    * Creative ADPCM audio support via lavc or binary codec
+    * IBM Ultimoion video support via lavc
+    * Micronas Speech codec support via binary codec
+    * H.261 video support via lavc
+    * Techsmith Camtasia Screen Codec video support via lavc
+    * sonic audio codec support via lavc
+    * snow video codec support via lavc
+    * QuickDraw video support via lavc
+    * Cinepak, CYUV and RoQ Audio/Video moved to FFmpeg
 
     Demuxers:
     * fix -nosound and -novideo for NSV
@@ -40,6 +55,8 @@ MPlayer (1.0)
     * support .vp5 file format (AVI variant)
     * seeking for audio-only ASF files fixed
     * improved MP3 detection
+    * AVC in .mp4 files
+    * raw H.261 files via lavf
 
     Streaming:
     * -cache-min option
