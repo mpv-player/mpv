@@ -147,6 +147,8 @@ struct config of_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+extern int vd_use_slices;
+
 static config_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
@@ -186,6 +188,10 @@ static config_t mencoder_opts[]={
 	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
+	// draw by slices or whole frame (usefull with libmpeg2/libavcodec)
+	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{"autoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noautoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 1, 0, NULL},
