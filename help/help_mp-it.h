@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.115
+// Updated to help_mp-en.h v1.121
 
 // ========================= MPlayer help ===========================
 
@@ -346,6 +346,16 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "Impossibile trovare un colorspace adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
+
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Devi installare o aggiornare i codec binari.\nVai a http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow inizializzato correttamente.\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO inizializzato correttamente.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Impossibile inviare l'evento schermo pieno EWMH!\n"
+
+#define MSGTR_NeedAfVolume "Mixer: questo driver audio richiede \"-af volume\" per regolare il volume.\n"
 
 // ====================== GUI messages/buttons ========================
 
