@@ -432,7 +432,7 @@ fichier.
 .
 .TP
 .B \-codecs-file <nomfichier> (voir aussi \-afm, \-ac, \-vfm et \-vc)
-Définit le fichier de codecs au lieu de celui du système ou de celui inclus
+Défini le fichier de codecs au lieu de celui du système ou de celui inclus
 dans mplayer.
 .
 .TP
@@ -3796,7 +3796,7 @@ fichiers à deux canaux.
 .PD 0
 .RSs
 .IPs <retard>
-décalage en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 15).
+décalage en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 20).
 .RE
 .PD 1
 .
@@ -7689,7 +7689,19 @@ frameref.
 .
 .TP
 .B bframe=<0\-16>
-nombre de trames-B consécutives entre les trames-I et -P (par défaut\ : 0)
+nombre maximum de trames-B consécutives entre les trames-I et -P
+(par défaut\ : 0)
+.
+.TP
+.B (no)b_adapt
+Décide automatiquement quand utiliser des trames-B et combien, jusqu'au
+maximum défini ci-dessus (par défaut\ : activé).
+Si cette option est désactivée, alors le maximum de trames-B est utilisé.
+.
+.TP
+.B b_bias=<-100\-100>
+Contrôle la décision prise par b_adapt.
+Un biais plus important produit plus de trames-B (par défaut\ : 0).
 .
 .TP
 .B (no)deblock
