@@ -3788,7 +3788,7 @@ int main(void) {
 EOF
   if cc_check $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
-    _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\+\)\.\([0-9]\+\).*/\1\2/'`
+    _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]*\)\.\([0-9]*\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"
     echores "yes ($_faad_version)"
   else
