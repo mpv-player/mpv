@@ -4542,6 +4542,14 @@ Useful to control at which point of the filter chain subtitles are rendered
 when hardcoding subtitles onto a movie.
 .
 .TP
+.B \-noencodedups
+Do not attempt to encode duplicate frames in duplicate; always output
+zero-byte frames to indicate duplicates.
+Zero-byte frames will be written anyway unless a filter or encoder
+capable of doing duplicate encoding is loaded.
+Currently the only such filter is harddup.
+.
+.TP
 .B \-noodml (\-of avi only)
 Do not write OpenDML index for AVI files >1GB.
 .
