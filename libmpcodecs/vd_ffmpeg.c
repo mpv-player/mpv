@@ -411,10 +411,11 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
     pic->data[2]= mpi->planes[2];
-    
-    assert(mpi->w >= ((width +align)&(~align)));
-    assert(mpi->h >= ((height+align)&(~align)));
-    assert(mpi->stride[0] >= mpi->w);
+
+#if 0    
+    assert(mpi->width >= ((width +align)&(~align)));
+    assert(mpi->height >= ((height+align)&(~align)));
+    assert(mpi->stride[0] >= mpi->width);
     if(mpi->imgfmt==IMGFMT_I420 || mpi->imgfmt==IMGFMT_YV12 || mpi->imgfmt==IMGFMT_IYUV){
         const int y_size= mpi->stride[0] * (mpi->h-1) + mpi->w;
         const int c_size= mpi->stride[1] * ((mpi->h>>1)-1) + (mpi->w>>1);
@@ -426,6 +427,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         assert(mpi->planes[2] > mpi->planes[0] || mpi->planes[2] + c_size <= mpi->planes[0]);
         assert(mpi->planes[2] > mpi->planes[1] || mpi->planes[2] + c_size <= mpi->planes[1]);
     }
+#endif
 
     /* Note, some (many) codecs in libavcodec must have stride1==stride2 && no changes between frames
      * lavc will check that and die with an error message, if its not true
