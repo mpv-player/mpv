@@ -3,7 +3,7 @@
 /* 
  * vo_jpeg.c, JPEG Renderer for Mplayer
  *
- * Copyright 2001 by Pontscho (pontscho@makacs.poliod.hu)
+ * Copyright 2002 by Pontscho (pontscho@makacs.poliod.hu)
  *
  */
 
@@ -46,7 +46,7 @@ int jpeg_progressive_mode = 0;
 int jpeg_optimize = 100;
 int jpeg_smooth = 0;
 int jpeg_quality = 75;
-char * jpeg_outdir;
+char * jpeg_outdir = '.';
 
 #define bpp 24
 
