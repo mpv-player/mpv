@@ -449,6 +449,11 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
             for (i=0;i<6;i++) ((char*)0x10007688)[i]=0x90;
             for (i=0;i<6;i++) ((char*)0x100082c3)[i]=0x90;
             for (i=0;i<6;i++) ((char*)0x100084aa)[i]=0x90;
+          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003e70) {
+            // looks like VP 6.0.7.3
+            for (i=0;i<6;i++) ((char*)0x10007559)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x100081c3)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x1000839e)[i]=0x90;
           } else {
             fprintf(stderr, "Unsupported VP6 version\n");
             return 0;
