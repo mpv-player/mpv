@@ -5,14 +5,14 @@
    Licence: GPL
 */
 
-#include "../../libdha/pci_ids.h"
-#include "../../libdha/pci_names.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
+#include "../../libdha/pci_ids.h"
+#include "../../libdha/pci_names.h"
 #include "../vidix.h"
 #include "../fourcc.h"
 #include "../../libdha/libdha.h"
