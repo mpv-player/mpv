@@ -2,10 +2,70 @@
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
-<qandaset defaultlabel="number">
+<qandaset defaultlabel="qanda">
+
+<qandadiv id="faq-development">
+<title>Développement</title>
+
+<qandaentry>
+<question><para>
+Comment puis-je créer un patch adapté pour <application>MPlayer</application> ?
+</para></question>
+<answer><para>
+Nous avons fait un <ulink url="../../tech/patches.txt">court document</ulink>
+décrivant tous les détails nécessaires. Merci de suivre les instructions.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je supporter le développement de <application>MPlayer</application> ?
+</para></question>
+<answer><para>
+Nous sommes plus que contents d'accepter vos
+<ulink url="http://www.mplayerhq.hu/homepage/donations.html">dons</ulink>
+matériels et logiciels. Ils nous aident à améliorer continuellement MPlayer.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je devenir un développeur <application>MPlayer</application> ?
+</para></question>
+<answer><para>
+Nous accueillons toujours des codeurs et des &quot;documenteurs&quot;. Lisez la
+<ulink url="../../tech/">documentation technique</ulink>
+pour avoir un premier aperçu. Ensuite vous devriez vous inscrire à la liste de diffusion
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+et commencer à coder.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Pourquoi n'utilisez-vous pas autoconf/automake ?
+</para></question>
+<answer><para>
+Nous avons un système modulaire écrit à la main. Il fait un travail
+relativement bon, donc pourquoi changer ? Nous n'aimons pas les outils
+auto*, comme d'
+<ulink url="http://freshmeat.net/articles/view/889/">autres gens</ulink>.
+</para></answer>
+</qandaentry>
+</qandadiv>
 
 <qandadiv id="faq-compilation">
 <title>Compilation</title>
+<qandaentry>
+<question><para>
+Y'a-t-il des paquets binaires (RPM/deb) de <application>MPlayer</application> ?
+</para></question>
+<answer><para>
+Voir les sections <link linkend="debian">Debian</link> et <link linkend="rpm">RPM</link>
+pour plus de détails.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 La compilation s'arrête avec un message d'erreur similaire à celui-ci:
@@ -32,15 +92,6 @@ Configure se termine par ce texte, et MPlayer ne compile pas !
 <answer><para>
 Votre gcc n'est pas installé correctement, voir le fichier <filename>config.log</filename>
 pour plus de détails.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Que veut dire &quot;No such file or directory&quot; ?
-</para></question>
-<answer><para>
-Probablement qu'il n'y a pas de tel fichier ou répertoire.
 </para></answer>
 </qandaentry>
 
@@ -194,22 +245,25 @@ mais préparez-vous à des problèmes).
 
 <qandaentry>
 <question><para>
-J'ai une G200/G400, comment puis-je compiler/utiliser le pilote mga_vid ?
+J'ai une Matrox G200/G400/G450/G550, comment puis-je compiler/utiliser le pilote mga_vid ?
 </para></question>
 <answer><para>
-Lisez la <link linkend="mga_vid">mga_vid documentation</link>.
+Lisez la section <link linkend="mga_vid">mga_vid</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Y'a-t-il des paquets rpm/deb/... de <application>MPlayer</application> ?
+Hmm, étrange. En chargeant le pilote noyau <filename>mga_vid.o</filename>, J'ai
+trouvé ceci dans les logs:
+<programlisting>
+Warning: loading mga_vid.o will taint the kernel: no license
+</programlisting>
 </para></question>
 <answer><para>
-Vous pouvez faire un paquet .deb pour vous, voyez la section
-<link linkend="debian">Paquets Debian</link>. Il y a des liens vers les paquets
-RPM Red Hat officiels disponibles sur notre
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">page de téléchargement</ulink>.
+Les derniers modutils du noyau requièrent un flag indiquant la licence
+(principalement pour éviter que les hackers noyau ne débogguent des noyaux
+closed source). Upgradez vos noyau, modutils et <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -260,21 +314,6 @@ et exécutez <command>ldconfig</command>.
 
 <qandaentry>
 <question><para>
-Hmm, étrange. En chargeant le pilote noyau <filename>mga_vid.o</filename>, J'ai
-trouvé ceci dans les logs:
-<programlisting>
-Warning: loading mga_vid.o will taint the kernel: no license
-</programlisting>
-</para></question>
-<answer><para>
-Les derniers modutils du noyau requièrent un flag indiquant la licence
-(principalement pour éviter que les hackers noyau ne débogguent des noyaux
-closed source). Upgradez votre noyau, modutils et <application>MPlayer</application>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 En compilant <application>MEncoder</application>, il provoque un segfault au linkage!
 </para></question>
 <answer><para>
@@ -306,50 +345,46 @@ Moi aussi. :)
 
 <qandadiv id="faq-general">
 <title>Questions générales</title>
+
 <qandaentry>
 <question><para>
-Comment puis-je créer un patch adapté pour <application>MPlayer</application> ?
+Y-a-t'il des listes de diffusion pour <application>MPlayer</application> ?
 </para></question>
 <answer><para>
-Nous avons fait un <ulink url="../../tech/patches.txt">court document</ulink>
-décrivant tous les détails nécessaires. Merci de suivre les instructions.
+Oui. Voir la section <link linkend="mailinglists">listes de diffusion</link>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Comment puis-je supporter le développement de <application>MPlayer</application> ?
+J'ai trouvé un sale bogue quand j'essaie de lire ma vidéo préférée! Qui dois-je
+informer ?
 </para></question>
 <answer><para>
-Nous sommes plus que contents d'accepter vos
-<ulink url="http://www.mplayerhq.hu/homepage/donations.html">donations</ulink>
-matérielles et logicielles. Elles nous aident à améliorer continuellement MPlayer.
+Veuillez lire <link linkend="bugreports">comment rapporter un bogue</link> et
+suivez les instructions.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Comment puis-je devenir un développeur <application>MPlayer</application> ?
+J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utiliser?
 </para></question>
 <answer><para>
-Nous accueillons toujours des codeurs et des &quot;documenteurs&quot;. Lisez la
-<ulink url="../../tech/">documentation technique</ulink>
-pour avoir un premier aperçu. Ensuite vous devriez vous inscrire à la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
-et commencer à coder.
+Regardez l'<ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">état des codecs</ulink>,
+si il ne contient pas votre codec, lisez la <link linkend="codecs">documentation des codecs</link>,
+surtout le <link linkend="win32-codecs">HOWTO importation des codecs</link> et contactez-nous.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Puis-je lancer plusieurs instances de <application>MPlayer</application> ?
+Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler normalement:
+<screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Oui. Certains pilotes de sortie vidéo comme xv, dga ou (x)mga sont exclusifs,
-certains sont exclusifs en combinaison avec certaines cartes graphique et pilotes.
-Vous ne pourrez pas lancer plus d'une instance de MPlayer avec l'un de ces
-pilotes. A un degré moindre cela s'applique également aux pilotes audio. Ils ne
-permettent pas tous la lecture de flux multiples sur le même périphérique.
+Vous avez besoin des droits root ou un noyau configuré spécialement pour utiliser le nouveau
+code de timing. Pour les détails voir la <link linkend="rtc">section RTC</link> de la documentation.
 </para></answer>
 </qandaentry>
 
@@ -368,7 +403,7 @@ Les options <option>-xy</option> ou <option>-fs</option> ne fonctionnent pas ave
 le pilote x11 (<option>-vo x11</option>) ...
 </para></question>
 <answer><para>
-Ils fonctionnent, mais vous devez spécifier explicitement le zoom logiciel (très lent)
+Elles fonctionnent, mais vous devez spécifier explicitement le zoom logiciel (très lent)
 avec l'option <option>-zoom</option>. Vous feriez mieux d'utiliser le support
 XF86VidMode: Vous devez spécifier les options <option>-vm</option> et
 <option>-fs</option>, et c'est bon. Assurez vous d'avoir les bons modelines dans votre
@@ -417,7 +452,7 @@ Utilisez l'option <option>-quiet</option> et lisez la page de man.
 
 <qandaentry>
 <question><para>
-Pourquoi l'utilisation cpu du video_est à zéro (0%) pour certains fichiers ?
+Pourquoi l'utilisation cpu de video_out est-elle à zéro (0%) pour certains fichiers ?
 </para></question>
 <answer><para>
 Ce n'est pas zéro, mais comme il est appelé à partir du codec il ne peut être mesuré
@@ -439,39 +474,6 @@ Téléchargez les codecs Win32 sur notre
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page des codecs</ulink>
 (c'est le paquetage de codecs avifile mais avec un ensemble de DLL différent) et
 installez-les.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Y-a-t'il des listes de diffusion pour <application>MPlayer</application> ?
-</para></question>
-<answer><para>
-Oui. Voir le bas de la page d'info sur
-<ulink url="http://www.mplayerhq.hu/homepage/info.html">notre homepage</ulink>
-pour s'inscrire.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-J'ai trouvé un sale bogue quand j'essaie de lire ma vidéo préférée! Qui dois-je
-informer ?
-</para></question>
-<answer><para>
-Veuillez lire <link linkend="bugreports">comment rapporter un bogue</link> et
-suivez les instructions.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utiliser?
-</para></question>
-<answer><para>
-Regardez l'<ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">état des codecs</ulink>,
-si il ne contient pas votre codec, lisez la <link linkend="codecs">documentation des codecs</link>,
-surtout le <link linkend="win32-codecs">HOWTO importation des codecs</link> et contactez-nous.
 </para></answer>
 </qandaentry>
 
@@ -524,7 +526,7 @@ et remplacez <systemitem>#undef FAST_OSD</systemitem> par
 
 <qandaentry>
 <question><para>
-L'On Screen Display (OSD) tremblote!
+L'On Screen Display (OSD) tremblote !
 </para></question>
 <answer><para>
 Vous utilisez le pilote vo avec un cache simple (x11,xv). Avec xv, utilisez l'option
@@ -534,7 +536,7 @@ Vous utilisez le pilote vo avec un cache simple (x11,xv). Avec xv, utilisez l'op
 
 <qandaentry>
 <question><para>
-libavcodec, c'est quoi?
+libavcodec, c'est quoi exactement ?
 </para></question>
 <answer><para>
 Voir la <link linkend="ffmpeg">section libavcodec</link>.
@@ -591,34 +593,21 @@ Utilisez:
 <title>Problèmes de lecture</title>
 <qandaentry>
 <question><para>
-Je peut lire certains AVIs mais je n'ai pas de son et j'obtiens ce type d'erreur:
-<screen>
-    Detected audio codec: [divx] afm:4 (DivX audio (WMA))
-    Requested audio codec family [divx] (afm=4) not available (enable it at
-    compile time!)
-</screen>
-</para></question>
-<answer><para>
-L'audio utilise probablement un codec audio non-supporté nativement par
-<application>MPlayer</application>. Installez le paquetage de codecs Win32 comme
-décrit dans le <filename>README</filename> ou dans la section
-<link linkend="install">Installation</link>.
-</para></answer>
-</qandaentry>
-<qandaentry>
-<question><para>
-... fonctionne avec <application>avifile/aviplay</application> mais pas avec
+... fonctionne avec <application>xine/avifile/...</application> mais pas avec
 <application>MPlayer</application>.
 </para></question>
 <answer><para>
-<application>MPlayer</application> n'est pas <application>avifile</application>.
-La seule chose commune entre ces deux lecteurs est le chargeur de DLL Win32.
-L'ensemble des codecs (DLL), la synchronisation, le démultiplexage etc sont
-totalement différents et ne devraient pas être comparés. Si quelque chose
-fonctionne avec <application>aviplay</application> cela ne veut pas dire que
-<application>MPlayer</application> fonctionnera avec et vice versa.
+<application>MPlayer</application> n'est pas <application>xine/avifile/...</application>.
+Bien que ces lecteurs aient du code en commun, l'ensemble des codecs
+(DLL), la synchronisation, le démultiplexage etc. sont différents et
+ne devraient pas être comparés. Si vous avez un fichier que
+<application>MPlayer</application> n'arrive pas à lire mais qui
+fonctionne avec un autre lecteur, veuillez lire les
+<link linkend="bugreports">directives de rapport de bogue</link> et
+uploader le fichier sur notre serveur FTP.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 L'audio se désynchronise pendant la lecture d'un fichier AVI.
@@ -629,6 +618,7 @@ Si cela ne s'améliore pas, lisez <link linkend="bugreports">ceci</link> et uploa
 fichier en FTP.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 <application>MPlayer</application> se termine par des erreurs pendant l'utilisation de
@@ -647,6 +637,7 @@ nous ne pouvons pas changer ça. Vous devriez utiliser un noyau non-patché, ou ut
 l'option de MPlayer <option>-afm 1</option> pour désactiver l'utilisation de <filename>l3codeca.acm</filename>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Mon ordinateur joue des MS DivX AVIs avec résolution de ~640x300 et son stéréo mp3
@@ -657,6 +648,7 @@ Votre machine est trop lente ou le pilote de votre carte son est cassé. Consulte
 documentation pour voir si vous pouvez améliorer les performances.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 <application>MPlayer</application> meurt avec &quot;MPlayer interrupted by
@@ -669,6 +661,7 @@ N'utilisez pas MPlayer sur un CPU différent de celui sur lequel il a été compilé
 sans utiliser cette option.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai des problèmes avec [votre gestionnaire de fenêtres] et les modes plein écran
@@ -679,6 +672,7 @@ Lisez <link linkend="bugreports">Comment reporter un bogue</link> et envoyez-nou
 rapport de bogue.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'obtiens ceci quand je lis des fichiers MPEG: Can't find codec for video format 0x10000001!
@@ -691,6 +685,7 @@ Vous avez une ancienne version de <filename>codecs.conf</filename> dans
 ou quelque chose de similaire dans votre (vos) fichier(s) de config.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Quand je lance <application>MPlayer</application> sous KDE Je n'obtient qu'un
@@ -705,6 +700,7 @@ utiliser le son arts, spécifiez la sortie audio via notre pilote arts audio nati
 option est de lancer <application>MPlayer</application> avec artsdsp.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai un AVI qui produit un écran gris quand il est joué avec <option>-vc odivx</option>
@@ -714,6 +710,7 @@ et un vert avec <option>-vc divx4</option>.
 Ce n'est pas un fichier DivX, mais un MS MPEG4v3. Mettez à jour votre <filename>codecs.conf</filename>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Quand je lis ce film j'obtiens des désynchro vidéo-audio et/ou <application>MPlayer</application>
@@ -742,6 +739,7 @@ L'AVI a un mauvais entête, essayez l'option <option>-nobps</option>, et/ou <opti
 </itemizedlist>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai un fichier MJPEG qui fonctionne avec les autres lecteurs mais n'affiche
@@ -752,6 +750,7 @@ Désactivez la DLL Windows dans <filename>codecs.conf</filename>, ou utilisez l'o
 <option>-vc ffmjpeg</option> (compilez MPlayer avec libavcodec pour que cela fonctionne).
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Quand j'essaie de capturer à partir de mon tuner, ça marche, mais les couleurs
@@ -759,19 +758,10 @@ sont étranges. Elles sont normales avec les autres applications.
 </para></question>
 <answer><para>
 Votre carte rapporte probablement mal sa palette. Essayez avec YUY2 au lieu du YV12
-par défaut (voir la <link linkend="tv-input">documentation de l'entrée TV</link>).
+par défaut (voir la section <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
-<qandaentry>
-<question><para>
-Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler normalement:
-<screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
-</para></question>
-<answer><para>
-Vous avez besoin des droits root ou un noyau configuré spécialement pour utiliser le nouveau
-code de timing. Pour les détails voir la <link linkend="rtc">section RTC</link> de la documentation.
-</para></answer>
-</qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai des problèmes de synchro A/V. Certains de mes AVIs sont lus correctement, mais
@@ -782,6 +772,7 @@ Vous avez une carte son/pilote boguée. Elle est certainement fixé à 44100Hz, et
 vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le plugin resample.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Tous les fichiers WMV (ou d'autres..) que je lis créent une fenêtre verte/grise
@@ -792,6 +783,7 @@ et il n'y a que le son ! <application>MPlayer</application> affiche:
 Mettez à jour votre <filename>codecs.conf</filename>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'obtiens un pourcentage très étrange (bien trop grand) en lisant des fichiers sur
@@ -805,6 +797,7 @@ d'allumer votre notebook. Vous pouvez aussi voir si
 pour Linux) vous aide.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 L'audio/video se désynchronise complètement quand je lance <application>MPlayer</application>
@@ -816,6 +809,7 @@ l'alimentation secteur <emphasis role="bold">avant</emphasis> d'allumer votre
 notebook ou utilisez l'option <option>-nortc</option>.
 </para></answer>
 </qandaentry>
+
 <qandaentry> 
 <question><para>
 Pendant la lecture d'un film tout deviens sale et j'obtiens le message suivant:
@@ -847,6 +841,7 @@ démon son, ou utilisez les options <option>-ao arts</option> ou <option>-ao esd<
 pour faire utiliser ARTS ou ESD à MPlayer.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Et a propos du pilote DGA? Je ne le trouve pas !
@@ -854,10 +849,11 @@ Et a propos du pilote DGA? Je ne le trouve pas !
 <answer><para>
 <filename>./configure</filename> autodétecte votre pilote DGA. Si <option>-vo help</option>
 ne montre pas DGA, alors il y a un problème avec votre installation de X. Essayez
-<command>./configure --enable-dga</command> et lisez la <link linkend="dga">documentation</link>.
+<command>./configure --enable-dga</command> et lisez la section <link linkend="dga">DGA</link>.
 Vous pouvez également utiliser le pilote DGA de SDL avec l'option <option>-vo sdl:dga</option>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 OK, <option>-vo help</option> montre le pilote DGA, mais il se plaint à propos des
@@ -881,6 +877,7 @@ root par l'exécutable SUID root Mplayer.
 </para></warning>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Quand j'utilise Xvideo, ma Voodoo 3/Banshee dit:
@@ -900,6 +897,7 @@ vous pouvez soit télécharger DRI version 0.6 (au moins) depuis la
 <ulink url="http://dri.sourceforge.net">page de DRI</ulink>, soit utiliser DRI CVS.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 La sortie OpenGL (<option>-vo gl</option>) ne fonctionne pas (blocage/fenêtre
@@ -914,6 +912,7 @@ autres cartes. Cela ne fonctionnera pas sur les cartes 3DFX à cause de la limite
 de 256x256 de la taille de texture.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai une carte nVidia TNT/TNT2, et j'ai une bande avec des couleurs étranges
@@ -926,6 +925,7 @@ problème, upgradez à la dernière version des pilotes binaires de nVidia. Si c'es
 toujours mauvais, plaignez-vous à nVidia !
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai une carte nVidia XYZ, et quand je clique sur la fenêtre d'affichage de la
@@ -938,14 +938,7 @@ Félicitons-les. UPDATE: D'après <link linkend="nvidia">nVidia</link>, cela a
 déjà été corrigé.
 </para></answer>
 </qandaentry>
-<qandaentry>
-<question><para>
-Quand j'utilise la GUI avec la sortie vidéo SDL, une seconde fenêtre vidéo est crée.
-</para></question>
-<answer><para>
-Connu, n'utilisez pas encore SDL pour la GUI.
-</para></answer>
-</qandaentry>
+
 <qandaentry>
 <question><para>
 Oh le monde est cruel ...! SDL n'a qu'une destination <systemitem>x11</systemitem>,
@@ -975,6 +968,7 @@ devrez utiliser un autre lecteur comme <application>Xine</application> ou
 <ulink url="../../tech/patches.txt">patch</ulink>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Pendant la lecture d'un DVD, Je rencontre cette erreur:
@@ -985,9 +979,10 @@ C'est un bogue connu de libdvdread 0.9.1/0.9.2. Utilisez <emphasis role="bold">l
 qui est présent dans le source <application>MPlayer</application>, et est utilisé par défaut.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
-Puis-je compiler libdvdread et libdvdcss sur mon doux SPARC sous Solaris?
+Puis-je compiler libdvdread et libdvdcss sur mon doux SPARC sous Solaris ?
 </para></question>
 <answer><para>
 Qui sait ... Il semble fonctionner, donc testez et envoyez-nous vos retours, SVP.
@@ -996,14 +991,16 @@ pas les auteurs de libdvdread. Utilisez <emphasis role="bold">libmpdvdkit2</emph
 qui est présent dans les sources de <application>MPlayer</application>, et est utilisé par défaut.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
-Et à propos des sous-titres? Est ce que MPlayer peut les afficher?
+Et à propos des sous-titres? Est ce que MPlayer peut les afficher ?
 </para></question>
 <answer><para>
-Oui. Voir le <link linkend="dvd">chapitre DVD</link> de la documentation.
+Oui. Voir le <link linkend="dvd">chapitre DVD</link>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Comment puis-je changer le code de zone de mon lecteur DVD? Je n'ai pas Windows!
@@ -1012,6 +1009,7 @@ Comment puis-je changer le code de zone de mon lecteur DVD? Je n'ai pas Windows!
 Utilisez <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">l'outil regionset</ulink>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Dois-je être en (setuid) root/setuid fibmap_mplayer pour pouvoir lire un DVD ?
@@ -1021,6 +1019,7 @@ Non, uniquement pour l'ancienne méthode DVD. Par contre vous devez avoir les dro
 appropriés sur le périphérique DVD (dans <filename class="directory">/dev/</filename>).
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Où puis-je trouver les paquetages libdvdread et libdvdcss ?
@@ -1031,6 +1030,7 @@ qui est présent dans le et est utilisé par défaut. Vous pouvez obtenir les paque
 mentionnés sur le <ulink url="http://www.dtek.chalmers.se/groups/dvd/">site d'Ogle</ulink>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Est-il possible de lire/encoder uniquement certains chapitres ?
@@ -1039,6 +1039,7 @@ Est-il possible de lire/encoder uniquement certains chapitres ?
 Oui, essayez l'option <option>-chapter</option>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 La lecture de DVD est très lente !
@@ -1046,7 +1047,7 @@ La lecture de DVD est très lente !
 <answer><para>
 Utilisez l'option <option>-cache</option> (décrite dans la page de man) et essayez
 d'activer le DMA pour le lecteur DVD avec l'outil <command>hdparm</command> (décrit
-dans le <link linkend="drives">chapitre CD</link> de la documentation).
+dans le <link linkend="drives">chapitre CD</link>).
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -1064,6 +1065,7 @@ C'est très compliqué a implémenter sans perdre la synchronisation A/V. Toutes
 les tentatives ont échouées jusqu'à présent, mais les patches sont les bienvenus.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'aimerais me déplacer de +/- 1 trames au lieu de 10 secondes.
@@ -1073,17 +1075,7 @@ Cela ne peut pas être réalisé. Cela l'était, mais foutait en l'air la synchro A/
 Vous êtes libre de l'implémenter, et d'envoyer un patch. Ne le demandez pas.
 </para></answer>
 </qandaentry>
-<qandaentry>
-<question><para>
-Où est la version Windows?
-</para></question>
-<answer><para>
-Elle n'est pas réalisée, et ne le sera pas. Regardez l'ensemble de la scène
-Windows (parseurs ASF open source, encodeurs ASF open source, etc.) et vous verrez
-pourquoi. Nous ne voulons pas aller en prison. A propos, vous pouvez le compiler
-vous-même, sous <link linkend="cygwin">Cygwin</link>.
-</para></answer>
-</qandaentry>
+
 <qandaentry>
 <question><para>
 Comment puis-je faire pour que MPlayer se rappelle des options que j'utilise pour
@@ -1104,9 +1096,10 @@ ou dans le même répertoire que le fichier.
 Comment puis-je encoder ?
 </para></question>
 <answer><para>
-Lisez la <link linkend="mencoder">documentation</link> de <application>MEncoder</application>
+Lisez la section <link linkend="mencoder">MEncoder</link>.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Comment puis-je créer des VCDs ?
@@ -1117,6 +1110,7 @@ Essayez le script <filename>mencvcd</filename> du sous-répertoire
 ou d'autres films en format VCD ou SVCD et même les graver directement sur un CD.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Comment puis-je joindre deux fichiers vidéo ?
@@ -1138,6 +1132,7 @@ si vous avez deux fichiers partageant les mêmes dimensions et même codec. Essaye
 </screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Mon tuner fonctionne, Je peut entendre le son et voir la vidéo avec <application>MPlayer</application>,
@@ -1148,6 +1143,7 @@ L'encodage audio TV pour Linux n'est actuellement pas implémenté, nous
 travaillons dessus. Pour le moment cela ne fonctionne que sur BSD.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Je ne peux pas encoder les sous-titres en AVI !
@@ -1156,14 +1152,16 @@ Je ne peux pas encoder les sous-titres en AVI !
 Vous devez spécifier l'option <option>-sid</option> correctement !
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
-<application>MEncoder</application> provoque une segfault au démarrage!
+<application>MEncoder</application> provoque une segfault au démarrage !
 </para></question>
 <answer><para>
 Mettez à jour DivX4Linux.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Comment puis-je encoder seulement certains chapitres d'un DVD ?
@@ -1172,6 +1170,7 @@ Comment puis-je encoder seulement certains chapitres d'un DVD ?
 Utilisez l'option <option>-chapter</option> correctement, comme: <option>-chapter 5-7</option>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 J'essaie de travailler avec des fichiers de plus de 2Go sur un système de fichier VFAT. Ça marche?
@@ -1180,6 +1179,7 @@ J'essaie de travailler avec des fichiers de plus de 2Go sur un système de fichie
 Non, VFAT ne supporte pas les fichiers plus gros que 2Go.
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Pourquoi le bitrate affiché par <application>MEncoder</application> est négatif?

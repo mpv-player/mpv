@@ -25,7 +25,7 @@
 <!ENTITY video.xml		SYSTEM "video.xml">
 ]>
 
-<book lang="fr">
+<book id="index" lang="fr">
 <bookinfo id="toc">
 <title>MPlayer - Le lecteur vidéo pour LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
