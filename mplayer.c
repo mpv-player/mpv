@@ -2790,10 +2790,14 @@ if(use_gui || playtree_iter != NULL
 #endif 
 ){
 
+  current_module="uninit_acodec";
+  if(sh_audio) uninit_video(sh_audio);
+  sh_audio=NULL;
+
   current_module="uninit_vcodec";
   if(sh_video) uninit_video(sh_video);
   sh_video=NULL;
-  
+ 
   current_module="free_demuxer";
   if(demuxer) free_demuxer(demuxer);
   demuxer=NULL;
