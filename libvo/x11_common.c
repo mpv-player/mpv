@@ -202,9 +202,8 @@ int vo_wm_detect( void )
        wm |= vo_wm_LAYER;
        metacity_hack |= 1;
      } else
-     if ( args[i] == XA_WIN_HINTS)
-       // metacity is the only manager which reports that supports _WIN_LAYER but not _WIN_HINTS.
-       // what's more is has broken _WIN_LAYER support
+       // metacity is the only manager I know which reports support only for _WIN_LAYER
+       // hint in _WIN_PROTOCOLS (what's more support for it is broken)
        metacity_hack |= 2;
    }
    XFree( args );
