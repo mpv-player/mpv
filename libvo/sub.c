@@ -37,6 +37,7 @@ unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
+int sub_width_p=100;
 int sub_alignment=0; /* 0=top, 1=center, 2=bottom */
 int sub_visibility=1;
 
@@ -374,7 +375,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	      }
 	      obj->params.subtitle.utbl[k++]=c;
 	      xsize+=vo_font->width[c]+vo_font->charspace+kerning(vo_font,prevc,c);
-	      if (dxs<xsize){
+	      if (dxs*sub_width_p/100<xsize){
 		  prevc = -1;
 		 if (lastStripPosition>0){
 		    j=lastStripPosition;
