@@ -56,6 +56,7 @@ MPlayer (1.0)
     * AVI OpenDML read and write support
 
     Streaming:
+    * smil playlist parser
     * support for URL redirection
     * support for seeking in HTTP streams
     * updated LIVE.COM streaming code
@@ -102,7 +103,7 @@ MPlayer (1.0)
     * pan & scan support in VIDIX nVidia driver
     * support for more cards in VIDIX nVidia driver
     * vo_libcaca: color ASCII art output driver
-    * vo_quartz: MacOS X/Quartz video output
+    * vo_quartz: native MacOS X/Quartz video output
     * support for VIDIX when ATI FireGLX drivers are used
 
     FFmpeg/libavcodec:
@@ -166,8 +167,7 @@ MPlayer (1.0)
     * AVI VPRP (video property) read and write support
     * fixed long standing lame quality option off-by-one bug in MEncoder
     * MPL2 subtitle support
-    * smil playlist parser
-    * less verbosity in Win32 loader and in other places
+    * less verbosity in Win32 loader and other places
 
 
   pre3try2: security fix release Mar 3, 2004
