@@ -183,6 +183,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n"
 #define MSGTR_NoDShowAudio "Compiled without DirectShow support -> force nosound :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis audio codec disabled -> force nosound :(\n"
+#define MSGTR_NoXAnimSupport "MPlayer was compiled WITHOUT XAnim support!\n"
 
 #define MSGTR_MpegPPhint "WARNING! You requested image postprocessing for an MPEG 1/2 video,\n" \
 			 "         but compiled MPlayer without MPEG 1/2 postprocessing support!\n" \

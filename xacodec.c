@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> /* strerror */
 
 #ifdef __FreeBSD__
 #include <unistd.h>
@@ -17,7 +18,6 @@
 #include <errno.h> /* strerror, errno */
 
 #include "config.h"
-#define XACODEC_PATH "/usr/lib/xanim/mods"
 
 #include "mp_msg.h"
 #include "bswap.h"
@@ -28,11 +28,12 @@
 #include "stheader.h"
 
 #include "libvo/img_format.h"
+#include "linux/timer.h"
 #include "xacodec.h"
 
-#if defined(HAVE_LIBDL) || defined(__FreeBSD__)
+#ifdef USE_XANIM
 
-#if 0 
+#if 0
 typedef char xaBYTE;
 typedef short xaSHORT;
 typedef int xaLONG;
@@ -72,7 +73,7 @@ typedef struct xacodec_driver
 xacodec_driver_t *xacodec_driver = NULL;
 
 /* Needed by XAnim DLLs */
-int XA_Print(char *fmt, ...)
+void XA_Print(char *fmt, ...)
 {
     va_list vallist;
     char buf[1024];
@@ -81,24 +82,30 @@ int XA_Print(char *fmt, ...)
     vsnprintf(buf, 1024, fmt, vallist);
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "[xacodec] %s\n", buf);
     va_end(vallist);
+
+    return;
 }
 
 /* 0 is no debug (needed by 3ivX) */
 long xa_debug = 0;
 
-int TheEnd1(char *err_mess)
+void TheEnd1(char *err_mess)
 {
     XA_Print("error: %s - exiting\n", err_mess);
     xacodec_exit();
+
+    return;
 }
 
-int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
+void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
 {
 //    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
 //	    anim_hdr, function);
     xacodec_driver->close_func[xa_close_func] = function;
     if (xa_close_func+1 < XA_CLOSE_FUNCS)
 	xa_close_func++;
+
+    return;
 }
 /* end of crap */
 
@@ -116,9 +123,9 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
     {
 	error = dlerror();
 	if (error)
-	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to init %s while %s\n", filename, error);
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to dlopen %s while %s\n", filename, error);
 	else
-	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed ot init (dlopen) %s\n", filename);
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to dlopen %s\n", filename);
 	return(0);
     }
 
@@ -133,7 +140,7 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
     mod_hdr = what_the();
     if (!mod_hdr)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: 'What_The' function failed in %s\n", filename);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: initializer function failed in %s\n", filename);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
@@ -164,26 +171,27 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
 	return(0);
     }
     
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "dump: funcs: 0x%08x (num %d)\n", mod_hdr->funcs, mod_hdr->num_funcs);
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Exported functions by codec: [functable: 0x%08x entries: %d]\n",
+	mod_hdr->funcs, mod_hdr->num_funcs);
     for (i = 0; i < mod_hdr->num_funcs; i++)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "dump(%d): %d %d [iq:0x%08x d:0x%08x]\n", i,
-		func[i].what, func[i].id, func[i].iq_func, func[i].dec_func);
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %d: %d %d [iq:0x%08x d:0x%08x]\n",
+		i, func[i].what, func[i].id, func[i].iq_func, func[i].dec_func);
 	if (func[i].what & XAVID_AVI_QUERY)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: avi init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: avi init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
-	    codec_driver->iq_func = (void *)(func[i].iq_func);
+	    codec_driver->iq_func = (void *)func[i].iq_func;
 	}
 	if (func[i].what & XAVID_QT_QUERY)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: qt init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: qt init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
 	    codec_driver->iq_func = (void *)func[i].iq_func;
 	}
 	if (func[i].what & XAVID_DEC_FUNC)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
 		func[i].dec_func, func[i].iq_func, func[i].id);
 	    codec_driver->dec_func = (void *)func[i].dec_func;
 	}
@@ -254,7 +262,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     switch(out_format)
     {
-	case IMGFMT_RGB8:
+/*	case IMGFMT_RGB8:
 	    codec_hdr.depth = 8;
 	    break;
 	case IMGFMT_RGB15:
@@ -283,20 +291,19 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 	    break;
 	case IMGFMT_BGR32:
 	    codec_hdr.depth = 32;
-	    break;
+	    break;*/
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
 	case IMGFMT_YV12:
 	    codec_hdr.depth = 12;
 	    break;
 	default:
-	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image format (%s)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image out format (%s)\n",
 		vo_format_name(out_format));
 	    return(0);
     }
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "xacodec: querying for %dx%d %dbit [fourcc: %4x] (%s)...\n",
-	codec_hdr.x, codec_hdr.y, codec_hdr.depth, codec_hdr.compression,
-	codec_hdr.description);
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "xacodec: querying for input %dx%d %dbit [fourcc: %4x] (%s)...\n",
+	codec_hdr.x, codec_hdr.y, codec_hdr.depth, codec_hdr.compression, codec_hdr.description);
 
     if (xacodec_query(xacodec_driver, &codec_hdr) == 0)
 	return(0);
@@ -342,13 +349,13 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     return(1);
 }
 
-#define ACT_DLT_NORM	0x00000000
-#define ACT_DLT_BODY	0x00000001
-#define ACT_DLT_XOR	0x00000002
-#define ACT_DLT_NOP	0x00000004
-#define ACT_DLT_MAPD	0x00000008
-#define ACT_DLT_DROP	0x00000010
-#define ACT_DLT_BAD	0x80000000
+#define ACT_DLTA_NORM	0x00000000
+#define ACT_DLTA_BODY	0x00000001
+#define ACT_DLTA_XOR	0x00000002
+#define ACT_DLTA_NOP	0x00000004
+#define ACT_DLTA_MAPD	0x00000008
+#define ACT_DLTA_DROP	0x00000010
+#define ACT_DLTA_BAD	0x80000000
 
 //    unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 //	unsigned int dsize, XA_DEC_INFO *dec_info);
@@ -356,7 +363,6 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_flag)
 {
     unsigned int ret;
-    int i;
     xacodec_image_t *image=&xacodec_driver->image;
 
 // ugyis kiirja a vegen h dropped vagy nem.. 
@@ -387,12 +393,14 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 //    printf("ret: %lu : ", ret);
     
 
-    if (ret == ACT_DLT_NORM)
+    if (ret == ACT_DLTA_NORM)
     {
 //	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "norm\n");
 	return &xacodec_driver->image;
     }
 
+    if (ret & ACT_DLTA_MAPD)
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "mapd\n");
 /*
     if (!(ret & ACT_DLT_MAPD))
 	xacodec_driver->decinfo->map_flag = 0;
@@ -403,36 +411,39 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
     }
 */
 
-    if (ret & ACT_DLT_NOP)
-    {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "nop\n");
-	return NULL; /* dst = 0 */
-    }
-
-    if (ret & ACT_DLT_DROP) /* by skip frames and errors */
-    {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "drop\n");
-	return NULL;
-    }
-
-    if (ret & ACT_DLT_BAD)
-    {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "bad\n");
-	return NULL;
-    }
-
-    if (ret & ACT_DLT_BODY)
-    {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "body\n");
-	return NULL;
-    }
-    
-    if (ret & ACT_DLT_XOR)
+    if (ret & ACT_DLTA_XOR)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "xor\n");
 	return &xacodec_driver->image;
     }
 
+    /* nothing changed */
+    if (ret & ACT_DLTA_NOP)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "nop\n");
+	return NULL;
+    }
+
+    /* frame dropped (also display latest frame) */
+    if (ret & ACT_DLTA_DROP)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "drop\n");
+	return NULL;
+    }
+
+    if (ret & ACT_DLTA_BAD)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "bad\n");
+	return NULL;
+    }
+
+    /* used for double buffer */
+    if (ret & ACT_DLTA_BODY)
+    {
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "body\n");
+	return NULL;
+    }
+    
     return NULL;
 }
 
@@ -546,8 +557,6 @@ void XA_2x2_OUT_4BLKS_Convert(unsigned char *image_p, unsigned int x, unsigned i
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
-    void (*color_func)();
-
     switch(blks){
     case 1:
 	return (void*) XA_2x2_OUT_1BLK_Convert;
@@ -746,25 +755,4 @@ void *XA_YUV221111_Func(unsigned int image_type)
 }
 
 /* *** EOF XANIM *** */
-
-#else /* HAVE_LIBDL */
-
-int xacodec_init_video(void)
-{
-    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
-    return 0;
-}
-
-void xacodec_decode_frame(void)
-{
-    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
-    return NULL;
-}
-
-void xacodec_exit(void)
-{
-    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
-    return;
-}
-
-#endif /* HAVE_LIBDL */
+#endif

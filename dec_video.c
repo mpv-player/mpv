@@ -245,13 +245,16 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 sh_video->our_out_buffer=NULL;
 
 switch(sh_video->codec->driver){
-#ifdef USE_XANIM
  case VFM_XANIM: {
+#ifdef USE_XANIM
    int ret=xacodec_init_video(sh_video,out_fmt);
    if(!ret) return 0;
+#else
+   mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_NoXAnimSupport);
+   return 0;
+#endif
    break;
  }
-#endif
 #ifdef USE_WIN32DLL
  case VFM_VFW: {
    if(!init_vfw_video_codec(sh_video,0)) {
