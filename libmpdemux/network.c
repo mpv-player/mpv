@@ -187,6 +187,13 @@ http_read_response( int fd ) {
 		i = read( fd, response, BUFFER_SIZE ); 
 		if( i<0 ) {
 			printf("Read failed\n");
+			http_free( http_hdr );
+			return NULL;
+		}
+		if( i==0 ) {
+			printf("http_read_response read 0 -ie- EOF\n");
+			http_free( http_hdr );
+			return NULL;
 		}
 		http_response_append( http_hdr, response, i );
 	} while( !http_is_header_entire( http_hdr ) ); 
@@ -353,7 +360,12 @@ printf("read %d bytes from buffer\n", len );
 	}
 
 	if( len<size ) {
-		len += read( fd, buffer+len, size-len );
+		int ret;
+		ret = read( fd, buffer+len, size-len );
+		if( ret==0 ) {
+			printf("nop_streaming_read read 0 -ie- EOF\n");
+		}
+		len += ret;
 //printf("read %d bytes from network\n", len );
 	}
 	
