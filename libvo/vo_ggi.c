@@ -195,7 +195,7 @@ static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth)
 	    mode.size.x, mode.size.y,
 	    vo_depthonscreen, ggi_conf.bpp);
 
-    ggi_conf.bppmul = ggi_conf.bpp/8;
+    ggi_conf.bppmul = (ggi_conf.bpp+7)/8;
 
     return(0);
 }
@@ -326,8 +326,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
     ggi_conf.format = format;
 
-    ggi_conf.framePlaneRGB = width * height * (ggi_conf.bpp/8); /* fix it! */
-    ggi_conf.stridePlaneRGB = width * (ggi_conf.bpp/8);
+    ggi_conf.framePlaneRGB = width * height * ((ggi_conf.bpp+7)/8); /* fix it! */
+    ggi_conf.stridePlaneRGB = width * ((ggi_conf.bpp+7)/8);
 #ifdef GGI_PLANAR_NOCONV
     ggi_conf.framePlaneY = width * height;
     ggi_conf.framePlaneUV = (width * height) >> 2;
