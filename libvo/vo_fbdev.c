@@ -441,8 +441,11 @@ static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
 	p->bits_per_pixel = (bpp + 1) & ~1;
 	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
+	p->transp.offset = p->transp.length = 0;
 	switch (bpp) {
 		case 32:
+			p->transp.offset = 24;
+			p->transp.length = 8;
 		case 24:
 			p->red.offset = 16;
 			p->red.length = 8;
