@@ -623,15 +623,26 @@ static uint32_t preinit(const char *arg)
     }
 
    /* check adaptors */
-    if(xv_port >= ai[0].num_ports || xv_port < 0) // FIXME: ai[0] should not be hardcoded
-    {
-    	mp_msg(MSGT_VO, MSGL_WARN,"Xv: Invalid port parameter, overriding with port 0\n");
-    	xv_port = 0;
-    }
-    if (xv_port)
-    {
-      if (XvGrabPort(mDisplay, xv_port, CurrentTime))
-        xv_port = 0;
+    if (xv_port) {
+        int port_found;
+        
+        for (port_found = 0, i = 0; !port_found && i < adaptors; i++) {
+            if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask)) {
+                for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p) {
+                    if (xv_p == xv_port) {
+                        port_found = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        if (port_found) {
+            if (XvGrabPort(mDisplay, xv_port, CurrentTime))
+                xv_port = 0;
+        } else {
+            mp_msg(MSGT_VO, MSGL_WARN,"Xv: Invalid port parameter, overriding with port 0\n");
+            xv_port = 0;
+        }
     }
    
     for (i = 0; i < adaptors && xv_port == 0; i++){
