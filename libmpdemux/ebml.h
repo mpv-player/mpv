@@ -1,7 +1,7 @@
 #ifndef __EBML_H
 #define __EBML_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 
 /* EBML version supported */

@@ -141,12 +141,6 @@ typedef struct mkv_demuxer
 } mkv_demuxer_t;
 
 
-#if __GNUC__ == 2
-#pragma pack(2)
-#else
-#pragma pack(push,2)
-#endif
-
 typedef struct
 {
   uint32_t chunks;              /* number of chunks */
@@ -155,7 +149,7 @@ typedef struct
   uint32_t chunktab;            /* offset to chunk offset array */
 } dp_hdr_t;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t size;
   uint32_t fourcc1;
@@ -169,7 +163,7 @@ typedef struct
   uint32_t type2;
 } real_video_props_t;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t fourcc1;             /* '.', 'r', 'a', 0xfd */
   uint16_t version1;            /* 4 or 5 */
@@ -193,7 +187,7 @@ typedef struct
   uint16_t channels;
 } real_audio_v4_props_t;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
   uint32_t fourcc1;             /* '.', 'r', 'a', 0xfd */
   uint16_t version1;            /* 4 or 5 */
