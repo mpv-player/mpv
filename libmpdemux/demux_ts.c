@@ -467,6 +467,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		char *buf;
 		int pos;
 	} pes_priv1[8192], *pptr;
+	char *tmpbuf;
 
 	priv->last_pid = 8192;		//invalid pid
 
@@ -488,9 +489,10 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			if((es.type == PES_PRIVATE1) && (! audio_found))
 			{
 				pptr = &pes_priv1[es.pid];
-				pptr->buf = (char*) realloc(pptr->buf, pptr->pos + es.size);
-				if(pptr->buf != NULL)
+				tmpbuf = (char*) realloc(pptr->buf, pptr->pos + es.size);
+				if(tmpbuf != NULL)
 				{
+					pptr->buf = tmpbuf;
 					memcpy(&(pptr->buf[ pptr->pos ]), es.start, es.size);
 					pptr->pos += es.size;
 					if(a52_check(pptr->buf, pptr->pos) > 2)
@@ -854,11 +856,26 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 void demux_close_ts(demuxer_t * demuxer)
 {
-	if(demuxer->priv)
+	uint16_t i;
+	ts_priv_t *priv = (ts_priv_t*) demuxer->priv;
+	
+	if(priv)
 	{
-		free(demuxer->priv);
-		demuxer->priv=NULL;
+		if(priv->pat.progs)
+			free(priv->pat.progs);
+	
+		if(priv->pmt)
+		{	
+			for(i = 0; i < priv->pmt_cnt; i++)
+			{
+				if(priv->pmt[i].es)
+					free(priv->pmt[i].es);
+			}
+			free(priv->pmt);
+		}
+		free(priv);
 	}
+	demuxer->priv=NULL;
 }
 
 static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, int32_t type_from_pmt)
@@ -1196,6 +1213,7 @@ static int parse_pat(ts_priv_t * priv, int is_start, unsigned char *buff, int si
 	unsigned char *base;
 	int entries, i, sections;
 	uint16_t progid;
+	struct pat_progs_t *tmp;
 
 	//PRE-FILLING
 	if(! is_start)
@@ -1272,13 +1290,13 @@ static int parse_pat(ts_priv_t * priv, int is_start, unsigned char *buff, int si
 		if((idx = prog_idx_in_pat(priv, progid)) == -1)
 		{
 			int sz = sizeof(struct pat_progs_t) * (priv->pat.progs_cnt+1);
-			priv->pat.progs = (struct pat_progs_t*) realloc(priv->pat.progs, sz);
-			if(priv->pat.progs == NULL)
+			tmp = (struct pat_progs_t*) realloc(priv->pat.progs, sz);
+			if(tmp == NULL)
 			{
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PAT: COULDN'T REALLOC %d bytes, NEXT\n", sz);
 				break;
 			}
-
+			priv->pat.progs = tmp;
 			idx = priv->pat.progs_cnt;
 			priv->pat.progs_cnt++;
 		}
@@ -1413,19 +1431,21 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	pmt_t *pmt;
 	int32_t idx, es_count, section_bytes;
 	uint8_t skip, m=0;
+	pmt_t *tmp;
+	struct pmt_es_t *tmp_es;
 
 	idx = progid_idx_in_pmt(priv, progid);
 
 	if(idx == -1)
 	{
 		int sz = (priv->pmt_cnt + 1) * sizeof(pmt_t);
-		priv->pmt = (pmt_t *) realloc(priv->pmt, sz);
-		if(priv->pmt == NULL)
+		tmp = (pmt_t *) realloc(priv->pmt, sz);
+		if(tmp == NULL)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT: COULDN'T REALLOC %d bytes, NEXT\n", sz);
 			return 0;
 		}
-
+		priv->pmt = tmp;
 		idx = priv->pmt_cnt;
 		memset(&(priv->pmt[idx]), 0, sizeof(pmt_t));
 		priv->pmt_cnt++;
@@ -1525,12 +1545,13 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		if(idx == -1)
 		{
 			int sz = sizeof(struct pmt_es_t) * (pmt->es_cnt + 1);
-			pmt->es = (struct pmt_es_t *) realloc(pmt->es, sz);
-			if(pmt->es == NULL)
+			tmp_es = (struct pmt_es_t *) realloc(pmt->es, sz);
+			if(tmp_es == NULL)
 			{
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT, COULDN'T ALLOCATE %d bytes for PMT_ES\n", sz);
 				continue;
 			}
+			pmt->es = tmp_es;
 			idx = pmt->es_cnt;
 			memset(&(pmt->es[idx]), 0, sizeof(struct pmt_es_t));
 			pmt->es_cnt++;
@@ -1771,7 +1792,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		cc_ok = (tss->last_cc < 0) || ((((tss->last_cc + 1) & 0x0f) == cc));
 		tss->last_cc = cc;
 		    
-		bad = ts_error || (! cc_ok);
+		bad = ts_error; // || (! cc_ok);
     
 		if(! bad)
 		{
@@ -1798,8 +1819,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				afc = c + 1;
 			}
-			else
-				afc = 0;	//payload only
 		}
 		else
 		{
