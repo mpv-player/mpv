@@ -1308,7 +1308,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 //             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
              usec_sleep(0); // sleeps 1 clock tick (10ms)!
           else
-             usec_sleep(1000000*(time_frame-0.002));
+             usec_sleep(1000000*(time_frame-0.020));
 #ifdef HAVE_NEW_GUI
           if(use_gui){
             EventHandling();
