@@ -65,7 +65,7 @@ mencoder:
 DOCS:
 - break up 6 level deep sections
 - merge tech/encoding-tips.txt into mencoder.xml
-- merge tech/directfb.txt into video.xml
+- merge iive's XvMC docs into video.xml
 - finish reviewing all of the docs
   - mplayer.1
   - encoding.html
