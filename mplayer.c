@@ -2320,14 +2320,20 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       else {
 	if ( (v_cont += v) > 100 ) v_cont = 100;
       }
-      if(v_cont < 0) v_cont = 0;
-
+      if(v_hw_equ_cap & VEQ_CAP_CONTRAST) {
+	if(v_cont < -100) v_cont = -100;
+      } else {
+	if(v_cont < 0) v_cont = 0;
+      }
       if(set_video_colors(sh_video,"Contrast",v_cont)){
 #ifdef USE_OSD
 	if(osd_level){
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_CONTRAST;
-	  vo_osd_progbar_value=((v_cont)<<8)/100;
+	  if(v_hw_equ_cap & VEQ_CAP_CONTRAST)
+	    vo_osd_progbar_value=((v_cont)<<7)/100 + 128;
+	  else
+	    vo_osd_progbar_value=((v_cont)<<8)/100;
 	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
@@ -2350,7 +2356,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(osd_level){
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_BRIGHTNESS;
-	  vo_osd_progbar_value=((v_bright)<<8)/100;
+	  if(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS)
+	    vo_osd_progbar_value=((v_bright)<<7)/100 + 128;
+	  else
+	    vo_osd_progbar_value=((v_bright)<<8)/100;
 	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
@@ -2373,7 +2382,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(osd_level){
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_HUE;
-	  vo_osd_progbar_value=((v_hue)<<8)/100;
+	  if(v_hw_equ_cap & VEQ_CAP_HUE)
+	    vo_osd_progbar_value=((v_hue)<<7)/100 + 128;
+	  else
+	    vo_osd_progbar_value=((v_hue)<<8)/100;
 	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
@@ -2396,7 +2408,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(osd_level){
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_SATURATION;
-	  vo_osd_progbar_value=((v_saturation)<<8)/100;
+	  if(v_hw_equ_cap & VEQ_CAP_SATURATION)
+	    vo_osd_progbar_value=((v_saturation)<<7)/100 + 128;
+	  else
+	    vo_osd_progbar_value=((v_saturation)<<8)/100;
 	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif

@@ -86,7 +86,6 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 	    {
 		if(vo_vaa.set_video_eq)
 		{
-		    vidix_video_eq_t veq;
 		    veq.flags = VEQ_FLG_ITU_R_BT_601; /* Fixme please !!! */
 		    if(strcmp(item,"Brightness") == 0)
 		    {
