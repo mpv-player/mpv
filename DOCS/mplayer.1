@@ -236,7 +236,8 @@ Used when decoding from multiple PNG or JPEG files
     w=<value>     width of the output (autodetect)
     h=<value>     height of the output (autodetect)
     fps=<value>   fps of the output (default: 25)
-    type=<value>  type of input files (available types : jpeg, png)
+    type=<value>  type of input files
+                  (available types: jpeg, png)
 .TP
 .B \-ni (.AVI only)
 Force usage of non\-interleaved AVI parser (fixes playing
@@ -512,7 +513,7 @@ Available plugins are:
     dvbscale[=aspect]   optimal scaling for DVB
                         cards (aspect=
                         DVB_HEIGHT*ASPECTRATIO)
-    cropdetect          black border detection
+    cropdetect[=limit]  black border detection
                         (print crop values)
     noise[=lumaNoise[u][t][h]:chromaNoise[u][t][h]
                         add noise
