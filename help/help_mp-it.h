@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.104
+// Updated to help_mp-en.h v1.105
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
@@ -134,7 +134,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Commento: %s\n"
 #define MSGTR_Video_NoVideo "Video: no video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Impossibile inizializzare i filtri video (-vop) o l'output video (-vo)!\n"
-#define MSGTR_Paused "\n------ IN PAUSA -------\r"
+#define MSGTR_Paused "\n  =====  PAUSA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nImpossibile caricare la playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
