@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.49 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -471,8 +471,9 @@ a video_out is)</para></listitem>
 <listitem><para>a kép utófeldolgozás aktuális szintje (ha a
 <option>-autoq</option> kapcsolót használod)</para></listitem>
 <listitem><para>aktuálisan használt cache mérete (50% körül normális)</para></listitem>
+<listitem><para>lejátszás sebessége az eredeti sebesség függvényében</para></listitem>
 </itemizedlist>
-A legtöbbjük hibakeresési célból szerepel, idővel el lesznek távolítva.
+A legtöbbjük hibakeresés céljából szerepel, idővel el lesznek távolítva.
 </para></answer>
 </qandaentry>
 
