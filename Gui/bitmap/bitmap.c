@@ -114,7 +114,7 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->Width=in->Width;
  out->Height=in->Height;
  out->BPP=1;
- out->ImageSize=out->Width * out->Height / 8;
+ out->ImageSize=(out->Width * out->Height + 7) / 8;
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
  out->Image=(char *)calloc( 1,out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
