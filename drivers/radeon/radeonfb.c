@@ -31,7 +31,7 @@
  *			Disable SURFACE_CNTL because mplayer doesn't work
  *			propertly (by NK)
  *			0.1.0-ve.1
- *
+ *	2001-09-25	MTRR support (by NK)
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  * LIMITATIONS: on dualhead Radeons (VE, M6, M7) driver doesn't work in
@@ -74,6 +74,10 @@
 #include <video/fbcon-cfb16.h>
 #include <video/fbcon-cfb24.h>
 #include <video/fbcon-cfb32.h>
+
+#ifdef CONFIG_MTRR
+#include <asm/mtrr.h>
+#endif
 
 #include "radeon.h"
 
@@ -281,7 +285,9 @@ struct radeonfb_info {
 
 	u32 hack_crtc_ext_cntl;
 	u32 hack_crtc_v_sync_strt_wid;
-
+#ifdef CONFIG_MTRR
+	struct { int vram; int vram_valid; } mtrr;
+#endif
 #if defined(FBCON_HAS_CFB16) || defined(FBCON_HAS_CFB32)
         union {
 #if defined(FBCON_HAS_CFB16)
@@ -529,11 +535,16 @@ static __inline__ int _max(int val1, int val2)
 static char fontname[40] __initdata;
 static char *mode_option __initdata;
 static char noaccel __initdata = 0;
+static int  nomtrr __initdata = 0;
 
 #if 0
 #ifdef FBCON_HAS_CFB8
 static struct display_switch fbcon_radeon8;
 #endif
+#endif
+
+#ifdef CONFIG_MTRR
+static int mtrr = 1;
 #endif
 
 /*
@@ -606,7 +617,13 @@ static struct pci_driver radeonfb_driver = {
 
 int __init radeonfb_init (void)
 {
-	return pci_module_init (&radeonfb_driver);
+#ifdef CONFIG_MTRR
+    if (nomtrr) {
+        mtrr = 0;
+        printk("radeonfb: Parameter NOMTRR set\n");
+    }
+#endif
+    return pci_module_init (&radeonfb_driver);
 }
 
 
@@ -637,6 +654,11 @@ int __init radeonfb_setup (char *options)
                 } else if (!strncmp(this_opt, "noaccel", 7)) {
 			noaccel = 1;
 		}
+#ifdef CONFIG_MTRR
+		else if(!strncmp(this_opt, "nomtrr", 6)) {
+		mtrr = 0;
+		}
+#endif
                 else    mode_option = this_opt;
         }
 
@@ -651,6 +673,10 @@ module_exit(radeonfb_exit);
 
 MODULE_AUTHOR("Ani Joshi. (Radeon VE extensions by Nick Kurshev)");
 MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERSION);
+#ifdef CONFIG_MTRR
+MODULE_PARM(nomtrr, "i");
+MODULE_PARM_DESC(nomtrr, "Don't touch MTRR (touch=0(default))");
+#endif
 
 static char * GET_MON_NAME(int type)
 {
@@ -951,6 +977,15 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 	else
 	    printk("radeonfb: CRT port has %s monitor connected\n",GET_MON_NAME(rinfo->crtDispType));
 	printk("radeonfb: This card has %sTVout\n",rinfo->hasTVout ? "" : "no ");
+#ifdef CONFIG_MTRR
+	if (mtrr) {
+		rinfo->mtrr.vram = mtrr_add(rinfo->fb_base_phys,
+				rinfo->video_ram, MTRR_TYPE_WRCOMB, 1);
+		rinfo->mtrr.vram_valid = 1;
+		/* let there be speed */
+		printk("radeonfb: MTRR set to ON\n");
+	}
+#endif /* CONFIG_MTRR */
 
 	return 0;
 }
@@ -968,7 +1003,11 @@ static void __devexit radeonfb_pci_unregister (struct pci_dev *pdev)
         radeon_write_mode (rinfo, &rinfo->init_state);
  
         unregister_framebuffer ((struct fb_info *) rinfo);
-                
+#ifdef CONFIG_MTRR
+        if (rinfo->mtrr.vram_valid)
+            mtrr_del(rinfo->mtrr.vram, rinfo->fb_base_phys,
+                     rinfo->video_ram);
+#endif /* CONFIG_MTRR */
         iounmap ((void*)rinfo->mmio_base);
         iounmap ((void*)rinfo->fb_base);
  
@@ -1940,8 +1979,8 @@ static void radeon_load_video_mode (struct radeonfb_info *rinfo,
 	newmode.dac_cntl = INREG(DAC_CNTL) | DAC_MASK_ALL | DAC_VGA_ADR_EN |
 			   DAC_8BIT_EN;
 
-	newmode.crtc_h_total_disp = ((((hTotal / 8) - 1) & 0xffff) |
-				     (((mode->xres / 8) - 1) << 16));
+	newmode.crtc_h_total_disp = ((((hTotal / 8) - 1) & 0x3ff) |
+				     ((((mode->xres / 8) - 1) & 0x1ff) << 16));
 
 	newmode.crtc_h_sync_strt_wid = ((hsync_start & 0x1fff) |
 					(hsync_wid << 16) | (h_sync_pol << 23));
@@ -2061,7 +2100,6 @@ static void radeon_load_video_mode (struct radeonfb_info *rinfo,
 		OUTREG(CRTC_EXT_CNTL, rinfo->hack_crtc_ext_cntl);
 		OUTREG(CRTC_V_SYNC_STRT_WID, rinfo->hack_crtc_v_sync_strt_wid);
 	}
-
 	return;
 }
 
