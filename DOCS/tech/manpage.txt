@@ -52,7 +52,7 @@ A setting of 4 looks readable IMHO. Here's an overview again:
                  The output is unuseable as the script doesn't seem to
                  support the macro definitions. Maybe a manual change of all
                  leads to acceptable results.
-    - rman:      cat mplayer.1 | egrep -v "^\.PD" | rman -f html - > manpage.rman.html
+    - rman:      rman -f html mplayer.1 > manpage.rman.html
                  The output is ugly as rman doesn't understand many of the
                  macros used.
     - troffcvt:  troff2html -man mplayer.1 > manpage.tcvt.html
