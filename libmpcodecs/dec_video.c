@@ -76,53 +76,23 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 
 int set_video_colors(sh_video_t *sh_video,char *item,int value)
 {
-    if(vo_vaa.get_video_eq)
-    {
-	vidix_video_eq_t veq;
-	if(vo_vaa.get_video_eq(&veq) == 0)
-	{
-	    int v_hw_equ_cap = veq.cap;
-	    if(v_hw_equ_cap != 0)
-	    {
-		if(vo_vaa.set_video_eq)
-		{
-		    veq.flags = VEQ_FLG_ITU_R_BT_601; /* Fixme please !!! */
-		    if(strcmp(item,"Brightness") == 0)
-		    {
-			if(!(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS)) goto try_sw_control;
-			veq.brightness = value*10;
-			veq.cap = VEQ_CAP_BRIGHTNESS;
-		    }
-		    else
-		    if(strcmp(item,"Contrast") == 0)
-		    {
-			if(!(v_hw_equ_cap & VEQ_CAP_CONTRAST)) goto try_sw_control;
-			veq.contrast = value*10;
-			veq.cap = VEQ_CAP_CONTRAST;
-		    }
-		    else
-		    if(strcmp(item,"Saturation") == 0)
-		    {
-			if(!(v_hw_equ_cap & VEQ_CAP_SATURATION)) goto try_sw_control;
-			veq.saturation = value*10;
-			veq.cap = VEQ_CAP_SATURATION;
-		    }
-		    else
-		    if(strcmp(item,"Hue") == 0)
-		    {
-			if(!(v_hw_equ_cap & VEQ_CAP_HUE)) goto try_sw_control;
-			veq.hue = value*10;
-			veq.cap = VEQ_CAP_HUE;
-		    }
-		    else goto try_sw_control;;
-		    vo_vaa.set_video_eq(&veq);
-		}
-		return 1;
-	    }
-	}
-    }
-    try_sw_control:
-    if(mpvdec) return mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER,item,(int)value);
+    vf_instance_t* vf=sh_video->vfilter;
+    
+    if (vf->control(vf, VFCTRL_SET_EQUALIZER, item, (int *)value) == CONTROL_TRUE)
+	return 1;
+    /* try software control */
+    if(mpvdec) return mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value);
+    return 0;
+}
+
+int get_video_colors(sh_video_t *sh_video,char *item,int *value)
+{
+    vf_instance_t* vf=sh_video->vfilter;
+    
+    if (vf->control(vf, VFCTRL_GET_EQUALIZER, item, value) == CONTROL_TRUE)
+	return 1;
+    /* try software control */
+    if(mpvdec) return mpvdec->control(sh_video,VDCTRL_GET_EQUALIZER, item, value);
     return 0;
 }
 
@@ -201,7 +171,7 @@ mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
 //------------------------ frame decoded. --------------------
 
 #ifdef ARCH_X86
-	// some codecs is broken, and doesn't restore MMX state :(
+	// some codecs are broken, and doesn't restore MMX state :(
 	// it happens usually with broken/damaged files.
 if(gCpuCaps.has3DNow){
 	__asm __volatile ("femms\n\t":::"memory");

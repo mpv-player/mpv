@@ -24,7 +24,7 @@ typedef struct vf_instance_s {
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt);
     int (*control)(struct vf_instance_s* vf,
-        int request, void* data);
+        int request, void* data, ...);
     int (*query_format)(struct vf_instance_s* vf,
         unsigned int fmt);
     void (*get_image)(struct vf_instance_s* vf,
@@ -49,7 +49,7 @@ typedef struct vf_instance_s {
 #define VFCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
 #define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
 #define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
-
+#define VFCTRL_GET_EQUALIZER 8 /* gset color options (brightness,contrast etc) */
 #define VFCTRL_DRAW_OSD 7
 
 #include "vfcap.h"

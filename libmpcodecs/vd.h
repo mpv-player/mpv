@@ -21,6 +21,7 @@ extern int vd_use_slices;
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
 #define VDCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
 #define VDCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
+#define VDCTRL_GET_EQUALIZER 7 /* get color options (brightness,contrast etc) */
 
 // callbacks:
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
