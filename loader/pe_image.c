@@ -884,19 +884,23 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  * due to the PROCESS_Create stuff.
  */
 
-#if	0
 /*
- * so this is a dirty hack.
- * Why do we need it?
- *
- * Disable it for now, let's see if it breaks something
+ * This is a dirty hack.
+ * The win32 DLLs contain an alloca routine, that first probes the soon
+ * to be allocated new memory *below* the current stack pointer in 4KByte
+ * increments.  After the mem probing below the current %esp,  the stack
+ * pointer is finally decremented to make room for the "alloca"ed memory.
+ * Maybe the probing code is intended to extend the stack on a windows box.
+ * Anyway, the linux kernel does *not* extend the stack by simply accessing
+ * memory below %esp;  it segfaults.
+ * The extend_stack_for_dll_alloca() routine just preallocates a big chunk
+ * of memory on the stack, for use by the DLLs alloca routine.
  */
-static void This_Is_Dirty_Hack(void)
+static void extend_stack_for_dll_alloca(void)
 {
     void* mem=alloca(0x20000);
     *(int*)mem=0x1234;
 }
-#endif
 
 
 /* Called if the library is loaded or freed.
@@ -939,9 +943,7 @@ WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 		break;
 	}	
 	TRACE("for %s\n", wm->filename);
-#if 0
-	This_Is_Dirty_Hack();
-#endif
+	extend_stack_for_dll_alloca();
         retv = entry( wm->module, type, lpReserved );
     }
 
