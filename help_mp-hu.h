@@ -196,6 +196,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM hang kodek támogatás ki van kapcsolva, vagy nem létezik nem-x86 CPU-n -> hang kikapcsolva :(\n"
 #define MSGTR_NoDShowAudio "DirectShow támogatás nincs lefordítva -> hang kikapcsolva :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis hang kodek kikapcsolva -> hang kikapcsolva :(\n"
+#define MSGTR_NoXAnimSupport "Az MPlayer-t XAnim codec-ek támogatása NÉLKÜL fordítottad!\n"
 
 #define MSGTR_MpegPPhint "FIGYELEM! Képjavítást kértél egy MPEG1/2 filmre, de az MPlayer-t\n" \
                          "          MPEG1/2 javítási támogatás nélkül fordítottad!\n" \
