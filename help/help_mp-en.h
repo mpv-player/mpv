@@ -385,6 +385,9 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Original"
 #define MSGTR_MENU_AspectRatio "Aspect ratio"
+#define MSGTR_MENU_AudioTrack "Audio track"
+#define MSGTR_MENU_Track "Track %d"
+#define MSGTR_MENU_VideoTrack "Video track"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
