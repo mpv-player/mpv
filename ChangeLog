@@ -77,7 +77,7 @@ mplayer (1.0)
     * fullscreen and geometry support in directx
     * fullscreen support with opengl drivers
     * OSD fixed with svga
-    * new consolevidix and winvidix drivers
+    * new cvidix and winvidix drivers
     * user settable colorkey
 
     Others:
