@@ -75,6 +75,7 @@ typedef struct
    int    Track;
    int    AudioType;
    int    StreamType;
+   int	  AudioOnly;
    int    TimeSec;
    int    LengthInSec;
    int    FrameDrop;
@@ -93,12 +94,15 @@ typedef struct
 
 extern guiInterface_t guiIntfStruct;
 
-#define guiXEvent      0
-#define guiCEvent      1
-#define guiIEvent      2
-#define guiSetDVD      3
-#define guiSetFileName 4
-#define guiSetState    5
+#define guiXEvent           0
+#define guiCEvent           1
+#define guiIEvent           2
+#define guiSetDVD           3
+#define guiSetFileName      4
+#define guiSetState         5
+#define guiSetAudioOnly     6
+#define guiReDrawSubWindow  7
+#define guiSetShVideo       8
 
 #define guiSetStop  0
 #define guiSetPlay  1

@@ -13,8 +13,11 @@
 #include "mplayer/mplayer.h"
 #include "app.h"
 #include "../libvo/x11_common.h"
+#include "../libvo/video_out.h"
 #include "../input/input.h"
+
 #include "../libmpdemux/stream.h"
+#include "../libmpdemux/demuxer.h"
 
 guiInterface_t guiIntfStruct;
 
@@ -45,6 +48,20 @@ int guiCMDArray[] =
   evSkinBrowser
  };
 
+typedef struct 
+{
+ demux_stream_t *ds;
+ unsigned int format;
+ struct codecs_st *codec;
+ int inited;
+ // output format:                                                                                
+ float timer;
+ float fps;
+ float frametime;
+ int i_bps;
+ int disp_w,disp_h;
+} tmp_sh_video_t;
+
 void guiGetEvent( int type,char * arg )
 {
 #ifdef USE_DVDREAD
@@ -70,6 +87,23 @@ void guiGetEvent( int type,char * arg )
    case guiSetFileName:
         if ( arg ) guiSetFilename( guiIntfStruct.Filename,arg );
         break;
+   case guiSetAudioOnly:
+	guiIntfStruct.AudioOnly=(int)arg;
+	if ( (int)arg ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	  else wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+	break;
+   case guiReDrawSubWindow:
+	wsPostRedisplay( &appMPlayer.subWindow );
+	break;
+   case guiSetShVideo:
+        if ( arg )
+	 {
+	  tmp_sh_video_t * sh_video = (tmp_sh_video_t *)arg;
+	  mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
+	  guiIntfStruct.MovieWidth=sh_video->disp_w;
+	  guiIntfStruct.MovieHeight=sh_video->disp_h;
+         }
+	break;
 #ifdef USE_DVDREAD
    case guiSetDVD:
         guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
@@ -106,7 +140,7 @@ void guiGetEvent( int type,char * arg )
 
 void guiEventHandling( void )
 {
- if ( use_gui && !guiIntfStruct.Playing ) wsHandleEvents();
+ if ( ( use_gui && !guiIntfStruct.Playing )||( guiIntfStruct.AudioOnly ) ) wsHandleEvents();
  gtkEventHandling();
  mplTimerHandler(); // handle GUI timer events
 }

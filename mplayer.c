@@ -769,6 +769,7 @@ if(!use_stdin && !slave_mode){
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
 
+      guiGetEvent( guiReDrawSubWindow,0 );
       while ( guiIntfStruct.Playing != 1 )
        {
 #ifdef HAVE_NEW_INPUT
@@ -1280,22 +1281,6 @@ if(auto_quality>0){
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
-#ifdef HAVE_NEW_GUI
-   if ( use_gui )
-    {
-     mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
-     guiIntfStruct.MovieWidth=sh_video->disp_w;
-     guiIntfStruct.MovieHeight=sh_video->disp_h;
-     guiIntfStruct.StreamType=stream->type;
-     guiGetEvent( guiSetFileName,filename );
-     if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels;
-      else guiIntfStruct.AudioType=0;
-#ifdef USE_DVDREAD
-     if ( stream->type == STREAMTYPE_DVD ) guiGetEvent( guiSetDVD,(char *)stream->priv );
-#endif
-    }
-#endif
-
 current_module="init_vo_vaa";
 
    if(video_out->control(VOCTRL_QUERY_VAA, &vo_vaa)==VO_NOTIMPL)
@@ -1326,6 +1311,20 @@ current_module="init_vo_vaa";
 if(!sh_video) osd_level = 0;
 
 fflush(stdout);
+
+#ifdef HAVE_NEW_GUI
+   if ( use_gui )
+    {
+     guiGetEvent( guiSetShVideo,(char *)sh_video );
+     guiGetEvent( guiSetFileName,filename );
+     guiIntfStruct.StreamType=stream->type;
+     if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
+     if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,1 ); else guiGetEvent( guiSetAudioOnly,0 );
+#ifdef USE_DVDREAD
+     if ( stream->type == STREAMTYPE_DVD ) guiGetEvent( guiSetDVD,(char *)stream->priv );
+#endif
+    }
+#endif
 
 {
 //int frame_corr_num=0;   //
@@ -2734,6 +2733,7 @@ if(rel_seek_secs || abs_seek_pos){
 
 #ifdef HAVE_NEW_GUI
       if(use_gui){
+        guiEventHandling();
 	if(demuxer->file_format==DEMUXER_TYPE_AVI && sh_video->video.dwLength>2){
 	  // get pos from frame number / total frames
 	  guiIntfStruct.Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
