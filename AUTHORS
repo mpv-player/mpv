@@ -193,6 +193,12 @@ Ivan Kalvachev <iive@yahoo.com>
     * interlaced MPEG2 support (libmpeg2)
     * libvo2 draft
     * configfile parser fixes
+    * SRT subtitle dump support
+    * Bulgarian msg translation (help_mp-bg.h)
+    * vo_svga rewrite
+    * various fixes and small improvements
+    * XvMC support (mplayer & ffmpeg)
+    * import of xvid4 drivers (vd/ve_xvid4.c by GomGom)
 
 Pierre Lombard (pl) <p_l@gmx.fr>
     * new configure script
