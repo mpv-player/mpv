@@ -251,6 +251,12 @@ Examples:
 mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
 mplayer  foobar.avi -lavdopts bug=1
 
+Links:
+short intro to mpeg coding:
+http://www.eecs.umich.edu/~amarathe/mpeg.html
+longer intro to jpeg/mpeg coding:
+http://www.cs.sfu.ca/undergrad/CourseMaterials/CMPT479/material/notes/Chap4/Chap4.2/Chap4.2.html
+
 --
 Written 2002 by Michael Niedermayer and reviewed by Felix Buenemann.
 Check the MPlayer documentation for contact-addresses.
