@@ -33,6 +33,10 @@
 #endif
 #include "aspect.h"
 
+#ifdef HAVE_PNG
+extern vo_functions_t video_out_png;
+#endif
+
 LIBVO_EXTERN(fbdev)
 
 static vo_info_t vo_info = {
@@ -87,6 +91,7 @@ static FILE *fp;
 static int line_num = 0;
 static char *line;
 static char *token[MAX_NR_TOKEN];
+static uint32_t dstFourcc;
 
 static int get_token(int num)
 {
@@ -996,15 +1001,20 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	switch (fb_bpp) {
 	case 32:
 		draw_alpha_p = vo_draw_alpha_rgb32;
+		dstFourcc = IMGFMT_BGR32;
 		break;
 	case 24:
 		draw_alpha_p = vo_draw_alpha_rgb24;
+		dstFourcc = IMGFMT_BGR24;
 		break;
+	default:
 	case 16:
 		draw_alpha_p = vo_draw_alpha_rgb16;
+		dstFourcc = IMGFMT_BGR16;
 		break;
 	case 15:
 		draw_alpha_p = vo_draw_alpha_rgb15;
+		dstFourcc = IMGFMT_BGR15;
 		break;
 	}
 
@@ -1339,11 +1349,55 @@ static uint32_t preinit(const char *arg)
     if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
 }
 
+#ifdef HAVE_PNG
+static int fbdev_screenshot(void)
+{
+    uint32_t i;
+    uint8_t *ptrs[fb_vinfo.yres];
+    if(video_out_png.preinit(NULL)) 
+    {
+	printf("\nvo_fbdev: can't preinit vo_png\n");
+	return 1;
+    }
+    if(!video_out_png.control(VOCTRL_QUERY_FORMAT, &dstFourcc))
+    {
+	printf("\nvo_fbdev: vo_png doesn't support: %s fourcc\n",vo_format_name(dstFourcc));
+	return 1;
+    }
+    if(video_out_png.config(fb_vinfo.xres,
+			    fb_vinfo.yres,
+			    fb_vinfo.xres,
+			    fb_vinfo.yres,
+			    0,NULL,dstFourcc,NULL))
+    {
+	printf("\nvo_fbdev: can't configure vo_png\n");
+	return 1;
+    }
+    ptrs[0] = L123123875;
+    for(i=1;i<fb_vinfo.yres;i++)
+		ptrs[i] = ptrs[i-1]+fb_line_len;
+    if(video_out_png.draw_frame(ptrs))
+    {
+	printf("\nvo_fbdev: vo_png: error during dumping\n");
+	return 1;
+    }
+    
+    video_out_png.uninit();
+    if(verbose) printf("\nvo_fbdev: png output has been created\n");
+    return 0;
+}
+#endif
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+#ifdef HAVE_PNG
+  case VOCTRL_SCREENSHOT:
+    return fbdev_screenshot();
+    break;
+#endif
   }
   return VO_NOTIMPL;
 }
