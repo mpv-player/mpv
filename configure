@@ -162,6 +162,7 @@ Optional features:
   --disable-dvdnav       Disable dvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit support [autodetect]
+  --disable-css          Disable oldstyle libcss DVD support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   
 Video:
