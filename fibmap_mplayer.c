@@ -1,3 +1,6 @@
+/* (C)2001,2002 by LGB (Gábor Lénárt), lgb@lgb.hu
+   Part of MPlayer project, this source is copyrighted according to GNU/GPL.  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +33,6 @@ int main ( int argc , char ** argv )
             return 1;
         }
 	close(fd);
-	fprintf(stderr,"%d\n",lba);
+	printf("%d\n",lba);
 	return 0;
 }

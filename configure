@@ -2069,7 +2069,31 @@ else
 fi
 
 
-echocheck "DVD support"
+
+
+echocheck "DVD support (libcss - old style)"
+if test "$_css" = auto ; then
+  cat > $TMPC <<EOF
+#include <types.h>
+#include <css.h>
+int main(void) { (void) CSSisEncrypted(0); return 0; }
+EOF
+  _css=no
+  cc_check -lcss $_ld_dl && _css=yes
+fi
+if test "$_css" = yes ; then
+  _def_css='#define HAVE_LIBCSS 1'
+  test "$_csslibdir" && _ld_css="-L${_csslibdir} $_ld_css"
+  _inputmodules="dvdcss $_inputmodules"
+  _largefiles=yes
+  echores "yes"
+else
+  _def_css='#undef HAVE_LIBCSS'
+  echores "no"
+fi
+
+
+echocheck "DVD support (libdvdread - new style)"
 if test "$_dvdread" = auto ; then
   cat > $TMPC << EOF
 #include <dvdread/dvd_reader.h>
@@ -2085,35 +2109,16 @@ EOF
      _dvdread=yes
   fi
 fi
-if test "$_css" = auto ; then
-  cat > $TMPC <<EOF
-#include <css.h>
-int main(void) { (void) CSSisEncrypted(0); return 0; }
-EOF
-  _css=no
-  cc_check -lcss && _css=yes
-fi
-# dvdread preferred to DeCSS
 if test "$_dvdread" = yes ; then
   _largefiles=yes
   _def_dvdread='#define USE_DVDREAD 1'
-  _def_css='#undef HAVE_LIBCSS'
   _ld_css='-ldvdread'
   _inputmodules="dvdread $_inputmodules"
-  echores "libdvdread"
-elif test "$_css" = yes ; then
-  _def_dvdread='#undef USE_DVDREAD'
-  _def_css='#define HAVE_LIBCSS 1'
-  _ld_css='-lcss'
-  test "$_csslibdir" && _ld_css="-L${_csslibdir} $_ld_css"
-  _inputmodules="dvdcss $_inputmodules"
-  echores "libcss"
+  echores "yes"
 else
   _def_dvdread='#undef USE_DVDREAD'
-  _def_css='#undef HAVE_LIBCSS'
   echores "no"
 fi
-
 
 echocheck "zlib"
 cat > $TMPC << EOF

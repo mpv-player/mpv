@@ -221,7 +221,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
 #ifdef HAVE_LIBCSS
     if (css) {
-	    if (descrambling) CSSDescramble(demux->stream->buffer,key_title); else
+	    if (descrambling) dvd_css_descramble(demux->stream->buffer,key_title); else
 		    mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOBauth);
     }
 #endif

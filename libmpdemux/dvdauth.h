@@ -7,9 +7,11 @@ extern unsigned char key_disc[];
 extern unsigned char key_title[];
 extern unsigned char *dvdimportkey;
 extern int descrambling;
+extern char *css_so;
 
 int dvd_auth ( char *, char * );
 int dvd_import_key ( unsigned char * );
+int dvd_css_descramble ( u_char *, u_char * );
 
 #endif
 #endif

@@ -22,21 +22,11 @@
 #ifdef HAVE_LIBCSS
         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},
         {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
-//	{"dvd", "Option -dvd will be \"full disk\" mode, old meaning has been renamed to -dvdauth.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"csslib", &css_so, CONF_TYPE_STRING, 0, 0, 0},
 #else
-//        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
-//            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#ifdef USE_DVDREAD
-        {"dvdkey", "MPlayer was compiled with libdvdread support, this option not available.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-        {"dvdauth", "MPlayer was compiled with libdvdread support! Use option -dvd !\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#else
-        {"dvdkey", "DVD support was not compiled in. See file DOCS/DVD.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-        {"dvdauth", "DVD support was not compiled in. See file DOCS/DVD.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#endif
+        {"dvdauth", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+        {"dvdkey", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"csslib", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
 
 // ------------------------- demuxer options --------------------

@@ -1,9 +1,23 @@
-/* (C)2001 by LGB (Gabor Lenart), based on example programs in libcss
-           lgb@lgb.hu                                                        */
+/* (C)2001,2002 by LGB (Gabor Lenart), based on example programs in libcss
+                lgb@lgb.hu
+		
+   This source is part of MPlayer project. This source is copyrighted by
+   the author according to rules declared in GNU/GPL license.
+
+   2001		Inital version (LGB)
+   2001		fibmap_mplayer to avoid uid=0 mplayer need (LGB)
+   2001		Support for libcss with the new API (by ???)
+   2002/Jan/04  Use dlopen to access libcss.so to avoid conflict with
+                libdvdread [now with only libcss with old API (LGB)          
+		
+   TODO:
+		support for libcss libraries with new API		     */
 
 /* don't do anything with this source if css support was not requested */
 #include "config.h"
 #ifdef HAVE_LIBCSS
+
+#warning FIXME: Dynamic loading of libcss.so with newer (ver>0.1) libcss API is not supported in this version!
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,27 +29,23 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <css.h>
-#if CSS_MAJOR_VERSION > 0 || (CSS_MAJOR_VERSION == 0 && CSS_MINOR_VERSION > 1)
-# include <dvd.h>
-# undef	 OLD_CSS_API
-#else
-# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+// #include <css.h>
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <sys/dvdio.h>
-# elif defined(__linux__)
+#elif defined(__linux__)
 #  include <linux/cdrom.h>
-# elif defined(__sun)
+#elif defined(__sun)
 #  include <sun/dvdio.h>
-# else
+#else
 #  error "Need the DVD ioctls"
-# endif
-# define OLD_CSS_API 1
 #endif
 
+#include <dlfcn.h>
 #include "dvdauth.h"
 
 
-#if	OLD_CSS_API
+// #if	OLD_CSS_API
 /*
  * provide some backward compatibiliy macros to compile this
  * code using the old libcss-0.1
@@ -46,41 +56,40 @@
 #define	DVDAuth(hdl, s)		ioctl(hdl, DVD_AUTH, s)
 #define	DVDOpenDevice(path)	open(path, O_RDONLY)
 #define	DVDCloseDevice(hdl)	close(hdl)
-#define	CSSDVDisEncrypted(hdl)	CSSisEncrypted(hdl)
-#define	CSSDVDAuthDisc		CSSAuthDisc
-/* Arghhh! Please think before you commit! You forget to check the return
-   value of path_to_lba (-1 for error) in this way ... - LGB */
-//#define	CSSDVDAuthTitlePath(hdl,key_title,path) \
-//		CSSAuthTitle(hdl,key_title,path_to_lba(path))
-
-#else	/*OLD_CSS_API*/
-
-#define DVDHandle		struct dvd_device *
-#define	DVDOpenFailed		NULL
-
-#endif	/*OLD_CSS_API*/
+// #define	CSSDVDisEncrypted(hdl)	CSSisEncrypted(hdl)
+// #define	CSSDVDAuthDisc		CSSAuthDisc
 
 
 char *dvd_auth_device=NULL;
 char *dvd_device=NULL;
 char *dvd_raw_device=NULL;
+char *css_so=NULL;
 unsigned char key_disc[2048];
 unsigned char key_title[5];
 unsigned char *dvdimportkey=NULL;
 int descrambling=0;
 
+static void *dlid;
+static int (*dl_CSSisEncrypted)(int);
+static int (*dl_CSSAuthDisc)(int,char *);
+static int (*dl_CSSAuthTitle)(int, char *,int);
+static int (*dl_CSSGetASF)(int);
+static int (*dl_CSSDecryptTitleKey)(char *, char *);
+static void (*dl_CSSDescramble)(u_char *, u_char *);
 
-#if OLD_CSS_API
-/*
- * With the old libcss-0.1 api, we have to find out the LBA for
- * a title for title authentication.
- */
+dvd_css_descramble ( u_char *sec , u_char *key )
+{
+	(*dl_CSSDescramble)(sec,key);
+}
+
+
 #ifdef __linux__
 #include <linux/fs.h>
 
 #ifndef FIBMAP
 #define FIBMAP 1
 #endif
+
 
 static int path_to_lba (char *path)
 {
@@ -94,51 +103,56 @@ static int path_to_lba (char *path)
 	    int ret;
 	    memset(cmd,0,sizeof(cmd));
 	    fgets(cmd,99,fp);
+//	    printf("DVD: cmd: %s\n",cmd);
 	    if ((ret=pclose(fp)))
-		    fprintf(stderr,"fibmap_mplayer: %s\n",*cmd?cmd:"no error info");
-	    if(WIFEXITED(ret) && !WEXITSTATUS(ret)) 
-		lba=atoi(cmd);
-	    else
-		fp=NULL;
+		    fprintf(stderr,"DVD: fibmap_mplayer: %s\n",*cmd?cmd:"no error info");
+	    if (cmd[0]<'0'||cmd[0]>'9') fp=NULL; else {
+		if(WIFEXITED(ret) && !WEXITSTATUS(ret)) {
+		    lba=atoi(cmd);
+		    printf("DVD: fibmap_mplayer is being used\n");
+		} else
+		    fp=NULL;
+	    }
     }
     if (!fp) {
 	int fd;
-	printf("fibmap_mplayer could not run, trying with ioctl() ...\n");
+	printf("DVD: fibmap_mplayer could not run, trying with ioctl() ...\n");
 	if ((fd = open(path, O_RDONLY)) == -1) {
-    	    fprintf(stderr, "Cannot open file %s: %s",
+    	    fprintf(stderr, "DVD: Cannot open file %s: %s",
 	    path ? path : "(NULL)", strerror(errno));
     	    return -1;
 	}
         if (ioctl(fd, FIBMAP, &lba) != 0) {
-            perror ("ioctl FIBMAP");
-	    fprintf(stderr,"Hint: run mplayer as root (or better to install fibmap_mplayer as suid root)!\n");
+            perror("DVD: ioctl FIBMAP");
+	    fprintf(stderr,"  Hint: run mplayer as root (or better to install fibmap_mplayer as suid root)!\n");
             close(fd);
             return -1;
         }
 	close(fd);
     }
-    printf("LBA: %d\n",lba);
+    printf("DVD: LBA: %d\n",lba);
     return lba;
 }
 
-
-int CSSDVDAuthTitlePath(DVDHandle hdl,unsigned char *key_title,char *path)
-{
-	int lba=path_to_lba(path);
-	if (lba==-1) return -1;
-	return CSSAuthTitle(hdl,key_title,lba);
-}		
-		
-
 #else /*linux*/
+
 static int path_to_lba (char *path)
 {
 #warning translating pathname to iso9660 LBA is not supported on this platform
-    fprintf(stderr, "Translating pathname to iso9660 LBA is not supported on this platform\n");
+    fprintf(stderr, "DVD: Translating pathname to iso9660 LBA is not supported on this platform\n");
     return -1;
 }
+
 #endif /*linux*/
-#endif /*OLD_CSS_API*/
+
+
+static int CSSDVDAuthTitlePath(DVDHandle hdl,unsigned char *key_title,char *path)
+{
+	int lba=path_to_lba(path);
+	if (lba==-1) return -1;
+	return (*dl_CSSAuthTitle)(hdl,key_title,lba);
+}		
+		
 
 
 static void reset_agids ( DVDHandle dvd )
@@ -173,7 +187,7 @@ int dvd_import_key ( unsigned char *hexkey )
 		hexkey++;
 	}
 	if (*hexkey) return 1;
-	printf("DVD key (requested): %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
+	printf("DVD: DVD key (requested): %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
 	descrambling=1;
 	return 0;
 }
@@ -184,28 +198,46 @@ int dvd_auth ( char *dev , char *filename )
 {
     	DVDHandle dvd;  /* DVD device handle */
 
+	if (!css_so) css_so=strdup("/usr/local/lib/libcss.so");
+	printf("DVD: opening libcss.so as %s ...\n",css_so);
+	dlid=dlopen(css_so,RTLD_NOW);
+	if (!dlid) {
+		printf("DVD: dlopen: %s\n",dlerror());
+		return 1;
+	} printf("DVD: dlopen OK!\n");
+
+#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,s))) {\
+fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
+return 1; }
+
+	CSS_DLSYM(dl_CSSisEncrypted,"CSSisEncrypted");
+	CSS_DLSYM(dl_CSSAuthDisc,"CSSAuthDisc");
+	CSS_DLSYM(dl_CSSAuthTitle,"CSSAuthTitle");
+	CSS_DLSYM(dl_CSSGetASF,"CSSGetASF");
+	CSS_DLSYM(dl_CSSDecryptTitleKey,"CSSDecryptTitleKey");
+	CSS_DLSYM(dl_CSSDescramble,"CSSDescramble");
+
+#undef CSS_DLSYM
+
 	if ((dvd=DVDOpenDevice(dev)) == DVDOpenFailed) {
 		fprintf(stderr,"DVD: cannot open DVD device \"%s\": %s.\n",
 			dev, strerror(errno));
 		return 1;
 	}
-	
-	if (!CSSDVDisEncrypted(dvd)) {
-		printf("DVD is unencrypted! Skipping authentication!\n(note: you should not use -dvd switch for unencrypted discs!)\n");
+
+	if (!(*dl_CSSisEncrypted)(dvd)) {
+		printf("DVD: DVD is unencrypted! Skipping authentication!\n(note: you should not use -dvd switch for unencrypted discs!)\n");
 		DVDCloseDevice(dvd);
 		return 0;
-	} else printf("DVD is encrypted, issuing authentication ...\n");
-
+	} else printf("DVD: DVD is encrypted, issuing authentication ...\n");
 	/* reset AGIDs */
 	reset_agids(dvd);
-
 	/* authenticate disc */
-	if (CSSDVDAuthDisc(dvd,key_disc)) {
+	if ((*dl_CSSAuthDisc)(dvd,key_disc)) {
 		fprintf(stderr,"DVD: CSSDVDAuthDisc() failed.\n");
 		DVDCloseDevice(dvd);
 		return 1;
 	}
-
         if (CSSDVDAuthTitlePath(dvd,key_title,filename)) {
 		fprintf(stderr,"DVD: CSSDVDAuthTitle() failed.\n");
 		DVDCloseDevice(dvd);
@@ -213,14 +245,14 @@ int dvd_auth ( char *dev , char *filename )
 	}
 
 	/* decrypting title */
-        if (CSSDecryptTitleKey (key_title, key_disc) < 0) {
+        if ((*dl_CSSDecryptTitleKey)(key_title, key_disc) < 0) {
                 fprintf(stderr,"DVD: CSSDecryptTitleKey() failed.\n");
 		DVDCloseDevice(dvd);
 		return 1;
 	}
 
 	DVDCloseDevice(dvd);
-	printf("DVD title key is: %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
+	printf("DVD: DVD title key is: %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
 	descrambling=1;
 	return 0;
 }
