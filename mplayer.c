@@ -419,6 +419,7 @@ int out_fmt=0;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
+int osd_show_sub_delay = 0;
 
 int v_bright=50;
 int v_cont=50;
@@ -1757,9 +1758,11 @@ if(step_sec>0) {
       break;
     case 'z':
       sub_delay -= 0.1;
+      osd_show_sub_delay = 9; // show the subdelay in OSD
       break;
     case 'x':
       sub_delay += 0.1;
+      osd_show_sub_delay = 9; // show the subdelay in OSD
       break;
     case '9':
     case '0':
@@ -2026,7 +2029,11 @@ if(rel_seek_secs || abs_seek_pos){
       int pts=d_video->pts;
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
-      sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
+      if (osd_show_sub_delay) {
+	  sprintf(vo_osd_text, "Sub delay: %d ms",(int)(sub_delay*1000));
+	  osd_show_sub_delay--;
+      } else
+          sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
   } else {
       vo_osd_text=NULL;
   }
