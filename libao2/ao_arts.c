@@ -16,7 +16,7 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
-#define OBTAIN_BITRATE(a) (((a != AFMT_U8) || (a != AFMT_S8)) ? 16 : 8)
+#define OBTAIN_BITRATE(a) (((a != AFMT_U8) && (a != AFMT_S8)) ? 16 : 8)
 
 /* Feel free to experiment with the following values: */
 #define ARTS_PACKETS 10 /* Number of audio packets */
@@ -49,6 +49,24 @@ static int init(int rate_hz, int channels, int format, int flags)
 		return 0;
 	}
 	mp_msg(MSGT_AO, MSGL_INFO, "AO: [arts] Connected to sound server\n");
+
+	/*
+	 * arts supports 8bit unsigned and 16bit signed sample formats
+	 * (16bit apparently in little endian format, even in the case
+	 * when artsd runs on a big endian cpu).
+	 *
+	 * Unsupported formats are translated to one of these two formats
+	 * using mplayer's audio filters.
+	 */
+	switch (format) {
+	case AFMT_U8:
+	case AFMT_S8:
+	    format = AFMT_U8;
+	    break;
+	default:
+	    format = AFMT_S16_LE;    /* artsd always expects little endian?*/
+	    break;
+	}
 
 	ao_data.format = format;
 	ao_data.channels = channels;
