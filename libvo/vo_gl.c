@@ -42,14 +42,14 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_DOUBLEBUFFER,
                                        None };
 
-int use_osd;
+static int use_osd;
 #define MAX_OSD_PARTS 20
-GLuint osdtex[MAX_OSD_PARTS];
+static GLuint osdtex[MAX_OSD_PARTS];
 #ifndef FAST_OSD
-GLuint osdatex[MAX_OSD_PARTS];
+static GLuint osdatex[MAX_OSD_PARTS];
 #endif
-GLuint osdDispList[MAX_OSD_PARTS];
-int osdtexCnt = 0;
+static GLuint osdDispList[MAX_OSD_PARTS];
+static int osdtexCnt = 0;
 
 static uint32_t image_width;
 static uint32_t image_height;
