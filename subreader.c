@@ -605,191 +605,185 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
 
 subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
 {
-    char commands[LINE_LEN], line1[LINE_LEN], line2[LINE_LEN],
-	text[LINE_LEN], *p, *q;
-    int a1, a2, a3, a4, b1, b2, b3, b4, comment = 0;
-    unsigned short directive = 0;
+    char line1[LINE_LEN], line2[LINE_LEN], directive[LINE_LEN], *p, *q;
+    unsigned a1, a2, a3, a4, b1, b2, b3, b4, comment = 0;
+    static unsigned jacoTimeres = 30;
+    static int jacoShift = 0;
 
     bzero(current, sizeof(subtitle));
-    bzero(commands, sizeof(char) * LINE_LEN);
-    bzero(line1, sizeof(char) * LINE_LEN);
-    bzero(line2, sizeof(char) * LINE_LEN);
+    bzero(line1, LINE_LEN);
+    bzero(line2, LINE_LEN);
+    bzero(directive, LINE_LEN);
     while (!current->text[0]) {
-	if (!fgets(line1, LINE_LEN, fd))
+	if (!fgets(line1, LINE_LEN, fd)) {
 	    return NULL;
+	}
 	if (sscanf
-	    (line1, "%d:%d:%d.%d %d:%d:%d.%d %[^\n\r]", &a1, &a2, &a3, &a4,
-	     &b1, &b2, &b3, &b4, line2) < 9)
-	    continue;
-	//a Jacosub script *may* have some commands before the text, so let's recognize them 
-	switch (toupper(line2[0])) {
-	case 'C':
-	    switch (toupper(line2[1])) {
-	    case 'F':
-	    case 'P':
-	    case 'S':
-	    case 'B':
-		if (isdigit(line2[2]))
-		    directive = 1;
-	    }
-	    break;
-	case 'D':
-	    if ((line2[1] == ' ') || isdigit(line2[1]))
-		directive = 1;
-	    // special case
-	    if (toupper(line2[1]) == 'C')
-		directive = 1;
-	    break;
-	case 'E':
-	    switch (toupper(line2[1])) {
-	    case 'D':
-	    case 'P':
-		if (isdigit(line2[2]))
-		    directive = 1;
-		break;
-	    case 'I':
-		if ((toupper(line2[2]) == 'O') && (isdigit(line2[3])))
-		    directive = 1;
-		break;
-	    case 'R':
-		if ((toupper(line2[2]) == 'D') && (isdigit(line2[3])))
-		    directive = 1;
-		break;
-	    case 'W':
-		if ((toupper(line2[2]) == 'L')
-		    || (toupper(line2[2]) == 'R'))
-		    directive = 1;
-		break;
-	    }
-	    break;
-	case 'F':
-	    if (isdigit(line2[1]))
-		directive = 1;
-	    else
-		switch (toupper(line2[1])) {
-		case 'O':
-		    if (isdigit(line2[2]))
-			directive = 1;
-		    break;
-		case 'S':
-		    directive = 1;
+	    (line1, "%u:%u:%u.%u %u:%u:%u.%u %[^\n\r]", &a1, &a2, &a3, &a4,
+	     &b1, &b2, &b3, &b4, line2) < 9) {
+	    if (sscanf(line1, "@%u @%u %[^\n\r]", &a4, &b4, line2) < 3) {
+		if (line1[0] == '#') {
+		    int hours = 0, minutes = 0, seconds, delta, inverter =
+			1;
+		    unsigned units = jacoShift;
+		    switch (toupper(line1[1])) {
+		    case 'S':
+			if (isalpha(line1[2])) {
+			    delta = 6;
+			} else {
+			    delta = 2;
+			}
+			if (sscanf(&line1[delta], "%d", &hours)) {
+			    if (hours < 0) {
+				hours *= -1;
+				inverter = -1;
+			    }
+			    if (sscanf(&line1[delta], "%*d:%d", &minutes)) {
+				if (sscanf
+				    (&line1[delta], "%*d:%*d:%d",
+				     &seconds)) {
+				    sscanf(&line1[delta], "%*d:%*d:%*d.%d",
+					   &units);
+				} else {
+				    hours = 0;
+				    sscanf(&line1[delta], "%d:%d.%d",
+					   &minutes, &seconds, &units);
+				    minutes *= inverter;
+				}
+			    } else {
+				hours = minutes = 0;
+				sscanf(&line1[delta], "%d.%d", &seconds,
+				       &units);
+				seconds *= inverter;
+			    }
+			    jacoShift =
+				((hours * 3600 + minutes * 60 +
+				  seconds) * jacoTimeres +
+				 units) * inverter;
+			}
+			break;
+		    case 'T':
+			if (isalpha(line1[2])) {
+			    delta = 8;
+			} else {
+			    delta = 2;
+			}
+			sscanf(&line1[delta], "%u", &jacoTimeres);
+			break;
+		    }
 		}
-	    break;
-	case 'G':
-	    if ((line2[1] == 'G') && (isdigit(line2[2])))
-		directive = 2;
-	    break;
-	case 'H':
-	    switch (toupper(line2[1])) {
-	    case 'L':
-	    case 'R':
-		if (isdigit(line2[2]))
-		    directive = 1;
+		continue;
+	    } else {
+		current->start =
+		    (unsigned long) ((a4 + jacoShift) * 100.0 /
+				     jacoTimeres);
+		current->end =
+		    (unsigned long) ((b4 + jacoShift) * 100.0 /
+				     jacoTimeres);
 	    }
-	    break;
-	case 'J':
-	    switch (toupper(line2[1])) {
-	    case 'B':
-		if (toupper(line2[2]) == 'C')
-		    directive = 1;
-		break;
-	    case 'C':
-	    case 'L':
-	    case 'R':
-		directive = 1;
-		break;
-	    case 'F':
-		if ((line2[2] == ':') && (toupper(line2[3]) == 'L'))
-		    directive = 1;
-	    }
-	    break;
-	case 'R':
-	    if (((toupper(line2[1]) == 'D') && (toupper(line2[2]) == 'B'))
-		|| ((toupper(line2[1]) == 'D')
-		    && (toupper(line2[2]) == 'C'))
-		|| ((toupper(line2[1]) == 'L')
-		    && (toupper(line2[2]) == 'B')))
-		directive = 2;
-	    break;
-	case 'V':
-	    switch (toupper(line2[1])) {
-	    case 'A':
-	    case 'B':
-	    case 'M':
-	    case 'T':
-	    case 'U':
-		directive = 1;
-		break;
-	    case 'L':
-	    case 'P':
-		if (isdigit(line2[2]))
-		    directive = 1;
-	    }
-	    break;
-	case '[':
-	    directive = 1;
-	    break;
-	case '~':
-	    directive = 2;
+	} else {
+	    current->start =
+		(unsigned
+		 long) (((a1 * 3600 + a2 * 60 + a3) * jacoTimeres + a4 +
+			 jacoShift) * 100.0 / jacoTimeres);
+	    current->end =
+		(unsigned
+		 long) (((b1 * 3600 + b2 * 60 + b3) * jacoTimeres + b4 +
+			 jacoShift) * 100.0 / jacoTimeres);
 	}
-	if (directive == 1) {
-	    strcpy(line1, line2);
-	    sscanf(line1, "%s %[^\n\r]", commands, line2);
-	} else if (directive == 2) {
-	    continue;
-	}
-	current->start = a1 * 360000 + a2 * 6000 + a3 * 100 + a4;
-	current->end = b1 * 360000 + b2 * 6000 + b3 * 100 + b4;
 	current->lines = 0;
-
-	q = text;
 	p = line2;
-	while ((*p) == ' ')
-	    p++;
+	while ((*p == ' ') || (*p == '\t')) {
+	    ++p;
+	}
+	if (isalpha(*p)||*p == '[') {
+	    int cont, jLength;
 
-	for (; (!eol(*p)) && (current->lines < SUB_MAX_TEXT); p++) {
+	    if (sscanf(p, "%s %[^\n\r]", directive, line1) < 2)
+		return (subtitle *) ERR;
+	    jLength = strlen(directive);
+	    for (cont = 0; cont < jLength; ++cont) {
+		if (isalpha(*(directive + cont)))
+		    *(directive + cont) = toupper(*(directive + cont));
+	    }
+	    if ((strstr(directive, "RDB") != NULL)
+		|| (strstr(directive, "RDC") != NULL)
+		|| (strstr(directive, "RLB") != NULL)
+		|| (strstr(directive, "RLG") != NULL)) {
+		continue;
+	    }
+	    strcpy(line2, line1);
+	    p = line2;
+	}
+	for (q = line1; (!eol(*p)) && (current->lines < SUB_MAX_TEXT);
+	     ++p) {
 	    switch (*p) {
 	    case '{':
 		comment++;
 		break;
 	    case '}':
-		comment--;
-		//the next to get rid of a blank after the comment
-		if ((*(p + 1)) == ' ')
-		    p++;
+		if (comment) {
+		    --comment;
+		    //the next line to get rid of a blank after the comment
+		    if ((*(p + 1)) == ' ')
+			p++;
+		}
+		break;
+	    case '~':
+		if (!comment) {
+		    *q = ' ';
+		    ++q;
+		}
+		break;
+	    case ' ':
+	    case '\t':
+		if ((*(p + 1) == ' ') || (*(p + 1) == '\t'))
+		    break;
+		if (!comment) {
+		    *q = ' ';
+		    ++q;
+		}
 		break;
 	    case '\\':
 		if (*(p + 1) == 'n') {
 		    *q = '\0';
-		    q = text;
-		    current->text[current->lines++] = strdup(text);
-		    p++;
+		    q = line1;
+		    current->text[current->lines++] = strdup(line1);
+		    ++p;
 		    break;
-		} else if (toupper(*(p + 1)) == 'C') {
-		    p++;
-		    p++;
+		}
+		if ((toupper(*(p + 1)) == 'C')
+		    || (toupper(*(p + 1)) == 'F')) {
+		    ++p,++p;
 		    break;
-		} else if ((toupper(*(p + 1)) == 'I')
-			   || (toupper(*(p + 1)) == 'B')
-			   || (toupper(*(p + 1)) == 'N')) {
-		    p++;
+		}
+		if ((*(p + 1) == 'B') || (*(p + 1) == 'b') || (*(p + 1) == 'D') ||	//actually this means "insert current date here"
+		    (*(p + 1) == 'I') || (*(p + 1) == 'i') || (*(p + 1) == 'N') || (*(p + 1) == 'T') ||	//actually this means "insert current time here"
+		    (*(p + 1) == 'U') || (*(p + 1) == 'u')) {
+		    ++p;
 		    break;
+		}
+		if ((*(p + 1) == '\\') ||
+		    (*(p + 1) == '~') || (*(p + 1) == '{')) {
+		    ++p;
 		} else if (eol(*(p + 1))) {
-		    if (!fgets(line1, LINE_LEN, fd))
+		    if (!fgets(directive, LINE_LEN, fd))
 			return NULL;
-		    trail_space(line1);
-		    p = line1;
+		    trail_space(directive);
+		    strncat(line2, directive,
+			    (LINE_LEN > 511) ? LINE_LEN : 511);
+		    break;
 		}
 	    default:
 		if (!comment) {
 		    *q = *p;
-		    q++;
+		    ++q;
 		}
-	    }
-	}
+	    }			//-- switch
+	}			//-- for
 	*q = '\0';
-	current->text[current->lines] = strdup(text);
-    }
+	current->text[current->lines] = strdup(line1);
+    }				//-- while
     current->lines++;
     return current;
 }
@@ -817,6 +811,8 @@ int sub_autodetect (FILE *fd) {
 	if (strstr (line, "<SAMI>"))
 		{sub_uses_time=1; return SUB_SAMI;}
 	if (sscanf(line, "%d:%d:%d.%d %d:%d:%d.%d", &i, &i, &i, &i, &i, &i, &i, &i) == 8)
+		{sub_uses_time = 1; return SUB_JACOSUB;}
+	if (sscanf(line, "@%d @%d", &i, &i) == 2)
 		{sub_uses_time = 1; return SUB_JACOSUB;}
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
 		{sub_uses_time=1;return SUB_VPLAYER;}
