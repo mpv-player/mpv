@@ -170,7 +170,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- if( flags&0x04 && format==IMGFMT_YV12 ) {
+ if( flags&0x04 && (format==IMGFMT_YV12 || format==IMGFMT_I420 || format==IMGFMT_IYUV)) {
      // software scale
      if(fullscreen){
          image_width=vo_screenwidth;
@@ -424,7 +424,8 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 //   return -1;
   }
 
- if( format==IMGFMT_YV12 ) yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
+ if((format == IMGFMT_YV12) || (format == IMGFMT_I420) || (format == IMGFMT_IYUV))
+    yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
   
 #ifdef HAVE_NEW_GUI  
  if ( vo_window == None ) 
@@ -486,10 +487,19 @@ static void flip_page( void ){
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
-
+ /* hack: swap planes for I420 ;) -- alex */
+ if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
+ {
+    uint8_t *src_i420[3];
+    
+    src_i420[0] = src[0];
+    src_i420[1] = src[2];
+    src_i420[2] = src[1];
+    src = src_i420;
+ }
 if(scale_srcW){
  uint8_t *dst[3] = {ImageData, NULL, NULL};
- SwScale_YV12slice(src,stride,y,h,
+    SwScale_YV12slice(src,stride,y,h,
                          dst, image_width*((bpp+7)/8), ( depth == 24 ) ? bpp : depth,
 			 scale_srcW, scale_srcH, image_width, image_height);
 } else {
@@ -570,6 +580,8 @@ static uint32_t query_format( uint32_t format )
 
  switch( format )
   {
+   case IMGFMT_I420:
+   case IMGFMT_IYUV:
    case IMGFMT_YV12: return 1;
   }
  return 0;
