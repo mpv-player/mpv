@@ -23,7 +23,7 @@ extern int sub_num;         // number of subtitle structs
 // One of the SUB_* constant above
 extern int sub_format;
 
-#define SUB_MAX_TEXT 5
+#define SUB_MAX_TEXT 10
 
 typedef struct {
 
