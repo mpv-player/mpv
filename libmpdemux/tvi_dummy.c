@@ -84,6 +84,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_VID_CHK_WIDTH:
 	case TVI_CONTROL_VID_CHK_HEIGHT:
 	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_TUN_SET_NORM:
+	    return(TVI_CONTROL_TRUE);
     }
     return(TVI_CONTROL_UNKNOWN);
 }
