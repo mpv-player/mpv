@@ -287,6 +287,7 @@ static void uninit(sh_video_t *sh){
 	if(rv_handle) dlclose(rv_handle);
 #endif
 	rv_handle=NULL;
+	inited = 0;
 }
 
 // copypaste from demux_real.c - it should match to get it working!
