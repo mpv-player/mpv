@@ -3,9 +3,6 @@
 // Enable ALSA emulation (using 32kB audio buffer) - timer testing only
 //#define SIMULATE_ALSA
 
-// Define, if you want to run libmpeg2 in a new process (using codec-ctrl)
-//#define HAVE_CODECCTRL
-
 #ifdef USE_XMMP_AUDIO
 #define OUTBURST 4096
 #else
@@ -87,6 +84,8 @@ extern int errno;
 
 #define DEBUG if(0)
 int verbose=0;
+
+#define ABS(x) (((x)>=0)?(x):(-(x)))
 
 //**************************************************************************//
 //             .SUB 
@@ -306,11 +305,6 @@ while(len>0){
 // Common FIFO functions, and keyboard/event FIFO code
 #include "fifo.c"
 
-// MPEG video codec process controller:
-#ifdef HAVE_CODECCTRL
-#include "codecctrl.c"
-#endif
-
 //**************************************************************************//
 
 static vo_functions_t *video_out=NULL;
@@ -322,26 +316,7 @@ void exit_player(char* how){
   if(verbose) printf("max framesize was %d bytes\n",max_framesize);
   // restore terminal:
   getch2_disable();
-#ifdef HAVE_CODECCTRL
-  if(child_pid){
-    // MPEG
-      // printf("\n\n");
-      //send_cmd(data_fifo,0);usleep(50000); // EOF request
-    DEBUG_SIG { printf("Sending TERM signal to CTRL...\n");DEBUG_SIGNALS_SLEEP}
-      kill(child_pid,SIGTERM);
-      usleep(10000);  // kill & wait 10ms
-    DEBUG_SIG { printf("Closing PIPEs...\n");DEBUG_SIGNALS_SLEEP}
-      close(control_fifo);
-      close(data_fifo);
-    DEBUG_SIG { printf("Freeing shmem...\n");DEBUG_SIGNALS_SLEEP}
-      if(videobuffer) shmem_free(videobuffer);
-    DEBUG_SIG { printf("Exiting...\n");DEBUG_SIGNALS_SLEEP}
-  } else
-#endif
-  {
-  	// AVI
-	video_out->uninit();
-  }
+  video_out->uninit();
 #ifdef USE_XMMP_AUDIO
   if(verbose) printf("XMM: closing audio driver...\n");
   if(pSound){
@@ -399,7 +374,6 @@ int video_id=-1;
 float default_max_pts_correction=0.01f;
 int delay_corrected=1;
 float force_fps=0;
-float default_fps=25;
 float audio_delay=0;
 int vcd_track=0;
 #ifdef VCD_CACHE
@@ -421,8 +395,6 @@ int screen_size_x=0;//SCREEN_SIZE_X;
 int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
 // movie info:
-int movie_size_x=0;
-int movie_size_y=0;
 int out_fmt=0;
 char *dsp="/dev/dsp";
 int force_ni=0;
@@ -698,18 +670,20 @@ switch(file_format){
       has_audio=0;
     } else sh_audio->format=sh_audio->wf.wFormatTag;
   }
+  // calc. FPS:
+  sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+  sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
   // calculating video bitrate:
-  default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
   if(sh_audio) avi_header.bitrate-=sh_audio->audio.dwLength;
   if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-  avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)*default_fps;
+  avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)*sh_video->fps;
   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     &sh_video->bih.biCompression,
     sh_video->bih.biWidth,
     sh_video->bih.biHeight,
     sh_video->bih.biBitCount,
-    default_fps,
+    sh_video->fps,
     avi_header.bitrate*0.008f,
     avi_header.bitrate/1024.0f );
   break;
@@ -732,6 +706,7 @@ switch(file_format){
       has_audio=0;
     } else sh_audio->format=sh_audio->wf.wFormatTag;
   }
+  sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
   printf("VIDEO:  [%.4s]  %dx%d  %dbpp\n",
     &sh_video->bih.biCompression,
     sh_video->bih.biWidth,
@@ -768,8 +743,8 @@ switch(file_format){
  case DEMUXER_TYPE_ASF: {
   // display info:
   sh_video->format=sh_video->bih.biCompression;
-  movie_size_x=sh_video->bih.biWidth;
-  movie_size_y=abs(sh_video->bih.biHeight);
+  sh_video->disp_w=sh_video->bih.biWidth;
+  sh_video->disp_h=abs(sh_video->bih.biHeight);
   break;
  }
  case DEMUXER_TYPE_MPEG_ES:
@@ -804,16 +779,17 @@ switch(file_format){
     }
    }
    // display info:
-   default_fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-   movie_size_x=picture->display_picture_width;
-   movie_size_y=picture->display_picture_height;
+   sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
+   sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
+   sh_video->disp_w=picture->display_picture_width;
+   sh_video->disp_h=picture->display_picture_height;
    // info:
    if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
    printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     picture->mpeg1?"MPEG1":"MPEG2",
-    movie_size_x,movie_size_y,
+    sh_video->disp_w,sh_video->disp_h,
     picture->aspect_ratio_information,
-    default_fps,
+    sh_video->fps,
     picture->bitrate*0.5f,
     picture->bitrate/16.0f );
   break;
@@ -821,6 +797,11 @@ switch(file_format){
 } // switch(file_format)
 
 if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
+
+printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+   file_format,sh_video->format,sh_video->disp_w,sh_video->disp_h,
+   sh_video->fps,sh_video->frametime
+);
 
 fflush(stdout);
 
@@ -956,7 +937,7 @@ switch(has_video){
        printf("Cannot create file for encoding\n");
        return 0;
      }
-     write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),default_fps,movie_size_x,movie_size_y);
+     write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),sh_video->fps,sh_video->disp_w,sh_video->disp_h);
      fclose(encode_file);
      encode_index_name=malloc(strlen(encode_name)+8);
      strcpy(encode_index_name,encode_name);
@@ -971,7 +952,7 @@ switch(has_video){
 
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
-// ========== Init display (movie_size_x*movie_size_y/out_fmt) ============
+// ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
 #ifdef X11_FULLSCREEN
    if(fullscreen){
@@ -984,22 +965,22 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
    if(screen_size_xy>0){
      if(screen_size_xy<=8){
-       screen_size_x=screen_size_xy*movie_size_x;
-       screen_size_y=screen_size_xy*movie_size_y;
+       screen_size_x=screen_size_xy*sh_video->disp_w;
+       screen_size_y=screen_size_xy*sh_video->disp_h;
      } else {
        screen_size_x=screen_size_xy;
-       screen_size_y=screen_size_xy*movie_size_y/movie_size_x;
+       screen_size_y=screen_size_xy*sh_video->disp_h/sh_video->disp_w;
      }
    } else if(!vidmode){
      if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
      if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
-     if(screen_size_x<=8) screen_size_x*=movie_size_x;
-     if(screen_size_y<=8) screen_size_y*=movie_size_y;
+     if(screen_size_x<=8) screen_size_x*=sh_video->disp_w;
+     if(screen_size_y<=8) screen_size_y*=sh_video->disp_h;
    }
 
    { const vo_info_t *info = video_out->get_info();
      printf("VO: [%s] %dx%d => %dx%d %s%s%s ",info->short_name,
-         movie_size_x,movie_size_y,
+         sh_video->disp_w,sh_video->disp_h,
          screen_size_x,screen_size_y,
          fullscreen?"fs ":"",
          vidmode?"vm ":"",
@@ -1018,12 +999,12 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 //                      screen_size_x,screen_size_y,out_fmt);
 
    if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
-                      movie_size_x,movie_size_y,
+                      sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2),
                       title,out_fmt);
 
-   if(video_out->init(movie_size_x,movie_size_y,
+   if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2),
                       title,out_fmt)){
@@ -1049,7 +1030,6 @@ float max_pts_correction=default_max_pts_correction;
 int eof=0;
 int force_redraw=0;
 float num_frames=0;      // number of frames played
-//int real_num_frames=0;   // number of frames readed
 double video_time_usage=0;
 double vout_time_usage=0;
 double audio_time_usage=0;
@@ -1175,10 +1155,10 @@ if(!has_audio){
 
 if(file_format==DEMUXER_TYPE_AVI){
   a_pts=d_audio->pts-(buffer_delay+audio_delay);
-  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
+  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
 //  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
   if(verbose){
-    printf("AVI Initial frame delay: %5.3f\n",(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps);
+    printf("AVI Initial frame delay: %5.3f\n",(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime);
     printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
              audio_delay,buffer_delay,a_pts,a_frame);
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
@@ -1186,7 +1166,10 @@ if(file_format==DEMUXER_TYPE_AVI){
   delay_corrected=0; // has to correct PTS diffs
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
 }
-if(force_fps) default_fps=force_fps;
+if(force_fps){
+  sh_video->fps=force_fps;
+  sh_video->frametime=1.0f/sh_video->fps;
+}
 
 printf("Start playing...\n");fflush(stdout);
 
@@ -1259,25 +1242,18 @@ while(has_audio){
     // Use system timer for sync, not audio card/driver
     time_frame+=OUTBURST/(float)(sh_audio->o_bps);
     time_frame-=GetRelativeTime();
-//    printf("time_frame=%5.3f\n",time_frame);
     if(time_frame<-0.1 || time_frame>0.1){
       time_frame=0;
     } else {
-//      if(time_frame>0.01) usleep(1000000*(time_frame-0.01)); // sleeping
-//      if(time_frame>0.019) usleep(1000000*(time_frame-0.019)); // sleeping
-//      if(time_frame>0.001) usleep(1000000*(time_frame)); // sleeping
-//      if(time_frame>0.02) usleep(1000000*(time_frame)); // sleeping if >20ms
-        while(time_frame>0.007){
-//            printf("TIMER  %8.3f -> ",time_frame*1000);
-//            if(time_frame>0.021)
-//                usleep(time_frame-0.12);
-//            else
-                usleep(1000);
+        while(time_frame>0.022){
+            usleep(time_frame-0.22);
             time_frame-=GetRelativeTime();
-//            printf("%8.3f    \n",time_frame*1000);
         }
-      }
-
+        while(time_frame>0.007){
+            usleep(0);
+            time_frame-=GetRelativeTime();
+        }
+    }
   }
 
 
@@ -1285,6 +1261,9 @@ while(has_audio){
 
 if(1)
   while(v_frame<a_frame || force_redraw){
+  
+    float frame_time=1;
+    float pts1=d_video->pts;
 
     current_module="decode_video";
 
@@ -1302,23 +1281,17 @@ switch(has_video){
     // let's decode
         dec_frame.length = in_size;
 	dec_frame.bitstream = start;
-	//dec_frame.bmp = video_out;
 	dec_frame.render_flag = 1;
 	decore(0x123, 0, &dec_frame, NULL);
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
       if(opendivx_src[0]){
         video_out->draw_slice(opendivx_src,opendivx_stride,
-                            movie_size_x,movie_size_y,0,0);
-//        video_out->flip_page();
+                            sh_video->disp_w,sh_video->disp_h,0,0);
         opendivx_src[0]=NULL;
       }
-
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
-      ++num_frames;
-      v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-    
     break;
   }
 #ifdef USE_DIRECTSHOW
@@ -1326,30 +1299,14 @@ switch(has_video){
     char* start=NULL;
     unsigned int t=GetTimer();
     unsigned int t2;
-    float pts1=d_video->pts;
     int in_size=ds_get_packet(d_video,&start);
-    float pts2=d_video->pts;
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
 
-//    printf("frame len = %5.4f\n",pts2-pts1);
-
     DS_VideoDecoder_DecodeFrame(start, in_size, 0, 1);
-
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
-//        video_out->flip_page();
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-
-      ++num_frames;
-      
-      if(file_format==DEMUXER_TYPE_ASF){
-        float d=pts2-pts1;
-        if(d>0 && d<0.2) v_frame+=d;
-      } else
-        v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-      //v_pts+=1.0f/default_fps;   //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-
     break;
   }
 #endif
@@ -1358,198 +1315,93 @@ switch(has_video){
     char* start=NULL;
     unsigned int t=GetTimer();
     unsigned int t2;
-    float pts1=d_video->pts;
     int in_size=ds_get_packet(d_video,&start);
-    float pts2=d_video->pts;
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
     
-//    printf("frame len = %5.4f\n",pts2-pts1);
-
-//if(in_size>0){
       sh_video->bih.biSizeImage = in_size;
-      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME, 
 //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
+      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME, 
                         &sh_video->bih,   start,
                         &sh_video->o_bih, sh_video->our_out_buffer);
       if(ret){ printf("Error decompressing frame, err=%d\n",ret);break; }
-//}
 
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
-//        video_out->flip_page();
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-
-      ++num_frames;
-      
-      if(file_format==DEMUXER_TYPE_ASF){
-        float d=pts2-pts1;
-        if(d>0 && d<0.2) v_frame+=d;
-      } else
-        v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-      //v_pts+=1.0f/default_fps;   //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
     break;
   }
   case 1: {
-#ifndef HAVE_CODECCTRL
-
         int in_frame=0;
-        videobuf_len=0;
-        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
-          int i=sync_video_packet(d_video);
-          if(in_frame){
-            if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
-              // send END OF FRAME code:
-#if 1
-              videobuffer[videobuf_len+0]=0;
-              videobuffer[videobuf_len+1]=0;
-              videobuffer[videobuf_len+2]=1;
-              videobuffer[videobuf_len+3]=0xFF;
-              videobuf_len+=4;
-#endif
-              if(!i) eof=1; // EOF
-              break;
-            }
-          } else {
-            //if(i==0x100) in_frame=1; // picture startcode
-            if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
-            else if(!i){ eof=1; break;} // EOF
-          }
-	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
-          if(!read_video_packet(d_video)){ eof=1; break;} // EOF
-          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
-        }
-        
-        if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
-        //printf("--- SEND %d bytes\n",videobuf_len);
-	if(grab_frames==1){
-	      FILE *f=fopen("grab.mpg","ab");
-	      fwrite(videobuffer,videobuf_len-4,1,f);
-	      fclose(f);
-	}
-        ++dbg_es_sent;
-        //if(videobuf_len>4) 
-        //my_write(data_fifo,(char*) &videobuf_len,4);
-        
-        { int t=0;
-          int x;
-          float l;
-          t-=GetTimer();
-          mpeg2_decode_data(video_out, videobuffer, videobuffer+videobuf_len);
-          t+=GetTimer();
-          //*** CMD=0 : Frame completed ***
-          //send_cmd(control_fifo2,0); // FRAME_COMPLETED command
-          x=frameratecode2framerate[picture->frame_rate_code]; //fps
-          ++dbg_es_rcvd;
-          l=(100+picture->repeat_count)*0.01f;
-          num_frames+=l;
-          picture->repeat_count=0;
-          video_time_usage+=t*0.000001;
-          if(x && !force_fps) default_fps=x*0.0001f;
-          if(!force_redraw){
-            // increase video timers:
-            v_frame+=l/default_fps;
-            v_pts+=l/default_fps;
-          }
-        }
-        //if(eof) break;
-
-#else
-    while(1){
-      int x;
-      while(1){
-        x=-1; // paranoia
-        if(4==read(control_fifo,&x,4)) break;  // status/command
-        usleep(5000); // do not eat 100% CPU (waiting for codec restart)
-      }
-      if(x==0x3030303){
-        //*** CMD=3030303 : Video packet requested ***
-        // read a single compressed frame:
-        int in_frame=0;
-        videobuf_len=0;
-        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
-          int i=sync_video_packet(d_video);
-          if(in_frame){
-            if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
-              // send END OF FRAME code:
-#if 1
-              videobuffer[videobuf_len+0]=0;
-              videobuffer[videobuf_len+1]=0;
-              videobuffer[videobuf_len+2]=1;
-              videobuffer[videobuf_len+3]=0xFF;
-              videobuf_len+=4;
-#endif
-              if(!i) eof=1; // EOF
-              break;
-            }
-          } else {
-            //if(i==0x100) in_frame=1; // picture startcode
-            if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
-            else if(!i){ eof=1; break;} // EOF
-          }
-	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
-          if(!read_video_packet(d_video)){ eof=1; break;} // EOF
-          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
-        }
-        if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
-        //printf("--- SEND %d bytes\n",videobuf_len);
-	if(grab_frames==1){
-	      FILE *f=fopen("grab.mpg","ab");
-	      fwrite(videobuffer,videobuf_len-4,1,f);
-	      fclose(f);
-	}
-        ++dbg_es_sent;
-        //if(videobuf_len>4) 
-        my_write(data_fifo,(char*) &videobuf_len,4);
-        if(eof) break;
-      } else
-      if(x==0){
-        //*** CMD=0 : Frame completed ***
-        int l=100;
         int t=0;
-        read(control_fifo,&x,4); // FPS
-        read(control_fifo,&l,4); // Length*100
-        read(control_fifo,&t,4); // Time*1000000
-        //printf("+++ FRAME COMPLETED fps=%d  len=%d  time=%d\n",x,l,t);
-        ++dbg_es_rcvd;
-        num_frames+=l/100.0f;
-        video_time_usage+=t*0.000001;
-        if(x && !force_fps) default_fps=x*0.0001f;
-        if(!force_redraw){
-          // increase video timers:
-          v_frame+=l*0.01f/default_fps;
-          v_pts+=l*0.01f/default_fps;
-        }
-        break; // frame OK.
-      } else
-      if(x==0x22222222){
-        //*** CMD=22222222 : codec reset/restart ***
-        read(control_fifo,&codec_pid,4); // PID
-        printf("\nVideo codec started... (pid %d)\n",codec_pid);
-        send_cmd(data_fifo,0x22222222);  // send response (syncword)
-        dbg_es_sent=dbg_es_rcvd=0;
-        //printf("  [ReSync-VIDEO]       \n");
-        while(1){
-          int id=sync_video_packet(d_video);
-          if(id==0x100 || id>=0x1B0) break; // header chunk
-          if(!id || !skip_video_packet(d_video)){ eof=1; break;} // EOF
-        }
-        if(eof) break;
-        max_pts_correction=0.2;
-      } else
-        printf("invalid cmd: 0x%X\n",x);
-    }
+        float newfps;
+        videobuf_len=0;
+        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
+          int i=sync_video_packet(d_video);
+          if(in_frame){
+            if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
+#if 1
+              // send END OF FRAME code:
+              videobuffer[videobuf_len+0]=0;
+              videobuffer[videobuf_len+1]=0;
+              videobuffer[videobuf_len+2]=1;
+              videobuffer[videobuf_len+3]=0xFF;
+              videobuf_len+=4;
 #endif
+              if(!i) eof=1; // EOF
+              break;
+            }
+          } else {
+            //if(i==0x100) in_frame=1; // picture startcode
+            if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
+            else if(!i){ eof=1; break;} // EOF
+          }
+	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
+          if(!read_video_packet(d_video)){ eof=1; break;} // EOF
+          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
+        }
+        
+        if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
+        //printf("--- SEND %d bytes\n",videobuf_len);
+	if(grab_frames==1){
+	      FILE *f=fopen("grab.mpg","ab");
+	      fwrite(videobuffer,videobuf_len-4,1,f);
+	      fclose(f);
+	}
+        
+        t-=GetTimer();
+          mpeg2_decode_data(video_out, videobuffer, videobuffer+videobuf_len);
+        t+=GetTimer(); video_time_usage+=t*0.000001;
+
+        newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
+        if(ABS(sh_video->fps-newfps)>0.01f){
+            printf("Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,newfps,sh_video->fps-newfps,picture->frame_rate_code);
+            sh_video->fps=newfps;
+            sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
+        }
+        
+        frame_time=(100+picture->repeat_count)*0.01f;
+        picture->repeat_count=0;
+
     break;
   }
 } // switch
 //------------------------ frame decoded. --------------------
 
+    // Increase video timers:
+    num_frames+=frame_time;
+    frame_time*=sh_video->frametime;
+    if(file_format==DEMUXER_TYPE_ASF){
+        // .ASF files has no fixed FPS - just frame durations!
+        float d=d_video->pts-pts1;
+        if(d>=0 && d<5) frame_time=d;
+    }
+    v_frame+=frame_time;
+    v_pts+=frame_time;
+
     current_module="flip_page";
-
     video_out->flip_page();
-
     current_module=NULL;
 
     if(eof) break;
@@ -1590,25 +1442,13 @@ switch(has_video){
     if(d_video->pts) v_pts=d_video->pts;
     if(frame_corr_num==5){
       float x=(frame_correction/5.0f);
-      if(!delay_corrected){
-#if 0
-        printf("Initial PTS delay: %5.3f sec\n",x);
-        delay_corrected=1;
-        audio_delay+=x;
-        a_pts-=x;
-#endif
-      } else
-      {
+      if(delay_corrected){
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts,v_pts,x);
         x*=0.5f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
         max_pts_correction=default_max_pts_correction;
         a_frame+=x; c_total+=x;
-#if 0
-        printf("  ct:%7.3f  a=%d v=%d  \r",c_total,
-        d_audio->pos,d_video->pos);
-#else
         printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% %d \r",c_total,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
@@ -1616,12 +1456,8 @@ switch(has_video){
         (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0,
         dbg_es_sent-dbg_es_rcvd 
         );
-#endif
         fflush(stdout);
-//        printf("\n");
       }
-      //force_fps+=1*force_fps*x;
-//      printf("  ct:%7.3f  fps:%5.2f nf:%2.1f/%d  t:%d.%03d\r",c_total,default_fps,num_frames,real_num_frames,codec_time_usage_sec,codec_time_usage/1000);fflush(stdout);
       frame_corr_num=0; frame_correction=0;
     }
     if(frame_corr_num>=0) frame_correction+=a_pts-v_pts;
@@ -1701,26 +1537,10 @@ switch(has_video){
     case KEY_ENTER: // ESC
     case 'q': exit_player("Quit");
     case 'g': grab_frames=2;break;
-    // restart codec
-#ifdef HAVE_CODECCTRL
-    case 'k': kill(codec_pid,SIGKILL);break;
-//    case 'k': kill(child_pid,SIGKILL);break;
-#endif
     // pause
     case 'p':
     case ' ':
       osd_function=OSD_PAUSE;
-#if 0
-      printf("\n------ PAUSED -------\r");fflush(stdout);
-      while(
-#ifdef HAVE_LIRC
-          lirc_mp_getinput()<=0 &&
-#endif
-          getch2(20)<=0 && mplayer_get_key()<=0){
-	  video_out->check_events();
-      }
-      osd_function=OSD_PLAY;
-#endif
       break;
     case 'o':  // toggle OSD
       osd_level=(osd_level+1)%3;
@@ -1744,7 +1564,7 @@ switch(file_format){
 
   case DEMUXER_TYPE_AVI: {
   //================= seek in AVI ==========================
-    int rel_seek_frames=rel_seek_secs*default_fps;
+    int rel_seek_frames=rel_seek_secs*sh_video->fps;
     int curr_audio_pos=0;
     int audio_chunk_pos=-1;
     int video_chunk_pos=d_video->pos;
@@ -1891,7 +1711,7 @@ switch(file_format){
 
         // Set OSD:
       if(osd_level){
-        osd_visible=default_fps;
+        osd_visible=sh_video->fps; // 1 sec
         vo_osd_progbar_type=0;
         vo_osd_progbar_value=(demuxer->filepos)/((avi_header.movi_end-avi_header.movi_start)>>8);
         //printf("avi filepos = %d  \n",vo_osd_progbar_value);
@@ -2019,7 +1839,7 @@ switch(file_format){
   
   // find sub
   if(subtitles){
-      if(sub_fps==0) sub_fps=default_fps;
+      if(sub_fps==0) sub_fps=sh_video->fps;
       find_sub(sub_uses_time?(100*(v_pts+sub_delay)):((v_pts+sub_delay)*sub_fps)); // FIXME! frame counter...
   }
 }
