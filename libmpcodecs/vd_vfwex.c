@@ -255,9 +255,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	return NULL;
     }
 
-    // set buffer:
-    sh->our_out_buffer=mpi->planes[0];
-
     // set stride:  (trick discovered by Andreas Ackermann - thanx!)
     sh->bih->biWidth=mpi->width; //mpi->stride[0]/(mpi->bpp/8);
     priv->o_bih->biWidth=mpi->width; //mpi->stride[0]/(mpi->bpp/8);
