@@ -499,32 +499,34 @@ documentation.
 Activate comma separated list of video filters (see documentation).
 Available plugins are:
 
-    crop[=w:h:x:y]      cropping
-    rectangle[=w:h:x:y] shows cropping boundaries
-    expand[=w:h:x:y:o]  expanding and OSD
-    flip                vertical mirroring
-    mirror              horizontal mirroring
-    rotate[=<0-3>]      rotate image +- 90 degrees
-    scale[=w:h]         software scaling
-    yuy2                YV12/I420 \-> YUY2
-    rgb2bgr[=swap]      RGB 24/32 <\-> BGR 24/32
-    palette             RGB/BGR 8 \-> 15/16/24/32bpp
-    format[=fourcc]     restrict colorspace
-    pp[=flags]          postprocessing (see \-pp)
-    lavc[=quality:fps]  YV12\->MPEG1 (libavcodec)
-    fame                YV12\->MPEG1 (libfame)
-    dvbscale[=aspect]   optimal scaling for DVB
-                        cards (aspect=
-                        DVB_HEIGHT*ASPECTRATIO)
-    cropdetect[=limit]  black border detection
-                        (print crop values)
-    noise[=lumaNoise[u][t][h]:chromaNoise[u][t][h]
-                        add noise
-                          <0-100>  lumaNoise
-                          <0-100>  chromaNoise
-                          u        uniform noise
-                          t        temporal noise
-                          h        high quality
+  crop[=w:h:x:y]       cropping
+  rectangle[=w:h:x:y]  shows cropping boundaries
+  expand[=w:h:x:y:o]   expanding and OSD
+  flip                 vertical mirroring
+  mirror               horizontal mirroring
+  rotate[=<0-3>]       rotate image +- 90 degrees
+  scale[=w:h]          software scaling
+  yuy2                 YV12/I420 \-> YUY2
+  rgb2bgr[=swap]       RGB 24/32 <\-> BGR 24/32
+  palette              RGB/BGR 8 \-> 15/16/24/32bpp
+  format[=fourcc]      restrict colorspace
+  pp[=flags]           postprocessing (see \-pp)
+  lavc[=quality:fps]   YV12\->MPEG1 (libavcodec)
+  fame                 YV12\->MPEG1 (libfame)
+  dvbscale[=aspect]    optimal scaling for DVB
+                       cards (aspect=
+                       DVB_HEIGHT*ASPECTRATIO)
+  cropdetect[=limit]   black border detection
+                       (print crop values)
+  noise[=luma[u][t|a][h]:chroma[u][t|a][h]
+                       add noise
+                         <0-100>  luma noise
+                         <0-100>  chroma noise
+                         u        uniform noise
+                         t        temporal noise
+                         a        averaged
+                                  temporal noise
+                         h        high quality
 
 .I parameters:
 .br
