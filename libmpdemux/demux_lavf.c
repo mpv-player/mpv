@@ -350,9 +350,11 @@ int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 void demux_close_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t* priv = demuxer->priv;
- 
     if (priv){
-        av_close_input_file(priv->avfc); priv->avfc= NULL;
+        if(priv->avfc)
+       {
+         av_close_input_file(priv->avfc); priv->avfc= NULL;
+        }
         free(priv); demuxer->priv= NULL;
     }
 }
