@@ -31,9 +31,17 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
 
   if(stream_id==demux->audio->id){
       if(!demux->audio->sh){
-        demux->audio->sh=demux->a_streams[stream_id];
+        sh_audio_t* sh;
+        sh=demux->audio->sh=demux->a_streams[stream_id];
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected AVI audio ID = %d\n",demux->audio->id);
-	demux->audio->block_size=((sh_audio_t*)(demux->audio->sh))->wf->nBlockAlign;
+	if(sh->wf){
+	  demux->audio->block_size=sh->wf->nBlockAlign;
+	  if(!demux->audio->block_size){
+	    // for PCM audio we can calculate the blocksize:
+	    if(sh->format==1) demux->audio->block_size=sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
+	    if(!demux->audio->block_size) demux->audio->block_size=1; // bug!
+	  }
+	}
 	//printf("&&&&& setting blocksize to %d &&&&&\n",demux->audio->block_size);
       }
       return demux->audio;
