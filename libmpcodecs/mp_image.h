@@ -60,6 +60,8 @@ typedef struct mp_image_s {
     int chroma_height;
     int chroma_x_shift; // horizontal
     int chroma_y_shift; // vertical
+    /* for private use by filter or vo driver (to store buffer id or dmpi) */
+    void* priv;
 } mp_image_t;
 
 #ifdef IMGFMT_YUY2
