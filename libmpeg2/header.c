@@ -111,6 +111,10 @@ int mpeg2_header_sequence (mpeg2dec_t * mpeg2dec)
     i = (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
     sequence->display_width = sequence->picture_width = width = i >> 12;
     sequence->display_height = sequence->picture_height = height = i & 0xfff;
+
+    if(width == 0 || height == 0)
+        return 1;
+
     decoder->width = sequence->width = width = (width + 15) & ~15;
     decoder->height = sequence->height = height = (height + 15) & ~15;
     decoder->vertical_position_extension = (height > 2800);
