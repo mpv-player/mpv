@@ -7,7 +7,8 @@
 
 /* ChangeLog added 2002-01-10
  * 2003-01-02:
- *  Added patch that makes vo_dxr3 return to previous TV norm after quiting.
+ *  Added patch from Jens Axboe that makes vo_dxr3 return to previous TV norm
+ *   after quiting.
  *
  * 2002-12-24: (Hohoho)
  *  Added patch from Thomas Jarosch <tomj@simonv.com> which adds support
@@ -149,8 +150,8 @@ LIBVO_EXTERN (dxr3)
 static int v_width, v_height;
 static int s_width, s_height;
 static int osd_w, osd_h;
-static int fullscreen = 0;
-static int img_format = 0;
+static int fullscreen;
+static int img_format;
 
 /* Configuration values
  * Don't declare these static, they 
@@ -171,19 +172,19 @@ static char fds_name[80];
 
 #ifdef SPU_SUPPORT
 /* on screen display/subpics */
-static char *osdpicbuf = NULL;
+static char *osdpicbuf;
 static int osdpicbuf_w;
 static int osdpicbuf_h;
-static int disposd = 0;
+static int disposd;
 static encodedata *spued;
 static encodedata *spubuf;
 #endif
 
 
 /* Static variable used in ioctl's */
-static int ioval = 0;
-static int prev_pts = 0;
-static int pts_offset = 0;
+static int ioval;
+static int prev_pts;
+static int pts_offset;
 static int old_vmode = -1;
 
 
@@ -424,20 +425,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 	
 	/* Start em8300 prebuffering and sync engine */
-#ifdef MVCOMMAND_SYNC
 	reg.microcode_register = 1;
 	reg.reg = 0;
 	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
-#endif
 
-#ifdef EM8300_IOCTL_FLUSH	
 	/* Clean buffer by syncing it */
 	ioval = EM8300_SUBDEVICE_VIDEO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	ioval = EM8300_SUBDEVICE_AUDIO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
-#endif
 
 	/* Sync the video device to make sure the buffers are empty
 	 * and set the playback speed to normal. Also reset the
