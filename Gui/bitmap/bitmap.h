@@ -11,8 +11,6 @@ typedef struct _txSample
  char *        Image;
 } txSample;
 
-#include "tga/tga.h"
-#include "bmp/bmp.h"
 #include "png/png.h"
 #include "../../mp_msg.h"
 

@@ -199,7 +199,25 @@ int cfg_write( void )
       {
        case CONF_TYPE_INT:
        case CONF_TYPE_FLAG:   fprintf( f,"%s = %d\n",gui_opts[i].name,*( (int *)gui_opts[i].p ) );   				      break;
-       case CONF_TYPE_FLOAT:  fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) ); 				      break;
+       case CONF_TYPE_FLOAT:  
+    	    #if 0
+    	    fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) );
+	    #else
+	    #warning ugly hakk for fucking locale
+	    {
+	     char tmp[64];
+	     snprintf( tmp,64,"%f",*( (float *)gui_opts[i].p ) );
+	     // locale emulator
+	     // { char * c = strchr( tmp,'.' ); if ( c ) *c=','; }
+	     // ---
+	     { int i;
+	       for ( i=0;i < strlen( tmp );i++ )
+	        if ( ( tmp[i] != '.' )&&( ( tmp[i] < '0' )||( tmp[i] > '9' ) ) ) tmp[i]='.';
+	     }
+	     fprintf( f,"%s = %s\n",gui_opts[i].name,tmp );
+	    }
+	    #endif
+	    break;
        case CONF_TYPE_STRING: 
             {
 	     char * tmp = *( (char **)gui_opts[i].p );

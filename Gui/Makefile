@@ -15,7 +15,7 @@ endif
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
 
 SRCS = wm/ws.c wm/wsxdnd.c app.c events.c interface.c cfg.c \
-	bitmap/bitmap.c bitmap/tga/tga.c bitmap/bmp/bmp.c bitmap/png/png.c \
+	bitmap/bitmap.c bitmap/png/png.c \
 	skin/skin.c skin/font.c skin/cut.c \
 	mplayer/mplayer.c mplayer/widgets.c mplayer/play.c \
 	mplayer/gtk/menu.c mplayer/gtk/mb.c mplayer/gtk/about.c mplayer/gtk/pl.c mplayer/gtk/sb.c mplayer/gtk/fs.c mplayer/gtk/opts.c mplayer/gtk/url.c mplayer/gtk/eq.c
