@@ -587,7 +587,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     curr_filename=0;
 play_next_file:
     filename=(num_filenames>0)?filenames[curr_filename]:NULL;
-
+    demuxer=NULL; stream=NULL;
+    
 #ifdef USE_LIBVO2
     current_module="vo2_new";
     video_out=vo2_new(video_driver);
@@ -656,7 +657,7 @@ play_next_file:
 
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
-  if(!stream) exit_player(MSGTR_Exit_error); // error...
+  if(!stream) goto goto_next_file;//  exit_player(MSGTR_Exit_error); // error...
   stream->start_pos+=seek_to_byte;
 
   use_stdin=filename && (!strcmp(filename,"-"));
@@ -687,7 +688,7 @@ if(!has_audio) audio_id=-2; // do NOT read audio packets...
 current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
-if(!demuxer) exit_player(MSGTR_Exit_error); // ERROR
+if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
 
 file_format=demuxer->file_format;
 
@@ -739,7 +740,7 @@ current_module="video_read_properties";
 
 if(sh_video){
 
-  if(!video_read_properties(sh_video)) exit_player(MSGTR_Exit_error); // couldn't read header?
+  if(!video_read_properties(sh_video)) goto goto_next_file; // exit_player(MSGTR_Exit_error); // couldn't read header?
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
@@ -748,7 +749,7 @@ if(sh_video){
 
   if(!sh_video->fps && !force_fps){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_FPSnotspecified);
-    exit_player(MSGTR_Exit_error);
+    goto goto_next_file; //  exit_player(MSGTR_Exit_error);
   }
 
 }
@@ -757,7 +758,7 @@ fflush(stdout);
 
 if(!sh_video){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoVideoStream);
-    exit_player(MSGTR_Exit_error);
+    goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
 //================== Init AUDIO (codec) ==========================
@@ -819,7 +820,7 @@ while(1){
     }
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    exit_player(MSGTR_Exit_error);
+    goto goto_next_file; // exit_player(MSGTR_Exit_error);
   }
   // is next line needed anymore? - atmos ::
   if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
@@ -844,7 +845,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
-    exit_player(MSGTR_Exit_error);
+    goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 sh_video->outfmtidx=i;
 
@@ -860,7 +861,7 @@ mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt))
 
 if(!init_video(sh_video)){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
-     exit_player(MSGTR_Exit_error);
+     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
 if(auto_quality>0){
@@ -967,18 +968,15 @@ current_module="init_libvo";
    if(!vo2_start(video_out,
                sh_video->disp_w,sh_video->disp_h,out_fmt,0,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
-     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO );
-     exit_player(MSGTR_Exit_error);
-   }
 #else
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt)){
-     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
-     exit_player(MSGTR_Exit_error);
-   }
 #endif
+     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
+     goto goto_next_file; // exit_player(MSGTR_Exit_error);
+   }
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
 
    fflush(stdout);
@@ -1777,8 +1775,8 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 }
 
-++curr_filename;
-if(curr_filename<num_filenames){
+
+if(curr_filename+1<num_filenames){
     // partial uninit:
 
   // restore terminal:
@@ -1787,17 +1785,33 @@ if(curr_filename<num_filenames){
   #endif
      getch2_disable();
 
+  current_module="uninit_vo";
+
 #ifdef USE_LIBVO2
   if(video_out) vo2_close(video_out);
 #else
   if(video_out) video_out->uninit();
 #endif
-  video_out=NULL;
+
+  current_module="uninit_ao";
   if(audio_out) audio_out->uninit();
-  audio_out=NULL;
 //  if(encode_name) avi_fixate();
+}
+
+goto_next_file:  // don't jump here after ao/vo/getch initialization!
+    ++curr_filename;
+if(curr_filename<num_filenames){
+
+  current_module="free_demuxer";
+  if(demuxer) free_demuxer(demuxer);
+
+  current_module="free_stream";
+  if(stream) free_stream(stream);
+
+  video_out=NULL;
+  audio_out=NULL;
     
-    goto play_next_file;
+  goto play_next_file;
 }
 
 exit_player(MSGTR_Exit_eof);
