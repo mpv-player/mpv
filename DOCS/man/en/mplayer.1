@@ -2024,6 +2024,13 @@ d: delay time in ms for the rear speakers (0ms to 1000ms) default is 15ms.
 Delays the sound output.
 Specify the delay separately for each channel in milliseconds (floating point
 number between 0 and 1000).
+.IPs export[=mmapped_file[:nsamples]]
+Exports the incoming signal to other processes using memory mapping (mmap()).
+.RSss
+mmapped_file: File to map data to (default: ~/.mplayer/mplayer-af_export).
+.br
+nsamples: number of samples per channel (default: 512)
+.REss
 .RE
 .
 .TP

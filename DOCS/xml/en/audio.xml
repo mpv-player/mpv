@@ -942,6 +942,47 @@ would add surround sound decoding with 15ms delay for the sound to the
 rear speakers.
 </para>
 </sect4>
+
+<sect4 id="af_export">
+<title>Audio Exporter</title>
+<para>
+This audio filter exports the incoming signal to other processes using memory
+mapping (<literal>mmap()</literal>). Memory mapped areas contain a header:
+
+<programlisting>
+int nch                      /*number of channels*/
+int size		     /*buffer size*/
+unsigned long long counter   /*Used to keep sync, it's updated
+                               every time new data is exported.*/
+</programlisting>
+
+The rest is payload (non-interleaved) 16bit data.
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>mmapped_file</option></term>
+<listitem><para>
+The file you want this filter to export to. The default is to map to 
+<filename>~/.mplayer/mplayer-af_export</filename>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nsamples</option></term>
+<listitem><para>
+Number of samples per channel. The default is <literal>512</literal> samples.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af export=/tmp/mplayer-af_export:1024 media.avi</screen>
+would export 1024 samples per channel to <filename>/tmp/mplayer-af_export</filename>.
+</para>
+</sect4>
+
 </sect3>
 
 <sect3 id="audio-plugins">
