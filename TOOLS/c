@@ -6,3 +6,13 @@ gcc audio-select.c -o audio-select
 gcc audio-block.c -o audio-block
 
 gcc png2raw.c -o png2raw -lpng
+
+gcc -g -DNAME=\"mmx\" -DHAVE_MMX fastmemcpybench.c -o fastmem-mmx
+gcc -g -DNAME=\"k6\ \" -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem-k6
+gcc -g -DNAME=\"k7\ \" -DHAVE_MMX2 -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem-k7
+gcc -g -DNAME=\"sse\" -DHAVE_MMX2 -DHAVE_SSE -DHAVE_MMX fastmemcpybench.c -o fastmem-sse
+
+gcc -g -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX fastmemcpybench.c -o fastmem2-mmx
+gcc -g -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem2-k6
+gcc -g -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX2 -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem2-k7
+gcc -g -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX2 -DHAVE_SSE -DHAVE_MMX fastmemcpybench.c -o fastmem2-sse
