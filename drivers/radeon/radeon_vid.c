@@ -763,11 +763,13 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_P23_H_ACCUM_INIT,	besr.p23_h_accum_init);
     OUTREG(OV0_P23_V_ACCUM_INIT,	besr.p23_v_accum_init);
 
+#ifdef RADEON
+    bes_flags = SCALER_ENABLE |
+                SCALER_SMART_SWITCH;
+//		SCALER_HORZ_PICK_NEAREST;
+#else
     bes_flags = SCALER_ENABLE |
                 SCALER_SMART_SWITCH |
-#ifdef RADEON
-		SCALER_HORZ_PICK_NEAREST;
-#else
 		SCALER_Y2R_TEMP |
 		SCALER_PIX_EXPAND;
 #endif
