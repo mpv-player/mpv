@@ -3481,7 +3481,7 @@ else
 do normal ratecontrol (dont lock to next P frame quantizer) and
 set q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .TP
-.B
+.B \ 
 Tip: To do constant quantizer encoding with different quantizers for
 I/P and B frames you can use:
 vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
@@ -3659,7 +3659,7 @@ Each video packet will be encoded in 3 separate partitions:
 .RE
 .PD 1
 .TP
-.B
+.B \ 
 MV & DC are most important, loosing them looks far worse than loosing
 the AC and the 1. & 2. partition.
 (MV&DC) are far smaller than the 3. partition (AC) meaning that errors
@@ -3773,9 +3773,9 @@ use interlaced dct
 .TP
 .B format=<value>
 .RSs
-.IPs YV12
+.IPs YV12\ 
 default
-.IPs 422P
+.IPs 422P\ \ 
 for huffyuv or lossless jpeg
 .IPs 411P,410P,BGR32
 for lossless jpeg
@@ -3891,7 +3891,7 @@ the minimum of error and lambda*bits.
 .RSs
 .IPs lambda
 qp dependant constant
-.IPs bits
+.IPs bits\ 
 amount of bits needed to encode the block
 .IPs error
 sum of squared errors of the quantization
