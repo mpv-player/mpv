@@ -141,7 +141,7 @@ Video:
   --enable-xinerama      build with Xinerama support for x11 driver [autodetect]
   --enable-x11           build with X11 render support [autodetect]
   --enable-fbdev         build with FBDev render support [disable]
-  --enable-mlib          build with MLIB support (Solaris only) [auto]
+  --enable-mlib          build with MLIB support (Solaris only) [autodetect]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
 
