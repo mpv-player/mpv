@@ -103,6 +103,28 @@ OpenGL's GL_RGB on all platforms, and the same goes for BGR - GL_BGR.
 Unfortunately, most of the x86 codecs call our BGR to RGB, so it sometimes
 confuse developers.
 
-If you are unsure, try the OpenGL driver (-vo gl:manyfmts). There is at least
-software OpenGL implementation for all major platforms and OS's, but you will
-need OpenGL version >= 1.2 for most formats.
+memory order:           name
+RGBA                    IMGFMT_RGBA
+ARGB                    IMGFMT_ARGB
+BGRA                    IMGFMT_BGRA
+ABGR                    IMGFMT_ABGR
+RGB                     IMGFMT_RGB24
+BGR                     IMGFMT_BGR24
+
+order in an int         name
+mostsignifant .. least significant bit
+8A8R8G8B                IMGFMT_BGR32
+8A8B8G8R                IMGFMT_RGB32
+5R6G5B                  IMGFMT_BGR16
+5B6G5R                  IMGFMT_RGB16
+1A5R5G5B                IMGFMT_BGR15
+1A5B5G5R                IMGFMT_RGB15
+3R3G2B                  IMGFMT_BGR8
+2B3G3R                  IMGFMT_RGB8
+1R2G1B                  IMGFMT_BGR4_CHAR
+1B2G1R                  IMGFMT_RGB4_CHAR
+1R2G1B1R2G1B            IMGFMT_BGR4
+1B2G1R1B2G1R            IMGFMT_RGB4
+
+depending upon little vs big endian different in memory & in register formats 
+will be equal (LE -> BGRA == BGR32 / BE -> ARGB == BGR32)
