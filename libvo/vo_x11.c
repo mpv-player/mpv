@@ -405,7 +405,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   /* always allocate swsContext as size could change between frames */
   swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
 
-  printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
+  //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
   // If we have blue in the lowest bit then obviously RGB
   mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_RGB : MODE_BGR;
@@ -419,8 +419,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //   printf( "No support for non-native XImage byte order!\n" );
 //   return -1;
   }
-// hack-atmos
-mode=MODE_RGB;
+
 #ifdef WORDS_BIGENDIAN
   if(mode==MODE_BGR && bpp!=32){
     mp_msg(MSGT_VO,MSGL_ERR,"BGR%d not supported, please contact the developers\n", bpp);
@@ -572,17 +571,15 @@ static uint32_t get_image(mp_image_t *mpi)
 static uint32_t query_format( uint32_t format )
 {
     mp_msg(MSGT_VO,MSGL_DBG2,"vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
-#if 0
     if (IMGFMT_IS_BGR(format))
     {
 	if (IMGFMT_BGR_DEPTH(format) == 8)
-	    return 3;
+	    return 0; // TODO 8bpp not yet fully implemented
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
 	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
 	else
 	    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
     }
-#endif
 
  switch( format )
   {
@@ -591,7 +588,7 @@ static uint32_t query_format( uint32_t format )
 //   case IMGFMT_BGR16:
 //   case IMGFMT_BGR24:
 //   case IMGFMT_BGR32:
-//    return 3|VFCAP_SWSCALE|VFCAO_FLIP;
+//    return 0x2;
 //   case IMGFMT_YUY2: 
    case IMGFMT_I420:
    case IMGFMT_IYUV:
