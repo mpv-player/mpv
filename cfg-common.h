@@ -14,6 +14,7 @@
 #ifdef USE_DVDNAV
 	{"dvdnav", "-dvdnav deprecated, use dvdnav:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
 	{"skipopening", &dvd_nav_skip_opening, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noskipopening", &dvd_nav_skip_opening, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif
 #ifdef USE_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
@@ -197,6 +198,7 @@
 #endif	
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
 	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+	{"autosub", &sub_auto, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -206,6 +208,7 @@
 	{"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// enable Closed Captioning display
 	{"subcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nosubcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
 	{"nooverlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 	{"sub-bg-color", &sub_bg_color, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
