@@ -488,7 +488,7 @@ a (possibly slow) conversion has to be done.
 <para>
 If you should be lucky enough to have enough offscreen memory left to
 put a whole image there, the DGA driver will use double buffering, which
-results in much smoother movie replaying. It will tell you whether
+results in much smoother movie playback. It will tell you whether
 double buffering is enabled or not.
 </para>
 
@@ -544,7 +544,7 @@ Using a depth of 24 bit is even a good idea if your card natively just supports
 </para>
 
 <para>
-I've seen some AVI files already be replayed on a Pentium MMX 266. AMD K6-2
+I've seen some AVI files be played back on a Pentium MMX 266. AMD K6-2
 CPUs might work at 400 MHZ and above.
 </para>
 
