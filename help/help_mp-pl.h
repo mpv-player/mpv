@@ -381,6 +381,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Przegl±darka skórek"
 #define MSGTR_MENU_Preferences "Preferencje"
 #define MSGTR_MENU_Exit "Wyj¶cie ..."
+#define MSGTR_MENU_Mute "Mute"
+#define MSGTR_MENU_Original "Oryginalne"
+#define MSGTR_MENU_AspectRatio "Aspect ratio"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
