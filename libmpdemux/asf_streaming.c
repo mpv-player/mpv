@@ -50,6 +50,7 @@ int
 asf_streaming_start( stream_t *stream, int *demuxer_type) {
     char *proto = stream->streaming_ctrl->url->protocol;
     int fd = -1;
+    int port = stream->streaming_ctrl->url->port;
 
     // Is protocol even valid mms,mmsu,mmst,http,http_proxy?
     if (!(!strncasecmp(proto, "mmst", 4) || !strncasecmp(proto, "mmsu", 4) ||
@@ -75,6 +76,7 @@ asf_streaming_start( stream_t *stream, int *demuxer_type) {
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		fd = asf_mmst_streaming_start( stream );
+		stream->streaming_ctrl->url->port = port;
 		if( fd>-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
 		if( fd==-2 ) return -1;
@@ -86,6 +88,7 @@ asf_streaming_start( stream_t *stream, int *demuxer_type) {
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream, demuxer_type );
+		stream->streaming_ctrl->url->port = port;
 		if( fd>-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/HTTP failed\n");
 		if( fd==-2 ) return -1;
