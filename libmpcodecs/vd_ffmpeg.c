@@ -357,7 +357,7 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
 	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //???
-#ifdef PIX_FMT_YUV411P
+#if LIBAVCODEC_BUILD >= 4631
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 #endif
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //???
