@@ -113,40 +113,6 @@ static int synth_1to1_mono2stereo(real *bandPtr,unsigned char *samples,int *pnt)
   return ret;
 }
 
-
-#ifdef USE_FAKE_MONO
-static int synth_1to1_l(real *bandPtr,int channel,unsigned char *out,int *pnt)
-{
-  int i,ret;
-
-  ret = synth_1to1(bandPtr,channel,out,pnt);
-  out = out + *pnt - 128;
-
-  for(i=0;i<32;i++) {
-    ((short *)out)[1] = ((short *)out)[0];
-    out+=4;
-  }
-
-  return ret;
-}
-
-
-static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
-{
-  int i,ret;
-
-  ret = synth_1to1(bandPtr,channel,out,pnt);
-  out = out + *pnt - 128;
-
-  for(i=0;i<32;i++) {
-    ((short *)out)[0] = ((short *)out)[1];
-    out+=4;
-  }
-
-  return ret;
-}
-#endif
-
 static synth_func_t synth_func;
 
 #if defined(CAN_COMPILE_X86_ASM)
@@ -277,3 +243,34 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
 }
 
+#ifdef USE_FAKE_MONO
+static int synth_1to1_l(real *bandPtr,int channel,unsigned char *out,int *pnt)
+{
+  int i,ret;
+
+  ret = synth_1to1(bandPtr,channel,out,pnt);
+  out = out + *pnt - 128;
+
+  for(i=0;i<32;i++) {
+    ((short *)out)[1] = ((short *)out)[0];
+    out+=4;
+  }
+
+  return ret;
+}
+
+static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
+{
+  int i,ret;
+
+  ret = synth_1to1(bandPtr,channel,out,pnt);
+  out = out + *pnt - 128;
+
+  for(i=0;i<32;i++) {
+    ((short *)out)[0] = ((short *)out)[1];
+    out+=4;
+  }
+
+  return ret;
+}
+#endif
