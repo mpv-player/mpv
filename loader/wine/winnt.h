@@ -81,7 +81,7 @@
 /* These types are _not_ defined for the emulator, because they */
 /* depend on the UNICODE macro that only exists in user's code. */
 
-#ifndef __WINE__
+//#ifndef __WINE__
 # ifdef UNICODE
 typedef WCHAR TCHAR, *PTCHAR;
 typedef LPWSTR PTSTR, LPTSTR;
@@ -93,7 +93,7 @@ typedef LPSTR PTSTR, LPTSTR;
 typedef LPCSTR PCTSTR, LPCTSTR;
 #define __TEXT(string) string
 # endif /* UNICODE */
-#endif   /* __WINE__ */
+//#endif   /* __WINE__ */
 #define TEXT(quote) __TEXT(quote)
 
 typedef BYTE     BOOLEAN;
