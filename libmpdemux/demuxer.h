@@ -96,13 +96,13 @@ typedef struct demuxer_info_st {
 #define MAX_V_STREAMS 256
 
 typedef struct demuxer_st {
-  stream_t *stream;
-  int synced;  // stream synced (used by mpeg)
   off_t filepos; // input stream current pos.
-  int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
-  int file_format;  // file format: mpeg/avi/asf
   off_t movi_start;
   off_t movi_end;
+  stream_t *stream;
+  int synced;  // stream synced (used by mpeg)
+  int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
+  int file_format;  // file format: mpeg/avi/asf
   int seekable;  // flag
   //
   demux_stream_t *audio; // audio buffer/demuxer

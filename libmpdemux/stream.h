@@ -35,11 +35,10 @@ void vcd_cache_init(int s);
 
 typedef struct {
   int fd;
-  off_t pos;
-  int eof;
   int type; // 0=file 1=VCD
   unsigned int buf_pos,buf_len;
-  off_t start_pos,end_pos;
+  off_t pos,start_pos,end_pos;
+  int eof;
   unsigned int cache_pid;
   void* cache_data;
   void* priv; // used for DVD
