@@ -1065,6 +1065,14 @@ if(sh_video){
 	   sh_video->fps,sh_video->frametime
 	   );
 
+    vo_fps = sh_video->fps;
+    /* need to set fps here for output encoders to pick it up in their init */
+    if(force_fps){
+      sh_video->fps=force_fps;
+      sh_video->frametime=1.0f/sh_video->fps;
+      vo_fps = force_fps;
+    }
+
     if(!sh_video->fps && !force_fps){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
       sh_video=d_video->sh=NULL;
@@ -1476,7 +1484,7 @@ if(!sh_audio){
 
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps){
-  sh_video->fps=force_fps;
+  vo_fps = sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,sh_video->fps,sh_video->frametime);
 }
