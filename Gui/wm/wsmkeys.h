@@ -48,5 +48,14 @@ TwsKeyNames wsKeyNames[ wsKeyNumber ] =
   { wsGrayRight,       "GrayRight" }, { wsGrayHome,         "GrayHome" },
   { wsGrayUp,             "GrayUp" }, { wsGrayPageUp,     "GrayPageUp" },
 
+  { wsXF86LowerVolume, "XF86LowerVolume" },
+  { wsXF86RaiseVolume, "XF86RaiseVolume" },
+  { wsXF86Mute,               "XF86Mute" },
+  { wsXF86Play,               "XF86Play" },
+  { wsXF86Stop,               "XF86Stop" },
+  { wsXF86Prev,               "XF86Prev" },
+  { wsXF86Next,               "XF86Next" },
+  { wsXF86Media,             "XF86Media" },
+
   { wsKeyNone, "None" }
  };

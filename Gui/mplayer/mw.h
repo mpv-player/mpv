@@ -583,6 +583,7 @@ int keyPressed = 0;
 void mplMainKeyHandle( int State,int Type,int Key )
 {
  int msg = evNone;
+ if ( Type != wsKeyPressed ) return;
  switch ( Key )
   {
    case '.':
@@ -612,9 +613,19 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
-   default:          if ( Type == wsKeyPressed ) vo_x11_putkey( Key ); return;
+   
+   case wsXF86LowerVolume:  msg=evDecVolume; break;
+   case wsXF86RaiseVolume:  msg=evIncVolume; break;
+   case wsXF86Mute:         msg=evMute; break;
+   case wsXF86Play:         msg=evPlaySwitchToPause; break;
+   case wsXF86Stop:         msg=evStop; break;
+   case wsXF86Prev:         msg=evPrev; break;
+   case wsXF86Next:         msg=evNext; break;
+   case wsXF86Media:        msg=evLoad; break;
+
+   default:          vo_x11_putkey( Key ); return;
   }
- if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
+ if ( msg != evNone )
   {
    mplMsgHandle( msg,0 );
 //   mplMainRender=1;
