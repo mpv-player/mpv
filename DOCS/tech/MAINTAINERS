@@ -31,10 +31,10 @@ Documentation translations:
     * German: Moritz Bunkus
     * French: Nicolas Le Gaillart
     * Spanish: TeLeNiEkO (outdated)
-    * Russian: Nick Kurshev (outdated)
-    * Polish: Dariusz Pietrzak <eyck@nowanet.lub.pl>
+    * Russion: Daniel A. Nagy (Nick Kurshev) (outdated)
+    * Polish: Dariusz Pietrzak
     * Italian: Matteo Balduzzi
-    * Chinese: hephooey@fastmail.fm
+    * Chinese (simplified): Lu Ran
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Debian packaging: Dariusz Pietrzak
@@ -109,7 +109,7 @@ VIDIX drivers:
 
 libao2 drivers:
     * ao_alsa5.c - Alex
-    * ao_alsa9.c - joy_ping <joy@pingfm.org>, Alex
+    * ao_alsa9.c - Joy Winter <joy@pingfm.org>, Alex
     * ao_arts.c - ?
     * ao_dxr2.c - Albeu
     * ao_mpegpes.c - A'rpi
