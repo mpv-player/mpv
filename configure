@@ -129,13 +129,13 @@ Optional features:
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-divx4linux   disable DivX4linux codec [autodetect]
-  --disable-opendivx     disable OpenDivx codec [enable]
+  --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --disable-mp1e         disable libmp1e support
-                         (use this option if it does not compile) [enable] 
+  --enable-mp1e          enable libmp1e support
+                         (use this option if it does not compile) [disable]
   --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
@@ -764,7 +764,7 @@ _prefix="/usr/local"
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=no # changed default to no as it causes problems - atmos
-_mp1e=auto
+_mp1e=no
 _mencoder=yes
 _x11=auto
 _dga=auto	# 1 2 no auto
@@ -1931,16 +1931,16 @@ fi
 echores "$_mga"
 
 
-echocheck "syncfb"
-_syncfb=no
-test "$_mga" = yes && _syncfb=yes
-if test "$_syncfb" = yes ; then
-  _def_syncfb='#define HAVE_SYNCFB 1'
-  _vosrc="$_vosrc vo_syncfb.c"
-else
-  _def_syncfb='#undef HAVE_SYNCFB'
-fi
-echores "$_syncfb"
+# echocheck "syncfb"
+# _syncfb=no
+# test "$_mga" = yes && _syncfb=yes
+# if test "$_syncfb" = yes ; then
+#   _def_syncfb='#define HAVE_SYNCFB 1'
+#   _vosrc="$_vosrc vo_syncfb.c"
+# else
+#   _def_syncfb='#undef HAVE_SYNCFB'
+# fi
+# echores "$_syncfb"
 
 
 echocheck "xmga"

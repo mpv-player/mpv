@@ -60,14 +60,14 @@ V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA
 AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
-CODEC_LIBS = -Llibmpcodecs -lmpcodecs -Lg72x -lg72x -Lmp3lib -lMP3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB) -Llibfame -lfame
+CODEC_LIBS = -Llibmpcodecs -lmpcodecs -Lmp3lib -lMP3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB) -Llibfame -lfame
 COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = libfame g72x libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec opendivx libao2 drivers drivers/syncfb linux postproc xa input
+PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc xa input
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -109,7 +109,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = libfame/libfame.a g72x/libg72x.a libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a input/libinput.a
+COMMON_DEPS = libfame/libfame.a libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a input/libinput.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -162,17 +162,11 @@ liba52/liba52.a:
 mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
 
-opendivx/libdecore.a:
-	$(MAKE) -C opendivx
-
 libdha/libdha.so:
 	$(MAKE) -C libdha
 
 vidix/libvidix.a:
 	$(MAKE) -C vidix
-
-# encore/libencore.a:
-# 	$(MAKE) -C encore
 
 Gui/libgui.a:
 	$(MAKE) -C Gui
@@ -185,9 +179,6 @@ postproc/libpostproc.a:
 
 xa/libxa.a:
 	$(MAKE) -C xa
-
-g72x/libg72x.a:
-	$(MAKE) -C g72x
 
 input/libinput.a:
 	$(MAKE) -C input
