@@ -7,13 +7,10 @@ FOR THE LAST RC-RELEASE:
 - Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
   This patch makes mplayer unusable in console mode, always leaves the 
   console in graphic mode.
-- -ac hwac3 problems? (see -users posts) - FIXED?
 - fix iconv issues:
    - ogm subtitles crash if compiled with libiconv - FIXED?
-   - -subcp crash / no effect - FIXED?
-- fix the broken -geometry option changes (fbdev, xv etc) - FIXED?
-- fix vo_svga  (unusably broken. On my Cirrus, and Geforce2, confirmed)
-   - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56 - FIXED?
+   - -subcp has no effect - FIXED?
+- fix vo_svga vs. -vop scale
 - remove or fix -vop lavcdeint - WHAT TO DO?
 - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
 - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
