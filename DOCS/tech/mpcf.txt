@@ -1,4 +1,4 @@
-		NUT Open Container Format DRAFT 20040409
+		NUT Open Container Format DRAFT 20040911
 		----------------------------------------
 
 
@@ -127,7 +127,6 @@ stream_header:
 	stream_class				v
 	fourcc					vb
 	average_bitrate				v
-	language_code				vb
 	time_base_nom				v
 	time_base_denom				v
 	msb_timestamp_shift			v
@@ -185,7 +184,7 @@ Index:
 	reserved_bytes
 	checksum				u(32)
 
-info_packet: (optional)
+info_packet: (optional) (file global)
 	info_startcode				f(64)
 	packet header
 	for(;;){
@@ -193,6 +192,27 @@ info_packet: (optional)
 		if(id==0) break
 		name= info_table[id][0]
 		type= info_table[id][1]
+		if(type==NULL)
+			type			vb
+		if(name==NULL)
+			name			vb
+		if(type=="v")
+			value			v
+		else
+			value			vb
+	}
+	reserved_bytes
+        checksum				u(32)
+
+meta_packet: (optional) (stream specific)
+	meta_startcode				f(64)
+	packet header
+	stream_id				v
+	for(;;){
+		id				v
+		if(id==0) break
+		name= meta_table[id][0]
+		type= meta_table[id][1]
 		if(type==NULL)
 			type			vb
 		if(name==NULL)
@@ -257,6 +277,8 @@ index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
 info_startcode
 	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
+meta_startcode
+	FIXME
 
 version
 	2 for now
@@ -367,7 +389,7 @@ codec_specific_data_type
 	3	waveformatex
 	4	imagedesc
 	5	sounddesc
-	"native", means a simple api & container independanet storage form,
+	"native", means a simple api & container independent storage form,
 	for example some mpeg4-es headers
         
 codec_specific_data
@@ -480,13 +502,9 @@ type
 	Note: nonstandard fields should be prefixed by "X-"
 	Note: MUST be less than 6 byte long (might be increased to 64 later)
 
-name
+info packet types
 	the name of the info entry, valid names are
-	"TotalTime"	total length of the stream in msecs
-	"StreamId"	the stream(s) to which the info packet applies
-	"StartTimestamp" 
-	"EndTimestamp" 	the time range in msecs to which the info applies
-	"SegmentId"	a unique id for the streams + time specified
+
 	"Author"
 	"Description"
 	"Copyright"
@@ -500,8 +518,12 @@ name
 	"CreationTime"	"2003-01-20 20:13:15Z", ... 
 			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
 			Note: dont forget the timezone
-	"ReplayGain"
 	"Keywords"
+	"TotalTime"	total length of the stream in msecs
+	
+meta packet types
+	"ReplayGain"
+	"Language"	the language code
 	"Disposition"	"original", "dub" (translated), "comment", "lyrics", "karaoke"
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
@@ -521,10 +543,6 @@ info_table[][2]={
 	{NULL			, "UTF8"},
 	{NULL			, "v"},
 	{NULL			, "s"},
-	{"StreamId"		, "v"},
-	{"SegmentId"		, "v"},
-	{"StartTimestamp"	, "v"},
-	{"EndTimestamp"		, "v"},
 	{"Author"		, "UTF8"},
 	{"Titel"		, "UTF8"},
 	{"Description"		, "UTF8"},
@@ -533,7 +551,17 @@ info_table[][2]={
 	{"Keyword"		, "UTF8"},
 	{"Cover"		, "JPEG"},
 	{"Cover"		, "PNG"},
-	{"Disposition"		, "UTF8"},
+};
+
+meta_table[][2]={
+	{NULL			,  NULL }, // end
+	{NULL			,  NULL },
+	{NULL			, "UTF8"},
+	{NULL			, "v"},
+	{NULL			, "s"},
+	{"Language"		, to be decided},
+	{"Disposition"		, to be decided},
+	{"ReplayGain"		, to be decided},
 };
 
 			Structure:
