@@ -35,7 +35,7 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	int controlstart= ed->count;
 	int x1;
 	int i;
-	u_int top, left, bottom, right;
+	unsigned int top, left, bottom, right;
 
 	top= 450 - pb->y/2;
    	left=(720 / 2) - (pb->x / 2);
@@ -138,7 +138,7 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 }
 
 static void
-encode_put_nibble( encodedata* ed, u_char nibble ) {
+encode_put_nibble( encodedata* ed, unsigned char nibble ) {
 	if( ed->nibblewaiting ) {
 		ed->data[ed->count++]|= nibble;
 		ed->nibblewaiting= 0;
@@ -175,7 +175,7 @@ encode_eol( encodedata* ed ) {
 static void
 encode_do_row( encodedata* ed, pixbuf* pb, int row ) {
 	int i= 0;
-	u_char* pix= pb->pixels + row * pb->x;
+	unsigned char* pix= pb->pixels + row * pb->x;
 	int color= *pix;
 	int n= 0; /* the number of pixels of this color */
 	
@@ -237,7 +237,7 @@ void
 pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
 	int colors, chrs, l, n; 
 	char c[4], table[256];
-	u_char *b, *i;
+	unsigned char *b, *i;
 
 	sscanf( xpm[0], "%d %d %d %d", &pb->x, &pb->y, &colors, &chrs);
 	if( colors > 4 ) {

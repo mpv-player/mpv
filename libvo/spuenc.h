@@ -25,12 +25,12 @@
 
 typedef struct {
 	int x, y;
-	u_int rgb[4];
-	u_char* pixels;
+	unsigned int rgb[4];
+	unsigned char* pixels;
 } pixbuf;
 
 typedef struct {
-	u_char data[DATASIZE];
+	unsigned char data[DATASIZE];
 	int count;	/* the count of bytes written */
 	int oddstart;
 	int nibblewaiting;
