@@ -2116,6 +2116,20 @@ echocheck "linux devfs"
 echores "$_linux_devfs"
 
 
+echocheck "scandir()"
+cat > $TMPC << EOF
+int main (void) { scandir("", 0, 0, 0); alphasort(0, 0); return 0; }
+EOF
+_scandir=no
+cc_check && _scandir=yes
+if test "$_scandir" = yes ; then
+ _def_scandir='#define HAVE_SCANDIR 1'
+else
+ _def_scandir='#undef HAVE_SCANDIR'
+fi
+echores "$_scandir"
+
+
 echocheck "strsep()"
 cat > $TMPC << EOF
 #include <string.h>
@@ -4823,6 +4837,9 @@ $_def_zlib
 
 /* Define this if you have shm support */
 $_def_shm
+
+/* Define this if your system has scandir & alphasort */
+$_def_scandir
 
 /* Define this if your system has strsep */
 $_def_strsep
