@@ -1296,13 +1296,17 @@ See also \-zoom.
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (use \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
-.B \-geometry x[%][:y[%]]
+.B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Adjust where the output is on the screen initially.
 The x and y specifications are in pixels measured from the top-right of the
 screen to the top-right of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
-screen size in that direction.
+screen size in that direction. It also supports the standard option format to
+the standard X \-geometry option.
 The values given must be integers.
+
+Note: This option is only supported by a few vo's, including tdfxfb, fbdev and
+xv.
 
 .I EXAMPLE:
 .PD 0

@@ -204,7 +204,7 @@ static void clear_screen()
 static void setup_screen(uint32_t full)
 {
 	aspect(&vidwidth, &vidheight, full ? A_ZOOM : A_NOZOOM);
-	geometry(&vidx, &vidy, screenwidth, screenheight, vidwidth, vidheight, full);
+	geometry(&vidx, &vidy, screenwidth, screenheight, vidwidth, vidheight);
 	vo_fs = full;
 	clear_screen();
 }

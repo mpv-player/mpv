@@ -110,6 +110,8 @@ play_tree_iter_t* playtree_iter = NULL;
 //             Config
 //**************************************************************************//
 
+#include "libvo/geometry.h"
+
 m_config_t* mconfig;
 
 #ifdef NEW_CONFIG
@@ -697,6 +699,9 @@ int gui_no_filename=0;
 #else
     if(m_config_parse_command_line(mconfig, argc, argv) < 0) exit(1); // error parsing cmdline
 #endif
+
+    geometryFull(&opt_screen_size_x, &opt_screen_size_y, NULL, NULL,
+	vo_screenwidth, vo_screenheight, vo_screenwidth, vo_screenheight);
 
     playtree = play_tree_cleanup(playtree);
     if(playtree) {
