@@ -243,6 +243,7 @@ Forghieri, Daniele (xdanny) <guru@digitalfantasy.it>
     * TGA output driver
     * framestep & tile video filters
     * initial Italian man page translation
+    * fixes and improvements to lavc audio encoding
 
 Foth, Kilian A. <foth@informatik.uni-hamburg.de>
     * slave mode
