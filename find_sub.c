@@ -19,6 +19,7 @@ static int nosub_range_start=-1;
 static int nosub_range_end=-1;
 
 extern float sub_delay;
+extern float  sub_fps;
 
 void step_sub(subtitle *subtitles, float pts, int movement) {
     int key = sub_uses_time ? (100*(pts+sub_delay)) : ((pts+sub_delay)*sub_fps);
