@@ -4477,7 +4477,7 @@ if test "$_real" = auto ; then
     if linux || freebsd || netbsd || cygwin || mingw32 ; then
       _real=yes
     else
-      echores "no (tested only on Linux/FreeBSD/NetBSD/Cygwin/MINGW32)"
+      echores "no (tested only on Linux/FreeBSD/NetBSD/Cygwin/MinGW)"
     fi
     if test "$_real" = yes ; then
       if test -z "$_reallibdir" ; then
@@ -5362,7 +5362,7 @@ if test "$_vidix" = yes && test "$_x11" = yes; then
 else
   _novomodules="xvidix $_novomodules"
 fi
-echo Checking for vidix ... "$_vidix"
+echo Checking for VIDIX ... "$_vidix"
 
 _def_joystick='#undef HAVE_JOYSTICK'
 if test "$_joystick" = yes ; then
