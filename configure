@@ -1010,16 +1010,17 @@ fi
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
 _awk=
 if test "$_vidix" = yes ; then
-_awk_works=no
+_awk_verc_fail=yes
+echocheck "awk"
 for _awk in mawk gawk nawk awk; do
-  if echo 'BEGIN{testme();}function testme(){print"test";}'|$_awk -f/dev/stdin 2>&1 >/dev/null; then
-    _awk_works=yes
+  if ( echo 'BEGIN{testme();}function testme(){print"";}'|$_awk -f/dev/stdin ) >> "$TMPLOG" 2>&1; then
+    _awk_verc_fail=no
     break
   fi
 done
-test "$_awk_works" = no && _awk=no
-echo Checking for awk ... $_awk
-if test "$_awk_works" = no; then
+test "$_awk_verc_fail" = yes && _awk=no
+echores "$_awk"
+if test "$_awk_verc_fail" = yes; then
 echo "VIDIX needs Awk, but there was no working implementation found!"
 echo "Try the GNU implementation, which can be downloaded from:"
 echo "ftp://ftp.gnu.org/gnu/gawk/"
