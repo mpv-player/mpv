@@ -328,6 +328,50 @@ parse_pls(play_tree_parser_t* p) {
   return entry;
 }
 
+/*
+ Reference Ini-Format: Each entry is assumed a reference
+ */
+play_tree_t*
+parse_ref_ini(play_tree_parser_t* p) {
+  char *line,*v;
+  play_tree_t *list = NULL, *entry = NULL;
+
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying reference-ini playlist...\n");
+  line = play_tree_parser_get_line(p);
+  strstrip(line);
+  if(strcasecmp(line,"[Reference]"))
+    return NULL;
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected reference-ini playlist format\n");
+  play_tree_parser_stop_keeping(p);
+  line = play_tree_parser_get_line(p);
+  if(!line)
+    return NULL;
+  while(line) {
+    strstrip(line);
+    if(strncasecmp(line,"Ref",3) == 0) {
+      v = pls_entry_get_value(line+3);
+      if(!v)
+	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"No value in entry %s\n",line);
+      else
+      {
+        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",v);
+        entry = play_tree_new();
+        play_tree_add_file(entry,v);
+        if(list)
+  	  play_tree_append_entry(list,entry);
+        else
+  	  list = entry;
+      }
+    }
+    line = play_tree_parser_get_line(p);
+  }
+
+  if(!list) return NULL;
+  entry = play_tree_new();
+  play_tree_set_child(entry,list);	
+  return entry;
+}
+
 play_tree_t*
 parse_m3u(play_tree_parser_t* p) {
   char* line;
@@ -529,6 +573,10 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p) {
     play_tree_parser_reset(p);
 
     tree = parse_m3u(p);
+    if(tree) break;
+    play_tree_parser_reset(p);
+    
+    tree = parse_ref_ini(p);
     if(tree) break;
     play_tree_parser_reset(p);
 
