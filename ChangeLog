@@ -26,6 +26,7 @@ MPlayer (1.0)
     * 32 bit RGB support in binary TSCC decoder
     * dropped support of old faad2 versions (<= 1.1)
     * support for Real 10 cook Linux binary codec (decodes cook5.1)
+    * improved NV12/NV21 support
 
     Demuxers:
     * vqf demuxer
@@ -40,6 +41,7 @@ MPlayer (1.0)
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
     * fallback to HTTP if connection refused on pnm://
+    * support for UDP streaming (udp://)
 
     FFmpeg/libavcodec:
     * RV20 fixes
@@ -47,7 +49,8 @@ MPlayer (1.0)
     * B-frames in H.264, H.264 weighted prediction support
     * a lot of integer overflow and pointer fixes
     * 32 bit RGB support in TSCC
-    * Multichannel MP3 decoder (MP3on4)
+    * multichannel MP3 decoder (MP3on4)
+    * 3g2 support
 
     GUI:
     * half size event implemented and added to the menu
