@@ -1327,8 +1327,8 @@ if(1)
     }
 
     // fix mpeg2 frametime:
-    frame_time=(100+picture->repeat_count)*0.01f;
-    picture->repeat_count=0;
+    frame_time=(picture->display_time)*0.01f;
+    picture->display_time=100;
     videobuf_len=0;
 
   } else {

@@ -146,7 +146,7 @@ typedef struct picture_s {
     int display_picture_width;
     int display_picture_height;
     int pp_options;
-    int repeat_count;
+    int display_time;
 
     struct vo_frame_s * display_frame;
     int slice;
