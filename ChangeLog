@@ -28,6 +28,7 @@ mplayer (0.90)
     * hw-accelerated video eq for -vo x11 and gl2, using DirectColor colormap
     * -vop unsharp - an sharp/blur filter, nice, but very slow
     * overlapping subtitles support, jacosub (*.js) format support
+    * dxr3 got a new syncengine, ':sync', read the manual for more info
 
   pre9:
     Docs:
