@@ -42,6 +42,7 @@ static int video_on=0;
 static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
+static vo_functions_t *   vo_server;
 
 static int  vidix_get_bes_da(bes_da_t *);
 static int  vidix_get_video_eq(vidix_video_eq_t *info);
@@ -61,175 +62,6 @@ static void vidix_query_vaa(vo_vaa_t *vaa)
   vaa->get_oem_fx=vidix_get_oem_fx;
   vaa->set_oem_fx=vidix_set_oem_fx;
   vaa->set_deint=vidix_set_deint;
-}
-
-int vidix_preinit(const char *drvname,void *server)
-{
-  int err;
-  if(verbose > 1) printf("vosub_vidix: vidix_preinit(%s) was called\n",drvname);
-	if(vdlGetVersion() != VIDIX_VERSION)
-	{
-	  printf("vosub_vidix: You have wrong version of VIDIX library\n");
-	  return -1;
-	}
-	vidix_handler = vdlOpen(LIBDIR"/vidix/",
-				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
-				TYPE_OUTPUT,
-				verbose);
-	if(vidix_handler == NULL)
-	{
-		printf("vosub_vidix: Couldn't find working VIDIX driver\n");
-		return -1;
-	}
-	if((err=vdlGetCapability(vidix_handler,&vidix_cap)) != 0)
-	{
-		printf("vosub_vidix: Couldn't get capability: %s\n",strerror(err));
-		return -1;
-	}
-	printf("vosub_vidix: Using: %s by %s\n",vidix_cap.name,vidix_cap.author);
-	/* we are able to tune up this stuff depend on fourcc format */
-	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
-	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
-	((vo_functions_t *)server)->flip_page=vidix_flip_page;
-	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
-	((vo_functions_t *)server)->query_format=vidix_query_fourcc;
-	((vo_functions_t *)server)->query_vaa=vidix_query_vaa;
-	return 0;
-}
-
-int      vidix_init(unsigned src_width,unsigned src_height,
-		   unsigned x_org,unsigned y_org,unsigned dst_width,
-		   unsigned dst_height,unsigned format,unsigned dest_bpp,
-		   unsigned vid_w,unsigned vid_h,const void *info)
-{
-  size_t i,awidth;
-  int err;
-  if(verbose > 1)
-     printf("vosub_vidix: vidix_init() was called\n"
-    	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
-	    "format=%s dest_bpp=%u vid_w=%u vid_h=%u\n"
-	    ,src_width,src_height,x_org,y_org,dst_width,dst_height
-	    ,vo_format_name(format),dest_bpp,vid_w,vid_h);
-
-	if(((vidix_cap.maxwidth != -1) && (vid_w > vidix_cap.maxwidth)) ||
-	    ((vidix_cap.minwidth != -1) && (vid_w < vidix_cap.minwidth)) ||
-	    ((vidix_cap.maxheight != -1) && (vid_h > vidix_cap.maxheight)) ||
-	    ((vidix_cap.minwidth != -1 ) && (vid_h < vidix_cap.minheight)))
-	{
-	  printf("vosub_vidix: video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d\n",
-	    vid_w, vid_h, vidix_cap.minwidth, vidix_cap.minheight,
-	    vidix_cap.maxwidth, vidix_cap.maxheight);
-	  return -1;
-	}
-
-	err = 0;
-	switch(dest_bpp)
-	{
-	  case 1: err = ((vidix_fourcc.depth & VID_DEPTH_1BPP) != VID_DEPTH_1BPP); break;
-	  case 2: err = ((vidix_fourcc.depth & VID_DEPTH_2BPP) != VID_DEPTH_2BPP); break;
-	  case 4: err = ((vidix_fourcc.depth & VID_DEPTH_4BPP) != VID_DEPTH_4BPP); break;
-	  case 8: err = ((vidix_fourcc.depth & VID_DEPTH_8BPP) != VID_DEPTH_8BPP); break;
-	  case 12:err = ((vidix_fourcc.depth & VID_DEPTH_12BPP) != VID_DEPTH_12BPP); break;
-	  case 16:err = ((vidix_fourcc.depth & VID_DEPTH_16BPP) != VID_DEPTH_16BPP); break;
-	  case 24:err = ((vidix_fourcc.depth & VID_DEPTH_24BPP) != VID_DEPTH_24BPP); break;
-	  case 32:err = ((vidix_fourcc.depth & VID_DEPTH_32BPP) != VID_DEPTH_32BPP); break;
-	  default: err = 1; break;
-	}
-	if(err)
-	{
-	  printf("vosub_vidix: video server has unsupported color depth by vidix (%d)\n",
-	    vidix_fourcc.depth);
-	  return -1;
-	}
-	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_UPSCALER) != FLAG_UPSCALER)
-	{
-	  printf("vosub_vidix: vidix driver can't upscale image (%dx%d -> %dx%d)\n",
-	    src_width, src_height, dst_width, dst_height);
-	  return -1;
-	}
-	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_DOWNSCALER) != FLAG_DOWNSCALER)
-	{
-	  printf("vosub_vidix: vidix driver can't downscale image (%dx%d -> %dx%d)\n",
-	    src_width, src_height, dst_width, dst_height);
-	  return -1;
-	}
-	image_width = src_width;
-	image_height = src_height;
-	src_format = format;
-	memset(&vidix_play,0,sizeof(vidix_playback_t));
-	vidix_play.fourcc = format;
-	vidix_play.capability = vidix_cap.flags; /* every ;) */
-	vidix_play.blend_factor = 0; /* for now */
-	/* display the full picture.
-	   Nick: we could implement here zooming to a specified area -- alex */
-	vidix_play.src.x = vidix_play.src.y = 0;
-	vidix_play.src.w = src_width;
-	vidix_play.src.h = src_height;
-	vidix_play.dest.x = x_org;
-	vidix_play.dest.y = y_org;
-	vidix_play.dest.w = dst_width;
-	vidix_play.dest.h = dst_height;
-	vidix_play.num_frames=NUM_FRAMES;
-	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
-	if(info)
-	{
-	switch(((const vo_tune_info_t *)info)->pitch[0])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.y = ((const vo_tune_info_t *)info)->pitch[0];
-		      break;
-	    default: break;
-	}
-	switch(((const vo_tune_info_t *)info)->pitch[1])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.u = ((const vo_tune_info_t *)info)->pitch[1];
-		      break;
-	    default: break;
-	}
-	switch(((const vo_tune_info_t *)info)->pitch[2])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.v = ((const vo_tune_info_t *)info)->pitch[2];
-		      break;
-	    default: break;
-	}
-	}
-	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
-	{
-		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
-		return -1;
-	}
-
-	vidix_mem = vidix_play.dga_addr;
-
-	/* select first frame */
-	next_frame = 0;
-//        vdlPlaybackFrameSelect(vidix_handler,next_frame);
-
-	/* clear every frame with correct address and frame_size */
-	for (i = 0; i < vidix_play.num_frames; i++)
-	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
-		vidix_play.frame_size);
-	return 0;
 }
 
 extern int vo_gamma_brightness;
@@ -380,6 +212,21 @@ static uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h
     return 0;
 }
 
+static uint32_t vidix_draw_slice_422_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    unsigned bespitch,apitch;
+    int i;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*2 + apitch) & ~apitch;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += bespitch*y + x;
+    src = image[0];
+    memcpy(dest,src,h*bespitch);
+    return 0;
+}
+
 static uint32_t vidix_draw_slice_32(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
@@ -397,6 +244,21 @@ static uint32_t vidix_draw_slice_32(uint8_t *image[], int stride[], int w,int h,
         dest += bespitch;
     }
 
+    return 0;
+}
+
+static uint32_t vidix_draw_slice_32_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    unsigned bespitch,apitch;
+    int i;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*4 + apitch) & ~apitch;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += bespitch*y + x;
+    src = image[0];
+    memcpy(dest,src,h*bespitch);
     return 0;
 }
 
@@ -420,54 +282,46 @@ static uint32_t vidix_draw_slice_24(uint8_t *image[], int stride[], int w,int h,
     return 0;
 }
 
+static uint32_t vidix_draw_slice_24_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    unsigned bespitch,apitch;
+    int i;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*3 + apitch) & ~apitch;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += bespitch*y + x;
+    src = image[0];
+    memcpy(dest,src,h*bespitch);
+    return 0;
+}
+
 uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
- if(verbose > 1) printf("vosub_vidix: vidix_draw_slice() was called\n");
-    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
-	vidix_draw_slice_420(image,stride,w,h,x,y);
-    else
-    if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
-	vidix_draw_slice_32(image,stride,w,h,x,y);
-    else
-    if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
-	vidix_draw_slice_24(image,stride,w,h,x,y);
-    else
-	vidix_draw_slice_422(image,stride,w,h,x,y);
- return 0;
+	printf("vosub_vidix: Error unoptimized draw_slice was called\nExiting...");
+	vidix_term();
+	exit( EXIT_FAILURE );
+	return 0;
 }
 
 uint32_t vidix_draw_frame(uint8_t *image[])
 {
+  int stride[1];
   if(verbose > 1) printf("vosub_vidix: vidix_draw_frame() was called\n");
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
-    {
 	printf("vosub_vidix: draw_frame for YUV420 called, frame cannot be written\n");
-    }
     else
     if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
-    {
-	int stride[1];
 	stride[0] = vidix_play.src.w*4;
-	vidix_draw_slice_32(image,stride,vidix_play.src.w,vidix_play.src.h,
-			     vidix_play.src.x,vidix_play.src.y);
-    }
     else
     if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
-    {
-	int stride[1];
 	stride[0] = vidix_play.src.w*3;
-	vidix_draw_slice_24(image,stride,vidix_play.src.w,vidix_play.src.h,
-			     vidix_play.src.x,vidix_play.src.y);
-    }
     else
-    {
-	int stride[1];
 	stride[0] = vidix_play.src.w*2;
-	vidix_draw_slice_422(image,stride,vidix_play.src.w,vidix_play.src.h,
-			     vidix_play.src.x,vidix_play.src.y);
-    }
-  return 0;
+    return vo_server->draw_slice(image,stride,vidix_play.src.w,vidix_play.src.h,
+				 vidix_play.src.x,vidix_play.src.y);
 }
 
 void     vidix_flip_page(void)
@@ -615,4 +469,194 @@ static int  vidix_set_deint(const vidix_deinterlace_t *info)
 {
   if(!video_on) return EPERM;
   return vdlPlaybackSetDeint(vidix_handler, info);
+}
+
+int      vidix_init(unsigned src_width,unsigned src_height,
+		   unsigned x_org,unsigned y_org,unsigned dst_width,
+		   unsigned dst_height,unsigned format,unsigned dest_bpp,
+		   unsigned vid_w,unsigned vid_h,const void *info)
+{
+  size_t i,awidth;
+  int err;
+  if(verbose > 1)
+     printf("vosub_vidix: vidix_init() was called\n"
+    	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
+	    "format=%s dest_bpp=%u vid_w=%u vid_h=%u\n"
+	    ,src_width,src_height,x_org,y_org,dst_width,dst_height
+	    ,vo_format_name(format),dest_bpp,vid_w,vid_h);
+
+	if(((vidix_cap.maxwidth != -1) && (vid_w > vidix_cap.maxwidth)) ||
+	    ((vidix_cap.minwidth != -1) && (vid_w < vidix_cap.minwidth)) ||
+	    ((vidix_cap.maxheight != -1) && (vid_h > vidix_cap.maxheight)) ||
+	    ((vidix_cap.minwidth != -1 ) && (vid_h < vidix_cap.minheight)))
+	{
+	  printf("vosub_vidix: video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d\n",
+	    vid_w, vid_h, vidix_cap.minwidth, vidix_cap.minheight,
+	    vidix_cap.maxwidth, vidix_cap.maxheight);
+	  return -1;
+	}
+
+	err = 0;
+	switch(dest_bpp)
+	{
+	  case 1: err = ((vidix_fourcc.depth & VID_DEPTH_1BPP) != VID_DEPTH_1BPP); break;
+	  case 2: err = ((vidix_fourcc.depth & VID_DEPTH_2BPP) != VID_DEPTH_2BPP); break;
+	  case 4: err = ((vidix_fourcc.depth & VID_DEPTH_4BPP) != VID_DEPTH_4BPP); break;
+	  case 8: err = ((vidix_fourcc.depth & VID_DEPTH_8BPP) != VID_DEPTH_8BPP); break;
+	  case 12:err = ((vidix_fourcc.depth & VID_DEPTH_12BPP) != VID_DEPTH_12BPP); break;
+	  case 16:err = ((vidix_fourcc.depth & VID_DEPTH_16BPP) != VID_DEPTH_16BPP); break;
+	  case 24:err = ((vidix_fourcc.depth & VID_DEPTH_24BPP) != VID_DEPTH_24BPP); break;
+	  case 32:err = ((vidix_fourcc.depth & VID_DEPTH_32BPP) != VID_DEPTH_32BPP); break;
+	  default: err=1; break;
+	}
+	if(err)
+	{
+	  printf("vosub_vidix: video server has unsupported color depth by vidix (%d)\n"
+	  ,vidix_fourcc.depth);
+	  return -1;
+	}
+	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_UPSCALER) != FLAG_UPSCALER)
+	{
+	  printf("vosub_vidix: vidix driver can't upscale image (%d%d -> %d%d)\n",
+	  src_width, src_height, dst_width, dst_height);
+	  return -1;
+	}
+	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_DOWNSCALER) != FLAG_DOWNSCALER)
+	{
+	  printf("vosub_vidix: vidix driver can't downscale image (%d%d -> %d%d)\n",
+	  src_width, src_height, dst_width, dst_height);
+	  return -1;
+	}
+	image_width = src_width;
+	image_height = src_height;
+	src_format = format;
+	memset(&vidix_play,0,sizeof(vidix_playback_t));
+	vidix_play.fourcc = format;
+	vidix_play.capability = vidix_cap.flags; /* every ;) */
+	vidix_play.blend_factor = 0; /* for now */
+	/* display the full picture.
+	   Nick: we could implement here zooming to a specified area -- alex */
+	vidix_play.src.x = vidix_play.src.y = 0;
+	vidix_play.src.w = src_width;
+	vidix_play.src.h = src_height;
+	vidix_play.dest.x = x_org;
+	vidix_play.dest.y = y_org;
+	vidix_play.dest.w = dst_width;
+	vidix_play.dest.h = dst_height;
+	vidix_play.num_frames=NUM_FRAMES;
+	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
+	if(info)
+	{
+	switch(((const vo_tune_info_t *)info)->pitch[0])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.y = ((const vo_tune_info_t *)info)->pitch[0];
+		      break;
+	    default: break;
+	}
+	switch(((const vo_tune_info_t *)info)->pitch[1])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.u = ((const vo_tune_info_t *)info)->pitch[1];
+		      break;
+	    default: break;
+	}
+	switch(((const vo_tune_info_t *)info)->pitch[2])
+	{
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16:
+	    case 32:
+	    case 64:
+	    case 128:
+	    case 256: vidix_play.src.pitch.v = ((const vo_tune_info_t *)info)->pitch[2];
+		      break;
+	    default: break;
+	}
+	}
+	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
+	{
+		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
+		return -1;
+	}
+
+	vidix_mem = vidix_play.dga_addr;
+
+	/* select first frame */
+	next_frame = 0;
+//        vdlPlaybackFrameSelect(vidix_handler,next_frame);
+
+	/* clear every frame with correct address and frame_size */
+	for (i = 0; i < vidix_play.num_frames; i++)
+	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
+		vidix_play.frame_size);
+        /* tune some info here */
+        if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
+		vo_server->draw_slice = vidix_draw_slice_420;
+	else
+	if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
+		vo_server->draw_slice =
+			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			vidix_draw_slice_32_fast:
+			vidix_draw_slice_32;
+	else
+	if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
+		vo_server->draw_slice =
+			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			vidix_draw_slice_24_fast:
+			vidix_draw_slice_24;
+	else
+		vo_server->draw_slice =
+			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			vidix_draw_slice_422_fast:
+			vidix_draw_slice_422;
+	return 0;
+}
+
+int vidix_preinit(const char *drvname,void *server)
+{
+  int err;
+  if(verbose > 1) printf("vosub_vidix: vidix_preinit(%s) was called\n",drvname);
+	if(vdlGetVersion() != VIDIX_VERSION)
+	{
+	  printf("vosub_vidix: You have wrong version of VIDIX library\n");
+	  return -1;
+	}
+	vidix_handler = vdlOpen(LIBDIR"/vidix/",
+				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
+				TYPE_OUTPUT,
+				verbose);
+	if(vidix_handler == NULL)
+	{
+		printf("vosub_vidix: Couldn't find working VIDIX driver\n");
+		return -1;
+	}
+	if((err=vdlGetCapability(vidix_handler,&vidix_cap)) != 0)
+	{
+		printf("vosub_vidix: Couldn't get capability: %s\n",strerror(err));
+		return -1;
+	}
+	printf("vosub_vidix: Using: %s by %s\n",vidix_cap.name,vidix_cap.author);
+	/* we are able to tune up this stuff depend on fourcc format */
+	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
+	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
+	((vo_functions_t *)server)->flip_page=vidix_flip_page;
+	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
+	((vo_functions_t *)server)->query_format=vidix_query_fourcc;
+	((vo_functions_t *)server)->query_vaa=vidix_query_vaa;
+	vo_server = server;
+	return 0;
 }
