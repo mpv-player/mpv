@@ -48,10 +48,8 @@ long RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
 
 char* def_path=WIN32_PATH;
 
-static void do_cpuid(unsigned int *regs)
+static void do_cpuid(unsigned int ax, unsigned int *regs)
 {
-  unsigned int ax;
-  ax=1;
     __asm__ __volatile__(
 	"pushl %%ebx; pushl %%ecx; pushl %%edx; "
         ".byte  0x0f, 0xa2;"
@@ -61,7 +59,7 @@ static void do_cpuid(unsigned int *regs)
         "movl   %%edx, 12(%2);"
 	"popl %%edx; popl %%ecx; popl %%ebx; "
         : "=a" (ax)
-    :  "0" (ax), "S" (&regs));
+    :  "0" (ax), "S" (regs));
 }
 static unsigned int c_localcount_tsc()
 {
@@ -113,8 +111,8 @@ static void (*longcount)(long long*)=longcount_stub;
 static unsigned int localcount_stub(void)
 {
     unsigned int regs[4];
-    do_cpuid(regs);
-    if ((regs[3] & 0x00000010) == 0) 
+    do_cpuid(1, regs);
+    if ((regs[3] & 0x00000010) != 0) 
     {
 	localcount=c_localcount_tsc;
 	longcount=c_longcount_tsc;
@@ -129,8 +127,8 @@ static unsigned int localcount_stub(void)
 static void longcount_stub(long long* z)
 {
     unsigned int regs[4];
-    do_cpuid(regs);
-    if ((regs[3] & 0x00000010) == 0) 
+    do_cpuid(1, regs);
+    if ((regs[3] & 0x00000010) != 0) 
     {
 	localcount=c_localcount_tsc;
 	longcount=c_longcount_tsc;
@@ -705,7 +703,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	cachedsi.wProcessorRevision		= 0x0101;
 	
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__)
-	do_cpuid(regs);
+	do_cpuid(1, regs);
 	switch ((regs[0] >> 8) & 0xf) {			// cpu family
 	case 3: cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
 		cachedsi.wProcessorLevel= 3;
