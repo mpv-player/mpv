@@ -24,9 +24,9 @@ static int recursion_depth = 0;
 int m_config_parse_config_file(m_config_t* config, char *conffile)
 {
 #define PRINT_LINENUM	mp_msg(MSGT_CFGPARSER,MSGL_V,"%s(%d): ", conffile, line_num)
-#define MAX_LINE_LEN	1000
-#define MAX_OPT_LEN	100
-#define MAX_PARAM_LEN	100
+#define MAX_LINE_LEN	10000
+#define MAX_OPT_LEN	1000
+#define MAX_PARAM_LEN	1000
 	FILE *fp;
 	char *line;
 	char opt[MAX_OPT_LEN + 1];
