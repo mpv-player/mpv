@@ -176,7 +176,8 @@ struct config conf[]={
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
 	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
 	{"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3},
-	
+	{"dumpmpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 4},
+
 	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0},
 	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0},

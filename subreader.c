@@ -23,7 +23,7 @@ char *sub_cp=NULL;
 #endif
 
 
-static long int mpsub_position=0;
+static float mpsub_position=0;
 
 int sub_uses_time=0;
 int sub_errs=0;
@@ -373,18 +373,19 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
 
 subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	char line[1000];
-	int a,b,num=0;
+	float a,b;
+	int num=0;
 	char *p, *q;
 
 	do
 	{
 		if (!fgets(line, 1000, fd)) return NULL;
-	} while (sscanf (line, "%d %d", &a, &b) !=2);
+	} while (sscanf (line, "%f %f", &a, &b) !=2);
 
-	mpsub_position += (a*100);
-	current->start=mpsub_position+1;
-	mpsub_position += (b*100);
-	current->end=mpsub_position;
+	mpsub_position += (a*100.0);
+	current->start=(int) mpsub_position;
+	mpsub_position += (b*100.0);
+	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
 		if (!fgets (line, 1000, fd)) return NULL;
@@ -673,6 +674,49 @@ void list_sub_file(subtitle* subs){
     printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
 
 }
+
+void dump_mpsub(subtitle* subs){
+	int i,j;
+	FILE *fd;
+	float a,b;
+
+	mpsub_position=0.0;
+
+	fd=fopen ("dump.mpsub", "w");
+	if (!fd) {
+		perror ("dump_mpsub: fopen");
+		return;
+	}
+	
+
+	if (sub_uses_time) fprintf (fd,"FORMAT=TIME\n\n");
+	else fprintf (fd, "FORMAT=25");  // FIXME: fps
+
+	for(j=0;j<sub_num;j++){
+	    subtitle* egysub=&subs[j];
+	    a=((egysub->start-mpsub_position)/100.0);
+	    b=((egysub->end-egysub->start)/100.0);
+	    if ( (float)((int)a) == a)
+		fprintf (fd, "%.0f",a);
+	    else
+		fprintf (fd, "%.2f",a);
+	    
+	    if ( (float)((int)b) == b)
+		fprintf (fd, " %.0f\n",b);
+	    else
+		fprintf (fd, " %.2f\n",b);
+	    
+	    mpsub_position = egysub->end;
+	    for (i=0; i<egysub->lines; i++) {
+		fprintf (fd, "%s\n",egysub->text[i]);
+	    }
+	    fprintf (fd, "\n");
+	}
+	fclose (fd);
+	printf ("Subtitles dumped in \'dump.mpsub\'.\n");
+}
+
+
 
 #if 0
 int main(int argc, char **argv) {  // for testing
