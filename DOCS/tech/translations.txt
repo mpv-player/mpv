@@ -44,6 +44,14 @@ will print untranslated messages to the screen, just substitute XX with your
 language code. Additionally, please make sure that your translated messages fit
 on an 80 character wide display to avoid overflowing output.
 
+If you do not translate all messages at once, please do not leave untranslated
+messages in your translated file, just leave them out instead. The MPlayer
+build system automatically checks for missing messages and uses the English
+ones instead. This has the added advantage of providing the latest versions of
+the English messages, since English messages in translations may be outdated.
+Furthermore, running help_diff.sh on your translated file will immediately show
+missing messages, which eases further translation.
+
 Translations are for documentation what porting is for code. Many more eyes
 see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
 clumsy wording, spelling/grammar errors or if you notice that something is
