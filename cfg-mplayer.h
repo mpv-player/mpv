@@ -103,6 +103,7 @@ extern int nortc;
 /* defined in network.c */
 extern char *network_username;
 extern char *network_password;
+extern int   network_bandwidth;
 #endif
 
 /* from libvo/aspect.c */

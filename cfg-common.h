@@ -42,8 +42,10 @@
 #ifdef STREAMING
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 #else
 	{"user", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"bandwidth", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	
 // ------------------------- demuxer options --------------------

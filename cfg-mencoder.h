@@ -24,6 +24,7 @@ extern struct config divx4opts_conf[];
 /* defined in network.c */
 extern char *network_username;
 extern char *network_password;
+extern int   network_bandwidth;
 #endif
 
 #ifdef HAVE_MP3LAME
