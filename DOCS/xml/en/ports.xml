@@ -278,7 +278,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
   to compile the DirectX video output driver.</para>
 
-<para>QuickTime and Real DLLs also work. Compile with <option>--enable-qtx</option>
+<para>QuickTime DLLx and Real Win32 codecs (not Real Linux codecs) also work.
+  Compile with <option>--enable-qtx</option>
   and <option>--enable-real</option> and put the codecs into the
   default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename> or
   <filename class="directory">C:\Windows\system</filename> depending on your Windows version.</para>
