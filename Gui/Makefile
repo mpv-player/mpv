@@ -4,10 +4,6 @@ LIB	= libgui.a
 include ../config.mak
 include config.mak
 
-include bitmap/bitmap.mak
-MPLAYERDIR = mplayer/
-include gui.mak
-
 INCDIR  = -I. -I./event -I./wm -I./skin $(GTKINC) $(EXTRA_INC)
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
@@ -18,6 +14,13 @@ endif
 
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
 
+SRCS = wm/ws.c wm/wsconv.c app.c events.c interface.c \
+	bitmap/bitmap.c bitmap/tga/tga.c bitmap/bmp/bmp.c bitmap/png/png.c \
+	skin/skin.c skin/font.c skin/cut.c \
+	mplayer/mplayer.c mplayer/widgets.c mplayer/play.c \
+	mplayer/gtk/menu.c mplayer/gtk/mb.c mplayer/gtk/about.c mplayer/gtk/pl.c mplayer/gtk/sb.c mplayer/gtk/fs.c mplayer/gtk/opts.c mplayer/gtk/url.c mplayer/gtk/eq.c
+OBJS = $(SRCS:.c=.o)
+
 .SUFFIXES: .c .o
 
 .c.o:
@@ -26,14 +29,12 @@ CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG)
 ### TARGETS ###
 
 $(LIB):	.depend	$(OBJS)
-	$(MAKE) -C mplayer
 	rm -f $(LIB)
 	$(AR) rc $(LIB) $(OBJS) $(MPLAYEROBJS)
 
 all:	$(LIB)
 
 clean:
-	$(MAKE) -C mplayer clean
 	rm -rf $(OBJS) *.o *~ *.bak main $(PRG) $(LIB) .depend
 
 #dep:	depend
@@ -48,8 +49,7 @@ dep:    depend
 
 depend: .depend
 
-.depend: Makefile config.mak gui.mak bitmap/bitmap.mak
-	$(MAKE) -C mplayer depend
+.depend: Makefile config.mak
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #

@@ -6,11 +6,11 @@
 #include <glob.h>
 #include <unistd.h>
 
-#include "./mplayer.h"
+#include "../mplayer.h"
 
-#include "pixmaps/up.xpm"
-#include "pixmaps/dir.xpm"
-#include "pixmaps/file.xpm"
+#include "mplayer/pixmaps/up.xpm"
+#include "mplayer/pixmaps/dir.xpm"
+#include "mplayer/pixmaps/file.xpm"
 
 #include "../../events.h"
 #include "../../interface.h"

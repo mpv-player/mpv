@@ -3,7 +3,7 @@
 #include "../../../config.h"
 #include "../../../help_mp.h"
 
-#include "pixmaps/about.xpm"
+#include "mplayer/pixmaps/about.xpm"
 #include "../widgets.h"
 #include "about.h"
 

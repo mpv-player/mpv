@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "./mplayer.h"
+#include "../mplayer.h"
 
 #include "../../events.h"
 #include "../../../config.h"
