@@ -401,13 +401,13 @@ Alpha and PowerPC (Linux/Alpha and Linux/PowerPC have been tested) platforms</em
 
 
 <sect3 id="xvid">
-<title>XViD</title>
+<title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XViD</ulink> is a forked development of the
+<ulink url="http://www.xvid.org">XviD</ulink> is a forked development of the
 OpenDivX codec. It happened when ProjectMayo changed OpenDivX to closed source
 DivX4 (now DivX5), and the non-ProjectMayo people working on OpenDivX got angry,
-then started XViD. So both projects have the same origin.
+then started XviD. So both projects have the same origin.
 
 <itemizedlist>
 <title>ADVANTAGES</title>
@@ -434,7 +434,7 @@ then started XViD. So both projects have the same origin.
   can play them)
   </simpara></listitem>
 <listitem><simpara>
-  you have to choose between DivX4 <emphasis role="bold">or</emphasis> XViD
+  you have to choose between DivX4 <emphasis role="bold">or</emphasis> XviD
   support at compiletime
   </simpara></listitem>
 <listitem><simpara>
@@ -446,8 +446,8 @@ then started XViD. So both projects have the same origin.
 <procedure>
 <title>INSTALLING XVID CVS</title>
 <para>
-It is currently available only from CVS. Here are the download and
-installation instructions:
+  It is currently available only from CVS. Here are download and installation
+  instructions (you need at least autoconf 2.50, automake and libtool):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -459,24 +459,24 @@ installation instructions:
   <screen>cd xvidcore/build/generic</screen>
   </para></step>
 <step><para>
-  Edit <filename>MakeFile</filename> for your architecture (probably
-  <filename>Makefile.linuxx86</filename>) to fit your needs.
+  <screen>./bootstrap.sh</screen>
   </para></step>
 <step><para>
-  <screen>make -f Makefile.linux</screen>
+  <screen>./configure</screen>
+  You may have to add some options (examine the output of
+  <screen>./configure --help</screen>).
   </para></step>
 <step><para>
-  Copy <filename>divx4.h</filename> and <filename>xvid.h</filename> from
-  <filename class="directory">/usr/local/include/</filename>.
+  <screen>make &amp;&amp; make install</screen>
   </para></step>
 <step><para>
-  Get <filename>encore2.h</filename> and <filename>decore.h</filename> from
-  the DivX4Linux package, and copy them to
+  If you specified <option>--enable-divxcompat</option>,
+  copy <filename>../../src/divx4.h</filename> to
   <filename class="directory">/usr/local/include/</filename>.
   </para></step>
 <step><para>
   Recompile <application>MPlayer</application> with
-  <option>--with-xvidcore=<replaceable>/path/to/libxvidcore.a</replaceable></option>.
+  <option>--with-xvidcore=<replaceable>/path/to/</replaceable>libxvidcore.a</option>.
   </para></step>
 </procedure>
 </sect3>
