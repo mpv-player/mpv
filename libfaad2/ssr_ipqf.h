@@ -16,7 +16,9 @@
 ** along with this program; if not, write to the Free Software 
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
-** $Id: ssr_ipqf.h,v 1.2 2003/10/03 22:22:27 alex Exp $
+** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
+** $Id: ssr_ipqf.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
 #ifndef __SSR_IPQF_H__
