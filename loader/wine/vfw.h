@@ -377,6 +377,7 @@ typedef struct {
 
 
 long VFWAPIV ICDecompress(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,void* lpData,LPBITMAPINFOHEADER lpbi,void* lpBits);
+long VFWAPIV ICDecompressEx(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,void* lpData,LPBITMAPINFOHEADER lpbi,void* lpBits);
 
 
 #define ICDecompressBegin(hic, lpbiInput, lpbiOutput) 	\
@@ -385,9 +386,21 @@ long VFWAPIV ICDecompress(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,voi
 	(long)(void*)(lpbiOutput)				\
     )
 
+#define ICDecompressBeginEx(hic, lpbiInput, lpbiOutput) 	\
+    ICUniversalEx(						\
+    	hic, ICM_DECOMPRESSEX_BEGIN, (long)(void*)(lpbiInput),	\
+	(long)(void*)(lpbiOutput)				\
+    )
+
 #define ICDecompressQuery(hic, lpbiInput, lpbiOutput) 	\
     ICSendMessage(						\
     	hic,ICM_DECOMPRESS_QUERY, (long)(void*)(lpbiInput),	\
+	(long) (void*)(lpbiOutput)				\
+    )
+
+#define ICDecompressQueryEx(hic, lpbiInput, lpbiOutput) 	\
+    ICUniversalEx(						\
+    	hic,ICM_DECOMPRESSEX_QUERY, (long)(void*)(lpbiInput),	\
 	(long) (void*)(lpbiOutput)				\
     )
 

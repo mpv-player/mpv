@@ -145,7 +145,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
 
 
 
-int init_video_codec(sh_video_t *sh_video){
+int init_video_codec(sh_video_t *sh_video,int ex){
   HRESULT ret;
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
@@ -267,14 +267,18 @@ int init_video_codec(sh_video_t *sh_video){
 	printf("  biSizeImage %ld\n", sh_video->o_bih.biSizeImage);
   }
 
-  ret = ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
+  ret = ex ?
+      ICDecompressQueryEx(sh_video->hic, sh_video->bih, &sh_video->o_bih) :
+      ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressQuery failed: Error %d\n", (int)ret);
     return 0;
   }
   if(verbose) printf("ICDecompressQuery OK\n");
 
-  ret = ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
+  ret = ex ?
+      ICDecompressBeginEx(sh_video->hic, sh_video->bih, &sh_video->o_bih) :
+      ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressBegin failed: Error %d\n", (int)ret);
     return 0;

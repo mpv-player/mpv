@@ -210,6 +210,7 @@ static short get_driver(char *s,int audioflag)
 		"odivx",
 		"dshow",
 		"ffmpeg",
+		"vfwex",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

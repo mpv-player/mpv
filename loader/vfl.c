@@ -283,6 +283,66 @@ ICDecompress(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,void* lpData,LPB
 }
 
 /***********************************************************************
+ *		ICDecompressEx			[MSVFW.26]
+ */
+long VFWAPIV 
+ICDecompressEx(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,void* lpData,LPBITMAPINFOHEADER  lpbi,void* lpBits) {
+	ICDECOMPRESSEX	icd;
+	int result;
+	
+	icd.dwFlags	= dwFlags;
+
+	icd.lpbiSrc	= lpbiFormat;
+	icd.lpSrc	= lpData;
+
+	icd.lpbiDst	= lpbi;
+	icd.lpDst	= lpBits;
+	
+	icd.xSrc=icd.ySrc=0;
+	icd.dxSrc=lpbiFormat->biWidth;
+	icd.dySrc=abs(lpbiFormat->biHeight);
+
+	icd.xDst=icd.yDst=0;
+	icd.dxDst=lpbi->biWidth;
+	icd.dyDst=abs(lpbi->biHeight);
+	
+	//icd.ckid	= 0;
+	STORE_ALL;
+	result=ICSendMessage(hic,ICM_DECOMPRESSEX,(long)&icd,sizeof(icd));
+	REST_ALL;
+	return result;
+}
+
+long VFWAPIV 
+ICUniversalEx(HIC hic,int command,LPBITMAPINFOHEADER lpbiFormat,LPBITMAPINFOHEADER lpbi) {
+	ICDECOMPRESSEX	icd;
+	int result;
+	
+	icd.dwFlags	= 0;
+
+	icd.lpbiSrc	= lpbiFormat;
+	icd.lpSrc	= 0;
+
+	icd.lpbiDst	= lpbi;
+	icd.lpDst	= 0;
+	
+	icd.xSrc=icd.ySrc=0;
+	icd.dxSrc=lpbiFormat->biWidth;
+	icd.dySrc=abs(lpbiFormat->biHeight);
+
+	icd.xDst=icd.yDst=0;
+	icd.dxDst=lpbi->biWidth;
+	icd.dyDst=abs(lpbi->biHeight);
+	
+	//icd.ckid	= 0;
+	STORE_ALL;
+	result=ICSendMessage(hic,command,(long)&icd,sizeof(icd));
+	REST_ALL;
+	return result;
+}
+
+
+/***********************************************************************
  *		ICSendMessage			[MSVFW.40]
  */
 LRESULT VFWAPI

@@ -30,7 +30,7 @@ extern double vout_time_usage;
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
-extern int init_video_codec(sh_video_t *sh_video);
+extern int init_video_codec(sh_video_t *sh_video,int ex);
 
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_VideoDec.h"
@@ -77,12 +77,21 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
 switch(sh_video->codec->driver){
  case 2: {
-   if(!init_video_codec(sh_video)) {
+   if(!init_video_codec(sh_video,0)) {
 //     GUI_MSG( mplUnknowError )
 //     exit(1);
       return 0;
    }  
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
+   break;
+ }
+ case 6: {
+   if(!init_video_codec(sh_video,1)) {
+//     GUI_MSG( mplUnknowError )
+//     exit(1);
+      return 0;
+   }  
+   if(verbose) printf("INFO: Win32Ex video codec init OK!\n");
    break;
  }
  case 4: { // Win32/DirectShow
@@ -309,6 +318,7 @@ switch(sh_video->codec->driver){
     break;
   }
 #endif
+  case 6:
   case 2: {
     HRESULT ret;
     unsigned int t=GetTimer();
@@ -320,6 +330,15 @@ switch(sh_video->codec->driver){
 //      sh_video->bih->biWidth = 1280;
 //      sh_video->o_bih.biWidth = 1280;
 	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
+
+if(sh_video->codec->driver==6)
+      ret = ICDecompressEx(sh_video->hic, 
+	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
+	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
+                         sh_video->bih,   start,
+                        &sh_video->o_bih,
+                        drop_frame ? 0 : sh_video->our_out_buffer);
+else
       ret = ICDecompress(sh_video->hic, 
 	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
 	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
