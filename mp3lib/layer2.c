@@ -80,12 +80,12 @@ static void II_step_one(unsigned int *bit_alloc,int *scale,struct frame *fr)
     bita = bit_alloc;
     if(stereo)
     {
-      for (i=jsbound;i;i--,alloc1+=(1<<step))
+      for (i=jsbound;i>0;i--,alloc1+=(1<<step))
       {
         *bita++ = (char) getbits(step=alloc1->bits);
         *bita++ = (char) getbits(step);
       }
-      for (i=sblimit-jsbound;i;i--,alloc1+=(1<<step))
+      for (i=sblimit-jsbound;i>0;i--,alloc1+=(1<<step))
       {
         bita[0] = (char) getbits(step=alloc1->bits);
         bita[1] = bita[0];
@@ -93,24 +93,24 @@ static void II_step_one(unsigned int *bit_alloc,int *scale,struct frame *fr)
       }
       bita = bit_alloc;
       scfsi=scfsi_buf;
-      for (i=sblimit2;i;i--)
+      for (i=sblimit2;i>0;i--)
         if (*bita++)
           *scfsi++ = (char) getbits_fast(2);
     }
     else /* mono */
     {
-      for (i=sblimit;i;i--,alloc1+=(1<<step))
+      for (i=sblimit;i>0;i--,alloc1+=(1<<step))
         *bita++ = (char) getbits(step=alloc1->bits);
       bita = bit_alloc;
       scfsi=scfsi_buf;
-      for (i=sblimit;i;i--)
+      for (i=sblimit;i>0;i--)
         if (*bita++)
           *scfsi++ = (char) getbits_fast(2);
     }
 
     bita = bit_alloc;
     scfsi=scfsi_buf;
-    for (i=sblimit2;i;i--) 
+    for (i=sblimit2;i>0;i--) 
       if (*bita++)
         switch (*scfsi++) 
         {
