@@ -40,7 +40,8 @@ extern void	vixDestroy( void );
 
 typedef struct vidix_capability_s
 {
-	char	name[32];	/* Driver name */
+	char	name[64];	/* Driver name */
+	char	author[64];	/* Author name */
 #define TYPE_OUTPUT	0x00000000	/* Is a video playback device */
 #define TYPE_CAPTURE	0x00000001	/* Is a capture device */
 #define TYPE_CODEC	0x00000002	/* Device supports hw (de)coding */
@@ -62,7 +63,7 @@ typedef struct vidix_capability_s
 	unsigned flags;		/* Feature flags, see above */
 	unsigned short vendor_id;
 	unsigned short device_id;
-	unsigned reserved[4];
+	unsigned reserved1[4];
 }vidix_capability_t;
 
 			/* Should fill at least type before init.
@@ -139,14 +140,18 @@ typedef struct vidix_playback_s
 {
 	unsigned	fourcc;		/* app -> driver: movies's fourcc */
 	unsigned	capability;	/* app -> driver: what capability to use */
-	unsigned	blend_factor;	/* app -> driver: blenfing factor */
+	unsigned	blend_factor;	/* app -> driver: blending factor */
 	vidix_rect_t	src;            /* app -> driver: original movie size */
 	vidix_rect_t	dest;           /* app -> driver: destinition movie size. driver->app dest_pitch */
+#define VID_PLAY_INTERLEAVED_UV	0x00000001	/* driver -> app: interleaved UV planes */
+#define INTERLEAVING_UV		0x00001000	/* UVUVUVUVUV used by Matrox G200 */
+#define INTERLEAVING_VU		0x00001001	/* VUVUVUVUVU */
+	int		flags;
 	/* memory model */
-	unsigned	frame_size;		/* driver -> app; destinition frame size */
+	unsigned	frame_size;		/* driver -> app: destinition frame size */
 	unsigned	num_frames;		/* app -> driver: after call: driver -> app */
-#define LVO_MAXFRAMES 32
-	unsigned	offsets[LVO_MAXFRAMES];	/* driver -> app */
+#define VID_PLAY_MAXFRAMES 32
+	unsigned	offsets[VID_PLAY_MAXFRAMES];	/* driver -> app */
 	vidix_yuv_t	offset;			/* driver -> app: relative offsets within frame for yuv planes */
 	void*		dga_addr;		/* driver -> app: linear address */
 }vidix_playback_t;
