@@ -385,10 +385,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef HAVE_XINERAMA
 	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-    } else 
-       if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
-
-    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
+	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
+    } else  {
+	// vo_fs set means we were already at fullscreen
+	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
+	if ( !vo_fs ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+	if ( flags&1 && !vo_fs ) vo_x11_fullscreen(); // handle -fs on non-first file
+    }
+    
+//    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
+    
+    printf("\n!!!!!! %d;%d %dx%d  \n",hint.x,hint.y,hint.width,hint.height);
  
     if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
     vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
@@ -434,7 +441,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
      aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
-     if ( ( flags&1 )&&( WinID <= 0 ) )
+     if ( (( flags&1 )&&( WinID <= 0 )) || vo_fs )
       {
        aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
        drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;
@@ -445,6 +452,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
       }
 
      panscan_calc();
+     XClearWindow(mDisplay, vo_window);
+#ifdef HAVE_SHM
+     if ( Shmem_Flag )
+     {
+	 XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
+	 XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight), False);
+     }
+     else
+#endif
+     {
+	 XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1);
+	 XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
+     }
      
      mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
