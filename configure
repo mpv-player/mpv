@@ -1047,6 +1047,20 @@ if [ $_png = yes ]; then
    _libpng='-lpng -lz'
 fi
 
+_alsa5='#undef HAVE_ALSA5'
+_alsa9='#undef HAVE_ALSA9'
+if [ $_alsa == 'yes' ]; then
+ [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
+ # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
+fi
+  
+_esdd='#undef HAVE_ESD'
+#if [ $_esd == 'yes' ]; then
+# _esdd='#define HAVE_ESD'
+# _aosrc="$ao_src ao_esd.c"
+# _esdlib='-lesd'
+#fi
+
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
  CFLAGS="-O2 -march=$proc -mcpu=$proc $_debug $_profile"
@@ -1076,6 +1090,8 @@ CSS_INC = $_cssinc
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
 DS_DEP = $_dshowdep
 DS_LIB = $_dshowlib
+ALSA_LIB = $_alsalib
+ESD_LIB = $_esdlib
 prefix = $_prefix
 ARCH_LIBS = -ldl -lpthread
 
@@ -1237,18 +1253,6 @@ else
  _gui='#undef HAVE_GUI'
 fi
 
-_alsa5='#undef HAVE_ALSA5'
-_alsa9='#undef HAVE_ALSA9'
-if [ $_alsa == 'yes' ]; then
- [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; }
- # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; }
-fi
-  
-_esdd='#undef HAVE_ESD'
-if [ $_esd == 'yes' ]; then
- _esdd='#undef HAVE_ESD'
- # _aosrc="$ao_src ao_esd.c"
-fi
    
 cat > $CCONF << EOF
 
