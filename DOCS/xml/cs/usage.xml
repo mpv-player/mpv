@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.23  -->
+<!-- Synced with: 1.24  -->
 <chapter id="usage">
 <title>Použití</title>
 
@@ -329,13 +329,6 @@ jako je automatické vystřihávání reklam z videa které sleduješ.
 Formát EDL souboru je poměrně kostrbatý. Jakmile dospěje EDL systém do určité
 úrovně, pravděpodobně bude implementován formát založený na XML
 (ponecháme zpětnou kompatibilitu s předchozími EDL formáty).
-</para>
-
-<para>
-Maximální množství EDL značek současné verze EDL je 1000.
-Pokud se vám stane, že budete potřebovat víc, změňte
-<systemitem>#define MAX_EDL_ENTRIES</systemitem>
-v souboru <filename>edl.h</filename>.
 </para>
 
 <sect2 id="edl_using">
