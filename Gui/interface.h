@@ -196,6 +196,9 @@ extern char * fsHistory[fsPersistant_MaxPos];
 #define gtkSetFontEncoding  20
 #define gtkSetFontAutoScale 21
 #define gtkSetSubEncoding   22
+#define gtkDelCurrPlItem    23
+#define gtkInsertPlItem     24
+#define gtkSetCurrPlItem    25
 
 extern float gtkEquChannels[6][10];
 

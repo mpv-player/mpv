@@ -670,7 +670,7 @@ int guiGetEvent( int type,char * arg )
 	       break;
 #endif
 	 }
-	if ( guiIntfStruct.StreamType != STREAMTYPE_PLAYLIST )
+	//if ( guiIntfStruct.StreamType != STREAMTYPE_PLAYLIST ) // Does not make problems anymore!
 	 {	
 	  if ( guiIntfStruct.Filename ) filename=gstrdup( guiIntfStruct.Filename );
 	   else if ( filename ) guiSetFilename( guiIntfStruct.Filename,filename );
@@ -834,29 +834,68 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	 } else { item->prev=item->next=NULL; plCurrent=plList=item; }
         list();
         return NULL;
-   case gtkGetNextPlItem: // get current item from playlist
+   case gtkInsertPlItem: // add item into playlist after current
 	if ( plCurrent )
 	 {
+	  plItem * curr = plCurrent;
+	  item->next=curr->next;
+	  if (item->next)
+	    item->next->prev=item;
+	  item->prev=curr;
+	  curr->next=item;
 	  plCurrent=plCurrent->next;
-	  if ( !plCurrent && plList ) 
+	  return plCurrent;
+	 }
+	 else
+	   return gtkSet(gtkAddPlItem,0,(void*)item);
+        return NULL;
+   case gtkGetNextPlItem: // get current item from playlist
+	if ( plCurrent && plCurrent->next)
+	 {
+	  plCurrent=plCurrent->next;
+	  /*if ( !plCurrent && plList ) 
 	   {
 	    plItem * next = plList;
 	    while ( next->next ) { if ( !next->next ) break; next=next->next; }
 	    plCurrent=next;
-	   }
+	   }*/
 	  return plCurrent;
 	 }
         return NULL;
    case gtkGetPrevPlItem:
-	if ( plCurrent )
+	if ( plCurrent && plCurrent->prev)
 	 {
 	  plCurrent=plCurrent->prev;
-	  if ( !plCurrent && plList ) plCurrent=plList;
+	  //if ( !plCurrent && plList ) plCurrent=plList;
 	  return plCurrent;
 	 }
 	return NULL;
+   case gtkSetCurrPlItem: // set current item
+	plCurrent=item;
+        return plCurrent;
    case gtkGetCurrPlItem: // get current item
         return plCurrent;
+   case gtkDelCurrPlItem: // delete current item
+	{
+	 plItem * curr = plCurrent;
+
+	 if (!curr)
+	   return NULL;
+	 if (curr->prev)
+	   curr->prev->next=curr->next;
+	 if (curr->next)
+	   curr->next->prev=curr->prev;
+	 if (curr==plList)
+	   plList=curr->next;
+	 plCurrent=curr->next;
+	 // Free it
+	 if ( curr->path ) free( curr->path );
+	 if ( curr->name ) free( curr->name );
+	 free( curr ); 
+        }
+	mplCurr(); // Instead of using mplNext && mplPrev
+
+	return plCurrent;
    case gtkDelPl: // delete list
         {
 	 plItem * curr = plList;
@@ -1001,4 +1040,109 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	return NULL;
   }
  return NULL;
+}
+
+#define mp_basename(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+
+#include "../playtree.h"
+
+//This function adds/inserts one file into the gui playlist
+
+int import_file_into_gui(char* temp, int insert)
+{
+  char *filename, *pathname;
+  plItem * item;
+	
+  filename = strdup(mp_basename(temp));
+  pathname = strdup(temp);
+  if (strlen(pathname)-strlen(filename)>0)
+    pathname[strlen(pathname)-strlen(filename)-1]='\0'; // We have some path so remove / at end
+  else
+    pathname[strlen(pathname)-strlen(filename)]='\0';
+  mp_msg(MSGT_PLAYTREE,MSGL_V, "Adding filename %s && pathname %s\n",filename,pathname); //FIXME: Change to MSGL_DBG2 ?
+  item=calloc( 1,sizeof( plItem ) );
+  if (!item)
+     return 0;
+  item->name=filename;
+  item->path=pathname;
+  if (insert)
+    gtkSet( gtkInsertPlItem,0,(void*)item ); // Inserts the item after current, and makes current=item
+  else
+    gtkSet( gtkAddPlItem,0,(void*)item );
+  return 1;
+}
+
+#ifdef NEW_CONFIG
+  #include "../m_option.h"
+  #include "../m_config.h"
+#else
+  #include "../cfgparser.h"
+#endif
+
+// This function imports the initial playtree (based on cmd-line files) into the gui playlist
+// by either:
+//   - overwriting gui pl (enqueue=0)
+//   - appending it to gui pl (enqueue=1)
+
+int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue)
+{
+  play_tree_iter_t* my_pt_iter=NULL;
+  int result=0;
+  
+  if (!enqueue) // Delete playlist before "appending"
+    gtkSet(gtkDelPl,0,0);
+  
+  if((my_pt_iter=pt_iter_create(&my_playtree,config)))
+  {
+    while ((filename=pt_iter_get_next_file(my_pt_iter))!=NULL)
+    {
+      if (import_file_into_gui(filename, 0)) // Add it to end of list
+        result=1;
+    }
+  }
+
+  mplCurr(); // Update filename
+
+  if (!enqueue)
+    filename=guiIntfStruct.Filename; // Backward compatibility; if file is specified on commandline,
+  				     // gmplayer does directly start in Play-Mode.
+  else 
+    filename=NULL;
+
+  return result;
+}
+
+// This function imports and inserts an playtree, that is created "on the fly", for example by
+// parsing some MOV-Reference-File; or by loading an playlist with "File Open"
+//
+// The file which contained the playlist is thereby replaced with it's contents.
+
+int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config)
+{ 
+  play_tree_iter_t* my_pt_iter=NULL;
+  int result=0;
+  plItem * save=(plItem*)gtkSet( gtkGetCurrPlItem, 0, 0); // Save current item
+
+  if((my_pt_iter=pt_iter_create(&my_playtree,config)))
+  {
+    while ((filename=pt_iter_get_next_file(my_pt_iter))!=NULL)
+    {
+      if (import_file_into_gui(filename, 1)) // insert it into the list and set plCurrent=new item 
+        result=1;
+    }
+    pt_iter_destroy(&my_pt_iter);
+  }
+
+  if (save) 
+    gtkSet(gtkSetCurrPlItem, 0, (void*)save);
+  else
+    gtkSet(gtkSetCurrPlItem, 0, (void*)plList); // go to head, if plList was empty before
+
+  if (save && result)
+    gtkSet(gtkDelCurrPlItem, 0, 0);
+  
+  mplCurr();  // Update filename
+  filename=NULL;
+  
+  return result;
 }

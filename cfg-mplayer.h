@@ -106,6 +106,7 @@ extern int rtspStreamOverTCP;
 
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
+extern int enqueue;
 #endif
 
 #ifdef HAVE_ODIVX_POSTPROCESS
@@ -395,6 +396,8 @@ static config_t mplayer_opts[]={
       
 #ifdef HAVE_NEW_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
+	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 #endif
 
 	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1, NULL},

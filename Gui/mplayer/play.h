@@ -13,6 +13,7 @@ extern void mplPause( void );
 extern void mplState( void );
 extern void mplPrev( void );
 extern void mplNext( void );
+extern void mplCurr( void );
 
 extern void mplIncAudioBufDelay( void );
 extern void mplDecAudioBufDelay( void );

@@ -69,7 +69,7 @@ void mplEnd( void )
 {
  plItem * next;
 
- if ( !mplGotoTheNext ) { mplGotoTheNext=1; return; }
+ if ( !mplGotoTheNext && guiIntfStruct.Playing) { mplGotoTheNext=1; return; }
 
  if ( guiIntfStruct.Playing && (next=gtkSet( gtkGetNextPlItem,0,NULL )) && plLastPlayed != next )
   {
@@ -267,6 +267,36 @@ void mplSetFileName( char * dir,char * name,int type )
  gfree( (void **)&guiIntfStruct.AudioFile );
  gfree( (void **)&guiIntfStruct.Subtitlename );
 }
+
+void mplCurr( void )
+{
+ plItem * curr;
+ int      stop = 0;
+ 
+ if ( guiIntfStruct.Playing == 2 ) return;
+ switch ( guiIntfStruct.StreamType )
+  {
+#ifdef USE_DVDREAD
+   case STREAMTYPE_DVD:
+	break;
+#endif
+#ifdef HAVE_VCD
+   case STREAMTYPE_VCD:
+	break;
+#endif
+   default: 
+	if ( (curr=gtkSet( gtkGetCurrPlItem,0,NULL)) )
+	 {
+	  mplSetFileName( curr->path,curr->name,STREAMTYPE_FILE );
+	  mplGotoTheNext=0;
+	  break;
+	 }
+	return;
+  }
+ if ( stop ) mplEventHandling( evStop,0 );
+ if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
+}
+
 
 void mplPrev( void )
 {

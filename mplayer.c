@@ -181,6 +181,11 @@ static int output_quality=0;
 float playback_speed=1.0;
 
 int use_gui=0;
+
+#ifdef HAVE_NEW_GUI
+int enqueue=0;
+#endif
+
 #define MAX_OSD_LEVEL 3
 
 int osd_level=1;
@@ -577,6 +582,15 @@ static int libmpdemux_was_interrupted(int eof) {
 
 int playtree_add_playlist(play_tree_t* entry)
 {
+#ifdef HAVE_NEW_GUI
+  if (use_gui) {
+    if (entry) {
+      import_playtree_playlist_into_gui(entry, mconfig);
+      play_tree_free_list(entry,1);
+    }
+  } else
+#endif
+  {
   if(!entry) {      
     entry = playtree_iter->tree;
     if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
@@ -597,6 +611,7 @@ int playtree_add_playlist(play_tree_t* entry)
     return PT_NEXT_ENTRY;
   }      
   play_tree_remove(entry,1,1);
+  }
   return PT_NEXT_SRC;
 }
 
@@ -742,6 +757,13 @@ int gui_no_filename=0;
     if(use_gui && !vo_init()){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_GuiNeedsX);
       use_gui=0;
+    }
+    if (use_gui && playtree_iter){
+      // Remove Playtree and Playtree-Iter from memory as its not used by gui
+      play_tree_iter_free(playtree_iter);
+      playtree_iter=NULL;
+      // Import initital playtree into gui
+      import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
 #endif
 
@@ -2303,7 +2325,19 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
       int force = cmd->args[1].v.i;
 
-      if(!force) {
+#ifdef HAVE_NEW_GUI
+     if (use_gui) {
+	int i=0;
+        if (n>0)
+	  for (i=0;i<n;i++)
+	    mplNext();
+        else
+	  for (i=0;i<-1*n;i++)
+	    mplPrev();
+     } else
+#endif
+     {
+      if(!force && playtree_iter) {
 	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
 	
 	if(play_tree_iter_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
@@ -2313,12 +2347,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
       if(eof)
 	play_tree_step = n;
+     }
     } break;
     case MP_CMD_PLAY_TREE_UP_STEP : {
       int n = cmd->args[0].v.i > 0 ? 1 : -1;
       int force = cmd->args[1].v.i;
 
-      if(!force) {
+      if(!force && playtree_iter) {
 	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
 	if(play_tree_iter_up_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
 	  eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
