@@ -478,7 +478,7 @@ static void flip_page(void) {
       gl_fillbox(0, 0, x_pos, HEIGHT, 0);
       gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
     }
-//  vo_draw_text(WIDTH, HEIGHT, draw_alpha);
+  vo_draw_text(WIDTH, HEIGHT, draw_alpha);
   gl_copyscreen(screen);
 }
 
