@@ -11,7 +11,7 @@
 
 #include "config.h"
 
-#ifdef USE_TV
+#if defined(USE_TV) && defined(HAVE_TV_V4L)
 
 #include <stdio.h>
 #include <errno.h>
