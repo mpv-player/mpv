@@ -4144,16 +4144,14 @@ if test "$_win32" = auto ; then
 fi
 
 if test "$_win32" != no ; then
-  echocheck "Win32 codec DLL files path"
     if test -z "$_win32libdir" ; then
-      for I in "$_libdir/win32" /usr/local/lib/win32 /usr/lib/win32 ; do
+      for I in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
           _win32libdir="$I"
           break;
         fi;
       done
     fi
-  echores "$_win32libdir"
 fi
 
 echocheck "Win32 codec DLL support"
@@ -4163,7 +4161,7 @@ if test "$_win32" = auto ; then
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
-  echores "yes"
+  echores "yes (using $_win32libdir)"
 else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
@@ -4247,7 +4245,7 @@ if test "$_xanim" = auto ; then
   _xanim=no
   if test "$_dl" = yes ; then
     if test -z "$_xanimlibdir" ; then
-	for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
+	for I in "$_libdir/codecs" /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
           if test -d "$I" ; then
             _xanimlibdir="$I"
             break;
@@ -4288,9 +4286,9 @@ if test "$_real" = auto ; then
     fi
     if test "$_real" = yes ; then
       if test -z "$_reallibdir" ; then
-	for I in $_libdir/real /usr/lib/real /usr/lib/RealPlayer*/Codecs \
-          /usr/local/RealPlayer*/Codecs /usr/local/lib/RealPlayer*/Codecs \
-          /opt/RealPlayer*/Codecs; do
+	for I in "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
+	  /usr/lib/RealPlayer*/Codecs /usr/local/RealPlayer*/Codecs \
+	  /usr/local/lib/RealPlayer*/Codecs /opt/RealPlayer*/Codecs; do
           if test -d "$I" ; then
             _reallibdir="$I"
             break;
