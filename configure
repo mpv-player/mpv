@@ -97,7 +97,7 @@ case `echo -n` in
   *)	_echo_n='-n '	_echo_c=	;;	# BSD echo
 esac
 
-LANGUAGES=`echo help_mp-??.h | sed "s/help_mp-\(..\).h/\1/g"`
+LANGUAGES=`echo help_mp-??.h help_mp-??_??.h | sed "s/help_mp-\(..\).h/\1/g" |sed "s/help_mp-\(.....\).h/\1/g"`
 
 for parm in "$@" ; do
   if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
