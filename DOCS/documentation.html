@@ -312,29 +312,29 @@
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendix C - Known bugs</A></LI>
-  <LI><A HREF="skin-en.html">Appendix D - MPlayer skin format</A>
+  <LI><A HREF="skin.html">Appendix D - MPlayer skin format</A>
     <UL>
-      <LI><A HREF="skin-en.html#overview">D.1 Overview</A>
+      <LI><A HREF="skin.html#overview">D.1 Overview</A>
         <UL>
-          <LI><A HREF="skin-en.html#directories">D.1.1 Directories</A></LI>
-          <LI><A HREF="skin-en.html#images">D.1.2 Images</A></LI>
-          <LI><A HREF="skin-en.html#components">D.1.3 Skin components</A></LI>
-          <LI><A HREF="skin-en.html#files">D.1.4 Files</A></LI>
+          <LI><A HREF="skin.html#directories">D.1.1 Directories</A></LI>
+          <LI><A HREF="skin.html#images">D.1.2 Images</A></LI>
+          <LI><A HREF="skin.html#components">D.1.3 Skin components</A></LI>
+          <LI><A HREF="skin.html#files">D.1.4 Files</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="skin-en.html#skinfile">D.2 The skin file</A>
+      <LI><A HREF="skin.html#skinfile">D.2 The skin file</A>
         <UL>
-          <LI><A HREF="skin-en.html#mainwindow">D.2.1 Main window and playbar</A></LI>
-          <LI><A HREF="skin-en.html#subwindow">D.2.2 Subwindow</A></LI>
-          <LI><A HREF="skin-en.html#skinmenu">D.2.3 Skin menu</A></LI>
+          <LI><A HREF="skin.html#mainwindow">D.2.1 Main window and playbar</A></LI>
+          <LI><A HREF="skin.html#subwindow">D.2.2 Subwindow</A></LI>
+          <LI><A HREF="skin.html#skinmenu">D.2.3 Skin menu</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="skin-en.html#fonts">D.3 Fonts</A>
+      <LI><A HREF="skin.html#fonts">D.3 Fonts</A>
         <UL>
-          <LI><A HREF="skin-en.html#symbols">D.3.1 Symbols</A></LI>
+          <LI><A HREF="skin.html#symbols">D.3.1 Symbols</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="skin-en.html#guimessages">D.4 GUI messages</A></LI>
+      <LI><A HREF="skin.html#guimessages">D.4 GUI messages</A></LI>
     </UL>
   </LI>
   <LI><A HREF="users_against_developers.html">Appendix E - Developer Cries</A>
@@ -1593,7 +1593,7 @@ end
 
 <H2><A NAME="linux">6.1 Linux</A></H2>
 
-<P>The main development platform is Linux on x86, altough MPlayer works on many
+<P>The main development platform is Linux on x86, although MPlayer works on many
   other Linux ports.</P>
 
 
@@ -1854,7 +1854,8 @@ end
 
 <P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
-<P>QuickTime DLLs have also been reported to work. Put the codecs into the
+<P>QuickTime DLLs have also been reported to work. Compile with
+  <CODE>--enable-qtx-codecs</CODE> and put the codecs into the
   default Windows DLL location, <CODE>C:\WINNT\system32</CODE> or
   <CODE>C:\Windows\system</CODE> depending on your Windows version.</P>
 
@@ -2051,7 +2052,7 @@ No picture at all (just plain grey/green window):
 
 
 
-<H1><A NAME="skin">Appendix D</A> - <A HREF="skin-en.html">MPlayer skin format</A></H1>
+<H1><A NAME="skin">Appendix D</A> - <A HREF="skin.html">MPlayer skin format</A></H1>
 
 
 
