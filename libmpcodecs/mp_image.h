@@ -26,6 +26,8 @@
 #define MP_IMGFLAG_SWAPPED 0x400
 // type displayed (do not set this flag - it's for internal use!)
 #define MP_IMGFLAG_TYPE_DISPLAYED 0x800
+// using palette for RGB data
+#define MP_IMGFLAG_TYPE_RGB_PALETTE 0x1000
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:
@@ -73,6 +75,10 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_YV12:
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=12;
+	return;
+    case IMGFMT_YVU9:
+	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=9;
 	return;
     case IMGFMT_UYVY:
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
