@@ -175,13 +175,15 @@ else
  fi
 fi
 
+_skip_cc_check=no
+
 for ac_option
 do
  case "$ac_option" in
   --cc=*)
         _cc=`echo $ac_option | cut -d '=' -f 2`
         ;;
-  --disable-gcc-checking=*)
+  --disable-gcc-checking)
         _skip_cc_check=yes
 	;;
   --with-x11libdir=*)
@@ -196,9 +198,9 @@ do
  esac
 done
 
-# Checking CC version...
-if ! test -z "$_skip_cc_check"; then
-echo "checking version of $CC""... $_cc"
+# Checking CC version... what's with egcs, pgcc? - Atmos
+if test "$_skip_cc_check" != "yes"; then
+echo -n "Checking version of $_cc ... "
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 case $cc_version in
     '') cc_version="v. ?.??, bad"; cc_verc_fail=yes;;
@@ -212,7 +214,7 @@ echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
 exit
 fi
 fi
-if test -z "$_skip_cc_check"; then
+if test "$_skip_cc_check" = "yes"; then
 echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
 fi
 # ---
@@ -758,6 +760,7 @@ do
 done
 
 # Checking as compatibility...
+echo -n "Checking assembler (as) ... "
 cat > astest.S <<EOF
 filds -2(%ebp)
 EOF
@@ -793,12 +796,12 @@ EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 rm -f astest.S astest.o
 fi
-if test -z "$as_verc_fail"; then
-echo "checking assembler...o'k"
-fi
-if ! test -z "$as_verc_fail"; then
-echo "Please upgrade binutils..."
-exit
+if test "$as_verc_fail" != "yes"; then
+  echo "ok"
+else
+  echo "failed"
+  echo "Please upgrade binutils..." # to which version? - Atmos
+  exit
 fi
 
 
