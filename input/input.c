@@ -1582,6 +1582,8 @@ mp_input_uninit(void) {
     if(cmd_fds[i].close_func)
       cmd_fds[i].close_func(cmd_fds[i].fd);
   }
+  mp_input_free_binds(cmd_binds);
+  cmd_binds=NULL;
   
 }
 
