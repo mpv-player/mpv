@@ -76,19 +76,45 @@ static int freq_id=0;
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
+#ifdef HAVE_DVB
+    if(vo_mpegpes_fd2<0) return 0; // couldn't open audio dev
+#else
+    if(vo_mpegpes_fd<0) return 0; // no file
+#endif
+
+    ao_data.channels=2;
     ao_data.outburst=2000;
-    ao_data.format=format;
-freq=rate;
+    switch(format){
+	case AFMT_S16_LE:
+	case AFMT_S16_BE:
+	case AFMT_MPEG:
+	    ao_data.format=format;
+	    break;
+	default:
+	    ao_data.format=AFMT_S16_BE;
+    }
     
+retry:
     switch(rate){
 	case 48000:	freq_id=0;break;
 	case 96000:	freq_id=1;break;
 	case 44100:	freq_id=2;break;
 	case 32000:	freq_id=3;break;
 	default:
-	    mp_msg(MSGT_AO, MSGL_ERR, "ao_mpegpes: %d Hz not supported, try to resample (RTFM)\n",rate);
-	    return 0;
+	    mp_msg(MSGT_AO, MSGL_ERR, "ao_mpegpes: %d Hz not supported, try to resample...\n",rate);
+#if 0
+	    if(rate>48000) rate=96000; else
+	    if(rate>44100) rate=48000; else
+	    if(rate>32000) rate=44100; else
+	    rate=32000;
+	    goto retry;
+#else
+	    rate=48000; freq_id=0;
+#endif
     }
+
+    ao_data.bps=rate*2*2;
+    freq=ao_data.samplerate=rate;
 
     return 1;
 }
@@ -123,6 +149,7 @@ extern int vo_pts;
 static int get_space(){
     float x=(float)(vo_pts-ao_data.pts)/90000.0;
     int y;
+//    printf("vo_pts: %5.3f  ao_pts: %5.3f\n",vo_pts/90000.0,ao_data.pts/90000.0);
     if(x<=0) return 0;
     y=freq*4*x;y/=ao_data.outburst;y*=ao_data.outburst;
     if(y>32000) y=32000;
@@ -134,6 +161,7 @@ static int get_space(){
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
+//    printf("\nao_mpegpes: play(%d) freq=%d\n",len,freq_id);
     if(ao_data.format==AFMT_MPEG)
 	send_pes_packet(data,len,0x1C0,ao_data.pts);
     else {
@@ -141,7 +169,8 @@ static int play(void* data,int len,int flags){
 	unsigned short *s=data;
 //	if(len>2000) len=2000;
 //	printf("ao_mpegpes: len=%d  \n",len);
-	for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
+	if(ao_data.format==AFMT_S16_LE)
+	    for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
 	send_lpcm_packet(data,len,0xA0,ao_data.pts,freq_id);
     }
     return len;
