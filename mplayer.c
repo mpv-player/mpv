@@ -177,8 +177,10 @@ int has_audio=1;
 int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
+char **video_codec_list=NULL; // override video codec
 char *audio_fm=NULL;    // override audio codec family 
 char *video_fm=NULL;    // override video codec family 
+char **video_fm_list=NULL;    // override video codec family 
 
 // streaming:
 int audio_id=-1;
@@ -619,19 +621,27 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 }
 
+#if 0
+    if(video_codec_list){
+	int i;
+	video_codec=video_codec_list[0];
+	for(i=0;video_codec_list[i];i++)
+	    printf("vc#%d: '%s'\n",i,video_codec_list[i]);
+    }
+#endif
     if(audio_codec && strcmp(audio_codec,"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
       list_codecs(1);
       printf("\n");
       exit(0);
     }
-    if(video_codec && strcmp(video_codec,"help")==0){
+    if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
       list_codecs(0);
       printf("\n");
       exit(0);
     }
-    if(video_fm && strcmp(video_fm,"help")==0){
+    if(video_fm_list && strcmp(video_fm_list[0],"help")==0){
       vfm_help();
       printf("\n");
       exit(0);
@@ -1234,7 +1244,7 @@ sh_video->vfilter=append_filters(sh_video->vfilter);
 current_module="init_video_codec";
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-init_best_video_codec(sh_video,video_codec,video_fm);
+init_best_video_codec(sh_video,video_codec_list,video_fm_list);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(!sh_video->inited){

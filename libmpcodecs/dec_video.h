@@ -4,7 +4,7 @@ extern int video_read_properties(sh_video_t *sh_video);
 
 extern void vfm_help();
 
-extern int init_best_video_codec(sh_video_t *sh_video,char* video_codec,char* video_fm);
+extern int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,char** video_fm_list);
 
 //extern int init_video(sh_video_t *sh_video, int *pitches);
 extern int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status);

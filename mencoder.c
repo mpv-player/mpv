@@ -94,8 +94,10 @@ static char* spudec_ifo=NULL;
 static int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
+char **video_codec_list=NULL; // override video codec
 char* audio_fm=NULL;     // override audio codec family 
 char* video_fm=NULL;     // override video codec family 
+char** video_fm_list=NULL;     // override video codec family 
 
 int out_audio_codec=-1;
 int out_video_codec=-1;
@@ -633,7 +635,7 @@ default:
     sh_video->vfilter=append_filters(sh_video->vfilter);
 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-    init_best_video_codec(sh_video,video_codec,video_fm);
+    init_best_video_codec(sh_video,video_codec_list,video_fm_list);
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     if(!sh_video->inited) mencoder_exit(1,NULL);
 

@@ -107,9 +107,9 @@
 //	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync
 //	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 29, NULL}, // with codec-cfg.c
 	{"afm", &audio_fm, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"vfm", &video_fm, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vfm", &video_fm_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 	// postprocessing:
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
