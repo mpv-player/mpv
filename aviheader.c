@@ -49,6 +49,7 @@ while(1){
       demuxer->movi_start=stream_tell(demuxer->stream);
       demuxer->movi_end=demuxer->movi_start+len;
       if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
+      if(index_mode==-2) break; // reading from non-seekable source (stdin)
       len=(len+1)&(~1);
       stream_skip(demuxer->stream,len);
     }

@@ -24,6 +24,7 @@ int stream_fill_buffer(stream_t *s){
   if(s->eof){ s->buf_pos=s->buf_len=0; return 0; }
   switch(s->type){
   case STREAMTYPE_FILE:
+  case STREAMTYPE_STREAM:
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
   case STREAMTYPE_VCD:
 #ifdef VCD_CACHE
@@ -55,6 +56,7 @@ if(verbose>=3){
 
   switch(s->type){
   case STREAMTYPE_FILE:
+  case STREAMTYPE_STREAM:
     newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
   case STREAMTYPE_VCD:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
@@ -63,17 +65,28 @@ if(verbose>=3){
   pos-=newpos;
 
 if(newpos==0 || newpos!=s->pos){
-  s->pos=newpos; // real seek
   switch(s->type){
   case STREAMTYPE_FILE:
+    s->pos=newpos; // real seek
     if(lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
     break;
   case STREAMTYPE_VCD:
+    s->pos=newpos; // real seek
 #ifdef VCD_CACHE
     vcd_cache_seek(s->pos/VCD_SECTOR_DATA);
 #else
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
 #endif
+    break;
+  case STREAMTYPE_STREAM:
+    //s->pos=newpos; // real seek
+    if(newpos<s->pos){
+      printf("Cannot seek backward in linear streams!\n");
+      return 1;
+    }
+    while(s->pos<newpos){
+      if(stream_fill_buffer(s)<=0) break; // EOF
+    }
     break;
   }
 //   putchar('.');fflush(stdout);

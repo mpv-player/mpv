@@ -3,6 +3,7 @@
 
 #define STREAMTYPE_FILE 0
 #define STREAMTYPE_VCD  1
+#define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for stdin)
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -109,7 +110,7 @@ inline static int stream_seek(stream_t *s,unsigned int pos){
 }
 
 inline static void stream_skip(stream_t *s,int len){
-  if(len<0 || len>2*STREAM_BUFFER_SIZE){
+  if(len<0 || (len>2*STREAM_BUFFER_SIZE && s->type!=STREAMTYPE_STREAM)){
     // negative or big skip!
     stream_seek(s,stream_tell(s)+len);
     return;

@@ -553,11 +553,18 @@ if(vcd_track){
 } else {
 //============ Open plain FILE ============
   int len;
-  f=open(filename,O_RDONLY);
-  if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
-  len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
-  stream=new_stream(f,STREAMTYPE_FILE);
-  stream->end_pos=len;
+  if(!strcmp(filename,"-")){
+      // read from stdin
+      printf("Reading from stdin...\n");
+      f=0; // 0=stdin
+      stream=new_stream(f,STREAMTYPE_STREAM);
+  } else {
+      f=open(filename,O_RDONLY);
+      if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
+      len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+      stream=new_stream(f,STREAMTYPE_FILE);
+      stream->end_pos=len;
+  }
 }
 
 #ifdef HAVE_LIBCSS
@@ -658,7 +665,7 @@ d_dvdsub=demuxer->sub;
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
   //---- AVI header:
-  read_avi_header(demuxer,index_mode);
+  read_avi_header(demuxer,f?index_mode:-2);
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
   demuxer->idx_pos=0;
@@ -1157,7 +1164,7 @@ int osd_last_pts=-303;
 #ifdef USE_TERMCAP
   load_termcap(NULL); // load key-codes
 #endif
-  getch2_enable();
+  if(f) getch2_enable();
 
   //========= Catch terminate signals: ================
   // terminate requests:
@@ -1636,7 +1643,7 @@ switch(sh_video->codec->driver){
 #ifdef HAVE_LIRC
           lirc_mp_getinput()<=0 &&
 #endif
-          getch2(20)<=0 && mplayer_get_key()<=0){
+          (!f || getch2(20)<=0) && mplayer_get_key()<=0){
 	  video_out->check_events();
       }
       osd_function=OSD_PLAY;
@@ -1653,7 +1660,7 @@ switch(sh_video->codec->driver){
 #ifdef HAVE_LIRC
       (c=lirc_mp_getinput())>0 ||
 #endif
-      (c=getch2(0))>0 || (c=mplayer_get_key())>0) switch(c){
+      (f && (c=getch2(0)))>0 || (c=mplayer_get_key())>0) switch(c){
     // seek 10 sec
     case KEY_RIGHT:
       osd_function=OSD_FFW;

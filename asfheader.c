@@ -180,6 +180,9 @@ if(verbose){
 //    case 0x33000890: return "guid_index_chunk";
 
   } // switch GUID
+
+  if((*((unsigned int*)&objh.guid))==0x75b22636) break; // movi chunk
+
   if(!stream_seek(demuxer->stream,endpos)) break;
 } // while EOF
 
