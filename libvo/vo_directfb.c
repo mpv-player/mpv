@@ -179,9 +179,9 @@ static int primaryallocated=0;
 
 DFBEnumerationResult enum_modes_callback( unsigned int width,unsigned int height,unsigned int bpp, void *data)
 {
-int overx=0,overy=0;
+int overx=0,overy=0,closer=0,over=0;
 unsigned int index=bpp/8-1;
-int allow_under=0;
+int we_are_under=0;
 
 if (verbose) printf("DirectFB: Validator entered %i %i %i\n",width,height,bpp);
 
@@ -194,9 +194,10 @@ if (!modes[index].valid) {
         modes[index].overx=overx;
         modes[index].overy=overy;
         }
-if ((modes[index].overy<0)||(modes[index].overx<0)) allow_under=1;
-if (abs(overx*overy)<abs(modes[index].overx * modes[index].overy)) {
-        if (((overx>=0)&&(overy>=0)) || allow_under) {
+if ((modes[index].overy<0)||(modes[index].overx<0)) we_are_under=1; // stored mode is smaller than req mode
+if (abs(overx*overy)<abs(modes[index].overx * modes[index].overy)) closer=1; // current mode is closer to desired res
+if ((overx>=0)&&(overy>=0)) over=1; // current mode is bigger or equaul to desired res
+if ((closer && (over || we_are_under)) || (we_are_under && over)) {
                 modes[index].valid=1;
                 modes[index].width=width;
                 modes[index].height=height;
@@ -204,7 +205,6 @@ if (abs(overx*overy)<abs(modes[index].overx * modes[index].overy)) {
                 modes[index].overy=overy;
 		if (verbose) printf("DirectFB:Better mode added %i %i %i\n",width,height,bpp);
                 };
-        };
 
 return DFENUM_OK;
 }
@@ -297,10 +297,10 @@ if (verbose) printf("DirectFB: Preinit entered\n");
     	    DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
 	}
 
-	// disable YV12 for dfb until 0.9.10 - there is a bug in dfb! should be revised with every dfb version until bug is fixed in dfb.
+	// disable YV12 for dfb until 0.9.11 - there is a bug in dfb! should be revised with every dfb version until bug is fixed in dfb.
 	if ((directfb_major_version <= 0) &&
 	    (directfb_minor_version <= 9) &&
-	    (directfb_micro_version <= 10)) {
+	    (directfb_micro_version <= 11)) {
 	    buggyYV12BitBlt=1;
 	    if (verbose) printf("DirectFB: Buggy YV12BitBlt!\n");
 	}
@@ -492,10 +492,53 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         modes[3].valid=0;
         DFBCHECK (dfb->EnumVideoModes(dfb,enum_modes_callback,NULL));
 
-
   if (vm) {
         // need better algorithm just hack
-        if (modes[source_pixel_size-1].valid) dfb->SetVideoMode(dfb,modes[source_pixel_size-1].width,modes[source_pixel_size-1].height,source_pixel_size);
+	    switch (format) {
+		    case IMGFMT_RGB32: 
+    		    case IMGFMT_BGR32: 
+				if (modes[3].valid) {
+				    dfb->SetVideoMode(dfb,modes[3].width,modes[3].height,32);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 32 bpp]\n",modes[3].width,modes[3].height);
+				};
+				break;
+        	    case IMGFMT_RGB24: 
+		    case IMGFMT_BGR24: 
+				if (modes[2].valid) {
+				    dfb->SetVideoMode(dfb,modes[2].width,modes[2].height,24);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 24 bpp]\n",modes[2].width,modes[2].height);
+				};
+				break;
+		    case IMGFMT_RGB16:
+    		    case IMGFMT_BGR16:
+            	    case IMGFMT_RGB15:
+	    	    case IMGFMT_BGR15:
+				if (modes[1].valid) {
+				    dfb->SetVideoMode(dfb,modes[1].width,modes[1].height,16);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 16 bpp]\n",modes[1].width,modes[1].height);
+				};
+				break;
+		
+        	    default: // try all of them in order 16bit 24bit 32bit 8bit
+				if (modes[1].valid) {
+				    dfb->SetVideoMode(dfb,modes[1].width,modes[1].height,16);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 16 bpp]\n",modes[1].width,modes[1].height);
+				    }
+				else if (modes[2].valid) {
+				    dfb->SetVideoMode(dfb,modes[2].width,modes[2].height,24);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 24 bpp]\n",modes[2].width,modes[2].height);
+				    }
+				else if (modes[3].valid) {
+				    dfb->SetVideoMode(dfb,modes[3].width,modes[3].height,32);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 32 bpp]\n",modes[3].width,modes[3].height);
+				    }
+				else if (modes[0].valid) {
+				    dfb->SetVideoMode(dfb,modes[0].width,modes[0].height,8);
+				    if (verbose) printf("DirectFB: Trying to set videomode [%ix%i 8 bpp]\n",modes[0].width,modes[0].height);
+				    }
+				break;
+            };
+
         }
 
   // release primary if it is already allocated
@@ -1167,12 +1210,33 @@ static void check_events(void)
 
       DFBInputEvent event;
 //if (verbose) printf ("DirectFB: Check events entered\n");
+#ifdef HAVE_DIRECTFB0910
+if (buffer->GetEvent(buffer, DFB_EVENT (&event)) == DFB_OK) {
+#else
 if (buffer->GetEvent(buffer, &event) == DFB_OK) {
+#endif
      if (event.type == DIET_KEYPRESS) { 
-    		switch (event.keycode) {
-                                case DIKC_ESCAPE:
+#ifdef HAVE_DIRECTFB0911
+    		switch (event.key_symbol) {
+                                case DIKS_ESCAPE:
 					mplayer_put_key('q');
 				break;
+				case DIKS_PAGE_UP: mplayer_put_key(KEY_PAGE_UP);break;
+				case DIKS_PAGE_DOWN: mplayer_put_key(KEY_PAGE_DOWN);break;
+                                case DIKS_CURSOR_UP: mplayer_put_key(KEY_UP);break;
+                                case DIKS_CURSOR_DOWN: mplayer_put_key(KEY_DOWN);break;
+                                case DIKS_CURSOR_LEFT: mplayer_put_key(KEY_LEFT);break;
+                                case DIKS_CURSOR_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+				case DIKS_INSERT: mplayer_put_key(KEY_INSERT);break;
+				case DIKS_DELETE: mplayer_put_key(KEY_DELETE);break;
+				case DIKS_HOME: mplayer_put_key(KEY_HOME);break;
+				case DIKS_END: mplayer_put_key(KEY_END);break;
+
+                default:mplayer_put_key(event.key_symbol);
+                };
+#else  /* DirectFB < 0.9.11 */
+    		switch (event.keycode) {
+                                case DIKC_ESCAPE: mplayer_put_key('q');break;
                                 case DIKC_KP_PLUS: mplayer_put_key('+');break;
                                 case DIKC_KP_MINUS: mplayer_put_key('-');break;
 				case DIKC_TAB: mplayer_put_key('\t');break;
@@ -1192,6 +1256,7 @@ if (buffer->GetEvent(buffer, &event) == DFB_OK) {
 
                 default:mplayer_put_key(event.key_ascii);
                 };
+#endif
 	};
     };
 // empty buffer, because of repeating (keyboard repeat is faster than key handling
@@ -1340,7 +1405,7 @@ static int directfb_set_video_eq( const vidix_video_eq_t *info)
 	    if (verbose) printf("DirectFB: SetVEq Hue 0x%X %i\n",ca.hue,info->hue);
 	}
 
-	if ((videolayercaps.saturation)&&(info->cap&VEQ_CAP_HUE)) {
+	if ((videolayercaps.saturation)&&(info->cap&VEQ_CAP_SATURATION)) {
 	    ca.saturation = info->saturation * factor + 0x8000;
 	    ca.flags |= DCAF_SATURATION;
 	    if (verbose) printf("DirectFB: SetVEq Saturation 0x%X %i\n",ca.saturation,info->saturation);
