@@ -41,6 +41,7 @@ LIBVO_EXTERN(mga)
 
 #include "drivers/mga_vid.h"
 #include "sub.h"
+#include "aspect.h"
 
 static vo_info_t vo_info = 
 {
@@ -57,6 +58,18 @@ static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
 char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+
+	if(vo_screenwidth && vo_screenheight){
+		aspect_save_orig(width,height);
+		aspect_save_prescale(d_width,d_height);
+		aspect_save_screenres(vo_screenwidth,vo_screenheight);
+	
+		if(fullscreen&0x01) /* -fs */
+			aspect(&d_width,&d_height,A_NOZOOM);
+		else
+			aspect(&d_width,&d_height,A_NOZOOM);
+	}
+
 
 	f = open(devname,O_RDWR);
 	if(f == -1)
