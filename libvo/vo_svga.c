@@ -484,36 +484,29 @@ static const vo_info_t* get_info(void) {
 }
 
 static uint32_t draw_frame(uint8_t *src[]) {
+  uint8_t *s=src[0];
+#if 0
+  // draw_frame() is never called for YV12
   if (pformat == IMGFMT_YV12) {
     if(bpp==1)
       yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, (orig_w+7)/8, orig_w, orig_w / 2);
     else
       yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, orig_w * BYTESPERPIXEL, orig_w, orig_w / 2);
-    src[0] = yuvbuf;
+    s = yuvbuf;
   }
+#endif
   if (bpp_conv) {
     switch(bpp) {
-      case 32: {
-        uint8_t *source = src[0];
-        uint8_t *dest = bppbuf;
-	register uint32_t i = 0;
-    
-	while (i < (maxw * maxh * 4)) {
-	  dest[i] = source[i];
-	  dest[i+1] = source[i+1];
-	  dest[i+2] = source[i+2];
-	  dest[i+3] = 0;
-	  i += 4;
-	}
-      } break;
-      case 16: {
+      case 32:
+        rgb24to32(src[0],bppbuf,maxw * maxh * 3);
+        break;
+      case 16:
         rgb15to16(src[0],bppbuf,maxw * maxh * 2);
-      } break;
+        break;
     }
-    src[0] = bppbuf;
+    s = bppbuf;
   }
-  putbox(x_pos, y_pos, maxw, maxh, src[0], 1);
-  
+  putbox(x_pos, y_pos, maxw, maxh, s, 1);
   return (0);
 }
 
