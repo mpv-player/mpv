@@ -18,6 +18,8 @@
 
 #include "DS_AudioDec.h"
 
+#include "ldt_keeper.h"
+
 //    DS_Decoder(const CodecInfo& info, const WAVEFORMATEX*);
 //    virtual ~DS_Decoder();
 //    virtual int Convert(const void*, size_t, void*, size_t, size_t*, size_t*);
@@ -25,13 +27,10 @@
 
 static void* _handle;
 
-extern "C" void Setup_LDT_Keeper();
-extern "C" void setup_FS_Segment();
-
 extern "C" int DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf){
 
     Setup_LDT_Keeper();
-    setup_FS_Segment();
+    Setup_FS_Segment();
 
     CodecInfo ci;
     ci.dll=dllname;
@@ -55,7 +54,7 @@ extern "C" int DS_AudioDecoder_Convert(unsigned char* in_data, unsigned in_size,
 	     unsigned char* out_data, unsigned out_size,
 	     unsigned* size_read, unsigned* size_written){
     DS_AudioDecoder* dec=(DS_AudioDecoder*)_handle;
-    setup_FS_Segment();
+    Setup_FS_Segment();
     return dec->Convert( (void*)in_data,(size_t)in_size,
 			 (void*)out_data,(size_t)out_size,
 			 (size_t*)size_read, (size_t*)size_written );

@@ -20,11 +20,10 @@
 
 #include "DS_VideoDec.h"
 
+#include "ldt_keeper.h"
+
 static void* _handle; // will be parameter later...
 static char** _d_ptr;  // will be parameter later...
-
-extern "C" void Setup_LDT_Keeper();
-extern "C" void setup_FS_Segment();
 
 extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER* format, int flip,char** d_ptr){
 

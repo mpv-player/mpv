@@ -24,8 +24,9 @@
 
 #define __MODULE__ "DirectShow_VideoDecoder"
 
+#include "ldt_keeper.h"
+
 extern "C" char* def_path;
-extern "C" void setup_FS_Segment();
 
 using namespace std;
 
@@ -232,7 +233,7 @@ int DS_VideoDecoder::DecodeInternal(void* src, size_t size, int is_keyframe, CIm
     // crashes inside ...->Receive() fixed now?
     //
     // nope - but this is surely helpfull - I'll try some more experiments
-    setup_FS_Segment();
+    Setup_FS_Segment();
 #if 0
     if (!m_pDS_Filter || !m_pDS_Filter->m_pImp
 	|| !m_pDS_Filter->m_pImp->vt
