@@ -49,11 +49,11 @@ Configuring:
 
 You can tune up some parameters with using following trick:
 echo "parameter=value">/dev/radeon_vid
-Example:
-echo "double_buff=on">/dev/radeon_vid
+Example (disables adaptive deinterlacing):
+echo "deinterlace=off">/dev/radeon_vid
 
 To know more about these parameters - try read /dev/radeon_vid file ;)
-Note: don't use 'cat' since it cab catch EOF during reading such files.
+Note: don't use 'cat' since it can detect EOF during reading such files.
 (I use midnight commander for that ;)
 
 Note:
