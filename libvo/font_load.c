@@ -45,6 +45,7 @@ unsigned char sor[1024];
 unsigned char sor2[1024];
 font_desc_t *desc;
 FILE *f;
+char *dn;
 struct stat fstate;
 char section[64];
 int i,j;
@@ -57,9 +58,19 @@ memset(desc,0,sizeof(font_desc_t));
 
 f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); return NULL;}
 
-desc->fpath=get_path("font/");
+i = strlen (fname) - 9;
+if ((dn = malloc(i+1))!=NULL){
+   strncpy (dn, fname, i);
+   dn[i]='\0';
+}
+
+desc->fpath = dn; // search in the same dir as fonts.desc
 	
-if (stat(desc->fpath, &fstate)!=0) desc->fpath=DATADIR"/font";
+// desc->fpath=get_path("font/");
+// if (stat(desc->fpath, &fstate)!=0) desc->fpath=DATADIR"/font";
+
+	
+	
 	
 // set up some defaults, and erase table
 desc->charspace=2;
@@ -120,6 +131,8 @@ while(fgets(sor,1020,f)){
   
   if(strcmp(section,"[fpath]")==0){
       if(pdb==1){
+	  if (desc->fpath)
+	     free (desc->fpath); // release previously allocated memory
           desc->fpath=strdup(p[0]);
           continue;
       }
