@@ -6341,6 +6341,9 @@ $_def_vcd
 /* C99 lrintf function available */
 $_def_lrintf
 
+/* yes, we have inttypes.h */
+#define HAVE_INTTYPES_H
+
 /* int_fastXY_t emulation */
 $_def_fast_inttypes
 
