@@ -686,7 +686,7 @@ fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if test ! -z "`$_sdlconfig --version 2>/dev/null`" ; then
+if test ! -z "`($_sdlconfig --version) 2>/dev/null`" ; then
 if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2>&1 ; then
 	_sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
 	if test "$_sdlversion" -gt 116 ; then
@@ -732,7 +732,7 @@ $_cc $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
 
 _kstat=no
 $_cc $TMPC -o $TMPO -lkstat >/dev/null 2>&1 && _kstat=yes _archlibs="-lkstat $_archlibs"
-$_cc $TMPC -o $TMPO -lrt >/dev/null 2>&1 && _archlibs="-lrt $_archlibs"
+$_cc $TMPC -o $TMPO -lposix4 >/dev/null 2>&1 && _archlibs="-lposix4 $_archlibs"
 
 _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
@@ -1356,8 +1356,10 @@ fi
 if [ $_x11 = yes ]; then
   if [ $_xdpms = yes ]; then
     _x11lib='-lX11 -lXext -lXdpms'
+    _have_xdpms='#define HAVE_XDPMS 1'
   else
     _x11lib='-lX11 -lXext'
+    _have_xdpms='#undef HAVE_XDPMS'
   fi
 fi
 
@@ -1860,6 +1862,7 @@ $_xmga
 $_syncfb
 $_fbdev
 $_svga
+$_have_xdpms
 
 #if defined(HAVE_GL)||defined(HAVE_X11)||defined(HAVE_XV)
 #define X11_FULLSCREEN
