@@ -754,6 +754,7 @@ int sub_source()
 #ifdef USE_SUB
 
 sub_data* subdata = NULL;
+static subtitle* vo_sub_last = NULL;
 
 void add_subtitles(char *filename, float fps, int silent)
 {
@@ -961,6 +962,43 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
 #endif
   return result;
 }
+
+#ifdef USE_SUB
+/**
+ * \brief Log the currently displayed subtitle to a file
+ * 
+ * Logs the current or last displayed subtitle together with filename
+ * and time information to ~/.mplayer/subtitle_log
+ *
+ * Intended purpose is to allow convenient marking of bogus subtitles
+ * which need to be fixed while watching the movie.
+ */
+
+static void log_sub(){
+    char *fname;
+    FILE *f;
+    int i;
+
+    if (subdata == NULL || vo_sub_last == NULL) return;
+    fname = get_path("subtitle_log");
+    f = fopen(fname, "a");
+    if (!f) return;
+    fprintf(f, "----------------------------------------------------------\n");
+    if (subdata->sub_uses_time) {
+	fprintf(f, "N: %s S: %02d:%02d:%02d.%02d E: %02d:%02d:%02d.%02d\n", filename, 
+		vo_sub_last->start/360000, (vo_sub_last->start/6000)%60,
+		(vo_sub_last->start/100)%60, vo_sub_last->start%100,
+		vo_sub_last->end/360000, (vo_sub_last->end/6000)%60,
+		(vo_sub_last->end/100)%60, vo_sub_last->end%100);
+    } else {
+	fprintf(f, "N: %s S: %d E: %d\n", filename, vo_sub_last->start, vo_sub_last->end);
+    }
+    for (i = 0; i < vo_sub_last->lines; i++) {
+	fprintf(f, "%s\n", vo_sub_last->text[i]);
+    }
+    fclose(f);
+}
+#endif
 
 int main(int argc,char* argv[]){
 
@@ -2861,6 +2899,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     }
 #endif
     } break;
+    case MP_CMD_SUB_LOG : {
+#ifdef USE_SUB
+	log_sub();
+#endif
+    } break;
     case MP_CMD_OSD :  {
 #ifdef USE_OSD
       if(sh_video) {
@@ -3367,7 +3410,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #ifdef USE_SUB
         set_of_sub_pos = -1;
         subdata = NULL;
-        vo_sub = NULL;
+        vo_sub_last = vo_sub = NULL;
 #endif
         vobsub_id = -1;
         dvdsub_id = -1;
@@ -4008,6 +4051,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
          find_sub(subdata, (pts+sub_delay) * 
 				 (subdata->sub_uses_time ? 100. : sub_fps)); 
+	 if (vo_sub) vo_sub_last = vo_sub;
 	 // FIXME! frame counter...
          sub_last_pts = pts;
       }
@@ -4110,7 +4154,7 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
     for (i = 0; i < set_of_sub_size; ++i)
         sub_free( set_of_subtitles[i] );
     set_of_sub_size = 0;
-    vo_sub=NULL;
+    vo_sub_last = vo_sub=NULL;
     subdata=NULL;
    }
 #endif

@@ -101,6 +101,12 @@ sub_select
     -sub options on the command line, VOBsubs, DVD subtitles, and Ogg text
     streams.
 
+sub_log
+    Logs the current or last displayed subtitle together with filename
+    and time information to ~/.mplayer/subtitle_log. Intended purpose
+    is to allow convenient marking of bogus subtitles which need to be
+    fixed while watching the movie.
+
 vobsub_lang
     This is a stub linked to sub_select for backwards compatibility.
 
