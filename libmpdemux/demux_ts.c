@@ -37,6 +37,7 @@
 #include "bswap.h"
 #include "../unrarlib.h"
 
+#define TS_PH_PACKET_SIZE 192
 #define TS_FEC_PACKET_SIZE 204
 #define TS_PACKET_SIZE 188
 #define NB_PID_MAX 8192
@@ -173,10 +174,20 @@ static uint8_t get_packet_size(const unsigned char *buf, int size)
 try_fec:
 	for(i=0; i<NUM_CONSECUTIVE_TS_PACKETS; i++)
 	{
-		if (buf[i * TS_FEC_PACKET_SIZE] != 0x47)
-		return 0;
+		if (buf[i * TS_FEC_PACKET_SIZE] != 0x47){
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "GET_PACKET_SIZE, pos %d, char: %2x\n", i, buf[i * TS_PACKET_SIZE]);
+			goto try_philips;
+		}
 	}
 	return TS_FEC_PACKET_SIZE;
+
+ try_philips:
+	for(i=0; i<NUM_CONSECUTIVE_TS_PACKETS; i++)
+	{
+		if (buf[i * TS_PH_PACKET_SIZE] != 0x47)
+		return 0;
+	}
+	return TS_PH_PACKET_SIZE;
 }
 
 
@@ -1682,6 +1693,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	demux_packet_t **dp = NULL;
 	int *dp_offset = 0, *buffer_size = 0;
 	int32_t progid, pid_type, bad, ts_error;
+	int junk = 0;
 
 
 	while(! done)
@@ -1691,7 +1703,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		dp = (demux_packet_t **) NULL;
 		dp_offset = buffer_size = NULL;
 
-		buf_size = priv->ts.packet_size;
+		junk = priv->ts.packet_size - TS_PACKET_SIZE;
+		buf_size = priv->ts.packet_size - junk;
 
 		if(stream_eof(stream))
 		{
@@ -1742,7 +1755,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 		if(((pid > 1) && (pid < 16)) || (pid == 8191))		//invalid pid
 		{
-			stream_skip(stream, buf_size-1);
+			stream_skip(stream, buf_size-1+junk);
 			continue;
 		}
 
@@ -1759,7 +1772,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			afc = (packet[3] >> 4) & 3;
 			if(! (afc % 2))	//no payload in this TS packet
 			{
-			    stream_skip(stream, buf_size-1);
+			    stream_skip(stream, buf_size-1+junk);
 			    continue;
 			}
 			
@@ -1790,7 +1803,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			if(priv->keep_broken == 0)
 			{
-				stream_skip(stream, buf_size-1);
+				stream_skip(stream, buf_size-1+junk);
 				continue;
 			}
 			
@@ -1808,6 +1821,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		if(pid  == 0)
 		{
 			stream_read(stream,&packet[base], buf_size);
+			stream_skip(stream, junk);
 			parse_pat(priv, is_start, &packet[base], buf_size);
 			continue;
 		}
@@ -1819,6 +1833,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				if(pid != demuxer->video->id && pid != demuxer->audio->id && pid != demuxer->sub->id)
 				{
 					stream_read(stream,&packet[base], buf_size);
+					stream_skip(stream, junk);
 					parse_pmt(priv, progid, pid, is_start, &packet[base], buf_size);
 					continue;
 				}
@@ -1908,13 +1923,13 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				else
 				{
-					stream_skip(stream, buf_size);
+					stream_skip(stream, buf_size+junk);
 					continue;
 				}
 			}
 			else
 			{
-				stream_skip(stream, buf_size);
+				stream_skip(stream, buf_size+junk);
 				continue;
 			}
 
@@ -1948,6 +1963,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			p = &packet[base];
 			stream_read(stream, p, buf_size);
+			stream_skip(stream, junk);
 
 			len = pes_parse2(p, buf_size, es, pid_type);
 			es->pid = tss->pid;
@@ -2042,7 +2058,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			if(tss->type == UNKNOWN)
 			{
-				stream_skip(stream, buf_size);
+				stream_skip(stream, buf_size+junk);
 				if(probe)
 					return 0;
 				else
@@ -2070,7 +2086,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				else
 				{
-					stream_skip(stream, buf_size);
+					stream_skip(stream, buf_size+junk);
 					continue;
 				}
 			}
@@ -2094,6 +2110,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				{
 					stream_skip(stream, buf_size - sz);
 				}
+				stream_skip(stream, junk);
 
 				if(is_audio)
 				{
@@ -2108,6 +2125,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			{
 				stream_read(stream, es->start, sz);
 				if(buf_size - sz) stream_skip(stream, buf_size-sz);
+				stream_skip(stream, junk);
 
 				if(es->size)
 					return es->size;
