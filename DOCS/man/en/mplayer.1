@@ -1236,12 +1236,10 @@ formats).
 Display DVD subtitles in the language specified by <ID> (0\-31).
 MPlayer prints the available subtitle languages when run in verbose (\-v) mode.
 .TP
-.B \-slang <two\ letter\ country\ code> (also see \-sid option)
-Selects DVD subtitle language.
+.B \-slang <country\ code[,country\ code,...]> (also see \-sid)
+Specify a priority list of DVD subtitle languages to use.
+Languages must be given as two letter country codes.
 MPlayer prints the available subtitle languages when run in verbose (\-v) mode.
-.br
-Otherwise, determines an optional subtitle suffix which gets a higher
-priority when searching for subtitles.
 .sp 1
 .I EXAMPLE:
 .PD 0
