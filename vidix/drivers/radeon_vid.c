@@ -597,8 +597,8 @@ vidix_capability_t def_cap =
 #endif
     TYPE_OUTPUT | TYPE_FX,
     { 0, 0, 0, 0 },
-    1024,
-    768,
+    2048,
+    2048,
     4,
     4,
     -1,
