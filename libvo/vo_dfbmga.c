@@ -631,7 +631,7 @@ config( uint32_t width, uint32_t height,
      if (use_crtc2) {
           dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE | DLCONF_OPTIONS;
           dlc.buffermode = buffermode;
-          dlc.options    = DLOP_FLICKER_FILTERING;
+          dlc.options    = DLOP_NONE;
 
 #if DIRECTFBVERSION > 916
           if (field_parity != -1) {
