@@ -869,7 +869,7 @@ EOF
 	_mcpu='-mtune=750'
     fi
     if darwin ; then
-	if [[ $(sysctl -n hw.vectorunit) == 1 ]]; then
+	if [[ `sysctl -n hw.vectorunit` == 1 ]]; then
 	    _altivec=yes
  	fi
     fi
