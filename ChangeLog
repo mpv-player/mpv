@@ -1,6 +1,9 @@
 MPlayer (1.0)
 
-  pre5: "Niu ririsu" Mai 22, 2004
+  pre5: "Niu ririsu" June 29, 2004
+
+    Security:
+    * complete review of string operations, buffer overflows fixed
 
     DOCS:
     * Hungarian XML documentation translation started
@@ -11,10 +14,57 @@ MPlayer (1.0)
 
     Ports:
     * encrypted DVD playback on Windows fixed (again)
-    * Cygwin and MinGW now accept the same  -dvd-device syntax
+    * Cygwin and MinGW now accept the same -dvd-device syntax
+    * AC3 passthrough for ao_win32
+    * improved vo_quartz (esp. YUV support), made default on Mac OS X
+    * Bigendian fixed (vf.c, vo_tga)
+    * OpenBSD/VAX support
+    * disabled SSE on MinGW as it caused crashes
+    * RealVideo binary codecs support on MacOS X (still buggy)
 
     Drivers:
     * support for more Radeons (9800 XT among them) in VIDIX
+    * gl2 vo now supports GUI, fix for flickering borders in fullscreen
+    * support 24 bit and 32bit pcm files, bigendian fixes
+    * sdl ao converts unsupported formats instead of quitting
+    * ENCA support
+    * merged alsa9 and alsa1x ao drivers to ao_alsa
+    * NeoMagic TV-out support through VESA
+    * JACK ao output module
+    * mga_vid ported to 2.6 kernels
+    * vo_sdl fixes (wrong flags)
+
+    Decoders:
+    * MSZH/ZLIB, FLI, QTRLE, RoQ video and audio support moved to FFmpeg
+    * audio format 0xff support (is AAC)
+    * "raw" audio in MOV supported
+    * Indeo audio (iac25) supported via dshow DLL
+    * upgrade libfaad2 to the faad 2.0 release
+
+    Demuxers:
+    * support NSA streams
+    * ASF, MMST streaming fixes
+    * Ogg subtitle handling fixes
+    * support seeking in Real files without -idx
+    * support seeking in Real files without index with -forceidx
+
+    Streaming:
+    * misc bug fixes
+
+    Filters:
+    * vf_softskip: frame skipping filter for MEncoder
+    * vf_harddup: frame duplication filter for MEncoder
+
+    Others:
+    * Metacity fullscreen fixes
+    * fix crash on original Pentiums and older
+    * support for ram playlist
+    * dvd://start-end support
+    * URL escaping ?
+    * mpst:// support
+    * better AMD64 support
+    * support comments in playlists
+    * loader/ dependency removed
 
 
   pre4: "YAML Counter" Apr 28, 2004
