@@ -170,6 +170,7 @@ Codecs:
   --disable-libavcodec   disable libavcodec [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
+  --enable-tremor        build with integer-only OggVorbis support [disabled]
   --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
@@ -964,6 +965,7 @@ _arts=auto
 _liblzo=auto
 _mad=auto
 _vorbis=auto
+_tremor=no
 _faad=auto
 _css=auto
 _dvdnav=yes
@@ -1099,6 +1101,8 @@ for ac_option do
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
+  --enable-tremor)	_tremor=yes	;;
+  --disable-tremor)	_tremor=no	;;
   --enable-faad)	_faad=yes	;;
   --disable-faad)	_faad=no	;;
   --enable-css)		_css=yes	;;
@@ -3580,10 +3584,17 @@ EOF
 fi
 if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
-  _ld_vorbis='-lvorbis -logg'
+  if test "$_tremor" = yes ; then
+    _def_tremor='#define TREMOR 1'
+    _ld_vorbis='-lvorbisidec -logg'
+  else
+    _def_tremor='#undef TREMOR'
+    _ld_vorbis='-lvorbis -logg'
+  fi
   _codecmodules="libvorbis $_codecmodules"
 else
   _def_vorbis='#undef HAVE_OGGVORBIS'
+  _def_tremor='#undef TREMOR'
   _nocodecmodules="libvorbis $_nocodecmodules"
 fi
 echores "$_vorbis"
@@ -5019,6 +5030,9 @@ $_def_mad
 
 /* enable OggVorbis support */
 $_def_vorbis
+
+/* enable Tremor as vorbis decoder */
+$_def_tremor
 
 /* enable FAAD (AAC) support */
 $_def_faad

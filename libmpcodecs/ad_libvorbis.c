@@ -25,7 +25,11 @@ static ad_info_t info =
 
 LIBAD_EXTERN(libvorbis)
 
+#ifdef TREMOR
+#include <tremor/ivorbiscodec.h>
+#else
 #include <vorbis/codec.h>
+#endif
 
 // This struct is also defined in demux_ogg.c => common header ?
 typedef struct ov_struct_st {
@@ -35,6 +39,9 @@ typedef struct ov_struct_st {
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
   float            rg_scale; /* replaygain scale */
+#ifdef TREMOR
+  int              rg_scale_int;
+#endif
 } ov_struct_t;
 
 static int read_vorbis_comment( char* ptr, char* comment, char* format, ... ) {
@@ -125,6 +132,9 @@ static int init(sh_audio_t *sh)
     /* replaygain: security */
     if(ov->rg_scale > 15.) 
       ov->rg_scale = 15.;
+#ifdef TREMOR
+    ov->rg_scale_int = (int)(ov->rg_scale*256.f);
+#endif
     mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel%s, %dHz, %dbit/s %cBR\n",(int)ov->vi.channels,ov->vi.channels>1?"s":"",(int)ov->vi.rate,(int)ov->vi.bitrate_nominal,
 	(ov->vi.bitrate_lower!=ov->vi.bitrate_nominal)||(ov->vi.bitrate_upper!=ov->vi.bitrate_nominal)?'V':'C');
     if(rg_gain || rg_peak)
@@ -199,13 +209,15 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	    for(i=0;i<ov->vi.channels;i++){
 	      ogg_int16_t *convbuffer=(ogg_int16_t *)(&buf[len]);
 	      ogg_int16_t *ptr=convbuffer+i;
+#ifdef TREMOR
+	      ogg_int32_t  *mono=pcm[i];
+	      for(j=0;j<bout;j++){
+		int val=(mono[j]*ov->rg_scale_int)>>(9+8);
+#else
 	      float  *mono=pcm[i];
 	      for(j=0;j<bout;j++){
-#if 1
 		int val=mono[j]*32767.f*ov->rg_scale;
-#else /* optional dither */
-		int val=mono[j]*32767.f*ov->rg_scale+drand48()-0.5f;
-#endif
+#endif    /* TREMOR */
 		/* might as well guard against clipping */
 		if(val>32767){
 		  val=32767;

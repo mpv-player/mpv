@@ -13,8 +13,13 @@
 #include "demuxer.h"
 #include "stheader.h"
 
+#ifdef TREMOR
+#include <tremor/ogg.h>
+#include <tremor/ivorbiscodec.h>
+#else
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
+#endif
 
 #define BLOCK_SIZE 4096
 
