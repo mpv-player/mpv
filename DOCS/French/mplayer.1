@@ -1,4 +1,4 @@
-.\" MPlayer (C) 2000-2002 Arpad Gereoffy
+.\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
 .\"
@@ -715,7 +715,7 @@ disponible: PAL, SECAM, NTSC
 Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
-.IPs channels=<channel>-<name>,<channel>-<name>,...
+.IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
 Défini des noms pour les canaux. Utilisez _ pour les espaces dans les noms 
 (ou jouez avec les quotes ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
@@ -863,9 +863,17 @@ Désactive le chargement automatique du fichier de sous-titres.
 .B \-nooverlapsub
 Désactive le support des sous-titres qui dépassent.
 .TP
-.B \-osdlevel <0\-2> (MPLAYER uniquement)
-Spécifie dans quel mode OSD démarrer (0:aucun, 1: déplacement, 
-2: déplacement+chrono, 1 par défaut).
+.B \-osdlevel <0\-3> (MPLAYER uniquement)
+Spécifie dans quel mode OSD démarrer.
+.RSs
+0: sous-titres uniquement
+.br
+1: volume + position (par défaut)
+.br
+2: volume + position + compteur + pourcentage
+.br
+3: volume + position + compteur + pourcentage + temps total
+.RE
 .TP
 .B \-sid <id> (voir aussi l'option \-slang)
 Active l'affichage des sous-titres DVD.
@@ -1716,7 +1724,9 @@ postprocessing interne.
 
 L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant les
 codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
-
+.TP
+.B \-pphelp (voir l'option \-vop pp également)
+Affiche un apercu des filtres de postprocess disponibles et de leur utilisation.
 .TP
 .B \-ssf <mode>
 Spécifie les paramètres de SwScaler.
@@ -1854,8 +1864,8 @@ essaie les codecs XAnim en premier
 .PD 1
 .
 .TP
-.B \-vop <...,plugin3[=options],plugin2,plugin1>
-Active une liste de filtres vidéo séparés par des virgules en ordre inverser.
+.B \-vop <...,filtre3[=options],filtre2,filtre1>
+Active une liste de filtres vidéo séparés par des virgules en ordre inversé.
 
 .I NOTE:
 .br
@@ -1915,9 +1925,10 @@ conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant palette.
 Restreints la palette pour le prochain filtre.
 Il ne fait aucune conversion
 Utilisez-le avec le filtre scale pour une véritable conversion.
-.IPs pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi -pp)
+.IPs pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi \-pphelp)
 Cette option active le filtre interne de postprocessing, et propose une
 interface où vous pouvez passer des options au filtre nommé.
+Pour obtenir une liste des filtres disponibles, utilisez \-pphelp.
 .br
 Notez que chaque sous-filtre doit être séparé des autres avec le signe /.
 .br
@@ -2009,9 +2020,16 @@ amount: taux relatif de sharpness / flou à ajouter à l'image
 \-1.5 et 1.5)
 .REss
 .IPs swapuv
-Swap U & V plane.
+Interchange les plans U & V.
 .IPs "il=[d|i][s][:[d|i][s]]"
 (dés)entrelace les lignes.
+Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs d'images 
+entrelacées sans les désentrelacer.
+Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser l'entrelacement.
+Pendant que le désentrelacement (avec le filtre de postprocessing) supprime le désentrelacement
+de facon permanente (en lissant la moyenne etc), le démultiplexage sépare la trame en 2 champs
+(appelé demi-images), de facon à ce que vous puissiez les traiter (filtrer) indépendemment et les
+re-multiplexer.
 .RSss
 d: désentrelace
 .br
@@ -2020,12 +2038,14 @@ i: entrelace
 s: échange les champs (échange même les lignes impaires)
 .REss
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
+flou boite
 .RSss
 rayon: taille du filtre
 .br
 puissance: à quelle fréquence le filtre devrait être appliqué
 .REss
 .IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
+flou adapté aux formes
 .RSss
 rad: force du filtre de flou (~0.1\-4.0) (le plus bas est le plus large)
 .br
@@ -2035,6 +2055,7 @@ cDiff: différence autorisée des pixels
 (~0.1-100.0)
 .REss
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
+flou smart
 .RSss
 rad: force du filtre de  flou (~0.1\-5.0) (le plus bas est le plus large)
 .br
@@ -2044,6 +2065,7 @@ thresh: filtre tout (0), filtre les surfaces plates (0\-30) ou filtre les bords
 (-30\-0)
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
+correction de perspective
 .RSss
 x0,y0,...: coordonnées des coins supérieur-gauche, supérieur-droit, 
 inférieur-gauche et inférieur-droit
@@ -2056,15 +2078,17 @@ t: rééchantillonage linéaire (0) ou cubique (1)
 Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser les 
 images.
 .IPs 1bpp
+conversion bitmap 1bpp vers YUV/BGR 8/15/16/32
 A FAIRE: documenter ça
-.IPs eq2
+.IPs eq2[=gamma:cont:lum]
+égualiseur logiciel basé sur LUT
+Les valeurs peuvent aller de -100 à 100.
 A FAIRE: documenter ça
 .IPs yvu9
 A FAIRE: documenter ça
 .IPs bmovl
+Lit des bitmaps depuis un FIFO et les affiche dans une fenêtre.
 A FAIRE: documenter ça
-
-
 .RE
 .
 .TP
@@ -2685,8 +2709,12 @@ Couper les bords noirs pour avoir une meilleur qualité:
 .br
 0.0\-0.5: interval sensé
 .REss
-.IPs naq\ \
-normalise la quantization adaptive (expérimental)
+.IPs naq
+Normalise la quantisation adaptive (expérimental).
+En utilisant la quantisation adaptive (*_mask), le quantiseur moyen par Mo 
+peut ne pas correspondre au quantiseur niveau-trame demandé.
+Naq essaiera de s'ajuster aux quantiseurs par Mo pour maintenir une moyenne 
+correcte.
 .IPs ildct
 utilise un dct entrelacé
 .IPs format=<valeur>
@@ -2725,6 +2753,70 @@ fonction de comparaison pour sous estimation pel motion
 .br
 +256: utile également chroma, ne fonctionne pas avec les trames b actuellement
 .REss
+.IPs predia=<\-99\-6>
+Type et taille de diamant pour la pré-passe d'estimation de mouvement
+.IPs dia=<\-99\-6>
+Type et taille de diamant pour l'estimation de mouvement.
+Note: Les tailles des diamants normales et celles de ceux à dimensions adaptées
+n'ont pas la même signification
+.RSss
+\-3: dimension adaptée de taille 3 (rapide) 
+.br
+\-2: dimension adaptée de taille 2 (rapide) 
+.br
+\-1: experimental
+.br
+ 1: diamant normal, taille=1 (par défaut) = type de diamant EPZS
+.nf
+.ne
+      0 
+     000
+      0 
+.fi
+.br
+ 2: diamant normal, taille=2
+.nf
+.ne
+      0  
+     000 
+    00000
+     000 
+      0  
+.fi
+.REss
+.IPs trell
+Quantisation Trellis.
+Ceci trouvera l'encodage optimal pour chaque bloc 8x8.
+La quantisation Trellis est tout simplement un quantisation optimale sur PSNR
+contre sens de bitrate (en supposant qu'il n'y aurait pas d'erreurs introduites
+par l'IDCT, ce qui n'est clairement pas le cas) il trouve simplement un bloc
+pour le nombre minimum d'erreurs et lambda*bits.
+.RSss
+lambda: constante dépendante de qp
+.br
+bits: quantité de bits requis pour encoder le bloc
+.br
+error: somme des erreurs au carré de la quantisation
+.REss
+.IPs last_pred=<0\-99>
+Montant des prédicateurs de mouvement à partir de la trame précédente
+.RSss
+0: (default)
+.br
+a: utilisera 2a+1 x 2a+1 Mo au carré de prédicateurs pour la trame précédente
+.REss
+.IPs preme=<0\-2> 
+pré-passe d'estimation de mouvement
+.RSss
+0: désactivée
+.br
+1: uniquement après I trames (par défaut)
+.br
+2: toujours
+.REss
+.IPs subq=<1\-8>
+réaffinage de la qualité subpel (pour qpel) (par défaut: 8).
+Note: ceci a un effet significatif sur la vitesse
 .IPs mpeg_quant
 utilise les quantizers MPEG au lieu de H.263.
 (par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
@@ -2864,10 +2956,10 @@ les plus basses sont les plus rapides
 période pour atteindre la moyenne requise
 .IPs rc_buffer=<valeur>
 taille du tampon de contrôle du débit
-.IPs quant_range=<1-31>-<1-31>[/<1-31>-<1-31>]
-quantizer min & max pour toutes les trames (défaut=2-31, mode CBR)
+.IPs quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
+quantizer min & max pour toutes les trames (défaut=2\-31, mode CBR)
 .br
-quantizer min & max pour trames I/P (défaut=2-31/2-31, mode 2passes)
+quantizer min & max pour trames I/P (défaut=2\-31/2\-31, mode 2passes)
 .IPs min_key_interval=<valeur>
 interval minimum entre les trames-clé (défaut=0, 2passes uniquement)
 .IPs max_key_interval=<valeur>
@@ -2890,11 +2982,11 @@ spécifie le fichier temporaire qui devra être utilisé par l'option 'hintedme'
 sauve les statistiques par trames dans xvid.dbg (par défaut: off)
 .br
 ce n'est *pas* le fichier de contrôle 2passes
-.IPs keyframe_boost=<0-1000>
+.IPs keyframe_boost=<0\-1000>
 (défaut=0, mode 2passes uniquement)
 .IPs kfthreshold=<valeur>
 (défaut=10, mode 2passes uniquement)
-.IPs kfreduction=<0-100>
+.IPs kfreduction=<0\-100>
 (défaut=30, mode 2passes uniquement)
 .RE
 
