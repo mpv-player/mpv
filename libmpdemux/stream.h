@@ -42,7 +42,7 @@ typedef struct {
 } stream_t;
 
 #ifdef USE_STREAM_CACHE
-void stream_enable_cache(stream_t *stream,int size,float prefill_init,float prefill);
+void stream_enable_cache(stream_t *stream,int size,int min,int prefill);
 #else
 // no cache
 #define cache_stream_fill_buffer(x) stream_fill_buffer(x)
