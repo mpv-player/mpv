@@ -376,6 +376,19 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
 }
 
 subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
+/*
+ * Sub Station Alpha v4 (and v2?) scripts have 9 commas before subtitle
+ * other Sub Station Alpha scripts have only 8 commas before subtitle
+ * Reading the "ScriptType:" field is not reliable since many scripts appear
+ * w/o it
+ *
+ * http://www.scriptclub.org is a good place to find more examples
+ * http://www.eswat.demon.co.uk is where the SSA specs can be found
+ */
+        int comma;
+        static int max_comma = 32; /* let's use 32 for the case that the */
+                    /*  amount of commas increase with newer SSA versions */
+
 	int hour1, min1, sec1, hunsec1,
 	    hour2, min2, sec2, hunsec2, nothing;
 	int num;
@@ -392,10 +405,19 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 			&hour1, &min1, &sec1, &hunsec1, 
 			&hour2, &min2, &sec2, &hunsec2,
 			line3) < 9);
-	line2=strstr(line3,",,");
-	if (!line2) return NULL;
-	line2 ++;
-	line2 ++;
+
+        line2=strchr(line3, ',');
+
+        for (comma = 4; comma < max_comma; comma ++)
+          {
+            tmp = line2;
+            if(!(tmp=strchr(++tmp, ','))) break;
+            if(*(++tmp) == ' ') break; 
+                  /* a space after a comma means we're already in a sentence */
+            line2 = tmp;
+          }
+
+        if(comma < max_comma)max_comma = comma;
 
 	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
