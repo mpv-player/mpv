@@ -137,7 +137,7 @@ A: ...but you don't have the X development package installed. Or not
    Your distribution may differ from the Linux Filesystem Standard.
 
 Q: I have problems playing files with ... codec. Can I use'em?
-A: Check DOCS/CODECS, if it doesn't contain your codec, contact us.
+A: Check DOCS/codecs.conf, if it doesn't contain your codec, contact us.
 
 Q: What about DGA driver? I can't find it!!!
 A: ./configure autodetects your DGA driver. If -vo help doesn't show

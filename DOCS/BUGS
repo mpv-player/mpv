@@ -56,7 +56,7 @@ Signal 11 in decode_audio:
 
 No sound at all:
 - your file uses an unsupported codec
-  Workaround: read DOCS/CODECS, and help us adding support for it
+  Workaround: read DOCS/codecs.conf, and help us adding support for it
 
 Video-out problems:
 ~~~~~~~~~~~~~~~~~~~
