@@ -51,6 +51,7 @@ Audio delay/de-sync specific to one or a few files:
 After many > or ^ (fast forward) audio vs. video is going out of sync (ASF/AVI)
 - bug in mplayer code (a-v sync probs after seek... not really bug but
   my avi/asf seeking code is not perfect yet)
+  Workaround: -bps
 
 Signal 11 in decode_audio:
 - mp3lib doesn't handle (yet) well bad/broken audio streams
