@@ -211,11 +211,17 @@ Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
 A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
    Semmiképp se használd másik processzoron, mint amin lefordítottad!
 
-Q: Gondjaim vannak a WindowMaker-rel, és a teljesképernyõs xv móddal..
-   Az ICCCM patch elõtt még jó volt.
-A1: Tudjuk, az ICCCM szar.
-A2: Kapcsold ki az ICCCM patchet a következõ módon: a libvo/x11_common.c file
-    161.-edik sorában lévo "#if 1"-et írd át "#if 0"-ra, és fordítsd újra.
+Q: Gondjaim vannak a (kedvenc ablakkezelõd), és a teljesképernyõs xv/xmga/..
+   móddal..
+A: Igen, ez egy bug. De nem(csak) a miénk. Eddig nem találtunk olyan
+   fullscreen módszert, ami tényleg teljesképernyõs ablakot adna.
+   Volt néhány próbálkozás, de valamivel mindig bugzott. Valószínûleg a
+   megoldás egy új opció lesz, például -fsmode , a kívánt módszerek közti
+   választásara.
+   Sajnos a legtöbb elterjedt ablakkezelõ nem kompatibilis a szabványokkal,
+   vagy Motif-fal, így a teljesképernyõs mód bekapcsolására irányuló
+   szabványos módszerek nem mûködnek velük. A nemszabványos módszerek pedig
+   a szabványos ablakkezelõkkel nem mûködnek.
 
 Q: Dehát aviplay-jel mûködik !
 A: És?
