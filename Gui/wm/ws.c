@@ -161,7 +161,7 @@ int wsErrorHandler( Display * dpy,XErrorEvent * Event )
  fprintf(stderr,"[ws]  Error code: %d ( %s )\n",Event->error_code,type );
  fprintf(stderr,"[ws]  Request code: %d\n",Event->request_code );
  fprintf(stderr,"[ws]  Minor code: %d\n",Event->minor_code );
- fprintf(stderr,"[ws]  Modules: %s\n",current_module );
+ fprintf(stderr,"[ws]  Modules: %s\n",current_module?current_module:"(NULL)" );
  exit( 0 );
 }
 
@@ -436,7 +436,6 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
 
  win->WindowMask=CWBackPixel | CWBorderPixel |
                  CWColormap | CWEventMask | CWCursor |
-                 CWX | CWY | CWWidth | CWHeight |
                  CWOverrideRedirect;
 
  win->WindowID=XCreateWindow( wsDisplay,
