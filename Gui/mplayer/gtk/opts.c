@@ -1798,7 +1798,7 @@ GtkWidget * create_Preferences( void )
   gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( on_HSPPQuality_motion_notify_event ),NULL );
 #endif
 
-  gtk_notebook_set_page( GTK_NOTEBOOK( notebook1 ),3 );
+  gtk_notebook_set_page( GTK_NOTEBOOK( notebook1 ),2 );
 
   gtk_window_add_accel_group( GTK_WINDOW( Preferences ),accel_group );
 
