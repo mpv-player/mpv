@@ -315,8 +315,9 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     pos = base + (rel_seek_secs*sh_audio->i_bps);
 
   if(demuxer->movi_end && pos >= demuxer->movi_end) {
-    sh_audio->delay = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
-    return;
+     pos = demuxer->movi_end;
+    //sh_audio->delay = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
+    //return;
   } else if(pos < demuxer->movi_start)
     pos = demuxer->movi_start;
 
