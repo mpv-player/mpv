@@ -1,5 +1,9 @@
+#include <sys/types.h>
+#include <CoreFoundation/CFBase.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOCDTypes.h>
+#include <IOKit/storage/IOCDMedia.h>
 #include <IOKit/storage/IOCDMediaBSDClient.h>
-#include <CoreFoundation/CoreFoundation.h>
 
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA
