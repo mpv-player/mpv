@@ -160,6 +160,8 @@ m_option_t of_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+extern float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
+
 m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 
@@ -191,6 +193,9 @@ m_option_t mencoder_opts[]={
 
 	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
+
+	// override avi aspect autodetection
+	{"force-avi-aspect", &avi_aspect_override, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 
 	{"pass", "The -pass option is obsolete. Use -lavcopts vpass=n or -divx4opts pass=n!\nRTFM!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},

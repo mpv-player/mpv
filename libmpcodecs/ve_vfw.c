@@ -217,6 +217,7 @@ static int config(struct vf_instance_s* vf,
     vfw_bih->biWidth=width;
     vfw_bih->biHeight=height;
     vfw_bih->biSizeImage=width*height*((vfw_bih->biBitCount+7)/8);
+    mux_v->aspect = (float)d_width/d_height;
 
     if(!vfw_start_encoder(vfw_bih, mux_v->bih)) return 0;
 

@@ -211,6 +211,7 @@ static int config(struct vf_instance_s* vf,
     mux_v->bih->biWidth=width;
     mux_v->bih->biHeight=height;
     mux_v->bih->biSizeImage=width*height*3;
+    mux_v->aspect = (float)d_width/d_height;
 
     if(!divx4_param.bitrate) divx4_param.bitrate=800000;
     else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;

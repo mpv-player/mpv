@@ -663,12 +663,6 @@ case VCODEC_COPY:
 	mux_v->bih->biBitCount=24; // FIXME!!!
 	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     }
-    /*
-     * FIXME: with -ovc copy we don't get aspect ratio information
-     *        from the source stream.
-     */
-    if(movie_aspect>-1.0) sh_video->aspect = movie_aspect;
-
     printf("videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n",
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);

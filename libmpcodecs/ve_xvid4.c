@@ -339,6 +339,7 @@ config(struct vf_instance_s* vf,
 	mod->mux->bih->biHeight = height;
 	mod->mux->bih->biSizeImage = 
 		mod->mux->bih->biWidth * mod->mux->bih->biHeight * 3;
+	mod->mux->aspect = (float)d_width/d_height;
 
 	/* Message the FourCC type */
 	mp_msg(MSGT_MENCODER, MSGL_INFO,

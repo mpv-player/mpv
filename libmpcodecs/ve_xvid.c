@@ -172,6 +172,7 @@ config(struct vf_instance_s* vf,
     fp->mux->bih->biWidth = width;
     fp->mux->bih->biHeight = height;
     fp->mux->bih->biSizeImage = fp->mux->bih->biWidth * fp->mux->bih->biHeight * 3;
+    fp->mux->aspect = (float)d_width/d_height;
     mp_msg(MSGT_MENCODER,MSGL_INFO,"videocodec: XViD (%dx%d fourcc=%x [%.4s])\n",
 	width, height, fp->mux->bih->biCompression, (char *)&fp->mux->bih->biCompression);
 

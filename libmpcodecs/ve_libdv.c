@@ -55,6 +55,7 @@ static int config(struct vf_instance_s* vf,
     mux_v->bih->biWidth=width;
     mux_v->bih->biHeight=height;
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    mux_v->aspect = (float)d_width/d_height;
 
     return 1;
 }

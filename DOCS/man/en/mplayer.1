@@ -364,27 +364,6 @@ will not be displayed.
 Particularly useful on slow terminals or broken ones that do not properly
 handle carriage return (i.e. \\r).
 .TP
-.B \-useaviaspect
-With this option MPlayer and MEncoder will read and write the aspect
-setting from the OpenDML AVI Video Property Header.
-
-This is a different method than the "aspect=..." option of
-libavcodec or XviD, and is prioritized over it during playback,
-because this header is processed first.
-
-Generally, encoding AVIs with square pixels is still the best
-choice, so aspect headers should be avoided.
-Some players can understand it, while they may not understand the
-aspect headers produced by the codec.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-aspect 16:9 \-useaviaspect"
-will add a header specifying 16:9 aspect ratio.
-.RE
-.PD 1
-.TP
 .B \-v, \-verbose
 Increment verbose level (more \-v means more verbosity).
 .
@@ -3794,6 +3773,10 @@ will have the output file contain 'div3' as video fourcc.
 .RE
 .PD 1
 .
+.TP
+.B \-force-avi-aspect <0.2\-3.0>
+Override the aspect stored in the AVI OpenDML vprp header.
+This can be used to change the aspect ratio with \-ovc copy.
 .TP
 .B \-info <option1:option2:...> (AVI only)
 Specify the info header of the resulting AVI file.

@@ -17,6 +17,7 @@ typedef struct {
   uint32_t ckid; // chunk id (00dc 01wb etc)
   double timer;
   off_t size;
+  float aspect; // aspect ratio of this stream (set by ve_*.c)
   // buffering:
   unsigned char *buffer;
   unsigned int buffer_size;

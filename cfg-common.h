@@ -119,9 +119,6 @@
 	{"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
-	{"useaviaspect", &avi_use_vprp_aspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nouseaviaspect", &avi_use_vprp_aspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-
 // ------------------------- a-v sync options --------------------
 
 	// AVI specific: A-V sync mode (bps vs. interleaving)
@@ -318,8 +315,6 @@ extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 extern int ts_prog;
 extern int ts_keep_broken;
 extern off_t ts_probe;
-
-extern int avi_use_vprp_aspect; /* defined in aviheader.c */
 
 #include "libmpdemux/tv.h"
 

@@ -28,8 +28,6 @@ extern void print_index(AVIINDEXENTRY *idx,int idx_size);
 extern void print_avistdindex_chunk(avistdindex_chunk *h);
 extern void print_avisuperindex_chunk(avisuperindex_chunk *h);
 
-int avi_use_vprp_aspect = 0;
-
 static int odml_get_vstream_id(int id, unsigned char res[])
 {
     unsigned char *p = (unsigned char *)&id;
@@ -345,7 +343,7 @@ while(1){
 	for (i=0; i<vprp->nbFieldPerFrame; i++) {
 		le2me_VIDEO_FIELD_DESC(&vprp->FieldInfo[i]);
 	}
-	if (avi_use_vprp_aspect && sh_video) {
+	if (sh_video) {
 		sh_video->aspect = GET_AVI_ASPECT(vprp->dwFrameAspectRatio);
 	}
 	if(verbose>=1) print_vprp(vprp);

@@ -519,6 +519,7 @@ static int config(struct vf_instance_s* vf,
 #else
 	    lavc_venc_context->aspect_ratio= ratio;
 #endif
+	    mux_v->aspect = ratio;
 	    mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio: %f\n", ratio);
 	} else {
 	    mp_dbg(MSGT_MENCODER, MSGL_ERR, "aspect ratio: cannot parse \"%s\"\n", lavc_param_aspect);
@@ -529,8 +530,9 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4687
 	lavc_venc_context->sample_aspect_ratio = av_d2q((float)d_width/d_height*height / width, 255);
 #else
-	lavc_venc_context->aspect_ratio = (float)d_width/d_height;
+	lavc_venc_context->aspect_ratio =
 #endif
+	mux_v->aspect = (float)d_width/d_height;
 
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */

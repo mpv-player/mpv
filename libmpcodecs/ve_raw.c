@@ -83,6 +83,7 @@ static int config(struct vf_instance_s *vf,
     int ret;
     mux_v->bih->biWidth = width;
     mux_v->bih->biHeight = height;
+    mux_v->aspect = (float)d_width/d_height;
     ret = set_format(vf, outfmt);
     if (!ret) return 0;
 

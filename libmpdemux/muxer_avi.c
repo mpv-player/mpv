@@ -34,7 +34,7 @@ extern char *info_comment;
 #define ODML_NOTKEYFRAME 0x80000000U
 #define MOVIALIGN        0x00001000
 
-extern int avi_use_vprp_aspect;
+float avi_aspect_override = -1.0;
 
 struct avi_odmlidx_entry {
 	uint64_t ofs;
@@ -56,6 +56,35 @@ struct avi_stream_info {
 	struct avi_odmlidx_entry *idx;
 	struct avi_odmlsuperidx_entry *superidx;
 };
+
+static unsigned int avi_aspect(muxer_stream_t *vstream)
+{
+    int x,y;
+    float aspect = vstream->aspect;
+
+    if (avi_aspect_override > 0.0) {
+        aspect = avi_aspect_override;
+    }
+
+    if (aspect <= 0.0) return 0;
+
+    if (aspect > 15.99/9.0 && aspect < 16.01/9.0) {
+        return MAKE_AVI_ASPECT(16, 9);
+    }
+    if (aspect > 3.99/3.0 && aspect < 4.01/3.0) {
+        return MAKE_AVI_ASPECT(4, 3);
+    }
+
+    if (aspect >= 1.0) {
+        x = 16384;
+        y = (float)x / aspect;
+    } else {
+        y = 16384;
+        x = (float)y * aspect;
+    }
+
+    return MAKE_AVI_ASPECT(x, y);
+}
 
 static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     struct avi_stream_info *si;
@@ -225,21 +254,6 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
 
 #define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(wf)->cbSize)
 
-static unsigned int avi_aspect(float aspect)
-{
-    if (aspect <= 0.0) {
-    	aspect = 4.0/3.0;
-    }
-    if (aspect >= 3.99/3.0 &&
-        aspect <= 4.01/3.0) return MAKE_AVI_ASPECT(4,3);
-    if (aspect >= 15.99/9.0 &&
-        aspect <= 16.01/9.0) return MAKE_AVI_ASPECT(16,9);
-    if (aspect >= 0.99 &&
-        aspect <= 1.01) return MAKE_AVI_ASPECT(1,1);
-    if (aspect<1.0) return MAKE_AVI_ASPECT((int)(aspect*8192),8192);
-    return MAKE_AVI_ASPECT(8192,(int)(8192/aspect));
-}
-
 static void avifile_write_header(muxer_t *muxer){
   uint32_t riff[3];
   unsigned int dmlh[1];
@@ -248,9 +262,15 @@ static void avifile_write_header(muxer_t *muxer){
   muxer_info_t info[16];
   FILE *f = muxer->file;
   VideoPropHeader vprp;
-
+  uint32_t aspect = avi_aspect(muxer->def_v);
   off_t pos;
   int isodml = muxer->file_end > ODML_CHUNKLEN ? 1 : 0;
+
+  if (aspect == 0) {
+    mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Aspect information not (yet?) available or unspecified, not writing vprp header.\n");
+  } else {
+    mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: vprp aspect is %d:%d.\n", aspect >> 16, aspect & 0xffff);
+  }
 
   if (isodml) {
     for (pos = 0; pos < muxer->file_end; pos += ODML_CHUNKLEN) {
@@ -316,7 +336,7 @@ static void avifile_write_header(muxer_t *muxer){
       switch(muxer->streams[i]->type){
       case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
-	  if (avi_use_vprp_aspect) {
+	  if (aspect != 0) {
 	      hdrsize+=8+4*(9+8*1); // vprp
 	  }
 	  break;
@@ -351,14 +371,13 @@ static void avifile_write_header(muxer_t *muxer){
           s->h.fccHandler = s->bih->biCompression;
           s->h.rcFrame.right = s->bih->biWidth;
           s->h.rcFrame.bottom = s->bih->biHeight;
-	  if (avi_use_vprp_aspect) {
-	      sh_video_t *sh_video = s->source;
+	  if (aspect != 0) {
 	      // fill out vprp info
 	      memset(&vprp, 0, sizeof(vprp));
 	      vprp.dwVerticalRefreshRate = (s->h.dwRate+s->h.dwScale-1)/s->h.dwScale;
 	      vprp.dwHTotalInT = muxer->avih.dwWidth;
 	      vprp.dwVTotalInLines = muxer->avih.dwHeight;
-	      vprp.dwFrameAspectRatio = avi_aspect(sh_video->aspect);
+	      vprp.dwFrameAspectRatio = aspect;
 	      vprp.dwFrameWidthInPixels = muxer->avih.dwWidth;
 	      vprp.dwFrameHeightInLines = muxer->avih.dwHeight;
 	      vprp.nbFieldPerFrame = 1;
@@ -388,7 +407,7 @@ static void avifile_write_header(muxer_t *muxer){
           write_avi_chunk(f,ckidSTREAMFORMAT,biSize,s->bih); /* BITMAPINFOHEADER */
           le2me_BITMAPINFOHEADER(s->bih);
 
-	  if (avi_use_vprp_aspect) {
+	  if (aspect != 0) {
 	      int fields = vprp.nbFieldPerFrame;
 	      le2me_VideoPropHeader(&vprp);
 	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[0]);
