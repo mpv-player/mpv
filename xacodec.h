@@ -101,3 +101,14 @@ typedef struct
     unsigned int	imagec;
     unsigned int	imaged;
 } XA_ANIM_HDR;
+
+// Added by A'rpi
+typedef struct {
+    unsigned int out_fmt;
+    int bpp;
+    int width,height;
+    unsigned char* planes[3];
+    int stride[3];
+    unsigned char *mem;
+} xacodec_image_t;
+

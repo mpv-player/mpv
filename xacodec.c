@@ -60,6 +60,7 @@ typedef struct xacodec_driver
     unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 	unsigned int dsize, XA_DEC_INFO *dec_info);
     void *close_func[XA_CLOSE_FUNCS];
+    xacodec_image_t image;
 } xacodec_driver_t;
 
 xacodec_driver_t *xacodec_driver = NULL;
@@ -303,16 +304,23 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->decinfo->extra = codec_hdr.extra;
 
 //    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
-    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * codec_hdr.depth);
+//    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * codec_hdr.depth);
+    xacodec_driver->image.out_fmt=out_format;
+    xacodec_driver->image.bpp=codec_hdr.depth;
+    xacodec_driver->image.width=codec_hdr.x;
+    xacodec_driver->image.height=codec_hdr.y;
+    xacodec_driver->image.mem=malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
 
 //    printf("out_buf size: %d\n", codec_hdr.y * codec_hdr.x * codec_hdr.depth);
 
+#if 0
     if (vidinfo->our_out_buffer == NULL)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, "cannot allocate memory for output: %s",
 	    strerror(errno));
 	return(0);
     }
+#endif
 
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "extra: %08x - %dx%d %dbit\n", codec_hdr.extra,
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth);
@@ -330,23 +338,23 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 //    unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 //	unsigned int dsize, XA_DEC_INFO *dec_info);
 
-int xacodec_decode_frame(uint8_t *frame, int frame_size,
-			uint8_t *dest, int skip_flag)
+xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_flag)
 {
     unsigned int ret;
     int i;
-    
+
     if (skip_flag > 0)
 	printf("frame will be dropped..\n");
 
     xacodec_driver->decinfo->skip_flag = skip_flag;
 
-    printf("frame: %08x (size: %d) - dest: %08x\n", frame, frame_size, dest);
+//    printf("frame: %08x (size: %d) - dest: %08x\n", frame, frame_size, dest);
 
-    ret = xacodec_driver->dec_func(dest, frame, frame_size, xacodec_driver->decinfo);
+    ret = xacodec_driver->dec_func((uint8_t*)&xacodec_driver->image, frame, frame_size, xacodec_driver->decinfo);
 
-    printf("ret: %lu : ", ret);
+//    printf("ret: %lu : ", ret);
     
+#if 0
     for (i = 0; i < 10; i++)
     {
 	if (frame[i] != dest[i])
@@ -354,11 +362,12 @@ int xacodec_decode_frame(uint8_t *frame, int frame_size,
 	else
 	    printf("%d: [%02x] ", frame[i]);
     }
+#endif
 
     if (ret == ACT_DLT_NORM)
     {
 	printf("norm\n");
-	return(TRUE);
+	return &xacodec_driver->image;
     }
 
 /*
@@ -374,35 +383,35 @@ int xacodec_decode_frame(uint8_t *frame, int frame_size,
     if (ret & ACT_DLT_NOP)
     {
 	printf("nop\n");
-	return(FALSE); /* dst = 0 */
+	return NULL; /* dst = 0 */
     }
 
     if (ret & ACT_DLT_DROP) /* by skip frames and errors */
     {
 	printf("drop\n");
-	return(FALSE);
+	return NULL;
     }
 
 
     if (ret & ACT_DLT_BAD)
     {
 	printf("bad\n");
-	return(FALSE);
+	return NULL;
     }
 
     if (ret & ACT_DLT_BODY)
     {
 	printf("body\n");
-	return(TRUE);
+	return NULL;
     }
     
     if (ret & ACT_DLT_XOR)
     {
 	printf("xor\n");
-	return(TRUE);
+	return &xacodec_driver->image;
     }
 
-    return(FALSE);
+    return NULL;
 }
 
 int xacodec_exit()
@@ -433,7 +442,7 @@ int xacodec_exit()
 
 unsigned long XA_Time_Read()
 {
-    return(GetRelativeTime());
+    return GetTimer(); //(GetRelativeTime());
 }
 
 void XA_dummy()
@@ -707,21 +716,46 @@ void *XA_YUV411111_Func(unsigned int image_type)
     return((void *)color_func);
 }
 
-void XA_YUV221111_To_CLR8(image,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr)
-xaUBYTE *image;		xaULONG imagex,imagey,i_x,i_y;
+void XA_YUV221111_To_CLR8(image_p,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr)
+xaUBYTE *image_p;		xaULONG imagex,imagey,i_x,i_y;
 YUVBufs *yuv;	YUVTabs *yuv_tabs;
 xaULONG map_flag,*map;	XA_CHDR *chdr;
 {
-    printf("XA_YUV221111_To_CLR8(%p  %dx%d %d;%d  %p %p %d %p %p)\n",
-	image,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr);
+    xacodec_image_t *image=(xacodec_image_t*)image_p;
+
+#if 0
+    printf("XA_YUV221111_To_CLR8(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
+	image,imagex,imagey,i_x,i_y, image->width,image->height,
+	yuv,yuv_tabs,map_flag,map,chdr);
 
     printf("YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
+#endif
 
-    memcpy(image,yuv->Ybuf,imagex*imagey);
-    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
-    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
+if(imagex==image->width && imagey==image->height){
+//    printf("Direct render!!!\n");
+    image->planes[0]=yuv->Ybuf;
+    if(image->out_fmt==IMGFMT_YV12){
+	image->planes[1]=yuv->Ubuf;
+	image->planes[2]=yuv->Vbuf;
+    } else {
+	image->planes[1]=yuv->Vbuf;
+	image->planes[2]=yuv->Ubuf;
+    }
+    image->stride[0]=imagex; // yuv->y_w
+    image->stride[1]=image->stride[2]=imagex/2; // yuv->uv_w
+} else {
+    int y;
+    printf("partial YV12 not implemented!!!!!!\n");
+//    image->planes[0]=image->mem;
+//    image->planes[1]=image->planes[0]+image->width*image->height;
+//    image->planes[2]=image->planes[1]+image->width*image->height/4;
+}
+
+//    memcpy(image,yuv->Ybuf,imagex*imagey);
+//    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
+//    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
 
 /*
     unsigned char *Ybuf;

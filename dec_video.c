@@ -1,4 +1,6 @@
 
+#define USE_XANIM
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -451,8 +453,12 @@ unsigned int t2;
 switch(sh_video->codec->driver){
 #ifdef USE_XANIM
   case VFM_XANIM: {
-    int ret=xacodec_decode_frame(start,in_size,sh_video->our_out_buffer,drop_frame?1:0);
-    if(ret) blit_frame=3;
+    xacodec_image_t* image=xacodec_decode_frame(start,in_size,drop_frame?1:0);
+    if(image){
+	blit_frame=2;
+	planes=image->planes;
+	stride=image->stride;
+    }
     break;
   }
 #endif
