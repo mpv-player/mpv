@@ -25,15 +25,14 @@ mailing list. Number one is of course the topic of the</P>
 <P>The <I>background</I> : there were/are the GCC <B>2.95</B> series. The
 best of them was 2.95.3 . Please note the style of the version numbering.
 This is how the GCC team numbers their compilers. The 2.95 series are good.
-We never ever saw anything that was miscompiled because of the 2.95's faultiness.</P>
+We never ever saw anything that was miscompiled because of the 2.95.3's faultiness.</P>
 
 <P>The <I>action</I> : <B>RedHat</B> started to include a GCC version of <B>2.96</B>
 with their distributions. Note the version numbering. This should be the GCC
 team's versioning. They patched the CVS version of GCC (something between 2.95 and 3.0)
 They patched it very deep, and used this version in the distrib because 3.0
 wasn't out at time, and they wanted IA64 support ASAP (business reasons).
-Oh, and GCC 2.95 miscompiles bash on the s390 architecture (there is
-no RedHat distribution for s390..) .</P>
+Oh, and GCC 2.95 miscompiles bash on the s390 architecture...</P>
 
 <P>The <I>facts</I> : <B>MPlayer</B>'s compile process needs the
 <CODE>--disable-gcc-checking</CODE> to proceed upon detecting a GCC version of
@@ -150,6 +149,12 @@ most likely be blacklisted.</P>
     say: yes, let's make 30 versions of downloadable binaries! We won't. We
     will make these stuff pluggable in the future.</LI>
 </UL>
+
+<P>We will (at least we wish) solve 2 of these problems in the next major release:
+the legal problems (we're on removing all non-GPL codes and getting others to
+change license to GPL) and the runtime CPU detection. Anyway, dependency on
+various libraries, versions and environment parameters will remain.</P>
+
 
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 
