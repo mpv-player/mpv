@@ -101,18 +101,21 @@ static uint32_t               dwidth,dheight;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   x0+=(vo_panscan_x>>2);
    vo_draw_alpha_yv12(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_yuy2(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   x0+=(vo_panscan_x>>2);
    vo_draw_alpha_yuy2(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+2*x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   x0+=(vo_panscan_x>>2);
    vo_draw_alpha_yuy2(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+2*x0+1,xvimage[current_buf]->pitches[0]);
@@ -594,7 +597,7 @@ static void check_events(void)
 }
 
 static void draw_osd(void)
-{ vo_draw_text(image_width,image_height,draw_alpha_fnc);}
+{ vo_draw_text(image_width-(vo_panscan_x>>1),image_height,draw_alpha_fnc);}
 
 static void flip_page(void)
 {
@@ -853,20 +856,25 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
-  case VOCTRL_FULLSCREEN:
-    vo_x11_fullscreen();
-    return VO_TRUE;
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
     if ( !vo_config_count || !vo_fs ) return VO_FALSE;
     return VO_TRUE;
+  case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+  /* indended, fallthrough to update panscan on fullscreen/windowed switch */
   case VOCTRL_SET_PANSCAN:
-   if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
+   if ( ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) || ( !vo_fs && vo_panscan_amount ) )
      {
+      int old_y = vo_panscan_y;
       panscan_calc();
-      XClearWindow(mDisplay, vo_window);
-      XFlush(mDisplay);
+      
+      if(old_y != vo_panscan_y)
+       {
+        XClearWindow(mDisplay, vo_window);
+        XFlush(mDisplay);
+       }
      }
     return VO_TRUE;
   }
