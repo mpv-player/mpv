@@ -239,6 +239,7 @@ static char help_text[]=
 #define MSGTR_PlayList "Playlista"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Przegl±darka Skórek"
+#define MSGTR_Network "Strumieñ sieciowy ..."
 
 // --- buttons ---
 #define MSGTR_Ok "Tak"
@@ -309,6 +310,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Przegl±darka skórek"
 #define MSGTR_MENU_Preferences "Preferencje"
 #define MSGTR_MENU_Exit "Wyj¶cie ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Audio"
+#define MSGTR_EQU_Video "Video"
+#define MSGTR_EQU_Contrast "Kontrast: "
+#define MSGTR_EQU_Brightness "Jasno¶æ: "
+#define MSGTR_EQU_Hue "Hue: "
+#define MSGTR_EQU_Saturation "Saturation: "
+#define MSGTR_EQU_Front_Left "Lewy Przedni"
+#define MSGTR_EQU_Front_Right "Prawy Przedni"
+#define MSGTR_EQU_Back_Left "Lewy Tylni"
+#define MSGTR_EQU_Back_Right "Prawy Tylni"
+#define MSGTR_EQU_Center "Centralny"
+#define MSGTR_EQU_Bass "Basowy"
+#define MSGTR_EQU_All "Wszystkie"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
