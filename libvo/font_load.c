@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "font_load.h"
@@ -42,6 +45,7 @@ unsigned char sor[1024];
 unsigned char sor2[1024];
 font_desc_t *desc;
 FILE *f;
+struct stat fstate;
 char section[64];
 int i,j;
 int chardb=0;
@@ -51,10 +55,12 @@ int version=0;
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
 
-desc->fpath=get_path("font/");
-
 f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); return NULL;}
 
+desc->fpath=get_path("font/");
+	
+if (stat(desc->fpath, &fstate)!=0) desc->fpath=DATADIR"/font";
+	
 // set up some defaults, and erase table
 desc->charspace=2;
 desc->spacewidth=12;
