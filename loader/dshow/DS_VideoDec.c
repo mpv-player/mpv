@@ -377,7 +377,7 @@ extern "C" int DS_SetValue_DivX(char* name, int value){
 // get4=set3 73
 // get5=set4 19
 // get6=set5 23
-        printf("DivX setting: %s = %d\n",name,value);
+//        printf("DivX setting: %s = %d\n",name,value);
 
     	IHidden* hidden=(IHidden*)((int)dsf->m_pFilter+0xb8);
 	if(strcmp(name, "Brightness")==0)
