@@ -50,7 +50,10 @@ o MPlayer and LIRC
   button = Tape_Stop
   config = QUIT
  end
-	      
+
+ I you don't like the standard location for the lirc-config file (~/.lircrc) 
+ use the -lircconf <filename> the switch to specify another file.
+
  Enjoy
 
  -Andreas
