@@ -4065,10 +4065,12 @@ Audio bitrate in kBit (default 224).
 Use the specified Windows audio format tag (e.g.\& atag=0x55).
 .TP
 .B bit_exact
-Use only bit exact algorithms (except (i)dct).   
-This also suppresses the user_data header in MPEG-4 streams
-(that section causes some players such as Apple's
-Quicktime player to declare the stream corrupt).
+Use only bit exact algorithms (except (i)dct).
+Additionally bit_exact disables several optimizations and thus
+should only be used for regression tests, which need binary
+identical files even if the encoder version changes.
+This also suppresses the user_data header in MPEG-4 streams.
+Do not use this option unless you know exactly what you are doing.
 .TP
 .B vcodec=<value>
 use the specified codec (default: mpeg4):
