@@ -11,7 +11,8 @@ of supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, but you can use SDL (and this way all drivers of SDL) and some 
 lowlevel card-specific drivers (for Matrox/3dfx/SiS) too! Most of them
 supports software or hardware scaling, so you can enjoy movies in fullscreen.
-And what about the nice big antialiased shaded subtitles (.sub files) and OSD?
+And what about the nice big antialiased shaded subtitles (.sub files) with
+hungarian, english, cyrillic, czech, korean fonts, and OSD?
 
 History:
 ~~~~~~~~
