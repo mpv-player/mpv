@@ -195,6 +195,7 @@ extern char * fsHistory[fsPersistant_MaxPos];
 #define gtkSetFontOSDScale  19
 #define gtkSetFontEncoding  20
 #define gtkSetFontAutoScale 21
+#define gtkSetSubEncoding   22
 
 extern float gtkEquChannels[6][10];
 

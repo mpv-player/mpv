@@ -386,6 +386,7 @@ void guiLoadSubtitle( char * name )
    mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete Load subtitle: %s\n",name );
    sub_name=gstrdup( name );
    subtitles=sub_read_file( sub_name,guiIntfStruct.FPS );
+   if ( !subtitles ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_CantLoadSub,name );
   }
 }
 #endif
@@ -862,7 +863,6 @@ void * gtkSet( int cmd,float fparam, void * vparam )
          } else { url_item->next=NULL; URLList=url_item; }
         return NULL;
 // --- subtitle
-#if defined( USE_OSD ) || defined( USE_SUB )
 #ifndef HAVE_FREETYPE
    case gtkSetFontFactor:
         font_factor=fparam;
@@ -886,7 +886,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	guiLoadFont();
 	return NULL;
    case gtkSetFontEncoding:
-        if ( subtitle_font_encoding ) free( subtitle_font_encoding );
+	gfree( (void **)&subtitle_font_encoding );
 	subtitle_font_encoding=gstrdup( (char *)vparam );
 	guiLoadFont();
 	return NULL;
@@ -895,6 +895,11 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	guiLoadFont();
 	return NULL;
 #endif
+#ifdef USE_ICONV
+   case gtkSetSubEncoding:
+	gfree( (void **)&sub_cp );
+	sub_cp=gstrdup( (char *)vparam );
+	break;
 #endif
 // --- misc
    case gtkClearStruct:

@@ -34,6 +34,7 @@ extern float  sub_fps;
 extern int    sub_auto;
 extern int    sub_pos;
 extern int    sub_unicode;
+extern char * sub_cp;
 extern subtitle* subtitles;
 extern subtitle* vo_sub;
 extern int    suboverlap_enabled;

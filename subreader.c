@@ -904,6 +904,7 @@ int sub_autodetect (FILE *fd) {
 int sub_utf8=0;
 #else
 extern int sub_utf8;
+int sub_utf8_prev=0;
 #endif
 
 extern float sub_delay;
@@ -916,9 +917,11 @@ void	subcp_open (void)
 {
 	char *tocp = "UTF-8";
 	icdsc = (iconv_t)(-1);
+
 	if (sub_cp){
 		if ((icdsc = iconv_open (tocp, sub_cp)) != (iconv_t)(-1)){
 			mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: opened iconv descriptor.\n");
+			sub_utf8_prev=sub_utf8;
 			sub_utf8 = 2;
 		} else
 			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
@@ -929,6 +932,7 @@ void	subcp_close (void)
 {
 	if (icdsc != (iconv_t)(-1)){
 		(void) iconv_close (icdsc);
+		sub_utf8=sub_utf8_prev;
 	   	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: closed iconv descriptor.\n");
 	}
 }
@@ -947,10 +951,10 @@ subtitle* subcp_recode (subtitle *sub)
 		ip = sub->text[--l];
 		ileft = strlen(ip);
 		oleft = ICBUFFSIZE - 1;
-		
+
 		if (iconv(icdsc, &ip, &ileft,
 			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
+			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line (1).\n");
 			l++;
 			break;
 		}
@@ -988,7 +992,7 @@ subtitle* subcp_recode1 (subtitle *sub)
 		
      if (iconv(icdsc, &ip, &ileft,
 	      &op, &oleft) == (size_t)(-1)) {
-	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
+	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line (2).\n");
 	return sub;
      }
      *op='\0' ;
@@ -1119,6 +1123,14 @@ subtitle* sub_read_file (char *filename, float fps) {
 #ifdef USE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
+	if ( sub == ERR )
+	 {
+#ifdef USE_ICONV
+          subcp_close();
+#endif
+    	  if ( first ) free(first);
+	  return NULL; 
+	 }
         // Apply any post processing that needs recoding first
         if ((sub!=ERR) && srp->post) srp->post(sub);
 #ifdef USE_SORTSUB

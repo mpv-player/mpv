@@ -106,7 +106,11 @@ static GtkWidget     * RBFontNoAutoScale, * BRFontAutoScaleWidth, * RBFontAutoSc
 //static GtkWidget     * AutoScale;
 #endif
 
-#ifdef HAVE_FREETYPE
+#ifdef USE_ICONV
+static GtkWidget     * CBSubEncoding, * ESubEncoding;
+#endif
+
+#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
 static struct 
 {
  char * name;
@@ -137,6 +141,7 @@ static struct
   { NULL,NULL } 
  };
 char * lCEncoding = NULL;
+char * lSEncoding = NULL;
 #endif
 	    
 static int    old_audio_driver = 0;
@@ -160,7 +165,7 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
 #ifdef HAVE_FREETYPE
-static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_data );
+static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
 extern int    muted;
@@ -248,7 +253,7 @@ void ShowPreferences( void )
 #endif
  }
  
-  gtk_adjustment_set_value( HSFPS,force_fps );
+  gtk_adjustment_set_value( HSFPSadj,force_fps );
 
 // -- 3. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubOverlap ),suboverlap_enabled );
@@ -268,6 +273,17 @@ void ShowPreferences( void )
   }
 #if 0
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
+#endif
+
+#ifdef USE_ICONV
+ if ( sub_cp )
+  {
+   int i;
+   for ( i=0;lEncoding[i].name;i++ ) 
+    if ( !gstrcmp( sub_cp,lEncoding[i].name ) ) break;
+   if ( lEncoding[i].name ) lSEncoding=lEncoding[i].comment;
+   gtk_entry_set_text( GTK_ENTRY( ESubEncoding ),lSEncoding );
+  }
 #endif
 
 // --- 4. page
@@ -411,7 +427,10 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSFontOutLine ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)7 );
  gtk_signal_connect( GTK_OBJECT( HSFontTextScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)8 );
  gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
- gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),NULL );
+ gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)0 );
+#endif
+#ifdef USE_ICONV
+ gtk_signal_connect( GTK_OBJECT( ESubEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)1 );
 #endif
  gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)10 );
  
@@ -447,16 +466,32 @@ void HidePreferences( void )
 #endif
 }
 
-#ifdef HAVE_FREETYPE
-static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_data )
+#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
+static void prEntry( GtkContainer * container,gpointer user_data )
 {
- char * comment = gtk_entry_get_text( GTK_ENTRY( EFontEncoding ) );
+ char * comment;
  int    i;
- 
- for ( i=0;lEncoding[i].name;i++ )
-  if ( !gstrcmp( lEncoding[i].comment,comment ) ) break;
-  
- if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
+
+ switch( (int)user_data )
+  {
+#ifdef HAVE_FREETYPE
+   case 0: // font encoding
+        comment=gtk_entry_get_text( GTK_ENTRY( EFontEncoding ) );
+        for ( i=0;lEncoding[i].name;i++ )
+	  if ( !gstrcmp( lEncoding[i].comment,comment ) ) break;
+	if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
+	break;
+#endif
+#ifdef USE_ICONV
+   case 1: // sub encoding
+        comment=gtk_entry_get_text( GTK_ENTRY( ESubEncoding ) );
+        for ( i=0;lEncoding[i].name;i++ )
+	  if ( !gstrcmp( lEncoding[i].comment,comment ) ) break;
+	if ( lEncoding[i].comment ) gtkSet( gtkSetSubEncoding,0,lEncoding[i].name );
+	 else gtkSet( gtkSetSubEncoding,0,NULL );
+	break;
+#endif
+  }
 }
 #endif
 
@@ -492,6 +527,8 @@ void prButton( GtkButton * button,gpointer user_data )
 
 	flip=-1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) ) ) flip=1;
+
+	force_fps=HSFPSadj->value;
 	
 	// -- 3. page
 	suboverlap_enabled=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubOverlap ) );
@@ -502,11 +539,11 @@ void prButton( GtkButton * button,gpointer user_data )
 	sub_delay=HSSubDelayadj->value;
 	sub_fps=HSSubFPSadj->value;
 	sub_pos=(int)HSSubPositionadj->value;
-	force_fps=HSFPSadj->value;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTPTT ) ) ) osd_level=3;
+	
 
         // --- 4. page
 	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
@@ -712,6 +749,7 @@ GtkWidget * create_Preferences( void )
   GSList    * OSD_group = NULL;
   GSList    * Font_group = NULL;
   GList     * CBFontEncoding_items = NULL;
+  GList	    * CBSubEncoding_items = NULL;
   GtkWidget * vbox7;
   GtkWidget * vbox8;
   GtkWidget * table1;
@@ -917,6 +955,11 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
+#ifdef USE_ICONV
+  label=AddLabel( MSGTR_PREFERENCES_FontEncoding,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+#endif
+
   HSSubDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10.0,10,0.01,0,0 ) );
   HSSubDelay=AddHScaler( HSSubDelayadj,NULL,1 );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubDelay,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
@@ -932,6 +975,25 @@ GtkWidget * create_Preferences( void )
     gtk_widget_set_usize( HSSubFPS,60,-1 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSSubFPS ),TRUE );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+#ifdef USE_ICONV
+  CBSubEncoding=gtk_combo_new();
+  gtk_widget_set_name( CBSubEncoding,"CBSubEncoding" );
+  gtk_widget_show( CBSubEncoding );
+  gtk_table_attach( GTK_TABLE( table1 ),CBSubEncoding,1,2,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  CBSubEncoding_items=g_list_append( CBSubEncoding_items,MSGTR_PREFERENCES_None );
+  {
+   int i;
+   for ( i=0;lEncoding[i].name;i++ ) CBSubEncoding_items=g_list_append( CBSubEncoding_items,lEncoding[i].comment );
+  }
+  gtk_combo_set_popdown_strings( GTK_COMBO( CBSubEncoding ),CBSubEncoding_items );
+  g_list_free( CBSubEncoding_items );
+
+  ESubEncoding=GTK_COMBO( CBSubEncoding )->entry;
+  gtk_widget_set_name( ESubEncoding,"ESubEncoding" );
+  gtk_entry_set_editable( GTK_ENTRY( ESubEncoding ),FALSE );
+  gtk_widget_show( ESubEncoding );
+#endif
 
   vbox9=AddVBox( vbox8,0 );
 

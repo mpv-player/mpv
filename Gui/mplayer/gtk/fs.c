@@ -334,7 +334,12 @@ int fs_PersistantHistory( char * subject )
 {
  int i;
 
- for ( i=0;i < fsPersistant_MaxPos;i++ ) if ( fsHistory[i] && !strcmp( fsHistory[i],subject ) ) return 0;
+ for ( i=0;i < fsPersistant_MaxPos;i++ )
+  if ( fsHistory[i] && !strcmp( fsHistory[i],subject ) )
+   {
+    char * tmp = fsHistory[i]; fsHistory[i]=fsHistory[0]; fsHistory[0]=tmp;
+    return 0;
+   }
  gfree( (void **)&fsHistory[fsPersistant_MaxPos - 1] );
  for ( i=fsPersistant_MaxPos - 1;i;i-- ) fsHistory[i]=fsHistory[i - 1];
  fsHistory[0]=gstrdup( subject );

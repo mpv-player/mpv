@@ -116,6 +116,7 @@ static config_t gui_opts[] =
  { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "sub_overlap",&suboverlap_enabled,CONF_TYPE_FLAG,0,0,0,NULL },
+ { "sub_cp",&sub_cp,CONF_TYPE_STRING,0,0,0,NULL },
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
  { "font_name",&font_name,CONF_TYPE_STRING,0,0,0,NULL },
 #ifdef HAVE_FREETYPE 
