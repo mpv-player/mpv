@@ -49,7 +49,7 @@ static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, un
 static unsigned char *ImageData;
 
 /* X11 related variables */
-static XImage *myximage;
+static XImage *myximage = NULL;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
 
@@ -275,12 +275,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   else
 #endif   
    {
-     if(vo_window != None) {
-       freeMyXImage();
-       XUnmapWindow( mDisplay,vo_window );
-       XDestroyWindow(mDisplay, vo_window);
-     }
-
 #ifdef HAVE_XF86VM
     if ( vm )
    {
@@ -325,24 +319,27 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     }
     else
      {
-      vo_window=XCreateWindow( mDisplay,mRootWin,
+      if ( vo_window == None )
+       {
+        vo_window=XCreateWindow( mDisplay,mRootWin,
     			 vo_dx,vo_dy,
 			 vo_dwidth,vo_dheight,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
 
-      vo_x11_classhint( mDisplay,vo_window,"x11" );
-      vo_hidecursor(mDisplay,vo_window);
-      vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
-      XSelectInput( mDisplay,vo_window,StructureNotifyMask );
-      XStoreName( mDisplay,vo_window,title );
-      XMapWindow( mDisplay,vo_window );
-      if(WinID!=0)
-         do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
-
-      if ( fullscreen ) vo_x11_fullscreen();
+        vo_x11_classhint( mDisplay,vo_window,"x11" );
+        vo_hidecursor(mDisplay,vo_window);
+        vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
+        XSelectInput( mDisplay,vo_window,StructureNotifyMask );
+        XStoreName( mDisplay,vo_window,title );
+        XMapWindow( mDisplay,vo_window );
+//      if(WinID!=0)
+           do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
+ 
+        if ( fullscreen ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
-      vo_x11_xinerama_move(mDisplay,vo_window);
+        vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
+      } else if ( !fullscreen ) XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
      }
 
     XFlush( mDisplay );
@@ -366,6 +363,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    }
 
   vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
+  
+  if ( myximage ) freeMyXImage();
   getMyXImage();
   
   if ( !WinID )
