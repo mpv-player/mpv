@@ -1177,9 +1177,9 @@ else
   _termios=no
 fi
 if test "$_termios" = yes ; then
-  _def_termios='#define USE_TERMIOS 1'
+  _def_termios='#define HAVE_TERMIOS 1'
  else
-  _def_termios='#undef USE_TERMIOS'
+  _def_termios='#undef HAVE_TERMIOS'
 fi
 echores "$_termios"
 
