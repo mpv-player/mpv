@@ -3469,18 +3469,19 @@ quantizer offset between B and non B frames, 100=1.00 (default=100)
 .IPs hq_ac
 enable a better prediction of AC component, will save bits at cost of a 
 slightly slower encoding (default=off)
-.IPs vhq=<0\-3>
-enable a higher quality ME search using DCT, 3 possible settings
-(faster to slower):
+.IPs vhq=<0\-4>
+enable a higher quality ME search using DCT, faster to slower:
 
 .br
 0 = off (default)
 .br
-1 = limited search
+1 = mode decision (inter/intra MB)
 .br
-2 = medium search
+2 = limited search
 .br
-3 = wide search
+3 = medium search
+.br
+4 = wide search
 .IPs psnr
 print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
