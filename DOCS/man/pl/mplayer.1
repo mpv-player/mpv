@@ -1,4 +1,4 @@
-.\" synced with 1.761
+.\" synced with 1.765
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -682,17 +682,21 @@ Kiedy odtwarzany jest strumieñ MPEG-TS, MPlayer/\:MEncoder u¿yje pierwszego
 programu (je¿eli jest dostêpny) z wybranym strumieniem.
 .
 .TP
-.B \-alang <dwuliterowy\ kod\ kraju> (sprawd¼ te¿ \-aid) (tylko DVD)
-Wybiera jêzyk ¶cie¿ki d¼wiêkowej d¼wiêku DVD i próbuje otworzyæ strumieñ audio
-pasuj±cy do podanego kodu.
-MPlayer wy¶wietli listê dostêpnych jêzyków, je¶li jest uruchomiony w trybie
-gatatliwym (\-v).
+.B \-alang <kod\ jêzyka> (sprawd¼ te¿ \-aid)
+Odtwarza ¶cie¿kê d¼wiêkow±, która odpowiada podanemu kodowi jêzyka.
+Ró¿ne formaty u¿ywaj± ró¿nych kodów. DVD korzysta z dwuliterowych w standardzie
+ISO 639-1, Matroska i NUT operuj± na trzyliterowych ISO 639-2, a OGM
+korzysta z dowolnego identyfikatora. MPlayer wy¶wietli listê dostêpnych jêzyków,
+je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
-.IPs "\-alang pl,en"
-Odtwarza polsk± ¶cie¿kê, a je¶li ta jest niedostêpna to angielsk±.
+.IPs "mplayer dvd://1 \-alang hu,en"
+Wybiera z DVD ¶cie¿kê w jêzyku wêgierskim, a je¿eli jej nie ma, korzysta z
+angielskiej.
+.IPs "mplayer \-alang jpn example.mkv"
+Odtwarza film w formacie Matroska w jêzyku japoñskim.
 .RE
 .PD 1
 .
@@ -2361,7 +2365,7 @@ Wybiera sterownik, którego nale¿y u¿yæ jako nak³adki na X11.
 .PD 1
 .
 .TP
-.B xvmc (tylko X11, \-vc ffmpeg12mc)
+.B xvmc (tylko X11 z \-vc ffmpeg12mc)
 Sterownik wyj¶cia video, który korzysta z rozszerzenia XvMC (X Video Motion
 Compensation) oferowanego przez XFree86 4.x, aby przyspieszyæ dekodowanie
 MPEG1/\:2 i VCR2.
@@ -6997,7 +7001,7 @@ Mo¿esz u¿yæ wszelkich opcji kodowania, nawet te wymagaj±ce
 du¿ej mocy obliczeniowej.
 .br
 .I INFORMACJA:
-Obs³uga trybu trójprzej¶ciowego i x264 jest ca³kiem nowa w MEncoderze, mile
+Obs³uga trybu trójprzej¶ciowego x264 jest ca³kiem nowa w MEncoderze, mile
 widziane jest wszelkie wsparcie dotycz±ce dobrych kombinacji opcji x264,
 które s±, i szybkie, i daj± dobr± jako¶æ.
 .REss
@@ -7063,7 +7067,15 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .
 .TP
 .B psnr | nopsnr 
-Drukuje statystyki stosunku sygna³u do szumu (domy¶lnie: wy³±czone).
+Drukuje statystyki stosunku sygna³u do szumu.
+.br
+.I INFORMACJA:
+Pola PSNR 'Y', 'U', 'V', i 'Avg' nie s± matematycznie poprawne
+(s± po prostu u¶rednion± warto¶ci± PSNR branego z ka¿dej klatki).
+S± trzymane tylko dla porównania z referencyjnym kodekiem JM.
+Dla wszytkich innych celów, korzystaj albo z "Global" PSNR, albo z poszczególnych
+warto¶ci PSNR przypadaj±cych na klatkê drukowanych przez log=3.
+
 .
 .
 .\" --------------------------------------------------------------------------
