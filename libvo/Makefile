@@ -7,7 +7,7 @@ SRCS=aspect.c aclib.c osd.c font_load.c video_out.c vo_null.c vo_pgm.c vo_md5.c 
 OBJS=$(SRCS:.c=.o)
 
 ifeq ($(VIDIX),yes)
-SRCS += vosub_vidix.c vo_xvidix.c
+SRCS += vosub_vidix.c
 endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DVB_INC) -DMPG12PLAY #-Wall

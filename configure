@@ -2754,8 +2754,13 @@ test "$_debug" && _def_debug='#define MP_DEBUG 1'
 _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
+# TODO cleanup the vidix stuff here
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
+if test "$_vidix" = yes && test "$_x11" = yes; then
+  _vosrc="$_vosrc vo_xvidux.c"
+  _vomodules="xvidix $_vomodules"
+fi
 echo Checking for vidix ... "$_vidix"
 #############################################################################
 echo "Creating config.mak"
