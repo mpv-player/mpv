@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.7 -->
 <appendix id="mailinglists">
 <title>Listy mailingowe</title>
 <para>
@@ -103,7 +103,7 @@ możliwe problemy związane z tą zmianą).
 Lista przenoszenia <application>MPlayera</application> do środowiska Cygwin:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
 Lista poświęcona dyskusji o przenoszeniu <application>MPlayera</application> do
-środowiska Cygwin.
+środowiska <application>Cygwin</application> i <application>MinGW</application>.
 </para></listitem>
 <listitem><para>
 Lista przenoszenia <application>MPlayera</application> do środowiska OS/2:
