@@ -73,7 +73,7 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "Ошибка обработки DVD КЛЮЧА.\n"
 #define MSGTR_CmdlineDVDkey "Коммандная строка DVD требует записанный ключ для дешифрования.\n"
 #define MSGTR_DVDauthOk "Авторизация DVD выглядит OK.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: FATAL: выбранный поток потерян!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: выбранный поток потерян!\n"
 #define MSGTR_CantOpenDumpfile "Не могу открыть файл дампа!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "Кадр/сек не указаны (или недопустимые) в заголовке! Используйте -fps опцию!\n"

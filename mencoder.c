@@ -467,7 +467,7 @@ sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
   if(!video_read_properties(sh_video)){
-      printf(MSGTR_CannotReadVideoPropertiers);
+      printf(MSGTR_CannotReadVideoProperties);
       mencoder_exit(1,NULL);
   }
 

@@ -73,7 +73,7 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "Feil under bearbeiding av DVD KEY.\n"
 #define MSGTR_CmdlineDVDkey "Etter spurte DVD kommandolinje nøkkel er lagret for descrambling.\n"
 #define MSGTR_DVDauthOk "DVD auth sekvense ser ut til å være OK.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: FATALT: valgte stream mangler!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATALT: valgte stream mangler!\n"
 #define MSGTR_CantOpenDumpfile "Kan ikke åpne dump fil!!!\n"
 #define MSGTR_CoreDumped "core dumpet :)\n"
 #define MSGTR_FPSnotspecified "FPS ikke spesifisert (eller ugyldig) i headeren! Bruk -fps valget!\n"

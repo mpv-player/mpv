@@ -69,7 +69,7 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "Eroare la procesarea cheii DVD.\n"
 #define MSGTR_CmdlineDVDkey "Cheia DVD specificatã în linia de comandã este pãstratã pentru decodificare.\n"
 #define MSGTR_DVDauthOk "Secvenþa de autentificare DVD pare sã fie OK.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: FATALA: pista selectatã lipseºte!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATALA: pista selectatã lipseºte!\n"
 #define MSGTR_CantOpenDumpfile "Nu pot deschide fiºierul (dump)!!!\n"
 #define MSGTR_CoreDumped "core aruncat :)\n"
 #define MSGTR_FPSnotspecified "FPS nespecificat (sau invalid) în antet! Folosiþi opþiunea -fps!\n"

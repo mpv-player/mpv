@@ -1010,7 +1010,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   case 3: ds=d_dvdsub;break;
   }
   if(!ds){        
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedSteramMissing);
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedStreamMissing);
       exit_player(MSGTR_Exit_error);
   }
   // disable other streams:
@@ -1042,7 +1042,7 @@ if(sh_video){
 
   current_module="video_read_properties";
   if(!video_read_properties(sh_video)) {
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoPropertiers);
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoProperties);
     sh_video=d_video->sh=NULL;
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",

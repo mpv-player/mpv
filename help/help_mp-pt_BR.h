@@ -75,7 +75,7 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "Erro processado a cahve do DVD.\n"
 #define MSGTR_CmdlineDVDkey "Linha de comando requisitada do DVD está armazenada para \"descrambling\".\n"
 #define MSGTR_DVDauthOk "Sequência de autenticação do DVD parece estar OK.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: FATAL: fluxo (stream) selecionado faltando!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: fluxo (stream) selecionado faltando!\n"
 #define MSGTR_CantOpenDumpfile "Nào pode-se abrir o arquivo dump!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "Quadros por segundo (FPS) não especificado (ou inválido) no cabeçalho! User a opção -fps!\n"

@@ -77,7 +77,7 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "DVD 키를 처리하는 도중 오류가 발생했습니다.\n"
 #define MSGTR_CmdlineDVDkey "요청한 DVD 명령줄 키를 해독을 위해 저장했습니다.\n"
 #define MSGTR_DVDauthOk "DVD 인증 결과가 정상적인듯 합니다.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: 치명적: 선택된 스트림이 없습니다!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: 치명적: 선택된 스트림이 없습니다!\n"
 #define MSGTR_CantOpenDumpfile "dump파일을 열 수 없습니다!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "헤더에 FPS가 지정되지않았거나 잘못되었습니다! -fps 옵션을 사용하세요!\n"
