@@ -536,8 +536,8 @@ int gui_no_filename=0;
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags: Type: %d MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
-      gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
+      gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #ifdef RUNTIME_CPUDETECT
@@ -559,7 +559,10 @@ int gui_no_filename=0;
 #ifdef HAVE_SSE
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
 #endif
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
+#ifdef HAVE_SSE2
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
+#endif
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
 #endif
 
 #endif

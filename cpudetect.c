@@ -117,7 +117,7 @@ void GetCpuCaps( CpuCaps *caps)
 		    caps->cpuType=8+((regs2[0]>>20)&255);
 		}
 		caps->cpuStepping=regs2[0] & 0xf;
-		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Type: %d, Stepping: %d)\n",
+		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Family: %d, Stepping: %d)\n",
 		    caps->cpuType, caps->cpuStepping);
 
 		// general feature flags:
