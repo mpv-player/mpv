@@ -1,0 +1,19 @@
+Aby zbudowaæ pakiet:
+ ¦ci±gnij najnowsz± wersjê z cvs, lub ¶wie¿ego .tgz i rozpakuj go,
+ cd do katalogu programu:
+eyck@incubus:~/src$ cd main
+eyck@incubus:~/src/main$ fakeroot debian/rules binary
+ (... mplayer wykrywa sprzêt, dostêpne sterowniki..i... )
+ ..
+ dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
+
+I teraz wystarczy jako root uruchomiæ: dpkg -i ../mplayer_0.18-1_i386.deb 
+Tak to bêdzie wygl±daæ:
+
+eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+Password:
+(Reading database ... 26946 files and directories currently installed.)
+Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb) ...
+Unpacking replacement mplayer ...
+Setting up mplayer (0.18-1) ...
+

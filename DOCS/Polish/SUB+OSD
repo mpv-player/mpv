@@ -1,0 +1,40 @@
+Podtytu³y 
+-- -- -- -- - 
+Tak, mplayer wspiera du¿± gamê typów napisów. Aktualnie ( 2001/06/01 ) 
+7 rodzaji podtytu³ów/napisów mog± byæ u¿ywany przez kod subreadera.
+Aby zobaczyæ co to za formaty zobacz plik subreader.c linia 20.
+ 
+Podtytu³y s¹ wystawiane na pokaz z technik¹ nazywany Na Ekranie Wystawiaj¹ na pokaz . 
+Napisy s± wy¶wietlane technik± zwan± OSD, On Screen Display.
+OSD jest u¿ywany by wy¶wietlaæ aktualny czas, wska¼nik g³o¶no¶ci oraz 
+wska¼nik wyszukiwania.
+ 
+ 
+INSTALOWANIE OSD oraz napisów.
+-- -- -- - 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+@ Uwaga: OSD i napisy nie s± standardowo skonfigurowane.
+@  Musisz ¶ci±gn±c fonty ze strony mplayera 
+@ mplayer.sf.net/homepage/dload.html
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+Standartowy ( Centralne europejskie , Latin1 ) pakunek fontów : 
+	http://mplayer.dev.hu/mp-ftp/release/mp_font3.zip
+	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
+	( mp_font1 i mp_font2 s± ju¿ nieaktualne )
+ 
+Cyrylica : 
+	http://thot.banki.hu/mp-ftp/releases/bgfont.zip
+ 
+A pod tym adresem znajdziesz koreañskie fonty
+	http://realtime.ssu.ac.kr/~lethean/mplayer
+	
+Jak ¶ci±gniesz, UNZIPuj pliki do ~/.mplayer/font/
+Powiniene¶ teraz zobaczyæ zegar w lewym górnym rogu filmu
+(wyl±cz to za pomoc± klawisza 'o')
+ 
+OSD ma 3 stany : ( prze³±czaj za pomoc± 'o' )
+- zegar + wska¼nik wolumenu + wska¼nik wyszukiwania + sub ( standart ) 
+- wolumenu kreska + szuka kreski + ³odzi podwodna 
+- tylko napisy
+     
+

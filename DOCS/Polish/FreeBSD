@@ -1,0 +1,21 @@
+Notatki dla u¿ytkowników FreeBSD
+======================= 
+ 
+1 . Bêdziesz potrzebowa³ GNU make ( gmake , /usr/ports/devel/gmake ) , 
+Rodzime BSD make nie zadzia³a w³a¶ciwie.
+
+2 . Aby uruchomiæ mplayera bêdziesz potrzebowa³ przekompilowaæ j±dro z opcj±
+" options USER_LDT " ( chyba ¿e uje¿dzasz -CURRENT, gdzie opcja ta jest domy¶ln± )
+ 
+3 . Je¿eli mplayer narzeka "CD-ROM Device '/dev/cdrom/' not found!" zrób
+symboliczne dowi±zanie: ln -s /dev/<twoje urzadzenie cdrom> /dev/cdrom
+ 
+4 . Nie ma jeszcze supportu dla DVD w FreeBSD
+Czuj siê zaproszony by go dodaæ;)
+ 
+Baw siê dobrze (tak jak ja)!
+ 
+-- 
+Vladimir Kushnir 
+     
+
