@@ -784,15 +784,19 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
 
 int
 mp_input_read_key_code(int time) {
+#ifndef HAVE_NO_POSIX_SELECT
   fd_set fds;
   struct timeval tv,*time_val;
+#endif
   int i,n=0,max_fd = 0;
   static int last_loop = 0;
 
   if(num_key_fd == 0)
     return MP_INPUT_NOTHING;
 
+#ifndef HAVE_NO_POSIX_SELECT
   FD_ZERO(&fds);
+#endif
   // Remove fd marked as dead and build the fd_set
   // n == number of fd's to be select() checked
   for(i = 0; (unsigned int)i < num_key_fd; i++) {
@@ -804,13 +808,16 @@ mp_input_read_key_code(int time) {
       continue;
     if(key_fds[i].fd > max_fd)
       max_fd = key_fds[i].fd;
+#ifndef HAVE_NO_POSIX_SELECT
     FD_SET(key_fds[i].fd,&fds);
+#endif
     n++;
   }
 
   if(num_key_fd == 0)
     return MP_INPUT_NOTHING;
 
+#ifndef HAVE_NO_POSIX_SELECT
 // if we have fd's without MP_FD_NO_SELECT flag, call select():
 if(n>0){
 
@@ -831,6 +838,7 @@ if(n>0){
   }
 
 }
+#endif
 
   for(i = last_loop + 1 ; i != last_loop ; i++) {
     int code = -1;
@@ -841,9 +849,11 @@ if(n>0){
       last_loop %= (num_key_fd+1);
       continue;
     }
+#ifndef HAVE_NO_POSIX_SELECT
     // No input from this fd
     if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds))
       continue;
+#endif
     if(key_fds[i].fd == 0) { // stdin is handled by getch2
       code = getch2(time);
       if(code < 0)
@@ -959,8 +969,10 @@ mp_input_read_keys(int time,int paused) {
 
 static mp_cmd_t*
 mp_input_read_cmds(int time) {
+#ifndef HAVE_NO_POSIX_SELECT
   fd_set fds;
   struct timeval tv,*time_val;
+#endif
   int i,n = 0,max_fd = 0,got_cmd = 0;
   mp_cmd_t* ret;
   static int last_loop = 0;
@@ -968,7 +980,9 @@ mp_input_read_cmds(int time) {
   if(num_cmd_fd == 0)
     return NULL;
 
+#ifndef HAVE_NO_POSIX_SELECT
   FD_ZERO(&fds);
+#endif
   for(i = 0; (unsigned int)i < num_cmd_fd ; i++) {
     if( (cmd_fds[i].flags & MP_FD_DEAD) || (cmd_fds[i].flags & MP_FD_EOF) ) {
       mp_input_rm_cmd_fd(cmd_fds[i].fd);
@@ -980,13 +994,16 @@ mp_input_read_cmds(int time) {
       got_cmd = 1;
     if(cmd_fds[i].fd > max_fd)
       max_fd = cmd_fds[i].fd;
+#ifndef HAVE_NO_POSIX_SELECT
     FD_SET(cmd_fds[i].fd,&fds);
+#endif
     n++;
   }
 
   if(num_cmd_fd == 0)
     return NULL;
 
+#ifndef HAVE_NO_POSIX_SELECT
   if(time >= 0) {
     tv.tv_sec=time/1000; 
     tv.tv_usec = (time%1000)*1000;
@@ -1006,6 +1023,7 @@ mp_input_read_cmds(int time) {
     }
     break;
   }
+#endif
 
   for(i = last_loop + 1; i !=  last_loop ; i++) {
     int r = 0;
@@ -1016,8 +1034,10 @@ mp_input_read_cmds(int time) {
       last_loop %= (num_cmd_fd+1);
       continue;
     }
+#ifndef HAVE_NO_POSIX_SELECT
     if( ! (cmd_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(cmd_fds[i].fd,&fds) && ! (cmd_fds[i].flags & MP_FD_GOT_CMD) )
       continue;
+#endif
 
     r = mp_input_read_cmd(&cmd_fds[i],&cmd);
     if(r < 0) {
