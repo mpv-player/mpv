@@ -11,6 +11,7 @@
 #include <limits.h>
 
 #include "af.h"
+#include "../bswap.h"
 
 // Integer to float conversion through lrintf()
 #ifdef HAVE_LRINTF
@@ -379,10 +380,8 @@ static void endian(void* in, void* out, int len, int bps)
   register int i;
   switch(bps){
     case(2):{
-      register uint16_t s;
       for(i=0;i<len;i++){
-	s=((uint16_t*)in)[i];
-	((uint16_t*)out)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
+	((uint16_t*)out)[i]=bswap_16(((uint16_t*)in)[i]);
       }
       break;
     }
@@ -398,13 +397,8 @@ static void endian(void* in, void* out, int len, int bps)
       break;
     }
     case(4):{
-      register uint32_t s;
       for(i=0;i<len;i++){
-	s=((uint32_t*)in)[i];
-	((uint32_t*)out)[i]=(uint32_t)(((s&0x000000FF)<<24) | 
-				       ((s&0x0000FF00)<<8)  |
-				       ((s&0x00FF0000)>>8)  |
-				       ((s&0xFF000000)>>24));
+	((uint32_t*)out)[i]=bswap_32(((uint32_t*)in)[i]);
       }
       break;
     }
