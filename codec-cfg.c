@@ -228,6 +228,7 @@ static short get_driver(char *s,int audioflag)
 		"rle",
 		"xanim",
 		"msvidc",
+		"fli",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

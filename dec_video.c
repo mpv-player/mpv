@@ -123,6 +123,15 @@ void AVI_Decode_Video1_8(
   unsigned char *palette_map,
   int bytes_per_pixel);
 
+void AVI_Decode_Fli(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int bytes_per_pixel);
+
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -556,6 +565,12 @@ switch(sh_video->codec->driver){
      (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
    }
    break;
+ case VFM_FLI: {
+   int bpp=((out_fmt&255)+7)/8; // RGB only
+   sh_video->our_out_buffer = 
+     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   }
+   break;
  }
 }
   sh_video->inited=1;
@@ -803,6 +818,13 @@ if(verbose>1){
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
         (char *)sh_video->bih+40, ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
+  case VFM_FLI:
+      AVI_Decode_Fli(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;
 } // switch
