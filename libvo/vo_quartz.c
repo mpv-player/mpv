@@ -9,8 +9,7 @@
 	
 	MPlayer Mac OSX Quartz video out module.
 	
-	todo:   -'plist' resource
-			-RGB32 color space support
+	todo:	-RGB32 color space support
 			-rootwin
 			-screen overlay output
 			-while mouse button down event mplayer is locked, fix that
@@ -302,7 +301,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
   
 	//Set window title
-	titleKey	= CFSTR("MPlayer");
+	titleKey	= CFSTR("MPlayer - The Movie Player");
 	windowTitle = CFCopyLocalizedString(titleKey, NULL);
 	result		= SetWindowTitleWithCFString(theWindow, windowTitle);
 	CFRelease(titleKey);
@@ -717,6 +716,26 @@ static uint32_t preinit(const char *arg)
             else if (parse_pos[0]) parse_err = 1;
         }
     }
+	
+	//this chunk of code is heavily based off SDL_macosx.m from SDL 
+	//it uses an Apple private function to request foreground operation
+
+	void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
+	ProcessSerialNumber myProc, frProc;
+	Boolean sameProc;
+	
+	if (GetFrontProcess(&frProc) == noErr)
+	{
+		if (GetCurrentProcess(&myProc) == noErr)
+		{
+			if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
+			{
+				CPSEnableForegroundOperation(&myProc);
+			}
+			SetFrontProcess(&myProc);
+		}
+	}
+
     return 0;
 }
 
