@@ -717,7 +717,7 @@ $_3dfx
 $_mga
 $_syncfb
 
-#if defined(HAVE_GL)||defined(HAVE_X11)|defined(HAVE_XV)
+#if defined(HAVE_GL)||defined(HAVE_X11)||defined(HAVE_XV)
 #define X11_FULLSCREEN
 #endif
 
