@@ -1,4 +1,4 @@
-.\" synced with 1.810
+.\" synced with 1.811
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "25 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -190,7 +190,7 @@ DVD (SPU streams, VobSub et Closed Captions).
 (MPlayer's Movie Encoder) est un simple encodeur de vidéos, conçu pour encoder
 des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
 par MPlayer (voir ci-dessous).
-Il encode en MPEG4 (DivX/XviD), un des codecs libavcodec, et en
+Il encode en MPEG-4 (DivX/XviD), un des codecs libavcodec, et en
 PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3\ passes.
 Il permet également de copier des flux de données (stream), possède un
 puissant système de plugins (découpage, expansion, retournement, postprocess,
@@ -2540,7 +2540,7 @@ Sélectionnne le pilote à utiliser comme source pour l'incrustation dans X11.
 .TP
 .B xvmc (X11 avec \-vc ffmpeg12mc uniquement)
 Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de
-XFree86 4.x pour accélérer les lectures de médias MPEG1/\:2 et VCR2.
+XFree86 4.x pour accélérer les lectures de médias MPEG-1/\:2 et VCR2.
 .PD 0
 .RSs
 .IPs benchmark
@@ -3491,9 +3491,9 @@ réduite.
 .br
 3: 1/8 résolution
 .REss
-.IPs "sb=<valeur> (MPEG2 uniquement)"
+.IPs "sb=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs au bas de l'image.
-.IPs "st=<valeur> (MPEG2 uniquement)"
+.IPs "st=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs en haut de l'image.
 .IPs vismv=<valeur>
 vismv:
@@ -3654,7 +3654,7 @@ Essaie d'abord le codec divx4linux, puis se rabat sur les autres.
 .IPs "\-vc -divxds,-divx,"
 Essaie les autres codecs excepté les codecs DivX Win32.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Essaie le codec MPEG1/\:2 de libavcodec, puis libmpeg2, puis les autres.
+Essaie le codec MPEG-1/\:2 de libavcodec, puis libmpeg2, puis les autres.
 .RE
 .PD 1
 .
@@ -4133,7 +4133,7 @@ Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .
 .TP
 .B lavc[=qualité:fps]
-Conversion logicielle rapide YV12 vers MPEG1 avec libavcodec pour utilisation
+Conversion logicielle rapide YV12 vers MPEG-1 avec libavcodec pour utilisation
 avec DVB/\:DXR3.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
@@ -4150,7 +4150,7 @@ force le nombre de trames par seconde en sortie (nombre flottant)
 .
 .TP
 .B fame\ \ \ 
-Conversion logicielle rapide YV12 vers MPEG1 avec libfame pour utilisation avec
+Conversion logicielle rapide YV12 vers MPEG-1 avec libfame pour utilisation avec
 DVB/\:DXR3.
 .
 .TP
@@ -4607,7 +4607,7 @@ Seuil de la Somme des Différences Absolues (par défaut\ : 64).
 .
 .TP
 .B softpulldown
-Ce filtre ne fonctionne qu'avec MEncoder et agit sur les flags MPEG2 utilisés
+Ce filtre ne fonctionne qu'avec MEncoder et agit sur les flags MPEG-2 utilisés
 pour le pulldown soft 3:2 (soft telecine).
 Si vous voulez utiliser les filtres ivtc ou detc sur des films qui sont
 soft téléciné, insérer ce filtre avant eux devrait les rendre plus efficaces.
@@ -5582,11 +5582,11 @@ H.263
 .IPs h263p
 H.263+
 .IPs mpeg4
-MPEG4 (DivX 4/5)
+MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
-MS MPEG4v2
+MS MPEG-4v2
 .IPs wmv1\ 
 Windows Media Video, version 1 (alias WMV7)
 .IPs wmv2
@@ -5594,9 +5594,9 @@ Windows Media Video, version 2 (alias WMV8)
 .IPs rv10\ 
 un ancien codec RealVideo
 .IPs mpeg1video
-MPEG1 video
+MPEG-1 video
 .IPs mpeg2video
-MPEG2 video
+MPEG-2 video
 .IPs huffyuv
 HuffYUV
 .IPs asv1\ 
@@ -5671,7 +5671,7 @@ nombre maximum de trames-B entre les trames-non-B\ :
 .IPs 0
 pas de trames-B (par défaut)
 .IPs 0\-2
-intervalle sensé pour MPEG4
+intervalle sensé pour MPEG-4
 .RE
 .PD 1
 .
@@ -5761,7 +5761,7 @@ légèrement plus petits, mais un déplacement moins précis.
 0 est équivalent à 1, ce qui rend chaque trame une trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
 mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
-Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
+Pour une conformité stricte MPEG-1/\:2/\:4 cela devrait être <=132.
 .
 .TP
 .B sc_threshold=<-1000000\-1000000>
@@ -5907,7 +5907,7 @@ bitrate minimum en kbit/\:sec (passe\ 1/\:2)
 .TP
 .B vrc_buf_size=<valeur>
 taille du tampon en kbit (passe\ 1/\:2).
-Pour MPEG1/\:2 cela fixe également la taille du tampon vbv, utilisez 327 pour
+Pour MPEG-1/\:2 cela fixe également la taille du tampon vbv, utilisez 327 pour
 un VCD, 917 pour un SVCD et 1835 pour un DVD.
 .I NOTE:
 vratetol ne devrait pas être trop grand durant la seconde passe
@@ -6121,7 +6121,7 @@ conformité stricte au standard
 .IPs 0
 désactivé (par défaut)
 .IPs 1
-Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG4 de
+Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG-4 de
 référence.
 .IPs -1
 Permet l'encodage non-standard huffyuv YV12 (fichiers 20% plus petits,
@@ -6884,7 +6884,7 @@ quant_type.
 Décide  trame par trame d'utiliser ou non les quantificateurs MPEG ou H.263.
 .br
 .I ATTENTION\ :
-Cette option génèrera un flux vidéo incompatible avec la norme MPEG4.
+Cette option génèrera un flux vidéo incompatible avec la norme MPEG-4.
 Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
 (mode 2passes uniquement)
 .br
@@ -6949,7 +6949,7 @@ pouvez sans problème laisser cette option désactivée, à moins de savoir
 précisément ce que vous faites.
 .br
 .I ATTENTION\ :
-Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG4,
+Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG-4,
 et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:XviD.
 .br
 .I ATTENTION\ :
@@ -7003,7 +7003,7 @@ mauvaise qualité, soyez prévenus\ !
 .
 .TP
 .B (no)qpel
-MPEG4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
+MPEG-4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
 Il est néanmoins possible de faire une recherche avec une précision d'un
 quart de pixel, ce qui permet généralement d'obtenir une image plus
 détaillée et d'économiser des bits en description de mouvement.
@@ -7194,7 +7194,7 @@ Rapport hauteur/\:largeur d'affichage).
 PAR est le ratio entre la largeur et la hauteur d'un pixel.
 Ils sont tout deux liés par la formule\ : DAR = PAR * (largeur/hauteur).
 .br
-MPEG4 définit 5 PAR et un étendu, pour permettre de définir des PAR
+MPEG-4 définit 5 PAR et un étendu, pour permettre de définir des PAR
 particuliers.
 5 modes standard peuvent être définis\ :
 .PD 0
