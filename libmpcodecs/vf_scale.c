@@ -46,6 +46,19 @@ extern int opt_screen_size_y;
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam);
 
 static unsigned int outfmt_list[]={
+// YUV:
+    IMGFMT_444P,
+    IMGFMT_422P,
+    IMGFMT_YV12,
+    IMGFMT_I420,
+    IMGFMT_IYUV,
+    IMGFMT_YVU9,
+    IMGFMT_IF09,
+    IMGFMT_411P,
+    IMGFMT_Y800,
+    IMGFMT_Y8,
+    IMGFMT_YUY2,
+    IMGFMT_UYVY,
 // RGB:
     IMGFMT_BGR32,
     IMGFMT_RGB32,
@@ -63,19 +76,6 @@ static unsigned int outfmt_list[]={
     IMGFMT_RG4B,
     IMGFMT_BGR1,
     IMGFMT_RGB1,
-// YUV:
-    IMGFMT_444P,
-    IMGFMT_422P,
-    IMGFMT_YV12,
-    IMGFMT_I420,
-    IMGFMT_IYUV,
-    IMGFMT_YVU9,
-    IMGFMT_IF09,
-    IMGFMT_411P,
-    IMGFMT_Y800,
-    IMGFMT_Y8,
-    IMGFMT_YUY2,
-    IMGFMT_UYVY,
     0
 };
 
