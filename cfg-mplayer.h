@@ -173,7 +173,6 @@ extern char* pp_help;
 
 m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
-	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this don't need anymore to be the first!!! */
 
 //---------------------- libao/libvo options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
