@@ -249,8 +249,8 @@ too. So I've decided to write/modify one...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
-<P>You'll need the following packages and versions if you don't want to
-experience any problems:<BR>
+<P><B><I>REQUIREMENTS</I></B><BR>
+
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
   responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
@@ -270,49 +270,73 @@ experience any problems:<BR>
 
 <UL>
 <LI>If you have <B>gcc 2.96</B> on your system, <A HREF="users_against_developers.html"><B><I>READ
-THIS</A> or the <A HREF="faq.html">FAQ</A> !</I></B></LI>
+THIS</A> and the <A HREF="faq.html">FAQ</A> !</I></B></LI>
+</UL>
 
-<LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to
-use Win32 codecs. If you want to play or encode for example movies recorded
-with digital cameras (example: DV), you must install them. Download and unzip
-w32codecs.zip to /usr/lib/win32 . Note: the avifile project has similar codecs
-package, but it differs from ours, so if you want to use all supported codecs,
-then use our package! However, you can use our codecs package with
-avifile.</LI>
+<P><B><I>CODECS</I></B></P>
 
-<LI>If you own a Matrox G200/G400/G450/G550 card, then please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
+<UL>
+<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/etc codec, check the
+<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
+<UL>
+  <LI>you can <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B></LI>
+  <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4
+movies (even faster than the original DivX4 library itself) !</LI>
+</UL>
+</LI>
+
+<LI><B>Win32 codecs</B> : If you plan to use <B>MPlayer</B> on x86
+architecture, you will possibly need them. Download and unzip w32codecs.zip to
+/usr/lib/win32 . Note: the avifile project has similar codecs package, but it
+differs from ours, so if you want to use all supported codecs, then use our
+package! However, you can use our codecs package with avifile. Features :<BR>
+<UL>
+  <LI>you need this if you want to play or encode for example movies recorded
+  with digital cameras (example: DV)</LI>
+  <LI>needed if you want to play <B>WMV movies</B> or older ASF's</LI>
+</UL>
+</LI>
+
+<LI><B>DivX4</B> : information about this codec is available in the
+<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. If you don't want to use
+<B>MEncoder</B>, you possibly don't want this codec as <B>libavcodec</B> (see
+above) is much faster than this.<BR>
+Features :<UL>
+  <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL</LI>
+  <LI>it's closed-source, and only an x86 version is available.</LI>
+  <LI><I>You also need this codec for <B>MEncoder</B>, see below !</I></LI>
+</UL>
+</LI>
+
+<LI>If you want to play <B>3ivx</B> movies, check the <A HREF=codecs.html#2.2.1.3>
+XAnim codecs section</A>.</LI>
+</UL>
+
+<P><B><I>VIDEOCARDS</I></B></P>
+
+<UL>
+<LI><B>Matrox G200/G400/G450/G550 cards</B> : please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
 section in order to gain big speedup. It is important to do these steps
 <I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built. Also check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>
 section.</LI>
 
-<LI>If you own a 3Dfx Voodoo3/Banshee card, then please see the <A
+<LI><B>3Dfx Voodoo3/Banshee cards</B> : please see the <A
 HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big speedup. It
 is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
 otherwise no 3Dfx support will be built. Also see the <A HREF="video.html#2.3.1.A.3">3dfx
 TV out section</A>.</LI>
 
-<LI>If you own an ATI card, see the <A HREF="video.html#2.3.1.A.2">ATI cards
+<LI><B>ATI cards</B> : see the <A HREF="video.html#2.3.1.A.2">ATI cards
 section</A> of the TV-out documentation, to know what features of your card is
-supported under Linux/MPlayer. If you have a <B>Radeon</B> card, we have a
-<B>radeon_vid</B> driver for you, with TV out ! Check <A
+supported under Linux/MPlayer. If you have a <B>Radeon</B> or <B>Rage128</B> card, we have a
+<B>XXX_vid</B> driver for you, with TV out ! Check <A
 HREF="video.html#2.3.1.14">this</A> section !</LI>
+</UL>
 
-<LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
-<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section before compiling.
-This codec can play old <B>DivX</B> movies much faster than the Win32 DLL.
-If you want to play movies with the new <B>DivX4</B> codec, it's
-<B>recommended</B> to use this library, instead the DivX.dll in the
-w32codecs.zip package. The codec itself is closed-source, and only an x86
-version is available. <I>You also need this codec for <B>MEncoder</B>, see
-below !</I></LI>
+<P><B><I>FEATURES</I></B></P>
 
-<LI>If you plan to use ffmpeg's <B>libavcodec</B>, check the
-<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling.
-You'll need this to <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B>,
-and this codec has the <B>greatest decoding speed</B> for DivX and DivX4
-movies (even faster than the original DivX4 library itself) !</LI>
-
+<UL>
 <LI>For DVD support, you'll have to compile libdvdread and libdvdcss.
 See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
 
@@ -322,8 +346,6 @@ before compiling.</LI>
 <LI>If you want to install <B>MEncoder</B> (our great all-purpose encoder),
 see the <A HREF="encoding.html#2.4">MEncoder section</A> .</LI>
 
-<LI>If you want to play <B>3ivx</B> movies, check the <A HREF=codecs.html#2.2.1.3>
-XAnim codecs section</A>.</LI>
 
 <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
 encode movies with <B>MPlayer</B>, read the <A HREF=#2.5>TV input</A> section.</LI>
