@@ -133,7 +133,7 @@ akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
   ezáltal az SDL drivereit is), és néhány alacsonyszintû kártyaspecifikus
   driver (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat szoftveres vagy
   hardveres skálázást, így a teljesképernyõs mód is elérhetõ.  És még nem is
-  szóltam a szép, élsímított, árnyékolt feliratozásról (8 támogatott típus!),
+  szóltam a szép, élsímított, árnyékolt feliratozásról (<B>8 támogatott típus!!!</B>),
   ami támogat európai/ISO 8859-1,2 (magyar, angol, cseh, stb), cirill és koreai
   fontokat, valamint OSD-t!</P>
 
@@ -189,7 +189,7 @@ könyvtárat is, melynek speciális licensze van.</P>
     2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
     még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
     stabilabb, mint eddig! KÖTELEZÕ !
-<LI><B>MPlayer 0.50pre "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmm. Újra release. Néhány tonna új feature, béta verziójú GUI,
     hibajavítások, új vo és ao meghajtók, Linuxon kívül sok más támogatott
     rendszer, nyílt forráskódú DivX kodek, és még rengeteg más. Próbáld ki!
@@ -300,8 +300,36 @@ könyvtárban lévõ skin kerül betöltésre.</P>
 <P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
 
 <P>Igen, az <B>MPlayer</B> sokféle fajta feliratot támogat. A beolvasó kód
-jelenleg 7 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
-file-t, a 20. sor körül.</P>
+jelenleg 8 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
+file-t, a 30. sor körül.</P>
+
+<P>Az <B>MPlayer</B> tartalmaz egy új, <B><I>MPsub</I></B> nevû feliratformátumot.
+A tervezés az én (Gabucino) kezem munkáját dicséri. A legfõbb újítása hogy
+<I>dinamikusan</I> idõ alapú (bár van képkocka alapú módja is). Példa (a
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A> file-ból) :
+</P>
+
+<P><CODE><I>
+# elsõ szám    : ennyi másodpercnyi szünet miután az elõzõ felirat eltünt<BR>
+# második szám : a jelenlegi feliratot ennyi ideig jeleníti meg<BR>
+<BR>
+15 3<BR>
+A long, long time ago...<BR>
+<BR>
+0 3<BR>
+in a galaxy far away...<BR>
+<BR>
+0 3<BR>
+Naboo was under an attack.<BR>
+</I></CODE></P>
+
+<P>Tehát a fõ cél a <B>felirat szerkesztés/idõzítés/összeillesztés/szétvágás
+megkönnyítése</B>. Valamint, ha - tegyük fel - szerzel egy SSA feliratot,
+de a te filmedhez képest rosszul van idõzítve, egyszerûen végrehajtasz egy
+<I>mplayer semmi.avi -sub forras.ssa -dumpmpsub</I> parancsot. Ekkor egy
+<CODE>dump.mpsub</CODE> file jön létre a jelenlegi könyvtárban, a
+forrás feliratfile szövegével, de <B>MPsub</B> formátumban. Ezekután
+szabadon, röviden, gyorsan idõzítheted.</P>
 
 <P>A feliratok egy <B>'OSD', On Screen Display</B> nevu módszerrel vannak
 megjelenítve. Ez az OSD használatos az idõ, hangerõ, stb megjelenítésére is.</P>

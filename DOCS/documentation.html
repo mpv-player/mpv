@@ -128,8 +128,8 @@ is the wide range of supported output drivers. It works with X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, but you can use SDL (and this way all drivers of
 SDL) and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too!
 Most of them supports software or hardware scaling, so you can enjoy movies in
-fullscreen. And what about the nice big antialiased shaded subtitles (8
-supported types!!!) with european/ISO 8859-1,2 (hungarian, english, czech, etc), cyrillic,
+fullscreen. And what about the nice big antialiased shaded subtitles (<B>8
+supported types!!!</B>) with european/ISO 8859-1,2 (hungarian, english, czech, etc), cyrillic,
 korean fonts, and OSD?</P>
 
 <P><B>MPlayer</B> is basically GPL, but contains some non-GPL code which is not
@@ -183,7 +183,7 @@ too. So I've decided to write/modify one...</P>
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
     even more stable than ever, and so on. It's a MUST !  
-<LI><B>MPlayer 0.50pre "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmm. Release again. Tons of new features, beta GUI version, bugs fixed,
     new vo and ao drivers, ported to many systems, including opensource DivX
     codecs and much more. Try it!
@@ -291,8 +291,36 @@ directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
 
 <P>Yes, <B>MPlayer</B> also supports many kinds of subtitles. Currently
-7 kinds of subtitle can be used by the subreader code. To see what are
-these subtitle formats, see subreader.c, line ~20.</P>
+8 kinds of subtitle can be used by the subreader code. To see what are
+these subtitle formats, see subreader.c, line ~30.</P>
+
+<P><B>MPlayer</B> introduces a new subtitle format called <B><I>MPsub</I></B>.
+It was designed by me (Gabucino). Basically its main feature is being
+<I>dynamically</I> time-based (although it has frame-based mode too). Example (from
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
+</P>
+
+<P><CODE><I>
+# first number  : wait this much after previous subtitle disappeared<BR>
+# second number : display the current subtitle for this many seconds<BR>
+<BR>
+15 3<BR>
+A long, long time ago...<BR>
+<BR>
+0 3<BR>
+in a galaxy far away...<BR>
+<BR>
+0 3<BR>
+Naboo was under an attack.<BR>
+</I></CODE></P>
+
+<P>So you see, the main goal was to <B>make subtitle editing/timing/joining/cutting easy</B>. And,
+if you - say - get an SSA subtitle but it's badly timed/delayed to your
+version of the movie, you simply do a <I>mplayer dummy.avi -sub source.ssa
+-dumpmpsub</I> . A <CODE>dump.mpsub</CODE> file will be created in the
+current directory, which will contain the source subtitle's text, but in
+<B>MPsub</B> format. Then you can freely add/substract seconds to/from the
+subtitle.</P>
 
 <P>Subtitles are displayed with a technique called <B>'OSD', On Screen Display</B>.
 OSD is used to display current time, volume bar, seek bar etc.</P>
@@ -653,13 +681,14 @@ all data is accessed modulo 4GB
 
 </LI><LI>Gábor Bérczi (Gabucino):  &lt;gabucino@k2.jozsef.kando.hu&gt;
 <UL><LI>documentation maintainer
-</LI><LI>hungarian translation of documentation
+</LI><LI>hungarian translation of documentation and homepage
 </LI><LI>second webpage design&amp;gfx
 </LI><LI>webpage maintainer
 </LI><LI>testing, codecs quality &amp; speed comparsions
 </LI><LI>IRC channels operator
 (#MPlayer is user channel)
 </LI><LI>experimental MINIX port :)
+</LI><LI>MPsub subtitle format design
 </LI></UL>
 
 </LI><LI>Szabolcs Berecz (Szabi): &lt;szabi@inf.elte.hu&gt;
@@ -704,6 +733,7 @@ all data is accessed modulo 4GB
 </LI><LI>RAW PCM/WAVE file writer for libao2
 </LI><LI>OggVorbis audio support
 </LI><LI>Various aspect code
+</LI><LI>Win32 port
 </LI></UL>
 
 </LI><LI>TeLeNiEkO: &lt;telenieko@telenieko.com&gt;
@@ -776,6 +806,18 @@ all data is accessed modulo 4GB
 
 </LI><LI>Kamil Toman &lt;ktoman@email.cz&gt;
 <UL><LI>czech fonts
+</LI></UL>
+
+</LI><LI>Ivan Kalvatchev &lt;iive@yahoo.com&gt;
+<UL><LI>interlaced MPEG2 support
+</LI></UL>
+
+</LI><LI>pl (?) &lt;p_l@gmx.fr&gt;
+<UL><LI>./configure fixes
+</LI></UL>
+
+</LI><LI>Michael Niedermayer &lt;michaelni@gmx.at&gt;
+<UL><LI>postprocessing support
 </LI></UL>
 
 </LI></UL></P>
