@@ -425,7 +425,6 @@ static const char *cpuname
 				/* D */ N_UNKNOWN, 
 				/* F */ N_UNKNOWN 
 			}, 
-			/* 6 */ F_UNKNOWN, 
 			/* 7 */ F_UNKNOWN, 
 			/* 8 */ F_UNKNOWN, 
 			/* 9 */ F_UNKNOWN, 
