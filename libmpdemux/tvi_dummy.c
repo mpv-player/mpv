@@ -55,6 +55,13 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_VID_GET_FORMAT:
 	    (int)*(void **)arg = IMGFMT_YV12;
 	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_FORMAT:
+	{
+	    int req_fmt = (int)*(void **)arg;
+	    if (req_fmt != IMGFMT_YV12)
+		return(TVI_CONTROL_FALSE);
+	    return(TVI_CONTROL_TRUE);
+	}
 	case TVI_CONTROL_VID_SET_WIDTH:
 	    priv->width = (int)*(void **)arg;
 	    return(TVI_CONTROL_TRUE);
