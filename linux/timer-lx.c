@@ -28,6 +28,16 @@ unsigned int GetTimer(){
   return (tv.tv_sec*1000000+tv.tv_usec);
 }  
 
+// Returns current time in milliseconds
+unsigned int GetTimerMS(){
+  struct timeval tv;
+  struct timezone tz;
+//  float s;
+  gettimeofday(&tv,&tz);
+//  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
+  return (tv.tv_sec*1000+tv.tv_usec/1000);
+}  
+
 static unsigned int RelativeTime=0;
 
 // Returns time spent between now and last call in seconds
