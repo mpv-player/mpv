@@ -1500,7 +1500,7 @@ while(sh_audio){
 
   if(playsize>0){
       sh_audio->a_buffer_len-=playsize;
-      memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
+      memmove(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
       sh_audio->timer+=playsize/(float)(sh_audio->o_bps);
   }
 
