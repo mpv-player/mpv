@@ -2597,6 +2597,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       osd_show_av_delay = 9;
       if(sh_audio) sh_audio->delay+= v;
     } break;
+    case MP_CMD_FRAME_STEP :
     case MP_CMD_PAUSE : {
       osd_function=OSD_PAUSE;
       brk_cmd = 1;

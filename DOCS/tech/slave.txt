@@ -28,6 +28,9 @@ quit [<value>]
 pause
     Pause/unpause the playback.
 
+frame_step
+    Play one frame, then pause again.
+
 grab_frames
     ???
 
