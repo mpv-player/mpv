@@ -99,8 +99,6 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
 
 void free_sh_audio(sh_audio_t* sh){
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_audio at %p  \n",sh);
-    if(sh->a_in_buffer) free(sh->a_in_buffer);
-    if(sh->a_buffer) free(sh->a_buffer);
     if(sh->wf) free(sh->wf);
     free(sh);
 }
@@ -135,7 +133,6 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
 
 void free_sh_video(sh_video_t* sh){
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_video at %p  \n",sh);
-//    if(sh->our_out_buffer) free(sh->our_out_buffer);
     if(sh->bih) free(sh->bih);
     free(sh);
 }
