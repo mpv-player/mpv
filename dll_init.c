@@ -24,11 +24,7 @@
 
 #include "dll_init.h"
 
-#ifdef USE_LIBVO2
-#include "libvo2/img_format.h"
-#else
 #include "libvo/img_format.h"
-#endif
 #include "linux/shmem.h"
 
 extern int divx_quality;

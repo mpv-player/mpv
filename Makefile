@@ -38,13 +38,8 @@ SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c mp-opt-reg.c
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-ifeq ($(VO2),yes)
-VO_LIBS = -Llibvo2 -lvo2
-VO_INC = -Ilibvo2
-else
 VO_LIBS = -Llibvo -lvo
 VO_INC = -Ilibvo
-endif
 V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 
 AO_LIBS = -Llibao2 -lao2
@@ -57,16 +52,10 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC)# -Wall
 
-PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit
+PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit libvo
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
-ifeq ($(VO2),yes)
-PARTS += libvo2
-else
-PARTS += libvo
-endif
-
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
@@ -97,15 +86,10 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a
+COMMON_DEPS = libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
-endif
-ifeq ($(VO2),yes)
-COMMON_DEPS += libvo2/libvo2.a
-else
-COMMON_DEPS += libvo/libvo.a
 endif
 ifeq ($(FAME),yes)
 COMMON_DEPS += libfame/libfame.a
@@ -166,9 +150,6 @@ libmpeg2/libmpeg2.a:
 
 libvo/libvo.a:
 	$(MAKE) -C libvo
-
-libvo2/libvo2.a:
-	$(MAKE) -C libvo2
 
 libao2/libao2.a:
 	$(MAKE) -C libao2

@@ -8,13 +8,8 @@
 
 #include <stdio.h>
 
-#ifdef USE_LIBVO2
-#include "libvo2/libvo2.h"
-#include "libvo2/sub.h"
-#else
 #include "libvo/video_out.h"
 #include "libvo/sub.h"
-#endif
 #include "subreader.h"
 
 static int current_sub=0;

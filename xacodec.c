@@ -29,11 +29,7 @@
 #include "codec-cfg.h"
 #include "stheader.h"
 
-#ifdef USE_LIBVO2
-#include "libvo2/img_format.h"
-#else
 #include "libvo/img_format.h"
-#endif
 #include "linux/timer.h"
 #include "xacodec.h"
 

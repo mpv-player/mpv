@@ -19,8 +19,7 @@
 #
 # GOTCHAS:
 #  - config files are currently:
-#    config.h config.mak libvo/config.mak libao2/config.mak
-#    Gui/config.mak libvo2/config.mak
+#    config.h config.mak libvo/config.mak libao2/config.mak Gui/config.mak
 #
 #############################################################################
 
@@ -970,7 +969,6 @@ _tdfxfb=no
 _directfb=auto
 _zr=auto
 _largefiles=no
-_vo2=no
 _language=en
 _shm=auto
 _linux_devfs=no
@@ -1128,8 +1126,6 @@ for ac_option do
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
   --disable-largefiles)	_largefiles=no	;;
-  --enable-vo2)		_vo2=yes	;;
-  --disable-vo2)	_vo2=no		;;
   --enable-shm)		_shm=yes	;;
   --disable-shm)	_shm=no         ;;
   --enable-select)	_select=yes	;;
@@ -4211,8 +4207,6 @@ VIDIX = $_vidix
 
 OPENDIVX = $_opendivx
 
-VO2 = $_vo2
-
 PNG = $_mkf_png
 JPEG = $_mkf_jpg
 GIF = $_mkf_gif
@@ -4705,20 +4699,6 @@ include ../config.mak
 OPTIONAL_SRCS = $_vosrc
 OPTIONAL_OBJS = $_voobj
 EOF
-
-#############################################################################
-
-if test -d "libvo2" ; then
-
-echo "Creating libvo2/config.mak"
-_vo2obj=`echo $_vo2src | sed -e 's/\.c/\.o/g'`
-cat > libvo2/config.mak << EOF
-include ../config.mak
-OPTIONAL_SRCS = $_vo2src
-OPTIONAL_OBJS = $_vo2obj
-EOF
-
-fi
 
 #############################################################################
 
