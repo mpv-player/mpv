@@ -189,8 +189,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    printf("alsa-init: pcm channel info error: %s\n", snd_strerror(err));
 	    return(0);
 	}
+#ifndef __QNX__
 	if (chninfo.buffer_size)
 	    ao_buffersize = chninfo.buffer_size;
+#endif
 	if (verbose)
 	    printf("alsa-init: setting preferred buffer size from driver: %d bytes\n",
 		ao_buffersize);
