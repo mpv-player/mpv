@@ -29,6 +29,8 @@ extern int frameratecode2framerate[16];
 #include "codec-cfg.h"
 #include "stheader.h"
 
+#include "dll_init.h"
+
 //#include <inttypes.h>
 //#include "libvo/img_format.h"
 
@@ -43,7 +45,6 @@ extern int frameratecode2framerate[16];
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
-extern int init_video_codec(sh_video_t *sh_video,int ex);
 
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_VideoDec.h"
@@ -145,7 +146,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
     return 0;
 }
 
-int uninit_video(sh_video_t *sh_video){
+void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"uninit video: %d  \n",sh_video->codec->driver);
     switch(sh_video->codec->driver){
@@ -179,14 +180,14 @@ sh_video->our_out_buffer=NULL;
 switch(sh_video->codec->driver){
 #ifdef USE_WIN32DLL
  case VFM_VFW: {
-   if(!init_video_codec(sh_video,0)) {
+   if(!init_vfw_video_codec(sh_video,0)) {
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
    break;
  }
  case VFM_VFWEX: {
-   if(!init_video_codec(sh_video,1)) {
+   if(!init_vfw_video_codec(sh_video,1)) {
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32Ex video codec init OK!\n");
@@ -222,7 +223,7 @@ switch(sh_video->codec->driver){
      DS_VideoDecoder_SetDestFmt(out_fmt&255,0);           // RGB/BGR
    }
 
-   sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
+   sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
 
    DS_VideoDecoder_Start();
 
@@ -288,7 +289,7 @@ switch(sh_video->codec->driver){
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
-	sh_video->our_out_buffer = memalign(64,((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
+	sh_video->our_out_buffer = (char*)memalign(64,((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
 //	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
@@ -342,7 +343,7 @@ switch(sh_video->codec->driver){
  }
  case VFM_RLE: {
    int bpp=((out_fmt&255)+7)/8; // RGB only
-   sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
    if(bpp==2){  // 15 or 16 bpp ==> palette conversion!
      unsigned int* pal=(unsigned int*)(((char*)sh_video->bih)+40);
      //int cols=(sh_video->bih->biSize-40)/4;
@@ -486,7 +487,7 @@ if(verbose>1){
 	    int y;
 	    // temporary hack - FIXME
 	    if(!sh_video->our_out_buffer)
-		sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*2);
+		sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*2);
 	    for(y=0;y<sh_video->disp_h;y++){
 	      unsigned char *s0=lavc_picture.data[0]+lavc_picture.linesize[0]*y;
 	      unsigned char *s1=lavc_picture.data[1]+lavc_picture.linesize[1]*y;
@@ -512,33 +513,12 @@ if(verbose>1){
   case VFM_VFWEX:
   case VFM_VFW:
   {
-    HRESULT ret;
-    
+    int ret;
     if(!in_size) break;
-    
-      sh_video->bih->biSizeImage = in_size;
-
-//      sh_video->bih->biWidth = 1280;
-//      sh_video->o_bih.biWidth = 1280;
-	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
-
-if(sh_video->codec->driver==VFM_VFWEX)
-      ret = ICDecompressEx(sh_video->hic, 
-	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
-	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
-                         sh_video->bih,   start,
-                        &sh_video->o_bih,
-                        drop_frame ? 0 : sh_video->our_out_buffer);
-else
-      ret = ICDecompress(sh_video->hic, 
-	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
-	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
-                         sh_video->bih,   start,
-                        &sh_video->o_bih,
-                        drop_frame ? 0 : sh_video->our_out_buffer);
-
-      if(ret){ mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",(int)ret);break; }
-
+    if((ret=vfw_decode_video(sh_video,start,in_size,drop_frame,(sh_video->codec->driver==VFM_VFWEX) ))){
+      mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",ret);
+      break;
+    }
     if(!drop_frame) blit_frame=3;
     break;
   }
@@ -552,7 +532,7 @@ else
 	packet.size=in_size-4;
 	packet.timestamp=sh_video->timer*90000.0;
 	packet.id=0x1E0; //+sh_video->ds->id;
-	planes[0]=&packet;
+	planes[0]=(uint8_t*)(&packet);
 	blit_frame=2;
     } else {
 	// software decoding:
@@ -647,7 +627,7 @@ switch(d_video->demuxer->file_format){
 //   sh_video=d_video->sh;sh_video->ds=d_video;
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
-   if(!videobuffer) videobuffer=memalign(8,VIDEOBUFFER_SIZE);
+   if(!videobuffer) videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
      return 0;

@@ -25,6 +25,8 @@ int fakemono=0;
 #include "codec-cfg.h"
 #include "stheader.h"
 
+#include "dll_init.h"
+
 #include "mp3lib/mp3.h"
 #include "libac3/ac3.h"
 
@@ -51,8 +53,6 @@ int fakemono=0;
     extern int avcodec_inited;
 #endif
 
-extern int init_acm_audio_codec(sh_audio_t *sh_audio);
-extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen);
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
 
@@ -512,7 +512,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	    int len2=0;
 	    int x=ds_get_packet(sh_audio->ds,&start);
 	    if(x<=0) break; // error
-	    y=avcodec_decode_audio(&lavc_context,buf,&len2,start,x);
+	    y=avcodec_decode_audio(&lavc_context,(INT16*)buf,&len2,start,x);
 	    if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
 	    if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
 	    if(len2>0){

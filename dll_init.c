@@ -18,10 +18,10 @@
 #include "codec-cfg.h"
 #include "stheader.h"
 
+#include "dll_init.h"
+
 #include "libvo/img_format.h"
 #include "linux/shmem.h"
-
-extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
 // ACM audio and VfW video codecs initialization
 // based on the avifile library [http://divx.euro.ru]
@@ -143,7 +143,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
 
 
 
-int init_video_codec(sh_video_t *sh_video,int ex){
+int init_vfw_video_codec(sh_video_t *sh_video,int ex){
   HRESULT ret;
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
@@ -282,7 +282,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
     return 0;
   }
 
-  sh_video->our_out_buffer = memalign(64,sh_video->o_bih.biSizeImage);
+  sh_video->our_out_buffer = (char*)memalign(64,sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
     mp_msg(MSGT_WIN32,MSGL_ERR,MSGTR_NoMemForDecodedImage, sh_video->o_bih.biSizeImage);
     return 0;
@@ -296,3 +296,27 @@ int init_video_codec(sh_video_t *sh_video,int ex){
   mp_msg(MSGT_WIN32,MSGL_V,"VIDEO CODEC Init OK!!! ;-)\n");
   return 1;
 }
+
+int vfw_decode_video(sh_video_t* sh_video,void* start,int in_size,int drop_frame,int ex){
+    HRESULT ret;
+
+    sh_video->bih->biSizeImage = in_size;
+
+    if(ex)
+      ret = ICDecompressEx(sh_video->hic, 
+	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
+	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
+                         sh_video->bih,   start,
+                        &sh_video->o_bih,
+                        drop_frame ? 0 : sh_video->our_out_buffer);
+    else
+      ret = ICDecompress(sh_video->hic, 
+	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
+	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
+                         sh_video->bih,   start,
+                        &sh_video->o_bih,
+                        drop_frame ? 0 : sh_video->our_out_buffer);
+
+    return (int)ret;
+}
+
