@@ -3,10 +3,10 @@ include config.mak
 
 LIBNAME = libvo.a
 
-SRCS=aspect.c aclib.c osd.c font_load.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c x11_common.c $(OPTIONAL_SRCS) img_format.c
+SRCS=aspect.c aclib.c osd.c font_load.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c x11_common.c $(OPTIONAL_SRCS) img_format.c vosub_vidix.c
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DVB_INC) -DMPG12PLAY #-Wall
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DVB_INC) -DMPG12PLAY -DVIDIX_PATH='"$(prefix)/lib/mplayer/vidix/"' #-Wall
 # -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o

@@ -2,6 +2,8 @@
 
 include ../../config.mak
 
+BINDIR = $(prefix)/lib/mplayer/vidix
+
 
 RADEON_VID=radeon_vid.so
 RADEON_SRCS=radeon_vid.c
@@ -26,13 +28,13 @@ $(RADEON_OBJS):    $(RADEON_SRCS)
 	$(CC) -c $(RADEON_CFLAGS) -o $@ $<
 
 $(RADEON_VID):     $(RADEON_OBJS)
-	$(CC) $(RADEON_LIBS) -shared -o $(RADEON_VID) $(RADEON_OBJS)
+	$(LD) $(RADEON_LIBS) -shared -soname $(RADEON_VID) -o $(RADEON_VID) $(RADEON_OBJS)
 
 $(RAGE128_OBJS):    $(RAGE128_SRCS)
 	$(CC) -c $(RAGE128_CFLAGS) -o $@ $<
 
 $(RAGE128_VID):     $(RAGE128_OBJS)
-	$(CC) $(RAGE128_LIBS) -shared -o $(RAGE128_VID) $(RAGE128_OBJS)
+	$(LD) $(RAGE128_LIBS) -shared -soname $(RAGE128_VID) -o $(RAGE128_VID) $(RAGE128_OBJS)
 
 clean:
 	rm -f *.o *.so *~
@@ -46,7 +48,8 @@ depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
-
+	mkdir -p $(BINDIR)
+	cp *.so $(BINDIR)
 #
 # include dependency files if they exist
 #

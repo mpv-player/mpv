@@ -41,7 +41,7 @@ depend:
 
 install:
 	cp $(LIBNAME) $(prefix)/lib/$(LIBNAME)
-	rm $(prefix)/lib/libdha.so
+	rm -f $(prefix)/lib/libdha.so
 	ln -sf $(LIBNAME) $(prefix)/lib/libdha.so
 	ldconfig
 

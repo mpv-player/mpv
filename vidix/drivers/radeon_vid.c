@@ -1,5 +1,8 @@
 /*
    radeon_vid - VIDIX based video driver for Radeon and Rage128 chips
+   Copyrights 2002 Nick Kurshev. This file is based on sources from
+   GATOS (gatos.sf.net) and X11 (www.xfree86.org)
+   Licence: GPL
 */
 
 #include <linux/pci_ids.h>
@@ -25,7 +28,7 @@
 #endif
 #endif
 
-#define DEBUG 1
+static int __verbose = 0;
 
 typedef struct bes_registers_s
 {
@@ -83,9 +86,7 @@ typedef struct bes_registers_s
 
 typedef struct video_registers_s
 {
-#ifdef DEBUG
   const char * sname;
-#endif
   uint32_t name;
   uint32_t value;
 }video_registers_t;
@@ -94,12 +95,7 @@ static bes_registers_t besr;
 #ifndef RAGE128
 static int IsR200=0;
 #endif
-#ifdef DEBUG
 #define DECLARE_VREG(name) { #name, name, 0 }
-#else
-#define DECLARE_VREG(name) { name, 0 }
-#endif
-#ifdef DEBUG
 static video_registers_t vregs[] = 
 {
   DECLARE_VREG(VIDEOMUX_CNTL),
@@ -194,7 +190,7 @@ static video_registers_t vregs[] =
   DECLARE_VREG(IDCT_AUTH),
   DECLARE_VREG(IDCT_CONTROL)
 };
-#endif
+
 static void * radeon_mmio_base = 0;
 static void * radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
@@ -629,6 +625,7 @@ int vixProbe( int verbose )
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
   int err;
+  __verbose = verbose;
   err = pci_scan(lst,&num_pci);
   if(err)
   {
@@ -724,7 +721,6 @@ int vixQueryFourcc(vidix_fourcc_t *to)
     return ENOSYS;
 }
 
-#ifdef DEBUG
 static void radeon_vid_dump_regs( void )
 {
   size_t i;
@@ -738,7 +734,6 @@ static void radeon_vid_dump_regs( void )
 	printf(RADEON_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
   printf(RADEON_MSG"*** End of OV0 registers dump ***\n");
 }
-#endif
 
 static void radeon_vid_stop_video( void )
 {
@@ -848,9 +843,7 @@ static void radeon_vid_display_video( void )
     }
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-#ifdef DEBUG
-    radeon_vid_dump_regs();
-#endif
+    if(__verbose > 1) radeon_vid_dump_regs();
 }
 
 static unsigned radeon_query_pitch(unsigned fourcc)
@@ -1050,9 +1043,7 @@ int vixPlaybackFrameSel(unsigned frame)
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off1);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off2);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-#ifdef DEBUG
-    radeon_vid_dump_regs();
-#endif
+    if(__verbose > 1) radeon_vid_dump_regs();
     return 0;
 }
 
