@@ -2018,7 +2018,7 @@ fi
 
 if [ $_gl = yes ]; then
  _gl='#define HAVE_GL'
- _vosrc=$_vosrc' vo_gl.c'
+ _vosrc=$_vosrc' vo_gl.c vo_gl2.c'
 else
  _gl='#undef HAVE_GL'
 fi
