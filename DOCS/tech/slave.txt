@@ -80,5 +80,13 @@ tv_set_freq <frequency in MHz>
 	Set the tv tuner frequency.
 tv_set_norm <norm>
 	Set the tv tuner norm. PAL, SECAM, NTSC and so on..
+tv_set_brightness [-100:100]
+	Set tv tuner brightness.
+tv_set_contrast [-100:100]
+	Set tv tuner contrast.
+tv_set_hue [-100:100]
+	Set tv tuner hue.
+tv_set_saturation [-100:100]
+	Set tv tuner saturation.
 gui_[loadsubtitle|about|play|stop]
 	GUI actions
