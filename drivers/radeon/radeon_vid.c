@@ -345,13 +345,13 @@ static char *fourcc_format_name(int format)
 	case IMGFMT_IY41: return("Packed IY41");
 	case IMGFMT_IYU1: return("Packed IYU1");
 	case IMGFMT_IYU2: return("Packed IYU2");
-	case IMGFMT_UYVY: return("Packed UYVY");
 	case IMGFMT_UYNV: return("Packed UYNV");
 	case IMGFMT_cyuv: return("Packed CYUV");
 	case IMGFMT_Y422: return("Packed Y422");
 	case IMGFMT_YUY2: return("Packed YUY2");
 	case IMGFMT_YUNV: return("Packed YUNV");
-	case IMGFMT_YVYU: return("Packed YVYU");
+	case IMGFMT_UYVY: return("Packed UYVY");
+//	case IMGFMT_YVYU: return("Packed YVYU");
 	case IMGFMT_Y41P: return("Packed Y41P");
 	case IMGFMT_Y211: return("Packed Y211");
 	case IMGFMT_Y41T: return("Packed Y41T");

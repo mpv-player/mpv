@@ -64,8 +64,13 @@ uint32_t num_frames;
 #define IMGFMT_YVU9 0x39555659
 #define IMGFMT_IF09 0x39304649
 #define IMGFMT_YV12 0x32315659
+#if 0
 #define IMGFMT_I420 0x30323449
 #define IMGFMT_IYUV 0x56555949
+#else
+#define IMGFMT_I420 (('I'<<24)|('4'<<16)|('2'<<8)|'0')
+#define IMGFMT_IYUV (('I'<<24)|('Y'<<16)|('U'<<8)|'V')
+#endif
 #define IMGFMT_CLPL 0x4C504C43
 #define IMGFMT_Y800 0x30303859
 #define IMGFMT_Y8   0x20203859
@@ -76,11 +81,16 @@ uint32_t num_frames;
 #define IMGFMT_IY41 0x31435949
 #define IMGFMT_IYU1 0x31555949
 #define IMGFMT_IYU2 0x32555949
-#define IMGFMT_UYVY 0x59565955
 #define IMGFMT_UYNV 0x564E5955
 #define IMGFMT_cyuv 0x76757963
 #define IMGFMT_Y422 0x32323459
+#if 0
 #define IMGFMT_YUY2 0x32595559
+#define IMGFMT_UYVY 0x59565955
+#else
+#define IMGFMT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
+#define IMGFMT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
+#endif
 #define IMGFMT_YUNV 0x564E5559
 #define IMGFMT_YVYU 0x55595659
 #define IMGFMT_Y41P 0x50313459
