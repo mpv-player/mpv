@@ -4,7 +4,6 @@ TODO:
 
 FOR THE PRE-RELEASE:
 ~~~~~~~~~~~~~~~~~~~~
-- move realtime mpeg1 encoders (lavc, fame, rte) to libmpcodecs/vf
 - finish mencoder -ovc vfw (bitrate setting, codec selection etc)
 - codec priority option
 
@@ -28,12 +27,12 @@ FUTURE:
 ~~~~~~~
 
 decoders:
-- fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, tm20,
-  pim1, qpeg, rricm
+- fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, pim1,
+  qpeg, rricm
 
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
-- implement seeking for YUV4MPEG_2_ and Real
+- implement seeking for YUV4MPEG_2_
 
 decoders:
 - qtx support?
@@ -51,3 +50,4 @@ other:
 - mga_vid crtc2 fix
 - make nvidia_vid ;)
 - display OSD and subtitles using DVB card's OSD
+- sync with mplayerxp-vidix (pm3 and rage128)
