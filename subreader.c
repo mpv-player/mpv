@@ -362,7 +362,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
 	
-	while ((tmp=strstr(line2, "\\n")) != NULL) {
+        while (((tmp=strstr(line2, "\\n")) != NULL) || ((tmp=strstr(line2, "\\N")) != NULL) ){
 		current->text[num]=(char *)malloc(tmp-line2+1);
 		strncpy (current->text[num], line2, tmp-line2);
 		current->text[num][tmp-line2]='\0';
