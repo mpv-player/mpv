@@ -2151,7 +2151,7 @@ debug:
 .br
 32: Motion vector
 .br
-0x0040: Motion vector vissualization (use -noslices)
+0x0040: Motion vector visualization (use -noslices)
 .br
 0x0080: MB skip
 .br
@@ -3284,7 +3284,7 @@ encode to uncompressed PCM
 .IPs "\-oac mp3lame"
 encode to MP3 (using Lame)
 .IPs "\-oac lavc"
-encode with a libavcodec codecs
+encode with a libavcodec codec
 .RE
 .PD 1
 .
@@ -3583,7 +3583,7 @@ IMA Adaptive PCM (4bits per sample, 4:1 compression)
 Audio bitrate in kBit (default 224).
 .TP
 .B atag=<value>
-Use the specified windows audio format tag (e.g. atag=0x55).
+Use the specified Windows audio format tag (e.g. atag=0x55).
 .TP
 .B vcodec=<value>
 use the specified codec (default: mpeg4):
@@ -3593,7 +3593,7 @@ use the specified codec (default: mpeg4):
 Motion JPEG
 .IPs ljpeg
 Lossless JPEG
-.IPs h263
+.IPs h263\ 
 H263
 .IPs h263p
 H263 Plus
@@ -3717,6 +3717,9 @@ select the MB mode which has the best rate distortion
 .RE
 .PD 1
 .TP
+.B vhq
+Same as mbd=1, kept for compatibility reasons.
+.TP
 .B v4mv\ \ \ 
 Allow 4 motion vectors per macroblock (slightly better quality).
 (default: disabled)
@@ -3813,6 +3816,9 @@ For MPEG1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
 Note: vratetol should not be too large during the second pass or there might
 be problems if vrc_(min|max)rate is used.
+.TP
+.B vrc_strategy
+Dummy, reserved for future use.
 .TP
 .B vb_qfactor=<-31.0\-31.0>
 quantizer factor between B and non B frames (pass\ 1/\:2) (default: 1.25)
@@ -4216,7 +4222,7 @@ comparison function for full pel motion estimation
 comparison function for sub pel motion estimation
 .TP
 .B mbcmp=<0\-2000>
-comparison function for the macroblock decission, only used if mbd=0
+comparison function for the macroblock decision, only used if mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"

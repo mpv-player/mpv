@@ -72,9 +72,7 @@ DOCS:
   - documentation.html
 - enhance the FAQ
 - man page HTML version
-- document missing lavcopts (vhq, lmin, lmax, vrc_strategy, vqmod_amp,
-  vqmod_freq, vrc_buf_aggressivity, p_mask, debug, mbcmp, me_range,
-  aic, context,)
+- document missing lavcopts (vqmod_amp, vqmod_freq, vrc_buf_aggressivity)
 - document missing divx4opts (everything in #if ENCORE_MAJOR_VERSION >= 5200,
   vbrdebug)
 
