@@ -258,6 +258,7 @@ GtkWidget * create_PopUpMenu( void )
 {
  GtkWidget * Menu = NULL;
  GtkWidget * SubMenu = NULL;
+ GtkWidget * MenuItem = NULL;
 
  Menu=gtk_menu_new();
 
@@ -301,7 +302,11 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDTitleMenu,tmp,( (i+1) << 16 ) + evSetDVDTitle );
         }
       }
-      else AddMenuItem( DVDTitleMenu,MSGTR_MENU_None,evNone );
+      else 
+       {
+        MenuItem=AddMenuItem( DVDTitleMenu,MSGTR_MENU_None,evNone );
+        gtk_widget_set_sensitive( MenuItem,FALSE );
+       }
     DVDChapterMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Chapters );
      if ( gtkShMem->DVD.chapters )
       {
@@ -312,7 +317,11 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDChapterMenu,tmp,( (i+1) << 16 ) + evSetDVDChapter );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDChapterMenu,MSGTR_MENU_None,evNone );
+      else 
+       {
+        MenuItem=AddMenuItem( DVDChapterMenu,MSGTR_MENU_None,evNone );
+        gtk_widget_set_sensitive( MenuItem,FALSE );
+       }
     DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_AudioLanguages );
      if ( gtkShMem->DVD.nr_of_audio_channels )
       {
@@ -323,7 +332,11 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDAudioLanguageMenu,tmp,( gtkShMem->DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
+      else 
+       {
+        MenuItem=AddMenuItem( DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
+        gtk_widget_set_sensitive( MenuItem,FALSE );
+       }
     DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_SubtitleLanguages );
      if ( gtkShMem->DVD.nr_of_subtitles )
       {
@@ -334,7 +347,11 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDSubtitleLanguageMenu,tmp,( gtkShMem->DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
+      else 
+       {
+        MenuItem=AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
+        gtk_widget_set_sensitive( MenuItem,FALSE );
+       }
 #endif
   AddSeparator( Menu );
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
