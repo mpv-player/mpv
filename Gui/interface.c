@@ -86,7 +86,7 @@ void gfree( void ** p )
 
 void gset( char ** str,char * what )
 {
- if ( *str ) { if ( !strstr( *str,what ) )  gstrcat( str,"," ); gstrcat( str,what ); }
+ if ( *str ) { if ( !strstr( *str,what ) ) { gstrcat( str,"," ); gstrcat( str,what ); }}
    else gstrcat( str,what );
 }
 
@@ -541,7 +541,7 @@ int guiGetEvent( int type,char * arg )
 		 
 // --- audio opts
 	audio_delay=gtkAODelay;
-	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
+//	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
 	if ( gtkAONorm ) 	       gset( &ao_plugin_cfg.plugin_list,"volnorm" );
 	if ( gtkEnableAudioEqualizer ) gset( &ao_plugin_cfg.plugin_list,"eq" );
 	if ( gtkAOExtraStereo )
