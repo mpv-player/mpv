@@ -35,6 +35,9 @@
 #include "audio_plugin_internal.h"
 #include "afmt.h"
 
+#include "remez.h"
+#include "firfilter.c"
+
 static ao_info_t info =
 {
         "Surround decoder plugin",
@@ -51,16 +54,18 @@ typedef struct pl_surround_s
   int passthrough;      // Just be a "NO-OP"
   int msecs;            // Rear channel delay in milliseconds
   int16_t* databuf;     // Output audio buffer
-  int16_t* delaybuf;    // circular buffer to be used for delaying Ls and Rs audio
-  int delaybuf_len;     // local buffer length in samples
-  int delaybuf_ptr;     // offset in buffer where we are reading/writing
+  int16_t* Ls_delaybuf; // circular buffer to be used for delaying Ls audio
+  int16_t* Rs_delaybuf; // circular buffer to be used for delaying Rs audio
+  int delaybuf_len;     // delaybuf buffer length in samples
+  int delaybuf_pos;     // offset in buffer where we are reading/writing
+  double* filter_coefs_surround; // FIR filter coefficients for surround sound 7kHz lowpass
   int rate;             // input data rate
   int format;           // input format
   int input_channels;   // input channels
 
 } pl_surround_t;
 
-static pl_surround_t pl_surround={0,15,NULL,NULL,0,0,0,0,0};
+static pl_surround_t pl_surround={0,15,NULL,NULL,NULL,0,0,NULL,0,0,0};
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -73,8 +78,9 @@ static int control(int cmd,int arg){
     if (pl_surround.databuf != NULL) {
       free(pl_surround.databuf);  pl_surround.databuf = NULL;
     }
+    // Allocate output buffer
     pl_surround.databuf = calloc(ao_plugin_data.len, 1);
-    // Return back smaller len so we don't get overflowed...  (??seems the right thing to do?)
+    // Return back smaller len so we don't get overflowed...
     ao_plugin_data.len /= 2;
     return CONTROL_OK;
   }
@@ -108,13 +114,16 @@ static int init(){
   ao_plugin_data.channels    = 4;
   ao_plugin_data.sz_mult    /= 2;
 
-  // Figure out buffer space needed for the 15msec delay
-  pl_surround.delaybuf_len = 2 * (pl_surround.rate * pl_surround.msecs / 1000);
-  // Allocate delay buffer
-  pl_surround.delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
-  fprintf(stderr, "pl_surround: %dmsec surround delay, rate %d - buffer is %d bytes\n",
+  // Figure out buffer space (in int16_ts) needed for the 15msec delay
+  pl_surround.delaybuf_len = (pl_surround.rate * pl_surround.msecs / 1000);
+  // Allocate delay buffers
+  pl_surround.Ls_delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
+  pl_surround.Rs_delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
+  fprintf(stderr, "pl_surround: %dmsec surround delay, rate %d - buffers are %d bytes each\n",
 	  pl_surround.msecs,pl_surround.rate,  pl_surround.delaybuf_len*sizeof(int16_t));
-  pl_surround.delaybuf_ptr = 0;
+  pl_surround.delaybuf_pos = 0;
+  // Surround filer coefficients
+  pl_surround.filter_coefs_surround = calc_coefficients_7kHz_lowpass(pl_surround.rate);
 
   return 1;
 }
@@ -123,8 +132,10 @@ static int init(){
 static void uninit(){
   //  fprintf(stderr, "pl_surround: uninit called!\n");
   if (pl_surround.passthrough) return;
-  if(pl_surround.delaybuf) 
-    free(pl_surround.delaybuf);
+  if(pl_surround.Ls_delaybuf) 
+    free(pl_surround.Ls_delaybuf);
+  if(pl_surround.Rs_delaybuf) 
+    free(pl_surround.Rs_delaybuf);
   if(pl_surround.databuf) 
     free(pl_surround.databuf);
   pl_surround.delaybuf_len=0;
@@ -135,8 +146,9 @@ static void reset()
 {
   if (pl_surround.passthrough) return;
   //fprintf(stderr, "pl_surround: reset called\n");
-  pl_surround.delaybuf_ptr = 0;
-  memset(pl_surround.delaybuf, 0, sizeof(int16_t)*pl_surround.delaybuf_len);
+  pl_surround.delaybuf_pos = 0;
+  memset(pl_surround.Ls_delaybuf, 0, sizeof(int16_t)*pl_surround.delaybuf_len);
+  memset(pl_surround.Rs_delaybuf, 0, sizeof(int16_t)*pl_surround.delaybuf_len);
 }
 
 
@@ -165,19 +177,22 @@ static int play(){
     //   must take 3dB off as we split it:
     //       Ls=Rs=.707*(Lt-Rt)
     //   Trouble is, Lt could be +32767, Rt -32768, so possibility that S will
-    //   clip.  So to compensate, we cut L/R by 3dB (*.707), and S by 6dB (/2).
+    //   clip.  So to avoid that, we cut L/R by 3dB (*.707), and S by 6dB (/2).
 
     // output front left and right
     out[0] = in[0]*.707;
     out[1] = in[1]*.707;
-    // output Ls and Rs - from 15msec ago
-    out[2] = pl_surround.delaybuf[pl_surround.delaybuf_ptr];
-    out[3] = pl_surround.delaybuf[pl_surround.delaybuf_ptr+1];
+    // output Ls and Rs - from 15msec ago, lowpass filtered @ 7kHz
+    out[2] = firfilter(pl_surround.Ls_delaybuf, pl_surround.delaybuf_pos,
+		       pl_surround.delaybuf_len, 32, pl_surround.filter_coefs_surround);
+    out[3] = - out[2];
+    //    out[3] = firfilter(pl_surround.Rs_delaybuf, pl_surround.delaybuf_pos,
+    //		       pl_surround.delaybuf_len, 32, pl_surround.filter_coefs_surround);
     // calculate and save surround for 15msecs time
     surround = (in[0]/2 - in[1]/2);
-    pl_surround.delaybuf[pl_surround.delaybuf_ptr++] = surround;
-    pl_surround.delaybuf[pl_surround.delaybuf_ptr++] = - surround;
-    pl_surround.delaybuf_ptr %= pl_surround.delaybuf_len;
+    pl_surround.Ls_delaybuf[pl_surround.delaybuf_pos] = surround;
+    pl_surround.Rs_delaybuf[pl_surround.delaybuf_pos++] = - surround;
+    pl_surround.delaybuf_pos %= pl_surround.delaybuf_len;
     // next samples...
     in = &in[pl_surround.input_channels];  out = &out[4];
   }
