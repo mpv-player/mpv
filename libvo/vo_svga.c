@@ -457,6 +457,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     return(1); // error
   }
   
+  if(vid_mode<10 || vid_mode==145) {
+  	oldmethod=1;
+  }
   /* set 332 palette for 8 bpp */
   if(bpp==8){
     int i;
@@ -473,12 +476,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   WIDTH=vga_getxdim();
   HEIGHT=vga_getydim();
   BYTESPERPIXEL=(bpp+4)>>3;
-  if(bpp==1)
-    LINEWIDTH=(WIDTH+7)/8;
-  else
     LINEWIDTH=vga_getmodeinfo(vid_mode)->linewidth;
 
-//  vga_setlinearaddressing(); //it is not compatable with vga_draw* for "some" cards
+  if(oldmethod && (bpp==8 || bpp==4)) LINEWIDTH*=8;
+  
+  if(!oldmethod || (bpp>8))vga_setlinearaddressing();
   if(oldmethod) {
      buffer=malloc(HEIGHT*LINEWIDTH);
      maxframes=0;
