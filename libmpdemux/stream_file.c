@@ -77,6 +77,12 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_UNSUPORTED;
   }
 
+  if(!p->filename) {
+    mp_msg(MSGT_OPEN,MSGL_ERR, "[file] No filename\n");
+    m_struct_free(&stream_opts,opts);
+    return STREAM_ERROR;
+  }
+
 #if defined(__CYGWIN__)|| defined(__MINGW32__)
   m |= O_BINARY;
 #endif    
