@@ -15,7 +15,7 @@ of global options written as first, for example
 and options written after filenames, that apply only to the given
 filename/URL/whatever, for example:
 
-<screen>mplayer -vfm 5 movie1.avi <replaceable>movie2.avi</replaceable> -vfm 4</screen>
+<screen>mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
