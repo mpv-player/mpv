@@ -1,5 +1,5 @@
 //  VIVO file parser by A'rpi
-//  VIVO text header parser by alex
+//  VIVO text header parser and audio support by alex
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,8 +13,29 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-
 #include "bswap.h"
+
+/* VIVO audio standards from vivog723.acm:
+
+    G.723:
+	FormatTag = 0x111
+	Channels = 1 - mono
+	SamplesPerSec = 8000 - 8khz
+	AvgBytesPerSec = 800
+	BlockAlign (bytes per block) = 24
+	BitsPerSample = 8
+
+    Siren:
+	FormatTag = 0x112
+	Channels = 1 - mono
+	SamplesPerSec = 16000 - 16khz
+	AvgBytesPerSec = 2000
+	BlockAlign (bytes per block) = 40
+	BitsPerSample = 8
+*/
+
+#define VIVO_AUDIO_G723 1
+#define VIVO_AUDIO_SIREN 2
 
 typedef struct {
     /* generic */
@@ -32,9 +53,10 @@ typedef struct {
     int		disp_width;
     int		disp_height;
     /* audio */
-    int		br;
-    int		samplerate;
-    int		audio_len;
+    int		audio_codec;
+    int		audio_bitrate;
+    int		audio_samplerate;
+    int		audio_bytesperblock;
 } vivo_priv_t;
 
 /* parse all possible extra headers */
@@ -75,9 +97,9 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 		token, stream_tell(demux->stream));
 	    break;
 	}
-	mp_msg(MSGT_DEMUX, MSGL_DBG3, "token: '%s' (%d bytes/%d bytes left)\n",
+	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token: '%s' (%d bytes/%d bytes left)\n",
 	    token, strlen(token), header_len);
-	mp_msg(MSGT_DEMUX, MSGL_DBG3, "token => o: '%s', p: '%s'\n",
+	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token => o: '%s', p: '%s'\n",
 	    opt, param);
 
 	/* checking versions: only v1 or v2 is suitable (or known?:) */
@@ -122,7 +144,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	/* audio specific */
 	if (!strcmp(opt, "RecordType"))
 	{
-	    /* 3 by Vivo/1.00, 4 by Vivo/2.00 */
+	    /* no audio recordblock by Vivo/1.00, 3 and 4 by Vivo/2.00 */
 	    if ((atoi(param) == 3) || (atoi(param) == 4))
 		parser_in_audio_block = 1;
 	    else
@@ -130,44 +152,50 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	}
 	if (!strcmp(opt, "NominalBitrate"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Bitrate: %d\n", atoi(param));
-	    priv->br = atoi(param);
+	    priv->audio_bitrate = atoi(param);
+	    if (priv->audio_bitrate == 2000)
+		priv->audio_codec = VIVO_AUDIO_SIREN;
+	    if (priv->audio_bitrate == 800)
+		priv->audio_codec = VIVO_AUDIO_G723;
 	}
 	if (!strcmp(opt, "SamplingFrequency"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Samplerate: %d\n", atoi(param));
-	    priv->samplerate = atoi(param);
+	    priv->audio_samplerate = atoi(param);
+	    if (priv->audio_samplerate == 16000)
+		priv->audio_codec = VIVO_AUDIO_SIREN;
+	    if (priv->audio_samplerate == 8000)
+		priv->audio_codec = VIVO_AUDIO_G723;
 	}
 	if (!strcmp(opt, "Length") && (parser_in_audio_block == 1))
 	{
-	    priv->audio_len = atoi(param); /* 24 or 40 kbps */
+	    priv->audio_bytesperblock = atoi(param); /* 24 or 40 kbps */
+	    if (priv->audio_bytesperblock == 40)
+		priv->audio_codec = VIVO_AUDIO_SIREN;
+	    if (priv->audio_bytesperblock == 24)
+		priv->audio_codec = VIVO_AUDIO_G723;
 	}
 	
 	/* only for displaying some informations about movie*/
 	if (!strcmp(opt, "Title"))
 	{
-//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Title: %s\n", param);
 	    demux_info_add(demux, "name", param);
 	    priv->title = malloc(strlen(param));
 	    strcpy(priv->title, param);
 	}
 	if (!strcmp(opt, "Author"))
 	{
-//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", param);
 	    demux_info_add(demux, "author", param);
 	    priv->author = malloc(strlen(param));
 	    strcpy(priv->author, param);
 	}
 	if (!strcmp(opt, "Copyright"))
 	{
-//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", param);
 	    demux_info_add(demux, "copyright", param);
 	    priv->copyright = malloc(strlen(param));
 	    strcpy(priv->copyright, param);
 	}
 	if (!strcmp(opt, "Producer"))
 	{
-//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", param);
 	    demux_info_add(demux, "encoder", param);
 	    priv->producer = malloc(strlen(param));
 	    strcpy(priv->producer, param);
@@ -568,29 +596,64 @@ if(demuxer->audio->id>=-1){
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 
-		if (priv->version == '2')
+		if (priv->audio_codec == 0)
+		{
+		    if (priv->version == '2')
+			priv->audio_codec = VIVO_AUDIO_SIREN;
+		    else
+			priv->audio_codec = VIVO_AUDIO_G723;
+		}
+
+//		if (priv->version == '2')
+//		if (priv->audio_bytesperblock == 40)
+		if (priv->audio_codec == VIVO_AUDIO_SIREN)
 		    sh->format=0x112; /* Vivo Siren */
 		else
 //		if (priv->version == '1')
 		    sh->format=0x111; /* Vivo G.723 */
-
-//		if (sh->format == 0x111) /* G.723 */
-//		sh->samplesize = priv->audio_len; /* 24 or 40 kbps */
-//		printf("samplesize: %d\n", sh->samplesize);
 
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
 		sh->wf->wFormatTag=sh->format;
 		sh->wf->nChannels=1;
-		sh->wf->wBitsPerSample=16;
-//		sh->wf->wBitsPerSample=8;
-		if (priv->samplerate)
-		    sh->wf->nSamplesPerSec=priv->samplerate;
+		/* FIXME bits, samplerate, avgbytes, and blockalign */
+		if (priv->audio_codec == VIVO_AUDIO_SIREN)
+//		if (priv->audio_len == 40)
+		    sh->wf->wBitsPerSample=16; /* siren */
 		else
-		    sh->wf->nSamplesPerSec=22050;
-//		    sh->wf->nSamplesPerSec=8000;
-		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
+		    sh->wf->wBitsPerSample=8;
+		if (priv->audio_samplerate)
+		    sh->wf->nSamplesPerSec=priv->audio_samplerate;
+		else
+		{
+		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
+			sh->wf->nSamplesPerSec=16000;
+		    else
+			sh->wf->nSamplesPerSec=8000;
+		}
+		if (priv->audio_bitrate)
+		    sh->wf->nAvgBytesPerSec=priv->audio_bitrate;
+		else
+		{
+		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
+//		    if (priv->version == '2')
+			sh->wf->nAvgBytesPerSec = 2000;
+		    else
+			sh->wf->nAvgBytesPerSec = 800;
+		}
+//    		    sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
+//		sh->wf->nBlockAlign=2*sh->wf->nChannels;
+		if (!priv->audio_bytesperblock)
+		{
+		    if (priv->audio_codec == VIVO_AUDIO_SIREN)
+//		    if (priv->version == '2')
+			sh->wf->nBlockAlign=40; /* siren */
+		    else
+			sh->wf->nBlockAlign=24;
+		}
+		else
+		    sh->wf->nBlockAlign=priv->audio_bytesperblock;
 		demuxer->audio->sh=sh; sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 }
