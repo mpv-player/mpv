@@ -213,9 +213,9 @@ if(verbose){
 //    case 0x33000890: return "guid_index_chunk";
 
     case 0x75b22633: // Content description
-      stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
-      {
+      if(verbose){
         char *string;
+        stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
         // extract the title
         string=(char*)malloc(contenth.title_size);
         stream_read(demuxer->stream, string, contenth.title_size);
