@@ -247,7 +247,7 @@ play from FTP:
 </para>
 
 <note><para>
-Note: It's also recommended to enable <option>-cache</option> when playing
+It's also recommended to enable <option>-cache</option> when playing
 from the network:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
