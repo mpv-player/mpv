@@ -14,118 +14,166 @@
 <P><B>Hogyan küldj bugreport-ot?</B></P>
 
 <P>Elõször is nézd meg a CVS verziót, mert lehet hogy az általad talált hibát
-már kijavítottuk. A CVS letöltésére vonatkozó utasításokat a honlapunkon, a ``download" szekcióban
-találhatod meg.</P>
+  már kijavítottuk. A CVS letöltésére vonatkozó utasításokat
+  <A HREF="http://www.mplayerhq.hu/homepage/dload-hu.html">ezen a lapon</A>
+  találhatod meg.</P>
 
-<P>Ha ez nem segített a probléma megoldásában, akkor olvasd el a <A HREF="../documentation.html#D">D fejezetet</A>, és a dokumentáció többi részét. Ha a
-problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik meg, akkor jelentsd be:</P>
+<P>Ha ez nem segített a probléma megoldásában, akkor olvasd el a
+  <A HREF="../documentation.html#D">D fejezetet</A>, és a dokumentáció többi
+  részét. Ha a problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik
+  meg, akkor kérjük jelentsd be.</P>
+
+<P>Ha igazán tökös gyerek vagy, próbáld Te javítani. Vagy már sikerült is?
+  Olvasd el <A HREF="../tech/patches.txt">ezt a kis szöveget</A> hogy
+  megtudd mit kell tenned hogy a javításod bekerüljön az <B>MPlayerbe</B>.
+  Az <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+  levelezési listán lévõk segítenek, ha kérdésed van.</P>
 
 <P><B>Hol jelentheted be?</B></P>
 
-<P>Iratkozz fel az mplayer-users levelezési listára:<BR><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR><BR>
-és küldd a bugreportot a<BR><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@mplayerhq.hu</CODE><BR><BR>
-címre. Nem fogunk CC-zni, légy szíves iratkozz fel a listára!!!</P>
+<P>Iratkozz fel az mplayer-users levelezési listára:<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
+  és küldd a bugreportot az<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
+  címre.</P>
 
-<P>Ne küldj bugreportot közvetlenül valamelyik készítõnek!!!
-Együtt dolgozunk a kódon, ezért mindenkit érdekelhet a hiba.  
-Elõfordulhat, hogy más felhasználók már tudják a megoldást a problémádra,
-(konfigurációs hiba, rossz driver stb.). Ha a levelezési listára írsz hamarabb juthatsz segítséghez, hiszen azt több ember olvassa.</P>
+<P>A lista nyelve <B>angol</B>. Kérjük kövesd a szabvány
+  <A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netikettet</A>, és
+  <B>ne küldj HTML formátumú levelet</B> egyik listánkra se, különben
+  vagy nem fog senkit se érdekelni a leveled, vagy ki leszel tiltva.
+  Megjegyzendõ továbbá, hogy nem fogunk CC-zni (carbon copy) mindenkinek,
+  így jó ötlet feliratkozni a listára mielõtt elküldöd a leveled.</P>
 
-<P>Kérlek részletesen írd le a problémádat, példákkal, magyarázatokkal, stb., és ne
-felejtsd el ezeket se mellékelni:</P>
+<P>Ne küldj bugreportot közvetlenül valamelyik készítõnek. Együtt dolgozunk a
+  kódon, ezért mindenkit érdekelhet a hiba. Elõfordulhat, hogy más felhasználók
+  már tudják a megoldást a problémádra. Ha a levelezési listára írsz hamarabb
+  juthatsz segítséghez, hiszen azt több ember olvassa.</P>
+
+<P>Kérjük részletezd a problémát olyan mélységben ahogyan csak tudod.
+  Szûkítsd le a lehetséges okokat amik a hibához vezethetnek. A hiba csak
+  bizonyos szituációkban jön elõ? Bizonyos fileokhoz vagy file formátumokhoz
+  kapcsolódik? Csak egy codec-kel, vagy minddel elõjön? Az összes
+  kimenettel reprodukálható? Minél több információt küldesz, annál több
+  esélyünk van arra hogy sikeresen javítsunk. Ne feledd továbbá csatolni
+  az összes, lejjebb felsorolt információt, különben valószínûleg nem fogunk
+  sikerrel járni.</P>
 
 <P><B>Mit tartalmazzon a bugreport?</B></P>
 
-<P><B><I>1. Mindenképpen küldj _részletes_ adatokat a rendszeredrõl:</I></B></P>
+<P><B>Rendszer információ</B></P>
+
 <UL>
-<LI>milyen disztribúciót használsz?<BR>
-például:<UL>
-        <LI>RedHat 7.1
-        <LI>Slackware 7.0 + csomagok 7.1-bõl ...</UL>
-<LI>kernel verzió<BR>
-  <CODE>uname -a</CODE>
-<LI>libc verzió:<BR>
-  <CODE>ls -l /lib/libc[.-]*</CODE>
-<LI>X verzió:<BR>
-  <CODE>X -version</CODE>
-<LI>gcc és ld verzió:<BR>
-  <CODE>gcc -v<BR>
-  ld -v</CODE>
-<LI>binutils verzió:<BR>
-  <CODE>as --version</CODE>
-<LI>ha a GUI a bugos:
+  <LI>milyen disztribúciót használsz?<BR>
+    például:
+    <UL>
+      <LI>RedHat 7.1</LI>
+      <LI>Slackware 7.0 + csomagok 7.1-bõl...</LI>
+    </UL>
+  <LI>kernel verzió<BR>
+    <CODE>uname -a</CODE></LI>
+  <LI>libc verzió:<BR>
+    <CODE>ls -l /lib/libc[.-]*</CODE></LI>
+  <LI>X verzió:<BR>
+    <CODE>X -version</CODE></LI>
+  <LI>gcc és ld verzió:<BR>
+    <CODE>gcc -v<BR>
+    ld -v</CODE></LI>
+  <LI>binutils verzió:<BR>
+    <CODE>as --version</CODE></LI>
+  <LI>ha a probléma kapcsolódik a teljesképernyõs mód használatához:
+    <UL>
+      <LI>ablakkezelõ típusa, verziószáma</LI>
+    </UL>
+  </LI>
+  <LI>ha a GUI a bugos:
+    <UL>
+      <LI>GTK verzió</LI> 
+      <LI>GLIB verzió</LI>
+      <LI>libpng verzió</LI>
+      <LI>a szituáció leírása, melyben a hiba elõjött</LI>
+    </UL>
+  </LI>
+</UL>
+
+<P><B>Hardver és eszközmeghajtók:</B></P>
+
+<UL>
+  <LI>CPU típusa:<BR>
+    <CODE>cat /proc/cpuinfo</CODE></LI>
+  <LI>video kártya: gyártó és típus<BR>
+    például:<BR>
+    <UL>
+      <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</LI>
+      <LI>Matrox G400 DH 32MB SGRAM</LI>
+    </UL>
+  </LI>
+  <LI>video driver típus és verzió<BR>
+    például:
+    <UL>
+      <LI>X beépített drivere</LI>
+      <LI>nvidia 0.9.623</LI>
+      <LI>Utah-GLX CVS 2001-02-17</LI>
+      <LI>DRI a 4.0.3-as X-bõl</LI>
+    </UL>
+  </LI>
+  <LI>hangkártya típus és driver<BR>
+    például:<BR>
+    <UL>
+      <LI>Creative SBLive! Gold az oss.creative.com-ról való driverrel</LI>
+      <LI>Creative SB16 a kernel OSS driverével</LI>
+      <LI>GUS PnP az ALSA OSS emulációjával</LI>
+    </UL>
+  </LI>
+  <LI>ha nem vagy biztos a dolgodban, csatold az <CODE>lspci -vv</CODE>
+    kimenetét</LI>
+</UL>
+
+<P><B>Fordítási problémákhoz, hibákhoz</B></P>
+
+<P><B>Kérlek küldd el az alábbi file-okat:</B></P>
   <UL>
-    <LI>GTK verzió</LI> 
-    <LI>GLIB verzió</LI>
-    <LI>libpng verzió</LI>
-    <LI>a szituáció leírása, melyben a hiba elõjött</LI>
+    <LI>configure.log</LI>
+    <LI>config.h</LI>
+    <LI>config.mak</LI>
+    <LI>libvo/config.mak</LI>
   </UL>
-</LI>
-</UL>
 
-<P><B><I>2. Hardver adatok és eszközmeghajtók:</I></B></P>
+<P><B>Lejátszási problémákhoz</B></P>
 
-<UL>
-<LI>CPU típusa:<BR>
-  <CODE>cat /proc/cpuinfo</CODE>
-<LI>video kártya: gyártó és típus<BR>
-  például:<BR><UL>
-  <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-  <LI>Matrox G400 DH 32MB SGRAM</UL>
-<LI>video driver típus és verzió<BR>
-  például:<UL>
-    <LI>X beépített drivere
-    <LI>nvidia 0.9.623
-    <LI>Utah-GLX CVS 2001-02-17
-    <LI>DRI a 4.0.3-as X-bõl   
-<LI>hangkártya típus és driver<BR>
-  például:<BR><UL>
-    <LI>Creative SBLive! Gold az oss.creative.com-ról való driverrel
-    <LI>Creative SB16 a kernel OSS driverével
-    <LI>GUS PnP az ALSA OSS emulációjával</UL>
-<LI>ha nem vagy biztos a dolgodban, csatold az 'lspci -v' kimenetét
-</UL></UL>
+<P>Kérjük mellékeld az <B>MPlayer</B> kimenetét legalább egyes bõségi
+  (verbosity) szinten, de <B>ne töröld ki sorokat a kimenetbõl</B>, mikor
+  a levélbe másolod. A fejlesztõknek az összes üzenetre szükségük van.
+  A következõképpen tudod file-ba irányítani a kimenetet:</P>
 
-<P><B>Fordítási problémákhoz, hibákhoz:</B></P>
-
-<P><B><I>3. Kérlek küldd el az alábbi file-okat:</I></B></P>
-<UL><LI>configure.log
-<LI>config.h
-<LI>config.mak
-<LI>libvo/config.mak
-</UL>
-
-<P><B>Lejátszási problémákhoz:</B></P>
-
-<P><B><I>3. Az MPlayer outputot 1-es debug szinten (-v)</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filenév &amp;&gt; mplayer.log</CODE></P>
 
-<P><B><I>4. Ha a probléma csak egy, vagy néhány file-nál jelentkezik,
-  töltsd fel a file-t (file-okat) ide:</I></B></P>
+<P>Ha a probléma csak egy, vagy néhány file-nál jelentkezik,
+  töltsd fel a file-t (file-okat) ide:</P>
+
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Tölts fel egy (a fájloddal azonos nevû) kis .txt fájlt, amiben leírod hogy
+
+<P>Tölts fel egy (a fájloddal azonos nevû) kis .txt fájlt, amiben leírod hogy
   mi a baj, plusz egy mplayer -v kimenet, és az email címed!<BR>
   Általában az elsõ 1-5 MB elég, hogy reprodulkáljuk a
   problémát, de elõször probáld ki:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1024k count=5</CODE></P>
-  (ez az 'a_file' elsõ 5 MB-ját elmenti 'kis_file' néven')
-  Ekkor probáld lejátszani a keletkezõ file-t, és ha a bug jelentkezik,
-  akkor elég lesz csak ennyit feltölteni.<BR><BR>
-  SOHA ne küldj file-t levélben! Töltsd fel, és csak a file nevét
-  küldd el!
-  Ha a file a neten hozzaférhetõ, akkor a _pontos_ URL elküldése
-  is elég!
+  <P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1024k count=5</CODE></P>
+</P>
 
-<P><B><I>5. Segfault, SIGILL, signal 4, stb esetén:</I></B></P>
+<P>Ez az <STRONG>a_file</STRONG> elsõ 5 MB-ját elmenti
+  <STRONG>kis_file</STRONG> néven. Ekkor próbáld lejátszani a keletkezõ
+  file-t, és ha a bug jelentkezik, akkor elég lesz csak ennyit feltölteni.<BR>
+  <B>Soha</B> ne küldj file-t levélben! Töltsd fel, és csak a file nevét küldd
+  el! Ha a file a neten hozzaférhetõ, akkor a <B>pontos</B> URL elküldése is
+  elég!
 
-<P><I>Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:</I></P>
+<P><B>Összeomlás (Michael Douglas) esetén</B></P>
 
-<P><B><I>5.a. Küldd el a coredump tartalmát (ha volt).</I></B></P>
+<P>Ha keletkezett coredump, akkor lásd a következõ bekezdést, máskülönben
+  hagyd ki.</P>
 
-<P>Hogyan:
-Hozd létre a következõ parancs file-t:</P>
+<P><B>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</B></P>
+
+<P>Hozd létre a következõ parancs file-t:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
 printf "eax=%08lX\n",$eax<BR>
@@ -142,24 +190,47 @@ printf "esi=%08lX\n",$esi<BR>
 <P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug</CODE></P>
 
 <P><B><I>5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:</I></B></P>
+
 <P>Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:<BR>
-./configure --enable-debug=3<BR>
-make
-</P>
-<P>[a promptnál:]<BR>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
-[a gdb promptnál:]<BR>
-&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [mplayer opciói] filenév</CODE><BR>
-  ... (várj amíg össze nem omlik)<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
-A fenti parancsok teljes kimenetét küldd el nekünk!
-</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
+
+majd futtasd az <B>MPlayer-t</B> gdb-bõl:
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
+
+<P>Most a gdb-n belül vagy. Írd be a következõket:</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [mplayer-opciók] filenév</CODE></P>
+
+és reprodukáld a hibát. Amint megtörtént, a gdb visszaadja a promptot, ahova
+a következõket kell beírnod
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+és a kimenetet elküldeni nekünk.
 
 <P><B>Általánosan:</B></P>
 
-<P>Ha valami nagy reportot akarsz küldeni (pl.: log-ok, stb.), akkor jobb ha FTP-re töltöd fel (gzip -9 ..),
-  és csak a file nevét, elérhetõségét írod bele a bugreportba!</P>
+<P>Ha valami nagy reportot akarsz küldeni (pl.: log-ok, stb.), akkor jobb ha
+  FTP-re töltöd fel (gzip -9 ..), és csak a file nevét, elérhetõségét írod bele
+  a bugreportba!</P>
+
+<P><B>Tudom hogy mit csinálok...</B></P>
+
+<P>Ha a fentieket követve csináltál egy megfelelõ bugreportot, biztos
+  vagy benne hogy <B>MPlayer</B>, nem pedig fordító, file, hang-meghajtó
+  hibáról van szó, elolvastad a dokumentációt és nem találtál benne
+  megoldást, iratkozz fel az mplayer-advusers levelezési listára és oda
+  küldd a reportot, biztos lehetsz benne hogy jobb és gyorsabb választ
+  kapsz.<BR><BR>
+
+  Ha kezdõ, vagy a dokumentációban már megválaszolt kérdést küldesz,
+  vagy figyelmen kívül hagyunk, vagy leordítjuk a hajad.<BR>
+  Ne flamelj minket, és csak akkor iratkozz fel az advusers listára ha
+  tényleg tudod hogy mit csinálsz, és/vagy hozzáértõ <B>MPlayer</B>
+  felhasználónak/fejlesztõnek érzed magad. Ha ez mind rád illik, nem lesz
+  nehéz kitalálni a feliratkozás módját...
+</P>
 
 </BODY>
 </HTML>

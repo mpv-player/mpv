@@ -12,26 +12,25 @@
 <P><B><A NAME=2.1>2.1. Támogatott formátumok</A></B></P>
 
 <P>Fontos tisztázni egy elterjedt tévhitet. Amikor az emberek egy <B>.AVI</B>
-kiterjesztésû file-t látnak, azonnal azt mondják hogy az nem MPEG file.
-Ez nem igaz. Legalábbis nem ebben a formában. Ha azt mondod nekik hogy ez
-a file tartalmazhat MPEG videot is, kinevetnek. Nyugodtan verd bucira
-a fejüket, és küldd el õket RTFM-be.</P>
+  kiterjesztésû file-t látnak, azonnal azt mondják hogy az nem MPEG file.
+  Ez nem igaz. Legalábbis nem ebben a formában. Ha azt mondod nekik hogy ez
+  a file tartalmazhat MPEG videot is, kinevetnek. Nyugodtan verd bucira
+  a fejüket, és küldd el õket RTFM-be.</P>
 
 <P>Ugyanis, a <B>codec</B> nem egyenlõ a <B>file formátummal</B>.<BR>
-A video <B>codec-ek</B> például a következõk: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
-És a video <B>formátumok</B>: MPG, VOB, AVI, ASF.<BR>
+  A video <B>codec-ek</B> például a következõk: MPEG1, MPEG2, DivX, Indeo5,
+  3ivx.<BR>
+  És a video <B>formátumok</B>: MPG, AVI, ASF.<BR>
 </P>
 
 <P>Elméletben nyugodt szívvel beletehetsz OpenDivX videot és MP3 audiot
-egy <B>.MPG</B> formátumú file-ba. Annyi a probléma hogy a legtöbb lejátszó
-nem fogja lejátszani, mert MPEG1 videot és MP2 audiot várnak (az <B>.MPG</B>-ben
-nem lehet megadni hogy milyen formátumban van benne a video és audio, mint
-például az <B>.AVI</B>-ban). Van tegyél MPEG1 videot .AVI-ba. Például az
-<A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> és persze a
-<A HREF="encoding.html">MEncoder</A> tud ilyen fileokat létrehozni.</P>
-
-<P>Audionál a <B>codec</B> és <B>formátum</B> gyakorlatilag ugyanazt
-jelenti.</P>
+  egy <B>.MPG</B> formátumú file-ba. Annyi a probléma hogy a legtöbb lejátszó
+  nem fogja lejátszani, mert MPEG1 videot és MP2 audiot várnak (az
+  <B>.MPG</B>-ben nem lehet megadni hogy milyen formátumban van benne a video
+  és audio, mint például az <B>.AVI</B>-ban). Van tegyél MPEG1 videot .AVI-ba.
+  Például az
+  <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> és persze a
+  <A HREF="encoding.html">MEncoder</A> tud ilyen fileokat létrehozni.</P>
 
 
 <P><B><A NAME=2.1.1>2.1.1. Video formátumok</A></B></P>
@@ -53,32 +52,32 @@ jelenti.</P>
 <B>Olvasd el a <A HREF="cd-dvd.html#4.2">DVD fejezetet</A> !</B></LI>
 
 <P>Az MPEG fileokban néhány frame-bõl álló csoportok vannak, melyek
-teljesen függetlenek egymástól. Ez annyit tesz hogy akár egy normális
-file-kezelõvel szétvághatsz vagy összeilleszthetsz MPEG fileokat, melyek
-utána teljesen mûködõképesek maradnak.</P>
+  teljesen függetlenek egymástól. Ez annyit tesz hogy akár egy normális
+  file-kezelõvel szétvághatsz vagy összeilleszthetsz MPEG fileokat, melyek
+  utána teljesen mûködõképesek maradnak.</P>
 
 <P>Az MPEG fileok egyik tulajdonsága hogy van bennük egy mezõ a video
-képarányának (aspect ratio) leírására. Például az SVCD-ken 480x480-as
-felbontású video van, és a lejátszóprogramok az elõbb említett
-fejlécbõl (ami itt 4:3-at tartalmaz) tudják hogy hogyan kell
-megjeleníteni (itt 640x480-as felbontásban). Az AVI fileoknak nincs ilyen
-mezõjük, így MPEG-bõl AVI-ba kódolásnál át kell méretezni a képet, vagy
-az <CODE>-aspect</CODE> opciót használni lejátszásnál.</P>
+  képarányának (aspect ratio) leírására. Például az SVCD-ken 480x480-as
+  felbontású video van, és a lejátszóprogramok az elõbb említett fejlécbõl (ami
+  itt 4:3-at tartalmaz) tudják hogy hogyan kell megjeleníteni (itt 640x480-as
+  felbontásban). Az AVI fileoknak nincs ilyen mezõjük, így MPEG-bõl AVI-ba
+  kódolásnál át kell méretezni a képet, vagy az <CODE>-aspect</CODE> opciót
+  használni lejátszásnál.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI file-ok</A></B></P>
 
-<P>A Micro$oft <B>AVI (Audio Video Interleaved)</B> formátuma egy széles
-körben elterjedt és használt formátum, jelenleg többnyire DivX és DivX4
-codec-kel ellátott videokhoz használják. Több ismert hátránya, inkompatibilitása
-van (például streaming-nél). Egy darab video, és 0-99 audio streamet támogat
-egy fileban. 2Gb-ig terjedhet, bár az <B>OpenDMS</B> kiterjesztés
-többek között ezt a korlátot is kitágítja. Az M$ jelenleg erõsen ellenzi
-a használatát, az ASF/WMV javára. Persze nem mintha bárkit is érdekelne.</P>
+<P>A Micro$oft <B>AVI (Audio Video Interleaved)</B> formátuma egy széles körben
+  elterjedt és használt formátum, jelenleg többnyire DivX és DivX4 codec-kel
+  ellátott videokhoz használják. Több ismert hátránya, inkompatibilitása van
+  (például streaming-nél). Egy darab video, és 0-99 audio streamet támogat egy
+  fileban. 2Gb-ig terjedhet, bár az <B>OpenDMS</B> kiterjesztés többek között
+  ezt a korlátot is kitágítja. Az M$ jelenleg erõsen ellenzi a használatát, az
+  ASF/WMV javára. Persze nem mintha bárkit is érdekelne.</P>
 
 <P><B>Megj</B>.: a DV kamerák két fajta AVI formátumot hozhatnak létre. Az
-egyik a szabványos és lejátszható, a másik nélkülözi mindkét elõbb
-felsorolt tulajdonságot.</P>
+  egyik a szabványos és lejátszható, a másik nélkülözi mindkét elõbb
+  felsorolt tulajdonságot.</P>
 
 <P>Két fajta AVI file fajta ismert:</P>
 
@@ -110,86 +109,92 @@ felsorolt tulajdonságot.</P>
 </UL>
 
 <P>Bármilyen audio és video codec használható, de megjegyzendõ hogy a VBR
-audio támogatása igencsak gyenge a legtöbb lejátszóban. Maga a fileformátum
-lehetõvé teszi a VBR audiot, de a lejátszók CBR audiot várnak. A VBR új,
-és a Microsoft AVI specifikációi csak CBR audiot irnak le. Ráadásul a
-legtöbb enkóder/multiplexer hibás fileokat generál VBR audio használata
-esetén. Két kivételt ismerek: NanDub, és <A HREF="encoding.html">MEncoder</A>.</P>
+  audio támogatása igencsak gyenge a legtöbb lejátszóban. Maga a fileformátum
+  lehetõvé teszi a VBR audiot, de a lejátszók CBR audiot várnak. A VBR új,
+  és a Microsoft AVI specifikációi csak CBR audiot irnak le. Ráadásul a
+  legtöbb enkóder/multiplexer hibás fileokat generál VBR audio használata
+  esetén. Két kivételt ismerek: NanDub, és
+  <A HREF="encoding.html">MEncoder</A>.</P>
 
 
 <P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV file-ok</A></B></P>
 
 <P>ASF (active streaming format) a Microsofttól jön. Az ASF két variánsát
-fejlesztették ki, v1.0 és v2.0. A v1.0-át a média szerkesztõik (windows
-media player és windows media encoder) használják, és teljesen titkos. A
-v2.0 pedig publikus és bejegyzett :). Természetesen különböznek, abszolut
-semmi kompatibilitás nem áll fent, ez csak egy újabb jogi játék. Az <B>MPlayer</B>
-csak a v1.0-át támogatja, mivel v2.0-át még senki nem látott :) . Megjegyzendõ
-hogy manapság az ASF fileok .WMA vagy .WMV kiterjesztéssel jönnek.</P>
+  fejlesztették ki, v1.0 és v2.0. A v1.0-át a média szerkesztõik (windows media
+  player és windows media encoder) használják, és teljesen titkos. A v2.0 pedig
+  publikus és bejegyzett :). Természetesen különböznek, abszolut semmi
+  kompatibilitás nem áll fent, ez csak egy újabb jogi játék. Az <B>MPlayer</B>
+  csak a v1.0-át támogatja, mivel v2.0-át még senki nem látott :) .
+  Megjegyzendõ hogy manapság az ASF fileok .WMA vagy .WMV kiterjesztéssel
+  jönnek.</P>
 
 
 <P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV file-ok</A></B></P>
 
 <P>Ezek Macintosh-ról származnak. Általában .QT vagy .MOV kiterjesztésûek,
-valamint mivel az MPEG4 Group a QuickTime-t választotta ajánlott
-fileformátumnak az MPEG4-hez, az õ .MOV filejaik .MPG vagy .MP4 kiterjesztésûek
-(érdekesség hogy ezekben a fileokban a video stream egy az egyben egy .MPG
-file. A <CODE>-dumpvideo</CODE> opcióval ki is lehet szedni.).</P>
+  valamint mivel az MPEG4 Group a QuickTime-t választotta ajánlott
+  fileformátumnak az MPEG4-hez, az õ .MOV filejaik .MPG vagy .MP4
+  kiterjesztésûek (érdekesség hogy ezekben a fileokban a video és audio stream
+  egy az egyben egy MPG vagy AAC file. A <CODE>-dumpvideo</CODE> és
+  <CODE>-dumpaudio</CODE> opciókkal ki is lehet õket szedni.).</P>
 
 <P><B>Codec-ek</B> : bármilyen codec engedélyezett, mind CBR vagy VBR. A
-legtöbb új MOV file <B>Sorenson</B> videoval és QDesign Music Audioval
-van ellátva. Ez a formátumok teljesen titkosan, és csak az Apple quicktime
-lejátszója képes õket lejátszani (és csak win/mac-en).</P>
+  legtöbb új MOV file <B>Sorenson</B> videoval és QDesign Music Audioval van
+  ellátva. Lásd a <A HREF="codecs.html#2.2.1.10">Sorenson</A> fejezetet.
+  A QDesign Music Audio jelenleg nem támogatott.</P>
 
 
-<P><B><A NAME=2.1.1.5>2.1.1.5. VIV file-ok</A></B></P>
+<P><B><A NAME=2.1.1.5>2.1.1.5. VIVO file-ok</A></B></P>
 
 <P>Az <B>MPlayer</B> teljesen természetesen játszik VIVO fileokat. A formátum
-nagy hátránya hogy nincs benne index blokk, se fix csomagméret vagy sync
-byte, és a legtöbb fileban keyframe sincs így a tekerést el lehet felejteni.</P>
+  nagy hátránya hogy nincs benne index blokk, se fix csomagméret vagy sync
+  byte, és a legtöbb fileban keyframe sincs így a tekerést el lehet
+  felejteni.</P>
 
-<P>A VIVO/1.0 fileok video codec-e szabványos <B>h.263</B> . A VIVO/2.0
-fileok video codec-e egy módosított, nem szabványos <B>h.263</B> . Az audioval
-ugyanez a helyzet, <B>g.723</B> (szabvány), vagy <B>Vivo Siren</B>.</P>
+<P>A VIVO/1.0 fileok video codec-e szabványos <B>h.263</B>. A VIVO/2.0 file-ok
+  video codec-e egy módosított, nem szabványos <B>h.263</B>. Az audioval
+  ugyanez a helyzet, <B>g.723</B> (szabvány), vagy <B>Vivo Siren</B>.</P>
 
-<P>Lásd a <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
-és <A HREF=codecs.html#2.2.2.4>VIVO audio codec</A> fejezeteket az installálási
-útmutatóhoz.</P>
+<P>Lásd a <A HREF=codecs.html#2.2.1.4>VIVO video codec</A> és
+  <A HREF=codecs.html#2.2.2.4>VIVO audio codec</A> fejezeteket az installálási
+  útmutatóhoz.</P>
 
 
 <P><B><A NAME=2.1.1.6>2.1.1.6. FLI file-ok</A></B></P>
 
 <P>A <B>FLI</B> egy - az Autodesk Animator által használt - nagyon régi
-fileformátum, de a Neten igen elterjedt. Az <B>MPlayer</B> teljeskörûen
-támogatja ezen formátum beolvasását és dekódolását, seekeléssel is,
-természetesen. A FLI file-ok nem tartalmaznak keyframe-eket, így a seekelés
-után a kép rövid ideig zavaros lesz.</P>
+  fileformátum, de a Neten igen elterjedt. Az <B>MPlayer</B> teljeskörûen
+  támogatja ezen formátum beolvasását és dekódolását, seekeléssel is,
+  természetesen. A FLI file-ok nem tartalmaznak keyframe-eket, így a seekelés
+  után a kép rövid ideig zavaros lesz.</P>
 
 
 <P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia file-ok</A></B></P>
 
 <P>Igen, az <B>MPlayer</B> képes RealMedia (.rm) file-ok beolvasására (demux).
-Lehet seekelni. Itt található a támogatott
-<A HREF="codecs.html#2.2.1.8">RealVideo</A> és
-<A HREF="codecs.html#2.2.2.5">RealAudio</A> codec-ek listája.</P>
+  Lehet seekelni, ha megadod a <CODE>-forceidx</CODE> opciót.
+  Itt található a támogatott
+  <A HREF="codecs.html#2.2.1.8">RealVideo</A> és
+  <A HREF="codecs.html#2.2.2.5">RealAudio</A> codec-ek listája.</P>
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo file-ok</A></B></P>
 
-<P>A <A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
-egy TV grabber program (ha minden igaz:). Az <B>MPlayer</B> képes a létrehozott
-<CODE>.nuv</CODE> file-okat olvasni (csak az 5.0-ás NuppelVideo formátumot).
-Ezek a file-ok tartalmazhatnak tömörítetlen YV12, YV12+RTJpeg tömörített,
-YV12 RTJpeg+lzo tömörített, valamint YV12+lzo tömörített képeket.
-Természetesen lehetséges ezen file-ok <B>MEncoder</B>-rel történõ DivX-be
-(vagy bármibe) tömörítése. A seekelés mûködik.</P>
+<P>A <A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A> egy
+  TV grabber program (ha minden igaz:). Az <B>MPlayer</B> képes a létrehozott
+  <CODE>.nuv</CODE> file-okat olvasni (csak az 5.0-ás NuppelVideo formátumot). 
+  Ezek a file-ok tartalmazhatnak tömörítetlen YV12, YV12+RTJpeg tömörített,
+  YV12 RTJpeg+lzo tömörített, valamint YV12+lzo tömörített képeket. 
+  Természetesen lehetséges ezen file-ok <B>MEncoder</B>-rel történõ DivX-be
+  (vagy bármibe) tömörítése. A seekelés mûködik.</P>
 
 
 <P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg file-ok</A></B></P>
 
 <P>A <A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> is egy
-formátum amit például az <A HREF="http://mjpeg.sf.net">mjpegtools programok</A>
-használnak. Ezek a fileok gyakorlatilag YUV 4:2:0 képek sorozataiból állnak.</P>
+  formátum amit például az <A HREF="http://mjpeg.sf.net">mjpegtools
+  programok</A> használnak. Ezek a fileok gyakorlatilag YUV 4:2:0 képek
+  sorozataiból állnak.</P>
 
 
 <P><B><A NAME=2.1.1.10>2.1.1.10. FILM file-ok</A></B></P>
@@ -234,6 +239,9 @@ használnak. Ezek a fileok gyakorlatilag YUV 4:2:0 képek sorozataiból állnak.</P>
 
 
 <P><B><A NAME=2.1.2.3>2.1.2.3. OGG file-ok</A></B></P>
+
+<P>Megfelelõen felinstallált <CODE>libogg</CODE> valamint
+  <CODE>libvorbis</CODE> szükséges.</P>
 
 
 <P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF file-ok</A></B></P>

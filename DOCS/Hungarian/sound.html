@@ -24,12 +24,13 @@ a következõ meghajtókat tartalmazza :</P>
 <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>natív ALSA 0.5 meghajtó</TD></TR>
 <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>natív ALSA 0.9 meghajtó (mûködik, de vannak vele problémák -> használd az OSS meghajtót)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio meghajtó (/dev/audio) BSD-re és Solaris-ra</TD></TR>
+<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>natív ARTS meghajtó (KDE lusereknek)</TD></TR>
 
 </TABLE>
 
 <P>A helyzet az, hogy a Linux hangkártyameghajtói nem túl jók, ráadásul
-olyan inkompatibilisek amennyire csak lehet. Lehetséges hogy eltart egy
-ideig amíg megtalálod az optimális beállitásokat.</P>
+  olyan inkompatibilisek amennyire csak lehet. Lehetséges hogy eltart egy
+  ideig amíg megtalálod az optimális beállitásokat.</P>
 
 <UL>
   <LI>ha OSS meghajtót használsz, elõször próbálkozz az <I>-ao oss</I> opcióval
@@ -41,17 +42,14 @@ ideig amíg megtalálod az optimális beállitásokat.</P>
   <LI>ha ALSA 0.5-öt használsz, akkor MAJDNEM mindig az <I>-ao alsa5</I>-öt kell
     használnod, mert a 0.5 hibás OSS emulációs kódot tartalmaz, amitõl kissé
     összeesik az <B>MPlayer</B> :
-    <UL>
-      <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
-    </UL>
-  </LI>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
   <LI>ha ALSA 0.9-ed van, használd az <I>-ao oss</I>-t vagy az <I>-ao sdl</I>-t,
     izlés szerint. Használhatod az <I>-ao alsa9</I>-et is, de az még elég bugos.</LI>
 </UL>
 
 <P><B>Solaris/FreeBSD</B> rendszereken természetesen a SUN audio meghajtót
-kell használni, az <I>-ao sun</I> opcióval, különben lõttek mind a video, mind az audio
-lejátszásnak.</P>
+  kell használni, az <I>-ao sun</I> opcióval, különben lõttek mind a video,
+  mind az audio lejátszásnak.</P>
 
 <P><B><A NAME=2.3.2.1>2.3.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></B></P>
 
@@ -60,8 +58,8 @@ lejátszásnak.</P>
 <TD></TD><TD>Driver:</TD><TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">innen</A></TD><TR>
 
 <TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>nincs</TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
 <TD></TD><TD>ALSA:</TD><TD>nincs</TD><TR>
 <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 <TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
@@ -69,8 +67,8 @@ lejátszásnak.</P>
 (<I>bufferméret megnövelve 32k-ra</I>)</TD><TR>
 
 <TD COLSPAN=3><B>GUS PnP</B></TD><TR>
-<TD></TD><TD>OSS/Free:</TD><TD>nincs</TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
 <TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
 <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
@@ -85,8 +83,7 @@ lejátszásnak.</P>
 <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
 <TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK<I>Az új audio kóddal
-is bugzik...</I></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK<I>Az új audio kóddal is bugzik...</I></TD><TR>
 <TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
 <TD></TD><TD>Max kHz:</TD><TD>44</TD><TR>
 
@@ -266,6 +263,7 @@ hangkártyára+meghajtóra van szükség.</P>
 
 <P>Használat :<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
+
 
 <P><B><A NAME=2.3.2.2.8>2.3.2.2.8. Surround</A></B></P>
 

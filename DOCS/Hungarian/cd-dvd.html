@@ -14,21 +14,23 @@
 <P>Szabványos Video CD-k lejátszása a következõképpen lehetséges:</P>
 
 <P>
-mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
-Néhány példa:<BR>
-mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
+  mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
+
+  Néhány példa:<BR>
+  mplayer -vcd 1<BR>
+  mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
 </P>
 
 <P>
-Megjegyzések:<BR>
-- NE próbálj mountolni VCD-ket, és közvetlen lejátszani DAT fájlokat! Ez
-windows alatt mûködik, de Linux alatt nem.<BR>
-- A VCD lemezeken általában 2 sáv van: egy adatsáv (windowsos lejátszót,
-karaoke adatot tartalmaz, stb) és egy mode-2 sáv (a film), így elõször
-'-vcd 2'-t írj be!<BR>
-- Az alapértelmezett VCD eszköz a /dev/cdrom . Ha a tied ettõl eltér,
-szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
+  Megjegyzések:<BR>
+  - NE próbálj mountolni VCD-ket, és közvetlen lejátszani DAT fájlokat! Ez
+    windows alatt mûködik, de Linux alatt nem.<BR>
+  - A VCD lemezeken általában 2 sáv van: egy adatsáv (windowsos lejátszót,
+    karaoke adatot tartalmaz, stb) és egy mode-2 sáv (a film), így elõször
+    <CODE>-vcd 2</CODE>-t írj be!<BR>
+  - Az alapértelmezett VCD eszköz a /dev/cdrom. Ha a tied ettõl eltér,
+    szimbolikus linket kell létrehozni, vagy megadni az eszközt a
+    parancssorban!
 </P>
 
 <P>A Linux dokumentációjából:</P>
@@ -42,7 +44,7 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 
 <P>Ajánlott a 'setcd' nevû programot használni. Elég régi, de könnyen fellelhetõ
   a Neten. VALAMINT az újabb hdparm-oknak is van erre opciójuk !
-  Használata :</P>
+  Használata:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [sebesség] [meghajtó]</CODE></P>
 
@@ -51,7 +53,7 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[meghajtó]/settings</CODE></P>
 
 <P>de ehhez rendszergazdai jogosultság szükséges. A következõ parancsot is
-  használom :</P>
+  használom:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[meghajtó]/settings</CODE></P>
 
@@ -91,7 +93,7 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 
 <P><I>Futtasd a <CODE>./configure</CODE>-t. Ha nem törölted le a
   <CODE>libmpdvdkit</CODE> könyvtárat, a ./configure valami ilyesmit fog
-  kiírni :</P>
+  kiírni:</P>
 
 <P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
 
@@ -103,7 +105,7 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 <P>Ezután a szokott módon <CODE>make</CODE> és <CODE>make install</CODE>.</P>
 
 <P>Természetesen miután felinstalláltad a libdvdcss-t és a libdvdread-et,
-nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
+  nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 
 <P><B>MPlayer használata DVD lejátszáshoz:</B></P>
 
@@ -149,7 +151,7 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 </TABLE>
 
 <P>Az egység alapbeállítás szerint <CODE>/dev/dvd</CODE>, ezt a config.h-ban
-változtathatod meg (fordításkor), van megadhatod a -dvd-device opcióval :</P>
+  változtathatod meg (fordításkor), van megadhatod a -dvd-device opcióval:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu -dvd-device /dev/dvd</CODE></P>
