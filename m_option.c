@@ -84,6 +84,7 @@ static int parse_flag(m_option_t* opt,char *name, char *param, void* dst, int sr
 	!strcasecmp(param, "i") ||
 	!strcasecmp(param, "tak") ||
 	!strcasecmp(param, "ja") ||
+	!strcasecmp(param, "true") ||
 	!strcmp(param, "1")) {
       if(dst) VAL(dst) = opt->max;
     } else if (!strcasecmp(param, "no") ||
@@ -94,6 +95,7 @@ static int parse_flag(m_option_t* opt,char *name, char *param, void* dst, int sr
 	       !strcasecmp(param, "n") ||
 	       !strcasecmp(param, "nie") ||
 	       !strcasecmp(param, "nej") ||
+	       !strcasecmp(param, "false") ||
 	       !strcmp(param, "0")) {
       if(dst) VAL(dst) = opt->min;
     } else {
