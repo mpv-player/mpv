@@ -103,6 +103,11 @@ int vo_flags=0;
 
 static vo_tune_info_t vtune;
 
+static mp_image_t* static_images[2];
+static mp_image_t* temp_images[1];
+static mp_image_t* export_images[1];
+static int static_idx=0;
+
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
     int i,j;
     unsigned int out_fmt=0;
@@ -182,6 +187,21 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     }
   }
 
+  { const vo_info_t *info = video_out->get_info();
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
+         sh->disp_w,sh->disp_h,
+         screen_size_x,screen_size_y,
+	 vo_format_name(out_fmt),
+         fullscreen?"fs ":"",
+         vidmode?"vm ":"",
+         softzoom?"zoom ":"",
+         (flip==1)?"flip ":"");
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
+    if(info->comment && strlen(info->comment) > 0)
+        mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
+  }
+
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh->disp_w,sh->disp_h,
@@ -198,13 +218,14 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 	return 0; // exit_player(MSGTR_Exit_error);
     }
 
+#define FREE_MPI(mpi) if(mpi){if(mpi->flags&MP_IMGFLAG_ALLOCATED) free(mpi->planes[0]); free(mpi); mpi=NULL;}
+    FREE_MPI(static_images[0])
+    FREE_MPI(static_images[1])
+    FREE_MPI(temp_images[0])
+    FREE_MPI(export_images[0])
+#undef FREE_MPI
     return 1;
 }
-
-static mp_image_t* static_images[2];
-static mp_image_t* temp_images[1];
-static mp_image_t* export_images[1];
-static int static_idx=0;
 
 // mp_imgtype: buffering type, see mp_image.h
 // mp_imgflag: buffer requirements (read/write, preserve, stride limits), see mp_image.h
