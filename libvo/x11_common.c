@@ -156,7 +156,6 @@ int vo_wm_detect( void )
  int             format;
  unsigned long   nitems, bytesafter;
  Atom          * args = NULL;
- int             icewm_hack = 0;
  int             metacity_hack = 0;
  char          * name;
  
@@ -172,8 +171,6 @@ int vo_wm_detect( void )
      name = XGetAtomName (mDisplay, args[i]);
      if (!strncmp( name, "_WIN_LAYER", 10))
        wm = vo_wm_Layered;
-     if (!strncmp( name, "_ICEWM_TRAY", 11))
-       icewm_hack = 1;
      if (!strncmp( name, "_WIN_HINTS", 10))
        // metacity is the only manager which supports _WIN_LAYER but not _WIN_HINTS
        metacity_hack = 1;
@@ -209,19 +206,8 @@ int vo_wm_detect( void )
 	XFree (args);
      }
      return vo_wm_NetWM;
-   } else
-   if (icewm_hack) {
-     // Next ugly hack for new IceWM (1.2.x). It supports FULLSCREEN state but doesn't say a word
-     // about it. What's more it doesn't accept regular resising, so we have to us _NET_WM_STATE_FULLSCREEN
-     mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is a broken IceWM.\n" );
-     net_wm_support |= SUPPORT_FULLSCREEN;
-     return vo_wm_NetWM;
    }
   }
-
- // this is old good IceWM, treat it right
- if (icewm_hack)
-   return vo_wm_Layered;
  
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
  return wm;
