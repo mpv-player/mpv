@@ -10,7 +10,7 @@
 #include <stdarg.h> /* va_alist, va_start, va_end */
 #include <errno.h> /* strerror, errno */
 
-#include "odeon.h"
+#include "mp_msg.h"
 #include "aclib/byteswap.h"
 
 #include "stream.h"
@@ -48,221 +48,6 @@ typedef struct xacodec_driver
 
 xacodec_driver_t *xacodec_driver = NULL;
 
-/* *** XANIM SHIT *** */
-
-typedef struct
-{
-    unsigned char r0, g0, b0;
-    unsigned char r1, g1, b1;
-    unsigned char r2, g2, b2;
-    unsigned char r3, g3, b3;
-    unsigned int clr0_0, clr0_1, clr0_2, clr0_3;
-    unsigned int clr1_0, clr1_1, clr1_2, clr1_3;
-    unsigned int clr2_0, clr2_1, clr2_2, clr2_3;
-    unsigned int clr3_0, clr3_1, clr3_2, clr3_3;
-} XA_2x2_Color;
-
-#define ip_OUT_2x2_1BLK(ip, CAST, cmap2x2, rinc) { register CAST d0, d1; \
- *ip++ = d0 = (CAST)(cmap2x2->clr0_0); *ip++ = d0; \
- *ip++ = d1 = (CAST)(cmap2x2->clr1_0); *ip = d1; \
-  ip += rinc; \
- *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip = d1; ip += rinc; \
- *ip++ = d0 = (CAST)(cmap2x2->clr2_0); *ip++ = d0; \
- *ip++ = d1 = (CAST)(cmap2x2->clr3_0); *ip = d1; \
-  ip += rinc; *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip++ = d1; }
-
-#define ip_OUT_2x2_2BLKS(ip, CAST, c2x2map0, c2x2map1, rinc) { \
- *ip++ = (CAST)(c2x2map0->clr0_0); \
- *ip++ = (CAST)(c2x2map0->clr1_0); \
- *ip++ = (CAST)(c2x2map1->clr0_0); \
- *ip   = (CAST)(c2x2map1->clr1_0); ip += rinc; \
- *ip++ = (CAST)(c2x2map0->clr2_0); \
- *ip++ = (CAST)(c2x2map0->clr3_0); \
- *ip++ = (CAST)(c2x2map1->clr2_0); \
- *ip   = (CAST)(c2x2map1->clr3_0); }
-
-void XA_2x2_OUT_1BLK_clr8(unsigned char *image, unsigned int x, unsigned int y,
-    unsigned int imagex, XA_2x2_Color *cmap2x2)
-{
-    unsigned int row_inc = imagex - 3;
-    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
-
-    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
-	image, x, y, imagex, cmap2x2);
-    ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
-}
-
-void XA_2x2_OUT_4BLKS_clr8(unsigned char *image, unsigned int x, unsigned int y,
-    unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
-    XA_2x2_Color *cm3)
-{
-    unsigned int row_inc = imagex - 3;
-    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
-
-    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cm0: %08x', 'cm1: %08x', 'cm2: %08x', 'cm3: %08x')",
-	image, x, y, imagex, cm0, cm1, cm2, cm3);
-    ip_OUT_2x2_2BLKS(ip, unsigned char, cm0, cm1, row_inc);
-    ip += row_inc;
-    ip_OUT_2x2_2BLKS(ip, unsigned char, cm2, cm3, row_inc);
-}
-
-void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
-{
-    void (*color_func)();
-
-    XA_Print("YUV2x2_Blk_Func('image_type: %d', 'blks: %d', 'dith_flag: %d')",
-	    image_type, blks, dith_flag);
-
-    if (blks == 1)
-    {
-	switch(image_type)
-	{
-	    default:
-		color_func = XA_2x2_OUT_1BLK_clr8;
-		break;
-	}
-    }
-    else /* blks == 4 */
-    {
-	switch(image_type)
-	{
-	    default:
-		color_func = XA_2x2_OUT_4BLKS_clr8;
-		break;
-	}
-    }
-
-    XA_Print("YUV2x2_Blk_Func -> %08x", color_func);
-
-    return((void *)color_func);
-}
-
-void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
-{
-    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
-	    image_type, dith_type);
-}
-
-int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
-{
-    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
-	    anim_hdr, function);
-    xacodec_driver->close_func = function;
-}
-
-int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
-{
-    XA_Print("XA_Gen_YUV_Tabs('anim_hdr: %08x')", anim_hdr);
-
-//    XA_Print("anim type: %d - img[x: %d, y: %d, c: %d, d: %d]",
-//	anim_hdr->anim_type, anim_hdr->imagex, anim_hdr->imagey,
-//	anim_hdr->imagec, anim_hdr->imaged);
-}
-
-void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
-{
-    XA_Print("JPG_Setup_Samp_Limit_Table('anim_hdr: %08x')", anim_hdr);
-}
-
-void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
-	unsigned int height, unsigned int full_flag)
-{
-    XA_Print("JPG_Alloc_MCU_Bufs('anim_hdr: %08x', 'width: %d', 'height: %d', 'full_flag: %d')",
-	    anim_hdr, width, height, full_flag);
-}
-
-typedef struct
-{
-    unsigned char *Ybuf;
-    unsigned char *Ubuf;
-    unsigned char *Vbuf;
-    unsigned char *the_buf;
-    unsigned int the_buf_size;
-    unsigned short y_w, y_h;
-    unsigned short uv_w, uv_h;
-} YUVBufs;
-
-typedef struct
-{
-    unsigned long Uskip_mask;
-    long	*YUV_Y_tab;
-    long	*YUV_UB_tab;
-    long	*YUV_VR_tab;
-    long	*YUV_UG_tab;
-    long	*YUV_VG_tab;
-} YUVTabs;
-
-#define XA_IMTYPE_RGB	0x0001
-
-void XA_YUV1611_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
-    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
-{
-    XA_Print("XA_YUV1611_To_RGB('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
-}
-
-void XA_YUV1611_To_CLR8(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
-    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
-{
-    XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
-}
-
-void *XA_YUV1611_Func(unsigned int image_type)
-{
-    void (*color_func)();
-
-    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
-
-    switch(image_type)
-    {
-	case XA_IMTYPE_RGB:
-	    color_func = XA_YUV1611_To_RGB;
-	    break;
-	default:
-	    color_func = XA_YUV1611_To_CLR8;
-	    break;
-    }
-
-    return((void *)color_func);
-}
-
-unsigned long XA_Time_Read()
-{
-    return(GetRelativeTime());
-}
-
-/* YUV 41 11 11 routines */
-void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
-    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
-{
-    XA_Print("XA_YUV411111_To_RGB('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
-}
-
-
-void *XA_YUV411111_Func(unsigned int image_type)
-{
-    void (*color_func)();
-
-    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);    
-
-    switch(image_type)
-    {
-	case XA_IMTYPE_RGB:	color_func = XA_YUV411111_To_RGB;	break;
-    }
-    
-    return((void *)color_func);
-}
-
-
-YUVBufs jpg_YUVBufs;
-YUVTabs def_yuv_tabs;
-
-/* *** EOF XANIM SHIT *** */
 
 /* Needed by XAnim DLLs */
 int XA_Print(char *fmt, ...)
@@ -272,7 +57,7 @@ int XA_Print(char *fmt, ...)
 
     va_start(vallist, fmt);
     vsnprintf(buf, 1024, fmt, vallist);
-    odprintf(LOG_NORM, "[xacodec] %s", buf);
+    mp_msg(MSGT_DECVIDEO, MSGL_HINT, "[xacodec] %s", buf);
     va_end(vallist);
 }
 
@@ -297,16 +82,16 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
     {
 	error = dlerror();
 	if (error)
-	    printf("xacodec: fialed to init %s while %s\n", filename, error);
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to init %s while %s\n", filename, error);
 	else
-	    printf("xacodec: failed ot init (dlopen) %s\n", filename);
+	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed ot init (dlopen) %s\n", filename);
 	return(0);
     }
 
     what_the = dlsym(codec_driver->file_handler, "What_The");
     if ((error = dlerror()) != NULL)
     {
-	printf("xacodec: failed to init %s while %s\n", filename, error);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to init %s while %s\n", filename, error);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
@@ -314,24 +99,24 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
     mod_hdr = what_the();
     if (!mod_hdr)
     {
-	printf("xacodec: 'What_The' function failed in %s\n", filename);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: 'What_The' function failed in %s\n", filename);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
     
-    printf("=== XAnim Codec ===\n");
-    printf(" Filename: %s (API revision: %x)\n", filename, mod_hdr->api_rev);
-    printf(" Codec: %s. Rev: %s\n", mod_hdr->desc, mod_hdr->rev);
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "=== XAnim Codec ===\n");
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, " Filename: %s (API revision: %x)\n", filename, mod_hdr->api_rev);
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, " Codec: %s. Rev: %s\n", mod_hdr->desc, mod_hdr->rev);
     if (mod_hdr->copyright)
-	printf(" %s\n", mod_hdr->copyright);
+	mp_msg(MSGT_DECVIDEO, MSGL_INFO, " %s\n", mod_hdr->copyright);
     if (mod_hdr->mod_author)
-	printf(" Module Author(s): %s\n", mod_hdr->mod_author);
+	mp_msg(MSGT_DECVIDEO, MSGL_INFO, " Module Author(s): %s\n", mod_hdr->mod_author);
     if (mod_hdr->authors)
-	printf(" Codec Author(s): %s\n", mod_hdr->authors);
+	mp_msg(MSGT_DECVIDEO, MSGL_INFO, " Codec Author(s): %s\n", mod_hdr->authors);
 
     if (mod_hdr->api_rev > XAVID_API_REV)
     {
-	printf("xacodec: not supported api revision in %s\n", filename);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported api revision in %s\n", filename);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
@@ -339,7 +124,7 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
     func = mod_hdr->funcs;
     if (!func)
     {
-	printf("xacodec: function table error in %s\n", filename);
+	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: function table error in %s\n", filename);
 	dlclose(codec_driver->file_handler);
 	return(0);
     }
@@ -597,3 +382,221 @@ int xacodec_exit()
 	free(xacodec_driver);
     return(TRUE);
 }
+
+
+/* *** XANIM SHIT *** */
+/* like loader/win32.c - mini XANIM library */
+
+typedef struct
+{
+    unsigned char r0, g0, b0;
+    unsigned char r1, g1, b1;
+    unsigned char r2, g2, b2;
+    unsigned char r3, g3, b3;
+    unsigned int clr0_0, clr0_1, clr0_2, clr0_3;
+    unsigned int clr1_0, clr1_1, clr1_2, clr1_3;
+    unsigned int clr2_0, clr2_1, clr2_2, clr2_3;
+    unsigned int clr3_0, clr3_1, clr3_2, clr3_3;
+} XA_2x2_Color;
+
+#define ip_OUT_2x2_1BLK(ip, CAST, cmap2x2, rinc) { register CAST d0, d1; \
+ *ip++ = d0 = (CAST)(cmap2x2->clr0_0); *ip++ = d0; \
+ *ip++ = d1 = (CAST)(cmap2x2->clr1_0); *ip = d1; \
+  ip += rinc; \
+ *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip = d1; ip += rinc; \
+ *ip++ = d0 = (CAST)(cmap2x2->clr2_0); *ip++ = d0; \
+ *ip++ = d1 = (CAST)(cmap2x2->clr3_0); *ip = d1; \
+  ip += rinc; *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip++ = d1; }
+
+#define ip_OUT_2x2_2BLKS(ip, CAST, c2x2map0, c2x2map1, rinc) { \
+ *ip++ = (CAST)(c2x2map0->clr0_0); \
+ *ip++ = (CAST)(c2x2map0->clr1_0); \
+ *ip++ = (CAST)(c2x2map1->clr0_0); \
+ *ip   = (CAST)(c2x2map1->clr1_0); ip += rinc; \
+ *ip++ = (CAST)(c2x2map0->clr2_0); \
+ *ip++ = (CAST)(c2x2map0->clr3_0); \
+ *ip++ = (CAST)(c2x2map1->clr2_0); \
+ *ip   = (CAST)(c2x2map1->clr3_0); }
+
+void XA_2x2_OUT_1BLK_clr8(unsigned char *image, unsigned int x, unsigned int y,
+    unsigned int imagex, XA_2x2_Color *cmap2x2)
+{
+    unsigned int row_inc = imagex - 3;
+    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
+
+    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
+	image, x, y, imagex, cmap2x2);
+    ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
+}
+
+void XA_2x2_OUT_4BLKS_clr8(unsigned char *image, unsigned int x, unsigned int y,
+    unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
+    XA_2x2_Color *cm3)
+{
+    unsigned int row_inc = imagex - 3;
+    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
+
+    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cm0: %08x', 'cm1: %08x', 'cm2: %08x', 'cm3: %08x')",
+	image, x, y, imagex, cm0, cm1, cm2, cm3);
+    ip_OUT_2x2_2BLKS(ip, unsigned char, cm0, cm1, row_inc);
+    ip += row_inc;
+    ip_OUT_2x2_2BLKS(ip, unsigned char, cm2, cm3, row_inc);
+}
+
+void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
+{
+    void (*color_func)();
+
+    XA_Print("YUV2x2_Blk_Func('image_type: %d', 'blks: %d', 'dith_flag: %d')",
+	    image_type, blks, dith_flag);
+
+    if (blks == 1)
+    {
+	switch(image_type)
+	{
+	    default:
+		color_func = XA_2x2_OUT_1BLK_clr8;
+		break;
+	}
+    }
+    else /* blks == 4 */
+    {
+	switch(image_type)
+	{
+	    default:
+		color_func = XA_2x2_OUT_4BLKS_clr8;
+		break;
+	}
+    }
+
+    XA_Print("YUV2x2_Blk_Func -> %08x", color_func);
+
+    return((void *)color_func);
+}
+
+void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
+{
+    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
+	    image_type, dith_type);
+}
+
+int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
+{
+    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
+	    anim_hdr, function);
+    xacodec_driver->close_func = function;
+}
+
+int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
+{
+    XA_Print("XA_Gen_YUV_Tabs('anim_hdr: %08x')", anim_hdr);
+
+//    XA_Print("anim type: %d - img[x: %d, y: %d, c: %d, d: %d]",
+//	anim_hdr->anim_type, anim_hdr->imagex, anim_hdr->imagey,
+//	anim_hdr->imagec, anim_hdr->imaged);
+}
+
+void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
+{
+    XA_Print("JPG_Setup_Samp_Limit_Table('anim_hdr: %08x')", anim_hdr);
+}
+
+void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
+	unsigned int height, unsigned int full_flag)
+{
+    XA_Print("JPG_Alloc_MCU_Bufs('anim_hdr: %08x', 'width: %d', 'height: %d', 'full_flag: %d')",
+	    anim_hdr, width, height, full_flag);
+}
+
+typedef struct
+{
+    unsigned char *Ybuf;
+    unsigned char *Ubuf;
+    unsigned char *Vbuf;
+    unsigned char *the_buf;
+    unsigned int the_buf_size;
+    unsigned short y_w, y_h;
+    unsigned short uv_w, uv_h;
+} YUVBufs;
+
+typedef struct
+{
+    unsigned long Uskip_mask;
+    long	*YUV_Y_tab;
+    long	*YUV_UB_tab;
+    long	*YUV_VR_tab;
+    long	*YUV_UG_tab;
+    long	*YUV_VG_tab;
+} YUVTabs;
+
+#define XA_IMTYPE_RGB	0x0001
+
+void XA_YUV1611_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
+    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
+    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
+{
+    XA_Print("XA_YUV1611_To_RGB('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
+}
+
+void XA_YUV1611_To_CLR8(unsigned char *image, unsigned int imagex, unsigned int imagey,
+    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
+    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
+{
+    XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
+}
+
+void *XA_YUV1611_Func(unsigned int image_type)
+{
+    void (*color_func)();
+
+    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
+
+    switch(image_type)
+    {
+	case XA_IMTYPE_RGB:
+	    color_func = XA_YUV1611_To_RGB;
+	    break;
+	default:
+	    color_func = XA_YUV1611_To_CLR8;
+	    break;
+    }
+
+    return((void *)color_func);
+}
+
+unsigned long XA_Time_Read()
+{
+    return(GetRelativeTime());
+}
+
+/* YUV 41 11 11 routines */
+void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
+    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
+    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
+{
+    XA_Print("XA_YUV411111_To_RGB('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
+}
+
+
+void *XA_YUV411111_Func(unsigned int image_type)
+{
+    void (*color_func)();
+
+    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);    
+
+    switch(image_type)
+    {
+	case XA_IMTYPE_RGB:	color_func = XA_YUV411111_To_RGB;	break;
+    }
+    
+    return((void *)color_func);
+}
+
+
+YUVBufs jpg_YUVBufs;
+YUVTabs def_yuv_tabs;
+
+/* *** EOF XANIM SHIT *** */
