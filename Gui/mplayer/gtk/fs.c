@@ -121,7 +121,7 @@ GdkBitmap   * fmask;
 
 static char * Filter( char * name )
 {
- char tmp[32];
+ static char tmp[32];
  int  i,c;
  for ( i=0,c=0;i < strlen( name );i++ )
   {
