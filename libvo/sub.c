@@ -195,9 +195,9 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
    k=i=0; l=lines;
    while (l--){
        x = xtbl[i++];
-       while (utbl[k]){
-	     c=utbl[k]; 
-	     k++;
+       while ((c=utbl[k++])){
+//	     c=utbl[k]; 
+//	     k++;
 	     if (x>=0 && x+vo_font->width[c]<=dxs)
 		if ((font=vo_font->font[c])>=0)
 	           draw_alpha(x,y,
