@@ -205,9 +205,9 @@ printosdprogbar(){
     }
 }
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width,
+config(uint32_t width, uint32_t height, uint32_t d_width,
 	    uint32_t d_height, uint32_t fullscreen, char *title, 
-	    uint32_t format) {
+	    uint32_t format,const vo_tune_info_t *info) {
     /*
      * main init
      * called by mplayer

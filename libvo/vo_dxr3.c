@@ -96,7 +96,7 @@ void write_dxr3(rte_context *context, void *data, size_t size, void *user_data)
 }
 #endif
 
-static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	int tmp1, tmp2;
 	em8300_register_t reg;

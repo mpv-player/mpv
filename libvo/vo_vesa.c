@@ -542,7 +542,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
  * bit 3 (0x08) enables flipping (-flip) (NK: and for what?)
  */
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
 {
   struct VbeInfoBlock vib;
   struct VesaModeInfoBlock vmib;

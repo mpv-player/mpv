@@ -109,10 +109,12 @@ unsigned int stride2[3];
     gb2.width  = gb1.width;
     gb2.height = gb1.height;
 
-    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YV12);
-//    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_UYVY);
-//    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YUY2);
-//    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_RGB|24);
+    // video_out->preinit() LOST here ? 
+
+    video_out->config(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YV12,NULL);
+//    video_out->config(gb1.width,gb1.height,1024,768,0,0,IMGFMT_UYVY,NULL);
+//    video_out->config(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YUY2,NULL);
+//    video_out->config(gb1.width,gb1.height,1024,768,0,0,IMGFMT_RGB|24,NULL);
 
     tmpframe=malloc(gb1.width*gb1.height*3/2);
     stride[0]=(gb1.width+15)&(~15);
@@ -178,7 +180,7 @@ unsigned int stride2[3];
       fwrite(map,320*240*2,1,f);
       fclose(f);
     }
-    video_out->init(320,240,800,600,0,0,IMGFMT_YUY2);
+    video_out->config(320,240,800,600,0,0,IMGFMT_YUY2,NULL);
     video_out->draw_frame(count?map1:map2);
     video_out->flip_page();
     

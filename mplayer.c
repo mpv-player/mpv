@@ -1346,10 +1346,10 @@ current_module="init_libvo";
                sh_video->disp_w,sh_video->disp_h,out_fmt,0,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
 #else
-   if(video_out->init(sh_video->disp_w,sh_video->disp_h,
+   if(video_out->config(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
-                      title,out_fmt)){
+                      title,out_fmt,NULL)){
 #endif
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);

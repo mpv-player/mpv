@@ -23,8 +23,8 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.37  2002/01/26 16:01:26  nick
- * Extensions for video accelerated architecture
+ * Revision 1.38  2002/01/31 09:52:45  nick
+ * new info for tuning
  *
  * Revision 1.35  2001/12/28 20:52:54  alex
  * use XF86VidMode later in init (at line 1031) only if we've got support (if have_vm==1)
@@ -803,9 +803,9 @@ int check_res( int num, int x, int y, int bpp,
 
 //---------------------------------------------------------
 
-static uint32_t init( uint32_t width,  uint32_t height,
+static uint32_t config( uint32_t width,  uint32_t height,
                       uint32_t d_width,uint32_t d_height,
-                      uint32_t flags,char *title,uint32_t format )
+                      uint32_t flags,char *title,uint32_t format,const vo_tune_info_t *info )
 {
 
   int x_off, y_off;

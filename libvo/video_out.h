@@ -65,6 +65,12 @@ typedef struct vo_vaa_s
 	int  (*set_deint)(const vidix_deinterlace_t *info);
 }vo_vaa_t;
 
+/* Misc info to tuneup vo driver */
+typedef struct vo_tune_info_s
+{
+	int	pitch[3]; /* Should be 0 if unknown else power of 2 */
+}vo_tune_info_t;
+
 typedef struct vo_functions_s
 {
 	/*
@@ -83,7 +89,9 @@ typedef struct vo_functions_s
 	 *   format: fourcc of pixel format
          * returns : zero on successful initialization, non-zero on error.
          */
-        uint32_t (*init)(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format);
+        uint32_t (*config)(uint32_t width, uint32_t height, uint32_t d_width,
+			 uint32_t d_height, uint32_t fullscreen, char *title,
+			 uint32_t format,const vo_tune_info_t *);
 
         /*
          * Query that given pixel format is supported or not.

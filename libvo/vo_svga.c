@@ -121,9 +121,9 @@ static int checksupportedmodes() {
   return(0);
 }
 
-static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                      uint32_t d_height, uint32_t fullscreen, char *title, 
-		     uint32_t format) {
+		     uint32_t format,const vo_tune_info_t *info) {
   uint32_t req_w = (d_width > 0 ? d_width : width);
   uint32_t req_h = (d_height > 0 ? d_height : height);
   uint16_t vid_mode = 0;

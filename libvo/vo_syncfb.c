@@ -60,7 +60,7 @@ static int vo_conf_deinterlace = 0;
 static int vo_conf_cinemode = 0;
 
 
-static syncfb_config_t config;
+static syncfb_config_t _config;
 static syncfb_capability_t sfb_caps;
 
 static syncfb_buffer_info_t bufinfo;
@@ -90,26 +90,26 @@ write_frame_YUV422(uint_8 *y,uint_8 *cr, uint_8 *cb)
 	uint_32 bespitch,h,w;
 
 
-	bespitch = config.src_pitch;
+	bespitch = _config.src_pitch;
 	dest32 = (uint_32 *)vid_data;
 
-	for(h=0; h < config.src_height/2; h++)
+	for(h=0; h < _config.src_height/2; h++)
 	{
 		cbp = cb;
 		crp = cr;
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*dest32++ = (*y) + ((*cr)<<8) + ((*(y+1))<<16) + ((*cb)<<24);
 			y++; y++; cb++; cr++;
 		}
-		dest32 += (bespitch - config.src_width) / 2;
+		dest32 += (bespitch - _config.src_width) / 2;
 
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*dest32++ = (*y) + ((*crp)<<8) + ((*(y+1))<<16) + ((*cbp)<<24);
 			y++; y++; cbp++; crp++;
 		}
-		dest32 += (bespitch - config.src_width) / 2;
+		dest32 += (bespitch - _config.src_width) / 2;
 	}
 }
 
@@ -120,21 +120,21 @@ write_frame_YUV420P2(uint_8 *y,uint_8 *cr, uint_8 *cb)
 	uint_8 *dest, *tmp;
 	uint_32 bespitch,h,w;
 
-	bespitch = config.src_pitch;
+	bespitch = _config.src_pitch;
 	dest = frame_mem + bufinfo.offset;
 
-	for(h=0; h < config.src_height; h++)
+	for(h=0; h < _config.src_height; h++)
 	{
-		memcpy(dest, y, config.src_width);
-		y += config.src_width;
+		memcpy(dest, y, _config.src_width);
+		y += _config.src_width;
 		dest += bespitch;
 	}
 
 	dest = frame_mem + bufinfo.offset_p2;
-	for(h=0; h < config.src_height/2; h++)
+	for(h=0; h < _config.src_height/2; h++)
 	{
 		tmp = dest;
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*tmp++ =  *cr++;
 			*tmp++ =  *cb++;
@@ -154,13 +154,13 @@ write_slice_YUV420P2(uint_8 *y,uint_8 *cr, uint_8 *cb,uint_32 slice_num)
 	uint_8 *dest, *tmp;
 	uint_32 bespitch,h,w;
 
-	bespitch = config.src_pitch;
+	bespitch = _config.src_pitch;
 	dest = frame_mem + bufinfo.offset + (bespitch * 16 * slice_num);
 
 	for(h=0; h < 16; h++)
 	{
-		memcpy(dest, y, config.src_width);
-		y += config.src_width;
+		memcpy(dest, y, _config.src_width);
+		y += _config.src_width;
 		dest += bespitch;
 	}
 
@@ -168,7 +168,7 @@ write_slice_YUV420P2(uint_8 *y,uint_8 *cr, uint_8 *cb,uint_32 slice_num)
 	for(h=0; h < 8; h++)
 	{
 		tmp = dest;
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*tmp++ =  *cr++;
 			*tmp++ =  *cb++;
@@ -183,7 +183,7 @@ write_slice_YUV420P3(uint_8 *y,uint_8 *cr, uint_8 *cb,int stride[],uint_32 ypos,
 	uint_8 *dest;
 	uint_32 bespitch,h;
 
-	bespitch = config.src_pitch;
+	bespitch = _config.src_pitch;
 
 	dest = frame_mem + bufinfo.offset + (bespitch * ypos);
 	for(h=0; h < ysize; h++)
@@ -224,26 +224,26 @@ write_slice_YUV422(uint_8 *y,uint_8 *cr, uint_8 *cb,uint_32 slice_num)
 	uint_32 bespitch,h,w;
 
 
-	bespitch = config.src_pitch;
+	bespitch = _config.src_pitch;
 	dest32 = (uint_32 *)(vid_data + (bespitch * 16 * slice_num) * 2);
 
 	for(h=0; h < 8; h++)
 	{
 		cbp = cb;
 		crp = cr;
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*dest32++ = (*y) + ((*cr)<<8) + ((*(y+1))<<16) + ((*cb)<<24);
 			y++; y++; cb++; cr++;
 		}
-		dest32 += (bespitch - config.src_width) / 2;
+		dest32 += (bespitch - _config.src_width) / 2;
 
-		for(w=0; w < config.src_width/2; w++)
+		for(w=0; w < _config.src_width/2; w++)
 		{
 			*dest32++ = (*y) + ((*crp)<<8) + ((*(y+1))<<16) + ((*cbp)<<24);
 			y++; y++; cbp++; crp++;
 		}
-		dest32 += (bespitch - config.src_width) / 2;
+		dest32 += (bespitch - _config.src_width) / 2;
 	}
 }
 
@@ -280,7 +280,7 @@ static void
 flip_page(void)
 {
 
-//	memset(frame_mem + bufinfo.offset_p2, 0x80, config.src_width*config.src_height);
+//	memset(frame_mem + bufinfo.offset_p2, 0x80, _config.src_width*config.src_height);
 	ioctl(f,SYNCFB_COMMIT_BUFFER,&bufinfo);
 
 	if ( dbg_singleframe ) {
@@ -346,7 +346,7 @@ query_format(uint32_t format)
     return 0;
 }
 
-static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	uint_32 frame_size;
 
@@ -366,54 +366,54 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 	if (ioctl(f,SYNCFB_GET_CONFIG,&config)) perror("Error in mga_vid_config ioctl");
 
 	if (sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV420P3) ) {
-		config.src_palette= VIDEO_PALETTE_YUV420P3;
+		_config.src_palette= VIDEO_PALETTE_YUV420P3;
 		printf("using palette yuv420p3\n");
 	}else if ( sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV420P2) ) {
-		config.src_palette= VIDEO_PALETTE_YUV420P2;
+		_config.src_palette= VIDEO_PALETTE_YUV420P2;
 		printf("using palette yuv420p2\n");
 	} else if ( sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV422) ) {
-		config.src_palette= VIDEO_PALETTE_YUV422;
+		_config.src_palette= VIDEO_PALETTE_YUV422;
 		printf("using palette yuv422\n");
 	} else {
 		printf("no supported palette found\n");
 		return -1;
 	}
 
-	// config.src_palette= VIDEO_PALETTE_YUV422;
+	// _config.src_palette= VIDEO_PALETTE_YUV422;
 
 	if ( vo_conf_cinemode ) {
-		config.default_repeat = 3;
+		_config.default_repeat = 3;
 	} else {
-		config.default_repeat = 2;
+		_config.default_repeat = 2;
 	}
 
-	conf_palette = config.src_palette;
+	conf_palette = _config.src_palette;
 	if ( vo_conf_deinterlace ) {
-		config.syncfb_mode = SYNCFB_FEATURE_SCALE | SYNCFB_FEATURE_BLOCK_REQUEST | SYNCFB_FEATURE_DEINTERLACE;
-		config.default_repeat = 1;
+		_config.syncfb_mode = SYNCFB_FEATURE_SCALE | SYNCFB_FEATURE_BLOCK_REQUEST | SYNCFB_FEATURE_DEINTERLACE;
+		_config.default_repeat = 1;
 	} else {
-		config.syncfb_mode = SYNCFB_FEATURE_SCALE | SYNCFB_FEATURE_BLOCK_REQUEST;
+		_config.syncfb_mode = SYNCFB_FEATURE_SCALE | SYNCFB_FEATURE_BLOCK_REQUEST;
 	}
 
-	config.fb_screen_size = (RAM_SIZE-4)*0x100000; //(1280 * 1024 * 32) / 8;
-	config.src_width = width;
-	config.src_height= height;
+	_config.fb_screen_size = (RAM_SIZE-4)*0x100000; //(1280 * 1024 * 32) / 8;
+	_config.src_width = width;
+	_config.src_height= height;
 
-	config.image_width = d_width;
-	config.image_height= d_height;
-	//config.image_width = 1024;
-	//config.image_height= 576;
+	_config.image_width = d_width;
+	_config.image_height= d_height;
+	//_config.image_width = 1024;
+	//_config.image_height= 576;
 
-	config.image_xorg= 0;
-	config.image_yorg= 0;
+	_config.image_xorg= 0;
+	_config.image_yorg= 0;
 
 
 	printf ("BES Sourcer size: %d x %d\n", width, height);
 
 	ioctl(f,SYNCFB_ON,0);
-	if (ioctl(f,SYNCFB_SET_CONFIG,&config)) perror("Error in mga_vid_config ioctl");
+	if (ioctl(f,SYNCFB_SET_CONFIG,&_config)) perror("Error in mga_vid_config ioctl");
 
-	printf ("Framebuffer memory: %ld in %ld buffers\n", sfb_caps.memory_size, config.buffers);
+	printf ("Framebuffer memory: %ld in %ld buffers\n", sfb_caps.memory_size, _config.buffers);
 
 	frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
 	frame_mem = (uint_8*)mmap(0,sfb_caps.memory_size,PROT_WRITE,MAP_SHARED,f,0);

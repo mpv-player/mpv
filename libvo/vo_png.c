@@ -63,7 +63,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 }
 
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
     if (fullscreen&0x04 && (width != d_width || height != d_height) &&
 	((format==IMGFMT_YV12) /*|| (format == IMGFMT_I420) || (format == IMGFMT_IYUV)*/)) {
