@@ -63,7 +63,7 @@ static int config(struct vf_instance_s* vf,
 }
 
 
-void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance_s* vf)
 {
     free(vf->priv->Line);
 }
