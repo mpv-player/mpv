@@ -61,6 +61,7 @@ extern "C" void DS_VideoDecoder_Restart(){
 
 extern "C" void DS_VideoDecoder_Close(){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
+    _handle=NULL;
     delete dec;
 }
 
