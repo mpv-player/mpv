@@ -126,7 +126,7 @@ Installation directories:
 
 Optional features:
   --disable-mencoder     disable mencoder [autodetect]
-  --enable-largefiles    enable support for files >2^32 bytes long [disable]
+  --enable-largefiles    enable support for files > 2^32 Bytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
@@ -145,7 +145,7 @@ Optional features:
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
-  --enable-libfame       enable libfame realtime-encoder [autodetect]
+  --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
@@ -203,8 +203,8 @@ Audio:
 Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
-  --enable-static        build a statically linked binary. If more linking
-                         options needed : --enable-static="-lslang -lncurses"
+  --enable-static        build a statically linked binary. Set further linking
+                         options with --enable-static="-lslang -lncurses"
   --language=xx          select a language [en]
                          (Available: $LANGUAGES)
 
@@ -220,7 +220,7 @@ Advanced options:
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
 
-Hazardous options a.k.a. "DO NOT BUGREPORT ANYTHING !"
+Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
 
 Use these options if autodetection fails:
@@ -230,16 +230,16 @@ Use these options if autodetection fails:
   --with-x11libdir=DIR     X library files in DIR
   --with-dxr2incdir=DIR    DXR2 headers in DIR
   --with-csslibdir=DIR     libcss in DIR
-  --with-madlibdir=DIR     libmad (libmad shared lib.) in DIR
+  --with-madlibdir=DIR     libmad (libmad shared library) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
   --with-libdvdnav=DIR     libdvdnav in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
-  --with-xvidcore=PATH     path to XviD libcore.a (e.g: /opt/lib/libcore.a)
-  --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
-  --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
-  --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
+  --with-xvidcore=PATH     path to XviD libcore.a (e.g. /opt/lib/libcore.a)
+  --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
+  --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
+  --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-dvdnav-config=PATH  path to dvdnav-config
 
 EOF
@@ -380,7 +380,7 @@ TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 # from /usr we should be sure that there no effects from other compilers
 # (libraries) which might be installed into /usr/local.  Let users use this
 # stuff explicitly as command line argument.  In other words: It would be
-# resonable have or only /usr/include or only /usr/local/include.
+# resonable to have only /usr/include or only /usr/local/include.
 
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
@@ -420,22 +420,22 @@ if test "$_skip_cc_check" != yes ; then
   if test "$cc_verc_fail" = yes ; then
     cat <<EOF
 
-*** Please downgrade/upgrade C compiler to gcc-2.95.x or gcc-3.x version! ***
+*** Please downgrade/upgrade C compiler to version gcc-2.95.x or gcc-3.x! ***
 
-You are using a different compiler than ours. We do not have the time to make
-sure everything works with compilers than the one we use.  Use either use the
-same compiler as ours, or use --disable-gcc-checking but DO *NOT* REPORT BUGS
-unless you can reproduce them after recompiling with 2.95.x or 3.0.x version!
+You are not using a supported compiler. We do not have the time to make sure
+everything works with compilers other than the ones we use.  Use either the
+same compiler as we do, or use --disable-gcc-checking but DO *NOT* REPORT BUGS
+unless you can reproduce them after recompiling with a 2.95.x or 3.x version!
 
-Note for gcc 2.96 users: some versions of this compiler are known to miscompile
+Note for gcc 2.96 users: Some versions of this compiler are known to miscompile
 mplayer and lame (which is used for mencoder).  If you get compile errors,
-first upgrade to the latest 2.96 release (but minimum 2.96-85) and try again.
-If the problem still exists, try with gcc 3.0.x (or 2.95.x) *BEFORE* reporting
+first upgrade to the latest 2.96 release (minimum 2.96-85) and try again.
+If the problem still exists, try with gcc 3.x (or 2.95.x) *BEFORE* reporting
 bugs!
 
         GCC 2.96 IS NOT AND WILL NOT BE SUPPORTED BY US !
 
-     *** For details please read DOCS/gcc-2.96-3.0.html ***
+     *** For details please read DOCS/users_against_developers.html ***
 
 EOF
     die "Bad gcc version"
@@ -446,16 +446,16 @@ cat <<EOF
 ******************************************************************************
 
 Hmm. You really want to compile MPlayer with an *UNSUPPORTED* C compiler?
-Ok. You know. Do it. But did you already read DOCS/gcc-2.96-3.0.html ???
+Ok. You know. Do it. Did you already read DOCS/users_against_developers.html???
 
 DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* compiler's fault!
 Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
 Lame which is used by mencoder produces weird errors, too.
 
-If you have any problem, then install GCC 2.95.x or 3.x version and try again.
+If you have any problem, install a GCC 2.95.x or 3.x version and try again.
 If the problem _still_ exists, then read DOCS/bugreports.html !
 
-  *** DO NOT SEND BUGREPORTS OR COMPLAIN it's *YOUR* compiler's fault! ***
+  *** DO NOT SEND BUG REPORTS OR COMPLAIN it's *YOUR* compiler's fault! ***
 
 ******************************************************************************
 
@@ -840,7 +840,7 @@ EOF
 
   *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
-    echo "It seems noone has ported MPlayer to your OS or CPU type yet."
+    echo "It seems nobody has ported MPlayer to your OS or CPU type yet."
     die "unsupported architecture $host_arch"
     ;;
 esac
@@ -1325,11 +1325,11 @@ if x86 && linux ; then
   fi
   if test "$_k_verc_fail" ; then
     echores "$kernel_version, fail"
-    echo "WARNING! If you want to run mplayer on this system, get prepared for problems!"
-    echo "2.2.x has limited SSE support. Upgrade kernel or use --disable-sse if you"
-    echo "experience crashes. MPlayer tries to autodetect if your kernel correctly supports"
-    echo "SSE, but you have been warned! If you are using kernel older than 2.2.x you must"
-    echo "upgrade it to get SSE support!"
+    echo "WARNING! If you want to run MPlayer on this system, get prepared for problems!"
+    echo "2.2.x has limited SSE support. Upgrade the kernel or use --disable-sse if you"
+    echo "experience crashes. MPlayer tries to autodetect if your kernel correctly"
+    echo "supports SSE, but you have been warned! If you are using a kernel older than"
+    echo "2.2.x you must upgrade it to get SSE support!"
 #    die "old kernel for this cpu" # works fine on some 2.2.x so don't die (later check will test)
   else
     echores "$kernel_version, ok"
@@ -1358,10 +1358,10 @@ done
 test "$_awk_verc_fail" = yes && _awk=no
 echores "$_awk"
 if test "$_awk_verc_fail" = yes; then
-echo "VIDIX needs Awk, but there was no working implementation found!"
-echo "Try the GNU implementation, which can be downloaded from:"
+echo "VIDIX needs awk, but no working implementation was found!"
+echo "Try the GNU version, which can be downloaded from:"
 echo "ftp://ftp.gnu.org/gnu/gawk/"
-echo "If you don't need vidix, you can use configure --disable-vidix instead."
+echo "If you don't need VIDIX, you can use configure --disable-vidix instead."
 die "no awk"
 fi
 fi
@@ -1545,7 +1545,7 @@ if test "$_inttypes" = yes ; then
   # nothing to do
   :
 else
-  die "cannot find header inttypes.h (see in DOCS/faq.html)"
+  die "cannot find header inttypes.h (see DOCS/faq.html)"
 fi
 echores "$_inttypes"
 
@@ -1650,7 +1650,7 @@ echores "$_dl"
 
 
 #echocheck "dynamic linking"
-# FIXME !! make this dynamic detection to work and modify at the end (search _ld_dl_dynamic)
+# FIXME !! make this dynamic detection work and modify at the end (search _ld_dl_dynamic)
 # also gcc flags are different, but ld flags aren't (-Bdynamic/-Bstatic/-Bsymbolic)
 #cat > $TMPC << EOF
 #int main(void) { return 0; }
@@ -1685,10 +1685,10 @@ else
     elif ( cc_check -pthread ) ; then
      _ld_pthread='-pthread'
     else
-      die "Static lib pthread not found. (needed by windows and networking stuff)"
+      die "Static lib pthread not found (needed by Windows and networking stufff)."
     fi
   else
-    die "Lib pthread not found. (needed by windows and networking stuff)"
+    die "Lib pthread not found (needed by Windows and networking stuff)."
   fi
 fi
 echores "yes (using $_ld_pthread)"
@@ -3292,13 +3292,13 @@ EOF
 
 Your C++ runtime environment is broken.
 
-Hints: Does $_cc support C++ ? Have you a C++ compiler installed ?
-       Are the C++ libraries correctly installed ?
-       Check for libstdc++ and in (/etc/)ld.so.conf
+Hints: Does $_cc support C++? Do you have you a C++ compiler installed?
+       Are the C++ libraries correctly installed?
+       Check for libstdc++ and in (/etc/)ld.so.conf.
 
 If you do not need DirectShow support, you can also use:
   ./configure --disable-dshow <your-normal-configure-options>
-to disable building of the C++ based DirectShow code.
+to disable building the C++ based DirectShow code.
 
 EOF
     die "$_cc's C++ is broken"
@@ -3920,11 +3920,11 @@ elif test -z "$CFLAGS" ; then
 else
   cat <<EOF
 
-MPlayer compilation will use CFLAGS set by you, but:
+MPlayer compilation will use the CFLAGS set by you, but:
 
-    *** ***  DO NOT BUGREPORT IF IT DOES NOT COMPILE/WORK!  *** ***
+    *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
 
-It is strongly recommended you let MPlayer choose the correct CFLAGS!
+It is strongly recommended to let MPlayer choose the correct CFLAGS!
 To do so, execute 'CFLAGS= ./configure <options>'
 
 EOF
@@ -4172,10 +4172,10 @@ cat > config.h << EOF
 /* -------- This file has been automatically generated by configure ---------
    Note: Any changes in it will be lost when you run configure again. */
 
-/* use GNU internationalisation */
+/* use GNU internationalization */
 $_def_i18n
 
-/* Runtime Cpudetection */
+/* Runtime CPU detection */
 $_def_runtime_cpudetection
 
 /* "restrict" keyword */
@@ -4224,8 +4224,8 @@ $_def_stddef
 /* Define to include support for XviD/Divx4Linux/OpenDivx */
 $_def_divx
 
-/* Define for using new XviD/DivX4Linux library, instead of open-source OpenDivX */
-/* You have to change DECORE_LIBS in config.mak too! */
+/* Define to use the new XviD/DivX4Linux library instead of open source OpenDivX */
+/* You have to change DECORE_LIBS in config.mak, too! */
 $_def_decore
 
 /* Define if you are using DivX5Linux Decore library */
@@ -4260,13 +4260,13 @@ $_def_mp1e
 #define AVI_SYNC_BPS 1
 
 /* Undefine this if you do not want to select mono audio (left or right)
-   with a stereo MPEG layer 2/3 audio stream. The command-line option
+   with a stereo MPEG layer 2/3 audio stream. The command line option
    -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
    right-only), with 0 being the default.
    */
 #define USE_FAKE_MONO 1
 
-/* Undefine this if your soundcard driver has no working select().
+/* Undefine this if your sound card driver has no working select().
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */
 $_def_select
@@ -4286,7 +4286,7 @@ $_def_rtc
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
 
-/* Define this if you system has the header file for the OSS sound interface
+/* Define this if your system has the header file for the OSS sound interface
  * in /usr/include */
 $_def_soundcard
 
@@ -4339,10 +4339,10 @@ $_def_css
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav
 
-/* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
+/* Define this to enable MPEG 1/2 image postprocessing (requires a FAST CPU!) */
 #define MPEG12_POSTPROC 1
 
-/* Define this to enable image postprocessing in libavcodec (requires FAST cpu!) */
+/* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
 $_def_ffpostprocess
 
 /* Define to include support for OpenDivx postprocessing */
@@ -4621,8 +4621,8 @@ Config files successfully generated by ./configure !
     Video output: $_novomodules
 
 'config.h' and 'config.mak' contain your configuration options.
-Note: if you alter theses files (for instance CFLAGS) MPlayer may no longer
-      compile *** DON'T BUGREPORT if you tweak these files ***
+Note: If you alter theses files (for instance CFLAGS) MPlayer may no longer
+      compile *** DO NOT REPORT BUGS if you tweak these files ***
 
 'make' will now compile MPlayer and 'make install' will install it.
 Note: On non-Linux systems you might need to use 'gmake' instead of 'make'.
@@ -4631,7 +4631,7 @@ EOF
 
 
 if test "$_mtrr" = yes ; then
-  echo "Please check mtrr settings at /proc/mtrr (see DOCS/video.html#2.2.1.1)"
+  echo "Please check mtrr settings at /proc/mtrr (see DOCS/video.html#mtrr)"
   echo
 fi
 
@@ -4643,8 +4643,8 @@ support has therefore been disabled.
 Please upgrade to a more recent version (version 1.1.8 and above are known to
 work). You may get this library from: http://www.libsdl.org
 
-You need to re-run ./configure and recompile after updating SDL.  If you are
-only interested in the libSDL audio drivers, then older version might work.
+You need to rerun ./configure and recompile after updating SDL.  If you are
+only interested in the libSDL audio drivers, then an older version might work.
 
 Use --enable-sdl to force usage of libSDL.
 
@@ -4668,8 +4668,8 @@ EOF
       :
     else
       cat <<EOF
-Failed to find a WIN32 codecs dir!
-Create it and copy the DLL files there! (You can get them from your windows
+Failed to find a WIN32 codecs directory!
+Create it and copy the DLL files there! (You can get them from your Windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
 
@@ -4680,7 +4680,7 @@ else
   cat <<EOF
 NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch).
 You may encounter a few AVI files that cannot be played due to missing
-opensource video/audio codec support.
+open source video/audio codec support.
 
 EOF
 fi
