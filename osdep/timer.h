@@ -1,6 +1,8 @@
 #ifndef __TIMER_H
 #define __TIMER_H
 
+extern const char *timer_name;
+
 void InitTimer();
 unsigned int GetTimer();
 unsigned int GetTimerMS();

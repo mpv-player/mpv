@@ -1127,7 +1127,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
     if(rtc_fd<0)
 #endif
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using %s timing\n",softsleep?"software":"usleep()");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using %s timing\n",
+	     softsleep?"software":timer_name);
 
 #ifdef USE_TERMCAP
   if ( !use_gui ) load_termcap(NULL); // load key-codes
@@ -2232,9 +2233,9 @@ if(time_frame>0.001 && !(vo_flags&256)){
     } else
 #endif
     {
-	// -------- USLEEP + SOFTSLEEP -----------
+	// -------- TIMER + SOFTSLEEP -----------
 	float min=softsleep?0.021:0.005;
-	current_module="sleep_usleep";
+	current_module="sleep_timer";
         while(time_frame>min){
           if(time_frame<=0.020)
              usec_sleep(0); // sleeps 1 clock tick (10ms)!
