@@ -391,11 +391,11 @@ RealVideo:
 
 <itemizedlist>
 <listitem><simpara>
-  RealVideo 1.0 (fourcc RV10) - en/decoding supported by
+  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - en/decoding supported by
   <systemitem class="library">libavcodec</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealVideo 2.0, 3.0, 4.0 (fourcc RV20, RV30, RV40) - decoding supported by
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - decoding supported by
   <emphasis role="bold">RealPlayer libraries</emphasis>
   </simpara></listitem>
 </itemizedlist>
