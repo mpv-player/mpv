@@ -503,7 +503,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, open_mode)) < 0)
 	{
-	  if (ao_noblock) {
+	  if (err != -EBUSY && ao_noblock) {
 	    printf("alsa-init: open in nonblock-mode failed, trying to open in block-mode\n");
 	    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 	      printf("alsa-init: playback open error: %s\n", snd_strerror(err));
