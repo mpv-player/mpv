@@ -35,38 +35,24 @@ all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single: $(HTMLFILE)
 
-$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS)
+$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(if $(findstring yes,$(USE_SYMLINKS)),symlinks)
 ifndef HTMLDIR
 	$(warning $(HTMLDIR))
 	$(warning Error: HTMLDIR not set!!!)
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
-		for file in ../en/*.xml ; do \
-		if ! test -r `basename $$file` ; then \
-			ln -s $$file `basename $$file` ; \
-		fi ; \
-		done ; \
-	fi
 	-rm -f $(HTMLDIR)/*
 	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
-$(HTMLFILE): main.xml $(XSL_DEPS)
+$(HTMLFILE): main.xml $(XSL_DEPS) $(if $(findstring yes,$(USE_SYMLINKS)),symlinks)
 ifndef HTMLFILE
 	$(warning Error: HTMLFILE not set!!!)
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
-		for file in ../en/*.xml ; do \
-		if ! test -r `basename $$file` ; then \
-			ln -s $$file `basename $$file` ; \
-		fi ; \
-		done ; \
-	fi
 	-rm -f $(HTMLFILE)
 	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
@@ -74,6 +60,14 @@ endif
 
 ../html-chunk.xsl ../html-single.xsl main.xml:
 	cd .. && sh configure
+
+.PHONY: symlinks
+symlinks:
+	for file in ../en/*.xml ; do \
+	if ! test -r `basename $$file` ; then \
+		ln -s $$file `basename $$file` ; \
+	fi; \
+	done
 
 distclean:
 	rm -f main.xml
