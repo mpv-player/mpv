@@ -10,7 +10,7 @@ ifeq ($(VIDIX),yes)
 SRCS += vosub_vidix.c
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(FREETYPE_INC) $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DVB_INC) $(DIRECTFB_INC) -DMPG12PLAY #-Wall
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(FREETYPE_INC) $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DIRECTFB_INC) -DMPG12PLAY #-Wall
 ifeq ($(VIDIX),yes)
 CFLAGS += -DVIDIX_PATH='"$(prefix)/lib/mplayer/vidix/"'
 endif
@@ -25,6 +25,9 @@ endif
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+
+vo_mpegpes.o: vo_mpegpes.c
+	$(CC) -c $(CFLAGS) $(DVB_INC) -o $@ $<
 
 all:    $(LIBNAME)
 

@@ -275,11 +275,12 @@ Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
 
 Use these options if autodetection fails:
-  --with-extraincdir=DIR   extra headers (png, dvb, mad, sdl, css, ...) in DIR
+  --with-extraincdir=DIR   extra headers (png, mad, sdl, css, ...) in DIR
   --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
   --with-x11incdir=DIR     X headers in DIR
   --with-x11libdir=DIR     X library files in DIR
   --with-dxr2incdir=DIR    DXR2 headers in DIR
+  --with-dvbincdir=DIR     DVB headers in DIR
   --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared library) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
@@ -1464,6 +1465,9 @@ for ac_option do
     ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-dvbincdir=*)
+    _inc_dvb=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-xvidcore=*)
     _xvidcore=`echo $ac_option | cut -d '=' -f 2`
@@ -3081,7 +3085,7 @@ EOF
         _dvb=yes
         echores "yes"
     else
-      for I in "-I/usr/src/DVB/ost/include" "$_inc_extra/ost/include" ; do
+      for I in "$_inc_dvb" "-I/usr/src/DVB/ost/include" ; do
         if cc_check "$I" ; then
           _dvb=yes
           _inc_dvb="$I"
@@ -3089,7 +3093,7 @@ EOF
           break
         fi
       done
-      test "$_dvb" = no && echores "no (specify path to DVB/ost/include with --with-extraincdir=DIR)"
+      test "$_dvb" = no && echores "no (specify path to DVB/ost/include with --with-dvbincdir=DIR)"
     fi
 else
     echores "no"
@@ -3122,7 +3126,7 @@ EOF
       _dvbhead=yes
       echores "yes"
     else
-      for I in "-I/usr/src/DVB/include" "$_inc_extra/include/linux" ; do
+      for I in "$_inc_dvb" "-I/usr/src/DVB/include" ; do
         if cc_check "$I" ; then
           _dvbhead=yes
           _inc_dvb="$I"
@@ -3130,7 +3134,7 @@ EOF
           break
         fi
       done
-      test "$_dvbhead" = no && echores "no (specify path to DVB/include (HEAD Version) with --with-extraincdir=DIR)"
+      test "$_dvbhead" = no && echores "no (specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR)"
     fi
   else
     echores "no"
