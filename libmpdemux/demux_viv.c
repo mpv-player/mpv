@@ -245,12 +245,22 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
   int c;
   int len=0;
   int seq;
+  int prefix=0;
   demux->filepos=stream_tell(demux->stream);
   
   c=stream_read_char(demux->stream);
   if (c == -256) /* EOF */
     return 0;
-//  printf("c=%02X\n",c);
+//  printf("c=%x,%02X\n",c,c&0xf0);
+  if (c == 0x82)
+  {
+      /* ok, this works, but pts calculating from header is required! */
+#warning "Calculate PTS from picture header!"
+      prefix = 1;
+      c = stream_read_char(demux->stream);
+      printf("packet 0x82(pos=%lu) chunk=%x\n",
+        stream_tell(demux->stream), c);
+  }
   switch(c&0xF0){
   case 0x00: // header - skip it!
   {
@@ -269,7 +279,10 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       break;
   }
   case 0x10:  // video packet
-      len=128;
+      if (prefix == 1)
+        len = stream_read_char(demux->stream);
+      else
+        len=128;
       ds=demux->video;
       break;
   case 0x20:  // video packet
@@ -277,16 +290,26 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       ds=demux->video;
       break;
   case 0x30:  // audio packet
-      len=40;	/* 40kbps */
+      if (prefix == 1)
+        len = stream_read_char(demux->stream);
+      else
+        len=40;	/* 40kbps */
       ds=demux->audio;
       break;
   case 0x40:  // audio packet
-      len=24;	/* 24kbps */
+      if (prefix == 1)
+        len = stream_read_char(demux->stream);
+      else
+        len=24;	/* 24kbps */
       ds=demux->audio;
       break;
   default:
-      mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X contact author!\n",c);
+      mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X at pos %lu contact author!\n",
+        c, stream_tell(demux->stream));
+      return 0;
   }
+
+//  printf("chunk=%x, len=%d\n", c, len);
   
   if(!ds || ds->id<-1){
       if(len) stream_skip(demux->stream,len);
