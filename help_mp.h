@@ -3,7 +3,7 @@ static char* banner_text=
 "MPlayer " VERSION "  (C) 2000-2001 Arpad Gereoffy <arpi@thot.banki.hu>\n"
 "\n";
 
-static char* help_text=
+static char help_text[]=
 "\nUsage:   mplayer [options] [path/]name\n"
 "\n"
 "  Options:\n"
