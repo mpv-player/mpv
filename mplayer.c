@@ -529,6 +529,8 @@ extern void mp_input_register_options(m_config_t* cfg);
 
 #include "mixer.h"
 mixer_t mixer;
+/// step size of mixer changes
+int volstep = 3;
 
 #include "cfg-mplayer.h"
 
@@ -1921,7 +1923,7 @@ if(sh_audio){
   }
   mixer.audio_out = audio_out;
   mixer.afilter = sh_audio ? sh_audio->afilter : NULL;
-  mixer.volstep = 3;
+  mixer.volstep = volstep;
 }
 
 current_module="av_init";

@@ -47,6 +47,8 @@ extern int sdl_forcexv;
 extern int fakemono; // defined in dec_audio.c
 #endif
 
+extern int volstep;
+
 #ifdef HAVE_LIRC
 extern char *lirc_configfile;
 #endif
@@ -190,6 +192,7 @@ m_option_t mplayer_opts[]={
 	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// override audio buffer size (used only by -ao oss, anyway obsolete...)
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
