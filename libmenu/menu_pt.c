@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgen.h>
+//#include <libgen.h>
 
 #include "../config.h"
 
@@ -18,7 +18,7 @@
 #include "../playtree.h"
 #include "../input/input.h"
 
-
+#define mp_basename(s) (strrchr((s),'/')==NULL?(char*)(s):(strrchr((s),'/')+1))
 
 extern play_tree_iter_t* playtree_iter;
 
@@ -127,7 +127,7 @@ static int op(menu_t* menu, char* args) {
   for( ; i != NULL ; i = i->next ) {
     e = calloc(1,sizeof(list_entry_t));
     if(i->files)
-      e->p.txt = basename(i->files[0]);
+      e->p.txt = mp_basename(i->files[0]);
     else
       e->p.txt = "Group ...";
     e->pt = i;
