@@ -22,6 +22,9 @@ extern ao_functions_t audio_out_null;
 #ifdef HAVE_ESD
  extern ao_functions_t audio_out_esd;
 #endif
+#ifdef HAVE_NAS
+extern ao_functions_t audio_out_nas;
+#endif
 #ifdef HAVE_SDL
 extern ao_functions_t audio_out_sdl;
 #endif
@@ -59,6 +62,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef HAVE_ESD
 	&audio_out_esd,
+#endif
+#ifdef HAVE_NAS
+	&audio_out_nas,
 #endif
 #ifdef HAVE_SDL
         &audio_out_sdl,

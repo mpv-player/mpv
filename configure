@@ -646,6 +646,7 @@ _x11=auto
 _dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
+_nas=auto
 _png=auto
 _gl=auto
 _ggi=auto
@@ -714,6 +715,8 @@ for ac_option do
   --disable-xv)		_xv=no		;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
+  --enable-nas)		_nas=yes	;;
+  --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
   --enable-gl)		_gl=yes		;;
@@ -1768,6 +1771,24 @@ else
 fi
 echores "$_sdl (with $_sdlconfig)"
 
+echocheck "NAS"
+if test "$_nas" = auto || test "$_nas" = yes ; then
+  cat > $TMPC << EOF
+#include <audio/audiolib.h>
+int main(void) { return 0; }
+EOF
+  _nas=no
+  cc_check -laudio -lX11 -lXt -L$_x11libdir && _nas=yes
+fi
+if test "$_nas" = yes ; then
+  _def_nas='#define HAVE_NAS 1'
+  _ld_nas="-laudio -lX11 -lXt -L$_x11libdir"
+  _aosrc="$_aosrc ao_nas.c"
+  _aomodules="nas $_aomodules"
+else
+  _def_nas='#undef HAVE_NAS'
+fi
+echores "$_nas"
 
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
@@ -2598,6 +2619,7 @@ AA_LIB = $_ld_aa
 
 # audio output
 ALSA_LIB = $_ld_alsa
+NAS_LIB = $_ld_nas
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis
 SGIAUDIO_LIB = $_ld_sgiaudio
@@ -2779,6 +2801,8 @@ $_def_alsa5
 $_def_alsa9
 $_def_sunaudio
 $_def_sgiaudio
+$_def_nas
+
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD
