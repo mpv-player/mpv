@@ -4,11 +4,12 @@ Contents
 
  1. Summary
  2. What is DGA
- 3. DGA & MPlayer
- 4. Features of DGA driver
- 5. Speed issues
- 6. Known bugs
- 7. Future work
+ 3. Resolution switching
+ 4. DGA & MPlayer
+ 5. Features of the DGA driver
+ 6. Speed issues
+ 7. Known bugs
+ 8. Future work
  
  A. Some modelines
 
@@ -26,11 +27,98 @@ Contents
  bypass the X-Server and directly modifying the framebuffer memory. 
  Technically spoken this happens by mapping the framebuffer memory into
  the memory range of your process. This is just allowed by the kernel
- if 
+ if you have superuser privileges. You can get these either by logging in 
+ as root or by setting the suid bit on the mplayer excecutable.
 
+ There are two versions of DGA: DGA1 is used by XFree 3.X.X and DGA2 was 
+ introduced with XFree 4.0.1.
+
+ DGA1 just provides direct framebuffer access as described above. For 
+ switching the resolution of the video signal you have to rely on the 
+ XVidMode extension.
+
+ DGA2 incorporated the features of XVidMode extension and also allows
+ switching the depth of the display. So you may, although basically 
+ running a 32 bit depth XServer, switch to a depth of 15 bits and vice 
+ versa. 
+
+ However DGA has some drawbacks. It seems it is somewhat dependent on the
+ graphics chip you use and on the implementation of the XServer's video 
+ driver that controls this chip. So it does not work on every system ...
+
+
+3. Resolution switching
+~~~~~~~~~~~~~~~~~~~~~~~
+ The DGA driver allows for switching the resolution of the output signal.
+ This avoids the need for doing (slow) software scaling and at the same
+ time provides a fullscreen image. Ideally it would switch to the exact
+ resolution (except for honouring aspect ratio) of the video data, but the
+ XServer only allows switching to resolutions predefined in 
+ /etc/X11/XF86Config (/etc/X11/XF86Config-4 for XFree 4.0.X respectively).
+ Those are defined by so-called modelines and depend on the capabilites
+ of your video hardware. The XServer scans this config file on startup and
+ disables those modelines not suitable for your hardware. You can find 
+ out which modes survive with the X11 log file. It can be found at:
+ /var/log/XFree86.0.log
+ See appendix A for some sample modeline definitions.
+
+4. DGA & MPLayer
+~~~~~~~~~~~~~~~~
+
+ DGA is used in two places with MPlayer: The SDL driver can be made to make
+ use of it (-vo sdl -dga (or the like)) and within the DGA driver (-vo dga).
+ The above said is true for both; in the following sections I'll explain
+ how the DGA driver for MPlayer works.
+
+
+5. Features of the DGA driver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+ The DGA driver is invoked by specifying -vo dga at the command line.
+
+ ... to be continued during the next days ...
+
+# An advantage of this method is that you are in full control of the 
+# framebuffer and can put your hand on the code that is used for copying
+# to the framebuffer. However there are two disadvantages:
+ 
+# First, you control the screen - no more windowmanager functionally - just
+# the one application that uses DGA is visible.
+
+# Second you 
+ 
+ 
+ 
+# Do it like this (you got to be root for this):
+
+ # chown root /usr/local/bin/mplayer
+ # chmod 750 /usr/local/bin/mplayer 
+ # chmod +s /usr/local/bin/mplayer 
+ 
+# Now it works for simple users, too.
+# !!!! BUT STAY TUNED !!!!
+# This is a BIG security risk! Never do this on a server or on a computer
+# can be accessed by more people than only you because they can gain root
+# privilegies through suid root mplayer.
+# !!!! SO YOU HAVE BEEN WARNED ... !!!!
+#
+
+A. Sample modelines
+~~~~~~~~~~~~~~~~~~~
+Section "Modes"
+  Identifier    "Modes[0]"
+  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
+  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
+  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+  # 800x600 @ 60 Hz, 37.8 kHz hsync
+  Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+  Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+EndSection
+
+
+ These entries work fine with my Riva128 chip, using nv.o XServer driver
+ module.
 
  Acki (acki@acki-netz.de, www.acki-netz.de)                  17.5.2001 
-
- To be continued...
 
  
