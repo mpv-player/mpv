@@ -3002,7 +3002,7 @@ error resilience:
 Enable optimizations that do not comply to the specification and might
 potentially cause problems, like simpler dequantization, assuming use
 of the default quantization matrix, assuming YUV 4:2:0, skipping a few
-checks to detect damaged bitstreams).
+checks to detect damaged bitstreams.
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
@@ -4364,7 +4364,7 @@ for AVI it means every scene change or every keyint value (see \-lavcopts
 keyint= value if you use MEncoder to encode the video).
 .sp 1
 When a keyframe is found, an 'I!' string followed by a newline character is
-printed, leaving the current line of mplayer/\:mencoder output on the screen,
+printed, leaving the current line of MPlayer/\:MEncoder output on the screen,
 because it contains the time (in seconds) and frame number of the keyframe
 (You can use this information to split the AVI.).
 .sp 1
@@ -6592,7 +6592,7 @@ Print signal-to-noise ratio statistics.
 .SH FILES
 .
 .TP
-/usr/\:/local\:etc/\:mplayer/\:mplayer.conf
+/usr/\:local/\:etc/\:mplayer/\:mplayer.conf
 system-wide settings
 .
 .TP
@@ -6639,7 +6639,7 @@ in this order:
 .SH EXAMPLES
 .
 .TP
-.B quickstart DVD playing:
+.B Quickstart DVD playing:
 mplayer dvd://1
 .
 .TP
@@ -6711,7 +6711,7 @@ mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .TP
-.B The same, but with MJPEG compression
+.B The same, but with MJPEG compression:
 mencoder dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
 .
