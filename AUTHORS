@@ -341,6 +341,10 @@ Johansson, Anders <ajh@atri.curtin.edu.au>
     * old audio plugin system, some effect plugins
     * new libaf interface design, implementation, plugins
 
+Kain, Nicholas <njk@aerifal.cx>
+    * strl(cpy|cat) detection and conversion
+    * string handling cleanups
+
 Kalinski, Filip (filon) <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
 
