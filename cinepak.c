@@ -581,6 +581,8 @@ void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *
 
 	switch(mpi->imgfmt)
 		{
+		case IMGFMT_I420:
+		case IMGFMT_IYUV:
 		case IMGFMT_YV12:  // YV12
 			read_codebook = read_codebook_yv12;
 			cvid_v1 = cvid_v1_yv12;
