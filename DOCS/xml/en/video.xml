@@ -283,7 +283,7 @@ EndSection<!--
 <sect4 id="trident">
 <title>Trident cards</title>
 <para>
-If you want to use xv with a trident card, provided that it doesn't work
+If you want to use Xv with a Trident card, provided that it doesn't work
 with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen Xv
 support with the Cyberblade XP card.
 </para>
