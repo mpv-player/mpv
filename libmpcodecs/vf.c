@@ -41,6 +41,7 @@ extern vf_info_t vf_info_rotate;
 extern vf_info_t vf_info_mirror;
 extern vf_info_t vf_info_palette;
 extern vf_info_t vf_info_lavc;
+extern vf_info_t vf_info_zrmjpeg;
 extern vf_info_t vf_info_dvbscale;
 extern vf_info_t vf_info_cropdetect;
 extern vf_info_t vf_info_test;
@@ -110,6 +111,9 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_lavc,
     &vf_info_lavcdeint,
+#endif
+#ifdef HAVE_ZR
+    &vf_info_zrmjpeg,
 #endif
     &vf_info_dvbscale,
     &vf_info_cropdetect,

@@ -27,6 +27,10 @@ ifeq ($(FAME),yes)
 VFILTER_SRCS += vf_fame.c
 endif
 
+ifeq ($(ZORAN),yes)
+VFILTER_SRCS += vf_zrmjpeg.c
+endif
+
 ifeq ($(PNG),yes)
 VIDEO_SRCS += vd_mpng.c
 endif
