@@ -710,9 +710,9 @@ void list_codecs(int audioflag){
 			  case CODECS_STATUS_UNTESTED:    s="untested";break;
 			}
 			if(c->dll)
-			  printf("%-10s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
+			  printf("%-11s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
 			else
-			  printf("%-10s%2d  %s  %s\n",c->name,c->driver,s,c->info);
+			  printf("%-11s%2d  %s  %s\n",c->name,c->driver,s,c->info);
 			
 		}
 
