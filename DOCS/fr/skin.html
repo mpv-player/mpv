@@ -282,9 +282,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     <td>Un exemple. Supposons que vous avez crée une image
       <i>main.png</i> que vous voulez utiliser pour la fenêtre principale:
       <blockquote>
-<pre>
-    base = main, -1, -1
-</pre>
+        <code>base = main, -1, -1</code>
       </blockquote>
       MPlayer essaie de charger les fichiers <code>main</code>, <code>main.png</code>, 
       <code>main.PNG</code>.<br>
@@ -305,11 +303,10 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     La fenêtre apparaîtra a la position <code>X,Y</code> sur l'écran. La fenêtre a la
     taille de l'image.
     <div><em class="warn"><b>Note:</b> Ces coordonnées ne fonctionnent actuellement
-      pas pour la fenêtre d'affichage.</em><br>
-      <em class="warn"><b>Attention :</b> les régions transparentes (couleur #FF00FF) apparaîtront en noir
+      pas pour la fenêtre d'affichage.</em></div>
+    <div><em class="warn"><b>Attention :</b> les régions transparentes (couleur #FF00FF) apparaîtront en noir
       sur les serveurs X n'ayant pas l'extension XShape. La largeur de l'image doit être
-      divisible par 8.</em>
-    </div>
+      divisible par 8.</em></div>
   </dd>
 
   <dt><a name="main.button"><b><code>button = image, X, Y, largeur, hauteur, 
@@ -334,9 +331,9 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     </a></dt>
   <dd>Active (<code>enable</code>) ou désactive (<code>disable</code>) la 
     décoration du gestionnaire de fenêtre pour la fenêtre principale. 
-    <b>Désactivé</b> par défaut.<br><br>
-    <em class="warn"><b>Note:</b> Cela ne fonctionne pas pour la fenêtre d'affichage,
-    il n'y en a pas besoin.</em><br>
+    <b>Désactivé</b> par défaut.
+    <div><em class="warn"><b>Note:</b> Cela ne fonctionne pas pour la fenêtre d'affichage,
+    il n'y en a pas besoin.</em></div>
   </dd>
 
   <dt><a name="main.hpotmeter"><b><code>hpotmeter = button, blargeur, bhauteur, 
