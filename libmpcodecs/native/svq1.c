@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../../config.h"
 #include "bswap.h"
 
 /* variable length (bit) code */
@@ -39,6 +40,12 @@ typedef struct vlc_code_s {
 
 #include "svq1.h"
 #include "svq1_cb.h"
+
+#ifdef USE_LIBAVCODEC
+typedef void (*op_pixels_func)(unsigned char *block, const unsigned char *pixels, int line_size, int h);
+extern op_pixels_func put_pixels_tab[4];
+extern op_pixels_func put_no_rnd_pixels_tab[4];
+#endif
 
 /* memory bit stream */
 typedef struct bit_buffer_s {
@@ -339,6 +346,10 @@ static int motion_inter_block (bit_buffer_t *bitbuf,
   src = &previous[(x + (mv.x >> 1)) + (y + (mv.y >> 1))*pitch];
   dst = current;
 
+#ifdef USE_LIBAVCODEC
+  put_pixels_tab[((mv.y & 1) << 1) | (mv.x & 1)](dst,src,pitch,16);
+  put_pixels_tab[((mv.y & 1) << 1) | (mv.x & 1)](dst+8,src+8,pitch,16);
+#else
   /* form prediction */
   if (mv.y & 0x1) {
     if (mv.x & 0x1) {
@@ -375,6 +386,7 @@ static int motion_inter_block (bit_buffer_t *bitbuf,
       }
     }
   }
+#endif
 
   return 0;
 }
@@ -441,6 +453,9 @@ static int motion_inter_4v_block (bit_buffer_t *bitbuf,
     src = &previous[(x + (pmv[i]->x >> 1)) + (y + (pmv[i]->y >> 1))*pitch];
     dst = current;
 
+#ifdef USE_LIBAVCODEC
+    put_pixels_tab[((pmv[i]->y & 1) << 1) | (pmv[i]->x & 1)](dst,src,pitch,8);
+#else
     if (pmv[i]->y & 0x1) {
       if (pmv[i]->x & 0x1) {
 	for (sy=0; sy < 8; sy++) {
@@ -476,6 +491,7 @@ static int motion_inter_4v_block (bit_buffer_t *bitbuf,
 	}
       }
     }
+#endif
 
     /* select next block */
     if (i & 1) {
