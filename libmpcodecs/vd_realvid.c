@@ -78,7 +78,7 @@ void __pure_virtual(void) {
 //	exit(1);
 }
 
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 void ___brk_addr(void) {exit(0);}
 char **__environ={NULL};
 #undef stderr
