@@ -26,7 +26,7 @@
 #include "mp3.h"
 #include "bswap.h"
 #include "../cpudetect.h"
-#include "../liba52/mm_accel.h"
+//#include "../liba52/mm_accel.h"
 #include "../mp_msg.h"
 
 #include "fastmemcpy.h"
@@ -371,7 +371,7 @@ retry1:
   return frames;
 }
 
-int _has_mmx = 0;
+int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 
 #include "layer2.c"
 #include "layer3.c"
@@ -379,8 +379,6 @@ int _has_mmx = 0;
 /******************************************************************************/
 /*           PUBLIC FUNCTIONS                  */
 /******************************************************************************/
-
-static int tables_done_flag=0;
 
 /* It's hidden from gcc in assembler */
 extern void __attribute__((__stdcall__)) dct64_MMX(real *, real *, real *);
@@ -397,78 +395,49 @@ void MP3_Init(int fakemono){
 #else
 void MP3_Init(){
 #endif
-  int accel=0;
+
+//gCpuCaps.hasMMX=gCpuCaps.hasMMX2=gCpuCaps.hasSSE=0; // for testing!
+
+    _has_mmx = 0;
+    dct36_func = dct36;
+
+    make_decode_tables(outscale);
 
 #ifdef CAN_COMPILE_X86_ASM
-//    GetCpuCaps(&gCpuCaps);
-    if(gCpuCaps.hasMMX) 	accel |= MM_ACCEL_X86_MMX;
-    if(gCpuCaps.hasMMX2) 	accel |= MM_ACCEL_X86_MMXEXT;
-    if(gCpuCaps.hasSSE) 	accel |= MM_ACCEL_X86_SSE;
-    if(gCpuCaps.has3DNow) 	accel |= MM_ACCEL_X86_3DNOW;
-    if(gCpuCaps.has3DNowExt) 	accel |= MM_ACCEL_X86_3DNOWEXT;
 
-    if (accel & MM_ACCEL_X86_MMX)
+    if (gCpuCaps.hasMMX)
     {
 	_has_mmx = 1;
 	make_decode_tables_MMX(outscale);
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: made decode tables with MMX optimization\n");
+	synth_func = synth_1to1_MMX;
     }
-    else
-	make_decode_tables(outscale);
-#else
-    make_decode_tables(outscale);
-#endif
 
-#ifdef USE_FAKE_MONO
-    if (fakemono == 1)
-        fr.synth = synth_1to1_l;
-    else if (fakemono == 2)
-        fr.synth = synth_1to1_r;
-    else
-        fr.synth = synth_1to1;
-#else
-    fr.synth = synth_1to1;
-#endif
-    fr.synth_mono = synth_1to1_mono2stereo;
-    fr.down_sample = 0;
-    fr.down_sample_sblimit = SBLIMIT>>(fr.down_sample);
-    init_layer2();
-    init_layer3(fr.down_sample_sblimit);
-    tables_done_flag = 1;
-
-    dct36_func = dct36;
-    mp_msg(MSGT_DECAUDIO,MSGL_V,"init layer2&3 finished, tables done\n");
-
-#ifdef CAN_COMPILE_X86_ASM
 #if 0
-    if(accel & MM_ACCEL_X86_SSE)
+    if(gCpuCaps.hasSSE)
     {
 	/* SSE version is buggy */
-	synth_func = synth_1to1_MMX;
 	dct64_MMX_func = dct64_MMX_sse;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
     }
     else
 #endif
-    if (accel & MM_ACCEL_X86_3DNOWEXT)
+    if (gCpuCaps.has3DNowExt)
     {
-	synth_func=synth_1to1_MMX;
 	dct36_func=dct36_3dnowex;
-	dct64_MMX_func= (accel & MM_ACCEL_X86_MMXEXT) ? dct64_MMX_3dnowex : dct64_MMX_3dnow;
+	dct64_MMX_func= (gCpuCaps.hasMMX2) ? dct64_MMX_3dnowex : dct64_MMX_3dnow;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
-    if (accel & MM_ACCEL_X86_3DNOW)
+    if (gCpuCaps.has3DNow)
     {
-	synth_func = synth_1to1_MMX;
 	dct36_func = dct36_3dnow;
 	dct64_MMX_func = dct64_MMX_3dnow;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow! optimized decore!\n");
     }
     else
-    if (accel & MM_ACCEL_X86_MMX)
+    if (gCpuCaps.hasMMX)
     {
-        synth_func = synth_1to1_MMX;
 	dct64_MMX_func = dct64_MMX;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using MMX optimized decore!\n");
     }
@@ -479,14 +448,11 @@ void MP3_Init(){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using Pentium optimized decore!\n");
     }
     else
+#endif
     {
 	synth_func = NULL; /* use default c version */
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
     }
-#else /* CAN_COMPILE_X86_ASM */
-    synth_func = NULL;
-    mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
-#endif
 
 #ifdef USE_FAKE_MONO
     if (fakemono == 1)
@@ -501,9 +467,10 @@ void MP3_Init(){
     fr.synth_mono=synth_1to1_mono2stereo;
     fr.down_sample=0;
     fr.down_sample_sblimit = SBLIMIT>>(fr.down_sample);
+
     init_layer2();
     init_layer3(fr.down_sample_sblimit);
-    tables_done_flag=1;
+    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"MP3lib: init layer2&3 finished, tables done\n");
 }
 
 #if 0
