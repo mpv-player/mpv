@@ -722,7 +722,12 @@ if x86 && test "$_runtime_cpudetection" = no ; then
     if test "$1" = yes ; then
       echocheck "kernel support of $2"
       cat > $TMPC <<EOF
-int main(void){__asm__ __volatile__ ("$3":::"memory");return(0);}
+#include <signal.h>
+void catch() { exit(1); }
+int main(void){
+  signal(SIGILL, catch);
+  __asm__ __volatile__ ("$3":::"memory");return(0);
+}
 EOF
 
       if ( cc_check && $TMPO ) > /dev/null 2>&1 ; then
