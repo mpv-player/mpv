@@ -1353,10 +1353,10 @@ sub_data* sub_read_file (char *filename, float fps) {
 	|| sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
 	current_sub_cp = guess_cp(fd, enca_lang, enca_fallback);
     } else {
-	current_sub_cp = strdup(sub_cp);
+	current_sub_cp = sub_cp ? strdup(sub_cp) : NULL;
     }
 #else
-    current_sub_cp = strdup(sub_cp);
+    current_sub_cp = sub_cp ? strdup(sub_cp) : NULL;
 #endif
 
 #ifdef USE_ICONV
