@@ -6,7 +6,7 @@
 Les bons rapports de bogue sont une contribution précieuse pour tout projet en
 développement. Mais tout comme pour écrire un bon logiciel, les bons rapports de
 problème exigent du travail. Rendez-vous compte que la plupart des développeurs sont
-extrêmement occupés et reçoivent un nombre obscène d'emails. Donc bien que votre retour soit crucial pour l'amélioration de <application>MPlayer</application> et soit très apprécié, comprenez que vous devez fournir <emphasis role="bold">toutes</emphasis>  les informations que nous demandons
+extrêmement occupés et reçoivent un nombre colossal d'emails. Donc bien que votre retour soit crucial pour l'amélioration de <application>MPlayer</application> et soit très apprécié, comprenez que vous devez fournir <emphasis role="bold">toutes</emphasis>  les informations que nous demandons
 et suivre de près les instructions de ce document.
 </para>
 <sect1 id="bugreports_fix">
@@ -31,7 +31,7 @@ est également valable pour les paquets binaires de <application>MPlayer</applica
 Les instructions CVS peuvent être trouvées en bas de <ulink url="http://www.mplayerhq.hu/homepage/dload.html">cette page</ulink>
 ou dans le README. Si tout cela ne vous aide pas, veuillez vous référer à
 <link linkend="bugs">la liste des bogues connus</link> et au reste de la documentation.
-Si votre problème n'est pas connu ou non résolvable par nos instructions, alors merci
+Si votre problème n'est pas connu ou non résolvable avec nos instructions, alors merci
 de rapporter le bogue.
 </para>
 
@@ -50,7 +50,7 @@ fichiers ou types de fichier ? Apparaît-il avec un seul codec ou est-ce indépend
 codec ? Pouvez-vous le reproduire avec tous les pilotes de sortie ? Plus vous fournissez
 d'information, plus grandes sont nos chances de résoudre votre problème. Merci de ne
 pas oublier d'inclure également les informations importantes requises plus bas, sinon
-nous ne pourront établir un diagnostic précis de votre problème.
+nous ne pourront pas établir un diagnostic précis de votre problème.
 </para>
 
 <para>
@@ -193,7 +193,7 @@ Type de carte son et pilote, ex.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-En cas de doute, joignez y le résultat de <command>lspci -vv</command> sur les systèmes Linux.
+En cas de doute, joignez-y le résultat de <command>lspci -vv</command> sur les systèmes Linux.
 </para></listitem>
 </itemizedlist>
 </para>
@@ -203,8 +203,8 @@ En cas de doute, joignez y le résultat de <command>lspci -vv</command> sur les s
 <title>Problèmes de configuration</title>
 <para>
 Si vous rencontrez des erreurs pendant l'éxecution de <command>./configure</command>,
-ou si l'autodetection ou autre chose échoue, lisez <filename>configure.log</filename>.
-Vous pouvez y trouver la réponse, par exemple des versions multiples de la même
+ou si l'auto-détection ou autre chose échoue, lisez <filename>configure.log</filename>.
+Vous pourriez y trouver la réponse, par exemple des versions multiples de la même
 librairie mélangés dans votre système, ou vous avez oublié d'installer les paquets de
 développement (ceux avec le suffixe -dev). Si vous pensez que c'est un bogue, incluez
 <filename>configure.log</filename> dans votre rapport de bogue.
@@ -270,7 +270,7 @@ pouvez extraire des informations utiles du fichier <filename>core</filename>. Vo
 </para>
 
 <sect3 id="bugreports_debug">
-<title>Comment conserver les informations avec un plantage reproduisible</title>
+<title>Comment conserver les informations avec un plantage reproductible</title>
 <para>
 Recompilez <application>MPlayer</application> avec les instructions de déboguage:
 <screen>
