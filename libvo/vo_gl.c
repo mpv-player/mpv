@@ -228,7 +228,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
     glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
-	XFlush(mDisplay);
 	XSync(mDisplay, False);
 
 	vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
