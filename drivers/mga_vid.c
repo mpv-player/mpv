@@ -32,7 +32,6 @@
 #include <linux/malloc.h>
 #include <linux/pci.h>
 #include <linux/init.h>
-#include <linux/videodev.h>
 
 #include "mga_vid.h"
 
@@ -146,7 +145,6 @@ static uint32_t mga_ram_size = 0;
 
 static struct pci_dev *pci_dev;
 
-static struct video_window mga_win;
 static mga_vid_config_t mga_config; 
 
 
@@ -662,164 +660,6 @@ static struct file_operations mga_vid_fops =
 };
 #endif
 
-static long mga_v4l_read(struct video_device *v, char *buf, unsigned long count, 
-	int noblock)
-{
-	return -EINVAL;
-}
-
-static long mga_v4l_write(struct video_device *v, const char *buf, unsigned long count, int noblock)
-{
-	return -EINVAL;
-}
-
-static int mga_v4l_open(struct video_device *dev, int mode)
-{
-	MOD_INC_USE_COUNT;
-	return 0;
-}
-
-static void mga_v4l_close(struct video_device *dev)
-{
-	regs.besctl &= ~1;
-	mga_vid_write_regs();
-	vid_overlay_on = 0;
-	MOD_DEC_USE_COUNT;
-	return;
-}
-
-static int mga_v4l_init_done(struct video_device *dev)
-{
-	return 0;
-}
-
-static int mga_v4l_ioctl(struct video_device *dev, unsigned int cmd, void *arg)
-{
-	switch(cmd)
-	{
-		case VIDIOCGCAP:
-		{
-			struct video_capability b;
-			strcpy(b.name, "Matrox G200/400");
-			b.type = VID_TYPE_SCALES|VID_TYPE_OVERLAY|VID_TYPE_CHROMAKEY;
-			b.channels = 0;
-			b.audios = 0;
-			b.maxwidth = 1024;	/* GUESS ?? */
-			b.maxheight = 768;
-			b.minwidth = 32;
-			b.minheight = 16;	/* GUESS ?? */
-			if(copy_to_user(arg,&b,sizeof(b)))
-				return -EFAULT;
-			return 0;
-		}
-		case VIDIOCGPICT:
-		{
-			/*
-			 *	Default values.. if we can change this we
-			 *	can add the feature later
-			 */
-			struct video_picture vp;
-			vp.brightness = 0x8000;
-			vp.hue = 0x8000;
-			vp.colour = 0x8000;
-			vp.whiteness = 0x8000;
-			vp.depth = 8;
-			/* Format is a guess */
-			vp.palette = VIDEO_PALETTE_YUV420P;
-			if(copy_to_user(arg, &vp, sizeof(vp)))
-				return -EFAULT;
-			return 0;
-		}
-		case VIDIOCSPICT:
-		{
-			return -EINVAL;
-		}
-		case VIDIOCSWIN:
-		{
-			struct video_window vw;
-			if(copy_from_user(&vw, arg, sizeof(vw)))
-				return -EFAULT;
-			if(vw.x <0 || vw.y <0 || vw.width < 32 
-				|| vw.height < 16)
-				return -EINVAL;
-			memcpy(&mga_win, &vw, sizeof(mga_win));
-
-			mga_config.x_org = vw.x;
-			mga_config.y_org = vw.y;
-			mga_config.dest_width = vw.width;
-			mga_config.dest_height = vw.height;
-
-			/* 
-			 * May have to add 
-			 *
-			 * #define VIDEO_WINDOW_CHROMAKEY 16 
-			 *
-			 * to <linux/videodev.h> 
-			 */
-
-			//add it here for now
-			#define VIDEO_WINDOW_CHROMAKEY 16 
-
-			if (vw.flags & VIDEO_WINDOW_CHROMAKEY)
-				mga_config.colkey_on = 1;
-			else 
-				mga_config.colkey_on = 0;
-
-			mga_config.colkey_red   = (vw.chromakey >> 24) & 0xFF;
-			mga_config.colkey_green = (vw.chromakey >> 16) & 0xFF;
-			mga_config.colkey_blue  = (vw.chromakey >> 8)  & 0xFF;
-			mga_vid_set_config(&mga_config);
-			return 0;
-				
-		}
-		case VIDIOCGWIN:
-		{
-			if(copy_to_user(arg, &mga_win, sizeof(mga_win)))
-				return -EFAULT;
-			return 0;
-		}
-		case VIDIOCCAPTURE:
-		{
-			int v;
-			if(copy_from_user(&v, arg, sizeof(v)))
-				return -EFAULT;
-			vid_overlay_on = v;
-			if(vid_overlay_on && vid_src_ready)
-			{
-				regs.besctl |= 1;
-				mga_vid_write_regs();
-			}
-			else
-			{
-				regs.besctl &= ~1;
-				mga_vid_write_regs();
-			}
-			return 0;
-		}
-		default:
-			return -ENOIOCTLCMD;
-	}
-}
-
-static struct video_device mga_v4l_dev =
-{
-	"Matrox G200/G400",
-	VID_TYPE_CAPTURE,
-	VID_HARDWARE_BT848,		/* This is a lie for now */
-	mga_v4l_open,
-	mga_v4l_close,
-	mga_v4l_read,
-	mga_v4l_write,
-	NULL,
-	mga_v4l_ioctl,
-	NULL,
-	mga_v4l_init_done,
-	NULL,
-	0,
-	0
-};
-
-
 
 /* 
  * Main Initialization Function 
@@ -844,18 +684,6 @@ static int mga_vid_initialize(void)
 		return -EINVAL;
 	}
 	
-#if 0
-	if (video_register_device(&mga_v4l_dev, VFL_TYPE_GRABBER)<0)
-	{
-		printk("mga_vid: unable to register.\n");
-		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
-		if(mga_mmio_base)
-			iounmap(mga_mmio_base);
-		mga_mmio_base = 0;
-		return -EINVAL;
-	}
-#endif
-
 	return(0);
 }
 
@@ -866,7 +694,6 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-//	video_unregister_device(&mga_v4l_dev);
 	if(mga_mmio_base)
 		iounmap(mga_mmio_base);
 
