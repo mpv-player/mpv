@@ -21,10 +21,10 @@ FILETYPE VFT_APP
             VALUE "FileDescription", "MPlayer - Movie Player for Linux\000"
             VALUE "FileVersion",VERSION
             VALUE "InternalName", "Counter Counter\000"
-            VALUE "LegalCopyright", " (C) 2000-2003 Arpad Gereoffy (see DOCS)\000"
+            VALUE "LegalCopyright", " (C) 2000-2004 MPlayer Team\000"
             //VALUE "LegalTrademarks"," \000";
             VALUE "OriginalFilename", "mplayer.exe\000"
-            VALUE "ProductName", "MPlayer - Movie Player for Linux\000"
+            VALUE "ProductName", "MPlayer - The Movie Player for Linux\000"
             VALUE "ProductVersion",VERSION
             //VALUE "SpecialBuild","\000"
         }
