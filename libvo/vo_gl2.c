@@ -194,7 +194,7 @@ static void initTextures()
     texnumy++;
 
   printf("[gl2] Creating %dx%d textures of size %dx%d ...\n",
-	texnumx, texnumy, texture_width,texture_height, gl_bitmap_format_s);
+	texnumx, texnumy, texture_width,texture_height);
 
   /* Allocate the texture memory */
 
