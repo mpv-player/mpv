@@ -39,6 +39,8 @@ LIBVO_EXTERN( x11 )
 #include "fastmemcpy.h"
 #include "sub.h"
 
+#include "../postproc/swscale.h"
+
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",
@@ -133,6 +135,9 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
+static unsigned int scale_xinc=0;
+static unsigned int scale_yinc=0;
+
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
 {
 // int screen;
@@ -158,14 +163,23 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
-
-printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
+ 
+//printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
  XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
  depth=attribs.depth;
 
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
+
+ if( flags&0x04 && depth>=24 && format==IMGFMT_YV12 ) {
+     // software scale
+     scale_xinc=(width << 8) / d_width - 1;  // -1 needed for proper rounding
+     scale_yinc=(height << 16) / d_height;
+     image_width=d_width;
+     image_height=d_height;
+     SwScale_Init();
+ }
 
 #ifdef HAVE_NEW_GUI
  if ( vo_window != None ) { mywindow=vo_window; mygc=vo_gc; }
@@ -364,7 +378,7 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
    Shmem_Flag=0;
 #endif
    myximage=XGetImage( mDisplay,mywindow,0,0,
-   width,image_height,AllPlanes,ZPixmap );
+   image_width,image_height,AllPlanes,ZPixmap );
    ImageData=myximage->data;
 #ifdef SH_MEM
   }
@@ -463,10 +477,15 @@ static void flip_page( void ){
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
- uint8_t *dst;
 
- dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
+if(scale_xinc){
+ SwScale_YV12slice_brg24(src,stride,y,h,
+                         ImageData, image_width*((bpp+7)/8), image_width, ((bpp+7)/8),
+			 scale_xinc, scale_yinc);
+} else {
+ uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
  yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
+}
  return 0;
 }
 
