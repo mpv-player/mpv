@@ -41,6 +41,7 @@ int vo_dwidth=0;
 int vo_dheight=0;
 int vo_dbpp=0;
 int vo_doublebuffering = 0;
+int vo_fsmode = 0;
 
 char *vo_subdevice = NULL;
 
