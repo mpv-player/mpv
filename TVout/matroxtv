@@ -101,7 +101,7 @@ echo
 echo "Please read MPlayer's TV-out documentation, and install 'matroxset' and 'fbset'."
 echo "Then edit this script to suit your monitor+TV set."
 echo
-#exit 1
+exit 1
 
 while [ 1 ]; do
 
