@@ -58,6 +58,7 @@ static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,uns
 #endif
 
 static void *rv_handle=NULL;
+static int inited;
 #ifdef USE_WIN32DLL
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
@@ -206,9 +207,10 @@ static int init(sh_video_t *sh){
 		return 0;
 	}
 	// only I420 supported
-	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
+//	if((sh->format!=0x30335652) && !mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	// init codec:
 	sh->context=NULL;
+	inited=0;
 #ifdef USE_WIN32DLL
 	if (dll_type == 1)
 	    result=(*wrvyuv_init)(&init_data, &sh->context);
@@ -220,8 +222,8 @@ static int init(sh_video_t *sh){
 	    return 0;
 	}
 	// setup rv30 codec (codec sub-type and image dimensions):
-	if(extrahdr[1]>=0x20200002){
-	    uint32_t cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
+	if((sh->format<=0x30335652) && (extrahdr[1]>=0x20200002)){
+	    uint32_t cmsg24[4]={sh->disp_w,sh->disp_h,((unsigned short *)extrahdr)[4],((unsigned short *)extrahdr)[5]};
 	    cmsg_data_t cmsg_data={0x24,1+((extrahdr[0]>>16)&7), &cmsg24[0]};
 
 #ifdef USE_WIN32DLL
@@ -270,6 +272,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	dp_hdr_t* dp_hdr=(dp_hdr_t*)data;
 	unsigned char* dp_data=((unsigned char*)data)+sizeof(dp_hdr_t);
 	uint32_t* extra=(uint32_t*)(((char*)data)+dp_hdr->chunktab);
+	unsigned char* buffer;
 
 	unsigned int transform_out[5];
 	transform_in_t transform_in={
@@ -283,18 +286,37 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
 
+	if(inited){  // rv30 width/height not yet known
 	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
 		sh->disp_w, sh->disp_h);
 	if(!mpi) return NULL;
+	    buffer=mpi->planes[0];
+	} else {
+	    buffer=malloc(sh->disp_w*sh->disp_h*3/2);
+	    if (!buffer) return 0;
+	}
 	
 #ifdef USE_WIN32DLL
 	if (dll_type == 1)
-	    result=(*wrvyuv_transform)(dp_data, mpi->planes[0], &transform_in,
+	    result=(*wrvyuv_transform)(dp_data, buffer, &transform_in,
 		transform_out, sh->context);
 	else
 #endif
-	result=(*rvyuv_transform)(dp_data, mpi->planes[0], &transform_in,
+	result=(*rvyuv_transform)(dp_data, buffer, &transform_in,
 		transform_out, sh->context);
+
+	if(!inited){  // rv30 width/height now known
+	    sh->aspect=(float)sh->disp_w/(float)sh->disp_h;
+	    sh->disp_w=transform_out[3];
+	    sh->disp_h=transform_out[4];
+	    if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
+	    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
+		    sh->disp_w, sh->disp_h);
+	    if(!mpi) return NULL;
+	    memcpy(mpi->planes[0],buffer,sh->disp_w*sh->disp_h*3/2);
+	    free(buffer);
+	    inited=1;
+	} 
 
 	return (result?NULL:mpi);
 }
