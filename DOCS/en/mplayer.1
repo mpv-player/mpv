@@ -753,6 +753,10 @@ Useful with broken/\:incomplete downloads, or badly created AVIs.
 You can only use this option if the underlying media supports seeking
 (i.e. not with stdin, pipe, etc).
 .TP
+.B \-ipv4-only-proxy
+Skip the proxy for IPv6 addresses.
+It will still be used for IPv4 connections.
+.TP
 .B \-mc <seconds/frame>
 Maximum A-V sync correction per frame (in seconds).
 .TP
@@ -792,6 +796,14 @@ demuxer selection.
 .TP
 .B \-passwd <password> (see \-user option too)
 Specify password for http authentication.
+.TP
+.B \-prefer-ipv4
+Use IPv4 on network connections.
+Falls back to IPv6 automatically.
+.TP
+.B \-prefer-ipv6
+Use IPv6 on network connections.
+Falls back to IPv4 automatically.
 .TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files.
