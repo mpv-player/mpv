@@ -74,6 +74,8 @@ Bérczi, Gábor (Gabucino) <gabucino@mplayerhq.hu>
     * IRC channels operator (#MPlayer is user channel)
     * experimental MINIX port :) (what's funny about it?)
     * MPsub subtitle format design
+    * AlienMind, BlueHeart, CubicPlayer, MidnightLove, netscape4,
+      WindowsMediaPlayer6, xanim, xine-lcd skins
 
 Berecz, Szabolcs (Szabi) <szabi@inf.elte.hu>
     * codecs.conf file parser
@@ -118,6 +120,7 @@ Biurrun, Diego (DonDiego) <diego@biurrun.de>
     * homepage improvements, design7
     * second homepage maintainer
     * head of the Ministry for English Composition
+    * ultrafina skin
     * skin overhaul
 
 Blomenkamp, Marcus <Marcus.Blomenkamp@epost.de>
@@ -590,11 +593,11 @@ Togni, Roberto (rxt) <r_togni@tiscali.it>
 Tropea, Salvador Eduardo <salvador@inti.gov.ar>
     * subtitle parsing/displaying related patches
 
-von Merkatz, Arwed <v.merkatz@gmx.net>
-    * fontconfig font lookup support
-
 Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
     * TOOLS/divx2svcd author
+
+von Merkatz, Arwed <v.merkatz@gmx.net>
+    * fontconfig font lookup support
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
@@ -685,3 +688,122 @@ McGowan, John F. <http://www.jmcgowan.com>
 Williams, Adam <broadcast@earthling.net>
     * libmpeg3 (and xmovie) author [MPEG1/MPEG2 video decoder, used in
       v0.1-v0.4]
+
+
+_________
+GUI skins
+~~~~~~~~~
+
+unknown author
+    * iTunes, iTunes-mini
+
+Bekesi, Viktor (FRD)
+    * default, plastic, slim
+
+bleachie <toku4@cox.net>
+    * bluecurve
+
+Burt.S. decex@poczta.onet.pl>
+    * mplayer_red
+
+caparuni <pelesiran@softhome.net>
+    * PowerPlayer
+
+Carpenter, Andrew <acarpent@microbits.com.au>
+    * handheld
+
+DogFaceMonk <werenotworthy5018@yahoo.dot.com>
+    * OSX-Mod
+
+Franz, Fabian <mplayer-skin@fabian-franz.de>
+    * mini
+
+funkydrummer@postmaster.co.uk
+    * Dushku
+
+ghostman_2k@hotmail.com
+    * sessene
+
+Gyimesi, Attila (JiM) <jim@ond.vein.hu>
+    * JiMPlayer
+
+Hertroys, Alban <dalroi@solfertje.student.utwente.nl>
+    * disappearer
+
+hwsw.hu
+    * hwswskin
+
+Javipa <javipa01@hotmail.com>
+    * new-age
+
+Kiss, Balint (Blint) <blint@destgames.hu>
+    * Terminator3
+
+krivilli <krivilli@ajato.com.br>
+    * Cyrus
+
+Kuehne, Andre <andre.kuehne@gmx.net>
+    * tvisor
+
+Kuhlmann, Rüdiger
+    * KDE
+
+LUIGI <lui77@freemail.hu>
+    * Corelian
+
+michaell@uni.de
+    * hayraphon
+
+Naumov, Dan (Jago) <dan.naumov@ofw.fi>
+    * MoonPhase
+
+Northam, Ryan
+    * OSX-Brushed
+
+nostrildamus
+    * xmmplayer
+
+Park, DongCheon <pdc@kaist.ac.kr>
+    * CornerMP, CornerMP-aqua
+
+Pehrson, Jurgen <jp@spektr.eu.org>
+    * phony
+
+Pizurica, Nikola <pizurica@neobee.net>
+    * Industrial, XFce4
+
+Ptak, Oliwier (aleczapka) <aleczapka@@gmx.net>
+    * mentalic, neutron
+
+Quiana <quiana@quiana.net>
+    * QPlayer
+
+Riccio, Pasquale <flash@@the-realworld.de>
+    * proton
+
+Scognito <scognito@libero.it>
+    * gnome, trium
+
+Sudrien
+    * softgrip
+
+Szumiela, Marcin <marcin@szumiela.pl>
+    * divxplayer
+
+Tyr, Jiri jun. <jirka@dts.cz>
+    * DVDPlayer
+
+Vasilev, Ognian <ogi28@mail.bg>
+    * Orange
+
+Veres, Imre <six@freemail.hu>
+    * Canary
+
+Vigvary, Balasz (Toky)
+    * avifile
+
+Whitmore, Gary Jr.
+    * krystal
+
+Wilamowski, Franciszek (Xenomorph) <higgs@hoth.amu.edu.pl>
+    * Abyss, Blue, Blue-small
