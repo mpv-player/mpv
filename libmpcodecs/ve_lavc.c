@@ -426,10 +426,13 @@ static int config(struct vf_instance_s* vf,
         lavc_venc_context->pix_fmt= PIX_FMT_YUV411P;
     else if(!strcasecmp(lavc_param_format, "YVU9"))
         lavc_venc_context->pix_fmt= PIX_FMT_YUV410P;
+    else if(!strcasecmp(lavc_param_format, "BGR32"))
+        lavc_venc_context->pix_fmt= PIX_FMT_RGBA32;
     else{
         mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", lavc_param_format);
         return 0;
     }
+
     /* lavc internal 2pass bitrate control */
     switch(lavc_param_vpass){
     case 1: 
@@ -524,6 +527,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
         break;
     case IMGFMT_YVU9:
         if(!strcasecmp(lavc_param_format, "YVU9"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
+    case IMGFMT_BGR32:
+        if(!strcasecmp(lavc_param_format, "BGR32"))
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     }
@@ -707,6 +714,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('R', 'V', '1', '0');
     else if (!strcasecmp(lavc_param_vcodec, "mjpeg"))
 	mux_v->bih->biCompression = mmioFOURCC('M', 'J', 'P', 'G');
+    else if (!strcasecmp(lavc_param_vcodec, "ljpeg"))
+	mux_v->bih->biCompression = mmioFOURCC('L', 'J', 'P', 'G');
     else if (!strcasecmp(lavc_param_vcodec, "mpeg4"))
 	mux_v->bih->biCompression = mmioFOURCC('D', 'I', 'V', 'X');
     else if (!strcasecmp(lavc_param_vcodec, "msmpeg4"))
