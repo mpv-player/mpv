@@ -500,6 +500,11 @@ if [ $_sdl = yes ]; then
   _sdllib='-lSDL -lpthread' 
 fi
 
+if [ $_dga = yes ]; then
+  _dgalib='-lXxf86dga'
+fi
+
+
 if [ "$_termcap" = "yes" ]; then
  _termcap='#define USE_TERMCAP'
  _libtermcap='-ltermcap'
@@ -534,8 +539,8 @@ AR=ar
 CC=gcc
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
-# LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_x11lib $_xvlib
+# LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
+X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
