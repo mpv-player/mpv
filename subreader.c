@@ -1257,8 +1257,8 @@ if(suboverlap_enabled){
 	for (i = first[j].lines - 1; i >= 0; --i) {
 	    free(first[j].text[i]);
 	}
-	free(&first[j]);
     }
+    free(first);
 
     return second;
 } else { //if(suboverlap_enabled)
