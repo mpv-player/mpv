@@ -1,3 +1,4 @@
+#define HAVE_XVID_VBR
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,9 +19,28 @@
 #include "mp_image.h"
 #include "vf.h"
 
+/* About XviD VBR Library, Edouard Gomez (GomGom) said:
+  <GomGom> header bytes == frame header bytes :-)
+  <GomGom> total bytes = frame bytes == texture + header
+  <GomGom> quant = quant returned by xvidcore
+  <GomGom> it's possible that xvid lowers or increases the passed quant because of lumimasking
+  <GomGom> kblks = blocks coded as intra blocks
+  <GomGom> mblks = blocks coded as predicted blocks
+  <GomGom> ublks = skipped blocks
+  <GomGom> at the moemnt le vbr lib uses total bytes, and quant
+  <GomGom> so it's easy to use it with divx5 (wo bframes)
+  <klOUg> bframes breaks what assumptions?
+  <GomGom> quant estimation for next frame
+  <GomGom> because of the bframe quant multiplier given to divx5
+  <GomGom> that the vbr lib does not "know"
+*/
+
 //===========================================================================//
 
 #include "divx4_vbr.h"
+#ifdef HAVE_XVID_VBR
+#include "xvid_vbr.h"
+#endif
 
 extern int pass;
 extern char* passtmpfile;
@@ -34,6 +54,10 @@ extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags
 
 ENC_PARAM divx4_param;
 int divx4_crispness;
+#ifdef HAVE_XVID_VBR
+static int vbrpass = -1;
+static int vbrdebug = 0;
+#endif
 
 #include "cfgparser.h"
 
@@ -62,6 +86,10 @@ struct config divx4opts_conf[]={
 	{"spatial", &divx4_param.extensions.spatial_passes, CONF_TYPE_INT, 0,0,1, NULL},
 	{"mv_file", &divx4_param.extensions.mv_file, CONF_TYPE_STRING, 0,0,1, NULL},
 #endif
+#ifdef HAVE_XVID_VBR
+	{"vbrpass", &vbrpass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+	{"vbrdebug", &vbrdebug, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
+#endif
 	{"help", "TODO: divx4opts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -71,6 +99,9 @@ struct vf_priv_s {
     ENC_RESULT enc_result;
     ENC_FRAME enc_frame;
     void* enc_handle;
+#ifdef HAVE_XVID_VBR
+    vbr_control_t vbr_state;
+#endif
 };
 
 #define mux_v (vf->priv->mux)
@@ -97,6 +128,32 @@ static int config(struct vf_instance_s* vf,
     if(!divx4_param.rc_period) divx4_param.rc_period=2000;
     if(!divx4_param.rc_reaction_period) divx4_param.rc_reaction_period=10;
     if(!divx4_param.rc_reaction_ratio) divx4_param.rc_reaction_ratio=20;
+
+#ifdef HAVE_XVID_VBR
+    if (vbrpass >= 0) {
+	vbrSetDefaults(&vf->priv->vbr_state);
+	vf->priv->vbr_state.desired_bitrate = divx4_param.bitrate;
+	switch (vbrpass) {
+	case 0:
+	    vf->priv->vbr_state.mode = VBR_MODE_1PASS;
+	    break;
+	case 1:
+	    vf->priv->vbr_state.mode = VBR_MODE_2PASS_1;
+	    break;
+	case 2:
+	    vf->priv->vbr_state.mode = VBR_MODE_2PASS_2;
+	    break;
+	default:
+	    abort();
+	}
+	vf->priv->vbr_state.debug = vbrdebug;
+	if (vbrInit(&vf->priv->vbr_state) == -1)
+	    abort();
+	/* XXX - kludge to workaround some DivX encoder limitations */
+	if (vf->priv->vbr_state.mode != VBR_MODE_2PASS_2)
+	    divx4_param.min_quantizer = divx4_param.max_quantizer = vbrGetQuant(&vf->priv->vbr_state);
+    }
+#endif
 
     divx4_param.handle=NULL;
     encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
@@ -138,6 +195,13 @@ static int config(struct vf_instance_s* vf,
     return 1;
 }
 
+#ifdef HAVE_XVID_VBR
+static void uninit(struct vf_instance_s* vf){
+    if (vbrpass >= 0 && vbrFinish(&vf->priv->vbr_state) == -1)
+	    abort();
+}
+#endif
+
 static int control(struct vf_instance_s* vf, int request, void* data){
 
     return CONTROL_UNKNOWN;
@@ -165,6 +229,30 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->enc_frame.bitstream=mux_v->buffer;
     vf->priv->enc_frame.length=mux_v->buffer_size;
     vf->priv->enc_frame.mvs=NULL;
+#ifdef HAVE_XVID_VBR
+    if (vbrpass >= 0) {
+	int quant = vbrGetQuant(&vf->priv->vbr_state);
+	int intra = vbrGetIntra(&vf->priv->vbr_state);
+	vf->priv->enc_frame.quant = quant ? quant : 1;
+	vf->priv->enc_frame.intra = intra;
+	/* XXX - kludge to workaround some DivX encoder limitations:
+	   only pass 2 needs to call encore with VBR, and then it does
+	   not report quantizer and intra*/
+	if (vf->priv->vbr_state.mode != VBR_MODE_2PASS_2)
+	    encore(vf->priv->enc_handle, ENC_OPT_ENCODE, &vf->priv->enc_frame, &enc_result);
+	else {
+	    encore(vf->priv->enc_handle, ENC_OPT_ENCODE_VBR, &vf->priv->enc_frame, &enc_result);
+	    enc_result.quantizer = quant;
+	    if (intra >= 0)
+		enc_result.is_key_frame = intra;
+	}
+	if (vbrUpdate(&vf->priv->vbr_state, enc_result.quantizer, enc_result.is_key_frame,
+		      (enc_result.total_bits - enc_result.texture_bits) / 8, enc_result.total_bits / 8,
+		      0, 0, 0) == -1)
+	    abort();
+    }
+    else
+#endif
     if(pass==2){	// handle 2-pass:
     	vf->priv->enc_frame.quant = VbrControl_get_quant();
 	vf->priv->enc_frame.intra = VbrControl_get_intra();
@@ -194,6 +282,9 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;
+#ifdef HAVE_XVID_VBR
+    vf->uninit = uninit;
+#endif
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(aviwrite_stream_t*)args;
