@@ -1,4 +1,4 @@
-.\" synced with 1.878
+.\" synced with 1.880
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -3683,18 +3683,18 @@ Ne gère que le format 16-bit little-endian.
 Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
 .PD 0
 .RSs
-.IPs srate
+.IPs <srate>
 le taux d'échantillonnage de sortie
-.IPs longueur
+.IPs <longueur>
 longueur du filtre par rapport au taux d'échantillonnage le plus faible
 (par défaut\ : 16)
-.IPs linéaire
+.IPs <linéaire>
 si à 1 alors les filtres seront interpolés linéairement entre les entrées
 polyphase
-.IPs count
+.IPs <count>
 le log2 du nombre d'entrées polyphase
 (..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
-.IPs cutoff
+.IPs <cutoff>
 fréquence de coupure (0.0-1.0) (par défaut\ : initialisé en fonction de la
 longueur du filtre)
 .RE
@@ -3711,7 +3711,7 @@ préservant la spatialité du son.
 .
 .TP
 .B channels[=nch]
-Change le nombre de canaux à nch canaux de sortie.
+Change le nombre de canaux à <nch> canaux de sortie.
 Si le nombre de canaux de sortie est plus grand que le nombre de canaux
 d'entrée des canaux vides sont insérés (excepté pour le mixage de mono vers
 stéréo, où le canal audio est répété sur chacun des canaux de sortie).
@@ -3745,17 +3745,17 @@ Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule fois
 pour chaque flux audio.
 .PD 0
 .RSs
-.IPs v
+.IPs <v>
 Défini le gain désiré en dB pour tous les canaux du flux,
 de -200dB à +60dB (où -200dB coupe le son complètement
 et +40dB équivaut à un gain de 1000).
-.IPs sc
+.IPs <sc>
 Active le découpage logiciel.
 .RE
 .PD 1
 .
 .TP
-.B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mixe les canaux arbitrairement.
 Il s'agit d'une combinaison du filtre volume et channels pouvant être
 utilisé pour mixer plusieurs canaux dans seulement quelques-uns, par
@@ -3780,10 +3780,10 @@ Combien du canal j est mixé dans le canal de sortie i (0\-1).
 Ajoute le canal du caisson de basse.
 .PD 0
 .RSs
-.IPs fc
+.IPs <fc>
 fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz)
 (par défaut\ : 60Hz).
-.IPs ca
+.IPs <ca>
 numéro de canal pour le sous-canal
 .RE
 .PD 1
@@ -3812,9 +3812,9 @@ Exporte le signal entrant vers un autre processus en utilisant le mappage
 mémoire (nmap()).
 .PD 0
 .RSs
-.IPs fichier_nmappé
+.IPs <fichier_nmappé>
 fichier où mapper les données (par défaut\ : ~/.mplayer/\:mplayer-af_export)
-.IPs nsamples
+.IPs <nsamples>
 nombre d'échantillons par canal (par défaut\ : 512)
 .RE
 .PD 1
@@ -3825,7 +3825,7 @@ Augmente la différence entre les canaux de gauche et de droite pour qu'à
 la lecture on ait un effet "live".
 .PD 0
 .RSs
-.IPs mul\ \ 
+.IPs <mul>
 coefficient de différence (par défaut\ : 2.5)
 .RE
 .PD 1
@@ -3841,18 +3841,18 @@ Ce filtre est réentrant, donc plusieurs instances de plugins LADSPA penvent
 être utilisé à la fois.
 .PD 0
 .RSs
-.IPs nom_fichier\ 
+.IPs <nom_fichier>
 Définit le fichier de la librairie du plugin LADSPA.
 Si LADSPA_PATH est définit, la recherche se fait dans le répertoire spécifié.
 S'il n'est pas définit, vous devez alors donner le chemin absolu.
-.IPs label
+.IPs <label>
 Sélectionne le filtre de la librairie.
 Certaines librairies disposent d'un seul filtre, mais d'autres en contiennent
 plusieurs.
 Entrez 'help' ici pour obtenir une liste des filtres disponibles dans la
 librairie donnée, ce qui élimine d'utilisation de 'listplugins' depuis le
 kit de développement LADSPA.
-.IPs contrôles
+.IPs <contrôles>
 Les paramètres contrôles sont aucun ou plus nombres flottants qui
 contrôlent le comportement du plugin chargé (par exemple délais, seuil ou
 amplification).
