@@ -609,6 +609,7 @@ vidix_capability_t def_cap =
 #else
     "BES driver for radeon cards",
 #endif
+    "Nick Kurshev",
     TYPE_OUTPUT | TYPE_FX,
     { 0, 0, 0, 0 },
     2048,
