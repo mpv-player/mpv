@@ -842,7 +842,7 @@ other technical help from:</P>
 <P>Documentation translations
 <UL>
   <LI><B>Hungarian</B>: Gabucino
-  <LI><B>German</B>: <A HREF="mailto:jaf.corporation@gmx.at">Johannes Feigl</A>
+  <LI><B>German</B>: <A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A>
   <LI><B>Spanish</B>: TeLeNiEkO (outdated)
   <LI><B>Russian</B>: Nick Kurshev (outdated)
   <LI><B>Polish</B>: Dariush Pietrzak (outdated)
@@ -941,9 +941,9 @@ This list should be kept low-traffic.</P>
 <LI>matrox's official beta drivers (for X 4.x.x)</LI>
 <LI>and about matroxfb-TVout stuff.</LI></UL></P>
 
-</LI><LI>MPlayer &amp; Siemens DVB card users:<BR>
+</LI><LI>MPlayer &amp; DVB card users:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Things related to Siemens' hardware decoder card, called DVB.<UL>
+<P>Things related to the hardware decoder card called DVB.<UL>
 </P>
 
 </LI><LI>MPlayer announce:<BR>
@@ -988,13 +988,13 @@ otherwise.  Please do not send messages using other language!</P>
 <LI>SIGILL (signal 4) on P3 using 2.2.x kernels:<BR>
   Problem: kernel 2.2.x doesn't have proper (working) SSE support<BR>
   Solution: upgrade kernel to 2.4.x<BR>
-  Workaround: ./configure --disable-sse<BR>
+  Workaround: ./configure --disable-sse</LI>
 
 <LI>General SIGILL (signal 4):<BR>
   Problem: you compiled and run mplayer in different machines
   (for example compiled on P3 and running on celeron)<BR>
   Solution: compile MPlayer on the same machine where you will use it!<BR>
-  Workaround: ./configure --disable-sse etc. options<BR>
+  Workaround: ./configure --disable-sse etc. options</LI>
 </UL>
 
 <P>Various A-V sync and other audio problems:</P>
@@ -1012,7 +1012,7 @@ General audio delay or jerky sound (exists with all or many files):<BR>
 Audio delay/de-sync specific to one or a few files:<BR>
 <UL>
 <LI>bad file (please upload the file, so we can check & fix)<BR>
-  Workaround: -ni or -bps option   (for non-interlaved or bad files)<BR>
+  Workaround: -ni or -bps option   (for non-interlaced or bad files)<BR>
               -mc 0   (required for files with VBR audio)<BR>
               -delay option or +/- keys at runtime to adjust delay</LI>
 <LI>your soundcard doesn't support 48Khz playback<BR>
