@@ -96,6 +96,7 @@ while(1){
         if(verbose>=1) printf("found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
+        if(verbose>=1) print_video_header(sh_video->bih);
         chunksize=0;
 //        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
 //        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
