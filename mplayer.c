@@ -263,7 +263,7 @@ sh_audio_t* new_sh_audio(int id){
     if(avi_header.a_streams[id]){
         printf("Warning! Audio stream header %d redefined!\n",id);
     } else {
-        if(verbose) printf("Found audio stream: %d\n",id);
+        printf("==> Found audio stream: %d\n",id);
         avi_header.a_streams[id]=malloc(sizeof(sh_audio_t));
         memset(avi_header.a_streams[id],0,sizeof(sh_audio_t));
     }
@@ -274,7 +274,7 @@ sh_video_t* new_sh_video(int id){
     if(avi_header.v_streams[id]){
         printf("Warning! video stream header %d redefined!\n",id);
     } else {
-        if(verbose) printf("Found video stream: %d\n",id);
+        printf("==> Found video stream: %d\n",id);
         avi_header.v_streams[id]=malloc(sizeof(sh_video_t));
         memset(avi_header.v_streams[id],0,sizeof(sh_video_t));
     }
@@ -825,7 +825,8 @@ switch(file_format){
  }
  case DEMUXER_TYPE_MPEG_ES: {
    d_audio->type=0;
-   has_audio=0;sh_audio=NULL; // ES streams has no audio channel
+   has_audio=0;sh_audio=NULL;   // ES streams has no audio channel
+   d_video->sh=new_sh_video(0); // create dummy video stream header, id=0
    break;
  }
  case DEMUXER_TYPE_MPEG_PS: {
