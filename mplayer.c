@@ -184,7 +184,7 @@ static double audio_time_usage=0;
 static double max_audio_time_usage=0;
 static double cur_audio_time_usage=0;
 static int total_time_usage_start=0;
-static int benchmark=0;
+int benchmark=0;
 static unsigned bench_dropped_frames=0;
 
 // static int play_in_bg=0;
@@ -1562,7 +1562,10 @@ InitTimer();
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-max_audio_time_usage=0; max_video_time_usage=0; max_vout_time_usage=0;
+if(benchmark) 
+{
+  max_audio_time_usage=0; max_video_time_usage=0; max_vout_time_usage=0;
+}
 while(!eof){
 //    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
@@ -1608,8 +1611,11 @@ while(sh_audio){
   t=GetTimer()-t;
   tt = t*0.000001f;
   audio_time_usage+=tt;
-  if(tt > max_audio_time_usage) max_audio_time_usage = tt;
-  cur_audio_time_usage=tt;
+  if(benchmark)
+  {
+    if(tt > max_audio_time_usage) max_audio_time_usage = tt;
+    cur_audio_time_usage=tt;
+  }
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
   
   playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
@@ -1861,17 +1867,23 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;
 	   vout_time_usage+=tt;
-	   if(cur_vout_time_usage + tt > max_vout_time_usage)
+	   if(benchmark)
+	   {
+	    if(cur_vout_time_usage + tt > max_vout_time_usage)
 		    max_vout_time_usage = cur_vout_time_usage + tt;
-	   our_n_frames++;
+	    our_n_frames++;
+	   }
 	}
 #endif
 //        usec_sleep(50000); // test only!
 
     }
 /*  Compute total frame dropping here */
-    if((cur_video_time_usage + cur_vout_time_usage + cur_audio_time_usage)*vo_fps > 1)
+    if(benchmark)
+    {
+	if((cur_video_time_usage + cur_vout_time_usage + cur_audio_time_usage)*vo_fps > 1)
 							bench_dropped_frames ++;
+    }
     current_module=NULL;
     
     if(eof) break;

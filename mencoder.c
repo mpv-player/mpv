@@ -147,7 +147,6 @@ int out_video_codec=
 //void resync_audio_stream(sh_audio_t *sh_audio){}
 
 int verbose=0; // must be global!
-
 double video_time_usage=0;
 double vout_time_usage=0;
 double max_video_time_usage=0;
@@ -156,7 +155,7 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 static double audio_time_usage=0;
 static int total_time_usage_start=0;
-static int benchmark=0;
+int benchmark=0;
 
 // A-V sync:
 int delay_corrected=1;
