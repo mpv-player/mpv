@@ -1007,7 +1007,7 @@ switch(file_format){
    }
    if(verbose) printf("OK!\n");
    sh_video=d_video->sh;sh_video->ds=d_video;
-   sh_video->format=1; // mpeg video
+   sh_video->format=0x10000001; // mpeg video
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
