@@ -181,7 +181,7 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
 
-#if LIBAVCODEC_BUILD >= 4691
+#if LIBAVCODEC_BUILD >= 4691 && LIBAVCODEC_BUILD <= 4692
     if(lavc_codec->capabilities&CODEC_CAP_CR)
         avctx->cr_available = 1;
 #endif
@@ -202,6 +202,9 @@ static int init(sh_video_t *sh){
         avctx->flags|= CODEC_FLAG_EMU_EDGE; 
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
+#if LIBAVCODEC_BUILD >= 4693
+        avctx->reget_buffer= get_buffer;
+#endif
     }
 
 #ifdef CODEC_FLAG_NOT_TRUNCATED
