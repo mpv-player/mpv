@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <netdb.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,7 +27,6 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
-#include <linux/types.h>
 
 #include "config.h"
 
