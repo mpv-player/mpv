@@ -13,7 +13,6 @@
   - hw YUV support (need volunteers who have corresponding hardware)
   - triple buffering (if it will really speedup playback).
     note: triple buffering requires VBE 3.0 - need volunteers.
-  - refresh rate support (need additional info from mplayer)
 */
 #include "config.h"
 #include "gtf.h"
@@ -906,7 +905,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		
 		if (((int)(vib.VESAVersion >> 8) & 0xff) > 2) {
 		
-		if (set_refresh(dstW,dstH,video_mode,&crtc_pass))
+		if (set_refresh(video_mode_info.XResolution,video_mode_info.YResolution,video_mode,&crtc_pass))
 		video_mode = video_mode | 0x800;
 		
 		}
