@@ -250,6 +250,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if(in_format==IMGFMT_I420 || in_format==IMGFMT_IYUV) in_format=IMGFMT_YV12;
  srcW= width;
  srcH= height;
+ vo_dwidth=width; vo_dheight=height;
  
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
@@ -622,14 +623,6 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-#if 0
-/* for runtime fullscreen switching */
-static int vo_fs_oldx = -1;
-static int vo_fs_oldy = -1;
-static int vo_fs_oldwidth = -1;
-static int vo_fs_oldheight = -1;
-#endif
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
@@ -641,55 +634,6 @@ static uint32_t control(uint32_t request, void *data, ...)
     return get_image(data);
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
-/*
-    if ((vo_fs_oldwidth == -1) && (vo_fs_oldheight == -1))
-    {
-	int foo;
-	Window root;
-
-#ifdef LOCAL_LOOKUP
-	XGetGeometry(mDisplay, vo_window, &root, &foo, &foo,
-		     &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
-	    
-        XTranslateCoordinates(mDisplay, vo_window, root, 0, 0,
-				  &vo_fs_oldx, &vo_fs_oldy,(Window *) &foo);
-#else
-	vo_fs_oldwidth = vo_dwidth;
-	vo_fs_oldheight = vo_dheight;
-	vo_fs_oldx = vo_dx;
-	vo_fs_oldy = vo_dy;
-#endif
-
-	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
-	    vo_fs_oldx, vo_fs_oldy, vo_fs_oldwidth, vo_fs_oldheight);
-	
-	// resize 
-	vo_dwidth = vo_screenwidth;
-	vo_dheight = vo_screenheight;
-	vo_x11_decoration( mDisplay,vo_window,0 );
-	XMoveResizeWindow(mDisplay, vo_window, 0, 0,
-	    vo_screenwidth, vo_screenheight);
-	XSync(mDisplay, False);
-    }
-    else
-    {
-	vo_x11_decoration( mDisplay,vo_window,1 );
-	XMoveResizeWindow(mDisplay, vo_window, vo_fs_oldx, vo_fs_oldy, 
-	    vo_fs_oldwidth, vo_fs_oldheight);
-	
-
-#ifdef LOCAL_LOOKUP
-	// restore 
-	vo_dwidth = vo_fs_oldwidth;
-	vo_dheight = vo_fs_oldheight;
-#endif
-	
-	// clean
-	vo_fs_oldwidth = -1;
-	vo_fs_oldheight = -1;
-	XSync(mDisplay, False);
-    }
-*/
     return VO_TRUE;
   }
   return VO_NOTIMPL;

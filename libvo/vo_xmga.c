@@ -76,8 +76,6 @@ static uint32_t               mDepth, bpp, mode;
 static XWindowAttributes      attribs;
 static uint32_t               X_already_started=0;
 
-static uint32_t               wndHeight;
-static uint32_t               wndWidth;
 static uint32_t               wndX;
 static uint32_t               wndY;
 
@@ -109,7 +107,7 @@ static void set_window(){
 
          XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          fprintf( stderr,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
-         drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
+         drwX=0; drwY=0;
          XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
@@ -164,8 +162,8 @@ static void check_events(void)
 {
  int e=vo_x11_check_events(mDisplay);
  if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
- if(e&VO_EVENT_EXPOSE) mDrawColorKey();
  set_window();
+ if(e&VO_EVENT_EXPOSE) mDrawColorKey();
  if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
    printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
@@ -239,7 +237,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  mvWidth=width; mvHeight=height;
 
  wndX=0; wndY=0;
- wndWidth=d_width; wndHeight=d_height;
  vo_fs=fullscreen&1;
  vo_dwidth=d_width; vo_dheight=d_height;
  if ( vo_fs )
@@ -256,20 +253,20 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
   inited=1;
 
-  aspect(&d_width,&d_height,A_NOZOOM);
+ aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
   {
 #endif
    if ( vo_fs )
     {
-     wndWidth=vo_screenwidth;
-     wndHeight=vo_screenheight;
+     vo_dwidth=vo_screenwidth;
+     vo_dheight=vo_screenheight;
 #ifdef X11_FULLSCREEN
-     aspect(&d_width,&d_height,A_ZOOM);
+     aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
 #endif
     }
-   dwidth=d_width; dheight=d_height;
+   dwidth=vo_dwidth; dheight=vo_dheight;
 
    XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
    mDepth=attribs.depth;
@@ -289,7 +286,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
     } else 
    vo_window=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
      wndX,wndY,
-     wndWidth,wndHeight,
+     vo_dwidth,vo_dheight,
      xWAttribs.border_pixel,
      mDepth,
      InputOutput,

@@ -91,8 +91,8 @@ static uint32_t image_format;
 static int flip_flag;
 
 static Window                 mRoot;
-static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
-static uint32_t               drwcX,drwcY,dwidth,dheight;
+static uint32_t               drwX,drwY,drwBorderWidth,drwDepth;
+static uint32_t               dwidth,dheight;
 
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
@@ -331,6 +331,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  image_width = width;
  image_format=format;
 
+ vo_dwidth=d_width; vo_dheight=d_height;
  vo_fs=flags&1;
  if ( vo_fs )
   { vo_old_width=d_width; vo_old_height=d_height; }
@@ -393,7 +394,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
     }
-   dwidth=d_width; dheight=d_height; //XXX: what are the copy vars used for?
+//   dwidth=d_width; dheight=d_height; //XXX: what are the copy vars used for?
+   vo_dwidth=d_width; vo_dheight=d_height;
    hint.flags = PPosition | PSize;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
@@ -466,23 +468,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
      set_gamma_correction();
 
-     XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-     drwX=0; drwY=0;
-     XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-     mp_msg(MSGT_VO,MSGL_V, "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
-
-     aspect(&dwidth,&dheight,A_NOZOOM);
+     aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
      if ( vo_fs )
       {
-       aspect(&dwidth,&dheight,A_ZOOM);
-       drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-       drwcX+=drwX;
-       drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-       drwcY+=drwY;
-       drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-       drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-       mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+       aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
+       drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;
+       drwY=( vo_screenheight - (vo_dheight > vo_screenheight?vo_screenheight:vo_dheight) ) / 2;
+       vo_dwidth=(vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth);
+       vo_dheight=(vo_dheight > vo_screenheight?vo_screenheight:vo_dheight);
+       mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
       }
+
+     mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
+
      saver_off(mDisplay);  // turning off screen saver
      return 0;
 }
@@ -548,22 +546,18 @@ static void check_events(void)
  int e=vo_x11_check_events(mDisplay);
  if(e&VO_EVENT_RESIZE)
   {
-   XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-   drwX=0; drwY=0;
-   XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-   mp_msg(MSGT_VO,MSGL_V, "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+   XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,&drwBorderWidth,&drwDepth );
+   mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
    aspect(&dwidth,&dheight,A_NOZOOM);
    if ( vo_fs )
     {
      aspect(&dwidth,&dheight,A_ZOOM);
      drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-     drwcX+=drwX;
      drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-     drwcY+=drwY;
-     drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-     drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-     mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+     vo_dwidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
+     vo_dheight=(dheight > vo_screenheight?vo_screenheight:dheight);
+     mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
     }
   }
  if ( e & VO_EVENT_EXPOSE )
@@ -571,12 +565,12 @@ static void check_events(void)
    if ( Shmem_Flag )
     {
      XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
-     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight), False);
+     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight), False);
     }
    else
     {
      XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1);
-     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight));
+     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
     }
   }
 }
@@ -590,14 +584,14 @@ static void flip_page(void)
   {
    XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
-         drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight),
+         drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight),
          False);
   }
  else
   {
    XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
-         drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight));
+         drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
   }
  if (num_buffers>1){
     current_buf=(current_buf+1)%num_buffers;

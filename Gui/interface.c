@@ -99,7 +99,7 @@ void guiGetEvent( int type,char * arg )
         if ( arg )
 	 {
 	  tmp_sh_video_t * sh_video = (tmp_sh_video_t *)arg;
-	  mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
+	  mplResizeToMovieSize( vo_dwidth,vo_dheight );
 	  guiIntfStruct.MovieWidth=sh_video->disp_w;
 	  guiIntfStruct.MovieHeight=sh_video->disp_h;
          }
