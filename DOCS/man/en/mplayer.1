@@ -588,8 +588,8 @@ Useful for slideshows.
 .B \-use-stdin
 The standard input (aka. stdin) will be used to read data instead of key
 events.  If you open /dev/stdin (or the equivalent on your system), use stdin
-in a playlist or intend to read from stdin later on via the openfile or
-openlist commands you
+in a playlist or intend to read from stdin later on via the loadfile or
+loadlist commands you
 .B need
 this option.
 .
@@ -621,7 +621,7 @@ Plays Hungarian and falls back to English if Hungarian is not available.
 .TP
 .B \-audio-demuxer <number> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
-Give the demuxer ID as defined in demuxers.h.
+Give the demuxer ID as defined in libmpdemux/demuxer.h.
 Use \-audio-demuxer 17 to force .mp3 detection.
 .TP
 .B \-audiofile <filename>
@@ -730,7 +730,7 @@ and ~/.mozilla/.
 .TP
 .B \-demuxer <number>
 Force demuxer type.
-Give the demuxer ID as defined in demuxers.h.
+Give the demuxer ID as defined in libmpdemux/demuxer.h.
 Use \-demuxer 17 to force .mp3 detection.
 .TP
 .B \-dumpaudio (MPLAYER only)
@@ -1747,8 +1747,8 @@ See \-fstype help for a full list of available modes.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Adjust where the output is on the screen initially.
-The x and y specifications are in pixels measured from the top-right of the
-screen to the top-right of the image being displayed, however if a percentage
+The x and y specifications are in pixels measured from the top-left of the
+screen to the top-left of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
 screen size in that direction.
 It also supports the standard option format to the standard X \-geometry
@@ -2104,6 +2104,9 @@ It's autodetected on MPEG files, but can't be autodetected on most AVI files.
 .PD 1
 .
 .TP
+.B \-noaspect
+Disable automatic movie aspect ratio compensation.
+.TP
 .B \-flip \ 
 Flip image upside-down.
 .TP
@@ -2227,9 +2230,6 @@ This may come at a price in accuracy, though.
 grayscale only decoding (a bit faster than with color)
 .RE
 .
-.TP
-.B \-noaspect
-Disable automatic movie aspect ratio compensation.
 .TP
 .B \-noslices
 Disable drawing video by 16-pixel height slices/\:bands, instead draws the
