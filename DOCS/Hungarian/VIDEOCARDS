@@ -14,7 +14,7 @@ III. Nativ kártyaspecifikus driverek, amik egyes kártyák különleges
      képességeit használják ki
 IV.  DGA - Direct Graphic Access. Nincs YUV, scaling, de még mindig
      gyorsabb, mint az X11
-V.   Nem igazán gyorsítás, de...
+V.   Nem igazán gyorsítás, hanem...
 
 Nos, lássuk õket részletesen:
 
