@@ -69,6 +69,7 @@ darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
 mingw32() { issystem "MINGW32" ; return "$?" ; }
 morphos() { issystem "MorphOS" ; return "$?" ; }
+win32()   { cygwin || mingw32  ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -1839,8 +1840,7 @@ if test "$_vidix" = auto ; then
   x86 && _vidix=yes
   ppc && linux && _vidix=yes
   alpha && linux && _vidix=yes
-  cygwin && _vidix=no
-  mingw32 && _vidix=no
+  win32 && _vidix=no
   qnx && _vidix=no
   sunos && _vidix=no
 fi
@@ -3187,7 +3187,7 @@ fi
 
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect $_ld_gl
-if (test "$_x11" = yes || mingw32 || cygwin) && test "$_gl" != no ; then
+if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
@@ -4135,13 +4135,13 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd || netbsd || darwin || cygwin || mingw32 || openbsd || sunos || hpux; then
+ if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux; then
   test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
 if test "$_dvdkit" = yes ; then
-  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || cygwin || mingw32 ; then
+  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || win32 ; then
    if test -f "./libmpdvdkit2/Makefile" ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
@@ -4776,7 +4776,7 @@ fi
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
   echocheck "Win32 loader support"
-  if not cygwin && not mingw32 ; then
+  if not win32 ; then
     _ld_win32='loader/libloader.a'
     _dep_win32='loader/libloader.a'
     _codecmodules="win32 $_codecmodules"
@@ -4887,7 +4887,7 @@ if test "$_real" = auto ; then
   _real=no
   if test "$_dl" = yes || test "$_win32" = yes ; then
 #  if test "$_dl" = yes  ; then
-    if linux || freebsd || netbsd || cygwin || mingw32 ; then
+    if linux || freebsd || netbsd || win32 ; then
       _real=yes
     else
       echores "no (tested only on Linux/FreeBSD/NetBSD/Cygwin/MinGW)"
@@ -5100,7 +5100,7 @@ if test "$_libavformat" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
   _ld_libavformat='libavformat/libavformat.a'
   _dep_libavformat='libavformat/libavformat.a'
-  if mingw32 || cygwin ; then
+  if win32 ; then
     _def_libavformat_win32='#define CONFIG_WIN32 1'
   fi
 fi
@@ -5790,7 +5790,7 @@ else
   _confmingw32='TARGET_MINGW32 = no'
 fi
 
-if mingw32 || cygwin ; then
+if win32 ; then
   _confwin32='TARGET_WIN32 = yes'
 else
   _confwin32='TARGET_WIN32 = no'
@@ -5824,7 +5824,7 @@ if test "$_vidix" = yes; then
 else
   _novomodules="cvidix $_novomodules"
 fi
-if test "$_vidix" = yes && (cygwin || mingw32); then
+if test "$_vidix" = yes && (win32); then
   _vosrc="$_vosrc vo_winvidix.c"
   _vomodules="winvidix $_vomodules"
 else
