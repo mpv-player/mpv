@@ -273,14 +273,12 @@ void mplEventHandling( int msg,float param )
    case evSetAudio:
         if ( !guiIntfStruct.demuxer || audio_id == iparam ) break;
 	audio_id=iparam;
-	guiIntfStruct.NewPlay=1;
-	break;
+	goto play;
 
    case evSetVideo:
         if ( !guiIntfStruct.demuxer || video_id == iparam ) break;
 	video_id=iparam;
-	guiIntfStruct.NewPlay=1;
-	break;
+	goto play;
 
 #ifdef HAVE_VCD
    case evSetVCDTrack:

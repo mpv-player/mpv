@@ -175,6 +175,7 @@ void ShowPreferences( void )
   int    i = 0;
   char * tmp[3]; tmp[2]="";
   old_audio_driver=-1;
+  if ( CLADrivers ) gtk_clist_clear( GTK_CLIST( CLADrivers ) );
   while ( audio_out_drivers[i] )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
@@ -220,6 +221,7 @@ void ShowPreferences( void )
   int i = 0, c = 0;
   char * tmp[3]; tmp[2]="";
   old_video_driver=0; 
+  if ( CLVDrivers ) gtk_clist_clear( GTK_CLIST( CLVDrivers ) );
   while ( video_out_drivers[i] )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 

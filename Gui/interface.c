@@ -691,7 +691,7 @@ int guiGetEvent( int type,char * arg )
 	  gset( &ao_plugin_cfg.plugin_list,"extrastereo" );
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
-	mixer_device=gtkAOOSSMixer;
+	mixer_device=gstrdup( gtkAOOSSMixer );
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) && gtkAOOSSDevice )
 	 {
 	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 7 );
@@ -713,13 +713,11 @@ int guiGetEvent( int type,char * arg )
 
 // --- misc		    
 	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
-	 else stream_cache_size=-1;
-
 	if ( gtkAutoSyncOn ) autosync=gtkAutoSync;
-	 else autosync=0;
 
-        if ( guiIntfStruct.AudioFile ) audio_stream=guiIntfStruct.AudioFile;
-	  else if ( guiIntfStruct.FilenameChanged ) audio_stream=NULL;
+        if ( guiIntfStruct.AudioFile ) audio_stream=gstrdup( guiIntfStruct.AudioFile );
+	  else if ( guiIntfStruct.FilenameChanged ) gfree( (void**)&audio_stream );
+	  //audio_stream=NULL;
 	
         guiIntfStruct.DiskChanged=0;
         guiIntfStruct.FilenameChanged=0;

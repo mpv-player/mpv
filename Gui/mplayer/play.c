@@ -106,7 +106,7 @@ void mplEnd( void )
   } 
   else
     {
-     if ( guiIntfStruct.FilenameChanged ) return;
+     if ( guiIntfStruct.FilenameChanged || guiIntfStruct.NewPlay ) return;
 
      guiIntfStruct.TimeSec=0;
      guiIntfStruct.Position=0;
