@@ -3261,6 +3261,33 @@ set to -1, a green rectangle is drawn on the screen to simplify finding
 the right x,y,w,h parameters.
 .RE
 .PD 1
+.TP
+.B zrmjpeg[=options]
+Software YV12 to MJPEG encoder for use with the zr2 video
+output device.
+Multiple options can be specified separated by ':'.
+.RSs
+.IPs maxheight=h|maxwidth=w
+These options set the maximum width and height the zr card
+can handle. (the MPlayer filter layer currently can't query those)
+.IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
+Use these options to set maxwidth and maxheight automatically to the 
+values known for card/mode combo. For example, valid options are:
+dc10-PAL and buz-NTSC. The default is dc10+PAL.
+.IPs color|bw
+Select color or black and white encoding. Black and white encoding is 
+faster. Color is the default.
+.IPs hdec={1,2,4}
+Horizontal decimation 1, 2 or 4.
+.IPs vdec={1,2,4}
+Vertical decimation 1, 2 or 4.
+.IPs quality=1-20
+Set JPEG compression quality [BEST] 1 - 20 [VERY BAD]
+.IPs fd|nofd
+By default, decimation is only performed if the zoran hardware
+can upscale the resulting MJPEG images to the original size. The option
+fd instructs the filter to always perform the requested decimation (ugly).
+.RE
 .
 .
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
@@ -4735,6 +4762,12 @@ mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 .B Input from standard V4L
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
+.TP
+.B Playback on zoran card (old style, depreciated)
+mplayer -vo zr -vf scale=352:288 file.avi
+.TP
+.B Playback on zoran card (new style)
+mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Encoding DVD title #2, only selected chapters
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
