@@ -190,7 +190,7 @@ $(PRG):	$(MPLAYER_DEP)
 
 mplayer_wine.so:	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so mplayer_wine.spec.o $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) -lwine $(ARCH_LIB) -lm
+	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so mplayer_wine.spec.c $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) -lwine $(ARCH_LIB) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
