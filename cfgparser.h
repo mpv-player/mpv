@@ -74,7 +74,7 @@ struct config_save {
     int as_int;
     float as_float;
     void* as_pointer;
-    off_t* as_off_t;
+    off_t as_off_t;
   } param;
   char* opt_name;
 };

@@ -103,7 +103,7 @@ static void put_image(struct vf_instance_s* vf,
 }
 
 static void draw_slice(struct vf_instance_s* vf,
-        unsigned char* src, int* stride, int w,int h, int x, int y){
+        unsigned char** src, int* stride, int w,int h, int x, int y){
     if(!vo_config_count) return; // vo not configured?
     video_out->draw_slice(src,stride,w,h,x,y);
 }

@@ -257,7 +257,7 @@ static void draw_slice(struct AVCodecContext *s,
         }
     }else
 #endif
-        mpcodecs_draw_slice (sh,(unsigned char*)src, stride, width, height, 0, y);
+        mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
 }
 
 static int init_vo(sh_video_t *sh){

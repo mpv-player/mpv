@@ -528,7 +528,7 @@ if (vobsub_out) {
     unsigned char tmp[3] = { 0, 0, 0 };
     if (spudec_ifo && vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, dvdsub_id, tmp) >= 0)
 	vobsub_writer = vobsub_out_open(vobsub_out, palette, sh_video->disp_w, sh_video->disp_h,
-					vobsub_out_id?vobsub_out_id:tmp, vobsub_out_index);
+					vobsub_out_id?vobsub_out_id:(char *)tmp, vobsub_out_index);
 #ifdef USE_DVDREAD
     if (vobsub_writer == NULL) {
 	char tmp[3];
