@@ -1367,7 +1367,7 @@ switch(has_video){
         t+=GetTimer(); video_time_usage+=t*0.000001;
 
         newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-        if(ABS(sh_video->fps-newfps)>0.01f){
+        if(ABS(sh_video->fps-newfps)>0.01f) if(!force_fps){
             printf("Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,newfps,sh_video->fps-newfps,picture->frame_rate_code);
             sh_video->fps=newfps;
             sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
@@ -1384,7 +1384,7 @@ switch(has_video){
     // Increase video timers:
     num_frames+=frame_time;
     frame_time*=sh_video->frametime;
-    if(file_format==DEMUXER_TYPE_ASF){
+    if(file_format==DEMUXER_TYPE_ASF && !force_fps){
         // .ASF files has no fixed FPS - just frame durations!
         float d=d_video->pts-pts1;
         if(d>=0 && d<5) frame_time=d;
