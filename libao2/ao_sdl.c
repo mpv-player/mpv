@@ -206,7 +206,7 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 
-#if 1	
+#if 0	
 	int ret;
 
 	/* Audio locking prohibits call of outputaudio */
