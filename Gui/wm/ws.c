@@ -770,7 +770,7 @@ while(wsTrue){
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
-#define WIN_LAYER_ONTOP                  6
+#define WIN_LAYER_ONTOP                 10
 
 void wsSetLayer( Display * wsDisplay, Window win, int layer )
 {
@@ -791,6 +791,29 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
     XInternAtom( wsDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
   return;
  }
+
+ type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **)&args ) && nitems > 0 )
+  {
+   XClientMessageEvent  xev;
+   
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.window=win;
+   xev.message_type=XInternAtom( wsDisplay,"_WIN_LAYER",False );
+   xev.format=32;
+   switch ( layer ) 
+    {
+     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
+     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
+     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
+    }
+   XSendEvent( wsDisplay,wsRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
+   if ( layer ) XRaiseWindow( wsDisplay,win );
+								              
+   XFree( args );
+   return;
+  }
 					
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **)&args ) && nitems > 0 )
@@ -815,28 +838,6 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
    e.xclient.data.l[4]=0l;
    XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
 								   
-   XFree( args );
-   return;
-  }
- type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **)&args ) && nitems > 0 )
-  {
-   XClientMessageEvent  xev;
-   
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.window=win;
-   xev.message_type=XInternAtom( wsDisplay,"_WIN_LAYER",False );
-   xev.format=32;
-   switch ( layer ) 
-    {
-     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
-     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
-     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
-    }
-   XSendEvent( wsDisplay,wsRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
-   if ( layer ) XRaiseWindow( wsDisplay,win );
-								              
    XFree( args );
    return;
   }

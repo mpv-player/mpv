@@ -599,8 +599,7 @@ int guiGetEvent( int type,char * arg )
            while ( video_out_drivers[i++] )
 	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	     {
-	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	      gaddlist( &video_driver_list,(char *)info->short_name );
+	      gaddlist( &video_driver_list,(char *)video_out_drivers[i - 1]->info->short_name );
 	      break;
 	     }
 	 }
@@ -613,8 +612,7 @@ int guiGetEvent( int type,char * arg )
          while ( video_out_drivers[i++] )
 	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	   {
-	    const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	    if  ( ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
+	    if  ( ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)video_out_drivers[i - 1]->info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
 	      { guiIntfStruct.NoWindow=True; break; }
 	   }
 	}
