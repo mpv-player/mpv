@@ -1,4 +1,4 @@
-.\" synced with 1.718
+.\" synced with 1.721
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "15 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "17 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1651,7 +1651,7 @@ que celui du film)
 .I NOTE:
 .br
 Uniquement pour les fichiers de sous-titres basés sur des trames,
-c'est-à-dire pas le format MicroDVD.
+comme le format MicroDVD.
 .
 .TP
 .B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
@@ -2561,7 +2561,7 @@ Utilise le framebuffer du noyau pour afficher la vidéo.
 .IPs <périph>
 Choisit explicitement le périphérique fbdev à utiliser (par ex.\& /dev/\:fb0)
 ou le nom du sous-périphérique vidix si le nom de périphérique commence
-par vidix (par ex.\& vidixsis_vid pour utiliser le pilote sis).
+par 'vidix' (par ex.\& 'vidixsis_vid' pour utiliser le pilote sis).
 .RE
 .PD 1
 .
@@ -2592,7 +2592,7 @@ Active la sortie TV NeoMagic et la configure en norme PAL.
 .IPs neotv_ntsc
 Active la sortie TV NeoMagic et la configure en norme NTSC.
 .IPs vidix
-Utilise le pilote VIDIX
+Utilise le pilote VIDIX.
 .IPs lvo:\ \ \ 
 Active le "Linux Video Overlay" au-dessus du mode VESA.
 .RE
@@ -2845,7 +2845,7 @@ Voir aussi le filtre vidéo lavc.
 Active l'overlay au lieu de TVOut.
 .IPs prebuf
 Active le pré-buffering.
-.IPs sync
+.IPs sync\ 
 Active le nouveau moteur de synchro.
 .IPs norm=<norm>
 Spécifie la norme TV.
@@ -2862,7 +2862,7 @@ Spécifie la norme TV.
 .br
 5: NTSC
 .REss
-.IPs 0\ 1\ 2\ 3\ 
+.IPs <0\-3>
 Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 em8300.
 .RE
@@ -2870,21 +2870,20 @@ em8300.
 .
 .TP
 .B mpegpes (DVB uniquement)
-Pilote de sortie vidéo spécifique DVB ou écriture au format MPEG-PES dans
-un fichier.
+Pilote de sortie vidéo pour cartes DVB permettant l'écriture au format
+MPEG-PES dans un fichier si aucune carte DVB n'est installée.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
 .IPs <nom_fichier>
-Si vous n'avez pas de carte DVB, ce pilote de sortie vidéo redirige la sortie
-dans le fichier <nom_fichier> au format MPEG-PES (par défaut\ : ./grab.mpg).
+Définit le nom du fichier de sortie (par défaut\ : ./grab.mpg).
 .RE
 .PD 1
 .
 .TP
-.B zr (voir aussi \-zr* et \-zrhelp)
+.B zr (voir aussi \-zr* et \-zrhelp, le filtre vidéo zrmjpeg)
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG.
 .
@@ -2892,16 +2891,15 @@ MJPEG.
 .B zr2\ \ \ \ 
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG, seconde génération.
-Voir aussi le filtre vidéo zrmjpeg.
 .PD 0
 .RSs
 .IPs dev=<périph>
 Définit le périphérique à utiliser.
-.IPs PAL\ \ \ 
+.IPs pal\ \ \ 
 Active la norme vidéo PAL.
-.IPs SECAM
+.IPs secam
 Active la norme vidéo SECAM.
-.IPs NTSC\ \ \ 
+.IPs ntsc\ \ \ 
 Active la norme vidéo NTSC.
 .IPs prebuf
 Active le pré-tamponnage (prebuffering), non géré pour le moment.
@@ -2949,7 +2947,7 @@ Ne gère que le format RGB avec 24 bits/pixel en entrée et est limité en
 sortie à 256 couleurs.
 .PD 0
 .RSs
-.IPs <fps>\ \ \ 
+.IPs <fps>
 Valeur flottante pour définir le nombre de trames/sec (framerate)
 (par défaut\ : 5.0).
 .IPs <nom_fichier>
@@ -3384,7 +3382,7 @@ utilisation.
 .
 .TP
 .B \-ssf <mode>
-Définit les paramètres de SwScaler.
+Définit les paramètres de redimensionnement logiciel (scaler).
 .sp 1
 .I EXEMPLE\ :
 .PD 0
