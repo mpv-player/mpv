@@ -328,6 +328,11 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  
  set_window();
 
+ saver_off(mDisplay);
+
+ XFlush( mDisplay );
+ XSync( mDisplay,False );
+
  mga_vid_config.src_width=width;
  mga_vid_config.src_height=height;
 
@@ -335,15 +340,10 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  mga_vid_config.colkey_red=255;
  mga_vid_config.colkey_green=0;
  mga_vid_config.colkey_blue=255;
-
- if(mga_init()) return -1;
  
- XFlush( mDisplay );
- XSync( mDisplay,False );
+ mga_vid_config.version=MGA_VID_VERSION;
 
- saver_off(mDisplay);
- 
- return 0;
+ return mga_init();
 }
 
 static const vo_info_t* get_info( void )

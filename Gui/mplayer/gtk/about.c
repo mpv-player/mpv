@@ -15,6 +15,7 @@ void ShowAboutBox( void )
  if ( gtkVAboutBox ) gtkActive( AboutBox );
    else AboutBox=create_About();
  gtk_widget_show( AboutBox );
+ gtkVisible++;
 }
 
 void ab_AboutBox_show( GtkButton * button,gpointer user_data )
@@ -24,6 +25,7 @@ void ab_Ok_released( GtkButton * button,gpointer user_data )
 {
  gtkVAboutBox=(int)user_data; 
  gtk_widget_destroy( AboutBox );
+ gtkVisible--;
 }
 
 GtkWidget * create_About( void )

@@ -138,8 +138,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
      {
 	for (i = 0; i < howmany && attributes; i++)
         {
-            if (attributes[i].flags & XvSettable && !strcmp(attributes[i].name,"XV_SET_DEFAULTS"
-))
+            if (attributes[i].flags & XvSettable && !strcmp(attributes[i].name,"XV_SET_DEFAULTS"))
             {
 		was_reset = 1;
 		mp_msg(MSGT_VO,MSGL_V,"vo_xv: reset gamma correction\n");
@@ -289,14 +288,6 @@ static int xv_get_video_eq( vidix_video_eq_t *info)
     }
     return 0;
 }
-
-extern int vo_gamma_brightness;
-extern int vo_gamma_saturation;
-extern int vo_gamma_contrast;
-extern int vo_gamma_hue;
-extern int vo_gamma_red_intensity;
-extern int vo_gamma_green_intensity;
-extern int vo_gamma_blue_intensity;
 
 static void set_gamma_correction( void )
 {

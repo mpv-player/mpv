@@ -153,11 +153,6 @@ extern plItem * plLastPlayed;
 #define gtkGetCurrPlItem 8
 #define gtkDelPl         9
 
-extern float gtkContrast;
-extern float gtkBrightness;
-extern float gtkHue;
-extern float gtkSaturation;
-
 extern float gtkEquChannels[6][10];
 
 extern void * gtkSet( int cmd,float param, void * vparam );

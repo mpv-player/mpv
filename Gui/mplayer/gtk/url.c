@@ -34,14 +34,15 @@ void ShowURLDialogBox( void )
   }
  
  gtk_widget_show( URL );
- gtkVURLDialogBox=1;
+ gtkVURLDialogBox=1; gtkVisible++;
 }
 
 void HideURLDialogBox( void )
 {
+ if ( !gtkVURLDialogBox ) return;
  gtk_widget_hide( URL );
  gtk_widget_destroy( URL );
- gtkVURLDialogBox=0;
+ gtkVURLDialogBox=0; gtkVisible--;
 }
 
 static gboolean on_URL_destroy_event( GtkWidget * widget,GdkEvent * event,gpointer user_data )

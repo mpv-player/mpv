@@ -220,6 +220,14 @@ extern int vo_fs;
 extern int vo_fsmode;
 extern float vo_panscan;
 
+extern int vo_gamma_brightness;
+extern int vo_gamma_saturation;
+extern int vo_gamma_contrast;
+extern int vo_gamma_hue;
+extern int vo_gamma_red_intensity;
+extern int vo_gamma_green_intensity;
+extern int vo_gamma_blue_intensity;
+
 extern int vo_mouse_timer_const;
 
 extern int vo_pts;

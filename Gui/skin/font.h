@@ -23,6 +23,8 @@ extern bmpFont  * Fonts[26];
 extern int  fntAddNewFont( char * name );
 extern void fntFreeFont( void );
 extern int  fntFindID( char * name );
+extern int  fntTextHeight( int id,char * str );
+extern int  fntTextWidth( int id,char * str );
 
 extern int        fntRead( char * path,char * fname );
 extern txSample * fntRender( int id,int px,int sx,char * fmt,... );

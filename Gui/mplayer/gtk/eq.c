@@ -15,6 +15,7 @@
 #include "../../../help_mp.h"
 #include "../../../mplayer.h"
 #include "../../../libao2/eq.h"
+#include "../../../libvo/video_out.h"
 #include "../widgets.h"
 #include "../mplayer.h"
 
@@ -64,10 +65,11 @@ static void eqSetBands( int channel )
  gtk_adjustment_set_value( A4000adj,0.0f - gtkEquChannels[channel][7] );
  gtk_adjustment_set_value( A8000adj,0.0f - gtkEquChannels[channel][8] );
  gtk_adjustment_set_value( A16000adj,0.0f - gtkEquChannels[channel][9] );
- gtk_adjustment_set_value( VContrastadj,gtkContrast );
- gtk_adjustment_set_value( VBrightnessadj,gtkBrightness );
- gtk_adjustment_set_value( VHueadj,gtkHue );
- gtk_adjustment_set_value( VSaturationadj,gtkSaturation );
+
+ gtk_adjustment_set_value( VContrastadj,(float)vo_gamma_contrast );
+ gtk_adjustment_set_value( VBrightnessadj,(float)vo_gamma_brightness );
+ gtk_adjustment_set_value( VHueadj,(float)vo_gamma_hue );
+ gtk_adjustment_set_value( VSaturationadj,(float)vo_gamma_saturation );
 }
 
 static void eqSetChannelNames( void )
@@ -92,7 +94,7 @@ static void eqSetChannelNames( void )
    str[0]=gtkEquChannel5; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
    str[0]=gtkEquChannel6; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
   }
- gtk_clist_select_row( GTK_CLIST( ChannelsList ),1,0 );
+ gtk_clist_select_row( GTK_CLIST( ChannelsList ),0,0 );
 }
 
 void ShowEqualizer( void )
@@ -109,10 +111,10 @@ void ShowEqualizer( void )
 
  eqSetChannelNames();
 
- VContrastadj->value=gtkContrast;
- VBrightnessadj->value=gtkBrightness;
- VHueadj->value=gtkHue;
- VSaturationadj->value=gtkSaturation;
+ VContrastadj->value=(float)vo_gamma_contrast;
+ VBrightnessadj->value=(float)vo_gamma_brightness;
+ VHueadj->value=(float)vo_gamma_hue;
+ VSaturationadj->value=(float)vo_gamma_saturation;
 
  if ( !guiIntfStruct.Playing && gtkEnableVideoEqualizer )
   {
@@ -138,13 +140,15 @@ void ShowEqualizer( void )
    gtk_widget_set_sensitive( A16000,FALSE );
   }
 
- gtk_widget_show( Config );
+ if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( Notebook ) ) == 0 ) gtk_widget_show( Config );
  gtk_widget_show( Equalizer );
+ gtkVisible++;
 }
 
 void HideEqualizer( void )
 {
- gtkVEqualizer=0;
+ if ( !gtkVEqualizer ) return;
+ gtkVEqualizer=0; gtkVisible--;
  gtk_widget_hide( Equalizer );
  gtk_widget_destroy( Equalizer );
  if ( gtkVEquConfig ) HideEquConfig();
@@ -186,7 +190,7 @@ static gboolean eqVScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpoin
   {
    case 1: gtkSet( gtkSetContrast,VContrastadj->value,NULL );      break;
    case 2: gtkSet( gtkSetBrightness,VBrightnessadj->value,NULL );  break;
-   case 3: gtkSet( gtkSetHue,VHueadj->value,NULL );		   break;
+   case 3: gtkSet( gtkSetHue,VHueadj->value,NULL );	           break;
    case 4: gtkSet( gtkSetSaturation,VSaturationadj->value,NULL );  break;
   }
 
@@ -207,11 +211,13 @@ static void eqButtonReleased( GtkButton * button,gpointer user_data )
 	 }
 	 else
 	  {
-	   if ( !guiIntfStruct.Playing && !gtkEnableVideoEqualizer ) break;
+	   if ( !guiIntfStruct.Playing || !gtkEnableVideoEqualizer ) break;
 	   gtkSet( gtkSetContrast,0.0f,NULL );
 	   gtkSet( gtkSetBrightness,0.0f,NULL );
 	   gtkSet( gtkSetHue,0.0f,NULL );
 	   gtkSet( gtkSetSaturation,0.0f,NULL );
+	   vo_gamma_brightness=vo_gamma_contrast=vo_gamma_hue=vo_gamma_saturation=0;
+	   eqSetBands( Channel );
 	  }
 	break;
    case 2:
@@ -375,7 +381,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_set_row_spacings( GTK_TABLE( table1 ),4 );
   gtk_table_set_col_spacings( GTK_TABLE( table1 ),9 );
 
-  A3125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A3125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A3125=gtk_vscale_new( A3125adj );
   gtk_widget_set_name( A3125,"A3125" );
   gtk_widget_ref( A3125 );
@@ -384,7 +390,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A3125,0,1,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A3125 ),FALSE );
 
-  A6250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A6250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A6250=gtk_vscale_new( A6250adj );
   gtk_widget_set_name( A6250,"A6250" );
   gtk_widget_ref( A6250 );
@@ -393,7 +399,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A6250,1,2,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A6250 ),FALSE );
 
-  A125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A125=gtk_vscale_new( A125adj );
   gtk_widget_set_name( A125,"A125" );
   gtk_widget_ref( A125 );
@@ -402,7 +408,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A125,2,3,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A125 ),FALSE );
 
-  A250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A250=gtk_vscale_new( A250adj );
   gtk_widget_set_name( A250,"A250" );
   gtk_widget_ref( A250 );
@@ -411,7 +417,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A250,3,4,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A250 ),FALSE );
 
-  A500adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A500adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A500=gtk_vscale_new( A500adj );
   gtk_widget_set_name( A500,"A500" );
   gtk_widget_ref( A500 );
@@ -420,7 +426,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A500,4,5,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A500 ),FALSE );
 
-  A1000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A1000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A1000=gtk_vscale_new( A1000adj );
   gtk_widget_set_name( A1000,"A1000" );
   gtk_widget_ref( A1000 );
@@ -429,7 +435,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A1000,5,6,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A1000 ),FALSE );
 
-  A2000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A2000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A2000=gtk_vscale_new( A2000adj );
   gtk_widget_set_name( A2000,"A2000" );
   gtk_widget_ref( A2000 );
@@ -438,7 +444,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A2000,6,7,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A2000 ),FALSE );
 
-  A4000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A4000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A4000=gtk_vscale_new( A4000adj );
   gtk_widget_set_name( A4000,"A4000" );
   gtk_widget_ref( A4000 );
@@ -447,7 +453,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A4000,7,8,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A4000 ),FALSE );
 
-  A8000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A8000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A8000=gtk_vscale_new( A8000adj );
   gtk_widget_set_name( A8000,"A8000" );
   gtk_widget_ref( A8000 );
@@ -456,7 +462,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A8000,8,9,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A8000 ),FALSE );
 
-  A16000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-15,15,0.5,0,0 ) );
+  A16000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
   A16000=gtk_vscale_new( A16000adj );
   gtk_widget_set_name( A16000,"A16000" );
   gtk_widget_ref( A16000 );
@@ -618,7 +624,7 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_show( vbox3 );
   gtk_box_pack_start( GTK_BOX( hbox2 ),vbox3,TRUE,TRUE,0 );
 
-  VContrastadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
+  VContrastadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
   VContrast=gtk_hscale_new( VContrastadj );
   gtk_widget_set_name( VContrast,"VContrast" );
   gtk_widget_ref( VContrast );
@@ -627,7 +633,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VContrast,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VContrast ),GTK_POS_RIGHT );
 
-  VBrightnessadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
+  VBrightnessadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
   VBrightness=gtk_hscale_new( VBrightnessadj );
   gtk_widget_set_name( VBrightness,"VBrightness" );
   gtk_widget_ref( VBrightness );
@@ -636,7 +642,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VBrightness,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VBrightness ),GTK_POS_RIGHT );
 
-  VHueadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
+  VHueadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
   VHue=gtk_hscale_new( VHueadj );
   gtk_widget_set_name( VHue,"VHue" );
   gtk_widget_ref( VHue );
@@ -645,7 +651,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VHue,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VHue ),GTK_POS_RIGHT );
 
-  VSaturationadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
+  VSaturationadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
   VSaturation=gtk_hscale_new( VSaturationadj );
   gtk_widget_set_name( VSaturation,"VSaturation" );
   gtk_widget_ref( VSaturation );
@@ -784,6 +790,7 @@ void ShowEquConfig( void )
  gtk_entry_set_text( GTK_ENTRY( CEChannel6 ),gtkEquChannel6 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel6 ),FALSE );
 
  gtk_widget_show( EquConfig );
+ gtkSetLayer( EquConfig );
 }
 
 void HideEquConfig( void )

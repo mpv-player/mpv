@@ -73,6 +73,8 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
+extern void set_video_eq( int cap );
+
 static void set_window(int force_update,const vo_tune_info_t *info)
 {
     Window mRoot;
@@ -172,6 +174,13 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     
     mp_msg(MSGT_VO, MSGL_V, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	vo_dx, vo_dy, window_width, window_height);
+	
+    { // á.c.s. technologies (C) Pontscho
+     vidix_video_eq_t eq;
+     vo_vaa_t vo_vaa;
+     if ( vidix_control( VOCTRL_QUERY_VAA,&vo_vaa) != VO_NOTIMPL )
+       if ( vo_vaa.get_video_eq && vo_vaa.get_video_eq( &eq ) == 0 ) set_video_eq( eq.cap ); 
+    }
 
     /* mDrawColorKey: */
 
@@ -332,6 +341,7 @@ else
     }
 
     set_window(1,info);
+
     if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
     else     memset(&vtune,0,sizeof(vo_tune_info_t));
     XFlush(mDisplay);

@@ -37,9 +37,21 @@ static int mga_set_video_eq( const vidix_video_eq_t *info)
 
 	uint32_t luma;
 	float factor = 256.0 / 2000;
+	static int prev_br = 0;
+	static int prev_c = 0;
 
-	luma = ((int)(info->brightness * factor) << 16) +
-		   ((int)(info->contrast * factor) & 0xFFFF);
+        if ( info->cap & VEQ_CAP_BRIGHTNESS ) 
+	 {
+	  prev_br=info->brightness;
+	  if ( prev_br == 1000 ) prev_br=999; // i dunno why needed this line -- Pontscho
+	 }
+	if ( info->cap & VEQ_CAP_CONTRAST ) 
+	 { 
+	  prev_c=info->contrast; 
+	  if ( prev_c == 1000 ) prev_c=999; // i dunno why needed this line -- Pontscho
+	 }
+
+	luma = ((int)(prev_br * factor) << 16) + ((int)(prev_c * factor) & 0xFFFF);
 	if (ioctl(f,MGA_VID_SET_LUMA,luma)) {
 		perror("Error in mga_vid_config ioctl()");
                 printf("Could not set luma values in the kernel module!\n");

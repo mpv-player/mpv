@@ -192,7 +192,11 @@ void mplMainDraw( wsParamDisplay )
             image=fntRender( item->fontid,0,item->width,"%s",item->label );
             goto drawrenderedtext;
        case itDLabel:
-            image=fntRender( item->fontid,mplTimer%item->width,item->width,"%s",Translate( item->label ) );
+            {
+	     char * t = Translate( item->label );
+	     int    l = fntTextWidth( item->fontid,t );
+             image=fntRender( item->fontid,mplTimer%(l?l:item->width),item->width,"%s",t );
+	    }
 drawrenderedtext:
             if ( image )
              {
@@ -499,6 +503,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
  switch ( Button )
   {
    case wsPMMouseButton:
+	  gtkShow( evHidePopUpMenu,NULL );
           mplShowMenu( RX,RY );
           itemtype=itPRMButton;
           break;
@@ -507,6 +512,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           break;
 
    case wsPLMouseButton:
+	  gtkShow( evHidePopUpMenu,NULL );
           sx=X; sy=Y; boxMoved=1; itemtype=itPLMButton; // if move the main window
           SelectedItem=currentselected;
           if ( SelectedItem == -1 ) break; // yeees, i'm move the fucking window

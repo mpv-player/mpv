@@ -1437,6 +1437,8 @@ int vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
    uint32_t luma = 0;
    float factor = 256.0 / 2000;
+   static int32_t prev_br = 0;
+   static int32_t prev_c = 0;
 
     /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
@@ -1444,11 +1446,11 @@ int vixPlaybackSetEq( const vidix_video_eq_t * eq)
 	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
 	return(ENOTSUP);
     }
-    
-    if (eq->cap & VEQ_CAP_BRIGHTNESS)
-	luma += ((int)(eq->brightness * factor) << 16);
-    if (eq->cap & VEQ_CAP_CONTRAST)
-	luma += ((int)(eq->contrast * factor) & 0xFFFF);
+
+    if (eq->cap & VEQ_CAP_BRIGHTNESS) { prev_br=eq->brightness; if ( prev_br == 1000 ) prev_br=999; }
+    if (eq->cap & VEQ_CAP_CONTRAST) { prev_c=eq->contrast; if ( prev_c == 1000 ) prev_c=999; }
+
+    luma = ((int)(prev_br * factor) << 16) + ((int)(prev_c * factor) & 0xFFFF);
 
     regs.beslumactl = luma+0x80;
 
@@ -1471,8 +1473,8 @@ int vixPlaybackGetEq( vidix_video_eq_t * eq)
     regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
     luma = regs.beslumactl-0x80;
 
-    eq->brightness = (luma >> 16) * factor;
-    eq->contrast = (luma & 0xFFFF) * factor;
+    eq->brightness = (signed short int)(luma >> 16) * factor;
+    eq->contrast = (signed short int)(luma & 0xFFFF) * factor;
     eq->cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST;
 
     return(0);

@@ -71,14 +71,6 @@ static void vidix_query_vaa(vo_vaa_t *vaa)
   vaa->set_deint=vidix_set_deint;
 }
 
-extern int vo_gamma_brightness;
-extern int vo_gamma_saturation;
-extern int vo_gamma_contrast;
-extern int vo_gamma_hue;
-extern int vo_gamma_red_intensity;
-extern int vo_gamma_green_intensity;
-extern int vo_gamma_blue_intensity;
-
 static vidix_video_eq_t vid_eq;
 
 int vidix_start(void)

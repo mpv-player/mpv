@@ -90,6 +90,7 @@ typedef struct
 } tmp_sh_video_t;
 
 extern ao_functions_t * audio_out;
+extern vo_functions_t * video_out;
 
 void guiGetEvent( int type,char * arg )
 {
@@ -214,16 +215,6 @@ void guiGetEvent( int type,char * arg )
 	 btnModify( evSetBalance,guiIntfStruct.Balance );
 	}
 
-#if 0
-#warning video equalizer support disabled 
-	if ( gtkEnableVideoEqualizer )
-	 {
-	  gtkSet( gtkSetContrast,gtkContrast,NULL );
-	  gtkSet( gtkSetBrightness,gtkBrightness,NULL );
-	  gtkSet( gtkSetHue,gtkHue,NULL );
-	  gtkSet( gtkSetSaturation,gtkSaturation,NULL );
-	 }
-#endif
 	if ( gtkEnableAudioEqualizer )
 	 {
 	  equalizer_t eq;
@@ -266,7 +257,7 @@ void guiGetEvent( int type,char * arg )
 
 	if ( gtkEnableAudioEqualizer )
 	 {
-	  if ( ao_plugin_cfg.plugin_list ) { if ( !strstr( ao_plugin_cfg.plugin_list,"eq" ) )  gstrcat( &ao_plugin_cfg.plugin_list,"," ); }
+	  if ( ao_plugin_cfg.plugin_list ) { if ( !strstr( ao_plugin_cfg.plugin_list,"eq" ) )  gstrcat( &ao_plugin_cfg.plugin_list,",eq" ); }
 	    else gstrcat( &ao_plugin_cfg.plugin_list,"eq" );
 	 }
 	
@@ -282,15 +273,9 @@ void guiEventHandling( void )
  if ( !guiIntfStruct.Playing || guiIntfStruct.AudioOnly ) wsHandleEvents();
  gtkEventHandling();
  mplTimer=GetTimerMS() / 20;
-// if ( !( GetTimerMS()%2 ) ) 
 }
 
 // --- 
-
-float gtkContrast = 0.0f;
-float gtkBrightness = 0.0f;
-float gtkHue = 0.0f;
-float gtkSaturation = 0.0f;
 
 float gtkEquChannels[6][10];
 
@@ -323,7 +308,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
  switch ( cmd )
   {
 // --- handle playlist
-   case gtkAddPlItem: // add item to platlist
+   case gtkAddPlItem: // add item to playlist
 	if ( plList )
 	 {
 	  plItem * next = plList;
@@ -384,19 +369,15 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 // --- set equalizers
    case gtkSetContrast:
 	mp_cmd->id=MP_CMD_CONTRAST;   mp_cmd->name=strdup( "contrast" );
-	gtkContrast=fparam;
 	break;
    case gtkSetBrightness:
 	mp_cmd->id=MP_CMD_BRIGHTNESS; mp_cmd->name=strdup( "brightness" );
-	gtkBrightness=fparam;
 	break;
    case gtkSetHue:
 	mp_cmd->id=MP_CMD_HUE;        mp_cmd->name=strdup( "hue" );
-	gtkHue=fparam;
 	break;
    case gtkSetSaturation:
 	mp_cmd->id=MP_CMD_SATURATION; mp_cmd->name=strdup( "saturation" );
-	gtkSaturation=fparam;
 	break;
    case gtkSetEqualizer:
         if ( eq )
