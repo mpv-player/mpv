@@ -1,4 +1,4 @@
-.\" synced with 1.756
+.\" synced with 1.759
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "29 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "01 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5653,7 +5653,6 @@ gourmandes.
 .sp 1
 .RS
 huffyuv\ :
-.RE
 .PD 0
 .RSs
 .IPs "la passe 1"
@@ -6097,7 +6096,7 @@ intervalle sensé
 .TP
 .B tcplx_mask=<0.0\-1.0>
 masquage de la complexité temporelle (par défaut\ : 0.0 (désactivé))
-Imaginez une scène avec un oiseau y volant, tcplx_mask va diminuer les
+Imaginez une scène avec un oiseau y volant, tcplx_mask va augmenter les
 quantificateurs des macro-blocs décrivant l'oiseau (et donc réduit leur
 qualité) puisque l'oeil humain n'a normalement pas le temps de voir tous
 les détails de l'oiseau.
@@ -6117,7 +6116,7 @@ si aucun filtre de déblocage n'est utilisé pendant le décodage, ce qui
 n'est d'ailleurs pas une bonne idée.
 .br
 Imaginez une scène avec une pelouse (caractéristique d'une grande complexité
-spatiale), un ciel bleu et une maison, scplx_mask va diminuer les
+spatiale), un ciel bleu et une maison, scplx_mask va augmenter les
 quantificateurs des macro-blocs décrivant la pelouse (et donc réduit leur
 qualité), pour pouvoir distribuer plus de bits au ciel et à la maison.
 .I
@@ -7167,11 +7166,48 @@ facteur de quantification entre les trames P et B (par défaut\ : 2.0)
 .
 .TP
 .B pass=<1|2>
-Active le mode 2-passes.
-La première passe est celle qui récolte des statistiques sur la vidéo.
-Il est recommandé de toujours encoder en mode deux passe puisque cela
+Active le mode 2 ou 3-passes.
+Il est recommandé de toujours encoder en mode 2 ou 3 passes puisque cela
 permet une distribution plus adéquate des bits et améliore la qualité
 globale.
+.PD 0
+.RSs
+.IPs 1
+première passe
+.IPs 2
+seconde passe
+.IPs 3
+Nième passe (seconde et troisième passes de l'encodage trois passes)
+.RE
+.RS
+Voici comment cela fonctionne, et comment l'utiliser\ :
+.br
+La première passe (pass=1) écrit le fichier de statistiques.
+Vous devriez désactiver des options gourmandes en temps processeur.
+.br
+En mode deux passes, la seconde passe (pass=2) se base sur le fichier de
+stats pour allouer le bon nombre de bits aux trames (ratecontrol).
+.br
+En mode trois passes, la seconde passe (pass=3, non ce n'est pas une
+erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+par dessus.
+Peut-être que vous devriez sauver le fichier divx2pass.log avant si
+MEncoder peut être interrompu dans son cours.
+Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
+vraiment très gourmandes.
+.br
+La troisième passe (pass=3) fait la même chose que la seconde, à la
+différence près qu'elle dispose des stats de la deuxième passe pour mieux
+travailler.
+Vous pouvez utiliser toutes les options d'encodage, même les plus
+gourmandes.
+.I
+NOTE\ :
+MEncoder gérant x264 et son mode 3 passes depuis peu de temps, nous
+encourageons les utilisateurs à partager avec nous leurs expériences et
+leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
+de produisant des images de qualité.
+.REss
 .
 .TP
 .B qcomp=<0\-1>
