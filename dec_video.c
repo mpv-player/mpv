@@ -81,6 +81,13 @@ int divx_quality=0;
 #include "xacodec.h"
 #endif
 
+#ifdef USE_TV
+#include "libmpdemux/tv.h"
+
+extern int tv_param_on;
+extern tvi_handle_t *tv_handler;
+#endif
+
 #include "mmx_defs.h"
 
 void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
@@ -210,6 +217,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
 	return 1;
     }
 #endif
+
 #ifdef NEW_DECORE
 #ifdef DECORE_VERSION
 #if DECORE_VERSION >= 20011010
@@ -225,6 +233,33 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
     }
 #endif
 #endif
+#endif
+
+#ifdef USE_TV
+    
+    if (tv_param_on == 1)
+    {
+	if (!strcmp(item, "Brightness"))
+	{
+	    tv_set_color_options(tv_handler, TV_COLOR_BRIGHTNESS, value);
+	    return(1);
+	}
+	if (!strcmp(item, "Hue"))
+	{
+	    tv_set_color_options(tv_handler, TV_COLOR_HUE, value);
+	    return(1);
+	}
+	if (!strcmp(item, "Saturation"))
+	{
+	    tv_set_color_options(tv_handler, TV_COLOR_SATURATION, value);
+	    return(1);
+	}
+	if (!strcmp(item, "Contrast"))
+	{
+	    tv_set_color_options(tv_handler, TV_COLOR_CONTRAST, value);
+	    return(1);
+	}
+    }
 #endif
     return 0;
 }
