@@ -1,4 +1,4 @@
-.\" synced with 1.822
+.\" synced with 1.825
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2919,6 +2919,8 @@ i przechowuje j± w pliku (domy¶lnie: ./stream.yuv).
 Format jest taki sam jak ten stosowany przez mjpegtools, wiêc jest to przydatne
 je¶li chcesz poddaæ film obróbce przy pomocy tego pakietu.
 Obs³uguje formaty YV12, RGB (24 bpp) i BGR (24bpp).
+Mo¿esz tego u¿yæ z opcj± \-fixed-vo ¿eby po³±czyæ zbiory o tych samych
+wymiarach i ilo¶ci klatek na sekundê.
 .PD 0
 .RSs
 .IPs interlaced
@@ -3358,9 +3360,9 @@ dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 IDCT do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
-.IPs lowres=<numer>
+.IPs lowres=<numer>[,<s>]
 Dekoduje w niskiej rozdzielczo¶ci.
-Nie wszystkie kodeki obs³uguj± dekodowanie w niskiej czêstotliwo¶ci
+Nie wszystkie kodeki obs³uguj± dekodowanie w niskiej rozdzielczo¶ci
 i czêsto powoduje to pojawienie siê okropnych zniekszta³ceñ.
 Nie jest to ¿aden b³±d,
 a jedynie efekt uboczny nie dekodowania w pe³nej rozdzielczo¶ci.
@@ -3374,6 +3376,10 @@ a jedynie efekt uboczny nie dekodowania w pe³nej rozdzielczo¶ci.
 .br
 3: 1/8 rozdzielczo¶ci
 .REss
+.RS
+Je¶li podano <s> dekodowanie w niskiej rozdzielczo¶ci bêdzie zastosowane tylko
+je¶li szeroko¶æ filmu jest wiêsza lub równa <s>.
+.RE
 .IPs "sb=<liczba> (tylko MPEG-2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
 .IPs "st=<liczba> (tylko MPEG-2)"
@@ -7016,9 +7022,10 @@ Pozwala na okre¶lenie w³asnego wspó³czynnika proporcji piksela przez par_width
 i par_height.
 .RE
 .PD 1
-.br
+.RS
 .I INFORMACJA:
 Ogólnie ustawienie opcji aspect i autoaspect jest wystarczaj±ce.
+.RE
 .
 .TP
 .B par_width=<1\-255> (tylko z par=ext)
