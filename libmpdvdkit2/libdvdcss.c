@@ -117,6 +117,12 @@
 #define SYS_CYGWIN
 #endif
 
+#ifndef HAVE_MPLAYER
+ #include "get_path.c"
+#else
+ extern char * get_path( char * filename );
+#endif
+
 /**
  * \brief Symbol for version checks.
  *
@@ -390,7 +396,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
             goto nocache;
         }
 
-        i += sprintf( dvdcss->psz_cachefile + i, "/%s/", psz_data );
+        i += sprintf( dvdcss->psz_cachefile + i, "/%s", psz_data );
 #if !defined( WIN32 ) || defined( SYS_CYGWIN )
         i_ret = mkdir( dvdcss->psz_cachefile, 0755 );
 #else
@@ -402,6 +408,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
             dvdcss->psz_cachefile[0] = '\0';
             goto nocache;
         }
+        i += sprintf( dvdcss->psz_cachefile + i, "/");
 
         /* Pointer to the filename we will use. */
         dvdcss->psz_block = dvdcss->psz_cachefile + i;
