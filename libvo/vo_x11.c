@@ -473,22 +473,26 @@ if(swsContext){
   int newW= vo_dwidth&(~1);  // the swscaler should be able to handle odd sizes but something else doesnt seem to like it
   int newH= vo_dheight&(~1);
     
-  if(newH==0) newH=2;
   if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
-  if(newW<8) newW=8;
   
   if(image_width!=newW || image_height!=newH)
   {
     SwsContext *oldContext= swsContext;
-    image_width= newW;
-    image_height= newH;
     
-    freeMyXImage();
-    getMyXImage();
-
     swsContext= getSwsContextFromCmdLine(oldContext->srcW, oldContext->srcH, oldContext->srcFormat, 
-    					 image_width, image_height, out_format);
-    freeSwsContext(oldContext);
+    					 newW, newH, out_format);
+    if(swsContext)
+    {
+	image_width= newW;
+	image_height= newH;
+	freeMyXImage();
+	getMyXImage();
+	freeSwsContext(oldContext);
+    }    
+    else
+    {
+	swsContext= oldContext;
+    }
   }
   dstStride[0]=image_width*((bpp+7)/8);
   dstStride[1]=
@@ -500,7 +504,10 @@ if(swsContext){
   swScale(swsContext,src,stride,y,h,dst, dstStride);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
- yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
+ if(image_format==IMGFMT_YV12)
+   yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
+ else /* I420 & IYUV */
+   yuv2rgb( dst,src[0],src[2],src[1],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
 }
  return 0;
 }
