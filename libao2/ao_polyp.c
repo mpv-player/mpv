@@ -4,10 +4,10 @@
 #include <polyp/polyplib-error.h>
 #include <polyp/mainloop.h>
 
+#include "config.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
-#include "config.h"
 #include "mp_msg.h"
 
 #define	POLYP_CLIENT_NAME "MPlayer"

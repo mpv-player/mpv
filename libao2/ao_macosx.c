@@ -43,6 +43,7 @@
 #include <inttypes.h>
 #include <pthread.h>
 
+#include "config.h"
 #include "mp_msg.h"
 
 #include "audio_out.h"

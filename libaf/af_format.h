@@ -4,6 +4,10 @@
 #ifndef __af_format_h__
 #define __af_format_h__
 
+#ifndef MPLAYER_CONFIG_H
+#error af_format.h needs config.h
+#endif
+
 // Endianess
 #define AF_FORMAT_BE		(0<<0) // Big Endian
 #define AF_FORMAT_LE		(1<<0) // Little Endian
