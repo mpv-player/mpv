@@ -125,6 +125,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  vo_dx=( vo_screenwidth - d_width ) / 2;
  vo_dy=( vo_screenheight - d_height ) / 2;
+ geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
  vo_dwidth=d_width; vo_dheight=d_height;
  vo_mouse_autohide=1;
 
@@ -139,7 +140,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
   inited=1;
 
-  aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
+  aspect(&d_width,&d_height,A_NOZOOM);
 
 #ifdef HAVE_NEW_GUI
   if(use_gui)
