@@ -103,6 +103,9 @@ extern vo_functions_t video_out_dxr3;
 #ifdef HAVE_JPEG
 extern vo_functions_t video_out_jpeg;
 #endif
+#ifdef HAVE_GIF
+extern vo_functions_t video_out_gif89a;
+#endif
 #ifdef HAVE_VESA
 extern vo_functions_t video_out_vesa;
 #endif
@@ -169,6 +172,9 @@ vo_functions_t* video_out_drivers[] =
 #endif	
 #ifdef HAVE_JPEG
 	&video_out_jpeg,
+#endif
+#ifdef HAVE_GIF
+	&video_out_gif89a,
 #endif
         &video_out_null,
 //        &video_out_odivx,

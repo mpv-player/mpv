@@ -125,6 +125,7 @@ Optional features:
   --enable-gui           enable GUI [disable]
   --enable-png		 enable png support [autodetect]
   --enable-jpeg		 enable jpeg support [autodetect]
+  --enable-gif		 enable gif89a support [autodetect]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
@@ -768,6 +769,7 @@ _sdl=auto
 _nas=auto
 _png=auto
 _jpg=auto
+_gif=auto
 _gl=auto
 _ggi=auto
 _aa=auto
@@ -859,6 +861,8 @@ for ac_option do
   --disable-png)	_png=no		;;
   --enable-jpeg)	_jpg=yes	;;
   --disable-jpeg)	_jpg=no		;;
+  --enable-gif)	_gif=yes	;;
+  --disable-gif)	_gif=no		;;
   --enable-gl)		_gl=yes		;;
   --disable-gl)		_gl=no		;;
   --enable-ggi)		_ggi=yes	;;
@@ -2320,6 +2324,40 @@ else
   _mkf_jpg="no"
 fi
 
+echocheck "GIF89a support"
+if test "$_gif" = auto ; then
+  _gif=no
+cat > $TMPC << EOF
+#include <gif_lib.h>
+int main(void) {
+  return 0;
+}
+EOF
+    if cc_check -lungif ; then
+      if "$TMPO" >> "$TMPLOG" ; then
+        _gif=yes
+        _ld_gif="-lungif"
+      fi
+    elif cc_check -lgif ; then
+      if "$TMPO" >> "$TMPLOG" ; then
+        _gif=yes
+        _ld_gif="-lgif"
+      fi
+    fi
+fi
+echores "$_gif"
+
+if test "$_gif" = yes ; then
+  _def_gif='#define HAVE_GIF 1'
+  _vosrc="$_vosrc vo_gif89a.c"
+  _vomodules="gif89a $_vomodules"
+  _mkf_gif="yes"
+else
+  _def_gif='#undef HAVE_GIF'
+  _novomodules="gif89a $_novomodules"
+  _mkf_gif="no"
+fi
+
 
 if test "$_vesa" != no ; then
 echocheck "VESA support"
@@ -3618,6 +3656,7 @@ VO2 = $_vo2
 
 PNG = $_mkf_png
 JPEG = $_mkf_jpg
+GIF = $_mkf_gif
 
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
@@ -3635,6 +3674,7 @@ MLIB_INC = $_inc_mlib
 DVB_INC = $_inc_dvb
 PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpg
+GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
@@ -3969,6 +4009,9 @@ $_def_png
 
 /* enable JPEG support */
 $_def_jpg
+
+/* enable GIF support */
+$_def_gif
 
 /* libmad support */
 $_def_mad
