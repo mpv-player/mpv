@@ -1,4 +1,4 @@
-.\" synced with 1.914
+.\" synced with 1.915
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -612,7 +612,7 @@ Afficher toutes les commandes pouvant être attachées.
 .IPs js-dev
 Spécifier le périphérique joystick à utiliser (par défaut\ :
 /dev/\:input/\:js0).
-.IPs file
+.IPs file=<nom_fichier>
 Lit les commandes depuis un fichier donné.
 Utile surtout avec une FIFO.
 .br
@@ -8520,6 +8520,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+.br
 Peut-être vous aurez à ajuster un peu la valeur de pan (par c-à-d la
 multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
 .
