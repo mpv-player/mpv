@@ -3691,40 +3691,54 @@ Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
 Gibt zusätzliche Parameter für die Decodierung mti XviD an.
 .PD 0
 .RSs
+.IPs deblock-chroma
+Aktiviert den internen Postprocessing-Filter von XviD: Chroma-Deblock-Filter.
+Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
+.IPs deblock-luma
+Aktiviert den internen Postprocessing-Filter von XviD: Luma-Deblock-Filter.
+Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
 .IPs dr2\ \ 
 Aktiviert das direkte Rendern mit Methode 2.
 .IPs nodr2
 Deaktiviert das direkte Rendern mit Methode 2.
+.IPs filmeffect
+Aktiviert den internen Film-Körnungs-Effekt von XviD.
+Dieser fügt einem Film künstlich Körnung hinzu.
+Dies kann die wahrgenommene Qualität erhöhen, während sich die wirkliche
+Qualität verschlechtert.
+Siehe auch \-vf noise.
 .RE
 .PD 1
 .
 .TP
-.B \-xy <x>
+.B \-xy <Wert>
 .PD 0
 .RSs
-.IPs "x<=8"
-Skaliert das Bild um den Faktor <x>.
-.IPs "x>8\ "
-Setzt die Bildbreite auf <x> und berechnet die Höhe so, dass das urpsrüngliche
-Höhen\-/\:Breitenverhältnis beibehalten wird.
+.IPs Wert<=8
+Skaliert das Bild um den Faktor <Wert>.
+.IPs Wert>8
+Setzt die Bildbreite auf <Wert> und berechnet die Höhe so, dass das
+ursprüngliche Höhen-/\:Breitenverhältnis beibehalten wird.
 .RE
 .PD 1
 .
 .TP
 .B \-y <y> (nur bei MPlayer)
-Skaliert das Bild auf eine Höhe von x (falls Software\-/\:Hardwareskalierung
-verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
+Skaliert das Bild auf eine Höhe von <y> (falls Software-/\:Hardwareskalierung
+verfügbar ist).
+Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
+.
 .TP
-.B \-zoom \ 
-Lässt Softwareskalierung zu, wo sie verfügbar ist. Kann benutzt werden,
-um Skalierung mit \-vf scale zu erzwingen.
-
-.I ANMERKUNG:
+.B \-zoom\ \ 
+Lässt Softwareskalierung zu, wo sie verfügbar ist.
+Kann benutzt werden, um Skalierung mit \-vf scale zu erzwingen.
 .br
+.I ANMERKUNG:
 \-vf scale IGNORIERT die Optionen \-x / \-y / \-xy / \-fs / \-aspect, wenn
 \-zoom nicht angegeben wird.
-
-
+.
+.
+.
 .SH "ENCODING-OPTIONEN (NUR BEI MENCODER)"
 .TP
 .B \-audio-density <1\-50>
