@@ -1,0 +1,90 @@
+How to report bugs?
+~~~~~~~~~~~~~~~~~~~
+First read DOCS/BUGS, and other docs. If your problem isn't
+known or isn't solved by our instructions, then report the bug:
+
+Where?
+======
+Subscribe to the mplayer-users mailing list:
+   http://lists.sourceforge.net/lists/listinfo/mplayer-users
+and send your bugreport to:
+   mplayer-users@lists.sourceforge.net
+We won't CC: so please subscribe!!!
+
+Don't send bugreports private, directly to author's address!!!
+We are working together on code, so everyone is interested in it.
+Btw many times other users know the solution (system config probs,
+bad drivers etc), even when we think it's a bug in our code.
+
+Please describe your problem in details, examples etc, and don't
+forget to include these:
+
+What?
+=====
+
+1. The system info what we always want:
+- linux distribution
+  for example: RedHat 7.1 / Slackware 7.0 + devel packs from 7.1 ...
+- kernel version:
+  uname -a
+- libc version:
+  ls -l /lib/libc[.-]*
+- X version (you should know that)
+- gcc and ld version:
+  gcc -v
+  ld -v
+
+2. Hardware & drivers:
+- CPU info:
+  cat /proc/cpuinfo
+- video card manufacturer and model
+  examples:
+    ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
+    Matrox G400 DH 32MB SGRAM
+- video driver type&version
+  examples:
+    X built-in driver
+    nvidia 0.9.623
+    Utah-GLX CVS 2001-02-17
+    DRI from X 4.0.3
+- sound card type & driver
+  examples:
+    Creative SBLive! Gold with OSS driver from oss.creative.com
+    Creative SB16 with OSS drivers of kernel
+    GUS PnP with ALSA OSS emulation
+- if you are unsure, attach output of lspci -v
+
+For compiling problems/errors:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3. output of configure/make:
+     make distclean
+     ./configure &>config.log
+     ./make &>make.log
+4. these files:
+     config.h
+     config.mak
+     libvo/config.mak
+
+For playback problems:
+~~~~~~~~~~~~~~~~~~~~~~
+3. Output of mplayer at verbose level 1 (-v)
+  mplayer -v [options] filename &> mplayer.log
+  
+4. If the problem is specific to one or a few files,
+  then please upload that file to:
+    ftp://thot.banki.hu/MPlayer/incoming/
+  Usually first 1-5 MB of the file is enough to reproduce
+  the problem, but first you should try it:
+    dd if=yourfile of=smallfile bs=1k count=1024
+  (it will cut first 1MB of 'yourfile' and save to 'smallfile')
+  Then try again on this small file, and if bug still exists
+  then it's enough to upload this small file.
+  NEVER send such files via mail! Upload it, and send only
+  the path/filename of the file on the FTP.
+  If the file is accessible on the net, then sending the
+  _exact_ URL is enough!
+  
+In general:
+  If something is big (logs etc) then it's better to upload to the ftp
+  (gzipped), and include only path/filename in the bugreport!
+
