@@ -552,15 +552,12 @@ decoders:
 <itemizedlist>
 <title>The most important audio codecs above all:</title>
 <listitem><simpara>
-  MPEG layer 2 (MP2), and layer 3 (MP3) audio (<emphasis role="bold">native</emphasis>
+  MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">native</emphasis>
   code, with MMX/SSE/3DNow! optimization)
   </simpara></listitem>
 <listitem><simpara>
-  MPEG layer 1 audio (<emphasis role="bold">native</emphasis> code, with libavcodec)
-  </simpara></listitem>
-<listitem><simpara>
-  Windows Media Audio v1, v2 (<emphasis role="bold">native</emphasis> code, with
-  libavcodec)
+  Windows Media Audio 7 and 8 (aka WMAv1 and WMAv2) (<emphasis role="bold">native</emphasis> code, with
+  <link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (using DMO DLL)
@@ -571,6 +568,9 @@ decoders:
   </simpara></listitem>
 <listitem><simpara>
   AC3 passing through soundcard hardware
+  </simpara></listitem>
+<listitem><simpara>
+  AAC
   </simpara></listitem>
 <listitem><simpara>
   Ogg Vorbis audio codec (<emphasis role="bold">native</emphasis> library)
@@ -590,9 +590,6 @@ decoders:
 <listitem><simpara>
   alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
   audio codecs
-  </simpara></listitem>
-<listitem><simpara>
-  AAC
   </simpara></listitem>
 </itemizedlist>
 
@@ -653,9 +650,11 @@ MPEG decoder cards.
 <title>libmad support</title>
 
 <para>
-<ulink url="http://mad.sourceforge.net">libmad</ulink> is a multiplatform
+<ulink url="http://mad.sourceforge.net">libmad</ulink> is a multiplatform,
+integer (internally 24bit PCM) only
 MPEG audio decoding library. It does not handle broken files well, and it
-sometimes has problems with seeking.
+sometimes has problems with seeking, but it may perform better on FPU-less
+(such as <link linked="arm">ARM</link>) platform than mp3lib.
 </para>
 
 <para>
