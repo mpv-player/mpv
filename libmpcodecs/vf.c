@@ -44,6 +44,7 @@ extern vf_info_t vf_info_eq2;
 extern vf_info_t vf_info_halfpack;
 extern vf_info_t vf_info_dint;
 extern vf_info_t vf_info_1bpp;
+extern vf_info_t vf_info_2xsai;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -81,6 +82,7 @@ static vf_info_t* filter_list[]={
     &vf_info_halfpack,
     &vf_info_dint,
     &vf_info_1bpp,
+    &vf_info_2xsai,
     NULL
 };
 
