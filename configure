@@ -209,7 +209,7 @@ Audio:
   --disable-mad          disable mad audio support [autodetect]
 
 Miscellaneous features:
-  --cc                   use this C compiler to build MPlayer [gcc]
+  --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --language=xx          select a language [en]
                          (Available: $LANGUAGES)
