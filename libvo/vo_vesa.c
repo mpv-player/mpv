@@ -701,10 +701,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
 			return -1;
 		}
+		dstBpp = video_mode_info.BitsPerPixel;
 		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,dstBpp);
-		dstBpp = video_mode_info.BitsPerPixel;
 		if(subdev_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
 		if(use_scaler || fs_mode)
 		{
