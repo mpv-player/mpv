@@ -16,7 +16,7 @@ typedef struct {
     raw_file* pic_a[16];
     raw_file* pic_b[16];
     short font[65536];
-    short start[65536];
+    int start[65536];   // short is not enough for unicode fonts
     short width[65536];
 } font_desc_t;
 

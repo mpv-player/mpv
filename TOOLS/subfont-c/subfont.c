@@ -111,7 +111,15 @@ void write_header(FILE *f) {
     static unsigned char   header[800] = "mhwanh";
     int i;
     header[7] = 4;
+    if (width < 0x10000) { // are two bytes enough for the width?
     header[8] = width>>8;	header[9] = (unsigned char)width;
+    } else {               // store width using 4 bytes at the end of the header
+	    header[8] = header[9] = 0;
+	    header[28] = (width >> 030) & 0xFF;
+	    header[29] = (width >> 020) & 0xFF;
+	    header[30] = (width >> 010) & 0xFF;
+	    header[31] = (width       ) & 0xFF;
+    }
     header[10] = height>>8;	header[11] = (unsigned char)height;
     header[12] = colors>>8;	header[13] = (unsigned char)colors;
     for (i = 32; i<800; ++i) header[i] = (i-32)/3;

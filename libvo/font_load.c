@@ -22,6 +22,8 @@ raw_file* load_raw(char *name,int verbose){
     raw->w=head[8]*256+head[9];
     raw->h=head[10]*256+head[11];
     raw->c=head[12]*256+head[13];
+    if(raw->w == 0) // 2 bytes were not enough for the width... read 4 bytes from the end of the header
+    	raw->w = ((head[28]*0x100 + head[29])*0x100 + head[30])*0x100 + head[31];
     if(raw->c>256) return NULL;                 // too many colors!?
     if(verbose) printf("RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
     if(raw->c){
