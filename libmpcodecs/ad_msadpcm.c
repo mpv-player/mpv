@@ -43,7 +43,7 @@ static int ms_adapt_coeff2[] =
   0, -256, 0, 64, 0, -208, -232
 };
 
-#define MS_ADPCM_PREAMBLE_SIZE 7
+#define MS_ADPCM_PREAMBLE_SIZE 6
 
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 #define LE_32(x) (le2me_32(*(unsigned int *)(x)))
@@ -157,6 +157,17 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     sample2[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
     SE_16BIT(sample2[1]);
+  }
+
+  if (channels == 1)
+  {
+    output[out_ptr++] = sample2[0];
+    output[out_ptr++] = sample1[0];
+  } else {
+    output[out_ptr++] = sample2[0];
+    output[out_ptr++] = sample2[1];
+    output[out_ptr++] = sample1[0];
+    output[out_ptr++] = sample1[1];
   }
 
   while (stream_ptr < block_size)
