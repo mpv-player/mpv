@@ -145,7 +145,7 @@ Optional features:
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
-  --disable-runtime-cpudetection    disable runtime CPU detection [enable]
+  --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
   --disable-dvdnav       Disable dvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit support [autodetect]
