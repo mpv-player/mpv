@@ -343,11 +343,11 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     phases, numphases, default, X, Y, largeur, hauteur, message</code><br>
     <code>vpotmeter = button, blargeur, bhauteur, phases, numphases, default, X, Y,
     largeur, hauteur, message</code></b></a></dt>
-  <dd>Place un podomètre horizontal de taille <code>largeur</code> * <code>hauteur</code>
-    a la position <code>X</code>,<code>Y</code>. L'image peut être divisée en
-    différentes parties pour les différentes phases du podomètre
+  <dd>Place un podomètre horizontal (hpotmeter) ou vertical (vpotmeter) de taille 
+    <code>largeur</code> * <code>hauteur</code> a la position <code>X</code>,<code>Y</code>. 
+    L'image peut être divisée en différentes parties pour les différentes phases du podomètre
     (par exemple, vous pouvez en avoir un pour le contrôle du volume qui passe du vert
-    au rouge quand sa valeur passe du minimum au maximum.) hpotmeter peut posséder un
+    au rouge quand sa valeur passe du minimum au maximum.). <code>hpotmeter</code> peut posséder un
     bouton qui sera glissé horizontalement.
 
     <div>Les paramètres sont :</div>
@@ -484,7 +484,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     </table>
 
     <em class="note"><b>Note:</b> les variables <kbd>$a</kbd>, <kbd>$T</kbd>, 
-    <kbd>$p</kbd>, <kbd>$s</kbd> et <kbd>$e</kbd> retournent toutres des 
+    <kbd>$p</kbd>, <kbd>$s</kbd> et <kbd>$e</kbd> retournent toutes des 
     caractères pouvant s'afficher comme des symboles spéciaux (par exemple, 
     "e" est le symbole de pause qui ressemble généralement à <code>||</code>). 
     Vous pouvez avoir une police pour les caractères normaux et une autre pour 
@@ -502,7 +502,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
   <dt><a name="sub.base"><b>base = <code>image, x, y, largeur, hauteur</code></b>
     </a></dt>
   <dd>L'image qui s'affichera dans la fenêtre.
-    La fenêtre appara&icirc;tra à la position <code>x</code>,<code>y</code>
+    La fenêtre apparaîtra à la position <code>x</code>,<code>y</code>
     sur l'écran (<code>0,0</code> est le coin supérieur gauche). Vous pouvez spécifier 
     <code>-1</code> pour centre et <code>-2</code> pour droite. La fenêtre prendra 
     la taille de l'image. <code>largeur</code> et <code>hauteur</code> donnent la taille de la fenêtre; ces
