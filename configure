@@ -4242,7 +4242,7 @@ fi
 if test "$_theora" = yes ; then
   _def_theora='#define HAVE_OGGTHEORA 1'
   _codecmodules="libtheora $_codecmodules"
-  _ld_theora="-ltheora"
+  _ld_theora="-ltheora -logg"
 else
   _def_theora='#undef HAVE_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
