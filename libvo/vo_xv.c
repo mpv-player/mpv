@@ -282,6 +282,10 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 }
 
+extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
+			int w,int h, unsigned char* src, unsigned char *srca,
+			int stride));
+
 static void flip_page(void)
 {
  vo_draw_text(image_width,image_height,draw_alpha);

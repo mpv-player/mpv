@@ -445,7 +445,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		priv->windowsize.w = d_width;
 	  	priv->windowsize.h = d_height;
-          	if(priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags))
+          	if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);
 	  break;	
 	  case 0x02:
@@ -709,6 +709,10 @@ static void check_events (void)
  *   params : mode == index of the desired fullscreen mode
  *  returns : doesn't return
  **/
+
+extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
+			int w,int h, unsigned char* src, unsigned char *srca,
+			int stride));
 
 static void flip_page (void)
 {

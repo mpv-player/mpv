@@ -152,7 +152,7 @@ enc_frame.bitstream=buffer;
 enc_frame.length=0;
 encore(0x123,0,&enc_frame,&enc_result);
 
-printf("coded length: %d  \n",enc_frame.length);
+printf("coded length: %ld  \n",enc_frame.length);
 
 if(encode_name){
   AVIINDEXENTRY i;

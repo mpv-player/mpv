@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <png.h>
 //#include "/usr/include/png.h"
@@ -146,7 +147,7 @@ struct pngdata create_png (char * fname)
     
     png.fp = fopen (fname, "wb");
     if (png.fp == NULL) {
-	printf("\nPNG Error opening %s for writing!\n");
+	printf("\nPNG Error opening %s for writing!\n", strerror(errno));
        	png.status = ERROR;
        	return png;
     }	    

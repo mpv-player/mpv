@@ -281,7 +281,7 @@ static uint32_t query_format( uint32_t format )
  printf("vo_dga: query_format\n");
 
  if( !vo_init() ) return 0; // Can't open X11
- printf("Format: %lx\n", format);
+ printf("Format: %lx\n", (unsigned long) format);
 
  if( format==IMGFMT_YV12 ) return 1;
  if( ( format&IMGFMT_BGR_MASK )==IMGFMT_BGR && 
@@ -341,7 +341,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vo_dga_src_height = height;
   vo_dga_bpp = (vo_depthonscreen+7) >> 3;
 
-  printf("vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n", 
+  printf("vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %p, bpp: %d\n", 
           vo_dga_width, vo_dga_vp_width, 
           vo_dga_vp_height, vo_depthonscreen, vo_dga_base,
           vo_dga_bpp);

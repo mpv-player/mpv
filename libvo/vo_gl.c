@@ -79,7 +79,7 @@ static uint32_t image_bytes;
 static uint32_t texture_width;
 static uint32_t texture_height;
 
-static resize(int x,int y){
+static void resize(int x,int y){
   printf("Resize: %dx%d\n",x,y);
   glViewport( 0, 0, x, y );
 

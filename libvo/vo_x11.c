@@ -319,7 +319,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
   bpp=myximage->bits_per_pixel;
 
-  fprintf( stderr,"X11 color mask:  R:%X  G:%X  B:%X\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
+  fprintf( stderr,"X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
   // If we have blue in the lowest bit then obviously RGB
   mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_RGB : MODE_BGR;
@@ -387,6 +387,19 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #endif
 }
 
+extern void vo_draw_alpha_rgb24(int w,int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb32(int w,int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb15(int w,int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb16(int w,int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     switch(bpp){
         case 24: 
@@ -405,6 +418,9 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
+extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0,
+			int w,int h, unsigned char* src, unsigned char *srca,
+			int stride));
 
 static void flip_page( void ){
     vo_draw_text(image_width,image_height,draw_alpha);
