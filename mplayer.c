@@ -74,7 +74,9 @@ XMM xmm;
 XMM_PluginSound *pSound=NULL;
 #endif
 
+#ifdef HAVE_FBDEV
 extern char *fb_dev_name;
+#endif
 
 extern int vo_screenwidth;
 
