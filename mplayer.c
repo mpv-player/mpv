@@ -1890,7 +1890,8 @@ switch(file_format){
 //    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
 //       rel_seek_secs,rel_seek_packs,rel_seek_bytes);
     newpos=demuxer->filepos+rel_seek_bytes;
-    if(newpos<0) newpos=0;
+    if(newpos<0 || newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+    printf("\r -- asf: newpos=%d -- \n",newpos);
     stream_seek(demuxer->stream,newpos);
   }
   break;
