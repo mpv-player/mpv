@@ -67,22 +67,21 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
 
   if(save) {
     for(sl = 0; save[sl].opt != NULL; sl++){
-      // Check to not allocate the same arg two times
+      // Check to not save the same arg two times
       if(save[sl].opt == conf && (save[sl].opt_name == NULL || strcasecmp(save[sl].opt_name,opt) == 0))
 	break;
     }
-    
-  }
-  if(save == NULL || save[sl].opt == NULL) {
-    save = (config_save_t*)realloc(save,(sl+2)*sizeof(config_save_t));
-    if(save == NULL) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Can't allocate %d bytes of memory : %s\n",(sl+2)*sizeof(config_save_t),strerror(errno));
+    if(save[sl].opt)
       return;
-    }
-    memset(&save[sl],0,2*sizeof(config_save_t));
-    save[sl].opt = conf;
   }
 
+  save = (config_save_t*)realloc(save,(sl+2)*sizeof(config_save_t));
+  if(save == NULL) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Can't allocate %d bytes of memory : %s\n",(sl+2)*sizeof(config_save_t),strerror(errno));
+    return;
+  }
+  memset(&save[sl],0,2*sizeof(config_save_t));
+  save[sl].opt = conf;
   
   switch(conf->type) {
   case CONF_TYPE_FLAG :
@@ -323,6 +322,69 @@ static int config_is_entry_option(m_config_t *config, char *opt, char *param) {
       entry = play_tree_new();
       play_tree_add_file(entry,s);
       free(s);
+    } else if(strcasecmp(opt,"tv") == 0) {
+      char *s,*pr,*prs;
+      char *ps,*pe,*channel=NULL;
+      char *as;
+      int on=0;
+      if(!param)
+	return ERR_MISSING_PARAM;
+      ps = param;
+      pe = strchr(param,':');
+      pr = prs = (char*)malloc((strlen(param)+1)*sizeof(char));
+      pr[0] = '\0';
+      while(ps) {
+	if(!pe)
+	  pe = ps + strlen(ps);
+
+	as = strchr(ps,'=');
+	if(as && as[1] != '\0' && pe-as > 0)
+	  as++;
+	else
+	  as = NULL;
+	if( !as && pe-ps == 2 &&  strncasecmp("on",ps,2) == 0 )
+	  on = 1;
+	else if(as  && as-ps == 8  && strncasecmp("channel",ps,6) == 0 && pe-as > 0) {
+	  channel = (char*)realloc(channel,(pe-as+1)*sizeof(char));
+	  strncpy(channel,as,pe-as);
+	  channel[pe-as] = '\0';
+	} else if(pe-ps > 0) {
+	  if(prs != pr) {
+	    prs[0] = ':';
+	    prs++;
+	  }
+	  strncpy(prs,ps,pe-ps);
+	  prs += pe-ps;
+	  prs[0] = '\0';
+	}
+
+	if(pe[0] != '\0') {
+	  ps = pe+1;
+	  pe = strchr(ps,':');
+	} else
+	  ps = NULL;
+      }
+
+      if(on) {
+	int l=5;
+	
+	if(channel)
+	  l += strlen(channel);
+	s = (char*) malloc((l+1)*sizeof(char));
+	if(channel)
+	  sprintf(s,"tv://%s",channel);
+	else
+	  sprintf(s,"tv://");
+	entry = play_tree_new();
+	play_tree_add_file(entry,s);
+	if(strlen(pr) > 0)
+	  play_tree_set_param(entry,"tv",pr);
+	free(s);
+      }
+      free(pr);
+      if(channel)
+	free(channel);
+	  
     }
   }
 
@@ -394,7 +456,8 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 	  return ret;
 	else
 	  ret = -1;
-	if(! IS_RUNNING(config) && ! IS_GLOBAL(config) && ! (conf[i].flags & CONF_GLOBAL) )
+	if(! IS_RUNNING(config) && ! IS_GLOBAL(config) && 
+	   ! (conf[i].flags & CONF_GLOBAL)  && conf[i].type != CONF_TYPE_SUBCONFIG  )
 	  m_config_push(config);
 	if( !(conf[i].flags & CONF_NOSAVE) && ! (conf[i].flags & CONF_GLOBAL) )
 	  m_config_save_option(config,&conf[i],opt,param);
@@ -560,7 +623,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			sublist[0] = subconf;
 			for (subconf_optnr = 0; subconf[subconf_optnr].name != NULL; subconf_optnr++)
 			    /* NOTHING */;
-
+			config->sub_conf = opt;
 			token = strtok(p, (char *)&(":"));
 			while(token)
 			{
@@ -590,7 +653,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			    }
 			    token = strtok(NULL, (char *)&(":"));
 			}
-
+			config->sub_conf = NULL;
 			free(subparam);
 			free(subopt);
 			free(p);
@@ -605,15 +668,23 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			break;
 	}
 out:
-	if(ret >= 0 && ! IS_RUNNING(config) && ! IS_GLOBAL(config) && ! (conf[i].flags & CONF_GLOBAL)) {
+	if(ret >= 0 && ! IS_RUNNING(config) && ! IS_GLOBAL(config) && ! (conf[i].flags & CONF_GLOBAL) && conf[i].type != CONF_TYPE_SUBCONFIG ) {
 	  play_tree_t* dest = config->last_entry ? config->last_entry : config->last_parent;
+	  char* o;
 #ifdef MP_DEBUG
 	  assert(dest != NULL);
 #endif
+	  if(config->sub_conf) {
+	    o = (char*)malloc((strlen(config->sub_conf) + 1 + strlen(opt) + 1)*sizeof(char));
+	    sprintf(o,"%s:%s",config->sub_conf,opt);
+	  } else
+	    o =strdup(opt);
+
 	  if(ret == 0)
-	    play_tree_set_param(dest,opt,NULL);
+	    play_tree_set_param(dest,o,NULL);
 	  else if(ret > 0)
-	    play_tree_set_param(dest,opt,param);
+	    play_tree_set_param(dest,o,param);
+	  free(o);
 	  m_config_pop(config); 
 	}
 	return ret;
@@ -624,13 +695,34 @@ err_missing_param:
 }
 
 int m_config_set_option(m_config_t *config,char *opt, char *param) {
-
+  char *e;
 #ifdef MP_DEBUG
   assert(config != NULL);
   assert(config->opt_list != NULL);
   assert(opt != NULL);
 #endif
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting option %s=%s\n",opt,param);
+  e = strchr(opt,':');
+  if(e && e[1] != '\0') {
+    int ret;
+    config_t* opt_list[] = { NULL, NULL };
+    char* s = (char*)malloc((e-opt+1)*sizeof(char));
+    strncpy(s,opt,e-opt);
+    s[e-opt] = '\0';
+    opt_list[0] = m_config_get_option_ptr(config,s);
+    if(!opt_list[0]) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR,"m_config_set_option %s=%s : no %s subconfig\n",opt,param,s);
+      free(s);
+      return ERR_NOT_AN_OPTION;
+    }
+    e++;
+    s = (char*)realloc(s,strlen(e) + 1);
+    strcpy(s,e);
+    ret = config_read_option(config,opt_list,s,param);
+    free(s);
+    return ret;
+  }
+
   return config_read_option(config,config->opt_list,opt,param);
 }
 
@@ -942,7 +1034,7 @@ err_out:
 	return -1;
 }
 
-void
+int
 m_config_register_options(m_config_t *config,config_t *args) {
   int list_len = 0;
   config_t** conf_list = config->opt_list;
@@ -960,26 +1052,42 @@ m_config_register_options(m_config_t *config,config_t *args) {
   conf_list = (config_t**)realloc(conf_list,sizeof(struct conf*)*(list_len+2));
   if(conf_list == NULL) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Can't allocate %d bytes of memory : %s\n",sizeof(struct conf*)*(list_len+2),strerror(errno));
-    return;
+    return 0;
   }
   conf_list[list_len] = args;
   conf_list[list_len+1] = NULL;
 
   config->opt_list = conf_list;
+
+  return 1;
 }
 
 config_t*
 m_config_get_option(m_config_t *config, char* arg) {
   int i,j;
+  char *e;
   config_t *conf;
   config_t **conf_list;
+  config_t* cl[] = { NULL, NULL };
 
 #ifdef MP_DEBUG
   assert(config != NULL);
   assert(arg != NULL);
 #endif
 
-  conf_list = config->opt_list;
+  e = strchr(arg,':');
+
+  if(e) {
+    char *s;
+    s = (char*)malloc((e-arg+1)*sizeof(char));
+    strncpy(s,arg,e-arg);
+    s[e-arg] = '\0';
+    cl[0] = m_config_get_option(config,s);
+    conf_list = cl;
+    free(s);
+  } else
+    conf_list = config->opt_list;
+
   if(conf_list) {
     for(j = 0 ; conf_list[j] != NULL ; j++) {
       conf = conf_list[j];
@@ -994,20 +1102,122 @@ m_config_get_option(m_config_t *config, char* arg) {
 
 void*
 m_config_get_option_ptr(m_config_t *config, char* arg) {
-  config_t* conf = m_config_get_option(config,arg);
+  config_t* conf;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  conf = m_config_get_option(config,arg);
   if(!conf) return NULL;
   return conf->p;
+}
+
+int
+m_config_get_int (m_config_t *config, char* arg,int* err_ret) {
+  int *ret;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  ret = m_config_get_option_ptr(config,arg);
+  if(err_ret)
+    *err_ret = 0;
+  if(!ret) {
+    if(err_ret)
+      *err_ret = 1;
+    return -1;
+  } else
+    return (*ret);
+}
+
+float
+m_config_get_float (m_config_t *config, char* arg,int* err_ret) {
+  float *ret;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  ret = m_config_get_option_ptr(config,arg);
+  if(err_ret)
+    *err_ret = 0;
+  if(!ret) {
+    if(err_ret)
+      *err_ret = 1;
+    return -1;
+  } else
+    return (*ret);
 }
 
 #define AS_INT(c) (*((int*)c->p))
 
 int
+m_config_set_int(m_config_t *config, char* arg,int val) {
+  config_t* opt;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  opt = m_config_get_option(config,arg);
+
+  if(!opt || opt->type != CONF_TYPE_INT)
+    return ERR_NOT_AN_OPTION;
+
+  if(opt->flags & CONF_MIN && val < opt->min)
+    return ERR_OUT_OF_RANGE;
+  if(opt->flags & CONF_MAX && val > opt->max)
+    return ERR_OUT_OF_RANGE;
+
+  m_config_save_option(config,opt,arg,NULL);
+  AS_INT(opt) = val;
+
+  return 1;
+}
+
+int
+m_config_set_float(m_config_t *config, char* arg,float val) {
+  config_t* opt;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  opt = m_config_get_option(config,arg);
+
+  if(!opt || opt->type != CONF_TYPE_FLOAT)
+    return ERR_NOT_AN_OPTION;
+
+  if(opt->flags & CONF_MIN && val < opt->min)
+    return ERR_OUT_OF_RANGE;
+  if(opt->flags & CONF_MAX && val > opt->max)
+    return ERR_OUT_OF_RANGE;
+
+  m_config_save_option(config,opt,arg,NULL);
+  *((float*)opt->p) = val;
+
+  return 1;
+}
+
+
+int
 m_config_switch_flag(m_config_t *config, char* opt) {
   config_t *conf;
-  
+ 
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(opt != NULL);
+#endif
+ 
   conf = m_config_get_option(config,opt);
-  if(!conf) return 0;
-  if(conf->type != CONF_TYPE_FLAG) return 0;
+  if(!conf || conf->type != CONF_TYPE_FLAG) return 0;
   if( AS_INT(conf) == conf->min) AS_INT(conf) = conf->max;
   else if(AS_INT(conf) == conf->max) AS_INT(conf) = conf->min;
   else return 0;
@@ -1015,12 +1225,67 @@ m_config_switch_flag(m_config_t *config, char* opt) {
   return 1;
 }
     
-void
-m_config_set_flag(m_config_t *config, char* opt, int max) {
+int
+m_config_set_flag(m_config_t *config, char* opt, int state) {
   config_t *conf;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(opt != NULL);
+#endif
+
   conf = m_config_get_option(config,opt);
-  if(!conf) return;
-  if(conf->type != CONF_TYPE_FLAG) return;
-  if(max) AS_INT(conf) = conf->max;
+  if(!conf || conf->type != CONF_TYPE_FLAG) return 0;
+  if(state) AS_INT(conf) = conf->max;
   else AS_INT(conf) = conf->min;
+  return 1;
 }
+
+int
+m_config_get_flag(m_config_t *config, char* opt) {
+  config_t *conf;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(opt != NULL);
+#endif
+
+  conf = m_config_get_option(config,opt);
+  if(!conf || conf->type != CONF_TYPE_FLAG) return -1;
+  if(AS_INT(conf) == conf->max)
+    return 1;
+  else if(AS_INT(conf) == conf->min)
+    return 0;
+  else
+    return -1;
+}
+
+int m_config_is_option_set(m_config_t *config, char* arg) {
+  config_t* opt;
+  config_save_t* save;
+  int l,i;
+
+#ifdef MP_DEBUG
+  assert(config != NULL);
+  assert(arg != NULL);
+#endif
+
+  opt = m_config_get_option(config,arg);
+
+  if(!opt) 
+    return -1;
+
+  for(l = config->cs_level ; l >= 0 ; l--) {
+    save = config->config_stack[l];
+    if(!save) 
+      continue;
+    for(i = 0 ; save[i].opt != NULL ; i++) {
+      if(save[i].opt == opt)
+	return 1;
+    }
+  }
+
+  return 0;
+}
+
+#undef AS_INT

@@ -403,8 +403,9 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
 
   
   for(n = 0; pt->params[n].name != NULL ; n++) {
-    if(m_config_set_option(iter->config,pt->params[n].name,pt->params[n].value) < 0) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while setting option '%s' with value '%s'\n",
+    int e;
+    if((e = m_config_set_option(iter->config,pt->params[n].name,pt->params[n].value)) < 0) {
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error %d while setting option '%s' with value '%s'\n",e,
 	     pt->params[n].name,pt->params[n].value);      
     }
   }
