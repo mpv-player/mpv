@@ -1762,7 +1762,11 @@ if(rel_seek_secs || abs_seek_pos){
         if(len>0){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=0;
-          vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	  vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	  if (vo_osd_progbar_value<0)
+	     vo_osd_progbar_value=0;
+	  else if (vo_osd_progbar_value>255)
+	     vo_osd_progbar_value=255;
         }
       }
 #endif
