@@ -2621,15 +2621,14 @@ if test "$_dvdkit" = yes ; then
     _inputmodules="mpdvdkit $_inputmodules"
     _dvdread=included
   fi
-  if bsd ; then
-   _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
+  _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
+  _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
+  if linux || netbsd || openbsd ; then
+    _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
   else
-   _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
-  fi
-  if linux ; then
-   _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
-  else
-   _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
+    if freebsd || bsdos ; then
+     _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
+    fi
   fi
 else
   _noinputmodules="mpdvdkit $_noinputmodules"
