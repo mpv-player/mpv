@@ -214,7 +214,7 @@ do{
     }
 
     pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
-    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->type!=STREAMTYPE_STREAM)){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & STREAM_SEEK)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
     }
@@ -246,7 +246,7 @@ do{
     if(!(idx->dwFlags&AVIIF_KEYFRAME)) flags=0;
   } else {
     demux->filepos=stream_tell(demux->stream);
-    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->type!=STREAMTYPE_STREAM)){
+    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->flags & STREAM_SEEK)){
           demux->stream->eof=1;
           return 0;
     }
@@ -449,7 +449,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
-  read_avi_header(demuxer,(demuxer->stream->type!=STREAMTYPE_STREAM)?index_mode:-2);
+  read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK)?index_mode:-2);
   
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
       mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);

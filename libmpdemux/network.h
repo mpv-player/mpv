@@ -53,7 +53,7 @@ int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
 
 int connect2Server(char *host, int port,int verb);
 
-int http_send_request(URL_t *url);
+int http_send_request(URL_t *url, off_t pos);
 HTTP_header_t *http_read_response(int fd);
 
 int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);

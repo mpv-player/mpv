@@ -428,7 +428,7 @@ check4proxies( URL_t *url ) {
 }
 
 int
-http_send_request( URL_t *url ) {
+http_send_request( URL_t *url, off_t pos ) {
 	HTTP_header_t *http_hdr;
 	URL_t *server_url;
 	char str[256];
@@ -455,6 +455,12 @@ http_send_request( URL_t *url ) {
 	}
 	else
 	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
+
+	if(pos>0) { 
+	// Extend http_send_request with possibility to do partial content retrieval
+	    snprintf(str, 256, "Range: bytes=%d-", pos);
+	    http_set_field(http_hdr, str);
+	}
 	    
 	if (network_cookies_enabled) cookies_set( http_hdr, server_url->hostname, server_url->url );
 	
@@ -572,6 +578,50 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	return 0;
 }
 
+int
+http_seek( stream_t *stream, off_t pos ) {
+	HTTP_header_t *http_hdr = NULL;
+	int fd;
+	if( stream==NULL ) return 0;
+
+	if( stream->fd>0 ) closesocket(stream->fd); // need to reconnect to seek in http-stream
+	fd = http_send_request( stream->streaming_ctrl->url, pos ); 
+	if( fd<0 ) return 0;
+
+	http_hdr = http_read_response( fd );
+
+	if( http_hdr==NULL ) return 0;
+
+	switch( http_hdr->status_code ) {
+		case 200:
+		case 206: // OK
+			mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", http_get_field(http_hdr, "Content-Type") );
+			mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length") );
+			if( http_hdr->body_size>0 ) {
+				if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+					http_free( http_hdr );
+					return -1;
+				}
+			}
+			break;
+		default:
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+			close( fd );
+			fd = -1;
+	}
+	stream->fd = fd;
+
+	if( http_hdr ) {
+		http_free( http_hdr );
+		stream->streaming_ctrl->data = NULL;
+	}
+
+	stream->pos=pos;
+
+	return 1;
+}
+
+
 // By using the protocol, the extension of the file or the content-type
 // we might be able to guess the streaming type.
 int
@@ -581,6 +631,7 @@ autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_form
 	int fd=-1;
 	int redirect;
 	int auth_retry=0;
+	int seekable=0;
 	char *extension;
 	char *content_type;
 	char *next_url;
@@ -683,7 +734,7 @@ extension=NULL;
 
 		// HTTP based protocol
 		if( !strcasecmp(url->protocol, "http") || !strcasecmp(url->protocol, "http_proxy") ) {
-			fd = http_send_request( url );
+			fd = http_send_request( url, 0 );
 			if( fd<0 ) {
 				return -1;
 			}
@@ -701,7 +752,10 @@ extension=NULL;
 			}
 			
 			streaming_ctrl->data = (void*)http_hdr;
-			
+
+			// Check if we can make partial content requests and thus seek in http-streams
+		        seekable=(http_hdr!=NULL && http_hdr->status_code==200 && strncmp(http_get_field(http_hdr,"Accept-Ranges"),"bytes",5)==0);
+
 			// Check if the response is an ICY status_code reason_phrase
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {
 				switch( http_hdr->status_code ) {
@@ -756,13 +810,13 @@ extension=NULL;
 						for( i=0 ; i<(sizeof(mime_type_table)/sizeof(mime_type_table[0])) ; i++ ) {
 							if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
 								*file_format = mime_type_table[i].demuxer_type;
-								return 0; 
+								return seekable; // for streaming_start
 							}
 						}
 					}
 					// Not found in the mime type table, don't fail,
 					// we should try raw HTTP
-					return 0;
+					return seekable; // for streaming_start
 				// Redirect
 				case 301: // Permanently
 				case 302: // Temporarily
@@ -857,7 +911,7 @@ nop_streaming_start( stream_t *stream ) {
 
 	fd = stream->fd;
 	if( fd<0 ) {
-		fd = http_send_request( stream->streaming_ctrl->url ); 
+		fd = http_send_request( stream->streaming_ctrl->url, 0 ); 
 		if( fd<0 ) return -1;
 		http_hdr = http_read_response( fd );
 		if( http_hdr==NULL ) return -1;
@@ -1121,6 +1175,11 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	if( ret<0 ) {
 		return -1;
 	}
+	if( ret==1 ) {
+		stream->flags |= STREAM_SEEK;
+		stream->seek = http_seek;
+	}
+
 	ret = -1;
 	
 	// Get the bandwidth available

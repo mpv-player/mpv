@@ -204,7 +204,7 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 		return -1;
 	}
 	
-	fd = http_send_request(url);
+	fd = http_send_request(url,0);
 	if( fd<0 ) {
 		printf("failed to send the http request\n");
 		return -1;
