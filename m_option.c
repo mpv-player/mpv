@@ -914,6 +914,7 @@ m_option_type_t m_option_type_subconfig = {
 
 #include "libmpcodecs/img_format.h"
 
+/* FIXME: snyc with img_format.h */
 static struct {
   char* name;
   unsigned int fmt;
@@ -922,12 +923,18 @@ static struct {
   {"422p", IMGFMT_422P},
   {"411p", IMGFMT_411P},
   {"yuy2", IMGFMT_YUY2},
-  {"yv12", IMGFMT_YV12},
-  {"i420", IMGFMT_I420},
+  {"uyvy", IMGFMT_UYVY},
   {"yvu9", IMGFMT_YVU9},
   {"if09", IMGFMT_IF09},
+  {"yv12", IMGFMT_YV12},
+  {"i420", IMGFMT_I420},
   {"iyuv", IMGFMT_IYUV},
-  {"uyvy", IMGFMT_UYVY},
+  {"clpl", IMGFMT_CLPL},
+  {"hm12", IMGFMT_NV12},
+  {"y800", IMGFMT_Y800},
+  {"y8", IMGFMT_Y8},
+  {"nv12", IMGFMT_NV12},
+  {"nv21", IMGFMT_NV21},
   {"bgr24", IMGFMT_BGR24},
   {"bgr32", IMGFMT_BGR32},
   {"bgr16", IMGFMT_BGR16},
