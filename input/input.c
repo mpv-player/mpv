@@ -25,6 +25,10 @@
 #include "joystick.h"
 #endif
 
+#ifdef HAVE_LIRC
+#include "lirc.h"
+#endif
+
 // If the args field is not NULL, the command will only be passed if
 // an argument exist.
 
@@ -791,6 +795,23 @@ mp_input_init(void) {
     else
       mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close);
   }
+#endif
+
+#ifdef HAVE_LIRC
+  {
+    int fd = mp_input_lirc_init();
+    if(fd > 0)
+      mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)close);
+  }
+#endif
+
+}
+
+void
+mp_input_uninit(void) {
+
+#ifdef HAVE_LIRC
+  mp_input_lirc_uninit();
 #endif
 
 }
