@@ -1,10 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=WHITE>
+<BODY>
 
 
 <P><B><A NAME=2.2>2.2.  Supported codecs</A></B></P>
@@ -72,10 +74,10 @@ the following options when using this codec:</P>
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
 <TD>Uses the codec in OpenDivX fashion. In this case it
 produces YV12 images in its own buffer, and <B>MPlayer</B> does colorspace
-conversion via libvo. (<B>RECOMMENDED!</B>)</FONT></TD></TR>
+conversion via libvo. (<B>RECOMMENDED!</B>)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
 <TD>Uses the colorspace conversion of the codec.
-In this mode you can use YUY2/UYVY, too.</FONT></TD></TR>
+In this mode you can use YUY2/UYVY, too.</TD></TR>
 </TABLE>
 
 <P>The <CODE>-vc odivx</CODE> method is usually faster, due to the fact that it transfers
@@ -91,12 +93,12 @@ faster, or even the fastest solution.</P>
   <CODE>-oldpp</CODE> option, but the range of values is strange:</P>
 
 <TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD>0</FONT></TD><TD>&nbsp;&nbsp;</TD>
-<TD>no postprocessing</FONT></TD></TR>
-<TR><TD></TD><TD>10 .. 20</FONT></TD>
-<TD></TD><TD>normal postprocessing (like level 2 with divxds)</FONT></TD></TR>
-<TR><TD></TD><TD>30 .. 60</FONT></TD>
-<TD></TD><TD>hard postprocessing, CPU intensive (like level 4 with divxds)</FONT></TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
+<TD>no postprocessing</TD></TR>
+<TR><TD></TD><TD>10 .. 20</TD>
+<TD></TD><TD>normal postprocessing (like level 2 with divxds)</TD></TR>
+<TR><TD></TD><TD>30 .. 60</TD>
+<TD></TD><TD>hard postprocessing, CPU intensive (like level 4 with divxds)</TD></TR>
 </TABLE>
 
 
@@ -213,13 +215,12 @@ video output driver permits it.</P>
 
 <P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
 
-<P><B>MPlayer</B> supports decoding all versions of RealVideo:
-  <UL>
-    <LI>RealVideo 1.0 (fourcc RV10) - en/decoding supported by <B>libavcodec</B></LI>
-    <LI>RealVideo 2.0 (fourcc RV20) - decoding supported by <B>RealPlayer libraries</B></LI>
-    <LI>RealVideo 3.0 (fourcc RV30) - decoding supported by <B>RealPlayer libraries</B></LI>
-  </UL>
-</P>
+<B>MPlayer</B> supports decoding all versions of RealVideo:
+<UL>
+  <LI>RealVideo 1.0 (fourcc RV10) - en/decoding supported by <B>libavcodec</B></LI>
+  <LI>RealVideo 2.0 (fourcc RV20) - decoding supported by <B>RealPlayer libraries</B></LI>
+  <LI>RealVideo 3.0 (fourcc RV30) - decoding supported by <B>RealPlayer libraries</B></LI>
+</UL>
 
 <P>On how to install RealPlayer libraries, see the
   <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section.</P>
@@ -335,13 +336,13 @@ then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 <P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
 
-<P><B>MPlayer</B> supports decoding all versions of RealAudio:
-  <UL>
-    <LI>RealAudio DNET - decoding supported by <B>libavcodec</B></LI>
-    <LI>RealAudio Cook - decoding supported by <B>RealPlayer libraries</B></LI>
-    <LI>RealAudio Sipro - decoding supported by <B>RealPlayer libraries</B></LI>
-  </UL>
-</P>
+<B>MPlayer</B> supports decoding all versions of RealAudio:
+<UL>
+  <LI>RealAudio DNET - decoding supported by <B>libavcodec</B></LI>
+  <LI>RealAudio Cook - decoding supported by <B>RealPlayer libraries</B></LI>
+  <LI>RealAudio Sipro - decoding supported by <B>RealPlayer libraries</B></LI>
+</UL>
+
 
 <P>On how to install RealPlayer libraries, see the
   <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section.</P>
