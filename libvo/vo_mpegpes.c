@@ -5,7 +5,7 @@
 #define QUALITY 90
 
 // #undef if you don't want mpeg1 transcoder (you'll be limited to mpeg1/2 playback only)
-//#define USE_LIBFAME
+#define USE_LIBFAME
 
 /* 
  * Based on:
@@ -203,12 +203,15 @@ if(format==IMGFMT_YV12){
       osd_w=params.width;
     } else s_pos_x=0;
 
-    osd_h=s_height;
     d_pos_y=(params.height-(int)s_height)/2;
     if(d_pos_y<0){
       s_pos_y=-d_pos_y;d_pos_y=0;
       osd_h=params.height;
-    } else s_pos_y=0;
+    } else {
+      s_pos_y=0;
+      osd_h=s_height+d_pos_y;
+      // if(d_pos_y) osd clear: s_height+d_pos_y .. params.height
+    }
 
     printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
 
@@ -254,6 +257,10 @@ static void draw_osd(void)
 {
 #ifdef USE_LIBFAME
   if(picture_buf){ // YV12 only:
+  // if(d_pos_y) osd clear: s_height+d_pos_y .. params.height
+    if(d_pos_y){
+	memset(yuv.y+osd_h*yuv.w,0,(params.height-osd_h)*yuv.w);
+    }
     vo_draw_text(osd_w,osd_h,draw_alpha);
   }
 #endif
