@@ -2218,9 +2218,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
       if(abs) {
 	abs_seek_pos = 3;
-	if(sh_video)
-	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
-	rel_seek_secs = v/100.0;
+	osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	rel_seek_secs = v;
       }
       else {
 	rel_seek_secs+= v;
@@ -2744,8 +2743,8 @@ if(rel_seek_secs || abs_seek_pos){
 	  int pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
 	  guiIntfStruct.Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
-	if ( demuxer->file_format==DEMUXER_TYPE_AUDIO ) guiIntfStruct.TimeSec=sh_audio->timer;
-	  else guiIntfStruct.TimeSec=d_video->pts; 
+	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
+	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
 	if ( guiIntfStruct.VolumeChanged ) 
