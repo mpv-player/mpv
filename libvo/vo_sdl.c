@@ -139,7 +139,7 @@ LIBVO_EXTERN(sdl)
 #include <SDL.h>
 //#include <SDL/SDL_syswm.h>
 
-#if defined(WIN32) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
+#if defined(__MINGW32__) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
 /* setenv is missing on win32, solaris, IRIX and HPUX */
 static void setenv(const char *name, const char *val, int _xx)
 {

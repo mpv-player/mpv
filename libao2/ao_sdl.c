@@ -99,7 +99,7 @@ static int read_buffer(unsigned char* data,int len){
 
 // end ring buffer stuff
 
-#if defined(WIN32) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
+#if defined(__MINGW32__) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
 /* setenv is missing on win32, solaris, IRIX and HPUX */
 static void setenv(const char *name, const char *val, int _xx)
 {
