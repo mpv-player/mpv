@@ -1364,6 +1364,26 @@ specify codepage of the subtitle.
 .PD 1
 .
 .TP
+.B \-subcp enca:<language>:<fallback codepage> (ENCA only)
+You can specify your language using a two letter language code to
+make ENCA detect the codepage automatically.
+If unsure, enter anything and watch mplayer -v output for available
+languages. Fallback codepage specifies the codepage to use, when the
+autodetection fails.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-subcp enca:cs:latin2"
+Guess the encoding, assuming the subtitles are Czech, fall back to
+latin 2, if the detection fails.
+.br
+.IPs "\-subcp enca:pl:cp1250"
+Guess the encoding for Polish, fall back to cp1250.
+.RE
+.PD 1
+.
+.TP
 .B \-subdelay <sec>
 Delays subtitles by <sec> seconds.
 Can be negative.
