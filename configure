@@ -506,7 +506,7 @@ int main() {
 }
 EOF
   $_cc -o "$TMPO" "$TMPC"
-  case "$TMPO" in
+  case `"$TMPO"` in
     0-0) proc="ev4" ;;
     1-0) proc="ev5" ;;
     1-1) proc="ev56" ;;
