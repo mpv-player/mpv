@@ -260,7 +260,7 @@ if(dvd_title){
           url_free(url);
           return NULL;
         }
-        f=streaming_start( &url, f, file_format );
+        f=streaming_start( &url, f, *file_format );
         if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, url->url); return NULL; }
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
