@@ -754,18 +754,19 @@ vobsub_process(void *vobhandle, float pts)
 {
     vobsub_t *vob = (vobsub_t *)vobhandle;
     unsigned int pts100 = 100 * pts;
-    if (vob->spudec)
+    if (vob->spudec) {
 	spudec_heartbeat(vob->spudec, pts100);
-    if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
-	packet_queue_t *queue = vob->spu_streams + vobsub_id;
-	while (queue->current_index < queue->packets_size) {
-	    packet_t *pkt = queue->packets + queue->current_index;
-	    if (pkt->pts100 <= pts100) {
-		spudec_assemble(vob->spudec, pkt->data, pkt->size, pkt->pts100);
-		++queue->current_index;
+	if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
+	    packet_queue_t *queue = vob->spu_streams + vobsub_id;
+	    while (queue->current_index < queue->packets_size) {
+		packet_t *pkt = queue->packets + queue->current_index;
+		if (pkt->pts100 <= pts100) {
+		    spudec_assemble(vob->spudec, pkt->data, pkt->size, pkt->pts100);
+		    ++queue->current_index;
+		}
+		else
+		    break;
 	    }
-	    else
-		break;
 	}
     }
 }
