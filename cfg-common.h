@@ -69,8 +69,8 @@
 	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2},
 #endif
 
-	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 15}, // keep ranges in sync
-	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 12}, // with codec-cfg.c
+	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 16}, // keep ranges in sync
+	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 14}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
 
