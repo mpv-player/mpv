@@ -133,7 +133,9 @@ static unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base
                 *endp = (char *)cp;
         return result;
 }
+#endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0) || LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,5)
 static long simple_strtol(const char *cp,char **endp,unsigned int base)
 {
         if(*cp=='-')
@@ -1472,8 +1474,13 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 #ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
 #endif	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
+	if(remap_page_range(vma, vma->vm_start, mga_mem_base + mga_src_base,
+		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#else
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#endif
 	{
 		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
@@ -1507,7 +1514,11 @@ static long long mga_vid_lseek(struct file *file, long long offset, int origin)
 
 static int mga_vid_open(struct inode *inode, struct file *file)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,2)
+	int minor = MINOR(inode->i_rdev.value);
+#else
 	int minor = MINOR(inode->i_rdev);
+#endif
 
 	if(minor != 0)
 	 return(-ENXIO);
