@@ -88,12 +88,12 @@ driver calls this library too.</P>
 this codec:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD>using divx4 codec as a new version of OpenDivX.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec as a new version of OpenDivX.
 in this case it produces YV12 image in its own buffer,
-and <B>MPlayer</B> (libvo) does colorspace conversion.</TD><TR>
-<TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
-<TD>using divx4 codec's colorspace conversion.
+and <B>MPlayer</B> (libvo) does colorspace conversion. (<B>RECOMMENDED!</B>)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec's colorspace conversion.
 in this mode, you can use YUY2/UYVY too.</TD><TR>
 </TABLE></P>
 
@@ -106,12 +106,12 @@ differ according to the current bpp.</P>
 <P>Note: it supports postprocessing too, but range of values is strange:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD>no postproc</TD><TR>
-<TD></TD><TD>10 .. 20</TD>
-<TD></TD><TD>postprocessing, normal (like level 2 with divxds)</TD><TR>
-<TD></TD><TD>30 .. 60</TD>
-<TD></TD><TD>hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no postproc</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normal (like level 2 with divxds)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
 </TABLE></P>
 
 <P><B><A NAME=2.1.2.2>2.1.2.2. ffmpeg's DivX/libavcodec</A></B></P>
@@ -123,7 +123,7 @@ It was removed from <B>MPlayer</B>'s cvs tree, you have to download it
 manually directly from <B>FFmpeg</B>'s tree:</P>
 
 <P><CODE>
-  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
+  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 </CODE></P>
 
@@ -154,7 +154,7 @@ focus on ffdivx, and it's unlikely that this will change.</P>
 <P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
 card's driver must support the AFMT_AC3 format (like SB Live! does).
 Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
-option. It may or may not work (experimental).</P>
+option. It may or may not work (experimental). (probably won't...)</P>
 
 
 <P><B><A NAME=2.1.4>2.1.4. Codec importing howto</A></B></P>

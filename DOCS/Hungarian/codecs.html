@@ -93,12 +93,12 @@ nagyon hasonlít az OpenDivX-éhez), az OpenDivX kód kikapcsolásra kerül,
 használatára:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD>a DivX4 codec használata, mint az OpenDivX új verziója.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a DivX4 codec használata, mint az OpenDivX új verziója.
 Ebben az esetben YV12 képeket produkál a saját bufferében,
 és az <B>MPlayer</B> (libvo) konverziót végez.</TD><TR>
-<TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
-<TD>a DivX4 codec csinál konverziót.
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a DivX4 codec csinál konverziót.
 Ebben az esetben használhatsz YUY2/UYVY módokat is.</TD><TR>
 </TABLE></P>
 
@@ -111,12 +111,12 @@ talán a használt bpp-tol függõen változhat.</P>
 <P>Megj: támogat postprocessinget is, de az értékei furcsák:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD>nincs</TD><TR>
-<TD></TD><TD>10 .. 20</TD>
-<TD></TD><TD>postprocessing, normal (mint a 2-es szint a DirectShow-os DivX codeccel)</TD><TR>
-<TD></TD><TD>30 .. 60</TD>
-<TD></TD><TD>hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nincs</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normal (mint a 2-es szint a DirectShow-os DivX codeccel)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
 </TABLE></P>
 
 <P><B><A NAME=2.1.2.2>2.1.2.2.  ffmpeg DivX/libavcodec</A></B></P>
@@ -128,7 +128,7 @@ platformokon!</B> Az <B>MPlayer</B> fa nem tartalmazza, le kell töltened az <B>F
 fát:</P>
 
 <P><CODE>
-  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
+  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 </CODE></P>
 
@@ -154,7 +154,7 @@ manpage vagy az example.conf mondja (a -vfm opció).</P>
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
 meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
 SB Live!). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
-és használd az -ac hwac3 opciót. Akár mûködhet is.</P>
+és használd az -ac hwac3 opciót. Akár mûködhet is. De nem fog. Tényleg. :)</P>
 
 
 <P><B><A NAME=2.1.4>2.1.4.  Hogyan használj ismeretlen Win32 codec-et</A></B></P>
@@ -167,7 +167,7 @@ Ha az <B>MPlayer</B> ezt írja ki az AVI-dra:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
 
-<P>Ez azt jelenti, hogy az AVI-d egy olyan codeckel van tömörítve, aminek
+<P>Ez azt jelenti, hogy az AVI-d egy olyan codec-kel van tömörítve, aminek
 a fourcc-je HFYU (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, stb...).
 Most, hogy ezt már tudod, azt kell kitalálni, hogy a Windows melyik DLL-lel
 játssza le a file-t. Esetünkben a system.ini ezt tartalmazza (többek között):</P>

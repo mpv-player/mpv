@@ -110,12 +110,12 @@ machine.</P>
 
 
 <TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
-<TD>Enables DVD support and selects title.</TD><TR>
-<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD>Selects DVD chapter (default: play from chapter 1)</TD><TR>
-<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD>Selects camera angle (default: 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enables DVD support and selects title.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter (default: play from chapter 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects camera angle (default: 1)</TD><TR>
 </TABLE>
 
 <P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
@@ -129,25 +129,25 @@ machine.</P>
 
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Can I compile libdvdread and libcss for example on my sweet Sparc/Solaris?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Who knows ... Please test it and send feedback. But it's said that it
 should work. Please refer documentation of libdvdread and its homepage
 as well. We're not authors of libdvdread.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 What about subtitles? Can MPlayer decode them?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Yes it can (or at least it would be able to) but there is now DVD subtitle
 displaying functionality inside <B>MPlayer</B> (DVD subs are stored as images,
 not text!). However it's a planned feature (at the time of libvo2).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 I've got no sound / bad sound (Spanish audio and other ugly things).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 <B>MPlayer</B> currently does not use all of information of IFO blocks from DVD.
 You can adjust the right DVD audio stream with: '-aid 128' command line
 option, where 128 is the stream id of requested audio stream. You can
@@ -155,46 +155,46 @@ experience with numbers of 128,129,... and so on. Of course this problem
 will be solved in the future.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 There is some strange effect (interlace like thing) especially when fast
 moving objects are shown in the movie.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Known problem, we try to fix it later (when we switch to libvo2).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 How can I set the region code of my DVD-Drive ? I don't have windows!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Use the 'regionset' tool:
 <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
 under the XYZ#$ paragraph of the--
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Get back asshole, there is no DeCSS code in <B>MPlayer</B>. <B>MPlayer</B> uses libdvdread
 by linking against it, and libdvdread uses libcss by dynamic loading it.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play DVD?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 No, you don't. This is the past :) However of course you must have got
 the proper rights to the DVD device driver entry (in /dev).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 How can I ... (insert some expectable DVD player feature here)?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 The current implementation is the first implementation of some real DVD
 player functionality. First, we would like to target existing bugs and
 basic features before implementing new features.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Where can I get libdvdread and libcss packages from?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 From the site of Ogle:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>

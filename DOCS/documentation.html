@@ -36,8 +36,8 @@
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW codecs</A></LI>
 	     <LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow codecs</A></LI>
 	     </UL>
-	</LI></UL>
-    </LI><LI><A HREF="video.html">2.2 Video & Audio output devices</A>
+	</UL>
+    <LI><A HREF="video.html">2.2 Video & Audio output devices</A>
 	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video output devices</A>
 	     <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
 	     </LI><LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
@@ -69,8 +69,8 @@
 	     </LI><LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL output</A>
 	     </LI><LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - text mode displaying</A>
 	     </LI><LI><A HREF="video.html#2.2.1.A">2.2.1.A TVout</A>
-		     <UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Dualhead</A>
-	     </UL></LI></UL></LI>
+		     <UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Dualhead</A></LI></UL>
+	</UL>
 	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Soundcards, audio output devices</A>
 	     <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Soundcard experiences, recommendations</A>
 	     </LI></UL>
@@ -117,17 +117,17 @@
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, AVI
-and ASF files, supported by many native and Win32 DLL codecs. You can watch
-<B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B> and even <B>DivX</B> movies too. The
-another big feature of mplayer is the wide range of supported output drivers.
-It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, but you can use SDL
-(and this way all drivers of SDL) and some lowlevel card-specific drivers (for
-Matrox) too! Most of them supports software or hardware scaling, so you can
-enjoy movies in fullscreen. And what about the nice big antialiased shaded
-subtitles (7 supported types!!!) with hungarian, english, cyrillic, czech,
-korean fonts, and OSD?</P>
+and ASF/WMV files, supported by many native and Win32 DLL codecs. You can watch
+<B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B> and even <B>DivX</B> movies too (and
+you don't need the avifile library at all!). The another big feature of mplayer
+is the wide range of supported output drivers. It works with X11, Xv, DGA,
+OpenGL, SVGAlib, fbdev, AAlib, but you can use SDL (and this way all drivers of
+SDL) and some lowlevel card-specific drivers (for Matrox) too! Most of them
+supports software or hardware scaling, so you can enjoy movies in fullscreen.
+And what about the nice big antialiased shaded subtitles (7 supported types!!!)
+with hungarian, english, cyrillic, czech, korean fonts, and OSD?</P>
 
-<P>MPlayer is distributable under the terms of the <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>.</P>
+<P>MPlayer is distributable under the terms of the <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, EXCEPT the OpenDivX code.</P>
 
 <P>I didn't write any codecs, just some players. I spent
 a lot of time finding the best way to parse bad damaged input files
@@ -172,7 +172,7 @@ too. So I've decided to write/modify one...</P>
     The release version of the 0.11pre after 4 months of heavy development!
     Try it, and be amazed! Thousands of new features added... and of course
     old code was improved too, bugs removed etc.
-<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.xx (TODO this evening!) "The BugCounter"</B><BR>
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
     even more stable than ever, and so on. It's a MUST !  
@@ -191,6 +191,8 @@ experience any problems:<BR>
   everyone wants this. If you don't know why, you <B>do</B> need it.</LI>
   <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
   usually isn't important.</LI>
+  <LI><B>SDL</B> - it's not mandatory, but can help in some cases. Always
+  use the newest (beginning from 1.2.x).</LI>
 </UL>
 </P>
 
@@ -234,7 +236,8 @@ config.h and config.mak files.</P>
 
 <P>Though not mandatory, the fonts should be installed in order to gain
 OSD, and subtitle functionality. Download mp_font3.zip and optional
-(if exists) language updates.</P>
+(if exists) language updates. It's VERY RECOMMENDED to check
+<A HREF=#1.5>section 1.5</A> for details.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
@@ -247,11 +250,7 @@ directory (relative to the <B>MPlayer</B> tree) to $HOME/.mplayer/codecs.conf.</
 
 <P><B><A NAME=1.4>1.4. What about the GUI?</A></B></P>
 
-<P>I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
-So the player has only keyboard control from the controlling console/xterm now.
-There is a GUI development for the player, coordinated by Pontscho/Fresh!
-It's still under development, but it will be merged and released real soon.
-BTW he needs some nice skins, if you are a good graphician, contact him!!!</P>
+<P>TODO</P>
 
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
 
@@ -268,17 +267,9 @@ OSD is used to display current time, volume bar, seek bar etc.</P>
 There are many ways to get it:
 <UL>
 
-<LI>use the font generator tool at TOOLS/subfont-c
-It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
-(read TOOLS/subfont-c/README for details)
-
-<LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
-(note: you must have HSI RAW plugin too, see URL below)
-
 <LI>download ready-to-use font packages from <B>MPlayer</B> site.
 Note: currently available fonts are limited for iso 8859-1/2 support,
 and there are a few special versions for korean, russian etc codepages.
-You better build fonts yourself with the tool mentioned above.
 Font should have appropriate font.desc file which maps unicode font
 positions to the actual code page of the subtitles text. Other solution
 is to have subtitles encoded in utf8 encoding and use -utf8 option
@@ -291,8 +282,16 @@ Some URLs:
   <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
   <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - korean fonts & RAW plugin
 </UL>
-</P>
+
+<LI>use the font generator tool at TOOLS/subfont-c
+It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
+(read TOOLS/subfont-c/README for details)
+
+<LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
+(note: you must have HSI RAW plugin too, see URL below)
 </UL>
+</P>
+
 <P>After that, UNZIP the files to ~/.mplayer/font/ .
 Now you have to see a timer at the upper left corner of the movie
 (switch it off with 'o') .</P>
@@ -315,10 +314,10 @@ Now you have to see a timer at the upper left corner of the movie
 <P><B><A NAME=3>3. Usage</A></B></P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [options] [path/]filename</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd trackno /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.[mpg|avi]</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] [path/]filename</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -vcd trackno /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -dvd titleno [/dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi]</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -421,8 +420,7 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
 
-<P><B>MPlayer</B> can play media from network, by using the HTTP protocol, and even
-beta ASF streaming (FROM network) is available.
+<P><B>MPlayer</B> can play media from network, by using the HTTP protocol.
 Configuring it is simple, just recompile <B>MPlayer</B> with</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
@@ -476,7 +474,7 @@ If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
 <P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
 symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
-<P>There's no DVD support for FreeBSD yet. (??? libdvdread?)</P>
+<P>There's no DVD support for FreeBSD yet.</P>
 
 <P><B><A NAME=6.3>6.3. Solaris</A></B></P>
 
@@ -827,7 +825,7 @@ other technical help from:</P>
 <P>Documentation translations
 <UL>
   <LI><B>Hungarian</B>: Gabucino
-  <LI><B>German</B>: <A HREF="mailto:jaf.corporation@gmx.at">Johannes Feigl</A> (slightly outdated)
+  <LI><B>German</B>: <A HREF="mailto:jaf.corporation@gmx.at">Johannes Feigl</A>
   <LI><B>Spanish</B>: TeLeNiEkO (outdated)
   <LI><B>Russian</B>: Nick Kurshev (outdated)
   <LI><B>Polish</B>: Dariush Pietrzak (outdated)
@@ -962,7 +960,7 @@ otherwise.  Please do not send messages using other language!</P>
   MPEG or OpenDivX files:<BR>
   Problem: gcc 2.96 bug<BR>
   Workaround: ./configure --disable-mmx, or use gcc 2.95.x<BR>
-  SOLVED: code fixed<LI>
+  SOLVED: code fixed</LI>
 
 <LI>SIGILL (signal 4) or other fault at loading l3codeca.acm:<BR>
   Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx<BR>

@@ -118,7 +118,7 @@ static char help_text[]=
 #define MSGTR_DVDnumChapters "Helytelen DVD fejezet: %d\n"
 #define MSGTR_DVDnumAngles "%d darab kameraállás van ezen a DVD sávon.\n"
 #define MSGTR_DVDinvalidAngle "Helytelen DVD kameraállás: %d\n"
-#define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO fájlt.\n"
+#define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO file-t.\n"
 #define MSGTR_DVDnoVOBs "Nem tudom megnyitni a sávot (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
 
@@ -142,7 +142,7 @@ static char help_text[]=
 #define MSGTR_MissingAudioStream "Nincs hangfolyam... -> hang nélkül\n"
 #define MSGTR_MissingVideoStreamBug "Nincs képfolyam?! Írj a szerzõnek, lehet hogy hiba :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: a fájl nem tartalmazza a kért hang vagy kép folyamot\n"
+#define MSGTR_DoesntContainSelectedStream "demux: a file nem tartalmazza a kért hang vagy kép folyamot\n"
 
 #define MSGTR_NI_Forced "Kényszerítve"
 #define MSGTR_NI_Detected "Detektálva"
@@ -151,9 +151,9 @@ static char help_text[]=
 #define MSGTR_UsingNINI "NON-INTERLEAVED hibás AVI formátum használata!\n"
 #define MSGTR_CouldntDetFNo "Nem tudom meghatározni a képkockák számát (abszolut tekeréshez)   \n"
 #define MSGTR_CantSeekRawAVI "Nem tudok nyers .AVI-kban tekerni! (index kell, próbáld az -idx kapcsolóval!)\n"
-#define MSGTR_CantSeekFile "Nem tudok ebben a fájlban tekerni!  \n"
+#define MSGTR_CantSeekFile "Nem tudok ebben a fileban tekerni!  \n"
 
-#define MSGTR_EncryptedVOB "Kódolt VOB fájl (libcss támogatás nincs befordítva!) Olvasd el a doksit\n"
+#define MSGTR_EncryptedVOB "Kódolt VOB file (libcss támogatás nincs befordítva!) Olvasd el a doksit\n"
 #define MSGTR_EncryptedVOBauth "Kódolt folyam, de nem kértél autentikálást!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Tömörített fejlécek (még) nincsenek támogatva!\n"
@@ -166,7 +166,7 @@ static char help_text[]=
 #define MSGTR_CantCloseCodec "nem tudom lezárni a kodeket\n"
 
 #define MSGTR_MissingDLLcodec "HIBA: Nem tudom megnyitni a kért DirectShow kodeket: %s\n"
-#define MSGTR_ACMiniterror "Nem tudom betölteni/inicializálni a Win32/ACM kodeket (hiányzó DLL fájl?)\n"
+#define MSGTR_ACMiniterror "Nem tudom betölteni/inicializálni a Win32/ACM kodeket (hiányzó DLL file?)\n"
 #define MSGTR_MissingLAVCcodec "Nem találom a(z) '%s' nevû kodeket a libavcodec-ben...\n"
 
 #define MSGTR_NoDShowSupport "Az MPlayer DirectShow támogatás NÉLKÜL lett fordítva!\n"
@@ -180,7 +180,7 @@ static char help_text[]=
 #define MSGTR_MpegPPhint "FIGYELEM! Képjavítást kértél egy MPEG1/2 filmre, de az MPlayer-t\n" \
                          "          MPEG1/2 javítási támogatás nélkül fordítottad!\n" \
                          "          #define MPEG12_POSTPROC a config.h-ba, és fordítsd újra libmpeg2-t!\n"
-#define MSGTR_MpegNoSequHdr "MPEG: VÉGZETES: vége lett a fájlnak mikozben a szekvencia fejlécet kerestem\n"
+#define MSGTR_MpegNoSequHdr "MPEG: VÉGZETES: vége lett a filenak mikozben a szekvencia fejlécet kerestem\n"
 #define MSGTR_CannotReadMpegSequHdr "VÉGZETES: Nem tudom olvasni a szekvencia fejlécet!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "VÉGZETES: Nem tudom olvasni a szekvencia fejléc kiterjesztését!\n"
 #define MSGTR_BadMpegSequHdr "MPEG: Hibás szekvencia fejléc!\n"
@@ -200,7 +200,7 @@ static char help_text[]=
 #define MSGTR_LIRCdisabled "Nem fogod tudni használni a távirányítót\n"
 #define MSGTR_LIRCopenfailed "Nem tudtam megnyitni a lirc támogatást!\n"
 #define MSGTR_LIRCsocketerr "Valami baj van a lirc socket-tel: %s\n"
-#define MSGTR_LIRCcfgerr "Nem tudom olvasni a LIRC konfigurációs fájlt : %s \n"
+#define MSGTR_LIRCcfgerr "Nem tudom olvasni a LIRC konfigurációs file-t : %s \n"
 
 //  ====================== GUI messages/buttons ========================
 

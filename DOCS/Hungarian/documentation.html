@@ -22,6 +22,7 @@
      <LI><A HREF="#1.2">1.2 Történelem</A></LI>
      <LI><A HREF="#1.3">1.3 Telepítés</A></LI>
      <LI><A HREF="#1.4">1.4 És a grafikus felület?</A>
+     <LI><A HREF="#1.5">1.5 Feliratok és OSD</A>
      </LI></UL>
 </LI><LI><A HREF="#2">2. Funkciók</A>
      <UL><LI><A HREF="codecs.html">2.1 Video formátumok, audio és video codec-ek</A>
@@ -34,7 +35,8 @@
 	</LI><LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
 	     <LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A></LI>
-	     </UL></UL></LI>
+	     </UL>
+	</UL>
     </LI><LI><A HREF="video.html">2.2 Video és audio kimeneti eszközök</A>
 	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video kimenetek</A>
 	     <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
@@ -67,8 +69,8 @@
 	     </LI><LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL kimenet</A>
 	     </LI><LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - szöveges módú megjelenítés</A>
 	     </LI><LI><A HREF="video.html#2.2.1.A">2.2.1.A TV kimenet</A>
-		     </LI><UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox TV kimenet</A>
-	     </UL></UL></LI>
+		     </LI><UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox TV kimenet</A></LI></UL>
+	</UL>
 	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Hangkártyák, audio kimenetek</A>
 	     <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Ajánlott beállítások különféle hangkártyákhoz</A>
 	     </LI></UL>
@@ -96,9 +98,9 @@
      </LI><LI><A HREF="#6.3">6.3 Solaris</A>
      </LI><LI><A HREF="#6.4">6.4 StrongARM</A>
      </LI></UL>
-</LI><LI><A HREF="../documentation.html#A">A. Készítõk</A>
-</LI><LI><A HREF="../documentation.html#A2">A. Maintainerek</A>
-</LI><LI><A HREF="#B">B. Levelezési listák</A>
+</LI><LI><A HREF="../documentation.html#A">A. Készítõk</A></LI>
+<UL><LI><A HREF="../documentation.html#A2">A/2. Maintainerek</A></LI></UL>
+<LI><A HREF="#B">B. Levelezési listák</A>
 </LI><LI><A HREF="bugreports.html">C. Hogyan jelents be hibát</A>
 </LI><LI><A HREF="../documentation.html#D">D. Ismert hibák</A>
 
@@ -116,9 +118,10 @@
 
 <P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
 akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
-  Le tudja játszani a legtöbb MPEG, AVI és ASF file-t, valamint felsorakoztat
-  jónéhány natív és Win32 codecet.  Nézhetsz vele <B>VideoCD</B>-t,
-  <B>SVCD</B>-t, <B>DVD</B>-t, és még <B>DivX</B>-et is. A másik óriási
+  Le tudja játszani a legtöbb MPEG, AVI és ASF/WMV file-t, valamint
+  felsorakoztat jónéhány natív és Win32 codecet.  Nézhetsz vele
+  <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, és még <B>DivX</B>-et is
+  (ezutóbbihoz egyáltalán nincs szükség az avifile csomagra!). A másik óriási
   tulajdonsága az MPlayernek a megjelenítési módok széles választéka. Mûködik
   X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib, sõt SDL-lel is (beleértve
   ezáltal az SDL drivereit is), és néhány alacsonyszintû kártyaspecifikus
@@ -129,7 +132,7 @@ akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
   OSD-t!</P>
 
 <P>Az <B>MPlayer</B> a <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>
-licensz alá tartozik.</P>
+licensz alá tartozik, KIVÉVE az OpenDivX kódot.</P>
 
 <P>Nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem azzal is, hogy
   megtaláljam a megfelelõ módszert a hibás file-ok beolvasására (mind MPEG,
@@ -161,21 +164,21 @@ licensz alá tartozik.</P>
     Az MPEG codec itt az Aaron Holtzman és Michel Lespinasse készítette libmpeg2
     (mpeg2dec). Nagyon jó, optimalizált, gyors C kód, tökéletes képminõség és   
     100%-os megfelelés a szabványnak.
-<LI><B>MPlayer</B> v0.3-v0.9:</B><BR>
+<LI><B>MPlayer v0.3-v0.9:</B><BR>
     Egyvelege két programnak: mpg12play v0.95pre6 és az új, egyszerû AVI
     lejátszómnak ('avip'), ami az avifile Win32 DLL loaderén alapul.
-<LI><B>MPlayer</B> v0.10:</B><BR>
+<LI><B>MPlayer v0.10:</B><BR>
     Az MPEG és AVI lejátszó egyetlen programban!
-<LI><B>MPlayer</B> v0.11:</B><BR>
+<LI><B>MPlayer v0.11:</B><BR>
     Néhány új fejlesztõvel gyarapodtunk, és innentõl az mplayer project
     csapatmunkán alapul!
     ASF támogatás hozzáadása, és OpenDivX (lásd www.projectmayo.com)
     en/dekódolás.
-<LI><B>MPlayer</B> v0.17 "The IdegCounter"</B><BR>
+<LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
     A 0.11pre sorozat végsõ verziója, 4 hónapnyi kõkemény fejlesztés után!
     Próbáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
     feljavítva, bugok eltávolítva stb.
-<LI><B>MPlayer</B> 0.18</B><BR>
+<LI><B>MPlayer 0.18 (TODO)</B><BR>
     2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
     még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
     stabilabb, mint eddig! KÖTELEZÕ !
@@ -195,6 +198,8 @@ problémákba ütközni:<BR>
   muszáj.</LI>
   <LI><B>make</B> - <B>mindig a legújabb</B> ajánlott (legalább 3.79.x).
   Bár általában erre nem kell figyelj.</LI>
+  <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet. Ajánlott mindig
+  a legújabbat használni.</LI>
 </UL>
 </P>
 
@@ -239,24 +244,74 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 
 <P>Bár nem kötelezõ, jobb ha felteszed a fontokat is, mert így kapsz OSD-t, és
   feliratok megjelenítésének képességét. Töltsd le az mp_font3.zip-et
-  (és opcionálisan nyelvi kiegészítõket)</P>
+  (és opcionálisan nyelvi kiegészítõket). Részletekért olvasd el az
+  <A HREF=#1.5>1.5-ös</A> fejezetet.</P>
 
 <PRE>	mkdir ~/.mplayer/font
 	cd ~/.mplayer/font
 	unzip mp_font3.zip
 	unzip mp_font3_hu.zip</PRE>
 
-<P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> fájlt
+<P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> file-t
 az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.</P>
 
-<P><B><A NAME=1.4>1.4.  És a grafikus felület ?</A></B></P>
+<P><B><A NAME=1.4>1.4. És a grafikus felület ?</A></B></P>
 
-<P>Én nem vagyok GUI (grafikus felület) fejlesztõ. Nem szeretem ezeket,
-  szívesebben használom az egyszerû fekete 80x25-ös konzolt.  Ezért a lejátszó
-  most még csak billentyûzetrõl vezérelhetõ.  Pontscho/Fresh! már dolgozik a
-  grafikus felületen, ami még fejlesztési stádiumban van ugyan, de hamarosan
-  elkészül és beépítjük. Ha már itt tartunk, kellene neki néhány skin, ha jó
-  grafikus vagy, írj neki!!!</P>
+<P>TODO</P>
+
+<P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
+
+<P>Igen, az <B>MPlayer</B> sokféle fajta feliratot támogat. A beolvasó kód
+jelenleg 7 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
+file-t, a 20. sor körül.</P>
+
+<P>A feliratok egy <B>'OSD', On Screen Display</B> nevu módszerrel vannak
+megjelenítve. Ez az OSD használatos az idõ, hangerõ, stb megjelenítésére is.</P>
+
+<P><B>OSD és feliratok installálása</B></P>
+
+<P>Elõszöris, egy <B>MPlayer</B> betûtipus csomag kell. Sok módszer van a
+megszerzésére:
+<UL>
+
+<LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
+Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
+tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
+A font mellett kell egy font.desc file, ami hozzárendeli az unicode
+font pozíciókat a felirat tényleges kódlapjához. Másik megoldás lehet
+a felirat UTF8 formátummá alakítása, és az -utf8 opció használata, avagy
+a felirat file kiterjesztésének megváltoztatása .utf-re. Ezt az
+átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
+elvégezni.<BR>
+<UL>
+  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
+  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
+  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
+</UL>
+
+<LI>a TOOLS/subfont-c könyvtárban található betûtipusgenerátor. Teljesértékû
+program TTF/Type1/stb betûtipusok MPlayer tipussá alakítására. Olvasd el a
+TOOLS/subfont-c/README file-t a részletekért)
+
+<LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
+könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.
+
+</UL>
+</P>
+
+<P>Ezután, tömörítsd ki a file-okat a ~/.mplayer/font/ könyvtárba. Ha most
+elindítod a lejátszást, egy órát láthatsz a film bal felsõ sarkában
+(kikapcsolás az 'o' billentyûvel).</P>
+
+<P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)<BR>
+<UL>
+  <LI>timer + hangerõ + keresõ + feliratok (alapállapot)
+  <LI>hangerõ + keresõ + feliratok
+  <LI>csak feliratok
+</UL>
+
+<P>Az alapértelmezést megváltoztathatod az <CODE>osdlevel=</CODE> változóval a
+konfigurációs file-ban.</P>
 
 <P><B><A NAME=2>2.  Funkciók</A></B></P>
 
@@ -267,10 +322,10 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 <P><B><A NAME=3>3.  Használat</A></B></P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opciók] [útvonal//]filenév</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opciók] -vcd trackszám /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opciók] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [opciók] http://site.com/file.[mpg|avi]</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] [útvonal//]filenév</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] -vcd trackszám /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] -dvd titleno [/dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] http://site.com/file.[mpg|avi]</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -374,8 +429,7 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 
 <P><B><A NAME=3.3>3.3.  Streaming from network or pipes</A></B></P>
 
-<P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül,
-  és béta állapotú ASF streaming támogatással is rendelkezik.
+<P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül.
   A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :</P>
 
 
@@ -432,7 +486,7 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 <P>Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
   csinálj egy linket : <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
 
-<P>Egyenlõre nincs DVD támogatás FreeBSD-hez. (??? libdvdread?)</P>
+<P>Egyenlõre nincs DVD támogatás FreeBSD-hez.</P>
 
 <P><B><A NAME=6.3>6.3.  Solaris</A></B></P>
 
@@ -445,7 +499,7 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 <P>Az <B>MPlayer</B> kihasználja az <B>UltraSPARC</B> gépek <B>VIS</B>
 utasításkészletét (az MMX sparc-os megfelelõje), bár jelenleg csak a
 <I>libmpeg2</I>-ben, <I>libavcodec</I>-ben, és a <I>libvo</I>-ban, mp3lib-ben nem.
-Egy 400Mhz-es CPU elég hogy megnézz egy VOB fájlt. Szükséged lesz egy
+Egy 400Mhz-es CPU elég hogy megnézz egy VOB file-t. Szükséged lesz egy
 felinstallált <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>-re
 is.</P>
 
