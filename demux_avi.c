@@ -54,7 +54,6 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   return NULL;
 }
 
-
 static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos,int flags){
   avi_priv_t *priv=demux->priv;
   int skip;
@@ -87,8 +86,8 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
        // drop frame (seeking)
        --priv->skip_video_frames;
        ds=NULL;
-     } else {
-       pts=priv->avi_video_pts;
+//     } else {
+//       pts=priv->avi_video_pts;
      }
      // ezt a 2 sort lehet hogy fell kell majd cserelni:
      //priv->avi_video_pts+=avi_pts_frametime;
@@ -109,6 +108,10 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 //          printf("\rYYY-V  A: %5.3f  V: %5.3f  \n",priv->avi_audio_pts,priv->avi_video_pts);
      priv->avi_audio_pts=priv->avi_video_pts+priv->pts_correction;
      priv->pts_has_video=1;
+
+     pts=priv->avi_video_pts;
+
+     //printf("read  pack_no: %d  pts %5.3f  \n",demux->video->pack_no+demux->video->packs,pts);
 
   }
   
@@ -500,7 +503,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
         }
       } else {
         // seek backward
-        while(video_chunk_pos>=0){
+        while(video_chunk_pos>0){
           int id=((AVIINDEXENTRY *)priv->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((++rel_seek_frames)>0 && ((AVIINDEXENTRY *)priv->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
@@ -519,6 +522,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
       sh_video->num_frames=d_video->pack_no;
       priv->avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
       d_video->pos=video_chunk_pos;
+      
+      printf("V_SEEK:  pack=%d  pts=%5.3f  chunk=%d  \n",d_video->pack_no,priv->avi_video_pts,video_chunk_pos);
 
 // ------------ STEP 2: seek audio, find the right chunk & pos ------------
 
@@ -622,6 +627,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	    priv->idx_pos_v=video_chunk_pos;
 	    priv->idx_pos=(audio_chunk_pos<video_chunk_pos)?audio_chunk_pos:video_chunk_pos;
 	}
+	
+	d_video->pts=priv->avi_video_pts; // OSD
 
           if(verbose) printf("SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
             priv->idx_pos,audio_chunk_pos,video_chunk_pos,

@@ -227,13 +227,14 @@ static int audio_id=-1;
 static int video_id=-1;
 static int dvdsub_id=-1;
 static int vcd_track=0;
-char *stream_dump_name=NULL;
-int stream_dump_type=0;
+static char *stream_dump_name=NULL;
+static int stream_dump_type=0;
+
 int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
 int force_ni=0;
 
-float default_max_pts_correction=-1;//0.01f;
-float max_pts_correction=0;//default_max_pts_correction;
+static float default_max_pts_correction=-1;//0.01f;
+static float max_pts_correction=0;//default_max_pts_correction;
 #ifdef AVI_SYNC_BPS
 int pts_from_bps=1;
 #else
@@ -1031,6 +1032,7 @@ if(!sh_audio){
 //==================== START PLAYING =======================
 
 if(file_format==DEMUXER_TYPE_AVI && sh_audio){
+#if 0
   //a_pts=d_audio->pts;
   if(verbose) printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
   if(!pts_from_bps){
@@ -1045,6 +1047,7 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
   }
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
+#endif
 } else {
   pts_from_bps=0; // it must be 0 for mpeg/asf !
 }
@@ -1330,45 +1333,37 @@ if(1)
     float delay=(float)delay_bytes/(float)sh_audio->o_bps;
 
     if(pts_from_bps){
-      // PTS = (audio position)/(bytes per sec)
-//      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+#if 1
+        unsigned int samples=(sh_audio->audio.dwSampleSize)?
+          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
+          (d_audio->pack_no); // <- used for VBR audio
+        a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
+#else
       if(sh_audio->audio.dwSampleSize)
         a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
       else  // VBR:
         a_pts=d_audio->pack_no*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
-      v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-//      if(verbose)printf("%5.3f|",v_pts-d_video->pts);
+#endif
+//      v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+//      printf("V_PTS: PTS: %8.3f BPS: %8.3f  \n",d_video->pts,v_pts);
+      delay_corrected=1;
     } else {
-      if(!delay_corrected && d_audio->pts){
-//        float x=d_audio->pts-d_video->pts-(delay);
-        float x=d_audio->pts-d_video->pts-(delay+audio_delay);
-//        float y=-(delay+audio_delay);
-      float bps_a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
-      float bps_v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-        printf("Initial PTS delay: %5.3f sec ->%5.3f (bps: %5.3f)  audio_delay=%5.3f\n",x,2*sh_video->frametime,bps_a_pts-bps_v_pts-(delay+audio_delay),audio_delay);
-	x=0; //2*sh_video->frametime;
-//	initial_pts_delay+=x; audio_delay+=x;
-        delay_corrected=1;
-        if(verbose)
-        printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a.pts=%5.3f  v.pts=%5.3f\n",
-               audio_delay,delay,d_audio->pts,d_video->pts);
-      }
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
+      if(!delay_corrected) if(a_pts) delay_corrected=1;
       //printf("*** %5.3f ***\n",a_pts);
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 //      v_pts=d_video->pts-frame_time;
-      v_pts=d_video->pts;
+//      v_pts=d_video->pts;
     }
+    v_pts=d_video->pts;
 
-    if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
+    if(verbose>1)
+      printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       if(delay_corrected){
         float x;
 	AV_delay=(a_pts-delay-audio_delay)-v_pts;
-//        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts-audio_delay-delay,v_pts,x);
-        if(!quiet)
-	  printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,AV_delay);
         x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
@@ -1377,13 +1372,14 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        if(!quiet) printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",c_total,
-        (int)sh_video->num_frames,
-        (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
-        (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
-        (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
-        ,drop_frame_cnt
-	,output_quality
+        if(!quiet) printf("A:%6.1f V:%6.1f  A-V:%7.3f ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",
+	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
+          (int)sh_video->num_frames,
+          (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
+          ,drop_frame_cnt
+	  ,output_quality
         );
         fflush(stdout);
       }
@@ -1695,7 +1691,7 @@ if(rel_seek_secs){
       
       c_total=0;
       max_pts_correction=0.1;
-      force_redraw=5;
+//      force_redraw=5;
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
       drop_frame_cnt=0;
   
