@@ -1374,8 +1374,11 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 	printf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
 	return;
     }
-    cs->locked=0;
-    pthread_mutex_unlock(&(cs->mutex));
+    if (cs->locked)
+    {
+	cs->locked=0;
+	pthread_mutex_unlock(&(cs->mutex));
+    }
     return;
 }
 
