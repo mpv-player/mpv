@@ -8,7 +8,6 @@ extern int verbose; // defined in mplayer.c
 #include "stream.h"
 #include "demuxer.h"
 
-#include "asf.h"
 
 // defined at asfheader.c:
 extern unsigned char* asf_packet;
@@ -27,13 +26,15 @@ extern int asf_packetsize;
 //static int skip_video_frames=0;
 
 //BB: Moved to asf.h --------- FROM HERE --------
-#ifdef 0
+#ifndef STREAMING
 typedef struct __attribute__((packed)) {
   unsigned char streamno;
   unsigned char seq;
   unsigned long x;
   unsigned char flag;
 } ASF_segmhdr_t;
+#else
+#include "asf.h"
 #endif
 //BB: Moved to asf.h --------- TO HERE --------
 

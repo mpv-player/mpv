@@ -16,10 +16,9 @@ extern int verbose; // defined in mplayer.c
 #include "codec-cfg.h"
 #include "stheader.h"
 
-#include "asf.h"
 
 // BB: Moved to asf.h  --------------------- FROM HERE -------------------
-#ifdef 0
+#ifndef STREAMING
 typedef struct __attribute__((packed)) {
   unsigned char guid[16];
   unsigned long long size;
@@ -64,6 +63,8 @@ typedef struct  __attribute__((packed)) {
   unsigned short comment_size;
   unsigned short rating_size;
 } ASF_content_description_t;
+#else
+#include "asf.h"
 #endif
 // BB: Moved to asf.h  --------------------- TO HERE -------------------
 
