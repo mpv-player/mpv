@@ -40,7 +40,7 @@ extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags
 #error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
 #endif
 
-#if LIBAVCODEC_BUILD < 4620
+#if LIBAVCODEC_BUILD < 4624
 #warning your version of libavcodec is old, u might want to get a newer one
 #endif
 
@@ -154,7 +154,7 @@ struct config lavcopts_conf[]={
 
 struct vf_priv_s {
     aviwrite_stream_t* mux;
-    AVCodecContext context;
+    AVCodecContext *context;
     AVCodec *codec;
     FILE *stats_file;
 };
@@ -173,51 +173,49 @@ static int config(struct vf_instance_s* vf,
     mux_v->bih->biHeight=height;
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
 
-    memset(&lavc_venc_context, 0, sizeof(lavc_venc_context));
-
     printf("videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
 	mux_v->bih->biWidth, mux_v->bih->biHeight, mux_v->bih->biCompression,
 	    (char *)&mux_v->bih->biCompression);
 
-    lavc_venc_context.width = width;
-    lavc_venc_context.height = height;
+    lavc_venc_context->width = width;
+    lavc_venc_context->height = height;
     if (lavc_param_vbitrate > 16000) /* != -1 */
-	lavc_venc_context.bit_rate = lavc_param_vbitrate;
+	lavc_venc_context->bit_rate = lavc_param_vbitrate;
     else if (lavc_param_vbitrate >= 0) /* != -1 */
-	lavc_venc_context.bit_rate = lavc_param_vbitrate*1000;
+	lavc_venc_context->bit_rate = lavc_param_vbitrate*1000;
     else
-	lavc_venc_context.bit_rate = 800000; /* default */
-    lavc_venc_context.bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
-    lavc_venc_context.frame_rate = (float)mux_v->h.dwRate/mux_v->h.dwScale * FRAME_RATE_BASE;
-    lavc_venc_context.qmin= lavc_param_vqmin;
-    lavc_venc_context.qmax= lavc_param_vqmax;
-    lavc_venc_context.max_qdiff= lavc_param_vqdiff;
-    lavc_venc_context.qcompress= lavc_param_vqcompress;
-    lavc_venc_context.qblur= lavc_param_vqblur;
-    lavc_venc_context.max_b_frames= lavc_param_vmax_b_frames;
-    lavc_venc_context.b_quant_factor= lavc_param_vb_qfactor;
-    lavc_venc_context.rc_strategy= lavc_param_vrc_strategy;
-    lavc_venc_context.b_frame_strategy= lavc_param_vb_strategy;
+	lavc_venc_context->bit_rate = 800000; /* default */
+    lavc_venc_context->bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
+    lavc_venc_context->frame_rate = (float)mux_v->h.dwRate/mux_v->h.dwScale * FRAME_RATE_BASE;
+    lavc_venc_context->qmin= lavc_param_vqmin;
+    lavc_venc_context->qmax= lavc_param_vqmax;
+    lavc_venc_context->max_qdiff= lavc_param_vqdiff;
+    lavc_venc_context->qcompress= lavc_param_vqcompress;
+    lavc_venc_context->qblur= lavc_param_vqblur;
+    lavc_venc_context->max_b_frames= lavc_param_vmax_b_frames;
+    lavc_venc_context->b_quant_factor= lavc_param_vb_qfactor;
+    lavc_venc_context->rc_strategy= lavc_param_vrc_strategy;
+    lavc_venc_context->b_frame_strategy= lavc_param_vb_strategy;
 #ifdef CODEC_FLAG_PART
-    lavc_venc_context.b_quant_offset= lavc_param_vb_qoffset;
-    lavc_venc_context.luma_elim_threshold= lavc_param_luma_elim_threshold;
-    lavc_venc_context.chroma_elim_threshold= lavc_param_chroma_elim_threshold;
-    lavc_venc_context.rtp_payload_size= lavc_param_packet_size;
-    if(lavc_param_packet_size )lavc_venc_context.rtp_mode=1;
-    lavc_venc_context.strict_std_compliance= lavc_param_strict;
+    lavc_venc_context->b_quant_offset= lavc_param_vb_qoffset;
+    lavc_venc_context->luma_elim_threshold= lavc_param_luma_elim_threshold;
+    lavc_venc_context->chroma_elim_threshold= lavc_param_chroma_elim_threshold;
+    lavc_venc_context->rtp_payload_size= lavc_param_packet_size;
+    if(lavc_param_packet_size )lavc_venc_context->rtp_mode=1;
+    lavc_venc_context->strict_std_compliance= lavc_param_strict;
 #endif
 #if LIBAVCODEC_BUILD >= 4620
-    lavc_venc_context.i_quant_factor= lavc_param_vi_qfactor;
-    lavc_venc_context.i_quant_offset= lavc_param_vi_qoffset;
-    lavc_venc_context.rc_qsquish= lavc_param_rc_qsquish;
-    lavc_venc_context.rc_qmod_amp= lavc_param_rc_qmod_amp;
-    lavc_venc_context.rc_qmod_freq= lavc_param_rc_qmod_freq;
-    lavc_venc_context.rc_eq= lavc_param_rc_eq;
-    lavc_venc_context.rc_max_rate= lavc_param_rc_max_rate*1000;
-    lavc_venc_context.rc_min_rate= lavc_param_rc_min_rate*1000;
-    lavc_venc_context.rc_buffer_size= lavc_param_rc_buffer_size*1000;
-    lavc_venc_context.rc_buffer_aggressivity= lavc_param_rc_buffer_aggressivity;
-    lavc_venc_context.rc_initial_cplx= lavc_param_rc_initial_cplx;
+    lavc_venc_context->i_quant_factor= lavc_param_vi_qfactor;
+    lavc_venc_context->i_quant_offset= lavc_param_vi_qoffset;
+    lavc_venc_context->rc_qsquish= lavc_param_rc_qsquish;
+    lavc_venc_context->rc_qmod_amp= lavc_param_rc_qmod_amp;
+    lavc_venc_context->rc_qmod_freq= lavc_param_rc_qmod_freq;
+    lavc_venc_context->rc_eq= lavc_param_rc_eq;
+    lavc_venc_context->rc_max_rate= lavc_param_rc_max_rate*1000;
+    lavc_venc_context->rc_min_rate= lavc_param_rc_min_rate*1000;
+    lavc_venc_context->rc_buffer_size= lavc_param_rc_buffer_size*1000;
+    lavc_venc_context->rc_buffer_aggressivity= lavc_param_rc_buffer_aggressivity;
+    lavc_venc_context->rc_initial_cplx= lavc_param_rc_initial_cplx;
 
     p= lavc_param_rc_override_string;
     for(i=0; p; i++){
@@ -227,30 +225,30 @@ static int config(struct vf_instance_s* vf,
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"error parsing vrc_q\n");
             return 0;
         }
-        lavc_venc_context.rc_override= 
-            realloc(lavc_venc_context.rc_override, sizeof(RcOverride)*(i+1));
-        lavc_venc_context.rc_override[i].start_frame= start;
-        lavc_venc_context.rc_override[i].end_frame  = end;
+        lavc_venc_context->rc_override= 
+            realloc(lavc_venc_context->rc_override, sizeof(RcOverride)*(i+1));
+        lavc_venc_context->rc_override[i].start_frame= start;
+        lavc_venc_context->rc_override[i].end_frame  = end;
         if(q>0){
-            lavc_venc_context.rc_override[i].qscale= q;
-            lavc_venc_context.rc_override[i].quality_factor= 1.0;
+            lavc_venc_context->rc_override[i].qscale= q;
+            lavc_venc_context->rc_override[i].quality_factor= 1.0;
         }
         else{
-            lavc_venc_context.rc_override[i].qscale= 0;
-            lavc_venc_context.rc_override[i].quality_factor= -q/100.0;
+            lavc_venc_context->rc_override[i].qscale= 0;
+            lavc_venc_context->rc_override[i].quality_factor= -q/100.0;
         }
         p= strchr(p, '/');
         if(p) p++;
     }
-    lavc_venc_context.rc_override_count=i;
+    lavc_venc_context->rc_override_count=i;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4619
-    lavc_venc_context.mpeg_quant=lavc_param_mpeg_quant;
+    lavc_venc_context->mpeg_quant=lavc_param_mpeg_quant;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4621
-    lavc_venc_context.dct_algo= lavc_param_fdct;
+    lavc_venc_context->dct_algo= lavc_param_fdct;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4623
@@ -258,38 +256,38 @@ static int config(struct vf_instance_s* vf,
     {
 	/* 625 means CIF */
 	if (lavc_param_aspect == (float)(4.0/3.0))
-	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_4_3_625;
+	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_4_3_625;
 	else if (lavc_param_aspect == (float)(16.0/9.0))
-	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_16_9_625;
+	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_16_9_625;
 	else if (lavc_param_aspect == (float)(221.0/100.0))
 	{
-    	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_EXTENDED;
-	    lavc_venc_context.aspected_width = 221;
-	    lavc_venc_context.aspected_height = 100;
+    	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_EXTENDED;
+	    lavc_venc_context->aspected_width = 221;
+	    lavc_venc_context->aspected_height = 100;
 	}
 	else
 	{
 	    printf("Unsupported aspect ratio (%f)\n", lavc_param_aspect);
 	}
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio_info: %d\n", lavc_venc_context.aspect_ratio_info);
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_width: %d\n", lavc_venc_context.aspected_width);
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_height: %d\n", lavc_venc_context.aspected_height);
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio_info: %d\n", lavc_venc_context->aspect_ratio_info);
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_width: %d\n", lavc_venc_context->aspected_width);
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_height: %d\n", lavc_venc_context->aspected_height);
     }
 #endif
 
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
-	lavc_venc_context.gop_size = lavc_param_keyint;
+	lavc_venc_context->gop_size = lavc_param_keyint;
     else
-	lavc_venc_context.gop_size = 250; /* default */
+	lavc_venc_context->gop_size = 250; /* default */
 
     if (lavc_param_vhq)
     {
 	printf("High quality encoding selected (non real time)!\n");
-	lavc_venc_context.flags = CODEC_FLAG_HQ;
+	lavc_venc_context->flags = CODEC_FLAG_HQ;
     }
     else
-	lavc_venc_context.flags = 0;
+	lavc_venc_context->flags = 0;
 
      /* 4mv is currently buggy with B frames */
     if (lavc_param_vmax_b_frames > 0 && lavc_param_v4mv) {
@@ -297,12 +295,12 @@ static int config(struct vf_instance_s* vf,
         lavc_param_v4mv = 0;
     }
 
-    lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
+    lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
 #ifdef CODEC_FLAG_PART
-    lavc_venc_context.flags|= lavc_param_data_partitioning;
+    lavc_venc_context->flags|= lavc_param_data_partitioning;
 #endif
 #if LIBAVCODEC_BUILD >= 4614
-    if(lavc_param_gray) lavc_venc_context.flags|= CODEC_FLAG_GRAY;
+    if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 #endif
 
 
@@ -313,7 +311,7 @@ static int config(struct vf_instance_s* vf,
     switch(lavc_param_vpass?lavc_param_vpass:pass){
 #endif
     case 1: 
-	lavc_venc_context.flags|= CODEC_FLAG_PASS1; 
+	lavc_venc_context->flags|= CODEC_FLAG_PASS1; 
 #if LIBAVCODEC_BUILD >= 4620
 	stats_file= fopen(passtmpfile, "w");
 	if(stats_file==NULL){
@@ -323,7 +321,7 @@ static int config(struct vf_instance_s* vf,
 #endif
 	break;
     case 2:
-	lavc_venc_context.flags|= CODEC_FLAG_PASS2; 
+	lavc_venc_context->flags|= CODEC_FLAG_PASS2; 
 #if LIBAVCODEC_BUILD >= 4620
 	stats_file= fopen(passtmpfile, "r");
 	if(stats_file==NULL){
@@ -334,10 +332,10 @@ static int config(struct vf_instance_s* vf,
 	size= ftell(stats_file);
 	fseek(stats_file, 0, SEEK_SET);
 	
-	lavc_venc_context.stats_in= malloc(size + 1);
-	lavc_venc_context.stats_in[size]=0;
+	lavc_venc_context->stats_in= malloc(size + 1);
+	lavc_venc_context->stats_in[size]=0;
 
-	if(fread(lavc_venc_context.stats_in, size, 1, stats_file)<1){
+	if(fread(lavc_venc_context->stats_in, size, 1, stats_file)<1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: reading from filename=%s\n", passtmpfile);
             return 0;
 	}        
@@ -349,15 +347,15 @@ static int config(struct vf_instance_s* vf,
     // workaround Juanjo's stupid incompatible change:
     motion_estimation_method = lavc_param_vme;
 #else
-    lavc_venc_context.me_method = ME_ZERO+lavc_param_vme;
+    lavc_venc_context->me_method = ME_ZERO+lavc_param_vme;
 #endif
 
     /* fixed qscale :p */
     if (lavc_param_vqscale)
     {
 	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
-	lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
-	lavc_venc_context.quality = lavc_param_vqscale;
+	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
+	lavc_venc_context->quality = lavc_param_vqscale;
     }
 
 #ifdef HAVE_DIVX4ENCORE
@@ -370,32 +368,32 @@ static int config(struct vf_instance_s* vf,
 	break;
     case 2:
         if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
-		    lavc_venc_context.bit_rate,
+		    lavc_venc_context->bit_rate,
 		    (float)mux_v->h.dwRate/mux_v->h.dwScale,
 		    100, /* crispness */
 		    5) == -1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
 	    pass=0;
 	} else
-	    lavc_venc_context.flags|=CODEC_FLAG_QSCALE|CODEC_FLAG_TYPE; // VBR
+	    lavc_venc_context->flags|=CODEC_FLAG_QSCALE|CODEC_FLAG_TYPE; // VBR
 	break;
     }
 #endif
 
-    if (avcodec_open(&lavc_venc_context, vf->priv->codec) != 0) {
+    if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
 	return 0;
     }
 
-    if (lavc_venc_context.codec->encode == NULL) {
+    if (lavc_venc_context->codec->encode == NULL) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,"avcodec init failed (ctx->codec->encode == NULL)!\n");
 	return 0;
     }
     
 #if LIBAVCODEC_BUILD >= 4620
     /* free second pass buffer, its not needed anymore */
-    if(lavc_venc_context.stats_in) free(lavc_venc_context.stats_in);
-    lavc_venc_context.stats_in= NULL;
+    if(lavc_venc_context->stats_in) free(lavc_venc_context->stats_in);
+    lavc_venc_context->stats_in= NULL;
 #endif
     
     return 1;
@@ -429,50 +427,53 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 #ifdef HAVE_DIVX4ENCORE
     if(pass==2){ // handle 2-pass:
-	lavc_venc_context.flags|=CODEC_FLAG_QSCALE; // enable VBR
-	lavc_venc_context.quality=VbrControl_get_quant();
-	lavc_venc_context.key_frame=VbrControl_get_intra();
-	lavc_venc_context.gop_size=0x3fffffff;
-	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
+	lavc_venc_context->flags|=CODEC_FLAG_QSCALE; // enable VBR
+	lavc_venc_context->quality=VbrControl_get_quant();
+	lavc_venc_context->key_frame=VbrControl_get_intra();
+	lavc_venc_context->gop_size=0x3fffffff;
+	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
-	VbrControl_update_2pass_vbr_encoding(lavc_venc_context.mv_bits,
-	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
+	VbrControl_update_2pass_vbr_encoding(lavc_venc_context->mv_bits,
+	      lavc_venc_context->i_tex_bits+lavc_venc_context->p_tex_bits,
 	      8*out_size);
     } else
 #endif
     {
-	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
+	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
 #ifdef HAVE_DIVX4ENCORE
 	if(pass==1){
-	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context.key_frame,
-	      lavc_venc_context.mv_bits,
-	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
-	      8*out_size, lavc_venc_context.quality);
+	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context->key_frame,
+	      lavc_venc_context->mv_bits,
+	      lavc_venc_context->i_tex_bits+lavc_venc_context->p_tex_bits,
+	      8*out_size, lavc_venc_context->quality);
 	}
 #endif
     }
 
-    mencoder_write_chunk(mux_v,out_size,lavc_venc_context.key_frame?0x10:0);
+    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->key_frame?0x10:0);
     
 #if LIBAVCODEC_BUILD >= 4620
     /* store stats if there are any */
-    if(lavc_venc_context.stats_out && stats_file) 
-        fprintf(stats_file, "%s", lavc_venc_context.stats_out);
+    if(lavc_venc_context->stats_out && stats_file) 
+        fprintf(stats_file, "%s", lavc_venc_context->stats_out);
 #endif
     return 1;
 }
 
 static void uninit(struct vf_instance_s* vf){
-    avcodec_close(&lavc_venc_context);
+    avcodec_close(lavc_venc_context);
 
 #if LIBAVCODEC_BUILD >= 4620
     if(stats_file) fclose(stats_file);
     
     /* free rc_override */
-    if(lavc_venc_context.rc_override) free(lavc_venc_context.rc_override);
-    lavc_venc_context.rc_override= NULL;
+    if(lavc_venc_context->rc_override) free(lavc_venc_context->rc_override);
+    lavc_venc_context->rc_override= NULL;
 #endif
+
+    if(vf->priv->context) free(vf->priv->context);
+    vf->priv->context= NULL;
 }
 
 //===========================================================================//
@@ -543,6 +544,13 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_MissingLAVCcodec, lavc_param_vcodec);
 	return 0;
     }
+
+#if LIBAVCODEC_BUILD >= 4624
+    vf->priv->context = avcodec_alloc_context();
+#else
+    vf->priv->context = malloc(sizeof(AVCodecContext));
+    memset(vf->priv->context, 0, sizeof(AVCodecContext));
+#endif
 
     return 1;
 }

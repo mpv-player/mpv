@@ -131,9 +131,13 @@ static int init(sh_video_t *sh){
     if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
 #endif
-            
+
+#if LIBAVCODEC_BUILD >= 4624
+    ctx->avctx = avcodec_alloc_context();
+#else
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
+#endif
     avctx = ctx->avctx;
 
 #if LIBAVCODEC_BUILD > 4615
