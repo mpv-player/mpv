@@ -1484,7 +1484,10 @@ mp_input_init(void) {
   if(!file)
     return;
   
-  if(! mp_input_parse_config(file)) {
+  if( mp_input_parse_config(file)) {
+    free(file); // release the buffer created by get_path()
+  }
+  else {
     // Try global conf dir
     file = MPLAYER_CONFDIR "/input.conf";
     if(! mp_input_parse_config(file))

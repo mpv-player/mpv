@@ -723,6 +723,7 @@ void update_set_of_subtitles()
 int main(int argc,char* argv[]){
 
 
+char * mem_ptr;
 
 static demux_stream_t *d_audio=NULL;
 static demux_stream_t *d_video=NULL;
@@ -904,7 +905,7 @@ int gui_no_filename=0;
 
 // check codec.conf
 if(!codecs_file || !parse_codec_cfg(codecs_file)){
-  if(!parse_codec_cfg(get_path("codecs.conf"))){
+  if(!parse_codec_cfg(mem_ptr=get_path("codecs.conf"))){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
       if(!parse_codec_cfg(NULL)){
 	mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
@@ -913,6 +914,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
     }
   }
+  free( mem_ptr ); // release the buffer created by get_path()
 }
 
 #if 0
@@ -1083,7 +1085,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
   } else {
       // try default:
-       vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
+       vo_font=read_font_desc( mem_ptr=get_path("font/font.desc"),font_factor,verbose>1);
+       free(mem_ptr); // release the buffer created by get_path()
        if(!vo_font)
        vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
@@ -1649,11 +1652,13 @@ if(sh_video) {
     char *psub = get_path( "sub/" );
     char **tmp = sub_filenames((psub ? psub : ""), filename);
     char **tmp2 = tmp;
+    free(psub); // release the buffer created by get_path() above
     while (*tmp2)
         add_subtitles (*tmp2++, sh_video->fps, 0);
     free(tmp);
     if (set_of_sub_size == 0)
-        add_subtitles (get_path("default.sub"), sh_video->fps, 1);
+        add_subtitles (mem_ptr=get_path("default.sub"), sh_video->fps, 1);
+    free(mem_ptr); // release the buffer created by get_path()
     if (set_of_sub_size > 0)
         add_subtitles (NULL, sh_video->fps, 1);
   }
