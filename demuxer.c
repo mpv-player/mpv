@@ -51,6 +51,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   d->stream=stream;
   d->movi_start=stream->start_pos;
   d->movi_end=stream->end_pos;
+  d->seekable=1;
   d->synced=0;
   d->filepos=0;
   d->audio=new_demuxer_stream(d,a_id);
@@ -413,7 +414,7 @@ switch(file_format){
   break;
  }
  case DEMUXER_TYPE_AVI: {
-  return demux_open_avi(demuxer);
+  return (demuxer_t*) demux_open_avi(demuxer);
 //  break;
  }
  case DEMUXER_TYPE_ASF: {
@@ -492,10 +493,13 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
 
-//if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
-//    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
-//    return 0;
-//}
+if(!demuxer->seekable){
+    if(demuxer->file_format==DEMUXER_TYPE_AVI)
+	mp_msg(MSGT_SEEK,MSGL_WARN,"Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
+    else
+	mp_msg(MSGT_SEEK,MSGL_WARN,"Can't seek in this file!  \n");
+    return 0;
+}
 
     // clear demux buffers:
     if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}

@@ -62,6 +62,7 @@ typedef struct demuxer_st {
   int file_format;  // file format: mpeg/avi/asf
   off_t movi_start;
   off_t movi_end;
+  int seekable;  // flag
   //
   demux_stream_t *audio; // audio buffer/demuxer
   demux_stream_t *video; // video buffer/demuxer

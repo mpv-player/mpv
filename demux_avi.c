@@ -433,6 +433,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 	  priv->idx_pos_v=demuxer->movi_start;
 	  pts_from_bps=1; // force BPS sync!
       }
+      demuxer->seekable=0;
   }
   if(!ds_fill_buffer(d_video)){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: missing video stream!? contact the author, it may be a bug :(\n");
