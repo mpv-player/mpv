@@ -34,52 +34,52 @@ I. TECH SIDE:
   As you probably got a restricted CVS-only shell, it's not trivial:
 
     ssh LOGIN@mplayerhq.hu passwd
-  
+
   Replace LOGIN with your login name. Leave 'passwd' unchanged, it's a command.
-  
+
   Note: If you need a real shell for something, tell A'rpi.
 
 2. Checking out development source tree:
-  
+
     export CVS_RSH=ssh
     cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co -P main
-  
+
   Replace LOGIN with your login name.
   NOTE: cvs -d:pserver: mode doesn't allow writing, even with password!
-  
+
 3. Committing changes:
 
     cvs -z3 commit -m "comment - what you changed and why" filename(s)
-  
+
   Do not use comments such as: "bug fix." or "files changed" or "dunno".
   You don't have to include the filename in the comment, as comments are linked
   to files. If you have different comments for different files, commit them
   separately, not at the same time. If you leave out -m at the command line you
   will be prompted for a comment in an editor (usually vi).
-  
+
 4. Adding new files/dirs:
 
     cvs add filename/dirname
-  
+
 5. Removing files:
 
     rm filename
     cvs remove filename
     cvs commit -m "reason for removing this file" filename
-  
+
 6. Checking changes:
-  
+
     cvs -z3 diff -u filename(s)
-  
+
   It's recommended to check changes before committing. especially if you forget
   what you changed :)
   This way you will see if your patch has debug stuff or indentation changes
   and you can fix it before committing and triggering me to use cvs-backup.
-  
+
 7. Checking changelog:
 
-  cvs -z3 log filename(s)
-  
+    cvs -z3 log filename(s)
+
 8. Renaming/moving files or content of files, removing empty directories:
 
   You CANNOT do that. Ask the CVS server admin (A'rpi) to do it!
@@ -98,7 +98,7 @@ I. TECH SIDE:
   you can use the 'cvs admin -o' command. Assuming that 1.123 is the latest
   version of the file and the one you want to remove
 
-  cvs -z3 admin -o1.123 filename
+    cvs -z3 admin -o1.123 filename
 
   Do NOT do this unless you really know what you are doing and the version you
   are removing is the last version, e.g. there were no commits after yours.
@@ -133,13 +133,13 @@ II. POLICY / RULES:
    for doing things the way we do. Send them as patches to the mailing list,
    and if the code maintainers say OK, you may commit. This does not apply to
    files written and/or maintained by you.
-   
+
 5. We refuse source indentation and other cosmetical changes, such commits will
    be rejected and removed. Every developer has his own indentation style, you
    should not change it. Of course if you (re)write something, you can use your
    own style... (Many projects force a given indentation style - we don't.)
-   
-   Note: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
+
+   NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
    do NOT change the indentation of the inner part (move it right)!
 
 6. Always fill out the comment at committing (-m switch of CVS, or in the
@@ -163,7 +163,7 @@ II. POLICY / RULES:
    breaking docs or getting translations or the homepage desynced. If you are
    unsure about this, send a patch to dev-eng, the documentation maintainers
    will review and commit your stuff.
-   
+
 Also read patches.txt !!!!
 
 We think our rules are not too hard. If you have comments, contact us.
@@ -198,7 +198,7 @@ that my CVS commits are proper and won't get me banned.
    diff -Nur -x "CVS" -x ".*" main main.dev > dev2stable
    dev2stable is the filename for the patchfile, it doesn't matter what you
    call it.
-   
+
 3. Now comes one of the tricky parts, editing the patch. I prefer using mcedit
    (comes with Midnight Commander) since it does syntax highlighting in patches
    (= it uses colors to identify lines =), But most ASCII editors should do
@@ -213,12 +213,12 @@ that my CVS commits are proper and won't get me banned.
        EVERYTHING from the diff -Nur... line until the next diff -Nur... line
        are changes to the file specified after the diff options, and ONLY that
        file.
-       
+
      * Lines containing "Binary files..." if you add the 'a' switch to -N(a)ur
        binary files will be added to the patch as well, making it huge and
        putting a lot of unnecessary data in it (since you seldom commit any
        binaries).
-       
+
      * If you find changes within a diff block that you don't want to commit
        you can delete them if they are the only changes ranging from the
        @@ -x,y +x,y @@ until the line before the next @@ -x,y +x,y @@. You
@@ -231,29 +231,29 @@ that my CVS commits are proper and won't get me banned.
          + new_option;
          @@ -65,13 +65,3 @@
          ...
-         
+
          OK:
          ...
          @@ -65,13 +65,3 @@
          ...
-         
+
          Will break patch:
          ...
          @@ -15,34 +15,6 @@
            old_option;
          @@ -65,13 +65,3 @@
          ...
-       
+
        When I end up in a situation where I have to remove just some lines from
        a block, I leave it alone, remember (write down) which file it is in and
        then edit the file in "main" after I've applied the patch.
-       
+
      * Now it's time for applying the patch to the "main" (stable) directory.
        This should be done in two steps:
          1. enter "main" and run
- 
+
                patch -p1 --dry-run < ../dev2stable
- 
+
  	    -p1 means that you are one level deep (that you have entered the
             "main" directory and that should be stripped when patching, if you
             run it from "~/mplayer" you would use -p0).
@@ -263,10 +263,10 @@ that my CVS commits are proper and won't get me banned.
  	    "../dev2stable" is your patchfile. (don't forget the '<')
  	    If the dry run fails, check the line it failed on and figure out
             why it failed, make a new patch and try again.
- 
+
  	2. OK, you finally have a working patch, remove --dry-run, patch "main"
            and you are done with the patching part =).
- 
+
 4. It's almost time for the final step, committing the changes. But first you
    MUST make sure your changes compile without breaking anything and that it
    follows the Policy mentioned in section 2. (Read it until your eyes are
@@ -276,7 +276,7 @@ that my CVS commits are proper and won't get me banned.
    new files (discuss it on dev-eng before adding new files!).
    Now to make sure your additions follow policy do the following on every file
    you will commit:
-  
+
      cvs -z3 diff -u <filename> > <filename.d>
 
    Of course the output file (<filename.d>) can have any name you want. This
@@ -307,7 +307,7 @@ that my CVS commits are proper and won't get me banned.
 
    The latter will bring up your default text editor for writing comments (I
    prefer this method).
-   
+
 You are done, congratulations. If you are certain you have followed all of the
 policy you shouldn't have any trouble with the CVS maintainers at all.
 At first I thought the policy was too strict, but I discussed it with A'rpi and
