@@ -16,7 +16,6 @@
 #include "../app.h"
 
 #include "../wm/wskeys.h"
-#include "../wm/widget.h"
 #include "../interface.h"
 
 #include "widgets.h"

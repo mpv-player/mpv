@@ -1,12 +1,32 @@
 
 // main window
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include "../app.h"
+#include "../skin/font.h"
+#include "../wm/ws.h"
+
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../../libvo/x11_common.h"
+
 #include "../../libmpdemux/stream.h"
 #include "../../mixer.h"
 #include "../../libvo/sub.h"
 #include "../../mplayer.h"
 
+#include "play.h"
+#include "widgets.h"
+
 extern unsigned int GetTimerMS( void );
+extern void mplHideMenu( int mx,int my,int w );
+extern void mplShowMenu( int mx,int my );
+extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
@@ -470,7 +490,6 @@ set_volume:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
-        mplRedrawTimer=mplRedrawTimerConst;
         break;
 // --- system events
 #ifdef MP_DEBUG

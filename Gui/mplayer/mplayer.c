@@ -1,47 +1,28 @@
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <inttypes.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
-#include "./mplayer.h"
 #include "../app.h"
-#include "../cfg.h"
-#include "../interface.h"
 #include "../skin/skin.h"
-#include "../skin/font.h"
 #include "../wm/ws.h"
-#include "../wm/wskeys.h"
-#include "../wm/widget.h"
 #include "../wm/wsxdnd.h"
-#include "../bitmap/bitmap.h"
 
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
-#include "../../libmpdemux/stream.h"
-#include "../../mp_msg.h"
-
-#include <gdk/gdkprivate.h>
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-
-#define mplRedrawTimerConst 5
-
-int mplRedrawTimer = mplRedrawTimerConst;
 
 void mplEventHandling( int msg,float param );
+
+extern void mplMainDraw( wsParamDisplay );
+extern void mplEventHandling( int msg,float param );
+extern void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY );
+extern void mplMainKeyHandle( int KeyCode,int Type,int Key );
+extern void mplDandDHandler(int num,char** files);
+extern void mplSubDraw( wsParamDisplay );
+extern void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY );
 
 #include "widgets.h"
 #include "play.h"
 #include "menu.h"
-#include "mw.h"
-#include "sw.h"
-#include "widgets.h"
 
 void mplInit( void * disp )
 {
