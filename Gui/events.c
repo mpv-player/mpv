@@ -44,4 +44,4 @@ evName evNames[] =
   { evHelp,		 "evHelp"	       }	
  };
 
-const int evBoxs = sizeof( evNames ) / sizeof( evName );
+int evBoxs = sizeof( evNames ) / sizeof( evName );
