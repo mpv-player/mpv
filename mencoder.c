@@ -301,9 +301,9 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
 static void mencoder_exit(int level, char *how)
 {
     if (how)
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ExitingHow, mp_gettext(how));
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ExitingHow, mp_gettext(how));
     else
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_Exiting);
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_Exiting);
 
     exit(level);
 }
@@ -471,7 +471,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
-    if(demuxer2) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_UsingPass3ControllFile, frameno_filename);
+    if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControllFile, frameno_filename);
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
 
@@ -533,11 +533,11 @@ play_next_file:
   stream=open_stream(filename,0,&file_format);
 
   if(!stream){
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotOpenFile_Device);
+	mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_CannotOpenFile_Device);
 	mencoder_exit(1,NULL);
   }
 
-  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_OpenedStream, file_format, (int)(stream->start_pos), (int)(stream->end_pos));
+  mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_OpenedStream, file_format, (int)(stream->start_pos), (int)(stream->end_pos));
 
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
@@ -573,7 +573,7 @@ sh_video=d_video->sh;
   }
 
   if(!video_read_properties(sh_video)){
-      mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotReadVideoProperties);
+      mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_CannotReadVideoProperties);
       mencoder_exit(1,NULL);
   }
 
@@ -687,7 +687,7 @@ spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
-  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotOpenOutputFile, out_filename);
+  mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotOpenOutputFile, out_filename);
   mencoder_exit(1,NULL);
 }
 
@@ -741,7 +741,7 @@ case VCODEC_COPY:
 	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     }
 	}
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_VCodecFramecopy,
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_VCodecFramecopy,
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
 
@@ -830,7 +830,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 {
     mux_v->bih->biCompression = mmioFOURCC(force_fourcc[0], force_fourcc[1],
 					    force_fourcc[2], force_fourcc[3]);
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ForcingOutputFourcc,
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ForcingOutputFourcc,
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
@@ -881,12 +881,12 @@ case ACODEC_COPY:
     }
     mux_a->h.dwRate *= playback_speed;
     mux_a->wf->nSamplesPerSec *= playback_speed;
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ACodecFramecopy,
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
 	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
 	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
     break;
 case ACODEC_PCM:
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CBRPCMAudioSelected);
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_CBRPCMAudioSelected);
     mux_a->h.dwScale=1;
     mux_a->h.dwRate=force_srate?force_srate:new_srate;
     mux_a->wf=malloc(sizeof(WAVEFORMATEX));
@@ -910,7 +910,7 @@ case ACODEC_PCM:
     break;
 #ifdef HAVE_MP3LAME
 case ACODEC_VBRMP3:
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MP3AudioSelected);
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwRate=force_srate?force_srate:new_srate;
     mux_a->h.dwScale=(mux_a->h.dwRate<32000)?576:1152; // samples/frame
@@ -1009,7 +1009,7 @@ case ACODEC_LAVC:
     lavc_abuf = malloc(lavc_actx->frame_size * 2 * lavc_actx->channels);
     if(lavc_abuf == NULL)
     {
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotAllocateBytes, lavc_actx->frame_size * 2 * lavc_actx->channels); // Converted from fprintf(stderr, ...);
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotAllocateBytes, lavc_actx->frame_size * 2 * lavc_actx->channels);
 	exit(1);
     }
 
@@ -1156,14 +1156,14 @@ if (verbose>1) print_wave_header(mux_a->wf);
 
 if(audio_delay!=0.0){
     mux_a->h.dwStart=audio_delay*mux_a->h.dwRate/mux_a->h.dwScale;
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
 }
 if(muxer->fix_stream_parameters)
 	  muxer_stream_fix_parameters(muxer,mux_a);
 
 } // if(sh_audio)
 
-mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_WritingAVIHeader);
+mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_WritingAVIHeader);
 if (muxer->cont_write_header) muxer_write_header(muxer);
 
 decoded_frameno=0;
@@ -1193,14 +1193,14 @@ if(lame_param_vbr){  // VBR:
 if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
 if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
 if(lame_param_scale>0) {
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SettingAudioInputGain, lame_param_scale);
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_SettingAudioInputGain, lame_param_scale);
     lame_set_scale(lame,lame_param_scale);
 }
 if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
 if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
 #if HAVE_MP3LAME >= 392
 if(lame_param_preset != NULL){
-  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LamePresetEquals,lame_param_preset);
+  mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_LamePresetEquals,lame_param_preset);
   lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset);
 }
 #endif
@@ -1266,7 +1266,7 @@ else if (sh_audio) {
 			break;
 #ifdef HAVE_MP3LAME
 		case ACODEC_VBRMP3:
-			mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MP3AudioSelected);
+			mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
 			out_format = AF_FORMAT_S16_NE;
 			out_minsize = 4608;
 			out_maxsize = mux_a->h.dwRate*mux_a->wf->nChannels*2;
@@ -1327,18 +1327,18 @@ if (seek_to_sec) {
 if (out_file_format == MUXER_TYPE_MPEG)
 	{
 	if (audio_preload > 0.4) {
-	  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LimitingAudioPreload);
+	  mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_LimitingAudioPreload);
 	  audio_preload = 0.4;
 	}
 	if (audio_density < 4) {
-	  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_IncreasingAudioDensity);
+	  mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_IncreasingAudioDensity);
 	  audio_density = 4;
 	}
 	}
 
 if(file_format == DEMUXER_TYPE_TV) 
 	{
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection);
+	mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection);
 	audio_preload = 0.0;
 	default_max_pts_correction = 0;
 	}
@@ -1868,15 +1868,15 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     mux_a->h.dwScale=1;
     mux_a->wf->nBlockAlign=1;
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CBRAudioByterate,
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_CBRAudioByterate,
 	    mux_a->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize);
 }
 #endif
 
-mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_WritingAVIIndex);
+mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_WritingAVIIndex);
 if (muxer->cont_write_index) muxer_write_index(muxer);
 muxer_f_size=ftello(muxer_f);
-mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_FixupAVIHeader);
+mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
 if (muxer->cont_write_header) muxer_write_header(muxer); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
@@ -1887,18 +1887,18 @@ if(vobsub_writer)
     vobsub_out_close(vobsub_writer);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"650MB",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"700MB",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"800MB",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 650MB",(int)((2*650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 700MB",(int)((2*700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 800MB",(int)((2*800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"650MB",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"700MB",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"800MB",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"2 x 650MB",(int)((2*650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"2 x 700MB",(int)((2*700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_RecommendedVideoBitrate,"2 x 800MB",(int)((2*800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
 
-mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_VideoStreamResult,
+mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_VideoStreamResult,
     (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (int)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
-mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_AudioStreamResult,
+mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
 if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
@@ -1986,7 +1986,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
     int mono = 0;
 
     if (strcmp(preset_name, "help") == 0) {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+        mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_LameVersion, get_lame_version(), get_lame_url());
         lame_presets_longinfo_dm( stdout );
         return -1;
     }
@@ -2087,16 +2087,16 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         }
         else {
-            mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-            mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_InvalidBitrateForLamePreset);
+            mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+            mp_msg(MSGT_MENCODER, MSGL_ERR, MSGTR_InvalidBitrateForLamePreset);
             return -1;
         }
     }
 
 
 
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_InvalidLamePresetOptions);
+    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+    mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidLamePresetOptions);
     mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
 }
 #endif
@@ -2106,7 +2106,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
    taken out of presets_longinfo_dm in lame-3.93.1/frontend/parse.c and modified */
 static void  lame_presets_longinfo_dm ( FILE* msgfp )
 {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LamePresetsLongInfo);
+        mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_LamePresetsLongInfo);
 	mencoder_exit(0, NULL);
 }
 #endif
