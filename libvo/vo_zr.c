@@ -125,7 +125,7 @@ int zoran_getcap() {
 		mp_msg(MSGT_VO, MSGL_ERR, "error getting video capabilities from %s\n");
 		return 1;
 	}
-	mp_msg(MSGT_VO, MSGL_V, "zr36067 reports: maxwidth=%d, maxheight=%d\n", vc.maxwidth, vc.maxheight);
+	mp_msg(MSGT_VO, MSGL_V, "zr: MJPEG card reports maxwidth=%d, maxheight=%d\n", vc.maxwidth, vc.maxheight);
 	
 	return 0;
 }
@@ -133,8 +133,8 @@ int zoran_getcap() {
 int init_zoran(int zrhdec, int zrvdec) {
 	/* center the image, and stretch it as far as possible (try to keep
 	 * aspect) and check if it fits */
-	if (image_width/hdec > vc.maxwidth) {
-		mp_msg(MSGT_VO, MSGL_ERR, "movie to be played is too wide, max width currenty %d\n", vc.maxwidth);
+	if (image_width > vc.maxwidth) {
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too wide, max width currenty %d\n", vc.maxwidth);
 		return 1;
 	}
 
@@ -230,6 +230,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		g.height = height;
 		g.xoff = 0;
 		g.yoff = 0;
+		g.set = 1;
 	}
 	/* we must know the maximum resolution of the device
 	 * it differs for DC10+ and buz for example */
@@ -246,6 +247,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		if (vdec == 2) {
 			fields = 1;
 		} else if (vdec == 4) {
+			fields = 1;
 			stretchy = 2;
 		}
 		stretchx = hdec;
@@ -286,6 +288,28 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 			hdec = 1;
 		}
 	}
+	/* It can be that the original frame was too big for display,
+	 * or that the width of the decimated image (for example) after
+	 * padding up to a multiple of 16 has become too big. (orig
+	 * width 720 (exactly right for the Buz) after decimation 360,
+	 * after padding up to a multiple of 16 368, display 736 -> too
+	 * large). In these situations we auto(re)crop. */
+	j = 16*((g.width - 1)/(hdec*16) + 1);
+	if (stretchx*j > vc.maxwidth) {
+		g.xoff += 2*((g.width - hdec*(j-16))/4);
+		/* g.off must be a multiple of 2 */
+		g.width = hdec*(j - 16);
+		g.set = 0; /* we abuse this field to report that g has changed*/
+	}
+	j = 8*fields*((g.height - 1)/(vdec*fields*8) + 1);
+	if (stretchy*j > vc.maxheight) {
+		g.yoff += 2*((g.height - vdec*(j - 8*fields))/4);
+		g.height = vdec*(j - 8*fields);
+		g.set = 0;
+	}
+	if (!g.set) 
+		mp_msg(MSGT_VO, MSGL_V, "zr: auto(re)cropping %dx%d+%d+%d to make the image fit on the screen\n", g.width, g.height, g.xoff, g.yoff);
+
 	/* the height must be a multiple of fields*8 and the width
 	 * must be a multiple of 16 */
 	/* add some black borders to make it so, and center the image*/
@@ -300,7 +324,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	off_c += (image_width - g.width)/4;
 	framenum = 0;
 	size = image_width*image_height;
-	mp_msg(MSGT_VO, MSGL_V, "input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width/hdec, height, g.width, g.height, image_width, image_height, off_y, off_c);
+	mp_msg(MSGT_VO, MSGL_V, "input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width, height, g.width, g.height, image_width, image_height, off_y, off_c);
 	
 	image = malloc(2*size); /* this buffer allows for YUV422 data,
 				 * so it is a bit too big for YUV420 */
