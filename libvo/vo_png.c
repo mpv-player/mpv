@@ -82,6 +82,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     //printf("Verbose level is %i\n", verbose);
     
     switch(format) {
+	case IMGFMT_BGR32:
+	     bpp = 24;
+	     cspace = BGR;
+	     image_data = malloc(image_width*image_height*3);
+	break;
 	case IMGFMT_BGR24:
 	     bpp = 24;
 	     cspace = BGR;
@@ -219,6 +224,12 @@ static uint32_t draw_frame(uint8_t * src[])
     
     snprintf (buf, 100, "%08d.png", ++framenum);
 
+    if (image_format == IMGFMT_BGR32)
+    {
+      rgb32to24(src[0], image_data, image_width * image_height * 4);
+      src[0] = image_data;
+    }
+
     png = create_png(buf);
 
     if(png.status){
@@ -309,6 +320,7 @@ query_format(uint32_t format)
     case IMGFMT_YV12:
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
+    case IMGFMT_BGR|32:
         return 1;
     }
     return 0;
