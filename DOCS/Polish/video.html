@@ -1,103 +1,18 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1. Video output devices</A></B></P>
-
-<TABLE BORDER=0>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>General:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 with optional SHM
-  extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11 using overlays with the Xvideo extension
-  (hardware YUV & scaling)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>OpenGL renderer, so far works only with:
-<UL><LI>all cards with Utah-GLX
-<LI>Matrox cards with X/DRI >=4.0.3
-<LI>Radeon with X/DRI CVS</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl2</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>OpenGL renderer, multiple textures version</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11 DGA extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to general framebuffers</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to SVGAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>
-&nbsp;&nbsp;<CODE>1.1.7:</CODE> supports software scaling<BR>
-&nbsp;&nbsp;<CODE>1.1.8:</CODE> supports Xvideo (hardware scaling/fullscreen)<BR>
-&nbsp;&nbsp;<CODE>1.2.0:</CODE> supports AAlib (-vo aa is very recommended, see below!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana,
-  Arial, Helvetica, sans-serif" size=2>similar to SDL</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>textmode rendering with AAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>directfb</TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Card specific:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 hardware
-  YUV overlay via the mga_vid device</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Matrox G200/G400 overlay (mga_vid) in X11
-  window<BR>
-(<I>Xv emulation on X 3.3.x!</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>Matrox G400 YUV support on framebuffer (obsoleted, use
-  mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) support (not yet tested, maybe
-  broken)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV support on tdfx
-  framebuffer (works!)</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Special:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>PNG files output (use -z switch to set
-  compression)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>PGM files output (for testing purposes or ffmpeg encoding)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>MD5sum output (for MPEG conformance tests)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Null output (for speed tests/benchmarking)</TD><TR>
-</TABLE>
-
-<P>NOTE: <I>check the following subsections for details and requirements!</I></P>
 
 
 <P><B><A NAME=2.3.1.1>2.3.1.1.  Setting up MTRR</A></B></P>
@@ -161,8 +76,12 @@ to check it').</P>
 <P><B><A NAME=2.3.1.2>2.3.1.2. Xv</A></B></P>
 
 <P>Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
-using the XVideo extension. This is what the option '-vo xv' uses.
-In order to make this work, be sure to check the following:</P>
+using the XVideo extension. This is what the option '-vo xv' uses. Also,
+this is driver supports adjusting brightness/contrast/hue/etc (unless you use
+the old, slow DirectShow DivX codec, which supports it everywhere), see the
+manpage.</P>
+
+<P>In order to make this work, be sure to check the following:</P>
 <P><UL>
 <LI>You have to use XFree86 4.0.2 or newer (former versions don't have XVideo)
 <LI>Your card actually supports hardware acceleration (modern cards do)
@@ -215,8 +134,8 @@ usable with <B>MPlayer</B>.</P>
 
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration,
 it didn't support either YUY2 or YV12, and so. Verify that you have
-XFree86 version 4.1.0 or greater, it works ok. Alternatively, you can use
-<A HREF="http://dri.sourceforge.net">DRI</A> cvs.
+XFree86 version 4.2.0 or greater, it works ok with YV12 and YUY2. Previous
+versions, including 4.1.0 <B>crashes with YV12</B>!
 If you experience strange effects using -vo xv, try SDL (it has XVideo too)
 and see if it helps. Check the <A HREF="#2.3.1.4">SDL section</A> for details.</P>
 
@@ -227,17 +146,20 @@ section!</P>
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2. S3 cards</A></B></P>
 
 <P>S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
-or greater (in case of image problems, try 16bpp). As for S3 Virge.. sell it.</P>
+or greater (in case of image problems, try 16bpp). As for S3 Virge.. there is
+xv support, but the card itself is very slow, so you better sell it.</P>
 
 <P><B>NOTE</B>: Savage cards have a slow YV12 image displaying capability (it needs
 to do YV12->YUY2 conversion, because the Savage hardware can't display YV12).
 So when this documentation says at some point "this has YV12 output use this,
-it's faster", it's not sure. Try.</P>
+it's faster", it's not sure. Try <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">this
+driver</A>, it uses MMX2 for this task and is faster than the native X driver.</P>
 
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia cards</A></B></P>
 
-<P>nVidia isn't a very good choice under Linux.. You'll have to use the
+<P>nVidia isn't a very good choice under Linux (according to NVidia, this
+is <A HREF="users_against_developers.html#nvidia">not true</A>).. You'll have to use the
 binary closed-source nVidia driver, available at nVidia's website. The standard XFree86
 driver doesn't support XVideo for these cards, due to nVidia's closed
 sources/specifications.</P>
@@ -252,27 +174,38 @@ Complain to NVidia.</UL></P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI cards</A></B></P>
 
 <P>
-<LI>The GATOS driver (which you should use) has VSYNC enabled by default. It means that decoding speed
-(!) is synced to the monitor's refresh rate. If playing seems to be slow, try
-disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.</LI>
+<LI>The <A HREF="http://www.linuxvideo.org/gatos">GATOS driver</A> (which you
+should use, unless you have Rage128 or Radeon) has VSYNC enabled by default. It
+means that decoding speed (!) is synced to the monitor's refresh rate. If
+playing seems to be slow, try disabling VSYNC somehow, or set refresh rate to
+n*(fps of the movie) Hz.</LI>
 
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
 4.1.0 doesn't. And no TV out support. Of course with <B>MPlayer</B> you can
 happily get <B>accelerated</B> display, with or without <B>TV output</B>, and
-no libraries or X are needed. Read <a href=#2.3.1.12>VESA driver</a> and <A
-HREF=#2.3.1.14>Radeon video overlay</A> sections).</LI> </P>
+no libraries or X are needed. Read <A HREF=#2.3.1.15>Vidix</A> section.</LI>
+
+</P>
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic cards</A></B></P>
 
+<P>These cards can be found in many laptops. Unfortunately, the driver in
+  X 4.2.0 can't do Xv, but we have a modified, Xv-capable driver for you.
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Download from here</A>.
+  Driver provided by Stefan Seyfried.</P>
+
+<P>To allow playback of DVD sized content change your XF86Config like this :</P>
+
 <P>
-These cards can be found in many laptops. Under Linux, their peak is only DGA.
-Unfortunately, the DGA driver in X 4.1.0 doesn't work, you'll have to wait for
-4.2.0, or download a modified driver for 4.0.3 or 4.1.0 from here :
-<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver</A>
-(there is also the patch to the driver's source).<BR>
-Drivers provided by <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka</A>.
+Section "Device"<BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+&nbsp; &nbsp; Driver "neomagic"<BR>
+&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+EndSection
 </P>
+
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident cards</A></B></P>
 
@@ -498,24 +431,43 @@ also help. Thanks!</P>
 
 <P><B><A NAME=2.3.1.4>2.3.1.4. SDL</A></B></P>
 
+<P>SDL (Simple Directmedia Layer) is basically an unified video/audio
+  interface. Programs that use it know only about SDL, and not about what video
+  or audio driver does SDL actually use. For example a Doom port using SDL can
+  run on svgalib, aalib, X, fbdev, and others, you only have to specify the
+  (for example) video driver to use with the SDL_VIDEODRIVER environment
+  variable. Well, in theory.</P>
+
+<P>With <B>MPlayer</B>, we used its X11 driver's software scaler ability for
+  cards/drivers that doesn't support XVideo, until we made our own (faster,
+  nicer) software scaler. Also we used its aalib output, but now we have ours
+  which is more comfortable. Its DGA mode was better than ours, until
+  recently. Get it now? :)</P>
+
+<P>It also helps with some buggy drivers/cards if the video is jerky
+  (not slow system problem), or audio is lagging.</P>
+
+<P>SDL video output supports displaying subtitles under the movie, on the (if
+  present) black bar.</P>
+
 <P>Here are some notes about SDL out in <B>MPlayer</B>.</P>
 
 
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>There are several commandline switches for SDL:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-ao sdl:name</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifies sdl audio driver to use (ie. dsp,
+<TD COLSPAN=4><P><B><FONT CLASS="text">There are several commandline switches for SDL:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-ao sdl:name</TD><TD></TD><TD><FONT CLASS="text">specifies sdl audio driver to use (ie. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-noxv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>disables Xvideo hardware acceleration</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-forcexv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tries to force Xvideo acceleration</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">disables Xvideo hardware acceleration</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">tries to force Xvideo acceleration</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL Keys:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">SDL Keys:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>F</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggles fullscreen/windowed mode</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>cycles available fullscreen modes</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>W/S</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mappings for * and / (mixer control)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">toggles fullscreen/windowed mode</TD><TR>
+<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">cycles available fullscreen modes</TD><TR>
+<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">mappings for * and / (mixer control)</TD><TR>
 
 </TABLE></P>
 
@@ -550,13 +502,13 @@ whatever.  And don't forget to register your UniVBE ;))</P>
 <P>The FBdev output takes some additional parameters above the others:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify the framebuffer device to use (/dev/fd0)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mode name to use (according to /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>	config file of modes (default /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>IMPORTANT values, see example.conf</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_vfreq</TD><TD></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_dotclock</TD><TD></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT CLASS="text">specify the framebuffer device to use (/dev/fb0)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">mode name to use (according to /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">	config file of modes (default /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">IMPORTANT values, see example.conf</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>
+<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
 <P>If you want to change to a specific mode, then use</P>
@@ -570,9 +522,11 @@ Pay attention to the bpp value, fbdev driver tries to use the current,
 or if you specify the -bpp option, then that.</LI>
 <LI><B>-zoom</B> option isn't supported (software scaling is slow). -fs option
 isn't supported. You can't use 8bpp (or less) modes.</LI>
-<LI>you possibly want to turn the cursor off : <CODE>echo -e '\033[?25l'</CODE><BR>
+<LI>you possibly want to turn the cursor off : <CODE>echo -e '\033[?25l'</CODE>
+  or <CODE>setterm -cursor off</CODE><BR>
   and the screen saver: <CODE>setterm -blank 0</CODE><BR>
   To turn the cursor back on : <CODE>echo -e '\033[?25h'</CODE>
+  or <CODE>setterm -cursor on</CODE>
 </UL></P>
 
 <P>NOTE: FBdev video mode changing _does not work_ with the VESA framebuffer,
@@ -584,6 +538,9 @@ and don't ask for it, since it's not an <B>MPlayer</B> limitation.</P>
 support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
 it has hardware VSYNC support with triple buffering. It works on both
 framebuffer console and under X.</P>
+
+<P><B>WARNING</B>: on non-Linux systems, use <A HREF=#2.3.1.15>Vidix</A> for
+  mga_vid !!!</P>
 
 <P>To use it, you first have to compile mga_vid.o:</P>
 
@@ -622,6 +579,10 @@ you have matroxfb console, or '-vo xmga' under XFree86 3.x.x or 4.x.x.</P>
 
 <P>The mga_vid driver cooperates with Xv.</P>
 
+<P>The <CODE>/dev/mga_vid</CODE> device file can be read (for example by
+  <CODE>cat /dev/mga_vid</CODE>) for some info, and written for brightness
+  change : <CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
+
 
 <P><B><A NAME=2.3.1.8>2.3.1.8. SiS 6326 framebuffer (sis_vid)</A></B></P>
 
@@ -657,29 +618,29 @@ Quake, etc. MPlayer contains a very usable driver for it.
 If ./configure detects aalib installed, the aalib libvo driver will be built.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease contrast</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase contrast</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease brightness</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase brightness</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>switch fast rendering on/off</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>invert image</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggles between aa and mplayer control)</TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">decrease contrast</TD><TR>
+<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">increase contrast</TD><TR>
+<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">decrease brightness</TD><TR>
+<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">increase brightness</TD><TR>
+<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">switch fast rendering on/off</TD><TR>
+<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">invert image</TD><TR>
+<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">toggles between aa and mplayer control)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>The following command line options can be used:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">The following command line options can be used:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaosdcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change osd color</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aasubcolor=V</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change subtitle color</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">change osd color</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">change subtitle color</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>AAlib itselves provides a large sum of options.
+<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib itselves provides a large sum of options.
 Here are some important:</P></B></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aadriver</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set recommended aa driver (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaextended</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use all 256 characters</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aaeight</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use eight bit ascii</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-aahelp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>prints out all aalib options</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">set recommended aa driver (X11, curses, linux)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">use all 256 characters</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">use eight bit ascii</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">prints out all aalib options</TD><TR>
 </TABLE></P>
 
 <P>NOTE: the rendering is very CPU intensive, especially when using AA-on-X
@@ -756,14 +717,14 @@ in vm86 mode).<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>These switches of command line currently are available for VESA:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opts</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>force userdefined mode</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enables userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales image to fullscreen</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales userdefined prescaling to fullscreen</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-double</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
+<TD COLSPAN=4><P><B><FONT CLASS="text">These switches of command line currently are available for VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo vesa:opts</TD><TD></TD><TD><FONT CLASS="text">currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT CLASS="text">force userdefined mode</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-x, -y</TD><TD></TD><TD><FONT CLASS="text">set userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-zoom</TD><TD></TD><TD><FONT CLASS="text">enables userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs</TD><TD></TD><TD><FONT CLASS="text">scales image to fullscreen</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD><TD></TD><TD><FONT CLASS="text">scales userdefined prescaling to fullscreen</TD><TR>
+<TD></TD><TD><FONT CLASS="text">-double</TD><TD></TD><TD><FONT CLASS="text">enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
 </TABLE>
 </P>
 
@@ -815,59 +776,201 @@ video modes.</P>
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
-<P>
-<b>radeon_vid</b> and <B>rage128_vid</B> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> and Rage128 (Pro) chipsets.
-It was designed and introduced as analog of <a href="video.html#2.3.1.7">mga_vid</a> driver, so you can use it in the same way!<br>
-But main goal of this driver usage is <a href="video.html#2.3.1.12">VESA</a> driver.<br>
-Simply because VESA enables TV-out on ATI's card but Backend scaler is used after
-mode switching. This implementation outputs video stream on both: <b>TV-screen</b> and <b>CRTC</b>
-display simultaneously. (It slightly degrades quality of video output but it's
-much better than nothing).
-Sorry! I couldn't find out any video overlay's related information
-on ATI pages. (I planned to implement it through <b>int 10h</b> calls). But it was
-very easy to implement this stuff through reading/writing Radeon ports.
-<br><b>NOTE</b>: XXX_VID technology is perfectly undocumented and maybe in the
-future this stuff will be fully rewritten. This is the first public release of
-driver.</P>
 
-<P><B>Installation</B></P>
+<P>This section is OBSOLETED ! Use Vidix !</P>
+
+
+<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+
+<P><B><I>WHAT IS VIDIX</I></B></P>
+
+<P>VIDIX is the abbreviation for <b>VID</b>eo <b>I</b>nterface for
+  *ni<b>X</b>.<BR>
+  VIDIX was designed and introduced as an interface for fast user-space drivers
+  providing <b>DGA</b> everywhere where it's possible (<b>unlike X11</b>). I
+  hope that these drivers will be as portable as X11 (<b>not only on
+  *nix</b>).<BR>
+  What is it:
+  <LI>It's a portable successor of mga_vid technology, but it's located in
+    user-space.</LI>
+  <LI>Unlike X11 it provides DGA everywhere it's possible</LI>
+  <LI>Unlike v4l it provides interface for video playback</LI>
+  <LI>Unlike linux's drivers it uses mathematics library</LI>
+</P>
+
+<P>I can tell you in bold capital letters :<BR>
+  <b>VIDIX PROVIDES DIRECT GRAPHICS ACCESS TO BES YUV MEMORY.</b>
+</P>
+
+<P><i>Well (it's in my todo) - implement DGA to MPEG2 decoder.</i></P>
+
+<P>This interface was designed as an attempt to fit existing video acceleration
+  interfaces (known as mga_vid, mga_yuv, radeon_vid) into a fixed scheme. It
+  provides highlevel interface to chips which are known as BES (BackEnd
+  scalers) or OV (Video Overlays). It doesn't provide lowlevel interface to
+  things which are known as graphics servers. (I don't want to compete with X11
+  team in graphics mode switching). I.e. main goal of this interface is to
+  provide maximal speed of video playback but not putting video signal on
+  screen of your TV or on tape of your VCR. Although these things are also very
+  significant - it's perfectly other task. (However I guess that it would be
+  possible to implement something like mini-X (don't mix it with Minix ;) in
+  the future, if some number of volunteers will be found.
+</P>
+
+<P><B><I>USAGE</I></B></P>
 
 <P>
+  <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
+    This driver was developed as X11's front end to VIDIX technology.  It
+    requires XServer and can work only under XServer.</LI>
+  <LI>You can use VIDIX subdevice which was applied to several video output
+    drivers, such as:<BR>
+    <CODE>-vo vesa:vidix</CODE> and <CODE>-vo fbdev:vidix</CODE></LI>
+  Indeed it doesn't matter which video output driver is used with <b>VIDIX</b>.
+</P>
+
+<P><B><I>REQUIREMENTS</I></B></P>
+
+<P>
+  <LI>video card should be in graphics mode (I write <b>should</b> simply
+    because I tested it in text mode - it works but has awful output ;) Use
+    AAlib for that).<BR>
+    <I>Note: Everyone can try this trick by commenting out mode switching in
+    vo_vesa driver.</I></LI>
+  <LI><B>MPlayer</B>'s video output driver should know active video mode and be
+    able to tell to VIDIX subdevice some video characteristics of server.</LI>
+  I hope that probably every video output driver of <B>MPlayer</B> will
+  recognize <CODE>:vidix</CODE> subdevice.
+</P>
+
+<P><B><I>USAGE METHODS</I></B></P>
+
+<P>When VIDIX is used as <b>subdevice</b> (<CODE>-vo vesa:vidix</CODE>) then
+  video mode configuration is performed by video output device
+  (<b>vo_server</b> in short). Therefore you can pass into command line of
+  <B>MPlayer</B> the same keys as for vo_server. In addition it understands
+  <CODE>-double</CODE> key as globally visible parameter. (I recommend using
+  this key with VIDIX at least for ATI's card).<BR>
+  As for <CODE>-vo xvidix</CODE> : currently it recognizes the following
+  options: <CODE>-fs -zoom -x -y -double</CODE>.<BR>
+</P>
+
+<P>Also you can specify VIDIX's driver directly as third subargument in command
+  line :<BR>
+  <BR>
+  &nbsp;&nbsp;<code>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
+    file.avi</code><BR>
+  or<BR>
+  &nbsp;&nbsp;<code>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp
+    32 file.avi</code><BR>
+  <BR>
+  But it's dangerous, and you shouldn't do that. In this case given driver will
+  be forced and result is unpredictable (it may <b>freeze</b> your
+  computer). You should do that ONLY if you are absolutely sure it will work,
+  and <B>MPlayer</B> doesn't do it automatically. Please tell about it to the
+  developers. The Right Way is to use VIDIX without arguments to enable driver
+  autodetection.
+</P>
+
+<P>
+  VIDIX is very new technology and it's extremely possible that on your system
+  (OS=abc CPU=xyz) it won't work. In this case only solution for you it's port
+  it (mainly libdha). But there is hope that it will work on those systems
+  where X11 does.
+</P>
+
+<P>And the last <b>WARNING</b>: (un)fortunately you <b>MUST</b> have
+  <b>ROOT</b> privileges to use VIDIX due to direct hardware access. At least
+  set the <b>suid</b> bit on the <B>MPlayer</B> excecutable.
+</P>
+
+<P><B><I>VIDEO EQUALIZER</I></B></P>
+
+<P>
+  This is a video equalizer implemented especially for Vidix. You can use
+  it either with <B>1-8</B> keys as described in the manpage, or
+  by command line arguments. <B>MPlayer</B> recognizes the
+  following options :
+</P>
+
+<P>
+  &nbsp;&nbsp;<CODE>-brightness</CODE> - adjust <B>BRIGHTNESS</B> of video
+  output. It's not equal to brightness adjusting on monitor panel or on TV. It
+  changes intensity of RGB components of video signal from black to white
+  screen.<BR>
+  &nbsp;&nbsp;<CODE>-contrast</CODE> - adjust <B>CONTRAST</B> of video output. 
+  Works in similar manner as brightness.<BR>
+  &nbsp;&nbsp;<CODE>-saturation</CODE> - adjust <B>SATURATION</B> of video
+  output.  You can get grayscale output with this option.<BR>
+  &nbsp;&nbsp;<CODE>-hue</CODE> - adjust <B>HUE</B> of video signal.  You can
+  get colored negative of image with this option.<BR>
+  &nbsp;&nbsp;<CODE>-red_intensity</CODE> - adjust intensity of <B>RED</B>
+    component of video signal.<BR>
+  &nbsp;&nbsp;<CODE>-green_intensity</CODE> - adjust intensity of <B>GREEN</B>
+    component of video signal.<BR>
+  &nbsp;&nbsp;<CODE>-blue_intensity</CODE> - adjust intensity of <B>BLUE</B>
+    component of video signal.
+</P>
+<P>
+  Each parameter can accept values from <B>-1000</B> to <B>+1000</B>.<BR>
+  Default value for each parameter is <B>0</B>.
+</P>
+<P>
+  <B>Note:</B> Not every driver provides support for each of those parameters.
+  Currently only <B>radeon_vid.so</B> provides full support for video eqalizing.
+  Other drivers only partly support these options.
+</P>
+<P><B>Examples:</B><BR>
+  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
+  filename.avi</CODE><BR>
+  or<BR>
+  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
+  filename.vob</CODE>
+</P>
+
+
+<P><B><A NAME=2.3.1.16>2.3.1.16. Zr</A></B></P>
+
+<P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
+capture/playback cards (tested for DC10+ and Buz, and it should work for the
+LML33, the DC10). The driver works by encoding the frame to jpeg and then
+sending it to the card. For the jpeg encoding <B>libavcodec</B> is
+used, and required.</P>
+
+<P>This driver talks to the kernel driver available at
+<A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, so
+you must get it working first. Then recompile <B>MPlayer</B> with
+<CODE>--enable-zr</CODE>.</P>
+
+<P>Some remarks:
 <UL>
-  <LI>
-    <CODE>cd drivers/radeon<BR>
-    make<BR>
-    make install<BR>
-    make nodes</CODE></LI>
-  <LI>add one of the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
-  <LI>run <CODE>depmod -a</CODE></LI>
+  <LI>don't start or stop XawTV on the playback device during playback, 
+    it will crash your computer. It is, however, fine to <B>FIRST</B> start 
+    XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for <B>MPlayer</B> to finish 
+    and <B>THEN</B> stop XawTV.</LI>
+  <LI>this driver adds <CODE>-zr*</CODE> commandline options. The explanation
+    of these options can be viewed with <CODE>-zrhelp</CODE>. It is possible to
+    crop the input frame (cut borders to make it fit or to enhance performace)
+    and to do other things.</LI>
+  <LI>the driver takes data in YV12 and YUY2 format, this means that some 
+    codecs won't work. Some old VfW (Video for Windows) codecs, for example,
+    are incompatible with this driver. The errormessage that you will see is: 
+    <CODE>Sorry, selected video_out device is incompatible with this codec.
+    </CODE></LI>
+  <LI>OSD is currently not supported, so you won't see
+    subtitles.</LI>
 </UL>
 </P>
 
-<P>
-<br><b>Usage:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;your options&gt; filename</CODE>
-</P>
-
-<P>More examples (for hardware deinterlacing, etc) can be found
-  <A HREF="../drivers/radeon/README">here</A>.</P>
-
-<P><B>NOTE</B>: don't use any framebuffers when you plan to use this driver ! Use
-it only from textmode console.</P>
-
-<P>
-<b>Conclusion:</b> I know there are lot of lacks and bugs. So if you are able
-to improve something then simply send me your patches.
-</P>
 
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
 
-<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox cards</A></B></P>
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox G400 cards</A></B></P>
 
-<P>Under Linux you have 2 methods to get TV out working :</P>
+<P>Under Linux you have 2 methods to get G400 TV out working :</P>
+
+<P><B>IMPORTANT:</B> Only Matrox G400DH/G400MAX has TV-out support under Linux, others (G450, G550) has <B>NOT!</B></P>
 
 <P>
 <UL>
@@ -880,11 +983,14 @@ to improve something then simply send me your patches.
     3D engine to zoom, and the YUV framebuffer to display the zoomed
     image. If you really want to use X, use the <CODE>-vo x11 -fs -zoom</CODE>
     options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copyprotection
-    enabled.</LI>
+    enabled (you can "workaround" Macrovision using
+    <A HREF="http://avifile.sourceforge.net/mgamacro.pl">this</A> perl
+    script.</LI>
   <LI><B>Framebuffer</B>: using the <B>matroxfb modules</B> in the 2.4 kernels.
     2.2 kernels don't have the TVout feature in them, thus unusable for this.
     You have to enable ALL matroxfb-specific feature during compilation (except
-    MultiHead), and compile them into <B>modules</B>!
+    MultiHead), and compile them into <B>modules</B>! You'll also need I2C
+    enabled.
     <UL>
       <LI>
 	Enter <CODE>TVout/matroxset</CODE> and type <CODE>make</CODE>. Install
@@ -911,13 +1017,14 @@ to improve something then simply send me your patches.
     and turn off screen blanking. Execute the following commands:</P>
 
     <P>
-      <CODE>echo -e '\033[?25l'<BR>
+      <CODE>echo -e '\033[?25l'</CODE> or <CODE>setterm -cursor off<BR>
       setterm -blank 0</CODE>
     </P>
 
     <P>
     You possibly want to put the above into a script, and also clear
     the screen.. To turn the cursor back :<BR><CODE>echo -e '\033[?25h'</CODE>
+    or <CODE>setterm -cursor on</CODE>
     </P>
 
     <P>Yeah kewl. Start movie playing with <CODE>mplayer -vo mga -fs -screenw 640
@@ -971,8 +1078,8 @@ hackers will be able to disable copy protection on their chips. Therefore
 we have no chance to get working TV-out on ATI.</P>
 
 <P>What's status of ATI's tv-out chips under Linux:
-<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by gatos.
-<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by gatos.
+<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.
+<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.
 <LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.
 But with <B>MPlayer</B> you get <B>full hardware acceleration</B> and <B>TV out</B>
 for Radeons !

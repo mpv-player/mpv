@@ -1,865 +1,1063 @@
 <html>
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
-<title>MPlayer skin format</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <title>MPlayer skin format</title>
 <style type="text/css">
 em.note {color: green}
 em.warn {color: red}
 </style>
 </head>
+<body text="#000000" bgcolor="#FFFFFF">
 
-<body bgcolor=white text=black>
+<center>
+<h1>
+Format skór MPlayera</h1></center>
 
-<h1 align="center">MPlayer skin format</h1>
+<center>
+<h1>
 
-<hr>
+<hr></h1></center>
 
-<h2>Contents</h2>
+<h2>
+Zawarto¶æ</h2>
 
 <ul type=disc>
-<li><a href="#intro">1 Introduction</a></li>
-<li><a href="#overview">2 Overview</a></li>
-  <ul type=circle>
-  <li><a href="#dirs">2.1 Directories</a></li>
-  <li><a href="#images">2.2 Images</a></li>
-  <li><a href="#parts">2.3 Parts of a skin</a></li>
-  <li><a href="#files">2.4 Files</a></li>
-  </ul>
-<li><a href="#skin">3 The <code>skin</code> file</a></li>
-  <ul type=circle>
-  <li><a href="#mainwin">3.1 Main window</a></li>
-  <li><a href="#subwindow">3.2 Subwindow</a></li>
-  <li><a href="#skinmenu">3.3 Skin menu</a></li>
-  </ul>
-<li><a href="#fonts">4 Fonts</a></li>
-  <ul type=circle>
-  <li><a href="#symbols">4.1 Symbols</a></li>
-  </ul>
-<li><a href="#guimsg">Appendix A: GUI messages</a></li>
+<li>
+<a href="#intro">1 Wstêp</a></li>
+
+<li>
+<a href="#overview">2 Omówienie</a></li>
+
+<ul type=circle>
+<li>
+<a href="#dirs">2.1 Katalogi</a></li>
+
+<li>
+<a href="#images">2.2 Obrazki</a></li>
+
+<li>
+<a href="#parts">2.3 Czê¶ci skóry</a></li>
+
+<li>
+<a href="#files">2.4 Pliki</a></li>
+</ul>
+
+<li>
+<a href="#skin">3 Plik <tt>skin</tt></a></li>
+
+<ul type=circle>
+<li>
+<a href="#mainwin">3.1 G³ówne okno</a></li>
+
+<li>
+<a href="#subwindow">3.2 Okno ekranu</a></li>
+
+<li>
+<a href="#skinmenu">3.3 Menu skóry</a></li>
+</ul>
+
+<li>
+<a href="#fonts">4 Fonty</a></li>
+
+<ul type=circle>
+<li>
+<a href="#symbols">4.1 Symbole</a></li>
+</ul>
+
+<li>
+<a href="#guimsg">Dodatek A: sygna³y GUI</a></li>
 </ul>
 
 <hr>
-
-<div align=center>
-Last modified: Sep 10, 2001
-</div>
+<center>Ostatnia modyfikacja: Sep 10, 2001
+<br>Ostatnia modyfikacja w jêzyku polskim: 29 marca 2002</center>
 
 <hr>
+<h2>
+<a NAME="intro"></a>1 Wstêp</h2>
+Celem tej dokumentacji jest opisanie formatu skór MPlayera. Informacje zawarte
+w tym dokumencie mog± byæ b³êdne, poniewa¿:
+<br><i>a)</i> to nie ja napisa³em GUI
+<br><i>b)</i> Gui nie jest skoñczony
+<br><i>c)</i> Mogê siê myliæ, wiêc nie b±d¼ zaskoczony je¿eli co¶ nie bêdzie
+dzia³a³o w sposób w jaki zosta³o tutaj opisane.
+<p>Podziêkowania dla <i>Zoltán Ponekker</i> za pomoc.
+<p><i>András Mohari &lt;mayday@freemail.hu></i>
+<p><i>T³umaczenie na jêzyk polski:</i>
+<br><i>CyberPe &lt;cyberp@silesianet.pl></i>
+<br>Wszystkie uwagi i pomys³y dotycz±ce tego t³umaczenia s± mile widziane.
+W temacie proszê podaæ "Mplayer".
+<h2>
+<a NAME="overview"></a>2 Omówienie</h2>
+To nie ma tak naprawdê ¿adnego zwi±zku z formatem skór, ale powiniene¶
+wiedzieæ, ¿e MPlayer <b>nie ma</b> wbudowanej skórki, wiêc <b>musisz mieæ
+zainstalowan± chocia¿ jedn± skórê, aby mieæ mo¿liwo¶æ u¿ywania GUII</b>.
+<h3>
+<a NAME="dirs"></a>2.1 Katalogi</h3>
+Katalogi przeszukiwane przez MPlayera w poszukiwaniu skór to (w kolejno¶ci
+szukania):
+<pre>&nbsp;&nbsp;&nbsp; /usr/local/share/mplayer/Skin/
+&nbsp;&nbsp;&nbsp; ~/.mplayer/Skin/</pre>
+Zauwa¿, ¿e pierwsza ¶cie¿ka mo¿e byæ zale¿na od tego, jak MPlayer zosta³
+skonfigurowany podczas kompilacji (zobacz argument "<tt>--datadir" skryptu
+konfiguracyjnego</tt>).
+<p>Ka¿da skórka jest zainstalowana w swoim w³asnym katalogu znajduj±cym
+siê w jednym z folderów zwymienionych powy¿ej, na przyk³ad:
+<pre>&nbsp;&nbsp;&nbsp; /usr/local/share/mplayer/Skin/default/</pre>
 
-<h2><a name="intro">1 Introduction</a></h2>
-
-The purpose of this document is to describe the MPlayer skin format.
-The information contained here might be wrong, for <em>a)</em> it is not me
-who wrote the GUI, <em>b)</em> the GUI is not finished, <em>c)</em> I might
-be wrong. So do not be surprised if something does not work as described here.
-
-<p>
-Thanks to <em>Zoltán Ponekker</em> for his help.
-
-<p>
-<em>András Mohari &lt;mayday@freemail.hu&gt;</em>
-
-
-<h2><a name="overview">2 Overview</a></h2>
-
-It does not really have anything to do with the skin format, but you should
-know that <em>MPlayer has <b>no</b> builtin skin, so <b>at least one skin
-must be installed in order to be able to use the GUI.</b></em>
-
-
-<h3><a name="dirs">2.1 Directories</a></h3>
-
-The directories searched for skins are (in order):
-<pre>
-    /usr/local/share/mplayer/Skin/
-    ~/.mplayer/Skin/
-</pre>
-
-<p>
-Note that the first path may vary according to the way MPlayer was configured
-(see the <code>--datadir</code> argument of the <code>configure</code>
-script).
-
-<p>
-Every skin is installed into its own directory under one of the directories
-listed above, for example:
-<pre>
-    /usr/local/share/mplayer/Skin/default/
-</pre>
-
-
-<h3><a name="images">2.2 Image formats</a></h3>
-
-Images must be truecolor (24 or 32 bpp) and can be in
-BMP, PNG and TGA format (note that TGA images must be uncompressed).
-<em>The preferred format is PNG as it compresses very well.</em>
-
-<p>
-In the main window (see below) you can use images with `transparency':
-regions filled with the color #FF00FF (<font color="#FF00FF">magenta</font>)
-are fully transparent when viewed by MPlayer. This means that you can even
-have shaped windows if your X server has the XShape extension.
-
-
-<h3><a name="parts">2.3 Parts of a skin</a></h3>
-
-Skins are quite free-format (unlike the fixed-format skins of
-Winamp/XMMS, for example), so it is up to you to create something great.
-
-<p>
-Currently there are three windows to be decorated: the
-<a href="#mainwin">main window</a>, the <a href="#subwindow">subwindow</a> and
-the <a href="#skinmenu">skin menu</a> (which can be activated by a right
-click).
-
+<h3>
+<a NAME="images"></a>2.2 Formaty plików graficznych</h3>
+Obrazki musz± byæ w formacie truecolor (24, albo 32 bity) i mog± byæ zapisane
+jako BMP, PNG i TGA (z tym, ¿e obrazki zapisane jako TGA nie mog± byæ skompresowane).
+Preferowany format to PNG, poniewa¿ ma on bardzo dobry wspó³czynnik kompresji,
+a co za tym idzie, obrazki zajmuj± mniej miejsca.
+<p>W g³ównym oknie (zobacz ni¿ej) mo¿esz u¿ywaæ obrazków z 'prze¼roczysto¶ci±':
+obszary wype³nione przy u¿yciu koloru #FF00FF (<font color="#FF00FF">magenta</font>)
+s± dla MPlayera w pe³ni prze¼roczyste. Oznacza to, ¿e mo¿esz u¿ywaæ dowolnych
+kszta³tów okna g³ównego (np. okr±g³ych), je¿eli tylko twój X serwer posiada
+rozszerzenie XShape.
+<h3>
+<a NAME="parts"></a>2.3 Czê¶ci skóry</h3>
+Skórki s± ca³kowicie konfigurowalne (w przeciwieñstwie np. do skór Winampa/XMMS)
+(chodzi o to, ¿e mo¿esz umie¶ciæ dowolny przycisk np. 'play' w dowolnym
+miejscu swojej skóry, format XMMSa i Winampa ma z góry ustalone po³o¿enie
+ka¿dego elementu i nie mo¿na tego zmieniæ - przyp. t³umacza), wiêc tylko
+od ciebie zale¿y czy stworzysz co¶ naprawdê fajnego.
+<p>Na dzieñ dzisiejszy s± trzy okna do skonfigurowania: <a href="#mainwin">okno
+g³ówne</a> (main window), <a href="#subwindow">okno ekranu</a> (subwindow)
+oraz <a href="#skinmenu">menu skóry</a> (skin menu), które mo¿e zostaæ
+uaktywnione poprzez naci¶niêcie prawego przycisku myszy.
 <ul>
 <li>
-The <b>main window</b> is where you can control MPlayer. The background of
-the window is an image. Various items can (and must) be
-placed in the window: <em>buttons</em>, <em>potmeters</em> (sliders, if
-you like it better) and <em>labels</em>. For every item, you must
-specify its position and size.
+<b>okno g³ówne</b> - to okno w którym kontrolujesz MPlayera. T³o tego okna
+jest obrazkiem. Wszystkie elementy musz± byæ umieszczone w tym oknie: przyciski
+(buttons), potencjometry (albo suwaki, je¿eli bardziej ci odpowiada ta
+nazwa) oraz etykiety (labels). Dla ka¿dego elementu musisz okre¶liæ jego
+pozycjê oraz rozmiar.</li>
 
-<p>
-A <b>button</b> has three states (pressed, released,
-disabled), so its image must be divided into three parts vertically.
-See the <a href="#main.button">button</a> item for details.
-<p>
-A <b>potmeter</b> (mainly used for the seek bar and volume/balance
-control) can have any number of phases by dividing its image into different
-parts below each other.
-See <a href="#main.hpotmeter">hpotmeter</a> and
-<a href="#main.potmeter">potmeter</a> for details.
-
-<p>
-<b>Labels</b> are a bit special: the characters needed to draw them are taken
-from an image file, and the characters in the image are described
-by a <a href="#fonts">font description file</a>.
-The latter is a plain text file which specifies
-the x,y position and size of each character in the image. (So the
-image file and its font description file form a font <em>together</em>.)
-See <a href="#main.dlabel">dlabel</a> and <a href="#main.slabel">slabel</a>
-for details.
-
-<p>
-<em class=note>
-<b>Note:</b> all images can have full transparency as described in the
-section about <a href="#images">image formats</a>.
-</em>
-</li>
-
+<p>Ka¿dy <b>przycisk</b> ma trzy fazy (wci¶niêty, uwolniony oraz nieaktywny),
+wiêc ich obrazki musz± byæ podzielone na trzy czê¶ci w pionie. Zobacz sekcjê
+<a href="#main.button">przyciski</a>,
+aby uzyskaæ wiêcej informacji.
+<p><b>potencjometry </b>(zazwyczaj u¿ywane do okre¶lania pozycji filmu
+(seek bar) oraz do kontroli g³o¶no¶ci, balansu d¼wiêku) mog± posiadaæ dowoln±
+liczbê faz poprzez umieszczenie ka¿dej nastêpnej fazy pod poprzedni± (w
+obrazku) <font size=-1>(to nie jest za dobrze przet³umaczone-przyp. t³umacz)</font>.Zobacz
+sekcjê
+<a href="#main.hpotmeter">hpotmeter</a> i <a href="#main.potmeter">potmeter</a>,
+aby dowiedzieæ siê wiêcej na ten temat.
+<p><b>Etykiety </b>s± bardzo specyficzne: znaki s³u¿±ce do ich opisania
+s± brane z osobnego obrazka, a litery, które s± w nim zawarte (w pliku
+graficznym) s± opisane przez <a href="#fonts">plik opisuj±cy fonty</a>.
+Jest to plik tekstowy, który okre¶la pozycjê x, y oraz rozmiar ka¿dego
+symbolu znajduj±cego siê w obrazku. (a wiêc "plik graficzny z fontami"
+i "plik opisuj±cy fonty" tworz± razem fonty). Zobacz <a href="#main.dlabel">dlabel</a>
+i <a href="#main.slabel">slabel</a>, po wiêcej szczegó³ów
+<p><i><b>Uwaga:</b> wszystkie obrazki mog± posiadaæ prze¼roczysto¶æ tak,
+jak opisano to w sekcji <a href="#images">formaty plików graficznych</a>.</i>
+<br>&nbsp;
 <li>
-The <b>subwindow</b> is where the movie appears. It can display a specified
-image if there is no movie loaded (it is quite boring to have an empty
-window :-))
-<em class=note><b>Note:</b> transparency
-is <b>not allowed</b> here.</em>
-</li>
+<b>okno ekranu</b> <font size=-1>(niezbyt szczê¶liwe t³umaczenie - przyp.
+t³umacz)</font> - tutaj pojawia siê film podczas odtwarzania. Mo¿e ono wy¶wietlaæ
+okre¶lony obrazek je¿eli nie jest w danym momencie odgrywany ¿aden film
+(to strasznie denerwuj±ce mieæ puste okno:-)) <i><b>Uwaga</b>: prze¼roczysto¶æ
+</i>jest tutaj <i><b>niedostêpna</b>.</i></li>
 
+<br>&nbsp;
 <li>
-The <b>skin menu</b> is just a way to control MPlayer by means of
-menu entries. Two images are required for the menu: one of them is the base
-image that shows the menu in its normal state, the other one is used to
-display the selected entries. When you pop up the menu, the first image is
-shown. If you move the mouse over the menu entries, the currently selected
-entry is copied from the second image over the menu entry below the mouse
-pointer. (So the second image is never shown in whole.)
-<p>
-A menu entry is defined by its position and size in the image (see the
-section about the <a href="#skinmenu">skin menu</a> for details).
-</li>
-</ul>
+<b>menu skóry</b>- to po prostu jeden ze sposobów do kontrolowania MPlayera
+poprzez polecenia z menu. Wymagane s± tutaj dwa obrazki: pierwszy z nich
+jest podstawowym obrazkiem pokazuj±cym menu w "normalnym" stanie, drugi
+natomiast jest u¿ywany do wy¶wietlania wybranych elementów. Kiedy aktywujesz
+menu (poprzez prawe klikniêcie myszy) pokazywany jest pierwszy obrazek.
+Kiedy naje¿d¿asz kursorem na któr±¶ z pozycji, jej zaznaczenie jest kopiowane
+z drugiego obrazka na obszar menu znajduj±cy siê pod wska¼nikiem myszy
+(a wiêc drugi obrazek nigdy nie jest pokazany w ca³o¶ci).</li>
 
-<p>
-There is an important thing not mentioned yet: for buttons, potmeters and
-menu entries to work, MPlayer must know what to do if they are clicked.
-This is done by <a href="#guimsg">messages</a> (events). For these items
-you must define the messages to be genereated when they are clicked.
+<br>&nbsp;</ul>
 
-<h3><a name="files">2.4 Files</a></h3>
-
-You need the following files to build a skin.
+<ul>Obszar menu znajduj±cy siê pod kursorem jest zdefiniowany poprzez jego
+pozycjê i rozmiar w obrazku (zobacz sekcjê <a href="#skinmenu">menu skóry</a>
+aby dowiedzieæ siê wiêcej na ten temat)</ul>
+Jest jeszcze jedna wa¿na rzecz, która nie zosta³a jeszcze wspomniana: dla
+przycisków, potencjometrów i obszarów menu, MPlayer musi wiedzieæ co ma
+zrobiæ je¿eli zostan± one klikniête. Zajmuj± siê tym <a href="#guimsg">sygna³y</a>
+(zdarzenia). Dla wszystkich tych elementów musz± byæ zdefiniowane sygna³y,
+które maj± zostaæ wywo³ane po naci¶niêciu przycisku myszy.
+<h3>
+<a NAME="files"></a><i>2.4 Pliki</i></h3>
+Aby stworzyæ skórê bêdziesz potrzebowa³ nastêpuj±cych plików.
 <ul>
 <li>
-The configuration file named <a href="#skin">skin</a> tells MPlayer how
-to put different parts of the skin together and what to do if you click
-somewhere in the window.
-</li>
-<li>The background image for the main window.</li>
-<li>Images for the items in the main window (including one or more font
-description files needed to draw labels).</li>
-<li>The image to be displayed in the subwindow (optional).</li>
-<li>Two images for the skin menu (they are needed only if you want to create
-a menu).
+Plik konfiguracyjny o nazwie <a href="#skin">skin</a>, który informuje
+MPlayera w jaki sposób ³±czyæ ze sob± poszczególne czê¶ci skóry i co ma
+zrobiæ kiedy klikasz gdziesz w obszarze okna.</li>
+
+<li>
+Obrazek T³a do g³ównego okna.</li>
+
+<li>
+Obrazki dla elementów okna g³ównego (w³±czaj±c w to jeden, albo wiêcej
+plików opisuj±cych fonty potrzebnych do wy¶wietlania etykiet)</li>
+
+<li>
+Obrazek który ma byæ wy¶wietlony w oknie ekranu (opcjonalnie)</li>
+
+<li>
+Dwa obrazki do menu skóry (s± one potrzebne tylko je¶li chcesz stworzyæ
+takie menu)</li>
 </ul>
-
-With the exception of the skin configuration file, you can name the other
-files whatever you want (but note that font description files must have
-.fnt extension).
-
-
-<h2><a name="skin">3 The <code><b>skin</b></code> file</a></h2>
-
-<p>
-As mentioned above, this is the skin configuration file.
-It is line oriented; comment lines start with a '<code>;</code>' character
-at the beginning of the line (only spaces and tabs are allowed before the
-'<code>;</code>').
-
-<p>
-The file is made up of sections. Each section describes the skin for an
-application and has the following form:
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
-section = <i>section name</i>
+Poza plikiem konfiguracyjnym skóry, mo¿esz nazwaæ wszystkie inne pliki
+jak tylko chcesz (ale pamiêtaj, ¿e plik opisuj±cy fonty musi mieæ rozszerzenie
+.fnt).
+<h2>
+<a NAME="skin"></a>3 The <b><tt>skin</tt></b> file</h2>
+Jak wspomniano powy¿ej jest to plik konfiguruj±cy skórê. Potrafi on rozpoznawaæ
+typy wierszy: wiersze komentarza rozpoczyna ¶rednik, czyli ';' (przed nim
+mog± znajdowaæ siê tylko spacje, lub "taby")
+<p>Plik podzielony jest na sekcjê. Ka¿da z nich opisuje poszczególny element
+skóry dla ka¿dej z aplikacji i ma nastêpuj±c± postaæ:
+<table BORDER WIDTH="100%" >
+<tr BGCOLOR="#C0C0C0">
+<td>
+<pre>section = section<i> name
+</i>.
 .
 .
-.
-end
-</pre></td></tr></table>
+end</pre>
+</td>
+</tr>
+</table>
 
-<p>
-Currently there is only one application, so you need only one section:
-its name is <b>movieplayer</b>.
-
-<p>
-Within this section each window is described by a block in the following form:
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
-window = <i>window name</i>
+<p>Na dzieñ dzisiejszy istnieje tylko jedna aplikacja, wiêc potrzebujesz
+tylko jednej sekcji: jej nazwa to <b>movieplayer</b> (odtwarzacz filmów)
+<p>W tej sekcji ka¿de z okien jest opisane poprzez dany blok w taki sposób:
+<table BORDER WIDTH="100%" >
+<tr BGCOLOR="#C0C0C0">
+<td>
+<pre>window = <i>window name
+</i>.
 .
 .
-.
-end
-</pre></tr></td></table>
-where <i>window name</i> can be one of these strings:
+end</pre>
+</td>
+</tr>
+</table>
+gdzie<i> window name </i>mo¿e byæ jednym z nastêpuj±cych bloków:
 <ul>
-<li><b>main</b> - for the main window</li>
-<li><b>sub</b> - for the subwindow</li>
-<li><b>menu</b> - for the skin menu</li>
+<li>
+<b>main</b> - dla g³ównego okna</li>
+
+<li>
+<b>sub</b> - dla okna ekranu</li>
+
+<li>
+<b>menu</b> - dla menu skóry.</li>
 </ul>
-
-<p>
-(The sub and menu block is optional---you do not need to create a menu or
-to decorate the subwindow.)
-
-<p>
-Within a window block, you can define each item for the window
-by a line in this form:
-
+(Blok sub i menu s± opcjonalne-nie musisz tworzyæ menu, ani dekorowaæ okna
+ekranu je¿eli nie chcesz.)
+<p>W ka¿dym z bloków mo¿esz zdefiniowaæ poszczególne elementy (items) dla
+danego okna w sposób przedstawiony poni¿ej:
 <blockquote>
-<pre>
-item = parameter
-</pre>
+<pre>item = parameter</pre>
 </blockquote>
+Gdzie <i>item </i>jest blokiem identyfikuj±cym typ danego elementu GUI,
+<i>parametr</i>
+jest numeryczn±, lub tekstow± warto¶ci± (lub lst± warto¶ci oddzielon± przecinkami).
+<p>£±cz±c to wszystko ze sob±, uzyskujemy plik wygl±daj±cy mniej wiêcej
+tak:
+<table BORDER WIDTH="100%" >
+<tr BGCOLOR="#C0C0C0">
+<td>
+<pre>section = movieplayer
+&nbsp; window = main
+&nbsp; ; ... elementy dla okna g³ównego ...
+&nbsp; end
+&nbsp;&nbsp;
+&nbsp; window = sub
+&nbsp; ; ... elementy dla okna ekranu ...
+&nbsp; end
+&nbsp;&nbsp;
+&nbsp; window = menu
+&nbsp; ; ... elementy dla menu skóry ...
+&nbsp; end
+end</pre>
+</td>
+</tr>
+</table>
 
-<p>
-where <i>item</i> is a string that identifies the type of the GUI item,
-<i>parameter</i> is a numeric or textual value (or a list of values
-separated by commas).
-</p>
-
-<p>
-Putting the above together, the whole file looks something like this:
-
-<p>
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
-section = movieplayer
-  window = main
-  ; ... items for main window ...
-  end
-  
-  window = sub
-  ; ... items for subwindow ...
-  end
-  
-  window = menu
-  ; ... items for skin menu ...
-  end
-end
-</pre></tr></td></table>
-
-<p>
-Finally some words about specifying images for the various items.
-<br>
-The name of an image file must be given without leading directories---
-images are searched in the directory of the skins. You may (but you need not)
-specify the file's extension. If the file doesn't exist, MPlayer tries to
-load the file <i>&lt;filename&gt;.&lt;ext&gt;</i>, where <i>tga</i>,
-<i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i> and <i>PNG</i> is tried
-for <i>&lt;ext&gt;</i> (in this order). The first matching file will be used.
-
-<p>
-
-<table border=1 cellpadding=5 width="100%"><tr bgcolor="#ffffcc"><td>
-Here is an example to make this clear. Suppose that you have an image called
-<i>main.png</i> that you use for the main window:
+<p>Na koniec kila s³ów o specyfice obrazków dla ró¿nych elementów.
+<br>Nazwa obrazk musi byæ podana bez ¿adnych g³ównych katalogów---obrazki
+s± poszukiwane w katalogu ze skórk±. Mo¿esz (ale nie musisz) podaæ rozszerzenie
+plików. Je¿eli plik nie istnieje, MPlayer próbuje za³adowaæ plik <i>&lt;nazwa
+pliku>.&lt;rozszerzenie></i> gdzie <i>tga, TGA, bmp, BMP, png i PNG</i>
+s± próbowane jako <i>&lt;rozszerzenie></i> (w tej kolejno¶ci)
+<br>Wykorzystany zostanie pierwszy pasuj±cy plik.
+<table BORDER CELLPADDING=5 WIDTH="100%" >
+<tr BGCOLOR="#FFFFCC">
+<td>Tutaj jest przyk³ad, który powinien to wyja¶niæ. Przypu¶æmy, ¿e masz
+obrazek o nazwie <i>main.png</i>, który u¿ywasz do g³ównego okna:
 <blockquote>
-<pre>
-    base = main, -1, -1
-</pre>
+<pre>&nbsp;&nbsp;&nbsp; base = main, -1, -1</pre>
 </blockquote>
-
-MPlayer tries to load <i>main</i>, <i>main.tga</i>, <i>main.TGA</i>,
-<i>main.bmp</i> etc, so <i>main.png</i> will be found.
-<br>
-If (by accident) you wrote
+MPlayer próbuje za³adowaæ <i>main, main.tga, main.TGA, main.BMP</i>, itd.,
+wiêc <i>main.png</i> zostanie znaleziony.
+<br>Je¿eli (przez przypadek) napiszesz:
 <blockquote>
-<pre>
-    base = main.bmp, -1, -1
-</pre>
+<pre>&nbsp;&nbsp;&nbsp; base = main.bmp, -1, -1</pre>
 </blockquote>
-then <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
-<i>main.bmp.bmp</i> would be searched and MPlayer would finally give up
-because there is no <i>main.bmp</i> in the directory, but <i>main.png</i>.
-</td></tr></table>
+wtedy <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
+<i>main.bmp.bmp</i>
+bêd± wyszukiwane i MPlayer w koñcu siê podda, poniewa¿ nie ma pliku <b>main.bmp</b>
+w katalogu, ale <i>main.png.</i></td>
+</tr>
+</table>
 
+<h3>
+<a NAME="mainwin"></a>3.1 G³ówne okno</h3>
+Poni¿ej mo¿esz zobaczyæ listê elementów, które mog± byæ u¿yte w bloku '<tt>window
+= main</tt>' . . . '<tt>end</tt>'.
+<dl>
+<dt>
+<a NAME="main.base"></a><b>base = <i>obrazek, x, y</i></b></dt>
 
-<h3><a name="mainwin">3.1 Main window</a></h3>
+<dd>
+Pozwala ci okre¶liæ obrazek t³a, który ma zostaæ u¿yty w g³ównym oknie.
+Okno to pojawi siê w okre¶lonej przez <i>x,y</i> pozycji na ekranie (0,0
+to lewy górny róg). Mo¿esz tu u¿yæ tak¿e nastêpuj±cych warto¶ci: 1-dla
+wy¶rodkowania, 2 dla wyrównania do prawej (dla warto¶ci x) i do do³u (dla
+warto¶ci y). Okno to bêdzie rozmiarów obrazka t³a.</dd>
 
-Below you can see the list of items that can be used in the 
-'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>' block.
+<p><i><b>Uwaga: </b>prze¼roczyste obszary w obrazku (kolor #FF00FF) pojawiaj±
+siê jako czarny kolor w X serwerach, które nie obs³uguj± rozszerzenia XShape.</i></dl>
 
 <dl>
-<dt><a name="main.base">
-<b>base = <i>image, x, y</i></b>
-</a></dt>
-<dd>
-Lets you specify the background image to be used for the main window.
-The window will appear at the given <i>x</i>,<i>y</i> position
-on the screen (0,0 is the top left corner). You can specify -1 for center
-and -2 for right (x) and bottom (y). The window will be as large as the image. 
-<p>
-<em class=warn>
-<b>Warning:</b> transparent regions in the image (colored #FF00FF) appear
-black on X servers without the XShape extension.
-</em>
-</dd>
-</dl>
+<dt>
+<a NAME="main.button"></a><b>button = <i>obrazek, x, y, szeroko¶æ, wysoko¶æ,
+sygna³</i></b></dt>
 
-<dl>
-<dt><a name="main.button">
-<b>button = <i>image, x, y, width, height, message</i></b></a></dt>
 <dd>
-Place a button of <i>width</i> * <i>height</i> size at the
-<i>x</i>,<i>y</i> position. The specified message is generated when
-the button is clicked.
-The image given by <i>image</i> must have three parts below each other
-(according to the possible states of the button), like this:
-<div align=center><table><tr><td><pre><small>
-+------------+
-|  pressed   |
-+------------+
-|  released  |
-+------------+
-|  disabled  |
-+------------+
-</small></pre></td></tr></table></div>
-</dd>
-</dl>
+Umieszcza przycisk o rozmiarze <i>szeroko¶æ * wysoko¶æ</i> na pozycji <i>x,y</i>.
+Okre¶lony sygna³ jest generowany, kiedy przycisk zostanie klikniêty. Obrazek
+okre¶lony jako <i>obrazek</i> musi byæ podzielony na trzy czê¶ci umieszczone
+jedna pod drug± (podzielony wed³ug mo¿liwych faz przycisku), w ten sposób:</dd>
 
-<dl>
-<dt><a name="main.decoration">
-<b>decoration = enable|disable</b>
-</a></dt>
-<dd>
-Enable or disable window manager decoration of the main window. Default
-is <b>disable</b>.
-</dd>
+<br>&nbsp;
+<center><table>
+<tr>
+<td>
+<pre><font size=-1>+------------+
+| wci¶niêty&nbsp; |
++------------+
+|&nbsp; uwolniony |
++------------+
+| nieaktywny |
++------------+</font></pre>
+</td>
+</tr>
+</table></center>
 </dl>
 
 <dl>
 <dt>
-<a name="main.hpotmeter">
-<b>
-hpotmeter = <i>butt, bw,bh, phases, numphases, default, x, y, w, h, msg</i>
-</b>
-</a>
-</dt>
+<a NAME="main.decoration"></a><b>decoration = enable|disable</b></dt>
+
 <dd>
-Place a horizontal potmeter of <i>w</i> * <i>h</i> size at the
-<i>x</i>,<i>y</i> position. The image can be divided into
-different parts for the different phases of the potmeter (for example,
-you can have a pot for volume control that turns from green to red
-while its value changes from the minimum to the maximum.)
-hpotmeter can have a button that can be dragged horizontally.
-The parameters are:
+W³±cza, lub wy³±cza dekoracje okna (pasek tytu³owy) twojego menad¿era okien.
+Domy¶lnie jest to <b>wy³±czone</b>.</dd>
+</dl>
+
+<dl>
+<dt>
+<a NAME="main.hpotmeter"></a><b>hpotmeter = <i>suwak, szs,ws, fazy, liczbafaz,
+domy¶lna, x, y, sz, w, sygna³</i></b></dt>
+
+<dd>
+Umieszcza poziomo potencjometr o rozmiarach <i>sz*w</i> na pozycji <i>x,y</i>.
+Obrazek mo¿e byæ podzielony na ró¿ne czê¶ci dla ró¿nych faz potencjometru
+(np. mo¿esz mieæ potencjometr g³o¶no¶ci, który zmienia siê z zielonego
+na czerwony podczas zmiany g³o¶no¶ci z minimalnej do maksymalnej). hpotencjometr
+mo¿e mieæ przycisk który jest przesuwany w poziomie. Jego parametry to:</dd>
+
 <ul>
-<li><i>butt</i> - the image to be used for the button
-(must have three parts below each other, like in case of
-<a href="#main.button">button</a>)</li>
-<li><i>bw</i>, <i>bh</i> - size of the button</li>
-<li><i>phases</i> - The image to be used for the different phases of the
-hpotmeter. The image must be divided into <i>numphases</i> parts vertically
-(see below). A special value of <kbd>NULL</kbd> can be used if you want
-no such image.
-</li>
-<li><i>numphases</i> - number of phases stored in the <i>phases</i>
-image</li>
-<li><i>default</i> - default value for hpotmeter (in the range 0 to
-100)</li>
-<li><i>x</i>, <i>y</i> - position for the hpotmeter</li>
-<li><i>w</i>, <i>h</i> - width and height of the hpotmeter</li>
-<li><i>msg</i> - the message to be generated when the value of hpotmeter
-is changed</li>
-</ul>
-The image used for the different phases must look something like this:
-<div align=center><table border=0><tr><td><pre><small>
+<li>
+<i>suwak</i> - obrazek który ma byæ u¿yty jako suwak (musi mieæ trzy czê¶ci
+umieszczone jedna pod drug±, tak jak w przypadku <a href="#main.button">przycisku</a>)</li>
+
+<li>
+szs, ws - rozmiar suwaka</li>
+
+<li>
+<i>fazy</i> - obrazek który ma byæ u¿yty&nbsp; dla ró¿nych faz hpotencjometru.
+Obrazek musi byæ podzielony w pionie na <i>liczbêfaz</i> (zobacz poni¿ej).
+Specjalna warto¶æ <font size=-1>NULL</font> mo¿e byæ u¿yta je¿eli nie chcesz
+¿adnego obrazka.</li>
+
+<li>
+<i>liczbafaz</i> - liczba faz znajduj±ca siê w obrazku z <i>fazami</i>.</li>
+
+<li>
+<i>domy¶lna</i> - domy¶lna warto¶æ dla hpotencjometru (w przedziale od
+0 do 100)</li>
+
+<li>
+<i>x</i>, <i>y</i> - pozycja hpotencjometru</li>
+
+<li>
+<i>sz, w</i> - szeroko¶æ i wysoko¶æ obszaru po którym mo¿e poruszaæ siê
+suwak.</li>
+
+<li>
+<i>sygna³</i> - sygna³ który ma byæ wywo³any, kiedy zmienia siê warto¶æ
+hpotnecjometru</li>
+
+<p>Obrazek okre¶laj±cy poszczególne fazy musi wygl±daæ w ten sposób:
+<br>&nbsp;</ul>
+
+<center><table BORDER=0 >
+<tr>
+<td>
+<pre><font size=-1>+------------+
+|&nbsp;&nbsp; faza #1&nbsp; |
 +------------+
-|  phase #1  |
+|&nbsp;&nbsp; faza #2&nbsp; |
 +------------+
-|  phase #2  |
+&nbsp;&nbsp;&nbsp;&nbsp; ...
 +------------+
-     ...
-+------------+
-|  phase #n  |
-+------------+
-</small></pre></td></tr></table></div>
-<em class=note>
-<b>Note:</b> there will be a vpotmeter item too, but is it not implemented
-yet.
-</em>
-</dd>	
+|&nbsp;&nbsp; faza #n&nbsp; |
++------------+</font></pre>
+</td>
+</tr>
+</table></center>
+<i><b>Uwaga: </b>w przysz³o¶ci bêdzie teæ vpotencjometr, ale nie zosta³
+on jeszcze zaimpletowany.</i></dl>
+
+<dl>
+<dt>
+<a NAME="main.potmeter"></a><b>potmeter = <i>fazy, liczbafaz, domy¶lna,
+x, y, sz, w, sygna³</i></b></dt>
+
+<dd>
+Potencjometr bez suwaka. (My¶lê, ¿e chodzi tu o to ¿eby nim krêciæ, ale
+reaguje on tylko na poziome przesuwanie.) Aby zobaczyæ opis parametrów
+zobacz <a href="#main.hpotmeter">hpotmeter</a>. <i>fazy</i> mog± mieæ warto¶æ
+<font size=-1>NULL</font>
+(nic), ale jest to bezu¿yteczne, je¿eli nie mo¿esz zobaczyæ gdzie znajduje
+siê potencjometr.</dd>
 </dl>
 
 <dl>
-<dt><a name="main.potmeter">
-<b>potmeter = <i>phases, numphases, default, x, y, w, h, msg</i></b>
-</a></dt>
+<dt>
+<a NAME="main.font"></a><b>font = <i>plikfontów, fontid</i></b></dt>
+
 <dd>
-A potmeter without a button. (I guess it is ment to be turned round,
-but it reacts to horizontal dragging only.)
-For the description of the parameters see
-<a href="#main.hpotmeter">hpotmeter</a>. <i>phases</i> can be
-<code>NULL</code>, but its quite useless, since you can not see where
-the potmeter is set.
-</dd>
+Definiuje fonty. <i>plikfontów</i> jest nazw± <i>pliku opisuj±cego fonty</i>
+z rozszerzeniem .fnt (<b>nie trzeba</b> tu okre¶laæ rozszerzenia). <i>fontid</i>
+jest u¿ywany do odsy³ania do fontów (kiepskie t³umaczenie-przyp. t³umacz)
+(zobacz <a href="#main.dlabel">dlabel</a> i <a href="#main.slabel">slabel</a>).
+Mo¿esz okre¶liæ ponad 25 znaków.</dd>
 </dl>
 
 <dl>
-<dt><a name="main.font">
-<b>font = <i>fontfile, fontid</i></b>
-</a></dt>
+<dt>
+<a NAME="main.dlabel"></a><b>dlabel = <i>x, y, d³ugo¶æ, align, fontid,
+"text"</i></b></dt>
+
 <dd>
-Defines a font. <i>fontfile</i> is the name of a font description file
-with <code>.fnt</code> extension (<b>no need</b> to specify the extension
-here).
-<i>fontid</i> is used to refer to the font 
-(see <a href="#main.dlabel">dlabel</a> and <a href="#main.slabel">slabel</a>).
-Up to 25 fonts can be defined.
-</dd>
+Umieszcza dynamiczne etykiety na pozycji x,y. Etykieta nazywana jest dynamiczn±,
+poniewa¿ tekst w niej jest regularnie od¶wie¿any (co¶ jak okno z tytu³em
+utworu w Winampie-przyp. t³umacz). Maksymalna d³ugo¶æ etykiety jest ustalona
+przez <i>d³ugo¶æ</i> (jej wysoko¶æ jest wysoko¶ci± fontów). Je¿eli tekst
+który ma byæ wy¶wietlony jest d³u¿szy od tej warto¶ci, wtedy bêdzie on
+skrolowany (przesuwany-tak jak w XMMS/Winamp-przyp.t³umacz), w innym przypadku
+bêdzie on wyrównany do okre¶lonej przez <i>align</i> (wyrównanie) przestrzeni.0
+dla wyrównania do prawej, 1 dla wy¶rodkowania, 2 dla wyrównania do lewej.</dd>
+
+<p>Tekst, który ma zostaæ wy¶wietlony jest okre¶lony przez <i>text</i>:
+musi byæ on opisany w cudzys³owiu (") (ale " nie mo¿e byæ czê¶ci± tekstu).
+Etykieta jest wy¶wietlana u¿ywaj±c <i>fontid</i>. Mo¿esz u¿yæ poni¿szych
+zmiennych w tek¶cie:
+<br>&nbsp;
+<center><table BORDER valign="top" >
+<tr ALIGN=CENTER>
+<th>Zmienna</th>
+
+<th ALIGN=LEFT>Znaczenie</th>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$1</tt></td>
+
+<td>odtwarza czas w formacie <i>hh:mm:ss</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$2</tt></td>
+
+<td>odtwarza czas w formacie <i>mmmm:ss</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$3</tt></td>
+
+<td>odtwarza czas w formacie <i>hh</i> (godziny)</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$4</tt></td>
+
+<td>odtwarza czas w formacie <i>mm</i> (minuty)</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$5</tt></td>
+
+<td>odtwarza czas w formacie <i>ss</i> (sekundy)</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$6</tt></td>
+
+<td>wy¶wietla d³ugo¶æ filmu w formacie <i>hh:mm:ss</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$7</tt></td>
+
+<td>wy¶wietla d³ugo¶æ filmu w formacie <i>mmmm:ss</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$8</tt></td>
+
+<td>odtwarza czas w formacie <i>h:mm:ss</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$v</tt></td>
+
+<td>g³o¶no¶æ w formacie <i>xxx.xx%</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$V</tt></td>
+
+<td>g³o¶no¶æ w formacie <i>xxx.x</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$b</tt></td>
+
+<td>balans w formacie <i>xxx.xx%</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$B</tt></td>
+
+<td>balans w formacie <i>xxx.x</i></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$$</tt></td>
+
+<td>znaczek <tt>$</tt></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$a</tt></td>
+
+<td>znak okre¶laj±cy typ d¼wiêku (¿aden: <tt>n</tt>, mono: <tt>m</tt>,
+stereo: <tt>t</tt>)</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$t</tt></td>
+
+<td>Numer ¶cie¿ki (w playli¶cie)</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$o</tt></td>
+
+<td>nazwa pliku</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$f</tt></td>
+
+<td>nazwa pliku ma³ymi literami</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$F</tt></td>
+
+<td>nazwa pliku drukowanymi literami</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$T</tt></td>
+
+<td>znak okre¶laj±cy typ strumienia (plik: <tt>f</tt>, video CD:
+<tt>v</tt>,
+DVD: <tt>d</tt>, URL: <tt>u</tt>)&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$p</tt></td>
+
+<td>znak "p" (je¿eli film jest odgrywany i font ma okre¶lony symbol "p")&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$s</tt></td>
+
+<td>znak "s" (je¿eli film jest zatrzymany i font ma okre¶lony symbol "s")&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>$e</tt></td>
+
+<td>znak "e" (je¿eli w³±czona jest pauza i font ma okre¶lony symbol "e")&nbsp;</td>
+</tr>
+</table></center>
+<b>Uwaga: </b>Zmienne <font size=-1>$a, $T, $p, $s i $e</font> maj± znaki
+które powinny byæ wy¶wietlane jako znaki specjalne (np. "e" jest symbolem
+pauzy wygl±daj±cym zazwyczaj tak <b><tt>||</tt></b> ). Powiniene¶ mieæ
+fonty dla normalnych znaczków i osobne dla znaków specjalnych. Zobacz sekcjê
+<a href="#symbols">symbols</a>
+, aby dowiedzieæ siê wiêcej.</dl>
+
+<dl>
+<dt>
+<a NAME="main.slabel"></a><b>slabel = <i>x, y, fontid, text</i></b></dt>
+
+<dd>
+Umieszcza statyczn± etykietê na pozycji <i>x,y</i>. <i>text</i> jest wy¶wietlany
+u¿ywaj±c <i>fontid</i>. Text jest po prostu ci±giem (zmienne $x nie dzia³aj±)
+który musi znajdowaæ siê w cudzys³owiu (" nie mo¿e byæ czê¶ci± tekstu).
+Etykieta jest wy¶wietlana u¿ywaj±c&nbsp; <i>fontid</i>.</dd>
+</dl>
+
+<h3>
+<a NAME="subwindow"></a>3.2 Okno ekranu</h3>
+Poni¿ej mo¿esz zobaczyæ listê elementów, które mog± byæ u¿yte w bloku '<tt>window
+= sub</tt>' . . . '<tt>end</tt>'.
+<dl>
+<dt>
+<a NAME="sub.base"></a><b>base = <i>image, x, y, szeroko¶æ, wysoko¶æ</i></b></dt>
+
+<dd>
+Obrazek który ma byæ wy¶wietlony w tym oknie. Okno pojawi siê w okre¶lonej
+przez ciebie pozycji <i>x,y</i> na ekranie (0,0 umieszcza obrazek w lewym
+górnym rogu). Mo¿esz tu u¿yæ tak¿e nastêpuj±cych warto¶ci: 1-dla wy¶rodkowania,
+2 dla wyrównania do prawej (dla warto¶ci x) i do do³u (dla warto¶ci y).
+Okno to bêdzie rozmiarów obrazka. <i>szeroko¶æ</i> i <i>wysoko¶æ</i> okre¶la
+rozmiar okna. Te zmienne s± opcjonalne (je¿eli ich nie bêdzie, okno bêdzie
+takich samych rozmiarów jak obrazek)</dd>
 </dl>
 
 <dl>
-<dt><a name="main.dlabel">
-<b>dlabel = <i>x, y, length, align, fontid, "text"</i></b>
-</a></dt>
-<dd>
-Place a dynamic label at the <i>x</i>,<i>y</i> position. The label is called
-dynamic because its text is refreshed periodically.
-The maximum length of the label is given by <i>length</i> (its height is the
-height of a character).
-If the text to be displayed is wider than that, then it will be
-scrolled, otherwise it is aligned within the specified space by the value
-of the <i>align</i> parameter: 0 is for right, 1 is for center,
-2 is for left.
-<br>
-The text to be displayed is given by <i>text</i>: it must be written between
-double quotes (<code>"</code>) (but the <code>"</code> cannot be part of the
-text). The label is displayed using the font identified by <i>fontid</i>.
-You can use the following variables in the text.
+<dt>
+<a NAME="sub.background"></a><b>background = <i>r, g, b</i></b></dt>
 
-<div align=center>
-<table valign=top border=1>
-<tr align=center><th>Variable</th><th align=left>Meaning</th></tr>
-<tr><td align=center><kbd>$1</kbd></td>
-    <td>play time in <em>hh:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$2</kbd></td>
-    <td>play time in <em>mmmm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$3</kbd></td>
-    <td>play time in <em>hh</em> format (hours)</td></tr>
-<tr><td align=center><kbd>$4</kbd></td>
-    <td>play time in <em>mm</em> format (minutes)</td></tr>
-<tr><td align=center><kbd>$5</kbd></td>
-    <td>play time in <em>ss</em> format (seconds)</td></tr>
-<tr><td align=center><kbd>$6</kbd></td>
-    <td>movie's length in <em>hh:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$7</kbd></td>
-    <td>movie's length in <em>mmmm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$8</kbd></td>
-    <td>play time in <em>h:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$v</kbd></td>
-    <td>volume in <em>xxx.xx%</em> format</td></tr>
-<tr><td align=center><kbd>$V</kbd></td>
-    <td>volume in <em>xxx.x</em> format</td></tr>
-<tr><td align=center><kbd>$b</kbd></td>
-    <td>balance in <em>xxx.xx%</em> format</td></tr>
-<tr><td align=center><kbd>$B</kbd></td>
-    <td>balance in <em>xxx.x</em> format</td></tr>
-<tr><td align=center><kbd>$$</kbd></td>
-    <td>the <kbd>$</kbd> character</td></tr>
-<tr><td align=center><kbd>$a</kbd></td>
-    <td>a character according to the audio type (none: <code>n</code>,
-    mono: <code>m</code>, stereo: <code>t</code>)</td></tr>
-<tr><td align=center><kbd>$t</kbd></td>
-    <td>track number (in playlist)</td></tr>
-<tr><td align=center><kbd>$o</kbd></td>
-    <td>filename</td></tr>
-<tr><td align=center><kbd>$f</kbd></td>
-    <td>filename in lower case</td></tr>
-<tr><td align=center><kbd>$F</kbd></td>
-    <td>filename in upper case</td></tr>
-<tr><td align=center><kbd>$T</kbd></td>
-    <td>a character according to the stream type (file: <code>f</code>,
-    video CD: <code>v</code>, DVD: <code>d</code>, URL: <code>u</code>)
-    </td></tr>
-<tr><td align=center><kbd>$p</kbd></td>
-    <td>the "p" character (if a movie is playing and the font has the "p"
-    character)
-    </td></tr>
-<tr><td align=center><kbd>$s</kbd></td>
-    <td>the "s" character (if the movie is stopped and the font has the "s"
-    character)
-    </td></tr>
-<tr><td align=center><kbd>$e</kbd></td>
-    <td>the "e" character (if playback is paused and the font has the "e"
-    character)
-    </td></tr>
-</table></div>
-<p>
-<b>Note:</b> The <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
-and <kbd>$e</kbd> variables all return characters that should be displayed
-as special symbols (for example, "e" is for the pause symbol that usually
-looks something like <code>||</code>). You should have a font for normal
-characters and a different font for symbols.
-See the section about <a href="#symbols">symbols</a> for more information.
-</dd>
+<dd>
+Pozwala ci ustaliæ kolor t³a. Jest to przydatne je¿eli obrazek jest mniejszy
+od okna (bêdzie on tak¿e wy¶wietlany dooko³a okna ekranu w trybie pe³noekranowym-przyp.
+t³umacz). r, g i b okre¶laj± czerwon±, zielon± i niebiesk± warto¶æ koloru
+(ka¿da z nich jest okre¶lona w przedziale od 0 do 255).</dd>
+</dl>
+
+<h3>
+<a NAME="skinmenu"></a>3.3 Menu Skóry</h3>
+Jak wspomnianow wcze¶niej, menu jest wy¶witlane przy u¿yciu dwóch obrazków.
+"Normalny" stan menu jest brany z obrazka okre¶lonego jako <i>base</i>,
+podczas gdy zaznaczony obszar jest brany z obrazka okre¶lonego jako <i>selected</i>.
+Musisz zdefiniowaæ pozycjê i rozmiar ka¿dego z elementów menu poprzez element
+<i>menu</i>.
+<p>Te elementy mog± zostaæ wykorzystane w bloku '<tt>window = menu</tt>'
+. . . '<tt>end</tt>':
+<dl>
+<dt>
+<a NAME="menu.base"></a><b>base = <i>obrazek</i></b></dt>
+
+<dd>
+Obrazek pokazuj±cy normalny stan menu</dd>
 </dl>
 
 <dl>
-<dt><a name="main.slabel">
-<b>slabel = <i>x, y, fontid, text</i></b>
-</a></dt>
+<dt>
+<a NAME="menu.selected"></a><b>selected = <i>obrazek</i></b></dt>
+
 <dd>
-Place a static label at the <i>x</i>,<i>y</i> position.
-<i>text</i> is displayed using the font identified by <i>fontid</i>.
-The text is just a raw string ($x variables do not work) that must be enclosed
-between double quotes (the <code>"</code> cannot be part of the text).
-The label is displayed using the font identified by <i>fontid</i>.
-</dd>
-</dl>
-
-
-<h3><a name="subwindow">3.2 Subwindow</a></h3>
-
-The following items can be used in the
-'<code>window = sub</code>' .&nbsp;.&nbsp;. '<code>end</code>' block.
-
-<dl>
-<dt><a name="sub.base">
-<b>base = <i>image, x, y, width, height</i></b>
-</a></dt>
-<dd>
-The image to be displayed in the window.
-The window will appear at the given <i>x</i>,<i>y</i> position
-on the screen (0,0 is the top left corner). You can specify -1 for center
-and -2 for right (x) and bottom (y). The window will be as large as the image. 
-<i>width</i> and <i>height</i> gives the size of the window; they are
-optional (if they are missing, the window is the same size as the image).
-</dd>
+Obrazek pokazuj±cy zaznaczony stan menu.</dd>
 </dl>
 
 <dl>
-<dt><a name="sub.background">
-<b>background = <i>r, g, b</i></b>
-</a></dt>
+<dt>
+<a NAME="menu.menu"></a><b>menu = <i>x, y, szeroko¶æ, wysoko¶æ, sygna³</i></b></dt>
+
 <dd>
-Lets you set the background color. It is useful if the image is smaller than
-the window.
-<i>r</i>, <i>g</i> and <i>b</i> specifies the red, green and blue
-component of the color (each of them is a decimal number from 0 to 255).
-</dd>
+Definiuje pozycjê <i>x,y</i> i rozmiar poszczególnych elementów menu w
+obrazku. <i>sygna³</i> jest sygna³em, który ma byæ uaktywniony, kiedy klikniesz
+t± pozycjê.</dd>
 </dl>
 
-
-<h3><a name="skinmenu">3.3 Skin menu</a></h3>
-
-As mentioned earlier, the menu is displayed using two images.
-Normal menu entries are taken from the image specified by the <i>base</i>
-item, while the currently selected entry is taken from the image specified
-by the <i>selected</i> item.
-You must define the position and size of each menu entry by the <i>menu</i>
-item.
-
-<p>
-These are the items that can be used in the '<code>window = menu</code>'
-.&nbsp;.&nbsp;. '<code>end</code>' block.
-
-<dl>
-<dt><a name="menu.base">
-<b>base = <i>image</i></b>
-</a></dt>
-<dd>
-The image for normal menu entries.
-</dl>
-</dd>
-
-<dl>
-<dt><a name="menu.selected">
-<b>selected = <i>image</i></b>
-</a></dt>
-<dd>
-The image showing the menu with all entries selected.
-</dd>
-</dl>
-
-<dl>
-<dt><a name="menu.menu">
-<b>menu = <i>x, y, width, height, message</i></b>
-</a></dt>
-<dd>
-Defines the <i>x</i>,<i>y</i> position and the size of a menu entry in
-the images. <i>message</i> is the message to be generated when
-the mouse button is released over the entry.
-</dd>
-</dl>
-
-
-<h2><a name="fonts">4 Fonts</a></h2>
-
-As mentioned in the section about the parts of a skin, a font is defined
-by an image and a description
-file. You can place the characters anywhere in the image, but make sure that
-their position and size is given in the description file exactly.
-
-<p>
-The font description file (with .fnt extension) can have comment
-lines starting with '<code>;</code>'.
-The file must have a line in the form
+<h2>
+<a NAME="fonts"></a>4 Fonty</h2>
+Tak jak wspomniano w sekcji o czê¶ciach skóry, fonty s± zdefiniowane przez
+obrazek i <i>plik opisuj±cy fonty</i>. Mo¿esz umie¶ciæ znaki w dowolnym
+miejscu obrazka, ale upewnij siê, ¿e ich pozycja i rozmiar s± dok³adnie
+okre¶lone w <i>pliku opisuj±cym fonty</i>.
+<p><i>Plik opisuj±cy fonty</i> (z rozszerzeniem .fnt) mo¿e mieæ linie komentarza
+rozpoczête ¶rednikiem '<tt>;</tt>'. Plik musi mieæ tê liniê:
 <blockquote>
-<pre>
-image = <i>image</i>
-</pre>
+<pre>image = <i>obrazek</i></pre>
 </blockquote>
-
-<p>
-where <i>image</i> is the name of the image file to be used for
-the font (you do not have to specify the extension).
-The above line is followed by character definition lines of the form:
-
+gdzie <i>obrazek</i> jest nazw± pliku w którym znajduj± siê fonty (nie
+musisz podawaæ rozszerzenia).&nbsp; Po tej lini nastêpuje opisanie poszczególnych
+znaków:
 <blockquote>
-<pre>
-"<i>char</i>" = <i>x, y, w, h</i>
-</pre>
+<pre>"znak" = <i>x, y, sz, w</i></pre>
 </blockquote>
-
-<p>
-Here <i>x</i> and <i>y</i> specifies the position of the
-<i>char</i> character in the image (0,0 is the upper left corner).
-<i>w</i> and <i>h</i> is the width and height of the character
-(in pixels, of course).
-
-<p>
-Here is an example that defines the A, B, C characters using font.png.
-<table width="100%" border=1><tr bgcolor=silver><td><pre>
-; can be "font" instead of "font.png"
+Tutaj x i y okre¶laj± pozycjê <i>znaku</i> w obrazku (0,0 to lewy górny
+róg). sz i w to szeroko¶æ i wysoko¶æ znaku (oczywi¶cie w pikselach).
+<p>Poni¿ej mo¿esz zobaczyæ przyk³ad definiuj±cy znaki A, B, C znajduj±ce
+siê w pliku font.png:
+<table BORDER WIDTH="100%" >
+<tr BGCOLOR="#C0C0C0">
+<td>
+<pre>; mo¿e byæ "font" zamiast "font.png"
 image = font.png
 
-; Three characters are enough for demonstration only. :-)
-"A" =  0,0, 7,13
-"B" =  7,0, 7,13
-"C" = 14,0, 7,13
-</pre></td></tr></table>
-
-
-<h3><a name="symbols">4.1 Symbols</a></h3>
-
-Some characters have special meanings when returned by some of the variables
-used in
-<a href="#main.dlabel">dlabel</a>; these characters are meant to be
-displayed as symbols. (For example, in case of a DVD stream, you could display
-a nice DVD logo instead of the character 'd'.)
-
-<p>
-The following table lists all the characters that can be used to display
-symbols (and thus require a different font).
-
-<div align=center>
-<table>
-<tr><th align=center>Character</th><th align=left>Symbol</th></tr>
-<tr><td align=center><kbd>p</kbd></td>
-    <td align=left>play</td></tr>
-<tr><td align=center><kbd>s</kbd></td>
-    <td align=left>stop</td></tr>
-<tr><td align=center><kbd>e</kbd></td>
-    <td align=left>pause</td></tr>
-<tr><td align=center><kbd>n</kbd></td>
-    <td align=left>no sound</td></tr>
-<tr><td align=center><kbd>m</kbd></td>
-    <td align=left>mono sound</td></tr>
-<tr><td align=center><kbd>t</kbd></td>
-    <td align=left>stereo sound</td></tr>
-<tr><td align=center><kbd>f</kbd></td>
-    <td align=left>stream is a file</td></tr>
-<tr><td align=center><kbd>v</kbd></td>
-    <td align=left>stream is a video CD</td></tr>
-<tr><td align=center><kbd>d</kbd></td>
-    <td align=left>stream is a DVD</td></tr>
-<tr><td align=center><kbd>u</kbd></td>
-    <td align=left>stream is a URL</td></tr>
+; Trzy znaki s± wystarczaj±ce, aby zademonstrowaæ jak to dzia³a. :-)
+"A" =&nbsp; 0,0, 7,13
+"B" =&nbsp; 7,0, 7,13
+"C" = 14,0, 7,13</pre>
+</td>
+</tr>
 </table>
-</div>
 
-<p>
-<b>Note:</b> currently only 'p', 's', 'e', 'n', 'm' and 't' is used.
-</p>
+<h3>
+<a NAME="symbols"></a>4.1 Symbole</h3>
+Niektóre znaki maj± specjalne znaczenia kiedy s± zmiennymi u¿ywanymi w
+<a href="#main.dlabel">dlabel</a>;
+te znaki s± wy¶wietlane jako symbole. (np. kiedy odgrywasz strumieñ DVD,
+mo¿esz wy¶wietliæ fajne logo DVD zdefiniowane pod znakiem 'd'.)
+<p>Poni¿sza tabelka zawiera wszystkie znaki, które mog± byæ wykorzystane
+do wy¶wietlania symboli (i wymagaj± one osobnych fontów).
+<center><table>
+<tr>
+<th ALIGN=CENTER>Znak&nbsp;</th>
 
-<h2><a name="guimsg">Appendix A: GUI messages</a></h2>
+<th ALIGN=LEFT>Symbol</th>
+</tr>
 
+<tr>
+<td ALIGN=CENTER><tt>p</tt></td>
+
+<td ALIGN=LEFT>odtwarzanie</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>s</tt></td>
+
+<td ALIGN=LEFT>stop</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>e</tt></td>
+
+<td ALIGN=LEFT>pauza</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>n</tt></td>
+
+<td ALIGN=LEFT>bez d¼wiêku</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>m</tt></td>
+
+<td ALIGN=LEFT>d¼wiêk mono</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>t</tt></td>
+
+<td ALIGN=LEFT>d¼wiêk mono</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>f</tt></td>
+
+<td ALIGN=LEFT>strumieñ jest plikiem</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>v</tt></td>
+
+<td ALIGN=LEFT>strumieñ to VideoCD</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>d</tt></td>
+
+<td ALIGN=LEFT>strumieñ to DVD</td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><tt>u</tt></td>
+
+<td ALIGN=LEFT>strumieñ to URL</td>
+</tr>
+</table></center>
+<b>Uwaga: </b>obecnie tylko 'p', 's', 'e', 'n', 'm' i 't' s± wykorzystywane
+(W chwili gdy t³umaczona jest ta dokumentacja pozosta³e opcje s± ju¿ dostêpne-przyp.
+t³umacz)
+<h2>
+<a NAME="guimsg"></a>Dodatek A: sygna³y GUI</h2>
 These are the messages that can be generated by buttons, potmeters and
 menu entries.
-
-<p>
-<em class=note>
-<b>Note:</b> some of the messages might not work as expected (or not
-work at all). As you know, the GUI is under development.</em>
-
-<p>
-<i>Playback control:</i>
+<br>Tutaj znajduj± siê sygna³y które mog± zostaæ wywo³ane przez przyciski,
+potencjometry i elementy menu.
+<p><i><b>Uwaga:</b> niektóre z sygna³ów mog± dzia³aæ nieprawid³owo (albo
+w ogóle nie dzia³aæ). Jak wiesz, GUI jest ci±gle w fazie rozwoju.</i>
+<p><i>Opcje odgrywania:</i>
 <blockquote>
 <dl>
-<dt><b>evNext</b>
-<dd>Jump to next track in the playlist.
+<dt>
+<b>evNext</b></dt>
 
-<dt><b>evPause</b>
-<dd>Pause playing.
+<dd>
+Przeskakuje do nastêpnej ¶cie¿ki z playlisty</dd>
 
-<dt><b>evPauseSwitchToPlay</b>
-<dd>Forms a switch together with <i>evPlaySwitchToPause</i>. They can be
-used to have a common play/pause button. Both messages should be assigned
-to buttons displayed at the very same position in the window. This
-message pauses playing and the image for the <i>evPlaySwitchToPause</i> button
-is displayed (to indicate that the button can be pressed to continue playing).
+<dt>
+<b>evPause</b></dt>
 
-<dt><b>evPlay</b>
-<dd>Start playing.
+<dd>
+wstrzymuje odgrywanie.</dd>
 
-<dt><b>evPlaySwitchToPause</b>
-<dd>The opposite of <i>evPauseSwitchToPlay</i>. This message starts playing
-and the image for the <i>evPauseSwitchToPlay</i> button is displayed (to
-indicate that the button can be pressed to pause playing).
+<dt>
+<b>evPauseSwitchToPlay</b></dt>
 
-<dt><b>evPrev</b>
-<dd>Jump to previous track in the playlist.
+<dd>
+Prze³±cza miêdzy sob± u¿uwaj±c <i>evPlaySwitchToPause </i>(to niezbyt udane
+t³umaczenie-przyp. t³umacz). Mo¿e to zostaæ wykorzystane aby utworzyæ jeden
+przycisk spe³niaj±cy równocze¶nie funkcje odgrywania i pauzy. Oba sygna³y
+powinny byæ przydzielone do przycisków wy¶wietlanych w tym samym miejscu
+w oknie. Ten sygna³ wstrzymuje odtwarzanie i wy¶wietlany jest obrazek dla
+przycisku <i>evPlaySwitchToPause</i> (aby zaznaczyæ, ¿e ten przycisk mo¿e
+byæ wci¶niêty, aby kontynuowaæ odgrywanie).</dd>
 
-<dt><b>evStop</b>
-<dd>Stop playing.
+<dt>
+<b>evPlay</b></dt>
+
+<dd>
+Rozpoczyna odgrywanie.</dd>
+
+<dt>
+<b>evPlaySwitchToPause</b></dt>
+
+<dd>
+Przeciwieñstwo <i>evPauseSwitchToPlay</i>. Ten sygna³ rozpoczyna odgrywanie
+i wy¶wietlany jest obrazek dla przycisku <i>evPauseSwitchToPlay</i> (aby
+zaznaczyæ, ¿e ten przycisk mo¿e byæ wci¶niêty, aby wstrzymaæ odgrywanie).</dd>
+
+<dt>
+<b>evPrev</b></dt>
+
+<dd>
+Przeskakuje do poprzedniej ¶cie¿ki z playlisty.</dd>
+
+<dt>
+<b>evStop</b></dt>
+
+<dd>
+Zatrzymuje odgrywanie.</dd>
 </dl>
 </blockquote>
-
-<p>
-<i>Seeking in the stream:</i>
+<i>Przemieszczanie siê w strumieniu:</i>
 <blockquote>
 <dl>
-<dt><b>evBackward10sec</b>
-<dt><b>evBackward1min</b>
-<dt><b>evBackward10min</b>
-<dd>Seek backward 10 seconds / 1 minute / 10 minutes.
+<dt>
+<b>evBackward10sec</b></dt>
 
-<dt><b>evForward10sec</b>
-<dt><b>evForward1min</b>
-<dt><b>evForward10min</b>
-<dd>Seek forward 10 seconds / 1 minute / 10 minutes.
+<dt>
+<b>evBackward1min</b></dt>
 
-<dt><b>evSetMoviePosition</b>
-<dd>Seek to position (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
+<dt>
+<b>evBackward10min</b></dt>
+
+<dd>
+przesuwa w ty³ o 10 sekund / 1 minutê / 10 minut.</dd>
+
+<dt>
+<b>evForward10sec</b></dt>
+
+<dt>
+<b>evForward1min</b></dt>
+
+<dt>
+<b>evForward10min</b></dt>
+
+<dd>
+przesuwa w przód o 10 sekund / 1 minutê / 10 minut.</dd>
+
+<dt>
+<b>evSetMoviePosition</b></dt>
+
+<dd>
+ustawia pozycjê (mo¿e byæ zmieniane za pomoc± suwaka; wykorzystywane s±
+relatywne (0-100%) warto¶ci potencjometru).</dd>
 </dl>
 </blockquote>
-  
-<p>
-<i>Video control:</i>
+<i>Kontrola obrazu:</i>
 <blockquote>
 <dl>
-<dt><b>evDoubleSize</b>
-<dd>Set the movie window to double size.
+<dt>
+<b>evDoubleSize</b></dt>
 
-<dt><b>evFullScreen</b>
-<dd>Switch fullscreen mode on/off.
+<dd>
+Ustawia podwójny rozmiar okna z filmem.</dd>
 
-<dt><b>evNormalSize</b>
-<dd>Set the movie window to its normal size.
+<dt>
+<b>evFullScreen</b></dt>
+
+<dd>
+W³±cza/wy³±cza tryb pe³noekranowy.</dd>
+
+<dt>
+<b>evNormalSize</b></dt>
+
+<dd>
+Ustawia oryginalny rozmiar okna z filmem.</dd>
 </dl>
 </blockquote>
-
-<p>
-<i>Audio control:</i>
+<i>Kontrola D¼wiêku:</i>
 <blockquote>
 <dl>
-<dt><b>evDecAudioBufDelay</b>
-<dd>Decrease audio buffer delay.
+<dt>
+<b>evDecAudioBufDelay</b></dt>
 
-<dt><b>evDecBalance</b>
-<dd>Decrease balance.
+<dd>
+Zmniejsza opó¼nienie buffera d¼wiêku.</dd>
 
-<dt><b>evDecVolume</b>
-<dd>Decrease volume.
+<dt>
+<b>evDecBalance</b></dt>
 
-<dt><b>evIncAudioBufDelay</b>
-<dd>Increase audio buffer delay.
+<dd>
+zmniejsza balans.</dd>
 
-<dt><b>evIncBalance</b>
-<dd>Increase balance.
+<dt>
+<b>evDecVolume</b></dt>
 
-<dt><b>evIncVolume</b>
-<dd>Increase volume.
+<dd>
+zmniejsza g³o¶no¶æ.</dd>
 
-<dt><b>evMute</b>
-<dd>Mute/unmute the sound.
+<dt>
+<b>evIncAudioBufDelay</b></dt>
 
-<dt><b>evSetBalance</b>
-<dd>Set balance (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
+<dd>
+Zmniejsza opó¼nienie buffera d¼wiêku.</dd>
 
-<dt><b>evSetVolume</b>
-<dd>Set volume (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
+<dt>
+<b>evIncBalance</b></dt>
+
+<dd>
+zwiêksza balans.</dd>
+
+<dt>
+<b>evIncVolume</b></dt>
+
+<dd>
+zwiêksza g³o¶no¶æ.</dd>
+
+<dt>
+<b>evMute</b></dt>
+
+<dd>
+Wycisza/w³±cza d¼wiêk..</dd>
+
+<dt>
+<b>evSetBalance</b></dt>
+
+<dd>
+Ustawia balans (mo¿e byæ u¿ywane przez suwak; wykorzystywane s± relatywne
+(0-100%) warto¶ci potencjometru).</dd>
+
+<dt>
+<b>evSetVolume</b></dt>
+
+<dd>
+Ustawia g³o¶no¶æ (mo¿e byæ u¿ywane przez suwak; wykorzystywane s± relatywne
+(0-100%) warto¶ci potencjometru).</dd>
 </dl>
 </blockquote>
-
-<p>
-<i>Miscellaneous:</i>
+<i>Ró¿ne:</i>
 <blockquote>
 <dl>
-<dt><b>evAbout</b>
-<dd>Open the about window.
+<dt>
+<b>evAbout</b></dt>
 
-<dt><b>evEqualeaser</b>
-<dd>Turn the equalizer on/off.
+<dd>
+Otwiera okno "o programie".</dd>
 
-<dt><b>evExit</b>
-<dd>Quit from the program.
+<dt>
+<b>evEqualeaser</b></dt>
 
-<dt><b>evIconify</b>
-<dd>Iconify the window.
+<dd>
+w³±cza/wy³±cza equalizer.</dd>
 
-<dt><b>evLoad</b>
-<dd>Load a file (by opening a file browser window, where you can choose a
-file).
+<dt>
+<b>evExit</b></dt>
 
-<dt><b>evLoadPlay</b>
-<dd>Does the same as <i>evLoad</i>, but it automatically starts
-playing after the file is loaded.
+<dd>
+Zamyka program.</dd>
 
-<dt><b>evNone</b>
-<dd>Empty message, it has no effect. (Except maybe in CVS versions. :-))
+<dt>
+<b>evIconify</b></dt>
 
-<dt><b>evPlayList</b>
-<dd>Open/close the playlist window.
+<dd>
+Minimalizuje okno.</dd>
 
-<dt><b>evPreferences</b>
-<dd>Open the preferences window.
+<dt>
+<b>evLoad</b></dt>
 
-<dt><b>evSkinBrowser</b>
-<dd>Open the skin browser window.
+<dd>
+Wczytuje plik (poprzez otwarcie przegl±darki plików, w której mo¿esz wybraæ
+plik).</dd>
+
+<dt>
+<b>evLoadPlay</b></dt>
+
+<dd>
+Robi dok³adnie to samo co <i>evLoad</i> z tym, ¿e po wczytaniu pliku automatycznie
+rozpoczyna jego odtwarzanie.</dd>
+
+<dt>
+<b>evNone</b></dt>
+
+<dd>
+Pusty sygna³, nic nie robi. (No mo¿e nie dotyczy to wersji CVS&nbsp; :-))</dd>
+
+<dt>
+<b>evPlayList</b></dt>
+
+<dd>
+Otwiera/zamyka okno playlisty.</dd>
+
+<dt>
+<b>evPreferences</b></dt>
+
+<dd>
+Otwiera okno preferencji.</dd>
+
+<dt>
+<b>evSkinBrowser</b></dt>
+
+<dd>
+Otwiera okno z przegl±dark± skórek..</dd>
 </dl>
 </blockquote>
 
