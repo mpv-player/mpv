@@ -149,8 +149,7 @@ connect2Server(char *host, int port) {
 	fd_set set;
 	struct timeval tv;
 	struct sockaddr_in server_address;
-
-	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s:%d ...\n", host, port );
+	struct hostent *hp;
 
 	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if( socket_server_fd==-1 ) {
@@ -159,7 +158,7 @@ connect2Server(char *host, int port) {
 	}
 
 	if( isalpha(host[0]) ) {
-		struct hostent *hp;
+		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s ...\n", host );
 		hp=(struct hostent*)gethostbyname( host );
 		if( hp==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", host);
@@ -173,6 +172,11 @@ connect2Server(char *host, int port) {
 	server_address.sin_port=htons(port);
 	
 	// Turn the socket as non blocking so we can timeout on the connection
+	if( isalpha(host[0]) ) {
+		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%d.%d.%d.%d]:%d ...\n", host, (hp->h_addr_list[0][0])&0xff, (hp->h_addr_list[0][1])&0xff, (hp->h_addr_list[0][2])&0xff, (hp->h_addr_list[0][3])&0xff, port );
+	} else {
+		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s:%d ...\n", host, port );
+	}
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
 	if( connect( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
 		if( errno!=EINPROGRESS ) {
