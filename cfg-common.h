@@ -78,6 +78,7 @@
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+	{"novideo", &video_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
 	{ "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
