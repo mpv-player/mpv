@@ -42,6 +42,7 @@ int sub_alignment=0; /* 0=top, 1=center, 2=bottom */
 int sub_visibility=1;
 int sub_bg_color=0; /* subtitles background color */
 int sub_bg_alpha=0;
+int sub_justify=0;
 
 // return the real height of a char:
 static inline int get_height(int c,int h){
@@ -449,6 +450,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     obj->bbox.y2 = obj->y + h;
 
     // calculate bbox:
+    if (sub_justify) xmin = 10;
     obj->bbox.x1=xmin;
     obj->bbox.x2=xmax;
     obj->bbox.y1=obj->y;
@@ -462,6 +464,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     i=j=0;
     if ((l=obj->params.subtitle.lines)) for (;;) {
  	 x=obj->params.subtitle.xtbl[i++]; 
+	 if (sub_justify) x = 10;
 	 prevc = -1;
 	 while ((c=obj->params.subtitle.utbl[j++])){
 	       x += kerning(vo_font,prevc,c);

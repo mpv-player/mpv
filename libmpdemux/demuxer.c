@@ -137,6 +137,8 @@ extern void demux_close_gif(demuxer_t* demuxer);
 extern void demux_close_ts(demuxer_t* demuxer);
 extern void demux_close_mkv(demuxer_t* demuxer);
 extern void demux_close_ra(demuxer_t* demuxer);
+extern void demux_close_ty(demuxer_t* demuxer);
+
 
 #ifdef USE_TV
 #include "tv.h"
@@ -173,6 +175,8 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_fli(demuxer); break;
     case DEMUXER_TYPE_NUV:
       demux_close_nuv(demuxer); break;
+    case DEMUXER_TYPE_MPEG_TY:
+      demux_close_ty(demuxer); break;
 #if defined(USE_TV) && defined(HAVE_TV_V4L)
     case DEMUXER_TYPE_TV:
 	demux_close_tv(demuxer); break;
@@ -278,6 +282,7 @@ int demux_bmp_fill_buffer(demuxer_t *demux);
 int demux_fli_fill_buffer(demuxer_t *demux);
 int demux_mpg_es_fill_buffer(demuxer_t *demux);
 int demux_mpg_fill_buffer(demuxer_t *demux);
+int demux_ty_fill_buffer(demuxer_t *demux);
 int demux_avi_fill_buffer(demuxer_t *demux);
 int demux_avi_fill_buffer_ni(demuxer_t *demux,demux_stream_t *ds);
 int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
@@ -312,6 +317,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
     case DEMUXER_TYPE_BMP: return demux_bmp_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
+    case DEMUXER_TYPE_MPEG_TY: return demux_ty_fill_buffer( demux );
     case DEMUXER_TYPE_MPEG4_ES:
     case DEMUXER_TYPE_H264_ES:
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
@@ -881,6 +887,18 @@ if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TS){
 		demuxer=NULL;
 	}
 }
+//=============== Try to open as MPEG-TY file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TY)
+{
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_TY,audio_id,video_id,dvdsub_id);
+  if(ds_fill_buffer(demuxer->video)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"TiVo (DeMuxer By WyngNut)");
+      file_format=DEMUXER_TYPE_MPEG_TY;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
@@ -1187,6 +1205,26 @@ switch(file_format){
    sh_video=d_video->sh;sh_video->ds=d_video;
    break;
  }
+
+ case DEMUXER_TYPE_MPEG_TY: {
+  sh_video=d_video->sh;sh_video->ds=d_video;
+
+  if(audio_id!=-2) {
+   if(!ds_fill_buffer(d_audio)){
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
+    sh_audio=NULL;
+   } else {
+    sh_audio=d_audio->sh;sh_audio->ds=d_audio;
+    switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
+      case 0x00: sh_audio->format=0x50;break; // mpeg
+      case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
+      case 0x80: sh_audio->format=0x2000;break; // ac3
+      default: sh_audio=NULL; // unknown type
+    }
+   }
+  }
+  break;
+ }
  case DEMUXER_TYPE_MPEG_PS: {
   sh_video=d_video->sh;sh_video->ds=d_video;
 //  if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
@@ -1303,6 +1341,7 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_ty(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_y4m(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_film(demuxer_t *demuxer,float rel_seek_secs,int flags);
@@ -1369,6 +1408,9 @@ switch(demuxer->file_format){
 
   case DEMUXER_TYPE_ASF:
       demux_seek_asf(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_MPEG_TY:
+      demux_seek_ty(demuxer,rel_seek_secs,flags);  break;
   
   case DEMUXER_TYPE_H264_ES:
   case DEMUXER_TYPE_MPEG4_ES:
@@ -1475,6 +1517,7 @@ char* demux_info_get(demuxer_t *demuxer, char *opt) {
   return NULL;
 }
 
+extern int demux_ty(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_asf_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
@@ -1483,6 +1526,8 @@ extern int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
+	case DEMUXER_TYPE_MPEG_TY:
+	    return demux_ty_control(demuxer,cmd,arg);
 	case DEMUXER_TYPE_MPEG4_ES:
 	case DEMUXER_TYPE_MPEG_ES:
 	case DEMUXER_TYPE_MPEG_PS:

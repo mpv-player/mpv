@@ -176,6 +176,7 @@ switch(d_video->demuxer->file_format){
  case DEMUXER_TYPE_PVA:
  case DEMUXER_TYPE_MPEG_TS:
  case DEMUXER_TYPE_MPEG_ES:
+ case DEMUXER_TYPE_MPEG_TY:
  case DEMUXER_TYPE_MPEG_PS: {
 //mpeg_header_parser:
    // Find sequence_header first:
@@ -282,12 +283,19 @@ switch(d_video->demuxer->file_format){
 return 1;
 }
 
+void ty_processuserdata( unsigned char* buf, int len );
+
 static void process_userdata(unsigned char* buf,int len){
     int i;
     /* if the user data starts with "CC", assume it is a CC info packet */
     if(len>2 && buf[0]=='C' && buf[1]=='C'){
 //    	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"video.c: process_userdata() detected Closed Captions!\n");
 	if(subcc_enabled) subcc_process_data(buf+2,len-2);
+    }
+    if( len > 2 && buf[ 0 ] == 'T' && buf[ 1 ] == 'Y' )
+    {
+       ty_processuserdata( buf + 2, len - 2 );
+       return;
     }
     if(verbose<2) return;
     printf( "user_data: len=%3d  %02X %02X %02X %02X '",
@@ -312,6 +320,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
   if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS
 		  || demuxer->file_format==DEMUXER_TYPE_PVA || demuxer->file_format==DEMUXER_TYPE_MPEG_TS
+		  || demuxer->file_format==DEMUXER_TYPE_MPEG_TY
 #ifdef STREAMING_LIVE_DOT_COM
     || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
 #endif
@@ -473,7 +482,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_TS ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_ES){
+       demuxer->file_format==DEMUXER_TYPE_MPEG_ES ||
+       demuxer->file_format==DEMUXER_TYPE_MPEG_TY){
 
 //	if(pts>0.0001) printf("\r!!! pts: %5.3f [%d] (%5.3f)   \n",pts,picture_coding_type,i_pts);
 
