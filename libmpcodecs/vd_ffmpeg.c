@@ -433,7 +433,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #else
     mpi->qstride=MBC+1;
 #endif
-#else ifdef FF_POSTPROCESS
+#elif defined(FF_POSTPROCESS)
     mpi->qscale=&quant_store[0][0];
     mpi->qstride=MBC+1;
 #endif
