@@ -3439,6 +3439,12 @@ not work as intended.
 .RSS
 .IPs packed
 create a bitstream that can be decoded delay-free (default=off)
+.br
+WARNING: this will generate an illegal bitstream, and WILL NOT be 
+decodeable by ISO-MPEG4 deocoders except divx/libavcodec/xvid
+.br
+WARNING: this will allso store a fake divx version in the file so the bug
+autodetection of some decoders might be confused
 .IPs divx5bvop
 generate DivX5 compatible B-frames (default=on)
 .IPs qpel
