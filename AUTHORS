@@ -62,11 +62,14 @@ Bedel, Alban (albeu) <albeu@free.fr>
     * OSD menu
     * new modular config/commandline parser code
 
+Belev, Luchezar (lucho) <lucho@haemimont.bg>
+    * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
+
 Bérczi, Gábor (Gabucino) <gabucino@mplayerhq.hu>
-    * documentation writer & maintainer
+    * first documentation writer & maintainer
     * Hungarian translation of documentation, homepage, and help output
     * second homepage design & gfx
-    * homepage maintainer
+    * first homepage maintainer
     * testing, codecs quality & speed comparisons
     * IRC channels operator (#MPlayer is user channel)
     * experimental MINIX port :) (what's funny about it?)
@@ -80,6 +83,7 @@ Berecz, Szabolcs (Szabi) <szabi@inf.elte.hu>
     * type #7 subtitle support
 
 Beregszászi, Alex (al3x) <alex@fsn.hu>
+    * second project maintainer
     * ALSA output driver in libao2
     * vo_ggi output driver in libvo (www.ggi-project.org)
     * XAnim codecs support
@@ -105,12 +109,14 @@ Bitterberg, Tilmann <transcode@tibit.org>
     * AVI OpenDML read support
 
 Biurrun, Diego (DonDiego) <diego@biurrun.de>
-    * documentation and console output translation (help_mp-XX.h) maintainer
+    * second documentation writer and maintainer
+    * console output (help_mp-XX.h) maintainer
     * README, wishlist, translations.txt
     * random trivial fixes
     * main tester and small fixes for the Cygwin and MinGW port
     * testing, bug reports
-    * homepage improvements
+    * homepage improvements, design7
+    * second homepage maintainer
     * head of the Ministry for English Composition
     * skin overhaul
 
@@ -138,7 +144,7 @@ Bünemann, Felix (Atmos) <atmosfear@users.sourceforge.net>
     * AAC decoding support via libfaad2
     * Darwin (MacOS X) port
 
-Bunkus, Moritz (mosu) <moritz@bunkus.org>
+Bunkus, Moritz (Mosu) <moritz@bunkus.org>
     * various OGM hacks/fixes
     * ogm-tools author
     * Matroska demuxer
@@ -182,6 +188,9 @@ Falco, Salvatore <sfalco@studenti.ing.uniroma1.it>
     * overlapping subtitles & sub sorting support
     * SAMI subtitles dump support
 
+Fargas, Marc (TeLeNiEkO) <telenieko@telenieko.com>
+    * first Spanish documentation translation (outdated)
+
 Feigl, Johannes (jaf) <johannes.feigl@aon.at>
     * original German docs translation (outdated)
     * some improvements in configure, small patches
@@ -212,6 +221,7 @@ Gansser, Martin <mgansser@ngi.de>
     * HP-UX port
 
 Gereöffy, Árpád (A'rpi/ESP-team) [mail to <mplayer-users@mplayerhq.hu>]
+    * project founder, first project maintainer
     * MPlayer, MEncoder core, A-V sync
     * libmpdemux, demultiplexer for MPEG, ASF, AVI, various fixes in others
     * mp3lib, based on mpglib sources [MP3 audio decoder]
@@ -298,6 +308,10 @@ Jacobs, Aurelien <aurel@gnuage.org>
 Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * NSV demuxer
 
+Jermann, Jonas (g0th) <jjermann@gmx.net>
+    * man page rewrite
+    * documentation
+
 Johansson, Anders <ajh@atri.curtin.edu.au>
     * old audio plugin system, some effect plugins
     * new libaf interface design, implementation, plugins
@@ -331,7 +345,7 @@ Keil, Jürgen <jk@tools.de>
     * mediaLib support in libavcodec
     * esd driver in libao2
 
-Kinali, Attila <attila@kinali.ch>
+Kinali, Attila (KotH) <attila@kinali.ch>
     * various small fixes in the X11 code
     * xinerama support
     * documentation
@@ -405,9 +419,6 @@ Lombard, Pierre (pl) <p_l@gmx.fr>
 López, Juan Martin (nauj27) <nauj27@teleline.es>
     * Spanish man page translation
     * Spanish documentation translation
-
-lucho <lucho@haemimont.bg>
-    * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
 Madick, Puk <pingy@swirvemail.com>
     * KDE/GNOME2 fullscreen fix
@@ -562,9 +573,6 @@ Sandell, Björn <biorn@dce.chalmers.se>
 
 Tam, Howell (Pigeon) <pigeon@pigeond.net>
     * native libcaca driver (-vo caca)
-
-TeLeNiEkO <telenieko@telenieko.com>
-    * first Spanish documentation translation (outdated)
 
 Tlalka, Adam (atlka) <atlka@pg.gda.pl>
     * OSD/subtitle review, fixes, optimization, UTF8 support
