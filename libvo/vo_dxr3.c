@@ -264,16 +264,21 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 	
 	/* Start em8300 prebuffering and sync engine */
+#ifdef MVCOMMAND_SYNC
 	reg.microcode_register = 1;
 	reg.reg = 0;
 	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
-	
+#endif
+
+#ifdef EM8300_IOCTL_FLUSH	
 	/* Clean buffer by syncing it */
 	ioval = EM8300_SUBDEVICE_VIDEO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	ioval = EM8300_SUBDEVICE_AUDIO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+#endif
+
 	fsync(fd_video);
 	if (!noprebuf) {
 		ioval = 0x900;
@@ -293,6 +298,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	/* libavcodec requires a width and height that is x|16 */
 	aspect_save_orig(width, height);
 	aspect_save_prescale(d_width, d_height);
+#ifdef EM8300_IOCTL_GET_VIDEOMODE
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
 		printf("VO: [dxr3] Setting up for NTSC.\n");
@@ -301,6 +307,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("VO: [dxr3] Setting up for PAL/SECAM.\n");
 		aspect_save_screenres(352, 288);
 	}
+#endif
 	aspect(&s_width, &s_height, A_ZOOM);
 	s_width -= s_width % 16;
 	s_height -= s_height % 16;
@@ -405,7 +412,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			memset(avc_context, 0, sizeof(AVCodecContext));
 			avc_context->width = s_width;
 			avc_context->height = s_height;
-			ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
+// realy need this line ? -- Pontscho
+//			ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 			avc_context->gop_size = 7;
 			avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
 			avc_context->bit_rate = 0;
