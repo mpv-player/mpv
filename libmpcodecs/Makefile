@@ -28,7 +28,7 @@ OBJS=$(SRCS:.c=.o)
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = -Wall $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
+CFLAGS  = $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
 
 .SUFFIXES: .c .o
 

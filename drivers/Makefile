@@ -1,7 +1,7 @@
 
 KERNEL_INCLUDES = /usr/src/linux/include
 INCLUDES = -I$(KERNEL_INCLUDES)
-CFLAGS = -g -O2  -Wall -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h
+CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h
 VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
@@ -15,7 +15,7 @@ sis_vid.o: sis_vid.c sis_vid.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
 
 mga_vid_test: mga_vid_test.c
-	$(CC) -g -O -Wall $(INCLUDES) -o $@ $@.c
+	$(CC) -O $(INCLUDES) -o $@ $@.c
 
 install: mga_vid.o
 	if test ! -d $(MDIR) ; then mkdir -p $(MDIR) ; fi

@@ -14,7 +14,7 @@ LIBNAME = libdha.so.$(VERSION)
 SRCS=libdha.c mtrr.c pci.c pci_names.c
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+CFLAGS  = $(OPTFLAGS) -fPIC -I. -I..
 LIBS = 
 ifeq ($(TARGET_OS),OpenBSD)
 ifeq ($(TARGET_ARCH_X86),yes)

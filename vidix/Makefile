@@ -7,7 +7,7 @@ include ../config.mak
 SRCS    = vidixlib.c
 OBJS	= $(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -W -Wall
+CFLAGS  = $(OPTFLAGS)
 
 .SUFFIXES: .c .o
 

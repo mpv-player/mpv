@@ -9,37 +9,37 @@ RADEON_VID=radeon_vid.so
 RADEON_SRCS=radeon_vid.c
 RADEON_OBJS=radeon_vid.o
 RADEON_LIBS=-L../../libdha -ldha -lm
-RADEON_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+RADEON_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
 RAGE128_VID=rage128_vid.so
 RAGE128_SRCS=radeon_vid.c
 RAGE128_OBJS=rage128_vid.o
 RAGE128_LIBS=-L../../libdha -ldha
-RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
+RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DRAGE128
 
 PM3_VID=pm3_vid.so
 PM3_SRCS=pm3_vid.c
 PM3_OBJS=pm3_vid.o
 PM3_LIBS=-L../../libdha -ldha
-PM3_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+PM3_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
 
 MACH64_VID=mach64_vid.so
 MACH64_SRCS=mach64_vid.c
 MACH64_OBJS=mach64_vid.o
 MACH64_LIBS=-L../../libdha -ldha
-MACH64_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
+MACH64_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DRAGE128
 
 MGA_VID=mga_vid.so
 MGA_SRCS=mga_vid.c
 MGA_OBJS=mga_vid.o
 MGA_LIBS=-L../../libdha -ldha -lm
-MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
 
 MGA_CRTC2_VID=mga_crtc2_vid.so
 MGA_CRTC2_SRCS=mga_vid.c
 MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
-MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DCRTC2
+MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DCRTC2
 
 all:    $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
 

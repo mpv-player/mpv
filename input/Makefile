@@ -6,7 +6,7 @@ LIBNAME = libinput.a
 SRCS=input.c joystick.c lirc.c 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(EXTRA_INC) -Wall
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(EXTRA_INC)
 
 .SUFFIXES: .c .o
 
