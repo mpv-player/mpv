@@ -55,6 +55,11 @@ static int init(sh_audio_t *sh)
   faac_hdec = faacDecOpen();
 
   // If we don't get the ES descriptor, try manual config
+  if(!sh->codecdata_len && sh->wf) {
+    sh->codecdata_len = sh->wf->cbSize;
+    sh->codecdata = (char*)(sh->wf+1);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: codecdata extracted from WAVEFORMATEX\n");
+  }
   if(!sh->codecdata_len) {
 #if 1
     faacDecConfigurationPtr faac_conf;
