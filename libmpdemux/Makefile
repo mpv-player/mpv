@@ -3,7 +3,7 @@ LIBNAME = libmpdemux.a
 
 include ../config.mak
 
-SRCS = asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c demux_mpg.c demuxer.c dvdauth.c open.c parse_es.c stream.c test.c
+SRCS = asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c demux_mpg.c demuxer.c dvdauth.c open.c parse_es.c stream.c
 ifeq ($(STREAMING),yes)
 SRCS += asf_streaming.c url.c http.c network.c
 endif
