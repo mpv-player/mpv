@@ -5082,7 +5082,7 @@ average.
 use interlaced dct
 .TP
 .B ilme\ \ \ 
-use interlaced motion estimation
+Use interlaced motion estimation (mutually exclusive with qpel).
 .TP
 .B alt\ \ \ \ 
 use alternative scantable
@@ -5164,8 +5164,8 @@ large context model
 .PD 1
 .TP
 .B qpel\ \ \ 
-use quarter pel motion compensation
-Tip: This seems only useful for high bitrate encodings.
+Use quarter pel motion compensation (mutually exclusive with ilme).
+Hint: This seems only useful for high bitrate encodings.
 .TP
 .B ildctcmp=<0\-2000>
 comparison function for interlaced dct decision
