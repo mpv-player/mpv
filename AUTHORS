@@ -81,14 +81,14 @@ Bérczi, Gábor (Gabucino) <gabucino@mplayerhq.hu>
 Berecz, Szabolcs (Szabi) <szabi@inf.elte.hu>
     * codecs.conf file parser
     * config file and command line parser
-    * mga_vid fixes, module option etc.
-    * fbdev support in libvo
+    * mga_vid fixes, module option etc
+    * fbdev video output driver
     * type #7 subtitle support
 
 Beregszászi, Alex (al3x) <alex@fsn.hu>
     * second project maintainer
-    * ALSA output driver in libao2
-    * vo_ggi output driver in libvo (www.ggi-project.org)
+    * ALSA audio output driver in libao2
+    * ggi video output driver (www.ggi-project.org)
     * XAnim codecs support
     * VIVO files, codecs support
     * TV grabbing support
@@ -141,9 +141,9 @@ Bulgroz, Eviv <ebulgroz@yahoo.com>
 Bünemann, Felix (Atmos) <atmosfear@users.sourceforge.net>
     * additional YUV formats fixes
     * new font (mp_font2.zip)
-    * PNG file output support in libvo
+    * png video output driver
     * flipping support (for Indeo 3/4, etc)
-    * SDL audio driver in libao2
+    * SDL audio output driver in libao2
     * RAW PCM/WAVE file writer for libao2
     * Ogg Vorbis audio support
     * aspect ratio code improvements, prescaling support
@@ -390,9 +390,9 @@ Kärkkäinen, Samuli <skarkkai@woods.iki.fi>
 Keil, Jürgen <jk@tools.de>
     * patched MPlayer to work on Solaris 8 x86
     * various fixes (Win32, configure, etc)
-    * SUN audio driver in libao2
+    * SUN audio output driver in libao2
     * mediaLib support in libavcodec
-    * ESD driver in libao2
+    * ESD audio output driver in libao2
 
 Kesterson, Robert <robertk@robertk.com>
     * yuv4mpeg video output driver
@@ -425,7 +425,7 @@ Kurshev, Nick <nickols_k@mail.ru>
     * further 3DNow! optimizations into mp3lib and libac3 and FFmpeg
     * first Russian documentation translation (outdated)
     * radeon_vid, rage128_vid, radeonfb
-    * libvo driver: vo_vesa
+    * vesa video output driver
     * VIDIX and libdha design, programming, Rage128/Radeon VIDIX drivers
 
 Kuschak, Brian <bkuschak@yahoo.com>
@@ -582,7 +582,7 @@ Plourde, Nicolas <nicolas.plourde@sympatico.ca>
     * Darwin VCD/SVCD support
 
 Poettering, Lennart <mzzcynlre@0pointer.de>
-    * Audio driver for the Polypaudio sound server
+    * audio driver for the Polypaudio sound server
 
 Poirier, Guillaume <guillaume.poirier@ifsic.univ-rennes1.fr>
     * French documentation translation and synchronization
@@ -595,7 +595,7 @@ Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * 3DNow! support into mp3lib and fastmemcpy.h
     * various X11 driver changes, fixes (keyboard handling, fullscreen,
       bpp detect, etc)
-    * libvo: adding xmga driver
+    * xmga video output driver
     * audio mixer (volume) support
 
 van Poorten, Ivo (ivop) <ivop@euronet.nl>
