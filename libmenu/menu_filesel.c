@@ -94,7 +94,7 @@ static int mylstat(char *dir, char *file,struct stat* st) {
   int l = strlen(dir) + strlen(file);
   char s[l+2];
   sprintf(s,"%s/%s",dir,file);
-  return lstat(s,st);
+  return stat(s,st);
 }
 
 static int compare(char **a, char **b){
