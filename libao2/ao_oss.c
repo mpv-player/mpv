@@ -166,6 +166,7 @@ ac3_retry:
 	mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
 	return 0;
       }
+      ao_data.channels=c+1;
     }
     mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d channels (requested: %d)\n", ao_data.channels, channels);
     // set rate
