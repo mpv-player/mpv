@@ -158,6 +158,30 @@ void GetCpuCaps( CpuCaps *caps)
 //		caps->hasMMX2 = 0;
 //		caps->hasMMX = 0;
 
+#ifndef HAVE_MMX
+	if(caps->hasMMX) printf("MMX supported but disabled\n");
+	caps->hasMMX=0;
+#endif
+#ifndef HAVE_MMX2
+	if(caps->hasMMX2) printf("MMX2 supported but disabled\n");
+	caps->hasMMX2=0;
+#endif
+#ifndef HAVE_SSE
+	if(caps->hasSSE) printf("SSE supported but disabled\n");
+	caps->hasSSE=0;
+#endif
+#ifndef HAVE_SSE2
+	if(caps->hasSSE2) printf("SSE2 supported but disabled\n");
+	caps->hasSSE2=0;
+#endif
+#ifndef HAVE_3DNOW
+	if(caps->has3DNow) printf("3DNow supported but disabled\n");
+	caps->has3DNow=0;
+#endif
+#ifndef HAVE_3DNOWEX
+	if(caps->has3DNowExt) printf("3DNowExt supported but disabled\n");
+	caps->has3DNowExt=0;
+#endif
 }
 
 
