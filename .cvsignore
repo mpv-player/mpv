@@ -1,8 +1,9 @@
+.depend
+.developer
 config.h
 config.mak
-mplayer
-.depend
-version.h
-help_mp.h
-.developer
 configure.log
+help_mp.h
+mencoder
+mplayer
+version.h
