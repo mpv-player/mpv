@@ -618,8 +618,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  palette_map = (unsigned char *)sh->bih + 40;
 
 		  // load default palette
-		  if (flag == 0xFFFF)
+		  if (flag & 0x08)
 		  {
+		    mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT palette\n");
 		    if (palette_count == 4)
 		      memcpy(palette_map, qt_default_palette_4, 4 * 4);
 		    else if (palette_count == 16)
@@ -630,6 +631,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  // load palette from file
 		  else
 		  {
+		    mp_msg(MSGT_DEMUX, MSGL_INFO, "Loading palette from file\n");
 		    for (i = start; i <= end; i++)
 		    {
 		      entry = BE_16(&trak->stdata[hdr_ptr]);
