@@ -56,14 +56,22 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
 
 int vbeInit( void )
 {
+   unsigned short iopl_port,int_10_seg;
+   size_t i;
    if(!LRMI_init()) return VBE_VM86_FAIL;
    /*
     Allow read/write to ALL io ports
    */
+   int_10_seg = *(unsigned short *)PhysToVirtSO(0x0000,0x0042);
+   /* Video BIOS should be at C000:0000 and above */
+   if((int_10_seg >> 12) < 0xC) return VBE_BROKEN_BIOS;
    ioperm(0, 1024, 1);
    iopl(3);
    memset(&vbe_pm_info,0,sizeof(struct VesaProtModeInterface));
    vbeGetProtModeInfo(&vbe_pm_info);
+   i = 0;
+   while((iopl_port=vbe_pm_info.iopl_ports[i++]) != 0xFFFF) ioperm(iopl_port,1,1);
+   iopl(3);
    return VBE_OK;
 }
 

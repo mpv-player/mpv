@@ -189,6 +189,7 @@ struct VesaProtModeInterface
 #define VBE_VM86_FAIL         -1
 #define VBE_OUT_OF_DOS_MEM    -2
 #define VBE_OUT_OF_MEM        -3
+#define VBE_BROKEN_BIOS       -4
 #define VBE_VESA_ERROR_MASK   0x004f
 #define VBE_VESA_ERRCODE_MASK 0xff00
 
