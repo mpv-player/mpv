@@ -78,7 +78,7 @@ static void open_registry()
         pwent=getpwuid(getuid());
         pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
 	strcpy(pathname, pwent->pw_dir);
-        strcat(pathname, "/.registry");
+        strcat(pathname, "/.mplayer/registry");
 	fd=open(pathname, O_RDONLY);
         free(pathname);
 	if(fd==-1)
@@ -125,7 +125,7 @@ static void save_registry()
         pwent=getpwuid(getuid());
         pathname=(char*)malloc(strlen(pwent->pw_dir)+20);
 	strcpy(pathname, pwent->pw_dir);
-        strcat(pathname, "/.registry");
+        strcat(pathname, "/.mplayer/registry");
 	fd=open(pathname, O_WRONLY | O_CREAT, 00777);
         free(pathname);
 	if(fd==-1)
