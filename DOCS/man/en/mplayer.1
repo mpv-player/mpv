@@ -1126,7 +1126,7 @@ Force audio parameters for the VIVO demuxer (for debugging purposes).
 .
 .SH "OSD/SUB OPTIONS"
 .I NOTE:
-See \-vf expand too.
+Also see \-vf expand.
 .TP
 .B \-dumpjacosub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
@@ -1155,10 +1155,10 @@ Creates a dumpsub.srt file in the current directory.
 .TP
 .B \-dumpsub (MPlayer only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
-See \-dump*sub and \-vobsubout* options too.
+Also see the \-dump*sub and \-vobsubout* options.
 .TP
 .B \-ffactor <number> (OSD only)
-Resample alphamap of the font.
+Resample the font alphamap.
 Can be:
 .
 .PD 0
@@ -1184,8 +1184,7 @@ fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 ~/.mplayer/\:subfont.ttf).
 .br
 .I NOTE:
-With FreeType, this option determines path to the text font file.
-.br
+With FreeType, this option determines the path to the text font file.
 With fontconfig, this option determines the fontconfig font name.
 .sp 1
 .I EXAMPLE:
@@ -1208,15 +1207,15 @@ Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 \-slang.
 .TP
 .B \-fribidi-charset <charset\ name> (FriBiDi only)
-Specifies the charset that will be passed to FriBiDi when decoding a non-UTF8
-subtitles (default: ISO8859-8).
+Specifies the character set that will be passed to FriBiDi when
+decoding non-UTF-8 subtitles (default: ISO8859-8).
 .TP
 .B \-ifo <VOBsub\ ifo\ file>
 Indicate the file that will be used to load palette and frame size for VOBsub
 subtitles.
 .TP
 .B \-noautosub
-Turns off automatic loading of subtitle files.
+Turns off automatic subtitle file loading.
 .TP
 .B \-osdlevel <0\-3> (MPlayer only)
 Specifies which mode the OSD should start in.
@@ -1240,17 +1239,13 @@ Allows the next subtitle to be displayed while the current one is
 still visible (default is to enable the support only for specific
 formats).
 .TP
-.B \-sid <id> (also see \-slang option)
-Turns on DVD subtitle displaying.
-Also, you MUST specify a number which corresponds to a DVD subtitle language
-(0\-31).
-For the list of available subtitles, use with the \-v option and look at the
-output.
+.B \-sid <ID> (also see \-slang option)
+Display DVD subtitles in the language specified by <ID> (0\-31).
+MPlayer prints the available subtitle languages when run in verbose (\-v) mode.
 .TP
 .B \-slang <two\ letter\ country\ code> (also see \-sid option)
-For DVD playback, turns on/\:selects DVD subtitle language.
-For the list of available subtitles, use with the \-v option and look at the
-output.
+Selects DVD subtitle language.
+MPlayer prints the available subtitle languages when run in verbose (\-v) mode.
 .br
 Otherwise, determines an optional subtitle suffix which gets a higher
 priority when searching for subtitles.
@@ -1266,10 +1261,10 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .TP
 .B \-spuaa <mode> (OSD only)
 Antialiasing/scaling mode for DVD/VOBsub.
-A value of 16 may be added to mode in order to force scaling even
-when original and scaled frame size already match, for example to
-smooth subtitles with the gaussian blur.
-The available modes are:
+A value of 16 may be added to <mode> in order to force scaling even
+when original and scaled frame size already match.
+This can be employed to e.g.\& smooth subtitles with gaussian blur.
+Available modes are:
 .PD 0
 .RSs
 .IPs 0
@@ -1287,14 +1282,24 @@ uses swscaler gaussian blur (looks very good)
 .
 .TP
 .B \-spualign <-1\-2> (OSD only)
-Specify how spu (DVD/VOBsub) subtitles should be aligned.
-Values are the same as for \-subalign, with the extra choice -1 for original
-position.
+Specify how SPU (DVD/VOBsub) subtitles should be aligned.
+.PD 0
+.RSs
+.IPs -1
+original position
+.IPs 0
+align at top (original/default behavior)
+.IPs 1
+align at center
+.IPs 2
+align at bottom
+.RE
+.PD 1
+.
 .TP
 .B \-spugauss <0.0\-3.0> (OSD only)
 Variance parameter of gaussian used by \-spuaa 4.
-Higher means more blur.
-The default is 1.0.
+Higher means more blur (default: 1.0).
 .TP
 .B \-sub <subtitlefile1,subtitlefile2,...>
 Use/\:display these subtitle files.
@@ -1304,13 +1309,13 @@ switched with 'j'.
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
 Big values mean more transparency.
-The 0 value is an exception and means completely transparent.
+0 means completely transparent.
 .TP
 .B \-sub-bg-color <0\-255>
 Specify the color value for subtitles and OSD backgrounds.
 Currently subtitles are grayscale so this value is equivalente to the
 intensity of the color.
-The 255 value means white and 0 black.
+255 means white and 0 black.
 .TP
 .B \-sub-demuxer <number> (\-subfile only) (BETA CODE)
 Force subtitle demuxer type for \-subfile.
@@ -1323,9 +1328,9 @@ Adjust matching fuzziness when searching for subtitles:
 .IPs 0
 exact match
 .IPs 1
-load all subs containing movie name
+Load all subs containing movie name.
 .IPs 2
-load all subs in the current directory
+Load all subs in the current directory.
 .RE
 .PD 1
 .
@@ -1336,8 +1341,17 @@ Used for debug purposes.
 .TP
 .B \-subalign <0\-2> (OSD only)
 Specify how subtitles should be aligned with \-subpos.
-0 means align at top (original/default behavior), 1 means align at center, and
-2 means align at bottom.
+.PD 0
+.RSs
+.IPs 0
+align at top (original/default behavior)
+.IPs 1
+align at center
+.IPs 2
+align at bottom
+.RE
+.PD 1
+.
 .TP
 .B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles.
@@ -1347,7 +1361,7 @@ CC subtitles have not been spotted on DVDs from other regions so far.
 .TP
 .B \-subcp <codepage> (iconv only)
 If your system supports iconv(3), you can use this option to
-specify codepage of the subtitle.
+specify the subtitle codepage.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -1391,7 +1405,7 @@ Same as \-audiofile, but for subtitle streams (OggDS?).
 Sets the autoscale mode.
 .br
 .I NOTE:
-Zero means that text-scale and osd-scale are font heights in points.
+0 means that text scale and OSD scale are font heights in points.
 .sp 1
 The mode can be:
 .sp 1
@@ -1418,21 +1432,20 @@ When set to 'unicode', all the glyphs from the font file will be rendered and
 unicode will be used (default: unicode).
 .TP
 .B \-subfont-osd-scale <0\-100> (FreeType only)
-Sets the osd elements autoscale coefficient (default: 6).
+Sets the autoscale coefficient of the OSD elements (default: 6).
 .TP
 .B \-subfont-outline <0\-8> (FreeType only)
 Sets the font outline thickness (default: 2).
 .TP
 .B \-subfont-text-scale <0\-100> (FreeType only)
-Sets the subtitle text autoscale coefficient (percentage of the
-screen size) (default: 5).
+Sets the subtitle text autoscale coefficient as percentage of the
+screen size (default: 5).
 .TP
 .B \-subfps <rate>
-Specify frame/\:sec rate of subtitle file (float number),
-default: the same fps as the movie.
+Specify the framerate of the subtitle file (default: movie fps).
 .br
 .I NOTE:
-ONLY for frame-based SUB files, i.e.\& NOT MicroDVD format.
+Only for frame-based subtitle files, i.e.\& not MicroDVD format.
 .TP
 .B \-subpos <0\-100> (useful with \-vf expand) (OSD only)
 Specify the position of subtitles on the screen.
@@ -1444,18 +1457,18 @@ Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
 .TP
 .B \-unicode
-Tells MPlayer to handle the subtitle file as UNICODE.
+Tells MPlayer to handle the subtitle file as unicode.
 .TP
 .B \-utf8 \ \ 
-Tells MPlayer to handle the subtitle file as UTF8.
+Tells MPlayer to handle the subtitle file as UTF-8.
 .TP
 .B \-vobsub <VOBsub\ file\ without\ extension>
-Specify the VOBsub files that are to be used for subtitle.
-This is the full pathname without extensions, i.e.\& without
+Specify a VOBsub file to use for subtitles.
+Has to be the full pathname without extension, i.e.\& without
 the '.idx', '.ifo' or '.sub'.
 .TP
 .B \-vobsubid <0\-31>
-Specify the VOBsub subtitle id.
+Specify the VOBsub subtitle ID.
 .
 .
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
