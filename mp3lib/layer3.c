@@ -1012,6 +1012,8 @@ static void III_i_stereo(real xr_buf[2][SBLIMIT][SSLIMIT],int *scalefac,
       }
 #endif
 
+//      printf("III_i_st: tab1=%p tab2=%p tab=%d ms=%d  \n", tab1, tab2, tab, ms_stereo);
+
       if (gr_info->block_type == 2) {
          int lwin,do_l = 0;
          if( gr_info->mixed_block_flag )
@@ -1240,7 +1242,7 @@ static int do_layer3(struct frame *fr,int single){
     stereo1 = 2;
 
   if(fr->mode == MPG_MD_JOINT_STEREO) {
-    ms_stereo = fr->mode_ext & 0x2;
+    ms_stereo = (fr->mode_ext & 0x2)>>1;
     i_stereo  = fr->mode_ext & 0x1;
   } else
     ms_stereo = i_stereo = 0;
