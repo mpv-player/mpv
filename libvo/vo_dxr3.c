@@ -21,7 +21,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include <libmp1e.h>
+#include "../libmp1e/libmp1e.h"
 
 #include "../postproc/rgb2rgb.h"
 #ifdef HAVE_MMX
