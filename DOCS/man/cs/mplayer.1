@@ -1,4 +1,4 @@
-.\" synced with 1.718
+.\" synced with 1.726
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -37,7 +37,7 @@
 .\" Název
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-09-10" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-09-19" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
 mplayer  \- multimediální pøehrávaè
@@ -554,6 +554,10 @@ Pou¾ije náhradní menu.conf.
 Urèí hlavní menu.
 .
 .TP
+.B \-menu-startup (pouze OSD menu)
+Zobrazí hlavní menu pøi startu MPlayeru.
+.
+.TP
 .B \-noconsolecontrols
 Zamezí MPlayeru èíst stisky kláves ze standardního vstupu.
 Pou¾itelné pokud naèítáte data ze standardního vstupu.
@@ -892,7 +896,7 @@ Pro IPv4 bude stále proxy pou¾ívána.
 .
 .TP
 .B \-loadidx <soubor_obsahující_index>
-Soubor ze kterého budou naètena indexová data videosouboru ulo¾ená volbou \-saveidx.
+Soubor ze kterého budou naètena indexová data video souboru ulo¾ená volbou \-saveidx.
 Tento index se pou¾ije pro pøevíjení a nahradí jakákoli indexová data
 z pùvodního AVI.
 MPlayer vám nezabrání v naètení indexu ze souboru který byl vygenerován
@@ -1120,7 +1124,7 @@ Volba není kompatibilní s volbou frekvence.
 tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2,
 tv_set_channel TV1, atd.
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-Nastavení obrazového eqvalizéru na kartì.
+Nastavení obrazového ekvalizéru na kartì.
 .IPs audiorate=<hodnota>
 Nastavení datového toku (bitrate) zachytávaného zvuku.
 .IPs forceaudio
@@ -1148,7 +1152,7 @@ aktuální audio re¾im.
 .IPs adevice=<hodnota>
 Nastaví audio zaøízení.
 <hodnota> mù¾e být /dev/\:xxx pro OSS a ID hardvéru pro ALSA.
-Zpùsob jak urèit ID kardvéru naleznete v dokumentaci k \-ao alsa.
+Zpùsob jak urèit ID hardvéru naleznete v dokumentaci k \-ao alsa.
 .REss
 .IPs audioid=<hodnota>
 Vybere zvukový výstup zachytávací karty, pokud je jich více ne¾ jeden.
@@ -1694,7 +1698,7 @@ Syntax je:
 .B \-ao <ovladaè1[:pod-volba1[=hodnota]:...],ovladaè2,...[,]>
 Nastavuje seznam pou¾itých audio výstupních rozhraní podle priority.
 .PP
-Pokud seznam konèí ',', pak se vpøípadì selhání v¹ech zadaných rozhraní pou¾ijí
+Pokud seznam konèí ',', pak se v pøípadì selhání v¹ech zadaných rozhraní pou¾ijí
 i ostatní.
 Pod-volby jsou volitelné a v mnoha pøípadech je nemusíte vùbec pou¾ít.
 .br
@@ -1771,7 +1775,7 @@ Zvukový výstup pøes ESD démona.
 .PD 0
 .RSs
 .IPs <server>
-Explicitnì vybere ESD server (default: localhost).
+Explicitnì vybere ESD server k pou¾ití (default: localhost).
 .RE
 .PD 1
 .
@@ -1841,7 +1845,7 @@ Seznam a vysvìtlení jednotlivých voleb dostanete pøíkazem
 Nastaví grafickou kartu na kterou se bude posílat obrázek.
 K zprovoznìní potøebuje volbu \-vm.
 Seznam dostupných karet získáte, doplníte-li tuto volbu o \-v.
-V souèasnosti pracuje poze s \-vo directx.
+V souèasnosti pracuje pouze s \-vo directx.
 .
 .TP
 .B \-bpp <hloubka>
@@ -1911,7 +1915,7 @@ cesta k mikrokódu
 .RE
 .RS
 .sp 1
-.I Výsup na TV
+.I Výstup na TV
 .RE
 .RSs
 .IPs 75ire
@@ -2306,7 +2310,7 @@ Pøidá podporu X11 v¹em rozhraním zalo¾eným na overlay (pøekrývání).
 V souèasnosti je podporován pouze tdfx_vid.
 .PD 0
 .RSs
-.IPs <vo_rozhrani>
+.IPs <vo_rozhraní>
 Vybere video rozhraní, které se pou¾ije jako zdroj pro pøekrytí nad X11.
 .RE
 .PD 1
@@ -2340,7 +2344,7 @@ Zobrazuje video pøes XFree86 roz¹íøení: Direct Graphics Access.
 Pova¾ujeme za zastaralé.
 .
 .TP
-.B sdl (pouze SDL, viz také volby \-forcexv, \-noxv)
+.B sdl (viz také volby \-forcexv, \-noxv) (pouze SDL)
 Video rozhraní platformnì nezávislé knihovny SDL (Simple Directmedia Layer).
 Vzhledem k tomu, ¾e SDL má vlastní X11 vrstvu, nemají X11 volby MPlayeru 
 na SDL ¾ádný vliv.
@@ -2367,7 +2371,7 @@ mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid a sis_vid.
 .
 .TP
 .B xvidix (pouze X11)
-X11 frontend pro VIDIX
+X11 front-end pro VIDIX
 .PD 0
 .RSs
 .IPs <ovladaè>
@@ -2377,7 +2381,7 @@ shodné s vidix
 .
 .TP
 .B cvidix\ 
-Obecný a platformnì nezávislý frontend k VIDIXu. Mù¾e dokonce pracovat
+Obecný a platformnì nezávislý front-end k VIDIXu. Mù¾e dokonce pracovat
 v textové konzoli s nVidia kartami.
 .PD 0
 .RSs
@@ -2387,7 +2391,7 @@ shodné s vidix
 .PD 1
 .TP
 .B winvidix (pouze Windows)
-Windows frontend pro VIDIX
+Windows front-end pro VIDIX
 .PD 0
 .RSs
 .IPs <ovladaè>
@@ -2423,7 +2427,7 @@ Zvolí zobrazovací zaøízení pro zobrazení na celou obrazovku.
 Pou¾ije jaderný framebuffer k pøehrávání videa.
 .PD 0
 .RSs
-.IPs <zaøízeví>
+.IPs <zaøízení>
 Explicitnì vybere jméno zaøízení fbdev k pou¾ití (napø.\& /dev/\:fb0) nebo
 název vidixového ovladaèe, pokud jméno zaøízení zaèíná vidix (napø.\&
 vidixsis_vid povolí sis ovladaè).
@@ -2527,7 +2531,7 @@ Pøehrávání videa UDP protokolem Blinkenlights.
 Toto rozhraní je velmi závislé na hardvéru.
 .PD 0
 .RSs
-.IPs <subdevice>
+.IPs <bl_zaøízení>
 Explicitnì vybere Blinkenlights ovladaè zaøízení k pou¾ití.
 Je to nìco jako arcade:host=localhost:2323 nebo
 hdl:file=jméno1,file=jméno2.
@@ -2644,7 +2648,7 @@ hardvérové vlastnosti karet Matrox Gxxx jako je hardvérové odstranìní prokladu,
 .B 3dfx (pouze Linux)
 Nativní 3Dfx video rozhraní.
 Toto rozhraní pou¾ívá pøímo 3Dfx hardvér nad X11.
-Podporováva je pouze barevná hloubka 16 bpp.
+Podporována je pouze barevná hloubka 16 bpp.
 DOKONÈIT: Staèí to k rozdílu mezi 3dfx, tdfxfb a tdfx_vid?
 .
 .TP
@@ -2692,7 +2696,7 @@ Viz té¾ lavc video filtr.
 Aktivuje pøekrývání namísto TV-Outu.
 .IPs prebuf
 Zapíná ètení napøed do vyrovnávací pamìti.
-.IPs sync
+.IPs sync\ 
 Zapíná nový synchronizaèní modul.
 .IPs norm=<norma>
 Urèuje TV normu.
@@ -2709,33 +2713,32 @@ Urèuje TV normu.
 .br
 5: NTSC
 .REss
-.IPs 0\ 1\ 2\ 3\
+.IPs <0\-3>
 Urèuje èíslo zaøízení které se má pou¾ít pokud máte více ne¾ jednu em8300 kartu.
 .RE
 .PD 1
 .
 .TP
 .B mpegpes (pouze DVB)
-Nativní video rozhraní k DVB nebo zápisu souborù ve formátu MPEG-PES.
-.IPs <soubor>
-Pokud nemáte DVB kartu, toto video rozhraní zapí¹e výstup ve formátu MPEG-PES
-do <soubor> (default: ./grab.mpg).
+Výstupní video rozhraní pro DVB, který zapisuje do souboru ve formátu MPEG-PES,
+pokud není nainstalována DVB karta.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Urèí èíslo zaøízení k pou¾ití, pokud máte více ne¾ jednu výstupní DVB kartu.
 (pouze V3 API, takové jaké mají ovladaèe øady 1.x.y).
+.IPs <soubor>
+Umo¾òuje zadat jméno výstupního souboru (default: ./grab.mpg).
 .RE
 .PD 1
 .
 .TP
-.B zr (viz také \-zr* a \-zrhelp)
+.B zr (viz také \-zr* a \-zrhelp, zrmjpeg video filtr)
 Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet.
 .
 .TP
 .B zr2\ \ \ \ 
 Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet, druhá generace.
-Viz té¾ zrmjpeg video filtr.
 .PD 0
 .RSs
 .IPs dev=<zaøízení>
@@ -2764,6 +2767,18 @@ Umo¾òuje zadat jméno výstupního souboru (default: ./md5).
 .PD 1
 .
 .TP
+.B md5sum\ \ \ \ 
+Spoèítá MD5 otisk pro ka¾dý snímek a zapí¹e je do souboru.
+Podporuje barevné prostory RGB24 a YV12.
+Pou¾itelné pøi hledání chyb.
+.PD 0
+.RSs
+.IPs outfile=<hodnota>
+Nastaví jméno výstupního souboru (default: ./md5sums).
+.RE
+.PD 1
+.
+.TP
 .B yuv4mpeg
 Pøevádí video proud na sekvenci nekomprimovaných YUV 4:2:0 obrázkù a
 ukládá je do souboru jménem 'stream.yuv' v aktuálním adresáøi.
@@ -2780,19 +2795,19 @@ Zapisuje výstup jako prokládané snímky, dolní pùlsnímek napøed.
 .PD 1
 .RS
 .sp 1
-.I NOTE:
-If you don't specify any option the output is progressive
-(i.e.\& not interlaced).
+.I POZNÁMKA:
+Pokud neuvedete ¾ádnou volbu, bude výstup progresivní
+(èili.\& neprokládaný).
 .RE
 .
 .TP
 .B gif89a\ 
 Vyexportuje v¹echny snímky do jediného animovaného GIF souboru v aktuálním adresáøi.
-Podporuje pouze RGB formát s barevnou hloudkou 24 bpp a výstup je pøeveden
+Podporuje pouze RGB formát s barevnou hloubkou 24 bpp a výstup je pøeveden
 na 256 barev.
 .PD 0
 .RSs
-.IPs <fps>\ \ \ 
+.IPs <fps>
 Desetinné èíslo nastavující rychlost snímkování (default: 5.0).
 .IPs <soubor>
 Nastaví jméno výstupního souboru (default: ./out.gif).
@@ -2844,6 +2859,45 @@ Musí být vìt¹í nebo rovno 1 (default: 1000).
 .PD 1
 .
 .TP
+.B pnm\ \ \ \ 
+Vyexportuje ka¾dý snímek do PNM souboru do aktuálního adresáøe.
+Ka¾dý ze souborù je pojmenován èíslem snímku vèetnì úvodních nul.
+Podporuje PPM, PGM a PGMYUV soubory v re¾imu raw i ASCII.
+Viz té¾ 
+.BR pnm (5),
+.BR ppm (5)
+a
+.BR pgm (5).
+.PD 0
+.RSs
+.IPs ppm
+Zapisuje PPM soubory (default).
+.IPs pgm
+Zapisuje PGM soubory.
+.IPs pgmyuv
+Zapisuje PGMYUV soubory.
+PGMYUV jsou podobné PGM, ale zároveò obsahují U a V slo¾ku pøidanou na spodní
+okraj obrázku.
+.IPs raw
+Zapisuje PNM soubory v raw re¾imu (default).
+.IPs ascii
+Zapisuje PNM soubory v ASCII re¾imu.
+.IPs outdir=<hodnota>
+Nastaví adresáø pro ukládání PNM souborù.
+Pokud není zadán, v¹echny PNM soubory jsou zapsány do aktuálního adresáøe.
+.IPs subdirs=<hodnota>
+Pokud je zadán, bude MPlayer vytváøet oèíslované podadresáøe se zadanou
+pøedponou.
+Pokud není zadán, nejsou vytváøeny podadresáøe a v¹echny PNM soubory jsou
+zapsány do stejného adresáøe.
+.IPs maxfiles=<hodnota>
+Maximální poèet PNM souborù ulo¾ených v podadresáøi, pokud je nastaveno
+vytváøení podadresáøù.
+Musí být vìt¹í nebo rovno 1 (default: 1000).
+.RE
+.PD 1
+.
+.TP
 .B pgm\ \ \ \ 
 Vyexportuje ka¾dý snímek do PGM souboru v aktuálním adresáøi.
 Ka¾dý soubor bude pojmenován èíslem snímku i s vodícími nulami.
@@ -2863,9 +2917,10 @@ Podporuje formáty RGB a BGR, oba v 24bpp barevné hloubce.
 .B tga\ \ \ \ 
 Vyexportuje ka¾dý snímek do Targa souboru v aktuálním adresáøi.
 Ka¾dý soubor bude pojmenován èíslem snímku i s vodícími nulami.
-Úèel tohoto rozhraní je: mít jednoduchý bezstrátový zapisovaè obrázkù,
+Úèel tohoto rozhraní je: mít jednoduchý bezztrátový zapisovaè obrázkù,
 který nebude potøebovat ¾ádnou externí knihovnu.
 Podporuje barevný formát BGR[A], v barevné hloubce 15, 24 a 32 bpp.
+Mù¾ete vynutit urèitý formát pomocí video filtru format.
 .sp 1
 .I PØÍKLAD:
 .RE
@@ -3145,7 +3200,7 @@ odolnost proti chybám:
 .IPs fast\ 
 Zapne optimalizace nevyhovující specifikaci, co¾ mù¾e potenciálnì zpùsobit
 problémy jako: zjednodu¹enou dekvantizaci, pøedpokládané pou¾ití defaultní
-kvantizaèní matice, pøedpokládaný ZUV 4:2:0 a pøeskoèení nìkolika testù
+kvantizaèní matice, pøedpokládaný YUV 4:2:0 a pøeskoèení nìkolika testù
 detekujících po¹kozené bitové proudy.
 .IPs gray\ 
 dekódování pouze èernobíle (o nìco rychlej¹í ne¾ barevnì)
@@ -3157,7 +3212,7 @@ Ov¹em cenou za to mù¾e být vìrnost.
 .IPs "sb=<poèet> (pouze MPEG2)"
 Pøeskoèí zadaný poèet dolních makroblokových øad.
 .IPs "st=<poèet> (pouze MPEG2)"
-Pøeskoèí zadaný poèet horích makroblokových øad.
+Pøeskoèí zadaný poèet horních makroblokových øad.
 .IPs vismv=<hodnota>
 vizualizace pohybového vektoru:
 .RSss
@@ -3192,8 +3247,8 @@ Nepøehrávat/\:enkódovat video.
 .
 .TP
 .B \-oldpp <kvalita> (pouze OpenDivX) (ZASTARALÉ)
-Pou¾ije se opendivx kód pro postprocessing místo vestavìného.
-Pøekonáno volbou \-pp, vestavìný postprocessing nabízí lep¹í kvalitu i výkon.
+Pou¾ije se opendivx kód pro postprocesing místo vestavìného.
+Pøekonáno volbou \-pp, vestavìný postprocesing nabízí lep¹í kvalitu i výkon.
 Platný rozsah \-oldpp hodnot závisí na kodeku, zpravidla 0\-6, 
 kde 0=vypnuto, 6=nejpomalej¹í/\:nejlep¹í.
 .
@@ -3201,7 +3256,7 @@ kde 0=vypnuto, 6=nejpomalej¹í/\:nejlep¹í.
 .B \-pp <kvalita> (viz také volbu \-vf pp)
 Nastaví úroveò postprocesingu DLL.
 Tuto volbu ji¾ není mo¾né pou¾ít s \-vf pp.
-Pracuje pouze s Win32 DirectShow DLL které mají interní rutiny pro postprocessing.
+Pracuje pouze s Win32 DirectShow DLL které mají interní rutiny pro postprocesing.
 Platný rozsah \-pp hodnot závisí na kodeku, zpravidla 0\-6, 
 kde 0=vypnuto 6=nejpomalej¹í/\:nejlep¹í.
 .
@@ -3280,7 +3335,7 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-bikubický spline
+pøirozený bikubický spline
 .RE
 .sp 1
 .PD 1
@@ -3521,9 +3576,8 @@ renderování OSD/\:titulkù
 .RE
 .
 .TP
-.B flip\ \ \ 
+.B flip (viz také volbu \-flip)
 Pøevrátí obraz vzhùru nohama.
-Viz také volbu \-flip.
 .
 .TP
 .B mirror\ 
@@ -3536,11 +3590,11 @@ Parametry pro rotaci mezi 4\-7 jsou funkèní pouze pokud je obraz na vý¹ku
 nikoli na ¹íøku.
 .
 .TP
-.B scale[=w:h[:prokládané[:zru¹ení_barev[:param[:pøednast]]]]]
+.B scale[=¹:v[:prokládané[:zru¹ení_barev[:param[param2[:pøednast]]]]]]
 ©káluje obraz pomocí (pomalého) softvérového ¹kálovaèe a provádí konverzi
 barevného prostoru YUV<\->RGB (viz také volbu \-sws).
 .RSs
-.IPs w,h\ \ 
+.IPs <¹>,<v>
 výsledná ¹íøka/vý¹ka (default: originální ¹íøka/\:vý¹ka)
 .br
 .I POZNÁMKA:
@@ -3557,10 +3611,10 @@ Pou¾ijete-li \-zoom, a podkladové filtry (vèetnì libvo) nejsou schopny
 .REss
 .IPs prokládané
 Pøepíná prokládané ¹kálování.
-.IPs zru¹ení_barev
+.IPs <zru¹ení_barev>
 ignorování barevné informace
 .RSss
-0: pou¾ívat barvy ze v¹ech øádkù
+0: Pou¾ívat barvy ze v¹ech øádkù.
 .br
 1: Pou¾ívat barvy pouze z ka¾dého 2. øádku.
 .br
@@ -3568,16 +3622,25 @@ ignorování barevné informace
 .br
 3: Pou¾ívat barvy pouze z ka¾dého 8. øádku.
 .REss
-.IPs param
-¹kálovací parametr (závisí na pou¾ité ¹kálovací metodì)
+.IPs <param>
 .RSss
-\-sws 2 (bikubické):  ostøení (0 (jemné) \- 100 (ostré))
+\-sws 2 (bikubické): B (rozostøení) a C (ringing)
+.br
+(0.00, 0.60) default
+.br
+(0.00, 0.75) odpovídá "precise bicubic" z VirtualDubu
+.br
+(0.00, 0.50) Catmull-Rom spline
+.br
+(0.33, 0.33) Mitchell-Netravali spline
+.br
+(1.00, 0.00) kubická B-spline
 .br
 \-sws 7 (Gauss): ostøení (0 (jemné) \- 100 (ostré))
 .br
 \-sws 9 (lanczos):  délka filtru (1\-10)
 .REss
-.IPs pøednast
+.IPs <pøednast>
 ©káluje na pøednastavený rozmìr.
 .RSss
 qntsc:   352x240 (NTSC ètvrtina obrazu)
@@ -3595,7 +3658,7 @@ spal:    768x576 (square pixel PAL)
 .RE
 .
 .TP
-.B dsize={pomìr_stran|w:h}
+.B dsize=[pomìr_stran|w:h]
 Zmìní zamý¹lený rozmìr/\:pomìr_stran obrazovky v daném bodì øetìzce filtrù.
 Pomìr stran mù¾e být zadán jako zlomek (4/\:3) nebo desetinné èíslo (1.33).
 Alternativnì mù¾ete zadat pøímo po¾adovanou ¹íøku a vý¹ku obrazu.
@@ -3604,8 +3667,8 @@ Tento filtr sám os sobì ne¹káluje; pouze ovlivní chování pozdìj¹ích ¹kálovaèù
 .
 .TP
 .B yuy2\ \ \ 
-Vynutí softvérovou konverzi YV12/\:I420 nebo 422P to YUY2.
-Pou¾itelné pro vide karty/\:rozhraní s pomalým YV12 ale rychlým YUY2.
+Vynutí softvérovou konverzi YV12/\:I420/\:422P na YUY2.
+Pou¾itelné pro video karty/\:rozhraní s pomalým YV12 ale rychlým YUY2.
 .
 .TP
 .B yvu9\ \ \ 
@@ -3635,6 +3698,8 @@ palety.
 .B format[=fourcc]
 Omezí barevný prostor pro následující filtr bez provedení konverze.
 Chcete-li provést opravdovou konverzi, pou¾ijte v kombinaci s filtrem scale.
+.br
+.I POZNÁMKA:
 Seznam dostupných formátù získáte pomocí format=fmt=help.
 .PD 0
 .RSs
@@ -3649,6 +3714,8 @@ Omezí barevný prostor pro následující filtr bez provedení konverze.
 Na rozdíl od filtru formát, tato volba umo¾òuje jakýkoliv barevný prostor
 .B kromì
 toho který zadáte.
+.br
+.I POZNÁMKA:
 Seznam dostupných formátù získáte pomocí noformat=fmt=help.
 .PD 0
 .RSs
@@ -3659,15 +3726,10 @@ jméno formátu jako rgb15, bgr24, yv12, atd (default: yv12)
 .
 .TP
 .B pp[=filtr1[:volba1[:volba2...]]/\:[-]filtr2...] (viz také volbu \-pphelp)
-Tato volby zapíná pou¾ití MPlayerova vestavìného postprocesního filtru a
-rovnì¾ poskytuje rozhraní pomocí kterého mù¾ete pøedat parametry 
-vyjmenovanému filtru.
-Seznam v¹ech dostupných filtrù dostanete pomocí \-pphelp.
-Pod-filtry se oddìlují znakem / (lomítko).
-Ka¾dý filtr je pøednastaven na 'c' (chrominance(barvy)).
-Klíèová slova akceptují pøedponu '-' pro vypnutí volby.
-Znak ':' následován písmenem mù¾e být pøidán k volbì pro indikaci pole
-pùsobnosti:
+Zapíná uvedený øetìzec postprocesních filtrù.
+Jednotlivé filtry musí být oddìleny '/' a mohou být vypnuty pou¾itím '\-'.
+Zamìøení filtru mù¾e být vymezeno pøidáním ':' následované 'a', 'c' nebo 'y'
+(default: c):
 .PD 0
 .RSs
 .IPs a
@@ -3675,14 +3737,14 @@ Automaticky vypne filtr pokud je procesor pøíli¹ pomalý.
 .IPs c
 Provádí také filtrování barevné slo¾ky (chrominance).
 .IPs y
-Neprovádí filtrování barevné slo¾ky (pouze filtrování luminance(èernobílá slo¾ka)).
+Provádí filtrování pouze jasové (èernobílé) slo¾ky.
 .RE
 .PD 1
 .sp 1
 .RS
 .br
 .I POZNÁMKA:
-\-pphelp zobrazí seznam dostupných postprocesních filtrù.
+\-pphelp zobrazí seznam dostupných filtrù.
 .sp 1
 .I PØÍKLAD:
 .RE
@@ -3696,10 +3758,10 @@ a lineárnì smì¹ující odstraòovaè prokladu
 .IPs "\-vf pp=de/\:-al"
 pøednastavené filtry bez korekce jasu/\:kontrastu
 .IPs "\-vf pp=de/\:tn:1:2:3"
-Zapne pøednastavené filtry a temporal denoiser.
+Zapne pøednastavené filtry a filtr zrnìní (temporal denoiser).
 .IPs "\-vf pp=hb:y/\:vb:a \-autoq 6"
 Horizontálnì deblokuje pouze luminanci a zapíná nebo vypíná vertikální
-deblokování podle dostupného èasu CPU.
+deblokování podle dostupného výkonu CPU.
 .RE
 .PD 1
 .
@@ -3757,13 +3819,22 @@ Rychlá softvérová konverze YV12 do MPEG1 pomocí libfame pro pou¾ití s DVB/\:DXR3
 .B dvbscale[=pomìr_stran]
 Nastaví optimální ¹kálování pro DVB karty, ¹káluje hardvérovì v ose X a provede
 softvérové ¹kálování v ose Y pro zachování pomìru stran.
-Toto je pou¾itelné pouze v kombinaci s expand+scale
-(\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
+Toto je pou¾itelné pouze v kombinaci s expand a scale
 .RSs
 .IPs aspect
 Ovládá pomìr stran, vypoèítá se jako DVB_VÝ©KA*POMÌR_STRAN (default:
 576*4/3=768), nastavte 576*(16/9)=1024 pro 16:9 TV.
 .RE
+.sp 1
+.RS
+.I PØÍKLAD:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+DODÌLAT: Vysvìtlit co to dìlá.
+.RE
+.PD 1
 .
 .TP
 .B noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
@@ -3791,16 +3862,14 @@ smì¹uje náhodný ¹um se (skoro)konstantním vzorem
 .B denoise3d[=luma:chroma:time]
 Tento filtr je zamìøen na omezení ¹umu v obrázku a stabilní obraz bude skuteènì
 stabilní (To by mìlo vylep¹it komprimovatelnost.).
-Filtru lze pøedat 0 a¾ 3 parametry.  
-Pokud nìkterý parametr vynecháte, doplní se pro nìj rozumná hodnota.
 .PD 0
 .RSs
 .IPs luma\ 
-prostorová intenzita svìtlosti (default = 4)
+prostorová intenzita svìtlosti (default: 4)
 .IPs chroma
-prostorová intenzita barevnosti (default = 3)
+prostorová intenzita barevnosti (default: 3)
 .IPs time\ 
-doèasná intenzita (default = 6)
+doèasná intenzita (default: 6)
 .RE
 .PD 1
 .
@@ -3810,14 +3879,14 @@ Vysoce precizní/\:kvalitní verze denoise3d filtru.
 Pou¾ití a parametry jsou stejné.
 .
 .TP
-.B eq[=jas:kontrast]
-Softvérová ekvalizér a interaktivním ovládáním shodným s hradvérovým 
+.B eq[=jas:kontrast] (ZASTARALÉ)
+Softvérový ekvalizér s interaktivním ovládáním shodným s hardvérovým
 ekvalizérem pro karty/\:ovladaèe které nemají podporu nastavení jasu a
 kontrastu v hardvéru.
+Poèáteèní hodnotu v rozsahu -100 \- 100 mù¾ete zadat na pøíkazovém øádku.
 Rovnì¾ mù¾e být pou¾itelný pro MEncoder, buï pro opravu mizernì zachycených
 filmù, nebo pro mírné sní¾ení kontrastu, èím¾ zamaskujete artefakty vznikající
 pøi nízkých datových tocích.
-Na pøíkazovém øádku mù¾e být zadána poèáteèní hodnota v rozsahu -100\-100.
 .
 .TP
 .B eq2[=gama:kontrast:jas:sytost_barev:rg:gg:bg:váha]
@@ -3847,7 +3916,7 @@ vytvoøí barevný negativ).
 Konvertuje jednoduchý YUV 4:2:0 do pakovaného 4:2:2 s polovièní vý¹kou, 
 podsampluje se luma ale ve¹keré barevné (chroma) informace jsou zachovány.
 Pou¾itelné pro výstup na zobrazovaè s nízkým rozli¹ením kdy¾ má hardvérové
-podsamlování ¹patnou kvalitu, nebo  není k dispozici.
+podsamplování ¹patnou kvalitu, nebo  není k dispozici.
 Rovnì¾ mù¾e být pou¾it jako primitivní pouze-luma deinterlacer (odstraòovaè
  prokladu) s velmi malou re¾ií pro CPU.
 Defaultnì se pøi podsamplovávání pakuje prùmìrná hodnota párovaných øádkù.
@@ -3904,14 +3973,14 @@ filmù s nesprávnì provedeným odstranìním prokladu (inverse telecine).
 .
 .TP
 .B dint[=sense:level]
-Detekuje a zahodí první pùlsnímky z prokládaného video-proudu.
+Detekuje a zahodí první ze sady pùlsnímkù z prokládaného video-proudu.
 Hodnoty musí být v rozsahu 0.0 a¾ 1.0 vèetnì \- první z nich (default 0.1) je
 relativní rozdíl mezi sousedními pixely, druhá (default 0.15) udává jak velká
 èást obrázku se má prozkoumat na proklad pro zahození pùlsnímku.
 .
 .TP
 .B lavcdeint
-Pou¾ije se deinterlace (odstraòovaè prokladu) filtr z libavcodec.
+filtr deinterlace (odstraòovaè prokladu) z libavcodec.
 .
 .TP
 .B kerndeint[=práh[:map[:poøadí[:ostøit[:dvoucest]]]]]
@@ -3919,7 +3988,7 @@ Adaptivní jaderný deinterlacer od Donalda Grafta.
 Odstraní proklad z tìch èástí videa, kde je pøekroèen nastavitelný práh.
 .PD 0
 .RSs
-.IPs "práh (0 - 255)"
+.IPs "práh (0 \- 255)"
 Práh citlivosti (default 10).
 .IPs "map (0 nebo 1)"
 Obarví pixely které pøesahují práh na bílo (default: 0).
@@ -3934,14 +4003,14 @@ Zapne dvoucestné ostøení (default: 0).
 .
 .TP
 .B unsharp=l|cWxH:amount[:l|cWxH:amount]
-Maska rozostøení / Gaussovo rozostøení.
+maska rozostøení / Gaussovo rozostøení
 .RSs
-.IPs l
+.IPs l\ \ \ \ 
 Aplikuje efekt na èernobílou slo¾ku.
-.IPs c
+.IPs c\ \ \ \ 
 Aplikuje efekt na barevnou slo¾ku.
-.IPs WxH
-¹íøka(W) a vý¹ka(H) matice, oba rozmìry musí být liché
+.IPs <¹íøka>x<vý¹ka>
+¹íøka a vý¹ka matice, oba rozmìry musí být liché
 (min = 3x3, max = 13x11 nebo 11x13, obvykle nìco mezi 3x3 a 7x7)
 .IPs amount
 Relativní mno¾ství ostøení/\:rozmazání pøidané obrázku
@@ -4018,7 +4087,7 @@ Vývoj tohoto filtru byl zastaven, jeliko¾ ivtc, pullup,
 a filmdint jsou ve vìt¹inì pøípadù lep¹í.
 Následující argumenty (syntax viz vý¹) mù¾ete pou¾ít k ovlivnìní chování detc:
 .RSs
-.IPs dr
+.IPs dr\ \ \ 
 Nastaví re¾im zahazování snímkù.
 0 (default) znamená nezahazovat snímky abychom mìli pevné snímkování.
 1 znamená v¾dy zahodit snímek pokud za posledních 5 snímkù nebyl ¾ádný zahozen 
@@ -4027,12 +4096,12 @@ nebo slouèen z pùlsnímkù.
 .br
 .I POZNÁMKA:
 V MEncoderu pou¾ívejte módy 1 nebo 2.
-.IPs am
+.IPs am\ \ \ 
 Analytický re¾im.
 Dostupné hodnoty jsou 0 (pevná ¹ablona s poèáteèním snímkem jeho¾ èíslo je 
 zadáno pomocí fr=#) a 1 (agresivní vyhledávání telecine ¹ablony).
 Default je 1.
-.IPs fr
+.IPs fr\ \ \ 
 Nastaví poèáteèní èíslo snímku v øadì.
 0\-2 jsou tøi èisté progresivní snímky; 3 a 4 jsou dva prokládané snímky.
 Defaultní hodnota -1 znamená 'není v telecine øadì'.
@@ -5276,6 +5345,13 @@ prùchodu.
 .PD 1
 .
 .TP
+.B turbo (pouze 2-prùchodový re¾im)
+Výraznì urychlí první prùchod díky rychlej¹ím algoritmùm a vypnutím voleb
+nároèných na CPU.
+Pravdìpodobnì o nìco sní¾í celkový PSNR (kolem 0.01dB) a
+o nìco více zmìní PSNR (více ne¾ 0.03dB) a typ jednotlivých snímkù.
+.
+.TP
 .B aspect=<x/\:y>
 Ukládá pomìr stran filmu internì, stejnì jako MPEG soubory.
 Mnohem lep¹í øe¹ení ne¾ pøe¹kálování, proto¾e není sní¾ena kvalita.
@@ -5318,7 +5394,7 @@ pøibli¾ná tolerance velikosti souboru v kBitech.
 (default: 8000)
 .br
 .I POZNÁMKA:
-Hodnota vratetol by nemìla být pøíli¾ velká pøi druhém prùchodu, jinak mù¾ou
+Hodnota vratetol by nemìla být pøíli¹ velká pøi druhém prùchodu, jinak mù¾ou
 nastat problémy pøi pou¾ití vrc_(min|max)rate.
 .
 .TP
@@ -5703,7 +5779,7 @@ pou¾ít prokládané dct
 .
 .TP
 .B ilme\ \ \ 
-Pou¾íje prokládané odhadování pohybu (oboustranná exkluzivita s qpel).
+Pou¾ije prokládané odhadování pohybu (oboustranná exkluzivita s qpel).
 .
 .TP
 .B alt\ \ \ \ 
@@ -6011,8 +6087,8 @@ Redukce ¹umu, 0 znamená vypnuto.
 .B qns=<0\-3>
 Tvarování ¹umu kvantizeru, omezuje krou¾kové artefakty, vìt¹í hodnoty jsou 
 pomalej¹í, ale nemusí zlep¹it kvalitu.
-Toto mù¾e, a mìlo by, být pou¾íváno spolu s trellisovou kvantizací. V tom 
-pøípadì bude trellisova kvantizace (optimální pro konstantní váhu) pou¾ita jako
+Toto mù¾e, a mìlo by, být pou¾íváno spolu s Trellisovou kvantizací. V tom 
+pøípadì bude Trellisova kvantizace (optimální pro konstantní váhu) pou¾ita jako
 výchozí bod pro opakované vyhledávání.
 .PD 0
 .RSs
@@ -6134,7 +6210,7 @@ mìniè velikosti, který mù¾ete aktivovat pomocí \-vf scale=<width>:<height>:1.
 .
 .TP
 .B 4mv\ \ \ \ 
-Pou¾íje 4 vektory pohybu na makroblok.
+Pou¾ije 4 vektory pohybu na makroblok.
 Mù¾e poskytnout lep¹í kompresi za cenu zpomalení enkódování.
 .br
 .I VAROVÁNÍ:
@@ -6153,7 +6229,7 @@ Skuteèného CBR je tì¾ké dosáhnout.
 V závislosti na video materiálu bude datový tok rùzný a tì¾ko pøedvídatelný.
 Proto XviD pou¾ívá prùmìrovací periodu pro kterou garantuje spotøebu daného 
 poètu bitù (mínus malá odchylka).
-Toto nastavní vyjadøuje "poèet snímkù" pro který XviD prùmìruje datový tok
+Toto nastavení vyjadøuje "poèet snímkù" pro který XviD prùmìruje datový tok
 a zkou¹í dosáhnout CBR.
 .
 .TP
@@ -6214,7 +6290,7 @@ co¾ zlep¹í kvalitu klíèových snímkù.
 .B kfreduction=<0\-100>
 Dvì vý¹e uvedené volby mohou být pou¾ity k doladìní velikosti klíèových snímkù
 a¾ k mezi kterou pova¾ujete za absolutní jednièku.
-kfthreshold nastavuje rozsah ve kterém jsou klíèováé snímky redukovány a
+kfthreshold nastavuje rozsah ve kterém jsou Klíèové snímky redukovány a
 kfreduction stanovuje okam¾itou redukci datového toku.
 S posledním I snímkem bude zacházeno normálnì.
 (default: 30, pouze 2prùchodový re¾im)
@@ -6306,10 +6382,10 @@ materiálu.
 .
 .TP
 .B trellis
-Trelisova kvantizace je druh adaptivní kvantizaèní metody, která ¹etøí bity
+Trellisova kvantizace je druh adaptivní kvantizaèní metody, která ¹etøí bity
 pomocí zmìn kvantizaèních koeficientù tak, aby byly lépe komprimovatelné
 entropickým enkodérem.
-Zlep¹ení kvality je znatelné a pokud VHQ na vá¹ vkus pøíli¾ zamìstnává CPU,
+Zlep¹ení kvality je znatelné a pokud VHQ na vá¹ vkus pøíli¹ zamìstnává CPU,
 mù¾e být tato volba dobrou alternativou jak u¹etøit pár bitù (a zvý¹it
 kvalitu pøi konstantním datovém toku) s ni¾¹í zátì¾í ne¾ VHQ.
 .
@@ -6411,14 +6487,14 @@ Takový soubor mù¾ete vytvoøit maticovým editorem z xvid4confu.
 Toto nastavení umo¾ní XviDu odebrat urèité procento bitù z datovì nároèných
 scén a dát je zpìt do bitového zásobníku.
 To vyu¾ijete pokud máte klip s tak velkým mno¾stvím bitù alokovaných pro
-scény s vysokým datovým ktokem, ¾e ty ostatní zaèínají vypadat ¹patnì
+scény s vysokým datovým tokem, ¾e ty ostatní zaèínají vypadat ¹patnì
 (default: 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
 Toto nastavení umo¾ní XviDu pøidat urèité procento navíc scénám s nízkým
 datovým tokem tak, ¾e odebere nìkolik bitù z celého klipu.
-To pøíjde vhod, pokud máte jen nìkolik 'pomalých' scén, které jsou stále
+To pøijde vhod, pokud máte jen nìkolik 'pomalých' scén, které jsou stále
 ètvereèkované (default: 0).
 .
 .TP
@@ -6433,7 +6509,7 @@ ka¾dý nový snímek.
 Nízké hodnoty povolují línou regulaci pøeteèení, velké skoky v toku jsou
 kompenzovány pomaleji (to mù¾e vést ke ztrátì pøesnosti pøi malých souborech).
 Vy¹¹í hodnoty pùsobí zmìny v pøerozdìlování bitù strmìj¹í. Pokud hodnotu nastavíte
-pøíli¾ vysoko, mù¾e dojít k vytváøení artefaktù (default: 5).
+pøíli¹ vysoko, mù¾e dojít k vytváøení artefaktù (default: 5).
 .br
 .I POZNÁMKA:
 Tento parametr velmi ovlivòuje kvalitu, pou¾ívejte jej opatrnì!
@@ -6480,7 +6556,7 @@ konkrétní pomìr stran pixelu.
 .PD 0
 .RSs
 .IPs vga11
-Obvyklý PAR ma PC.
+Obvyklý PAR na PC.
 Pixely mají ètvercový tvar.
 .IPs pal43
 Standardní PAL 4:3 PAR.
@@ -6490,9 +6566,9 @@ stejné jako viz. vý¹
 .IPs ntsc43
 stejné jako viz. vý¹
 .IPs ntsc169
-stejné jako viz. vý¹ (Nezapomìòte zadat pøesný pomìr stran.)
+stejné jako viz. vý¹ (Nezapomeòte zadat pøesný pomìr stran.)
 .IPs ext\ \
-Umo¾òuje nastavit vá¹ vlasní pomìr stran pixelu pomocí par_width a
+Umo¾òuje nastavit vá¹ vlastní pomìr stran pixelu pomocí par_width a
 par_height.
 .RE
 .PD 1
@@ -6570,7 +6646,7 @@ AlphaC0 parametr deblokovacího filtru (default: 0).
 To upravuje úrovnì (prahy) pro H.264 deblokovací filtr.
 Zaprvé, tento parametr nastavuje maximální zmìnu kterou filtr mù¾e
 provést na jakémkoli pixelu.
-Zadruhé, tento parametr ovlivòuje práh pro zmìnu pøi fitrování obrysù.
+Zadruhé, tento parametr ovlivòuje práh pro zmìnu pøi filtrování obrysù.
 Kladná hodnota sni¾uje blokové artefakty více, ale rovnì¾ sma¾e detaily.
 .
 .TP
@@ -6640,7 +6716,7 @@ faktor kvantizeru mezi I a P snímky (default: 2.0)
 .
 .TP
 .B pb_factor=<hodnota>
-faktor kvantizeru mezi P a B snimky (default: 2.0)
+faktor kvantizeru mezi P a B snímky (default: 2.0)
 .
 .TP
 .B pass=<1|2>
@@ -6661,8 +6737,8 @@ vy¹¹í hodnoty vynucují pozvolnìj¹í zmìny.
 .
 .TP
 .B fullinter
-Pou¾ije ve snímku v¹echny dostupné analytické metody (i4x4, psub8x8, psub16x16)
-(default: 4x4, psub16x16).
+Pou¾ije ve snímku v¹echny dostupné typy makrobloku (i16x16, i4x4, p16x16-4x4)
+(default: i16x16, i4x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
@@ -6674,7 +6750,7 @@ Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
 .br
  1: varování
 .br
- 2: PSNR, èasy enkódování a dal¹í analytycké statistiky po skonèení enkódování
+ 2: PSNR, èasy enkódování a dal¹í analytické statistiky po skonèení enkódování
 (default)
 .br
  3: PSNR, QP, typ snímku, velikost a ostatní statistiky pro ka¾dý snímek
@@ -6812,7 +6888,7 @@ mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 .
 .TP
 .B To samé, jen s MJPEG kompresí:
-mencoder dvd://2 \-o titel2.avi \-ovc lavc
+mencoder dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
 .
 .TP
@@ -6829,7 +6905,7 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Bugs, authors, standard disclaimer
+.\" Chyby, autoøi, standardní upozornìní
 .\" --------------------------------------------------------------------------
 .
 .SH CHYBY
@@ -6845,7 +6921,7 @@ vysvìtluje jak sestavit pou¾itelné hlá¹ení o chybách.
 MPlayer byl pùvodnì napsán Arpadem Gereoffym.
 Viz soubor AUTHORS pro seznam nìkterých dal¹ích pøispìvatelù.
 .TP
-MPlayer is (C) 2000\-2004 The MPlayer Team
+MPlayer (C) 2000\-2004 The MPlayer Team
 .PP
 Tuto manuálovou stránku pøevá¾nì pí¹í: Gabucino, Jonas Jermann a Diego Biurrun.
 Spravuje ji: Diego Biurrun
