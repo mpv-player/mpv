@@ -182,6 +182,7 @@ stream_t* open_stream(char* filename,int vcd_track,int* file_format);
 //#ifdef USE_DVDREAD
 extern int dvd_title;
 extern int dvd_chapter;
+extern int dvd_last_chapter;
 extern int dvd_angle;
 //#endif
 
@@ -207,6 +208,7 @@ typedef struct {
   pgc_t *cur_pgc;
 //
   int cur_cell;
+  int last_cell;
   int cur_pack;
   int cell_last_pack;
 // Navi:

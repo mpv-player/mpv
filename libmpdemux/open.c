@@ -24,6 +24,7 @@ static URL_t* url;
 
 int dvd_title=0;
 int dvd_chapter=1;
+int dvd_last_chapter=0;
 int dvd_angle=1;
 char* dvd_device=NULL;
 char* cdrom_device=NULL;
@@ -162,7 +163,16 @@ if(dvd_title){
         DVDClose( dvd );
         return NULL;
     }
+    if( dvd_last_chapter>0 ) {
+	if ( dvd_last_chapter<dvd_chapter || dvd_last_chapter>tt_srpt->title[dvd_title].nr_of_ptts ) {
+	    mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD last chapter number: %d\n", dvd_last_chapter);
+	    ifoClose( vmg_file );
+	    DVDClose( dvd );
+	    return NULL;
+	}
+    }
     --dvd_chapter; // remap 1.. -> 0..
+    /* XXX No need to remap dvd_last_chapter */
     /**
      * Make sure the angle number is valid for this title.
      */
@@ -315,6 +325,13 @@ if(dvd_title){
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
     d->packs_left=-1;      // for Navi stuff
     d->angle_seek=0;
+    /* XXX dvd_last_chapter is in the range 1..nr_of_ptts */
+    if ( dvd_last_chapter > 0 && dvd_last_chapter < tt_srpt->title[ttn-1].nr_of_ptts ) {
+	pgn=vts_file->vts_ptt_srpt->title[ttn-1].ptt[dvd_last_chapter].pgn;
+	d->last_cell=d->cur_pgc->program_map[pgn-1] - 1;
+    }
+    else
+	d->last_cell=d->cur_pgc->nr_of_cells;
     
     if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
 	== BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
@@ -450,7 +467,7 @@ static int dvd_next_cell(dvd_priv_t *d){
     
     if( d->cur_pgc->cell_playback[ next_cell ].block_type
                                         == BLOCK_TYPE_ANGLE_BLOCK ) {
-	    while(next_cell<d->cur_pgc->nr_of_cells){
+	    while(next_cell<d->last_cell){
                 if( d->cur_pgc->cell_playback[next_cell].block_mode
                                           == BLOCK_MODE_LAST_CELL ) break;
 		++next_cell;
@@ -459,10 +476,10 @@ static int dvd_next_cell(dvd_priv_t *d){
     mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next2=0x%X  \n",next_cell);
     
     ++next_cell;
-    if(next_cell>=d->cur_pgc->nr_of_cells) return -1; // EOF
+    if(next_cell>=d->last_cell) return -1; // EOF
     if( d->cur_pgc->cell_playback[next_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ){
 	next_cell+=dvd_angle;
-	if(next_cell>=d->cur_pgc->nr_of_cells) return -1; // EOF
+	if(next_cell>=d->last_cell) return -1; // EOF
     }
     mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next3=0x%X  \n",next_cell);
     return next_cell;
