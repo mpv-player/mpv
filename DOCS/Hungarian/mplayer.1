@@ -97,9 +97,10 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-loop\ <num> ]
 .RB [ \-mixer\ <eszköz> ]
 .RB [ \-master\ igen/nem ]
-.RB [ \-tv\ alopciók ]
+.RB [ \-tv\ <alopciók> ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
+.RB [ \-rootwin ]
 .I < - | file | URL | eszköz >
 .PP
 .SH LEÍRÁS
@@ -316,9 +317,12 @@ Ezen opció "igen" állapotba állítása azt eredményezi hogy az MPlayer a
 hangerõszabályzást a mixer MASTER csatornáján végzi, míg a "nem" állapot
 a PCM csatorna használatát eredményezi.
 .IP
-.B \-tv\ alopciók
+.B \-tv\ <alopciók>
 Ez az opció TV-nézõ üzemmódba kapcsolja az MPlayer-t. A további dokumentáció
 a documentation.html file 2.5-ös fejezetében található.
+.TP
+új ablak megnyitása helyett a desktop hátterében (root window) történik a
+lejátszás. Csak az xv és xmga meghajtókkal mûködik.
 .IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
