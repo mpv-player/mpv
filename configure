@@ -154,98 +154,105 @@ case `echo -n` in
 *)      _echo_n=-n _echo_c=;;		# OK, a BSD style echo
 esac
 
+LANGUAGES=`echo help_mp-??.h | sed "s/help_mp-\(..\).h/\1/g"`
 
 for parm in "$@" ; do
-if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
-cat << EOF
+  if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
+    cat << EOF
 
-usage: $0 [options]
+Usage: `basename $0` [OPTIONS]...
 
-params:
-  --cc                   use this C compiler to build MPlayer [gcc]
-  --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
+Configuration:
+  -h, --help             display this help and exit
+
+Installation directories:
   --prefix=DIR           use this prefix for installing mplayer [/usr/local]
   --datadir=DIR          use this prefix for installing machine independent
                          data [/usr/local/share/mplayer] 
-  --language=LANGUAGE    selects manual a language, e.g. de, en, hu, pl, ...
-  --enable-debug[=1-3]   compile debugging information into mplayer [disable]
-  --enable-profile       compile profiling information into mplayer [disable]
-  --enable-largefiles    build with support for files >2^32 bytes long [disable]
-  --enable-mmx           build with mmx support [autodetect]
-  --enable-mmx2          build with mmx2 support (PIII, Athlon) [autodetect]
-  --enable-3dnow         build with 3dnow! support [autodetect]
-  --enable-3dnowex       build with 3dnow-dsp! support (K7) [autodetect]
-  --enable-sse           build with sse support [autodetect]
+
+Optional features:
+  --enable-largefiles    enable support for files >2^32 bytes long [disable]
+  --enable-termcap       use termcap database for key codes [disable]
+  --enable-xmmp          use XMMP audio drivers [disable]
+  --enable-lirc          enable LIRC (remote control) support [disable]
+  --enable-gui           enable GUI [disable]
+  --disable-win32        disable Win32 DLL support [autodetect]
+  --disable-dshow        disable DirectShow support (if no C++ compiler and
+                         libs are available or find the dshow codecs slower 
+                         than the old VfW ones) [autodetect]
+  --enable-vorbis        build with OggVorbis support [autodetect]
+  --disable-iconv        do not use iconv(3) function [autodetect]
+
+Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga           build with DGA support [autodetect]
   --enable-svga          build with SVGAlib support [autodetect]
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
-  --enable-mga           build with mga_vid support
-                         [autodetect, if /dev/mga_vid is available]
-  --enable-xmga          build with mga_vid X Window support [autodetect,
-                         if both /dev/mga_vid and x11 are available]
+  --enable-mga           build with mga_vid support 
+                         (check for /dev/mga_vid) [autodetect]
+  --enable-xmga          build with mga_vid X Window support
+                         (check for X & /dev/mga_vid) [autodetect]
   --enable-xv            build with Xv render support for X 4.x [autodetect]
-  --enable-vm            build with XF86VidMode support for x11 driver
+  --enable-vm            build with XF86VidMode support for x11 driver [disable]
   --enable-xinerama      build with Xinerama support for x11 driver [autodetect]
   --enable-x11           build with X11 render support [autodetect]
-  --enable-fbdev         build with FBDev render support [_not_ autodetected]
-  --enable-mlib          build with MLIB support ( only Solaris )
-  --enable-vorbis        build with OggVorbis support [autodetect]
+  --enable-fbdev         build with FBDev render support [disable]
+  --enable-mlib          build with MLIB support (Solaris only) [disable]
 
-  --enable-termcap       use termcap database for key codes
-  --enable-xmmp          use XMMP audio drivers
-  --enable-lirc          enable LIRC (remote control) support
-  --enable-mad           enable mad audio support
-
-  --disable-iconv        do not use iconv(3) function [autodetect]
+Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-esd          disable esd sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
+  --disable-mad          disable mad audio support [autodetect]
 
-  --disable-gcc-checking    disable gcc version checking (READ THE DISCLAIMER)
-  --disable-kernel-extchk   disables checking for CPU extension support in
-                            your kernel (MMX, SSE, ...) (READ THE DISCLAIMER)
-
-  --disable-select       disable audio select() support ( for example 
-                         required this option ALSA or Vortex2 driver )
-
-  --disable-win32        disable Win32 DLL support
-  --disable-dshow        disable DirectShow support (if you don't have
-                         C++ compiler&libs, or you've found dshow codecs
-                         slower than old VfW ones)
-
-  --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy()
-
-  --with-x11libdir=DIR   X library files are in DIR
-  --with-x11incdir=DIR   X headerss are in DIR
-                         (only needed if autodetection fails)
-  --with-win32libdir=DIR windows codec files
-  --with-csslibdir=DIR   directory contains libcss.so shared library
-  --with-cssincdir=DIR   directory contains libcss header file (css.h)
-                         (--with-css* only needed, if libCSS autodetect fails)
-  --with-sdl-config=PATH specify location of 'sdl-config' if not in your PATH
-                         (example: --with-sdl-config=/usr/sdl/bin/sdl-config)
-  --with-extralibdir=DIR extra library files (png, SDL) are in DIR
-                         (only needed if autodetection fails)
-  --with-extraincdir=DIR extra headers (png, SDL) are in DIR
-                         (only needed if autodetection fails)
-  --with-madlibdir=DIR   libmad library files are in DIR
-  --with-madincdir=DIR   libmad header is in DIR
+Miscellaneous features:
+  --cc                   use this C compiler to build MPlayer [gcc]
+  --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
+  --language=xx          select a language [en]
+                         (Available: $LANGUAGES)
+  --disable-select       disable audio select() support (for example, required
+                         for ALSA or Vortex2 driver) [enable]
   --size-x=SIZE          default screen width
   --size-y=SIZE          default screen height
+
+Advanced options:
+  --enable-mmx           build with mmx support [autodetect]
+  --enable-mmx2          build with mmx2 support (PIII, Athlon) [autodetect]
+  --enable-3dnow         build with 3dnow! support [autodetect]
+  --enable-3dnowex       build with 3dnow-dsp! support (K7) [autodetect]
+  --enable-sse           build with sse support [autodetect]
+  --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy() [enable]
+  --enable-debug[=1-3]   compile debugging information into mplayer [disable]
+  --enable-profile       compile profiling information into mplayer [disable]
+
+Hazardous options:
+  If you ever use one of these options, DO NOT BUGREPORT ANYTHING !
+  --disable-gcc-checking   disable gcc version checking
+  --disable-kernel-extchk  disables checking for CPU extension support in
+                           your kernel (MMX, SSE, ...)
+
+Use these options if autodetection fails:
+  --with-x11libdir=DIR     X library files in DIR
+  --with-x11incdir=DIR     X headers in DIR
+  --with-win32libdir=DIR   W*ndows DLL files in DIR
+  --with-csslibdir=DIR     'libcss.so' (libcss shared lib.) in DIR
+  --with-cssincdir=DIR     'css.h' (libcss header file) in DIR
+  --with-sdl-config=PATH   path to 'sdl-config'
+  --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
+  --with-extraincdir=DIR   extra headers (png, SDL) are in DIR
+  --with-madlibdir=DIR     'libmad.so' (libmad shared lib.) in DIR
+  --with-madincdir=DIR     'mad.h' (libmad header file) in DIR
+
 EOF
-exit 0
-fi
+    exit 0
+  fi
 done # for parm in ...
 
-if test "$CC" ; then
-  _cc=$CC
-else
-  _cc=gcc
-fi
+_cc=gcc
+test "$CC" && _cc="$CC"
 
 _as=auto
 _x11=auto
@@ -302,8 +309,13 @@ done
 
 # LGB: Some inital help
 
-echo "You can get detailed help on configure with: $0 --help"
-echo "Please wait while ./configure discovers your software and hardware environment!"
+cat <<EOF
+
+You can get detailed help on configure with: `basename $0` --help
+
+Please wait while ./configure discovers your software and hardware environment!
+
+EOF
 
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
@@ -422,10 +434,7 @@ fi
 # ---
 
 # Checking CC version...
-# Q: what's with egcs, pgcc? - Atmos
-# A: same as with agcc! These compilers always were introduced as experimental
-# ones. Now gcc-3.0 should introduce all features of these compilers.
-# Since 3.0 is almost released we don't need to support them. - Nick 05 jun 2001
+# gcc-3.0 merges optimizations coming from egcs, pgcc, agcc, ...
 if test "$_skip_cc_check" != yes ; then
 echo $_echo_n "Checking version of $_cc ... $_echo_c"
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
@@ -447,7 +456,7 @@ Important: this is NOT an MPlayer-specific problem, numerous other projects
 (DRI, avifile, etc..) have problems with this shit too. DO NOT USE gcc 2.96 !!!
 If you don't want to downgrade, use the --disable-gcc-checking option to avoid
 this check, but DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* fault!
-Get ready for misterious crashes, no-picture bugs, strange noises... REALLY!
+Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
 EOF
 die "Bad gcc version"
 fi
@@ -569,10 +578,11 @@ _iconvlib=
 
 _select='#define HAVE_AUDIO_SELECT'
 
-_gui=no;
+_gui=no
 
 _alsa=yes
 _esd=yes
+_mad=yes
 
 for i in $pparam; do
 
@@ -1170,6 +1180,14 @@ EOF
 cc_check $_extraincdir $_extralibdir -lesd || _esd=no
 
 
+# check for mad library
+cat > $TMPC << EOF
+#include <mad.h>
+int main(void) { return 0; }
+EOF
+cc_check $_extraincdir $_extralibdir $_madlibdir $_madincdir -lmad || _mad=no
+
+
 # ---
 
 # check for the parameters.
@@ -1293,9 +1311,6 @@ for ac_option do
   --enable-gui)
   	_gui=yes
 	;;
-  --enable-new-gui)
-  	_gui=yes
-	;;
   --enable-streaming)
   	_streaming=yes
 	;;
@@ -1303,10 +1318,10 @@ for ac_option do
   	_divx4linux=yes
 	;;
   --enable-mad)
-	_madlibrary=yes
+	_mad=yes
 	;;
   --disable-mad)
-	_madlibrary=no
+	_mad=no
 	;;
   --disable-css)
 	_css=no
@@ -1641,7 +1656,7 @@ echo "Checking for Sun mediaLib ... $_mlib"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
-echo "Checking for mad support ... $_madlibrary"
+echo "Checking for mad support ... $_mad"
 echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
@@ -1932,9 +1947,6 @@ if test "$_png" = yes ; then
    _libpng='-lpng -lz'
 fi
 
-if test "$_madlibrary" = yes ; then
-    _libmad='-lmad'
-fi
 
 if test "$_vorbis" = yes ; then
    _vorbis='#define HAVE_OGGVORBIS'
@@ -2114,10 +2126,12 @@ else
    _png='#undef HAVE_PNG'
 fi
 
-if test "$_madlibrary" = yes ; then
- _madlibrary='#define USE_LIBMAD'
+if test "$_mad" = yes ; then
+  _madlibrary='#define USE_LIBMAD'
+  _libmad='-lmad'
 else
- _madlibrary='#undef USE_LIBMAD'
+  _madlibrary='#undef USE_LIBMAD'
+  _libmad=
 fi
 
 if test "$_mlib" = yes ; then
@@ -2252,12 +2266,11 @@ else
 fi
 
 if test "$_gui" = yes ; then
-# _gui_def='#define HAVE_GUI'
  _gui_def='#define HAVE_NEW_GUI'
  _gui_lib='-LGui -lgui $(GTKLIB) $(GLIBLIB)'
 else
- _gui_def='#undef HAVE_GUI'
- _gui_lib=''
+ _gui_def='#undef HAVE_NEW_GUI'
+ _gui_lib=
 fi
 
 if test "$_divx4linux" = yes ; then
