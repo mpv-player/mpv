@@ -788,6 +788,8 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 static int pf_set = 0;
 static BYTE PF[64] = {0,};
 
+static void WINAPI expGetSystemInfo(SYSTEM_INFO* si); /* forward declaration */
+
 static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
 {
     WIN_BOOL result;

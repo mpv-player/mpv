@@ -358,7 +358,7 @@ int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
     data[i]= 0;
     break;
   default: 
-	
+    break;
   } 
 
   if( bitoff == 0 ) {

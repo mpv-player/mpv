@@ -12,6 +12,7 @@
 #include "url.h"
 #include "../../interface.h"
 #include "../../events.h"
+#include "../widgets.h"
 
 GtkWidget * URL;
 int         gtkVURLDialogBox = 0;

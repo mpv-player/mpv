@@ -4,6 +4,9 @@
 #include "../postproc/rgb2rgb.h"
 
 // mga_vid drawing functions
+#ifdef VO_XMGA
+static void set_window( int ps );	/* forward declaration to kill warnings */
+#endif
 
 static int mga_next_frame=0;
 
