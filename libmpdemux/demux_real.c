@@ -363,12 +363,14 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 
   while(1){
 
+#if 0
     /* also don't check if no num_of_packets was defined in header */
     if ((priv->current_packet > priv->num_of_packets) &&
 	(priv->num_of_packets != -10)){
 	printf("num_of_packets reached!\n");
 	return 0; /* EOF */
     }
+#endif
 
     demuxer->filepos = stream_tell(demuxer->stream);
     version = stream_read_word(demuxer->stream); /* version */
