@@ -315,9 +315,9 @@ char *seek_to_sec=NULL;
 int seek_to_byte=0;
 int has_audio=1;
 //int has_video=1;
-int audio_format=0; // override
-
-int force_vcodec=-1;
+char *audio_codec=NULL; // override audio codec
+char *video_codec=NULL; // override video codec
+int audio_format=0; // override - This might be removed - atmos ::
 
 #ifdef USE_DIRECTSHOW
 int allow_dshow=1;
@@ -777,6 +777,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
+  // Arpi? why is this extra and not in codec selection? - atmos ::
   if(audio_format) demuxer->audio->type=audio_format; // override audio format
   if(ds_fill_buffer(demuxer->video)){
     printf("Detected MPEG-PS file format!\n");
@@ -1144,8 +1145,8 @@ if(has_audio){
       has_audio=0;
       break;
     }
-    if(audio_format>0 && sh_audio->codec->driver!=audio_format) continue;
-    printf("Found audio codec: [%s] drv:%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
+    printf("%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     //has_audio=sh_audio->codec->driver;
     break;
   }
@@ -1166,17 +1167,10 @@ if(has_audio){
 
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
-if (force_vcodec!=-1) printf("Trying to use forced video codec driver %d ...\n",force_vcodec);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
-    if(force_vcodec!=-1) {
-      sh_video->codec=NULL; /* re-search */
-      printf("Can't find video codec for forced driver %d, defaulting to other drivers.\n",force_vcodec);
-      force_vcodec=-1;
-      continue;      
-    }
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
       printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
       printf("*** If it's still not OK, then read DOCS/CODECS!\n");
@@ -1190,14 +1184,14 @@ while(1){
     #endif
     exit(1);
   }
-  if(sh_video->codec->driver==force_vcodec) break;  /* OK, we find our codec */
-  if(force_vcodec!=-1&&sh_video->codec->driver!=force_vcodec) continue;
+  // is next line needed anymore? - atmos ::
   if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
+  else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
   break;
 }
 //has_video=sh_video->codec->driver;
 
-printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+printf("%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     int ret;
@@ -1317,7 +1311,7 @@ switch(sh_video->codec->driver){
    if(verbose) printf("FFmpeg's libavcodec video codec\n");
     avcodec_init();
     avcodec_register_all();
-    lavc_codec = avcodec_find_decoder_by_name(sh_video->codec->dll);
+    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_video->codec->dll);
     if(!lavc_codec){
 	fprintf(stderr,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
 	exit(1);
