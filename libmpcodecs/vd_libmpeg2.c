@@ -186,8 +186,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
 				       (type==PIC_FLAG_CODING_TYPE_B) ?
 					use_callback : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
-				       info->sequence->picture_width,
-				       info->sequence->picture_height );
+				       info->sequence->width,
+				       info->sequence->height);
 
 	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
