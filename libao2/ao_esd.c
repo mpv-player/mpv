@@ -315,58 +315,24 @@ static int play(void* data, int len, int flags)
 #if	SINGLE_WRITE
     nwritten = write(esd_play_fd, data, len);
 #else
-    for (offs = 0; offs + ESD_BUF_SIZE <= len; offs += ESD_BUF_SIZE) {
+    for (offs = 0, nwritten=0; offs + ESD_BUF_SIZE <= len; offs += ESD_BUF_SIZE) {
 	/*
 	 * note: we're writing to a non-blocking socket here.
 	 * A partial write means, that the socket buffer is full.
 	 */
-	nwritten = write(esd_play_fd, (char*)data + offs, ESD_BUF_SIZE);
-	if (nwritten != ESD_BUF_SIZE) {
-	    if (nwritten < 0 && errno != EAGAIN) {
+	n = write(esd_play_fd, (char*)data + offs, ESD_BUF_SIZE);
+	if ( n < 0 ) {
+	    if ( errno != EAGAIN ) 
 		dprintf("esd play: write failed: %s\n", strerror(errno));
-	    }
 	    break;
-	}
-    }
-    nwritten = offs;
-#endif
-
-    if (nwritten > 0 && nwritten % ESD_BUF_SIZE != 0) {
-
-	/*
-	 * partial write of an audio block of ESD_BUF_SIZE bytes.
-	 *
-	 * Send the remainder of that block as well; this avoids a busy
-	 * polling loop in the esd daemon, which waits for the rest of
-	 * the incomplete block using reads from a non-blocking
-	 * socket. This busy polling loop wastes CPU cycles on the
-	 * esd server machine, and we're trying to avoid that.
-	 * (esd 0.2.28+ has the busy polling read loop, 0.2.22 inserts
-	 * 0 samples which is bad as well)
-	 *
-	 * Let's hope the blocking write does not consume too much time.
-	 *
-	 * (fortunatelly, this piece of code is not used when playing
-	 * sound on the local machine - on solaris at least)
-	 */
-	remainder = ESD_BUF_SIZE - nwritten % ESD_BUF_SIZE;
-	dprintf("esd play: partial audio block written, remainder %d \n",
-		remainder);
-
-	/* blocking write of remaining bytes for the partial audio block */
-	saved_fl = fcntl(esd_play_fd, F_GETFL);
-	fcntl(esd_play_fd, F_SETFL, saved_fl & ~O_NDELAY);
-	n = write(esd_play_fd, (char *)data + nwritten, remainder);
-	fcntl(esd_play_fd, F_SETFL, saved_fl);
-
-	if (n != remainder) {
-	    mp_msg(MSGT_AO, MSGL_ERR,
-		   "AO: [esd] send remainer of audio block failed, %d/%d\n",
-		   n, remainder);
+	} else if ( n != ESD_BUF_SIZE ) {
+	    nwritten += n;
+	    break;
 	} else
 	    nwritten += n;
     }
-
+#endif
+	
     if (nwritten > 0) {
 	if (!esd_play_start.tv_sec)
 	    gettimeofday(&esd_play_start, NULL);
