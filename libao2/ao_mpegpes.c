@@ -97,6 +97,7 @@ static int init(int rate,int channels,int format,int flags){
 	case AFMT_S16_LE:
 	case AFMT_S16_BE:
 	case AFMT_MPEG:
+	case AFMT_AC3:
 	    ao_data.format=format;
 	    break;
 	default:
@@ -178,7 +179,7 @@ static int play(void* data,int len,int flags){
 	unsigned short *s=data;
 //	if(len>2000) len=2000;
 //	printf("ao_mpegpes: len=%d  \n",len);
-	if(ao_data.format==AFMT_S16_LE)
+	if(ao_data.format==AFMT_S16_LE || ao_data.format==AFMT_AC3)
 	    for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
 	send_lpcm_packet(data,len,0xA0,ao_data.pts,freq_id);
     }
