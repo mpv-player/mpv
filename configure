@@ -101,8 +101,8 @@
 
 # Check how echo works in this /bin/sh
 case `echo -n` in
--n)     _echo_n=   _echo_c='\c';;
-*)      _echo_n=-n _echo_c=;;
+-n)     _echo_n=   _echo_c='\c';;	# seems to be a SysV echo
+*)      _echo_n=-n _echo_c=;;		# OK, a BSD style echo
 esac
 
 
@@ -184,6 +184,8 @@ echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
 
 
+# Determine our OS name and CPU architecture
+
 system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
 host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 case "$host_arch" in
@@ -197,7 +199,7 @@ unknown)		    # Linux returns "unknown" for the processor type
     ;;
 esac
 
-# Determine our OS name and OS dependent libs
+# Determine OS dependent libs
 
 if [ "$system_name" = "FreeBSD" ]; then
     _archlibs="-rdynamic -pthread"
