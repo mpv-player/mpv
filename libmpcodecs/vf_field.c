@@ -51,11 +51,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 //===========================================================================//
 
-// FIXME - do we need to free dmpi on uninit?
+static void uninit(struct vf_instance_s* vf)
+{
+	free(vf->priv);
+}
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->uninit=uninit;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
     vf->priv=calloc(1, sizeof(struct vf_priv_s));
     if (args) sscanf(args, "%d", &vf->priv->field);
