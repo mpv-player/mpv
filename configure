@@ -1999,17 +1999,20 @@ if test "$_libavcodec" = yes ; then
    _lavcdep='libavcodec/libavcodec.a'
    _libavcodec='#define USE_LIBAVCODEC'
    _libavcodecso='#undef USE_LIBAVCODEC_SO'
+   _ffpostprocess='#define FF_POSTPROCESS'
 else
    if test "$_libavcodec_so" = yes ; then
       _lavclib='-lffmpeg'
       _lavcdep=''
       _libavcodec='#define USE_LIBAVCODEC'
       _libavcodecso='#define USE_LIBAVCODEC_SO'
+      _ffpostprocess='#define FF_POSTPROCESS'
    else
       _lavclib=''
       _lavcdep=''
       _libavcodec='#undef USE_LIBAVCODEC'
       _libavcodecso='#undef USE_LIBAVCODEC'
+      _ffpostprocess='#undef FF_POSTPROCESS'
    fi
 fi
 
@@ -2653,7 +2656,7 @@ $_cssdef
 #define MPEG12_POSTPROC
 
 /* Define this to enable image postprocessing in libavcodec (requires FAST cpu!) */
-#define FF_POSTPROCESS
+$_ffpostprocess
 
 #define HAVE_ODIVX_POSTPROCESS
 
