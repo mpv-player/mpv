@@ -600,7 +600,7 @@ int guiGetEvent( int type,char * arg )
 	 }
 	break;
    case guiIEvent:
-        printf( "cmd: %d\n",(int)arg );
+        mp_msg( MSGT_GPLAYER,MSGL_V,"cmd: %d\n",(int)arg );
 	switch( (int)arg )
 	 {
           case MP_CMD_QUIT:
