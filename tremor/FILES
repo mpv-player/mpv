@@ -1,0 +1,45 @@
+On the origin of the files:
+==========================
+
+The code is a mixture of Tremor 1.0 code (API, parser, part of math
+code) and December 2004 Trunk fetched from xiph.org's Subversion
+(mostly math).
+
+1.0 Release:
+-----------
+backends.h
+bitwise.c
+block.c
+codebook.c
+codebook.h
+codec_internal.h
+config_types.h
+framing.c
+info.c
+ivorbiscodec.h
+lsp_lookup.h
+mapping0.c
+ogg.h
+os.h
+registry.c
+registry.h
+res012.c
+sharedbook.c
+
+Dec 2004 SVN Trunk:
+------------------
+asm_arm.h
+COPYING
+floor0.c
+floor1.c
+mdct.c
+mdct.h
+mdct_lookup.h
+misc.h
+os_types.h
+window.c
+window.h
+window_lookup.h
+
+Additional MPlayer-specific changes are contained in tremor.diff.
+This file should be updated with each modification of the Tremor code.
