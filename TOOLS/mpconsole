@@ -4,7 +4,7 @@
 # Written by Rich Felker.
 
 trap "tput cnorm ; exit 1" SIGQUIT SIGINT EXIT
-res=`fbset | grep geometry | sed 's/^ *//'`
+res=`PATH="$PATH:/usr/sbin" fbset | grep geometry | sed 's/^ *//'`
 width=`echo "$res" | cut -d' ' -f2`
 height=`echo "$res" | cut -d' ' -f3`
 tput civis
