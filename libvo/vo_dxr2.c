@@ -540,6 +540,7 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
   int p_len = strlen(p), name_len = strlen(name);
   char cache_path[p_len + name_len + 2];
   int ret;
+  int xc,yc,wc,hc;
   FILE* fd;
 
   sprintf(cache_path,"%s/%s",p,name);
@@ -562,12 +563,16 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
 	       &vga->hOffset,
 	       &vga->vOffset,
 	       &vga->ratio,
-	       &olx_cor,
-	       &oly_cor,
-	       &olw_cor,
-	       &olh_cor);
+	       &xc,
+	       &yc,
+	       &wc,
+	       &hc);
 
   fclose(fd);
+  if(ret > 11 && !olx_cor) olx_cor = xc;
+  if(ret > 12 && !oly_cor) oly_cor = yc;
+  if(ret > 13 && !olw_cor) olw_cor = wc;
+  if(ret > 14 && !olh_cor) olh_cor = hc;    
   return ret >= 11 ? 1 : 0;
 }
 
