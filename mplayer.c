@@ -3149,7 +3149,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
        else
 #endif
-      mp_msg(MSGT_CPLAYER, MSGL_V, "Received unknow cmd %s\n",cmd->name);
+      mp_msg(MSGT_CPLAYER, MSGL_V, "Received unknown cmd %s\n",cmd->name);
     }
     }
     mp_cmd_free(cmd);

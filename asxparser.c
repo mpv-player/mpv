@@ -470,7 +470,7 @@ asx_parse_param(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
   }
   val = asx_get_attrib("VALUE",attribs);
   if(m_config_get_option(mconfig,name) == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Found unknow param in asx: %s",name);
+    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Found unknown param in asx: %s",name);
     if(val)
       mp_msg(MSGT_PLAYTREE,MSGL_WARN,"=%s\n",val);
     else

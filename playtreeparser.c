@@ -297,7 +297,7 @@ parse_pls(play_tree_parser_t* p) {
       else
 	entries[num-1].length = strdup(v);
     } else 
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Unknow entry type %s\n",line);
+      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Unknown entry type %s\n",line);
     line = play_tree_parser_get_line(p);
   }
 

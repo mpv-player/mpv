@@ -110,7 +110,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
     else if(strcmp(arg,"hide") == 0)
       priv->current->show = 0;
     else
-      printf("Unknow menu command: '%s'\n",arg);
+      printf("Unknown menu command: '%s'\n",arg);
     return 1;
   }
   case MP_CMD_SET_MENU : {

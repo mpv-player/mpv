@@ -97,7 +97,7 @@ static int menu_parse_config(char* buffer) {
       mcount++;
       memset(&menu_list[mcount],0,sizeof(menu_def_t));
     } else {
-      printf("Unknow menu type %s at line %d\n",element,parser->line);
+      printf("Unknown menu type %s at line %d\n",element,parser->line);
       free(name);
       if(body) free(body);
     }

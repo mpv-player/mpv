@@ -323,7 +323,7 @@ static void tdfx_vid_get_config(tdfx_vid_config_t* cfg) {
     cfg->screen_format = TDFX_VID_FORMAT_BGR32;
     break;
   default:
-    printk(KERN_INFO "tdfx_vid: unknow screen format %d\n",in);
+    printk(KERN_INFO "tdfx_vid: unknown screen format %d\n",in);
     cfg->screen_format = 0;
     break;
   }

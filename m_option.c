@@ -872,7 +872,7 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
 	    if(!strcmp(subopts[i].name,subopt)) break;
 	  }
 	  if(!subopts[i].name) {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Unknow suboption %s\n",name,subopt);
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Unknown suboption %s\n",name,subopt);
 	    return M_OPT_UNKNOW;
 	  }
 	  r = m_option_parse(&subopts[i],subopt,

@@ -181,7 +181,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	      }
 	    } else {
 	      tmp = M_OPT_UNKNOW;
-	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknow option on the command line: %s\n",opt);
+	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown option on the command line: %s\n",opt);
 	    }
 	  }
 	}

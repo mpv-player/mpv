@@ -139,7 +139,7 @@ int mp_input_joystick_read(int fd) {
     } else
       return MP_INPUT_NOTHING;
   } else {
-    printf("Joystick warning unknow event type %d\n",ev.type);
+    printf("Joystick warning unknown event type %d\n",ev.type);
     return MP_INPUT_ERROR;
   }
 

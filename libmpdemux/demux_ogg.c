@@ -600,7 +600,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       if(id >= 0)
 	ogg_stream_pagein(&ogg_d->subs[id].stream,page);
       else
-	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG : Warning found none bos page from unknow stream %d\n",ogg_page_serialno(page));
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG : Warning found none bos page from unknown stream %d\n",ogg_page_serialno(page));
       break;
     }
 
@@ -716,7 +716,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio (old hdr)\n",ogg_d->num_sub);
 	if(verbose>0) print_wave_header(sh_a->wf);
       } else
-	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG stream %d contain an old header but the header type is unknow\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG stream %d contains an old header but the header type is unknown\n",ogg_d->num_sub);
 
         // Check new header
     } else if ( (*pack.packet & PACKET_TYPE_BITS ) == PACKET_TYPE_HEADER && 
@@ -774,12 +774,12 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
           n_text++;
           demux_ogg_init_sub();
-	//// Unknow header type
+	//// Unknown header type
       } else
-	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d has a header marker but is of an unknow type\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d has a header marker but is of an unknown type\n",ogg_d->num_sub);
       /// Unknow (invalid ?) header
     } else
-      mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d is of an unknow type\n",ogg_d->num_sub);
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d is of an unknown type\n",ogg_d->num_sub);
 
     if(sh_a || sh_v) {
       demux_stream_t* ds = NULL;
@@ -897,7 +897,7 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
 	  ogg_d->last_size = pa;
 	  /// Find the page's logical stream
 	  if( (id = demux_ogg_get_page_stream(ogg_d,&os)) < 0) {
-	    mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG demuxer error : we met an unknow stream\n");
+	    mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG demuxer error : we met an unknown stream\n");
 	    return 0;
 	  }
 	  /// Take the page
