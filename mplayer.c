@@ -49,13 +49,6 @@ void* mDisplay; // Display* mDisplay;
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
 
-//#include "loader.h"
-//#include "wine/avifmt.h"
-
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
 #include "codec-cfg.h"
 
 #include "dvdauth.h"

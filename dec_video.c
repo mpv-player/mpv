@@ -22,10 +22,6 @@ extern int frameratecode2framerate[16];
 #include "demuxer.h"
 #include "parse_es.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
 #include "codec-cfg.h"
 #include "stheader.h"
 
