@@ -253,7 +253,7 @@ zooming), thus fullscreen is nice and very fast.
   otherwise no mga_vid support will be built. Also check out the
   <link linkend="tvout-mga-g400">Matrox TV-out</link> section.  If you
   <emphasis role="bold"> If you don't use Linux</emphasis>, your only
-  possibility is the VIDIX driver: read <link linkend="vidix">VIDIX</link> section.
+  possibility is the VIDIX driver: read the <link linkend="vidix">VIDIX</link> section.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">3Dfx Voodoo3/Banshee cards</emphasis>: please see
@@ -279,10 +279,10 @@ zooming), thus fullscreen is nice and very fast.
   support.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">nVidia cards</emphasis>: very bad choice for video playing.
+  <emphasis role="bold">nVidia cards</emphasis>: may or may not be good choice for video playing.
   If you do not have a GeForce2 (or newer) card, it's not likely to work without bugs.
-  <emphasis role="bold">the built-in nVidia driver in XFree86 doesn't contain
-  support for hardware YUV acceleration for all nVidia cards.</emphasis> You have
+  <emphasis role="bold">the built-in nVidia driver in XFree86 does not support
+  hardware YUV acceleration on all nVidia cards.</emphasis> You have
   to download nVidia's closed-source drivers from nVidia.com. See the <link
   linkend="nvidia">nVidia Xv driver</link> section for details. Please also check
   the <link linkend="tvout-nvidia">nVidia TV-out section</link> if you wish to
@@ -302,10 +302,10 @@ zooming), thus fullscreen is nice and very fast.
     </simpara></listitem>
   <listitem><simpara>
     If it doesn't, then your card's video features aren't supported under
-    your operating system :( If it does hardware scaling under Windows, it
-    doesn't mean it will do the same under Linux or other OS, it depends on
-    the drivers. Most manufacturers don't make Linux drivers nor release chip
-    specs - so you're unlucky if using their cards.
+    your operating system :( If hardware scaling works under Windows, it
+    doesn't mean it will work under Linux or other operating system, it depends on
+    the drivers. Most manufacturers neither make Linux drivers nor release
+    specifications of their chips - so you are unlucky if using their cards.
     See <xref linkend="non-yuv-cards"/>.
     </simpara></listitem>
   </itemizedlist>
@@ -320,7 +320,7 @@ zooming), thus fullscreen is nice and very fast.
 
 <para>
 Fullscreen playing can be achieved by either enabling <emphasis role="bold">
-software scaling</emphasis> (use the <option>-zoom</option> or <option>-vop</option>,
+software scaling</emphasis> (use the <option>-zoom</option> or <option>-vf</option> option,
 but i warn you: this is slow), or switching to a smaller video mode, for example
 352x288. If you don't have YUV acceleration, this latter method is recommended.
 Video mode switching can be enabled by using the <option>-vm</option> option and
@@ -384,9 +384,9 @@ it works with the following drivers:
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">Soundblaster Live!</emphasis>: with this card you can use
-  4 or 6 (5.1) channels AC3 decoding instead of 2. Read the
+  4 or 6 (<emphasis role="bold">5.1</emphasis>) channels AC3 decoding instead of 2. Read the
   <link linkend="swac3">Software AC3 decoding</link> section. For hardware AC3
-  passthrough you <emphasis role="bold">must</emphasis> use ALSA 0.9 oss emulation!
+  passthrough you <emphasis role="bold">must</emphasis> use ALSA 0.9 with OSS emulation!
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">C-Media with SP/DIF out</emphasis>: hardware AC3
@@ -709,7 +709,7 @@ There are many ways to get it:
   </thead>
   <tbody>
   <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/"></ulink>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
     </entry><entry>
     ISO fonts
     </entry></row>
@@ -719,7 +719,7 @@ There are many ways to get it:
     various fonts by users
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
     </entry><entry>
     Korean fonts and RAW plugin
     </entry></row>

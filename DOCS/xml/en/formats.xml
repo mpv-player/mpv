@@ -55,8 +55,8 @@ MPEG files come in different guises:
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
   It is the same as MPG, plus the capability to contain subtitles or non-MPEG
   (AC3) audio. It contains encoded MPEG2 video and usually AC3 audio, but DTS,
-  MP2 and uncompressed LPCM are allowed, too.  Read the
-  <link linkend="dvd">DVD section</link>!
+  MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
+  <link linkend="dvd">DVD section</link></emphasis>!
   </simpara></listitem>
 </itemizedlist>
 
@@ -86,9 +86,9 @@ Designed by Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emph
 is a widespread multipurpose format currently used mostly for DivX and DivX4
 video. It has many known drawbacks and shortcomings (for example in streaming). It
 supports one video stream and 0 to 99 audio streams and can be as big as
-2GB. There exists an extension allowing bigger files called OpenDML. Microsoft
-currently strongly discourages its use and encourages ASF/WMV. Not that
-anybody cares.
+2GB, but there exists an extension allowing bigger files called
+<emphasis role="bold">OpenDML</emphasis>. Microsoft currently strongly
+discourages its use and encourages ASF/WMV. Not that anybody cares.
 </para>
 
 <para>
@@ -184,7 +184,7 @@ They usually have a <filename>.QT</filename> or <filename>.MOV</filename>
 extension. Note that since the MPEG4 group chose QuickTime as the recommended
 file format for MPEG4, their MOV files come with a <filename>.MPG</filename> or
 <filename>.MP4</filename> extension (Interestingly the video and audio
-streams in these files are real MPG and AAC files. Yo can even extract them with the
+streams in these files are real MPG and AAC files. You can even extract them with the
 <option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
 </para>
 

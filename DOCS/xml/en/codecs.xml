@@ -78,7 +78,7 @@ and help us add support for it.
 <title>DivX4/DivX5</title>
 
 <para>
-This section contains information about the DivX4 codec of
+This section contains information about the DivX4 and DivX5 codecs of
 <ulink url="http://www.projectmayo.com">Project Mayo</ulink>.
 Their first available alpha version was OpenDivX 4.0 alpha 47 and 48.
 Support for this was included in <application>MPlayer</application> in the
@@ -277,8 +277,12 @@ for decoding. Follow the instructions to enable them:
 <step><para>
   Download the codecs you wish to use from the
   <ulink url="http://xanim.va.pubnix.com">XAnim site</ulink>.
-  The 3ivx codec is not there, but at the
+  The <emphasis role="bold">3ivx</emphasis> codec is not there, but at the
   <ulink url="http://www.3ivx.com">3ivx site</ulink>.
+  </para></step>
+<step><para>
+  <emphasis role="bold">OR</emphasis> download the codecs pack from our
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</ulink>
   </para></step>
 <step><para>
   Use the <option>--with-xanimlibdir</option> option to tell

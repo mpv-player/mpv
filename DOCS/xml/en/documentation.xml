@@ -29,7 +29,7 @@
 <bookinfo id="toc">
 <title>MPlayer - The Movie Player for LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
-<date>July 4, 2002</date>
+<date>March 24, 2003</date>
 <copyright>
   <year>2000</year>
   <year>2001</year>
@@ -74,16 +74,18 @@ The main rule of this documentation: if it's not documented, it
 <emphasis>does not exist.</emphasis> If I don't say you encode audio from
 TV tuner, you can't.  A healthy quantity of combining ability is welcomed,
 though.  Good luck. You'll need it :) And for another good advice, let me
-quote Chris Phillips from the mplayer-users mailing list:
+quote Chris Phillips from the
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+mailing list:
 </para>
 
 <blockquote><para>
 I said a while ago that there is such a difference between a newbie and a
 dumbass. No matter what you actually know about a system (linux, cars,
 girls :D) you should ALWAYS be able to take a step back and be objective,
-otherwise, you're just dumb IMHO. A girl i live with assumed the vacuum
+otherwise, you're just dumb IMHO. A girl I live with assumed the vacuum
 cleaner was broken because it didn't suck things up. never thought to
-change the bag, becasue she'd never done it before... now that's just
+change the bag, because she'd never done it before... now that's just
 stupid, not a case of simply not knowing what to do... Simply not being
 that familiar with your surroundings is no excuse for a) laziness and b)
 ignorance. So many people seem to see the word "error" and then stop...
@@ -110,11 +112,11 @@ drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and
 Radeon, Mach64, Permedia3) too! Most of them supports software or hardware
 scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
-hardware MPEG decoder boards, such as the DVB and DXR3/Hollywood+ !  And
-what about the nice big antialiased shaded subtitles
-(<emphasis role="bold">10 supported types</emphasis>) with European/ISO 8859-1,2
-(Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen display
-(OSD)?
+hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
+<link linkend="dxr3">DXR3/Hollywood+</link>. And what about the nice big
+antialiased shaded subtitles (<emphasis role="bold">10 supported types</emphasis>)
+with European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic, Korean
+fonts, and the onscreen display (OSD)?
 </para>
 
 <para>
@@ -132,8 +134,9 @@ but the speed is also amazing.
 encoder, designed to encode MPlayer-playable movies
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 to other MPlayer-playable formats (see below). It can encode with various codecs,
-like DivX4 (1 or 2 passes), libavcodec, <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
-audio. Also has powerful plugin system for video manipulation.
+like <emphasis role="bold">DivX4</emphasis> (1 or 2 passes), libavcodec,
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> audio. Also has powerful plugin
+system for video manipulation.
 </para>
 
 

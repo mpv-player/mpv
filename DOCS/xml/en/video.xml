@@ -731,7 +731,7 @@ Maybe automatic aspect correction has to be shut off:
 </para>
 
 <note><para>
-according to my experience the best image quality on
+According to my experience the best image quality on
 EGA screens can be achieved by decreasing the brightness a bit:
 <option>-vf eq=-20:0</option>. I also needed to lower the audio
 samplerate on my box, because the sound was broken on 44kHz:
@@ -739,7 +739,7 @@ samplerate on my box, because the sound was broken on 44kHz:
 </para></note>
 
 <para>
-ou can turn on OSD and subtitles only with the <systemitem>expand</systemitem>
+You can turn on OSD and subtitles only with the <systemitem>expand</systemitem>
 filter, see the man page for exact parameters.
 </para>
 </sect4>
@@ -1482,7 +1482,7 @@ informations.
 </para>
 
 <para>This video output driver will enable CRTC2 (on the second head) on the
-Matrox G400/G450/G500 card, displaying video <emphasis role="bold">independently</emphasis>
+Matrox G400/G450/G550 card, displaying video <emphasis role="bold">independently</emphasis>
 of the first head.
 </para>
 
@@ -1594,8 +1594,8 @@ while keeping the right aspect ratio), use the new dvbscale filter:
 </para>
 
 <para><screen>
-for  3:4 TV: -vf expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV: -vf expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+for 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>

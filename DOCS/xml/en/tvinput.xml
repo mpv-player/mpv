@@ -175,7 +175,7 @@ LAME codec. This setup is suitable for capturing movies.
      mencoder -tv on:driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vf pp=lb,crop=720:544:24:16 -o output.avi
+     -vf crop=720:544:24:16,pp=lb -o output.avi
 </screen>
 </para>
 </informalexample>
@@ -191,7 +191,7 @@ capturing long TV series, where the video quality isn't so important.
      mencoder -tv on:driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi 
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi
 </screen>
 It's also possible to specify smaller image dimensions in the <option>-tv</option>
 option and omit the software scaling but this approach uses the maximum available
