@@ -22,10 +22,9 @@
 #include "video_out_internal.h"
 
 #include "yuv2rgb.h"
+extern void rgb15to16_mmx(char *s0, char *d0, int count);
 
 LIBVO_EXTERN(fbdev)
-
-//#include "yuv2rgb.h"
 
 static vo_info_t vo_info = {
 	"Framebuffer Device",
@@ -43,6 +42,7 @@ static size_t fb_size;
 static uint8_t *frame_buffer;
 static int fb_pixel_size;
 static int fb_bpp;
+static int fb_bpp_on_screen;
 struct fb_fix_screeninfo fb_fix_info;
 struct fb_var_screeninfo fb_var_info;
 static uint32_t fb_xres_virtual;
@@ -63,7 +63,7 @@ static int fb_works = 0;
 /*
  * Note: this function is completely cut'n'pasted from
  * Chris Lawrence's code.
- * (modified to fit in my code :) )
+ * (modified a bit to fit in my code...)
  */
 struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
 {
@@ -135,58 +135,7 @@ static int fb_init(void)
 {
 	int fd;
 	struct fb_cmap *cmap;
-#if 0
-	int vt;
-	char vt_name[11];
-	struct vt_stat vt_state;
-	struct vt_mode vt_mode;
 
-	/* get a free vt */
-	if ((fd = open("/dev/tty0", O_WRONLY, 0)) == -1) {
-		printf("Can't open /dev/tty0: %s\n", strerror(errno));
-		return 1;
-	}
-	if (ioctl(fd, VT_OPENQRY, &vt) < 0 || vt == -1) {
-		printf("Can't open a free VT: %s\n", strerror(errno));
-		return 1;
-	}
-	close(fd);
-
-	/* open the vt */
-	snprintf(vt_name, 10, "/dev/tty%d", vt);
-	if ((vt_fd = open(vt_name, O_RDWR | O_NONBLOCK, 0)) == -1) {
-		printf("Can't open %s: %s\n", vt_name, strerror(errno));
-		return 1;
-	}
-
-	/* save the current vtnum */
-	if (!ioctl(vt_fd, VT_GETSTATE, &vt_state))
-		vt_active = vt_state.v_active;
-
-	/* detach the controlling tty */
-	if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
-		ioctl(fd, TIOCNOTTY, 0);
-		close(fd);
-	}
-
-	/* switch to the new vt */
-	if (ioctl(vt_fd, VT_ACTIVATE, vt_active))
-		printf("ioctl VT_ACTIVATE: %s\n", strerror(errno));
-	if (ioctl(vt_fd, VT_WAITACTIVE, vt_active))
-		printf("ioctl VT_WAITACTIVE: %s\n", strerror(errno));
-	if (ioctl(vt_fd, VT_GETMODE, &vt_mode) < 0) {
-		printf("ioctl VT_GETMODE: %s\n", strerror(errno));
-		return 1;
-	}
-	signal(SIGUSR1, vt_request);
-	vt_mode.mode = VT_PROCESS;
-	vt_mode.relsig = SIGUSR1;
-	vt_mode.acqsig = SIGUSR1;
-	if (ioctl(vt_fd, VT_SETMODE, &vt_mode) < 0) {
-		printf("ioctl VT_SETMODE: %s\n", strerror(errno));
-		return 1;
-	}
-#endif
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
 		fb_dev_name = "/dev/fb0";
 	printf("fb_init: using %s\n", fb_dev_name);
@@ -262,11 +211,16 @@ static int fb_init(void)
 		free(cmap->green);
 		free(cmap->blue);
 		free(cmap);
+	} else if (fb_fix_info.visual != FB_VISUAL_TRUECOLOR) {
+		printf("fb_init: visual: %d not yet supported\n",
+				fb_fix_info.visual);
+		goto err_out_fd;
 	}
 
 	fb_pixel_size = fb_var_info.bits_per_pixel / 8;
 	fb_bpp = fb_var_info.red.length + fb_var_info.green.length +
 		fb_var_info.blue.length;
+	fb_bpp_on_screen = (fb_pixel_size == 4) ? 32 : fb_bpp;
 	screen_width = fb_fix_info.line_length;
 	fb_size = fb_fix_info.smem_len;
 	if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
@@ -278,6 +232,7 @@ static int fb_init(void)
 	printf("fb_init: framebuffer @ %p\n", frame_buffer);
 	printf("fb_init: framebuffer size: %d bytes\n", fb_size);
 	printf("fb_init: bpp: %d\n", fb_bpp);
+	printf("fb_init: bpp on screen: %d\n", fb_bpp_on_screen);
 	printf("fb_init: pixel size: %d\n", fb_pixel_size);
 	printf("fb_init: pixel per line: %d\n", screen_width / fb_pixel_size);
 	printf("fb_init: visual: %d\n", fb_fix_info.visual);
@@ -321,7 +276,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 	if (format == IMGFMT_YV12)
 //		yuv2rgb_init(fb_pixel_size * 8, MODE_RGB);
-		yuv2rgb_init((fb_pixel_size == 4) ? 32 : fb_bpp, MODE_RGB);
+		yuv2rgb_init(fb_bpp_on_screen, MODE_RGB);
 	return 0;
 }
 
@@ -333,13 +288,26 @@ static uint32_t query_format(uint32_t format)
 	if (!fb_works)
 		return 0;
 
+	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
+		int bpp = format & 0xff;
+		if (bpp == fb_bpp_on_screen)
+			return 1;
+		else if (bpp == 15 && fb_bpp_on_screen == 16)
+			return 1;
+		else if (bpp == 24 && fb_bpp_on_screen == 32)
+			return 1;
+	}
+	if (format == IMGFMT_YV12)
+		return 1;
+	return 0;
+/*
 	printf("vo_fbdev: query_format(%#x(%.4s)): ", format, &format);
-//	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
-//		goto not_supported;
+	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
+		goto not_supported;
 	switch (format) {
 		case IMGFMT_YV12:
 			goto supported;
-/*
+
 		case IMGFMT_RGB32:
 			if (fb_bpp == 32)
 				goto supported;
@@ -356,7 +324,7 @@ static uint32_t query_format(uint32_t format)
 			if (fb_bpp == 15)
 				goto supported;
 			break;
-*/
+
 		case IMGFMT_BGR|32:
 			if (fb_bpp == 24 && fb_pixel_size == 4)
 				goto supported;
@@ -380,6 +348,7 @@ not_supported:
 supported:
 	printf("supported\n");
 	return 1;
+*/
 }
 
 static const vo_info_t *get_info(void)
@@ -393,21 +362,21 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	int x, y;
 	uint8_t *dst;
 
-	if (pixel_format == IMGFMT_YV12) {
-		for (y = 0; y < h; y++){
-			dst = next_frame + (in_width * (y0 + y) + x0) * fb_pixel_size;
-			for (x = 0; x < w; x++) {
-				if (srca[x]) {
-					dst[0]=((dst[0]*srca[x])>>8)+src[x];
-					dst[1]=((dst[1]*srca[x])>>8)+src[x];
-					dst[2]=((dst[2]*srca[x])>>8)+src[x];
-				}
-				dst += fb_pixel_size;
+//	if (pixel_format == IMGFMT_YV12) {
+	for (y = 0; y < h; y++){
+		dst = next_frame + (in_width * (y0 + y) + x0) * fb_pixel_size;
+		for (x = 0; x < w; x++) {
+			if (srca[x]) {
+				dst[0]=((dst[0]*srca[x])>>8)+src[x];
+				dst[1]=((dst[1]*srca[x])>>8)+src[x];
+				dst[2]=((dst[2]*srca[x])>>8)+src[x];
 			}
-			src += stride;
-			srca += stride;
+			dst += fb_pixel_size;
 		}
+		src += stride;
+		srca += stride;
 	}
+//	}
 }
 
 static uint32_t draw_frame(uint8_t *src[])
@@ -416,10 +385,37 @@ static uint32_t draw_frame(uint8_t *src[])
 		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
 				in_height, in_width * fb_pixel_size,
 				in_width, in_width / 2);
-	} else if ((pixel_format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
-		memcpy(next_frame, src[0], in_width * in_height * fb_pixel_size);
-	} else if ((pixel_format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
+	} else {
+		int sbpp = ((pixel_format & 0xff) + 7) / 8;
+		char *d = next_frame;
+		char *s = src[0];
+		if (sbpp == fb_pixel_size) {
+			if (fb_bpp == 16 && pixel_format == (IMGFMT_BGR|15)) {
+#ifdef HAVE_MMX
+				rgb15to16_mmx(s, d, 2 * in_width * in_height);
+#else
+				unsigned short *s1 = (unsigned short *) s;
+				unsigned short *d1 = (unsigned short *) d;
+				unsigned short *e = s1 + in_width * in_height;
+				while (s1<e) {
+					register x = *(s1++);
+					*(d1++) = (x&0x001f)|((x&0x7fe0)<<1);
+				}
+#endif
+			} else
+				memcpy(d, s, sbpp * in_width * in_height);
+		}
 	}
+/*
+	} else if ((pixel_format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
+		if (pixel_format == fb_bpp_on_screen)
+			memcpy(next_frame, src[0],
+					in_width * in_height * fb_pixel_size);
+		else {
+			
+		}
+	}
+*/
 	return 0;
 }
 
