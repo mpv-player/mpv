@@ -19,4 +19,24 @@ extern void * mem2agpcpy(void * to, const void * from, size_t len);
 #else /* USE_FASTMEMCPY */
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
 #endif
+
+static inline void * mem2agpcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
+{
+	int i;
+	void *retval=dst;
+
+	if(dstStride == srcStride) mem2agpcpy(dst, src, srcStride*height);
+	else
+	{
+		for(i=0; i<height; i++)
+		{
+			mem2agpcpy(dst, src, bytesPerLine);
+			src+= srcStride;
+			dst+= dstStride;
+		}
+	}
+
+	return retval;
+}
+
 #endif
