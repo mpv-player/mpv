@@ -61,9 +61,9 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
 
     next=p, i=0;
     while ((next =sub_readtext (next, &(current->text[i])))) {
-        if (current->text[i]==ERR || current->text[i]==ERR) {return ERR;}
+        if (current->text[i]==ERR) {return ERR;}
 	i++;
-	if (i>SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");return ERR;}
+	if (i>SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
     }
     current->lines=i+1;
 
@@ -92,6 +92,7 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
 	    current->text[current->lines-1]=(char *)malloc (len+1);
 	    if (!current->text[current->lines-1]) return ERR;
 	    strncpy (current->text[current->lines-1], q, len);
+	    current->text[current->lines-1][len]='\0';
 	    if (!*p || *p=='\r' || *p=='\n') break;
 	    while (*p++!=']');
 	}
@@ -120,7 +121,7 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
 	    if (len) {
 		current->text[i]=(char *)malloc (len+1);
 		if (!current->text[i]) return ERR;
-		strncpy (current->text[i], line, len);
+		strncpy (current->text[i], line, len); current->text[i][len]='\0';
 		i++;
 	    } else {
 		break;
