@@ -25,7 +25,7 @@
    w filter taps
    x input signal must be a circular buffer which is indexed backwards 
 */
-inline _ftype_t fir(register unsigned int n, _ftype_t* w, _ftype_t* x)
+inline _ftype_t af_filter_fir(register unsigned int n, _ftype_t* w, _ftype_t* x)
 {
   register _ftype_t y; // Output
   y = 0.0; 
@@ -46,13 +46,13 @@ inline _ftype_t fir(register unsigned int n, _ftype_t* w, _ftype_t* x)
    y  output buffer
    s  output buffer stride
 */
-inline _ftype_t* pfir(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** w, _ftype_t** x, _ftype_t* y, unsigned int s)
+inline _ftype_t* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** w, _ftype_t** x, _ftype_t* y, unsigned int s)
 {
   register _ftype_t* xt = *x + xi;
   register _ftype_t* wt = *w;
   register int    nt = 2*n;
   while(d-- > 0){
-    *y = fir(n,wt,xt);
+    *y = af_filter_fir(n,wt,xt);
     wt+=n;
     xt+=nt;
     y+=s;
@@ -65,7 +65,7 @@ inline _ftype_t* pfir(unsigned int n, unsigned int d, unsigned int xi, _ftype_t*
    at the new samples, xi current index in xq and n the length of the
    filter. xq must be n*2 by k big, s is the index for in.
 */
-inline int updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** xq, _ftype_t* in, unsigned int s)  
+inline int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** xq, _ftype_t* in, unsigned int s)  
 {
   register _ftype_t* txq = *xq + xi;
   register int nt = n*2;
@@ -95,7 +95,7 @@ inline int updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** 
    
    returns 0 if OK, -1 if fail
 */
-int design_fir(unsigned int n, _ftype_t* w, _ftype_t* fc, unsigned int flags, _ftype_t opt)
+int af_filter_design_fir(unsigned int n, _ftype_t* w, _ftype_t* fc, unsigned int flags, _ftype_t opt)
 {
   unsigned int	o   = n & 1;          	// Indicator for odd filter length
   unsigned int	end = ((n + 1) >> 1) - o;       // Loop end
@@ -233,7 +233,7 @@ int design_fir(unsigned int n, _ftype_t* w, _ftype_t* fc, unsigned int flags, _f
 
    returns 0 if OK, -1 if fail
 */
-int design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t** pw, _ftype_t g, unsigned int flags)
+int af_filter_design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t** pw, _ftype_t g, unsigned int flags)
 {
   int l = (int)n/k;	// Length of individual FIR filters
   int i;     	// Counters
@@ -274,7 +274,7 @@ int design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t** pw, _fty
    Note that a0 is assumed to be 1, so there is no wrapping
    of it.  
 */
-void prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
+void af_filter_prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
 {
   _ftype_t wp;
   wp = 2.0 * fs * tan(M_PI * fc / fs);
@@ -310,7 +310,7 @@ void prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
    Return: On return, set coef z-domain coefficients and k to the gain
    required to maintain overall gain = 1.0;
 */
-void bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef)
+void af_filter_bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef)
 {
   _ftype_t ad, bd;
 
@@ -410,7 +410,7 @@ void bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef
 
    return -1 if fail 0 if success.
 */
-int szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t fs, _ftype_t *k, _ftype_t *coef)
+int af_filter_szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t fs, _ftype_t *k, _ftype_t *coef)
 {
   _ftype_t at[3];
   _ftype_t bt[3];
@@ -424,10 +424,10 @@ int szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t fs, _fty
   bt[1]/=Q;
 
   /* Calculate a and b and overwrite the original values */
-  prewarp(at, fc, fs);
-  prewarp(bt, fc, fs);
+  af_filter_prewarp(at, fc, fs);
+  af_filter_prewarp(bt, fc, fs);
   /* Execute bilinear transform */
-  bilinear(at, bt, k, fs, coef);
+  af_filter_bilinear(at, bt, k, fs, coef);
 
   return 0;
 }

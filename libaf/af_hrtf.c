@@ -49,10 +49,10 @@ static float conv(const int nx, const int nk, float *sx, float *sk,
     int k = offset >= 0 ? offset % nx : nx + (offset % nx);
 
     if(nk + k <= nx)
-	return fir(nk, sx + k, sk);
+	return af_filter_fir(nk, sx + k, sk);
     else
-	return fir(nk + k - nx, sx, sk + nx - k) +
-	    fir(nx - k, sx + k, sk);
+	return af_filter_fir(nk + k - nx, sx, sk + nx - k) +
+	    af_filter_fir(nx - k, sx + k, sk);
 }
 
 /* Detect when the impulse response starts (significantly) */
@@ -392,7 +392,7 @@ static int open(af_instance_t* af)
 	return AF_ERROR;
     }
     fc = 2.0 * BASSFILTFREQ / (float)af->data->rate;
-    if(design_fir(s->basslen, s->ba_ir, &fc, LP | KAISER, 4 * M_PI) ==
+    if(af_filter_design_fir(s->basslen, s->ba_ir, &fc, LP | KAISER, 4 * M_PI) ==
        -1) {
 	af_msg(AF_MSG_ERROR, "[hrtf] Unable to design low-pass "
 	       "filter.\n");

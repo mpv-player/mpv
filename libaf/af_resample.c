@@ -245,7 +245,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
       // Design prototype filter type using Kaiser window with beta = 10
       if(NULL == w || NULL == s->w || 
-	 -1 == design_fir(s->up*L, w, &fc, LP|KAISER , 10.0)){
+	 -1 == af_filter_design_fir(s->up*L, w, &fc, LP|KAISER , 10.0)){
 	af_msg(AF_MSG_ERROR,"[resample] Unable to design prototype filter.\n");
 	return AF_ERROR;
       }
