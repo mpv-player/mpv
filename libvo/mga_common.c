@@ -1,4 +1,6 @@
 
+//#include "fastmemcpy.h"
+
 // mga_vid drawing functions
 
 static int mga_next_frame=0;
