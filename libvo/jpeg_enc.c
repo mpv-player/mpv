@@ -46,15 +46,15 @@ extern int avcodec_inited;
 /* zr_mjpeg_encode_mb needs access to these tables for the black & white 
  * option */
 typedef struct MJpegContext {
-    UINT8 huff_size_dc_luminance[12];
-    UINT16 huff_code_dc_luminance[12];
-    UINT8 huff_size_dc_chrominance[12];
-    UINT16 huff_code_dc_chrominance[12];
+    uint8_t huff_size_dc_luminance[12];
+    uint16_t huff_code_dc_luminance[12];
+    uint8_t huff_size_dc_chrominance[12];
+    uint16_t huff_code_dc_chrominance[12];
 
-    UINT8 huff_size_ac_luminance[256];
-    UINT16 huff_code_ac_luminance[256];
-    UINT8 huff_size_ac_chrominance[256];
-    UINT16 huff_code_ac_chrominance[256];
+    uint8_t huff_size_ac_luminance[256];
+    uint16_t huff_code_ac_luminance[256];
+    uint8_t huff_size_ac_chrominance[256];
+    uint16_t huff_code_ac_chrominance[256];
 } MJpegContext;
 
 
@@ -75,7 +75,7 @@ static const unsigned short aanscales[64] = {
 
 static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
 		uint16_t (*qmat16)[64], uint16_t (*qmat16_bias)[64],
-		const UINT16 *quant_matrix, int bias)
+		const uint16_t *quant_matrix, int bias)
 {
     int qscale;
 
@@ -125,7 +125,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 }
 
 static inline void encode_dc(MpegEncContext *s, int val, 
-                             UINT8 *huff_size, UINT16 *huff_code)
+                             uint8_t *huff_size, uint16_t *huff_code)
 {
     int mant, nbits;
 
@@ -156,8 +156,8 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
     int mant, nbits, code, i, j;
     int component, dc, run, last_index, val;
     MJpegContext *m = s->mjpeg_ctx;
-    UINT8 *huff_size_ac;
-    UINT16 *huff_code_ac;
+    uint8_t *huff_size_ac;
+    uint16_t *huff_code_ac;
     
     /* DC coef */
     component = (n <= 3 ? 0 : n - 4 + 1);
