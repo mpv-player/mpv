@@ -1,3 +1,4 @@
+// synced with help_mp-en.h 20030404
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -52,7 +53,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c:
 
 #define MSGTR_Exiting "\n正在退出... (%s)\n"
 #define MSGTR_Exit_quit "退出"
@@ -194,7 +195,7 @@ static char help_text[]=
 " cbr           常比特率\n"\
 "               会在后继ABR预置模式中强制使用CBR模式\n"\
 "\n"\
-" br=<0-1024>   以kBit为单位指定比特率 (仅用于CBR和ABR)\n"\
+" br=<0-1024>   以kBit为单位设置比特率 (仅用于CBR和ABR)\n"\
 "\n"\
 " q=<0-9>       编码质量 (0-最高, 9-最低) (仅用于VBR)\n"\
 "\n"\
@@ -398,7 +399,7 @@ static char help_text[]=
 #define MSGTR_NEEDLAVCFAME "抱歉, 你不能用你的DXR3/H+设备不经过重新编码而播放非mpeg的文件.\n请在DXR3/H+配置中开启lavc或者fame."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] skin配置文件的 %d: %s行出错" 
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] skin配置文件的 %d: %s行出错"
 #define MSGTR_SKIN_WARNING1 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到\"section\" ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到 \"subsection\" ( %s) "
 #define MSGTR_SKIN_WARNING3 "[skin] 警告, 在skin配置文件的 %d行: 这个widget不支持这个subsection(%s)"
@@ -578,6 +579,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD缩放:"
 #define MSGTR_PREFERENCES_Cache "打开/关闭缓存"
 #define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
+#define MSGTR_PREFERENCES_SaveWinPos "保存窗口位置"
 #define MSGTR_PREFERENCES_CacheSize "缓存大小: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "停用XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "使用播放条"
@@ -596,6 +598,6 @@ static char help_text[]=
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
 #define MSGTR_MSGBOX_LABEL_Error "错误 ..."
-#define MSGTR_MSGBOX_LABEL_Warning "警告 ..." 
+#define MSGTR_MSGBOX_LABEL_Warning "警告 ..."
 
 #endif
