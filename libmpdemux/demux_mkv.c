@@ -897,6 +897,8 @@ demux_mkv_read_trackvideo (demuxer_t *demuxer, mkv_track_t *track)
             track->v_frate = num;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |   + Frame rate: %f\n",
                     track->v_frate);
+            if (track->v_frate > 0)
+              track->default_duration = 1 / track->v_frate;
             break;
           }
 
@@ -1095,6 +1097,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
             else
               {
                 track->v_frate = 1000000000.0 / num;
+                track->default_duration = num / 1000000000.0;
                 mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: "
                         "%.3fms ( = %.3f fps)\n",num/1000000.0,track->v_frate);
               }
