@@ -34,6 +34,11 @@
 #define VO_NOTAVAIL	-2
 #define VO_NOTIMPL	-3
 
+#define VOFLAG_FULLSCREEN	0x01
+#define VOFLAG_MODESWITCHING	0x02
+#define VOFLAG_SWSCALE		0x04
+#define VOFLAG_FLIPPING		0x08
+
 typedef struct vo_info_s
 {
         /* driver name ("Matrox Millennium G200/G400" */
