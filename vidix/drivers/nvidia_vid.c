@@ -3,7 +3,7 @@
    Copyrights 2003 Sascha Sommer. This file is based on sources from
    RIVATV (rivatv.sf.net)
    Licence: GPL
-   WARNING: THIS DRIVER IS IN BETTA STAGE
+   WARNING: THIS DRIVER IS IN BETA STAGE
    
    multi buffer support and TNT2 fixes by Dmitry Baryshkov
 */
@@ -410,6 +410,7 @@ static uint32_t rivatv_overlay_pan (struct rivatv_info *info){
 /* Compute and set colorkey depending on the colour depth. */
 static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 	uint32_t r, g, b, key = 0;
+
 	r = (chromakey & 0x00FF0000) >> 16;
 	g = (chromakey & 0x0000FF00) >> 8;
 	b = chromakey & 0x000000FF;
@@ -428,7 +429,6 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 		break;
 	}
 	//printf("[nvidia_vid] depth=%d %08X \n", info->depth, chromakey);
-    if(!info->use_colorkey)return;
     switch (info->chip.arch) {
 	  case NV_ARCH_10:
 	  case NV_ARCH_20:
@@ -727,7 +727,7 @@ int vixInit(void){
    
   rivatv_enable_PMEDIA(info);
   info->next_frame = 0;
-  info->use_colorkey = 1;
+  info->use_colorkey = 0;
   return 0;
 }
 
@@ -834,6 +834,14 @@ int vixPlaybackOff(void){
 }
 
 int vixSetGrKeys( const vidix_grkey_t * grkey){
+  if (grkey->ckey.op == CKEY_FALSE)
+  {
+    info->use_colorkey = 0;
+    printf("[nvidia_vid] colorkeying disabled\n");
+    return 0;
+  }
+
+  info->use_colorkey = 1;
   info->vidixcolorkey = ((grkey->ckey.red<<16)|(grkey->ckey.green<<8)|grkey->ckey.blue);
   printf("[nvidia_vid] set colorkey 0x%x\n",info->vidixcolorkey);
   rivatv_overlay_colorkey(info,info->vidixcolorkey);
