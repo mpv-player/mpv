@@ -970,7 +970,7 @@ EOF
 _kstat=no
 cc_check -lkstat && _kstat=yes
 if test "$_kstat" = yes ; then
-  _ld_arch="-lkstat ${_ld_arch}"
+  _ld_arch="-lkstat $_ld_arch"
 fi
 if test "$_kstat" = yes ; then
   _def_kstat="#define HAVE_LIBKSTAT 1"
@@ -989,7 +989,7 @@ EOF
 _posix4=no
 cc_check -lposix4 && _posix4=yes
 if test "$_posix4" = yes ; then
-  _ld_arch="-lposix4 ${_ld_arch}"
+  _ld_arch="-lposix4 $_ld_arch"
 fi
 echores "$_posix4"
 
@@ -1094,9 +1094,7 @@ echores "$_dl"
 
 
 #echocheck "dynamic linking"
-_ld_dl_dynamic=''
-bsd && _ld_dl_dynamic='-rdynamic'
-# FIXME !! make this dynamic detection to work
+# FIXME !! make this dynamic detection to work and modify at the end (search _ld_dl_dynamic)
 # also gcc flags are different, but ld flags aren't (-Bdynamic/-Bstatic/-Bsymbolic)
 #cat > $TMPC << EOF
 #int main(void) { return 0; }
@@ -1854,7 +1852,7 @@ if test "$_dvdread" = yes ; then
 elif test "$_css" = yes ; then
   _def_dvdread='#undef USE_DVDREAD'
   _def_css='#define HAVE_LIBCSS 1'
-  test "$_csslibdir" && _ld_css="-L${_csslibdir} ${_ld_css}"
+  test "$_csslibdir" && _ld_css="-L${_csslibdir} $_ld_css"
   echores "libcss"
 else
   _def_dvdread='#undef USE_DVDREAD'
@@ -2103,7 +2101,7 @@ echores "$_iconv"
 
 echocheck "FFmpeg codec"
 if test "$_libavcodec" = auto ; then
-  # Note: static link is preferred to dynamic link
+  # Note: static linking is preferred to dynamic linking
   _libavcodec=no
   test -d libavcodec && test -f libavcodec/Makefile && _libavcodec=yes
 fi
@@ -2358,7 +2356,13 @@ else
   _confcygwin="TARGET_CYGWIN = no"
 fi
 
-_ld_arch="${_ld_arch} $_ld_pthread $_ld_dl $_ld_dl_dynamic"
+# Dynamic linking flags 
+# (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
+_ld_dl_dynamic=''
+bsd && _ld_dl_dynamic='-rdynamic'
+test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
+
+_ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 
 _def_debug='#undef MP_DEBUG'
