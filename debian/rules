@@ -36,7 +36,7 @@ clean:
 	#-$(MAKE) clean
 #	$(checkdir)
 #	-rm -f build
-#	-$(MAKE) distclean
+	-$(MAKE) distclean
 #	-rm -f `find . -name "*~"`
 #	-rm -rf debian/tmp debian/files* core debian/substvars
 	dh_clean
@@ -77,7 +77,7 @@ binary-arch: build install
 #	dh_installmime
 #	dh_installinit
 #	dh_installcron
-	dh_installmanpages
+	dh_installmanpages TVout/fbset/fb.modes.5
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs
