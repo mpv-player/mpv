@@ -244,8 +244,8 @@ void parse_cfgfiles( m_config_t* conf )
 
 int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     int size=0;
-    int eof=0;
-    while(size<total && !eof){
+    int at_eof=0;
+    while(size<total && !at_eof){
 	int len=total-size;
 		if(len>MAX_OUTBURST) len=MAX_OUTBURST;
 		if(len>sh_audio->a_buffer_size) len=sh_audio->a_buffer_size;
@@ -254,7 +254,7 @@ int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 			&sh_audio->a_buffer[sh_audio->a_buffer_len],
     			len-sh_audio->a_buffer_len,
 			sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-		    if(ret>0) sh_audio->a_buffer_len+=ret; else eof=1;
+		    if(ret>0) sh_audio->a_buffer_len+=ret; else at_eof=1;
 		}
 		if(len>sh_audio->a_buffer_len) len=sh_audio->a_buffer_len;
 		memcpy(buffer+size,sh_audio->a_buffer,len);
@@ -269,7 +269,7 @@ extern void me_register_options(m_config_t* cfg);
 
 //---------------------------------------------------------------------------
 
-static int eof=0;
+static int at_eof=0;
 static int interrupted=0;
 
 enum end_at_type_t {END_AT_NONE, END_AT_TIME, END_AT_SIZE};
@@ -277,7 +277,7 @@ static enum end_at_type_t end_at_type = END_AT_NONE;
 static int end_at;
 
 static void exit_sighandler(int x){
-    eof=1;
+    at_eof=1;
     interrupted=1;
 }
 
@@ -796,7 +796,7 @@ if(tv_param_on == 1)
 	default_max_pts_correction = 0;
 	}
 
-while(!eof){
+while(!at_eof){
 
     float frame_time=0;
     int blit_frame=0;
@@ -892,7 +892,7 @@ if(sh_audio){
     // get video frame!
 
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
-    if(in_size<0){ eof=1; break; }
+    if(in_size<0){ at_eof=1; break; }
     sh_video->timer+=frame_time; ++decoded_frameno;
 
     v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
@@ -902,22 +902,22 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 	while(next_frameno<decoded_frameno){
 	    int* start;
 	    int len=ds_get_packet(demuxer2->video,(unsigned char**) &start);
-	    if(len<0){ eof=1;break;}
+	    if(len<0){ at_eof=1;break;}
 	    if(len==0) --skip_flag; else  // duplicate
 	    if(len==4) next_frameno=start[0];
 	}
-    if(eof) break;
+    if(at_eof) break;
 	// if(skip_flag) printf("!!!!!!!!!!!!\n");
 	skip_flag=next_frameno-decoded_frameno;
     // find next frame:
 	while(next_frameno<=decoded_frameno){
 	    int* start;
 	    int len=ds_get_packet(demuxer2->video,(unsigned char**) &start);
-	    if(len<0){ eof=1;break;}
+	    if(len<0){ at_eof=1;break;}
 	    if(len==0) --skip_flag; else  // duplicate
 	    if(len==4) next_frameno=start[0];
 	}
-//    if(eof) break;
+//    if(at_eof) break;
 //	    printf("Current fno=%d  requested=%d  skip=%d  \n",decoded_frameno,fno,skip_flag);
 } else {
 
@@ -1105,7 +1105,7 @@ if(sh_audio && !demuxer2){
      mencoder_exit(1, NULL);
  }
 
-} // while(!eof)
+} // while(!at_eof)
 
 #ifdef HAVE_MP3LAME
 // fixup CBR mp3 audio header:
