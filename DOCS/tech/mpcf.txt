@@ -281,7 +281,6 @@ time_base_nom / time_base_denom = time_base
 	if the fixed_fps is 1
 	time_base_denom MUST not be 0
 	time_base_nom and time_base_denom MUST be relative prime
-	time_base_nom MUST be < 2^16
 	examples:
         	fps	time_base_nom	time_base_denom
 		30	30		1
