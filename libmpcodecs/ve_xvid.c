@@ -143,7 +143,7 @@ struct config xvidencopts_conf[] = {
     { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "chroma_me", &xvidenc_chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hq_ac", &xvidenc_hqac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "vhq", &xvidenc_vhq, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+    { "vhq", &xvidenc_vhq, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
     { "chroma_opt", &xvidenc_chroma_opt, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
@@ -279,12 +279,13 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
     }
     switch (xvidenc_vhq) {
-    case 3: // wide search
+    case 4: // wide search
 	fp->enc_frame.motion |= EXTSEARCH_BITS | PMV_EXTSEARCH8;
-    case 2: // medium search
+    case 3: // medium search
 	fp->enc_frame.motion |= HALFPELREFINE8_BITS | QUARTERPELREFINE8_BITS | CHECKPREDICTION_BITS;
-    case 1: // limited search
+    case 2: // limited search
 	fp->enc_frame.motion |= HALFPELREFINE16_BITS | QUARTERPELREFINE16_BITS;
+    case 1: // mode decision
 	fp->enc_frame.general |= XVID_MODEDECISION_BITS;
 	break;
     case 0: // off
