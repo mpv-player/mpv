@@ -761,12 +761,12 @@ case VCODEC_VFW:
     vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
     vfw_bih->biWidth=vo_w;
     vfw_bih->biHeight=vo_h;
-    vfw_bih->biPlanes=0;
+    vfw_bih->biPlanes=1;
     vfw_bih->biBitCount=24;
     vfw_bih->biCompression=0;
     vfw_bih->biSizeImage=vo_w*vo_h*((vfw_bih->biBitCount+7)/8);
-//    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih);
-    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih);
+//    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih,mmioFOURCC('D', 'I', 'V', '3'));
+    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih, 0);
     break;
 #else
     printf("No support for Win32/VfW codecs compiled in\n");

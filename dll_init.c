@@ -420,7 +420,7 @@ static int encoder_buf_size=0;
 static int encoder_frameno=0;
 
 //int init_vfw_encoder(char *dll_name, BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih)
-BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih)
+BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih,unsigned int out_fourcc)
 {
 //  sh_video_t *sh_video;
   HRESULT ret;
@@ -440,7 +440,7 @@ BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih)
 //  output_bih->biSize = sizeof(BITMAPINFOHEADER);
 
   win32_codec_name = dll_name;
-  encoder_hic = ICOpen( 0x63646976, 0, ICMODE_COMPRESS);
+  encoder_hic = ICOpen( 0x63646976, out_fourcc, ICMODE_COMPRESS);
   if(!encoder_hic){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICOpen failed! unknown codec / wrong parameters?\n");
     return NULL;
