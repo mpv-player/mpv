@@ -63,7 +63,7 @@ You can also get MPlayer via anonymous CVS. Issue the following commands to get
 the latest sources:
 
   cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-  cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co main
+  cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
 
 When asked for a password, just hit enter. A directory named 'main' will be
 created. You can later update your sources by saying
