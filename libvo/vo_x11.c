@@ -431,52 +431,60 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 
 void rgb15to16_mmx( char* s0,char* d0,int count );
 
-#if 1
-static uint32_t draw_frame( uint8_t *src[] )
-{
- if( image_format==IMGFMT_YV12 )
-  {
-   yuv2rgb( ImageData,src[0],src[1],src[2],image_width,image_height,image_width*( bpp/8 ),image_width,image_width/2 );
-  }
-  else
-   {
+static uint32_t draw_frame( uint8_t *src[] ){
     int i;
     int sbpp=( ( image_format&0xFF )+7 )/8;
     int dbpp=( bpp+7 )/8;
     char *d=ImageData;
     char *s=src[0];
     //printf( "sbpp=%d  dbpp=%d  depth=%d  bpp=%d\n",sbpp,dbpp,depth,bpp );
-#if 0
+
+  if( Flip_Flag ){
     // flipped BGR
     int i;
     //printf( "Rendering flipped BGR frame  bpp=%d  src=%d  dst=%d\n",bpp,sbpp,dbpp );
     s+=sbpp*image_width*image_height;
-    for( i=0;i<image_height;i++ )
-     {
+    for( i=0;i<image_height;i++ ) {
       s-=sbpp*image_width;
-      if( sbpp==dbpp ) memcpy( d,s,sbpp*image_width );
-       else
-        {
+      if( sbpp==dbpp ) {
+        if( depth==16 && image_format==( IMGFMT_BGR|15 ) ){
+
+       // do 15bpp->16bpp
+#ifdef HAVE_MMX
+       rgb15to16_mmx( s,d,2*image_width );
+#else
+       unsigned short *s1=( unsigned short * )s;
+       unsigned short *d1=( unsigned short * )d;
+       unsigned short *e=s1+image_width;
+       while( s1<e ){
+         register int x=*( s1++ );
+         // rrrrrggggggbbbbb
+         // 0rrrrrgggggbbbbb
+         // 0111 1111 1110 0000=0x7FE0
+         // 00000000000001 1111=0x001F
+         *( d1++ )=( x&0x001F )|( ( x&0x7FE0 )<<1 );
+       }
+#endif
+
+        } else
+          memcpy( d,s,sbpp*image_width );
+      } else {
+         // sbpp!=dbpp
          char *s2=s;
          char *d2=d;
          char *e=s2+sbpp*image_width;
-         while( s2<e )
-          {
+         while( s2<e ) {
            d2[0]=s2[0];
            d2[1]=s2[1];
            d2[2]=s2[2];
            s2+=sbpp;d2+=dbpp;
-          }
-        }
+         }
+      }
       d+=dbpp*image_width;
-     }
-#else
-//   memcpy( ImageData,src[0],image_width*image_height*bpp );
-     if( sbpp==dbpp )
-      {
-       //Display_Image( myximage,s );return 0;
-#if 1
-       if( depth==16 && image_format==( IMGFMT_BGR|15 ) ){
+    }
+  } else {
+    if( sbpp==dbpp ) {
+      if( depth==16 && image_format==( IMGFMT_BGR|15 ) ){
        // do 15bpp->16bpp
 #ifdef HAVE_MMX
        rgb15to16_mmx( s,d,2*image_width*image_height );
@@ -484,51 +492,31 @@ static uint32_t draw_frame( uint8_t *src[] )
        unsigned short *s1=( unsigned short * )s;
        unsigned short *d1=( unsigned short * )d;
        unsigned short *e=s1+image_width*image_height;
-       while( s1<e )
-        {
+       while( s1<e ){
          register int x=*( s1++ );
          // rrrrrggggggbbbbb
          // 0rrrrrgggggbbbbb
          // 0111 1111 1110 0000=0x7FE0
          // 00000000000001 1111=0x001F
          *( d1++ )=( x&0x001F )|( ( x&0x7FE0 )<<1 );
-        }
-#endif
-      }
-      else
-#endif
-       {
-        if( Flip_Flag )
-         {
-          s+=sbpp*image_width*image_height;
-	  for( i=0;i < image_height;i++ )
-           {
-	    s-=sbpp*image_width;
-	    memcpy( d,s,sbpp*image_width );
-	    d+=sbpp*image_width;
-	   }
-         }
-        else memcpy( d,s,sbpp*image_width*image_height );
        }
-   }
-   else
-    {
-     char *e=s+sbpp*image_width*image_height;
-     //printf( "libvo: using C 24->32bpp conversion\n" );
-     while( s<e )
-      {
-       d[0]=s[0];
-       d[1]=s[1];
-       d[2]=s[2];
-       s+=sbpp;d+=dbpp;
+#endif
+      } else
+        memcpy( d,s,sbpp*image_width*image_height );
+    } else {
+        // sbpp!=dbpp
+      char *e=s+sbpp*image_width*image_height;
+      //printf( "libvo: using C 24->32bpp conversion\n" );
+      while( s<e ){
+        d[0]=s[0];
+        d[1]=s[1];
+        d[2]=s[2];
+        s+=sbpp;d+=dbpp;
       }
-   }
-#endif
+    }
   }
- //Display_Image( myximage,ImageData );
- return 0;
+  return 0;
 }
-#endif
 
 static uint32_t query_format( uint32_t format )
 {
