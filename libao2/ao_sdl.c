@@ -40,8 +40,8 @@ LIBAO_EXTERN(sdl)
 
 // General purpose Ring-buffering routines
 
-#define BUFFSIZE 1024
-#define NUM_BUFS 64
+#define BUFFSIZE 4096
+#define NUM_BUFS 16
 
 static unsigned char *buffer[NUM_BUFS];
 
@@ -156,6 +156,9 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
         	return(0);
 	} 
 	
+	printf("SDL buf size = %d\n",aspec.size);
+	if(ao_buffersize==-1) ao_buffersize=16*aspec.size;
+	
 	/* unsilence audio, if callback is ready */
 	SDL_PauseAudio(0);
 
@@ -209,7 +212,7 @@ static int play(void* data,int len,int flags){
 
 // return: how many unplayed bytes are in the buffer
 static int get_delay(){
-    return buffered_bytes;
+    return buffered_bytes + ao_buffersize;
 }
 
 
