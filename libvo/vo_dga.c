@@ -20,9 +20,10 @@
  *      BGR_24_24_888
  *      BGR_32_24_888
  *
- * - works only on x86 architectures
- *
  * $Log$
+ * Revision 1.45  2002/05/27 17:14:13  alex
+ * revised query_format. added support for native/conversion detection
+ *
  * Revision 1.44  2002/02/17 08:24:43  nick
  * I don't like such reports: '-vo dga:vidix or -vo x11:vidix works fine for me'
  *
@@ -183,10 +184,11 @@ LIBVO_EXTERN( dga )
 #include <X11/extensions/xf86vmode.h>
 #endif
 
-
 #include "x11_common.h"
 #include "../postproc/rgb2rgb.h"
 #include "fastmemcpy.h"
+
+#include "../mp_msg.h"
 
 static vo_info_t vo_info =
 {
@@ -305,6 +307,18 @@ int vd_ModeValid( int mplayer_depth){
   return 0;
 }
 
+int vd_ModeSupportedMethod( int mplayer_depth){
+  int i;
+  if(mplayer_depth == 0)return 0;
+  for(i=1; i<vo_dga_mode_num; i++){
+    if(vo_dga_modes[i].vdm_mplayer_depth == mplayer_depth && 
+       vo_dga_modes[i].vdm_supported != 0){
+      return vo_dga_modes[i].vdm_conversion_func;
+    }
+  }
+  return 0;
+}
+
 char *vd_GetModeString(int index){
 
 #define VO_DGA_MAX_STRING_LEN 100
@@ -390,7 +404,7 @@ void vd_printf( int level, const char *str, ...){
 #endif
   
   va_start(ap, str);
-  vprintf(str, ap);
+  vprintf(mp_gettext(str), ap);
   va_end(ap);
 }
 
@@ -428,30 +442,6 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 
 
 
-// I had tried to work with mmx/3dnow copy code but
-// there was not much speed gain and I didn't know
-// how to save the FPU/mmx registers - so the copy
-// code interferred with sound output ...
-// removed the leftovers
-// acki2 on 30/3/2001
-
-
-#define rep_movsl(dest, src, numwords, d_add, count) \
-__asm__ __volatile__( \
-" \
-1:                     \n\t\
-                  movl %%edx, %%ecx \n\t \
-                  cld\n\t \
-                  rep\n\t \
-                  movsl \n\t\
-                  add %%eax, %%edi \n\t\
-                  dec %%ebx \n\t\
-                  jnz 1b \n\t\
-" \
-                  : \
-                  : "a" (d_add), "b" (count), "S" (src), "D" (dest), \
-		    "d" (numwords) \
-                  : "memory" )
 
 // quick & dirty - for debugging only 
 
@@ -610,7 +600,7 @@ static uint32_t query_format( uint32_t format )
    }
    if( !vo_init() ){
     vd_printf(VD_ERR, "vo_dga: vo_init() failed!\n");
-    return 1; 
+    return 0; 
    }
    vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
  
@@ -669,11 +659,16 @@ static uint32_t query_format( uint32_t format )
    }
  }
 
- // TODO: respect bit for native/not native
- if( format==IMGFMT_YV12 ) return 7;
+ if( format==IMGFMT_YV12 ) return VFCAP_CSP_SUPPORTED;
  
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
-     vd_ModeValid(format&0xff)) return 7;
+     vd_ModeValid(format&0xff))
+ {
+    if (vd_ModeSupportedMethod(format&0xff) == VDM_CONV_NATIVE)
+	return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD;
+    else
+	return VFCAP_CSP_SUPPORTED|VFCAP_OSD;
+ }
  
  return 0;
 }
