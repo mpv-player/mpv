@@ -97,10 +97,10 @@ static uint8_t *mga_param_buff = NULL;
 static uint32_t mga_param_buff_size=0;
 static uint32_t mga_param_buff_len=0;
 
+#define min(x,y) (((x)<(y))?(x):(y))
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
 #include <linux/ctype.h>
-
-#define min(x,y) (((x)<(y))?(x):(y))
 
 unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
 {
@@ -1141,6 +1141,8 @@ void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
 	int frame;
+	uint32_t tmp;
+
 
 	switch(cmd) 
 	{
@@ -1231,6 +1233,22 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			mga_vid_frame_sel(frame);
 		break;
 
+		case MGA_VID_GET_LUMA:
+			tmp = regs.beslumactl - 0x80;
+			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t)))
+			{
+				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n",
+					   &tmp, (uint32_t *) arg);
+				return(-EFAULT);
+			}
+		break;
+			
+		case MGA_VID_SET_LUMA:
+			tmp = arg;
+			regs.beslumactl = tmp + 0x80;
+			mga_vid_write_regs(0);
+		break;
+			
 	        default:
 			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
 			return (-EINVAL);
