@@ -17,6 +17,8 @@ typedef struct cpucaps_s {
 
 extern CpuCaps gCpuCaps;
 
-void GetCpuCaps( CpuCaps *caps);
+void GetCpuCaps(CpuCaps *caps);
+char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]);
 
 #endif /* ARCH_X86 */
+

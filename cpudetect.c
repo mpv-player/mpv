@@ -79,7 +79,6 @@ do_cpuid(unsigned int ax, unsigned int *p)
 
 }
 
-
 void GetCpuCaps( CpuCaps *caps)
 {
 	unsigned int regs[4];
@@ -95,6 +94,9 @@ void GetCpuCaps( CpuCaps *caps)
 	if (regs[0]>=0x00000001)
 	{
 		do_cpuid(0x00000001, regs2);
+
+		printf("CPU: %s\n",GetCpuFriendlyName(regs, regs2));
+
 		caps->cpuType=(regs2[0] >> 8)&0xf;
 		if(caps->cpuType==0xf){
 		    // use extended family (P4, IA64)
@@ -139,6 +141,52 @@ void GetCpuCaps( CpuCaps *caps)
 
 
 }
+
+
+#define CPUID_EXTFAMILY	((regs2[0] >> 20)&0xFF) /* 27..20 */
+#define CPUID_EXTMODEL	((regs2[0] >> 16)&0x0F) /* 19..16 */
+#define CPUID_TYPE		((regs2[0] >> 12)&0x04) /* 13..12 */
+#define CPUID_FAMILY	((regs2[0] >>  8)&0x0F) /* 11..08 */
+#define CPUID_MODEL		((regs2[0] >>  4)&0x0F) /* 07..04 */
+#define CPUID_STEPPING	((regs2[0] >>  0)&0x0F) /* 03..00 */
+
+char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
+#include "cputable.h" /* get cpuname and cpuvendors */
+	char vendor[17];
+	char retname[255];
+	int i;
+
+	sprintf(vendor,"%.4s%.4s%.4s",&regs[1],&regs[3],&regs[2]);
+	
+	for(i=0; i<MAX_VENDORS; i++){
+		if(!strcmp(cpuvendors[i].string,vendor)){
+			if(cpuname[i][CPUID_FAMILY][CPUID_MODEL]){
+				sprintf(retname,"%s %s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL]);
+			} else {
+				sprintf(retname,"unknown %s %d. Generation CPU",cpuvendors[i].name,CPUID_FAMILY); 
+				printf("unknown %s CPU:\n",cpuvendors[i].name);
+				printf("Vendor:   %s\n",cpuvendors[i].string);
+				printf("Type:     %d\n",CPUID_TYPE);
+				printf("Family:   %d (ext: %d)\n",CPUID_FAMILY,CPUID_EXTFAMILY);
+				printf("Model:    %d (ext: %d)\n",CPUID_MODEL,CPUID_EXTMODEL);
+				printf("Stepping: %d\n",CPUID_STEPPING);
+				printf("Please send the above info along with the exact CPU name"
+				       "to the MPlayer-Developers, so we can add it to the list!\n");
+			}
+		}
+	}
+
+	//printf("Detected CPU: %s\n", retname);
+	return retname;
+}
+
+#undef CPUID_EXTFAMILY
+#undef CPUID_EXTMODEL
+#undef CPUID_TYPE
+#undef CPUID_FAMILY
+#undef CPUID_MODEL
+#undef CPUID_STEPPING
+
 
 #if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
