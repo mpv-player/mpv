@@ -14,7 +14,7 @@ void mplMenuDraw( wsParamDisplay )
  unsigned long   x,y,tmp;
 
  if ( !appMPlayer.menuBase.Bitmap.Image ) return;
- if ( !appMPlayer.menuWindow.Visible ) return;
+ if ( !mplMenuRender && !appMPlayer.menuWindow.Visible ) return;
 
  if ( mplMenuRender || mplMenuItem != mplOldMenuItem )
   {
@@ -34,7 +34,6 @@ void mplMenuDraw( wsParamDisplay )
    mplOldMenuItem=mplMenuItem;
 // ---
    wsConvert( &appMPlayer.menuWindow,mplMenuDrawBuffer,appMPlayer.menuBase.Bitmap.ImageSize );
-//   wsConvert( &appMPlayer.menuWindow,mplMenuDrawBuffer,appMPlayer.menuBase.Bitmap.Height * appMPlayer.menuBase.Bitmap.Width );
    mplMenuRender=0;
   }
  wsPutImage( &appMPlayer.menuWindow );
@@ -80,8 +79,10 @@ void mplShowMenu( int mx,int my )
  mplMenuItem = 0;
 
  wsMoveWindow( &appMPlayer.menuWindow,False,x,y );
- wsVisibleWindow( &appMPlayer.menuWindow,wsShowWindow );
  wsMoveTopWindow( &appMPlayer.menuWindow );
+ mplMenuRender=1;
+ wsVisibleWindow( &appMPlayer.menuWindow,wsShowWindow );
+ wsPostRedisplay( &appMPlayer.menuWindow );
 }
 
 void mplHideMenu( int mx,int my )
@@ -99,8 +100,8 @@ void mplHideMenu( int mx,int my )
 
  if ( ( x < 0 ) || ( y < 0 ) ) return;
 
- printf( "---------> %d %d,%d\n",i,x,y ); 
- printf( "--------> mi: %d,%d %dx%d\n",appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].height );
+// printf( "---------> %d %d,%d\n",i,x,y ); 
+// printf( "--------> mi: %d,%d %dx%d\n",appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].height );
  if ( wgIsRect( x,y,
         appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,
         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,
@@ -138,6 +139,5 @@ void mplMenuInit( void )
  appMPlayer.menuWindow.ReDraw=mplMenuDraw;
 // appMPlayer.menuWindow.MouseHandler=mplMenuMouseHandle;
 // appMPlayer.menuWindow.KeyHandler=mplMainKeyHandle;
-
- wsPostRedisplay( &appMPlayer.menuWindow );
+ mplMenuRender=1; wsPostRedisplay( &appMPlayer.menuWindow );
 }
