@@ -69,10 +69,9 @@ static int set_block_mode;
 
 snd_pcm_t *
 
-spdif_init(int acard, int adevice)
+spdif_init(char *pcm_name)
 {
 	//char *pcm_name = "hw:0,2"; /* first card second device */
-	char pcm_name[255];
 	static snd_aes_iec958_t spdif;
 	snd_pcm_info_t 	*info;
 	snd_pcm_t *handler;
@@ -80,11 +79,6 @@ spdif_init(int acard, int adevice)
 	unsigned int channels = 2;
 	unsigned int rate = 48000;
 	int err, c;
-
-	if (err = snprintf(&pcm_name[0], 11, "hw:%1d,%1d", acard, adevice) <= 0)
-	{
-		return NULL;
-	}
 
 	if ((err = snd_pcm_open(&handler, pcm_name, SND_PCM_STREAM_PLAYBACK, 0)) < 0)
 	{
@@ -128,17 +122,17 @@ spdif_init(int acard, int adevice)
        sprintf(ctl_name, "hw:%d", ctl_card);
        printf("hw:%d\n", ctl_card);
        if ((err = snd_ctl_open(&ctl_handler, ctl_name, 0)) < 0) {
-          fprintf(stderr, "Unable to open the control interface '%s': %s", ctl_name, snd_strerror(err));                                                    
+          fprintf(stderr, "Unable to open the control interface '%s': %s\n", ctl_name, snd_strerror(err));                                                    
           goto __diga_end;
        }
        if ((err = snd_ctl_elem_write(ctl_handler, ctl)) < 0) {
-          fprintf(stderr, "Unable to update the IEC958 control: %s", snd_strerror(err));
-          goto __diga_end;
+        fprintf(stderr, "Unable to update the IEC958 control: %s\n", snd_strerror(err));
+        goto __diga_end;
        }
       snd_ctl_close(ctl_handler);
       __diga_end:                                                       
 
-      }
+       }
 
 	{
 	  snd_pcm_hw_params_t *params;
@@ -302,6 +296,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     int period_val;
     snd_pcm_info_t *alsa_info;
     char *str_block_mode;
+    int device_set = 0;
     
     printf("alsa-init: testing and bugreports are welcome.\n");    
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
@@ -402,10 +397,22 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    ao_noblock = 1;
 	  }
 	  else if (strcmp(*(token_str+i3), "hw") == 0) {
-	    alsa_device = *(token_str+i3);
+	    if ((i3 < i2-1) && (strcmp(*(token_str+i3+1), "noblock") != 0) && (strcmp(*(token_str+i3+1), "mmap") != 0)) {
+	      //printf("next tok = %s\n", *(token_str+(i3+1)));
+	      alsa_device = alloca(ALSA_DEVICE_SIZE);
+	      snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%s", *(token_str+(i3+1)));
+	      device_set = 1;
+	    }
+		else {
+		  //printf("setting hw\n");
+		  alsa_device = *(token_str+i3);
+		  device_set = 1;
+		}
 	  }
-	  else if (!alsa_device || !ao_mmap || !ao_noblock) {
+	  else if (device_set == 0 && (!ao_mmap || !ao_noblock)) {
+	    //printf("setting common, %s\n", *(token_str+i3));
 	    alsa_device = *(token_str+i3);
+	    device_set = 1;
 	  }
 	}
       }
@@ -448,15 +455,28 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 
 	snd_pcm_info_free(alsa_info);
+	printf("alsa-init: %d soundcard%s found, using: %s\n", cards+1,
+	       (cards >= 0) ? "" : "s", alsa_device);
+      } else if (strcmp(alsa_device, "help") == 0) {
+	printf("alsa-help: available options are:\n");
+	printf("           mmap: sets mmap-mode\n");
+	printf("           noblock: sets noblock-mode\n");
+	printf("           device-name: sets device name\n");
+	printf("           example -ao alsa9:mmap:noblock:hw:0,3 sets noblock-mode,\n");
+	printf("           mmap-mode and the device-name as first card third device\n");
+	return(0);
+      } else {
+		printf("alsa-init: soundcard set to %s\n", alsa_device);
       }
 
-    printf("alsa-init: %d soundcard%s found, using: %s\n", cards+1,
-	(cards >= 0) ? "" : "s", alsa_device);
-
+    // switch for spdif
+    // Try to initialize the SPDIF interface
     if (format == AFMT_AC3) {
-	    // Try to initialize the SPDIF interface
-	    alsa_handler = spdif_init(0, 2);
-    }	    
+      if (device_set)
+	alsa_handler = spdif_init(alsa_device);
+      else
+	alsa_handler = spdif_init("hw:0,2");
+    }
 
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
@@ -470,9 +490,8 @@ static int init(int rate_hz, int channels, int format, int flags)
       str_block_mode = "block-mode";
     }
       
-
-    //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
     if (!alsa_handler) {
+      //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, open_mode)) < 0)
 	{
 	  if (ao_noblock) {
@@ -489,182 +508,183 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    return(0);
 	  }
 	}
-    }
 
-    if ((err = snd_pcm_nonblock(alsa_handler, set_block_mode)) < 0) {
-      printf("alsa-init: error set block-mode %s\n", snd_strerror(err));
-    }
-    else if (verbose) {
-      printf("alsa-init: pcm opend in %s\n", str_block_mode);
-    }
+      if ((err = snd_pcm_nonblock(alsa_handler, set_block_mode)) < 0) {
+	printf("alsa-init: error set block-mode %s\n", snd_strerror(err));
+      }
+      else if (verbose) {
+	printf("alsa-init: pcm opend in %s\n", str_block_mode);
+      }
+      
+      snd_pcm_hw_params_alloca(&alsa_hwparams);
+      snd_pcm_sw_params_alloca(&alsa_swparams);
 
-    snd_pcm_hw_params_alloca(&alsa_hwparams);
-    snd_pcm_sw_params_alloca(&alsa_swparams);
-
-    // setting hw-parameters
-    if ((err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams)) < 0)
-    {
-	printf("alsa-init: unable to get initial parameters: %s\n",
-	    snd_strerror(err));
-	return(0);
-    }
+      // setting hw-parameters
+      if ((err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams)) < 0)
+	{
+	  printf("alsa-init: unable to get initial parameters: %s\n",
+		 snd_strerror(err));
+	  return(0);
+	}
     
-    if (ao_mmap) {
-      snd_pcm_access_mask_t *mask = alloca(snd_pcm_access_mask_sizeof());
-      snd_pcm_access_mask_none(mask);
-      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_INTERLEAVED);
-      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_NONINTERLEAVED);
-      snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_COMPLEX);
-      err = snd_pcm_hw_params_set_access_mask(alsa_handler, alsa_hwparams, mask);
-      printf("alsa-init: mmap set\n");
-    } else {
-      err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,SND_PCM_ACCESS_RW_INTERLEAVED);
-      printf("alsa-init: interleave set\n");
-    }
-    if (err < 0) {
-      printf("alsa-init: unable to set access type: %s\n", snd_strerror(err));
-      return (0);
-    }
+      if (ao_mmap) {
+	snd_pcm_access_mask_t *mask = alloca(snd_pcm_access_mask_sizeof());
+	snd_pcm_access_mask_none(mask);
+	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_INTERLEAVED);
+	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_NONINTERLEAVED);
+	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_COMPLEX);
+	err = snd_pcm_hw_params_set_access_mask(alsa_handler, alsa_hwparams, mask);
+	printf("alsa-init: mmap set\n");
+      } else {
+	err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,SND_PCM_ACCESS_RW_INTERLEAVED);
+	printf("alsa-init: interleave set\n");
+      }
+      if (err < 0) {
+	printf("alsa-init: unable to set access type: %s\n", snd_strerror(err));
+	return (0);
+      }
     
-    if ((err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams,
-	alsa_format)) < 0)
-    {
-	printf("alsa-init: unable to set format: %s\n",
-	    snd_strerror(err));
-	return(0);
-    }
+      if ((err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams,
+					      alsa_format)) < 0)
+	{
+	  printf("alsa-init: unable to set format: %s\n",
+		 snd_strerror(err));
+	  return(0);
+	}
 
-    if ((err = snd_pcm_hw_params_set_channels(alsa_handler, alsa_hwparams,
-	ao_data.channels)) < 0)
-    {
-	printf("alsa-init: unable to set channels: %s\n",
-	    snd_strerror(err));
-	return(0);
-    }
+      if ((err = snd_pcm_hw_params_set_channels(alsa_handler, alsa_hwparams,
+						ao_data.channels)) < 0)
+	{
+	  printf("alsa-init: unable to set channels: %s\n",
+		 snd_strerror(err));
+	  return(0);
+	}
 
-        if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, ao_data.samplerate, 0)) < 0) 
+      if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, ao_data.samplerate, 0)) < 0) 
         {
-    	printf("alsa-init: unable to set samplerate-2: %s\n",
-    	    snd_strerror(err));
-    	return(0);
+	  printf("alsa-init: unable to set samplerate-2: %s\n",
+		 snd_strerror(err));
+	  return(0);
         }
 
 #ifdef BUFFERTIME
-    {
-      int alsa_buffer_time = 500000; /* original 60 */
+      {
+	int alsa_buffer_time = 500000; /* original 60 */
 
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time, 0)) < 0)
-	{
+	  {
 	    printf("alsa-init: unable to set buffer time near: %s\n",
-		snd_strerror(err));
+		   snd_strerror(err));
 	    return(0);
-	} else
+	  } else
 	    alsa_buffer_time = err;
 
 	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time/4, 0)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
-	{
+	  {
 	    printf("alsa-init: unable to set period time: %s\n",
-		snd_strerror(err));
+		   snd_strerror(err));
 	    return(0);
-	}
+	  }
 	if (verbose)
 	  printf("alsa-init: buffer_time: %d, period_time :%d\n",alsa_buffer_time, err);
-    }
+      }
 #endif
 
 #ifdef SET_CHUNKSIZE
- {
-    //set chunksize
-    chunk_size = alsa_fragsize / 4;
-
-    if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
       {
-	printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
-	return(0);
-      }
-    else if (verbose) {
-      printf("alsa-init: chunksize set to %i\n", chunk_size);
-    }
+	//set chunksize
+	chunk_size = alsa_fragsize / 4;
 
-    //set period_count
-    if ((period_val = snd_pcm_hw_params_get_periods_max(alsa_hwparams, 0)) < alsa_fragcount) {
-			alsa_fragcount = period_val;			
+	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
+	  {
+	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
+	    return(0);
+	  }
+	else if (verbose) {
+	  printf("alsa-init: chunksize set to %i\n", chunk_size);
 	}
 
-    if (verbose)
-      printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
+	//set period_count
+	if ((period_val = snd_pcm_hw_params_get_periods_max(alsa_hwparams, 0)) < alsa_fragcount) {
+	  alsa_fragcount = period_val;			
+	}
 
-    if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
-      printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
-    }
- }
+	if (verbose)
+	  printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
+
+	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
+	  printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
+	}
+      }
 #endif
 
-    /* finally install hardware parameters */
-    if ((err = snd_pcm_hw_params(alsa_handler, alsa_hwparams)) < 0)
-    {
-	printf("alsa-init: unable to set hw-parameters: %s\n",
-	    snd_strerror(err));
-	return(0);
-    }
-    // end setting hw-params
+      /* finally install hardware parameters */
+      if ((err = snd_pcm_hw_params(alsa_handler, alsa_hwparams)) < 0)
+	{
+	  printf("alsa-init: unable to set hw-parameters: %s\n",
+		 snd_strerror(err));
+	  return(0);
+	}
+      // end setting hw-params
 
 
-    // gets buffersize for control
-    if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
-      {
-	printf("alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
-	return(0);
-      }
-    else {
-      ao_data.buffersize = err;
-      if (verbose)
-	printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
-    }
-
-    // setting sw-params (only avail-min) if noblocking mode was choosed
-    if (ao_noblock)
-    {
-
-    if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
-      {
-	printf("alsa-init: unable to get parameters: %s\n",snd_strerror(err));
-	return(0);
+      // gets buffersize for control
+      if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
+	{
+	  printf("alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
+	  return(0);
+	}
+      else {
+	ao_data.buffersize = err;
+	if (verbose)
+	  printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
 
-    //set min available frames to consider pcm ready (4)
-    //increased for nonblock-mode should be set dynamically later
-    if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, chunk_size)) < 0)
-      {
-	printf("alsa-init: unable to set avail_min %s\n",snd_strerror(err));
-	return(0);
-      }
+      // setting sw-params (only avail-min) if noblocking mode was choosed
+      if (ao_noblock)
+	{
 
-    if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0)
-      {
-	printf("alsa-init: unable to install sw-params\n");
-	return(0);
-      }
+	  if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
+	    {
+	      printf("alsa-init: unable to get parameters: %s\n",snd_strerror(err));
+	      return(0);
+	    }
 
-    bits_per_sample = snd_pcm_format_physical_width(alsa_format);
-    bits_per_frame = bits_per_sample * channels;
-    chunk_bytes = chunk_size * bits_per_frame / 8;
+	  //set min available frames to consider pcm ready (4)
+	  //increased for nonblock-mode should be set dynamically later
+	  if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, chunk_size)) < 0)
+	    {
+	      printf("alsa-init: unable to set avail_min %s\n",snd_strerror(err));
+	      return(0);
+	    }
 
-    if (verbose) {
-      printf("alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
+	  if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0)
+	    {
+	      printf("alsa-init: unable to install sw-params\n");
+	      return(0);
+	    }
 
-    }//end swparams
+	  bits_per_sample = snd_pcm_format_physical_width(alsa_format);
+	  bits_per_frame = bits_per_sample * channels;
+	  chunk_bytes = chunk_size * bits_per_frame / 8;
 
-    if ((err = snd_pcm_prepare(alsa_handler)) < 0)
-    {
-	printf("alsa-init: pcm prepare error: %s\n", snd_strerror(err));
-	return(0);
-    }
+	  if (verbose) {
+	    printf("alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
 
-    printf("alsa9: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-	ao_data.samplerate, ao_data.channels, ao_data.bps, ao_data.buffersize,
-	snd_pcm_format_description(alsa_format));
+	}//end swparams
+
+      if ((err = snd_pcm_prepare(alsa_handler)) < 0)
+	{
+	  printf("alsa-init: pcm prepare error: %s\n", snd_strerror(err));
+	  return(0);
+	}
+
+      printf("alsa9: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+	     ao_data.samplerate, ao_data.channels, ao_data.bps, ao_data.buffersize,
+	     snd_pcm_format_description(alsa_format));
+
+    } // end switch alsa_handler (spdif)
     return(1);
 } // end init
 
