@@ -94,7 +94,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     
     if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	// export palette:
-	mpi->planes[1]=((unsigned char*)&sh->o_bih)+40;
+// FIXME: sh->o_bih is cutted down to 40 bytes!!!
+//	if(sh->o_bih->biSize>40)
+//	    mpi->planes[1]=((unsigned char*)&sh->o_bih)+40;
+//	else
+	    mpi->planes[1]=NULL;
     }
     
     return mpi;

@@ -29,6 +29,8 @@ static unsigned int rgb_list[]={
     0
 };
 
+static unsigned int gray_pal[256];
+
 static unsigned int find_best(struct vf_instance_s* vf, unsigned int fmt){
     unsigned int best=0;
     int ret;
@@ -72,6 +74,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
+
+    if(!mpi->planes[1]) mpi->planes[1]=gray_pal;
 
     if(mpi->w==mpi->stride[0] && dmpi->w*(dmpi->bpp>>3)==dmpi->stride[0]){
 	// no stride conversion needed
@@ -119,10 +123,12 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
+    unsigned int i;
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+    for(i=0;i<256;i++) gray_pal[i]=0x01010101*i;
     return 1;
 }
 
