@@ -105,6 +105,8 @@ static IDirectFBSurface *frame = NULL;
 static int framelocked = 0;
 // flipping mode flag (layer/surface)
 static int flipping = 0; 
+// tvnorm
+static int tvnorm = -1;
 // scaling flag
 static int stretch = 0;
 // pictrure position
@@ -126,11 +128,6 @@ static void (*draw_alpha_p)(int w, int h, unsigned char *src,
 ******************************/
 
 /* command line/config file options */
-#ifdef HAVE_FBDEV
-extern char *fb_dev_name;
-#else
-char *fb_dev_name;
-#endif
 char *dfb_params;
 static int layer_id = -1;
 static int buffer_mode = 1;
@@ -299,9 +296,6 @@ static uint32_t preinit(const char *arg)
    * (set options)
    */
 	
-	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = strdup("/dev/fb0");
-    	DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
-	
 //	uncomment this if you do not wish to create a new vt for DirectFB
 //        DFBCHECK (DirectFBSetOption ("no-vt-switch",""));
 
@@ -309,7 +303,7 @@ static uint32_t preinit(const char *arg)
 //       DFBCHECK (DirectFBSetOption ("vt-switching",""));
 
 //	uncomment this if you want to hide gfx cursor (req dfb >=0.9.9)
-       DFBCHECK (DirectFBSetOption ("no-cursor",""));
+        DFBCHECK (DirectFBSetOption ("no-cursor",""));
 
 // bg color fix
         DFBCHECK (DirectFBSetOption ("bg-color","00000000"));
@@ -657,6 +651,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
         DFBCHECK (dfb->GetDisplayLayer( dfb, params.id, &layer));
 	
 #if DIRECTFBVERSION > 916
+        mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Config - switching layer to exclusive mode\n");
 	ret = layer->SetCooperativeLevel (layer, DLSCL_EXCLUSIVE);
 
         if (DFB_OK != ret) {
@@ -809,6 +804,19 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		}
 	    }
         }
+	mp_msg( MSGT_VO, MSGL_INFO, "DirectFB: Requested field parity: ");
+          switch (field_parity) {
+            case -1:
+                mp_msg( MSGT_VO, MSGL_INFO, "Don't care\n");
+                break;
+            case 0:
+                mp_msg( MSGT_VO, MSGL_INFO, "Top field first\n");
+                break;
+            case 1:
+                mp_msg( MSGT_VO, MSGL_INFO, "Bottom field first\n");
+                break;
+          }
+	
 #endif
 
 
@@ -834,6 +842,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	)) {
 	    ret = primary->Flip(primary,NULL,0);
 	    if (ret==DFB_OK) { 
+		flipping = 1; 
 #if DIRECTFBVERSION > 913
 		primary->Clear(primary,0,0,0,0xff);
 #ifdef TRIPLE
@@ -841,10 +850,10 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	if (caps & DSCAPS_TRIPLE) {
 		primary->Flip(primary,NULL,0);
 		primary->Clear(primary,0,0,0,0xff);
+		flipping = 2; 
 	}
 #endif
 #endif	
-		flipping = 1; 
 	    } 
 	};
 
@@ -993,9 +1002,19 @@ static void flip_page(void)
 	};
 
 
+#ifdef TRIPLE
+    switch (flipping) { 
+	    case 1: DFBCHECK (primary->Flip (primary, NULL, DSFLIP_WAIT));
+		    break;
+	    case 2: DFBCHECK (primary->Flip (primary, NULL, DSFLIP_ONSYNC));
+		    break;
+	    default:; // should never reach here
+	}
+#else
     if (flipping) { 
 	    DFBCHECK (primary->Flip (primary, NULL, DSFLIP_WAITFORSYNC));
 	}
+#endif
 
 }
 
