@@ -8,7 +8,7 @@
 #include "mp_msg.h"
 #include "vd_internal.h"
 
-#ifdef USE_WIN32DLL
+#ifdef WIN32_LOADER
 #include "ldt_keeper.h"
 #endif
 
@@ -98,7 +98,7 @@ static int init(sh_video_t *sh){
     CodecInfo cinfo;	// for ImageCodecGetCodecInfo()
     ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
 
-#ifdef USE_WIN32DLL
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif
 

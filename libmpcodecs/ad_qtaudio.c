@@ -10,7 +10,7 @@
 #include "ad_internal.h"
 #include "bswap.h"
 
-#ifdef USE_WIN32DLL
+#ifdef WIN32_LOADER
 #include "ldt_keeper.h"
 #endif
 
@@ -81,7 +81,7 @@ int       WINAPI FreeLibrary(HMODULE);
 static int loader_init()
 {
 
-#ifdef USE_WIN32DLL
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif
     qtml_dll = LoadLibraryA("qtmlClient.dll");
