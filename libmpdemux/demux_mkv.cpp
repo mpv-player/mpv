@@ -167,7 +167,7 @@ typedef struct mkv_demuxer {
   int num_tracks;
   mkv_track_t *video, *audio, *subs_track;
 
-  uint64_t tc_scale, cluster_tc;
+  uint64_t tc_scale, cluster_tc, first_tc;
 
   mpstream_io_callback *in;
 
@@ -273,7 +273,8 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
   vo_sub = &mkv_d->subs;
   vo_osd_changed(OSDTYPE_SUBTITLE);
 
-  mkv_d->clear_subs_at = block->GlobalTimecode() / 1000000 + duration;
+  mkv_d->clear_subs_at = block->GlobalTimecode() / 1000000 - mkv_d->first_tc +
+    duration;
 }
 
 static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
@@ -692,10 +693,9 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
         if (EbmlId(*l3) == KaxCueTime::ClassInfos.GlobalId) {
           KaxCueTime &cue_time = *static_cast<KaxCueTime *>(l3);
           cue_time.ReadData(es->I_O());
+          timecode = uint64(cue_time) * tc_scale / 1000000 - mkv_d->first_tc;
           mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |  + found cue time: %.3fs\n",
-                 ((float)uint64(cue_time)) * tc_scale / 1000000000.0);
-
-          timecode = uint64(cue_time) * tc_scale / 1000000;
+                 (float)timecode / 1000.0);
           elements_found |= 1;
 
         } else if (EbmlId(*l3) ==
@@ -1065,9 +1065,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                   *static_cast<KaxTrackDefaultDuration *>(l3);
                 def_duration.ReadData(es->I_O());
                 track->v_frate = 1000000000.0 / (float)uint64(def_duration);
-                fprintf(stdout, "[mkv] |  + Default duration: %.3fms ( = %.3f "
-                        "fps)\n", (float)uint64(def_duration) / 1000000.0,
-                        track->v_frate);
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: "
+                       "%.3fms ( = %.3f fps)\n", (float)uint64(def_duration) /
+                       1000000.0, track->v_frate);
 #endif // LIBEBML_VERSION
 
               } else if (EbmlId(*l3) == KaxTrackType::ClassInfos.GlobalId) {
@@ -1430,6 +1430,21 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       return 0;
     }
 
+    // Try to find the very first timecode (cluster timecode).
+    l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
+                             0xFFFFFFFFL, true, 1);
+    if ((l2 != NULL) && !upper_lvl_el &&
+        (EbmlId(*l2) == KaxClusterTimecode::ClassInfos.GlobalId)) {
+      KaxClusterTimecode &ctc = *static_cast<KaxClusterTimecode *>(l2);
+      ctc.ReadData(es->I_O());
+      mkv_d->first_tc = uint64(ctc) * mkv_d->tc_scale / 1000000;
+      delete l2;
+    } else
+      mkv_d->first_tc = 0;
+    stream_seek(s, l1->GetElementPosition());
+    
+    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] First tc: %lld\n", mkv_d->first_tc);
+
     // If we have found an entry for the cues in the meta seek data but no
     // cues at the front of the file then read them now. This way the
     // timecode scale will have been initialized correctly.
@@ -1441,7 +1456,6 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         stream_reset(s);
       io.setFilePointer(current_pos);
     }
-
 
   } catch (exception &ex) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] caught exception\n");
@@ -1824,7 +1838,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
               // Clear the subtitles if they're obsolete now.
               if ((mkv_d->clear_subs_at > 0) &&
                   (mkv_d->clear_subs_at <=
-                   (block->GlobalTimecode() / 1000000))) {
+                   (block->GlobalTimecode() / 1000000 - mkv_d->first_tc))) {
                 mkv_d->subs.lines = 0;
                 vo_sub = &mkv_d->subs;
                 vo_osd_changed(OSDTYPE_SUBTITLE);
@@ -1843,7 +1857,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                   (((elements_found & 4) == 0) && // It's a key frame.
                    (ds != NULL) &&                // Corresponding track found
                    (ds == d->video))) {           // track is our video track
-                if ((ds != NULL) && ((block->GlobalTimecode() / 1000000) >=
+                if ((ds != NULL) && ((block->GlobalTimecode() / 1000000 -
+                                       mkv_d->first_tc) >=
                                      (uint64_t)mkv_d->skip_to_timecode)) {
                   for (i = 0; i < (int)block->NumberFrames(); i++) {
                     DataBuffer &data = block->GetBuffer(i);
@@ -1861,8 +1876,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                   handle_subtitles(d, block, block_duration);
 
                 d->filepos = mkv_d->in->getFilePointer();
-                mkv_d->last_pts = (float)block->GlobalTimecode() /
-                  1000000000.0;
+                mkv_d->last_pts = (float)(block->GlobalTimecode() / 1000000.0 -
+                                          mkv_d->first_tc) / 1000.0;
                 mkv_d->last_filepos = d->filepos;
               }
 
