@@ -1,5 +1,9 @@
+
+// Reference: DOCS/tech/hwac3.txt !!!!!
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -9,7 +13,6 @@
 #include "ad_internal.h"
 
 #include "../liba52/a52.h"
-#include "../ac3-iec958.h"
 
 extern int a52_fillbuff(sh_audio_t *sh_audio);
 
@@ -81,8 +84,23 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 {
   int len=-1;
   if(!sh_audio->a_in_buffer_len)
-    if((len=a52_fillbuff(sh_audio))<0) return len; /*EOF*/
+    if((len=a52_fillbuff(sh_audio))<=0) return len; /*EOF*/
   sh_audio->a_in_buffer_len=0;
-  len = ac3_iec958_build_burst(len, 0x01, 1, sh_audio->a_in_buffer, buf);
-  return len;
+
+//    int ac3_iec958_build_burst(int length, int data_type, int big_endian, unsigned char * data, unsigned char * out)
+//  len = ac3_iec958_build_burst(len, 0x01, 1, sh_audio->a_in_buffer, buf);
+
+	buf[0] = 0x72;
+	buf[1] = 0xF8;
+	buf[2] = 0x1F;
+	buf[3] = 0x4E;
+	buf[4] = 0x01; //(length) ? data_type : 0; /* & 0x1F; */
+	buf[5] = 0x00;
+	buf[6] = (len << 3) & 0xFF;
+	buf[7] = (len >> 5) & 0xFF;
+	swab(sh_audio->a_in_buffer, buf + 8, len);
+	//memcpy(buf + 8, sh_audio->a_in_buffer, len);
+	memset(buf + 8 + len, 0, 6144 - 8 - len);
+
+	return 6144;
 }
