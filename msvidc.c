@@ -1,3 +1,11 @@
+/*
+    Microsoft Video 1 Decoder
+    
+    (C) 2001 Mike Melanson
+    
+    The description of the algorithm you can read here:
+      http://www.pcisys.net/~melanson/video1.txt
+*/
 
 #define LE_16(x) *(unsigned short *)(x)
 
