@@ -42,7 +42,6 @@ v
 		data				u(7)
 		value= 128*value + data
 	}while(more_data)
-	value-=4
  
 sz (zero terminated string)
 	for(i=0; next_byte != 0; i++){
@@ -124,12 +123,12 @@ frame
 	if(keyframe){
 		keyframe_startcode		f(64)
 	}
-	lsb_timestamp				u(lsb_timestamp_length)
-	stream_id				u(log2_stream_count)
+	lsb_timestamp				v
+	stream_id				v
 	priority				u(2)
 	checksum_flag				u(1)
 	msb_timestamp_flag			u(1)
-	align_byte
+	reserved				u(4)
 	if(msb_timestamp_flag)
 		msb_timestamp			v
 	bitstream
@@ -353,13 +352,12 @@ static inline uint64_t get_v(BufferContext *bc){
 		if(tmp&0x80)
 			val= (val<<7) + tmp - 0x80;
 		else
-			return (val<<7) + tmp - 4;
+			return (val<<7) + tmp;
 	}
 }
 
 static inline void put_v(BufferContext *bc, uint64_t val){
 	int i;
-	val+=4;
         
 	assert(val);
 
