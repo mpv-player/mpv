@@ -1000,7 +1000,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
 
-<P>Kosz hogy ilyen sokan irtatok ide..</P>
+<P>Kösz hogy ilyen sokan írtatok ide..</P>
 
 
 <H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
@@ -1045,39 +1045,39 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
     opciók: 5 = NTSC, 4 = PAL-60, 3 = PAL. Speciális értékek a 2 (automata
     állítás PAL/PAL-60) és az 1 (automata állítás PAL/NTSC), mert ezek a
     film framerátájának alapján döntenek a használandó normáról. A 0
-    ertek (alapallapot) nem valtoztat a norman.<BR>
-    <CODE>&lt;egysegnev&gt;</CODE> - ha tobb em8300 kartyad van, itt
-    megadhatod hogy melyiket akarod hasznalni.
+    érték (alapállapot) nem változtat a normán.<BR>
+    <CODE>&lt;egysegnev&gt;</CODE> - ha több em8300 kártyád van, itt
+    megadhatod hogy melyiket akarod használni.
     <BR>
-    Mindegyik opcio opcionalis. Jo mi?<BR>
-    <CODE>:prebuf:sync</CODE> kombinacio a legmegfelelobb a DivX filmek
-    lejatszasara. Nehanyak szerint a <CODE>prebuf</CODE> opcio problemakat
-    okozhat MPEG1/2 lejatszasanal. A <CODE>sync</CODE> opcio akkor hasznalando,
-    ha valamilyen problema adodik az opciok nelkuli lejatszasnal, peldaul
-    nem megjeleno DVD feliratok, stb.</DD>
+    Mindegyik opció opcionális. Jó mi?<BR>
+    <CODE>:prebuf:sync</CODE> kombináció a legmegfelelõbb a DivX filmek
+    lejátszására. Néhányak szerint a <CODE>prebuf</CODE> opció problémákat
+    okozhat MPEG1/2 lejátszásnál. A <CODE>sync</CODE> opció akkor használandó,
+    ha valamilyen probléma adódik az opciók nélküli lejátszásnál, például
+    nem megjelenõ DVD feliratok, stb.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
-  <DD>Ezzel az opcioval az em8300 kartyan keresztul lesz lejatszva a
-    hang (a hasznalando ertek egy kartya eseten 0).</DD>
+  <DD>Ezzel az opcióval az em8300 kártyán keresztül lesz lejátszva a
+    hang (a használandó érték egy kártya esetén 0).</DD>
 
   <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
-  <DD>Az em8300 nem tud 44100Hz-nel alacsonyabb frekvencian lejatszani.
-  Ha ilyen audioval van dolgod, a fenti opcioba irj 44100-at vagy 48000-at
-  annak megfeleloen hogy az eredeti ertek melyikhez van kozelebb. Tehat
-  22050Hz eseten 44100, 24000Hz eseten 48000. Ez az opcio termeszetesen
-  nem mukodik digitalis AC3 eseten (<CODE>-ac hwac3</CODE>).</DD>
+  <DD>Az em8300 nem tud 44100Hz-nél alacsonyabb frekvencián lejátszani.
+  Ha ilyen audióval van dolgod, a fenti opcióba írj 44100-at vagy 48000-at
+  annak megfelelõen hogy az eredeti érték melyikhez van közelebb. Tehát
+  22050Hz esetén 44100, 24000Hz esetén 48000. Ez az opció természetesen
+  nem mûködik digitális AC3 esetén (<CODE>-ac hwac3</CODE>).</DD>
 
   <DT><CODE>-vop lavc</CODE></DT>
-  <DD>Ez elvileg mar szuksegtelen.. TODO: tesztelni</DD>
+  <DD>Ez elvileg már szükségtelen.. TODO: tesztelni</DD>
 
   <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>Detto</DD>
 
   <DT><CODE>-ac hwac3</CODE></DT>
-  <DD>Az em8300 kepes a rajta athalado dekodolatlan AC3 adatot a digitalis
-    kimeneten egy erositonek tovabbadni. Ebben az esetben meg kell adni
-    a fenti <CODE>-ao oss:...</CODE> opciot, hogy a hangkartya helyett
-    a DXR3-on keresztul menjen a hang.</DD>
+  <DD>Az em8300 képes a rajta áthaladó dekódolatlan AC3 adatot a digitális
+    kimeneten egy erõsítõnek továbbadni. Ebben az esetben meg kell adni
+    a fenti <CODE>-ao oss:...</CODE> opciót, hogy a hangkártya helyett
+    a DXR3-on keresztül menjen a hang.</DD>
 </DL>
 
 
