@@ -174,7 +174,7 @@ MPlayer (1.0)
     * -crash-debug option to attach gdb automatically after crashes
     * gcc 4 compilation fixes
     * compilation fixes for many files in the TOOLS directory
-    * infamous "stuck mouse button" bug fixed
+    * infamous "stuck mouse button" bug fixed, new -key-fifo-size option
     * reduced verbosity of MPlayer's output somewhat
 
 
