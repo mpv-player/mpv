@@ -454,13 +454,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  parse_cfgfiles(mconfig);
  filelist = m_config_parse_me_command_line(mconfig, argc, argv);
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
- m_entry_set_options(mconfig,&filelist[0]);
- filename = filelist[0].name;
-
-  if(!filename){
-	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MissingFilename);
-	mencoder_exit(1,NULL);
-  }
 
   mp_msg_set_level(verbose+MSGL_STATUS);
 
@@ -489,6 +482,13 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
   vo_init_osd();
 
+  m_entry_set_options(mconfig,&filelist[0]);
+  filename = filelist[0].name;
+ 
+  if(!filename){
+	mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_MissingFilename);
+	mencoder_exit(1,NULL);
+  }
   stream=open_stream(filename,0,&file_format);
 
   if(!stream){
@@ -571,6 +571,21 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 }
 
+#ifdef USE_SUB
+// after reading video params we should load subtitles because
+// we know fps so now we can adjust subtitles time to ~6 seconds AST
+// check .sub
+//  current_module="read_subtitles_file";
+  if(sub_name && sub_name[0]){
+    subdata=sub_read_file(sub_name[0], sh_video->fps);
+    if(!subdata) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name[0]);
+  } else
+  if(sub_auto) { // auto load sub file ...
+    subdata=sub_read_file( filename ? sub_filenames( get_path("sub/"), filename )[0]
+	                              : "default.sub", sh_video->fps );
+  }
+#endif	
+
 // set up video encoder:
 
 if (vobsub_out) {
@@ -612,21 +627,6 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 }
 #endif
 }
-
-#ifdef USE_SUB
-// after reading video params we should load subtitles because
-// we know fps so now we can adjust subtitles time to ~6 seconds AST
-// check .sub
-//  current_module="read_subtitles_file";
-  if(sub_name && sub_name[0]){
-    subdata=sub_read_file(sub_name[0], sh_video->fps);
-    if(!subdata) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name[0]);
-  } else
-  if(sub_auto) { // auto load sub file ...
-    subdata=sub_read_file( filename ? sub_filenames( get_path("sub/"), filename )[0]
-	                              : "default.sub", sh_video->fps );
-  }
-#endif	
 
 // Apply current settings for forced subs
 spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
