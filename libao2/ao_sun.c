@@ -459,6 +459,6 @@ static float get_delay(){
     if (info.play.samples && enable_sample_timing == RTSC_ENABLED)
 	return (float)(queued_samples - info.play.samples) / (float)byte_per_sec;
     else
-	return (flaot)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
+	return (float)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
 }
 
