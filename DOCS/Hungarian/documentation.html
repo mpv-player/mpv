@@ -738,7 +738,7 @@
 	make install</PRE>
 
 <P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
-  <CODE>$PREFIX/share/mplayer</CODE> könyvtár tartalmazza a
+  <CODE>$PREFIX/etc/mplayer</CODE> könyvtár tartalmazza a
   <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
   codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
   együtt kell frissíteni! Ha a home könyvtáradban van egy régi codecs.conf
@@ -757,14 +757,9 @@
   fent van-e, és a verziójuk egyezik-e.</P>
 
 <P>Bár nem kötelezõ, jobb ha felteszed a fontokat is, mert így kapsz OSD-t, és
-  feliratok megjelenítésének képességét. Töltsd le az mp-arial-iso-8859-2.zip-et
-  (és/vagy opcionálisan nyelvi kiegészítõket). Részletekért olvasd el az
-  <A HREF=#subtitles_osd>OSD</A> fejezetet.</P>
-
-<PRE>	mkdir ~/.mplayer
-	cd ~/.mplayer
-	unzip mp-arial-iso-8859-2.zip
-	ln -s ~/.mplayer/iso-8859-1/arial-24 font</PRE>
+  feliratok megjelenítésének képességét. Szerintem a legjobban akkor jársz
+  ha TTF (TrueType) feliratot használsz. Részletekért olvasd el az
+  <A HREF=#install_osd>OSD installálás</A> fejezetet.</P>
 
 <P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> file-t
   az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.
@@ -814,6 +809,7 @@
   <LI>SSA</LI>
   <LI>MPsub</LI>
   <LI>AQTitle</LI>
+  <LI>JACOsub</LI>
 </UL>
 
 <P>Az MPlayer az elõzõ listán felsorolt felirattipusokat a következõ
@@ -823,6 +819,8 @@
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
   <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
   <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+  <LI>JACOsub: <CODE>-dumpjacosub</CODE></LI>
+  <LI>Sami: <CODE>-dumpsami</CODE></LI>
 </UL>
 
 <P>A következõ formátumokra más opciók érvényesek mint egyébként:</P>
@@ -923,10 +921,19 @@ Naboo was under an attack.<BR>
   <LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
     könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
   <LI>TTF font használata. Ehhez a freetype könyvtár legalább 2.0.9-es
-    verziója szükséges. TODO: befejezni</LI>
+    verziója szükséges. Add meg a ./configure-nak az <CODE>--enable-freetype</CODE>
+    opciót, és így fordítsd le az MPlayert. Ezután két lehetõséged van:
+    <UL>
+      <LI>minden alkalommal megadod az MPlayer-nek a <CODE>-font /útvonal/arial.ttf</CODE>
+        opciót</LI>
+      <LI>vagypedig létrehozol egy symlink-et: <CODE>ln -s /útvonal/arial.ttf
+        ~/.mplayer/subfont.ttf</LI>
+    </UL>
+  </LI>
 </UL>
 
-<P>Ezután, tömörítsd ki a letöltött file-t a <CODE>~/.mplayer</CODE> vagy a
+<P>Ha mégis bitmap fontot akarsz használni TrueType helyett, tömörítsd ki a
+  letöltött file-t a <CODE>~/.mplayer</CODE> vagy a
   <CODE>$PREFIX/share/mplayer</CODE> könyvtárba. Ezután hozz létre egy
   symlink-et a kívánt betûméretre, pl így: <CODE>ln -s ~/.mplayer/arial-24
   ~/.mplayer/font</CODE>. Ha most elindítod a lejátszást, egy órát láthatsz a
@@ -1436,8 +1443,38 @@ end
 
 <H2><A NAME=sgi>6.5. Silicon Graphics Indigo / IRIX</A></H2>
 
-<P>Azt mondják mûxik. Használd az <I>sgi</I> ao meghajtót és jók leszünk.
-Közelebbi információ valakinél?</P>
+<P>A GNU install programot kell felinstallálnod, és (ha nem tetted bele a
+  globális path-ba) add meg a helyét:</P>
+
+<PRE>
+  ./configure --install-path=PATH
+</PRE>
+
+<P>Lehet az alap IRIX 6.5-ös install-t is használni, de ebben az esetben
+  a Makefile egy kis kézi átírásra szorul. A következõ két sort kell
+  átírni:</P>
+
+<PRE>
+  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+
+  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+</PRE>
+
+<P>erre:</P>
+
+<PRE>
+  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+
+  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+</PRE>
+
+<P>Add ki a következõ parancsokat (az MPlayer forrás könyvtárában):</P>
+
+<PRE>
+  cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
+</PRE>
+
+<P>ezután símán fordítsd le az MPlayer-t.</P>
 
 
 <H2><A NAME=qnx>6.6. QNX</A></H2>
