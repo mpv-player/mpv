@@ -808,7 +808,9 @@ static void radeon_param_buff_fill( void )
     len += sprintf(&radeon_param_buff[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
     len += sprintf(&radeon_param_buff[len],"MMIO: %p\n",radeon_mmio_base);
     len += sprintf(&radeon_param_buff[len],"Overlay offset: %p\n",radeon_overlay_off);
+#ifdef CONFIG_MTRR
     len += sprintf(&radeon_param_buff[len],"Tune MTRR: %s\n",mtrr?"on":"off");
+#endif
     len += sprintf(&radeon_param_buff[len],"Swapped fourcc: %s\n",swap_fourcc?"on":"off");
     len += sprintf(&radeon_param_buff[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
