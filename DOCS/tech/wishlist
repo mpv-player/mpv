@@ -98,6 +98,7 @@ Enhancements:
 
  * write native MacOS X video driver
 
+ * -stop option for MPlayer similar to -endpos for MEncoder
 
 
 Difficult stuff:
