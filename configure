@@ -2909,13 +2909,12 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd || netbsd ; then
+ if linux || freebsd || netbsd || darwin; then
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
 if test "$_dvdkit" = yes ; then
-  test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes && _dvdkit=yes
-  if test "$_dvdkit" = yes ; then
+  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes ; then
     _inputmodules="mpdvdkit $_inputmodules"
     _dvdread=included
   fi
