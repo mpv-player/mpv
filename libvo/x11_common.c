@@ -105,6 +105,8 @@ XF86VidModeModeInfo **vidmodes=NULL;
 XF86VidModeModeLine modeline;
 #endif
 
+int vo_x11_get_fs_type( int supported );
+
 void vo_hidecursor ( Display *disp , Window win )
 {
 	Cursor no_ptr;

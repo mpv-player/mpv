@@ -497,6 +497,7 @@ static int check_res( int num, int x, int y, int bpp,
        // as long as it's above 50 Hz (acki2 on 30/3/2001)
        ||
        (
+	(
 	(new_x == *old_x) &&
 	(new_y == *old_y) &&
 	(
@@ -509,6 +510,7 @@ static int check_res( int num, int x, int y, int bpp,
 	  new_vbi < *old_vbi &&
 	  new_vbi >= 50
 	 )
+	)
 	)
         ||
         // if everything is equal, then use the mode with the lower 
