@@ -2355,7 +2355,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
       track->realmedia = true;
 
-    } else if (!strcmp(track->codec_id, MKV_A_FLAC)) {
+    } else if (!strcmp(track->codec_id, MKV_A_FLAC) ||
+               (track->a_formattag == 0xf1ac)) {
       free(sh_a->wf);
       sh_a->wf = NULL;
 
@@ -2364,8 +2365,16 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       dp->pts = 0;
       dp->flags = 0;
       ds_add_packet(demuxer->audio, dp);
-      dp = new_demux_packet(track->private_size);
-      memcpy(dp->buffer, track->private_data, track->private_size);
+      if (track->a_formattag == mmioFOURCC('f', 'L', 'a', 'C')) {
+        dp = new_demux_packet(track->private_size);
+        memcpy(dp->buffer, track->private_data, track->private_size);
+      } else {
+        sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
+        dp = new_demux_packet(track->private_size - sizeof(WAVEFORMATEX));
+        memcpy(dp->buffer, (unsigned char *)track->private_data +
+               sizeof(WAVEFORMATEX), track->private_size -
+               sizeof(WAVEFORMATEX));
+      }
       dp->pts = 0;
       dp->flags = 0;
       ds_add_packet(demuxer->audio, dp);
