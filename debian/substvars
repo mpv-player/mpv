@@ -1,1 +1,1 @@
-shlibs:Depends=libc6 (>= 2.2.1-2), liblircclient0, libncurses5, xlibs (>= 4.0.1-11)
+shlibs:Depends=libc6 (>= 2.2.3-1), libgl1, libncurses5 (>= 5.2.20010310-1), libpng2(>=1.0.10), libsdl1.1, libstdc++2.10-glibc2.2, svgalibg1, xlibs (>> 4.0.3), zlib1g (>= 1:1.1.3)

@@ -1,6 +1,6 @@
 mplayer for Debian
 ----------------------
-  This package is ment for users to build themselves.
+  This package is meant for users to build themselves.
   Recommended method is running "fakeroot debian/rules binary" in "main" directory
 
 Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Thu, 17 May 2001 13:25:12 +0200

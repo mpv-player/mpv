@@ -1,6 +1,12 @@
+mplayer (0.17a-2) unstable; urgency=low
+
+  * mplayer.conf file, automatic menu files update 
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Sun, 20 May 2001 22:50:41 +0200
+
 mplayer (0.17a-1) unstable; urgency=low
 
-  * Version change, debian scripts update (rm), temporary(?) new maintainer;)
+  * Version change, debian scripts update (rm), maintainer switch
 
  -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Thu, 17 May 2001 13:25:12 +0200
 
