@@ -144,7 +144,7 @@ static int init(sh_video_t *sh){
 	// setup rv30 codec (codec sub-type and image dimensions):
 	if(extrahdr[1]>=0x30000000){
 	    ulong cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
-	    ulong cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&3),&cmsg24};
+	    ulong cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),&cmsg24};
 	    (*rvyuv_custom_message)(cmsg_data,sh->context);
 	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
