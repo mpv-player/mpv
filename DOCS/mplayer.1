@@ -34,7 +34,7 @@ mencoder \- Movie Encoder for Linux
 .SH "DESCRIPTION"
 .B mplayer
 is a movie player for LINUX (runs on many other Unices, and non\-x86
-CPUs, see the documentation). It plays most MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV,
+CPUs, see the documentation). It plays most MPEG/VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 and even WMV
 movies, too (without the avifile library).
@@ -42,7 +42,7 @@ movies, too (without the avifile library).
 Another great feature of mplayer is the wide range of supported output drivers.
 It works with X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, but you can use
 GGI, SDL (and this way all their drivers), VESA (on every VESA compatible card, even 
-without X11!) and some low level card-specific drivers (for Matrox, 3Dfx and Radeon), too!
+without X11!) and some low level card-specific drivers (for Matrox, 3Dfx and ATI), too!
 .br
 Most of them support software or hardware scaling, so you can enjoy movies in fullscreen.
 MPlayer supports displaying through some hardware MPEG decoder boards, such as the Siemens
@@ -51,15 +51,16 @@ DVB, DXR2 and DXR3/Hollywood+!
 MPlayer has an onscreen display (OSD) for status information, nice big
 antialiased shaded subtitles and visual feedback for keyboard controls.
 European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
-fonts are supported along with 10 subtitle formats (VobSub, MicroDVD, SubRip,
-SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub).
+fonts are supported along with 9 subtitle formats (MicroDVD, SubRip,
+SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub). DVD subtitles
+(SPU streams, VobSub and Closed Captions) are supported.
 
 .B mencoder
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to
 encode MPlayer-playable movies (see above) to other MPlayer-playable formats
 (see below). It encodes to DivX4 (1, 2 or 3 passes), XviD, codecs of libavcodec,
 PCM/MP3/VBRMP3 audio. It also has stream copying abilities, a powerful plugin system
-(crop, expand, flip, postprocess, rotate, scale, rgb/yuv conversion) and more.
+(crop, expand, flip, postprocess, rotate, scale, add/remove noise, rgb/yuv conversion) and more.
 
 .B gmplayer
 is MPlayer with a graphical user interface.
