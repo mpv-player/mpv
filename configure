@@ -5978,11 +5978,7 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   fi
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
-  if test "$host_arch" != "mips" ; then
     CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
-  else
-    CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
-  fi
   # always compile with '-g' if .developer:
   if test -f ".developer" ; then
     CFLAGS="-g $CFLAGS"
