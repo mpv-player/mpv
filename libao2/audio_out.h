@@ -71,6 +71,7 @@ extern int ao_buffersize;
 #define CONTROL_NA -3
 
 #define AOCONTROL_SET_DEVICE 1
-#define AOCONTROL_QUERY_FORMAT 2
-
-
+#define AOCONTROL_GET_DEVICE 2
+#define AOCONTROL_QUERY_FORMAT 3
+#define AOCONTROL_GET_VOLUME 4
+#define AOCONTROL_SET_VOLUME 5
