@@ -316,7 +316,7 @@ static void radeon_vid_start_video( void )
 
 static int radeon_vid_init_video( mga_vid_config_t *config )
 {
-    uint32_t tmp,src_w,pitch,h_inc,step_by,left,leftUV,top;
+    uint32_t tmp,src_w,src_h,pitch,h_inc,step_by,left,leftUV,top;
     int is_420;
 RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) dest(%u:%ux%u:%u) frame_size=%u num_frames=%u\n"
 	,(uint32_t)config->version
@@ -332,6 +332,10 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 	,(uint32_t)config->frame_size
 	,(uint32_t)config->num_frames);
     radeon_vid_stop_video();
+    left = XXX_SRC_X << 16;
+    top = XXX_SRC_Y << 16;
+    src_h = config->src_height;
+    src_w = config->src_width;
     switch(config->format)
     {
         case IMGFMT_RGB15:
@@ -369,20 +373,17 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
         case IMGFMT_RGB15:
         case IMGFMT_BGR15:
         case IMGFMT_RGB16:
-	case IMGFMT_BGR16: pitch = ((XXX_WIDTH*2) + 15) & ~15; break;
+	case IMGFMT_BGR16: pitch = ((src_w*2) + 15) & ~15; break;
         case IMGFMT_RGB24:
-        case IMGFMT_BGR24: pitch = ((XXX_WIDTH*3) + 15) & ~15; break;
+        case IMGFMT_BGR24: pitch = ((src_w*3) + 15) & ~15; break;
         case IMGFMT_RGB32:
-	case IMGFMT_BGR32: pitch = ((XXX_WIDTH*4) + 15) & ~15; break;
+	case IMGFMT_BGR32: pitch = ((src_w*4) + 15) & ~15; break;
     }
-    
-    left = XXX_SRC_X << 16;
-    top = XXX_SRC_Y << 16;
     
     besr.fourcc = config->format;
 
-    besr.v_inc = (config->src_height << 20) / XXX_DRW_H;
-    h_inc = (config->src_width  << 12) / XXX_DRW_W;
+    besr.v_inc = (src_h << 20) / XXX_DRW_H;
+    h_inc = (src_w << 12) / XXX_DRW_W;
     step_by = 1;
 
     while(h_inc >= (2 << 12)) {
@@ -395,30 +396,24 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     if(is_420)
     {
         uint32_t dstPitch,d1line,d2line,d3line;
-	dstPitch = (XXX_WIDTH + 15) & ~15;  /* of luma */
+	dstPitch = ((src_w + 15) & ~15);  /* of luma */
 	d1line = top * dstPitch;
-	d2line = (XXX_HEIGHT * dstPitch) + ((top >> 1) * (dstPitch >> 1));
-	d3line = d2line + ((XXX_HEIGHT >> 1) * (dstPitch >> 1));
-	d1line += (left >> 16) & ~15;
-	d2line += (left >> 17) & ~15;
-	d3line += (left >> 17) & ~15;
-        besr.vid_buf0_base_adrs = (radeon_overlay_off + d1line) & 0xfffffff0;
-        besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & 0xfffffff0) | 0x00000001;
-        besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & 0xfffffff0) | 0x00000001;
-        besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs;
-        besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs;
-        besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs;
+	d2line = (src_h * dstPitch) + ((top >> 1) * (dstPitch >> 1));
+	d3line = d2line + ((src_h >> 1) * (dstPitch >> 1));
+        besr.vid_buf0_base_adrs = (radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK;
+        besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & VIF_BUF1_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
+        besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & VIF_BUF2_BASE_ADRS_MASK) | VIF_BUF2_PITCH_SEL;
     }
     else
     {
       besr.vid_buf0_base_adrs = radeon_overlay_off;
       besr.vid_buf0_base_adrs += ((left & ~7) << 1)&0xfffffff0;
-      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
+      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
       besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
-      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
     }
+    besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
+    besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs+config->frame_size;
+    besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs+config->frame_size;
 
     tmp = (left & 0x0003ffff) + 0x00028000 + (h_inc << 3);
     besr.p1_h_accum_init = ((tmp <<  4) & 0x000f8000) |
@@ -435,23 +430,24 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     tmp = ((top >> 1) & 0x0000ffff) + 0x00018000;
     besr.p23_v_accum_init = is_420 ? ((tmp << 4) & 0x01ff8000) | 0x00000001 : 0;
 
-    leftUV = (left >> 17) & 7;
-    left = (left >> 16) & 7;
+    leftUV = (left >> 17) & 15;
+    left = (left >> 16) & 15;
     besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
     besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
     besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
-    besr.p1_blank_lines_at_top = 0x00000fff | ((config->src_height - 1) << 16);
-    besr.p23_blank_lines_at_top = is_420 ? 0x000007ff | ((((config->src_height+1)>>1) - 1) << 16) : 0;
+    besr.p1_blank_lines_at_top = P1_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
+    src_h = (src_h + 1) >> 1;
+    besr.p23_blank_lines_at_top = is_420 ? P23_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16):0;
     besr.vid_buf_pitch0_value = pitch;
-    besr.vid_buf_pitch1_value = is_420 ? pitch/2 : pitch;
+    besr.vid_buf_pitch1_value = is_420 ? pitch>>1 : pitch;
 RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
 RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
 RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
-    besr.p1_x_start_end = (config->src_width + left - 1) | (left << 16);
-    src_w=config->src_width >> 1;
-    besr.p2_x_start_end = (src_w + left - 1) | (leftUV << 16);
+    besr.p1_x_start_end = (src_w+left-1)|(left<<16);
+    src_w>>=1;
+    besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
     besr.p3_x_start_end = besr.p2_x_start_end;
     return 0;
 }
@@ -459,16 +455,7 @@ RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x
 static void radeon_vid_frame_sel(int frame)
 {
     uint32_t off;
-    switch(frame)
-    {
-      default:
-      case 0:  off = besr.vid_buf0_base_adrs; break;
-      case 1:  off = besr.vid_buf3_base_adrs; break;
-      case 2:  off = besr.vid_buf0_base_adrs; break;
-      case 3:  off = besr.vid_buf3_base_adrs; break;
-      case 4:  off = besr.vid_buf0_base_adrs; break;
-      case 5:  off = besr.vid_buf3_base_adrs; break;
-    }
+    off = frame%2?besr.vid_buf3_base_adrs:besr.vid_buf0_base_adrs;
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	off);
