@@ -1,0 +1,38 @@
+include ../config.mak
+
+LIBNAME = libaf.a
+
+SRCS=af.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c window.c filter.c
+
+OBJS=$(SRCS:.c=.o)
+
+CFLAGS  = $(OPTFLAGS) -I. -Wall 
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+$(LIBNAME):     $(OBJS) Makefile
+	$(AR) r $(LIBNAME) $(OBJS)
+
+$(OBJS):af.h dsp.h filter.h window.h
+
+all:    $(LIBNAME)
+
+clean:
+	rm -f *.o *.a *~
+
+distclean:
+	rm -f *.o *.a *~ .depend
+
+dep:    depend
+
+depend:
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+
+#
+# include dependency files if they exist
+#
+ifneq ($(wildcard .depend),)
+include .depend
+endif

@@ -45,13 +45,13 @@ AO_LIBS = libao2/libao2.a
 A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB)
-COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -lm
+COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -lm -Llibaf -laf
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
-PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libvo
+PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libvo libaf
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -84,7 +84,7 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-COMMON_DEPS = $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a
+COMMON_DEPS = $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a libaf/libaf.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -114,6 +114,9 @@ all:	$(ALL_PRG)
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
+
+libaf/libaf.a:
+	$(MAKE) -C libaf
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
