@@ -1,7 +1,7 @@
 /* This audio filter changes the volume of the sound, and can be used
    when the mixer doesn't support the PCM channel. It can handel
    between 1 and 6 channels. The volume can be adjusted between -60dB
-   to +10dB and is set on a per channels basis. The volume can be
+   to +20dB and is set on a per channels basis. The volume can be
    written ad read by AF_CONTROL_VOLUME_SET and AF_CONTROL_VOLUME_GET
    respectivly.
 
@@ -32,7 +32,7 @@
 #define MIN_S16 -32650
 #define MAX_S16  32650
 
-#define MAX_VOL +10.0
+#define MAX_VOL +20.0
 #define MIN_VOL	-60.0
 
 // Number of channels
@@ -55,7 +55,7 @@ typedef struct af_volume_s
 
 /* Convert to gain value from dB. Returns AF_OK if of and AF_ERROR if
    fail */
-inline int from_dB(double* in, double* out) 
+inline int from_dB(double* in, double* out, double k) 
 {
   int i = 0; 
   // Sanity check
@@ -63,13 +63,13 @@ inline int from_dB(double* in, double* out)
     return AF_ERROR;
 
   for(i=0;i<NCH;i++) 
-    out[i]=pow(10.0,clamp(in[i],MIN_VOL,MAX_VOL)/10.0);
+    out[i]=pow(10.0,clamp(in[i],MIN_VOL,MAX_VOL)/k);
   return AF_OK;
 }
 
 /* Convert from gain value to dB. Returns AF_OK if of and AF_ERROR if
    fail */
-inline int to_dB(double* in, double* out) 
+inline int to_dB(double* in, double* out, double k) 
 {
   int i = 0; 
   // Sanity check
@@ -77,7 +77,7 @@ inline int to_dB(double* in, double* out)
     return AF_ERROR;
 
   for(i=0;i<NCH;i++) 
-    out[i]=10.0*log10(clamp(in[i],MIN_VOL,MAX_VOL));
+    out[i]=k*log10(clamp(in[i],MIN_VOL,MAX_VOL));
   return AF_OK;
 }
 
@@ -104,14 +104,21 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        af->data->bps != ((af_data_t*)arg)->bps)
       return AF_FALSE;
     return AF_OK;
+  case AF_CONTROL_COMMAND_LINE:{
+    double vol[6]={-10.0,-10.0,-10.0,-10.0,-10.0,-10.0};
+    sscanf((char*)arg,"%lf:%lf:%lf:%lf:%lf:%lf:%i:%i:%i",
+	   &vol[0], &vol[1], &vol[2], &vol[3], &vol[4], &vol[5],
+	   &(s->softclip), &(s->probe), &(s->onoff));
+    return from_dB(vol,s->volume,20.0);
+  }
   case AF_CONTROL_VOLUME_SET:
-    return from_dB((double*)arg,s->volume);
+    return from_dB((double*)arg,s->volume,20.0);
   case AF_CONTROL_VOLUME_GET:
-    return to_dB(s->volume,(double*)arg);
+    return to_dB(s->volume,(double*)arg,20.0);
   case AF_CONTROL_VOLUME_PROBE_GET:
-    return to_dB(s->power,(double*)arg);
+    return to_dB(s->power,(double*)arg,10.0);
   case AF_CONTROL_VOLUME_PROBE_GET_MAX:
-    return to_dB(s->maxpower,(double*)arg);
+    return to_dB(s->maxpower,(double*)arg,10.0);
   case AF_CONTROL_VOLUME_SOFTCLIP:
     s->softclip = (int)arg;
     return AF_OK;
@@ -203,10 +210,13 @@ static int open(af_instance_t* af){
   af->setup=calloc(1,sizeof(af_volume_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;
-  // Enable volume control and set initial volume to 0.1
+  /* Enable volume control and set initial volume to 0.1 this is a
+     safety mesure to ensure that the user doesn't blow his
+     speakers. If the user isn't happy with this he can use the
+     commandline parameters to set the initial volume */
   ((af_volume_t*)af->setup)->onoff = 1;
   for(i=0;i<NCH;i++)
-    ((af_volume_t*)af->setup)->volume[i]=1.0; //0.1;
+    ((af_volume_t*)af->setup)->volume[i]=0.1;
 
   return AF_OK;
 }

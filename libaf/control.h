@@ -29,11 +29,16 @@
 
 /* Called just after creation with the af_cfg for the stream in which
    the filter resides as input parameter this call can be used by the
-   filter to initialize itself using commandline parameters */
+   filter to initialize itself */
 #define AF_CONTROL_POST_CREATE 		1 + AF_CONTROL_OPTIONAL_BASE
 
 // Called just before destruction of a filter
 #define AF_CONTROL_PRE_DESTROY 		2 + AF_CONTROL_OPTIONAL_BASE
+
+/* Commandline parameters. If there were any commandline parameters
+   for this specific filter, they will be given as a char* in the
+   argument */
+#define AF_CONTROL_COMMAND_LINE		3 + AF_CONTROL_OPTIONAL_BASE
 
 
 // FILTER SPECIFIC CALLS

@@ -181,7 +181,8 @@ static config_t mplayer_opts[]={
 	{"fixed-vo", &fixed_vo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"af", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},

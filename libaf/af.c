@@ -57,9 +57,12 @@ af_instance_t* af_get(af_stream_t* s, char* name)
   return NULL;
 }
 
-// Function for creating a new filter of type name
+/*/ Function for creating a new filter of type name. The name may
+  contain the commandline parameters for the filter */
 af_instance_t* af_create(af_stream_t* s, char* name)
 {
+  char* cmdline = name;
+  char* delim   = "=";
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if(!new){
@@ -68,11 +71,15 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   }  
   memset(new,0,sizeof(af_instance_t));
 
+  // Check for commandline parameters
+  strsep(&cmdline, delim);
+
   // Find filter from name
   if(NULL == (new->info=af_find(name)))
     return NULL;
 
-  // Make sure that the filter is not already in the list if it is non-reentrant
+  /* Make sure that the filter is not already in the list if it is
+     non-reentrant */
   if(new->info->flags & AF_FLAGS_NOT_REENTRANT){
     if(af_get(s,name)){
       mp_msg(MSGT_AFILTER,MSGL_ERR,"There can only be one instance of the filter '%s' in each stream\n",name);  
@@ -80,14 +87,22 @@ af_instance_t* af_create(af_stream_t* s, char* name)
       return NULL;
     }
   }
-
+  
+  mp_msg(MSGT_AFILTER,MSGL_V,"Adding filter %s \n",name);
+  
   // Initialize the new filter
   if(AF_OK == new->info->open(new) && 
-     AF_ERROR < new->control(new,AF_CONTROL_POST_CREATE,&s->cfg))
-    return new;
+     AF_ERROR < new->control(new,AF_CONTROL_POST_CREATE,&s->cfg)){
+    if(cmdline){
+      if(AF_ERROR<new->control(new,AF_CONTROL_COMMAND_LINE,cmdline))
+	return new;
+    }
+    else
+      return new; 
+  }
   
   free(new);
-  mp_msg(MSGT_AFILTER,MSGL_ERR,"Couldn't create audio filter '%s'\n",name);  
+  mp_msg(MSGT_AFILTER,MSGL_ERR,"Couldn't create or open audio filter '%s'\n",name);  
   return NULL;
 }
 
