@@ -2941,6 +2941,11 @@ if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _vomodules="mpegpes(file) $_vomodules"
 fi
 
+if test "$_dvb" = yes || test "$_dvbhead" = yes ; then
+    _dvbin=yes
+else
+    _dvbin=no
+fi
 
 echocheck "PNG support"
 if test "$_png" = auto ; then
@@ -5005,7 +5010,7 @@ $_live_libs_def
 STREAMING = $_streaming
 STREAMING_LIVE_DOT_COM = $_live
 STREAMING_LIB = $_ld_streaming $_ld_live
-DVBIN = $_dvb
+DVBIN = $_dvbin
 VIDIX = $_vidix
 SHARED_PP = $_shared_pp
 CONFIG_PP = yes
