@@ -2744,6 +2744,20 @@ El parámetro opcional (ivtc=1) corresonde a la opción dr=1 para el filtro
 detc, y debe ser usado con MEncoder pero no con mplayer. Como con detc,
 debe especificar la relación de imágenes por segundo correcta (-ofps 23.976)
 cuando use MEncoder.
+.B "pullup"
+Filtro de pulldown inverso de tercera generación (telecine inverso),
+capaz de manejar contenido de telecine-duro mezclado, 24 fps progresivo,
+y 30 fps progresivo.
+El filtro pullup está diseñado para ser mucho más robusto que detc o
+ivtc, pero aún está en desarrollo.
+Aún no hay opciones de configuración disponibles.
+Al igual que el motor de pulldown inverso subyacente está diseñado para
+tomar ventaja de las nuevas características en MPlayer G2, la actual
+implementación en G1 es más bien para ser probada.
+Nota: actualmente pullup no tiene ninguna forma de fijar la tasa de bits
+de salida durante secuencias de 30 fps o pausas, devuelve más de 24 fps,
+lo que quiere decir que tendrá problemas is lo usa con mencoder -ofps 23.976.
+.TP
 .B "softpulldown"
 Este filtro funciona correctamente solo con MEncoder y actúa en las marcas
 MPEG2 usadas para bajada 3:2 por software (telecine por software).
