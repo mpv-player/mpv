@@ -101,6 +101,7 @@ case 4: {
         printf("ACM decoding error: %d\n",ret);
         driver=0;
     }
+    sh_audio->a_buffer_len=ret;
     break;
 }
 case 2: {
