@@ -36,23 +36,19 @@
 
 #define L   	8	// Filter length
 // Unrolled loop to speed up execution 
-#define FIR(x,w,y){ \
-  int16_t a = (w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3]) >> 16; \
-  int16_t b = (w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7]) >> 16; \
-  (y[0])    = a+b; \
-}
+#define FIR(x,w,y) \
+  (y[0])  = ( w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3] \
+            + w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7] ) >> 16
 
 #else  /* Fast machine */
 
 #define L   	16
 // Unrolled loop to speed up execution 
-#define FIR(x,w,y){ \
-  int16_t a = (w[0] *x[0] +w[1] *x[1] +w[2] *x[2] +w[3] *x[3] ) >> 16; \
-  int16_t b = (w[4] *x[4] +w[5] *x[5] +w[6] *x[6] +w[7] *x[7] ) >> 16; \
-  int16_t c = (w[8] *x[8] +w[9] *x[9] +w[10]*x[10]+w[11]*x[11]) >> 16; \
-  int16_t d = (w[12]*x[12]+w[13]*x[13]+w[14]*x[14]+w[15]*x[15]) >> 16; \
-  y[0]      = (a+b+c+d) >> 1; \
-}
+#define FIR(x,w,y) \
+  y[0] = ( w[0] *x[0] +w[1] *x[1] +w[2] *x[2] +w[3] *x[3] \
+         + w[4] *x[4] +w[5] *x[5] +w[6] *x[6] +w[7] *x[7] \
+         + w[8] *x[8] +w[9] *x[9] +w[10]*x[10]+w[11]*x[11] \
+         + w[12]*x[12]+w[13]*x[13]+w[14]*x[14]+w[15]*x[15] ) >> 16
 
 #endif /* Fast machine */
 
@@ -271,8 +267,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Reinit must be called after this function has been called
     
     // Sanity check
-    if(((int*)arg)[0] <= 8000 || ((int*)arg)[0] > 192000){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] The output sample frequency must be between 8kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
+    if(((int*)arg)[0] < 2000 || ((int*)arg)[0] > 192000){
+      mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] The output sample frequency must be between 2kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
       return AF_ERROR;
     }
 
