@@ -121,6 +121,7 @@ if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
   while(1){
     int id,len,skip;
     AVIINDEXENTRY* idx;
+    unsigned char c;
     demuxer->filepos=stream_tell(demuxer->stream);
     if(demuxer->filepos>=avi_header.movi_end) break;
     id=stream_read_dword_le(demuxer->stream);
@@ -140,16 +141,16 @@ if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
     idx->dwChunkOffset=demuxer->filepos;
     idx->dwChunkLength=len;
+    
+    c=stream_read_char(demuxer->stream);
 
     // Fix keyframes for DivX files:
     if(idxfix_divx)
       if(avi_stream_id(id)==idxfix_videostream){
-        unsigned char c=stream_read_char(demuxer->stream);
-//        --skip;
-        if(!(c&0x40)) idx->dwFlags=0;
+        if(c&0x40) idx->dwFlags=0;
       }
     
-    if(verbose>=2) printf("0x%08X  0x%08X %.4s  %X\n",demuxer->filepos,id,&id,idx->dwFlags);
+    if(verbose>=2) printf("%08X %08X %.4s %02X %X\n",demuxer->filepos,id,&id,c,idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
       int i;
