@@ -283,12 +283,10 @@ end
     <td>Here is an example to make this clear. Suppose that you have an image
       called <code>main.png</code> that you use for the main window:
       <blockquote>
-<pre>
-    base = main, -1, -1
-</pre>
+        <code>base = main, -1, -1</code>
       </blockquote>
       MPlayer tries to load <code>main</code>, <code>main.png</code>,
-      <code>main.PNG</code> files.<br>
+      <code>main.PNG</code> files.
     </td>
   </tr>
 </table>
@@ -306,11 +304,10 @@ end
     The window will appear at the given <code>X,Y</code> position on the screen
     The window will have the size of the image.
     <div><em class="warn"><b>Note:</b> These coordinates do not currently work
-      for the display window.</em><br>
-      <em class="warn"><b>Warning:</b> Transparent regions in the image (colored
-      #FF00FF) appear black on X servers without the XShape extension. The
-      image's width must be dividable by 8.</em>
-    </div>
+      for the display window.</em></div>
+    <div><em class="warn"><b>Warning:</b> Transparent regions in the image
+      (colored #FF00FF) appear black on X servers without the XShape extension.
+      The image's width must be dividable by 8.</em></div>
   </dd>
 
   <dt><a name="main.button"><b><code>button = image, X, Y, width, height,
@@ -334,9 +331,9 @@ end
   <dt><a name="main.decoration"><b><code>decoration = enable|disable</code></b>
     </a></dt>
   <dd>Enable or disable window manager decoration of the main window. Default
-    is <b>disable</b>.<br><br>
-    <em class="warn"><b>Note:</b> This doesn't work for the display window,
-    there is no need to.</em><br>
+    is <b>disable</b>.
+    <div><em class="warn"><b>Note:</b> This doesn't work for the display window,
+    there is no need to.</em></div>
   </dd>
 
   <dt><a name="main.hpotmeter"><b><code>hpotmeter = button, bwidth, bheight,
