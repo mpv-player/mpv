@@ -200,7 +200,7 @@ using the \-input option.
 .IPs "<\- and \->"
 seek backward/\:forward 10 seconds
 .IPs "up and down"
-seek backward/\:forward  1 minute
+seek backward/\:forward 1 minute
 .IPs "pgup and pgdown"
 seek backward/\:forward 10 minutes
 .IPs "< and >"
@@ -232,7 +232,7 @@ decrease/\:increase panscan range
 .IPs o\ \ \ \ 
 toggle OSD states: none / seek / seek + timer / seek + timer + total time
 .IPs d\ \ \ \ 
-toggle frame dropping states:  none / skip display / skip decoding
+toggle frame dropping states: none / skip display / skip decoding
 (see \-framedrop and \-hardframedrop)
 .IPs v\ \ \ \ 
 toggle subtitle visibility
@@ -1474,7 +1474,7 @@ Specify the VOBsub subtitle ID.
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-abs <value> (OBSOLETE)
-Override audio driver/\:card buffer size detection, \-ao oss only
+Override audio driver/\:card buffer size detection, \-ao oss only.
 .TP
 .B \-aofile <filename>
 Filename for \-ao pcm.
@@ -1487,9 +1487,9 @@ Available options are:
 .RSs
 .IPs list=[plugins]
 comma separated list of plugins (resample, surround, format, volume,
-extrastereo, volnorm)
+extrastereo, volnorm, delay)
 .IPs delay=<sec>
-example plugin, do not use.
+example plugin, do not use (delay plugin only)
 .IPs format=<format>
 output format (format plugin only)
 .IPs fout=<Hz>
@@ -1519,25 +1519,25 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-Signed 8-bit
+signed 8-bit
 .IPs 16
-Unsigned 8-bit
+unsigned 8-bit
 .IPs 32
-Unsigned 16-bit (Little-Endian)
+unsigned 16-bit (little-endian)
 .IPs 64
-Unsigned 16-bit (Big-Endian)
+unsigned 16-bit (big-endian)
 .IPs 128
-Signed  16-bit (Little-Endian)
+signed 16-bit (little-endian)
 .IPs 256
-Signed 16-bit (Big-Endian)
+signed 16-bit (big-endian)
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
 AC3
 .IPs 4096
-Signed 32-bit (Little-Endian)
+signed 32-bit (little-endian)
 .IPs 8192
-Signed 32-bit (Big-Endian)
+signed 32-bit (big-endian)
 .RE
 .PD 1
 .
@@ -1723,7 +1723,6 @@ very little video memory.
 .TP
 .B \-dr \ \ \ 
 Turns on direct rendering (not supported by all codecs and video outputs)
-(default is off).
 Warning: may cause OSD/\:SUB corruption!
 .TP
 .B \-dxr2 <option1:option2:...>
@@ -3309,7 +3308,7 @@ It's only useful together with expand+scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
-control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
+Control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
 576*4/3=768), set it to 576*(16/9)=1024 for a 16:9 TV.
 .RE
 .TP
@@ -3627,7 +3626,7 @@ up from their original framerate for TV.
 Only the luma plane is used to find the frame breaks.
 If a field has no match, it is deinterlaced with simple linear
 approximation.
-If the source is MPEG-2, and this must be the first filter to allow
+If the source is MPEG-2, this must be the first filter to allow
 access to the field-flags set by the MPEG-2 decoder.
 Depending on the source MPEG, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
@@ -3972,7 +3971,7 @@ size of image/area
 .IPs "xpos, ypos"
 start blitting at X/Y position
 .IPs alpha
-set alpha difference.
+Set alpha difference.
 If you set this to -255 you can then send a sequence of ALPHA-commands to set
 the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
 .RSss
@@ -4573,13 +4572,13 @@ equal to or lower than vqmin (default: 2.0).
 .RE
 .TP
 .B lmax=<0.01\-255.0>
-maximum lagrange multiplier for ratecontrol (default: 31.0).
+maximum lagrange multiplier for ratecontrol (default: 31.0)
 .RE
 .TP
 .B vqscale=<1\-31>
 Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
 A lower value means better quality but larger files (default: 0 (disabled)).
-1 is not recommended (see \-vqmin for details).
+1 is not recommended (see vqmin for details).
 .TP
 .B vqmax=<1\-31>
 maximum quantizer (pass\ 1/\:2) 10\-31 should be a sane range (default: 31)
@@ -4749,6 +4748,9 @@ approximated filesize tolerance in kBit.
 1000\-100000 is a sane range.
 (warning: 1kBit = 1000 Bits)
 (default: 8000)
+.I NOTE:
+vratetol should not be too large during the second pass or there might
+be problems if vrc_(min|max)rate is used.
 .TP
 .B vrc_maxrate=<value>
 maximum bitrate in kbit/\:sec (pass\ 1/\:2)
@@ -4760,9 +4762,6 @@ minimum bitrate in kbit/\:sec (pass\ 1/\:2)
 buffer size in kbit (pass\ 1/\:2).
 For MPEG1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
-.I NOTE:
-vratetol should not be too large during the second pass or there might
-be problems if vrc_(min|max)rate is used.
 .TP
 .B vrc_buf_aggressivity
 currently useless
@@ -4911,7 +4910,7 @@ use a nice differentiable function (default)
 .PD 1
 .TP
 .B vlelim=<-1000\-1000>
-single coefficient elimination threshold for luminance.
+Sets single coefficient elimination threshold for luminance.
 Negative values will also consider the dc coefficient (should be at least -4
 or lower for encoding at quant=1):
 .PD 0
@@ -4924,7 +4923,7 @@ disabled (default)
 .PD 1
 .TP
 .B vcelim=<-1000\-1000>
-single coefficient elimination threshold for chrominance.
+Sets single coefficient elimination threshold for chrominance.
 Negative values will also consider the dc coefficient (should be at least -4
 or lower for encoding at quant=1):
 .PD 0
@@ -5039,9 +5038,13 @@ sh4
 .PD 1
 .TP
 .B lumi_mask=<0.0\-1.0>
-luminance masking.
-Warning: Be careful, too large values can cause disastrous things.
-Warning2: Large values might look good on some monitors but may look horrible
+luminance masking
+.br
+.I WARNING:
+Be careful, too large values can cause disastrous things.
+.br
+.I WARNING:
+Large values might look good on some monitors but may look horrible
 on other monitors:
 .RSs
 .IPs 0.0
@@ -5051,9 +5054,13 @@ sane range
 .RE
 .TP
 .B dark_mask=<0.0\-1.0>
-darkness masking.
-Warning: be careful, too large values can cause disasterous things.
-Warning2: large values might look good on some monitors but may look horrible
+darkness masking
+.br
+.I WARNING:
+Be careful, too large values can cause disasterous things.
+.br
+.I WARNING:
+Large values might look good on some monitors but may look horrible
 on other monitors / TV / TFT:
 .RSs
 .IPs 0.0
@@ -5066,10 +5073,12 @@ sane range
 temporal complexity masking (default: 0.0 (disabled))
 .TP
 .B scplx_mask=<0.0\-1.0>
-spatial complexity masking.
+Spatial complexity masking.
 Larger values help against blockiness, if no deblocking filter is used for
 decoding.
-Tip: Crop any black borders completely as they will reduce the quality
+.br
+.I HINT:
+Crop any black borders completely as they will reduce the quality
 of the macro blocks (also applies without scplx_mask).
 .RSs
 .IPs 0.0
@@ -5279,13 +5288,13 @@ sum of squared errors of the quantization
 .PD 1
 .TP
 .B cbp\ \ \ \ 
-Rate distorted optimal coded block pattern
-will select the coded block pattern which minimizes distortion + lambda*rate
-this can only be used together with trellis quantization
+Rate distorted optimal coded block pattern.
+Will select the coded block pattern which minimizes distortion + lambda*rate.
+This can only be used together with trellis quantization.
 .TP
 .B mv0\ \ \ \ 
-try to encode each MB with MV=<0,0> and choose the better one
-this has no effect if mbd=0
+Try to encode each MB with MV=<0,0> and choose the better one.
+This has no effect if mbd=0.
 .TP
 .B qprd\ \ \ 
 rate distorted optimal QP for the given lambda of each macroblock, note this
@@ -5327,7 +5336,7 @@ and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
 .TP
 .B mpeg_quant
-Use MPEG quantizers instead of H.263 (i.e.\& use H.263 quantizers).
+Use MPEG quantizers instead of H.263.
 .TP
 .B aic\ \ \ \ 
 ac prediction (=advanced intra prediction for H.263+)
@@ -5349,8 +5358,8 @@ MPEG style quantizer default: 96
 H.263 style quantizer default: 0
 .br
 .I NOTE:
-The H.263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
-the MPEG MMX quantizer cannot handle negative biases (set vfdct=1or2).
+The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
+the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .TP
 .B pbias=<-256\-256>
 inter quantizer bias (256 == 1.0)
@@ -5360,8 +5369,8 @@ MPEG style quantizer default: 0
 H.263 style quantizer default: -64
 .br
 .I NOTE:
-The H.263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
-the MPEG MMX quantizer cannot handle negative biases (set vfdct=1or2).
+The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
+the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .br
 Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
 .TP
@@ -5369,11 +5378,11 @@ Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
 noise reduction, 0 is disabled
 .TP
 .B qns=<0\-3>
-quantizer noise shaping, reduces ringing artefacts, larger values are slower
-but may not result in better quality
-this can and should be used together with trellis quantization, in which case
-the trellis quantization (optimal for constant weight) will be used as startpoint
-for the iterative search.
+Quantizer noise shaping, reduces ringing artefacts, larger values are slower
+but may not result in better quality.
+This can and should be used together with trellis quantization, in which case
+the trellis quantization (optimal for constant weight) will be used as
+startpoint for the iterative search.
 .PD 0
 .RSs
 .IPs 0
@@ -5556,7 +5565,7 @@ This will generate an illegal bitstream, and WILL NOT be
 decodable by ISO-MPEG4 decoders except DivX/libavcodec/XviD.
 .br
 .I WARNING:
-this will also store a fake DivX version in the file so the bug
+This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
 .TP
 .B divx5bvop
