@@ -217,6 +217,81 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
     }
 }
 
+static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    int i;
+
+    /* Plane Y */
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += dstrides.y*y + x;
+    src = image[0];
+    for(i=0;i<h;i++){
+        memcpy(dest,src,w);
+        src+=stride[0];
+        dest += dstrides.y;
+    }
+    
+    if (vidix_play.flags & VID_PLAY_INTERLEAVED_UV)
+    {
+	printf("vosub_vidix: interleaved uv for yuv410p not supported\n");
+    }
+    else 
+    {
+		/* Plane V */
+		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
+		dest += dstrides.v*y/8 + x;
+		src = image[1];
+		for(i=0;i<h/4;i++){
+			memcpy(dest,src,w/4);
+			src+=stride[1];
+			dest+=dstrides.v/4;
+		}
+
+		/* Plane U */
+		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.u;
+		dest += dstrides.u*y/8 + x;
+		src = image[2];
+		for(i=0;i<h/4;i++){
+			memcpy(dest,src,w/4);
+			src+=stride[2];
+			dest += dstrides.u/4;
+		}
+		return 0;
+    }
+}
+
+static uint32_t vidix_draw_slice_410_fast(uint8_t *image[], int stride[], int w, int h, int x, int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    UNUSED(w);
+    UNUSED(stride);
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += dstrides.y*y + x;
+    src = image[0];
+    memcpy(dest, src, dstrides.y*h*9/8);
+    return 0;
+}
+
+static uint32_t vidix_draw_slice_400(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    int i;
+
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += dstrides.y*y + x;
+    src = image[0];
+    for(i=0;i<h;i++){
+        memcpy(dest,src,w);
+        src+=stride[0];
+        dest += dstrides.y;
+    }
+    return 0;
+}
+
 static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
@@ -258,7 +333,8 @@ uint32_t vidix_draw_frame(uint8_t *image[])
   int stride[1];
   if(verbose > 1) printf("vosub_vidix: vidix_draw_frame() was called\n");
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
-    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
+    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV
+	|| src_format == IMGFMT_YVU9 || src_format == IMGFMT_IF09)
 	printf("vosub_vidix: draw_frame for YUV420 called, frame cannot be written\n");
     else
     if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
@@ -580,10 +656,10 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		vidix_play.frame_size);
 	switch(format)
 	{
-	    /*
-	    case IMGFMT_YV09:
+	    case IMGFMT_Y800:
+	    case IMGFMT_Y8:
+	    case IMGFMT_YVU9:
 	    case IMGFMT_IF09:
-	    */
 	    case IMGFMT_I420:
 	    case IMGFMT_IYUV:
 	    case IMGFMT_YV12:
@@ -617,12 +693,15 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		break;
 	}
         /* tune some info here */
-	sstride = src_width*2;
+	sstride = src_width*image_Bpp;
 	if(!forced_fourcc)
 	{
 	    is_422_planes_eq = sstride == dstrides.y;
+
 	    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 		 vo_server->draw_slice = vidix_draw_slice_420;
+	    else if (src_format == IMGFMT_YVU9 || src_format == IMGFMT_IF09)
+		 vo_server->draw_slice = vidix_draw_slice_410;
 	    else vo_server->draw_slice =
 		 is_422_planes_eq ?
 		 vidix_draw_slice_packed_fast:
