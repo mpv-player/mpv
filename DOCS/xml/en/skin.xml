@@ -304,8 +304,8 @@ MPlayer tries to load <filename>main</filename>, <filename>main.png</filename>,
 <title>Main window and playbar</title>
 <para>
 Below is the list of entries that can be used in the
-'<literal>window = main</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>',
-and the '<literal>window = playbar</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>'
+'<literal>window = main</literal>' ... '<literal>end</literal>',
+and the '<literal>window = playbar</literal>' ... '<literal>end</literal>'
 blocks.
 </para>
 
