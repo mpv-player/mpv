@@ -12,6 +12,7 @@
 ///  - partial unrolling loops for removing slower MOVW insns.
 ///    (Note: probably same operation should be done for decode_3dnow.s)
 ///  - change function name for support 3DNowEx! automatic detect
+///  - added loops alignment
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
 ///       superscalar ones instruction order is not significand for them.
@@ -113,7 +114,7 @@ synth_1to1_3dnowex:
         subl  %edx,%ecx
         movl  $8,%ebp
 	prefetchw (%esi)
-
+.align 16
 .L55:
 
         movq  (%ecx),%mm0
@@ -231,7 +232,7 @@ synth_1to1_3dnowex:
         addl  $4,%esi
         addl  $256,%ecx
         movl  $7,%ebp
-
+.align 16
 .L68:
 	pxor  %mm0, %mm0
 	pxor  %mm4, %mm4
