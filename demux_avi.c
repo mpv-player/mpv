@@ -80,6 +80,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 	      printf("XXX initial  v_pts=%5.3f  a_pos=%d (%5.3f) \n",avi_audio_pts,pts_corr_bytes,delay);
 	      //pts_correction=-avi_audio_pts+delay;
 	      pts_correction=delay-avi_audio_pts;
+	      avi_audio_pts+=pts_correction;
 	      pts_corrected=1;
 	  } else
           pts_corr_bytes+=len;
