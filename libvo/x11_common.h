@@ -105,6 +105,8 @@ extern unsigned long xv_colorkey;
 
 extern int vo_xv_init_colorkey();
 extern void vo_xv_colorkey(uint32_t x,uint32_t  y, uint32_t w, uint32_t h);
+extern void vo_xv_draw_colorkey(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+extern void xv_setup_colorkeyhandling(char const * ck_method_str, char const * ck_str);
 
 /*** test functions for common suboptions ***/
 int xv_test_ck( void * arg );
