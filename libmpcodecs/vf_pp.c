@@ -27,7 +27,11 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
-    vf->priv->context= pp_get_context(width, height);
+    vf->priv->context= pp_get_context(width, height,
+          (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
+	| (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0)
+	| (gCpuCaps.has3DNow ? PP_CPU_CAPS_3DNOW : 0)
+    );
 
     return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
 }
@@ -130,12 +134,6 @@ static int open(vf_instance_t *vf, char* args){
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt) return 0; // no csp match :(
-    
-    pp_init(
-          (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
-	| (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0)
-	| (gCpuCaps.has3DNow ? PP_CPU_CAPS_3DNOW : 0)
-    );
     
     if(args){
 	if(!strcmp("help", args)){
