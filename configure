@@ -67,6 +67,7 @@ bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
 qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
+mingw32() { issystem "MINGW32" ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -372,6 +373,9 @@ if test -z "$_target" ; then
     ;;
   [cC][yY][gG][wW][iI][nN]*)
     system_name=CYGWIN
+    ;;
+  MINGW32*)
+    system_name=MINGW32
     ;;
   *)
     system_name="$system_name-UNKNOWN"
@@ -1544,8 +1548,15 @@ if test "$_vidix" = auto ; then
   x86 && _vidix=yes
   ppc && linux && _vidix=yes
   cygwin && _vidix=no
+  mingw32 && _vidix=no
   qnx && _vidix=no
   sunos && _vidix=no
+fi
+
+if mingw32 ; then
+   _def_stream_cache='#undef USE_STREAM_CACHE'
+else 
+   _def_stream_cache='#define USE_STREAM_CACHE 1'
 fi
 
 # On QNX we must link to libph - Gabucino
@@ -1996,7 +2007,9 @@ cat > $TMPC << EOF
 void* func(void *arg) { return arg; }
 int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
-if ( cc_check && $TMPO ) ; then              # QNX
+if mingw32 ; then
+  _ld_pthread=''
+elif ( cc_check && $TMPO ) ; then              # QNX
   _ld_pthread=''
 elif ( cc_check -lpthread && $TMPO ) ; then
   _ld_pthread='-lpthread'
@@ -5027,6 +5040,12 @@ else
   _confcygwin="TARGET_CYGWIN = no"
 fi
 
+if mingw32 ; then
+  _confmingw32='TARGET_MINGW32 = yes'
+else
+  _confmingw32='TARGET_MINGW32 = no'
+fi
+
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
@@ -5215,6 +5234,7 @@ MACOSX_FRAMEWORKS = $_macosx_frameworks
 # --- Some stuff for autoconfigure ----
 $_target_arch
 $_confcygwin
+$_confmingw32
 TARGET_CPU=$iproc
 TARGET_MMX = $_mmx
 TARGET_MMX2 = $_mmx2
@@ -5294,7 +5314,7 @@ $_def_stddef
 
 /* Define this to compile stream-caching support, it can be enabled via
    -cache <kilobytes> */
-#define USE_STREAM_CACHE 1
+$_def_stream_cache
 
 /* Define to include support for XviD/Divx4Linux/OpenDivx */
 $_def_divx
