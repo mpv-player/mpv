@@ -897,7 +897,11 @@ switch(sh_video->codec->driver){
 #ifdef NEW_DECORE
         dec_frame.bmp=&dec_pic;
         dec_pic.y=dec_pic.u=dec_pic.v=NULL;
+#ifdef DECORE_DIVX5
+	decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
+#else
 	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+#endif
 #else
         opendivx_src[0]=NULL;
 	decore(0x123, 0, &dec_frame, NULL);
@@ -943,7 +947,11 @@ switch(sh_video->codec->driver){
         dec_frame.bmp=sh_video->our_out_buffer;
         dec_frame.stride=sh_video->disp_w;
 //	printf("Decoding DivX4 frame\n");
+#ifdef DECORE_DIVX5
+	decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
+#else
 	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+#endif
     if(!drop_frame) blit_frame=3;
     break;
   }

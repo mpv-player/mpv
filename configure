@@ -2605,7 +2605,8 @@ else
 fi
 
 
-echocheck "XviD/DivX4linux/OpenDivX decore"
+echocheck "XviD/DivX4linux/DivX5linux/OpenDivX decore"
+# DivX5: DEC_OPT_MEMORY_REQS - DivX4: DEC_OPT_FRAME_311
 cat > $TMPC << EOF
 #include <decore.h>
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
@@ -2617,6 +2618,7 @@ if test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
   _ld_decore="$_xvidcore"
   _def_decore='#define NEW_DECORE 1'
   _def_divx='#define USE_DIVX'
+  _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="xvid $_codecmodules"
   echores "XviD (with $_xvidcore)"
@@ -2627,6 +2629,7 @@ elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
   _ld_decore='-lxvidcore'
   _def_decore='#define NEW_DECORE 1'
   _def_divx='#define USE_DIVX'
+  _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="xvid $_codecmodules"
   echores "XviD (with libxvidcore.so)"
@@ -2637,9 +2640,31 @@ elif test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _ld_decore='-ldivxdecore opendivx/postprocess.o'
   _def_decore='#define NEW_DECORE 1'
   _def_divx='#define USE_DIVX'
+  _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="divx4linux $_codecmodules"
-  echores "Divx4linux (with libdivxdecore.so)"
+  echores "DivX4linux (with libdivxdecore.so)"
+elif test "$_divx4linux" != no ; then 
+# DivX5 check
+# OdivxPP disabled because of:
+# ld: Warning: type of symbol `dering' changed from 1 to 2 in opendivx/postprocess.o
+cat > $TMPC << EOF
+#include <decore.h>
+int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_MEMORY_REQS; }
+EOF
+if cc_check -lm -ldivxdecore -lm ; then
+  _xvid=no
+  _divx4linux=yes
+  _opendivx=no
+#  _ld_decore='-ldivxdecore opendivx/postprocess.o'
+  _ld_decore='-ldivxdecore'
+  _def_decore='#define NEW_DECORE 1'
+  _def_divx='#define USE_DIVX'
+  _def_divx5='#define DECORE_DIVX5 1'
+#  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  _codecmodules="divx5linux $_codecmodules"
+  echores "DivX5linux (with libdivxdecore.so)"
 elif test "$_opendivx" != no ; then
   _xvid=no
   _divx4linux=no
@@ -2647,6 +2672,7 @@ elif test "$_opendivx" != no ; then
   _ld_decore='-Lopendivx -ldecore'
   _def_decore='#undef NEW_DECORE'
   _def_divx='#define USE_DIVX'
+  _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="opendivx $_codecmodules"
   echores "OpenDivX"
@@ -2657,8 +2683,10 @@ else
   _ld_decore=''
   _def_decore='#undef NEW_DECORE'
   _def_divx='#undef USE_DIVX'
+  _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   echores "no"
+fi # DivX5 check
 fi
 
 
@@ -3125,6 +3153,9 @@ $_def_divx
 /* Define for using new XviD/DivX4Linux library, instead of open-source OpenDivX */
 /* You have to change DECORE_LIBS in config.mak too! */
 $_def_decore
+
+/* Define if you are using DivX5Linux Decore library */
+$_def_divx5
 
 /* If build mencoder */
 $_mencoder_flag
