@@ -112,6 +112,7 @@ static int lavc_param_me_sub_cmp= 0;
 static int lavc_param_mb_cmp= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
+static int lavc_param_trell= 0;
 
 #include "cfgparser.h"
 
@@ -178,8 +179,11 @@ struct config lavcopts_conf[]={
         {"cmp", &lavc_param_me_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"subcmp", &lavc_param_me_sub_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"mbcmp", &lavc_param_mb_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
-        {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
+#if LIBAVCODEC_BUILD >= 4648
+	{"trell", &lavc_param_trell, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_TRELLIS_QUANT, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -333,7 +337,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->dia_size= lavc_param_dia_size;
     lavc_venc_context->flags|= lavc_param_qpel;
 #endif 
-        
+#if LIBAVCODEC_BUILD >= 4648
+    lavc_venc_context->flags|= lavc_param_trell;
+#endif 
     lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
