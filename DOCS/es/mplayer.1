@@ -3049,13 +3049,41 @@ Los parámetros son:
 .PD 0
 .RSs
 .IPs xtile
-número de mosaicos en el eje x (5)
+número de mosaicos en el eje x (por defecto: 5)
 .IPs ytile
-número de mosaicos en el eje y (5)
-.IPs xytile
-cuando se escribe la imagen, pueden ser diferentes de xtile * ytile
-(por ejemplo puede escribir un mosaico 8 * 7, escribiendo el archivo
-cada 50 marcos, para obtener una imagen cada 2 segundos @ 25 fps.
+número de mosaicos en el eje y (por defecto: 5)
+.IPs output
+Renderiza el mosaico cuando 'output' número de marcos se han alcanzado,
+donde 'output' debe ser un número menor que xtile * ytile.
+Los mosaicos que falten se dejan en blanco.
+Usted puede, por ejemplo, escribir un mosaico de 8 * 7 cada 50 marcos para
+obtener una imagen cada 2 segundos @ 25 fps.
+.IPs start
+pixel donde se empieza (x/y) (por defecto: 2)
+.IPs delta
+pixel entre cada 2 mosaicos, (x/y) (por defecto: 4)
+.RE
+.PD 1
+Si omite un parámetro o usa un valor menor que 0, entonces se usará
+el valor por defecto. Puede también pararlo cuando esté OK (... -vf tile=10:5 ...)
+
+Probablemente es una buena idea poner un filtro de escalado antes del mosaico :-)
+.TP
+.B delogo[=x:y:w:h:t]
+Suprime el logo de una estación de TV mediante una interpolación simple de los pixels
+de alrededor. Establece un rectángulo cubriendo el logo y lo hace desaparecer (y
+algunas veces aparece algo más feo incluso - su experiencia puede variar).
+.PD 0
+.RSs
+.IPs x,y
+Posición de la esquina de arriba a la izquierda del logo.
+.IPs w,h
+Ancho y alto del rectángulo a limpiar.
+.IPs t
+Anchura del filo borroso del rectángulo (añadida a w y h). Cuando
+se establece en -1, un rectángulo verde se dibuja en la pantalla para
+simplificarla busqueda de los parámetros x,y,w,h correctos.
+
 
 .SH "OPCIONES DE CODIFICACIÓN GENERALES (SOLAMENTE MENCODER)"
 .TP
