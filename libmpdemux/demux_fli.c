@@ -55,6 +55,8 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   fli_frames_t *frames = (fli_frames_t *)malloc(sizeof(fli_frames_t));
   int frame_number;
   int speed;
+  unsigned int frame_size;
+  int magic_number;
 
   // go back to the beginning
   stream_reset(demuxer->stream);
@@ -107,10 +109,20 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   while ((!stream_eof(demuxer->stream)) && (frame_number < frames->num_frames))
   {
     frames->filepos[frame_number] = stream_tell(demuxer->stream);
-    frames->frame_size[frame_number] = stream_read_dword_le(demuxer->stream);
-    stream_skip(demuxer->stream, frames->frame_size[frame_number] - 4);
-    frame_number++;
+    frame_size = stream_read_dword_le(demuxer->stream);
+    magic_number = stream_read_word_le(demuxer->stream);
+    stream_skip(demuxer->stream, frame_size - 6);
+
+    // if this chunk has the right magic number, index it
+    if (magic_number == 0xF1FA)
+    {
+      frames->frame_size[frame_number] = frame_size;
+      frame_number++;
+    }
   }
+
+  // save the actual number of frames indexed
+  frames->num_frames = frame_number;
 
   demuxer->priv = frames;
 
