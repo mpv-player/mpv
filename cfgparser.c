@@ -612,7 +612,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			    last_ptr = ptr;
 			    ptr = strchr(ptr,LIST_SEPARATOR);
 			    if(!ptr) {
-			      if(strlen(last_ptr) > 0)
+//			      if(strlen(last_ptr) > 0)
 				n++;
 			      break;
 			    }
@@ -630,11 +630,13 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			  res = malloc((n+1)*sizeof(char*));
 			  ptr = param;
 			  n = 0;
-			  while(ptr[0] != '\0') {
+//			  while(ptr[0] != '\0') {
+			  while(1) {
 			    last_ptr = ptr;
 			    ptr = strchr(ptr,LIST_SEPARATOR);
 			     if(!ptr) {
-			       if(strlen(last_ptr) > 0) {
+			       //if(strlen(last_ptr) > 0) 
+			       {
 				 res[n] = strdup(last_ptr);
 				 n++;
 			       }
@@ -642,7 +644,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			     }
 			     len = ptr - last_ptr;
 			     res[n] = (char*)malloc(len + 1);
-			     strncpy(res[n],last_ptr,len);
+			     if(len) strncpy(res[n],last_ptr,len);
 			     res[n][len] = '\0';
 			     ptr++;
 			     n++;
