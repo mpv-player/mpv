@@ -1192,8 +1192,8 @@ if(!sh_video)
 
 current_module="preinit_libvo";
 
-if((i=video_out->preinit(vo_subdevice))!=0){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"error on vo preinit = %u\n",i);
+if((video_out->preinit(vo_subdevice))!=0){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device!\n");
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 sh_video->video_out=video_out;
