@@ -725,7 +725,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   if(!s->end_pos)
     demuxer->seekable = 0;
   else {
-    demuxer->movi_start = 0;
+    demuxer->movi_start = s->start_pos; // Needed for XCD (Ogg written in MODE2)
     demuxer->movi_end = s->end_pos;
     demuxer->seekable = 1;
     if(index_mode == 2)
@@ -965,19 +965,18 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
     pos = ogg_d->syncpoints[sp].page_pos;
 
   } else {
-    pos = flags & 1 ? demuxer->movi_start : ogg_d->pos;
+    pos = flags & 1 ? 0 : ogg_d->pos;
     if(flags & 2)
       pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
     else
       pos += rel_seek_secs * ogg_d->pos / (os->lastpos / rate);
-
-    if(pos < demuxer->movi_start)
-      pos = demuxer->movi_start;
-    else if(pos > demuxer->movi_end)
+    if (pos < 0)
+      pos = 0;
+    else if (pos > (demuxer->movi_end - demuxer->movi_start))
       return;
   }
 
-  stream_seek(demuxer->stream,pos);
+  stream_seek(demuxer->stream,pos+demuxer->movi_start);
   ogg_sync_reset(sync);
   for(i = 0 ; i < ogg_d->num_sub ; i++) {
     ogg_stream_reset(&ogg_d->subs[i].stream);
