@@ -86,6 +86,23 @@ int divx_quality=0;
 void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
     unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
 
+void AVI_Decode_Video1_16(
+  char *encoded,
+  int encoded_size,
+  char *decoded,
+  int width,
+  int height,
+  int bytes_per_pixel);
+
+void AVI_Decode_Video1_8(
+  char *encoded,
+  int encoded_size,
+  char *decoded,
+  int width,
+  int height,
+  unsigned char *palette_map,
+  int bytes_per_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -251,7 +268,7 @@ sh_video->our_out_buffer=NULL;
 switch(sh_video->codec->driver){
  case VFM_XANIM: {
 #ifdef USE_XANIM
-   int ret=xacodec_init_video(sh_video,out_fmt);
+	   int ret=xacodec_init_video(sh_video,out_fmt);
    if(!ret) return 0;
 #else
 //   mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_NoXAnimSupport);
@@ -448,6 +465,12 @@ switch(sh_video->codec->driver){
 	else
 	  pal[i]=((r>>3)<<11)|((g>>2)<<5)|((b>>3));
      }
+   }
+   break;
+ case VFM_MSVIDC: {
+   int bpp=((out_fmt&255)+7)/8; // RGB only
+   sh_video->our_out_buffer = 
+     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
    }
    break;
  }
@@ -681,6 +704,19 @@ if(verbose>1){
       sh_video->disp_w,sh_video->disp_h,((out_fmt&255)+7)/8);
     blit_frame=3;
     break;
+  case VFM_MSVIDC:
+    if (sh_video->bih->biBitCount == 16)
+      AVI_Decode_Video1_16(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        ((out_fmt&255)+7)/8);
+    else
+      AVI_Decode_Video1_8(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        (char *)sh_video->bih+40, ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
 } // switch
 //------------------------ frame decoded. --------------------
 
@@ -726,4 +762,5 @@ case 2:
 
   return blit_frame;
 }
+
 
