@@ -164,6 +164,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     w->wBitsPerSample = sh_audio->samplesize = stream_read_word_le(s);
     w->cbSize = 0;
     l -= 16;
+    if(verbose>0) print_wave_header(w);
     if(l)
       stream_skip(s,l);
     do
@@ -175,6 +176,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     } while (chunk_type != mmioFOURCC('d', 'a', 't', 'a'));
     demuxer->movi_start = stream_tell(s);
     demuxer->movi_end = s->end_pos;
+//    printf("wav: %X .. %X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
   } break;
   }
 
