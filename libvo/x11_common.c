@@ -10,6 +10,7 @@
 
 #ifdef X11_FULLSCREEN
 
+#include <X11/Xmd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -19,6 +20,9 @@ int vo_screenwidth=0;
 int vo_screenheight=0;
 int vo_dwidth=0;
 int vo_dheight=0;
+
+static int dpms_disabled=0;
+static int timeout_save=0;
 
 int vo_init( void )
 {
@@ -151,3 +155,48 @@ int vo_x11_check_events(Display *mydisplay){
 }
 
 #endif
+
+void saver_on(Display *mDisplay) {
+
+    int nothing;
+    if (dpms_disabled)
+    {
+	if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
+	{
+	    printf ("Enabling DPMS\n");
+	    DPMSEnable(mDisplay);  // restoring power saving settings
+	    DPMSQueryExtension(mDisplay, &nothing, &nothing);
+	}
+    }
+    
+    if (timeout_save)
+    {
+	int dummy, interval, prefer_blank, allow_exp;
+	XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank, &allow_exp);
+	XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank, allow_exp);
+	XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+    }
+
+}
+
+void saver_off(Display *mDisplay) {
+
+    int interval, prefer_blank, allow_exp, nothing;
+
+    if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
+    {
+	BOOL onoff;
+	CARD16 state;
+	DPMSInfo(mDisplay, &state, &onoff);
+	if (onoff)
+	{
+	    printf ("Disabling DPMS\n");
+	    dpms_disabled=1;
+		DPMSDisable(mDisplay);  // monitor powersave off
+	}
+    }
+    XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+    if (timeout_save)
+	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+		    // turning off screensaver
+}

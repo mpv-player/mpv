@@ -1,3 +1,4 @@
+#include <X11/extensions/dpms.h>
 
 #ifdef X11_FULLSCREEN
 
@@ -10,6 +11,7 @@ extern int vo_dheight;
 int vo_init( void );
 void vo_x11_decoration( Display * vo_Display,Window w,int d );
 int vo_x11_check_events(Display *mydisplay);
-
 #endif
 
+void saver_off( Display * );
+void saver_on( Display * );

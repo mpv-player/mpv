@@ -24,7 +24,6 @@ LIBVO_EXTERN(xv)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XShm.h>
-#include <X11/extensions/dpms.h>
 #include <errno.h>
 
 #include "x11_common.h"
@@ -79,9 +78,6 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
-static int timeout_save=0;
-static int dpms_disabled=0;
-
 /*
  * connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -89,7 +85,6 @@ static int dpms_disabled=0;
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
  int screen;
- int nothing, interval, prefer_blank, allow_exp;
  char *hello = (title == NULL) ? "Xv render" : title;
  char *name = ":0.0";
  XSizeHints hint;
@@ -204,23 +199,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
        fprintf( stderr,"[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
 
-    if (DPMSQueryExtension(mydisplay, &nothing, &nothing))
-    {
-	BOOL onoff;
-	CARD16 state;
-	DPMSInfo(mydisplay, &state, &onoff);
-	if (onoff)
-	{
-	    dpms_disabled=1;
-	    DPMSDisable(mydisplay);  // monitor powersave off
-	}
-    }
-
-    XGetScreenSaver(mydisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
-    if (timeout_save)
-	XSetScreenSaver(mydisplay, 0, interval, prefer_blank, allow_exp);
-			// switching off screensaver
-
+     saver_off(mydisplay);  // turning off screen saver
      return 0;
     }
   }
@@ -412,25 +391,7 @@ static uint32_t query_format(uint32_t format)
 }
 
 static void uninit(void) {
- int nothing;
- if (DPMSQueryExtension(mydisplay, &nothing, &nothing))
- {
-     if (dpms_disabled)
-     {
- 	DPMSEnable(mydisplay);  // restoring power saving settings
-	DPMSQueryExtension(mydisplay, &nothing, &nothing);
-     }
- }
-
- if (timeout_save)
- {
-     int interval, prefer_blank, allow_exp, dummy;
-     XGetScreenSaver(mydisplay, &dummy, &interval, &prefer_blank, &allow_exp);
-     XSetScreenSaver(mydisplay, timeout_save, interval, prefer_blank, allow_exp);
-     XGetScreenSaver(mydisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
- }
-
-
+    saver_on(mydisplay); // screen saver back on
 }
 
 
