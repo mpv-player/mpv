@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.22 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -99,18 +99,23 @@ Jeżeli Twój procesor ma rozszerzenie SSE, przekompiluj jądro z opcją
 <sect2 id="openbsd">
 <title>OpenBSD</title>
 <para>Ze względu na ograniczenia w różnych wersjach gas (Gnu assemblera - przyp. tłumacza; relokacja
-względem MMX), będziesz musiał przeprowadzić kompilację w dwóch krokach: Pierwszy, 
-upewnij się, że wersja nierdzenna występuje w zmiennej <envar>$PATH</envar> 
-i wykonaj  <command>gmake -k</command>, później upewnij się, że używana jest wersja rdzenna 
+względem MMX), będziesz musiał przeprowadzić kompilację w dwóch krokach: Pierwszy,
+upewnij się, że wersja nierdzenna występuje w zmiennej <envar>$PATH</envar>
+i wykonaj  <command>gmake -k</command>, później upewnij się, że używana jest wersja rdzenna
 i wykonaj <command>gmake</command>.
 </para>
+</sect2>
 
-
+<sect2 id="darwin">
+<title>Darwin</title>
+<para>
+Zobacz rozdział <link linkend="macos">Mac OS</link>.
+</para>
 </sect2>
 </sect1>
 
 <sect1 id="solaris">
-<title>Solaris</title>
+<title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> powinien działać na Solarisie 2.6 lub nowszym.
 </para>
@@ -219,7 +224,7 @@ przestrzeni kolorów w sterownikach wyjściowych video.
 </sect1>
 
 <sect1 id="sgi">
-<title>Silicon Graphics / Irix</title>
+<title>Silicon Graphics Irix</title>
 <para>
 Możesz albo spróbować zainstalować program instalacyjny GNU i (jeżeli nie
 umieściłeś go w globalnej ścieżce) wskazać go przez:
@@ -315,9 +320,10 @@ wolna. Używaj SDL.
 <sect2 id="cygwin">
 <title>Cygwin</title>
 
-<para>Cygwin w wersji wcześniejszej niż 1.5.0 nie zawiera <filename>inttypes.h</filename>. Będziesz
-  musiał skopiować lub stworzyć symboliczne dowiązanie <filename>etc/cygwin_inttypes.h</filename> z 
-  katalogu źródłowego MPlayera do <filename>/usr/include/inttypes.h</filename>, żeby umożliwić kompilację 
+<para>Cygwin w wersji wcześniejszej niż 1.5.0 nie zawiera <filename>inttypes.h</filename>.
+  Umieść plik
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  w katalogu <filename class="directory">/usr/include/</filename>, żeby umożliwić kompilację
   MPlayera.</para>
 
 <para>Pliki nagłówkowe DirectX muszą być rozpakowane do <filename class="directory">/usr/include/</filename> lub
@@ -371,6 +377,26 @@ wolna. Używaj SDL.
 </sect2>
 
 
+</sect1>
+<sect1 id="macos">
+<title>Mac OS</title>
+<para>
+"Surowe" źródła <application>MPlayera</application> obsługują
+tylko Mac OS X w wersjach 10.2 i wyżej. Możesz spróbować umożliwić
+obsługę starszych wersji Mac OS oraz przysłać nam łaty!
+</para>
+
+<para>
+Zmodyfikowane GCC 3.X Apple jest zalecane do kompilacji 
+<application>MPlayera</application>, szczególnie z libavcodec, ponieważ 
+ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
+</para>
+
+<para>
+Możesz pobrać Aqua GUI dla <application>MPlayera</application> razem z
+jego skompilowanymi binariami dla MacOS X ze strony projektu
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+</para>
 </sect1>
 
 </chapter>
