@@ -1700,7 +1700,7 @@ switch(file_format){
         if(!sh_video->i_bps) // unspecified?
           newpos=demuxer->filepos+2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
-          newpos=demuxer->filepos+(sh_video->i_bps*1000/16)*rel_seek_secs;
+          newpos=demuxer->filepos+(sh_video->i_bps)*rel_seek_secs;
 
         if(newpos<seek_to_byte) newpos=seek_to_byte;
         newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
