@@ -1511,6 +1511,8 @@ if(1)
       printf("== drop: %d ==  \n",frame_dropping);
       break;
   }
+} // keyboard event handler
+
   if (seek_to_sec) {
     int a,b; float d;
     
@@ -1554,8 +1556,6 @@ if(1)
   }
   rel_seek_secs=0;
   
-} // keyboard event handler
-
 //================= Update OSD ====================
 { if(osd_level>=2){
       int pts=d_video->pts;
