@@ -23,17 +23,13 @@
 #define CHUNK_FDSC mmioFOURCC('F', 'D', 'S', 'C')
 #define CHUNK_STAB mmioFOURCC('S', 'T', 'A', 'B')
 
-#define VERSION_1_01 mmioFOURCC('1', '.', '0', '1')
-
-#define MAGIC_FPS_CONSTANT 27
-
 typedef struct _film_chunk_t
 {
   off_t chunk_offset;
   int chunk_size;
 
-  unsigned int flags1;
-  unsigned int flags2;
+  unsigned int syncinfo1;
+  unsigned int syncinfo2;
 
   unsigned int video_chunk_number;  // in the case of a video chunk
   unsigned int running_audio_sample_count;  // for an audio chunk
@@ -93,8 +89,8 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
 
   // load the chunks manually (instead of using ds_read_packet()), since
   // they require some adjustment
-  // (all ones in flags1 indicates an audio chunk)
-  if (film_chunk.flags1 == 0xFFFFFFFF)
+  // (all ones in syncinfo1 indicates an audio chunk)
+  if (film_chunk.syncinfo1 == 0xFFFFFFFF)
   {
     demux_packet_t* dp=new_demux_packet(film_chunk.chunk_size);
     stream_read(demuxer->stream, dp->buffer, film_chunk.chunk_size);
@@ -122,18 +118,8 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
   }
   else
   {
-    // check the tick to see if it's time to dispatch a new frame
-    if ((film_data->film_version == VERSION_1_01) &&
-        ((film_chunk.flags1 & 0x7FFFFFFF) != film_data->ticks++))
-    {
-      demux_packet_t* dp=new_demux_packet(0);
-      dp->pts = 0;
-      dp->pos = 0;
-      dp->flags = 0;
-      ds_add_packet(demuxer->video, dp);
-    }
     // if the demuxer is dealing with CVID data, deal with it a special way
-    else if (sh_video->format == mmioFOURCC('c', 'v', 'i', 'd'))
+    if (sh_video->format == mmioFOURCC('c', 'v', 'i', 'd'))
     {
       // account for 2 extra bytes
       demux_packet_t* dp=new_demux_packet(film_chunk.chunk_size - 2);
@@ -142,9 +128,9 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
       stream_read(demuxer->stream, dp->buffer, 10);
       stream_skip(demuxer->stream, 2);
       stream_read(demuxer->stream, dp->buffer + 10, film_chunk.chunk_size - 12);
-      dp->pts = film_chunk.video_chunk_number / sh_video->fps;
+      dp->pts = (film_chunk.syncinfo1 & 0x7FFFFFFF) / sh_video->fps;
       dp->pos = film_chunk.chunk_offset;
-      dp->flags = (film_chunk.flags1 & 0x80000000) ? 1 : 0;
+      dp->flags = (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0;
 
       // fix the CVID chunk size by adding 6
       cvid_size = (dp->buffer[1] << 16) | (dp->buffer[2] << 8) | dp->buffer[3];
@@ -160,8 +146,8 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
     else
     {
       ds_read_packet(demuxer->video, demuxer->stream, film_chunk.chunk_size,
-        film_chunk.video_chunk_number / sh_video->fps,  /* pts */
-        film_chunk.chunk_offset, (film_chunk.flags1 & 0x80000000) ? 1 : 0);
+        (film_chunk.syncinfo1 & 0x7FFFFFFF) / sh_video->fps,
+        film_chunk.chunk_offset, (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0);
       film_data->current_chunk++;
     }
   }
@@ -286,9 +272,9 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
       if (sh_video)
       {
         sh_video->fps = stream_read_dword(demuxer->stream);
-        if (film_data->film_version != VERSION_1_01)
-          sh_video->fps = MAGIC_FPS_CONSTANT;
-        sh_video->frametime = 1 / sh_video->fps;
+//        if (film_data->film_version != VERSION_1_01)
+//          sh_video->fps = MAGIC_FPS_CONSTANT;
+        sh_video->frametime = 1.0 / sh_video->fps;
       }
 
       // fetch the number of chunks
@@ -308,14 +294,14 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         film_chunk.chunk_offset = 
           demuxer->movi_start + stream_read_dword(demuxer->stream);
         film_chunk.chunk_size = stream_read_dword(demuxer->stream);
-        film_chunk.flags1 = stream_read_dword(demuxer->stream);
-        film_chunk.flags2 = stream_read_dword(demuxer->stream);
+        film_chunk.syncinfo1 = stream_read_dword(demuxer->stream);
+        film_chunk.syncinfo2 = stream_read_dword(demuxer->stream);
         film_data->chunks[i] = film_chunk;
 
         // audio housekeeping
         if (sh_audio)
         {
-          if ((film_chunk.flags1 == 0xFFFFFFFF) && 
+          if ((film_chunk.syncinfo1 == 0xFFFFFFFF) && 
             (film_chunk.chunk_size > largest_audio_chunk))
             largest_audio_chunk = film_chunk.chunk_size;
           film_data->total_audio_sample_count +=
@@ -325,7 +311,7 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         // video housekeeping
         if (sh_video)
         {
-          if (film_chunk.flags1 != 0xFFFFFFFF)
+          if (film_chunk.syncinfo1 != 0xFFFFFFFF)
             film_chunk.video_chunk_number =
               film_data->total_video_chunks++;
         }
