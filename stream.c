@@ -158,11 +158,13 @@ stream_t* new_stream(int fd,int type){
   s->type=type;
   s->buf_pos=s->buf_len=0;
   s->start_pos=s->end_pos=0;
+  s->priv=NULL;
   stream_reset(s);
   return s;
 }
 
 void free_stream(stream_t *s){
+  if(s->priv) free(s->priv);
   free(s);
 }
 
