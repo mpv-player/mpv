@@ -3132,7 +3132,7 @@ EOF
   fi
   test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
   _used_css=
-  test "$_dvdkit" = no && _used_css=$_ld_css
+  test "$_dvdkit" = no && test "$_dvdkit2" = no && _used_css=$_ld_css
   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
