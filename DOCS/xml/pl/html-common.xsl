@@ -4,6 +4,6 @@
                 version="1.0">
 
   <xsl:param name="chunker.output.encoding" select="'iso-8859-2'"/>
-  <xsl:output encoding="utf-8"/>
+  <xsl:output encoding="iso-8859-2"/>
 
 </xsl:stylesheet>
