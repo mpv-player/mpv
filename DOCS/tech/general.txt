@@ -109,7 +109,7 @@ Now, go on:
 
 5.a Codec controller: this is the greatest hack in the whole :)
 	 The libmpeg2 is so unstable, that I can't believe it.
-	 Of course I don't mean it bullshit :) rather it only accepts
+	 Of course I don't mean it's bullshit :) rather it only accepts
 	 totally perfect, error-free streams. If it founds error, it
 	 just segfaults ;) And don't start laughing, this is great this way,
 	 from the view of speed it would be 50-100% slower if stuffed full with
