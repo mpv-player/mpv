@@ -1908,7 +1908,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
 
-  uninit_player(INITED_ALL-INITED_GUI);
+  uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
 
 }
 
