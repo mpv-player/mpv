@@ -848,7 +848,7 @@ int vixInit( void )
 void vixDestroy( void )
 {
   unmap_phys_mem(radeon_mem_base,radeon_ram_size);
-  unmap_phys_mem(radeon_mmio_base,0x7FFF);
+  unmap_phys_mem(radeon_mmio_base,0xFFFF);
 }
 
 int vixGetCapability(vidix_capability_t *to)
@@ -1306,19 +1306,18 @@ int vixPlaybackFrameSelect(unsigned frame)
       off[4] = besr.vid_buf4_base_adrs;
       off[5] = besr.vid_buf5_base_adrs;
     }
-    radeon_wait_vsync();
-    radeon_fifo_wait(2);
+    radeon_fifo_wait(8);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     radeon_engine_idle();
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[0]);
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[1]);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[2]);
-    radeon_fifo_wait(9);
     OUTREG(OV0_VID_BUF3_BASE_ADRS,	off[3]);
     OUTREG(OV0_VID_BUF4_BASE_ADRS,	off[4]);
     OUTREG(OV0_VID_BUF5_BASE_ADRS,	off[5]);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
+    radeon_wait_vsync();
     if(__verbose > 1) radeon_vid_dump_regs();
     return 0;
 }
