@@ -135,6 +135,8 @@
 	    <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Decodifica suono Surround</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Convertitore del formato di campionamento</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Ritardo</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Controllo volume via software</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
 	  </UL>
       </UL>
     </UL>
@@ -150,6 +152,7 @@
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Copia da Stream</A></LI>
             <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Correggere gli AVI con indice danneggiato</A></LI>
             <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Codificare la famiglia di codec libavcodec</A></LI>
+            <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Codificare da file di immagine multipli (MJPEG/MPNG)</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Sintassi</A></LI>
         <LI><A HREF="encoding.html#2.4.5">2.4.5 Opzioni disponibili</A></LI>
@@ -680,13 +683,13 @@ Si tratta di un'utility completa per convertire da font TTF/Type1/ecc al pacchet
 </UL>
 </P>
 
-<P>Dopo questo, scomprimi il file che hai scaricato in <CODE>~/.mplayer</CODE> o
+<P>Dopo questo, decomprimi il file che hai scaricato in <CODE>~/.mplayer</CODE> o
 <CODE>$PREFIX/share/mplayer</CODE>. Quindi rinomina o crea un symlink tra uno di questi e
 <CODE>font</CODE> (come : <CODE>ln -s ~/.mplayer/arial-24
 ~/.mplayer/font</CODE>). Ora potrai vedere un timer nell'angolo in alto a sinistra
 del filmato (disattivabile con 'o').</P>
 
-<P>OSD ha 3 stati: (scambiabili con 'o')<BR>
+<P>OSD ha 3 stati: (selezionabili con 'o')<BR>
 <UL>
   <LI>timer + barra volume + barra ricerca + sottotitoli (default)
   <LI>barra volume + barra ricerca + sottotitoli
@@ -1775,6 +1778,13 @@ altrimenti.  Per favore non mandate messaggi in altre lingue!</P>
   Problema: bug di gcc 2.96 conosciuto, ancora nessuna correzione disponibile. Se hai gcc 2.95,
   hai la libreria libmp3lame che è stato compilata con gcc 2.96 (installata da un
   pacchetto deb/rpm?). Controlla quale libreria ha trovato MEncoder: ldd mencoder.</LI>
+
+<LI>Il suono in formato MP2/MP3 si sente male su PPC:<BR>
+  Problema: bug conosciuto di GCC su piattaforme PPC, non è stato ancora corretto.<BR>
+  Aggiramento: usa il decoder MP1/MP2/MP3 di FFmpeg (lento) (<CODE>-ac ffmpeg</CODE>)</LI>
+
+<LI>sig11 in libmpeg2, quando si codifica e contemporaneamente si ridimensiona:<BR>
+  Problema: bug MMX conosciuto di GCC 2.95.2, aggiorna a 2.95.3.</LI>
 </UL>
 
 <P>Vari problemi audio e di sincronizzazione A-V:</P>

@@ -248,7 +248,8 @@ xv, ma la scheda stessa è molto lenta, quindi faresti meglio a rivenderla.</P>
 <P><B>NOTA</B>: la schede Savage hanno una visualizzazione delle immagini lenta con YV12 (deve fare
 una conversione YV12->YUY2, perchè l'hardware Savage non può usare YV12).
 Quindi quando ad un certo punto di questa documentazione si dice "ha l'output YV12 usa questo,
-è più veloce", non è cosa certa. Prova.</P>
+è più veloce", non è cosa certa. Prova <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">questo
+driver</A> che usa MMX2 per questa operazione ed è più veloce del driver nativo di X.</P>
 
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. Schede nVidia</A></B></P>
@@ -278,20 +279,17 @@ a n*(fps del filmato) Hz.</LI>
 <LI>Radeon VE - attualmente solo il CVS di XFree86 ha un driver per questa scheda, la versione
 4.1.0 no. E nessun supporto TV out. Naturalmente con <B>MPlayer</B> puoi felicemente
 ottenere una visualizzazione <B>accelerata</B>, con o senza <B>output TV</B>, e
-non servono librerie o X. Leggi le sezioni <a href=#2.3.1.12>driver VESA</a> e <A
+non servono librerie o X. Leggi le sezioni <a href=#2.3.1.15>Vidix</a> e <A
 HREF=#2.3.1.14>livello video Radeon</A>).</LI> </P>
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. Schede NeoMagic</A></B></P>
 
 <P>
-Queste schede possono essere trovate su molti laptop. Sotto Linux, danno il meglio solo col DGA.
-Sfortunatamente, il driver DGE in X 4.1.0 non funziona, dovrai aspettare il
-4.2.0, o scaricare un driver modificato per 4.0.3 o 4.1.0 da qui :
-<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver</A>
-(c'è anche una patch per i sorgenti del driver).<BR>
-Questi driver sono forniti da <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka</A>.
-</P>
+Queste schede possono essere trovate su molti laptop. Sfortunatamente, il driver in
+  X 4.2.0 non può usare Xv, ma abbiamo un driver modificato, capace di Xv, per te.
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Scaricalo da qui</A>.
+  Driver fornito da Atmosfear.</P>
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Schede Trident</A></B></P>
 
@@ -572,13 +570,13 @@ scheda video &amp; monitor.</P>
 
 <P><B><A NAME=2.3.1.6>2.3.1.6. Output col Framebuffer (FBdev)</A></B></P>
 
-<P>Se compilare il driver FBdev stabilito automaticamente da ./configure .
+<P>Se compilare il driver FBdev è stabilito automaticamente da ./configure .
 Leggi la documentazione del framebuffer nei sorgenti del kernel
 (Documentation/fb/*) per informazioni su come abilitarlo, ecc.. !</P>
 
 <P>Se la tua scheda non supporta lo standard VBE 2.0 (le più vecchie schede ISA/PCI,
 come la S3 Trio64), ma solo VBE 1.2 (o più vecchio?) :
-Bene, VESAfb è ancora disponibile, ma dovrai caricare il programma SciTech Display
+ebbene, VESAfb è ancora disponibile, ma dovrai caricare il programma SciTech Display
 Doctor (prima UniVBE) prima di fare il boot di Linux.  Usa un dischetto di boot DOS o
 quello che vuoi.  E non dimenticare di registrare il tuo UniVBE ;))</P>
 
@@ -613,12 +611,12 @@ non è supportata. Non puoi usare le modalità a 8bpp (o meno).</LI>
 </UL></P>
 
 <P>NOTA: il cambiamento di modalità video di FBdev _non funziona_ col framebuffer VESA,
-e non chiederlo, in quanto non è una limitazione di <B>MPlayer</B>.</P>
+e non richiederlo, in quanto non è una limitazione di <B>MPlayer</B>.</P>
 
 <P><B><A NAME=2.3.1.7>2.3.1.7. Framebuffer Matrox (mga_vid)</A></B></P>
 
 <P>Questa sezione parla del supporto BES (Back-End Scaler) di Matrox G200/G400/G450/G550,
-il driver del kernel mga_vid.  E attualmente sviluppato da me (A'rpi), e
+il driver del kernel mga_vid.  E' attualmente sviluppato da me (A'rpi), e
 ha il supporto VSYNC hardware con triplo buffering. Funziona sia da console col framebuffer
 che sotto X.</P>
 
@@ -892,7 +890,7 @@ driver.</P>
 
 <P>
 <br><b>Utilizzo:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;tue opzioni&gt; nomefile</CODE>
+&nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix &lt;le tue opzioni&gt; nomefile</CODE>
 </P>
 
 <P>Più esempi (per il deinterlacing hardware, ecc) si possono trovare

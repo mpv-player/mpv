@@ -65,8 +65,8 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>KHz massimi:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
 
 <TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB Live!</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l' AC3 hardware non funziona</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>KHz massimi:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
 
 <TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB AWE 64</B></TD><TR>
@@ -210,6 +210,44 @@ surround.</p>
   nuovi plugin. Non può essere usato per niente di utile dalla prospettiva degli utenti
   ed è menzionato qui solo per dovere di completezza. Non usare questo plugin
   se non sei uno sviluppatore.</P>
+
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Controllo volume via software</A></B></P>
+
+<P>Questo plugin è un sostituto software per il controllo volume, e
+  può essere usato in macchine con dispositivo mixer non funzionante. Può
+  anche essere usato se si vuole modificare il volume di output da <B>MPlayer</B>
+  senza cambiare le impostazioni del volume PCM del mixer. Ha una sola opzione
+  <CODE>volume</CODE> che serve a impostare il volume
+  iniziale. Può essere impostato a valori tra 0
+  e 255 e il default è 255. Usa questo plugin con attenzione in quanto
+  può aumentare il rumore nel segnale. Nella maggior parte dei casi
+  è meglio impostare il livello del suono PCM a massimo, lasciare perdere questo plugin
+  e controllare il livello in output col controllo volume principale
+  del mixer. Se è connesso al computer un aplificatore esterno
+  (questo è quasi sempre il caso), il livello del rumore
+  può essere minimizzato regolando le manopole del livello principale e del volume
+  dell'amplificatore finchè il rumore sibilante sullo sfondo non sparisce.
+</P>
+
+<P>Utilizzo :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE>
+</P>
+
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Extrastereo</A></B></P>
+
+<P>Questo plugin aumenta (linearmente) la differenza tra i canali destro e sinistro
+  (come il plugin extrastereo di XMMS) che da un certo effetto "live" alla
+  riproduzione.
+</P>
+
+<P>Utilizzo :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+
+<P>Il coefficiente di default (<CODE>mul</CODE>) è un numero razionale preimpostato
+  a 2.5.  Se lo si imposta a 0.0, si ottiene un suono mono (media di entrambi i canali),
+  se lo si imposta a 1.0, il suono non risulterà cambiato.</P>
 
 </BODY>
 </HTML>

@@ -165,9 +165,8 @@ due comandi :<BR>
 
 <P><B>MEncoder</B> può ridimensionare le immagini di input se sono in formato YV12 (per esempio:
   ffdivx, driver odivx, o mpeg1/2). Le dimensioni di output si specificano co le opzioni
-  <CODE>-x</CODE>, e <CODE>-y</CODE>.  Inoltre, ci sono 3 filtri
-  di ridimensionamento in <B>MEncoder</B>, <I>0
-  : bilineare veloce</I>, <I>1 : bilineare</I>, <I>2 : bicubico</I> (migliore qualità).
+  <CODE>-x</CODE>, e <CODE>-y</CODE>.  Inoltre, ci sono alcuni filtri
+  di ridimensionamento in <B>MEncoder</B>, guarda la pagina di man !
   Possono essere specificati con l'opzione <CODE>-sws</CODE>. Se non specificato,
   <B>MEncoder</B> userà 0 : bilineare veloce.</P>
 
@@ -227,6 +226,54 @@ supportati). Puoi codificare i seguenti codec :</P>
 
 <P>Un esempio, con la compressione MJPEG :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
+
+
+<P><B><A NAME=2.4.3.6>2.4.3.6.  Codificare da file di immagine multipli (JPEG o PNG)</B></P>
+
+<P><B>MEncoder</B> è in grado di creare filmati a partire da uno o più file JPEG o PNG.
+  Con un semplice framecopy può creare file MJPEG (Motion JPEG) o MPNG
+  (Motion PNG).</P>
+
+<P><B><I>Spiegazione del processo</I></B></P>
+
+<P><B>MEncoder</B> <I>decodifica</I> le immagini in input con un codec video MJPEG
+  disponibile (per i PNG, usa il decoder PNG interno). Di
+  default usa <CODE>ffmjpeg</CODE>, quindi devi compilare con il supporto libavcodec
+  (cosa che è raccomandata comunque). Lo svantaggio è che non può gestire
+  alcuni tipi di JPEG (al posto di questi verrà codificata un'immagine verde). Usa dei
+  programmi esterni per convertire quelle immagini in un formato adatto.<BR> Si può
+  liberamente scegliere qualunque altro decoder MJPEG, come <CODE>mcmjpg32.dll</CODE>
+  (MainConcept Motion JPEG) se installato, e dopo aver controllato
+  <CODE>codecs.conf</CODE> e la linea di <CODE>videocodec</CODE> che fa riferimento
+  a questo file, saprai che devi usare l'opzione <CODE>-vc mjpeg</CODE>
+  per ottenere questo.
+</P>
+
+<P><B>MEncoder</B> quindi passa l' immagine decodificata al compressore video scelto
+  (DivX4, Xvid, ffmpeg msmpeg4, ecc...). Attenzione al decoder PNG, dato che
+  attualmente può fornire in output solo formati RGB, quindi non può essere usato con i codec
+  che richiedono un input YUV, come il DivX4 o l' msmpeg4 di ffmpeg.</P>
+
+<P><B><I>Esempi</I></B></P>
+
+<P>La spiegazione dell'opzione <CODE>-mf</CODE> si trova più sotto nella sezione
+  delle <A HREF=#2.4.5>Opzioni</A> generali e nella pagina di man.</P>
+
+<P><I>Creare un file DivX4 da tutti i file JPEG presenti nella directory attuale :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P>
+
+<P><I>Creare un file Motion JPEG (MJPEG) da tutti i file JPEG presenti nella directory attuale :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
+  -o output.avi</CODE></P>
+
+<P><I>Creare un file non compresso da tutti i file PNG presenti nella directory attuale :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  output.avi</CODE></P>
+
+<P><I>Creare un file Motion PNG (MPNG) da tutti i file PNG presenti nella directory attuale :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.4>2.4.4.  Sintassi</B></P>
@@ -319,15 +366,28 @@ supportati). Puoi codificare i seguenti codec :</P>
 </TR>
 <TR>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <I>-mf</I> opzioni multifile</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Usate per codificare da file JPEG multipli. Le sue sotto-opzioni sono:<BR>
+    &nbsp;&nbsp;<B>on</B> - abilita il supporto multifile<BR>
+    &nbsp;&nbsp;<B>w</B>=&lt;valore&gt; - larghezza del file di output<BR>
+    &nbsp;&nbsp;<B>h</B>=&lt;valore&gt; - altezza del file di output<BR>
+    &nbsp;&nbsp;<B>fps</B>=&lt;valore&gt; - fps del file di output<BR>
+    &nbsp;&nbsp;<B>type</B>=&lt;valore&gt; - tipo di file in input (tipi disponibili : <CODE>jpeg</CODE>, <CODE>png</CODE>)<BR>
+  </TD>
+</TR>
+
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-divx4opts</I></TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Se codifichi in DivX4, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - qualità (1-veloce, 5-migliore - predefinito 5)<BR>
-    &nbsp;&nbsp;<B>key</B>=XXXX - intervallo tra i frame chiave<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;valore&gt; - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;valore&gt; - qualità (1-veloce, 5-migliore - predefinito 5)<BR>
+    &nbsp;&nbsp;<B>key</B>=&lt;valore&gt; - intervallo tra i frame chiave<BR>
   </TD>
 </TR>
 <TR>
@@ -338,10 +398,10 @@ supportati). Puoi codificare i seguenti codec :</P>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
-    &nbsp;&nbsp;<B>vcodec</B>=XXX - seleziona il codec video (per la lista completa, vedi la sezione libavcodec sopra)<BR>
-    &nbsp;&nbsp;<B>vbitrate</B>=XXX - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>vcodec</B>=&lt;valore&gt; - seleziona il codec video (per la lista completa, vedi la sezione libavcodec sopra)<BR>
+    &nbsp;&nbsp;<B>vbitrate</B>=&lt;valore&gt; - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
     &nbsp;&nbsp;<B>vhq</B> - alta qualità<BR>
-    &nbsp;&nbsp;<B>keyint</B>=XXX - intervallo tra i frame chiave<BR>
+    &nbsp;&nbsp;<B>keyint</B>=&lt;valore&gt; - intervallo tra i frame chiave<BR>
   </TD>
 </TR>
 <TR>
@@ -354,8 +414,8 @@ supportati). Puoi codificare i seguenti codec :</P>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
     &nbsp;&nbsp;<B>cbr</B> - seleziona MP£ <B>CBR</B> MP3 (il default è <B>VBR</B>)<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - specifica il bitrate in kbit &lt;0-1024&gt; (solo per <B>CBR</B>!)<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - qualità (0-alta, 9-veloce - predefinito 0) (solo per <B>VBR</B>!)<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;valore&gt; - specifica il bitrate in kbit &lt;0-1024&gt; (solo per <B>CBR</B>!)<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;valore&gt; - qualità (0-alta, 9-veloce - predefinito 0) (solo per <B>VBR</B>!)<BR>
   </TD>
 </TR>
 </TABLE>
