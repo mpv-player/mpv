@@ -19,6 +19,8 @@
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
 
+#define MAX_RECURSION_DEPTH	10
+
 #ifdef DEBUG
 #include <assert.h>
 #endif
@@ -28,6 +30,7 @@
 static struct config *config;
 static int nr_options;		/* number of options in 'conf' */
 static int parser_mode;		/* COMMAND_LINE or CONFIG_FILE */
+static int recursion_depth = 0;
 
 static int init_conf(struct config *conf, int mode)
 {
@@ -190,7 +193,6 @@ static int read_option(char *opt, char *param)
 			if (param == NULL)
 				goto err_missing_param;
 			if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0) {
-				printf("parser function returned error:\n");
 				ret = ERR_FUNC_ERR;
 				goto out;
 			}
@@ -198,7 +200,6 @@ static int read_option(char *opt, char *param)
 			break;
 		case CONF_TYPE_FUNC:
 			if ((((cfg_func_t) config[i].p)(config + i)) < 0) {
-				printf("parser function returned error:\n");
 				ret = ERR_FUNC_ERR;
 				goto out;
 			}
@@ -239,20 +240,29 @@ int parse_config_file(struct config *conf, char *conffile)
 #ifdef DEBUG
 	assert(conffile != NULL);
 #endif
+	if (++recursion_depth > MAX_RECURSION_DEPTH) {
+		printf("too deep 'include'. check your configfiles\n");
+		return -1;
+	}		
+
 	printf("Reading config file: %s\n", conffile);
 
-	if (init_conf(conf, CONFIG_FILE) == -1)
-		return -1;
+	if (init_conf(conf, CONFIG_FILE) == -1) {
+		ret = -1;
+		goto out;
+	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN)) == NULL) {
 		perror("parse_config_file: can't get memory for 'line'");
-		return -1;
+		ret = -1;
+		goto out;
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
 		perror("parse_config_file: can't open filename");
 		free(line);
-		return 0;
+		ret = 0;
+		goto out;
 	}
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
@@ -357,6 +367,8 @@ int parse_config_file(struct config *conf, char *conffile)
 
 	free(line);
 	fclose(fp);
+out:
+	--recursion_depth;
 	return ret;
 }
 
