@@ -76,24 +76,29 @@ static void yuv420_rgb16_mmx (uint8_t * image, uint8_t * py,
 			      int rgb_stride, int y_stride, int uv_stride)
 {
     int even = 1;
-    int x = 0, y = 0;
+    int x, y;
 
-    /* load data for first scan line */
-    __asm__ __volatile__ (
-	     "movd (%1), %%mm0;" /* Load 4 Cb 00 00 00 00 u3 u2 u1 u0 */ 
-	     "movd (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 v3 v2 v1 v0 */ 
+    __asm__ __volatile__ ("pxor %mm4, %mm4;" /* zero mm4 */ );
 
-	     "pxor %%mm4, %%mm4;" /* zero mm4 */ 
-	     "movq (%0), %%mm6;" /* Load 8 Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
+    for (y = v_size; --y >= 0; ) {
+	uint8_t *_image = image;
+	uint8_t *_py = py;
+	uint8_t *_pu = pu;
+	uint8_t *_pv = pv;
 
-	     //"movl $0, (%3);" /* cache preload for image */ 
-	     : : "r" (py), "r" (pu), "r" (pv), "r" (image));
+	/* load data for start of next scan line */
+	__asm__ __volatile__ (
+		 "movd (%1), %%mm0;" /* Load 4 Cb 00 00 00 00 u3 u2 u1 u0 */ 
+		 "movd (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 v3 v2 v1 v0 */ 
+		 "movq (%0), %%mm6;" /* Load 8  Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
 
-    do {
-	do {
+		 : : "r" (_py), "r" (_pu), "r" (_pv));
+
+	for (x = h_size >> 3; --x >= 0; ) {
 	    /* this mmx assembly code deals with SINGLE scan line at a time, it convert 8
 	       pixels in each iteration */
-	    __asm__ __volatile__ (".align 8;" 
+
+	    __asm__ __volatile__ (
 		     /* Do the multiply part of the conversion for even and odd pixels,
 			register usage:
 			mm0 -> Cblue, mm1 -> Cred, mm2 -> Cgreen even pixels,
@@ -199,40 +204,24 @@ static void yuv420_rgb16_mmx (uint8_t * image, uint8_t * py,
 		     "movd 4 (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 v3 v2 v1 v0 */ 
 
 		     MOVNTQ " %%mm5, 8 (%3);" /* store pixel 4-7 */ 
-		     : : "r" (py), "r" (pu), "r" (pv), "r" (image));
+		     : : "r" (_py), "r" (_pu), "r" (_pv), "r" (_image));
 
-	    py += 8;
-	    pu += 4;
-	    pv += 4;
-	    image += 16;
-	    x += 8;
-	} while (x < h_size);
-
-	if (even) {
-	    pu -= h_size/2;
-	    pv -= h_size/2;
-	} else {
-	    pu += (uv_stride - h_size/2);
-	    pv += (uv_stride - h_size/2);
+	    _py += 8;
+	    _pu += 4;
+	    _pv += 4;
+	    _image += 16;
 	}
 
-	py += (y_stride - h_size);
-	image += (rgb_stride - 2*h_size);
+	if (!even) {
+	    pu += uv_stride;
+	    pv += uv_stride;
+	}
 
-	/* load data for start of next scan line */
-	__asm__ __volatile__ (
-		 "movd (%1), %%mm0;" /* Load 4 Cb 00 00 00 00 00 u3 u2 u1 u0 */ 
-		 "movd (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 00 v2 v1 v0 */ 
+	py += y_stride;
+	image += rgb_stride;
 
-		 //"movl $0, (%3);" /* cache preload for image */ 
-		 "movq (%0), %%mm6;" /* Load 8 Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
-
-		 : : "r" (py), "r" (pu), "r" (pv), "r" (image));
-
-	x = 0;
-	y += 1;
 	even = (!even);
-    } while (y < v_size) ;
+    }
 
     __asm__ __volatile__ (EMMS);
 }
@@ -243,25 +232,29 @@ static void yuv420_argb32_mmx (uint8_t * image, uint8_t * py,
 			       int rgb_stride, int y_stride, int uv_stride)
 {
     int even = 1;
-    int x = 0, y = 0;
+    int x, y;
 
-    __asm__ __volatile__ (
-	     ".align 8;" 
+    __asm__ __volatile__ ("pxor %mm4, %mm4;" /* zero mm4 */ );
+
+    for (y = v_size; --y >= 0; ) {
+	uint8_t *_image = image;
+	uint8_t *_py = py;
+	uint8_t *_pu = pu;
+	uint8_t *_pv = pv;
+
+	/* load data for start of next scan line */
+	__asm__ __volatile__ 
+	    (
 	     "movd (%1), %%mm0;" /* Load 4 Cb 00 00 00 00 u3 u2 u1 u0 */ 
-	     //"movl $0, (%3);" /* cache preload for image */ 
-
 	     "movd (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 v3 v2 v1 v0 */ 
-	     "pxor %%mm4, %%mm4;" /* zero mm4 */ 
+	     "movq (%0), %%mm6;" /* Load 8  Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
+	     : : "r" (_py), "r" (_pu), "r" (_pv)
+	     );
 
-	     "movq (%0), %%mm6;" /* Load 8 Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
-	     : : "r" (py), "r" (pu), "r" (pv), "r" (image));
-
-    do {
-	do {
+	for (x = h_size >> 3; --x >= 0; ) {
 	    /* this mmx assembly code deals with SINGLE scan line at a time, it convert 8
 	       pixels in each iteration */
 	    __asm__ __volatile__ (
-		     ".align 8;" 
 		     /* Do the multiply part of the conversion for even and odd pixels,
 			register usage:
 			mm0 -> Cblue, mm1 -> Cred, mm2 -> Cgreen even pixels,
@@ -379,43 +372,24 @@ static void yuv420_argb32_mmx (uint8_t * image, uint8_t * py,
 		     "pxor %%mm4, %%mm4;" /* zero mm4 */ 
 		     "movq 8 (%0), %%mm6;" /* Load 8 Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
 
-		     : : "r" (py), "r" (pu), "r" (pv), "r" (image));
+		     : : "r" (_py), "r" (_pu), "r" (_pv), "r" (_image));
 
-	    py += 8;
-	    pu += 4;
-	    pv += 4;
-	    image += 32;
-	    x += 8;
-	} while (x < h_size);
-
-	if (even) {
-	    pu -= h_size/2;
-	    pv -= h_size/2;
-	} else {
-	    pu += (uv_stride - h_size/2);
-	    pv += (uv_stride - h_size/2);
+	    _py += 8;
+	    _pu += 4;
+	    _pv += 4;
+	    _image += 32;
 	}
 
-	py += (y_stride - h_size);
-	image += (rgb_stride - 4*h_size);
+	if (!even) {
+	    pu += uv_stride;
+	    pv += uv_stride;
+	}
 
-	/* load data for start of next scan line */
-	__asm__ __volatile__ 
-	    (
-	     ".align 8;" 
-	     "movd (%1), %%mm0;" /* Load 4 Cb 00 00 00 00 u3 u2 u1 u0 */ 
-	     "movd (%2), %%mm1;" /* Load 4 Cr 00 00 00 00 v3 v2 v1 v0 */ 
+	py += y_stride;
+	image += rgb_stride;
 
-	     //"movl $0, (%3);" /* cache preload for image */ 
-	     "movq (%0), %%mm6;" /* Load 8 Y Y7 Y6 Y5 Y4 Y3 Y2 Y1 Y0 */ 
-	     : : "r" (py), "r" (pu), "r" (pv), "r" (image)
-	     );
-
-
-	x = 0;
-	y += 1;
 	even = (!even);
-    } while ( y < v_size) ;
+    }
 
     __asm__ __volatile__ (EMMS);
 }
