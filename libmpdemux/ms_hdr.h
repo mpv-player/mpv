@@ -14,6 +14,8 @@ typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
 } WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
 #endif /* _WAVEFORMATEX_ */
 
+#ifndef _MPEGLAYER3WAVEFORMAT_
+#define _MPEGLAYER3WAVEFORMAT_
 typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
   WAVEFORMATEX wf;
   unsigned short wID;
@@ -22,6 +24,7 @@ typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
   unsigned short nFramesPerBlock;
   unsigned short nCodecDelay;
 } MPEGLAYER3WAVEFORMAT;
+#endif /* _MPEGLAYER3WAVEFORMAT_ */
 
 #if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_H)
 #define _BITMAPINFOHEADER_
