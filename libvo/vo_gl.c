@@ -6,6 +6,7 @@
 #include <math.h>
 #include <errno.h>
 
+#include "mp_msg.h"
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -55,7 +56,7 @@ static uint32_t texture_height;
 static int slice_height=1;
 
 static void resize(int x,int y){
-  printf("[gl] Resize: %dx%d\n",x,y);
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
   glViewport( 0, 0, x, y );
 
   glMatrixMode(GL_PROJECTION);
@@ -113,7 +114,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
   if (vinfo == NULL)
   {
-    printf("[gl] no GLX support present\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
     return -1;
   }
 
@@ -176,7 +177,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   glEnable(GL_TEXTURE_2D);
 
-  printf("[gl] Creating %dx%d texture...\n",texture_width,texture_height);
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",texture_width,texture_height);
 
 #if 1
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -302,7 +303,7 @@ static uint32_t preinit(const char *arg)
     {
 	    slice_height = 4;
     }
-    printf("[vo_gl] Using %d as slice_height (0 means image_height).\n", slice_height);
+    mp_msg(MSGT_VO, MSGL_INFO, "[vo_gl] Using %d as slice_height (0 means image_height).\n", slice_height);
 
     if( !vo_init() ) return -1; // Can't open X11
 
