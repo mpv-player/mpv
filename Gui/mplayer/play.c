@@ -178,11 +178,10 @@ void ChangeSkin( void )
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
   }
 
- mplSkinChanged=1;
+/*
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
  if ( !mplShMem->Playing )
   {
-   mplSkinChanged=0;
    if ( !appMPlayer.subWindow.isFullScreen ) 
     {
      wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
@@ -192,6 +191,21 @@ void ChangeSkin( void )
    wsClearWindow( appMPlayer.subWindow );
    if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
    mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
+  }
+*/
+ if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
+ if ( ( !appMPlayer.subWindow.isFullScreen )&&( !mplShMem->Playing ) )
+  {
+   wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+  } 
+ wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+ if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
+ if ( !mplShMem->Playing ) 
+  {
+   mplSubRender=1; 
+   wsClearWindow( appMPlayer.subWindow );
+   wsPostRedisplay( &appMPlayer.subWindow );
   }
 
  if ( mplDrawBuffer ) free( mplDrawBuffer );

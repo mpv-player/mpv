@@ -5,7 +5,6 @@
 extern int             mplSubRender;
 extern int             mplMainRender;
 extern int             mplGeneralTimer;
-extern int             mplSkinChanged;
 
 extern unsigned char * mplDrawBuffer;
 extern unsigned char * mplMenuDrawBuffer;

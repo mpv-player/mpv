@@ -27,8 +27,6 @@ int mplRedrawTimer = mplRedrawTimerConst;
 int mplGeneralTimer = -1;
 int mplTimer = 0;
 
-int mplSkinChanged = 0;
-
 void mplMsgHandle( int msg,float param );
 
 #include "widgets.h"
