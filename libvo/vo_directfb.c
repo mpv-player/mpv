@@ -224,8 +224,16 @@ if (verbose) {
      if (caps & DLCAPS_ALPHACHANNEL)
           printf( "  - Supports blending based on alpha channel.\n" );
 
+#ifdef HAVE_DIRECTFB0910
+     if (caps & DLCAPS_SRC_COLORKEY)
+          printf( "  - Supports source based color keying.\n" );
+
+     if (caps & DLCAPS_DST_COLORKEY)
+          printf( "  - Supports destination based color keying.\n" );
+#else
      if (caps & DLCAPS_COLORKEYING)
           printf( "  - Supports color keying.\n" );
+#endif
 
      if (caps & DLCAPS_FLICKER_FILTERING)
           printf( "  - Supports flicker filtering.\n" );
@@ -289,10 +297,10 @@ if (verbose) printf("DirectFB: Preinit entered\n");
     	    DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
 	}
 
-	// disable YV12 for dfb 0.9.9 - there is a bug in dfb!
+	// disable YV12 for dfb until 0.9.10 - there is a bug in dfb! should be revised with every dfb version until bug is fixed in dfb.
 	if ((directfb_major_version <= 0) &&
 	    (directfb_minor_version <= 9) &&
-	    (directfb_micro_version <= 9)) {
+	    (directfb_micro_version <= 10)) {
 	    buggyYV12BitBlt=1;
 	    if (verbose) printf("DirectFB: Buggy YV12BitBlt!\n");
 	}

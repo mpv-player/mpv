@@ -1858,6 +1858,21 @@ else
 fi
 echores "$_directfb099"
 fi
+if test "$_directfb" = yes; then
+echocheck "DirectFB >= 0.9.10"
+  _directfb0910=no
+  cat > $TMPC <<EOF
+#include <directfb.h>
+int main(void) { DFBDisplayLayerCapabilities  caps=DLCAPS_DST_COLORKEY; return 0; }
+EOF
+  cc_check -ldirectfb && _directfb0910=yes
+if test "$_directfb0910" = yes ; then
+  _def_directfb0910='#define HAVE_DIRECTFB0910 1'
+else
+  _def_directfb0910='#undef HAVE_DIRECTFB0910'
+fi
+echores "$_directfb0910"
+fi
 echocheck "X11"
 if test "$_x11" = auto || test "$_x11" = yes ; then
   cat > $TMPC <<EOF
@@ -4008,6 +4023,7 @@ $_def_3dfx
 $_def_tdfxfb
 $_def_directfb
 $_def_directfb099
+$_def_directfb0910
 $_def_zr
 $_def_mga
 $_def_xmga
