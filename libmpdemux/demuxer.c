@@ -628,7 +628,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 {
     demuxer_info_t *info = &demuxer->info;
 
-    if (!strncmp(opt, "name"))
+    if (!strcmp(opt, "name"))
     {
 	if (info->name)
 	{
@@ -640,7 +640,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    if (!strncmp(opt, "author"))
+    if (!strcmp(opt, "author"))
     {
 	if (info->author)
 	{
@@ -652,7 +652,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    if (!strncmp(opt, "encoder"))
+    if (!strcmp(opt, "encoder"))
     {
 	if (info->encoder)
 	{
@@ -664,7 +664,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    if (!strncmp(opt, "comments"))
+    if (!strcmp(opt, "comments"))
     {
 	if (info->comments)
 	{
