@@ -152,7 +152,7 @@ screen #0
   </para></listitem>
 <listitem><para>
   And finally, check if <application>MPlayer</application> was compiled
-  with 'xv' support. Do a <command>mplayer -vo help | grep xv </command>
+  with 'xv' support. Do a <command>mplayer -vo help | grep xv </command>.
   If 'xv' support was built a line similar to this should appear:
   <screen>
   xv      X11/Xv<!--
