@@ -120,6 +120,11 @@
 #include "x11_common.h"
 #endif
 
+#ifdef HAVE_NEW_INPUT
+#include "../input/input.h"
+#include "../input/mouse.h"
+#endif
+
 LIBVO_EXTERN(sdl)
 
 extern int verbose;
@@ -430,8 +435,6 @@ increase your display's color depth, if possible.\n", priv->bpp);
 #ifndef BUGGY_SDL
 	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
 //	SDL_EventState(SDL_QUIT, SDL_IGNORE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
@@ -1025,7 +1028,7 @@ static void check_events (void)
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Event event;
 	SDLKey keypressed = 0;
-	static int firstcheck = 0;
+	static int firstcheck = 0, modifiers = 0;
 	
 	/* Poll the waiting SDL Events */
 	while ( SDL_PollEvent(&event) ) {
@@ -1043,7 +1046,53 @@ static void check_events (void)
 				if(verbose > 2) printf("SDL: Window resize\n");
 			break;
 			
-			
+			case SDL_MOUSEBUTTONDOWN:
+#ifdef HAVE_NEW_INPUT
+				if(event.button.button == 4 || event.button.button == 5)
+					mplayer_put_key(MOUSE_BASE+event.button.button-1);
+				else
+					mplayer_put_key((MOUSE_BASE+event.button.button-1) | MP_KEY_DOWN);
+#else
+				switch(event.button.button) {
+					case 1: modifiers |= 1; break;
+					case 2: modifiers |= 2; break;
+					case 3: modifiers |= 4; break;
+					case 4:	/* wheel up */
+						if ((modifiers & 1))
+							mplayer_put_key(KEY_LEFT);
+						else if ((modifiers & 2))
+							mplayer_put_key('/');
+						else if ((modifiers & 4))
+							mplayer_put_key(KEY_PAGE_DOWN);
+						else
+							mplayer_put_key(KEY_DOWN);
+						break;
+					case 5:	/* wheel down */
+						if ((modifiers & 1))
+							mplayer_put_key(KEY_RIGHT);
+						else if ((modifiers & 2))
+							mplayer_put_key('*');
+						else if ((modifiers & 4))
+							mplayer_put_key(KEY_PAGE_UP);
+						else
+							mplayer_put_key(KEY_UP);
+						break;
+				}
+#endif
+				break;			    
+		
+			case SDL_MOUSEBUTTONUP:
+#ifdef HAVE_NEW_INPUT
+				mplayer_put_key(MOUSE_BASE+event.button.button-1);
+#else
+				switch(event.button.button) {
+					case 1: modifiers &= ~1; break;
+					case 2: modifiers &= ~2; break;
+					case 3: modifiers &= ~4; break;
+				}
+#endif
+				break;
+	
 			/* graphics mode selection shortcuts */
 #ifdef BUGGY_SDL
 			case SDL_KEYDOWN:
