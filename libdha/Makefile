@@ -37,7 +37,7 @@ endif
 
 # .PHONY: all clean
 
-.c.o:
+.c.o: pci_names.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
@@ -63,7 +63,7 @@ distclean:
 
 dep:    depend
 
-depend:
+depend: pci_names.c
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
