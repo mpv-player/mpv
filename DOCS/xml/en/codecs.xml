@@ -485,7 +485,7 @@ then started XviD. So both projects have the same origin.
 <step><para>
   <screen>./configure</screen>
   You may have to add some options (examine the output of
-  <screen>./configure --help</screen>).
+  <command>./configure --help</command>).
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
@@ -529,7 +529,7 @@ decoders:
 
 <procedure>
 <title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
-<note><para>currently only 32bit Intel platforms are supported.</para></note>
+<note><para>Currently only 32-bit Intel platforms are supported.</para></note>
 <step><para>download <application>MPlayer</application> CVS</para></step>
 <step><para>download QuickTime DLL pack from
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
