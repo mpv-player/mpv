@@ -131,7 +131,7 @@ int vo_wm_string_test( char * name )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" ); return vo_wm_IceWM; }
  if ( !strncmp( name,"_KDE_",5 ) )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" ); return vo_wm_KDE; }
- if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+ if ( !strncmp( name,"KWM_WIN",7 ) )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); return vo_wm_WMakerStyle; }
 // fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
  return vo_wm_Unknown;
@@ -635,7 +635,9 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
-#define WIN_LAYER_ONTOP                  10
+#define WIN_LAYER_ONTOP                  6
+#define WIN_LAYER_ABOVE_DOCK             10
+ 
 
 void vo_x11_setlayer( int layer )
 {
@@ -651,6 +653,7 @@ void vo_x11_setlayer( int layer )
     XClientMessageEvent xev;
     memset(&xev, 0, sizeof(xev));
     xev.type = ClientMessage;
+    xev.display= mDisplay;
     xev.window = vo_window;
     xev.message_type = XInternAtom(mDisplay, "_WIN_LAYER", False);
     xev.format = 32;
@@ -661,11 +664,28 @@ void vo_x11_setlayer( int layer )
    return;
   }
 
+ type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
+  {
+   XClientMessageEvent  xev;
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   xev.display=mDisplay;
+   xev.window=vo_window;
+   xev.format=32;
+   xev.data.l[0]=layer;
+   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+   XFree( args );
+   return;
+  }
+
  type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
   {
    XClientMessageEvent  xev;
-   
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Gnome style stay on top ( layer %d ).\n",layer );
    memset( &xev,0,sizeof( xev ) );
    xev.type=ClientMessage;
@@ -676,37 +696,11 @@ void vo_x11_setlayer( int layer )
     {
      case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
      case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
-     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
+     case  1: xev.data.l[0] = WIN_LAYER_ABOVE_DOCK; break;
     }
    
    if ( layer ) XRaiseWindow( mDisplay,vo_window );
    XSendEvent( mDisplay,mRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
-								              
-   XFree( args );
-   return;
-  }
- type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
-  {
-   XEvent e;
-   int    i;
-   
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
-   memset( &e,0,sizeof( e ) );
-   e.xclient.type=ClientMessage;
-   e.xclient.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
-   e.xclient.display=mDisplay;
-   e.xclient.window=vo_window;
-   e.xclient.format=32;
-   e.xclient.data.l[0]=layer;
-
-   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-   type=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
-   for ( i=0;i < nitems;i++ )
-     if ( args[i] == type ) { e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False ); break; }
-
-   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
-								   
    XFree( args );
    return;
   }
