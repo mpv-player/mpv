@@ -102,6 +102,28 @@
 #define wsGrayMinus     0xad + 256
 #define wsGrayMul       0xaa + 256
 #define wsGrayDiv       0xaf + 256
+#define wsGrayDecimal   0xae + 256
+#define wsGray0         0xb0 + 256
+#define wsGray1         0xb1 + 256
+#define wsGray2         0xb2 + 256
+#define wsGray3         0xb3 + 256
+#define wsGray4         0xb4 + 256
+#define wsGray5         0xb5 + 256
+#define wsGray6         0xb6 + 256
+#define wsGray7         0xb7 + 256
+#define wsGray8         0xb8 + 256
+#define wsGray9         0xb9 + 256
+#define wsGrayHome      0x95 + 256
+#define wsGrayLeft      0x96 + 256
+#define wsGrayUp        0x97 + 256
+#define wsGrayRight     0x98 + 256
+#define wsGrayDown      0x99 + 256
+#define wsGrayPgUp      0x9a + 256
+#define wsGrayPgDn      0x9b + 256
+#define wsGrayEnd       0x9c + 256
+#define wsGray5Dup      0x9d + 256
+#define wsGrayInsert    0x9e + 256
+#define wsGrayDelete    0x9f + 256
 
 #endif
 

@@ -434,6 +434,16 @@ void vo_x11_putkey(int key){
    case wsEnd:       mplayer_put_key(KEY_END); break;
    case wsPageUp:    mplayer_put_key(KEY_PAGE_UP); break;
    case wsPageDown:  mplayer_put_key(KEY_PAGE_DOWN); break;
+   case wsF1:        mplayer_put_key(KEY_F+1); break;
+   case wsF2:        mplayer_put_key(KEY_F+2); break;
+   case wsF3:        mplayer_put_key(KEY_F+3); break;
+   case wsF4:        mplayer_put_key(KEY_F+4); break;
+   case wsF5:        mplayer_put_key(KEY_F+5); break;
+   case wsF6:        mplayer_put_key(KEY_F+6); break;
+   case wsF7:        mplayer_put_key(KEY_F+7); break;
+   case wsF8:        mplayer_put_key(KEY_F+8); break;
+   case wsF9:        mplayer_put_key(KEY_F+9); break;
+   case wsF10:       mplayer_put_key(KEY_F+10); break;
    case wsq:
    case wsQ:         mplayer_put_key('q'); break;
    case wsp:
@@ -448,6 +458,29 @@ void vo_x11_putkey(int key){
    case wsDiv:       mplayer_put_key('/'); break;
    case wsLess:      mplayer_put_key('<'); break;
    case wsMore:      mplayer_put_key('>'); break;
+   case wsGray0:     mplayer_put_key(KEY_KP0); break;
+   case wsGrayEnd:
+   case wsGray1:     mplayer_put_key(KEY_KP1); break;
+   case wsGrayDown:
+   case wsGray2:     mplayer_put_key(KEY_KP2); break;
+   case wsGrayPgDn:
+   case wsGray3:     mplayer_put_key(KEY_KP3); break;
+   case wsGrayLeft:
+   case wsGray4:     mplayer_put_key(KEY_KP4); break;
+   case wsGray5Dup:
+   case wsGray5:     mplayer_put_key(KEY_KP5); break;
+   case wsGrayRight:
+   case wsGray6:     mplayer_put_key(KEY_KP6); break;
+   case wsGrayHome:
+   case wsGray7:     mplayer_put_key(KEY_KP7); break;
+   case wsGrayUp:
+   case wsGray8:     mplayer_put_key(KEY_KP8); break;
+   case wsGrayPgUp:
+   case wsGray9:     mplayer_put_key(KEY_KP9); break;
+   case wsGrayDecimal: mplayer_put_key(KEY_KPDEC); break;
+   case wsGrayInsert: mplayer_put_key(KEY_KPINS); break;
+   case wsGrayDelete: mplayer_put_key(KEY_KPDEL); break;
+   case wsGrayEnter: mplayer_put_key(KEY_KPENTER); break;
    case wsm:
    case wsM:	     mplayer_put_key('m'); break;
    case wso:
