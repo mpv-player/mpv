@@ -1698,9 +1698,10 @@ on his homepage that explain how to make DirectFB TV output run on Matrox cards.
 
 <note><para>
 the first DirectFB version with which we could get this working was
-0.9.17 (it's buggy, needs that <systemitem>surfacemanager</systemitem> patch from
-the URL above). Anyway, porting of the CRTC2 code to <emphasis role="bold">mga_vid</emphasis>
-is underway.
+0.9.17 (it's buggy, needs that <systemitem>surfacemanager</systemitem>
+patch from the URL above). Porting the CRTC2 code to
+<link linkend="mga_vid">mga_vid</link> has been planned for years,
+<ulink url="../../tech/patches.txt">patches</ulink> are welcome.
 </para></note>
 </sect4>
 </sect3>
