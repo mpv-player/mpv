@@ -53,6 +53,7 @@ extern vo_functions_t video_out_mga;
 extern vo_functions_t video_out_xmga;
 extern vo_functions_t video_out_x11;
 extern vo_functions_t video_out_xover;
+extern vo_functions_t video_out_xvmc;
 extern vo_functions_t video_out_xv;
 extern vo_functions_t video_out_gl;
 extern vo_functions_t video_out_gl2;
@@ -126,6 +127,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_TDFXFB
         &video_out_tdfxfb,
+#endif
+#ifdef HAVE_XVMC
+        &video_out_xvmc,
 #endif
 #ifdef HAVE_XV
         &video_out_xv,

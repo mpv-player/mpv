@@ -95,6 +95,10 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=0;
 	return;
     }
+    if(IMGFMT_IS_XVMC(out_fmt)){
+	mpi->bpp=0;
+	return;
+    }
     mpi->num_planes=1;
     if (IMGFMT_IS_RGB(out_fmt)) {
 	if (IMGFMT_RGB_DEPTH(out_fmt) < 8 && !(out_fmt&128))

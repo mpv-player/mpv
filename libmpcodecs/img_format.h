@@ -77,6 +77,14 @@
 /* Compressed Formats */
 #define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
 
+// I think that this code could not be used by any other codec/format
+#define IMGFMT_XVMC 0x1DC70000
+#define IMGFMT_XVMC_MASK 0xFFFF0000
+#define IMGFMT_IS_XVMC(fmt) (((fmt)&IMGFMT_XVMC_MASK)==IMGFMT_XVMC)
+//these are chroma420
+#define IMGFMT_XVMC_MOCO_MPEG2 (IMGFMT_XVMC|0x02)
+#define IMGFMT_XVMC_IDCT_MPEG2 (IMGFMT_XVMC|0x82)
+
 typedef struct {
     void* data;
     int size;

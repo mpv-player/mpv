@@ -54,6 +54,8 @@ char *vo_format_name(int format)
 	case IMGFMT_YUVP: return("Packed YUVP");
 	case IMGFMT_UYVP: return("Packed UYVP");
 	case IMGFMT_MPEGPES: return("Mpeg PES");
+	case IMGFMT_XVMC_MOCO_MPEG2: return("MPEG1/2 Motion Compensation");
+	case IMGFMT_XVMC_IDCT_MPEG2: return("MPEG1/2 Motion Compensation and IDCT");
     }
     return("Unknown");
 }

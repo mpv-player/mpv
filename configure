@@ -215,6 +215,7 @@ Video output:
   --enable-xmga          build with mga_vid X Window support
                          (check for X & /dev/mga_vid) [autodetect]
   --enable-xv            build with Xv render support for X 4.x [autodetect]
+  --enable-xvmc          build with XvMC acceleration for X 4.x [autodetect]
   --enable-vm            build with XF86VidMode support for X11 [autodetect]
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
@@ -288,6 +289,7 @@ Use these options if autodetection fails:
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
+  --with-xvmclib=PATH      path to adapter specific XvMCxxxxx.so (e.g. NVIDIA)
   --with-xvidcore=PATH     path to XviD libxvidcore.a
                            (e.g. /opt/lib/libxvidcore.a)
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
@@ -991,6 +993,7 @@ fi
 
 
 _prefix="/usr/local"
+_xvmclib="XvMCNVIDIA"
 
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
@@ -1003,6 +1006,7 @@ _mencoder=yes
 _x11=auto
 _dga=auto	# 1 2 no auto
 _xv=auto
+_xvmc=no  #auto when complete
 _sdl=auto
 _directx=auto
 _win32waveout=auto
@@ -1129,6 +1133,8 @@ for ac_option do
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
   --disable-xv)		_xv=no		;;
+  --enable-xvmc)        _xvmc=yes       ;;
+  --disable-xvmc)       _xvmc=no        ;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
   --enable-directx)     _directx=yes    ;;
@@ -1416,6 +1422,9 @@ for ac_option do
     ;;
   --with-dxr2incdir=*)
     _inc_dxr2=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-xvmclib=*)
+    _xvmclib=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-xvidcore=*)
     _xvidcore=`echo $ac_option | cut -d '=' -f 2`
@@ -2734,6 +2743,32 @@ else
   _novomodules="xv $_novomodules"
 fi
 echores "$_xv"
+
+
+echocheck "XvMC"
+if test "$_x11" = yes && test "$_xv" && test "$_xvmc" != no ; then
+  _xvmc=no
+  cat > $TMPC <<EOF
+#include <X11/Xlib.h>
+#include <X11/extensions/Xvlib.h>
+#include <X11/extensions/XvMClib.h>
+int main(void) { 
+  (void) XvMCQueryExtension(0,0,0);
+  (void) XvMCCreateContext(0,0,0,0,0,0,0);
+  return 0; }
+EOF
+  cc_check $_inc_x11 $_ld_x11 $_ld_xv -lXvMC -l$_xvmclib && _xvmc=yes
+fi
+if test "$_xvmc" = yes ; then
+  _def_xvmc='#define HAVE_XVMC 1'
+  _ld_xvmc="-lXvMC -l$_xvmclib"
+  _vosrc="$_vosrc vo_xvmc.c"
+  _vomodules="xvmc $_vomodules"
+else
+  _def_xvmc='#undef HAVE_XVMC'
+  _novomodules="xvmc $_novomodules"
+fi
+echores "$_xvmc"
 
 
 echocheck "Xinerama"
@@ -5310,7 +5345,7 @@ X11DIR = $_ld_x11
 SRC_PATH=.
 
 # video output
-X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_x11 $_ld_mad $_ld_sock
+X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_mad $_ld_sock
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
@@ -5883,6 +5918,7 @@ $_def_mlib  // Sun mediaLib, available only on solaris
 #define SCREEN_SIZE_Y 1
 $_def_x11
 $_def_xv
+$_def_xvmc
 $_def_vm
 $_def_xinerama
 $_def_gl

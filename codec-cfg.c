@@ -158,6 +158,10 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"BGR1",  IMGFMT_BGR|1},
 
 		{"MPES",  IMGFMT_MPEGPES},
+
+		{"IDCT_MPEG2",IMGFMT_XVMC_IDCT_MPEG2},
+		{"MOCO_MPEG2",IMGFMT_XVMC_MOCO_MPEG2},
+
 		{NULL,    0}
 	};
 
