@@ -42,6 +42,7 @@ typedef struct {
     AVCodecContext *avctx;
     int last_aspect;
     int do_slices;
+    int do_dr1;
     int vo_inited;
     int convert;
     int yuy2_support;
@@ -55,6 +56,8 @@ typedef struct {
 //#endif
 
 #include "cfgparser.h"
+
+extern int vo_directrendering;
 
 static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=0;
@@ -113,6 +116,9 @@ static int init(sh_video_t *sh){
 
     if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
 	ctx->do_slices=1;
+ 
+    if(vo_directrendering && lavc_codec->capabilities&CODEC_CAP_DR1)
+	ctx->do_dr1=1;
     
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
@@ -196,7 +202,6 @@ static void draw_slice(struct AVCodecContext *s,
     stride[1]=stride[2]=stride[0]/2;
 
     mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
-
 }
 
 static int init_vo(sh_video_t *sh){
@@ -241,6 +246,7 @@ static int init_vo(sh_video_t *sh){
 #if LIBAVCODEC_BUILD > 4615
 static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
     sh_video_t * sh = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t* mpi=NULL;
 //    int flags= MP_IMGFLAG_ALIGNED_STRIDE;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE;
@@ -251,7 +257,8 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     }
 
     if(pict_type==B_TYPE)
-        flags|= 0; //FIXME slice, framedrop?
+        flags|=(!avctx->hurry_up && ctx->do_slices) ?
+                MP_IMGFLAG_DRAW_CALLBACK:0;
     else
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
 
@@ -269,9 +276,19 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     avctx->dr_buffer[0]= mpi->planes[0];
     avctx->dr_buffer[1]= mpi->planes[1];
     avctx->dr_buffer[2]= mpi->planes[2];
-    avctx->dr_stride   = mpi->stride[0]; //FIXME check if it didnt change & check uv strides
+    
+    if(avctx->dr_stride && avctx->dr_stride !=mpi->stride[0]){
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: stride changed\n");
+    }
+
+    avctx->dr_stride   = mpi->stride[0];
+
+    if(mpi->stride[0]>>1 != mpi->stride[1] 
+     ||mpi->stride[0]>>1 != mpi->stride[2]){
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: chroma stride != luma stride >>1\n");
+    }
+    
     avctx->dr_opaque_frame = mpi;
-//    printf("get_buffer: %X %d %d %d %d\n", (int)avctx->dr_buffer[0], width, height, avctx->width, avctx->height);
 }
 #endif
 
@@ -283,12 +300,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
-    int dr1=0;
-    
-    //FIXME check if lavc codec supports dr1
+    int dr1= ctx->do_dr1=0;
 
     if(len<=0) return NULL; // skipped frame
-    
+
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
     if(ctx->vo_inited && !ctx->convert && !(flags&3) && !dr1){
