@@ -3,6 +3,11 @@
 
 CpuCaps gCpuCaps;
 
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#include <stdlib.h>
+
 #ifdef ARCH_X86
 
 #include <stdio.h>
@@ -93,7 +98,8 @@ void GetCpuCaps( CpuCaps *caps)
 	    return;
 	}
 	do_cpuid(0x00000000, regs); // get _max_ cpuid level and vendor name
-	printf("CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",&regs[1],&regs[3],&regs[2],regs[0]);
+	printf("CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",
+			(char*) (regs+1),(char*) (regs+3),(char*) (regs+2), regs[0]);
 	if (regs[0]>=0x00000001)
 	{
 		char *tmpstr;
@@ -173,7 +179,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 		exit(1);
 	}
 
-	sprintf(vendor,"%.4s%.4s%.4s",&regs[1],&regs[3],&regs[2]);
+	sprintf(vendor,"%.4s%.4s%.4s",(char*)(regs+1),(char*)(regs+3),(char*)(regs+2));
 
 	for(i=0; i<MAX_VENDORS; i++){
 		if(!strcmp(cpuvendors[i].string,vendor)){
