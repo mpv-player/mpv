@@ -1112,11 +1112,15 @@ static void uninit(void)
 			printf(FBDEV "Can't restore original cmap\n");
 		fb_cmap_changed = 0;
 	}
-	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
-		printf(FBDEV "Can't set virtual screensize to original value: %s\n", strerror(errno));
-	close(fb_dev_fd);
-	memset(next_frame, '\0', in_height * in_width * fb_pixel_size);
-	put_frame();
+//	memset(next_frame, '\0', in_height * in_width * fb_pixel_size);
+//	put_frame();
 	free(next_frame);
+	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
+		printf(FBDEV "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
+	fb_orig_vinfo.xoffset = fb_vinfo.xoffset;
+	fb_orig_vinfo.yoffset = fb_vinfo.yoffset;
+	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
+		printf(FBDEV "Can't reset original fb_var_screeninfo: %s\n", strerror(errno));
+	close(fb_dev_fd);
 	munmap(frame_buffer, fb_size);
 }
