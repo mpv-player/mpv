@@ -85,3 +85,18 @@ void *xbuffer_ensure_size(void *buf, int size) {
 
   return buf;
 }
+
+
+
+void *xbuffer_strcat(void *buf, char *data) {
+
+  if (!buf || !data) {
+    return NULL;
+  }
+
+  buf = xbuffer_ensure_size(buf, strlen(buf)+strlen(data)+1);
+
+  strcat(buf, data);
+
+  return buf;
+}

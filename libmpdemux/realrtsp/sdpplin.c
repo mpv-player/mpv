@@ -96,13 +96,19 @@ static char *b64_decode(const char *in, char *out, int *size)
 
 static char *nl(char *data) {
 
-  return strchr(data,'\n')+1;
+  char *nlptr = (data) ? strchr(data,'\n') : NULL;
+  return (nlptr) ? nlptr + 1 : NULL;
 }
 
 static int filter(const char *in, const char *filter, char **out) {
 
   int flen=strlen(filter);
-  int len=strchr(in,'\n')-in;
+  int len;
+
+  if (!in)
+    return 0;
+
+  len = (strchr(in,'\n')) ? strchr(in,'\n')-in : strlen(in);
 
   if (!strncmp(in,filter,flen))
   {
@@ -135,7 +141,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
   }
   *data=nl(*data);
 
-  while (**data && *data[0]!='m') {
+  while (*data && **data && *data[0]!='m') {
 
     handled=0;
     
@@ -236,7 +242,7 @@ sdpplin_t *sdpplin_parse(char *data) {
   int              handled;
   int              len;
 
-  while (*data) {
+  while (data && *data) {
 
     handled=0;
     

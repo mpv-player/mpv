@@ -35,6 +35,7 @@
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"
+#include "xbuffer.h"
 
 /*
 #define LOG
@@ -422,7 +423,7 @@ void real_calc_response_and_checksum (char *response, char *chksum, char *challe
  * returns a pointer to selected data and number of bytes in that.
  */
 
-static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection, char *out) {
+static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection, char **out) {
 
   int numrules, codec, size;
   int i;
@@ -437,7 +438,7 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
 #ifdef LOG
     printf("libreal: MLTI tag not detected, copying data\n");
 #endif
-    memcpy(out, mlti_chunk, mlti_size);
+    *out = xbuffer_copyin(*out, 0, mlti_chunk, mlti_size);
     return mlti_size;
   }
 
@@ -478,7 +479,7 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
 #ifdef LOG
   hexdump(mlti_chunk+4, size);
 #endif
-  memcpy(out,mlti_chunk+4, size);
+  *out = xbuffer_copyin(*out, 0, mlti_chunk+4, size);
   return size;
 }
 
@@ -486,11 +487,11 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
  * looking at stream description.
  */
 
-rmff_header_t *real_parse_sdp(char *data, char *stream_rules, uint32_t bandwidth) {
+rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t bandwidth) {
 
   sdpplin_t *desc;
   rmff_header_t *header;
-  char buf[2048];
+  char *buf;
   int len, i;
   int max_bit_rate=0;
   int avg_bit_rate=0;
@@ -505,6 +506,7 @@ rmff_header_t *real_parse_sdp(char *data, char *stream_rules, uint32_t bandwidth
 
   if (!desc) return NULL;
   
+  buf = xbuffer_init(2048);
   header=calloc(1,sizeof(rmff_header_t));
 
   header->fileheader=rmff_new_fileheader(4+desc->stream_count);
@@ -535,12 +537,12 @@ rmff_header_t *real_parse_sdp(char *data, char *stream_rules, uint32_t bandwidth
       printf("asmrp rule match: %u for stream %u\n", rulematches[j], desc->stream[i]->stream_id);
 #endif
       sprintf(b,"stream=%u;rule=%u,", desc->stream[i]->stream_id, rulematches[j]);
-      strcat(stream_rules, b);
+      *stream_rules = xbuffer_strcat(*stream_rules, b);
     }
 
     if (!desc->stream[i]->mlti_data) return NULL;
 
-    len=select_mlti_data(desc->stream[i]->mlti_data, desc->stream[i]->mlti_data_size, rulematches[0], buf);
+    len=select_mlti_data(desc->stream[i]->mlti_data, desc->stream[i]->mlti_data_size, rulematches[0], &buf);
     
     header->streams[i]=rmff_new_mdpr(
 	desc->stream[i]->stream_id,
@@ -566,8 +568,8 @@ rmff_header_t *real_parse_sdp(char *data, char *stream_rules, uint32_t bandwidth
       avg_packet_size=desc->stream[i]->avg_packet_size;
   }
   
-  if (stream_rules)
-    stream_rules[strlen(stream_rules)-1]=0; /* delete last ',' in stream_rules */
+  if (*stream_rules && strlen(*stream_rules) && (*stream_rules)[strlen(*stream_rules)-1] == ',')
+    (*stream_rules)[strlen(*stream_rules)-1]=0; /* delete last ',' in stream_rules */
 
   header->prop=rmff_new_prop(
       max_bit_rate,
@@ -583,11 +585,12 @@ rmff_header_t *real_parse_sdp(char *data, char *stream_rules, uint32_t bandwidth
       desc->flags);
 
   rmff_fix_header(header);
+  buf = xbuffer_free(buf);
 
   return header;
 }
 
-int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
+int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
 
   int n=1;
   uint8_t header[8];
@@ -653,9 +656,10 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
   }
   else
     ph.flags=0;
-  rmff_dump_pheader(&ph, buffer);
+  *buffer = xbuffer_ensure_size(*buffer, 12+size);
+  rmff_dump_pheader(&ph, *buffer);
   size-=12;
-  n=rtsp_read_data(rtsp_session, buffer+12, size);
+  n=rtsp_read_data(rtsp_session, (*buffer)+12, size);
   
   return n+12;
 }
@@ -687,8 +691,8 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   char *challenge1;
   char challenge2[64];
   char checksum[34];
-  char subscribe[256];
-  char buf[256];
+  char *subscribe;
+  char *buf = xbuffer_init(256);
   char *mrl=rtsp_get_mrl(rtsp_session);
   unsigned int size;
   int status;
@@ -718,6 +722,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
       printf("real: got message from server:\n%s\n", alert);
     }
     rtsp_send_ok(rtsp_session);
+    buf = xbuffer_free(buf);
     return NULL;
   }
 
@@ -743,9 +748,14 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   description[size]=0;
 
   /* parse sdp (sdpplin) and create a header and a subscribe string */
+  subscribe = xbuffer_init(256);
   strcpy(subscribe, "Subscribe: ");
-  h=real_parse_sdp(description, subscribe+11, bandwidth);
-  if (!h) return NULL;
+  h=real_parse_sdp(description, &subscribe, bandwidth);
+  if (!h) {
+    subscribe = xbuffer_free(subscribe);
+    buf = xbuffer_free(buf);
+    return NULL;
+  }
   rmff_fix_header(h);
 
 #ifdef LOG
@@ -755,19 +765,24 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   
   /* setup our streams */
   real_calc_response_and_checksum (challenge2, checksum, challenge1);
+  buf = xbuffer_ensure_size(buf, strlen(challenge2) + strlen(checksum) + 32);
   sprintf(buf, "RealChallenge2: %s, sd=%s", challenge2, checksum);
   rtsp_schedule_field(rtsp_session, buf);
+  buf = xbuffer_ensure_size(buf, strlen(session_id) + 32);
   sprintf(buf, "If-Match: %s", session_id);
   rtsp_schedule_field(rtsp_session, buf);
   rtsp_schedule_field(rtsp_session, "Transport: x-pn-tng/tcp;mode=play,rtp/avp/tcp;unicast;mode=play");
+  buf = xbuffer_ensure_size(buf, strlen(mrl) + 32);
   sprintf(buf, "%s/streamid=0", mrl);
   rtsp_request_setup(rtsp_session,buf);
 
   if (h->prop->num_streams > 1) {
     rtsp_schedule_field(rtsp_session, "Transport: x-pn-tng/tcp;mode=play,rtp/avp/tcp;unicast;mode=play");
+    buf = xbuffer_ensure_size(buf, strlen(session_id) + 32);
     sprintf(buf, "If-Match: %s", session_id);
     rtsp_schedule_field(rtsp_session, buf);
 
+    buf = xbuffer_ensure_size(buf, strlen(mrl) + 32);
     sprintf(buf, "%s/streamid=1", mrl);
     rtsp_request_setup(rtsp_session,buf);
   }
@@ -794,5 +809,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   /* and finally send a play request */
   rtsp_request_play(rtsp_session,NULL);
 
+  subscribe = xbuffer_free(subscribe);
+  buf = xbuffer_free(buf);
   return h;
 }

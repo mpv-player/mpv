@@ -45,6 +45,7 @@
 #include "real.h"
 #include "rmff.h"
 #include "asmrp.h"
+#include "xbuffer.h"
 
 /*
 #define LOG
@@ -58,7 +59,7 @@ struct rtsp_session_s {
   rtsp_t       *s;
 
   /* receive buffer */
-  uint8_t       recv[BUF_SIZE];
+  uint8_t       *recv;
   int           recv_size;
   int           recv_read;
 
@@ -78,6 +79,8 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   rmff_header_t *h;
   uint32_t bandwidth=10485800;
 
+  rtsp_session->recv = xbuffer_init(BUF_SIZE);
+
 //connect:
   *redir = 0;
 
@@ -86,6 +89,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   if (!rtsp_session->s)
   {
     printf("rtsp_session: failed to connect to server %s\n", path);
+    rtsp_session->recv = xbuffer_free(rtsp_session->recv);
     free(rtsp_session);
     return NULL;
   }
@@ -124,6 +128,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
       {
         printf("rtsp_session: session can not be established.\n");
         rtsp_close(rtsp_session->s);
+        rtsp_session->recv = xbuffer_free(rtsp_session->recv);
         free(rtsp_session);
         return NULL;
       }
@@ -131,7 +136,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
 	
     rtsp_session->header_len=rmff_dump_header(h,rtsp_session->header,1024);
 
-    memcpy(rtsp_session->recv, rtsp_session->header, rtsp_session->header_len);
+    rtsp_session->recv = xbuffer_copyin(rtsp_session->recv, 0, rtsp_session->header, rtsp_session->header_len);
     rtsp_session->recv_size = rtsp_session->header_len;
     rtsp_session->recv_read = 0;
     
@@ -140,6 +145,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
     printf("rtsp_session: Not a Real server. Server type is '%s'.\n",server);
     rtsp_close(rtsp_session->s);
     free(server);
+    rtsp_session->recv = xbuffer_free(rtsp_session->recv);
     free(rtsp_session);
     return NULL;
   }
@@ -162,8 +168,8 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
     to_copy -= fill;
     dest += fill;
     this->recv_read = 0;
+    this->recv_size = real_get_rdt_chunk (this->s, &(this->recv));
     source = this->recv;
-    this->recv_size = real_get_rdt_chunk (this->s, source);
     fill = this->recv_size;
 
     if (this->recv_size == 0) {
@@ -197,5 +203,6 @@ int rtsp_session_peek_header(rtsp_session_t *this, char *buf, int maxsize) {
 void rtsp_session_end(rtsp_session_t *session) {
 
   rtsp_close(session->s);
+  session->recv = xbuffer_free(session->recv);
   free(session);
 }
