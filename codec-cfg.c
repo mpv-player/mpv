@@ -724,7 +724,7 @@ int main(void)
         int win32=-1;
         int dshow=-1;
 
-	if (!(codecs = parse_codec_cfg("DOCS/codecs.conf")))
+	if (!(codecs = parse_codec_cfg("etc/codecs.conf")))
 		return 0;
 	if (!codecs[0])
 		printf("no videoconfig.\n");
@@ -813,7 +813,7 @@ int main(void)
 	codecs_t **codecs, *c;
         int i,j, nr_codecs, state;
 
-	if (!(codecs = parse_codec_cfg("DOCS/codecs.conf")))
+	if (!(codecs = parse_codec_cfg("etc/codecs.conf")))
 		return 0;
 	if (!codecs[0])
 		printf("no videoconfig.\n");
