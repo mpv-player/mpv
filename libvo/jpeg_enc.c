@@ -380,7 +380,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 	unsigned char *source;
 	/* initialize the buffer */
 
-	init_put_bits(&j->s->pb, bufr, 1024*256, NULL, NULL);
+	init_put_bits(&j->s->pb, bufr, 1024*256);
 
 	mjpeg_picture_header(j->s);
 
