@@ -43,8 +43,7 @@ OSes:
 -> Cygwin (Atmos)
  + add an automagical fix of sdl-configure's compile flags (contact Atmos for
    more info)
- + write vo_directx for hw accelerated yuv overlay (code reference eg. videolan)
- + write ao_directx using direct sound as alternative to oss (low priority)
+ + write ao_directx using direct sound as alternative to waveout and oss (very low priority)
  + port vidix (needs special device driver for NT/2k/XP and 9x/Me)
  + VCD and DVD support (for the future, maybe vlc helps)
 
