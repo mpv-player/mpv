@@ -17,6 +17,7 @@
 #include "../cfgparser.h"
 #include "stream.h"
 #include "demuxer.h"
+#include "mf.h"
 
 #ifdef STREAMING
 #include "url.h"
@@ -381,6 +382,20 @@ tv_err:
     return(NULL);
   }
 #endif
+
+//============ Check for multi file-input ====
+  if (mf_support == 1)
+  {
+    /* create stream */
+    stream = new_stream(-1, STREAMTYPE_MF);
+    if (!stream)
+       return(NULL);
+
+    if (!stream_open_mf(filename, stream))
+        return(NULL);
+
+    return(stream);
+  }
 
 //============ Open STDIN ============
   if(!strcmp(filename,"-")){

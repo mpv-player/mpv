@@ -15,6 +15,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "mf.h"
 
 void free_demuxer_stream(demux_stream_t *ds){
     ds_free_packs(ds);
@@ -150,6 +151,7 @@ void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t 
 // return value:
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
+int demux_mf_fill_buffer( demuxer_t *demux);
 int demux_roq_fill_buffer(demuxer_t *demux);
 int demux_film_fill_buffer(demuxer_t *demux);
 int demux_fli_fill_buffer(demuxer_t *demux);
@@ -177,6 +179,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
 //  printf("demux->type=%d\n",demux->type);
   switch(demux->type){
+    case DEMUXER_TYPE_MF: return demux_mf_fill_buffer(demux);
     case DEMUXER_TYPE_ROQ: return demux_roq_fill_buffer(demux);
     case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
@@ -368,6 +371,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer);
 int mov_check_file(demuxer_t* demuxer);
 int mov_read_header(demuxer_t* demuxer);
 int demux_open_fli(demuxer_t* demuxer);
+int demux_open_mf(demuxer_t* demuxer);
 int demux_open_film(demuxer_t* demuxer);
 int demux_open_roq(demuxer_t* demuxer);
 
@@ -396,6 +400,12 @@ sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 
 //printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
+
+if ( mf_support )
+ {
+  mp_msg(MSGT_DEMUXER,MSGL_INFO,"forced mf.\n");
+  file_format=DEMUXER_TYPE_MF;
+ }
 
 #ifdef USE_TV
 //=============== Try to open as TV-input: =================
@@ -564,6 +574,17 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
 }
+//=============== Try to open as multi file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
+  {
+   if ( mf_support )
+    {
+     file_format=DEMUXER_TYPE_MF;
+     mp_msg( MSGT_DEMUXER,MSGL_INFO,"[demuxer] mf support.\n" );
+    }
+  }
+}
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
@@ -578,6 +599,10 @@ d_video=demuxer->video;
 demuxer->file_format=file_format;
 
 switch(file_format){
+ case DEMUXER_TYPE_MF: {
+  if (!demux_open_mf(demuxer)) return NULL;
+  break;
+ }
  case DEMUXER_TYPE_FLI: {
   if (!demux_open_fli(demuxer)) return NULL;
   break;
@@ -696,6 +721,7 @@ int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_y4m(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 
