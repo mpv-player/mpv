@@ -472,13 +472,6 @@ uninit(void)
   vo_x11_uninit();
 }
 
-static int int_non_neg(int *sh)
-{
-  if ( *sh < 0 )
-    return 0;
-  return 1;
-}
-
 static opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},

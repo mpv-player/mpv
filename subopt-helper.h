@@ -39,4 +39,8 @@ typedef struct strarg_s
   char const * str;  ///< pointer to position inside the parse string
 } strarg_t;
 
+
+int int_non_neg( int * i );
+int int_pos( int * i );
+
 #endif

@@ -263,3 +263,21 @@ static char const * parse_str( char const * const str, strarg_t * const valp )
 
   return match;
 }
+
+
+/*** common test functions ***/
+
+/** \brief Test if i is not negative */
+int int_non_neg( int * i )
+{
+  if ( *i < 0 ) { return 0; }
+
+  return 1;
+}
+/** \brief Test if i is positive. */
+int int_pos( int * i )
+{
+  if ( *i > 0 ) { return 1; }
+
+  return 0;
+}

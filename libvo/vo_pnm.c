@@ -103,16 +103,6 @@ void pnm_write_error(void) {
 
 /* ------------------------------------------------------------------------- */
 
-/** \brief Validation function for maxfiles
- */
-
-static int int_pos(int *mf)
-{
-    if ( *mf > 0 )
-        return 1;
-    return 0;
-}
-
 /** \brief Pre-initialisation.
  *
  * This function is called before initialising the video output driver. It
