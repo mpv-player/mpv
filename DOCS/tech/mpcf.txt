@@ -1,4 +1,4 @@
-		NUT Open Container Format DRAFT 20030906
+		NUT Open Container Format DRAFT 20040330
 		----------------------------------------
 
 
@@ -19,11 +19,10 @@ Compact
 	~0.2% overhead, for normal bitrates
 	index is <10kb per hour (1 keyframe every 3sec)
 	a usual header for a file is about 100bytes (audio + video headers together)
-	a packet header is about ~8 bytes
+	a packet header is about ~1-8 bytes
 Error resistant
 	seeking / playback without an index
 	headers & index can be repeated
-	audio packet reshuffle
 	checksums to allow quick redownloading of damaged parts
 	damaged files can be played back with minimal data lost and fast
 	resyncing times
@@ -68,8 +67,8 @@ u(x)	unsigned number encoded in x bits in MSB first order
 
 		Bitstream syntax:
 packet header
-	forward ptr				v
 	backward ptr				v
+	forward ptr				v
 
 align_byte
 	while(not byte aligned)
@@ -88,6 +87,15 @@ main header:
 	packet header
 	version					v
 	stream_count				v
+	checksum_threshold			v
+	for(i=0; i<256; i++){
+		flags[i]			v
+		if(flags&64){
+			stream_id[i]		v
+			lsb_size[i]		v
+			data_size_mul[i]	v
+		}
+	}
 	reserved_bytes
 	checksum				u(32)
 
@@ -102,7 +110,8 @@ stream_header:
 	time_base_nom				v
 	time_base_denom				v
 	msb_timestamp_shift			v
-	shuffle_type				v
+	inital_timestamp_predictor		v(3)
+	initial_data_size_predictor		v(2)
 	fixed_fps				u(1)
 	index_flag				u(1)
 	reserved				u(6)
@@ -130,44 +139,31 @@ audio_stream_header:
 	reserved_bytes
 	checksum				u(32)
 
+ 
 frame
-	if(keyframe){
-		keyframe_startcode		f(64)
+	if(frame_type == 2){
+		frame_type2_startcode		f(64)
 	}
-	zero_bit				f(1)
-	priority				u(2)
-	checksum_flag				u(1)
-	msb_timestamp_flag			u(1)
-	subpacket_type				u(2)
-	reserved				u(1)
-	packet header
-	stream_id				v
-	if(msb_timestamp_flag)
+	frame_code				f(8)
+	if(flags[frame_code]&1){
+		packet header
+	}       
+	if(stream_id[frame_code]==stream_count){
+		stream_id			v
+	}
+	if(frame_type == 2){
 		msb_timestamp			v
-	lsb_timestamp				s
-	if(sub_packet_type==01)
-		sub_packet[0]
-	else{
-		subpacket_count			v
-		if(sub_packet_type&01)
-		    for(i=0; ; i++)
-			keyframe_run[i]		v
-		for(i=0; ; i++){
-		    timestamp_diff[i]		v
-		    if(timestamp_diff[i] & 1)
-			timestamp_diff_run[i]	v
-		}
-		if(sub_packet_type&10){
-		    for(i=0; i<subpacket_count-1; i++)
-			subpacket_size_diff[i]	s
-		}
-		for(i=0; i<subpacket_count; i++)
-		    subpacket[i]
-		}
 	}
-	if(checksum_flag)
+	if((flags[frame_code]&12) == 12){
+		lsb_timestamp			v
+	}
+	if(flags[frame_code]&2){
+		data_size_msb			v
+	}
+	data
+	if(checksum_threshold < frame_type)
 		frame_checksum			u(32)
-
+                
 Index:
 	index_startcode				f(64)
 	packet header
@@ -230,13 +226,7 @@ backward_ptr
 
 version
 	0 for now
-
-file_size
-	size in bytes. 0 invalidates the field
-
-length_in_msec
-	length of the file in milli seconds (0 invalidates the field)
- 
+        
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
 	so a stream with class 0 MUST allways have a id which is lower then any
@@ -305,56 +295,76 @@ codec_specific_data_type
         
 codec_specific_data
 	private global data for a codec (could be huffman tables or ...)
-        
-msb_timestamp_flag
-	indicates that the msb_timestamp is coded
-	MUST be 1 for keyframes
-        
-subpacket_type
-		subpacket_count	subpacket_size	keyframe_flag
-	00	>1		constant	constant
-	01	1		NA		NA
-	10	>1		variable	constant
-	11	>1		variable	variable
-	the only legal subpacket_type for video streams is 01, so video streams
-	MUST NOT contain multiple subpackets per packet
-	Note, if there are multiple subpackets then the timestamp of the packet
-	is the timestamp of the first subpacket
-	Note, if multiple subpackets are stored in one frame then the resulting
-	framesize SHOULD be < 16kbyte and not more then 0.5 sec of data SHOULD
-	be put in a single packet
 
-subpacket_count
-	the number of subpackets, if not pressent then 1
+frame_code
+	the meaning of this byte is stored in the main header
+	the value 78 ('N') is forbidden to ensure that the byte is always
+	different from the first byte of any startcode
 
-keyframe_run[i]
-	the number of subpackets with an identical keyframe_flag
-	Note, the value of first flag is stored in the packet header
-	is equal to subpacket count if not coded
+flags[frame_code]
+	the bits of the flags from MSB to LSB are CKKTTDP
+	P is 1 for type 1 and 2 packets, 0 for type 0 packets
+	TT is the timestamp_code 00,01,10 use the last timestamp + the first,
+		second and third last unique timestamp difference, so if the
+		timestamp differences, are +3,+1,+2,+2,+1 then last diff is 
+		+1, second is +2 and third is +3
+		if TT is 11, then the timestamp is calculated by
+		mask = (1<<msb_timestamp_shift)-1;
+		delta= last_timestamp - mask/2
+		timestamp= ((timestamp_lsb-delta)&mask) + delta
+		TT must be 11 if packet_type is not 0
+		the last timestamp differences are reset to the default values
+		from the stream header if a packet of type not 0 in encountered
+	if D is 1 then the data_size_msb is coded otherwise data_size_msb is 0
+	KK is the keyframe_type 
+		00-> no keyframe, 
+		01-> keyframe, 
+		10-> equal to last of the same stream, 
+		11-> opposite from last of the same stream
+		KK must be 00 or 01 if the packet_type is not 0
+	if C is 1 then stream_id, data_size_mul and data_size_lsb are not
+		stored, but predicted from the last ones
+	the value 1000001 (65) is used to mark illegal frame_code bytes, at
+	least flags[78] must be 65
 
-timestamp_diff[i]
-	the difference from the last subpacket timestamp to the current one in
-	time_base precission
-	the lowwest bit is used to indicate if timestamp_diff_run[i] is coded
+frame_type
+	0       is indicated by (flags[frame_code]&1)==0
+	1       is indicated by (flags[frame_code]&1)==1 && !startcode
+	2       is indicated by (flags[frame_code]&1)==1 && startcode
+	there SHOULD not be more then 0.5 seconds or 16kbyte of type 0 frames
+	wihout a intervening frame of different frame_type
+                
+stream_id[frame_code]
+	if its not coded in the main_header then its equal to the last one
+	from the main header
+	must be <250
 
-timestamp_diff_run[i]
-	the number of subpackets which have the same timestamp_diff
-	if not coded than 1
-	0 is forbidden
-        
-subpacket_size_diff
-	the difference between the predicted size of this subpacket and the
-	actual size
-	the predicted size is 64 for the first subpacket in a packet
-	otherwise it is MAX(64, last_subpacket_size)
-	the size of the last subpacket is not coded and is simply the space left
-	Note a subpacket MUST be in exactly one packet, it cannot be split
-       
+data_size_mul[frame_code]
+	if its not coded in the main_header then its equal to the last one
+	from the main header
+	must be <250
+
+data_size_lsb[frame_code]
+	if its not coded in the main_header then its equal to the last one
+	from the main header + 1
+	must be <250
+
+data_size
+	if(data_size_lsb == data_size_mul)
+		data_size= last;
+	else if(data_size_lsb == data_size_mul+1)
+		data_size= next last;
+	else if(data_size_lsb < data_size_mul)
+		data_size= data_size_lsb + data_size_msb*data_size_mul;
+	else reserved
+	last and next last are reset to the values stored in the stream header
+	if an frame with type > 0 is encountered
+
 msb_timestamp
 	most significant bits of the timestamp, SHOULD be 0 for the first frame
  
 lsb_timestamp
-	difference from the msb_timestamp in time_base precission
+	least significant bits of the timestamp in time_base precission
         Example: IBBP display order
 		keyframe msb_timestamp=0 lsb_timestamp=0 -> timestamp=0
 		frame                    lsb_timestamp=3 -> timestamp=3
@@ -362,7 +372,7 @@ lsb_timestamp
 		frame                    lsb_timestamp=2 -> timestamp=2
 		...
 		keyframe msb_timestamp=1 lsb_timestamp=1 -> timestamp=257
-		frame                    lsb_timestamp=-1-> timestamp=255
+		frame                    lsb_timestamp=255->timestamp=255
 		frame                    lsb_timestamp=0 -> timestamp=256
 		frame                    lsb_timestamp=4 -> timestamp=260
 		frame                    lsb_timestamp=2 -> timestamp=258
@@ -391,29 +401,13 @@ zero_bit
 	MUST be 0, its there to distinguish non keyframes from other packets,
 	Note: all packets have a 64-bit startcode except non-keyframes to reduce
 	      their size, and all startcodes start with a 1 bit
-        
-priority
-	if 0 then the frame isnt used as reference (b frame) and can be droped
-	MUST be > 0 for keyframes
-
-shuffle_type
-	audio is often encoded in small subpackets, and to increase the
-	error robustness these can be shuffled
-	0 -> no shuffle
-	1-16 -> interleave packets by 2^n 
 
 checksum
 	crc32 checksum using the generator polynomial 0x104c11db7 (same as ogg)
 
-checksum_flag
-	indicates that the frame_checksum is coded
-	must be 1 for the last non keyframe before a keyframe
-        
 frame_checksum
 	identical to checksum, but instead of covering just the current 
-	packet, it covers all frames of the same stream id since the last
-	frame_checksum
-	this field is only coded if checksum_flag=1
+	packet, it covers all frames since the last frame_checksum
         
 index_timestamp
 	value in time_base precission, relative to the last index_timestamp
@@ -584,17 +578,6 @@ static inline int put_v(BufferContext *bc, uint64_t val){
 	*(bc->buf_ptr++)= val&0x7F;
         
 	return 0;
-}
-
-static inline int put_s(BufferContext *bc, uint64_t val){
-	if(val<=0) return put_v(bc, -2*val  );
-	else       return put_v(bc,  2*val-1);
-}
-
-static inline int64_t get_s(BufferContext *bc){
-	int64_t v= get_v(bc) + 1;
-	if(v&1) return -(v>>1);
-	else    return  (v>>1);
 }
 
                 
