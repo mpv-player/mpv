@@ -151,21 +151,35 @@ int h263_decode_picture_header(unsigned char *b_ptr)
 
 int postable[32768];
 
-int main(){
+int main(int argv,char ** argc){
 int c;
 unsigned int head=-1;
 int pos=0;
 int frames=0;
-FILE *f=fopen("paulvandykforanangel.viv","rb");
-FILE *f2=fopen("GB1.avi","wb");
-muxer_t* avi=muxer_new_muxer(MUXER_TYPE_AVI,f2);
-muxer_stream_t* mux=muxer_new_stream(avi,MUXER_TYPE_VIDEO);
+FILE *f;
+FILE *f2;
+muxer_t* avi;
+muxer_stream_t* mux;
 //unsigned char* buffer=malloc(0x200000);
 int i,len;
 int v_id=0;
 int flag=0;
 int flag2=0;
 int prefix=0;
+
+// input
+if(!(f=fopen(argc[1],"rb"))){
+       printf("Couldn't open input file.\n");
+       return -1;
+}
+// output
+if(!(f2=fopen(argc[2],"wb"))){
+       printf("Couldn't open output file.\n");
+       return -1;
+}
+
+avi=muxer_new_muxer(MUXER_TYPE_AVI,f2);
+mux=muxer_new_stream(avi,MUXER_TYPE_VIDEO);
 
 mux->buffer_size=0x200000;
 mux->buffer=malloc(mux->buffer_size);
