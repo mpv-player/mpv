@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced to 1.11 -->
+<chapter id="cd-dvd">
+<title>CD/DVD használat</title>
+
+<sect1 id="drives">
+<title>CD/DVD vezérlők</title>
+<para>
+Részlet a Linux dokumentációból:
+</para>
+
+<para>
+A modern CD-ROM meghajtók nagyon nagy sebességen működnek, ugyanakkor több CD-ROM
+képes kisebb sebességű pörgésre is. Rengeteg oka lehet annak, hogy valaki
+meg akarja megváltoztatni a CD-ROM meghajtó sebességét:
+</para>
+
+<itemizedlist>
+<listitem><para>
+Sok helyen írtak olvasási hibákról, melyek nagy sebességnél fordulnak elő,
+különösen rosszul nyomott CD-ROM-ok esetén. A csökkentett sebességgel megelőzheted
+az adatvesztést ilyen esetben.
+</para></listitem>
+
+<listitem><para>
+Sok CD-ROM idegesítően hangos, alacsonyabb sebességen kisebb a zaj.
+</para></listitem>
+</itemizedlist>
+
+<para>
+Az IDE CD-ROM meghajtók sebességét a <command>hdparm</command> vagy egy
+<command>setcd</command> nevezetű programmal módosíthatod. It works like this:
+<screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
+<screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
+</para>
+
+<para>
+Ha root jogaid vannak, a következő parancs is segíthet:
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom eszköz]</replaceable>/settings</screen>
+</para>
+
+<para>
+Ez beállítja a fájl előreolvasást 2 MB-ra, ami segít a karcos CD-ROM-ok esetében.
+Ha túl nagyra állítod, a meghajtó folyton felpörög majd leáll, és dramatikus módon
+csökkenni fog a teljesítménye.
+A javasolt módszer a CD-ROM meghajtó <command>hdparm</command>-mal történő beállítása:
+<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+</para>
+
+<para>
+Ez bekapcsolja a DMA elérést, az előreolvasást, és az IRQ unmasking-ot (olvasd el a <command>hdparm</command>
+man oldalát a bővebb magyarázatért).
+</para>
+
+<para>
+Nézd meg a &quot;<filename>/proc/ide/<replaceable>cdrom eszköz</replaceable>/settings&quot;</filename>
+fájlt a CD-ROM tuningolásához.
+</para>
+
+<para>
+A SCSI meghajtókra vonatkozóan nincs egységes módszer ezen paraméterek beállításához.
+(Ismersz egyet? Mondd el nekünk is!) Van egy eszköz, ami
+<ulink url="http://das.ist.org/~georg/">Plextor SCSI meghajtókkal</ulink> működik.
+</para>
+
+<para>FreeBSD:</para>
+<para>Sebesség: <command>cdcontrol [-f <replaceable>eszköz</replaceable>] speed <replaceable>sebesség</replaceable></command></para>
+<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect1>
+
+<sect1 id="dvd">
+<title>DVD lejátszás</title>
+<para>
+A használható kapcsolók teljes listájáért olvasd el a man oldalt.
+A szintaxis egy szabványos Digital Versatile Disc (DVD)-hez a következő:
+<screen>mplayer dvd://<replaceable>&lt;sáv&gt;</replaceable> [-dvd-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
+</para>
+
+<para>
+Például:
+<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+</para>
+
+<para>
+Az alapértelmezett DVD eszköz a <filename>/dev/dvd</filename>. Ha a te
+beállításod különböző, készíts egy szimbolikus linket vagy add meg a megfelelő
+eszközt a parancssorban a <option>-dvd-device</option> kapcsolóval.
+</para>
+
+<formalpara>
+<title>A DVD támogatás új formája (mpdvdkit2)</title>
+<para>
+Az <application>MPlayer</application> fel tudja használni a <systemitem>libdvdread</systemitem>-ot
+és a <systemitem>libdvdcss</systemitem>-t is a DVD-k dekódolásához és lejátszásához. Ez
+a két függvény könyvtár a <filename class="directory">libmpdvdkit2/</filename> alkönyvtárban
+található az <application>MPlayer</application> forrás fájéban, nem kell őket
+külön telepítened. Ezt a megoldást választottuk, mert javítanunk kellett egy
+<systemitem>libdvdread</systemitem> hibát és beletennünk egy másik javítást
+a <emphasis role="bold">feltört CSS kulcsok cache-elésének támogatásához</emphasis> a
+<systemitem>libdvdcss</systemitem>-be. Ez nagy sebességnövekedést eredményezett,
+mivel a kulcsokat nem kell mindig feltörni lejátszás előtt.
+</para>
+</formalpara>
+
+<para>
+Az <application>MPlayer</application> a rendszer <systemitem>libdvdread</systemitem>
+és <systemitem>libdvdcss</systemitem> függvénykönyvtárait is tudja használni, de ez
+<emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása lehet,
+könyvtár inkompatibilítást és sebességcsökkenést okozhat.
+</para>
+
+<note><para>
+Ha DVD dekódolási problémáid vannak, próbáld meg letiltani a supermount-ot vagy
+bármilyen más hasonló dolgot.
+</para></note>
+
+<formalpara>
+<title>DVD struktúra</title>
+<para>
+A DVD lemezeken 2048 bájtos szektorok vannak ECC/CRC-vel. Legtöbbször UDF
+fájlrendszer van egyetlen sávon, ami különböző fájlokat tartalmaz (kicsi
+.IFO és .BUK fájlok, valamint nagy (1 GB) .VOB fájlok). Ezek igazi fájlok,
+amik másolhatóak/lejátszhatóak egy nem titkosított DVD mountolt fájlrendszeréről.
+</para>
+</formalpara>
+
+<para>
+Az .IFO fájlok a filmben történő navígációhoz tartalmaznak információkat (fejezet/cím/szög
+térkép, nyelvtáblázat, stb.) és szökségesek a .VOB tartalmának olvasásához és értelmezéséhez
+(film). A .BUK fájlok ezek biztonsági mentései. <emphasis role="bold">Szektorokat</emphasis>
+használnak mindenhol, így a lemezen nyers szektor címzést kell használni a DVD navigáláshoz
+és a tartalom dekódolásához.
+</para>
+
+<para>
+A DVD támogatás nyers szektor-alapú elérést igényel az eszközhöz. Sajnos (Linux
+alatt) root-nak kell lenned, hogy megkapd egy fájl szektor címét. Emiatt egyáltalán
+nem használjuk a kernel fájlrendszer vezérlőjét, inkább felhasználói szinten
+(userspace) oldottuk meg. A <systemitem>libdvdread</systemitem> 0.9.x és a
+<systemitem>libmpdvdkit</systemitem> teszi ezt lehetővé. A kernel UDF fájlrendszer
+vezérlője nem kell, mivel saját beépített UDF fájlrendszer vezérlőjük van.
+Sőt, még mountolni sem kell a DVD-t, mivel csak nyers szektor-alapú címzést
+használnak.
+</para>
+
+<para>
+Néha a <filename>/dev/dvd</filename> nem olvasható a felhasználók által, így
+a <systemitem>libdvdread</systemitem> szerzői egy emulációs réteget készítettek,
+ami átalakítja a szektor címeket fájlnév+eltolásra, így nyers elérést emulál a
+mountolt fájlrendszeren vagy akár a merevlemezen is.
+</para>
+
+<para>
+A <systemitem>libdvdread</systemitem> elfogadja a mountolás helyét is az eszköz
+neve helyett a nyers címzéshez, az eszköz nevét a <filename>/proc/mounts</filename>
+fájlból olvassa ki. Solaris-ra lett kifejlesztve, ahol az eszköz nevek dinamikusan
+vannak lefoglalva.
+</para>
+
+<para>
+Az alapértelmezett DVD eszköz a <filename>/dev/dvd</filename>. Ha a te beállításaid
+különbözőek, készíts egy szimbolikus linket vagy add meg a megfelelő eszközt a
+parancssorban a <option>-dvd-device</option> kapcsolóval.
+</para>
+
+<formalpara>
+<title>DVD hitelesítés</title>
+<para>
+A hitelesítés és az új formájú DVD támogatás dekódolási metódusának támogatását a
+patchelt <systemitem>libdvdcss</systemitem> biztosítja (lásd feljebb). A módszert
+a <envar>DVDCSS_METHOD</envar> környezeti változó segítségével előírhatod, beállítható
+kulcsra, lemezre vagy sávra.
+</para>
+</formalpara>
+
+<para>
+Ha semmi sincs megadva, akkor a következő módon próbálkozik (alapértelmezett:
+kulcs, sáv kérés):
+</para>
+
+<orderedlist>
+<listitem><para>
+<emphasis role="bold">busz kulcs</emphasis>: Ez a kulcs a hitelesítés során
+kerül megállapításra (ioctl-ek és egyéb kulcs cserék hosszú sora, titkosítási
+cucc) és a sáv és a lemez kulcsok titkosítására használják, mielőtt kiküldenék
+a védtelen buszra (hogy megelőzzés az eavesdropping-ot). A busz kulcs szükséges
+a titkosított lemez kulcs megszerzéséhez és visszakódolásához.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">cache-elt kulcs</emphasis>: Az <application>MPlayer</application>
+végignézi a már cache-elt sáv kulcsokat, amik a <filename class="directory">~/.mplayer/DVDKeys</filename>
+könyvtárban tárolódnak (gyors ;).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">kulcs</emphasis>: Ha nincs cache-lt kulcs, az
+<application>MPlayer</application> megpróbálja visszakódolni a lemez kulcsot
+a beépített lejátszó kulcsok gyűjteményének segítségével.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">lemez</emphasis>: Ha a kulcs metódus sikertelen
+(pl. nincs beépített lejátszó kulcs), az <application>MPlayer</application>
+feltöri a lemez kulcsot egy brute force algoritmussal. Ez az eljárás
+intenzív CPU használatot eredményez és 64 MB memóriát igényel (16M 32Bit-es
+bejegyzések a hash táblához) az ideiglenes adatok tárolásához. Ez a módszer
+mindig működik (lassú).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">sáv kérés</emphasis>: a lemez kulccsal az
+<application>MPlayer</application> az <systemitem>ioctl()</systemitem> segítségével
+lekéri a titkosított sáv kulcsokat, amik <emphasis>rejtett szektorokban</emphasis> találhatók.
+Az RPC-2 meghajtók régió védelme is ebben a lépésben van megvalósítva, ezért
+ez hibázhat ilyen meghajtókon. Ha sikerül, a sáv kulcsokat dekódolja a busz és
+lemez kulccsal.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">sáv</emphasis>: Ezt a metódust akkor használjuk, ha
+a sáv kérés sikertelen és nem a DVD meghajtóval történő kulcs cserén alapul.
+Ez egy crypto támadást indít, hogy kitalálja közvetlenül a sáv kulcsot (egy,
+a visszakódolt VOB tartalomban ismétlődő minta megkeresésével, azt feltételezve,
+hogy az első titkosított bájtnak megfelelő sima szöveg ezen minta folytatása).
+Ezt a metódust úgy is ismerik, mint &quot;ismert tiszta szöveg támadás&quot;
+vagy &quot;DeCSSPlus&quot;. Ritka esetben sikertelen lehet, mert nincs elég
+titkosított adat a lemezen a statisztikai támadáshoz vagy mert a kulcs megváltozik
+a sáv közepén. Ez a módszer az egyetlen járható út a merevlemezen tárolt DVD-k
+visszakódolásához vagy a rossz régió kódú DVD-k RPC2 meghajtóban történő
+lejátszásához (lassú).
+</para></listitem>
+</orderedlist>
+
+<para>
+Az RPC-1 DVD meghajtók csak szoftveresen védik a régió kódot. Az RPC-2 meghajtókban
+hardveres védelem van, ami csak 5 változtatást engedélyez. Szükséges/javasolt
+a firmware frissítése RPC-1-re ha RPC-2-es DVD meghajtód van. Firmware
+frissítések találhatóak ezen a
+<ulink url="http://www.firmware-flash.com">firmware oldalon</ulink>. Ha nicns firmware
+javítás a te meghajtódhoz, használd a
+<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset eszközt</ulink>
+a DVD meghajtód régió kódjának beállításához (Linux alatt).
+<emphasis role="bold">Figyelem</emphasis>: Csak 5 alkalommal állíthatod át a régió kódot.
+</para>
+</sect1>
+
+<sect1 id="vcd">
+<title>VCD lejátszás</title>
+<para>
+A használható kapcsolók teljes listájáért olvasd el a man oldalt. Egy szabványos
+Video CD (VCD) szintaxisa a következő:
+<screen>mplayer vcd://<replaceable>&lt;sáv&gt;</replaceable> [-cdrom-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
+Például:
+<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+Az alapértelmezett VCD eszköz a <filename>/dev/cdrom</filename>. Ha a te beállításaid
+különbözőek, készíts egy szimbolikus linket vagy add meg a megfelelő eszközt a
+parancssorban a <option>-cdrom-device</option> kapcsolóval.
+</para>
+
+<note><para>
+A Plextor és néhány Toshiba SCSI CD-ROM meghajtónak borzalmas a teljesítménye
+CVD olvasáskor. Ez azért van, mert a CDROMREADRAW <systemitem>ioctl</systemitem>
+nincs teljesen implementálva ezekben a meghajtókban. Ha ismered a SCSI programozást,
+kérlek <ulink url="../../tech/patches.txt">segíts nekünk</ulink> egy általános
+SCSI támogatás elkészítésében VCD-khez.
+</para></note>
+
+<para>
+Addig is kinyerheted az adatokat a VCD-ről a
+<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+segítségével, majd az eredményül kapott fájlt lejátszhatod az <application>MPlayer</application>rel.
+</para>
+
+<formalpara>
+<title>VCD struktúra</title>
+<para>A VCD lemezek egy vagy több sávból állnak:</para>
+</formalpara>
+
+<itemizedlist>
+<listitem><para>
+Az első sáv egy kicsi, 2048 bájt/szektor adat sáv iso9660 fájlrendszerrel,
+gyakran Windows VCD lejátszó programokat és esetleg más információkat tartalmaz
+(képek, szövegek, stb).
+</para></listitem>
+
+<listitem><para>
+A második és a többi sáv nyers 2324 bájt/szektor méretű MPEG (film)
+sáv, mely egy MPEG PS adat csomagot tartalmaz szektoronként fájlrendszer
+helyett. Hasonlóan az audió CD sávokhoz, ezeket a sávokat <emphasis role="bold">
+sem lehet mountolni</emphasis> (Mountoltál valaha audió CD-t a lejátszáshoz?).
+Mivel a legtöbb film ezen a sávon belül van, megpróbálhatod egyből a
+<option>vcd://2</option> kapcsolót.
+</para></listitem>
+
+<listitem><para>
+Léteznek olyan VCD lemezek is, melyeken nincs meg az első sáv (egy sáv és
+egyáltalán nincs fájlrendszer). Ezek szintén lejátszhatóak, de nem lehet
+őket becsatolni.
+</para></listitem>
+</itemizedlist>
+
+<formalpara>
+<title>A .DAT fájlokról</title>
+<para>
+A becsatolt VCD első sávján látható ~600 MB fájl valójában nem igazi fájl!
+Ez egy úgynevezett ISO átjáró, azért hozták létre, hogy a Windows kezelni
+tudja ezen sávokat (a Windows semmilyen módon sem engedi a közvetlen eszköz
+elérést az alkalmazásoknak). Linux alatt nem tudod átmásolni vagy lejátszani
+az ilyen fájlokat (szemét van bennük). Windows alatt lehetséges, mivel az
+iso9660 vezérlője a sávok nyers olvasását emulálja ebben a fájlban. A .DAT
+fájlok lejátszásához szükséged lesz egy kernel vezérlőre, ami a PowerDVD
+Linuxos verziójában található. Ez egy módosított iso9660 fájlrendszer vezérlőt
+(<filename>vcdfs/isofs-2.4.X.o</filename>) tartalmaz, ami képes a nyers sáv
+emulációra ezen ál .DAT fájlon keresztül. Ha az ő vezérlőjük segítségével
+csatolod be a lemezt, át tudod másolni és le tudod játszani a .DAT fájlt az
+<application>MPlayer</application>rel. A Linux kernel szabványos iso9660
+vezérlőjével ez nem megy! Használd a <option>vcd://</option>-t helyette.
+VCD másolásához alternatíva az új <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>
+kernel vezérlő (nem része a hivatalos kernelnek) ami a CD meneteket kép fájlok
+formájában mutatja, és a <ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>,
+egy bitről-bitre grabbelő/másoló program.
+</para>
+</formalpara>
+</sect1>
+</chapter>
