@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # (c) 2003 Vajna Miklos <mainroot@freemail.hu>
-# divx2svcd for MPlayer 1.0pre3+dumpvideo patch
+# divx2svcd for MPlayer+dumpvideo patch
 # distributed under GPL License
 
 # A simple utility that creates SvcD from a video which uses avi container
@@ -17,6 +17,11 @@
 ###changelog###
 #nobody cares about it :-)
 cat >/dev/null <<EOF
+0.4.9
+- changed default bitrate to 1600 for better quality
+- fix for burning more than one cd
+- fix for wrong parameter help
+
 0.4.8
 - small fixes
 
@@ -77,10 +82,10 @@ function usage()
 Usage: `basename $0` input_avi [options]
 
 Options:
--b|--bitrate=xx	bitrate of mp2 video stream [1600]
--s|--cdsize=xx	size of the cd we split the video to [795]
+-b|--bitrate xx	bitrate of mp2 video stream [1600]
+-s|--cdsize xx	size of the cd we split the video to [795]
 -w|--writecd	enables burning [disable]
--d|--device=xx	scsi cd-recording device if you are using linux 2.4.x [0,0,0]
+-d|--device xx	scsi cd-recording device if you are using linux 2.4.x [0,0,0]
 -c|--clean	clean up svcd images you just created
 -h|--help	this help screen
 EOF
@@ -88,8 +93,8 @@ EOF
 }
 
 #initializating constants
-version='0.4.8'
-bitrate=1200
+version='0.4.9'
+bitrate=1600
 cdsize=795
 burning=0
 cleaning=0
@@ -325,20 +330,22 @@ $tcbin -i "$nev.m2v" $tcopt "$nev.mp2" -o "$nev.mpg" -m s -F template
 rm template
 rm "$nev.m2v" "$nev.mp2"
 
-`which ls` -N "$nev"*mpg | while read i
+for i in *mpg
 do
 	nev2=`basename "$i" .mpg`
 	#creating images
 	vcdimager -t svcd -c "$nev2.cue" -b "$nev2.bin" "$i"
 	#burning if needs
 	if [ "$burning" == 1 ]; then
-		if ["$firstcd" != 1 ]; then
+		if [ "$firstcd" != 1 ]; then
 			cat <<EOF
 
 Please insert an another blank cd in your cdwriter.
 Press any key when your are ready.
 EOF
 			read -n 1 i
+		else
+			firstcd=2
 		fi
 		$cdrbin -v -dao $dev speed=12 gracetime=2 driveropts=burnfree -eject cuefile="$nev2.cue"
 	fi
