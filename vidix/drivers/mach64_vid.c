@@ -534,20 +534,41 @@ static void mach64_vid_display_video( void )
     vf = INREG(VIDEO_FORMAT);
 
 // Bits 16-19 seem to select the format
-// Bit 28 seems to toggle something affects luma & chroma
+// 0x0  dunno behaves strange
+// 0x1  dunno behaves strange
+// 0x2  dunno behaves strange
+// 0x3  BGR15
+// 0x4  BGR16
+// 0x5  BGR16 (hmm, that need investigation, 2 BGR16 formats, i guess 1 will have only 5bits for green)
+// 0x6  BGR32
+// 0x7  BGR32 with somehow mixed even / odd pixels ?
+// 0x8	YYYYUVUV
+// 0x9	YVU9
+// 0xA	YV12
+// 0xB	YUY2
+// 0xC	UYVY
+// 0xD  UYVY (not again ... dont ask me, i dunno the difference)
+// 0xE  dunno behaves strange
+// 0xF  dunno behaves strange
+// Bit 28 all values are assumed to be 7 bit with chroma=64 for black (tested with YV12 & YUY2)
 // the remaining bits seem to have no effect
+
 
     switch(besr.fourcc)
     {
+	/* BGR formats */
+	case IMGFMT_BGR15: OUTREG(VIDEO_FORMAT, 0x00030000);  break;
+	case IMGFMT_BGR16: OUTREG(VIDEO_FORMAT, 0x00040000);  break;
+	case IMGFMT_BGR32: OUTREG(VIDEO_FORMAT, 0x00060000);  break;
         /* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xA0000);  break;
+	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, 0x000A0000);  break;
         /* 4:2:2 */
         case IMGFMT_YVYU:
-	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xC0000); break;
+	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, 0x000C0000); break;
 	case IMGFMT_YUY2:
-	default:           OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xB0000); break;
+	default:           OUTREG(VIDEO_FORMAT, 0x000B0000); break;
     }
     if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
 }
@@ -576,6 +597,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 			  config->dest.pitch.y = 
 			  config->dest.pitch.u = 
 			  config->dest.pitch.v = best_pitch;
+			  besr.vid_buf_pitch= pitch;
 			  break;
 	/* RGB 4:4:4:4 */
 	case IMGFMT_RGB32:
@@ -583,6 +605,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 			  config->dest.pitch.y = 
 			  config->dest.pitch.u = 
 			  config->dest.pitch.v = best_pitch;
+			  besr.vid_buf_pitch= pitch>>2;
 			  break;
 	/* 4:2:2 */
         default: /* RGB15, RGB16, YVYU, UYVY, YUY2 */
@@ -590,6 +613,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 			  config->dest.pitch.y =
 			  config->dest.pitch.u =
 			  config->dest.pitch.v = best_pitch;
+			  besr.vid_buf_pitch= pitch>>1;
 			  break;
     }
     dest_w = config->dest.w;
@@ -660,7 +684,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     if(mach64_is_interlace()) y_pos/=2;
     besr.y_x_end = y_pos | ((config->dest.x + dest_w) << 16);
     besr.height_width = ((src_w - left)<<16) | (src_h - top);
-    besr.vid_buf_pitch = is_420 ? pitch : pitch/2;
+
     return 0;
 }
 
@@ -668,7 +692,8 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 uint32_t supported_fourcc[] = 
 {
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
-  IMGFMT_UYVY, IMGFMT_YUY2, IMGFMT_YVYU
+  IMGFMT_UYVY, IMGFMT_YUY2, IMGFMT_YVYU,
+  IMGFMT_BGR15,IMGFMT_BGR16,IMGFMT_BGR32
 };
 
 __inline__ static int is_supported_fourcc(uint32_t fourcc)
@@ -754,6 +779,72 @@ int vixPlaybackFrameSelect(unsigned int frame)
       off[3] = besr.vid_buf3_base_adrs;
       off[4] = besr.vid_buf4_base_adrs;
       off[5] = besr.vid_buf5_base_adrs;
+#if 0 // debuging code, can be removed
+{
+int x,y;
+char *buf0= (char *)mach64_mem_base + mach64_overlay_offset;
+char *buf1= (char *)mach64_mem_base + mach64_overlay_offset;
+char *buf2= (char *)mach64_mem_base + mach64_overlay_offset;
+buf0 += ((besr.vid_buf0_base_adrs)&~15) - mach64_overlay_offset;
+buf1 += ((besr.vid_buf1_base_adrs)&~15) - mach64_overlay_offset;
+buf2 += ((besr.vid_buf2_base_adrs)&~15) - mach64_overlay_offset;
+/*for(y=0; y<480/4; y++)
+{
+	for(x=0; x<640/4; x++)
+	{
+		buf1[x + y*160]= 0; // buf1[2*x + y*160*4];
+		buf2[x + y*160]= 0; //buf2[2*x + y*160*4];
+	}
+}*/
+/*)for(y=479; y>0; y--)
+{
+	for(x=0; x<640; x++)
+	{
+		buf0[x*2 + y*1280+1]=
+		buf0[x*2 + y*1280]= buf0[x + y*640];
+	}
+}*/
+for(y=0; y<480; y++)
+{
+//	for(x=0; x<1280; x++) buf0[x + y*1280]=0;
+	for(x=0; x<1280/4; x++)
+	{
+// 1-> gray0
+//		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
+//		buf0[x*2 + y*1280 +1] ^= buf0[x*2 + y*1280 +0];
+//		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
+		
+		buf0[x*4 + y*1280 +1] =x; //buf0[x*4 + y*1280 +0]>>1;
+		buf0[x*4 + y*1280 +3] =128; //buf0[x*4 + y*1280 +2]>>1;
+		buf0[x*4 + y*1280 +0] =128;
+		buf0[x*4 + y*1280 +2] =128;
+
+//		buf0[x*8 + y*1280 +0]= 1;
+//		buf0[x*2 + y*1280 +1]= 7;
+//		buf0[x*2 + y*1280+6 ]= 255;
+	}
+// Y, Y, Y, Y, U, V, U, V
+}
+/*for(y=0; y<480; y++)
+{
+//	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
+	for(x=0; x<640; x++)
+	{
+		buf0[x + y*640 ]>>=1;
+		buf0[x + y*640 ]|=128;
+	}
+}
+for(y=0; y<480/2; y++)
+{
+//	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
+	for(x=0; x<640/2; x++)
+	{
+		buf1[x + y*320 ]>>=1;
+		buf2[x + y*320 ]>>=1;
+	}
+}*/
+}
+#endif
     }
 
     mach64_wait_vsync();
