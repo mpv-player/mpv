@@ -70,8 +70,15 @@
 #	define AGP_APER_SIZE_8MB               (0x3e << 0)
 #	define AGP_APER_SIZE_4MB               (0x3f << 0)
 #	define AGP_APER_SIZE_MASK              (0x3f << 0)
+#define AMCGPIO_A_REG                          0x01a0
+#define AMCGPIO_EN_REG                         0x01a8
+#define AMCGPIO_MASK                           0x0194
+#define AMCGPIO_Y_REG                          0x01a4
 #define BM_STATUS                              0x0160
+#define MPP_TB_CONFIG                          0x01c0 /* ? */
+#define MPP_GP_CONFIG                          0x01c8 /* ? */
 #define CAP0_TRIG_CNTL			       0x0950
+#define CAP1_TRIG_CNTL                         0x09c0 /* ? */
 #define VIPH_CONTROL			       0x0C40
 #define VENDOR_ID                              0x0F00  
 #define DEVICE_ID                              0x0F02  
@@ -339,6 +346,7 @@
 #	define CRTC2_TILE_EN                   (1 << 15)
 #define CRTC_PITCH                             0x022C  
 #define CRTC2_PITCH                            0x032C
+#define TMDS_CRC                               0x02a0
 #define OVR_CLR                                0x0230  
 #define OVR_WID_LEFT_RIGHT                     0x0234  
 #define OVR_WID_TOP_BOTTOM                     0x0238  
@@ -351,6 +359,22 @@
 #define FP_CRTC2_H_TOTAL_DISP                  0x0350
 #define FP_CRTC_V_TOTAL_DISP                   0x0254  
 #define FP_CRTC2_V_TOTAL_DISP                  0x0354
+#	define FP_CRTC_H_TOTAL_MASK            0x000003ff
+#	define FP_CRTC_H_DISP_MASK             0x01ff0000
+#	define FP_CRTC_V_TOTAL_MASK            0x00000fff
+#	define FP_CRTC_V_DISP_MASK             0x0fff0000
+#	define FP_H_SYNC_STRT_CHAR_MASK        0x00001ff8
+#	define FP_H_SYNC_WID_MASK              0x003f0000
+#	define FP_V_SYNC_STRT_MASK             0x00000fff
+#	define FP_V_SYNC_WID_MASK              0x001f0000
+#	define FP_CRTC_H_TOTAL_SHIFT           0x00000000
+#	define FP_CRTC_H_DISP_SHIFT            0x00000010
+#	define FP_CRTC_V_TOTAL_SHIFT           0x00000000
+#	define FP_CRTC_V_DISP_SHIFT            0x00000010
+#	define FP_H_SYNC_STRT_CHAR_SHIFT       0x00000003
+#	define FP_H_SYNC_WID_SHIFT             0x00000010
+#	define FP_V_SYNC_STRT_SHIFT            0x00000000
+#	define FP_V_SYNC_WID_SHIFT             0x00000010
 #define CRT_CRTC_H_SYNC_STRT_WID               0x0258
 #define CRT_CRTC_V_SYNC_STRT_WID               0x025C
 #define CUR_OFFSET                             0x0260
@@ -400,36 +424,124 @@
 #	define FP2_PAD_FLOP_EN                 (1 << 22)
 #	define FP2_CRC_EN                      (1 << 23)
 #	define FP2_CRC_READ_EN                 (1 << 24)
-#define FP_HORZ_STRETCH                        0x028C  
-#define FP_VERT_STRETCH                        0x0290  
-#define FP_H_SYNC_STRT_WID                     0x02C4  
-#define FP_H2_SYNC_STRT_WID                    0x03C4
-#define FP_V_SYNC_STRT_WID                     0x02C8  
-#define FP_V2_SYNC_STRT_WID                    0x03C8
 #define FP_HORZ_STRETCH                        0x028C
 #define FP_HORZ2_STRETCH                       0x038C
+#	define HORZ_STRETCH_RATIO_MASK         0xffff
+#	define HORZ_STRETCH_RATIO_MAX          4096
+#	define HORZ_PANEL_SIZE                 (0x1ff   << 16)
+#	define HORZ_PANEL_SHIFT                16
+#	define HORZ_STRETCH_PIXREP             (0      << 25)
+#	define HORZ_STRETCH_BLEND              (1      << 26)
+#	define HORZ_STRETCH_ENABLE             (1      << 25)
+#	define HORZ_AUTO_RATIO                 (1      << 27)
+#	define HORZ_FP_LOOP_STRETCH            (0x7    << 28)
+#	define HORZ_AUTO_RATIO_INC             (1      << 31)
 #define FP_VERT_STRETCH                        0x0290
 #define FP_VERT2_STRETCH                       0x0390
+#	define VERT_PANEL_SIZE                 (0xfff << 12)
+#	define VERT_PANEL_SHIFT                12
+#	define VERT_STRETCH_RATIO_MASK         0xfff
+#	define VERT_STRETCH_RATIO_SHIFT        0
+#	define VERT_STRETCH_RATIO_MAX          4096
+#	define VERT_STRETCH_ENABLE             (1     << 25)
+#	define VERT_STRETCH_LINEREP            (0     << 26)
+#	define VERT_STRETCH_BLEND              (1     << 26)
+#	define VERT_AUTO_RATIO_EN              (1     << 27)
+#	define VERT_STRETCH_RESERVED           0xf1000000
+#define FP_H_SYNC_STRT_WID                     0x02C4
+#define FP_H2_SYNC_STRT_WID                    0x03C4
+#define FP_V_SYNC_STRT_WID                     0x02C8
+#define FP_V2_SYNC_STRT_WID                    0x03C8
+#define LVDS_GEN_CNTL                          0x02d0
+#	define LVDS_ON                         (1   <<  0)
+#	define LVDS_DISPLAY_DIS                (1   <<  1)
+#	define LVDS_PANEL_TYPE                 (1   <<  2)
+#	define LVDS_PANEL_FORMAT               (1   <<  3)
+#	define LVDS_EN                         (1   <<  7)
+#	define LVDS_DIGON                      (1   << 18)
+#	define LVDS_BLON                       (1   << 19)
+#	define LVDS_SEL_CRTC2                  (1   << 23)
+#define LVDS_PLL_CNTL                          0x02d4
+#	define HSYNC_DELAY_SHIFT               28
+#	define HSYNC_DELAY_MASK                (0xf << 28)
 #define AUX_WINDOW_HORZ_CNTL                   0x02D8  
 #define AUX_WINDOW_VERT_CNTL                   0x02DC  
 #define DDA_CONFIG			       0x02e0
 #define DDA_ON_OFF			       0x02e4
 #define GRPH_BUFFER_CNTL                       0x02F0
 #define VGA_BUFFER_CNTL                        0x02F4
+/* first overlay unit (there is only one) */
 #define OV0_Y_X_START                          0x0400
 #define OV0_Y_X_END                            0x0404  
 #define OV0_PIPELINE_CNTL                      0x0408  
+#define OV0_EXCLUSIVE_HORZ                     0x0408
+#	define EXCL_HORZ_START_MASK            0x000000ff
+#	define EXCL_HORZ_END_MASK              0x0000ff00
+#	define EXCL_HORZ_BACK_PORCH_MASK       0x00ff0000
+#	define EXCL_HORZ_EXCLUSIVE_EN          0x80000000
+#define OV0_EXCLUSIVE_VERT                     0x040C
+#	define EXCL_VERT_START_MASK            0x000003ff
+#	define EXCL_VERT_END_MASK              0x03ff0000
 #define OV0_REG_LOAD_CNTL                      0x0410  
+#	define REG_LD_CTL_LOCK                 0x00000001L
+#	define REG_LD_CTL_VBLANK_DURING_LOCK   0x00000002L
+#	define REG_LD_CTL_STALL_GUI_UNTIL_FLIP 0x00000004L
+#	define REG_LD_CTL_LOCK_READBACK        0x00000008L
 #define OV0_SCALE_CNTL                         0x0420  
+#	define SCALER_PIX_EXPAND               0x00000001L
+#	define SCALER_Y2R_TEMP                 0x00000002L
+#	define SCALER_HORZ_PICK_NEAREST        0x00000003L
+#	define SCALER_VERT_PICK_NEAREST        0x00000004L
+#	define SCALER_SIGNED_UV                0x00000010L
+#	define SCALER_GAMMA_SEL_MASK           0x00000060L
+#	define SCALER_GAMMA_SEL_BRIGHT         0x00000000L
+#	define SCALER_GAMMA_SEL_G22            0x00000020L
+#	define SCALER_GAMMA_SEL_G18            0x00000040L
+#	define SCALER_GAMMA_SEL_G14            0x00000060L
+#	define SCALER_COMCORE_SHIFT_UP_ONE     0x00000080L
+#	define SCALER_SURFAC_FORMAT            0x00000f00L
+#	define SCALER_SOURCE_15BPP             0x00000300L
+#	define SCALER_SOURCE_16BPP             0x00000400L
+#	define SCALER_SOURCE_32BPP             0x00000600L
+#	define SCALER_SOURCE_YUV9              0x00000900L
+#	define SCALER_SOURCE_YUV12             0x00000A00L
+#	define SCALER_SOURCE_VYUY422           0x00000B00L
+#	define SCALER_SOURCE_YVYU422           0x00000C00L
+#	define SCALER_SMART_SWITCH             0x00008000L
+#	define SCALER_BURST_PER_PLANE          0x00ff0000L
+#	define SCALER_DOUBLE_BUFFER            0x01000000L
+#	define SCALER_DIS_LIMIT                0x08000000L
+#	define SCALER_PRG_LOAD_START           0x10000000L
+#	define SCALER_INT_EMU                  0x20000000L
+#	define SCALER_ENABLE                   0x40000000L
+#	define SCALER_SOFT_RESET               0x80000000L
 #define OV0_V_INC                              0x0424  
 #define OV0_P1_V_ACCUM_INIT                    0x0428  
+#	define OV0_P1_MAX_LN_IN_PER_LN_OUT     0x00000003L
+#	define OV0_P1_V_ACCUM_INIT_MASK        0x01ff8000L
 #define OV0_P23_V_ACCUM_INIT                   0x042C  
 #define OV0_P1_BLANK_LINES_AT_TOP              0x0430  
+#	define P1_BLNK_LN_AT_TOP_M1_MASK       0x00000fffL
+#	define P1_ACTIVE_LINES_M1              0x0fff0000L
 #define OV0_P23_BLANK_LINES_AT_TOP             0x0434  
+#	define P23_BLNK_LN_AT_TOP_M1_MASK      0x000007ffL
+#	define P23_ACTIVE_LINES_M1             0x07ff0000L
 #define OV0_BASE_ADDR                          0x043C  
 #define OV0_VID_BUF0_BASE_ADRS                 0x0440  
+#	define VIF_BUF0_PITCH_SEL              0x00000001L
+#	define VIF_BUF0_TILE_ADRS              0x00000002L
+#	define VIF_BUF0_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF0_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF1_BASE_ADRS                 0x0444  
+#	define VIF_BUF1_PITCH_SEL              0x00000001L
+#	define VIF_BUF1_TILE_ADRS              0x00000002L
+#	define VIF_BUF1_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF1_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF2_BASE_ADRS                 0x0448  
+#	define VIF_BUF2_PITCH_SEL              0x00000001L
+#	define VIF_BUF2_TILE_ADRS              0x00000002L
+#	define VIF_BUF2_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF2_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF3_BASE_ADRS                 0x044C  
 #define OV0_VID_BUF4_BASE_ADRS                 0x0450
 #define OV0_VID_BUF5_BASE_ADRS                 0x0454
@@ -458,6 +570,19 @@
 #define OV0_GRPH_KEY_CLR_LOW                   0x04EC  
 #define OV0_GRPH_KEY_CLR_HIGH                  0x04F0  
 #define OV0_KEY_CNTL                           0x04F4  
+#	define VIDEO_KEY_FN_MASK               0x00000007L
+#	define VIDEO_KEY_FN_FALSE              0x00000000L
+#	define VIDEO_KEY_FN_TRUE               0x00000001L
+#	define VIDEO_KEY_FN_EQ                 0x00000004L
+#	define VIDEO_KEY_FN_NE                 0x00000005L
+#	define GRAPHIC_KEY_FN_MASK             0x00000070L
+#	define GRAPHIC_KEY_FN_FALSE            0x00000000L
+#	define GRAPHIC_KEY_FN_TRUE             0x00000010L
+#	define GRAPHIC_KEY_FN_EQ               0x00000040L
+#	define GRAPHIC_KEY_FN_NE               0x00000050L
+#	define CMP_MIX_MASK                    0x00000100L
+#	define CMP_MIX_OR                      0x00000000L
+#	define CMP_MIX_AND                     0x00000100L
 #define OV0_TEST                               0x04F8  
 #define SUBPIC_CNTL                            0x0540  
 #define SUBPIC_DEFCOLCON                       0x0544  
@@ -527,8 +652,8 @@
 #define CLOCK_CNTL_INDEX                       0x0008  
 /* CLOCK_CNTL_INDEX bit constants */
 #	define PLL_WR_EN                       0x00000080
-#	define RADEON_PLL_DIV_SEL              (3 << 8)
-#	define RADEON_PLL2_DIV_SEL_MASK        ~(3 << 8)
+#	define PLL_DIV_SEL                     (3 << 8)
+#	define PLL2_DIV_SEL_MASK               ~(3 << 8)
 #define CLOCK_CNTL_DATA                        0x000C  
 #define CP_RB_CNTL                             0x0704  
 #define CP_RB_BASE                             0x0700  
@@ -755,13 +880,22 @@
 
 #define CLK_PIN_CNTL                               0x0001
 #define PPLL_CNTL                                  0x0002
+#	define PPLL_RESET                          (1 <<  0)
+#	define PPLL_SLEEP                          (1 <<  1)
+#	define PPLL_ATOMIC_UPDATE_EN               (1 << 16)
+#	define PPLL_VGA_ATOMIC_UPDATE_EN           (1 << 17)
+#	define PPLL_ATOMIC_UPDATE_VSYNC            (1 << 18)
 #define PPLL_REF_DIV                               0x0003
+#	define PPLL_REF_DIV_MASK                   0x03ff
+#	define PPLL_ATOMIC_UPDATE_R                (1 << 15) /* same as _W */
+#	define PPLL_ATOMIC_UPDATE_W                (1 << 15) /* same as _R */
 #define PPLL_DIV_0                                 0x0004
 #define PPLL_DIV_1                                 0x0005
 #define PPLL_DIV_2                                 0x0006
 #define PPLL_DIV_3                                 0x0007
 #define VCLK_ECP_CNTL                              0x0008
 #define HTOTAL_CNTL                                0x0009
+#define HTOTAL2_CNTL                               0x002e /* PLL */
 #define M_SPLL_REF_FB_DIV                          0x000a
 #define AGP_PLL_CNTL                               0x000b
 #define SPLL_CNTL                                  0x000c
@@ -775,8 +909,20 @@
 #	define FORCEON_YCLKB         	   	   (1 << 19)
 #	define FORCEON_MC            	  	   (1 << 20)
 #	define FORCEON_AIC           	   	   (1 << 21)
-#define AGP_PLL_CNTL                               0x000b
 #define PLL_TEST_CNTL                              0x0013
+#define P2PLL_CNTL                                 0x002a /* P2PLL */
+#	define P2PLL_RESET                         (1 <<  0)
+#	define P2PLL_SLEEP                         (1 <<  1)
+#	define P2PLL_ATOMIC_UPDATE_EN              (1 << 16)
+#	define P2PLL_VGA_ATOMIC_UPDATE_EN          (1 << 17)
+#	define P2PLL_ATOMIC_UPDATE_VSYNC           (1 << 18)
+#define P2PLL_DIV_0                                0x002c
+#	define P2PLL_FB0_DIV_MASK                  0x07ff
+#	define P2PLL_POST0_DIV_MASK                0x00070000
+#define P2PLL_REF_DIV                              0x002B /* PLL */
+#	define P2PLL_REF_DIV_MASK                  0x03ff
+#	define P2PLL_ATOMIC_UPDATE_R               (1 << 15) /* same as _W */
+#	define P2PLL_ATOMIC_UPDATE_W               (1 << 15) /* same as _R */
 
 /* masks */
 
@@ -786,14 +932,8 @@
 #define DST_PITCH_MASK			0x3fc00000
 #define DEFAULT_TILE_MASK		0xc0000000
 #define	PPLL_DIV_SEL_MASK		0x00000300
-#define	PPLL_RESET			0x00000001
-#define PPLL_ATOMIC_UPDATE_EN		0x00010000
-#define PPLL_REF_DIV_MASK		0x000003ff
 #define	PPLL_FB3_DIV_MASK		0x000007ff
 #define	PPLL_POST3_DIV_MASK		0x00070000
-#define PPLL_ATOMIC_UPDATE_R		0x00008000
-#define PPLL_ATOMIC_UPDATE_W		0x00008000
-#define	PPLL_VGA_ATOMIC_UPDATE_EN	0x00020000
 
 #define GUI_ACTIVE			0x80000000
 
