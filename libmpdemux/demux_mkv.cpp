@@ -459,6 +459,9 @@ static int check_track_information(mkv_demuxer_t *d) {
             t->a_formattag = 0x0055;
           else if (!strcmp(t->codec_id, MKV_A_AC3))
             t->a_formattag = 0x2000;
+          else if (!strcmp(t->codec_id, MKV_A_DTS))
+            // uses same format tag as AC3, only supported with -hwac3
+            t->a_formattag = 0x2000;
           else if (!strcmp(t->codec_id, MKV_A_PCM))
             t->a_formattag = 0x0001;
           else if (!strcmp(t->codec_id, MKV_A_VORBIS)) {
