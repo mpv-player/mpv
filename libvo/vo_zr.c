@@ -304,7 +304,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	framenum = 0;
 	if (format != IMGFMT_YV12 && format != IMGFMT_YUY2) {
 		printf("vo_zr called with wrong format");
-		exit(1);
+		return 1;
 	}
 	for (i = 0; i < zr_count; i++) {
 		zr_info_t *zr = &zr_info[i];

@@ -377,7 +377,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
       default:
 	fprintf(stderr, "%d channels are not supported\n", channels);
-	exit (0);
+	return(0);
       }
 
       alsa_device = devstr;
