@@ -824,7 +824,8 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_QL,
  DEVICE_ATI_RADEON_QW,
  DEVICE_ATI_RADEON_VE_QY,
- DEVICE_ATI_RADEON_VE_QZ
+ DEVICE_ATI_RADEON_VE_QZ,
+ DEVICE_ATI_RADEON_9000_IF
 #endif
 };
 
@@ -954,9 +955,8 @@ int vixInit( void )
     case DEVICE_ATI_RADEON_MOBILITY_M62:
     case DEVICE_ATI_RADEON_MOBILITY_M63:
     case DEVICE_ATI_RADEON_MOBILITY_M64:
+    case DEVICE_ATI_RADEON_9000_IF:
       rage_ckey_model=1;
-      is_shift_required=1;
-      break;
     case DEVICE_ATI_RADEON_QD:
     case DEVICE_ATI_RADEON_QE:
     case DEVICE_ATI_RADEON_QF:
@@ -965,7 +965,9 @@ int vixInit( void )
     case DEVICE_ATI_RADEON_VE_QZ:
       is_shift_required=1;
       break;
-    default: break;
+    default:
+//	printf(RADEON_MSG" Warning! Probably colorkeying isn't working correct!\n");
+	break;
     }
 #endif
 
