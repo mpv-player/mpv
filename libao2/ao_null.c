@@ -37,7 +37,7 @@ static int drain(){
     buffer-=temp;
     if (buffer<0) buffer=0;
 
-    last_tv = now_tv;
+    if(temp>0) last_tv = now_tv;//mplayer is fast
 }
 
 // to set/get/query special features/parameters
