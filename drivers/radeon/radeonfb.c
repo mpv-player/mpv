@@ -12,13 +12,14 @@
  *	2001-07-05	fixed scrolling issues, engine initialization,
  *			and minor mode tweaking, 0.0.9
  *
+ *	2001-09-07	Radeon VE support
  *
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  */
 
 
-#define RADEON_VERSION	"0.0.9"
+#define RADEON_VERSION	"0.0.10"
 
 
 #include <linux/config.h>
@@ -62,7 +63,8 @@ enum radeon_chips {
 	RADEON_QD,
 	RADEON_QE,
 	RADEON_QF,
-	RADEON_QG
+	RADEON_QG,
+	RADEON_VE
 };
 
 
@@ -71,6 +73,7 @@ static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QE, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QE},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QF, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QF},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QG, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QG},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_VE, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_VE},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, radeonfb_pci_table);
@@ -640,6 +643,9 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		case PCI_DEVICE_ID_RADEON_QG:
 			strcpy(rinfo->name, "Radeon QG ");
 			break;
+		case PCI_DEVICE_ID_RADEON_VE:
+			strcpy(rinfo->name, "Radeon VE ");
+			break;
 		default:
 			return -ENODEV;
 	}
@@ -755,7 +761,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		radeon_engine_init (rinfo);
 	}
 
-	printk ("radeonfb: ATI Radeon %s %d MB\n", rinfo->ram_type,
+	printk ("radeonfb: ATI %s %d MB\n", rinfo->name,
 		(rinfo->video_ram/(1024*1024)));
 
 	return 0;
