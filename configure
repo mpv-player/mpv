@@ -154,6 +154,7 @@ Optional features:
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
+  --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
   --enable-dvdnav        enable dvdnav support [disable]
   --disable-dvdread      Disable libdvdread support [autodetect]
@@ -1034,6 +1035,7 @@ _tv_v4l=auto
 _tv_bsdbt848=auto
 _edl=yes
 _streaming=yes
+_smbsupport=auto
 _vidix=auto
 _joystick=no
 _xvid=auto
@@ -1200,6 +1202,8 @@ for ac_option do
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-streaming)	_streaming=yes	;;
   --disable-streaming)	_streaming=no	;;
+  --enable-smb)		_smbsupport=yes	;;
+  --disable-smb)	_smbsupport=no	;;
   --enable-vidix)	_vidix=yes	;;
   --disable-vidix)	_vidix=no	;;
   --enable-joystick)	_joystick=yes	;;
@@ -2316,6 +2320,32 @@ else
     _def_macosx='#undef MACOSX'
 fi
 echores "$_macosx"
+
+
+echocheck "Samba support (libsmbclient)"
+if test "$_smbsupport" = auto; then
+    _smbsupport=no
+    cat > $TMPC << EOF
+#include <libsmbclient.h>
+int main(void) { smbc_opendir("smb://"); return 0; }
+EOF
+    _ld_smb=" -L/usr/lib -lsmbclient"
+    _inc_smb=" -I/usr/include "
+    if cc_check $_ld_smb $_inc_smb ; then 
+# this is not working for me becouse it needs -ldl and some NIS (YP) libs
+# $_ld_dl and -lyp ? should be added
+	_smbsupport=yes
+    fi
+fi
+
+if test "$_smbsupport" = yes; then
+    _def_smbsupport="#define LIBSMBCLIENT"
+    _inputmodules="smb $_inputmodules"
+else
+    _def_smbsupport="#undef LIBSMBCLIENT"
+    _noinputmodules="smb $_noinputmodules"
+fi
+echores "$_smbsupport"
 
 
 #########
@@ -5018,6 +5048,8 @@ LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
 FAAD_LIB = $_ld_faad
+SMBSUPPORT_INC = $_inc_smb
+SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
@@ -5380,6 +5412,9 @@ $_def_lrintf
 
 /* nanosleep support */
 $_def_nanosleep
+
+/* SMB support */
+$_def_smbsupport
 
 /* termcap flag for getch2.c */
 $_def_termcap
