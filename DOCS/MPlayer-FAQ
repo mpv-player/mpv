@@ -23,11 +23,6 @@ A: Where did you install the SDL library? If you installed in /usr/local
    (the default) then edit the top level config.mak and add
    "-L/usr/local/lib " after "X_LIBS=" Now type make. You're done!
 
-Q: I have problem ... with the SDL driver.
-A: It's very experimental & buggy code, and it's UNSUPPORTED by us.
-   Please do NOT report bugs or ask features relating to SDL.
-   If you can improve it, send us patches!
-
 Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
 A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
    try again... if fail, contact me
