@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/10/22 by Jeroen Dobbelaere
+# - added selection of libmad
+#
 # 2001/08/27 by Johannes Feigl
 # - added manual selection of language
 #
@@ -194,6 +197,7 @@ params:
   --enable-termcap       use termcap database for key codes
   --enable-xmmp          use XMMP audio drivers
   --enable-lirc          enable LIRC (remote control) support
+  --enable-mad           enable mad audio support
 
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -228,6 +232,8 @@ params:
                          (only needed if autodetection fails)
   --with-extraincdir=DIR extra headers (png, SDL) are in DIR
                          (only needed if autodetection fails)
+  --with-madlibdir=DIR   libmad library files are in DIR
+  --with-madincdir=DIR   libmad header is in DIR
   --size-x=SIZE          default screen width
   --size-y=SIZE          default screen height
 EOF
@@ -284,6 +290,12 @@ for ac_option do
         ;;
   --with-extraincdir=*)
         _extraincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+        ;;
+ --with-madlibdir=*)
+        _madlibdir=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+        ;;
+ --with-madincdir=*)
+        _madincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
         ;;
  esac
 done
@@ -1292,6 +1304,12 @@ for ac_option do
   --enable-divx4)
   	_divx4linux=yes
 	;;
+  --enable-mad)
+	_madlibrary=yes
+	;;
+  --disable-mad)
+	_madlibrary=no
+	;;
   --disable-css)
 	_css=no
 	;;
@@ -1624,6 +1642,7 @@ echo "Checking for Sun mediaLib ... $_mlib"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
+echo "Checking for mad support ... $_madlibrary"
 echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
@@ -1908,6 +1927,10 @@ if test "$_png" = yes ; then
    _libpng='-lpng -lz'
 fi
 
+if test "$_madlibrary" = yes ; then
+    _libmad='-lmad'
+fi
+
 if test "$_vorbis" = yes ; then
    _vorbis='#define HAVE_OGGVORBIS'
    _libvorbis='-lvorbis -lm'
@@ -2086,6 +2109,11 @@ else
    _png='#undef HAVE_PNG'
 fi
 
+if test "$_madlibrary" = yes ; then
+ _madlibrary='#define USE_LIBMAD'
+else
+ _madlibrary='#undef USE_LIBMAD'
+fi
 
 if test "$_mlib" = yes ; then
  _mlibdef='#define HAVE_MLIB'
@@ -2264,7 +2292,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2287,6 +2315,8 @@ DECORE_LIBS = $_decorelibs
 DIVX4LINUX=$_divx4linux
 MLIB_INC = $_mlibinc
 MLIB_LIB = $_mliblib
+MADLIB_INC = $_madincdir
+MADLIB_LIB = $_madlibdir
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -2475,6 +2505,9 @@ $_termcap
 
 /* enable PNG support */
 $_png
+
+/* libmad support */
+$_madlibrary
 
 /* enable OggVorbis support */
 $_vorbis
