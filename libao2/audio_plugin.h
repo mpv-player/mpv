@@ -56,7 +56,7 @@ extern ao_plugin_cfg_t ao_plugin_cfg;
 // This block should not be available in the pl_xxxx files
 // due to compilation issues
 #ifndef PLUGIN
-#define NPL 7+1 // Number of PLugins ( +1 list ends with NULL )
+#define NPL 8+1 // Number of PLugins ( +1 list ends with NULL )
 // List of plugins 
 extern ao_plugin_functions_t audio_plugin_delay;
 extern ao_plugin_functions_t audio_plugin_format; 
@@ -65,7 +65,7 @@ extern ao_plugin_functions_t audio_plugin_resample;
 extern ao_plugin_functions_t audio_plugin_volume;
 extern ao_plugin_functions_t audio_plugin_extrastereo;
 extern ao_plugin_functions_t audio_plugin_volnorm;
-
+extern ao_plugin_functions_t audio_plugin_eq;
 
 #define AO_PLUGINS { \
    &audio_plugin_delay, \
@@ -75,6 +75,7 @@ extern ao_plugin_functions_t audio_plugin_volnorm;
    &audio_plugin_volume, \
    &audio_plugin_extrastereo, \
    &audio_plugin_volnorm, \
+   &audio_plugin_eq, \
    NULL \
 }
 #endif /* PLUGIN */
