@@ -6026,9 +6026,9 @@ When me_quality > 4, 4mv is activated.
 .
 .TP
 .B rc_reaction_delay_factor=<value>
-This parameter controls the delay in frames before the CBR rate controller
-will react to bitrate changes and will try to compensate the change to obtain
-a constant bitrate over an averaging range of frames.
+This parameter controls the number of frames the CBR rate controller
+will wait before reacting to bitrate changes and compensating for them
+to obtain a constant bitrate over an averaging range of frames.
 .
 .TP
 .B rc_averaging_period=<value>
@@ -6048,6 +6048,10 @@ size of the rate control buffer
 CBR mode: min & max quantizer for all frames (default: 2\-31)
 .br
 2pass mode: min & max quantizer for I/\:P frames (default: 2\-31/\:2\-31)
+.br
+.I WARNING:
+This option is deprecated in XviD-1.0.x, and is replaced by the
+[min|max]_[i|p|b]quant options.
 .
 .TP
 .B min_key_interval=<value>
@@ -6063,26 +6067,22 @@ Use MPEG quantizers instead of H.263.
 For high bitrates, you will find that MPEG quantization preserves more detail.
 For low bitrates, the smoothing of H.263 will give you less block noise.
 When using custom matrices, MPEG must be used.
+.br
+.I WARNING:
+This option is deprecated in XviD-1.0.x, and is replaced by the quant_type
+option.
 .
 .TP
 .B mod_quant
-Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
+Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
+(2pass mode only).
 .br
 .I WARNING:
 This will generate an illegal bitstream, and most likely not be decodable
 by any MPEG4 decoder besides libavcodec or XviD.
-(2pass mode only)
-.
-.TP
-.B greyscale
-Make XviD discard chroma planes so the encoded video is greyscale only.
-Note that this does not speed up encoding, it just prevents chroma data
-from being written in the last stage of encoding.
-.
-.TP
-.B debug\ \ 
-Save per-frame statistics in ./xvid.dbg.
-This is NOT the 2pass control file.
+.br
+.I WARNING:
+This option is deprecated in XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6100,8 +6100,20 @@ The above two settings can be used to adjust the size of keyframes that
 you consider too close to the first (in a row).
 kfthreshold sets the range in which keyframes are reduced, and
 kfreduction determines the bitrate reduction they get.
-The last i-frame will get treated normally.
+The last I frame will get treated normally.
 (default: 30, 2pass mode only)
+.
+.TP
+.B greyscale
+Make XviD discard chroma planes so the encoded video is greyscale only.
+Note that this does not speed up encoding, it just prevents chroma data
+from being written in the last stage of encoding.
+.
+.TP
+.B debug\ \ 
+Save per-frame statistics in ./xvid.dbg (this is
+.B not
+the 2pass control file).
 .RE
 .
 .PP
@@ -6123,7 +6135,43 @@ autodetection of some decoders might be confused.
 .
 .TP
 .B divx5bvop
-generate DivX5 compatible B-frames (default: on)
+generate DivX5 compatible B frames (default: on)
+.
+.TP
+.B max_bframes=<0\-4>
+maximum number of B frames to put between I/\:P frames (default: 0)
+.
+.TP
+.B bquant_ratio=<0\-1000>
+quantizer ratio between B and non B frames, 150=1.50 (default: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+quantizer offset between B and non B frames, 100=1.00 (default: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Sometimes B frames do not look good, and introduce artifacts when most of
+the frame is static and some small zones have high motion (in a static
+scene with a man talking, his mouth will probably look bad if what is
+surrounding the man and his mouth is completely static).
+This setting allows you to specify what priority to place on the use of
+B frames.
+The higher the value, the higher the probability of B frames being used.
+(default: 0)
+.
+.TP
+.B frame_drop_ratio=<0\-100> (max_bframes=0 only)
+This setting allows the creation of variable framerate video streams.
+The value of the setting specifies a threshold under which, if the
+difference of the following frame to the previous frame is below or equal
+to this threshold, a frame gets not coded (a so called n-vop is placed
+in the stream).
+On playback, when reaching an n-vop the previous frame will be displayed.
+.br
+.I WARNING:
+Playing with this setting may result in a jerky video, so use it at your
+own risks!
 .
 .TP
 .B qpel\ \ \ 
@@ -6160,6 +6208,13 @@ It modifies some XviD internal thresholds so XviD takes better decisions on
 frame types and motion vectors for flat looking cartoons.
 .
 .TP
+.B quant_type=<h263|mpeg>
+Sets the type of quantizer to use.
+For high bitrates, you will find that MPEG quantization preserves more detail.
+For low bitrates, the smoothing of H.263 will give you less block noise.
+When using custom matrices, MPEG quantization must be used.
+.
+.TP
 .B chroma_me
 The usual motion estimation algorithm uses only the luminance information to
 find the best motion vector.
@@ -6177,36 +6232,6 @@ It reduces PSNR by nature, as the mathematical deviation to the original
 picture will get bigger, but the subjective image quality will raise.
 Since it works with color information, you might want to turn it off when
 encoding in greyscale.
-.
-.TP
-.B reduced
-Enable encoding reduced-resolution frames.
-.br
-.I WARNING:
-The bitstream created is outside any MPEG-4 profile!
-This means it most likely won't be decodable by anything except XviD.
-.
-.TP
-.B max_bframes=<0\-4>
-maximum number of B frames to put between I/\:P frames (default: 0)
-.
-.TP
-.B bquant_ratio=<0\-1000>
-quantizer ratio between B and non B frames, 150=1.50 (default: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-quantizer offset between B and non B frames, 100=1.00 (default: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Sometimes B frames do not look good, and introduce artifacts when most of
-the frame is static and some small zones have high motion (in a static
-scene with a man talking, his mouth will probably look bad if what is
-surrounding the man and his mouth is completly static).
-This setting allows you to favorize or not, the use of B frames.
-The higher the value, the higher the probability of B frames being used.
-(default: 0)
 .
 .TP
 .B hq_ac\ \ 
@@ -6235,6 +6260,144 @@ medium search
 wide search
 .RE
 .PD 1
+.
+.TP
+.B min_iquant=<0\-31>
+minimum I frame quantizer (default: 2)
+.
+.TP
+.B max_iquant=<0\-31>
+maximum I frame quantizer (default: 31)
+.
+.TP
+.B min_pquant=<0\-31>
+minimum P frame quantizer (default: 2)
+.
+.TP
+.B max_pquant=<0\-31>
+maximum P frame quantizer (default: 31)
+.
+.TP
+.B min_bquant=<0\-31>
+minimum B frame quantizer (default: 2)
+.
+.TP
+.B max_bquant=<0\-31>
+maximum B frame quantizer (default: 31)
+.
+.TP
+.B quant_intra_matrix=<filename>
+Load a custom intra matrix file.
+You can build such a file with xvid4conf's matrix editor.
+.
+.TP
+.B quant_inter_matrix=<filename>
+Load a custom inter matrix file.
+You can build such a file with xvid4conf's matrix editor.
+.
+.TP
+.B curve_compression_high=<0\-100>
+This setting allows XviD to take a certain percentage of bits away from
+high bitrate scenes and give them back to the bit reservoir.
+You could also use this if you have a clip with so many bits allocated
+to high-bitrate scenes that the low(er)-bitrate scenes start to look bad
+(default: 0).
+.
+.TP
+.B curve_compression_low=<0\-100>
+This setting allows XviD to give a certain percentage of extra bits to the
+low bitrate scenes, taking a few bits from the entire clip.
+This might come in handy if you have a few low-bitrate scenes that are
+still blocky (default: 0).
+.
+.TP
+.B overflow_control_strength=<0\-100>
+During pass 1 of 2-pass encoding, a scaled bitrate curve is computed.
+The difference between that expected curve and the result obtained during
+encoding is called overflow.
+Obviously, the two pass Rate Controller tries to compensate for that overflow,
+distributing it over next frames to be encoded.
+This setting controls how much of the overflow is distributed at each new
+frame.
+Low values allow lazy overflow control, big rate bursts are compensated for
+more slowly (could lead to lack of precision for small clips).
+Higher values will make changes in bit redistribution more abrupt, possibly
+too abrupt if you set it too high, creating artifacts (default: 5).
+.br
+.I NOTE:
+This setting impacts quality a lot, play with it carefully!
+.
+.TP
+.B max_overflow_improvement=<0\-100>
+During the frame bit allocation, overflow control may increase the frame
+size.
+This parameter specifies the maximum percentage by which the overflow
+control is allowed to increase the frame size, compared to the ideal curve
+allocation
+(default: 5).
+.
+.TP
+.B max_overflow_degradation=<0\-100>
+During the frame bit allocation, overflow control may decrease the frame
+size.
+This parameter specifies the maximum percentage by which the overflow
+control is allowed to decrease the frame size, compared to the ideal curve
+allocation
+(default: 5).
+.
+.TP
+.B container_frame_overhead=<0..>
+Specifies a frame average overhead per frame, in bytes.
+Most of the time users express their target bitrate for video w/o taking
+care of the video container overhead.
+This small but (mostly) constant overhead can cause the target file size
+to be exceeded.
+We decided to allow users to set the amount of overhead per frame the
+container generates (give only an average per frame).
+0 has a special meaning, it lets XviD use its own default values
+(default: 24 - AVI average overhead).
+.
+.TP
+.B par=<mode>
+Specifies the Pixel Aspect Ratio mode, which is not to be confused with DAR
+which is Display Aspect Ratio.
+PAR is the ratio of the width and height of a single pixel.
+So both are related like this: DAR = PAR * (width/height).
+.br
+MPEG4 defines 5 pixel aspect ratios and one extended
+one, giving the opportunity to specify a specific pixel aspect
+ratio.
+5 standard modes can be specified:
+.PD 0
+.RSs
+.IPs vga11
+It's the usual PAR for PC content.
+Pixels are a square unit.
+.IPs pal43
+PAL standard 4:3 PAR.
+Pixels are rectangles.
+.IPs pal169
+same as above
+.IPs ntsc43
+same as above
+.IPs ntsc169
+same as above (Don't forget to give the exact ratio.)
+.IPs ext\ \ 
+Allows you to specify your own pixel aspect ratio with par_width and
+par_height.
+.RE
+.PD 1
+.br
+.I NOTE\ :
+In general, setting aspect and autoaspect options is enough.
+.
+.TP
+.B par_width=<1..255> (par=ext only)
+Specifies the width of the custom pixel aspect ratio.
+.
+.TP
+.B par_height=<1...255> (par=ext only)
+Specifies the height of the custom pixel aspect ratio.
 .
 .TP
 .B aspect=<x/\:y | f (float value)>
