@@ -16,6 +16,7 @@
 struct vf_priv_s {
     int x1,y1,x2,y2;
     int limit;
+    int round;
     int fno;
 };
 
@@ -57,7 +58,7 @@ static int config(struct vf_instance_s* vf,
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t *dmpi;
     int bpp=mpi->bpp/8;
-    int x,y;
+    int w,h,x,y,shrink_by;
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,mpi->imgfmt,
@@ -103,14 +104,34 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
 	}
     }
 
+    // round x and y (up), important for yuv colorspaces
+    // make sure they stay rounded!
     x=(vf->priv->x1+1)&(~1);
     y=(vf->priv->y1+1)&(~1);
     
+    w = vf->priv->x2 - x;
+    h = vf->priv->y2 - y;
+
+    // w and h must be divisible by 2 as well because of yuv
+    // colorspace problems.
+    if (vf->priv->round <= 1)
+      vf->priv->round = 16;
+    if (vf->priv->round % 2)
+      vf->priv->round *= 2;
+
+    shrink_by = w % vf->priv->round;
+    w -= shrink_by;
+    x += (shrink_by / 2 + 1) & ~1;
+
+    shrink_by = h % vf->priv->round;
+    h -= shrink_by;
+    y += (shrink_by / 2 + 1) & ~1;
+
     printf("crop area: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d)\n",
 	vf->priv->x1,vf->priv->x2,
 	vf->priv->y1,vf->priv->y2,
-	(vf->priv->x2+1-x)&(~1),(vf->priv->y2+1-y)&(~1),x,y
-	  );
+	w,h,x,y);
+
 
 }
 
@@ -124,7 +145,9 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->limit=24; // should be option
-    if(args) vf->priv->limit=atoi(args);
+    if(args) sscanf(args, "%d:%d",
+    &vf->priv->limit,
+    &vf->priv->round);
     return 1;
 }
 

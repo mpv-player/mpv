@@ -3317,12 +3317,24 @@ Position of the cropped picture, defaults to center.
 .PD 1
 .
 .TP
-.B cropdetect[=0\-255]
+.B cropdetect[=limit:round]
 Calculates necessary cropping parameters and prints the recommended parameters
 to stdout.
-The threshold can be optionally specified from nothing (0) to everything
+.PD 0
+.RSs
+.IPs limit
+threshold, which can be optionally specified from nothing (0) to everything
 (255).
 (default: 24)
+.br
+.IPs round
+value which the width/height should be divisible by.
+The offset is automatically adjusted to center the video.
+Use \'2\' to get only even dimentions (needed for 4:2:2 video).
+\'16\' is best when encoding to most video codecs.
+(default: 16)
+.RE
+.PD 1
 .
 .TP
 .B rectangle[=w:h:x:y]
