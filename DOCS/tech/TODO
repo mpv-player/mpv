@@ -8,6 +8,13 @@ FOR THE v0.90 RELEASE:
 - new demuxer layer - at least modularized...
 - fix AVI index offset base position handling ('no video stream found' bug)
 
+- fix locale problems (add common float parser / mp_sscanf())
+- fix the XineramaIsActive bug
+- better libwine build support / or fix loader to handle QT dll
+- NEWSTRUCT DVB driver support
+- update DOCS, manpage
+
+
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
