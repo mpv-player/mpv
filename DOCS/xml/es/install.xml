@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.30 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -733,9 +733,9 @@ Hay muchas maneras de conseguirlo:
   <filename>TOOLS/subfont-c/README</filename> para más detalles).
   </para></listitem>
 <listitem><para>
-  Use el plugin de GIMP generador de tipografías en
-  <filename class="directory">TOOLS/subfont-GIMP</filename> (nota:
-  debe tener también el plugin HSI RAW,
+  Use el plugin de <application>GIMP</application> generador de
+  tipografías en <filename class="directory">TOOLS/subfont-GIMP
+  </filename> (nota: debe tener también el plugin HSI RAW,
   vea <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
   </para></listitem>
 <listitem><para>
@@ -744,19 +744,22 @@ Hay muchas maneras de conseguirlo:
   ¡La versión debe ser 2.0.9 o mayor! Entonces tiene 2 métodos:
   <itemizedlist>
     <listitem><para>
-      use la opción <option>-font /camino/a/arial.ttf</option> para especificar un
-      archivo de fuente TrueType en cada ocasión
+      use la opción
+      <option>-font <replaceable>/ruta/a/tipografía_ejemplo.ttf</replaceable></option>
+      para especificar un archivo de tipografía TrueType en cada ocasión
       </para></listitem>
     <listitem><para>
-      cree un enlace simbólico: <screen>ln -s /camino/a/arial.ttf ~/.mplayer/subfont.ttf
-      </screen>
+      cree un enlace simbólico:
+      <screen>ln -s <replaceable>/ruta/a/tipografía_ejemplo.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
-      Si <application>MPlayer</application> fue compilada con soporte para
+      Si <application>MPlayer</application> fue compilado con soporte para
       <systemitem class="library">fontconfig</systemitem>, los métodos de arriba no
       funcionarán, en su lugar la opción <option>-font</option> espera un nombre
-      de tipografía fontconfig y por defecto se usa la tipografía sans-serif.
-      Para obtener una lista de los tipos de letra que conoce fontconfig,
+      de tipografía <systemitem class="library">fontconfig</systemitem> y por
+      defecto se usa la tipografía sans-serif.
+      Para obtener una lista de los tipos de letra que conoce
+      <systemitem class="library">fontconfig</systemitem>,
       use <command>fc-list</command>.
       Ejemplo: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
@@ -774,7 +777,7 @@ Hay muchas maneras de conseguirlo:
   a los archivos de subtítulos <filename>&lt;nombre_del_video&gt;utf</filename> y
   tenerlo en el mismo directorio que el archivo de vídeo. La recodificación desde
   diferentes códigos de página a UTF8 lo puede hacer usando los programas 
-  <command>konwert</command> (Debian) o <command>iconv</command> (RedHat).
+  <command>konwert</command> o <command>iconv</command>.
   </para><para>
   
   <table>
@@ -809,8 +812,8 @@ Hay muchas maneras de conseguirlo:
 Si elige fuentes no TTF, descomprima el archivo que haya descargado a
 <filename class="directory">~/.mplayer</filename> o <filename
 class="directory">$PREFIX/share/mplayer</filename>. Entonces renombre o
-enlace simbólicamente uno de los directorios extraídos a <filename>font</filename>, 
-por ejemplo:
+enlace simbólicamente uno de los directorios extraídos a
+<filename class="directory">font</filename>, por ejemplo:
 
 <screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
 
@@ -916,12 +919,13 @@ Existen tres métodos de temporización en MPlayer.
   que el archivo ejecutable de <application>MPlayer</application> tenga <emphasis>
   permiso de SUID root</emphasis> o un núcleo configurado apropiadamente.
   Si utiliza un núcleo 2.4.19pre8 o más nuevo entonces puede ajustar la frecuencia
-  máxima del RTC para usuarios normales a través del sistema de archivo /proc. Use
+  máxima del RTC para usuarios normales a través del sistema de archivo
+  <systemitem class="systemname">/proc</systemitem>. Use
   este comando para habilitar el RTC para usuarios normales:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   Si no posee dicho núcleo actualizado, puede también cambiar una línea
-  el el archivo <filename>drivers/char/rtc.c</filename> y recompilar el núcleo.
-  Encuentre la sección que dice:
+  en el archivo <filename>drivers/char/rtc.c</filename> y recompilar el núcleo.
+  Busque la sección que dice:
   <programlisting>
        * We don't really want Joe User enabling more
        * than 64Hz of interrupts on a multi-user machine.

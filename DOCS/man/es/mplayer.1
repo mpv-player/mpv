@@ -1,4 +1,4 @@
-.\" synced with 1.504
+.\" synced with 1.506
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -35,7 +35,7 @@
 .\" Título
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-07-05"
+.TH MPlayer 1 "2003-12-23"
 .
 .SH NOMBRE
 mplayer  \- Reproductor de películas para Linux
@@ -2804,13 +2804,17 @@ solo líneas impares.
 Cualquier otro valor para f hace que se use el comportamiento por defecto (para
 hacer la media).
 .TP
-.B ilpack\ 
+.B ilpack[=mode]\ 
 Cuando el video entrelazado es almacenado en formatos YUV 4:2:0, el entrelazado
 de crominancia no se alinea correctamente debido al submuestreo vertical de los
 canales de crominancia.
 Este filtro empaqueta los datos de 4:2:0 planar en formato YUY2 (4:2:2) con
 las líneas de crominancia en sus posiciones correctas, en cualquier scanline
 dado, la luminancia y la crominancia vienen ambos del mismo campo.
+El argumento opcional selecciona el modo de muestreo.
+Por defecto, se usa interpolación lineal (modo 1).
+El modo 0 usa muestreo por entorno más cercano, el cual es rápido
+pero incorrecto.
 .TP
 .B decimate[=max:hi:lo:frac]
 Ignora imágenes que no difieren mucho de las imágenes anteriores para
@@ -3295,9 +3299,37 @@ Ancho y alto del rectángulo a limpiar.
 .IPs t
 Anchura del filo borroso del rectángulo (añadida a w y h). Cuando
 se establece en -1, un rectángulo verde se dibuja en la pantalla para
-simplificarla busqueda de los parámetros x,y,w,h correctos.
+simplificarla busqueda de los parámetros x, y, w, h correctos.
 .RE
 .PD 1
+.TP
+.B zrmjpeg[=opciones]
+Codificador por software de YV12 a MJPEG para uso con dispositivo de
+salida de video zr2. Pueden especificarse múltiples opciones con ':'.
+.RSs
+.IPs maxheight=h|maxwidth=w
+Estas opciones establecen el ancho y alto máximos que la tarjeta zr
+puede manejar.
+La capa de filtros de MPlayer no puede hacer actualmente esto.
+.IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
+Use estas opciones para establecer maxheight y maxwidth automáticamente
+a los valores conocidos por la combinación tarjeta/modo. Por ejemplo,
+opciones válidas son:
+dc10-PAL y buz-NTSC. Por defecto se toma dc10+PAL.
+.IPs color|bw
+Elige color o blanco y negro para la codificación. La codificación en
+blanco y negro es más rápida. Por defecto es en color.
+.IPs hdec={1,2,4}
+Decimación horizontal 1, 2 ó 4.
+.IPs vdec={1,2,4}
+Decimación vertical 1, 2 ó 4.
+.IPs quality=1-20
+Establece la calidad en la compresión JPEG [MEJOR] 1 - 20 [MUY MALA].
+.IPs fd|nofd
+Por defecto, la decimación solo se hace si el hardware zoran puede
+sobreescalar las imágenes MJPEG resultantes al tamaño original. La
+opción fd le indica al filtro que siempre haga la decimación (antiestético).
+.RE
 .
 .
 .SH "OPCIONES DE CODIFICACIÓN GENERALES (SOLAMENTE MENCODER)"
@@ -4772,6 +4804,12 @@ mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 .B Entrada desde V4L estandar
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
+.TP
+.B Reproducción en tarjeta zoran (al viejo estilo, desvalorizado)
+mplayer -vo zr -vf scale=352:288 archivo.avi
+.TP
+.B Reproducción en tarjeta zoran (nuevo estilo)
+mplayer -vo zr2 -vf scale=352:288,zrmjpeg archivo.avi
 .TP
 .B Codificación del título #2 del DVD, solo los capítulos seleccionados
 mencoder dvd://2 \-chapter 10-15 \-o titulo2.avi \-oac copy \-ovc divx4
