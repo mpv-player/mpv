@@ -244,11 +244,17 @@ Read the <link linkend="vidix">VIDIX</link> section.
 <title>NeoMagic cards</title>
 
 <para>
-These cards can be found in many laptops. Unfortunately, the driver in X
-4.2.0 can't do Xv, but we have a modified, Xv-capable driver for you.
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">
-Download from here</ulink>.
-Driver provided by Stefan Seyfried.
+These cards can be found in many laptops. Unfortunately, the driver in
+XFree prior to 4.3.0 cannot do Xv, but Stefan Seyfried provided 
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-capable drivers</ulink>.
+Just choose the one that applies to your version of Xfree.
+</para>
+
+<para>
+XFree86 4.3.0 includes Xv support, yet Bohdan Horst sent a small
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
+against the XFree sources that speeds up framebuffer operations up to four
+times.
 </para>
 
 <para>

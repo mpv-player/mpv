@@ -189,9 +189,14 @@
 <H4><A NAME="xv_neomagic">2.3.1.2.1.5 NeoMagic cards</A></H4>
 
 <P>These cards can be found in many laptops. Unfortunately, the driver in
-  X 4.2.0 can't do Xv, but we have a modified, Xv-capable driver for you.
-  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Download from here</A>.
-  Driver provided by Stefan Seyfried.</P>
+  XFree prior to 4.3.0 cannot do Xv, but Stefan Seyfried provided 
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-capable drivers</A>.
+  Just choose the one that applies to your version of Xfree.</P>
+
+<P>XFree86 4.3.0 includes Xv support, yet Bohdan Horst sent a small
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</A>
+  against the XFree sources that speeds up framebuffer operations up to four
+  times.</P>
 
 <P>To allow playback of DVD sized content change your XF86Config like this:</P>
 
