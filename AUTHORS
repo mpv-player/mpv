@@ -472,6 +472,11 @@ Marcus Blomenkamp <Marcus.Blomenkamp@epost.de>
 
 Alan Young <ayoung@teleport.com>
     * fixed support of RealMedia & Xanim binary plugins on Alpha
+
+Attila Kinali <kinali@gmx.net>
+    * various small fixes in the x11 code
+    * xinerama support
+    * documentation
     
 
 NOTE: If you think you are missing here, feel free to send a patch.
