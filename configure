@@ -2668,6 +2668,7 @@ echores "$_dynamic_plugins"
 #fi
 #echores "using $_ld_dl_dynamic"
 
+_def_threads='#undef HAVE_THREADS'
 
 echocheck "pthread"
 cat > $TMPC << EOF
@@ -2703,6 +2704,7 @@ if test "$_ld_pthread" != '' ; then
   echores "yes (using $_ld_pthread)"
   _pthreads='yes'
   _def_pthreads='#define HAVE_PTHREADS 1'
+  _def_threads='#define HAVE_THREADS 1'
 else
   echores "no"
   _pthreads=''
@@ -6943,6 +6945,9 @@ $_def_glob
 
 /* Define this if your system has pthreads */
 $_def_pthreads
+
+/* Define this if you enabled thread support for libavcodec */
+$_def_threads
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
