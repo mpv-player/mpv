@@ -7,7 +7,15 @@
 
 #include "config.h"
 
-#ifdef HAVE_NEW_GUI
+#if	defined(FOR_MENCODER) || defined(CODECS2HTML)
+#undef	ENABLE_GUI_CODE
+#elif	defined(HAVE_NEW_GUI)
+#define	ENABLE_GUI_CODE	HAVE_NEW_GUI
+#else
+#undef	ENABLE_GUI_CODE
+#endif
+
+#if ENABLE_GUI_CODE
 #include "Gui/mplayer/widgets.h"
 extern void gtkMessageBox( int type,char * str );
 extern int use_gui;
@@ -58,7 +66,7 @@ void mp_msg_c( int x, const char *format, ... ){
     va_end(va);
     tmp[MSGSIZE_MAX-1] = 0;
 
-#if defined(HAVE_NEW_GUI) && !defined(FOR_MENCODER)
+#if ENABLE_GUI_CODE
     if(use_gui)
     {
 	switch(x & 255)
@@ -106,7 +114,7 @@ void mp_msg_c( int x, const char *format, ... ){
     va_list va;
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
-#if defined( HAVE_NEW_GUI ) && !defined( FOR_MENCODER )
+#if ENABLE_GUI_CODE
     if(use_gui){
       char tmp[16*80];
       vsnprintf( tmp,8*80,format,va ); tmp[8*80-1]=0;
