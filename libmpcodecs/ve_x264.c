@@ -49,7 +49,7 @@
 
 #include <x264.h>
 
-#if X264_BUILD < 0x000c
+#if X264_BUILD < 0x000d
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 
@@ -75,8 +75,10 @@ static int deblockbeta = 0;
 static int cabac = 1;
 static int cabacidc = -1;
 static int p4x4mv = 0;
+static int b8x8mv = 1;
+static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static float ip_factor = 1.4;
-static float pb_factor = 1.4;
+static float pb_factor = 1.3;
 static int rc_buffer_size = -1;
 static int rc_init_buffer = -1;
 static int rc_sens = 4;
@@ -88,7 +90,7 @@ static float qcomp = 0.6;
 static float qblur = 0.5;
 static float complexity_blur = 20;
 static char *rc_eq = "tex*blurTex^(qComp-1)";
-static int subq = 1;
+static int subq = 3;
 static int psnr = 0;
 static int log_level = 2;
 
@@ -109,6 +111,9 @@ m_option_t x264encopts_conf[] = {
     {"cabacidc", &cabacidc, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
     {"4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"no4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"b8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nob8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -198,10 +203,14 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         mod->param.rc.i_rc_init_buffer = rc_init_buffer;
         mod->param.rc.i_rc_sens = rc_sens;
     }
-    if(p4x4mv)
-        mod->param.analyse.inter = X264_ANALYSE_I4x4 | X264_ANALYSE_PSUB16x16 | X264_ANALYSE_PSUB8x8;
     mod->param.rc.f_ip_factor = ip_factor;
     mod->param.rc.f_pb_factor = pb_factor;
+    mod->param.analyse.inter = X264_ANALYSE_I4x4 | X264_ANALYSE_PSUB16x16;
+    if(p4x4mv)
+        mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
+    if(b8x8mv)
+        mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
+    mod->param.analyse.i_direct_mv_pred = direct_pred;
 
     mod->param.i_width = width;
     mod->param.i_height = height;
