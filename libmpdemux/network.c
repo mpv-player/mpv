@@ -722,7 +722,7 @@ nop_streaming_start( stream_t *stream ) {
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
 	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-	stream->streaming_ctrl->prebuffer_size = 8192;	// KBytes
+	stream->streaming_ctrl->prebuffer_size = 64*1024; // 64 KBytes
 	stream->streaming_ctrl->buffering = 1;
 	stream->streaming_ctrl->status = streaming_playing_e;
 	return 0;
@@ -753,7 +753,7 @@ pnm_streaming_start( stream_t *stream ) {
 
 	stream->streaming_ctrl->streaming_read = pnm_streaming_read;
 //	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-	stream->streaming_ctrl->prebuffer_size = 128;	// KBytes
+	stream->streaming_ctrl->prebuffer_size = 8*1024;  // 8 KBytes
 	stream->streaming_ctrl->buffering = 1;
 	stream->streaming_ctrl->status = streaming_playing_e;
 	return 0;
@@ -857,7 +857,7 @@ rtp_streaming_start( stream_t *stream ) {
 
 	streaming_ctrl->streaming_read = rtp_streaming_read;
 	streaming_ctrl->streaming_seek = nop_streaming_seek;
-	streaming_ctrl->prebuffer_size = 4096;	// KBytes	
+	streaming_ctrl->prebuffer_size = 64*1024;	// 64 KBytes	
 	streaming_ctrl->buffering = 0;
 	streaming_ctrl->status = streaming_playing_e;
 	return 0;
@@ -956,7 +956,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
-			if( stream_cache_size<16 ) stream_cache_size = 16;	// 16KBytes min buffer
+			if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
 		}
 		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", stream_cache_size);
 	}
