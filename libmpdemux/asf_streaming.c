@@ -214,7 +214,7 @@ int
 asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
   static ASF_stream_chunck_t chunk;
   int read,chunk_size = 0;
-  static int rest = 0, drop_chunk = 0, waiting = 0;
+  static int rest = 0, drop_chunk = 0, waiting = 0,eof= 0;
   asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
 
   while(1) {
@@ -224,8 +224,9 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 	int r = nop_streaming_read( fd, ((char*)&chunk) + read, 
 				    sizeof(ASF_stream_chunck_t)-read, 
 				    streaming_ctrl );
-	if(r < 0){
-	  printf("End of stream without a full chunk header\n");
+	if(r <= 0){
+	  if( r < 0) 
+	    printf("Error while reading chunk header\n");
 	  return -1;
 	}
 	read += r;
@@ -260,8 +261,9 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
       }
       while(read < chunk_size) {
 	int got = nop_streaming_read( fd,buffer+read,chunk_size-read,streaming_ctrl );
-	if(got < 0) {
-	  printf("Error while reading chunk EOF ?\n");
+	if(got <= 0) {
+	  if(got < 0)
+	    printf("Error while reading chunk\n");
 	  return -1;
 	}
 	read += got;
@@ -610,18 +612,15 @@ printf("read: %d\n", i );
 				}
 				break;
 			case ASF_Redirector_e:
-				url_next = asf_http_ASX_redirect( http_hdr );
-				if( url_next==NULL ) {
-					printf("Failed to parse ASX file\n");
-					close(fd);
-					http_free( http_hdr );
-					return -1;
-				}
-				url_free( stream->streaming_ctrl->url );
-				stream->streaming_ctrl->url = url_next;
-				url = url_next;
-				done = 0;
-				break;
+			  if( http_hdr->body_size>0 ) {
+			    if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+			      http_free( http_hdr );
+			      return -1;
+			    }
+			  }
+			  stream->type = STREAMTYPE_PLAYLIST;
+			  done = 1;
+			  break;
 			case ASF_Unknown_e:
 			default:
 				printf("Unknown ASF streaming type\n");
@@ -633,7 +632,7 @@ printf("read: %d\n", i );
 	} while(!done);
 
 	stream->fd= fd;
-	if( streaming_type==ASF_PlainText_e ) {
+	if( streaming_type==ASF_PlainText_e || streaming_type==ASF_Redirector_e ) {
 		stream->streaming_ctrl->streaming_read = nop_streaming_read;
 		stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
 	} else {

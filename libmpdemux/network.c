@@ -147,7 +147,7 @@ connect2Server(char *host, int port) {
 			return -1;
 		}
 	}
-	tv.tv_sec = 5;	// 5 seconds timeout on connection
+	tv.tv_sec = 15;	// 15 seconds timeout on connection
 	tv.tv_usec = 0;	
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
@@ -569,12 +569,17 @@ streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 	}
 	
 	stream->streaming_ctrl->url = url_copy(url);
-//	stream->streaming_ctrl->demuxer_type = demuxer_type;
-	stream->fd = -1;
+//	stream->streaming_ctrl->demuxer_type = demuxer_type;	
 
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcmp( url->protocol, "rtp"))
 	{
+		if(stream->fd >= 0) 
+		{
+			if(close(stream->fd) < 0)
+				printf("streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
+		}
+		stream->fd = -1;
 		stream->fd = rtp_streaming_start( stream );
 	}
 	// For connection-oriented streams, we can usually determine the streaming type.
