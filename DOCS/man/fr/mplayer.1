@@ -1,8 +1,8 @@
-.\" synced with 1.806
+.\" synced with 1.807
 .\" MPlayer (C) 2000-2004 MPlayer Team
-.\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
-.\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
-.\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >
+.\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
+.\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
+.\"             Nicolas Le Gaillart < nicolas AT legaillart.com >
 .
 .\" --------------------------------------------------------------------------
 .\" Définition des macros
@@ -7414,11 +7414,11 @@ sensibilité du ratecontrol (default: 4)
 .
 .TP
 .B ip_factor=<value>
-facteur de quantification entre les trames-I et -P (par défaut\ : 2.0)
+facteur de quantification entre les trames-I et -P (par défaut\ : 1.4)
 .
 .TP
 .B pb_factor=<value>
-facteur de quantification entre les trames-P et -B (par défaut\ : 2.0)
+facteur de quantification entre les trames-P et -B (par défaut\ : 1.4)
 .
 .TP
 .B pass=<1\-2>
@@ -7474,19 +7474,32 @@ constant, alors qu'une valeur importante rend les quantificateurs plus
 constants.
 .
 .TP
+.B cplx_blur=<0\-999>
+Flou temporel de la complexité de trame estimée, avant la compression de
+la courbe (défaut\ : 20).
+Des valeurs plus faibles permettent au quantificateurs de plus changer d'une
+trame à l'autre, des valeurs plus hautes forcent une variation plus douce.
+cplx_blur permet de s'assurer que chaque trame-I ait une qualité comparable
+aux trame-P suivantes, et garantit qu'une alternance de trames à complexité
+forte et faible (par exemple un dessin animé dont la cadence d'animation est
+faible) ne gâche pas de bits en faisant fluctuer les quantificateurs.
+.
+.TP
 .B qblur=<0\-99>
-Flou temporel entre les quantificateurs (par défaut\ : 0.5).
+Flou temporel entre les quantificateurs, après la compression de la courbe
+(par défaut\ : 0.5).
 Une faible valeur permet aux quantificateurs de voir leur valeur varier plus
 d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
 .TP
-.B (no)fullinter
-Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16-4x4)
+.B (no)4x4mv
+Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16,
+p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip)
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
 Typiquement très efficace pour les dessins animés, qui contiennent souvent
-de grands à-plats de couleurs (par défaut\ : i16x16, i4x4, p16x16-8x8).
+de grands à-plats de couleurs (par défaut\ : i16x16, i4x4, p16x16-8x8, skip).
 Suivant le type de source, ce paramètre peut améliorer ou dégrader la
 qualité, utilisez-le avec précaution.
 .
