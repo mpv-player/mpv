@@ -47,51 +47,6 @@ void mplErrorHandler( int critical,const char * format, ... )
  gtkMessageBox( p );
 }
 
-/*
-void mplPlayerSigHandler( int s )
-{
- #ifdef DEBUG
-  dbprintf( 5,"[psignal] mpl sig handler msg: %d\n",mplShMem->message );
- #endif
- if ( s != SIGTYPE ) return;
- switch ( mplShMem->message )
-  {
-   case mplQuit:
-        exit_player( "GUI close" );
-        break;
-   case mplPauseEvent:
-//        if ( osd_function != OSD_PAUSE ) osd_function=OSD_PAUSE;
-//          else osd_function=OSD_PLAY;
-        break;
-   case mplResizeEvent:
-        vo_resize=1;
-        vo_expose=1;
-        printf( "[psignal] resize.\n" );
-//        if (video_out != NULL ) video_out->check_events();
-        break;
-   case mplExposeEvent:
-        vo_expose=1;
-        printf( "[psignal] expose.\n" );
-//        if (video_out != NULL ) video_out->check_events();
-        break;
-   case mplSeekEvent:
-//        rel_seek_secs+=mplShMem->videodata.seek;
-//        if ( rel_seek_secs > 0 ) osd_function=OSD_FFW;
-//          else osd_function=OSD_REW;
-        break;
-   case mplIncAudioBufferDelay:
-//        audio_delay+=0.1;  // increase audio buffer delay
-//        a_frame-=0.1;
-        break;
-   case mplDecAudioBufferDelay:
-//        audio_delay-=0.1;  // increase audio buffer delay
-//        a_frame+=0.1;
-        break;
-  }
- mplShMem->message=0;
-}
-*/
-
 void gtkSigHandler( int s )
 {
  if ( s != SIGTYPE ) return;
@@ -202,6 +157,7 @@ void mplMainSigHandler( int s )
    case evSkinBrowser: mplShMem->SkinChange=1; break;
    case evFileLoaded:
         strcpy( mplShMem->Filename,gtkShMem->fs.dir ); strcat( mplShMem->Filename,"/" ); strcat( mplShMem->Filename,gtkShMem->fs.filename );
+	mplShMem->FilenameChanged=1;
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
         break;
    case evMessageBox:

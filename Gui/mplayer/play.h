@@ -46,7 +46,9 @@ typedef struct
    int    StreamType;
    int    TimeSec;
    int    LengthInSec;
+   
    char   Filename[4096];
+   int    FilenameChanged;
    
    int    SkinChange;
 } mplCommStruct;
