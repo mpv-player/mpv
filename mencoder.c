@@ -672,7 +672,7 @@ case ACODEC_COPY:
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
 	mux_a->wf->nBlockAlign = 1; //mux_a->h.dwSampleSize;
-	mux_a->wf->wFormatTag = audio_output_format?audio_output_format:sh_audio->format;
+	mux_a->wf->wFormatTag = sh_audio->format;
 	mux_a->wf->nChannels = sh_audio->channels;
 	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
 	mux_a->wf->nAvgBytesPerSec=sh_audio->i_bps; //mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
