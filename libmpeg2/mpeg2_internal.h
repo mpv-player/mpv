@@ -55,6 +55,7 @@ typedef struct vo_frame_s {
     uint8_t * base[3];	/* pointer to 3 planes */
     void (* copy) (struct vo_frame_s * frame, uint8_t ** src);
     void* vo;
+    void* mpi;
 //    int slice;
 //    void (* field) (struct vo_frame_s * frame, int flags);
 //    void (* draw) (struct vo_frame_s * frame);
@@ -128,6 +129,7 @@ typedef struct picture_s {
     struct vo_frame_s * current_frame;
     struct vo_frame_s * forward_reference_frame;
     struct vo_frame_s * backward_reference_frame;
+    struct vo_frame_s * temp_frame; // B frame
 
     int second_field;
 
