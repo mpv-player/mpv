@@ -63,7 +63,7 @@ echocheck() {
 
 # Use this to echo the results of a check
 echores() {
-  echo "Result is $@" >> "$TMPLOG"
+  echo "Result is: $@" >> "$TMPLOG"
   echo "##########################################" >> "$TMPLOG"
   echo "" >> "$TMPLOG"
   echo "$@"
@@ -658,13 +658,9 @@ _gui=no
 _termcap=auto
 _3dfx=no
 _tdfxfb=no
-
+_largefiles=no
 _vo2=no
-
-_x=1
-_y=1
 _language=en
-
 
 
 for ac_option do
@@ -754,7 +750,8 @@ for ac_option do
   --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
-
+  --enable-largefiles)	_largefiles=yes	;;
+  --enable-largefiles)	_largefiles=no	;;
   --enable-vo2)		_vo2=yes	;;
   --disable-vo2)	_vo2=no		;;
 
@@ -786,17 +783,6 @@ for ac_option do
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
     _mlib=yes
-    ;;
-
-  --size-x=*)
-    _x=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --size-y=*)
-    _y=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  --enable-largefiles)
-    _largefiles=yes
     ;;
 
   --enable-profile)
@@ -947,12 +933,6 @@ fi
 ######################
 # MAIN TESTS GO HERE #
 ######################
-
-
-echocheck "Screen size ..."
-_def_x="#define SCREEN_SIZE_X $_x"
-_def_y="#define SCREEN_SIZE_Y $_y"
-echores "${_x} x ${_y}"
 
 
 echocheck "Extra headers"
@@ -1738,7 +1718,7 @@ fi
 echores "$_sgiaudio"
 
 
-echocheck "Encrypted DVD support"
+echocheck "DVD support"
 if test "$_dvdread" = auto ; then
   cat > $TMPC << EOF
 #include <dvdread/dvd_reader.h>
@@ -1758,7 +1738,7 @@ if test "$_css" = auto ; then
 int main(void) { int i=CSSisEncrypted(0); return 0; }
 EOF
   _css=no
-  cc_check  -lcss && _css=yes
+  cc_check -lcss && _css=yes
 fi
 # dvdread preferred to DeCSS
 if test "$_dvdread" = yes ; then
@@ -1766,16 +1746,16 @@ if test "$_dvdread" = yes ; then
   _def_dvdread='#define USE_DVDREAD 1'
   _def_css='#undef HAVE_LIBCSS'
   _ld_css='-ldvdread'
-  echores "-ldvdread"
+  echores "libdvdread"
 elif test "$_css" = yes ; then
   _def_dvdread='#undef USE_DVDREAD'
   _def_css='#define HAVE_LIBCSS 1'
   test "$_csslibdir" && _ld_css="-L${_csslibdir} ${_ld_css}"
-  echores "-lcss"
+  echores "libcss"
 else
   _def_dvdread='#undef USE_DVDREAD'
   _def_css='#undef HAVE_LIBCSS'
-  echores "none"
+  echores "no"
 fi
 
 
@@ -1906,9 +1886,12 @@ fi
 
 echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
+  # xanim only requires dlopen() and/or libdl
+  cat > $TMPC << EOF
+int main(void) { (void) dlopen(0, 0); return 0; } 
+EOF
   _xanim=no
-  # FreeBSD does not libdl
-  if freebsd || test "$_dl" = yes ; then
+  if cc_check || test "$_dl" = yes ; then
     if test "$host_arch" = i386 ; then
       if test -z "$_xanimlibdir" ; then
         for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
@@ -2538,8 +2521,8 @@ $_def_mlib  // Sun mediaLib, available only on solaris
 #endif
 
 /* libvo options */
-$_def_x
-$_def_y
+#define SCREEN_SIZE_X 1
+#define SCREEN_SIZE_Y 1
 $_def_x11
 $_def_xv
 $_def_vm
