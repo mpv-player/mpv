@@ -49,6 +49,7 @@ typedef struct {
   size_t packet_reserve;	/* size of the memory pointed to by packet */
   unsigned int packet_offset;	/* end of the currently assembled fragment */
   unsigned int packet_size;	/* size of the packet once all fragments are assembled */
+  unsigned int packet_pts;	/* PTS for this packet */
   unsigned int control_start;	/* index of start of control data */
   unsigned int palette[4];
   unsigned int alpha[4];
@@ -75,9 +76,8 @@ typedef struct {
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
   vo_functions_t *hw_spu;
+  int spu_changed;
 } spudec_handle_t;
-
-static int spu_changed = 0;
 
 static inline unsigned int get_be16(const unsigned char *p)
 {
@@ -402,13 +402,13 @@ static void spudec_decode(spudec_handle_t *this, unsigned int pts100)
     spudec_process_control(this, pts100);
     spudec_process_data(this);
   }
-  spu_changed = 1;
+  this->spu_changed = 1;
 }
 
 int spudec_changed(void * this)
 {
     spudec_handle_t * spu = (spudec_handle_t*)this;
-    return (spu_changed|(spu->now_pts > spu->end_pts));
+    return (spu->spu_changed || spu->now_pts > spu->end_pts);
 }
 
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsigned int pts100)
@@ -418,6 +418,10 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
   if (len < 2) {
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
       return;
+  }
+  if (spu->packet_pts < pts100) {
+    spu->packet_pts = pts100;
+    spu->packet_offset = 0;
   }
   if (spu->packet_offset == 0) {
     unsigned int len2 = get_be16(packet);
@@ -437,6 +441,7 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
       }
       memcpy(spu->packet, packet, len);
       spu->packet_offset = len;
+      spu->packet_pts = pts100;
     }
   } else {
     // Continue current fragment
@@ -502,8 +507,11 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
 {
     spudec_handle_t *spu = (spudec_handle_t *)this;
     if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts && spu->image)
+    {
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
+	spu->spu_changed = 0;
+    }
 }
 
 /* calc the bbox for spudec subs */
@@ -603,8 +611,11 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
     if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
 	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
       if (spu->image)
+      {
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
+	spu->spu_changed = 0;
+      }
     }
     else {
       if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {	/* Resizing is needed */
@@ -887,7 +898,7 @@ nothing_to_do:
 #endif
 	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
-	spu_changed = 0;
+	spu->spu_changed = 0;
       }
     }
   }
