@@ -233,7 +233,7 @@ int demux_open_ra(demuxer_t* demuxer)
 			break;
 		case FOURCC_288:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: 28_8\n");
-			    sh->wf->cbSize = 8/*+codecdata_length*/;
+			    sh->wf->cbSize = 10/*+codecdata_length*/;
 			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
 			    ((short*)(sh->wf+1))[0]=0;
 			    ((short*)(sh->wf+1))[1]=ra_priv->sub_packet_h;
