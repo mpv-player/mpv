@@ -8,8 +8,8 @@ projektu. Jednak tak jak pisanie dobrych programów wymaga sporo pracy, tak
 dobre zg³oszenia problemów wymagaj± trochê wysi³ku. Prosimy wzi±æ pod uwagê to,
 ¿e wiêkszo¶æ deweloperów jest bardzo zajêta i odbiera nieprzyzwoit± wrêcz
 ilo¶æ listów. Wsparcie ze strony u¿ytkownika jest naprawdê wa¿ne w procesie
-ulepszania <application>MPlayera</application>. Nale¿y jednak pamiêtaæ, ¿e
-trzeba dostarczyæ <emphasis role="bold">wszystkie</emphasis> informacjê o które
+rozwoju <application>MPlayera</application>. Nale¿y jednak pamiêtaæ, ¿e
+trzeba dostarczyæ <emphasis role="bold">wszystkie</emphasis> informacje o które
 poprosimy i postêpowaæ dok³adnie wed³ug instrukcji zawartej w tym dokumencie.
 </para>
 <sect1 id="bugreports_fix">
@@ -33,8 +33,8 @@ poniewa¿ dany b³±d mo¿e byæ ju¿ w niej naprawiony. Rozwój
 <application>MPlayera</application> przebiega naprawdê szybko, wiêkszo¶æ
 problemów wystêpuj±cych w oficjalnych wydaniach jest zg³aszana w ci±gu kilku dni
 albo nawet godzin. Dlatego te¿ prosimy u¿ywaæ <emphasis role="bold">tylko wersji
-z CVSa</emphasis> do zg³aszania b³êdów. Dotyczy to g³ównie pakietów binarnych
-<application>MPlayera</application>. Instrukcje dotycz±ce CVSa znajduj± siê na
+z CVSu</emphasis> do zg³aszania b³êdów. Dotyczy to g³ównie pakietów binarnych
+<application>MPlayera</application>. Instrukcje dotycz±ce CVSu znajduj± siê na
 dole <ulink url="http://www.mplayerhq.hu/homepage/dload.html">tej strony</ulink>
 lub w pliku README. Je¿eli problem dalej wystêpuje prosimy sprawdziæ listê
 <link linkend="bugs">znanych b³êdów</link> i resztê dokumentacji. Je¿eli problem
@@ -54,7 +54,7 @@ Prosimy opisywaæ problem tak dok³adnie, jak to tylko mo¿liwe. Nale¿y sprawdziæ w
 jakich dok³adnie okoliczno¶ciach pojawia siê b³±d. Czy wystêpuje on tylko w
 okre¶lonych sytuacjach? Czy ma zwi±zek z konkretnym plikiem lub typem plików?
 Czy dotyczy tylko danego kodeka, czy te¿ jest niezale¿ny od kodeków? Czy mo¿esz
-go odtworzyæ z ka¿dym wyj¶ciem video? Im wiêcej informacji dostarczysz, tym
+go odtworzyæ z ka¿dym wyj¶ciem wideo? Im wiêcej informacji dostarczysz, tym
 wiêksze s± szanse na rozwi±zanie zg³oszonego problemu. Nie nale¿y równie¿
 zapominaæ o do³±czeniu warto¶ciowych informacji wymienionych poni¿ej. W
 przeciwnym wypadku nie bêdziemy w stanie prawid³owo zdiagnozowaæ zg³oszonego
@@ -90,20 +90,20 @@ i wy¶lij swoje zg³oszenie b³êdu na
 </para>
 <para>
 Je¿eli wolisz, mo¿esz zamiast tego skorzystaæ z naszej nowej
-<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zg³aszania b³êdów-przyp.t³um.)
+<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zg³aszania b³êdów - przyp. t³um.)
 </para>
 <para>
 Jêzykiem obowi±zuj±cym na tej li¶cie jest
 <emphasis role="bold">angielski</emphasis>. Prosimy trzymaæ siê zasad standardowej
-<ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netykiety</ulink>
+<ulink url="http://www.ietf.org/rfc/rfc1855.txt">netykiety</ulink>
 (Polsk± wersjê netykiety mo¿na przeczytaæ np.
-<ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> -przyp. t³um.)
+<ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> - przyp. t³um.)
 i <emphasis role="bold">nie wysy³aæ listów w HTMLu</emphasis> na ¿adn± z naszych
 list. W przeciwnym wypadku zostaniesz zignorowany lub wyrzucony z listy. Je¿eli
 nie wiesz czym jest list w HTMLu albo dlaczego jest on z³y, przeczytaj ten
 <ulink url="http://expita.com/nomime.html">¶wietny dokument</ulink> (znów tylko
-po angielsku -przyp. t³um.). Wyja¶nia on wszystkie szczegó³y i zawiera
-instrukcje wy³±czania HTMLa. Zauwa¿ równie¿, ¿e nie wysy³amy kopii listów do
+po angielsku - przyp. t³um.). Wyja¶nia on wszystkie szczegó³y i zawiera
+instrukcje wy³±czania HTMLu. Zauwa¿ równie¿, ¿e nie wysy³amy kopii listów do
 u¿ytkowników, wiêc dobrym pomys³em jest zapisanie siê na listê w celu uzyskania
 odpowiedzi.
 </para>
@@ -112,7 +112,8 @@ odpowiedzi.
 <sect1 id="bugreports_what">
 <title>Co zg³aszaæ</title>
 <para>
-Mo¿esz potrzebowaæ do³±czyæ log, konfiguracjê lub przyk³adowy plik w twoim
+Mo¿e zaj¶æ potrzeba do³±czenia logu, konfiguracji lub przyk³adowego
+pliku w Twoim
 zg³oszeniu b³êdu. Je¿eli który¶ z nich ma du¿y rozmiar, lepiej za³adowaæ go na
 nasz <ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">serwer FTP</ulink>
 w skompresowanej postaci (gzip i bzip2 s± preferowanymi formatami) i za³±czyæ
@@ -196,7 +197,7 @@ Producent karty graficznej i model. Np.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Typ sterownika video i wersja, np:
+Typ sterownika wideo i wersja, np:
   <itemizedlist>
     <listitem><para>wbudowane sterowniki X</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
@@ -213,7 +214,8 @@ Typ karty d¼wiêkowej i sterownik, np:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Je¿eli masz w±tpliwo¶ci, za³±cz wyj¶cie <command>lspci -vv</command> systemu Linux.
+Je¿eli masz w±tpliwo¶ci, za³±cz wyj¶cie linuksowego polecenia
+<command>lspci -vv</command>.
 </para></listitem>
 </itemizedlist>
 </para>
@@ -222,7 +224,7 @@ Je¿eli masz w±tpliwo¶ci, za³±cz wyj¶cie <command>lspci -vv</command> systemu Lin
 <sect2 id="bugreports_configure">
 <title>Problemy z konfiguracj±</title>
 <para>
-Je¿eli dostajesz b³±d podczas uruchamiania <command>./configure</command> albo
+Je¿eli <command>./configure</command> zwraca b³±d albo
 automatyczne wykrywanie czego¶ zawiedzie, przeczytaj
 <filename>configure.log</filename>. Mo¿liwe, ¿e znajdziesz tam odpowied¼, na
 przyk³ad kilka po³±czonych wersji tej samej biblioteki w Twoim systemie albo ¿e
@@ -254,9 +256,9 @@ nastêpuj±ce pliki:
 <title>Problemy z odtwarzaniem</title>
 <para>
 Prosimy za³±czyæ wyj¶cie <application>MPlayera</application> w trybie gadatliwym
-na poziomie pierwszym (opcja -v -przyp. t³um.), ale pamiêtaj±c o
+na poziomie pierwszym (opcja -v - przyp. t³um.), ale pamiêtaj±c o
 <emphasis role="bold">nie skracaniu wyniku polecenia</emphasis> podczas
-kopiowania go do Twojego listu. Developerzy potrzebuj± wszystkich informacji do
+kopiowania go do Twojego listu. Deweloperzy potrzebuj± wszystkich informacji do
 prawid³owego zdiagnozowania problemu. Mo¿esz przekierowaæ wyj¶cie bezpo¶rednio
 do pliku w ten sposób:
 <screen>mplayer -v <replaceable>opcje</replaceable> <replaceable>nazwa_pliku</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
@@ -290,7 +292,7 @@ poprzez pocztê elektroniczn±! Za³aduj je na serwer FTP i wy¶lij tylko
 <title>Awarie programu (ang. Crashes)</title>
 <para>
 Musisz uruchomiæ <application>MPlayera</application> wewn±trz
-<command>gdb</command> i wys³aæ nam kompletne wyj¶cie albo je¿eli posiadasz
+<command>gdb</command> i wys³aæ nam kompletne wyj¶cie, albo je¿eli posiadasz
 zrzut <filename>core</filename> (ang. core dump) utworzony w wyniku awarii,
 wyci±gn±æ z niego u¿yteczne informacje. Oto jak to zrobiæ:
 </para>
@@ -319,16 +321,16 @@ info all-registers
 </sect3>
 
 <sect3 id="bugreports_core">
-<title>Jak wyci±gn±æ sensowne informacjê ze zrzutu core (ang. core dump)</title>
+<title>Jak wyci±gn±æ sensowne informacje ze zrzutu core (ang. core dump)</title>
 <para>
-Utwórz nastêpuj±cy plik poleceñ:
+Utwórz plik z nastepuj±cymi poleceniami:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
 A nastêpnie uruchomiæ nastêpuj±ce polecenie:
-<screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
+<screen>gdb mplayer --core=core -batch 	--command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
 </sect2>
@@ -341,7 +343,7 @@ Je¿eli utworzy³e¶ w³a¶ciwy raport b³êdu kieruj±c siê powy¿szymi wskazówkami i
 jeste¶ pewien ¿e to b³±d <application>MPlayera</application>, nie kompilatora
 albo uszkodzonego pliku, przeczyta³e¶ dokumentacjê i nie mo¿esz znale¼æ
 rozwi±zania, Twoje sterowniki d¼wiêku s± w porz±dku, mo¿esz chcieæ zapisaæ siê
-na listê mplayer-advusers (tylko po angielsku -przyp. t³um.) i wys³aæ tam swoje
+na listê mplayer-advusers (tylko po angielsku - przyp. t³um.) i wys³aæ tam swoje
 zg³oszenie b³êdu, aby uzyskaæ lepsz± i szybsz± odpowied¼.
 </para>
 
@@ -353,7 +355,7 @@ Dlatego te¿ nie obra¿aj nas i zapisz siê na listê -advusers tylko je¿eli
 naprawdê wiesz co robisz i czujesz siê zaawansowanym u¿ytkownikiem lub
 deweloperem. Je¿eli spe³niasz te kryteria, nie powinno Ci sprawiæ problemu
 znalezienie sposobu zapisania siê na listê (pamiêtaj, ¿e musisz biegle znaæ j.
-angielski -przyp. t³um.)
+angielski - przyp. t³um.)
 </para>
 
 </sect1>
