@@ -34,6 +34,7 @@
 #include "linux/vbelib.h"
 #include "bswap.h"
 #include "aspect.h"
+#include "vesa_lvo.h"
 
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
@@ -245,8 +246,6 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 {
     if(verbose > 2)
 	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
-    if(lvo_name) return vlvo_draw_slice(image,stride,w,h,x,y);
-    else
     if(vesa_zoom)
     {
 	 uint8_t *dst[3]= {dga_buffer, NULL, NULL};
@@ -314,8 +313,6 @@ static void draw_osd(void)
  uint32_t w,h;
  if(verbose > 2)
 	printf("vo_vesa: draw_osd was called\n");
- if(lvo_name) vlvo_draw_osd();
- else
  {
    w = HAS_DGA()?video_mode_info.XResolution:image_width;
    h = HAS_DGA()?video_mode_info.YResolution:image_height;
@@ -327,8 +324,6 @@ static void flip_page(void)
 {
   if(verbose > 2)
 	printf("vo_vesa: flip_page was called\n");
-  if(lvo_name) vlvo_flip_page();
-  else
   if(flip_trigger) 
   {
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
@@ -365,8 +360,6 @@ static uint32_t draw_frame(uint8_t *src[])
   uint8_t *data = src[0];
     if(verbose > 2)
         printf("vo_vesa: draw_frame was called\n");
-    if(lvo_name) return vlvo_draw_frame(src);
-    else
     if(rgb2rgb_fnc)
     {
       if(HAS_DGA()) 

@@ -24,6 +24,8 @@
 #include "../drivers/mga_vid.h" /* <- should be changed to "linux/'something'.h" */
 #include "fastmemcpy.h"
 
+#include "video_out.h"
+
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
 #define NUM_FRAMES 2
 static uint8_t *frames[NUM_FRAMES];
@@ -39,6 +41,8 @@ extern int verbose;
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
 #define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
 
+extern vo_functions_t video_out_vesa;
+
 int vlvo_preinit(const char *drvname)
 {
   if(verbose > 1) printf("vesa_lvo: vlvo_preinit(%s) was called\n",drvname);
@@ -48,6 +52,11 @@ int vlvo_preinit(const char *drvname)
 		printf("vesa_lvo: Couldn't open '%s'\n",drvname);
 		return -1;
 	}
+	/* we are able to tune up this stuff depend on fourcc format */
+	video_out_vesa.draw_slice=vlvo_draw_slice;
+	video_out_vesa.draw_frame=vlvo_draw_frame;
+	video_out_vesa.flip_page=vlvo_flip_page;
+	video_out_vesa.draw_osd=vlvo_draw_osd;
 	return 0;
 }
 
@@ -172,16 +181,18 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
 
 uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
- uint8_t *dst;
- uint8_t bytpp;
  if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
- bytpp = (image_bpp+7)/8;
- dst = lvo_mem + (image_width * y + x)*bytpp;
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
-      vlvo_draw_slice_420(image,stride,w,h,x,y);
+	vlvo_draw_slice_420(image,stride,w,h,x,y);
     else
-      /* vlvo_draw_slice_422(image,stride,w,h,x,y); just for speed */
-      memcpy(dst,image[0],mga_vid_config.frame_size);
+    {
+	uint8_t *dst;
+	uint8_t bytpp;
+	bytpp = (image_bpp+7)/8;
+	dst = lvo_mem + (image_width * y + x)*bytpp;
+	/* vlvo_draw_slice_422(image,stride,w,h,x,y); just for speed */
+	memcpy(dst,image[0],mga_vid_config.frame_size);
+    }
  return 0;
 }
 
