@@ -83,7 +83,7 @@ params:
         --enable-gl             build with OpenGL render support [autodetect]
         --enable-dga            build with DGA support [autodetect]
         --enable-svga           build with SVGAlib support [autodetect]
-        --enable-sdl            build with SDL render support [def.: disabled!]
+        --enable-sdl            build with SDL render support [autodetect]
         --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
                                 is available]
 	--enable-xmga           build with mga_vid X Window support [autodetect,
@@ -397,10 +397,13 @@ $_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
 $_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO ; exit 1; }
 
-# SDL disabled by default (0.11pre22-) because of the compilation problems
-# this is very buggy & experimental code, use it only if you really need it!!
-_have_sdl=no
-$_cc $TMPC -o $TMPO -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=yes
+# Atmosfear: added SDL versioncheck and autodetect; removed warnings.
+_sdl=no
+if test `sdl-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
+	$_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _sdl=yes
+else
+	_sdl=outdated
+fi
 
 _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
@@ -1062,15 +1065,13 @@ if [ $_mtrr = yes ]; then
  echo
 fi
 
-if [ $_sdl = no ]; then
-if [ $_have_sdl = yes ]; then
- echo "You have libSDL installed, but SDL support is disabled by default."
- echo "If you want to compile MPlayer with SDL support, re-run ./configure"
- echo "with --enable-sdl. But it's very buggy & experimental code, use it"
- echo "only if you really need it! And it works(?) *ONLY* with SDL v1.1.7 !"
- echo "(SDL driver is NOT supported, so do NOT report bugs relating to SDL!)"
+if [ $_sdl = outdated ]; then
+ echo "You have libSDL installed, but your version is outdated (earlier then"
+ echo "v.1.1.7), SDL support has been disabled please update, if you want to"
+ echo "use it (libSDL v1.1.8 and v1.2.0 are tested and known to work, recent"
+ echo "versions are available from http://www.libsdl.org/)."
+ echo "After updating you need to re-run ./configure and recompile to enable SDL."
  echo
-fi
 fi
 
 if [ $_win32libdirnotify = yes ]; then
