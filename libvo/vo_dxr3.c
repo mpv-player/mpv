@@ -80,11 +80,11 @@
 #include "../postproc/swscale.h"
 #include "../cpudetect.h"
 
-/*#ifndef USE_LIBAVCODEC*/
+#ifndef USE_LIBAVCODEC
 #  define USE_LIBFAME
-/*#else
+#else
 #  undef USE_LIBFAME
-#endif*/
+#endif
 #ifdef USE_LIBFAME
 #include "../libfame/fame.h"
 static unsigned char *outbuf = NULL;
@@ -288,7 +288,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			return -1;
 		}
 
-		fame_obj = fame_get_object(fame_ctx, "motion/none");
+		fame_obj = fame_get_object(fame_ctx, "motion/pmvfast");
 		fame_register(fame_ctx, "motion", fame_obj);
 		
 		fame_params.width = s_width;
