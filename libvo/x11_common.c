@@ -414,7 +414,7 @@ void vo_x11_putkey_ext(int keysym){
    case XF86XK_AudioStop:     mplayer_put_key(KEY_XF86_STOP); break;
    case XF86XK_AudioPrev:     mplayer_put_key(KEY_XF86_PREV); break;
    case XF86XK_AudioNext:     mplayer_put_key(KEY_XF86_NEXT); break;
-   default:
+   default:	              break;
   }
 }
 #endif

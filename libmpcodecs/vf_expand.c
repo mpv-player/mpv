@@ -31,7 +31,6 @@ static struct vf_priv_s {
 } vf_priv_dflt = {
   -1,-1,
   -1,-1,
-  NULL,
   0,
   NULL
 };
