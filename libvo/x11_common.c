@@ -49,6 +49,7 @@ int vo_init( void )
 {
 // int       mScreen;
  int bpp;
+ unsigned int mask;
 // char    * DisplayName = ":0.0";
 // Display * mDisplay;
  XImage  * mXImage;
@@ -78,12 +79,19 @@ int vo_init( void )
  // get bits/pixel:
    mXImage=XGetImage( mDisplay,mRootWin,0,0,1,1,AllPlanes,ZPixmap );
    bpp=mXImage->bits_per_pixel;
+   if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
+   mask=mXImage->red_mask|mXImage->green_mask|mXImage->blue_mask;
+   printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
+     mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
+   if(((vo_depthonscreen+7)/8)==2){
+     if(mask==0x7FFF) vo_depthonscreen=15; else
+     if(mask==0xFFFF) vo_depthonscreen=16;
+   }
    XDestroyImage( mXImage );
- if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
 // XCloseDisplay( mDisplay );
 #warning Better local display detection method is needed. 
  if (*mDisplayName==':') mLocalDisplay=1; else mLocalDisplay=0;
- printf("X11 running at %dx%d depth: %d (\"%s\" => %s display)\n",vo_screenwidth,vo_screenheight,vo_depthonscreen,mDisplayName,mLocalDisplay?"local":"remote");
+ printf("vo: X11 running at %dx%d depth: %d (\"%s\" => %s display)\n",vo_screenwidth,vo_screenheight,vo_depthonscreen,mDisplayName,mLocalDisplay?"local":"remote");
  return 1;
 }
 
@@ -149,6 +157,14 @@ static Atom           vo_MotifHints  = None;
 
 void vo_x11_decoration( Display * vo_Display,Window w,int d )
 {
+
+#if 1
+    XSetWindowAttributes attr;
+    attr.override_redirect = True;
+    XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
+//    XMapWindow(vo_Display], w);
+#endif
+
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
   {
@@ -157,6 +173,13 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
    XChangeProperty( vo_Display,w,vo_MotifHints,vo_MotifHints,32,
                     PropModeReplace,(unsigned char *)&vo_MotifWmHints,4 );
   }
+}
+
+void vo_x11_classhint( Display * display,Window window,char *name ){
+	    XClassHint wmClass;
+	    wmClass.res_name = name;
+	    wmClass.res_class = "MPlayer";
+	    XSetClassHint(display,window,&wmClass);
 }
 
 #ifdef HAVE_GUI

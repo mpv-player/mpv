@@ -16,6 +16,7 @@ extern int mLocalDisplay;
 int vo_init( void );
 int vo_hidecursor ( Display* , Window );
 void vo_x11_decoration( Display * vo_Display,Window w,int d );
+void vo_x11_classhint( Display * display,Window window,char *name );
 int vo_x11_check_events(Display *mydisplay);
 #endif
 

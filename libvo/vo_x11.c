@@ -117,6 +117,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 {
 // int screen;
  int fullscreen=0;
+ int vm=0;
 // int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
  char *hello=( title == NULL ) ? "X11 render" : title;
@@ -141,11 +142,12 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  hint.width=image_width;
  hint.height=image_height;
  
- if( flags&0x01 ) fullscreen = 1;
+ if( flags&0x03 ) fullscreen = 1;
+ if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
 
 #ifdef HAVE_XF86VM
- if (fullscreen) {
+ if (vm) {
     unsigned int modeline_width, modeline_height, vm_event, vm_error;
     unsigned int vm_ver, vm_rev;
     int i,j,have_vm=0,X,Y;
@@ -221,6 +223,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
+ vo_x11_classhint( mDisplay,mywindow,"x11" );
  vo_hidecursor(mDisplay,mywindow);
 
  if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
@@ -315,7 +318,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
   bpp=myximage->bits_per_pixel;
 
-  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
+//  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
   // If we have blue in the lowest bit then obviously RGB
   mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_RGB : MODE_BGR;
@@ -325,8 +328,9 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   if ( myximage->byte_order != LSBFirst )
 #endif
   {
-   printf( "No support fon non-native XImage byte order!\n" );
-   return -1;
+    mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_BGR : MODE_RGB;
+//   printf( "No support fon non-native XImage byte order!\n" );
+//   return -1;
   }
 
  if( format==IMGFMT_YV12 ) yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );

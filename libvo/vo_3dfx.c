@@ -188,6 +188,7 @@ create_window(Display *display)
 
 	mywindow = XCreateWindow(display, RootWindow(display,screen),
 				 hint.x, hint.y, hint.width, hint.height, 4, bpp,CopyFromParent,vinfo.visual,xswamask,&xswa);
+	vo_x11_classhint( display,mywindow,"3dfx" );
 
 	XSelectInput(display, mywindow, StructureNotifyMask);
 
