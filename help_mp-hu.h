@@ -224,6 +224,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "A GUI-ról"
 #define MSGTR_FileSelect "File kiválasztása ..."
+#define MSGTR_SubtitleSelect "Felirat kiválasztása ..."
+#define MSGTR_OtherSelect "File kiválasztása ..."
 #define MSGTR_MessageBox "Üzenetablak"
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_SkinBrowser "Skin böngészõ"

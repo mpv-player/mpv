@@ -3,7 +3,13 @@
 
 #include <gtk/gtk.h>
 
+#define fsVideoSelector    0
+#define fsSubtitleSelector 1
+#define fsOtherSelector    2
+
 extern void HideFileSelect( void );
+extern void ShowFileSelect( int type );
+
 extern GtkWidget * create_FileSelect( void );
 
 #endif

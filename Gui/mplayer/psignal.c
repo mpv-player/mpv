@@ -7,6 +7,7 @@
 
 #include "widgets.h"
 #include "play.h"
+#include "gtk/fs.h"
 
 #include "../app.h"
 
@@ -83,16 +84,26 @@ void gtkSigHandler( int s )
         gtkShow( evPlayList );
         break;
    case evLoad:
+        ShowFileSelect( fsVideoSelector );
+#if 0   
         if ( gtkVisibleFileSelect ) gtk_widget_hide( FileSelect );
         gtk_widget_show( FileSelect );
         gtkVisibleFileSelect=1;
         gtkShow( evPlay );
+#endif
         break;
    case evFirstLoad:
+        ShowFileSelect( fsVideoSelector );
+#if 0
         if ( gtkVisibleFileSelect ) gtk_widget_hide( FileSelect );
         gtk_widget_show( FileSelect );
         gtkVisibleFileSelect=1;
         gtkShow( evFirstLoad );
+#endif	
+        break;
+   case evLoadSubtitle:
+        ShowFileSelect( fsSubtitleSelector );
+//	gtkShow( evPlay );
         break;
    case evMessageBox:
         gtk_label_set_text( gtkMessageBoxText,(char *)gtkShMem->mb.str );
@@ -188,6 +199,11 @@ void mplMainSigHandler( int s )
 	mplShMem->FilenameChanged=1;
 	mplShMem->StreamType=STREAMTYPE_FILE;
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
+        break;
+   case evSubtitleLoaded:
+        printf("*** gtkShMem->fs.subtitlename == '%s'  \n",gtkShMem->fs.subtitlename );
+        strcpy( mplShMem->Subtitlename,gtkShMem->fs.subtitlename ); 
+	mplShMem->SubtitleChanged=1;
         break;
    case evShowPopUpMenu:
         fprintf( stderr,"[psignal] PopUpMenu: %d param: %d\n",gtkShMem->popupmenu,gtkShMem->popupmenuparam );

@@ -229,6 +229,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "About"
 #define MSGTR_FileSelect "Select file ..."
+#define MSGTR_SubtitleSelect "Select subtitle ..."
+#define MSGTR_OtherSelect "Select ..."
 #define MSGTR_MessageBox "MessageBox"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_SkinBrowser "Skin Browser"

@@ -64,6 +64,7 @@
 #define evSetDVDSubtitle  5008
 #define evSetDVDTitle     5009
 #define evSetDVDChapter   5010
+#define evSubtitleLoaded  5011
 
 #define evFName           7000
 #define evMovieTime       7001

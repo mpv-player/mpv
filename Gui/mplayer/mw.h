@@ -264,6 +264,10 @@ NoPause:
         mplMainRender=1;
         gtkSendMessage( evLoad );
         break;
+   case evLoadSubtitle:
+        mplMainRender=1;
+        gtkSendMessage( evLoadSubtitle );
+        break;
    case evPrev:
         IZE("evPrev");
         mplMainRender=1;
@@ -560,6 +564,8 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsF:         msg=evFullScreen; break;
    case wsl:
    case wsL:         msg=evLoad; break;
+   case wsu:
+   case wsU:         msg=evLoadSubtitle; break;
    case wsm:
    case wsM:         msg=evMute; break;
    case wss:

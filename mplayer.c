@@ -589,18 +589,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
-#ifdef USE_SUB
-// check .sub
-  if(sub_name){
-       int l=strlen(sub_name);
-       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
-		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
-	  sub_utf8=1;
-       subtitles=sub_read_file(sub_name);
-       if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
-  }
-#endif
-
   // It's time to init the GUI code: (and fork() the GTK process)
 #ifdef HAVE_NEW_GUI
   if(use_gui){
@@ -678,6 +666,10 @@ play_next_file:
       if(mplShMem->FilenameChanged){
         filename=mplShMem->Filename;
       }
+#ifdef USE_SUB
+      sub_name=NULL;
+      if ( mplShMem->SubtitleChanged ) sub_name=mplShMem->Subtitlename;
+#endif
     }
 #endif
 
@@ -685,6 +677,14 @@ play_next_file:
 
 #ifdef USE_SUB
 // check .sub
+  if(sub_name){
+       int l=strlen(sub_name);
+       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
+		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
+	  sub_utf8=1;
+       subtitles=sub_read_file(sub_name);
+       if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  }
   if(!sub_name){
       if(sub_auto && filename) { // auto load sub file ...
          subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );

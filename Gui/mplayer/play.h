@@ -77,6 +77,9 @@ typedef struct
    char   Filename[4096];
    int    FilenameChanged;
    
+   char   Subtitlename[4096];
+   int    SubtitleChanged;
+   
    int    SkinChange;
 } mplCommStruct;
 

@@ -19,6 +19,8 @@ typedef struct
 {
  char dir[ 2048 ];
  char filename[ 2048 ];
+ char subtitlename[ 4096 ];
+ char otherfilename[ 4096 ];
 } gtkFileSelectorStruct;
 
 typedef struct
