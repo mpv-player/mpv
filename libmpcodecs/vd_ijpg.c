@@ -30,7 +30,7 @@ static unsigned int out_fmt=0;
 
 static int last_w=-1;
 static int last_h=-1;
-static int last_c=-1;
+static unsigned int last_c=-1;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -123,7 +123,6 @@ METHODDEF(void) my_error_exit (j_common_ptr cinfo)
 static struct     jpeg_decompress_struct cinfo;
 static struct     my_error_mgr jerr;
 static int        row_stride;
-static int 	  count;
 				  
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -169,7 +168,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  for ( i=0;i < height;i++ )
   {
    char * row = mpi->planes[0] + mpi->stride[0] * i;
-   jpeg_read_scanlines( &cinfo,&row,1 );
+   jpeg_read_scanlines( &cinfo,(JSAMPLE**)&row,1 );
 #warning workaround for rgb2bgr
    if ( depth == 24 )
     for ( j=0;j < width * 3;j+=3 )
