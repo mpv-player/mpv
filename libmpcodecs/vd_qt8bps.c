@@ -84,8 +84,6 @@ static int init(sh_video_t *sh)
   int vo_ret; // Video output init ret value
   qt8bps_context_t *hc; // Decoder context
   BITMAPINFOHEADER *bih = sh->bih;
-  int i;
-  unsigned char *psrc, *pdest;
 
   if ((hc = malloc(sizeof(qt8bps_context_t))) == NULL) {
     mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate memory for 8BPS decoder context.\n");
@@ -99,16 +97,10 @@ static int init(sh_video_t *sh)
     case 8:
       hc->planes = 1;
       hc->planemap[0] = 0; // 1st plane is palette indexes
-	    if (bih->biSize > sizeof(BITMAPINFOHEADER)) {
-        psrc = (unsigned char*)bih + sizeof(BITMAPINFOHEADER);
-        pdest = hc->palette = (unsigned char *)malloc(256*3);
-        for (i = 0; i < 256; i++) {
-          *pdest++ = *psrc++;
-          *pdest++ = *psrc++;
-          *pdest++ = *psrc++;
-          psrc++;
-        }
-	    }
+      if (bih->biSize > sizeof(BITMAPINFOHEADER)) {
+        hc->palette = (unsigned char *)malloc(256*4);
+        memcpy(hc->palette, (unsigned char*)bih + sizeof(BITMAPINFOHEADER), 256*4);
+      }
       break;
     case 24:
       hc->planes = 3;
