@@ -14,12 +14,58 @@
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
 
-#ifdef HAVE_MMX
-static void pack_MMX(unsigned char *dst, unsigned char *y,
+typedef void (pack_func_t)(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w, int us, int vs);
+
+struct vf_priv_s {
+	int mode;
+	pack_func_t *pack[2];
+};
+
+static void pack_nn_C(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w)
 {
 	int j;
-	asm (""
+	for (j = w/2; j; j--) {
+		*dst++ = *y++;
+		*dst++ = *u++;
+		*dst++ = *y++;
+		*dst++ = *v++;
+	}
+}
+
+static void pack_li_0_C(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w, int us, int vs)
+{
+	int j;
+	for (j = w/2; j; j--) {
+		*dst++ = *y++;
+		*dst++ = (u[us+us] + 7*u[0])>>3;
+		*dst++ = *y++;
+		*dst++ = (v[vs+vs] + 7*v[0])>>3;
+		u++; v++;
+	}
+}
+
+static void pack_li_1_C(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w, int us, int vs)
+{
+	int j;
+	for (j = w/2; j; j--) {
+		*dst++ = *y++;
+		*dst++ = (3*u[us+us] + 5*u[0])>>3;
+		*dst++ = *y++;
+		*dst++ = (3*v[vs+vs] + 5*v[0])>>3;
+		u++; v++;
+	}
+}
+
+#ifdef HAVE_MMX
+static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w)
+{
+	int j;
+	asm volatile (""
 		"pxor %%mm0, %%mm0 \n\t"
 		".balign 16 \n\t"
 		"1: \n\t"
@@ -56,57 +102,52 @@ static void pack_MMX(unsigned char *dst, unsigned char *y,
 		"addl $16, %3 \n\t"
 		"decl %4 \n\t"
 		"jnz 1b \n\t"
+		"emms \n\t"
 		: 
 		: "r" (y), "r" (u), "r" (v), "r" (dst), "r" (w/8)
 		: "memory"
 		);
-	for (j = (w&7)/2; j; j--) {
-		*dst++ = *y++;
-		*dst++ = *u++;
-		*dst++ = *y++;
-		*dst++ = *v++;
-	}
-	asm volatile ( "emms \n\t" ::: "memory" );
+	pack_nn_C(dst, y, u, v, (w&7));
 }
 #endif
 
-static void pack_C(unsigned char *dst, unsigned char *y,
-	unsigned char *u, unsigned char *v, int w)
-{
-	int j;
-	for (j = w/2; j; j--) {
-		*dst++ = *y++;
-		*dst++ = *u++;
-		*dst++ = *y++;
-		*dst++ = *v++;
-	}
-}
-
-static void (*pack)(unsigned char *dst, unsigned char *y,
-	unsigned char *u, unsigned char *v, int w);
+static pack_func_t *pack_nn;
+static pack_func_t *pack_li_0;
+static pack_func_t *pack_li_1;
 
 static void ilpack(unsigned char *dst, unsigned char *src[3],
-	unsigned int dststride, unsigned int srcstride[3], int w, int h)
+	int dststride, int srcstride[3], int w, int h, pack_func_t *pack[2])
 {
 	int i;
 	unsigned char *y, *u, *v;
+	int ys = srcstride[0], us = srcstride[1], vs = srcstride[2];
+	int a, b;
 
 	y = src[0];
 	u = src[1];
 	v = src[2];
 
-	for (i=0; i<h; i++) {
-		pack(dst, y, u, v, w);
-		y += srcstride[0];
+	pack_nn(dst, y, u, v, w, 0, 0);
+	y += ys; dst += dststride;
+	pack_nn(dst, y, u+us, v+vs, w, 0, 0);
+	y += ys; dst += dststride;
+	for (i=2; i<h-2; i++) {
+		a = (i&2) ? 1 : -1;
+		b = (i&1) ^ ((i&2)>>1);
+		pack[b](dst, y, u, v, w, us*a, vs*a);
+		y += ys;
 		if ((i&3) == 1) {
-			u -= srcstride[1];
-			v -= srcstride[2];
+			u -= us;
+			v -= vs;
 		} else {
-			u += srcstride[1];
-			v += srcstride[2];
+			u += us;
+			v += vs;
 		}
 		dst += dststride;
 	}
+	pack_nn(dst, y, u, v, w, 0, 0);
+	y += ys; dst += dststride; u += us; v += vs;
+	pack_nn(dst, y, u, v, w, 0, 0);
 }
 
 
@@ -119,7 +160,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			  MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 			  mpi->w, mpi->h);
 
-	ilpack(dmpi->planes[0], mpi->planes, dmpi->stride[0], mpi->stride, mpi->w, mpi->h);
+	ilpack(dmpi->planes[0], mpi->planes, dmpi->stride[0], mpi->stride, mpi->w, mpi->h, vf->priv->pack);
 
 	return vf_next_put_image(vf,dmpi);
 }
@@ -150,11 +191,31 @@ static int open(vf_instance_t *vf, char* args)
 	vf->config=config;
 	vf->query_format=query_format;
 	vf->put_image=put_image;
+	vf->priv = calloc(1, sizeof(struct vf_priv_s));
+	vf->priv->mode = 1;
+	if (args) sscanf(args, "%d", &vf->priv->mode);
 	
-	pack = pack_C;
+	pack_nn = (pack_func_t *)pack_nn_C;
+	pack_li_0 = pack_li_0_C;
+	pack_li_1 = pack_li_1_C;
 #ifdef HAVE_MMX
-	if(gCpuCaps.hasMMX) pack = pack_MMX;
+	if(gCpuCaps.hasMMX) pack_nn = (pack_func_t *)pack_nn_MMX;
 #endif
+
+	switch(vf->priv->mode) {
+	case 0:
+		vf->priv->pack[0] = vf->priv->pack[1] = pack_nn;
+		break;
+	default:
+		mp_msg(MSGT_VFILTER, MSGL_WARN,
+			"ilpack: unknown mode %d (fallback to linear)\n",
+			vf->priv->mode);
+	case 1:
+		vf->priv->pack[0] = pack_li_0;
+		vf->priv->pack[1] = pack_li_1;
+		break;
+	}
+	
 	return 1;
 }
 
