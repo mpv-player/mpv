@@ -51,12 +51,13 @@ for details.
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>What's the problem with gcc 2.96?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><B>We strongly discourage the use of gcc 2.96!!!</B><BR>
-Read <A HREF="users_against_developers.html#gcc">this</A>
-document for details. If you still really really want to use it, be sure to get
-the latest release, but remember that  you are on your own. Do <B>not</B> report
-bugs or ask for help on the mailing lists. We will <B>not</B> provide any support
-in case you run into problems.
-<BR>
+Read <A HREF="users_against_developers.html#gcc">this</A> document for details
+about why Red Hat released gcc 2.96 and what the problems are all about. If you
+still really really want to use it, be sure to get the latest release and give
+the <CODE>--disable-gcc-checking</CODE> option to configure. Remember that  you
+are on your own from this point. Do <B>not</B> report bugs, do <B>not</B> ask
+for help on the mailing lists. We will <B>not</B> provide any support in case
+you run into problems.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
@@ -117,11 +118,6 @@ development could go faster, and we could earn lots of money with it and buy a
 big house, etc etc. Do you really want it? It seems.</P>
 </BLOCKQUOTE>
 
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Where can I find information about gcc 2.96 bugs?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><A HREF="users_against_developers.html#gcc">This</A>
-document describes why Red Hat released 2.96 and other interesting things.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>SDL output doesn't work or compile. The problem is ...
@@ -333,6 +329,18 @@ Set "Use Applications position hints" to "Yes".
 <B><A NAME="5.3">5.3 File playing problems</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I can play certain AVIs but I
+get no sound and this kind of error:
+<PRE>
+Detected audio codec: [divx] afm:4 (DivX audio (WMA))
+Requested audio codec family [divx] (afm=4) not available (enable it at
+compile time!)
+</PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Probably the audio uses a codec
+not natively supported by <B>MPlayer</B>. Install the Win32 codec package as
+described in the README or <A HREF="documentation.html#1.3">here</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>... works with avifile/aviplay but doesn't with MPlayer.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><B>MPlayer</B> != avifile.
 The only common thing between these players is the Win32 DLL loader.
@@ -379,15 +387,7 @@ without using the feature mentioned just now.
 proper bug report.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>But it works with avifile!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>So what?
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Then avifile is better!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Then use avifile, it has a nice GUI and nice C++ code :)
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I got this playing mpeg files: Can't find codec for video format 0x10000001!
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I got this playing MPEG files: Can't find codec for video format 0x10000001!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You have an old version of codecs.conf at <CODE>~/.mplayer/</CODE>. Upgrade it
 from <CODE>/etc/</CODE>.<BR>
 <B>OR</B> you have the <CODE>vc=</CODE> option or something similar in your
@@ -471,6 +471,19 @@ connector in <B>before</B> you power on your notebook or use the
 <B><A NAME="5.4">5.4 Video/audio driver problems (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have no sound when playing a
+video and get error messages similar to this one:
+<PRE>
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+couldn't open/init audio device -> NOSOUND
+Audio: no sound!!!
+Start playing...
+</PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Are you running KDE or GNOME with
+the arts or esd sound daemon? Try disabling the sound daemon, or use the
+<CODE>-ao arts</CODE> switch to make <B>MPlayer</B> use arts.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>What about the DGA driver? I can't find it!!!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><CODE>./configure</CODE> autodetects your DGA driver. If <CODE>-vo help</CODE> doesn't show
