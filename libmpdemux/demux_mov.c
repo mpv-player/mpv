@@ -32,7 +32,7 @@
 #include "bswap.h"
 
 #include "qtpalette.h"
-#include "parse_mp4.h" // MP3 specific stuff
+#include "parse_mp4.h" // .MP4 specific stuff
 
 #ifdef USE_QTX_CODECS
 #include "../loader/qtx/qtxsdk/components.h"
@@ -667,7 +667,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //	22  short	packet_size (==0)
 //	24  intfp	sample_rate
 //     (26  short)	unknown (==0)
-//    ---- qt3.0+
+//    ---- qt3.0+ (version>=1)
 //	28  int		samples_per_packet
 //	32  int		bytes_per_packet
 //	36  int		bytes_per_frame
@@ -706,6 +706,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d  rate: %d\n",
 		    trak->stdata[19],trak->stdata[17],sh->samplerate);
+
+		if(trak->stdata_len >= 44 && trak->stdata[9]>=1)
+		  mp_msg(MSGT_DEMUX,MSGL_V,"Audio header: samp/pack=%d bytes/pack=%d bytes/frame=%d bytes/samp=%d  \n",
+		    char2int(trak->stdata,28),
+		    char2int(trak->stdata,32),
+		    char2int(trak->stdata,36),
+		    char2int(trak->stdata,40));
+
 		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
@@ -1290,22 +1298,24 @@ if(trak->samplesize){
 	x=trak->chunks[trak->pos].size;
 //    printf("X = %d\n", x);
     /* the following stuff is audio related */
-    if (trak->type == MOV_TRAK_AUDIO)
-    {
-    if(trak->stdata_len>=36 && trak->stdata[30] && trak->stdata[31]){
-	// extended stsd header - works for CBR MP3:
-	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet
-	// x*=(trak->stdata[34]<<8)+trak->stdata[35];  // bytes/packet
-	x*=(trak->stdata[38]<<8)+trak->stdata[39];  // bytes/frame
-    } else {
-	// works for ima4:   -- we should find this info in mov headers!
+    if (trak->type == MOV_TRAK_AUDIO){
+      if(trak->stdata_len>=44 && trak->stdata[9]>=1){
+        // stsd version 1 - we have audio compression ratio info:
+	x/=char2int(trak->stdata,28); // samples/packet
+	x*=char2int(trak->stdata,32); // bytes/packet
+//	x*=char2int(trak->stdata,36); // bytes/frame
+      } else {
 	if(ds->ss_div!=1 || ds->ss_mul!=1){
+	    // workaround for buggy files like 7up-high-traffic-areas.mov,
+	    // with missing stsd v1 header containing compression rate
 	    x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix  ! HACK !
 	} else {
-	    x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
+	    x*=(trak->stdata[16]<<8)+trak->stdata[17]; //channels
+	    x*=(trak->stdata[18]<<8)+trak->stdata[19]; //bits/sample
+	    x/=8;  // bits/sample
 	}
-    }
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Audio sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
+      }
+      mp_msg(MSGT_DEMUX, MSGL_DBG2, "Audio sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
     } /* MOV_TRAK_AUDIO */
     pos=trak->chunks[trak->pos].pos;
 } else {
