@@ -14,6 +14,7 @@ typedef struct _txSample
 #include "tga/tga.h"
 #include "bmp/bmp.h"
 #include "png/png.h"
+#include "../../mp_msg.h"
 
 extern int bpRead( char * fname, txSample * bf );
 extern int conv24to32( txSample * bf );

@@ -5,30 +5,23 @@
 #include <unistd.h>
 #include <signal.h>
 
-int    mplParent = 1;
-
-int    moviex,moviey,moviewidth,movieheight;
-
-#include "../app.h"
-
 #include "../wm/ws.h"
-#include "../wm/wskeys.h"
-#include "../wm/widget.h"
-
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
 
+#include "../app.h"
+
+#include "../wm/wskeys.h"
+#include "../wm/widget.h"
+#include "../interface.h"
+
 #include "widgets.h"
 #include "./mplayer.h"
-#include "psignal.h"
 #include "play.h"
 
 #include "../skin/skin.h"
-#include "../error.h"
-
-mplCommStruct * mplShMem;
-char          * Filename = NULL;
+#include "../skin/font.h"
 
 extern float rel_seek_secs;
 extern int abs_seek_pos;
@@ -53,7 +46,7 @@ void mplFullScreen( void )
     wsWindowDecoration( &appMPlayer.subWindow,0 );
     appMPlayer.subWindow.isFullScreen=1;
    }
- if ( mplShMem->Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+ if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
  mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
@@ -63,11 +56,11 @@ extern int mplSubRender;
 
 void mplStop()
 {
- mplShMem->Playing=0;
- mplShMem->TimeSec=0;
- mplShMem->Position=0;
- mplShMem->AudioType=0;
-// if ( !mplShMem->Playing ) return;
+ guiIntfStruct.Playing=0;
+ guiIntfStruct.TimeSec=0;
+ guiIntfStruct.Position=0;
+ guiIntfStruct.AudioType=0;
+// if ( !guiIntfStruct.Playing ) return;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
@@ -81,30 +74,31 @@ void mplStop()
 
 void mplPlay( void )
 {
- if ( ( mplShMem->Filename[0] == 0 )||
-      ( mplShMem->Playing == 1 ) ) return;
- if ( mplShMem->Playing == 2 ) { mplPause(); return; }
- mplShMem->Playing=1;
+ if ( ( !guiIntfStruct.Filename )||
+      ( guiIntfStruct.Filename[0] == 0 )||
+      ( guiIntfStruct.Playing == 1 ) ) return;
+ if ( guiIntfStruct.Playing == 2 ) { mplPause(); return; }
+ guiIntfStruct.Playing=1;
  mplSubRender=0;
  wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
- wsClearWindow( appMPlayer.subWindow ); 
+ wsClearWindow( appMPlayer.subWindow );
  wsPostRedisplay( &appMPlayer.subWindow );
 }
 
 void mplPause( void )
 {
- switch( mplShMem->Playing )
+ switch( guiIntfStruct.Playing )
   {
    case 1: // playing
-        mplShMem->Playing=2;
-//	btnModify( evPlaySwitchToPause,btnReleased );
-//	btnModify( evPauseSwitchToPlay,btnDisabled );
-	break;
+        guiIntfStruct.Playing=2;
+//      btnModify( evPlaySwitchToPause,btnReleased );
+//      btnModify( evPauseSwitchToPlay,btnDisabled );
+        break;
    case 2: // paused
-	mplShMem->Playing=1;
-//	btnModify( evPlaySwitchToPause,btnDisabled );
-//	btnModify( evPauseSwitchToPlay,btnReleased );
-	break;
+        guiIntfStruct.Playing=1;
+//      btnModify( evPlaySwitchToPause,btnDisabled );
+//      btnModify( evPauseSwitchToPlay,btnReleased );
+        break;
   }
  mplState();
  mplSubRender=0;
@@ -112,12 +106,12 @@ void mplPause( void )
 
 void mplState( void )
 {
- if ( ( mplShMem->Playing == 0 )||( mplShMem->Playing == 2 ) )
+ if ( ( guiIntfStruct.Playing == 0 )||( guiIntfStruct.Playing == 2 ) )
   {
    btnModify( evPlaySwitchToPause,btnReleased );
    btnModify( evPauseSwitchToPlay,btnDisabled );
   }
-  else 
+  else
    {
     btnModify( evPlaySwitchToPause,btnDisabled );
     btnModify( evPauseSwitchToPlay,btnReleased );
@@ -130,19 +124,13 @@ void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int he
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 {
- struct sigaction sa;
-
- mplShMem=calloc( 1,sizeof( mplCommStruct ) );
- mplShMem->Balance=50.0f;
- mplShMem->StreamType=-1;
- memset(&sa, 0, sizeof(sa));
- sa.sa_handler = mplMainSigHandler;
- sigaction( SIGTYPE,&sa,NULL );
+ guiIntfStruct.Balance=50.0f;
+ guiIntfStruct.StreamType=-1;
 }
 
 float mplGetPosition( void )
 { // return 0.0 ... 100.0
- return mplShMem->Position;
+ return guiIntfStruct.Position;
 }
 
 void mplRelSeek( float s )
@@ -157,27 +145,22 @@ void mplAbsSeek( float s )
 
 listItems tmpList;
 
-void ChangeSkin( void )
+void ChangeSkin( char * name )
 {
  int ret;
- if ( !strcmp( skinName,gtkShMem->sb.name ) ) return;
-#ifdef DEBUG
- dbprintf( 1,"[psignal] skin: %s\n",gtkShMem->sb.name );
-#endif
-
+// if ( !strcmp( skinName,name ) ) return;
  mainVisible=0;
 
  appInitStruct( &tmpList );
  skinAppMPlayer=&tmpList;
  fntFreeFont();
- ret=skinRead( gtkShMem->sb.name );
+ ret=skinRead( name );
 
  appInitStruct( &tmpList );
  skinAppMPlayer=&appMPlayer;
  appInitStruct( &appMPlayer );
- if ( !ret ) strcpy( skinName,gtkShMem->sb.name );
- skinRead( skinName );
- if ( ret )
+ if ( ret ) name=skinName;
+ if ( skinRead( name ) )
   {
    mainVisible=1;
    return;
@@ -187,21 +170,21 @@ void ChangeSkin( void )
   {
    if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
    if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
-    { message( False,MSGTR_NEMDB ); return; }
+    { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
    wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
   }
 
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
- if ( ( !appMPlayer.subWindow.isFullScreen )&&( !mplShMem->Playing ) )
+ if ( ( !appMPlayer.subWindow.isFullScreen )&&( !guiIntfStruct.Playing ) )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
    wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-  } 
+  }
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
- if ( !mplShMem->Playing ) 
+ if ( !guiIntfStruct.Playing )
   {
-   mplSubRender=1; 
+   mplSubRender=1;
    wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
    wsClearWindow( appMPlayer.subWindow );
    wsPostRedisplay( &appMPlayer.subWindow );
@@ -209,7 +192,7 @@ void ChangeSkin( void )
 
  if ( mplDrawBuffer ) free( mplDrawBuffer );
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
-  { message( False,MSGTR_NEMDB ); return; }
+  { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
  wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
  wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
  wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
@@ -218,10 +201,10 @@ void ChangeSkin( void )
  wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
  mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
-   
- btnModify( evSetVolume,mplShMem->Volume );
- btnModify( evSetBalance,mplShMem->Balance );
- btnModify( evSetMoviePosition,mplShMem->Position );
+
+ btnModify( evSetVolume,guiIntfStruct.Volume );
+ btnModify( evSetBalance,guiIntfStruct.Balance );
+ btnModify( evSetMoviePosition,guiIntfStruct.Position );
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
@@ -231,10 +214,12 @@ void mplResizeToMovieSize( unsigned int width,unsigned int height )
   {
    wsResizeWindow( &appMPlayer.subWindow,width,height );
    wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-  } 
+  }
 }
 
 void mplSetFileName( char * fname )
 {
- if ( ( fname )&&( gtkShMem ) ) strcpy( gtkShMem->fs.filename,fname );
+ if ( !fname ) return;
+ if ( guiIntfStruct.Filename ) free( guiIntfStruct.Filename );
+ guiIntfStruct.Filename=strdup( fname );
 }

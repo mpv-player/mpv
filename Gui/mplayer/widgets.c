@@ -17,12 +17,14 @@
 #include "widgets.h"
 
 #include "./mplayer.h"
-#include "psignal.h"
 #include "../events.h"
+
+#include "gtk/menu.h"
+#include "play.h"
+#include "gtk/fs.h"
 
 #include "../../config.h"
 #include "../../help_mp.h"
-#include "../error.h"
 
 GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
@@ -36,14 +38,8 @@ GtkWidget     * MessageBox;
 GtkWidget     * WarningPixmap;
 GtkWidget     * ErrorPixmap;
 
-int             gtkVisibleSkinBrowser = 0;
-int             gtkVisiblePlayList = 0;
-int             gtkVisibleFileSelect = 0;
-int             gtkVisibleMessageBox = 0;
-int             gtkVisibleAboutBox = 0;
-int             gtkVisibleOptions = 0;
-
-gtkCommStruct * gtkShMem;
+int gtkPopupMenu = 0;
+int gtkPopupMenuParam = 0;
 
 #include "gtk/sb.h"
 #include "gtk/pl.h"
@@ -64,65 +60,18 @@ void widgetsCreate( void )
 // PopUpMenu=create_PopUpMenu();
 }
 
-// --- forked function
-
-extern char *mDisplayName;
-
-static void gtkThreadProc( int argc,char * argv[] )
-{
- struct sigaction sa;
-
- #ifdef HAVE_RTC
-  setuid( getuid() ); // strongly test, please check this.
- #endif
-
- gtk_set_locale();
- {
-  char tmp[128];
-  sprintf( tmp,"--display=%s",mDisplayName );
-  argv[argc++]=strdup( tmp );
-  gtk_init( &argc,&argv );
- }
- gdk_set_use_xshm( TRUE );
- printf( "[gtk] display: %s\n",gdk_get_display() );
-
- widgetsCreate();
-
- gtkPID=getppid();
-
- memset(&sa, 0, sizeof(sa));
- sa.sa_handler = gtkSigHandler;
- sigaction( SIGTYPE, &sa, NULL );
-
- gtkIsOk=True;
- gtkSendMessage( evGtkIsOk );
-
- gtk_main();
- printf( "[gtk] exit.\n" );
- exit( 0 );
-}
-
 // --- init & close gtk
 
 void gtkInit( int argc,char* argv[], char *envp[] )
 {
- gtkShMem=shmem_alloc( sizeof( gtkCommStruct ) );
- if ( ( gtkPID = fork() ) == 0 ) gtkThreadProc( argc,argv );
+ gtk_set_locale();
+ gtk_init( &argc,&argv );
+ gdk_set_use_xshm( TRUE );
+ widgetsCreate();
 }
 
-void gtkDone( void ){
- gtkSendMessage(evExit);
- usleep(50000); // 50ms should be enough!
- printf("gtk killed...\n");
- kill( gtkPID,SIGKILL );
-}
-
-void gtkMessageBox( int type,gchar * str )
+void gtkDone( void )
 {
- if ( !gtkIsOk ) return;
- gtkShMem->mb.type=type;
- strcpy( gtkShMem->mb.str,str );
- gtkSendMessage( evMessageBox );
 }
 
 void gtkClearList( GtkWidget * list )
@@ -146,3 +95,82 @@ void gtkSetDefaultToCList( GtkWidget * list,char * item )
  if ( ( i=gtkFindCList( list,item ) ) > -1 ) gtk_clist_select_row( GTK_CLIST( list ),i,0 );
 }
 
+void gtkEventHandling( void )
+{
+ int i;
+ for( i=0;i < 25;i++ ) gtk_main_iteration_do( 0 );
+}
+
+// --- funcs
+
+void gtkMessageBox( int type,gchar * str )
+{
+ gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
+ gtk_widget_hide( MessageBox );
+ switch( type)
+  {
+    case GTK_MB_FATAL:
+         gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_FatalError );
+         gtk_widget_hide( WarningPixmap );
+         gtk_widget_show( ErrorPixmap );
+         break;
+    case GTK_MB_ERROR:
+         gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_Error );
+         gtk_widget_hide( WarningPixmap );
+         gtk_widget_show( ErrorPixmap );
+         break;
+    case GTK_MB_WARNING:
+         gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_Warning );
+         gtk_widget_show( WarningPixmap );
+         gtk_widget_hide( ErrorPixmap );
+         break;
+  }
+ gtk_widget_show( MessageBox );
+}
+
+void gtkShow( int type,char * param )
+{
+ switch( type )
+  {
+   case evSkinBrowser:
+        gtk_widget_hide( SkinBrowser );
+        gtkClearList( SkinList );
+        if ( gtkFillSkinList( sbMPlayerPrefixDir )&&gtkFillSkinList( sbMPlayerDirInHome ) )
+         {
+          gtkSetDefaultToCList( SkinList,param );
+          gtk_widget_show( SkinBrowser );
+         }
+        break;
+   case evPreferences:
+        gtk_widget_hide( Options );
+        gtk_widget_show( Options );
+        break;
+   case evPlayList:
+        gtk_widget_hide( PlayList );
+        gtk_widget_show( PlayList );
+        break;
+   case evLoad:
+        ShowFileSelect( fsVideoSelector );
+        break;
+   case evFirstLoad:
+        ShowFileSelect( fsVideoSelector );
+        break;
+   case evLoadSubtitle:
+        ShowFileSelect( fsSubtitleSelector );
+        break;
+   case evAbout:
+        gtk_widget_hide( AboutBox );
+        gtk_widget_show( AboutBox );
+        break;
+   case evShowPopUpMenu:
+        gtkPopupMenu=evNone;
+        gtkPopupMenuParam=0;
+        gtk_widget_hide_on_delete( PopUpMenu );
+        PopUpMenu=create_PopUpMenu();
+        gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
+        break;
+   case evHidePopUpMenu:
+        gtk_widget_hide_on_delete( PopUpMenu );
+        break;
+  }
+}

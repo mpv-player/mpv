@@ -7,9 +7,9 @@ GTKSRCS = $(MPLAYERDIR)gtk/menu.c $(MPLAYERDIR)gtk/mb.c $(MPLAYERDIR)gtk/about.c
 	     $(MPLAYERDIR)gtk/opts.c
 
 MPLAYERSRCS = $(MPLAYERDIR)mplayer.c $(MPLAYERDIR)widgets.c $(MPLAYERDIR)play.c \
-	     $(MPLAYERDIR)psignal.c $(GTKSRCS)
+	      $(GTKSRCS)
 MPLAYEROBJS = $(MPLAYERSRCS:.c=.o)
 
-SRCS = $(SKINSRC) $(BITMAPSRCS) wm/ws.c wm/wsconv.c app.c events.c timer.c error.c interface.c
+SRCS = $(SKINSRC) $(BITMAPSRCS) wm/ws.c wm/wsconv.c app.c events.c interface.c
 OBJS = $(SRCS:.c=.o)
 

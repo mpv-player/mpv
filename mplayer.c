@@ -283,7 +283,7 @@ extern char *ao_subdevice;
 
 static stream_t* stream=NULL;
 
-static char* current_module=NULL; // for debugging
+char* current_module=NULL; // for debugging
 
 static unsigned int inited_flags=0;
 #define INITED_VO 1
@@ -332,7 +332,7 @@ void uninit_player(unsigned int mask){
   if(mask&INITED_GUI){
     inited_flags&=~INITED_GUI;
     current_module="uninit_gui";
-    mplDone();
+    guiDone();
   }
 #endif
 
@@ -643,9 +643,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   // It's time to init the GUI code: (and fork() the GTK process)
 #ifdef HAVE_NEW_GUI
   if(use_gui){
-       appInit( argc,argv,envp,(void*)mDisplay );
+       guiInit( argc,argv,envp );
        inited_flags|=INITED_GUI;
-       mplShMem->Playing= (gui_no_filename) ? 0 : 1;
+       guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
        mplState();
   }
 #endif
@@ -728,18 +728,18 @@ play_next_file:
     if ( use_gui ) {
 
 #ifdef USE_DVDREAD 
-     if ( mplShMem->DVDChanged ) 
+     if ( guiIntfStruct.DVDChanged ) 
       {
-       mplShMem->DVDChanged=0;
-       mplShMem->Playing=1;
+       guiIntfStruct.DVDChanged=0;
+       guiIntfStruct.Playing=1;
        filename="/dev/dvd";
        goto play_dvd;
       }
 #endif
-    
-      if(filename && !mplShMem->FilenameChanged) strcpy( mplShMem->Filename,filename );
-//      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
-      while(mplShMem->Playing!=1){
+
+      if(filename && !guiIntfStruct.FilenameChanged) guiSetFilename( guiIntfStruct.Filename,filename );
+//      guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
+      while(guiIntfStruct.Playing!=1){
 	usleep(20000);
 	guiEventHandling();
       }
@@ -747,17 +747,17 @@ play_next_file:
 play_dvd:
 
 #ifdef USE_SUB
-      if ( mplShMem->SubtitleChanged || !mplShMem->FilenameChanged )
+      if ( guiIntfStruct.SubtitleChanged || !guiIntfStruct.FilenameChanged )
        {
-        if ( mplShMem->Subtitlename[0] != 0 ) sub_name=mplShMem->Subtitlename;
-        mplShMem->SubtitleChanged=0;
+        if ( ( guiIntfStruct.Subtitlename )&&( guiIntfStruct.Subtitlename[0] != 0 ) ) sub_name=guiIntfStruct.Subtitlename;
+        guiIntfStruct.SubtitleChanged=0;
        }
 #endif
 
-      if ( mplShMem->FilenameChanged || !filename )
+      if ( guiIntfStruct.FilenameChanged || !filename )
        {
-        filename=mplShMem->Filename;
-	mplShMem->FilenameChanged=0;
+        filename=strdup( guiIntfStruct.Filename );
+	guiIntfStruct.FilenameChanged=0;
        }
     }
 #endif
@@ -1049,17 +1049,17 @@ sh_video=d_video->sh;
 if ( use_gui && stream->type == STREAMTYPE_DVD )
  {
   dvd_priv_t * dvdp = stream->priv;
-  mplShMem->DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
-  mplShMem->DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
-  mplShMem->DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
-  mplShMem->DVD.nr_of_audio_channels=dvdp->nr_of_channels;
-  memcpy( mplShMem->DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
-  mplShMem->DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
-  memcpy( mplShMem->DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
-  mplShMem->DVD.current_title=dvd_title + 1;
-  mplShMem->DVD.current_chapter=dvd_chapter + 1;
-  mplShMem->DVD.current_angle=dvd_angle + 1;
-  mplShMem->Track=dvd_title + 1;
+  guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
+  guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
+  guiIntfStruct.DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+  guiIntfStruct.DVD.nr_of_audio_channels=dvdp->nr_of_channels;
+  memcpy( guiIntfStruct.DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
+  guiIntfStruct.DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
+  memcpy( guiIntfStruct.DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
+  guiIntfStruct.DVD.current_title=dvd_title + 1;
+  guiIntfStruct.DVD.current_chapter=dvd_chapter + 1;
+  guiIntfStruct.DVD.current_angle=dvd_angle + 1;
+  guiIntfStruct.Track=dvd_title + 1;
  } 
 #endif
 #endif
@@ -1179,13 +1179,13 @@ if(sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
 #ifdef HAVE_NEW_GUI
-    if ( use_gui ) mplShMem->AudioType=0;
+    if ( use_gui ) guiIntfStruct.AudioType=0;
 #endif
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
 #ifdef HAVE_NEW_GUI
-    if ( use_gui ) mplShMem->AudioType=sh_audio->channels;
+    if ( use_gui ) guiIntfStruct.AudioType=sh_audio->channels;
 #endif
   }
 }
@@ -1359,10 +1359,10 @@ current_module="init_libvo";
    if ( use_gui )
     {
      mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
-     moviewidth=sh_video->disp_w;
-     movieheight=sh_video->disp_h;
-     mplShMem->StreamType=stream->type;
-     mplSetFileName( filename );
+     guiIntfStruct.MovieWidth=sh_video->disp_w;
+     guiIntfStruct.MovieHeight=sh_video->disp_h;
+     guiIntfStruct.StreamType=stream->type;
+     guiIntfStruct.Filename=filename;
     }
 #endif
 
@@ -1964,7 +1964,7 @@ read_input:
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI
-      if(use_gui) mplShMem->Playing=2;
+      if(use_gui) guiIntfStruct.Playing=2;
 #endif
       if (video_out && sh_video)
 	 video_out->control(VOCTRL_PAUSE, NULL);
@@ -2002,7 +2002,7 @@ read_input:
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
-		if(mplShMem->Playing!=2 || (rel_seek_secs || abs_seek_pos))
+		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
 		  { gui_pause_flag=1; break; } // end of pause or seek
              }
 #endif
@@ -2021,7 +2021,7 @@ read_input:
         video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
-      if(use_gui && !gui_pause_flag) mplShMem->Playing=1; // play from keyboard
+      if(use_gui && !gui_pause_flag) guiIntfStruct.Playing=1; // play from keyboard
 #endif
   }
 
@@ -2660,36 +2660,36 @@ if(rel_seek_secs || abs_seek_pos){
       if(use_gui){
 	if(demuxer->file_format==DEMUXER_TYPE_AVI && sh_video->video.dwLength>2){
 	  // get pos from frame number / total frames
-	  mplShMem->Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
+	  guiIntfStruct.Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
 	} else {
 	  // get pos from file position / filesize
           int len=((demuxer->movi_end-demuxer->movi_start));
 	  int pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
-	  mplShMem->Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
+	  guiIntfStruct.Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
-	mplShMem->TimeSec=d_video->pts; 
-	if(mplShMem->Playing==0) break; // STOP
-	if(mplShMem->Playing==2) osd_function=OSD_PAUSE;
-	if ( mplShMem->VolumeChanged ) 
+	guiIntfStruct.TimeSec=d_video->pts; 
+	if(guiIntfStruct.Playing==0) break; // STOP
+	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
+	if ( guiIntfStruct.VolumeChanged ) 
 	 {
-	  mixer_setvolume( mplShMem->Volume,mplShMem->Volume );
-	  mplShMem->VolumeChanged=0;
+	  mixer_setvolume( guiIntfStruct.Volume,guiIntfStruct.Volume );
+	  guiIntfStruct.VolumeChanged=0;
 #ifdef USE_OSD
           if ( osd_level )
 	   {
             osd_visible=sh_video->fps; // 1 sec
             vo_osd_progbar_type=OSD_VOLUME;
-            vo_osd_progbar_value=( ( mplShMem->Volume ) * 256.0 ) / 100.0;
+            vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
            }
 #endif
 	 } 
-	mplShMem->Volume=(float)mixer_getbothvolume();
+	guiIntfStruct.Volume=(float)mixer_getbothvolume();
 #ifdef USE_DVDREAD
-        if ( mplShMem->DVDChanged ) goto goto_next_file;
+        if ( guiIntfStruct.DVDChanged ) goto goto_next_file;
         if ( stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = stream->priv;
-	  mplShMem->DVD.current_chapter=dvdp->cur_cell + 1;
+	  guiIntfStruct.DVD.current_chapter=dvdp->cur_cell + 1;
 	 }
 #endif
       }
@@ -2787,7 +2787,6 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
-
 if(benchmark){
   double tot=video_time_usage+vout_time_usage+audio_time_usage;
   double total_time_usage;
@@ -2836,7 +2835,7 @@ if(eof == 0) eof = 1;
       if(use_gui) 
        {
 #ifdef USE_DVDREAD
-        if ( !mplShMem->DVDChanged ) 
+        if ( !guiIntfStruct.DVDChanged ) 
 #endif
 	mplStop();
        }	
@@ -2855,7 +2854,7 @@ while(playtree_iter != NULL) {
 
 if(use_gui || playtree_iter != NULL
 #if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
- || (mplShMem && mplShMem->DVDChanged)
+ || guiIntfStruct.DVDChanged
 #endif 
 ){
 
@@ -2874,8 +2873,9 @@ if(use_gui || playtree_iter != NULL
     sub_free( subtitles );
     sub_name=NULL;
     vo_sub=NULL;
+    subtitles=NULL;
    }
-  
+
   video_out=NULL;
   audio_out=NULL;
   eof = 0;

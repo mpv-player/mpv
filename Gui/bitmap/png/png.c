@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "./png.h"
-#include "../../error.h"
 #include <png.h>
 
 typedef struct
@@ -106,9 +105,7 @@ int pngRead( unsigned char * fname,txSample * bf )
 
  if ( pngLoadRaw( fname,&raw ) )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[png] file read error ( %s ).\n",fname );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png] file read error ( %s ).\n",fname );
    return 1;
   }
  bf->Width=raw.Width;
@@ -117,17 +114,13 @@ int pngRead( unsigned char * fname,txSample * bf )
  bf->ImageSize=bf->Width * bf->Height * ( bf->BPP / 8 );
  if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[png]  Not enough memory for image buffer.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  Not enough memory for image buffer.\n" );
    return 2;
   }
  memcpy( bf->Image,raw.Data,bf->ImageSize );
  free( raw.Data );
- #ifdef DEBUG
-  dbprintf( 4,"[png] filename: %s.\n",fname );
-  dbprintf( 4,"[png]  size: %dx%d bits: %d\n",bf->Width,bf->Height,bf->BPP );
-  dbprintf( 4,"[png]  imagesize: %lu\n",bf->ImageSize );
- #endif
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png] filename: %s.\n",fname );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  size: %dx%d bits: %d\n",bf->Width,bf->Height,bf->BPP );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  imagesize: %lu\n",bf->ImageSize );
  return 0;
 }

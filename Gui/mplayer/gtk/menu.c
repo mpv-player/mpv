@@ -14,10 +14,9 @@
 void ActivateMenuItem( int Item )
 {
 // fprintf( stderr,"[menu] item: %d.%d\n",Item&0xffff,Item>>16 );
- gtkShMem->popupmenu=Item & 0x0000ffff;
- gtkShMem->popupmenuparam=Item >> 16;
- gtkShMem->visiblepopupmenu=0;
- gtkSendMessage( evShowPopUpMenu );
+ gtkPopupMenu=Item & 0x0000ffff;
+ gtkPopupMenuParam=Item >> 16;
+ mplEventHandling( Item & 0x0000ffff,Item >> 16 );
 }
 
 GtkWidget * AddMenuItem( GtkWidget * Menu,char * label,int Number )
@@ -246,6 +245,7 @@ char * GetLanguage( int language )
  int i;
  for ( i=0;i<sizeof( Languages ) / sizeof( Languages_t );i++ )
   if ( Languages[i].id == language ) return Languages[i].name;
+ return NULL;
 }
 
 GtkWidget * DVDSubMenu;
@@ -293,61 +293,61 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );
     AddSeparator( DVDSubMenu );
     DVDTitleMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Titles );
-     if ( gtkShMem->DVD.titles )
+     if ( guiIntfStruct.DVD.titles )
       {
        char tmp[32]; int i;
-       for ( i=0;i<gtkShMem->DVD.titles;i++ )
+       for ( i=0;i < guiIntfStruct.DVD.titles;i++ )
         {
          sprintf( tmp,MSGTR_MENU_Title,i+1 );
          AddMenuItem( DVDTitleMenu,tmp,( (i+1) << 16 ) + evSetDVDTitle );
         }
       }
-      else 
+      else
        {
         MenuItem=AddMenuItem( DVDTitleMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
     DVDChapterMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Chapters );
-     if ( gtkShMem->DVD.chapters )
+     if ( guiIntfStruct.DVD.chapters )
       {
        char tmp[32]; int i;
-       for ( i=0;i<gtkShMem->DVD.chapters;i++ )
+       for ( i=0;i < guiIntfStruct.DVD.chapters;i++ )
         {
          sprintf( tmp,MSGTR_MENU_Chapter,i+1 );
          AddMenuItem( DVDChapterMenu,tmp,( (i+1) << 16 ) + evSetDVDChapter );
         }
       }
-      else 
+      else
        {
         MenuItem=AddMenuItem( DVDChapterMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
     DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_AudioLanguages );
-     if ( gtkShMem->DVD.nr_of_audio_channels )
+     if ( guiIntfStruct.DVD.nr_of_audio_channels )
       {
        char tmp[64]; int i;
-       for ( i=0;i<gtkShMem->DVD.nr_of_audio_channels;i++ )
+       for ( i=0;i < guiIntfStruct.DVD.nr_of_audio_channels;i++ )
         {
-         strcpy( tmp,GetLanguage( gtkShMem->DVD.audio_streams[i].language ) );
-         AddMenuItem( DVDAudioLanguageMenu,tmp,( gtkShMem->DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
+         strcpy( tmp,GetLanguage( guiIntfStruct.DVD.audio_streams[i].language ) );
+         AddMenuItem( DVDAudioLanguageMenu,tmp,( guiIntfStruct.DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }
-      else 
+      else
        {
         MenuItem=AddMenuItem( DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
     DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_SubtitleLanguages );
-     if ( gtkShMem->DVD.nr_of_subtitles )
+     if ( guiIntfStruct.DVD.nr_of_subtitles )
       {
        char tmp[64]; int i;
-       for ( i=0;i<gtkShMem->DVD.nr_of_subtitles;i++ )
+       for ( i=0;i < guiIntfStruct.DVD.nr_of_subtitles;i++ )
         {
-         strcpy( tmp,GetLanguage( gtkShMem->DVD.subtitles[i].language ) );
-         AddMenuItem( DVDSubtitleLanguageMenu,tmp,( gtkShMem->DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
+         strcpy( tmp,GetLanguage( guiIntfStruct.DVD.subtitles[i].language ) );
+         AddMenuItem( DVDSubtitleLanguageMenu,tmp,( guiIntfStruct.DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
         }
       }
-      else 
+      else
        {
         MenuItem=AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );

@@ -7,14 +7,13 @@
 #include <unistd.h>
 
 #include "./mplayer.h"
-#include "psignal.h"
-#include "../error.h"
 
 #include "pixmaps/up.xpm"
 #include "pixmaps/dir.xpm"
 #include "pixmaps/file.xpm"
 
 #include "../../events.h"
+#include "../../interface.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"
 
@@ -35,30 +34,30 @@ unsigned char * fsThatDir = ".";
 gchar           fsFilter[8] = "*";
 
 int             fsPressed = 0;
-int		fsMessage = -1;
-int		fsType    = 0;
+int             fsMessage = -1;
+int             fsType    = 0;
 
 #define fsNumberOfVideoFilterNames 6
-char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] = 
+char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
          { { "MPEG files ( *.mpg )", "*.mpg" },
-	   { "VOB files ( *.vob )",  "*.vob" },
+           { "VOB files ( *.vob )",  "*.vob" },
            { "AVI files ( *.avi )",  "*.avi" },
-	   { "QT files ( *.mov )",   "*.mov" },
-	   { "ASF files ( *.asf )",  "*.asf" },
-  	   { "VIVO files ( *.viv )", "*.viv" },
+           { "QT files ( *.mov )",   "*.mov" },
+           { "ASF files ( *.asf )",  "*.asf" },
+           { "VIVO files ( *.viv )", "*.viv" },
            { "All files ( * )",      "*"     } };
-	   
+
 #define fsNumberOfSubtitleFilterNames 8
 char * fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames+1][2] =
          { { "UTF ( *.utf )",   "*.utf" },
-	   { "SUB ( *.sub )",   "*.sub" },
-	   { "SRT ( *.srt )",   "*.str" },
+           { "SUB ( *.sub )",   "*.sub" },
+           { "SRT ( *.srt )",   "*.str" },
            { "SMI ( *.smi )",   "*.smi" },
            { "RT ( *.rt )",     "*.rt"  },
            { "TXT ( *.txt )",   "*.txt" },
            { "SSA ( *.ssa )",   "*.ssa" },
            { "AQT ( *.aqt )",   "*.aqt" },
-	   { "All files ( * )", "*"     } };
+           { "All files ( * )", "*"     } };
 
 #define fsNumberOfOtherFilterNames 0
 char * fsOtherFilterNames[fsNumberOfOtherFilterNames+1][2] =
@@ -99,7 +98,7 @@ void CheckDir( GtkWidget * list,char * directory )
  gtk_widget_hide( list );
  gtk_clist_clear( GTK_CLIST( list ) );
  str[0][0]=NULL;
- 
+
  pixmap=dpixmap; mask=dmask;
  str[0][0]=NULL; str[0][1]=(gchar *)malloc( 3 );
  strcpy( str[0][1],"." );  gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),0,0,pixmap,mask );
@@ -121,9 +120,9 @@ void CheckDir( GtkWidget * list,char * directory )
    free( str[0][1] );
   }
  globfree( &gg );
- 
+
  glob( fsFilter,0,NULL,&gg );
- 
+
 #if 0
  if ( !strcmp( fsFilter,"*" ) )
  {
@@ -132,7 +131,7 @@ void CheckDir( GtkWidget * list,char * directory )
   for( i=0;i<strlen( f );i++ )
    if ( ( f[i] >= 'A' )&&( f[i] <= 'Z' ) ) f[i]+=32;
   glob( f,GLOB_APPEND,NULL,&gg );
-  
+
   for( i=0;i<strlen( f );i++ )
    if ( ( f[i] >= 'a' )&&( f[i] <= 'z' ) ) f[i]-=32;
   glob( f,GLOB_APPEND,NULL,&gg );
@@ -163,13 +162,13 @@ void CheckDir( GtkWidget * list,char * directory )
 void ShowFileSelect( int type )
 {
  int i;
- if ( gtkVisibleFileSelect ) gtk_widget_hide( FileSelect );
+ gtk_widget_hide( FileSelect );
  fsType=type;
  switch ( type )
   {
    case fsVideoSelector:
         fsMessage=evFileLoaded;
-	gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
+        gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
         fsList_items=NULL;
         for( i=0;i<fsNumberOfVideoFilterNames + 1;i++ )
           fsList_items=g_list_append( fsList_items,fsVideoFilterNames[i][0] );
@@ -178,7 +177,7 @@ void ShowFileSelect( int type )
         gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames][0] );
         break;
    case fsSubtitleSelector:
-	gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_SubtitleSelect );
+        gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_SubtitleSelect );
         fsList_items=NULL;
         for( i=0;i<fsNumberOfSubtitleFilterNames + 1;i++ )
           fsList_items=g_list_append( fsList_items,fsSubtitleFilterNames[i][0] );
@@ -187,7 +186,7 @@ void ShowFileSelect( int type )
         gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames][0] );
         break;
    case fsOtherSelector:
-	gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_OtherSelect );
+        gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_OtherSelect );
         fsList_items=NULL;
         for( i=0;i<fsNumberOfSubtitleFilterNames + 1;i++ )
           fsList_items=g_list_append( fsList_items,fsOtherFilterNames[i][0] );
@@ -197,15 +196,11 @@ void ShowFileSelect( int type )
         break;
   }
  gtk_widget_show( FileSelect );
- gtkVisibleFileSelect=1;
 }
 
 void HideFileSelect( void )
 {
  gtk_widget_hide( fsFileSelect );
- gtkVisibleFileSelect=0;
- gtkShMem->vs.window=evLoad;
- gtkSendMessage( evHideWindow );
 }
 
 void fs_fsFileSelect_destroy( GtkObject * object,gpointer user_data )
@@ -223,35 +218,35 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
  int    i;
 
  str=gtk_entry_get_text( GTK_ENTRY(user_data ) );
- 
+
  switch ( fsType )
   {
    case fsVideoSelector:
           for( i=0;i<fsNumberOfVideoFilterNames+1;i++ )
-           if( !strcmp( str,fsVideoFilterNames[i][0] ) ) 
+           if( !strcmp( str,fsVideoFilterNames[i][0] ) )
             {
- 	     strcpy( fsFilter,fsVideoFilterNames[i][1] );
- 	     CheckDir( fsFNameList,get_current_dir_name() );
- 	     break;
-  	    }
-	  break;
+             strcpy( fsFilter,fsVideoFilterNames[i][1] );
+             CheckDir( fsFNameList,get_current_dir_name() );
+             break;
+            }
+          break;
    case fsSubtitleSelector:
           for( i=0;i<fsNumberOfSubtitleFilterNames+1;i++ )
-           if( !strcmp( str,fsSubtitleFilterNames[i][0] ) ) 
+           if( !strcmp( str,fsSubtitleFilterNames[i][0] ) )
             {
- 	     strcpy( fsFilter,fsSubtitleFilterNames[i][1] );
- 	     CheckDir( fsFNameList,get_current_dir_name() );
- 	     break;
-  	    }
+             strcpy( fsFilter,fsSubtitleFilterNames[i][1] );
+             CheckDir( fsFNameList,get_current_dir_name() );
+             break;
+            }
           break;
    case fsOtherSelector:
           for( i=0;i<fsNumberOfOtherFilterNames+1;i++ )
-           if( !strcmp( str,fsOtherFilterNames[i][0] ) ) 
+           if( !strcmp( str,fsOtherFilterNames[i][0] ) )
             {
- 	     strcpy( fsFilter,fsOtherFilterNames[i][1] );
- 	     CheckDir( fsFNameList,get_current_dir_name() );
- 	     break;
-  	    }
+             strcpy( fsFilter,fsOtherFilterNames[i][1] );
+             CheckDir( fsFNameList,get_current_dir_name() );
+             break;
+            }
           break;
   }
 }
@@ -313,18 +308,10 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
   {
    case 1:
         fsSelectedDirectory=(unsigned char *)get_current_dir_name();
-//        printf("[gtk-fs] 1-fsSelectedFile: %s\n",fsSelectedFile);
-//        #ifdef DEBUG
-//         dbprintf( 1,"[gtk-fs] fsSelectedFile: %s\n",fsSelectedFile );
-//        #endif
         break;
    case 2:
         str=gtk_entry_get_text( GTK_ENTRY( fsPathCombo ) );
         fsSelectedFile=str;
-//        printf("[gtk-fs] 2-fsSelectedFile: '%s'  \n",fsSelectedFile);
-//        #ifdef DEBUG
-//         dbprintf( 1,"[gtk-fs] fsSelectedFile: %s\n",fsSelectedFile );
-//        #endif
         if ( !fsFileExist( fsSelectedFile ) ) return;
         fsSelectedDirectory=fsSelectedFile;
         size=strlen( fsSelectedDirectory );
@@ -337,31 +324,21 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
             break;
            }
          }
-//        printf("[gtk-fs-xxx] fsSelectedFile: '%s'  \n",fsSelectedFile);
-//        printf("[gtk-fs-xxx] fsSelectedDirectory: '%s'  \n",fsSelectedDirectory);
         break;
   }
-// printf( "----gtk---> directory: %s\n",fsSelectedDirectory );
-// printf( "----gtk---> filename: %s\n",fsSelectedFile );
  switch ( fsType )
   {
    case fsVideoSelector:
-          strcpy( gtkShMem->fs.dir,fsSelectedDirectory );
-	  strcpy( gtkShMem->fs.filename,fsSelectedFile );
-//          printf( "----gtksm-> directory: %s\n",gtkShMem->fs.dir );
-//          printf( "----gtksm-> filename: %s\n",gtkShMem->fs.filename );
-          gtkSendMessage( evFileLoaded );
-	  break;
+          guiSetDF( guiIntfStruct.Filename,fsSelectedDirectory,fsSelectedFile );
+          guiIntfStruct.StreamType=STREAMTYPE_FILE;
+          guiIntfStruct.FilenameChanged=1;
+          break;
    case fsSubtitleSelector:
-          strcpy( gtkShMem->fs.subtitlename,fsSelectedDirectory );
-	  strcat( gtkShMem->fs.subtitlename,"/" );
-	  strcat( gtkShMem->fs.subtitlename,fsSelectedFile );
-          gtkSendMessage( evSubtitleLoaded );
+          guiSetDF( guiIntfStruct.Subtitlename,fsSelectedDirectory,fsSelectedFile );
+          guiIntfStruct.SubtitleChanged=1;
           break;
    case fsOtherSelector:
-          strcpy( gtkShMem->fs.otherfilename,fsSelectedDirectory );
-	  strcat( gtkShMem->fs.subtitlename,"/" );
-	  strcat( gtkShMem->fs.otherfilename,fsSelectedFile );
+          guiSetDF( guiIntfStruct.Othername,fsSelectedDirectory,fsSelectedFile );
           break;
   }
  item=fsTopList_items;
@@ -375,6 +352,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    fsTopList_items=g_list_prepend( fsTopList_items,(gchar *)get_current_dir_name() );
    gtk_combo_set_popdown_strings( GTK_COMBO( user_data ),fsTopList_items );
   }
+ if (  mplMainAutoPlay ) mplEventHandling( evPlay,0 );
 }
 
 void fs_Cancel_released( GtkButton * button,gpointer user_data )
@@ -382,7 +360,7 @@ void fs_Cancel_released( GtkButton * button,gpointer user_data )
 
 void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEventButton *bevent,gpointer user_data )
 {
- gtk_clist_get_text( GTK_CLIST(widget ),row,1,&fsSelectedFile ); 
+ gtk_clist_get_text( GTK_CLIST(widget ),row,1,&fsSelectedFile );
  fsPressed=1;
  if( !bevent ) return;
  if( bevent->type == GDK_2BUTTON_PRESS ) gtk_button_released( GTK_BUTTON( fsOk ) );

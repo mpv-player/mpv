@@ -7,7 +7,7 @@ unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
 
 int             mplMainAutoPlay = 0;
-int		mplMiddleMenu = 0;
+int             mplMiddleMenu = 0;
 
 int             mainVisible = 1;
 
@@ -18,19 +18,19 @@ int             i,pot = 0;
 inline void TranslateFilename( int c,char * tmp )
 {
  int i;
- switch ( mplShMem->StreamType )
+ switch ( guiIntfStruct.StreamType )
   {
    case STREAMTYPE_FILE:
-          if ( gtkShMem->fs.filename[0] )
+          if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
-            strcpy( tmp,gtkShMem->fs.filename );
+            strcpy( tmp,guiIntfStruct.Filename );
             if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
            } else strcpy( tmp,"no file loaded" );
           break;
-#ifdef USE_DVDREAD		     
+#ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
-          if ( mplShMem->DVD.current_chapter ) sprintf( tmp,"chapter %d",mplShMem->DVD.current_chapter );
+          if ( guiIntfStruct.DVD.current_chapter ) sprintf( tmp,"chapter %d",guiIntfStruct.DVD.current_chapter );
             else strcat( tmp,"no chapter" );
           break;
 #endif
@@ -38,7 +38,7 @@ inline void TranslateFilename( int c,char * tmp )
   }
  if ( c )
   {
-   for ( i=0;i < strlen( tmp );i++ )
+   for ( i=0;i < (int)strlen( tmp );i++ )
     {
      int t=0;
      if ( c == 1 ) { if ( ( tmp[i] >= 'A' )&&( tmp[i] <= 'Z' ) ) t=32; }
@@ -51,46 +51,46 @@ inline void TranslateFilename( int c,char * tmp )
 char * Translate( char * str )
 {
  static char   trbuf[512];
-        char   tmp[128];
+        char   tmp[512];
         int    i,c;
         int    t;
  memset( trbuf,0,512 );
  memset( tmp,0,128 );
- for ( c=0,i=0;i < strlen( str );i++ )
+ for ( c=0,i=0;i < (int)strlen( str );i++ )
   {
    if ( str[i] != '$' ) { trbuf[c++]=str[i]; trbuf[c]=0; }
     else
     {
      switch ( str[++i] )
       {
-       case 't': sprintf( tmp,"%02d",mplShMem->Track ); strcat( trbuf,tmp ); break;
+       case 't': sprintf( tmp,"%02d",guiIntfStruct.Track ); strcat( trbuf,tmp ); break;
        case 'o': TranslateFilename( 0,tmp ); strcat( trbuf,tmp ); break;
        case 'f': TranslateFilename( 1,tmp ); strcat( trbuf,tmp ); break;
        case 'F': TranslateFilename( 2,tmp ); strcat( trbuf,tmp ); break;
-       case '6': t=mplShMem->LengthInSec; goto calclengthhhmmss;
-       case '1': t=mplShMem->TimeSec;
+       case '6': t=guiIntfStruct.LengthInSec; goto calclengthhhmmss;
+       case '1': t=guiIntfStruct.TimeSec;
 calclengthhhmmss:
             sprintf( tmp,"%02d:%02d:%02d",t/3600,t/60%60,t%60 ); strcat( trbuf,tmp );
             break;
-       case '7': t=mplShMem->LengthInSec; goto calclengthmmmmss;
-       case '2': t=mplShMem->TimeSec;
+       case '7': t=guiIntfStruct.LengthInSec; goto calclengthmmmmss;
+       case '2': t=guiIntfStruct.TimeSec;
 calclengthmmmmss:
             sprintf( tmp,"%04d:%02d",t/60,t%60 ); strcat( trbuf,tmp );
             break;
-       case '3': sprintf( tmp,"%02d",mplShMem->TimeSec / 3600 ); strcat( trbuf,tmp ); break;
-       case '4': sprintf( tmp,"%02d",( ( mplShMem->TimeSec / 60 ) % 60 ) ); strcat( trbuf,tmp ); break;
-       case '5': sprintf( tmp,"%02d",mplShMem->TimeSec % 60 ); strcat( trbuf,tmp ); break;
-       case '8': sprintf( tmp,"%01d:%02d:%02d",mplShMem->TimeSec / 3600,( mplShMem->TimeSec / 60 ) % 60,mplShMem->TimeSec % 60 ); strcat( trbuf,tmp ); break;
-       case 'v': sprintf( tmp,"%3.2f%%",mplShMem->Volume ); strcat( trbuf,tmp ); break;
-       case 'V': sprintf( tmp,"%3.1f",mplShMem->Volume ); strcat( trbuf,tmp ); break;
-       case 'b': sprintf( tmp,"%3.2f%%",mplShMem->Balance ); strcat( trbuf,tmp ); break;
-       case 'B': sprintf( tmp,"%3.1f",mplShMem->Balance ); strcat( trbuf,tmp ); break;
-       case 'd': sprintf( tmp,"%d",mplShMem->FrameDrop ); strcat( trbuf,tmp ); break;
-       case 's': if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" ); break;
-       case 'l': if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" ); break;
-       case 'e': if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" ); break;
+       case '3': sprintf( tmp,"%02d",guiIntfStruct.TimeSec / 3600 ); strcat( trbuf,tmp ); break;
+       case '4': sprintf( tmp,"%02d",( ( guiIntfStruct.TimeSec / 60 ) % 60 ) ); strcat( trbuf,tmp ); break;
+       case '5': sprintf( tmp,"%02d",guiIntfStruct.TimeSec % 60 ); strcat( trbuf,tmp ); break;
+       case '8': sprintf( tmp,"%01d:%02d:%02d",guiIntfStruct.TimeSec / 3600,( guiIntfStruct.TimeSec / 60 ) % 60,guiIntfStruct.TimeSec % 60 ); strcat( trbuf,tmp ); break;
+       case 'v': sprintf( tmp,"%3.2f%%",guiIntfStruct.Volume ); strcat( trbuf,tmp ); break;
+       case 'V': sprintf( tmp,"%3.1f",guiIntfStruct.Volume ); strcat( trbuf,tmp ); break;
+       case 'b': sprintf( tmp,"%3.2f%%",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
+       case 'B': sprintf( tmp,"%3.1f",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
+       case 'd': sprintf( tmp,"%d",guiIntfStruct.FrameDrop ); strcat( trbuf,tmp ); break;
+       case 's': if ( guiIntfStruct.Playing == 0 ) strcat( trbuf,"s" ); break;
+       case 'l': if ( guiIntfStruct.Playing == 1 ) strcat( trbuf,"p" ); break;
+       case 'e': if ( guiIntfStruct.Playing == 2 ) strcat( trbuf,"e" ); break;
        case 'a':
-            switch ( mplShMem->AudioType )
+            switch ( guiIntfStruct.AudioType )
              {
               case 0: strcat( trbuf,"n" ); break;
               case 1: strcat( trbuf,"m" ); break;
@@ -98,12 +98,12 @@ calclengthmmmmss:
              }
             break;
        case 'T':
-           switch ( mplShMem->StreamType )
+           switch ( guiIntfStruct.StreamType )
             {
              case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
              case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
              case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
-#ifdef USE_DVDREAD		     
+#ifdef USE_DVDREAD
              case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
 #endif
              default:                strcat( trbuf," " ); break;
@@ -131,8 +131,8 @@ inline void PutImage( txSample * bf,int x,int y,int max,int ofs )
  buf=(unsigned long *)mplDrawBuffer;
  drw=(unsigned long *)bf->Image;
 
- for ( iy=y;iy < y+bf->Height / max;iy++ )
-  for ( ix=x;ix < x+bf->Width;ix++ )
+ for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
+  for ( ix=x;ix < (int)(x+bf->Width);ix++ )
    {
     tmp=drw[i++];
     if ( tmp != 0x00ff00ff )
@@ -150,8 +150,8 @@ void mplMainDraw( wsParamDisplay )
       !mainVisible ) return;
 //      !appMPlayer.mainWindow.Mapped ) return;
 
- btnModify( evSetMoviePosition,mplShMem->Position );
- btnModify( evSetVolume,mplShMem->Volume );
+ btnModify( evSetMoviePosition,guiIntfStruct.Position );
+ btnModify( evSetVolume,guiIntfStruct.Volume );
 
  if ( mplMainRender )
   {
@@ -176,7 +176,7 @@ void mplMainDraw( wsParamDisplay )
             goto drawrenderedtext;
        case itDLabel:
             image=fntRender( item->fontid,mplTimer%item->width,item->width,"%s",Translate( item->label ) );
-//            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
+////            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
 drawrenderedtext:
             PutImage( image,item->x,item->y,1,0 );
             if ( image )
@@ -200,7 +200,7 @@ extern void exit_player(char* how);
 extern int audio_id;
 extern int dvdsub_id;
 
-void mplMsgHandle( int msg,float param )
+void mplEventHandling( int msg,float param )
 {
  int j;
 
@@ -218,69 +218,64 @@ void mplMsgHandle( int msg,float param )
         dvd_chapter=1;
         dvd_angle=1;
 play_dvd_2:
-        mplShMem->StreamType=STREAMTYPE_DVD;
+        guiIntfStruct.StreamType=STREAMTYPE_DVD;
 #endif
    case evPlay:
    case evPlaySwitchToPause:
 //        btnModify( evPlaySwitchToPause,btnDisabled );
 //        btnModify( evPauseSwitchToPlay,btnReleased );
-        if ( ( msg == evPlaySwitchToPause )&( mplShMem->Playing == 1 ) ) goto NoPause;
+        mplMainAutoPlay=0;
+        if ( ( msg == evPlaySwitchToPause )&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
         mplMainRender=1;
 
-        switch ( mplShMem->StreamType )
+        switch ( guiIntfStruct.StreamType )
          {
-          case STREAMTYPE_STREAM: 
+          case STREAMTYPE_STREAM:
           case STREAMTYPE_VCD:
-          case STREAMTYPE_FILE:   
-	       dvd_title=0;
-	       break;
+          case STREAMTYPE_FILE:
+               dvd_title=0;
+               break;
 #ifdef USE_DVDREAD
-          case STREAMTYPE_DVD:    
-	       strcpy( mplShMem->Filename,"/dev/dvd" );
-	       break;
+          case STREAMTYPE_DVD:
+               guiSetFilename( guiIntfStruct.Filename,"/dev/dvd" );
+               break;
 #endif
          }
         mplPlay();
-	mplState();
+        mplState();
         break;
-   case evSetDVDSubtitle:
 #ifdef USE_DVDREAD
+   case evSetDVDSubtitle:
         dvdsub_id=(int)param;
-	dvd_title=mplShMem->DVD.current_title;
-	dvd_angle=mplShMem->DVD.current_angle;
-        dvd_chapter=mplShMem->DVD.current_chapter;
-        mplShMem->DVDChanged=1;
-	goto play_dvd_2;
-#endif
+        dvd_title=guiIntfStruct.DVD.current_title;
+        dvd_angle=guiIntfStruct.DVD.current_angle;
+        dvd_chapter=guiIntfStruct.DVD.current_chapter;
+        guiIntfStruct.DVDChanged=1;
+        goto play_dvd_2;
         break;
    case evSetDVDAudio:
-#ifdef USE_DVDREAD
         audio_id=(int)param;
-	dvd_title=mplShMem->DVD.current_title;
-	dvd_angle=mplShMem->DVD.current_angle;
-        dvd_chapter=mplShMem->DVD.current_chapter;
-        mplShMem->DVDChanged=1;
-	goto play_dvd_2;
-#endif
+        dvd_title=guiIntfStruct.DVD.current_title;
+        dvd_angle=guiIntfStruct.DVD.current_angle;
+        dvd_chapter=guiIntfStruct.DVD.current_chapter;
+        guiIntfStruct.DVDChanged=1;
+        goto play_dvd_2;
         break;
    case evSetDVDChapter:
-#ifdef USE_DVDREAD
-	dvd_title=mplShMem->DVD.current_title;
-	dvd_angle=mplShMem->DVD.current_angle;
+        dvd_title=guiIntfStruct.DVD.current_title;
+        dvd_angle=guiIntfStruct.DVD.current_angle;
         dvd_chapter=(int)param;
-        mplShMem->DVDChanged=1;
-	goto play_dvd_2;
-#endif
+        guiIntfStruct.DVDChanged=1;
+        goto play_dvd_2;
         break;
    case evSetDVDTitle:
-#ifdef USE_DVDREAD
         dvd_title=(int)param;
-	dvd_chapter=1;
-	dvd_angle=1;
-        mplShMem->DVDChanged=1;
-	goto play_dvd_2;
-#endif
+        dvd_chapter=1;
+        dvd_angle=1;
+        guiIntfStruct.DVDChanged=1;
+        goto play_dvd_2;
         break;
+#endif
 
    case evPause:
    case evPauseSwitchToPlay:
@@ -292,42 +287,38 @@ NoPause:
         break;
 
    case evStop:
-        IZE("evStop");
 //        btnModify( evPlaySwitchToPause,btnReleased );
 //        btnModify( evPauseSwitchToPlay,btnDisabled );
         mplMainRender=1;
         mplStop();
-	mplState();
+        mplState();
         break;
 
    case evLoadPlay:
         mplMainAutoPlay=1;
    case evLoad:
         mplMainRender=1;
-        gtkSendMessage( evLoad );
+        gtkShow( evLoad,NULL );
         break;
    case evLoadSubtitle:
         mplMainRender=1;
-        gtkSendMessage( evLoadSubtitle );
+        gtkShow( evLoadSubtitle,NULL );
         break;
    case evPrev:
-        IZE("evPrev");
         mplMainRender=1;
-        #ifdef DEBUG
-         dbprintf( 1,"[mw.h] previous stream ...\n" );
-        #endif
+        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[mw.h] previous stream ...\n" );
         break;
    case evNext:
-        IZE("evNext");
         mplMainRender=1;
-        #ifdef DEBUG
-         dbprintf( 1,"[mw.h] next stream ...\n" );
-        #endif
+        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[mw.h] next stream ...\n" );
         break;
 
    case evPlayList:
         IZE("evPlayList");
         mplMainRender=1;
+        gtkShow( evPlayList,NULL );
+#warning disabled old gtk code
+#if 0
         if ( gtkVisiblePlayList )
          {
           btnModify( evPlayList,btnReleased );
@@ -341,11 +332,12 @@ NoPause:
            btnModify( evPlayList,btnPressed );
            gtkVisiblePlayList=1;
           }
+#endif
         break;
 
-   case evSkinBrowser: gtkSendMessage( evSkinBrowser ); break;
-   case evAbout:       gtkSendMessage( evAbout ); break;
-   case evPreferences: gtkSendMessage( evPreferences ); break;
+   case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
+   case evAbout:       gtkShow( evAbout,NULL ); break;
+   case evPreferences: gtkShow( evPreferences,NULL ); break;
 
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;
@@ -355,9 +347,9 @@ NoPause:
 
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
-   case evMute:       mplShMem->Mute=1; break;
+   case evMute:       guiIntfStruct.Mute=1; break;
    case evSetVolume:
-   case evSetBalance: mplShMem->VolumeChanged=1; break;
+   case evSetBalance: guiIntfStruct.VolumeChanged=1; break;
 
 
    case evIconify:
@@ -368,25 +360,25 @@ NoPause:
          }
         break;
    case evNormalSize:
-        if ( mplShMem->Playing )
+        if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
-          appMPlayer.subWindow.OldX=( wsMaxX - moviewidth ) / 2;
-          appMPlayer.subWindow.OldY=( wsMaxY - movieheight ) / 2;
-          appMPlayer.subWindow.OldWidth=moviewidth; appMPlayer.subWindow.OldHeight=movieheight;
+          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth ) / 2;
+          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2;
+          appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight;
           wsFullScreen( &appMPlayer.subWindow );
-          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,guiIntfStruct.MovieWidth,guiIntfStruct.MovieHeight );
          }
         break;
    case evDoubleSize:
-        if ( mplShMem->Playing )
+        if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
-          appMPlayer.subWindow.OldX=( wsMaxX - moviewidth * 2 ) / 2;
-          appMPlayer.subWindow.OldY=( wsMaxY - movieheight * 2 ) / 2;
-          appMPlayer.subWindow.OldWidth=moviewidth * 2; appMPlayer.subWindow.OldHeight=movieheight * 2;
+          appMPlayer.subWindow.OldX=( wsMaxX - guiIntfStruct.MovieWidth * 2 ) / 2;
+          appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight * 2 ) / 2;
+          appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth * 2; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight * 2;
           wsFullScreen( &appMPlayer.subWindow );
-          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,guiIntfStruct.MovieWidth,guiIntfStruct.MovieHeight );
          }
         break;
    case evFullScreen:
@@ -410,30 +402,15 @@ NoPause:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
-//        if ( !mplShMem->Playing )
-//      wsPostRedisplay( &appMPlayer.subWindow );
         XFlush( wsDisplay );
         mplRedrawTimer=mplRedrawTimerConst;
         break;
-   case evGeneralTimer:
-        if ( mplMainAutoPlay )
-         {
-          mplMainRender=1;
-          mplMainAutoPlay=0;
-          mplPlay();
-         }
-	if ( mplMiddleMenu )
-	 {
-	  mplMiddleMenu=0;
-	  mplMsgHandle( gtkShMem->popupmenu,gtkShMem->popupmenuparam );
-	 }
-        break;
 // --- system events
    case evNone:
-        dbprintf( 1,"[mw] event none received.\n" );
+        mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[mw] event none received.\n" );
         break;
    default:
-        dbprintf( 1,"[mw] unknown event received ( %d,%.2f ).\n",msg,param );
+        mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[mw] unknown event received ( %d,%.2f ).\n",msg,param );
         break;
   }
 }
@@ -503,24 +480,21 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                  switch ( item->msg )
                   {
                    case evSetVolume:
-                        mplShMem->VolumeChanged=1;
-                        mplShMem->Volume=item->value;
+                        guiIntfStruct.VolumeChanged=1;
+                        guiIntfStruct.Volume=item->value;
                         break;
                   }
                  value=item->value;
                  break;
            }
-          mplMsgHandle( item->msg,value );
+          mplEventHandling( item->msg,value );
           mplMainRender=1;
           itemtype=0;
           break;
-	  
+
    case wsPMMouseButton:
-#ifdef USE_DVDREAD
-	memcpy( &gtkShMem->DVD,&mplShMem->DVD,sizeof( mplDVDStruct ) );
-#endif
-        gtkSendMessage( evShowPopUpMenu );
-	break;	  
+        gtkShow( evShowPopUpMenu,NULL );
+        break;
 
 // --- rolled mouse ... de szar :)))
    case wsP5MouseButton: value=-2.5f; goto rollerhandled;
@@ -535,11 +509,11 @@ rollerhandled:
             switch ( item->msg )
              {
               case evSetVolume:
-                   mplShMem->VolumeChanged=1;
-                   mplShMem->Volume=item->value;
+                   guiIntfStruct.VolumeChanged=1;
+                   guiIntfStruct.Volume=item->value;
                    break;
              }
-            mplMsgHandle( item->msg,item->value );
+            mplEventHandling( item->msg,item->value );
             mplMainRender=1;
            }
           break;
@@ -567,11 +541,11 @@ potihandled:
                  switch ( item->msg )
                   {
                    case evSetVolume:
-                        mplShMem->VolumeChanged=1;
-                        mplShMem->Volume=item->value;
+                        guiIntfStruct.VolumeChanged=1;
+                        guiIntfStruct.Volume=item->value;
                         break;
                   }
-                 mplMsgHandle( item->msg,item->value );
+                 mplEventHandling( item->msg,item->value );
                  mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
            }
@@ -615,7 +589,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
-   
+
    case wsXF86LowerVolume:  msg=evDecVolume; break;
    case wsXF86RaiseVolume:  msg=evIncVolume; break;
    case wsXF86Mute:         msg=evMute; break;
@@ -629,7 +603,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
   }
  if ( msg != evNone )
   {
-   mplMsgHandle( msg,0 );
+   mplEventHandling( msg,0 );
 //   mplMainRender=1;
 //   wsPostRedisplay( &appMPlayer.mainWindow );
   }

@@ -194,6 +194,8 @@ extern int wsGetDepthOnScreen( void );
 
 extern void wsDoExit( void );
 extern void wsMainLoop( void );
+extern Bool wsEvents( Display * display,XEvent * Event,XPointer arg );
+extern void wsHandleEvents( void );
 
 // ----------------------------------------------------------------------------------------------
 //  wsCrateWindow: create a new window on the screen.

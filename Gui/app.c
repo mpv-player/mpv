@@ -8,7 +8,6 @@
 #include "../help_mp.h"
 
 #include "app.h"
-#include "error.h"
 #include "wm/wskeys.h"
 #include "skin/skin.h"
 #include "mplayer/mplayer.h"
@@ -106,10 +105,9 @@ void appInit( int argc,char* argv[], char *envp[], void* disp )
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
  if ( !skinName )
   {
-   if ( ( skinName=(char *)calloc( 1,7 ) ) == NULL ) { dbprintf( 0,"[config] Not enough memory.\n" ); exit( 1 ); }
+   if ( ( skinName=(char *)calloc( 1,7 ) ) == NULL ) { mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[config] Not enough memory.\n" ); exit( 1 ); }
    strcpy( skinName,"default" );
   }
- initDebug(NULL); // write messages to stderr
  switch ( skinRead( skinName ) )
   {
    case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );

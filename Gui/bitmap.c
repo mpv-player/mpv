@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "bitmap.h"
-#include "../error.h"
 
 #define BMP 1
 #define TGA 2
@@ -25,13 +24,11 @@ int conv24to32( txSample * bf )
    bf->BPP=32;
    if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
     {
-     #ifdef DEBUG
-      dbprintf( 4,"[bitmap] Not enough memory for image.\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] Not enough memory for image.\n" );
      return 1;
     }
    memset( bf->Image,0,bf->ImageSize );
-   for ( c=0,i=0;i < bf->Width * bf->Height * 3; )
+   for ( c=0,i=0;i < (int)(bf->Width * bf->Height * 3); )
     {
      bf->Image[c++]=tmpImage[i++];
      bf->Image[c++]=tmpImage[i++];
@@ -47,7 +44,7 @@ void bgr2rgb( txSample * bf )
  unsigned char c;
  int           i;
 
- for ( i=0;i < bf->ImageSize;i+=4 )
+ for ( i=0;i < (int)bf->ImageSize;i+=4 )
   {
    c=bf->Image[i];
    bf->Image[i]=bf->Image[i+2];
@@ -58,8 +55,7 @@ void bgr2rgb( txSample * bf )
 void Normalize( txSample * bf )
 {
  int           i;
-
- for ( i=0;i < bf->ImageSize;i+=4 ) bf->Image[i+3]=0;
+ for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i+3]=0;
 }
 
 unsigned char tmp[512];
@@ -149,23 +145,17 @@ int bpRead( char * fname, txSample * bf )
         bgr=1;
         break;
    case TGAPACKED:
-        #ifdef DEBUG
-         dbprintf( 4,"[bitmap] sorry, packed TGA not supported.\n" );
-        #endif
+        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] sorry, packed TGA not supported.\n" );
         return -6;
    default:
      {
-      #ifdef DEBUG
-       dbprintf( 4,"[bitmap] Unknown file type ( %s ).\n",fname );
-      #endif
+      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] Unknown file type ( %s ).\n",fname );
       return -7;
      }
   }
  if ( bf->BPP < 24 )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[bitmap] sorry, 16 or less bitmaps not supported.\n" );
-   #endif
+    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] sorry, 16 or less bitmaps not supported.\n" );
    return -1;
   }
  if ( conv24to32( bf ) ) return -8;
@@ -180,15 +170,15 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->Height=in->Height;
  out->BPP=1;
  out->ImageSize=out->Width * out->Height / 8;
- dbprintf( 4,"[c1to32] imagesize: %d\n",out->ImageSize );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
  out->Image=(char *)calloc( 1,out->ImageSize );
- if ( out->Image == NULL ) dbprintf( 4,"nem van ram baze\n" );
+ if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
  {
   int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
   buf=(unsigned long *)in->Image;
-  for ( b=0,i=0;i < out->Width * out->Height;i++ )
+  for ( b=0,i=0;i < (int)(out->Width * out->Height);i++ )
    {
-    if ( buf[i] != adaptivlimit ) tmp=( tmp >> 1 )|128;
+    if ( (int)buf[i] != adaptivlimit ) tmp=( tmp >> 1 )|128;
      else { tmp=tmp >> 1; buf[i]=nothaveshape=0; }
     if ( b++ == 7 ) { out->Image[c++]=tmp; tmp=b=0; }
    }
@@ -205,12 +195,12 @@ void Convert1to32( txSample * in,txSample * out )
  out->BPP=32;
  out->ImageSize=out->Width * out->Height * 4;
  out->Image=(char *)calloc( 1,out->ImageSize );
- dbprintf( 4,"[c32to1] imagesize: %d\n",out->ImageSize );
- if ( out->Image == NULL ) dbprintf( 4,"nem van ram baze\n" );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
+ if ( (int)out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
  {
   int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0;
   buf=(unsigned long *)out->Image;
-  for ( c=0,i=0;i < in->Width * in->Height / 8;i++ )
+  for ( c=0,i=0;i < (int)(in->Width * in->Height / 8);i++ )
    {
     tmp=in->Image[i];
     for ( b=0;b<8;b++ )

@@ -11,7 +11,7 @@ void mplSubDraw( wsParamDisplay )
  if ( !appMPlayer.subWindow.Mapped ||
       appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
 
- if ( mplShMem->Playing ) mplSubRender=0;
+ if ( guiIntfStruct.Playing ) mplSubRender=0;
 
  if ( mplSubRender )
   {
@@ -28,18 +28,15 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  mplMouseTimer=mplMouseTimerConst;
  wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
- 
+
 
  switch( Button )
   {
    case wsPMMouseButton:
-#ifdef USE_DVDREAD
-	  memcpy( &gtkShMem->DVD,&mplShMem->DVD,sizeof( mplDVDStruct ) );
-#endif
-          gtkSendMessage( evShowPopUpMenu );
+          gtkShow( evShowPopUpMenu,NULL );
           break;
    case wsPRMouseButton:
-	  if ( gtkShMem->visiblepopupmenu ) gtkSendMessage( evHidePopUpMenu );
+          gtkShow( evHidePopUpMenu,NULL );
           mplShowMenu( RX,RY );
           msButton=wsPRMouseButton;
           break;
@@ -50,13 +47,13 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 // ---
    case wsPLMouseButton:
           if ( appMPlayer.subWindow.isFullScreen )
-	   {
+           {
             if( ++SubVisible%2 ) wsMoveTopWindow( &appMPlayer.mainWindow );
              else wsMoveTopWindow( &appMPlayer.subWindow );
             mplSubMoved=1;
-	    break;
-	   }
-	  if ( gtkShMem->visiblepopupmenu ) gtkSendMessage( evHidePopUpMenu );
+            break;
+           }
+          gtkShow( evHidePopUpMenu,NULL );
           sx=X; sy=Y;
           msButton=wsPLMouseButton;
           mplSubMoved=0;

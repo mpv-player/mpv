@@ -7,29 +7,28 @@
 #include "./mplayer.h"
 #include "../events.h"
 #include "../app.h"
+#include "../interface.h"
 #include "../skin/skin.h"
 #include "../skin/font.h"
 #include "../wm/ws.h"
 #include "../wm/wskeys.h"
 #include "../wm/widget.h"
 #include "../bitmap/bitmap.h"
-#include "../timer.h"
-#include "../error.h"
 
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
 #include "../../libmpdemux/stream.h"
+#include "../../mp_msg.h"
 
 #define mplMouseTimerConst  10
 #define mplRedrawTimerConst 5
 
 int mplMouseTimer  = mplMouseTimerConst;
 int mplRedrawTimer = mplRedrawTimerConst;
-int mplGeneralTimer = -1;
 int mplTimer = 0;
 
-void mplMsgHandle( int msg,float param );
+void mplEventHandling( int msg,float param );
 
 #include "widgets.h"
 #include "play.h"
@@ -38,31 +37,24 @@ void mplMsgHandle( int msg,float param );
 #include "sw.h"
 #include "widgets.h"
 
-void mplTimerHandler( int signum )
+void mplTimerHandler( void )
 {
  mplTimer++;
  mplMouseTimer--;
  mplRedrawTimer--;
- mplGeneralTimer--;
- if ( mplMouseTimer == 0 ) mplMsgHandle( evHideMouseCursor,0 );
- if ( mplRedrawTimer == 0 ) mplMsgHandle( evRedraw,0 );
- if ( mplGeneralTimer == 0 ) mplMsgHandle( evGeneralTimer,0 );
+ if ( mplMouseTimer == 0 ) mplEventHandling( evHideMouseCursor,0 );
+ if ( mplRedrawTimer == 0 ) mplEventHandling( evRedraw,0 );
 }
 
 void mplInit( int argc,char* argv[], char *envp[], void* disp )
 {
  int i;
 
- // allocates shmem to mplShMem
  // init fields of this struct to default values
  mplMPlayerInit( argc,argv,envp );
 
- // allocates shmem to gtkShMem
  // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit( argc,argv,envp );
- strcpy( gtkShMem->sb.name,skinName ); 
-
- message=mplErrorHandler;  // error messagebox drawing function
 
  // opens X display, checks for extensions (XShape, DGA etc)
  wsXInit(disp);
@@ -81,7 +73,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
 
  vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
- 
+
  i=wsHideFrame|wsMaxSize|wsHideWindow;
  if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsHideWindow;
  wsCreateWindow( &appMPlayer.mainWindow,
@@ -89,13 +81,13 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
- 
+
  mplMenuInit();
 
  #ifdef DEBUG
-  dbprintf( 1,"[main] Depth on screen: %d\n",wsDepthOnScreen );
-  dbprintf( 1,"[main] parent: 0x%x\n",(int)appMPlayer.mainWindow.WindowID );
-  dbprintf( 1,"[main] sub: 0x%x\n",(int)appMPlayer.subWindow.WindowID );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] Depth on screen: %d\n",wsDepthOnScreen );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] parent: 0x%x\n",(int)appMPlayer.mainWindow.WindowID );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] sub: 0x%x\n",(int)appMPlayer.subWindow.WindowID );
  #endif
 
  appMPlayer.mainWindow.ReDraw=mplMainDraw;
@@ -114,24 +106,13 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  wsPostRedisplay( &appMPlayer.mainWindow );
  wsPostRedisplay( &appMPlayer.subWindow );
 
- btnModify( evSetVolume,mplShMem->Volume );
- btnModify( evSetBalance,mplShMem->Balance );
- btnModify( evSetMoviePosition,mplShMem->Position );
+ btnModify( evSetVolume,guiIntfStruct.Volume );
+ btnModify( evSetBalance,guiIntfStruct.Balance );
+ btnModify( evSetMoviePosition,guiIntfStruct.Position );
 
- mplShMem->Playing=0;
+ guiIntfStruct.Playing=0;
 
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
-}
-
-void mplDone(){
-
- dbprintf( 1,"[mplayer] exit.\n" );
-
- mplStop();
-// timerDone();
- gtkDone();  // kills the gtkThreadProc() process
- wsXDone();
-
 }
 

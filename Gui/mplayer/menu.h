@@ -100,14 +100,14 @@ void mplHideMenu( int mx,int my )
 
  if ( ( x < 0 ) || ( y < 0 ) ) return;
 
-// printf( "---------> %d %d,%d\n",i,x,y ); 
+// printf( "---------> %d %d,%d\n",i,x,y );
 // printf( "--------> mi: %d,%d %dx%d\n",appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].height );
  if ( wgIsRect( x,y,
         appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,
         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,
         appMPlayer.MenuItems[i].y+appMPlayer.MenuItems[i].height ) )
    {
-    mplMsgHandle( appMPlayer.MenuItems[i].msg,0 );
+    mplEventHandling( appMPlayer.MenuItems[i].msg,0 );
    }
 }
 
@@ -122,7 +122,7 @@ void mplMenuInit( void )
  if ( ( mplMenuDrawBuffer = calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
   {
    #ifdef DEBUG
-    dbprintf( 1,MSGTR_NEMFMR );
+    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] %s",MSGTR_NEMFMR );
    #endif
    gtkMessageBox( GTK_MB_FATAL,MSGTR_NEMFMR );
    return;
@@ -133,7 +133,7 @@ void mplMenuInit( void )
  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsOverredirect|wsHideFrame|wsMaxSize|wsMinSize|wsHideWindow,"MPlayer menu" );
 
  #ifdef DEBUG
-  dbprintf( 1,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
  #endif
 
  appMPlayer.menuWindow.ReDraw=mplMenuDraw;

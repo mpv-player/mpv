@@ -7,7 +7,7 @@
 #include "skin.h"
 #include "font.h"
 #include "cut.h"
-#include "../error.h"
+#include "../../mp_msg.h"
 
 int items;
 
@@ -44,8 +44,7 @@ int fntRead( char * path,char * fname,int id )
  unsigned char * ptmp;
  unsigned char   command[32];
  unsigned char   param[256];
- int             c,i;
- int             linenumber = 0;
+ int             c,linenumber = 0;
 
  strcpy( tmp,path ); strcat( tmp,fname ); strcat( tmp,".fnt" );
  if ( ( f=fopen( tmp,"rt" ) ) == NULL ) return -1;
@@ -55,7 +54,7 @@ int fntRead( char * path,char * fname,int id )
 
    c=tmp[ strlen( tmp ) - 1 ]; if ( ( c == '\n' )||( c == '\r' ) ) tmp[ strlen( tmp ) - 1 ]=0;
    c=tmp[ strlen( tmp ) - 1 ]; if ( ( c == '\n' )||( c == '\r' ) ) tmp[ strlen( tmp ) - 1 ]=0;
-   for ( c=0;c < strlen( tmp );c++ )
+   for ( c=0;c < (int)strlen( tmp );c++ )
     if ( tmp[c] == ';' )
      {
       tmp[c]=0;
@@ -76,18 +75,14 @@ int fntRead( char * path,char * fname,int id )
      cutItem( param,tmp,',',1 ); Fonts[id]->Fnt[i].y=atoi( tmp );
      cutItem( param,tmp,',',2 ); Fonts[id]->Fnt[i].sx=atoi( tmp );
      cutItem( param,tmp,',',3 ); Fonts[id]->Fnt[i].sy=atoi( tmp );
-     #ifdef DEBUG
-      dbprintf( 3,"[font]  char: '%s' params: %d,%d %dx%d\n",command,Fonts[id]->Fnt[i].x,Fonts[id]->Fnt[i].y,Fonts[id]->Fnt[i].sx,Fonts[id]->Fnt[i].sy );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[font]  char: '%s' params: %d,%d %dx%d\n",command,Fonts[id]->Fnt[i].x,Fonts[id]->Fnt[i].y,Fonts[id]->Fnt[i].sx,Fonts[id]->Fnt[i].sy );
     }
     else
      {
       if ( !strcmp( command,"image" ) )
        {
         strcpy( tmp,path ); strcat( tmp,param );
-        #ifdef DEBUG
-         dbprintf( 3,"[font] font imagefile: %s\n",tmp );
-        #endif
+        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[font] font imagefile: %s\n",tmp );
         if ( skinBPRead( tmp,&Fonts[id]->Bitmap ) ) return -2;
        }
      }
@@ -109,7 +104,7 @@ int fntTextWidth( int id,char * str )
  int size = 0;
  int i;
  if ( !Fonts[id] ) return 0;
- for ( i=0;i < strlen( str );i++ )
+ for ( i=0;i < (int)strlen( str );i++ )
    if ( Fonts[id]->Fnt[ (int)str[i] ].sx != -1 ) size+=Fonts[id]->Fnt[ (int)str[i] ].sx;
  return size;
 }
@@ -118,7 +113,7 @@ int fntTextHeight( int id,char * str )
 {
  int max = 0,i;
  if ( !Fonts[id] ) return 0;
- for ( i=0;i < strlen( str );i++ )
+ for ( i=0;i < (int)strlen( str );i++ )
    if ( Fonts[id]->Fnt[ (int)str[i] ].sy > max ) max=Fonts[id]->Fnt[ (int)str[i] ].sy;
  return max;
 }
@@ -150,7 +145,7 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
 
  obuf=(unsigned long *)tmp->Image;
  ibuf=(unsigned long *)Fonts[id]->Bitmap.Image;
- for ( i=0;i < strlen( p );i++ )
+ for ( i=0;i < (int)strlen( p );i++ )
   {
    int c = (int)p[i];
    if ( Fonts[id]->Fnt[c].x == -1 ) c=32;

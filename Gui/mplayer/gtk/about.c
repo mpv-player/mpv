@@ -10,7 +10,6 @@
 void ab_Ok_released( GtkButton * button,gpointer user_data )
 {
  gtk_widget_hide( AboutBox );
- gtkVisibleAboutBox=0;
 }
 
 GtkWidget * create_About( void )
@@ -157,7 +156,7 @@ GtkWidget * create_About( void )
                    "Homepage:\n" \
                    "        Design:  Chass\n" \
                    "        Contents: Gabucino\n" \
-		   "                  LGB\n\n" \
+                   "                  LGB\n\n" \
                    "English documentation:\n" \
                    "        tech-*.txt: A'rpi\n" \
                    "        all the others: Gabucino\n\n" \

@@ -1,7 +1,8 @@
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "./mplayer.h"
-#include "psignal.h"
-#include "../error.h"
 
 #include "../../events.h"
 #include "../../../config.h"
@@ -27,14 +28,11 @@ GtkWidget * opAutoFullscreenCheckBox;
 GtkWidget * opOk;
 GtkWidget * opCancel;
 
-int opShift = False;
+int opShift = 0;
 
 void HideOptions( void )
 {
  gtk_widget_hide( Options );
- gtkVisibleOptions=0;
- gtkShMem->vs.window=evPreferences;
- gtkSendMessage( evHideWindow );
 }
 
 gboolean on_window2_key_press_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
@@ -43,10 +41,10 @@ gboolean on_window2_key_press_event( GtkWidget * widget,GdkEventKey * event,gpoi
   {
    case GDK_Shift_L:
    case GDK_Shift_R:
-        opShift=True;
+        opShift=1;
         break;
   }
- return FALSE;
+ return 0;
 }
 
 gboolean on_window2_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
@@ -66,7 +64,7 @@ gboolean on_window2_key_release_event( GtkWidget * widget,GdkEventKey * event,gp
         break;
    case GDK_Shift_L:
    case GDK_Shift_R:
-        opShift=False;
+        opShift=0;
         break;
   }
  return FALSE;

@@ -27,7 +27,6 @@
 
 #include "bmp.h"
 #include "../bitmap.h"
-#include "../../error.h"
 
 int bmpRead( unsigned char * fname,txSample * bF )
 {
@@ -40,16 +39,12 @@ int bmpRead( unsigned char * fname,txSample * bF )
 
  if ( (BMP=fopen( fname,"rt" )) == NULL )
   {
-#ifdef DEBUG
-   dbprintf( 4,"[bmp] File not found ( %s ).\n",fname );
-#endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp] File not found ( %s ).\n",fname );
    return 1;
   }
  if ( (i=fread( bmpHeader,54,1,BMP )) != 1 )
   {
-#ifdef DEBUG
-   dbprintf( 4,"[bmp] Header read error ( %s ).\n",fname );
-#endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp] Header read error ( %s ).\n",fname );
    return 2;
   }
 // memcpy( &bF->Size,&bmpHeader[2],4 );
@@ -61,31 +56,23 @@ int bmpRead( unsigned char * fname,txSample * bF )
 
  if ( bF->BPP < 24 )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[bmp] Sorry, this loader not supported 16 bit or less ...\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp] Sorry, this loader not supported 16 bit or less ...\n" );
    return 3;
   }
 
-#ifdef DEBUG
- dbprintf( 4,"[bmp] filename: %s\n",fname );
- dbprintf( 4,"[bmp]  size: %dx%d bits: %d\n",bF->Width,bF->Height,bF->BPP );
- dbprintf( 4,"[bmp]  imagesize: %lu\n",bF->ImageSize );
-#endif
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp] filename: %s\n",fname );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp]  size: %dx%d bits: %d\n",bF->Width,bF->Height,bF->BPP );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp]  imagesize: %lu\n",bF->ImageSize );
 
  if ( ( bF->Image=malloc( bF->ImageSize ) ) == NULL )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[bmp]  Not enough memory for image buffer.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp]  Not enough memory for image buffer.\n" );
    return 4;
   }
 
  if ( (i=fread( bF->Image,bF->ImageSize,1,BMP )) != 1 )
    {
-   #ifdef DEBUG
-    dbprintf( 4,"[bmp]  Image read error.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp]  Image read error.\n" );
    return 5;
   }
 
@@ -94,9 +81,7 @@ int bmpRead( unsigned char * fname,txSample * bF )
  linesize=bF->Width * ( bF->BPP / 8 );
  if ( (line=malloc( linesize )) == NULL )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[bmp] Not enough memory for flipping.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bmp] Not enough memory for flipping.\n" );
    return 6;
   }
 

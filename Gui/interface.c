@@ -1,9 +1,31 @@
 
+#include <string.h>
 
 #include "ws.h"
 #include "mplayer/play.h"
 #include "interface.h"
+
 #include "../mplayer.h"
+#include "mplayer/widgets.h"
+#include "mplayer/mplayer.h"
+#include "app.h"
+#include "../libvo/x11_common.h"
+
+guiInterface_t guiIntfStruct;
+
+void guiInit( int argc,char* argv[], char *envp[] )
+{
+ memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );
+ appInit( argc,argv,envp,(void*)mDisplay );
+}
+
+void guiDone( void )
+{
+ mp_msg( MSGT_GPLAYER,MSGL_V,"[mplayer] exit.\n" );
+ mplStop();
+ gtkDone();
+ wsXDone();
+}
 
 void guiGetEvent( int type,char * arg )
 {
@@ -11,15 +33,16 @@ void guiGetEvent( int type,char * arg )
   {
    case guiXEvent:
         wsEvents( wsDisplay,(XEvent *)arg,NULL );
-	break;
+        gtkEventHandling();
+        break;
    case guiCEvent:
-	break;
+        break;
   }
 }
 
 void guiEventHandling( void )
 {
- if ( use_gui && !mplShMem->Playing ) wsHandleEvents();
- mplTimerHandler(0); // handle GUI timer events
- if ( mplShMem->SkinChange ) { ChangeSkin(); mplShMem->SkinChange=0;  }
+ if ( use_gui && !guiIntfStruct.Playing ) wsHandleEvents();
+ gtkEventHandling();
+ mplTimerHandler(); // handle GUI timer events
 }

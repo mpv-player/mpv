@@ -9,9 +9,6 @@
 void HidePlayList( void )
 {
  gtk_widget_hide( PlayList );
- gtkVisiblePlayList=0;
- gtkShMem->vs.window=evPlayList;
- gtkSendMessage( evHideWindow );
 }
 
 void pl_PlayList_destroy( GtkObject * object,gpointer user_data )

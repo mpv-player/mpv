@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "sb.h"
 #include "../../events.h"
@@ -18,16 +19,7 @@ char      * sbSelectedSkin=NULL;
 char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
 
-void HideSkinBrowser( void )
-{
- gtk_widget_hide( SkinBrowser );
- gtkVisibleSkinBrowser=0;
- gtkShMem->vs.window=evSkinBrowser;
- gtkSendMessage( evHideWindow );
- gtkSendMessage( evSkinBrowser );
-}
-
-char gtkOldSkin[128];
+char * gtkOldSkin;
 
 int gtkFillSkinList( gchar * mdir )
 {
@@ -37,7 +29,7 @@ int gtkFillSkinList( gchar * mdir )
  glob_t          gg;
  struct stat     fs;
 
- strcpy( gtkOldSkin,gtkShMem->sb.name );
+ gtkOldSkin=strdup( skinName );
  if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
   {
    gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory );
@@ -68,21 +60,28 @@ int gtkFillSkinList( gchar * mdir )
 }
 
 void on_SkinBrowser_destroy( GtkObject * object,gpointer user_data )
-{ HideSkinBrowser(); }
+{ gtk_widget_hide( SkinBrowser ); }
 
 void on_SkinBrowser_Cancel( GtkObject * object,gpointer user_data )
 {
- strcpy( gtkShMem->sb.name,gtkOldSkin );
- HideSkinBrowser();
+ ChangeSkin( skinName );
+ gtk_widget_hide( SkinBrowser );
+}
+
+void on_SkinBrowser_Ok( GtkObject * object,gpointer user_data )
+{
+ ChangeSkin( sbSelectedSkin );
+ if ( skinName ) free( skinName );
+ skinName=strdup( sbSelectedSkin );
+ gtk_widget_hide( SkinBrowser );
 }
 
 void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
 {
  gtk_clist_get_text( clist,row,0,&sbSelectedSkin );
- strcpy( gtkShMem->sb.name,sbSelectedSkin );
- gtkSendMessage( evSkinBrowser );
+ ChangeSkin( sbSelectedSkin );
  if( !bevent ) return;
- if( bevent->type == GDK_2BUTTON_PRESS ) HideSkinBrowser();
+ if( bevent->type == GDK_2BUTTON_PRESS ) gtk_widget_hide( SkinBrowser );
 }
 
 GtkWidget * create_SkinBrowser( void )
@@ -248,7 +247,7 @@ GtkWidget * create_SkinBrowser( void )
 
  gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),NULL );
  gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",GTK_SIGNAL_FUNC( on_SkinList_select_row ),NULL );
- gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),NULL );
+ gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_Ok ),NULL );
  gtk_signal_connect( GTK_OBJECT( Cancel ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_Cancel ),NULL );
 
  if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )

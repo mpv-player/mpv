@@ -1,4 +1,7 @@
 
+#ifndef _MP_MSG_H
+#define _MP_MSG_H
+
 extern int verbose; // defined in mplayer.c
 
 // verbosity elevel:
@@ -85,4 +88,6 @@ void mp_msg_c( int x, const char *format, ... );
 // these messages are only usefull for developers, disable them
 #define mp_dbg(mod,lev, ... ) 
 #endif
+#endif
+
 #endif

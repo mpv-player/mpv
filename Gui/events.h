@@ -47,7 +47,7 @@
 #define evHelp              37
 
 #define evLoadSubtitle      38
-#define evPlayDVD	    39
+#define evPlayDVD           39
 
 #define evExit              1000
 

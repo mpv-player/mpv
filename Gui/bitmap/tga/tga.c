@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "tga.h"
-#include "../../error.h"
 
 int tgaRead( char * filename,txSample * bf )
 {
@@ -20,23 +19,17 @@ int tgaRead( char * filename,txSample * bf )
  if ( !strstr( tmp,".tga" ) ) strcat( tmp,".tga" );
  if ( (BMP=fopen( tmp,"rb" )) == NULL )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[tga] File not found ( %s ).\n",tmp );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] File not found ( %s ).\n",tmp );
    return 1;
   }
  if ( (i=fread( &tgaHeader,sizeof( tgaHeader ),1,BMP )) != 1 )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[tga] Header read error ( %s ).\n",tmp );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Header read error ( %s ).\n",tmp );
    return 2;
   }
  if ( tgaHeader.depth < 24 )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[tga] Sorry, this loader not supported 16 bit or less ...\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Sorry, this loader not supported 16 bit or less ...\n" );
    return 3;
   }
  bf->Width=tgaHeader.sx;
@@ -46,9 +39,7 @@ int tgaRead( char * filename,txSample * bf )
 
  if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[tga]  Not enough memory for image buffer.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  Not enough memory for image buffer.\n" );
    return 4;
   }
 
@@ -57,35 +48,29 @@ int tgaRead( char * filename,txSample * bf )
   {
    if ( ( comment=malloc( tgaHeader.tmp[0] + 1 ) ) == NULL )
     {
-     #ifdef DEBUG
-      dbprintf( 4,"[tga] Not enough memory for comment string.\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Not enough memory for comment string.\n" );
      return 5;
     }
    memset( comment,0,tgaHeader.tmp[0] + 1 );
    if ( fread( comment,tgaHeader.tmp[0],1,BMP ) != 1 )
     {
-     #ifdef DEBUG
-      dbprintf( 4,"[tga] Comment read error.\n" );
-     #endif
-   return 6;
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Comment read error.\n" );
+     return 6;
     }
   }
 
- #ifdef DEBUG
-  dbprintf( 4,"[tga] filename ( read ): %s\n",tmp );
-  dbprintf( 4,"[tga]  size: %dx%d bits: %d\n",bf->Width,bf->Height,bf->BPP );
-  dbprintf( 4,"[tga]  imagesize: %lu\n",bf->ImageSize );
-  if ( comment ) dbprintf( 4,"[tga]  comment: %s\n",comment );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] filename ( read ): %s\n",tmp );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  size: %dx%d bits: %d\n",bf->Width,bf->Height,bf->BPP );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  imagesize: %lu\n",bf->ImageSize );
+ #ifdef MP_DEBUG
+  if ( comment ) mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  comment: %s\n",comment );
  #endif
 
  if ( comment ) free( comment );
 
  if ( fread( bf->Image,bf->ImageSize,1,BMP ) != 1 )
   {
-   #ifdef DEBUG
-    dbprintf( 4,"[tga] Image read error.\n" );
-   #endif
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Image read error.\n" );
    return 7;
   }
 
@@ -96,9 +81,7 @@ int tgaRead( char * filename,txSample * bf )
    linesize=bf->Width * ( bf->BPP / 8 );
    if ( (line=malloc( linesize )) == NULL )
     {
-     #ifdef DEBUG
-      dbprintf( 4,"[tga] Not enough memory for flipping.\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga] Not enough memory for flipping.\n" );
      return 8;
     }
 
@@ -129,7 +112,7 @@ void tgaWriteTexture( char * filename,txSample * bf )
  if ( !strstr( tmp,".tga" ) ) strcat( tmp,".tga" );
  if ( ( BMP=fopen( tmp,"wb+" ) ) == NULL )
   {
-   dbprintf( 0,"[tga] File not open ( %s ).\n",tmp );
+   mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[tga] File not open ( %s ).\n",tmp );
    exit( 0 );
   }
  memset( &tgaHeader,0,sizeof( tgaHeader ) );
@@ -141,21 +124,19 @@ void tgaWriteTexture( char * filename,txSample * bf )
  if ( bf->BPP != 8 ) tgaHeader.tmp[2]=2;
   else tgaHeader.tmp[2]=3;
 
- #ifdef DEBUG
-  dbprintf( 4,"\n[tga] filename ( write ): %s\n",tmp );
-  dbprintf( 4,"[tga]  size: %dx%d\n",bf->Width,bf->Height );
-  dbprintf( 4,"[tga]  bits: %d\n",bf->BPP );
-  dbprintf( 4,"[tga]  imagesize: %lu\n",bf->ImageSize );
-  dbprintf( 4,"[tga]  comment: %s\n",comment );
-  dbprintf( 4,"\n" );
- #endif
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"\n[tga] filename ( write ): %s\n",tmp );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  size: %dx%d\n",bf->Width,bf->Height );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  bits: %d\n",bf->BPP );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  imagesize: %lu\n",bf->ImageSize );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[tga]  comment: %s\n",comment );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"\n" );
 
  if ( tgaHeader.ctmp == 0 )
   {
    linesize=bf->Width * ( bf->BPP / 8 );
    if ( (line=malloc( linesize )) == NULL )
     {
-     dbprintf( 0,"[tga] Not enough memory for flipping.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[tga] Not enough memory for flipping.\n" );
      exit( 0 );
     }
 

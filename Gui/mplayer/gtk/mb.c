@@ -21,14 +21,11 @@ void on_MessageBox_destroy( GtkObject * object,gpointer user_data  )
   }
 */
  gtk_widget_hide( MessageBox  );
- gtkVisibleMessageBox=0;
 }
 
 void on_Ok_released( GtkButton * button,gpointer user_data  )
 {
  gtk_widget_hide( MessageBox  );
- gtkVisibleMessageBox=0;
- gtkSendMessage( evMessageBox  );
 }
 
 GtkWidget * create_MessageBox( int type )

@@ -18,9 +18,9 @@
 
 #include <inttypes.h>
 
+#include "../../config.h"
 #include "ws.h"
 #include "wsconv.h"
-#include "../../config.h"
 #include "../../postproc/rgb2rgb.h"
 
 #include <X11/extensions/XShm.h>
@@ -381,9 +381,9 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  {
   char buf[32]; int i;
   sprintf( buf,"_%s_REMOTE",label );
-  for( i=0;i<strlen( buf );i++ )
+  for( i=0;i < (int)strlen( buf );i++ )
     if ( ( buf[i] >= 'a' )&&( buf[i] <= 'z' ) ) buf[i]=buf[i] - 32;
-  for( i=0;i<strlen( buf );i++ )
+  for( i=0;i < (int)strlen( buf );i++ )
     if ( buf[i] == ' ' ) buf[i]='_';
   fprintf( stderr,"[ws] atomname: %s\n",buf );
   win->AtomRemote=XInternAtom( wsDisplay,buf,False );
@@ -681,11 +681,11 @@ buttonreleased:
           wsWindowList[l]->MouseHandler( i,Event->xbutton.x,Event->xbutton.y,Event->xmotion.x_root,Event->xmotion.y_root );
         break;
 
-   case GravityNotify:
+//   case GravityNotify:
 //        #ifdef DEBUG
-         fprintf( stderr,"[ws] window ( 0x%x ) gravity: %d,%d\n",wsWindowList[l]->WindowID,Event->xgravity.x,Event->xgravity.y );
+//         fprintf( stderr,"[ws] window ( 0x%x ) gravity: %d,%d\n",wsWindowList[l]->WindowID,Event->xgravity.x,Event->xgravity.y );
 //      #endif
-        break;
+//        break;
 
    case PropertyNotify:
 //      break;
@@ -730,8 +730,7 @@ buttonreleased:
 Bool wsDummyEvents( Display * display,XEvent * Event,XPointer arg )
 { return True; }
 
-// mplTimerHandler(0); // handle timer event
-void wsHandleEvents(){
+void wsHandleEvents( void ){
  // handle pending events
  while ( XPending(wsDisplay) ){
    XNextEvent( wsDisplay,&wsEvent );
@@ -739,6 +738,8 @@ void wsHandleEvents(){
    wsEvents( wsDisplay,&wsEvent,NULL );
  }
 }
+
+extern void mplTimerHandler( void );
 
 void wsMainLoop( void )
 {
@@ -758,7 +759,7 @@ while(wsTrue){
    wsEvents( wsDisplay,&wsEvent,NULL );
    delay=0;
  }
- mplTimerHandler(0); // handle timer event
+ mplTimerHandler(); // handle timer event
  usleep(delay*1000); // FIXME!
  if(delay<10*20) delay+=20; // pump up delay up to 0.2 sec (low activity)
 }
