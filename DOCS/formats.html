@@ -198,17 +198,33 @@ The file format is really a sequence of uncompressed YUV 4:2:0 images.
 
 <P><B><A NAME=2.1.2>2.1.2. Audio formats</A></B></P>
 
-<P><B>MPlayer</B> used to be a <B>Movie</B> and not a <B>Media</B> player.
-This is slowly changing and MP3, OGG VORBIS, WMA, MP4 and WAV are currently
-supported. Nevertheless the main focus is still video, so you may prefer to
-use alternatives like <A HREF="http://www.xmms.org">xmms</A> or 
-<A HREF="http://www.mpg123.de">mpg123</A> instead.</P>
+<P><B>MPlayer</B> is a <B>Movie</B> and not a <B>Media</B> player, although
+  it can play some audio file formats (they are listed in the sections below).
+  This is not a recommended usage of <B>MPlayer</B>, you better use
+  <A HREF="http://www.xmms.org">xmms</A>.</P>
+
+
+<P><B><A NAME=2.1.2.1>2.1.2.1. MP3 files</A></B></P>
 
 <P>You may have problems playing certain MP3 files that <B>MPlayer</B> will
-misdetect as mpegs and play incorrectly or not at all. This cannot be fixed
-without dropping support for certain broken mpeg files and thus will remain
+misdetect as MPEGs and play incorrectly or not at all. This cannot be fixed
+without dropping support for certain broken MPEG files and thus will remain
 like this for the foreseeable future. The <CODE>-demuxer</CODE> flag described
 in the manpage may help you in these cases.</P>
+
+
+<P><B><A NAME=2.1.2.2>2.1.2.2. WAV files</A></B></P>
+
+
+<P><B><A NAME=2.1.2.3>2.1.2.3. OGG files (Vorbis)</A></B></P>
+
+<P>Requires properly installed <CODE>libvorbis</CODE>.</P>
+
+
+<P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF files</A></B></P>
+
+
+<P><B><A NAME=2.1.2.5>2.1.2.5. MP4 files</A></B></P>
 
 </BODY>
 </HTML>

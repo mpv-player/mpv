@@ -150,16 +150,8 @@ like this:</P>
 <P>Then compile. configure detects if it's alright, and can be compiled. The
 codec also <B>supports postprocessing!</B></P>
 
-<P>In order to use it, update your codecs.conf file, and do as the manpage,
-or the example.conf says (the -vfm option).</P>
-
-<P>To achieve the <B>greatest speed</B> on my K6, I remove the
-<CODE>ffmpeg12</CODE> section from codecs.conf (this codec isn't optimized, and
-libmpeg2 is twice as fast), and place <CODE>vfm=5</CODE> in my config file.
-Then <B>MPlayer</B> always uses <B>ffdivx/ffodivx</B> to decode
-<B>DivX</B> files, and libmpeg2 for MPEG1/2 . With this and my
-Matrox G400, I can view even the highest resolution DivX movies on my
-K6/2 500, without framedrop.</P>
+<P>With ffmpeg and my Matrox G400, I can view even the highest resolution DivX
+  movies on my K6/2 500, without dropped frames.</P>
 
 
 <P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codecs</A></B></P>

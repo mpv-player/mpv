@@ -206,10 +206,36 @@ használnak. Ezek a fileok gyakorlatilag YUV 4:2:0 képek sorozataiból állnak.</P>
 
 <P><B><A NAME=2.1.2>2.1.2. Audio formátumok</A></B></P>
 
-<P>Jelenleg az <B>MPlayer</B> még mindig egy <B>Movie</B> (film) és nem
-<B>Média</B> lejátszó, így a teljesen audio formátumok (például MP3, WAV, audio
-ASF) lejátszhatatlanok. Használd ilyen célra az <A HREF="http://www.xmms.org">xmms-t</A>, <A HREF="http://www.mpg123.de">mpg123-at</A>
-vagy akármit.</P>
+<P>Az <B>MPlayer</B> egy <B>Movie</B> (film) és nem
+  <B>Média</B> lejátszó, bár le tud játszani néhány audio fileformátumot
+  (ezek alant vannak felsorolva). Fontos megjegyezni hogy ez nem az ajánlott
+  használati módja az <B>MPlayernek</B>, inkább az
+  <A HREF="http://www.xmms.org">xmms-t</A> ajánljuk erre a célra.</P>
+
+
+<P><B><A NAME=2.1.2.1>2.1.2.1. MP3 file-ok</A></B></P>
+
+<P>Bizonyos MP3-aknál elõfordulhat hogy az <B>MPlayer</B> MPEG file-nak
+  detektálja õket, és ennek következtében hibásan vagy sehogy se játszik le.
+  Ezt nem lehet megoldani anélkül hogy néhány hibás MPEG file lejátszását
+  lehetetlenné tennénk, ezért ez így marad a jövõben is. Használd a
+  manpage-ben elmagyarázott <CODE>-demuxer</CODE> opciót, ez ilyen esetekben
+  segíthet.</P>
+
+
+<P><B><A NAME=2.1.2.2>2.1.2.2. WAV file-ok</A></B></P>
+
+
+<P><B><A NAME=2.1.2.3>2.1.2.3. OGG file-ok</A></B></P>
+
+<P>Ezek lejátszásához szükség van egy helyesen felinstallált
+  <CODE>libvorbis</CODE>-ra.</P>
+
+
+<P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF file-ok</A></B></P>
+
+
+<P><B><A NAME=2.1.2.5>2.1.2.5. MP4 file-ok</A></B></P>
 
 </BODY>
 </HTML>

@@ -204,6 +204,17 @@ vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A> fejezetet.</LI>
   4.2.0 elõtti X-szel fölösleges próbálkozni...
 </P>
 
+<P>DVD méretû filmek lejátszásához írd át az XF86Config-ot a következõképp :</P>
+
+<P>
+Section "Device"<BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+&nbsp; &nbsp; Driver "neomagic"<BR>
+&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+EndSection
+</P>
+
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident kártyák</A></B></P>
 

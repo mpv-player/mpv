@@ -283,6 +283,10 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   kimenet.avi</CODE></P>
 
+<P><I>DivX4 film létrehozása néhány JPEG fileból :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  kimenet.avi</CODE></P>
+
 <P><I>MJPEG (Motion JPEG) film létrehozása az aktuális könyvtárban található összes JPEG fileból :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
   -o kimenet.avi</CODE></P>

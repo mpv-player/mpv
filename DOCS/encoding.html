@@ -272,6 +272,10 @@ unsupported). You can encode to the following codecs :</P>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   output.avi</CODE></P>
 
+<P><I>Creating a DivX4 file from some JPEG files in the current dir :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P>
+
 <P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
   -o output.avi</CODE></P>
