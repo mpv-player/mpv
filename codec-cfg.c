@@ -623,6 +623,9 @@ int parse_codec_cfg(char *cfgfile)
 			if (!strcmp(token[0], "seekable"))
 				codec->flags |= CODECS_FLAG_SEEKABLE;
 			else
+			if (!strcmp(token[0], "align16"))
+				codec->flags |= CODECS_FLAG_ALIGN16;
+			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "status")) {
 			if (get_token(1, 1) < 0)

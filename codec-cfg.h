@@ -1,7 +1,7 @@
 #ifndef __CODEC_CFG_H
 #define __CODEC_CFG_H
 
-#define CODEC_CFG_MIN	20020625
+#define CODEC_CFG_MIN	20020626
 
 #define CODECS_MAX_FOURCC	32
 #define CODECS_MAX_OUTFMT	16
@@ -9,6 +9,7 @@
 
 // Global flags:
 #define CODECS_FLAG_SEEKABLE	(1<<0)
+#define CODECS_FLAG_ALIGN16	(1<<1)
 #define CODECS_FLAG_SELECTED	(1<<15)  /* for internal use */
 
 // Outfmt flags:
