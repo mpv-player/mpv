@@ -65,6 +65,13 @@ int demux_audio_open(demuxer_t* demuxer) {
       // We found wav header. Now we can have 'fmt ' or a mp3 header
       // empty the buffer
 	step = 4;
+    } else if( hdr[0] == 'I' && hdr[1] == 'D' && hdr[2] == '3' && (hdr[3] >= 2)) {
+      int len;
+      stream_skip(s,2);
+      stream_read(s,hdr,4);
+      len = (hdr[0]<<21) | (hdr[1]<<14) | (hdr[2]<<7) | hdr[3];
+      stream_skip(s,len);
+      step = 4;
     } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;      
