@@ -633,7 +633,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  There are two ways to avoid this. You can try encoding again using
+  There are three ways to avoid this. You can try encoding again using
   <option>vqscale=4</option> and see if both the resulting file size
   and picture quality are acceptable. You can also use
   <link linkend="menc-feat-divx4">2 pass encoding</link>.
@@ -643,6 +643,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   option without using
   <link linkend="menc-feat-divx4">3 pass encoding</link>.
+</para>
+
+<para>
+  The third and possibly the best option may be to slightly scale down
+  the resolution. The uniform slight softening and loss of detail is
+  visually more appealing than the blockiness and other artifacts
+  caused by MPEG compression. Scaling down also effectively reduces the
+  noise of the picture, which is good, as noise is hard to compress.
 </para></sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-deinterlacing">
@@ -701,8 +709,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect2 id="menc-feat-dvd-mpeg4-scaling">
 <title>Scaling and aspect ratio</title>
 <para>
-  For best quality, do not scale the movie while ripping. Scaling
-  causes artifacts and makes the file larger. Pixels in DVD movies
+  For best quality, do not scale the movie while ripping. Scaling down
+  obviously loses detail, and scaling up causes artifacts and obviously
+  makes the file larger. Pixels in DVD movies
   are not square, so DVD movies include info about the correct aspect
   ratio. It is possible to store the aspect ratio in the MPEG4 header
   of the output file. Most video players ignore this info, but
