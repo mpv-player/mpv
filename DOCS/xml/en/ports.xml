@@ -420,12 +420,20 @@ Nicholas Det at Genesi has done a big and powerful port of <application>MPlayer
 
 <para>
 Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<itemizedlist>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
 <application>MPlayer</application> 0.91 binary</ulink>
+</para></listitem>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
 <application>MPlayer</application> 0.91 source</ulink>
+</para></listitem>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
 <application>MEncoder</application> 0.91 binary</ulink>
+</para></listitem>
+</itemizedlist>
 </para>
 </sect1>
 
