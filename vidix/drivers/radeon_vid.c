@@ -933,6 +933,8 @@ int vixProbe( int verbose,int force )
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M72||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M6||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M62) RadeonFamily = 100;
+	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QW ||
+		ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QX) RadeonFamily = 150;
 	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_BB ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QH ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QI ||
@@ -942,9 +944,7 @@ int vixProbe( int verbose,int force )
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QH2 ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QI2 ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QJ2 ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QK2 ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QW ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QX) RadeonFamily = 200;
+		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QK2) RadeonFamily = 200;
 	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_ID ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_IE ||
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_IF ||
@@ -1011,24 +1011,23 @@ int vixInit( void )
   printf(RADEON_MSG" Saved overlay colorkey settings\n");
 
 #ifdef RADEON
+  switch(RadeonFamily)
+    {
+    case 100:
+    case 150:
+    case 250:
+      is_shift_required=1;
+      break;
+    default:
+      break;
+    }
+
   switch(def_cap.device_id)
     {
     case DEVICE_ATI_RADEON_MOBILITY_M7:
     case DEVICE_ATI_RADEON_MOBILITY_M72:
     case DEVICE_ATI_RADEON_MOBILITY_M62:
       rage_ckey_model=1;
-    case DEVICE_ATI_RADEON_R250_IF:
-    case DEVICE_ATI_RADEON_MOBILITY_M6:
-    case DEVICE_ATI_RADEON_RV200_QW:
-    case DEVICE_ATI_RADEON_RV200_QX:
-    case DEVICE_ATI_RADEON_R100_QD:
-    case DEVICE_ATI_RADEON_R100_QE:
-    case DEVICE_ATI_RADEON_R100_QF:
-    case DEVICE_ATI_RADEON_R100_QG:
-    case DEVICE_ATI_RADEON_VE_QY:
-    case DEVICE_ATI_RADEON_VE_QZ:
-      is_shift_required=1;
-      break;
     default:
 //	printf(RADEON_MSG" Warning! Probably colorkeying isn't working correct!\n");
 	break;
