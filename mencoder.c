@@ -1,9 +1,8 @@
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
+// real codecs:
 #define VCODEC_DIVX4 2
-#define VCODEC_RAW 3
 #define VCODEC_LIBAVCODEC 4
-#define VCODEC_NULL 5
 #define VCODEC_RAWRGB 6
 #define VCODEC_VFW 7
 
@@ -39,58 +38,13 @@ static char* banner_text=
 
 #include "aviwrite.h"
 
-#ifdef USE_LIBVO2
-#include "libvo2/libvo2.h"
-#else
 #include "libvo/video_out.h"
-#endif
 
 #include "dec_audio.h"
 #include "dec_video.h"
 
-#include "postproc/rgb2rgb.h"
-
-#ifdef HAVE_DIVX4ENCORE
-#include <encore2.h>
-#include "divx4_vbr.h"
-#endif
-
 #ifdef HAVE_MP3LAME
 #include <lame/lame.h>
-#endif
-
-#ifdef USE_LIBAVCODEC
-#ifdef USE_LIBAVCODEC_SO
-#include <libffmpeg/avcodec.h>
-#else
-#include "libavcodec/avcodec.h"
-#endif
-extern int avcodec_inited;
-
-/* for video encoder */
-static AVCodec *lavc_venc_codec=NULL;
-static AVCodecContext lavc_venc_context;
-static AVPicture lavc_venc_picture;
-/* video options */
-char *lavc_param_vcodec = NULL;
-int lavc_param_vbitrate = -1;
-int lavc_param_vrate_tolerance = 1024*8;
-int lavc_param_vhq = 0; /* default is realtime encoding */
-int lavc_param_v4mv = 0;
-int lavc_param_vme = 3;
-int lavc_param_vqscale = 0;
-int lavc_param_vqmin = 3;
-int lavc_param_vqmax = 15;
-int lavc_param_vqdiff = 3;
-float lavc_param_vqcompress = 0.5;
-float lavc_param_vqblur = 0.5;
-int lavc_param_keyint = -1;
-#endif
-
-#ifdef USE_WIN32DLL
-static BITMAPINFOHEADER* vfw_bih=NULL;
-char *vfw_codecname = NULL;
-codecs_t *vfw_codec = NULL;
 #endif
 
 #ifdef HAVE_LIBCSS
@@ -98,14 +52,13 @@ codecs_t *vfw_codec = NULL;
 #endif
 
 #include <inttypes.h>
-#include "postproc/swscale.h"
 
 #include "fastmemcpy.h"
 
 /**************************************************************************
              Video accelerated architecture
 **************************************************************************/
-vo_vaa_t vo_vaa;
+vo_vaa_t vo_vaa;			// FIXME! remove me!
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int vo_config_count=0;
@@ -186,8 +139,8 @@ char* ac3_filename=NULL;
 
 char *force_fourcc=NULL;
 
-static int pass=0;
-static char* passtmpfile="divx2pass.log";
+int pass=0;
+char* passtmpfile="divx2pass.log";
 int pass_working=0;
 
 static int play_n_frames=-1;
@@ -197,11 +150,6 @@ static int play_n_frames=-1;
 
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
-
-#ifdef HAVE_DIVX4ENCORE
-ENC_PARAM divx4_param;
-int divx4_crispness=100;
-#endif
 
 #ifdef HAVE_MP3LAME
 int lame_param_quality=0; // best
@@ -213,9 +161,7 @@ int lame_param_ratio=-1; // unset
 #endif
 
 static int vo_w=0, vo_h=0;
-static int crop_width, crop_height, crop_x0 = 0, crop_y0 = 0;
 static int input_pitch, input_bpp;
-static SwsContext* swsContext = NULL;
 
 //-------------------------- config stuff:
 
@@ -232,7 +178,6 @@ static off_t seek_to_byte=0;
 
 static int parse_end_at(struct config *conf, const char* param);
 static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
-static int bits_per_pixel(uint32_t fmt);
 
 #include "get_path.c"
 
@@ -269,186 +214,7 @@ void parse_cfgfiles( m_config_t* conf )
 
 //---------------------------------------------------------------------------
 
-// mini dummy libvo:
-
-static unsigned char* vo_image=NULL;
-static unsigned char* vo_image_ptr=NULL;
-
-static uint32_t draw_slice(const uint8_t *src0[], int stride[], int w,int h, int x0,int y0){
-  int y;
-  uint8_t *src[3];
-  memcpy(src, src0, sizeof(src));
-//  printf("draw_slice %dx%d %d;%d\n",w,h,x0,y0);
-
-  if(y0 + h < crop_y0)
-      return 0;
-
-  if(y0 > crop_height + crop_y0)
-      return 0;
-
-  if(x0 + w < crop_x0)
-      return 0;
-
-  if(x0 > crop_width + crop_x0)
-      return 0;
-  
-  if(y0 < crop_y0) {
-      src[0] += stride[0]*(crop_y0 - y0);
-      src[1] += stride[1]*(crop_y0 - y0)/2;
-      src[2] += stride[2]*(crop_y0 - y0)/2;
-      h -= crop_y0 - y0;
-      y0 = crop_y0;
-  }
-
-  if(x0 < crop_x0) {
-      src[0] += crop_x0 - x0;
-      src[1] += (crop_x0 - x0)/2;
-      src[2] += (crop_x0 - x0)/2;
-      w -= crop_x0 - x0;
-      x0 = crop_x0;
-  }
-  
-  if(y0 + h > crop_y0 + crop_height)
-      h = crop_y0 + crop_height - y0;
-
-  if(x0 + w > crop_x0 + crop_width)
-      w = crop_x0 + crop_width - x0;
-
-  if(swsContext) 
-  {
-      uint8_t* dstPtr[3]= {
-          vo_image,
-          vo_image + vo_w*vo_h*5/4,
-          vo_image + vo_w*vo_h};
-      int dstStride[3] = {vo_w, vo_w/2, vo_w/2};
-
-      swsContext->swScale(swsContext, src, stride, y0 - crop_y0, h, dstPtr, dstStride);
-  }
-  else 
-  {
-  // copy Y:
-  for(y = 0; y < h; y++){
-      unsigned char* s = src[0] + stride[0]*y;
-      unsigned char* d = vo_image + vo_w*(y0 - crop_y0 + y);
-      memcpy(d,s,w);
-  }
-  x0>>=1;y0>>=1;
-  w>>=1;h>>=1;
-  // copy U:
-  for(y = 0; y < h; y++){
-      unsigned char* s = src[2] + stride[2]*y;
-      unsigned char* d = vo_image + vo_w*vo_h + (vo_w>>1)*(y0 - crop_y0/2 + y);
-      memcpy(d,s,w);
-  }
-  // copy V:
-  for(y = 0; y < h; y++){
-      unsigned char* s = src[1] + stride[1]*y;
-      unsigned char* d = vo_image + vo_w*vo_h + vo_w*vo_h/4 + (vo_w>>1)*(y0 - crop_y0/2 + y);
-      memcpy(d,s,w);
-  }
-  } // !swscaler
-  return(0);
-}
-
-static uint32_t draw_frame(uint8_t *src[]){
-    int y;
-  // printf("This function shouldn't be called - report bug!\n");
-  // later: add YUY2->YV12 conversion here!
-    
-    if(swsContext) {
-        uint8_t* src_img = *src + crop_y0*input_pitch + crop_x0*input_bpp/8;
-        int dstStride = vo_w * input_bpp/8;
-
-        swsContext->swScale(swsContext, &src_img, &input_pitch, 0, crop_height,
-                            &vo_image_ptr, &dstStride);
-    }
-    else {
-        for(y = crop_y0; y < crop_height + crop_y0; y++)
-            memcpy(&vo_image_ptr[(y - crop_y0)*crop_width*input_bpp/8],
-                   src[0] + y*input_pitch + crop_x0*input_bpp/8,
-                   crop_width*input_bpp/8);
-    }
-      
-    return(0);
-}
-
-static int query_format(unsigned int out_fmt){
-// check for supported colorspace:
-switch(out_video_codec){
-case VCODEC_RAWRGB:
-    switch(out_fmt){
-    case IMGFMT_BGR32:
-    case IMGFMT_BGR24:
-    case IMGFMT_RGB32:
-    case IMGFMT_YV12:
-	return VO_TRUE;
-    }
-    break;
-case VCODEC_VFW:
-    if(out_fmt==IMGFMT_BGR24) return VO_TRUE;
-    break;
-case VCODEC_LIBAVCODEC:
-    switch(out_fmt){
-    case IMGFMT_YV12:
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:
-	return VO_TRUE;
-    }
-    break;
-case VCODEC_DIVX4:
-    switch(out_fmt){
-    case IMGFMT_YV12:
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:
-    case IMGFMT_YUY2:
-    case IMGFMT_UYVY:
-    case IMGFMT_RGB24:
-    case IMGFMT_BGR24:
-	return VO_TRUE;
-    }
-    break;
-default:
-    return VO_TRUE; // FIXME!
-}
-return VO_FALSE;
-}
-
-static uint32_t control(uint32_t request, void *data, ...){
-  switch (request) {
-  case VOCTRL_QUERY_FORMAT:
-    return query_format(*((uint32_t*)data));
-//  case VOCTRL_GET_IMAGE:
-//    return get_image(data);
-  }
-  return VO_NOTIMPL;
-}
-
-static unsigned int out_fmt=0;
-
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info){
-  // we should do codec initialization here!
-  printf("vo.config(%d x %d, %s) called!\n",width,height,vo_format_name(format));
-  out_fmt=format;
-  return 0; // OK!
-}
-
-
-vo_functions_t video_out;
-
-//---------------------------------------------------------------------------
-
 void *vo_spudec=NULL;
-
-static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    vo_draw_alpha_yv12(w,h,src,srca,stride,vo_image + vo_w * y0 + x0,vo_w);
-}
-
-static void draw_sub(void) {
-#ifdef USE_DVDREAD
-    if (vo_spudec)
-	spudec_draw_scaled(vo_spudec, vo_w, vo_h, draw_alpha);
-#endif
-}
 
 int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     int size=0;
@@ -489,6 +255,15 @@ static void exit_sighandler(int x){
     interrupted=1;
 }
 
+aviwrite_t* muxer=NULL;
+FILE* muxer_f=NULL;
+
+// callback for ve_*.c:
+void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags){
+    aviwrite_write_chunk(muxer,s,muxer_f,len,flags);
+}
+
+
 int main(int argc,char* argv[], char *envp[]){
 
 stream_t* stream=NULL;
@@ -503,17 +278,9 @@ sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int i;
 
-aviwrite_t* muxer=NULL;
 aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
-FILE* muxer_f=NULL;
 int muxer_f_size=0;
-
-#ifdef HAVE_DIVX4ENCORE
-ENC_FRAME enc_frame;
-ENC_RESULT enc_result;
-void* enc_handle=NULL;
-#endif
 
 #ifdef HAVE_MP3LAME
 lame_global_flags *lame;
@@ -534,9 +301,6 @@ int next_frameno=-1;
 
 unsigned int timer_start;
 
-//int out_buffer_size=0x200000;
-//unsigned char* out_buffer=malloc(out_buffer_size);
-
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
@@ -556,15 +320,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
-#endif
-
-#ifdef HAVE_DIVX4ENCORE
-// set some defaults, before parsing configfile/commandline:
-divx4_param.min_quantizer = 2;
-divx4_param.max_quantizer = 31;
-divx4_param.rc_period = 2000;
-divx4_param.rc_reaction_period = 10;
-divx4_param.rc_reaction_ratio  = 20;
 #endif
 
   // FIXME: get rid of -dvd and other tricky options and config/playtree
@@ -661,94 +416,6 @@ sh_video=d_video->sh;
    demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
-  
-video_out.config=config;
-video_out.control=control;
-video_out.draw_slice=draw_slice;
-video_out.draw_frame=draw_frame;
-
-sh_video->video_out=&video_out;
-sh_video->codec=NULL;
-if(out_video_codec>1){
-
-sh_video->vfilter=vf_open_filter(NULL,"vo",&video_out);
-// Dirty hack to fix mencoder until someone does all the new filter/vo stuff right :)
-if (out_video_codec == VCODEC_LIBAVCODEC || out_video_codec == VCODEC_DIVX4)
-{
-    sh_video->vfilter=vf_open_filter(sh_video->vfilter, "format", "yv12");
-    out_fmt = IMGFMT_YV12;
-}
-sh_video->vfilter=append_filters(sh_video->vfilter);
-
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-
-// Go through the codec.conf and find the best codec...
-sh_video->inited=0;
-codecs_reset_selection(0);
-if(video_codec){
-    // forced codec by name:
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
-    init_video(sh_video,video_codec,-1,-1);
-} else {
-    int status;
-    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
-    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
-    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
-	if(video_family>=0) // try first the preferred codec family:
-	    if(init_video(sh_video,NULL,video_family,status)) break;
-	if(init_video(sh_video,NULL,-1,status)) break;
-    }
-}
-if(!sh_video->inited){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    mencoder_exit(1,NULL);
-}
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-
-//sh_video->outfmtidx=i;    // FIXME!!!!!!!!!!!!!!!!!!!
-
-
- if(!crop_width)
-     crop_width = sh_video->disp_w - crop_x0;
- if(!crop_height)
-     crop_height = sh_video->disp_h - crop_y0;
- 
- if(crop_width  + crop_x0 > sh_video->disp_w ||
-    crop_height + crop_y0 > sh_video->disp_h) {
-     printf("Fatal error: x0 + xsize (or y0 + ysize) is larger than the movie.\n");
-     return 1;
- }
-
- if(crop_x0 >= sh_video->disp_w ||
-    crop_y0 >= sh_video->disp_h) {
-     printf("Fatal error: You tried to crop away more than the entire movie!\n");
-     return 1;
- }
-
- printf("x0: %d y0: %d crop_width: %d crop_height: %d\n", crop_x0, crop_y0, crop_width, crop_height);
-
- if(!vo_w) vo_w = crop_width;
- if(!vo_h) vo_h = crop_height;
-
- if(vo_w != crop_width || vo_h != crop_height)
- {
-     swsContext = getSwsContextFromCmdLine(crop_width, crop_height, out_fmt, vo_w, vo_h, out_fmt);
-
-     if(!swsContext) {
-         printf("Fatal error: Initialization of software scaler faild.\n");
-         return 1;
-     }
- }
-
- input_bpp = bits_per_pixel(out_fmt);
- vo_image_ptr = vo_image = malloc(vo_w*vo_h*input_bpp/8); 
- input_pitch = sh_video->disp_w*input_bpp/8;
-
-} // if(out_video_codec)
-
 
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
@@ -785,8 +452,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
   }
 }
-
-
 
 // set up video encoder:
 
@@ -826,6 +491,11 @@ mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
 
 mux_v->codec=out_video_codec;
 
+mux_v->bih=NULL;
+sh_video->codec=NULL;
+sh_video->video_out=NULL;
+sh_video->vfilter=NULL; // fixme!
+
 switch(mux_v->codec){
 case VCODEC_COPY:
     if (sh_video->bih)
@@ -845,50 +515,6 @@ case VCODEC_COPY:
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
-case VCODEC_RAW:
-    if (sh_video->bih)
-	mux_v->bih=sh_video->bih;
-    else
-    {
-	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-	mux_v->bih->biWidth=sh_video->disp_w;
-	mux_v->bih->biHeight=sh_video->disp_h;
-	mux_v->bih->biCompression=0;
-	mux_v->bih->biPlanes=1;
-	mux_v->bih->biBitCount=24; // FIXME!!!
-	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
-    }
-    mux_v->bih->biCompression=0;
-    printf("videocodec: raw (%dx%d %dbpp fourcc=%x)\n",
-	mux_v->bih->biWidth, mux_v->bih->biHeight,
-	mux_v->bih->biBitCount, mux_v->bih->biCompression);
-    break;
-case VCODEC_RAWRGB:
-	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-	mux_v->bih->biWidth=vo_w;
-	mux_v->bih->biHeight=vo_h;
-	mux_v->bih->biCompression=0;
-	mux_v->bih->biPlanes=1;
-	
-	if(IMGFMT_IS_RGB(out_fmt))
-        mux_v->bih->biBitCount = IMGFMT_RGB_DEPTH(out_fmt);    
-	else if(IMGFMT_IS_BGR(out_fmt))
-        mux_v->bih->biBitCount = IMGFMT_BGR_DEPTH(out_fmt);
-	else {
-        mux_v->bih->biBitCount = 24;
-        yuv2rgb_init(24, MODE_BGR);
-	}
-    
-    if(mux_v->bih->biBitCount == 32)
-        mux_v->bih->biBitCount = 24;
-
-	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
-    printf("videocodec: rawrgb (%dx%d %dbpp fourcc=%x)\n",
-	mux_v->bih->biWidth, mux_v->bih->biHeight,
-	mux_v->bih->biBitCount, mux_v->bih->biCompression);
-    break;
 case VCODEC_FRAMENO:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -899,111 +525,51 @@ case VCODEC_FRAMENO:
     mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     break;
-case VCODEC_VFW:
-#ifdef USE_WIN32DLL
-#if 0
-    if (!vfw_codecname)
-    {
-	printf("No vfw/dshow codec specified! It's requested!\n");
-	mencoder_exit(1, NULL);
-    }
-#endif
-    vfw_bih=malloc(sizeof(BITMAPINFOHEADER));
-    vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
-    vfw_bih->biWidth=vo_w;
-    vfw_bih->biHeight=vo_h;
-    vfw_bih->biPlanes=1;
-    vfw_bih->biBitCount=24;
-    vfw_bih->biCompression=0;
-    vfw_bih->biSizeImage=vo_w*vo_h*((vfw_bih->biBitCount+7)/8);
-//    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih,mmioFOURCC('D', 'I', 'V', '3'));
-    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih, 0);
-    break;
-#else
-    printf("No support for Win32/VfW codecs compiled in\n");
-    mencoder_exit(1,NULL);
-#endif
-case VCODEC_NULL:
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-    mux_v->bih->biWidth=vo_w;
-    mux_v->bih->biHeight=vo_h;
-    mux_v->bih->biPlanes=1;
-    mux_v->bih->biBitCount=24;
-    mux_v->bih->biCompression=0;
-    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
-    break;
-case VCODEC_DIVX4:
-#ifndef HAVE_DIVX4ENCORE
-    printf("No support for Divx4 encore compiled in\n");
-    mencoder_exit(1,NULL);
-#else
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-    mux_v->bih->biWidth=vo_w;
-    mux_v->bih->biHeight=vo_h;
-    mux_v->bih->biPlanes=1;
-    mux_v->bih->biBitCount=24;
-    mux_v->bih->biCompression=mmioFOURCC('d','i','v','x');
-    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+default:
 
-    if (pass)
-	printf("Divx: 2-pass logfile: %s\n", passtmpfile);
-    break;
-#endif
-case VCODEC_LIBAVCODEC:
-#ifndef USE_LIBAVCODEC
-    printf("No support for FFmpeg's libavcodec compiled in\n");
-    mencoder_exit(1,NULL);
-#else
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-    mux_v->bih->biWidth=vo_w;
-    mux_v->bih->biHeight=vo_h;
-    mux_v->bih->biPlanes=1;
-    mux_v->bih->biBitCount=24;
-    if (!lavc_param_vcodec)
-    {
-	printf("No libavcodec codec specified! It's requested!\n");
-	mencoder_exit(1,NULL);
+    switch(mux_v->codec){
+    case VCODEC_DIVX4:
+	sh_video->vfilter=vf_open_encoder(NULL,"divx4",mux_v); break;
+    case VCODEC_LIBAVCODEC:
+        sh_video->vfilter=vf_open_encoder(NULL,"lavc",mux_v); break;
+    case VCODEC_RAWRGB:
+        sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",mux_v); break;
+    case VCODEC_VFW:
+        sh_video->vfilter=vf_open_encoder(NULL,"vfw",mux_v); break;
     }
-    else
-    {
-        const char *vcodec = lavc_param_vcodec;
-        if (!strcasecmp(vcodec, "mpeg1video"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('m', 'p', 'g', '1');
-        }
-        else if (!strcasecmp(vcodec, "h263") || !strcasecmp(vcodec, "h263p"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('h', '2', '6', '3');
-        }
-        else if (!strcasecmp(vcodec, "rv10"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('R', 'V', '1', '0');
-        }
-        else if (!strcasecmp(vcodec, "mjpeg"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('M', 'J', 'P', 'G');
-        }
-        else if (!strcasecmp(vcodec, "mpeg4"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('D', 'I', 'V', 'X');
-        }
-        else if (!strcasecmp(vcodec, "msmpeg4"))
-        {
-	    mux_v->bih->biCompression = mmioFOURCC('d', 'i', 'v', '3');
-        }
-	else
-	    mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
-		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
+    if(!mux_v->bih || !sh_video->vfilter){
+        mp_msg(MSGT_MENCODER,MSGL_FATAL,"Failed to open the encoder\n");
+        mencoder_exit(1,NULL);
     }
-    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    sh_video->vfilter=append_filters(sh_video->vfilter);
 
-    printf("videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
-	mux_v->bih->biWidth, mux_v->bih->biHeight, mux_v->bih->biCompression,
-	    (char *)&mux_v->bih->biCompression);
-#endif
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+// Go through the codec.conf and find the best codec...
+sh_video->inited=0;
+codecs_reset_selection(0);
+if(video_codec){
+    // forced codec by name:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
+    init_video(sh_video,video_codec,-1,-1);
+} else {
+    int status;
+    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
+    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
+	if(video_family>=0) // try first the preferred codec family:
+	    if(init_video(sh_video,NULL,video_family,status)) break;
+	if(init_video(sh_video,NULL,-1,status)) break;
+    }
+}
+if(!sh_video->inited){
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mencoder_exit(1,NULL);
+}
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+
 }
 
 /* force output fourcc to .. */
@@ -1098,265 +664,7 @@ case ACODEC_VBRMP3:
 printf("Writing AVI header...\n");
 aviwrite_write_header(muxer,muxer_f);
 
-switch(mux_v->codec){
-case VCODEC_COPY:
-case VCODEC_RAW:
-case VCODEC_RAWRGB:        
-case VCODEC_NULL:
-    break;
-case VCODEC_FRAMENO:
-    decoded_frameno=0;
-    break;
-case VCODEC_DIVX4:
-#ifndef HAVE_DIVX4ENCORE
-    printf("No support for Divx4 encore compiled in\n");
-    mencoder_exit(1,NULL);
-#else
-    // init divx4linux:
-    divx4_param.x_dim=vo_w;
-    divx4_param.y_dim=vo_h;
-    divx4_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
-    if(!divx4_param.bitrate) divx4_param.bitrate=800000;
-    else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;
-    if(!divx4_param.quality) divx4_param.quality=5; // the quality of compression ( 1 - fastest, 5 - best )
-    divx4_param.handle=NULL;
-    encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
-    enc_handle=divx4_param.handle;
-    switch(out_fmt){
-    case IMGFMT_YV12:	enc_frame.colorspace=ENC_CSP_YV12; break;
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:	enc_frame.colorspace=ENC_CSP_I420; break;
-    case IMGFMT_YUY2:	enc_frame.colorspace=ENC_CSP_YUY2; break;
-    case IMGFMT_UYVY:	enc_frame.colorspace=ENC_CSP_UYVY; break;
-    case IMGFMT_RGB24:
-    case IMGFMT_BGR24:
-    	enc_frame.colorspace=ENC_CSP_RGB24; break;
-    default:
-	mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported picture format (%s)!\n",
-	    vo_format_name(out_fmt));
-	mencoder_exit(1,NULL);
-    }
-    switch(pass){
-    case 1:
-	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, divx4_param.quality) == -1)
-	{
-	    printf("2pass failed: filename=%s\n", passtmpfile);
-	    pass_working = 0;
-	}
-	else
-	    pass_working = 1;
-	break;
-    case 2:
-        if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
-					 divx4_param.bitrate,
-					 divx4_param.framerate,
-					 divx4_crispness,
-					 divx4_param.quality) == -1)
-	{
-	    printf("2pass failed: filename=%s\n", passtmpfile);
-	    pass_working = 0;
-	}
-	else
-	    pass_working = 1;
-	break;
-    }
-    break;
-#endif
-case VCODEC_LIBAVCODEC:
-#ifndef USE_LIBAVCODEC
-    printf("No support for FFmpeg's libavcodec compiled in\n");
-#else
-    if (!avcodec_inited)
-    {
-	avcodec_init();
-	avcodec_register_all();
-	avcodec_inited=1;
-    }
-    
-#if 0
-    {
-	extern AVCodec *first_avcodec;
-	AVCodec *p = first_avcodec;
-	
-	lavc_venc_codec = NULL;
-	while (p)
-	{
-	    if (p->encode != NULL && strcmp(lavc_param_vcodec, p->name) == 0)
-		break;
-	    p = p->next;
-	}
-	lavc_venc_codec = p;
-    }
-#else
-    /* XXX: implement this in avcodec (i will send a patch to ffmpeglist) -- alex */
-    lavc_venc_codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
-#endif
-
-    if (!lavc_venc_codec)
-    {
-	printf(MSGTR_MissingLAVCcodec, lavc_param_vcodec);
-	mencoder_exit(1,NULL);
-    }
-
-    memset(&lavc_venc_context, 0, sizeof(lavc_venc_context));
-    
-//    lavc_venc_context.width = mux_v->bih->biWidth;
-//    lavc_venc_context.height = mux_v->bih->biHeight;
-    /* scaling only for YV12 (and lavc supports only YV12 ;) */
-    lavc_venc_context.width = vo_w;
-    lavc_venc_context.height = vo_h;
-    if (lavc_param_vbitrate >= 0) /* != -1 */
-	lavc_venc_context.bit_rate = lavc_param_vbitrate*1000;
-    else
-	lavc_venc_context.bit_rate = 800000; /* default */
-    lavc_venc_context.bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
-    lavc_venc_context.frame_rate = (float)(force_ofps?force_ofps:sh_video->fps) * FRAME_RATE_BASE;
-    lavc_venc_context.qmin= lavc_param_vqmin;
-    lavc_venc_context.qmax= lavc_param_vqmax;
-    lavc_venc_context.max_qdiff= lavc_param_vqdiff;
-    lavc_venc_context.qcompress= lavc_param_vqcompress;
-    lavc_venc_context.qblur= lavc_param_vqblur;
-    /* keyframe interval */
-    if (lavc_param_keyint >= 0) /* != -1 */
-	lavc_venc_context.gop_size = lavc_param_keyint;
-    else
-	lavc_venc_context.gop_size = 250; /* default */
-
-    if (lavc_param_vhq)
-    {
-	printf("High quality encoding selected (non real time)!\n");
-	lavc_venc_context.flags = CODEC_FLAG_HQ;
-    }
-    else
-	lavc_venc_context.flags = 0;
-
-    lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
-
-    /* motion estimation (0 = none ... 3 = high quality but slow) */
-    /* this is just an extern from libavcodec but it should be in the
-       encoder context - FIXME */
-    motion_estimation_method = lavc_param_vme;
-
-    /* fixed qscale :p */
-    if (lavc_param_vqscale)
-    {
-	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
-	lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
-	lavc_venc_context.quality = lavc_param_vqscale;
-    }
-
-    switch(pass){
-    case 1:
-	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1)
-	{
-	    printf("2pass failed: filename=%s\n", passtmpfile);
-	    pass_working = 0;
-	}
-	else
-	    pass_working = 1;
-	break;
-    case 2:
-        if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
-		    lavc_venc_context.bit_rate,
-		    force_ofps?force_ofps:sh_video->fps,
-		    100, /* crispness */
-		    5) == -1)
-	{
-	    printf("2pass failed: filename=%s\n", passtmpfile);
-	    pass_working = 0;
-	}
-	else {
-	    pass_working = 1;
-	    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
-	}
-	break;
-    }
-
-    if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
-    {
-	printf(MSGTR_CantOpenCodec);
-	mencoder_exit(1,NULL);
-    }
-
-    if (lavc_venc_context.codec->encode == NULL)
-    {
-	printf("avcodec init failed (ctx->codec->encode == NULL)!\n");
-	mencoder_exit(1,NULL);
-    }
-
-#if 1
-    if (out_fmt != IMGFMT_YV12 && out_fmt != IMGFMT_I420 && out_fmt != IMGFMT_IYUV)
-    {
-        printf("Not supported image format! (%s)\n",
-    	    vo_format_name(out_fmt));
-	mencoder_exit(1,NULL);
-    }
-
-    memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
-    
-    {
-	int size = lavc_venc_context.width * lavc_venc_context.height;
-
-/* Y */	lavc_venc_picture.data[0] = vo_image_ptr;
-	if (out_fmt == IMGFMT_YV12)
-	{
-/* U */		lavc_venc_picture.data[2] = lavc_venc_picture.data[0] + size;
-/* V */		lavc_venc_picture.data[1] = lavc_venc_picture.data[2] + size/4;
-	}
-	else /* IMGFMT_I420 */
-	{
-/* U */		lavc_venc_picture.data[1] = lavc_venc_picture.data[0] + size;
-/* V */		lavc_venc_picture.data[2] = lavc_venc_picture.data[1] + size/4;
-	}
-	lavc_venc_picture.linesize[0] = lavc_venc_context.width;
-	lavc_venc_picture.linesize[1] = lavc_venc_context.width / 2;
-	lavc_venc_picture.linesize[2] = lavc_venc_context.width / 2;
-    }
-#else
-    switch(out_fmt)
-    {
-	case IMGFMT_YV12:
-	    lavc_venc_context.pix_fmt = PIX_FMT_YUV420P;
-	    break;
-#if 0 /* it's faulting :( -- libavcodec's bug! -- alex */
-	case IMGFMT_YUY2: /* or UYVY */
-	    lavc_venc_context.pix_fmt = PIX_FMT_YUV422;
-	    break;
-	case IMGFMT_BGR24:
-	    lavc_venc_context.pix_fmt = PIX_FMT_BGR24;
-	    break;
-	case IMGFMT_RGB24:
-	    lavc_venc_context.pix_fmt = PIX_FMT_RGB24;
-	    break;
-#endif
-	default:
-	    printf("Not supported image format! (%s)\n",
-		vo_format_name(out_fmt));
-	    mencoder_exit(1,NULL);
-    }
-
-    printf("Using picture format: %s\n", vo_format_name(out_fmt));
-
-    memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
-    
-    printf("ahh: avpict_getsize=%d, vo_image_ptr=%d\n", avpicture_get_size(lavc_venc_context.pix_fmt,
-	lavc_venc_context.width, lavc_venc_context.height),
-	vo_h*vo_w*3/2);
-    
-    avpicture_fill(&lavc_venc_picture, vo_image_ptr,
-	lavc_venc_context.pix_fmt, lavc_venc_context.width,
-	lavc_venc_context.height);
-
-    {
-	char buf[1024];
-	
-	avcodec_string((char *)&buf[0], 1023, &lavc_venc_context, 1);
-	printf("%s\n", buf);
-    }
-#endif
-
-#endif
-}
+decoded_frameno=0;
 
 if(sh_audio)
 switch(mux_a->codec){
@@ -1498,7 +806,7 @@ if(sh_audio){
     
     v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
-if(demuxer2){
+if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
     // find our frame:
 	while(next_frameno<decoded_frameno){
 	    int* start;
@@ -1554,9 +862,9 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
      int len;
      while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
 	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
-	 spudec_assemble(vo_spudec,packet,len,100*d_dvdsub->pts);
+	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
      }
-     spudec_heartbeat(vo_spudec,100*d_video->pts);
+     spudec_heartbeat(vo_spudec,90000*d_video->pts);
  }
 #endif
 
@@ -1565,181 +873,15 @@ case VCODEC_COPY:
     mux_v->buffer=start;
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
-case VCODEC_RAWRGB:
- {
-     static uint8_t* raw_rgb_buffer = NULL;
-     static uint8_t* raw_rgb_buffer2 = NULL;
-        
-     if(!raw_rgb_buffer) {
-         raw_rgb_buffer = malloc(vo_w*vo_h*4);
-         raw_rgb_buffer2 = malloc(vo_w*vo_h*4);
-     }
-	    
-     blit_frame=decode_video(sh_video,start,in_size,0);
-     if(skip_flag>0) break;
-     if(!blit_frame){
-         // empty.
-         aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-         break;
-     }
-
-     /* Uncompressed avi files store rgb data with the top most row last so we
-      * have to flip the frames. */
-     if(IMGFMT_IS_BGR(out_fmt)) {
-         if(IMGFMT_BGR_DEPTH(out_fmt) == 32) {
-             rgb32to24(vo_image_ptr, raw_rgb_buffer, vo_w*vo_h*4);
-             mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
-                                              vo_w*3, vo_h);
-         }
-         else
-             mux_v->buffer = flip_upside_down(raw_rgb_buffer, vo_image_ptr,
-                                              vo_w*3, vo_h);
-     }
-     else if(IMGFMT_IS_RGB(out_fmt)) {
-         if(IMGFMT_RGB_DEPTH(out_fmt) == 32) {
-             rgb32tobgr32(vo_image_ptr, raw_rgb_buffer2, vo_w*vo_h*4);
-             rgb32to24(raw_rgb_buffer2, raw_rgb_buffer, vo_w*vo_h*4);
-             mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
-                                              vo_w*3, vo_h);
-         }
-         else
-             mux_v->buffer = flip_upside_down(raw_rgb_buffer, vo_image_ptr,
-                                              vo_w*3, vo_h);
-     }
-     else {
-         yuv2rgb(raw_rgb_buffer, vo_image_ptr, vo_image_ptr + vo_w*vo_h,
-                 vo_image_ptr + vo_w*vo_h*5/4, vo_w, vo_h, vo_w*24/8, vo_w, vo_w/2);
-         mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
-                                          vo_w*3, vo_h);
-     }
-
-     aviwrite_write_chunk(muxer,mux_v,muxer_f, vo_w*vo_h*3, 0x10);
- }
- break;
-case VCODEC_RAW:
-    blit_frame=decode_video(sh_video,start,in_size,0);
-    if(skip_flag>0) break;
-    if(!blit_frame){
-	// empty.
-	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-	break;
-    }
-    mux_v->buffer = vo_image_ptr;
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->buffer_size,0x10);
-    break;
-case VCODEC_FRAMENO: {
+case VCODEC_FRAMENO:
     mux_v->buffer=&decoded_frameno; // tricky
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
-    break; }
-#ifdef USE_WIN32DLL
-case VCODEC_VFW: {
-//int vfw_encode_frame(BITMAPINFOHEADER* biOutput,void* OutBuf,
-//		     BITMAPINFOHEADER* biInput,void* Image,
-//		     long* keyframe, int quality);
-    long flags=0;
-    int ret;
-    blit_frame=decode_video(sh_video,start,in_size,0);
-    if(skip_flag>0) break;
-    if(!blit_frame){
-	// empty.
-	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-	break;
-    }
-    flip_upside_down(vo_image_ptr,vo_image_ptr,3*vo_w,vo_h); // dirty hack
-    ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, vo_image_ptr, &flags, 10000);
-//    printf("vfw_encode_frame -> %d  (size=%d,flag=%X)\n",ret,mux_v->bih->biSizeImage,flags);
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->bih->biSizeImage,flags);
     break;
-}
-#endif
-case VCODEC_DIVX4:
-#ifndef HAVE_DIVX4ENCORE
-    printf("No support for Divx4 encore compiled in\n");
-    mencoder_exit(1,NULL);
-#else
-    blit_frame=decode_video(sh_video,start,in_size,0);
-    draw_sub();
+default:
+    // decode_video will callback down to ve_*.c encoders, through the video filters
+    blit_frame=decode_video(sh_video,start,in_size,(skip_flag>0)?1:0);
     if(skip_flag>0) break;
-    if(!blit_frame){
-	// empty.
-	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-	break;
-    }
-    enc_frame.image=vo_image_ptr;
-    enc_frame.bitstream=mux_v->buffer;
-    enc_frame.length=mux_v->buffer_size;
-    enc_frame.mvs=NULL;
-    enc_frame.quant=0;
-    enc_frame.intra=0;
-    if(pass==2 && pass_working){	// handle 2-pass:
-    	enc_frame.quant = VbrControl_get_quant();
-	enc_frame.intra = VbrControl_get_intra();
-	encore(enc_handle,ENC_OPT_ENCODE_VBR,&enc_frame,&enc_result);
-        VbrControl_update_2pass_vbr_encoding(enc_result.motion_bits,
-					    enc_result.texture_bits,
-					    enc_result.total_bits);
-    } else {
-	encore(enc_handle,ENC_OPT_ENCODE,&enc_frame,&enc_result);
-	if(pass==1 && pass_working){
-	  VbrControl_update_2pass_vbr_analysis(enc_result.is_key_frame, 
-					       enc_result.motion_bits, 
-					       enc_result.texture_bits, 
-					       enc_result.total_bits, 
-					       enc_result.quantizer);
-	}
-    }
-    
-//    printf("encoding...\n");
-//    printf("  len=%d  key:%d  qualt:%d  \n",enc_frame.length,enc_result.is_key_frame,enc_result.quantizer);
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
-    break;
-#endif
-case VCODEC_LIBAVCODEC:
-    {
-#ifndef USE_LIBAVCODEC
-	printf("No support for FFmpeg's libavcodec compiled in\n");
-#else
-	int out_size;
-
-	blit_frame=decode_video(sh_video,start,in_size,0);
-	if(skip_flag>0) break;
-	if(!blit_frame){
-	    // empty.
-	    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-	    break;
-	}
-
-    if(pass==2 && pass_working){	// handle 2-pass:
-	lavc_venc_context.flags|=CODEC_FLAG_QSCALE; // enable VBR
-	lavc_venc_context.quality=VbrControl_get_quant();
-#ifdef CODEC_FLAG_TYPE
-	lavc_venc_context.flags|=CODEC_FLAG_TYPE; // force keyframes
-	lavc_venc_context.key_frame=VbrControl_get_intra();
-	lavc_venc_context.gop_size=0x3fffffff;
-#else
-#error you should upgrade libavcodec... get latest CVS
-#endif
-	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
-	    &lavc_venc_picture);
-	VbrControl_update_2pass_vbr_encoding(lavc_venc_context.mv_bits,
-	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
-	      8*out_size);
-    } else {
-	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
-	    &lavc_venc_picture);
-
-	if(pass==1 && pass_working){
-	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context.key_frame,
-	      lavc_venc_context.mv_bits,
-	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
-	      8*out_size, lavc_venc_context.quality);
-	}
-	
-    }
-
-	aviwrite_write_chunk(muxer,mux_v,muxer_f,out_size,lavc_venc_context.key_frame?0x10:0);
-#endif
-    }
+    if(!blit_frame) aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0); // empty.
 }
 
 if(skip_flag<0){
@@ -1848,11 +990,6 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 }
 #endif
 
-#ifdef USE_LIBAVCODEC
-    if (mux_v->codec == VCODEC_LIBAVCODEC)
-	avcodec_close(&lavc_venc_context);
-#endif
-
 printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
 muxer_f_size=ftell(muxer_f);
@@ -1946,27 +1083,3 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
     return dst;
 }
 
-/* Bits per pixel for format fmt. Not depth */
-static int bits_per_pixel(uint32_t fmt)
-{
-    if(IMGFMT_IS_RGB(fmt)) {
-        if(IMGFMT_RGB_DEPTH(fmt) == 15)
-            return 16;
-        else
-            return IMGFMT_RGB_DEPTH(fmt);
-    }
-    else if(IMGFMT_IS_BGR(fmt)) {
-        if(IMGFMT_BGR_DEPTH(fmt) == 15)
-            return 16;
-        else
-            return IMGFMT_BGR_DEPTH(fmt);
-    }
-    else if(fmt==IMGFMT_YV12 || fmt==IMGFMT_I420 || fmt==IMGFMT_IYUV)
-        return 12;
-    else if(fmt == IMGFMT_YUY2 || fmt == IMGFMT_UYVY)
-        return 16;
-    else {
-        fprintf(stderr, "Error: bits_per_pixel: Unknown imgfmt: %s\n", vo_format_name(fmt));
-        return 0;
-    }
-}

@@ -17,20 +17,7 @@ extern int readNPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 
 #ifdef HAVE_DIVX4ENCORE
-struct config divx4opts_conf[]={
-	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
-	{"rc_period", &divx4_param.rc_period, CONF_TYPE_INT, 0,0,0, NULL},
-	{"rc_reaction_period", &divx4_param.rc_reaction_period, CONF_TYPE_INT, 0,0,0, NULL},
-	{"rc_reaction_ratio", &divx4_param.rc_reaction_ratio, CONF_TYPE_INT, 0,0,0, NULL},
-	{"min_quant", &divx4_param.min_quantizer, CONF_TYPE_INT, CONF_RANGE,0,32, NULL},
-	{"max_quant", &divx4_param.max_quantizer, CONF_TYPE_INT, CONF_RANGE,0,32, NULL},
-	{"key", &divx4_param.max_key_interval, CONF_TYPE_INT, CONF_MIN,0,0, NULL},
-	{"deinterlace", &divx4_param.deinterlace, CONF_TYPE_FLAG, 0,0,1, NULL},
-	{"q", &divx4_param.quality, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
-	{"crispness", &divx4_crispness, CONF_TYPE_INT, CONF_RANGE,0,100, NULL},
-	{"help", "TODO: divx4opts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
+extern struct config divx4opts_conf[];
 #endif
 
 #ifdef HAVE_MP3LAME
@@ -49,22 +36,7 @@ struct config lameopts_conf[]={
 #endif
 
 #ifdef USE_LIBAVCODEC
-struct config lavcopts_conf[]={
-	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
-	{"vratetol", &lavc_param_vrate_tolerance, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
-	{"vhq", &lavc_param_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"v4mv", &lavc_param_v4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"vme", &lavc_param_vme, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
-	{"vqscale", &lavc_param_vqscale, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
-	{"vqmin", &lavc_param_vqmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
-	{"vqmax", &lavc_param_vqmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
-	{"vqdiff", &lavc_param_vqdiff, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
-	{"vqcomp", &lavc_param_vqcompress, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
-	{"vqblur", &lavc_param_vqblur, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
-	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
+extern struct config lavcopts_conf[];
 #endif
 
 #ifdef USE_WIN32DLL
@@ -77,9 +49,9 @@ struct config ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO, NULL},
 	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4, NULL},
-	{"raw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAW, NULL},
+//	{"raw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAW, NULL},
 	{"lavc", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBAVCODEC, NULL},
-	{"null", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_NULL, NULL},
+//	{"null", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_NULL, NULL},
 	{"rawrgb", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWRGB, NULL},
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n   lavc\n   rawrgb\n   vfw\n   null\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
@@ -113,11 +85,11 @@ static config_t mencoder_opts[]={
 	{"x", &vo_w, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &vo_h, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 
-    {"x0", &crop_x0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
-	{"y0", &crop_y0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+//	{"x0", &crop_x0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+//	{"y0", &crop_y0, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 
-    {"xsize", &crop_width, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
-	{"ysize", &crop_height, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+//	{"xsize", &crop_width, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+//	{"ysize", &crop_height, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 
 	{"mp3file", &mp3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ac3file", &ac3_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
