@@ -265,8 +265,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	    return rv;
 	}
 	// Insert format filter
-	if(((af->prev?af->prev->data->format:s->input.format) != in.format) || 
-	   ((af->prev?af->prev->data->bps:s->input.bps) != in.bps)){
+	if((af->prev?af->prev->data->format:s->input.format) != in.format){
 	  // Create format filter
 	  if(NULL == (new = af_prepend(s,af,"format")))
 	    return AF_ERROR;
@@ -438,8 +437,7 @@ int af_init(af_stream_t* s, int force_output)
     }
     
     // Check output format fix if not OK
-    if((s->last->data->format != s->output.format) || 
-       (s->last->data->bps != s->output.bps)){
+    if(s->last->data->format != s->output.format){
       if(strcmp(s->last->info->name,"format"))
 	af = af_append(s,s->last,"format");
       else
@@ -457,7 +455,6 @@ int af_init(af_stream_t* s, int force_output)
       return -1;
 
     if((s->last->data->format != s->output.format) || 
-       (s->last->data->bps    != s->output.bps)    ||
        (s->last->data->nch    != s->output.nch)    || 
        (s->last->data->rate   != s->output.rate))  {
       // Something is stuffed audio out will not work 
@@ -698,3 +695,7 @@ void af_help (void) {
   }
 }
 
+void af_fix_parameters(af_data_t *data)
+{
+    data->bps = af_fmt2bits(data->format)/8;
+}

@@ -214,6 +214,10 @@ float af_softclip(float a);
 /** Print a list of all available audio filters */
 void af_help(void);
 
+/* Fill the missing parameters in the af_data_t structure.
+   Used for stuffing bps with a value based on format. */
+void af_fix_paramaters(af_data_t *data);
+
 /* Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
    called to ensure the buffer is big enough. */
@@ -269,5 +273,3 @@ extern af_msg_cfg_t af_msg_cfg; // Message
 #endif
 
 #endif /* __aop_h__ */
-
-
