@@ -739,12 +739,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 
 		if(trak->stdata_len >= 86) { // extra atoms found
-		  int atom_len = char2int(trak->stdata,78);
-		  if((trak->stdata_len - atom_len) > 78)
-		      mp_msg(MSGT_DEMUX, MSGL_WARN, "MOV: Movie stdata contains more then one atom (yet unsupported)!\n");
-		  // TODO: add support for multiple atoms, by analyzing stdata len
-		  // and comparing with len of first atom ::atmos
-		  switch(char2int(trak->stdata,82)) { // switch atom type
+		  int pos=78;
+		  while(pos+8<=trak->stdata_len &&
+		    (pos+(atom_len=char2int(trak->stdata,pos)))<=trak->stdata_len){
+		   switch(char2int(trak->stdata,pos+4)) { // switch atom type
 		    case MOV_FOURCC('g','a','m','a'):
 		      // intfp with gamma value at which movie was captured
 		      // can be used to gamma correct movie display
@@ -776,8 +774,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      break;
 		    default:
 	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
-	      		  trak->stdata[86],trak->stdata[87],trak->stdata[88],trak->stdata[89],
+	      		  trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],
 	      		  atom_len);
+		   }
+		   pos+=atom_len;
 		  }
 		}
 		if(!sh->fps) sh->fps=trak->timescale;
