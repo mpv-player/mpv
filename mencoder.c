@@ -1219,7 +1219,7 @@ case VCODEC_LIBAVCODEC:
 
     switch(pass){
     case 1:
-	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, lavc_param_vme) == -1)
+	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1)
 	{
 	    printf("2pass failed: filename=%s\n", passtmpfile);
 	    pass_working = 0;
@@ -1230,15 +1230,17 @@ case VCODEC_LIBAVCODEC:
     case 2:
         if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
 		    lavc_venc_context.bit_rate,
-		    lavc_venc_context.frame_rate,
+		    force_ofps?force_ofps:sh_video->fps,
 		    100, /* crispness */
-		    lavc_param_vme) == -1)
+		    5) == -1)
 	{
 	    printf("2pass failed: filename=%s\n", passtmpfile);
 	    pass_working = 0;
 	}
-	else
+	else {
 	    pass_working = 1;
+	    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
+	}
 	break;
     }
 
