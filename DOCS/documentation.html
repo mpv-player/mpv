@@ -648,16 +648,25 @@ see the <A HREF="encoding.html#2.4">MEncoder section</A> .</LI>
 <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
 encode movies with <B>MPlayer</B>, read the <A HREF="#2.5">TV input</A> section.</LI>
 
-<LI>There are three timing methods in <B>MPlayer</B>. To use the old
-method, you don't have to do anything. It uses <CODE>usleep()</CODE> to tune
-A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be tuned
-even finer. The new timer code uses PC's RTC (Real Time Clock) for this task,
+<LI>There are three timing methods in <B>MPlayer</B>.<BR>
+<BR>
+<B>To use the old method</B>, you don't have to do anything. It uses
+<CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
+sometimes the sync has to be tuned even finer.<BR>
+<BR>
+<B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
 because it has precise 1ms timers. This requires root, or a <I>setuid root</I>
 <B>MPlayer</B> binary (or a little kernel hacking, but that's unadvised). You
-can see the new timer's efficiency in the status line. The third timer
-code is turned on with the <CODE>-softsleep</CODE> option. It has the
-efficiency of the RTC, but it doesn't use RTC. On the other hand,
-it requires more CPU. Note: <B>NEVER install setuid MPlayer binary on a
+can see the new timer's efficiency in the status line. In some hardware
+combinations (confirmed during usage of non-DMA DVD drive on an ALi1541 board)
+usage of the RTC timer causes skippy playback. It's recommended to use the
+following method in these cases.<BR>
+<BR>
+<B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
+option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
+hand, it requires more CPU.<BR>
+<BR>
+Note: <B>NEVER install setuid MPlayer binary on a
 multiuser system!</B> It's a clear way for everyone to gain root.</LI>
 
 </UL>
