@@ -25,6 +25,8 @@
 #endif
 #endif
 
+#define DEBUG 1
+
 typedef struct bes_registers_s
 {
   /* base address of yuv framebuffer */
@@ -718,6 +720,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK;
 	return 0;
     }
+    else  to->depth = to->flags = 0;
     return ENOSYS;
 }
 
@@ -725,10 +728,15 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 static void radeon_vid_dump_regs( void )
 {
   size_t i;
-  printk(RVID_MSG"*** Begin of OV0 registers dump ***\n");
+  printf(RADEON_MSG"*** Begin of DRIVER variables dump ***\n");
+  printf(RADEON_MSG"radeon_mmio_base=%p\n",radeon_mmio_base);
+  printf(RADEON_MSG"radeon_mem_base=%p\n",radeon_mem_base);
+  printf(RADEON_MSG"radeon_overlay_off=%08X\n",radeon_overlay_off);
+  printf(RADEON_MSG"radeon_ram_size=%08X\n",radeon_ram_size);
+  printf(RADEON_MSG"*** Begin of OV0 registers dump ***\n");
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
-	printk(RVID_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
-  printk(RVID_MSG"*** End of OV0 registers dump ***\n");
+	printf(RADEON_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
+  printf(RADEON_MSG"*** End of OV0 registers dump ***\n");
 }
 #endif
 
@@ -878,8 +886,8 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
 	case IMGFMT_I420: pitch = (src_w + 31) & ~31;
-			  config->dest.pitch.y =
-			  config->dest.pitch.u =
+			  config->dest.pitch.y = 
+			  config->dest.pitch.u = 
 			  config->dest.pitch.v = 32;
 			  break;
 	/* 4:2:2 */
@@ -909,7 +917,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     }
 
     /* keep everything in 16.16 */
-    besr.base_addr = (uint32_t)radeon_mem_base;
+    besr.base_addr = INREG(DISPLAY_BASE_ADDR);
     if(is_420)
     {
         uint32_t d1line,d2line,d3line;
@@ -920,11 +928,11 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	d2line += (left >> 17) & ~15;
 	d3line += (left >> 17) & ~15;
 	config->offset.y = d1line & VIF_BUF0_BASE_ADRS_MASK;
-	config->offset.u = d2line & VIF_BUF1_BASE_ADRS_MASK;
-	config->offset.v = d3line & VIF_BUF2_BASE_ADRS_MASK;
+	config->offset.v = d2line & VIF_BUF1_BASE_ADRS_MASK;
+	config->offset.u = d3line & VIF_BUF2_BASE_ADRS_MASK;
         besr.vid_buf0_base_adrs=(radeon_overlay_off+config->offset.y);
-        besr.vid_buf1_base_adrs=(radeon_overlay_off+config->offset.u)|VIF_BUF1_PITCH_SEL;
-        besr.vid_buf2_base_adrs=(radeon_overlay_off+config->offset.v)|VIF_BUF2_PITCH_SEL;
+        besr.vid_buf1_base_adrs=(radeon_overlay_off+config->offset.v)|VIF_BUF1_PITCH_SEL;
+        besr.vid_buf2_base_adrs=(radeon_overlay_off+config->offset.u)|VIF_BUF2_PITCH_SEL;
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -1042,6 +1050,9 @@ int vixPlaybackFrameSel(unsigned frame)
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off1);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off2);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
+#ifdef DEBUG
+    radeon_vid_dump_regs();
+#endif
     return 0;
 }
 
