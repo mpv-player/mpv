@@ -46,6 +46,7 @@ int ai_oss_set_channels(audio_in_t *ai)
 		   ai->req_channels);
 	    return -1;
 	}
+	ai->channels = ioctl_param;
     }
     else
     {
@@ -58,8 +59,8 @@ int ai_oss_set_channels(audio_in_t *ai)
 		   ai->req_channels == 2);
 	    return -1;
 	}
+	ai->channels = ioctl_param ? 2 : 1;
     }
-    ai->channels = ai->req_channels;
     return 0;
 }
 
@@ -102,7 +103,7 @@ int ai_oss_init(audio_in_t *ai)
 	       ai->req_samplerate);
 	return -1;
     }
-    ai->samplerate = ai->req_samplerate;
+    ai->samplerate = ioctl_param;
 
     mp_msg(MSGT_TV, MSGL_V, "ioctl dsp trigger: %d\n",
 	   ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETTRIGGER, &ioctl_param));
