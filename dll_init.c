@@ -23,6 +23,8 @@
 #include "libvo/img_format.h"
 #include "linux/shmem.h"
 
+extern int divx_quality;
+
 // ACM audio and VfW video codecs initialization
 // based on the avifile library [http://divx.euro.ru]
 
@@ -141,12 +143,12 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         return len;
 }
 
-
-
 int init_vfw_video_codec(sh_video_t *sh_video,int ex){
   HRESULT ret;
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
+  unsigned char temp[1024];
+  int i;
 
   mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (VFW) VIDEO Codec init =======\n");
 
@@ -163,12 +165,20 @@ int init_vfw_video_codec(sh_video_t *sh_video,int ex){
 
 //  sh_video->bih.biBitCount=32;
 
-  ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, &sh_video->o_bih);
+  // Note: DivX.DLL overwrites 4 bytes _AFTER_ the o_bih header, so it corrupts
+  // the sh_video struct content. We call it with an 1024-byte temp space and
+  // then copy out the data we need:
+  memset(temp,0x77,1024);
+
+  ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, temp);
   if(ret){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressGetFormat failed: Error %d\n", (int)ret);
     return 0;
   }
   mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormat OK\n");
+  
+  memcpy(&sh_video->o_bih,temp,sizeof(sh_video->o_bih));
+  // for(i=0;i<1024;i++) printf("%02X ",temp[i]);
   
 //  printf("ICM_DECOMPRESS_QUERY=0x%X",ICM_DECOMPRESS_QUERY);
 
@@ -292,9 +302,16 @@ int init_vfw_video_codec(sh_video_t *sh_video,int ex){
     sh_video->o_bih.biCompression = outfmt;
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!
-  
+
+  ICSendMessage(sh_video->hic, ICM_USER+80, (long)(&divx_quality) ,NULL);
+
   mp_msg(MSGT_WIN32,MSGL_V,"VIDEO CODEC Init OK!!! ;-)\n");
   return 1;
+}
+
+int vfw_set_postproc(sh_video_t* sh_video,int quality){
+  // Works only with opendivx/divx4 based DLL
+  return ICSendMessage(sh_video->hic, ICM_USER+80, (long)(&quality) ,NULL);
 }
 
 int vfw_decode_video(sh_video_t* sh_video,void* start,int in_size,int drop_frame,int ex){

@@ -95,6 +95,11 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 
 int get_video_quality_max(sh_video_t *sh_video){
  switch(sh_video->codec->driver){
+#ifdef USE_WIN32DLL
+  case VFM_VFW:
+  case VFM_VFWEX:
+      return 6;
+#endif
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW:
       return 4;
@@ -111,6 +116,12 @@ int get_video_quality_max(sh_video_t *sh_video){
 
 void set_video_quality(sh_video_t *sh_video,int quality){
  switch(sh_video->codec->driver){
+#ifdef USE_WIN32DLL
+  case VFM_VFW:
+  case VFM_VFWEX:
+   vfw_set_postproc(sh_video,10*quality);
+  break;
+#endif
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW: {
    if(quality<0 || quality>4) quality=4;
