@@ -435,7 +435,7 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
 
   for(i = 0 ; pt->files[i] != NULL ; i++) {
     fl = strlen(pt->files[i]);
-    if(fl <= 0 || pt->files[i][0] == PATH_SEP)
+    if(fl <= 0 || pt->files[i][0] == PATH_SEP || strstr(pt->files[i],"://"))
       continue;
     pt->files[i] = (char*)realloc(pt->files[i],bl+fl+1);
     memmove(pt->files[i] + bl,pt->files[i],fl+1);
