@@ -849,8 +849,7 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 	mga_vid_write_regs();
 	mga_vid_in_use = 0;
 
-	//FIXME put back in!
-	//MOD_DEC_USE_COUNT;
+	MOD_DEC_USE_COUNT;
 	return 0;
 }
 
@@ -870,8 +869,7 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 		return(-EBUSY);
 
 	mga_vid_in_use = 1;
-	//FIXME turn me back on!
-	//MOD_INC_USE_COUNT;
+	MOD_INC_USE_COUNT;
 	return(0);
 }
 
