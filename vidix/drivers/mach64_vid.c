@@ -119,6 +119,9 @@ static video_registers_t vregs[] =
   DECLARE_VREG(VIDEO_SYNC_TEST_B)
 };
 
+/* have to restore it on exit */
+static uint32_t SAVED_OVERLAY_GRAPHICS_KEY_CLR;
+
 /* VIDIX exports */
 
 /* MMIO space*/
@@ -465,6 +468,10 @@ int vixInit(void)
   printf("[mach64] Video memory = %uMb\n",mach64_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,mach64_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf("[mach64] Set write-combining type of video memory\n");
+
+  /* save this */
+  mach64_wait_for_idle();
+  SAVED_OVERLAY_GRAPHICS_KEY_CLR = INREG(OVERLAY_GRAPHICS_KEY_CLR);
   
   /* check if planar formats are supported */
   supports_planar=0;
@@ -501,6 +508,10 @@ int vixInit(void)
 
 void vixDestroy(void)
 {
+  /*restore this*/
+  mach64_wait_for_idle();
+  OUTREG(OVERLAY_GRAPHICS_KEY_CLR,SAVED_OVERLAY_GRAPHICS_KEY_CLR);
+  
   unmap_phys_mem(mach64_mem_base,mach64_ram_size);
   unmap_phys_mem(mach64_mmio_base,0x4000);
 }
