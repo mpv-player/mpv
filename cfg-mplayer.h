@@ -255,10 +255,11 @@ struct config conf[]={
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1},
+
 #ifdef HAVE_X11
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0},
+	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0},
 #endif
-
 
 #define MAIN_CONF
 #include "cfg-common.h"
