@@ -42,7 +42,7 @@
 #ifndef SIGTYPE
 #ifdef SIGUSR2
 #define	SIGTYPE SIGUSR2
-#warning should we use SIGUSR1 or SIGUSR2 on linux, bsd, ... too?
+//#warning should we use SIGUSR1 or SIGUSR2 on linux, bsd, ... too?
 #else
 #ifdef	__bsdi__
 #define	_NSIG NSIG

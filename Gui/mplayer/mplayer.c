@@ -81,7 +81,6 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
 
  vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
- vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
  
  i=wsHideFrame|wsMaxSize|wsHideWindow;
  if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsHideWindow;

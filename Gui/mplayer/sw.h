@@ -11,11 +11,7 @@ void mplSubDraw( wsParamDisplay )
  if ( !appMPlayer.subWindow.Mapped ||
       appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
 
- if ( mplShMem->Playing )
-  {
-   vo_expose=1;
-   mplSubRender=0;
-  }
+ if ( mplShMem->Playing ) mplSubRender=0;
 
  if ( mplSubRender )
   {

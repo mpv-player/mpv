@@ -126,9 +126,6 @@ void mplState( void )
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
-// printf( "----resize---> %dx%d --- \n",width,height );
- vo_setwindowsize( width,height );
- vo_resize=1;
 }
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
