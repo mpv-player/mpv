@@ -381,26 +381,6 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		uint32_t d_height, uint32_t fullscreen, char *title,
 		uint32_t format,const vo_tune_info_t *info)
 {
-
-/*
-1) pokud je vm zmen videomode 
-    - HOTOVO
-
-2) nejprve najit nejvhodnejsi vrstvu - tj. podporujici dany format a zmenu polohy/velikosti
-->enum vyplni strukturu: - pokud neni nic tak tam placne prvni co alespon podporuje format
-			 - jinak posledni podporujici vse (prepise klidne strukturu nekolikrat)
-			 struktura - format + layer + caps 
-    - HOTOVO
-			 
-3) nakonfigurovat vrstvu (postupne po jedne vlastnosti: - format 		HOTOVO
-							- velikost obrazu	HOTOVO
-							- buffermode		HOTOVO
-							- pozici/velikost	HOTOVO
-3) ziskat surface na vrstve - HOTOVO
-4) pokud je zoom vytvori pomocny buffer
-5) v pripade potreby zapnout a otestovat flip nebo vytvorit pomocny buffer (pokud jeste neni)
-
-*/
   /*
    * (Locals)
    */
@@ -499,7 +479,11 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    printf("DirectFB: ConfigError - no suitable layer found\n");
 	    params.id = DLID_PRIMARY;
 	}	
-	
+/*	Uncomment following if you want to use tvout on CRTC2 (requieres patch for DirectFB from Ville Syrjala)
+	params.id=2;
+	params.scale=0;
+	params.result=1;
+*/	
 	if (verbose) printf("DirectFB: Config - layer %i\n",params.id);
 
 
@@ -542,14 +526,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
         if (ret!=DFB_OK) {
     	    dlc.buffermode = DLBM_BACKSYSTEM;
 	    ret = layer->SetConfiguration( layer, &dlc );
-/*                if (ret==DFB_OK) {
-		// nastav vse pro flip
-		    flipping = 1;
 		}
-        } else  {
-		// nastav vse pro flip
-		    flipping = 1;
-*/	}
 
 // get layer surface
 	
@@ -627,7 +604,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    
 	    DFBCHECK (dfb->CreateSurface( dfb, &dsc, &frame));
 	    DFBCHECK(frame->GetSize(frame,&width,&height));
-	    
+	    if (verbose) printf("DirectFB: Frame is active.\n");
 	} 
 
 // get format for draw_alpha - should be removed soon - osd will be rendered outside vo driver
@@ -702,8 +679,6 @@ static void flip_page(void)
 //	if (verbose) printf("DirectFB: Flip page entered");
 	
 	DFBCHECK (primary->SetBlittingFlags(primary,flags));
-
-// tady jsete pridat odemknuti frame a primary v pripade potreby
 
 	if (frame) {
 	    if (stretch) {
@@ -883,14 +858,12 @@ static uint32_t get_image(mp_image_t *mpi)
         int pitch;
 
 //    if (verbose) printf("DirectFB: get_image() called\n");
-
-// tohle overit - mozna pokud mam frame pak by to nemuselo byt
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
     if(mpi->type==MP_IMGTYPE_STATIC) return VO_FALSE; // it is not static
 
 //    printf("width=%d vs. pitch=%d, flags=0x%X  \n",mpi->width,pitch,mpi->flags);
 
-    if((mpi->width==width) ||
+    if((mpi->width==pitch) ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))){
        // we're lucky or codec accepts stride => ok, let's go!
 
@@ -917,7 +890,8 @@ static uint32_t get_image(mp_image_t *mpi)
 	   mpi->planes[2]=dst + pitch*height;
 	   mpi->planes[1]=mpi->planes[2] + pitch*height/4;
 	   }
-	   mpi->width= mpi->stride[0]=pitch;
+	   mpi->width=width;
+	   mpi->stride[0]=pitch;
 	   mpi->stride[1]=mpi->stride[2]=pitch/2;
        } else {
     	   //YUY2 and RGB formats
@@ -1026,13 +1000,11 @@ static uint32_t put_image(mp_image_t *mpi){
     unlock();
 
     // already out?
-    if((mpi->flags&(MP_IMGFLAG_DIRECT))) {
+    if((mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))) {
 //        if (verbose) printf("DirectFB: Put_image - nothing todo\n");
 	return VO_TRUE;
     }
 
-    //|MP_IMGFLAG_DRAW_CALLBACK
-    
     if (mpi->flags&MP_IMGFLAG_PLANAR) {
     // memcpy all planes - sad but necessary
         int i;
