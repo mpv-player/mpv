@@ -26,7 +26,7 @@ typedef struct ao_plugin_data_s
   float delay_fix;  /* Fix delay */
 }ao_plugin_data_t;
 
-extern ao_plugin_data_t ao_plugin_data;
+extern volatile ao_plugin_data_t ao_plugin_data;
 
 // Plugin confuguration data set by cmd-line parameters
 typedef struct ao_plugin_cfg_s
@@ -36,7 +36,7 @@ typedef struct ao_plugin_cfg_s
   int pl_delay_len;	// Number of samples to delay sound output
 } ao_plugin_cfg_t;
 
-extern ao_plugin_cfg_t ao_plugin_cfg;
+extern volatile ao_plugin_cfg_t ao_plugin_cfg;
 
 // Configuration defaults
 #define CFG_DEFAULTS { \
