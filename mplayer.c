@@ -105,10 +105,6 @@ int quiet=0;
 static int last_dvb_step = 1;
 #endif
 
-#ifdef HAVE_MATROSKA
-#include "libmpdemux/matroska.h"
-#endif
-
 //**************************************************************************//
 //             Playtree
 //**************************************************************************//
@@ -171,6 +167,9 @@ static int max_framesize=0;
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 //#include "parse_es.h"
+#ifdef HAVE_MATROSKA
+#include "libmpdemux/matroska.h"
+#endif
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
