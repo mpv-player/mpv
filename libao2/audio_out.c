@@ -42,6 +42,9 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
 #endif
+#ifdef USE_SUN_AUDIO
+        &audio_out_sun,
+#endif
         &audio_out_null,
 #ifdef HAVE_ALSA5
 	&audio_out_alsa5,
@@ -54,9 +57,6 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef HAVE_SDL
         &audio_out_sdl,
-#endif
-#ifdef USE_SUN_AUDIO
-        &audio_out_sun,
 #endif
 	&audio_out_pcm,
 //	&audio_out_pss,
