@@ -219,15 +219,22 @@ du codec Video.
 .B \-edl <nomfichier>
 Active l'édition de la liste de décision durant la lecture. La vidéo sera
 sautée et le son coupé et remis suivant les entrées du fichier indiqué. 
-Voir DOCS/edl.html pour les détails sur comment l'utiliser.
+Voir DOCS/documentation.html#edl pour les détails sur comment l'utiliser.
 .TP
 .B \-edlout <nomfichier>
 Créé un nouveau fichier et écrit les enregistrement d'édition de la liste de 
 décision dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i', une
 entrée à sauter après les deux dernières secondes de la lecture est écrite dans
 ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur peut
-régler plus finement les entrées EDL plus tard. Voir DOCS/edl.html pour les 
-détails.
+régler plus finement les entrées EDL plus tard. Voir DOCS/documentation.html#edl 
+pour les détails.
+.TP
+.B \-fixed-vo (CODE BETA!)
+force un système de vidéo fixe pour des fichiers multiples (une 
+(dès)initialisation pour pour tous les fichiers).
+Ainsi une seule fenêtre sera ouverte pour tous les fichiers.
+Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix, xmga
+et gl2.
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
@@ -281,7 +288,7 @@ communication fifo.
 .PD 1
 .
 .TP
-.B \-lircconf <fichier\ de\ configuration>
+.B \-lircconf <fichier>
 Indique un fichier de configuration pour LIRC (Linux Infrared Remote 
 Control, voir http://www.lirc.org) si vous n'aimez pas le 
 ~/\:.lircrc par défaut.
@@ -289,6 +296,15 @@ Control, voir http://www.lirc.org) si vous n'aimez pas le
 .B \-loop <nombre>
 Répète la lecture <nombre> fois.
 0 signifie illimité.
+.TP
+.B \-menu (CODE BETA)
+Active le menu OSD.
+.TP
+.B \-menu-root <valeur> (CODE BETA)
+Spécifie le menu principal.
+.TP
+.B \-menu-cfg <file> (CODE BETA)
+Utilise un autre menu.conf.
 .TP
 .B \-nojoystick
 Désactive le support joystick.
@@ -523,7 +539,7 @@ non-décrypté depuis un DVD, cette option fournit la clé CSS nécessaire
 au décryptage du VOB (la clé est affiché pendant la validation avec le 
 lecteur de DVD en utilisant \-dvdauth).
 .TP
-.B \-dvdnav (BETA CODE)
+.B \-dvdnav (BETA CODE!)
 Forcer l'utilisation de libdvdnav.
 .TP
 .B \-forceidx
@@ -857,6 +873,17 @@ disponible.
 .B \-sub <fichier\ de\ sous-titres>
 Utilise/\:affiche ce fichier de sous-titres.
 .TP
+.B \-sub-bg-alpha <0\-255>
+Spécifie la valeur du canal alpha pour le fond des sous-titres et de l'osd.
+De grandes valeurs signifient plus transparent.
+La valeur 0 est une exception et signifie complètement transparent.
+.TP
+.B \-sub-bg-color <0\-255>
+Spécifie la valeur de la couleur pour le fond des sous-titres et de l'osd.
+Actuellement les sous-titres sont en niveau de gris donc cette valeur est
+équivalente à l'intensité de la couleur.
+La valeur 255 signifie blanc et 0 noir.
+.TP
 .B \-subcc \
 Affiche les sous-titres DVD Closed Caption (CC).
 Ce ne sont PAS les sous-titres VOB, ce sont des sous-titres ASCII spéciaux pour
@@ -1100,11 +1127,40 @@ capacités de compression/\:'soft\-clipping' (plugin volume uniquement)
 Décalage audio en secondes (peut être +/\:\-nombre à virgule).
 .TP
 .B \-format <0\-8192>
-Selectionne le format utilisé pour la sortie à partir de la couche filtre. Le format est sélectionné
-suivant les définitions de libao2/afmt.h.
-A FAIRE: lister les formats ici
+Selectionne le format utilisé pour la sortie à partir de la couche filtre 
+(suivant les définitions de libao2/afmt.h):
+.
+.RSs
+.IPs 1
+Mu-Law
+.IPs 2
+A-Law
+.IPs 4
+Ima-ADPCM
+.IPs 8
+8-bit signé
+.IPs 16
+8-bit non signé
+.IPs 32
+16-bit non signé (Little-Endian)
+.IPs 64
+16-bit non signé (Big-Endian)
+.IPs 128
+16-bit non signé (Little-Endian)
+.IPs 256
+16-bit signé (Big-Endian)
+.IPs 512
+MPEG (2) Audio
+.IPs 1024
+AC3
+.IPs 4096
+32-bit signé (Little-Endian)
+.IPs 8192
+32-bit non signé (Big-Endian)
+.RE
+.
 .TP
-.B \-mixer <device>
+.B \-mixer <périph.>
 Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
 /dev/\:mixer.
 .TP
@@ -1169,8 +1225,9 @@ réglages par défaut devraient fonctionner pour tout le monde. L'OSD peut être
 utilisable avec l'overlay (pas sur la TV) en le dessinant sur la couleur-clé.
 Avec les réglages de couleur-clé par défaut vous devriez obtenir des résultats
 variables, généralement vous verrez la couleur-clé autour des caractères et
-autres effets amusants. Mais si vous ajustez correctement les paramètres de
-couleur-clé vous devriez pouvoir obtenir des résultats acceptables.
+autres effets amusants. 
+Mais si vous ajustez correctement les paramètres de couleur-clé vous devriez 
+pouvoir obtenir des résultats acceptables.
 .
 .RSs
 .IPs ar-mode=<valeur>
@@ -1220,7 +1277,7 @@ valeurs de couleur clé
 ne pas utilise le cache VGA
 .IPs ol-osd
 active le hack osd sur le chevauchage
-.IPs ol[hwxy]\-cor=<value>
+.IPs ol[hwxy]\-cor=<valeur>
 ajuste la taille et la position du chevauchage au cas ou il ne corresponde
 pas parfaitement à la fenêtre
 .IPs overlay
@@ -1550,11 +1607,13 @@ paramètres ici.
 .RE
 .PD 1
 
+.RS
 .I NOTE:
 .br
 Ajoutez juste les valeurs des choses que vous voulez activer.
 .br
 Les options disponibles sont:
+.RE
 .
 .RSs
 .IPs ec
@@ -1582,7 +1641,7 @@ les flux valides)
 4: très agressive
 .REss
 .IPs bug=<valeur>
-contourne manuellement les bogues des encodeurs
+contourne manuellement les bogues des encodeurs:
 .RSss
 0: rien
 .br
@@ -1598,7 +1657,11 @@ d'autodétection)
 16 (mpeg4): bogue de remplissage
 .br
 32 (mpeg4):  bogue vlc illégal (autodétecté par fourcc)
+.br
+64 (mpeg4): bogue qpel XVID et DIVX (autodétecté)
 .REss
+.IPs idct=<0\-99>
+(voir lavcopts)
 .IPs gray
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .RE
@@ -1610,53 +1673,11 @@ Désactive la compensation automatique de l'aspect ratio.
 .B \-nosound
 Ne pas jouer/\:encoder le son.
 .TP
-.B \-vop pp <option1/option2/...>
-Cette option active le filtre interne de postprocessing, et propose une
-interface où vous pouvez passer des options au filtre nommé.
-
-.I NOTE:
-Voir \-npp help pour une liste complète des options disponibles.
-.br
-Chaque filtre est 'c' (chrominance) par défaut.
-.br
-\-npp ne contrôle que le filtre externe de postprocessing, et vous DEVEZ le
-charger manuellement avec \-vop pp (Utilisation: \-vop pp \-npp <options>),
-il n'est pas chargé automatiquement.
-.br
-Les mots-clé acceptent un préfixe '\-' pour désactiver une option.
-.br
-A ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa
-portée:
-.RSs
-a: Désactive automatiquement le filtre si le CPU est trop lent.
-.br
-c: Filtre la chrominance, également.
-.br
-y: Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
-.RE
-
-.RS 7
-.I EXEMPLE:
-.RE
-.PD 0
-.RSs
-.IPs "\-vop pp hb/vb/dr/al/lb"
-.IPs "\-vop pp hb/vb/dr/al"
-.IPs "\-vop pp de/\-al"
-filtres par défaut sans correction de luminosité/\:contraste
-.IPs "\-vop pp de/tn:1:2:3"
-Active les filtres par défaut & le débruiteur temporel.
-.IPs "\-vop pp hb:y,vb:a \-autoq 6"
-Débloque la luminance horizontale uniquement et active ou désactive
-le déblocage vertical suivant le temps CPU disponible.
-.RE
-.PD 1
-.
-.TP
-.B \-pp <qualité> (voir l'option \-vop pp également)
-Initialise le niveau de postprocess de la DLL. Cette option N'EST PLUS
-UTILISABLE avec le filtre de postprocess de MPlayer, mais uniquement avec
-les DLLs DirectShow Win32 qui ont une routine de postprocessing interne.
+.B \-pp <qualité> (voir l'option \-vop pp également!)
+Initialise le niveau de postprocess de la DLL. 
+Cette option N'EST PLUS UTILISABLE avec le filtre de postprocess de MPlayer, 
+mais uniquement avec les DLLs DirectShow Win32 qui ont une routine de 
+postprocessing interne.
 
 L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant les
 codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
@@ -1859,9 +1880,47 @@ conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant palette.
 Restreints la palette pour le prochain filtre.
 Il ne fait aucune conversion
 Utilisez-le avec le filtre scale pour une véritable conversion.
-.IPs pp[=flags]
-Active le filtre externe de postrocessing
-(voir l'option \-vop pp pour les détails)
+.IPs pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi -pp)
+Cette option active le filtre interne de postprocessing, et propose une
+interface où vous pouvez passer des options au filtre nommé.
+.br
+Notez que chaque sous-filtre doit être séparé des autres avec le signe /.
+.br
+Chaque filtre est 'c' (chrominance) par défaut.
+.br
+Les mots-clés acceptent un préfixe '\-' pour désactiver une option.
+.br
+A ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa portée:
+.RSss
+a: Désactive automatiquement le filtre si le CPU est trop lent.
+.br
+c: Filtre également la chrominance.
+.br
+y: Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
+.REss
+
+.RS
+.I EXEMPLES:
+.RE
+.RSss
+.br
+\-vop pp=hb/vb/dr/al/lb
+.br
+\-vop pp=hb/vb/dr/al
+.br
+filtres par défaut sans correction de luminosité/\:contraste:
+.br
+\-vop pp=de/\-al
+.br
+Active les filtres par défaut & le débruiteur temporel:
+.br
+\-vop pp=de/tn:1:2:3
+.br
+Débloque la luminance horizontale uniquement et active ou désactive
+le déblocage vertical suivant le temps CPU disponible:
+.br
+\-vop pp=hb:y/vb:a \-autoq 6
+.REss
 .IPs lavc[=qualité:fps]
 Encodeur MPEG1 temps-réel à utiliser avec DVB/\:DXR3 (libavcodec)
 .IPs fame
@@ -1884,7 +1943,7 @@ a: bruit temporel moyen
 .br
 h: haute qualité
 .br
-p: mix with pattern
+p: mixe du bruit aléatoire avec un motif (semi)régulier
 .REss
 .IPs eq[=bright:cont]
 Active l'égaliseur logiciel avec contrôles interactifs comme les ég. matériels.
@@ -1929,8 +1988,35 @@ s: échange les champs (échange même les lignes impaires)
 .RSss
 rayon: taille du filtre
 .br
-puissance: comment le filtre devrait être appliqué
+puissance: à quelle fréquence le filtre devrait être appliqué
 .REss
+.IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
+.RSss
+rad: force du filtre de flou (~0.1\-4.0) (le plus bas est le plus large)
+.br
+pfilter: force du préfiltre strength (~0.1\-2.0)
+.br
+cDiff: différence autorisée des pixels
+(~0.1-100.0)
+.REss
+.IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
+.RSss
+rad: force du filtre de  flou (~0.1\-5.0) (le plus bas est le plus large)
+.br
+strength: flou (0.0\-1.0) ou accentuation (-1.0\-0.0)
+.br
+thresh: filtre tout (0), filtre les surfaces plates (0\-30) ou filtre les bords 
+(-30\-0)
+.REss
+.IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
+.RSss
+x0,y0,...: coordonnées des coins supérieur-gauche, supérieur-droit, 
+inférieur-gauche et inférieur-droit
+corners
+.br
+t: rééchantillonage linéaire (0) ou cubique (1)
+.REss
+.
 .IPs 2xsai
 Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser les 
 images.
@@ -2254,11 +2340,15 @@ rv10: un ancien codec RealVideo
 mpeg1video: MPEG1 video :)
 .REss
 .IPs vqmin=<2\-31>
-minimum quantizer (passe\ 1/\:2) (par défaut: 3)
+minimum quantizer (passe\ 1/\:2) (par défaut: 2)
 .IPs vqscale=<2\-31>
 constant quantizer (sélectionne le mode quantizer fixe) (par défaut: 0 (désactivé))
 .IPs vqmax=<1\-31>
-maximum quantizer (passe\ 1/\:2) (par défaut: 15)
+maximum quantizer (passe\ 1/\:2) (par défaut: 31)
+.IPs mbqmin=<1\-31>
+minimum macroblock quantizer (passe\ 1/\:2) (par défault: 2)
+.IPs mbqmax=<1\-31>
+maximum macroblock quantizer (passe\ 1/\:2) (par défault: 31)
 .IPs vqdiff=<1\-31>
 maximum quantizer entre les trames I ou P (passe\ 1/\:2) (par défaut: 3)
 .IPs vmax_b_frames=<0\-4>
@@ -2281,7 +2371,7 @@ méthode d'estimation du mouvement:
 .br
 4: EPZS (par défaut)
 .br
-5: X1
+5: X1 (expérimental)
 .REss
 .IPs vhq\ \
 mode haute qualité, décode chaque bloc macro dans tous les modes et choisi le
@@ -2289,7 +2379,6 @@ plus petit (lent).
 (par défaut: HQ désactivé)
 .IPs v4mv
 4 vecteurs de mouvement par macrobloc (qualité légèrement meilleure),
-ne peut être utilisé avec des trames B.
 (par défaut: désactivé)
 .IPs keyint=<0\-300>
 intervalle entre les trames-clé en trames.
@@ -2492,7 +2581,7 @@ l'option \-vdpart):
 .REss
 .IPs gray
 encodage en niveaux de gris uniquement (plus rapide) (par défaut: désactivé)
-.IPs vfdct=<0\-99>
+.IPs vfdct=<0\-10>
 algorithme dct:
 .RSss
 0: en sélectionne un bon automatiquement (par défaut)
@@ -2563,6 +2652,42 @@ Couper les bords noirs pour avoir une meilleur qualité:
 normalise la quantization adaptive (expérimental)
 .IPs ildct
 utilise un dct entrelacé
+.IPs format=<valeur>
+.RSss
+YV12: défaut
+.br
+422P: pour huffyuv
+.REss
+.IPs pred
+(pour huffyuv)
+.RSss
+0: prédiction gauche
+.br
+1: prédiction plane/gradient
+.br
+2: prédiction median 
+.REss
+.IPs qpel
+utilise la compensation par quarter pel motion
+.IPs cmp=<0\-2000>
+fonction de comparaison pour estimation pel motion complète
+.IPs subcmp=<0\-2000>
+fonction de comparaison pour sous estimation pel motion
+.RSss
+0 (SAD): somme des différences absolues, rapide (par défaut)
+.br
+1 (SSE): somme des erreurs au carré
+.br
+2 (SATD): somme des différences transformées des hadamard absolus
+.br
+3 (DCT): somme des différences transformées des dct absolus
+.br
+4 (PSNR): somme des erreurs de quantisation au carré
+.br
+7 (ZERO): 0
+.br
++256: utile également chroma, ne fonctionne pas avec les trames b actuellement
+.REss
 .IPs mpeg_quant
 utilise les quantizers MPEG au lieu de H.263.
 (par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
@@ -2576,7 +2701,7 @@ Ne saute pas de trames.
 Envoie dans nomfichier, au lieu de 'test.avi' par défaut.
 .TP
 .B \-oac <nom codec>
-Encode avec le codec indiqué.
+Encode avec le codec audio.
 Utilisez \-ovc help pour obtenir une liste des codecs disponibles.
 (pas de valeur par défaut)
 
@@ -2593,13 +2718,28 @@ encode en MP3 (en utilisant Lame)
 .PD 1
 .
 .TP
+.B \-of <format>
+Encode dans le format spécifié.
+Utilisez \-of help pour obtenir une liste des formats disponibles.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "-of avi"
+encode en avi (par défaut)
+.IPs "-of mpeg"
+encode en mpeg
+.RE
+.PD 1
+.
+.TP
 .B \-ofps <fps>
 Le fichier de destination à un rapport trame/\:sec différent du fichier
 source. Vous DEVEZ l'initialiser pour les fichiers à fps variables
 (asf, quelques mov) et progressifs (29.97fps telecined mpeg).
 .TP
 .B \-ovc <nom codec>
-Encode avec le codec indiqué.
+Encode avec le codec vidéo indiqué.
 Utilisez \-ovc help pour avoir une liste des codecs disponibles.
 (pas de valeur par défaut)
 
@@ -2683,7 +2823,7 @@ interval maximum entre les trames-clé (défaut=10*fps)
 utilise les quantizers MPEG au lieu de H.263 (défaut=off)
 .IPs mod_quant
 décide d'utiliser ou non les quantizers MPEG ou H.263 sur une base
-trame-par-trame. (défaut=off, 2pass mode only)
+trame-par-trame. (défaut=off, mode 2passes uniquement)
 .IPs lumi_mask
 utilise un algorithme de lumimasquage (défaut=off, semble bogué)
 .IPs hintedme
