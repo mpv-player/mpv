@@ -2148,6 +2148,16 @@ The value 0 is used for scaled (aspect) destination w/\:h.
 skipping (c from 0\-3) and scaling parameters can be specified.
 (see the \-sws option for details)
 .REss
+.IPs dsize={aspect|w:h}
+Changes the intended display size/aspect at an arbitrary point in the
+filter chain.
+Aspect can be given as a fraction (4/3) or floating point number
+(1.33).
+Alternatively, you may specify the exact display width and height
+desired.
+Note that this filter does NOT do any scaling itself; it just affects
+what later scalers (software or hardware) will do when auto-scaling to
+correct aspect.
 .IPs yuy2
 Forces software YV12/\:I420 or 422P to YUY2 conversion.
 Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
@@ -2368,6 +2378,17 @@ starts.
 .br
 tr0, tr1, tr2, tr3: Threshold values to be used in certain modes.
 .REss
+.IPs "ivtc[=1]"
+Experimental "stateless" inverse telecine filter.
+Rather than trying to lock on to a pattern like the detc filter does,
+ivtc makes its decisions independently for each frame.
+This will give much better results for material that has undergone
+heavy editing after telecine was applied, but as a result it is not as
+forgiving of noisy input, for example TV capture.
+The optional parameter (ivtc=1) corresponds to the dr=1 option for the
+detc filter, and should be used with mencoder but not with mplayer.
+As with detc, you must specify the correct output framerate (-ofps
+23.976) when using mencoder.
 .IPs "telecine[=start]"
 Apply 3:2 "telecine" process to increase framerate by 20%. This most
 likely will not work correctly with mplayer, but it can be used
@@ -2377,12 +2398,18 @@ parameter tells the filter where in the telecine pattern to start
 (0-3).
 .IPs "tfields[=mode]"
 Temporal field separation -- split fields into frames, doubling the
-output framerate. In mode 0, the filter will leave the fields
-unchanged, resulting in half-height output. In mode 1, interlaced
-parts of the image will be interpolated to reconstruct full-height
-frames. Like the telecine filter, "tfields" will only work properly
-with mencoder, and only if both -fps and -ofps are set to the desired
-(double) framerate!
+output framerate. Like the telecine filter, "tfields" will only work
+properly with mencoder, and only if both -fps and -ofps are set to the
+desired (double) framerate! Available modes are:
+.RSss
+0: leave fields unchanged (this will jump/flicker)
+.br
+1: interpolate missing lines (the algorithm used might not be so good)
+.br
+2: translate fields by 1/4 pixel with linear interp (no jump)
+.br
+4: translate fields by 1/4 pixel with 4tap filter (higher quality)
+.REss
 .IPs "boxblur=radius:power[:radius:power]"
 box blur
 .RSss
