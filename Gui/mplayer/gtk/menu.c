@@ -18,6 +18,7 @@
 #include "../../../libmpdemux/demuxer.h"
 
 #include "../pixmaps/ab.xpm"
+#include "../pixmaps/half.xpm"
 #include "../pixmaps/normal.xpm"
 #include "../pixmaps/double.xpm"
 #include "../pixmaps/fs.xpm"
@@ -391,7 +392,7 @@ GtkWidget * create_PopUpMenu( void )
  GtkWidget * Menu = NULL;
  GtkWidget * SubMenu = NULL;
  GtkWidget * MenuItem = NULL;
- GtkWidget * N, * D, * F;
+ GtkWidget * H, * N, * D, * F;
 
  Menu=gtk_menu_new();
  gtk_widget_realize (Menu);
@@ -579,14 +580,17 @@ GtkWidget * create_PopUpMenu( void )
 
   if ( guiIntfStruct.NoWindow == False )
    {
-    int b1 = 0, b2 = 0;
+    int b1 = 0, b2 = 0, b_half = 0;
     AddSeparator( Menu );
     if ( !appMPlayer.subWindow.isFullScreen && guiIntfStruct.Playing )
      {
       if ( ( appMPlayer.subWindow.Width == guiIntfStruct.MovieWidth * 2 )&& 
            ( appMPlayer.subWindow.Height == guiIntfStruct.MovieHeight * 2 ) ) b2=1;
-	   else b1=1;
+      else if ( ( appMPlayer.subWindow.Width == guiIntfStruct.MovieWidth / 2 ) && 
+                ( appMPlayer.subWindow.Height == guiIntfStruct.MovieHeight / 2 ) ) b_half=1;
+      else b1=1;
      } else b1=!appMPlayer.subWindow.isFullScreen;
+    H=AddMenuCheckItem( window1, (const char*)half_xpm, Menu,MSGTR_MENU_HalfSize,b_half,evHalfSize );
     N=AddMenuCheckItem( window1, (const char*)normal_xpm, Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
     D=AddMenuCheckItem( window1, (const char*)double_xpm, Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
     F=AddMenuCheckItem( window1, (const char*)fs_xpm, Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
@@ -594,6 +598,7 @@ GtkWidget * create_PopUpMenu( void )
 
   if ( !gtkShowVideoWindow && !guiIntfStruct.Playing )
    {
+    gtk_widget_set_sensitive( H,FALSE );
     gtk_widget_set_sensitive( N,FALSE );
     gtk_widget_set_sensitive( D,FALSE );
     gtk_widget_set_sensitive( F,FALSE );

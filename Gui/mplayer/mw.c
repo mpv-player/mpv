@@ -281,6 +281,20 @@ set_volume:
           case 1: wsIconify( appMPlayer.subWindow ); break;
          }
         break;
+   case evHalfSize:
+        btnSet( evFullScreen,btnReleased );
+        if ( guiIntfStruct.Playing )
+         {
+          if ( appMPlayer.subWindow.isFullScreen )
+           {
+            mplFullScreen();
+           }
+          wsResizeWindow( &appMPlayer.subWindow, guiIntfStruct.MovieWidth / 2, guiIntfStruct.MovieHeight / 2 );
+          wsMoveWindow( &appMPlayer.subWindow, 0,
+                        ( wsMaxX - guiIntfStruct.MovieWidth/2  )/2 + wsOrgX,
+                        ( wsMaxY - guiIntfStruct.MovieHeight/2 )/2 + wsOrgY  );
+         }
+        break;
    case evDoubleSize:
     	btnSet( evFullScreen,btnReleased );
         if ( guiIntfStruct.Playing )

@@ -32,6 +32,7 @@
 #define evBackward10min     22
 #define evForward10min      23
 
+#define evHalfSize          301
 #define evNormalSize        24
 #define evDoubleSize        25
 #define evFullScreen        26

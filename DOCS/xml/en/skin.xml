@@ -900,6 +900,12 @@ relative value (0-100%) of the potmeter is used).
 <variablelist>
 <title>Video control:</title>
 <varlistentry>
+  <term><emphasis role="bold">evHalfSize</emphasis></term>
+  <listitem><para>
+Set the movie window to half size.
+    </para></listitem>
+</varlistentry>
+<varlistentry>
   <term><emphasis role="bold">evDoubleSize</emphasis></term>
   <listitem><para>
 Set the movie window to double size.

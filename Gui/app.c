@@ -50,6 +50,7 @@ evName evNames[] =
   { evDecAudioBufDelay,  "evDecAudioBufDelay"  },
   { evPlaySwitchToPause, "evPlaySwitchToPause" },
   { evPauseSwitchToPlay, "evPauseSwitchToPlay" },
+  { evNormalSize,        "evHalfSize"          },
   { evNormalSize,        "evNormalSize"        },
   { evDoubleSize,        "evDoubleSize"        },
   { evSetMoviePosition,  "evSetMoviePosition"  },
