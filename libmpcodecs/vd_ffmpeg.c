@@ -53,6 +53,9 @@ typedef struct {
     int best_csp;
     int b_age;
     int ip_age[2];
+    int qp_stat[32];
+    double qp_sum;
+    double inv_qp_sum;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -245,6 +248,17 @@ static int init(sh_video_t *sh){
 static void uninit(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
+    
+    if(lavc_param_vstats){
+        int i;
+        for(i=1; i<32; i++){
+            printf("QP: %d, count: %d\n", i, ctx->qp_stat[i]);
+        }
+        printf("Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n", 
+            ctx->qp_sum / avctx->coded_picture->coded_picture_number,
+            1.0/(ctx->inv_qp_sum / avctx->coded_picture->coded_picture_number)
+            );
+    }
 
     if (avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
@@ -429,13 +443,19 @@ else
         ctx->ip_age[1]++;
         ctx->b_age=1;
     }
-//pic->age= 256*256*256*64;
-//printf("G%X %X\n", pic->linesize[0], pic->data[0]);
+#if LIBAVCODEC_BUILD >= 4644
+    pic->type= FF_BUFFER_TYPE_USER;
+#endif
     return 0;
 }
 
 static void release_buffer(struct AVCodecContext *avctx, AVVideoFrame *pic){
     int i;
+    
+#if LIBAVCODEC_BUILD >= 4644
+    assert(pic->type == FF_BUFFER_TYPE_USER);
+#endif
+    
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
     }
@@ -528,7 +548,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
         all_len+=len;
         all_frametime+=sh->frametime;
-        fprintf(fvstats, "frame= %5d q= %f2.0d f_size= %6d s_size= %8.0fkB ",
+        fprintf(fvstats, "frame= %5d q= %2.2f f_size= %6d s_size= %8.0fkB ",
             ++frame_number, pic->quality, len, (double)all_len/1024);
         fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
@@ -547,6 +567,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             fprintf(fvstats, "type= B\n");
 	    break;
 	}
+        
+        ctx->qp_stat[(int)(pic->quality+0.5)]++;
+        ctx->qp_sum += pic->quality;
+        ctx->inv_qp_sum += 1.0/pic->quality;
+        
         break;
     }
 #endif
