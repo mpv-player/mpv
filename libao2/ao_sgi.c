@@ -25,6 +25,8 @@ LIBAO_EXTERN(sgi)
 
 static ALconfig	ao_config;
 static ALport	ao_port;
+static int sample_rate;
+static int queue_size;
 
 // to set/get/query special features/parameters
 static int control(int cmd, void *arg){
@@ -54,7 +56,7 @@ static int init(int rate, int channels, int format, int flags) {
     }
     
     frate = rate;
-
+   
     x[0].param = AL_RATE;
     x[0].value.ll = alDoubleToFixed(rate);
     x[1].param = AL_MASTER_CLOCK;
@@ -76,7 +78,7 @@ static int init(int rate, int channels, int format, int flags) {
     if (frate != alFixedToDouble(x[0].value.ll)) {
       printf("ao_sgi, init: samplerate is now %lf (desired rate is %lf)\n", alFixedToDouble(x[0].value.ll), frate);
     } 
-
+    sample_rate = (int)frate;
   }
   
   ao_data.buffersize=131072;
@@ -110,7 +112,7 @@ static int init(int rate, int channels, int format, int flags) {
   }
   
   // printf("ao_sgi, init: port %d config %d\n", ao_port, ao_config);
-  
+  queue_size = alGetQueueSize(ao_config);
   return 1;  
 
 }
@@ -181,8 +183,8 @@ static float get_delay(){
   
   // printf("ao_sgi, get_delay: (ao_buffersize %d)\n", ao_buffersize);
   
-  return 0;
-
+  //return 0;
+  return  (float)queue_size/((float)sample_rate);
 }
 
 
