@@ -463,7 +463,7 @@ static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample
     }
 }
 
-void* output_to_PCM(NeAACDecHandle hDecoder,
+void* output_to_PCM_sux(NeAACDecHandle hDecoder,
                     real_t **input, void *sample_buffer, uint8_t channels,
                     uint16_t frame_len, uint8_t format)
 {
@@ -548,6 +548,53 @@ void* output_to_PCM(NeAACDecHandle hDecoder,
                 int_sample_buffer[(i*channels)+ch] = (int32_t)tmp;
             }
             break;
+        }
+    }
+
+    return sample_buffer;
+}
+
+void* output_to_PCM(NeAACDecHandle hDecoder,
+                    real_t **input, void *sample_buffer, uint8_t channels,
+                    uint16_t frame_len, uint8_t format)
+{
+    int ch;
+    int i;
+    int16_t *short_sample_buffer = (int16_t*)sample_buffer;
+    real_t *ch0 = input[hDecoder->internal_channel[0]];
+    real_t *ch1 = input[hDecoder->internal_channel[1]];
+    real_t *ch2 = input[hDecoder->internal_channel[2]];
+    real_t *ch3 = input[hDecoder->internal_channel[3]];
+    real_t *ch4 = input[hDecoder->internal_channel[4]];
+
+    if (format != FAAD_FMT_16BIT)
+        return output_to_PCM_sux(hDecoder, input, sample_buffer, channels, frame_len, format);
+
+    if (hDecoder->downMatrix) {
+        for(i = 0; i < frame_len; i++)
+        {
+	    int32_t tmp;
+	    tmp = (ch1[i] + ((ch0[i]+ch3[i])<<1) + (ch0[i]+ch3[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
+	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;
+            short_sample_buffer[0] = tmp;
+	    tmp = (ch2[i] + ((ch0[i]+ch4[i])<<1) + (ch0[i]+ch4[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
+	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;
+            short_sample_buffer[1] = tmp;
+	    short_sample_buffer += channels;
+        }
+        return sample_buffer;
+    }
+
+    /* Copy output to a standard PCM buffer */
+    for(i = 0; i < frame_len; i++)
+    {
+        for (ch = 0; ch < channels; ch++)
+        {
+            int32_t tmp = input[ch][i];
+            tmp += (1 << (REAL_BITS-1));
+            tmp >>= REAL_BITS;
+	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;
+            *(short_sample_buffer++) = tmp;
         }
     }
 
