@@ -490,7 +490,7 @@ info[i].id=0;
     if (ftello(f) != MOVIALIGN) {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "Opendml superindex is too big for reserved space!\n");
 	mp_msg(MSGT_MUXER, MSGL_ERR, "Expected filepos %d, real filepos %d, missing space %d\n", MOVIALIGN, ftell(muxer->file), ftell(muxer->file)-MOVIALIGN);
-	mp_msg(MSGT_MUXER, MSGL_ERR, "Try increasing MOVIALIGN in libmpdemux/muxer_avi.c\n", MOVIALIGN, ftell(muxer->file), ftell(muxer->file)-MOVIALIGN);
+	mp_msg(MSGT_MUXER, MSGL_ERR, "Try increasing MOVIALIGN in libmpdemux/muxer_avi.c\n");
     }
     write_avi_list(f,listtypeAVIMOVIE,muxer->movi_end-ftello(f)-12);
   }
