@@ -237,10 +237,15 @@ endif
 	@if test -f $(CONFDIR)/codecs.conf.old ; then mv -f $(CONFDIR)/codecs.conf.old $(CONFDIR)/codecs.conf.older ; fi
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 	$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
-ifeq ($(DVDKIT),yes)
 ifeq ($(DVDKIT_SHARED),yes)
+ifeq ($(DVDKIT2),yes)
 	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
 	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit2/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
+else
+ifeq ($(DVDKIT),yes)
+	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
+	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
+endif
 endif
 endif
 ifeq ($(CSS_USE),yes)
