@@ -24,7 +24,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#include "../postproc/rgb2rgb.h"
+#include "../opendivx/yuv2rgb.h"
 #ifdef HAVE_MMX
 #include "mmx.h"
 #endif
@@ -46,11 +46,14 @@ extern int avcodec_inited;
 
 static unsigned char *picture_buf=NULL;
 static unsigned char *outbuf=NULL;
-static int outbuf_size = 100000;
+static unsigned char *spubuf=NULL;
+static int outbuf_size = 0;
+static int v_width,v_height;
 static int s_pos_x,s_pos_y;
 static int d_pos_x,d_pos_y;
 static int osd_w,osd_h;
-static uint32_t img_format = 0;
+static int img_format = 0;
+static int palette[] = { 0x0000, 0x4949, 0xb5b5, 0xffff };
 
 static vo_info_t vo_info = 
 {
@@ -65,16 +68,23 @@ init(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint3
 {
     if( dxr3_get_status() == DXR3_STATUS_CLOSED )
     {
-	if( dxr3_open( "/dev/em8300", "/etc/dxr3.ux" ) != 0 ) printf( "Error loading /dev/em8300 with /etc/dxr3.ux microcode file\n" );
+	if( dxr3_open( "/dev/em8300" ) != 0 ) { printf( "Error opening /dev/em8300\n" ); return -1; }
 	printf( "DXR3 status: %s\n",  dxr3_get_status() ? "opened":"closed" );
     }
-    else
-	printf( "DXR3 already open\n" );
 
+    /* Subpic code isn't working yet, don't set to ON 
+       unless you are really sure what you are doing */
+    dxr3_subpic_set_mode( DXR3_SPU_MODE_OFF );
+    dxr3_subpic_set_palette( (char*)palette );
+    spubuf = malloc(width*height);
+    
     if( dxr3_set_playmode( DXR3_PLAYMODE_PLAY ) !=0 ) printf( "Error setting playmode of DXR3\n" );
 
     img_format = format;
+    v_width = width;
+    v_height = height;
     picture_buf=NULL;
+    
     if( format == IMGFMT_YV12 )
     {
 #ifdef USE_LIBAVCODEC
@@ -98,11 +108,11 @@ init(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint3
             
         memset(&codec_context,0,sizeof(codec_context));
         codec_context.bit_rate=100000; // not used
-        codec_context.frame_rate=25*FRAME_RATE_BASE; // !!!!!
-        codec_context.gop_size=0; // I frames only
+        codec_context.frame_rate=25*FRAME_RATE_BASE;
+        codec_context.gop_size=0;
         codec_context.flags=CODEC_FLAG_QSCALE;
-        codec_context.quality=1; // quality!  1..31  (1=best,slowest)
-	codec_context.pix_fmt = PIX_FMT_RGB24;
+        codec_context.quality=1;
+	codec_context.pix_fmt = PIX_FMT_YUV420P;
         if(width<=352 && height<=288){
           codec_context.width=352;
           codec_context.height=288;
@@ -145,11 +155,101 @@ init(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint3
             return -1;
         }
         
-        outbuf_size=10000+width*height;  // must be enough!
+        outbuf_size=10000+width*height*4;
         outbuf = malloc(outbuf_size);
     
         size = codec_context.width*codec_context.height;
-        picture_buf = malloc((size * 3) / 2); /* size for YUV 420 */
+        picture_buf = malloc((size * 3)/2); /* size for YUV 420 */
+        
+        picture.data[0] = picture_buf;
+        picture.data[1] = picture.data[0] + size;
+        picture.data[2] = picture.data[1] + size / 4;
+        picture.linesize[0] = codec_context.width;
+        picture.linesize[1] = codec_context.width / 2;
+        picture.linesize[2] = codec_context.width / 2;
+
+	return 0;
+#endif
+	return -1;    
+    }
+    else if(format==IMGFMT_BGR24)
+    {
+#ifdef USE_LIBAVCODEC
+	int size = 0;
+	printf("Format: BGR24\n");
+
+        if(!avcodec_inited)
+	{
+	  avcodec_init();
+          avcodec_register_all();
+          avcodec_inited=1;
+        }
+    
+        /* find the mpeg1 video encoder */
+        codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
+        if (!codec) 
+	{
+            fprintf(stderr, "mpeg1 codec not found\n");
+            return -1;
+        }
+            
+        outbuf_size=10000+width*height*4;
+        outbuf = malloc(outbuf_size);
+	
+        memset(&codec_context,0,sizeof(codec_context));
+        codec_context.bit_rate=100000;
+        codec_context.frame_rate=25*FRAME_RATE_BASE;
+        codec_context.gop_size=0;
+        codec_context.flags=CODEC_FLAG_QSCALE;
+        codec_context.quality=1;
+	codec_context.pix_fmt = PIX_FMT_YUV420P;
+
+/*	codec_context.width=width;
+	codec_context.height=height;*/
+        if(width<=352 && height<=288){
+          codec_context.width=352;
+          codec_context.height=288;
+        } else
+        if(width<=352 && height<=576){
+          codec_context.width=352;
+          codec_context.height=576;
+        } else
+        if(width<=480 && height<=576){
+          codec_context.width=480;
+          codec_context.height=576;
+        } else
+        if(width<=544 && height<=576){
+          codec_context.width=544;
+          codec_context.height=576;
+        } else {
+          codec_context.width=704;
+          codec_context.height=576;
+        }
+
+        osd_w=s_width;
+        d_pos_x=(codec_context.width-(int)s_width)/2;
+        if(d_pos_x<0){
+          s_pos_x=-d_pos_x;d_pos_x=0;
+          osd_w=codec_context.width;
+        } else s_pos_x=0;
+    
+        osd_h=s_height;
+        d_pos_y=(codec_context.height-(int)s_height)/2;
+        if(d_pos_y<0){
+          s_pos_y=-d_pos_y;d_pos_y=0;
+          osd_h=codec_context.height;
+        } else s_pos_y=0;
+    
+        printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+    
+        /* open it */
+        if (avcodec_open(&codec_context, codec) < 0) {
+            fprintf(stderr, "could not open codec\n");
+            return -1;
+        }
+
+        size = codec_context.width*codec_context.height;
+        picture_buf = malloc((size * 3)/2);
         
         picture.data[0] = picture_buf;
         picture.data[1] = picture.data[0] + size;
@@ -159,7 +259,7 @@ init(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint3
         picture.linesize[2] = codec_context.width / 2;
 	return 0;
 #endif
-	return -1;    
+	return -1;
     }
     else if(format==IMGFMT_MPEGPES)
     {
@@ -177,30 +277,29 @@ get_info(void)
     return &vo_info;
 }
 
-#ifdef USE_LIBAVCODEC
-static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-    int x,y;
-    if( img_format == IMGFMT_YV12 )
-	vo_draw_alpha_yv12(w,h,src,srca,stride,picture.data[0]+(x0+d_pos_x)+(y0+d_pos_y)*picture.linesize[0],picture.linesize[0]);
+    int i,skip=0,index=0;
+    unsigned char *dst = spubuf;
+    for( i = (y*w)+x; i < w*h; i++ )
+    {
+	    if(srca[i]) {*dst=skip;skip=0;dst++;*dst=3;dst++;index+=2;}
+	    else skip++;
+    }
+
+    dxr3_subpic_write(spubuf,index);
 }
-#endif
 
 static void draw_osd(void)
 {
-  if( img_format == IMGFMT_YV12 )
-  {
-#ifdef USE_LIBAVCODEC
     vo_draw_text(osd_w,osd_h,draw_alpha);
-#endif
-  }
 }
 
 static uint32_t draw_frame(uint8_t * src[])
 {
-    int data_left;
     if( img_format == IMGFMT_MPEGPES )
     {
+        int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
     
 	data_left = p->size;
@@ -214,24 +313,91 @@ static uint32_t draw_frame(uint8_t * src[])
     {
 	printf("ERROR: Uninplemented\n");
     }
+    else if( img_format == IMGFMT_BGR24 )
+    {
+	int tmp_size, out_size;
+	int wrap, wrap3, x, y;
+	int r, g, b, R, G, B, h = v_height, w = v_width;
+	unsigned char *s, *Y, *U, *V;
+
+        if(d_pos_x+w>picture.linesize[0]) w=picture.linesize[0]-d_pos_x;
+        if(d_pos_y+h>codec_context.height) h=codec_context.height-d_pos_y;
+	
+	Y = picture.data[0]+d_pos_x+d_pos_y*picture.linesize[0];
+	U = picture.data[1]+(d_pos_x/2)+(d_pos_y/2)*picture.linesize[1];
+	V = picture.data[2]+(d_pos_x/2)+(d_pos_y/2)*picture.linesize[2];
+	
+	//BGR24->YUV420P from ffmpeg, see ffmpeg.sourceforge.net for terms of license
+#define SCALEBITS	8
+#define ONE_HALF	(1 << (SCALEBITS - 1))
+#define FIX(x)		((int) ((x) * (1L<<SCALEBITS) + 0.5))
+	wrap = w;
+	wrap3 = w * 3;
+        s = src[0];
+	for( y = 0; y < h; y+=2 )
+	{
+	    for( x = 0; x < w; x+=2 )
+	    {
+		b = s[0];
+		g = s[1];
+		r = s[2];
+		R = r;
+		G = g;
+		B = b;
+		Y[0] = (FIX(0.29900) * r + FIX(0.58700) * g + FIX(0.11400) * b + ONE_HALF) >> SCALEBITS;
+		b = s[3];
+		g = s[4];
+		r = s[5];
+		R += r;
+		G += g;
+		B += b;
+		Y[1] = (FIX(0.29900) * r + FIX(0.58700) * g + FIX(0.11400) * b + ONE_HALF) >> SCALEBITS;
+		s += wrap3;
+		Y += wrap;
+
+		b = s[0];
+		g = s[1];
+		r = s[2];
+		R += r;
+		G += g;
+		B += b;
+		Y[0] = (FIX(0.29900) * r + FIX(0.58700) * g + FIX(0.11400) * b + ONE_HALF) >> SCALEBITS;
+		b = s[3];
+		g = s[4];
+		r = s[5];
+		R += r;
+		G += g;
+		B += b;
+		Y[1] = (FIX(0.29900) * r + FIX(0.58700) * g + FIX(0.11400) * b + ONE_HALF) >> SCALEBITS;
+		U[0] = ((- FIX(0.16874) * R - FIX(0.33126) * G - FIX(0.50000) * B + 4 * ONE_HALF - 1) >> (SCALEBITS + 2)) + 128;
+		V[0] = ((FIX(0.50000) * R - FIX(0.41869) * G - FIX(0.08131) * B + 4 * ONE_HALF - 1) >> (SCALEBITS + 2)) + 128;
+		
+		U++;
+		V++;
+		s -= (wrap3-6);
+		Y -= (wrap-2);
+	    }
+	    s += wrap3;
+	    Y += wrap;
+	}
+#undef SCALEBITS
+#undef ONE_HALF
+#undef FIX(x)
+	//End of ffmpeg code, see ffmpeg.sourceforge.net for terms of license
+        tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
+	while( out_size )
+		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
+	
+	return 0;
+    }
 #endif
     
-    printf( "Error in draw_frame(...)" );
+    printf( "Error in draw_frame(...)\n" );
     return -1;
 }
 
 static void flip_page (void)
 {
-#ifdef USE_LIBAVCODEC
-    if( img_format == IMGFMT_YV12 )
-    {
-        int out_size, tmp_size;
-        /* encode the image */
-        tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
-        while( out_size )
-		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
-    }
-#endif
 }
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
@@ -245,6 +411,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
     if( img_format == IMGFMT_YV12 )
     {    
 #ifdef USE_LIBAVCODEC
+        int out_size, tmp_size;
 	x0+=d_pos_x;
         y0+=d_pos_y;
         if(x0+w>picture.linesize[0]) w=picture.linesize[0]-x0; // !!
@@ -281,12 +448,17 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 	    s+=stride[2];
 	    d+=picture.linesize[2];
 	}
+	
+        tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
+        while( out_size )
+		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
 
-	yuv2rgb_init( 24, MODE_RGB );
-	yuv2rgb( outbuf, srcimg[0], srcimg[1], srcimg[2], w, h, h*3, stride[0], stride[1] );
 	return 0;
 #endif
-	printf( "You will need libavcodec of ffmpeg.so yo play this video\n" );
+	return -1;
+    }
+    else if( img_format == IMGFMT_BGR24 )
+    {
 	return -1;
     }
     else if( img_format == IMGFMT_MPEGPES )
@@ -304,23 +476,23 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 1;
+    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
 #ifdef USE_LIBAVCODEC
-    if(format==IMGFMT_YV12) return 1;
-#endif
+    if(format==IMGFMT_YV12) return 0x1|0x4;
+    if(format==IMGFMT_BGR24) return 0x1|0x4;
+#else
+    if(format==IMGFMT_YV12) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
+    if(format==IMGFMT_BGR24) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
+#endif    
     return 0;
 }
 
 static void
 uninit(void)
 {
-#ifdef USE_LIBAVCODEC
-    if( img_format == IMGFMT_YV12 )
-    {
-	free(outbuf);
-	free(picture_buf);
-    }
-#endif
+    free(outbuf);
+    free(picture_buf);
+    free(spubuf);
     dxr3_close( );
 }
 

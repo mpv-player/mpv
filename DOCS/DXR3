@@ -36,7 +36,9 @@ These days, you have two uses for this card:
 
  * First of all you will need the DXR3/H+ drivers properly installed,
    including the dev-api.
-   These can be downloaded from dxr3.sourceforge.net
+   These can be downloaded from dxr3.sourceforge.net (I suggest using
+   the CVS version since most of the time I use the latest features
+   which are only available through cvs)
 
  * <mplayerdir>/libavcodec from ffmpeg (only required if you intend to
    play formats other than mpeg-(1/2), highly recommended!) there are
@@ -57,13 +59,15 @@ These days, you have two uses for this card:
  problems.
 
 
- 
+
 3. Usage
 
 After installation you will have two new outdevices in mplayer:
     -vo dxr3	For video output
-    -ao dxr3	For audio output
+    -ao dxr3	For audio output (due to an unresolved bug
+				  this is not recommended/useful!)
 
+MPEG-1, MPEG-2, VCD and DVD Notes
 There are some notes to take into account here for optimum playback.
 When playing any mpeg-(1/2) file, this including usage of the "-dvd"
 and "-vcd" options you must either add the "-vc mpegpes" or edit
@@ -72,38 +76,34 @@ If you fail to do this you will only get software playback which kinda
 spoils most of the useful features of this card except for tv-out ;).
 Remember that if you edit the codecs.conf file and move the mpegpes
 section will have to specify "-vc mpeg12" if you want to playback
-any of these video types without "-vo dxr3"!
+any of these video types _without_ "-vo dxr3"!
 
+DIVX Notes
+When playing divx's add "-vc odivx", if you get any other divx codec
+to run faster tell me which one because I'll be interested in how it
+could possibly be any faster than OpenDivX4Linux...
+
+Unsupported Codecs:
 If you ever get a codec unsupported message, lookup the codec in the
 codecs.conf file (search for "videocodec <codecname>"), copy the entire
 codec section and send it to me and I'll make sure it works with the
 next patch (or the next after that if I have a thousand things to take
 care of first ;) my e-mail is at the bottom of this page.
 
-
-
 4. Todo
 
- * Make the osd use the subpic feature of the dxr3 		(High)
- * Overlay output						(Medium)
- * Driver options						(Medium)
- * Add an onscreen menu for "live" performance tuning		(Low)
- 
-(yuv2rgb (24bpp) asm optimizations, not my job though... but
- this will improve playback of anything not mpeg-(1/2) for us
- all)
+ * Scale video played using windows codecs			(High)
+ * Make the osd use the subpic feature of the dxr3 (almost done)(High)
+ * Driver options (probably not until libvo2)			(Medium)
 
 
  
 5. Contacting me
 
-You can contact me either by e-mailing me, dholm@iname.com or by using
+You can contact me either by e-mailing me, <dholm@iname.com> or by using
 icq: 798427
-Feedback, bugreports and general suggestions are appreciated 
-(preferably by e-mail)
-My name is David Holm for those of you who are incapable of reading
-a heading. ;)
-
-
+Feedback, bugreports and general suggestions are appreciated (preferably
+by e-mail). My name is David Holm for those of you who are incapable of 
+reading a heading. ;)
 
 
