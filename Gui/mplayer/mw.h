@@ -130,7 +130,6 @@ void mplMainDraw( wsParamDisplay )
  wItem    * item;
  txSample * image = NULL;
  int        i;
- char     * tmp;
 
  if ( appMPlayer.mainWindow.Visible == wsWindowNotVisible ||
       !mainVisible ) return;

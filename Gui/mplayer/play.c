@@ -34,12 +34,6 @@ char          * Filename = NULL;
 extern float rel_seek_secs;
 extern int abs_seek_pos;
 
-
-void mplPlayerThread( void )
-{
-// mplayer( 0,NULL,NULL );
-}
-
 void mplFullScreen( void )
 {
 // if ( appMPlayer.subWindow.isFullScreen )
@@ -55,9 +49,10 @@ void mplStop()
 {
  if ( !mplShMem->Playing ) return;
 // ---
-//printf("%%%%%% STOP  \n");
+printf("%%%%%% STOP  \n");
 // ---
  mplShMem->Playing=0;
+ mplShMem->TimeSec=0;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
@@ -69,13 +64,14 @@ void mplStop()
 
 void mplPlay( void )
 {
- if ( ( mplShMem->Filename[0] == 0 )&&
+ if ( ( mplShMem->Filename[0] == 0 )||
       ( mplShMem->Playing == 1 ) ) return;
  if ( mplShMem->Playing == 2 ) { mplPause(); return; }
 // ---
 //printf("%%%%%% PLAY  \n");
 // ---
  mplShMem->Playing=1;
+// wsPostRedisplay( &appMPlayer.subWindow );
  mplSubRender=0;
 }
 
@@ -103,6 +99,7 @@ void mplPause( void )
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
+ printf( "----resize---> %dx%d --- \n",width,height );
  vo_setwindowsize( width,height );
  vo_resize=1;
 }
@@ -115,20 +112,9 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
  mplShMem=calloc( 1,ShMemSize );
 #endif
  signal( SIGTYPE,mplMainSigHandler );
-// signal( SIGCHLD,SIG_IGN );
 
- mplShMem->Playing=0;
- mplShMem->Volume=0.0f;
- mplShMem->Position=0.0f;
+ memset( mplShMem,0,ShMemSize );
  mplShMem->Balance=50.0f;
- mplShMem->Track=0;
- mplShMem->AudioType=0;
- mplShMem->StreamType=0;
- mplShMem->TimeSec=0;
- mplShMem->LengthInSec=0;
-
-// ---
-// ---
 }
 
 float mplGetPosition( void )

@@ -2,24 +2,64 @@
 // sub window
 
 int             mplSubRender = 1;
-int             mplSubMoved = 0;
+
+int VisibleMainWindow( void )
+{
+ Window   root,parent,me,subw,mainw;
+ Window * childs;
+ int      nchilds;
+ int      i;
+ int      visible = 0;
+
+ me=appMPlayer.mainWindow.WindowID;
+ for (;;) 
+  {
+   XQueryTree( wsDisplay,me,&root,&parent,&childs,&nchilds);
+   XFree((char *) childs);
+   if (root == parent) break;
+   me=parent;
+  }
+ XQueryTree( wsDisplay,root,&root,&parent,&childs,&nchilds );
+ mainw=me;
+
+ me=appMPlayer.subWindow.WindowID;
+ for (;;) 
+  {
+   XQueryTree( wsDisplay,me,&root,&parent,&childs,&nchilds);
+   XFree((char *) childs);
+   if (root == parent) break;
+   me=parent;
+  }
+ XQueryTree( wsDisplay,root,&root,&parent,&childs,&nchilds );
+ subw=me;
+
+ for (i=0; i < nchilds; i++) if ( childs[i]==me ) break;
+ for ( ;i<nchilds;i++ ) if ( childs[i] == mainw ) visible=1; 
+// printf( "-----------> visible main vindov: %d ---\n",visible );
+ return visible;
+}
+
+int mainisvisible1;
+int mainisvisible2;
+int count = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( ( appMPlayer.subWindow.Visible == wsWindowNotVisible )||
-      ( appMPlayer.subWindow.State != wsWindowExpose ) ) return;
+// if ( ( appMPlayer.subWindow.Visible == wsWindowNotVisible )||
+//      ( appMPlayer.subWindow.State != wsWindowExpose ) ) return;
 
- if ( ( mplShMem->Playing )&&( appMPlayer.subWindow.State == wsWindowExpose ) )
+ if ( ( mplShMem->Playing ) )//&&( appMPlayer.subWindow.State == wsWindowExpose ) )
   { 
+printf( "------> redraw volib.\n" );   
    wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
    wsClearWindow( appMPlayer.subWindow );
-   appMPlayer.subWindow.State=0; 
    vo_expose=1; 
-   return; 
+   mplSubRender=0;
   }
 
  if ( mplSubRender )
   {
+printf( "------> redraw video.\n" );   
    wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
    wsClearWindow( appMPlayer.subWindow );
    if ( appMPlayer.sub.Bitmap.Image ) 
@@ -29,10 +69,14 @@ void mplSubDraw( wsParamDisplay )
     } 
    XFlush( wsDisplay );
   }
+ appMPlayer.subWindow.State=0; 
 }
 
 void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 {
+ static int mplSubMoved = 0;
+ static int oldmainisvisible = 0;
+
  mplMouseTimer=mplMouseTimerConst;
  wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
 
@@ -46,7 +90,11 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           mplHideMenu( RX,RY );
           msButton=0;
           break;
+// ---	  
    case wsPLMouseButton:
+          oldmainisvisible=VisibleMainWindow();
+	  printf( "----> %d %d\n",mainisvisible1,mainisvisible2 );
+	  //=mainisvisible;
           sx=X; sy=Y;
           msButton=wsPLMouseButton;
           mplSubMoved=0;
@@ -65,15 +113,15 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
-          if ( !mplSubMoved )
+          if ( ( !mplSubMoved )&&
+	       ( appMPlayer.subWindow.isFullScreen )&&
+	       ( !VisibleMainWindow() ) )
 	   {
-	    wsMoveTopWindow( &appMPlayer.mainWindow );
+wsMoveTopWindow( &appMPlayer.mainWindow );
+//	     else wsMoveTopWindow( &appMPlayer.mainWindow );
 	   }
           msButton=0;
           mplSubMoved=0;
           break;
   }
 }
-
-//void mplSubResizeHandle( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
-//{ mplResize( X,Y,width,height ); }
