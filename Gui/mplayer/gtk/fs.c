@@ -62,7 +62,7 @@ char * fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames+1][2] =
 
 #define fsNumberOfOtherFilterNames 0
 char * fsOtherFilterNames[fsNumberOfOtherFilterNames+1][2] =
-         { { "All types", "*"     } };
+         { { "All files ( * )", "*"     } };
 
 GtkWidget   * fsFileNamesList;
 GtkWidget   * fsFNameList;

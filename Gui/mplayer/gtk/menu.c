@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../../../config.h"
+#include "../../../help_mp.h"
 
 #include "../../events.h"
 
@@ -260,59 +261,59 @@ GtkWidget * create_PopUpMenu( void )
 
  Menu=gtk_menu_new();
 
-  AddMenuItem( Menu,"About MPlayer""      ", evAbout );
+  AddMenuItem( Menu,MSGTR_MENU_AboutMPlayer"      ", evAbout );
   AddSeparator( Menu );
-   SubMenu=AddSubMenu( Menu,"Open ..." );
-    AddMenuItem( SubMenu,"Play file ...""    ", evLoadPlay );
-    AddMenuItem( SubMenu,"Play VCD ...", evNone );
+   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Open );
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayFile"    ", evLoadPlay );
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayVCD, evNone );
 #ifdef USE_DVDREAD
-    AddMenuItem( SubMenu,"Play DVD ...", evPlayDVD );
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
 #endif
-    AddMenuItem( SubMenu,"Play URL ...", evNone );
-    AddMenuItem( SubMenu,"Load subtitle ...   ", evLoadSubtitle );
-   SubMenu=AddSubMenu( Menu,"Playing" );
-    AddMenuItem( SubMenu,"Play""        ", evPlay );
-    AddMenuItem( SubMenu,"Pause", evPause );
-    AddMenuItem( SubMenu,"Stop", evStop );
-    AddMenuItem( SubMenu,"Prev stream", evPrev );
-    AddMenuItem( SubMenu,"Next stream", evNext );
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayURL, evNone );
+    AddMenuItem( SubMenu,MSGTR_MENU_LoadSubtitle"   ", evLoadSubtitle );
+   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Playing );
+    AddMenuItem( SubMenu,MSGTR_MENU_Play"        ", evPlay );
+    AddMenuItem( SubMenu,MSGTR_MENU_Pause, evPause );
+    AddMenuItem( SubMenu,MSGTR_MENU_Stop, evStop );
+    AddMenuItem( SubMenu,MSGTR_MENU_NextStream, evPrev );
+    AddMenuItem( SubMenu,MSGTR_MENU_PrevStream, evNext );
 //    AddSeparator( SubMenu );
 //    AddMenuItem( SubMenu,"Back 10 sec", evBackward10sec );
 //    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
 //    AddMenuItem( SubMenu,"Back 1 min", evBackward1min );
 //    AddMenuItem( SubMenu,"Fwd 1 min", evForward1min );
-   SubMenu=AddSubMenu( Menu,"Size" );
-    AddMenuItem( SubMenu,"Normal size""      ", evNormalSize );
-    AddMenuItem( SubMenu,"Double size", evDoubleSize );
-    AddMenuItem( SubMenu,"Fullscreen", evFullScreen );
+   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Size );
+    AddMenuItem( SubMenu,MSGTR_MENU_NormalSize"      ", evNormalSize );
+    AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
+    AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
 #ifdef USE_DVDREAD
-   DVDSubMenu=AddSubMenu( Menu,"DVD" );
-    AddMenuItem( DVDSubMenu,"Play disc ...""    ", evPlayDVD );
-    AddMenuItem( DVDSubMenu,"Show DVD Menu", evNone );
+   DVDSubMenu=AddSubMenu( Menu,MSGTR_MENU_DVD );
+    AddMenuItem( DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );
+    AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );
     AddSeparator( DVDSubMenu );
-    DVDTitleMenu=AddSubMenu( DVDSubMenu,"Titles" );
+    DVDTitleMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Titles );
      if ( gtkShMem->DVD.titles )
       {
        char tmp[32]; int i;
        for ( i=0;i<gtkShMem->DVD.titles;i++ )
         {
-         sprintf( tmp,"Title %2d",i+1 );
+         sprintf( tmp,MSGTR_MENU_Title,i+1 );
          AddMenuItem( DVDTitleMenu,tmp,( (i+1) << 16 ) + evSetDVDTitle );
         }
       }
-      else AddMenuItem( DVDTitleMenu,"(none)",evNone );
-    DVDChapterMenu=AddSubMenu( DVDSubMenu,"Chapter" );
+      else AddMenuItem( DVDTitleMenu,MSGTR_MENU_None,evNone );
+    DVDChapterMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Chapters );
      if ( gtkShMem->DVD.chapters )
       {
        char tmp[32]; int i;
        for ( i=0;i<gtkShMem->DVD.chapters;i++ )
         {
-         sprintf( tmp,"Chapter %2d",i+1 );
+         sprintf( tmp,MSGTR_MENU_Chapter,i+1 );
          AddMenuItem( DVDChapterMenu,tmp,( (i+1) << 16 ) + evSetDVDChapter );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDChapterMenu,"(none)",evNone );
-    DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,"Audio language" );
+      else DVDChapterMenu=AddMenuItem( DVDChapterMenu,MSGTR_MENU_None,evNone );
+    DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_AudioLanguages );
      if ( gtkShMem->DVD.nr_of_audio_channels )
       {
        char tmp[64]; int i;
@@ -322,8 +323,8 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDAudioLanguageMenu,tmp,( gtkShMem->DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDAudioLanguageMenu,"(none)",evNone );
-    DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,"Subtitle language" );
+      else DVDChapterMenu=AddMenuItem( DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
+    DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_SubtitleLanguages );
      if ( gtkShMem->DVD.nr_of_subtitles )
       {
        char tmp[64]; int i;
@@ -333,14 +334,14 @@ GtkWidget * create_PopUpMenu( void )
          AddMenuItem( DVDSubtitleLanguageMenu,tmp,( gtkShMem->DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
         }
       }
-      else DVDChapterMenu=AddMenuItem( DVDSubtitleLanguageMenu,"(none)",evNone );
+      else DVDChapterMenu=AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
 #endif
   AddSeparator( Menu );
-  AddMenuItem( Menu,"Playlist", evPlayList );
-  AddMenuItem( Menu,"Skin browser", evSkinBrowser );
-  AddMenuItem( Menu,"Preferences", evPreferences );
+  AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
+  AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
+  AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
   AddSeparator( Menu );
-  AddMenuItem( Menu,"Exit ...", evExit );
+  AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );
 
  return Menu;
 }

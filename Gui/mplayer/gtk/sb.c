@@ -161,7 +161,7 @@ GtkWidget * create_SkinBrowser( void )
  gtk_widget_show( vbox5 );
  gtk_container_add( GTK_CONTAINER( frame8 ),vbox5 );
 
- label=gtk_label_new( "Skins:" );
+ label=gtk_label_new( MSGTR_SKIN_LABEL );
  gtk_widget_set_name( label,"label" );
  gtk_widget_ref( label );
  gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"label",label,
@@ -221,11 +221,12 @@ GtkWidget * create_SkinBrowser( void )
  gtk_widget_set_name( hbuttonbox4,"hbuttonbox4" );
  gtk_widget_ref( hbuttonbox4 );
  gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hbuttonbox4",hbuttonbox4,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_set_usize( hbuttonbox4,-2,25 );
  gtk_widget_show( hbuttonbox4 );
  gtk_box_pack_start( GTK_BOX( vbox5 ),hbuttonbox4,FALSE,TRUE,0 );
  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox4 ),GTK_BUTTONBOX_END );
- gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),0 );
- gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox4 ),80,0 );
+ gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),5 );
+ gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox4 ),75,0 );
 
  Ok=gtk_button_new_with_label( MSGTR_Ok );
  gtk_widget_set_name( Ok,MSGTR_Ok );
@@ -233,8 +234,7 @@ GtkWidget * create_SkinBrowser( void )
  gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Ok,Ok,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( Ok );
  gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Ok );
- gtk_widget_set_usize( Ok,-2,33 );
- GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
+ gtk_widget_set_usize( Ok,-2,22 );
  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
  Cancel=gtk_button_new_with_label( MSGTR_Cancel );
@@ -243,8 +243,7 @@ GtkWidget * create_SkinBrowser( void )
  gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Cancel,Cancel,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( Cancel );
  gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Cancel );
- gtk_widget_set_usize( Cancel,-2,33 );
- GTK_WIDGET_SET_FLAGS( Cancel,GTK_CAN_DEFAULT );
+ gtk_widget_set_usize( Cancel,-2,22 );
  gtk_widget_add_accelerator( Cancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
  gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),NULL );
