@@ -79,7 +79,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 	}
 	if (i == conf_optnr) {
 		if (parser_mode == CONFIG_FILE)
-			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option:\n");
+			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option: %s\n", opt);
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
@@ -87,12 +87,12 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 	    conf[i].name, conf[i].p, conf[i].type);
 
 	if (conf[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
-		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used on command line:\n");
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used on command line: %s\n", opt);
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
 	if (conf[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE) {
-		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used in config file:\n");
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used in config file: %s\n", opt);
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
@@ -265,6 +265,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			    switch(sscanf_ret)
 			    {
 				case 1:
+				    subparam = NULL;
 				case 2:
 				    if ((ret = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
 				    {
@@ -297,7 +298,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 out:
 	return ret;
 err_missing_param:
-	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "missing parameter: %s\n", param);
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "missing parameter for option: %s\n", opt);
 	ret = ERR_MISSING_PARAM;
 	goto out;
 }
