@@ -1,7 +1,94 @@
+mplayer (0.99)
+  pre1:
+  
+    NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
+    0.90-rc5 (and later 0.90 releases) changes are independent!
+    (it also means that there are main-only and 0_90-only changes too)
+
+    Big/Structural changes:
+    * linux/ dir renamed to osdep/
+    * postproc/postproc* files moved to libavcodec
+    * old libmpeg2 replaced with patched version of the 0.3.1 release
+    * DOCS/Language/ dirs renamed to DOCS/id, english files moved to DOCS/en
+    * HTML->XML transformed documentation (english & russian for now)
+    * docs priority & installation (--language=ab,cd,ef,all and so on)
+    * yuv2rgb conversion removed from most vo drivers (like fbdev, gif89 etc)
+    * -vop option obsoleted by reverse-order -vf, big config layer changes
+    * stream layer "cleanup", -dvd -> dvd:// etc
+    * autosub fuzziness, it tries to load all subs with similar filenames
+    
+    Ports:
+    * HPUX fixes
+    * Ported to Darwin / MACOS X
+    * Ported to Win32/Mingw (including network, timers, getch etc)
+    * win32 codecs DLL support on Win32/Cygwin (and Mingw too!)
+    * Lots of Altivec optimizations
+    
+    Codecs/demuxers support:
+    * realaudio win32 dlls support
+    * various realaudio/realvideo fixes, including WxH bugs, Sipr etc
+    * various realmedia a-v sync fixes
+    * realaudio v4 demuxer
+    * realaudio 14_4 and 28_8 codecs support (both binary dlls and native code)
+    * realmedia rtsp:// support (independent from the live.com rtsp stuff!)
+    * matroska demuxer
+    * demuxer: enabling mpeg4-es autodetection, h264-es support
+    * .wav extradata parsing (for truespeech, atrac3 etc)
+    * DVB input driver, mpeg-TS demuxer
+    * hwac3: DTS passthru support
+    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize
+    * vf layer: slices support (crop, expand, swscale only)
+    * vf scale aspect fixes
+    * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm, -fPIC compileable
+    * swscaler: brightness/cont/sat. and different YUV matrices support
+    * NUV encoding
+    * SGI image files decoding (-mf)
+    * Theora video (using libtheora/libogg) support
+    * DivX.com 5.0.5 libs support
+    * support for latest Xvid en/decoder features
+    * decoder for Hauppauge PVR 250/350 MB-YUV format (fourcc HM12)
+    * support for Vanguard's win32 h264 etc codecs
+
+    FFMpeg/libavcodec:
+    * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
+    * huffyuv v1 support
+    * PAL 4:1:1 SMPTE 314M DV streams support, NTSC DV last MB column fix
+    * fixing padding bug autodetection for some rare files
+    * DspContext.(i)dct_* bitexact cleanup
+    * user setable quantizer bias
+    * mpeg1 slice encoidng support
+    * msmpeg4 2-pass support
+    * H264 video decoding
+    * Indeo 3 video decoding
+    * buggy VP3 video decoder (no UMV and inaccurate idct)
+    * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
+    * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Vidoe v1) decoding
+    * Improved SVQ1 decoding (using ffmpeg VLC functions)
+    * truncated unary binerization, unary k-th order exp golomb binarization :)
+    * FFV1: lossless YUV codec, compress a lot better than huffyuv, but slower
+    * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
+
+    Others:
+    * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
+    * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
+    * vo/x11: fix detection of metacity
+    * configure: enable vidix for ppc
+    * spudec.c: Fix "invalid fragment" handling, Improved subtitle queueing
+    * TVout/matroxtv: various improvements
+    * tdfx_vid driver & vo support (3dfx cards overlay)
+    * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
+    * new svgalib vo driver
+    * Finally merged libavc-option.txt into the man page.
+    * v4l capturing: various bugfixes, video eq support
+    * network streaming layer: IPv6 support
+    * playtree parsing speedup :)
+    * vo_directfb2: triple buffering support,configuration sys changed,fixes
+    * various URL parsing fixes
+    * GUI PPC (reverse byteorder) fixes
+    * crashing on broken config files finally fixed!
+
 
 mplayer (0.90)
-
-  final:  "CounterCounter"
 
   rc4:  "FlameCounter"
 
