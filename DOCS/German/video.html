@@ -204,7 +204,7 @@ XVideo-Unterst&uuml;tzung (beklag dich bei nVidia).</P>
     du mit MPlayer <B>hardwarebeschleunigte</B> Wiedergabe, das ganze
     wahlweise <B>mit oder ohne TV-Ausgang</B>, und es werden dabei nicht
     einmal weitere Bibliotheken oder X selber ben&ouml;tigt. Lies dazu
-    die <A HREF="#vidix">Vidix-Sektion</A>.</LI>
+    die <A HREF="#vidix">VIDIX-Sektion</A>.</LI>
 </UL>
 
 <H4><A NAME="xv_neomagic">2.3.1.2.1.5 NeoMagic-Karten</A></H4>
@@ -235,16 +235,23 @@ enth&auml;lt Unterst&uuml;tzung f&uuml;r Xv im Vollbild f&uuml;r
 Cyberblade XP-Karten.</P>
 
 
+<H4><A NAME="xv_powervr">2.3.1.2.1.7 Kyro/PowerVR-Karten</A></H4>
+
+<P>Wenn du Xv mit Kyro-Karten (wie z.B. der Hercules Prophet 4000XT) verwenden
+m&ouml;chstest, dann solltest du die Treiber von der
+<A HREF="http://www.powervr.com/">PowerVR-Seite</A> benutzen.</P>
+
+
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H4><A NAME="dga_summary">2.3.1.2.2.1 Zusammenfassung</A></H4>
+<H5>EINLEITUNG</H5>
 
 <P>Dieser Abschnitt versucht, in wenigen Worten zu beschreiben, was DGA 
 generell ist, und was der DGA-Videotreiber in MPlayer erreichen kann, 
 und was nicht.</P>
 
-<H4><A NAME="dga_whatis">2.3.1.2.2.2 Was ist DGA?</A></H4>
+<H5>Was ist DGA?</H5>
 
 <P>DGA ist die Abk&uuml;rzung f&uuml;r Direct Graphics Access (direkter
 Zugriff auf die Grafikhardware) und gibt Programmen die M&ouml;glichkeit,
@@ -272,8 +279,7 @@ von der Grafikkarte und dem Grafikkartentreiber im X-Server abh&auml;ngig zu
 sein. Es fuktioniert also nicht auf jedem System...</P>
 
 
-<H4><A NAME="dga_installation">2.3.1.2.2.3 DGA-Unterst&uuml;tzung f&uuml;r 
-MPlayer installieren</A></H4>
+<H5>DGA-UNTERST&Uuml;TZUNG F&Uuml;R MPLAYER INSTALLIEREN</H5>
 
 <P>Stell als erstes sicher, dass X die DGA-Erweiterung l&auml;dt. Schau
 in /var/log/XFree86.0.log nach:</P>
@@ -313,8 +319,7 @@ m&ouml;chtest, dann installiere MPlayer mit dem SUID-Bit:</P>
 zumindest :))! Du solltest auch ausprobieren, ob bei dir die Option
 <CODE>-vo sdl:dga</CODE> funktioniert. Sie ist viel schneller.</P>
 
-<H4><A NAME="dga_resolution">2.3.1.2.2.4 &Auml;ndern der 
-Aufl&ouml;sung</A></H4>
+<H5>&Auml;NDERN DER AUFL&Ouml;SUNG</H5>
 
 <P>Der DGA-Treiber erm&ouml;glicht es, die Aufl&ouml;sung zu &auml;ndern. 
 Damit entf&auml;llt die Notwendigkeit der langsamen Softwareskalierung und 
@@ -330,16 +335,31 @@ vertragen. Du kannst die "&uuml;berlebenden" Modelines anhand der X11-
 Logdatei herausfinden (normalerweise 
 <CODE>/var/log/XFree86.0.log</CODE>).</P>
 
-<P>Einige Modelines findest du in Anhang A.</P>
+<P>Diese Eintr&auml;ge funktionieren mit einem Riva128-Chip und dem
+<CODE>nv.o</CODE>-X-Server-Treibermodul.</P>
+ 
+<PRE>
+  Section "Modes"
+    Identifier    "Modes[0]"
+    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
+    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
+    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
+    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
+    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
+  EndSection
+</PRE>
 
-<H4><A NAME="dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></H4>
+
+<H5>DGA &amp; MPLAYER</H5>
 
 <P>DGA wird bei MPlayer an zwei Stellen benutzt: beim SDL-Treiber mit 
 <CODE>-vo sdl:dga</CODE> oder beim DGA-Treiber selber (<CODE>-vo dga</CODE>). 
 Das oben gesagte gilt f&uuml;r beide Treiber. In den folgenden Abschnitten 
 erkl&auml;re ich, wie der DGA-Treiber von MPlayer selber arbeitet.</P>
 
-<H4><A NAME="dga_features">2.3.1.2.2.6 Features des DGA-Treibers</A></H4>
+<H5>FEATURES DES DGA-TREIBERS</H5>
 
 <P>Der DGA-Treiber wird durch die Option <CODE>-vo dga</CODE> aktiviert. Sein 
 Standardverhalten sieht vor, dass er in die Aufl&ouml;sung schaltet, die der 
@@ -383,7 +403,8 @@ einen gro&szlig;en Einbruch bei der Geschwindigkeit hervorrufen, was sehr von
 der DGA-Implementierung der Treiber f&uuml;r deine Hardware abh&auml;ngt (auf 
 meinem K6-II+ 525 ben&ouml;tigt Doppelpufferung weitere 20% CPU-Zeit!).</P>
 
-<H4><A NAME="dga_speed">2.3.1.2.2.7 Punkte bzgl. der Geschwindigkeit</A></H4>
+
+<H5>PUNKTE BZGL. DER GESCHWINDIGKEIT</H5>
 
 <P>Generell gesehen sollte der Zugriff auf den DGA-Framebuffer genauso 
 schnell sein wie der X11-Treiber, wobei man zus&auml;tzlich noch ein Vollbild 
@@ -410,7 +431,8 @@ weniger Daten &uuml;ber den Bus transferiert werden m&uuml;ssen.</P>
 wiedergegeben werden konnten. AMD K6-2-CPUs werden ab ca. 400 MHz oder 
 h&ouml;her funktionieren.</P>
 
-<H4><A NAME="dga_bugs">2.3.1.2.2.8 Bekannte Fehler</A></H4>
+
+<H5>BEKANNTE FEHLER</H5>
 
 <P>Die Entwickler von XFree sagen selber, dass DGA ein ganz sch&ouml;nes
 Monstrum ist. Sie raten eher davon ab, es zu benutzen, da seine Implementation
@@ -432,49 +454,10 @@ bei bestimmten Treibern nicht immer ganz fehlerfrei war.</P>
   <LI>Einige Treiber schaffen es nicht einmal, auch nur einen einzigen
     g&uuml;ltigen Grafikmodus bereitzustellen. In solchen F&auml;llen
     gibt der DGA-Treiber schwachsinnige Modi wie z.B. 100000x100000 oder
-    so &auml;hnlich aus...</LI>
+    so &auml;hnlich aus.</LI>
   <LI>Das OSD funktioniert nur, wenn auch die Doppelpufferung aktiviert ist.
     </LI>
 </UL>
-
-
-<H4><A NAME="dga_future">2.3.1.2.2.9 Ausblick</A></H4>
-
-<UL>
-  <LI>Benutze das neue X11-Renderinterface f&uuml;r das OSD</LI>
-  <LI>Wo ist meine TODO-Liste ???? :-(((</LI>
-</UL>
-
-<H4><A NAME="dga_modelines">2.3.1.2.2.A Einige Modelines</A></H4>
-
-<PRE>
-  Section "Modes"
-    Identifier    "Modes[0]"
-    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
-    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
-    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
-    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
-    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
-    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
-    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
-  EndSection
-</PRE>
-
-<P>Diese Eintr&auml;ge funktionieren mit meinem Riva128-Chip und dem
-nv.o-Treiber einwandfrei.</P>
-
-<H4><A NAME="dga_bug_reports">2.3.1.2.2.B Fehlerberichte</A></H4>
-
-<P>Wenn du Probleme mit dem DGA-Treiber hast, dann kannst du gerne einen 
-Fehlerbericht an die unten stehende Adresse schicken. Starte dazu bitte 
-MPlayer mit der Option <CODE>-v</CODE> und &uuml;bernimm alle Zeilen 
-in den Fehlerbericht, die mit <CODE>vo_dga:</CODE> anfangen.</P>
-
-<P>Bitte gib auch ann, welche X11-Version du benutzt, welche Grafikkarte und 
-welche CPU du hast. Das X11-Treibermodul, das in der <CODE>XF86Config</CODE>
-angegeben wird, k&ouml;nnte ebenfalls hilfreich sein. Danke!</P>
-
-<P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
 <H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
@@ -530,7 +513,7 @@ sind).</P>
     <TD>gleiche Funktionen wie * und / (Mixersteuerung)</TD></TR>
 </TABLE>
 
-<H4>Bekannte Fehler:</H4>
+<H5>BEKANNTE FEHLER</H5>
 
 <UL>
   <LI>Tasten, die bei sdl:aalib einmal gedr&uuml;ckt werden, bleiben aus
@@ -543,7 +526,7 @@ sind).</P>
 
 <H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
-<H4>Installation</H4>
+<H5>INSTALLATION</H5>
 
 <P>Du must zuerst die svgalib und die dazugeh&ouml;rigen Devel-Pakete 
 installieren, bevor du MPlayer compilierst, da es die Svgalib sonst 
@@ -552,7 +535,7 @@ trotzdem erzwungen werden). Vergiss auch nicht, in
 <CODE>/etc/vga/libvga.config</CODE> richtige Werte f&uuml;r deine Grafikkarte 
 &amp; deinen Monitor anzugeben.</P>
 
-<H4>Anmerkungen</H4>
+<H4>ANMERKUNGEN</H4>
 
 <P>Verwende nicht die <CODE>-fs</CODE>-Option, da sie die Benutzung des 
 Softwareskalierers erzwingt, und das ganze dann langsam wird. Wenn du diese 
@@ -561,7 +544,7 @@ schlechte Qualit&auml;t produziert, daf&uuml;r aber auch ein wenig schneller
 ist.</P>
 
 
-<H4>EGA(4bpp)-Unterst&uuml;tzung</H4>
+<H5>EGA(4bpp)-UNTERST&Uuml;TZUNG</H4>
 
 <P>SVGAlib beinhaltet die EGAlib, und MPlayer kann damit jeden Film in 
 16 Farben bei den folgenden Modi anzeigen:</P>
@@ -583,6 +566,15 @@ produzierende Skalierroutine:<BR>
 Eventuell muss die automatische Anpassung des
 H&ouml;hen-/Breitenver&auml;ltnisses ausgeschaltet werden:<BR>
   &nbsp;&nbsp;<CODE>-noaspect</CODE></P>
+
+<P><B>ANMERKUNG:</B> Die besten Ergebnisse bei EGA-Bildschirmen erh&auml;lt
+man meiner Erfahrung nach, wenn man die Helligkeit ein wenig verringert:
+<CODE>-vop eq=-20:0</CODE>. Ich musste auch die Audiosamplerate erniedrigen,
+weil bei 44KHz der Sound nicht richtig funktionierte: <CODE>-srate 22050</CODE>.
+</P>
+
+<P>Du kannst das OSD und Untertitel mit dem <CODE>expand</CODE>-Filter
+aktivieren. Die man-Page enth&auml;lt die exakten Parameter.</P>
 
 
 <H4><A NAME="fbdev">2.3.1.2.5 Framebuffer-Ausgabe (FBdev)</A></H4>
@@ -654,12 +646,13 @@ Einschr&auml;nkung seitens MPlayer.</P>
 <P>Dieser Abschnitt besch&auml;ftigt sich mit der Unterst&uuml;tzung f&uuml;r 
 den BES (Back-End Scaler, Hardwareskalierungseinheit) bei Karten mit dem 
 Matrox-G200/G400/G450/G550-Chip durch das mga_vid-Kernelmodul. Es wird von 
-mir (A'rpi) aktiv entwickelt und bietet Unterst&uuml;tzung f&uuml;r Hardware-
+A'rpi aktiv entwickelt und bietet Unterst&uuml;tzung f&uuml;r Hardware-
 VSYNC und Dreifachpufferung. Dieser Treiber funktioniert sowohl unter der 
 Framebufferconsole als auch unter X.</P>
 
-<P><B>WARNUNG</B>: Auf nicht-Linux-Systemen solltest du <A 
-HREF="#vidix">VIDIX</A> f&uuml;r mga_vid benutzen!</P>
+<P><B>ANMERKUNG</B>: Das Modul ist nur f&uuml;r Linux-Systeme verf&uuml;gbar!
+Auf nicht-Linux-Systemen solltest du statt dessen <A HREF="#vidix">VIDIX</A>
+benutzen!</P>
 
 <P><B>Installation:</B></P>
 <OL>
@@ -812,7 +805,7 @@ festgestellt, aber vo_aa versucht, den besten Modus herauszufinden. Lies <A
 HREF="http://aa-project.sourceforge.net/tune/">http://aa-
 project.sourceforge.net/tune/</A> f&uuml;r weitere Tuningtipps.</P>
 
-<H4><A NAME="vesa">2.3.1.2.10 VESA - Ausgabe &uuml;ber das VESA-BIOS</A></H4>
+<H4><A NAME="vesa">2.3.1.2.10 VESA-Ausgabe &uuml;ber das VESA-BIOS</A></H4>
 
 <P>Dieser Treiber ist vom Design her ein <B>generischer Treiber</B> f&uuml;r
 alle Grafikkarten, deren Bios VESA VBE 2.0+ unterst&uuml;tzt. Ein weiterer
@@ -844,7 +837,7 @@ Laufen zu bringen.<BR>
 (Ich vermute, dass der TV-Ausgang normalerweise auf einer separaten
 Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
 
-<H4>Vorteile:</H4>
+<H5>VORTEILE</H5>
 
 <UL>
   <LI>Du hast die M&ouml;glichkeit, selbst dann Filme anzusehen, wenn
@@ -857,7 +850,7 @@ Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
   <LI>Dieser Treiber ruft wirklich die <B>int 10h</B>-Routine auf und ist 
     dementsprechend kein Emulator - er ruft <B>echte</B> Funktionen des 
     <B>echten</B> BIOS im <B>Real</B>-Modus auf (bzw. im vm68-Modus).</LI>
-  <LI>Du kannst den Treiber zusammen mit Vidis benutzen und erh&auml;lst 
+  <LI>Du kannst den Treiber zusammen mit VIDIX benutzen und erh&auml;lst 
     dadurch gleichzeitig hardwarebeschleunigte Grafikanzeige <B>UND</B> den 
     TV-Ausgang! (f&uuml;r ATI-Karten empfohlen)</LI>
   <LI>Wenn du ein VESA-VBE-3.0+-BIOS hast und irgendwo die Optionen 
@@ -869,7 +862,7 @@ Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
     werden.</LI>
 </UL>
 
-<H4>Nachteile:</H4>
+<H5>NACHTEILE</H5>
 
 <UL>
   <LI>Der Treiber funtkioniert nur auf <B>x86-Systemen</B>.</LI>
@@ -880,7 +873,7 @@ Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
 <P>Benutz diesen Treiber nicht mit <B>GCC 2.96</B>! Das wird nicht 
 funktionieren!</P>
 
-<P><B>Bei VESA verf&uuml;gbare Kommandozeilenoptionen:</B></P>
+<H5>BEI VESA VERF&Uuml;GBARE KOMMANDOZEILENOPTIONEN</H5>
 <DL>
   <DT><CODE>-vo vesa:opts</CODE></DT>
   <DD>momentan erkannte Optionen <B>dga</B>, um den DGA-Modus zu erzwingen 
@@ -890,7 +883,7 @@ funktionieren!</P>
     Erkennung</B> des DGA-Modus zu erm&ouml;glichen.</DD>
 </DL>
 
-<H4>Bekannte Probleme und wie man sie umgeht:</H4>
+<H5>BEKANNTE PROBLEME UND WIE MAN SIE UMGEHT</H5>
 
 <UL>
   <LI>Wenn du unter Linux eine <B>NLS</B>-Schrift verwendest und du den 
@@ -953,7 +946,9 @@ vonn&ouml;ten sind.</P>
 
 <H4><A NAME="vidix">2.3.1.2.12 VIDIX</A></H4>
 
-<P>VIDIX ist eine Abk&uuml;rzung f&uuml;r <B>VID</B>eo <B>I</B>nterface for 
+<H5>EINLEITUNG</H5>
+
+<P>VIDIX ist die Abk&uuml;rzung f&uuml;r <B>VID</B>eo <B>I</B>nterface for 
 *ni<B>X</B> (Video-Schnittstelle f&uuml;r *n*x).<BR> VIDIX wurde entworfen, 
 um eine Schnittstelle f&uuml;r schnelle Userspacetreiber f&uuml;r 
 Grafikkarten zur Verf&uuml;gung zu stellen, so wie es mga_vid f&uuml;r 
@@ -969,7 +964,7 @@ X11-Leuten in Sachen Grafikmodusumschaltung konkurieren.) Das Ziel dieser
 Schnittstelle liegt also einfach darin, die h&ouml;chstm&ouml;gliche 
 Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 
-<H4>BENUTZUNG</H4>
+<H5>BENUTZUNG</H5>
 
 <UL>
   <LI>Du kannst den eigenst&auml;ndigen Videotreiber benutzen:
@@ -995,7 +990,7 @@ Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 <P>Es ist in der Tat nicht wichtig, welcher Videoausgabetreiber mit
 <B>VIDIX</B> verwendet wird.</P>
 
-<H4>ANFORDERUNGEN</H4>
+<H5>ANFORDERUNGEN</H5>
 
 <UL>
   <LI>Die Grafikkarte sollte sich gerade im Grafikmodus befinden (ich 
@@ -1012,7 +1007,7 @@ Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 <P>Ich hoffe, dass jeder von MPlayers Videoausgabetreibern das 
 <CODE>:vidix</CODE>-Unterger&auml;t erkennt.</P>
 
-<H4>BEDIENUNG</H4>
+<H5>BEDIENUNG</H5>
 
 <P>Wenn VIDIX als <B>Unterger&auml;t</B> (<CODE>-vo vesa:vidix</CODE>) 
 benutzt wird, dann wird die Konfiguration des Videomodus vom 
@@ -1042,18 +1037,76 @@ benutzen, ist ohne das dritte Teilargument, sodass MPlayer automatishc
 den richtigen Treiber aussucht.</P>
 
 <P>VIDIX ist eine sehr junge Technologie. Es ist deshalb gut m&ouml;glich, 
-dass sie auf deinem System (OS=abc, CPU=xyz) nicht funktioniert. In diesem 
+dass sie auf deinem System nicht funktioniert. In diesem 
 Fall liegt deine einzige M&ouml;glichkeit darin, VIDIX auf dein System zu 
 portieren (haupts&auml;chlich die <CODE>libdha</CODE>). Aber es gibt immer 
 noch die Hoffnung, dass es auf den Systemen funktioniert, auf denen auch X11 
 funktioniert.</P>
 
-<BLOCKQUOTE>
-  <B>Warnung: Sicherheitsrisiko</B><BR>
-  Leider <B>musst</B> du <B>root-Privilegien</B> haben, um VIDIX benutzen zu 
-  k&ouml;nnen, da VIDIX direkt auf die Hardware zugreift. Zumindest das 
-  <B>SUID</B>-Bit muss beim MPlayer-Executable gesetzt sein.
-</BLOCKQUOTE>
+<P>Da VIDIX direkten Zugriff auf die Hardware ben&ouml;tigt, musst du MPlayer
+entweder als root starten oder der Programmdatei das SUID-Bit setzen
+(<B>WARNUNG: Das ist ein Sicherheitsrisiko!</B>). Alternativ kannst du auch
+spezielle Kernelmodule benutzen:</P>
+
+<OL>
+  <LI>Lade dir die
+    <A HREF="http://www.arava.co.il/matan/svgalib/">Entwicklerversion</A>
+    der svgalib herunter (z.B. 1.9.17).</LI>
+  <LI><B>ODER</B> lade dir eine von Alex speziell f&uuml;r die Benutzung mit
+    MPlayer modifizierte Version herunter (die nicht die svgalib-Sourcen
+    zum Compilieren ben&ouml;tigt):
+    <A HREF="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">
+    svgalib_helper-1.9.17-mplayer.tar.bz2</A>.
+  <LI>Compiliere das Modul im <CODE>svgalib_helper</CODE>-Verzeichnis
+    (das im <CODE>svgalib-1.9.17/kernel/</CODE>-Verzeichnis gefunden werden
+    kann, wenn du die Sourcen von der svgalib-Seite heruntergeladen hast) und
+    lade es mit insmod.</LI>
+  <LI>Verschiebe das <CODE>svgalib_helper</CODE>-Verzeichnis nach
+    <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
+  <LI>Wenn du die Sourcen von der svgalib-Seite heruntergeladen hast, dann musst
+    du den Kommentar vor der CFLAGS-Zeile entfernen, die "svgalib_helper"
+    enth&auml;lt, und die sich in <CODE>libdha/Makefile</CODE> befindet.</LI>
+  <LI>Compiliere und installiere libdha.</LI>
+</OL>
+
+<H4><A NAME="vidix_ati">2.3.1.2.12.1 ATI-Karten</A></H4>
+
+<P>Momentan werden die meisten ATI-Karten unterst&uuml;tzt, von der Mach64
+bis hin zur neuesten Radeon.</P>
+
+<P>Es gibt zwei compilierte Binaries: <CODE>radeon_vid</CODE> f&uuml;r Radeons
+und <CODE>rage128_vid</CODE> f&uuml;r Rage128-Karten. Du kannst entweder eine
+der beiden erzwingen oder das VIDIX-System automatisch alle verf&uuml;gbaren
+Treiber ausprobieren lassen.</P>
+
+
+<H4><A NAME="vidix_matrox">2.3.1.2.12.2 Matrox-Karten</A></H4>
+
+<P>Matrox G200,G400,G450 und G550 funktionieren.</P>
+
+<P>Der Treiber unterst&uuml;tzt Videoequalizer und sollte fast genauso schnell
+wie der <A HREF="#mga_vid">Matrox-Framebuffer</A> sein.</P>
+
+
+<H4><A NAME="vidix_trident">2.3.1.12.3 Trident-Karten</A></H4>
+
+<P>Es gibt einen Treiber f&uuml;r den Trident Cyberblade/i1-Chipsatz, der auf
+VIA Epia-Mainboards eingesetzt wird.</P>
+
+<P>Der Treiber wurde von Alastair M. Robinson geschrieben und weiterentwickelt,
+welcher auch die neuesten Treiberversionen auf seiner
+<A HREF="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Homepage</A> zum
+Download anbietet. Dieer Treiber wird bei MPlayer immer sehr schnell nach
+Updates implementiert, sodass die CVS-Version von MPlayer immer auf dem
+aktuellen Stand sein sollte.</P>
+
+
+<H4><A NAME="vidix_3dlabs">2.3.1.2.12.4 3DLabs-Karten</A></H4>
+
+<P>Auch wenn es einen Treiber f&uuml;r 3DLabs GLINT R3-Chips und Permedia3-Chips
+gibt, so hat noch niemand diese getestet. Feedback wird deswegen gern gesehen.
+</P>
+
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
 
@@ -1121,7 +1174,7 @@ explizit den Pfad zu ihnen an:</P>
 
 <P>Dann compiliere und installiere wie sonst auch.</P>
 
-<H4>BEDIENUNG</H4>
+<H5>BEDIENUNG</H5>
 
 <P>Hardwaredecodierung (Abspielen von Standard-MPEG1/2-Dateien) geschieht mit 
 diesem Kommando:</P>
@@ -1200,7 +1253,7 @@ f&uuml;r  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
 f&uuml;r 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
-<H4>AUSBLICK</H4>
+<H5>AUSBLICK</H5>
 
 <P>Wenn du Fragen hast oder an der Diskussion &uuml;ber zuk&uuml;nfitge 
 Features teilnehen willst, dann melde dich an unserer <A 
@@ -1231,7 +1284,7 @@ du auf der Seite <A HREF="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood
 Plus for Linux</A>. <CODE>configure</CODE> sollte die Karte automatisch 
 finden. Die Compilierung sollte auch problemlos funktionieren.</P>
 
-<H4>Bedienung:</H4>
+<H5>BEDIENUNG</H5>
 <DL>
   <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
 
@@ -1278,10 +1331,7 @@ finden. Die Compilierung sollte auch problemlos funktionieren.</P>
     G&uuml;ltige Werte sind 5 = NTSC, 4 = PAL-60, 3 = PAL. Spezielle Standards
     sind 2 (automatische Erkennung mit PAL/PAL-60) und 1 (automatische
     Erkennung f&uuml;r PAL/NTSC), da sie den Standard in Abh&auml;ngigkeit
-    der FPS des Films setzen. Moderne Fernseher sind in der Lage, sowohl
-    PAL als auch NTSC abzuspielen. Wenn man Filme mit ihrer urspr&uuml;nglichen
-    Anzahl von Bildern pro Sekunde ansieht, so erh&auml;lt man die
-    beste Wiedergabe ohne verworfene Bilder. norm = 0 (Standard) &auml;ndert
+    der FPS des Films setzen. norm = 0 (Standard) &auml;ndert
     den momentan eingestellten TV-Standard nicht.<BR>
 
     <CODE>&lt;device&gt;</CODE> = Ger&auml;tenummer w&auml;hlt die zu 
@@ -1290,8 +1340,8 @@ finden. Die Compilierung sollte auch problemlos funktionieren.</P>
     Jede dieser Optionen kann auch weggelassen werden.<BR>
     
     <CODE>:prebuf:sync</CODE> scheint sehr gut zu funktionieren, wenn du DivX 
-    abspielst - und das selbst auf AMD-CPUs. Andererseits gab es Berichte von 
-    Leuten, die Probleme mit dieser Option und normalen MPEGs hatten. Du 
+    abspielst. Es gab Berichte von Leuten, die Probleme mit <CODE>prebuf</CODE>
+    bei der Wiedergabe von MPEG1/2-Dateien hatten. Du 
     solltest es also zuerst ohne Optionen probieren. Wenn du Sync-Probleme 
     hast, dann probier <CODE>:sync</CODE> aus.</DD>
 
@@ -1338,22 +1388,8 @@ finden. Die Compilierung sollte auch problemlos funktionieren.</P>
   <DD>Der em8300 unterst&uuml;tzt die Audiowiedergabe von AC3-Streams 
     (Surroundsound) &uuml;ber den digitalen Ausgang der Karte. Schau oben bei 
     der <CODE>-ao oss</CODE>-Option nach. Sie muss angegeben werden, um den 
-    DXR3-Ausgang anstelle der Soundkarte anzugeben. Lies auch die <A 
-    HREF="codecs.html#hardware_ac3">Hardware-AC3-Sektion</A>. Dort findest du 
-    weitere Details.</DD>
+    DXR3-Ausgang anstelle der Soundkarte anzugeben. </DD>
 </DL>
-
-<H4>Anmerkungen zu MPEG1, MPEG2, VCD und DVD</H4>
-
-<P>In manchen F&auml;llen werden Untertitel nicht synchron zum Audio/Video 
-angezeigt, wenn Hardwaredecodierung verwendet wird. Das ist ein bekanntes 
-Problem. Der em8300 kommt auch nicht mit zu gro&szlig;en Untertiteln zurecht. 
-Er wird dann eine oder zwei Sekunden h&auml;ngen. Momentan ist die einzige 
-M&ouml;glichkeit zur Umgehung des Problems die Verwendung von <CODE>-vop 
-lavc</CODE> bei DVDs mit Untertiteln. Wenn <CODE>-vop lavc</CODE> verwendet 
-wird, dann encodiert MPlayer das Video erneut nach MPEG1, selbst wenn 
-es vorher bereits MPEG1 war. Das bedeutet, dass mehr CPU-Power ben&ouml;tigt 
-wird, und dass ein wenig Bildqualit&auml;t verloren geht.</P>
 
 
 <H4><A NAME="other">2.3.1.4 Andere Anzeigehardware</A></H4>
@@ -1453,8 +1489,8 @@ beenden.</P>
 <H4><A NAME="blinken">2.3.1.4.2 Blinkenlights</A></H4>
 
 <P>Dieser Trieber kann Video mit dem Blinkenlights UDP-Protokoll wiedergeben. 
-Wenn du nicht wei&szlig;t, was Blinkenlights ist, dann brauchst du diesen 
-Treiber auch nicht.</P>
+Wenn du nicht wei&szlig;t, was <A HREF="http://www.blinkenlights.de/">
+Blinkenlights</A> ist, dann brauchst du diesen Treiber auch nicht.</P>
 
 
 <H4><A NAME="tv-out">2.3.1.5 Unterst&uuml;tzung f&uuml;r die TV-
@@ -1543,12 +1579,16 @@ TV-Ausg&auml;nge findest du in der n&auml;chsten Sektion!</P>
 
 <H4>Matrox-TV-Ausgangskabel zum Selberbau</H4>
 
-<P>Diese Informationen stammen von <B>Rácz Balázs</B>. Nat&uuml;rlich 
-&uuml;bernimmt niemand Verantwortung f&uuml;r irgendetwas oder jegliche 
+<P>Niemand &uuml;bernimmt Verantwortung f&uuml;r irgendetwas oder jegliche 
 Sch&auml;den, die durch diese Dokumentation entstehen.</P>
 
-<P>Der vierte Pin des CRTC2-Steckers ist das Composite-Videosignal. Masse 
-liegt an den Pins sechs, sieben und acht.</P>
+<P><B>Kabel f&uuml;r die G400</B>: Der vierte Pin des CRTC2-Steckers liefert
+das Composite Video-Signal. Erde liegt am sechsten, siebten und achten Pin.
+(Informationen von Balázs Rácz)</P>
+
+<P><B>Kabel f&uuml;r die G450</B>: Der erste Pin des CRTC2-Steckers liefert
+das Composite Video-Signal. Erde liegt am f&uuml;nften, sechsten, siebten und 
+f&uuml;nfzehnten (5, 6, 7, 15) Pin. (Information von Balázs Kerekes)</P>
 
 <H4><A NAME="tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550-Karten</A></H4>
 

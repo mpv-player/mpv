@@ -103,7 +103,28 @@ encodiert. Das Schema: </P>
   -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
-<H3><A NAME="rescaling">7.2. Skalierung von Filmen</A></H3>
+<H2><A NAME="mpeg">7.2 In das MPEG-Format encodieren</A></H2>
+
+<P>MEncoder kann MPEG-Dateien (MPEG-PS) erstellen. Das ist wahrscheinlich
+nur in Kombination mit dem <I>mpeg1video</I>-Codec der libavcodec sinnvoll,
+da alle Player (bis auf MPlayer) MPEG1-Video und MPEG1 Layer 2 (MP2)-Audio
+in MPEG-Dateien erwarten.</P>
+
+<P>Dieses Feature ist momentan nicht wirklich n&uuml;tzlich, mal davon
+abgesehen, dass es wahrscheinlich noch einige Fehler enth&auml;lt. Schlimmer
+ist aber, dass MEncoder momentan kein MPEG1 Layer 2 (MP2)-Audio erzeugen
+kann, das alle anderen Player in einer MPEG-Datei erwarten.</P>
+
+<P>Das Ausgabeformat von MEncoder kann mit <CODE>-of mpeg</CODE> auf MPEG
+ge&auml;ndert werden.</P>
+
+<P>Beispiel:<BR>
+  &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
+  -oac copy &lt;weitere Optionen&gt; media.avi -o ausgabe.mpg</CODE></P>
+
+
+
+<H3><A NAME="rescaling">7.3. Skalierung von Filmen</A></H3>
 
 <P>Oftmals ist die &Auml;nderung der Bildgr&ouml;&szlig;e erforderlich. Die
 Gr&uuml;nde daf&uuml;r k&ouml;nnen verschieden sein: Dateigr&ouml;&szlig;e
@@ -123,7 +144,7 @@ MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4 -vop scale=640:480 -sws 2 -oac copy -o ausgabe.avi</CODE></P>
 
-<H3><A NAME="copying">7.3. Stream-Kopiermodus</A></H3>
+<H3><A NAME="copying">7.4. Stream-Kopiermodus</A></H3>
 
 <P>MEncoder kann Input-Streams auf zwei Arten bearbeiten:
 <B>encodieren</B> oder <B>kopieren (copy)</B>. Diese Sektion erkl&auml;rt die
@@ -144,7 +165,7 @@ MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 </UL>
 
 
-<H3><A NAME="fixing">7.4. Reparieren von AVIs mit defektem Index oder
+<H3><A NAME="fixing">7.5. Reparieren von AVIs mit defektem Index oder
 schlechtem Interleaving</A></H3>
 
 <P>Trivial. Wir kopieren einfach die Video- und Audiostreams, und
@@ -156,8 +177,22 @@ nicht mehr gebraucht wird.</P>
 <P>Befehl: <CODE>mencoder -idx eingabe.avi -ovc copy -oac copy -o
 ausgabe.avi</CODE></P>
 
+<H3><A NAME="appending">7.5.1 Aneinanderh&auml;ngen mehrerer AVI-Dateien</A>
+</H3>
 
-<H3><A NAME="libavcodec">7.5. Encodierung mit der
+<P>Ein Nebeneffekt des oben erw&auml;hnten Reparierens ist, dass MEncoder
+damit auch zwei oder mehrere aneinandergeh&auml;ngte AVI-Dateien reparieren
+kann:</P>
+
+<P>Kommando: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o
+ausgabe.avi -</CODE></P>
+
+<P><B>Anmerkung:</B> Hier wird angenommen, das 1.avi und 2.avi den gleichen
+Codec verwenden, die gleiche Aufl&ouml;ung und Streamrate besitzen etc., und
+wenigstens 1.avi darf nicht defekt sein. Eventuell musst du, wie 
+<A HREF="#fixing">oben</A> beschrieben, die Quelldateien erst reparieren.</P>
+
+<H3><A NAME="libavcodec">7.6. Encodierung mit der
   <I>libavcodec</I>-Codec-Familie</A></H4>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> bietet eine einfache
@@ -186,7 +221,7 @@ Codecs encodieren:</P>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts
 vcodec=mjpeg -oac copy</CODE></P>
 
-<H3><A NAME="image_files">7.6 Encodierung von mehreren Einzelbildern
+<H3><A NAME="image_files">7.7. Encodierung von mehreren Einzelbildern
   (JPEGs, PNGs oder TGAs)</A></H3>
 
 <P>MEncoder kann aus mehreren JPEG-, PNG- oder TGA-Einzelbildern
@@ -196,7 +231,6 @@ einen Film erstellen. Durch einfaches Kopieren der Bilder kann er MJPEG-
 <P>So l&auml;uft dieser Prozess ab:</P>
 
 <OL>
-
   <LI>MEncoder <I>decodiert</I> das/die Eingangsbild(er) mit
     <CODE>libjpeg</CODE> (wenn PNGs decodiert werden, wird die <B>libpng</B>
     benutzt).</LI>
@@ -207,46 +241,49 @@ einen Film erstellen. Durch einfaches Kopieren der Bilder kann er MJPEG-
 
 <H4>Beispiele</H4>
 
-<P>Die Erkl&auml;rung der <CODE>-mf</CODE>-Option kann unten in der globalen
-<A HREF=#options>Optionen</A>-Sektion und in den Manpages gefunden werden.</P>
+<P>Die Erkl&auml;rung der <CODE>-mf</CODE>-Option kann in der Manpage gefunden
+werden.</P>
 
 <P><I>Erstellung einer DivX4-Datei aus allen JPEG-Dateien im aktuellen
 Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-ausgabe.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4
+  -o ausgabe.avi \*.jpg</CODE></P>
 
 <P><I>Erstellung einer DivX4-Datei aus einigen JPEG-Dateien im aktuellen
 Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25
--ovc divx4 -o ausgabe.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25
+  -ovc divx4 -o ausgabe.avi frame001.jpg,frame002.jpg</CODE></P>
 
 <P><I>Erstellung einer Motion JPEG-Datei (MJPEG) aus allen JPEG-Dateien im
 aktuellen Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy -o
-ausgabe.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc copy
+  -o output.avi \*.jpg</CODE></P>
 
 <P><I>Erstellung einer unkomprimierten Datei aus allen PNG-Dateien im
 momentanen Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw
--o ausgabe.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb
+  -o output.avi \*.png</CODE></P>
+
+<P><B>Anmerkung:</B> Die Breite muss ein Vielfaches von 4 betragen, was eine
+Beschr&auml;nkung des RGB-AVI-Formates ist.</P>
 
 <P><I>Erstellung einer Motion PNG-Datei (MPNG) aus allen PNG-Dateien im
 momentanen Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
--o ausgabe.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi \*.png</CODE></P>
 
 <P><I>Erstellung einer Motion TGA-Datei (MTGA) aus allen TGA-Dateien im
 aktuellen Verzeichnis:</I><BR>
 
-&nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
--o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  -o output.avi \*.tga</CODE></P>
 
-<H3><A NAME="vobsub">7.7. Extrahieren von DVD-Untertiteln in eine
+<H3><A NAME="vobsub">7.8. Extrahieren von DVD-Untertiteln in eine
 Vobsub-Datei</A></H3>
   
 <P>MEncoder kann Untertitel von einer DVD extrahieren und sie als Datei
@@ -296,7 +333,7 @@ pass=1</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder film.mpg -ifo film.ifo -vobsubout untertitel
 -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H3><A NAME="aspect">7.8. Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
+<H3><A NAME="aspect">7.9. Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
 </A></H3>
 
 <P>DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert, der das Verh&auml;ltnis

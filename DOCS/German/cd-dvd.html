@@ -77,7 +77,17 @@ HREF="http://das.ist.org/~georg/">Plextor-SCSI-Laufwerken</A> funktioniert.</P>
 <H2><A NAME="dvd">4.2. DVD-Wiedergabe</A></H2>
 
 <P>Bitte schau in der man-Page nach, wenn du eine Auflistung aller
-verf&uuml;gbaren Optionen willst.</P>
+verf&uuml;gbaren Optionen willst. Die Syntax bei einer normalen Digital
+Versatile Disc (DVD) sieht wie folgt aus:</P>
+
+<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;Ger&auml;t&gt;]</CODE></P>
+
+<P>Beispiel: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>Das Standard-DVD-Ger&auml;t ist  <CODE>/dev/dvd</CODE>. Wenn das bei dir
+anders ist, so erstelle einen symbolischen Link auf das richtige Ger&auml;t,
+oder gib es auf der Kommandozeile mit der Option <CODE>-dvd-device</CODE> an.
+</P>
   
 <P>MPlayer benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE>
 f&uuml;r die DVD Entschl&uuml;sselung und Wiedergabe. Diese beiden Bibliotheken
@@ -262,6 +272,10 @@ dass der ioctl-Aufruf CDROMREADRAW nicht vollst&auml;ndig implementiert ist.
 Wenn du Ahnung von der SCSI-Programmierung hast, dann
 <A HREF="../tech/patches.txt">hilf uns</A>, generische Unterst&uuml;tzung
 f&uuml;r VCD auf SCSI-Laufwerken zu implementieren.</P>
+
+<P>Bis dahin kannst du mit 
+<A HREF="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</A>
+Daten von der VCD extrahieren und diese mit MPlayer abspielen.</P>
 
 <H4>VCD-Struktur</H4>
  

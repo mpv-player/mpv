@@ -21,7 +21,8 @@ zur Zeit diese Treiber:</P>
   <DD>OSS (ioctl)-Treiber (unterst&uuml;tzt das Durchreichen von AC3)</DD>
 
   <DT>sdl</DT>
-  <DD>SDL-Treiber (untertst&uuml;tzt <B>ESD</B>, <B>ARTS</B> etc)</DD>
+  <DD>SDL-Treiber (untertst&uuml;tzt Sound-D&auml;monen wie <B>ESD</B> und
+    <B>ARTS</B>)</DD>
 
   <DT>nas</DT>
   <DD>NAS (Network Audio System)-Treiber</DD>
@@ -42,24 +43,30 @@ zur Zeit diese Treiber:</P>
   <DD>ESD-Treiber (haupts&auml;chlich f&uuml;r GNOME-Benutzer)</DD>
 </DL>
 
-<P>Fakt ist, dass Linux-Soundkartentreiber Kompatibilit&auml;tsprobleme haben. 
-Der Grund f&uuml;r diese Probleme liegt darin, dass MPlayer ein Feature 
-des Soundkartentreibers benutzt, um Audio und Video synchron zu halten. Leider 
-k&uuml;mmern sich einige Soundkartentreiberprogrammierer nicht besonders um 
-diese Funktion, da sie weder f&uuml;r die Wiedergabe von MP3s noch f&uuml;r 
-Soundeffeket ben&ouml;tigt wird.</P>
+<P>Linux-Soundkartentreiber haben Probleme mit der Kompatibilit&auml;t.
+MPlayer benutzt einen in <EM>vern&uuml;nftig</EM> implementierten Treibern
+eingebauten Mechanismus, um die Audio-/Video-Synchronisation korrekt
+beizubehalten. Leider sind einige Treiberautoren nicht sonderlich gr&uuml;ndlich
+bei der Implementation dieses Mechanismusses, da er nicht ben&ouml;tigt wird,
+um MP3s abzuspielen oder Soundeffekte zu erzeugen.</P>
 
-<P>Andere Medienplayer wie z.B. aviplay oder xine funktionieren bei dir 
-wahrscheinlich so, wie sie sind, weil sie eine "simplere" Methode wie internes 
-Timing f&uuml;r die Audio-/Video-Synchronisation verwenden. Anmerkung: es hat 
-sich oft gezeigt, dass ihre Methoden nicht ganz so effizient wie 
-MPlayers Methoden sind.</P>
+<P>Andere Medienplayer wie z.B. <A HREF="http://avifile.sourceforge.net">
+aviplay</A> oder <A HREF="http://xine.sourceforge.net">xine</A> funktionieren
+bei dir  wahrscheinlich so, wie sie sind, weil sie eine "simplere" Methode wie
+internes  Timing f&uuml;r die Audio-/Video-Synchronisation verwenden.
+Verschiedene Tests haben gezeigt, dass ihre Methoden nicht ganz so effizient
+wie MPlayers Methoden sind.</P>
 
 <P>Wenn du MPlayer zusammen mit einem korrekt geschriebenen 
 Soundkartentreiber verwendest, dann wirst du niemals A/V-Desyncs aufgrund des 
 Audiotreibers erleben (h&ouml;chstens mit sehr schlecht erstellten Dateien. 
 Schau in einem solchen Fall in die Dokumentation, wie du das beheben 
 kannst).</P>
+
+<P>Wenn du einen solchen nicht gut implementierten Audiotreiber verwendest,
+dann probier die Option <CODE>-autosync</CODE> aus, die deine Probleme
+l&ouml;sen sollte. Schau in der man-Page nach; dort findest du mehr
+Informationen dazu.</P>
 
 <P>Einige Anmerkungen:</P>
 
@@ -69,102 +76,204 @@ kannst).</P>
     Verz&ouml;gerungen oder irgendetwas anderes ungew&ouml;hliches h&ouml;rst, 
     versuche mal <CODE>-ao sdl</CODE> (HINWEIS: die SDL-Bibliotheken und das 
     dazugeh&ouml;rige Devel-Paket m&uuml;ssen installiert sein). Der SDL-
-    Audiotreiber hilft in vielen F&auml;llen (er unterst&uuml;tzt auch ESD, 
-    ARTS und Up-/Downsampling. ESD ist der Sounddaemon von GNOME, arts der 
-    von KDE).</LI>
+    Audiotreiber hilft in vielen F&auml;llen und unterst&uuml;tzt auch ESD
+    (GNOME) und ARTS (KDE).</LI>
   <LI>Wenn du ALSA Version 0.5 verwendest, musst du fast immer <CODE>-ao 
     alsa5</CODE> verwenden, weil ALSA 0.5 einen fehlerhaften OSS-
     Emulationscode hat. MPlayer wird mit etwa so einer Meldung 
     <B>abst&uuml;rzen</B>:<BR> <CODE>DEMUXER: Too many (945 in 8390980 bytes) 
     video packets in the buffer!</CODE></LI>
+  <LI>Unter Solaris solltest du den SUN-Audiotreiber mittels <CODE>-ao
+    sun</CODE> benutzen, da ansonsten weder Video noch Audio funktionierne.</LI>
+  <LI>Wenn beim Ton Klickger&auml;usche beim Abspielen vom CD-ROM-Laufwerk zu
+    h&ouml;rne sind, dann schalte "IRQ unmasking" an, z.B. mit
+    <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). Das ist auch
+    generell von Vorteil, wie du in der
+    <A HREF="cd-dvd.html#drives">CD-ROM-Sektion</A> nachleesn kannst.</LI>
 </UL>
-
-<P>Verwende auf <B>Solaris</B>-Systemen den SUN-Audio-Treiber mit 
-<CODE>-ao sun</CODE>, ansonsten wirst du weder Video noch Ton haben.</P>    
 
 
 <H4><A NAME="experiences">2.3.2.2. Soundkarten-Erfahrungen, 
 -Empfehlungen</A></H4>
 
-<TABLE BORDER="0" WIDTH="100%">
-  <TR><TD COLSPAN=3><B>VIA Onboard-Chipsatz (via82cxxx), nur 48kHz</B></TD></TR>
-  <TR><TD></TD><TD>Treiber:</TD>
-    <TD>von <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">sourceforge.net</A></TD></TR>
-
-  <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
-  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>kein Treiber</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>kein Treiberr</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-  <TR><TD></TD><TD>Treiber:</TD>
-    <TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-  <TR><TD></TD><TD>Treiber 2:</TD>
-    <TD>von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's Seite</A><BR>
-    (<I>Puffergr&ouml;&szlig;e auf 32k erh&ouml;ht</I>)</TD></TR>
-
-  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>kein Treiber</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF funktioniert nicht</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>beide OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>192</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>max 44kHz</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>48kHz klingt schlecht</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>44</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>C-Media-Karten (welche genau?)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK (scharfe ssss-Ger&auml;usche) (?)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Yamaha-Karten (*ymf*)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK (?) (evtl. <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>nur mit der OSS-Emulation von ALSA 0.5
-    <B>UND</B> <CODE>-ao sdl</CODE> OK (!) (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Karten mit envy24-Chips (wie z.B. Terratec EWS88MT)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>PC-Lautsprecher oder DAC</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK (Benutz den SDL-Treiber: <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>Der Treiber emuliert 44.1, evtl auch mehr.</TD></TR>
-  <TR><TD></TD><TD>Treiber:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
-</TABLE>
-
 <P>Unter Linux wird ein 2.4.x Kernel sehr empfohlen. Kernel 2.2 wird nicht
 getestet.</P>
 
-<P>Wenn der sound w&auml;hrend der Wiedergabe von CD-ROM "klickende" 
-Ger&auml;usche verursacht, schalte die Interupt-Unmaskierung ein, zum Beispiel 
-<CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). Dies ist 
-allgemein besser und wird in der <A HREF="cd-dvd.html#drives">CD-ROM-
-Sektion</A> genauer beschrieben.</P>
+<P>Linux-Soundtreiber werden haupts&auml;chlich von der freien Version von
+OSS bereitgestellt. Diese Treiber werden inzwischen von denen des
+<A HREF="http://www.alsa-project.org">ALSA-Projektes</A> abgel&ouml;st
+(Advanced Linux Sound Architecture), die bereits im Entwicklerbaum des Kernels
+(2.5) zu finden sind. Wenn deine Distribution nicht bereits ALSA verwendet
+und du Probleme mit dem Sound hast, dann solltest du die ALSA-Treiber mal
+ausprobieren. Die ALSA-Treiber sind den OSS-Treibern meistens in Sachen
+Kompatibilit&auml;t, Performance und Featuren &uuml;berlegen. Ledier werden
+einige Soundkarten dagegen nur von OSS-Treibern von
+<A HREF="http://www.opensound.com/">4Front Technologies</A> unterst&uuml;tzt.
+Sie unterst&uuml;tzen ebenfalls einige Nicht-Linux-Systeme.</P>
+
+<TABLE BORDER="1" WIDTH="100%">
+
+  <TR>
+    <TH ROWSPAN="2"><B>SOUNDKARTE</B></TH>
+    <TH COLSPAN="4"><B>TREIBER</B></TH>
+    <TH ROWSPAN="2"><B>Max kHz</B></TH>
+    <TH ROWSPAN="2"><B>Max Anz. Kan&auml;le</B></TH>
+    <TH ROWSPAN="2"><B>Max gleichzeitige Zugriffe</B></TH>
+  </TR>
+
+  <TR>
+    <TH><B>OSS/Free</B></TH>
+    <TH><B>ALSA</B></TH>
+    <TH><B>OSS/Pro</B></TH>
+    <TH><B>andere</B></TH>
+  </TR>
+
+  <TR>
+    <TD><B>VIA onboard (686/A/B, 8233, 8235)</B></TD>
+    <TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</A></TD>
+    <TD>snd-via82xx</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>4-48 kHz oderr nur 48 kHz, abh&auml;ngig vom Chipsatz</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+
+  <TR>
+    <TD><B>Aureal Vortex 2</B></TD>
+    <TD>keine</TD>
+    <TD>keine</TD>
+    <TD>OK</TD>
+    <TD><A HREF="http://aureal.sourceforge.net">Linux Aureal-Treiber</A><BR>
+      <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">buffer size increased to 32k</A></TD> 
+    <TD>48</TD>
+    <TD>4.1</TD>
+    <TD>5+</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB Live!</B></TD>
+    <TD>Analog OK, SP/DIF funktioniert nicht</TD>
+    <TD>beide OK</TD>
+    <TD>beide OK</TD>
+    <TD><A HREF="http://opensource.creative.com">Creatives OSS-Treiber (mit SP/DIF-Unterst&uuml;tzung)</A></TD>
+    <TD>192</TD>
+    <TD>4.0/5.1</TD>
+    <TD>32</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB 128 PCI (es1371)</B></TD>
+    <TD>OK</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>stereo</TD>
+    <TD>2</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB AWE 64</B></TD>
+    <TD>max 44kHz</TD>
+    <TD>48kHz klingt schlecht</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>keine</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound ACE</B></TD>
+    <TD>nicht OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>44</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound MAX</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>ESS 688</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>C-Media-Karten (welche genau?)</B></TD>
+    <TD>nicht OK (zischt) (?)</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Yamaha-Karten (*ymf*)</B></TD>
+    <TD>nicht OK (?) (vielleicht mit <CODE>-ao sdl</CODE>)</TD>
+    <TD>nur mit der OSS-Emulation von ALSA 0.5 OK <B>UND</B>
+      <CODE>-ao sdl</CODE> (!) (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Karten mit envy24-Chips (wie z.B. Terratec EWS88MT)</B></TD>
+    <TD>?</TD>
+    <TD>?</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+
+  <TR>
+    <TD><B>PC-Lautsprecher oder DAC</B></TD>
+    <TD>OK (mit dem SDL-Treiber: <CODE>-ao sdl</CODE>)</TD>
+    <TD>none</TD>
+    <TD>&nbsp;</TD>
+    <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">OSS-Treiber f&uuml;r den PC-Lautsprecher</a></TD>
+    <TD>Der Treiber emuliert 44.1, vielleicht auch mehr.</TD>
+    <TD>mono</TD>
+    <TD>1</TD>
+  </TR>
+
+</TABLE>
 
 <P>R&uuml;ckmeldungen zu diesem Dokument sind willkommen. Bitte sag uns, wie 
 MPlayer und deine Soundkarte(n) zusammen funktionieren.</P>
@@ -251,19 +360,21 @@ beeinflusst:</P>
   <DD>Gibt ausf&uuml;hrlichere Meldungen aus. Die meisten Filter geben hiermit
     auch mehr Statusinformationen aus.</DD>
   <DT><CODE>-channels</CODE></DT>
-  <DD>Diese Option setzt die Anzahl der Ausgabekan&auml;le, die deine
-    Soundkarte benutzt. Sie beeinflusst auch die Anzahl der Kan&auml;le, die
+  <DD>Diese Option setzt die Anzahl der Ausgabekan&auml;le, die du von deiner
+    Soundkarte ausgegeben haben m&ouml;chtest. Sie beeinflusst auch die Anzahl
+    der Kan&auml;le, die
     vom Quellstream decodiert werden. Wenn der Stream weniger als die hiermit
     geforderte Anzahl Kan&auml;le enth&auml;lt, so werden automatisch
     Filter eingef&uuml;gt (siehe unten). Das Routing ist das Standardrouting
     des channels-Filters.</DD>
   <DT><CODE>-srate</CODE></DT>
-  <DD>Diese Option gibt die Samplerate deiner Soundkarte an. Wenn die
-    Samplefrequenz deiner Soundkarte anders ist als die des aktuellen
+  <DD>Diese Option gibt die Samplerate an, die die Soundkarte benutzen soll,
+    sofern sie diese Rate unterst&uuml;tzt.
+    Wenn die Samplefrequenz deiner Soundkarte anders ist als die des aktuellen
     Quellstreams, so wird der resample-Filter (siehe unten) automatisch
     eingef&uuml;gt, um diese Differenz auszugleichen.</DD>
   <DT><CODE>-format</CODE><DT>
-  <DD>Diese Option setzt das Sampleformt der Audiofilterschicht und der
+  <DD>Diese Option setzt das Sampleformt zwischen Audiofilterschicht und der
     Soundkarte. Wenn das angeforderte Format der Soundkarte nicht das gleiche
     wie das des Quellstreams ist, dann wird der format-Filter (siehe unten)
     automatisch eingef&uuml;gt, um das Format zu konvertieren.</DD>
@@ -435,7 +546,11 @@ realisiert. Sei bei der Benutzung dieses Filters vorsichtig, da er den
 Signal-zu-Rausch-Abstand verringern kann. In den meisten F&auml;llen ist es
 besser, beim Mixer deiner Soundkarte den PCM-Regler auf's Maximum zu setzen und
 diesen Filter wegzulassen. &Auml;ndere dann die Lautst&auml;rke mit dem
-Hauptregler des Mixers. Wenn der Computer an einen externen Verst&auml;rker
+Hauptregler des Mixers.
+Wenn deine Soundkarte einen digitalen PCM-Mixer anstelle eines analogen
+besitzt und du Verzerrungen h&ouml;rst, dann benutze statt dessen den
+MASTER-Mixer.
+Wenn der Computer an einen externen Verst&auml;rker
 angeschlossen ist (was meistens der Fall ist), dann kann der Rauschpegel
 minimiert werden, indem der Hauptregler und der Lautst&auml;rkeregler des
 Verst&auml;rkers angepasst werden, bis das Hintergrundzischen verschwunden ist.
@@ -445,7 +560,7 @@ Der Filter selber kennt zwei Parameter:</P>
   <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
   <DD>ist eine Flie&szlig;kommazahl zwischen <CODE>-200</CODE> und
     <CODE>+60</CODE> und gibt die Lautst&auml;rke in dB an. Der Standardlevel
-    ist -10dB.</DD>
+    ist 0dB.</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>ist ein Bin&auml;rwert, der soft clipping an- oder ausschaltet.
@@ -510,7 +625,7 @@ resample-Filter vorgenommen wird.</P>
 <P>verst&auml;rkt den Sound in den oberen und unteren Frequenzbereichen und
 l&ouml;scht ihn um 1kHz beinahe komplett aus.</P>
 
-<H5><A NAME="af_panning">2.3.2.3.7 Panning-Filter </A></H5>
+<H5><A NAME="af_panning">2.3.2.3.7 Panning-Filter</A></H5>
 
 <P>Der <CODE>pan</CODE>-Filter kann benutzt werden, um Kan&auml;le beliebig zu
 mischen. Er ist grundlegend nur eine Kombination des Lautst&auml;rkefilters und
@@ -616,10 +731,10 @@ hinteren Lautsprecher.</P>
 
 
 
+<H4><A NAME="plugins">2.3.2.4. Audio-Plugins (veraltet)</A></H4>
+
 <H2><STRONG>Anmerkung: Audioplugins sind veraltet und wurden durch Audiofilter
 ersetzt. Sie werden bald entfernt werden.</STRONG></H2>
-
-<H4><A NAME="plugins">2.3.2.4. Audio-Plugins (veraltet)</A></H4>
 
 <P>MPlayer bietet Unterst&uuml;tzung f&uuml;r Audio-Plugins. Audio-
 Plugins k&ouml;nnen benutzt werden, um die Einstellungen der Audio-Daten zu 
@@ -706,6 +821,11 @@ Anwenderperspektive verwendet werden und ist hier nur aus Gr&uuml;nden der
 Vollst&auml;ndigkeit erw&auml;hnt. Verwende dieses Plugin nicht, wenn du kein 
 Entwickler bist.</P>
 
+<P>Wenn du eine Datei mit einer konstanten A/V-Sync-Differenz hast, dann benutze
+einfach die Tasten <CODE>+</CODE> und <CODE>-</CODE>, um das Timing w&auml;hrend
+des Abspielens anzupassen. Wenn das OSD aktiviert ist, dann werden die aktuellen
+Werte angezeigt, was die Anpassung erleichtert.</P>
+
 
 <H5><A NAME="volume">2.3.2.4.5. Software Lautst&auml;rkeregelung</A></H5>
 
@@ -717,10 +837,12 @@ verwendet werden, um die Ausgabelautst&auml;rke von MPlayer zu
 wird, um den anf&auml;nglichen Schallpegel festzulegen. Der anf&auml;ngliche 
 Schallpegel kann auf Werte zwischen 0 und 255 festgelegt werden (normal auf 
 101, was 0db Verst&auml;rkung entspricht). Benutze dieses Plugin mit Vorsicht, 
-da es den Signal/Rauschabstand verringern kann.In den meisten F&auml;llen ist 
-es das beste, den Reglere f&uuml;r PCM auf das Maximum zu stellen, 
+da es den Signal/Rauschabstand verringern kann. In den meisten F&auml;llen ist 
+es das beste, den Regler f&uuml;r PCM auf das Maximum zu stellen, 
 dieses Plugin nicht zu verwenden und die Lautst&auml;rke zu deinen Boxen mit 
-der Master-Lautst&auml;rkeregelung zu kontrollieren. Wenn ein externer 
+der Master-Lautst&auml;rkeregelung zu kontrollieren. Wenn deine Soundkarte
+einen digitalen PCM-Mixer anstelle eines analogen verwendet und du Verzerrungen
+h&ouml;rst, so verwende statt dessen den MASTER-Mixer. Wenn ein externer 
 Verst&auml;rker mit dem Computer verbunden ist (was fast immer der Fall ist), 
 kann der Ger&auml;uschepegel durch die Anpassung des Master-Stufe und der 
 Lautst&auml;rkekn&ouml;pfe des Verst&auml;rkers minimiert werden, bis das 

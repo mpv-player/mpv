@@ -63,8 +63,9 @@
               <LI><A HREF="formats.html#film">2.1.1.10 FILM-Dateien</A></LI>
               <LI><A HREF="formats.html#roq">2.1.1.11 RoQ-Dateien</A></LI>
               <LI><A HREF="formats.html#ogg">2.1.1.12 OGG-Dateien</A></LI>
-              <LI><A HREF="formats.html#sdp">2.1.1.13 SDP-files</A></LI>
-              <LI><A HREF="formats.html#pva">2.1.1.14 PVA-files</A></LI>
+              <LI><A HREF="formats.html#sdp">2.1.1.13 SDP-Dateien</A></LI>
+              <LI><A HREF="formats.html#pva">2.1.1.14 PVA-Dateien</A></LI>
+              <LI><A HREF="formats.html#gif">2.1.1.15 GIF-Dateien</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 Audioformate</A>
@@ -130,23 +131,10 @@
                       <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATI-Karten</A></LI>
                       <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagic-Karten/A></LI>
                       <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 Trident-Karten</A></LI>
+                      <LI><A HREF="video.html#xv_powervr">2.3.1.2.1.7 Kyro/PowerVR-Karten</A></LI>
                     </UL>
                   </LI>
-                  <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A>
-                    <UL>
-                      <LI><A HREF="video.html#dga_summary">2.3.1.2.2.1 &Uuml;berblick</A></LI>
-                      <LI><A HREF="video.html#dga_whatis">2.3.1.2.2.2 Was ist DGA?</A></LI>
-                      <LI><A HREF="video.html#dga_installation">2.3.1.2.2.3 DGA-Support f&uuml;r MPlayer</A></LI>
-                      <LI><A HREF="video.html#dga_resolution">2.3.1.2.2.4 &Auml;ndern der Aufl&ouml;sund</A></LI>
-                      <LI><A HREF="video.html#dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></LI>
-                      <LI><A HREF="video.html#dga_features">2.3.1.2.2.6 Features des DGA-Treibers</A></LI>
-                      <LI><A HREF="video.html#dga_speed">2.3.1.2.2.7 bez&uuml;glich der Geschwindigkeit</A></LI>
-                      <LI><A HREF="video.html#dga_bugs">2.3.1.2.2.8 Bekannte Fehler</A></LI>
-                      <LI><A HREF="video.html#dga_future">2.3.1.2.2.9 Ausblick</A></LI>
-                      <LI><A HREF="video.html#dga_modelines">2.3.1.2.2.A Eine modeline-Eintr&auml;ge</A></LI>
-                      <LI><A HREF="video.html#dga_bug_reports">2.3.1.2.2.B Fehlerberichte</A></LI>
-                    </UL>
-                  </LI>
+                  <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A></LI>
                   <LI><A HREF="video.html#sdl">2.3.1.2.3 SDL</A></LI>
                   <LI><A HREF="video.html#svgalib">2.3.1.2.4 SVGAlib</A></LI>
                   <LI><A HREF="video.html#fbdev">2.3.1.2.5 Framebuffer-Ausgabe (FBdev)</A></LI>
@@ -156,7 +144,14 @@
                   <LI><A HREF="video.html#aalib">2.3.1.2.9 AAlib - Ausgabe im Textmodus</A></LI>
                   <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA - Ausgabe &uuml;ber ein VESA-BIOS</A></LI>
                   <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
-                  <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A></LI>
+                  <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A>
+		    <UL>
+		      <LI><A HREF="video.html#vidix_ati"> 2.3.1.2.12.1 ATI-Karten</A></LI>
+		      <LI><A HREF="video.html#vidix_matrox"> 2.3.1.2.12.2 Matrox-Karten</A></LI>
+		      <LI><A HREF="video.html#vidix_trident"> 2.3.1.2.12.3 Trident-Karten</A></LI>
+		      <LI><A HREF="video.html#vidix_3dlabs"> 2.3.1.2.12.4 3DLabs-Karten</A></LI>
+		    </UL>
+		  </LI>
                   <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
                   <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></LI>
                 </UL>
@@ -292,41 +287,47 @@
   <LI><A HREF="encoding.html">7. Encodieren mit MEncoder</A>
     <UL>
       <LI><A HREF="encoding.html#2pass">7.1 2- oder 3-pass-Encodierung mit MPEG4 ("DivX")</A></LI>
-      <LI><A HREF="encoding.html#rescaling">7.2 Bildgr&ouml;&szlig;e skalieren</A></LI>
-      <LI><A HREF="encoding.html#copying">7.3 Kopieren einzelner Streams</A></LI>
-      <LI><A HREF="encoding.html#fixing">7.4 AVIs mit defektem Index reparieren</A></LI>
-      <LI><A HREF="encoding.html#libavcodec">7.5 Encodierung mit der libavcodec-Familie</A></LI>
-      <LI><A HREF="encoding.html#image_files">7.6 Encodieren einer Menge einzelner Bildern (PNGs oder JPGs)</A></LI>
-      <LI><A HREF="encoding.html#vobsub">7.7 DVD-Untertitel in eine Vobsub-Datei extrahieren</A></LI>
-      <LI><A HREF="encoding.html#aspect">7.8 H&ouml;hen-Seitenverh&auml;ltnis beibehalten</A></LI>
+      <LI><A HREF="encoding.html#mpeg">7.2 In das MPEG-Format encodieren</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.3 Bildgr&ouml;&szlig;e skalieren</A></LI>
+      <LI><A HREF="encoding.html#copying">7.4 Kopieren einzelner Streams</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.5 AVIs mit defektem Index reparieren</A></LI>
+	<UL>
+          <LI><A HREF="encoding.html#appending">7.5.1 Aneinanderh&auml;ngen mehrerer AVI-Dateien</A></LI>
+	</UL>
+      <LI><A HREF="encoding.html#libavcodec">7.6 Encodierung mit der libavcodec-Familie</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.7 Encodieren einer Menge einzelner Bildern (PNGs oder JPGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.8 DVD-Untertitel in eine Vobsub-Datei extrahieren</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.9 H&ouml;hen-Seitenverh&auml;ltnis beibehalten</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Anhang A - Mail-Listen</A></LI>
-  <LI><A HREF="bugreports.html">Anhang B - Wie man einen Fehler berichtet</A>
-    <UL>
-      <LI><A HREF="bugreports.html#fix">B.1 Wie man Fehler berichtigt</A></LI>
-      <LI><A HREF="bugreports.html#report">B.2 Wie man &uuml;ber einen Fehler berichtet</A></LI>
-      <LI><A HREF="bugreports.html#where">B.3 Wo man Fehler berichtet</A></LI>
-      <LI><A HREF="bugreports.html#what">B.4 Was man melden sollte</A>
-        <UL>
-          <LI><A HREF="bugreports.html#system">B.4.1 Systeminformationen</A></LI>
-          <LI><A HREF="bugreports.html#hardware">B.4.2 Hardware und Treiber</A></LI>
-          <LI><A HREF="bugreports.html#compilation">B.4.3 Probleme bei der Compilierung</A></LI>
-          <LI><A HREF="bugreports.html#configure">B.4.4 Probleme mit <CODE>configure</CODE></A></LI>
-          <LI><A HREF="bugreports.html#playback">B.4.5 Wiedergabeprobleme</A></LI>
-          <LI><A HREF="bugreports.html#crash">B.4.6 Abst&uuml;rze</A>
-            <UL>
-              <LI><A HREF="bugreports.html#debug">B.4.6.1 Wie man Informationen &uuml;ber einen reproduzierbaren Absturz erh&auml;lt</A></LI>
-              <LI><A HREF="bugreports.html#core">B.4.6.2 Wie man sinnvolle Informationen aus einem core dump extrahiert</A></LI>
-            </UL>
-          </LI>
-        </UL>
-      </LI>
-      <LI><A HREF="bugreports.html#advusers">B.5 Ich wei&szlig;, was ich tue...</A></LI>
-    </UL>
-  </LI>
+  <LI><A HREF="bugreports.html">Anhang B - Wie man einen Fehler berichtet</A></LI>
   <LI><A HREF="#known_bugs">Anhang C - Bekannte Fehler</A></LI>
   <LI><A HREF="../skin.html">Anhang D - Skin file format (Englisch)</A></LI>
+    <UL>
+      <LI><A HREF="../skin.html#overview">D.1 Overview</A>
+        <UL>
+          <LI><A HREF="../skin.html#directories">D.1.1 Directories</A></LI>
+          <LI><A HREF="../skin.html#images">D.1.2 Images</A></LI>
+          <LI><A HREF="../skin.html#components">D.1.3 Skin components</A></LI>
+          <LI><A HREF="../skin.html#files">D.1.4 Files</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="../skin.html#skinfile">D.2 The skin file</A>
+        <UL>
+          <LI><A HREF="../skin.html#mainwindow">D.2.1 Main window and playbar</A></LI>
+          <LI><A HREF="../skin.html#subwindow">D.2.2 Subwindow</A></LI>
+          <LI><A HREF="../skin.html#skinmenu">D.2.3 Skin menu</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="../skin.html#fonts">D.3 Fonts</A>
+        <UL>
+          <LI><A HREF="../skin.html#symbols">D.3.1 Symbols</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="../skin.html#guimessages">D.4 GUI messages</A></LI>
+    </UL>
+  </LI>
   <LI><A HREF="users_against_developers.html">Anhang E - Aufschrei der Entwickler</A>
     <UL>
       <LI><A HREF="users_against_developers.html#gcc">E.1 GCC 2.96</A></LI>
@@ -431,9 +432,7 @@ die Manipulation des Videos.</P>
   <LI>Erstellen des Audio-Streams von externen Audiodateien</LI>
   <LI>Encodieren mit einem, zwei oder drei Durchg&auml;ngen</LI>
   <LI><B>VBR</B> MP3-Audio - <B>WICHTIGER HINWEIS:</B> VBR-MP3-Audio wird
-    eventuell nicht immer korrekt von Windows-Playern wiedergegeben!
-    Andererseits scheint MEncoders aktuelle CBR-Implementierung noch
-    schlechter mit den Windows-Playern zusammenzuarbeiten :)</LI>
+    eventuell nicht immer korrekt von Windows-Playern wiedergegeben!</LI>
   <LI>PCM-Audio</LI>
   <LI>1:1-Streamkopien</LI>
   <LI>Audio-/Videosynchronisation basierend auf den PTS (kann mit der Option
@@ -546,8 +545,9 @@ empfohlen.</P>
   <LI><B>binutils</B> - vorgeschlagene Version ist <B>2.11.x</B>. Diese
     Programme sind f&uuml;r das Erzeugen von MMX/3DNow!/usw-Befehlen
     verantwortlich und deshalb sehr wichtig.</LI>
-  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B>, <B>2.95.4</B>
-    und <B>3.1</B>. Verwende <B>NIEMALS</B> 2.96 oder 3.0.x! Sie erzeugen
+  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B>, (eventuell
+    <B>2.95.4</B>) und <B>3.3</B>. Verwende <B>NIEMALS</B> 2.96 oder 3.0.x! Sie
+    erzeugen
     f&uuml;r MPlayer fehlerhaften Code. Wenn du dich dazu entscheidest,
     den 2.96 &uuml;ber Bord zu werfen, dann nimm nicht einfach den 3.0.x, nur
     weil er neuer ist! Fr&uuml;he Versionen von 3.0.x waren sogar schlechter
@@ -900,11 +900,11 @@ HREF="#subtitles_osd">Untertitel und das OSD</A>nachlesen.</P>
 
 <H2><A NAME="gui">1.3. Was ist mit dem GUI?</A></H2>
 
-<P>Das GUI basiert auf GTK (nicht das ganze GUI sondern nur die Dialoge). Die
-Skins sind als PNG-Grafiken gespeichern, so dass du also auch gtk und die
-libpng (und deren devel-Pakete) installieren musst. Du kannst das GUI durch den
-Parameter <CODE>--enable-gui</CODE> bei <CODE>./configure</CODE> anschalten. Um
-MPlayer im GUI-Modus zu betreiben, kannst du entweder</P>
+<P>Das GUI basiert auf GTK 1.2.x (nicht das ganze GUI benutzt GTK, sondern nur
+die Dialoge). Die Skins sind als PNG-Grafiken gespeichern, so dass du also auch
+gtk und die libpng (und deren devel-Pakete) installieren musst. Du kannst das
+GUI durch den Parameter <CODE>--enable-gui</CODE> bei <CODE>./configure</CODE>
+anschalten. Um MPlayer im GUI-Modus zu betreiben, kannst du entweder</P>
 
 <UL>
   <LI><CODE>gui=yes</CODE> in deine Config-File eintragen oder</LI>
@@ -933,6 +933,8 @@ Formate unterst&uuml;tzt:</P>
 
 <UL>
   <LI>VobSub</LI>
+  <LI>OGM</LI>
+  <LI>CC (closed caption)</LI>
   <LI>Microdvd</LI>
   <LI>SubRip</LI>
   <LI>SubViewer</LI>
@@ -945,9 +947,9 @@ Formate unterst&uuml;tzt:</P>
   <LI>JACOsub</LI>
 </UL>
 
-<P>MPlayer kann die oben aufgef&uuml;hrten Formate in die folgenden
-Formate konvertieren, wenn du die jeweils dahinter angegebene Option benutzt:
-</P>
+<P>MPlayer kann die oben aufgef&uuml;hrten Formate (bis auf die ersten drei) in
+die folgenden Formate konvertieren, wenn du die jeweils dahinter angegebene
+Option benutzt: </P>
 
 <UL>
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
@@ -1021,7 +1023,7 @@ HREF="cd-dvd.html#dvd">DVD-Sektion</A>.</P>
 <H3><A NAME="mpsub">1.4.1 MPlayers eigenes Untertitelformat (MPsub)</A></H3>
 
 <P>MPlayer hat ein neues Untertitelformat eingef&uuml;hrt, das
-<B>MPsub</B> genannt wird. Es wurde von mir (Gabucino) entwickelt. Das
+<B>MPsub</B> genannt wird. Es wurde von Gabucino entwickelt. Das
 Haupt-Feature ist, dass es <B>dynamische</B> Zeitabh&auml;ngigkeiten benutzt
 (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (aus <A
 HREF="tech/mpsub.sub">mpsub.sub</A>):</P>
@@ -1139,11 +1141,13 @@ in der Konfigurationsdatei oder der Kommandozeilenoption
 <P>MPlayer besitzt nun ein komplett vom Benutzer definierbares
 OSD-Men&uuml;.</P>
 
+<P><B>ANMERKUNG:</B> das Optionsmen&uuml; ist momentan NICHT IMPLEMENTIERT!</P>
+
 <H4>Installation</H4>
 
 <OL>
-  <LI>Gib vor der Compilierung <CODE>./configure</CODE> die Optionen
-    <CODE>--enable-new-conf --enable-menu</CODE> mit.</LI>
+  <LI>Gib vor der Compilierung <CODE>./configure</CODE> die Option
+    <CODE>--enable-menu</CODE> mit.</LI>
   <LI>&Uuml;berzeuge dich, dass du auch wirklich eine Schrift f&uuml;r das
     OSD installiert hast (siehe oben).</LI>
   <LI>Kopiere die Datei <CODE>etc/menu.conf</CODE> in dein
@@ -1946,7 +1950,7 @@ werden.</P>
 und f&uuml;r Farbraumkonvertierung im Videoausgabetreiber verwendet.</P>
 
 
-<H2><A NAME="sgi">6.5. Silicon Graphics / IRIX</A></H2>
+<H2><A NAME="sgi">6.4. Silicon Graphics / IRIX</A></H2>
 
 <P>Du hast zwei M&ouml;glichkeiten. Die eine besteht darin, das GNU
 install-Programm zu installieren und <CODE>./configure</CODE> mitzuteilen, wo
@@ -1986,7 +1990,7 @@ MPlayer-Quellcodeverzeichnis heraus auf:</P>
 weiter.</P>
 
 
-<H2><A NAME="qnx">6.6 QNX</A></H2>
+<H2><A NAME="qnx">6.5 QNX</A></H2>
 
 <P>Funktioniert. Du musst SDL f&uuml;r QNX herunterladen, installieren und dann
 MPlayer  mit den Optionen <CODE>-vo sdl:photon</CODE> und <CODE>-ao
@@ -1995,11 +1999,11 @@ sdl:nto</CODE> starten. Es sollte schnell sein.</P>
 <P>Die <CODE>-vo x11</CODE>-Ausgabe ist sogar noch langsamer als unter Linux,
 da QNX nur eine <B>sehr langsame</B> <I>X-Emulation</I> hat. Benutze SDL.</P>
 
-<H2><A NAME="cygwin">6.7 Cygwin</A></H2>
+<H2><A NAME="cygwin">6.6 Cygwin</A></H2>
 
 <P>Die Portierung auf Cygwin, eine Unix-Tool-Umgebung unter Windows, steckt
 noch in ihren Kinderschuhen. Momentan werden die folgenden Punkte nicht
-unterst&uuml;tzt: Win32-DLLs, VCDs, OpenGL. Von SDL ist bekannt, dass sie
+unterst&uuml;tzt: Win32-DLLs oder OpenGL. Von SDL ist bekannt, dass sie
 Audio- und Videoverzerrung hervorruft oder sogar das System zum Absturz bringt.
 <A HREF="../tech/patches.txt">Patches</A> sind nat&uuml;rlich jederzeit
 willkommen. Die besten Resultate erh&auml;lst du mit der windowseigenen
@@ -2025,6 +2029,23 @@ directx:noaccel</CODE>.</P>
 <P>Anweisungen, wie du SDL unter Cygwin zum Laufen bringst, findest du auf
 der <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl-Seite</A>.</P>
 
+<P>Du kannst VCDs einfach abspielen, indem du die <CODE>.DAT</CODE>-Datei
+oder die <CODE>.MPG</CODE>-Datei abspielst, die Windows auf einer VCD
+anzeigt. So funktioniert es (pass bei Bedarf den Laufwerksbuchstaben an):</P>
+
+<P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
+
+<P><CODE>mplayer /cydrive/d/MPEG2/AVSEQ01.MPG</CODE></P>
+
+<P>DVDs funktionieren ebenfalls. Setze daf&uuml;r einfach dsa DVD-Ger&auml;t
+korrekt:</P>
+
+<P><CODE>mplayer -dvd &lt;Titel&gt; -dvd-device '\\.\d:'</CODE></P>
+
+<P>Die QuickTime-DLLs sollen angeblich ebenfalls funktionieren. Compiliere
+MPlayer mit <CODE>--enable-qtx-codecs</CODE> und kopiere die Codecs an den
+Standardort f&uuml;r Windows-DLLs, <CODE>C:\WINNT\system32</CODE> oder
+<CODE>C:\Windows\system</CODE>, ab&auml;ngig von deiner Windowsversion.</P>
 
 
 <H1><A NAME="encoding">7.</A><A HREF="encoding.html">Encodierung mit

@@ -243,7 +243,7 @@ Feature benutzen kannst.
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
 für alle Dateien). Dementsprechend wird für alle Dateien nur ein Fenster
 geöffnet. Momentan funktionieren die folgenden Treiber mit fixed\-vo: x11, xv,
-xvidix, xmga und gl2.
+xvidix, xmga, gl2 und svga.
 s.TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
@@ -625,6 +625,14 @@ Wiedergabe einiger schlecht erstellter AVIs ermöglicht).
 Benutze nicht die durchschnittlichen Bytes/\:Sekunde fuer A\-V-Sync (AVI).
 Hilft bei einigen AVIs mit defektem Header.
 .TP
+.B \-noextbased
+Deaktiviert die auf Dateinamenserweiterungen basierende Demultiplexerauswahl.
+Wenn der Dateityp (und damit der Demultiplexer) nicht zweifelsfrei
+festgestellt werden kann (z.B. wenn die Datei keinen Dateikopf besitzt
+oder dieser nicht eindeutig genug ist), dann wird normalerweise ein
+Demultiplexer anhand der Dateiendung gewählt. Die inhaltsbasierende
+Demultiplexerauswahl wird immer vorgenommen.
+.TP
 .B \-passwd <Passwort> (siehe ebenfalls bei \-user)
 Gibt das Passwort für die HTTP-Authentifizierung an.
 .TP
@@ -647,6 +655,33 @@ Rate in Samplen pro Sekunde
 Samplegröße in Byte
 .IPs format=<Wert>
 FourCC in Hexadezimal
+.RE
+.PD 1
+.
+.TP
+.B \-rawvideo <option1:option2:...>
+Mit dieser Option kannst du Dateien abspielen, die nur aus Videodaten bestehen.
+.br
+Die verfügbaren Optionen lauten:
+
+.PD 0
+.RSs
+.IPs on\ \ \ 
+benutze den nur-Video-Demuxer
+.IPs fps=<Wert>
+Anzahl der Bilder pro Sekunde, Standardwert: 25.0
+.IPs sqcif|qcif|cif|4cif|pal|ntsc
+setzt die Standardbildgröße
+.IPs w=<Wert>
+Bildbreite in Pixeln
+.IPs h=<Wert>
+Bildhöhe in Pixeln
+.IPs y420|yv12|yuy2|y8
+wählt den Farbraum
+.IPs format=<Wert>
+gibt die FourCC des Farbraums in Hex an
+.IPs size=<Wert>
+Bildgröße in Bytes
 .RE
 .PD 1
 .
@@ -1044,6 +1079,10 @@ Sagt MPlayer, dass er die Untertitel als UNICODE behandeln soll.
 .B \-utf8 \ \ 
 Sagt MPlayer, dass er die Untertitel als UTF8 behandeln soll.
 .TP
+.B \-sub-no-text-pp
+Deaktiviert jegliche Textbearbeitung, die normalerweise nach dem Laden der
+Untertitel geschieht. Wird für's Debuggen benutzt.
+.TP
 .B \-vobsub <vobsub\-Datei ohne Erweiterung>
 Gibt die VobSub-Dateien an, die als Untertitel angezeigt werden sollen.
 Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
@@ -1051,6 +1090,37 @@ Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 .TP
 .B \-vobsubid <0-31>
 Gibt die ID für die VobSubs an.
+.TP
+.B \-spualign <-1\-2>
+Gibt an, wie SPU\-Untertitel (DVD/\:VobSub) angeordnet werden. Es gelten
+die gleichen Werte wie bei \-subpos, wobei -1 für die Originalposition
+steht.
+.TP
+.B \-spuaa <Modus>
+Antialiasingmodus/Skalierungmodus für DVD/\:VobSub. Ein Wert von 16 kann zum
+Modus hinzuaddiert werden, um die Skalierung auch dann zu erzwingen, wenn
+das Orignalbild und das skalierte Bild bereits die gleiche Größe haben, um
+z.B. auch dann die Untertitel mit einem Gaußschen Unschärfefilter zu
+bearbeiten. Die verfügbaren Modi lauten:
+.PD 0
+.RSs
+.IPs 0
+nix (am schnellsten, sehr hässlich)
+.IPs 1
+Approximation (kaputt?)
+.IPs 2
+komplett (langsam)
+.IPs 3
+bilinear (Standard, schnell und nicht zu übel)
+.IPs 4
+benutzt Gaußsche Unschärfe des Softwareskalierers (sieht sehr gut aus)
+.RE
+.PD 1
+.
+.TP
+.B \-spugauss <0.0\-3.0>
+Varianzparameter der Gaußschen Unschärfe bei \-spuaa 4. Höhere Werte stehen
+für mehr Unschärfe. Der Standardwert ist 1.0.
 
 
 .SH "OPTIONEN FÜR DIE AUDIOAUSGABE (NUR BEI MPLAYER)"
@@ -1458,8 +1528,24 @@ Menu (Standard)
 .B \-jpeg <option1:option2:...> (nur mit \-vo jpeg)
 Gibt Optionen für die JPEG-Ausgabe an.
 .br
-Verfügbare Optionen sind: [no]progressive, [no]baseline, optimize, smooth,
-quality und outdir.
+Verfügbare Optionen sind:
+.PD 0
+.RSs
+.IPs [no]progressive
+Standard-JPEG oder progressives JPEG
+.IPs [no]baseline
+Benutze eine baseline (oder auch nicht).
+.IPs optimize=<Wert>
+Optimierungswert [0\-100]
+.IPs smooth=<Wert>
+Glättungsfaktor [0\-100]
+.IPs quality=<Wert>
+Qualitätsfaktor [0\-100]
+.IPs outdir=<Wert>
+Verzeichnis, in dem die JPEG-Bilder gespeichert werden.
+.RE
+.PD 1
+.
 .TP
 .B \-monitor_dotclock <dotclock\-\ (oder\ pixelclock\-)Bereich> (nur bei fbdev und vesa)
 Lies etc/\:example.conf und DOCS/\:video.html für weitere Erklärungen.
@@ -1954,10 +2040,13 @@ links).
 .IPs expand[=w:h:x:y:o]
 Vergrößert das Bild (KEINE Skalierung) auf die angegebene Größe und
 platziert das unskalierte Originalbild an die Koordinaten x/\:y.
+Neegative Werte für w und h werden als Offsets bezüglich der Orignalgröße
+interpretiert. Beispielsweise fügt expand=0:-50:0:0 einen 50 Pixel hohen
+schwarzen Balken unterhalb des Bildes hinzu.
 Kann benutzt werden, um die Platzierung des OSD/\:der Untertitel auf
 schwarzen Balken zu erreichen (Standard: Originalhöhe/\:\-breite, zentriertes
 Bild).
-Der letzte Parameter (de)aktiviert das OSD (Standard: 0).
+Der letzte Parameter (de)aktiviert das OSD (Standard: 0 = deaktiviert).
 .IPs flip
 Stellt das Bild auf den Kopf. Siehe auch \-flip.
 .IPs mirror
@@ -2053,18 +2142,36 @@ h: hohe Qualität
 .br
 p: Mische Rauschen mit einem (halbwegs) gleichmäßigen Muster
 .REss
+.IPs "denoise3d[=Helligkeit:Farbe:Zeit]"
+Dieser Filter versucht, Bildrauschen zu unterdrücken und so bewegungslose
+Bilder wirklich statisch zu machen (was das Bild besser komprimierbar macht).
+Ihm können bis zu drei Parameter übergeben werden. Wenn du einen Parameter
+auslässt, so werden vernünftige Standardwerte angenommen.
+.RSss
+Helligkeit:	räumliche Helligkeitsstärke (standard = 4)
+.br
+Farbe:	        räumliche Farbstärke (standard = 3)
+.br
+Zeit:	        zeitliche Stärke (standard = 6)
+.REss
 .IPs eq[=bright:cont]
 Aktiviert den Softwareequalizer mit interaktiver Kontrolle wie der
 Hardware\-EQ\-Kontrolle.
 Die Werte können zwischen -100 und 100 liegen.
-.IPs eq2[=gamma:cont:bright]
+.IPs eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg]
 Alternativer Softwareequalizer, der Lookup-Tabellen benutzt (sehr langsam).
-Er erlaubt neben simpler Anpassung der Helligkeit und des Kontrastes auch
-eine Gammakorrektur.
+Er erlaubt neben simpler Anpassung der Helligkeit, des Kontrastes und der
+Sättigung auch eine Gammakorrektur. Beachte, dass er den gleichen
+MMX-optimierten Code benutzt wie der eq-Filter, wenn alle Gammawerte 1.0
+betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
-Standardwerte sind gamma=1.0, contrast=1.0 und brightness=0.0.
+Standardwerte sind gamma=1.0, Kontrast=1.0, und Helligkeit=0.0 und
+Sättigung=1.0. Die Parameter rg, gg, bg sind unabhängige Gammawerte für
+die einzelnen Farbkomponenten Rot, Grün und Blau. Alle drei sind standardmäßig
+auf 1.0.
 Die Wertebereiche betragen 0.1\-10 für gamma, -2\-2 für Kontrast (negative
-Werte invertieren das Bild) und -1\-1 für die Helligkeit.
+Werte invertieren das Bild), -1\-1 für die Helligkeit und 0\-3 für die
+Sättigung.
 .IPs halfpack[=f]
 Konvertiert planaeres YUV 4:2:0 in halbhohes, gepacktes 4:2:2, wobei
 die Helligkeit runtergesamplet und der Farbanteil beibehalten wird.
@@ -2120,6 +2227,11 @@ i: interleave, verschachteln
 .br
 s: vertausche die Felder (die ungerade und geraden Zeilen)
 .REss
+.IPs "field[=n]"
+Extrahiert ein einzelnes Feld eines interlaceten Bildes mit Stridearithmetic,
+um Verschwendung von CPU-Zeit zu vermeiden. Der optionale Parameter n
+gibt an, ob das gerade oder ungerade Feld extrahiert wird (abhängig davon,
+ob n selber gerade oder ungerade ist).
 .IPs "boxblur=Radius:Stärke[:Radius:Stärke]"
 Kastenunschärfe (?)
 .RSss
@@ -2234,6 +2346,7 @@ clear: löscht den Framebuffer vor dem Blitten.
 sodass du nicht immer 1,8MB RGBA32-Daten schicken musst, wenn sich nur ein
 kleiner Teil des Bildschirms ändert.
 .REss
+.RE
 .
 .TP
 .B \-x <x> (nur bei MPLAYER)
@@ -2910,6 +3023,10 @@ Vergleichsfunktion für sub pel motion estimation
 3 (DCT): Summe der absoluten DCT\-transformierten Differenzen
 .br
 4 (PSNR): Summe der quadratischen Quantisierungsfehler
+.br
+5 (BIT): Anzahl der für den Block benötigten Bits
+.br
+6 (RD): rate distoration optimal, langsam
 .br
 7 (ZERO): 0
 .br

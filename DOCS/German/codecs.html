@@ -15,7 +15,9 @@
 
 <P>Siehe
 <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">Codec-Status</A>-Seite
-f&uuml;r die komplette, t&auml;glich generierte Liste.</P>
+f&uuml;r die komplette, t&auml;glich generierte Liste. Eine Vielzahl von
+Codecs kann von unserer Homepage runtergeladen werden. Du findest sie auf der
+<A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">Codec-Seite</A>.</P>
 
 <P>Die wichtigsten Video-Codecs:</P>
 
@@ -23,12 +25,12 @@ f&uuml;r die komplette, t&auml;glich generierte Liste.</P>
   <LI>MPEG1 (VCD) und MPEG2 (DVD) Video</LI>
   <LI>eingebauter Dekoder f&uuml;r DivX ;-), OpenDivX, DivX4, DivX5,
     M$ MPEG4 v1, v2 und andere MPEG4-Varianten</LI>
-  <LI>eingebauter Decoder f&uuml;r Windows Media Video 7 (WMV1) und
-    Win32-DLL-Decoder f&uuml;r Windows Media Video 8 (WMV2). Beide werden in
+  <LI>eingebauter Decoder f&uuml;r Windows Media Video 7 (WMV1/WMV2) und
+    Win32-DLL-Decoder f&uuml;r Windows Media Video 9 (WMV3). Beide werden in
     .wmv-Dateien verwendet</LI>
   <LI><B>eingebauter Sorenson 1 (SVQ1) Decoder</B></LI>
   <LI><B>Win32/QT Sorenson 3 (SVQ3) Decoder</B></LI>
-  <LI>3ivx-Decoder</LI>
+  <LI>3ivx-Decoder f&uuml;r v1 und v2</LI>
   <LI>Cinepak und Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 und andere Hardwareformate</LI>
   <LI>VIVO 1.0, 2.0, I263 und andere h263(+)-Varianten</LI>
@@ -91,13 +93,15 @@ Farbtiefe ab.</P>
 ist <CODE>-vc divx4</CODE> wahrscheinlich die schnellere oder sogar die 
 schnellste L&ouml;sung.</P>
 
-<P>Der codec kann von <A HREF="http://avifile.sourceforge.net">avifile</A>
+<P>Die bin&auml;re DivX4/5-Bilbiothek kann von
+<A HREF="http://avifile.sourceforge.net">avifile</A> oder
+<A HREF="http://www.divx.com>divx.com</A> heruntergeladen werden.
 heruntergeladen werden. Entpacke ihn, starte <CODE>./install.sh</CODE> als
 root, und vergiss nicht, <CODE>/usr/local/lib</CODE> deiner
 <CODE>/etc/ld.so.conf</CODE> hinzuzuf&uuml;gen und <CODE>ldconfig</CODE>
 aufzurufen.</P>
 
-<P>Besorge dir die CVS-Version der Kernbibliothek wie folgt:</P>
+<P>Besorge dir die CVS-Version der ALTEN OpenDivX-Kernbibliothek wie folgt:</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot
@@ -143,10 +147,10 @@ installiert.</P>
 
 <P>Das <A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>-Projekt enth&auml;lt
 ein <B>Open-Source</B>-Codec-Paket, das f&auml;hig ist, mit
-H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 codiertes Video und mit WMA
-(Windows Media Audio) codiertes Audio zu decodieren. Man kann nicht nur einige
-dieser Codecs zum Encodieren benutzen, sondern die Geschwindigkeit ist sogar um
-einiges h&auml;her als die der Win32-Codecs oder der ProjectMayo
+H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV codiertes Video
+und mit WMA (Windows Media Audio) codiertes Audio zu decodieren. Man kann nicht
+nur einige dieser Codecs zum Encodieren benutzen, sondern die Geschwindigkeit
+ist sogar um einiges h&auml;her als die der Win32-Codecs oder der ProjectMayo
 DivX4/5-Bibliothek!</P>
 
 <P>FFmpeg beinhaltet auch viele nette Codecs. Die wichtigsten sind die
@@ -213,8 +217,8 @@ diese zu aktivieren, solltest folgenden Anweisungen folgen:</P>
     <CODE>vid_iv50.xa</CODE>.</LI>
 </OL>
   
-<P>XAnim ist die Videocodec-Familie Nummer 10. Du kannst also die
-<CODE>-vfm 10</CODE>-Option verwenden, um MPlayer zu sagen, dass er
+<P>XAnim ist die Videocodec-Familie <I>xanim</I>. Du kannst also die
+<CODE>-vfm xanim</CODE>-Option verwenden, um MPlayer zu sagen, dass er
 sie, wenn m&ouml;glich, verwenden soll.</P>
 	  
 <P>Die getesteten Codecs beinhalten: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>,
@@ -282,10 +286,6 @@ suchen/finden sind.</P>
 mit Linux, FreeBSD, NetBSD und Cygwin auf der x86 oder der Alpha-Plattform.</B>
 </P>
 
-<P><B>Hinweis2:</B> Wir k&ouml;nnen die RealPlayer-Bibliotheken nicht zum
-Download zur Verf&uuml;gung stellen oder sie mit MPlayer vertreiben, da
-die Lizenz es nicht erlaubt. Du musst sie selbst runterladen.</P>
-
 
 <H4><A NAME="xvid">2.2.1.9. XviD</A></H4>
 
@@ -352,7 +352,9 @@ decodieren, die mit einer der folgenden Sorenson-Versionen erstellt wurden:</P>
     OpenSource-Codec, der andere ist der in libavcodec vorhandene Decoder.
     Du kannst sie mit <CODE>-vc svq1</CODE> respektive <CODE>-vc ffsvq1</CODE>
     benutzen. Manche Dateien funktionieren eventuell nur mit einem der beiden
-    Decoder. Probier als bei problematischen Dateien beide Decoder aus.</LI>
+    Decoder. Probier als bei problematischen Dateien beide Decoder aus.
+    Der Decoder wurde von den
+    <A HREF="http://www.xinehq.de">xine</A>-Autoren geschrieben.</LI>
   <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - Decodierung mit den
     <B>Win32-QuickTime-Bibliotheken</B></LI>
 </UL>
@@ -557,8 +559,7 @@ DirectShow schwieriger, weil...</P>
 
 <P><B>Anmerkdung:</B> Wenn es keinen Eintrag namens <CODE>Filename</CODE> gibt
 und der <CODE>DisplayName</CODE>-Eintrag etwas in der Art
-<CODE>device:dmo</CODE> enth&auml;lt, so handelt es sich um einen DMO-Codec,
-der momentan nicht von MPlayer unterst&uuml;tzt wird.</P>
+<CODE>device:dmo</CODE> enth&auml;lt, so handelt es sich um einen DMO-Codec.</P>
 
 <P><B>Alte Methode</B>: Atme tief durch und beginne mit dem Durchsuchen der
 Registry...</P>

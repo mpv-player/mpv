@@ -253,8 +253,40 @@ heruntergeladen werden: <A
 HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotr
 end.de/download/av_format_v1.pdf</A></P>
 
-<H3><A NAME="audio_for
-mats">2.1.2. Audio Formate</A></H3>
+
+<H4><A NAME="gif">2.1.1.15 GIF-Dateien</A></H4>
+
+<P>Das <B>GIF</B>-Format ist ein weit verbreitetes Format f&uuml;r Grafiken
+im Web. Es gibt zwei Versionen der GIF-Spezifikationen, GIF87a und GIF89a.
+Der gr&ouml;&szlig;te Unterschied liegt darin, dass GIF89a Animationen
+unterst&uuml;tzt. MPlayer unterst&uuml;tzt beide Formate mit Hilfe der
+libungif-Bibliothek oder einer anderen libgif-kompatiblen Bibliothek.
+Nicht animierte GIFs werden als Ein-Bild-Videos dargestellt. (Mit den
+Optionen <CODE>-loop</CODE> und <CODE>-fixed-vo</CODE> k&ouml;nnen solche
+GIFs l&auml;nger angezeigt werden.)</P>
+
+<P>Momentan unterst&uuml;tzt MPlayer nicht das Spulen in GIF-Dateien. Die
+einzelnen Bilder in GIF-Dateien haben nicht zwangsl&auml;ufig die gleichen
+Dimensionen, und auch nicht eine feste Bildrate. Jedes Bild hat vielmehr
+seine eigenen Dimensionen und soll an einer bestimmten Position auf einem
+Bereich angezeigt werden, der selber aber eine feste Gr&ouml;&szlig;e hat.
+Die Bildrate wird von einem optionalen Block vor jedem Bild kontrolliert,
+der die Anzeigedauer des nachfolgenden Bildes in Zentisekunen angibt.</P>
+
+<P>Standard-GIF-Dateien enthalten 24 Bit RGB-Bilder mit einer indizierten
+Palette, die h&ouml;chstens bis 8 Bit geht. Die Bilder sind normalerweise
+mit dem LZW-Algorithmus komprimiert. Es gibt aber auch GIF-Encoder, die
+unkomprimierte Bilder erzeugen, um die Patentprobleme mit dem LZW-Algorithmus
+zu umgehen.</P>
+
+<P>Wenn bei deiner Distribution die libungif nicht dabei ist, dann lade sie
+von der <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">
+libungif-Homepage</A> herunter. Detaillierte technische Informationen findest
+du in den <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">
+GIF89a-Spezifikationen</A>.</P>
+
+
+<H3><A NAME="audio_formats">2.1.2. Audio Formate</A></H3>
 
 <P>MPlayer ist ein <B>Movie-(Film-)</B> und kein <B>Media-</B>Player. 
 Er kann auch einige Audioformate wiedergeben (diese sind in der unteren 
