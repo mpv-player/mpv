@@ -1132,8 +1132,8 @@ static uint32_t query_format(uint32_t format)
 		else if (bpp == 24 && fb_bpp == 32)
 			return ret;
 	}
-	if (format == IMGFMT_YV12)
-		return ret;
+	//if (format == IMGFMT_YV12)
+	//	return ret;
 	return 0;
 }
 
