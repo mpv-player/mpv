@@ -3817,6 +3817,33 @@ coefficiente di differenza (default: 2.5)
 Massimizza il volume senza distorcere il suono.
 .P
 .
+.TP
+.B ladspa=file:label[:controlli...]
+Carica un plugin LADSPA (Linux Audio Developer's Simple Plugin API).
+Questo filtro e' rientrante percio' posso venir usati piu' plugin LADSPA
+contemporaneamente.
+.PD 0
+.RSs
+.IPs file\ 
+Specifica il file di plugin della libreria LADSPA.
+Se e' settato l'environment LADSPA_PATH viene utilizzato nella ricerca del
+file specificato.
+In caso contrario devi fornire un percorso completo.
+.IPs label
+Specifica il filtro all'interno della libreria.
+Alcune librerie contengono solo un filtro ma altre invece ne contengono molti.
+Se si specifica 'help' verrano elencati tutti i filtri disponibili all'interno
+della libreria specificata, cosa che elimina l'utilizzo di 'listplugins'
+dall'SDK di LADSPA.
++.IPs controlli
+Controlli sono zero o piu' valori in floating point che determinano il
+comportamento del plugin caricato (ad esempio ritardo, soglia o guadagno).
+In modalita' verbose (aggiungi \-v alla linea di comando do MPlayer) tutti
+i controlli disponibili, insieme ai loro range validi, vengono stampati.
+Questo elimina l'utilizzo di 'analyseplugin' dall'SDK di LADSPA.
+.RE
+.PD 1
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Filtri video
