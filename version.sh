@@ -9,4 +9,8 @@ elif test `uname -s` = 'Darwin' ; then
         last_cvs_update=`date +%y%m%d-%H:%M`
 fi
 
-echo "#define VERSION \"CVS-${last_cvs_update}-$1 \"" >version.h
+extra=""
+if test $1 ; then
+ extra="-$1"
+fi
+echo "#define VERSION \"CVS-${last_cvs_update}${extra} \"" >version.h
