@@ -62,11 +62,17 @@ void close_cdda(stream_t* s);
 #ifdef HAVE_CDDA
 extern stream_info_t stream_info_cdda;
 #endif
+#ifdef STREAMING
+extern stream_info_t stream_info_netstream;
+#endif
 extern stream_info_t stream_info_file;
 
 stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_CDDA
   &stream_info_cdda,
+#endif
+#ifdef STREAMING
+  &stream_info_netstream,
 #endif
   &stream_info_file,
   NULL
@@ -115,7 +121,7 @@ stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
   if(s->flags & STREAM_SEEK && !s->seek)
     s->flags &= ~STREAM_SEEK;
   if(s->seek && !(s->flags & STREAM_SEEK))
-    s->flags &= STREAM_SEEK;
+    s->flags |= STREAM_SEEK;
   
 
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: [%s] %s\n",sinfo->name,filename);
@@ -370,6 +376,7 @@ void stream_reset(stream_t *s){
 //    s->buf_pos=s->buf_len=0;
     s->eof=0;
   }
+  if(s->control) s->control(s,STREAM_CTRL_RESET,NULL);
   //stream_seek(s,0);
 }
 
@@ -412,7 +419,6 @@ void free_stream(stream_t *s){
     shmem_free(s->cache_data);
   }
 #endif
-  if(s->fd>0) close(s->fd);
   switch(s->type) {
 #ifdef LIBSMBCLIENT
   case STREAMTYPE_SMB:
@@ -432,6 +438,7 @@ void free_stream(stream_t *s){
   default:
     if(s->close) s->close(s);
   }
+  if(s->fd>0) close(s->fd);
   // Disabled atm, i don't like that. s->priv can be anything after all
   // streams should destroy their priv on close
   //if(s->priv) free(s->priv);
