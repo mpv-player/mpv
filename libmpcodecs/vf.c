@@ -219,6 +219,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   }
   if(mpi){
     mpi->type=mp_imgtype;
+    mpi->w=w; mpi->h=h;
     // keep buffer allocation status & color flags only:
 //    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
     mpi->flags&=MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_TYPE_DISPLAYED|MP_IMGFLAGMASK_COLORS;
@@ -234,7 +235,8 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		mpi->flags&=~MP_IMGFLAG_ALLOCATED;
 		printf("vf.c: have to REALLOCATE buffer memory :(\n");
 	    }
-	} else {
+//	} else {
+	} {
 	    mpi->width=w2; mpi->chroma_width=(w2 + (1<<mpi->chroma_x_shift) - 1)>>mpi->chroma_x_shift;
 	    mpi->height=h; mpi->chroma_height=(h + (1<<mpi->chroma_y_shift) - 1)>>mpi->chroma_y_shift;
 	}
@@ -278,8 +280,10 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
-	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
-	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
+	      //if(!mpi->stride[0]) 
+	      mpi->stride[0]=mpi->width;
+	      //if(!mpi->stride[1]) 
+	      mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
 	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
 	          // I420/IYUV  (Y,U,V)
 	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
@@ -290,7 +294,8 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	          mpi->planes[1]=mpi->planes[2]+mpi->chroma_width*mpi->chroma_height;
 	      }
 	  } else {
-	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
+	      //if(!mpi->stride[0]) 
+	      mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
 //	  printf("clearing img!\n");
 	  vf_mpi_clear(mpi,0,0,mpi->width,mpi->height);
