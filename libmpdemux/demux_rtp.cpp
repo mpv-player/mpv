@@ -441,7 +441,10 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (!mustGetNewData) {
     // Check whether we have a previously-saved buffer that we can use:
     dp = bufferQueue->getPendingBuffer();
-    if (dp != NULL) return dp;
+    if (dp != NULL) {
+      ptsBehind = 0.0; // so that we always accept this data
+      return dp;
+    }
   }
 
   // Allocate a new packet buffer, and arrange to read into it:
