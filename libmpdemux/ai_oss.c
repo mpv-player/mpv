@@ -1,4 +1,6 @@
 #include "config.h"
+
+#ifdef USE_OSS_AUDIO
 #ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
@@ -11,6 +13,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <string.h> /* strerror */
 
 #include "audio_in.h"
 #include "mp_msg.h"
@@ -130,3 +133,5 @@ int ai_oss_init(audio_in_t *ai)
 
     return 0;
 }
+
+#endif /* USE_OSS_AUDIO */
