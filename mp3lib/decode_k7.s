@@ -4,7 +4,8 @@
 /// This code based 'decode_3dnow.s' by Syuuhei Kashiyama
 /// <squash@mb.kcom.ne.jp>,only some types of changes have been made:
 ///
-///  - decreased number of opcodes (as it suggested by k7 manual)
+///  - Added new opcode PFNACC
+///  - decreased number of opcodes (as it was suggested by k7 manual)
 ///    (using memory reference as operand of instructions)
 ///  - change function name for support 3DNowEx! automatic detect
 ///
@@ -45,6 +46,7 @@
 bo:
         .long 1
 .text
+/* int synth_1to1(real *bandPtr,int channel,unsigned char *out) */
 .globl synth_1to1_3dnowex
 synth_1to1_3dnowex:
         subl  $12,%esp
@@ -97,7 +99,7 @@ synth_1to1_3dnowex:
         movl  16(%esp),%edx
         leal  0(,%edx,4),%edx
         movl  $decwin+64,%eax
-        movl  %eax,%ecx
+        movl  %eax,%ecx            
         subl  %edx,%ecx
         movl  $16,%ebp
 
@@ -134,9 +136,7 @@ synth_1to1_3dnowex:
         pfmul 56(%ebx),%mm0
         pfadd %mm0,%mm4
 
-        movq  %mm4,%mm0
-        psrlq $32,%mm0
-        pfsub %mm0,%mm4
+	pfnacc %mm4, %mm4
 
         pf2id %mm4,%mm4
         movd  %mm4,%eax
@@ -196,7 +196,7 @@ synth_1to1_3dnowex:
         movl  $15,%ebp
 
 .L68:
-        psubd %mm0,%mm0
+	pxor  %mm0, %mm0
 
         movq  (%ecx),%mm2
         pfmul (%ebx),%mm2
