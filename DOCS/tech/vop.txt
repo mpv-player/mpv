@@ -129,10 +129,13 @@ Current plugins:
 	-vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
     MPI: passthru
 
--vop cropdetect
+-vop cropdetect[=limit]
     It's a special filter, it doesn't alter the image itself, but detects
     (using some kind of heuristics) the black borders/bands of the image,
     and prints the optimal -vop crop= parameters to the stdout/console.
+    It calculates the average value of pixel luminances for a line, and
+    depending on the result it's either black band (result<=limit) or
+    picture (result>limit). Optional parameter 'limit' defaults to 24.
     MPI: EXPORT
 
 -vop test[=first frame number]
