@@ -232,7 +232,7 @@ static int parse_end_at(m_option_t *conf, const char* param);
 #include "vobsub.h"
 
 /* FIXME */
-void mencoder_exit(int level, char *how)
+static void mencoder_exit(int level, char *how)
 {
     if (how)
 	printf("Exiting... (%s)\n", how);
@@ -385,7 +385,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
     if(!parse_codec_cfg(NULL)){
       mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
-      exit(0);
+      mencoder_exit(1,NULL);
     }
     mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
   }
@@ -804,7 +804,7 @@ if(audio_delay!=0.0){
 } // if(sh_audio)
 
 printf(MSGTR_WritingAVIHeader);
-muxer_write_header(muxer);
+if (muxer->cont_write_header) muxer_write_header(muxer);
 
 decoded_frameno=0;
 
@@ -1263,11 +1263,11 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 #endif
 
 printf(MSGTR_WritingAVIIndex);
-muxer_write_index(muxer);
+if (muxer->cont_write_index) muxer_write_index(muxer);
 muxer_f_size=ftello(muxer_f);
 printf(MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
-muxer_write_header(muxer); // update header
+if (muxer->cont_write_header) muxer_write_header(muxer); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
     mencoder_exit(1, NULL);

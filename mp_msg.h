@@ -85,6 +85,8 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_NETST 38 // Netstream
 
+#define MSGT_MUXER 39 // muxer layer
+
 #define MSGT_MAX 64
 
 void mp_msg_init();

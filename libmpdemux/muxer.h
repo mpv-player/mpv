@@ -36,6 +36,7 @@ typedef struct {
   size_t ipb[3]; // sizes of I/P/B frames
   // muxer of that stream
   struct muxer_t *muxer;
+  void *priv; // private stream specific data stored by the muxer
 } muxer_stream_t;
 
 typedef struct {
