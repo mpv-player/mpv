@@ -271,37 +271,37 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         printf("vo_svga: vo_dbpp == %d\n",bpp);
       switch (bpp) {
         case 32: if (!(bpp_avail & BPP_32)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 24: if (!(bpp_avail & BPP_24)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 16: if (!(bpp_avail & BPP_16)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 15: if (!(bpp_avail & BPP_15)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 8: if (!(bpp_avail & BPP_8)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 4: if (!(bpp_avail & BPP_4)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
         case 1: if (!(bpp_avail & BPP_1)) {
-	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resolution) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
 		 break;
