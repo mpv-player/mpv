@@ -1696,7 +1696,7 @@ echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
 echo "Checking for mad support ... $_mad"
 echo "Checking for OggVorbis support ... $_vorbis"
-echo "Checking for Win32 DLL support ... $_win32dll"
+echo "Checking for Win32 DLL support ... $_win32"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for iconv function ... $_iconv"
 
