@@ -371,7 +371,8 @@ if test "$_as" = auto ; then
 fi
 
 # Try to find the available options for the current CPU
-if test "$host_arch" = i386 ; then
+if test "$host_arch" = i386 || test "$host_arch" = i486 || 
+   test "$host_arch" = i586 || test "$host_arch" = i686; then
   if test -r /proc/cpuinfo ; then
     # linux with /proc mounted, extract cpu information from it
     _cpuinfo="cat /proc/cpuinfo"
@@ -426,7 +427,7 @@ fi
 
 
 case "$host_arch" in
-  i386)
+  i386|i486|i586|i686)
   _def_arch="#define ARCH_X86 1"
   _target_arch="TARGET_ARCH_X86 = yes"
   _def_words_endian="#undef WORDS_BIGENDIAN"
