@@ -344,6 +344,9 @@ the automatic colorspace/stride matching code (vf_next_config()).
     unsigned int default_caps; // used by default query_format()
     unsigned int default_reqs; // used by default config()
 
+btw, u should avoid using global or static variables, to store filter instance 
+specific stuff, as filters might be used multiple times & in the future even
+multiple streams might be possible
 
 The AUDIO path:
 ===============
