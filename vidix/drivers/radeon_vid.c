@@ -35,7 +35,6 @@
 
 static int __verbose = 0;
 #ifdef RADEON
-static int rage_ckey_model=0;
 static int is_shift_required = 0;
 #endif
 
@@ -923,40 +922,67 @@ int vixProbe( int verbose,int force )
 #ifndef RAGE128	
 	if(idx != -1)
 	{
-	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R100_QD ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R100_QE ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R100_QF ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R100_QG ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_VE_QY ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_VE_QZ ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M7||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M72||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M6||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_MOBILITY_M62) RadeonFamily = 100;
-	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QW ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_RV200_QX) RadeonFamily = 150;
-	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_BB ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QH ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QI ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QJ ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QK ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QL ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QH2 ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QI2 ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QJ2 ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R200_QK2) RadeonFamily = 200;
-	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_ID ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_IE ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_IF ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_IG ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_LD ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_LE ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_LF ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R250_LG) RadeonFamily = 250;
-	     if(ati_card_ids[idx] == DEVICE_ATI_RADEON_R300_ND ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R300_NE ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R300_NF ||
-		ati_card_ids[idx] == DEVICE_ATI_RADEON_R300_NG) RadeonFamily = 300;
+          switch(ati_card_ids[idx]) {
+            /* Original radeon */
+            case DEVICE_ATI_RADEON_R100_QD:
+            case DEVICE_ATI_RADEON_R100_QE:
+            case DEVICE_ATI_RADEON_R100_QF:
+            case DEVICE_ATI_RADEON_R100_QG:
+              RadeonFamily = 100;
+              break;
+              
+            /* Radeon VE / Radeon Mobility */
+            case DEVICE_ATI_RADEON_VE_QY:
+            case DEVICE_ATI_RADEON_VE_QZ:
+            case DEVICE_ATI_RADEON_MOBILITY_M6:
+            case DEVICE_ATI_RADEON_MOBILITY_M62:
+              RadeonFamily = 120;
+              break;
+              
+            /* Radeon 7500 / Radeon Mobility 7500 */
+            case DEVICE_ATI_RADEON_RV200_QW:
+            case DEVICE_ATI_RADEON_RV200_QX: 
+            case DEVICE_ATI_RADEON_MOBILITY_M7:
+            case DEVICE_ATI_RADEON_MOBILITY_M72:
+              RadeonFamily = 150;
+              break;
+              
+            /* Radeon 8500 */
+            case DEVICE_ATI_RADEON_R200_BB:
+            case DEVICE_ATI_RADEON_R200_QH:
+            case DEVICE_ATI_RADEON_R200_QI:
+            case DEVICE_ATI_RADEON_R200_QJ:
+            case DEVICE_ATI_RADEON_R200_QK:
+            case DEVICE_ATI_RADEON_R200_QL:
+            case DEVICE_ATI_RADEON_R200_QH2:
+            case DEVICE_ATI_RADEON_R200_QI2:
+            case DEVICE_ATI_RADEON_R200_QJ2:
+            case DEVICE_ATI_RADEON_R200_QK2:
+              RadeonFamily = 200;
+              break;
+              
+            /* Radeon 9000 */
+            case DEVICE_ATI_RADEON_R250_ID:
+            case DEVICE_ATI_RADEON_R250_IE:
+            case DEVICE_ATI_RADEON_R250_IF:
+            case DEVICE_ATI_RADEON_R250_IG:
+            case DEVICE_ATI_RADEON_R250_LD:
+            case DEVICE_ATI_RADEON_R250_LE:
+            case DEVICE_ATI_RADEON_R250_LF:
+            case DEVICE_ATI_RADEON_R250_LG:
+              RadeonFamily = 250;
+              break;
+              
+            /* Radeon 9700 */
+            case DEVICE_ATI_RADEON_R300_ND:
+            case DEVICE_ATI_RADEON_R300_NE:
+            case DEVICE_ATI_RADEON_R300_NF:
+            case DEVICE_ATI_RADEON_R300_NG:
+              RadeonFamily = 300;
+              break;
+            default:
+              break;
+          }
 	}
 #endif
 	if(force > PROBE_NORMAL)
@@ -1014,23 +1040,13 @@ int vixInit( void )
   switch(RadeonFamily)
     {
     case 100:
+    case 120:
     case 150:
     case 250:
       is_shift_required=1;
       break;
     default:
       break;
-    }
-
-  switch(def_cap.device_id)
-    {
-    case DEVICE_ATI_RADEON_MOBILITY_M7:
-    case DEVICE_ATI_RADEON_MOBILITY_M72:
-    case DEVICE_ATI_RADEON_MOBILITY_M62:
-      rage_ckey_model=1;
-    default:
-//	printf(RADEON_MSG" Warning! Probably colorkeying isn't working correct!\n");
-	break;
     }
 #endif
 
@@ -1123,7 +1139,7 @@ static void radeon_vid_stop_video( void )
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
     OUTREG(OV0_FILTER_CNTL, FILTER_HARDCODED_COEF);
 #ifdef RADEON
-    OUTREG(OV0_KEY_CNTL, rage_ckey_model ? GRAPHIC_KEY_FN_NE : GRAPHIC_KEY_FN_EQ);
+    OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_EQ);
 #else
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
 #endif
@@ -1807,11 +1823,7 @@ static void set_gr_key( void )
 	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_NE|CMP_MIX_AND;
 #else
 	besr.graphics_key_msk=besr.graphics_key_clr;
-	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|CMP_MIX_AND;
-	if(rage_ckey_model)
-	    besr.ckey_cntl |= GRAPHIC_KEY_FN_NE;
-	else
-	    besr.ckey_cntl |= GRAPHIC_KEY_FN_EQ;
+	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|CMP_MIX_AND|GRAPHIC_KEY_FN_EQ;
 #endif
     }
     else
