@@ -171,12 +171,19 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char *p, *next;
     int i;
 
+static subtitle *prevsub = NULL;
+
     memset(current, 0, sizeof(subtitle));
 
     do {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
-    } while (sscanf (line, "{%ld}{%ld}%[^\r\n]", &(current->start), &(current->end),line2) <3);
-
+    } while ((sscanf (line,
+		      "{%ld}{}%[^\r\n]",
+		      &(current->start), line2) < 2) &&
+	     (sscanf (line,
+		      "{%ld}{%ld}%[^\r\n]",
+		      &(current->start), &(current->end), line2) < 3));
+	
     p=line2;
 
     next=p, i=0;
@@ -187,6 +194,14 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     }
     current->lines= ++i;
 
+    if (!current->end)
+	current->end = current->start + 150; /* approx 6 sec */
+
+    if (prevsub && (prevsub->end >= current->start))
+	prevsub->end = current->start - 1; /* correct previous end time */
+
+    prevsub = current;
+	
     return current;
 }
 
