@@ -514,11 +514,16 @@ static uint32_t draw_frame( uint8_t *src[] )
 static uint32_t query_format( uint32_t format )
 {
  if( !vo_init() ) return 0; // Can't open X11
- if( ( format&IMGFMT_BGR_MASK )==IMGFMT_BGR && ( format&0xFF )==vo_depthonscreen ) return 1;
+ if( ( format&IMGFMT_BGR_MASK )==IMGFMT_BGR ){
+   int bpp=format&0xFF;
+   if( bpp==vo_depthonscreen ) return 1;
+   if( bpp==15 && vo_depthonscreen==16) return 1; // built-in conversion
+   if( bpp==24 && vo_depthonscreen==32) return 1; // built-in conversion
+ }
  switch( format )
-  {
+ {
    case IMGFMT_YV12: return 1;
-  }
+ }
  return 0;
 }
 

@@ -1,51 +1,16 @@
 
-// FIXME: use codec.conf struct here!!!
-int detect_audio_format(sh_audio_t *sh_audio){
-    int has_audio=0;
-// Decide audio format:
-    switch(sh_audio->wf.wFormatTag){
-      case 0:
-        has_audio=0;break; // disable/no audio
-      case 6:
-        avi_header.audio_seekable=1;
-        has_audio=5;break; // aLaw
-      case 0x31:
-      case 0x32:
-        has_audio=6;break; // MS-GSM
-      case 0x50:
-#ifdef DEFAULT_MPG123
-      case 0x55:
-#endif
-        avi_header.audio_seekable=1;
-        has_audio=1;break; // MPEG
-      case 0x01:
-        avi_header.audio_seekable=1;
-        has_audio=2;break; // PCM
-      case 0x2000:
-        avi_header.audio_seekable=1;
-        has_audio=3;break; // AC3
-      default:
-        avi_header.audio_seekable=0;
-        has_audio=4;       // Win32/ACM
-    }
-  if(has_audio==4){
-    if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name(sh_audio);
-    if(avi_header.auds_guid) has_audio=7; // force DShow
-    if(!avi_header.audio_codec) has_audio=0; // unknown win32 codec
-    if(verbose) printf("win32 audio codec: '%s'\n",avi_header.audio_codec);
-  }
-  if(verbose) printf("detected audio format: %d\n",has_audio);
-  return has_audio;
-}
-
 int init_audio(sh_audio_t *sh_audio){
-int has_audio=sh_audio->codec.driver;
+
+int driver=sh_audio->codec->driver;
 
 sh_audio->samplesize=2;
+sh_audio->samplerate=0;
 sh_audio->pcm_bswap=0;
-sh_audio->a_buffer_size=16384;  // default size, maybe not enough for Win32/ACM
 
-if(has_audio==4){
+sh_audio->a_buffer_size=16384;  // default size, maybe not enough for Win32/ACM
+sh_audio->a_buffer=NULL;
+
+if(driver==4){
   // Win32 ACM audio codec:
   if(init_acm_audio_codec(sh_audio)){
     sh_audio->channels=sh_audio->o_wf.nChannels;
@@ -54,69 +19,50 @@ if(has_audio==4){
         sh_audio->a_buffer_size=sh_audio->audio_out_minsize+OUTBURST;
   } else {
     printf("Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
-    if((sh_audio->wf.wFormatTag)==0x55){
-      printf("Audio format is MP3 -> fallback to internal mp3lib/mpg123\n");
-      has_audio=1;  // fallback to mp3lib
-    } else
-      has_audio=0;  // nosound
+    driver=0;
   }
 }
 
-if(has_audio==7){
+if(driver==7){
 #ifndef USE_DIRECTSHOW
   printf("Compiled without DirectShow support -> force nosound :(\n");
-  has_audio=0;
+  driver=0;
 #else
   // Win32 DShow audio codec:
-    WAVEFORMATEX *in_fmt=&sh_audio->wf;
-    sh_audio->o_wf.nChannels=in_fmt->nChannels;
-    sh_audio->o_wf.nSamplesPerSec=in_fmt->nSamplesPerSec;
-    sh_audio->o_wf.nAvgBytesPerSec=2*sh_audio->o_wf.nSamplesPerSec*sh_audio->o_wf.nChannels;
-    sh_audio->o_wf.wFormatTag=WAVE_FORMAT_PCM;
-    sh_audio->o_wf.nBlockAlign=2*in_fmt->nChannels;
-    sh_audio->o_wf.wBitsPerSample=16;
-    sh_audio->o_wf.cbSize=0;
+  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
 
-  if(!DS_AudioDecoder_Open(avi_header.audio_codec,avi_header.auds_guid,in_fmt)){
-    sh_audio->channels=sh_audio->o_wf.nChannels;
-    sh_audio->samplerate=sh_audio->o_wf.nSamplesPerSec;
-
-    sh_audio->audio_in_minsize=2*sh_audio->o_wf.nBlockAlign;
+  if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,&sh_audio->wf)){
+    printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);
+    driver=0;
+  } else {
+    sh_audio->channels=sh_audio->wf.nChannels;
+    sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
+    sh_audio->audio_in_minsize=2*sh_audio->wf.nBlockAlign;
     if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
     sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
     sh_audio->a_in_buffer_len=0;
-
-  } else {
-    printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",avi_header.audio_codec);
-    if((in_fmt->wFormatTag)==0x55){
-      printf("Audio format is MP3 -> fallback to internal mp3lib/mpg123\n");
-      has_audio=1;  // fallback to mp3lib
-    } else
-      printf("Audio disabled! Try to upgrade your w32codec.zip package!!!\n");
-      has_audio=0;  // nosound
   }
 #endif
 }
 
+if(!driver) return 0;
 
 // allocate audio out buffer:
 sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
 memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
 sh_audio->a_buffer_len=0;
 
-if(has_audio==4){
+switch(driver){
+case 4: {
     int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,sh_audio->a_buffer_size);
     if(ret<0){
-        printf("ACM error %d -> switching to nosound...\n",ret);
-        has_audio=0;
-    } else {
-        sh_audio->a_buffer_len=ret;
-        printf("ACM decoding test: %d bytes\n",ret);
+        printf("ACM decoding error: %d\n",ret);
+        driver=0;
     }
+    break;
 }
-
-if(has_audio==2){
+case 2: {
 //  if(file_format==DEMUXER_TYPE_AVI){    // FIXME!!!!!!!
     // AVI PCM Audio:
     WAVEFORMATEX *h=&sh_audio->wf;
@@ -129,8 +75,9 @@ if(has_audio==2){
 //    sh_audio->samplerate=48000;
 //    sh_audio->pcm_bswap=1;
 //  }
-} else
-if(has_audio==3){
+    break;
+}
+case 3: {
   // Dolby AC3 audio:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
   ac3_config.num_output_ch = 2;
@@ -146,22 +93,26 @@ if(has_audio==3){
   if(sh_audio->ac3_frame){
     sh_audio->samplerate=sh_audio->ac3_frame->sampling_rate;
     sh_audio->channels=2;
-  } else has_audio=0; // bad frame -> disable audio
-} else
-if(has_audio==5){
+  } else {
+    driver=0; // bad frame -> disable audio
+  }
+  break;
+}
+case 5: {
   // aLaw audio codec:
   Gen_aLaw_2_Signed(); // init table
   sh_audio->channels=sh_audio->wf.nChannels;
   sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
-} else
-if(has_audio==6){
+  break;
+}
+case 6: {
   // MS-GSM audio codec:
   GSM_Init();
   sh_audio->channels=sh_audio->wf.nChannels;
   sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
+  break;
 }
-// must be here for Win32->mp3lib fallbacks
-if(has_audio==1){
+case 1: {
   // MPEG Audio:
   MP3_Init();
   MP3_samplerate=MP3_channels=0;
@@ -170,23 +121,30 @@ if(has_audio==1){
 //  printf("]\n");
   sh_audio->channels=2; // hack
   sh_audio->samplerate=MP3_samplerate;
+  break;
+}
 }
 
 if(!sh_audio->channels || !sh_audio->samplerate){
   printf("Unknown/missing audio format, using nosound\n");
-  has_audio=0;
+  driver=0;
 }
 
-  sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
+  if(!driver){
+      if(sh_audio->a_buffer) free(sh_audio->a_buffer);
+      sh_audio->o_bps=0;
+      return 0;
+  }
 
-  return has_audio;
+  sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
+  return driver;
 }
 
 // Audio decoding
 
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen){
     int len=-1;
-    switch(sh_audio->codec.driver){
+    switch(sh_audio->codec->driver){
       case 1: // MPEG layer 2 or 3
         len=MP3_DecodeFrame(buf,-1);
         sh_audio->channels=2; // hack

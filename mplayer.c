@@ -51,13 +51,7 @@
 #include "loader.h"
 #include "wine/avifmt.h"
 
-typedef struct
-{
-    long f1;
-    short f2;
-    short f3;
-    char f4[8];
-} GUID;
+#include "codec-cfg.h"
 
 #ifdef USE_DIRECTSHOW
 #include "DirectShow/DS_VideoDec.h"
@@ -186,18 +180,6 @@ typedef struct {
   int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
   // video:
   unsigned int bitrate;
-  //===== This stuff will be removed when codec.conf reader is finished! =====
-  // video codec info:  (filled by codecs.c)
-  char *video_codec;
-  char yuv_supported;   // 1 if codec support YUY2 output format
-  char yuv_hack_needed; // requires for divx & mpeg4
-  char no_32bpp_support; // requires for INDEO 3.x, 4.x
-  char flipped;         // image is upside-down
-  GUID* vids_guid;
-  // audio codec info:  (filled by codecs.c)
-  char *audio_codec;
-  int audio_seekable;
-  GUID* auds_guid;
 } avi_header_t;
 
 avi_header_t avi_header;
@@ -238,8 +220,6 @@ static const int frameratecode2framerate[16] = {
    0, 24000*10000/1001, 24*10000,25*10000, 30000*10000/1001, 30*10000,50*10000,60000*10000/1001,
   60*10000, 0,0,0,0,0,0,0
 };
-
-#include "codecs.c"
 
 //**************************************************************************//
 //             Audio codecs:
@@ -409,7 +389,7 @@ int stream_type;
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int has_audio=1; // audio  0=no 1=mpeg 2=pcm 3=ac3 4=ACM 5=alaw 6=msgsm 7=DShow
-int has_video=0; // video  0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
+int has_video=1; // video  0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
 //
 int audio_format=0; // override
 #ifdef ALSA_TIMER
@@ -551,6 +531,11 @@ if(!filename){
   }
 }
 
+// check codec.conf
+if(!parse_codec_cfg(get_path("codecs.conf"))){
+    printf("Warning! Couldn't load codecs.conf!");
+}
+
 
 if(vcd_track){
 //============ Open VideoCD track ==============
@@ -600,7 +585,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
   if(asf_check_header()){
       printf("Detected ASF file format!\n");
       file_format=DEMUXER_TYPE_ASF;
-//      printf("!!! ASF files not (yet) supported !!!\n");exit(1);
   }
 }
 //=============== Try to open as MPEG-PS file: =================
@@ -698,7 +682,6 @@ switch(file_format){
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
           printf("Detected NON-INTERLEAVED AVI file-format!\n");
-//          file_format=DEMUXER_TYPE_AVI_NI; // HACK!!!!
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
         }
@@ -707,7 +690,6 @@ switch(file_format){
       // no index
       if(force_ni){
           printf("Using NON-INTERLEAVED Broken AVI file-format!\n");
-//          file_format=DEMUXER_TYPE_AVI_NI; // HACK!!!!
           demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
 	  avi_header.idx_pos_a=
 	  avi_header.idx_pos_v=avi_header.movi_start;
@@ -719,11 +701,7 @@ switch(file_format){
     printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
-  has_video=2;
-  // Decide audio format:
-  if(audio_format)
-    has_audio=audio_format; // override type
-  else if(has_audio) has_audio=detect_audio_format(sh_audio);
+  sh_video->format=sh_video->bih.biCompression;
   if(has_audio){
     if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
@@ -731,6 +709,7 @@ switch(file_format){
       has_audio=0;
     }
   }
+  if(has_audio) sh_audio->format=sh_audio->wf.wFormatTag;
   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   break;
  }
@@ -740,26 +719,12 @@ switch(file_format){
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,avi_header.movi_start);
   avi_header.idx_pos=0;
-#if 0
-  if(avi_header.idx_size>0){
-    // decide index format:
-    if(avi_header.idx[0].dwChunkOffset<avi_header.movi_start)
-      avi_header.idx_offset=avi_header.movi_start-4;
-    else
-      avi_header.idx_offset=0;
-    if(verbose) printf("ASF index offset: %d\n",avi_header.idx_offset);
-  }
-#endif
   demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
-  has_video=2;
-  // Decide audio format:
-  if(audio_format)
-    has_audio=audio_format; // override type
-  else if(has_audio) has_audio=detect_audio_format(sh_audio);
+  sh_video->format=sh_video->bih.biCompression;
   if(has_audio){
     if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
@@ -767,13 +732,26 @@ switch(file_format){
       has_audio=0;
     }
   }
+  if(has_audio) sh_audio->format=sh_audio->wf.wFormatTag;
   break;
  }
  case DEMUXER_TYPE_MPEG_ES: {
-  demuxer->audio->type=0;
-  has_audio=0; // ES streams has no audio channel
-  has_video=1; // mpeg video
-  break;
+   demuxer->audio->type=0;
+   // Find sequence_header first:
+   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i==0x1B3) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        if(verbose)  printf("NONE :(\n");
+        printf("MPEG: FATAL: EOF while searching for sequence header\n");
+        exit(1);
+      }
+   }
+   if(verbose) printf("OK!\n");
+   sh_video->format=1; // mpeg video
+   has_audio=0; // ES streams has no audio channel
+   break;
  }
  case DEMUXER_TYPE_MPEG_PS: {
   if(has_audio)
@@ -781,10 +759,27 @@ switch(file_format){
     printf("MPEG: No Audio stream found...  ->nosound\n");
     has_audio=0;
   } else {
-    has_audio=d_audio->type;
+    switch(d_audio->type){
+      case 1: sh_audio->format=0x50;break; // mpeg
+      case 2: sh_audio->format=0x2;break;  // pcm
+      case 3: sh_audio->format=0x2000;break; // ac3
+      default: has_audio=0; // unknown type
+    }
   }
-  if(verbose) printf("detected MPG-PS audio format: %d\n",has_audio);
-  has_video=1; // mpeg video
+  if(has_audio) if(verbose) printf("detected MPG-PS audio format: %d\n",sh_audio->format);
+   // Find sequence_header first:
+   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i==0x1B3) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        if(verbose)  printf("NONE :(\n");
+        printf("MPEG: FATAL: EOF while searching for sequence header\n");
+        exit(1);
+      }
+   }
+   if(verbose) printf("OK!\n");
+   sh_video->format=1; // mpeg video
   break;
  }
 } // switch(file_format)
@@ -793,52 +788,56 @@ if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
 
 fflush(stdout);
 
+//================== Init AUDIO (codec) ==========================
+if(has_audio){
+  // Go through the codec.conf and find the best codec...
+  sh_audio->codec=find_codec(sh_audio->format,NULL,1);
+  if(!sh_audio->codec){
+    printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
+    has_audio=0;
+  } else {
+    printf("Found audio codec: %s drv=%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    has_audio=sh_audio->codec->driver;
+  }
+}
+
+if(has_audio){
+  if(verbose) printf("Initializing audio codec...\n");
+  has_audio=init_audio(sh_audio);
+  if(!has_audio){
+    printf("Couldn't initialize audio codec! -> nosound\n");
+  } else {
+    printf("AUDIO: samplerate=%d  channels=%d  bps=%d\n",has_audio,sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
+  }
+}
+
 //================== Init VIDEO (codec & libvo) ==========================
 
-if(has_video==2){
-  if(sh_video->video.fccHandler==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
-  if(sh_video->video.fccHandler==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
-  if(sh_video->bih.biCompression==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
-  if(sh_video->bih.biCompression==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
-//  if(sh_video->bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
+// Go through the codec.conf and find the best codec...
+sh_video->codec=find_codec(sh_video->format,(unsigned int*) &sh_video->bih.biCompression,0);
+if(!sh_video->codec){
+    printf("Can't find codec for video format 0x%X !\n",sh_video->format);
+    exit(1);
 }
+has_video=sh_video->codec->driver;
 
-if(has_video==2){
-   if(!avi_header.video_codec) avi_header.video_codec=get_vids_codec_name(sh_video);
-   if(verbose)
-     printf("win32 video codec: '%s' %s%s%s\n",avi_header.video_codec,
-       avi_header.yuv_supported?"[YUV]":"",
-       avi_header.yuv_hack_needed?"[hack]":"",
-       avi_header.flipped?"[FLIP]":""
-     );
-   if(!avi_header.video_codec) exit(1); // unknown video codec
-   if(avi_header.vids_guid){
-#ifdef USE_DIRECTSHOW
-       has_video=4; // switching to DirectShow
-#else
-        printf("MPlayer was compiled without DirectShow support!\n");exit(1);
-#endif
-   }
+printf("Found video codec: %s drv=%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+
+for(i=0;i<CODECS_MAX_OUTFMT;i++){
+    out_fmt=sh_video->codec->outfmt[i];
+    if(video_out->query_format(out_fmt)) break;
 }
+if(i>=CODECS_MAX_OUTFMT){
+    printf("Sorry, selected video_out device is incompatible with this codec.\n");
+    exit(1);
+}
+sh_video->outfmtidx=i;
 
 switch(has_video){
  case 2: {
-   if(avi_header.yuv_supported && video_out->query_format(IMGFMT_YUY2)) out_fmt=IMGFMT_YUY2; else
-   if(avi_header.no_32bpp_support && video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|24; else
-   if(video_out->query_format(IMGFMT_BGR|15)) out_fmt=IMGFMT_BGR|16; else
-   if(video_out->query_format(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|16; else
-   if(video_out->query_format(IMGFMT_BGR|24)) out_fmt=IMGFMT_BGR|24; else
-   if(video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|32; else {
-     printf("Sorry, selected video_out device is incompatible with this codec.\n");
-     printf("(It can't show 24bpp or 32bpp RGB images. Try to run X at 24/32bpp!)\n");
-//     printf("(cannot convert between YUY2, YV12 and RGB colorspace formats)\n");
-     exit(1);
-   }
-   //if(verbose) printf("AVI out_fmt=%X\n",out_fmt);
-   if(verbose) if(out_fmt==IMGFMT_YUY2) printf("Using YUV/YUY2 video output format!\n");
    if(!init_video_codec(out_fmt)) exit(1);
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
-   if(out_fmt==(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|15; // fix bpp
+   //if(out_fmt==(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|15; // fix bpp  FIXME!
    
    // calculating video bitrate:
    avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
@@ -861,24 +860,14 @@ switch(has_video){
    movie_size_y=abs(sh_video->o_bih.biHeight);
    break;
  }
-#ifdef USE_DIRECTSHOW
  case 4: { // Win32/DirectShow
-   if(avi_header.yuv_supported && video_out->query_format(IMGFMT_YUY2)) out_fmt=IMGFMT_YUY2; else
-//   if(avi_header.no_32bpp_support && video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|24; else
-   if(video_out->query_format(IMGFMT_BGR|15)) out_fmt=IMGFMT_BGR|15; else
-   if(video_out->query_format(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|16; else
-   if(video_out->query_format(IMGFMT_BGR|24)) out_fmt=IMGFMT_BGR|24; else
-   if(video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|32; else {
-     printf("Sorry, selected video_out device is incompatible with this codec.\n");
-     printf("(It can't show 24bpp or 32bpp RGB images. Try to run X at 24/32bpp!)\n");
-//     printf("(cannot convert between YUY2, YV12 and RGB colorspace formats)\n");
-     exit(1);
-   }
-   //if(verbose) printf("AVI out_fmt=%X\n",out_fmt);
-   if(verbose) if(out_fmt==IMGFMT_YUY2) printf("Using YUV/YUY2 video output format!\n");
+#ifndef USE_DIRECTSHOW
+   printf("MPlayer was compiled WITHOUT directshow support!\n");
+   exit(1);
+#else
    sh_video->our_out_buffer=NULL;
-   if(DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &sh_video->bih, 0, &sh_video->our_out_buffer)){
-        printf("ERROR: Couldn't open required DirectShow codec: %s\n",avi_header.video_codec);
+   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, &sh_video->bih, 0, &sh_video->our_out_buffer)){
+        printf("ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
         printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
         printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
         printf("Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
@@ -921,12 +910,6 @@ switch(has_video){
  }
 #endif
  case 3: {  // OpenDivX
-   out_fmt=IMGFMT_YV12;
-   if(!video_out->query_format(out_fmt)) {
-     printf("Sorry, selected video_out device is incompatible with this codec!\n");
-     exit(1);
-   }
-
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
@@ -956,29 +939,11 @@ switch(has_video){
     avi_header.bitrate/1024.0f );
 
    // display info:
-//   movie_size_x=sh_video->bih.biWidth+(divx_quality?0:64);
    movie_size_x=sh_video->bih.biWidth;
    movie_size_y=abs(sh_video->bih.biHeight);
    break;
  }
  case 1: {
-   out_fmt=IMGFMT_YV12;
-   if(!video_out->query_format(out_fmt)) {
-     printf("Sorry, selected video_out device is incompatible with this codec!\n");
-     exit(1);
-   }
-   // Find sequence_header first:
-   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
-   while(1){
-      int i=sync_video_packet(d_video);
-      if(i==0x1B3) break; // found it!
-      if(!i || !skip_video_packet(d_video)){
-        if(verbose)  printf("NONE :(\n");
-        printf("MPEG: FATAL: EOF while searching for sequence header\n");
-        exit(1);
-      }
-   }
-   if(verbose) printf("FOUND!\n");
    // allocate some shared memory for the video packet buffer:
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
    if(!videobuffer){ printf("Cannot allocate shared memory\n");exit(0);}
@@ -1017,7 +982,6 @@ switch(has_video){
     picture->bitrate*0.5f,
     picture->bitrate/16.0f );
    // display info:
-//   movie_size_x=picture->coded_picture_width;
    movie_size_x=picture->display_picture_width;
    movie_size_y=picture->display_picture_height;
    break;
@@ -1167,16 +1131,6 @@ int osd_function=OSD_PLAY;
   current_module="setup_audio";
 
 if(has_audio){
-
-  if(verbose) printf("Initializing audio codec...\n");
-  
-  sh_audio->codec.driver=has_audio; // FIXME!
-  has_audio=init_audio(sh_audio);
-  sh_audio->codec.driver=has_audio; // FIXME!
-
-if(verbose) printf("Audio: type: %d  samplerate=%d  channels=%d  bps=%d\n",has_audio,sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
-
-if(has_audio){
 #ifdef USE_XMMP_AUDIO
   xmm_Init( &xmm );
   xmm.cSound = (XMM_PluginSound *)xmm_PluginRegister( XMMP_AUDIO_DRIVER );
@@ -1247,7 +1201,6 @@ if(has_audio){
   printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,buffer_delay);
 }
 
-} // has_audio
 
 if(has_audio){
   printf("Audio: type: %d  samplerate: %d  channels: %d  bps: %d\n",has_audio,sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
@@ -1283,15 +1236,6 @@ if(force_fps) default_fps=force_fps;
 
 printf("Start playing...\n");fflush(stdout);
 
-#if 0
-     // ACM debug code
-{   DWORD srcsize=0;
-    DWORD dstsize=16384*8;
-    int ret=acmStreamSize(avi_header.srcstream,dstsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
-    printf("acmStreamSize %d -> %d (err=%d)\n",dstsize,srcsize,ret);
-}
-#endif
-
 InitTimer();
 
 while(!eof){
@@ -1303,7 +1247,7 @@ while(has_audio){
   // Update buffer if needed
   unsigned int t=GetTimer();
   current_module="decode_audio";   // Enter AUDIO decoder module
-  sh_audio->codec.driver=has_audio; // FIXME!
+  sh_audio->codec->driver=has_audio; // FIXME!
   while(sh_audio->a_buffer_len<OUTBURST && !d_audio->eof){
     int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],sh_audio->a_buffer_size-sh_audio->a_buffer_len);
     if(ret>0) sh_audio->a_buffer_len+=ret; else break;
@@ -1934,7 +1878,7 @@ switch(file_format){
           avi_header.idx_pos_a=avi_header.idx_pos_v=
           avi_header.idx_pos=audio_chunk_pos;
 
-          if(!avi_header.audio_seekable){
+          if(!(sh_audio->codec->flags&CODECS_FLAG_SEEKABLE)){
 #if 0
 //             curr_audio_pos=apos; // selected audio codec can't seek in chunk
              skip_audio_secs=(float)skip_audio_bytes/(float)sh_audio->wf.nAvgBytesPerSec;

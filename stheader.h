@@ -1,13 +1,16 @@
 // Stream headers:
 
+/*
 typedef struct {
   int driver;
     // codec descriptor from codec.conf
 } codecinfo_t;
+*/
 
 typedef struct {
   demux_stream_t *ds;
-  codecinfo_t codec;
+  unsigned int format;
+  codecs_t *codec;
   // output format:
   int samplerate;
   int samplesize;
@@ -36,11 +39,12 @@ typedef struct {
 
 typedef struct {
   demux_stream_t *ds;
-  codecinfo_t codec;
+  unsigned int format;
+  codecs_t *codec;
   // output format:
   float fps;
   float frametime;  // 1/fps
-  unsigned int outfmt;
+  unsigned int outfmtidx;
 //  unsigned int bitrate;
   // buffers:
   char *our_out_buffer;

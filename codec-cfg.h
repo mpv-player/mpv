@@ -15,14 +15,17 @@
 #define CODECS_MAX_FOURCC	16
 #define CODECS_MAX_OUTFMT	16
 
+// Global flags:
 #define CODECS_FLAG_AUDIO	(1<<0)
+#define CODECS_FLAG_SEEKABLE	(1<<1)
 
+// Outfmt flags:
 #define CODECS_FLAG_FLIP	(1<<0)
 #define CODECS_FLAG_NOFLIP	(1<<1)
 #define CODECS_FLAG_YUVHACK	(1<<2)
 
 
-#warning nem kellene ket typedef GUID-nak...
+//#warning nem kellene ket typedef GUID-nak...
 typedef struct {
 	unsigned long f1;
 	unsigned short f2;
@@ -44,6 +47,7 @@ typedef struct {
 	unsigned char outflags[CODECS_MAX_OUTFMT];
 } codecs_t;
 
-codecs_t *parse_codec_cfg(char *cfgfile);
+codecs_t* parse_codec_cfg(char *cfgfile);
+codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,int audioflag);
 
 #endif

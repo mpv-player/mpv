@@ -1,3 +1,9 @@
+
+//#define DEBUG
+#define PRINT_LINENUM
+//	printf("%s(%d): ", cfgfile, line_num)
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -28,16 +34,17 @@
 #define RET_EOL		-2
 #define RET_OK		0
 
-FILE *fp;
-int line_num = 0;
-int line_pos;	/* line pos */
-int firstdef = 1;
-char *line;
-char *token;
+static FILE *fp;
+static int line_num = 0;
+static int line_pos;	/* line pos */
+static int firstdef = 1;
+static char *line;
+static char *token;
 
-int nr_codecs = 0;
+static codecs_t *codecs=NULL;
+static int nr_codecs = 0;
 
-int get_token(void)
+static int get_token(void)
 {
 	static int read_nextline = 1;
 
@@ -88,7 +95,7 @@ ret_eol:
 	return RET_EOL;
 }
 
-int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
+static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		unsigned int *map)
 {
 	int i;
@@ -133,7 +140,7 @@ int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 	return 1;
 }
 
-int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
+static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 {
 //        printf("\n-----[%s][%s]-----\n",s,format);
 
@@ -153,7 +160,7 @@ int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 }
 
 
-int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
+static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		unsigned char *outflags)
 {
 	static char *fmtstr[] = {
@@ -229,7 +236,7 @@ int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 	return 1;
 }
 
-short get_driver(char *s,int audioflag)
+static short get_driver(char *s,int audioflag)
 {
 	static char *audiodrv[] = {
 		"mp3lib",
@@ -256,13 +263,11 @@ short get_driver(char *s,int audioflag)
 	return 0;
 }
 
-//#define DEBUG
 
 codecs_t *parse_codec_cfg(char *cfgfile)
 {
-#define PRINT_LINENUM	printf("%s(%d): ", cfgfile, line_num)
 
-	codecs_t *codecs = NULL;  // array of codecs
+//	codecs_t *codecs = NULL;  // array of codecs
 	codecs_t *codec = NULL;   // currect codec
 	int free_slots = 0;
 	int tmp, i;
@@ -309,10 +314,10 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			state = 0;
                         
 			if (*token == 'a') {		/* audiocodec */
-				printf("audio");
+				//printf("audio");
 				codec->flags |= CODECS_FLAG_AUDIO;
 			} else if (*token == 'v') {	/* videocodec */
-				printf("video");
+				//printf("video");
 				codec->flags &= !CODECS_FLAG_AUDIO;
 			} else {
 				printf("itt valami nagyon el van baszva\n");
@@ -322,28 +327,28 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			codec->name = strdup(token);
 			state |= GOT_NAME;
-			printf(" %s\n", codec->name);
+			//printf(" %s\n", codec->name);
 		} else if (!strcmp(token, "info")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("info");
+			//printf("info");
 			if (state & GOT_INFO || get_token() < 0)
 				goto parse_error_out;
 			codec->info = strdup(token);
 			state |= GOT_INFO;
-			printf(" %s\n", codec->info);
+			//printf(" %s\n", codec->info);
 		} else if (!strcmp(token, "comment")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("comment");
+			//printf("comment");
 			if (get_token() < 0)
 				goto parse_error_out;
 #if 1
 			if (!codec->comment)
 				codec->comment = strdup(token);
-			printf(" %s\n", codec->comment);
+			//printf(" %s\n", codec->comment);
 #else
 			add_comment(token, &codec->comment);
 			printf(" FIXMEEEEEEEEEEEEEEE\n");
@@ -352,11 +357,11 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("fourcc");
-			if (codec->flags & CODECS_FLAG_AUDIO) {
-				printf("\n'fourcc' in audiocodec definition!\n");
-				goto err_out;
-			}
+			//printf("fourcc");
+//			if (codec->flags & CODECS_FLAG_AUDIO) {
+//				printf("\n'fourcc' in audiocodec definition!\n");
+//				goto err_out;
+//			}
 			if (get_token() < 0)
 				goto parse_error_out;
 			param1 = strdup(token);
@@ -366,49 +371,49 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 						codec->fourccmap))
 				goto err_out;
 			state |= GOT_FOURCC;
-			printf(" %s: %s\n", param1, token);
+			//printf(" %s: %s\n", param1, token);
 			free(param1);
 		} else if (!strcmp(token, "format")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("format");
-			if (!(codec->flags & CODECS_FLAG_AUDIO)) {
-				printf("\n'format' in videocodec definition!\n");
-				goto err_out;
-			}
+			//printf("format");
+//			if (!(codec->flags & CODECS_FLAG_AUDIO)) {
+//				printf("\n'format' in videocodec definition!\n");
+//				goto err_out;
+//			}
 			if (get_token() < 0)
 				goto parse_error_out;
 			if (!add_to_format(token, codec->fourcc,codec->fourccmap))
 				goto err_out;
 			state |= GOT_FORMAT;
-			printf(" %s\n", token);
+			//printf(" %s\n", token);
 		} else if (!strcmp(token, "driver")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("driver");
+			//printf("driver");
 			if (get_token() < 0)
 				goto parse_error_out;
 			if ((codec->driver = get_driver(token,codec->flags&CODECS_FLAG_AUDIO)) == -1)
 				goto err_out;
-			printf(" %s\n", token);
+			//printf(" %s\n", token);
 		} else if (!strcmp(token, "dll")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("dll");
+			//printf("dll");
 			if (get_token() < 0)
 				goto parse_error_out;
 			codec->dll = strdup(token);
-			printf(" %s\n", codec->dll);
+			//printf(" %s\n", codec->dll);
 		} else if (!strcmp(token, "guid")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("guid");
+			//printf("guid");
 			if (get_token() < 0) goto parse_error_out;
-                        printf("'%s'",token);
+                        //printf("'%s'",token);
                         codec->guid.f1=strtoul(token,NULL,0);
 			if (get_token() < 0) goto parse_error_out;
                         codec->guid.f2=strtoul(token,NULL,0);
@@ -422,7 +427,7 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("out");
+			//printf("out");
 			if (get_token() < 0)
 				goto parse_error_out;
 			param1 = strdup(token);
@@ -430,16 +435,16 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			if (!add_to_out(param1, token, codec->outfmt,
 						codec->outflags))
 				goto err_out;
-			printf(" %s: %s\n", param1, token);
+			//printf(" %s: %s\n", param1, token);
 			free(param1);
 		} else if (!strcmp(token, "flags")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
-			printf("flags");
+			//printf("flags");
 			if (get_token() < 0)
 				goto parse_error_out;
-			printf(" %s\n", token);
+			//printf(" %s\n", token);
 		} else
 			goto parse_error_out;
 	}
@@ -460,6 +465,23 @@ eof_out:
 	/* FIXME teljes az utolso config?? */
 	goto out;
 }
+
+codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,int audioflag){
+  int i,j;
+  for(i=0;i<nr_codecs;i++){
+    codecs_t *c=&codecs[i];
+    if(!audioflag && (c->flags&CODECS_FLAG_AUDIO)) continue;
+    if(audioflag && !(c->flags&CODECS_FLAG_AUDIO)) continue;
+    for(j=0;j<CODECS_MAX_FOURCC;j++){
+      if(c->fourcc[j]==fourcc){
+        if(fourccmap) *fourccmap=c->fourccmap[j];
+        return c;
+      }
+    }
+  }
+  return NULL;
+}
+
 
 #ifdef TESTING
 int main(void)

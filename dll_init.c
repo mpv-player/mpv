@@ -21,7 +21,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     sh_audio->o_wf.wBitsPerSample=16;
     sh_audio->o_wf.cbSize=0;
 
-    win32_codec_name = avi_header.audio_codec;
+    win32_codec_name = sh_audio->codec->dll;
     ret=acmStreamOpen(&sh_audio->srcstream,(HACMDRIVER)NULL,
                     in_fmt,&sh_audio->o_wf,
 		    NULL,0,0,0);
@@ -100,15 +100,16 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
 
 
 
-int init_video_codec(int outfmt){
+int init_video_codec(){
   HRESULT ret;
+  unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
   if(verbose) printf("======= Win32 (VFW) VIDEO Codec init =======\n");
 
   memset(&sh_video->o_bih, 0, sizeof(BITMAPINFOHEADER));
   sh_video->o_bih.biSize = sizeof(BITMAPINFOHEADER);
 
-  win32_codec_name = avi_header.video_codec;
+  win32_codec_name = sh_video->codec->dll;
   sh_video->hic = ICOpen( 0x63646976, sh_video->bih.biCompression, ICMODE_FASTDECOMPRESS);
 //  sh_video->hic = ICOpen( 0x63646976, sh_video->bih.biCompression, ICMODE_DECOMPRESS);
   if(!sh_video->hic){
@@ -142,12 +143,14 @@ int init_video_codec(int outfmt){
   else
     sh_video->o_bih.biBitCount=outfmt&0xFF;//   //24;
 
+  if(sh_video->o_bih.biBitCount==15) ++sh_video->o_bih.biBitCount;
+
   sh_video->o_bih.biSizeImage=sh_video->o_bih.biWidth*sh_video->o_bih.biHeight*(sh_video->o_bih.biBitCount/8);
 
-  if(!avi_header.flipped)
+  if(!(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_FLIP))
     sh_video->o_bih.biHeight=-sh_video->bih.biHeight; // flip image!
 
-  if(outfmt==IMGFMT_YUY2 && !avi_header.yuv_hack_needed)
+  if(outfmt==IMGFMT_YUY2 && !(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_YUVHACK))
     sh_video->o_bih.biCompression = mmioFOURCC('Y','U','Y','2');
 
 //  sh_video->o_bih.biCompression = mmioFOURCC('U','Y','V','Y');
@@ -205,7 +208,7 @@ int init_video_codec(int outfmt){
     return 0;
   }
 
-  if(outfmt==IMGFMT_YUY2 && avi_header.yuv_hack_needed)
+  if(outfmt==IMGFMT_YUY2 && (sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_YUVHACK))
     sh_video->o_bih.biCompression = mmioFOURCC('Y','U','Y','2');
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!

@@ -22,8 +22,8 @@ PRG_CFG = codec-cfg
 prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c
-OBJS = subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o
+SRCS = codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c
+OBJS = codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
@@ -77,7 +77,7 @@ $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 $(PRG_CFG):        codec-cfg.c codec-cfg.h
-	$(CC) $(CFLAGS) codec-cfg.c -o $(PRG_CFG) -DTESTING
+	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DTESTING
 
 install: $(PRG)
 	install -g $(GROUP) -o $(OWNER) -m $(PERM) -s $(PRG) $(BINDIR)
