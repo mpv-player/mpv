@@ -171,7 +171,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 return(1);
 	       } 
                break;
-      case 24: if (!(bpp_avail & BPP_24))
+      case 24: if (!(bpp_avail & BPP_24)) {
                  if (!(bpp_avail & BPP_32)) {
 	           printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
                    printf("vo_svga: Maybe you should try -bpp\n");
@@ -180,7 +180,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		     bpp = 32;
 		     bpp_conv = 1;
                      printf("vo_svga: BPP conversion 24->32\n");
-		   }     
+		   }
+	       }
                break;
       case 16: if (!(bpp_avail & BPP_16)) {
 	         printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
@@ -188,7 +189,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 return(1);
 	       } 
                break;
-      case 15: if (!(bpp_avail & BPP_15))
+      case 15: if (!(bpp_avail & BPP_15)) {
                  if (!(bpp_avail & BPP_16)) {
 	           printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
 		   printf("vo_svga: Maybe you should try -bpp\n");
@@ -198,6 +199,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		     bpp_conv = 1;
                      printf("vo_svga: BPP conversion 15->16\n");
 		   }
+	       }
                break;
     }
   } else {
