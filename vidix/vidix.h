@@ -58,6 +58,7 @@ typedef struct vidix_capability_s
 #define FLAG_UPSCALER		0x00000010 /* Card supports hw upscaling */
 #define FLAG_DOWNSCALER		0x00000020 /* Card supports hw downscaling */
 #define FLAG_SUBPIC		0x00001000 /* Card supports DVD subpictures */
+#define FLAG_EQUALIZER		0x00002000 /* Card supports equalizer */
 	unsigned flags;		/* Feature flags, see above */
 	unsigned short vendor_id;
 	unsigned short device_id;
