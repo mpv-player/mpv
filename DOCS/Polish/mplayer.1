@@ -5,16 +5,16 @@
 .\" Uruchom aby otrzymaæ wersjê html manuala:
 .\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
 .\" Uruchom aby otrzymaæ wersjê tekstow± manuala:
-.\"   groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
+.\"   groff -m man -Tlatin1 /¶cie¿ka/do/mplayer.1 | col -bx > manpage.txt
 .\"
 .
 .\" --------------------------------------------------------------------------
 .\" Macro definicje
 .\" --------------------------------------------------------------------------
 .
-.\" domy¶lny idntyfikator to 7, nie zmniaæ!
+.\" domy¶lny identyfikator to 7, nie zmniaæ!
 .nr IN 7
-.\" okre¶l indentyfikator dla subopcji
+.\" okre¶l identyfikator dla subopcji
 .nr SS 20
 .\" dodaj now± subopcjê
 .de IPs
@@ -192,14 +192,14 @@ bazowany zupe³nie na pomiarze opó¼nienia audio.
 Wyszczególnienie \-autosync\ 1 zrobi to samo, ale subtly zmieni u¿ywany
 algorytm korekcji A/\:V.
 Nierówne klatki wideo szacowane, które odtwarzane s± dobrze z \-nosound czêsto
-mog± byæ wspomagane przez ustawienie tego do ca³kowitych watro¶ci wiêkszych ni¿ 1.
+mog± byæ wspomagane przez ustawienie tego do ca³kowitych warto¶ci wiêkszych ni¿ 1.
 Wiêksze warto¶ci, bli¿sze timingowi (klatki) bêd± -nosound.
 Wypróbuj \-autosync\ 30 do t³umienia problemów ze sterownikami d¼wiêku, które
 nie nadzoruj± perfekcyjnie pomiaru opó¼nienia.
-Z t± warto¶ci±, je¿eli zda¿y siê du¿e odga³êzienie synchronizacji A/\:V,
+Z t± warto¶ci±, je¿eli zdarzy siê du¿e odga³êzienie synchronizacji A/\:V,
 zostan± wziête tylko 1 lub 2 sekundy do wyregulowania.
 To opó¼nienie w reakcji z czasem do nag³ego wyga³êzienia
-Opó¼nienie w reakcji czasu do nag³ego offsetu A/\:V powinno byæ tylko bocznym
+Opó¼nienie w reakcji czasu do nag³ego offsetu A/\:V powinno byæ tylko ubocznym
 efektem w³±czanie tej opcji, dla wszystkich sterowników d¼wiêku.
 .TP
 .B \-benchmark
@@ -247,7 +247,7 @@ Poka¿ wszystkie klawisze, którymi mo¿na przeskakiwaæ.
 Poka¿ wszystkie komendy, którymi mo¿na przeskakiwaæ.
 .IPs js\-dev
 Okre¶l urz±dzenie steruj±ce (domy¶lnie jest to /\dev/\:input/\:js0).
->IPs plik
+.IPs plik
 Czytaj komendy z otrzymanego pliku. G³ównie po¿yteczny z fifo.
 .RE
 .PD 1
@@ -393,12 +393,17 @@ Mo¿e byæ ujemna.
 .
 .TP
 .B \-channels <numer>
-Wybierz numer kana³ów wyj¶cia audio, które bêd± u¿yte
+Wybierz numer kana³u odtwarzania.
+Je¿eli numer kana³u wyj¶ciowego jest wiêkszy od numeru kana³u wej¶ciowego,
+puste kana³y zostan± wstawione (poza miksowaniem mono do stereo, wtedy kana³
+mono zostanie powielony we wszystkich kana³ach wyj¶cia).
+Je¿eli numer kana³u wyj¶ciowego jest mnieszy od numeru kana³u wej¶ciowego,
+kana³y przekraczaj±ce go zostan± przyciête.
 
 .I INFORMACJA:
 .br
 Aktualnie ta opcja jest uhonorowaniem dla kodeków  (tylko ac3), filtrów (surround)
-i sterowników ao (oss i najmniejszych).
+i sterowników ao (co najmniej oss).
 .br
 Dostêpne opcje to:
 
@@ -624,6 +629,8 @@ i420)
 szeroko¶æ okna danych wyj¶ciowych
 .IPs height=<warto¶æ>
 wysoko¶æ okna danych wyj¶ciowych
+.IPs buffersize=<warto¶æ>
+przechwyæ rozmiar buforu w megabajtach (domy¶lnie jest to po³owa pamiêci fizycznej)
 .IPs norm=<warto¶æ>
 dostêpne: PAL, SECAM, NTSC
 .IPs channel=<warto¶æ>
@@ -632,6 +639,8 @@ Ustaw tuner na kana³ <warto¶æ>.
 dostêpne: europe-east,europe-west, us-bcast, us-cable, itp.
 .IPs audiorate=<warto¶æ>
 ustaw bitrate wychwytywania audio
+.IPs forceaudio
+przechwyæ audio nawet gdy nie ma ¿ród³a audio zaraportowanego przez v41
 .IPs alsa
 przechwytywanie z ALSA
 .IPs amode=<0..3>
@@ -759,12 +768,12 @@ Okre¶l w którym trybie powinien w³±czyæ siê OSD (0: brak, 1: szukanie,
 W³±cz wy¶wietlanie napisów DVD.
 Poza tym, MUSISZ podaæ numer który pokrywa siê z jêzykiem napisów DVD (0\-31).
 Po listê dostêpnych jêzyków dla napisów, u¿yj prze³±cznika \-v i patrz na
-dane wyj¶ciowe.
+konsolê.
 .TP
 .B \-slang <dwu\ literowy\ kod\ kraju> (patrz te¿ opcjê \-sid)
 Dzia³a tylko z odtwarzaniem DVD!
 W³±cza/\:wybiera podane jêzyki napisów. Po listê
-dostêpnych napisów, u¿yj opcji \-v i patrz na dane wyj¶ciowe.
+dostêpnych napisów, u¿yj opcji \-v i patrz na konsolê.
 
 .I PRZYK£AD:
 .PD 0
@@ -809,6 +818,7 @@ Mo¿e byæ ujemne.
 Ustawia tym autoskalowanie.
 
 .I INFORMACJA:
+.br
 Zero oznacza, ¿e text-scale i osd-scale s± wysoko¶ci± czcionki w punktach.
 .br
 Mo¿e byæ:
@@ -880,9 +890,72 @@ Okre¶l id napisów VobSub.
 .B \-abs <warto¶æ> (PRZESTARZA£E)
 Zmieñ wykryty bufor audio urz±dzenia/\:karty, tylko \-ao oss
 .TP
+.B \-af <plugin1,plugin2,plugin3[=opcje],...>
+Aktywuj, podzielon± przecinkami, listê filtrów audio i ich opcji.
+.br
+Dostêpne opcje to:
+.
+.RSs
+.IPs resample[=srate[:sloppy][:fast]]
+Zmieñ czêstotliwo¶æ próbki audio do liczby ca³kowitej srate (Hz).
+Wspierany tylko format 16 bitowy little endian.
+.IPs channels[=nch]
+Zmieñ numer kana³u na kana³ wyj¶ciowy nch.
+Je¿eli numer kana³u wyj¶ciowego jest wiêkszy od numeru kana³u wej¶ciowego,
+puste kana³y zostan± wstawione (poza miksowaniem mono do stereo, wtedy kana³
+mono zostanie powielony we wszystkich kana³ach wyj¶cia).
+Je¿eli numer kana³u wyj¶ciowego jest mnieszy od numeru kana³u wej¶ciowego,
+kana³y przekraczaj±ce go zostan± przyciête.
+.IPs format[=f,bps]
+Wybierz format f u¿yty dla wyj¶cia warstwy filtru.
+Format mo¿e byæ wybrany zgodnie z definicjami z libao2/afmt.h.
+Opcja bps jest liczba ca³kowit± i oznacza bajty na próbkê i dostosowuje siê
+do wybranego formatu.
+.IPs "volume[=v0:v1:v2:v3:v4:v5:sc:pr:en]"
+Wybierz poziom g³o¶no¶ci wyj¶cia.
+Ten filtr nie jest re-u¿ywalny i mo¿e zatem byæ uruchomiony tylko raz dla
+wszystkich strumieni audio.
+.RSss
+v0 do v5: chêæ przyrostu w dB dla ka¿dego kana³u w strumieniu.
+Przyrost mo¿eby byæ ustawiony od -60dB do +20dB (gdzie -60dB równa siê przyrostowi
+1/1000, a +20dB równa siê przyrostowi 10).
+.br
+sc: w³±cz wycinanie programowe.
+.br
+pr: w³±cz badanie natychmiastowego strumienia audio.
+Maksymalna g³o¶no¶æ jest badana na standardowym kanale i mo¼e byæ dostepny
+tylko poprzez interfejs runtime filtra.
+.br
+en: wy³±cz lub wy³±cz kontrolê g³o¶no¶ci.
+.REss
+.IPs delay[=d] (KOD DEBUGOWANY)
+Opó¼nij wyj¶cie d¼wiêku o d sekund (liczba rzeczywista).
+.RE
+.
+.TP
+.B \-af-adv <force=(0\-3):list=(filtry)> (patrz te¿ opcjê -af)
+Okre¶l zaawansowane opcje filtrów audio:
+.
+.RSs
+.IPs force=<0-3>
+Wymuszanie trybu wprowadzenia filtrów audio w/g jednego z nastepuj±cych:
+.RSss
+0: Kompletnie automatyczne wprowadzanie filtrów (domy¶lnie)
+.br
+1: Zoptymalizowany do szybko¶ci
+.br
+2: Zoptymalizowany do dok³adno¶ci
+.br
+3: Wy³±cz auto
+.REss
+.IPs list=<filters>
+To samo co -af (patrz te¿ opcjê -af).
+.RE
+.
+.TP
 .B \-ao <sterownik1[:urz±dzenie], sterownik2,...[,]>
 Okre¶l priorytetow± listê wyj¶ciowych sterowników audio(opcjonalne z urz±dzeniem)
-do u¿ytku. Urz±dzenie jest tak¿e poprawne z SDL, wtedy oznacza podsterownik.
+do u¿ycia. Urz±dzenie jest tak¿e poprawne z SDL, wtedy oznacza podsterownik.
 
 . INFORMACJA:
 .br
@@ -985,37 +1058,73 @@ i wyj¶cia wideo)(domy¶lnie jest wy³±czone).
 Ostrze¿enie: mo¿e powodowaæ zepsucie OSD/\:SUB!
 .TP
 .B \-dxr2 <option1:option2:...>
-Ta opcja jest u¿yteczna do kontroli sterownika dxr2.
+Ta opcja jest u¿ywana do kontroli sterownika dxr2.
+Informacja: Filtr lavc jest teraz automatycznie wstawiany je¿eli próbujesz
+odtwarzaæ format nie MPEG1/2, wiêc wszystkie formaty wspierane przez MPlayera
+powinny byæ odtwarzane na zewn±trz skrzynki (je¿eli masz mocny CPU potrzebny
+do kodowania w locie).
+Chipset overlay u¿ywany przez dxr2 jest ca³kowicie z³ej jako¶ci, ale domy¶lne
+ustwienia powinny dzia³aæ u wszystkich. OSD mo¿e byæ u¿yte z overlay (nie na TV)
+poprzez rysowanie go w kolorze niewidocznym (colorkey). Z domy¶lnymi ustawieniami
+koloru niewidocznego mo¿esz dostaæ zmienne wyniki, zazwyczaj zabaczysz ten kolor
+wokó³ znaków lub inne zabawne efekty. Ale je¿eli poprawnie zmienisz ustawienia
+koloru przezroczystego powiniene¶ dostaæ aceptowalne rezultaty.
 .
 .RSs
-.IPs overlay
-w³±cz overlay
-.IPs overlay-ratio
-ustaw overlay
+.IPs ar-mode=<warto¶æ>
+tryb wideo (aspect ratio) (0 = normalny, 1 = pan scan, 2 = letterbox (domy¶lnie))
+.IPs iec958\-encoded/\:decoded
+tryb wyj¶cia iec958
+.IPs mute
+wycisz wyj¶cie dzwiêku
 .IPs ucode=<warto¶æ>
 ¶cie¿ka do microcode
-.IPs norm=<warto¶æ>
-norma TV
-.IPs ar-mode=<warto¶æ>
-tryb stosunku aspektu
-.IPs macrovision=<warto¶æ>
-tryb macrovision
+.RE
+.RS
+
+.I TV Out
+.RE
+.RSs
 .IPs 75ire
 w³±cz 7.5 IRE
 .IPs bw\ \ \
-czarno/\:bia³e dane wyj¶ciowe TV
+czarno/\:bia³e wyj¶cie TV
 .IPs color
-kolorowe dane wyj¶ciowe TV
+kolorowe wyj¶cie TV
 .IPs interlaced
-interlaced TV output
+interlaced (przeplatane) wyj¶cie TV output
+.IPs macrovision=<warto¶æ>
+tryb macrovision (0 = off (domy¶lnie), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
+.IPs norm=<warto¶æ>
+norma TV (ntsc (default), pal,pal60,palm,paln,palnc)
 .IPs square/\:ccir601-pixel
 tryb TV pixel
-.IPs iec958-encoded/\:decoded
-tryb iec958 danych wyj¶iowych
-.Ips mute
-wycisz d¼wiêk danych wyj¶ciowych
+.RE
+.RS
+
+.I Overlay
+.RE
+.RSs
+.IPs cr-[lewy|prawy|góra|gó³]=<\-20\-20>
+modyfikuj przycinanie overlay
+.IPs ck-[rgb]min=<0\-255>
+minimalna warto¶æ dla koloru kluczowego (color key)
+.IPs ck-[rgb]max=<0\-255>
+maksymalna warto¶æ dla koloru kluczowego (color key)
+.IPs ck-[rgb]=<0\-255>
+warto¶æ koloru kluczowego (color key)
 .IPs ignore-cache
 nie u¿ywaj cache'u VGA
+.IPs ol-osd
+w³±cz osd hack w overlay
+.IPs ol[hwxy]\-cor=<warto¶æ>
+modyfikuj rozmiar overlay i pozycjê w przypadku gdy nie pasuje do okna
+perfekcyjnie
+.IPs overlay
+w³±cz overlay
+.IPs overlay-ratio=<1\-2500>
+ustaw overlay (domy¶lnie 1000)
 .IPs update-cache
 odnów cache VGA
 .RE
@@ -1048,12 +1157,13 @@ Zobacz tak¿e \-zoom.
 Wypróbuj t± opcjê, je¿eli masz problemy z trybem pe³noekranowym.
 .TP
 .B \-geometry x[%][:y[%]]
-Ustaw, gdzie wyj¶cie ma znajdowaæ siê pocz±tkowo na ekranie. Ustawienia X i Y
-mierzone s± w pikselach od górnego-prawego rogu ekranu do górnego-prawego rogu
-wy¶wietlanego obrazu, jednak je¿eli procent podawany jest po argumencie
-w³±cza warto¶æ do procentu ekranu do tego kierunku.
-Podawane warto¶ci musz± byæ ca³kowite. Przyk³ad:
+Ustaw, gdzie wyj¶cie ma znajdowaæ siê pocz±tkowo na ekranie.
+Ustawienia X i Y mierzone s± w pikselach od górnego-prawego rogu ekranu do
+górnego-prawego rogu wy¶wietlanego obrazu, jednak je¿eli po argumencie podawany
+jest procent, ustawia je do procentu ekranu w tym kierunku.
+Podawane warto¶ci musz± byæ liczbami ca³kowitymi.
 
+.I PRZYK£AD
 .PD 0
 .RSs
 .IPs 50:40
@@ -1067,6 +1177,7 @@ Umieszcza okno w dolnym-lewym rogu ekranu
 .RE
 .PD 1
 .
+.TP
 .B \-hue <\-100\ \-\ 100>
 Modyfikuj barwê sygna³u wideo (domy¶lnie 0).
 Dziêki tej opcji mo¿esz otrzymaæ kolorowy negatyw obrazu.
@@ -1159,7 +1270,7 @@ Sterowniki wyj¶cia dga, x11/xv (XF86VidMode) i sdl wspieraj± to.
 .TP
 .B \-vo <sterownik1[:urz±dzenie],sterownik2,...[,]>
 Okre¶l priorytetow± listê sterowników wyj¶cia wideo  (optymalne z urz±dzeniem).
-do u¿ytku.
+do u¿ycia.
 "Urz±dzenie" jest zgodne z SDL i tak¿e GGI, oznacza to wówczas podsterownik.
 
 .I INFORMACJA:
@@ -1252,7 +1363,7 @@ Film domy¶lnie jest wycentrowany.
 .SH "OPCJE DEKODOWANIA/FILTROWANIA"
 .TP
 .B \-ac <[-]kodek1,[-]kodek2,...[,]>
-Okre¶l priorytetow± listê kodeków audio do u¿ytku, wed³ug ich nazw
+Okre¶l priorytetow± listê kodeków audio do u¿ycia, wed³ug ich nazw
 w codecs.conf.
 U¿yj '-' przed nazw± kodeka aby go pomin±æ.
 
@@ -1278,7 +1389,7 @@ próbuj innych kodeków pomijaj±c dekoder MP3 FFmpeg
 .
 .TP
 .B \-afm <sterownik1,sterownik2,...>
-Okre¶l priorytetow± listê sterowników audio do u¿ytku, zgodnie z ich nazwami
+Okre¶l priorytetow± listê sterowników audio do u¿ycia, zgodnie z ich nazwami
 w codecs.conf.
 Powraca do domy¶lnego, kiedy ¿aden nie jest poprawny.
 
@@ -1379,7 +1490,7 @@ tylko dekodowanie w skali szaro¶ci (trochê szybsze z kolorem)
 .
 .TP
 .B \-noaspect
-Wy³±cz automatycznie wyrównywanie stosunku aspektu filmu.
+Wy³±cz automatycznie wyrównywanie trybu wideo filmu.
 .TP
 .B \-nosound
 Nie odtwarzaj/\:koduj d¼wiêku.
@@ -1542,7 +1653,7 @@ bicubic spline
 .
 .TP
 .B \-vc <[-]kodek1,[-]kodek2,...[,]>
-Okre¶l priorytetow± listê kodeków wideo do u¿ytku, wed³ug ich nazw w codecs.conf.
+Okre¶l priorytetow± listê kodeków wideo do u¿ycia, wed³ug ich nazw w codecs.conf.
 U¿yj '-' przed nazw± kodeka aby go pomin±æ.
 
 .I INFORMACJA:
@@ -1590,8 +1701,8 @@ próbuj najpierw kodek XAnim
 .PD 1
 .
 .TP
-.B \-vop <plugin3[=opcje],plugin2,plugin1>
-Uruchom osobn± listê filtrów video w odwrotnym porz±dku.
+.B \-vop <...,filter3[=options],filter2,filter1>
+Uruchom, rozdzielon± przecinkami, listê filtrów video w odwrotnym porz±dku.
 
 .I INFORMACJA:
 .br
@@ -1603,7 +1714,7 @@ od wy¿szego lewego rogu wiêkszego obrazu.
 .br
 By pobraæ listê dostêpnych pluginów patrz \-vop help.
 .br
-Dostêpne pluginy to:
+Dostêpne filtry to:
 .
 .RSs
 .IPs crop[=w:h:x:y]
@@ -1630,7 +1741,7 @@ tylko je¿eli geometria filmu jest portretem i nie jest krajobrazem.
 .IPs scale[=w:h[:c[:p]]]
 Skaluje obraz programowym skalatorem (wolny) i wykonuje konwersjê kolorów
 YUV<\->RGB (zobacz tak¿e opcjê \-sws).
-Warto¶æ 0 u¿ywana jest dla wyskalowanego celu (aspectu) w/\:h.
+Warto¶æ 0 u¿ywana jest dla wyskalowanego celu (aspektu) w/\:h.
 (domy¶lnie: orygina³ w/\:h, cel w/\:h z \-zoom)
 Dodatkowe parametry chroma skipping (c z 0\-3) i scaling mog± byæ okre¶lone.
 (po detale zobacz opcjê \-sws)
@@ -1656,7 +1767,7 @@ Ustaw optymalne skalowanie dla kart DVB.
 (aspect=DVB_HEIGHT*ASPECTRATIO, domy¶lnie: 768)
 .IPs cropdetect[=0\-255]
 Oblicza niezbêdne parametry i podaje sugerowane parametry do stdout.
-Próg dodatkowo mo¿e byæ okre¶lnony od niczego (0), do wszystkiego (255).
+Próg dodatkowo mo¿e byæ okre¶lonony od niczego (0), do wszystkiego (255).
 (domy¶lnie: 24)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Dodaje zaburzenie
@@ -1665,13 +1776,13 @@ Dodaje zaburzenie
 .br
 <0\-100>: zaburzenie chromowane
 .br
-u: jadnolite zaburzenia
+u: jednolite zaburzenia
 .br
 t: zaburzenie temporal
 .br
 a: ¶rednia zaburzenia temporal
 .br
-h: wyskoa jako¶æ
+h: wysoka jako¶æ
 .br
 p: mix wed³ug wzoru
 .REss
@@ -1685,10 +1796,40 @@ próbkowanie luma, ale pozostawia wszystkie próbki chroma.
 U¿yteczne dla wyj¶cia na urz±dzenie wy¶wietlaj±cych w niskiej rozdzielczo¶ci,
 gdy sprzêtowe zmniejszanie jest kiepskiej jako¶ci lub nie jest dostêpne.
 .IPs dint[=sense:poziom]
-Wykrywa i przesuwa pierwsz± z przeplataj±cych siê kalek w strumieniu wideo.
+Wykrywa i przesuwa pierwsz± z przeplataj±cych siê klatek w strumieniu wideo.
 Warto¶ci mog± byæ do 0.0 do 1.0 - pierwszy (domy¶lnie 0.1) jest wzglêdn±
 ró¿nic± pomiêdzy s±siaduj±cym pikselem, drugi (domy¶lnie 0.15) jest t± parti±
 obrazu wykrytego jako przeplataj±cy do przesuniêcia klatki.
+.IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
+Maska "odostrzaj±ca" / rozmycie gaussian.
+.RSss
+l: zastosuj efekty w komponencie luma
+.br
+c: zastosuj efekty w komponentach chroma
+.br
+WxH: szeroko¶æ i wysoko¶c macierzy, nieparzysty rozmiar w obu wska¼nikach
+(min = 3x3, max = 13x11 lub 11x13, zazwyczaj co¶ pomiêdzy 3x3 i 7x7)
+.br
+amount: wspó³czynnik wyostrzania / rozmycia obrazu
+(amount < 0 = rozmycie, amount > 0 = sharpen, zazwyczaj co¶ pomiêdzy -1.5 i 1.5)
+.REss
+.IPs swapuv
+Zamiana p³aszczyzny U & V.
+.IPs "il=[d|i][s][:[d|i][s]]"
+(nie) pomijanie linii (oryg. (de)interleaves).
+.RSss
+d: nie pomijanie
+.br
+i: pomijanie
+.br
+s: zamieñ pola (wymiana parzystych i nieparzystych linii)
+.REss
+.IPs "boxblur=radius:power[:radius:power]"
+.RSss
+radius: rozmiar do filtrowania
+.br
+power: jak czêsto filtr powinien byæ stosowany
+.REss
 .RE
 .
 .TP
@@ -1761,10 +1902,10 @@ Dostêpne opcje to:
 uzyskaj pomoc
 .IPs br=<warto¶æ>
 okre¶l  bitrate w
-.RSssfileta
-kbit <4\-16000> lub
+.RSss
+kbitach <4\-16000> lub
 .br
-bit  <16001\-24000000>
+bitach  <16001\-24000000>
 .REss
 .IPs key=<warto¶æ>
 maksymalna  przerwa klatki (w klatkach)
@@ -1784,17 +1925,21 @@ wspó³czynnik kontroli reakcji czasu
 wspó³czynnik kontroli reakcji
 .IPs crispness=<0\-100>
 wyszczególnienie chropowato¶ci/\:g³adko¶ci
+.IPs pass=<1\-2>
+Z t± opcj± mo¿esz kodowaæ 2-krokowo pliki DivX4.
+najpierw koduj z pass=1, potem z tymi samymi parametrami, koduj z pass=2.
 .IPs vbrpass=<0\-2>
-Z góry potraktuj argument -pass i u¿yj Xvid VBR Library zamiast DivX4
+Uniewa¿nij argument pass i u¿yj Xvid VBR Library zamiast DivX4
 VBR.  Dostêpne opcje to:
 .
 .RSss
-0: jedno-krokowe kodowanie (w nie umieszczanych -pass  na linii komend)
+0: jedno-krokowe kodowanie (krok nie umieszczany w linii komend)
 .br
 1: Analiza (pierwszego) kroku z dwu-krokowego kodowania.
-Otrzymywane pliki AVI bêdê przekierowywane to /dev/null.
+Otrzymywane pliki AVI mog± byæ przekierowywane to /dev/null.
 .br
-2: Fina³ (drugiego) kroku z dwu-krokowego kodowania.
+2: Finalny (drugi) krok z dwu-krokowego kodowania.
+.REss
 .RE
 .
 .TP
@@ -1831,7 +1976,7 @@ da plik wyj¶ciowy zawieraj±cy 'div3' jako wideo fourcc.
 .PD 1
 .
 .TP
-.B \-include <plik\ konfiguracjfiletai>
+.B \-include <plik\ konfiguracyjny>
 Wyszczególnij plik konfiguracyjny, który bêdzie u¿ywany po domy¶lnym
 .TP
 .B \-info <opcja1:opcja2:...> (tylko .AVI)
@@ -1932,6 +2077,7 @@ jego parametry tutaj.
 Dostêpne opcje:
 .RE
 .
+.RSs
 .IPs vcodec=<warto¶æ>
 u¿ywaj okre¶lonych kodeków (nie ma domy¶lnego, musisz sam go wybraæ):
 .RSss
@@ -1944,6 +2090,7 @@ h263p: H263 Plus
 mpeg4: DivX 4/\:5
 .br
 msmpeg4: DivX 3
+.br
 rv10: stary kodek RealVideo
 .br
 mpeg1video: MPEG1 wideo :)
@@ -1987,7 +2134,7 @@ najmniejszy (wolne).
 B.
 (domy¶lnie: wy³±czone)
 .IPs keyint=<0\-300>
-Przerwa pomiêdzy keyframes w klatfiletakach.
+Przerwa pomiêdzy keyframes w klatkach.
 Wiêksze liczny oznaczaj± lekko mniejsze pliki, ale mniej dok³adnie szuka, 0 oznacza
 brak kluczowych klatek i warto¶ci mniejsze ni¿ 300 nie s± rekomendowane.
 Dla dok³adnej zgody mpeg1/\:2/\:4 musi to byæ <=132.
@@ -2137,8 +2284,8 @@ okre¶l jak utrzymywaæ quantizera pomiêdzy qmin i qmax (klatka\ 1/\:2):
 1: u¿yj ³adnych ró¿ni±cych siê funkcji (domy¶lne)
 .REss
 .IPs vlelim=<-1000\-1000>
-pojedynczy nieefektywny próg eliminacji dla luminance.
-Ujemne warto¶ci bêd± tak¿e rozwa¿ane do nieefektywnego (powinny byæ najmniejsze -4)
+pojedynczy efektywny próg eliminacji dla luminance.
+Ujemne warto¶ci bêd± tak¿e rozwa¿ane do efektywnego (powinny byæ najmniejsze -4)
 lub zni¿one do kodowania na quant=1):
 .RSss
 0: wy³±czony (domy¶lne)
@@ -2285,7 +2432,7 @@ U¿yj \-ovc help, aby otrzymaæ listê dostêpnych kodeków.
 .IPs "\-ovc copy"
 nie koduj, tylko kopiuj strumieñ
 .IPs "\-ovc divx4"
-koduj do DivX4/\:DivX5, lub XviD
+koduj do DivX4/\:DivX5
 .IPs "\-ovc rawrgb"
 koduj do odkompesowanego RGB24
 .IPs "\-ovc lavc"
@@ -2293,14 +2440,6 @@ koduj z kodekami libavcodec
 .RE
 .PD 1
 .
-.TP
-.B \-pass <1/2>
-Z tym mo¿esz kodowaæ pliki 2-krokowo DivX4.
-Najpierw koduje z \-pass\ 1, pó¼niej z tym samym parametrem, koduje z \-pass\ 2.
-
-.I INFORMACJA:
-.br
-U¿yj -lavcopts vpass=1/\:2 dla libavcodec 2-krokowego zamiast -pass 1/\:2
 .TP
 .B \-passlogfile <nazwa pliku>
 Kiedy koduje w trybie 2-krokowym, MEncoder zrzuca najpierw informacje
@@ -2332,41 +2471,35 @@ Je¶li koduje do XviD, mo¿esz okre¶liæ jego parametry tutaj.
 Dostêpne opcje to:
 .
 .RSs
-.IPs mode=<tryb>
-okre¶l tryb, który bêdzie u¿yty do kodowania
-.RSss
-help: poka¿ t± pomoc
-.br
-cbr: sta³y bit tempa (domy¶lne)
-.br
-2pass-1: pierwszy krok trybu dwukrokowego
-.br
-2pass-2: drugi krok trybu dwukrokowego
-.br
-fixedquant: ustawiony tryb quantizera
-.REss
+.IPs pass=<1|2>
+wyszczególnij kroki w trybie 2-krokowym mode
 .IPs quality=<0\-6>
-okre¶l jako¶æ kodowania
+okre¶l jako¶æ kodowania (domy¶lnie=6)
 .IPs br=<warto¶æ>
-ustawia bitrate do u¿ytku, w bitach/\:sekundy
+ustaw u¿ywany bitrate, w bitach/\:sekundy, je¿eli <16000 lub w bits/\:second je¿eli >16000
+(CBR lub tryb 2-krokowy, standardowo=687 kbits/s)
 .IPs rc_reaction_delay_factor=<warto¶æ>
 okre¶l szybko¶æ reakcji kontroli tempa, ma³e warto¶ci s± szybsze
 .IPs rc_averaging_period=<warto¶æ>
 do zakresu wymagaj±cego ¶redniej
 .IPs rc_buffer=<warto¶æ>
 rozmiar bufora kontroli tempa
-.IPs max_quantizer=<warto¶æ>
-maksymalny quantizer
 .IPs min_quantizer=<warto¶æ>
-minimalny quantizer
+minimalny quantizer (domyslnie=2)
+.IPs max_quantizer=<warto¶æ>
+maksymalny quantizer (domy¶lnie=31)
 .IPs min_key_interval=<warto¶æ>
-minimalna przerwa pomiêdzy key klatkami (tylko 2krokowy)
+minimalna przerwa pomiêdzy key klatkami (tylko 2krokowy, domy¶lnie=0)
 .IPs max_key_interval=<warto¶æ>
-maksymalna przerwa pomiêdzy key klatkami
-.IPs (no)debug
-zapisz lub nie zapisuj komunikaty debugowania w xvid.dbg (domy¶lne: on)
-.IPs statsfile=<nazwa\ pliku>
-nazwa pliku do statystyk pierwszego kroku (tylko tryb 1/\:2krokowy)
+maksymalna przerwa pomiêdzy key klatkami (domy¶lnie=10*fps)
+.IPs mpeg_quant
+u¿yj quantizery MPEG zamiast H.263 (domy¶lnie=off)
+.IPs lumi_mask
+u¿yj algorytmu lumimasking (domy¶lnie=off)
+.IPs debug
+zapisz komunikaty debugowania w xvid.dbg (domy¶lne: off)
+.br
+to *nie* jest plik kontrolny trybu 2-krokowego
 .IPs keyframe_boost=<warto¶æ>
 (tylko tryb 2krokowy)
 .IPs kfthreshold=<warto¶æ>
@@ -2374,7 +2507,7 @@ nazwa pliku do statystyk pierwszego kroku (tylko tryb 1/\:2krokowy)
 .IPs kfreduction=<warto¶æ>
 (tylko tryb 2krokowy)
 .IPs fixed_quant=<1\-31>
-okre¶l quantizer (tylko tryb wyznaczonego quantizera)
+prze³±cz do trybu sta³ego quantizera i wybierz quantizer, który ma byc u¿yty
 .RE
 
 
@@ -2664,7 +2797,7 @@ mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
 .TP
 .B Kodowanie z archiwum
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-pass\ 1 \-\- \-
+\-\- \-
 .TP
 .B Kodowanie zbiorowych plików *.vob
 cat *.vob | mencoder <opcje> \-
@@ -2700,7 +2833,7 @@ Ta strona manuala jest tworzona i utrzymywana przez:
 Strona przet³umaczona przez:
 .B Adriana Pawlika < imoteph@wp.pl >
 .br
-.B Konrada Materkê < kmaterka@wp.pl >.
+.B Konrada Materkê < kmaterka@wp.pl >
 .PP
 Maile odno¶nie manuala prosimy przesy³aæ do grupy maillingowej MPlayer-users,
 informacje o b³êdach w t³umaczeniu bezpo¶rednio do t³umaczy.
@@ -2718,7 +2851,7 @@ T³umaczenie mo¿e zawieraæ pewne b³êdy, niektóre s³owa mog³y byæ przet³umaczone
 b³êdnie lub nie powinny byæ t³umaczone.
 Je¶li zauwa¿ysz jaki¶ b³±d, popraw go i prze¶lij do autorów manuala
 (oryginalnego, b±d¼ t³umaczenia).
-T³umaczenie oparte na oryginalnym pliku do³±czonym do wersji 0.90-pre4, poprawione
-sukcesywnie, do wersji 0.90-pre9. Mamy nadzieje, ¿e w przysz³o¶ci t³umaczenie
+T³umaczenie oparte na oryginalnym pliku do³±czonym do wersji 0.90-pre4, poprawiane
+sukcesywnie, do wersji 0.90-pre10. Mamy nadzieje, ¿e w przysz³o¶ci t³umaczenie
 te¿ bêdzie uaktualniane, zg³aszanie b³êdów na pewno w tym pomo¿e.
 .\" end of file
