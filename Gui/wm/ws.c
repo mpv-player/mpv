@@ -645,13 +645,13 @@ while(wsTrue){
  // handle pending events
  while ( XPending(wsDisplay) ){
    XNextEvent( wsDisplay,&wsEvent );
-   printf("### X event: %d  [%d]\n",wsEvent.type,delay);
+//   printf("### X event: %d  [%d]\n",wsEvent.type,delay);
    wsEvents( wsDisplay,&wsEvent,NULL );
-   delay=20;
+   delay=0;
  }
  mplTimerHandler(0); // handle timer event
  usleep(delay*1000); // FIXME!
- if(delay<8*20) delay+=20; // pump up delay up to 0.16 sec (low activity)
+ if(delay<10*20) delay+=20; // pump up delay up to 0.2 sec (low activity)
 }
 
 #else
