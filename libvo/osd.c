@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "osd.h"
+#include "mp_msg.h"
 //#define ENABLE_PROFILE
 #include "../my_profile.h"
 #include <inttypes.h>
@@ -248,27 +249,27 @@ void vo_draw_alpha_init(){
 #ifdef CAN_COMPILE_X86_ASM
 		// ordered per speed fasterst first
 		if(gCpuCaps.hasMMX2)
-			printf("Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
 		else if(gCpuCaps.has3DNow)
-			printf("Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
 		else if(gCpuCaps.hasMMX)
-			printf("Using MMX Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
 		else
-			printf("Using X86 Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
 #else
-			printf("Using Unoptimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");
 #endif
 #else //RUNTIME_CPUDETECT
 #ifdef HAVE_MMX2
-			printf("Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
 #elif defined (HAVE_3DNOW)
-			printf("Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
 #elif defined (HAVE_MMX)
-			printf("Using MMX Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
 #elif defined (ARCH_X86)
-			printf("Using X86 Optimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
 #else
-			printf("Using Unoptimized OnScreenDisplay\n");
+			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");
 #endif
 #endif //!RUNTIME_CPUDETECT
 	}

@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -79,7 +80,7 @@ static XvImage* xvimage[NUM_BUFFERS];
 #include <X11/extensions/XShm.h>
 
 static int Shmem_Flag;
-static int Quiet_Flag;
+//static int Quiet_Flag; <-- What is that for ? Albeu.
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int gXErrorFlag;
 static int CompletionType = -1;
@@ -126,7 +127,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 ))
             {
 		was_reset = 1;
-		if(verbose > 1) printf("vo_xv: reset gamma correction\n");
+		mp_msg(MSGT_VO,MSGL_V,"vo_xv: reset gamma correction\n");
                 xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
                 XvSetPortAttribute(mDisplay, xv_port, xv_atomka, attributes[i].max_value);
 	    }
@@ -182,8 +183,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 		    port_max = xv_max;
 		    port_mid = (port_min + port_max) / 2;
 		    port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
-		    if(verbose > 1)
-			printf("vo_xv: set gamma %s to %i (min %i max %i mid %i)\n",attributes[i].name,port_value,port_min,port_max,port_mid);
+		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: set gamma %s to %i (min %i max %i mid %i)\n",attributes[i].name,port_value,port_min,port_max,port_mid);
                     XvSetPortAttribute(mDisplay, xv_port, xv_atomka, port_value);
                 }
         }
@@ -217,14 +217,14 @@ static int xv_get_video_eq( vidix_video_eq_t *info)
                 {
 		    int port_value,port_min,port_max,port_mid;
                     XvGetPortAttribute(mDisplay, xv_port, xv_atomka, &port_value);
-		    if(verbose>1) printf("vo_xv: get: %s = %i\n",attributes[i].name,port_value);
+		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: get: %s = %i\n",attributes[i].name,port_value);
 
 		    port_min = xv_min;
 		    port_max = xv_max;
 		    port_mid = (port_min + port_max) / 2;		    
 		    port_value = ((port_value - port_mid)*2000)/(port_max-port_min);
 		    
-		    if(verbose>1) printf("vo_xv: assume: %s = %i\n",attributes[i].name,port_value);
+		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: assume: %s = %i\n",attributes[i].name,port_value);
 		    
 		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
 		    {
@@ -346,7 +346,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      xv_format=0;
      if(format==IMGFMT_BGR24) format=IMGFMT_YV12;
      for(i = 0; i < formats; i++){
-       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
+       mp_msg(MSGT_VO,MSGL_V,"Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
        if (fo[i].id == format) xv_format = fo[i].id;
      }
      if (!xv_format) return -1;
@@ -447,7 +447,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
   }
 #endif
 
-     printf( "using Xvideo port %d for hw scaling\n",xv_port );
+     mp_msg(MSGT_VO,MSGL_V, "using Xvideo port %d for hw scaling\n",xv_port );
        
        switch (xv_format){
 	case IMGFMT_YV12:  
@@ -469,7 +469,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
      XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-     printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+     mp_msg(MSGT_VO,MSGL_V, "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
      aspect(&dwidth,&dheight,A_NOZOOM);
      if ( vo_fs )
@@ -481,7 +481,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        drwcY+=drwY;
        drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
        drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-       printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+       mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
      saver_off(mDisplay);  // turning off screen saver
      return 0;
@@ -500,7 +500,7 @@ static void allocate_xvimage(int foo)
  else
   {
    Shmem_Flag = 0;
-   if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xv\n" );
+   mp_msg(MSGT_VO,MSGL_INFO, "Shared memory not supported\nReverting to normal Xv\n" );
   }
  if ( Shmem_Flag ) 
   {
@@ -551,7 +551,7 @@ static void check_events(void)
    XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
    drwX=0; drwY=0;
    XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-   printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+   mp_msg(MSGT_VO,MSGL_V, "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
    aspect(&dwidth,&dheight,A_NOZOOM);
    if ( vo_fs )
@@ -563,7 +563,7 @@ static void check_events(void)
      drwcY+=drwY;
      drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
      drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-     printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+     mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
     }
   }
  if ( e & VO_EVENT_EXPOSE )
@@ -797,7 +797,7 @@ static uint32_t preinit(const char *arg)
     XvPortID xv_p;
     if(arg) 
     {
-	printf("vo_xv: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO,MSGL_ERR,"vo_xv: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
     if (!vo_init()) return -1;
@@ -805,30 +805,31 @@ static uint32_t preinit(const char *arg)
     xv_port = 0;
    /* check for Xvideo extension */
     if (Success != XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err)){
-	printf("Sorry, Xv not supported by this X11 version/driver\n");
-	printf("******** Try with  -vo x11  or  -vo sdl  *********\n");
+	mp_msg(MSGT_VO,MSGL_ERR,"Sorry, Xv not supported by this X11 version/driver\n");
+	mp_msg(MSGT_VO,MSGL_ERR,"******** Try with  -vo x11  or  -vo sdl  *********\n");
 	return -1;
     }
     
    /* check for Xvideo support */
     if (Success != XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay), &adaptors,&ai)){
-	printf("Xv: XvQueryAdaptors failed");
+	mp_msg(MSGT_VO,MSGL_ERR,"Xv: XvQueryAdaptors failed");
 	return -1;
     }
 
    /* check adaptors */
     for (i = 0; i < adaptors && xv_port == 0; i++){
-     if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
+      if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask)) {
 	 for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p)
 	     if (!XvGrabPort(mDisplay, xv_p, CurrentTime)) {
 		 xv_port = xv_p;
 		 break;
 	     } else {
-		 printf("Xv: could not grab port %i\n", (int)xv_p);
+		 mp_msg(MSGT_VO,MSGL_ERR,"Xv: could not grab port %i\n", (int)xv_p);
 	     }
+      }
     }
     if(!xv_port){
-	printf("Couldn't find free Xvideo port - maybe other applications keep open it\n");
+	mp_msg(MSGT_VO,MSGL_ERR,"Couldn't find free Xvideo port - maybe other applications keep open it\n");
 	return -1;
     }
 

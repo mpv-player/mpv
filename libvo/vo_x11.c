@@ -74,7 +74,7 @@ static int zoomFlag;
 #include <X11/extensions/XShm.h>
 
 static int Shmem_Flag;
-static int Quiet_Flag;
+//static int Quiet_Flag;  Here also what is this for. It's used but isn't inited ?
 static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType=-1;
@@ -133,7 +133,7 @@ static void getMyXImage()
   else
    {
     Shmem_Flag=0;
-    if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xlib\n" );
+    mp_msg(MSGT_VO,MSGL_WARN, "Shared memory not supported\nReverting to normal Xlib\n" );
    }
  if ( Shmem_Flag ) CompletionType=XShmGetEventBase( mDisplay ) + ShmCompletion;
 
@@ -143,7 +143,7 @@ static void getMyXImage()
    if ( myximage == NULL )
     {
      if ( myximage != NULL ) XDestroyImage( myximage );
-     if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( Ximage error )\n" );
+     mp_msg(MSGT_VO,MSGL_WARN,"Shared memory error,disabling ( Ximage error )\n" );
      goto shmemerror;
     }
    Shminfo[0].shmid=shmget( IPC_PRIVATE,
@@ -152,12 +152,9 @@ static void getMyXImage()
    if ( Shminfo[0].shmid < 0 )
    {
     XDestroyImage( myximage );
-    if ( !Quiet_Flag )
-     {
-      printf( "%s\n",strerror( errno ) );
-      perror( strerror( errno ) );
-      printf( "Shared memory error,disabling ( seg id error )\n" );
-     }
+    mp_msg(MSGT_VO,MSGL_V, "%s\n",strerror( errno ) );
+    //perror( strerror( errno ) );
+    mp_msg(MSGT_VO,MSGL_WARN,"Shared memory error,disabling ( seg id error )\n" );
     goto shmemerror;
    }
    Shminfo[0].shmaddr=( char * ) shmat( Shminfo[0].shmid,0,0 );
@@ -166,7 +163,7 @@ static void getMyXImage()
    {
     XDestroyImage( myximage );
     if ( Shminfo[0].shmaddr != ( ( char * ) -1 ) ) shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( address error )\n" );
+    mp_msg(MSGT_VO,MSGL_WARN, "Shared memory error,disabling ( address error )\n" );
     goto shmemerror;
    }
    myximage->data=Shminfo[0].shmaddr;
@@ -180,7 +177,7 @@ static void getMyXImage()
    {
     XDestroyImage( myximage );
     shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) printf( "Shared memory error,disabling.\n" );
+    mp_msg(MSGT_VO,MSGL_WARN, "Shared memory error,disabling.\n" );
     gXErrorFlag=0;
     goto shmemerror;
    }
@@ -189,8 +186,8 @@ static void getMyXImage()
 
    {
      static int firstTime=1;
-     if ( !Quiet_Flag && firstTime){
-       printf( "Sharing memory.\n" );
+     if ( firstTime){
+       mp_msg(MSGT_VO,MSGL_V, "Sharing memory.\n" );
        firstTime=0;
      } 
    }
@@ -415,16 +412,16 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
 #ifdef WORDS_BIGENDIAN
   if(mode==MODE_BGR && bpp!=32){
-    printf("BGR%d not supported, please contact the developers\n", bpp);
+    mp_msg(MSGT_VO,MSGL_ERR,"BGR%d not supported, please contact the developers\n", bpp);
     return -1;
   }
   if(mode==MODE_RGB && bpp==32){
-    printf("RGB32 not supported on big-endian systems, please contact the developers\n");
+    mp_msg(MSGT_VO,MSGL_ERR,"RGB32 not supported on big-endian systems, please contact the developers\n");
     return -1;
   }
 #else
   if(mode==MODE_BGR){
-    printf("BGR not supported, please contact the developers\n");
+    mp_msg(MSGT_VO,MSGL_ERR,"BGR not supported, please contact the developers\n");
     return -1;
   }
 #endif  
@@ -566,8 +563,7 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static uint32_t query_format( uint32_t format )
 {
-    if(verbose > 2)
-        printf("vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
+    mp_msg(MSGT_VO,MSGL_DBG2,"vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
     if (IMGFMT_IS_BGR(format))
     {
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
@@ -614,7 +610,7 @@ static uint32_t preinit(const char *arg)
 {
     if(arg) 
     {
-	printf("vo_x11: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO,MSGL_ERR,"vo_x11: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
 
