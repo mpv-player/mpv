@@ -481,14 +481,14 @@ only video (you can think of that as infinite fps).
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover, xv (see -vo xv:ck), xvmc (see -vo xv:ck) and directx video output
+xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
 .B \-nocolorkey
 Disables colorkeying.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover, xv (see -vo xv:ck), xvmc (see -vo xv:ck) and xover video output
+xover, xv (see \-vo xv:ck) and xvmc (see \-vo xv:ck) video output
 drivers.
 .
 .TP
@@ -2361,8 +2361,8 @@ Uses the XVideo extension of XFree86 4.x to enable hardware
 accelerated playback.
 If you cannot use a hardware specific driver, this is probably
 the best option.
-For information about what colorkey is used and how it is drawn run mplayer
-with -v option and look out for the lines tagged with [xv common] at the
+For information about what colorkey is used and how it is drawn run MPlayer
+with \-v option and look out for the lines tagged with [xv common] at the
 beginning.
 .PD 0
 .RSs
@@ -2374,7 +2374,7 @@ Select the source from which the colorkey is taken (default: cur).
 .IPs cur
 The default takes the colorkey currently set in Xv.
 .IPs use
-Use but do not set the colorkey from mplayer (use -colorkey option to change
+Use but do not set the colorkey from mplayer (use \-colorkey option to change
 it).
 .IPs set
 Same as use but also sets the supplied colorkey.
@@ -2428,9 +2428,9 @@ May add a small (not noticeable) constant A/\:V desync (default: noqueue).
 Use sleep function while waiting for rendering to finish
 (not recomended on Linux). Default is not to sleep (nosleep).
 .IPs ck=cur|use|set
-Same as -vo xv:ck (see -vo xv).
+Same as -vo xv:ck (see \-vo xv).
 .IPs ck-method=man|bg|auto
-Same as -vo xv:ck-method (see -vo xv).
+Same as -vo xv:ck-method (see \-vo xv).
 .RE
 .PD 1
 .
