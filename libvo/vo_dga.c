@@ -23,8 +23,15 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.32  2001/11/02 15:27:38  nick
+ * *** empty log message ***
+ *
+ *
  * Revision 1.31  2001/10/30 17:04:31  nick
  * Using new stuff of rgb15to16
+ *
+ * Revision 1.30  2001/08/13 11:08:18  atlka
+ * changes according to -utf8 option, draw_osd() function added
  *
  * Revision 1.29  2001/07/16 18:41:52  jkeil
  * vo_dga doesn't compile on non-x86 architecture due to x86 asm usage.
