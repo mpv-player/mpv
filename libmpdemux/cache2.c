@@ -198,7 +198,9 @@ static void exit_sighandler(int x){
 
 int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
-  cache_vars_t* s=cache_init(size,ss);
+  cache_vars_t* s;
+  if(size<32*1024) size=32*1024; // 32kb min
+  s=cache_init(size,ss);
   stream->cache_data=s;
   s->stream=stream; // callback
   s->prefill=size*prefill;
