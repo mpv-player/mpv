@@ -40,6 +40,9 @@ static int config(struct vf_instance_s* vf,
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
   }
 
+    // save vo's stride capability for the wanted colorspace:
+    vf->default_caps=query_format(vf,outfmt) & VFCAP_ACCEPT_STRIDE;
+
     if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
     ++vo_config_count;
@@ -95,7 +98,8 @@ static int put_image(struct vf_instance_s* vf,
   // nope, fallback to old draw_frame/draw_slice:
   if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
-    if(mpi->flags&MP_IMGFLAG_PLANAR)
+//    if(mpi->flags&MP_IMGFLAG_PLANAR)
+    if(vf->default_caps&VFCAP_ACCEPT_STRIDE)
         video_out->draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,mpi->x,mpi->y);
     else
         video_out->draw_frame(mpi->planes);

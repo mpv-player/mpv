@@ -19,10 +19,9 @@
 #define VFCAP_TIMER 0x100
 // driver _always_ flip image upside-down (for ve_vfw)
 #define VFCAP_FLIPPED 0x200
-// driver accept stride: (put_image/draw_frame)
+// vf filter: accepts stride (put_image)
+// vo driver: has draw_slice() support for the given csp
 #define VFCAP_ACCEPT_STRIDE 0x400
 // filter does postprocessing (so you shouldn't scale/filter image before it)
 #define VFCAP_POSTPROC 0x800
-// filter has draw_slice() support for this colorspace (assumed for planar YUV)
-#define VFCAP_DRAW_SLICE 0x1000
 
