@@ -65,6 +65,7 @@ extern vf_info_t vf_info_telecine;
 extern vf_info_t vf_info_tfields;
 extern vf_info_t vf_info_ivtc;
 extern vf_info_t vf_info_ilpack;
+extern vf_info_t vf_info_dsize;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -121,6 +122,7 @@ static vf_info_t* filter_list[]={
     &vf_info_tfields,
     &vf_info_ivtc,
     &vf_info_ilpack,
+    &vf_info_dsize,
     NULL
 };
 
