@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.22 -->
+<chapter id="usage">
+<title>Használat</title>
+
+<sect1 id="commandline">
+<title>Parancssor</title>
+
+<para>
+Az <application>MPlayer</application> egy komplex lejátszási sort használ. Először a
+globális opciók szerepelnek, például
+
+<screen>mplayer -vfm 5</screen>
+
+majd a fájlnév után írt kapcsolók, amik csak a megadott fájlra/URL-re/bármire vonatkoznak,
+például:
+
+<screen>mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4</screen>
+</para>
+
+<para>
+A fájlneveket/URL-eket csoportosíthatod a <literal>{</literal> és <literal>}</literal>
+segítségével. Ez főleg a <option>-loop</option> kapcsolóval együtt hasznos:
+
+<screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
+
+A fenti parancs a fájlokat ebben a sorrendben játsza le: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+</para>
+
+<para>
+Egy fájl lejátszása:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>kapcsolók</replaceable>]<!--
+--> [<replaceable>elérési út</replaceable>/]<replaceable>fájlnév</replaceable>
+</synopsis>
+</para>
+
+<para>
+Több fájl lejátszása:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>alapértelmezett kapcsolók</replaceable>]<!--
+--> [<replaceable>elérési út</replaceable>/]<replaceable>fájlnév1</replaceable><!--
+--> [<replaceable>fájlnév1 kapcsolói</replaceable>]<!--
+--> <replaceable>fájlnév2</replaceable><!--
+--> [<replaceable>fájlnév2 kapcsolói</replaceable>] ...
+</synopsis>
+</para>
+
+<para>
+VCD lejátszása:
+<synopsis>
+<command>mplayer</command> [<replaceable>kapcsolók</replaceable>]<!--
+--> vcd://<replaceable>sávszám</replaceable><!--
+--> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
+</synopsis>
+</para>
+
+<para>
+DVD lejátszása:
+<synopsis>
+<command>mplayer</command> [<replaceable>kapcsolók</replaceable>]<!--
+--> dvd://<replaceable>cím szám</replaceable><!--
+--> [-dvd-device <replaceable>/dev/dvd</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Lejátszás a WWW-ről:
+<synopsis>
+<command>mplayer</command> [<replaceable>kapcsolók</replaceable>]<!--
+--> http://<replaceable>site.com/file.asf</replaceable>
+</synopsis>
+(lejátszási listák is megadhatóak)
+</para>
+
+<para>
+Lejátszás RTSP-ről:
+<synopsis>
+<command>mplayer</command> [<replaceable>kapcsolók</replaceable>]<!--
+--> rtsp://<replaceable>server.example.com/streamName</replaceable>
+</synopsis>
+</para>
+
+<para>
+Példák:
+<screen>
+mplayer -vo x11 <replaceable>/mnt/Films/Contact/contact2.mpg</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
+mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
+mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
+mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceable><!--
+--></screen>
+</para>
+</sect1>
+
+
+<sect1 id="control">
+<title>Vezérlés</title>
+
+<para>
+Az <application>MPlayer</application> teljesen konfigurálható, parancsvezérelt,
+az irányítási rétegének a segítségével az <application>MPlayer</application>t
+vezérelheted billentyűzettel, egérrel, joystickkal vagy távirányítóval
+(LIRC használatával). Olvasd el a man oldalon a használható billentyűk listáját.
+</para>
+
+
+<sect2 id="ctrl-cfg">
+<title>Vezérlés beállítása</title>
+
+<para>
+Az <application>MPlayer</application> engedélyezi bármely billentyűhöz/gombhoz
+bármilyen <application>MPlayer</application> parancs hozzárendelését egy egyszerű
+konfigurációs fájl segítségével. A szintaxis egy egyszerű billentyű névből
+és az azt követő parancsból áll. A konfigurációs fájl alapértelmezett helye
+a <filename>$HOME/.mplayer/input.conf</filename> de ez megváltoztatható
+a <option>-input <replaceable>conf</replaceable></option> kapcsoló
+segítségével (a relatív elérési útvonalak a <filename>$HOME/.mplayer</filename>-hez
+képest relatívak).
+</para>
+
+<para>
+Az összes támogatott billentyű nevének listáját az
+<command>mplayer -input keylist</command>
+parancs írja ki, az elérhető parancsok listáját pedig az
+<command>mplayer -input cmdlist</command>
+paranccsal kapod meg.
+</para>
+
+<example>
+<title>Egy példa bemeneti vezérlő fájl</title>
+<programlisting>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+&gt; pt_step 1
+&lt; pt_step -1
+ENTER pt_step 1 1<!--
+--></programlisting>
+</example>
+</sect2>
+
+
+<sect2 id="lirc">
+<title>Irányítás LIRC-ből</title>
+
+<para>
+Linux Infrared Remote Control (Linux Infravörös Távoli Irányítás) - végy
+egy egyszerűen összerakható, otthon barkácsolt IR-vevőt, egy (majdnem)
+tetszés szerinti távirányítót és irányítsd a Linux-os gépedet vele!
+Bővebben a <ulink url="http://www.lirc.org">LIRC weboldalon</ulink>
+olvashatsz erről.
+</para>
+
+<para>
+Ha feltelepítetted a LIRC csomagot, a <filename>configure</filename> automatikusan
+megtalálja. Ha minden jól megy, az <application>MPlayer</application> egy ilyen
+üzenetet ír ki indításkor: &quot;<computeroutput>Setting up lirc support...</computeroutput>&quot;.
+Ha valami hiba történt, tájékoztat róla. Ha semmit sem mond a LIRC-ről,
+akkor a támogatása nincs beforgatva. Ennyi :-)
+</para>
+
+<para>
+Az <application>MPlayer</application> alkalmazás neve - minő meglepő -
+<filename>mplayer</filename>. Bármelyik mplayer parancsot használhatod
+és egyszerre több parancsot is megadhatsz egy lépésben, ha <literal>\n</literal>
+karakterrel választod el őket. Ne felejtsd el engedélyezni az ismétlés jelzőt
+(repeat flag) a <filename>.lircrc</filename> fájlban, ha van értelme
+(keresés, hangerő, stb.). Itt egy kivonat az én
+<filename>.lircrc</filename> fájlomból:
+</para>
+
+<programlisting>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end<!--
+--></programlisting>
+
+<para>
+Ha nem tetszik a lirc-config fájl alapértelmezett elérési útvonala
+(<filename>~/.lircrc</filename>), használd a <option>-lircconf
+<replaceable>fájlnév</replaceable></option> kapcsolót egy másik fájl
+megadásához.
+</para>
+</sect2>
+
+
+<sect2 id="slave-mode">
+<title>Szolga mód</title>
+<para>
+A szolga mód segítségével egyszerű frontend-eket készíthetsz az
+<application>MPlayer</application>hez. Ha a
+<option>-slave</option> kapcsolóval futtatod az <application>MPlayer</application>t,
+beolvassa az új sor karakterrel (\n) elválasztott parancsokat
+a standard bemenetről (stdin).
+A parancsok a <ulink url="../../tech/slave.txt">slave.txt</ulink> fájlban
+vannak leírva.
+</para>
+</sect2>
+</sect1>
+
+
+<sect1 id="streaming">
+<title>Hálózati és pipe-os stream-elés</title>
+
+<para>
+Az <application>MPlayer</application> HTTP, FTP, MMS vagy RTSP/RTP protokoll
+segítségével le tud játszani fájlokat hálózatról is.
+</para>
+
+<para>
+A lejátszáshoz egyszerűen csak be kell írni az URL-t a parancssorba.
+Az <application>MPlayer</application> figyeli a
+<envar>http_proxy</envar> környezeti változót is, és használja a
+proxy-t, ha van. Azonban így is megadhatod a proxy-t:
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
+</para>
+
+<para>
+Az <application>MPlayer</application> tud olvasni a standard bemenetről (stdin)
+is (<emphasis>nem</emphasis> nevesített pipe). Ezt például FTP-ről történő lejátszásnál
+tudod használni:
+<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+</para>
+
+<note><para>
+Megjegyzés: tanácsos megadni a <option>-cache</option> kapcsolót, ha hálózatról játszol le:
+<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
+</para></note>
+</sect1>
+
+<sect1 id="mpst" xreflabel="Remote streams">
+<title>Távoli stream-ek</title>
+
+<para>
+A távoli stream-ek segítségévela legtöbb <application>MPlayer</application> által
+ismert stream típust elérheted egy távoli hoszt segítségével is. A fő célja ennek,
+hogy direkt módon használhasd egy másik számítógép CD vagy DVD meghajtóját
+hálózaton keresztül (feltéve, hogy megvan a megfelelő sávszélesség).
+Letöltési oldalon pár stream típus (jelenleg a TV és az MF) nem használhatóak
+távolról, mert a demuxer szintjén vannak implementálva.
+Ez sajnálatos az MF esetében, de a TV stream-hez úgyis eszeveszettül nagy
+sávszélesség kellene.
+</para>
+
+<sect2 id="compile_mpst_server">
+<title>A szerver fordítása</title>
+<para>
+Miután lefordítottad az <application>MPlayer</application>t, menj a
+<filename>TOOLS/netstream</filename> könyvtárba és add ki a
+<application>make</application> parancsot a szerver bináris
+elkészítéséhez. Ezután a <application>netstream</application> binárist
+bemásolhatod a megfelelő helyre (általában <filename class="directory">/usr/local/bin</filename> Linuxon).
+</para>
+</sect2>
+
+<sect2 id="use_mpst">
+<title>Távoli stream-ek használata</title>
+<para>
+Először el kell indítanod a szervert azon a gépen, amit távolról el akarsz
+érni. Jelenleg a szerver nagyon kezdetleges és nincs parancssori kapcsolója,
+csak írd be a <filename>netstream</filename> parancsot. Ezután például
+le tudod játszani a szerverben lévő VCD második sávját:
+<screen>
+mplayer -cache 5000 <replaceable>mpst://servername/vcd://2</replaceable>
+</screen>
+A szerveren lévő fájlokat is elérheted:
+<screen>
+mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
+</screen>
+Figyelj arra, hogy ha egy elérési útvonal nem / jellel kezdődik, akkor az a szerver
+futási helyéhez képest lesz relatív. A <option>-cache</option> kapcsoló nem szükséges,
+de nagyon ajánlott.
+</para>
+
+<para>
+Vigyázz, a jelenlegi szerver semennyire sem biztonságos. Tehát ne panaszkodj
+a számos exploit miatt, ami esetleg kihasználhatja ezt. Inkább küldj néhány
+(jó) javítást, hogy jobb legyen vagy kezd el írni a saját szervered.
+</para>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
+<title>Edit Decision Lists (EDL)</title>
+
+<para>
+Az edit decision list (EDL) rendszer segítségével automatikusan kihagyhatsz
+vagy elnémíthatsz részeket videókban a lejátszás alatt, egy film specifikus
+EDL konfigurációs fájl segítségével.
+</para>
+
+<para>
+Ez azoknak hasznos, akik "család-barát" módban szeretnének filmet nézni. Ki
+tudsz vágni bármilyen erőszakos, káromkodós, Jar-Jar Binks-es jelenetet egy
+filmből, a saját igényeidnek megfelelően. Mindemellett más felhasználási módok
+is vannak, például automatikusan átlépni a videó fájlokban lévő reklámokat.
+</para>
+
+<para>
+Az EDL fájl formátuma eléggé egyszerű. Majd ha az EDL rendszer elér egy bizonyos
+fejlettségi szintet, egy XML alapú fájl formátum lesz implementálva valószínűleg
+(megtartva a kompatibilitást visszafelé, a régi EDL formátumokkal).
+</para>
+
+<para>
+Az EDL bejegyzések maximális száma a jelenlegi EDL változatban 1000. Ha esetleg
+neked több kellene, változtasd meg a <systemitem>#define MAX_EDL_ENTRIES</systemitem>
+sort az <filename>edl.h</filename> fájlban.
+</para>
+
+<sect2 id="edl_using">
+<title>EDL fájl használata</title>
+<para>
+Add meg a <option>-edl &lt;fájlnév&gt;</option> kapcsolót, amikor indítod az
+<application>MPlayer</application>t, a videóhoz használni kívánt EDL fájl nevével.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>EDL fájl készítése</title>
+<para>
+A jelenlegi EDL fájl formátum:
+<programlisting>
+[kezdés másodperce] [befejezés másodperce] [akció]
+</programlisting>
+A másodpercek lebegőpontos számok, az akció pedig vagy
+<literal>0</literal> a kihagyáshoz vagy <literal>1</literal> az elnémításhoz. Például:
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+Ez az 5.3 másodperctől a 7.1 másodpercig kihagyja a videót, majd 15 másodpercnél
+leveszi a hangot, 16.7 másodpercnél visszateszi és a 420. és 422. másodperc között
+ismét kihagy a videóból. Ezek az akciók akkor hajtódnak végre, amikor a lejátszás
+időzítője eléri a fájlban megadott időket.
+</para>
+
+<para>
+Ha készíteni akarsz egy EDL fájl, amit utána szerkeszthetsz, használd a
+<option>-edlout &lt;fájlnév&gt;</option> kapcsolót. Lejátszás közben, ha meg akarod
+jelölni az előző két másodpercet kihagyásra, nyomd meg az <keycap>i</keycap>
+billentyűt. A megfelelő bejegyzés bekerül a fájlba erre az időszakra. Ezután
+kézzel tetszőlegesen beigazíthatod az EDL fájlt.
+</para>
+</sect2>
+
+</sect1>
+
+</chapter>
