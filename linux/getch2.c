@@ -79,6 +79,7 @@ static int success=0;
 
 int load_termcap(char *termtype){
   if(!termtype) termtype=getenv("TERM");
+  if(!termtype) termtype="unknown";
   success=tgetent(term_buffer, termtype);
   if(success<0){ printf("Could not access the 'termcap' data base.\n"); return 0; }
   if(success==0){ printf("Terminal type `%s' is not defined.\n", termtype);return 0;}
