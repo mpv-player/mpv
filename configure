@@ -3016,7 +3016,7 @@ if test "$_dvdkit" = auto ; then
  fi
 fi
 if test "$_dvdkit" = yes ; then
-  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes || cygwin; then
+  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || cygwin; then
    if test -f "./libmpdvdkit2/Makefile" ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
