@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Historia</title>
@@ -12,7 +12,7 @@ Zaczęło się rok temu... Wypróbowałem mnóstwo odtwarzaczy pod Linuksa
 <application>xanim</application>, <application>avifile</application>,
 <application>xmmp</application>), ale one wszystkie miały jakieś problemy.
 Przeważnie z wyjątkowymi formatami plików lub z synchronizacją audio/video.
-Większość z nich nie potrafiła odtwarzać zarówno plików MPEG1, MPEG2 jak
+Większość z nich nie potrafiła odtwarzać zarówno plików MPEG-1, MPEG-2 jak
 i AVI (DivX). Wiele odtwarzaczy miało także problemy z jakością obrazu lub
 prędkością odtwarzania. Tak więc zdecydowałem się zmienić jeden
 z istniejących lub napisać własny odtwarzacz...
