@@ -53,9 +53,20 @@ mplayer (1.0)
     * quality improvement for high bitrate videos with trellis quantization
     * indeo3 decoder fixed
     * new options: mv0, cbp
+    * DV video encoder
+    
+    Faad2:
+    * synced to latest CVS
+    * HE_AAC profile added
+    * SBR QMF improvements
+    * DRM updates
+    * Covariance speedup
+    * reduced memory usage
+    * overall cleanups and fixes
     
     Drivers:
     * VIDIX driver for nVidia cards
+    * VIDIX and libdha ported to Windows
     * SDL on IRIX support
     * directfb2 fixed for latest directfb
     * opengl video output for Windows
@@ -63,6 +74,7 @@ mplayer (1.0)
     * fullscreen and geometry support in directx
     * fullscreen support with opengl drivers
     * OSD fixed with svga
+    * New consolevidix and winvidix drivers
     
     Others:
     * several leak fixes
