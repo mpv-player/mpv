@@ -401,6 +401,10 @@ Lombard, Pierre (pl) <p_l@gmx.fr>
     * new configure script
     * general code maintaining, fixes, patch committing
 
+López, Juan Martin (nauj27) <nauj27@teleline.es>
+    * Spanish man page translation
+    * Spanish documentation translation
+
 lucho <lucho@haemimont.bg>
     * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
@@ -415,10 +419,6 @@ Makovicka, Jindrich (henry) <makovick@KMLinux.fjfi.cvut.cz>
 
 Marek, Rudolf <MAREKR2@cs.felk.cvut.cz>
     * gtf code for -vo vesa
-
-Martin, Juan (nauj27) <nauj27@teleline.es>
-    * Spanish man page translation
-    * Spanish documentation translation
 
 Megyer, László (Lez, Laaz) <lez@sch.bme.hu>
     * subtitle reader
