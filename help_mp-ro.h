@@ -132,6 +132,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(poate afiºaþi un film/pistã ne-întreþesut sau codec-ul a dat eroare)\n"
 #define MSGTR_DetectedFILMfile "Format fiºier detectat: FILM\n"
 #define MSGTR_DetectedFLIfile "Format fiºier detectat: FLI\n"
+#define MSGTR_DetectedROQfile "Format fiºier detectat: RoQ\n"
+#define MSGTR_DetectedREALfile "Format fiºier detectat: REAL\n"
 #define MSGTR_DetectedAVIfile "Format fiºier detectat: AVI\n"
 #define MSGTR_DetectedASFfile "Format fiºier detectat: ASF\n"
 #define MSGTR_DetectedMPEGPESfile "Format fiºier detectat: MPEG-PES\n"

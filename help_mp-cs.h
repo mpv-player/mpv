@@ -148,6 +148,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(mo¾ná pøehráváte neprokládaný proud/soubor nebo kodek selhal)\n"
 #define MSGTR_DetectedFILMfile "Detekován FILM formát souboru!\n"
 #define MSGTR_DetectedFLIfile "Detekován FLI formát souboru!\n"
+#define MSGTR_DetectedROQfile "Detekován RoQ formát souboru!\n"
+#define MSGTR_DetectedREALfile "Detekován REAL formát souboru!\n"
 #define MSGTR_DetectedAVIfile "Detekován AVI formát souboru!\n"
 #define MSGTR_DetectedASFfile "Detekován ASF formát souboru!\n"
 #define MSGTR_DetectedMPEGPESfile "Detekován MPEG-PES formát souboru!\n"

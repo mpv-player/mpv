@@ -143,6 +143,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(Peut-être jouez-vous un flux/fichier non-entrelacé, ou le codec manque...)\n"
 #define MSGTR_DetectedFILMfile "Format de fichier FILE détecté!\n"
 #define MSGTR_DetectedFLIfile "Format de fichier FLI détecté!\n"
+#define MSGTR_DetectedROQfile "Format de fichier RoQ détecté!\n"
+#define MSGTR_DetectedREALfile "Format de fichier REAL détecté!\n"
 #define MSGTR_DetectedAVIfile "Format de fichier AVI détecté!\n"
 #define MSGTR_DetectedASFfile "Format de fichier ASF détecté!\n"
 #define MSGTR_DetectedMPEGPESfile "Format de fichier MPEG-PES détecté!\n"

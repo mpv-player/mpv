@@ -149,6 +149,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(non-interleaved 스트림/파일을 재생하고있거나 코덱이 잘못되었습니다.)\n"
 #define MSGTR_DetectedFILMfile "FILM 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedFLIfile "FLI 파일 형식을 발견했습니다!\n"
+#define MSGTR_DetectedROQfile "RoQ 파일 형식을 발견했습니다!\n"
+#define MSGTR_DetectedREALfile "REAL 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedAVIfile "AVI 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedASFfile "ASF 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedMPEGPESfile "MPEG-PES 파일 형식을 발견했습니다!\n"

@@ -144,6 +144,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(misschien speel je een non-interleaved stream/bestand of werkte de codec niet)\n"
 #define MSGTR_DetectedFILMfile "FILM bestandsformaat gedetecteerd!\n"
 #define MSGTR_DetectedFLIfile "FLI bestandsformaat gedetecteerd!\n"
+#define MSGTR_DetectedROQfile "RoQ bestandsformaat gedetecteerd!\n"
+#define MSGTR_DetectedREALfile "REAL bestandsformaat gedetecteerd!\n"
 #define MSGTR_DetectedAVIfile "AVI bestandsformaat gedetecteerd!\n"
 #define MSGTR_DetectedASFfile "ASF bestandsformaat gedetecteerd!\n"
 #define MSGTR_DetectedMPEGPESfile "MPEG-PES bestandsformaat gedetecteerd!\n"

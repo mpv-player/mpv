@@ -145,6 +145,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(talán ez egy nem összefésült file vagy a CODEC nem mûködik jól)\n"
 #define MSGTR_DetectedFILMfile "Ez egy FILM formátumú file!\n"
 #define MSGTR_DetectedFLIfile "Ez egy FLI formátumú file!\n"
+#define MSGTR_DetectedROQfile "Ez egy RoQ formátumú file!\n"
+#define MSGTR_DetectedREALfile "Ez egy REAL formátumú file!\n"
 #define MSGTR_DetectedAVIfile "Ez egy AVI formátumú file!\n"
 #define MSGTR_DetectedASFfile "Ez egy ASF formátumú file!\n"
 #define MSGTR_DetectedMPEGPESfile "Ez egy MPEG-PES formátumú file!\n"

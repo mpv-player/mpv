@@ -146,6 +146,8 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(возможно Вы проигрываете нечередованный поток/файл или неудачный кодек)\n"
 #define MSGTR_DetectedFILMfile "Обнаружен FILM формат файла!\n"
 #define MSGTR_DetectedFLIfile "Обнаружен FLI формат файла!\n"
+#define MSGTR_DetectedROQfile "Обнаружен RoQ формат файла!\n"
+#define MSGTR_DetectedREALfile "Обнаружен REAL формат файла!\n"
 #define MSGTR_DetectedAVIfile "Обнаружен AVI формат файла!\n"
 #define MSGTR_DetectedASFfile "Обнаружен ASF формат файла!\n"
 #define MSGTR_DetectedMPEGPESfile "Обнаружен MPEG-PES формат файла!\n"
