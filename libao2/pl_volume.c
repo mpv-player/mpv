@@ -81,7 +81,7 @@ static int init(){
   // Sanity sheck this plugin supports AFMT_U8 and AFMT_S16_LE
   switch(ao_plugin_data.format){
   case(AFMT_U8):
-  case(AFMT_S16_LE):
+  case(AFMT_S16_NE):
     break;
   default: 
     fprintf(stderr,"[pl_volume] Audio format not yet suported \n");
@@ -135,7 +135,7 @@ static int play(){
       }
       break;
   }
-  case(AFMT_S16_LE):{
+  case(AFMT_S16_NE):{
     register int len=ao_plugin_data.len>>1;
     register int16_t* data=(int16_t*)ao_plugin_data.data;
     register int x;

@@ -122,7 +122,7 @@ static int init(){
   float F[KM] = CF;
   
   // Check input format
-  if(ao_plugin_data.format != AFMT_S16_LE){
+  if(ao_plugin_data.format != AFMT_S16_NE){
     fprintf(stderr,"[pl_eq] Input audio format not yet supported. \n");
     return 0;
   }

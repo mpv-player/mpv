@@ -108,8 +108,8 @@ static int init(){
     pl_surround.passthrough = 1;
     return 1;
   }
-  if (ao_plugin_data.format != AFMT_S16_LE) {
-    fprintf(stderr, "pl_surround: I'm dumb and can only handle AFMT_S16_LE audio format, using passthrough mode\n");
+  if (ao_plugin_data.format != AFMT_S16_NE) {
+    fprintf(stderr, "pl_surround: I'm dumb and can only handle AFMT_S16_NE audio format, using passthrough mode\n");
     pl_surround.passthrough = 1;
     return 1;
   }

@@ -24,7 +24,6 @@
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
 #include "afmt.h"
-#include "../config.h"
 
 static ao_info_t info =
 {
@@ -120,11 +119,7 @@ static int init(){
   pl_resample.up=UP;
 
   // Sheck input format
-#ifndef WORDS_BIGENDIAN
-  if(ao_plugin_data.format != AFMT_S16_LE){
-#else
-  if(ao_plugin_data.format != AFMT_S16_BE){
-#endif	  
+  if(ao_plugin_data.format != AFMT_S16_NE){
     fprintf(stderr,"[pl_resample] Input audio format not yet suported. \n");
     return 0;
   }

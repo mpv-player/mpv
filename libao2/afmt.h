@@ -9,6 +9,8 @@
 #endif
 #endif
 
+#include "../config.h" /* for native endianness */
+
 /* standard, old OSS audio formats */
 #ifndef AFMT_MU_LAW
 #	define AFMT_MU_LAW		0x00000001
