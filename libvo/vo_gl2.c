@@ -31,6 +31,7 @@
 #endif
 #include <errno.h>
 
+#include "gl_common.h"
 #ifdef GL_WIN32
     #include "w32_common.h"
 #else
@@ -96,7 +97,6 @@ static GLint    gl_bitmap_format;
 static char *   gl_bitmap_format_s;
 static GLint    gl_bitmap_type;
 static char *   gl_bitmap_type_s;
-static int      gl_alignment;
 static int      isGL12 = GL_FALSE;
 
 static int      gl_bilinear=1;
@@ -821,16 +821,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
    * may give a little speed up for a kinda burst read ..
    * Also, the default of 4 will break some files.
    */
-  if( (image_width*image_bytes)%8 == 0 )
-  	gl_alignment=8;
-  else if( (image_width*image_bytes)%4 == 0 )
-  	gl_alignment=4;
-  else if( (image_width*image_bytes)%2 == 0 )
-  	gl_alignment=2;
-  else
-  	gl_alignment=1;
-
-  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment); 
+  glAdjustAlignment(image_width*image_bytes);
 
   glEnable (GL_TEXTURE_2D);
 
@@ -842,9 +833,9 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   free (ImageData);
   ImageData = NULL;
 
-  mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
+  mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\trgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
   	image_bpp, image_bytes, image_mode==MODE_BGR, 
-        gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
+        gl_bitmap_format_s, gl_bitmap_type_s,
 	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
 
   resize(&d_width, &d_height);

@@ -21,6 +21,7 @@
 
 #include <GL/gl.h>
 
+#include "gl_common.h"
 #include "x11_common.h"
 #include "aspect.h"
 
@@ -180,7 +181,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XSizeHints hint;
 	XVisualInfo *vinfo;
 	XEvent xev;
-	GLint gl_alignment;
 
 //	XGCValues xgcv;
 
@@ -280,15 +280,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   glEnable(GL_TEXTURE_2D);
 
   // set alignment as default is 4 which will break some files
-  if ((image_width * image_bytes) % 8 == 0)
-    gl_alignment=8;
-  else if ((image_width * image_bytes) % 4 == 0)
-    gl_alignment=4;
-  else if ((image_width * image_bytes) % 2 == 0)
-    gl_alignment=2;
-  else
-    gl_alignment=1;
-  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment);
+  glAdjustAlignment(image_width * image_bytes);
 
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",texture_width,texture_height);
 
@@ -330,7 +322,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
                                  unsigned char *src, unsigned char *srca,
                                  int stride)
 {
-  int sx = 1, sy = 1;
+  // initialize to 8 to avoid special-casing on alignment
+  int sx = 8, sy = 8;
   GLfloat xcov, ycov;
   char *clearTexture;
   while (sx < w) sx *= 2;
@@ -346,16 +339,16 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   memset(clearTexture, 0, sx * sy);
 
   // create Textures for OSD part
+  glAdjustAlignment(stride);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
   glGenTextures(1, &osdtex[osdtexCnt]);
   glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sx, sy, 0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_LUMINANCE,
                     GL_UNSIGNED_BYTE, src);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
@@ -364,11 +357,11 @@ static void create_osd_texture(int x0, int y0, int w, int h,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_ALPHA,
                     GL_UNSIGNED_BYTE, srca);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+  glAdjustAlignment(image_width * image_bytes);
 
   glBindTexture(GL_TEXTURE_2D, 0);
   free(clearTexture);
