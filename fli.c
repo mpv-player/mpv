@@ -353,10 +353,10 @@ void decode_fli_frame(
   }
 
   // by the end of the chunk, the stream ptr should equal the frame 
-  // size (minus 1, possible); if it doesn't, issue a warning
+  // size (minus 1, possibly); if it doesn't, issue a warning
   if ((stream_ptr != encoded_size) && (stream_ptr != encoded_size - 1))
     mp_msg(MSGT_DECVIDEO, MSGL_WARN,
       "  warning: processed FLI chunk where encoded size = %d\n" \
-      "  and final chunk ptr = and final chunk ptr = %d\n",
+      "  and final chunk ptr = %d\n",
       encoded_size, stream_ptr);
 }
