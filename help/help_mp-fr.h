@@ -305,6 +305,9 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Info du demuxer %s déjà présentes!\n"
 #define MSGTR_ClipInfo "Information sur le clip: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: seq progressive détectée, quitte le mode TELECINE 3:2\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE détecté, active les effets telecine inversés. FPS changé en %5.3f!  \n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Ne peut ouvrir le codec\n"
 #define MSGTR_CantCloseCodec "Ne peut fermer le codec\n"
@@ -508,6 +511,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Minuteur et indicateurs"
 #define MSGTR_PREFERENCES_OSDProgress "Barres de progression seulement"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Minuteur, pourcentage et temps total"
 #define MSGTR_PREFERENCES_Subtitle "Sous-titre:"
 #define MSGTR_PREFERENCES_SUB_Delay "Delay: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -579,6 +583,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynchro: "
 #define MSGTR_PREFERENCES_CDROMDevice "Périphérique CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Périphérique DVD:"
+#define MSGTR_PREFERENCES_FPS "FPS du film:"
+
+#define MSGTR_ABOUT_UHU "Développement de la GUI sponsorisé par UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   Equipe principale MPlayer:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Programmeurs additionnels:\n"
+#define MSGTR_ABOUT_MainTesters "   Principaux testeurs:\n"
   
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale!"
