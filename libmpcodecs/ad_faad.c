@@ -50,8 +50,6 @@ static int init(sh_audio_t *sh)
   int faac_init;
   faac_hdec = faacDecOpen();
 
-  sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
-
   // If we don't get the ES descriptor, try manual config
   if(!sh->codecdata_len) {
 #if 1
@@ -84,10 +82,14 @@ static int init(sh_audio_t *sh)
     faacDecSetConfiguration(faac_hdec, faac_conf);
 #endif
 
+    sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
+
     /* init the codec */
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
        &faac_samplerate, &faac_channels);
+
     sh->a_in_buffer_len -= (faac_init > 0)?faac_init:0; // how many bytes init consumed
+    // XXX FIXME: shouldn't we memcpy() here in a_in_buffer ?? --A'rpi
 
   } else { // We have ES DS in codecdata
     /*int i;
@@ -143,7 +145,9 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   void *faac_sample_buffer;
 
   while(len < minlen) {
-    /* update buffer */
+
+    /* update buffer for raw aac streams: */
+  if(!sh->codecdata_len)
     if(sh->a_in_buffer_len < sh->a_in_buffer_size){
       sh->a_in_buffer_len +=
 	demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
@@ -156,7 +160,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       printf ("%02X ", sh->a_in_buffer[i]);
     printf ("\n");}
 #endif
-  do {
+
+  if(!sh->codecdata_len){
+   // raw aac stream:
+   do {
     faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j);
     /* update buffer index after faacDecDecode */
     if(faac_finfo.bytesconsumed >= sh->a_in_buffer_len) {
@@ -171,8 +178,16 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       j++;
     } else
       break;
-    } while(j < FAAD_BUFFLEN);	  
-
+   } while(j < FAAD_BUFFLEN);	  
+  } else {
+   // packetized (.mp4) aac stream:
+    unsigned char* bufptr=NULL;
+    int buflen=ds_get_packet(sh->ds, &bufptr);
+    if(buflen<=0) break;
+    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, bufptr);
+//    printf("FAAC decoded %d of %d  (err: %d)  \n",faac_finfo.bytesconsumed,buflen,faac_finfo.error);
+  }
+  
     if(faac_finfo.error > 0) {
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to decode frame: %s \n",
       faacDecGetErrorMessage(faac_finfo.error));
