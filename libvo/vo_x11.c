@@ -246,7 +246,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
 #endif   
-    if( !vo_init() ) return 0; // Can't open X11
+    if( !vo_init() ) return -1; // Can't open X11
 
 
  if (!title)
