@@ -10,8 +10,10 @@
 
     TODO:
 	* fix doublebuffering for vidix
-	* fix pci_config_read for option word (memory size detection)
+	* fix memory size detection (current reading pci userconfig isn't
+	    working as requested - returns the max avail. ram on arch?)
 	* fix/complete brightness/contrast handling (Nick)
+	    MGA users: please test this! (#define MGA_EQUALIZER)
 	* translate all non-english comments to english
 */
 
@@ -38,6 +40,7 @@
 // Set this value, if autodetection fails! (video ram size in megabytes)
 // #define MGA_MEMORY_SIZE 16
 
+/* No irq support in userspace implemented yet, do not enable this! */
 /* disable irq */
 #undef MGA_ALLOW_IRQ
 
@@ -47,14 +50,14 @@
 
 #undef MGA_PCICONFIG_MEMDETECT
 
+#define MGA_DEFAULT_FRAMES 1
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
-
-//#include "../../libvo/fastmemcpy.h"
 
 #include "../vidix.h"
 #include "../fourcc.h"
@@ -82,10 +85,10 @@ static int probed = 0;
 static pciinfo_t pci_info;
 
 /* internal booleans */
-static uint32_t mga_vid_in_use = 0;
-static uint32_t is_g400 = 0;
-static uint32_t vid_src_ready = 0;
-static uint32_t vid_overlay_on = 0;
+static int mga_vid_in_use = 0;
+static int is_g400 = 0;
+static int vid_src_ready = 0;
+static int vid_overlay_on = 0;
 
 /* mapped physical addresses */
 static uint8_t *mga_mmio_base = 0;
@@ -111,6 +114,7 @@ static int mga_next_frame = 0;
 static vidix_capability_t mga_cap =
 {
     "Matrox MGA G200/G400 YUV Video",
+    "Aaron Holtzman, Arpad Gereoffy, Alex Beregszaszi, Nick Kurshev",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
     1600, /* 2048x2048 is supported if Pontscho is right */
@@ -124,7 +128,7 @@ static vidix_capability_t mga_cap =
 #endif
     ,
     VENDOR_MATROX,
-    0,
+    -1, /* will be set in vixProbe */
     { 0, 0, 0, 0}
 };
 
@@ -714,8 +718,9 @@ int vixConfigPlayback(vidix_playback_t *config)
 
     if ((config->num_frames < 1) || (config->num_frames > 4))
     {
-	printf("[mga] illegal num_frames: %d, setting to 1\n", config->num_frames);
-	config->num_frames = 1;
+	printf("[mga] illegal num_frames: %d, setting to %d\n",
+	    config->num_frames, MGA_DEFAULT_FRAMES);
+	config->num_frames = MGA_DEFAULT_FRAMES;
 //        return(EINVAL);
     }
 
@@ -734,15 +739,13 @@ int vixConfigPlayback(vidix_playback_t *config)
 
     if ((sw < 4) || (sh < 4) || (dw < 4) || (dh < 4))
     {
-        printf("[mga] Invalid src/dest dimenstions\n");
+        printf("[mga] Invalid src/dest dimensions\n");
         return(EINVAL);
     }
 
     //FIXME check that window is valid and inside desktop
 
 //    printf("[mga] vcount = %d\n", readl(mga_mmio_base + VCOUNT));
-    printf("[mga] mga_mmio_base = %p\n",mga_mmio_base);
-    printf("[mga] mga_mem_base = %08x\n",mga_mem_base);
     
     config->offsets[0] = 0;
     config->offsets[1] = config->frame_size;
@@ -764,6 +767,9 @@ int vixConfigPlayback(vidix_playback_t *config)
 	case IMGFMT_UYVY:
 	    config->frame_size = ((sw + 31) & ~31) * sh * 2;
 	    break;
+	default:
+	    printf("[mga] Unsupported pixel format: %x\n", config->fourcc);
+	    return(ENOTSUP);
     }
 
 //    config->frame_size = config->src.h*config->src.w+(config->src.w*config->src.h)/2;
@@ -784,6 +790,9 @@ int vixConfigPlayback(vidix_playback_t *config)
 
     config->dga_addr = mga_mem_base + mga_src_base;
 
+    /* for G200 set Interleaved UV planes */
+    if (!is_g400)
+	config->flags = VID_PLAY_INTERLEAVED_UV | INTERLEAVING_UV;
 	
     //Setup the BES registers for a three plane 4:2:0 video source 
 
@@ -841,9 +850,6 @@ int vixConfigPlayback(vidix_playback_t *config)
 	regs.besglobctl = 1<<6;        // UYVY format selected
         break;
 
-	default:
-	    printf("[mga] Unsupported pixel format: %x\n", config->fourcc);
-	    return(ENOTSUP);
     }
 
 
@@ -1096,10 +1102,6 @@ switch(config->fourcc){
 		    + (0<<28)	// static subpicture key
 */		    ;
         break;
-
-    default:
-	printf("[mga] Unsupported pixel format: %x\n",config->fourcc);
-	return(ENOTSUP);
     }
 
 	cregs.c2hparam=((hdispend - 8) << 16) | (htotal - 8);
@@ -1449,9 +1451,20 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
    uint32_t beslumactl;
    int brightness,contrast;
+
+    /* contrast and brightness control isn't supported with G200,
+       don't enable c/b control and set values, just return error -- alex */
+    if (!is_g400)
+    {
+	if (mga_verbose > 1)
+		printf("[mga] equalizer isn't supported with G200\n");
+	return ENOSYS;
+    }
+
     if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
     if(eq->cap & VEQ_CAP_CONTRAST)   equal.contrast   = eq->contrast;
     equal.flags = eq->flags;
+
 	//Enable contrast and brightness control
 	writel(readl(mga_mmio_base + BESGLOBCTL) & ~((1<<5) + (1<<7)),mga_mmio_base + BESGLOBCTL);
 	brightness = (equal.brightness * 128) / 1000;
@@ -1462,11 +1475,7 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 	if(contrast > 255) contrast = 255;
 	beslumactl = ((brightness & 0xff) << 16) | (contrast & 0xff);
 
-    if (is_g400)
-	writel(beslumactl,mga_mmio_base + BESLUMACTL);
-    else
-	if (mga_verbose > 1)
-		printf("[mga] equalizer isn't supported with G200\n");
+    writel(beslumactl,mga_mmio_base + BESLUMACTL);
     return 0;
 }
 
