@@ -977,7 +977,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    }
 	    case MOV_TRAK_VIDEO: {
 		int i, entry;
-		int flag, start, count_flag, end, palette_count;
+		int flag, start, count_flag, end, palette_count, gray;
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
@@ -1113,7 +1113,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		if(depth>32+8) printf("*** depth = 0x%X\n",depth);
 
 		// palettized?
-		if (depth > 32) depth&=31; // depth > 32 means grayscale
+		gray = 0;
+		if (depth > 32) { depth&=31; gray = 1; } // depth > 32 means grayscale
 		if ((depth == 2) || (depth == 4) || (depth == 8))
 		  palette_count = (1 << depth);
 		else
@@ -1145,13 +1146,24 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  // load default palette
 		  if (flag & 0x08)
 		  {
-		    mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT palette\n");
-		    if (palette_count == 4)
-		      memcpy(palette_map, qt_default_palette_4, 4 * 4);
-		    else if (palette_count == 16)
-		      memcpy(palette_map, qt_default_palette_16, 16 * 4);
-		    if (palette_count == 256)
-		      memcpy(palette_map, qt_default_palette_256, 256 * 4);
+		    if (gray)
+		    {
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT grayscale palette\n");
+		      if (palette_count == 16)
+		        memcpy(palette_map, qt_default_grayscale_palette_16, 16 * 4);
+		      else if (palette_count == 256)
+		        memcpy(palette_map, qt_default_grayscale_palette_256, 256 * 4);
+		    }
+		    else
+		    {
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT colour palette\n");
+		      if (palette_count == 4)
+		        memcpy(palette_map, qt_default_palette_4, 4 * 4);
+		      else if (palette_count == 16)
+		        memcpy(palette_map, qt_default_palette_16, 16 * 4);
+		      else if (palette_count == 256)
+		        memcpy(palette_map, qt_default_palette_256, 256 * 4);
+		    }
 		  }
 		  // load palette from file
 		  else
