@@ -1,7 +1,7 @@
 <HTML>
 
 <HEAD>
-<STYLE>
+<STYLE TYPE="text/css">
        .text
                {font-family    :       Verdana, Arial, Helvetica, sans-serif;
                font-size       :       14px;}
@@ -596,15 +596,21 @@ kompiliere <B>MPlayer</B> mit <CODE>./configure --enable-tdfxfb</CODE> neu.</P>
 
 <P><B><A NAME=2.3.1.10>2.3.1.10. OpenGL Ausgabe</A></B></P>
 
-<P><B>MPlayer</B> unterstützt die Ausgabe von Videos über OpenGL. Unglücklicherweise
-unterstützten nicht alle Treiber diese Fähigkeit. Zum Beispiel
-haben es allen Karte mit Utah-GLX Treibern (für XFree86 3.3.6) Unterstützung.
-Siehe <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
-für Details für die Installation.</P>
+<P><B>MPlayer</B> unterstützt die Ausgabe von Videos über OpenGL. Wenn die
+Plattform / der Treiber jedoch xv unterstützt, was für ein PC mit Linux der
+Fall sein sollte, sollte besser xv verwendet werden, da die Leistung von OpenGL
+beträchtlich schlechter ist. Wenn man eine X11 Implementierung ohne xv besitzt,
+ist OpenGL trotzdem eine funktionsfähige Alternative.</P>
 
-<P>XFree86(DRI) >= 4.0.3 unterstützt nur Matrox und Radeon Karten.
-Siehe <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> für Downloads
-und Installtionsanweisungen.</P>
+<P>Unglücklicherweise unterstützten nicht alle Treiber diese Feature. Die
+Utah-GLX Treiber (für XFree86 3.3.6) unterstützen es für alle Karten. Siehe
+<A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
+für Details zur Installation.</P>
+
+<P>XFree86(DRI) >= 4.0.3 unterstützt OpenGL mit Matrox- und Radeon-Karten, >= 4.2
+unterstützt auch Rage128. Siehe
+<A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> für Download-
+und Installations-Anweisungen.</P>
 
 <P><B><A NAME=2.3.1.11>2.3.1.11. AAlib - Textmodus-Ausgabe</B></P>
 
