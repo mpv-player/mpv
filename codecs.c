@@ -17,6 +17,8 @@ static    GUID CLSID_IV50_Decoder={0x30355649, 0x0000, 0x0010,
     {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 static    GUID dvsd_clsid={0xB1B77C00, 0xC3E4, 0x11CF,
     {0xAF, 0x79, 0x00, 0xAA, 0x00, 0xB6, 0x7A, 0x42}};
+static    GUID CLSID_TM20DecompressorCF={0x4cb63e61, 0xc611, 0x11D0,
+    { 0x83, 0xaa, 0x00, 0x00, 0x92, 0x90, 0x01, 0x84}};
 
 
 char* get_vids_codec_name(){
@@ -162,6 +164,28 @@ char* get_vids_codec_name(){
           avi_header.vids_guid=&wmv1_clsid;
           return "wmvds32.ax";
 
+	case mmioFOURCC('H', 'F', 'Y', 'U'):
+	  printf("HuffYUV\n");
+          avi_header.yuv_supported=1;
+          return "huffyuv.dll";
+
+	case mmioFOURCC('Z', 'L', 'I', 'B'):
+	  printf("ZLIB\n");
+          avi_header.yuv_supported=1;
+          return "avizlib.dll";
+
+	case mmioFOURCC('M', 'S', 'Z', 'H'):
+	  printf("MSZH\n");
+          avi_header.yuv_supported=1;
+          return "avimszh.dll";
+
+#ifdef USE_DIRECTSHOW
+       case mmioFOURCC('T', 'M', '2', '0'):
+         printf("Video in TrueMotion 2.0 format\n");
+          avi_header.yuv_supported=1;
+          avi_header.vids_guid=&CLSID_TM20DecompressorCF;
+          return "tm20dec.ax";
+#endif
 
   }
   printf("UNKNOWN video codec: %.4s (0x%0X)\n",&fccHandler,fccHandler);
@@ -189,10 +213,10 @@ char* get_auds_codec_name(){
             return "imaadp32.acm";  // segfault :(
 	case 0x31://MS GSM
 	case 0x32://MS GSM
-            return "msgsm32.acm";   // segfault :( - not req. has internal now!
+            return "msgsm32.acm";   // OK after FS patch
         case 0x75://VoxWare
             avi_header.auds_guid=&CLSID_Voxware;
-            return "voxmsdec.ax";
+            return "voxmsdec.ax";   // OK after FS patch
 //	case 0x06://???
 //            return "lhacm.acm";
 //            return "msg711.acm";
