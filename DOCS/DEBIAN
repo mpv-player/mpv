@@ -1,6 +1,6 @@
 To build the package:
  Get the cvs version, or .tgz and uncompress it,
- move main to something nicer... mv main mplayer-0.11pre (optional)
+ link main to something nicer... ln -s main mplayer-0.11pre (optional)
  move there (cd main)
  run dpkg-buildpackage
  be patient... and you're done!
