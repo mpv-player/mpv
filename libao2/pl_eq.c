@@ -146,10 +146,12 @@ static int init(){
   // Reset buffers
   reset();
 
+#if 0
   // Reset gain factors
   for(c=0;c<pl_eq.channels;c++)
     for(k=0;k<pl_eq.K;k++)
       pl_eq.g[c][k]=0;
+#endif
 
   // Tell ao_plugin how much this plugin adds to the overall time delay
   ao_plugin_data.delay_fix-=2/((float)pl_eq.channels*(float)ao_plugin_data.rate);
@@ -185,6 +187,7 @@ static int play(){
       for(;k<pl_eq.K;k++){
 	// Pointer to circular buffer wq
 	register int16_t* wq = pl_eq.wq[ci][k];
+#if 0
 	// Calculate output from AR part of current filter
 	register int32_t xt = (x*pl_eq.b[k][0]) >> 4;
 	register int32_t w = xt + wq[0]*pl_eq.a[k][0] + wq[1]*pl_eq.a[k][1];
@@ -196,6 +199,19 @@ static int play(){
 
       // Calculate output 
       *out=(int16_t)(yt+x);
+#else
+	// Calculate output from AR part of current filter
+	register int32_t xt = (x*pl_eq.b[k][0]) / 48;
+	register int32_t w = xt + wq[0]*pl_eq.a[k][0] + wq[1]*pl_eq.a[k][1];
+	// Calculate output form MA part of current filter
+	yt+=(((w + wq[1]*pl_eq.b[k][1]) >> 10)*g[k]) >> 12;
+	// Update circular buffer
+	wq[1] = wq[0]; wq[0] = w / 24576;
+      }	
+
+      // Calculate output 
+      *out=(int16_t)(yt * 0.25 + x * 0.5);
+#endif
       out+=nch;
     }
   }
