@@ -189,6 +189,7 @@ Codecs:
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-tremor        build with integer-only OggVorbis support [disabled]
+  --enable-theora        build with OggTheora support [autodetect]
   --enable-matroska      build with Matroska support [autodetect]
   --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
@@ -1026,6 +1027,7 @@ _esd=auto
 _liblzo=auto
 _mad=auto
 _vorbis=auto
+_theora=auto
 _matroska=auto
 _tremor=no
 _faad=auto
@@ -1180,6 +1182,8 @@ for ac_option do
   --disable-vorbis)	_vorbis=no	;;
   --enable-tremor)	_tremor=yes	;;
   --disable-tremor)	_tremor=no	;;
+  --enable-theora)	_theora=yes	;;
+  --disable-theora)	_theora=no	;;
   --enable-matroska)    _matroska=yes   ;;
   --disable-matroska)   _matroska=no    ;;
   --enable-faad)	_faad=yes	;;
@@ -4028,6 +4032,25 @@ else
 fi
 echores "$_vorbis"
 
+echocheck "OggTheora support"
+if test "$_theora" = auto ; then
+  _theora=no
+  cat > $TMPC << EOF
+#include <theora/theora.h>
+int main(void) { theora_version_number (); return 0; }
+EOF
+  cc_check -ltheora -logg -lm && _theora=yes
+fi
+if test "$_theora" = yes ; then
+  _def_theora='#define HAVE_OGGTHEORA 1'
+  _codecmodules="libtheora $_codecmodules"
+  _ld_theora="-ltheora"
+else
+  _def_theora='#undef HAVE_OGGTHEORA'
+  _nocodecmodules="libtheora $_nocodecmodules"
+fi
+echores "$_theora"
+
 
 echocheck "Matroska support"
 if test "$_matroska" != no ; then
@@ -5272,6 +5295,7 @@ FRIBIDI_LIB = $_ld_fribidi
 LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
+THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
@@ -5686,6 +5710,9 @@ $_def_vorbis
 
 /* enable Tremor as vorbis decoder */
 $_def_tremor
+
+/* enable OggTheora support */
+$_def_theora
 
 /* enable Matroska support */
 $_def_matroska

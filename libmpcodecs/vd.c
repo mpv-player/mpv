@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define USE_THEORA
+
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -29,6 +31,7 @@ extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_qtrpza;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
+extern vd_functions_t mpcodecs_vd_theora;
 extern vd_functions_t mpcodecs_vd_dshow;
 extern vd_functions_t mpcodecs_vd_dmo;
 extern vd_functions_t mpcodecs_vd_vfw;
@@ -66,6 +69,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_qtrpza,
 #ifdef USE_LIBAVCODEC
         &mpcodecs_vd_ffmpeg,
+#endif
+#ifdef HAVE_OGGTHEORA
+	&mpcodecs_vd_theora,
 #endif
 #ifdef USE_WIN32DLL
 #ifdef USE_DIRECTSHOW
