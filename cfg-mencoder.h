@@ -180,6 +180,9 @@ static config_t mencoder_opts[]={
 	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	{"autoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noautoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	
 	// info header strings
 	{"info", info_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 

@@ -172,6 +172,8 @@ static subtitle* subtitles=NULL;
 float sub_last_pts = -303;
 #endif
 
+int auto_expand=1;
+
 // infos are empty by default
 char *info_name=NULL;
 char *info_artist=NULL;
@@ -675,7 +677,7 @@ default:
         mencoder_exit(1,NULL);
     }
     // append 'expand' filter, it fixes stride problems and renders osd:
-    sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand","-1:-1:-1:-1:1");
+    if (auto_expand) sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand","-1:-1:-1:-1:1");
     sh_video->vfilter=append_filters(sh_video->vfilter);
 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
