@@ -144,19 +144,6 @@ if(!filename) {
    return NULL;
 }
 
-#ifdef HAVE_CDDA
-if(filename && strncmp("cdda://",filename,7) == 0) {
-  *file_format = DEMUXER_TYPE_RAWAUDIO;
-  return open_cdda(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
-}
-#ifdef STREAMING
-if(filename && strncmp("cddb://",filename,7) == 0) {
-  *file_format = DEMUXER_TYPE_RAWAUDIO;
-  return cddb_open(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
-}
-#endif
-#endif
-
 //============ Open VideoCD track ==============
 #ifdef HAVE_VCD
 if(strncmp("vcd://",filename,6) == 0){

@@ -3,93 +3,141 @@
 #ifdef HAVE_CDDA
 
 #include "stream.h"
-#include "../cfgparser.h"
+#include "../m_option.h"
+#include "../m_struct.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "demuxer.h"
 
 #include "cdd.h"
 
-static int speed = -1;
-static int paranoia_mode = 1;
-static char* generic_dev = NULL;
-static int sector_size = 0;
-static int search_overlap = -1;
-static int toc_bias = 0;
-static int toc_offset = 0;
-static int no_skip = 0;
+static struct cdda_params {
+  int speed;
+  int paranoia_mode;
+  char* generic_dev;
+  int sector_size;
+  int search_overlap;
+  int toc_bias;
+  int toc_offset;
+  int no_skip;
+  char* device;
+  m_span_t span;
+} cdda_dflts = {
+  -1,
+  1,
+  NULL,
+  0,
+  -1,
+  0,
+  0,
+  0,
+  DEFAULT_CDROM_DEVICE,
+  { 0, 0 }
+};
 
-config_t cdda_opts[] = {
-  { "speed", &speed, CONF_TYPE_INT, CONF_RANGE,1,100, NULL },
-  { "paranoia", &paranoia_mode, CONF_TYPE_INT,CONF_RANGE, 0, 2, NULL },
-  { "generic-dev", &generic_dev, CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "sector-size", &sector_size, CONF_TYPE_INT, CONF_RANGE,1,100, NULL },
-  { "overlap", &search_overlap, CONF_TYPE_INT, CONF_RANGE,0,75, NULL },
-  { "toc-bias", &toc_bias, CONF_TYPE_INT, 0, 0, 0, NULL },
-  { "toc-offset", &toc_offset, CONF_TYPE_INT, 0, 0, 0, NULL },
-  { "noskip", &no_skip, CONF_TYPE_FLAG, 0 , 0, 1, NULL },
-  { "skip", &no_skip, CONF_TYPE_FLAG, 0 , 1, 0, NULL },
+#define ST_OFF(f) M_ST_OFF(struct cdda_params,f)
+m_option_t cdda_params_fields[] = {
+  { "speed", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
+  { "paranoia", ST_OFF(paranoia_mode), CONF_TYPE_INT,M_OPT_RANGE, 0, 2, NULL },
+  { "generic-dev", ST_OFF(generic_dev), CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "sector-size", ST_OFF(sector_size), CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
+  { "overlap", ST_OFF(search_overlap), CONF_TYPE_INT, M_OPT_RANGE,0,75, NULL },
+  { "toc-bias", ST_OFF(toc_bias), CONF_TYPE_INT, 0, 0, 0, NULL },
+  { "toc-offset", ST_OFF(toc_offset), CONF_TYPE_INT, 0, 0, 0, NULL },
+  { "noskip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0 , 0, 1, NULL },
+  { "skip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0 , 1, 0, NULL },
+  { "device", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "span",  ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
+  /// For url parsing
+  { "hostname", ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
+  { "port", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
+  { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL },
+  {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+static struct m_struct_st stream_opts = {
+  "cdda",
+  sizeof(struct cdda_params),
+  &cdda_dflts,
+  cdda_params_fields
+};
+
+/// We keep these options but now they set the defaults
+m_option_t cdda_opts[] = {
+  { "speed", &cdda_dflts.speed, CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
+  { "paranoia", &cdda_dflts.paranoia_mode, CONF_TYPE_INT,M_OPT_RANGE, 0, 2, NULL },
+  { "generic-dev", &cdda_dflts.generic_dev, CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "sector-size", &cdda_dflts.sector_size, CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
+  { "overlap", &cdda_dflts.search_overlap, CONF_TYPE_INT, M_OPT_RANGE,0,75, NULL },
+  { "toc-bias", &cdda_dflts.toc_bias, CONF_TYPE_INT, 0, 0, 0, NULL },
+  { "toc-offset", &cdda_dflts.toc_offset, CONF_TYPE_INT, 0, 0, 0, NULL },
+  { "noskip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0 , 0, 1, NULL },
+  { "skip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0 , 1, 0, NULL },
+  { "device", &cdda_dflts.device, CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "span", &cdda_dflts.span, CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-stream_t* open_cdda(char* dev,char* track) {
-  stream_t* st;
-  int start_track = 0;
-  int end_track = 0;
-  int mode = paranoia_mode;
-  int offset = toc_offset;
+extern int cddb_resolve(const char *dev, char **xmcd_file);
+extern cd_info_t* cddb_parse_xmcd(char *xmcd_file);
+
+static int seek(stream_t* s,off_t pos);
+static int fill_buffer(stream_t* s, char* buffer, int max_len);
+static void close(stream_t* s);
+
+static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
+  struct cdda_params* p = (struct cdda_params*)opts;
+  int mode = p->paranoia_mode;
+  int offset = p->toc_offset;
   cdrom_drive* cdd = NULL;
   cdda_priv* priv;
-  char* end = strchr(track,'-');
-  cd_info_t *cd_info;
+  cd_info_t *cd_info,*cddb_info = NULL;
   unsigned int audiolen=0;
   int i;
+  char *xmcd_file = NULL;
 
-  if(!end)
-    start_track = end_track = atoi(track);
-  else {
-    int st_len = end - track;
-    int ed_len = strlen(track) - 1 - st_len;
+  if(m != STREAM_READ) {
+    m_struct_free(&stream_opts,opts);
+    return STREAM_UNSUPORTED;
+  }
 
-    if(st_len) {
-      char st[st_len + 1];
-      strncpy(st,track,st_len);
-      st[st_len] = '\0';
-      start_track = atoi(st);
-    }
-    if(ed_len) {
-      char ed[ed_len + 1];
-      strncpy(ed,end+1,ed_len);
-      ed[ed_len] = '\0';
-      end_track = atoi(ed);
+#ifdef STREAMING
+  if(strncmp(st->url,"cddb",4) == 0) {
+    i = cddb_resolve(p->device, &xmcd_file);
+    if(i == 0) {
+      cddb_info = cddb_parse_xmcd(xmcd_file);
+      free(xmcd_file);
     }
   }
-    
-  if(generic_dev)
-    cdd = cdda_identify_scsi(generic_dev,dev,0,NULL);
+#endif
+  
+  if(p->generic_dev)
+    cdd = cdda_identify_scsi(p->generic_dev,p->device,0,NULL);
   else
 #if defined(__NetBSD__)
-    cdd = cdda_identify_scsi(dev,dev,0,NULL);
+    cdd = cdda_identify_scsi(p->device,p->device,0,NULL);
 #else
-    cdd = cdda_identify(dev,0,NULL);
+    cdd = cdda_identify(p->device,0,NULL);
 #endif
 
   if(!cdd) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"Can't open cdda device\n");
-    return NULL;
+    m_struct_free(&stream_opts,opts);
+    return STREAM_ERROR;
   }
 
   cdda_verbose_set(cdd, CDDA_MESSAGE_FORGETIT, CDDA_MESSAGE_FORGETIT);
 
-  if(sector_size) {
-    cdd->nsectors = sector_size;
-    cdd->bigbuff = sector_size * CD_FRAMESIZE_RAW;
+  if(p->sector_size) {
+    cdd->nsectors = p->sector_size;
+    cdd->bigbuff = p->sector_size * CD_FRAMESIZE_RAW;
   }
 
   if(cdda_open(cdd) != 0) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"Can't open disc\n");
     cdda_close(cdd);
-    return NULL;
+    m_struct_free(&stream_opts,opts);
+    return STREAM_ERROR;
   }
 
   cd_info = cd_info_new();
@@ -112,7 +160,7 @@ stream_t* open_cdda(char* dev,char* track) {
   priv->cd = cdd;
   priv->cd_info = cd_info;
 
-  if(toc_bias)
+  if(p->toc_bias)
     offset -= cdda_track_firstsector(cdd,1);
 
   if(offset) {
@@ -121,18 +169,18 @@ stream_t* open_cdda(char* dev,char* track) {
       cdd->disc_toc[i].dwStartSector += offset;
   }
 
-  if(speed)
-    cdda_speed_set(cdd,speed);
+  if(p->speed)
+    cdda_speed_set(cdd,p->speed);
 
-  if(start_track)
-    priv->start_sector = cdda_track_firstsector(cdd,start_track);
+  if(p->span.start)
+    priv->start_sector = cdda_track_firstsector(cdd,p->span.start);
   else
     priv->start_sector = cdda_disc_firstsector(cdd);
 
-  if(end_track) {
+  if(p->span.end) {
     int last = cdda_tracks(cdd);
-    if(end_track > last) end_track = last;
-    priv->end_sector = cdda_track_lastsector(cdd,end_track);
+    if(p->span.end > last) p->span.end = last;
+    priv->end_sector = cdda_track_lastsector(cdd,p->span.end);
   } else
     priv->end_sector = cdda_disc_lastsector(cdd);
 
@@ -140,7 +188,9 @@ stream_t* open_cdda(char* dev,char* track) {
   if(priv->cdp == NULL) {
     cdda_close(cdd);
     free(priv);
-    return NULL;
+    cd_info_free(cd_info);
+    m_struct_free(&stream_opts,opts);
+    return STREAM_ERROR;
   }
 
   if(mode == 0)
@@ -150,37 +200,54 @@ stream_t* open_cdda(char* dev,char* track) {
   else
     mode = PARANOIA_MODE_FULL;
   
-  if(no_skip)
+  if(p->no_skip)
     mode |= PARANOIA_MODE_NEVERSKIP;
 
-  if(search_overlap >= 0)
-    paranoia_overlapset(cdd,search_overlap);
+  if(p->search_overlap >= 0)
+    paranoia_overlapset(cdd,p->search_overlap);
 
   paranoia_seek(priv->cdp,priv->start_sector,SEEK_SET);
   priv->sector = priv->start_sector;
 
-  st = new_stream(-1,STREAMTYPE_CDDA);
+#ifdef STREAMING
+  if(cddb_info) {
+    cd_info_free(cd_info);
+    priv->cd_info = cddb_info;
+    cd_info_debug( cddb_info );
+  }
+#endif
+
   st->priv = priv;
   st->start_pos = priv->start_sector*CD_FRAMESIZE_RAW;
   st->end_pos = priv->end_sector*CD_FRAMESIZE_RAW;
+  st->type = STREAMTYPE_CDDA;
+  st->sector_size = CD_FRAMESIZE_RAW;
 
-  return st;
+  st->fill_buffer = fill_buffer;
+  st->seek = seek;
+  st->close = close;
+
+  *file_format = DEMUXER_TYPE_RAWAUDIO;
+
+  m_struct_free(&stream_opts,opts);
+
+  return STREAM_OK;
 }
 
 static void cdparanoia_callback(long inpos, int function) {
 }
 
-int read_cdda(stream_t* s) {
+static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   cdda_priv* p = (cdda_priv*)s->priv;
   cd_track_t *cd_track;
   int16_t * buf;
-  unsigned int i;
+  int i;
   
   buf = paranoia_read(p->cdp,cdparanoia_callback);
 
   p->sector++;
   s->pos = p->sector*CD_FRAMESIZE_RAW;
-  memcpy(s->buffer,buf,CD_FRAMESIZE_RAW);
+  memcpy(buffer,buf,CD_FRAMESIZE_RAW);
 
   if((p->sector < p->start_sector) || (p->sector >= p->end_sector)) {
     s->eof = 1;
@@ -202,16 +269,17 @@ int read_cdda(stream_t* s) {
   return CD_FRAMESIZE_RAW;
 }
 
-void seek_cdda(stream_t* s) {
+static int seek(stream_t* s,off_t newpos) {
   cdda_priv* p = (cdda_priv*)s->priv;
   cd_track_t *cd_track;
   int sec;
   int current_track=0, seeked_track=0;
   int i;
   
+  s->pos = newpos;
   if(s->pos < 0) {
     s->eof = 1;
-    return;
+    return 0;
   }
 
   sec = s->pos/CD_FRAMESIZE_RAW;
@@ -248,13 +316,26 @@ void seek_cdda(stream_t* s) {
 
 //printf("seek: %d, sec: %d\n", (int)s->pos, sec);
   paranoia_seek(p->cdp,sec,SEEK_SET);
-
+  return 1;
 }
 
-void close_cdda(stream_t* s) {
+static void close(stream_t* s) {
   cdda_priv* p = (cdda_priv*)s->priv;
   paranoia_free(p->cdp);
   cdda_close(p->cd);
+  cd_info_free(p->cd_info);
+  free(p);
 }
+
+stream_info_t stream_info_cdda = {
+  "CDDA",
+  "cdda",
+  "Albeu",
+  "",
+  open_cdda,
+  { "cdda", "cddb", NULL },
+  &stream_opts,
+  1 // Urls are an option string
+};
 
 #endif

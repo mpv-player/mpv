@@ -59,9 +59,11 @@ void close_cdda(stream_t* s);
 #include "libsmbclient.h"
 #endif
 
+extern stream_info_t stream_info_cdda;
 extern stream_info_t stream_info_file;
 
 stream_info_t* auto_open_streams[] = {
+  &stream_info_cdda,
   &stream_info_file,
   NULL
 };
@@ -174,11 +176,6 @@ int stream_fill_buffer(stream_t *s){
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
 #endif
-#ifdef HAVE_CDDA
-  case STREAMTYPE_CDDA:
-    len = read_cdda(s);
-    break;
-#endif
 #ifdef HAVE_VCD
   case STREAMTYPE_VCD:
     len=vcd_read(s->fd,s->buffer);break;
@@ -246,10 +243,6 @@ off_t newpos=0;
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_DVD:
     newpos=pos/2048; newpos*=2048; break;
-#ifdef HAVE_CDDA
-  case STREAMTYPE_CDDA:
-    newpos=(pos/VCD_SECTOR_SIZE)*VCD_SECTOR_SIZE;break;
-#endif
   default:
     // Round on sector size
     if(s->sector_size)
@@ -294,13 +287,6 @@ if(newpos==0 || newpos!=s->pos){
     s->pos=newpos; // real seek
     cue_set_msf(s->pos/VCD_SECTOR_DATA);
     break;
-#ifdef HAVE_CDDA
-  case STREAMTYPE_CDDA: {
-    s->pos=newpos;
-    seek_cdda(s);
-    break;
-  }
-#endif
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
     if (newpos==0) {
@@ -428,11 +414,6 @@ void free_stream(stream_t *s){
   case STREAMTYPE_SMB:
     smbc_close(s->fd);
     break;    
-#endif
-#ifdef HAVE_CDDA
-  case STREAMTYPE_CDDA:
-    close_cdda(s);
-    break;
 #endif
 #ifdef HAS_DVBIN_SUPPORT
   case STREAMTYPE_DVB:

@@ -776,34 +776,4 @@ cddb_parse_xmcd(char *xmcd_file) {
 	return cd_info;
 }
 
-stream_t* 
-cddb_open(char *dev, char *track) {
-	stream_t *stream = NULL;
-	cd_info_t *cd_info = NULL;
-	cdda_priv *priv;
-	char *xmcd_file = NULL;
-	int ret;
-	
-	ret = cddb_resolve(dev, &xmcd_file);
-//	if( ret<0 ) {
-//		return NULL;
-//	}
-	if( ret==0 ) {
-		cd_info = cddb_parse_xmcd(xmcd_file);
-		free(xmcd_file);
-	}
-
-	stream = open_cdda(dev, track);
-	if( stream==NULL ) {
-		return NULL;
-	}
-
-	priv = ((cdda_priv*)(stream->priv));
-	if( cd_info!=NULL ) { 
-		cd_info_free(priv->cd_info);
-		priv->cd_info = cd_info;
-	}	
-cd_info_debug( cd_info );	
-	return stream;
-}
 #endif
