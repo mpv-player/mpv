@@ -303,6 +303,10 @@ Hammelmann, Jürgen <juergen.hammelmann@gmx.de>
 Hertel, Christopher R. <crh@ubiqx.mn.org>
     * md5sum code used by vo_md5sum. part of uCIFS library.
 
+Heryan, Jiri <technik@domotech.cz>
+    * czech manpage translation
+    * some other czech translation related work
+
 Hess, Andreas <jaska@gmx.net>
     * upgrading libdvdcss in libmpdvdkit2
     * various small bug fixes
