@@ -527,7 +527,8 @@
 
 <P><B>NOTE:</B> according to my experience the best image quality on EGA
   screens can be achieved by decreasing the brightness a bit: <CODE>-vop
-  eq=-20:0</CODE></P>
+  eq=-20:0</CODE>. I also needed to lower the audio samplerate on my box,
+  because the sound was broken on 44kHz: <CODE>-srate 22050</CODE>.</P>
 
 <P>You can turn on OSD and subtitles only with the <CODE>expand</CODE> filter,
   see the man page for exact parameters.</P>
