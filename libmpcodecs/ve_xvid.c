@@ -77,7 +77,23 @@ struct {
     -1,				/* fixed_quant */
 };
 
+static struct config mode_conf[] = {
+    /* cbr, vbrqual, vbrquant, 2pass-1, 2pass-2-int, 2pass-2-ext */
+    { "cbr", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_CBR, NULL},
+    { "fixedquant", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_FIXED_QUANT, NULL},
+    { "2pass-1", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_2PASS_1, NULL},
+    { "2pass-2", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_2PASS_2, NULL},
+    { "help", "\nAvailable modes: \n"
+      "    cbr         - Constant Bit Rate\n"
+      "    2pass-1     - First pass of two pass mode\n"
+      "    2pass-2     - Second pass of two pass mode\n"
+      "    fixedquant  - Fixed quantizer mode\n"
+      "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+    { NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 struct config xvidencopts_conf[] = {
+    { "mode", mode_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     { "quality", &xvidenc_param.quality, CONF_TYPE_INT, CONF_RANGE, 0,
       sizeof(divx4_motion_presets) / sizeof(divx4_motion_presets[0]) - 1, NULL},
     { "br", &xvidenc_param.bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -87,11 +103,6 @@ struct config xvidencopts_conf[] = {
     { "max_quantizer", &xvidenc_param.max_quantizer, CONF_TYPE_INT, 0, 0, NULL},
     { "min_quantizer", &xvidenc_param.max_quantizer, CONF_TYPE_INT, 0, 0, NULL},
     { "max_key_interval", &xvidenc_param.max_key_interval, CONF_TYPE_INT, 0, 0, NULL},
-    /* cbr, vbrqual, vbrquant, 2pass-1, 2pass-2-int, 2pass-2-ext */
-    { "cbr", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_CBR, NULL},
-    { "2pass-1", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_2PASS_1, NULL},
-    { "2pass-2", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_2PASS_2, NULL},
-    { "fixedquant", &xvidenc_param.mode, CONF_TYPE_FLAG, 0, 0, XVID_MODE_FIXED_QUANT, NULL},
     { "nodebug", &xvidenc_param.debug, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     { "debug", &xvidenc_param.debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "statsfile", &xvidenc_param.stats_file, CONF_TYPE_STRING, 0, 0, 0, NULL},	/* for XVID_MODE_2PASS_1/22 */
