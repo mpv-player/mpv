@@ -76,9 +76,9 @@
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
 
 	// select audio/videosubtitle stream
-	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
-	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
-	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
+	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
+	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
 	{"novideo", &video_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
@@ -184,6 +184,9 @@
 	{"tsfastparse", "-tsfastparse isn't a valid option anymore.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL
 },
 	{"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
+#define TS_MAX_PROBE_SIZE 2000000 /* dont forget to change this in libmpdemux/demux_ts.c too */
+	{"tsprobe", &ts_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
+	{"tskeepbroken", &ts_keep_broken, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
 	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -286,6 +289,8 @@ extern char* audio_stream;
 extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 extern int ts_prog;
+extern int ts_keep_broken;
+extern off_t ts_probe;
 
 #include "libmpdemux/tv.h"
 
