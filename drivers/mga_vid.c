@@ -391,6 +391,8 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	
 	//Setup the BES registers for a three plane 4:2:0 video source 
 
+	regs.besglobctl = 0;
+
 switch(config->format){
     case MGA_VID_FORMAT_YV12:	
 	regs.besctl = 1         // BES enabled
@@ -400,7 +402,7 @@ switch(config->format){
                     + (1<<16)   // chroma upsampling
                     + (1<<17)   // 4:2:0 mode
                     + (1<<18);  // dither enabled
-
+#if 0
 	if(is_g400)
 	{
 		//zoom disabled, zoom filter disabled, 420 3 plane format, proc amp
@@ -411,8 +413,9 @@ switch(config->format){
 	{
 		//zoom disabled, zoom filter disabled, Cb samples in 0246, Cr
 		//in 1357, BES register update on besvcnt
-		regs.besglobctl = 0;
+	        regs.besglobctl = 0;
 	}
+#endif
         break;
 
     case MGA_VID_FORMAT_YUY2:	
@@ -426,6 +429,19 @@ switch(config->format){
 
 	regs.besglobctl = 0;        // YUY2 format selected
         break;
+
+    case MGA_VID_FORMAT_UYVY:	
+	regs.besctl = 1         // BES enabled
+                    + (0<<6)    // even start polarity
+                    + (1<<10)   // x filtering enabled
+                    + (1<<11)   // y filtering enabled
+                    + (1<<16)   // chroma upsampling
+                    + (0<<17)   // 4:2:2 mode
+                    + (1<<18);  // dither enabled
+
+	regs.besglobctl = 1<<6;        // UYVY format selected
+        break;
+
     default:
 	printk(KERN_ERR "mga_vid: Unsupported pixel format: 0x%X\n",config->format);
 	return -1;
@@ -433,7 +449,7 @@ switch(config->format){
 
 
 	//Disable contrast and brightness control
-	regs.besglobctl = (1<<5) + (1<<7);
+	regs.besglobctl |= (1<<5) + (1<<7);
 	regs.beslumactl = (0x7f << 16) + (0x80<<0);
 	regs.beslumactl = 0x80<<0;
 
@@ -665,6 +681,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			if ( mga_irq != -1 ) disable_irq();
 #endif
 			regs.besctl &= ~1;
+                        regs.besglobctl &= ~(1<<6);  // UYVY format selected
 			mga_vid_write_regs();
 		break;
 			
@@ -759,7 +776,8 @@ static int mga_vid_find_card(void)
 		}
 	    }else{
 		switch((card_option>>11)&1){
-		    case 0:  mga_ram_size = 8; break;
+		    case 0:
+		    case 3:  mga_ram_size = 8; break;
 		    default: mga_ram_size = 16;
 		}
 	    } 
@@ -834,6 +852,7 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 
 	vid_src_ready = 0;   
 	regs.besctl &= ~1;
+        regs.besglobctl &= ~(1<<6);  // UYVY format selected
 	mga_vid_write_regs();
 	mga_vid_in_use = 0;
 

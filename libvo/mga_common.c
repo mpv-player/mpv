@@ -12,10 +12,17 @@ static int f;
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     int x,y;
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
-    if (mga_vid_config.format==MGA_VID_FORMAT_YV12)
+    switch(mga_vid_config.format){
+    case MGA_VID_FORMAT_YV12:
         vo_draw_alpha_yv12(w,h,src,srca,stride,vid_data+bespitch*y0+x0,bespitch);
-    else
+        break;
+    case MGA_VID_FORMAT_YUY2:
         vo_draw_alpha_yuy2(w,h,src,srca,stride,vid_data+2*(bespitch*y0+x0),2*bespitch);
+        break;
+    case MGA_VID_FORMAT_UYVY:
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,vid_data+2*(bespitch*y0+x0)+1,2*bespitch);
+        break;
+    }
 }
 
 
