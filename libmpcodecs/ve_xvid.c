@@ -374,6 +374,7 @@ config(struct vf_instance_s* vf,
     return 1;
 }
 
+#ifdef XVID_API_UNSTABLE
 static double
 sse_to_PSNR(double sse, double pixels)
 {
@@ -381,12 +382,14 @@ sse_to_PSNR(double sse, double pixels)
     // 4.34294481903251827652 = 10/log(10)
     // 11.08252709031685229249 = log(255*255)
 }
+#endif
 
 static void
 uninit(struct vf_instance_s* vf)
 {
     struct vf_priv_s *fp = vf->priv;
 
+#ifdef XVID_API_UNSTABLE
     if (xvidenc_psnr) {
 	double p = (double)fp->pixels * (double)fp->nb_frames;
         printf ("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n", 
@@ -395,6 +398,7 @@ uninit(struct vf_instance_s* vf)
 		sse_to_PSNR(xvid_error[2], p/4), 
 		sse_to_PSNR(xvid_error[0] + xvid_error[1] + xvid_error[2], p*1.5));
     }
+#endif
     vbrFinish(&fp->vbr_state);
 }
 
@@ -474,6 +478,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	break;
     }
 
+#ifdef XVID_API_UNSTABLE
     if (xvidenc_psnr) {
         static FILE *fvstats = NULL;
         char filename[20];
@@ -508,6 +513,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	fp->nb_frames++;
     }
+#endif
     
     // write output
     muxer_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0);
