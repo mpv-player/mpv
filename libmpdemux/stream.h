@@ -1,6 +1,7 @@
 #ifndef __STREAM_H
 #define __STREAM_H
 
+#include "mp_msg.h"
 #include <inttypes.h>
 
 #define STREAM_BUFFER_SIZE 2048
@@ -124,7 +125,7 @@ inline static int stream_read(stream_t *s,char* mem,int total){
       if(!cache_stream_fill_buffer(s)) return total-len; // EOF
       x=s->buf_len-s->buf_pos;
     }
-    if(s->buf_pos>s->buf_len) printf("stream_read: WARNING! s->buf_pos>s->buf_len\n");
+    if(s->buf_pos>s->buf_len) mp_msg(MSGT_DEMUX, MSGL_WARN, "stream_read: WARNING! s->buf_pos>s->buf_len\n");
     if(x>len) x=len;
     memcpy(mem,&s->buffer[s->buf_pos],x);
     s->buf_pos+=x; mem+=x; len-=x;
@@ -142,7 +143,7 @@ inline static off_t stream_tell(stream_t *s){
 
 inline static int stream_seek(stream_t *s,off_t pos){
 
-//  if(verbose>=3) printf("seek to 0x%qX\n",(long long)pos);
+  mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%qX\n",(long long)pos);
 
   if(pos<s->pos){
     off_t x=pos-(s->pos-s->buf_len);
