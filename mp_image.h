@@ -33,7 +33,7 @@ typedef struct mp_image_s {
 #ifdef IMGFMT_YUY2
 static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
-    mpi->out_fmt=out_fmt;
+    mpi->imgfmt=out_fmt;
     if( (out_fmt&IMGFMT_RGB_MASK) == IMGFMT_RGB ){
 	mpi->bpp=((out_fmt&255)+7)&(~7);
 	return;
