@@ -5,15 +5,15 @@ but i have only analyzed the cook codec
 audio properties
 
 00 short text/description of the format (bitrate, when to use)
-01 avg. bytes/sec output
+01 bitrate (bits/s) //avg. bytes/sec output
 02 ulong: ?
    ulong: samples per second
    ushort: bits/sample
    ushort: number of channels
-03 constant 2
+03 same as 02 //constant 2
 04 long description
 05 constant 1 (always?)
-06 ulong: block align (input frame for RADecode)
+06 ulong: block align (input frame size for RADecode)
 07 string: minimum player version
 08 n/a
 09 n/a
@@ -37,7 +37,19 @@ functions:
 ulong result=RAOpenCodec2(ra_main_t *raMain);
 
 ulong result=RAInitDecoder(ra_main_t *raMain, p2);
-p2=?
+p2 points to an array of 7 longs:
+
+bfffefe0  22 56 00 00 10 00 02 00 64 00 00 00 3c 00 00 00   "V......d...<...
+bfffeff0  58 02 00 00 10 00 00 00 f0 73 1c 08 7c f0 ff bf   X........s..|...
+
+long  00005622=22050 (Hz)
+short     0010=16 (bit)
+short     0002=2  (channels)
+long  00000064=100 ???
+long  0000003c=60  ???
+long  00000258=600 packet size (used for 'p3' of RADecode)
+long  00000010=16  ???
+long  081c73f0= looks like a pointer
 
 
 void *GetRAFlavorProperty(ra_main_t *raMain, ulong flavor, ulong property,
