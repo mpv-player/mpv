@@ -524,8 +524,7 @@ int af_outputlen(af_stream_t* s, int len)
   register frac_t mul = {1,1};
   // Iterate through all filters 
   do{
-    mul.n *= af->mul.n;
-    mul.d *= af->mul.d;
+    af_frac_mul(&mul, &af->mul);
     af=af->next;
   }while(af);
   return t * (((len/t)*mul.n + 1)/mul.d);
@@ -542,8 +541,7 @@ int af_inputlen(af_stream_t* s, int len)
   register frac_t mul = {1,1};
   // Iterate through all filters 
   do{
-    mul.n *= af->mul.n;
-    mul.d *= af->mul.d;
+    af_frac_mul(&mul, &af->mul);
     af=af->next;
   }while(af);
   return t * (((len/t) * mul.d - 1)/mul.n);
@@ -567,8 +565,7 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
   register frac_t mul = {1,1};
   // Iterate through all filters and calculate total multiplication factor
   do{
-    mul.n *= af->mul.n;
-    mul.d *= af->mul.d;
+    af_frac_mul(&mul, &af->mul);
     af=af->next;
   }while(af);
   // Sanity check 
@@ -643,6 +640,49 @@ af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
     filt = filt->prev;
   }
   return NULL;
+}
+
+/**
+ * \brief calculate greatest common divisior of a and b.
+ *   Extended for negative and 0 values. If both are 0 the result is 1.
+ *   The sign of the result will be so that it has the same sign as b.
+ */
+int af_gcd(register int a, register int b) {
+  int b_org = b;
+  while (b != 0) {
+    a %= b;
+    if (a == 0)
+      break;
+    b %= a;
+  }
+  // the result is either in a or b. As the other one is 0 just add them.
+  a += b;
+  if (!a)
+    return 1;
+  if (a * b_org < 0)
+    return -a;
+  return a;
+}
+
+/**
+ * \brief cancel down a fraction f
+ */
+void af_frac_cancel(frac_t *f) {
+  int gcd = af_gcd(f->n, f->d);
+  f->n /= gcd;
+  f->d /= gcd;
+}
+
+/**
+ * \brief multiply out by in and store result in out.
+ *        the resulting fraction wil be cancelled down
+ *        if in and out were.
+ */
+void af_frac_mul(frac_t *out, const frac_t *in) {
+  int gcd1 = af_gcd(out->n, in->d);
+  int gcd2 = af_gcd(in->n, out->d);
+  out->n = (out->n / gcd1) * (in->n / gcd2);
+  out->d = (out->d / gcd2) * (in->d / gcd1);
 }
 
 void af_help (void) {

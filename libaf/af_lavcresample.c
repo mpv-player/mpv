@@ -40,7 +40,6 @@ typedef struct af_resample_s{
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  int g;
   af_resample_t* s   = (af_resample_t*)af->setup; 
   af_data_t *data= (af_data_t*)arg;
   int out_rate, test_output_res; // helpers for checking input format
@@ -54,9 +53,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if (af->data->nch > CHANS) af->data->nch = CHANS;
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
-    g= ff_gcd(af->data->rate, data->rate);
-    af->mul.n = af->data->rate/g;
-    af->mul.d = data->rate/g;
+    af->mul.n = af->data->rate;
+    af->mul.d = data->rate;
+    af_frac_cancel(&af->mul);
     af->delay = 500*s->filter_length/(double)min(af->data->rate, data->rate);
 
     if(s->avrctx) av_resample_close(s->avrctx);

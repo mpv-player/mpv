@@ -62,22 +62,6 @@ typedef struct af_resample_s
   int		setup;	// Setup parameters cmdline or through postcreate
 } af_resample_t;
 
-// Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
-static inline int gcd(register int a, register int b)
-{
-  register int r = min(a,b);
-  a=max(a,b);
-  b=r;
-
-  r=a%b;
-  while(r!=0){
-    a=b;
-    b=r;
-    r=a%b;
-  }
-  return b;
-}
-
 // Fast linear interpolation resample with modest audio quality
 static int linint(af_data_t* c,af_data_t* l, af_resample_t* s)
 {
@@ -202,11 +186,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	     s->step);
       af->mul.n = af->data->rate;
       af->mul.d = n->rate;
+      af_frac_cancel(&af->mul);
       return rv;
     }
 
     // Calculate up and down sampling factors
-    d=gcd(af->data->rate,n->rate);
+    d=af_gcd(af->data->rate,n->rate);
 
     // If sloppy resampling is enabled limit the upsampling factor
     if(((s->setup & FREQ_MASK) == FREQ_SLOPPY) && (af->data->rate/d > 5000)){
@@ -214,7 +199,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       int dn=n->rate/2;
       int m=2;
       while(af->data->rate/(d*m) > 5000){
-	d=gcd(up,dn); 
+	d=af_gcd(up,dn); 
 	up/=2; dn/=2; m*=2;
       }
       d*=m;

@@ -306,6 +306,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->nch  = ((af_data_t*)arg)->nch;
     af->mul.n      = af->data->bps;
     af->mul.d      = ((af_data_t*)arg)->bps;
+    af_frac_cancel(&af->mul);
     
     af->play = play; // set default
     

@@ -28,6 +28,10 @@ typedef struct frac_s
   int d; // Denominator
 } frac_t;
 
+int af_gcd(register int a, register int b);
+void af_frac_cancel(frac_t *f);
+void af_frac_mul(frac_t *out, const frac_t *in);
+
 // Flags used for defining the behavior of an audio filter
 #define AF_FLAGS_REENTRANT 	0x00000000
 #define AF_FLAGS_NOT_REENTRANT 	0x00000001

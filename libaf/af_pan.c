@@ -41,6 +41,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->bps    = 4;
     af->mul.n        = af->data->nch;
     af->mul.d	     = ((af_data_t*)arg)->nch;
+    af_frac_cancel(&af->mul);
 
     if((af->data->format != ((af_data_t*)arg)->format) || 
        (af->data->bps != ((af_data_t*)arg)->bps)){

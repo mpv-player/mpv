@@ -151,6 +151,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->bps    = ((af_data_t*)arg)->bps;
     af->mul.n        = af->data->nch;
     af->mul.d	     = ((af_data_t*)arg)->nch;
+    af_frac_cancel(&af->mul);
     return check_routes(s,((af_data_t*)arg)->nch,af->data->nch);
   case AF_CONTROL_COMMAND_LINE:{
     int nch = 0;
