@@ -81,8 +81,7 @@ bitrate <application>MEncoder</application> printed at the end of the previous p
 <step><para>
   <emphasis>Third pass:</emphasis>
 <screen>
-mencoder <replaceable>file/DVD</replaceable> -oac copy -pass 2 \
-         -ovc divx4 -divx4opts br=<replaceable>bitrate</replaceable>
+mencoder <replaceable>file/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=<replaceable>bitrate</replaceable>
 </screen>
 This is the second pass of video encoding. Specify the same bitrate
 as in the previous pass unless you really know what you are doing.
@@ -608,7 +607,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
   <option>vqscale=3</option> should give you a file below 2GB in size,
   depending mainly on the movie length and video noisiness (the more
-  noise, the harder it is to compress.)
+  noise, the harder it is to compress).
 </para></sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-2gb">
@@ -639,7 +638,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <link linkend="menc-feat-divx4">2 pass encoding</link>.
   As you will be copying the audio track as is and hence know its
   bitrate, and you know the running time of the movie, you can
-  compute the required bitrate to give to the
+  compute the required video bitrate to give to the
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   option without using
   <link linkend="menc-feat-divx4">3 pass encoding</link>.
@@ -669,7 +668,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   the DVD. If the DVD is made from film, which was shot at 24 fps, you
   can as well deinterlace while ripping. If, however, the original was
   50/60 fps video, converting into deinterlaced 23.976/25 fps video
-  will lose information. If you do decide to interlace, you can further
+  will lose information. If you do decide to deinterlace, you can further
   experiment with different deinterlacing filters. See
   <ulink url="http://www.wieser-web.de/MPlayer/">http://www.wieser-web.de/MPlayer/</ulink>
   for examples. A good starting point is <option>-vf pp=fd</option>.
@@ -679,7 +678,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   If you are both cropping and deinterlacing, deinterlace
   <emphasis>before</emphasis> cropping. Actually, this is not necessary
   if the crop offset is vertically a multiple of 2 pixels. However with
-  some other filters like dering you should always crop last, so it's a
+  some other filters, like dering, you should always crop last, so it's a
   good habit to put the crop filter last.
 </para></sect2>
 
