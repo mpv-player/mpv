@@ -2097,11 +2097,11 @@ int main(void) {
 }
 EOF
   _iconv=no
-  if cc_check -lm -liconv ; then
+  if cc_check -lm ; then
+    _iconv=yes
+  elif cc_check -lm -liconv ; then
     _iconv=yes
     _ld_iconv='-liconv'
-  else
-    cc_check -lm && _iconv=yes
   fi
 fi
 if test "$_iconv" = yes ; then
