@@ -679,7 +679,15 @@ static int uninit(priv_t *priv)
             mp_msg(MSGT_TV, MSGL_ERR, "\n  MJP: ioctl MJPIOC_QBUF_CAPT failed: %s\n", strerror(errno));
           }
       }
-    close(priv->video_fd);
+    else
+      {
+	// We need to munmap as close don't close mem mappings
+	if(munmap(priv->mmap,priv->mbuf.size))
+	  mp_msg(MSGT_TV, MSGL_ERR, "Munmap failed: %s\n",strerror(errno));
+      }
+
+    if(close(priv->video_fd))
+      mp_msg(MSGT_TV, MSGL_ERR, "Close tv failed: %s\n",strerror(errno));
 
     audio_in_uninit(&priv->audio_in);
 
