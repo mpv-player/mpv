@@ -390,47 +390,16 @@ if(dvd_title){
 }
 #endif
 
+//============ Check for TV-input or multi-file input ====
+  if( (mf_support == 1)
 #ifdef USE_TV
-//============ Check for TV-input ====
-  if (tv_param_on == 1)
-  {
-    tvi_handle_t *tv_handler;
-
-    /* create stream */
-    stream = new_stream(-1, STREAMTYPE_TV);
-    if (!stream)
-	return(NULL);
-
-    /* create tvi handler */
-    tv_handler = tv_begin();
-    if (!tv_handler)
-	return(NULL);
-
-    /* preinit */
-    if (!tv_init(tv_handler))
-	goto tv_err;
-
-    if (!stream_open_tv(stream, tv_handler))
-	goto tv_err;
-
-    stream->priv=tv_handler;
-    
-    return(stream);
-
-    /* something went wrong - uninit */
-tv_err:
-    tv_uninit(tv_handler);
-    return(NULL);
-  }
+   || (tv_param_on == 1)
 #endif
-
-//============ Check for multi file-input ====
-  if (mf_support == 1)
-  {
+  ){
     /* create stream */
     stream = new_stream(-1, STREAMTYPE_DUMMY);
     if (!stream) return(NULL);
-    stream->url=strdup(filename);
+    stream->url=filename?strdup(filename):NULL;
     return(stream);
   }
   

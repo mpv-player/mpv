@@ -194,11 +194,8 @@ if(newpos==0 || newpos!=s->pos){
     }
 #endif
     break;
-#ifdef USE_TV
-  case STREAMTYPE_TV:
-    s->pos=newpos; /* no sense */
-    break;
-#endif
+  default:
+    return 0;
   }
 //   putchar('.');fflush(stdout);
 //} else {

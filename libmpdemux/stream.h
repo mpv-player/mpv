@@ -13,7 +13,6 @@
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
 #define STREAMTYPE_DVD  3      // libdvdread
 #define STREAMTYPE_MEMORY  4   // read data from memory area
-#define STREAMTYPE_TV	5      // FIXME!!! dummy
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
 #define STREAMTYPE_DS   8      // read from a demuxer stream
 #define STREAMTYPE_DVDNAV 9    // we cannot safely "seek" in this...

@@ -75,7 +75,7 @@ char* tv_param_adevice = NULL;
 
 int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
-    tvi_handle_t *tvh=(tvi_handle_t*)(demux->stream->priv);
+    tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;
 
     sh_video_t *sh_video = demux->video->sh;
@@ -111,7 +111,7 @@ int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     return 1;
 }
 
-int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
+static int open_tv(tvi_handle_t *tvh)
 {
     int i;
     tvi_functions_t *funcs = tvh->functions;
@@ -257,10 +257,19 @@ done:
 
 int demux_open_tv(demuxer_t *demuxer)
 {
-    tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->stream->priv);
-    sh_video_t *sh_video = NULL;
+    tvi_handle_t *tvh;
+    sh_video_t *sh_video;
     sh_audio_t *sh_audio = NULL;
-    tvi_functions_t *funcs = tvh->functions;
+    tvi_functions_t *funcs;
+    
+    if(!(tvh=tv_begin())) return 0;
+    if (!tv_init(tvh)) return 0;
+    if (!open_tv(tvh)){
+	tv_uninit(tvh);
+	return 0;
+    }
+    funcs = tvh->functions;
+    demuxer->priv=tvh;
     
     sh_video = new_sh_video(demuxer, 0);
 
@@ -387,7 +396,7 @@ no_audio:
 #if defined(USE_TV) && defined(HAVE_TV_V4L)
 int demux_close_tv(demuxer_t *demuxer)
 {
-    tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->stream->priv);
+    tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     return(tvh->functions->uninit(tvh->priv));
 }
 #endif
