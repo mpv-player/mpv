@@ -37,12 +37,37 @@ SHOULD	its recommanded to be done that way but its not strictly required
 
 			Syntax:
 
+Since nut heavly uses variable lenght fields the simplest way to describe it
+is using a pseudocode approach.
+
+			Conventions:
+
+The data tipes have a name, used in the bitstream syntax description, a short
+text description and a pseudocode (functional) definition, optional notes may
+follow:
+
+name	(text description)
+	functional definition
+	[Optional notes]
+
+The bitream syntax element have a tagname and a functional definition, they are
+presented in a bottom up approach, again optional notes may follow and are reproduced in the tag description:
+
+name:	(optional note)
+	functional definition
+	[Optional notes]
+
+The in-depth tag description follows the bitstream syntax.
+The functional definition has a C like syntax.
+
+
 		Type definitions:
 
-f(x)	n fixed bits in big-endian order
-u(x)	unsigned number encoded in x bits in MSB first order
 
-v
+f(n)	(n fixed bits in big-endian order)
+u(n)	(unsigned number encoded in n bits in MSB first order)
+
+v	(variable length value, unsigned)
 	value=0
 	do{
 		more_data			u(1)
@@ -50,38 +75,43 @@ v
 		value= 128*value + data
 	}while(more_data)
         
-s
+s	(variable length value, signed)
 	temp					v
 	temp++
 	if(temp&1) value= -(temp>>1)
 	else       value=  (temp>>1)
 
-b (binary data or string)
+b 	(binary data or string, to be use in vb, see below)
 	for(i=0; i<length; i++){
 		data[i]				u(8)
 	}
-	Note: strings MUST be encoded in utf8
+	[Note: strings MUST be encoded in utf8]
 
-vb
+vb	(variable lenght binary data or string)
 	length					v
 	value					b
 
 
 		Bitstream syntax:
-packet header
+
+		Common elements:
+
+packet header:
 	forward ptr				v
 
-align_byte
+align_byte: 
 	while(not byte aligned)
 		one				f(1)
 
-reserved_bytes
+reserved_bytes:
 	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
 		reserved			u(8)
-	a demuxer MUST ignore any reserved bytes
+	[a demuxer MUST ignore any reserved bytes
 	a muxer MUST NOT write any reserved bytes, as this would make it
-	inpossible to add new fields at the end of packets in the future in
-	a compatible way
+	 impossible to add new fields at the end of packets in the future in
+	 a compatible way]
+
+		Headers:
 
 main header:
 	main_startcode				f(64)
@@ -152,8 +182,9 @@ audio_stream_header:
 	reserved_bytes
 	checksum				u(32)
 
+		Basic Packets:
  
-frame
+frame:
 	frame_code				f(8)
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
@@ -168,7 +199,7 @@ frame
 		reserved			v
 	data
                 
-Index:
+index:
 	index_startcode				f(64)
 	packet header
 	stream_id				v
@@ -200,11 +231,13 @@ info_packet: (optional)
 	reserved_bytes
         checksum				u(32)
         
-sync_point
+sync_point:
 	frame_startcode				f(64)
 		global_timestamp		v
 
-file
+			Complete definition:
+
+file:
 	file_id_string
 	while(!eof && next_code != index_startcode){
 		main_header
@@ -226,9 +259,14 @@ file
 	}
 	index
                 
+
+
+			Tag description:
+
 forward_ptr
 	size of the packet (exactly the distance from the first byte of the
-	startcode of the current packet to the first byte of the following packet
+	startcode of the current packet to the first byte of the following
+	packet
 
 file_id_string
 	"nut/multimedia container\0"
@@ -238,13 +276,16 @@ file_id_string
 
 main_startcode
 	0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
+
 stream_starcode
 	0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
+
 frame_startcode
 	0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
+	
 	frame_startcodes SHOULD be placed immedeatly before a keyframe if the
 	previous frame of the same stream was a non-keyframe, unless such
-	non-keyframe - keyframe tansitions are very frequent
+	non-keyframe - keyframe transitions are very frequent
 
 index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
@@ -252,25 +293,27 @@ info_startcode
 	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
 version
-	2 for now
+	NUT version, the current values is 2
 
 max_distance
 	max distance of frame_startcodes, the distance may only be larger if
-	there is only a single frame between the 2 frame_startcodes
-	this can be used by the demuxer to detect damaged frame headers if the
-	damage results in a too long chain
-	SHOULD be set to <=32768 or at least <=65536 unless there is a very good
-	reason to set it higher otherwise reasonable error recovery will be
-	impossible
+	there is only a single frame between the 2 frame_startcodes this can 
+	be used by the demuxer to detect damaged frame headers if the damage
+	results in a too long chain
+	
+	SHOULD be set to <=32768 or at least <=65536 unless there is a very
+	good reason to set it higher otherwise reasonable error recovery will
+	be impossible
 
 max_index_distance
 	max distance of keyframes which are represented in the index, the
 	distance between consecutive entries A and B may only be larger if
 	there are no keyframes within this stream between A and B
-	SHOULD be set to <=32768 or at least <=65536 unless there is a very good
-	reason to set it higher
+	SHOULD be set to <=32768 or at least <=65536 unless there is a very
+	good reason to set it higher
 
 stream_id[FIXME]
+	Stream identifier
 	Note: streams with a lower relative class MUST have a lower relative id
 	so a stream with class 0 MUST always have a id which is lower then any
 	stream with class > 0
@@ -281,7 +324,7 @@ stream_class
 	1	audio
 	2	subtiles
 	3	metadata
-	Note the remaining values are reserved and MUST NOT be used
+	Note: the remaining values are reserved and MUST NOT be used
 	     a demuxer MUST ignore streams with reserved classes
 
 fourcc
@@ -305,8 +348,9 @@ time_base_nom / time_base_denom = time_base
 		44100		1		44100		1
 		44100		64		11025		16 
 		48000		1024		375		8  
-		Note: the advantage to using a large sample_rate_mul is that the
-		      timestamps need fewer bits
+
+		Note: the advantage to using a large sample_rate_mul is that
+		the timestamps need fewer bits
 
 global_time_base_nom / global_time_base_denom = global_time_base
 	the number of timer ticks per second
@@ -316,14 +360,15 @@ global_time_base_nom / global_time_base_denom = global_time_base
 
 global_timestamp
 	timestamp in global_time_base units
-	when a global_timestamp is encountered the last_timestamp of all streams
-	is set to the following:
+	when a global_timestamp is encountered the last_timestamp of all
+	streams is set to the following:
+	
 	ln= global_time_base_denom*time_base_nom
 	sn= global_timestamp
 	d1= global_time_base_nom
 	d2= time_base_denom
 	last_timestamp= (ln/d1*sn + ln%d1*sn/d1)/d2
-	Note, this calculation MUST be done with unsigned 64 bit integers, and 
+	Note: this calculation MUST be done with unsigned 64 bit integers, and 
 	is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
 
 msb_timestamp_shift
@@ -331,10 +376,10 @@ msb_timestamp_shift
 	MUST be <16
 
 decode_delay
-	maximum time between input and output for a codec, used to generate dts
-	from pts
-	is 0 for streams without b frames, and 1 for streams with b frames, may
-	be larger for future codecs
+	maximum time between input and output for a codec, used to generate
+	dts from pts
+	is set to 0 for streams without b frames, and set to 1 for streams with
+	b frames, may be larger for future codecs
         
 fixed_fps
 	1 indicates that the fps is fixed
@@ -348,17 +393,17 @@ frame_code
 	different from the first byte of any startcode
 
 flags[frame_code]
-	the bits of the flags from MSB to LSB are KD
+	first of the flags from MSB to LSB are called KD
 	if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
 	K is the keyframe_type 
 		0-> no keyframe, 
 		1-> keyframe, 
 	flags=4 can be used to mark illegal frame_code bytes
 	frame_code=78 must have flags=4
-	* frames MUST not depend(1) upon frames prior to the last
+	Note: frames MUST not depend(1) upon frames prior to the last 
 	  frame_startcode
-	depend(1) means dependancy on the container level (NUT) not dependancy
-	on the codec level
+	Important: depend(1) means dependancy on the container level (NUT) not
+	dependancy on the codec level
 
 stream_id_plus1[frame_code]
 	must be <250
@@ -377,8 +422,8 @@ data_size
 	data_size= data_size_lsb + data_size_msb*data_size_mul;
 
 coded_timestamp
-	if coded_timestamp < (1<<msb_timestamp_shift) then its a
-	lsb timestamp, otherwise its a full timestamp + (1<<msb_timestamp_shift)
+	if coded_timestamp < (1<<msb_timestamp_shift) then its a lsb
+	timestamp, otherwise its a full timestamp + (1<<msb_timestamp_shift)
 	lsb timestamps are converted to full timesamps by:
 	mask = (1<<msb_timestamp_shift)-1;
 	delta= last_timestamp - mask/2
@@ -387,7 +432,7 @@ coded_timestamp
 	available after the last frame_startcode with the current stream_id
         
 lsb_timestamp
-	least significant bits of the timestamp in time_base precission
+	least significant bits of the timestamp in time_base precision
         Example: IBBP display order
 		keyframe timestamp=0                     -> timestamp=0
 		frame                    lsb_timestamp=3 -> timestamp=3
@@ -405,8 +450,8 @@ lsb_timestamp
 dts
 	dts are calculated by using a decode_delay+1 sized buffer for each 
 	stream, into which the current pts is inserted and the element with
-	the smallest value is removed, this is then the current dts
-	this buffer is initalized with decode_delay -1 elements
+	the smallest value is removed, this is then the current dts this
+	buffer is initalized with decode_delay -1 elements
 	all frames with dts == timestamp must be monotone, that means a frame
 	which occures later in the stream must have a larger or equal dts
 	then an earlier frame
@@ -487,8 +532,7 @@ value
 	value of this name/type pair
 	
 stuffing
-        0x80 can be placed infront of any type v entry for stuffing
-	      purposes
+        0x80 can be placed in front of any type v entry for stuffing purposes
 
 info_table[][2]={
 	{NULL			,  NULL }, // end
@@ -520,9 +564,9 @@ stream_header (id=n)
 
 headers may be repated, but if they are then they MUST all be repeated together
 and repeated headers MUST be identical
-headers MAY only repeated at the closest possible positions after 2^x where x is 
-an integer and the file end, so the headers may be repeated at 4102 if thats the
-closest possition after 2^12=4096 at which the headers can be placed
+headers MAY only repeated at the closest possible positions after 2^x where x
+is an integer and the file end, so the headers may be repeated at 4102 if that
+is the closest possition after 2^12=4096 at which the headers can be placed
 
 headers MUST be placed at least at the begin of the file and immedeatly before
 the index or at the file end if there is no index
@@ -544,9 +588,9 @@ the info_packet can be repeated, it can also contain different names & values
 each time but only if also the time is different
 Info packets can be used to describe the file or some part of it (chapters)
 
-info packets, SHOULD be placed at the begin of the file at least
-for realtime streaming info packets will normally be transmitted when they apply
-for example, the current song title & artist of the currently shown music video
+info packets, SHOULD be placed at the begin of the file at least for realtime
+streaming info packets will normally be transmitted when they apply for
+example, the current song title & artist of the currently shown music video
 
 		Unknown packets
 MUST be ignored by the demuxer
@@ -554,8 +598,8 @@ MUST be ignored by the demuxer
 			demuxer (non-normative)
 
 in the absence of valid header at beginning, players SHOULD search for backup
-headers starting at offset 2^x for each x players SHOULD end their search from a
-particular offset when any startcode is found (including syncpoint)
+headers starting at offset 2^x for each x players SHOULD end their search from
+a particular offset when any startcode is found (including syncpoint)
 
 
 			Sample code (GPL, & untested)
