@@ -21,8 +21,6 @@ FOR THE LAST RC-RELEASE:
      UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
      no matter if panscan is used or not...
    - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
-   - Dec 28: [BUG] nice little bug somewhere (config/playtree) - FIXED?
-     (It's in new-conf. I can provide shell access...:)
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
