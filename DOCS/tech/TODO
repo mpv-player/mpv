@@ -4,18 +4,19 @@ TODO:
 
 FOR THE LAST RC-RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-- fix the broken -geometry option changes (fbdev, xv etc)
+- fix iconv issues:
+   - ogm subtitles crash if compiled with libiconv
+   - -subcp crash / no effect
+- fix the broken -geometry option changes (fbdev, xv etc) - FIXED?
 - fix vo_svga  (unusably broken. On my Cirrus, and Geforce2, confirmed)
    - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
-- fix the constant 200-300ms DVD/DVB/VOB audio delay (-delay -0.25)
-  UPDATE: I (A'rpi) could reproduce with the "Metal Jacket" DVD.
 - fix partial -dr + ffmpeg + B frames (different stride per frame)
 - remove or fix -vop lavcdeint
 - fix locale problems (add common float parser / mp_sscanf())
 - check files at FTP/incoming/!to_be_fixed/*
 - fix Gabucino's bugs:
    - new-conf prints meaningless error messages of bad options (actually none)
-     (see also: Dec 17: [BUG] mencoder prints meaningless message)
+     (see also: Dec 17: [BUG] mencoder prints meaningless message) - FIXED?
    - supporting Noir.rm? Garbled image now. Maybe codec scales?
    - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
    - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
@@ -42,6 +43,8 @@ FOR THE v0.90 RELEASE:
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
+- fix the constant 200-300ms DVD/DVB/VOB audio delay (-delay -0.25)
+  UPDATE: I (A'rpi) could reproduce with the "Metal Jacket" DVD.
 - display OSD and subtitles using DVB card's OSD
 
 mpg demuxer:
