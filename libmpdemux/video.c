@@ -19,6 +19,9 @@
 #include "parse_es.h"
 #include "mpeg_hdr.h"
 
+/* biCompression constant */
+#define BI_RGB        0L
+
 static mp_mpeg_header_t picture;
 
 int video_read_properties(sh_video_t *sh_video){
@@ -28,8 +31,18 @@ demux_stream_t *d_video=sh_video->ds;
 switch(d_video->demuxer->file_format){
  case DEMUXER_TYPE_AVI:
  case DEMUXER_TYPE_ASF: {
-  // display info:
-    sh_video->format=sh_video->bih->biCompression;
+  // display info: 
+  
+    if(sh_video->bih->biCompression == BI_RGB &&
+       (sh_video->video.fccHandler == mmioFOURCC('D', 'I', 'B', ' ') ||
+        sh_video->video.fccHandler == mmioFOURCC('R', 'G', 'B', ' ') ||
+        sh_video->video.fccHandler == mmioFOURCC('R', 'A', 'W', ' ') ||
+        sh_video->video.fccHandler == 0)) {
+                sh_video->format = mmioFOURCC(0, 'R', 'G', 'B') | sh_video->bih->biBitCount;
+    }
+    else 					    
+        sh_video->format=sh_video->bih->biCompression;
+
     sh_video->disp_w=sh_video->bih->biWidth;
     sh_video->disp_h=abs(sh_video->bih->biHeight);
 
