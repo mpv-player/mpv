@@ -1294,6 +1294,7 @@ fi
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
   _vosrc="$_vosrc vo_directfb.c"
+  _vomodules="directfb $_vomodules"
   _ld_directfb='-ldirectfb'
 else
   _def_directfb='#undef HAVE_DIRECTFB'
@@ -2172,7 +2173,11 @@ if test "$_xanim" = auto ; then
         done
     fi
     test "$_xanimlibdir" && _xanim=yes
-    echores "yes (found: $_xanimlibdir)"
+    if test "$_xanim" == yes ; then
+      echores "yes (found: $_xanimlibdir)"
+    else
+      echores "no suitable directory found"
+    fi
   else
     echores "dl support needed"
   fi
@@ -2603,7 +2608,7 @@ X11_INC = $_inc_x11
 X11DIR = $_ld_x11
 
 # video output
-X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock 
+X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
