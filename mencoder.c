@@ -937,19 +937,6 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
 
 } // demuxer2
 
-#ifdef USE_DVDREAD
-// DVD sub:
- if(vo_spudec){
-     unsigned char* packet=NULL;
-     int len;
-     while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
-	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
-	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
-     }
-     spudec_heartbeat(vo_spudec,90000*d_video->pts);
- }
-#endif
-
 ptimer_start = GetTimerMS();
 
 switch(mux_v->codec){
@@ -1098,6 +1085,7 @@ if(sh_audio && !demuxer2){
 	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
      }
      spudec_heartbeat(vo_spudec,90000*d_video->pts);
+     vo_osd_changed(OSDTYPE_SPU);
  }
 #endif
 
