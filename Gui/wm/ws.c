@@ -772,13 +772,13 @@ void wsFullScreen( wsTWindow * win )
   {
    vo_x11_ewmh_fullscreen( _NET_WM_STATE_REMOVE ); // removes fullscreen state if wm supports EWMH
    if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // shouldn't be needed with EWMH fs
-   {
-   win->X=win->OldX;
-   win->Y=win->OldY;
-   win->Width=win->OldWidth;
-   win->Height=win->OldHeight;
-   decoration=win->Decorations;
-   }
+    {
+     win->X=win->OldX;
+     win->Y=win->OldY;
+     win->Width=win->OldWidth;
+     win->Height=win->OldHeight;
+     decoration=win->Decorations;
+    }
 
 #ifdef ENABLE_DPMS
    wsScreenSaverOn( wsDisplay );
@@ -789,12 +789,12 @@ void wsFullScreen( wsTWindow * win )
   else
    {
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // shouldn't be needed with EWMH fs
-    {
-    win->OldX=win->X; win->OldY=win->Y;
-    win->OldWidth=win->Width; win->OldHeight=win->Height;
-    win->X=wsOrgX; win->Y=wsOrgY;
-    win->Width=wsMaxX; win->Height=wsMaxY;
-    }
+     {
+      win->OldX=win->X; win->OldY=win->Y;
+      win->OldWidth=win->Width; win->OldHeight=win->Height;
+      win->X=wsOrgX; win->Y=wsOrgY;
+      win->Width=wsMaxX; win->Height=wsMaxY;
+     }
 
     win->isFullScreen=True;
 #ifdef ENABLE_DPMS
@@ -805,19 +805,19 @@ void wsFullScreen( wsTWindow * win )
    }
 
   if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // shouldn't be needed with EWMH fs
- {
- vo_x11_decoration( wsDisplay,win->WindowID,decoration );
- vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
- vo_x11_setlayer( wsDisplay,win->WindowID,win->isFullScreen );
+   {
+    vo_x11_decoration( wsDisplay,win->WindowID,decoration );
+    vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
+    vo_x11_setlayer( wsDisplay,win->WindowID,win->isFullScreen );
 
-if ((!(win->isFullScreen)) & vo_ontop) vo_x11_setlayer(wsDisplay, win->WindowID,1);
+    if ((!(win->isFullScreen)) & vo_ontop) vo_x11_setlayer(wsDisplay, win->WindowID,1);
 
- XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
- }
-    
+    XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
+   }
+
  if ( vo_wm_type == 0 && !(vo_fsmode&16) )
   {
-  XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
+   XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
   }
 
 
