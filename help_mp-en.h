@@ -117,7 +117,7 @@ static char help_text[]=
 #define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
 #define MSGTR_DVDinvalidChapter "Invalid DVD chapter number: %d\n"
 #define MSGTR_DVDnumAngles "There are %d angles in this DVD title.\n"
-#define MSGTR_DVDinvaludAngle "Invalid DVD angle number: %d\n"
+#define MSGTR_DVDinvalidAngle "Invalid DVD angle number: %d\n"
 #define MSGTR_DVDnoIFO "Can't open the IFO file for DVD title %d.\n"
 #define MSGTR_DVDnoVOBs "Can't open title VOBS (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD successfully opened!\n"
@@ -149,7 +149,7 @@ static char help_text[]=
 #define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file-format!\n"
 
 #define MSGTR_UsingNINI "Using NON-INTERLEAVED Broken AVI file-format!\n"
-#define MSGTR_CouldntDetFNo "Couldn't determine number of frames (for absoulte seek)  \n"
+#define MSGTR_CouldntDetFNo "Couldn't determine number of frames (for absolute seek)  \n"
 #define MSGTR_CantSeekRawAVI "Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n"
 #define MSGTR_CantSeekFile "Can't seek in this file!  \n"
 
