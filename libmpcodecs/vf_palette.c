@@ -14,18 +14,22 @@
 
 //===========================================================================//
 
+// commented out 16 and 15 bit output support, because the conversion
+// routines are incorrrect.  they assume the palette to be of the same
+// depth as the output, which is incorrect. --Joey
+
 static unsigned int bgr_list[]={
     IMGFMT_BGR32,
     IMGFMT_BGR24,
-    IMGFMT_BGR16,
-    IMGFMT_BGR15,
+//    IMGFMT_BGR16,
+//    IMGFMT_BGR15,
     0
 };
 static unsigned int rgb_list[]={
     IMGFMT_RGB32,
     IMGFMT_RGB24,
-    IMGFMT_RGB16,
-    IMGFMT_RGB15,
+//    IMGFMT_RGB16,
+//    IMGFMT_RGB15,
     0
 };
 
