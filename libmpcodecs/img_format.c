@@ -11,7 +11,7 @@ char *vo_format_name(int format)
 	case IMGFMT_RGB15: return("RGB 15-bit");
 	case IMGFMT_RGB16: return("RGB 16-bit");
 	case IMGFMT_RGB24: return("RGB 24-bit");
-	case IMGFMT_RGB32: return("RGB 32-bit");
+//	case IMGFMT_RGB32: return("RGB 32-bit");
 	case IMGFMT_BGR1: return("BGR 1-bit");
 	case IMGFMT_BGR4: return("BGR 4-bit");
 	case IMGFMT_BG4B: return("BGR 4-bit per byte");
@@ -19,7 +19,11 @@ char *vo_format_name(int format)
 	case IMGFMT_BGR15: return("BGR 15-bit");
 	case IMGFMT_BGR16: return("BGR 16-bit");
 	case IMGFMT_BGR24: return("BGR 24-bit");
-	case IMGFMT_BGR32: return("BGR 32-bit");
+//	case IMGFMT_BGR32: return("BGR 32-bit");
+	case IMGFMT_ABGR: return("ABGR");
+	case IMGFMT_BGRA: return("BGRA");
+	case IMGFMT_ARGB: return("ARGB");
+	case IMGFMT_RGBA: return("RGBA");
 	case IMGFMT_YVU9: return("Planar YVU9");
 	case IMGFMT_IF09: return("Planar IF09");
 	case IMGFMT_YV12: return("Planar YV12");
