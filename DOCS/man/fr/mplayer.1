@@ -1,4 +1,4 @@
-.\" synced with 1.825
+.\" synced with 1.832
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "18 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "24 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -493,13 +493,13 @@ lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 .B \-colorkey <nombre>
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
-Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix, xover et directx uniquement.
 .
 .TP
 .B \-nocolorkey
 Désactive la couleur de transparence.
-Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
 .
 .TP
@@ -2408,7 +2408,8 @@ nouveau mode d'affichage vidéo.
 Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .
 .TP
-.B \-wid <window\ ID> (voir aussi \-guiwid) (X11 et DirectX uniquement)
+.B \-wid <window\ ID> (voir aussi \-guiwid, \-geometry) (X11 et DirectX \
+uniquement)
 Dit à MPlayer de s'attacher à une fenêtre existante.
 Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
