@@ -45,6 +45,7 @@
 
 #define MAX_STREAM_PROTOCOLS 10
 
+#define STREAM_CTRL_RESET 0
 
 #ifdef STREAMING
 #include "network.h"
