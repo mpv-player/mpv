@@ -46,7 +46,6 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 		// has been called earlier in the filter chain
 		// since the last put_image. This is reasonable
 		// because we're handling a duplicate frame!
-		puts("hard dup!");
 		if (put_image(vf, vf->priv->last_mpi))
 			return CONTROL_TRUE;
 		break;
