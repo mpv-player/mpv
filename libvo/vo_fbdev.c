@@ -1037,7 +1037,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		image_width=width;
 		image_height=height;
 	    }
-		geometry(&x_offset,&y_offset,fb_xres,fb_yres,image_width,image_height);
+		geometry(&x_offset,&y_offset,fb_xres,fb_yres,image_width,image_height,fs);
 
 		if(vidix_init(width,height,x_offset,y_offset,image_width,
 			    image_height,format,fb_bpp,
@@ -1061,7 +1061,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		return 1;
 	    }
 
-	    geometry(&x_offset,&y_offset,fb_xres,fb_yres,out_width,out_height);
+	    geometry(&x_offset,&y_offset,fb_xres,fb_yres,out_width,out_height,fs);
 
 	    L123123875 = frame_buffer + (out_width - in_width) * fb_pixel_size /
 		    2 + ( (out_height - in_height) / 2 ) * fb_line_len +

@@ -2,8 +2,6 @@
 #ifndef __GEOMETRY_H
 #define __GEOMETRY_H
 
-#include "aspect.h"
-
 extern char *vo_geometry;
 int geometry(int *xpos, int *ypos, int scrw, int scrh, int vidw, int vidh, int fs);
 
