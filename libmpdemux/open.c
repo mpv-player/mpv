@@ -14,7 +14,7 @@
 #include <sys/cdrio.h>
 #endif
 
-#include "../cfgparser.h"
+#include "../m_config.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "mf.h"
@@ -897,6 +897,8 @@ void dvd_close(dvd_priv_t *d) {
   ifoClose(d->vmg_file);
   DVDCloseFile(d->title);
   DVDClose(d->dvd);
+  dvd_chapter = 1;
+  dvd_last_chapter = 0;
 }
 
 #endif
