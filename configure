@@ -3313,7 +3313,7 @@ EOF
     else
         _def_directfb_version='#undef DIRECTFBVERSION'
 	_directfb=no
-	echores "no (version =>0.9.13 required)"
+	echores "no (version >=0.9.13 required)"
     fi
   else
     _directfb=no
