@@ -198,8 +198,12 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_audio->channels= codec->channels;
             sh_audio->samplerate= codec->sample_rate;
             if(verbose>=1) print_wave_header(sh_audio->wf);
-            demuxer->audio->id=i;
-            demuxer->audio->sh= demuxer->a_streams[i];
+            if(demuxer->audio->id != i && demuxer->audio->id != -1)
+                st->discard= AVDISCARD_ALL;
+            else{
+                demuxer->audio->id = i;
+                demuxer->audio->sh= demuxer->a_streams[i];
+            }
             break;}
         case CODEC_TYPE_VIDEO:{
             BITMAPINFOHEADER *bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
@@ -237,9 +241,15 @@ int demux_open_lavf(demuxer_t *demuxer){
     int  	biYPelsPerMeter;
     int 	biClrUsed;
     int 	biClrImportant;*/
-            demuxer->video->id=i;
-            demuxer->video->sh= demuxer->v_streams[i];            
+            if(demuxer->video->id != i && demuxer->video->id != -1)
+                st->discard= AVDISCARD_ALL;
+            else{
+                demuxer->video->id = i;
+                demuxer->video->sh= demuxer->v_streams[i];
+            }
             break;}
+        default:
+            st->discard= AVDISCARD_ALL;
         }
     }
     
