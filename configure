@@ -212,6 +212,7 @@ Codecs:
   --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
+  --disable-toolame      disable Toolame (MPEG layer 2 audio) support in mencoder [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
   --disable-mp3lib       disable builtin mp3lib [enabled]
   --disable-liba52       disable builtin liba52 [enabled]
@@ -326,6 +327,7 @@ multiple paths separated by ':'):
   --with-dtslibdir=DIR     libdts library in DIR  (*)
   --with-dtsincdir=DIR     libdts header in DIR (*)
   --with-livelibdir=DIR    LIVE.COM Streaming Media libraries in DIR
+  --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
   --with-bio2jack=DIR      libbio2jack.a in DIR
@@ -1258,6 +1260,7 @@ _esd=auto
 _jack=auto
 _liblzo=auto
 _mad=auto
+_toolame=auto
 _vorbis=auto
 _theora=auto
 _mp3lib=yes
@@ -1429,6 +1432,7 @@ for ac_option do
   --disable-jack)	_jack=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --disable-toolame)	_toolame=no	;;
   --enable-liblzo)	_liblzo=yes	;;
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
@@ -1624,6 +1628,9 @@ for ac_option do
     ;;
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-toolamedir=*)
+    _toolamedir=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -4844,6 +4851,33 @@ else
 fi
 echores "$_mad"
 
+echocheck "Toolame"
+if test "$_toolame" = auto ; then
+  cat > $TMPC <<EOF
+#include <toolame.h>
+int main(void) { toolame_init(); return 0; }
+EOF
+  _toolame=no
+  _toolame_extraflags=""
+  _toolame_lib="-ltoolame"
+  if test -n "$_toolamedir"; then
+    _toolame_extraflags="-I$_toolamedir -L$_toolamedir"
+  fi
+  cc_check $_toolame_extraflags $_toolame_lib -lm && _toolame=yes
+fi
+if test "$_toolame" = yes ; then
+  _def_toolame='#define HAVE_TOOLAME 1'
+  _codecmodules="$_codecmodules toolame"
+else
+  _def_toolame='#undef HAVE_TOOLAME'
+  _toolame_lib=""
+  _nocodecmodules="toolame $_nocodecmodules"
+fi
+if test -z "$_toolamedir" ; then
+  echores "$_toolame"
+else
+  echores "$_toolame (using $_toolamedir)"
+fi
 
 echocheck "OggVorbis support"
 if test "$_vorbis" = auto ; then
@@ -6351,6 +6385,9 @@ XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
 MACOSX_FRAMEWORKS = $_macosx_frameworks
+TOOLAME=$_toolame
+TOOLAME_EXTRAFLAGS=$_toolame_extraflags
+TOOLAME_LIB=$_toolame_lib
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -6966,6 +7003,7 @@ $_def_xdpms
 $_def_aa
 $_def_caca
 $_def_tga
+$_def_toolame
 
 /* used by GUI: */
 $_def_xshape

@@ -5105,6 +5105,28 @@ print additional options and informations on presets settings.
 .PD 1
 .
 .
+.SS toolame (\-toolameopts)
+.
+.TP
+.B br=<0\-384>
+specify bitrate in kBit (CBR only)
+.TP
+.B mode=<stereo  |  jstereo  |  mono  |  dual>
+(default: mono for 1-channel audio, stereo otherwise)
+.TP
+.B psy=<0\-3>
+psychoacoustic model, default is 2
+.TP
+.B errprot=<0 | 1>
+include error protection
+.TP
+.B debug=<0\-10>
+debug level
+.RE
+
+.PD 1
+.
+.
 .SS lavc (\-lavcopts)
 Many lavc options are very specialized and tersely documented.
 Read the source for full details.

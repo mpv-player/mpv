@@ -39,6 +39,11 @@ ifeq ($(JPEG),yes)
 VIDEO_SRCS += vd_ijpg.c
 endif
 
+ifeq ($(TOOLAME),yes)
+AUDIO_SRCS += ae_toolame.c
+EXTRA_INC += $(TOOLAME_EXTRAFLAGS)
+endif
+
 SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS) img_format.c
 OBJS=$(SRCS:.c=.o)
 

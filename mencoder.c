@@ -16,6 +16,7 @@
 #define ACODEC_VBRMP3 2
 #define ACODEC_NULL 3
 #define ACODEC_LAVC 4
+#define ACODEC_TOOLAME 5
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,6 +94,11 @@ static void    *lavc_abuf = NULL;
 extern int      avcodec_inited;
 
 static uint32_t lavc_find_atag(char *codec);
+#endif
+
+#ifdef HAVE_TOOLAME
+#include "libmpcodecs/ae_toolame.h"
+static mpae_toolame_ctx *mpae_toolame;
 #endif
 
 int vo_doublebuffering=0;
@@ -987,6 +993,70 @@ case ACODEC_LAVC:
 
     break;
 #endif
+
+#ifdef HAVE_TOOLAME
+case ACODEC_TOOLAME:
+{
+    int cn = audio_output_channels ? audio_output_channels : sh_audio->channels;
+    int sr = force_srate ? force_srate : sh_audio->samplerate;
+    int br;
+
+    mpae_toolame = mpae_init_toolame(cn, sr);
+    if(mpae_toolame == NULL)
+    {
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Couldn't open toolame codec, exiting\n");
+	exit(1);
+    }
+    
+    br = mpae_toolame->bitrate;
+
+    mux_a->wf = malloc(sizeof(WAVEFORMATEX)+256);
+    mux_a->wf->wFormatTag = 0x50;
+    mux_a->wf->nChannels = cn;
+    mux_a->wf->nSamplesPerSec = sr;
+    mux_a->wf->nAvgBytesPerSec = 1000 * (br / 8);
+    mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
+    mux_a->h.dwScale = (mux_a->wf->nAvgBytesPerSec * 1152)/ mux_a->wf->nSamplesPerSec; /* for cbr */
+
+    if ((mux_a->wf->nAvgBytesPerSec *
+	1152) % mux_a->wf->nSamplesPerSec) {
+	mux_a->h.dwScale = 1152;
+	mux_a->h.dwRate = sr;
+	mux_a->h.dwSampleSize = 0; // Blocksize not constant
+    } else {
+	mux_a->h.dwSampleSize = mux_a->h.dwScale;
+    }
+    mux_a->wf->nBlockAlign = mux_a->h.dwScale;
+    mux_a->h.dwSuggestedBufferSize = audio_preload*mux_a->wf->nAvgBytesPerSec;
+    mux_a->h.dwSuggestedBufferSize -= mux_a->h.dwSuggestedBufferSize % mux_a->wf->nBlockAlign;
+
+    mux_a->wf->cbSize = 12;
+    mux_a->wf->wBitsPerSample = 0; /* does not apply */
+    ((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->wID = 1;
+    ((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->fdwFlags = 2;
+    ((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nBlockSize = mux_a->wf->nBlockAlign;
+    ((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nFramesPerBlock = 1;
+    ((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nCodecDelay = 0;
+	
+    // Fix allocation    
+    mux_a->wf = realloc(mux_a->wf, sizeof(WAVEFORMATEX)+mux_a->wf->cbSize);
+
+    // setup filter:
+    if (!init_audio_filters(
+	sh_audio,
+	sh_audio->samplerate, sh_audio->channels,
+	sh_audio->sample_format, sh_audio->samplesize,
+	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
+	AFMT_S16_NE, 2,
+	mux_a->h.dwSuggestedBufferSize,
+	mux_a->h.dwSuggestedBufferSize*2)) {
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't find matching filter / ao format!\n");
+	exit(1);
+    }
+
+    break;
+}
+#endif
 }
 
 if (verbose>1) print_wave_header(mux_a->wf);
@@ -1135,6 +1205,30 @@ if(sh_audio){
 		/*
 		 * work around peculiar lame behaviour
 		 */
+		if (mux_a->buffer_len < mux_a->wf->nBlockAlign) {
+		    len = 0;
+		} else {
+		    len = mux_a->wf->nBlockAlign*(mux_a->buffer_len/mux_a->wf->nBlockAlign);
+		}
+	    } else { /* VBR */
+		len = mux_a->buffer_len;
+	    }
+	    if (mux_v->timer == 0) mux_a->h.dwInitialFrames++;
+	}
+#endif
+#ifdef HAVE_TOOLAME
+	if((mux_a->codec == ACODEC_TOOLAME) && (mpae_toolame != NULL)){
+	    int  size, rd_len;
+	    uint8_t buf[1152*2*2];
+	    size = 1152 * 2 * mux_a->wf->nChannels;
+
+	    rd_len = dec_audio(sh_audio, buf, size);
+	    if(rd_len != size)
+		break;
+
+	    // Encode one frame
+	    mux_a->buffer_len += mpae_encode_toolame(mpae_toolame, mux_a->buffer + mux_a->buffer_len, 1152, (void*)buf, mux_a->buffer_size-mux_a->buffer_len);
+	    if (mux_a->h.dwSampleSize) { /* CBR */
 		if (mux_a->buffer_len < mux_a->wf->nBlockAlign) {
 		    len = 0;
 		} else {
