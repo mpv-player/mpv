@@ -245,8 +245,9 @@ struct rivatv_info {
 	unsigned long picture_base;	 /* direct pointer to video picture	       */
 	unsigned long picture_offset;	 /* offset of video picture in frame buffer    */
 //	struct rivatv_dma dma;           /* DMA structure                              */
-    unsigned int next_frame;
+    unsigned int cur_frame;
 	unsigned int num_frames;             /* number of buffers                          */
+	int bps;			/* bytes per line */
 };
 typedef struct rivatv_info rivatv_info;
 
@@ -451,16 +452,12 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
     }
 }
 
-static void nv_waitidle(struct rivatv_info *info ){
-     while (info->chip.PGRAPH[0x1C0] & 1) {}
-}
-
 static void nv_getscreenproperties(struct rivatv_info *info){
   uint32_t bpp=0;
   info->chip.lock(&info->chip, 0);
   /*get screen depth*/
   VID_WR08(info->chip.PCIO, 0x03D4,0x28);
-  bpp = VID_RD08(info->chip.PCIO,0x03D5);
+  bpp = VID_RD08(info->chip.PCIO,0x03D5)&0x3;
   if(bpp==3)bpp=4;
   if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           
   else info->depth = bpp*8;
@@ -489,6 +486,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 	int x=info->wx?info->wx:8, y=info->wy?info->wy:8;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
+	int i;
 
     size = info->buffer_size;
 	base = info->picture_offset;
@@ -497,12 +495,37 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     nv_getscreenproperties(info);
 
     if(info->depth){
-        bps = info->screen_x * ((info->depth+1)/8);
+//        bps = info->screen_x * ((info->depth+1)/8);
     	/* get pan offset of the physical screen */
      	pan = rivatv_overlay_pan (info);
     	/* adjust window position depending on the pan offset */
-    	x = info->wx - (pan % bps) * 8 / info->depth;
+        bps = 0;
+	info->chip.lock (&info->chip, 0);
+	for (i = 0; (i < 1024) && (bps == 0); i++)
+	{
+		if (info->chip.arch != NV_ARCH_03)
+			bps = info->chip.PGRAPH[0x00000670/4];
+		else
+			bps = info->chip.PGRAPH[0x00000650/4];
+	}
+	if (bps == 0)
+	{
+		fprintf(stderr, "[nvidia_vid] reading bps returned 0!!!\n");
+		if (info->bps != 0)
+			bps = info->bps;
+	}
+	else
+	{
+		info->bps = bps;
+	}
+
+    	if (bps != 0)
+	{
+	x = info->wx - (pan % bps) * 8 / info->depth;
     	y = info->wy - (pan / bps);
+	}
+    }
+    
 	    /* adjust negative output window variables */
 	    if (x < 0) {
 		  lwidth = info->d_width + x;
@@ -516,7 +539,6 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 //		offset += (-window->y * port->vld_height / window->height * port->org_width) << 1;
 	      y = 0;
 	    }
-    }
 
 	switch (info->chip.arch) {
 	case NV_ARCH_10:
@@ -735,8 +757,9 @@ int vixInit(void){
  
    
   rivatv_enable_PMEDIA(info);
-  info->next_frame = 0;
+  info->cur_frame = 0;
   info->use_colorkey = 0;
+
   return 0;
 }
 
@@ -833,7 +856,7 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
 }
 
 int vixPlaybackOn(void){
-    rivatv_overlay_start(info,info->next_frame);
+    rivatv_overlay_start(info,info->cur_frame);
     return 0;
 }
 
@@ -861,6 +884,6 @@ int vixPlaybackFrameSelect(unsigned int frame){
 //  printf("selecting buffer %d\n", frame);
   rivatv_overlay_start(info, frame);
   if (info->num_frames >= 1)
-	  info->next_frame = (frame+1)%info->num_frames;
+	  info->cur_frame = frame/*(frame+1)%info->num_frames*/;
   return 0;
 }
