@@ -526,7 +526,7 @@ if(strncmp("dvd://",filename,6) == 0){
 #endif
 	}
         stream=new_stream(f,STREAMTYPE_STREAM);
-//    if (strcmp(url->protocol, "ftp")) { // ftp is handled somewhere else
+    if (strcmp(url->protocol, "ftp")) { // ftp is handled somewhere else
 	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
 	  url_free(url);
@@ -535,7 +535,7 @@ if(strncmp("dvd://",filename,6) == 0){
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
 	url_free(url);
 	return stream;
-//	}
+	}
   }
   }
 #endif
