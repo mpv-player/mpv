@@ -11,8 +11,6 @@
  *	2001-02-19	mode bug fixes, 0.0.7
  *	2001-07-05	fixed scrolling issues, engine initialization,
  *			and minor mode tweaking, 0.0.9
- *	2001-09-06	console switching fixes, blanking fixes,
- *			0.1.0
  *
  *	2001-09-07	Radeon VE support
  *	2001-09-10	Radeon VE QZ support by Nick Kurshev <nickols_k@mail.ru>
@@ -26,14 +24,32 @@
  *	2001-09-13	merge Ani Joshi radeonfb-0.1.0:
  *			console switching fixes, blanking fixes,
  *			0.1.0-ve.0
+ *	2001-09-18	Radeon VE, M6 support (by Nick Kurshev <nickols_k@mail.ru>),
+ *			Fixed bug of rom bios detection on VE (by NK),
+ *                      Minor code cleanup (by NK),
+ *			Enable CRT port on VE (by NK),
+ *			Disable SURFACE_CNTL because mplayer doesn't work
+ *			propertly (by NK)
+ *			0.1.0-ve.1
  *
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
- */
+ * LIMITATIONS: on dualhead Radeons (VE, M6, M7) driver doesn't work in
+ * dual monitor configuration. TVout is not supported too. M7 chips currently
+ * are not supported (Need volunteers to test its work). Probably these bugs
+ * can be solved by importing XFree86 code, which has ATI's support.
+ *
+ * Mini-HOWTO: This driver doesn't accept any options. It only switches your
+ * video card to graphics mode. Standard way to change video modes and other
+ * video attributes is using 'fbset' utility.
+ * Sample:
+ * 
+ * #!/bin/sh
+ * fbset -fb /dev/fb0 -xres 640 -yres 480 -depth 32 -vxres 640 -vyres 480 -left 70 -right 50 -upper 70 -lower 70 -laced false -pixclock 39767
+ *
+*/
 
-
-#define RADEON_VERSION	"0.1.0-ve.0"
-
+#define RADEON_VERSION	"0.1.0-ve.1"
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -78,9 +94,39 @@ enum radeon_chips {
 	RADEON_QF,
 	RADEON_QG,
 	RADEON_QY,
-	RADEON_QZ
+	RADEON_QZ,
+	RADEON_LY,
+	RADEON_LZ,
+	RADEON_LW
 };
 
+enum radeon_montype
+{
+    MT_NONE,
+    MT_CRT, /* CRT-(cathode ray tube) analog monitor. (15-pin VGA connector) */
+    MT_LCD, /* Liquid Crystal Display */
+    MT_DFP, /* DFP-digital flat panel monitor. (24-pin DVI-I connector) */
+    MT_CTV, /* Composite TV out (not in VE) */
+    MT_STV  /* S-Video TV out (probably in VE only) */
+};
+
+enum radeon_ddctype
+{
+    DDC_NONE_DETECTED,
+    DDC_MONID,
+    DDC_DVI,
+    DDC_VGA,
+    DDC_CRT2
+};
+
+enum radeon_connectortype
+{
+    CONNECTOR_NONE,
+    CONNECTOR_PROPRIETARY,
+    CONNECTOR_CRT,
+    CONNECTOR_DVI_I,
+    CONNECTOR_DVI_D
+};
 
 static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QD, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QD},
@@ -89,6 +135,9 @@ static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QG, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QG},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QY, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QY},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QZ, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QZ},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LY, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LY},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LZ, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LZ},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LW, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LW},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, radeonfb_pci_table);
@@ -177,7 +226,9 @@ struct radeon_regs {
 	int bpp;
 	u32 crtc_gen_cntl;
 	u32 crtc_ext_cntl;
+#if defined(__BIG_ENDIAN)
 	u32 surface_cntl;
+#endif
 	u32 dac_cntl;
 	u32 dda_config;
 	u32 dda_on_off;
@@ -194,6 +245,12 @@ struct radeonfb_info {
 
 	char name[14];
 	char ram_type[12];
+
+	int hasCRTC2;
+	int crtDispType;
+	int dviDispType;
+	int hasTVout;
+	int isM7;
 
 	u32 mmio_base_phys;
 	u32 fb_base_phys;
@@ -592,9 +649,24 @@ module_exit(radeonfb_exit);
 #endif
 
 
-MODULE_AUTHOR("Ani Joshi");
-MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset");
+MODULE_AUTHOR("Ani Joshi. (Radeon VE extensions by Nick Kurshev)");
+MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERSION);
 
+static char * GET_MON_NAME(int type)
+{
+  char *pret;
+  switch(type)
+  {
+    case MT_NONE: pret = "no"; break;
+    case MT_CRT:  pret = "CRT"; break;
+    case MT_DFP:  pret = "DFP"; break;
+    case MT_LCD:  pret = "LCD"; break;
+    case MT_CTV:  pret = "CTV"; break;
+    case MT_STV:  pret = "STV"; break;
+    default:      pret = "Unknown";
+  }
+  return pret;
+}
 
 
 static int radeonfb_pci_register (struct pci_dev *pdev,
@@ -673,12 +745,34 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 			strcpy(rinfo->name, "Radeon QG ");
 			break;
 		case PCI_DEVICE_ID_RADEON_QY:
-			strcpy(rinfo->name, "Radeon VE QY");
+			rinfo->hasCRTC2 = 1;
+			strcpy(rinfo->name, "Radeon VE QY ");
 			break;
 		case PCI_DEVICE_ID_RADEON_QZ:
-			strcpy(rinfo->name, "Radeon VE QZ");
+			rinfo->hasCRTC2 = 1;
+			strcpy(rinfo->name, "Radeon VE QZ ");
+			break;
+		case PCI_DEVICE_ID_RADEON_LY:
+			rinfo->hasCRTC2 = 1;
+			strcpy(rinfo->name, "Radeon M6 LY ");
+			break;
+		case PCI_DEVICE_ID_RADEON_LZ:
+			rinfo->hasCRTC2 = 1;
+			strcpy(rinfo->name, "Radeon M6 LZ ");
+			break;
+		case PCI_DEVICE_ID_RADEON_LW:
+/* Note: Only difference between VE,M6 and M7 is initialization CRTC2
+   registers in dual monitor configuration!!! */
+			rinfo->hasCRTC2 = 1;
+			rinfo->isM7 = 1;
+			strcpy(rinfo->name, "Radeon M7 LW ");
 			break;
 		default:
+			release_mem_region (rinfo->mmio_base_phys,
+				    pci_resource_len(pdev, 2));
+			release_mem_region (rinfo->fb_base_phys,
+				    pci_resource_len(pdev, 0));
+			kfree (rinfo);
 			return -ENODEV;
 	}
 
@@ -742,6 +836,61 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 
 	RTRACE("radeonfb: probed %s %dk videoram\n", (rinfo->ram_type), (rinfo->video_ram/1024));
 
+ /*****
+   VE and M6 have both DVI and CRT ports (for M6 DVI port can be switch to
+   DFP port). The DVI port can also be conneted to a CRT with an adapter.
+   Here is the definition of ports for this driver---
+   (1) If both port are connected, DVI port will be treated as the Primary 
+       port (uses CRTC1) and CRT port will be treated as the Secondary port
+       (uses CRTC2)
+   (2) If only one port is connected, it will treated as the Primary port
+       (??? uses CRTC1 ???)
+ *****/
+	if(rinfo->hasCRTC2) {
+	/* Using BIOS scratch registers works with for VE/M6,
+	no such registers in regular RADEON!!!*/
+		tmp = INREG(RADEON_BIOS_4_SCRATCH);
+		/*check Primary (DVI/DFP port)*/
+		if(tmp & 0x08) rinfo->dviDispType = MT_DFP;
+		else if(tmp & 0x04) rinfo->dviDispType = MT_LCD;
+		else if(tmp & 0x0200) rinfo->dviDispType = MT_CRT;
+		else if(tmp & 0x10) rinfo->dviDispType = MT_CTV;
+		else if(tmp & 0x20) rinfo->dviDispType = MT_STV;
+		/*check Secondary (CRT port).*/
+		if(tmp & 0x02) rinfo->crtDispType = MT_CRT;
+		else if(tmp & 0x800) rinfo->crtDispType = MT_DFP;
+		else if(tmp & 0x400) rinfo->crtDispType = MT_LCD;
+		else if(tmp & 0x1000) rinfo->crtDispType = MT_CTV;
+		else if(tmp & 0x2000) rinfo->crtDispType = MT_STV;
+		if(rinfo->dviDispType == MT_NONE && 
+		   rinfo->crtDispType == MT_NONE) {
+			printk("radeonfb: No monitor detected!!!\n");
+			release_mem_region (rinfo->mmio_base_phys,
+					    pci_resource_len(pdev, 2));
+			release_mem_region (rinfo->fb_base_phys,
+					    pci_resource_len(pdev, 0));
+			kfree (rinfo);
+			return -ENODEV;
+		}
+	}
+	else {
+	  /*Regular Radeon ASIC, only one CRTC, but it could be
+	    used for DFP with a DVI output, like AIW board*/
+		rinfo->dviDispType = MT_NONE;
+		tmp = INREG(FP_GEN_CNTL);
+		if(tmp & FP_EN_TMDS) rinfo->crtDispType = MT_DFP;
+		else rinfo->crtDispType = MT_CRT;
+	}
+
+	if(bios_seg) {
+/*
+  FIXME!!! TVout support currently is incomplete 
+  On Radeon VE TVout is recognized as STV monitor on DVI port.
+*/
+		char * bios_ptr = bios_seg + 0x48L;
+		rinfo->hasTVout = readw(bios_ptr+0x32);
+	}
+
 	rinfo->fb_base = (u32) ioremap (rinfo->fb_base_phys,
 				  		  rinfo->video_ram);
 	if (!rinfo->fb_base) {
@@ -793,8 +942,15 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		radeon_engine_init (rinfo);
 	}
 
-	printk ("radeonfb: ATI %s %d MB\n", rinfo->name,
+	printk ("radeonfb: ATI %s %s %d MB\n",rinfo->name,rinfo->ram_type,
 		(rinfo->video_ram/(1024*1024)));
+	if(rinfo->hasCRTC2) {
+	    printk("radeonfb: DVI port has %s monitor connected\n",GET_MON_NAME(rinfo->dviDispType));
+	    printk("radeonfb: CRT port has %s monitor connected\n",GET_MON_NAME(rinfo->crtDispType));
+	}
+	else
+	    printk("radeonfb: CRT port has %s monitor connected\n",GET_MON_NAME(rinfo->crtDispType));
+	printk("radeonfb: This card has %sTVout\n",rinfo->hasTVout ? "" : "no ");
 
 	return 0;
 }
@@ -833,9 +989,12 @@ static char *radeon_find_rom(struct radeonfb_info *rinfo)
         char *rom_base;
         char *rom;
         int  stage;
-        int  i;
+        int  i,j;
         char aty_rom_sig[] = "761295520";
-        char radeon_sig[] = "RG6";
+        char *radeon_sig[] = {
+	  "RG6",
+	  "RADEON"
+	};
 
 	for(segstart=0x000c0000; segstart<0x000f0000; segstart+=0x00001000) {   
                 stage = 1;
@@ -867,10 +1026,14 @@ static char *radeon_find_rom(struct radeonfb_info *rinfo)
                 rom = rom_base;
                 
                 for (i = 0; (i < 512) && (stage != 4); i++) {
-                        if (radeon_sig[0] == *rom)
-                                if (strncmp(radeon_sig, rom,
-                                                strlen(radeon_sig)) == 0)
-                                        stage = 4;
+		    for(j = 0;j < sizeof(radeon_sig)/sizeof(char *);j++) {
+                        if (radeon_sig[j][0] == *rom)
+                                if (strncmp(radeon_sig[j], rom,
+                                            strlen(radeon_sig[j])) == 0) {
+                                              stage = 4;
+					      break;
+					    }
+		    }
                         rom++;
                 }
                 if (stage != 4) {
@@ -1533,8 +1696,9 @@ static void radeonfb_blank (int blank, struct fb_info *info)
 				CRTC_HSYNC_DIS);
 			break;
 	}
-
-	OUTREG(CRTC_EXT_CNTL, val);
+	if(blank == VESA_NO_BLANKING && rinfo->hasCRTC2)
+		    OUTREGP(CRTC_EXT_CNTL,CRTC_CRT_ON, val);
+	else OUTREG(CRTC_EXT_CNTL, val);
 }
 
 
@@ -1769,9 +1933,10 @@ static void radeon_load_video_mode (struct radeonfb_info *rinfo,
 
 	newmode.crtc_gen_cntl = CRTC_EXT_DISP_EN | CRTC_EN |
 				(format << 8);
-
-	newmode.crtc_ext_cntl = VGA_ATI_LINEAR | XCRT_CNT_EN;
-
+	if(rinfo->hasCRTC2) 
+        /* HACKED: !!! Enable CRT port here !!! */
+	     newmode.crtc_ext_cntl = VGA_ATI_LINEAR | XCRT_CNT_EN | CRTC_CRT_ON;
+	else newmode.crtc_ext_cntl = VGA_ATI_LINEAR | XCRT_CNT_EN;
 	newmode.dac_cntl = INREG(DAC_CNTL) | DAC_MASK_ALL | DAC_VGA_ADR_EN |
 			   DAC_8BIT_EN;
 
@@ -1789,8 +1954,8 @@ static void radeon_load_video_mode (struct radeonfb_info *rinfo,
 
 	newmode.crtc_pitch = (mode->xres >> 3);
 
-	newmode.surface_cntl = SURF_TRANSLATION_DIS;
 #if defined(__BIG_ENDIAN)
+	newmode.surface_cntl = SURF_TRANSLATION_DIS;
 	switch (mode->bits_per_pixel) {
 		case 16:
 			newmode.surface_cntl |= NONSURF_AP0_SWP_16BPP;
@@ -1890,11 +2055,23 @@ static void radeon_load_video_mode (struct radeonfb_info *rinfo,
 
 	/* do it! */
 	radeon_write_mode (rinfo, &newmode);
+	/* XXX absurd hack for X to restore console on VE */
+	if(rinfo->hasCRTC2 && rinfo->crtDispType == MT_CRT &&
+	   (rinfo->dviDispType == MT_NONE || rinfo->dviDispType == MT_STV)) {
+		OUTREG(CRTC_EXT_CNTL, rinfo->hack_crtc_ext_cntl);
+		OUTREG(CRTC_V_SYNC_STRT_WID, rinfo->hack_crtc_v_sync_strt_wid);
+	}
 
 	return;
 }
 
 
+    /*****
+      When changing mode with Dual-head card (VE/M6), care must
+      be taken for the special order in setting registers. CRTC2 has
+      to be set before changing CRTC_EXT register.
+      Otherwise we may get a blank screen.
+    *****/
 
 static void radeon_write_mode (struct radeonfb_info *rinfo,
                                struct radeon_regs *mode)
@@ -1918,7 +2095,11 @@ static void radeon_write_mode (struct radeonfb_info *rinfo,
 	OUTREG(CRTC_OFFSET, 0);
 	OUTREG(CRTC_OFFSET_CNTL, 0);
 	OUTREG(CRTC_PITCH, mode->crtc_pitch);
+#if defined(__BIG_ENDIAN)
+	/* XXX this code makes degradation of mplayer quality on Radeon VE */
 	OUTREG(SURFACE_CNTL, mode->surface_cntl);
+#endif
+/* Here we should restore FP registers for LCD & DFP monitors */
 
 	while ((INREG(CLOCK_CNTL_INDEX) & PPLL_DIV_SEL_MASK) !=
 	       PPLL_DIV_SEL_MASK) {
