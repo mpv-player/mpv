@@ -1,5 +1,3 @@
-#define DISP
-
 /* 
  * video_out_pgm.c, pgm interface
  *
@@ -34,9 +32,9 @@ static vo_info_t vo_info =
 };
 
 extern vo_functions_t video_out_pgm;
+extern char vo_pgm_filename[24];
 
 static FILE * md5_file;
-static int framenum = -2;
 
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
@@ -53,54 +51,47 @@ get_info(void)
 
 static void flip_page (void)
 {
-}
-
-//static uint32_t draw_slice(uint8_t * src[], uint32_t slice_num)
-static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    return 0;
-}
-
-extern uint32_t output_pgm_frame (char * fname, uint8_t * src[]);
-
-static uint32_t draw_frame(uint8_t * src[])
-{
-    char buf[100];
     char buf2[100];
     FILE * f;
     int i;
 
-    if (++framenum < 0)
-	return 0;
+    video_out_pgm.flip_page();
 
-    sprintf (buf, "%d.pgm", framenum);
-    output_pgm_frame (buf, src);
-
-    sprintf (buf2, "md5sum %s", buf);
+    sprintf (buf2, "md5sum %s", vo_pgm_filename);
     f = popen (buf2, "r");
     i = fread (buf2, 1, sizeof(buf2), f);
     pclose (f);
     fwrite (buf2, 1, i, md5_file);
 
-    remove (buf);
+    remove (vo_pgm_filename);
+    
+}
 
+//static uint32_t draw_slice(uint8_t * src[], uint32_t slice_num)
+static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    return video_out_pgm.draw_slice(image,stride,w,h,x,y);
+}
+
+//extern uint32_t output_pgm_frame (char * fname, uint8_t * src[]);
+
+static uint32_t draw_frame(uint8_t * src[])
+{
     return 0;
 }
 
 static uint32_t
 query_format(uint32_t format)
 {
-//    switch(format){
-//    case IMGFMT_YV12:
-//        return 1;
-//    }
-    return 0;
+    return video_out_pgm.query_format(format);
 }
 
 
 static void
 uninit(void)
 {
+    video_out_pgm.uninit();
+    fclose(md5_file);
 }
 
 

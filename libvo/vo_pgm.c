@@ -1,5 +1,3 @@
-#define DISP
-
 /* 
  * video_out_pgm.c, pgm interface
  *
@@ -36,13 +34,18 @@ static vo_info_t vo_info =
 static int image_width;
 static int image_height;
 static char header[1024];
-static int framenum = -2;
+static int framenum = 0;
+
+static uint8_t *image=NULL;
+
+char vo_pgm_filename[24];
 
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
     image_height = height;
     image_width = width;
+    image=malloc(width*height*3/2);
 
     sprintf (header, "P5\n\n%d %d\n255\n", width, height*3/2);
 
@@ -57,46 +60,58 @@ get_info(void)
 
 static void flip_page (void)
 {
-}
-
-static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
-//static uint32_t draw_slice(uint8_t * src[], uint32_t slice_num)
-{
-    return 0;
-}
-
-uint32_t output_pgm_frame (char * fname, uint8_t * src[])
-{
     FILE * f;
     int i;
 
-    f = fopen (fname, "wb");
-    if (f == NULL) return 1;
+    sprintf (vo_pgm_filename, "%08d.pgm", framenum++);
+
+    f = fopen (vo_pgm_filename, "wb");  if (f == NULL) return;
     fwrite (header, strlen (header), 1, f);
-    fwrite (src[0], image_width, image_height, f);
-    for (i = 0; i < image_height/2; i++) {
-	fwrite (src[1]+i*image_width/2, image_width/2, 1, f);
-	fwrite (src[2]+i*image_width/2, image_width/2, 1, f);
-    }
+    fwrite (image, image_width, image_height*3/2, f);
     fclose (f);
 
+    return;
+}
+
+static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
+{
+    int i;
+    // copy Y:
+    uint8_t *dst=image+image_width*y+x;
+    uint8_t *src=srcimg[0];
+    for(i=0;i<h;i++){
+        memcpy(dst,src,w);
+        src+=stride[0];
+        dst+=image_width;
+    }
+{
+    // copy U+V:
+    uint8_t *src1=srcimg[1];
+    uint8_t *src2=srcimg[2];
+    uint8_t *dst=image+image_width*image_height+image_width*(y/2)+(x/2);
+    for(i=0;i<h/2;i++){
+        memcpy(dst,src1,w/2);
+        memcpy(dst+image_width/2,src2,w/2);
+        src1+=stride[1];
+        src2+=stride[2];
+        dst+=image_width;
+    }
+
+}
+    
     return 0;
 }
 
+
 static uint32_t draw_frame(uint8_t * src[])
 {
-    char buf[100];
-
-    if (++framenum < 0)
-	return 0;
-
-    sprintf (buf, "%d.pgm", framenum);
-    return output_pgm_frame (buf, src);
+    return 0;
 }
 
 static uint32_t
 query_format(uint32_t format)
 {
+    if(format==IMGFMT_YV12) return 1;
 //    switch(format){
 //    case IMGFMT_YV12:
 //    case IMGFMT_RGB|24:
@@ -109,6 +124,7 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+    if(image){ free(image);image=NULL;}
 }
 
 
