@@ -92,7 +92,7 @@ extern int errno;
 #include "help_mp.h"
 
 #define DEBUG if(0)
-static int verbose=0;
+int verbose=0;
 
 //**************************************************************************//
 //             .SUB 
