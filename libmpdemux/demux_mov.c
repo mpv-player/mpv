@@ -9,11 +9,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_PNG
-// should be detected by ./configure...
-#define HAVE_ZLIB
-#endif
-
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -81,8 +76,8 @@ void mov_build_index(mov_track_t* trak){
     int i,j,s;
     int last=trak->chunks_size;
     unsigned int pts=0;
-    printf("MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
-    printf("pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
+    mp_msg(MSGT_DEMUX, MSGL_HINT, "MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
+    mp_msg(MSGT_DEMUX, MSGL_HINT, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
     // process chunkmap:
     i=trak->chunkmap_size;
     while(i>0){
@@ -105,7 +100,7 @@ void mov_build_index(mov_track_t* trak){
 	// constant sampesize
 	if(trak->durmap_size==1 || (trak->durmap_size==2 && trak->durmap[1].num==1)){
 	    trak->duration=trak->durmap[0].dur;
-	} else printf("*** constant samplesize & variable duration not yet supported! ***\nContact the author if you have such sample file!\n");
+	} else mp_msg(MSGT_DEMUX, MSGL_ERR, "*** constant samplesize & variable duration not yet supported! ***\nContact the author if you have such sample file!\n");
 	return;
     }
     
@@ -125,12 +120,10 @@ void mov_build_index(mov_track_t* trak){
 	off_t pos=trak->chunks[j].pos;
 	for(i=0;i<trak->chunks[j].size;i++){
 	    trak->samples[s].pos=pos;
-#if 0
-	    printf("Sample %5d: pts=%8d  off=0x%08X  size=%d\n",s,
+	    mp_msg(MSGT_DEMUX, MSGL_DBG3, "Sample %5d: pts=%8d  off=0x%08X  size=%d\n",s,
 		trak->samples[s].pts,
 		(int)trak->samples[s].pos,
 		trak->samples[s].size);
-#endif
 	    pos+=trak->samples[s].size;
 	    ++s;
 	}
@@ -317,7 +310,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    /* initial fps */
 		    }
 		}
-		if(trak->length!=pts) printf("Warning! pts=%d  length=%d\n",pts,trak->length);
+		if(trak->length!=pts) mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! pts=%d  length=%d\n",pts,trak->length);
 		break;
 	    }
 	    case MOV_FOURCC('s','t','s','c'): {
@@ -399,8 +392,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_AUDIO: {
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
-		printf("!!! audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
-		printf("Fourcc: %.4s\n",&trak->fourcc);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",&trak->fourcc);
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
@@ -435,8 +428,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->bih->biCompression=trak->fourcc;
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
 
-		printf("Image size: %d x %d\n",sh->disp_w,sh->disp_h);
-		printf("Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata_len-43,trak->stdata+43);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d\n",sh->disp_w,sh->disp_h);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata_len-43,trak->stdata+43);
 		
 		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
 		    // (auto)selected video track:
@@ -446,7 +439,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    }
-	    printf("--------------\n");
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 	    priv->track_db++;
 	    trak=NULL;
 	} else
@@ -463,7 +456,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	if(id==MOV_FOURCC('d','c','o','m')){
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int len=bswap_32(stream_read_dword(demuxer->stream));
-	    printf("Compressed header uses %.4s algo!\n",&len);
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&len);
 	} else
 	if(id==MOV_FOURCC('c','m','v','d')){
 //	    int temp=stream_read_dword(demuxer->stream);
@@ -475,7 +468,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    z_stream zstrm;
 	    stream_t* backup;
 
-	    printf("Compressed header size: %d / %d\n",cmov_sz,moov_sz);
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header size: %d / %d\n",cmov_sz,moov_sz);
 
 	    stream_read(demuxer->stream,cmov_buf,cmov_sz);
 
@@ -489,12 +482,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    
 	      zret = inflateInit(&zstrm);
 	      if (zret != Z_OK)
-		{ fprintf(stderr,"QT cmov: inflateInit err %d\n",zret);
+		{ mp_msg(MSGT_DEMUX, MSGL_ERR, "QT cmov: inflateInit err %d\n",zret);
 		return;
 		}
 	      zret = inflate(&zstrm, Z_NO_FLUSH);
 	      if ((zret != Z_OK) && (zret != Z_STREAM_END))
-		{ fprintf(stderr,"QT cmov inflate: ERR %d\n",zret);
+		{ mp_msg(MSGT_DEMUX, MSGL_ERR, "QT cmov inflate: ERR %d\n",zret);
 		return;
 		}
 #if 0
@@ -505,7 +498,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		fclose(DecOut);
 	      }
 #endif
-	      if(moov_sz != zstrm.total_out) printf("Warning! moov size differs cmov: %d  zlib: %d\n",moov_sz,zstrm.total_out);
+	      if(moov_sz != zstrm.total_out)
+	        mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! moov size differs cmov: %d  zlib: %d\n",moov_sz,zstrm.total_out);
 	      zret = inflateEnd(&zstrm);
 	      
 	      backup=demuxer->stream;
@@ -514,7 +508,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	       lschunks(demuxer,level+1,moov_sz,NULL); // parse uncompr. 'moov'
 	       //free_stream(demuxer->stream);
 	      demuxer->stream=backup;
-	    
+	      free(cmov_buf);
+	      free(moov_buf);	    
 	}
 #endif
 	else if (id==MOV_FOURCC('u','d','t','a'))
@@ -541,6 +536,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    case MOV_FOURCC(0xa9,'d','i','r'):
 		    case MOV_FOURCC(0xa9,'c','m','t'):
 		    case MOV_FOURCC(0xa9,'r','e','q'):
+		    case MOV_FOURCC(0xa9,'a','u','t'):
+		    case MOV_FOURCC(0xa9,'s','w','r'):
 		    {
 			off_t text_len = stream_read_word(demuxer->stream);
 			char text[text_len+2+1];
@@ -548,6 +545,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			text[text_len+2] = 0x0;
 			switch(udta_id)
 			{
+			    case MOV_FOURCC(0xa9,'a','u','t'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", &text[2]);
+				break;
 			    case MOV_FOURCC(0xa9,'c','p','y'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", &text[2]);
 				break;
@@ -568,6 +568,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				break;
 			    case MOV_FOURCC(0xa9,'r','e','q'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requests(codec): %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'s','w','r'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Software: %s\n", &text[2]);
 				break;
 			}
 			udta_size -= 4+text_len;
@@ -592,19 +595,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 int mov_read_header(demuxer_t* demuxer){
     mov_priv_t* priv=demuxer->priv;
     
-    printf("mov_read_header!\n");
+    mp_msg(MSGT_DEMUX, MSGL_DBG3, "mov_read_header!\n");
 
     // Parse header:    
     stream_reset(demuxer->stream);
     if(!stream_seek(demuxer->stream,priv->moov_start)) return 0; // ???
     lschunks(demuxer, 0, priv->moov_end, NULL);
 
-#if 1    
     return 1;
-#else
-    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVnotyetsupp);
-    return 0;
-#endif
 }
 
 // return value:
@@ -627,7 +625,7 @@ if(trak->samplesize){
     x=trak->chunks[trak->pos].size*trak->samplesize;
     x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix
     ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
-    if(ds==demuxer->audio) printf("sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
+    if(ds==demuxer->audio) mp_msg(MSGT_DEMUX, MSGL_DBG2, "sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
 } else {
     // read sample:
     if(trak->pos>=trak->samples_size) return 0; // EOF
