@@ -30,6 +30,10 @@ SRCS_COMMON = cpudetect.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree
 SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c libvo/font_load_ft.c me-opt-reg.c xvid_vbr.c
 SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c mp-opt-reg.c
 
+ifeq ($(UNRARLIB),yes)
+SRCS_COMMON += unrarlib.c
+endif
+
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
@@ -47,21 +51,28 @@ MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
-PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit2 libvo
+PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libvo
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
+endif
+ifeq ($(FAME),yes)
+PARTS += libfame
+endif
+ifeq ($(DVDKIT2),yes)
+PARTS += libmpdvdkit2
+else
+ifeq ($(DVDKIT),yes)
+PARTS += libmpdvdkit
+endif
 endif
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
-
-ifeq ($(UNRARLIB),yes)
-SRCS_COMMON += unrarlib.c
-endif
-
 ifneq ($(W32_LIB),)
 PARTS += loader loader/dshow
 endif
+
+
 LOADER_DEP = $(W32_DEP) $(DS_DEP)
 LIB_LOADER = $(W32_LIB) $(DS_LIB)
 
@@ -73,16 +84,7 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-.SUFFIXES: .cc .c .o
-
-# .PHONY: all clean
-
-all:	$(ALL_PRG)
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-COMMON_DEPS = libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a
+COMMON_DEPS = $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -97,6 +99,21 @@ else
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 endif
+
+ifeq ($(GUI),yes)
+COMMON_DEPS += Gui/libgui.a
+GUI_LIBS = Gui/libgui.a
+endif
+
+
+.SUFFIXES: .cc .c .o
+
+# .PHONY: $(COMMON_DEPS)
+
+all:	$(ALL_PRG)
+
+.c.o:
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
@@ -155,14 +172,8 @@ postproc/libpostproc.a:
 input/libinput.a:
 	$(MAKE) -C input
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
-MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
-
-ifeq ($(GUI),yes)
-MPLAYER_DEP += Gui/libgui.a
-MENCODER_DEP += Gui/libgui.a
-GUI_LIBS = Gui/libgui.a
-endif
+MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
+MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS)
 
 VIDIX_LIBS =
 ifeq ($(VIDIX),yes)
