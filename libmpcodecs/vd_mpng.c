@@ -32,6 +32,12 @@ static int last_c=-1;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    switch (cmd)
+    {
+	case VDCTRL_QUERY_FORMAT:
+	    if (*((int *) arg) == out_fmt) return CONTROL_TRUE;
+	    return CONTROL_FALSE;
+    }
     return CONTROL_UNKNOWN;
 }
 
