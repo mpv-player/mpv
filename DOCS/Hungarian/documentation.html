@@ -10,7 +10,7 @@
 
 <H1 ALIGN="center">MPlayer - Movie Player for LINUX</H1>
 
-<H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+<H2 ALIGN="center">&copy; 2000-2003 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
 
 <P ALIGN="center">
@@ -961,16 +961,21 @@ Naboo was under an attack.<BR>
   ~/.mplayer/font</CODE>. Ha most elindítod a lejátszást, egy órát láthatsz a
   film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
 
-<P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)</P>
+<P>Az OSD-nek 4 állása van: ('o' billentyûvel lehet váltani)</P>
+
+<P>(a feliratok <I>mindig be vannak kapcsolva</I>, a kikapcsolásukhoz olvasd
+  el a man page-t)</P>
 
 <UL>
-  <LI>timer + hangerõ + keresõ + feliratok</LI>
-  <LI>hangerõ + keresõ + feliratok (alapállapot)</LI>
+  <LI>hangerõ + keresõsáv (alapállapot)</LI>
+  <LI>hangerõ + keresõsáv + timer + file pozíció kiírása tekerésnél</LI>
+  <LI>hangerõ + keresõsáv + timer + a lejátszott média hossza idõben</LI>
   <LI>csak feliratok</LI>
 </UL>
 
 <P>Az alapértelmezést megváltoztathatod az <CODE>osdlevel=</CODE> változóval a
-  konfigurációs file-ban.</P>
+  konfigurációs file-ban, illetve az <CODE>-osdlevel</CODE> parancsori
+  opcióval.</P>
 
 
 <H3><A NAME="menu">1.4.3 OSD menü</A></H3>
