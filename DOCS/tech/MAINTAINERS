@@ -123,14 +123,16 @@ libvo drivers:
     * vo_tga.c - Daniele Forghieri
     * vo_vesa.c - None
     * vo_winvidix.c - Sascha Sommer
-    * vo_x11.c - Attila Kinali
+    * vo_x11.c - Alexander Strasser
     * vo_xmga.c - Attila Kinali
     * vo_xover.c - Alban Bedel
-    * vo_xv.c - Attila Kinali
+    * vo_xv.c - Alexander Strasser
     * vo_xvidix.c - Attila Kinali
     * vo_xvmc.c - Ivan Kalvachev
     * vo_yuv4mpeg.c - Robert Kesterson
     * vo_zr.c - Rik Snel
+
+    * x11_common.c - Alexander Strasser
 
 VIDIX drivers:
     * mach64_vid - None
