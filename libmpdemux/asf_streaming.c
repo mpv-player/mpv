@@ -97,7 +97,6 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 		r += i;
 	  }
 	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
-//printf("size=%d\n", size);
 	  if(r) printf("Warning : drop header ????\n");
 	  if(size < 0){
 	    printf("Error while parsing chunk header\n");
@@ -110,7 +109,7 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	  
 	  buffer = (char*) malloc(size+buffer_size);
 	  if(buffer == NULL) {
-	    printf("Error can't allocate %d bytes buffer\n",buffer_size);
+	    printf("Error can't allocate %d bytes buffer\n",size+buffer_size);
 	    return -1;
 	  }
 	  if( chunk_buffer!=NULL ) {
@@ -129,7 +128,6 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	    }
 	    r += i;
 	  }  
-//for(i=0;i<30;i++) printf(" 0x%02x", buffer[i] );
 
 	  if( chunk_size2read==0 ) {
 		if(size < (int)sizeof(asfh)) {
@@ -141,10 +139,9 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 		chunk_size2read = asfh.objh.size;
 		printf("Size 2 read=%d\n", chunk_size2read);
 	  }
-//printf("buffer_size=%d\n", buffer_size );
   } while( buffer_size<chunk_size2read);
   buffer = chunk_buffer;
-//for(i=0;i<30;i++) printf(" 0x%02x", buffer[i] );
+  size = buffer_size;
 	  
   if(asfh.cno > 256) {
     printf("Error sub chunks number is invalid\n");
@@ -159,7 +156,6 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 
     switch(ASF_LOAD_GUID_PREFIX(objh.guid)) {
     case 0x8CABDCA1 : // File header
-//printf("Found file header\n");
       pos += sizeof(objh);
       memcpy(&fileh,buffer + pos,sizeof(fileh));
       le2me_ASF_file_header_t(&fileh);
@@ -175,7 +171,6 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
       pos += sizeof(fileh);
       break;
     case 0xB7DC0791 : // stream header
-//printf("Found stream header\n");
       pos += sizeof(objh);
       memcpy(&streamh,buffer + pos,sizeof(streamh));
       le2me_ASF_stream_header_t(&streamh);
