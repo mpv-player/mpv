@@ -85,55 +85,54 @@ static inline void * PhysToVirtSO(unsigned short seg,unsigned short off)
 
 /* SuperVGA mode information block */
 struct VesaModeInfoBlock {
-  unsigned short ModeAttributes;      /* Mode attributes */
-  unsigned char  WinAAttributes;      /* Window A attributes */
-  unsigned char  WinBAttributes;      /* Window B attributes */
-  unsigned short WinGranularity;      /* Window granularity in k */
-  unsigned short WinSize;             /* Window size in k */
-  unsigned short WinASegment;         /* Window A segment */
-  unsigned short WinBSegment;         /* Window B segment */
-  FarPtr         WinFuncPtr;          /* 16-bit far pointer to window function */
-  unsigned short BytesPerScanLine;    /* Bytes per scanline */
+  unsigned short ModeAttributes;      /* 00: Mode attributes */
+  unsigned char  WinAAttributes;      /* 02: Window A attributes */
+  unsigned char  WinBAttributes;      /* 03: Window B attributes */
+  unsigned short WinGranularity;      /* 04: Window granularity in k */
+  unsigned short WinSize;             /* 06: Window size in k */
+  unsigned short WinASegment;         /* 08: Window A segment */
+  unsigned short WinBSegment;         /* 0A: Window B segment */
+  FarPtr         WinFuncPtr;          /* 0C: 16-bit far pointer to window function */
+  unsigned short BytesPerScanLine;    /* 10: Bytes per scanline */
   /*  VBE 1.2 and above */
-  unsigned short XResolution;         /* Horizontal resolution */
-  unsigned short YResolution;         /* Vertical resolution */
-  unsigned char  XCharSize;           /* Character cell width */
-  unsigned char  YCharSize;           /* Character cell height */
-  unsigned char  NumberOfPlanes;      /* Number of memory planes */
-  unsigned char  BitsPerPixel;        /* Bits per pixel */
-  unsigned char  NumberOfBanks;       /* Number of CGA style banks */
-  unsigned char  MemoryModel;         /* Memory model type */
-  unsigned char  BankSize;            /* Size of CGA style banks */
-  unsigned char  NumberOfImagePages;  /* Number of images pages */
-  unsigned char  res1;                /* Reserved */
+  unsigned short XResolution;         /* 12: Horizontal resolution */
+  unsigned short YResolution;         /* 14: Vertical resolution */
+  unsigned char  XCharSize;           /* 16: Character cell width */
+  unsigned char  YCharSize;           /* 17: Character cell height */
+  unsigned char  NumberOfPlanes;      /* 18: Number of memory planes */
+  unsigned char  BitsPerPixel;        /* 19: Bits per pixel */
+  unsigned char  NumberOfBanks;       /* 1A: Number of CGA style banks */
+  unsigned char  MemoryModel;         /* 1B: Memory model type */
+  unsigned char  BankSize;            /* 1C: Size of CGA style banks */
+  unsigned char  NumberOfImagePages;  /* 1D: Number of images pages */
+  unsigned char  res1;                /* 1E: Reserved */
   /* Direct Color fields (required for direct/6 and YUV/7 memory models) */
-  unsigned char  RedMaskSize;         /* Size of direct color red mask */
-  unsigned char  RedFieldPosition;    /* Bit posn of lsb of red mask */
-  unsigned char  GreenMaskSize;       /* Size of direct color green mask */
-  unsigned char  GreenFieldPosition;  /* Bit posn of lsb of green mask */
-  unsigned char  BlueMaskSize;        /* Size of direct color blue mask */
-  unsigned char  BlueFieldPosition;   /* Bit posn of lsb of blue mask */
-  unsigned char  RsvdMaskSize;        /* Size of direct color res mask */
-  unsigned char  RsvdFieldPosition;   /* Bit posn of lsb of res mask */
-  unsigned char  DirectColorModeInfo; /* Direct color mode attributes */
-  unsigned char  res2[216];           /* Pad to 256 byte block size */
+  unsigned char  RedMaskSize;         /* 1F: Size of direct color red mask */
+  unsigned char  RedFieldPosition;    /* 20: Bit posn of lsb of red mask */
+  unsigned char  GreenMaskSize;       /* 21: Size of direct color green mask */
+  unsigned char  GreenFieldPosition;  /* 22: Bit posn of lsb of green mask */
+  unsigned char  BlueMaskSize;        /* 23: Size of direct color blue mask */
+  unsigned char  BlueFieldPosition;   /* 24: Bit posn of lsb of blue mask */
+  unsigned char  RsvdMaskSize;        /* 25: Size of direct color res mask */
+  unsigned char  RsvdFieldPosition;   /* 26: Bit posn of lsb of res mask */
+  unsigned char  DirectColorModeInfo; /* 27: Direct color mode attributes */
   /* VBE 2.0 and above */
-  unsigned long  PhysBasePtr;         /* physical address for flat memory frame buffer. (Should be converted to linear before using) */
-  unsigned short res3[3];             /* Reserved - always set to 0 */
+  unsigned long  PhysBasePtr;         /* 28: physical address for flat memory frame buffer. (Should be converted to linear before using) */
+  unsigned short res3[3];             /* 2C: Reserved - always set to 0 */
   /* VBE 3.0 and above */
-  unsigned short LinBytesPerScanLine; /* bytes per scan line for linear modes */
-  unsigned char  BnkNumberOfImagePages;/* number of images for banked modes */
-  unsigned char  LinNumberOfImagePages;/* number of images for linear modes */
-  unsigned char  LinRedMaskSize;      /* size of direct color red mask (linear modes) */
-  unsigned char  LinRedFieldPosition; /* bit position of lsb of red mask (linear modes) */
-  unsigned char  LinGreenMaskSize;    /* size of direct color green mask (linear modes) */
-  unsigned char  LinGreenFieldPosition;/* bit position of lsb of green mask (linear modes) */
-  unsigned char  LinBlueMaskSize;     /* size of direct color blue mask (linear modes) */
-  unsigned char  LinBlueFieldPosition;/* bit position of lsb of blue mask (linear modes) */
-  unsigned char  LinRsvdMaskSize;     /* size of direct color reserved mask (linear modes) */
-  unsigned char  LinRsvdFieldPosition;/* bit position of lsb of reserved mask (linear modes) */
-  unsigned long  MaxPixelClock;       /* maximum pixel clock (in Hz) for graphics mode */
-  char           res4[189];           /* remainder of ModeInfoBlock */
+  unsigned short LinBytesPerScanLine;  /* 32: bytes per scan line for linear modes */
+  unsigned char  BnkNumberOfImagePages;/* 34: number of images for banked modes */
+  unsigned char  LinNumberOfImagePages;/* 35: number of images for linear modes */
+  unsigned char  LinRedMaskSize;       /* 36: size of direct color red mask (linear modes) */
+  unsigned char  LinRedFieldPosition;  /* 37: bit position of lsb of red mask (linear modes) */
+  unsigned char  LinGreenMaskSize;     /* 38: size of direct color green mask (linear modes) */
+  unsigned char  LinGreenFieldPosition;/* 39: bit position of lsb of green mask (linear modes) */
+  unsigned char  LinBlueMaskSize;      /* 40: size of direct color blue mask (linear modes) */
+  unsigned char  LinBlueFieldPosition; /* 41: bit position of lsb of blue mask (linear modes) */
+  unsigned char  LinRsvdMaskSize;      /* 42: size of direct color reserved mask (linear modes) */
+  unsigned char  LinRsvdFieldPosition; /* 43: bit position of lsb of reserved mask (linear modes) */
+  unsigned long  MaxPixelClock;        /* 44: maximum pixel clock (in Hz) for graphics mode */
+  char           res4[189];            /* 48: remainder of ModeInfoBlock */
 }__attribute__ ((packed));
 
 typedef enum {
