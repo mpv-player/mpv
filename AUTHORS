@@ -28,21 +28,6 @@ adland <adland123@yahoo.com>
 Anholt, Eric <eanholt@gladstone.uoregon.edu>
     * CPU detection code
 
-Árpád, Gereöffy (A'rpi/ESP-team) [mail to <mplayer-users@mplayerhq.hu>]
-    * MPlayer, MEncoder core, A-V sync
-    * libmpdemux, demultiplexer for MPEG, ASF, AVI, various fixes in others
-    * mp3lib, based on mpglib sources [MP3 audio decoder]
-    * getch2 [keyboard handler]
-    * some changes in libmpeg2 code (progressive frames, bitrate & fps support)
-    * libvo improvements: adding OpenGL support, bug fix in mga driver...
-    * triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver
-    * OSD & subtitle display code
-    * FFmpeg/libavcodec integration
-    * DivX4Linux (Project Mayo) support (see documentation)
-    * New DVD support using libdvdread
-    * MPEG PES output & DVB card support
-    * libmpcodecs design, porting video decoders, filters
-
 Ashberg, Folke <folke@ashberg.de>
     * native AAlib driver (-vo aa)
 
@@ -224,6 +209,21 @@ Foth, Kilian A. <foth@informatik.uni-hamburg.de>
 
 Gansser, Martin <mgansser@ngi.de>
     * HP-UX port
+
+Gereöffy, Árpád (A'rpi/ESP-team) [mail to <mplayer-users@mplayerhq.hu>]
+    * MPlayer, MEncoder core, A-V sync
+    * libmpdemux, demultiplexer for MPEG, ASF, AVI, various fixes in others
+    * mp3lib, based on mpglib sources [MP3 audio decoder]
+    * getch2 [keyboard handler]
+    * some changes in libmpeg2 code (progressive frames, bitrate & fps support)
+    * libvo improvements: adding OpenGL support, bug fix in mga driver...
+    * triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver
+    * OSD & subtitle display code
+    * FFmpeg/libavcodec integration
+    * DivX4Linux (Project Mayo) support (see documentation)
+    * New DVD support using libdvdread
+    * MPEG PES output & DVB card support
+    * libmpcodecs design, porting video decoders, filters
 
 Giani, Matteo <matgiani@ctonet.it>
     * PVA demuxer
