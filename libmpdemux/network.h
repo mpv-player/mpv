@@ -52,6 +52,8 @@ int connect2Server(char *host, int port);
 int http_send_request(URL_t *url);
 HTTP_header_t *http_read_response(int fd);
 
+int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
+
 /* 
  * Joey Parrish <joey@yunamusic.com>:
  *

@@ -35,6 +35,9 @@ extern int stream_cache_size;
 
 extern int mp_input_check_interrupt(int time);
 
+int asf_streaming_start( stream_t *stream );
+int rtsp_streaming_start( stream_t *stream );
+
 /* Variables for the command line option -user, -passwd & -bandwidth */
 char *network_username=NULL;
 char *network_password=NULL;
@@ -150,7 +153,7 @@ connect2Server(char *host, int port) {
 	fd_set set;
 	struct timeval tv;
 	struct sockaddr_in server_address;
-	struct hostent *hp;
+	struct hostent *hp=NULL;
 
 	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if( socket_server_fd==-1 ) {
@@ -173,7 +176,7 @@ connect2Server(char *host, int port) {
 	server_address.sin_port=htons(port);
 	
 	// Turn the socket as non blocking so we can timeout on the connection
-	if( isalpha(host[0]) ) {
+	if( isalpha(host[0]) && hp!=NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%d.%d.%d.%d]:%d ...\n", host, (hp->h_addr_list[0][0])&0xff, (hp->h_addr_list[0][1])&0xff, (hp->h_addr_list[0][2])&0xff, (hp->h_addr_list[0][3])&0xff, port );
 	} else {
 		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s:%d ...\n", host, port );
@@ -312,7 +315,7 @@ http_send_request( URL_t *url ) {
 	mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request: [%s]\n", http_hdr->buffer );
 	
 	ret = write( fd, http_hdr->buffer, http_hdr->buffer_size );
-	if( ret!=http_hdr->buffer_size ) {
+	if( ret!=(int)http_hdr->buffer_size ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while sending HTTP request: didn't sent all the request\n");
 		return -1;
 	}
@@ -354,7 +357,7 @@ http_read_response( int fd ) {
 int
 http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	char *aut;
-	int ret;
+
 	if( *auth_retry==1 ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
@@ -643,6 +646,10 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 int
 nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 	return -1;
+	// To shut up gcc warning
+	fd++;
+	pos++;
+	stream_ctrl=NULL;
 }
 
 int
@@ -805,7 +812,7 @@ rtp_streaming_start( stream_t *stream ) {
 
 int
 streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
-	int ret, val;
+	int ret;
 	if( stream==NULL ) return -1;
 
 	stream->streaming_ctrl = streaming_ctrl_new();
@@ -884,7 +891,6 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		streaming_ctrl_free( stream->streaming_ctrl );
 		stream->streaming_ctrl = NULL;
 	} else if( stream->streaming_ctrl->buffering ) {
-		int cache_size = stream_cache_size; 
 		if(stream_cache_size<0) {
 			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.

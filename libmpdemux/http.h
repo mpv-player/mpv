@@ -16,21 +16,21 @@ typedef struct {
 	char *protocol;
 	char *method;
 	char *uri;
-	int status_code;
+	unsigned int status_code;
 	char *reason_phrase;
-	int http_minor_version;
+	unsigned int http_minor_version;
 	// Field variables
 	HTTP_field_t *first_field;
 	HTTP_field_t *last_field;
-	int field_nb;
+	unsigned int field_nb;
 	char *field_search;
 	HTTP_field_t *field_search_pos;
 	// Body variables
 	char *body;
-	int body_size;
+	size_t body_size;
 	char *buffer;
-	int buffer_size;
-	int is_parsed;
+	size_t buffer_size;
+	unsigned int is_parsed;
 } HTTP_header_t;
 
 HTTP_header_t*	http_new_header();

@@ -371,7 +371,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			}
 			// Ok found the end
 			// do a sanity check
-			if( http_hdr->body_size<(ptr2-ptr) ) {
+			if( http_hdr->body_size<(unsigned int)(ptr2-ptr) ) {
 				printf("Unexpected fix me\n");
 				return -1;
 			}
@@ -746,7 +746,7 @@ cddb_parse_xmcd(char *xmcd_file) {
 			// Search for the genre
 			else if( xmcd_parse_dgenre(cd_info, ptr) );
 			// Search for a track title
-			else if( xmcd_parse_ttitle(cd_info, ptr) );
+			else if( xmcd_parse_ttitle(cd_info, ptr) ) audiolen++;	// <-- audiolen++ to shut up gcc warning
 		}
 		if( ptr2[1]=='\n' ) ptr2++;
 		pos = (ptr2+1)-ptr;

@@ -61,5 +61,6 @@ void		cd_info_free(cd_info_t *cd_info);
 cd_track_t*	cd_info_add_track(cd_info_t *cd_info, char *track_name, unsigned int track_nb, unsigned int min, unsigned int sec, unsigned int msec, unsigned long frame_begin, unsigned long frame_length);
 cd_track_t*	cd_info_get_track(cd_info_t *cd_info, unsigned int track_nb);
 
+void 		cd_info_debug(cd_info_t *cd_info);
 
 #endif // __CDD_H__

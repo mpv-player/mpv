@@ -133,8 +133,8 @@ static void get_answer (int s)
 
 static int get_data (int s, char *buf, size_t count) 
 {
-  ssize_t  len, total;
-  total = 0;
+  ssize_t  len;
+  size_t total = 0;
 
   while (total < count) {
 
@@ -161,7 +161,7 @@ static int get_data (int s, char *buf, size_t count)
 static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl) 
 {
   unsigned char  pre_header[8];
-  int            header_len,i ;
+  int            header_len;
 
   header_len = 0;
 
@@ -200,16 +200,16 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 
     } else {
 
-      int packet_len;
+      int32_t packet_len;
       int command;
       char data[BUF_SIZE];
 
-      if (!get_data (s, &packet_len, 4)) {
+      if (!get_data (s, (char*)&packet_len, 4)) {
 	printf ("packet_len read failed\n");
 	return 0;
       }
       
-      packet_len = get_32 (&packet_len, 0) + 4;
+      packet_len = get_32 ((unsigned char*)&packet_len, 0) + 4;
       
 //      printf ("command packet detected, len=%d\n", packet_len);
       
@@ -304,7 +304,6 @@ static int interp_header (uint8_t *header, int header_len)
 
 static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) {
   unsigned char  pre_header[8];
-  int            i;
   char           data[BUF_SIZE];
 
   if (!get_data (s, pre_header, 8)) {
@@ -333,14 +332,15 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
 
   } else {
 
-    int packet_len, command;
+    int32_t packet_len;
+    int command;
 
-    if (!get_data (s, &packet_len, 4)) {
+    if (!get_data (s, (char*)&packet_len, 4)) {
       printf ("packet_len read failed\n");
       return 0;
     }
 
-    packet_len = get_32 (&packet_len, 0) + 4;
+    packet_len = get_32 ((unsigned char*)&packet_len, 0) + 4;
 
     if (!get_data (s, data, packet_len)) {
       printf ("command data read failed\n");
@@ -415,6 +415,10 @@ int
 asf_mmst_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) 
 {
 	return -1;
+	// Shut up gcc warning
+	fd++;
+	pos++;
+	streaming_ctrl=NULL;
 }
 
 int asf_mmst_streaming_start(stream_t *stream)
@@ -426,7 +430,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   int                  len, i, packet_length;
   char                *path;
   URL_t *url1 = stream->streaming_ctrl->url;
-  int s;
+  int s = stream->fd;
 
   if( s>0 ) {
 	  close( stream->fd );
