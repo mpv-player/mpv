@@ -19,7 +19,9 @@
 #include "video_out_internal.h"
 
 #include "yuv2rgb.h"
+#ifdef HAVE_MMX
 #include "mmx.h"
+#endif
 
 #include "sub.h"
 
@@ -546,4 +548,3 @@ static void uninit(void) {
     free(modelist);
   }
 }
-	
