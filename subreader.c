@@ -735,7 +735,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
 	
 	n=m=0;
-	if (i)	for (;;){	
+	if (i)	for (;;){
 		if (sub->end <= sub->start){
 			sub->end = sub->start + subfms;
 			m++;
@@ -750,6 +750,22 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 			if (!m)
 				n++;
 		}
+
+		/* Theory:
+		 * Movies are often converted from FILM (24 fps)
+		 * to PAL (25) by simply speeding it up, so we
+		 * to multiply the original timestmaps by
+		 * (Movie's FPS / Subtitle's (guessed) FPS)
+		 * so eg. for 23.98 fps movie and PAL time based
+		 * subtitles we say -subfps 25 and we're fine!
+		 */
+
+		/* timed sub fps correction ::atmos */
+		if(sub_uses_time && sub_fps) {	
+			sub->start *= sub_fps/fps;
+			sub->end   *= sub_fps/fps;
+		}
+
 		sub = nextsub;
 		m = 0;
 	}
