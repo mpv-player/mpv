@@ -573,6 +573,8 @@ void XA_2x2_OUT_4BLKS_Convert(unsigned char *image_p, unsigned int x, unsigned i
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV2x2_Blk_Func(image_type=%d, blks=%d, dith_flag=%d)\n",
+	image_type, blks, dith_flag);
     switch(blks){
     case 1:
 	return (void*) XA_2x2_OUT_1BLK_Convert;
@@ -591,8 +593,8 @@ void XA_YUV_2x2_clr(XA_2x2_Color *cmap2x2, unsigned int Y0, unsigned int Y1,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
 
-//  printf("XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
-//          cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr);
+  mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
+          cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr);
 
   cmap2x2->clr0_0=Y0;
   cmap2x2->clr0_1=Y1;
@@ -605,8 +607,8 @@ void XA_YUV_2x2_clr(XA_2x2_Color *cmap2x2, unsigned int Y0, unsigned int Y1,
 
 void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
-//    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
-//	    image_type, dith_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
+	    image_type, dith_type);
     return((void*)XA_YUV_2x2_clr);
 }
 
@@ -646,21 +648,19 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
     int y;
     int uvstride;
 
-#if 0
-    printf("YUVTabs:  %d %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUVTabs:  %d %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
 	yuv_tabs->YUV_Y_tab,
 	yuv_tabs->YUV_UB_tab,
 	yuv_tabs->YUV_VR_tab,
 	yuv_tabs->YUV_UG_tab,
 	yuv_tabs->YUV_VG_tab );
 
-    XA_Print("XA_YUV1611_Convert('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV1611_Convert('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	image, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
 
-    printf("YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
-#endif
 
     // copy Y plane:
     if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
@@ -700,24 +700,24 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
 
 void *XA_YUV1611_Func(unsigned int image_type)
 {
-//    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV1611_Func('image_type: %d')", image_type);
     return((void *)XA_YUV1611_Convert);
 }
 
-/* -------------- YUV 4x1 1x1 1x1 (4:1:1 ?) [???] ------------------ */
+/* -------------- YUV 4x1 1x1 1x1 (4:1:1 ?) [CYUV] ------------------ */
 
 void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
-    XA_Print("XA_YUV411111_Convert('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV411111_Convert('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
     return;
 }
 
 void *XA_YUV411111_Func(unsigned int image_type)
 {
-//    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV411111_Func('image_type: %d')", image_type);
     return((void*)XA_YUV411111_Convert);
 }
 
@@ -729,15 +729,13 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
 {
     xacodec_image_t *image=(xacodec_image_t*)image_p;
 
-#if 0
-    XA_Print("XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
 	image,imagex,imagey,i_x,i_y, image->width,image->height,
 	yuv,yuv_tabs,map_flag,map,chdr);
 
-    XA_Print("YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
-#endif
 
 #warning "FIXME! Decoder doesn't supports Vivo/2.00 :("
 
@@ -768,8 +766,14 @@ if(i_x==image->width && i_y==image->height){
 
 void *XA_YUV221111_Func(unsigned int image_type)
 {
-//    XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
-    return((void *)XA_YUV221111_Convert);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Func('image_type: %d')", image_type);    
+    /* hotfix to disable segfault by Vivo/2.00 H263 stream */
+    if (image_type < 0x10) /* obtaining to the latest XAnim source: */
+			   /* XA_IMTYPE_* has values from 0x0 to 0x9 */
+	return((void *)XA_YUV221111_Convert);
+
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Unimplemented: XA_YUV221111_Func(image_type=%d)\n",image_type);
+    return((void *)XA_dummy);
 }
 
 /* *** EOF XANIM *** */
