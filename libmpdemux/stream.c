@@ -152,7 +152,7 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
   for(i = 0 ; auto_open_streams[i] ; i++) {
     sinfo = auto_open_streams[i];
     if(!sinfo->protocols) {
-      mp_msg(MSGT_OPEN,MSGL_WARN, "Stream type %s have protocols == NULL, it's a bug\n");
+      mp_msg(MSGT_OPEN,MSGL_WARN, "Stream type %s has protocols == NULL, it's a bug\n", sinfo->name);
       continue;
     }
     for(j = 0 ; sinfo->protocols[j] ; j++) {

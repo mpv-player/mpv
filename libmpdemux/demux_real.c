@@ -519,14 +519,14 @@ got_video:
 		// bit 7: 1=last block in block chain
 		// bit 6: 1=short header (only one block?)
 		vpkg_header=stream_read_char(demuxer->stream); --len;
-		mp_dbg(MSGT_DEMUX,MSGL_DBG2, "hdr: %0.2X (len=%d) ",vpkg_header,len);
+		mp_dbg(MSGT_DEMUX,MSGL_DBG2, "hdr: %02X (len=%d) ",vpkg_header,len);
 
 		if (0x40==(vpkg_header&0xc0)) {
 		    // seems to be a very short header
 	    	    // 2 bytes, purpose of the second byte yet unknown
 	    	    int bummer;
 		    bummer=stream_read_char(demuxer->stream); --len;
- 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "%0.2X",bummer);
+ 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "%02X",bummer);
  	    	    vpkg_offset=0;
  		    vpkg_length=len;
 		} else {
@@ -535,7 +535,7 @@ got_video:
 			// sub-seqnum (bits 0-6: number of fragment. bit 7: ???)
 		        vpkg_subseq=stream_read_char(demuxer->stream);
 	                --len;
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "subseq: %0.2X ",vpkg_subseq);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "subseq: %02X ",vpkg_subseq);
 			vpkg_subseq&=0x7f;
 	            }
 
@@ -543,11 +543,11 @@ got_video:
 		    // bit 14 is always one (same applies to the offset)
 		    vpkg_length=stream_read_word(demuxer->stream);
 		    len-=2;
-		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l: %0.2X %0.2X ",vpkg_length>>8,vpkg_length&0xff);
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l: %02X %02X ",vpkg_length>>8,vpkg_length&0xff);
 		    if (!(vpkg_length&0xC000)) {
 			vpkg_length<<=16;
 		        vpkg_length|=stream_read_word(demuxer->stream);
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l+: %0.2X %0.2X ",(vpkg_length>>8)&0xff,vpkg_length&0xff);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l+: %02X %02X ",(vpkg_length>>8)&0xff,vpkg_length&0xff);
 	    	        len-=2;
 		    } else
 		    vpkg_length&=0x3fff;
@@ -557,17 +557,17 @@ got_video:
 		    // _end_ of the packet, so it's equal to fragment size!!!
 		    vpkg_offset=stream_read_word(demuxer->stream);
 	            len-=2;
-		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o: %0.2X %0.2X ",vpkg_offset>>8,vpkg_offset&0xff);
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o: %02X %02X ",vpkg_offset>>8,vpkg_offset&0xff);
 		    if (!(vpkg_offset&0xC000)) {
 			vpkg_offset<<=16;
 		        vpkg_offset|=stream_read_word(demuxer->stream);
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o+: %0.2X %0.2X ",(vpkg_offset>>8)&0xff,vpkg_offset&0xff);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o+: %02X %02X ",(vpkg_offset>>8)&0xff,vpkg_offset&0xff);
 	    	        len-=2;
 		    } else
 		    vpkg_offset&=0x3fff;
 
 		    vpkg_seqnum=stream_read_char(demuxer->stream); --len;
-		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "seq: %0.2X ",vpkg_seqnum);
+		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "seq: %02X ",vpkg_seqnum);
 	        }
  		mp_dbg(MSGT_DEMUX,MSGL_DBG2, "\n");
                 mp_dbg(MSGT_DEMUX,MSGL_DBG2, "blklen=%d\n", len);

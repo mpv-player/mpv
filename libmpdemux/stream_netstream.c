@@ -166,7 +166,7 @@ static mp_net_stream_packet_t* send_net_stream_cmd(stream_t *s,uint16_t cmd,char
     return NULL;
   }
   
-  mp_msg(MSGT_STREAM,MSGL_ERR, "Unknown response to %d: %d\n",pack->cmd);
+  mp_msg(MSGT_STREAM,MSGL_ERR, "Unknown response to %d: %d\n",cmd,pack->cmd);
   free(pack);
   return NULL;
 }

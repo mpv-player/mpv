@@ -477,7 +477,8 @@ if(strncmp("dvd://",filename,6) == 0){
 
   // FIXME: to avoid nonsense error messages...
   if (strncmp("tv://", filename, 5) && strncmp("mf://", filename, 5) &&
-    strncmp("vcd://", filename, 6))
+    strncmp("vcd://", filename, 6) && strncmp("dvb://", filename, 6) &&
+    strstr(filename, "://"))
     url = url_new(filename);
   if(url) {
 	if (strcmp(url->protocol, "smb")==0){
@@ -513,7 +514,7 @@ if(strncmp("dvd://",filename,6) == 0){
     	    stream->end_pos=len;
 	    return stream;
 #else
-	    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBNotCompiled,filename);
+	    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBNotCompiled);
 	    return NULL;
 #endif
 	}

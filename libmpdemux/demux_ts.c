@@ -1199,7 +1199,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		if(pmt->es[idx].descr_length > section_bytes - 5)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT, ES_DESCR_LENGTH TOO LARGE %d > %d, EXIT %d bytes for PMT_ES\n",
-				pmt->es[idx].descr_length, section_bytes - 5);
+				pmt->es[idx].descr_length, section_bytes - 5, section_bytes);
 			return -1;
 		}
 

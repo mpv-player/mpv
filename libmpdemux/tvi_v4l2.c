@@ -658,7 +658,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 #endif
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_TUN_GET_TUNER:
-	mp_msg(MSGT_TV, MSGL_V, "%s: get tuner\n");
+	mp_msg(MSGT_TV, MSGL_V, "%s: get tuner\n",info.short_name);
 	if (ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) < 0) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl get tuner failed: %s\n",
 		   info.short_name, strerror(errno));
@@ -666,7 +666,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	}
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_TUN_SET_TUNER:
-	mp_msg(MSGT_TV, MSGL_V, "%s: set tuner\n");
+	mp_msg(MSGT_TV, MSGL_V, "%s: set tuner\n",info.short_name);
 	if (ioctl(priv->video_fd, VIDIOC_S_TUNER, &priv->tuner) < 0) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl set tuner failed: %s\n",
 		   info.short_name, strerror(errno));
