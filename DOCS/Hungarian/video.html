@@ -1096,26 +1096,73 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 <P>Ez a meghajtó néhány hardveres MJPEG capture/dekóder kártyával használható
   (DC10+-szal van lett tesztelve, de mûködnie kell LML33-mal és DC10-zel is).
   A meghajtó elõször JPEG-be kódolja a képkockát, ezután elküdli a kártyának.
-  Az enkódolás a <B>libavcodec</B>-kel történik.</P>
+  Az enkódolás a <B>libavcodec</B>-kel történik. A különleges <I>cinerama</I>
+  módban lehetõség van a filmek valóban szélesvásznú lejátszására, feltéve
+  hogy van két kártyád és két kivetítõd van. A felbontástól és a beállított
+  minõségtõl függõen ez a videokimenet sok CPU idõt is igényelhet, így
+  ajánlott a <CODE>-framedrop</CODE> opció használata.</P>
 
 <P>Mûködnie kell továbbá a
   <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>
   címrõl letölthetõ kernel meghajtónak. Ezután már csak újra kell fordítani
-  az <B>MPlayer-t</B> az <CODE>--enable-zr</CODE> configure opcióval.</P>
+  az MPlayer-t az <CODE>--enable-zr</CODE> configure opcióval.</P>
 
-<P>Néhány megjegyzés:</P>
+<P>A kimenet minõségét sok - a man page-ban részletezett - opcióval lehet
+  állítgatni. Egy rövid listát a következõ opcióval kaphatsz:</P>
 
-<UL>
-  <LI>ne használd az xawtv-t az <B>MPlayer</B>-rel egy idõben ugyanazon az
-    egységen, mert ez a gép lefagyását eredményezi.</LI>
-  <LI>a meghajtó konfigurálása a <CODE>-zr*</CODE> parancssori opciókkal
-    történik. Ezen opciók help-je a <CODE>-zrhelp</CODE> opcióval kérhetõ
-    le.</LI>
-  <LI>csak YV12 formátum használható (például libmpeg2, libavcodec).</LI>
-  <LI>az OSD nem támogatott</LI>
-</UL>
+<PRE>
+  mplayer -zrhelp
+</PRE>
 
-<P>TODO update</P>
+<P>A nagyítás és az OSD kiírását nem végzi el ez a video meghajtó, de azokat
+  az MPlayer megfelelõ szûrõivel megfelelõen lehet pótolni. Például
+  vegyünk egy <CODE>512x272</CODE> méretû filmet amit teljes képernyõn
+  szeretnél megtekinteni. 3 lehetséges méretbe tudod nagyítani a képet, amik
+  <CODE>768</CODE>, <CODE>384</CODE>, vagy <CODE>192</CODE>. A minõségre
+  és a sebességre való tekintettel én a <CODE>384x204</CODE>-et javaslom,
+  a gyors bilineáris szoftever nagyítással. A parancsok:</P>
+
+<PRE>
+  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+</PRE>
+
+<P>A vágást a <CODE>crop</CODE> szûrõvel is el lehet végezni. Tegyük fel hogy
+  túl széles a film ahhoz hogy megjelenítsd. Ilyenkor a <CODE>-zrcrop</CODE>
+  opciót is lehet használni, mégpedig a következõképp:</P>
+
+<PRE>
+  mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi
+</PRE>
+
+<P>ugyanez a <CODE>crop</CODE> szûrõvel:</P>
+
+<PRE>
+  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+</PRE>
+
+<P>A <CODE>-zrcrop</CODE> használatával állítható be a <I>cinerama</I> mód is.
+  Tegyük fel hogy 2 kivetítõd van. A bal oldali a <CODE>/dev/video1</CODE>-en,
+  a jobb oldali pedig a <CODE>/dev/video0</CODE>-án érhetõ el. A film mérete
+  <CODE>704x288</CODE>. Tegyük fel továbbá hogy a jobb oldalit fekete
+  fehérbe akarod állítani, 10-es JPEG minõségre:</P>
+
+<PRE>
+  mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+</PRE>
+
+<P>Látható hogy a második <CODE>-zrcrop</CODE> elõtt elõforduló opciók
+  az elsõ eszközre, míg a <CODE>-zrcrop</CODE> után lévõk a másodikra
+  vonatkoznak. A maximálisan használható kártyák száma 4, így lehetséges
+  egy 2x2-es videofal kiépítése is.</P>
+
+<P>Végül egy fontos megjegyzés: ne indítsd el az Xawtv-t miközben MPlayerrel
+  éppen lejátszol, mert elcrashel a gép. Viszont ha az MPlayer elõtt indítasz
+  Xawtv-t, valamint az MPlayer leállítása elõtt leállítod az Xawtv-t, akkor
+  így mûködni fog.</P>
+
+<P>A fordító (Gabucino) megj.: ha hozzám akarsz vágni ilyen Zr-es cuccot,
+  ne tétovázz :) Ha lehet, rögtön négyet :)</P>
 
 
 <H4><A NAME=blinken>2.3.1.4.2. Blinkenlights</A></H4>
