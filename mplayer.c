@@ -290,7 +290,7 @@ void exit_player(char* how){
   }
 #endif
 
-  if(how) mp_msgt(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
+  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
   mp_msg(MSGT_CPLAYER,MSGL_V,"max framesize was %d bytes\n",max_framesize);
   if(benchmark){
       double tot=video_time_usage+vout_time_usage+audio_time_usage;
@@ -337,7 +337,7 @@ void exit_sighandler(int x){
     // can't stop :(
     kill(getpid(),SIGKILL);
   }
-  mp_msgt(MSGT_CPLAYER,MSGL_FATAL,MSGTR_IntBySignal,x,
+  mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_IntBySignal,x,
       current_module?current_module:"unknown"
   );
   #ifdef HAVE_GUI
@@ -382,12 +382,12 @@ int conffile_fd;
 if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
-  mp_msgt(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
+  mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
 } else {
   mkdir(conffile, 0777);
   free(conffile);
   if ((conffile = get_path("config")) == NULL) {
-    mp_msgt(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
   } else {
     if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0666)) != -1) {
       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CreatingCfgFile, conffile);
