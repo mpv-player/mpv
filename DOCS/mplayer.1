@@ -142,10 +142,10 @@ Available options are:
                          to <value> sectors.
     toc-bias             Assume that the beginning
                          offset of track 1 as
-                         reported in the TOC will be
-                         addressed as LBA 0. Some
-                         Toshiba drives need this
-                         for getting track
+                         reported in the TOC will
+                         be addressed as LBA 0.
+                         Some Toshiba drives need
+                         this for getting track
                          boundaries correct.
     toc-offset=<value>   Add <value> sectors to the
                          values reported when
@@ -538,24 +538,27 @@ Available plugins are:
 
   crop[=w:h:x:y]       Crops the given part of the
                        image and discards the rest.
-                       Useful for removing black
-                       bands from widescreen movies.
+                       Useful to remove black bands
+                       from widescreen movies.
 
   rectangle[=w:h:x:y]  Draws a rectangle of the
-                       requested width and height at
-                       the designated coordinates over
-                       the image (used to test crop).
+                       requested width and height
+                       at the specified coordinates
+                       over the image (used to test
+                       crop).
                        (default: maximum w/h, upper
                        left x/y position)
 
   expand[=w:h:x:y:o]   Expands (not scales) movie
-                       resolution to the given value
-                       and places the unscaled
-                       original at coordinates x y.
+                       resolution to the given
+                       value and places the
+                       unscaled original at
+                       coordinates x y.
                        Can be used for placing
-                       subtitles/OSD in the resulting
-                       black bands. (default: original
-                       w/h, centered x/y)
+                       subtitles/OSD in the
+                       resulting black bands.
+                       (default: original w/h,
+                       centered x/y)
                        parameter (de)activates OSD
                        rendering. (default: 0)
 
@@ -571,14 +574,16 @@ Available plugins are:
                        performs a YUV<\->RGB
                        colorspace conversion
                        (see \-sws option too!).
-                       The value 0 is used for scaled
-                       (aspect) destination w/h.
+                       The value 0 is used for
+                       scaled (aspect) destination
+                       w/h.
                        (default: original w/h,
                        destination w/h with \-zoom)
                        Optionaly chroma skipping
                        (c from 0\-3) and scaling
                        parameters can be specified.
-                       (see \-sws option for details)
+                       (see the \-sws option for
+                       details)
                        
   yuy2                 Forces software YV12/I420 to
                        YUY2 conversion.
@@ -593,29 +598,35 @@ Available plugins are:
 
   format[=fourcc]      Restricts the colorspace for
                        next filter. It does not do
-                       any conversion! Use the scale
-                       filter for a real conversion.
+                       any conversion! Use the
+                       scale filter for a real
+                       conversion.
 
   pp[=flags]           Activates the internal
                        postprocessing filter.
-                       (see \-pp option for details!)
+                       (see \-pp option for details)
 
-  lavc[=quality:fps]   Realtime MPEG1 encoder for use
-                       with DVB/DXR3 (libavcodec)
+  lavc[=quality:fps]   Realtime MPEG1 encoder for
+                       use with DVB/DXR3
+                       (libavcodec)
 
-  fame                 Realtime MPEG1 encoder for use
-                       with DVB/DXR3 (libfame)
+  fame                 Realtime MPEG1 encoder for
+                       use with DVB/DXR3 (libfame)
 
-  dvbscale[=aspect]    Set up optimal scaling for DVB
-                       cards.
-                       (aspect=DVB_HEIGHT*ASPECTRATIO)
+  dvbscale[=aspect]    Set up optimal scaling for
+                       DVB cards.
+                       (aspect=
+                       DVB_HEIGHT*ASPECTRATIO)
 
-  cropdetect[=0-255]   Calculates necessary cropping
-                       parameters and prints the
-                       recommended parameters to stdout.
-                       The threshold can be optionally
-                       specified from nothing (0) to
-                       everything (255). (default: 24)
+  cropdetect[=0-255]   Calculates necessary
+                       cropping parameters and
+                       prints the recommended
+                       parameters to stdout.
+                       The threshold can be
+                       optionally
+                       specified from nothing (0)
+                       to everything (255).
+                       (default: 24)
 
   noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
                        Adds noise
@@ -628,11 +639,12 @@ Available plugins are:
                          h        high quality
                          p        mix with pattern
 
-  eq[=bright:cont]     Activates the software equalizer
-                       with interactive controls like
-                       the hardware eq controls.
-                       The values can be from -100 to
-                       100.
+  eq[=bright:cont]     Activates the software
+                       equalizer with interactive
+                       controls like the hardware
+                       eq controls.
+                       The values can be from -100
+                       to 100.
 
 .I NOTE:
 The parameters are optional and if omitted, some of them are set to default values.
@@ -731,10 +743,10 @@ Sets the font outline thickness.
 .TP
 .B \-subfont-autoscale <0-3>
 Sets the autoscale mode. Can be
-    0    no autoscale,
-    1    proportional to movie width,
-    2    proportional to movie height,
-    3    proportional to movie diagonal.
+    0  no autoscale
+    1  proportional to movie width
+    2  proportional to movie height
+    3  proportional to movie diagonal
 
 Default is 3 (diagonal). Zero means that text-scale and osd-scale are
 font heights in points.
