@@ -5,6 +5,7 @@
 #define VCODEC_LIBAVCODEC 4
 #define VCODEC_RAWRGB 6
 #define VCODEC_VFW 7
+#define VCODEC_LIBDV 8
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -546,6 +547,8 @@ default:
         sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",mux_v); break;
     case VCODEC_VFW:
         sh_video->vfilter=vf_open_encoder(NULL,"vfw",mux_v); break;
+    case VCODEC_LIBDV:
+        sh_video->vfilter=vf_open_encoder(NULL,"libdv",mux_v); break;
     }
     if(!mux_v->bih || !sh_video->vfilter){
         mp_msg(MSGT_MENCODER,MSGL_FATAL,"Failed to open the encoder\n");
