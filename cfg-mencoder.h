@@ -168,8 +168,8 @@ m_option_t mencoder_opts[]={
 	{"audio-preload", &audio_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2, NULL},
 	{"audio-delay",   &audio_delay, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 
-	{"x", "This option is obsolete, use -vop scale=w:h for scaling\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"xsize", "This option is obsolete, use -vop crop=w:h:x0:y0 for cropping\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"x", "This option is obsolete, use -vf scale=w:h for scaling.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"xsize", "This option is obsolete, use -vf crop=w:h:x0:y0 for cropping.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 	// output audio/video codec selection
 	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

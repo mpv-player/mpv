@@ -60,7 +60,7 @@ désactivé l'entrelacement. Sinon votre film sera distordu pendant les scènes
 fast-motion et le contrôleur de bitrate ne sera probablement même pas capable de
 garder le bitrate demandé car l'artefact de désentrelacement produit un grand taux de
 détails et donc consomme plus de bande passante. Vous pouvez désactiver
-l'entrelacement avec <option>-vop pp=DEINT_TYPE</option>. Généralement
+l'entrelacement avec <option>-vf pp=DEINT_TYPE</option>. Généralement
 <option>pp=lb</option> peut faire du bon travail, mais c'est une histoire de
 préférence personnelle. Voyez les autres algorithmes de désentrelacement dans le
 manuel et essayez-les.

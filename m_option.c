@@ -613,7 +613,7 @@ m_option_type_t m_option_type_string_list = {
   "\t-pre: Add the given parameters at the begining of the list.\n"
   "\t-del: Remove the entry at the given indices.\n"
   "\t-clr: Clear the list.\n"
-  "e.g: -vop-add flip,mirror -vop-del 2,5\n",  
+  "e.g: -vf-add flip,mirror -vf-del 2,5\n",  
   sizeof(char**),
   M_OPT_TYPE_DYNAMIC | M_OPT_TYPE_ALLOW_WILDCARD,
   parse_str_list,

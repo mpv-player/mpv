@@ -1062,7 +1062,7 @@ Le rendu prend beaucoup de temps CPU, spécialement en utilisant aalib sur X, et 
 moins de CPU sur une console standard, sans framebuffer. Utilisez SVGATextMode pour
 passer en mode texte large, et appréciez ! (une carte hercules en second écran, c'est
 génial :)) (mais à mon humble avis vous pouvez utiliser l'option
-<option>-vop 1bpp</option> pour avoir des graphismes sur hgafb:)
+<option>-vf 1bpp</option> pour avoir des graphismes sur hgafb:)
 </para>
 </note>
 

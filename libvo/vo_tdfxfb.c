@@ -19,7 +19,7 @@
  *
  * Hints and tricks:
  * - Use -dr to get direct rendering
- * - Use -vop yuy2 to get yuy2 rendering, *MUCH* faster than yv12
+ * - Use -vf yuy2 to get yuy2 rendering, *MUCH* faster than yv12
  * - To get a black background and nice smooth OSD, use -double
  * - To get the console as a background, but with scaled OSD, use -nodouble
  * - The driver supports both scaling and shrinking the image using the -x and

@@ -328,7 +328,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
 
 <para>
 L'affichage en plein-écran peut être obtenu soit en activant le <emphasis role="bold">
-redimensionnement logiciel</emphasis> (utilisez <option>-zoom</option> ou <option>-vop</option>,
+redimensionnement logiciel</emphasis> (utilisez <option>-zoom</option> ou <option>-vf</option>,
 mais je vous préviens: c'est lent), ou passez dans une résolution plus basse, par exemple 352x288. Si vous
 n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le changement de mode vidéo peut 
 être activé en utilisant l'option <option>-vm</option> et fonctionne avec les pilotes suivants:

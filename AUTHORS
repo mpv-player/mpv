@@ -345,7 +345,7 @@ Kees Cook <mplayer@outflux.net>
     * rawdv demuxer fixes
 
 Hampa Hug <hhug@student.ethz.ch>
-    * LUT-based soft eq video filter (-vop eq2)
+    * LUT-based soft eq video filter (-vf eq2)
     * .ogm demuxer endianess fixes
 
 Uwe Reder <Uwe.Reder@3SOFT.de>

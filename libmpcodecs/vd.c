@@ -218,7 +218,7 @@ csp_again:
 	    goto csp_again;
 	} else
 	if(palette==1){
-	    mp_msg(MSGT_DECVIDEO,MSGL_V,"vd: Trying -vop palette...\n");
+	    mp_msg(MSGT_DECVIDEO,MSGL_V,"vd: Trying -vf palette...\n");
 	    palette=-1;
 	    vf=vf_open_filter(vf,"palette",NULL);
 	    goto csp_again;

@@ -170,7 +170,7 @@
 #else
         {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"npp", "-npp has been removed, use -vop pp and read the fine manual\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"npp", "-npp has been removed, use -vf pp and read the fine manual.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #ifdef FF_POSTPROCESS
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif

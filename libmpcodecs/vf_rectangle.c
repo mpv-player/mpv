@@ -85,7 +85,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 
     /* Draw the rectangle */
 
-    mp_msg(MSGT_VFILTER,MSGL_INFO, "rectangle: -vop rectangle=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
+    mp_msg(MSGT_VFILTER,MSGL_INFO, "rectangle: -vf rectangle=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
 
     if (vf->priv->x < 0)
 	x = 0;

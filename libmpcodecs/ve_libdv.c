@@ -43,7 +43,7 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
 
     if(width!=DV_WIDTH || (height!=DV_PAL_HEIGHT && height!=DV_NTSC_HEIGHT)){
-	mp_msg(MSGT_VFILTER,MSGL_ERR,"DV: only 720x480 (NTSC) and 720x576 (PAL) resolutions allowed! try with -vop scale=720:480\n");
+	mp_msg(MSGT_VFILTER,MSGL_ERR,"DV: only 720x480 (NTSC) and 720x576 (PAL) resolutions allowed! Try with -vf scale=720:480\n");
     }
     
     vf->priv->enc->isPAL=(height==DV_PAL_HEIGHT);

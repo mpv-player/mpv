@@ -133,7 +133,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Description: %s\nAO: Auteur: %s\n"
 #define MSGTR_AOComment "AO: Commentaire: %s\n"
 #define MSGTR_Video_NoVideo "Vidéo: pas de vidéo\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: impossible d'initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo).\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: impossible d'initialiser les filtres vidéo (-vf) ou la sortie vidéo (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nImpossible de charger la liste de lecture %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -352,7 +352,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: le codec n'a pas défini sh->disp_w et sh->disp_h, essai de contournement !\n"
 #define MSGTR_VoConfigRequest "VDec: requête de configuration de vo - %d x %d (csp préferé: %s)\n"
-#define MSGTR_CouldNotFindColorspace "N'a pas pu trouver d'espace de couleur correspondant - nouvel essai avec -vop scale...\n"
+#define MSGTR_CouldNotFindColorspace "N'a pas pu trouver d'espace de couleur correspondant - nouvel essai avec -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
 #define MSGTR_MovieAspectUndefined "L'aspect du film est indéfini - pas de pré-redimensionnement appliqué.\n"
 

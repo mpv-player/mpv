@@ -106,7 +106,7 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     x=(vf->priv->x1+1)&(~1);
     y=(vf->priv->y1+1)&(~1);
     
-    printf("crop area: X: %d..%d  Y: %d..%d  (-vop crop=%d:%d:%d:%d)\n",
+    printf("crop area: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d)\n",
 	vf->priv->x1,vf->priv->x2,
 	vf->priv->y1,vf->priv->y2,
 	(vf->priv->x2+1-x)&(~1),(vf->priv->y2+1-y)&(~1),x,y

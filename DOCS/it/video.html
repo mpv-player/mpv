@@ -489,7 +489,7 @@ E' un bug di SDL, io non posso cambiarlo (provato con SDL 1.2.1).
 </P>
 
 <P><B>NOTA:</B> secondo la mia esperienza, la migliore qualità di immagine su EGA
- si ottiene riducendo un po' la luminosità: <CODE>-vop eq=-20:0</CODE>. Sulla
+ si ottiene riducendo un po' la luminosità: <CODE>-vf eq=-20:0</CODE>. Sulla
  mia macchina ho dovuto anche ridurre la frequenza di campionamento dell'audio,
  poichè il suono dava problemi a 44kHz: <CODE>-srate 22050</CODE>.</P>
 
@@ -654,7 +654,7 @@ Eccone alcune importanti:</P></B></TD><TR>
 e ne usa meno su console standard,
 non-framebuffer. Usa SVGATextMode per selezionare una modalità testo grande,
 e divertiti! (le schede Hercules con uscita secondaria vanno forte :)) (anche
- se, secondo me, puoi usare l'ozione <CODE>-vop 1bpp</CODE> per avere un
+ se, secondo me, puoi usare l'ozione <CODE>-vf 1bpp</CODE> per avere un
  immagine grafica su hgafb:)</P>
 
 <P>Usa l'opzione -framedrop se il tuo computer non è abbastanza veloce da renderizzare tutti i frame!</P>
@@ -1217,7 +1217,7 @@ ed è quindi necessario. Con la speciale modalità <I>cinerama</I>, si possono
  con l'algoritmo bilineare veloce. La linea di comando è
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi
 </PRE>
 
 <P>Il ritaglio (cropping) può essere fatto sia dal filtro <CODE>crop</CODE> che
@@ -1232,7 +1232,7 @@ ed è quindi necessario. Con la speciale modalità <I>cinerama</I>, si possono
  se vuoi invece usare il filtro <CODE>crop</CODE> fai
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>Usando più di un'opzione <CODE>-zrcrop</CODE> si attiva la modalità

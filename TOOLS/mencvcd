@@ -162,7 +162,7 @@ function usage() {
    echo "128 starting from 3:00 with frame rate 29.97 fps and input video norm NTSC"
    echo "and output frame rate 23.98 fps because of the 3:2 pulldown method in NTSC."
    echo
-   echo "'$HOWCALLED bj -size 640x272 -vop expand=640:480:0:104:0 \\"
+   echo "'$HOWCALLED bj -size 640x272 -vf expand=640:480:0:104:0 \\"
    echo "        -cdsize 645 -noburn bj.avi'"
    echo "this example above shows you, how to deal with movies which are not"
    echo "created with aspect ratios of 4:3 or 16:9."
@@ -296,7 +296,7 @@ while [ "$1"x != "x" ]; do
         shift 1
         ;;
       -sid) # mplayer option: have to set vop expand, too!!!
-        sub="-vop pp,expand=-1:-1:-1:-1:1 -sid $2"
+        sub="-vf pp,expand=-1:-1:-1:-1:1 -sid $2"
         shift 1
         ;;
       -size)
