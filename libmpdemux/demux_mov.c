@@ -669,7 +669,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 // esds atom:
 //      28  int		atom size (bytes of int size, int type and data)
 //      32  char[4]	atom type (fourc charater code -> esds)		
-//      62  int  	compressed datarate (Bits)
+//      36  char[]  	atom data (len=size-8)
 
 		sh->samplesize=char2short(trak->stdata,18)/8;
 		sh->channels=char2short(trak->stdata,16);
@@ -705,7 +705,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    switch(char2int(trak->stdata,32)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
-			if(atom_len >= 8) {
+			if(atom_len > 8) {
 			  esds_t esds; 				  
 			  if(!mp4_parse_esds(&trak->stdata[36], atom_len-8, &esds)) {
 			    
@@ -820,8 +820,17 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      // add code here to save esds header of length atom_len-8
 		      // beginning at stdata[86] to some variable to pass it
 		      // on to the decoder ::atmos
-		      trak->stream_header=trak->stdata+pos+8;
-		      trak->stream_header_len=atom_len-8;
+		      if(atom_len > 8) {
+      			esds_t esds; 				  
+			if(!mp4_parse_esds(trak->stdata+pos+8, atom_len-8, &esds)) {
+    
+			  // dump away the codec specific configuration for the AAC decoder
+			  trak->stream_header_len = esds.decoderConfigLen;
+			  trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);
+			  memcpy(trak->stream_header, esds.decoderConfig, trak->stream_header_len);
+			}
+			mp4_free_esds(&esds); // freeup esds mem
+		      }	      
 		      break;
 		    default:
 	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
@@ -1273,6 +1282,8 @@ if(trak->pos==0 && trak->stream_header_len>0){
     demux_packet_t* dp=new_demux_packet(x+trak->stream_header_len);
     memcpy(dp->buffer,trak->stream_header,trak->stream_header_len);
     stream_read(demuxer->stream,dp->buffer+trak->stream_header_len,x);
+    free(trak->stream_header);
+    trak->stream_header = NULL;
     dp->pts=pts;
     dp->flags=0;
     dp->pos=pos; // FIXME?
