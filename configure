@@ -155,7 +155,6 @@ Audio:
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
-  --disable-mp1e	 disable mp1e codec support [autodetect]
   --disable-select       disable using select() on OSS audio device [enable]
 
 Miscellaneous options:
@@ -659,7 +658,6 @@ _iconv=auto
 _rtc=auto
 _ossaudio=auto
 _mad=auto
-_mp1e=auto
 _vorbis=auto
 _css=auto
 _dvdread=auto
@@ -741,8 +739,6 @@ for ac_option do
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
-  --enable-mp1e)	_mp1e=yes	;;
-  --disable-mp1e)	_mp1e=no	;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
   --enable-css)		_css=yes	;;
@@ -1816,15 +1812,14 @@ echores "$_nas"
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   cat > $TMPC << EOF
-#include <libdxr3/api.h>
+#include <linux/em8300.h>
 int main(void) { return 0; }
 EOF
   _dxr3=no
-  cc_check  -ldxr3 && _dxr3=yes
+  cc_check && _dxr3=yes
 fi
 if test "$_dxr3" = yes ; then
   _def_dxr3='#define HAVE_DXR3 1'
-  _ld_dxr3='-ldxr3'
   _vosrc="$_vosrc vo_dxr3.c"
   _aosrc="$_aosrc ao_dxr3.c"
   _vomodules="dxr3 $_vomodules"
@@ -2068,28 +2063,6 @@ else
   _def_mad='#undef USE_LIBMAD'
 fi
 echores "$_mad"
-
-
-echocheck "mp1e rte support"
-if test "$_mp1e" = auto ; then
-  _mp1e=no
-  cat > $TMPC << EOF
-#include <unistd.h>
-#include <sys/types.h>
-#include <rte.h>
-int main(void) { return 0; }
-EOF
-  cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -lrte && _mp1e=yes
-fi
-if test "$_mp1e" = yes ; then
-  _largefiles=yes
-  _def_mp1e='#define USE_MP1E 1'
-  _ld_mp1e='-lrte'
-else
-  _def_mp1e='#undef USE_MP1E'
-  _ld_mp1e=''
-fi
-echores "$_mp1e"
 
 
 echocheck "OggVorbis support"
@@ -2570,9 +2543,9 @@ elif bsd ; then
 fi
 
 # 64 bit file offsets?
-if test "$_largefiles" = yes || test "$_mp1e" = yes || freebsd ; then
+if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  if test "$_dvdread" = yes || test "$_mp1e" = yes ; then
+  if test "$_dvdread" = yes ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
   fi
@@ -2631,7 +2604,6 @@ X11DIR = $_ld_x11
 
 # video output
 X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock 
-DXR3_LIB =  $_ld_dxr3
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
@@ -2659,7 +2631,6 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
-MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
 DECORE_LIB = $_ld_decore
@@ -2804,9 +2775,6 @@ $_def_libavcodecso
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS 1
 
-/* mp1e rte encoder */
-$_def_mp1e
-
 /* XAnim DLL support */
 $_def_xanim
 $_def_xanim_path
@@ -2886,9 +2854,6 @@ $_def_png
 
 /* libmad support */
 $_def_mad
-
-/* mp1e support */
-$_def_mp1e
 
 /* enable OggVorbis support */
 $_def_vorbis

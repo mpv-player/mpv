@@ -34,7 +34,7 @@ CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) # -Wall
 VO_LIBS = -Llibvo2 -lvo2 $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB)
 endif
 
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
@@ -43,9 +43,9 @@ XA_LIBS = -Lxa -lxa
 # SRCS = $(SRCS_MENCODER) $(SRCS_MPLAYER)
 # OBJS = $(OBJS_MENCODER) $(OBJS_MPLAYER)
 
-PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
+PARTS = libmpdemux mp3lib libac3 libmp1e libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
 ifeq ($(VO2),yes)
-PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo2 libao2 drivers drivers/syncfb linux postproc xa
+PARTS = libmpdemux mp3lib libac3 libmp1e libmpeg2 opendivx libavcodec libvo2 libao2 drivers drivers/syncfb linux postproc xa
 endif
 
 
@@ -81,9 +81,9 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 ifeq ($(VO2),yes)
-COMMONLIBS = libmpdemux/libmpdemux.a libvo2/libvo2.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMONLIBS = libmpdemux/libmpdemux.a libvo2/libvo2.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 endif
 
 loader/libloader.a:
@@ -94,6 +94,9 @@ libmpdemux/libmpdemux.a:
 
 loader/DirectShow/libDS_Filter.a:
 	$(MAKE) -C loader/DirectShow
+
+libmp1e/libmp1e.a:
+	$(MAKE) -C libmp1e
 
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec
@@ -146,14 +149,15 @@ MENCODER_DEP += Gui/libgui.a
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(AV_LIB) $(EXTRA_LIB) $(LIRC_LIB) $(LIB_LOADER) $(MP1E_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(TERMCAP_LIB) $(DIRECTFB_LIB) -lm $(STATIC_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB)
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(AV_LIB) $(EXTRA_LIB) $(LIRC_LIB) $(LIB_LOADER) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(TERMCAP_LIB) -Llibmp1e -lmp1e -lm $(STATIC_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux $(X_LIBS) $(LIB_LOADER) $(AV_LIB) $(MP1E_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux -Llibmp1e -lmp1e $(X_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
+
 endif
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
