@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -18,60 +22,99 @@
 #include "../input/input.h"
 #include "../linux/timer.h"
 
+typedef struct history_st history_t;
+
+struct history_st {
+  char* buffer;
+  int size;
+  history_t* next;
+  history_t* prev;
+};
+
 struct menu_priv_s {
   char** lines; // Our buffer
   int last_line;
   int num_lines;
-  char* input; // input buffer
-  int input_size; // size of the input buffer in lines
+  int add_line;
   unsigned int hide_ts;
   unsigned int show_ts;
-
-  //int max_lines; // Max number of lines with the last mpi
-  
+  pid_t child; // Child process if we are running a shell cmd
+  int child_fd[3]; // The 3 default fd
   char* prompt;
+  //int max_lines; // Max number of lines with the last mpi
+  history_t* history;
+  history_t* cur_history;
+  int history_size;
+  
+  char* mp_prompt;
+  char* child_prompt;
   int buf_lines; // Buffer size (in line)
   int height; // Display size in %
   int minb;
   int vspace;
   unsigned int hide_time;
   unsigned int show_time;
+  int history_max;
+  int raw_child;
 };
 
 static struct menu_priv_s cfg_dflt = {
   NULL,
   0,
   0,
+  1,
+  0,
+  0,
+  0,
+  { 0 , 0, 0 },
   NULL,
-  0,
-  0,
+  NULL,
+  NULL,
   0,
 
   "# ",
+  "$ ",
   50, // lines
   33, // %
   3,
   3,
   500,
   500,
+  10,
+  0
 };
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
 
 static m_option_t cfg_fields[] = {
-  { "prompt", ST_OFF(prompt), CONF_TYPE_STRING, M_OPT_MIN, 1, 0, NULL },
+  { "prompt", ST_OFF(mp_prompt), CONF_TYPE_STRING, M_OPT_MIN, 1, 0, NULL },
+  { "child-prompt", ST_OFF(child_prompt), CONF_TYPE_STRING, M_OPT_MIN, 1, 0, NULL },
   { "buffer-lines", ST_OFF(buf_lines), CONF_TYPE_INT, M_OPT_MIN, 5, 0, NULL },
   { "height", ST_OFF(height), CONF_TYPE_INT, M_OPT_RANGE, 1, 100, NULL },
   { "minbor", ST_OFF(minb), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "vspace", ST_OFF(vspace), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "show-time",ST_OFF(show_time), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "hide-time",ST_OFF(hide_time), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
+  { "history-size",ST_OFF(history_max), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL },
+  { "raw-child", ST_OFF(raw_child), CONF_TYPE_FLAG, 0, 0, 1, NULL },
   { NULL, NULL, NULL, 0,0,0,NULL }
 };
 
 #define mpriv (menu->priv)
 
+static void check_child(menu_t* menu);
+
 static void add_line(struct menu_priv_s* priv, char* l) {
+  char* eol = strchr(l,'\n');
+
+  if(eol) {
+    if(eol != l) {
+      eol[0] = '\0';
+      add_line(priv,l);
+    }
+    if(eol[1]) add_line(priv,eol+1);
+    return;
+  }
 
   if(priv->num_lines >= priv->buf_lines && priv->lines[priv->last_line])
     free(priv->lines[priv->last_line]);
@@ -80,13 +123,43 @@ static void add_line(struct menu_priv_s* priv, char* l) {
 
   priv->lines[priv->last_line] = strdup(l);
   priv->last_line = (priv->last_line + 1) % priv->buf_lines;
+  priv->add_line = 1;
+}
+
+static void add_string(struct menu_priv_s* priv, char* l) {
+  char* eol = strchr(l,'\n');
+  int ll =  priv->last_line > 0 ? priv->last_line - 1 : priv->buf_lines-1;
+
+  if(priv->num_lines <= 0 || priv->add_line || eol == l) {
+    add_line(priv,l);
+    priv->add_line = 0;
+    return;
+  }
+  
+  if(eol) {
+    eol[0] = '\0';
+    add_string(priv,l);
+    if(eol[1]) { 
+      add_line(priv,eol+1);
+      priv->add_line = 0;
+    } else
+      priv->add_line = 1;
+    return;
+  }
+  priv->lines[ll] = realloc(priv->lines[ll],strlen(priv->lines[ll]) + strlen(l) + 1);
+  strcat(priv->lines[ll],l);
+  
 }
 
 static void draw(menu_t* menu, mp_image_t* mpi) {
   int h = mpi->h*mpriv->height/100;
   int w = mpi->w - 2* mpriv->minb;
   int x = mpriv->minb, y;
-  int lw,lh,i, ll = mpriv->last_line - 1;
+  int lw,lh,i, ll;
+
+  if(mpriv->child) check_child(menu);
+
+  ll = mpriv->last_line - 1;
 
   if(mpriv->hide_ts) {
     unsigned int t = GetTimerMS() - mpriv->hide_ts;
@@ -112,11 +185,16 @@ static void draw(menu_t* menu, mp_image_t* mpi) {
   if(x < 0 || y < 0 || w <= 0 || h <= 0 )
     return;
 
-  menu_text_size(mpriv->input,w,mpriv->vspace,1,&lw,&lh);
-  menu_draw_text_full(mpi,mpriv->input,x,y,w,h,mpriv->vspace,1,
-		      MENU_TEXT_BOT|MENU_TEXT_LEFT,
-		      MENU_TEXT_BOT|MENU_TEXT_LEFT);
-  y -= lh + mpriv->vspace;
+  if(!mpriv->child || !mpriv->raw_child){
+    char input[strlen(mpriv->cur_history->buffer) + strlen(mpriv->prompt) + 1];
+    sprintf(input,"%s%s",mpriv->prompt,mpriv->cur_history->buffer);
+    menu_text_size(input,w,mpriv->vspace,1,&lw,&lh);
+    menu_draw_text_full(mpi,input,x,y,w,h,mpriv->vspace,1,
+			MENU_TEXT_BOT|MENU_TEXT_LEFT,
+			MENU_TEXT_BOT|MENU_TEXT_LEFT);
+    y -= lh + mpriv->vspace;
+  }
+
 
   for( i = 0 ; y > mpriv->minb && i < mpriv->num_lines ; i++){
     int c = (ll - i) >= 0 ? ll - i : mpriv->buf_lines + ll - i;
@@ -143,8 +221,130 @@ static void read_cmd(menu_t* menu,int cmd) {
   }
 }
 
+static void check_child(menu_t* menu) {
+  fd_set rfd;
+  struct timeval tv;
+  int max_fd = mpriv->child_fd[2] > mpriv->child_fd[3] ? mpriv->child_fd[2] :
+    mpriv->child_fd[3];
+  int i,r,child_status,w;
+  char buffer[256];
+
+  if(!mpriv->child) return;
+
+  memset(&tv,0,sizeof(struct timeval));
+  FD_ZERO(&rfd);
+  FD_SET(mpriv->child_fd[1],&rfd);
+  FD_SET(mpriv->child_fd[2],&rfd);
+
+  r = select(max_fd+1,&rfd, NULL, NULL, &tv);
+  if(r == 0) {
+    r = waitpid(mpriv->child,&child_status,WNOHANG);
+    if(r > 0) {
+      printf("child died\n");
+    for(i = 0 ; i < 3 ; i++) 
+      close(mpriv->child_fd[i]);
+    mpriv->child = 0;
+    mpriv->prompt = mpriv->mp_prompt;
+    //add_line(mpriv,"Child process exited");
+    } else if(r < 0)
+      printf("waitpid error: %s\n",strerror(errno));
+  } else if(r < 0) {
+    printf("select error\n");
+    return;
+  }
+  
+  w = 0;
+  for(i = 1 ; i < 3 ; i++) {
+    if(FD_ISSET(mpriv->child_fd[i],&rfd)){
+      if(w) mpriv->add_line = 1;
+      r = read(mpriv->child_fd[i],buffer,255);
+      if(r < 0)
+	printf("Read error on child's %s \n", i == 1 ? "stdout":"stderr");
+      else if(r>0) {
+	buffer[r] = '\0';
+	add_string(mpriv,buffer);
+      }
+      w = 1;
+    }
+  }
+
+}
+
+#define close_pipe(pipe) close(pipe[0]); close(pipe[1])
+
+static int run_shell_cmd(menu_t* menu, char* cmd) {
+  int in[2],out[2],err[2];
+
+  printf("Console run %s ...\n",cmd);
+  if(mpriv->child) {
+    printf("A child is alredy running\n");
+    return 0;
+  }
+
+  pipe(in);
+  pipe(out);
+  pipe(err);
+
+  mpriv->child = fork();
+  if(mpriv->child < 0) {
+    printf("Fork failed !!!\n");
+    close_pipe(in);
+    close_pipe(out);
+    close_pipe(err);
+    return 0;
+  }
+  if(!mpriv->child) { // Chlid process
+    int err_fd = dup(2);
+    FILE* errf = fdopen(err_fd,"w");
+    // Bind the std fd to our pipes
+    dup2(in[0],0);
+    dup2(out[1],1);
+    dup2(err[1],2);
+    execl("/bin/sh","sh","-c",cmd,NULL);
+    fprintf(errf,"exec failed : %s\n",strerror(errno));
+    exit(1);
+  }
+  // MPlayer
+  mpriv->child_fd[0] = in[1];
+  mpriv->child_fd[1] = out[0];
+  mpriv->child_fd[2] = err[0];
+  mpriv->prompt = mpriv->child_prompt;
+  //add_line(mpriv,"Child process started");
+  return 1;
+}
+
+static void enter_cmd(menu_t* menu) {
+  history_t* h;
+  char input[strlen(mpriv->cur_history->buffer) + strlen(mpriv->prompt) + 1];
+  
+  sprintf(input,"%s%s",mpriv->prompt,mpriv->cur_history->buffer);
+  add_line(mpriv,input);
+
+  if(mpriv->history == mpriv->cur_history) {
+    if(mpriv->history_size >= mpriv->history_max) {
+      history_t* i;
+      for(i = mpriv->history ; i->prev ; i = i->prev)
+	/**/;
+      i->next->prev = NULL;
+      free(i->buffer);
+      free(i);
+    } else
+      mpriv->history_size++;
+    h = calloc(1,sizeof(history_t));
+    h->size = 255;
+    h->buffer = calloc(h->size,1);
+    h->prev = mpriv->history;
+    mpriv->history->next = h;
+    mpriv->history = h;
+  } else
+    mpriv->history->buffer[0] = '\0';
+    
+  mpriv->cur_history = mpriv->history;
+  //mpriv->input = mpriv->cur_history->buffer;
+}
+
 static void read_key(menu_t* menu,int c) {
-  switch(c) {
+  if(!mpriv->child || !mpriv->raw_child) switch(c) {
   case KEY_ESC:
     if(mpriv->hide_time)
       mpriv->hide_ts = GetTimerMS();
@@ -153,8 +353,26 @@ static void read_key(menu_t* menu,int c) {
     mpriv->show_ts = 0;
     return;
   case KEY_ENTER: {
-    mp_cmd_t* c = mp_input_parse_cmd(&mpriv->input[strlen(mpriv->prompt)]);
-    add_line(mpriv,mpriv->input);
+    mp_cmd_t* c;
+    if(mpriv->child) {
+      char *str = mpriv->cur_history->buffer;
+      int l = strlen(str);
+      while(l > 0) {
+	int w = write(mpriv->child_fd[0],str,l);
+	if(w < 0) {
+	  printf("Write error\n");
+	  break;
+	}
+	l -= w;
+	str += w;
+      }
+      if(write(mpriv->child_fd[0],"\n",1) < 0)
+	printf("Write error\n");
+      enter_cmd(menu);
+      return;
+    }
+    c = mp_input_parse_cmd(mpriv->cur_history->buffer);
+    enter_cmd(menu);
     if(!c)
       add_line(mpriv,"Invalid command try help");
     else {
@@ -176,26 +394,45 @@ static void read_key(menu_t* menu,int c) {
 	  menu->show = 0;
 	mpriv->show_ts = 0;
 	break;
+      case MP_CMD_CRUN:
+	run_shell_cmd(menu,c->args[0].v.s);
+	break;
       default: // Send the other commands to mplayer
 	mp_input_queue_cmd(c);
       }
     }
-    mpriv->input[strlen(mpriv->prompt)] = '\0';
     return;
   }
   case KEY_DELETE:
   case KEY_BS: {
-    unsigned int i = strlen(mpriv->input);
-    if(i > strlen(mpriv->prompt))
-      mpriv->input[i-1] = '\0';
+    unsigned int i = strlen(mpriv->cur_history->buffer);
+    if(i > 0)
+      mpriv->cur_history->buffer[i-1] = '\0';
     return;
   }
+  case KEY_UP:
+    if(mpriv->cur_history->prev)
+      mpriv->cur_history = mpriv->cur_history->prev;
+    break;
+  case KEY_DOWN:
+    if(mpriv->cur_history->next)
+      mpriv->cur_history = mpriv->cur_history->next;
+    break;
+  }
+
+  if(mpriv->child && mpriv->raw_child) {
+    write(mpriv->child_fd[0],&c,sizeof(int));
+    return;
   }
 
   if(isascii(c)) {
-    int l = strlen(mpriv->input);
-    mpriv->input[l] = (char)c;
-    mpriv->input[l+1] = '\0';
+    int l = strlen(mpriv->cur_history->buffer);
+    if(l >= mpriv->cur_history->size) {
+      mpriv->cur_history->size += 255;
+      mpriv->cur_history->buffer = realloc(mpriv->cur_history,mpriv->cur_history->size);
+    }
+    mpriv->cur_history->buffer[l] = (char)c;
+    mpriv->cur_history->buffer[l+1] = '\0';
   }
 
 }
@@ -209,9 +446,10 @@ static int open(menu_t* menu, char* args) {
   menu->read_key = read_key;
 
   mpriv->lines = calloc(mpriv->buf_lines,sizeof(char*));
-  mpriv->input_size = 1024;
-  mpriv->input = calloc(mpriv->input_size,sizeof(char));
-  strcpy(mpriv->input,mpriv->prompt);
+  mpriv->prompt = mpriv->mp_prompt;
+  mpriv->cur_history = mpriv->history = calloc(1,sizeof(history_t));
+  mpriv->cur_history->buffer = calloc(255,sizeof(char));
+  mpriv->cur_history->size = 255;
   
   if(args)
     add_line(mpriv,args);
