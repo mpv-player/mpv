@@ -43,7 +43,7 @@ static struct
 	int ready;
 	int count;
 	struct mem_block blocks[REAL_MEM_BLOCKS];
-	} mem_info = { 0 };
+	} mem_info = { .ready = 0, };
 
 static int
 real_mem_init(void)
@@ -181,7 +181,7 @@ static struct
 	unsigned short ret_seg, ret_off;
 	unsigned short stack_seg, stack_off;
 	struct vm86_struct vm;
-	} context = { 0 };
+	} context = { .ready = 0, };
 
 
 static inline void
