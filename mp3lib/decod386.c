@@ -56,7 +56,7 @@
 
    /* sizeof(int) == 4 */
 #define WRITE_SAMPLE(samples,sum,clip) { \
-  double dtemp; long v;                  \
+  double dtemp; int v;                  \
   dtemp = ((((65536.0 * 65536.0 * 16)+(65536.0 * 0.5))* 65536.0)) + (sum);\
   v = (((int *)&dtemp)[MANTISSA_OFFSET] - 0x80000000); \
   if( v > 32767) { *(samples) = 0x7fff; (clip)++; } \
@@ -150,11 +150,13 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 synth_func_t synth_func;
 
 #ifdef HAVE_MMX
-int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
+int synth_1to1_MMX( real *bandPtr ,int channel,short * samples)
 {
-    static short buffs[2][2][0x110];
-    static int bo = 1;
-    synth_1to1_MMX_s(bandPtr, channel, samples, (short *) buffs, &bo); 
+    real *mybandPtr __attribute__((aligned(16))) = bandPtr;
+    short *mysamples __attribute__((aligned(16))) = samples;
+    static short buffs[2][2][0x110] __attribute__((aligned(16)));
+    static int bo __attribute__((aligned(16))) = 1;
+    synth_1to1_MMX_s(mybandPtr, channel, mysamples, (short *) buffs, &bo); 
     return 0;
 } 
 #endif
