@@ -15,7 +15,7 @@
 <P>For the complete list of available MEncoder options and examples, please see
   the man page.</P>
 
-<H3><A NAME="2pass">2.4.1 Encoding 2 or 3-pass DivX4</A></H3>
+<H3><A NAME="2pass">2.4.1 Encoding 2 or 3-pass MPEG-4 ("DIVX")</A></H3>
 
 <P><U><B>2-pass encoding:</B></U> the name comes from the fact that this method
   encodes the file <I>twice</I>. The first encoding (dubbed <I>pass</I>)
@@ -26,8 +26,8 @@
   you heard about this, you should consult some guides available on the
   Net.</P>
 
-<P>This example shows how to encode a DVD to a 2-pass DivX4 AVI. Just two
-  commands are needed:<BR>
+<P>This example shows how to encode a DVD to a 2-pass MPEG-4 ("DIVX") AVI. Just
+  two commands are needed:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
     can come from a previous 3-pass encoding (it interferes with current
     one)<BR>
@@ -54,16 +54,16 @@
   <LI>Second pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=&lt;bitrate&gt;</CODE></P>
-    <P>Alias the first pass of DivX4 video encoding. 
+    <P>This is the first pass of video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of
       the previous pass.</P></LI>
   <LI>Third pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=&lt;bitrate&gt;</CODE></P>
-    <P>Alias the second pass of DivX4 video encoding. 
-      Optionally specify the video bitrate MEncoder printed at the end of
-      the previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will
-      be inserted into the destination file.. and it's all ready!</P></LI>
+    <P>This is the second pass of video encoding. 
+      Specify the same bitrate as in the previous pass unless you really know
+      what you are doing. In this pass, audio from <CODE>frameno.avi</CODE>
+      will be inserted into the destination file.. and it's all ready!</P></LI>
 </OL>
 
 <H4>Example for 3-pass encoding:</H4>
@@ -140,11 +140,13 @@
   <LI>mjpeg - Motion JPEG</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
-  <LI>mpeg4 - DivX4</LI>
-  <LI>msmpeg4 - the old DivX</LI>
-  <LI>msmpeg4v2 - Micro$oft MPEG4 V2 (DivX alias MP43 predecessor)</LI>
+  <LI>mpeg4 - ISO standard MPEG-4 (DivX 4/5, OpenDivX, XVID compatible)</LI>
+  <LI>msmpeg4 - pre-standard MPEG-4 variant by MS, v3 (aka DivX3)</LI>
+  <LI>msmpeg4v2 - pre-standard MPEG-4 by MS, v2 (used in old asf files)</LI>
+  <LI>wmv1 - Windows Media Video, version 1 (aka WMV7)</LI>
   <LI>rv10 - an old RealVideo codec</LI>
   <LI>mpeg1video - MPEG1 video :)</LI>
+  <LI>huffyuv - lossless compression</LI>
 </UL>
 
 <P>The first column contains the codec names that should be passed after the
@@ -168,9 +170,7 @@ Explanation of the process:
     <CODE>libjpeg</CODE> (when decoding PNGs, it will use <B>libpng</B>).</LI>
 
   <LI>MEncoder then feeds the decoded image to the chosen video compressor
-    (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
-    currently it can output only to RGB formats, thus can't be used with codecs
-    that require YUV as input, like DivX4 or ffmpeg's msmpeg4.</LI>
+    (DivX4, Xvid, ffmpeg msmpeg4, etc...).</LI>
 </OL>
 
 <H4>Examples</H4>
