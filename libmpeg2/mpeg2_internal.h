@@ -218,7 +218,7 @@ void mpeg2_free_image_buffers (picture_t * picture);
 
 
 #ifdef MPEG12_POSTPROC
-#define MBC 48
-#define MBR 36
-extern int quant_store[MBR+1][MBC+1]; // [Review]
+#define MPEG2_MBC 120
+#define MPEG2_MBR 72
+extern int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
 #endif

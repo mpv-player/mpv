@@ -57,7 +57,7 @@ static int drop_frame = 0;
 
 #ifdef MPEG12_POSTPROC
 #include "../postproc/postprocess.h"
-int quant_store[MBR+1][MBC+1]; // [Review]
+int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
 #endif
 
 static table_init_state=0;
@@ -182,7 +182,7 @@ int stride[3];
 			picture->forward_reference_frame->base,
 			stride[0], frames[3].base, stride[0],
                         picture->coded_picture_width, picture->coded_picture_height,
-                        &quant_store[1][1], (MBC+1), picture->pp_options);
+                        &quant_store[1][1], (MPEG2_MBC+1), picture->pp_options);
 	output->draw_slice (frames[3].base, stride, 
                         picture->display_picture_width,
                         picture->display_picture_height, 0, 0);
