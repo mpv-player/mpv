@@ -194,7 +194,8 @@ static video_registers_t vregs[] =
   DECLARE_VREG(IDCT_LEVELS),
   DECLARE_VREG(IDCT_AUTH_CONTROL),
   DECLARE_VREG(IDCT_AUTH),
-  DECLARE_VREG(IDCT_CONTROL)
+  DECLARE_VREG(IDCT_CONTROL),
+  DECLARE_VREG(CONFIG_CNTL)
 };
 
 static void * radeon_mmio_base = 0;
@@ -207,6 +208,11 @@ static uint32_t SAVED_OV0_GRAPHICS_KEY_MSK = 0;
 static uint32_t SAVED_OV0_VID_KEY_CLR = 0;
 static uint32_t SAVED_OV0_VID_KEY_MSK = 0;
 static uint32_t SAVED_OV0_KEY_CNTL = 0;
+#if defined(RAGE128) && (WORDS_BIGENDIAN)
+static uint32_t SAVED_CONFIG_CNTL = 0;
+#define APER_0_BIG_ENDIAN_16BPP_SWAP (1<<0)
+#define APER_0_BIG_ENDIAN_32BPP_SWAP (2<<0)
+#endif
 
 #define GETREG(TYPE,PTR,OFFZ)		(*((volatile TYPE*)((PTR)+(OFFZ))))
 #define SETREG(TYPE,PTR,OFFZ,VAL)	(*((volatile TYPE*)((PTR)+(OFFZ))))=VAL
@@ -426,10 +432,10 @@ static void radeon_engine_restore( void )
 				  (pitch64 << 22));
 
     radeon_fifo_wait(1);
-//#if defined(__BIG_ENDIAN)
 #if defined(WORDS_BIGENDIAN)
-    OUTREGP(DP_DATATYPE,
-	    HOST_BIG_ENDIAN_EN, ~HOST_BIG_ENDIAN_EN);
+#ifdef RADEON
+    OUTREGP(DP_DATATYPE, HOST_BIG_ENDIAN_EN, ~HOST_BIG_ENDIAN_EN);
+#endif
 #else
     OUTREGP(DP_DATATYPE, 0, ~HOST_BIG_ENDIAN_EN);
 #endif
@@ -1060,6 +1066,19 @@ int vixInit( void )
     }
 #endif
 
+/* XXX: hack, but it works for me (tm) */
+#if defined(RAGE128) && (WORDS_BIGENDIAN)
+    /* code from gatos */
+    {
+	SAVED_CONFIG_CNTL = INREG(CONFIG_CNTL);
+	OUTREG(CONFIG_CNTL, SAVED_CONFIG_CNTL &
+	    ~(APER_0_BIG_ENDIAN_16BPP_SWAP|APER_0_BIG_ENDIAN_32BPP_SWAP));
+	    
+//	printf("saved: %x, current: %x\n", SAVED_CONFIG_CNTL,
+//	    INREG(CONFIG_CNTL));
+    }
+#endif
+
   if(__verbose > 1) radeon_vid_dump_regs();
   return 0;  
 }
@@ -1074,6 +1093,12 @@ void vixDestroy( void )
   OUTREG(OV0_VID_KEY_MSK, SAVED_OV0_VID_KEY_MSK);
   OUTREG(OV0_KEY_CNTL, SAVED_OV0_KEY_CNTL);
   printf(RADEON_MSG" Restored overlay colorkey settings\n");
+
+#if defined(RAGE128) && (WORDS_BIGENDIAN)
+    OUTREG(CONFIG_CNTL, SAVED_CONFIG_CNTL);
+//    printf("saved: %x, restored: %x\n", SAVED_CONFIG_CNTL,
+//	INREG(CONFIG_CNTL));
+#endif
 
   unmap_phys_mem(radeon_mem_base,radeon_ram_size);
   unmap_phys_mem(radeon_mmio_base,0xFFFF);
