@@ -121,7 +121,6 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 // int screen;
-// int myx,myy;
  char *hello = (title == NULL) ? "Xv render" : title;
 // char *name = ":0.0";
  XSizeHints hint;
@@ -169,9 +168,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
       */
 
      {
-       rect_t newres = aspect(d_width,d_height,vo_screenwidth,vo_screenheight);
-       dwidth=d_width=newres.w; dheight=d_height=newres.h;
-       //myx=newres.x; myy=newres.y;
+       aspect(&d_width,&d_height,vo_screenwidth,vo_screenheight);
+       dwidth=d_width; dheight=d_height;
      }
 #endif
 
@@ -286,12 +284,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
      if ( mFullscreen )
       {
-       drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2; /* =myx; */
+       drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
        drwcX+=drwX;
-       drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2; /* =myy; */
+       drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
        drwcY+=drwY;
-       drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth); /* =dwidth */
-       drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight); /* =dheight */
+       drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
+       drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
        printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
 #ifdef HAVE_NEW_GUI
