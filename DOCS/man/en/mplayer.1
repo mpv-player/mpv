@@ -1468,28 +1468,6 @@ Specify the VobSub subtitle id.
 .B \-abs <value> (OBSOLETE)
 Override audio driver/\:card buffer size detection, \-ao oss only
 .TP
-.B \-ao <driver1[:device],driver2,...[,]>
-Specify a priority list of audio output drivers (optionally with device) to be
-used.
-With SDL 'device' is valid, too, it means subdriver then.
-.br
-.I NOTE:
-To get a full list of available drivers, see \-ao help.
-.br
-If the list has a trailing ',' it will fallback to drivers not listed.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-try to use OSS with the specified sound devices and fallback to others if it
-fails
-.IPs "\-ao sdl:esd"
-specify the SDL subdriver
-.RE
-.PD 1
-.
-.TP
 .B \-aofile <filename>
 Filename for \-ao pcm.
 .TP
@@ -1593,9 +1571,8 @@ See \-ao help for a list of compiled-in drivers.
 .IPs "\-ao alsa,oss,"
 Try the ALSA driver, then the OSS driver, then others.
 .br
-.IPs "\-ao alsa:option"
-Uses the ALSA driver with a suboption.
-FIXME: Add a good example
+.IPs "\-ao sdl:esd"
+Use the SDL driver with the ESD subdriver.
 .RE
 .PD 1
 .
@@ -1606,15 +1583,25 @@ FIXME: Document all suboptions.
 .TP
 .B alsa\ \ \ 
 ALSA 0.9/1.x audio output driver.
+.PD 0
+.RSs
+.IPs mmap\ \ \ 
+Sets experimental mmap-mode (does not work for more than 2 channels).
+.IPs noblock
+Sets noblock-mode.
+.IPs hw=device0.3
+Sets the device name.
+.RE
+.PD 1
 .TP
 .B alsa1x\ 
 ALSA 1.x audio output driver.
 .TP
-.B alsa5\ \ 
-ALSA 0.5 audio output driver.
-.TP
 .B alsa9\ \ 
 ALSA 0.9 audio output driver.
+.TP
+.B alsa5\ \ 
+ALSA 0.5 audio output driver.
 .TP
 .B oss\ \ \ \ 
 OSS audio output driver
@@ -2115,7 +2102,7 @@ empty channels are inserted (except mixing from mono to stereo, then the mono
 channel is repeated in both of the output channels).
 If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
-.IPs format[=bps,f]
+.IPs format[=bps:f]
 Select the format f and bytes per sample bps used for output from the
 filter layer.
 The option bps is an integer and denotes Bytes per sample.
