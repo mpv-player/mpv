@@ -107,7 +107,7 @@ Now, go on:
 	 And they call the appropriate demuxer, to get the compressed data.
 	 (see 2.)
 
-5.a Codec controller: this is the greates hack in the whole :)
+5.a Codec controller: this is the greatest hack in the whole :)
 	 The libmpeg2 is so unstable, that I can't believe it.
 	 Of course I don't mean it bullshit :) rather it only accepts
 	 totally perfect, errorfree streams. If it founds error, it's
@@ -148,5 +148,5 @@ Now, go on:
 	 info). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
 	 to display the whole frame, only update small parts of it.
 5.b draw_frame(): this is the older interface, this displays only complete
-	 frames, and can do only packed format (YUV2, RGB/BGR).
+	 frames, and can do only packed format (YUY2, RGB/BGR).
 	 Win32 codecs use this (DivX, Indeo, etc).
