@@ -45,6 +45,8 @@ sub_alignment <value>
 	Set subtitle alignment.
 sub_visibility
 	Toggle subtitle visibility.
+get_sub_visibility
+	Print out subtitle visibility (1 == on, 0 == off).
 sub_pos <value>
 	Adjust subtitles position.
 vobsub_lang
@@ -55,6 +57,8 @@ get_time_length
 	???
 vo_fullscreen
 	Switch to fullscreen mode.
+get_vo_Fullscreen
+	Print out fullscreen-ness (1 == fullscreened, 0 == windowed).
 panscan value [value2]
 	???
 loadfile url
