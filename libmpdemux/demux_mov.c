@@ -22,6 +22,8 @@
 #include <zlib.h>
 #endif
 
+#include <fcntl.h>
+
 typedef struct {
     unsigned int pts; // duration
     unsigned int size;
@@ -140,6 +142,7 @@ void mov_build_index(mov_track_t* trak){
 #define MOV_TRAK_VIDEO 1
 #define MOV_TRAK_AUDIO 2
 #define MOV_TRAK_FLASH 3
+#define MOV_TRAK_GENERIC 4
 
 typedef struct {
     off_t moov_start;
@@ -266,6 +269,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		// read audio data
 		break;
 	    }
+	    case MOV_FOURCC('g','m','h','d'): {
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sGeneric header!\n",level,"");
+		trak->type=MOV_TRAK_GENERIC;
+		break;
+	    }
 	    case MOV_FOURCC('s','t','s','d'): {
 		int i=stream_read_dword(demuxer->stream); // temp!
 		int count=stream_read_dword(demuxer->stream);
@@ -308,7 +316,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->durmap[i].dur=stream_read_dword(demuxer->stream);
 		    pts+=trak->durmap[i].num*trak->durmap[i].dur;
 		    
-		    if(i==0)
+		    if(i==0 && trak->type == MOV_TRAK_VIDEO)
 		    {
 		    sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
 		    if (!sh->fps)
@@ -345,20 +353,16 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int entries=stream_read_dword(demuxer->stream);
 		int i;
 		
-		trak->samplesize=ss;
-		if (ss)
-		{
-		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table! (fixed ss=%d) (ver:%d,flags:%ld)\n",
-			level,"",ss,ver,flags);
-		    break;
-		}
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table! (entries=%d ss=%d) (ver:%d,flags:%ld)\n",
 		    level,"",entries,ss,ver,flags);
-		// variable samplesize
-		trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*entries);
-		trak->samples_size=entries;
-		for(i=0;i<entries;i++)
+		trak->samplesize=ss;
+		if (!ss) {
+		  // variable samplesize
+		  trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*entries);
+		  trak->samples_size=entries;
+		  for(i=0;i<entries;i++)
 		    trak->samples[i].size=stream_read_dword(demuxer->stream);
+		}
 		break;
 	    }
 	    case MOV_FOURCC('s','t','c','o'): {
@@ -429,6 +433,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 #endif
 		break;
+	    }
+	    case MOV_FOURCC('c','o','d','e'):
+	    {
+#warning Implement atom 'code' for FLASH
 	    }
 	    default:
 		id = bswap_32(id);
@@ -509,6 +517,54 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		break;
 	    }
+	    case MOV_TRAK_GENERIC:
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Generic track - not completly understood! (id: %d)\n",
+		    trak->id);
+#warning Also this contains the FLASH data
+#if 0
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Extracting samples to files (possibly this is an flash anim)\n");
+	    {
+		int pos = stream_tell(demuxer->stream);
+		int i;
+		int fd;
+		char name[20];
+		
+		for (i=0; i<trak->samples_size; i++)
+		{
+		    char buf[trak->samples[i].size];
+		    stream_seek(demuxer->stream, trak->samples[i].pos);
+		    snprintf((char *)&name[0], 20, "samp%d", i);
+		    fd = open((char *)&name[0], O_CREAT|O_WRONLY);
+		    stream_read(demuxer->stream, &buf[0], trak->samples[i].size);
+		    write(fd, &buf[0], trak->samples[i].size);
+		    close(fd);
+		 }
+		for (i=0; i<trak->chunks_size; i++)
+		{
+		    char buf[trak->length];
+		    stream_seek(demuxer->stream, trak->chunks[i].pos);
+		    snprintf((char *)&name[0], 20, "chunk%d", i);
+		    fd = open((char *)&name[0], O_CREAT|O_WRONLY);
+		    stream_read(demuxer->stream, &buf[0], trak->length);
+		    write(fd, &buf[0], trak->length);
+		    close(fd);
+		 }
+		 if (trak->samplesize > 0)
+		 {
+		    char *buf;
+		    
+		    buf = malloc(trak->samplesize);
+		    stream_seek(demuxer->stream, trak->chunks[0].pos);
+		    snprintf((char *)&name[0], 20, "trak%d", trak->id);
+		    fd = open((char *)&name[0], O_CREAT|O_WRONLY);
+		    stream_read(demuxer->stream, buf, trak->samplesize);
+		    write(fd, buf, trak->samplesize);
+		    close(fd);
+		 }
+		 stream_seek(demuxer->stream, pos);
+	    }		
+#endif
+		break;
 	    default:
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Unknown track type found (type: %d)\n", trak->type);
 		break;
