@@ -157,5 +157,6 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_FontImageNotFound "font image file not found\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "unknown parameter ( %s )\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enought memory.\n"
 
 #endif

@@ -33,10 +33,10 @@ GtkWidget * create_About( void )
   accel_group=gtk_accel_group_new( );
 
   About=gtk_window_new( GTK_WINDOW_TOPLEVEL );
-  gtk_widget_set_name( About,"About" );
-  gtk_object_set_data( GTK_OBJECT( About ),"About",About );
+  gtk_widget_set_name( About,MSGTR_About );
+  gtk_object_set_data( GTK_OBJECT( About ),MSGTR_About,About );
   gtk_widget_set_usize( About,340,415 );
-  gtk_window_set_title( GTK_WINDOW( About ),"MPlayer About" );
+  gtk_window_set_title( GTK_WINDOW( About ),MSGTR_About );
   gtk_window_set_position( GTK_WINDOW( About ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( About ),TRUE,FALSE,FALSE );
 
@@ -183,10 +183,10 @@ GtkWidget * create_About( void )
   gtk_widget_show( hbuttonbox1 );
   gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
 
-  Ok=gtk_button_new_with_label( "Ok" );
-  gtk_widget_set_name( Ok,"Ok" );
+  Ok=gtk_button_new_with_label( MSGTR_Ok );
+  gtk_widget_set_name( Ok,MSGTR_Ok );
   gtk_widget_ref( Ok );
-  gtk_object_set_data_full( GTK_OBJECT( About ),"Ok",Ok,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_object_set_data_full( GTK_OBJECT( About ),MSGTR_Ok,Ok,( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Ok );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
   GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );

@@ -13,7 +13,6 @@
 GtkWidget * SkinList;
 GtkWidget * sbOk;
 char      * sbSelectedSkin=NULL;
-char      * sbNotEnoughMemory="SkinBrowser: not enough memory.";
 char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
 
@@ -42,7 +41,7 @@ int gtkFillSkinList( gchar * mdir )
  strcpy( gtkOldSkin,gtkShMem->sb.name );
  if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
   {
-   gtkMessageBox( sbNotEnoughMemory );
+   gtkMessageBox( MSGTR_SKINBROWSER_NotEnoughMemory );
    return 0;
   }
  str[1]="";
@@ -59,7 +58,7 @@ int gtkFillSkinList( gchar * mdir )
     {
      tmp=strrchr( gg.gl_pathv[i],'/' ); tmp++;
      if ( !strcmp( tmp,"default" ) ) continue;
-     if ( ( str[0]=(char *)malloc( strlen( tmp ) + 1 ) ) == NULL ) { gtkMessageBox( sbNotEnoughMemory ); return 0; }
+     if ( ( str[0]=(char *)malloc( strlen( tmp ) + 1 ) ) == NULL ) { gtkMessageBox( MSGTR_SKINBROWSER_NotEnoughMemory ); return 0; }
      strcpy( str[0],tmp );
      if ( gtkFindCList( SkinList,str[0] ) == -1 ) gtk_clist_append( GTK_CLIST( SkinList ),str );
      free( str[0] );
