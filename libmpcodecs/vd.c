@@ -40,6 +40,8 @@ extern vd_functions_t mpcodecs_vd_qtsmc;
 extern vd_functions_t mpcodecs_vd_roqvideo;
 extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
+extern vd_functions_t mpcodecs_vd_mpng;
+extern vd_functions_t mpcodecs_vd_libmpeg2;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -73,6 +75,10 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_XANIM
         &mpcodecs_vd_xanim,
 #endif
+#ifdef HAVE_PNG
+        &mpcodecs_vd_mpng,
+#endif
+        &mpcodecs_vd_libmpeg2,
 	NULL
 };
 

@@ -3,7 +3,11 @@ TODO:
 - vo_config callbacks to ffmpeg, cinepak
 - better mpi support to xanim (now it's EXPORT but could be better)
 - fix initial postprocessing flags (divx_quality)
+- add common postprocessing filter support (export qscale array)
 - IP buffering for NUV
+- finish MPNG (8bpp support)
+- IPB buffering to libmpeg2
+- review authors
 
 DONE:
 #define VFM_CINEPAK 13
@@ -24,8 +28,6 @@ DONE:
 #define VFM_ROQVIDEO 19
 #define VFM_CYUV 16
 #define VFM_NUV 15
-
-TODO:
-
 #define VFM_MPNG 21
 #define VFM_MPEG 1
+
