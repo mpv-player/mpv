@@ -727,17 +727,18 @@ OSD/SUB feature. There are many ways to get it:
   library. Version 2.0.9 or greater is mandatory! Then you have two methods:
   <itemizedlist>
     <listitem><para>
-      use the <option>-font <replaceable>/path/to/some_font.ttf</replaceable></option>
+      use the <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
       option to specify a TrueType font file on every occasion
       </para></listitem>
     <listitem><para>
       create a symlink:
-      <screen>ln -s <replaceable>/path/to/some_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
   If <application>MPlayer</application> was compiled with
   <systemitem class="library">fontconfig</systemitem> support, the above methods
-  won't work, instead the <option>-font</option> expects a fontconfig font name
+  won't work, instead the <option>-font</option> expects a
+  <systemitem class="library">fontconfig</systemitem> font name
   and defaults to the sans-serif font. To get a list of fonts known to fontconfig,
   use <command>fc-list</command>. Example: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
