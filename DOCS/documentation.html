@@ -184,6 +184,22 @@
       <LI><A HREF=#2.5.4>2.5.4 Keyboard control</A></LI>
       <LI><A HREF=#2.5.5>2.5.5 Examples</A></LI>
     </UL>
+    <LI><A HREF=#2.6>2.6 Video filters</A></LI>
+    <UL>
+      <LI><A HREF=#2.6.1>2.6.1 Overview</A></LI>
+      <LI><A HREF=#2.6.2>2.6.2 Usage</A></LI>
+      <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI>
+      <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
+      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
+      <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
+      <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
+      <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
+      <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
+      <LI><A HREF=#2.6.12>2.6.12 VO/A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
     <UL>
@@ -904,6 +920,153 @@ Input from standard V4L<BR>
 </P>
 
 
+<A NAME=2.6><P><B><I>2.6.  Video filters</I></B></P>
+
+
+<A NAME=2.6.1><P><B><I>2.6.1.  Overview</I></B></P>
+
+<P>Both <B>MPlayer</B> and <B>MEncoder</B> supports using a universal
+  video filter layer, which comprises of numerous plugins - listed and
+  explained below. These plugins can perform various actions on the image,
+  such as rescale, crop black borders (useful not only for encoding but for
+  playing too, since black borders increase bus usage, and cropping these
+  can boost playing speed on slow boards), expand image (for SVCDs).</P>
+
+<P>With this filter layer it's possible to perform fast image format conversion
+  between the various RGB and YUV when neccessary. This enables for example
+  playing RGB data on <CODE>xv</CODE> and <CODE>xmga</CODE> outputs, amongst
+  others. (see the <A HREF=#2.6.11>Scale</A> filter)</P>
+
+<P>The layer also does <B>Direct Rendering</B> between the plugins, to
+  maximize the speed.
+
+<P>Note that the postprocessing code is now also a part of the layer. It
+  will be explained below.</P>
+
+<A NAME=2.6.2><P><B><I>2.6.2.  Usage</I></B></P>
+
+<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
+  </P>
+
+<P>This sets up a filter pipeline (you can use any number of filters). Their
+  parameters are optional and if omitted, some of them are set to default
+  values, like <I>x and y</I> are both set to 0, and <I>w and y</I> will be
+  set to the movie's width and height.</P>
+
+<P>Filters are queued starting from libvo, so <CODE>filter1</CODE> will be the
+  last called filter (after that libvo comes, or when using <B>MEncoder</B>,
+  encoding).</P>
+
+
+<A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Crops the given part of the image, and discards the rest. Useful for
+  removing black bands of widescreen movies.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop crop[=width:height:x:y]</CODE></P>
+
+
+<A NAME=2.6.4><P><B><I>2.6.4.  Expand</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Expands (NOT scales) movie resolution to the given value, and places the
+  unscaled original to <I>x</I> <I>y</I>. Can be used to add black bands,
+  this helps in creating SVCDs, or for using with the
+  <A HREF="video.html#2.3.1.4">SDL video output</A>, which can place
+  subtitles in these bands.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop expand[=width:height:x:y]</CODE></P>
+
+
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+
+<P>Hmm, segfaulted. :)</P>
+
+
+<A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Simply flips image. Useful for some old codecs which can output only
+  flipped image (these are autodetected).</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
+
+
+<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>This filter is NOT image format converter. It just forces the next filter
+  (or libvo) which image format to use. Useful for cards with slow YV12, like
+  tdfx and Savage4. For real conversion, use the <I>Scale</I> filter.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop format[=format]</CODE> (where
+  <CODE>format</CODE> can be for example: rgb32, yuy2, etc...)</P>
+
+
+<A NAME=2.6.8><P><B><I>2.6.8.  Postprocess</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>This is our good old postprocess, juts converted to the filter layer.
+  Performs image quality enhancement, deinterlacing, etc, see
+  <CODE>-npp help</CODE> for available options.
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop pp[=postprocess options/keywords]</CODE></P>
+
+
+<A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></P>
+
+<P>Anything..</P>
+
+
+<A NAME=2.6.10><P><B><I>2.6.10.  Rotate</I></B></P>
+
+<P>What are the parameters?</P>
+
+
+<A NAME=2.6.11><P><B><I>2.6.11.  Scale</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Scales the image with the software scaler (slow). You can adjust the
+  quality of the scaler with the <CODE>-sws</CODE> option, see the manpage.
+  Nice quality implies speed loss.</P>
+
+<P><B>NOTE</B>: calling this filter with no options means <B>colorspace
+  conversion</B>! This is useful for codecs which can't output in the needed
+  format for the specified video output device. These are hopefully
+  autodetected and scale filter is called to convert. In other cases, you
+  can use it manually.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop scale[=width:height]</CODE></P>
+
+
+<A NAME=2.6.12><P><B><I>2.6.12.  VO</I></B></P>
+
+<P>WTF</P>
+
+<A NAME=2.6.13><P><B><I>2.6.13.  YUY2</I></B></P>
+
+<P>Biztos</P>
+
+
 <P><B><A NAME=3>3. Usage</A></B></P>
 
 <P><B><A NAME=3.1>3.1. Command line</A></B></P>
@@ -912,7 +1075,7 @@ Input from standard V4L<BR>
   written as first (for example <CODE>mplayer -vfm 5</CODE>), and options
   written after filenames, that apply only to the given filename/URL/whatever
   (for example <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR>
-  You can group filenames/URLs together using { and }. It's usefull with
+  You can group filenames/URLs together using { and }. It's useful with
   option -loop: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE>
   will play files in this order: 1 1 2 1 1 2 1 1 2<BR>
   </P>
