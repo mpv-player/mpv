@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.110
+// Synced with help_mp-en.h 1.111
 
 // ========================= MPlayer help ===========================
 
@@ -76,6 +76,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "尝试指定音频解码器驱动族 %s...\n"
 #define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频解码器, 只能使用其他驱动.\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器.\n"
+#define MSGTR_RTFMCodecs "请看DOCS/zh/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "无法初始化音频解码器! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s...\n"
 #define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的解码器!\n"
@@ -280,10 +281,10 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "无法在不完整的.AVI流中搜索. (需要索引, 尝试使用-idx 选项!)  \n"
 #define MSGTR_CantSeekFile "无法在这个文件中搜索.  \n"
 
-#define MSGTR_EncryptedVOB "加密的VOB文件(没有编译libcss支持)! 阅读DOCS/zh/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "加密的VOB文件! 阅读DOCS/zh/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "加密流但你没有要求使用授权!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: 压缩的文件头(目前)不支持.\n"
+#define MSGTR_MOVcomprhdr "MOV: 压缩的文件头的支持需要ZLIB!!\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告! 检测到可变的FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 警告! 太多轨道."
 #define MSGTR_FoundAudioStream "==> 找到音频流: %d\n"
