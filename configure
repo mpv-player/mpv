@@ -309,6 +309,9 @@ fi
 # gcc-3.0 merges optimizations coming from egcs, pgcc, agcc, ...
 if test "$_skip_cc_check" != yes ; then
   echocheck "$_cc version"
+  # also check for name (the version checking is only for _gcc_ up for now)
+  # FIXME implement this in ver. check.
+  cc_name=`$_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
   cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
   case $cc_version in
     '')
@@ -996,6 +999,22 @@ if test "$_posix4" = yes ; then
   _ld_arch="-lposix4 $_ld_arch"
 fi
 echores "$_posix4"
+
+
+echocheck "nanosleep"
+# also check for nanosleep
+cat > $TMPC << EOF
+#include <time.h>
+int main(void) { (void) nanosleep(0, 0); return 0; }
+EOF
+_nanosleep=no
+cc_check $_ld_arch && _nanosleep=yes
+if test "$_nanosleep" = yes ; then
+  _def_nanosleep='#define HAVE_NANOSLEEP 1'
+else
+  _def_nanosleep='#undef HAVE_NANOSLEEP'
+fi
+echores "$_nanosleep"
 
 
 echocheck "socklib"
@@ -2636,6 +2655,9 @@ $_def_linux
 **       See ./configure --help for details.
 **
 *---------------------------------------------------------------------------*/
+
+/* nanosleep support */
+$_def_nanosleep
 
 /* termcap flag for getch2.c */
 $_def_termcap
