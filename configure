@@ -1254,6 +1254,13 @@ EOF
 _sys_soundcard_h=no
 cc_check && _sys_soundcard_h=yes
 
+# check for vsscanf
+cat > $TMPC << EOF
+int main( void ) { vsscanf(); return 0; }
+EOF
+_vsscanf=no
+cc_check && _vsscanf=yes
+
 
 # ---
 # try to detect type of audio supported on this machine
@@ -2271,6 +2278,12 @@ else
  _zlib=''
 fi
 
+if test "$_vsscanf" = yes ; then
+ _have_vsscanf='#define HAVE_VSSCANF 1'
+else
+ _have_vsscanf='#undef  HAVE_VSSCANF'
+fi
+
 # Checking for CFLAGS
 if test "$_profile" || test "$_debug" ; then
  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
@@ -2736,6 +2749,9 @@ $_have_libkstat
 
 /* Define this if you have zlib */
 $_have_zlib
+
+/* Define this if your system has vsscanf */
+$_have_vsscanf
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
