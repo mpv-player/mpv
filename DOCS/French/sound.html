@@ -94,7 +94,7 @@
   <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
   <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
   <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's page</A>
+  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">la page de Pontscho</A>
     (<I>taille du buffer augmentée à 32k</I>)</TD></TR>
 
   <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
@@ -190,33 +190,37 @@
 <P>définirait la fréquence de sortie du filtre resample filter à 11025Hz et downmixerait
   l'audio dans 1 cannal en utilisant le filtre pan.</P>
 
-<P>La plupart des filtres répondent à l'option <CODE>-v</CODE>, qui leur fait afficher des
-  messages d'état.</P>
-
 <P>Le fonctionnement général de la couche filtre est controllé en utilisant l'option
   <CODE>-af-adv</CODE>. Cette option a deux sous-options:</P>
 
 <DL>
   <DT><CODE>force</CODE><DT>
-  <DD>est un entier entre 0 et 3 qui contrôle comment les filtres sont insérés
-    et quelles optimisations de vitesse/exactitude ils utilisent:
+  <DD>est un champ de bits qui contrôle comment les filtres sont insérés et quelles optimisations
+    de vitesse/exactitude ils utilisent:
     <DL>
-      <DT>0</DT>
-      <DD>Utilise l'insertion automatique des filtres et optimise selon la vitesse
-        du CPU.</DD>
-      <DT>1</DT>
-      <DD>Utilise l'insertion automatique des filtres et optimise pour la plus haute 
-        vitesse. Si cette option est activée le traitement des données audio sera
-        fait en utilisant des opérations à virgule fixe. Attention: Certaines fonctions
-        des filtres audio échoueront en silence, et la qualité du son risque d'en souffrir.</DD>
-      <DT>2</DT>
-      <DD>Utilise l'insertion automatique des filtres et optimise pour la qualité. Si cette
-        option est activée le traitement des données audio sera fait en utilisant des 
-        opérations à virgule flottante et donc très intensif en usage CPU, mais donne
-        une bien meilleure qualité sonore qu'avec le traitement à virgule fixe.</DD>
-      <DT>3</DT>
-      <DD>N'utilise pas l'insertion automatique des filtres et n'optimise pas. Attention: 
-        il est possible que MPlayer plante en utilisant ce paramètre.</DD>
+      <DT><CODE>0</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise en fonction de la vitesse du CPU.</DD>
+      <DT><CODE>1</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise pour la plus haute vitesse.<BR>
+        <EM>Attention:</EM> Certaines fonctions des filtres audio pourraient alors échouer silencieusement,
+        et la qualité du son pourrait en souffrir.</DD>
+      <DT><CODE>2</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise pour la qualité.</DD>
+      <DT><CODE>3</CODE></DT>
+      <DD>N'utilise pas d'insertion automatique des filtres et n'optimise pas.<BR>
+        <I>Attention:</I> Il pourrait arriver de planter MPlayer en utilisant ce réglage.</DD>
+      <DT><CODE>4</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres comme indiqué au champ 0, mais fait des calculs
+        à virgule flottante si possible.</DD>
+      <DT><CODE>5</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres comme indiqué au champ 1, mais fait des calculs
+        à virgule flottante si possible.</DD>
+      <DT><CODE>6</CODE></DT>
+      <DD>Utilise l'insertion automatique des filtres comme indiqué au champ 2, mais fait des calculs
+        à virgule flottante si possible.</DD>
+      <DT><CODE>7</CODE></DT>
+      <DD>N'utilise pas d'insertion automatique des filtrescomme indiqué au champ 3, et fait des calculs
+        à virgule flottante si possible.</DD>
     </DL>
   </DD>
   
@@ -224,17 +228,40 @@
   <DD>est un alias de l'option -af.</DD>
 </DL>
 
+<P>La couche filtre est également affectée par les options génériques suivantes:
+
+<DL>
+  <DT><CODE>-v</CODE></DT>
+  <DD>Augmente le niveau de verbosité et fait afficher des messages d'état suplémentaires 
+    à la plupart des filtres.</DD>
+  <DT><CODE>-channels</CODE></DT>
+  <DD>Cette option définie le nombre de canaux de sorties utilisé par votre carte son.
+    Il affecte également le nombre de canaux qui sont décodés à partir des media.
+    Si le medium contient moins de canaux que le nombre demandé le filtre channels
+    (voir plus bas) sera automatiquement inséré. Le routage sera le routage par défaut
+    pour le filtre channels.</DD>
+  <DT><CODE>-srate</CODE></DT>
+  <DD>Cette option sélectionne le taux d'échantillonage pour votre carte son. Si la fréquence
+    d'échantillonage de votre carte son est différente de celle du medium, le filtre resample 
+    (voir plus bas) sera inséré dans la couche filtre audio pour compenser la différence.</DD>
+  <DT><CODE>-format</CODE><DT>
+  <DD>Cette option définie le format de sample de la couche audio et de la carte son. Si le format de
+    sample demandé pour votre carte son est différent de celui du medium, un filtre format (voir plus bas)
+    sera inséré pour réctifier la différence.</DD>
+</DL>
+
 
 <H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
 
-<P>MPlayer supporte pleinement l'up/down-sampling du son. Ce filtre peut être utilisé
+<P>MPlayer supporte pleinement l'up/down-sampling du son par l'intermédiaire du filtre
+   <CODE>resample</CODE>. Ce filtre peut être utilisé
   si vous avez une carte son à fréquence fixe ou si vous avez une vieille carte son
   qui n'est capable que de 44.1kHz. Ce filtre est automatiquement activé si cela est
   nécessaire, mais il peut être explicitement activé en ligne de commande. Il a trois
   options:</P>
 
 <DL>
-  <DT><CODE>srate</CODE></DT>
+  <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
   <DD>est un entier utilisé pour définir la fréquence d'échantillonage de sortie
     en Hz. L'intervale valide pour ce paramètre va de 8kHz à 192kHz. Si les fréquences
     d'entrée et de sortie sont les mêmes ou si les paramètres sont
@@ -247,14 +274,19 @@
     légèrement de la fréquence donnée par <CODE>srate</CODE>. Cette option est utilisé
     au démarrage si la lecture est extremement lente.</DD>
 
-  <DT><CODE>fast</CODE><DT>
-  <DD>est un paramètre binaire optionnel qui active l'interpolation linéaire comme
-    méthode de resampling. L'interpolation linéaire est extrémement rapide, mais souffre
-    d'une piètre qualité sonore surtout si elle est utilisée pour l'up-sampling.</DD>
+  <DT><CODE>type &lt;0-2&gt;</CODE><DT>
+  <DD>est un entier optionnel compris entre <CODE>0</CODE> et <CODE>2</CODE> qui
+    sélectionne quelle méthode de ré-échantillonage utiliser. Ici <CODE>0</CODE> représente
+    l'interpolation linéaire comme méthode de ré-échantillonage,  <CODE>1</CODE> représente
+    un rééchantillonage en utilisant une banque de filtres poly-phase et des calculs d'entiers
+    et <CODE>2</CODE> représente un ré-échantillonage en utilisant une banque de filtres poly-phase 
+    et des calculs à virgule flottante. L'interpolation linéaire est extrémement rapide, mais souffre d'une
+    pauvre qualité sonore surtout quand elle est utilisée pour l'up-sampling. La meilleur qualité est donnée par
+    <CODE>2</CODE> mais cette méthode souffre également de la plus forte charge CPU.</DD>
 </DL>
 
 <P>Example:<BR>
-  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:1</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
 
 <P>fixerait la fréquence de sortie du filtre resample à 44100Hz en utilisant une echelle 
   de fréquence exacte et l'interpolation linéaire.</P>
@@ -269,16 +301,16 @@
   Le nombre d'option est dynamique:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
-  <DD>est un entier entre 1 et 6 qui est utilisé pour définir le nombre de canaux de
-    sortie. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>est un entier entre <CODE>1</CODE> et <CODE>6</CODE> qui est utilisé pour définir 
+    le nombre de canaux de sortie. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
 
   <DT><CODE>nr</CODE></DT>
-  <DD>est un entier entre 1 et 6 qui est utilisé pour définir le nombre de routes.
+  <DD>est un entier entre <CODE>1</CODE> et <CODE>6</CODE> qui est utilisé pour définir le nombre de routes.
     Ce paramètre est optionnel. Si il est omis le routage par défaut est utilisé.</DD>
 
   <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
-  <DD>sont des paires de nombres entre 0 et 5 qui définissent où chaque canal est
+  <DD>sont des paires de nombres entre <CODE>0</CODE> et <CODE>5</CODE> qui définissent où chaque canal est
     routé.</DD>
 </DL>
 
@@ -306,15 +338,15 @@
 
 <H5><A NAME="af_format">2.3.2.3.3 Convertisseur de format de sample</A></H5>
 
-<P>Ce filtre est un convertisseur de format de sample. Il est automatiquement activé
-  si requis par la carte son ou un autre filtre.</P>
+<P>Le filtre <CODE>format</CODE> fait la conversion entre les différents formats de sample. 
+  Il est automatiquement activé si requis par la carte son ou un autre filtre.</P>
 
 <DL>
-  <DT><CODE>bps</CODE></DT>
-  <DD>peut être 1, 2 ou 4 et définie le nombre d'octets par sample. Cette option
-    est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+  <DT><CODE>bps &lt;number&gt;</CODE></DT>
+  <DD>peut être <CODE>1</CODE>, <CODE>2</CODE> ou <CODE>4</CODE> et définie le nombre 
+    d'octets par sample. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
 
-  <DT><CODE>f</CODE></DT>
+  <DT><CODE>f &lt;format&gt;</CODE></DT>
   <DD>est une chaine texte décrivant le format de sample. Cette chaine est un mix
     concaténé de: <CODE>alaw</CODE>, <CODE>mulaw</CODE> ou
     <CODE>imaadpcm</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
@@ -331,7 +363,7 @@
 
 <H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
 
-<P>Ce filtre décale le son vers les haut-parleurs de façon a faire arriver le son dans les 
+<P>Le filtre <CODE>delay</CODE> décale le son vers les haut-parleurs de façon a faire arriver le son dans les 
   différents canaux au même moment dans la position d'écoute. Cela n'est utile que si
   vous avez plus de 2 haut-parleurs Ce filtre a une nombre variable de paramètres:</P>
 
@@ -364,7 +396,8 @@
 
 <H5><A NAME="af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
 
-<P>Ce filtre est un contrôleur de volume logiciel. Utilisez ce filtre avec précaution 
+<P>Le contrôle de volume logiciel est implémenté par le filtre audio <CODE>volume</CODE>. 
+  Utilisez ce filtre avec précaution 
   car il peut réduire le signal au niveau de bruit du son. Dans la plupart des cas
   il vaut mieux fixer le niveau du son PCM au max, laisser ce filtre de côté et contrôler
   le niveau de sortie de vos haut-parleurs avec le contrôleur de volume principal du 
@@ -374,9 +407,9 @@
   deux options:</P>
 
 <DL>
-  <DT><CODE>v</CODE></DT>
-  <DD>est un nombre à virgule compris entre -200 et +60 qui représente le niveau
-    du volume en dB. Le niveau par défaut est -10dB.</DD>
+  <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
+  <DD>est un nombre à virgule compris entre <CODE>-200</CODE> et <CODE>+60</CODE> 
+    qui représente le niveau du volume en dB. Le niveau par défaut est -10dB.</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>est un contrôle binaire qui active et désactuve le soft clipping. Le Soft-clipping 
@@ -398,7 +431,7 @@
 
 <H5><A NAME="af_equalizer">2.3.2.3.6 Egaliseur</A></H5>
 
-<P> Ce filtre est un égaliseur graphique à 10 bandes, implementé en utilisant 10 filtres
+<P>Le filtre <CODE>equalizer</CODE> est un égaliseur graphique à 10 bandes, implémenté en utilisant 10 filtres
   IIR de bande passante. Cela signifie qu'il fonctionne quel que soit le type d'audio
   joué. Les fréquences centrales pour les 10 bandes sont:</P>
 
@@ -427,8 +460,8 @@
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
-  <DD>sont des nombres à virgule compris entre -12 et +12dB représentant le gain en
-    dB pour chaque bande de fréquence.</DD>
+  <DD>sont des nombres à virgule compris entre <CODE>-12</CODE> et <CODE>+12dB</CODE> 
+    représentant le gain en dB pour chaque bande de fréquence.</DD>
 </DL>
 
 <P>Exemple:<BR>
@@ -437,9 +470,10 @@
 <P>amplifierait le son sur les fréquences les plus hautes et les plus basses tout en
   les annulant presque complètement autour de 1kHz.</P>
 
+  
 <H5><A NAME="af_panning">2.3.2.3.7 Filtre panoramique</A></H5>
 
-<P>Ce filtre peut être utilisé pour mixer les canaux arbitrairement. Fondamentalement
+<P>Utilisez le filtre <CODE>pan</CODE> pour mixer les canaux arbitrairement. Fondamentalement
   c'est une combinaison des filtres volume control et channels. Il y a deux utilisations
   principales pour ce filtre: </P>
 
@@ -455,13 +489,14 @@
 
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
-  <DD>est un entier compris entre 1 et 6 et est utilisé pour définir le nombre de canaux
-    de sortie. Cette option est requise, la laisser vide provoquera une erreur à 
+  <DD>est un entier compris entre <CODE>1</CODE> et <CODE>6</CODE> et est utilisé pour définir le 
+    nombre de canaux de sortie. Cette option est requise, la laisser vide provoquera une erreur à 
     l'éxecution.</DD>
 
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
-  <DD>sont des nombres à virgule compris entre 0 et 1. <CODE>l[i][j]</CODE> détermine
-    le nombre j de canaux d'entrée à mixer dans le nombre i de canaux de sortie.</DD>
+  <DD>sont des nombres à virgule compris entre <CODE>0</CODE> et <CODE>1</CODE>. 
+    <CODE>l[i][j]</CODE> détermine le nombre j de canaux d'entrée à mixer dans le nombre i de 
+    canaux de sortie.</DD>
 </DL>
 
 <P>Exemple:<BR>
@@ -479,7 +514,8 @@
 
 <H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
 
-<P>Ce filtre ajoute un canal de sub woofer au flux audio. Les données audio
+<P>Le filtre <CODE>sub</CODE> ajoute un canal de sub woofer au flux audio. 
+  Les données audio
   utilisées pour créer le canal sub-woofer sont une moyenne des canaux 0 et 1.
   Le fréquences basses sont ensuites filtrées par un filtre Butterworth de 4ème
   ordre avec une fréquence de cutoff par défaut de 60Hz et ajoutées à
@@ -510,16 +546,16 @@
 
 <H5><A NAME="af_surround">2.3.2.3.9 Décodeur de son surround</A></H5>
 
-<P>Ce filtre est un décodeur pour le son surround encodé en matrice.
+<P>Le son surround encodé en matrice peut être décodé par le filtre <CODE>surround</CODE>.
   Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
-  avec deux canaux audio contiennent actuellement du son surround matricié.
+  avec deux canaux audio contiennent actuellement du son surround matricé.
   Pour utiliser cette fonction vous avez besoin d'une carte son supportant
   au moins 4 canaux. Ce filtre a un paramètre:</P>
 
 <DL>
   <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
   <DD>est un nombre à virgule optionnel entre <CODE>0</CODE> and
-    <CODE>1000</CODE> utilisé pour définir le décalage en ms pour les haut-parleurs rear
+    <CODE>1000</CODE> utilisé pour définir le décalage en ms pour les haut-parleurs 
     arrières. Ce décalage devrait être défini comme ceci: si d1 est la distance entre
     la position d'écoute et les haut-parleurs de devant et d2 la distance entre
     la position d'écoute et les haut-parleurs de derrière, alors le décalage <CODE>d</CODE>
