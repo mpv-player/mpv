@@ -1,11 +1,11 @@
 mplayer (1.0)
   pre1:  "Stalled"
-    # Stalled becouse the development slowed down a lot -- all the devs
+    # Stalled because the development slowed down a lot -- all the devs
       are on summer holiday, or dunno.
   
     NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
     0.90-rc5 (and later 0.90 releases) changes are independent!
-    (it also means that there are main-only and 0_90-only changes too)
+    (it also means that there are main-only and 0_90-only changes)
 
     DOCS:
     * DOCS/Language/ dirs renamed to DOCS/id, English files moved to DOCS/en
@@ -13,7 +13,12 @@ mplayer (1.0)
     * new Spanish DOCS translation
     * man page restructured, options ordered
     * Finally merged libavc-option.txt into the man page.
-    * traditional Chinese help file
+    * slave mode commands moved from the man page to DOCS/tech/
+    * traditional Chinese help file added
+    * massive help file updates, most languages are up to date now
+    * new and improved Windows port section with Cygwin and MinGW subsections
+    * almost all options documented
+    * fixes and small updates all over the place
 
     Big/Structural changes:
     * linux/ dir renamed to osdep/
