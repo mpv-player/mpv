@@ -12,7 +12,8 @@ Name:       FFmpeg
 Version:    CVS snapshot
 Homepage:   http://www.ffmpeg.org
 Directory:  libavcodec, libavformat
-License:    GNU Lesser General Public License
+License:    GNU Lesser General Public License, some parts GNU General Public
+            License, GNU General Public License when combined
 
 Name:       FAAD2
 Version:    2.0 + portability patches
@@ -99,7 +100,7 @@ Directory:  unrarlib.[ch]
 License:    GNU General Public License / UniquE RAR File Library License
 
 Name:       uCIFS library
-Version:    Development files as of september 2004
+Version:    development files as of september 2004
 Homepage:   http://ubiqx.org/libcifs/
 Directory:  libvo/md5sum.[ch]
 License:    GNU Lesser General Public License
