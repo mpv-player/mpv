@@ -352,8 +352,8 @@
   through the files.</P>
 
 <P>The main rule of this documentation: if it's not documented, it
-  <U>does not exist</U>. If I don't say you encode audio from TV tuner, you
-  can't. A healthy quantity of combining ability is welcomed, though.
+  <U>does not exist</U>. If I don't say you can encode audio from TV tuner, you
+  can't (you can!:). A healthy quantity of combining ability is welcomed, though.
   Good luck. You'll need it :) And for another good advice, let me quote
   Chris Phillips from the
   <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
@@ -380,10 +380,10 @@
 <P>MPlayer is a movie player for LINUX (runs on many other Unices, and
   <B>non-x86</B> CPUs, see the <A HREF="#ports">ports section</A>). It plays most
   MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg,
-  FILM, RoQ, PVA files, supported by many native, XAnim, RealPlayer, and
+  FILM, RoQ, PVA, Matroska files, supported by many native, XAnim, RealPlayer, and
   Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
-  <B>3ivx</B>, <B>RealMedia</B>, and <B>DivX</B> movies too (and you don't need
-  the avifile
+  <B>3ivx</B>, <B>RealMedia</B>, <B>Sorenson</B>, <B>Theora</B> and <B>DivX</B>
+  movies too (and you don't need the avifile
   library at all!). Another big feature of MPlayer is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
   AAlib, DirectFB, but you can also use GGI and SDL (and this way all their
@@ -501,7 +501,12 @@
     Again not a release, but after adding Sorenson 3 (QuickTime) and Windows
     Media 9 support, MPlayer is the world's first movie player with support
     for all known video formats!</LI>
-  <LI><B>MPlayer 0.90 "?"</B> Date yet unknown</LI>
+  <LI><B>MPlayer 0.90 "The CounterCounter"</B> Apr 6, 2003<BR>
+    After more than 1 year, we finally concluded that the code was indeed
+    stable again, and ready to be published as a release. Unfortunately we
+    forgot even to increase the version number, and other annoying bugs went
+    in, so get ready for...</LI>
+  <LI><B>MPlayer 0.91 "?"</B> date yet unknown</LI>
 </UL>
 
 
@@ -521,19 +526,19 @@
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
-  <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B> (maybe <B>2.95.4</B>) and <B>3.2+</B>.
+  <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B> (maybe <B>2.95.4</B>) and <B>3.3+</B>.
     <B>NEVER</B> use 2.96 or 3.0.x! They generate faulty code for MPlayer.
-    If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
-    just because it's newer! Early releases of 3.0.x were even more buggy than
+    If you decide to change gcc from 2.96, then don't decide in favor of 3.x
+    just because it's newer! Early releases of 3.x were even more buggy than
     2.96. So downgrade to 2.95.x (downgrade libstdc++ too, other programs may
     need it) or don't up/downgrade at all (but in this case, be prepared for
-    runtime problems). If you vote for 3.x.x, try to use the latest version,
-    early releases had various bugs, so be sure you use at least 3.1, it's
+    runtime problems). If you vote for 3.x, try to use the latest version,
+    early releases had various bugs, so be sure you use at least 3.3, it's
     tested and working. For detailed information about gcc 2.96's bugs (that are
     still NOT fixed, they have been WORKED AROUND in MPlayer!), see the
     <A HREF="users_against_developers.html#gcc">gcc 2.96</A> section and the
     <A HREF="faq.html">FAQ</A>.</LI>
-  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.1)</B>.
+  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.3)</B>.
     Normally, everyone wants this, as starting with XFree86 4.0.2, it contains
     the <A HREF="video.html#xv">XVideo</A> extension (somewhere referred to
     as <B>Xv</B>) which is needed to enable the hardware YUV acceleration (fast
@@ -563,14 +568,15 @@
     required.</LI>
   <LI><B>libxmms</B> - optional, for XMMS input plugin support. At least 1.2.7 is
     required.</LI>
+  <LI><B>libsmb</B> - optional, for Samba support.</LI>
 </UL>
 
 <H4>Codecs:</H4>
 
 <UL>
   <LI><B>libavcodec</B>: This codec package is capable of decoding
-    H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams and
-    WMA (Windows Media Audio) v1/v2 audio streams, on
+    H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 encoded
+    video streams and WMA (Windows Media Audio) v1/v2 audio streams, on
     multiple platforms. It is also known to be the fastest for this task.
     See the <A HREF="codecs.html#libavcodec">libavcodec</A> section for details.
     Features:<BR>
@@ -593,7 +599,7 @@
       <LI>you need this if you want to play or encode for example movies recorded
         with various hardware compressors, like tuner cards, digital cameras
         (example: DV, ATI VCR, MJPEG)</LI>
-      <LI>needed if you want to play <B>WMV8, WMV9/WMA9 movies</B>.</LI>
+      <LI>needed if you want to play <B>WMV9/WMA9 movies</B>.</LI>
       <LI>Not needed for old
         ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
         files - it's done by the Win32 codec), or WMV7. Also not needed
@@ -601,9 +607,9 @@
         for that.</LI>
     </UL>
   </LI>
-  <LI><B>QuickTime codecs</B>: on x86 platforms these codecs can be used
-    to decode Sorenson v1/v3, RPZA, and other QuickTime video, and
-    QDesign audio streams. Installation instructions can be found in the
+  <LI><B>QuickTime codecs</B>: on x86 platforms these codecs are needed
+    to decode RPZA, and other QuickTime video, and QDesign audio streams.
+    Installation instructions can be found in the
     <A HREF="codecs.html#sorenson">Sorenson video codec</A> section.</LI>
   <LI><B>DivX4/DivX5</B>: information about this codec is available in the
     <A HREF="codecs.html#divx">DivX4/DivX5</A> section. You possibly don't want
@@ -802,8 +808,8 @@
 <P>At this point, MPlayer is ready to use. The directory
   <CODE>$PREFIX/etc/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
   file, which is used to tell the program all the codecs and their
-  capabilities.  This file should always be kept up to date together with the
-  main binary.<BR>
+  capabilities. This file is needed only when you want to change its
+  properties, as the main binary contains an internal copy of it.<BR>
   Check if you have <CODE>codecs.conf</CODE> in your home directory
   (<CODE>~/.mplayer/codecs.conf</CODE>) left from old MPlayer versions, and remove it.</P>
 
@@ -886,6 +892,9 @@
   <LI>Sami: <CODE>-dumpsami</CODE></LI>
 </UL>
 
+<P>MEncoder can dump DVD subtitles into
+  <A HREF="encoding.html#vobsub">VobSub</A> format.</P>
+
 <P>The command line options differ slightly for the different formats:</P>
 
 <H4>VobSub subtitles</H4>
@@ -948,7 +957,9 @@
   (from
   <A HREF="../tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):</P>
 
-<P><CODE><I># first number  : wait this much after previous subtitle disappeared<BR>
+<P><CODE><I>
+  FORMAT=TIME<BR>
+  # first number  : wait this much after previous subtitle disappeared<BR>
   # second number : display the current subtitle for this many seconds<BR>
   <BR>
   15 3<BR>
@@ -978,6 +989,15 @@
   There are many ways to get it:</P>
 
 <UL>
+  <LI>using a TrueType (TTF) font, by the means of the <B>freetype</B>
+    library. Version 2.0.9 or greater is mandatory! Then you
+    have two methods:
+    <UL>
+      <LI>use the <CODE>-font /path/to/arial.ttf</CODE> option to specify
+        a TrueType font file on every occasion</LI>
+      <LI>create a symlink: <CODE>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</CODE></LI>
+    </UL>
+  </LI>
   <LI>download ready-to-use font packages from MPlayer site.
     Note: Currently available fonts are limited for iso 8859-1/2 support,
     but there are some other (including Korean, Russian, 8859-8 etc) fonts
@@ -1002,15 +1022,6 @@
     (read TOOLS/subfont-c/README for details)</LI>
   <LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
     (note: you must have HSI RAW plugin too, see URL below)</LI>
-  <LI>using a TrueType (TTF) font, by the means of the <B>freetype</B>
-    library. Version 2.0.9 or greater is mandatory! Then you
-    have two methods:
-    <UL>
-      <LI>use the <CODE>-font /path/to/arial.ttf</CODE> option to specify
-        a TrueType font file on every occasion</LI>
-      <LI>create a symlink: <CODE>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</CODE></LI>
-    </UL>
-  </LI>
 </UL>
 
 <P>If you chose non-TTF fonts, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or

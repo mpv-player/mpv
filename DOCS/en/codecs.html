@@ -30,7 +30,7 @@
     Win32 DLL decoder for <B>Windows Media Video 9</B> (<B>WMV3</B>), both
     used in .wmv files</LI>
   <LI>native <B>Sorenson 1 (SVQ1)</B> decoder</LI>
-  <LI>Win32/QT <B>Sorenson 3 (SVQ3)</B> decoder</LI>
+  <LI>native <B>Sorenson 3 (SVQ3)</B> decoder</LI>
   <LI><B>3ivx</B> v1, v2 decoder</LI>
   <LI>Cinepak and <B>Intel Indeo</B> codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI><B>MJPEG</B>, AVID, VCR2, ASV2 and other hardware formats</LI>
@@ -134,15 +134,20 @@
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contains an
   <B>open source</B> codec package, which is capable of decoding streams
   encoded with
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3
   video, or WMA (Windows Media Audio) audio codecs. Not only some of
   them can be encoded with, but it also offers higher speed than the Win32
   codecs or the DivX.com DivX4/5 library!</P>
 
 <P>It contains a lot of nice codecs, especially important are the MPEG4
   variants:
-  DivX3, DivX4, DivX5, Windows Media Video 7 (WMV1). Also a very
+  DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Also a very
   interesting one is the WMA decoder.</P>
+
+<P>The most recent codec deserving credit is the <B>Sorenson 3</B> (SVQ3)
+  codec. This is the first, completely opensource implementation of this
+  codec. It's even faster than the original. Be sure to prefer this instead
+  of the binary codec!</P>
 
 <P>If you use an MPlayer release you have libavcodec right in the
   package, just build as usual. If you use MPlayer from CVS you have to
@@ -322,10 +327,9 @@ MPlayer supports decoding all versions of RealVideo:
     MPlayer, the other is in libavcodec. You can invoke each of them with the
     <CODE>-vc svq1</CODE> and <CODE>-vc ffsvq1</CODE> options respectively.
     Some files may work with one of them, and not with the other, so test
-    both decoders. The decoder was written (reverse engineered) by the
-    <A HREF="http://www.xinehq.de">xine</A> authors.</LI>
-  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - decoding supported by <B>Win32
-    QuickTime libraries</B></LI>
+    both decoders.</LI>
+  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - decoding supported by <B>native
+    codec</B> (<A HREF="#libavcodec">libavcodec</A>)</LI>
 </UL>
 
 <H4>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</H4>
