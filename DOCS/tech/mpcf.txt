@@ -119,7 +119,7 @@ main header:
 	version					v
 	stream_count				v
 	max_distance				v
-	max_index_distance			v
+	index_distance				v
 	global_time_base_nom			v
 	global_time_base_denom			v
 	for(i=0; i<256; ){
@@ -160,6 +160,8 @@ stream_header:
 	time_base_denom				v
 	msb_timestamp_shift			v
 	decode_delay				v
+	index_modulo				v
+	index_increment				v
 	fixed_fps				u(1)
 	reserved				u(6)
 	codec_specific_data			vb
@@ -203,6 +205,7 @@ index:
 	index_startcode				f(64)
 	packet header
 	stream_id				v
+	index_id				v
 	index_length				v
 	for(i=0; i<index_length; i++){
 		index_timestamp			v
@@ -239,7 +242,7 @@ sync_point:
 
 file:
 	file_id_string
-	while(!eof && next_code != index_startcode){
+	while(!eof){
 		main_header
 		for(i=0; i<stream_count; i++){
 			if(next_packet==video_stream_header)
@@ -250,14 +253,15 @@ file:
 		while(next_code != main_startcode){
 			if(next_code == info_startcode)
 				info_packet
-			else{
+			else if(next_code == index_startcode){
+				index
+			}else{
 				if(next_code == frame_startcode)
 					sync_point
 				frame
 			}
 		}
 	}
-	index
                 
 
 
@@ -305,12 +309,26 @@ max_distance
 	good reason to set it higher otherwise reasonable error recovery will
 	be impossible
 
-max_index_distance
-	max distance of keyframes which are represented in the index, the
-	distance between consecutive entries A and B may only be larger if
-	there are no keyframes within this stream between A and B
-	SHOULD be set to <=32768 or at least <=65536 unless there is a very
-	good reason to set it higher
+index_distance
+	distance at which indexes are approximately stored, or 0 if there are
+	no indexes in the file
+	in every [x*index_distance, (x+1)*index_distance) interval, there
+	must be an index packet for every stream, and these packets must be
+	located prior to all frames within the interval
+	reasoning: this ensures good error recovery as there are many and
+	evenly distributed indexes, and also allows very quick finding of the
+	index packets
+
+index_modulo
+index_id
+	each index packet contains every index_moduloth's keyframe of a stream,
+	so the i'th keyframe of a stream will be at least in packets with 
+	(i % index_modulo) == index_id 
+
+index_increment
+	the index_id increment value, this MUST be a relative prime to
+	index_modulo
+	index_increment / index_modulo SHOULD be approximately 2/(sqrt(5)+1)
 
 stream_id[FIXME]
 	Stream identifier
@@ -485,9 +503,6 @@ index_timestamp
 index_position
 	position in bytes of the first byte of a keyframe, relative to the
 	last keyframe stored in this index
-	there MUST be no keyframe with the same stream_id as this index between
-	2 consecutive index entries if they are more then max_index_distance
-	appart
 
 id
 	the id of the type/name pair, so its more compact
@@ -580,8 +595,6 @@ info packets which describe the whole file or individual streams/tracks must be
 placed before any video/audio/... frames
 
 		Index
-every sync-point must be exacty once in the index
-Note: in case of realtime streaming there is no end, so no index there either
 
 		Info packets
 the info_packet can be repeated, it can also contain different names & values
