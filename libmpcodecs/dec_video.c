@@ -77,10 +77,11 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 int set_video_colors(sh_video_t *sh_video,char *item,int value)
 {
     vf_instance_t* vf=sh_video->vfilter;
-    
+
+    mp_dbg(MSGT_DECVIDEO,MSGL_V,"set video colors %s=%d \n", item, value);
     if (vf)
     {
-	int ret =  vf->control(vf, VFCTRL_SET_EQUALIZER, item, (int *)value);
+	int ret = vf->control(vf, VFCTRL_SET_EQUALIZER, item, (int *)value);
 	if (ret == CONTROL_TRUE)
 	    return(1);
     }
@@ -92,9 +93,14 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 int get_video_colors(sh_video_t *sh_video,char *item,int *value)
 {
     vf_instance_t* vf=sh_video->vfilter;
-    
-    if (vf->control(vf, VFCTRL_GET_EQUALIZER, item, value) == CONTROL_TRUE)
-	return 1;
+
+    mp_dbg(MSGT_DECVIDEO,MSGL_V,"get video colors %s \n", item);
+    if (vf)
+    {
+        int ret = vf->control(vf, VFCTRL_GET_EQUALIZER, item, value);
+	if (ret == CONTROL_TRUE)
+	    return(1);
+    }
     /* try software control */
     if(mpvdec) return mpvdec->control(sh_video,VDCTRL_GET_EQUALIZER, item, value);
     return 0;

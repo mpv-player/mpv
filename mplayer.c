@@ -270,10 +270,10 @@ static stream_t* stream=NULL;
 
 char* current_module=NULL; // for debugging
 
-int vo_gamma_brightness = 0;
-int vo_gamma_contrast = 0;
-int vo_gamma_saturation = 0;
-int vo_gamma_hue = 0;
+int vo_gamma_brightness = 1000;
+int vo_gamma_contrast = 1000;
+int vo_gamma_saturation = 1000;
+int vo_gamma_hue = 1000;
 
 // ---
 
@@ -1331,11 +1331,17 @@ if(auto_quality>0){
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
 current_module="init_vo";
-    /* set defaults */
-    set_video_colors(sh_video, "brightness", vo_gamma_brightness);
-    set_video_colors(sh_video, "contrast", vo_gamma_contrast);
-    set_video_colors(sh_video, "saturation", vo_gamma_saturation);
-    set_video_colors(sh_video, "hue", vo_gamma_hue);
+    if (sh_video)
+    {
+	if (vo_gamma_brightness != 1000)
+	    set_video_colors(sh_video, "brightness", vo_gamma_brightness);
+	if (vo_gamma_contrast != 1000)
+	    set_video_colors(sh_video, "contrast", vo_gamma_contrast);
+	if (vo_gamma_saturation != 1000)
+	    set_video_colors(sh_video, "saturation", vo_gamma_saturation);
+	if (vo_gamma_hue != 1000)
+	    set_video_colors(sh_video, "hue", vo_gamma_hue);
+    }
 
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,video_out);
@@ -2392,7 +2398,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-     
+      
+      if (!sh_video)
+	break;
+      
+      if (vo_gamma_brightness == 1000)
+      {
+	vo_gamma_brightness = 0;
+	get_video_colors(sh_video, "brightness", &vo_gamma_brightness);
+      }
+
       if (abs)
         vo_gamma_brightness = v;
       else
@@ -2415,6 +2430,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_CONTRAST :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+
+      if (!sh_video)
+	break;
+      
+      if (vo_gamma_contrast == 1000)
+      {
+	vo_gamma_contrast = 0;
+	get_video_colors(sh_video, "contrast", &vo_gamma_contrast);
+      }
      
       if (abs)
         vo_gamma_contrast = v;
@@ -2438,7 +2462,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_SATURATION :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-     
+
+      if (!sh_video)
+	break;
+      
+      if (vo_gamma_saturation == 1000)
+      {
+	vo_gamma_saturation = 0;
+	get_video_colors(sh_video, "saturation", &vo_gamma_saturation);
+      }
+
       if (abs)
         vo_gamma_saturation = v;
       else
@@ -2461,6 +2494,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_HUE :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+
+      if (!sh_video)
+	break;
+      
+      if (vo_gamma_hue == 1000)
+      {
+	vo_gamma_hue = 0;
+	get_video_colors(sh_video, "hue", &vo_gamma_hue);
+      }
      
       if (abs)
         vo_gamma_hue = v;

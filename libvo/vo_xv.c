@@ -144,8 +144,8 @@ static int xv_set_eq(char *name, int value, int use_reset)
 
     mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d, %d)\n", name, value, use_reset);
 
-    /* get available attributes */
-    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+     /* get available attributes */
+     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
      /* first pass try reset */
      if(use_reset)
      {
@@ -219,6 +219,85 @@ static int xv_set_eq(char *name, int value, int use_reset)
 		     } else port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
 		     
                     XvSetPortAttribute(mDisplay, xv_port, xv_atom, port_value);
+		    return(VO_TRUE);
+                }
+        }
+    }
+    return(VO_FALSE);
+}
+
+static int xv_get_eq(char *name, int *value)
+{
+    XvAttribute *attributes;
+    int howmany, xv_min, xv_max, xv_atom;
+    static int was_reset = 0;
+
+    *value = 0;
+
+     /* get available attributes */
+     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+     for (i = 0; i < howmany && attributes; i++)
+     {
+            if (attributes[i].flags & XvGettable)
+            {
+                xv_min = attributes[i].min_value;
+                xv_max = attributes[i].max_value;
+                xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
+/* since we have SET_DEFAULTS first in our list, we can check if it's available
+   then trigger it if it's ok so that the other values are at default upon query */
+                if (xv_atom != None)
+                {
+		    int val, port_value, port_min, port_max, port_mid;
+
+		    XvGetPortAttribute(mDisplay, xv_port, xv_atom, &port_value);
+
+		    port_min = xv_min;
+		    port_max = xv_max;
+		    port_mid = (port_min + port_max) / 2;
+		    
+		    val = ((port_value - port_mid)*2000)/(port_max-port_min);
+		    
+		    if(!strcmp(attributes[i].name,"XV_BRIGHTNESS") &&
+			(!strcasecmp(name, "brightness")))
+				*value = val;
+		    else
+		    if(!strcmp(attributes[i].name,"XV_CONTRAST") &&
+			(!strcasecmp(name, "contrast")))
+				*value = val;
+		    else
+		    if(!strcmp(attributes[i].name,"XV_SATURATION") &&
+			(!strcasecmp(name, "saturation")))
+				*value = val;
+		    else
+		    if(!strcmp(attributes[i].name,"XV_HUE") &&
+			(!strcasecmp(name, "hue")))
+			/* nasty nvidia detect */
+			{
+			if (port_min == 0 && port_max == 360)
+			{
+			    if (port_value > port_mid-1)
+				val = (port_value - port_max + 1) * 1000 / port_mid;
+			    else
+				val = port_value * 1000 / port_mid;
+			}
+			    *value = val;
+			}
+		    else
+                    /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
+		    if(!strcmp(attributes[i].name,"XV_RED_INTENSITY") &&
+			(!strcasecmp(name, "red_intensity")))
+				*value = val;
+		    else
+		    if(!strcmp(attributes[i].name,"XV_GREEN_INTENSITY") &&
+			(!strcasecmp(name, "green_intensity")))
+				*value = val;
+		    else
+		    if(!strcmp(attributes[i].name,"XV_BLUE_INTENSITY") &&
+			(!strcasecmp(name, "blue_intensity")))
+				*value = val;
+		    else continue;
+
+		    mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n", name, *value);
 		    return(VO_TRUE);
                 }
         }
@@ -828,6 +907,17 @@ static uint32_t control(uint32_t request, void *data, ...)
     va_end(ap);
     
     return(xv_set_eq(data, value, 0));
+  }
+  case VOCTRL_GET_EQUALIZER:
+  {
+    va_list ap;
+    int *value;
+    
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+    
+    return(xv_get_eq(data, value));
   }
   }
   return VO_NOTIMPL;

@@ -59,20 +59,6 @@ static int  vidix_get_oem_fx(vidix_oem_fx_t *info);
 static int  vidix_set_oem_fx(const vidix_oem_fx_t *info);
 static int  vidix_set_deint(const vidix_deinterlace_t *info);
 
-static void vidix_query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-  vaa->query_bes_da=vidix_get_bes_da;
-  vaa->get_video_eq=vidix_get_video_eq;
-  vaa->set_video_eq=vidix_set_video_eq;
-  vaa->get_num_fx=vidix_get_num_fx;
-  vaa->get_oem_fx=vidix_get_oem_fx;
-  vaa->set_oem_fx=vidix_set_oem_fx;
-  vaa->set_deint=vidix_set_deint;
-}
-
-static vidix_video_eq_t vid_eq;
-
 int vidix_start(void)
 {
     int err;
@@ -82,39 +68,6 @@ int vidix_start(void)
 	return -1;
     }
     video_on=1;
-    if (vidix_cap.flags & FLAG_EQUALIZER)
-    {
-	if(verbose > 1)
-	{
-	    printf("vosub_vidix: vo_gamma_brightness=%i\n"
-	       "vosub_vidix: vo_gamma_saturation=%i\n"
-	       "vosub_vidix: vo_gamma_contrast=%i\n"
-	       "vosub_vidix: vo_gamma_hue=%i\n"
-	       "vosub_vidix: vo_gamma_red_intensity=%i\n"
-	       "vosub_vidix: vo_gamma_green_intensity=%i\n"
-	       "vosub_vidix: vo_gamma_blue_intensity=%i\n"
-	       ,vo_gamma_brightness
-	       ,vo_gamma_saturation
-	       ,vo_gamma_contrast
-	       ,vo_gamma_hue
-	       ,vo_gamma_red_intensity
-	       ,vo_gamma_green_intensity
-	       ,vo_gamma_blue_intensity);
-	}
-        /* To use full set of vid_eq.cap */
-	if(vidix_get_video_eq(&vid_eq) == 0)
-	{
-		vid_eq.brightness = vo_gamma_brightness;
-		vid_eq.saturation = vo_gamma_saturation;
-		vid_eq.contrast = vo_gamma_contrast;
-		vid_eq.hue = vo_gamma_hue;
-		vid_eq.red_intensity = vo_gamma_red_intensity;
-		vid_eq.green_intensity = vo_gamma_green_intensity;
-		vid_eq.blue_intensity = vo_gamma_blue_intensity;
-		vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
-		vidix_set_video_eq(&vid_eq);
-	}
-    }
     return 0;
 }
 
@@ -136,15 +89,6 @@ void vidix_term( void )
 	vidix_stop();
 	vdlClose(vidix_handler);
 //  ((vo_functions_t *)vo_server)->control=server_control;
-}
-
-static uint32_t vidix_draw_slice_swYV12(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-  uint8_t *dest;
-  dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-  dest += dstrides.y*y + x;
-  yv12toyuy2(image[0], image[1], image[2], dest, w, h, stride[0], stride[1],dstrides.y);
-  return 0;
 }
 
 static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -363,17 +307,6 @@ void     vidix_flip_page(void)
   }	
 }
 
-static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
-{
-  UNUSED(x0);
-  UNUSED(y0);
-  UNUSED(w);
-  UNUSED(h);
-  UNUSED(src);
-  UNUSED(srca);
-  UNUSED(stride);
-}
-
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
     uint32_t apitch,bespitch;
@@ -420,7 +353,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 	vo_draw_alpha_rgb15(w,h,src,srca,stride,lvo_mem+y0*bespitch+2*x0,bespitch);
         break;
     default:
-        draw_alpha_null(x0,y0,w,h,src,srca,stride);
+	return;
     }
 }
 
@@ -437,22 +370,7 @@ uint32_t vidix_query_fourcc(uint32_t format)
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
   if (vidix_fourcc.depth == VID_DEPTH_NONE)
-  {
-    if(format == IMGFMT_YV12)
-    {
-	vidix_fourcc.fourcc = IMGFMT_YUY2;
-	vdlQueryFourcc(vidix_handler,&vidix_fourcc);
-	if (vidix_fourcc.depth == VID_DEPTH_NONE) return 0;
-	else
-	{
-	    vo_server->draw_slice = vidix_draw_slice_swYV12;
-	    forced_fourcc=IMGFMT_YUY2;
-	    printf("vosub_vidix: WARNING!!! Using YV12 to YUY2 SW convertion\n");
-	    return VFCAP_CSP_SUPPORTED|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
-	}
-    }
     return 0;
-  }
   return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD;
 }
 
@@ -753,9 +671,6 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 uint32_t vidix_control(uint32_t request, void *data, ...)
 {
   switch (request) {
-  case VOCTRL_QUERY_VAA:
-    vidix_query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return vidix_query_fourcc(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
@@ -769,6 +684,81 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
   case VOCTRL_GET_NUM_FRAMES:
 	*(uint32_t *)data = vidix_play.num_frames;
 	return VO_TRUE;
+  case VOCTRL_SET_EQUALIZER:
+  {
+    va_list ap;
+    int value;
+    vidix_video_eq_t info;
+
+    if(!video_on) return VO_FALSE;
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+    
+    /* vidix eq ranges are -1000..1000 */
+    if (!strcasecmp(data, "brightness"))
+    {
+	info.brightness = value*10;
+	info.cap |= VEQ_CAP_BRIGHTNESS;
+    }
+    else if (!strcasecmp(data, "contrast"))
+    {
+	info.contrast = value*10;
+	info.cap |= VEQ_CAP_CONTRAST;
+    }
+    else if (!strcasecmp(data, "saturation"))
+    {
+	info.saturation = value*10;
+	info.cap |= VEQ_CAP_SATURATION;
+    }
+    else if (!strcasecmp(data, "hue"))
+    {
+	info.hue = value*10;
+	info.cap |= VEQ_CAP_HUE;
+    }
+
+    if (vdlPlaybackSetEq(vidix_handler, &info) == 0)
+	return VO_TRUE;
+    return VO_FALSE;
+  }
+  case VOCTRL_GET_EQUALIZER:
+  {
+    va_list ap;
+    int *value;
+    vidix_video_eq_t info;
+
+    if(!video_on) return VO_FALSE;
+    if (vdlPlaybackSetEq(vidix_handler, &info) != 0)
+	return VO_FALSE;
+
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+    
+    /* vidix eq ranges are -1000..1000 */
+    if (!strcasecmp(data, "brightness"))
+    {
+	if (info.cap & VEQ_CAP_BRIGHTNESS)
+	    *value = info.brightness/10;
+    }
+    else if (!strcasecmp(data, "contrast"))
+    {
+	if (info.cap & VEQ_CAP_CONTRAST)
+	    *value = info.contrast/10;
+    }
+    else if (!strcasecmp(data, "saturation"))
+    {
+	if (info.cap & VEQ_CAP_SATURATION)
+	    *value = info.saturation/10;
+    }
+    else if (!strcasecmp(data, "hue"))
+    {
+	if (info.cap & VEQ_CAP_HUE)
+	    *value = info.hue/10;
+    }
+
+    return VO_TRUE;
+  }
   }
   return VO_NOTIMPL;
   // WARNING: we drop extra parameters (...) here!
@@ -798,7 +788,8 @@ int vidix_preinit(const char *drvname,void *server)
 		printf("vosub_vidix: Couldn't get capability: %s\n",strerror(err));
 		return -1;
 	}
-	printf("vosub_vidix: Using: %s by %s\n",vidix_cap.name,vidix_cap.author);
+	printf("VIDIX: Description: %s\n", vidix_cap.name);
+	printf("VIDIX: Author: %s\n", vidix_cap.author);
 	/* we are able to tune up this stuff depend on fourcc format */
 	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;

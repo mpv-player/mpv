@@ -174,13 +174,6 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     
     mp_msg(MSGT_VO, MSGL_V, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	vo_dx, vo_dy, window_width, window_height);
-	
-    { // á.c.s. technologies (C) Pontscho
-     vidix_video_eq_t eq;
-     vo_vaa_t vo_vaa;
-     if ( vidix_control( VOCTRL_QUERY_VAA,&vo_vaa) != VO_NOTIMPL )
-       if ( vo_vaa.get_video_eq && vo_vaa.get_video_eq( &eq ) == 0 ) set_video_eq( eq.cap ); 
-    }
 
     /* mDrawColorKey: */
 
@@ -455,6 +448,28 @@ static uint32_t control(uint32_t request, void *data, ...)
 	 set_window( 0,&vtune );
         }
       return VO_TRUE;
+  case VOCTRL_SET_EQUALIZER:
+  {
+    va_list ap;
+    int value;
+    
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+
+    return vidix_control(request, data, (int *)value);
+  }
+  case VOCTRL_GET_EQUALIZER:
+  {
+    va_list ap;
+    int *value;
+    
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+
+    return vidix_control(request, data, value);
+  }
   }
   return vidix_control(request, data);
 //  return VO_NOTIMPL;

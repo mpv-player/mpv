@@ -70,13 +70,13 @@ static int control(struct vf_instance_s* vf, int request, void* data, ...)
     case VFCTRL_GET_EQUALIZER:
     {
 	va_list ap;
-	int value;
+	int *value;
 
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	va_start(ap, data);
 	value = va_arg(ap, int);
 	va_end(ap);
-	return((video_out->control(VOCTRL_GET_EQUALIZER, data, (int *)value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
+	return((video_out->control(VOCTRL_GET_EQUALIZER, data, value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
     }
     }
     // return video_out->control(request,data);
