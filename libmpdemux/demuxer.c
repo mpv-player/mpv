@@ -155,6 +155,7 @@ extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
 extern void demux_close_rawdv(demuxer_t* demuxer);
 extern void demux_close_pva(demuxer_t* demuxer);
+extern void demux_close_smjpeg(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -207,6 +208,8 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_RTP:
       demux_close_rtp(demuxer); break;
 #endif
+    case DEMUXER_TYPE_SMJPEG:
+      demux_close_smjpeg(demuxer); return;
     case DEMUXER_TYPE_DEMUXERS:
       demux_close_demuxers(demuxer); return;
     case DEMUXER_TYPE_AVI: 
@@ -292,6 +295,7 @@ int demux_pva_fill_buffer(demuxer_t *demux);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
 extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
+extern int demux_smjpeg_fill_buffer(demuxer_t* demux);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -327,6 +331,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #ifdef STREAMING_LIVE_DOT_COM
     case DEMUXER_TYPE_RTP: return demux_rtp_fill_buffer(demux, ds);
 #endif
+    case DEMUXER_TYPE_SMJPEG: return demux_smjpeg_fill_buffer(demux);
   }
   return 0;
 }
@@ -546,6 +551,8 @@ extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
 extern int demux_rawaudio_open(demuxer_t* demuxer);
+extern int smjpeg_check_file(demuxer_t *demuxer);
+extern int demux_open_smjpeg(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -734,6 +741,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
       demuxer = NULL;
   }
 }
+//=============== Try to open as SMJPEG file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_SMJPEG,audio_id,video_id,dvdsub_id);
+  if(smjpeg_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected SMJPEG file!\n");
+      file_format=DEMUXER_TYPE_SMJPEG;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
 //=============== Try to open as Ogg file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
@@ -897,6 +915,10 @@ switch(file_format){
  }
  case DEMUXER_TYPE_ROQ: {
   if (!demux_open_roq(demuxer)) return NULL;
+  break;
+ }
+ case DEMUXER_TYPE_SMJPEG: {
+  if (!demux_open_smjpeg(demuxer)) return NULL;
   break;
  }
  case DEMUXER_TYPE_MOV: {

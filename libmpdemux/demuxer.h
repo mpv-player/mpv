@@ -32,6 +32,8 @@
 #define DEMUXER_TYPE_RTP 21
 #define DEMUXER_TYPE_RAWDV 22
 #define DEMUXER_TYPE_PVA 23
+#define DEMUXER_TYPE_SMJPEG 24
+
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
