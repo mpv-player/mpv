@@ -80,6 +80,7 @@ int identify=0;
 static int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
+#define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
 #ifdef HAVE_RTC
 #include <linux/rtc.h>
@@ -2925,7 +2926,7 @@ if(rel_seek_secs || abs_seek_pos){
 	  osd_show_vobsub_changed--;
       } else
       if (osd_show_sub_delay) {
-	  sprintf(osd_text_tmp, "Sub delay: %d ms",(int)(sub_delay*1000));
+	  sprintf(osd_text_tmp, "Sub delay: %d ms %.10f", ROUND(sub_delay*1000));
 	  osd_show_sub_delay--;
       } else
       if (osd_show_sub_pos) {
@@ -2939,7 +2940,7 @@ if(rel_seek_secs || abs_seek_pos){
          osd_show_sub_alignment--;
       } else
       if (osd_show_av_delay) {
-	  sprintf(osd_text_tmp, "A-V delay: %d ms",(int)(audio_delay*1000));
+	  sprintf(osd_text_tmp, "A-V delay: %d ms", ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
       } else if(osd_level>=2)
           sprintf(osd_text_tmp,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
