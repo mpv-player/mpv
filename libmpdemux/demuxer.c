@@ -374,13 +374,11 @@ sh_video_t *sh_video=NULL;
 
 #ifdef USE_TV
 //=============== Try to open as TV-input: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_TV){
+if((tv_param_on == 1) &&
+    (file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_TV)){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_TV,audio_id,video_id,dvdsub_id);
-  if(tv_param_on==1)
-  {
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected TV! ;-)\n");
-    file_format=DEMUXER_TYPE_TV;
-  }
+  mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected TV! ;-)\n");
+  file_format=DEMUXER_TYPE_TV;
 }
 #endif
 //=============== Try to open as AVI file: =================
