@@ -3,8 +3,8 @@ LIBNAME = libDS_Filter.a
 
 include ../../config.mak
 
-SRCS	= DS_VideoDec.cpp DS_Filter.cpp allocator.cpp cmediasample.cpp guids.cpp inputpin.cpp outputpin.cpp
-OBJS	= DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
+SRCS	= DS_AudioDec.cpp DS_VideoDec.cpp DS_Filter.cpp allocator.cpp cmediasample.cpp guids.cpp inputpin.cpp outputpin.cpp
+OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
 
 INCLUDE = -I. -I.. -I../wine
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
