@@ -153,6 +153,7 @@ Optional features:
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --enable-new-conf      Enable new config stuff [disabled]
   --enable-menu          Enable osd menu support (need new config) [disabled]
+  --enable-qtx-codecs	 Enable Quicktime codecs [disabled]
 
 Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
@@ -1017,6 +1018,7 @@ _freetype=no
 _shared_pp=no
 _new_conf=no
 _menu=no
+_qtx_codecs=no
 
 for ac_option do
   case "$ac_option" in
@@ -1202,6 +1204,9 @@ for ac_option do
 
   --enable-menu) _menu=yes ;;
   --disable-menu) _menu=no ;;
+
+  --enable-qtx-codecs) _qtx_codecs=yes ;;
+  --disable-qtx-codecs) _qtx_codecs=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -4261,6 +4266,15 @@ _def_menu='#undef HAVE_MENU'
 fi
 echores "$_menu"
 
+# Check to see if they want QTX codecs enabled
+echocheck "QTX codecs"
+if test "$_qtx_codecs" = yes ; then
+    _def_qtx_codecs='#define USE_QTX_CODECS 1'
+else
+    _def_qtx_codecs='#undef USE_QTX_CODECS'
+fi
+echores "$_qtx_codecs"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -4998,6 +5012,9 @@ $_def_joystick
 
 /* enables / disables new config */
 $_def_new_conf
+
+/* enables / disables QTX codecs */
+$_def_qtx_codecs
 
 /* enables / disables osd menu */
 $_def_menu
