@@ -116,7 +116,7 @@ int demux_y4m_fill_buffer(demuxer_t *demux) {
 
 void demux_open_y4m(demuxer_t* demuxer){
     y4m_priv_t* priv = demuxer->priv;
-    y4m_ratio_t framerate;
+    y4m_ratio_t ratio;
     sh_video_t* sh=new_sh_video(demuxer,0);
     int err;
 
@@ -186,13 +186,17 @@ void demux_open_y4m(demuxer_t* demuxer){
 	    mp_msg(MSGT_DEMUXER, MSGL_FATAL, "error parsing YUV4MPEG header: %s\n", y4m_strerr(err));
 	
 	if(!sh->fps) {
-    	    framerate = y4m_si_get_framerate(priv->si);
-    	    if (framerate.d != 0)
-        	sh->fps=(float)framerate.n/(float)framerate.d;
+    	    ratio = y4m_si_get_framerate(priv->si);
+    	    if (ratio.d != 0)
+        	sh->fps=(float)ratio.n/(float)ratio.d;
     	    else
         	sh->fps=15.0f;
 	}
 	sh->frametime=1.0f/sh->fps;
+	
+	ratio = y4m_si_get_sampleaspect(priv->si);
+	if (ratio.d != 0 && ratio.n != 0)
+	    sh->aspect = (float)ratio.n/(float)ratio.d;
 
 	sh->disp_w = y4m_si_get_width(priv->si);
 	sh->disp_h = y4m_si_get_height(priv->si);
@@ -224,7 +228,7 @@ void demux_open_y4m(demuxer_t* demuxer){
 
 void demux_close_y4m(demuxer_t *demuxer)
 {
-    y4m_priv_t* priv;
+    y4m_priv_t* priv = demuxer->priv;
     
     if (!priv->is_older)
 	y4m_fini_stream_info(((y4m_priv_t*)demuxer->priv)->si);
