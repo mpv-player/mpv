@@ -5051,6 +5051,9 @@ EOF
     _def_mp3lame='#undef HAVE_MP3LAME'
   fi
   echores "$_mp3lame"
+  if freebsd ; then
+    _mp3lame=no
+  fi
 
 
   echocheck "DivX4linux encore (for mencoder)"
