@@ -347,7 +347,7 @@ static void check_os_katmai_support( void )
 #else
    /* Do nothing on other platforms for now.
     */
-   message( "Not testing OS support for SSE, leaving disabled.\n" );
+   printf( "Not testing OS support for SSE, leaving disabled.\n" );
    gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }
