@@ -932,7 +932,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+28);
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+28;
     }
-    else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "huffyuv"))
+    else if (lavc_param_vcodec && (!strcasecmp(lavc_param_vcodec, "huffyuv")
+                                || !strcasecmp(lavc_param_vcodec, "ffvhuff")))
     {
     /* XXX: hack: huffyuv needs to store huffman tables (allthough we dunno the size yet ...) */
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+1000);
@@ -997,6 +998,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '2');
     else if (!strcasecmp(lavc_param_vcodec, "huffyuv"))
 	mux_v->bih->biCompression = mmioFOURCC('H', 'F', 'Y', 'U');
+    else if (!strcasecmp(lavc_param_vcodec, "ffvhuff"))
+	mux_v->bih->biCompression = mmioFOURCC('F', 'F', 'V', 'H');
     else if (!strcasecmp(lavc_param_vcodec, "asv1"))
 	mux_v->bih->biCompression = mmioFOURCC('A', 'S', 'V', '1');
     else if (!strcasecmp(lavc_param_vcodec, "asv2"))
