@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.6 -->
 <sect1 id="formats">
 <title>Formats supportés</title>
 
@@ -102,7 +103,7 @@ créer ces fichiers, <application>NanDub</application>, a ce problème.
 
 <note>
 <para>
-Les caméras DV créées des flux DV brut que les utilitaires de capture DV
+Les caméras DV créent des flux DV bruts que les utilitaires de capture DV
 convertissent en deux types de fichiers AVI différents. L'AVI pourra ensuite
 contenir soit des flux audio et vidéo séparés que <application>MPlayer</application>
 peut lire, soit un flux DV brut pour lequel le support est en développement.
@@ -115,7 +116,7 @@ Il y a deux types de fichiers AVI:
 <listitem><simpara>
   <emphasis role="bold">Entrelacé:</emphasis> Les contenus audio et vidéo sont
   entrelacés. C'est l'utilisation standard. Recommandé et généralement utilisé.
-  Certains outils crées des AVIs entrelacés avec une mauvaise synchro.
+  Certains outils créent des AVIs entrelacés avec une mauvaise synchro.
   <application>MPlayer</application> les détecte comme entrelacés, ce qui va
   enduire une perte de synchro A/V, probablement pendant un déplacement. Ces
   fichiers devraient être lu en temps que non-entrelacés (avec l'option <option>-ni</option>).
@@ -152,7 +153,7 @@ N'importe quel codec audio et vidéo est autorisé, mais notez que l'audio VBR
 n'est pas très bien supporté par la plupart des lecteurs. Le format de fichier
 rend l'utilisation d'audio VBR possible, mais la plupart des lecteurs attendent
 de l'audio CBR, donc ils échouent avec VBR. VBR n'est pas très courant et les
-spécs Microsoft AVI ne décrivent que l'audio CBR. La plupart des
+spécs AVI de Microsoft ne décrivent que l'audio CBR. La plupart des
 encodeurs /multiplexeurs créés de mauvais fichiers en utilisant l'audio VBR.
 Il n'y a que deux exceptions:
 <application>NanDub</application> et <link linkend="mencoder">MEncoder</link>.
@@ -193,7 +194,7 @@ pouvez même les extraire avec les options <option>-dumpvideo</option> et
 <para>
 La plupart des nouveaux fichiers QuickTime utilise de la vidéo
 <emphasis role="bold">Sorenson</emphasis> et de l'audio QDesign Music. Voir
-notre section codec <link linkend="sorenson">Sorenson</link>.
+notre section sur le codec <link linkend="sorenson">Sorenson</link>.
 </para>
 </note>
 </sect3>
@@ -235,7 +236,7 @@ courtes trouvées sur le net.
 <application>MPlayer</application> démuxe et décode les films FLI et est même
 capable de ce déplacer à l'intérieur (utile en utilisant l'option
 <option>-loop</option>). Les fichiers FLI n'ont pas de trame clé, donc l'image
-sera sale pendant un court instant après le déplacement.
+sera brouillée pendant un court instant après le déplacement.
 </para>
 </sect3>
 
@@ -259,7 +260,7 @@ linkend="realaudio">RealAudio</link> supportés.
 <ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
 est un outil de capture TV (d'après ce que j'en sais:). <application>MPlayer</application>
 peut lire ses fichiers <filename>.NUV</filename> (NuppelVideo 5.0 uniquement).
-Ces fichiers peuvent contenir des trames YV12 non-compressées, YV12+RTJpeg non-compressées,
+Ces fichiers peuvent contenir des trames YV12 non-compressées, YV12+RTJpeg compressées,
 YV12 RTJpeg+lzo compressées, et YV12+lzo compressées.
 <application>MPlayer</application> les décode tous (et les <emphasis role="bold">encode</emphasis>
 également avec <application>MEncoder</application> en DivX/etc!). Le déplacement fonctionne.
@@ -312,7 +313,8 @@ besoin d'installer <systemitem class="library">libogg</systemitem> et
 <sect3 id="sdp">
 <title>Fichiers SDP</title>
 <para>
-<ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink>
+<ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> est un
+format IETF standard pour décrire les flux RTP video et/ou audio.
 (Les librairies &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;
 sont requises.)
 </para>
@@ -343,7 +345,7 @@ principale différence est que le GIF89a autorise l'animation. MPlayer supporte
 les deux formats en utilisant <systemitem class="library">libungif</systemitem>
 ou une autre librairie compatible libgif. Les GIFs non-animées seront affichées
 comme des vidéos à simple trame. (Utilisez les options  <option>-loop</option>
-et <option>-fixed-vo</option>pour les afficher plus longtemps).
+et <option>-fixed-vo</option> pour les afficher plus longtemps).
 </para>
 
 <para>
@@ -389,7 +391,7 @@ usage recommandé de <application>MPlayer</application>, vous feriez mieux d'util
 <title>Fichiers MP3</title>
 <para>
 Vous pouvez avoir des problèmes pour lire certains fichiers MP3 que
-<application>MPlayer</application>prends pour des MPEGs et ne joue pas
+<application>MPlayer</application> prends pour des MPEGs et ne joue pas
 correctement voir pas du tout. Ceci ne peut être réparé sans enlever le
 support de certains fichiers MPEG endommagés et donc restera ainsi pour
 un temps indéterminé. L'option <option>-demuxer</option> décrite dans la
@@ -455,7 +457,7 @@ et compiler MPlayer avec <application>MPlayer</application> avec
 Si cela ne fonctionne pas, vous pourriez avoir besoin de préciser le chemin
 des plugins et des librairies <application>XMMS</application> explicitement
 par l'intermédiaire des options <option>--with-xmmsplugindir</option> et
-<option>--withxmmslibdir</option>.
+<option>--with-xmmslibdir</option>.
 </para>
 </sect3>
 </sect2>

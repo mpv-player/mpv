@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.8 -->
 <chapter id="cd-dvd">
 <title>Utilisation des CD/DVD</title>
 
@@ -34,14 +35,12 @@ ou avec un programme nommé <command>setcd</command>. Ils fonctionnent comme cela
 </para>
 
 <para>
-Vous pouvez également essayer
-<screen>echo vitesse_actuelle:4 &gt; /proc/ide/[périph. cdrom]/settings</screen>
-mais vous aurez besoin des privilèges root. La commande suivante peut également aider:
-<screen>echo file_readahead:2000000 &gt; /proc/ide/[périph. cdrom]/settings</screen>
+Si vous avez les privilèges root, la commande suivante peut également aider:
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[périph. cdrom]</replaceable>/settings</screen>
 </para>
 
 <para>
-pour créer 2MB de cache du fichier, ce qui est utile pour les CD-Roms endommagés.
+Ceci créé un cache de 2 Mo, ce qui est utile pour les CD-Roms endommagés.
 Si vous lui donnez une valeur trop haute, le lecteur ne va pas cesser de s'arrêter
 et de repartir, ce qui va dramatiquement diminuer les performances. Il est
 également recommandé d'optimiser votre lecteur de CD-ROM avec <command>hdparm</command>:
@@ -49,12 +48,12 @@ et de repartir, ce qui va dramatiquement diminuer les performances. Il est
 </para>
 
 <para>
-pour permettre l'accès DMA, le cache en lecture, et l'IRQ unmasking. (lisez la page de
+Ceci permet l'accès DMA, le cache en lecture, et l'IRQ unmasking. (lisez la page de
 man de <command>hdparm</command> pour plus d'explications).
 </para>
 
 <para>
-Référez vous à &quot;<filename>/proc/ide/[périph. cdrom]/settings&quot;</filename>&quot;
+Référez vous à &quot;<filename>/proc/ide/<replaceable>[périph. cdrom]</replaceable>/settings</filename>&quot;
 pour optimiser correctement votre lecteur CD-ROM.
 </para>
 
@@ -65,7 +64,7 @@ connaissez une ? Dites-la nous!) Il y a un outil qui fonctionne pour les
 </para>
 
 <para>FreeBSD:</para>
-<para>Vitesse: <command>cdcontrol [-f périphérique] speed [vitesse]</command></para>
+<para>Vitesse: <command>cdcontrol [-f <replaceable>périphérique</replaceable>] speed <replaceable>[vitesse]</replaceable></command></para>
 <para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
 </sect1>
 
@@ -92,12 +91,13 @@ correct en ligne de commande avec l'option <option>-dvd-device</option>.
 <title>Nouvelle méthode de lecture DVD (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> utilise <systemitem>libdvdread</systemitem> et
-<systemitem>libdvdcss</systemitem> Ces deux bibliothèques sont incluses dans le
-sous-répertoire <filename class="directory">libmpdvdkit2/</filename> du répertoire
+<systemitem>libdvdcss</systemitem> pour le décryptage et la lecture de DVD.
+Ces deux bibliothèques sont incluses dans le sous-répertoire
+<filename class="directory">libmpdvdkit2/</filename> du répertoire
 source de MPlayer, vous n'avez donc pas besoin de les installer séparément. Nous
 avons opté pour cette solution car nous devions corriger un bug de
 <systemitem>libdvdread</systemitem>, et appliquer un patch qui ajoute
-<emphasis role="bold">un cache pour les clés CSS crackées</emphasis> à
+<emphasis role="bold">un cache pour les clés CSS cassées</emphasis> à
 <systemitem>libdvdcss</systemitem>. Le résultat est bien plus rapide car les clés
 n'ont pas à être cassées à chaque lecture.
 </para>
@@ -108,17 +108,13 @@ n'ont pas à être cassées à chaque lecture.
 globales au système <systemitem>libdvdread</systemitem>
 et <systemitem>libdvdcss</systemitem> mais cette solution n'est
 <emphasis role="bold">pas</emphasis> recommandée, car elle peut provoquer des
-bugs, des incompatibilités de librairies, et une vitesse moins importante.
+bogues, des incompatibilités de librairies, et une vitesse moins importante.
 </para>
 
-<formalpara>
-<title>Navigation DVD (dvdnav)</title>
-<para>
-Le support pour la navigation DVD via <systemitem>dvdnav</systemitem> était
-développé, mais n'a jamais été vraiment fini et n'est actuellement plus maintenu.
-Qui sait, il pourrait même compiler.
-</para>
-</formalpara>
+<note><para>
+En cas de problème de décodage de DVD, essayez de désactiver supermount, et tout les
+outils de ce genre.
+</para></note>
 
 <formalpara>
 <title>Ancienne méthode de lecture DVD - OPTIONNELLE</title>
@@ -136,7 +132,7 @@ utiliser le wrapper fibmap_mplayer suid-root.
 <para>
 Les disques DVD utilisent tous des secteurs de 2048 octets par secondes avec ECC/CRC. Ils ont
 généralement un système de fichier UDF sur une seule piste, qui contient des fichiers variés (des
-petits fichiers .IFO et .BUK et un gros (1Go) fichier .VOB). Ce sont de véritables fichiers et ils
+petits fichiers .IFO et .BUK et de gros (1Go) fichiers .VOB). Ce sont de véritables fichiers et ils
 peuvent être joués/copiés depuis le système de fichier monté d'un DVD non-crypté.
 </para>
 </formalpara>
@@ -199,7 +195,7 @@ un lien symbolique ou spécifiez le bon périphérique en ligne de commande avec l'
 <para>
 La nouvelle méthode de certification et de décryptage est fait par un <systemitem>libdvdcss</systemitem>
 patché (voir plus haut). La méthode peut être spécifiée avec la variable d'environnement <envar>DVDCSS_METHOD</envar>
-qui peut être initialisée à <literal>key</literal>, <literal>disk</literal> ou <literal>title</literal>.
+qui peut être initialisée à key, disk ou title.
 </para>
 </formalpara>
 
@@ -217,7 +213,7 @@ pour obtenir et décrypter les clés disque cryptées.
 
 <listitem><para>
 <emphasis role="bold">clé mise en cache</emphasis>: <application>MPlayer</application>
-cherche une clé déjà crackée dans le répertoire
+cherche une clé déjà cassée dans le répertoire
 <filename class="directory">~/.mplayer/DVDKeys</filename> (rapide ;).
 </para></listitem>
 
@@ -227,8 +223,8 @@ cherche une clé déjà crackée dans le répertoire
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">disque</emphasis>: Si la méthode clé échoue (c-a-d. pas de clés incluses),
-<application>MPlayer</application> va cracker la clé disque avec un algorithme brute force. Ce
+<emphasis role="bold">disque</emphasis>: Si la méthode clé échoue (ex: pas de clés incluses),
+<application>MPlayer</application> va casser la clé disque avec un algorithme brute force. Ce
 processus est intensif pour le CPU et requiert 60 Mo de mémoire (table de hachage 32Bit de 16M) pour
 stocker temporairement les données. Cette méthode devrait toujours fonctionner (lent).
 </para></listitem>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.4 -->
 <appendix id="skin">
 <title>Format de skins MPlayer</title>
 <para>
@@ -85,28 +86,28 @@ Actuellement, trois fenêtres doivent être décorées: la
 
 <itemizedlist>
 <listitem><para>
-  Vous controlez MPlayer par la <emphasis role="bold">fenêtre principale</emphasis>
+  Vous contrôlez MPlayer par la <emphasis role="bold">fenêtre principale</emphasis>
   et/ou la <emphasis role="bold">barre de lecture</emphasis>. L'arrière plan est
-  une image. Divers objets doivent venir se placer dans cette fenêtre:
+  une image. Divers objets peuvent (et doivent) venir se placer dans cette fenêtre:
   <emphasis>boutons</emphasis>, <emphasis>podomètres</emphasis>
-  (sliders) et des <emphasis>labels</emphasis>. Pour chaque objet, vous devez
+  (sliders) et <emphasis>labels</emphasis>. Pour chaque objet, vous devez
   spécifier sa taille et sa position.
 </para><para>
   Un <emphasis role="bold">bouton</emphasis> comprend trois états (pressé, relâché,
-  désactivé), donc l'image doit se diviser en trois parties, verticalement. c.f.
+  désactivé), donc l'image doit se diviser en trois parties, verticalement. Voir
   l'objet <link linkend="skin-button">bouton</link> pour plus de détails.
 </para><para>
   Un <emphasis role="bold">podomètre</emphasis> (principalement utilisé pour la
   barre d'avancement et le contrôle du volume/balance) peut posséder n'importe quel
-  nombre d'états en empilant ces images, verticalement. C.f.
+  nombre d'états en empilant ces images, verticalement. Voir
   <link linkend="skin-hpotmeter">hpotmeter</link> et
   <link linkend="skin-potmeter">potmeter</link> pour plus de détails.
 </para><para>
-  Les <emphasis role="bold">labels</emphasis> sont un peut particuliers : les
+  Les <emphasis role="bold">labels</emphasis> sont un peu particuliers : les
   caractères nécessaires pour les dessiner sont récupérés depuis un fichier image,
   décrit par un <link linkend="skin-fonts">fichier de description de polices</link>.
   Ce dernier est un fichier texte brut spécifiant la position x,y ainsi que la
-  taille de chaque caractère dans l'image. (donc le fichier image et son descripteur
+  taille de chaque caractère dans l'image (le fichier image et son descripteur
   forment une police <emphasis>ensemble</emphasis>). Voir <link linkend="skin-dlabel">dlabel</link>
   et <link linkend="skin-slabel">slabel</link> pour plus de détails.
 </para>
@@ -133,7 +134,7 @@ Actuellement, trois fenêtres doivent être décorées: la
   utilisée pour afficher les entrées sélectionnées. Quand vous faites apparaître le
   menu, la première image s'affiche. Si vous passez la souris sur les entrées du
   menu, l'entrée sélectionnée est copiée depuis la seconde image, et uniquement la
-  partie concernée par cette sélection (Donc la seconde image ne s'affiche jamais
+  partie concernée par cette sélection (la seconde image ne s'affiche jamais
   complètement.)
 </para><para>
   Une entrée de menu se définit par sa position et sa taille dans l'image (c.f. la
@@ -211,7 +212,7 @@ section: dont le nom est <emphasis role="bold">movieplayer</emphasis>.
 <para>
 Dans cette section chaque fenêtre est décrite par un bloc de la forme suivante:
 <programlisting>
-window = <replaceable>window name</replaceable>
+window = <replaceable>nom de la fenêtre</replaceable>
 .
 .
 .
@@ -230,14 +231,14 @@ Où <replaceable></replaceable> peut-être l'un des types suivants:
 </para>
 
 <para>
-(Les blocs sub et menu sont optionnels - vous n'avez pas d'obligation de décorer
+(Les blocs sub et menu sont optionnels - vous n'avez pas l'obligation de décorer
 le menu et la sous-fenêtre.)
 </para>
 
 <para>
 Dans un bloc window, vous pouvez définir chaque objet sous la forme:
-<programlisting>item = paramètre</programlisting>
-Où <literal>item</literal> est une ligne identifiant le type d'objet de la GUI,
+<programlisting>objet = paramètre</programlisting>
+Où <literal>objet</literal> est une ligne identifiant le type d'objet de la GUI,
 <literal>paramètre</literal> est une valeur numérique ou textuelle (ou une liste
 de valeurs séparées par des virgules).
 </para>
@@ -247,19 +248,19 @@ Le fichier final doit donc ressembler à ceci:
 <programlisting>
 section = movieplayer
   window = main
-  ; ... items for main window ...
+  ; ... objets de la fenêtre principale ...
   end
 
   window = sub
-  ; ... items for subwindow ...
+  ; ... objets de la sous-fenêtre ...
   end
-  
+
   window = menu
-  ; ... items for menu ...
+  ; ... objets du menu ...
   end
 
   window = playbar
-  ; ... items for playbar ...
+  ; ... objets de la la barre de lecture ...
   end
 end
 </programlisting>
@@ -270,7 +271,7 @@ Le nom d'un fichier image doit être donné sans distinction de répertoire - les
 images seront cherchées dans le répertoire <filename class="directory">Skin</filename>.
 Vous pouvez (mais ce n'est pas obligatoire) spécifier l'extension du fichier. Si
 le fichier n'existe pas, MPlayer essaie de charger le fichier
-<filename>&lt;filename&gt;.&lt;ext&gt;</filename>, où <literal>png</literal>
+<filename>&lt;nomfichier&gt;.&lt;ext&gt;</filename>, où <literal>png</literal>
 et <literal>PNG</literal> sera respectivement <filename>&lt;ext&gt;</filename>
 (dans cet ordre). La première correspondance trouvée sera utilisée.
 </para>
@@ -320,7 +321,7 @@ et '<literal>window = playbar</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>
   <listitem><para>
   Vous spécifiez ici l'image de fond utilisée dans la fenêtre principale. La
   fenêtre apparaîtra a la position <literal>X,Y</literal> sur l'écran. La fenêtre
-  a la taille de l'image.
+  aura la taille de l'image.
     </para>
     <note><para>Ces coordonnées ne fonctionnent actuellement pas pour la fenêtre
     d'affichage.</para></note>
@@ -399,7 +400,7 @@ horizontalement.
     <listitem><para><literal>blargeur</literal>,<literal>bhauteur</literal> - taille
     du bouton
     </para></listitem>
-   <listitem><para><literal>phases</literal> - L'image utilisée pour les différentes
+   <listitem><para><literal>phases</literal> - l'image utilisée pour les différentes
    phases du podomètre. Une valeur <literal>NULL</literal> spéciale peut-être
    utilisée si vous ne voulez pas d'image. L'image doit être divisée en
    <literal>numphasesparts</literal> verticalement comme ceci:
@@ -418,7 +419,7 @@ horizontalement.
 </screen>
 </informalfigure>
     </listitem>
-    <listitem><para><literal>numphases</literal> - nombre d'états placés dans l'image.
+    <listitem><para><literal>numphases</literal> - nombre d'états placés dans l'image <literal>phases</literal>.
     </para></listitem>
     <listitem><para><literal>default</literal> - valeur par défaut du podomètre (dans
     un intervalle de <literal>0</literal> à <literal>100</literal>)
@@ -444,7 +445,7 @@ horizontalement.
 Un <literal>hpotmeter</literal> sans boutons. (je suppose qu'il est censé tourner
 en rond, mais il réagit uniquement aux tractions horizontales.) Pour une
 description de ses paramètres lisez <link linkend="skin-hpotmeter">hpotmeter</link>.
-Ses <literal>phases</literal> peuvent être <literal>NULL</literal>, mais ce n'est
+Ses <literal>phases</literal> peuvent être fixés à <literal>NULL</literal>, mais ce n'est
 pas vraiment utile, puisque vous ne pouvez pas voir son niveau.
     </para></listitem>
 </varlistentry>
@@ -505,51 +506,51 @@ Vous pouvez utiliser les variables suivantes dans le texte:
 <tbody>
 <row>
 <entry>$1</entry>
-<entry>temps de lecture en <emphasis>hh:mm:ss</emphasis></entry>
+<entry>temps de lecture au format <emphasis>hh:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$2</entry>
-<entry>temps de lecture en <emphasis>mmmm:ss</emphasis></entry>
+<entry>temps de lecture au format <emphasis>mmmm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$3</entry>
-<entry>temps de lecture en <emphasis>hh</emphasis> (heures)</entry>
+<entry>temps de lecture au format <emphasis>hh</emphasis> (heures)</entry>
 </row>
 <row>
 <entry>$4</entry>
-<entry>temps de lecture en <emphasis>mm</emphasis> (minutes)</entry>
+<entry>temps de lecture au format <emphasis>mm</emphasis> (minutes)</entry>
 </row>
 <row>
 <entry>$5</entry>
-<entry>temps de lecture en <emphasis>ss</emphasis> (secondes)</entry>
+<entry>temps de lecture au format <emphasis>ss</emphasis> (secondes)</entry>
 </row>
 <row>
 <entry>$6</entry>
-<entry>longueur du film en <emphasis>hh:mm:ss</emphasis></entry>
+<entry>longueur du film au format <emphasis>hh:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$7</entry>
-<entry>longueur du film en <emphasis>mmmm:ss</emphasis></entry>
+<entry>longueur du film au format <emphasis>mmmm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$8</entry>
-<entry>temps de lecture en <emphasis>h:mm:ss</emphasis></entry>
+<entry>temps de lecture au format <emphasis>h:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$v</entry>
-<entry>volume en <emphasis>xxx.xx</emphasis>%</entry>
+<entry>volume au format <emphasis>xxx.xx</emphasis>%</entry>
 </row>
 <row>
 <entry>$V</entry>
-<entry>volume en <emphasis>xxx.xx</emphasis></entry>
+<entry>volume au format <emphasis>xxx.xx</emphasis></entry>
 </row>
 <row>
 <entry>$b</entry>
-<entry>balance en <emphasis>xxx.xx</emphasis>%</entry>
+<entry>balance au format <emphasis>xxx.xx</emphasis>%</entry>
 </row>
 <row>
 <entry>$B</entry>
-<entry>balance en <emphasis>xxx.xx</emphasis></entry>
+<entry>balance au format <emphasis>xxx.xx</emphasis></entry>
 </row>
 <row>
 <entry>$$</entry>
@@ -643,7 +644,7 @@ Vous trouverez ci-dessous la liste des objets utilisables dans le bloc
 L'image qui s'affichera dans la fenêtre. La fenêtre apparaîtra à la position
 <literal>X,Y</literal> sur l'écran (<literal>0,0</literal> est le coin supérieur
 gauche). Vous pouvez spécifier <literal>-1</literal> pour centre et <literal>-2</literal>
-pour droite(<literal>X</literal>) et bas (<literal>Y</literal>). La fenêtre prendra
+pour droite (<literal>X</literal>) et bas (<literal>Y</literal>). La fenêtre prendra
 la taille de l'image. <literal>largeur</literal> et <literal>hauteur</literal>
 donnent la taille de la fenêtre; ces paramètres sont optionnels (si ils sont
 absents, le fenêtre prend la taille de l'image).
@@ -754,7 +755,7 @@ image = font.png
 <sect2 id="skin-fonts-symbols">
 <title>Symboles</title>
 <para>
-Certains caractères ont une signification spéciale quand retournés par des
+Certains caractères ont une signification spéciale quand ils sont retournés par des
 variables utilisées dans <link linkend="skin-dlabel">dlabel</link>. Ces caractères
 sont censés s'afficher comme des symboles (par exemple, dans le cas d'une lecture
 DVD, vous pouvez afficher un beau logo DVD a la place du caractère '<literal>d</literal>').
@@ -1061,7 +1062,7 @@ Charge un fichier audio (avec un sélecteur de fichier)
 <varlistentry>
   <term><emphasis role="bold">evNone</emphasis></term>
   <listitem><para>
-Message vide, sans effet. (À part peut-être dans les versions CVS :-)).
+Message vide, sans effet. (à part peut-être dans les versions CVS :-)).
     </para></listitem>
 </varlistentry>
 

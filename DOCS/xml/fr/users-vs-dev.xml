@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.7 -->
 <appendix id="users-vs-dev">
 <title>Lamentations du développeur</title>
 
@@ -38,7 +39,7 @@ Linux kernel news flash about kernel 2.4.17</ulink>
 et le <ulink url="http://www.voy.com/3516/572.html">Forum Voy</ulink>.
 <application>MPlayer</application> a également souffert des problèmes intermittents qui
 ont tous été résolus en passant à une version différente de GCC. Plusieurs projets en
-commencé d'implémenter des contournements pour quelques-uns des problèmes de 2.96, mais
+commencé à implémenter des contournements pour quelques-uns des problèmes de 2.96, mais
 nous avons refusé de réparer les bogues des autres, surtout parce que certains
 contournements peuvent impliquer une pénalité sur les performances.
 </para>
@@ -124,7 +125,7 @@ cd gcc-build
 <para>
 <application>MPlayer</application> contenait précédemment du code source du projet
 OpenDivX, qui interdit toute redistribution binaire. Ce code à été retiré depuis la
-version 0.90-pre1 et le fichier résultant <filename>divx_vbr.c</filename> qui est
+version 0.90-pre1 et le fichier restant <filename>divx_vbr.c</filename> qui est
 dérivé des sources OpenDivX à été placé sous GPL par ses auteurs au moment de la
 version 0.90pre9. Vous êtes maintenant invité à créer des paquetages binaires si vous
 en avez l'utilité.
@@ -200,7 +201,7 @@ puissiez vous faire votre propre opinion:
 <para>
 Marc Rassbach a
 <ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">quelque chose à dire</ulink>
-à propos de l'homme.
+à propos de cet homme.
 
 <blockquote><para>
 Vous devriez tous vous rappeler la LinuxWorld 2000, quand il prétendait que Linus T

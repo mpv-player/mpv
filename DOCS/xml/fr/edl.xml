@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.3 -->
 <sect1 id="edl" xreflabel="TV input">
 <title>Listes d'Edition de Décision (EDL)</title>
 
@@ -11,7 +12,7 @@ basé sur un fichier de configuration EDL spécifique au film.
 <para>
 Ceci est utile pour ceux qui veulent voir un film en mode "tout public".
 Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
-suivant vos propres préférences personnelles. A part ça, il y a d'autres
+suivant vos préférences personnelles. A part ça, il y a d'autres
 utilisations, comme sauter automatiquement les pubs dans les fichiers vidéos
 que vous regardez.
 </para>

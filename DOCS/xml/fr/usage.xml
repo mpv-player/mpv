@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.10 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -31,7 +32,7 @@ Lecture d'un fichier:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>options</replaceable>]<!--
---> [<replaceable>chemin</replaceable>/]<replaceable>nomfichier</replaceable>
+--> [<replaceable>chemin</replaceable>/]<replaceable>fichier</replaceable>
 </synopsis>
 </para>
 
@@ -40,10 +41,10 @@ Lecture de plusieurs fichiers:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>options par défaut</replaceable>]<!--
---> [<replaceable>chemin</replaceable>/]<replaceable>nomfichier1</replaceable><!--
---> [<replaceable>options pour nomfichier1</replaceable>]<!--
---> <replaceable>nomfichier2</replaceable><!--
---> [<replaceable>options pour nomfichier2</replaceable>] ...
+--> [<replaceable>chemin</replaceable>/]<replaceable>fichier1</replaceable><!--
+--> [<replaceable>options pour fichier1</replaceable>]<!--
+--> <replaceable>fichier2</replaceable><!--
+--> [<replaceable>options pour fichier2</replaceable>] ...
 </synopsis>
 </para>
 
@@ -83,18 +84,10 @@ Lecture à partir de RTSP:
 </para>
 
 <para>
-Les dernières versions de <application>MPlayer</application> acceptent
-également les pistes VCD et DVD en style URL, comme <application>xine</application>:
-<screen>mplayer dvd://1</screen>
-ou
-<screen>mplayer vcd://1</screen>
-</para>
-
-<para>
 Exemples:
 <screen>
 mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-mplayer vcd://2
+mplayer vcd://2 -cd-rom-device /dev/hdc
 mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
 mplayer dvd://1 -dvd-device /dev/hdc
 mplayer -abs 65536 -delay -0.4 -nobps ~/films/test.avi<!--
@@ -177,15 +170,15 @@ Vous pouvez obtenir la liste complète en exécutant
 <itemizedlist>
 <title>Souris (uniquement sous X)</title>
 <listitem><simpara>
-  <literal>MOUSE_BTN0</literal> (Left button)</simpara></listitem>
+  <literal>MOUSE_BTN0</literal> (Bouton gauche)</simpara></listitem>
 <listitem><simpara>
-  <literal>MOUSE_BTN1</literal> (Right button)</simpara></listitem>
+  <literal>MOUSE_BTN1</literal> (Bouton droit)</simpara></listitem>
 <listitem><simpara>
-  <literal>MOUSE_BTN2</literal> (Middle button)</simpara></listitem>
+  <literal>MOUSE_BTN2</literal> (Bouton du milieu)</simpara></listitem>
 <listitem><simpara>
-  <literal>MOUSE_BTN3</literal> (Wheel)</simpara></listitem>
+  <literal>MOUSE_BTN3</literal> (molette)</simpara></listitem>
 <listitem><simpara>
-  <literal>MOUSE_BTN4</literal> (Wheel)</simpara></listitem>
+  <literal>MOUSE_BTN4</literal> (molette)</simpara></listitem>
 <listitem><simpara>...</simpara></listitem>
 <listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
 </itemizedlist>
@@ -193,16 +186,16 @@ Vous pouvez obtenir la liste complète en exécutant
 <itemizedlist>
 <title>Joystick (son support doit avoir été activé à la compilation)</title>
 <listitem><simpara>
-  <literal>JOY_RIGHT</literal> or
+  <literal>JOY_RIGHT</literal> ou
   <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
 <listitem><simpara>
-  <literal>JOY_LEFT</literal> or
+  <literal>JOY_LEFT</literal> ou
   <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
 <listitem><simpara>
-  <literal>JOY_UP</literal> or
+  <literal>JOY_UP</literal> ou
   <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
 <listitem><simpara>
-  <literal>JOY_DOWN</literal> or
+  <literal>JOY_DOWN</literal> ou
   <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
 <listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
 <listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
@@ -238,7 +231,7 @@ Vous pouvez obtenir la liste complète des commandes en exécutant
   </para></listitem>
 <listitem><para><literal>pause</literal></para>
   <para>
-  Pause/dépause la lecture
+  Pause/relance la lecture
   </para></listitem>
 <listitem><para><literal>grap_frames</literal></para>
   <para>
@@ -267,7 +260,7 @@ Vous pouvez obtenir la liste complète des commandes en exécutant
   </para></listitem>
 <listitem><para><literal>osd</literal> [(int) level=-1]</para>
   <para>
-  Bascule le mode osd ou change le niveau quand level > 0.
+  Bascule le mode osd ou change le niveau quand level &gt; 0.
   </para></listitem>
 <listitem><para><literal>volume</literal> (int) dir</para>
   <para>Augmente/diminue le volume
@@ -340,10 +333,10 @@ sur <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
 </para>
 
 <para>
-Si vous avez installé le paquetage lirc, configure l'autodétectera. Si
+Si vous avez installé le paquetage lirc, configure le détectera automatiquement. Si
 tout c'est bien passé, <application>MPlayer</application> affichera un
 message du genre "<computeroutput>Setting up lirc support...</computeroutput>"
-au démarrage. Si une erreur se produit il vous le dira. Si il ne vous dis
+au démarrage. Si une erreur se produit il vous le dira. Si il ne vous dit
 rien à propos de LIRC c'est que son support n'est pas compilé. C'est tout :-)
 </para>
 
@@ -410,14 +403,14 @@ séparées par un saut de ligne (\n) depuis l'entrée par défaut (stdin).
 
 <para>
 <application>MPlayer</application> peut lire des fichiers depuis le réseau, en
-utilisant les protocoles HTTP, MMS ou RTSP/RTP.
+utilisant les protocoles HTTP, FTP, MMS ou RTSP/RTP.
 </para>
 
 <para>
 La lecture se fait juste en ajoutant l'URL à la ligne de commande.
 <application>MPlayer</application> utilise également la variable d'environnement
 <envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du Proxy
-peut aussi être forcée:
+peut aussi être forcé:
 <screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
 </para>
 
@@ -428,9 +421,67 @@ exemple pour lire depuis le FTP:
 <screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -</screen>
 </para>
 
-<para>
-Note: il est également recommandé d'activer le CACHE pour une lecture depuis le réseau:
+<note><para>
+Il est également recommandé d'activer le CACHE pour une lecture depuis le réseau:
 <screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -cache 8192 -</screen>
-</para>
+</para></note>
 </sect1>
+
+<sect1 id="mpst" xreflabel="Remote streams">
+<title>Flux distants</title>
+
+<para>
+Les flux distants vous permettent d'accéder à la plupart des types de flux de
+<application>MPlayer</application> depuis un hôte distant. Le but de cette fonction
+est de rendre possible l'utilisation du lecteur CD ou DVD d'un autre ordinateur
+sur le réseau (en supposant que vous ayez une bande passante suffisante). Malheureusement
+certains types de flux (pour l'instant TV et MF) ne sont pas utilisables à
+distance car ils sont implémentés au niveau du demuxer. C'est triste pour les
+flux MF mais les flux TV nécessiteraient une bande passante incensée.
+</para>
+
+<sect2 id="compile_mpst_server">
+<title>Compilation du serveur</title>
+<para>
+Après avoir compilé <application>MPlayer</application>, allez dans le répertoire
+<filename>TOOLS/netstream</filename> et tapez
+<application>make</application> pour compiler le serveur.
+Vous pouvez ensuite copier le binaire <application>netstream</application>
+dans l'endroit approprié sur votre système (généralement
+<filename class="directory">/usr/local/bin</filename> sous Linux).
+</para>
+</sect2>
+
+<sect2 id="use_mpst">
+<title>Utilisation de flux distants</title>
+<para>
+Tout d'abord vous devez lancer le serveur sur l'ordinateur auquel vous souhaitez
+accéder à distance. Actuellement le serveur est très basique et n'accepte aucun
+argument en ligne de commande, donc tapez juste <filename>netstream</filename>.
+Maintenant vous pouvez par exemple jouer la seconde piste d'un VCD sur le serveur avec:
+<screen>
+mplayer -cache 5000 mpst://serveur/vcd://2
+</screen>
+Vous pouvez aussi accéder aux fichiers de ce serveur:
+
+<screen>
+mplayer -cache 5000 mpst://serveur//usr/local/films/lol.avi
+</screen>
+Veuillez noter que les chemins qui ne commencent pas par un / seront relatifs
+au répertoire dans lequel le serveur fonctionne. L'option cache n'est pas requise
+mais vivement recommandée.
+</para>
+
+<para>
+Soyez conscient que pour l'instant le serveur n'est pas sécurisé du tout. Donc
+ne vous pleignez pas des nombreuses attaques possibles par cette voie. À la place
+envoyez-nous quelques (bons) patches pour le rendre meilleur ou ecrivez votre propre
+serveur.
+</para>
+
+
+</sect2>
+
+</sect1>
+
 </chapter>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.5 -->
 <appendix id="bugreports">
 <title>Comment rapporter les bogues</title>
 <para>
@@ -106,7 +107,7 @@ vous avez quelque chose de plus gros vous devrez le compresser ou l'uploader.
 <para>
 <itemizedlist>
 <listitem><para>
-Votre distribution Linux ou système d'exploitation et version ex.:
+Votre distribution Linux ou système d'exploitation et version c-a-d:
   <itemizedlist>
     <listitem><para>Red Hat 7.1</para></listitem>
     <listitem><para>Slackware 7.0 + paquets de développement de la 7.1 ...</para></listitem>
@@ -121,15 +122,15 @@ version de la libc:
 <screen>ls -l /lib/libc[.-]*</screen>
 </para></listitem>
 <listitem><para>
-version des binutils:
-<screen>as --version</screen>
-</para></listitem>
-<listitem><para>
 versions de gcc et ld :
 <screen>
 gcc -v
 ld -v
 </screen>
+</para></listitem>
+<listitem><para>
+version des binutils:
+<screen>as --version</screen>
 </para></listitem>
 <listitem><para>
 Si vous avez des problèmes avec le mode plein-écran:
@@ -169,8 +170,8 @@ Info CPU (cela ne fonctionne que sous Linux):
 <listitem><para>
 Fabricant et modèle de votre carte vidéo, ex.:
   <itemizedlist>
-    <listitem><para>chip ASUS V3800U: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
-    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
+    <listitem><para>chip ASUS V3800U: nVidia TNT2 Ultra pro 32Mo SDRAM</para></listitem>
+    <listitem><para>Matrox G400 DH 32Mo SGRAM</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
@@ -292,13 +293,13 @@ info all-registers
 <sect3 id="bugreports_core">
 <title>Comment extraire les informations significatives d'un core dump</title>
 <para>
-créez le fichier de commande suivant:
+Veuillez créer le fichier de commande suivant:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-puis exécutez simplement la ligne de commande suivante:
+Ensuite exécutez simplement:
 <screen>gdb mplayer --core=core -batch --command=<replaceable>fichier_de_commande</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>

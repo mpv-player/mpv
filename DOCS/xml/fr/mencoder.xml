@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.7 -->
 <chapter id="mencoder">
 <title>Encodage avec MEncoder</title>
 
@@ -7,7 +8,7 @@ Pour avoir la liste complète des options disponibles de <application>MEncoder</a
 et des exemples, voir la page de man. Pour une série d'exemples pratiques et de guides
 détaillés sur l'utilisation des nombreux paramètres d'encodage, lisez les
 <ulink url="../../tech/encoding-tips.txt">encoding-tips</ulink> (en anglais) qui ont
-été collecté sur de nombreuses threads de la liste de diffusion
+été collectés sur de nombreuses threads de la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">mplayer-users</ulink>.
 Cherchez dans les
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archives</ulink> pour trouver
@@ -62,7 +63,7 @@ Supprimez les fichiers temporaires conflictuels:
 
   <screen>mencoder <replaceable>fichier/DVD</replaceable> -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</screen>
   
-  Un fichier avi en lecture seule sera créé, contenant
+  Un fichier avi audio sera créé, contenant
   <emphasis role="bold">uniquement</emphasis> le flux audio demandé. N'oubliez pas
   <option>-lameopts</option>, si vous en avez besoin. Si vous encodez un long film,
   <application>MEncoder</application> affiche le bitrate recommandé pour les tailles
@@ -140,7 +141,7 @@ mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>a
 Souvent le besoin de redimensionner les images d'un film se fait sentir. Les raisons
 peuvent être multiples: diminuer la taille du fichier, la bande passante du réseau, etc.
 La plupart des gens redimensionnement même en convertissant des DVDs ou SVCDs en AVI
-DivX. C'est <emphasis role="bold">mauvais</emphasis>. Plutôt que faire ça, lisez la
+DivX. C'est <emphasis role="bold">mal</emphasis>. Plutôt que de faire ça, lisez la
 section <link linkend="aspect">Préserver l'aspect ratio</link>.
 </para>
 
@@ -152,7 +153,7 @@ Si elle n'est pas spécifiée, <application>MEncoder</application> utilisera 0: fa
 </para>
 
 <para>
-Usage:
+Utilisation:
 <screen>
 mencoder <replaceable>entree.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480-o <replaceable>sortie.avi</replaceable>
 </screen>
@@ -173,7 +174,7 @@ Cette section parle de la <emphasis role="bold">copie</emphasis>.
 <listitem><para>
   <emphasis role="bold">Flux vidéo</emphasis> (option <option>-ovc copy</option>):
   on peut faire des choses sympa :) comme, placer (pas convertir) de la vidéo FLI
-  ou VIVO ou MPEG1 dans un fichier AVI. Bien sûr seul <application>MPlayer</application>
+  ou VIVO ou MPEG1 dans un fichier AVI ! Bien sûr seul <application>MPlayer</application>
   peut lire de tels fichiers :) et ça n'a probablement pas de valeur réelle du tout.
   Concrètement: copier des flux vidéo peut être utile par exemple quand seul le flux
   audio doit être encodé (comme du PCM non-compressé en MP3).
@@ -233,18 +234,21 @@ d'abord, comme décrit
 <title>Encodage avec la famille de codecs libavcodec</title>
 
 <para>
-<link linkend="ffmpeg">libavcodec</link> permet un encodage simple dans plein de
+<link linkend="ffmpeg">libavcodec</link> permet un encodage simple dans de nombreux
 formats audio et vidéo intéressants (actuellement ses codecs audio ne sont pas
-supportés). Vous pouvez encoder avec les codecs suivants:
+supportés). Vous pouvez encoder avec les codecs suivants (plus ou moins à jour):
 
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Codec name</entry><entry>Description</entry></row>
+<row><entry>Nom codec</entry><entry>Description</entry></row>
 </thead>
 <tbody>
 <row><entry>mjpeg</entry><entry>
    Motion JPEG
+  </entry></row>
+<row><entry>ljpeg</entry><entry>
+   Lossless JPEG (sans perte)
   </entry></row>
 <row><entry>h263</entry><entry>
   H263
@@ -264,14 +268,29 @@ supportés). Vous pouvez encoder avec les codecs suivants:
   <row><entry>wmv1</entry><entry>
   Windows Media Video, version 1 (alias WMV7)
   </entry></row>
+<row><entry>wmv2</entry><entry>
+  Windows Media Video, version 2 (alias WMV8)
+  </entry></row>
 <row><entry>rv10</entry><entry>
   un vieux codec RealVideo
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
-  MPEG1 video :)
+  video MPEG1
+  </entry></row>
+<row><entry>mpeg2video</entry><entry>
+  video MPEG2
   </entry></row>
 <row><entry>huffyuv</entry><entry>
   compression sans perte
+  </entry></row>
+<row><entry>asv1</entry><entry>
+  ASUS Video v1
+  </entry></row>
+<row><entry>asv2</entry><entry>
+  ASUS Video v2
+  </entry></row>
+<row><entry>ffv1</entry><entry>
+  codec vidéo sans perte de FFmpeg
   </entry></row>
 </tbody>
 </tgroup>
@@ -303,7 +322,7 @@ des fichiers MJPEG (Motion JPEG), MPNG (Motion PNG) ou MTGA (Motion TGA).
 <title>Explication du processus:</title>
 <listitem><para>
   <application>MEncoder</application> <emphasis>décode</emphasis> le(s) image(s)
-  d'origine avec <systemitem class="library">libjpeg</systemitem> (pour encoder
+  d'origine avec <systemitem class="library">libjpeg</systemitem> (pour décoder
   des PNGs, il utilisera <systemitem class="library">libpng</systemitem>).
   </para></listitem>
 <listitem><para>
@@ -472,6 +491,71 @@ et <systemitem>crop</systemitem>.
 <screen>mencoder echantillon-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o sortie.avi</screen>
 </para>
 </formalpara>
+</sect1>
+
+<sect1 id="custommatrices"><title>Inter/intra matrices personnalisées</title>
+
+<para>
+Avec cette fonction de <link linkend="ffmpeg">libavcodec</link> vous pouvez
+initialiser des matrices personnalisées inter (I-frames/trames-clé) et intra
+(P-frames/trames prévues). Elle est supportée par de nombreux codecs:
+<systemitem>mpeg1video</systemitem> et <systemitem>mpeg2video</systemitem>
+fonctionnent.
+</para>
+
+<para>
+Une utilisation typique de cette fonction est d'initialiser les matrices
+recommandées par les spécifications <ulink url="http://www.kvcd.net/">KVCD</ulink>.
+</para>
+
+<para>
+La <emphasis role="bold">matrice de quantisation &quot;Notch&quot; de KVCD:</emphasis>
+</para>
+
+<para>
+Intra:
+<screen>
+ 8  9 12 22 26 27 29 34
+ 9 10 14 26 27 29 34 37
+12 14 18 27 29 34 37 38
+22 26 27 31 36 37 38 40
+26 27 29 36 39 38 40 48
+27 29 34 37 38 40 48 58
+29 34 37 38 40 48 58 69
+34 37 38 40 48 58 69 79
+</screen>
+
+Inter:
+<screen>
+16 18 20 22 24 26 28 30
+18 20 22 24 26 28 30 32
+20 22 24 26 28 30 32 34
+22 24 26 30 32 32 34 36
+24 26 28 32 34 34 36 38
+26 28 30 32 34 36 38 40
+28 30 32 34 36 38 42 42
+30 32 34 36 38 40 42 44
+</screen>
+</para>
+
+<para>
+Utilisation:
+<screen>
+$ mencoder entree.avi -o sortie.avi -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+</screen>
+</para>
+
+<para>
+<screen>
+$ mencoder entree.avi -ovc lavc -lavcopts
+vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
+12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,
+29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79
+:inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,
+28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,
+36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o svcd.mpg
+</screen>
+</para>
 </sect1>
 
 </chapter>

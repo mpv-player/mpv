@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.6 -->
 <sect2 id="audio-dev">
 <title>Périphériques de sortie audio</title>
 <sect3 id="sync">
@@ -32,7 +33,7 @@ L'interface audio de <application>MPlayer</application> se nomme
   pilote ALSA 0.9 natif (supporte le transfert AC3 matériel)
   </entry></row>
 <row><entry>sun</entry><entry>
-   pilote audio SUN (<filename>/dev/audio</filename>) pour les utilisateurs BSD et Solaris8
+   pilote audio SUN (<filename>/dev/audio</filename>) pour les utilisateurs de BSD et Solaris8
   </entry></row>
 <row><entry>macosx</entry><entry>
   pilote MacOS X natif
@@ -270,14 +271,14 @@ Ils supportent également de nombreux systèmes non-Linux.
   </row>
 
   <row>
-    <entry>Cartes C-Media (lesquelles?)</entry>
-    <entry>pas OK (hissing) (?)</entry>
+    <entry>Cartes C-Media (CMI8338/8738)</entry>
     <entry>OK</entry>
-    <entry></entry>
-    <entry></entry>
+    <entry>OK, SP/DIF est supporté par ALSA 0.9.x</entry>
     <entry>?</entry>
     <entry></entry>
-    <entry></entry>
+    <entry>44</entry>
+    <entry>stéréo</entry>
+    <entry>1</entry>
   </row>
 
   <row>
@@ -348,7 +349,7 @@ Remarquez que la liste ne doit contenir aucun espace, sinon cela échouera.
 </para>
 
 <para>
-Les filtres ont souvent des option changeant leur comportement. Ces options sont
+Les filtres ont souvent des options changeant leur comportement. Ces options sont
 expliquées en détail dans les sections ci-dessous. Un filtre sera exécuté en utilisant
 ses paramètres par défaut si ses options sont omises. Voici un exemple de comment
 utiliser les filtres en conjonction avec des options spécifiques à un filtre:
@@ -364,7 +365,7 @@ Le fonctionnement général de la couche filtre est contrôlé en utilisant l'option
 </para>
 
 <para>
-<option>force</option> est un champ de bits qui contrôle comment les filtres sont
+<option>force</option> est un champs de bits qui contrôle comment les filtres sont
 insérés et quelles optimisations de vitesse/exactitude ils utilisent:
 </para>
 
@@ -453,7 +454,7 @@ la plupart des filtres.
 <varlistentry>
 <term><option>-channels</option></term>
 <listitem><para>
-Cette option définie le nombre de canaux de sorties voulus pour votre carte son. Il
+Cette option définie le nombre de canaux de sortie voulus pour votre carte son. Il
 affecte également le nombre de canaux qui sont décodés à partir des média. Si le médium
 contient moins de canaux que le nombre demandé le filtre channels (voir plus bas) sera
 automatiquement inséré. Le routage sera le routage par défaut pour le filtre channels.
@@ -472,8 +473,8 @@ la différence.
 <varlistentry>
 <term><option>-format</option></term>
 <listitem><para>
-Cette option définie le format de sample de la couche audio et de la carte son. Si le
-format de sample demandé pour votre carte son est différent de celui du médium, un
+Cette option défini le format de sample de la couche audio et de la carte son. Si le
+format de sample demandé pour votre carte son est différent de celui du médium, le
 filtre format (voir plus bas) sera inséré pour rectifier la différence.
 </para></listitem>
 </varlistentry>
@@ -549,7 +550,7 @@ Le nombre d'option est dynamique:
 <varlistentry>
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
-  est un entier entre <literal>1</literal> et <literal>6</literal> est utilisé pour
+  est un entier entre <literal>1</literal> et <literal>6</literal> utilisé pour
   définir le nombre de canaux de sortie. Cette option est requise, la laisser vide
   provoquera une erreur à l'exécution.
 </para></listitem>
@@ -558,9 +559,9 @@ Le nombre d'option est dynamique:
 <varlistentry>
 <term><option>nr &lt;1-6&gt;</option></term>
 <listitem><para>
-   est un entier entre <literal>1</literal> et <literal>6</literal> qui est utilisé pour
-   définir le nombre de canaux de sortie. Cette option est requise, la laisser vide
-   provoquera une erreur à l'exécution.
+   est un entier entre <literal>1</literal> et <literal>6</literal> utilisé pour
+   définir le nombre de canaux de sortie. Cette option est optionnelle. Si elle
+   est omise, le routage par défaut est utilisé.
 </para></listitem>
 </varlistentry>
 
@@ -586,7 +587,7 @@ Le nombre d'option est dynamique:
 Exemple 1:
 <screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
 changerait le nombre de canaux à 4 et définirait 4 routes qui échangent le canal 0 et
-le canal 1 et laissent les canaux 2 et 3 intacts. Remarquez que si le média qui
+le canal 1 et laissent les canaux 2 et 3 intacts. Remarquez que si le médium qui
 contient deux canaux était joué en arrière, les canaux 2 et 3 contiendraient du silence
 mais les 0 et 1 seraient tout de même inversés.
 </para>
@@ -629,7 +630,7 @@ sample. Il est automatiquement activé si requis par la carte son ou un autre fil
 </variablelist>
 
 <para>
-Example:
+Exemple:
 <screen>mplayer -af format=4:float media.avi</screen>
 initialiserait le format de sortie en données à virgule de 4 octets par sample.
 </para>
@@ -640,7 +641,7 @@ initialiserait le format de sortie en données à virgule de 4 octets par sample.
 <para>
 Le filtre <option>delay</option> décale le son vers les haut-parleurs de façon a faire
 arriver le son dans les différents canaux au même moment dans la position d'écoute.
-Cela n'est utile que si vous avez plus de 2 haut-parleurs Ce filtre a une nombre
+Cela n'est utile que si vous avez plus de 2 haut-parleurs. Ce filtre a une nombre
 variable de paramètres:
 </para>
 
@@ -712,7 +713,7 @@ Ce filtre a deux options:
 <varlistentry>
 <term><option>c</option></term>
 <listitem><para>
-    est un contrôle binaire qui active et désactive le Soft-Clipping. Le Soft-Clipping
+    est un contrôle binaire qui active et désactive le soft clipping. Le Soft-Clipping
     peut rendre le son plus fluide si de très gros niveaux de volume de son sont utilisés.
     Activez cette option si l'intervalle dynamique de vos haut-parleurs est très bas.
     Soyez conscient que cette fonction crée une distorsion et ne devrait être utilisé
@@ -722,7 +723,7 @@ Ce filtre a deux options:
 </variablelist>
 
 <para>
-Example:
+Exemple:
 <screen>mplayer -af volume=10.1:0 media.avi</screen>
 amplifierait le son de 10.1dB et bloque le volume si il est trop haut.
 </para>
@@ -735,7 +736,7 @@ le niveau de son dans MEncoder pour que l'intervalle dynamique maximum soit util
 </sect4>
 
 <sect4 id="af_equalizer">
-<title>Egaliseur</title>
+<title>Égaliseur</title>
 <para>
 Le filtre <option>equalizer</option> est un égaliseur graphique à 10 bandes, implémenté
 en utilisant 10 filtres IIR de bande passante. Cela signifie qu'il fonctionne quel que
@@ -808,7 +809,7 @@ deux utilisations principales pour ce filtre:
 Down-mixage de plusieurs canaux vers seulement quelques uns, stéréo vers mono par exemple.
 </para></listitem>
 <listitem><para>
-Faire varier la &quot;largeur&quot;  du haut parleur central dans un système de son surround.
+Faire varier la &quot;largeur&quot; du haut parleur central dans un système de son surround.
 </para></listitem>
 </orderedlist>
 
@@ -821,7 +822,7 @@ résultat souhaité. Le nombre d'options pour ce filtre dépends du nombre de canau
 <varlistentry>
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
-est un entier compris entre <literal>1</literal> et <literal>6</literal> et est utilisé
+est un entier compris entre <literal>1</literal> et <literal>6</literal> utilisé
 pour définir le nombre de canaux de sortie. Cette option est requise, la laisser vide
 provoquera une erreur à l'exécution.
 </para></listitem>
@@ -935,7 +936,7 @@ audio et seront prochainement supprimés.</emphasis></para></note>
 <application>MPlayer</application> supporte les plugins audio. Les plugins audio
 peuvent être utilisés pour changer les propriétés des données audio avant que le son
 n'atteigne la carte son. Ils sont activés en utilisant l'option <option>-aop</option>
-qui accepte l'argument <option>list=plugin1,plugin2,...</option> L'argument
+qui accepte l'argument <option>list=plugin1,plugin2,...</option>. L'argument
 <option>list</option> est requis et détermine quels plugins devraient être utilisés et
 dans quel ordre ils devraient être exécutés. Exemple:
 
@@ -1038,7 +1039,7 @@ où <literal><replaceable>outfmt</replaceable></literal> est le format de sortie 
 <para>
 Ce plugin décale le son est n'est là que comme exemple pour démontrer comment
 développer de nouveaux plugins. Il ne peut être utilisé pour rien d'utile d'un point
-de vue utilisateur et n'est mentionné ici que pour l'amour de l'exhaustivité.
+de vue utilisateur et n'est mentionné ici que par soucis d'exhaustivité.
 N'utilisez pas ce plugin à moins que vous soyez un développeur.
 </para>
 </sect4>
@@ -1071,13 +1072,13 @@ mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceabl
 
 <para>
 Ce plugin a également des capacités de compression ou "Soft-Clipping". La compression
-peut être utilisé si si la dynamique du son est très élevée ou si la dynamique de vos
-haut-parleurs est très basse. Soyez contient que cette fonction crée des distorsion et
+peut être utilisé si la dynamique du son est très élevée ou si la dynamique de vos
+haut-parleurs est très basse. Soyez contient que cette fonction crée des distorsions et
 ne devrait être envisagée qu'en dernier ressort.
 </para>
 
 <para>
-Usage:
+Utilisation:
 <screen>
 mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
 </para>
@@ -1093,7 +1094,7 @@ le plugin extrastereo de <application>XMMS</application>) qui donne une sorte d'
 </para>
 
 <para>
-Usage:
+Utilisation:
 <screen>
 mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo
 mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--

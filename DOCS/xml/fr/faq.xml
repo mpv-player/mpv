@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!--synced with 1.14 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -100,7 +101,7 @@ pour plus de détails.
 Quel est le problème avec gcc 2.96 ?
 </para></question>
 <answer><para>
-<emphasis role="bold">Nous décourageons fortement l'utilisation de gcc 2.96!</emphasis>
+<emphasis role="bold">Nous décourageons fortement l'utilisation de gcc 2.96 !</emphasis>
 Lisez <link linkend="gcc-296">ce</link> document pour avoir des détails sur pourquoi
 Red Hat à diffusé gcc 2.96 et quel est le problème avec. Si vous voulez toujours
 réellement l'utiliser, soyez sûr d'obtenir la dernière version et indiquez l'option
@@ -165,7 +166,7 @@ essayé de compiler un noyau. Ils ont installé (avec les options par défaut) une
 Mandrake ou une Red Hat ou une SuSE, et sans lire le manuel ils envoient des
 messages disant 'cela ne marche pas! aidez-moi ! SVP! je suis nouveau sous Linux!
 de l'aide! oh! aidez-moi!'. Nous ne pouvons pas les arrêter, mais au moins nous
-les forçons à lire le manuel et à lire les messages de ./configure et mplayer.
+les forçons à lire le manuel et à lire les messages de ./configure et de MPlayer.
 </para>
 <para>
 Et vous gens intelligents venez et nous insultez à propos de gcc 2.96 et des
@@ -270,7 +271,7 @@ closed source). Upgradez vos noyau, modutils et <application>MPlayer</applicatio
 <qandaentry>
 <question><para>
 Pendant 'make', MPlayer se plaint à propose de librairies X11. Je ne comprends pas,
-J'ai VRAIMENT installé X!?
+J'ai VRAIMENT installé X !?
 </para></question>
 <answer><para>
 ... mais vous n'avez pas installé les paquets de développement. Ou pas correctement. Ils
@@ -278,7 +279,7 @@ s'appellent <filename>XFree86-devel*</filename> sous Red Hat, et
 <filename>xlibs-dev</filename> sous Debian. Vérifiez également que les liens symboliques
 <filename class="directory">/usr/X11</filename> et
 <filename class="directory">/usr/include/X11</filename> existent (cela peut poser un
-problème sur les systèmes Mandrake). Ils peuvent être créé avec ces commandes:
+problème sur les systèmes Mandrake). Ils peuvent être créés avec ces commandes:
 <screen>
      $ ln -sf /usr/X11R6 /usr/X11
      $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
@@ -467,7 +468,7 @@ Dans ce cas, le pourcentage de décodage contient également le pourcentage d'affi
 
 <qandaentry>
 <question><para>
-Il a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/local/lib/codecs/</filename> ...
+Il y a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Téléchargez les codecs Win32 sur notre
@@ -507,7 +508,7 @@ LIRC ne fonctionne pas, parce que ...
 <answer><para>
 Êtes-vous sûr d'utiliser <command>mplayer</command> au lieu de
 <command>mplayer_lirc</command>? Notez que c'était <command>mplayer_lirc</command>
-pendant un long moment, incluant la version 0.60, mais il à été récemment été remis en
+pendant un long moment, incluant la version 0.60, mais il à été récemment été renommé en
 <command>mplayer</command>.
 </para></answer>
 </qandaentry>
@@ -567,7 +568,7 @@ Cela ne devrait plus arriver, si c'est toujours le cas utilisez l'option
 <qandaentry>
 <question><para>
 Je ne peut pas accéder au menu de la GUI. J'appuie sur le bouton droit de la
-sourie, mais je ne peut pas accéder aux éléments du menu !
+souris, mais je ne peut pas accéder aux éléments du menu !
 </para></question>
 <answer><para>
 Utilisez-vous FVWM? Essayez cela:
@@ -591,6 +592,20 @@ Utilisez:
 
 <qandadiv id="faq-playback">
 <title>Problèmes de lecture</title>
+
+<qandaentry>
+<question><para>
+Je n'arrive pas à trouver la cause de certains problèmes étranges de lecture.
+</para></question>
+<answer><para>
+Avez-vous un fichier <filename>codecs.conf</filename> encore présent dans
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> ou dans un endroit similaire ? Supprimez-le,
+les fichiers <filename>codecs.conf</filename> obsolètes peuvent causer d'obscurs
+problèmes. MPlayer utilisera son fichier intégré à la place.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 ... fonctionne avec <application>xine/avifile/...</application> mais pas avec
@@ -668,7 +683,7 @@ J'ai des problèmes avec [votre gestionnaire de fenêtres] et les modes plein écra
 xv/xmga/sdl/x11 ...
 </para></question>
 <answer><para>
-Lisez <link linkend="bugreports">Comment reporter un bogue</link> et envoyez-nous un
+Lisez <link linkend="bugreports">Comment reporter des bogues</link> et envoyez-nous un
 rapport de bogue.
 </para></answer>
 </qandaentry>
@@ -679,8 +694,9 @@ J'obtiens ceci quand je lis des fichiers MPEG: Can't find codec for video format
 </para></question>
 <answer><para>
 Vous avez une ancienne version de <filename>codecs.conf</filename> dans
-<filename class="directory">~/.mplayer/</filename>.  Upgradez-le depuis
-<filename class="directory">/etc/</filename>.
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> ou similaire. Retirez-le.
 <emphasis role="bold">OU</emphasis> vous avez l'option <option>vc=</option>
 ou quelque chose de similaire dans votre (vos) fichier(s) de config.
 </para></answer>
@@ -688,7 +704,7 @@ ou quelque chose de similaire dans votre (vos) fichier(s) de config.
 
 <qandaentry>
 <question><para>
-Quand je lance <application>MPlayer</application> sous KDE Je n'obtient qu'un
+Quand je lance <application>MPlayer</application> sous KDE je n'obtient qu'un
 écran noir et rien ne se passe. Après environ une minute la vidéo commence à défiler.
 </para></question>
 <answer><para>
@@ -707,7 +723,11 @@ J'ai un AVI qui produit un écran gris quand il est joué avec <option>-vc odivx</
 et un vert avec <option>-vc divx4</option>.
 </para></question>
 <answer><para>
-Ce n'est pas un fichier DivX, mais un MS MPEG4v3. Mettez à jour votre <filename>codecs.conf</filename>.
+Ce n'est pas un fichier DivX, mais un MS MPEG4v3.
+Si vous avez une ancienne version de <filename>codecs.conf</filename> dans
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> ou similaire, retirez-la.
 </para></answer>
 </qandaentry>
 
@@ -746,8 +766,7 @@ J'ai un fichier MJPEG qui fonctionne avec les autres lecteurs mais n'affiche
 qu'une image noire dans <application>MPlayer</application>
 </para></question>
 <answer><para>
-Désactivez la DLL Windows dans <filename>codecs.conf</filename>, ou utilisez l'option
-<option>-vc ffmjpeg</option> (compilez MPlayer avec libavcodec pour que cela fonctionne).
+Utilisez un autre codec pour lire ce fichier, essayez <option>-vc ffmjpeg</option>.
 </para></answer>
 </qandaentry>
 
@@ -780,7 +799,10 @@ et il n'y a que le son ! <application>MPlayer</application> affiche:
 <screen>Detected video codec: [null] drv:0 (NULL codec (no decoding))</screen>
 </para></question>
 <answer><para>
-Mettez à jour votre <filename>codecs.conf</filename>.
+Si vous avez une ancienne version de <filename>codecs.conf</filename> dans
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> ou similaire, retirez-la.
 </para></answer>
 </qandaentry>
 
@@ -790,7 +812,7 @@ J'obtiens un pourcentage très étrange (bien trop grand) en lisant des fichiers s
 mon notebook.
 </para></question>
 <answer><para>
-C'est un effet de la gestion/économie d'énergie sur votre notebook (BIOS, pas
+C'est un effet de la gestion/économie d'énergie sur votre notebook (du BIOS, pas du
 noyau). Branchez l'alimentation secteur <emphasis role="bold">avant</emphasis>
 d'allumer votre notebook. Vous pouvez aussi voir si
 <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink> (une interface SpeedStep
@@ -857,10 +879,10 @@ Vous pouvez également utiliser le pilote DGA de SDL avec l'option <option>-vo sd
 <qandaentry>
 <question><para>
 OK, <option>-vo help</option> montre le pilote DGA, mais il se plaint à propos des
-permissions. Aidez-moi!
+permissions. Aidez-moi !
 </para></question>
 <answer><para>
-Il ne fonctionne qu'en root! C'est une limitation de DGA. Vous devriez devenir root
+Il ne fonctionne qu'en root ! C'est une limitation de DGA. Vous devriez devenir root
 (<command>su -</command>), et réessayer. Une autre solution est de rendre MPlayer SUID
 root, mais ce n'est <emphasis role="bold">pas recommandé</emphasis> !
 <screen>
@@ -1116,7 +1138,7 @@ ou d'autres films en format VCD ou SVCD et même les graver directement sur un CD
 Comment puis-je joindre deux fichiers vidéo ?
 </para></question>
 <answer><para>
-Cela à été le sujet d'une discussion sans fin sur mplayer-users. Allez chercher dans les
+Cela à été l'objet d'une discussion sans fin sur mplayer-users. Allez chercher dans les
 <ulink url="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archives</ulink>
 pour une réponse complète. C'est un sujet compliqué et votre résultat pourra beaucoup
 varier suivant le type de fichiers que vous voulez lier. Les MPEGs peuvent être
@@ -1188,6 +1210,27 @@ Pourquoi le bitrate affiché par <application>MEncoder</application> est négatif?
 Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour faire tenir le film sur un CD. Vérifiez que libmp3lame est installé correctement.
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+Je ne peux pas convertir de fichiers ASF en AVI/DivX car il utilisent 1000 fps?
+</para></question>
+<answer><para>
+Vous devrez fixer le débit à la main en utilsant <option>-ofps</option>, car ASF
+utilise un débit variable alors que AVI en utilise un fixe.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je insérer des sous-titres dans le fichier de sortie ?
+</para></question>
+<answer><para>
+Passez simplement l'option <option>-sub &lt;nomfichier&gt;</option> (ou <option>-sid</option>,
+<option>-vobsub</option>, respectivement) à MEncoder.
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 

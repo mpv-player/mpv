@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.3 -->
 <appendix id="mailinglists">
 <title>Listes de diffusion</title>
 <para>
 Il y a des listes de diffusion publiques sur <application>MPlayer</application>. À
 moins que cela soit explicitement précisé la langue utilisée sur ces listes est l'<emphasis role="bold">anglais</emphasis>.
-S'il vous plaît, n'envoyez pas de messages dans d'autres langues ou des mails HTML! La
+S'il vous plaît, n'envoyez pas de messages dans d'autres langues ou des mails en HTML ! La
 taille limite des message est 80k. Si vous avez quelque chose de plus gros, mettez-le
 en téléchargement quelque part. Sur les listes de diffusion, les règles d'écriture et
 de citation sont les même que sur usenet. Suivez-les SVP, elles simplifient énormément

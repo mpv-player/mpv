@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.6 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Entrée TV</title>
 
@@ -30,14 +31,14 @@ description des options TV et des contrôles clavier.
 <sect2 id="tv-tips">
 <title>Astuces d'utilisation</title>
 <para>
-La liste complète des options est disponible sur la page de manuel. Voci juste
+La liste complète des options est disponible sur la page de man. Voci juste
 quelques astuces:
 </para>
 <itemizedlist>
 <listitem>
 <para>
-Use the <option>channels</option> option. An example:
-<screen>-tv on:channels=26-MTV1,23-TV2</screen>
+Utilisez l'option <option>channels</option>. Un exemple:
+<screen>-tv channels=26-MTV1,23-TV2</screen>
 Explication: en utilisant cette option, seuls les canaux 26 et 23 seront utilisables,
 et il y a un joli texte OSD lors des changements de canal affichant le nom du nouveau.
 Les espaces dans le nom du canal doivent être remplacés par le caractère &quot;_&quot;.
@@ -53,7 +54,6 @@ devraient être divisible par 16.
 
 <listitem>
 <para>
-
 Si vous capturez la vidéo avec une résolution verticale supérieure à la moitié de la
 pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC, assurez-vous d'avoir
 désactivé l'entrelacement. Sinon votre film sera distordu pendant les scènes
@@ -61,7 +61,7 @@ fast-motion et le contrôleur de bitrate ne sera probablement même pas capable de
 garder le bitrate demandé car l'artefact de désentrelacement produit un grand taux de
 détails et donc consomme plus de bande passante. Vous pouvez désactiver
 l'entrelacement avec <option>-vop pp=DEINT_TYPE</option>. Généralement
-<option>pp=lb</option> peut faire du bon travail, m'est c'est une histoire de
+<option>pp=lb</option> peut faire du bon travail, mais c'est une histoire de
 préférence personnelle. Voyez les autres algorithmes de désentrelacement dans le
 manuel et essayez-les.
 </para>
@@ -75,7 +75,7 @@ passante inutilement. Plus précisément ce ne sont pas les zones noires elles-mêm
 mais les transitions nettes entre le noir et la vidéo plus claire qui jouent, mais
 ce n'est pas très important pour le moment. Avant que vous commenciez la capture,
 ajustez les arguments de l'option <option>crop</option> pour que toutes les saletés
-des bords soient coupées. De nouveau, n'oubliez pas de garder des dimensions sensées.
+des bords soient coupées. De nouveau, n'oubliez pas de garder des dimensions censées.
 </para>
 </listitem>
 
@@ -116,7 +116,7 @@ donc la seule chose que vous obtiendrez est un gaspillage massif de puissance CP
 <listitem>
 <para>
 Pour spécifier la palette I420 (<option>outfmt=i420</option>), vous devez ajouter
-une option <option>-vc rawi420</option> à cause d'un conflit entre fourcc et un
+une option <option>-vc rawi420</option> à cause d'un conflit de fourcc avec un
 codec vidéo Intel Indeo.
 </para>
 </listitem>
@@ -124,7 +124,7 @@ codec vidéo Intel Indeo.
 <listitem>
 <para>
 Il y a plusieurs façons de capturer l'audio. Vous pouvez attraper le son soit avec
-votre carte son via un cable externe entre la carte vidéo et l'entrée-ligne, soit
+votre carte son via un cable externe entre la carte vidéo et l'entrée ligne, soit
 en utilisant le DAC intégré au chip bt878. Dans ce dernier cas, vous devrez charger
 le pilote <emphasis role="bold">btaudio</emphasis>. Lisez le fichier
 <filename>linux/Documentation/sound/btaudio</filename> (dans l'arborescence du noyau,
@@ -136,7 +136,7 @@ pas celle de MPlayer) pour les instructions d'utilisations de ce pilote.
 <para>
 Si <application>MEncoder</application> ne peut pas ouvrir le périphérique audio,
 assurez-vous qu'il soit réellement disponible. Il peut y avoir des ennuis avec
-certains serveurs de son comme arts(KDE) ou esd (GNOME). Si vous avez une carte
+certains serveurs de son comme arts (KDE) ou esd (GNOME). Si vous avez une carte
 son full duplex (presques toutes les cartes descentes le supportent aujourd'hui),
 et que vous utilisez KDE, essayez d'activer l'otpion &quot;full duplex&quot; dans le
 menu des préférences du serveur de son.
@@ -153,16 +153,16 @@ menu des préférences du serveur de son.
 <para>
 Sortie muette, vers AAlib :)
 <screen>
-mplayer -tv on:driver=dummy:width=640:height=480 -vo aa<!--
+mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 --></screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Entrée depuis V4L standard
+Entrée depuis V4L standard:
 <screen>
-mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv<!--
+mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
 --></screen>
 </para>
 </informalexample>
@@ -174,10 +174,10 @@ désentrelace l'image en utilisant un algorithme de mélange linéaire. L'audio est
 compressé à un bitrate constant de 64kbps, en utilisant le codec LAME. Cette
 combinaison est adaptée pour capturer des films.
 <screen>
-     mencoder -tv on:driver=v4l:width=768:height=576 \
+     mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vop pp=lb,crop=720:544:24:16 -o output.avi
+     -vf crop=720:544:24:16,pp=lb -o sorite.avi tv://
 </screen>
 </para>
 </informalexample>
@@ -190,10 +190,10 @@ compresseur vidéo d'atteindre un bitrate plus bas au détriment de la qualité. Ce
 peut être utilisé pour capturer des longues séries TV, quand la qualité n'est pas
 très importante.
 <screen>
-     mencoder -tv on:driver=v4l:width=768:height=576 \
+     mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi 
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o sortie.avi tv://
 </screen>
 Il est également possible de spécifier des dimensions d'image plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!-- synced with 1.6 -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
 [
@@ -67,32 +68,12 @@ Si c'est votre première installation, assurez-vous de tout lire d'ici
 jusqu'à la fin de la section Installation, et de suivre tous les liens que vous
 pourrez trouver. Si vous avez d'autres questions, retournez à la
 <link linkend="toc">table des matières</link>, lisez la  <xref linkend="faq"/>
-ou faites une recherche dans ces fichiers.
+ou faites une recherche dans ces fichiers. La plupart des questions devraient trouver leur réponse ici et le
+reste à probablement déjà été demandé sur nos <link linkend="mailinglists">listes de diffusion</link>.
+Regardez leurs <ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">archives</ulink>, il y a beaucoup
+d'informations interressantes à y trouver.
 </para>
 
-<para>
-Règle principale de cette documentation: si ce n'est pas documenté, cela
-<emphasis>n'existe pas</emphasis>. Si je ne dit pas que vous pouvez encoder
-l'audio à partir du tuner TV, c'est que vous ne pouvez pas. Cependant, une bonne
-quantité de talents combinés est la bienvenue. Bonne chance. Vous en aurez besoin :)
-Et pour un autre bon conseil, laissez-moi citer Chris Phillips sur la liste de
-diffusion <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
-</para>
-
-<blockquote><para>
-  J'ai dit il y a quelque temps qu'il y avait une énorme différence entre
-  être novice et être idiot. Peu importe ce que vous pensez réellement
-  maîtriser (que ce soit à propos de linux, des voitures ou des femmes :D)
-  vous devriez TOUJOURS être capable de prendre du recul et d'être objectif.
-  Sinon vous êtes juste idiot, à mon humble avis. Une fille avec qui j'habite
-  pensait que l'aspirateur était cassé car il n'aspirait plus rien.
-  Elle n'a jamais pensé à remplacer le sac car elle ne l'avait jamais fait.
-  Ok, ça c'est juste bête, pas un exemple de méconnaissance...Simplement ne pas
-  être si familiarisé avec votre environnement n'est pas une excuse pour être
-  a) fainéant b) ignorant. Il y a tellement de personnes qui voient le mot
-  "erreur" et s'arrêtent là... Quelques-uns seulement semblent lire les mots
-  qui SUIVENT.
-</para></blockquote>
 </preface>
 
 
@@ -103,12 +84,16 @@ diffusion <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-user
 <application>MPlayer</application> est un lecteur de vidéos pour GNU/Linux
 (fonctionne sur de nombreux autres Un*x, et processeurs <emphasis role="bold">non-x86</emphasis>
 voir la section <xref linkend="ports"/>). Il lit la majorité des fichiers MPEG,
-VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
-PVA, Matroska supportés par de nombreux codecs natifs, XAnim et les DLLs Win32. Vous pouvez
-voir les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
+VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
+PVA, Matroska supportés par de nombreux codecs natifs, XAnim, RealPlayer et les DLLs Win32. Vous pouvez
+regarder les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
 ainsi que les vidéos au format <emphasis role="bold">DivX</emphasis> (et vous
 n'avez même pas besoin de la bibliothèque avifile pour cela !). L'autre point fort
-de <application>MPlayer</application> supporte la décompression matérielle fournie
+de <application>MPlayer</application> est la grande variété de pilotes de sortie supportée. Il fonctionne avec
+X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, mais vous pouvez utiliser GGI et SDL (et ainsi tous leurs pilotes)
+et également certains pilotes de bas niveau spécifiques à certaines cartes (pour Matrox, 3Dfx et Radeon, Mach64, Permedia3) !
+La plupart d'entre eux supportent le redimmensionnement logiciel ou matériel, vous pouvez donc apprécier les films en plein écran.
+<application>MPlayer</application> supporte la décompression matérielle fournie
 par certaines cartes MPEG, telles que la <link linkend="dvb">DVB</link> et la
 <link linkend="dxr3">DXR3/Hollywood+</link>. Et que dire de ces superbes sous-titres
 lissés (<emphasis role="bold">10 types supportés</emphasis>) avec des polices
@@ -123,8 +108,7 @@ Media Player. Même les fichiers AVI sans index sont lisibles, et vous pouvez
 reconstruire ses indexes soit temporairement avec l'option <option>-idx</option>,
 soit de manière définitive avec <application>MEncoder</application>, autorisant
 ainsi l'avance/retour rapide ! Comme vous pouvez le constater, le stabilité et la
-qualité sont mes objectifs prioritaires, même si la vitesse est aussi considérée
-comme importante.
+qualité sont les choses les plus importantes, mais la vitesse est également formidable.
 </para>
 
 <para>

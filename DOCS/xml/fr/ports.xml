@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.14 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -37,7 +38,7 @@ Dominik Mierzejewski a créé et maintient des paquets Red Hat RPM officiels de
 </para>
 
 <para>
-Les paquets Mandrake de MPlayer sont disponibles sur le <ulink url="http://plf.zarb.org/">P.L.F.</ulink>,
+Les paquets Mandrake sont disponibles sur le <ulink url="http://plf.zarb.org/">P.L.F.</ulink>,
 SuSE inclus une version limitée de MPlayer dans sa distribution. Vous pouvez obtenir des RPMs fonctionnels
 sur <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
@@ -74,14 +75,14 @@ et une version récente des binutils.
 </para>
 
 <para>
-Si MPlayer se plaint de ne pas trouver <filename>/dev/cdrom</filename> ou
+Si MPlayer se pleind de ne pas trouver <filename>/dev/cdrom</filename> ou
 <filename>/dev/dvd</filename>, créez le lien symbolique approprié:
-<screen>ln -s /dev/(votre_périphérique_cdrom) /dev/cdrom</screen>
+<screen>ln -s /dev/<replaceable>votre_périphérique_cdrom</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
 Pour utiliser les DLLs Win32 avec MPlayer vous devrez recompiler le noyau avec
-&quot;<envar>option USER_LDT</envar>&quot; (à moins d'utiliser FreeBSD -CURRENT, où c'est le
+&quot;<envar>option USER_LDT</envar>&quot; (à moins d'utiliser FreeBSD-CURRENT, où c'est le
 cas par défaut).
 </para>
 
@@ -97,7 +98,7 @@ Si votre CPU à SSE, recompilez votre noyau avec
 <sect2 id="openbsd">
 <title>OpenBSD</title>
 <para>
-A cause des limitations dans les différentes versions de gas (relocation vs MMX), vous aurez besoin
+A cause des limitations dans les différentes versions de gas (relocation contre MMX), vous aurez besoin
 de compiler en deux étapes: D'abord assurez-vous que le non-natif est en premier dans votre
 <envar>$PATH</envar> et faites un <command>gmake -k</command>, ensuite assurez-vous que la version
 native est utilisée et faites <command>gmake</command>.
@@ -112,7 +113,7 @@ native est utilisée et faites <command>gmake</command>.
 </para>
 
 <para>
-Sur les <emphasis role="bold">UltraSPARC</emphasis>s, MPlayer profite des avantages de leurs extensions
+Sur les <emphasis role="bold">UltraSPARCs</emphasis>, MPlayer profite des avantages de leurs extensions
 <emphasis role="bold">VIS</emphasis> (équivalentes au MMX), actuellement uniquement dans
 <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> et <emphasis>libavcodec</emphasis>, mais pas
 dans mp3lib. Vous pouvez regarder un fichier VOB sur un CPU à 400MHz. Vous aurez besoin d'avoir
@@ -136,7 +137,7 @@ compilateur C/C++ GNU soit configuré avec ou sans l'assembleur GNU.
 
 <para>
 Sur Solaris x86,vous aurez besoin de l'assembleur GNU et du compilateur C/C++ GNU, configuré pour
-l'utilisation de l'assembleur GNU! Le code de mplayer sur la plateforme x86 fait un usage intensif des
+l'utilisation de l'assembleur GNU ! Le code de mplayer sur la plateforme x86 fait un usage intensif des
 instructions MMX, SSE et 3DNOW! qui ne peuvent pas être assemblées en utilisant l'assembleur de Sun
 <filename>/usr/ccs/bin/as</filename>.
 </para>
@@ -247,70 +248,113 @@ et <option>-ao sdl:nto</option> et ça devrait être rapide.
 
 <para>
 La sortie <option>-vo x11</option> fonctionne encore
-plus lentement que sous Linux, car QNX ne dispose que d'une <emphasis>émulation X</emphasis>
-qui est TRÈS lente. Utilisez SDL.
+plus lentement que sous Linux, car QNX ne dispose que d'une <emphasis>émulation</emphasis>
+X qui est TRÈS lente. Utilisez SDL.
 </para>
 </sect1>
 
-<sect1 id="cygwin">
+<sect1 id="windows">
+<title>Windows</title>
+
+<para>Oui, MPlayer tourne sous Windows via
+  <ulink url="http://www.cygwin.com/">Cygwin</ulink> et
+  <ulink url="http://www.mingw.org/">MinGW</ulink>.
+  Il n'a pas encore de GUI, mais la version en ligne de commande est presque
+  complètement opérationelle. Les <ulink url="../../tech/patches.txt">Patches</ulink>
+  sont toujours les bienvenus. Vous devriez jeter un oeil à la liste de diffusion
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+  pour obtenir de l'aide et les dernières informations.</para>
+
+<para>Les meilleurs résultats sont obtenus avec le codec vidéo DirectX natif
+  (<option>-vo directx</option>) et le pilote waveout natif de Windows
+  (<option>-ao win32</option>) car OpenGL ne fonctionne pas et SDL est connu
+  pour distordre le son et l'image et planter sur certains systèmes. Vous pouvez
+  afficher la fenêtre par dessus les autres applications avec <option>-vo directx:ontop</option>.
+  Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
+  <option>-vo directx:noaccel</option>. Téléchargez les
+  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">fichiers d'entête DirectX 7</ulink>
+  pour compiler le pilote de sortie vidéo DirectX.</para>
+
+<para>Les codecs Win32, les DLLs QuickTime et les codecs Real Win32 (pas les
+  codecs Real Linux) fonctionnent également. Placez les codecs quelque part dans
+  votre path ou passez
+  <option>--with-codecsdir=c:/chemin/de/vos/codecs</option> (éventuellement
+  <option>--with-codecsdir=/chemin/de/vos/codecs</option> uniquement sous Cygwin) à
+  <filename>configure</filename>. Nous avons eu quelques retours indiquant que
+  les DLLs Real doivent être accessibles en écriture pour l'utilisateur, mais
+  seulement sur certains systèmes. Essayez de les rendre accessibles en écriture
+  si vous avez des problèmes.</para>
+
+<para>La console Cygwin/MinGW est plutôt lente. Il semble que rediriger la sortie
+  ou utiliser l'option <option>-quiet</option> améliore les performances. Le
+  rendu direct (<option>-dr</option>) peut également aider. Vous pouvez éviter le
+  tremblement de L'OSD en utilisant le double buffering avec l'option
+  <option>-double</option>. Si la lecture est sale, essayez
+  <option>-autosync 100</option>. Si certaines de ces options vous sont utiles,
+  vous pouvez les placer dans votre fichier de config.</para>
+
+<para>Il existe des versions précompilées créées par Sascha Sommer disponibles sur
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">notre page web</ulink>.
+  Joey Parrish a réalisé des
+  <ulink url="http://joey.nicewarrior.org/cygmp/">paquets Windows non-officiels</ulink>
+  complets avec installeur.</para>
+
+<sect2 id="cygwin">
 <title>Cygwin</title>
-<para>
-Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
-OpenGL. SDL est connu pour distordre le son et l'image ou planter sur certains systèmes. Les
-<ulink url="../../tech/patches.txt">patches</ulink> sont toujours bienvenus. Les meilleurs
-résultats peuvent être obtenus avec le pilote SDL natif de sortie vidéo (<option>-vo directx</option>)
-et le pilote Windows waveout natif de sortie audio (<option>-ao win32</option>). Vous devriez aussi
-jeter un oeil à la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
-pour obtenir de l'aide et les dernières informations.
-</para>
 
 <para>
-Les versions de Cygwin antérieures à 1.3.23 n'incluent pas  <filename>inttypes.h</filename>.
+Les versions de Cygwin antérieures à 1.5.0 n'incluent pas <filename>inttypes.h</filename>.
 Vous devrez copier ou lier <filename>etc/cygwin_inttypes.h</filename> depuis le répertoire source de
-MPlayer vers <filename>/usr/include/inttypes.h</filename> pour que MPlayer compile.
+MPlayer vers <filename>/usr/include/inttypes.h</filename> pour que MPlayer compile.</para>
 
-</para>
+<para>Les fichiers d'entête DirectX doivent être décompressés dans <filename class="directory">/usr/include/</filename>
+  ou dans <filename class="directory">/usr/local/include/</filename>.</para>
 
-<para>
-Pour avoir de la vidéo DirectX native (<option>-vo directx</option>), désarchivez
-<ulink url="http://www.videolan.org/vlc/dx7headers.tgz">les fichier d'entête DirectX 7</ulink>,
-dans <filename>/usr/include/</filename> ou <filename>/usr/local/include/</filename>
-et recompilez. Vous pourrez ensuite utiliser le pilote de sortie directx. Vous pouvez
-garder la fenêtre vidéo au premier plan avec  <option>-vo directx:ontop</option>.
-Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
-<option>-vo directx:noaccel</option>.
-</para>
+<para>Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvés sur le
+  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">site de libsdl</ulink>.</para>
 
-<para>
-Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvées sur le
-<ulink url="http://www.libsdl.org/extras/win32/cygwin/">site de libsdl</ulink>.
-</para>
+<para>Vous pouvez jouer des VCDs en lisant les fichiers <filename>.DAT</filename> ou <filename>.MPG</filename>
+  que Windows fait apparaître sur les VCDs. Cela fonctionne comme ça (changez la
+  lettre de votre lecteur CD-ROM):</para>
 
-<para>
-Vous pouvez jouer des VCDs en lisant les fichiers .DAT ou .MPG que Windows fait apparaître sur
-les VCDs. Cela fonctionne comme ça (changez la lettre de votre lecteur CD-ROM):
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
+
 <screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
-</para>
 
-<para>
-Les DVDs fonctionnent également, définissez juste votre périphérique DVD pour qu'il corresponde
-à votre périphérique CD-ROM:
+<para>Les DVDs fonctionnent également, indiquez la lettre de votre périphérique
+  CDROM à <option>-dvd-device</option>:</para>
+
 <screen>mplayer dvd://&lt;titre&gt; -dvd-device '\\.\d:'</screen>
-</para>
 
-<para>
-Les DLLs QuickTime doivent normalement fonctionner. Compilez avec
-<option>--enable-qtx</option> et placez les codecs dans l'emplacement par défaut des DLLs
-Windows, <filename class="directory">C:\WINNT\system32</filename>
-ou <filename class="directory">C:\Windows\system</filename> selon votre version de Windows.
-</para>
+</sect2>
 
-<para>
-La console Cygwin est particulièrement lente. Il semble que rediriger la sortie ou
-utiliser l'option <option>-quiet</option> amèliore les performances.
-</para>
+
+<sect2 id="mingw">
+<title>MinGW</title>
+
+<para>Installer une version de MinGW qui puisse compiler MPlayer était considéré
+  comme compliqué, mais fonctionne désormais sans modifications. Installez simplement
+  MinGW 3.1.0 ou plus récent et MSYS 1.0.9 ou plus récent et dites au postinstall
+  de MSYS que MinGW est installé.</para>
+
+<para>Si vous utilisez une version de MinGW antérieure à 3.1.0, vous devez
+  remplacer
+  <filename>/mingw/include/sys/types.h</filename> par
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
+
+<para>Décompressez les fichiers d'entête de DirectX dans <filename class="directory">/mingw/include/</filename>.</para>
+
+<para>Les VCDs et DVDs fonctionnent comme avec Cygwin (ajustez la lettre de votre
+  lecteur de CD-ROM/DVD-ROM):</para>
+
+<screen>mplayer d:/mpegav/avseq01.dat</screen>
+
+<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
+
+<screen>mplayer dvd://&lt;titre&gt; -dvd-device /d/</screen>
+
+</sect2>
+
 
 </sect1>
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced with 1.6 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Histoire</title>
@@ -95,7 +96,19 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
   bogues ennuyeux sont apparus, donc préparez-vous pour...
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> date encore inconnue
+  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> 13 Août 2003
+  </para><para>Des corrections ont été apportées à ce qui est dit ci-dessus,
+    ainsi qu'à d'autres bogues. Ceci est la dernière version stable.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0pre1 "Développement sur la plage"</emphasis> 1er Sep 2003
+  </para><para>Bien que ce ne soit pas une version stable, je la mentionne car
+   c'est la première pré-version de la série 1.0 de MPlayer et qu'elle est destinée
+   à aider la <emphasis>grande chasse aux bogues</emphasis>. C'est un pas en avant
+   énorme !
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0</emphasis> date encore inconnue
   </para></listitem>
 </itemizedlist>
 </para>
