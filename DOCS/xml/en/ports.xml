@@ -110,7 +110,7 @@ make sure that the native version is used and do <command>gmake</command>.
 <sect2 id="darwin">
 <title>Darwin</title>
 <para>
-See the <link linkend="macos">MacOS</link> section.
+See the <link linkend="macos">Mac OS</link> section.
 </para>
 </sect2>
 </sect1>
@@ -371,11 +371,11 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 </sect1>
 
 <sect1 id="macos">
-<title>MacOS</title>
+<title>Mac OS</title>
 <para>
-Only MacOS X 10.2 and up is supported by the "raw"
+Only Mac OS X 10.2 and up is supported by the "raw"
 <application>MPlayer</application> source. Feel free to make support for older
-MacOS versions and send patches!
+Mac OS versions and send patches!
 </para>
 
 <para>
