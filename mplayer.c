@@ -539,9 +539,9 @@ int gui_no_filename=0;
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #ifdef RUNTIME_CPUDETECT
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled with RUNTIME CPU Detection - warning, it's not optimal! To get best performance, recompile mplayer from sources with --disable-runtime-cpudetection\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
 #else
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled for x86 CPU with extensions:");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
 #ifdef HAVE_MMX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
 #endif
@@ -611,14 +611,14 @@ int gui_no_filename=0;
 #endif
 
     if(vo_plugin_args && vo_plugin_args[0] && strcmp(vo_plugin_args[0],"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video output plugins:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputPlugins);
       vf_list_plugins();
       printf("\n");
       exit(0);
     }
 
     if(video_driver && strcmp(video_driver,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video output drivers:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
       i=0;
       while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->get_info ();
@@ -629,7 +629,7 @@ int gui_no_filename=0;
     }
 
     if(audio_driver && strcmp(audio_driver,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available audio output drivers:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
       i=0;
       while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
@@ -648,13 +648,13 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 }
 
     if(audio_codec && strcmp(audio_codec,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
       list_codecs(1);
       printf("\n");
       exit(0);
     }
     if(video_codec && strcmp(video_codec,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
       list_codecs(0);
       printf("\n");
       exit(0);
@@ -720,7 +720,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     	    close (rtc_fd);
 	    rtc_fd = -1;
 	} else
-	    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using Linux's hardware RTC timing (%ldHz)\n", irqp);
+	    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_UsingRTCTiming, irqp);
     }
   }
 #ifdef HAVE_NEW_GUI
@@ -1127,7 +1127,7 @@ if(sh_video){
 
   current_module="video_read_properties";
   if(!video_read_properties(sh_video)) {
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Video: can't read properties\n");
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoPropertiers);
     sh_video=d_video->sh=NULL;
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
@@ -1154,7 +1154,7 @@ if(sh_video){
 fflush(stdout);
 
 if(!sh_video && !sh_audio){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"No stream found\n");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
@@ -1250,7 +1250,7 @@ if(sh_audio){
 current_module="init_audio_codec";
 
 if(sh_audio){
-  mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
+  mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_InitializingAudioCodec);
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
@@ -1270,7 +1270,7 @@ current_module="preinit_libvo";
 
 vo_config_count=0;
 if((video_out->preinit(vo_subdevice))!=0){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device!\n");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 #ifdef X11_FULLSCREEN
@@ -1293,7 +1293,7 @@ sh_video->inited=0;
 codecs_reset_selection(0);
 if(video_codec){
     // forced codec by name:
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
     init_video(sh_video,video_codec,-1,-1);
 } else {
     int status;
@@ -1396,10 +1396,10 @@ if(sh_audio){
       sh_audio->channels,
       audio_out_format_name(sh_audio->sample_format)
   );
-  mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
+  mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
       info->name, info->author);
   if(strlen(info->comment) > 0)
-      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", info->comment);
+      mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AOComment, info->comment);
 
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
@@ -1425,7 +1425,7 @@ if(!sh_audio){
   uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
-   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Video: no video!!!\n");
+   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
    if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
@@ -1576,7 +1576,7 @@ if(!sh_video) {
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
 
     if(sh_video->vf_inited<0){
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\nFATAL: Couldn't initialize video filters (-vop) or video output (-vo) !\n");
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NotInitializeVOPorVO);
 	eof=1; goto goto_next_file;
     }
 
@@ -1880,7 +1880,7 @@ if(auto_quality>0){
     mp_cmd_t* cmd;
 #endif
       if(!quiet) {
-	mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");
+	mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI
@@ -2408,7 +2408,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_LOADLIST : {
       play_tree_t* e = parse_playlist_file(cmd->args[0].v.s);
       if(!e)
-	mp_msg(MSGT_CPLAYER,MSGL_ERR,"\nUnable to load playlist %s\n",cmd->args[0].v.s);
+	mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_PlaylistLoadUnable,cmd->args[0].v.s);
       else {
 	// Go back to the start point
 	while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
