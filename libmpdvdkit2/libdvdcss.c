@@ -273,14 +273,15 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 	char sector[DVDCSS_BLOCK_SIZE];
 	// 32768+40  -> disc title (32 uppercase chars)
 	// 32768+813 -> disc manufacturing date + serial no (16 digit number)
-	dvdcss->pf_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
+	int ret=dvdcss->pf_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
+	//printf("disc_id seek: %d -> %d,  i_fd=%d  i_read_fd=%d\n",32768/DVDCSS_BLOCK_SIZE,ret,dvdcss->i_fd,dvdcss->i_read_fd);
 	if(dvdcss->pf_read( dvdcss, sector, 1) == 1){
 	    // check disc title first:
 	    char* title_name=&sector[40];
-	    int i=31;
-	    while(i>=0 && title_name[i]<=32) i--;
-	    title_name[i+1]=0;
-	    if(strlen(title_name)>5){
+	    int i=0;
+	    while(i<32 && title_name[i]>='0' && title_name[i]<='z') i++;
+	    title_name[i]=0;
+	    if(i>5){
 		disc_id=strdup(title_name);
 	    } else {
 		// use disc date+serial:
