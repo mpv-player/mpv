@@ -189,6 +189,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     {
       printf("vbelib:  OemStringPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemStringPtr);
       if(data->OemStringPtr) print_str(data->OemStringPtr);
+      fflush(stdout);
     }
 #endif
     fpdata.seg = (unsigned long)(data->VideoModePtr) >> 16;
@@ -204,6 +205,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     {
       printf("vbelib:  VideoModePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->VideoModePtr);
       if(data->VideoModePtr) print_wrd(data->VideoModePtr);
+      fflush(stdout);
     }
 #endif
     fpdata.seg = (unsigned long)(data->OemVendorNamePtr) >> 16;
@@ -215,6 +217,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     {
       printf("vbelib:  OemVendorNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemVendorNamePtr);
       if(data->OemVendorNamePtr) print_str(data->OemVendorNamePtr);
+      fflush(stdout);
     }
 #endif
     fpdata.seg = (unsigned long)(data->OemProductNamePtr) >> 16;
@@ -226,6 +229,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     {
       printf("vbelib:  OemProductNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductNamePtr);
       if(data->OemVendorNamePtr) print_str(data->OemProductNamePtr);
+      fflush(stdout);
     }
 #endif
     fpdata.seg = (unsigned long)(data->OemProductRevPtr) >> 16;
@@ -237,6 +241,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     {
       printf("vbelib:  OemProductRevPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductRevPtr);
       if(data->OemProductRevPtr) print_str(data->OemProductRevPtr);
+      fflush(stdout);
     }
 #endif
   }
@@ -452,6 +457,7 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
     {
       printf("vbelib:  iopl_ports=%04X:%04X => %p\n",r.es,info_offset+rm_info->iopl_ports,pm_info->iopl_ports);
       if(pm_info->iopl_ports) print_wrd(pm_info->iopl_ports);
+      fflush(stdout);
     }
 #endif
   }
