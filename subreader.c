@@ -171,8 +171,6 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char *p, *next;
     int i;
 
-static subtitle *prevsub = NULL;
-
     memset(current, 0, sizeof(subtitle));
 
     do {
@@ -194,14 +192,6 @@ static subtitle *prevsub = NULL;
     }
     current->lines= ++i;
 
-    if (!current->end)
-	current->end = current->start + 150; /* approx 6 sec */
-
-    if (prevsub && (prevsub->end >= current->start))
-	prevsub->end = current->start - 1; /* correct previous end time */
-
-    prevsub = current;
-	
     return current;
 }
 
@@ -609,6 +599,24 @@ subtitle* subcp_recode (subtitle *sub)
 
 #endif
 
+static void adjust_subs_time(subtitle* sub, unsigned long subtime){
+	int i = sub_num;
+	subtitle* nextsub;
+
+	for (;;){	
+		if (sub->end <= sub->start)
+			sub->end = sub->start + subtime;
+		if (!--i) return;
+		nextsub = sub + 1;
+		if (sub->end >= nextsub->start){
+			sub->end = nextsub->start - 1;
+			if (sub->end - sub->start > subtime)
+				sub->end = sub->start + subtime;
+		}
+		sub = nextsub;
+	}
+}
+
 subtitle* sub_read_file (char *filename) {
     FILE *fd;
     int n_max;
@@ -674,6 +682,11 @@ subtitle* sub_read_file (char *filename) {
 	return NULL;
     }
 
+// if sub->end time is 0 set it to sub_>start + ~6 sec but not 
+// after next sub->start time
+// correct also if sub->end time is below sub->start time
+// maybe default subtime (150fms) should be a program option AST
+    adjust_subs_time(first, 150);
     return first;
 }
 
