@@ -2623,18 +2623,21 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_SPEED_INCR : {
       float v = cmd->args[0].v.f;
       playback_speed += v;
+      if (sh_video)
       osd_show_speed = sh_video->fps;
       build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_SPEED_MULT : {
       float v = cmd->args[0].v.f;
       playback_speed *= v;
+      if (sh_video)
       osd_show_speed = sh_video->fps;
       build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_SPEED_SET : {
       float v = cmd->args[0].v.f;
       playback_speed = v;
+      if (sh_video)
       osd_show_speed = sh_video->fps;
       build_afilter_chain(sh_audio, &ao_data);
     } break;
