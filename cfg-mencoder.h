@@ -60,6 +60,9 @@ struct config conf[]={
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0},
 
+	{"x", &vo_w, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
+	{"y", &vo_h, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
+
 	{"mp3file", &mp3_filename, CONF_TYPE_STRING, 0, 0, 0},
 	{"ac3file", &ac3_filename, CONF_TYPE_STRING, 0, 0, 0},
 

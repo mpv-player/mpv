@@ -40,6 +40,9 @@ static char* banner_text=
 
 #include <lame/lame.h>
 
+#include <inttypes.h>
+#include "../postproc/swscale.h"
+
 //--------------------------
 
 // cache2:
@@ -112,6 +115,9 @@ int lame_param_padding=-1; // unset
 int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
 
+static int scale_srcW=0;
+static int scale_srcH=0;
+static int vo_w=0, vo_h=0;
 //-------------------------- config stuff:
 
 #include "cfgparser.h"
@@ -155,12 +161,20 @@ int       vo_expose = 0;
 
 static unsigned char* vo_image=NULL;
 static unsigned char* vo_image_ptr=NULL;
-static int vo_w,vo_h;
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int y0){
   int y;
-//  printf("draw_slice %dx%d %d;%d\n",w,h,x,y);
-  
+//  printf("draw_slice %dx%d %d;%d\n",w,h,x0,y0);
+  if(scale_srcW)
+  {
+      uint8_t* dstPtr[3]= {
+      		vo_image, 
+		vo_image + vo_w*vo_h*5/4,
+      		vo_image + vo_w*vo_h};
+      SwScale_YV12slice(src, stride, y0, h, dstPtr, vo_w, 12, scale_srcW, scale_srcH, vo_w, vo_h);
+  }
+  else 
+  {
   // copy Y:
   for(y=0;y<h;y++){
       unsigned char* s=src[0]+stride[0]*y;
@@ -181,7 +195,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
       unsigned char* d=vo_image+vo_w*vo_h+vo_w*vo_h/4+(vo_w>>1)*(y0+y)+x0;
       memcpy(d,s,w);
   }
-
+  } // !swscaler
 }
 
 static uint32_t draw_frame(uint8_t *src[]){
@@ -365,9 +379,18 @@ if(i>=CODECS_MAX_OUTFMT){
 }
 sh_video->outfmtidx=i;
 
+if(out_fmt==IMGFMT_YV12 && vo_w!=0 && vo_h!=0)
+{
+	scale_srcW= sh_video->disp_w;
+	scale_srcH= sh_video->disp_h;
+}
+else
+{
+	vo_w=sh_video->disp_w;
+	vo_h=sh_video->disp_h;
+}
+
 if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
-    vo_w=sh_video->disp_w;
-    vo_h=sh_video->disp_h;
     vo_image=malloc(vo_w*vo_h*3/2);
     vo_image_ptr=vo_image;
 }
@@ -418,6 +441,7 @@ if(sh_audio){
 
 
 // set up video encoder:
+SwScale_Init();
 video_out.draw_slice=draw_slice;
 video_out.draw_frame=draw_frame;
 
@@ -452,8 +476,8 @@ case 0:
 case VCODEC_DIVX4:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-    mux_v->bih->biWidth=sh_video->disp_w;
-    mux_v->bih->biHeight=sh_video->disp_h;
+    mux_v->bih->biWidth=vo_w;
+    mux_v->bih->biHeight=vo_h;
     mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
     mux_v->bih->biCompression=mmioFOURCC('d','i','v','x');
@@ -525,8 +549,8 @@ case 0:
     break;
 case VCODEC_DIVX4:
     // init divx4linux:
-    divx4_param.x_dim=sh_video->disp_w;
-    divx4_param.y_dim=sh_video->disp_h;
+    divx4_param.x_dim=vo_w;
+    divx4_param.y_dim=vo_h;
     divx4_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
     if(!divx4_param.bitrate) divx4_param.bitrate=800000;
     else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;
