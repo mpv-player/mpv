@@ -305,7 +305,7 @@ if (vo_window == None)
     xswa.border_pixel     = 0;
     xswa.colormap         = XCreateColormap(mDisplay, RootWindow(mDisplay, mScreen),
 					    vinfo.visual, AllocNone);
-    xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask;
+    xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask;
     xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if (WinID >= 0)
@@ -335,12 +335,6 @@ if (vo_window == None)
     hint.flags = USPosition | USSize;
     XSetNormalHints(mDisplay, mWindow, &hint);
 
-    XSelectInput(mDisplay, mWindow, StructureNotifyMask | KeyPressMask                             
-#ifdef HAVE_NEW_INPUT                                                                              
-       | ButtonPressMask | ButtonReleaseMask                                              
-#endif                                                                                             
-    );
-		       
     XStoreName(mDisplay, mWindow, title);
     /* Map window. */
 
