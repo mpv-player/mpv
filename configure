@@ -205,8 +205,10 @@ Codecs:
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
-  --enable-vorbis        build with OggVorbis support [autodetect]
-  --enable-tremor        build with integer-only OggVorbis support [disabled]
+  --disable-internal-tremor do not build internal OggVorbis support [enabled]
+  --enable-tremor-low    build with lower accuracy internal tremor [disabled]
+  --enable-external-tremor build with external tremor [disabled]
+  --disable-vorbis       disable OggVorbis support entirely [autodetect]
   --enable-theora        build with OggTheora support [autodetect]
   --disable-internal-matroska disable internal Matroska support [enabled]
   --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
@@ -1314,6 +1316,8 @@ _jack=auto
 _liblzo=auto
 _mad=auto
 _toolame=auto
+_tremor_internal=yes
+_tremor_low=no
 _vorbis=auto
 _theora=auto
 _mp3lib=yes
@@ -1499,8 +1503,12 @@ for ac_option do
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
-  --enable-tremor)	_tremor=yes	;;
-  --disable-tremor)	_tremor=no	;;
+  --enable-internal-tremor)	_tremor_internal=yes	;;
+  --disable-internal-tremor)	_tremor_internal=no	;;
+  --enable-tremor-low)	_tremor_low=yes	;;
+  --disable-tremor-low)	_tremor_low=no	;;
+  --enable-external-tremor)	_tremor=yes	;;
+  --disable-external-tremor)	_tremor=no	;;
   --enable-theora)	_theora=yes	;;
   --disable-theora)	_theora=no	;;
   --enable-mp3lib)	_mp3lib=yes	;;
@@ -5102,7 +5110,9 @@ else
 fi
 
 echocheck "OggVorbis support"
-if test "$_vorbis" = auto ; then
+if test "$_tremor_internal" = yes; then
+  _vorbis=yes
+elif test "$_vorbis" = auto; then
   _vorbis=no
   cat > $TMPC << EOF
 #include <vorbis/codec.h>
@@ -5112,7 +5122,16 @@ EOF
 fi
 if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
-  if test "$_tremor" = yes ; then
+  if test "$_tremor_internal" = yes ; then
+    # do not set _ld_vorbis as it is resolved separately
+    # mp3lame support for vorbis is deprecated so don't care
+    _def_tremor='#define TREMOR 1'
+    if test "$_tremor_low" = yes ; then
+	_tremor_flags='-D_LOW_ACCURACY_'
+    else
+	_tremor_flags=''
+    fi
+  elif test "$_tremor" = yes ; then
     _def_tremor='#define TREMOR 1'
     _ld_vorbis='-lvorbisidec'
   else
@@ -5125,7 +5144,11 @@ else
   _def_tremor='#undef TREMOR'
   _nocodecmodules="libvorbis $_nocodecmodules"
 fi
-if test "$_vorbis" = yes -a "$_tremor" = yes ; then
+if test "$_vorbis" = yes -a "$_tremor_internal" = yes -a "$_tremor_low" = yes ; then
+  echores "$_vorbis (internal low accuracy Tremor)"
+elif test "$_vorbis" = yes -a "$_tremor_internal" = yes ; then
+  echores "$_vorbis (internal Tremor)"
+elif test "$_vorbis" = yes -a "$_tremor" = yes ; then
   echores "$_vorbis (Tremor)"
 else
   echores "$_vorbis"
@@ -6650,6 +6673,8 @@ OPENDIVX = $_opendivx
 MP3LIB = $_mp3lib
 LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
+TREMOR = $_tremor_internal
+TREMOR_FLAGS = $_tremor_flags
 
 UNRARLIB = $_unrarlib
 HAVE_FFPOSTPROCESS = $_def_haveffpostprocess

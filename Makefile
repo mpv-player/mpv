@@ -77,6 +77,9 @@ endif
 ifeq ($(LIBMENU),yes)
 PARTS += libmenu
 endif
+ifeq ($(TREMOR),yes)
+PARTS += tremor
+endif
 
 ALL_PRG = $(PRG)
 ifeq ($(MENCODER),yes)
@@ -99,6 +102,10 @@ COMMON_LIBS += libmpeg2/libmpeg2.a
 endif
 ifeq ($(INTERNAL_FAAD),yes)
 COMMON_DEPS += libfaad2/libfaad2.a
+endif
+ifeq ($(TREMOR),yes)
+COMMON_DEPS += tremor/libvorbisidec.a
+COMMON_LIBS += tremor/libvorbisidec.a
 endif
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -183,6 +190,9 @@ libfaad2/libfaad2.a:
 
 mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
+
+tremor/libvorbisidec.a:
+	$(MAKE) -C tremor
 
 libdha/libdha.so:
 	$(MAKE) -C libdha
