@@ -711,6 +711,7 @@ uint32_t supported_fourcc[] =
 {
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
   IMGFMT_UYVY, IMGFMT_YUY2,
+  IMGFMT_RGB15, IMGFMT_BGR15,
   IMGFMT_RGB16, IMGFMT_BGR16,
   IMGFMT_RGB32, IMGFMT_BGR32
 };
@@ -840,11 +841,9 @@ static void radeon_vid_display_video( void )
 #endif
     switch(besr.fourcc)
     {
-/*
         case IMGFMT_RGB15:
         case IMGFMT_BGR15: bes_flags |= SCALER_SOURCE_15BPP; break;
-*/
-        case IMGFMT_RGB16:
+	case IMGFMT_RGB16:
 	case IMGFMT_BGR16: bes_flags |= SCALER_SOURCE_16BPP; break;
 /*
         case IMGFMT_RGB24:
@@ -919,7 +918,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 			  config->dest.pitch.v = best_pitch;
 			  break;
 	/* 4:2:2 */
-        default:
+        default: /* RGB15, RGB16 */
 	case IMGFMT_UYVY:
 	case IMGFMT_YUY2:
 			  pitch = ((src_w*2) + mpitch) & ~mpitch;
@@ -964,9 +963,11 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
+/*
 	  tmp = besr.vid_buf1_base_adrs;
 	  besr.vid_buf1_base_adrs = besr.vid_buf2_base_adrs;
 	  besr.vid_buf2_base_adrs = tmp;
+*/
 	  tmp = config->offset.u;
 	  config->offset.u = config->offset.v;
 	  config->offset.v = tmp;
@@ -1041,6 +1042,11 @@ static void radeon_compute_framesize(vidix_playback_t *info)
     case IMGFMT_IYUV:
 		info->frame_size = awidth*info->src.h+(awidth*info->src.h)/2;
 		break;
+    case IMGFMT_RGB32:
+    case IMGFMT_BGR32:
+		info->frame_size = awidth*info->src.h*4;
+		break;
+    /* YUY2 YVYU, RGB15, RGB16 */
     default:	info->frame_size = awidth*info->src.h*2;
 		break;
   }
