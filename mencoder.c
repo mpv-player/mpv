@@ -1,6 +1,7 @@
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
+#define VCODEC_RAW 3
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -525,6 +526,26 @@ case VCODEC_COPY:
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
+case VCODEC_RAW:
+    printf("sh_video->bih: %x\n", sh_video->bih);
+    if (sh_video->bih)
+	mux_v->bih=sh_video->bih;
+    else
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+	mux_v->bih->biWidth=sh_video->disp_w;
+	mux_v->bih->biHeight=sh_video->disp_h;
+	mux_v->bih->biCompression=0;
+	mux_v->bih->biPlanes=1;
+	mux_v->bih->biBitCount=24; // FIXME!!!
+	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    }
+    mux_v->bih->biCompression=0;
+    printf("videocodec: raw (%dx%d %dbpp fourcc=%x)\n",
+	mux_v->bih->biWidth, mux_v->bih->biHeight,
+	mux_v->bih->biBitCount, mux_v->bih->biCompression);
+    break;
 case VCODEC_FRAMENO:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -578,7 +599,7 @@ case ACODEC_COPY:
 	mux_a->wf->nChannels = sh_audio->channels;
 	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
 	mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
-	mux_a->wf->wBitsPerSample = 16;
+	mux_a->wf->wBitsPerSample = 16; // FIXME
 	mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
     }
     printf("audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d)\n",
@@ -628,6 +649,7 @@ aviwrite_write_header(muxer,muxer_f);
 
 switch(mux_v->codec){
 case VCODEC_COPY:
+case VCODEC_RAW:
     break;
 case VCODEC_FRAMENO:
     decoded_frameno=0;
@@ -831,6 +853,17 @@ switch(mux_v->codec){
 case VCODEC_COPY:
     mux_v->buffer=start;
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    break;
+case VCODEC_RAW:
+    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    if(skip_flag>0) break;
+    if(!blit_frame){
+	// empty.
+	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	break;
+    }
+    mux_v->buffer = vo_image_ptr;
+    aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->buffer_size,0x10);
     break;
 case VCODEC_FRAMENO:
     mux_v->buffer=&decoded_frameno; // tricky
