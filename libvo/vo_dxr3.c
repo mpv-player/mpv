@@ -275,6 +275,8 @@ static uint32_t draw_frame(uint8_t * src[])
         int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
 
+	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&p->timestamp) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );
 	data_left = p->size;
 	while( data_left )
 	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
