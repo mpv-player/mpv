@@ -303,4 +303,9 @@ static char help_text[]=
 #define MSGTR_MENU_Preferences "Preferences"
 #define MSGTR_MENU_Exit "Exit ..."
 
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "fatal error ..."
+#define MSGTR_MSGBOX_LABEL_Error "error ..."
+#define MSGTR_MSGBOX_LABEL_Warning "warning ..." 
+
 #endif

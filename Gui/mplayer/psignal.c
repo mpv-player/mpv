@@ -111,17 +111,17 @@ void gtkSigHandler( int s )
         switch( gtkShMem->mb.type)
          {
            case GTK_MB_FATAL:
-				  gtk_window_set_title (GTK_WINDOW (MessageBox), "fatal error ...");
+				  gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_FatalError );
 				  gtk_widget_hide( WarningPixmap );
 				  gtk_widget_show( ErrorPixmap );
                   break;
            case GTK_MB_ERROR: 
-				  gtk_window_set_title (GTK_WINDOW (MessageBox), "error ...");
+				  gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_Error );
 				  gtk_widget_hide( WarningPixmap );
 				  gtk_widget_show( ErrorPixmap );
                   break;
            case GTK_MB_WARNING: 
- 				 gtk_window_set_title (GTK_WINDOW (MessageBox), "warning ...");
+ 				 gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MSGBOX_LABEL_Warning );
 				  gtk_widget_show( WarningPixmap );
 				  gtk_widget_hide( ErrorPixmap );
            	   break;
