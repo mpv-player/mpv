@@ -6,6 +6,6 @@ Standards-Version: 3.2.1
 
 Package: mplayer
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends},debconf
 Description: The Ultimate Movie Player For Linux
  PoS Eso x"D
