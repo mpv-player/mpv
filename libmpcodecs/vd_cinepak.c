@@ -47,7 +47,8 @@ static void uninit(sh_video_t *sh){
 
 //mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
 
-void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel, int stride_);
+//void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel, int stride_);
+void decode_cinepak(void *context, unsigned char *buf, int size, mp_image_t* mpi);
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -61,8 +62,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	return NULL;
     }
     
-    decode_cinepak(sh->context, data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
-	(mpi->flags&MP_IMGFLAG_YUV)?16:(mpi->imgfmt&255), mpi->stride[0]);
+//    decode_cinepak(sh->context, data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
+//	(mpi->flags&MP_IMGFLAG_YUV)?16:(mpi->imgfmt&255), mpi->stride[0]);
+
+    decode_cinepak(sh->context, data, len, mpi);
     
     return mpi;
 }
