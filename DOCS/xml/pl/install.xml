@@ -119,6 +119,16 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - opcjonalna, do obs³ugi Samby.
   </para></listitem>
+<listitem><para>
+  <emphasis role="bold">bio2jack</emphasis> - opcjonalna, do obs³ugi wyj¶cia
+  d¼wiêku poprzez JACK, potrzebna jedynie w czasie kompilacji. Do pobrania z
+  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Poniewa¿
+  nie posiada ona opcji instalacji musisz samodzielnie umie¶ciæ plik
+  <filename>libbio2jack.a</filename> w swoim katalogu z bibliotekami 
+  (np. <filename>/usr/local/lib/</filename>) lub u¿yæ opcji 
+  <option>--with-bio2jack=KATALOG</option> aby przekazaæ jego lokalizacjê do
+  skryptu <filename>./configure</filename>.
+  </para></listitem>
 </itemizedlist>
 </sect2>
 

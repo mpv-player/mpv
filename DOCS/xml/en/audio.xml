@@ -47,6 +47,9 @@
 <row><entry>esd</entry><entry>
   native ESD driver (mostly for GNOME users)
   </entry></row>
+<row><entry>jack</entry><entry>
+  JACK (Jack Audio Connection Kit) driver
+  </entry></row>
 </tbody>
 </tgroup>
 </informaltable>

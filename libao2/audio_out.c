@@ -22,6 +22,9 @@ extern ao_functions_t audio_out_arts;
 #ifdef USE_ESD
 extern ao_functions_t audio_out_esd;
 #endif
+#ifdef USE_JACK
+extern ao_functions_t audio_out_jack;
+#endif
 extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
@@ -93,6 +96,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef USE_ESD
         &audio_out_esd,
+#endif
+#ifdef USE_JACK
+        &audio_out_jack,
 #endif
 #ifdef HAVE_NAS
 	&audio_out_nas,

@@ -49,6 +49,9 @@ Interfejs audio <application>MPlayera</application> nazywa siê
 <row><entry>esd</entry><entry>
   rdzenny sterownik ESD (g³ównie dla u¿ytkowników GNOMEa)
   </entry></row>
+<row><entry>jack</entry><entry>
+  sterownik JACK (Jack Audio Connection Kit)
+  </entry></row>
 </tbody>
 </tgroup>
 </informaltable>
