@@ -2880,7 +2880,8 @@ if(benchmark){
 	   100.0*max_vout_time_usage/total_time_usage+
 	   100.0*max_audio_time_usage/total_time_usage
 	   );
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK%%: dropped frames: %u\n",bench_dropped_frames);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK: from %u frames should be dropped: %u \n"
+	    ,our_n_frames,bench_dropped_frames);
 }
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
