@@ -108,7 +108,12 @@ static IDirectFBSurface *frame = NULL;
 /*
  * A buffer for input events.
  */
+
+#ifdef HAVE_DIRECTFB099
+static IDirectFBEventBuffer *buffer = NULL;
+#else
 static IDirectFBInputBuffer *buffer = NULL;
+#endif
 
 /******************************
 *	    vo_directfb       *
@@ -574,7 +579,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   /*
    * Create an input buffer for the keyboard.
    */
+#ifdef HAVE_DIRECTFB099
+  DFBCHECK (keyboard->CreateEventBuffer (DICAPS_ALL, &buffer));
+#else
   DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
+#endif
 
 // yuv2rgb transform init
 
@@ -797,8 +806,11 @@ static void check_events(void)
 {
 
       DFBInputEvent event;
-
+#ifdef HAVE_DIRECTFB099
+if (buffer->GetEvent (buffer, DFB_EVENT(&event)) == DFB_OK) {
+#else
 if (buffer->GetEvent (buffer, &event) == DFB_OK) {
+#endif
      if (event.type == DIET_KEYPRESS) { 
     		switch (event.keycode) {
                                 case DIKC_ESCAPE:

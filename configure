@@ -1507,6 +1507,23 @@ else
 fi
 echores "$_directfb"
 
+echocheck "DirectFB >= 0.9.9"
+if test "$_directfb" = auto; then
+    _directfb=no
+    cat > $TMPC <<EOF
+#include <directfb.h>
+nt main(void) { IDirectFBEventBuffer *foo; return 0; }
+EOF
+  linux && test -c /dev/fb0 && cc_check -ldirectfb && _directfb=yes
+fi
+if test "$_directfb" = yes ; then
+  _def_directfb='#define HAVE_DIRECTFB099 1'
+else
+  _def_directfb='#undef HAVE_DIRECTFB'
+fi
+echores "$_directfb"
+
+
 
 # Checking for localization ...
 echocheck "language"
