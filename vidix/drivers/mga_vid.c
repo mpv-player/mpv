@@ -1457,3 +1457,30 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
     memcpy(&mga_grkey, grkey, sizeof(vidix_grkey_t));
     return(0);
 }
+
+#ifdef TEST_ME_PLEASE
+vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
+int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
+{
+   uint32_t beslumactl;
+   int brightness,contrast;
+	memcpy(&equal,eq,sizeof(vidix_video_eq_t));
+	//Enable contrast and brightness control
+	writel(readl(mga_mmio_base + BESGLOBCTL) & ~((1<<5) + (1<<7)),mga_mmio_base + BESGLOBCTL);
+	brightness = (equal.brightness * 128) / 1000;
+	if(brightness < -128) brightness = -128;
+	if(brightness > 127) brightness = 127;
+	contrast = ((equal.contrast + 1000) * 128) / 1000;
+	if(contrast < 0)   contrast = 0;
+	if(contrast > 255) contrast = 255;
+	beslumactl = ((brightness & 0xff) << 16) | (contrast & 0xff);
+	writel(beslumactl,mga_mmio_base + BESLUMACTL);
+    return 0;
+}
+
+int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
+{
+  memcpy(eq,&equal,sizeof(vidix_video_eq_t));
+  return 0;
+}
+#endif
