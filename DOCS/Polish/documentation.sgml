@@ -1,0 +1,212 @@
+<!doctype linuxdoc system>
+
+<!-- This is a test -->
+
+<article>
+
+<!-- Title information -->
+
+<title>
+MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
+<url url="http://www.mplayerhq.hu/homepage/">
+</title>
+<author>
+ <name>
+ oparte na dokumentacji napisanej przez Gábor Bérczi (Gabucino)
+ <tt/&lt;gabucino@k2.jozsef.kando.hu/&gt;
+       <newline></name>
+  <and>
+ <name>t³umaczenie i migracja do linuxdoc Dariush Pietrzak<tt/&lt;eyck@ghost.anime.pl/&gt;
+       <newline></name>
+</author>
+<date> miejsce na ID jak wejdzie do cvsa$Id$</date>
+
+<abstract>
+Dokument ten opisuje odgrywarke MPlayer, dokument jest w fazie testów.
+<url url="http://mplayer.dev.hu/">
+</abstract>
+
+<!-- Table of contents -->
+<toc>
+
+<!-- Begin the document -->
+
+<sect>
+<heading>Wprowadzenie</>
+
+
+<sect1>
+<heading>O programie</>
+<p>
+
+<bf>MPlayer</> jest odgrywark± filmów. Wy¶wietla wiêkszo¶æ plików MPEG,
+AVI oraz ASF korzystaj±c z wielu w³asnych oraz Win32 DLL kodeków.
+Mo¿esz równie¿ ogl±daæ VCD, DVD oraz filmy w DivX. Kolejn± du¿± zalet±
+mplayera jest szeroki wachlarz sterowników wyj¶cia. Mplayer dzia³a z X11, Xv,
+DGA, OpenGL, SVGAlib, fbdev, ale mo¿esz te¿ korzystaæ z GGI iSDL ( i w ten sposób
+z wielu sterowników dostarczanych przez SDL - na przyk³ad AAlib ) oraz z 
+niskopoziomowych sterowników specyficznych dla danej karty (dla Matrox G200/400/450).
+ Wiêkszo¶æ dostêpnych sterowników udostêpnia softwarowe lub hardwarowe skalowania,
+mo¿esz wiêc radowaæ siê ogl±daniem film w trybie pe³noekranowym.
+ A co powiesz na du¿e antyaliasowane podtytu³y z cieniem ( 7 supportowanych typów!!)
+z wêgierskimi, angielskimi, czeskimi, koreañskimi fontami, cyrylic± oraz OSD?
+
+
+  I didn't write any codecs, just some players. I spent
+  a lot of time finding the best way to parse bad damaged input files
+  (both MPEG and AVI) and to do perfect A-V sync with seeking ability.
+  My player is rock solid playing damaged MPEG files (useful for some VCDs),
+  and it plays bad AVI files which are unplayable with the famous
+  windows media player. Even AVI files without index chunk are playable, and
+  you can rebuild their indexes with the -idx option, thus enabling seeking!
+  As you see, stability and quality are the most important things for me,
+  but the speed is also amazing.
+
+</p>
+</sect1>
+
+<sect1>
+<heading>Historia</>
+<p>
+Wszystko zaczê³o siê rok temu...(2000)
+Próbowa³em wielu odgrywarek pod linuxa (mtv,xmps,dvdview,livid/oms,VideoLAN,
+xine,xanim,avifile,xmmp) ale ka¿da mia³a jaki¶ feler. G³ównie w przypadku
+szczególnych plików lub z synchronizacj± audio/video. Wiêkszo¶æ z nich nie
+potrafi³a odgrywaæ zarówno plików MPEG1/2 jak i AVI(DivX). Wiele z nich
+mia³o równie¿ problemy z jako¶ci± obrazu oraz prêdkosci±.
+Postanowi³em wiêc napisaæ/zmodyfikowaæ now±....
+
+<itemize>
+
+<item>mpg12play v0.1-v0.3:
+  The first try, hacked together in a half hour!
+  I've used libmpeg3 from www.heroinewarrior.com up to the version 0.3,
+  but there were image quality and speed problems with it.
+<item>mpg12play v0.5-v0.87:
+  Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
+  but it was slow and was written in C++ (I hate C++!!!)
+<item>mpg12play v0.9-v0.95pre5:
+  Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
+  It's great, optimized very fast C code with perfect image quality and
+  100% MPEG standard conformance.
+<item>MPlayer v0.3-v0.9:
+  It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
+  player 'avip' based on avifile's Win32 DLL loader.
+<item>MPlayer v0.10:
+  The MPEG and AVI player in a single binary!
+<item>MPlayer v0.11:
+  Some new developers joined and from 0.11 the mplayer project is a team-work!
+  Added .ASF file support, and OpenDivX (see www.projectmayo.com) en/decoding.
+<item>MPlayer v0.17 "The IdegCounter"
+  The release version of the 0.11pre after 4 months of heavy development!
+  Try it, and be amazed! Thousands of new features added... and of course
+  old code was improved too, bugs removed etc.
+<item>MPlayer 0.18 "The BugCounter"
+  2 months since 0.17 and here's a new release.. Completed ASF support,
+  more subtitle formats, introduced libao (similar to libvo but to audio),
+  even more stable than ever, and so on. It's a MUST !
+</itemize>
+
+
+As you see, I didn't write any codecs, just some players. Instead I spent
+a lot of time finding the best way to parse bad damaged input files
+(both MPEG and AVI) and to do perfect A-V sync with seeking ability.
+My player is rock solid playing damaged MPEG files (useful for some VCDs),
+and it plays bad AVI files which are unplayable with the famous
+windows media player. Even AVI files without index chunk are playable, and
+you can rebuild their indexes with the -idx option, thus enabling seeking!
+As you see, stability and quality are the most important things for me,
+but the speed is also amazing.
+
+</p>
+
+</sect1>
+<sect1>
+<heading>Installation</>
+</sect1>
+<sect1>
+<heading>What about the GUI?</>
+<p>
+I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
+So the player has only keyboard control from the controlling console/xterm now.
+There is a GUI development for the player, coordinated by Pontscho/Fresh!
+It's still under development, but it will be merged and released real soon.
+BTW he needs some nice skins, if you are a good graphician, contact him!!!
+
+
+
+</p>
+</sect1>
+
+</sect>
+
+
+<sect>
+<heading>Features </>
+
+<sect1>
+	<heading>Obs³ugiwane formaty wej¶cia </>
+	<p>
+	<itemize>
+	<item>VCD (Video CD) bezpo¶rednio z CD-ROMu lub z obrazu .bin 
+	<item>DVD, bezpo¶rednio z Twojej p³yty DVD, opcjonalnie u¿ywaj±c libcss do deszyfrowania
+	<item>MPEG 1/2 System Stream (PS/PES/VOB) i Elementary Stream (ES) 
+	<item>RIFF AVI file format
+	<item>ASF 1.0 file format
+	<item>obs³uguje czytanie z pliku, stdin, DVD oraz sieci przez HTTP
+	</itemize>
+	Uwaga: o obs³udze quicktime (.mov/.qt) oraz realmedia (.ra/.rm) czytaj w FAQ-u!
+	</p>
+</sect1>
+<sect1>
+	<heading>Obs³ugiwanie kodeki audio i video</>
+	<p>
+		<tscreen>
+		Sprawd¼ <url url="http://mplayer.sourceforge.net/DOCS/codecs.html">      
+		znajdziesz tam kompletn±, codziennie od¶wie¿an± listê!!!      
+		</tscreen>
+	<itemize>Najwa¿niejsze kodeki video:
+	<item>MPEG1 (VCD) and MPEG2 (DVD) video
+	<item>DivX, OpenDivX i inne warianty MPEG4
+	<item>Windows Media Video 7 (WMV1) wykorzystywany w plikach .wmv
+	<item>Intel Indeo codecs (3.1,3.2,4.1,5.0)
+	<item>MJPEG, ASV2 oraz inne formaty sprzêtowe
+	</itemize>
+<itemize>Najwa¿niejsze kodeki audio:
+	<item>MPEG layer 2, and layer 3 (MP3) audio (natywny kod, z optymalizacjami 3dnow)
+	<item>AC3 dolby audio (natywny kod, z optymalizacjami 3dnow)
+	<item>Voxware audio
+	<item>alaw, msgsm, pcm and other simple old audio formats
+</itemize>
+
+
+Je¶li masz kodeka nie opisanego tutaj, oraz jeszcze nie obs³ugiwanego
+przeczytaj <url url="http://mplayer.sourceforge.net/DOCS/codecs.html"> oraz DOCS/CODECS
+by uzyskaæ informacje jego statusie oraz jak mo¿na nam pomóc dodaæ dla
+niego obs³ugê.
+
+	</p>
+</sect1>
+
+
+
+<sect1>
+ <heading> </>
+<p>
+</p>
+</sect1>
+
+</sect>
+
+
+<sect>
+<heading> </>
+<sect1>
+ <heading> </>
+<p>
+</p>
+</sect1>
+</sect>
+
+
+</article>
