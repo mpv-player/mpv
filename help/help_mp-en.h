@@ -1,10 +1,13 @@
 // $Revision$
 // MASTER FILE. Use this file as base for translations.
-
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
-// Please also put a note like "sync'ed with help_mp-en.h XXX" in the header
-// of the translated file so that we see at a glance if it is outdated.
+// The header of the translated file should contain credits and contact
+// information. Before major releases we will notify all translators to update
+// their files. Please do not simply translate and forget this, outdated
+// translations quickly become worthless. To help us spot outdated files put a
+// note like "sync'ed with help_mp-en.h XXX" in the header of the translation.
+// Do NOT translate the above lines, just follow the instructions.
 
 // ========================= MPlayer help ===========================
 
