@@ -1520,6 +1520,15 @@ Table of Contents
     Or install it to /usr/lib , because if you can't solve the /usr/local
     problem, you are careless enough to do such things.
 
+  <B>Q: I have gcc 3.0 . I have to compile mplayer with --disable-dshow,
+    else it prints
+
+  /usr/local/objdir/gcc-3.0/lib//libstdc++.so.3: undefined symbol: __dso_handle
+
+  </B>A: All you have to do is create a symbolic link from libstdc++.so to
+    libstdc++.so.3
+
+
   <A NAME=6.2>6.2.  General questions
 
   <B>Q: What about DVD playback?
