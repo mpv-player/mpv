@@ -3,6 +3,7 @@
 
 // #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "config.h"
 #include "mpeg_hdr.h"
