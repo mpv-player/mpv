@@ -27,7 +27,7 @@ Red Hata i zacz±³ do³±czaæ GCC 2.96 do serii Linux-Mandrake 8.0.
 <para>
 Zespó³ GCC wypar³ siê jakichkolwiek powi±zañ z GCC 2.96 i wystosowa³
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">oficjaln± odpowied¼</ulink>
-do GCC 2.96. Wielu developerów ze ¶wiata zaczê³o mieæ problemy z tym kompilatorem
+na GCC 2.96. Wielu developerów ze ¶wiata zaczê³o mieæ problemy z tym kompilatorem
 i zarekomendowali inne. Przyk³adami s± 
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>
 i
@@ -62,7 +62,7 @@ wraz z przej¶ciem na inny kompilator. W ka¿dym b±d¼ razie, nie ma to ju¿ znaczen
 Mamy nadziejê, ¿e dojrzewaj±ce GCC 3.x na dobre zakoñczy tê sprawê.  Je¿eli chcesz 
 kompilowaæ z 2.96, przeka¿ flagê <option>--disable-gcc-checking</option>
 skryptowi <filename>configure</filename>. Pamiêtaj, ¿e mo¿esz wtedy liczyæ tylko na siebie i
-<emphasis role="bold">nie zg³aszaj ¿adnych b³êdów</emphasis>. Je¿eli bêdziesz, zostanie
+<emphasis role="bold">nie zg³aszaj ¿adnych b³êdów</emphasis>. Je¿eli to zrobisz, zostanie
 odebrany Ci dostêp do naszej listy mailingowej, poniewa¿ mamy ju¿ wiêcej ni¿ do¶æ bezsensownych k³ótni
 na temat GCC 2.96. Proszê, zostaw tê sprawê w spokoju.
 </para>
@@ -152,7 +152,7 @@ dostarcza wy³±cznie sterowniki binarne (dla XFree86), które czêsto zawieraj± b³ê
 Dostali¶my wiele zg³oszeñ na 
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 o ich b³êdach, marnej jako¶ci, braku stabilno¶ci oraz 
-s³abemu wsparciu dla u¿ytkownika i eksperta.
+s³abym wsparciu dla u¿ytkownika i eksperta.
 Wiele z tych problemów/kwestii pojawia siê ci±gle. nVidia skontaktowa³a siê
 z nami ostatnio i stwierdzi³a, ¿e te b³êdy nie istniej±, a brak stabilno¶ci
 jest podyktowany wadliwymi chipami AGP, nie otrzymali równie¿ ¿adnych zg³oszeñ
@@ -182,7 +182,7 @@ na rok 2002</ulink>.
 W podobnej recenzji xine zatytu³owanej 
 <ulink url="http://www.linuxworld.com/story/32716.htm">Strumieniowy odtwarzacz mediów dla reszty z nas</ulink>
 ci±gle wzbudza³ kontrowersje. Jak na ironiê, pod koniec swojego artyku³u cytuje
-krótk± wymianê zdañ miêdzy nim a Günter'em Bartsch'em, twórc± <application>xine</application>,
+krótk± wymianê zdañ miêdzy nim a Günterem Bartschem, twórc± <application>xine</application>,
 która idealnie podsumowuje ca³± sprawê:
 
 <blockquote><para>
