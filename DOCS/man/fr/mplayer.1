@@ -525,9 +525,9 @@ Les chemins sont relatifs à ~/\:.mplayer/.
 .br
 .I NOTE:
 La répétition automatique n'est pour l'instant géré que par les joysticks.
-
+.sp 1
 Les commandes disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs conf=<nom_fichier>
@@ -1134,7 +1134,7 @@ Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
 plus bas) comme URL de film.
-
+.\" FIXME: Le texte suivante ne dois pas etre ici...
 .I NOTE:
 .br
 MPlayer n'accepte pas les deux-points, vous devez donc taper l'ID périphérique
@@ -1145,9 +1145,8 @@ d'échantillonnage en utilisant ALSA, le codec audio de LAME n'est
 capable d'encoder que les fréquences 'standards'. Vous obtiendrez
 un fichier .avi sans son si vous choisissez une fréquence inhabituelle
 et utilisez ce codec.
-
+.sp 1
 Les options disponibles sont:
-.
 .RSs
 .IPs noaudio
 aucun son
@@ -1359,12 +1358,11 @@ Active le retournement des sous-titres en utilisant FriBiDi.
 Recherche les polices OSD/\:SUB dans un répertoire particulier
 (par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc,
 pour les polices FreeType: ~/.mplayer/\:subfont.ttf).
-
+.br
 .I NOTE:
 Avec FreeType, cette option détermine le chemin vers le fichier de polices.
-.br
 Avec Fontconfig, cette option détermine le nom de police fontconfig.
-
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -5315,7 +5313,7 @@ encodage CBR, plus haute qualité pré-sélectionnée, bitrate 320 kbps.
 .IPs <8-320>
 encodage ABR au bitrate moyen indiqué.
 .RE
-
+.sp 1
 .RS
 .I EXEMPLE:
 .RE
