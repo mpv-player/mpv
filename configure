@@ -1177,7 +1177,19 @@ for ac_option do
         _select='#define HAVE_AUDIO_SELECT'
 	;;
   --enable-gui)
-  	_gui=yes
+        cat <<EOF
+
+You've tried to enable GUI support.
+
+GUI code was just imported to CVS, and we didn't finished integration yet!
+It's under heavy development, and it isn't trivial how to compile and run.
+Do NOT flood our mailboxes with GUI-related questions and bugreports now!
+We're busy with development, but we know the problems you want to report.
+
+Please wait until we announce it on mplayer-users list and News on homepage.
+
+EOF
+	exit
 	;;
   --enable-streaming)
   	_streaming=yes
@@ -1290,6 +1302,9 @@ for ac_option do
 	;;
   --enable-divx4)
   	_divx4linux=yes
+	;;
+  --enable-new-gui)
+  	_gui=yes
 	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
