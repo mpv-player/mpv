@@ -654,10 +654,9 @@ static dvd_file_t *DVDOpenVOBPath( dvd_reader_t *dvd, int title, int menu )
             dvd_file->title_sizes[ i ] = fileinfo.st_size / DVD_VIDEO_LB_LEN;
             dvd_file->title_devs[ i ] = DVDinput_open( full_path );
             dvd_file->filesize += dvd_file->title_sizes[ i ];
+            DVDinput_seek( dvd_file->title_devs[ i ], 0, DVDINPUT_SEEK_KEY );
         }
-        if( dvd_file->title_devs[ 0 ] ) {
-	    DVDinput_seek( dvd_file->title_devs[ 0 ], 0, DVDINPUT_SEEK_KEY );
-	} else {
+        if( !dvd_file->title_devs[ 0 ] ) {
             free( dvd_file );
             return 0;
         }
