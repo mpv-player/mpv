@@ -69,7 +69,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(s->fd)
       close(s->fd);	
 
-    // Accept only int16_t as input fomat (which sucks)
+    // Accept only int16_t as input format (which sucks)
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
     af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
@@ -79,12 +79,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(s->sz == 0)
       s->sz = DEF_SZ;
 	
-    // Allocate new buffers (as one continous block)
-    s->buf[0] = calloc(DEF_SZ*af->data->nch, af->data->bps);
+    // Allocate new buffers (as one continuous block)
+    s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
     if(NULL == s->buf[0])
       af_msg(AF_MSG_FATAL, "[export] Out of memory\n");
     for(i = 1; i < af->data->nch; i++)
-      s->buf[i] = s->buf[0] + i*DEF_SZ*af->data->bps;
+      s->buf[i] = s->buf[0] + i*s->sz*af->data->bps;
 	
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
@@ -139,7 +139,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     memcpy(s->filename, str, i);
     s->filename[i] = 0;
 	
-    sscanf(str + i, "%d", &(s->sz));
+    sscanf(str + i + 1, "%d", &(s->sz));
   
     return af->control(af, AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET, &s->sz);
   }
