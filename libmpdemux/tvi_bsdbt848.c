@@ -49,7 +49,11 @@
 #ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
+#ifdef HAVE_SOUNDCARD_H
+#include <soundcard.h>
+#else
 #include <machine/soundcard.h>
+#endif
 #endif
 
 #include "../libvo/img_format.h"
