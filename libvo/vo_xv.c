@@ -1,5 +1,7 @@
 
-#define NUM_BUFFERS 1
+// Number of buffers _FOR_DOUBLEBUFFERING_MODE_
+// Use option -double to enable double buffering! (default: single buffer)
+#define NUM_BUFFERS 2
 
 /*
  * vo_xv.c, X11 Xv interface
@@ -11,6 +13,8 @@
  * Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * Xv image suuport by Gerd Knorr <kraxel@goldbach.in-berlin.de>
+ * fullscreen support by Pontscho
+ * double buffering support by A'rpi
  */
 
 #include <stdio.h>
@@ -65,6 +69,7 @@ static XvAdaptorInfo        *ai;
 static XvImageFormatValues  *fo;
 
 static int current_buf=0;
+static int num_buffers=1; // default
 static XvImage* xvimage[NUM_BUFFERS];
 
 #include <sys/ipc.h>
@@ -113,6 +118,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
  mFullscreen=flags&1;
  dwidth=d_width; dheight=d_height;
+ num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
  if (!vo_init()) return -1;
 
@@ -210,7 +216,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
     {
      printf( "using Xvideo port %d for hw scaling\n",xv_port );
 
-     for(current_buf=0;current_buf<NUM_BUFFERS;++current_buf)
+     for(current_buf=0;current_buf<num_buffers;++current_buf)
        allocate_xvimage(current_buf);
 
      current_buf=0;
@@ -331,7 +337,7 @@ static void flip_page(void)
          drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
          False);
  XFlush(mDisplay);
- current_buf=(current_buf+1)%NUM_BUFFERS;
+ current_buf=(current_buf+1)%num_buffers;
  return;
 }
 
