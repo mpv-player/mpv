@@ -36,6 +36,11 @@ void* vo_sub=NULL;
 int vo_osd_changed(int new_value){return 0;}
 int   subcc_enabled=0;
 
+float sub_fps=0;
+int sub_utf8=0;
+int   suboverlap_enabled = 1;
+float sub_delay=0;
+
 //---------------
 
 extern stream_t* open_stream(char* filename,int vcd_track,int* file_format);
@@ -64,7 +69,7 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
   if(stream_cache_size)
       stream_enable_cache(stream,stream_cache_size,0,0);
 
-  demuxer=demux_open(stream,file_format,-1,-1,-1);
+  demuxer=demux_open(stream,file_format,-1,-1,-1,NULL);
   if(!demuxer){
 	printf("Cannot open demuxer\n");
 	exit(1);
@@ -73,4 +78,5 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
   if(demuxer->video->sh)
       video_read_properties(demuxer->video->sh);
 
+  return 0;
 }
