@@ -1047,6 +1047,8 @@ if [ $_png = yes ]; then
    _libpng='-lpng -lz'
 fi
 
+_aosrc=''
+
 _alsa5='#undef HAVE_ALSA5'
 _alsa9='#undef HAVE_ALSA9'
 if [ $_alsa == 'yes' ]; then
@@ -1057,7 +1059,7 @@ fi
 _esdd='#undef HAVE_ESD'
 #if [ $_esd == 'yes' ]; then
 # _esdd='#define HAVE_ESD'
-# _aosrc="$ao_src ao_esd.c"
+# _aosrc="$_aosrc ao_esd.c"
 # _esdlib='-lesd'
 #fi
 
@@ -1133,7 +1135,7 @@ fi
 # ---
 
 _vosrc=''
-_aosrc=''
+#_aosrc=''
 
 if [ $_png = yes ]; then
  _png='#define HAVE_PNG'
