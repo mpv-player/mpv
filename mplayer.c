@@ -2110,6 +2110,7 @@ if(!sh_video) {
 		    ,hhmmssf
 		    ,(sh_audio->delay>0.5)?100.0*audio_time_usage/(double)sh_audio->delay:0
 		    ,cache_fill_status
+		    ,playback_speed
 		    );
   }
   if(d_audio->eof) eof = PT_NEXT_ENTRY;
