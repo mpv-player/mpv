@@ -4892,6 +4892,22 @@ Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
 .B nr=<0\-100000>
 noise reduction, 0 is disabled
 .TP
+.B qns=<0\-3>
+quantizer noise shaping, reduces ringing artefacts, larger values are slower
+but may not result in better quality
+.PD 0
+.RSs
+.IPs 0
+disabled (default)
+.IPs 1
+only lower the absolute value of coefficients
+.IPs 2
+only change coefficients before the last non zero coefficient + 1
+.IPs 3
+try all
+.RE
+.PD 1
+.TP
 .B inter_matrix=<comma separated matrix>
 Use custom inter matrix. It needs a comma separated string of 64 integers.
 .TP

@@ -140,6 +140,7 @@ static char *lavc_param_inter_matrix = NULL;
 static int lavc_param_cbp= 0;
 static int lavc_param_mv0= 0;
 static int lavc_param_noise_reduction= 0;
+static int lavc_param_qns= 0;
 static int lavc_param_qp_rd= 0;
 static int lavc_param_inter_threshold= 0;
 static int lavc_param_sc_threshold= 0;
@@ -286,6 +287,7 @@ m_option_t lavcopts_conf[]={
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"top", &lavc_param_top, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
+        {"qns", &lavc_param_qns, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -401,6 +403,9 @@ static int config(struct vf_instance_s* vf,
 #endif
 #if LIBAVCODEC_BUILD >= 4690
     lavc_venc_context->noise_reduction= lavc_param_noise_reduction;
+#endif
+#if LIBAVCODEC_BUILD >= 4700
+    lavc_venc_context->quantizer_noise_shaping= lavc_param_qns;
 #endif
 #if LIBAVCODEC_BUILD >= 4693
     lavc_venc_context->inter_threshold= lavc_param_inter_threshold;
