@@ -2540,7 +2540,7 @@ Number of lines copied to texture in one piece (default: 4).
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
 Mostly for testing, you should use \-osdlevel 0 to disable OSD.
 .IPs (no)aspect
-Enable or disable aspect scaling and panscan support (default: enabled).
+Enable or disable aspect scaling and pan and scan support (default: enabled).
 Disabling might increase speed.
 .RE
 .PD 1
@@ -4928,7 +4928,7 @@ get help
 .
 .TP
 .B br=<value>
-specify bitrate
+Specify bitrate.
 .RSs
 .IPs 4\-16000
 (in kbit)
@@ -4942,7 +4942,7 @@ maximum keyframe interval (in frames)
 .
 .TP
 .B deinterlace
-enable deinterlacing (avoid it, DivX4 is buggy)
+Enable deinterlacing (avoid it, DivX4 is buggy).
 .
 .TP
 .B q=<1\-5>
@@ -4970,17 +4970,17 @@ rate control reaction ratio
 .
 .TP
 .B crispness=<0\-100>
-specify crispness/\:smoothness
+Specify crispness/\:smoothness.
 .
 .TP
 .B pass=<1\-2>
 With this you can encode 2pass DivX4 files.
-First encode with pass=1, then with the same parameters, encode with
-pass=2.
+First encode with pass=1, then do another encode with the
+same parameters and pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
-Override the pass argument and use XviD VBR Library instead of DivX4 VBR.
+Override the pass argument and use the XviD VBR library instead of DivX4 VBR.
 Available options are:
 .RSs
 .IPs 0
@@ -5024,15 +5024,15 @@ average bitrate
 .TP
 .B cbr\ \ \ \ 
 constant bitrate.
-Forces also CBR mode encoding on subsequent ABR presets modes
+Also forces CBR mode encoding on subsequent ABR presets modes.
 .
 .TP
 .B br=<0\-1024>
-specify bitrate in kBit (CBR and ABR only)
+bitrate in kBit (CBR and ABR only)
 .
 .TP
 .B q=<0\-9>
-quality (0\-highest, 9\-lowest) (only for VBR)
+quality (0\-highest, 9\-lowest) (VBR only)
 .
 .TP
 .B aq=<0\-9>
@@ -5044,7 +5044,7 @@ compression ratio
 .
 .TP
 .B vol=<0\-10>
-set audio input gain
+audio input gain
 .
 .TP
 .B mode=<0\-3>
@@ -5067,7 +5067,7 @@ mono
 .PD 0
 .RSs
 .IPs 0
-no
+none
 .IPs 1
 all
 .IPs 2
@@ -5077,8 +5077,8 @@ adjust
 .
 .TP
 .B fast\ \ \ 
-switch on faster encoding on subsequent VBR presets modes, slightly lower
-quality and higher bitrates.
+Switch on faster encoding on subsequent VBR presets modes, results in
+slightly lower quality and higher bitrates.
 .
 .TP
 .B highpassfreq=<freq>
@@ -5098,16 +5098,18 @@ will let LAME choose values automatically.
 .B preset=<value>
 preset values
 .RSs
+.IPs help\ 
+Print additional options and information about presets settings.
 .IPs medium
-VBR encoding, good quality, 150\-180 kbps bitrate range.
+VBR encoding, good quality, 150\-180 kbps bitrate range
 .IPs standard
-VBR encoding, high quality, 170\-210 kbps bitrate range.
+VBR encoding, high quality, 170\-210 kbps bitrate range
 .IPs extreme
-VBR encoding, very high quality, 200\-240 kbps bitrate range.
+VBR encoding, very high quality, 200\-240 kbps bitrate range
 .IPs insane
-CBR encoding, highest preset quality, 320 kbps bitrate.
+CBR encoding, highest preset quality, 320 kbps bitrate
 .IPs <8\-320>
-ABR encoding at average given kbps bitrate.
+ABR encoding at average given kbps bitrate
 .RE
 .sp 1
 .RS
@@ -5116,15 +5118,13 @@ ABR encoding at average given kbps bitrate.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-for most people on most music and already quite high in quality.
+suitable for most people and most music types and already quite high quality
 .IPs cbr:preset=192
-encode with ABR presets at a 192 kbps forced constant bitrate.
+Encode with ABR presets at a 192 kbps forced constant bitrate.
 .IPs preset=172
-encode with ABR presets at a 172 kbps average bitrate.
+Encode with ABR presets at a 172 kbps average bitrate.
 .IPs preset=extreme
-for people with extremely good hearing and similar equipment.
-.IPs preset=help
-print additional options and informations on presets settings.
+for people with extremely good hearing and similar equipment
 .RE
 .PD 1
 .
@@ -6299,11 +6299,11 @@ Currently it doesn't work (yet).
 .
 .SS nuv (\-nuvopts)
 .
-Nuppel video is based on rtjpeg and lzo.
-By default frames are first encoded with rtjpeg and then compressed with lzo.
+Nuppel video is based on RTJPEG and LZO.
+By default frames are first encoded with RTJPEG and then compressed with LZO.
 But both passes can be enabled or not.
-So you can in fact output raw i420, lzo compressed i420, rtjpeg, or the
-default lzo compressed rtjpeg.
+So you can in fact output raw i420, LZO compressed i420, RTJPEG, or the
+default LZO compressed RTJPEG.
 .br
 .I NOTE:
 The nuvrec documentation contains some advice and examples about the
@@ -6311,23 +6311,27 @@ settings to use for the most common TV encodings.
 .
 .TP
 .B c=<0\-20>
-chrominance threshold
+chrominance threshold (default: 1)
 .
 .TP
 .B l=<0\-20>
-luminance threshold
+luminance threshold (default: 1)
+.
+.TP
+.B lzo \ 
+Enable LZO compression (default).
 .
 .TP
 .B nolzo \ 
-Disable the lzo compression.
+Disable LZO compression.
 .
 .TP
 .B q=<3\-255>
-Set the quality level.
+quality level (default: 255)
 .
 .TP
 .B raw \ \ \ 
-Disable rtjpeg encoding.
+Disable rtjpeg encoding (default).
 .
 .TP
 .B rtjpeg\ 
@@ -6358,11 +6362,10 @@ Switch to fixed quantizer mode and specify the quantizer to be used.
 .TP
 .B me_quality=<0\-6>
 This option controls the motion estimation subsystem.
-The higher the value, the more precise the estimation should be.
+The higher the value, the more precise the estimation should be (default: 6).
 The more precise the motion estimation is, the more bits can be saved.
 Precision is gained at the expense of CPU time so decrease this setting if
 you need realtime encoding.
-(default: 6)
 .
 .TP
 .B interlacing
@@ -6484,7 +6487,7 @@ releases of XviD 1.0.x (api4).
 Create a bitstream which can be decoded delay-free.
 .br
 .I WARNING:
-This will generate an illegal bitstream, and WILL NOT be
+This will generate an illegal bitstream, and will not be
 decodable by ISO-MPEG4 decoders except DivX/\:libavcodec/\:XviD.
 .br
 .I WARNING:
@@ -6807,7 +6810,7 @@ precision (default: 250).
 .
 .TP
 .B idrint=<value>
-Each <value> I-Frames are IDR-Frames (default: 2).
+One in each <value> I-Frames are IDR-Frames (default: 2).
 In H.264, I-Frames do not necessarily bound a closed GOP because it is
 allowable for a P-frame to be predicted from more frames than just the one
 frame before it (also see frameref).
