@@ -50,21 +50,27 @@ and do not forget to include this valuable information:</P>
 <UL>
 <LI>Your Linux distribution or operating system e.g.:
     <UL>
-        <LI>Red Hat 7.1
-        <LI>Slackware 7.0 + devel packs from 7.1 ...
+        <LI>Red Hat 7.1</LI>
+        <LI>Slackware 7.0 + devel packs from 7.1 ...</LI>
     </UL>
+</LI>
 <LI>kernel version:<BR>
-    <CODE>uname -a</CODE>
+    <CODE>uname -a</CODE></LI>
 <LI>libc version:<BR>
-    <CODE>ls -l /lib/libc[.-]*</CODE>
+    <CODE>ls -l /lib/libc[.-]*</CODE></LI>
 <LI>X version:<BR>
-    <CODE>X -version</CODE>
+    <CODE>X -version</CODE></LI>
 <LI>gcc and ld versions:<BR>
     <CODE>gcc -v<BR>
-    ld -v</CODE>
+    ld -v</CODE></LI>
 <LI>binutils version:<BR>
-    <CODE>as --version</CODE>
-<LI>if only the GUI is buggy :
+    <CODE>as --version</CODE></LI>
+<LI>If you have problems with fullscreen mode:
+  <UL>
+    <LI>Window manager type and version</LI>
+  </UL>
+</LI>
+<LI>If only the GUI is buggy:
   <UL>
     <LI>GTK version</LI>
     <LI>GLIB version</LI>
@@ -78,35 +84,39 @@ and do not forget to include this valuable information:</P>
 
 <UL>
 <LI>CPU info (this works on Linux only):<BR>
-    <CODE>cat /proc/cpuinfo</CODE>
-<LI>Video card manufacturer and model, e.g.:<BR>
+    <CODE>cat /proc/cpuinfo</CODE></LI>
+<LI>Video card manufacturer and model, e.g.:
     <UL>
-        <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-        <LI>Matrox G400 DH 32MB SGRAM
+        <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</LI>
+        <LI>Matrox G400 DH 32MB SGRAM</LI>
     </UL>
-<LI>Video driver type &amp; version, e.g.:<BR>
+</LI>
+<LI>Video driver type &amp; version, e.g.:
     <UL>
-        <LI>X built-in driver
-        <LI>nVidia 0.9.623
-        <LI>Utah-GLX CVS 2001-02-17
-        <LI>DRI from X 4.0.3
+        <LI>X built-in driver</LI>
+        <LI>nVidia 0.9.623</LI>
+        <LI>Utah-GLX CVS 2001-02-17</LI>
+        <LI>DRI from X 4.0.3</LI>
     </UL>
-<LI>Sound card type &amp; driver, e.g.:<BR>
+</LI>
+<LI>Sound card type &amp; driver, e.g.:
     <UL>
-        <LI>Creative SBLive! Gold with OSS driver from oss.creative.com
-        <LI>Creative SB16 with kernel OSS drivers
-        <LI>GUS PnP with ALSA OSS emulation
+        <LI>Creative SBLive! Gold with OSS driver from oss.creative.com</LI>
+        <LI>Creative SB16 with kernel OSS drivers</LI>
+        <LI>GUS PnP with ALSA OSS emulation</LI>
     </UL>
-<LI>if in doubt include <CODE>lspci -vv</CODE> output on Linux systems
+</LI>
+<LI>If in doubt include <CODE>lspci -vv</CODE> output on Linux systems.</LI>
 </UL>
 
 <P><B>For compilation problems/errors</B></P>
 
 <P><B><I>Please include these files:</I></B></P>
-<UL><LI>configure.log
-<LI>config.h
-<LI>config.mak
-<LI>libvo/config.mak
+<UL>
+  <LI>configure.log</LI>
+  <LI>config.h</LI>
+  <LI>config.mak</LI>
+  <LI>libvo/config.mak</LI>
 </UL>
 
 <P><B>For playback problems</B></P>

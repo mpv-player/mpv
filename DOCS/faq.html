@@ -37,7 +37,7 @@ Probably there is no such file or directory.
 What's the problem with gcc 2.96?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 <B><I>We strongly discourage the use of gcc 2.96!!!</I></B><BR>
-Read <A HREF="gcc-2.96-3.0.html">this</A> and <A HREF="users_against_developers.html">this</A>
+Read <A HREF="users_against_developers.html#gcc">this</A>
 document for details. If you still really really want to use it, be sure to get
 the latest release, but remember that  you are on your own. Do <B>not</B> report
 bugs or ask for help on the mailing lists. We will <B>not</B> provide any support
@@ -49,7 +49,7 @@ in case you run into problems.
 Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 No, since there have been/are issues with these compilers as well.<BR>
-Use the 2.95.x series for reliability (not <A HREF="gcc-2.96-3.0.html">2.96</A>).
+Use the 2.95.x series for reliability (not <A HREF="users_against_developers.html#gcc">2.96</A>).
 Use the latest gcc 3.0.x (starting at 3.0.2) if you want to use a 3.0.x version.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -110,7 +110,7 @@ big house, etc etc. Do you really want it? It seems.</P>
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Where can I find information about gcc 2.96 bugs?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-In <A HREF="gcc-2.96-3.0.html">this</A> document. And <A HREF="users_against_developers.html">this</A>
+<A HREF="users_against_developers.html#gcc">This</A>
 document describes why Red Hat released 2.96 and other interesting things.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -441,7 +441,8 @@ use <B>MPlayer</B> on a CPU different from the one it was compiled on.
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11 modes ...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Use the <CODE>-fsmode</CODE> switch. See example.conf or the man page.
+Read the <A HREF="bugreports.html">bug reporting guidelines</A> and send us a
+proper bug report.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -690,7 +691,7 @@ It's for your information only but our criteria are:
 Speed:<BR>
 This parameter can be computed easily:
 <OL>
-  <LI>Which movies do you plan to watch?</LI>
+  <LI>Which movies do you plan to watch?
     <UL>
       <LI><B>MPEG1:</B> 320x200@32=256000<BR>
         You need only 256*25fps=6.4MB/sec of bandwidth (This format can be played
@@ -708,6 +709,7 @@ This parameter can be computed easily:
         32MB of video memory to watch this stream: 16MB for the RGB area and 16MB
         for the YUV area.</LI>
     </UL>
+  </LI>
   <LI>The bandwidth of PCI slots is: 33MHz*32Bit=133MB/sec. PCI2.1 has
     66MHz*32Bit=266MB/sec which is more than enough for playing any movie (except
     HDTV streams which really require an AGP bus).</LI>
@@ -717,6 +719,7 @@ This parameter can be computed easily:
       <LI><B>DIMM</B> - Good if your video card has 128-bit memory access.</LI>
       <LI><B>DDR</B> - Is fast enough for all types.</LI>
     </UL>
+  </LI>
 </OL>
 Note: DGA comparison shows that there is no visible difference between video
 cards which have the same type of video memory installed.<BR>
