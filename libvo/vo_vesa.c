@@ -438,10 +438,6 @@ static uint32_t parseSubDevice(const char *sd)
 {
    uint32_t flags;
    flags = 0;
-   lvo_name = NULL;
-#ifdef CONFIG_VIDIX
-   vidix_name = NULL;
-#endif
    if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
    else
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
@@ -1024,6 +1020,10 @@ static uint32_t preinit(const char *arg)
   if(verbose > 2)
         printf("vo_vesa: subdevice %s is being initialized\n",arg);
   subdev_flags = 0;
+  lvo_name = NULL;
+#ifdef CONFIG_VIDIX
+  vidix_name = NULL;
+#endif
   if(arg) subdev_flags = parseSubDevice(arg);
   if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
 #ifdef CONFIG_VIDIX
