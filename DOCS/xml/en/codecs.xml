@@ -245,7 +245,7 @@ and offers the most features. In order to achieve this do:
 <step><para>
   If you prefer having libavcodec updated at the same time you update
   <application>MPlayer</application> CVS, put the following line into the
-  <filename>main/CVS/Entires</filename> file:
+  <filename>main/CVS/Entries</filename> file:
   <screen>D/libavcodec////</screen>
   </para></step>
 <step><para>
