@@ -75,7 +75,7 @@ $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 $(PRG_CFG):        .depend codec-cfg.c codec-cfg.h
-	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DTESTING
+	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(PRG)
 	install -g $(GROUP) -o $(OWNER) -m $(PERM) -s $(PRG) $(BINDIR)
