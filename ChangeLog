@@ -45,6 +45,7 @@ MPlayer (1.0)
     * support for mixer channel selection in the ALSA audio output driver
     * jpeg video output driver now supports output to multiple directories
     * audio output driver for the polypaudio sound server
+    * yuv4mpeg video output now has a file= suboption.
 
     Decoders:
     * "experimental" support for 20 and 24 bit LPCM (DVD-Audio)
