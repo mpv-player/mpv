@@ -20,6 +20,15 @@ static int a52_resample_MONO_to_5_C(float * _f, int16_t * s16){
     return 5*256;
 }
 
+static int a52_resample_MONO_to_1_C(float * _f, int16_t * s16){
+    int i;
+    int32_t * f = (int32_t *) _f;
+	for (i = 0; i < 256; i++) {
+	    s16[i] = convert (f[i]);
+	}
+    return 1*256;
+}
+
 static int a52_resample_STEREO_to_2_C(float * _f, int16_t * s16){
     int i;
     int32_t * f = (int32_t *) _f;
@@ -136,6 +145,7 @@ static void* a52_resample_C(int flags, int ch){
     switch (flags) {
     case A52_MONO:
 	if(ch==5) return a52_resample_MONO_to_5_C;
+	if(ch==1) return a52_resample_MONO_to_1_C;
 	break;
     case A52_CHANNEL:
     case A52_STEREO:
