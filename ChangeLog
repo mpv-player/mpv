@@ -1,6 +1,20 @@
 
 mplayer (0.90)
 
+  pre10:
+    Fixes:
+    * LIRC error message (Error while reading cmd fd X : Success) fixed
+    * playback of some (streamed?) divx files fixed, starting with non-I frames.
+    * -vo png fixed (removed builtin YV12 support, removed OSD)
+    * some .mp3 playback/seek segfaults fixed
+    * vidix mach64 colorkey on PPC fixed
+    * -ao sdl now handles "featureless" soundcards
+    * -vo zr fixes
+    
+    Features:
+    * -ao win32 (for windows port)
+    * -vop 2xsai - 2x scaler for drawn images (low color cartoon anims)
+
   pre9:
     Docs:
     * man page rewritten again :)))
