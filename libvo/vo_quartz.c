@@ -462,6 +462,9 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	SetRect(&oldWinRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
 	
+	//Clear Menu Bar
+	ClearMenuBar();
+	
 	//Create Window Menu
 	CreateStandardWindowMenu(0, &windMenu);
 	InsertMenu(windMenu, 0);
