@@ -53,6 +53,13 @@ typedef struct {
     unsigned int dur;
 } mov_durmap_t;
 
+#define MOV_TRAK_UNKNOWN 0
+#define MOV_TRAK_VIDEO 1
+#define MOV_TRAK_AUDIO 2
+#define MOV_TRAK_FLASH 3
+#define MOV_TRAK_GENERIC 4
+#define MOV_TRAK_CODE 5
+
 typedef struct {
     int id;
     int type;
@@ -132,6 +139,15 @@ void mov_build_index(mov_track_t* trak){
         s+=trak->chunks[j].size;
     }
 
+    // workaround for fixed-size video frames (dv and uncompressed)
+    if(!trak->samples_size && trak->type==MOV_TRAK_VIDEO){
+	trak->samples_size=s;
+	trak->samples=malloc(sizeof(mov_sample_t)*s);
+	for(i=0;i<s;i++)
+	    trak->samples[i].size=trak->samplesize;
+	trak->samplesize=0;
+    }
+
     if(!trak->samples_size){
 	// constant sampesize
 	if(trak->durmap_size==1 || (trak->durmap_size==2 && trak->durmap[1].num==1)){
@@ -168,13 +184,6 @@ void mov_build_index(mov_track_t* trak){
 }
 
 #define MOV_MAX_TRACKS 256
-
-#define MOV_TRAK_UNKNOWN 0
-#define MOV_TRAK_VIDEO 1
-#define MOV_TRAK_AUDIO 2
-#define MOV_TRAK_FLASH 3
-#define MOV_TRAK_GENERIC 4
-#define MOV_TRAK_CODE 5
 
 typedef struct {
     off_t moov_start;
@@ -945,7 +954,7 @@ if(trak->samplesize){
     else
 	x=trak->chunks[trak->pos].size;
 //    printf("X = %d\n", x);
-    if(trak->stdata_len>=36){
+    if(trak->stdata_len>=36 && trak->stdata[30] && trak->stdata[31]){
 	// extended stsd header - works for CBR MP3:
 	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet
 	// x*=(trak->stdata[34]<<8)+trak->stdata[35];  // bytes/packet
