@@ -16,7 +16,7 @@ static vd_info_t info = {
 	"Quicktime Video decoder",
 	"qtvideo",
 	"A'rpi",
-	"Faust3",
+	"Sascha Sommer",
 	"win32"
 };
 
@@ -116,6 +116,10 @@ static int init(sh_video_t *sh){
 #endif
 
     handler = LoadLibraryA("qtmlClient.dll");
+    if(!handler){
+    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load qtmlClient.dll\n");
+    return 0;
+    }
 
     InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
     EnterMovies = (OSErr (*)(void))GetProcAddress(handler, "EnterMovies");
@@ -134,13 +138,13 @@ static int init(sh_video_t *sh){
     //     = GetProcAddress(handler, "");
     
     if(!InitializeQTML || !EnterMovies || !FindNextComponent || !ImageCodecBandDecompress){
-	printf("invalid qt DLL!\n");
+	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"invalid qtmlClient.dll!\n");
 	return 0;
     }
 
     result=InitializeQTML(6+16);
 //    result=InitializeQTML(0);
-    printf("InitializeQTML returned %i\n",result);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %i\n",result);
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
 #endif /* !MACOSX */
@@ -154,7 +158,7 @@ static int init(sh_video_t *sh){
 	memset(&desc2,0,sizeof(desc2));
 //	printf("juhee %p (%p)\n",prev,&desc);
 	GetComponentInfo(prev,&desc2,NULL,NULL,NULL);
-	printf("DESC: %c%c%c%c/%c%c%c%c [0x%X/0x%X] 0x%X\n",
+	mp_msg(MSGT_DECVIDEO,MSGL_DGB2,"DESC: %c%c%c%c/%c%c%c%c [0x%X/0x%X] 0x%X\n",
 	    c1[3],c1[2],c1[1],c1[0],
 	    c2[3],c2[2],c2[1],c2[0],
 	    desc2.componentType,desc2.componentSubType,
@@ -181,26 +185,26 @@ static int init(sh_video_t *sh){
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
 
-    printf("Count = %d\n",CountComponents(&desc));
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Count = %d\n",CountComponents(&desc));
     prev=FindNextComponent(NULL,&desc);
     if(!prev){
-	printf("Cannot find requested component\n");
+	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot find requested component\n");
 	return(0);
     }
-    printf("Found it! ID = 0x%X\n",prev);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Found it! ID = 0x%X\n",prev);
 
     ci=OpenComponent(prev);
-    printf("ci=%p\n",ci);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ci=%p\n",ci);
 
     memset(&icap,0,sizeof(icap));
     cres=ImageCodecInitialize(ci,&icap);
-    printf("ImageCodecInitialize->%p  size=%d (%d)\n",cres,icap.recordSize,icap.decompressRecordSize);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecInitialize->%p  size=%d (%d)\n",cres,icap.recordSize,icap.decompressRecordSize);
     
     memset(&cinfo,0,sizeof(cinfo));
     cres=ImageCodecGetCodecInfo(ci,&cinfo);
-    printf("Flags: compr: 0x%X  decomp: 0x%X format: 0x%X\n",
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Flags: compr: 0x%X  decomp: 0x%X format: 0x%X\n",
 	cinfo.compressFlags, cinfo.decompressFlags, cinfo.formatFlags);
-    printf("Codec name: %.*s\n",((unsigned char*)&cinfo.typeName)[0],
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Codec name: %.*s\n",((unsigned char*)&cinfo.typeName)[0],
 	((unsigned char*)&cinfo.typeName)+1);
 
     //make a yuy2 gworld
@@ -221,7 +225,7 @@ static int init(sh_video_t *sh){
 }
 #else
     if(!sh->ImageDesc) sh->ImageDesc=(sh->bih+1); // hack for SVQ3-in-AVI
-    printf("ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
     framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
     memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
     dump_ImageDescription(*framedescHandle);
@@ -266,10 +270,10 @@ static int init(sh_video_t *sh){
 	    qt_imgfmt = k32RGBAPixelFormat;
 	    break;
 	default:
-	    printf("Unknown requested csp\n");
+	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unknown requested csp\n");
 	    return(0);    
     }
-    printf("imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), &qt_imgfmt);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), &qt_imgfmt);
     sh->context = qt_imgfmt;
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,imgfmt)) return 0;
     }
@@ -315,7 +319,7 @@ if(!codec_inited){
         0, 
         mpi->planes[0],
         mpi->stride[0]);
-    printf("NewGWorldFromPtr returned:%d\n",65536-(result&0xffff));
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%d\n",65536-(result&0xffff));
 //    if (65536-(result&0xFFFF) != 10000)
 //	return NULL;
 
@@ -351,12 +355,12 @@ if(!codec_inited){
     decpar.dstPixMap = **GetGWorldPixMap( OutBufferGWorld);//destPixmap; 
   
     cres=ImageCodecPreDecompress(ci,&decpar);
-    printf("ImageCodecPreDecompress cres=0x%X\n",cres);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecPreDecompress cres=0x%X\n",cres);
     
     if(decpar.wantedDestinationPixelTypes)
     { OSType *p=*(decpar.wantedDestinationPixelTypes);
       if(p) while(*p){
-          printf("supported csp: 0x%08X %.4s\n",*p,p);
+          mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"supported csp: 0x%08X %.4s\n",*p,p);
 	  ++p;
       }
     }
@@ -378,7 +382,7 @@ if(!codec_inited){
     if(decpar.frameNumber==124){
 	decpar.frameNumber=1;
 	cres=ImageCodecPreDecompress(ci,&decpar);
-	printf("ImageCodecPreDecompress cres=0x%X\n",cres);
+	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecPreDecompress cres=0x%X\n",cres);
     }
 #endif
 
@@ -387,7 +391,7 @@ if(!codec_inited){
     ++decpar.frameNumber;
 
     if(cres&0xFFFF){
-	printf("ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
+	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
 	return NULL;
     }
     
