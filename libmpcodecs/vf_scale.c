@@ -32,6 +32,9 @@ static unsigned int outfmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
+    IMGFMT_Y800,
+    IMGFMT_Y8,
+    IMGFMT_YVU9,
     0
 };
 
@@ -128,7 +131,6 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	vf->priv->w, vf->priv->h);
-    
     vf->priv->ctx->swScale(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
     
     if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
@@ -157,7 +159,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_BGR15:
     case IMGFMT_RGB32:
     case IMGFMT_RGB24:
-    case IMGFMT_Y800: {
+    case IMGFMT_Y800: 
+    case IMGFMT_Y8: 
+    case IMGFMT_YVU9: 
+    {
 	unsigned int best=find_best_out(vf);
 	int flags;
 	if(!best) return 0;	 // no matching out-fmt
