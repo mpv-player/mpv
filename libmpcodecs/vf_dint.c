@@ -178,7 +178,7 @@ static int open (vf_instance_t *vf, char* args){
     vf->put_image = put_image;
 //    vf->default_reqs=VFCAP_ACCEPT_STRIDE;
     vf->priv = malloc (sizeof(struct vf_priv_s));
-    vf->priv->sense = 0.01;
+    vf->priv->sense = 0.1;
     vf->priv->level = 0.15;
     vf->priv->pmpi = NULL;
     if (args)
