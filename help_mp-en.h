@@ -13,48 +13,46 @@ static char* banner_text=
 
 static char help_text[]=
 #ifdef HAVE_NEW_GUI
-"Usage:   mplayer [-gui] [options] [path/]filename\n"
+"Usage:   mplayer [-gui] [options] [url|path/]filename\n"
 #else
-"Usage:   mplayer [options] [path/]filename\n"
+"Usage:   mplayer [options] [url|path/]filename\n"
 #endif
 "\n"
-"Options:\n"
+"Basic options: (see the manpage for the complete list including ALL options!)\n"
 " -vo <drv[:dev]> select video output driver & device (see '-vo help' for list)\n"
 " -ao <drv[:dev]> select audio output driver & device (see '-ao help' for list)\n"
+#ifdef HAVE_VCD
 " -vcd <trackno>  play VCD (video cd) track from device instead of plain file\n"
+#endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  specify DVD device for authentication (for encrypted discs)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  play DVD title/track from device instead of plain file\n"
+" -alang/-slang   select DVD audio/subtitle language (by 2-char country code)\n"
 #endif
 " -ss <timepos>   seek to given (seconds or hh:mm:ss) position\n"
 " -nosound        don't play sound\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mode>  select MPEG1 stereo output (0:stereo 1:left 2:right)\n"
-#endif
-" -channels <n>   target number of audio output channels\n"
 " -fs -vm -zoom   fullscreen playing options (fullscr,vidmode chg,softw.scale)\n"
-" -x <x> -y <y>   scale image to <x> * <y> resolution [if -vo driver supports!]\n"
+" -x <x> -y <y>   set display resolution (for vidmode change or sw scaling)\n"
 " -sub <file>     specify subtitle file to use (see also -subfps, -subdelay)\n"
 " -playlist <file> specify playlist file\n"
 " -vid x -aid y   options to select video (x) and audio (y) stream to play\n"
 " -fps x -srate y options to change video (x fps) and audio (y Hz) rate\n"
-" -pp <quality>   enable postprocessing filter (0-4 for DivX, 0-63 for mpegs)\n"
-" -nobps          use alternative A-V sync method for AVI files (may help!)\n"
+" -pp <quality>   enable postprocessing filter (see manpage/docs for details)\n"
 " -framedrop      enable frame-dropping (for slow machines)\n"
-" -wid <window id> use existing window for video output (useful with plugger!)\n"
 "\n"
-"Keys:\n"
+"Basic keys: (see the manpage for the complete list, check the input.conf too)\n"
 " <-  or  ->      seek backward/forward 10 seconds\n"
 " up or down      seek backward/forward  1 minute\n"
-" < or >          seek backward/forward in playlist\n"
+" < or >          step backward/forward in playlist\n"
 " p or SPACE      pause movie (press any key to continue)\n"
 " q or ESC        stop playing and quit program\n"
 " + or -          adjust audio delay by +/- 0.1 second\n"
 " o               cycle OSD mode:  none / seekbar / seekbar+timer\n"
-" * or /          increase or decrease volume (press 'm' to select master/pcm)\n"
+" * or /          increase or decrease pcm volume\n"
 " z or x          adjust subtitle delay by +/- 0.1 second\n"
+" r or t          adjust subtitle position up/down, see also -vop expand !\n"
 "\n"
 " * * * SEE MANPAGE FOR DETAILS, FURTHER (ADVANCED) OPTIONS AND KEYS ! * * *\n"
 "\n";
