@@ -25,8 +25,8 @@ fi
 
 
 
-echo "Searching stylesheets..."
-echo "Searching html/chunk.xsl..."
+echo "Searching for stylesheets..."
+echo "Searching for html/chunk.xsl..."
 for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl
 do
   if test -f "$_try_chunk_xsl"
@@ -79,7 +79,7 @@ cat > html-chunk.xsl << EOF
 EOF
 
 
-cat > html.xsl << EOF
+cat > html-single.xsl << EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- **************************************************
      This file is generated automatically. DO NOT EDIT.
@@ -245,7 +245,7 @@ EOF
 chmod +x $_xsltwrapper
 
 
-echo "Searching xml checker..."
+echo "Searching for XML checker..."
 for _try_xmllint in xmllint
 do
   if command -v $_try_xmllint > /dev/null

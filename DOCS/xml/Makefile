@@ -21,6 +21,7 @@ help:
 	@echo "build-html-chunked: Build HTML documentation (multiple files)."
 	@echo "clean-html-single : Purge the 'HTML-single' directory."
 	@echo "clean-html-chunked: Purge the 'HTML' directory."
+	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
 	@echo "distclean         : Remove ALL generated files."
 
 .PHONY: build-html-chunked
@@ -38,7 +39,7 @@ build-html-single: xsltproc.sh
 	for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
 		(test -d $(HTML_SINGLE)/$$dir || mkdir $(HTML_SINGLE)/$$dir) &&\
-		if $(MAKE) HTMLFILE=../$(HTML_SINGLE)/$$dir/MPlayer.html -C $$dir html; then :; else exit 1; fi;\
+		if $(MAKE) HTMLFILE=../$(HTML_SINGLE)/$$dir/MPlayer.html -C $$dir html-single; then :; else exit 1; fi;\
 	done
 
 .PHONY: clean-html-chunked
@@ -55,7 +56,7 @@ distclean: clean-html-chunked clean-html-single
 		test -f $$dir/Makefile &&\
 		if $(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$$dir -C $$dir distclean ; then :; else exit 1; fi;\
 	done
-	-rm -f html.xsl html-chunk.xsl xsltproc.sh xmllint.sh
+	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 xsltproc.sh: configure
 	./configure

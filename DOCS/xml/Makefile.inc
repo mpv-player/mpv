@@ -2,20 +2,8 @@
 # Makefile.inc for Makefiles in subdirectories.
 #
 
-# Use customized html.xsl and/or html-chunk.xsl file if they exist...
+# Use customized html-chunk.xsl and/or html-single.xsl file if they exist...
 # Also add html-common.xsl to depends if it exists.
-ifeq (html.xsl,$(wildcard html.xsl))
-HTML_XSL := html.xsl
-ifeq (html-common.xsl,$(wildcard html-common.xsl))
-XSL_DEPS := $(HTML_XSL) html-common.xsl ../html.xsl ../html-common.xsl
-else
-XSL_DEPS := $(HTML_XSL) html-common.xsl ../html.xsl ../html-common.xsl
-endif
-else
-HTML_XSL := ../html.xsl
-XSL_DEPS := $(HTML_XSL) ../html-common.xsl
-endif
-
 ifeq (html-chunk.xsl,$(wildcard html-chunk.xsl))
 HTML_CHUNK_XSL := html-chunk.xsl
 ifeq (html-common.xsl,$(wildcard html-common.xsl))
@@ -28,13 +16,25 @@ HTML_CHUNK_XSL := ../html-chunk.xsl
 CHUNK_XSL_DEPS := $(HTML_CHUNK_XSL) ../html-common.xsl
 endif
 
+ifeq (html-single.xsl,$(wildcard html-single.xsl))
+HTML_SINGLE_XSL := html-single.xsl
+ifeq (html-common.xsl,$(wildcard html-common.xsl))
+XSL_DEPS := $(HTML_SINGLE_XSL) html-common.xsl ../html-single.xsl ../html-common.xsl
+else
+XSL_DEPS := $(HTML_SINGLE_XSL) html-common.xsl ../html-single.xsl ../html-common.xsl
+endif
+else
+HTML_SINGLE_XSL := ../html-single.xsl
+XSL_DEPS := $(HTML_SINGLE_XSL) ../html-common.xsl
+endif
+
 # Fall back to the default HTML stylesheet if none is specified.
 HTML_STYLESHEET ?= ../default.css
 
 # This is the main target...
-all: html html-chunked
-html: $(HTMLFILE)
+all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
+html-single: $(HTMLFILE)
 
 $(HTMLDIR)/index.html: documentation.xml $(CHUNK_XSL_DEPS)
 	@if test "$(HTMLDIR)" = "" ; then echo "Error: HTMLDIR not set!!!"; echo "Typically this means, that you've run make from subdir of DOCS/xml. Don't do this!" ; false; fi
@@ -50,9 +50,9 @@ $(HTMLFILE): documentation.xml $(XSL_DEPS)
 	-rm -f $(HTMLFILE)
 	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
-	../xsltproc.sh $(HTMLFILE) $(HTML_XSL) $<
+	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
 
-../html.xsl:
+../html-single.xsl:
 	cd .. && sh configure
 
 distclean:
