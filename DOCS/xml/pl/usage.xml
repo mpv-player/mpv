@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <chapter id="usage">
 <title>Sposób użycia</title>
 
@@ -15,7 +15,7 @@ Składa się on z opcji globalnych podanych na początku, na przykład:
 i opcji podanych po nazwach plików, które stosują się jedynie do podanego
 pliku/URLa/czegokolwiek, na przykład:
 
-<screen>mplayer -vfm 5 film1.avi <replaceable>film2.avi</replaceable> -vfm 4</screen>
+<screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
