@@ -121,6 +121,7 @@ struct modes_t {
 static unsigned int best_bpp=5;
 static unsigned int preinit_done=0;
 static int no_yuy2=1;
+static int no_uyvy_support=1;
 
 
 DFBEnumerationResult enum_modes_callback( unsigned int width,unsigned int height,unsigned int bpp, void *data)
@@ -229,6 +230,18 @@ static uint32_t preinit()
 //  if (!dfb) {
 
         DFBCHECK (DirectFBInit (NULL,NULL));
+	
+	if ((directfb_major_version >= 0) &&
+	    (directfb_minor_version >= 9) &&
+	    (directfb_micro_version >= 7))
+	    no_uyvy_support = 0;
+	else
+	{
+	    no_uyvy_support = 1;
+	    printf("vo_directfb: no UYVY support. Version: %d.%d.%d\n",
+		directfb_major_version, directfb_minor_version,
+		directfb_micro_version);
+	}
 
         if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
         DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
@@ -257,7 +270,7 @@ static uint32_t preinit()
 
                 /* Test the configuration, getting failed fields */
                 ret = videolayer->TestConfiguration( videolayer, &dlc, &failed );
-                if (ret == DFB_UNSUPPORTED) {
+                if (ret == DFB_UNSUPPORTED && no_uyvy_support == 0) {
 //    	       printf("Videolayer does not support YUY2");
                         dlc.pixelformat = DSPF_UYVY;
                         ret = videolayer->TestConfiguration( videolayer, &dlc, &failed );
