@@ -85,7 +85,7 @@ extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_dxr3;
-#ifdef TARGET_LINUX
+#ifdef HAVE_VESA
 extern vo_functions_t video_out_vesa;
 #endif
 extern vo_functions_t video_out_directfb;
@@ -154,7 +154,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_pgm,
         &video_out_md5,
 	&video_out_mpegpes,
-#if defined( ARCH_X86 ) && defined( TARGET_LINUX )
+#ifdef HAVE_VESA
 	&video_out_vesa,
 #endif
 #ifdef HAVE_DIRECTFB

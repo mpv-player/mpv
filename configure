@@ -1928,12 +1928,15 @@ fi
 if test "$_vesa" != no ; then
 echocheck "VESA support"
 if x86 && linux ; then
+  _def_vesa='#define HAVE_VESA 1'
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
   _vomodules="vesa $_vomodules"
   echores "yes"
 else
+  _def_vesa='#undef HAVE_VESA'
   echores "no (not supported on this OS/architecture)"
 fi
+_def_vesa='#undef HAVE_VESA'
 fi
 
 
@@ -3278,6 +3281,7 @@ $_def_fbdev_nocopy
 $_def_dxr3
 $_def_dvb
 $_def_svga
+$_def_vesa
 $_def_xdpms
 $_def_aa
 
