@@ -140,6 +140,23 @@ lejátszani. Valamint: ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
 <P>Használat :<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;a kívánt
   frekvencia Hz-ben, pl 44100&gt;</CODE></P>
+
+
+<P><B><A NAME=2.3.2.2.2>2.3.2.2.2.  Térhatású hangok dekódolása</A></B></P>
+
+<P>Az <B>MPlayer</B>-nek van egy audio pluginje ami a mátrix-kódolt hangok
+dekódolására szolgál (ilyen például a Dolby Surround).</P>
+
+<P>Sok 2 csatornás file valójában mátrix-kódolt térhatású hangot
+tartalmaz.</P>
+
+<P>Az ilyen dekódolás használatához egy legalább 4 csatornát támogató
+hangkártyára+meghajtóra van szükség.</P>
+
+<P>Használat :<BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+
+
 </BODY>
 
 </HTML>

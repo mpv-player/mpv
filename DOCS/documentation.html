@@ -147,6 +147,13 @@
         <LI><A HREF="encoding.html#2.4.6">2.4.6 Examples</A></LI>
       </UL>
     <LI><A HREF=#2.5>2.5 TV input</A></LI>
+    <UL>
+      <LI><A HREF=#2.5.1>2.5.1 Overview</A></LI>
+      <LI><A HREF=#2.5.2>2.5.2 Compilation</A></LI>
+      <LI><A HREF=#2.5.3>2.5.3 Available options</A></LI>
+      <LI><A HREF=#2.5.4>2.5.4 Keyboard control</A></LI>
+      <LI><A HREF=#2.5.5>2.5.5 Examples</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
     <UL>
@@ -493,15 +500,17 @@ see the <A HREF="encoding.html#2.4">MEncoder section</A> .</LI>
 <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
 encode movies with <B>MPlayer</B>, read the <A HREF=#2.5>TV input</A> section.</LI>
 
-<LI>There are two timer codes in <B>MPlayer</B>. To use the old
+<LI>There are three timer codes in <B>MPlayer</B>. To use the old
 method, you don't have to do anything. It uses <CODE>usleep()</CODE> to tune
 A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be tuned
 even finer. The new timer code uses PC's RTC (Real Time Clock) for this task,
 because it has precise 1ms timers. This requires root, or a <I>setuid root</I>
 <B>MPlayer</B> binary (or a little kernel hacking, but that's unadvised). You
-can see the new timer's efficiency in the status line. Note: <B>NEVER install
-setuid MPlayer binary on a multiuser system!</B> It's a clear way for everyone
-to gain root.</LI>
+can see the new timer's efficiency in the status line. The third timer
+code is turned on with the <CODE>-softsleep</CODE> option. It has the
+efficiency of the RTC, but it doesn't need root rights. On the other hand,
+it requires more CPU. Note: <B>NEVER install setuid MPlayer binary on a
+multiuser system!</B> It's a clear way for everyone to gain root.</LI>
 
 </UL>
 
@@ -660,10 +669,12 @@ Now you have to see a timer at the upper left corner of the movie
 
 <P><A NAME=2.5><B>2.5. TV input</B></P>
 
+<A NAME=2.5.1><P><B><I>2.5.1.  Overview</I></B></P>
+
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>.</P>
 
-<P><B><I>Compilation</I></B></P>
+<A NAME=2.5.2><P><B><I>2.5.2.  Compilation</I></B></P>
 
 <P>
 <UL>
@@ -680,7 +691,7 @@ TV tuner</B>.</P>
   with <CODE>-vo sdl</CODE>) colorspaces.
   You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
-<P><B><I>Available options</I></B><BR>
+<A NAME=2.5.3><P><B><I>2.5.3.  Available options</I></B><BR>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -728,8 +739,8 @@ TV tuner</B>.</P>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in which output
   format to display images (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
-  <B>uyvy</B>)<BR>
-    The following option must have the same setting !</TD>
+  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc i420</CODE>
+  option, because of a fourcc conflict))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -769,7 +780,7 @@ TV tuner</B>.</P>
 </TABLE>
 </P>
 
-<P><B><I>Keyboard control</I></B></P>
+<A NAME=2.5.4><P><B><I>2.5.4.  Keyboard control</I></B></P>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>select previous/next channel</TD><TR>
@@ -777,7 +788,7 @@ TV tuner</B>.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change channel list</TD><TR>
 </TABLE>
 
-<P><B><I>Examples</I></B></P>
+<A NAME=2.5.5><P><B><I>2.5.5.  Examples</I></B></P>
 
 <P>
 Dummy output, to AAlib :)<BR>

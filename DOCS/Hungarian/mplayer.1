@@ -577,6 +577,10 @@ magasságot.
 Ezzel az opcióval megadható, hogy mennyi memóriát használjon az MPlayer a
 megadott file/URL cache-elésére. Különösen a lassú elérésû hordozókon
 hasznos. Alapállapotban kikapcsolva.
+.TP
+.B \-softsleep
+pontos szoftveres idõzítõ használata. Van olyan hatékony mint az RTC, nem kell
+hozzá root jogosultság, viszont több CPU az igen.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
@@ -588,6 +592,9 @@ is olvasd el a dokumentációt !
 .B \-dumpvideo
 video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 (nem túl használható)
+.TP
+.B \-dapsync
+alternatív A/V szinkron rutin használata. Mire jó?
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP

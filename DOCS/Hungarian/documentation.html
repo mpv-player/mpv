@@ -127,6 +127,7 @@
 	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Audio pluginek</A></LI>
 	  <UL>
 	    <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Térhatású hangok dekódolása</A></LI>
 	  </UL>
       </UL>
       </UL>
@@ -137,7 +138,7 @@
         <LI><A HREF="encoding.html#2.4.2">2.4.2 Fordítás</A></LI>
         <LI><A HREF="encoding.html#2.4.3">2.4.3 Funkciók</A></LI>
           <UL>
-            <LI><A HREF="encoding.html#2.4.3">2.4.3 Összefoglalva</A></LI>
+            <LI><A HREF="encoding.html#2.4.3">2.4.3 Áttekintés</A></LI>
             <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 2 menetes DivX4 enkódolása</A></LI>
             <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Átméretezés</A></LI>
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Stream másolása</A></LI>
@@ -149,6 +150,13 @@
         <LI><A HREF="encoding.html#2.4.6">2.4.6 Példák</A></LI>
       </UL>
     <LI><A HREF=#2.5>2.5 TV bemenet</A></LI>
+    <UL>
+      <LI><A HREF=#2.5.1>2.5.1 Áttekintés</A></LI>
+      <LI><A HREF=#2.5.2>2.5.2 Fordítás</A></LI>
+      <LI><A HREF=#2.5.3>2.5.3 Opciók</A></LI> 
+      <LI><A HREF=#2.5.4>2.5.4 Irányítás billentyûzetrõl</A></LI>
+      <LI><A HREF=#2.5.5>2.5.5 Példák</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
     <UL>
@@ -495,7 +503,7 @@ meghajtókat érdemes kipróbálni :
 <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
   fejezetet.</LI>
 
-<LI>Kétféle idõzítõ kód van az <B>MPlayerben</B>. A régi
+<LI>Három idõzítõ kód van az <B>MPlayerben</B>. A régi
 módszer használatához nem kell semmit tenned, alapértelmezett. Lényege hogy
 <CODE>usleep()</CODE>-et használ az A/V szinkron javításához, +/- 10ms
 pontossággal. Néha ez nem elég pontos. Az új kód a PC-k RTC-jét (Real Time
@@ -503,6 +511,9 @@ Clock) használja erre a célra, mivel ezzel sokkal pontosabb, +/- 1ms-os
 idõzítést lehet elérni. Ez root jogokat követel, vagy egy <I>setuid root</I>
 <B>MPlayer</B> binárist (nos, vagy egy kis kernel átirást, ezt azért inkább
 ne..). Az új idõzítõ kód hatékonysága szépen látszik a státuszsorban.
+A harmadik módszer haszálatához a <CODE>-softsleep</CODE> opciót kell megadni.
+Ez van olyan hatékony mint az RTC, de nincs szükség root jogokra a
+használatához. Viszont sajnos több CPU-t igényel.
 Megj.: <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
 gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 
@@ -677,10 +688,12 @@ kimeneti eszközök</P>
 
 <P><A NAME=2.5><B>2.5. TV bemenet</B></P>
 
+<A NAME=2.5.1><P><B><I>2.5.1.  Áttekintés</I></B></P>
+
 <P>Ez a fejezet elmagyarázza hogy tudsz <B>nézni/grabbelni egy V4L kompatibilis
 TV tuner-rõl</B>.</P>
 
-<P><B><I>Fordítás</I></B></P>
+<A NAME=2.5.2><P><B><I>2.5.2.  Fordítás</I></B></P>
 
 <P>
 <UL>
@@ -698,7 +711,7 @@ TV tuner-rõl</B>.</P>
   YUY2, UYVY, RGB32 colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
   <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
-<P><B><I>Rendelkezésre álló opciók</I></B><BR>
+<A NAME=2.5.3><P><B><I>2.5.3.  Rendelkezésre álló opciók</I></B><BR>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -747,8 +760,9 @@ TV tuner-rõl</B>.</P>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
   milyen kimeneti formátumban történjen a megjelenítés
-  (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>)<BR>
-    Ennek és a következõ opciónak beállításainak egyezniük kell !</TD>
+  (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B>
+  (ezutóbbinál meg kell adni a <CODE>-vc i420</CODE> opciót is, fourcc
+  conflict miatt))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -788,7 +802,7 @@ TV tuner-rõl</B>.</P>
 </TABLE>
 </P>
 
-<P><B><I>Irányítás a billentyûzetrõl</I></B></P>
+<A NAME=2.5.4><P><B><I>2.5.4.  Irányítás a billentyûzetrõl</I></B></P>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>elõzõ/következõ csatorna</TD><TR>
@@ -796,7 +810,7 @@ TV tuner-rõl</B>.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>csatornalista váltása</TD><TR>
 </TABLE>
 
-<P><B><I>Példák</I></B></P>
+<A NAME=2.5.5><P><B><I>2.5.5.  Példák</I></B></P>
 
 <P>
 Teszt kimenet, AAlib-re :)<BR>

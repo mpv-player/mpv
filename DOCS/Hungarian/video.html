@@ -216,7 +216,9 @@ megkeresni. Erre van 3 módszer :</P>
 
 <P>Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
   nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
-  XFree86-od verziója 4.1.0 vagy újabb-e, azok már jók.
+  XFree86-od verziója 4.1.0 vagy újabb-e, az már jó YUY2-vel, viszont
+  <B>szétfagy az YV12-tõl</B>! Szóval vagy vársz a 4.2.0-re, vagy
+  frissíted a DRI-det <A HREF="http://dri.sourceforge.net">CVS-bõl</A>.
   Ha furcsa effekteket észlelsz -vo xv-vel, próbáld ki az SDL meghajtót
   (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.3.1.4">2.3.1.4-es</A>
   fejezetet a részletekhez.</P>
@@ -228,7 +230,9 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2.  S3 kártyák</A></B></P>
 
 <P>S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
-  XFree86 kell (ha bajok vannak a képpel, próbáld meg 16bpp-n). S3 Virge-re vonatkozólag.. add el.</P>
+  XFree86 kell (ha bajok vannak a képpel, próbáld meg 16bpp-n). S3 Virge-re vonatkozólag..
+  van Xv támogatás hozzá, de a kártya maga elég lassú szoval jobb ha
+  eladod.</P>
 <P><B>Megj</B>.: a Savage kártyáknak lassú az YV12 megjelenítési képessége
   (YV12-YUY2 konverziót csinál a meghajtója mert a Savage hardver képtelen
   YV12-t megjeleníteni). Így amikor ezen dokumentáció azt mondja hogy
@@ -252,7 +256,7 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4.  ATI kártyák</A></B></P>
 
 <P>
-<LI>A GATOS meghajtó alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
+<LI>A <A HREF="http://www.linuxvideo.org/gatos">GATOS meghajtó</A> alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
   jelenti, hogy a dekódolási sebesség (!) hozzá van szinkronizálva a monitor
   frissítési frekvenciájához. Ha a lejátszás lassúnak tûnik, próbáld meg
   valahogy kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film
@@ -947,8 +951,8 @@ A:Egy másolásvédelmi mechanizmus.</code>
 a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
 
 <P>Az ATI TV kimenetek jelenlegi támogatottsága :
-<LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a gatos támogat.
-<LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a gatos által.
+<LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a <A HREF="http://www.linuxvideo.org/gatos">gatos</A> támogat.
+<LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a <A HREF="http://www.linuxvideo.org/gatos">gatos</A> által.
 <LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.
 Viszont <B>MPlayer</B>-rel teljeskörû <B>hardveres gyorsítást</B> és
 <B>TV kimenetet</B> kapsz Radeonokhoz ! Lásd a <a href=#2.3.1.12>VESA meghajtó</a> és

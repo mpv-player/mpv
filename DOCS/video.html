@@ -215,7 +215,8 @@ usable with <B>MPlayer</B>.</P>
 
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration,
 it didn't support either YUY2 or YV12, and so. Verify that you have
-XFree86 version 4.1.0 or greater, it works ok. Alternatively, you can use
+XFree86 version 4.1.0 or greater, it works ok with YUY2, but <B>crashes
+with YV12</B>! Thus, either wait for 4.2.0 or use the
 <A HREF="http://dri.sourceforge.net">DRI</A> cvs.
 If you experience strange effects using -vo xv, try SDL (it has XVideo too)
 and see if it helps. Check the <A HREF="#2.3.1.4">SDL section</A> for details.</P>
@@ -227,7 +228,8 @@ section!</P>
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2. S3 cards</A></B></P>
 
 <P>S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
-or greater (in case of image problems, try 16bpp). As for S3 Virge.. sell it.</P>
+or greater (in case of image problems, try 16bpp). As for S3 Virge.. there is
+xv support, but the card itself is very slow, so you better sell it.</P>
 
 <P><B>NOTE</B>: Savage cards have a slow YV12 image displaying capability (it needs
 to do YV12->YUY2 conversion, because the Savage hardware can't display YV12).
@@ -253,7 +255,7 @@ Complain to NVidia.</UL></P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI cards</A></B></P>
 
 <P>
-<LI>The GATOS driver (which you should use) has VSYNC enabled by default. It means that decoding speed
+<LI>The <A HREF="http://www.linuxvideo.org/gatos">GATOS driver</A> (which you should use) has VSYNC enabled by default. It means that decoding speed
 (!) is synced to the monitor's refresh rate. If playing seems to be slow, try
 disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.</LI>
 
@@ -972,8 +974,8 @@ hackers will be able to disable copy protection on their chips. Therefore
 we have no chance to get working TV-out on ATI.</P>
 
 <P>What's status of ATI's tv-out chips under Linux:
-<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by gatos.
-<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by gatos.
+<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by <A HREF="http://www.linuxvideo.org/gatos">gatos</A>.
+<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by <A HREF="http://www.linuxvideo.org/gatos">gatos</A>.
 <LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.
 But with <B>MPlayer</B> you get <B>full hardware acceleration</B> and <B>TV out</B>
 for Radeons !
