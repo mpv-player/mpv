@@ -882,7 +882,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
  }
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
-  mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
+  //mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized); // will be done by mplayer.c after fallback to playlist-parsing
   return NULL;
 //  GUI_MSG( mplUnknowFileType )
 }

@@ -585,6 +585,31 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
+int playtree_add_playlist(play_tree_t* entry)
+{
+  if(!entry) {      
+    entry = playtree_iter->tree;
+    if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+        return PT_NEXT_ENTRY;
+    }
+    if(playtree_iter->tree == entry ) { // Loop with a single file
+      if(play_tree_iter_up_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+	return PT_NEXT_ENTRY;
+      }
+    }
+    play_tree_remove(entry,1,1);
+    return PT_NEXT_SRC;
+  }
+  play_tree_insert_entry(playtree_iter->tree,entry);
+  play_tree_set_params_from(entry,playtree_iter->tree);
+  entry = playtree_iter->tree;
+  if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+    return PT_NEXT_ENTRY;
+  }      
+  play_tree_remove(entry,1,1);
+  return PT_NEXT_SRC;
+}
+
 static int play_tree_step = 1;
 
 /*
@@ -1125,32 +1150,8 @@ if(!use_stdin && !slave_mode){
     // Handle playlist
     current_module="handle_playlist";
     mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",filename);
-    entry = parse_playtree(stream);
-    if(!entry) {      
-      entry = playtree_iter->tree;
-      if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
-	eof = PT_NEXT_ENTRY;
-	goto goto_next_file;
-      }
-      if(playtree_iter->tree == entry ) { // Loop with a single file
-	if(play_tree_iter_up_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
-	  eof = PT_NEXT_ENTRY;
-	  goto goto_next_file;
-	}
-      }
-      play_tree_remove(entry,1,1);
-      eof = PT_NEXT_SRC;
-      goto goto_next_file;
-    }
-    play_tree_insert_entry(playtree_iter->tree,entry);
-    play_tree_set_params_from(entry,playtree_iter->tree);
-    entry = playtree_iter->tree;
-    if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
-      eof = PT_NEXT_ENTRY;
-      goto goto_next_file;
-    }      
-    play_tree_remove(entry,1,1);
-    eof = PT_NEXT_SRC;
+    entry = parse_playtree(stream,0);
+    eof=playtree_add_playlist(entry);
     goto goto_next_file;
   }
   stream->start_pos+=seek_to_byte;
@@ -1223,7 +1224,21 @@ if(stream_cache_size>0){
 current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
-if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
+if(!demuxer) 
+{
+  play_tree_t* entry;
+  // Handle playlist
+  current_module="handle_playlist";
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Falling back on trying to parse playlist %s...\n",filename);
+  stream_reset(stream);
+  stream_seek(stream,stream->start_pos);
+  entry = parse_playtree(stream,0);
+  if(!entry)
+    mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
+  else
+    eof=playtree_add_playlist(entry);
+  goto goto_next_file;
+}
 inited_flags|=INITED_DEMUXER;
 
 current_module="demux_open2";

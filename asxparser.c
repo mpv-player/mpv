@@ -528,7 +528,7 @@ asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
   ptp = play_tree_parser_new(stream,parser->deep+1);
 
-  pt = play_tree_parser_get_play_tree(ptp);
+  pt = play_tree_parser_get_play_tree(ptp, 1);
 
   play_tree_parser_free(ptp);
   free_stream(stream);

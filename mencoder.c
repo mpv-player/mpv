@@ -391,6 +391,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2);
     if(demuxer2) printf(MSGTR_UsingPass3ControllFile,frameno_filename);
+    else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
 
   // New config code
@@ -493,6 +494,7 @@ if(stream->type==STREAMTYPE_DVD){
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
+        mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
 	printf(MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }

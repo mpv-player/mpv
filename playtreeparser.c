@@ -251,7 +251,8 @@ parse_pls(play_tree_parser_t* p) {
   play_tree_t *list = NULL, *entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying winamp playlist...\n");
-  line = play_tree_parser_get_line(p);
+  if (!(line = play_tree_parser_get_line(p)))
+    return NULL;
   strstrip(line);
   if(strcasecmp(line,"[playlist]"))
     return NULL;
@@ -339,7 +340,8 @@ parse_ref_ini(play_tree_parser_t* p) {
   play_tree_t *list = NULL, *entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying reference-ini playlist...\n");
-  line = play_tree_parser_get_line(p);
+  if (!(line = play_tree_parser_get_line(p)))
+    return NULL;
   strstrip(line);
   if(strcasecmp(line,"[Reference]"))
     return NULL;
@@ -380,7 +382,8 @@ parse_m3u(play_tree_parser_t* p) {
   play_tree_t *list = NULL, *entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying extended m3u playlist...\n");
-  line = play_tree_parser_get_line(p);
+  if (!(line = play_tree_parser_get_line(p)))
+    return NULL;
   strstrip(line);
   if(strcasecmp(line,"#EXTM3U"))
     return NULL;
@@ -447,7 +450,7 @@ parse_textplain(play_tree_parser_t* p) {
 }
 
 play_tree_t*
-parse_playtree(stream_t *stream) {
+parse_playtree(stream_t *stream, int forced) {
   play_tree_parser_t* p;
   play_tree_t* ret;
 
@@ -460,7 +463,7 @@ parse_playtree(stream_t *stream) {
   if(!p)
     return NULL;
 
-  ret = play_tree_parser_get_play_tree(p);
+  ret = play_tree_parser_get_play_tree(p, forced);
   play_tree_parser_free(p);
 
   return ret;
@@ -509,7 +512,7 @@ parse_playlist_file(char* file) {
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Parsing playlist file %s...\n",file);
 
   stream = new_stream(fd,STREAMTYPE_PLAYLIST);
-  ret = parse_playtree(stream);
+  ret = parse_playtree(stream,1);
   if(close(fd) < 0)
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Warning error while closing playlist file %s : %s\n",file,strerror(errno));
   free_stream(stream);
@@ -555,7 +558,7 @@ play_tree_parser_free(play_tree_parser_t* p) {
 }
 
 play_tree_t*
-play_tree_parser_get_play_tree(play_tree_parser_t* p) {
+play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
   play_tree_t* tree = NULL;
 
 #ifdef MP_DEBUG
@@ -583,19 +586,23 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p) {
     play_tree_parser_reset(p);
 
     // Here come the others formats ( textplain must stay the last one )
-    tree = parse_textplain(p);
-    if(tree) break;
+    if (forced)
+    {
+      tree = parse_textplain(p);
+      if(tree) break;
+    }
     break;
   }
 
   if(tree)
     mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist succefully parsed\n");
-  else mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while parsing playlist\n");
+  else 
+    mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
 
   if(tree)
     tree = play_tree_cleanup(tree);
   
-  if(!tree) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Warning empty playlist\n");
+  if(!tree) mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning empty playlist\n");
 
   return tree;
 }

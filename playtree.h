@@ -158,7 +158,7 @@ char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d);
 
 play_tree_t*
-parse_playtree(struct stream_st *stream);
+parse_playtree(struct stream_st *stream, int forced);
 
 play_tree_t*
 play_tree_cleanup(play_tree_t* pt);
