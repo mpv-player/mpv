@@ -37,7 +37,7 @@ SGML_CATALOG_FILES ?= /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog
 CHUNK_XSL = /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl
 
 # List of subdirectories to be processed.
-SUBDIRS = en
+SUBDIRS = en fr
 
 # Here all generated html's go
 HTML_TOP = ../HTML
