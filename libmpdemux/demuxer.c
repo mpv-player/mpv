@@ -11,6 +11,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "../cfgparser.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -192,6 +193,7 @@ extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 #endif
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
+extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -216,6 +218,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #endif
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
+    case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
   }
   return 0;
 }
@@ -408,7 +411,8 @@ extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 
-demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
+
+static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
 //int file_format=(*file_format_ptr);
 
@@ -449,8 +453,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       if(id==formtypeAVI){ 
         mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAVIfile);
         file_format=DEMUXER_TYPE_AVI;
-      } else
+      } else {
         free_demuxer(demuxer);
+        demuxer = NULL;
+      }	
     }
   }
 }
@@ -460,8 +466,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   if(y4m_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
       file_format=DEMUXER_TYPE_Y4M;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as ASF file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
@@ -469,8 +477,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   if(asf_check_header(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
       file_format=DEMUXER_TYPE_ASF;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as NUV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
@@ -478,8 +488,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
   if(nuv_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected NuppelVideo file format!\n");
       file_format=DEMUXER_TYPE_NUV;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as MOV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
@@ -487,8 +499,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   if(mov_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
       file_format=DEMUXER_TYPE_MOV;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as VIVO file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
@@ -496,6 +510,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
   if(vivo_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
       file_format=DEMUXER_TYPE_VIVO;
+  } else {
+    free_demuxer(demuxer);
+    demuxer = NULL;
   }
 }
 //=============== Try to open as REAL file: =================
@@ -504,8 +521,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
   if(real_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedREALfile);
       file_format=DEMUXER_TYPE_REAL;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as FLI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
@@ -518,8 +537,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
     if((id==0xAF11) || (id==0xAF12)){ 
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
       file_format=DEMUXER_TYPE_FLI;
-    } else
+    } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+    }
   }
 }
 //=============== Try to open as FILM file: =================
@@ -531,8 +552,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
     if(signature==mmioFOURCC('F', 'I', 'L', 'M')){ 
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFILMfile);
       file_format=DEMUXER_TYPE_FILM;
-    } else
+    } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+    }
   }
 }
 //=============== Try to open as RoQ file: =================
@@ -541,8 +564,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
   if(roq_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedROQfile);
       file_format=DEMUXER_TYPE_ROQ;
-  } else
+  } else {
       free_demuxer(demuxer);
+      demuxer = NULL;
+  }
 }
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
@@ -591,6 +616,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       else
         mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
       free_demuxer(demuxer);
+      demuxer = NULL;
     }
   }
   break;
@@ -603,6 +629,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_InvalidMPEGES);
     file_format=DEMUXER_TYPE_UNKNOWN;
     free_demuxer(demuxer);
+    demuxer = NULL;
   } else {
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
@@ -624,11 +651,13 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
   if(demux_audio_open(demuxer)){
     mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected audio file\n");
     file_format=DEMUXER_TYPE_AUDIO;
-  } else
+  } else {
     free_demuxer(demuxer);
+    demuxer = NULL;
+  }
 }
 //=============== Unknown, exiting... ===========================
-if(file_format==DEMUXER_TYPE_UNKNOWN){
+if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   return NULL;
 //  GUI_MSG( mplUnknowFileType )
@@ -760,6 +789,58 @@ pts_from_bps=0; // !!!
 return demuxer;
 }
 
+static char* audio_stream = NULL;
+static char* sub_stream = NULL;
+static int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
+extern m_config_t* mconfig;
+
+demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id){
+  stream_t *as = NULL,*ss = NULL;
+  demuxer_t *vd,*ad = NULL,*sd = NULL;
+  int afmt = 0,sfmt = 0;
+
+  if(audio_stream) {
+    as = open_stream(audio_stream,0,&afmt);
+    if(!as) {
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't open audio stream: %s\n",audio_stream);
+      return NULL;
+    }
+  }
+  if(sub_stream) {
+    ss = open_stream(sub_stream,0,&sfmt);
+    if(!ss) {
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't open subtitles stream: %s\n",sub_stream);
+      return NULL;
+    }
+  }
+
+  vd = demux_open_stream(vs,demuxer_type ? demuxer_type : file_format,audio_stream ? -2 : audio_id,video_id, sub_stream ? -2 : dvdsub_id);
+  if(!vd)
+    return NULL;
+  if(as) {
+    ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2);
+    if(!ad)
+      mp_msg(MSGT_DEMUXER,MSGL_WARN,"Failed to open audio demuxer: %s\n",audio_stream);
+    else if(ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
+      m_config_set_flag(mconfig,"hr-mp3-seek",1); // Enable high res seeking
+  }
+  if(ss) {
+    sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id);
+    if(!sd)
+      mp_msg(MSGT_DEMUXER,MSGL_WARN,"Failed to open subtitles demuxer: %s\n",sub_stream);
+  }
+
+  if(ad && sd)
+    return new_demuxers_demuxer(vd,ad,sd);
+  else if(ad)
+    return new_demuxers_demuxer(vd,ad,vd);
+  else if(sd)
+    return new_demuxers_demuxer(vd,vd,sd);
+  else
+    return vd;
+}
+
+
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
@@ -769,6 +850,7 @@ int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -830,6 +912,8 @@ switch(demuxer->file_format){
       demux_seek_nuv(demuxer,rel_seek_secs,flags);  break;
   case DEMUXER_TYPE_AUDIO:
       demux_audio_seek(demuxer,rel_seek_secs,flags);  break;
+ case DEMUXER_TYPE_DEMUXERS:
+      demux_demuxers_seek(demuxer,rel_seek_secs,flags);  break;
 
 
 } // switch(demuxer->file_format)
@@ -874,3 +958,31 @@ int demux_info_print(demuxer_t *demuxer)
 
     return 0;
 }
+
+char* demux_info_get(demuxer_t *demuxer, char *opt) {
+  int i;
+  char **info = demuxer->info;
+
+  for(i = 0; info && info[2*i] != NULL; i++) {
+    if(!strcasecmp(opt,info[2*i]))
+      return info[2*i+1];
+  }
+
+  return NULL;
+}
+
+/******************* Options stuff **********************/
+
+static config_t demuxer_opts[] = {
+  { "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+  { "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+  { "sub-demuxer", &sub_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+  { NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
+void demuxer_register_options(m_config_t* cfg) {  
+  m_config_register_options(cfg,demuxer_opts);
+}
+

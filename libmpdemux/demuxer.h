@@ -20,6 +20,11 @@
 #define DEMUXER_TYPE_ROQ 15
 #define DEMUXER_TYPE_MF 16
 #define DEMUXER_TYPE_AUDIO 17
+// This should always match the higest demuxer type number.
+// Unless you want to disallow users to force the demuxer to some types
+#define DEMUXER_TYPE_MAX 17
+
+#define DEMUXER_TYPE_DEMUXERS (1<<16)
 
 #define DEMUXER_TIME_NONE 0
 #define DEMUXER_TIME_PTS 1
@@ -172,6 +177,7 @@ static inline int avi_stream_id(unsigned int id){
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 
 // AVI demuxer params:
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
@@ -179,4 +185,5 @@ extern int force_ni;
 extern int pts_from_bps;
 
 int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
+char* demux_info_get(demuxer_t *demuxer, char *opt);
 int demux_info_print(demuxer_t *demuxer);
