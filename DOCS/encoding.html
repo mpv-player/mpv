@@ -18,7 +18,7 @@
 
 <P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
 designed to encode MPlayer-playable movies
-(<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other MPlayer-playable
+(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other MPlayer-playable
 formats (see below). It can encode with various codecs, like <B>DivX4</B> (1 or
 2 passes), libavcodec, <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audio. Also has
 stream copying and video resizing abilities.</P>
@@ -196,15 +196,13 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
   AVI (DivX) files, you have be aware that AVI headers don't store this
   value. Thus, the only solution is rescaling.</P>
 
-<P><B>MEncoder</B> can scale input images if they come in YV12 format (for example:
-  ffdivx, odivx drivers, or mpeg1/2). The output size is specified with the
-  <CODE>-x</CODE>, and <CODE>-y</CODE> options.  Furthermore, there are some
-  rescaling filters in <B>MEncoder</B>, see the manpage for them !
-  They can be specified with the <CODE>-sws</CODE> option. If not specified,
-  <B>MEncoder</B> will use 0 : fast bilinear.</P>
+<P>The scaling process is handled by the <I>'scale'</I> video filter:
+  <CODE>-vop scale=X:Y</CODE>. Its quality can be set with the
+  <CODE>-sws</CODE> option. If it's not specified, <B>MEncoder</B> will use 0 :
+  fast bilinear.</P>
 
-<P>Rescaling is very simple :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P>
+<P>Usage :<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Stream copying</B></P>
@@ -236,7 +234,7 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
 the video and/or audio streams. It also fixes files with broken interleaving,
 thus the <CODE>-ni</CODE> option won't be needed for them anymore.</P>
 
-<P>Command : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+<P>Command : <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.5>2.4.3.5.  Encoding with the <I>libavcodec</I> codec family</B></P>
@@ -347,20 +345,6 @@ unsupported). You can encode to the following codecs :</P>
 </TR>
 <TR>
   <TD><FONT CLASS="text">
-    <I>-x</I> width in pixels</TD>
-  <TD><FONT CLASS="text">
-    rescale output video to given pixels width
-  </TD>
-</TR>
-<TR>
-  <TD><FONT CLASS="text">
-    <I>-y</I> height in pixels</TD>
-  <TD><FONT CLASS="text">
-    rescale output video to given pixels height
-  </TD>
-</TR>
-<TR>
-  <TD><FONT CLASS="text">
     <I>-sws</I> 0-2</TD>
   <TD><FONT CLASS="text">
     type of scaling method<BR>
@@ -375,8 +359,6 @@ unsupported). You can encode to the following codecs :</P>
   <TD><FONT CLASS="text">
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
-    &nbsp;&nbsp;<B>null</B> - do not create a video stream in the output AVI<BR>
-    &nbsp;&nbsp;<B>raw</B> - create uncompressed video<BR>
     &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
     &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
     &nbsp;&nbsp;<B>divx4</B> - encode to DivX4<BR>
@@ -463,7 +445,7 @@ unsupported). You can encode to the following codecs :</P>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
 
 <P>Encoding from DVD, title 2, with rescaling :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -x 640 -y 480 -sws 2 -o title2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o title2.avi</CODE></P>
 
 <P>Encoding from HTTP :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>

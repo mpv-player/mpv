@@ -294,8 +294,8 @@ Developer Cries
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
-AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ files,
-supported by many native, XAnim, and
+AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ
+files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
 library at all!). The another big feature of mplayer is the wide range of
@@ -309,14 +309,7 @@ HREF="DXR3">DXR3/Hollywood+</A></B> ! And what about the nice big antialiased
 shaded subtitles (<B>10 supported types!!!</B>) with european/ISO 8859-1,2
 (hungarian, english, czech, etc), cyrillic, korean fonts, and OSD?</P>
 
-<P><B>MPlayer</B> is basically GPL, but contains some non-GPL code which is not
-allowed to be distributed in binary form, and also contains the OpenDivX
-library which has special license. We are still developing towards GPL.</P>
-
-<P>Distributing <B>MPlayer</B> in the form of binaries and/or binary packages
-is currently impossible, speaking about both <B>technical</B> and <B>law</B>
-areas. Detailed information can be found in the second part of <A HREF="users_against_developers.html#binary">this file</A>,
-and it is recommended to read it.</P>
+<P><B>MPlayer</B> is under GPL v2 license.</P>
 
 <P>My player is rock solid playing damaged MPEG files (useful for some VCDs),
 and it plays bad AVI files which are unplayable with the famous
@@ -372,6 +365,8 @@ too. So I've decided to write/modify one...</P>
     MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak, ADPCM codecs,
     and support for XAnim's binary codecs; DVD subtitles support, first
     release of MEncoder, TV grabbing, cache, liba52, countless fixes.</LI>
+<LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
+    </LI>
 </UL></P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
@@ -428,10 +423,12 @@ will take some time, but it DOES worth it.</P>
 <P><B><I>CODECS</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/etc codec, check the
+<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/MP42/etc
+codec, check the
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
 <UL>
-  <LI>you can <B>gain <I>DivX/DivX4/DivX5</I> playing on non-x86 machines</B></LI>
+  <LI>you can <B>gain <I>DivX/DivX4/DivX5/MP42</I> playing on non-x86
+    machines</B></LI>
   <LI>RealVideo 1.0/VIVO/MJPEG/h263/others playing and encoding</LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4/DivX5
 movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
@@ -519,7 +516,7 @@ broken in 4.1.0, and earlier releases!</LI>
 section</A> of the TV-out documentation, to know what features of your card is
 supported under Linux/MPlayer. If you have a <B>Radeon</B>, <B>Rage128</B>
 or <B>Mach64</B> (Rage XL/Mobility, Xpert98) card, we have a
-<B>XXX_vid</B> driver for you, with optional TV out ! Check <A
+<B>Vidix</B> driver for you, with optional TV out ! Check <A
 HREF="video.html#2.3.1.14">this</A> section ! <U><B>If you are non-Linux
 user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
 
