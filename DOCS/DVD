@@ -89,7 +89,7 @@ like 1GHz Athlon systems (as far as I know, it's said that about
 300MHz celeron is the minimum to watch DVDs ... using windows
 DVD viewers).
 
-Hint: I commented out downmix fountions from libac3 (of course in this way I
+Hint: I commented out downmix functions from libac3 (of course in this way I
 can't get sound) and audio decoding CPU usage became 11% instead of 24 on
 my machine. This clearly indicates that we should optimize downmix functions
 (KNI code is no use for my k6-2).

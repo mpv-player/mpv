@@ -13,7 +13,6 @@ o MPlayer and LIRC
 
  If you have installed the lirc-package, you can compile MPlayer with LIRC
  support using  ./configure --enable-lirc
- You should do 'make distclean' before re-compile with 'make dep;make'
 
  If everything went fine, MPlayer will print a message like 
    LIRC init was successful.

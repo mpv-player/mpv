@@ -2,8 +2,9 @@
 Recommendations for misc. soundcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aureal Vortex 2:
-			run ./configure script with --disable-select option
+// (new audio code, what now?)
+// Aureal Vortex 2:
+//			run ./configure script with --disable-select option
 
 GUS PnP:
 			OSS	: none
@@ -31,7 +32,7 @@ ESS 688:
 			Max kHz : 48
 
 PC Speaker or DAC:
-			OSS     : only with the new HQ timing code
+			OSS     : OK (new timing code?)
 			ALSA    : no driver
 			Max kHz : 6 ;) (the driver emulates 44.1 maybe more)
 			Driver  : ftp://ftp.infradead.org/pub/pcsp

@@ -29,9 +29,8 @@ I use following command too :
 	echo file_readahead:2000000 >/proc/ide/<cdrom device>/settings
 for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
 
-It's recommended that you tuneup your CDROM drive also with hdparm:
-
-hdparm -d1 -a8 -u1 <cdrom device>
+It's recommended that you tuneup your CDROM drive also with hdparm :
+	hdparm -d1 -a8 -u1 <cdrom device>
 to enable using DMA access, readahead, and IRQ unmasking.
 (if you don't understand these, *read the hdparm manpage*)
 
