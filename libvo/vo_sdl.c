@@ -124,7 +124,6 @@
 LIBVO_EXTERN(sdl)
 
 extern int verbose;
-char *sdl_driver;
 int sdl_noxv;
 int sdl_forcexv;
 
@@ -335,7 +334,7 @@ static int sdl_open (void *plugin, void *name)
 
 	if(verbose > 2) printf("SDL: Opening Plugin\n");
 
-	if(sdl_driver) setenv("SDL_VIDEODRIVER", sdl_driver, 1);
+	if(vo_subdevice) setenv("SDL_VIDEODRIVER", vo_subdevice, 1);
 
 	/* does the user want SDL to try and force Xv */
 	if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
