@@ -408,9 +408,11 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   }
   // If packet is an header we jump it except for vorbis and theora
   // (PACKET_TYPE_HEADER bit doesn't even exist for theora ?!)
-  if((*pack->packet & PACKET_TYPE_HEADER) && 
+  // We jump nothing for FLAC. Ain't this great? Packet contents have to be
+  // handled differently for each and every stream type. The joy! The joy!
+  if(!os->flac && ((*pack->packet & PACKET_TYPE_HEADER) && 
      (ds != d->audio || ( ((sh_audio_t*)ds->sh)->format != 0xFFFE || os->hdr_packets >= NUM_VORBIS_HDR_PACKETS ) ) &&
-     (ds != d->video || (((sh_video_t*)ds->sh)->format != 0xFFFC)))
+     (ds != d->video || (((sh_video_t*)ds->sh)->format != 0xFFFC))))
     return 0;
 
   // For vorbis packet the packet is the data, for other codec we must jump
