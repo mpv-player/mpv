@@ -67,6 +67,7 @@
 #include <linux/ioport.h>
 #include <linux/init.h>
 #include <linux/pci.h>
+#include <linux/unistd.h>
 
 #include <asm/io.h>
 
@@ -1501,138 +1502,16 @@ RTRACE("radeonfb: radeon_init_common_regs is called\n");
 	    save->bus_cntl |= BUS_RD_DISCARD_EN;
 	*/
 }
-#if 0
-static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
-                                 struct radeon_regs *save,
-                                 struct fb_var_screeninfo *mode)
-{
-    int    format;
-    int    hsync_start;
-    int    hsync_wid;
-    int    hsync_fudge;
-    int    vsync_wid;
-    int    bytpp;
-    int    hsync_fudge_default[] = { 0x00, 0x12, 0x09, 0x09, 0x06, 0x05 };
-    int    hsync_fudge_fp[]      = { 0x02, 0x02, 0x00, 0x00, 0x05, 0x05 };
-    int    prim_mon;
-    int    hTotal, vTotal, hSyncStart, hSyncEnd;
-    int    vSyncStart, vSyncEnd;
-RTRACE("radeonfb: radeon_init_crtc_regs is called\n"); 
 
-    switch (mode->bits_per_pixel) {
-    case 8:  format = 2; bytpp = 1; break;
-    case 16: format = 4; bytpp = 2; break;      /*  565 */
-    case 24: format = 5; bytpp = 3; break;      /*  RGB */
-    case 32: format = 6; bytpp = 4; break;      /* xRGB */
-    default:
-	printk("radeonfb: Unsupported pixel depth (%d)\n", mode->bits_per_pixel);
-	return 0;
-    }
-    prim_mon = PRIMARY_MONITOR(rinfo);
-    if ((prim_mon == MT_DFP) || (prim_mon == MT_LCD))
-	hsync_fudge = hsync_fudge_fp[format-1];
-    else
-    hsync_fudge = hsync_fudge_default[format-1];
-
-    save->crtc_gen_cntl = (CRTC_EXT_DISP_EN
-			  | CRTC_EN
-			  | (format << 8)
-			 /* | CRTC_DBL_SCAN_EN*/);
-
-    if((prim_mon == MT_DFP) || (prim_mon == MT_LCD))
-    {
-        save->crtc_ext_cntl = VGA_ATI_LINEAR |
-        			  XCRT_CNT_EN;
-        save->crtc_gen_cntl &= ~(CRTC_DBL_SCAN_EN |
-                                  CRTC_INTERLACE_EN);
-    }
-    else
-    save->crtc_ext_cntl = VGA_ATI_LINEAR |
-			  XCRT_CNT_EN |
-			  CRTC_CRT_ON;
-
-    save->dac_cntl      = (DAC_MASK_ALL
-			   | DAC_VGA_ADR_EN
-			   | DAC_8BIT_EN);
-
-    rinfo->xres = mode->xres;
-    rinfo->yres = mode->yres;
-    rinfo->pixclock = mode->pixclock;
-
-    hSyncStart = mode->xres + mode->right_margin;
-    hSyncEnd = hSyncStart + mode->hsync_len;
-    hTotal = hSyncEnd + mode->left_margin;
-
-    vSyncStart = mode->yres + mode->lower_margin;
-    vSyncEnd = vSyncStart + mode->vsync_len;
-    vTotal = vSyncEnd + mode->upper_margin;
-
-    if(((prim_mon == MT_DFP) || (prim_mon == MT_LCD)))
-    {
-        if(rinfo->PanelXRes < mode->xres)
-            rinfo->xres = mode->xres = rinfo->PanelXRes;
-        if(rinfo->PanelYRes < mode->yres)
-            rinfo->yres = mode->yres = rinfo->PanelYRes;
-        hTotal = mode->xres + rinfo->HBlank + mode->left_margin;
-        hSyncStart = mode->xres + rinfo->HOverPlus + mode->right_margin;
-        hSyncEnd = hSyncStart + rinfo->HSyncWidth + mode->hsync_len;
-        vTotal = mode->yres + rinfo->VBlank + mode->upper_margin;
-        vSyncStart = mode->yres + rinfo->VOverPlus + mode->lower_margin;
-        vSyncEnd = vSyncStart + rinfo->VSyncWidth + mode->vsync_len;
-    }
-
-    save->crtc_h_total_disp = ((((hTotal / 8) - 1) & 0x3ff)
-	   | ((((mode->xres / 8) - 1) & 0x1ff) << 16));
-
-    hsync_wid = (hSyncEnd - hSyncStart) / 8;
-    if (!hsync_wid)       hsync_wid = 1;
-    if (hsync_wid > 0x3f) hsync_wid = 0x3f;
-    hsync_start = hSyncStart - 8 + hsync_fudge;
-
-    save->crtc_h_sync_strt_wid = ((hsync_start & 0x1fff)
- 				 | (hsync_wid << 16)
-				 | ((mode->sync & FB_SYNC_HOR_HIGH_ACT)
-				    ? 0
-				    : CRTC_H_SYNC_POL));
-
-				/* This works for double scan mode. */
-    save->crtc_v_total_disp = (((vTotal - 1) & 0xffff)
-			      | ((mode->yres - 1) << 16));
-
-    vsync_wid = vSyncEnd - vSyncStart;
-    if (!vsync_wid)       vsync_wid = 1;
-    if (vsync_wid > 0x1f) vsync_wid = 0x1f;
-
-    save->crtc_v_sync_strt_wid = (((vSyncStart - 1) & 0xfff)
-				 | (vsync_wid << 16)
-				 | ((mode->sync & FB_SYNC_VERT_HIGH_ACT)
-				    ? 0
-				    : CRTC_V_SYNC_POL));
-
-    save->crtc_offset      = 0;
-    save->crtc_offset_cntl = 0;
-
-    save->crtc_pitch  = ((mode->xres * bytpp) +
-                        ((mode->bits_per_pixel) - 1)) /
-                        (mode->bits_per_pixel);
-    save->crtc_pitch |= save->crtc_pitch << 16;
-
-    save->xres = mode->xres;
-    save->yres = mode->yres;
-
-RTRACE("radeonfb: radeon_init_crtc_regs returns SUCCESS\n"); 
-    return 1;
-}
-#endif
 static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
                                  struct radeon_regs *save,
                                  struct fb_var_screeninfo *mode)
 {
 	int hTotal, vTotal, hSyncStart, hSyncEnd,
-	    hSyncPol, vSyncStart, vSyncEnd, vSyncPol, cSync;
+	    vSyncStart, vSyncEnd, cSync;
 	u8 hsync_adj_tab[] = {0, 0x12, 9, 9, 6, 5};
 	u8 hsync_fudge_fp[] = { 2, 2, 0, 0, 5, 5 };
-	u32 sync, h_sync_pol, v_sync_pol;
+	u32 sync;
         int format = 0;
 	int hsync_start, hsync_fudge, bytpp, hsync_wid, vsync_wid;
 	int prim_mon;
@@ -1666,8 +1545,6 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 	}
 
 	sync = mode->sync;
-	h_sync_pol = sync & FB_SYNC_HOR_HIGH_ACT ? 0 : 1;
-	v_sync_pol = sync & FB_SYNC_VERT_HIGH_ACT ? 0 : 1;
 
 	RTRACE("hStart = %d, hEnd = %d, hTotal = %d\n",
 		hSyncStart, hSyncEnd, hTotal);
@@ -1685,9 +1562,6 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 		vsync_wid = 1;
 	else if (vsync_wid > 0x1f)	/* max */
 		vsync_wid = 0x1f;
-
-	hSyncPol = mode->sync & FB_SYNC_HOR_HIGH_ACT ? 0 : 1;
-	vSyncPol = mode->sync & FB_SYNC_VERT_HIGH_ACT ? 0 : 1;
 
 	cSync = mode->sync & FB_SYNC_COMP_HIGH_ACT ? (1 << 4) : 0;
 
@@ -1708,6 +1582,9 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 			format = DST_32BPP;
 			bytpp = 4;
 			break;
+		default:
+			printk("radeonfb: Unsupported pixel depth (%d)\n", mode->bits_per_pixel);
+			return 0;
 	}
 
         if ((prim_mon == MT_DFP) || (prim_mon == MT_LCD))
@@ -1721,8 +1598,7 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 			      | (format << 8)
 			     /* | CRTC_DBL_SCAN_EN*/);
 
-	if((prim_mon == MT_DFP) || (prim_mon == MT_LCD))
-	{
+	if((prim_mon == MT_DFP) || (prim_mon == MT_LCD)) {
     	    save->crtc_ext_cntl = VGA_ATI_LINEAR |
         			  XCRT_CNT_EN;
     	    save->crtc_gen_cntl &= ~(CRTC_DBL_SCAN_EN |
@@ -1733,23 +1609,30 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 				  XCRT_CNT_EN |
 				  CRTC_CRT_ON;
 
-	    save->dac_cntl      = (DAC_MASK_ALL
-				   | DAC_VGA_ADR_EN
-		    		   | DAC_8BIT_EN);
+	save->dac_cntl   = (DAC_MASK_ALL
+			    | DAC_VGA_ADR_EN
+	    		    | DAC_8BIT_EN);
 
 	save->crtc_h_total_disp = ((((hTotal / 8) - 1) & 0x3ff) |
 				     ((((mode->xres / 8) - 1) & 0x1ff) << 16));
 
-	save->crtc_h_sync_strt_wid = ((hsync_start & 0x1fff) |
-					(hsync_wid << 16) | (h_sync_pol << 23));
-
 	save->crtc_v_total_disp = ((vTotal - 1) & 0xffff) |
 				    ((mode->yres - 1) << 16);
 
-	save->crtc_v_sync_strt_wid = (((vSyncStart - 1) & 0xfff) |
-					 (vsync_wid << 16) | (v_sync_pol  << 23));
+	save->crtc_h_sync_strt_wid = ((hsync_start & 0x1fff)
+ 				     | (hsync_wid << 16)
+				     | (mode->sync & FB_SYNC_HOR_HIGH_ACT ? 0
+				        : CRTC_H_SYNC_POL));
 
-	save->crtc_pitch = (mode->xres >> 3);
+	save->crtc_v_sync_strt_wid = (((vSyncStart - 1) & 0xfff)
+				     | (vsync_wid << 16)
+				     | (mode->sync & FB_SYNC_VERT_HIGH_ACT ? 0
+				        : CRTC_V_SYNC_POL));
+
+	save->crtc_pitch  = ((mode->xres * bytpp) +
+            		    ((mode->bits_per_pixel) - 1)) /
+                    	    (mode->bits_per_pixel);
+	save->crtc_pitch |= save->crtc_pitch<<16;
 
 #if defined(__BIG_ENDIAN)
 	save->surface_cntl = SURF_TRANSLATION_DIS;
@@ -1768,9 +1651,9 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 			& ~(0x3f)) / 64;
 
 	RTRACE("h_total_disp = 0x%x\t   hsync_strt_wid = 0x%x\n",
-		newmode.crtc_h_total_disp, newmode.crtc_h_sync_strt_wid);
+		save->crtc_h_total_disp, save->crtc_h_sync_strt_wid);
 	RTRACE("v_total_disp = 0x%x\t   vsync_strt_wid = 0x%x\n",
-		newmode.crtc_v_total_disp, newmode.crtc_v_sync_strt_wid);
+		save->crtc_v_total_disp, save->crtc_v_sync_strt_wid);
 
 	save->xres = mode->xres;
 	save->yres = mode->yres;
@@ -2003,7 +1886,7 @@ static void radeon_init_pll_regs(struct radeonfb_info *rinfo,
 
 RTRACE("post div = 0x%x\n", rinfo->post_div);
 RTRACE("fb_div = 0x%x\n", rinfo->fb_div);
-RTRACE("ppll_div_3 = 0x%x\n", newmode.ppll_div_3);
+RTRACE("ppll_div_3 = 0x%x\n", save->ppll_div_3);
 }
 
 static void radeon_init_pll2_regs(struct radeonfb_info *rinfo,
@@ -2738,6 +2621,30 @@ static void radeonfb_blank (int blank, struct fb_info *info)
 
 	switch (blank) {
 		case VESA_NO_BLANKING:
+			if(DUAL_MONITOR(rinfo)) {
+			    OUTREGP(CRTC2_GEN_CNTL,
+				    0,
+				    ~(CRTC2_DISP_DIS |
+				    CRTC2_VSYNC_DIS |
+				    CRTC2_HSYNC_DIS));
+			}
+			switch(PRIMARY_MONITOR(rinfo)) {
+			    case MT_LCD:
+				OUTREGP(LVDS_GEN_CNTL, 0,
+					~LVDS_DISPLAY_DIS);
+			    case MT_CRT:
+			    case MT_DFP:
+				OUTREGP(CRTC_EXT_CNTL, 
+				    CRTC_CRT_ON,
+				    ~(CRTC_DISPLAY_DIS |
+				    CRTC_VSYNC_DIS |
+				    CRTC_HSYNC_DIS));
+				break;
+			    case MT_NONE:
+			    default:
+				break;
+
+			}
 			break;
 		case VESA_VSYNC_SUSPEND:
 			val |= (CRTC_DISPLAY_DIS | CRTC_VSYNC_DIS);
@@ -2750,9 +2657,7 @@ static void radeonfb_blank (int blank, struct fb_info *info)
 				CRTC_HSYNC_DIS);
 			break;
 	}
-	if(blank == VESA_NO_BLANKING && rinfo->hasCRTC2)
-		    OUTREGP(CRTC_EXT_CNTL,CRTC_CRT_ON, val);
-	else OUTREG(CRTC_EXT_CNTL, val);
+	if(blank != VESA_NO_BLANKING) OUTREG(CRTC_EXT_CNTL, val);
 }
 
 
@@ -3091,19 +2996,13 @@ RTRACE("radeonfb: radeon_write_fp_regs is called\n");
 	}
 	else {
 		if (restore->lvds_gen_cntl & (LVDS_ON | LVDS_BLON)) {
-#if 0
-/* TODO it later */
-			usleep(rinfo->PanelPwrDly * 1000);
-#endif
+			udelay(rinfo->PanelPwrDly * 1000);
 			OUTREG(LVDS_GEN_CNTL, restore->lvds_gen_cntl);
 		}
 		else {
 			OUTREG(LVDS_GEN_CNTL,
 			restore->lvds_gen_cntl | LVDS_BLON);
-#if 0
-/* TODO it later */
-			usleep(rinfo->PanelPwrDly * 1000);
-#endif
+			udelay(rinfo->PanelPwrDly * 1000);
 			OUTREG(LVDS_GEN_CNTL, restore->lvds_gen_cntl);
 		}
 	}
