@@ -235,12 +235,18 @@ play_dvd_2:
                break;
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
-	       if ( !dvd_device ) dvd_device=DEFAULT_DVD_DEVICE;
-               guiSetFilename( guiIntfStruct.Filename,dvd_device );
-	       dvd_title=guiIntfStruct.DVD.current_title;
-	       dvd_angle=guiIntfStruct.DVD.current_angle;
-               dvd_chapter=guiIntfStruct.DVD.current_chapter;
-               guiIntfStruct.DVDChanged=1;
+	       if ( !dvd_device ) 
+	        {
+	         dvd_device=DEFAULT_DVD_DEVICE;
+                 guiSetFilename( guiIntfStruct.Filename,dvd_device );
+		} 
+	       if ( guiIntfStruct.Playing != 2 )
+	        {
+	         dvd_title=guiIntfStruct.DVD.current_title;
+	         dvd_angle=guiIntfStruct.DVD.current_angle;
+                 dvd_chapter=guiIntfStruct.DVD.current_chapter;
+                 guiIntfStruct.DVDChanged=1;
+		} 
                break;
 #endif
          }
