@@ -1949,7 +1949,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       int v,abs;
       v = cmd->args[0].v.i;
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
-      if(abs) {
+      if(abs==2) { /* Absolute seek to a specific timestamp in seconds */
+        abs_seek_pos = 1;
+	if(sh_video)
+	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	rel_seek_secs = v;
+      }
+      else if(abs) { /* Absolute seek by percentage */
 	abs_seek_pos = 3;
 	if(sh_video)
 	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;

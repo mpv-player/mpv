@@ -2075,9 +2075,10 @@ otherwise one of the following tokens:
 .TP
 .B Commands
 .RSs
-.IPs "seek <value> [type=<0/1>]"
+.IPs "seek <value> [type=<0/1/2>]"
 Seek to some place in the movie. Type 0 is a relative seek of +/- <value>
 seconds. Type 1 seek to <value> % in the movie.
+Type 2 is a seek to an absolute position of <value> seconds.
 .IPs "audio_delay <value>"
 Adjust the audio delay of value seconds
 .IPs quit
