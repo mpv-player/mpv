@@ -51,6 +51,14 @@ Current plugins:
     No parameters.
     MPI: TEMP
 
+-vop rectangle[=w:h:x:y]
+    Draw a rectangle.  Useful for testing crop plugin parameters.
+    w,h (rectangle's width and height) defaults (-1) to maximum
+        possible width while keeping the boundaries visible.
+    x,y (rectangle's top left corner position) defauts (-1) to upper
+        left most position.
+    MPI: TEMP
+
 -vop rotate[=x]
     Rotate image +/- 90 degrees
     Optional 'x' parameter (0..3) controls horizontal and vertical mirroring
