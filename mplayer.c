@@ -17,11 +17,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/soundcard.h>
-#ifdef __FreeBSD__
-#include <sys/cdio.h>
-#else
-#include <linux/cdrom.h>
-#endif
 
 #include "version.h"
 #include "config.h"
