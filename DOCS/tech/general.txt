@@ -250,7 +250,7 @@ static void uninit();
   Guess what.
   Ok I help: closes the device, not (yet) called when exit.
 
-statis void reset();
+static void reset();
   Resets device. To be exact, it's for deleting buffers' contents,
   so after reset() the previously received stuff won't be output.
   (called if pause or seek)
