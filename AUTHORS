@@ -458,7 +458,7 @@ Alexander Gottwald <Alexander.Gottwald@informatik.tu-chemnitz.de>
     * various small bugfixes
 
 Andreas Hess <jaska@gmx.net>
-    * upgrading libdvdcss to 1.2.4 in libmpdvdkit2
+    * upgrading libdvdcss in libmpdvdkit2
     * various small bugfixes
 
 Salvador Eduardo Tropea <salvador@inti.gov.ar>
