@@ -27,10 +27,10 @@ extern ao_functions_t audio_out_null;
  extern ao_functions_t audio_out_alsa5;
 #endif
 #ifdef HAVE_ALSA9
- extern ao_functions_t audio_out_alsa9;
+ extern ao_functions_t audio_out_alsa;
 #endif
 #ifdef HAVE_ALSA1X
- extern ao_functions_t audio_out_alsa1x;
+ extern ao_functions_t audio_out_alsa;
 #endif
 #ifdef HAVE_NAS
 extern ao_functions_t audio_out_nas;
@@ -76,10 +76,10 @@ ao_functions_t* audio_out_drivers[] =
         &audio_out_oss,
 #endif
 #ifdef HAVE_ALSA1X
-	&audio_out_alsa1x,
+	&audio_out_alsa,
 #endif
 #ifdef HAVE_ALSA9
-	&audio_out_alsa9,
+	&audio_out_alsa,
 #endif
 #ifdef HAVE_ALSA5
 	&audio_out_alsa5,
