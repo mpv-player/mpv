@@ -2774,18 +2774,6 @@ Activate prebuffering, not yet supported.
 .PD 1
 .
 .TP
-.B md5\ \ \ \ 
-Generates images from each frame with the help of \-vo pgm and writes
-their MD5 sums into a file.
-Useful for debugging.
-.PD 0
-.RSs
-.IPs filename
-Allows specifying the output filename (default: ./md5).
-.RE
-.PD 1
-.
-.TP
 .B md5sum\ 
 Calculate MD5 sums of each frame and write them to a file.
 Supports RGB24 and YV12 colorspaces.
@@ -2904,17 +2892,6 @@ Maximum number of files to be saved per subdirectory.
 Must be equal to or larger than 1 (default: 1000).
 .RE
 .PD 1
-.
-.TP
-.B pgm\ \ \ \ 
-Output each frame into a PGM file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-Only supports the YV12 format.
-The resulting image is (width) * (height * 1.5) of the original
-image.
-At coordinates 0,0 for width,height you have the Y plane, at
-coordinates 0,height for width/2,height/2 you have the U plane
-and at width/2,height for width/2,height/2 you have the V plane.
 .
 .TP
 .B png (also see \-z)

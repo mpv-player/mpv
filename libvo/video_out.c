@@ -76,8 +76,6 @@ extern vo_functions_t video_out_null;
 extern vo_functions_t video_out_zr;
 extern vo_functions_t video_out_zr2;
 extern vo_functions_t video_out_bl;
-extern vo_functions_t video_out_pgm;
-extern vo_functions_t video_out_md5;
 extern vo_functions_t video_out_syncfb;
 extern vo_functions_t video_out_fbdev;
 extern vo_functions_t video_out_fbdev2;
@@ -217,8 +215,6 @@ vo_functions_t* video_out_drivers[] =
 #endif
         &video_out_null,
 //        &video_out_odivx,
-        &video_out_pgm,
-        &video_out_md5,
 	&video_out_mpegpes,
 	&video_out_yuv4mpeg,
 #ifdef HAVE_VESA
@@ -264,6 +260,10 @@ vo_functions_t* init_best_video_out(char** vo_list){
       while(vo_list[0][0]){
         char* vo=strdup(vo_list[0]);
 	vo_subdevice=strchr(vo,':');
+	if (!strcmp(vo, "pgm"))
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_PGM_HasBeenReplaced);
+	if (!strcmp(vo, "md5"))
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_MD5_HasBeenReplaced);
 	if(vo_subdevice){
 	    vo_subdevice[0]=0;
 	    ++vo_subdevice;

@@ -801,6 +801,10 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Using interlaced output mode, bottom-field first."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Using (default) progressive frame mode."
 
+// Old vo drivers that have been replaced
+
+#define MSGTR_VO_PGM_HasBeenReplaced "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "The md5 video output driver has been replaced by -vo md5sum.\n"
 
 // ======================= AO Audio Output drivers ========================
 
