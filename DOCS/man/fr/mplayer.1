@@ -1,4 +1,4 @@
-.\" synced with 1.836
+.\" synced with 1.840
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -809,10 +809,6 @@ Utile si vous voulez voir en direct avec une connexion lente des médias
 streamés.
 .
 .TP
-.B \-cdrom-device <périph>
-Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
-.
-.TP
 .B \-cache <Koctets>
 Cette option indique combien de mémoire (en Ko) utiliser pour mettre un
 fichier ou une URL en cache.
@@ -864,6 +860,10 @@ Peut être négatif.
 .IPs (no)skip
 (jamais) accepter les reconstructions imparfaites de données.
 .RE
+.
+.TP
+.B \-cdrom-device <périph>
+Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .
 .TP
 .B \-channels <nombre>
@@ -3843,7 +3843,7 @@ kit de développement LADSPA.
 Les paramètres contrôles sont aucun ou plus nombres flottants qui
 contrôlent le comportement du plugin chargé (par exemple délais, seuil ou
 amplification).
-En mode bavard (en ajoutant -v à la ligne de commande de MPlayer), s'affichent
+En mode bavard (en ajoutant \-v à la ligne de commande de MPlayer), s'affichent
 tous les paramètres de contrôle ainsi que leurs intervalles valides.
 Ceci élimine d'utilisation de 'analyseplugin' depuis le kit de développement
 LADSPA.
@@ -4097,9 +4097,11 @@ arbitraire de la chaine de fitres.
 (1.33).
 Vous pouvez également spécifier les largeurs et hauteurs exactes de
 l'affichage désiré.
-Notez que ce filtre ne fait AUCUN redimmensionnement lui-même; il affecte juste
-ce que feront les prochains redimmensionnements (logiciels ou matériels) feront
-en corrigeant le rapport hauteur/\:largeur.
+Notez que ce filtre ne fait
+.B aucun
+redimmensionnement lui-même; il affecte juste ce que feront les prochains
+redimmensionnements (logiciels ou matériels) feront en corrigeant le rapport
+hauteur/\:largeur.
 .
 .TP
 .B yuy2\ \ \ 
@@ -4123,7 +4125,7 @@ Conversion d'espace de couleur RGB 24/\:32 <\-> BGR 24/\:32
 .PD 0
 .RSs
 .IPs swap
-Échange aussi R <\-> B.
+Échange aussi R <-> B.
 .RE
 .PD 1
 .
@@ -7394,12 +7396,12 @@ Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
-Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
+Notez que la quantification dans H.264 fonctionne différemment de MPEG-[124].
 L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
-Les quantum utiles en H.264 ont tendance à être bien plus importants
-comparés à MPEG[124].
+Les quantum utiles ont tendance à être bien plus importants avec H.264,
+comparés à MPEG-[124].
 .
 .TP
 .B pass=<1\-2>
