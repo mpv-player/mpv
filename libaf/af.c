@@ -82,7 +82,6 @@ af_instance_t* af_get(af_stream_t* s, char* name)
 af_instance_t* af_create(af_stream_t* s, char* name)
 {
   char* cmdline = name;
-  char* delim   = "=";
 
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
@@ -93,7 +92,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   memset(new,0,sizeof(af_instance_t));
 
   // Check for commandline parameters
-  strsep(&cmdline, delim);
+  strsep(&cmdline, "=");
 
   // Find filter from name
   if(NULL == (new->info=af_find(name)))
@@ -598,3 +597,16 @@ inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
   af->data->len=len;
   return AF_OK;
 }
+
+// send control to all filters, starting with the last until
+// one responds with AF_OK
+int af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
+  int res = AF_UNKNOWN;
+  af_instance_t* filt = s->last;
+  while (filt && res != AF_OK) {
+    res = filt->control(filt, cmd, arg);
+    filt = filt->prev;
+  }
+  return (res == AF_OK);
+}
+

@@ -151,6 +151,11 @@ af_instance_t* af_get(af_stream_t* s, char* name);
 // Filter data chunk through the filters in the list
 af_data_t* af_play(af_stream_t* s, af_data_t* data);
 
+// send control to all filters, starting with the last until
+// one accepts the command with AF_OK.
+// Returns true if accepting filter was found.
+int af_control_any_rev (af_stream_t* s, int cmd, void* arg);
+
 /* Calculate how long the output from the filters will be given the
    input length "len". The calculated length is >= the actual
    length */
