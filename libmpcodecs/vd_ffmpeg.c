@@ -249,7 +249,8 @@ static int init(sh_video_t *sh){
     }
     
 #if LIBAVCODEC_BUILD >= 4639
-    avctx->bits_per_sample= sh->bih->biBitCount;
+    if(sh->bih)
+	avctx->bits_per_sample= sh->bih->biBitCount;
 #endif    
 
     /* open it */
