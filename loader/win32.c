@@ -784,12 +784,18 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     return (void *)ret;
 }
 
+static int pf_set = 0;
 static BYTE PF[64] = {0,};
 
 static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
 {
     WIN_BOOL result;
     if(v>63)result=0;
+    if (!pf_set)
+    {
+	SYSTEM_INFO si;
+	expGetSystemInfo(&si);
+    }
     else result=PF[v];
     dbgprintf("IsProcessorFeaturePresent(0x%x) => 0x%x\n", v, result);
     return result;
@@ -823,6 +829,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	return;
     }
     memset(PF,0,sizeof(PF));
+    pf_set = 1;
 
     cachedsi.u.s.wProcessorArchitecture     = PROCESSOR_ARCHITECTURE_INTEL;
     cachedsi.dwPageSize 			= getpagesize();
