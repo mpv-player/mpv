@@ -199,6 +199,8 @@ found:
   return code;
 }
 
+static int getch2_status=0;
+
 void getch2_enable(){
 struct termios tio_new;
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
@@ -219,9 +221,11 @@ struct termios tio_new;
 #else
     ioctl(0,TCSETS,&tio_new);
 #endif
+    getch2_status=1;
 }
 
 void getch2_disable(){
+    if(!getch2_status) return; // already disabled / never enabled
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcsetattr(0,TCSANOW,&tio_orig);
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
@@ -229,5 +233,6 @@ void getch2_disable(){
 #else
     ioctl(0,TCSETS,&tio_orig);
 #endif
+    getch2_status=0;
 }
 
