@@ -64,7 +64,6 @@ mplayer (0.90)
     * better/cleaner error resilience (done in a 2nd pass after decoding)
     * h263/mpeg4 out of order slice decoding
     * -lavdopts bug= reworked, now uses flags, autodetects most of them
-    * data partitioning, packetizing support at encoding (mpeg4)
     * complete mpeg4 GMC decoding support
     
 
