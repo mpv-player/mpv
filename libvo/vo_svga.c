@@ -350,34 +350,34 @@ static uint32_t query_format(uint32_t format) {
   // if (vo_dbpp) => There is NO conversion!!!
   if (vo_dbpp) {
     switch (vo_dbpp) {
-      case 32: if ((format == IMGFMT_RGB32) || (format == IMGFMT_BGR|32))
+      case 32: if ((format == IMGFMT_RGB32) || (format == IMGFMT_BGR32))
                  return ((bpp_avail & BPP_32) ? 1 : 0);
 	       break;
-      case 24: if ((format == IMGFMT_RGB24) || (format == IMGFMT_BGR|24))
+      case 24: if ((format == IMGFMT_RGB24) || (format == IMGFMT_BGR24))
                  return ((bpp_avail & BPP_24) ? 1 : 0);
 	       break;
-      case 16: if ((format == IMGFMT_RGB16) || (format == IMGFMT_BGR|16))
+      case 16: if ((format == IMGFMT_RGB16) || (format == IMGFMT_BGR16))
                  return ((bpp_avail & BPP_16) ? 1 : 0);
 	       break;
-      case 15: if ((format == IMGFMT_RGB15) || (format == IMGFMT_BGR|15))
+      case 15: if ((format == IMGFMT_RGB15) || (format == IMGFMT_BGR15))
                  return ((bpp_avail & BPP_15) ? 1 : 0);
 	       break;
     }
-  } else
+  } else {
       switch (format) {
         case IMGFMT_RGB32: 
-        case IMGFMT_BGR|32: return ((bpp_avail & BPP_32) ? 1 : 0); break;
+        case IMGFMT_BGR32: return ((bpp_avail & BPP_32) ? 1 : 0); break;
         case IMGFMT_RGB24: 
-        case IMGFMT_BGR|24: {
+        case IMGFMT_BGR24: {
           res = (bpp_avail & BPP_24) ? 1 : 0;
           if (!res)
             res = (bpp_avail & BPP_32) ? 1 : 0;
           return (res);
         } break;
         case IMGFMT_RGB16: 
-        case IMGFMT_BGR|16: return ((bpp_avail & BPP_16) ? 1 : 0); break;
+        case IMGFMT_BGR16: return ((bpp_avail & BPP_16) ? 1 : 0); break;
         case IMGFMT_RGB15: 
-        case IMGFMT_BGR|15: {
+        case IMGFMT_BGR15: {
           res = (bpp_avail & BPP_15) ? 1 : 0;
           if (!res)
             res = (bpp_avail & BPP_16) ? 1 : 0;
@@ -385,6 +385,7 @@ static uint32_t query_format(uint32_t format) {
         } break;
         case IMGFMT_YV12: return (1); break;
       }
+    }
   return (0);
 }
 
