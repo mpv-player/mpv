@@ -527,7 +527,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_FOURCC('s','t','t','s'): {
-		stream_read_dword(demuxer->stream);
+		int temp=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
 		int i;
 		unsigned int pts=0;
@@ -582,7 +582,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_FOURCC('s','t','c','o'): {
-		stream_read_dword(demuxer->stream);
+		int temp=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
 		int i;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sChunk offset table! (%d chunks)\n",level,"",len);
@@ -596,7 +596,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_FOURCC('c','o','6','4'): {
-		stream_read_dword(demuxer->stream);
+		int temp=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
 		int i;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s64bit chunk offset table! (%d chunks)\n",level,"",len);
