@@ -6,6 +6,11 @@
 #
 # Changes in reversed order:
 #
+# 2000/03/08 by LGB:
+#  - DGA detection-o-matic :)
+#  - '--disable-dga' option to force disabling DGA vo driver compiling into mplayer
+#  - line about '--enable-dga' is added to the help message
+#
 # 2000/02/26 by A'rpi:
 #  - added DGA option:  --enable-dga
 #  - no notify if --with-win32libdir used [Tibcu]
@@ -61,6 +66,7 @@ params:
         --enable-3dnow          build with 3dnow! support [autodetect]
         --enable-sse            build with sse support [autodetect]
         --enable-gl             build with OpenGL render support [autodetect]
+        --enable-dga            build with DGA support [autodetect]
         --enable-sdl            build with SDL render support [def.: disabled!]
         --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
                                 is available]
@@ -343,6 +349,25 @@ gcc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
 
+# LGB: Check DGA
+
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86dga.h>
+int main (void) { return 0;}
+EOF
+
+_dga=no
+gcc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
+# Note: the -lXxf86vm library is the VideoMode extension and though it's
+# not needed for DGA, AFAIK every distribution packages together with DGA
+# stuffs named 'X extensions' or something similar. This check can be usefull
+# for further mplayer versions to set resolution by mplayer itself.
+# If you run into problems, remove '-lXxf86vm'.
+
+# ---
+
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
@@ -445,6 +470,9 @@ do
   --disable-mlib)
 	_mlib=no
 	;;
+  --disable-dga)
+	_dga=no
+	;;
   --disable-termcap)
 	_termcap=no
 	;;
@@ -481,6 +509,7 @@ echo "Checking for SDL ... $_sdl"
 echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
 echo "Checking for X11 ... $_x11"
+echo "Checking for DGA ... $_dga"
 
 # write conf files.
 
