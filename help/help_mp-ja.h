@@ -1,5 +1,5 @@
 // Sync'ed with help_mp-en.h 1.115
-// Translated to Japanese Language file. Used encoding: EUC-JP
+// Translated to Japanese. Encoding: EUC-JP
 
 // Translated by smoker <http://smokerz.net/~smoker/>
 
