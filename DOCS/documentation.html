@@ -448,7 +448,8 @@
 
 <UL>
   <LI><B>libavcodec</B>: This codec package is capable of decoding
-    H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams, on
+    H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams and
+    WMA (Windows Media Audio) v1/v2 audio streams, on
     multiple platforms. It is also known to be the fastest for this task.
     See the <A HREF="codecs.html#libavcodec">libavcodec</A> section for details.
     Features:<BR>
@@ -472,7 +473,9 @@
         (example: DV, ATI VCR, MJPEG)</LI>
       <LI>needed if you want to play <B>WMV8 movies</B>. Not needed for old
         ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
-        files - it's done by the Win32 codec), or WMV7.</LI>
+        files - it's done by the Win32 codec), or WMV7. Also not needed
+        for WMA (Windows Media Audio), libavcodec has opensource decoder
+        for that.</LI>
     </UL>
   </LI>
   <LI><B>DivX4/DivX5</B>: information about this codec is available in the
@@ -1399,7 +1402,7 @@ end
 
 <H2><A NAME="bsd">6.2 *BSD</A></H2>
 
-<P>Mplayer runs on FreeBSD, OpenBSD, NetBSD, BSD/OS and Darwin. To build MPlayer
+<P>MPlayer runs on FreeBSD, OpenBSD, NetBSD, BSD/OS and Darwin. To build MPlayer
   you will need GNU make (gmake - native BSD make will not work) and a recent
   version of binutils.</P>
 
@@ -1427,14 +1430,6 @@ end
 <H2><A NAME="solaris">6.3 Solaris</A></H2>
 
 <P>MPlayer should work on Solaris 2.6 or newer.</P>
-
-<P>AVI file playback works best on Solaris x86, because you have the
-  option to use the win32 codecs on the x86 platform, or can use
-  MMX/MMX2/3DNow/etc instructions for MP3/DivX/DVD/whatever. On Colaris SPARC,
-  you'll find quite a few AVI files with non working video and/or audio
-  playback, because the video/audio codecs using the Win32 DLLs are not
-  available. However, <B>DivX/OpenDivX</B> movies should work, when using
-  libavcodec.</P>
 
 <P>On <B>UltraSPARC</B>s, MPlayer takes advantage of their <B>VIS</B>
   extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
