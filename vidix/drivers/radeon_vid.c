@@ -1316,6 +1316,37 @@ static void radeon_vid_stop_video( void )
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
+#ifdef WORDS_BIGENDIAN
+#if defined(RAGE128) 
+    /* code from gatos */
+    {
+	SAVED_CONFIG_CNTL = INREG(CONFIG_CNTL);
+	OUTREG(CONFIG_CNTL, SAVED_CONFIG_CNTL &
+	    ~(APER_0_BIG_ENDIAN_16BPP_SWAP|APER_0_BIG_ENDIAN_32BPP_SWAP));
+	    
+//	printf("saved: %x, current: %x\n", SAVED_CONFIG_CNTL,
+//	    INREG(CONFIG_CNTL));
+    }
+#else
+    /*code from radeon_video.c*/
+    {
+    	SAVED_CONFIG_CNTL = INREG(RADEON_SURFACE_CNTL);
+/*	OUTREG(RADEON_SURFACE_CNTL, (SAVED_CONFIG_CNTL |
+		RADEON_NONSURF_AP0_SWP_32BPP) & ~RADEON_NONSURF_AP0_SWP_16BPP);
+*/
+	OUTREG(RADEON_SURFACE_CNTL, SAVED_CONFIG_CNTL & ~(RADEON_NONSURF_AP0_SWP_32BPP
+						   | RADEON_NONSURF_AP0_SWP_16BPP));
+
+/*
+	OUTREG(RADEON_SURFACE_CNTL, (SAVED_CONFIG_CNTL | RADEON_NONSURF_AP0_SWP_32BPP)
+				    & ~RADEON_NONSURF_AP0_SWP_16BPP);
+*/
+    }
+#endif
+#endif
+
+
+ 
     radeon_fifo_wait(2);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     radeon_engine_idle();
