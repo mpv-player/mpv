@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/io.h>
+#include <ctype.h>
 
 static struct VesaProtModeInterface vbe_pm_info;
 
@@ -54,17 +55,19 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
 #define VBE_LRMI_int(int_no,regs) (VBE_LRMI_int(int_no,regs))
 #endif
 
+static unsigned hh_int_10_seg;
 int vbeInit( void )
 {
-   unsigned short iopl_port,int_10_seg;
+   unsigned short iopl_port;
    size_t i;
    if(!LRMI_init()) return VBE_VM86_FAIL;
    /*
     Allow read/write to ALL io ports
    */
-   int_10_seg = *(unsigned short *)PhysToVirtSO(0x0000,0x0042);
+   hh_int_10_seg = *(unsigned short *)PhysToVirtSO(0x0000,0x0042);
    /* Video BIOS should be at C000:0000 and above */
-   if((int_10_seg >> 12) < 0xC) return VBE_BROKEN_BIOS;
+   hh_int_10_seg >>= 12;
+   if(hh_int_10_seg < 0xC) return VBE_BROKEN_BIOS;
    ioperm(0, 1024, 1);
    iopl(3);
    memset(&vbe_pm_info,0,sizeof(struct VesaProtModeInterface));
@@ -76,6 +79,26 @@ int vbeInit( void )
 }
 
 int vbeDestroy( void ) { return VBE_OK; }
+
+static void print_str(unsigned char *str)
+{
+  size_t i;
+  fflush(stdout);
+  printf("vbelib:    ");
+  for(i = 0;i < 256;i++) { printf("%02X(%c) ",str[i],isprint(str[i])?str[i]:'.'); if(!str[i]) break; }
+  printf("\n");
+  fflush(stdout);
+}
+
+static void print_wrd(unsigned short *str)
+{
+  size_t i;
+  fflush(stdout);
+  printf("vbelib:    ");
+  for(i = 0;i < 256;i++) { printf("%04X ",str[i]); if(str[i] == 0xffff) break; }
+  printf("\n");
+  fflush(stdout);
+}
 
 int vbeGetControllerInfo(struct VbeInfoBlock *data)
 {
@@ -103,31 +126,51 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     fpdata.off = (unsigned long)(data->OemStringPtr) & 0xffff;
     data->OemStringPtr = PhysToVirt(fpdata);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  OemStringPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemStringPtr);
+    if(verbose > 1)
+    {
+      printf("vbelib:  OemStringPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemStringPtr);
+      print_str(data->OemStringPtr);
+    }
 #endif
     fpdata.seg = (unsigned long)(data->VideoModePtr) >> 16;
     fpdata.off = (unsigned long)(data->VideoModePtr) & 0xffff;
     data->VideoModePtr = PhysToVirt(fpdata);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  VideoModePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->VideoModePtr);
+    if(verbose > 1)
+    {
+      printf("vbelib:  VideoModePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->VideoModePtr);
+      print_wrd(data->VideoModePtr);
+    }
 #endif
     fpdata.seg = (unsigned long)(data->OemVendorNamePtr) >> 16;
     fpdata.off = (unsigned long)(data->OemVendorNamePtr) & 0xffff;
     data->OemVendorNamePtr = PhysToVirt(fpdata);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  OemVendorNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemVendorNamePtr);
+    if(verbose > 1)
+    {
+      printf("vbelib:  OemVendorNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemVendorNamePtr);
+      print_str(data->OemVendorNamePtr);
+    }
 #endif
     fpdata.seg = (unsigned long)(data->OemProductNamePtr) >> 16;
     fpdata.off = (unsigned long)(data->OemProductNamePtr) & 0xffff;
     data->OemProductNamePtr = PhysToVirt(fpdata);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  OemProductNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductNamePtr);
+    if(verbose > 1)
+    {
+      printf("vbelib:  OemProductNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductNamePtr);
+      print_str(data->OemProductNamePtr);
+    }
 #endif
     fpdata.seg = (unsigned long)(data->OemProductRevPtr) >> 16;
     fpdata.off = (unsigned long)(data->OemProductRevPtr) & 0xffff;
     data->OemProductRevPtr = PhysToVirt(fpdata);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  OemProductRevPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductRevPtr);
+    if(verbose > 1)
+    {
+      printf("vbelib:  OemProductRevPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductRevPtr);
+      print_str(data->OemProductRevPtr);
+    }
 #endif
   }
   return retval;
@@ -316,7 +359,9 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
+    retval = VBE_OK;
     info_offset = r.edi&0xffff;
+    if((r.es >> 12) != hh_int_10_seg) retval = VBE_BROKEN_BIOS;
     rm_info = PhysToVirtSO(r.es,info_offset);
     pm_info->SetWindowCall   = PhysToVirtSO(r.es,info_offset+rm_info->SetWindowCall);
 #ifdef HAVE_VERBOSE_VAR
@@ -332,9 +377,12 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
 #endif
     pm_info->iopl_ports      = PhysToVirtSO(r.es,info_offset+rm_info->iopl_ports);
 #ifdef HAVE_VERBOSE_VAR
-    if(verbose > 1) printf("vbelib:  iopl_ports=%04X:%04X => %p\n",r.es,info_offset+rm_info->iopl_ports,pm_info->iopl_ports);
+    if(verbose > 1)
+    {
+      printf("vbelib:  iopl_ports=%04X:%04X => %p\n",r.es,info_offset+rm_info->iopl_ports,pm_info->iopl_ports);
+      print_wrd(pm_info->iopl_ports);
+    }
 #endif
-    retval = VBE_OK;
   }
   return retval;
 }
