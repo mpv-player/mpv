@@ -219,6 +219,10 @@ struct mpeg2dec_s {
     int8_t q_scale_type, scaled[4];
     uint8_t quantizer_matrix[4][64];
     uint8_t new_quantizer_matrix[4][64];
+
+    /* for MPlayer: */
+    unsigned char *pending_buffer;
+    int pending_length;
 };
 
 typedef struct {

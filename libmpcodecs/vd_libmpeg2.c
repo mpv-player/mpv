@@ -63,6 +63,9 @@ static int init(sh_video_t *sh){
     
     sh->context=mpeg2dec;
 
+    mpeg2dec->pending_buffer = 0;
+    mpeg2dec->pending_length = 0;
+
     return 1;
     //return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
@@ -70,16 +73,17 @@ static int init(sh_video_t *sh){
 // uninit driver
 static void uninit(sh_video_t *sh){
     mpeg2dec_t * mpeg2dec = sh->context;
+    if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
     mpeg2_close (mpeg2dec);
 }
 
-static void draw_slice (void * _sh, uint8_t ** src, unsigned int y){ 
+static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){ 
     sh_video_t* sh = (sh_video_t*) _sh;
     mpeg2dec_t* mpeg2dec = sh->context;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int stride[3];
 
-//    printf("draw_slice() y=%d  \n",y);
+//  printf("draw_slice() y=%d  \n",y);
 
     stride[0]=mpeg2dec->decoder.stride;
     stride[1]=stride[2]=mpeg2dec->decoder.uv_stride;
@@ -107,15 +111,25 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     ((char*)data+len)[3]=0xff;
     len+=4;
 
-    mpeg2_buffer (mpeg2dec, data, data+len);
+    if (mpeg2dec->pending_length) {
+	mpeg2_buffer (mpeg2dec, mpeg2dec->pending_buffer, mpeg2dec->pending_buffer + mpeg2dec->pending_length);
+    } else {
+        mpeg2_buffer (mpeg2dec, data, data+len);
+    }
     
     while(1){
 	int state=mpeg2_parse (mpeg2dec);
 	switch(state){
 	case STATE_BUFFER:
-	    // parsing of the passed buffer finished, return.
-//	    if(!mpi) printf("\nNO PICTURE!\n");
-	    return mpi;
+	    if (mpeg2dec->pending_length) {
+		mpeg2dec->pending_length = 0;
+    		mpeg2_buffer (mpeg2dec, data, data+len);
+    	    } else {
+	        // parsing of the passed buffer finished, return.
+//		if(!mpi) fprintf(stderr, "\nNO PICTURE!\n");
+		return 0;
+	    }
+	    break;
 	case STATE_SEQUENCE:
 	    // video parameters inited/changed, (re)init libvo:
 	    if(!mpcodecs_config_vo(sh,
@@ -124,7 +138,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    break;
 	case STATE_PICTURE: {
 	    int type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
-	    mp_image_t* mpi;
+	    mp_image_t* mpi_new;
 	    
 	    drop_frame = framedrop && (mpeg2dec->decoder.coding_type == B_TYPE);
             drop_frame |= framedrop>=2; // hard drop
@@ -136,37 +150,39 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             mpeg2_skip(mpeg2dec, 0); //mpeg2skip skips frames until set again to 0
 
 	    // get_buffer "callback":
-	     mpi=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
-		(type==PIC_FLAG_CODING_TYPE_B)
+	     mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
+				    (type==PIC_FLAG_CODING_TYPE_B)
 		? ((!framedrop && vd_use_slices &&
 		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
 			    MP_IMGFLAG_DRAW_CALLBACK:0)
-		: (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
+                : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
 		(info->sequence->picture_width+15)&(~15),
 		(info->sequence->picture_height+15)&(~15) );
-	    if(!mpi) return 0; // VO ERROR!!!!!!!!
-	    mpeg2_set_buf(mpeg2dec, mpi->planes, mpi);
+	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
+//	    if (mpi_new == mpi)
+//		fprintf(stderr, "AIEEEEEEEEEE\n");;
+	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
 	    if (info->current_picture->flags&PIC_FLAG_TOP_FIELD_FIRST)
-		mpi->fields |= MP_IMGFIELD_TOP_FIRST;
-	    else mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
+		mpi_new->fields |= MP_IMGFIELD_TOP_FIRST;
+	    else mpi_new->fields &= ~MP_IMGFIELD_TOP_FIRST;
 	    if (info->current_picture->flags&PIC_FLAG_REPEAT_FIRST_FIELD)
-		mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
-	    else mpi->fields &= ~MP_IMGFIELD_REPEAT_FIRST;
-	    mpi->fields |= MP_IMGFIELD_ORDERED;
+		mpi_new->fields |= MP_IMGFIELD_REPEAT_FIRST;
+	    else mpi_new->fields &= ~MP_IMGFIELD_REPEAT_FIRST;
+	    mpi_new->fields |= MP_IMGFIELD_ORDERED;
 
 #ifdef MPEG12_POSTPROC
-	    if(!mpi->qscale){
-		mpi->qstride=(info->sequence->picture_width+15)>>4;
-		mpi->qscale=malloc(mpi->qstride*((info->sequence->picture_height+15)>>4));
+	    if(!mpi_new->qscale){
+		mpi_new->qstride=(info->sequence->picture_width+15)>>4;
+		mpi_new->qscale=malloc(mpi_new->qstride*((info->sequence->picture_height+15)>>4));
 	    }
-	    mpeg2dec->decoder.quant_store=mpi->qscale;
-	    mpeg2dec->decoder.quant_stride=mpi->qstride;
-	    mpi->pict_type=type; // 1->I, 2->P, 3->B
-	    mpi->qscale_type= 1;
+	    mpeg2dec->decoder.quant_store=mpi_new->qscale;
+	    mpeg2dec->decoder.quant_stride=mpi_new->qstride;
+	    mpi_new->pict_type=type; // 1->I, 2->P, 3->B
+	    mpi_new->qscale_type= 1;
 #endif
 
-	    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
-		!(mpi->flags&MP_IMGFLAG_DIRECT)){
+	    if(mpi_new->flags&MP_IMGFLAG_DRAW_CALLBACK &&
+		!(mpi_new->flags&MP_IMGFLAG_DIRECT)){
 		   // nice, filter/vo likes draw_callback :)
 		    mpeg2dec->decoder.convert=draw_slice;
 		    mpeg2dec->decoder.convert_id=sh;
@@ -179,8 +195,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	case STATE_INVALID_END:
 	    // decoding done:
 	    if(mpi) printf("AJAJJJJJJJJ2!\n");
-	    if(info->display_fbuf) mpi=info->display_fbuf->id;
-//	    return mpi;
+	    if(info->display_fbuf) {
+		mpi=info->display_fbuf->id;
+		mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
+//		fprintf(stderr, "pending = %d\n", pending);
+		mpeg2dec->pending_buffer = realloc(mpeg2dec->pending_buffer, mpeg2dec->pending_length);
+		memcpy(mpeg2dec->pending_buffer, mpeg2dec->buf_start, mpeg2dec->pending_length);
+		return mpi;
+	    }
 	}
     }
 }
