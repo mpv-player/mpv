@@ -680,8 +680,8 @@ void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
                 fprintf(f2,"%c",codec->driver==dshow?'+':'-'); break;
             case 'F':
                 for(d=0;d<CODECS_MAX_FOURCC;d++)
-                    if(codec->fourcc[d]!=0xFFFFFFFF)
-                        fprintf(f2,"%s%.4s",d?"<br>":"",codec->fourcc[d]<0x20202020?"-":(char*) &codec->fourcc[d]);
+                    if(!d || codec->fourcc[d]!=0xFFFFFFFF)
+                        fprintf(f2,"%s%.4s",d?"<br>":"",(codec->fourcc[d]==0xFFFFFFFF || codec->fourcc[d]<0x20202020)?!d?"-":"":(char*) &codec->fourcc[d]);
                 break;
             case 'f':
                 for(d=0;d<CODECS_MAX_FOURCC;d++)
@@ -727,6 +727,7 @@ int main(void)
         int nr_codecs;
         int win32=-1;
         int dshow=-1;
+        int win32ex=-1;
 
 	if (!(codecs = parse_codec_cfg("etc/codecs.conf")))
 		return 0;
@@ -757,7 +758,7 @@ int main(void)
                     // video
 		    cl = codecs[0];
 		    nr_codecs = nr_vcodecs;
-                    dshow=4;win32=2;
+                    dshow=4;win32=2;win32ex=6;
                 }
                 pos=ftell(f1);
                 for(i=0;i<nr_codecs;i++){
@@ -766,13 +767,13 @@ int main(void)
                     case 0:
                     case 5:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if(!(cl[i].driver==win32 || cl[i].driver==dshow))
+                            if(!(cl[i].driver==win32 || cl[i].driver==dshow || cl[i].driver==win32ex))
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
                     case 1:
                     case 6:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if(cl[i].driver==win32 || cl[i].driver==dshow)
+                            if(cl[i].driver==win32 || cl[i].driver==dshow || cl[i].driver==win32ex)
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
                     case 2:
