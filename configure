@@ -2443,7 +2443,7 @@ fi
 
 if test "$_divx4linux" = yes ; then
  _divx4def='#define NEW_DECORE'
- _decorelibs='-ldivxdecore opendivx/postprocess.o'
+ _decorelibs='-ldivxdecore -ldivxencore opendivx/postprocess.o'
 else
  _divx4def='#undef NEW_DECORE'
  _decorelibs='-Lopendivx -ldecore'

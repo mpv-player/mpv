@@ -129,7 +129,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) -rdynamic $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpdemux -lmpdemux $(X_LIBS) $(XMM_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame -ldivxencore -Llibmpeg2 -lmpeg2 $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpdemux -lmpdemux $(X_LIBS) $(XMM_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame -Llibmpeg2 -lmpeg2 $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
 # 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
