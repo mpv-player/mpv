@@ -24,11 +24,15 @@
 extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_qtrpza;
+extern vd_functions_t mpcodecs_vd_ffmpeg;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
         &mpcodecs_vd_cinepak,
         &mpcodecs_vd_qtrpza,
+#ifdef USE_LIBAVCODEC
+        &mpcodecs_vd_ffmpeg,
+#endif
 	NULL
 };
 
@@ -39,6 +43,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 
 static mp_image_t* static_images[2];
 static mp_image_t* temp_images[1];
+static mp_image_t* export_images[1];
 static int static_idx=0;
 
 // mp_imgtype: buffering type, see mp_image.h
@@ -51,7 +56,9 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
   // and if not, then fallback to software buffers:
   switch(mp_imgtype){
   case MP_IMGTYPE_EXPORT:
-    mpi=new_mp_image(w,h);
+//    mpi=new_mp_image(w,h);
+    if(!export_images[0]) export_images[0]=new_mp_image(w,h);
+    mpi=export_images[0];
     break;
   case MP_IMGTYPE_STATIC:
     if(!static_images[0]) static_images[0]=new_mp_image(w,h);
@@ -77,6 +84,15 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
     mpi->type=mp_imgtype;
     mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
     mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
+    if((mpi->width!=w || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
+	mpi->width=w;
+	mpi->height=h;
+	if(mpi->flags&MP_IMGFLAG_ALLOCATED){
+	    // need to re-allocate buffer memory:
+	    free(mpi->planes[0]);
+	    mpi->flags&=~MP_IMGFLAG_ALLOCATED;
+	}
+    }
     if(!mpi->bpp){
       mp_image_setfmt(mpi,sh->codec->outfmt[sh->outfmtidx]);
       if(!(mpi->flags&(MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_DIRECT)) 
