@@ -67,7 +67,6 @@ List of parameters:
 brightness=decval          (-64:+63) doesn't work on radeons
 saturation=decval          (0:+31) doesn't work on radeons
 double_buff=on/off         enables/disables double buffering
-colour_key=hexval          defines colour key
 deinterlace=on/off         enables/disables adaprive deinterlacing
 deinterlace_pattern=hexval defines deinterlacing pattern
 
@@ -105,7 +104,7 @@ So after implementing linux standards I'll fully rewrite this driver.
 Full example:
 ~~~~~~~~~~~~~
 modprobe radeon_vid mtrr=1
-echo "deinterlace_pattern=F0055555">>/dev/radeon_vid
+echo "deinterlace_pattern=F0055555">/dev/radeon_vid
 mplayer -vo vesa:lvo:/dev/radeon_vid -fs -zoom -bpp 32 filename
 
 Enjoy!

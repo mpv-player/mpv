@@ -107,6 +107,7 @@ typedef struct bes_registers_s
   /* base address of yuv framebuffer */
   uint32_t yuv_base;
   uint32_t fourcc;
+  uint32_t dest_bpp;
   /* YUV BES registers */
   uint32_t reg_load_cntl;
   uint32_t h_inc;
@@ -138,16 +139,21 @@ typedef struct bes_registers_s
   uint32_t exclusive_horz;
   uint32_t auto_flip_cntl;
   uint32_t filter_cntl;
-  uint32_t graphics_key_msk;
   uint32_t key_cntl;
   uint32_t test;
   /* Configurable stuff */
   int double_buff;
+  
   int brightness;
   int saturation;
+  
+  int ckey_on;
   uint32_t graphics_key_clr;
+  uint32_t graphics_key_msk;
+  
   int deinterlace_on;
   uint32_t deinterlace_pattern;
+  
 } bes_registers_t;
 
 typedef struct video_registers_s
@@ -188,8 +194,8 @@ static video_registers_t vregs[] =
   { OV0_AUTO_FLIP_CNTL, 0 },
   { OV0_FILTER_CNTL, 0 },
   { OV0_COLOUR_CNTL, 0 },
-  { OV0_GRAPHICS_KEY_MSK, 0 },
   { OV0_GRAPHICS_KEY_CLR, 0 },
+  { OV0_GRAPHICS_KEY_MSK, 0 },
   { OV0_KEY_CNTL, 0 },
   { OV0_TEST, 0 }
 };
@@ -270,6 +276,21 @@ static char *fourcc_format_name(int format)
 #define INREG(addr)		readl((radeon_mmio_base)+addr)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
 
+static uint32_t radeon_vid_get_dbpp( void )
+{
+  uint32_t dbpp,retval;
+  dbpp = (INREG(CRTC_GEN_CNTL)>>8)& 0xF;
+  switch(dbpp)
+  {
+    case DST_8BPP: retval = 8; break;
+    case DST_15BPP: retval = 15; break;
+    case DST_16BPP: retval = 16; break;
+    case DST_24BPP: retval = 24; break;
+    default: retval=32; break;
+  }
+  return retval;
+}
+
 static void __init radeon_vid_save_state( void )
 {
   size_t i;
@@ -315,6 +336,14 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
 			    (besr.saturation << 8) |
 			    (besr.saturation << 16));
+			    
+    if(besr.ckey_on)
+    {
+	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+	OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_FALSE|VIDEO_KEY_FN_FALSE|CMP_MIX_OR);
+    }
+    else OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -379,6 +408,22 @@ RTRACE(RVID_MSG"OV0: SCALER=%x\n",bes_flags);
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
 }
+
+void radeon_vid_set_color_key(int ckey_on, uint8_t R, uint8_t G, uint8_t B)
+{
+    besr.ckey_on = ckey_on;
+    if(radeon_vid_get_dbpp() == 16)
+    {  /* 5.6.5 mode, 
+          note that these values depend on DAC_CNTL.EXPAND_MODE setting */
+       R = (R<<3);
+       G = (G<<2);
+       B = (B<<3);
+       besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
+    }
+    else besr.graphics_key_msk = ((R)<<16)|((G) <<8)|(B)|(0xff<<24);
+    besr.graphics_key_clr=(R<<16)|(G<<8)|(B)|(0x00 << 24);
+}
+
 
 #define XXX_SRC_X   0
 #define XXX_SRC_Y   0
@@ -463,8 +508,8 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
 	case IMGFMT_BGR32: pitch = ((src_w*4) + 15) & ~15; break;
     }
     
+    besr.dest_bpp = radeon_vid_get_dbpp();
     besr.fourcc = config->format;
-
     besr.v_inc = (src_h << 20) / XXX_DRW_H;
     h_inc = (src_w << 12) / XXX_DRW_W;
     step_by = 1;
@@ -640,6 +685,10 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 				printk(RVID_MSG"failed copy to userspace\n");
 				return -EFAULT;
 			}
+			radeon_vid_set_color_key(radeon_config.colkey_on,
+						 radeon_config.colkey_red,
+						 radeon_config.colkey_green,
+						 radeon_config.colkey_blue);
 			if(swap_fourcc) radeon_config.format = swab32(radeon_config.format); 
 			printk(RVID_MSG"configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
 			return radeon_vid_init_video(&radeon_config);
@@ -792,7 +841,6 @@ static int __init radeon_vid_config_card(void)
 #define PARAM_BRIGHTNESS "brightness="
 #define PARAM_SATURATION "saturation="
 #define PARAM_DOUBLE_BUFF "double_buff="
-#define PARAM_COLOUR_KEY "colour_key="
 #define PARAM_DEINTERLACE "deinterlace="
 #define PARAM_DEINTERLACE_PATTERN "deinterlace_pattern="
 
@@ -811,14 +859,15 @@ static void radeon_param_buff_fill( void )
 #ifdef CONFIG_MTRR
     len += sprintf(&radeon_param_buff[len],"Tune MTRR: %s\n",mtrr?"on":"off");
 #endif
+    if(besr.ckey_on) len += sprintf(&radeon_param_buff[len],"Last used color_key=%X (mask=%X)\n",besr.graphics_key_clr,besr.graphics_key_msk);
     len += sprintf(&radeon_param_buff[len],"Swapped fourcc: %s\n",swap_fourcc?"on":"off");
+    len += sprintf(&radeon_param_buff[len],"Last BPP: %u\n",besr.dest_bpp);
     len += sprintf(&radeon_param_buff[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
     len += sprintf(&radeon_param_buff[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",brightness);
     len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
-    len += sprintf(&radeon_param_buff[len],PARAM_COLOUR_KEY"%X\n",besr.graphics_key_clr);
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
     radeon_param_buff_len = len;
@@ -862,13 +911,6 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
     {
       if(memcmp(&buf[strlen(PARAM_DOUBLE_BUFF)],"on",2) == 0) besr.double_buff = 1;
       else besr.double_buff = 0;
-    }
-    else
-    if(memcmp(buf,PARAM_COLOUR_KEY,min(count,strlen(PARAM_COLOUR_KEY))) == 0)
-    {
-      long ckey;
-      ckey=simple_strtol(&buf[strlen(PARAM_COLOUR_KEY)],NULL,16);
-	OUTREG(OV0_GRAPHICS_KEY_CLR, ckey);
     }
     else
     if(memcmp(buf,PARAM_DEINTERLACE,min(count,strlen(PARAM_DEINTERLACE))) == 0)
