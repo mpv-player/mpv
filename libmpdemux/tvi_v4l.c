@@ -410,7 +410,7 @@ static void init_v4l_audio(priv_t *priv)
     }
 }
 
-#ifndef __LINUX_VIDEODEV2_H
+#if !defined(__LINUX_VIDEODEV2_H) && !defined(VIDIOC_QUERYCAP)
 struct v4l2_capability
 {
         __u8    driver[16];     /* i.e. "bttv" */
