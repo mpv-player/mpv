@@ -35,101 +35,50 @@
  */
 void decode_cyuv(unsigned char *buf, int size, unsigned char *frame, int width, int height, int format)
 {
-int i, xpos, ypos, cur_Y = 0, cur_U = 0, cur_V = 0;
-char *delta_y_tbl, *delta_c_tbl, *ptr;
+unsigned int i, xpos, ypos;
+unsigned char *delta_y_tbl, *delta_c_tbl, *ptr;
 
 	delta_y_tbl = buf + 16;
 	delta_c_tbl = buf + 32;
 	ptr = buf + (16 * 3);
 
 	for(ypos = 0; ypos < height; ypos++)
-		for(xpos = 0; xpos < width; xpos += 4)
-			{
-			if(xpos == 0)		/* first pixels in scanline */
-				{
+		for(xpos = 0; xpos < width; xpos += 2){
+			unsigned char cur_Y1,cur_Y2,cur_U,cur_V;
+			if(xpos&2){
+			    i = *(ptr++);
+			    cur_Y1 = (cur_Y2 + delta_y_tbl[i & 0x0f])/* & 0xff*/;
+			    cur_Y2 = (cur_Y1 + delta_y_tbl[i >> 4])/* & 0xff*/;
+			} else {
+			    if(xpos == 0) {		/* first pixels in scanline */
 				cur_U = *(ptr++);
-				cur_Y = (cur_U & 0x0f) << 4;
+				cur_Y1= (cur_U & 0x0f) << 4;
 				cur_U = cur_U & 0xf0;
-				if (format == IMGFMT_YUY2)
-					{
-					*frame++ = cur_Y;
-					*frame++ = cur_U;
-					}
-				else
-					{
-					*frame++ = cur_U;
-					*frame++ = cur_Y;
-					}
-
 				cur_V = *(ptr++);
-				cur_Y = (cur_Y + delta_y_tbl[cur_V & 0x0f]) & 0xff;
+				cur_Y2= (cur_Y1 + delta_y_tbl[cur_V & 0x0f])/* & 0xff*/;
 				cur_V = cur_V & 0xf0;
-				if (format == IMGFMT_YUY2)
-					{
-					*frame++ = cur_Y;
-					*frame++ = cur_V;
-					}
-				else
-					{
-					*frame++ = cur_V;
-					*frame++ = cur_Y;
-					}
-				}
-			else			/* subsequent pixels in scanline */
-				{
+			    } else {	/* subsequent pixels in scanline */
 				i = *(ptr++);
-				cur_U = (cur_U + delta_c_tbl[i >> 4]) & 0xff;
-				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				if (format == IMGFMT_YUY2)
-					{
-					*frame++ = cur_Y;
-					*frame++ = cur_U;
-					}
-				else
-					{
-					*frame++ = cur_U;
-					*frame++ = cur_Y;
-					}
-
+				cur_U = (cur_U + delta_c_tbl[i >> 4])/* & 0xff*/;
+				cur_Y1= (cur_Y2 + delta_y_tbl[i & 0x0f])/* & 0xff*/;
 				i = *(ptr++);
-				cur_V = (cur_V + delta_c_tbl[i >> 4]) & 0xff;
-				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				if (format == IMGFMT_YUY2)
-					{
-					*frame++ = cur_Y;
-					*frame++ = cur_V;
-					}
-				else
-					{
-					*frame++ = cur_V;
-					*frame++ = cur_Y;
-					}
-				}
-
-			i = *(ptr++);
-			cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-			if (format == IMGFMT_YUY2)
-				{
-				*frame++ = cur_Y;
-				*frame++ = cur_U;
-				}
-			else
-				{
-				*frame++ = cur_U;
-				*frame++ = cur_Y;
-				}
-
-			cur_Y = (cur_Y + delta_y_tbl[i >> 4]) & 0xff;
-			if (format == IMGFMT_YUY2)
-				{
-				*frame++ = cur_Y;
-				*frame++ = cur_V;
-				}
-			else
-				{
-				*frame++ = cur_V;
-				*frame++ = cur_Y;
-				}
+				cur_V = (cur_V + delta_c_tbl[i >> 4])/* & 0xff*/;
+				cur_Y2= (cur_Y1 + delta_y_tbl[i & 0x0f])/* & 0xff*/;
+			    }
 			}
+
+			if (format == IMGFMT_YUY2) {
+				*frame++ = cur_Y1;
+				*frame++ = cur_U;
+				*frame++ = cur_Y2;
+				*frame++ = cur_V;
+			} else {
+				*frame++ = cur_U;
+				*frame++ = cur_Y1;
+				*frame++ = cur_V;
+				*frame++ = cur_Y2;
+			}
+		}
+
 }
 
