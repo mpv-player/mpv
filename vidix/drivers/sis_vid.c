@@ -29,7 +29,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
-#include <sys/io.h>
 
 #include "../vidix.h"
 #include "../fourcc.h"
