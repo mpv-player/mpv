@@ -16,6 +16,44 @@
 
 static struct VesaProtModeInterface vbe_pm_info;
 
+#define HAVE_VERBOSE_VAR 1
+
+#ifdef HAVE_VERBOSE_VAR
+extern int verbose;
+
+static void __dump_regs(struct LRMI_regs *r)
+{
+  printf("vbelib:    eax=%08lXh ebx=%08lXh ecx=%08lXh edx=%08lXh\n"
+	 "vbelib:    edi=%08lXh esi=%08lXh ebp=%08lXh esp=%08lXh\n"
+	 "vbelib:    ds=%04lXh es=%04Xh ss=%04Xh cs:ip=%04X:%04X\n"
+	 "vbelib:    fs=%04lXh gs=%04Xh ss:sp=%04X:%04X flags=%04X\n"
+	 ,r->eax,r->ebx,r->ecx,r->edx
+	 ,r->edi,r->esi,r->ebp,r->reserved
+	 ,r->ds,r->es,r->ss,r->cs,r->ip
+	 ,r->fs,r->gs,r->ss,r->sp,r->flags);
+}
+
+static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
+{
+  int retval;
+  if(verbose > 1) 
+  {
+    printf("vbelib: registers before int %02X\n",int_no);
+    __dump_regs(r);
+  }    
+  retval = LRMI_int(int_no,r);
+  if(verbose > 1)
+  {
+    printf("vbelib: Interrupt handler returns: %08lXh\n",retval);
+    printf("vbelib: registers after int %02X\n",int_no);
+    __dump_regs(r);
+  }    
+  return retval;
+}
+#else
+#define VBE_LRMI_int(int_no,regs) (VBE_LRMI_int(int_no,regs))
+#endif
+
 int vbeInit( void )
 {
    if(!LRMI_init()) return VBE_VM86_FAIL;
@@ -42,7 +80,7 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
   r.eax = 0x4f00;
   r.es  = VirtToPhysSeg(rm_space);
   r.edi = VirtToPhysOff(rm_space);
-  if(!LRMI_int(0x10,&r))
+  if(!VBE_LRMI_int(0x10,&r))
   {
      LRMI_free_real(rm_space);
      return VBE_VM86_FAIL;
@@ -56,18 +94,33 @@ int vbeGetControllerInfo(struct VbeInfoBlock *data)
     fpdata.seg = (unsigned long)(data->OemStringPtr) >> 16;
     fpdata.off = (unsigned long)(data->OemStringPtr) & 0xffff;
     data->OemStringPtr = PhysToVirt(fpdata);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  OemStringPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemStringPtr);
+#endif
     fpdata.seg = (unsigned long)(data->VideoModePtr) >> 16;
     fpdata.off = (unsigned long)(data->VideoModePtr) & 0xffff;
     data->VideoModePtr = PhysToVirt(fpdata);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  VideoModePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->VideoModePtr);
+#endif
     fpdata.seg = (unsigned long)(data->OemVendorNamePtr) >> 16;
     fpdata.off = (unsigned long)(data->OemVendorNamePtr) & 0xffff;
     data->OemVendorNamePtr = PhysToVirt(fpdata);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  OemVendorNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemVendorNamePtr);
+#endif
     fpdata.seg = (unsigned long)(data->OemProductNamePtr) >> 16;
     fpdata.off = (unsigned long)(data->OemProductNamePtr) & 0xffff;
     data->OemProductNamePtr = PhysToVirt(fpdata);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  OemProductNamePtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductNamePtr);
+#endif
     fpdata.seg = (unsigned long)(data->OemProductRevPtr) >> 16;
     fpdata.off = (unsigned long)(data->OemProductRevPtr) & 0xffff;
     data->OemProductRevPtr = PhysToVirt(fpdata);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  OemProductRevPtr=%04X:%04X => %p\n",fpdata.seg,fpdata.off,data->OemProductRevPtr);
+#endif
   }
   return retval;
 }
@@ -83,7 +136,7 @@ int vbeGetModeInfo(unsigned mode,struct VesaModeInfoBlock *data)
   r.ecx = mode;
   r.es  = VirtToPhysSeg(rm_space);
   r.edi = VirtToPhysOff(rm_space);
-  if(!LRMI_int(0x10,&r))
+  if(!VBE_LRMI_int(0x10,&r))
   {
      LRMI_free_real(rm_space);
      return VBE_VM86_FAIL;
@@ -112,7 +165,7 @@ int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *data)
   }
   r.eax = 0x4f02;
   r.ebx = mode;
-  retval = LRMI_int(0x10,&r);
+  retval = VBE_LRMI_int(0x10,&r);
   if(rm_space) LRMI_free_real(rm_space);
   if(!retval) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
@@ -126,7 +179,7 @@ int vbeGetMode(unsigned *mode)
   int retval;
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f03;
-  if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
@@ -145,7 +198,7 @@ int vbeSaveState(void **data)
   r.eax = 0x4f04;
   r.edx = 0x00;
   r.ecx = 0x0f;
-  if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval != 0x4f) return retval;
   if(!(rm_space = LRMI_alloc_real((r.ebx & 0xffff)*64))) return VBE_OUT_OF_DOS_MEM;
@@ -154,7 +207,7 @@ int vbeSaveState(void **data)
   r.ecx = 0x0f;
   r.es  = VirtToPhysSeg(rm_space);
   r.ebx = VirtToPhysOff(rm_space);
-  if(!LRMI_int(0x10,&r))
+  if(!VBE_LRMI_int(0x10,&r))
   {
     LRMI_free_real(rm_space);
     return VBE_VM86_FAIL;
@@ -180,7 +233,7 @@ int vbeRestoreState(void *data)
   r.ecx = 0x0f;
   r.es  = VirtToPhysSeg(data);
   r.ebx = VirtToPhysOff(data);
-  retval = LRMI_int(0x10,&r);
+  retval = VBE_LRMI_int(0x10,&r);
   LRMI_free_real(data);
   if(!retval) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
@@ -195,7 +248,7 @@ int vbeGetWindow(unsigned *win_num)
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f05;
   r.ebx = (*win_num & 0x0f) | 0x0100;
-  if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
@@ -210,6 +263,7 @@ int vbeSetWindow(unsigned win_num,unsigned win_gran)
   int retval;
   if(vbe_pm_info.SetWindowCall)
   {
+     /* Don't verbose this stuff from performance reasons */
      /* 32-bit function call is much better of int 10h */
      __asm __volatile(
 	"pushl	%%ebx\n"
@@ -226,7 +280,7 @@ int vbeSetWindow(unsigned win_num,unsigned win_gran)
     r.eax = 0x4f05;
     r.ebx = win_num & 0x0f;
     r.edx = win_gran;
-    if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+    if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
     retval = r.eax & 0xffff;
     if(retval == 0x4f) retval = VBE_OK;
   }
@@ -250,16 +304,28 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f0a;
   r.ebx = 0;
-  if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
     info_offset = r.edi&0xffff;
     rm_info = PhysToVirtSO(r.es,info_offset);
     pm_info->SetWindowCall   = PhysToVirtSO(r.es,info_offset+rm_info->SetWindowCall);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  SetWindowCall=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetWindowCall,pm_info->SetWindowCall);
+#endif
     pm_info->SetDisplayStart = PhysToVirtSO(r.es,info_offset+rm_info->SetDisplayStart);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  SetDisplayStart=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetDisplayStart,pm_info->SetDisplayStart);
+#endif
     pm_info->SetPaletteData  = PhysToVirtSO(r.es,info_offset+rm_info->SetPaletteData);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  SetPaletteData=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetPaletteData,pm_info->SetPaletteData);
+#endif
     pm_info->iopl_ports      = PhysToVirtSO(r.es,info_offset+rm_info->iopl_ports);
+#ifdef HAVE_VERBOSE_VAR
+    if(verbose > 1) printf("vbelib:  iopl_ports=%04X:%04X => %p\n",r.es,info_offset+rm_info->iopl_ports,pm_info->iopl_ports);
+#endif
     retval = VBE_OK;
   }
   return retval;
