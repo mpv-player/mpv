@@ -663,7 +663,7 @@ case VCODEC_COPY:
 	mux_v->bih=sh_video->bih;
     else
     {
-	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+	mux_v->bih=calloc(1,sizeof(BITMAPINFOHEADER));
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	mux_v->bih->biWidth=sh_video->disp_w;
 	mux_v->bih->biHeight=sh_video->disp_h;
@@ -677,7 +677,7 @@ case VCODEC_COPY:
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
 case VCODEC_FRAMENO:
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih=calloc(1,sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=sh_video->disp_w;
     mux_v->bih->biHeight=sh_video->disp_h;
