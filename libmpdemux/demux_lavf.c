@@ -292,8 +292,10 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
             ds->sh=demux->v_streams[id];
             mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected LAVF video ID = %d\n",ds->id);
         }
-    } else
-        ds= NULL;
+    } else {
+        av_free_packet(&pkt);
+        return 1;
+    }
         
     if(0/*pkt.destruct == av_destruct_packet*/){
         //ok kids, dont try this at home :)
