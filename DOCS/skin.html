@@ -14,46 +14,7 @@ em.warn {color: red;
 
 <body>
 
-<h1 align="center">MPlayer skin format</h1>
-
-<hr>
-
-<h2>Contents</h2>
-
-<ul type=disc>
-<li><a href="#intro">1 Introduction</a></li>
-<li><a href="#overview">2 Overview</a>
-  <ul type=circle>
-  <li><a href="#dirs">2.1 Directories</a></li>
-  <li><a href="#images">2.2 Images</a></li>
-  <li><a href="#components">2.3 Skin components</a></li>
-  <li><a href="#files">2.4 Files</a></li>
-  </ul>
-</li>
-<li><a href="#skin">3 The <code>skin</code> file</a>
-  <ul type=circle>
-  <li><a href="#mainwin">3.1 Main window</a></li>
-  <li><a href="#subwindow">3.2 Subwindow</a></li>
-  <li><a href="#skinmenu">3.3 Skin menu</a></li>
-  </ul>
-</li>
-<li><a href="#fonts">4 Fonts</a>
-  <ul type=circle>
-  <li><a href="#symbols">4.1 Symbols</a></li>
-  </ul>
-</li>
-<li><a href="#guimsg">Appendix A: GUI messages</a></li>
-</ul>
-
-<hr>
-
-<div align=center>
-Last modified: 2002/05/24
-</div>
-
-<hr>
-
-<h2><a name="intro">1 Introduction</a></h2>
+<h1>Appendix D - MPlayer skin format</h1>
 
 The purpose of this document is to describe the MPlayer skin format.
 The information contained here might be wrong, for
@@ -75,14 +36,14 @@ Thanks to <em>Zoltán Ponekker</em> for his help.
 </p>
 
 
-<h2><a name="overview">2 Overview</a></h2>
+<h2><a name="overview">D.1 Overview</a></h2>
 
 It does not really have anything to do with the skin format, but you should
 know that MPlayer has <b>no</b> builtin skin, so <b>at least one skin
 must be installed in order to be able to use the GUI.</b>
 
 
-<h3><a name="dirs">2.1 Directories</a></h3>
+<h3><a name="directories">D.1.1 Directories</a></h3>
 
 The directories searched for skins are (in order):
 <pre>
@@ -104,7 +65,7 @@ listed above, for example:
 </pre>
 
 
-<h3><a name="images">2.2 Image formats</a></h3>
+<h3><a name="images">D.1.2 Image formats</a></h3>
 
 Images must be truecolor (24 or 32 bpp) PNGs.
 
@@ -116,7 +77,7 @@ have shaped windows if your X server has the XShape extension.
 </p>
 
 
-<h3><a name="components">2.3 Skin components</a></h3>
+<h3><a name="components">D.1.3 Skin components</a></h3>
 
 Skins are quite free-format (unlike the fixed-format skins of
 Winamp/XMMS, for example), so it is up to you to create something great.
@@ -203,7 +164,7 @@ This is done by <a href="#guimsg">messages</a> (events). For these items
 you must define the messages to be generated when they are clicked.
 </p>
 
-<h3><a name="files">2.4 Files</a></h3>
+<h3><a name="files">D.1.4 Files</a></h3>
 
 You need the following files to build a skin:
 <ul>
@@ -225,7 +186,7 @@ files whatever you want (but note that font description files must have
 a <code>.fnt</code> extension).
 
 
-<h2><a name="skin">3 The <code>skin</code> file</a></h2>
+<h2><a name="skinfile">D.2 The skin file</a></h2>
 
 <p>
 As mentioned above, this is the skin configuration file.
@@ -363,7 +324,7 @@ MPlayer tries to load <code>main</code>, <code>main.png</code>,
 </td></tr></table>
 
 
-<h3><a name="mainwin">3.1 Main window and playbar</a></h3>
+<h3><a name="mainwindow">D.2.1 Main window and playbar</a></h3>
 
 Below is the list of entries that can be used in the 
 '<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>', and the
@@ -379,7 +340,7 @@ The window will appear at the given <code>X,Y</code> position on the screen
 The window will have the size of the image.
 <div>
 <em class=warn>
-<b>Note:</b> this coordinating doesn't work for the display window currently.
+<b>Note:</b> These coordinates do not currently work for the display window.
 </em>
 <br>
 <em class=warn>
@@ -606,7 +567,7 @@ See the section about <a href="#symbols">symbols</a> for more information.
 </dl>
 
 
-<h3><a name="subwindow">3.2 Subwindow</a></h3>
+<h3><a name="subwindow">D.2.2 Subwindow</a></h3>
 
 The following entries can be used in the
 '<code>window = sub</code>' .&nbsp;.&nbsp;. '<code>end</code>' block.
@@ -637,7 +598,7 @@ component of the color (each of them is a decimal number from 0 to 255).
 </dl>
 
 
-<h3><a name="skinmenu">3.3 Skin menu</a></h3>
+<h3><a name="skinmenu">D.2.3 Skin menu</a></h3>
 
 As mentioned earlier, the menu is displayed using two images.
 Normal menu entries are taken from the image specified by the <code>base</code>
@@ -676,7 +637,7 @@ the mouse button is released over the entry.
 </dl>
 
 
-<h2><a name="fonts">4 Fonts</a></h2>
+<h2><a name="fonts">D.3 Fonts</a></h2>
 
 As mentioned in the section about the parts of a skin, a font is defined
 by an image and a description
@@ -720,7 +681,7 @@ image = font.png
 </pre></td></tr></table>
 
 
-<h3><a name="symbols">4.1 Symbols</a></h3>
+<h3><a name="symbols">D.3.1 Symbols</a></h3>
 
 Some characters have special meanings when returned by some of the variables
 used in <a href="#main.dlabel">dlabel</a>. These characters are meant to be
@@ -757,7 +718,7 @@ symbols (and thus require a different font).
 </table>
 
 
-<h2><a name="guimsg">Appendix A: GUI messages</a></h2>
+<h2><a name="guimessages">D.4 GUI messages</a></h2>
 
 These are the messages that can be generated by buttons, potmeters and
 menu entries.
