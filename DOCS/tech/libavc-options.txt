@@ -376,9 +376,13 @@ bug	manual workaround encoder bugs (autodetection isnt foolproof for these)
 	2 for msmpeg4v3	some old lavc generated msmpeg4v3 files (no autodetect)
 	4 for mpeg4	xvid interlacing bug     (autodetected if fourcc==XVIX)
 	8 for mpeg4	UMP4                     (autodetected if fourcc==UMP4)
-        16for mpeg4	padding bug
+        16for mpeg4	padding bug              (autodetected)
         32for mpeg4	illegal vlc bug          (autodetected per fourcc)
-	64for mpeg4	XVID&DIVX qpel bug	 (autodetected)
+	64for mpeg4	XVID&DIVX qpel bug	 (autodetected per fourcc/ver)
+	128   mpeg4	old standard qpel        (autodetected per fourcc/ver)
+	256   mpeg4	another qpel bug         (autodetected per fourcc/ver)
+	512   mpeg4	direct-qpel-blocksize bug(autodetected per fourcc/ver)
+	1024  mpeg4	edge padding bug         (autodetected per fourcc/ver)
         Note: just add the ones u want to enable
 
 gray	grayscale only decoding (a bit faster than with color ...)
