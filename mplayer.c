@@ -1668,6 +1668,11 @@ switch(sh_video->codec->driver){
     case KEY_DOWN:
       osd_function=OSD_REW;
       rel_seek_secs-=60;break;
+    // seek 10 min
+    case KEY_PAGE_UP:
+      rel_seek_secs+=600;break;
+    case KEY_PAGE_DOWN:
+      rel_seek_secs-=600;break;
     // delay correction:
     case '+':
       buffer_delay+=0.1;  // increase audio buffer delay
@@ -1714,6 +1719,10 @@ switch(sh_video->codec->driver){
     case 'm':
       mixer_usemaster=!mixer_usemaster;
       break;
+  }
+  if (seek_to_sec) {
+     rel_seek_secs += seek_to_sec;
+     seek_to_sec = 0;
   }
   if(rel_seek_secs)
   if(file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){

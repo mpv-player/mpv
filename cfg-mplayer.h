@@ -58,7 +58,7 @@ struct config conf[]={
 	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
-//	{"ss", &seek_to_sec, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"ss", &seek_to_sec, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
 	{"abs", &audio_buffer_size, CONF_TYPE_INT, CONF_MIN, 0, 0},

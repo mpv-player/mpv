@@ -92,6 +92,8 @@ void vo_x11_putkey(int key){
    case wsSpace:     mplayer_put_key(' '); break;
    case wsEscape:    mplayer_put_key(KEY_ESC); break;
    case wsEnter:     mplayer_put_key(KEY_ENTER); break;
+   case wsPageUp:    mplayer_put_key(KEY_PAGE_UP); break;
+   case wsPageDown:  mplayer_put_key(KEY_PAGE_DOWN); break;
    case wsq:
    case wsQ:         mplayer_put_key('q'); break;
    case wsp:
