@@ -20,8 +20,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with GNU Make; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  $Id$
  */
 
 /*
@@ -37,9 +35,6 @@
  *
  *            AC-3 and MPEG audio passthrough is possible, but I don't have
  *            access to a sound card that supports it.
- */ 
-
-
  */
 
 #include <CoreAudio/AudioHardware.h>
@@ -63,6 +58,9 @@ static ao_info_t info =
   };
 
 LIBAO_EXTERN(macosx)
+
+/* Prefix for all mp_msg() calls */
+#define ao_msg(a, b, c...) mp_msg(a, b, "AO: [macosx] " c)
 
 /* This is large, but best (maybe it should be even larger).
  * CoreAudio supposedly has an internal latency in the order of 2ms */
@@ -97,7 +95,7 @@ static int write_buffer(unsigned char* data,int len){
 
   while(len>0){
     if(ao->full_buffers==NUM_BUFS) {
-      mp_msg(MSGT_AO,MSGL_V, "ao_macosx: Buffer overrun\n");
+      ao_msg(MSGT_AO,MSGL_V, "Buffer overrun\n");
       break;
     }
 
@@ -127,7 +125,7 @@ static int read_buffer(unsigned char* data,int len){
 
   while(len>0){
     if(ao->full_buffers==0) {
-      mp_msg(MSGT_AO,MSGL_V, "ao_macosx: Buffer underrun\n");
+      ao_msg(MSGT_AO,MSGL_V, "Buffer underrun\n");
       break;
     }
 
@@ -171,12 +169,12 @@ static int control(int cmd,void *arg){
 	case AOCONTROL_GET_VOLUME:
 	case AOCONTROL_SET_VOLUME:
 	  /* unimplemented/meaningless */
-	  return CONTROL_NA;
+	  return CONTROL_FALSE;
 	case AOCONTROL_QUERY_FORMAT:
 	  /* stick with what CoreAudio requests */
-	  return CONTROL_NA;
+	  return CONTROL_FALSE;
 	default:
-	  return CONTROL_UNKNOWN;
+	  return CONTROL_FALSE;
 	}
 	
 }
@@ -199,15 +197,15 @@ static int init(int rate,int channels,int format,int flags)
   propertySize = sizeof(ao->outputDeviceID);
   status = AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice, &propertySize, &(ao->outputDeviceID));
   if (status) {
-        mp_msg(MSGT_AO,MSGL_WARN, 
-		"ao_coreaudio: AudioHardwareGetProperty returned %d\n",
+        ao_msg(MSGT_AO,MSGL_WARN, 
+		"AudioHardwareGetProperty returned %d\n",
 		(int)status);
-	return CONTROL_ERROR;
+	return CONTROL_FALSE;
     }
     
     if (ao->outputDeviceID == kAudioDeviceUnknown) {
-        mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioHardwareGetProperty: ao->outputDeviceID is kAudioDeviceUnknown\n");
-	return CONTROL_ERROR;
+        ao_msg(MSGT_AO,MSGL_WARN, "AudioHardwareGetProperty: ao->outputDeviceID is kAudioDeviceUnknown\n");
+	return CONTROL_FALSE;
     }
     
     /* get default output format
@@ -216,36 +214,48 @@ static int init(int rate,int channels,int format,int flags)
     propertySize = sizeof(ao->outputStreamBasicDescription);
     status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormat, &propertySize, &ao->outputStreamBasicDescription);
     if (status) {
-        mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceGetProperty returned %d when getting kAudioDevicePropertyStreamFormat\n", (int)status);
-	return CONTROL_ERROR;
+        ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceGetProperty returned %d when getting kAudioDevicePropertyStreamFormat\n", (int)status);
+	return CONTROL_FALSE;
     }
 
-    mp_msg(MSGT_AO,MSGL_V, "hardware format...\n");
-    mp_msg(MSGT_AO,MSGL_V, "%f mSampleRate\n", ao->outputStreamBasicDescription.mSampleRate);
-    mp_msg(MSGT_AO,MSGL_V, " %c%c%c%c mFormatID\n", 
+    ao_msg(MSGT_AO,MSGL_V, "hardware format...\n");
+    ao_msg(MSGT_AO,MSGL_V, "%f mSampleRate\n", ao->outputStreamBasicDescription.mSampleRate);
+    ao_msg(MSGT_AO,MSGL_V, " %c%c%c%c mFormatID\n", 
 	    (int)(ao->outputStreamBasicDescription.mFormatID & 0xff000000) >> 24,
 	    (int)(ao->outputStreamBasicDescription.mFormatID & 0x00ff0000) >> 16,
 	    (int)(ao->outputStreamBasicDescription.mFormatID & 0x0000ff00) >>  8,
 	    (int)(ao->outputStreamBasicDescription.mFormatID & 0x000000ff) >>  0);
-    mp_msg(MSGT_AO,MSGL_V, "%5d mBytesPerPacket\n",
+    ao_msg(MSGT_AO,MSGL_V, "%5d mBytesPerPacket\n",
 	    (int)ao->outputStreamBasicDescription.mBytesPerPacket);
-    mp_msg(MSGT_AO,MSGL_V, "%5d mFramesPerPacket\n",
+    ao_msg(MSGT_AO,MSGL_V, "%5d mFramesPerPacket\n",
 	    (int)ao->outputStreamBasicDescription.mFramesPerPacket);
-    mp_msg(MSGT_AO,MSGL_V, "%5d mBytesPerFrame\n",
+    ao_msg(MSGT_AO,MSGL_V, "%5d mBytesPerFrame\n",
 	    (int)ao->outputStreamBasicDescription.mBytesPerFrame);
-    mp_msg(MSGT_AO,MSGL_V, "%5d mChannelsPerFrame\n",
+    ao_msg(MSGT_AO,MSGL_V, "%5d mChannelsPerFrame\n",
 	    (int)ao->outputStreamBasicDescription.mChannelsPerFrame);
 
     /* get requested buffer length */
     propertySize = sizeof(ao->buffer_len);
     status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyBufferSize, &propertySize, &ao->buffer_len);
     if (status) {
-        mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceGetProperty returned %d when getting kAudioDevicePropertyBufferSize\n", (int)status);
-	return CONTROL_ERROR;
+        ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceGetProperty returned %d when getting kAudioDevicePropertyBufferSize\n", (int)status);
+	return CONTROL_FALSE;
     }
-    mp_msg(MSGT_AO,MSGL_V, "%5d ao->buffer_len\n", (int)ao->buffer_len);
+    ao_msg(MSGT_AO,MSGL_V, "%5d ao->buffer_len\n", (int)ao->buffer_len);
 
-    ao_data.samplerate = (int)ao->outputStreamBasicDescription.mSampleRate;
+    /* FIXME:
+     *
+     * Resampling of 32-bit float audio is broken in MPlayer. Refuse to 
+     * handle anything other than the native format until this is fixed
+     * or this module is rewritten, whichever comes first.
+     */
+    if (ao_data.samplerate == ao->outputStreamBasicDescription.mSampleRate) {
+      ao_data.samplerate = (int)ao->outputStreamBasicDescription.mSampleRate;
+    } else {
+      ao_msg(MSGT_AO,MSGL_WARN, "Resampling not supported yet.\n");
+      return 0;
+    }
+
     ao_data.channels = ao->outputStreamBasicDescription.mChannelsPerFrame;
     ao_data.outburst = ao_data.buffersize = ao->buffer_len;
     ao_data.bps = 
@@ -253,19 +263,20 @@ static int init(int rate,int channels,int format,int flags)
 
     if (ao->outputStreamBasicDescription.mFormatID == kAudioFormatLinearPCM) {
       uint32_t flags = ao->outputStreamBasicDescription.mFormatFlags;
-	if (flags & kAudioFormatFlagIsFloat) {
-	  ao_data.format = AFMT_FLOAT;
-	} else {
-	  mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: Unsupported audio output "
-		 "format. Please report this to the developers\n",
-		 (int)status);
-	}
-
+      if (flags & kAudioFormatFlagIsFloat) {
+	ao_data.format = AFMT_FLOAT;
+      } else {
+	ao_msg(MSGT_AO,MSGL_WARN, "Unsupported audio output "
+	       "format %d. Please report this to the developer\n",
+	       (int)status);
+	return CONTROL_FALSE;
+      }
+      
     } else {
       /* TODO: handle AFMT_AC3, AFMT_MPEG & friends */
-      mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: Default Audio Device doesn't "
+      ao_msg(MSGT_AO,MSGL_WARN, "Default Audio Device doesn't "
 	     "support Linear PCM!\n");
-      return CONTROL_ERROR;
+      return CONTROL_FALSE;
     }
   
     /* Allocate ring-buffer memory */
@@ -280,16 +291,16 @@ static int init(int rate,int channels,int format,int flags)
     /* Set the IO proc that CoreAudio will call when it needs data */
     status = AudioDeviceAddIOProc(ao->outputDeviceID, audioDeviceIOProc, NULL);
     if (status) {
-        mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceAddIOProc returned %d\n", (int)status);
-	return CONTROL_ERROR;
+        ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceAddIOProc returned %d\n", (int)status);
+	return CONTROL_FALSE;
     }
  
     /* Start callback */
     status = AudioDeviceStart(ao->outputDeviceID, audioDeviceIOProc);
     if (status) {
-      mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceStart returned %d\n",
+      ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceStart returned %d\n",
 	     (int)status);
-      return CONTROL_ERROR;
+      return CONTROL_FALSE;
     }
     
     return CONTROL_OK;
@@ -317,9 +328,10 @@ static void reset()
   ao->full_buffers=0;
   ao->buffered_bytes=0;
   
+  /* zero output buffer */
   for (i = 0; i < NUM_BUFS; i++)
     bzero(ao->buffer[i], ao->buffer_len);
-	 
+
   pthread_mutex_unlock(&ao->buffer_mutex);
        
   return;
@@ -333,8 +345,7 @@ static int get_space()
 }
 
 
-/* return delay until audio is played
- * FIXME */
+/* return delay until audio is played */
 static float get_delay()
 {
   return (float)(ao->buffered_bytes)/(float)ao_data.bps;
@@ -351,7 +362,7 @@ static void uninit()
 
   status = AudioDeviceRemoveIOProc(ao->outputDeviceID, audioDeviceIOProc);
   if (status)
-    mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceRemoveIOProc "
+    ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceRemoveIOProc "
 	   "returned %d\n", (int)status);
 
   for(i=0;i<NUM_BUFS;i++) free(ao->buffer[i]);
@@ -367,7 +378,7 @@ static void audio_pause()
   /* stop callback */
   status = AudioDeviceStop(ao->outputDeviceID, audioDeviceIOProc);
   if (status)
-    mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceStop returned %d\n",
+    ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceStop returned %d\n",
 	   (int)status);
 }
 
@@ -377,8 +388,6 @@ static void audio_resume()
 {
   OSErr status = AudioDeviceStart(ao->outputDeviceID, audioDeviceIOProc);
   if (status)
-    mp_msg(MSGT_AO,MSGL_WARN, "ao_coreaudio: AudioDeviceStart returned %d\n",
+    ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceStart returned %d\n",
 	   (int)status);
 }
-
-
