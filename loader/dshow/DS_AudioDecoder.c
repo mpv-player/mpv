@@ -5,7 +5,26 @@
 
 *********************************************************/
 
+#ifndef NOAVIFILE_HEADERS
+#include "audiodecoder.h"
+#include "except.h"
+#else
+#include "libwin32.h"
+#endif
+
+#include "DS_Filter.h"
+
+struct _DS_AudioDecoder
+{ 
+    WAVEFORMATEX in_fmt;
+    AM_MEDIA_TYPE m_sOurType, m_sDestType;
+    DS_Filter* m_pDS_Filter;
+    char* m_sVhdr;
+    char* m_sVhdr2;
+};
+
 #include "DS_AudioDecoder.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,12 +141,12 @@ void DS_AudioDecoder_Destroy(DS_AudioDecoder *this)
     free(this);
 }
 
-int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, uint_t in_size,
-			     void* out_data, uint_t out_size,
-			     uint_t* size_read, uint_t* size_written)
+int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, unsigned int in_size,
+			     void* out_data, unsigned int out_size,
+			     unsigned int* size_read, unsigned int* size_written)
 {
-    uint_t written = 0;
-    uint_t read = 0;
+    unsigned int written = 0;
+    unsigned int read = 0;
         
     if (!in_data || !out_data)
 	return -1;
@@ -137,7 +156,7 @@ int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, uint_t i
     in_size -= in_size%this->in_fmt.nBlockAlign;
     while (in_size>0)
     {
-	uint_t frame_size = 0;
+	unsigned int frame_size = 0;
 	char* frame_pointer;
 	IMediaSample* sample=0;
 	char* ptr;

@@ -8,7 +8,31 @@
 #include "guids.h"
 #include "interfaces.h"
 
+#ifndef NOAVIFILE_HEADERS
+#include "videodecoder.h"
+#else
+#include "libwin32.h"
+#endif
+#include "DS_Filter.h"
+
+struct _DS_VideoDecoder
+{
+    IVideoDecoder iv;
+    
+    DS_Filter* m_pDS_Filter;
+    AM_MEDIA_TYPE m_sOurType, m_sDestType;
+    VIDEOINFOHEADER* m_sVhdr;
+    VIDEOINFOHEADER* m_sVhdr2;
+    int m_Caps;//CAPS m_Caps;                // capabilities of DirectShow decoder
+    int m_iLastQuality;         // remember last quality as integer
+    int m_iMinBuffers;
+    int m_iMaxAuto;
+    int m_bIsDivX;             // for speed
+    int m_bIsDivX4;            // for speed
+};
+
 #include "DS_VideoDecoder.h"
+
 #include "../wine/winerror.h"
 
 #ifndef NOAVIFILE_HEADERS
@@ -380,7 +404,7 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
  * bits == 0   - leave unchanged
  */
 //int SetDestFmt(DS_VideoDecoder * this, int bits = 24, fourcc_t csp = 0);
-int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, fourcc_t csp)
+int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp)
 {
     HRESULT result;
     int should_test=1;
@@ -584,7 +608,7 @@ int DS_VideoDecoder_SetDirection(DS_VideoDecoder *this, int d)
     return 0;
 }
 
-HRESULT DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* value)
+int DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* value)
 {
 /*
     if (m_bIsDivX4)
@@ -693,7 +717,7 @@ HRESULT DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* v
     return 0;
 }
 
-HRESULT DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
+int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 {
 /*
     if (m_bIsDivX4)
