@@ -76,7 +76,7 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
 
   // go back to the beginning
   stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
+//  stream_seek(demuxer->stream, 0);
   demuxer->movi_start = 0;
   demuxer->movi_end = mf->nr_of_files - 1;
   dmf->nr_of_frames= mf->nr_of_files;
@@ -93,9 +93,11 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
 
-  if ( !strcasecmp( mf_type,"jpg" ) ||
-	!(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('M', 'J', 'P', 'G');
-   else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
+  if ( !strcasecmp( mf_type,"jpg" ) || 
+        !(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('M', 'J', 'P', 'G');
+   else 
+     if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
+       else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
 
   sh_video->disp_w = mf_w;
   sh_video->disp_h = mf_h;

@@ -58,6 +58,7 @@
 #define VFM_DUCKTM1 18
 #define VFM_ROQVIDEO 19
 #define VFM_QTRPZA 20
+#define VFM_MPNG 21
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

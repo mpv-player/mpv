@@ -1935,8 +1935,10 @@ if test "$_png" = yes ; then
   _ld_png='-lpng -lz'
   _vosrc="$_vosrc vo_png.c"
   _vomodules="png $_vomodules"
+  _mkf_png="yes"
 else
   _def_png='#undef HAVE_PNG'
+  _mkf_png="no"
 fi
 
 
@@ -2947,6 +2949,8 @@ VIDIX = $_vidix
 OPENDIVX = $_opendivx
 
 VO2 = $_vo2
+
+PNG = $_mkf_png
 
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib

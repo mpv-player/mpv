@@ -246,6 +246,7 @@ static short get_driver(char *s,int audioflag)
 		"ducktm1",
 		"roqvideo",
 		"qtrpza",
+		"mpng",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

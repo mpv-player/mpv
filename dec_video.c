@@ -180,6 +180,16 @@ void decode_duck_tm1(
   int height,
   int bytes_per_pixel);
 
+#ifdef HAVE_PNG
+void decode_mpng(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int bytes_per_pixel);
+#endif
+
 void qt_decode_rpza(
   unsigned char *encoded,
   int encoded_size,
@@ -706,6 +716,9 @@ switch(sh_video->codec->driver){
  case VFM_FLI:
  case VFM_QTRLE:
  case VFM_DUCKTM1:
+#ifdef HAVE_PNG
+ case VFM_MPNG:
+#endif
  case VFM_QTRPZA:
    {
 #ifdef USE_MP_IMAGE
@@ -1139,6 +1152,16 @@ if(verbose>1){
         ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;
+#ifdef HAVE_PNG
+ case VFM_MPNG:
+    decode_mpng(
+        start, in_size, sh_video->our_out_buffer,
+	sh_video->disp_w,sh_video->disp_h,
+	24
+    );
+    blit_frame = 3;
+    break;
+#endif
  case VFM_CYUV:
    decode_cyuv(start, in_size, sh_video->our_out_buffer,
       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));

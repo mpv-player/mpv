@@ -34,6 +34,10 @@ SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
+ifeq ($(PNG),yes)
+SRCS_COMMON += mpng.c
+endif
+
 ifeq ($(VO2),yes)
 VO_LIBS = -Llibvo2 -lvo2
 VO_INC = -Ilibvo2
