@@ -1,0 +1,154 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=C>Anhang C - Wie man einen Fehler berichtet</A></B></P>
+
+<P><B>Wie berichte ich über Programmfehler?</B></P>
+
+<P>Zuerst lese DOCS/BUGS sowie andere Dokumentationen. Wenn dein Problem
+nicht bekannt ist oder durch unsere Anweisungen nicht gelöst werden kann,
+berichte über den Fehler:</P>
+
+<P><B>Wo?</B></P>
+
+<P>Tritt der mplayer-users Mailingliste bei:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>http://lists.sourceforge.net/lists/listinfo/mplayer-users</CODE><BR>
+und sende deinen Fehlerbericht an:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@lists.sourceforge.net</CODE><BR>
+Wir werden keine persönliche Kopie senden, also bitte anmelden!!!</P>
+
+<P>Sende auf keinen Fall Fehlerberichte direkt an die private Mail-Adresse
+des Autors!!! Wir arbeiten miteinander am Quellcode, also ist jeder
+interessiert.
+Nebenbei gesagt: Oft wissen auch andere Benutzer eine Lösung
+(Systemkonfigurationsprobleme, fehlerhafte Treiber usw.), sogar wenn wir
+denken es sei ein Fehler in unserem Code.
+Die Sprache dieser Mailingliste ist ENGLISCH!</P>
+
+<P>Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
+nicht, dass dein Bericht folgendes beinhalten sollte:</P>
+
+<P><B>Was?</B></P>
+
+<P><B><I>1. Die Systeminfos, die wir immer wollen:</I></B></P>
+
+<UL>
+<LI>Linux Distribution<BR>
+z.B.:<UL>
+    <LI>RedHat 7.1
+    <LI>Slackware 7.0 + devel packs von 7.1 ...</UL>
+<LI>Kernel Version:<BR>
+    <CODE>uname -a</CODE>
+<LI>libc Version:<BR>
+    <CODE>ls -l /lib/libc[.-]*</CODE>
+<LI>X Version:<BR>
+    <CODE>X -version</CODE>
+<LI>gcc und ld Versionen:<BR>
+    <CODE>gcc -v<BR>
+    ld -v</CODE>
+<LI>binutils Version:<BR>
+    <CODE>as --version</CODE>
+</UL>
+
+<P><B><I>2. Hardware & Treiber:</I></B></P>
+
+<UL>
+<LI>CPU Infos:<BR>
+    <CODE>cat /proc/cpuinfo</CODE>
+<LI>Grafikkartenhersteller und Modell<BR>
+    z.B.:<BR><UL>
+    <LI>ASUS V3800U chip: nVidia TNT2 Ultra Pro 32MB SDRAM
+    <LI>Matrox G400 DH 32MB SGRAM</UL>
+<LI>Grafikkartentreiber-Typ & Version<BR>
+    z.B.:<UL>
+    <LI>X eigener Treiber
+    <LI>nvidia 0.9.623
+    <LI>Utah-GLX CVS 2001-02-17
+    <LI>DRI von X 4.0.3</UL>
+<LI>Soundkartentyp und Treiber<BR>
+    z.B.:<BR><UL>
+    <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
+    <LI>Creative SB16 mit OSS Treiber des Kernels
+    <LI>GUS PnP mit ALSA OSS Emulation</UL>
+<LI>wenn du dir unsicher bist, schick die Ausgabe von lspci -v mit
+</UL>
+
+<P><B>Bei Kompilierungsfehlern/-problemen</B></P>
+
+<P><B><I>3. Ausgabe von configure/make:</I></B></P>
+
+<UL><LI><CODE>make distclean</CODE>
+<LI><CODE>./configure &>config.log</CODE>
+<LI><CODE>     ./make &>make.log
+</UL>
+
+<P><B><I>4. diese Dateien:</I></B></P>
+<UL><LI>config.h
+<LI>config.mak
+<LI>libvo/config.mak
+</UL>
+
+<P><B>Bei Wiedergabeproblemen:</B></P>
+
+<P><B><I>3. Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v)</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] Dateiname &amp;&gt; mplayer.log</CODE></P>
+  
+<P><B><I>4. Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
+  lade die Datei bitte auf:</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
+  Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
+  reproduzieren, aber als erstes solltest du das ausprobieren:
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1k count=1024</CODE></P>
+  (kopiert das erste MB von 'deinedatei' in die Datei 'kleinedatei')
+  Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
+  immer noch auftritt reicht es die kleine Datei hochzuladen.
+  Sende NIE solche Dateien via mail! Lade es herauf und schicke nur den Pfad/
+  Dateinamen der Datei auf den FTP Server.
+  Wenn die Datei im Internet bereits verfügbar ist reicht die _exakte_ URL
+  aus!
+
+<P><B><I>5. Bei Abstürzen (Speicherverletzung, SIGILL, signal 4 usw.):</I></B></P>
+
+<P><I>Wenn du ein Speicherabbild (Coredump) vom Absturz besitzt, siehe 5.a,<BR>
+  ansonsten 5.b:</I></P>
+
+<P><B><I>5.a: Bitte gib uns den Coredump aus (sofern er erzeugt wurde).</I></B></P>
+
+<P>Wie:
+Bitte erzeuge die folgende Kommandodatei (Command File):</P>
+
+<P><CODE>disass $eip-32 $eip+32<BR>
+printf "eax=%08lX\n",$eax<BR>
+printf "ebx=%08lX\n",$ebx<BR>
+printf "ecx=%08lX\n",$ecx<BR>
+printf "edx=%08lX\n",$edx<BR>
+printf "esp=%08lX\n",$esp<BR>
+printf "ebp=%08lX\n",$ebp<BR>
+printf "edi=%08lX\n",$edi<BR>
+printf "esi=%08lX\n",$esi<BR>
+</CODE></P>
+
+<P>Dann führe einfach den folgenden Befehl aus:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei >mplayer.bug</CODE></P>
+
+<P><B><I>5.b.: Führe MPlayer im gdb (GNU Debugger) aus:</I></B></P>
+<P>[im Root/User Shell Prompt:]<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
+[im gdb Prompt:]<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [Optionen für Mplayer] Dateiname</CODE><BR>
+  ... (warte bis zum Absturz)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
+Sende uns die gesamte Ausgabe obiger Dinge!
+</P>
+
+<P><B>Allgemein:</B></P>
+
+<P>Wenn etwas sehr groß ist (Log-Dateien usw.) ist es besser es gezippt
+auf den FTP hochzuladen und nur den Pfad-/Dateinamen im Fehlerbericht
+anzugebeben!</P>
+
+</BODY>
+</HTML>

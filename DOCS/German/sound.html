@@ -1,0 +1,85 @@
+<HTML>
+<BODY>
+
+<P><B><A NAME=2.2.2>2.2.2. Audio Ausgabe-Geräte</A></P></B>
+
+<P><UL>
+<LI>OSS (ioctl) Treiber
+<LI>SDL Treiber (unterstützt Up/Downsampling, esd, arts usw.)
+<LI>ALSA 0.5 Treiber
+<LI>ALSA 0.9 Treiber (fehlerhaft, verwende OSS Emulation!)
+<LI>ESD (durch SDL)
+<LI>ARTS (durch SDL)
+<LI>SUN Audio-Treiber (/dev/audio) für BSD und Solaris8 Anwender
+</UL></P>
+
+<P><B><A NAME=2.2.2.1>2.2.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
+
+<P><TABLE BORDER=0 WIDTH=100%>
+<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+<TD></TD><TD>Treiber:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD>Treiber22:</TD><TD> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
+(<I>Buffergröße erhöht auf 64k</I>)</TD><TR>
+
+<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+<TD></TD><TD>OSS/Free:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>SB Live!</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>(?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>48kHz hört sich scheisse an</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>max 44Khz. <I>Hat ebenfalls Probleme mit dem
+neuen Sound-Code.</I></TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>ESS 688</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+
+<TD COLSPAN=3><B>C-Media Karten (welche?)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nicht OK (zischen) (?)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
+
+<TD COLSPAN=3><B>PC Speaker or DAC</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK (<I>verwende den SDL-Treiber: -ao sdl</I>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>der Treiber emuliert 44.1, möglichweise mehr</TD><TR>
+<TD></TD><TD>Treiber:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
+</TABLE></P>
+
+<P><UL>
+<LI> verwende mindestens 2.4 wenn möglich, 2.2 ist ungetestet
+<LI> wenn der sound während der Wiedergeben von CD-ROM "klickende" Geräusche
+     macht, schalte die Interupt-Unmaskierung ein !
+     Zum Beispiel "hdparm -u1 /dev/cdrom" (siehe "man hdparm" !!!)
+     Dies ist allgemein empfohlen... (für XMMS, usw...)
+     Lese Sektion <A HREF="cd-dvd.html#4.1">4.1</A>.
+<LI> verwende deine Soundkarte nicht mit einer anderen Anwendung ( z.B. XMMS ) !
+     wenn du ESD verwendest, starte MPlayer mit dem Esddsp-Utility !
+<LI> Sag uns bitte, wie MPlayer und deine Soundkarte(n) zusammen funktionieren!
+</UL></P>
+
+</BODY>
+</HTML>
