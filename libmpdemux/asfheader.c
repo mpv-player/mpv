@@ -128,7 +128,7 @@ extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_video_header(BITMAPINFOHEADER *h);
 
 int read_asf_header(demuxer_t *demuxer){
-  static unsigned char buffer[1024];
+  static unsigned char buffer[2048];
   uint32_t* streams = NULL;
   int audio_streams=0;
   int video_streams=0;
@@ -158,9 +158,10 @@ while(!stream_eof(demuxer->stream)){
 	mp_msg(MSGT_HEADER,MSGL_V,"unk1: %lX  unk2: %X\n",(unsigned long)streamh.unk1,(unsigned int)streamh.unk2);
 	mp_msg(MSGT_HEADER,MSGL_V,"FILEPOS=0x%X\n",stream_tell(demuxer->stream));
       }
-      if(streamh.type_size>1024 || streamh.stream_size>1024){
-          mp_msg(MSGT_HEADER,MSGL_FATAL,"FATAL: header size bigger than 1024 bytes!\n"
-              "Please contact mplayer authors, and upload/send this file.\n");
+      if(streamh.type_size>2048 || streamh.stream_size>2048){
+          mp_msg(MSGT_HEADER,MSGL_FATAL,"FATAL: header size bigger than 2048 bytes (%d,%d)!\n"
+              "Please contact mplayer authors, and upload/send this file.\n",
+	      (int)streamh.type_size,(int)streamh.stream_size);
           return 0;
       }
       // type-specific data:
