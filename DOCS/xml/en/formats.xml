@@ -331,6 +331,23 @@ The PVA specifications can be downloaded from the following address:
 </sect3>
 
 
+<sect3 id="nsv">
+<title>NSV files</title>
+<para>
+NSV (NullSoft Video) is the file format used by the
+<application>Winamp</application> player to stream audio and video.
+Video is VP3, VP5 or VP6, audio is MP3, AAC or VLB.
+The audio only version of NSV has the <filename>.nsa</filename> extension.
+<application>MPlayer</application> can play both NSV streams and files.
+Please note that most files from the
+<ulink url="http://www.winamp.com">Winamp site</ulink> use VLB audio, that
+can't be decoded yet. Moreover streams from that site need an extra
+depacketization layer that still has to be implemented (those files are
+unplayable anyway because they use VLB audio).
+</para>
+</sect3>
+
+
 <sect3 id="gif">
 <title>GIF files</title>
 <para>

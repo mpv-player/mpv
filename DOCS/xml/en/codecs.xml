@@ -366,24 +366,13 @@ occurred.  This recovery technique has no measurable speed penalty.
 </sect3>
 
 
-<sect3 id="msvideo1">
-<title>MS Video1</title>
+<sect3 id="avicodecs">
+<title>MS Video1, Cinepak CVID, and other older codecs</title>
 <para>
-This is a very old and very bad codec from Microsoft. In the past it was
-decoded with the <filename>msvidc32.dll</filename> Win32 codec, now we have
-our own open source implementation
-(by <ulink url="mailto:melanson@pcisys.net">Mike Melanson</ulink>).
-</para>
-</sect3>
-
-
-<sect3 id="cinepak-cvid">
-<title>Cinepak CVID</title>
-<para>
-<application>MPlayer</application> uses its own open source, multiplatform
-Cinepak decoder (by <ulink url="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</ulink>)
-by default. It supports YUV outputs, so that hardware
-scaling is possible if the video output driver permits it.
+MPlayer is able to play most of the older codecs used in AVI and MOV files.
+In the past they were decoded with binary Win32 codecs, but now we have
+<emphasis role="bold">native codecs</emphasis> for most of them using
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para>
 </sect3>
 
