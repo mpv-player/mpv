@@ -430,7 +430,7 @@ increase your display's color depth, if possible.\n", priv->bpp);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
-	SDL_EventState(SDL_QUIT, SDL_IGNORE);
+//	SDL_EventState(SDL_QUIT, SDL_IGNORE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 #endif
@@ -1144,6 +1144,10 @@ static void check_events (void)
 					mplayer_put_key(keypressed);
                                 }
                                 
+				break;
+				case SDL_QUIT:
+					SDL_ShowCursor(1);
+					mplayer_put_key('q');
 				break;
 		}
 	}
