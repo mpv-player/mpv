@@ -212,6 +212,9 @@ static int init(sh_video_t *sh){
     avctx->error_resilience= lavc_param_error_resilience;
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
     avctx->codec_tag= sh->format;
+#if LIBAVCODEC_BUILD >= 4679
+    avctx->stream_codec_tag= sh->video.fccHandler;
+#endif
     avctx->idct_algo= lavc_param_idct_algo;
     avctx->error_concealment= lavc_param_error_concealment;
 #if LIBAVCODEC_BUILD >= 4642
