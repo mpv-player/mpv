@@ -43,6 +43,9 @@ doesn't matter what is they order in memory:
 	planes[0] = Y = luminance
 	planes[1] = U = Cb = blue
 	planes[2] = V = Cr = red
+    Note: planes[1] is ALWAYS U, and planes[2] is V, the fourcc
+    (YV12 vs. I420) doesn't matter here! So, every codecs using 3 pointers
+    (not only the first one) normally supports YV12 and I420 (=IYUV) too!
 
 But there are some codecs (vfw, dshow) and vo drivers (xv) ignoring the 2nd
 and 3rd pointer, and use only a single pointer to the planar yuv image. In
