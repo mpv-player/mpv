@@ -317,8 +317,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_FOURCC('s','t','s','c'): {
 		int temp=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
+		int ver = (temp << 24);
+		int flags = (temp << 16)|(temp<<8)|temp;
 		int i;
-		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample->Chunk mapping table!  (%d blocks)\n",level,"",len);
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample->Chunk mapping table!  (%d blocks) (ver:%d,flags:%ld)\n",
+		    level,"",len,ver,flags);
 		// read data:
 		trak->chunkmap_size=len;
 		trak->chunkmap=malloc(sizeof(mov_chunkmap_t)*len);
@@ -332,15 +335,18 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_FOURCC('s','t','s','z'): {
 		int temp=stream_read_dword(demuxer->stream);
 		int ss=stream_read_dword(demuxer->stream);
-		int len=stream_read_dword(demuxer->stream);
-		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table!  len=%d  ss=%d\n",level,"",len,ss);
+		int ver = (temp << 24);
+		int flags = (temp << 16)|(temp<<8)|temp;
+		int entries=stream_read_dword(demuxer->stream);
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table! (entries=%d ss=%d) (ver:%d,flags:%ld)\n",
+		    level,"",entries,ss,ver,flags);
 		trak->samplesize=ss;
 		if(!ss){
 		    // variable samplesize
 		    int i;
-		    trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*len);
-		    trak->samples_size=len;
-		    for(i=0;i<len;i++)
+		    trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*entries);
+		    trak->samples_size=entries;
+		    for(i=0;i<entries;i++)
 			trak->samples[i].size=stream_read_dword(demuxer->stream);
 		}
 		break;
@@ -357,6 +363,23 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		// read elements:
 		for(i=0;i<len;i++) trak->chunks[i].pos=stream_read_dword(demuxer->stream);
+		break;
+	    }
+	    case MOV_FOURCC('s','t','s','s'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int entries=stream_read_dword(demuxer->stream);
+		int ver = (temp << 24);
+		int flags = (temp << 16)|(temp<<8)|temp;
+		int i;
+	
+		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sSample syncing table! (%d entries) (ver:%d,flags:%ld)\n",
+		    level, "",entries, ver, flags);
+#if 0
+		for (i=0;i<entries;i++)
+		{
+		    printf("entry#%d: %ld\n", i, stream_read_dword(demuxer->stream));
+		}
+#endif
 		break;
 	    }
 	    case MOV_FOURCC('m','d','i','a'): {
