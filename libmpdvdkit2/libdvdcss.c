@@ -289,7 +289,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 	        for ( i=0;i<16;i++ )
 		    if ( ( title_name[i] < '0' )||( title_name[i] > '9' ) ){
 		        disc_id=malloc(16+4);
-	                sprintf( disc_id,"%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
+	                snprintf( disc_id,17,"%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
 			break;
 		    }
 		if(!disc_id) disc_id=strdup(title_name);
