@@ -1415,7 +1415,7 @@ current_module="init_libvo";
      guiIntfStruct.MovieWidth=sh_video->disp_w;
      guiIntfStruct.MovieHeight=sh_video->disp_h;
      guiIntfStruct.StreamType=stream->type;
-     guiIntfStruct.Filename=filename;
+     guiSetFilename( guiIntfStruct.Filename,filename );
     }
 #endif
 

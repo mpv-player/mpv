@@ -95,6 +95,7 @@ extern guiInterface_t guiIntfStruct;
 
 #define guiXEvent 0
 #define guiCEvent 1
+#define guiIEvent 2
 
 extern void guiInit( int argc,char* argv[], char *envp[] );
 extern void guiGetEvent( int type,char * arg );
@@ -102,7 +103,7 @@ extern void guiEventHandling( void );
 
 #define gstrdup( s,ss ) { s=malloc( strlen( ss ) + 3 ); strcpy( s,ss ); }
 
-#define guiSetFilename( s,n ) { s=strdup( n ); }
+#define guiSetFilename( s,n ) { if ( s ) free( s ); s=strdup( n ); }
 
 #define guiSetDF( s,d,n )                       \
  {                                              \
