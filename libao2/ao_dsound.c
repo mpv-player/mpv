@@ -253,15 +253,6 @@ static int write_buffer(unsigned char *data, int len)
   LPVOID lpvPtr2; 
   DWORD dwBytes2; 
 	
-  DWORD play_offset;
-  int space;
-  
-  // make sure we have enough space to write data
-  IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
-  space=buffer_size-(write_offset-play_offset);                                             
-  if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
-  if(space < len) len = space;
-	
   // Lock the buffer
   res = IDirectSoundBuffer_Lock(hdsbuf,write_offset, len, &lpvPtr1, &dwBytes1, &lpvPtr2, &dwBytes2, 0); 
   // If the buffer was lost, restore and retry lock. 
@@ -274,11 +265,39 @@ static int write_buffer(unsigned char *data, int len)
   
   if (SUCCEEDED(res)) 
   {
-  	// Write to pointers. 
+  	if( (ao_data.channels == 6) && (ao_data.format!=AFMT_AC3) ) {
+  	    // reorder channels while writing to pointers.
+  	    // it's this easy because buffer size and len are always
+  	    // aligned to multiples of channels*bytespersample
+  	    // there's probably some room for speed improvements here
+  	    const int chantable[6] = {0, 1, 4, 5, 2, 3}; // reorder "matrix"
+  	    int i, j;
+  	    int numsamp,sampsize;
+
+  	    sampsize = audio_out_format_bits(ao_data.format)>>3; // bytes per sample
+  	    numsamp = dwBytes1 / (ao_data.channels * sampsize);  // number of samples for each channel in this buffer
+
+  	    for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
+  	        memcpy(lpvPtr1+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
+  	    }
+
+  	    if (NULL != lpvPtr2 )
+  	    {
+  	        numsamp = dwBytes2 / (ao_data.channels * sampsize);
+  	        for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
+  	            memcpy(lpvPtr2+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+dwBytes1+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
+  	        }
+  	    }
+
+  	    write_offset+=dwBytes1+dwBytes2;
+  	    if(write_offset>=buffer_size)write_offset=dwBytes2;
+  	} else {
+  	    // Write to pointers without reordering. 
 	memcpy(lpvPtr1,data,dwBytes1);
     if (NULL != lpvPtr2 )memcpy(lpvPtr2,data+dwBytes1,dwBytes2);
 	write_offset+=dwBytes1+dwBytes2;
     if(write_offset>=buffer_size)write_offset=dwBytes2;
+  	}
 	
    // Release the data back to DirectSound. 
     res = IDirectSoundBuffer_Unlock(hdsbuf,lpvPtr1,dwBytes1,lpvPtr2,dwBytes2);
@@ -409,6 +428,8 @@ static int init(int rate, int channels, int format, int flags)
 	res = IDirectSoundBuffer_SetFormat( hdspribuf, (WAVEFORMATEX *)&wformat );
 	if ( res != DS_OK ) mp_msg(MSGT_AO, MSGL_WARN,"ao_dsound: cannot set primary buffer format (%s), using standard setting (bad quality)", dserr2str(res));
 
+	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: primary buffer created\n");
+
 	// now create the stream buffer
 
 	res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
@@ -497,6 +518,15 @@ static int get_space()
 */
 static int play(void* data, int len, int flags)
 {
+	DWORD play_offset;
+	int space;
+  
+	// make sure we have enough space to write data
+	IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
+	space=buffer_size-(write_offset-play_offset);                                             
+	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
+	if(space < len) len = space;
+
 	len = (len / ao_data.outburst) * ao_data.outburst;
 	return write_buffer(data, len);
 }
