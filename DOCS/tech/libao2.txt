@@ -85,7 +85,7 @@ static void uninit()
   Called before mplayer exits. Used for deallocating dynamic buffers.
 
 static void reset()
-  Called during reset can be used to empty buffers. Mplayer calls this
+  Called during reset can be used to empty buffers. MPlayer calls this
   function when pause is pressed.
 
 static int play() 

@@ -517,7 +517,7 @@ de la (umm) &quot;misteriosa&quot; desaparición de codigo CVS ;)
 <answer><para>
 &quot;Fasz&quot; es una palabra Húngara que no quieres saber, las otras están
 conectadas a las mentes pervertidas de los desarrolladores de
-<application>Mplayer</application>.
+<application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -604,7 +604,7 @@ a <systemitem>Yes</systemitem></para></listitem>
 
 <qandaentry>
 <question><para>
-¿Cómo puedo hacer que <application>Mplayer</application> funcione en segundo plano?
+¿Cómo puedo hacer que <application>MPlayer</application> funcione en segundo plano?
 </para></question>
 <answer><para>
 Use:
@@ -729,7 +729,7 @@ hay un problema con su kernel/libc. Quizas esté usando algún parche de seguridad
 librerías a direcciones bajas. Al ser un DLL non-relocable,<filename>l3codeca.acm</filename>
 debe ser cargado a <literal>0x00400000</literal>, no podemos
 cambiar esto. Debería usar un kernel sin parchear, o use la opción
-<option>-afm 1</option> de <application>Mplayer</application> para dejar de
+<option>-afm 1</option> de <application>MPlayer</application> para dejar de
 usar <filename>l3codeca.acm</filename>.
 </para></answer>
 </qandaentry>
@@ -751,7 +751,7 @@ documentación de la misma para ver si hay forma de mejorar el rendimiento.
 signal 4 in module: decode_video</screen>.
 </para></question>
 <answer><para>
-Intente ejecutar <application>Mplayer</application> en la máquina en la que
+Intente ejecutar <application>MPlayer</application> en la máquina en la que
 fue compilado. O recompile con detección de CPU en tiempo de ejecución
 (<command>./configure --enable-runtime-cpudetection</command>).
 No use <application>MPlayer</application> en un CPU diferente a en el que

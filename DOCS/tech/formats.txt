@@ -66,7 +66,7 @@
     they have an INDEX block at the end of the file. It's optional, but
     most files has such block, because it's REQUIRED for seeking.
     Btw usually it can be rebuilt from file content, mplayer does it with
-    the -idx switch. Mplayer can recreate broken index blocks using -forceidx.
+    the -idx switch. MPlayer can recreate broken index blocks using -forceidx.
     As AVI files needs index for random access, broken files with no index
     are usually unplayable.
     Of course, cutting/joining AVI files needs special programs.

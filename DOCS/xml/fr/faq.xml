@@ -899,7 +899,7 @@ root, mais ce n'est <emphasis role="bold">pas recommandé</emphasis> !
 Cela présente une <emphasis role="bold">grosse</emphasis> faille de sécurité !
 Ne faites <emphasis role="bold">jamais</emphasis> ceci sur un serveur ou un ordinateur
 accessible par d'autres personnes que vous, elles pourraient obtenir les privilèges
-root par l'exécutable SUID root Mplayer.
+root par l'exécutable SUID root MPlayer.
 <emphasis role="bold">Vous êtes prévenu</emphasis>.
 </para></warning>
 </para></answer>

@@ -334,7 +334,7 @@
 
 <H1><A NAME="introduction">1. Introduzione</A></H1>
 
-<P>Mplayer è un lettore di filmati per LINUX (funziona su molti altri Unix, e CPU
+<P>MPlayer è un lettore di filmati per LINUX (funziona su molti altri Unix, e CPU
 <B>non-x86</B>, vedi la <A HREF="#ports">sezione port</A>). Legge la maggior parte dei file MPEG, VOB,
 AVI, OGG, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
 con l'aiuto di molti codec nativi, di XAnim, di RealPlayer e
@@ -345,7 +345,7 @@ Funziona con X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, ma puoi usare GGI e SDL (e così tutti i loro driver)
 e anche alcuni driver di basso livello specifici di alcune schede (Matrox, 3Dfx e Radeon, Mach64, Permedia3)!
 La maggior parte di queste supporta il ridimensionamento software o hardware, così puoi goderti i film
-a pieno schermo. Mplayer supporta la visualizzazione con alcune schede di decodifica MPEG
+a pieno schermo. MPlayer supporta la visualizzazione con alcune schede di decodifica MPEG
 , come la <B><A HREF="video.html#dvb">DVB</A></B> e la <B> <A
 HREF="video.html#dxr3">DXR3/Hollywood+</A></B> ! E che dire dei magnifici sottotitoli ombreggiati dotati di antialiasing
 (<B>10 tipi supportati!!!</B>) con i caratteri europeo/ISO 8859-1,2
@@ -459,7 +459,7 @@ Così decisi di scriverne/modificarne uno...</P>
 <H2><A NAME="installation">1.2. Installazione</A></H2>
 
 <P>In questo capitolo proverò a guidarvi nel processo di compilazione e di
-configurazione di Mplayer. Non è facile, ma non sarà necessariamente
+configurazione di MPlayer. Non è facile, ma non sarà necessariamente
 difficile. Se riscontrate un comportamento diverso da quello qui descritto, per favore
 cercate in questa documentazione e troverete le risposte. Se vedete dei
 link, seguiteli e leggete attentamente cosa contengono. Vi costerà
@@ -481,7 +481,7 @@ del tempo, ma ne vale sicuramente la pena.</P>
     Se voti per il 3.x, prova ad usare l'ultima versione, le prime versioni avevano
     vari bug, quindi assicurati di usare almeno la 3.1.
     Informazioni dettagliate sui bug del gcc 2.96 (che NON sono stati ancora corretti, sono
-    stati AGGIRATI in Mplayer!) si possono trovare
+    stati AGGIRATI in MPlayer!) si possono trovare
     <A HREF="users_against_developers.html#gcc"><B><I>qui</I></B></A> e nelle
     <A HREF="faq.html">FAQ</A> !</LI>
   <LI><B>XFree86</B> - la versione suggerita è <B>sempre la più nuova (4.2.1)</B>.
@@ -498,9 +498,9 @@ del tempo, ma ne vale sicuramente la pena.</P>
     schede video stranamente lente col driver xv). Usate sempre la versione più recente
     (a partire dalla 1.2.x).</LI>
   <LI><B>libjpeg</B> - decodificatore JPEG opzionale, usato da -mf e alcuni file qt mov.
-    Utile sia per Mplayer che per MEncoder se hai intenzione di lavorare con file jpeg.</LI>
+    Utile sia per MPlayer che per MEncoder se hai intenzione di lavorare con file jpeg.</LI>
   <LI><B>libpng</B> - decodificatore (M)PNG raccomandato e usato di default. Necessario per la GUI.
-    Utile sia per Mplayer che per MEncoder.</LI>
+    Utile sia per MPlayer che per MEncoder.</LI>
   <LI><B>lame</B> - racommandato, necessario per codificare audio MP3 con MEncoder,
     la versione suggerita è <B>sempre la più recente</B> (almeno 3.90).</LI>
   <LI><B>libogg</B> - opzionale, necessario per leggere il formato file OGG.</LI>
@@ -529,10 +529,10 @@ del tempo, ma ne vale sicuramente la pena.</P>
 </UL>
 </LI>
 
-<LI><B>Codec Win32</B> : Se intendete usare Mplayer su architetture x86
+<LI><B>Codec Win32</B> : Se intendete usare MPlayer su architetture x86
 , probabilmente ne avete bisogno. Scaricate i codec Win32 dalla nostra
 <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">pagina dei codec</A>
-ed installateli in <CODE>/usr/lib/codecs</CODE> <B>PRIMA</B> di compilare Mplayer, altrimenti non avrete nessun
+ed installateli in <CODE>/usr/lib/codecs</CODE> <B>PRIMA</B> di compilare MPlayer, altrimenti non avrete nessun
 supporto Win32!<BR>
 Nota: il progetto avifile ha un simile pacchetto di codec, ma è
 diverso dal nostro, quindi se volete usare tutti i codec supportati, usate il nostro
@@ -574,7 +574,7 @@ Caratteristiche :<UL>
 zoom YUV hardware) per decodificare filmati <B>3ivx</B> e Indeo 3/4/5, e alcuni
 vecchi formati. E sono multipiattaforma, quindi è l'unico modo per vedere gli Indeo su
 piattaforme non-x86 (bhe, eccetto usare XAnim:). Ma per esempio i filmati Cinepak
-vengono letti meglio dal codec Cinepak proprio di Mplayer !</LI>
+vengono letti meglio dal codec Cinepak proprio di MPlayer !</LI>
 
 <LI>Per la decodifica dell' audio <B>Ogg Vorbis</B> devi installare correttamente
   <CODE>libvorbis</CODE>. Usa pacchetti deb/rpm se disponibili, o
@@ -582,7 +582,7 @@ vengono letti meglio dal codec Cinepak proprio di Mplayer !</LI>
   <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">sorgenti</A>
   (questa è una tarball del CVS di vorbis aggiornata ogni notte).</LI>
 
-<LI>Mplayer può usare le librerie di RealPlayer 8 o RealONE per riprodurre file
+<LI>MPlayer può usare le librerie di RealPlayer 8 o RealONE per riprodurre file
   con video <B>RealVideo 2.0 - 4.0</B>, e audio Sipro/Cook. Vedi la sezione
   <A HREF="formats.html#real">Formato file RealMedia</A> per le istruzioni
   sull'installazione e maggiori informazioni!</LI>
@@ -608,14 +608,14 @@ si ottiene un filmato a pieno schermo di buona qualità e molto veloce.</P>
 usare il modulo del kernel mga_vid al posto di questo, in quanto funziona molto meglio.
   Vedi la sezione <A HREF="video.html#mga_vid">mga_vid</A> per l'installazione
 e l'utilizzo.  E' importante eseguire questi passi
-<I>prima</I> di compilare Mplayer, altrimenti non ci sarà nessun supporto specifico Matrox.
+<I>prima</I> di compilare MPlayer, altrimenti non ci sarà nessun supporto specifico Matrox.
  Controllate anche la sezione <A HREF="video.html#tv-out_matrox">TV-out Matrox</A>.
 <U><B>Se sei un utente non-Linux</B></U>, leggi la documentazione
 di <A HREF="video.html#vidix">Vidix</A></LI>
 
 <LI><B>Schede 3Dfx Voodoo3/Banshee</B> : per favore leggete la sezione <A
 HREF="video.html#tdfxfb">tdfxfb</A> per ottenere un grande miglioramento delle prestazioni.
-E' importante eseguire questi passi <I>prima</I> di compilare Mplayer,
+E' importante eseguire questi passi <I>prima</I> di compilare MPlayer,
 altrimenti non ci sarà alcun supporto. Leggete anche la sezione <A HREF="video.html#tv-out_voodoo"> TV-out 3dfx
 </A>.Se usi X, usa almeno la versione 4.2.0, in quanto il driver Xv 3dfx era
 difettoso nella 4.1.0, e precedenti!</LI></LI>
@@ -667,7 +667,7 @@ TV-out nVidia</A> se vuoi usare una TV.</LI>
 La visualizzazione a pieno schermo può essere ottenuta sia zoomando
 <B>tramite software</B>(usa l'opzione -zoom, ma sei avvisato: è leeento), o usando una modalità video più piccola, per
 esempio 352x288. Se non avete l'accelerazione YUV, quest'ultimo metodo è
-quello consigliato. Con Mplayer, <U>questo può essere
+quello consigliato. Con MPlayer, <U>questo può essere
 ottenuto usando l'opzione <CODE>-vm</CODE></U> e con i seguenti
 driver :
 <UL>
@@ -721,7 +721,7 @@ Per il passaggio AC3 hardware DOVETE usare l'emulazione oss di ALSA 0.9!</LI>
   decodifica AC3 hardware, leggete la sezione
   <A HREF="codecs.html#hardware_ac3">Decodifica AC3 hardware</A>.</LI>
 
-<LI>Caratteristiche di <B>altre schede</B> non sono supportate da Mplayer.
+<LI>Caratteristiche di <B>altre schede</B> non sono supportate da MPlayer.
   <U>Si consiglia di leggere la sezione <A HREF="sound.html">schede sonore
   </A> !</U>
 </UL>
@@ -737,19 +737,19 @@ vedi la <A HREF="encoding.html">sezione MEncoder</A> .</LI>
 
 
 <LI>Se hai un <B>sintonizzatore TV</B> compatibile V4L, e vorresti guardare/catturare e
-codificare filmati con Mplayer, leggi la sezione <A HREF=#tv>input TV</A>.</LI>
+codificare filmati con MPlayer, leggi la sezione <A HREF=#tv>input TV</A>.</LI>
 
 <LI>C'è un bel supporto <B>Menu OSD</B> pronto da usare. Guarda la sezione
     <A HREF="#menu">Menu OSD</A>.</LI>
 </UL>
 
-<P>Quindi compila Mplayer:</P>
+<P>Quindi compila MPlayer:</P>
 
 <PRE>    ./configure
     make
     make install</PRE>
 
-<P>A questo punto, Mplayer è pronto ad essere usato. La directory
+<P>A questo punto, MPlayer è pronto ad essere usato. La directory
 <CODE>$PREFIX/etc/mplayer</CODE> contiene il file <CODE>codecs.conf</CODE>,
 che serve per dire al programma di quali codec dispone e le loro caratteristiche.
 Questo file dovrebbe essere sempre tenuto aggiornato di pari passo col binario principale !</BR>
@@ -757,7 +757,7 @@ Controlla se hai codecs.conf nella tua directory home (~/.mplayer/codecs.conf)
 lasciato da vecchie versioni di MPlayer, e rimuovilo!</P>
 
 <P><B>Gli utenti Debian</B> possono costruirsi un pacchetto .deb, è molto
-semplice. Basta eseguire <CODE>fakeroot debian/rules binary</CODE> nella directory principale di Mplayer.
+semplice. Basta eseguire <CODE>fakeroot debian/rules binary</CODE> nella directory principale di MPlayer.
 Istruzioni dettagliate possono essere trovate <A HREF="documentation.html#debian">qui</A>.</P>
 
 <P><B><I>Controllare SEMPRE l'output di ./configure</I></B> e il file
@@ -787,10 +787,10 @@ Quindi, per usare la modalità GUI, si può sia
 </UL>
 </P>
 
-<P>Dato che Mplayer non ha una skin inclusa, devi scaricarle
+<P>Dato che MPlayer non ha una skin inclusa, devi scaricarle
 se vuoi usare la GUI. Vedi la <A HREF="http://www.mplayerhq.hu/homepage/dload.html">pagina dei download</A>.
 Dovranno essere estratti nella solita directory valida per tutto il sistema (<CODE>$PREFIX/share/mplayer/Skin</CODE>),
-o in <CODE>$HOME/.mplayer/Skin</CODE> . Mplayer cerca in
+o in <CODE>$HOME/.mplayer/Skin</CODE> . MPlayer cerca in
 queste una directory di nome  <I>default</I>, ma puoi usare l'opzione
 <I>-skin nuovaskin</I>, o la direttiva <I>skin=nuovaskin</I> del file di configurazione
 per usare la skin nella directory <CODE>*/Skin/nuovaskin</CODE>.</P>
@@ -798,7 +798,7 @@ per usare la skin nella directory <CODE>*/Skin/nuovaskin</CODE>.</P>
 <H2><A NAME="subtitles_osd">1.4. Sottotitoli e OSD</A></H2>
 
 <P>
-Mplayer può mostrare i sottotitoli dei film. Attualmente sono supportati
+MPlayer può mostrare i sottotitoli dei film. Attualmente sono supportati
 i seguenti formati:
 <UL>
 <LI>VobSub</LI>
@@ -835,7 +835,7 @@ Le opzioni della riga di comando differiscono leggermente per i diversi formati:
 I sottotitoli VobSub consistono di un grande (alcuni megabyte) file .SUB, e opzionali
 file .IDX e/o .IFO.<BR>
 Utilizzo : se hai file come <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>(opzionale),
-<CODE>sample.idx</CODE> - devi passare a Mplayer l'opzione <CODE>-vobsub sample -vobsubid
+<CODE>sample.idx</CODE> - devi passare a MPlayer l'opzione <CODE>-vobsub sample -vobsubid
 &lt;id&gt;</CODE> (l'intero path è opzionale). L'opzione
 <CODE>-vobsubid</CODE> è come l'opzione <CODE>-sid</CODE> per i DVD, in questo modo puoi scegliere
 la traccia del sottotitolo (le lingue). In caso
@@ -862,7 +862,7 @@ Se noti un ritardo crescente tra il filmato e i sottotitoli usando un file di so
 molto probabilmente la frequenza dei frame del filmato e quella dei sottotitoli sono diverse.<BR>
 Per favore nota che il formato di sottotitoli MicroDVD usa numeri di frame assoluti per la
 temporizzazione, e quindi l'opzione <CODE>-subfps</CODE> non può essere usata con questo formato.
-Dato che Mplayer non ha modo di indovinare la frequenza dei frame del file dei sottotitoli, devi
+Dato che MPlayer non ha modo di indovinare la frequenza dei frame del file dei sottotitoli, devi
 convertire manualmente la frequenza dei frame. C'è un piccolo script perl nella directory <CODE>contrib</CODE>
 del sito ftp di MPlayer che fa questa conversione per te.
 
@@ -875,7 +875,7 @@ del sito ftp di MPlayer che fa questa conversione per te.
 
 <H3><A NAME="mpsub">1.4.1 Il formato di sottotitoli proprio di MPlayer (MPsub)</A></H3>
 
-<P>Mplayer introduce un nuovo formato di sottotitoli chiamato <B><I>MPsub</I></B>.
+<P>MPlayer introduce un nuovo formato di sottotitoli chiamato <B><I>MPsub</I></B>.
 E' stato ideato da Gabucino. La sua caratteristica principale è quella di essere
 <I>dinamicamente</I> basato sul tempo (ma ha anche una modalità basata sui frame). Esempio (da
 <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
@@ -908,11 +908,11 @@ OSD si usa per visualizzare il tempo attuale, la barra del volume, la barra dell
 
 <H3><A NAME="install_osd">1.4.2 Installare OSD e sottotitoli</A></H3>
 
-<P>Devi avere un pacchetto di font per Mplayer per essere in grado di usare la funzione di OSD/SUB.
+<P>Devi avere un pacchetto di font per MPlayer per essere in grado di usare la funzione di OSD/SUB.
 Ci sono molti modi per ottenerlo:
 <UL>
 
-<LI>scarica pacchetti di font pronti all'uso dal sito di Mplayer.
+<LI>scarica pacchetti di font pronti all'uso dal sito di MPlayer.
 Nota: i font attualmente disponibili sono limitati al supporto iso 8859-1/2,
 ma ci sono altri font (coreano, russo, 8859-8 ecc) nella
 sezione contrib/font dell' FTP, fatti dagli utenti.
@@ -980,18 +980,18 @@ pagina man.</P>
   <LI>assicurati di avere un carattere OSD installato</LI>
   <LI>copia <CODE>etc/menu.conf</CODE> nella tua directory <CODE>.mplayer</CODE></LI>
   <LI>copia <CODE>etc/input.conf</CODE> nella tua directory <CODE>.mplayer</CODE>
-    o nella directory di configurazione di Mplayer del sistema (default:
+    o nella directory di configurazione di MPlayer del sistema (default:
     <CODE>/usr/local/etc/mplayer</CODE>)</LI>
   <LI>controlla e modifica <CODE>input.conf</CODE> per abilitare i tasti di movimento nel menu
     (è descritto nel file).</LI>
-  <LI>fai partire Mplayer come nel seguente esempio:<BR>
+  <LI>fai partire MPlayer come nel seguente esempio:<BR>
     <CODE>$ mplayer -menu file.avi</CODE></LI>
   <LI>premi qualunque tasto di menu che hai definito</LI>
 </OL>
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
-Ci sono tre metodi di temporizzazione in Mplayer.
+Ci sono tre metodi di temporizzazione in MPlayer.
 <UL>
   <LI><B>Per usare il vecchio metodo</B>, non devi fare nulla. Usa
   <CODE>usleep()</CODE> per regolare la sincronia A/V, con +/- 10ms di
@@ -999,7 +999,7 @@ Ci sono tre metodi di temporizzazione in Mplayer.
   <LI><B>Il nuovo codice per il timer</B>  usa l'RTC (Real Time Clock, orologio
    a tempo reale, ndt) del PC per questo compito, perchè è preciso fino a 1ms.
    E' abilitato automaticamente quando disponibile, ma necessita dei privilegi
-   di root, di un binario Mplayer <I>setuid root</I>, o di un kernel appropriato.
+   di root, di un binario MPlayer <I>setuid root</I>, o di un kernel appropriato.
    <BR>
    Se stai usando un kernel 2.4.19pre8 o successivo, puoi regolare la massima
    frequenza dell'RTC per gli utenti normali con il filesystem <CODE>/proc</CODE>.
@@ -1226,7 +1226,7 @@ Input da standard V4L<BR>
 
 <H2><A NAME="command_line">3.1. Linea di comando</A></H2>
 
-<P>Mplayer utilizza un complesso albero di opzioni. Questo è costituito da opzioni globali
+<P>MPlayer utilizza un complesso albero di opzioni. Questo è costituito da opzioni globali
   scritte prima (per esempio <CODE>mplayer -vfm 5</CODE>), e opzioni
   scritte dopo i nomi dei file, che si applicano solo al dato file/URL/qualsiasicosa
   (per esempio <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</BR>
@@ -1257,13 +1257,13 @@ Xine: <CODE>mplayer dvd://1</CODE> o <CODE>mplayer vcd://1</CODE>
 
 <H2><A NAME="control">3.2. Controllo</A></H2>
 
-<P>Mplayer ha un livello di controllo totalmente configurabile che permette
-di controllare Mplayer usando la tastiera, il mouse, il joystick o un telecomando (usando LIRC).
+<P>MPlayer ha un livello di controllo totalmente configurabile che permette
+di controllare MPlayer usando la tastiera, il mouse, il joystick o un telecomando (usando LIRC).
 Guarda la pagina di man per la lista completa dei comandi da tastiera</P>
 
 <H3><A NAME="controls_configuration">3.2.1. Configurazione dei controlli</A></H3>
 
-<P>Mplayer ti permette di collegare qualsiasi tasto/bottone a qualsiasi comando di Mplayer usando un semplice file di configurazione.
+<P>MPlayer ti permette di collegare qualsiasi tasto/bottone a qualsiasi comando di MPlayer usando un semplice file di configurazione.
 La sintassi consiste in un nome tasto seguito da un comando. La posizione di default del file di configurazione è
 $HOME/.mplayer/input.conf ma può essere cambiata con l'opzione -input conf (path relativi sono relativi a $HOME/.mplayer).
 <P>
@@ -1357,7 +1357,7 @@ ENTER pt_step 1 1
          <P>Regola il ritardo audio di val secondi</P>
   </LI>
   <LI><B>quit</B>
-         <P>Chiude Mplayer</P>
+         <P>Chiude MPlayer</P>
   </LI>
   <LI><B>pause</B>
          <P>Mette in pausa la riproduzione</P>
@@ -1433,11 +1433,11 @@ un (pressoche) arbitrario telecomando e controlla la tua linux box!
 Per saperne di più visita <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
 <P>Se hai installato il pacchetto lirc, configure lo troverà automaticamente.
-Se tutto è andato bene, Mplayer stamperà un messaggio come
+Se tutto è andato bene, MPlayer stamperà un messaggio come
 "Setting up lirc support..." quando viene avviato. Se avviene un errore te lo dirà. Se non ti dice nulla
 su LIRC non è stato compilato il supporto. Questo è quanto :-)</P>
 
-<P>Il nome dell'applicazione per Mplayer è - oh, indovina - <CODE>mplayer</CODE>.
+<P>Il nome dell'applicazione per MPlayer è - oh, indovina - <CODE>mplayer</CODE>.
 Si possono usare tutti i comandi di mplayer e anche passarne più di uno separandoli con \n.
 Non dimenticare di abilitare la ripetizione per i pulsanti in .lircrc quando ha un senso (ricerca, volume, ecc).
 Ecco un estratto dal mio .lircrc:</P>
@@ -1475,20 +1475,20 @@ usa l'opzione -lircconf &lt;nomefile&gt; per specificare un altro file.</P>
 
 <H3><A NAME="slave">3.2.3. Modalità slave</A></H3>
 
-<P>La modalità slave ti permette di costruire un semplice frontend per Mplayer. Quando abilitato (con l'opzione -slave) Mplayer leggerà i comandi separati da una nuova linea (\n) dallo stdin.<P>
+<P>La modalità slave ti permette di costruire un semplice frontend per MPlayer. Quando abilitato (con l'opzione -slave) MPlayer leggerà i comandi separati da una nuova linea (\n) dallo stdin.<P>
 
 
 <H2><A NAME="streaming">3.3. Streaming dalla rete o da pipe</A></H2>
 
-<P>Mplayer può riprodurre file dalla rete, usando il protocollo HTTP, MMS o RTSP/RTP .
+<P>MPlayer può riprodurre file dalla rete, usando il protocollo HTTP, MMS o RTSP/RTP .
 
-<P>La riproduzione funziona aggiungendo semplicemente l'URL alla linea di comando. Mplayer
+<P>La riproduzione funziona aggiungendo semplicemente l'URL alla linea di comando. MPlayer
 può usare anche la variabile d'ambiente http_proxy, e usa il proxy se disponibile.
 L'utilizzo del proxy può anche essere forzato :</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
-<P>Mplayer può leggere dallo standard input (NON da named pipe). Questo può essere per esempio
+<P>MPlayer può leggere dallo standard input (NON da named pipe). Questo può essere per esempio
 usato per riprodurre da FTP:</P>
 <P><CODE>wget ftp://micorsops.com/qualcosa.avi -O - | mplayer -</CODE></P>
 
@@ -1557,7 +1557,7 @@ il metodo più semplice consoste nel prendere i pacchetti da uno dei feed
 <P>Per compilare MPlayer devi avere il make GNU (gmake,
 il make nativo di BSD non funzionerà) e una versione recente delle binutils.</P>
 
-<P>Se Mplayer lamenta di non trovare <CODE>/dev/cdrom</CODE> o <CODE>/dev/dvd</CODE>
+<P>Se MPlayer lamenta di non trovare <CODE>/dev/cdrom</CODE> o <CODE>/dev/dvd</CODE>
 fai un link simbolico: <CODE>ln -s /dev/(tuo_cdrom) /dev/cdrom</CODE></P>
 
 <P>Per usare le DLL Win32 con MPlayer dovrai ricompilare il kernel con
@@ -1580,7 +1580,7 @@ fai un link simbolico: <CODE>ln -s /dev/(tuo_cdrom) /dev/cdrom</CODE></P>
 
 <P>MPlayer dovrebbe funzionare su Solaris 2.6 o più recente.</P>
 
-<P>Su <B>UltraSPARC</B>, Mplayer si avvantaggia delle loro estensioni <B>VIS</B>
+<P>Su <B>UltraSPARC</B>, MPlayer si avvantaggia delle loro estensioni <B>VIS</B>
 (equivalenti a MMX), attualmente solo con <I>libmpeg2</I>,
 <I>libvo</I> e <I>libavcodec</I>, ma non con mp3lib. Puoi vedere un file VOB
 su una CPU a 400Mhz. Necessita <A
@@ -1699,7 +1699,7 @@ l'accesso a tutti i dati è modulo 4GB
 <H2><A NAME="qnx">6.5. QNX</A></H2>
 
 <P>Funziona. Bisogna scaricare SDL per QNX, e installarlo. Quindi esegui
-  Mplayer con le opzioni <CODE>-vo sdl:photon</CODE> <CODE>-ao sdl:nto</CODE>,
+  MPlayer con le opzioni <CODE>-vo sdl:photon</CODE> <CODE>-ao sdl:nto</CODE>,
   e dovrebbe essere veloce.</P>
 
 <P>L'output <CODE>-vo x11</CODE> è ancora più lento che in Linux, perchè
@@ -1716,9 +1716,9 @@ DirectX nativo (<CODE>-vo directx</CODE>) e con il driver audio nativo di Window
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   per avere aiuto e per le ultime informazioni.</P>
 
-<P>Devi andare nella directory di Mplayer, e copiare o creare un link simbolico
+<P>Devi andare nella directory di MPlayer, e copiare o creare un link simbolico
 <CODE>etc/cygwin_inttypes.h</CODE> a <CODE>/usr/include/inttypes.h</CODE> per
-far compilare Mplayer.</P>
+far compilare MPlayer.</P>
 
 <P>Per ottenere la riproduzione DirectX nativa (<CODE>-vo directx</CODE>), estrai i
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">file header di DirectX 7</A>
@@ -1750,7 +1750,7 @@ far compilare Mplayer.</P>
 
 <H1><A NAME="mailing_lists">Appendice A - Le mailing list</A></H1>
 
-<P>Esistono alcune mailing list pubbliche su Mplayer. La lingua delle liste sopra è 
+<P>Esistono alcune mailing list pubbliche su MPlayer. La lingua delle liste sopra è 
 l'INGLESE, a meno che non sia specificato altrimenti. Per favore non mandate 
 messaggi in altre lingue o mail in HTML! Il limite per la grandezza dei singoli messaggi è 80k.
   Se hai qualcosa di più grande mettilo da qualche parte per il download. Clicca sui
