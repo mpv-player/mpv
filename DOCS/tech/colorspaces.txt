@@ -79,3 +79,26 @@ I420:  12 bpp, full sized Y plane followed by 2x2 subsampled U and V planes
 IYUV:  the same as I420
 YVU9:   9 bpp, full sized Y plane followed by 4x4 subsampled V and U planes
 
+Huh 2. RGB vs. BGR ?
+====================
+
+The 2nd most missunderstood thingie...
+
+You know, there are Intel and Motorola, and they use different byteorder.
+There are also others, like MIPS or Alpha, they all follow either Intel
+or Motorola byteorder.
+Unfortunatelly, the packed colorspaces depend on CPU byteorder. So, RGB
+on Intel and Motorola means different order of bytes.
+
+In MPlayer, we have constants IMGFMT_RGBxx and IMGFMT_BGRxx.
+Unfortunatelly, some codecs and vo drivers follow Intel, some follow Motorola
+byteorder, so they are incompatible. We had to find a stable base, so long
+time ago I've choose OpenGL, as it's a wide-spreaded standard, and it well
+defines what is RGB and what is BGR. So, MPlayer's RGB is compatible with
+OpenGL's GL_RGB on all platforms, and the same stay for BGR - GL_BGR.
+Unfortunatelly, most of the x86 codecs call our BGR to RGB, so it sometimes
+confuse developers.
+
+If you are unsure, try the OpenGL driver (-vo gl). There is at least software
+OpenGL implementation for all major platforms and OSes.
+
