@@ -277,4 +277,8 @@ static int vcd_read(int fd,char *mem)
   return -1;
 }
 
+static inline void vcd_set_msf(unsigned int sect)
+{
+}
+
 #endif /* !linux && !sun */

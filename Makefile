@@ -19,13 +19,17 @@ BINDIR = ${prefix}/bin
 SRCS = ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c
 OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) $(MADLIB_INC) # -Wall
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB)
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB) $(SGI_AUDIO_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
 XA_LIBS = -Lxa -lxa
 
+ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
+PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
+else
 PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb linux postproc xa
+endif
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
@@ -108,7 +112,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) 
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS)  $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o

@@ -804,6 +804,19 @@ alpha)
     _mcpu="-mcpu=ev56"
     ;;
 
+mips)
+    _arch="#define ARCH_SGI_MIPS 1"
+    _target_arch="TARGET_ARCH_SGI_MIPS=yes"
+    _words_endian="#define WORDS_BIGENDIAN 1"
+    iproc=sgi-mips
+    proc=default
+    _march=""
+    _mcpu="-mcpu=$proc"
+    _skip_as_check=yes
+    # _png=no
+    # CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
+    ;;
+
 *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
     echo "It seems noone has ported MPlayer to your OS or CPU type yet."
@@ -1182,6 +1195,14 @@ int main( void ){ return 0; }
 EOF
 cc_check $_extraincdir $_extralibdir -lesd || _esd=no
 
+# check for SGI audio
+cat > $TMPC << EOF
+#include <dmedia/audio.h>
+int main( void ) { return 0; }
+EOF
+
+_sgi_audio=no
+$_cc -o $TMPO $TMPC 2> /dev/null && _sgi_audio=yes
 
 # check for mad library
 cat > $TMPC << EOF
@@ -1656,6 +1677,7 @@ echo "Checking for ALSA Audio ... $_alsaver"
 echo "Checking for ESD Audio ... $_esd"
 echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for Sun mediaLib ... $_mlib"
+echo "Checking for SGI Audio ... $_sgi_audio"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
@@ -1995,6 +2017,14 @@ else
  _sunaudio='#undef USE_SUN_AUDIO'
 fi
 
+if [ "$_sgi_audio" = "yes" ]; then
+ _sgiaudio='#define USE_SGI_AUDIO'
+ _aosrc="$_aosrc ao_sgi.c"
+ _sgi_audio_lib='-laudio'
+else
+ _sgiaudio='#undef USE_SGI_AUDIO'
+fi
+
 if test "$_sys_soundcard_h" = yes ; then
  _have_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 1'
 else
@@ -2036,8 +2066,12 @@ fi
 # Checking for CFLAGS
 if test "$_profile" || test "$_debug" ; then
  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
-elif test -z "$CFLAGS" ; then
- CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
+elif test -z "$CFLAGS" ; then 
+ if [ "$host_arch" != "mips" ]; then
+  CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
+ else
+  CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
+ fi
 else
  cat <<EOF
 MPlayer is using custom CFLAGS set by you, it is strongly recommended that you
@@ -2330,6 +2364,7 @@ AV_DEP = $_lavcdep
 AV_LIB = $_lavclib
 ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
+SGI_AUDIO_LIB = $_sgi_audio_lib
 ARCH_LIBS = $_archlibs $_iconvlib
 STREAMING=$_streaming
 DECORE_LIBS = $_decorelibs
@@ -2486,6 +2521,7 @@ $_alsa5
 $_alsa9
 $_esdd
 $_sunaudio
+$_sgiaudio
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD

@@ -34,6 +34,9 @@ extern ao_functions_t audio_out_sdl;
 #ifdef USE_SUN_AUDIO
 extern ao_functions_t audio_out_sun;
 #endif
+#ifdef USE_SGI_AUDIO
+extern ao_functions_t audio_out_sgi;
+#endif
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
 
@@ -44,6 +47,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef USE_SUN_AUDIO
         &audio_out_sun,
+#endif
+#ifdef USE_SGI_AUDIO
+        &audio_out_sgi,
 #endif
         &audio_out_null,
 #ifdef HAVE_ALSA5
@@ -84,7 +90,7 @@ char *audio_out_format_name(int format)
 	case AFMT_S16_LE:
 	    return("Signed 16-bit (Little-Endian)");
 	case AFMT_S16_BE:
-	    return("Unsigned 16-bit (Big-Endian)");
+	    return("Signed 16-bit (Big-Endian)");
 	case AFMT_MPEG:
 	    return("MPEG (2) audio");
 	case AFMT_AC3:

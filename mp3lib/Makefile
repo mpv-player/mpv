@@ -4,6 +4,9 @@ include ../config.mak
 SRCS = sr1.c
 OBJS = sr1.o
 # OBJS = $(SRCS:.c,.s=.o)
+ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
+OPTFLAGS := $(OPTFLAGS:-O4=-O0)
+endif
 CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
 ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += d_cpu.s decode_i586.s
