@@ -1,4 +1,4 @@
-.\" synced with 1.842
+.\" synced with 1.845
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "05 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "06 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -951,7 +951,7 @@ outrepasser ceux par défaut\ :
 Spécifie le numéro de carte à utiliser (par défaut\ : 1).
 .IPs file=<nom_fichier>
 Dit à MPlayer de lire les canaux depuis <nom_fichier>.
-~/.mplayer/\:channels.conf.{sat,ter,cbl} par défaut (en fonction de votre
+~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} par défaut (en fonction de votre
 type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
 .RE
 .PD 1
@@ -5061,7 +5061,7 @@ partie de l'écran serait mise à jour.
 .
 .TP
 .B "framestep=I|[i]step"
-N'affiche qu'une trame toutes les n trames ou que chaque trame (clé) Intra.
+N'affiche qu'une trame toutes les n trames ou que chaque trame intra (trame-clé).
 .sp 1
 Si vous appelez ce filtre avec I (en majuscule) en paramètre, alors
 .B seules
@@ -5079,10 +5079,10 @@ contient le temps (en secondes) et le numéro de trame de la trame clé
 Si vous appelez le filtre avec un paramètre numérique 'step' alors seule une
 sur 'step' trames sera affichée.
 .sp 1
-Si vous mettez un 'i' (minuscule) devant le nombre alors un "I!" sera affiché
+Si vous mettez un 'i' (minuscule) devant le nombre alors un 'I!' sera affiché
 (comme le paramètre I).
 .sp 1
-Si vous n'indiquez que i alors rien ne sera fait aux trames, seul I! est
+Si vous n'indiquez que i alors rien ne sera fait aux trames, seul 'I!' est
 affiché.
 .
 .TP
@@ -7853,6 +7853,10 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .TP
 .B Encode depuis un pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
+.
+ .TP
+.B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .TP
 .B Encode de multiples fichiers *.vob
