@@ -94,5 +94,7 @@ void vo_init_osd();
 int vo_update_osd(int dxs,int dys);
 int vo_osd_changed(int new_value);
 
+extern int vo_osd_changed_flag;
+
 #endif
 #endif
