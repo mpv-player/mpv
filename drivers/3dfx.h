@@ -29,7 +29,10 @@
 #define VOODOO_YUV_PLANE_OFFSET  ((unsigned long int)0x0C00000)
 
 #define VOODOO_BLT_FORMAT_YUYV   (8<<16)
+#define VOODOO_BLT_FORMAT_UYVY	 (9<<16)
 #define VOODOO_BLT_FORMAT_16     (3<<16)
+#define VOODOO_BLT_FORMAT_24	 (4<<16)
+#define VOODOO_BLT_FORMAT_32	 (5<<16)
 
 #define VOODOO_YUV_STRIDE        (1024>>2)
 
@@ -248,6 +251,7 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define ROP_COPY		0xcc     // src
 #define ROP_INVERT      0x55     // NOT dst
 #define ROP_XOR         0x66     // src XOR dst
+#define ROP_OR			(0xee)	/* src | dst */
 
 #define AUTOINC_DSTX                    BIT(10)
 #define AUTOINC_DSTY                    BIT(11)
