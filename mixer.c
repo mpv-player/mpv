@@ -7,7 +7,7 @@
 
 #include "mixer.h"
 
-char * mixer_device=NULL;
+char * mixer_device="/dev/mixer";
 int    mixer_usemaster=0;
 
 void mixer_getvolume( int *l,int *r )
