@@ -777,10 +777,16 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    
 			    sh->i_bps = esds.avgBitrate/8; 
 
+//			    printf("######## audio format = %d ########\n",esds.objectTypeId);
+			    if(esds.objectTypeId==107)
+				sh->format=0x55; // .mp3
+
 			    // dump away the codec specific configuration for the AAC decoder
+			    if(esds.decoderConfigLen){
 			    sh->codecdata_len = esds.decoderConfigLen;
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, esds.decoderConfig, sh->codecdata_len);
+			    }
 			  }
 			  mp4_free_esds(&esds); // freeup esds mem
 #if 0
