@@ -74,9 +74,15 @@ static AVPicture lavc_venc_picture;
 /* video options */
 char *lavc_param_vcodec = NULL;
 int lavc_param_vbitrate = -1;
+int lavc_param_vrate_tolerance = 1024*1024*8;
 int lavc_param_vhq = 0; /* default is realtime encoding */
 int lavc_param_vme = 3;
 int lavc_param_vqscale = 0;
+int lavc_param_vqmin = 3;
+int lavc_param_vqmax = 15;
+int lavc_param_vqdiff = 3;
+float lavc_param_vqcompress = 0.5;
+float lavc_param_vqblur = 0.5;
 int lavc_param_keyint = -1;
 #endif
 
@@ -1086,7 +1092,13 @@ case VCODEC_LIBAVCODEC:
 	lavc_venc_context.bit_rate = lavc_param_vbitrate;
     else
 	lavc_venc_context.bit_rate = 800000; /* default */
+    lavc_venc_context.bit_rate_tolerance= lavc_param_vrate_tolerance;
     lavc_venc_context.frame_rate = (float)(force_ofps?force_ofps:sh_video->fps) * FRAME_RATE_BASE;
+    lavc_venc_context.qmin= lavc_param_vqmin;
+    lavc_venc_context.qmax= lavc_param_vqmax;
+    lavc_venc_context.max_qdiff= lavc_param_vqdiff;
+    lavc_venc_context.qcompress= lavc_param_vqcompress;
+    lavc_venc_context.qblur= lavc_param_vqblur;
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
