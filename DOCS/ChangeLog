@@ -12,7 +12,10 @@ Note: If you've sent patches not applied in pre22, please send them again!
 
 *** 0.11 release is coming SOON!!! ***
 
-v0.11-CVS:  yeah, we moved to SourceForge CVS!
+v0.11-pre26-CVS:
+  - updated libmpeg2 source to libmpeg2-0.2.0 version
+
+v0.11-pre25:  yeah, we moved to SourceForge CVS!
   - DOCS updated (email address changed from arpi@* -> maillist)
   - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
   - stream.c: unsigned int fixes, required for some strange .asf files

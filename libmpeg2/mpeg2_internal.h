@@ -1,7 +1,6 @@
-#include <inttypes.h>
 /*
  * mpeg2_internal.h
- * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  *
@@ -20,20 +19,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// hack mode - temporary
-// 0 = decode B pictures in a small slice buffer, display slice per slice
-// 1 = decode in a frame buffer, display slice per slice
-// 2 = decode in a frame buffer, display whole frames
-#define HACK_MODE 0
-
-// macroblock modes
+/* macroblock modes */
 #define MACROBLOCK_INTRA 1
 #define MACROBLOCK_PATTERN 2
 #define MACROBLOCK_MOTION_BACKWARD 4
 #define MACROBLOCK_MOTION_FORWARD 8
 #define MACROBLOCK_QUANT 16
 #define DCT_TYPE_INTERLACED 32
-// motion_type
+/* motion_type */
 #define MOTION_TYPE_MASK (3*64)
 #define MOTION_TYPE_BASE 64
 #define MC_FIELD (1*64)
@@ -41,93 +34,16 @@
 #define MC_16X8 (2*64)
 #define MC_DMV (3*64)
 
-//picture structure
+/* picture structure */
 #define TOP_FIELD 1
 #define BOTTOM_FIELD 2
 #define FRAME_PICTURE 3
 
-//picture coding type
+/* picture coding type */
 #define I_TYPE 1
 #define P_TYPE 2
 #define B_TYPE 3
 #define D_TYPE 4
-
-//The picture struct contains all of the top level state
-//information (ie everything except slice and macroblock
-//state)
-typedef struct picture_s {
-    //-- sequence header stuff --
-    uint8_t intra_quantizer_matrix [64];
-    uint8_t non_intra_quantizer_matrix [64];
-
-    //The width and height of the picture snapped to macroblock units
-    int coded_picture_width;
-    int coded_picture_height;
-
-    //-- picture header stuff --
-
-    //what type of picture this is (I,P,or B) D from MPEG-1 isn't supported
-    int picture_coding_type;
-	
-    //-- picture coding extension stuff --
-	
-    //quantization factor for motion vectors
-    int f_code[2][2];
-    //quantization factor for intra dc coefficients
-    int intra_dc_precision;
-    //top/bottom/both fields
-    int picture_structure;
-    //bool to indicate all predictions are frame based
-    int frame_pred_frame_dct;
-    //bool to indicate whether intra blocks have motion vectors 
-    // (for concealment)
-    int concealment_motion_vectors;
-    //bit to indicate which quantization table to use
-    int q_scale_type;
-    //bool to use different vlc tables
-    int intra_vlc_format;
-
-    //last macroblock in the picture
-    int last_mba;
-    //width of picture in macroblocks
-    int mb_width;
-
-    //stuff derived from bitstream
-
-    //pointer to the zigzag scan we're supposed to be using
-    uint8_t * scan;
-
-    //Pointer to the current planar frame buffer (Y,Cr,CB)
-    uint8_t * current_frame[3];    
-    //storage for reference frames plus a b-frame
-    uint8_t * forward_reference_frame[3];
-    uint8_t * backward_reference_frame[3];
-    uint8_t * throwaway_frame[3];
-    uint8_t * pp_frame[3];  // postprocess
-    //uint8_t * throwaway_frame;
-
-    int pp_options; // postprocess
-
-    int second_field;
-
-    // MPEG1 - testing
-    uint8_t mpeg1;
-
-    //these things are not needed by the decoder
-    //NOTICE : this is a temporary interface, we will build a better one later.
-    int aspect_ratio_information;
-    int frame_rate_code;
-    int progressive_sequence;
-    int top_field_first; // this one is actually used for DMV MC
-    int repeat_first_field;
-    int progressive_frame;
-    // added by A'rpi/ESP-team:
-    int repeat_count;
-    int bitrate;
-    int frame_rate;
-    int display_picture_width;
-    int display_picture_height;
-} picture_t;
 
 typedef struct motion_s {
     uint8_t * ref[2][3];
@@ -135,57 +51,137 @@ typedef struct motion_s {
     int f_code[2];
 } motion_t;
 
-// state that is carried from one macroblock to the next inside of a same slice
-typedef struct slice_s {
-    // bit parsing stuff
-    uint32_t bitstream_buf;	// current 32 bit working set of buffer
-    int bitstream_bits;		// used bits in working set
-    uint8_t * bitstream_ptr;	// buffer with stream data
+typedef struct vo_frame_s {
+    uint8_t * base[3];	/* pointer to 3 planes */
+    void (* copy) (struct vo_frame_s * frame, uint8_t ** src);
+    void* vo;
+    int slice;
+//    void (* field) (struct vo_frame_s * frame, int flags);
+//    void (* draw) (struct vo_frame_s * frame);
+//    vo_instance_t * instance;
+} vo_frame_t;
 
-    //Motion vectors
-    //The f_ and b_ correspond to the forward and backward motion
-    //predictors
+typedef struct picture_s {
+    /* first, state that carries information from one macroblock to the */
+    /* next inside a slice, and is never used outside of slice_process() */
+
+    /* DCT coefficients - should be kept aligned ! */
+    int16_t DCTblock[64];
+
+    /* bit parsing stuff */
+    uint32_t bitstream_buf;	/* current 32 bit working set of buffer */
+    int bitstream_bits;		/* used bits in working set */
+    uint8_t * bitstream_ptr;	/* buffer with stream data */
+
+    /* Motion vectors */
+    /* The f_ and b_ correspond to the forward and backward motion */
+    /* predictors */
     motion_t b_motion;
     motion_t f_motion;
 
-    // predictor for DC coefficients in intra blocks
+    /* predictor for DC coefficients in intra blocks */
     int16_t dc_dct_pred[3];
 
-    uint16_t quantizer_scale;	// remove
-} slice_t;
+    int quantizer_scale;	/* remove */
+    int current_field;		/* remove */
+
+
+    /* now non-slice-specific information */
+
+    /* sequence header stuff */
+    uint8_t intra_quantizer_matrix [64];
+    uint8_t non_intra_quantizer_matrix [64];
+
+    /* The width and height of the picture snapped to macroblock units */
+    int coded_picture_width;
+    int coded_picture_height;
+
+    /* picture header stuff */
+
+    /* what type of picture this is (I, P, B, D) */
+    int picture_coding_type;
+	
+    /* picture coding extension stuff */
+	
+    /* quantization factor for motion vectors */
+    int f_code[2][2];
+    /* quantization factor for intra dc coefficients */
+    int intra_dc_precision;
+    /* top/bottom/both fields */
+    int picture_structure;
+    /* bool to indicate all predictions are frame based */
+    int frame_pred_frame_dct;
+    /* bool to indicate whether intra blocks have motion vectors */
+    /* (for concealment) */
+    int concealment_motion_vectors;
+    /* bit to indicate which quantization table to use */
+    int q_scale_type;
+    /* bool to use different vlc tables */
+    int intra_vlc_format;
+    /* used for DMV MC */
+    int top_field_first;
+
+    /* stuff derived from bitstream */
+
+    /* pointer to the zigzag scan we're supposed to be using */
+    uint8_t * scan;
+
+    struct vo_frame_s * current_frame;
+    struct vo_frame_s * forward_reference_frame;
+    struct vo_frame_s * backward_reference_frame;
+
+    int second_field;
+
+    int mpeg1;
+
+    /* these things are not needed by the decoder */
+    /* this is a temporary interface, we will build a better one later. */
+    int aspect_ratio_information;
+    int frame_rate_code;
+    int progressive_sequence;
+    int repeat_first_field;
+    int progressive_frame;
+    int bitrate;
+    
+    // added by A'rpi/ESP-team
+    int display_picture_width;
+    int display_picture_height;
+    int pp_options;
+    int repeat_count;
+} picture_t;
 
 typedef struct mpeg2_config_s {
-    //Bit flags that enable various things
+    /* Bit flags that enable various things */
     uint32_t flags;
 } mpeg2_config_t;
 
-//The only global variable,
-//the config struct
+/* The only global variable, */
+/* the config struct */
 extern mpeg2_config_t config;
 
 
 
-// slice.c
+/* slice.c */
 void header_state_init (picture_t * picture);
 int header_process_picture_header (picture_t * picture, uint8_t * buffer);
 int header_process_sequence_header (picture_t * picture, uint8_t * buffer);
 int header_process_extension (picture_t * picture, uint8_t * buffer);
 
-// idct.c
+/* idct.c */
 void idct_init (void);
 
-// idct_mlib.c
+/* idct_mlib.c */
 void idct_block_copy_mlib (int16_t * block, uint8_t * dest, int stride);
 void idct_block_add_mlib (int16_t * block, uint8_t * dest, int stride);
 
-// idct_mmx.c
+/* idct_mmx.c */
 void idct_block_copy_mmxext (int16_t *block, uint8_t * dest, int stride);
 void idct_block_add_mmxext (int16_t *block, uint8_t * dest, int stride);
 void idct_block_copy_mmx (int16_t *block, uint8_t * dest, int stride);
 void idct_block_add_mmx (int16_t *block, uint8_t * dest, int stride);
 void idct_mmx_init (void);
 
-// motion_comp.c
+/* motion_comp.c */
 void motion_comp_init (void);
 
 typedef struct mc_functions_s
@@ -208,13 +204,8 @@ extern mc_functions_t mc_functions_mmxext;
 extern mc_functions_t mc_functions_3dnow;
 extern mc_functions_t mc_functions_mlib;
 
-// slice.c
+/* slice.c */
 int slice_process (picture_t *picture, uint8_t code, uint8_t * buffer);
 
-// stats.c
+/* stats.c */
 void stats_header (uint8_t code, uint8_t * buffer);
-
-#define MBC 45
-#define MBR 36
-extern int quant_store[MBR+1][MBC+1]; // [Review]
-

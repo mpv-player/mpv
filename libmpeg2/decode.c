@@ -3,8 +3,7 @@
 
 /* mpeg2dec version: */
 #define PACKAGE "mpeg2dec"
-//#define VERSION "0.1.7-cvs"
-#define VERSION "0.1.8-cvs"
+#define VERSION "0.2.0-release"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +13,8 @@
 
 #include "config.h"
 
-//#include "video_out.h"
+#include "video_out.h"
+#include <inttypes.h>
 
 #include "mpeg2.h"
 #include "mpeg2_internal.h"
@@ -32,6 +32,9 @@
 #include "mmx.h"
 #endif
 
+#include "mm_accel.h"
+
+
 //this is where we keep the state of the decoder
 //picture_t picture_data;
 //picture_t *picture=&picture_data;
@@ -48,7 +51,9 @@ mpeg2_config_t config;
 static int drop_flag = 0;
 static int drop_frame = 0;
 
+#ifdef POSTPROC
 int quant_store[MBR+1][MBC+1]; // [Review]
+#endif
 
 void mpeg2_init (void)
 {
@@ -73,7 +78,7 @@ void mpeg2_init (void)
     picture=shmem_alloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
 
     header_state_init (picture);
-    picture->repeat_count=0;
+//    picture->repeat_count=0;
     
     picture->pp_options=0;
 
@@ -81,10 +86,13 @@ void mpeg2_init (void)
     motion_comp_init ();
 }
 
+static vo_frame_t frames[3];
+
 void mpeg2_allocate_image_buffers (picture_t * picture)
 {
 	int frame_size,buff_size;
         unsigned char *base=NULL;
+	int i;
 
         // height+1 requires for yuv2rgb_mmx code (it reads next line after last)
 	frame_size = picture->coded_picture_width * (1+picture->coded_picture_height);
@@ -92,56 +100,44 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
         buff_size = frame_size + (frame_size/4)*2; // 4Y + 1U + 1V
 
 	// allocate images in YV12 format
-        base = shmem_alloc(buff_size);
-	picture->throwaway_frame[0] = base;
-	picture->throwaway_frame[1] = base + frame_size * 5 / 4;
-	picture->throwaway_frame[2] = base + frame_size;
+	for(i=0;i<3;i++){
+            base = shmem_alloc(buff_size);
+	    frames[i].base[0] = base;
+	    frames[i].base[1] = base + frame_size * 5 / 4;
+	    frames[i].base[2] = base + frame_size;
+	    frames[i].copy = NULL;
+	    frames[i].vo = NULL;
+	    frames[i].slice=0;
+	}
+	
+	picture->forward_reference_frame=&frames[0];
+	picture->backward_reference_frame=&frames[1];
+	picture->current_frame=&frames[2];
 
-        base = shmem_alloc(buff_size);
-	picture->backward_reference_frame[0] = base;
-	picture->backward_reference_frame[1] = base + frame_size * 5 / 4;
-	picture->backward_reference_frame[2] = base + frame_size;
-
-        base = shmem_alloc(buff_size);
-	picture->forward_reference_frame[0] = base;
-	picture->forward_reference_frame[1] = base + frame_size * 5 / 4;
-	picture->forward_reference_frame[2] = base + frame_size;
-
+#ifdef POSTPROC
         base = shmem_alloc(buff_size);
 	picture->pp_frame[0] = base;
 	picture->pp_frame[1] = base + frame_size * 5 / 4;
 	picture->pp_frame[2] = base + frame_size;
+#endif
 
 }
 
-static void decode_reorder_frames (void)
-{
-    if (picture->picture_coding_type != B_TYPE) {
+static void copy_slice (vo_frame_t * frame, uint8_t ** src){
+    vo_functions_t * output = frame->vo;
+    int stride[3];
+    int y=frame->slice*16;
 
-	//reuse the soon to be outdated forward reference frame
-	picture->current_frame[0] = picture->forward_reference_frame[0];
-	picture->current_frame[1] = picture->forward_reference_frame[1];
-	picture->current_frame[2] = picture->forward_reference_frame[2];
+    stride[0]=picture->coded_picture_width;
+    stride[1]=stride[2]=stride[0]/2;
 
-	//make the backward reference frame the new forward reference frame
-	picture->forward_reference_frame[0] =
-	    picture->backward_reference_frame[0];
-	picture->forward_reference_frame[1] =
-	    picture->backward_reference_frame[1];
-	picture->forward_reference_frame[2] =
-	    picture->backward_reference_frame[2];
+    output->draw_slice (src, stride, 
+                picture->display_picture_width,
+		(y+16<=picture->display_picture_height) ? 16 :
+		    picture->display_picture_height-y,
+		0, y);
 
-	picture->backward_reference_frame[0] = picture->current_frame[0];
-	picture->backward_reference_frame[1] = picture->current_frame[1];
-	picture->backward_reference_frame[2] = picture->current_frame[2];
-
-    } else {
-
-	picture->current_frame[0] = picture->throwaway_frame[0];
-	picture->current_frame[1] = picture->throwaway_frame[1];
-	picture->current_frame[2] = picture->throwaway_frame[2];
-
-    }
+    ++frame->slice;
 }
 
 static int in_slice_flag=0;
@@ -156,43 +152,27 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
     if (is_frame_done) {
 	in_slice_flag = 0;
         
-        if(picture->picture_structure != FRAME_PICTURE) printf("Field! %d  \n",picture->second_field);
+//        if(picture->picture_structure != FRAME_PICTURE) printf("Field! %d  \n",picture->second_field);
         
-	    if ( ((HACK_MODE == 2) || (picture->mpeg1))
-                && ((picture->picture_structure == FRAME_PICTURE) ||
+	if (((picture->picture_structure == FRAME_PICTURE) ||
 		 (picture->second_field))
-            ) {
-	        uint8_t ** bar;
-                int stride[3];
-
-		if (picture->picture_coding_type == B_TYPE)
-		    bar = picture->throwaway_frame;
-		else
-		    bar = picture->forward_reference_frame;
-                
-                stride[0]=picture->coded_picture_width;
-                stride[1]=stride[2]=stride[0]/2;
-
-                if(picture->pp_options){
-                    // apply OpenDivX postprocess filter
-                    postprocess(bar, stride[0],
-                        picture->pp_frame, stride[0],
-                        picture->coded_picture_width, picture->coded_picture_height, 
-                        &quant_store[1][1], (MBC+1), picture->pp_options);
-		    output->draw_slice (picture->pp_frame, stride, 
-                        picture->display_picture_width,
-                        picture->display_picture_height, 0, 0);
-                } else {
-		    output->draw_slice (bar, stride, 
+           ) {
+#if 1
+		if (picture->picture_coding_type != B_TYPE) {
+            	    int stride[3];
+            	    stride[0]=picture->coded_picture_width;
+            	    stride[1]=stride[2]=stride[0]/2;
+		    output->draw_slice (picture->forward_reference_frame->base,
+			stride, 
                         picture->display_picture_width,
                         picture->display_picture_height, 0, 0);
                 }
-                
-	    }
-#ifdef ARCH_X86
-	    if (config.flags & MM_ACCEL_X86_MMX) emms ();
 #endif
-	    output->flip_page ();
+	}
+#ifdef ARCH_X86
+	if (config.flags & MM_ACCEL_X86_MMX) emms();
+#endif
+	output->flip_page();
     }
 
     switch (code) {
@@ -227,40 +207,32 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 	if (!(in_slice_flag)) {
 	    in_slice_flag = 1;
 
-	    if(!(picture->second_field)) decode_reorder_frames ();
+//	    if(!(picture->second_field)) decode_reorder_frames ();
+
+	    // set current_frame pointer:
+	    if (picture->second_field){
+//		vo_field (picture->current_frame, picture->picture_structure);
+	    } else {
+		if (picture->picture_coding_type == B_TYPE){
+		    picture->current_frame = &frames[2];
+		    picture->current_frame->copy=copy_slice;
+		} else {
+		    picture->current_frame = picture->forward_reference_frame;
+		    picture->forward_reference_frame = picture->backward_reference_frame;
+		    picture->backward_reference_frame = picture->current_frame;
+		    picture->current_frame->copy=NULL;
+		}
+	    }
+	    
+	    picture->current_frame->vo=output;
+	    picture->current_frame->slice=0;
+
 	}
 
 	if (!drop_frame) {
-	    uint8_t ** bar;
 
 	    slice_process (picture, code, buffer);
 
-	    if ((HACK_MODE < 2) && (!(picture->mpeg1))) {
-		uint8_t * foo[3];
-	        uint8_t ** bar;
-		//frame_t * bar;
-                int stride[3];
-		int offset;
-
-		if (picture->picture_coding_type == B_TYPE)
-		    bar = picture->throwaway_frame;
-		else
-		    bar = picture->forward_reference_frame;
-
-		offset = (code-1) * 4 * picture->coded_picture_width;
-		if ((! HACK_MODE) && (picture->picture_coding_type == B_TYPE))
-		    offset = 0;
-
-		foo[0] = bar[0] + 4 * offset;
-		foo[1] = bar[1] + offset;
-		foo[2] = bar[2] + offset;
-                
-                stride[0]=picture->coded_picture_width;
-                stride[1]=stride[2]=stride[0]/2;
-
-		output->draw_slice (foo, stride, 
-                    picture->display_picture_width, 16, 0, (code-1)*16);
-	    }
 #ifdef ARCH_X86
 	    if (config.flags & MM_ACCEL_X86_MMX) emms ();
 #endif

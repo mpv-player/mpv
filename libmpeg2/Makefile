@@ -3,8 +3,8 @@ LIBNAME = libmpeg2.a
 
 include ../config.mak
 
-SRCS	= decode.c header.c idct.c idct_mmx.c motion_comp.c motion_comp_mmx.c slice.c stats.c
-OBJS	= decode.o header.o idct.o idct_mmx.o motion_comp.o motion_comp_mmx.o slice.o stats.o
+SRCS	= header.c idct.c idct_mmx.c motion_comp.c motion_comp_mmx.c slice.c stats.c decode.c
+OBJS	= header.o idct.o idct_mmx.o motion_comp.o motion_comp_mmx.o slice.o stats.o decode.o
 INCLUDE = -I. -I../libvo -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 

@@ -1,6 +1,6 @@
 /*
  * motion_comp_mmx.c
- * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  *
@@ -33,7 +33,7 @@
 #define CPU_3DNOW 1
 
 
-//MMX code - needs a rewrite
+/* MMX code - needs a rewrite */
 
 
 
@@ -41,7 +41,7 @@
 
 
 
-// some rounding constants
+/* some rounding constants */
 mmx_t round1 = {0x0001000100010001LL};
 mmx_t round4 = {0x0002000200020002LL};
 
@@ -55,16 +55,14 @@ mmx_t round4 = {0x0002000200020002LL};
 
 static inline void mmx_zero_reg ()
 {
-    // load 0 into mm0
+    /* load 0 into mm0 */
     pxor_r2r (mm0, mm0);
 }
 
 static inline void mmx_average_2_U8 (uint8_t * dest,
 				     uint8_t * src1, uint8_t * src2)
 {
-    //
-    // *dest = (*src1 + *src2 + 1)/ 2;
-    //
+    /* *dest = (*src1 + *src2 + 1)/ 2; */
 
     movq_m2r (*src1, mm1);	// load 8 src1 bytes
     movq_r2r (mm1, mm2);	// copy 8 src1 bytes
@@ -93,9 +91,7 @@ static inline void mmx_average_2_U8 (uint8_t * dest,
 static inline void mmx_interp_average_2_U8 (uint8_t * dest,
 					    uint8_t * src1, uint8_t * src2)
 {
-    //
-    // *dest = (*dest + (*src1 + *src2 + 1)/ 2 + 1)/ 2;
-    //
+    /* *dest = (*dest + (*src1 + *src2 + 1)/ 2 + 1)/ 2; */
 
     movq_m2r (*dest, mm1);	// load 8 dest bytes
     movq_r2r (mm1, mm2);	// copy 8 dest bytes
@@ -139,9 +135,7 @@ static inline void mmx_average_4_U8 (uint8_t * dest,
 				     uint8_t * src1, uint8_t * src2,
 				     uint8_t * src3, uint8_t * src4)
 {
-    //
-    // *dest = (*src1 + *src2 + *src3 + *src4 + 2)/ 4;
-    //
+    /* *dest = (*src1 + *src2 + *src3 + *src4 + 2)/ 4; */
 
     movq_m2r (*src1, mm1);	// load 8 src1 bytes
     movq_r2r (mm1, mm2);	// copy 8 src1 bytes
@@ -158,7 +152,7 @@ static inline void mmx_average_4_U8 (uint8_t * dest,
     paddw_r2r (mm3, mm1);	// add lows
     paddw_r2r (mm4, mm2);	// add highs
 
-    // now have partials in mm1 and mm2
+    /* now have partials in mm1 and mm2 */
 
     movq_m2r (*src3, mm3);	// load 8 src3 bytes
     movq_r2r (mm3, mm4);	// copy 8 src3 bytes
@@ -178,7 +172,7 @@ static inline void mmx_average_4_U8 (uint8_t * dest,
     paddw_r2r (mm5, mm1);	// add lows
     paddw_r2r (mm6, mm2);	// add highs
 
-    // now have subtotal in mm1 and mm2
+    /* now have subtotal in mm1 and mm2 */
 
     paddw_m2r (round4, mm1);
     psraw_i2r (2, mm1);		// /4
@@ -193,9 +187,7 @@ static inline void mmx_interp_average_4_U8 (uint8_t * dest,
 					    uint8_t * src1, uint8_t * src2,
 					    uint8_t * src3, uint8_t * src4)
 {
-    //
-    // *dest = (*dest + (*src1 + *src2 + *src3 + *src4 + 2)/ 4 + 1)/ 2;
-    //
+    /* *dest = (*dest + (*src1 + *src2 + *src3 + *src4 + 2)/ 4 + 1)/ 2; */
 
     movq_m2r (*src1, mm1);	// load 8 src1 bytes
     movq_r2r (mm1, mm2);	// copy 8 src1 bytes
@@ -212,7 +204,7 @@ static inline void mmx_interp_average_4_U8 (uint8_t * dest,
     paddw_r2r (mm3, mm1);	// add lows
     paddw_r2r (mm4, mm2);	// add highs
 
-    // now have partials in mm1 and mm2
+    /* now have partials in mm1 and mm2 */
 
     movq_m2r (*src3, mm3);	// load 8 src3 bytes
     movq_r2r (mm3, mm4);	// copy 8 src3 bytes
@@ -237,7 +229,7 @@ static inline void mmx_interp_average_4_U8 (uint8_t * dest,
     paddw_m2r (round4, mm2);
     psraw_i2r (2, mm2);		// /4
 
-    // now have subtotal/4 in mm1 and mm2
+    /* now have subtotal/4 in mm1 and mm2 */
 
     movq_m2r (*dest, mm3);	// load 8 dest bytes
     movq_r2r (mm3, mm4);	// copy 8 dest bytes
@@ -253,13 +245,13 @@ static inline void mmx_interp_average_4_U8 (uint8_t * dest,
     paddw_m2r (round1, mm2);
     psraw_i2r (1, mm2);		// /2
 
-    // now have end value in mm1 and mm2
+    /* now have end value in mm1 and mm2 */
 
     packuswb_r2r (mm2, mm1);	// pack (w/ saturation)
     movq_r2m (mm1,*dest);	// store result in dest
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_avg_mmx (int width, int height,
 			       uint8_t * dest, uint8_t * ref, int stride)
@@ -289,7 +281,7 @@ static void MC_avg_8_mmx (uint8_t * dest, uint8_t * ref,
     MC_avg_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_put_mmx (int width, int height,
 			       uint8_t * dest, uint8_t * ref, int stride)
@@ -323,9 +315,9 @@ static void MC_put_8_mmx (uint8_t * dest, uint8_t * ref,
     MC_put_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
-// Half pixel interpolation in the x direction
+/* Half pixel interpolation in the x direction */
 static inline void MC_avg_x_mmx (int width, int height,
 				 uint8_t * dest, uint8_t * ref, int stride)
 {
@@ -354,7 +346,7 @@ static void MC_avg_x8_mmx (uint8_t * dest, uint8_t * ref,
     MC_avg_x_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_put_x_mmx (int width, int height,
 				 uint8_t * dest, uint8_t * ref, int stride)
@@ -384,7 +376,7 @@ static void MC_put_x8_mmx (uint8_t * dest, uint8_t * ref,
     MC_put_x_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_avg_xy_mmx (int width, int height,
 				  uint8_t * dest, uint8_t * ref, int stride)
@@ -418,7 +410,7 @@ static void MC_avg_xy8_mmx (uint8_t * dest, uint8_t * ref,
     MC_avg_xy_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_put_xy_mmx (int width, int height,
 				  uint8_t * dest, uint8_t * ref, int stride)
@@ -451,7 +443,7 @@ static void MC_put_xy8_mmx (uint8_t * dest, uint8_t * ref,
     MC_put_xy_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_avg_y_mmx (int width, int height,
 				 uint8_t * dest, uint8_t * ref, int stride)
@@ -484,7 +476,7 @@ static void MC_avg_y8_mmx (uint8_t * dest, uint8_t * ref,
     MC_avg_y_mmx (8, height, dest, ref, stride);
 }
 
-//-----------------------------------------------------------------------
+/*-----------------------------------------------------------------------*/
 
 static inline void MC_put_y_mmx (int width, int height,
 				 uint8_t * dest, uint8_t * ref, int stride)
@@ -526,7 +518,7 @@ MOTION_COMP_EXTERN (mmx)
 
 
 
-//CPU_MMXEXT/CPU_3DNOW adaptation layer
+/* CPU_MMXEXT/CPU_3DNOW adaptation layer */
 
 #define pavg_r2r(src,dest)		\
 do {					\
@@ -545,7 +537,7 @@ do {					\
 } while (0)
 
 
-//CPU_MMXEXT code
+/* CPU_MMXEXT code */
 
 
 static inline void MC_put1_8 (int height, uint8_t * dest, uint8_t * ref,

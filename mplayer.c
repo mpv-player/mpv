@@ -29,6 +29,8 @@
 #include "version.h"
 #include "config.h"
 
+#include "libvo/video_out.h"
+
 // CODECS:
 #include "mp3lib/mp3.h"
 #include "libac3/ac3.h"
@@ -37,7 +39,6 @@
 
 #include "loader.h"
 #include "wine/avifmt.h"
-//#include "libvo/x11_common.h"      // included from mpeg2.h
 
 #include "opendivx/decore.h"
 
@@ -861,7 +862,7 @@ switch(has_video){
       printf ("bad sequence header extension!\n"); return 1;
     }
    }
-   default_fps=picture->frame_rate*0.0001f;
+   default_fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
    if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
    printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     picture->mpeg1?"MPEG1":"MPEG2",
@@ -989,6 +990,7 @@ float num_frames=0;      // number of frames played
 double video_time_usage=0;
 double vout_time_usage=0;
 double audio_time_usage=0;
+int grab_frames=0;
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
@@ -1495,11 +1497,17 @@ switch(has_video){
             if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
             else if(!i){ eof=1; break;} // EOF
           }
+	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
           if(!read_video_packet(d_video)){ eof=1; break;} // EOF
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
         }
         if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
         //printf("--- SEND %d bytes\n",videobuf_len);
+	if(grab_frames==1){
+	      FILE *f=fopen("grab.mpg","ab");
+	      fwrite(videobuffer,videobuf_len-4,1,f);
+	      fclose(f);
+	}
         ++dbg_es_sent;
         //if(videobuf_len>4) 
         my_write(data_fifo,(char*) &videobuf_len,4);
@@ -1671,6 +1679,7 @@ switch(has_video){
     case KEY_ESC: // ESC
     case KEY_ENTER: // ESC
     case 'q': exit_player("Quit");
+    case 'g': grab_frames=2;break;
     // restart codec
     case 'k': kill(codec_pid,SIGKILL);break;
 //    case 'k': kill(child_pid,SIGKILL);break;

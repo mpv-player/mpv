@@ -1,6 +1,6 @@
 /*
- * MC_mlib.c
- * Copyright (C) 2000 Håkan Hjort <d95hjort@dtek.chalmers.se>
+ * motion_comp_mlib.c
+ * Copyright (C) 2000-2001 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  *

@@ -91,6 +91,12 @@ void send_cmd(int fd,int cmd){
 //  fflush(control_fifo);
 }
 
+static const int frameratecode2framerate[16] = {
+   0, 24000*10000/1001, 24*10000,25*10000, 30000*10000/1001, 30*10000,50*10000,60000*10000/1001,
+  60*10000, 0,0,0,0,0,0,0
+};
+
+
 void mpeg_codec_controller(vo_functions_t *video_out){
 //================== CODEC Controller: ==========================
     signal(SIGTERM,codec_ctrl_sighandler); // set our SIGTERM handler
@@ -145,8 +151,9 @@ void mpeg_codec_controller(vo_functions_t *video_out){
           mpeg2_decode_data(video_out, videobuffer, videobuffer+len);
           t+=GetTimer();
           send_cmd(control_fifo2,0); // FRAME_COMPLETED command
-          send_cmd(control_fifo2,picture->frame_rate); // fps
+          send_cmd(control_fifo2,frameratecode2framerate[picture->frame_rate_code]); // fps
           send_cmd(control_fifo2,100+picture->repeat_count);picture->repeat_count=0;
+//          send_cmd(control_fifo2,100); // FIXME!
           send_cmd(control_fifo2,t);t=0;
         }
 		video_out->uninit();

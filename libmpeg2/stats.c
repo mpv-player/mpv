@@ -1,6 +1,6 @@
 /*
  * stats.c
- * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  *
@@ -29,8 +29,8 @@
 
 static int debug_level = -1;
 
-// Determine is debug output is required.
-// We could potentially have multiple levels of debug info
+/* Determine is debug output is required. */
+/* We could potentially have multiple levels of debug info */
 static int debug_is_on (void)
 {
     char * env_var;
@@ -152,7 +152,7 @@ static void stats_group (uint8_t * buffer)
 
 static void stats_slice (uint8_t code, uint8_t * buffer)
 {
-    //fprintf (stderr, " (slice %d)\n", code);
+    /* fprintf (stderr, " (slice %d)\n", code); */
 }
 
 static void stats_sequence_extension (uint8_t * buffer)
@@ -274,7 +274,6 @@ void stats_header (uint8_t code, uint8_t * buffer)
 	stats_sequence_error (buffer);
 	break;
     case 0xb5:
-	//stats_extension (buffer);
 	switch (buffer[0] >> 4) {
 	case 1:
 	    stats_sequence_extension (buffer);
