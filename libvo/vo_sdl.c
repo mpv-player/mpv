@@ -96,6 +96,8 @@
 /* define to force software-surface (video surface stored in system memory)*/
 #undef SDL_NOHWSURFACE
 
+//#define BUGGY_SDL //defined by configure
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -805,7 +807,25 @@ static void check_events (void)
 			
 			
 			/* graphics mode selection shortcuts */
+#ifdef BUGGY_SDL
 			case SDL_KEYDOWN:
+				switch(event.key.keysym.sym) {
+                                case SDLK_UP: mplayer_put_key(KEY_UP);break;
+                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
+                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
+                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+                                case SDLK_ASTERISK:
+				case SDLK_KP_MULTIPLY:
+				case SDLK_w: mplayer_put_key('*');break;
+				case SDLK_SLASH:
+				case SDLK_KP_DIVIDE:
+                                case SDLK_s: mplayer_put_key('/');break;
+				}
+			break;
+			case SDL_KEYUP:
+#else			
+			case SDL_KEYDOWN:
+#endif			
 				keypressed = event.key.keysym.sym;
 				if(verbose > 1) printf("SDL: Key pressed: '%i'\n", keypressed);
 
@@ -851,6 +871,19 @@ static void check_events (void)
 				case SDLK_TAB: mplayer_put_key('\t');break;
 				case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
 				case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
+#ifdef BUGGY_SDL
+                                case SDLK_UP:
+                                case SDLK_DOWN:
+                                case SDLK_LEFT:
+                                case SDLK_RIGHT:
+                                case SDLK_ASTERISK:
+				case SDLK_KP_MULTIPLY:
+				case SDLK_w:
+				case SDLK_SLASH:
+				case SDLK_KP_DIVIDE:
+                                case SDLK_s:
+				break;
+#else				
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
@@ -861,6 +894,7 @@ static void check_events (void)
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
                                 case SDLK_s: mplayer_put_key('/');break;
+#endif				
 				default:
 					mplayer_put_key(keypressed);
                                 }
