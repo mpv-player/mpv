@@ -1,9 +1,9 @@
 
 ============================================================
 
-NOTE: libvo2 plan was abandoned, we've changed libvo1.
+NOTE: the 'libvo2 from scratch' plan was abandoned, we're changing libvo1 now.
 
-so, this draft is USELESS NOW, see libvo.txt
+So, this draft is ONLY A DRAFT, see libvo.txt for the current code docs!
 
 ============================================================
 
