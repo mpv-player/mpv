@@ -333,6 +333,69 @@ http_read_response( int fd ) {
 	return http_hdr;
 }
 
+int
+http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
+	char username[50], password[50];
+	char *aut;
+	if( *auth_retry>3 ) {
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
+		return -1;
+	}
+	if( *auth_retry>0 ) {
+		if( url->username ) {
+			free( url->username );
+			url->username = NULL;
+		}
+		if( url->password ) {
+			free( url->password );
+			url->password = NULL;
+		}
+	}
+	aut = http_get_field(http_hdr, "WWW-Authenticate");
+	if( aut!=NULL ) {
+		char *aut_space;
+		aut_space = strstr(aut, "realm=");
+		if( aut_space!=NULL ) aut_space += 6;
+//		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s, please enter:\n", aut_space);
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s\n", aut_space);
+	} else {
+//		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required, please enter:\n");
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required\n");
+	}
+return -1;
+	if( url->username==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"username: ");
+		// FIXME
+		scanf("%s", username);
+		printf("%s\n", username);
+
+		url->username = (char*)malloc(strlen(username)+1);
+		if( url->username==NULL ) {
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+			return -1;
+		}
+		strcpy(url->username, username);
+	} else {
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"%s ", url->username );
+	}
+	mp_msg(MSGT_NETWORK,MSGL_INFO,"password: ");
+	// FIXME
+	scanf("%s", password);
+	printf("%s\n", password);
+	if( url->password ) {
+		free( url->password );
+		url->password = NULL;
+	}
+	url->password = (char*)malloc(strlen(password)+1);
+	if( url->password==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		return -1;
+	}
+	strcpy(url->password, password);
+	(*auth_retry)++;
+	return 0;
+}
+
 // By using the protocol, the extension of the file or the content-type
 // we might be able to guess the streaming type.
 int
@@ -495,51 +558,9 @@ extension=NULL;
 					}
 					break;
 				case 401: // Authorization required
-					{
-					char username[50], password[50];
-					char *aut;
-					if( auth_retry>3 ) {
-						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
-						return -1;
-					}
-					aut = http_get_field(http_hdr, "WWW-Authenticate");
-					if( aut!=NULL ) {
-						char *aut_space;
-						aut_space = strstr(aut, "realm=");
-						if( aut_space!=NULL ) aut_space += 6;
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required for %s, please enter:\n", aut_space);
-					} else {
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Authorization required, please enter:\n");
-					}
-					if( url->username==NULL ) {
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"username: ");
-						// FIXME
-						scanf("%s", username);
-						printf("%s\n", username);
-
-						url->username = (char*)malloc(strlen(username)+1);
-						if( url->username==NULL ) {
-							mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-							return -1;
-						}
-						strcpy(url->username, username);
-					} else {
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"%s ", url->username );
-					}
-					mp_msg(MSGT_NETWORK,MSGL_INFO,"password: ");
-					// FIXME
-					scanf("%s", password);
-					printf("%s\n", password);
-					url->password = (char*)malloc(strlen(password)+1);
-					if( url->password==NULL ) {
-						mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-						return -1;
-					}
-					strcpy(url->password, password);
+					if( http_authenticate(http_hdr, url, &auth_retry)<0 ) return -1;
 					redirect = 1;
-					auth_retry++;
 					break;
-					}
 				default:
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
 					return -1;
@@ -834,7 +855,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		if(ret < 0) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if cache size option was set\n");
 		} else if(!ret) {
-			// cache option not set, will use the our computed value.
+			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
 			if( val<16 ) val = 16;	// 16KBytes min buffer
