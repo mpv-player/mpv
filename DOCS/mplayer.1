@@ -2528,6 +2528,8 @@ This overrides what is read from the DVD or the .ifo file.
 .B \-xvidencopts <option1:option2:...>
 If encoding to XviD, you can specify its parameters here.
 .br
+There's three modes available : constant bitrate (CBR), fixed quantizer and 2pass.
+.br
 Available options are:
 .
 .RSs
@@ -2544,18 +2546,12 @@ specify how fast the rate control reacts, lower values are faster
 period to reach the required average
 .IPs rc_buffer=<value>
 size of the rate control buffer
-.IPs min_quantizer=<1-31>
-minimum quantizer (default=2)
-.IPs max_quantizer=<1-31>
-maximum quantizer (default=31)
-.IPs min_iquantizer=<1-31>
-.IPs min_pquantizer=<1-31>
-minimum quantizer for I & P frames (2pass only, default=2)
-.IPs max_iquantizer=<1-31>
-.IPs max_pquantizer=<1-31>
-maximum quantizer for I & P frames (2pass only, default=31)
+.IPs quant_range=<1-31>-<1-31>[/<1-31>-<1-31>]
+min & max quantizer for all frames (default=2-31, CBR mode)
+.br
+min & max quantizer for I/P frames (default=2-31/2-31, 2pass mode)
 .IPs min_key_interval=<value>
-minimum interval between key frames (2pass only, default=0)
+minimum interval between key frames (default=0, 2pass only)
 .IPs max_key_interval=<value>
 maximum interval between key frames (default=10*fps)
 .IPs mpeg_quant
@@ -2563,7 +2559,11 @@ use MPEG quantizers instead of H.263 (default=off)
 .IPs mod_quant
 decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis. (default=off, 2pass mode only)
 .IPs lumi_mask
-use a lumimasking algorithm (default=off)
+use a lumimasking algorithm (default=off, seems buggy)
+.IPs hintedme
+save Motion Estimation vectors to a file during the first pass and reuse this file during the second (default=off, 2pass mode only, seems buggy)
+.IPs hintfile
+specify the temporary file to be used by the 'hintedme' option (default= ./xvid_hint_me.dat, 2pass mode only)
 .IPs debug
 save per-frame statistics in xvid.dbg (default=off)
 .br
