@@ -3394,6 +3394,8 @@ if >16000
 switch to fixed quantizer mode and specify the quantizer to be used
 .IPs me_quality=<0\-6>
 specify the motion detection quality (default=4)
+.IPs interlacing
+enable support for interlaced content (default=off)
 .IPs 4mv
 use 4 motion vectors per macro-block, might give better compression at the
 cost of a slower encoding (default=off)
@@ -3426,6 +3428,33 @@ this is *not* the 2pass control file
 (default=10, 2pass mode only)
 .IPs kfreduction=<0\-100>
 (default=30, 2pass mode only)
+.RE
+.br
+The folowing options are only available with the unstable (cvs -HEAD)
+version of XviD. Be warned that these options are experimental and may
+not work as intended.
+.
+.RSS
+.IPs packed
+create a bitstream that can be decoded delay-free (default=off)
+.IPs divx5bvop
+generate DivX5 compatible B-frames (default=on)
+.IPs greyscale
+encode in black & white (default=off)
+.IPs qpel
+enable quarter-pixel motion estimation (default=off)
+.IPs gmc
+enable global motion compensation, may save bits on panning scenes (default=off)
+.IPs chroma_me
+uses chroma information to estimate motion (default=off)
+.IPs reduced
+enable encoding reduced resolution frames (default=off)
+.IPs max_bframes=<0\-4>
+maximum number of B frames to put between I/P frames (default=0
+.IPs bquant_ratio=<0\-1000>
+quantizer ratio between B and non B frames, 150=1.50 (default=150)
+.IPs bquant_offset=<-1000\-1000>
+quantizer offset between B and non B frames, 100=1.00 (default=100)
 .RE
 
 

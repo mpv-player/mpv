@@ -83,14 +83,18 @@ static int xvidenc_kfthreshold = -1;
 static int xvidenc_kfreduction = -1;
 static int xvidenc_fixed_quant = 0;
 static int xvidenc_debug = 0;
+static int xvidenc_interlacing = 0;
 #ifdef XVID_API_UNSTABLE
+static int xvidenc_packed = 0;
+static int xvidenc_divx5bvop = 1;
+static int xvidenc_greyscale = 0;
 static int xvidenc_lumi_mask = 0;
 static int xvidenc_qpel = 0;
 static int xvidenc_max_bframes = 0;
 static int xvidenc_bquant_ratio = 150;
 static int xvidenc_bquant_offset = 100;
 static int xvidenc_gmc = 0;
-static int xvidenc_me_colour = 0;
+static int xvidenc_chroma_me = 0;
 static int xvidenc_reduced = 0;
 static int xvidenc_xstat=0;
 static int xvidenc_hqac=0;
@@ -117,7 +121,11 @@ struct config xvidencopts_conf[] = {
     { "kfreduction", &xvidenc_kfreduction, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL}, /* for XVID_MODE_2PASS_2 */
     { "fixed_quant", &xvidenc_fixed_quant, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL}, /* for XVID_MODE_FIXED_QUANT */
     { "debug", &xvidenc_debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "interlacing", &xvidenc_interlacing, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef XVID_API_UNSTABLE
+    { "packed", &xvidenc_packed, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "divx5bvop", &xvidenc_divx5bvop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     //{ "lumi_mask", &xvidenc_lumi_mask, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "extrastat", &xvidenc_xstat, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -126,7 +134,7 @@ struct config xvidencopts_conf[] = {
     { "bquant_offset", &xvidenc_bquant_offset, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
     { "reduced", &xvidenc_reduced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "me_colour", &xvidenc_me_colour, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "chroma_me", &xvidenc_chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hq_ac", &xvidenc_hqac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "vhq", &xvidenc_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "chroma_opt", &xvidenc_pref, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -210,11 +218,14 @@ config(struct vf_instance_s* vf,
     enc_param.max_bframes = xvidenc_max_bframes;
     enc_param.bquant_ratio = xvidenc_bquant_ratio;
     enc_param.bquant_offset = xvidenc_bquant_offset;
+    if (xvidenc_divx5bvop) 
+	enc_param.global |= XVID_GLOBAL_DX50BVOP;
+    if (xvidenc_packed) 
+	enc_param.global |= XVID_GLOBAL_PACKED;
     if (xvidenc_reduced)
 	enc_param.global |= XVID_GLOBAL_REDUCED;
     if (xvidenc_xstat)
 	enc_param.global |= XVID_GLOBAL_EXTRASTATS;
-
 #endif
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
@@ -245,6 +256,8 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_INTER4V;
     if (xvidenc_lumi_mask)
 	fp->enc_frame.general |= XVID_LUMIMASKING;
+    if (xvidenc_interlacing)
+	fp->enc_frame.general |= XVID_INTERLACING;
 #ifdef XVID_API_UNSTABLE
     if (xvidenc_qpel) {
 	fp->enc_frame.general |= XVID_QUARTERPEL;
@@ -256,7 +269,7 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_GMC;
     if (xvidenc_xstat)
 	fp->enc_frame.general |= XVID_EXTRASTATS;
-    if (xvidenc_me_colour)
+    if (xvidenc_chroma_me)
 	fp->enc_frame.motion |= PMV_CHROMA16 | PMV_CHROMA8;
     if(xvidenc_reduced)
 	fp->enc_frame.general |= XVID_REDUCED;
