@@ -764,46 +764,20 @@ Resample alphamap of the font. Can be:
     10    bold black outline
 .TP
 .B \-font <path\ to\ font.desc\ file>
-Search for the OSD/SUB fonts in an alternative directory (default:
-~/.mplayer/font/font.desc).
+Search for the OSD/SUB fonts in an alternative directory (default for normal
+fonts: ~/.mplayer/font/font.desc, default for FreeType fonts:
+~/.mplayer/subfont.ttf).
 .br
 .I NOTE:
-With FreeType, this option determines path to the text font file,
+With FreeType, this option determines path to the text font file.
 .br
 .I NOTE:
 The \-subfont-* options are available only with FreeType support compiled in.
+If FreeType support is enabled, the old font support can't be used.
 
 .I EXAMPLE:
     \-font ~/.mplayer/arial\-14/font.desc
-    \-font ~/.mplayer/my_cool_font.ttf
-.TP
-.B \-subfont-encoding <value>
-Sets the font encoding. When set to "unicode", all the glyphs from the
-font file will be rendered and unicode will be used. This is also the
-default setting.
-.TP
-.B \-subfont-text-scale <0\-100>
-Sets the subtitle text autoscale coefficient (percentage of the
-screen size).
-.TP
-.B \-subfont-osd-scale <0\-100> 
-Sets the osd elements autoscale coefficient.
-.TP
-.B \-subfont-blur <0\-8>
-Sets the font blur radius.
-.TP
-.B \-subfont-outline <0\-8>
-Sets the font outline thickness.
-.TP
-.B \-subfont-autoscale <0\-3>
-Sets the autoscale mode. Can be:
-
-    0  no autoscale
-    1  proportional to movie width
-    2  proportional to movie height
-    3  proportional to movie diagonal (default)
-
-Zero means that text-scale and osd-scale are font heights in points.
+    \-font ~/.mplayer/arialuni.ttf
 .TP
 .B \-noautosub
 Turns off automatic subtitles.
@@ -848,6 +822,33 @@ Force subtitle demuxer type for \-subfile.
 .TP
 .B \-subdelay <sec>
 Delays subtitles by <sec> seconds. Can be negative.
+.TP
+.B \-subfont-autoscale <0\-3>
+Sets the autoscale mode. Can be:
+
+    0  no autoscale
+    1  proportional to movie width
+    2  proportional to movie height
+    3  proportional to movie diagonal (default)
+
+Zero means that text-scale and osd-scale are font heights in points.
+.TP
+.B \-subfont-blur <0\-8>
+Sets the font blur radius (default: 2).
+.TP
+.B \-subfont-encoding <value>
+Sets the font encoding. When set to "unicode", all the glyphs from the
+font file will be rendered and unicode will be used (default: unicode).
+.TP
+.B \-subfont-osd-scale <0\-100> 
+Sets the osd elements autoscale coefficient (default: 6).
+.TP
+.B \-subfont-outline <0\-8>
+Sets the font outline thickness (default: 2).
+.TP
+.B \-subfont-text-scale <0\-100>
+Sets the subtitle text autoscale coefficient (percentage of the
+screen size) (default: 5).
 .TP
 .B \-subfps <rate>
 Specify frame/sec rate of subtitle file (float number),
