@@ -243,20 +243,24 @@ section in order to gain big speedup. It is important to do these steps
 <I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built.</LI>
 
-<LI>If you own a 3Dfx card (which models?), then please see the <A
+<LI>If you own a 3Dfx Voodoo3/Banshee card, then please see the <A
 HREF="video.html#2.2.1.9">2.2.1.9</A> section in order to gain big speedup. It
 is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
 otherwise no 3Dfx support will be built.</LI>
 
 <LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
 <A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.
-This codec can play <B>DivX</B> movies much faster than the Win32 DLL, and
-<B>ffmpeg</B>. It's closed-source, and only an x86 version is available.</LI>
+This codec can play old <B>DivX</B> movies much faster than the Win32 DLL.
+If you want to play movies with the new <B>DivX4</B> codec, it's
+<B>recommended</B> to use this library, instead the DivX.dll in the
+w32codecs.zip package. The codec itself is closed-source, and only an x86
+version is available.</LI>
 
 <LI>If you plan to use ffmpeg's <B>libavcodec</B>, check the
 <A HREF="codecs.html#2.1.2.2">2.1.2.2</A> section before compiling.
-You'll need this to gain <B>DivX</B> playing on non-x86 machines, or want to
-gain bigger speed than the Win32 codec does.</LI>
+You'll need this to <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B>,
+and this codec has the <B>greatest decoding speed</B> for DivX and DivX4
+movies (even faster than the original DivX4 library itself) !</LI>
 
 <LI>For DVD support, you'll have to compile libdvdread and libdvdcss.
 See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>

@@ -123,8 +123,10 @@ talán a használt bpp-tol függõen változhat.</P>
 
 <P>A 0.4.2-es verzióval kezdve az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott forráskódú</B>
 DivX codec-et, amely kompatibilis a hagyományossal. Az <B>MPlayer</B>
-támogatja ezt a codec-et, lehetõvé téve hogy <B>DivX filmeket nézzünk nem-x86
-platformokon!</B> Az <B>MPlayer</B> fa nem tartalmazza, le kell töltened az <B>FFmpeg</B>
+támogatja ezt a codec-et, lehetõvé téve hogy <B>DivX/DivX4 filmeket nézzünk nem-x86
+platformokon</B>, méghozzá sokkal gyorsabb dekódolással mint amit a Win32
+codec-ek, és az eredeti DivX4 lehetõvé tesz!<BR>
+Az <B>MPlayer</B> fa nem tartalmazza, le kell töltened az <B>FFmpeg</B>
 fát:</P>
 
 <P><CODE>
@@ -145,6 +147,14 @@ fát:</P>
 
 <P>A használatához frissítsd a codecs.conf file-odat, és tégy úgy ahogy a
 manpage vagy az example.conf mondja (a -vfm opció).</P>
+
+<P>A legnagyobb sebesség eléréséhez ajánlott kivenni az <CODE>ffmpeg12</CODE>
+részt a codecs.conf file-ból (a libmpeg2 kétszer gyorsabb ennél a codecnél),
+és betenni a konfigurációs file-ba a <CODE>vfm=5</CODE> opciót.
+Ekkor az <B>MPlayer</B> az <B>ffdivx/ffodivx</B> codec-eket használja
+a <B>DivX/DivX4</B> file-ok, és a libmpeg2-t az MPEG1/2 file-ok dekódolásához.
+Ezzel és egy Matrox G400-zal még a legnagyobb felbontású DivX/DivX4 filmeket
+is meg lehet nézni képkockavesztés nélkül, egy régi K6/2 500-ason.</P>
 
 
 <P><B><A NAME=2.1.2.3>2.1.2.3.  Hardveres AC3 dekódolás</B></P>
