@@ -1,4 +1,4 @@
-.\" synced with 1.663
+.\" synced with 1.664
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1491,11 +1491,11 @@ Okre¶la ID napisów VOBsub.
 .
 .SH "OPCJE WYJ¦CIA AUDIO (TYLKO MPLAYER)"
 .TP
-.B \-abs <warto¶æ> (PRZESTARZA£E)
-Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty, tylko \-ao oss.
+.B \-abs <warto¶æ> (tylko -ao oss) (PRZESTARZA£E)
+Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 .TP
 .B \-aofile <nazwa\ zbioru>
-Nazwa zbioru dla \-ao pcm.
+Nadpisuje domy¶ln± nazwê zbioru dla \-ao pcm.
 .TP
 .B \-aop <list=wtyczka1,wtyczka2...:opcja1=warto¶æ1:opcja2=warto¶æ2...>
 Okre¶l wtyczki audio i ich opcje (patrz te¿ dokumentacja).
@@ -1522,7 +1522,7 @@ w³±cza kompresjê / "miêkkie obcinanie (soft-clipping)" (tylko wtyczka volume)
 .
 .TP
 .B \-delay <sekundy>
-Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia/\:ujemna warto¶æ rzeczywista).
+Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna warto¶æ rzeczywista).
 .TP
 .B \-format <0\-8192>
 Wybiera format u¿ywany przez wyj¶cie warstwy filtruj±cej
@@ -1537,17 +1537,17 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-8-bit ze znakiem
-.IPs 16
 8-bit bez znaku
+.IPs 16
+16-bit (little-endian) ze znakiem 
 .IPs 32
-16-bit (little-endian) bez znaku
-.IPs 64
-16-bit (big-endian) bez znaku
-.IPs 128
-16-bit (little-endian) ze znakiem
-.IPs 256
 16-bit (big-endian) ze znakiem
+.IPs 64
+8-bit ze znakiem
+.IPs 128
+16-bit (little-endian) bez znaku
+.IPs 256
+16-bit (big-endian) bez znaku
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
@@ -1561,8 +1561,7 @@ AC3
 .
 .TP
 .B \-mixer <urz±dzenie>
-Wskazuje MPlayerowi, by u¿ywa³ do miksowania innego urz±dzenia ni¿
-/dev/\:mixer.
+Korzysta z miksera innego ni¿ domy¶lny /dev/\:mixer.
 Przy ALSA jest to nazwa miksera.
 .TP
 .B \-mixer-channel <linia miksera> (tylko \-ao oss i \-ao alsa)
@@ -1577,7 +1576,7 @@ Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 .TP
 .B \-nowaveheader (tylko \-ao pcm)
 Nie do³±cza nag³ówków wave.
-U¿ywany przy RAW PCM.
+U¿ywany przy surowym PCM.
 .
 .
 .SH "STEROWNIKI WYJ¦CIOWE D¬WIÊKU (TYLKO MPLAYER)"
@@ -1684,7 +1683,7 @@ Specyficzny sterownik DVB.
 Nie przekazuje d¼wiêku, ale utrzymuje prêdko¶æ odtwarzania video.
 Do testów wydajno¶ciowych u¿yj \-nosound.
 .TP
-.B pcm\ \ \ \ 
+.B pcm (sprawd¼ równie¿ -aofile)
 Sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/wave.
 Zapisuje d¼wiêk do ./audiodump.wav.
 .TP
@@ -1852,7 +1851,7 @@ Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego).
 Prze³±cz go klawiszem "f" (nie wszystkie wyj¶cia video to obs³uguj±).
 Zobacz tak¿e \-zoom.
 .TP
-.B \-fsmode-dontuse <0\-31> (PRZESTARZA£E) (u¿ywaj opcji \-fs)
+.B \-fsmode-dontuse <0\-31> (PRZESTARZA£, u¿ywaj opcji \-fs)
 Wypróbuj tê opcjê, je¿eli masz problemy z trybem pe³noekranowym.
 .TP
 .B \-fstype <typ1,typ2,...>
@@ -2812,7 +2811,7 @@ U¿yteczne do testów wydajno¶ci.
 .B \-novideo
 Nie koduje/\:odtwarza video.
 .TP
-.B \-oldpp <jako¶æ> (PRZESTARZA£E) (tylko OpenDivX)
+.B \-oldpp <jako¶æ> (tylko OpenDivX) (PRZESTARZA£E)
 U¿ywa kodu postprocessingu z opendivx zamiast wbudowanego.
 Zast±piony przez \-pp, wewnêtrzny postprocessing daje lepsz± jako¶æ i jest
 szybszy.
