@@ -26,10 +26,13 @@ Er verfügt auch über eine stream-copy-Funktion und kann die Grösse der Videos än
   <UL>
     <LI><B>OPTIONAL</B> - Lies die Anleitungen zu <B>MPlayer</B>, sie enthält Infos wie man z.B. 
       <I>libdvdread</I> für <B>DVD</B> Unterstützung installiert.</LI>
-    <LI><B>OPTIONAL</B> - Downloade die neuesten <B>DivX4linux</B> Libs von
+    <LI><B>OPTIONAL (NUR LINUX)</B> - Downloade die neuesten <B>DivX4linux</B> Libs von
       <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>
       und installiere sie RICHTIG. Es wird benötigt für das DivX4 (1/2 Pass) encodieren. 
       Weil er (zur Zeit) noch davon abhängig ist, ist MEncoder auf Linux beschränkt.</LI>
+    <LI><B>OPTIONAL</B> - <A HREF="codecs.html#2.2.1.9">downloade und installiere
+      <B>XViD</B></A>. Sehr nützlich für nicht-Linux Kisten und/oder wenn eine schnellere Encodierung
+      als DivX4 benötigt wird mit der annähernd gleichen Qualität.</LI>
     <LI><B>OPTIONAL</B> - für libavcodec Support, installiere libavcodec wie beschrieben in
       <A HREF="codecs.html#2.2.1.2">ffmpegs DivX/libavcodec</A>.</LI>
     <LI><B>OPTIONAL</B> - Downloade und kompiliere <B>libmp3lame</B> (von lame 3.89beta oder lame CVS).<BR>
@@ -234,7 +237,7 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 <P><B><I>Erklärung des Prozesses</I></B></P>
 
 <P><B>MEncoder</B> <I>decodiert</I> das/die Eingangsbild(er) mit einem verfügbaren
-  MJPEG Videocodec (wenn er PNGs decodiert, verwendet er einen eingebauten PNG Decoder).
+  MJPEG Videocodec (wenn er PNGs decodiert, verwendet er die <b>libpng</b>).
   Standardmässig wird <CODE>ffmjpeg</CODE> verwendet, so dass man die libavcodec-Unterstützung
   einkompilieren muss (was sowieso empfohlen ist). Der Nachteil ist, dass er gewisse JPEG-Typen
   nicht verarbeiten kann (für diese wird ein grünes Bild encodiert). Benutze dazu ein externes

@@ -37,7 +37,7 @@ täglich generierte Liste!!!</P>
 ist, lese <A HREF="#2.2.3">Sektion 2.2.3</A> um Infos über den Status zu bekommen
 und wie du uns helfen kannst, die Unterstützung hinzuzufügen!</P>
 
-<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4/DivX5</A></B></P>
 
 <P>Diese Sektion enthält Informationen über den DivX4 Codec von
 <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Ihre ersten verfügbaren alpha-Versionen
@@ -47,9 +47,10 @@ die Bildqualität von MPEG1/2 Filmen zu verbessern.</P>
 
 <P>Die neue Version dieses Codecs kann auch Filme dekodieren, die mit diesen relativ
 unbekannten DivX-Codecs erzeugt wurden! Und das ist noch nicht alles, ist es auch UM
-EINIGES schneller als die traditionelle Win32 DivX DLL. Siehe unten für die
-Konfiguration. Der einigze Nachteil diese Codecs ist, dass er zur Zeit Closed-Source
-ist. :(</P>
+EINIGES schneller als die traditionelle Win32 DivX DLL. (libavcodec's Decoder ist sogar 
+NOCH SCHNELLER, so dass der Gebrauch dieses Codecs <B>entmutigend</B> ist - man braucht 
+ihn bloss zur Encodierung). Siehe unten für die Konfiguration. Der einigze Nachteil 
+diese Codecs ist, dass er zur Zeit Closed-Source ist. :(</P>
 
 <P>Der Codec kann unter folgender URL heruntergeladen werden:</P>
 
@@ -63,8 +64,8 @@ ist. :(</P>
 
 <P>Hinweis: vergiss NICHT <CODE>/usr/local/lib</CODE> deiner <CODE>/etc/ld.so.conf</CODE> hinzuzufügen!</P>
 
-<P><B>MPlayer</B> erkennt automatisch, wenn DivX4 installiert ist, und kompiliert
-es wie gewöhnlich. Wenn es nicht erkannt wird, wurde es nicht exakt wir oben
+<P><B>MPlayer</B> erkennt automatisch, wenn DivX4/DivX5 (korrekt) installiert ist und kompiliert
+wie gewöhnlich. Wenn nichts erkannt wird, wurde es nicht exakt wie oben
 installiert und/oder du hast eine schlechte Konfiguration (siehe letzte Frage
 der 5.1 Sektion).</P>
 
@@ -76,12 +77,12 @@ OpenDivX-Code deaktiviert und der OpenDivX-Treiber verwendet auch diese Bibiliot
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">verwendet den DivX4 Codec als eine
-neue Version von OpenDivX. In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
+<TD><FONT CLASS="text">verwendet den Codec als eine neue Version von OpenDivX. 
+In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
 <B>MPlayer</B> (libvo) führt die Colorspace-Konversion durch (<B>EMPFOHLEN</B>).</TD><TR>
 <TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT CLASS="text">verwendet die Colorspace-Konversion
-des DivX4 Codecs. In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD><TR>
+<TD><FONT CLASS="text">verwendet die Colorspace-Konversion des Codecs. 
+In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD><TR>
 </TABLE></P>
 
 <P>Die 'odivx' Methode ist normalerweise schneller, da es die Daten in einem YV12
@@ -102,13 +103,13 @@ ist groß:</P>
 <TD></TD><TD><FONT CLASS="text">starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD><TR>
 </TABLE></P>
 
-<P><B><A NAME=2.1.2.2>2.1.2.2. ffmpeg's DivX/libavcodec</A></B></P>
+<P><B><A NAME=2.2.1.2>2.2.1.2. ffmpeg's DivX/libavcodec</A></B></P>
 
-<P>Seit Beginn der Version 0.4.2 enthält <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> einen <B>Open-Source</B>
-DivX-Codec, welcher kompatibel mit dem traditionellen DivX ist. <B>MPlayer</B>
-unterstützt diesen Codec und er ermöglicht, <B>DivX/DivX4 Filme auf nicht-x86
-Platformen zu sehen!</B> und es besitzt eine schnellere <B>DivX/DivX4</B> Dekodierung
-als der Win32 Codec oder die orginale DivX4 Codec.</P>
+<P>Seit Beginn der Version 0.4.2 enthält <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A>
+einen <B>Open-Source</B> DivX-Codec, welcher kompatibel mit dem traditionellen DivX ist. 
+<B>MPlayer</B> unterstützt diesen Codec und er ermöglicht, <B>DivX/DivX4/DivX5 Filme auf 
+nicht-x86 Platformen zu sehen!</B> und es besitzt eine schnellere <B>DivX/DivX4/DivX5</B> 
+Dekodierung als der Win32 Codec oder die orginale DivX4 Codec.</P>
 
 <P>Es beinhaltet auch viele nette Codecs, wie RealVideo 1.0, MJPEG, h263,
 h263+, etc.</P>
@@ -142,11 +143,11 @@ kann. Der Codec <B>unterstützt auch Postprocessing</B>!</P>
 <P>Um es zu verwenden aktualisiere deine codecs.conf-Datei und verwende es wie in der Manpage beschrieben
 oder die example.conf-Datei sagt (die -vfm Option).</P>
 
-<P>Um die <B>größtmögliche Geschwindigkeit</B> auf meinem K6 zu erreichen, habe ich
+<P>Um die <B>grösstmögliche Geschwindigkeit</B> auf meinem K6 zu erreichen, habe ich
 die <CODE>ffmpeg12</CODE> Sektion von codecs.conf entfernt (dieser Codec ist
 nicht optimiert und libmpeg2 ist doppelt so schnell) und habe <CODE>vfm=5</CODE>
 in meiner config-Datei hinzugefügt. <B>MPlayer</B> hat nun immer <B>ffdivx/ffodivx</B>
-zum Dekodieren von <B>DivX/DivX4</B> verwendet und libmpeg2 für MPEG1/2. Mit diesen
+zum Dekodieren von <B>DivX</B> Dateien verwendet und libmpeg2 für MPEG1/2. Mit diesen
 Einstellungen und meiner Matrox G400 kann ich auch DivX/DivX4-Filme mit hoher
 Auflösung ohne Framedrop sehen.</P>
 
@@ -223,6 +224,42 @@ Er wird standardgemäß verwendet.</P>
 ffmpeg. Dummerweise, kommen keine neuen RealMedia files mit diesem Codec, nur mit den neueren
 RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung ist unwahrscheinlich :(</P>
 
+<P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
+
+<P><B>XViD</B> ist eine weitere Entwicklung vom guten alten OpenDivX 
+(die erste Entwicklung war DivX4).</P>
+
+<P><B>Vorteile</B> :
+  <UL>
+    <LI>Opensource</LI>
+    <LI>Die API ist kompatibel mit DivX4, so dass es leicht ist Unterstützung dafür einzubauen.</LI>
+    <LI>2-Schritt Encodierungs-Unterstützung</LI>
+    <LI>gute Encodierungsqualität, höhere Geschwindigkeit als DivX4 (man kann es, während dem 
+    Kompilieren, spezifisch für den jeweiligen Rechner optimieren)</LI>
+  </UL>
+</P>
+
+<P><B>Nachteile</B> :
+  <UL>
+    <LI>Es decodiert momentan nicht alle DivX/DivX4-Dateien sauber</LI>
+    <LI>Man muss sich beim Kompilieren für die DivX4 <B>ODER</B> 
+    XViD Unterstützung entscheiden.</LI>
+    <LI>in der Entwicklung</LI>
+  </UL>
+</P>
+
+<P><B>Installation</B> : Es ist momentan nur als CVS erhältlich. Hier sind die
+  Download- und Installations-Anweisungen :<BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid
+    login</CODE><BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co
+    xvidcore</CODE><BR>
+  &nbsp;&nbsp;<CODE>cd xvidcore/build/generic</CODE><BR>
+  &nbsp;&nbsp;<CODE>bearbeite Makefile.linux deinen Bedürfnissen entsprechend</CODE><BR>
+  &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
+  &nbsp;&nbsp;<CODE>kompiliere <B>MPlayer</B> neu mit --with-xvidcore=/pfad/zu/libcore.a</CODE><BR>
+</P>
+
 
 <P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
 
@@ -297,9 +334,9 @@ kopieren.</P>
 Version mit tiefer Bitrate des bekannten AC3 Codec. Er kann in alten und neuen RealMedia Filmen gefunden werden.</P>
 
 
-<P><B><A NAME=2.1.4>2.1.4. Win32 Codec Einbindungs-Howto</A></B></P>
+<P><B><A NAME=2.2.3>2.2.3. Win32 Codec Einbindungs-Howto</A></B></P>
 
-<P><B><A NAME=2.1.4.1>2.1.4.1. VFW Codecs</A></B></P>
+<P><B><A NAME=2.2.3.1>2.2.3.1. VFW Codecs</A></B></P>
 
 <P>VfW (Video für Windows) ist die alte Video-Schnittstelle von Windows.
 Die Codecs haben die .DLL oder (eher selten) die .DRV Erweiterung.
@@ -327,7 +364,7 @@ FTP herauf:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
-<P><B><A NAME=2.1.4.2>2.1.4.2. DirectShow Codecs</A></B></P>
+<P><B><A NAME=2.2.3.2>2.2.3.2. DirectShow Codecs</A></B></P>
 
 <P>DirectShow ist die neuere Video-Programmierschnittstelle, welche noch
 schlimmer als ihr Vorgänger ist. Es ist schwieriger mit DirectShow, denn
