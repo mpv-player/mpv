@@ -3313,14 +3313,17 @@ else
 fi
 echores "$_aa"
 
+
 echocheck "CACA"
 if test "$_caca" = auto ; then
+  _caca=no
+  if ( caca-config --version ) >> "$TMPLOG" 2>&1 ; then
   cat > $TMPC << EOF
 #include <caca.h>
 int main(void) { (void) caca_init(); return 0; }
 EOF
-  _caca=no
   cc_check `caca-config --libs` && _caca=yes
+  fi
 fi
 if test "$_caca" = yes ; then
   _def_caca='#define HAVE_CACA 1'
