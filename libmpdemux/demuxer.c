@@ -719,8 +719,8 @@ int demux_info_print(demuxer_t *demuxer)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", info->name);
 	if (info->author)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", info->author);
-	if (info->comments)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", info->comments);
+	if (info->copyright)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", info->copyright);
 	if (info->comments)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Comments: %s\n", info->comments);
 	if (info->encoder)
