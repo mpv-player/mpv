@@ -47,24 +47,8 @@ int dvd_angle=1;
 #define	LIBDVDREAD_VERSION	DVDREAD_VERSION(0,8,0)
 #endif
 
-
-typedef struct {
-    dvd_reader_t *dvd;
-    dvd_file_t *title;
-    ifo_handle_t *vmg_file;
-    tt_srpt_t *tt_srpt;
-    ifo_handle_t *vts_file;
-    vts_ptt_srpt_t *vts_ptt_srpt;
-    pgc_t *cur_pgc;
-    //
-    int cur_cell;
-    int cur_pack;
-    int cell_last_pack;
-    // Navi:
-    int packs_left;
-    dsi_t dsi_pack;
-    int angle_seek;
-} dvd_priv_t;
+char * dvd_audio_stream_types[8] =
+        { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 
 #endif
 
@@ -220,6 +204,68 @@ if(dvd_title){
     d->vmg_file=vmg_file;
     d->tt_srpt=tt_srpt;
     d->vts_file=vts_file;
+
+    /**
+     * Check number of audio channels and types
+     */
+//    fprintf( stderr,"[open] nr_audio streams: %d\n",vts_file->vtsi_mat->nr_of_vts_audio_streams );
+    {
+     int ac3aid = 128;
+     int mpegaid = 0;
+     int pcmaid = 160;
+     
+     d->nr_of_channels=0;
+     
+     if ( vts_file->vts_pgcit ) 
+      {
+       int i;
+       for ( i=0;i<8;i++ )
+        if ( vts_file->vts_pgcit->pgci_srp[0].pgc->audio_control[i] & 0x8000 )
+	 {
+	  audio_attr_t * audio = &vts_file->vtsi_mat->vts_audio_attr[i];
+	  int language = 0;
+	  char tmp[] = "unknown";
+	  
+	  if ( audio->lang_type == 1 ) 
+	   {
+	    language=audio->lang_code;
+	    tmp[0]=language>>8;
+	    tmp[1]=language&0xff;
+	    tmp[2]=0;
+	   }
+	  
+          d->audio_streams[d->nr_of_channels].language=language;
+          d->audio_streams[d->nr_of_channels].id=0;
+	  switch ( audio->audio_format )
+	   {
+	    case 0: // ac3
+	    case 6: // dts
+	            d->audio_streams[d->nr_of_channels].id=ac3aid;
+		    ac3aid++;
+		    break;
+	    case 2: // mpeg layer 1/2/3
+	    case 3: // mpeg2 ext
+	            d->audio_streams[d->nr_of_channels].id=mpegaid;
+		    mpegaid++;
+		    break;
+	    case 4: // lpcm
+	            d->audio_streams[d->nr_of_channels].id=pcmaid;
+		    pcmaid++;
+		    break;
+	   }
+
+          mp_msg(MSGT_OPEN,MSGL_V,"[open] audio stream: %d audio format: %s language: %s aid: %d\n",
+	    d->nr_of_channels,
+            dvd_audio_stream_types[ audio->audio_format ],
+	    tmp,
+	    d->audio_streams[d->nr_of_channels].id
+	    );
+
+	  d->nr_of_channels++;
+	 }
+      }
+     mp_msg(MSGT_OPEN,MSGL_V,"[open] %d audio channel found on disk.\n",d->nr_of_channels );
+    }
 
     /**
      * Determine which program chain we want to watch.  This is based on the

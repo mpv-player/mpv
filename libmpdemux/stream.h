@@ -158,4 +158,39 @@ extern int dvd_chapter;
 extern int dvd_angle;
 //#endif
 
+#ifdef USE_DVDREAD
+
+#include <dvdread/dvd_reader.h>
+#include <dvdread/ifo_types.h>
+#include <dvdread/ifo_read.h>
+#include <dvdread/nav_read.h>
+
+typedef struct {
+ int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
+ int language; 
+} audio_stream_t;
+
+typedef struct {
+  dvd_reader_t *dvd;
+  dvd_file_t *title;
+  ifo_handle_t *vmg_file;
+  tt_srpt_t *tt_srpt;
+  ifo_handle_t *vts_file;
+  vts_ptt_srpt_t *vts_ptt_srpt;
+  pgc_t *cur_pgc;
+//
+  int cur_cell;
+  int cur_pack;
+  int cell_last_pack;
+// Navi:
+  int packs_left;
+  dsi_t dsi_pack;
+  int angle_seek;
+// audio datas
+  int nr_of_channels;
+  audio_stream_t audio_streams[8];
+} dvd_priv_t;
+
+#endif
+							    
 #endif // __STREAM_H
