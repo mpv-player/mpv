@@ -576,6 +576,7 @@ Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
 
 Plourde, Nicolas <nicolas.plourde@sympatico.ca>
     * quartz video output driver for Mac OS X
+    * Darwin vcd/svcd support
 
 Poirier, Guillaume <guillaume.poirier@ifsic.univ-rennes1.fr>
     * French documentation translation and synchronization
