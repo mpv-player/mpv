@@ -2,18 +2,38 @@
 TODO:
 =====
 
-CVS CLEANUP work:
-~~~~~~~~~~~~~~~~~
+Post-0.90 / CVS CLEANUP work:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- find/elect/etc new maintainer(s)
 - remove old config/cmdline parser code
 - maybe remove .raw font support too
-- renaming DOCS/translations: Hungarian->hu etc
-- rename linux->osdep
+- renaming DOCS/translations: Hungarian->hu etc - DONE!
+- rename linux->osdep - DONE!
 - upgrade libmpeg2 to 0.3.1+Fabian's patch
 - maybe upgrade to liba52 cvs & merge in (or redo?) the asm optimizations
 - change build & install stuff (cross-lib dependency etc)
-- we should apply the delayed patches (see my mail sent yesterday about patches
 - we should switch to the patch tracker (roundup)
-
+- fix & apply the delayed patches:
+  - MPlayer-0.90rc2.rawyuv.diff - raw YUV (I420) video 'encoder'
+    (checks requires for stride==width, and aligned planes)
+  - dvb-patch4.gz - DVB-in support
+    (requires Mpeg-TS demuxer)
+  - of-raw-1.diff - raw audio/video stream dump 'muxer'
+  - qt-osx.diff - Quicktime support on OSX
+    (needs cleanup, removal of cosmetics and unrelated changes)
+  - timer-win.c - GetTimer() etc implementation using native win32 API
+  - bte.diff - something input plugin (uses fork() )
+  - lavc_statsfile_errorchecking-patch - handle errors writing to logfile
+  - slices.diff - slices support in video filters (unfinished? messy?)
+  - spudec.patch - dunno, something with partial NAV VM support?
+  - xine-lib-cvs-xvmc.diff - XvMC support for libmpeg2 0.3.x
+  - fastermemcpy.diff - cacheline-size dependant optimizations
+  - fire-x86-runtime-options.diff - en/disable (force) cpu features runtime
+    (needs to be integrated with --runtime-cpu-detection en/disabled modes)
+  - mga_vid_laced.diff - buggy interlace support into mga_vid
+  - patch_sortsub_disable-1.3x.diff - remove --disable-sortsub
+  - mplayer-0.90rc3-fixfbdev.patch - ugly hack to fix multiple file & -vo fbdev
+  - vf_denoise3d.c.diff - better precision (and probably speed loss) to denoise3d
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
