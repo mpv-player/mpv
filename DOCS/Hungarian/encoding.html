@@ -25,8 +25,10 @@ beépítését, és hasonlókat.</P>
       installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.
       És mivel jelenleg ez az egyetlen módszer, a MEncoder csak Linuxon
       mûködik.</LI>
-    <LI>töltsd le és installáld a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
-      CVS-bõl). Ez szükségeltetik a CBR/VBR MP3 audio enkódoláshoz. Egy
+    <LI>töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
+      CVS-bõl).<BR>
+      <B>NE GCC 2.96-TAL FORDÍTSD ! Nem fog helyesen mûködni !</B><BR>
+      Ez szükségeltetik a CBR/VBR MP3 audio enkódoláshoz. Egy
       egyszerû <CODE>lame</CODE> bináris nem elég. Mégvalami: minél kevesebb
       optimalizációt használsz a lame fordításánál, annál jobb lesz a minõsége.
       A minõséget a fordítás utáni <CODE>make test</CODE> paranccsal
