@@ -5,6 +5,9 @@
 #				   pontscho@makacs.poliod.hu
 #
 # Changes in reversed order:
+# 2001/11/15 by Gabucino
+# - optional linking parameters for static linking
+#
 # 2001/11/14 by David Holm
 # - added --enable-libvo2 for dev purposes
 #
@@ -214,7 +217,8 @@ Audio:
 Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
-  --enable-static        build a statically linked binary
+  --enable-static        build a statically linked binary. If more linking
+                         options needed : --enable-static="-lslang -lncurses"
   --language=xx          select a language [en]
                          (Available: $LANGUAGES)
   --disable-select       disable audio select() support (for example, required
@@ -270,8 +274,11 @@ _glibconfig=
 
 for ac_option do
  case "$ac_option" in
-  --enable-static*)
+  --enable-static)
         _static="-static"
+        ;;
+  --enable-static=*)
+        _static="-static `echo $ac_option | cut -d '=' -f 2`"
         ;;
   --target=*)
         _target=`echo $ac_option | cut -d '=' -f 2`
