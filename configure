@@ -598,6 +598,9 @@ do
         _mmx=no
 	_mmx2=no
         ;;
+  --disable-mmx2)
+	_mmx2=no
+        ;;
   --disable-mtrr)
   	_mtrr=no
 	;;
