@@ -1,3 +1,5 @@
+// Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
+
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
