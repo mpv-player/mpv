@@ -1,8 +1,23 @@
 //#define ANGELPOTION
 //#define USE_DIRECTSHOW
 
-static GUID CLSID_DivxDecompressorCF={0x82CCd3E0, 0xF71A, 0x11D0,
+static    GUID wmv1_clsid={0x4facbba1, 0xffd8, 0x4cd7,
+    {0x82, 0x28, 0x61, 0xe2, 0xf6, 0x5c, 0xb1, 0xae}};
+static    GUID wmv2_clsid={0x521fb373, 0x7654, 0x49f2, 
+    {0xbd, 0xb1, 0x0c, 0x6e, 0x66, 0x60, 0x71, 0x4f}};    
+static    GUID CLSID_MorganMjpeg={0x6988b440, 0x8352, 0x11d3, 
+    {0x9b, 0xda, 0xca, 0x86, 0x73, 0x7c, 0x71, 0x68}};
+static    GUID CLSID_Acelp={0x4009f700, 0xaeba, 0x11d1,
+    {0x83, 0x44, 0x00, 0xc0, 0x4f, 0xb9, 0x2e, 0xb7}};
+static    GUID CLSID_Voxware={0x73f7a062, 0x8829, 0x11d1,
+    {0xb5, 0x50, 0x00, 0x60, 0x97, 0x24, 0x2d, 0x8d}};
+static    GUID CLSID_DivxDecompressorCF={0x82CCd3E0, 0xF71A, 0x11D0,
     { 0x9f, 0xe5, 0x00, 0x60, 0x97, 0x78, 0xaa, 0xaa}};
+static    GUID CLSID_IV50_Decoder={0x30355649, 0x0000, 0x0010,
+    {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+static    GUID dvsd_clsid={0xB1B77C00, 0xC3E4, 0x11CF,
+    {0xAF, 0x79, 0x00, 0xAA, 0x00, 0xB6, 0x7A, 0x42}};
+
 
 char* get_vids_codec_name(){
 //  unsigned long fccHandler=avi_header.video.fccHandler;
@@ -134,6 +149,14 @@ char* get_vids_codec_name(){
           return "mcmjpg32.dll";
 //          return "m3jpeg32.dll";
 //          return "libavi_mjpeg.so";
+
+	case mmioFOURCC('W', 'M', 'V', '1'):
+	  printf("Video in Windows Media Video 1 format\n");
+          avi_header.yuv_supported=1;
+          avi_header.vids_guid=&wmv1_clsid;
+          return "wmvds32.ax";
+
+
   }
   printf("UNKNOWN video codec: %.4s (0x%0X)\n",&fccHandler,fccHandler);
   printf("If you know this video format and codec, you can edit codecs.c in the source!\n");
@@ -162,7 +185,8 @@ char* get_auds_codec_name(){
 	case 0x32://MS GSM
             return "msgsm32.acm";   // segfault :( - not req. has internal now!
         case 0x75://VoxWare
-            return "voxmsdec.ax";   // directshow, not yet supported just a try
+            avi_header.auds_guid=&CLSID_Voxware;
+            return "voxmsdec.ax";
 //	case 0x06://???
 //            return "lhacm.acm";
 //            return "msg711.acm";

@@ -58,6 +58,7 @@ typedef struct
 
 #ifdef USE_DIRECTSHOW
 #include "DirectShow/DS_VideoDec.h"
+#include "DirectShow/DS_AudioDec.h"
 #endif
 
 #include "opendivx/decore.h"
@@ -367,8 +368,8 @@ int f; // filedes
 int stream_type;
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
-int has_audio=1; // audio format 0=no 1=mpeg 2=pcm 3=ac3 4=win32 5=alaw 6=msgsm
-int has_video=0; // video format 0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
+int has_audio=1; // audio  0=no 1=mpeg 2=pcm 3=ac3 4=ACM 5=alaw 6=msgsm 7=DShow
+int has_video=0; // video  0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
 //
 int audio_format=0; // override
 #ifdef ALSA_TIMER
@@ -676,6 +677,7 @@ switch(file_format){
   if(verbose) printf("detected AVI audio format: %d\n",has_audio);
   if(has_audio==4){
     if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name();
+    if(avi_header.auds_guid) has_audio=7; // force DShow
     if(!avi_header.audio_codec) has_audio=0; // unknown win32 codec
     if(verbose) printf("win32 audio codec: '%s'\n",avi_header.audio_codec);
   }
@@ -743,6 +745,7 @@ switch(file_format){
   if(verbose) printf("detected ASF audio format: %d\n",has_audio);
   if(has_audio==4){
     if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name();
+    if(avi_header.auds_guid) has_audio=7; // force DShow
     if(!avi_header.audio_codec) has_audio=0; // unknown win32 codec
     if(verbose) printf("win32 audio codec: '%s'\n",avi_header.audio_codec);
   }
@@ -1165,6 +1168,36 @@ if(has_audio==4){
       has_audio=0;  // nosound
   }
 }
+
+if(has_audio==7){
+#ifndef USE_DIRECTSHOW
+  printf("Compiled without DirectShow support -> force nosound :(\n");
+  has_audio=0;
+#else
+  // Win32 DShow audio codec:
+    WAVEFORMATEX *in_fmt=(WAVEFORMATEX*)&avi_header.wf_ext;
+    avi_header.wf.nChannels=in_fmt->nChannels;
+    avi_header.wf.nSamplesPerSec=in_fmt->nSamplesPerSec;
+    avi_header.wf.nAvgBytesPerSec=2*avi_header.wf.nSamplesPerSec*avi_header.wf.nChannels;
+    avi_header.wf.wFormatTag=WAVE_FORMAT_PCM;
+    avi_header.wf.nBlockAlign=2*in_fmt->nChannels;
+    avi_header.wf.wBitsPerSample=16;
+    avi_header.wf.cbSize=0;
+
+  if(!DS_AudioDecoder_Open(avi_header.audio_codec,avi_header.auds_guid,in_fmt)){
+    MP3_channels=avi_header.wf.nChannels;
+    MP3_samplerate=avi_header.wf.nSamplesPerSec;
+  } else {
+    printf("Could not load/initialize Win32/DirctShow AUDIO codec (missing .AX file?)\n");
+    if((in_fmt->wFormatTag)==0x55){
+      printf("Audio format is MP3 -> fallback to internal mp3lib/mpg123\n");
+      has_audio=1;  // fallback to mp3lib
+    } else
+      has_audio=0;  // nosound
+  }
+#endif
+}
+
 
 // allocate audio out buffer:
 a_buffer=malloc(a_buffer_size);
