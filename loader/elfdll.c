@@ -7,14 +7,7 @@
 
 #ifdef HAVE_LIBDL
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include <wine/windef.h>
-//#include <wine/global.h>
-//#include <wine/process.h>
 #include <wine/module.h>
 #include <wine/heap.h>
 #include <wine/elfdll.h>
@@ -23,6 +16,10 @@
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <dlfcn.h>
 
 struct modref_list_t;

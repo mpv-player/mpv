@@ -6,6 +6,8 @@
  * and initializes it at the start of player!
  */
 
+#include "ldt_keeper.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -14,7 +16,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
-
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>
@@ -36,8 +37,8 @@ extern int sysi86(int, void*);
 }
 #endif
 
-#ifndef NUMSYSLDTS		/* SunOS 2.5.1 does not define NUMSYSLDTS */
-#define NUMSYSLDTS	6	/* Let's hope the SunOS 5.8 value is OK */
+#ifndef NUMSYSLDTS             /* SunOS 2.5.1 does not define NUMSYSLDTS */
+#define NUMSYSLDTS     6       /* Let's hope the SunOS 5.8 value is OK */
 #endif
 
 #define       TEB_SEL_IDX     NUMSYSLDTS
@@ -72,8 +73,6 @@ struct modify_ldt_ldt_s {
 #endif
 #define       TEB_SEL LDT_SEL(TEB_SEL_IDX)
 
-#include "ldt_keeper.h"
-
 /**
  *
  *  This should be performed before we create first thread. See remarks
@@ -81,8 +80,8 @@ struct modify_ldt_ldt_s {
  *
  */
 
-static void* fs_seg=NULL;
-static char* prev_struct=NULL;
+static void* fs_seg = NULL;
+static char* prev_struct = NULL;
 /**
  * here is a small logical problem with Restore for multithreaded programs -
  * in C++ we use static class for this...
@@ -200,18 +199,18 @@ void Setup_LDT_Keeper(void)
 
 #if defined(__svr4__)
     {
-    struct ssd ssd;
-    ssd.sel = TEB_SEL;
-    ssd.bo = array.base_addr;
-    ssd.ls = array.limit - array.base_addr;
-    ssd.acc1 = ((array.read_exec_only == 0) << 1) |
-               (array.contents << 2) |
-               0xf0;   /* P(resent) | DPL3 | S */
-    ssd.acc2 = 0x4;   /* byte limit, 32-bit segment */
-    if (sysi86(SI86DSCR, &ssd) < 0) {
-	perror("sysi86(SI86DSCR)");
-	printf("Couldn't install fs segment, expect segfault\n");
-    }
+	struct ssd ssd;
+	ssd.sel = TEB_SEL;
+	ssd.bo = array.base_addr;
+	ssd.ls = array.limit - array.base_addr;
+	ssd.acc1 = ((array.read_exec_only == 0) << 1) |
+	    (array.contents << 2) |
+	    0xf0;   /* P(resent) | DPL3 | S */
+	ssd.acc2 = 0x4;   /* byte limit, 32-bit segment */
+	if (sysi86(SI86DSCR, &ssd) < 0) {
+	    perror("sysi86(SI86DSCR)");
+	    printf("Couldn't install fs segment, expect segfault\n");
+	}
     }
 #endif
 

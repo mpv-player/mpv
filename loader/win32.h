@@ -201,6 +201,7 @@ extern LONG WINAPI explstrcpynA(char* str1, const char* str2,int len);
 extern LONG WINAPI explstrcatA(char* str1, const char* str2);
 extern LONG WINAPI expInterlockedExchange(long *dest, long l);
 
+
 extern void* CDECL expmalloc(int size);
 extern void CDECL expfree(void* mem);
 extern void* CDECL expnew(int size);
@@ -219,7 +220,16 @@ extern int expmemmove(void* dest, void* src, int n);
 extern int expmemcmp(void* dest, void* src, int n);
 extern void *expmemcpy(void* dest, void* src, int n) ;
 extern time_t exptime(time_t* t);
+extern int expsprintf(char* str, const char* format, ...);
+extern int expsscanf(const char* str, const char* format, ...);
+extern void* expfopen(const char* path, const char* mode);
+
+
 extern void* LookupExternal(const char* library, int ordinal);
 extern void* LookupExternalByName(const char* library, const char* name);
+
+extern int exprand();
+extern int exp_ftol(float f);
+extern void WINAPI expInitCommonControls();
 
 #endif

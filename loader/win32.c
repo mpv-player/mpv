@@ -19,10 +19,16 @@
 #include "wine/winerror.h"
 #include "wine/debugtools.h"
 #include "wine/module.h"
-#include "win32.h"
 
 #include <stdio.h>
+#include "win32.h"
+
+#include "registry.h"
+#include "loader.h"
+#include "com.h"
+
 #include <stdlib.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include <pthread.h>
 #include <errno.h>
@@ -39,9 +45,6 @@
 #include <kstat.h>
 #endif
 
-#include "registry.h"
-#include "loader.h"
-#include "com.h"
 
 char* def_path=WIN32_PATH;
 
@@ -221,7 +224,7 @@ void* my_mreq(int size, int to_zero)
     if(to_zero)
     	memset(heap+heap_counter, 0, size);	    
     else
-	memset(heap+heap_counter, 0xcc, size);  // make crash reprocable
+	memset(heap+heap_counter, 0xcc, size);  // make crash reproducable
     heap_counter+=size;
     return heap+heap_counter-size;	
 }
@@ -1945,7 +1948,33 @@ int WINAPI expWritePrivateProfileStringA(const char* appname, const char* keynam
     dbgprintf(" => 0\n");
     return 0;
 }
-
+int expsprintf(char* str, const char* format, ...)
+{
+    va_list args;
+    int r;
+    dbgprintf("sprintf(%s, %s)\n", str, format);
+    va_start(args, format);
+    r = vsprintf(str, format, args);
+    va_end(args);
+    return r;
+}
+int expsscanf(const char* str, const char* format, ...)
+{
+    va_list args;
+    int r;
+    dbgprintf("sscanf(%s, %s)\n", str, format);
+    va_start(args, format);
+    r = vsscanf(str, format, args);
+    va_end(args);
+    return r;
+}
+void* expfopen(const char* path, const char* mode)
+{
+    //fails
+    printf("fopen: \"%s\"  mode:%s\n", path, mode);
+    //return fopen(path, mode);
+    return 0;
+}
 unsigned int _GetPrivateProfileIntA(const char* appname, const char* keyname, INT default_value, const char* filename)
 {
     return expGetPrivateProfileIntA(appname, keyname, default_value, filename);
@@ -2061,6 +2090,21 @@ time_t exptime(time_t* t)
     time_t result=time(t);
     dbgprintf("time(0x%x) => %d\n", t, result);
     return result;
+}
+
+int exprand()
+{
+    return rand();
+}
+
+void expsrand(int seed)
+{
+    srand(seed);
+}
+
+int exp_ftol(float f)
+{
+    return (int)(f+.5);
 }
 
 int WINAPI expStringFromGUID2(GUID* guid, char* str, int cbMax)
@@ -2818,6 +2862,12 @@ FF(isalnum, -1)
 FF(memmove, -1)
 FF(memcmp, -1)
 FF(time, -1)
+FF(_ftol,-1)
+FF(rand, -1)
+FF(srand, -1)
+FF(sprintf,-1)
+FF(sscanf,-1)
+FF(fopen,-1)
 };
 struct exports exp_winmm[]={
 FF(GetDriverModuleHandle, -1)
