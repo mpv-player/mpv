@@ -13,7 +13,7 @@ extern int             mainVisible;
 
 extern int             mplMainAutoPlay;
 
-extern void mplInit( int argc,char* argv[], char *envp[] );
+extern void mplInit( int argc,char* argv[], char *envp[], void* disp );
 extern void mplMsgHandle( int msg,float param );
 
 #endif

@@ -48,7 +48,7 @@ void mplTimerHandler( int signum )
  if ( mplGeneralTimer == 0 ) mplMsgHandle( evGeneralTimer,0 );
 }
 
-void mplInit( int argc,char* argv[], char *envp[] )
+void mplInit( int argc,char* argv[], char *envp[], void* disp )
 {
 // parse_cfgfiles( argc,argv,envp );
 
@@ -63,7 +63,7 @@ void mplInit( int argc,char* argv[], char *envp[] )
  message=mplErrorHandler;  // error messagebox drawing function
 
  // opens X display, checks for extensions (XShape, DGA etc)
- wsXInit();
+ wsXInit(disp);
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {
@@ -75,6 +75,9 @@ void mplInit( int argc,char* argv[], char *envp[] )
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsShowWindow,"ViDEO" );
 
+ vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
+ mplSubRender=0;
+ 
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsMaxSize|wsMinSize|wsShowWindow,"MPlayer" );
@@ -105,6 +108,8 @@ void mplInit( int argc,char* argv[], char *envp[] )
  btnModify( evSetBalance,mplShMem->Balance );
  btnModify( evSetMoviePosition,mplShMem->Position );
 
+ mplShMem->Playing=0;
+ 
 // timerSetHandler( mplTimerHandler );  // various timer hacks
 // timerInit();
 

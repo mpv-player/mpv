@@ -180,7 +180,7 @@ extern int                  wsUseDGA;
 extern unsigned long        wsKeyTable[512];
 
 extern void wsXDone( void );
-extern void wsXInit( void );
+extern void wsXInit( void* disp );
 
 extern int wsGetDepthOnScreen( void );
 

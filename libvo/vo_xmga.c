@@ -108,7 +108,7 @@ static void set_window(){
          XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-         //fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
          #ifdef HAVE_GUI
           if ( vo_window != None )
@@ -249,7 +249,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  if ( vo_window == None )
   {
 #endif
@@ -289,7 +289,8 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    XSetNormalHints( mDisplay,mWindow,&hint );
    XStoreName( mDisplay,mWindow,mTitle );
    XMapWindow( mDisplay,mWindow );
-#ifdef HAVE_GUI
+   mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
+#ifdef HAVE_NEW_GUI
   }
   else
     {
@@ -301,9 +302,9 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
        XResizeWindow( mDisplay,mWindow,d_width,d_height );
       }
       else mFullscreen=1;
+      mGC=vo_gc; //XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
     }
 #endif
- mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
 
  set_window();
 
@@ -317,16 +318,13 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
  if(mga_init()) return -1;
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  if ( vo_window == None )
-  {
 #endif
+ {
    XFlush( mDisplay );
    XSync( mDisplay,False );
-#ifdef HAVE_GUI
-  }
-#endif
-
+ }
  saver_off(mDisplay);
 
  return 0;

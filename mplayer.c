@@ -37,6 +37,7 @@
 #include "libvo2/libvo2.h"
 #else
 #include "libvo/video_out.h"
+void* mDisplay; // Display* mDisplay;
 #endif
 
 //#ifdef USE_OSD
@@ -185,6 +186,8 @@ static int benchmark=0;
 
 static int play_in_bg=0;
 
+extern float gui_position;
+
 extern void avi_fixate();
 
 #ifdef HAVE_GUI
@@ -274,8 +277,10 @@ float sub_fps=0;
 int   sub_auto = 1;
 /*DSP!!char *dsp=NULL;*/
 
-//float rel_seek_secs=0;
 //float initial_pts_delay=0;
+
+float rel_seek_secs=0;
+int abs_seek_pos=0;
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;
@@ -283,17 +288,30 @@ extern char *ao_subdevice;
 void exit_player(char* how){
  total_time_usage_start=GetTimer()-total_time_usage_start;
 
-#ifdef HAVE_GUI
- if ( !nogui )
-  {
-   if ( how != NULL )
-    {
-     if ( !strcmp( how,"Quit" ) ) mplSendMessage( mplEndOfFile );
-     if ( !strcmp( how,"End of file" ) ) mplSendMessage( mplEndOfFile );
-     if ( !strcmp( how,"audio_init" ) ) mplSendMessage( mplAudioError );
-    }
-    else mplSendMessage( mplUnknowError );
-  }
+  // restore terminal:
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     getch2_disable();
+
+#ifdef USE_LIBVO2
+  if(video_out) vo2_close(video_out);
+#else
+  if(video_out) video_out->uninit();
+#endif
+
+#ifdef HAVE_NEW_GUI
+  if(use_gui) mplDone();
+#endif
+
+  if(audio_out) audio_out->uninit();
+
+  if(encode_name) avi_fixate();
+#ifdef HAVE_LIRC
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+  lirc_mp_cleanup();
 #endif
 
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
@@ -312,25 +330,6 @@ void exit_player(char* how){
 	  100.0*(total_time_usage-tot)/total_time_usage,
 	  100.0);
   }
-  // restore terminal:
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     getch2_disable();
-
-#ifdef USE_LIBVO2
-  if(video_out) vo2_close(video_out);
-#else
-  if(video_out) video_out->uninit();
-#endif
-  if(audio_out) audio_out->uninit();
-  if(encode_name) avi_fixate();
-#ifdef HAVE_LIRC
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-  lirc_mp_cleanup();
-#endif
 
   exit(1);
 }
@@ -454,9 +453,6 @@ int v_saturation=50;
 
 //float a_frame=0;    // Audio
 
-float rel_seek_secs=0;
-int abs_seek_pos=0;
-
 int i;
 int use_stdin=0; //int f; // filedes
 
@@ -480,8 +476,12 @@ int use_stdin=0; //int f; // filedes
       mp_msg(MSGT_CPLAYER,MSGL_WARN,"MPlayer was compiled WITHOUT GUI support!\n");
       use_gui=0;
     }
+#else
+    if(use_gui && !vo_init()){
+      mp_msg(MSGT_CPLAYER,MSGL_WARN,"MPlayer GUI requires X11!\n");
+      use_gui=0;
+    }
 #endif
-
 
 #ifndef USE_LIBVO2
     if(video_driver && strcmp(video_driver,"help")==0){
@@ -560,7 +560,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   // It's time to init the GUI code: (and fork() the GTK process)
 #ifdef HAVE_NEW_GUI
   if(use_gui){
-       appInit( argc,argv,envp );
+       appInit( argc,argv,envp,(void*)mDisplay );
   }
 #endif
 
@@ -1778,6 +1778,17 @@ if(rel_seek_secs || abs_seek_pos){
   abs_seek_pos=0;
   current_module=NULL;
 }
+
+#ifdef HAVE_NEW_GUI
+      if(use_gui){
+        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
+        if(len>0)
+          gui_position=(demuxer->filepos-demuxer->movi_start)/len;
+        else
+	  gui_position=-1;
+      }
+#endif
+
 
 //================= Update OSD ====================
 #ifdef USE_OSD

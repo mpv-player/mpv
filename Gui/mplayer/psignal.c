@@ -18,6 +18,9 @@
 
 #include "../../config.h"
 
+#include "../../libvo/x11_common.h"
+//#include "../../libvo/sub.h"
+
 #include "./mplayer.h"
 
 #define gtkShow( w ) gtkShMem->vs.window=w; gtkSendMessage( evShowWindow );
@@ -55,20 +58,21 @@ void mplPlayerSigHandler( int s )
  switch ( mplShMem->message )
   {
    case mplQuit:
-//        exit_player( "Quit" );
+        exit_player( "GUI close" );
         break;
    case mplPauseEvent:
 //        if ( osd_function != OSD_PAUSE ) osd_function=OSD_PAUSE;
 //          else osd_function=OSD_PLAY;
         break;
    case mplResizeEvent:
-//        vo_resize=1;
-//        vo_expose=1;
-//        dbprintf( 2,"[psignal] resize.\n" );
+        vo_resize=1;
+        vo_expose=1;
+        printf( "[psignal] resize.\n" );
 //        if (video_out != NULL ) video_out->check_events();
         break;
    case mplExposeEvent:
-//        vo_expose=1;
+        vo_expose=1;
+        printf( "[psignal] expose.\n" );
 //        if (video_out != NULL ) video_out->check_events();
         break;
    case mplSeekEvent:

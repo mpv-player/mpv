@@ -9,6 +9,8 @@ int    mplParent = 1;
 
 int    mplx,mply,mplwidth,mplheight;
 
+float gui_position=-1;
+
 #include "../app.h"
 
 #include "../wm/ws.h"
@@ -16,6 +18,7 @@ int    mplx,mply,mplwidth,mplheight;
 #include "../wm/widget.h"
 
 #include "../../config.h"
+#include "../../libvo/x11_common.h"
 
 #include "widgets.h"
 #include "./mplayer.h"
@@ -24,6 +27,10 @@ int    mplx,mply,mplwidth,mplheight;
 
 mplCommStruct * mplShMem;
 char          * Filename = NULL;
+
+extern float rel_seek_secs;
+extern int abs_seek_pos;
+
 
 void mplPlayerThread( void )
 {
@@ -85,6 +92,10 @@ printf("%%%%%% PAUSE  \n");
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
+
+printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
+        vo_resize=1;
+
 }
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
@@ -109,7 +120,7 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 
 float mplGetPosition( void )
 { // return 0.0 ... 100.0
- return mplShMem->Position;
+ return (gui_position<0)?(mplShMem->Position):(gui_position*100.0);
 }
 
 void mplRelSeek( float s )
@@ -118,12 +129,14 @@ void mplRelSeek( float s )
 printf("%%%%%% RelSEEK=%5.3f  \n",s);
 // ---
  mplShMem->Position=mplGetPosition() + s;
+ rel_seek_secs=s; abs_seek_pos=0;
 }
 
 void mplAbsSeek( float s )
 { // 0.0 ... 100.0
 // ---
 printf("%%%%%% AbsSEEK=%5.3f  \n",s);
+ rel_seek_secs=0.01*s; abs_seek_pos=3;
 // ---
  mplShMem->Position=s;
  mplShMem->TimeSec=s;

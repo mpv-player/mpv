@@ -20,15 +20,16 @@ void vo_x11_classhint( Display * display,Window window,char *name );
 int vo_x11_check_events(Display *mydisplay);
 #endif
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  extern Window    vo_window;
- extern Display * vo_display;
  extern GC        vo_gc;
+ extern void vo_setwindow( Window w,GC g );
  extern int       vo_xeventhandling;
  extern int       vo_expose;
  extern int       vo_resize;
-
- extern void vo_setwindow( Window w,GC g );
+#endif
+#ifdef HAVE_GUI
+ extern Display * vo_display;
 #endif
 
 void saver_off( Display * );

@@ -96,7 +96,7 @@ int appFindMessage( unsigned char * str )
  return -1;
 }
 
-void appInit( int argc,char* argv[], char *envp[] )
+void appInit( int argc,char* argv[], char *envp[], void* disp )
 {
  skinDirInHome=get_path("Skin");
  skinMPlayerDir=DATADIR "/Skin";
@@ -124,6 +124,6 @@ void appInit( int argc,char* argv[], char *envp[] )
      case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
      case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
     }
-   mplInit( argc,argv,envp ); // does gtk & ws initialization, create windows
+   mplInit( argc,argv,envp,disp ); // does gtk & ws initialization, create windows
 //  }
 }

@@ -79,7 +79,7 @@ extern listItems   appRadio;
 extern char      * skinDirInHome;
 extern char      * skinMPlayerDir;
 
-extern void appInit( int argc,char* argv[], char *envp[] );
+extern void appInit( int argc,char* argv[], char *envp[], void* disp );
 extern void appInitStruct( listItems * item );
 extern void appClearItem( wItem * item );
 extern void appCopy( listItems * item1,listItems * item2 );

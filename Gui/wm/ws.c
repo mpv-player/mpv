@@ -130,12 +130,15 @@ int wsErrorHandler( Display * dpy,XErrorEvent * Event )
  exit( 0 );
 }
 
-void wsXInit( void )
+void wsXInit( void* mDisplay )
 {
- char * DisplayName = ":0.0";
  int    eventbase;
  int    errorbase;
 
+if(mDisplay){
+ wsDisplay=mDisplay;
+} else {
+ char * DisplayName = ":0.0";
  if ( getenv( "DISPLAY" ) ) DisplayName=getenv( "DISPLAY" );
  wsDisplay=XOpenDisplay( DisplayName );
  if ( !wsDisplay )
@@ -143,6 +146,7 @@ void wsXInit( void )
    fprintf( stderr,"[ws] couldn't open the display !\n" );
    exit( 0 );
   }
+}
 
  if ( !XShmQueryExtension( wsDisplay ) )
   {

@@ -227,15 +227,17 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 	    XSetClassHint(display,window,&wmClass);
 }
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  Window    vo_window = None;
  GC        vo_gc;
  int       vo_xeventhandling = 1;
  int       vo_resize = 0;
  int       vo_expose = 0;
 
- void vo_setwindow( Window w,GC g )
- { vo_window=w; vo_gc=g; }
+ void vo_setwindow( Window w,GC g ) {
+   vo_window=w; vo_gc=g;
+   vo_xeventhandling=0;
+ }
 #endif
 
 int vo_x11_check_events(Display *mydisplay){
@@ -246,7 +248,7 @@ int vo_x11_check_events(Display *mydisplay){
  static XComposeStatus stat;
 // unsigned long  vo_KeyTable[512];
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  if ( vo_xeventhandling )
    {
 #endif
@@ -270,7 +272,7 @@ int vo_x11_check_events(Display *mydisplay){
                break;
          }
       }
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
     }
     else
      {

@@ -178,6 +178,8 @@ drawrenderedtext:
  XFlush( wsDisplay );
 }
 
+#define IZE(x) printf("@@@ " x " @@@\n");
+
 void mplMsgHandle( int msg,float param )
 {
  int j;
@@ -186,12 +188,15 @@ void mplMsgHandle( int msg,float param )
   {
 // --- user events
    case evExit:
-        wsDoExit();
+        IZE("evExit");
+        wsDoExit();  // sets wsTrue=False;
         break;
    case evIconify:
+        IZE("evIcon");
         wsIconify( appMPlayer.mainWindow );
         break;
    case evFullScreen:
+        IZE("evFullS");
         for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
          {
           if ( appMPlayer.Items[j].msg == evFullScreen )
@@ -205,6 +210,7 @@ void mplMsgHandle( int msg,float param )
         break;
 
    case evPlaySwitchToPause:
+        IZE("evPlay->Pause");
         if ( Filename )
          {
           btnModify( evPlaySwitchToPause,btnDisabled );
@@ -212,20 +218,24 @@ void mplMsgHandle( int msg,float param )
          }
         if ( mplShMem->Playing == 1 ) goto NoPause;
    case evPlay:
+        IZE("evPlay");
         mplMainRender=1;
         mplPlay();
         break;
 
    case evPauseSwitchToPlay:
+        IZE("evPause->Play");
         btnModify( evPlaySwitchToPause,btnReleased );
         btnModify( evPauseSwitchToPlay,btnDisabled );
    case evPause:
 NoPause:
+        IZE("evPause");
         mplMainRender=1;
         mplPause();
         break;
 
    case evStop:
+        IZE("evStop");
         btnModify( evPlaySwitchToPause,btnReleased );
         btnModify( evPauseSwitchToPlay,btnDisabled );
         mplMainRender=1;
@@ -233,18 +243,22 @@ NoPause:
         break;
 
    case evLoadPlay:
+        IZE("evLoadPlay");
         mplMainAutoPlay=1;
    case evLoad:
+        IZE("evLoad");
         mplMainRender=1;
         gtkSendMessage( evLoad );
         break;
    case evPrev:
+        IZE("evPrev");
         mplMainRender=1;
         #ifdef DEBUG
          dbprintf( 1,"[mw.h] previous stream ...\n" );
         #endif
         break;
    case evNext:
+        IZE("evNext");
         mplMainRender=1;
         #ifdef DEBUG
          dbprintf( 1,"[mw.h] next stream ...\n" );
@@ -252,6 +266,7 @@ NoPause:
         break;
 
    case evPlayList:
+        IZE("evPlayList");
         mplMainRender=1;
         if ( gtkVisiblePlayList )
          {
