@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.18  2002/06/14 00:49:56  arpi
+    fixed playback speed and a-v sync issues
+
     Revision 1.17  2002/06/13 13:31:45  arpi
     fix fps/frametime parsing - patch by Florian Schneider <flo-mplayer-dev@gmx.net>
 
@@ -107,6 +110,11 @@ typedef struct {
 
     int		current_apacket;
     int		current_vpacket;
+    
+    // timestamp correction:
+    int		kf_pts;	// timestamp of next video keyframe
+    int		a_pts;	// previous audio timestamp
+    float	v_pts;  // previous video timestamp
     
     /* stream id table */
     int		last_a_stream;
@@ -357,6 +365,25 @@ int real_check_file(demuxer_t* demuxer)
 
 void hexdump(char *, unsigned long);
 
+static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timestamp, float frametime){
+    int kf=2*(((s[1]&15)<<8)+s[2]); // 12-bit timestamp from frame header
+    float v_pts;
+    kf|=timestamp&(~0x1fff);	// combine with packet timestamp
+    if(kf<timestamp-4096) kf+=8192; else // workaround wrap-around problems
+    if(kf>timestamp+4096) kf-=8192;
+    if(!(s[0]&0x8) || !(s[0]&0x10)){ // P || I  frame -> swap timestamps
+	int tmp=kf;
+	kf=priv->kf_pts;
+	priv->kf_pts=tmp;
+//	if(kf<=tmp) kf=0;
+    }
+    v_pts=kf*0.001f;
+    if(v_pts<priv->v_pts || !kf) v_pts=priv->v_pts+frametime;
+    priv->v_pts=v_pts;
+//    printf("\n#T# %5d/%5d (%5.3f) %5.3f  \n",kf,timestamp,frametime,v_pts);
+    return v_pts;
+}
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -469,7 +496,8 @@ loop:
 		    ptr += 2;
 		}
 	    }
-	    dp->pts = timestamp/1000.0f;
+	    dp->pts = (priv->a_pts==timestamp) ? 0 : (timestamp/1000.0f);
+	    priv->a_pts=timestamp;
 	    dp->pos = demuxer->filepos;
 	    dp->flags = (flags & 0x2) ? 0x10 : 0;
 	    ds_add_packet(ds, dp);
@@ -545,16 +573,18 @@ loop:
 		    vpkg_header, vpkg_length, vpkg_offset, vpkg_seqnum);
 
 		if(ds->asf_packet){
+		    demux_packet_t* dp=ds->asf_packet;
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "we have an incomplete packet (oldseq=%d new=%d)\n",ds->asf_seq,vpkg_seqnum);
 		    // we have an incomplete packet:
 		    if(ds->asf_seq!=vpkg_seqnum){
 			// this fragment is for new packet, close the old one
-			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",ds->asf_packet->len);
-			ds_add_packet(ds,ds->asf_packet);
+			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",dp->len);
+			dp->pts=(dp->len<3)?0:
+			    real_fix_timestamp(priv,dp->buffer,timestamp,sh_video->frametime);
+			ds_add_packet(ds,dp);
 			ds->asf_packet=NULL;
 		    } else {
 			// append data to it!
-			demux_packet_t* dp=ds->asf_packet;
 			extra=(unsigned int*)(dp->buffer+vpkg_length);
 			++extra[0];
 			if((extra[0]&3)==0){ // increase buffer size, if more than 4 subpackets
@@ -573,6 +603,8 @@ loop:
 			    len-=vpkg_offset;
  			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
 			    // we know that this is the last fragment -> we can close the packet!
+			    dp->pts=(dp->len<3)?0:
+				real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime);
 			    ds_add_packet(ds,dp);
 			    ds->asf_packet=NULL;
 			    // continue parsing
@@ -589,7 +621,7 @@ loop:
 		// create new packet!
 		dp = new_demux_packet(vpkg_length+8*5);
 	    	// the timestamp seems to be in milliseconds
-		dp->pts = timestamp/1000.0f; timestamp=0;
+		dp->pts = 0; // timestamp/1000.0f; //timestamp=0;
                 dp->pos = demuxer->filepos;
                 dp->flags = (flags & 0x2) ? 0x10 : 0;
 		ds->asf_seq = vpkg_seqnum;
@@ -608,6 +640,8 @@ loop:
 		// whole packet (not fragmented):
 		dp->len=vpkg_length; len-=vpkg_length;
 		stream_read(demuxer->stream, dp->buffer, dp->len);
+		dp->pts=(dp->len<3)?0:
+		    real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime);
 		ds_add_packet(ds,dp);
 
 	    } // while(len>0)

@@ -284,6 +284,10 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
     // override frame_time for variable/unknown FPS formats:
     if(!force_fps) switch(demuxer->file_format){
+      case DEMUXER_TYPE_REAL:
+	if(d_video->pts>0 && pts1>0 && d_video->pts>pts1)
+	  frame_time=d_video->pts-pts1;
+        break;
 #ifdef HAVE_TV_BSDBT848
       case DEMUXER_TYPE_TV:
 #endif
@@ -294,15 +298,16 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
         float next_pts = ds_get_next_pts(d_video);
         float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
         if(d>=0){
-          if(verbose)
+          if(d>0){
             if((int)sh_video->fps==1000)
-              mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
-          sh_video->frametime=d; // 1ms
-          sh_video->fps=1.0f/d;
+              mp_msg(MSGT_CPLAYER,MSGL_V,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
+	    sh_video->frametime=d; // 1ms
+            sh_video->fps=1.0f/d;
+	  }
           frame_time = d;
         } else {
-          mp_msg(MSGT_CPLAYER,MSGL_WARN,"\nInvalid frame duration value (%2.5f/%2.5f => %2.5f). Defaulting to 1/25 sec.\n",d_video->pts,next_pts,d);
-          frame_time = 1/25.0;
+          mp_msg(MSGT_CPLAYER,MSGL_WARN,"\nInvalid frame duration value (%5.3f/%5.3f => %5.3f). Defaulting to %5.3f sec.\n",d_video->pts,next_pts,d,frame_time);
+          // frame_time = 1/25.0;
         }
       }
     }
