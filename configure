@@ -1274,11 +1274,12 @@ if test "$_termios" = yes ; then
   elif test "$_def_termios_h_name" = 'termios.h' ; then
     _def_termios_h='#define HAVE_TERMIOS_H 1'
   fi
+  echores "yes (using $_def_termios_h_name)"
 else
   _def_termios='#undef HAVE_TERMIOS'
   _def_termios_h_name=''
+  echores "no"
 fi
-echores "$_termios (using: $_def_termios_h_name)"
 
 
 echocheck "shm"
@@ -1374,7 +1375,7 @@ if test -z "$_inc_x11" ; then
   for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
     if test -d "$I/X11" ; then
       _inc_x11="-I$I"
-      echores "yes (found: $I)"
+      echores "yes (using $I)"
       break
     fi
   done
@@ -1383,7 +1384,7 @@ if test -z "$_inc_x11" ; then
     echores "not found"
   fi
 else
-  echores "yes (use: $_inc_x11)"
+  echores "yes (using $_inc_x11)"
 fi
 if test "$_inc_x11" = "-I/usr/include" ; then
   _inc_x11=""
@@ -1395,7 +1396,7 @@ if test -z "$_ld_x11" ; then
   for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib ; do
     if test -d "$I" ; then
       _ld_x11="-L$I"
-      echores "yes (found: $I)"
+      echores "yes (using $I)"
       break;
     fi
   done
@@ -1404,7 +1405,7 @@ if test -z "$_ld_x11" ; then
     echores "not found"
   fi
 else
-  echores "yes (use: $_ld_x11)"
+  echores "yes (using $_ld_x11)"
 fi
 _ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
 
@@ -1830,10 +1831,11 @@ if test "$_sdl" = yes ; then
   _vomodules="sdl $_vomodules"
   _aosrc="$_aosrc ao_sdl.c"
   _aomodules="sdl $_aomodules"
+  echores "yes (using $_sdlconfig)"
 else
   _def_sdl='#undef HAVE_SDL'
+  echores "no"
 fi
-echores "$_sdl (with $_sdlconfig)"
 
 echocheck "NAS"
 if test "$_nas" = auto || test "$_nas" = yes ; then
@@ -1936,7 +1938,7 @@ EOF
   cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x'
   if test "$_alsaver" ; then
     _alsa=yes
-    echores "yes ($_alsaver)"
+    echores "yes (using alsa $_alsaver)"
   else
     echores "no"
   fi
@@ -2107,7 +2109,7 @@ EOF
   echores "$_rtc"
 else
   _rtc=no
-  echores "no (linux-specific)"
+  echores "no (Linux specific feature)"
 fi
 if test "$_rtc" = yes ; then
   _def_rtc='#define HAVE_RTC 1'
@@ -2173,15 +2175,15 @@ if test "$_win32" = yes ; then
   _ld_win32='-Lloader -lloader'
   _dep_win32='loader/libloader.a'
   _codecmodules="win32 $_codecmodules"
-  echores "$_win32 (found: $_win32libdir)"
+  echores "yes (using $_win32libdir)"
 else
   _def_win32='#undef USE_WIN32DLL'
   _dshow=no
-  echores "$_win32"
+  echores "no"
 fi
 
-echocheck "DirectShow"
 
+echocheck "DirectShow"
 if false ; then
 
 if test "$_dshow" != no ; then
@@ -2248,12 +2250,12 @@ if test "$_xanim" = auto ; then
     fi
     test "$_xanimlibdir" && _xanim=yes
     if test "$_xanim" = yes ; then
-      echores "yes (found: $_xanimlibdir)"
+      echores "yes (using $_xanimlibdir)"
     else
-      echores "no suitable directory found"
+      echores "no (no suitable directory found - see DOCS/codecs.html)"
     fi
   else
-    echores "dl support needed"
+    echores "no (dynamic loader support needed)"
   fi
 else
   echores "$_xanim"
@@ -2334,10 +2336,10 @@ if test "$_libavcodec" = auto ; then
       _libavcodec=yes
       echores "yes"
     else
-      echores "no: old ffmpeg version, use CVS !"
+      echores "no (old ffmpeg version, use CVS !)"
     fi
   else
-    echores "no: see DOCS/codecs.html"
+    echores "no (see DOCS/codecs.html)"
   fi
 else
   echores "$_libavcodec"
@@ -2356,9 +2358,9 @@ int main(void) { return 0; }
 EOF
   if cc_check -lffmpeg -lm ; then
     _libavcodecso=yes
-    echores "yes: using libffmpeg.so"
+    echores "yes (using libffmpeg.so)"
   else
-    echores "no: libffmpeg.so is broken/obsolete"
+    echores "no (libffmpeg.so is broken/obsolete)"
   fi
 else
   echores "$_libavcodecso"
@@ -2585,7 +2587,7 @@ EOF
   _gtk=`$_gtkconfig --version 2>&1`
   _inc_gtk=`$_gtkconfig --cflags 2>&1`
   _ld_gtk=`$_gtkconfig --libs 2>&1`
-  echores "$_gtk (with $_gtkconfig)"
+  echores "$_gtk (using $_gtkconfig)"
 
   # Check for GLIB
   echocheck "glib version"
@@ -2601,7 +2603,7 @@ EOF
   _glib=`$_glibconfig --version 2>&1`
   _inc_glib=`$_glibconfig --cflags 2>&1`
   _ld_glib=`$_glibconfig --libs 2>&1`
-  echores "$_glib (with $_glibconfig)"
+  echores "$_glib (using $_glibconfig)"
 
   _def_gui='#define HAVE_NEW_GUI 1'
   _ld_gui='$(GTKLIB) $(GLIBLIB)'
