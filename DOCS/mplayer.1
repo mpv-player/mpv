@@ -26,6 +26,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-zoom ]
 .RB [ \-x\ x ]
 .RB [ \-y\ y ]
+.RB [ \-sws\ software\ scaler\ type ]
 .RB [ \-xy\ factor ]
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
@@ -172,6 +173,15 @@ scale image to x width [if driver suppports!]
 .TP
 .B \-y\ y
 scale image to y height
+.TP
+.B \-sws\ software\ scaler\ type
+this option sets the quality (and speed, respectively) of the software scaler,
+with the -zoom option. For example with x11 or other outputs which lack
+hardware acceleration. Possible settings are :
+
+    0 - fast bilinear (default)
+    1 - bilinear
+    2 - bicubic (best quality)
 .TP
 .B \-xy\ factor
 scale image by <factor>

@@ -27,6 +27,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ovc\ <video\ codec\ name> ]
 .RB [ \-oac\ <audio\ codec\ name> ]
 .RB [ \-divx4opts\ <codec\ options> ]
+.RB [ \-lavcopts\ <codec\ options> ]
 .RB [ \-lameopts\ <codec\ options> ]
 .RB [ \-pass\ <1/2> ]
 .RB [ \-passlogfile\ <filename> ]
@@ -119,6 +120,7 @@ Examples:
   -ovc help      get help
   -ovc copy      no encoding, just streamcopy
   -ovc divx4     encode to DivX4
+  -ovc lavc     encode with a libavcodec codec
 .TP
 .B \-oac <codecname>
 Encode with the given codec (codec names are from codecs.conf).
@@ -153,6 +155,24 @@ Available options:
   rc_reaction_ratio=XXX  rate control
                          reaction ratio
 
+.TP
+.B \-lavcopts
+If encoding with a codec from libavcodec, you can specify its parameters here,
+like:
+
+  -lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
+
+Available options:
+
+  help           get help
+  vcodec=XXX     use the specified codec
+                 (for full list, see html doc!)
+  vbitrate=XXX   specify bitrate in
+                 kbit <4-16000> or
+                 bit  <16001-24000000>
+  keyint=XXX     interval between keyframes
+                 (specify in frames)
+  vhq            very high quality
 .TP
 .B \-lameopts
 If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
@@ -212,7 +232,7 @@ Rescale output movie to given pixels tall.
 .B \-sws (0-2>
 Type of scaling method
 
-    0            fast bilinear
+    0            fast bilinear (default)
     1            bilinear
     2            bicubic (best quality)
 
@@ -221,6 +241,9 @@ Type of scaling method
 .SH "EXAMPLES"
 .B Encoding DVD title #2
 mencoder -dvd 2 -o title2.avi
+.TP
+.B The same, but with libavcodec family, MJPEG compression
+mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg
 .TP
 .B Encoding from HTTP
 mencoder http://mplayer.hq/example.avi -o example.avi

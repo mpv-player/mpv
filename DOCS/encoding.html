@@ -5,7 +5,8 @@
 
 <P><B><A NAME=2.4>2.4.  Encoding with MEncoder</A></B></P>
 
-<A NAME=2.4.1><P><B><I>Overview</I></B>
+<P><B><A NAME=2.4.1>2.4.1.  Overview</B></P>
+
 <P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
 designed to encode MPlayer-playable movies
 (<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/NET</B>) to other MPlayer-playable formats (see
@@ -14,15 +15,19 @@ passes) video, <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audio. Also has stream
 copying abilities. In the future, there will be cropping, resizing filters, and
 other interesting stuff.</P>
 
-<A NAME=2.4.2><P><B><I>Compiling</I></B>
+<P><B><A NAME=2.4.2>2.4.2.  Compiling</B></P>
+
+<P>
   <UL>
-    <LI>read <B>MPlayer</B>'s compilation instructions, it contains info about
+    <LI><B>OPTIONAL</B> - read <B>MPlayer</B>'s compilation instructions, it contains info about
       how to install <I>libdvdread</I> for <B>DVD</B> support, etc.</LI>
-    <LI>download the newest <B>DivX4linux</B> libs
+    <LI><B>OPTIONAL</B> - download the newest <B>DivX4linux</B> libs
       from <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
       and have them PROPERLY installed. This is needed for DivX4 (1/2 pass)
       encoding. And since this is mandatory (now), MEncoder is Linux-only.</LI>
-    <LI>download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>
+    <LI><B>OPTIONAL</B> - for libavcodec support, install libavcodec as
+      described in the <A HREF="codecs.html#2.2.1.2">libavcodec section</A>.</LI>
+    <LI><B>OPTIONAL</B> - download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>
       <B>WARNING : DO NOT COMPILE LAME WITH <U>GCC 2.96</U> ! It won't
       work properly !</B><BR>
       This
@@ -43,7 +48,9 @@ other interesting stuff.</P>
 <P>You are ready. As you probably know, other encoding tools need the
 <I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
 
-<A NAME=2.4.3><P><B><I>MEncoder features</I></B> :
+<P><B><A NAME=2.4.3>2.4.3.  MEncoder features</B></P>
+
+<P>
   <UL>
     <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
     <LI>encoding from <B>V4L compatible TV tuners</B></LI>
@@ -68,7 +75,7 @@ other interesting stuff.</P>
   </UL>
 </P>
 
-<A NAME=2.4.3.1><P><B><I>Encoding 2-pass DivX4</I></B></P>
+<P><B><A NAME=2.4.3.1>2.4.3.1.  Encoding 2-pass DivX4</B></P>
 
 <P>The name comes from the fact that this method encodes the file <I>twice</I>.
 The first encoding (dubbed <I>pass</I>) creates some temporary files (*.log) with a
@@ -83,7 +90,7 @@ commands are needed :<BR>
 -o movie.avi -pass 1<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
 
-<A NAME=2.4.3.2><P><B><I>Rescaling movies</I></B></P>
+<P><B><A NAME=2.4.3.2>2.4.3.2.  Rescaling movies</B></P>
 
 <P>Often the need to resize movie images' size emerges. Its reasons can be many,
   examples are decreasing output file size, encoding SVCDs to DivX. Ripped DVDs
@@ -96,14 +103,14 @@ commands are needed :<BR>
 
 <P>The output size is specified with the <CODE>-x</CODE>, and <CODE>-y</CODE>
   options.  Furthermore, there are 3 rescaling filters in <B>MEncoder</B>, <I>0
-  : fast 1 : bilinear</I>, <I>2 : bilinear</I>, <I>bicubic</I> (best quality).
+  : fast bilinear</I>, <I>1 : bilinear</I>, <I>2 : bicubic</I> (best quality).
   They can be specified with the <CODE>-sws</CODE> option. If not specified,
   <B>MEncoder</B> will use 0 : fast bilinear.</P>
 
 <P>Rescaling is very simple :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P>
 
-<A NAME=2.4.3.3><P><B><I>Stream copying</I></B></P>
+<P><B><A NAME=2.4.3.3>2.4.3.3.  Stream copying</B></P>
 
 <P><B>MEncoder</B> can handle input streams in two ways : <B>encode</B> or
   <B>copy</B> them. This section is about <B>copying</B>.</P>
@@ -121,7 +128,7 @@ commands are needed :<BR>
 </UL>
 </P>
 
-<A NAME=2.4.3.4><P><B><I>Fixing AVIs with broken index</I></B></P>
+<P><B><A NAME=2.4.3.4>2.4.3.4.  Fixing AVIs with broken index</B></P>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
 <B>MEncoder</B> generates the index. Of course this cannot fix possible bugs in
@@ -129,11 +136,32 @@ the video and/or audio streams.</P>
 
 <P>Command : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
-<A NAME=2.4.4><P><B><I>Syntax</I></B></P>
+
+<P><B><A NAME=2.4.3.5>2.4.3.5.  Encoding with the <I>libavcodec</I> codec family</B></P>
+
+<P>libavcodec provides simple encoding to a lot of interesting video and audio
+formats (currently its audio codecs are unsupported). You can encode to the
+following codecs :</P>
+
+<P>
+<UL>
+  <LI>mjpeg - Motion JPEG</LI>
+  <LI>h263p - H263 Plus</LI>
+  <LI>mpeg4 - DivX4</LI>
+  <LI>msmpeg4 - the old DivX</LI>
+  <LI>rv10 - an old RealVideo codec</LI>
+  <LI>mpeg1video - MPEG1 video :)</LI>
+</UL>
+</P>
+
+<P>The first column contains the codec names that should be passed after the
+  <CODE>vcodec</CODE> config, like : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
+
+<P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</P>
 
-<A NAME=2.4.5><P><B><I>Available options</I></B></P>
+<P><B><A NAME=2.4.5>2.4.5.  Available options</B></P>
 
 <P>NOTE : for all available options, <B>read the manpage !</B></P>
 
@@ -187,6 +215,7 @@ the video and/or audio streams.</P>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
     &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
     &nbsp;&nbsp;<B>divx4</B> - encode to DivX4<BR>
+    &nbsp;&nbsp;<B>lavc</B> - encode with a codec from libavcodec<BR>
   </TD>
 </TR>
 <TR>
@@ -214,6 +243,23 @@ the video and/or audio streams.</P>
     &nbsp;&nbsp;<B>help</B> - get help<BR>
     &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
     &nbsp;&nbsp;<B>q</B>=XXXX - quality (1-fastest, 5-best - default 5)<BR>
+    &nbsp;&nbsp;<B>key</B>=XXXX - keyframe interval<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-lavcopts</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    If encoding with libavcodec, you can specify its parameters here, like:<BR>
+    &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
+    Common options: <B>(for full list, check the manpage!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - get help<BR>
+    &nbsp;&nbsp;<B>vcodec</B>=XXX - select videocodec (for the full list, see the libavcodec section above)<BR>
+    &nbsp;&nbsp;<B>vbitrate</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>vhq</B> - high quality<BR>
+    &nbsp;&nbsp;<B>keyint</B>=XXX - keyframe interval<BR>
   </TD>
 </TR>
 <TR>
@@ -234,12 +280,15 @@ the video and/or audio streams.</P>
 </TR>
 </TABLE>
 
-<A NAME=2.4.6><P><B><I>Examples</I></B></P>
+<P><B><A NAME=2.4.6>2.4.6.  Examples</B></P>
 
 <P>Using <B>MEncoder</B> is the easiest thing on Earth. See the following :</P>
 
 <P>Encoding from DVD, title 2 :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
+
+<P>The same, but with libavcodec family, MJPEG compression :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
 
 <P>Encoding from DVD, title 2, with rescaling :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -x 640 -y 480 -sws 2 -o title2.avi</CODE></P>

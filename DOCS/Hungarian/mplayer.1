@@ -26,6 +26,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-zoom ]
 .RB [ \-x\ x ]
 .RB [ \-y\ y ]
+.RB [ \-sws\ szoftveres\ skálázó\ minõsége ]
 .RB [ \-xy\ faktor ]
 .RB [ \-pp\ minõség ]
 .RB [ \-include\ configfile ]
@@ -176,6 +177,16 @@ kép nagyítása x pixel szélességûre [ha a meghajtó támogatja!]
 .TP
 .B \-y\ y
 kép nagyítása y pixel magasságúra [ha a meghajtó támogatja!]
+.TP
+.B \-sws\ szoftveres\ skálázó\ minõsége
+ez az opció a -zoom opcióval bekapcsolható szoftveres skálázó minõségét (és
+ezzel együtt a sebességét is) befolyásolja, például x11 vagy más, hardveres
+gyorsítással nem rendelkezõ kimenetek használatának esetén. A lehetséges
+beállítások :
+
+    0 - gyors bilinear (alapértelmezett)
+    1 - bilinear
+    2 - bicubic (legjobb minõség)
 .TP
 .B \-xy\ factor
 a kép nagyítása <factor>-szorosra
