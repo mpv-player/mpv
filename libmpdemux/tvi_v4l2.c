@@ -575,6 +575,7 @@ static int control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_VID_SET_HEIGHT:
 	if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
 	priv->format.fmt.pix.height = *(int *)arg;
+	priv->format.fmt.pix.field = V4L2_FIELD_ANY;
 	mp_msg(MSGT_TV, MSGL_V, "%s: set height: %d\n", info.short_name,
 	       *(int *)arg);
 	if (ioctl(priv->video_fd, VIDIOC_S_FMT, &priv->format) < 0) {
