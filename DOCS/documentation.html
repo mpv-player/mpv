@@ -25,7 +25,7 @@
   <UL>
     <LI><A HREF="#1.1">1.1 Overview</A></LI>
     <LI><A HREF="#1.2">1.2 History</A></LI>
-    <LI><A HREF="#1.3">1.3 Installation</A></LI>
+    <LI><A HREF="#1.3">1.3 Installation / Hints</A></LI>
     <LI><A HREF="#1.4">1.4 What about the GUI?</A></LI>
     <LI><A HREF="#1.5">1.5 Subtitles and OSD</A></LI>
   </UL>
@@ -158,9 +158,10 @@
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
     <UL>
-      <LI><A HREF="#3.1">3.1 Control from keyboard</A></LI>
-      <LI><A HREF="#3.2">3.2 Control from LIRC (Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.3">3.3 Streaming from network or pipes</A></LI>
+      <LI><A HREF="#3.1">3.1 Command line</A></LI>
+      <LI><A HREF="#3.2">3.2 Control from keyboard</A></LI>
+      <LI><A HREF="#3.3">3.3 Control from LIRC (Linux Infrared Remote Control)</A></LI>
+      <LI><A HREF="#3.4">3.4 Streaming from network or pipes</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. CD/DVD section</A></LI>
     <UL>
@@ -236,7 +237,7 @@ Developer Cries
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
-AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM files, supported by many native, XAnim, and
+AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
 library at all!). The another big feature of mplayer is the wide range of
@@ -325,9 +326,7 @@ search through this documentation and you'll find your answers. If you
 see links, please follow them and read carefully what they contain. It
 will take some time, but it DOES worth it.</P>
 
-<P>You need a fairly recent system. On Linux, 2.4.x kernels are required, but
-with 2.4.10 and above you'll ocassionally experience problems (licensing,
-kernel bugs, etc) so they are discouraged.</P>
+<P>You need a fairly recent system. On Linux, 2.4.x kernels are recommended.</P>
 
 <P><B><I>SOFTWARE REQUIREMENTS</I></B><BR>
 
@@ -340,7 +339,8 @@ kernel bugs, etc) so they are discouraged.</P>
     it's newer! In some ways it's even worse than 2.96. So downgrade to
     2.95.x (downgrade libstdc++ too!) or don't up/downgrade at all (but in
     this case, be prepared for runtime problems).
-    Detailed information about gcc 2.96's bugs can be found
+    Detailed information about gcc 2.96's bugs (that are still NOT fixed, they
+    are WORKAROUNDED in <B>MPlayer</B>!) can be found
     <A HREF="users_against_developers.html"><B><I>here</I></B></A> and in the
     <A HREF="faq.html">FAQ</A> !</LI>
   <LI><B>XFree86</B> - suggested version is <B>always the newest (4.1.0)</B>.
@@ -400,9 +400,10 @@ Features :<UL>
 XAnim codecs section</A>.</LI>
 
 <LI>The <A HREF=codecs.html#2.2.1.3>XAnim codecs</A> are the best (full screen,
-hardware YUV zoom) for decoding old videos like Indeo 3/4/5, Cinepak, and some
+hardware YUV zoom) for decoding old videos like Indeo 3/4/5, and some
 others. And they are multiplatform, so this is the only way to play Indeo on
-non-x86 platforms (well, apart from using XAnim:).</LI>
+non-x86 platforms (well, apart from using XAnim:). But for example Cinepak
+movies are best played with <B>MPlayer</B>'s own Cinepak decoder !</LI>
 
 </UL>
 
@@ -664,9 +665,11 @@ It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
 </UL>
 </P>
 
-<P>After that, UNZIP the files to ~/.mplayer/font/ .
-Now you have to see a timer at the upper left corner of the movie
-(switch it off with 'o') .</P>
+<P>After that, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
+<CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
+<CODE>font</CODE> (like : <CODE>ln -s ~/.mplayer/arial-24
+~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
+of the movie (switch it off with 'o').</P>
 
 <P>OSD has 3 states: (switch with 'o')<BR>
 <UL>
@@ -827,11 +830,19 @@ Input from standard V4L<BR>
 
 <P><B><A NAME=3>3. Usage</A></B></P>
 
+<P><B><A NAME=3.1>3.1. Command line</A></B></P>
+
+<P><B>MPlayer</B> utilizes a complex playtree. It consists of "default" options
+  written as first (for example <CODE>mplayer -vfm 5</CODE>), and options
+  written after filenames, that apply only to the given filename/URL/whatever
+  (for example <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
+
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] [path/]filename</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [default options] [path/]filename1 [options for filename1] filename2 filename3 [options for filename3]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -vcd trackno /dev/cdrom</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi] (playtree can also be used here, see above)</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -841,7 +852,7 @@ Input from standard V4L<BR>
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
-<P><B><A NAME=3.1>3.1. Control from keyboard</A></B></P>
+<P><B><A NAME=3.2>3.2. Control from keyboard</A></B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 seconds</TD></TR>
@@ -890,7 +901,7 @@ Input from standard V4L<BR>
 
 </TABLE></P>
 
-<P><B><A NAME=3.2>3.2. Control from LIRC</A></B></P>
+<P><B><A NAME=3.3>3.3. Control from LIRC</A></B></P>
 
 <P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
 an (almost) arbitrary remote control and control your linux box with it!
@@ -941,7 +952,7 @@ excerpt from my .lircrc:</P>
 <P>If you don't like the standard location for the lirc-config file (~/.lircrc)
 use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
-<P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
+<P><B><A NAME=3.4>3.4. Streaming from network or pipes</A></B></P>
 
 <P><B>MPlayer</B> can play files from network, using the HTTP protocol.
 Configuring it is simple, just recompile <B>MPlayer</B> with</P>

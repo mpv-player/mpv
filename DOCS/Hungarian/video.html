@@ -256,11 +256,14 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4.  ATI kártyák</A></B></P>
 
 <P>
-<LI>A <A HREF="http://www.linuxvideo.org/gatos">GATOS meghajtó</A> alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
-  jelenti, hogy a dekódolási sebesség (!) hozzá van szinkronizálva a monitor
-  frissítési frekvenciájához. Ha a lejátszás lassúnak tûnik, próbáld meg
-  valahogy kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film
-  fps-e) Hz-re.</LI>
+<LI>A <A HREF="http://www.linuxvideo.org/gatos">GATOS meghajtó</A> (amit
+  ajánlott használni, hacsak nem Rage128-ad vagy Radeon-od van mivel az
+  <B>MPlayer</B> ezekhez sokkal jobb, beépített támogatást nyújt)
+  alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt jelenti, hogy a
+  dekódolási sebesség (!) hozzá van szinkronizálva a monitor frissítési
+  frekvenciájához. Ha a lejátszás lassúnak tûnik, próbáld meg valahogy
+  kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film fps-e)
+  Hz-re.</LI>
 
 <LI>Radeon VE - ehhez a kártyához jelenleg csak az XFree86 CVS-ében van
 meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
@@ -881,7 +884,10 @@ küldj patchet.</P>
     a 3D motorral nagyítva, és a YUV framebufferrel megjelenítve a képet.
     Ha tényleg X-et akarsz használni, a <CODE>-vo x11 -fs -zoom</CODE>
     opciók bekapcsolják a <B>LASSÚ</B> szoftveres nagyítást, és ráadásul
-    Macrovision másolásvédelem tetõzi az egészet.</LI>
+    Macrovision másolásvédelem tetõzi az egészet (ezt egyébként 
+    meg lehet tö^H^Hkerülni
+    <A HREF="http://avifile.sourceforge.net/mgamacro.pl">ezzel</A> a
+    perl script-tel).</LI>
   <LI><B>Framebuffer</B>: a 2.4-es kernelek <B>matroxfb moduljait</B>
     használva. A 2.2-es kernelekben nincs TV kimenet, így használhatatlanok
     ilyen célra. Kernelfordításnál kapcsolj be MINDEN matroxfb-vel kapcsolatos

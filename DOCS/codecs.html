@@ -38,8 +38,9 @@ quality of MPEG1/2 movies. Now we use our own.</P>
 
 <P>The new generation of this codec can even decode movies made with the
 infamous DivX codec! And it's not everything, it's MUCH faster than the
-traditional Win32 DivX DLL's. See below for configuration. The only
-disadvantage of this codec is that it's currently closed-source. :(</P>
+traditional Win32 DivX DLL's (note that libavcodec's decoder is EVEN FASTER :).
+See below for configuration. The only disadvantage of this codec is that it's
+currently closed-source. :(</P>
 
 <P>The codec can be downloaded from the following URL:</P>
 
@@ -51,13 +52,14 @@ disadvantage of this codec is that it's currently closed-source. :(</P>
 
 <P>Unpack it, and run <CODE>./install.sh</CODE> as root.</P>
 
-<P>Note: do NOT forget to add /usr/local/lib to your /etc/ld.so.conf !</P>
+<P>Note: do NOT forget to add <CODE>/usr/local/lib</CODE> to your
+<CODE>/etc/ld.so.conf</CODE> and running <CODE>ldconfig</CODE> !</P>
 
 <P><B>MPlayer</B> autodetects if DivX4 is (properly) installed, just compile
 as usual. If it doesn't detect it, you didn't install it exactly as above,
 and/or has messed up config (see last question of 5.1 section).</P>
 
-<P>Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
+<P>Using it is a bit tricky. As it conflicts with the old OpenDivX (its API is
 very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
 driver calls this library too.</P>
 
@@ -80,7 +82,8 @@ bandwidth on the bus. For packed YUV modes (YUY2, UYVY) use the 'divx4'
 method. For RGB modes you can choose freely, their speed is same, maybe
 differ according to the current bpp.</P>
 
-<P>Note: it supports postprocessing too, but range of values is strange: (TODO UPDATE)</P>
+<P>Note: it supports postprocessing too (use option <CODE>-oldpp</CODE> to
+enable using it), but range of values is strange: </P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>

@@ -107,11 +107,9 @@ For
 
 <LI><P><B>Old-style DVD support - <I>OPTIONAL</I></B></P>
 
-<P><I>Useful if you want to play encoded VOB's from hard disk. Compile
-  <B>libcss</B> 0.0.1 (not newer) and install it to <CODE>/usr/local/lib</CODE>
-  (rpm/deb packages will put it to <CODE>/usr/lib</CODE>, but you can use the
-  <CODE>-csslib
-  /usr/lib/libcss.so</CODE> option)</P></LI>
+<P><I>Useful if you want to play encoded VOB's from hard disk. Compile and
+  install <B>libcss</B> 0.0.1 (not newer) (if <B>MPlayer</B> can't detect
+  it, use the <CODE>-csslib /path/to/libcss.so</CODE> option).</P></LI>
 
 <LI><P><B>Recompile MPlayer.</B></P>
   
@@ -161,7 +159,7 @@ machine.</P>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-csslib &lt;path/filename&gt;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
   (old-style DVD option) This option is used to override the default location
-  of <CODE>/usr/local/lib/libcss.so</CODE>
+  of <CODE>libcss.so</CODE>
   </TD></TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdauth &lt;DVD device&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>

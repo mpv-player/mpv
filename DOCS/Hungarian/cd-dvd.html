@@ -103,10 +103,9 @@ címrõl (klikkelj a 'download'-ra a bal oldali menûben).</I></P>
 <LI><P><B>Régi DVD támogatás - <I>OPCIONÁLIS</I></B></P>
 
 <P><I>Ez akkor hasznos ha pl merevlemezrõl akarsz kódolt VOB-ot lejátszani.
-  Fordítsd le a <B>libcss</B> 0.0.1-et (és ne újabbat) és installáld a
-  <CODE>/usr/local/lib</CODE> könyvtárba (az rpm/deb csomagok valószínûleg
-  <CODE>/usr/lib</CODE>-be pakolnak, de erre való a <CODE>-csslib
-  /usr/lib/libcss.so</CODE> opció)</P></LI>
+  Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
+  Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
+  opciót.</P></LI>
 
 <LI><P><B>Fordítsd újra az MPlayer-t.</B></P>
 
@@ -150,8 +149,8 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
   jelenti.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-csslib &lt;útvonal/filenév&gt;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  (régi DVD lejátszó kóddal) Ezzel az opcióval definiálható felül az
-  alapértelmezett <CODE>/usr/local/lib/libcss.so</CODE>
+  (régi DVD lejátszó kóddal) Ezzel az opcióval definiálható felül a
+  <CODE>libcss.so</CODE> helye (alapértelmezésben keres).
   </TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdauth &lt;DVD egység&gt;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>

@@ -255,9 +255,11 @@ Complain to NVidia.</UL></P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI cards</A></B></P>
 
 <P>
-<LI>The <A HREF="http://www.linuxvideo.org/gatos">GATOS driver</A> (which you should use) has VSYNC enabled by default. It means that decoding speed
-(!) is synced to the monitor's refresh rate. If playing seems to be slow, try
-disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.</LI>
+<LI>The <A HREF="http://www.linuxvideo.org/gatos">GATOS driver</A> (which you
+should use, unless you have Rage128 or Radeon) has VSYNC enabled by default. It
+means that decoding speed (!) is synced to the monitor's refresh rate. If
+playing seems to be slow, try disabling VSYNC somehow, or set refresh rate to
+n*(fps of the movie) Hz.</LI>
 
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
 4.1.0 doesn't. And no TV out support. Of course with <B>MPlayer</B> you can
@@ -899,7 +901,9 @@ to improve something then simply send me your patches.
     3D engine to zoom, and the YUV framebuffer to display the zoomed
     image. If you really want to use X, use the <CODE>-vo x11 -fs -zoom</CODE>
     options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copyprotection
-    enabled.</LI>
+    enabled (you can "workaround" Macrovision using
+    <A HREF="http://avifile.sourceforge.net/mgamacro.pl">this</A> perl
+    script.</LI>
   <LI><B>Framebuffer</B>: using the <B>matroxfb modules</B> in the 2.4 kernels.
     2.2 kernels don't have the TVout feature in them, thus unusable for this.
     You have to enable ALL matroxfb-specific feature during compilation (except

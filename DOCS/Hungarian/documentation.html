@@ -25,7 +25,7 @@
   <UL>
     <LI><A HREF="#1.1">1.1 Röviden</A></LI>
     <LI><A HREF="#1.2">1.2 Történelem</A></LI>
-    <LI><A HREF="#1.3">1.3 Installálás</A></LI>
+    <LI><A HREF="#1.3">1.3 Installálás / Tippek</A></LI>
     <LI><A HREF="#1.4">1.4 És a grafikus felület?</A></LI>
     <LI><A HREF="#1.5">1.5 Feliratok és OSD</A></LI>
   </UL>
@@ -158,9 +158,10 @@
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
     <UL>
-      <LI><A HREF="#3.1">3.1 Irányítás billentyûzetrõl</A></LI>
-      <LI><A HREF="#3.2">3.2 Irányítás LIRC-cel(Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.3">3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A></LI>
+      <LI><A HREF="#3.1">3.1 Parancssor</A></LI>
+      <LI><A HREF="#3.2">3.2 Irányítás billentyûzetrõl</A></LI>
+      <LI><A HREF="#3.3">3.3 Irányítás LIRC-cel(Linux Infrared Remote Control)</A></LI>
+      <LI><A HREF="#3.4">3.4 Lejátszás hálózatról, vagy pipe-on keresztül</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. CD/DVD fejezet</A></LI>
     <UL>
@@ -220,7 +221,8 @@
 
 <P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
   akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).  Le
-  tudja játszani a legtöbb MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM file-t,
+  tudja játszani a legtöbb MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM,
+  NuppelVideo, yuv4mpeg file-t,
   és ezekhez felsorakoztat jónéhány natív, XAnim, és Win32 codecet.  Nézhetsz
   vele <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et, és még
   <B>DivX</B>-et is (ezutóbbihoz egyáltalán nincs szükség az avifile
@@ -314,8 +316,7 @@ megtalálod a választ. A linkek azért vannak hogy alaposan elolvasd ahova
 mutatnak. Idõigényes lesz, de megéri.</P>
 
 <P>Újabb keletû rendszer ajánlott. Linuxon a 2.4.x-es számú kernelek
-ajánlottak, de 2.4.10-zel és afölött problémák adódhatnak (licenszelés,
-kernel bugok, stb).</P>
+ajánlottak.</P>
 
 <P><B><I>SZÜKSÉGES CSOMAGOK</I></B></P>
 
@@ -397,11 +398,13 @@ problémákba ütközni:<BR>
 <LI>Ha <B>3ivx</B> filmeket is le akarsz játszani, olvasd el az
   <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> fejezetet.</LI>
 
-<LI>Az <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> a legjobbak a régebbi
-  codec-û filmek (mint pl Indeo 3/4/5 vagy Cinepak) lejátszására (teljes
+<LI>Az <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> használhatóak a régebbi
+  codec-û filmek (mint pl Indeo 3/4/5) lejátszására (teljes
   képernyõ, hardveres YUV támogatás). Fõleg hogy mivel több platformon
   hozzáférhetõk, ez az egyetlen lehetõség Indeo (stb) filmek lejátszására
-  nem-x86-os gépeken (mármint az Xanim használatán kívûl persze;).</LI>
+  nem-x86-os gépeken (mármint az Xanim használatán kívûl persze;). Viszont
+  például a Cinepak filmekhez ajánlott az <B>MPlayer</B> saját codec-ét
+  használni !</LI>
 
 </UL>
 
@@ -681,9 +684,11 @@ könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.
 </UL>
 </P>
 
-<P>Ezután, tömörítsd ki a file-okat a ~/.mplayer/font/ könyvtárba. Ha most
-elindítod a lejátszást, egy órát láthatsz a film bal felsõ sarkában
-(kikapcsolás az 'o' billentyûvel).</P>
+<P>Ezután, tömörítsd ki a letöltött file-t a <CODE>~/.mplayer</CODE> vagy a
+<CODE>$PREFIX/share/mplayer</CODE> könyvtárba. Ezután hozz létre egy symlink-et
+a kívánt betûméretre, pl így : <CODE>ln -s ~/.mplayer/arial-24
+~/.mplayer/font</CODE>. Ha most elindítod a lejátszást, egy órát láthatsz a
+film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
 
 <P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)<BR>
 <UL>
@@ -851,8 +856,17 @@ Szabványos V4L-rõl bemenet<BR>
 
 <P><B><A NAME=3>3.  Használat</A></B></P>
 
+<P><B><A NAME=3.1>3.1.  Parancssor</A></B></P>
+
+<P>Az <B>MPlayer</B> képes "playtree" stílusban is kezelni az opcióit.
+  Ez abból áll hogy meg lehet adni opciókat amik "alapértelmezettnek" fognak
+  számítani (például <CODE>mplayer -vfm 5</CODE>), valamint egyes filenevekre
+  vonatkoztatva olyan opciókat amelyek ezeket felülbírálják (az elõbbi
+  példát folytatva : <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).
+
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] [útvonal//]filenév</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [alapértelmezett opciók] [útvonal/]filenév1 [opciók a filenév1 számára] filenév2 filenév3 [opciók a filenév3 számára]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] -vcd trackszám /dev/cdrom</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] -dvd titleno [/dev/dvd]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opciók] http://site.com/file.[mpg|avi]</CODE></TD><TR>
@@ -865,7 +879,7 @@ Szabványos V4L-rõl bemenet<BR>
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
-<P><B><A NAME=3.1>3.1.  Irányítás billentyûzetrõl</A></B></P>
+<P><B><A NAME=3.2>3.2.  Irányítás billentyûzetrõl</A></B></P>
 
 
 <P><TABLE BORDER=0>
@@ -915,7 +929,7 @@ Szabványos V4L-rõl bemenet<BR>
 </TABLE></P>
 
 
-<P><B><A NAME=3.2>3.2.  Irányítás LIRC-cel</A></B></P>
+<P><B><A NAME=3.3>3.3.  Irányítás LIRC-cel</A></B></P>
 
 <P>Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
   infravörös távirányítót, hogy irányítsd vele a géped!
@@ -966,7 +980,7 @@ Szabványos V4L-rõl bemenet<BR>
 <P>Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
   a -lircconf [file-név] kapcsolót.</P>
 
-<P><B><A NAME=3.3>3.3.  Lejátszás hálózatról, vagy pipe-n keresztül</A></B></P>
+<P><B><A NAME=3.4>3.4.  Lejátszás hálózatról, vagy pipe-n keresztül</A></B></P>
 
 <P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül.
   A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :</P>

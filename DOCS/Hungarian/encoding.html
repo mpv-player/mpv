@@ -25,9 +25,7 @@ beépítését, és hasonlókat.</P>
       támogatáshoz, stb.</LI>
     <LI><B>OPCIONÁLIS</B> - töltsd le a legújabb <B>DivX4linux</B> könyvtárat például
       <A HREF="http://avifile.sourceforge.net/download.htm">innen</A>, és
-      installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.
-      És mivel jelenleg ez az egyetlen módszer, a MEncoder csak Linuxon
-      mûködik.</LI>
+      installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.</LI>
     <LI><B>OPCIONÁLIS</B> - ha a libavcodec codec-ekkel is akarsz enkódolni,
       installáld a libavcodec-et, ahogyan az a <A HREF="codecs.html#2.2.1.2">libavcodec
       fejezetben</A> le van írva.</LI>
@@ -42,10 +40,6 @@ beépítését, és hasonlókat.</P>
       Azért ne ess pánikba ha pl <B>400</B> fölötti értéket kapsz, nem
       valószínû hogy hallod a különbséget. Jaigen, ha a fordítód nem tudja
       a tesztet lefuttatni.. Nos, töröld már le azt a nyavajás <B>GCC 2.96</B>-ot.</LI>
-    <LI><B>OPCIONÁLIS</B> -Futtasd a <CODE>./configure-t</CODE> az opcionális paramétereiddel
-      (az <CODE>--enable-tv</CODE> opció bekapcsolja a V4L tunerekrõl
-      grabbelõ kódot), és ird be : <CODE>make mencoder</CODE>, aztán
-      <CODE>make install</CODE>.</LI>
   </UL>
 </P>
 
@@ -58,6 +52,8 @@ beépítését, és hasonlókat.</P>
   <UL>
     <LI>enkódolás az összes file formátumból amit az <B>MPlayer</B> lejátszani
       képes</LI>
+    <LI>az ffmpeg/libavcodec által támogatott összes codec használata kódolásra
+      is</LI>
     <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
     <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
     <LI>1 vagy 2 menetes <B>DivX4</B> video</LI>
@@ -80,6 +76,7 @@ beépítését, és hasonlókat.</P>
     <LI>VBR audio stream másolás</LI>
     <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
       (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
+    <LI>audio enkódolása v4l-rõl</LI>
   </UL>
 </P>
 
@@ -181,39 +178,31 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 
 <P>Megj.: az összes rendelkezésre álló opcióhoz <B>olvasd el a manpage-t !</B></P>
 
-<TABLE BORDER=0>
+<TABLE BORDER=1>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-o</I> filenév</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     kimeneti filenév megadása
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-x</I> szélesség pixelben</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     kimeneti video átméretezése megadott szélességre
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-y</I> magasság pixelben</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     kimeneti video átméretezése megadott magasságúra
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-sws</I> 0-2</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     átmérezetési módszer meghatározása<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
@@ -222,10 +211,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-ovc</I> codecnév</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
     &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
@@ -235,10 +222,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-oac</I> codecnév</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
     &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
@@ -248,10 +233,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-divx4opts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Ha DivX4-be enkódolsz, itt megadhatod a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
@@ -263,10 +246,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-lavcopts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Ha egy libavcodec-es codec-kel enkódolsz, itt megadhatod a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
@@ -279,10 +260,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-lameopts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Ha MP3-ba kódolsz, itt adhatod meg a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>

@@ -23,8 +23,8 @@ other interesting stuff.</P>
       how to install <I>libdvdread</I> for <B>DVD</B> support, etc.</LI>
     <LI><B>OPTIONAL</B> - download the newest <B>DivX4linux</B> libs
       from <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
-      and have them PROPERLY installed. This is needed for DivX4 (1/2 pass)
-      encoding. And since this is mandatory (now), MEncoder is Linux-only.</LI>
+      and have them PROPERLY installed. You need them if you want DivX4
+      (1/2 pass) encoding.</LI>
     <LI><B>OPTIONAL</B> - for libavcodec support, install libavcodec as
       described in the <A HREF="codecs.html#2.2.1.2">libavcodec section</A>.</LI>
     <LI><B>OPTIONAL</B> - download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>
@@ -39,9 +39,6 @@ other interesting stuff.</P>
       panic if it's <B>400</B> or so, you shouldn't heard any audible
       quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
       Well, delete that <B>GCC 2.96</B>.</LI>
-    <LI>use <CODE>./configure</CODE> with optional parameters as usual
-      (use <CODE>--enable-tv</CODE> to include V4L tuner grabbing code), and
-      type : <CODE>make mencoder</CODE> , then <CODE>make install</CODE>.</LI>
   </UL>
 </P>
 
@@ -53,7 +50,9 @@ other interesting stuff.</P>
 <P>
   <UL>
     <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
-    <LI>encoding from <B>V4L compatible TV tuners</B></LI>
+    <LI>encoding to all the codecs of ffmpeg's
+      <A HREF=codecs.html#2.2.1.2>libavcodec</A></LI>
+    <LI>video encoding from <B>V4L compatible TV tuners</B></LI>
     <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
     <LI>1 or 2 pass <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE</B> : VBR MP3 audio doesn't
@@ -74,6 +73,7 @@ other interesting stuff.</P>
     <LI>VBR audio stream copy</LI>
     <LI>even wider variety of available en/decoding formats/codecs
     (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
+    <LI>audio encoding from v4l</LI>
   </UL>
 </P>
 
@@ -173,39 +173,31 @@ unsupported). You can encode to the following codecs :</P>
 
 <P>NOTE : for all available options, <B>read the manpage !</B></P>
 
-<TABLE BORDER=0>
+<TABLE BORDER=1>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-o</I> filename</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     specify output filename
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-x</I> width in pixels</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     rescale output video to given pixels width
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-y</I> height in pixels</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     rescale output video to given pixels height
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-sws</I> 0-2</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     type of scaling method<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
@@ -214,10 +206,8 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-ovc</I> codecname</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
@@ -227,10 +217,8 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-oac</I> codecname</TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
@@ -240,10 +228,8 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-divx4opts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     If encoding to DivX4, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
@@ -255,10 +241,8 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-lavcopts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     If encoding with libavcodec, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
@@ -271,10 +255,8 @@ unsupported). You can encode to the following codecs :</P>
   </TD>
 </TR>
 <TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-lameopts</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>

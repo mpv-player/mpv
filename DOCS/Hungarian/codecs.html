@@ -39,8 +39,9 @@ MPEG1/2 filmek képminõségén. Most már saját minõségjavító kódunk van.</P>
 
 <P>Ezen codec új generációja le tudja játszani a hírhedt DivX codec-kel
 készült filmeket is! És ez még nem minden, SOKKAL gyorsabb mint a
-Win32-es DivX DLL. A beállítást lásd lent. A codec egyetlen hátránya, hogy
-jelenleg zárt forráskódú. :(</P>
+Win32-es DivX DLL (viszont a libavcodec még ENNÉL IS gyorsabb:).
+A beállítást lásd lent. A codec egyetlen hátránya, hogy jelenleg zárt
+forráskódú. :(</P>
 
 <P>A következõ URL-rõl lehet letölteni:</P>
 
@@ -52,8 +53,9 @@ jelenleg zárt forráskódú. :(</P>
 
 <P>Tömörítsd ki, és futtasd a <CODE>./install.sh</CODE> scriptet.</P>
 
-<P>Megj: NE felejtsd el hozzáadni az /usr/local/lib-et az /etc/ld.so.conf
-file végére!</P>
+<P>Megj: NE felejtsd el hozzáadni az <CODE>/usr/local/lib</CODE>-et az
+<CODE>/etc/ld.so.conf</CODE> file végére, és futtatni az
+<CODE>ldconfig</CODE>-ot !</P>
 
 <P>Az <B>MPlayer</B> automatikusan detektálja, ha a DivX4 (helyesen) van
 installálva, fordítsd le a szokott módon. Ha nem veszi észre, akkor nem
@@ -83,7 +85,8 @@ igényel a buszon. Packed YUV módokhoz (YUY2, UYVY) használd a 'divx4'
 módszert. RGB módoknál szabadonválasztott, a sebességük megegyezik,
 talán a használt bpp-tol függõen változhat.</P>
 
-<P>Megj: támogat postprocessinget is, de az értékei furcsák: (TODO UPDATE)</P>
+<P>Megj: támogat postprocessinget is (ez a módszer az <CODE>-oldpp</CODE>
+opcióval kapcsolható be), de az értékei furcsák :</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
