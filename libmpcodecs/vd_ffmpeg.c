@@ -311,7 +311,8 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
                 MP_IMGFLAG_DRAW_CALLBACK:0;
     else
-        flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
+        flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
+                | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
 
 #if LIBAVCODEC_BUILD > 4616
     if(avctx->has_b_frames){
@@ -345,6 +346,7 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 
     avctx->dr_opaque_frame = mpi;
     avctx->dr_ip_buffer_count=2; //FIXME
+//printf("%X\n", (int)mpi->planes[0]);
 }
 #endif
 
