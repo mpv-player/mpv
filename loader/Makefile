@@ -2,10 +2,9 @@ include ../config.mak
 
 # Generated automatically from Makefile.in by configure.
 DEFINES=-rdynamic -fPIC $(WIN32_PATH) $(CDOPT) -D__WINE__ -Ddbg_printf=__vprintf \
-	-DTRACE=__vprintf
-# -DDETAILED_OUT
+	-DTRACE=__vprintf # -DDETAILED_OUT
 
-LIB_OBJECTS= pe_image.o module.o \
+LIB_OBJECTS= setup_FS.o pe_image.o module.o \
 ext.o win32.o driver.o pe_resource.o \
 resource.o registry.o elfdll.o afl.o vfl.o
 

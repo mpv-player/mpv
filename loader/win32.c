@@ -138,9 +138,10 @@ static void longcount_stub(long long* z)
     longcount(z);
 }
 
-int LOADER_DEBUG=0;
+int LOADER_DEBUG=1;
 inline void dbgprintf(char* fmt, ...)
 {
+#ifdef DETAILED_OUT
     if(LOADER_DEBUG)
     {
 	FILE* f;
@@ -156,6 +157,7 @@ inline void dbgprintf(char* fmt, ...)
 	}
 	va_end(va);
     }
+#endif
 }    
 char export_names[500][30]={
 "name1",
