@@ -223,6 +223,7 @@ void mplPrev( void )
  switch ( guiIntfStruct.StreamType )
   {
 //   case STREAMTYPE_FILE:
+#ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
 	if ( guiIntfStruct.Playing == 2 ) break;
 	if ( --guiIntfStruct.DVD.current_chapter == 0 )
@@ -234,6 +235,7 @@ void mplPrev( void )
 	if ( stop ) mplEventHandling( evStop,0 );
 	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 	break;
+#endif
   }
 }
 
@@ -243,6 +245,7 @@ void mplNext( void )
  switch ( guiIntfStruct.StreamType )
   {
 //   case STREAMTYPE_FILE:
+#ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
 	if ( guiIntfStruct.DVD.current_chapter++ == guiIntfStruct.DVD.chapters )
 	 {
@@ -253,5 +256,6 @@ void mplNext( void )
 	if ( stop ) mplEventHandling( evStop,0 );
 	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
 	break;
+#endif
   }
 }
