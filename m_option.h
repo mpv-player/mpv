@@ -190,7 +190,7 @@ m_option_print(m_option_t* opt,  void* val_ptr) {
   if(opt->type->print)
     return opt->type->print(opt,val_ptr);
   else
-    return NULL;
+    return (char*)-1;
 }
 
 inline static  void

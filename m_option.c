@@ -315,7 +315,7 @@ static int parse_str(m_option_t* opt,char *name, char *param, void* dst, int src
 }
 
 static char* print_str(m_option_t* opt,  void* val) {
-  return (val && VAL(val) && strlen(VAL(val)) > 0) ? strdup(VAL(val)) : strdup("(empty)");
+  return (val && VAL(val) && strlen(VAL(val)) > 0) ? strdup(VAL(val)) : NULL;
 }
 
 static void copy_str(m_option_t* opt,void* dst, void* src) {
@@ -559,7 +559,23 @@ static void copy_str_list(m_option_t* opt,void* dst, void* src) {
 }
 
 static char* print_str_list(m_option_t* opt, void* src) {
-  return strdup("TODO ;)");
+  char **lst = NULL;
+  char *ret = NULL,*last = NULL;
+  int i;
+  
+  if(!(src && VAL(src))) return NULL;
+  lst = VAL(src);
+
+  for(i = 0 ; lst[i] ; i++) {
+    if(last) {
+      ret = dup_printf("%s,%s",last,lst[i]);
+      free(last);
+    } else
+      ret = strdup(lst[i]);
+    last = ret;
+  }
+  if(last && last != ret) free(last);
+  return ret;
 }
 
 m_option_type_t m_option_type_string_list = {

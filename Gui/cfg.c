@@ -156,7 +156,11 @@ int cfg_read( void )
 
 // -- read configuration
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[cfg] read config file: %s\n",cfg );
- gui_conf=m_config_new( play_tree_new() ); 
+ gui_conf=m_config_new(
+#ifndef NEW_CONFIG
+ play_tree_new()
+#endif
+ ); 
  m_config_register_options( gui_conf,gui_opts );
  if ( m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
   {
@@ -221,6 +225,14 @@ int cfg_write( void )
   {
    for ( i=0;gui_opts[i].name;i++ )
     {
+#ifdef NEW_CONFIG
+      char* v = m_option_print(&gui_opts[i],gui_opts[i].p);
+      if(v) {
+	fprintf( f,"%s = \"%s\"\n",gui_opts[i].name, v);
+	free(v);
+      } else if((int)v == -1)
+	mp_msg(MSGT_GPLAYER,MSGL_WARN,"Unable to save the %s option\n");
+#else
      switch ( gui_opts[i].type )
       {
        case CONF_TYPE_INT:
@@ -239,6 +251,7 @@ int cfg_write( void )
 	     break;
 	    }
       }
+#endif
     }
    fclose( f );
   }
