@@ -1,4 +1,4 @@
-.\" synced with 1.913
+.\" synced with 1.914
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "11 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "15 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -8264,6 +8264,18 @@ types de macro-blocs candidats, avant de choisir le meilleur type.
 Ci-dessus, le terme "tous les candidats" ne signifie pas forcément tous les
 types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
 16x16.
+.
+.TP
+.B (no)chroma_me
+Utilise l'information chroma en plus de la luma lors de la recherche
+de mouvement sub pixel (par défaut\: activé).
+Nécessite subq=5.
+.
+.TP
+.B chroma_qp_offset=<-12\-12>
+Utilise un quanta différent pour la chroma et la luma.
+Les valeurs intéressantes se situent dans l'intervalle <-2\-2>
+(par défaut\ : 0).
 .
 .TP
 .B level_idc=<10\-51>
