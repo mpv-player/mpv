@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -655,7 +656,12 @@ void vo_zr_revertoption(config_t* opt,char* param) {
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	printf("vo_zr: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -137,7 +138,12 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	printf("vo_pgm: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)

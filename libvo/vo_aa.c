@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
+#include <errno.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -774,7 +775,12 @@ vo_aa_revertoption(config_t* opt,char* param) {
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	printf("vo_aa: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)

@@ -789,7 +789,12 @@ static void uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	printf("vo_xv: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static void query_vaa(vo_vaa_t *vaa)

@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -513,7 +513,12 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	printf("vo_mpegpes: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)

@@ -23,8 +23,8 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.43  2002/02/15 01:00:26  michael
- * use mem2agpcpy_pic()
+ * Revision 1.44  2002/02/17 08:24:43  nick
+ * I don't like such reports: '-vo dga:vidix or -vo x11:vidix works fine for me'
  *
  * Revision 1.42  2002/02/12 23:19:37  michael
  * use mem2agpcpy() instead of fast_memcpy()
@@ -165,6 +165,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -1171,7 +1172,12 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    if(arg) 
+    {
+	vd_printf(VD_INFO, "vo_dga: Unknown subdevice: %s\n",arg);
+	return ENOSYS;
+    }
+    return 0;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)
