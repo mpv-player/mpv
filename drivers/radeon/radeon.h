@@ -488,6 +488,12 @@
 #define MEM_REQ_LOCK                               0x00800000
 
 
+/* SURFACE_CNTL bit constants */
+#define SURF_TRANSLATION_DIS			   (1 << 8)
+#define NONSURF_AP0_SWP_16BPP			   (1 << 20)
+#define NONSURF_AP0_SWP_32BPP			   (2 << 20)
+
+
 /* RBBM_SOFT_RESET bit constants */
 #define SOFT_RESET_CP           		   (1 <<  0)
 #define SOFT_RESET_HI           		   (1 <<  1)
@@ -630,7 +636,9 @@
 #define GMC_CLR_CMP_CNTL_DIS      		   (1 << 28)
 #define GMC_SRC_DATATYPE_COLOR			   (3 << 12)
 #define ROP3_S                			   0x00cc0000
+#define ROP3_SRCCOPY				   0x00cc0000
 #define ROP3_P                			   0x00f00000
+#define ROP3_PATCOPY				   0x00f00000
 #define DP_SRC_SOURCE_MASK        		   (7    << 24)
 #define GMC_BRUSH_NONE            		   (15   <<  4)
 #define DP_SRC_SOURCE_MEMORY			   (2    << 24)
@@ -641,7 +649,6 @@
 #define DP_SRC_HOST                                0x00000300
 #define DP_SRC_HOST_BYTEALIGN                      0x00000400
 
-#define ROP3_PATCOPY				   0x00f00000
 
 /* masks */
 
