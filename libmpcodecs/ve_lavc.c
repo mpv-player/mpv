@@ -32,7 +32,7 @@ extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags
 #include "libavcodec/avcodec.h"
 #endif
 
-#if LIBAVCODEC_BUILD < 4601
+#if LIBAVCODEC_BUILD < 4641
 #error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
 #endif
 
@@ -181,6 +181,7 @@ struct config lavcopts_conf[]={
 struct vf_priv_s {
     aviwrite_stream_t* mux;
     AVCodecContext *context;
+    AVVideoFrame *pic;
     AVCodec *codec;
     FILE *stats_file;
 };
@@ -406,7 +407,7 @@ static int config(struct vf_instance_s* vf,
     {
 	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
-	lavc_venc_context->quality = lavc_param_vqscale;
+	vf->priv->pic->quality = lavc_param_vqscale;
     }
 
     if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
@@ -459,19 +460,19 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     int out_size;
-    AVPicture lavc_venc_picture;
+    AVVideoFrame *pic= vf->priv->pic;
 
-    lavc_venc_picture.data[0]=mpi->planes[0];
-    lavc_venc_picture.data[1]=mpi->planes[1];
-    lavc_venc_picture.data[2]=mpi->planes[2];
-    lavc_venc_picture.linesize[0]=mpi->stride[0];
-    lavc_venc_picture.linesize[1]=mpi->stride[1];
-    lavc_venc_picture.linesize[2]=mpi->stride[2];
+    pic->data[0]=mpi->planes[0];
+    pic->data[1]=mpi->planes[1];
+    pic->data[2]=mpi->planes[2];
+    pic->linesize[0]=mpi->stride[0];
+    pic->linesize[1]=mpi->stride[1];
+    pic->linesize[2]=mpi->stride[2];
 
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
-	    &lavc_venc_picture);
+	    pic);
 
-    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->key_frame?0x10:0);
+    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->coded_picture->key_frame?0x10:0);
     
 #if LIBAVCODEC_BUILD >= 4620
     /* store stats if there are any */
@@ -574,6 +575,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 	return 0;
     }
 
+    vf->priv->pic = avcodec_alloc_picture();
 #if LIBAVCODEC_BUILD >= 4624
     vf->priv->context = avcodec_alloc_context();
 #else

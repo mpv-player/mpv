@@ -32,6 +32,10 @@ LIBVD_EXTERN(ffmpeg)
 #include "libavcodec/avcodec.h"
 #endif
 
+#if LIBAVCODEC_BUILD < 4641
+#error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
+#endif
+
 int avcodec_inited=0;
 
 #if defined(FF_POSTPROCESS) && defined(MBR)
@@ -40,12 +44,15 @@ int quant_store[MBR+1][MBC+1];
 
 typedef struct {
     AVCodecContext *avctx;
+    AVVideoFrame *pic;
     float last_aspect;
     int do_slices;
     int do_dr1;
     int vo_inited;
     int convert;
     int best_csp;
+    int b_age;
+    int ip_age[2];
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -54,11 +61,8 @@ typedef struct {
 
 #include "cfgparser.h"
 
-#if LIBAVCODEC_BUILD >= 4632
-static int get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
-#else
-static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
-#endif
+static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
+static void release_buffer(AVCodecContext *avctx, AVVideoFrame *pic);
 
 #ifdef FF_BUG_AUTODETECT
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -150,7 +154,11 @@ static int init(sh_video_t *sh){
     if(sh->format == mmioFOURCC('H','F','Y','U'))
         ctx->do_dr1=0;
 #endif
+    ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
 
+#if LIBAVCODEC_BUILD >= 4641
+    ctx->pic = avcodec_alloc_picture();
+#endif
 #if LIBAVCODEC_BUILD >= 4624
     ctx->avctx = avcodec_alloc_context();
 #else
@@ -161,8 +169,9 @@ static int init(sh_video_t *sh){
 
 #if LIBAVCODEC_BUILD > 4615
     if(ctx->do_dr1){
-        avctx->flags|= CODEC_FLAG_EMU_EDGE | CODEC_FLAG_DR1; 
-        avctx->get_buffer_callback= get_buffer;
+        avctx->flags|= CODEC_FLAG_EMU_EDGE; 
+        avctx->get_buffer= get_buffer;
+        avctx->release_buffer= release_buffer;
     }
 #endif
 
@@ -284,6 +293,8 @@ static void uninit(sh_video_t *sh){
 
     if (avctx)
 	free(avctx);
+    if (ctx->pic)
+	free(ctx->pic);
     if (ctx)
 	free(ctx);
 }
@@ -295,16 +306,17 @@ static void draw_slice(struct AVCodecContext *s,
     int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
-#if LIBAVCODEC_BUILD > 4615
-    UINT8 *skip= &s->mbskip_table[(y>>4)*skip_stride];
-    int threshold= s->pict_type==B_TYPE ? -99 : s->dr_ip_buffer_count;
+#if LIBAVCODEC_BUILD >= 4641
+    UINT8 *skip= &s->coded_picture->mbskip_table[(y>>4)*skip_stride];
+    int threshold= s->coded_picture->age;
 #endif
 
     stride[0]=linesize;
-#if LIBAVCODEC_BUILD > 4615
-    if(s->dr_uvstride)
-        stride[1]=stride[2]= s->dr_uvstride;
-    else
+#if LIBAVCODEC_BUILD >= 4641
+    if(s->coded_picture->linesize[1]){
+        stride[1]= s->coded_picture->linesize[1];
+        stride[2]= s->coded_picture->linesize[2];
+    }else
 #endif
         stride[1]=stride[2]=stride[0]/2;
 #if 0
@@ -368,17 +380,15 @@ static int init_vo(sh_video_t *sh){
     return 0;
 }
 
-#if LIBAVCODEC_BUILD > 4615
-#if LIBAVCODEC_BUILD >= 4632
-static int get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
-#else
-static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
-#endif
+#if LIBAVCODEC_BUILD >= 4641
+static int get_buffer(AVCodecContext *avctx, AVVideoFrame *pic){
     sh_video_t * sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t* mpi=NULL;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE;
     int type= MP_IMGTYPE_IPB;
+    int width= avctx->width;
+    int height= avctx->height;
     int align=15;
 
     if(avctx->pix_fmt == PIX_FMT_YUV410P)
@@ -386,14 +396,13 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 
     if(init_vo(sh)<0){
         printf("init_vo failed\n");
-#if LIBAVCODEC_BUILD >= 4632
-	return -1;
-#else
-        return;
-#endif
+
+        avctx->get_buffer= avcodec_default_get_buffer;
+        avctx->release_buffer= avcodec_default_release_buffer;
+        return avctx->get_buffer(avctx, pic);
     }
 
-    if(pict_type==B_TYPE)
+    if(!pic->reference)
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
                 MP_IMGFLAG_DRAW_CALLBACK:0;
     else
@@ -419,17 +428,9 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 	avctx->draw_horiz_band= draw_slice;
     } else
 	avctx->draw_horiz_band= NULL;
-    avctx->dr_buffer[0]= mpi->planes[0];
-    avctx->dr_buffer[1]= mpi->planes[1];
-    avctx->dr_buffer[2]= mpi->planes[2];
-    
-    if(avctx->dr_stride && avctx->dr_stride !=mpi->stride[0]){
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: stride changed\n");
-    }
-    
-    if(avctx->dr_uvstride && avctx->dr_uvstride !=mpi->stride[1]){
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: uvstride changed\n");
-    }
+    pic->data[0]= mpi->planes[0];
+    pic->data[1]= mpi->planes[1];
+    pic->data[2]= mpi->planes[2];
     
     assert(mpi->width  >= ((width +align)&(~align)));   
     assert(mpi->height >= ((height+align)&(~align)));
@@ -446,11 +447,14 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
         assert(mpi->planes[2] > mpi->planes[1] || mpi->planes[2] + c_size <= mpi->planes[1]);
     }
 
-    avctx->dr_stride   = mpi->stride[0];
-    avctx->dr_uvstride = mpi->stride[1];
+    /* Note, some (many) codecs in libavcodec must have stride1==stride2 && no changes between frames
+     * lavc will check that and die with an error message, if its not true
+     */
+    pic->linesize[0]= mpi->stride[0];
+    pic->linesize[1]= mpi->stride[1];
+    pic->linesize[2]= mpi->stride[2];
 
-    avctx->dr_opaque_frame = mpi;
-    avctx->dr_ip_buffer_count=2; //FIXME
+    pic->opaque = mpi;
 //printf("%X\n", (int)mpi->planes[0]);
 #if 0
 if(mpi->flags&MP_IMGFLAG_DIRECT)
@@ -460,9 +464,30 @@ else if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
 else
     printf(".");
 #endif
-#if LIBAVCODEC_BUILD >= 4632
+    if(pic->reference){
+        pic->age= ctx->ip_age[0];
+        
+        ctx->ip_age[0]= ctx->ip_age[1]+1;
+        ctx->ip_age[1]= 1;
+        ctx->b_age++;
+    }else{
+        pic->age= ctx->b_age;
+    
+        ctx->ip_age[0]++;
+        ctx->ip_age[1]++;
+        ctx->b_age=1;
+    }
+//pic->age= 256*256*256*64;
+//printf("G%X %X\n", pic->linesize[0], pic->data[0]);
     return 0;
-#endif
+}
+
+static void release_buffer(struct AVCodecContext *avctx, AVVideoFrame *pic){
+    int i;
+    for(i=0; i<4; i++){
+        pic->data[i]= NULL;
+    }
+//printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 }
 #endif
 
@@ -479,8 +504,8 @@ typedef struct dp_hdr_s {
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int got_picture=0;
     int ret;
-    AVPicture lavc_picture;
     vd_ffmpeg_ctx *ctx = sh->context;
+    AVVideoFrame *pic= ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
     int dr1= ctx->do_dr1;
@@ -524,7 +549,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
 #endif
 
-    ret = avcodec_decode_video(avctx, &lavc_picture,
+    ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 
@@ -535,6 +560,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         static long long int all_len=0;
         static int frame_number=0;
         static double all_frametime=0.0;
+        AVVideoFrame *pic= avctx->coded_picture;
 
         if(!fvstats) {
             time_t today2;
@@ -554,12 +580,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
         all_len+=len;
         all_frametime+=sh->frametime;
-        fprintf(fvstats, "frame= %5d q= %2d f_size= %6d s_size= %8.0fkB ",
-            ++frame_number, avctx->quality, len, (double)all_len/1024);
+        fprintf(fvstats, "frame= %5d q= %f2.0d f_size= %6d s_size= %8.0fkB ",
+            ++frame_number, pic->quality, len, (double)all_len/1024);
         fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
-	switch(avctx->pict_type){
+	switch(pic->pict_type){
 	case I_TYPE:
             fprintf(fvstats, "type= I\n");
 	    break;
@@ -582,8 +608,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(init_vo(sh)<0) return NULL;
 
 #if LIBAVCODEC_BUILD > 4615
-    if(dr1 && avctx->dr_opaque_frame){
-        mpi= (mp_image_t*)avctx->dr_opaque_frame;
+    if(dr1 && pic->opaque){
+        mpi= (mp_image_t*)pic->opaque;
     }
 #endif
         
@@ -592,9 +618,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	    avctx->width, avctx->height);
 	if(!mpi) return NULL;
-	yuv422ptoyuy2(lavc_picture.data[0],lavc_picture.data[1],lavc_picture.data[2],
+	yuv422ptoyuy2(pic->data[0],pic->data[1],pic->data[2],
 	    mpi->planes[0],avctx->width,avctx->height,
-	    lavc_picture.linesize[0],lavc_picture.linesize[1],mpi->stride[0]);
+	    pic->linesize[0],pic->linesize[1],mpi->stride[0]);
 	return mpi;
     }
     
@@ -607,12 +633,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
     if(!dr1){
-        mpi->planes[0]=lavc_picture.data[0];
-        mpi->planes[1]=lavc_picture.data[1];
-        mpi->planes[2]=lavc_picture.data[2];
-        mpi->stride[0]=lavc_picture.linesize[0];
-        mpi->stride[1]=lavc_picture.linesize[1];
-        mpi->stride[2]=lavc_picture.linesize[2];
+        mpi->planes[0]=pic->data[0];
+        mpi->planes[1]=pic->data[1];
+        mpi->planes[2]=pic->data[2];
+        mpi->stride[0]=pic->linesize[0];
+        mpi->stride[1]=pic->linesize[1];
+        mpi->stride[2]=pic->linesize[2];
     }
 
     if(avctx->pix_fmt==PIX_FMT_YUV422P && mpi->chroma_y_shift==1){
@@ -622,21 +648,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
 /* to comfirm with newer lavc style */
-#if LIBAVCODEC_BUILD >= 4633
-    mpi->qscale=avctx->display_qscale_table;
-    mpi->qstride=avctx->qstride;
+#if LIBAVCODEC_BUILD >= 4641
+    mpi->qscale =pic->qscale_table;
+    mpi->qstride=pic->qstride;
+    mpi->pict_type=pic->pict_type;
 #endif
-
-    {
-        static int last_non_b_type= 0;
-
-	if(avctx->pict_type == B_TYPE)
-	    mpi->pict_type= B_TYPE;
-	else{
-	    mpi->pict_type= last_non_b_type;
-	    last_non_b_type= avctx->pict_type;
-	}
-    }
     
     return mpi;
 }

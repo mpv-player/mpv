@@ -21,12 +21,17 @@
 #include "libavcodec/avcodec.h"
 #endif
 
+#if LIBAVCODEC_BUILD < 4641
+#error your version of libavcodec is too old, get a newer one, and dont send a bugreport, THIS IS NO BUG
+#endif
+
 extern int avcodec_inited;
 
 struct vf_priv_s {
     unsigned char* outbuf;
     int outbuf_size;
     AVCodecContext* context;
+    AVVideoFrame* pic;
     AVCodec* codec;
     vo_mpegpes_t pes;
 };
@@ -80,17 +85,17 @@ static int config(struct vf_instance_s* vf,
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t* dmpi;
     int out_size;
-    AVPicture lavc_venc_picture;
+    AVVideoFrame *pic= vf->priv->pic;
 
-    lavc_venc_picture.data[0]=mpi->planes[0];
-    lavc_venc_picture.data[1]=mpi->planes[1];
-    lavc_venc_picture.data[2]=mpi->planes[2];
-    lavc_venc_picture.linesize[0]=mpi->stride[0];
-    lavc_venc_picture.linesize[1]=mpi->stride[1];
-    lavc_venc_picture.linesize[2]=mpi->stride[2];
+    pic->data[0]=mpi->planes[0];
+    pic->data[1]=mpi->planes[1];
+    pic->data[2]=mpi->planes[2];
+    pic->linesize[0]=mpi->stride[0];
+    pic->linesize[1]=mpi->stride[1];
+    pic->linesize[2]=mpi->stride[2];
 
     out_size = avcodec_encode_video(&lavc_venc_context, 
-	vf->priv->outbuf, vf->priv->outbuf_size, &lavc_venc_picture);
+	vf->priv->outbuf, vf->priv->outbuf_size, pic);
 
     if(out_size<=0) return 1;
 
@@ -143,6 +148,7 @@ static int open(vf_instance_t *vf, char* args){
     }
     
     vf->priv->context=avcodec_alloc_context();
+    vf->priv->pic=avcodec_alloc_picture();
 
     // TODO: parse args ->
     if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
@@ -150,7 +156,11 @@ static int open(vf_instance_t *vf, char* args){
     if(p_quality<32){
 	// fixed qscale
 	lavc_venc_context.flags = CODEC_FLAG_QSCALE;
+#if LIBAVCODEC_BUILD >= 4641
+	vf->priv->pic->quality = (p_quality<1) ? 1 : p_quality;
+#else
 	lavc_venc_context.quality = (p_quality<1) ? 1 : p_quality;
+#endif
     } else {
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;
