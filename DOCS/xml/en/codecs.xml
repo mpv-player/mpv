@@ -155,7 +155,7 @@ compiled separately. For the decore Library, simply type
 cd divxcore/decore/build/linux
 make
 cp libdivxdecore.so /usr/local/lib
-ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
 cp ../../src/decore.h /usr/local/include
 </screen>
 </para></step>
@@ -171,7 +171,7 @@ cd linux
 cp path/Makefile .
 make
 cp libdivxencore.so /usr/local/lib
-ln -s /usr/local/lib/libdivxencore.so /usr/local/lib/libdivxencore.so.0
+ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
 cp ../../src/encore.h /usr/local/include
 </screen>
 </para></step>
