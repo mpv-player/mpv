@@ -141,39 +141,45 @@ static int config(struct vf_instance_s* vf,
 	}
     }
 
+    if (vf->priv->w < -3 || vf->priv->h < -3 ||
+         (vf->priv->w < -1 && vf->priv->h < -1)) {
+      // TODO: establish a direct connection to the user's brain
+      // and find out what the heck he thinks MPlayer should do
+      // with this nonsense.
+      mp_msg(MSGT_VFILTER, MSGL_ERR, "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
+      return 0;
+    }
+
+    if (vf->priv->w == -1)
+      vf->priv->w = width;
+    if (vf->priv->w == 0)
+      vf->priv->w = d_width;
+
+    if (vf->priv->h == -1)
+      vf->priv->h = height;
+    if (vf->priv->h == 0)
+      vf->priv->h = d_height;
+
+    if (vf->priv->w == -3)
+      vf->priv->w = vf->priv->h * width / height;
+    if (vf->priv->w == -2)
+      vf->priv->w = vf->priv->h * d_width / d_height;
+
+    if (vf->priv->h == -3)
+      vf->priv->h = vf->priv->w * height / width;
+    if (vf->priv->h == -2)
+      vf->priv->h = vf->priv->w * d_height / d_width;
+
     // calculate the missing parameters:
     switch(best) {
-    case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
-    case IMGFMT_UYVY:
-	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
-	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
-	if(vf->priv->w<0) vf->priv->w=width; else
-	if(vf->priv->w==0) vf->priv->w=d_width;
-	if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
-	if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
-	break;
     case IMGFMT_YV12:		/* YV12 needs w & h rounded to 2 */
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
-	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
-	if(vf->priv->w<0) vf->priv->w=width; else
-	if(vf->priv->w==0) vf->priv->w=d_width;
-	if(vf->priv->h==-3) vf->priv->h=(vf->priv->w*height/width+1)&~1; else
-	if(vf->priv->h==-2) vf->priv->h=(vf->priv->w*d_height/d_width+1)&~1;
-	break;
-    default:
-    if(vf->priv->w==-3) vf->priv->w=vf->priv->h*width/height; else
-    if(vf->priv->w==-2) vf->priv->w=vf->priv->h*d_width/d_height;
-    if(vf->priv->w<0) vf->priv->w=width; else
-    if(vf->priv->w==0) vf->priv->w=d_width;
-    if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
-    if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
-    break;
+      vf->priv->h = (vf->priv->h + 1) & ~1;
+    case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
+    case IMGFMT_UYVY:
+      vf->priv->w = (vf->priv->w + 1) & ~1;
     }
-    
-    if(vf->priv->h<0) vf->priv->h=height; else
-    if(vf->priv->h==0) vf->priv->h=d_height;
     
     mp_msg(MSGT_VFILTER,MSGL_DBG2,"SwScale: scaling %dx%d %s to %dx%d %s  \n",
 	width,height,vo_format_name(outfmt),
