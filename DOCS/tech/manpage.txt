@@ -4,6 +4,7 @@ A documentation about MPlayer's man page
 
 About the documentation
 -----------------------
+Yes it's true: This is the documentation about the documentation (man page).
 This guide should be used as a reference for questions about the man page
 structure. It's not a strict guide but we recommend following it to get a
 uniform man page.
@@ -37,8 +38,10 @@ How do I create a html version of the man page?
 -----------------------------------------------
 The man pages was more or less designed for groff as it is the main tool for
 it. Therefore only groff produces acceptable results without changes.
-Additionaly, the SS variable was set to 4 instead of 18 (looks nice with man)
-to produce a better groff html output. Here's an overview again:
+Additionaly, the SS variable should be set to either very low or very high
+values to produce a better groff html output (~18 looks nice for man).
+Here's an overview again:
+
     - groff:     groff -Thtml -m man mplayer.1 > manpage.groff.html
     - man2html:  You can view it over your cgi script:
                  http://localhost/cgi-bin/man2html?mplayer
@@ -46,8 +49,8 @@ to produce a better groff html output. Here's an overview again:
                  support the macro definitions. Maybe a manual change of all
                  leads to acceptable results.
     - rman:      rman -f html mplayer.1 > manpage.rman.html
-                 The output is ugly, you need to remove the .PDs from the
-                 macro definitions to produce at least acceptable results.
+                 The output is ugly, you need to remove the .PDs to produce
+                 at least acceptable results.
 
 
 The structure
@@ -123,7 +126,7 @@ Separations:
     - Sub options      not (it's done automatically over .IP)
                        should be be separated over a comment (.) at the
                        beginning and the end to make the man page readable ;)
-    - Examples         1 newline before
+    - Examples, notes  1 newline before
     - Big parts        better use .P (paragraph) or .br (equal to html's <BR>)
                        instead of newlines
     - In general       no newlines
@@ -143,7 +146,9 @@ Option description:
     - If a non trivial default parameter exist, write it down
       eg. (default: 24)
     - Options inside a section are all alphabetically ordered
-    - Examples and notes at the end
+    - Examples and notes at the end of the description (before sub options)
+    - The end of the suboptions _always_ has to be followed by a paragraphs
+      (BUG).
 
 Macro definitions (see beginning of man page):
     - SS      SS is the starting value of the suboption column
@@ -162,7 +167,7 @@ Options, sub options, examples structure:
       description
       [...]
 
-    - Sub options:
+    - Long sub options:
 
       [...]
       description. Available options are:
@@ -179,6 +184,26 @@ Options, sub options, examples structure:
       .
       [...]
 
+    - Short sub options:
+
+      [...]
+      description. Available options are:
+
+      .DP 0
+      .RSs
+      .IPs "subopt1=<value>"
+      description1
+      .IPs "subopt2=<value>"
+      description2
+      [...]
+      .IPs "last subopt=<value>"
+      last description
+      .RE
+      .DP 1
+      .
+      [...]
+
+
     - Sub options in sub options:
 
       [...]
@@ -192,7 +217,7 @@ Options, sub options, examples structure:
       .REss
       [...]
 
-    - Examples (like sub options, note: no '.', newline before and ':' after
+    - Examples (like sub options, note: newline before and ':' after
       .I EXAMPLE, .PD 0 before and .PD 1 after the examples):
 
       [...]
@@ -205,4 +230,5 @@ Options, sub options, examples structure:
       [...]
       .RE
       .PD 1
+      .
       [...]
