@@ -156,7 +156,6 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '+', 0 }, "audio_delay -0.100" },
   { { 'q', 0 }, "quit" },
   { { KEY_ESC, 0 }, "quit" },
-  { { KEY_ENTER, 0 }, "pt_step 1 1" },
 #ifndef HAVE_NEW_GUI
   { { 'p', 0 }, "pause" },
 #endif
