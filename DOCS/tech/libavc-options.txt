@@ -188,9 +188,12 @@ vcelim (-1000-1000) single coefficient elimination threshold for chrominance
 	negative values will allso consider the dc coefficient
 	should be at least -4 or lower for encoding at quant=1
 
-vstrict strict standard compliance
-	only recommended if you want to feed the output into the mpeg4 reference
-        decoder
+vstrict (-1,0,1) strict standard compliance
+	0  (default)
+        1  only recommended if you want to feed the output into the mpeg4 reference
+           decoder
+        -1 allows nonstandard YV12 huffyuv encoding (20% smaller files, but 
+           cant be played back by the official huffyuv codec)
 
 vdpart	data partitioning
 	adds 2 byte per video packet
@@ -333,6 +336,10 @@ preme	(0-2) Motion estimation pre-pass
 subq	(1-8) subpel refinement quality (for qpel)
 	8 (default)
 	Note: this has a significant effect on the speed
+        
+psnr	will print the psnr for the whole video after encoding and store the per frame psnr
+	in a file with name like "psnr_012345.log"
+
 
 lavdopts: (decoder options)
 ---------------------------
@@ -389,6 +396,7 @@ DCT	Discrete Cosine Transform
 IDCT	Inverse Discrete Cosine Transform
 DC	The coefficient of the constant term in the DCT (avg value of block)
 JVT	Joint Video Team Standard -- http://www.itu.int/ITU-T/news/jvtpro.html
+PSNR	peak signal to noise ratio
 
 Examples:
 mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
@@ -399,6 +407,7 @@ short intro to mpeg coding:
 http://www.eecs.umich.edu/~amarathe/mpeg.html
 longer intro to jpeg/mpeg coding:
 http://www.cs.sfu.ca/undergrad/CourseMaterials/CMPT479/material/notes/Chap4/Chap4.2/Chap4.2.html
+ftp://ftp.tek.com/mbd/manuals/video_audio/25W_11418_4.pdf
 
 --
 Written 2002 by Michael Niedermayer and reviewed by Felix Buenemann.
