@@ -538,7 +538,7 @@ int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih)
 
   ret = ICCompressGetFormat(encoder_hic, input_bih, output_bih);
   if(ret < 0){
-    unsigned char* temp=output_bih;
+    unsigned char* temp=(unsigned char*)output_bih;
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICCompressGetFormat failed: Error %d  (0x%X)\n", (int)ret, (int)ret);
     for (i=0; i < temp_len; i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02x ", temp[i]);
     return 0;
@@ -547,7 +547,7 @@ int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih)
   
   if (temp_len > sizeof(BITMAPINFOHEADER))
   {
-    unsigned char* temp=output_bih;
+    unsigned char* temp=(unsigned char*)output_bih;
     mp_msg(MSGT_WIN32, MSGL_V, "Extra info in o_bih (%d bytes)!\n",
 	temp_len-sizeof(BITMAPINFOHEADER));
     for(i=sizeof(output_bih);i<temp_len;i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02X ",temp[i]);

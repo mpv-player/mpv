@@ -87,7 +87,7 @@ static int vid_overlay_on = 0;
 
 /* mapped physical addresses */
 static uint8_t *mga_mmio_base = 0;
-static uint32_t mga_mem_base = 0; 
+static uint8_t *mga_mem_base = 0;
 
 static int mga_src_base = 0; /* YUV buffer position in video memory */
 
@@ -685,7 +685,7 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 
 int vixConfigPlayback(vidix_playback_t *config)
 {
-	int i;
+	unsigned int i;
 	int x, y, sw, sh, dw, dh;
 	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
 #ifdef CRTC2
@@ -1179,7 +1179,7 @@ int vixProbe(int verbose,int force)
 
 	is_g400 = -1;
 
-	err = pci_scan(&lst, &num_pci);
+	err = pci_scan(lst, &num_pci);
 	if (err)
 	{
 	    printf("[mga] Error occured during pci scan: %s\n", strerror(err));

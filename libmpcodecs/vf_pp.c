@@ -98,7 +98,7 @@ static unsigned int fmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
-    NULL
+    0
 };
 
 static int open(vf_instance_t *vf, char* args){

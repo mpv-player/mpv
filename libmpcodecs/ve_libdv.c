@@ -23,6 +23,8 @@
 
 #include <libdv/dv.h>
 
+extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
+
 #ifndef DV_WIDTH
 #define DV_WIDTH       720
 #define DV_PAL_HEIGHT  576

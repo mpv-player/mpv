@@ -93,6 +93,11 @@ int load_syms_linux(char *path) {
 }
 
 #ifdef USE_WIN32DLL
+
+#include "../loader/ldt_keeper.h"
+void* LoadLibraryA(char* name);
+void* GetProcAddress(void* handle,char* func);
+
 int load_syms_windows(char *path) {
     void *handle;
     Setup_LDT_Keeper();

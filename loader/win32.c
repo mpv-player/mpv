@@ -4201,7 +4201,7 @@ void* LookupExternal(const char* library, int ordinal)
 
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
-	HMODULE *hand;
+	HMODULE hand;
 	WINE_MODREF *wm;
 	void *func;
 

@@ -81,7 +81,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
 
-    if(!mpi->planes[1]) mpi->planes[1]=gray_pal;
+    if(!mpi->planes[1]) mpi->planes[1]=(unsigned char*)gray_pal;
 
     if(mpi->w==mpi->stride[0] && dmpi->w*(dmpi->bpp>>3)==dmpi->stride[0]){
 	// no stride conversion needed

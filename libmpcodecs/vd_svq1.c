@@ -17,6 +17,14 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(svq1)
 
+#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
+#endif
+
 #include "native/svq1.h"
 
 // to set/get/query special features/parameters

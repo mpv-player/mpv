@@ -186,7 +186,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 		mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error at resampling\n");
 		break;
 	    }
-	    len+=2*a52_resample(a52_samples,&buf[len]);
+	    len+=2*a52_resample(a52_samples,(int16_t *)&buf[len]);
 	}
   return len;
 }

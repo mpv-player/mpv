@@ -44,7 +44,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		/* tables are in encoded */
 		if (encodedh->comptype == 'R')
 		{
-		    RTjpeg_init_decompress ( encoded+12, width, height );
+		    RTjpeg_init_decompress ( (unsigned long *)(encoded+12), width, height );
 		    mp_msg(MSGT_DECVIDEO, MSGL_V, "Found RTjpeg tables (size: %d, width: %d, height: %d)\n",
 			encoded_size-12, width, height);
 		}

@@ -61,7 +61,7 @@ void print_wave_header(WAVEFORMATEX *h){
   printf("bits/sample: %d\n",h->wBitsPerSample);
   printf("cbSize: %d\n",h->cbSize);
   if(h->wFormatTag==0x55 && h->cbSize>=12){
-      MPEGLAYER3WAVEFORMAT* h2=h;
+      MPEGLAYER3WAVEFORMAT* h2=(MPEGLAYER3WAVEFORMAT *)h;
       printf("mp3.wID=%d\n",h2->wID);
       printf("mp3.fdwFlags=0x%X\n",h2->fdwFlags);
       printf("mp3.nBlockSize=%d\n",h2->nBlockSize);
