@@ -236,7 +236,7 @@ void* enc_handle=NULL;
 
 lame_global_flags *lame;
 
-float audio_preload=0.3;
+float audio_preload=0.5;
 
 double v_pts_corr=0;
 double v_timer_corr=0;
@@ -473,7 +473,7 @@ case ACODEC_PCM:
     break;
 case ACODEC_VBRMP3:
     mux_a->h.dwSampleSize=0; // VBR
-    mux_a->h.dwScale=4608/4;
+    mux_a->h.dwScale=1152; // samples/frame
     mux_a->h.dwRate=sh_audio->samplerate;
     if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
@@ -481,13 +481,13 @@ case ACODEC_VBRMP3:
     mux_a->wf->nChannels=sh_audio->channels;
     mux_a->wf->nSamplesPerSec=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
-    mux_a->wf->nBlockAlign=1;
+    mux_a->wf->nBlockAlign=1152; // requires for l3codeca.acm + WMP 6.4
     mux_a->wf->wBitsPerSample=0; //16;
     // from NaNdub:  (requires for l3codeca.acm)
     mux_a->wf->cbSize=12;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->wID=1;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->fdwFlags=2;
-    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=1024; // ???
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=1152; // ???
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nFramesPerBlock=1;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
     break;
@@ -589,7 +589,7 @@ while(!eof){
 if(sh_audio){
     // get audio:
     while(mux_a->timer-audio_preload<mux_v->timer){
-	int len;
+	int len=0;
 	if(mux_a->h.dwSampleSize){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
@@ -637,6 +637,7 @@ if(sh_audio){
 		}
 		break;
 	    }
+	    mux_a->wf->nAvgBytesPerSec=mux_a->size/mux_a->timer;
 	}
 	if(len<=0) break; // EOF?
 	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
