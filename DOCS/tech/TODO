@@ -6,7 +6,7 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 AVI demuxer:
-- fix AVI index offset base position handling ('no video steram found' bug)
+- fix AVI index offset base position handling ('no video stream found' bug)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
@@ -30,6 +30,7 @@ decoders:
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_, NuppelVideo and Real
+- fix the whole syncing mechanism of Real demuxer
 
 decoders:
 - qtx support?
@@ -37,6 +38,8 @@ decoders:
 mencoder:
 - add ogg/vorbis audio encoder
 - stop/resume
+- make a better encoder api
+- add muxer api
 
 gui:
 - playlist ?
