@@ -76,7 +76,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		vf->priv->buf[1] = malloc(mpi->stride[2]*mpi->h >> mpi->chroma_y_shift);
 	}
 	
-	if (vf->priv->hue == 0){
+	if (vf->priv->hue == 0 && vf->priv->saturation == 1){
 		dmpi->planes[1] = mpi->planes[1];
 		dmpi->planes[2] = mpi->planes[2];
 	}else {
