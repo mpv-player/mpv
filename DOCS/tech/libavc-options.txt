@@ -284,6 +284,42 @@ subcmp	comparission function for sub pel motion estimation
         7 ZERO (0)
         +256 (use chroma too, doesnt work with b frames currently)
         Tip: SAD is fast, SATD is good
+        Tip2: when using SATD for full pel search u should use a larger diamond
+              something like dia=2 or dia=4
+
+dia	(-99 - 6) diamond type & size for motion estimation
+	...
+	-3 shape adaptive diamond with size 3
+	-2 shape adaptive diamond with size 2
+	-1 experimental
+	1 normal size=1 diamond (default) =EPZS type diamond
+                        0
+                       000
+                        0
+	2 normal size=2 diamond
+                        0
+                       000
+                      00000
+                       000
+                        0
+        ...
+        Tip: the shape adaptive stuff seems to be faster at the same quality
+        Note: the sizes of the normal diamonds and shape adaptive ones dont
+              have the same meaning
+
+trell	trellis quantization
+	this will find the optimal encoding for each 8x8 block
+	trellis quantization is quite simple a optimal quantization in the 
+	PSNR vs bitrate sense (assuming that there would be no rounding errors introduced 
+	by the IDCT, which is obviously not the case) it simply finds a block for the minimum of
+	error + lambda*bits 
+	lambda is a qp dependant constant
+	bits is the amount of bits needed to encode the block
+	error is simple the sum of squared errors of the quantization
+        
+last_pred	(0-99) amount of motion predictors from the previous frame
+	0 (default)
+	a -> will use 2a+1 x 2a+1 MB square of MV predictors from the previous frame
 
 lavdopts: (decoder options)
 ---------------------------
