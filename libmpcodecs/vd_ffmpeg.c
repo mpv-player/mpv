@@ -72,6 +72,11 @@ typedef struct {
     double inv_qp_sum;
     int ip_count;
     int b_count;
+    // AVC data
+    int got_avcC;
+    int nal_length_size;
+    void *data_bak;
+    int len_bak;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -339,6 +344,10 @@ static int init(sh_video_t *sh){
 	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
     }
     
+    if(sh->format == mmioFOURCC('a', 'v', 'c', '1')) {
+        ctx->got_avcC = 0;
+    }
+
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
 
@@ -678,6 +687,36 @@ typedef struct dp_hdr_s {
     uint32_t chunktab;	// offset to chunk offset array
 } dp_hdr_t;
 
+
+/**
+ * Add sync to a nal and queue it in buffer, increasing buffer size as needed
+ * @param dest pointer to current buffer area
+ * @param destsize pointer to size of current dest area
+ * @param source pointer to source nal data (after length bytes)
+ * @param nal_len length of nal data
+ */
+unsigned char* avc1_addnal(unsigned char *dest, int *destsize, unsigned char* source, int nal_len)
+{
+    unsigned char *temp;
+    int tempsize;
+
+    tempsize = *destsize + nal_len + 4;
+    temp = malloc (tempsize);
+    if (dest)
+        memcpy (temp, dest, *destsize);
+    temp[*destsize] = 0;
+    temp[*destsize+1] = 0;
+    temp[*destsize+2] = 0;
+    temp[*destsize+3] = 1;
+    memcpy (temp + *destsize + 4, source, nal_len);
+    if (dest)
+        free(dest);
+    *destsize = tempsize;
+
+    return temp;
+}
+
+
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int got_picture=0;
@@ -687,6 +726,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
     int dr1= ctx->do_dr1;
+    unsigned char *buf = NULL;
 
     if(len<=0) return NULL; // skipped frame
 
@@ -736,8 +776,68 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         data+= sizeof(dp_hdr_t);
     }
 
+    /*
+     * Convert avc1 nals to annexb nals (remove lenght, add sync)
+     * If first frame extract and process avcC (configuration data)
+     */    
+    if(sh->format == mmioFOURCC('a', 'v', 'c', '1')) {
+        int bufsize = 0;
+        int nalsize;
+        unsigned char *p = data;
+        int i;
+        int cnt, poffs;
+
+        // Remember original values
+        ctx->data_bak = data;
+        ctx->len_bak = len;
+
+        if (!ctx->got_avcC) {
+            // Parse some parts of avcC, just for fun :)
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC version: %d\n", *(p));
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC profile: %d\n", *(p+1));
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC profile compatibility: %d\n", *(p+2));
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC level: %d\n", *(p+3));
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC nal length size: %d\n", ctx->nal_length_size = ((*(p+4))&0x03)+1);
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC number of sequence param sets: %d\n", cnt = (*(p+5) & 0x1f));
+            poffs = 6;
+            for (i = 0; i < cnt; i++) {
+                mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC sps %d have length %d\n", i, nalsize = BE_16(p+poffs));
+                buf = avc1_addnal(buf, &bufsize, p + poffs + 2, nalsize);
+                poffs += nalsize + 2;
+            }
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC number of picture param sets: %d\n", *(p+poffs));
+            poffs++;
+            for (i = 0; i < cnt; i++) {
+                mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] avcC pps %d have length %d\n", i, nalsize = BE_16(p+poffs));
+                buf = avc1_addnal(buf, &bufsize, p + poffs + 2, nalsize);
+                poffs += nalsize + 2;
+            }
+            p += poffs;
+            ctx->got_avcC = 1;
+        }
+
+        while (p < (data + len)) {
+            nalsize = 0;
+            for(i = 0; i < ctx->nal_length_size; i++)
+                nalsize = (nalsize << 8) | (*p++);
+            mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "[ffmpeg] avc1: nalsize = %d\n", nalsize);
+            buf = avc1_addnal(buf, &bufsize, p, nalsize);
+            p += nalsize;
+            len -= nalsize;
+        }
+        data = buf;
+        len = bufsize;
+    }
+
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
+
+    if(sh->format == mmioFOURCC('a', 'v', 'c', '1')) {
+        free(buf);
+        data = ctx->data_bak;
+        len = ctx->len_bak;
+    }
+
     dr1= ctx->do_dr1;
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);

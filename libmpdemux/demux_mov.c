@@ -1111,6 +1111,39 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			mp4_free_esds(&esds); // freeup esds mem
 		      }	      
 		      break;
+		    case MOV_FOURCC('a','v','c','C'):
+		      // AVC decoder configuration record
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: AVC decoder configuration record atom (%d)!\n", atom_len);
+		      if(atom_len > 8) {
+		        int i, poffs, cnt;
+		        // Parse some parts of avcC, just for fun :)
+		        // avcC formatting happens in vd_ffmpeg, sps and pps are decoded in lavc
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC version: %d\n", *(trak->stdata+pos+8));
+		        if (*(trak->stdata+pos+8) != 1)
+		          mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: unknown avcC version (%d). Expexct problems.\n", *(trak->stdata+pos+9));
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC profile: %d\n", *(trak->stdata+pos+9));
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC profile compatibility: %d\n", *(trak->stdata+pos+10));
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC level: %d\n", *(trak->stdata+pos+11));
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC nal length size: %d\n", (*(trak->stdata+pos+12))&0x03+1);
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC number of sequence param sets: %d\n", cnt = (*(trak->stdata+pos+13) & 0x1f));
+		        poffs = pos + 14;
+		        for (i = 0; i < cnt; i++) {
+		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC sps %d have length %d\n", i, BE_16(trak->stdata+poffs));
+		          poffs += BE_16(trak->stdata+poffs) + 2;
+		        }
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC number of picture param sets: %d\n", *(trak->stdata+poffs));
+		        poffs++;
+		        for (i = 0; i < cnt; i++) {
+		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC pps %d have length %d\n", i, BE_16(trak->stdata+poffs));
+		          poffs += BE_16(trak->stdata+poffs) + 2;
+		        }
+		        // Copy avcC for the AVC decoder
+		        // This data will be sent to decoder with first frame, before frame data
+		        trak->stream_header_len = atom_len-8;
+		        trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);
+		        memcpy(trak->stream_header, trak->stdata+pos+8, trak->stream_header_len);
+		      }	      
+		      break;
 		    case 0:
 		      break;
 		    default:
