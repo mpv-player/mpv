@@ -20,7 +20,7 @@ amelyiken futtatni fogod!</para>
 <para>Tüneti kezelés: Ezt az egészet elfelejtheted, ha a
 <option>--enable-runtime-cpudetection</option> kapcsolót használod a konfigurálásnál
 vagy az egyes CPU utasítás készleteket letilthatod külön-külön a megfelelõ
-kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).
+kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).</para>
 </listitem>
 <listitem>
 <para>&quot;Internal buffer inconsistency&quot; (Belsõ buffer inkonzisztencia) a <application>MEncoder</application> futása közben:</para>
