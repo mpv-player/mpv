@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.51 -->
+<!-- synced with 1.52 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -16,7 +16,7 @@ Zgłaszaj problemy do ich opiekunów, a nie do nas.
 <sect2 id="debian">
 <title>Pakiety Debiana</title>
 <para>
-Aby zbudować pakiet dla Debiana, wywołaj poniższą komendę w katalogu ze źródłami 
+Aby zbudować pakiet dla Debiana, wywołaj poniższą komendę w katalogu ze źródłami
 <application>MPlayera</application>:
 <screen>fakeroot debian/rules binary</screen>
 Jako superużytkownik możesz zainstalować pakiet <filename>.deb</filename> tak, jak zwykle:
@@ -26,17 +26,15 @@ Jako superużytkownik możesz zainstalować pakiet <filename>.deb</filename> tak, j
 <para>
 Christian Marillat buduje dla Debiana nieoficjalne paczki
 <application>MPlayera</application>, <application>MEncodera</application>
-i czcionek już przez jakiś czas, możesz je pobrać (apt-get) z jego
-<ulink url="ftp://ftp.nerim.net/debian-marillat/index.html">lustrzanej
-strony domowej</ulink>, ponieważ jego 
-<ulink url="http://marillat.free.fr/">oryginalna</ulink> chwilowo nie działa.
+i naszych czcionek bitmapowych już przez jakiś czas, możesz je pobrać (apt-get)
+z <ulink url="http://hpisi.nerim.net/">jego strony domowej</ulink>.
 </para>
 </sect2>
 
 <sect2 id="rpm">
 <title>Pakiety RPM</title>
 <para>
-Dominik Mierzejewski tworzy i opiekuje się oficjalnymi pakietami 
+Dominik Mierzejewski tworzy i opiekuje się oficjalnymi pakietami
 <application>MPlayera</application> dla Red Hata. Są one dostępne na jego
 <ulink url="http://greysector.rangers.eu.org/mplayer.html">stronie domowej</ulink>.
 </para>
@@ -58,7 +56,7 @@ działających pod kontrolą Linuksa, np. Sharp Zaurus, Compaq iPAQ.
 Najprostszym sposobem, żeby uzyskać <application>MPlayera</application>,
 jest pobranie go z odpowiedniego źródła pakietów (stable, testing, unstable)
 z witryny <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Jeżeli chcesz
-go skompilować samodzielnie, powinieneś przyjrzeć się katalogom 
+go skompilować samodzielnie, powinieneś przyjrzeć się katalogom
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayera</ulink>
 i biblioteki
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
@@ -99,7 +97,7 @@ potrzebował przekompilować jądro z opcją &quot;<envar>USER_LDT</envar>&quot;
 <sect2 id="freebsd">
 <title>FreeBSD</title>
 <para>
-Jeżeli Twój procesor ma rozszerzenie SSE, przekompiluj jądro z opcją 
+Jeżeli Twój procesor ma rozszerzenie SSE, przekompiluj jądro z opcją
 &quot;<envar>CPU_ENABLE_SSE</envar>&quot; (wymagany FreeBSD-STABLE lub łaty na jądro).
 </para>
 </sect2>
@@ -177,7 +175,7 @@ systemie).
 </para>
 
 <para>
-Błąd jaki wyświetli <filename>configure</filename> na Solarisie x86, używającym GCC 
+Błąd jaki wyświetli <filename>configure</filename> na Solarisie x86, używającym GCC
 bez GNU assemblera:
 <screen>
    % configure
@@ -203,13 +201,13 @@ Typowy błąd, jaki otrzymasz przy próbie budowy kompilatorem GNU C, który nie uży
 </para>
 
 <para>
-Ze względu na błędy występujące w Solarisie 8, możesz nie być w stanie odtwarzać płyt DVD 
+Ze względu na błędy występujące w Solarisie 8, możesz nie być w stanie odtwarzać płyt DVD
 o pojemności większej niż 4 GB:
 </para>
 
 <itemizedlist>
 <listitem><para>
-Sterownik sd(7D) dla Solarisa 8 x86 ma błąd ujawniający się przy próbie dostępu do 
+Sterownik sd(7D) dla Solarisa 8 x86 ma błąd ujawniający się przy próbie dostępu do
 bloku dyskowego >4GB urządzenia korzystającego z logicznego rozmiaru bloku !=DEV_BSIZE
 (np. nośnik CD-ROM i DVD). Ze względu na przepełnienie 32bitowych liczb całkowitych,
 odczytywany jest adres dysku modulo 4GB
@@ -238,8 +236,8 @@ umieściłeś go w globalnej ścieżce) wskazać go przez:
 </para>
 
 <para>
-Albo użyć domyślnego programu instalacyjnego dostarczonego z IRIX 6.5, w tym 
-wypadku należy ręcznie zmodyfikować plik <filename>Makefile</filename> w 
+Albo użyć domyślnego programu instalacyjnego dostarczonego z IRIX 6.5, w tym
+wypadku należy ręcznie zmodyfikować plik <filename>Makefile</filename> w
 kilku miejscach. Zmień poniższe dwie linijki:
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
@@ -268,7 +266,7 @@ i <option>-ao sdl:nto</option>, powinno działać szybko.
 
 <para>
 Wyjście <option>-vo x11</option> będzie nawet wolniejsze niż na Linuksie,
-ponieważ QNX ma tylko <emphasis>emulację</emphasis> Xów, która jest bardzo 
+ponieważ QNX ma tylko <emphasis>emulację</emphasis> Xów, która jest bardzo
 wolna. Używaj SDL.
 </para>
 </sect1>
@@ -279,17 +277,17 @@ wolna. Używaj SDL.
 <para>Tak, <application>MPlayer</application> działa na Windowsie pod
   <ulink url="http://www.cygwin.com/"><application>Cygwinem</application></ulink> i
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-  Nie ma jeszcze interfejsu GUI, ale wersja dla wiersza poleceń jest już prawie w pełni 
+  Nie ma jeszcze interfejsu GUI, ale wersja dla wiersza poleceń jest już prawie w pełni
   funkcjonalna. <ulink url="../../tech/patches.txt">Łatki</ulink> są zawsze mile widziane.
-  Powinieneś sprawdzić listę 
+  Powinieneś sprawdzić listę
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>,
   aby uzyskać pomoc albo otrzymać najnowsze informacje.</para>
 
-<para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX 
+<para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX
   (<option>-vo directx</option>) i rdzennym wyjściem dźwiękowym wave Windows
   (<option>-ao win32</option>). Możesz skorzystać również z OpenGL lub SDL, jednak
   wydajność OpenGL w znacznym stopniu zależy od systemu, a SDL może powodować powstanie
-  zakłóceń w dźwięku i obrazie albo wywołać błąd, i zakończyć działanie programu. 
+  zakłóceń w dźwięku i obrazie albo wywołać błąd, i zakończyć działanie programu.
   Jeżeli występują zakłócenia obrazu, spróbuj
   wyłączyć sprzętową akcelerację przez opcję <option>-vo directx:noaccel</option>. Ściągnij
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
@@ -318,7 +316,7 @@ wolna. Używaj SDL.
 
 <para>Dla osiągnięcia najlepszych wyników <application>MPlayer</application> powinien
   korzystać z przestrzeni kolorów, którą Twoja karta wspiera sprzętowo. Niestety
-  wiele sterowników graficznych Windowsa źle informuje o wspieranych przez kartę 
+  wiele sterowników graficznych Windowsa źle informuje o wspieranych przez kartę
   przestrzeniach. Aby sprawdzić które są źle obsługiwane, wykonaj poniższą komendę:
 
   <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>przestrzeń</replaceable> <replaceable>film</replaceable></screen>
@@ -332,7 +330,7 @@ wolna. Używaj SDL.
 
 
 <para>Możesz wykorzystać kodeki Win32 i Real dla Win32 (nie kodeki Real dla Linuksa),
-  jeżeli chcesz. Umieść je gdzieś w swojej 
+  jeżeli chcesz. Umieść je gdzieś w swojej
   ścieżce (zmienna PATH - przyp. tłumacza) albo użyj opcji
   <option>--with-codecsdir=c:/ścieżka/do/twoich/kodeków</option> (lub
   <option>--with-codecsdir=/ścieżka/do/twoich/kodeków</option> tylko na
@@ -350,7 +348,7 @@ wolna. Używaj SDL.
 
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<para>DVD również działa, podaj literę Twojego DVD-ROMu przez 
+<para>DVD również działa, podaj literę Twojego DVD-ROMu przez
   opcję <option>-dvd-device</option>:</para>
 
 <screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
@@ -385,7 +383,7 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
   <filename class="directory">/usr/local/include/</filename>.</para>
 
 <para>Instrukcje i pliki potrzebne do kompilacji SDLa dla <application>Cygwin</application>
-  są dostępne na 
+  są dostępne na
   <ulink url="http://www.libsdl.org/extras/win32/cygwin/">stronie libsdl</ulink>.</para>
 
 </sect2>
@@ -395,7 +393,7 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
 
 <para>Zainstalowanie <application>MinGW</application>, który umożliwiłby
   kompilację <application>MPlayera</application> było zawiłe,
-  ale teraz składa się tylko z trzech prostych kroków i niedługo powinno 
+  ale teraz składa się tylko z trzech prostych kroków i niedługo powinno
   działać "prosto z pudełka". Zainstaluj <application>MinGW</application>
   3.0.0 lub nowszy. Zainstaluj MSYS 1.0.9 lub nowszy i wskaż systemowi poinstalacyjnemu
   MSYSa, że <application>MinGW</application> jest zainstalowane.</para>
@@ -426,9 +424,9 @@ obsługę starszych wersji Mac OS oraz przysłać nam łaty!
 </para>
 
 <para>
-Zmodyfikowane GCC 3.X Apple jest zalecane do kompilacji 
+Zmodyfikowane GCC 3.X Apple jest zalecane do kompilacji
 <application>MPlayera</application>, szczególnie z
-<systemitem class="library">libavcodec</systemitem>, ponieważ 
+<systemitem class="library">libavcodec</systemitem>, ponieważ
 ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
 </para>
 
