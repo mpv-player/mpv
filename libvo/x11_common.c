@@ -176,7 +176,10 @@ void vo_hidecursor(Display * disp, Window win)
         return;                 // do not hide, if we're playing at rootwin
 
     colormap = DefaultColormap(disp, DefaultScreen(disp));
-    XAllocNamedColor(disp, colormap, "black", &black, &dummy);
+    if ( !XAllocNamedColor(disp, colormap, "black", &black, &dummy) )
+    {
+      return; // color alloc failed, give up
+    }
     bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8, 8);
     no_ptr = XCreatePixmapCursor(disp, bm_no, bm_no, &black, &black, 0, 0);
     XDefineCursor(disp, win, no_ptr);
