@@ -163,7 +163,7 @@ static char help_text[]=
 #define MSGTR_EdlOutOfMem "Can't allocate enough memory to hold EDL data.\n"
 #define MSGTR_EdlRecordsNo "Read %d EDL actions.\n"
 #define MSGTR_EdlQueueEmpty "There are no EDL actions to take care of.\n"
-#define MSGTR_EdlCantOpenForWrite "Error opening file [%s] for writing.\n"
+#define MSGTR_EdlCantOpenForWrite "Can't open EDL file [%s] for writing.\n"
 #define MSGTR_EdlCantOpenForRead "Can't open EDL file [%s] for reading.\n"
 #define MSGTR_EdlNOsh_video "Cannot use EDL without video, disabling.\n"
 #define MSGTR_EdlNOValidLine "Invalid EDL line: %s\n"
