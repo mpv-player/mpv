@@ -771,6 +771,7 @@ _dshow=yes
 _select=yes
 _tv=yes
 _tv_v4l=auto
+_tv_bsdbt848=auto
 _streaming=yes
 _vidix=yes
 _new_input=yes
@@ -874,6 +875,8 @@ for ac_option do
   --disable-alsa)	_alsa=no	;;
   --enable-tv)		_tv=yes		;;
   --disable-tv)		_tv=no		;;
+  --enable-tv-bsdbt848)	_tv_bsdbt848=yes	;;
+  --disable-tv-bsdbt848)	_tv_bsdbt848=no	;;
   --enable-tv-v4l)	_tv_v4l=yes	;;
   --disable-tv-v4l)	_tv_v4l=no	;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
@@ -1490,7 +1493,7 @@ if test "$_tdfxfb" = yes ; then
   _vomodules="tdfxfb $_vomodules"
 else
   _def_tdfxfb='#undef HAVE_TDFXFB'
-  _novomodules="tdfxf $_novomodules"
+  _novomodules="tdfxfb $_novomodules"
 fi
 echores "$_tdfxfb"
 
@@ -2848,6 +2851,26 @@ else
 fi
 echores "$_tv"
 
+echocheck "*BSD BrookTree 848 TV interface"
+if test "$_tv_bsdbt848" = auto ; then
+ _tv_bsdbt848=no
+ if test "$_tv" = yes ; then
+    cat > $TMPC <<EOF
+#include <sys/types.h>
+#include <machine/ioctl_bt848.h>
+int main(void) { return 0; }
+EOF
+    cc_check && _tv_bsdbt848=yes
+ fi
+fi
+if test "$_tv_bsdbt848" = yes ; then
+  _def_tv_bsdbt848='#define HAVE_TV_BSDBT848 1'
+  _inputmodules="tv-bsdbt848 $_inputmodules"
+else
+  _def_tv_bsdbt848='#undef HAVE_TV_BSDBT848'
+fi
+echores "$_tv_bsdbt848"
+
 echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l" = auto ; then
  _tv_v4l=no
@@ -3389,6 +3412,9 @@ $_def_tv
 
 /* Enable Video 4 Linux TV interface support */
 $_def_tv_v4l
+
+/* Enable *BSD BrookTree TV interface support */
+$_def_tv_bsdbt848
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
