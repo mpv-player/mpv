@@ -1720,6 +1720,9 @@ extern int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg);
 #ifdef USE_WIN32DLL
 extern int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg);
 #endif
+#ifdef HAVE_LIBDV095
+extern int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg);
+#endif
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1762,6 +1765,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
         case DEMUXER_TYPE_AVS:
    	    return demux_avs_control(demuxer, cmd, arg);
 #endif 
+#ifdef HAVE_LIBDV095
+        case DEMUXER_TYPE_RAWDV:
+            return demux_rawdv_control(demuxer,cmd, arg);
+#endif
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }

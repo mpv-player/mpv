@@ -225,4 +225,22 @@ void demux_close_rawdv(demuxer_t* demuxer)
   free(frames);
 }
 
+int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
+    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
+    sh_video_t *sh_video=demuxer->video->sh;
+
+    switch(cmd) {
+        case DEMUXER_CTRL_GET_TIME_LENGTH:
+            *((unsigned long *)arg)=frames->frame_number / sh_video->fps;
+            return DEMUXER_CTRL_OK;
+
+        case DEMUXER_CTRL_GET_PERCENT_POS:
+            *((int *)arg)=(int)(frames->current_frame * 100. / frames->frame_number);
+            return DEMUXER_CTRL_OK;
+
+        default:
+            return DEMUXER_CTRL_NOTIMPL;
+    }
+}
+
 #endif
