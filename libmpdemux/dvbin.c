@@ -156,9 +156,10 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	row_count = 0;
 	while(! feof(f) && row_count < 512)
 	{
-		if( fgets(line, CHANNEL_LINE_LEN, f) == NULL ) continue;
+		if( fgets(line, CHANNEL_LINE_LEN, f) == NULL )
+			continue;
 
-		if(line[0] == '#')
+		if((line[0] == '#') || (strlen(line) == 0))
 			continue;
 
 		ptr =  &(list->channels[list->NUM_CHANNELS]);
@@ -168,12 +169,22 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			fields = sscanf(line, ter_conf,
 				&ptr->name, &ptr->freq, &inv, &bw, &cr, &tmp_lcr, &mod,
 				&transm, &gi, &tmp_hier, &ptr->vpid, &ptr->apid1);
+			/*
+			mp_msg(MSGT_DEMUX, MSGL_V,
+				"NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, VPID: %d, APID1: %d\n",
+				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->vpid, ptr->apid1);
+			*/
 		}
 		else if(type == TUNER_CBL)
 		{
 			fields = sscanf(line, cbl_conf,
 				&ptr->name, &ptr->freq, &inv, &ptr->srate,
 				&cr, &mod, &ptr->vpid, &ptr->apid1);
+			/*
+			mp_msg(MSGT_DEMUX, MSGL_V,
+				"NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, VPID: %d, APID1: %d\n",
+				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->vpid, ptr->apid1);
+			*/
 		}
 		else //SATELLITE
 		{
@@ -185,9 +196,13 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			ptr->srate *=  1000UL;
 			ptr->tone = -1;
 			mp_msg(MSGT_DEMUX, MSGL_V,
-				"NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, TONE: %d, VPID: %d, APID1: %d, APID2: %d, TPID: %d, PROGID: %d, NUM: %d\n",
-				fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc, ptr->tone, ptr->vpid, ptr->apid1, ptr->apid2, ptr->tpid, ptr->progid, list->NUM_CHANNELS);
+				"NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, TONE: %d, VPID: %d, APID1: %d, APID2: %d, TPID: %d, PROGID: %d\n",
+				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc, ptr->tone, ptr->vpid, ptr->apid1, ptr->apid2, ptr->tpid, ptr->progid);
 		}
+
+
+		if(((ptr->vpid <= 0) && (ptr->apid1 <=0)) || (ptr->freq == 0))
+			continue;
 
 
 		if((type == TUNER_TER) || (type == TUNER_CBL))

@@ -100,6 +100,7 @@ static int quiet=0;
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "libmpdemux/dvbin.h"
+static int last_dvb_step = 1;
 #endif
 
 
@@ -1532,6 +1533,27 @@ fflush(stdout);
 
 if(!sh_video && !sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
+#ifdef HAS_DVBIN_SUPPORT
+	if((stream->type == STREAMTYPE_DVB) && stream->priv)
+	{
+	  dvb_priv_t *priv = (dvb_priv_t*) stream->priv;
+	  if(priv->is_on)
+	  {
+		int dir;
+		int v = last_dvb_step;
+		if(v > 0)
+			dir = DVB_CHANNEL_HIGHER;
+		else
+			dir = DVB_CHANNEL_LOWER;
+			
+		if(dvb_step_channel(priv, dir))
+		{
+	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
+			goto goto_open_demuxer;
+		}
+	  }
+	}
+#endif	
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
@@ -2868,7 +2890,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  {
 		int dir;
 		int v = cmd->args[0].v.i;
-		
+	    
+		last_dvb_step = v;	
 		if(v > 0)
 			dir = DVB_CHANNEL_HIGHER;
 		else
@@ -2904,6 +2927,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  dvb_priv_t *priv = (dvb_priv_t*) stream->priv;
 	  if(priv->is_on)
 	  {
+		if(priv->list->current <= cmd->args[0].v.i)
+		    last_dvb_step = 1;
+		else
+		    last_dvb_step = -1;
+
   		if(dvb_set_channel(priv, cmd->args[0].v.i))
 		{
 	  	  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
