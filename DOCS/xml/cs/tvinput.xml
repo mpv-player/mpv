@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.12 -->
+<!-- Synced with: 1.13 -->
 <sect1 id="tv-input" xreflabel="TV vstup">
 <title>TV vstup</title>
 
@@ -196,7 +196,7 @@ tolik důležitá.
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>výstupní.avi</replaceable> tv://
+     -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>výstupní.avi</replaceable> tv://
 </screen>
 Rovněž můžete nastavit menší rozměry obrazu ve volbě <option>-tv</option>
 a vyhnout se tak softwarovému škálování, ale tento přístup vyžaduje
