@@ -22,6 +22,10 @@
 #include <winsock2.h>
 #endif
 
+#ifndef USE_SETLOCAL
+#undef USE_ICONV
+#endif
+
 #ifdef USE_ICONV
 #include <iconv.h>
 #ifdef USE_LANGINFO
