@@ -15,7 +15,7 @@ Directory:  libavcodec, libavformat
 License:    GNU Lesser General Public License
 
 Name:       FAAD2
-Version:    2.0 RC1, updated to CVS from 20031003
+Version:    2.0 + portability patches
 Homepage:   http://www.audiocoding.com
 Directory:  libfaad2
 License:    GNU General Public License
