@@ -266,9 +266,7 @@ void mplMainSigHandler( int s )
          }
         break;
    case evFileLoaded:
-        if ( Filename ) free( Filename );
-        Filename=(char *)malloc( strlen( gtkShMem->fs.dir ) + strlen( gtkShMem->fs.filename ) + 2 );
-        strcpy( Filename,gtkShMem->fs.dir ); strcat( Filename,"/" ); strcat( Filename,gtkShMem->fs.filename );
+        strcpy( mplShMem->Filename,gtkShMem->fs.dir ); strcat( mplShMem->Filename,"/" ); strcat( mplShMem->Filename,gtkShMem->fs.filename );
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
         break;
    case evMessageBox:
