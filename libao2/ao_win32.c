@@ -220,7 +220,7 @@ static int init(int rate,int channels,int format,int flags)
 	}
 	if(result != MMSYSERR_NOERROR)
 	{
-		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: unable to open wave mapper device\n");
+		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: unable to open wave mapper device (result=%i)\n",result);
 		return 0;
     }
 	//allocate buffer memory as one big block
