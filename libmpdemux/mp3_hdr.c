@@ -17,7 +17,7 @@ static int tabsel_123[2][3][16] = {
 
 static long freqs[9] = { 44100, 48000, 32000,	// MPEG 1.0
 			 22050, 24000, 16000,   // MPEG 2.0
-			 11025, 12000 , 8000 }; // MPEG 2.5
+			 11025, 12000,  8000};  // MPEG 2.5
 
 int mp_mp3_get_lsf(unsigned char* hbuf){
     unsigned long newhead = 
@@ -57,10 +57,10 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
       return -1;
     }
 
-    sampling_frequency = ((newhead>>10)&0x3);
+    sampling_frequency = ((newhead>>10)&0x3);  // valid: 0..2
     if(sampling_frequency==3){
 	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"invalid sampling_frequency\n");
-	return -1;  // valid: 0..8
+	return -1;
     }
 
     if( newhead & ((long)1<<20) ) {
@@ -74,7 +74,7 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
     }
 
 //    crc = ((newhead>>16)&0x1)^0x1;
-    bitrate_index = ((newhead>>12)&0xf);
+    bitrate_index = ((newhead>>12)&0xf);  // valid: 1..14
     padding   = ((newhead>>9)&0x1);
 //    fr->extension = ((newhead>>8)&0x1);
 //    fr->mode      = ((newhead>>6)&0x3);
@@ -101,7 +101,7 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
 
     if(!framesize){
 	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"invalid framesize/bitrate_index\n");
-	return -1;  // valid: 1..14
+	return -1;
     }
 
     framesize /= freqs[sampling_frequency]<<lsf;
