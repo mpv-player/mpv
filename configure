@@ -1527,6 +1527,7 @@ echores "$_sys_soundcard"
 
 echocheck "sys/dvdio.h"
 cat > $TMPC << EOF
+#include <unistd.h>
 #include <sys/dvdio.h>
 int main(void) { return 0; }
 EOF
