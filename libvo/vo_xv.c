@@ -488,7 +488,7 @@ static void uninit(void)
 #endif
   saver_on(mDisplay); // screen saver back on
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
- XClearWindow( mDisplay,mywindow );
+ XDestroyWindow( mDisplay,mywindow );
 }
 
 

@@ -348,6 +348,6 @@ uninit(void)
 #endif
   saver_on(mDisplay);
  mga_uninit();
- XClearWindow( mDisplay,mWindow );
+ XDestroyWindow( mDisplay,mWindow );
  printf("vo: uninit!\n");
 }

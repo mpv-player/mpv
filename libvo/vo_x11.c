@@ -568,7 +568,7 @@ uninit(void)
           free(vidmodes);
         }
 #endif
- XClearWindow( mDisplay,mywindow );
+ XDestroyWindow( mDisplay,mywindow );
 printf("vo: uninit!\n");
 }
 
