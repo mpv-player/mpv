@@ -411,6 +411,9 @@ sh_video->codec=NULL;
 if(out_video_codec>1){
 
 if(video_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+{
+short bestprio=-1;
+struct codecs_st *bestcodec=NULL;
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
@@ -427,10 +430,22 @@ while(1){
   }
   if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
   else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
+  else if(sh_video->codec && sh_video->codec->priority > bestprio) {
+    //printf("\n\n!!! setting bestprio from %d to %d for %s!!!\n\n", bestprio, sh_video->codec->priority, sh_video->codec->name);
+    bestprio=sh_video->codec->priority;
+    bestcodec=sh_video->codec;
+    continue;
+  }
   break;
 }
+if(bestprio!=-1) {
+  //printf("chose codec %s by priority.\n", bestcodec->name);
+  sh_video->codec=bestcodec;
+}
 
-mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+}
+
+mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];

@@ -577,6 +577,11 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				goto err_out_parse_error;
 			if (!(codec->cpuflags = get_cpuflags(token[0])))
 				goto err_out_parse_error;
+    } else if (!strcasecmp(token[0], "priority")) {
+			if (get_token(1, 1) < 0)
+				goto err_out_parse_error;
+      //printf("\n\n!!!cfg-parse: priority %s (%d) found!!!\n\n", token[0], atoi(token[0])); // ::atmos
+      codec->priority = atoi(token[0]);
 		} else
 			goto err_out_parse_error;
 	}

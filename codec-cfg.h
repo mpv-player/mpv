@@ -73,6 +73,7 @@ typedef struct codecs_st {
 	short flags;
 	short status;
 	short cpuflags;
+  short priority;
 } codecs_t;
 
 codecs_t** parse_codec_cfg(char *cfgfile);
