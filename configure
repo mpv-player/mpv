@@ -422,12 +422,19 @@ if test -z "$_x11incdir" ; then
 fi
 
 # Lots of stuff are installed under /usr/local
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# NK: But we should never use this stuff implicitly
+# since we call compiler from /usr we should be sure
+# that there no effects from other compilers (libraries)
+# which might be installed into /usr/local.
+# Let users use this stuff explicitly as command line argument.
+# In other words: It would be resonable have or only /usr/include
+# or only /usr/local/include.
 if test -z "$_extralibdir" ; then
-_extralibdir=-L/usr/local/lib
+_extralibdir=-L/usr/lib
 fi
 if test -z "$_extraincdir" ; then
-_extraincdir=-I/usr/local/include
+_extraincdir=-I/usr/include
 fi
 
 if test -z "$_sdlconfig" ; then
