@@ -432,7 +432,7 @@ vf_open(vf_instance_t* vf, char* args)
 
     vf->priv = malloc(sizeof(struct vf_priv_s));
 
-	if( sscanf(args, "%d:%d:%s", &vf->priv->hidden, &vf->priv->opaque, filename) < 3 ) {
+	if(!args || sscanf(args, "%d:%d:%s", &vf->priv->hidden, &vf->priv->opaque, filename) < 3 ) {
         mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Bad arguments!\n");
 		mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl: Arguments are 'bool hidden:bool opaque:string fifo'\n");
 		return FALSE;
