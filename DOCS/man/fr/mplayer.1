@@ -1,4 +1,4 @@
-.\" synced with 1.798
+.\" synced with 1.800
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "30 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "2 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -535,8 +535,8 @@ lieu de les jouer immédiatement.
 .B \-fixed-vo (CODE BETA!)
 Force l'initialistation d'une seule fenêtre vidéo pour la lecture d'une
 série de de fichiers.
-Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl2, mga, svga,
-x11, xmga, xv, xvidix et dfbmga.
+Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl, gl2, mga,
+svga, x11, xmga, xv, xvidix et dfbmga.
 .
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
@@ -2442,7 +2442,7 @@ Définit la norme TV à PAL ou NTSC (par défaut\ : 'no change').
 .B \-zrquality <1\-20> (\-vo zr uniquement)
 Un nombre de 1 (meilleur) à 20 (pire) représentant la qualité de l'encodage
 JPEG.
-1 est la meilleur qualité et 20 la plus mauvaise.
+1 est la meilleure qualité et 20 la plus mauvaise.
 .
 .TP
 .B \-zrvdec <1,2,4> (\-vo zr uniquement)
@@ -2533,7 +2533,7 @@ mettent à jour leurs tampons d'affichage uniquement lors du rafraîchissement
 de l'écran (nVidia).
 .IPs queue
 Met plusieurs trames dans queue d'affichage pour permettre aux circuits
-matériel de les traiter en parallèle.
+matériels de les traiter en parallèle.
 Peut ajouter une faible (imperceptible) et constante désynchronisation A/\:V.
 .IPs sleep
 Utilise la fonction sleep() lorsque MPlayer attend la fin de l'affichage de
@@ -2611,14 +2611,14 @@ Essayez cette option si vous avez des problèmes d'affichage.
 .TP
 .B quartz (Mac OS X uniquement)
 Pilote de sortie vidéo Quartz pour Mac OS X.
-Dans certain cas, il est préférable de forcer le format de sortie packed YUV ,
+Dans certains cas, il est préférable de forcer le format de sortie packed YUV,
 avec par ex.\& \-vf format=yuy2
 .PD 0
 .RSs
 .IPs device_id=<numéro>
 Choisir le moniteur à utiliser en plein-écran.
 .IPs fs_res=<largeur>:<hauteur>
-Choisir la résolution du mode plein-écran (utile sur les systèmes plus lent).
+Choisir la résolution du mode plein-écran (utile sur les systèmes plus lents).
 .RE
 .PD 1
 .
@@ -3010,7 +3010,7 @@ Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
 et les stocke dans un fichier nommé 'stream.yuv' dans le répertoire courant.
 Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
 vous être utile pour retraiter cette vidéo avec cette suite.
-Ne gère les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
+Ne que gère les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
 .PD 0
 .RSs
 .IPs interlaced
@@ -3029,7 +3029,7 @@ Si vous ne définissez pas d'options, sortie sera "progressive"
 .TP
 .B gif89a\ 
 Écrit chaque trame dans un fichier GIF animé du répertoire courant.
-Ne gère que le format RGB avec 24 bits/pixel en entrée et est limité en
+Ne gère que le format RGB avec 24 bits/pixel en entrée, et est limité en
 sortie à 256 couleurs.
 .PD 0
 .RSs
@@ -3072,7 +3072,7 @@ facteur d'adoucissement (par défaut\ : 0)
 .IPs quality=<0\-100>
 facteur de qualité (par défaut\ : 75)
 .IPs outdir=<chemin>
-Défini le répertoire où sauver les fichiers JPEG (par défaut\ ./).
+Définit le répertoire où sauver les fichiers JPEG (par défaut\ ./).
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés, avec le préfixe donné pour y écrire
 les fichiers au lieu de les mettre tous dans le même répertoire.
@@ -3170,7 +3170,7 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .
 .TP
 .B \-af <filtre1[=paramètre1:paramètre2:...],filtre2,...>
-Active un liste (séparés par une virgule) des filtres audio et de leurs
+Active un liste de filtres audio séparés par une virgule, accompagnés de leurs
 options.
 Voir aussi la section des filtres audio de la documentation.
 br
@@ -3240,7 +3240,7 @@ sc: Active le découpage logiciel.
 Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:devices.html#audio-dev
 pour les détails.
 .RSss
-n: nombre de canaux de d'entrée (1\-6)
+n: nombre de canaux d'entrée (1\-6)
 .br
 lij: Combien du canal j est mixé dans le canal de sortie i.
 .REss
@@ -3261,7 +3261,7 @@ d: Décalage en ms pour les hauts-parleurs arrière (0ms à 1000ms)
 .REss
 .IPs delay[=ch1:ch2:...]
 Retarde la sortie du son.
-Définit le décalage séparemment pour chaque canal en millisecondes (nombre
+Définit le décalage séparément pour chaque canal en millisecondes (nombre
 flottant entre 0 et 1000).
 .IPs export[=fichier_mmappé[:nsamples]]
 Exporte le signal entrant vers un autre processus en utilisant le mappage
@@ -3308,7 +3308,7 @@ d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
 .I NOTE:
-Voir \-afm help pour la liste complètes des familles de codecs disponibles.
+Voir \-afm help pour la liste complète des familles de codecs disponibles.
 .sp 1
 .I EXEMPLE\ :
 .PD 0
@@ -3451,9 +3451,9 @@ vérifications pour détecter les flux endommagés.
 .IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .IPs "idct=<0\-99> (voir \-lavcopts)"
-Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme IDCT
+Pour obtenir la meilleure qualité d'encodage utilisez le même algorithme IDCT
 pour le décodage et l'encodage.
-Cela dit, vous pouriez y perdre en terme de précision.
+Cela dit, vous pourriez y perdre en terme de précision.
 .IPs lowres=<valeur>
 Décodage en résolution réduite.
 Le décodage en résolution basse n'est pas géré par tous les codecs, et risque
@@ -3573,7 +3573,7 @@ canal droit
 .
 .TP
 .B \-sws <type\ de\ zoom\ logiciel> (voir aussi \-vf scale et \-zoom)
-Défini l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
+Définit l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
 Agit sur les pilotes de sortie vidéo qui ne disposent pas de ce type
 d'accélération logicielle, ex.\& x11.
 .sp 1
@@ -3609,7 +3609,7 @@ bicubique spline naturelle
 .sp 1
 .RS
 .I NOTE\ :
-Pour \-sws\ 2 et 7, la netteté (sharpness) peut être contrôlé avec le
+Pour \-sws\ 2 et 7, la netteté (sharpness) peut être contrôlée avec le
 paramètre de zoom de \-vf scale (0 (doux) \- 100 (net)), pour \-sws 9,
 le paramètre de zoom définit la longueur du filtre (1 \- 10).
 .
@@ -3747,7 +3747,7 @@ position x;y à partir de du coin supérieur gauche de la plus grande image.
 .I NOTE\ :
 Pour avoir une liste complète des filtres vidéo disponibles, voir \-vf help.
 .sp 1
-Les filtres sont gérés en listes.
+Les filtres sont gérés en liste.
 Il y a quelques commandes pour gérer la liste de filtres.
 .
 .TP
@@ -4162,7 +4162,7 @@ bruit temporel (le motif de bruit change entre les trames)
 .IPs a
 bruit temporel moyen (plus lisse, mais beaucoup plus lent)
 .IPs h
-haute qualité (qualité légèrement meilleure , mais légèrement plus lent)
+haute qualité (qualité légèrement meilleure, mais légèrement plus lent)
 .IPs p
 mixe du bruit aléatoire avec un motif (semi-)régulier
 .RE
@@ -4538,9 +4538,9 @@ automatique.
 .IPs fast=n
 Une valeur de n plus grande accélère le filtre au détriment de l'exactitude.
 La valeur par défaut est n=3.
-Si n est impaire, une trame suivant immédiatement une trame marquée par le flag
+Si n est impair, une trame suivant immédiatement une trame marquée par le flag
 mpeg REPEAT_FIRST_FIELD est supposée progressive, ainsi le filtre ne passera
-son temps sur la vidéo MPEG-2 soft-telecine.
+son temps que sur la vidéo MPEG-2 soft-telecine.
 C'est le seul effet de ce flag si MMX2 ou 3DNow! est disponible.
 Sans MMX2 et 3DNow, si n=0 ou 1, les mêmes calculs seront faits comme pour
 MMX2.
@@ -5403,7 +5403,7 @@ ajuste
 Sélectionne le plus rapide des modes VBR pré-sélectionnés à suivre cette
 option.
 Produit des fichiers de qualité légèrement inférieure au bitrate plus
-importants.
+important.
 .
 .TP
 .B highpassfreq=<fréq>
@@ -5877,7 +5877,7 @@ ou il pourrait y avoir des problèmes si vrc_(min|max)rate est utilisé.
 .
 .TP
 .B vrc_buf_aggressivity
-acuellement inutile
+actuellement inutile
 .
 .TP
 .B vrc_strategy
@@ -6647,7 +6647,7 @@ le PSNR
 .
 .TP
 .B nr=<0\-100000>
-Réduction du  bruit, 0 pour désactivé.
+Réduction du  bruit, 0 signifie désactivé.
 .
 .TP
 .B qns=<0\-3>
@@ -6704,7 +6704,7 @@ Ne fonctionne pas pour le moment.
 .
 Nuppel video est basé sur RTJPEG et LZO.
 Par défaut les trames sont d'abord encodées avec RTJPEG et ensuite avec LZO,
-mais il est possible de désactiver chacune passes, ou les deux.
+mais il est possible de désactiver chaque passe, ou les deux.
 Cela vous permet d'obtenir du i420 brut, du i420 compressé par LZO, du
 RTJPEG, ou le RTJPEG compressé par LZO.
 .br
@@ -6772,7 +6772,7 @@ long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
 paramètre.
 .
 .TP
-.B interlacing
+.B (no)interlacing
 Active la gestion des vidéos entrelacées.
 L'encodage se fera en tenant compte des champs de la vidéo entrelacée.
 .br
@@ -6871,7 +6871,7 @@ La dernière trame-clé est traitée normalement.
 (défaut\ : 0, mode 2passes uniquement)
 .
 .TP
-.B greyscale\ \ 
+.B (no)greyscale
 Indique à XviD de ne pas enregistrer l'information de chroma pour que la
 vidéo produite ne soit qu'en noir & blanc.
 Notez que cela ne changera en rien le temps de compression, cela évitera juste
@@ -6889,7 +6889,7 @@ Les options suivantes ne sont disponibles que dans les dernières versions
 stables 1.0.x de XviD (api4).
 .
 .TP
-.B packed\ 
+.B (no)packed
 Crée un flux de bits pouvant être décodé sans délais.
 .br
 .I ATTENTION\ :
@@ -6941,7 +6941,7 @@ Une mauvaise utilisation de cette option peut produire des vidéos de très
 mauvaise qualité, soyez prévenus\ !
 .
 .TP
-.B qpel\ \ \ 
+.B (no)qpel\ 
 MPEG4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
 Il est néanmoins possible de faire une recherche avec une précision d'un
 quart de pixel, ce qui permet généralement d'obtenir une image plus
@@ -6954,7 +6954,7 @@ de ne garder que celle qui vous paraît la plus fidèle (qui n'est pas
 forcément celle dont le PSNR est le plus élevé).
 .
 .TP
-.B gmc\ \ \ \ 
+.B (no)gmc\ 
 Active la Compensation de Mouvement Globale, ce qui permet à XviD d'engendrer
 des trames spéciales (trames GMC), particulièrement adaptées aux mouvements
 de travelling/\:zoom/\:rotation.
@@ -6962,7 +6962,7 @@ L'efficacité de cette option en terme d'économie de bits est très dépendante
 du type de vidéo source.
 .
 .TP
-.B trellis
+.B (no)trellis
 La quantization trellis est un type d'encodage adaptatif qui permet
 d'économiser des bits en modifiant les coefficients de quantization pour
 augmenter la compressibilité de la vidéo.
@@ -6971,7 +6971,7 @@ que de jouer sur les options VHQ .
 Aussi, dans un contexte d'encodage temps réel, pensez à cette option!
 .
 .TP
-.B cartoon
+.B (no)cartoon
 Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
 à-plats de couleurs que l'on trouve typiquement dans les dessins animés.
 .
@@ -6986,12 +6986,12 @@ Si vous utilisez vos propres matrices de quantization, vous devez
 utiliser la quantification MPEG.
 .
 .TP
-.B chroma_me
+.B (no)chroma_me
 Utilise l'information chroma en plus de la luma pour estimer le mouvement.
 L'efficacité de cette option dépend de la vidéo source.
 .
 .TP
-.B chroma_opt
+.B (no)chroma_opt
 Active un préfiltre d'optimisation chroma qui améliore la qualité
 .I subjective
 de l'image, tout en dégradant sensiblement le PSNR et la vitesse d'encodage.
@@ -6999,7 +6999,7 @@ de l'image, tout en dégradant sensiblement le PSNR et la vitesse d'encodage.
 pouvez désactiver cette option lors d'un encodage en noir et blanc.
 .
 .TP
-.B hq_ac
+.B (no)hq_ac
 Active une meilleure prévision du composant AC.
 .
 .TP
@@ -7090,7 +7090,7 @@ en le distribuant sur toutes les trames suivantes.
 Cette option vous permet de contrôler quelle fraction de cet overflow est
 distribuée à chaque nouvelle trame.
 Une valeur basse permet un contrôle de l'overflow paresseux, où des grosses
-demandes de bitrate sont compensés lentement (ce qui peut faire beaucoup
+demandes de bitrate sont compensées lentement (ce qui peut faire beaucoup
 varier la taille des petites vidéos).
 Une valeur plus haute rendra la re-distribution de bits plus brusque,
 peut-être même trop brusque si vous lui donnez une valeur trop importante,
@@ -7178,7 +7178,7 @@ autres l'afficheront avec un mauvais rapport hauteur/\:largeur.
 Le paramètre aspect peut être donné en ratio ou en nombre flottant.
 .
 .TP
-.B autoaspect
+.B (no)autoaspect
 Même chose que l'option aspect mais calcule automatiquement le rapport
 hauteur/\:largeur, en prenant en compte les ajustements faits par la chaîne de
 filtres
@@ -7247,8 +7247,8 @@ gâche des bits.
 seront insérées que toutes les keyint trames, même s'il vient d'y avoir
 un changement de scène.
 Cela n'est guère recommandé et gâche des bits puisque les changements de
-scène encodés par des trames-P sont aussi volumineuses que les trames-I,
-mais ne remet pas à zéro le "compteur keyint".
+scène encodés par des trames-P sont aussi coûteux en bits que les trames-I,
+mais ne remettent pas à zéro le "compteur keyint".
 .
 .TP
 .B frameref=<1\-15>
@@ -7264,7 +7264,7 @@ frameref.
 nombre de trames-B consécutives entre les trames-I et -P (par défaut\ : 0)
 .
 .TP
-.B deblock | nodeblock
+.B (no)deblock
 Utilise un filtre atténuant l'effet de blocs (deblocking)
 (par défaut\ : activé).
 Étant donné qu'il prend assez peu de temps au regard de l'amélioration
@@ -7282,10 +7282,10 @@ Une valeur positive réduit les artefacts de blocking, mais enlève du détail
 à l'image.
 .br
 Lorsque vous réalisez un encodage destiné à être de bonne qualité, vous
-devriez le diminuer un peu.
+devez le diminuer un peu.
 Par contre, si la vidéo source souffre déjà d'artefacts de blocking
-ou de bruit que vous voudriez atténuer, ou bien si c'est un dessin animé,
-vous devriez l'augmenter un peu.
+ou de bruit que vous voulez atténuer, ou bien si c'est un dessin animé,
+vous devez l'augmenter un peu.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -7293,7 +7293,7 @@ Paramètre beta du filtre de deblocking (par défaut\ : 0).
 Affecte le gradient maximum autorisé entre deux blocs adjacents
 .
 .TP
-.B cabac | nocabac
+.B (no)cabac
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
 Context-Adaptive Binary Arithmetic Coding) (par défaut\ : activé).
 Ralentit un peu l'encodage mais permet d'économiser 10-15% du bitrate.
@@ -7321,7 +7321,7 @@ FIXME: indiquer ce que signifie IDC.
 .
 .TP
 .B qp_constant=<1\-51>
-Défini le quantificateur à utiliser.
+Définit le quantificateur à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
@@ -7347,10 +7347,9 @@ Différence de quantification maximale autorisée d'une trame à l'autre.
 .
 .TP
 .B rc_buffer_size=<valeur>
-taille du tampon ratecontrol (par défaut\ : la taille nécessaire pour 1
+taille du tampon ratecontrol (tampon permettant de distribuer intelligemment
+les bits aux trames) (par défaut\ : la taille nécessaire pour 1
 seconde au débit binaire (bitrate) que vous avez défini).
-.br
-FIXME: expliquer ce que veut dire ratecontrol
 .
 .TP
 .B rc_init_buffer=<value>
@@ -7411,7 +7410,7 @@ NOTE\ :
 x264 gérant le mode 3 passes depuis peu de temps, nous
 encourageons les utilisateurs à partager avec nous leurs expériences et
 leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
-de produisant des images de qualité.
+produisant des images de qualité.
 .REss
 .
 .TP
@@ -7429,7 +7428,7 @@ d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
 .TP
-.B fullinter | nofullinter
+.B (no)fullinter
 Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16-4x4)
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
@@ -7476,7 +7475,7 @@ statistiques sur chaque trame
 .REss
 .
 .TP
-.B psnr | nopsnr
+.B (no)psnr
 Affiche les statistiques de rapport signal/bruit.
 .br
 .I NOTE\ :
