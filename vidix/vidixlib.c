@@ -25,6 +25,7 @@
 #include <dirent.h>
 
 #include "vidixlib.h"
+#include "../bswap.h"
 
 static char drv_name[FILENAME_MAX];
 
@@ -227,13 +228,27 @@ int  vdlGetCapability(VDL_HANDLE handle, vidix_capability_t *cap)
   return t_vdl(handle)->get_caps(cap);
 }
 
+#define MPLAYER_IMGFMT_RGB (('R'<<24)|('G'<<16)|('B'<<8))
+#define MPLAYER_IMGFMT_BGR (('B'<<24)|('G'<<16)|('R'<<8))
+#define MPLAYER_IMGFMT_RGB_MASK 0xFFFFFF00
+
+static uint32_t normilize_fourcc(uint32_t fourcc)
+{
+  if((fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_RGB|0) ||
+     (fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_BGR|0))
+	return bswap_32(fourcc);
+  else  return fourcc;
+}
+
 int  vdlQueryFourcc(VDL_HANDLE handle,vidix_fourcc_t *f)
 {
+  f->fourcc = normilize_fourcc(f->fourcc);
   return t_vdl(handle)->query_fourcc(f);
 }
 
 int  vdlConfigPlayback(VDL_HANDLE handle,vidix_playback_t *p)
 {
+  p->fourcc = normilize_fourcc(p->fourcc);
   return t_vdl(handle)->config_playback(p);
 }
 
