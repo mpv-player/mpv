@@ -156,6 +156,7 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
 	    }
 	}
         // continue...
+	free(ao);
 	++ao_list;
 	if(!(ao_list[0])) return NULL; // do NOT fallback to others
       }

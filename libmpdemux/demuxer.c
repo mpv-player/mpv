@@ -703,10 +703,11 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       if(id==formtypeAVI){ 
         mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"AVI");
         file_format=DEMUXER_TYPE_AVI;
-      } else {
-        free_demuxer(demuxer);
-        demuxer = NULL;
       }	
+    }
+    if (file_format==DEMUXER_TYPE_UNKNOWN) {
+      free_demuxer(demuxer);
+      demuxer = NULL;
     }
   }
 }
