@@ -1823,7 +1823,7 @@ VESA framebuffer doesn't support mode changing.
 .B \-fbmodeconfig <filename> (\-vo fbdev only)
 Override framebuffer mode configuration file (default: /etc/\:fb.modes).
 .TP
-.B \-forcexv (\-vo SDL only)
+.B \-forcexv (\-vo sdl only)
 Force using XVideo through the sdl video output driver.
 .TP
 .B \-fs (also see \-zoom)
@@ -1969,7 +1969,7 @@ Do not keep window aspect ratio when resizing windows.
 Only works with the x11, xv, xmga, xvidix, directx video output drivers.
 Furthermore under X11 your window manager has to honor window aspect hints.
 .TP
-.B \-noxv (\-vo SDL only)
+.B \-noxv (\-vo sdl only)
 Disables using XVideo through the sdl video output driver.
 .TP
 .B \-ontop
@@ -2062,7 +2062,7 @@ Display a list of all \-zr* options, their default values and a
 cinerama mode example.
 .TP
 .B \-zrnorm <norm> (\-vo zr only)
-Specify the TV norm as PAL orNTSC (default: no change).
+Specify the TV norm as PAL or NTSC (default: no change).
 .TP
 .B \-zrquality <1\-20> (\-vo zr only)
 A number from 1 (best) to 20 (worst) representing the JPEG encoding quality.
