@@ -510,6 +510,12 @@ d_dvdsub=demuxer->sub;
 sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
+  if(!sh_video)
+  {
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Video stream is mandatory!\n"); 
+	mencoder_exit(1,NULL);
+  }
+
   if(!video_read_properties(sh_video)){
       printf(MSGTR_CannotReadVideoProperties);
       mencoder_exit(1,NULL);
