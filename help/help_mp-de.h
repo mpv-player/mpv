@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <spambouncer@skraemer.de>
 
-// In synch with rev 1.119
+// In synch with rev 1.120
 
 // ========================= MPlayer help ===========================
 
@@ -367,7 +367,7 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
-#define MSGTR_NeedAfVolume "Mixer: Dieses ao benötigt -af volume zum Ändern der Lautstärke\n"
+#define MSGTR_NeedAfVolume "Mixer: Der Audioausgabetreiber benötigt \"-af volume\" zum Ändern der Lautstärke.\n"
 
 // ====================== GUI messages/buttons ========================
 
