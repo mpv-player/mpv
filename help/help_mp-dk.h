@@ -1,5 +1,5 @@
 // Translated by:  Anders Rune Jensen <anders@gnulinux.dk>
-// Sync'ed with help_mp-en.h 1.93.
+// Sync'ed with help_mp-en.h 1.97.
 
 // ========================= MPlayer help ===========================
 
@@ -23,16 +23,16 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  afspiller DVD titel fra et drev i stedet for en fil\n"
-" -alang/-slang   vælg DVD lyd/undertekst sprog (vha. landekode på 2 tegn)\n"
+" -alang/-slang   vælg DVD lyd / undertekst sprog (vha. landekode på 2 tegn)\n"
 #endif
-" -ss <timepos>   søger til en given position (sekunder eller hh:mm:ss)\n"
+" -ss <timepos>   søger til en given position (sekund eller hh:mm:ss)\n"
 " -nosound        afspiller uden lyd\n"
 " -fs -vm -zoom   type afspilning i fuldskærm (alm. fuldskærm, video mode, software skalering)\n"
 " -x <x> -y <y>   skaler billede til <x> * <y> opløsning [hvis -vo driveren understøtter dette!]\n"
 " -sub <file>     specificer undertekst-fil (se også -subfps, -subdelay)\n"
 " -playlist <file> specificer afspilningsliste\n"
 " -vid x -aid y   afspil film (x) og lyd (y)\n"
-" -fps x -srate y ændre filmens (x fps) og lydens (y Hz)\n"
+" -fps x -srate y tving filmen til x billeder per sekund og lyden til y Hz\n"
 " -pp <quality>   slå efterprocesseringsfilter til (bedre billedkvalitet) (se manualen for flere detaljer)\n"
 " -framedrop      slå billede-skip til (kan hjælpe langsomme maskiner)\n"
 "\n"
@@ -70,20 +70,20 @@ static char help_text[]=
 #define MSGTR_BuiltinCodecsConf "Benytter indbyggede standardværdier for codecs.conf\n"
 #define MSGTR_CantLoadFont "Kan ikke indlæse skrifttypen:  %s\n"
 #define MSGTR_CantLoadSub "Kan ikke indlæse undertekstfilen: %s\n"
-#define MSGTR_ErrorDVDkey "Fejl under afvikling af DVDNØGLE.\n"
+#define MSGTR_ErrorDVDkey "Fejl under afvikling af DVD nøgle.\n"
 #define MSGTR_CmdlineDVDkey "DVD kommandolinjenøgle er gemt til dekryptering.\n"
 #define MSGTR_DVDauthOk "DVD auth sekvens synes af være OK.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: kan ikke finde den valge fil eller adresse!\n"
 #define MSGTR_CantOpenDumpfile "Kan ikke åbne dump filen!!!\n"
 #define MSGTR_CoreDumped "kernen dumpede :)\n"
 #define MSGTR_FPSnotspecified "FPS ikke specificeret (eller ugyldig) i headeren! Brug -fps !\n"
-#define MSGTR_TryForceAudioFmtStr "Prøver at tvinge et lyd-codec driverfamilie %s ...\n"
-#define MSGTR_CantFindAfmtFallback "Kan ikke finde lyd codec for driver familien, falder tilbage på en anden driver.\n"
+#define MSGTR_TryForceAudioFmtStr "Prøver at tvinge en lyd-codec driverfamilie %s ...\n"
+#define MSGTR_CantFindAfmtFallback "Kan ikke finde lyd-codec for driverfamilien, falder tilbage på en anden driver.\n"
 #define MSGTR_CantFindAudioCodec "Kan ikke finde codec til lydformatet 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prøv at opgradere %s fra etc/codecs.conf\n*** Hvis dette ikke hjælper, så læs filen DOCS/codecs.html!\n"
-#define MSGTR_CouldntInitAudioCodec "Kunne ikke initialisere lydcodec! -> ingen lyd\n"
-#define MSGTR_TryForceVideoFmtStr "Prøver at tvinge en videocodec driver familie %s ...\n"
-#define MSGTR_CantFindVideoCodec "Kan ikke finde videocodec til formatet 0x%X !\n"
+#define MSGTR_CouldntInitAudioCodec "Kunne ikke initialisere lyd-codec! -> ingen lyd\n"
+#define MSGTR_TryForceVideoFmtStr "Prøver at tvinge en video-codec driver familie %s ...\n"
+#define MSGTR_CantFindVideoCodec "Kan ikke finde video-codec til formatet 0x%X !\n"
 #define MSGTR_VOincompCodec "Desværre, den valgte video-driverenhed er ikke kompatibel med dette codec.\n"
 #define MSGTR_CannotInitVO "FATAL: Kan ikke initialisere videodriveren!\n"
 #define MSGTR_CannotInitAO "Kunne ikke åbne/initialisere lydkortet -> INGEN LYD\n"
@@ -99,7 +99,7 @@ static char help_text[]=
 "  Du kan også ekperimentere med -autosync 30 eller andre værdier.\n"\
 "- Langsom video output. Prøv en anden -vo driver (for liste: -vo help) eller prøv\n"\
 "  med -framedrop !  Læs DOCS/video.html for video tuning/speedup tips.\n"\
-"- Langsom CPU. Prøv ikke at afspille en stor dvd/divx på en langsom CPU! Prøv -hardframedrop\n"\
+"- Langsom CPU. Prøv ikke at afspille en dvd/divx i høj opløsning på en langsom CPU! Prøv -hardframedrop\n"\
 "- Ødelagt fil. Prøv kombinationer af følgende: -nobps  -ni  -mc 0  -forceidx\n"\
 "- For afspilning fra langsomt medie (nfs/smb, dvd, vcd osv.) prøv -cache 8192\n"\
 "- Bruger du -cache til at afspille en non-interleaved AVI fil? Prøv i stedet -nocache.\n"\
@@ -115,18 +115,18 @@ static char help_text[]=
 #define MSGTR_AvailableVideoOutputPlugins "Tilgængelige videoudvidelser:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Tilgængelige videodrivere:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Tilgængelige lyddrivere:\n"
-#define MSGTR_AvailableAudioCodecs "Tilgængelige lydcodecs:\n"
-#define MSGTR_AvailableVideoCodecs "Tilgængelige videocodecs:\n"
+#define MSGTR_AvailableAudioCodecs "Tilgængelige lyd-codecs:\n"
+#define MSGTR_AvailableVideoCodecs "Tilgængelige video-codecs:\n"
 #define MSGTR_AvailableAudioFm "\nTilgængelige (prækompilerede) lyd-codec familier/drivere:\n"
 #define MSGTR_AvailableVideoFm "\nTilgængelige (prækompilerede) video-codec familier/drivere:\n"
 #define MSGTR_AvailableFsType "Tilgængelige fuldskærms modes:\n"
 #define MSGTR_UsingRTCTiming "Benytter Linux's hardware RTC timing (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: kan ikke læse egenskaber\n"
 #define MSGTR_NoStreamFound "Ingen stream fundet\n"
-#define MSGTR_InitializingAudioCodec "Initialiserer lydcodec...\n"
+#define MSGTR_InitializingAudioCodec "Initialiserer lyd-codec...\n"
 #define MSGTR_ErrorInitializingVODevice "Fejl under initialisering/åbning af den valgte video (-vo) enhed!\n"
-#define MSGTR_ForcedVideoCodec "Tvunget videocodec: %s\n"
-#define MSGTR_ForcedAudioCodec "Tvunget lydcodec: %s\n"
+#define MSGTR_ForcedVideoCodec "Tvunget video-codec: %s\n"
+#define MSGTR_ForcedAudioCodec "Tvunget lyd-codec: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Beskrivelse: %s\nAO: forfatter: %s\n"
 #define MSGTR_AOComment "AO: Kommentar: %s\n"
 #define MSGTR_Video_NoVideo "Video: ingen video!!!\n"
@@ -162,7 +162,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenDemuxer "Kan ikke åbne demuxer\n"
 #define MSGTR_NoAudioEncoderSelected "\nIngen lydenkoder (-oac) valgt! Vælg en eller brug -nosound. Brug -oac for hjælp !\n"
 #define MSGTR_NoVideoEncoderSelected "\nIngen videoenkoder (-ovc) valgt! Vælg en eller brug, brug -ovc for hjælp !\n"
-#define MSGTR_InitializingAudioCodec "Initialiserer lydcodec...\n"
+#define MSGTR_InitializingAudioCodec "Initialiserer lyd-codec...\n"
 #define MSGTR_CannotOpenOutputFile "Kan ikke skrive til filen '%s'\n"
 #define MSGTR_EncoderOpenFailed "Kunne ikke åbne enkoderen\n"
 #define MSGTR_ForcingOutputFourcc "Tvinger udgang fourcc til %x [%.4s]\n"
@@ -302,7 +302,7 @@ static char help_text[]=
 #define MSGTR_CantCloseCodec "kunne ikke afslutte codec\n"
 
 #define MSGTR_MissingDLLcodec "FEJL: Kunne ikke åbne DirectShow codec: %s\n"
-#define MSGTR_ACMiniterror "Kunne ikke loade/initialisere Win32/ACM LYD codec (manglende DLL fil?)\n"
+#define MSGTR_ACMiniterror "Kunne ikke loade/initialisere Win32/ACM lyd-codec (manglende DLL fil?)\n"
 #define MSGTR_MissingLAVCcodec "Kunne ikke finde codec '%s' i libavcodec...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF under søgning efter sekvensheader\n"
@@ -319,8 +319,8 @@ static char help_text[]=
 #define MSGTR_UsingExternalPP "[PP] Benytter ekstern efterprocesseringsfilter, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] Benytter codec's efterprocessering, max q = %d\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Video egenskab '%s' ikke understøttet af den valgte vo & vd! \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Anmodede videocodec familie [%s] (vfm=%s) ikke tilgængelig (aktiver før kompilering!)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Anmodede lydcodec familie [%s] (afm=%s) ikke tilgængelig (aktiver før kompilering!)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Anmodede video-codec familie [%s] (vfm=%s) ikke tilgængelig (aktiver før kompilering!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Anmodede lyd-codec familie [%s] (afm=%s) ikke tilgængelig (aktiver før kompilering!)\n"
 #define MSGTR_OpeningVideoDecoder "Åbner videodekoder: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Åbner audiodekoder: [%s] %s\n"
 #define MSGTR_UninitVideoStr "deinit video: %s  \n"
@@ -525,8 +525,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoQuality "Auto kvalitet: "
 #define MSGTR_PREFERENCES_NI "Benyt non-interleaved AVI parser"
 #define MSGTR_PREFERENCES_IDX "Genopbyg index tabel, hvis nødvendig"
-#define MSGTR_PREFERENCES_VideoCodecFamily "Video codec familie:"
-#define MSGTR_PREFERENCES_AudioCodecFamily "Lydcodec familie:"
+#define MSGTR_PREFERENCES_VideoCodecFamily "Video-codec familie:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Lyd-codec familie:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD level"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Undertekst"
 #define MSGTR_PREFERENCES_FRAME_Font "Skriftype"
@@ -562,13 +562,14 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Koreansk tegnsæt (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai tegnsæt (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavisk/Central Europæisk Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Ingen autoskalering"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional med film bredde"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional med film højde"
 #define MSGTR_PREFERENCES_FontPropDiagonal "Proportional med film diagonalt"
 #define MSGTR_PREFERENCES_FontEncoding "Enkodning:"
 #define MSGTR_PREFERENCES_FontBlur "Uskarp:"
-#define MSGTR_PREFERENCES_FontOutLine "Outline:"
+#define MSGTR_PREFERENCES_FontOutLine "Omrids:"
 #define MSGTR_PREFERENCES_FontTextScale "Text skalering:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD skalering:"
 #define MSGTR_PREFERENCES_Cache "Cache på/af"
