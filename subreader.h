@@ -19,6 +19,7 @@ extern int sub_num;         // number of subtitle structs
 #define SUB_AQTITLE   9
 #define SUB_SUBVIEWER2 10
 #define SUB_SUBRIP09 11
+#define SUB_JACOSUB  12
 
 // One of the SUB_* constant above
 extern int sub_format;

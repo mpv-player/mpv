@@ -603,6 +603,196 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
+{
+    char commands[LINE_LEN], line1[LINE_LEN], line2[LINE_LEN],
+	text[LINE_LEN], *p, *q;
+    int a1, a2, a3, a4, b1, b2, b3, b4, comment = 0;
+    unsigned short directive = 0;
+
+    bzero(current, sizeof(subtitle));
+    bzero(commands, sizeof(char) * LINE_LEN);
+    bzero(line1, sizeof(char) * LINE_LEN);
+    bzero(line2, sizeof(char) * LINE_LEN);
+    while (!current->text[0]) {
+	if (!fgets(line1, LINE_LEN, fd))
+	    return NULL;
+	if (sscanf
+	    (line1, "%d:%d:%d.%d %d:%d:%d.%d %[^\n\r]", &a1, &a2, &a3, &a4,
+	     &b1, &b2, &b3, &b4, line2) < 9)
+	    continue;
+	//a Jacosub script *may* have some commands before the text, so let's recognize them 
+	switch (toupper(line2[0])) {
+	case 'C':
+	    switch (toupper(line2[1])) {
+	    case 'F':
+	    case 'P':
+	    case 'S':
+	    case 'B':
+		if (isdigit(line2[2]))
+		    directive = 1;
+	    }
+	    break;
+	case 'D':
+	    if ((line2[1] == ' ') || isdigit(line2[1]))
+		directive = 1;
+	    // special case
+	    if (toupper(line2[1]) == 'C')
+		directive = 1;
+	    break;
+	case 'E':
+	    switch (toupper(line2[1])) {
+	    case 'D':
+	    case 'P':
+		if (isdigit(line2[2]))
+		    directive = 1;
+		break;
+	    case 'I':
+		if ((toupper(line2[2]) == 'O') && (isdigit(line2[3])))
+		    directive = 1;
+		break;
+	    case 'R':
+		if ((toupper(line2[2]) == 'D') && (isdigit(line2[3])))
+		    directive = 1;
+		break;
+	    case 'W':
+		if ((toupper(line2[2]) == 'L')
+		    || (toupper(line2[2]) == 'R'))
+		    directive = 1;
+		break;
+	    }
+	    break;
+	case 'F':
+	    if (isdigit(line2[1]))
+		directive = 1;
+	    else
+		switch (toupper(line2[1])) {
+		case 'O':
+		    if (isdigit(line2[2]))
+			directive = 1;
+		    break;
+		case 'S':
+		    directive = 1;
+		}
+	    break;
+	case 'G':
+	    if ((line2[1] == 'G') && (isdigit(line2[2])))
+		directive = 2;
+	    break;
+	case 'H':
+	    switch (toupper(line2[1])) {
+	    case 'L':
+	    case 'R':
+		if (isdigit(line2[2]))
+		    directive = 1;
+	    }
+	    break;
+	case 'J':
+	    switch (toupper(line2[1])) {
+	    case 'B':
+		if (toupper(line2[2]) == 'C')
+		    directive = 1;
+		break;
+	    case 'C':
+	    case 'L':
+	    case 'R':
+		directive = 1;
+		break;
+	    case 'F':
+		if ((line2[2] == ':') && (toupper(line2[3]) == 'L'))
+		    directive = 1;
+	    }
+	    break;
+	case 'R':
+	    if (((toupper(line2[1]) == 'D') && (toupper(line2[2]) == 'B'))
+		|| ((toupper(line2[1]) == 'D')
+		    && (toupper(line2[2]) == 'C'))
+		|| ((toupper(line2[1]) == 'L')
+		    && (toupper(line2[2]) == 'B')))
+		directive = 2;
+	    break;
+	case 'V':
+	    switch (toupper(line2[1])) {
+	    case 'A':
+	    case 'B':
+	    case 'M':
+	    case 'T':
+	    case 'U':
+		directive = 1;
+		break;
+	    case 'L':
+	    case 'P':
+		if (isdigit(line2[2]))
+		    directive = 1;
+	    }
+	    break;
+	case '[':
+	    directive = 1;
+	    break;
+	case '~':
+	    directive = 2;
+	}
+	if (directive == 1) {
+	    strcpy(line1, line2);
+	    sscanf(line1, "%s %[^\n\r]", commands, line2);
+	} else if (directive == 2) {
+	    continue;
+	}
+	current->start = a1 * 360000 + a2 * 6000 + a3 * 100 + a4;
+	current->end = b1 * 360000 + b2 * 6000 + b3 * 100 + b4;
+	current->lines = 0;
+
+	q = text;
+	p = line2;
+	while ((*p) == ' ')
+	    p++;
+
+	for (; (!eol(*p)) && (current->lines < SUB_MAX_TEXT); p++) {
+	    switch (*p) {
+	    case '{':
+		comment++;
+		break;
+	    case '}':
+		comment--;
+		//the next to get rid of a blank after the comment
+		if ((*(p + 1)) == ' ')
+		    p++;
+		break;
+	    case '\\':
+		if (*(p + 1) == 'n') {
+		    *q = '\0';
+		    q = text;
+		    current->text[current->lines++] = strdup(text);
+		    p++;
+		    break;
+		} else if (toupper(*(p + 1)) == 'C') {
+		    p++;
+		    p++;
+		    break;
+		} else if ((toupper(*(p + 1)) == 'I')
+			   || (toupper(*(p + 1)) == 'B')
+			   || (toupper(*(p + 1)) == 'N')) {
+		    p++;
+		    break;
+		} else if (eol(*(p + 1))) {
+		    if (!fgets(line1, LINE_LEN, fd))
+			return NULL;
+		    trail_space(line1);
+		    p = line1;
+		}
+	    default:
+		if (!comment) {
+		    *q = *p;
+		    q++;
+		}
+	    }
+	}
+	*q = '\0';
+	current->text[current->lines] = strdup(text);
+    }
+    current->lines++;
+    return current;
+}
 
 int sub_autodetect (FILE *fd) {
     char line[LINE_LEN+1];
@@ -626,6 +816,8 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=1;return SUB_SUBVIEWER2;}
 	if (strstr (line, "<SAMI>"))
 		{sub_uses_time=1; return SUB_SAMI;}
+	if (sscanf(line, "%d:%d:%d.%d %d:%d:%d.%d", &i, &i, &i, &i, &i, &i, &i, &i) == 8)
+		{sub_uses_time = 1; return SUB_JACOSUB;}
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
 		{sub_uses_time=1;return SUB_VPLAYER;}
 	if (sscanf (line, "%d:%d:%d ",     &i, &i, &i )==3)
@@ -777,8 +969,8 @@ subtitle* sub_read_file (char *filename, float fps) {
     int n_max;
     subtitle *first;
     char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
-		        "rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9" };
-    subtitle * (*func[])(FILE *fd,subtitle *dest)=
+			"rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9", "jacosub" };
+    subtitle * (*func[])(FILE *fd,subtitle *dest)= 
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
@@ -791,8 +983,9 @@ subtitle* sub_read_file (char *filename, float fps) {
 	    sub_read_line_mpsub,
 	    sub_read_line_aqt,
 	    sub_read_line_subviewer2,
-	    sub_read_line_subrip09
-
+	    sub_read_line_subrip09,
+	    sub_read_line_jacosub
+	    
     };
     if(filename==NULL) return NULL; //qnx segfault
     fd=fopen (filename, "r"); if (!fd) return NULL;
@@ -884,7 +1077,9 @@ char * sub_filename(char* path,  char * fname )
     ".ssa",
     ".SSA",
     ".aqt",
-    ".AQT"};
+    ".AQT",
+    ".js",
+    ".JS" };
 
 
  if ( fname == NULL ) return NULL;
