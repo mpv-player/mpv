@@ -74,7 +74,7 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! trying 'type=%s'...\n", mf_type);
   }
 
-  mf=open_mf(demuxer->stream->url);
+  mf=open_mf(demuxer->stream->url + 5);
   if(!mf) return NULL;
   mf->curr_frame=0;
 
