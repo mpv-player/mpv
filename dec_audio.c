@@ -52,6 +52,7 @@ int fakemono=0;
 
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_AudioDec.h"
+static void* ds_adec=NULL;
 #endif
 
 #ifdef HAVE_OGGVORBIS
@@ -231,7 +232,7 @@ case AFM_DSHOW:
 #else
   // Win32 DShow audio codec:
 //  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
-  if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)){
+  if(!(ds_adec=DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf))){
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_audio->codec->dll);
     driver=0;
   } else {
@@ -977,7 +978,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
       case AFM_DSHOW: // DirectShow
       { int size_in=0;
         int size_out=0;
-        int srcsize=DS_AudioDecoder_GetSrcSize(maxlen);
+        int srcsize=DS_AudioDecoder_GetSrcSize(ds_adec, maxlen);
         mp_msg(MSGT_DECAUDIO,MSGL_DBG3,"DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,maxlen);
         if(srcsize>sh_audio->a_in_buffer_size) srcsize=sh_audio->a_in_buffer_size; // !!!!!!
         if(sh_audio->a_in_buffer_len<srcsize){
@@ -985,7 +986,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
             demux_read_data(sh_audio->ds,&sh_audio->a_in_buffer[sh_audio->a_in_buffer_len],
             srcsize-sh_audio->a_in_buffer_len);
         }
-        DS_AudioDecoder_Convert(sh_audio->a_in_buffer,sh_audio->a_in_buffer_len,
+        DS_AudioDecoder_Convert(ds_adec, sh_audio->a_in_buffer,sh_audio->a_in_buffer_len,
             buf,maxlen, &size_in,&size_out);
         mp_dbg(MSGT_DECAUDIO,MSGL_DBG2,"DShow: audio %d -> %d converted  (in_buf_len=%d of %d)  %d\n",size_in,size_out,sh_audio->a_in_buffer_len,sh_audio->a_in_buffer_size,ds_tell_pts(sh_audio->ds));
         if(size_in>=sh_audio->a_in_buffer_len){

@@ -57,6 +57,7 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 int divx_quality=0;
 
 #ifdef USE_DIRECTSHOW
+static void* ds_vdec=NULL;
 #ifdef NEW_DSHOW
 //#include "loader/dshow/DS_VideoDecoder.h"
 //static DS_VideoDecoder* ds_vdec=NULL;
@@ -65,7 +66,6 @@ typedef struct _CodecInfo
     char* dll;
     GUID* guid;
 }CodecInfo;
-static void* ds_vdec=NULL;
 #else
 #include "loader/DirectShow/DS_VideoDec.h"
 #endif
@@ -199,11 +199,7 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW: {
    if(quality<0 || quality>4) quality=4;
-#ifdef NEW_DSHOW
    DS_VideoDecoder_SetValue(ds_vdec,"Quality",quality);
-#else
-   DS_SetValue_DivX("Quality",quality);
-#endif
   }
   break;
 #endif
@@ -239,11 +235,7 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 int set_video_colors(sh_video_t *sh_video,char *item,int value){
 #ifdef USE_DIRECTSHOW
     if(sh_video->codec->driver==VFM_DSHOW){
-#ifdef NEW_DSHOW
 	DS_VideoDecoder_SetValue(ds_vdec,item,value);
-#else
-	DS_SetValue_DivX(item,value);
-#endif
 	return 1;
     }
 #endif
@@ -306,11 +298,7 @@ void uninit_video(sh_video_t *sh_video){
 #endif
 #ifdef USE_DIRECTSHOW
     case VFM_DSHOW: // Win32/DirectShow
-#ifdef NEW_DSHOW
 	if(ds_vdec){ DS_VideoDecoder_Destroy(ds_vdec); ds_vdec=NULL; }
-#else
-	DS_VideoDecoder_Close();
-#endif
 	break;
 #endif
     case VFM_MPEG:
@@ -373,7 +361,7 @@ switch(sh_video->codec->driver){
    ci.guid=&sh_video->codec->guid;
    if(!(ds_vdec=DS_VideoDecoder_Create(&ci,sh_video->bih, 0, 0))){
 #else
-   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
+   if(!(ds_vdec=DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0))){
 #endif
 //   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_video->codec->dll);
@@ -387,38 +375,22 @@ switch(sh_video->codec->driver){
    case IMGFMT_YUY2:
    case IMGFMT_UYVY:
      bpp=16;
-#ifdef NEW_DSHOW
      DS_VideoDecoder_SetDestFmt(ds_vdec,16,out_fmt);break;        // packed YUV
-#else
-     DS_VideoDecoder_SetDestFmt(16,out_fmt);break;        // packed YUV
-#endif
    case IMGFMT_YV12:
    case IMGFMT_I420:
    case IMGFMT_IYUV:
      bpp=12;
-#ifdef NEW_DSHOW
      DS_VideoDecoder_SetDestFmt(ds_vdec,12,out_fmt);break;        // planar YUV
-#else
-     DS_VideoDecoder_SetDestFmt(12,out_fmt);break;        // planar YUV
-#endif
    default:
      bpp=((out_fmt&255)+7)&(~7);
-#ifdef NEW_DSHOW
      DS_VideoDecoder_SetDestFmt(ds_vdec,out_fmt&255,0);           // RGB/BGR
-#else
-     DS_VideoDecoder_SetDestFmt(out_fmt&255,0);           // RGB/BGR
-#endif
    }
 
    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
 
    DS_SetAttr_DivX("Quality",divx_quality);
 
-#ifdef NEW_DSHOW
    DS_VideoDecoder_StartInternal(ds_vdec);
-#else
-   DS_VideoDecoder_Start();
-#endif
 //   printf("DivX setting result = %d\n", DS_SetAttr_DivX("Quality",divx_quality) );
 //   printf("DivX setting result = %d\n", DS_SetValue_DivX("Brightness",60) );
    
@@ -673,11 +645,7 @@ switch(sh_video->codec->driver){
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW: {        // W32/DirectShow
     if(drop_frame<2)
-#ifdef NEW_DSHOW
 	DS_VideoDecoder_DecodeInternal(ds_vdec, start, in_size, 0, drop_frame ? 0 : sh_video->our_out_buffer);
-#else
-	DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
-#endif
     if(!drop_frame && sh_video->our_out_buffer) blit_frame=3;
     break;
   }
