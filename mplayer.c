@@ -186,6 +186,7 @@ int osd_level=2;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
 int has_audio=1;
+int loop_times=-1;
 
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
@@ -1848,6 +1849,25 @@ if(auto_quality>0){
      seek_to_sec = NULL;
   }
   
+  /* Looping. */
+  if(eof==5 && loop_times>-1) {
+
+    if(loop_times!=0) {
+      
+      loop_times--;
+      
+      if(loop_times==0)
+        loop_times=-1;
+      
+    }
+    
+    eof=0;
+    abs_seek_pos=1;
+
+    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = 0\n", loop_times);
+    
+  }
+
 if(rel_seek_secs || abs_seek_pos){
   current_module="seek";
   if(demux_seek(demuxer,rel_seek_secs,abs_seek_pos)){
