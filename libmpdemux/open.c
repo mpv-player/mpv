@@ -634,21 +634,48 @@ read_next:
 	    // process!
     	    d->packs_left = d->dsi_pack.dsi_gi.vobu_ea;
 	    mp_msg(MSGT_DVD,MSGL_DBG2, "Found NAVI packet! lba=0x%X  len=%d  \n",d->cur_pack,d->packs_left);
+	    //navPrint_DSI(&d->dsi_pack);
+	    mp_msg(MSGT_DVD,MSGL_DBG3,"\r### CELL %d: Navi: %d/%d  IFO: %d/%d   \n",d->cur_cell,
+		d->dsi_pack.dsi_gi.vobu_c_idn,d->dsi_pack.dsi_gi.vobu_vob_idn,
+		d->cur_pgc->cell_position[d->cur_cell].cell_nr,
+		d->cur_pgc->cell_position[d->cur_cell].vob_id_nr);
+
 	    if(d->angle_seek){
-		int skip=d->dsi_pack.sml_agli.data[dvd_angle].address;
-		if(skip) d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+skip;
-		d->angle_seek=0;
-		mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced! skip=%d  new_lba=0x%X  \n",skip,d->cur_pack);
+		int i,skip=0;
+		for(i=0;i<9;i++)	// check if all values zero:
+		    if((skip=d->dsi_pack.sml_agli.data[i].address)!=0) break;
+		if(skip){
+		    // sml_agli table has valid data (at least one non-zero):
+		    d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
+			d->dsi_pack.sml_agli.data[dvd_angle].address;
+		    d->angle_seek=0;
+		    mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced using sml_agli map!  new_lba=0x%X  \n",d->cur_pack);
+		} else {
+		    // check if we're in the right cell, jump otherwise:
+		    if( (d->dsi_pack.dsi_gi.vobu_c_idn==d->cur_pgc->cell_position[d->cur_cell].cell_nr) &&
+		        (d->dsi_pack.dsi_gi.vobu_vob_idn==d->cur_pgc->cell_position[d->cur_cell].vob_id_nr) ){
+			d->angle_seek=0;
+			mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced by cell/vob IDN search!  \n");
+		    } else {
+			// wrong angle, skip this vobu:
+			d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
+			    d->dsi_pack.dsi_gi.vobu_ea;
+			d->angle_seek=2; // DEBUG
+		    }
+		}
 	    }
 	}
 	++d->cur_pack;
 	goto read_next;
     }
-
+    
     ++d->cur_pack;
     if(d->packs_left>=0) --d->packs_left;
     
-    if(d->angle_seek) goto read_next; // searching for Navi packet
+    if(d->angle_seek){
+	if(d->angle_seek==2) mp_msg(MSGT_DVD,MSGL_V, "!!! warning! reading packet while angle_seek !!!\n");
+	goto read_next; // searching for Navi packet
+    }
 
     return d->cur_pack-1;
 }
