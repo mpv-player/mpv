@@ -1478,7 +1478,7 @@ Notes:
   The performace loss is small for most cases. On a bare-minimum encode,
   <option>pullup</option> causes <application>MEncoder</application> to
   be 50% slower. Adding sound processing and advanced <option>lavcopts
-  </option> overshadows that difference, bringing the performance of
+  </option> overshadows that difference, bringing the performance
   decrease of using <option>pullup</option> down to 2%.
   </para>
   </formalpara>
