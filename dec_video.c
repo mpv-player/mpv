@@ -59,13 +59,6 @@ int divx_quality=0;
 #ifdef USE_DIRECTSHOW
 static void* ds_vdec=NULL;
 #ifdef NEW_DSHOW
-//#include "loader/dshow/DS_VideoDecoder.h"
-//static DS_VideoDecoder* ds_vdec=NULL;
-typedef struct _CodecInfo
-{
-    char* dll;
-    GUID* guid;
-}CodecInfo;
 #else
 #include "loader/DirectShow/DS_VideoDec.h"
 #endif
@@ -355,14 +348,7 @@ switch(sh_video->codec->driver){
    return 0;
 #else
    int bpp;
-#ifdef NEW_DSHOW
-   CodecInfo ci;
-   ci.dll=sh_video->codec->dll;
-   ci.guid=&sh_video->codec->guid;
-   if(!(ds_vdec=DS_VideoDecoder_Create(&ci,sh_video->bih, 0, 0))){
-#else
-   if(!(ds_vdec=DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0))){
-#endif
+   if(!(ds_vdec=DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, 0))){
 //   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_video->codec->dll);
         mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
