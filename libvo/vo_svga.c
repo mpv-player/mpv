@@ -20,7 +20,7 @@ Wrangings:
 TODO:
  - let choose_best_mode take aspect into account
  - set palette from mpi->palette or mpi->plane[1]
- - let OSD draw in black bars - need some OSD changes
+ - make faster OSD black bars clear - need some OSD changes
  - Make nicer CONFIG parsing
  - change video mode logical width to match img->stride[0] - for HW only 
 */
@@ -63,6 +63,8 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 static uint32_t get_image(mp_image_t *mpi);
 
 #define MAXPAGES 16
+#define PAGE_EMPTY 0
+#define PAGE_BUSY 1
 
 #define CAP_ACCEL_CLEAR 8
 #define CAP_ACCEL_PUTIMAGE 4
@@ -75,7 +77,8 @@ static int squarepix;
 static int force_vm=0;
 static int force_native=0;
 static int sync_flip=0;
-static int cpage=0, max_pages;
+static int blackbar_osd=0;
+static int cpage,max_pages,old_page;
 
 static vga_modeinfo * modeinfo;
 static int mode_stride; //keep it in case of vga_setlogicalwidth
@@ -84,12 +87,13 @@ static int mode_bpp;
 static int mode_capabilities;
 
 static int image_width,image_height; // used by OSD
-static uint32_t x_pos, y_pos;
+static int x_pos, y_pos;
 
 static struct {
   int yoffset;//y position of the page
   int doffset;//display start of the page
   void * vbase;//memory start address of the page
+  int locks;
 }PageStore[MAXPAGES];
 
 static vo_info_t info = {
@@ -105,72 +109,14 @@ static char vidix_name[32] = "";
 
 LIBVO_EXTERN(svga)
 
-/*
-probably this should be in separate pages.c file so 
-all vo_drivers can use it, do it if you like it.
-TODO
-direct render with IP buffering support - for vo_tdfx_vid
-*/
 
-#define PAGES_MAX MAXPAGES
-#define Page_Empty 0
-#define Page_Durty 1
-
-static int page_locks[PAGES_MAX];
-static int pagecurrent;
-static int pagetoshow;
-static int pagesmax;
-
-static void page_init(int max){
-int i;
-  for(i=0;i<max;i++){
-    page_locks[i]=0;
-  }
-  pagetoshow=pagecurrent=0;
-  pagesmax=max;
-}
-//internal use function
 //return number of 1'st free page or -1 if no free one
-static int page_find_free(){
+static inline int page_find_free(){
 int i;
-  for(i=0;i<pagesmax;i++)
-  if(page_locks[i]==Page_Empty) return i;
+  for(i=0;i<max_pages;i++)
+    if(PageStore[i].locks == PAGE_EMPTY) return i;
   return -1;
 }
-
-//return the number of page we may draw directly of -1 if no such
-static int page_get_image(){
-int pg;
-  pg=page_find_free();
-  if(pg>=0) page_locks[pg]=Page_Durty;
-  return pg;
-}
-
-//return the number of page we should draw into.
-static int page_draw_image(){
-int pg;
-  pg=page_find_free();
-  if(pg<0) pg=pagecurrent;
-  page_locks[pg]=Page_Durty;
-  pagetoshow=pg;
-  return pg;
-}
-
-static void page_draw_gotten_image(int pg){
-assert((pg>=0)&&(pg<PAGES_MAX));
-  pagetoshow=pg;
-}
-
-//return the number of the page to show
-static int page_flip_page(){
-  page_locks[pagecurrent]=Page_Empty;
-  pagecurrent=pagetoshow;
-assert(pagecurrent>=0);
-  //movequeue;
-  page_locks[pagecurrent]=Page_Durty;
-  return pagecurrent;
-}
-//------------ END OF PAGE CODE -------------
 
 static uint32_t preinit(const char *arg)
 {
@@ -180,6 +126,8 @@ char s[64];
   getch2_disable();
   memset(zerobuf,0,sizeof(zerobuf));
   force_vm=force_native=squarepix=0;
+  sync_flip=vo_vsync;
+  blackbar_osd=0;
   
   if(arg)while(*arg) {
 #ifdef CONFIG_VIDIX  
@@ -204,7 +152,13 @@ char s[64];
       arg+=6;
       if( *arg == ':' ) arg++;
     }
- 
+
+    if(!strncmp(arg,"bbosd",5)) {
+      blackbar_osd=1;
+      arg+=5;
+      if( *arg == ':' ) arg++;
+    }
+
     if(!strncmp(arg,"retrace",7)) {
       sync_flip=1;
       arg+=7;
@@ -214,16 +168,19 @@ char s[64];
     if(*arg) {
       i=0;
       while(arg[i] && arg[i]!=':')i++;
-      strncpy(s, arg, i);
-      s[i]=0;
+      if(i<64){
+        strncpy(s, arg, i);
+        s[i]=0;
+
+        force_vm=vga_getmodenumber(s);
+        if(force_vm>0) {
+          if(verbose) printf("vo_svga: Forcing mode %i\n",force_vm);
+        }else{ 
+          force_vm = 0;
+        }
+      }
       arg+=i;
       if(*arg==':')arg++;
-      i=vga_getmodenumber(s);
-      if(i>0) {
-        force_vm = i;
-        if(verbose)
-        printf("vo_svga: Forcing mode %i\n",force_vm);
-      }
     }
   }
   
@@ -271,17 +228,24 @@ int i,x,y,w,h;
 int stride;
 uint8_t *rgbplane, *base;
 int bytesperline;
+int page;
 
   if(mpi->flags & MP_IMGFLAG_DIRECT){
     if(verbose > 2)
       printf("vo_svga: drawing direct rendered surface\n");
     cpage=(uint32_t)mpi->priv;
-    page_draw_gotten_image(cpage);
+    assert((cpage>=0)&&(cpage<max_pages));
     return VO_TRUE; //it's already done
   }
 //  if (mpi->flags&MP_IMGFLAGS_DRAWBACK) 
 //  return VO_TRUE;//direct render method 2
-  cpage=page_draw_image();
+
+//find a free page to draw into
+//if there is no one then use the current one
+  page = page_find_free();
+  if(page>=0) cpage=page;
+  PageStore[cpage].locks=PAGE_BUSY;
+
 // these variables are used in loops  
   x = mpi->x;
   y = mpi->y;
@@ -533,17 +497,18 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
       PageStore[i].yoffset = i * modeinfo->height;//starting y offset
       PageStore[i].vbase = GRAPH_MEM + i*modeinfo->height*mode_stride; //memory base address
       PageStore[i].doffset = dof; //display offset    
+      PageStore[i].locks = PAGE_EMPTY;
     }
   }
   assert(max_pages>0);
   printf("vo_svga: video mode have %d page(s)\n",max_pages);
-  page_init(max_pages);
   //15bpp
   if(modeinfo->bytesperpixel!=0)
     vga_claimvideomemory(max_pages * modeinfo->height * modeinfo->width * modeinfo->bytesperpixel);
   else
     vga_claimvideomemory(max_pages * modeinfo->height * modeinfo->width * mode_bpp / 8);
 
+  cpage=old_page=0;
   svga_clear_box(0,0,modeinfo->width,modeinfo->height * max_pages);
 
   image_height=req_h;
@@ -586,23 +551,44 @@ UNUSED(src);
 
 static void draw_osd(void)
 {
-// for now draw only over the image
-//  vo_draw_text(modeinfo->width, modeinfo->height, draw_alpha);//black bar OSD
-  vo_draw_text(image_width, image_height, draw_alpha);
+  if(verbose > 3)
+     printf("vo_svga: draw_osd()\n");
+  //only modes with bytesperpixel>0 can draw OSD
+  if(modeinfo->bytesperpixel==0) return;
+  if(!(mode_capabilities&CAP_LINEAR)) return;//force_native will remove OSD
+    
+  if(blackbar_osd){
+//111
+//3 4
+//222
+    svga_clear_box(0,0 + PageStore[cpage].yoffset, 
+                   modeinfo->width, y_pos);
+    svga_clear_box(0, image_height + y_pos + PageStore[cpage].yoffset,
+                   modeinfo->width, modeinfo->height-(image_height+ y_pos));
+    svga_clear_box(0, y_pos + PageStore[cpage].yoffset,
+                   x_pos, image_height);
+    svga_clear_box(image_width + x_pos, y_pos + PageStore[cpage].yoffset, 
+                   modeinfo->width-(x_pos+image_width), image_height);
+//    vo_remove_text(modeinfo->width, modeinfo->height, clear_alpha);
+    vo_draw_text(modeinfo->width, modeinfo->height, draw_alpha);
+  }else{
+    vo_draw_text(image_width, image_height, draw_alpha);
+  }
 }
 
 static void flip_page(void) {
-static int oldpage=-1;
-int page;
-  page = page_flip_page();
+  PageStore[old_page].locks=PAGE_EMPTY;
+  PageStore[cpage].locks=PAGE_BUSY;
+
   if(verbose > 2)
-    printf("vo_svga: viewing page %d\n",page);
-  if(sync_flip && oldpage!=page){
+    printf("vo_svga: viewing page %d\n",cpage);
+  if(sync_flip && old_page!=cpage){
     if(verbose > 2) printf("vo_svga:vga_waitretrace\n");
     vga_waitretrace();
   }
   vga_setdisplaystart(PageStore[cpage].doffset);
-  oldpage=page;
+  
+  old_page=cpage;//cpage will be overwriten on next draw_image
 }
 
 static void check_events(void) {
@@ -664,14 +650,14 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
   if(verbose>2)
     printf("vo_svga: draw_alpha(x0=%d,y0=%d,w=%d,h=%d,src=%p,srca=%p,stride=%d\n",
            x0,y0,w,h,src,srca,stride);
-  x0+=x_pos;// in case of drawing over image
-  y0+=y_pos;
+  if(!blackbar_osd) {
+    //drawing in the image, so place the stuff there
+    x0+=x_pos;
+    y0+=y_pos;
+  }
   
-  //only modes with bytesperpixel>0 can draw OSD
-  if(modeinfo->bytesperpixel==0) return;
-  if(!(mode_capabilities&CAP_LINEAR)) return;//force_native will remove OSD
   if(verbose>3)
-    printf("vo_svga: OSD draw in page %d",cpage);
+    printf("vo_svga: OSD draw in page %d\n",cpage);
   base=PageStore[cpage].vbase + y0*mode_stride + x0*modeinfo->bytesperpixel;
   bytelen = modeinfo->width * modeinfo->bytesperpixel;   
   switch (mode_bpp) {
@@ -708,8 +694,12 @@ int page;
 //reading from video memory is horribly slow
   if( !(mpi->flags & MP_IMGFLAG_READABLE) && vo_directrendering &&
        (mode_capabilities & CAP_LINEAR) ){
-    page=page_get_image();
+
+//find free page and reserve it
+    page=page_find_free();
     if(page >= 0){
+      PageStore[page].locks=PAGE_BUSY;
+
       mpi->flags |= MP_IMGFLAG_DIRECT;
       mpi->stride[0] = mode_stride;
       mpi->planes[0] = PageStore[page].vbase + 
