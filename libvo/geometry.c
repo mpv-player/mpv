@@ -9,6 +9,7 @@
 char *vo_geometry = NULL;
 // set when either width or height is changed
 int geometry_wh_changed = 0;
+int geometry_xy_changed = 0;
 
 #define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = -1;
 
@@ -85,6 +86,8 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 
 		if( width != -1 || height != -1)
 		    geometry_wh_changed = 1;
+		if( xoff != -1 || yoff != -1)
+		    geometry_xy_changed = 1;
         }
 	return 1;
 }
