@@ -712,8 +712,20 @@ OSD/SUB feature. There are many ways to get it:
 
 <itemizedlist>
 <listitem><para>
+  Use the font generator tool at <filename
+  class="directory">TOOLS/subfont-c</filename>. It's a complete tool to
+  convert from TTF/Type1/etc font to mplayer font pkg (read
+  <filename>TOOLS/subfont-c/README</filename> for details).
+  </para></listitem>
+<listitem><para>
+  Use the font generator GIMP plugin at <filename
+  class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
+  RAW plugin too, see URL below).
+  <!-- FIXME: where's that URL? -->
+ </para></listitem>  
+<listitem><para>
   using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
-library. Version 2.0.9 or greater is mandatory! Then you have two methods:
+  library. Version 2.0.9 or greater is mandatory! Then you have two methods:
   <itemizedlist>
     <listitem><para>
       use the <option>-font /path/to/arial.ttf</option> option to specify a
@@ -723,6 +735,11 @@ library. Version 2.0.9 or greater is mandatory! Then you have two methods:
       create a symlink:<screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
+  If <application>MPlayer</application> was compiled with
+  <systemitem class="library">fontconfig</systemitem> support, the above methods
+  won't work, instead the <option>-font</option> expects a fontconfig font name
+  and defaults to the sans-serif font. To get a list of fonts known to fontconfig,
+  use <command>fc-list</command>. Example: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
   Download ready-to-use font packages from <application>MPlayer</application>
@@ -769,39 +786,7 @@ library. Version 2.0.9 or greater is mandatory! Then you have two methods:
   </table>
 
   </para></listitem>
-<listitem><para>
-  Use the font generator tool at <filename
-  class="directory">TOOLS/subfont-c</filename>. It's a complete tool to
-  convert from TTF/Type1/etc font to mplayer font pkg.  (read
-  <filename>TOOLS/subfont-c/README</filename> for details)
-  </para></listitem>
-<listitem><para>
-  Use the font generator GIMP plugin at <filename
-  class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
-  RAW plugin too, see URL below)
-  <!-- FIXME: where's that URL? -->
-  </para></listitem>
-<listitem><para>
-  using a TrueType (TTF) font, by the means of the <systemitem class="library">
-  freetype</systemitem> library. Version 2.0.9 or greater is mandatory! Then
-  you have two methods:
-  <itemizedlist>
-    <listitem><para>
-      use the <option>-font /path/to/arial.ttf</option> option to specify a
-      TrueType font file on every occasion
-      </para></listitem>
-    <listitem><para>
-      create a symlink:<screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
-    If compiled with <systemitem class="library">fontconfig</systemitem>
-    support, the above methods won't work, instead the <option>-font</option>
-    expects a fontconfig font name and defaults to the sans-serif font. To get
-    a list of fonts known to fontconfig, use <command>fc-list</command>.
-    Example: <option>-font 'Bitstream Vera Sans'</option>
-  </para></listitem>
 </itemizedlist>
-
 <para>
 If you chose non-TTF fonts, UNZIP the file you downloaded to <filename
 class="directory">~/.mplayer</filename> or <filename
