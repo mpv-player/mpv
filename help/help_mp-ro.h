@@ -71,7 +71,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Încerc sã forþez utilizarea unui codec audio din familia %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nu pot sã gãsesc un codec audio pentru familia forþatã, revin la alte drivere.\n"
 #define MSGTR_CantFindAudioCodec "Nu gãsesc un codec audio pentru formatul 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Încercaþi sã înnoiþi %s din etc/codecs.conf\n*** Dacã nu ajutã citiþi DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nu pot sã iniþializez codec-ul audio! -> fãrã sunet\n"
 #define MSGTR_TryForceVideoFmt "Încerc sã forþez utilizarea unui codec video din familia %d ...\n"
 #define MSGTR_CantFindVideoCodec "Nu gãsesc un codec video pentru formatul 0x%X !\n"

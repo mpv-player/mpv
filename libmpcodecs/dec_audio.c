@@ -242,8 +242,8 @@ while(!sh_audio->inited && *audio_codec_list){
 }
 
 if(!sh_audio->inited){
-    mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
+    mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_RTFMCodecs);
     return 0; // failed
 }
 

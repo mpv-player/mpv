@@ -76,7 +76,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του ήχου %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Δεν είναι δυνατή η εύρεση της οικογένειας του οδηγού  του ήχου, χρήση άλλου οδηγού.\n"
 #define MSGTR_CantFindAudioCodec "Δεν είναι δυνατή η εύρεση του format του οδηγού του ήχου 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Δοκιμάστε να αναβαθμίσετε το %s από το etc/codecs.conf\n*** Αν ακόμα υπάρχει πρόβλημα, διαβάστε το DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Αδύνατη η αρχικοποίηση του οδηγού του ήχου! -> χωρίς-ήχο\n"
 #define MSGTR_TryForceVideoFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του βίντεο %d ...\n"
 #define MSGTR_CantFindVideoCodec "Δεν είναι δυνατή η εύρεση του οδηγού  για τον συγκεκριμένο -vo και το format του βίντεο 0x%X !\n"

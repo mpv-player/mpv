@@ -80,7 +80,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Спроба примусово використати с╕мейство ауд╕о кодек╕в %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Не можу знайти ауд╕о кодек для вказаного с╕мейства, перех╕д на ╕нш╕ драйвери.\n"
 #define MSGTR_CantFindAudioCodec "Не можу знайти кодек для ауд╕о формату 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Спробуйте оновити %s з etc/codecs.conf\n*** Якщо не допомогло - читайте DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не зм╕г ╕н╕ц╕ал╕зувати ауд╕о кодек! -> граю без звуку\n"
 #define MSGTR_TryForceVideoFmt "Спроба примусово використати с╕мейство в╕део кодек╕в %d ...\n"
 #define MSGTR_CantFindVideoCodec "Не можу знайти кодек для в╕део формату 0x%X !\n"

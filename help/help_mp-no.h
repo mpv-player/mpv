@@ -75,7 +75,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Prøver å tvinge lyd-codec driver familie %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Kan ikke finne lyd-codec for tvunget driver familie, faller tilbake til andre drivere.\n"
 #define MSGTR_CantFindAudioCodec "Kan ikke finne codec for lydformat 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prøv å oppgrader %s fra etc/codecs.conf\n*** Hvis det fortsatt ikke virker, les DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Greide ikke å initialisere lyd-codec! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Prøver å tvingte video-codec driver familie %d ...\n"
 #define MSGTR_CantFindVideoCodec "Kan ikke finne codec for videoformat 0x%X !\n"

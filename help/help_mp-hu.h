@@ -78,7 +78,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %s audio codec-családot használni ...\n"
 #define MSGTR_CantFindAfmtFallback "A megadott audio codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
 #define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/hu/codecs.html-t!\n"
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
 #define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %s video codec-családot használni ...\n"
 #define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"

@@ -76,7 +76,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Pokou¹ím se vynutit rodinu audiokodeku %s...\n"
 #define MSGTR_CantFindAfmtFallback "Nemohu nalézt audio kodek v po¾adované rodinì, pou¾iji ostatní rodiny.\n"
 #define MSGTR_CantFindAudioCodec "Nemohu nalézt kodek pro audio formát 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokuste se upgradovat %s z etc/codecs.conf\n*** Pokud problém pøetrvá, pak si pøeètìte DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Nelze inicializovat audio kodek - nebude zvuk!\n"
 #define MSGTR_TryForceVideoFmtStr "Poku¹ím se vynutit rodinu videokodeku %s...\n"
 #define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro vybraný -vo a video formát 0x%X.\n"

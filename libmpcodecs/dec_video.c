@@ -280,8 +280,8 @@ while(!sh_video->inited && *video_codec_list){
 }
 
 if(!sh_video->inited){
-    mp_msg(MSGT_DECVIDEO,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_RTFMCodecs);
     return 0; // failed
 }
 

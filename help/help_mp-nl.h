@@ -73,7 +73,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Probeer audio codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindAfmtFallback "Kan audio codec voor geforceerde driver familie niet vinden, val terug op andere drivers.\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Probeer %s te upgraden van etc/codecs.conf\n*** Als het nog steeds niet OK is, lees dan DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Kon audio codec niet initialiseren! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "Probeer video codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindVideoCodec "Kan codec voor video format 0x%X niet vinden!\n"

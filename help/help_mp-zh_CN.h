@@ -76,7 +76,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "尝试指定音频解码器驱动族 %s ...\n"
 #define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频解码器, 只能使用其他驱动.\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/zh/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "无法初始化音频解码器! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s ...\n"
 #define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的解码器!\n"

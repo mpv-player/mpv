@@ -85,7 +85,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Опитвам да наложа аудио декодер от указаната фамилия %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Не мога да намеря аудио декодер от указаната фамилия, връщам се на другите.\n"
 #define MSGTR_CantFindAudioCodec "Не мога да намеря декодер за аудио формат 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Опитай да обновиш %s с etc/codecs.conf\n*** Ако все още не работи прочети DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не успях да пусна аудио декодера! -> изключвам звука\n"
 #define MSGTR_TryForceVideoFmtStr "Опитвам да използвам видео декодер от фамилия %s ...\n"
 #define MSGTR_CantFindVideoCodec "Не мога да намеря декодер който да работи с този видео драйвер и видео тип 0x%X !\n"

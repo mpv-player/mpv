@@ -76,7 +76,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "오디오 코덱 드라이버 집합 %s를 시도하고 있습니다...\n"
 #define MSGTR_CantFindAfmtFallback "시도한 드라이버 집합에서 오디오 코덱을 찾을 수 없어, 다른 드라이버로 대체합니다.\n"
 #define MSGTR_CantFindAudioCodec "오디오 형식 0x%X를 위한 코덱을 찾을 수 없습니다.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** etc/codecs.conf로 부터 %s를 업그레이드해보세요.\n*** 여전히 작동하지 않으면, DOCS/codecs.html을 읽어보세요!\n"
 #define MSGTR_CouldntInitAudioCodec "오디오 코덱을 초기화할 수 없습니다. -> 소리없음\n"
 #define MSGTR_TryForceVideoFmtStr "비디오 코덱 드라이버 집합 %s를 시도하고 있습니다...\n"
 #define MSGTR_CantFindVideoCodec "선택한 -vo 및 비디오 형식 0x%X과 일치하는 코덱을 찾을 수 없습니다.\n"

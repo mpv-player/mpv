@@ -77,7 +77,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "正嘗試強行指定音效解碼驅動程式組群 %s ...\n"
 #define MSGTR_CantFindAfmtFallback "無法找到指定之驅動程式組群的音效解碼器，回復到其他驅動程式。\n"
 #define MSGTR_CantFindAudioCodec "無法為音效格式 0x%X 找到解碼器。\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 嘗試從 etc/codecs.conf 升級 %s \n*** 如果這樣還是不行，請查看 DOCS/zh/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "無法為音效解碼器初始化 -> 沒有聲音。\n"
 #define MSGTR_TryForceVideoFmtStr "正嘗試強行指定視訊解碼驅動程式組群 %s ...\n"
 #define MSGTR_CantFindVideoCodec "無法為所選擇的 -vo 與視訊格式 0x%X 找到適合的解碼器。\n"

@@ -75,7 +75,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Попытка форсировать семейство аудио кодеков %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов, переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Попытайтесь обновить %s из etc/codecs.conf\n*** Если не помогло - читайте DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не смог инициализировать аудио кодек! -> без звука\n"
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видео кодеков %s ...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для видео формата 0x%X !\n"

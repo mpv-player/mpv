@@ -78,7 +78,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Erzwinge Audiocodecgruppe %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Kann keinen Audiocodec für gewünschte Gruppe finden, verwende anderen.\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Versuche, %s durch etc/codecs.conf zu ersetzen.\n*** Sollte es weiterhin nicht gehen, dann lies DOCS/de/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Kann Audiocodec nicht finden! -> Kein Ton\n"
 #define MSGTR_TryForceVideoFmtStr "Erzwinge Videocodecgruppe %s ...\n"
 #define MSGTR_CantFindVideoCodec "Kann keinen Codec passend zum gewählten -vo und Videoformat 0x%X finden!\n"

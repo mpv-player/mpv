@@ -76,7 +76,6 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Ses codecleri sürücü ailesi çalýþmaya zorlanýyor %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Zorlanan sürücü ailesi için ses codeci bulunamadý, diðer sürücülere dönülüyor\n"
 #define MSGTR_CantFindAudioCodec "0x%X! Ses formatý için codec bulunamadý\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** %s dosyasýný etc/codecs.conf dan kopyalayýn.\n*** Çalýþmazsa, DOCS/codecs.html i gözden geçirin!\n"
 #define MSGTR_CouldntInitAudioCodec "Ses codeci yüklenemedi! -> ses yok\n"
 #define MSGTR_TryForceVideoFmtStr "Video codec sürücüsü zorlanmaya çalýþýlýyor %s ...\n"
 #define MSGTR_CantFindVideoCodec "Seçilmiþ -vo sürücüsü ve video formatý 0x%X için Codec bulunamadý!\n"
