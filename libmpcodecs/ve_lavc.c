@@ -104,7 +104,7 @@ static float lavc_param_p_masking= 0.0;
 static int lavc_param_normalize_aqp= 0;
 static int lavc_param_interlaced_dct= 0;
 static int lavc_param_prediction_method= FF_PRED_LEFT;
-static char *lavc_param_format="YV12";
+static int lavc_param_format= IMGFMT_YV12;
 static int lavc_param_debug= 0;
 static int lavc_param_psnr= 0;
 static int lavc_param_me_pre_cmp= 0;
@@ -185,7 +185,7 @@ m_option_t lavcopts_conf[]={
 	{"ildct", &lavc_param_interlaced_dct, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"idct", &lavc_param_idct, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
         {"pred", &lavc_param_prediction_method, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
-        {"format", &lavc_param_format, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"format", &lavc_param_format, CONF_TYPE_IMGFMT, 0, 0, 0, NULL},
 #if LIBAVCODEC_BUILD >= 4642
         {"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 100000000, NULL},
 #endif 
@@ -420,21 +420,29 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_psnr;
 #endif
     lavc_venc_context->prediction_method= lavc_param_prediction_method;
-    if(!strcasecmp(lavc_param_format, "YV12"))
-        lavc_venc_context->pix_fmt= PIX_FMT_YUV420P;
-    else if(!strcasecmp(lavc_param_format, "422P"))
-        lavc_venc_context->pix_fmt= PIX_FMT_YUV422P;
-    else if(!strcasecmp(lavc_param_format, "444P"))
-        lavc_venc_context->pix_fmt= PIX_FMT_YUV444P;
-    else if(!strcasecmp(lavc_param_format, "411P"))
-        lavc_venc_context->pix_fmt= PIX_FMT_YUV411P;
-    else if(!strcasecmp(lavc_param_format, "YVU9"))
-        lavc_venc_context->pix_fmt= PIX_FMT_YUV410P;
-    else if(!strcasecmp(lavc_param_format, "BGR32"))
-        lavc_venc_context->pix_fmt= PIX_FMT_RGBA32;
-    else{
-        mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", lavc_param_format);
-        return 0;
+    switch(lavc_param_format)
+    {
+	case IMGFMT_YV12:
+	    lavc_venc_context->pix_fmt = PIX_FMT_YUV420P;
+	    break;
+	case IMGFMT_422P:
+	    lavc_venc_context->pix_fmt = PIX_FMT_YUV422P;
+	    break;
+	case IMGFMT_444P:
+	    lavc_venc_context->pix_fmt = PIX_FMT_YUV444P;
+	    break;
+	case IMGFMT_411P:
+	    lavc_venc_context->pix_fmt = PIX_FMT_YUV411P;
+	    break;
+	case IMGFMT_YVU9:
+	    lavc_venc_context->pix_fmt = PIX_FMT_YUV410P;
+	    break;
+	case IMGFMT_BGR32:
+	    lavc_venc_context->pix_fmt = PIX_FMT_RGBA32;
+	    break;
+	default:
+    	    mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", vo_format_name(lavc_param_format));
+    	    return 0;
     }
 
     /* lavc internal 2pass bitrate control */
@@ -514,27 +522,27 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
-        if(!strcasecmp(lavc_param_format, "YV12"))
+        if(lavc_param_format == IMGFMT_YV12)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     case IMGFMT_411P:
-        if(!strcasecmp(lavc_param_format, "411P"))
+        if(lavc_param_format == IMGFMT_411P)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     case IMGFMT_422P:
-        if(!strcasecmp(lavc_param_format, "422P"))
+        if(lavc_param_format == IMGFMT_422P)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     case IMGFMT_444P:
-        if(!strcasecmp(lavc_param_format, "444P"))
+        if(lavc_param_format == IMGFMT_444P)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     case IMGFMT_YVU9:
-        if(!strcasecmp(lavc_param_format, "YVU9"))
+        if(lavc_param_format == IMGFMT_YVU9)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     case IMGFMT_BGR32:
-        if(!strcasecmp(lavc_param_format, "BGR32"))
+        if(lavc_param_format == IMGFMT_BGR32)
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     }
