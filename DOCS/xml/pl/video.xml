@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.65 -->
+<!-- synced with 1.66 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -1775,8 +1775,10 @@ wyjaśniające jak uruchomić wyjście TV DirectFB w kartach Matrox.
 Pierwszą wersją DirectFB, jaką udało nam się uruchomić była 0.9.17 
 (wadliwa, potrzebuje łatki <systemitem>surfacemanager</systemitem> 
 z powyższego URL).
-W ogóle to kod CRTC2 jest w trakcie portowania do 
-<emphasis role="bold">mga_vid</emphasis>.
+Port kodu CRTC2 do 
+<link linkend="mga_vid">mga_vid</link> jest od lat w planach. 
+Mile widziane są 
+<ulink url="../../tech/patches.txt">łatki</ulink>.
 </para></note>
 </sect4>
 </sect3>
