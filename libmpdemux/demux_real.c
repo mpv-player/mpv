@@ -4,29 +4,22 @@
     (C) Alex Beregszaszi <alex@naxine.org>
     
     Based on FFmpeg's libav/rm.c.
-*/
+    
+    $Log$
+    Revision 1.6  2002/01/04 19:32:58  alex
+    updated/extended some parts, based on RMFF (also initial ATRAC3 hackings and notes)
 
-/*
-Some codecs for Real (from Mike Melanson):
-
-RV10: As has been mentioned, H.263-based; not an unreasonable guess
-RV20: RealVideo 2.0, nothing known
-RV30: RealVideo 3.0,nothing known, but I don't believe I've ever seen any
-media encoded with it
-DNET: apparently one of their original audio codecs, to be used with music
-SIPR: SiprNet, based on ACELP, and is great for compressing voice
-COKR(?): Cooker, the fabled G2 audio codec
-
-New infos:
 
 Audio codecs: (supported by RealPlayer8 for Linux)
-    ATRC - RealAudio 8 (ATRAC3)
-    COOK - RealAudio G2
+    ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
+           ACM decoder uploaded, needs some fine-tuning to work
+    COOK/COKR - RealAudio G2
     DNET - RealAudio 3.0
-    SIPR - SiproLab's audio codec
+    SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
+	   needs fine-tuning too :)
 
 Video codecs: (supported by RealPlayer8 for Linux)
-    RV10
+    RV10 - H.263 based, working with libavcodec's decoder
     RV20
     RV30
 */
@@ -49,9 +42,16 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #define MAX_STREAMS 10
 
 typedef struct {
+    int		timestamp;
+    int		offset;
+    int		packetno;
+} real_index_table_t;
+
+typedef struct {
     /* for seeking */
     int		index_chunk_offset;
-    int		*index_table[MAX_STREAMS];
+    real_index_table_t *index_table[MAX_STREAMS];
+//    int		*index_table[MAX_STREAMS];
     int		index_table_size[MAX_STREAMS];
     int		data_chunk_offset;
     int		num_of_packets;
@@ -64,10 +64,10 @@ typedef struct {
     int 	v_streams[MAX_STREAMS];
 } real_priv_t;
 
+/* originally from FFmpeg */
 static void get_str(int isbyte, demuxer_t *demuxer, char *buf, int buf_size)
 {
-    int len, i;
-    char *q;
+    int len;
     
     if (isbyte)
 	len = stream_read_char(demuxer->stream);
@@ -99,54 +99,67 @@ static void parse_index_chunk(demuxer_t *demuxer)
 {
     real_priv_t *priv = demuxer->priv;
     int origpos = stream_tell(demuxer->stream);
-    int i, entries;
-    int stream_id = 0;
-
-    printf("Building index table from index chunk (%d)\n",
-	priv->index_chunk_offset);
-    
-    stream_seek(demuxer->stream, priv->index_chunk_offset);
-
-    stream_skip(demuxer->stream, 4); /* INDX */
+    int next_header_pos = priv->index_chunk_offset;
+    int i, entries, stream_id;
 
 read_index:
-    if (stream_id > MAX_STREAMS)
-	goto end;
+    stream_seek(demuxer->stream, next_header_pos);
 
-    stream_skip(demuxer->stream, 8); /* unknown */
-    entries = stream_read_word(demuxer->stream);
+    i = stream_read_dword_le(demuxer->stream);
+    if ((i == -256) || (i != MKTAG('I', 'N', 'D', 'X')))
+    {
+	printf("Something went wrong, no index chunk found on given address (%d)\n",
+	    next_header_pos);
+	goto end;
+    }
+
+    printf("Reading index table from index chunk (%d)\n",
+	next_header_pos);
+
+    i = stream_read_dword(demuxer->stream);
+    printf("size: %d bytes\n", i);
+
+    i = stream_read_word(demuxer->stream);
+    if (i != 0)
+	printf("Hmm, index table with unknown version (%d), please report it to MPlayer developers!\n", i);
+
+    entries = stream_read_dword(demuxer->stream);
     printf("entries: %d\n", entries);
+    
+    stream_id = stream_read_word(demuxer->stream);
+    printf("stream_id: %d\n", stream_id);
+    
+    next_header_pos = stream_read_dword(demuxer->stream);
+    printf("next_header_pos: %d\n", next_header_pos);
     if (entries <= 0)
+    {
+	if (next_header_pos)
+	    goto read_index;
+	i = entries;
 	goto end;
-    stream_skip(demuxer->stream, 12); /* unknown */
-
-//    stream_skip(demuxer->stream, 22); /* unknown bytes */
+    }
 
     priv->index_table_size[stream_id] = entries;
-    priv->index_table[stream_id] = malloc(priv->index_table_size[stream_id] * sizeof(int));
+    priv->index_table[stream_id] = malloc(priv->index_table_size[stream_id] * sizeof(real_index_table_t));
     
     for (i = 0; i < entries; i++)
     {
-	priv->index_table[stream_id][i] = stream_read_dword(demuxer->stream);
-	stream_skip(demuxer->stream, 10); /* unknown bytes */
-	/* [position(dword)][unk1(word)][unused(dword)][unk2(word)] */
+	stream_skip(demuxer->stream, 2); /* version */
+	priv->index_table[stream_id][i].timestamp = stream_read_dword(demuxer->stream);
+	priv->index_table[stream_id][i].offset = stream_read_dword(demuxer->stream);
+	priv->index_table[stream_id][i].packetno = stream_read_dword(demuxer->stream);
 	printf("Index table: Stream#%d: entry: %d: pos: %d\n",
-	    stream_id, i, priv->index_table[stream_id][i]);
+	    stream_id, i, priv->index_table[stream_id][i].offset);
     }
     demuxer->seekable = 1; /* got index, we're able to seek */
-
-//    stream_seek(demuxer->stream, stream_tell(demuxer->stream)-7);
-    /* search next index table for other stream */
-    i = stream_read_word(demuxer->stream);
-    printf("pos: %d, next tag: %.4s\n", stream_tell(demuxer->stream), &i);
-    if (i == MKTAG('I', 'N', 'D', 'X'))
-    {
-	stream_id++;
+    
+    if (next_header_pos > 0)
 	goto read_index;
-    }
+
+    printf("End of index tables\n");
 
 end:
-    if (entries == -256)
+    if (i == -256)
 	stream_reset(demuxer->stream);
     stream_seek(demuxer->stream, origpos);
 }
@@ -207,6 +220,7 @@ loop:
     stream_skip(demuxer->stream, 1); /* reserved */
     flags = stream_read_char(demuxer->stream);
     /* flags:		*/
+    /*  0x1 - reliable  */
     /* 	0x2 - keyframe	*/
 
 //    printf("packet#%d: pos: %d, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
@@ -260,8 +274,10 @@ void demux_open_real(demuxer_t* demuxer)
     int i;
 
     stream_skip(demuxer->stream, 4); /* header size */
-    stream_skip(demuxer->stream, 2);
-    stream_skip(demuxer->stream, 4);
+    stream_skip(demuxer->stream, 2); /* version */
+//    stream_skip(demuxer->stream, 4);
+    i = stream_read_dword(demuxer->stream);
+    printf("File version: %d\n", i);
     num_of_headers = stream_read_dword(demuxer->stream);
 //    stream_skip(demuxer->stream, 4); /* number of headers */
 
@@ -273,7 +289,7 @@ void demux_open_real(demuxer_t* demuxer)
 	chunk = stream_read_dword_le(demuxer->stream);
 	chunk_size = stream_read_dword(demuxer->stream);
 
-	stream_skip(demuxer->stream, 2);
+	stream_skip(demuxer->stream, 2); /* version */
 	
 	if (chunk_size < 10)
 	    goto fail;
@@ -284,7 +300,8 @@ void demux_open_real(demuxer_t* demuxer)
 	switch(chunk)
 	{
 	    case MKTAG('P', 'R', 'O', 'P'):
-//		printf("Properties chunk\n");
+		/* Properties header */
+
 		stream_skip(demuxer->stream, 4); /* max bitrate */
 		stream_skip(demuxer->stream, 4); /* avg bitrate */
 		stream_skip(demuxer->stream, 4); /* max packet size */
@@ -292,12 +309,10 @@ void demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* nb packets */
 		stream_skip(demuxer->stream, 4); /* duration */
 		stream_skip(demuxer->stream, 4); /* preroll */
-//		stream_skip(demuxer->stream, 4); /* index offset */
 		priv->index_chunk_offset = stream_read_dword(demuxer->stream);
-		printf("Index chunk offset: 0x%x\n", priv->index_chunk_offset);
-//		stream_skip(demuxer->stream, 4); /* data offset */
+		printf("First index chunk offset: 0x%x\n", priv->index_chunk_offset);
 		priv->data_chunk_offset = stream_read_dword(demuxer->stream)+10;
-		printf("Data chunk offset: 0x%x\n", priv->data_chunk_offset);
+		printf("First data chunk offset: 0x%x\n", priv->data_chunk_offset);
 		stream_skip(demuxer->stream, 2); /* nb streams */
 #if 0
 		stream_skip(demuxer->stream, 2); /* flags */
@@ -308,7 +323,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    if (flags & 0x1)
 			printf("[save allowed] ");
 		    if (flags & 0x2)
-			printf("[perfect play (?)] ");
+			printf("[perfect play (more buffers)] ");
 		    if (flags & 0x4)
 			printf("[live broadcast] ");
 		    printf("\n");
@@ -317,10 +332,9 @@ void demux_open_real(demuxer_t* demuxer)
 		break;
 	    case MKTAG('C', 'O', 'N', 'T'):
 	    {
+		/* Content description header */
 		char *buf;
 		int len;
-
-//		printf("Broadcasting informations (title, author, copyright, comment)\n");
 
 		len = stream_read_word(demuxer->stream);
 		if (len > 0)
@@ -360,16 +374,11 @@ void demux_open_real(demuxer_t* demuxer)
 		    demux_info_add(demuxer, "comment", buf);
 		    free(buf);
 		}
-
-//		skip_str(0, demuxer);	/* title */
-//		skip_str(0, demuxer);	/* author */
-//		skip_str(0, demuxer);	/* copyright */
-//		skip_str(0, demuxer);	/* comment */
 		break;
 	    }
 	    case MKTAG('M', 'D', 'P', 'R'):
 	    {
-		/* new stream */
+		/* Media properties header */
 		int stream_id;
 		int bitrate;
 		int codec_data_size;
@@ -380,22 +389,25 @@ void demux_open_real(demuxer_t* demuxer)
 		printf("Found new stream (id: %d)\n", stream_id);
 		
 		stream_skip(demuxer->stream, 4); /* max bitrate */
-		bitrate = stream_read_dword(demuxer->stream); /* bitrate */
+		bitrate = stream_read_dword(demuxer->stream); /* avg bitrate */
 		stream_skip(demuxer->stream, 4); /* max packet size */
 		stream_skip(demuxer->stream, 4); /* avg packet size */
 		stream_skip(demuxer->stream, 4); /* start time */
 		stream_skip(demuxer->stream, 4); /* preroll */
 		stream_skip(demuxer->stream, 4); /* duration */
 		
-		skip_str(1, demuxer);	/* stream description */
+		skip_str(1, demuxer);	/* stream description (name) */
 		skip_str(1, demuxer);	/* mimetype */
 		
+		/* Type specific header */
 		codec_data_size = stream_read_dword(demuxer->stream);
 		codec_pos = stream_tell(demuxer->stream);
 
 		tmp = stream_read_dword(demuxer->stream);
-		if (tmp == MKTAG(0xfd, 'a', 'r', '.')) /* audio header */
+
+		if (tmp == MKTAG(0xfd, 'a', 'r', '.'))
 		{
+		    /* audio header */
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
 		    char buf[128]; /* for codec name */
 		    int frame_size;
@@ -434,6 +446,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    {
 			stream_skip(demuxer->stream, 4);
 			stream_read(demuxer->stream, buf, 4);
+			buf[4] = 0;
 		    }
 		    else
 		    {		
@@ -442,6 +455,16 @@ void demux_open_real(demuxer_t* demuxer)
 			/* Desc #2 */
 			get_str(1, demuxer, buf, sizeof(buf));
 		    }
+
+		    /* Emulate WAVEFORMATEX struct: */
+		    sh->wf = malloc(sizeof(WAVEFORMATEX));
+		    memset(sh->wf, 0, sizeof(WAVEFORMATEX));
+		    sh->wf->nChannels = sh->channels;
+		    sh->wf->wBitsPerSample = 16;
+		    sh->wf->nSamplesPerSec = sh->samplerate;
+		    sh->wf->nAvgBytesPerSec = bitrate;
+		    sh->wf->nBlockAlign = frame_size;
+		    sh->wf->cbSize = 0;
 
 		    tmp = 1; /* supported audio codec */
 		    switch (MKTAG(buf[0], buf[1], buf[2], buf[3]))
@@ -453,31 +476,43 @@ void demux_open_real(demuxer_t* demuxer)
 			case MKTAG('s', 'i', 'p', 'r'):
 			    printf("Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
+			    /* for buggy directshow loader */
+			    sh->wf = realloc(sh->wf, 18+4);
+			    sh->wf->wBitsPerSample = 0;
+			    sh->wf->nAvgBytesPerSec = 1055;
+			    sh->wf->nBlockAlign = 19;
+//			    sh->wf->nBlockAlign = frame_size / 288;
+			    sh->wf->cbSize = 4;
+			    buf[0] = 30;
+			    buf[1] = 1;
+			    buf[2] = 1;
+			    buf[3] = 0;
+			    memcpy((sh->wf+18), (char *)&buf[0], 4);
+//			    sh->wf[sizeof(WAVEFORMATEX)+1] = 30;
+//			    sh->wf[sizeof(WAVEFORMATEX)+2] = 1;
+//			    sh->wf[sizeof(WAVEFORMATEX)+3] = 1;
+//			    sh->wf[sizeof(WAVEFORMATEX)+4] = 0;
 			    break;
 			case MKTAG('c', 'o', 'o', 'k'):
-			    printf("Audio: Real's GeneralCooker (unsupported)\n");
+			    printf("Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
 			    tmp = 0;
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
+			    printf("Audio: ATRAC3 (RealAudio 8?) (unsupported)\n");
+			    sh->format = 0x270;
+			    break;
 			default:
 			    printf("Audio: Unknown (%s)\n", buf);
 			    tmp = 0;
 			    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 		    }
 
+		    sh->wf->wFormatTag = sh->format;
+		    
+		    print_wave_header(sh->wf);
+
 		    if (tmp)
 		    {
-			/* Emulate WAVEFORMATEX struct: */
-			sh->wf = malloc(sizeof(WAVEFORMATEX));
-			memset(sh->wf, 0, sizeof(WAVEFORMATEX));
-			sh->wf->wFormatTag = sh->format;
-			sh->wf->nChannels = sh->channels;
-			sh->wf->wBitsPerSample = 16;
-			sh->wf->nSamplesPerSec = sh->samplerate;
-			sh->wf->nAvgBytesPerSec = bitrate;
-			sh->wf->nBlockAlign = frame_size; /* 19 for acelp, pff */
-			sh->wf->cbSize = 0;
-		    
 			/* insert as stream */
 			demuxer->audio->sh = sh;
 			sh->ds = demuxer->audio;
@@ -489,8 +524,12 @@ void demux_open_real(demuxer_t* demuxer)
 			    priv->last_a_stream++;
 			}
 		    }
+		    else
+			free(sh->wf);
+//		    break;
 		}
 		else
+//		case MKTAG('V', 'I', 'D', 'O'):
 		{
 		    /* video header */
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
@@ -499,7 +538,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    printf("video: %.4s (%x)\n", (char *)&tmp, tmp);
 		    if (tmp != MKTAG('V', 'I', 'D', 'O'))
 		    {
-			mp_msg(MSGT_DEMUX, MSGL_ERR, "Unsupported video codec\n");
+			mp_msg(MSGT_DEMUX, MSGL_ERR, "Not audio/video stream or unsupported!\n");
 			goto skip_this_chunk;
 		    }
 		    
@@ -559,12 +598,14 @@ void demux_open_real(demuxer_t* demuxer)
 			priv->last_v_stream++;
 		    }
 		}
-
+//		break;
+//	    default:
 skip_this_chunk:
 		/* skip codec info */
 		tmp = stream_tell(demuxer->stream) - codec_pos;
 		stream_skip(demuxer->stream, codec_data_size - tmp);
 		break;
+//	    }
 	    }
 	    case MKTAG('D', 'A', 'T', 'A'):
 		goto header_end;
@@ -589,7 +630,7 @@ header_end:
     /* disable seeking */
     demuxer->seekable = 0;
 
-    if (priv->index_chunk_offset && (index_mode == 1) || (index_mode == 2))
+    if (priv->index_chunk_offset && ((index_mode == 1) || (index_mode == 2)))
 	parse_index_chunk(demuxer);
 
 fail:
