@@ -332,13 +332,12 @@ static int validate_codec(codecs_t *c, int type)
 		mp_msg(MSGT_CODECCFG,MSGL_ERR,MSGTR_CodecLacksFourcc, c->name);
 		return 0;
 	}
+#endif
 
-	/* XXX fix this: shitty with 'null' codec */
-	if (!c->driver) {
+	if (!c->drv) {
 		mp_msg(MSGT_CODECCFG,MSGL_ERR,MSGTR_CodecLacksDriver, c->name);
 		return 0;
 	}
-#endif
 
 #if 0
 #warning codec->driver == 4;... <- ezt nem kellene belehegeszteni...
@@ -746,8 +745,10 @@ static void codecs_free(codecs_t* codecs,int count) {
 }
 
 void codecs_uninit_free() {
+	if (video_codecs)
 	codecs_free(video_codecs,nr_vcodecs);
 	video_codecs=NULL;
+	if (audio_codecs)
 	codecs_free(audio_codecs,nr_acodecs);
 	audio_codecs=NULL;
 }
