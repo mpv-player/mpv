@@ -30,6 +30,7 @@ int vo_dwidth=0;
 int vo_dheight=0;
 int vo_dbpp=0;
 
+int vo_grabpointer = 1;
 int vo_doublebuffering = 0;
 int vo_vsync = 0;
 int vo_fs = 0;

@@ -579,6 +579,7 @@ uninit(void)
   if(vo_dga_is_running){	
     vo_dga_is_running = 0;
     mp_msg(MSGT_VO,  MSGL_V, "vo_dga: in uninit\n");
+    if(vo_grabpointer)
     XUngrabPointer (vo_dga_dpy, CurrentTime);
     XUngrabKeyboard (vo_dga_dpy, CurrentTime);
 #ifdef HAVE_DGA2
@@ -1037,6 +1038,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   
   XGrabKeyboard (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
                  GrabModeAsync,GrabModeAsync, CurrentTime);
+  if(vo_grabpointer)
   XGrabPointer (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);

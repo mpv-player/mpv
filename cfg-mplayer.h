@@ -253,6 +253,9 @@ static config_t mplayer_opts[]={
 	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 
+	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},

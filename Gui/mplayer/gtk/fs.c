@@ -33,7 +33,7 @@
 gchar         * fsSelectedFile = NULL;
 gchar         * fsSelectedDirectory = NULL;
 unsigned char * fsThatDir = ".";
-gchar           fsFilter[64] = "*";
+gchar           fsFilter[256] = "*";
 
 int             fsPressed = 0;
 int             fsType    = 0;

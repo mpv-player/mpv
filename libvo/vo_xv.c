@@ -404,6 +404,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
     if ( vm )
      {
       /* Grab the mouse pointer in our window */
+      if(vo_grabpointer)
       XGrabPointer(mDisplay, vo_window, True, 0,
                    GrabModeAsync, GrabModeAsync,
                    vo_window, None, CurrentTime);
