@@ -123,8 +123,11 @@ int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     return 1;
 }
 
-static int norm_from_string(char* norm)
+static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
+#ifdef HAVE_TV_V4L2
+    if (strcmp(tv_param_driver, "v4l2") != 0) {
+#endif
     if (!strcasecmp(norm, "pal"))
 	return TV_NORM_PAL;
     else if (!strcasecmp(norm, "ntsc"))
@@ -143,6 +146,17 @@ static int norm_from_string(char* norm)
 	mp_msg(MSGT_TV, MSGL_V, "tv.c: norm_from_string(%s): Bogus norm parameter, setting PAL.\n", norm);
 	return TV_NORM_PAL;
     }
+#ifdef HAVE_TV_V4L2
+    } else {
+	tvi_functions_t *funcs = tvh->functions;
+	char str[8];
+	strncpy(str, norm, sizeof(str)-1);
+	str[sizeof(str)-1] = '\0';
+        if (funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str) != TVI_CONTROL_TRUE)
+	    return 0;
+	return *(int *)str;
+    }
+#endif
 }
 
 static int open_tv(tvi_handle_t *tvh)
@@ -181,10 +195,16 @@ static int open_tv(tvi_handle_t *tvh)
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
 
 #ifdef HAVE_TV_V4L2
-    if (strcmp(tv_param_driver, "v4l2") != 0) {
+    if (!strcmp(tv_param_driver, "v4l2") && tv_param_normid >= 0) {
+	mp_msg(MSGT_TV, MSGL_V, "Selected norm id: %d\n", tv_param_normid);
+	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
+	    mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
+	    return 0;
+	}
+    } else {
 #endif
     /* select video norm */
-    tvh->norm = norm_from_string(tv_param_norm);
+    tvh->norm = norm_from_string(tvh, tv_param_norm);
 
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
@@ -192,14 +212,6 @@ static int open_tv(tvi_handle_t *tvh)
 	return 0;
     }
 #ifdef HAVE_TV_V4L2
-    } else {
-	if (tv_param_normid >= 0) {
-	    mp_msg(MSGT_TV, MSGL_V, "Selected norm id: %d\n", tv_param_normid);
-	    if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
-		mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
-		return 0;
-	    }
-	}
     }
 #endif
 
@@ -826,7 +838,7 @@ int tv_step_chanlist(tvi_handle_t *tvh)
 
 int tv_set_norm(tvi_handle_t *tvh, char* norm)
 {
-    tvh->norm = norm_from_string(norm);
+    tvh->norm = norm_from_string(tvh, norm);
 
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {

@@ -693,6 +693,22 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return TVI_CONTROL_FALSE;
 	}
 	return TVI_CONTROL_TRUE;
+    case TVI_CONTROL_SPC_GET_NORMID:
+	{
+	    int i;
+	    for (i = 0;; i++) {
+		struct v4l2_standard standard;
+		memset(&standard, 0, sizeof(standard));
+		standard.index = i;
+		if (-1 == ioctl(priv->video_fd, VIDIOC_ENUMSTD, &standard))
+		    return TVI_CONTROL_FALSE;
+		if (!strcasecmp(standard.name, (char *)arg)) {
+		    *(int *)arg = i;
+		    return TVI_CONTROL_TRUE;
+		}
+	    }
+	    return TVI_CONTROL_FALSE;
+	}
     case TVI_CONTROL_SPC_GET_INPUT:
 	if (ioctl(priv->video_fd, VIDIOC_G_INPUT, (int *)arg) < 0) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl get input failed: %s\n",

@@ -156,6 +156,7 @@ char *tv_channel_last_real;
 /* SPECIFIC controls */
 #define TVI_CONTROL_SPC_GET_INPUT	0x401	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
+#define TVI_CONTROL_SPC_GET_NORMID	0x403	/* get normid from norm name */
 
 extern tvi_handle_t *tv_begin(void);
 extern int tv_init(tvi_handle_t *tvh);
