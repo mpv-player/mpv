@@ -32,13 +32,6 @@ static tvi_info_t info = {
 	"under development"
 };
 
-struct vid_fmt {
-    int fmtid;
-    int width;
-    int height;
-    int bytesperline;
-};
-
 typedef struct {
     /* general */
     char			*video_device;
@@ -81,16 +74,43 @@ static const char *device_pal[] = {
 
 static int palette2depth(int palette)
 {
-    if (palette == VIDEO_PALETTE_YUV420P)
-	return 12;
-    return 32;
+    switch(palette)
+    {
+	case VIDEO_PALETTE_RGB555:
+	    return(15);
+	case VIDEO_PALETTE_RGB565:
+	    return(16);
+	case VIDEO_PALETTE_RGB24:
+	    return(24);
+	case VIDEO_PALETTE_RGB32:
+	    return(32);
+	case VIDEO_PALETTE_YUV420P:
+	    return(12);
+	case VIDEO_PALETTE_YUV422:
+	case VIDEO_PALETTE_UYVY:
+	    return(16);
+    }
+    return(-1);
 }
 
 static int format2palette(int format)
 {
-    if (format == IMGFMT_YV12)
-	return VIDEO_PALETTE_YUV420P;
-    return VIDEO_PALETTE_RGB24;
+    switch(format)
+    {
+	case IMGFMT_RGB15:
+	    return(VIDEO_PALETTE_RGB555);
+	case IMGFMT_RGB16:
+	    return(VIDEO_PALETTE_RGB565);
+	case IMGFMT_RGB24:
+	    return(VIDEO_PALETTE_RGB24);
+	case IMGFMT_RGB32:
+	    return(VIDEO_PALETTE_RGB32);
+	case IMGFMT_YV12:
+	    return(VIDEO_PALETTE_YUV420P);
+	case IMGFMT_UYVY:
+	    return(VIDEO_PALETTE_YUV422);
+    }
+    return(-1);
 }
 
 #if 0
@@ -220,7 +240,7 @@ static int init(priv_t *priv, tvi_param_t *params)
 {
     int i;
 
-    priv->fd = open(priv->video_device, O_RDONLY);
+    priv->fd = open(priv->video_device, O_RDWR);
     if (priv->fd == -1)
     {
 	printf("v4l: unable to open '%s': %s\n",
@@ -249,7 +269,7 @@ static int init(priv_t *priv, tvi_param_t *params)
     printf("priv->input: %d\n", priv->input);
 #endif
 
-    printf("Selected device: %s\n", priv->capability.name);    
+    printf("Selected device: %s\n", priv->capability.name);
     printf(" Capabilites: ");
     for (i = 0; device_cap[i] != NULL; i++)
 	if (priv->capability.type & (1 << i))
@@ -299,11 +319,6 @@ static int init(priv_t *priv, tvi_param_t *params)
     if (priv->mmap == -1)
     {
 	printf("Unabel to map memory for buffers: %s\n", strerror(errno));
-        priv->mmap = malloc(priv->mbuf.size); /* our buffer */
-    }
-    if (!priv->mmap)
-    {
-	printf("Unable to allocate memory for buffers: %s\n", strerror(errno));
 	goto err;
     }
     printf("our buffer: %p\n", priv->mmap);
@@ -441,7 +456,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    (int)*(void **)arg = 1;
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_BITS:
-	    (int)*(void **)arg = 12;
+	    (int)*(void **)arg = palette2depth(format2palette(priv->format));
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_WIDTH:
 	    (int)*(void **)arg = priv->width;
@@ -451,8 +466,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    int req_width = (int)*(void **)arg;
 	    
 	    printf("Requested width: %d\n", req_width);
-	    if ((req_width > priv->capability.minwidth) &&
-		(req_width < priv->capability.maxwidth))
+	    if ((req_width >= priv->capability.minwidth) &&
+		(req_width <= priv->capability.maxwidth))
 		return(TVI_CONTROL_TRUE);
 	    return(TVI_CONTROL_FALSE);
 	}
@@ -467,8 +482,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    int req_height = (int)*(void **)arg;
 	    
 	    printf("Requested height: %d\n", req_height);
-	    if ((req_height > priv->capability.minheight) &&
-		(req_height < priv->capability.maxheight))
+	    if ((req_height >= priv->capability.minheight) &&
+		(req_height <= priv->capability.maxheight))
 		return(TVI_CONTROL_TRUE);
 	    return(TVI_CONTROL_FALSE);
 	}
@@ -654,7 +669,8 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
 	return(0);
     }
     
-    ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame]);
+    if (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame]) == -1)
+	printf("ioctl sync failed: %s\n", strerror(errno));
     priv->queue++;
     
     printf("mmap: %p + offset: %d => %p\n",

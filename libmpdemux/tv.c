@@ -42,7 +42,7 @@ int tv_param_input = 0; /* used in v4l and bttv */
 /* fill demux->video and demux->audio */
 int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
 {
-    int seq = tvh->seq;
+    int seq = tvh->seq++;
     demux_stream_t *ds_video = NULL;
     demux_packet_t *dp_video = NULL;
     demux_stream_t *ds_audio = NULL;
@@ -53,8 +53,8 @@ int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
 
     demux->filepos = -1;
 
-    seq++;
-    tvh->seq++;
+//    seq++;
+//    tvh->seq++;
 
     /* ================== ADD VIDEO PACKET =================== */
     len_video = tvh->functions->get_video_framesize(tvh->priv);
@@ -146,7 +146,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 
     /* get IMGFMT_ */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &sh_video->format);
-    if (IMGFMT_IS_RGB(sh_video->format) || IMGFMT_IS_BGR(sh_video->format))
+//    if (IMGFMT_IS_RGB(sh_video->format) || IMGFMT_IS_BGR(sh_video->format))
 	sh_video->format = 0x0;
 
     /* set FPS and FRAMETIME */
