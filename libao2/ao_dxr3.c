@@ -86,12 +86,26 @@ static int init(int rate,int channels,int format,int flags)
         if( ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_data.channels) < 0 )
 	    printf( "AO: [dxr3] Unable to set number of channels\n" );
   
-	// set rate
 	ao_data.bps = (channels+1)*rate;
 	ao_data.samplerate=rate;
 	if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate) < 0 )
+	{
 	    printf( "AO: [dxr3] Unable to set samplerate\n" );
-	printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
+	    return 0;
+	}
+	if( rate < ao_data.samplerate )
+	{
+	    ao_data.samplerate = 44100;
+	    ioctl(fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+    	    if( ao_data.samplerate != 44100 )
+	    {
+	        printf( "AO: [dxr3] Unable to set samplerate\n" );
+	        return 0;
+	    }
+	    printf("AO: [dxr3] Using %d Hz samplerate (requested: %d) (Upsampling)\n",ao_data.samplerate,rate);
+	    ao_data.samplerate = rate;
+	}
+	else printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
   }
   else ao_data.bps *= 2;
 
@@ -190,23 +204,68 @@ static int get_space()
     return space;
 }
 
+// playes 'len' bytes of 'data'
+// upsamples if samplerate < 44100
+// return: number of bytes played
 static int play(void* data,int len,int flags)
 {
     if( ioctl( fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_data.pts ) < 0 )
 	printf( "AO: [dxr3] Unable to set PTS\n" );
+    if( ao_data.samplerate < 44100 )
+    {
+	int i,j,ratio,len2;
+	unsigned char *data2,*s,*d;
+	
+	ratio = 44100/ao_data.samplerate;ratio/=2;ratio*=2;
+	len2 = len * ratio;
+	data2 = malloc(len2);
+	
+	s = data;
+	d = data2;
+	
+	//Upsampler
+	if( ao_data.format == AFMT_U8 )
+	{
+	    for(i=0;i<ratio/2;i++)
+		for(j=0;j<len;j++)
+		{
+		    *d = *s;
+		    d++;
+		    *d = *s;
+		    d++;s++;
+		}
+	}
+	else
+	{
+	    for(i=0;i<ratio/2;i++)
+		for(j=0;j<len/2;j++)
+		{
+		    *d = *s;
+		    d++;s++;
+		    *d = *s;
+		    d++;s--;
+		    *d = *s;
+		    d++;s++;
+		    *d = *s;
+		    d++;s++;
+		}
+	}
+	if( len2 < 0 ) return 0;
+	write(fd_audio,data2,len2);
+	return len;
+    }
     return write(fd_audio,data,len);
 }
 
-// return: how many unplayed bytes are in the buffer
+// return: delay in seconds between first and last sample in buffer
 static float get_delay()
 {
-/*    int r=0;
+    int r=0;
     if( ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &r) < 0 )
     {
         printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
 	return ((float)ao_data.buffersize)/(float)ao_data.bps;
     }
-    return (((float)r)/(float)ao_data.bps);*/
-    return 0.0;
+    return (((float)r)/(float)ao_data.bps);
 }
 
