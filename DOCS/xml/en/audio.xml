@@ -3,7 +3,7 @@
 <sect1 id="audio">
 <title>Audio output devices</title>
 <sect2 id="sync">
-<title>Audio/Video synchronisation</title>
+<title>Audio/Video synchronization</title>
 
 <para>
 <application>MPlayer</application>'s audio interface is called
@@ -344,8 +344,7 @@ Feedback to this document is welcome. Please tell us how
 <sect1 id="af">
 <title>Audio filters</title>
 <para>
-  The old audio plugins have been superseded by a new audio filter layer. Audio
-  filters are used for changing the properties of the audio data before the
+  Audio filters allow changing the properties of the audio data before the
   sound reaches the sound card. The activation and deactivation of the filters
   is normally automated but can be overridden. The filters are activated when
   the properties of the audio data differ from those required by the sound card
