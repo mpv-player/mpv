@@ -409,8 +409,7 @@ will take some time, but it DOES worth it.</P>
     usually isn't important.</LI>
   <LI><B>SDL</B> - it's not mandatory, but can help in some cases (bad audio,
     videocards that lag strangely with the xv driver). Always use the newest
-    (beginning from 1.2.x). Also can <B>display subtitles under the movie, on
-    the black bar</B>.</LI>
+    (beginning from 1.2.x).</LI>
   <LI><B>libjpeg</B> - optional JPEG decoder, used by -mf and some qt mov files.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
@@ -626,7 +625,7 @@ multiuser system!</B> It's a clear way for everyone to gain root.</LI>
     make install</PRE>
 
 <P>At this point, <B>MPlayer</B> is ready to use. The directory
-<CODE>/usr/local/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
+<CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
 file, which is used to tell the program all the codecs and their capabilities.
 This file should always be kept uptodate together with the main binary !<BR>
 Check if you have codecs.conf in your home directory (~/.mplayer/codecs.conf)
@@ -651,7 +650,8 @@ OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optiona
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
-    unzip mp-arial-iso-8859-1.zip</PRE>
+    unzip mp-arial-iso-8859-1.zip
+    ln -s ~/.mplayer/font/arial-24 font</PRE>
 
 
 <P><B><A NAME=1.4>1.4. What about the GUI?</A></B></P>
@@ -663,7 +663,7 @@ Then, to turn on GUI mode, you either
 <UL>
   <LI>use the <CODE>-gui</CODE> option</LI>
   <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
-  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
+  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
   and call <CODE>gmplayer</CODE> instead.
 </UL>
 </P>
@@ -673,7 +673,7 @@ simultaneously) for a popup GTK menu, with DVD playing option!</P>
 
 <P>As <B>MPlayer</B> doesn't have a skin included, you have to download them
 if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
-They should be extracted to the usual system-wide directory (<CODE>/usr/local/share/mplayer/Skin</CODE>),
+They should be extracted to the usual system-wide directory (<CODE>$PREFIX/share/mplayer/Skin</CODE>),
 or to <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> by default looks in
 these directories for a <I>default</I> named directory, but you can use the
 <I>-skin newskin</I> option, or the <I>skin=newskin</I> config file
@@ -803,7 +803,7 @@ It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
 <CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
 <CODE>font</CODE> (like : <CODE>ln -s ~/.mplayer/arial-24
 ~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
-of the movie (switch it off with 'o').</P>
+of the movie (switch it off with the "o" key).</P>
 
 <P>OSD has 3 states: (switch with 'o')<BR>
 <UL>
@@ -832,10 +832,15 @@ of the movie (switch it off with 'o').</P>
 
 <P><A NAME=2.5><B>2.5. TV input</B></P>
 
+
 <A NAME=2.5.1><P><B><I>2.5.1.  Overview</I></B></P>
 
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>.</P>
+
+<P><B>THIS CODE IS CURRENTLY NOT-WORKED ON! Don't expect it to work without
+  tweaking/experimenting!</P>
+
 
 <A NAME=2.5.2><P><B><I>2.5.2.  Compilation</I></B></P>
 
@@ -1184,8 +1189,9 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 
 <P><B><A NAME=3.2>3.2. Control</A></B></P>
 
-<P><B>MPlayer</B> have a fully configurable, command driven, control layer which allow you
-to control <B>MPlayer</B> using keyboard, mouse, joystick or remote control (using lirc).</P>
+<P><B>MPlayer</B> has a fully configurable, command driven, control layer which
+  allow you to control <B>MPlayer</B> using keyboard, mouse, joystick or remote
+  control (using lirc).</P>
 
 <P><B><A NAME=3.2.1>3.2.1. Default controls</A></B></P>
 

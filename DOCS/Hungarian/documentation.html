@@ -393,8 +393,7 @@ problémákba ütközni:<BR>
     Bár általában erre nem kell figyelj.</LI>
   <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet (például ha az
     audio lejátszásba furcsa hangok keverednek, vagy ha az xv meghajtóval
-    történõ lejátszás során furcsa a lejátszás képe). Képes továbbá a
-    <B>feliratokat a film alatti fekete sávon megjeleníteni</B>. Ajánlott
+    történõ lejátszás során furcsa a lejátszás képe). Ajánlott
     mindig a legújabbat használni.</LI>
   <LI><B>libjpeg</B> - opciónális (M)JPEG dekóder. Az -mf opció és néhány
     QT file használja.  Hasznos mind az <B>MPlayer</B>hez, mind a
@@ -629,7 +628,7 @@ gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 	make install</PRE>
 
 <P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
-<CODE>/usr/local/share/mplayer</CODE> könyvtár tartalmazza a
+<CODE>$PREFIX/share/mplayer</CODE> könyvtár tartalmazza a
 <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
 codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
 együtt kell frissíteni ! Ha a home könyvtáradban van egy régi codecs.conf
@@ -654,7 +653,8 @@ HREF="documentation.html#6.1">itt</A>.</P>
 
 <PRE>	mkdir ~/.mplayer/font
 	cd ~/.mplayer/font
-	unzip mp-arial-iso-8859-2.zip</PRE>
+	unzip mp-arial-iso-8859-2.zip
+	ln -s ~/.mplayer/font/arial-24 font</PRE>
 
 <P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> file-t
 az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.
@@ -671,7 +671,7 @@ bekapcsolásához :
 <UL>
   <LI>használd a <CODE>-gui</CODE> opciót</LI> vagy
   <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba</LI>vagy
-  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
+  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
   és a <CODE>gmplayer</CODE> file-t indítsd.
 </UL>
 
@@ -681,7 +681,7 @@ a DVD lejátszás is.</P>
 
 <P>Mivel az <B>MPlayer</B> alapban nem tartalmaz skineket, ezeket külön kell
 letöltened. Lásd <A HREF="http://www.mplayerhq.hu/homepage/dload.html">itt</A>.
-Ezeket a szokásos <CODE>/usr/local/share/mplayer/Skin</CODE> vagy <CODE>$HOME/.mplayer/Skin</CODE>
+Ezeket a szokásos <CODE>$PREFIX/share/mplayer/Skin</CODE> vagy <CODE>$HOME/.mplayer/Skin</CODE>
 könyvtárak egyikébe kell kicsomagolni. Az <B>MPlayer</B> egy '<I>default</I>'
 nevû könyvtárat keres alapállapotban, de a <I>-skin newskin</I> opcióval, vagy
 a konfigurációs file-ba a <I>skin=newskin</I> sor beírásával meg lehet adni
@@ -839,10 +839,15 @@ kimeneti eszközök</P>
 
 <P><A NAME=2.5><B>2.5. TV bemenet</B></P>
 
+
 <A NAME=2.5.1><P><B><I>2.5.1.  Áttekintés</I></B></P>
 
 <P>Ez a fejezet elmagyarázza hogy tudsz <B>nézni/grabbelni egy V4L kompatibilis
 TV tuner-rõl</B>.</P>
+
+<P>EZ A KÓDRÉSZLET JELENLEG NINCS FEJLESZTÉS ALATT! Ne várd hogy hosszadalmas
+  kísérletezés nélkül majd hirtelen menni fog!</P>
+
 
 <A NAME=2.5.2><P><B><I>2.5.2.  Fordítás</I></B></P>
 
