@@ -49,6 +49,8 @@ struct pullup_context
 	int junk_left, junk_right, junk_top, junk_bottom;
 	int verbose;
 	int metric_plane;
+	int strict_breaks;
+	int strict_pairs;
 	/* Internal data */
 	struct pullup_field *first, *last, *head;
 	struct pullup_buffer *buffers;

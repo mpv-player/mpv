@@ -443,7 +443,7 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 {
 	int i;
-	int max_l=0, max_r=0, l, t;
+	int max_l=0, max_r=0, l;
 	if (f->flags & F_HAVE_AFFINITY) return;
 	f->flags |= F_HAVE_AFFINITY;
 	for (i = 0; i < c->metric_len; i++) {
@@ -454,15 +454,6 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 	if (max_l + max_r < 64) return;
 	if (max_r > 2*max_l) f->affinity = -1;
 	else if (max_l > 2*max_r) f->affinity = 1;
-	else if (max_l + max_r > 1024) {
-		l = t = 0;
-		for (i = 0; i < c->metric_len; i++) {
-			l += f->comb[i] - f->next->comb[i];
-			t += ABS(f->comb[i] - f->next->comb[i]);
-		}
-		if (-l*4 > t) f->affinity = -1;
-		else if (l*4 > t) f->affinity = 1;
-	}
 }
 
 static void foo(struct pullup_context *c)
@@ -490,16 +481,19 @@ static int decide_frame_length(struct pullup_context *c)
 
 	switch (find_first_break(f0, 3)) {
 	case 1:
-		return 1;
+		if (!c->strict_breaks && f0->affinity == 1 && f1->affinity == -1)
+			return 2;
+		else return 1;
 	case 2:
+		/* FIXME: strictly speaking, f0->prev is no longer valid... :) */
+		if (c->strict_pairs
+			&& (f0->prev->breaks & BREAK_RIGHT) && (f2->breaks & BREAK_LEFT)
+			&& (f0->affinity != 1 || f1->affinity != -1) )
+			return 1;
 		if (f1->affinity == 1) return 1;
 		else return 2;
 	case 3:
-		if (f1->affinity == 1) {
-			if (f0->affinity == 1 && f2->affinity == -1) return 3;
-			else return 1;
-		}
-		else if (f2->affinity == 1) return 2;
+		if (f2->affinity == 1) return 2;
 		else return 3;
 	default:
 		/* 9 possibilities covered before switch */
