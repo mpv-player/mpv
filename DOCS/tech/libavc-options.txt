@@ -195,7 +195,7 @@ vpsize	(0-10000) video packet size
 
 gray	grayscale only encoding (a bit faster than with color ...)
 
-dct_algo (0-99) dct algorithm
+vfdct	(0-99) dct algorithm
 	0 automatically select a good one (default)
 	1 fast integer 
         2 accurate integer
