@@ -118,6 +118,7 @@ m_config_t* mconfig;
              Video accelerated architecture
 **************************************************************************/
 vo_vaa_t vo_vaa;
+extern int force_ni;
 
 //**************************************************************************//
 //             Config file
@@ -1399,7 +1400,13 @@ current_module="init_libvo";
    }
    init_video_vaa();
    fflush(stdout);
-   
+   /* Temporary solution for disabling deinterlacing */
+   if(vo_vaa.set_deint && force_ni)
+   {
+	vidix_deinterlace_t deint;
+	deint.flags = CFG_NON_INTERLACED;
+	vo_vaa.set_deint(&deint);
+   }
 //================== MAIN: ==========================
    main:
 if(!sh_video) osd_level = 0;
