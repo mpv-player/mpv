@@ -27,6 +27,13 @@ LIBVD_EXTERN(theora)
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    switch(cmd) {
+    case VDCTRL_QUERY_FORMAT:
+        if ((*((int*)arg)) == IMGFMT_YV12)
+	    return CONTROL_TRUE;
+	return CONTROL_FALSE;
+    }
+    
     return CONTROL_UNKNOWN;
 }
 
@@ -104,13 +111,13 @@ static int init(sh_video_t *sh){
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
-       sh->aspect = (float)(context->inf.aspect_numerator * context->inf.width)/
-          (context->inf.aspect_denominator * context->inf.height);
+       sh->aspect = (float)(context->inf.aspect_numerator * context->inf.frame_width)/
+          (context->inf.aspect_denominator * context->inf.frame_height);
     }
     
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
-    return mpcodecs_config_vo (sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
+    return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,IMGFMT_YV12);
 }
 
 /* 
@@ -160,16 +167,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
       return 0;
    }
 
-    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, sh->disp_w, sh->disp_h);
+    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, yuv.y_stride, yuv.y_height);
     if(!mpi) return NULL;
-    
-    mpi->planes[0]=yuv.y;
-    mpi->stride[0]=yuv.y_stride;
-    mpi->planes[1]=yuv.u;
-    mpi->stride[1]=yuv.uv_stride;
-    mpi->planes[2]=yuv.v;
-    mpi->stride[2]=yuv.uv_stride;
-
+    mpi->planes[0]=yuv.y+yuv.y_stride*(context->inf.frame_height-1);
+    mpi->stride[0]=-yuv.y_stride;
+    mpi->planes[1]=yuv.u+yuv.uv_stride*(context->inf.frame_height/2-1);
+    mpi->stride[1]=-yuv.uv_stride;
+    mpi->planes[2]=yuv.v+yuv.uv_stride*(context->inf.frame_height/2-1);
+    mpi->stride[2]=-yuv.uv_stride;
+   
     return mpi;
 }
 

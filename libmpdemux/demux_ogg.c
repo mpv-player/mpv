@@ -847,8 +847,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
 		(double)inf.fps_denominator;
 	    sh_v->frametime = ((double)inf.fps_denominator)/
 		(double)inf.fps_numerator;
-	    sh_v->disp_w = sh_v->bih->biWidth = inf.width;
-	    sh_v->disp_h = sh_v->bih->biHeight = inf.height;
+	    sh_v->disp_w = sh_v->bih->biWidth = inf.frame_width;
+	    sh_v->disp_h = sh_v->bih->biHeight = inf.frame_height;
 	    sh_v->bih->biBitCount = 24;
 	    sh_v->bih->biPlanes = 3;
 	    sh_v->bih->biSizeImage = ((sh_v->bih->biBitCount/8) * 
