@@ -756,9 +756,7 @@ OSD/SUB feature. There are many ways to get it:
   use <option>-utf8</option> option or just name the subtitles file
   <filename>&lt;video_name&gt;.utf</filename> and have it in the same dir
   as the video file. Recoding from different codepages to UTF8 could be
-  <!-- FIXME: iconv (Debian) konwert (Red Hat) instead? -->
-  done by using <command>konwert</command> (Debian) or
-  <command>iconv</command> (Red Hat) programs.
+  done by using <command>konwert</command> or <command>iconv</command> programs.
   </para><para>
   
   <table>
