@@ -148,6 +148,16 @@ static int init(int rate,int channels,int format,int flags)
 	unsigned char* buffer;
 	int i;
    
+	switch(format){
+		case AFMT_AC3:
+		case AFMT_S24_LE:
+		case AFMT_S16_LE:
+		case AFMT_S8:
+			break;
+		default:
+			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",audio_out_format_name(format));
+			format=AFMT_S16_LE;
+	}   
 	//fill global ao_data 
 	ao_data.channels=channels;
 	ao_data.samplerate=rate;
