@@ -533,7 +533,8 @@ if(!filename){
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
-    printf("Warning! Couldn't load codecs.conf!");
+    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
+    exit(1);
 }
 
 
