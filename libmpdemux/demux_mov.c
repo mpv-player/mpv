@@ -338,6 +338,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		trak->type=MOV_TRAK_GENERIC;
 		break;
 	    }
+	    case MOV_FOURCC('n','m','h','d'): {
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sGeneric header!\n",level,"");
+		trak->type=MOV_TRAK_GENERIC;
+		break;
+	    }
 	    case MOV_FOURCC('s','t','s','d'): {
 		int i=stream_read_dword(demuxer->stream); // temp!
 		int count=stream_read_dword(demuxer->stream);
@@ -947,13 +952,16 @@ if(trak->samplesize){
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
     if(trak->samplesize!=1)
     {
-	mp_msg(MSGT_DEMUX, MSGL_WARN, "WARNING! Samplesize(%d) != 1\n",
+	mp_msg(MSGT_DEMUX, MSGL_DBG2, "WARNING! Samplesize(%d) != 1\n",
 	    trak->samplesize);
 	x=trak->chunks[trak->pos].size*trak->samplesize;
     }
     else
 	x=trak->chunks[trak->pos].size;
 //    printf("X = %d\n", x);
+    /* the following stuff is audio related */
+    if (trak->type == MOV_TRAK_AUDIO)
+    {
     if(trak->stdata_len>=36 && trak->stdata[30] && trak->stdata[31]){
 	// extended stsd header - works for CBR MP3:
 	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet
@@ -967,6 +975,7 @@ if(trak->samplesize){
 	    x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
 	}
     }
+    } /* MOV_TRAK_AUDIO */
     ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
     if(ds==demuxer->audio) mp_msg(MSGT_DEMUX, MSGL_DBG2, "sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
 } else {
