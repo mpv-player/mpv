@@ -4641,7 +4641,7 @@ select the MB mode which has the best rate distortion
 .RE
 .PD 1
 .TP
-.B vhq
+.B vhq\ \ \ \ 
 Same as mbd=1, kept for compatibility reasons.
 .TP
 .B v4mv\ \ \ 
@@ -5118,7 +5118,7 @@ for lossless jpeg and ffv1
 for lossless jpeg and ffv1
 .RE
 .TP
-.B pred
+.B pred\ \ \ 
 (for huffyuv)
 .PD 0
 .RSs
@@ -5131,8 +5131,8 @@ median prediction
 .RE
 .PD 1
 .TP
-.B pred
-(for lossless jpeg)
+.B pred\ \ \ 
+(for lossless JPEG)
 .PD 0
 .RSs
 .IPs 0
@@ -5148,7 +5148,7 @@ mean prediction
 .RE
 .PD 1
 .TP
-.B coder
+.B coder\ \ 
 (for ffv1)
 .PD 0
 .RSs
@@ -5399,14 +5399,13 @@ experimental quantizer modulation
 .B vqmod_freq
 experimental quantizer modulation
 .TP
-.B dc
+.B dc\ \ \ \ \ 
 intra DC precision in bits (default: 8).
 If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
 .TP
-.B cgop
+.B cgop\ \ \ 
 Close all GOPs.
 Currently it doesn't work (yet).
-.RE
 .
 .SS nuv (\-nuvopts)
 .
