@@ -31,8 +31,8 @@ outdated patches.
    the behavior of existing features, please do not forget to also update the
    documentation. The documentation maintainers will assist you in doing this.
    Updating the English documentation is enough. If you speak several languages
-   you are of course welcome to update others as well.
-   
+   you are of course welcome to update translations as well.
+
 7. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
    attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you know
    that your mailer messes up (reformats) text attachments) with the subject
@@ -64,5 +64,5 @@ outdated patches.
 
 11. If you made a nontrivial contribution and wish to be mentioned in the
     AUTHORS file, include that in your patch.
-   
+
 Thank you!
