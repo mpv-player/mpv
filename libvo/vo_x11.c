@@ -107,6 +107,8 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t in_format;
 static uint32_t out_format=0;
+static int srcW=-1;
+static int srcH=-1;
 static int aspect; // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
 
 static void check_events(){
@@ -261,6 +263,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif
 
  in_format=format;
+ srcW= width;
+ srcH= height;
  
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
@@ -401,8 +405,9 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    	default:  draw_alpha_fnc=draw_alpha_null;
   }
 
-  /* no scaling here, it will be changed during draw_slice if -zoom is on so we dont dupplicate the code */
-  swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
+  /* we avoid unnecessary allocating the swsContext here as it is allocated during draw_slice if zoom is on */
+  if(!zoomFlag)
+	swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -494,7 +499,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 
     if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
 
-    swsContext= getSwsContextFromCmdLine(oldContext->srcW, oldContext->srcH, in_format, 
+    swsContext= getSwsContextFromCmdLine(srcW, srcH, in_format, 
     					 newW, newH, out_format);
     if(swsContext)
     {
