@@ -52,6 +52,7 @@ void decode_fli_frame(
   void *context)
 {
   int stream_ptr = 0;
+  int stream_ptr_after_color_chunk;
   int pixel_ptr;
   int palette_ptr1;
   int palette_ptr2;
@@ -82,7 +83,7 @@ void decode_fli_frame(
   unsigned char *fli_ghost_image = (unsigned char *)context;
   int ghost_pixel_ptr;
   int ghost_y_ptr;
-	
+
   frame_size = LE_32(&encoded[stream_ptr]);
   stream_ptr += 6;  // skip the magic number
   num_chunks = LE_16(&encoded[stream_ptr]);
@@ -101,6 +102,7 @@ void decode_fli_frame(
     {
     case FLI_256_COLOR:
     case FLI_COLOR:
+      stream_ptr_after_color_chunk = stream_ptr + chunk_size - 6;
       if (chunk_type == FLI_COLOR)
         color_scale = 4;
       else
@@ -130,10 +132,13 @@ void decode_fli_frame(
           stream_ptr += 3;
         }
       }
-      // it seems that a color packet has to be an even number of bytes
-      // so account for a pad byte
-      if (stream_ptr & 0x01)
-        stream_ptr++;
+
+      // color chunks sometimes have weird 16-bit alignment issues;
+      // therefore, take the hardline approach and set the stream_ptr
+      // to the value calculate w.r.t. the size specified by the color
+      // chunk header
+      stream_ptr = stream_ptr_after_color_chunk;
+
       /* Palette has changed, must update frame */
       update_whole_frame = 1;
       break;
