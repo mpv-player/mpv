@@ -1074,146 +1074,140 @@ Az -spuaa 4 opció által használt gaussian blue paramétere. Alapértelmezett:
 1.0.
 
 
-.SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
+.SH "AUDIO KIMENET OPCIÓI (CSAK MPLAYER)"
 .TP
-.B \-abs <value> (OBSOLETE)
-Override audio driver/\:card buffer size detection, \-ao oss only
+.B \-abs <érték> (RÉGI)
+Az audio meghajtó által kiszámolt bufferméret detektálás felülbírálata,
+csak \-ao oss kimenettel.
 .TP
-.B \-af <plugin1,plugin2,plugin3[=options],...>
-Activate a comma separated list of audio filters and their options.
+.B \-af <plugin1,plugin2,plugin3[=opciók],...>
+Vesszõvel elválasztott audio szûrõk listája, és opcióik.
 .br
-Available filters are:
+A rendelkezésre álló szûrõk:
 .
 .RSs
-.IPs resample[=srate[:sloppy][:type]]
-Changes the sample rate of the audio stream to an integer srate (Hz).
-It only supports the 16 bit little endian format.
+.IPs resample[=frekv[:sloppy][:tipus]]
+A frekvencia megváltoztatása. Csak 16bit little endian formátumot
+támogat.
 .IPs channels[=nch]
-Change the number of channels to nch output channels.
-If the number of output channels is bigger than the number of input channels
-empty channels are inserted (except mixing from mono to stereo, then the mono
-channel is repeated in both of the output channels).
-If the number of output channels is smaller than the number of input channels
-the exceeding channels are truncated.
+Csatornák számának megváltoztatása.
 .IPs format[=bps,f]
-Select the format f and bits per sample bps used for output from the
-filter layer.
-The option bps is an integer and denotes bytes per sample.
-The format f is a string containing a concatenated mix of:
+f formátum, és bps bit/sample érték használata.
+A bps opció egész szám, az f lehetséges értékei pedig:
 .br
-alaw, mulaw or imaadpcm
+alaw, mulaw vagy imaadpcm
 .br
-float or int
+float vagy int
 .br
-unsigned or signed
+unsigned vagy signed
 .br
-le or be (little or big endian)
+le vagy be (little vagy big endian)
 .br
 .IPs "volume[=v:sc]"
-Select the output volume level.
-This filter is not reentrant and can therefore only be enabled once for every
-audio stream.
+A kimeneti hangerõ szintjének megváltoztatása. Ez a szûrõ csak egyszer
+tehetõ be a szûrõlistába.
 .RSss
-v: desired gain in dB for all channels in the stream.
-The gain can be set from -200dB to +40dB (where -200dB mutes the sound
-completely and +40dB equals a gain of 1000).
-The default gain is -20dB.
+v: a kivánt eltérés dB-ben.
+Az értéke lehet -200dB-tõl +40dB (ahol a -200dB teljesen elnémitja a
+hangot, a +40dB pedig 1000-szeresére növeli).
 .br
-sc: enable soft clipping.
+sc: soft clipping bekapcsolása
 .REss
 .IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
-Mixes channels arbitrarily, see DOCS/sound.html for details.
+A csatornák átirányítása, a részletekhez lásd DOCS/sound.html.
 .RSss
-n: number of output channels (1 - 6).
+n: kimeneti csatornák száma (1 - 6).
 .br
-lij: how much of input channel j is mixed into output channel i.
+lij: mennyire legyen a j bemeneti csatorna az i kimenetibe átirányítva.
 .REss
 .IPs "sub[=fc:ch]"
-Add sub-woofer channel.
+Sub-woofer csatorna beillesztése.
 .RSss
-fc: Cutoff frequency for low-pass filter (20Hz to 300Hz) default is 60Hz.
+fc: Vágási frekvencia a low-pass szûrõnek (20Hz-tõl 300Hz-ig) alap 60Hz.
 .br
-ch: channel number for the sub-channel.
+ch: A sub-csatorna csatornaszáma.
 .REss
 .IPs "surround[=d]"
-Decoder for matrix encoded surround sound, works on many 2 channel files.
+Matrix enkódolt térhatású hang dekódolása, sok 2 csatornás file-on
+mûködik.
 .RSss
-d: delay time in ms for the rear speakers (0ms to 1000ms) default is 15ms.
+d: a hátsó hangszórók késleltetési ideje ms-ben (0ms-tõl 1000ms) alap 15ms.
 .REss
 .IPs delay[=ch1:ch2:...]
-Delays the sound output.
-Specify the delay separately for each channel in milliseconds (floating point
-number between 0 and 1000).
+Hang késleltetése. Minden csatornához külön megadható az érték
+milliszekundumban (lebegõpontos szám 0 és 1000 között).
 .RE
 .
 .TP
-.B \-af-adv <force=(0\-3):list=(filters)> (see -af option too)
-Specify advanced audio filter options:
+.B \-af-adv <force=(0\-3):list=(szûrõk)> (lásd még -af opció)
+Audio szûrõket felülbíráló opciók:
 .
 .RSs
 .IPs force=<0-3>
-Forces the insertion of audio filters to one of the following:
+A szûrõk beillesztésének módját határozza meg az alábbiak szerint:
 .RSss
-0: Completely automatic insertion of filters (default)
+0: Teljesen automatikus beillesztés (alap)
 .br
-1: Optimize for speed
+1: Sebességoptimalizálás
 .br
-2: Optimize for accuracy
+2: Pontosságra optimalizálás
 .br
-3: Turn off auto
+3: Automatikus beillesztés kikapcsolása
 .REss
-.IPs list=<filters>
-Same as -af (see -af option).
+.IPs list=<szûrõk>
+Ugyanaz mint az -af opció.
 .RE
 .
 .TP
-.B \-ao <driver1[:device],driver2,...[,]>
-Specify a priority list of audio output drivers (optionally with device) to be
-used.
-\'device' is valid with SDL, too, it means subdriver then.
+.B \-ao <meghajtó1[:egység],meghajtó2,...[,]>
+Audio kimeneti meghajtók prioritizált listájának megadása (opcionálisan
+egységnévvel).
+\'egység' az SDL meghajtóval is használható. Ilyenkor az almeghajtót
+határozza meg.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-To get a full list of available drivers, see \-ao help.
+A teljes listához lásd az \-ao help opciót.
 .br
-If the list has a trailing ',' it will fallback to drivers not listed.
+Ha a lista végén van egy ',' karakter, akkor hiba esetén a fel nem
+sorolt meghajtók is kipróbálásra kerülnek.
 
-.I EXAMPLE
+.I PÉLDA
 .PD 0
 .RSs
 .IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-try to use OSS with the specified sound devices and fallback to others if it
-fails
+OSS használata a megadott egységekkel, más kimenetek használata ha
+sikertelen
 .IPs "\-ao sdl:esd"
-specify the SDL subdriver
+egy SDL almeghajtó használata
 .RE
 .PD 1
 .
 .TP
-.B \-aofile <filename>
-Filename for \-ao pcm.
+.B \-aofile <filenév>
+Filenév az \-ao pcm opciónak.
 .TP
-.B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
-Specify audio plugin(s) and their options (see documentation too).
+.B \-aop <list=plugin1,plugin2...:opció1=érték1:opc2=ért2...>
+Audio plugin(-ek) és opcióik megadása (lásd a dokumentációt).
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .
 .RSs
-.IPs list=[plugins]
-comma separated list of plugins (resample, surround, format, volume,
-extrastereo, volnorm)
+.IPs list=[pluginek]
+vesszõvel elválasztott listája a plugineknek (resample, surround,
+format, volume, extrastereo, volnorm)
 .IPs delay=<sec>
-example plugin, do not use.
+példa plugin, ne használd.
 .IPs format=<format>
-output format (format plugin only)
+kimeneti formátum megadása (csak a format pluginnel)
 .IPs fout=<Hz>
-output frequency (resample plugin only)
+kimeneti frekvencia (csak a resample pluginnel)
 .IPs volume=<0\-255>
-volume (volume plugin only)
-.IPs mul=<value>
-stereo coefficient (default: 2.5) (extrastereo plugin only)
+hangerõ (csak a volume pluginnel)
+.IPs mul=<érték>
+sztereó érték (alap: 2.5) csak az (extrastereo pluginnel)
 .IPs softclip
-compressor / 'soft\-clipping' capabilities (volume plugin only)
+compressor / 'soft\-clipping' opciók (csak a volume pluginnel)
 .RE
 .
 .TP
