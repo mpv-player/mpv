@@ -33,12 +33,17 @@ typedef struct roq_chunk_t
   int chunk_type;
   off_t chunk_offset;
   int chunk_size;
+
+  int video_chunk_number;  // in the case of a video chunk
+  int running_audio_sample_count;  // for an audio chunk
 } roq_chunk_t;
 
 typedef struct roq_data_t
 {
   int total_chunks;
   int current_chunk;
+  int total_video_chunks;
+  int total_audio_sample_count;
   roq_chunk_t *chunks;
 } roq_data_t;
 
@@ -62,30 +67,26 @@ int roq_check_file(demuxer_t *demuxer)
 //     1 = successfully read a packet
 int demux_roq_fill_buffer(demuxer_t *demuxer)
 {
+  sh_video_t *sh_video = demuxer->video->sh;
   roq_data_t *roq_data = (roq_data_t *)demuxer->priv;
   roq_chunk_t roq_chunk;
-  demux_stream_t *ds;
 
   if (roq_data->current_chunk >= roq_data->total_chunks)
     return 0;
 
   roq_chunk = roq_data->chunks[roq_data->current_chunk];
-  if (roq_chunk.chunk_type == CHUNK_TYPE_AUDIO)
-    ds = demuxer->audio;
-  else
-    ds = demuxer->video;
 
   // make sure we're at the right place in the stream and fetch the chunk
   stream_seek(demuxer->stream, roq_chunk.chunk_offset);
-  ds_read_packet(
-    ds,
-    demuxer->stream,
-    roq_chunk.chunk_size,
-//    roq_data->current_frame/sh_video->fps,
-    0,
-    roq_chunk.chunk_offset,
-    0
-  );
+
+  if (roq_chunk.chunk_type == CHUNK_TYPE_AUDIO)
+    ds_read_packet(demuxer->audio, demuxer->stream, roq_chunk.chunk_size,
+      roq_chunk.running_audio_sample_count / 22050,
+      roq_chunk.chunk_offset, 0);
+  else
+    ds_read_packet(demuxer->video, demuxer->stream, roq_chunk.chunk_size,
+      roq_chunk.video_chunk_number / sh_video->fps,
+      roq_chunk.chunk_offset, 0);
 
   roq_data->current_chunk++;
   return 1;
@@ -99,11 +100,14 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   roq_data_t *roq_data = (roq_data_t *)malloc(sizeof(roq_data_t));
   int chunk_id;
   int chunk_size;
-  int chunk_arg1;
-  int chunk_arg2;
+  int chunk_arg;
   int chunk_counter = 0;
   int last_chunk_id = 0;
+  int largest_audio_chunk = 0;
 
+  roq_data->total_chunks = 0;
+  roq_data->current_chunk = 0;
+  roq_data->total_video_chunks = 0;
   roq_data->chunks = NULL;
 
   // position the stream and start traversing
@@ -111,9 +115,8 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   while (!stream_eof(demuxer->stream))
   {
     chunk_id = stream_read_word_le(demuxer->stream);
-    chunk_size = stream_read_word_le(demuxer->stream);
-    chunk_arg1 = stream_read_word_le(demuxer->stream);
-    chunk_arg2 = stream_read_word_le(demuxer->stream);
+    chunk_size = stream_read_dword_le(demuxer->stream);
+    chunk_arg = stream_read_word_le(demuxer->stream);
 
     // this is the only useful header info in the file
     if (chunk_id == RoQ_INFO)
@@ -126,7 +129,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
       }
       else
       {
-        // make the header first
+        // this is a good opportunity to create a video stream header
         sh_video = new_sh_video(demuxer, 0);
         // make sure the demuxer knows about the new stream header
         demuxer->video->sh = sh_video;
@@ -134,7 +137,6 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         // parent video demuxer stream
         sh_video->ds = demuxer->video;
 
-        // this is a good opportunity to create a video stream header
         sh_video->disp_w = stream_read_word_le(demuxer->stream);
         sh_video->disp_h = stream_read_word_le(demuxer->stream);
         stream_skip(demuxer->stream, 4);
@@ -161,18 +163,19 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         // parent audio demuxer stream
         sh_audio->ds = demuxer->audio;
 
+        // go through the bother of making a WAVEFORMATEX structure
+        sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+
         // custom fourcc for internal MPlayer use
         sh_audio->format = mmioFOURCC('R', 'o', 'Q', 'A');
-        // assume it's mono until there's reason to believe otherwise
-        sh_audio->channels = 1;
+        if (chunk_id == RoQ_SOUND_STEREO)
+          sh_audio->wf->nChannels = 2;
+        else
+          sh_audio->wf->nChannels = 1;
         // always 22KHz, 16-bit
-        sh_audio->samplerate = 22050;
-        sh_audio->samplesize = 2;
+        sh_audio->wf->nSamplesPerSec = 22050;
+        sh_audio->wf->wBitsPerSample = 2;
       }
-
-      // if it's stereo, promote the channel number
-      if (chunk_id == RoQ_SOUND_STEREO)
-        sh_audio->channels = 2;
 
       // index the chunk
       roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
@@ -181,6 +184,14 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
       roq_data->chunks[chunk_counter].chunk_offset = 
         stream_tell(demuxer->stream) - 8;
       roq_data->chunks[chunk_counter].chunk_size = chunk_size + 8;
+      roq_data->chunks[chunk_counter].running_audio_sample_count =
+        roq_data->total_audio_sample_count;
+
+      // audio housekeeping
+      if (chunk_size > largest_audio_chunk)
+        largest_audio_chunk = chunk_size;
+      roq_data->total_audio_sample_count += 
+        (chunk_size / sh_audio->wf->nChannels);
 
       stream_skip(demuxer->stream, chunk_size);
       chunk_counter++;
@@ -196,6 +207,8 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
       roq_data->chunks[chunk_counter].chunk_offset = 
         stream_tell(demuxer->stream) - 8;
       roq_data->chunks[chunk_counter].chunk_size = chunk_size + 8;
+      roq_data->chunks[chunk_counter].video_chunk_number = 
+        roq_data->total_video_chunks++;
 
       stream_skip(demuxer->stream, chunk_size);
       chunk_counter++;
@@ -215,10 +228,18 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
     last_chunk_id = chunk_id;
   }
 
+  // minimum output buffer size = largest audio chunk * 2, since each byte
+  // in the DPCM encoding effectively represents 1 16-bit sample
+  // (store it in wf->nBlockAlign for the time being since init_audio() will
+  // step on it anyway)
+  sh_audio->wf->nBlockAlign = largest_audio_chunk * 2;
+
   roq_data->total_chunks = chunk_counter;
   roq_data->current_chunk = 0;
 
   demuxer->priv = roq_data;
+
+  stream_reset(demuxer->stream);
 
   return demuxer;
 }
