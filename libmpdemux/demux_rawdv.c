@@ -80,7 +80,7 @@ int rawdv_check_file(demuxer_t *demuxer)
 
    td->quality=DV_QUALITY_BEST;
    result=dv_parse_header(td, tmp_buffer);
-   if (result)
+   if (result<0)
       return 0;
 
    if ((( td->num_dif_seqs==10) || (td->num_dif_seqs==12))
