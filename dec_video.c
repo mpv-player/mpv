@@ -591,6 +591,7 @@ switch(d_video->demuxer->file_format){
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
    // Find sequence_header first:
+   videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence header... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
@@ -606,13 +607,13 @@ switch(d_video->demuxer->file_format){
 //   sh_video=d_video->sh;sh_video->ds=d_video;
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
-   videobuffer=memalign(8,VIDEOBUFFER_SIZE);
+   if(!videobuffer) videobuffer=memalign(8,VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot allocate shared memory\n");
      return 0;
 //     GUI_MSG( mplErrorShMemAlloc )
    }
-   videobuf_len=0;
+   
    if(!read_video_packet(d_video)){ 
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"FATAL: Cannot read sequence header!\n");
      return 0;
