@@ -23,6 +23,7 @@
 
 extern void rgb15to16_mmx(char* s0,char* d0,int count);
 extern int vo_dbpp;
+extern int verbose;
 
 LIBVO_EXTERN(svga)
 
@@ -113,6 +114,8 @@ static int checksupportedmodes() {
         case 3: bpp_avail |= BPP_24; break;
         case 4: bpp_avail |= BPP_32; break;
       }
+      if (verbose >= 2)
+        printf("vo_svga: Mode found: %s\n",vga_getmodename(i));
       if (add_mode(i, *minfo))
         return(1);
     }
@@ -137,7 +140,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   bpp_avail = 0;
   while (list != NULL) {
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
-//	printf("w: %d, h: %d, bpp: %d, colors: %d\n",list->modeinfo.width,list->modeinfo.height,list->modeinfo.bytesperpixel,list->modeinfo.colors);
       switch (list->modeinfo.colors) {
         case 32768: bpp_avail |= BPP_15; break;
         case 65536: bpp_avail |= BPP_16; break;
@@ -157,7 +159,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   if (!vo_dbpp) {
     if (format == IMGFMT_YV12) bpp = 32;
     else bpp = format & 255;
-//    printf("bpp: %d\n",bpp);
+    if (verbose)
+      printf("vo_svga: vo_dbpp == 0, bpp: %d\n",bpp);
     switch (bpp) {
       case 32: if (!(bpp_avail & BPP_32)) {
 	         printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
@@ -173,6 +176,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 } else {
 		     bpp = 32;
 		     bpp_conv = 1;
+		     if (verbose)
+		       printf("vo_svga: BPP conversion 24->32\n");
 		   }     
                break;
       case 16: if (!(bpp_avail & BPP_16)) {
@@ -189,11 +194,15 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 } else {
 		     bpp = 16;
 		     bpp_conv = 1;
+		     if (verbose)
+		       printf("vo_svga: BPP conversion 15->16\n");
 		   }
                break;
     }
   } else {
       bpp = vo_dbpp;
+      if (verbose)
+        printf("vo_svga: vo_dbpp == %d\n",bpp);
       switch (bpp) {
         case 32: if (!(bpp_avail & BPP_32)) {
 	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
@@ -219,10 +228,26 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
   list = modelist;
-//  printf("req_w: %d, req_h: %d\n",req_w,req_h);
+  if (verbose) {
+    printf("vo_svga: Looking for the best resolution...\n");
+    printf("vo_svga: req_w: %d, req_h: %d, bpp: %d\n",req_w,req_h,bpp);
+  }
   while (list != NULL) {
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
-//      printf("w: %d, h: %d, bpp: %d, colors: %d, req_bpp: %d\n",list->modeinfo.width,list->modeinfo.height,list->modeinfo.bytesperpixel,list->modeinfo.colors,bpp);
+      if (verbose) {
+        switch (list->modeinfo.colors) {
+          case 32768: printf("vo_svga: vid_mode: %d, %dx%d 15bpp\n",list->modenum,list->modeinfo.width,list->modeinfo.height);
+	              break;
+          case 65536: printf("vo_svga: vid_mode: %d, %dx%d 16bpp\n",list->modenum,list->modeinfo.width,list->modeinfo.height);
+	              break;
+        }
+        switch (list->modeinfo.bytesperpixel) {
+          case 3: printf("vo_svga: vid_mode: %d, %dx%d 24bpp\n",list->modenum,list->modeinfo.width,list->modeinfo.height);
+	          break;
+          case 4: printf("vo_svga: vid_mode: %d, %dx%d 32bpp\n",list->modenum,list->modeinfo.width,list->modeinfo.height);
+	          break;
+        }
+      }
       switch (bpp) {
         case 32: if (list->modeinfo.bytesperpixel == 4)
                    if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
@@ -257,7 +282,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     list = list->next;
   }
 
-//  printf("vid_mode: %d\n",vid_mode);
+  if (verbose)
+    printf("vo_svga: vid_mode: %d\n",vid_mode);
   vga_setlinearaddressing();
   if (vga_setmode(vid_mode) == -1) {
     printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
@@ -331,8 +357,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     }
   }
 
-//  printf("bpp_conv: %d\n",bpp_conv);
-  printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
+  printf("vo_svga: SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
   if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
 
