@@ -383,6 +383,12 @@ int af_init(af_stream_t* s, int force_output)
       if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE_RATE,
 				      &(s->output.rate))))
 	return -1;
+      // Use lin int if the user wants fast
+      if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_FAST) {
+        char args[32];
+	sprintf(args, "%d:0:0", s->output.rate);
+	af->control(af, AF_CONTROL_COMMAND_LINE, args);
+      }
       if(AF_OK != af_reinit(s,af))
       	return -1;
     }	
