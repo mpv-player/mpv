@@ -3308,7 +3308,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
     dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => 0\n", s, s, lpfd);
     strcpy(lpfd->cFileName, "msms001.vwp");
     strcpy(lpfd->cAlternateFileName, "msms001.vwp");
-    return (HANDLE)-1;
+    return (HANDLE)0;
 }
 
 static WIN_BOOL WINAPI expFindClose(HANDLE h)
