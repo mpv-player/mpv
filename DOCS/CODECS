@@ -105,3 +105,62 @@ Not tested:
   acelpdec.ax: not tested (no sample file)
 - IMC:  (0x401)
   imc32.acm: not tested (no sample file)
+
+Extracting codecs from Win32
+============================
+
+1. VfW
+~~~~~~
+  VfW (Video for Windows) is the old Video API for Windows. Its codecs have
+the .DLL or (rarely) .DRV extension.
+If MPlayer fails with your AVI:
+
+        UNKNOWN video codec: HFYU (0x55594648)
+
+  It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
+HuffYUV codec, DIV3 = DivX Low Motion, etc...). Now that we know this, we'll
+have to find out which DLL Windows loads in order to play this file. In our
+case, the system.ini contains this (with many others):
+        VIDC.HFYU=huffyuv.dll
+So we'll need the huffyuv.dll file. Note that the audio codecs are specified
+with the MSACM prefix :
+	msacm.l3acm=L3codeca.acm
+This is the MP3 codec.
+
+So, now we have all the info needed (fourcc, codec file, sample AVI), submit a
+bugreport, and upload the files to thot.banki.hu/incoming/MPlayer
+(also see DOCS/README !!!) .
+
+2. DirectShow
+~~~~~~~~~~~~~
+  DirectShow is the newer Video API, which is even worse than its predecessor.
+Things are harder with DirectShow, since
+ - system.ini doesn't contain the needed information, instead it's stored in
+   the registry :(
+ - we'll need the GUID of the codec.
+
+  So let's search that goddamn registry..
+ - Start 'regedit'
+ - press ctrl-f, disable the first two checkbox, and enable the third. Type
+the fourcc of the codec. (for ex.: TM20)
+ - you should see a field which contains the path and filename
+   (for ex. : C:\WINDOWS\SYSTEM\TM20DEC.AX)
+ - now that we have the file, we'll need the GUID. Try searching again, but
+now we'll search for the codec's name, not the fourcc. Its name can be acquired
+when Media Player is playing that file, by checking File/Properties/Advanced.
+If not, bad luck ;) Try guessing.
+   (for ex. search for : TrueMotion)
+ - if found (in registry), there should be a FriendlyName field, and a CLSID
+field. Write down that 16 byte of CLSID.
+
+NOTE : if searching fails, try to enable all the checkboxes.. you may have
+       false hits, but maybe you'll have the right, too...
+NOTE : dump that M$ shit.
+
+So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
+submit a bugreport, and upload the files to thot.banki.hu/incoming/MPlayer
+(also see DOCS/README !!!) .
+
+
+
+	Gabucino & A'rpi
