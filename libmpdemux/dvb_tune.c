@@ -90,8 +90,12 @@ int dvb_get_tuner_type(int fe_fd)
 
 }
 
-int dvb_open_devices(dvb_priv_t *priv, int n)
+int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
+
+int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids)
 {
+	int i;
+	
 	priv->fe_fd = open(dvb_frontenddev[n], O_RDWR | O_NONBLOCK);
 	if(priv->fe_fd < 0)
 	{
@@ -109,18 +113,21 @@ int dvb_open_devices(dvb_priv_t *priv, int n)
       	return 0;
     }
 #endif
-	priv->demux_fd[0] = open(dvb_demuxdev[n], O_RDWR);
-	if(priv->demux_fd[0] < 0)
+	priv->demux_fds_cnt = 0;
+	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
+	for(i = 0; i < demux_cnt; i++)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
-		return 0;
-	}
-
-	priv->demux_fd[1] = open(dvb_demuxdev[n], O_RDWR);
-	if(priv->demux_fd[1] < 0)
-	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 1: %d\n", errno);
-		return 0;
+		priv->demux_fds[i] = open(dvb_demuxdev[n], O_RDWR | O_NONBLOCK);
+		if(priv->demux_fds[i] < 0)
+		{
+			mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
+			return 0;
+		}
+		else
+		{
+			mp_msg(MSGT_DEMUX, MSGL_V, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, dvb_demuxdev[n], priv->demux_fds[i], priv->demux_fds_cnt);
+			priv->demux_fds_cnt++;
+		}
 	}
 
 
@@ -135,6 +142,38 @@ int dvb_open_devices(dvb_priv_t *priv, int n)
 }
 
 
+int dvb_fix_demuxes(dvb_priv_t *priv, int cnt, int *pids)
+{
+	int i;
+	
+	mp_msg(MSGT_DEMUX, MSGL_V, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
+	if(priv->demux_fds_cnt >= cnt)
+	{
+		for(i = priv->demux_fds_cnt-1; i >= cnt; i--)
+		{
+			mp_msg(MSGT_DEMUX, MSGL_V, "FIX, CLOSE fd(%d): %d\n", i, priv->demux_fds[i]);
+			close(priv->demux_fds[i]);
+		}
+		priv->demux_fds_cnt = cnt;
+	}
+	else if(priv->demux_fds_cnt < cnt)
+	{
+		for(i = priv->demux_fds_cnt; i < cnt; i++)
+		{
+			priv->demux_fds[i] = open(dvb_demuxdev[priv->card], O_RDWR | O_NONBLOCK);
+			mp_msg(MSGT_DEMUX, MSGL_V, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
+			if(priv->demux_fds[i] < 0)
+			{
+				mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
+				return 0;
+			}
+			else
+				priv->demux_fds_cnt++;
+		}	
+	}
+	
+	return 1;
+}
 
 int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 {
@@ -152,6 +191,7 @@ int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 
 	pesFilterParams.flags   = DMX_IMMEDIATE_START;
 
+	errno = 0;
 	if ((i = ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams)) < 0)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN SETTING DMX_FILTER %i for fd %d: ERRNO: %d", pid, fd, errno);

@@ -32,12 +32,15 @@
 
 #include "inttypes.h"
 
+#ifndef DMX_FILTER_SIZE
+#define DMX_FILTER_SIZE 16
+#endif
 
 typedef struct {
 	char 				*name;
 	int 				freq, srate, diseqc, tone;
 	char 				pol;
-	int 				vpid, apid1, apid2, tpid, dpid1, dpid2, progid, ca;
+	int 				tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
 	fe_spectral_inversion_t 	inv;
 	fe_modulation_t 		mod;
 	fe_transmit_mode_t 		trans;
@@ -71,7 +74,7 @@ typedef struct {
 	int card;
     int fe_fd;
     int sec_fd;
-    int demux_fd[3];
+    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
     int dvr_fd;
 
     dvb_config_t *config;
