@@ -4,7 +4,8 @@
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
 <P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
-<BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></CENTER></P>
+<BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
+<A HREF="Hungarian/documentation.html">[ Hungarian translation ]</A></CENTER></P>
 
 <P><HR></P>
 
@@ -98,6 +99,7 @@
 </LI><UL><LI><A HREF="#A2">A/2. Maintainers</A></LI></UL>
 </LI><LI><A HREF="#B">B. Mailing lists</A>
 </LI><LI><A HREF="bugreports.html">C. How to report bugs</A>
+</LI><LI><A HREF="#D">D. Known bugs</A>
 
 </LI></UL></P>
 
@@ -170,6 +172,22 @@ too. So I've decided to write/modify one...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
+<P>You'll need the following packages and versions if you don't want to
+experience any problems:<BR>
+<UL>
+  <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
+  responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
+  <LI><B>gcc</B> - suggested version is from <B>2.95.2</B> to <B>2.95.4</B>.
+  <B>NEVER</B> use 2.96 or 3.x.x !!! They generate faulty code.</LI>
+  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.1.0)</B>. Normally
+  everyone wants this. If you don't know why, you <B>do</B> need it.</LI>
+  <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
+  usually isn't important.</LI>
+</UL>
+</P>
+
+<P>Read the following before trying to compile <B>MPlayer</B>:</P>
+
 <UL>
 <LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
 Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
@@ -179,7 +197,7 @@ our package! However, you can use our codecs package with avifile.</LI>
 
 <LI>If you own a Matrox G200/G400/G450 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
 section in order to gain big speedup. It is important to do these steps
-_before_ compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
+<I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built.</LI>
 
 <LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
@@ -444,9 +462,10 @@ are not available. However, <B>DivX/OpenDivX</B> movies should work,
 when using libavcodec.</P>
 
 <P>On <B>UltraSPARC</B>s, <B>MPlayer</B> takes advantage of their <B>VIS</B>
-extensions (equivalent to MMX), currently only(?) in <I>libmpeg2</I> and <I>libvo</I>, not
-libavcodec/mp3lib. You can watch a VOB file on a 400Mhz CPU. You'll need
-<A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
+extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
+<I>libvo</I> and <I>libavcodec</I>, but not in mp3lib. You can watch a VOB file
+on a 400Mhz CPU. You'll need <A
+HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
 
 <P>To build the package you will need GNU make (gmake, /opt/sfw/gmake), native
 Solaris make will not work. Typical error you get when building with solaris'
@@ -659,6 +678,7 @@ all data is accessed modulo 4GB
 </LI><LI>configure fixes
 </LI><LI>various fixes (win32, configure, etc)
 </LI><LI>SUN audio driver in libao2
+</LI><LI>mediaLib support in libavcodec
 </LI></UL>
 
 </LI><LI>Vladimir Kushnir: &lt;vkushnir@Alfacom.net&gt;
@@ -890,6 +910,79 @@ otherwise.  Please do not send messages using other language!</P>
 
 
 <P><B><A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A></B></P>
+
+<P><B><A NAME=D>Appendix D - Known bugs</A></B></P>
+
+<P>Special system/cpu-specific bugs/problems:</P>
+<UL>
+<LI> SIGILL (signal 4) in draw_frame, on P3 (mostly with 2.2.x kernels):<BR>
+  Problem: movups is crashing in libvo/fastmemcpy.h<BR>
+  Workaround:  ./configure --disable-fastmemcpy<BR>
+  SOLVED: disabled SSE code in fastmemcpy.h ;(</LI>
+
+<LI>No image (black image) in RGB 15/16bpp (x11,dga,fbdev,svga) playing
+  MPEG or OpenDivX files:<BR>
+  Problem: gcc 2.96 bug<BR>
+  Workaround: ./configure --disable-mmx, or use gcc 2.95.x<BR>
+  SOLVED: code fixed<LI>
+
+<LI>SIGILL (signal 4) or other fault at loading l3codeca.acm:<BR>
+  Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx<BR>
+  Workaround: mplayer -afm 1 ...<BR>
+  SOLVED: you are using some security kernel patch, like OpenWall etc.</LI>
+
+<LI>SIGILL (signal 4) on P3 using 2.2.x kernels:<BR>
+  Problem: kernel 2.2.x doesn't have proper (working) SSE support<BR>
+  Solution: upgrade kernel to 2.4.x<BR>
+  Workaround: ./configure --disable-sse<BR>
+
+<LI>General SIGILL (signal 4):<BR>
+  Problem: you compiled and run mplayer in different machines
+  (for example compiled on P3 and running on celeron)<BR>
+  Solution: compile MPlayer on the same machine where you will use it!<BR>
+  Workaround: ./configure --disable-sse etc. options<BR>
+</UL>
+
+<P>Various A-V sync and other audio problems:</P>
+
+General audio delay or jerky sound (exists with all or many files):<BR>
+<UL>
+<LI>audio buffer problems (buffer size badly detected)<BR>
+  Workaround:  mplayer -abs option</LI>
+<LI>slow machine (cpu or vga)<BR>
+  try with -vo null, if it plays well, then you have slow VGA card/driver<BR>
+  Workaround: buy a faster card or read this documentation about how to speed up<BR>
+  SOLVED: try -framedrop</LI>
+</UL><BR>
+
+Audio delay/de-sync specific to one or a few files:<BR>
+<UL>
+<LI>bad file (please upload the file, so we can check & fix)<BR>
+  Workaround: -ni or -bps option   (for non-interlaved or bad files)<BR>
+              -mc 0   (required for files with VBR audio)<BR>
+              -delay option or +/- keys at runtime to adjust delay</LI>
+<LI>your soundcard doesn't support 48Khz playback<BR>
+  Workaround: buy a better soundcard...  or try to decrease fps by 10% (use -fps 27 for a 30fps movie)</LI>
+<LI>slow machine<BR>
+  (if A-V is not around 0, and the last number in the status line increasing)<BR>
+  Workaround: -framedrop</LI>
+</UL><BR>
+
+No sound at all:<BR>
+<UL>
+<LI>your file uses an unsupported codec<BR>
+  Workaround: read the documentation and help us adding support for it</LI>
+</UL>
+
+<P>Video-out problems:</P>
+
+<P>First note: options -fs -vm and -zoom are just recommendations, not (yet)
+supported by all drivers. So it isn't a bug if it doesn't work.
+Only a few driver supports scaling/zooming, don't expect this from x11 or dga.</P>
+
+<P>OSD/sub flickering:<BR>
+- x11 driver: sorry, it can't be fixed now<BR>
+- xv driver: use -double option</P>
 
 </BODY>
 </HTML>
