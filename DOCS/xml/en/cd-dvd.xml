@@ -115,18 +115,6 @@ facilities.
 </para></note>
 
 <formalpara>
-<title>Old-style DVD support - OPTIONAL</title>
-<para>
-Useful if you want to play encoded VOBs from <emphasis role="bold">hard disk</emphasis>.
-Compile and install <emphasis role="bold">libcss</emphasis> 0.0.1 (not newer) for this
-(If <application>MPlayer</application> fails to detect it, use the
-<option>-csslib /path/to/libcss.so</option> option). To use it, you need to be root,
-use a suid root <application>MPlayer</application> binary or let
-<application>MPlayer</application> call the suid-root fibmap_mplayer wrapper program.
-</para>
-</formalpara>
-
-<formalpara>
 <title>DVD structure</title>
 <para>
 DVD disks have 2048 bytes per sector with ECC/CRC. They usually have an UDF
@@ -146,31 +134,14 @@ content.
 </para>
 
 <para>
-The whole old-style DVD support with <systemitem>libcss</systemitem> therefore
-needs a mounted DVD filesystem and raw sector-based access to the device.
-Unfortunately you must (under Linux) be root to get the sector address of a
-file. You have the following choices:
-
-<itemizedlist>
-<listitem><para>
-Be root or use a suid-root <application>MPlayer</application> binary.
-</para></listitem>
-
-<listitem><para>
-Let <application>MPlayer</application> call the suid-root fibmap_mplayer
-wrapper program to access the DVD (used in the old-style DVD playback over
-<systemitem>libcss</systemitem>).
-</para></listitem>
-
-<listitem><para>
-Don't use the kernel's filesystem driver at all and reimplement it in
-userspace. <systemitem>libdvdread</systemitem> 0.9.x and <systemitem>libmpdvdkit</systemitem>
-do this (new-style DVD support). The kernel UDF filesystem driver is not
-needed as they already have their own builtin UDF filesystem driver.
-Also the DVD does not have to be mounted as only the raw sector-based
-access is used.
-</para></listitem>
-</itemizedlist>
+DVD support needs raw sector-based access to the device. Unfortunately you must
+(under Linux) be root to get the sector address of a file. That's why we don't
+use the kernel's filesystem driver at all, instead we reimplement it in
+userspace. <systemitem>libdvdread</systemitem> 0.9.x and
+<systemitem>libmpdvdkit</systemitem> do this. The kernel UDF filesystem driver
+is not needed as they already have their own builtin UDF filesystem driver.
+Also the DVD does not have to be mounted as only the raw sector-based access is
+used.
 </para>
 
 <para>

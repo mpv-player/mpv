@@ -697,10 +697,6 @@ Read HTTP cookies from this file. The file is assumed to be in Netscape format.
 If you give this option, MPlayer will not look for cookies in "~/.netscape/"
 and "~/.mozilla/".
 .TP
-.B \-csslib <filename>
-(old-style DVD option) This option is used to override the default location of
-libcss.so.
-.TP
 .B \-demuxer <number>
 Force demuxer type.
 Give the demuxer ID as defined in demuxers.h.
@@ -744,14 +740,6 @@ Override default DVD device name /dev/\:dvd.
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
 Examples can be found below.
-.TP
-.B \-dvdauth <DVD\ device>
-(old-style DVD option) Turns on DVD authentication using the given device.
-.TP
-.B \-dvdkey <CSS\ key>
-(old-style DVD option) When decoding a VOB file copied undecrypted from DVD,
-this option gives the CSS key needed to decrypt the VOB (the key is printed
-when authenticating with the DVD drive using \-dvdauth).
 .TP
 .B \-forceidx
 Force rebuilding of INDEX.
@@ -4651,9 +4639,6 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Playing from a different DVD device
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
-.TP
-.B Old style DVD (VOB) playing
-mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
 .TP
 .B Stream from HTTP
 mplayer http://mplayer.hq/\:example.avi

@@ -672,10 +672,6 @@ Itt adható meg, hogy a lejátszás mely fejezetnél kezdõdjön. Opcionálisan az
 is megadható, hogy melyiknél végzõdjön (alapban: 1).
 Példákat lásd alább.
 .TP
-.B \-csslib <filenév>
-(régi tipusú DVD opció) Ezzel az opcióval felül lehet bírálni a libcss.so
-alapértelmezett helyét.
-.TP
 .B \-demuxer <szám>
 Használandó demuxer tipusának felülbírálata.
 A demuxers.h file-ban leírt ID-k lehetnek a paraméterek.
@@ -723,15 +719,6 @@ Néhány DVD lemezen egyes jelenetek több szemszögbõl is megtekinthetõk.
 Itt adható meg az MPlayer-nek, hogy mely szögeket jelenítse meg
 (alapban: 1).
 Példákat lásd alább.
-.TP
-.B \-dvdauth <DVD\ egység>
-(régi tipusú DVD opció) Bekapcsolja a DVD autentikációt a megadott egységre.
-.TP
-.B \-dvdkey <CSS\ kulcs>
-(régi tipusú DVD opció) Egy DVD-rõl dekódolatlanul HDD-re másolt VOB file
-lejátszásához szükséges ez az opció, mely megadja a dekódoláshoz
-szükséges CSS kulcsot (amelyet a \-dvdauth opcióval történõ autentikációval
-lehet megszerezni).
 .TP
 .B \-forceidx
 INDEX újraépítésének kényszerítése.
@@ -3631,9 +3618,6 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Más DVD egység használata
 mplayer dvd://1 \-dvd\-device /dev/\:dvd2
-.TP
-.B Régi tipusú DVD (VOB) lejátszás
-mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
 .TP
 .B HTTP stream lejátszása
 mplayer http://mplayer.hq/\:example.avi

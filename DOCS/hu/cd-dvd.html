@@ -88,14 +88,6 @@
 <P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban volt, de
   soha nem készült el. Jelenleg nem használható.</P>
 
-<P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
-
-<P>Ez akkor hasznos ha pl <B>merevlemezrõl</B> akarsz kódolt VOB-ot lejátszani.
-  Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
-  Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
-  opciót. Root jogokkal, vagy egy suid root binárissal kell rendelkezned a
-  használatához.</P>
-
 <H4>A DVD-k struktúrája</H4>
 
 <P>A DVD lemezek 2048 b/s szektorokat használnak ecc/crc-vel. Általában
@@ -109,17 +101,12 @@
   navigáció helyes implementálásához ezt át kell számítani. Szükséges
   továbbá a file-ok titkosításának megszüntetése.</P>
 
-<P>Az imént felsorolt okok miatt a régi tipusú DVD támogatás egy mountolt
-  DVD filerendszert igényel, és szektor szintû hozzáférést az egységhez.
-  Linux alatt ehhez sajnos root jogokkal kell rendelkezni. Ennek
-  megoldására két lehetõség van:</P>
-
-<UL>
-  <LI>Root jogok megadása, vagy egy suid root bináris használata.</LI>
-  <LI>Az UDF filerendszer implementálása userspace-ben. A libdvdread 0.9.x és
-    a libmpdvdkit ezt csinálja (Új típusú DVD támogatás). A kernel UDF
-    meghajtójára nincs szükség. A DVD-t sem kell mountolni, mivel csak a
-    szektor alapú hozzáférés lesz érvényben.</LI>
+<P>Az imént felsorolt okok miatt a DVD támogatás szektor szintû hozzáférést
+  igényel az egységhez. Linux alatt ehhez sajnos root jogokkal kell
+  rendelkezni. Ennek megoldásaképp az UDF filerendszert userspace-ben kell
+  implementálni. A libdvdread 0.9.x és a libmpdvdkit ezt csinálja. A kernel UDF
+  meghajtójára nincs szükség. A DVD-t sem kell mountolni, mivel csak a szektor
+  alapú hozzáférés lesz érvényben.</LI>
 </UL>
 
 <P>Néha a /dev/dvd felhasználók számára nem hozzáférhetõ, így a libdvdread
