@@ -59,8 +59,8 @@
 #define LOG
 */
 
-#define BUF_SIZE 1024
-#define HEADER_SIZE 1024
+#define BUF_SIZE 4096
+#define HEADER_SIZE 4096
 
 struct pnm_s {
 
