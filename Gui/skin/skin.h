@@ -5,8 +5,6 @@
 #include "../app.h"
 
 extern listItems     * skinAppMPlayer;
-//extern listItems     * skinAppTV;
-//extern listItems     * skinAppRadio;
 
 extern int skinRead( char * dname  );
 extern int skinBPRead( char * fname, txSample * bf );

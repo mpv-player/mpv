@@ -516,7 +516,7 @@ int guiGetEvent( int type,char * arg )
 	 {
 	  case guiSetPlay: 
 	       guiIntfStruct.Playing=1;
-	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+//	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
 	       break;
 	  case guiSetStop:
 	       guiIntfStruct.Playing=0;

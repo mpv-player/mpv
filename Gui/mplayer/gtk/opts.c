@@ -688,6 +688,7 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
 
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 {
+ int window;
  switch ( (int)user_data )
   {
    case 0: // extra stereo coefficient
@@ -707,9 +708,11 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 	  }
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ) ) )
 	 {
-	  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+	  window=wsShowWindow;
 	  gtkActive( Preferences );
-	 } else wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	 } else window=wsHideWindow;
+
+	if ( !guiIntfStruct.Playing ) wsVisibleWindow( &appMPlayer.subWindow,window );
 	break;
    case 4:
    case 5:
