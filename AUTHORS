@@ -590,6 +590,7 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
     * QuickTime audio+video decoding, video encoding (using Win32 DLLs) support
     * MinGW port, Cygwin fixes
     * winvidix driver
+    * cvidix driver
     * nvidia_vid driver
     * dhahelperwin for direct hardware access under Windows NT/2000/XP
 
@@ -615,6 +616,9 @@ Tlalka, Adam (atlka) <atlka@pg.gda.pl>
     * OSD/subtitle review, fixes, optimization, UTF8 support
     * various fixes
 
+Tiesi, Gianluigi <sherpya@netfarm.it>
+    * ac3 passthrough support for AO win32
+    
 Togni, Roberto (rxt) <r_togni@tiscali.it>
     * open source QT RPZA decoder
     * open source HuffYUV decoder
