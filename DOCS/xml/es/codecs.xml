@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.20 -->
+<!-- synced with 1.24 -->
 <sect1 id="codecs">
 <title>Codecs soportados</title>
 
@@ -195,10 +195,9 @@ lo detecta, puede que no esté instalado o configurado correctamente.
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contiene un paquete de
 codec <emphasis role="bold">de código abierto</emphasis> que es capaz de decodificar
-flujos codificados con codecs de video H263/MJPEG/LJPEG/RV10/DivX3/DivX4/DivX5/MP41/
-MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3/MPEG1/MPEG2/VCR1/VCR2/ASV1/ASV2/CLJR,
-o WMA (Windows Media Audio). No solo todos pueden ser decodificados con él, sino que
-¡también ofrece una velocidad mayor que la biblioteca de codecs Win32 o DivX.com DivX4.5!
+flujos con varios codecs de audio y video. ¡También ofrece una facilidad
+impresionante para codificar y una velocidad mayor que los codecs Win32 o las
+bibliotecas DivX.com DivX4/5!
 </para>
 
 <para>
@@ -211,35 +210,45 @@ el decodificador de WMA.
 <para>
 El codec más reciente merecedor de créditos es el codec
 <emphasis role="bold">Sorenson 3</emphasis> (SVQ3). Es la primera implementación
-de código abierto completa de éste codec. Es incluso más rápido que el original.
+de código abierto. Es incluso más rápido que el original.
 ¡Asegúrese de que prefiere éste antes que el codec binario!
 </para>
+
+<para>
+Para una lista completa de los codecs soportados visite la página de FFmpeg.
+Codecs soportados de <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
+y de <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>.
 
 <para>
 Si usa una liberación de <application>MPlayer</application> que tiene libavcodec
 dentro del paquete, constrúyalo de la manera habitual. Si usa
 <application>MPlayer</application> desde CVS debe extraer libavcodec desde
-el árbol CVS de FFmpeg ya que las liberaciones de FFmpeg
-<emphasis role="bold">no</emphasis> funcionan con <application>MPlayer</application>.
-Para hacer esto haga:
+el árbol CVS de FFmpeg ya que las liberaciones de FFmpeg son raras. El CVS es bastante
+estable y ofrece muchas características. Para ello haga lo siguiente:
 </para>
 
 <procedure>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
   </para></step>
 <step><para>
   
   Mueva el directorio <filename>libavcodec</filename> desde los fuentes
   de FFmpeg al raíz del árbol CVS de <application>MPlayer</application>.
   Debe quedar como ésto:
-  <filename>main/libavcodec</filename>
+  <filename class="directory">>main/libavcodec</filename>
   </para><para>
   Hacer enlace simbólico <emphasis role="bold">no</emphasis> es suficiente,
   ¡debe copiarlo/moverlo!
+  </para></step>
+<step><para>
+  Si prefiere tener libavcodec actualizado al mismo tiempo que actualiza
+  el CVS de <application>MPlayer</application>, ponga la siguiente línea en
+  su archivo <filename>main/CVS/Entries</filename>:
+  <screen>D/libavcodec////</screen>
   </para></step>
 <step><para>
   Compile. <filename>configure</filename> debe detectar los problemas antes

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.20 -->
+<!-- synced with 1.23 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -205,21 +205,24 @@ mplayer-users por un controlador con soporte para MMX/3DNow.
 <title>Tarjetas nVidia</title>
 
 <para>
-nVidia no son una buena elección bajo Linux (de acuerdo con nVidia esto
-<link linkend="nvidia-opinions">no es verdad</link>)... Tiene que usar un
-controlador de código-cerrado de nVidia, disponible en el sitio web de
-nVidia. El controlador estándar de XFree86 no tiene soporte de XVideo para
-estas tarjetas, debido a las especificaciones/código cerrados de nVidia.
+nVidia no es siempre una buena elección bajo Linux (de acuerdo con nVidia esto
+<link linkend="nvidia-opinions">no es verdad</link>)... El controlador de
+código abierto de XFree86 tiene soporte en la mayoría de los casos, pero para
+algunas tarjetas, tiene que usar un controlador de código-cerrado de nVidia,
+disponible en el sitio web de nVidia. Siempre necesitará ese controlador de
+todos modos si quiere también aceleración 3D.
 </para>
 
 <para>
-Hasta donde tengo entendido el último controlador de XFree86 contiene soporte
-XVideo para GeForce 2 y 3.
+Las tarjetas Riva128 no tienen soporte XVideo con el controlador nVidia de
+XFree86 :( Las quejas a nVidia.
 </para>
 
 <para>
-Las tarjetas Riva128 no tienen soporte XVideo incluso ni con el controlador
-de nVidia :( Quejas a nVidia.
+Sin embargo, MPlayer contiene un controlador <link linkend="vidix">Vidix</link>
+(<link linkend="vidix-nvidia">nvidia_vid</link>) para la mayoría de las
+tarjetas nVidia. Actualmente está en estado beta, y tiene algunos problemas.
+Para más información, <link linkend="vidix-nvidia">clic aquí</link>.
 </para>
 </sect5>
 
@@ -284,6 +287,12 @@ Si quiere usar xv con una tarjeta trident, sepa que no funciona con
 4.1.0, instale XFree 4.2.0. 4.2.0 añade soporte para xv en pantalla completa
 con la tarjeta Cyberblade XP.
 </para>
+
+<para>
+Alternativamente, MPlayer contiene un controlador <link linkend="vidix">Vidix</link>
+para la tarjeta Cyberblade/i1.
+</para>
+
 </sect5>
 
 
@@ -1349,6 +1358,15 @@ de la reproducción de video.
   video, puede usar la opción "XaaNoPixmapCache" en la sección screen en su lugar.
   </simpara></listitem>
 <listitem><simpara>
+  Hay un controlador de consola vidix: <option>-vo cvidix</option>.
+  Requiere un framebuffer inicializado y funcionando para muchas tarjetas (o
+  fastidiará su pantalla), y obtendrá un efecto similar al que se obtiene con
+  <option>-vo mga</option> o <option>-vo fbdev</option>. Las tarjetas nVidia, sin
+  embargo, son capaces de mostrar gráficos reales de video sobre una consola
+  de texto real. Vea la <link linkend="vidix-nvidia">sección nvidia_vid</link>
+  para más información.
+  </simpara></listitem>
+<listitem><simpara>
   Puede usar el subdispositivo VIDIX aplicado a varios controladores de salida
   de video, tales como: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">solo en Linux</emphasis>) y <option>-vo fbdev:vidix</option>.
@@ -1363,11 +1381,8 @@ Como ve no impora qué controlador de salida de video se usa con
 <itemizedlist spacing="compact">
 <title>REQUISITOS</title>
 <listitem><simpara>
-  La tarjeta gráfica debe estár en modo gráfico (he escrito
-  <emphasis role="bold">debe</emphasis> símplemente porque lo he probado en
-  modo-texto - funciona pero tiene una salida poco útil ;) Use AAlib para eso).
-  <emphasis role="bold">Nota</emphasis>: Todo el mundo puede probar este truco
-  comentando el modo al cambiar el controlador vo_vesa.
+  La tarjeta gráfica debe estar en modo gráfico (excepto las tarjetas nVidia
+  con el controlador de salida <option>-vo cvidix</option>.
   </simpara></listitem>
 <listitem><simpara>
   El controlador de salida de video de <application>MPlayer</application> debe
@@ -1491,11 +1506,9 @@ puede ser encontrado en las placas base VIA Epia.
 </para>
 
 <para>
-El controlador ha sido escrito y es mantenido por Alastair M. Robinson, quien
-ofrece las últimas versiones para descarga en su
-<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">página personal</ulink>.
-Los controladores son añadiros a <application>MPlayer</application> con solo un poco
-de retardo, ya que CVS siempre debe estar actualizado.
+El controlador ha sido escrito y es mantenido por, 
+<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M.
+Robinson</ulink>.
 </para>
 </sect5>
 
@@ -1515,11 +1528,35 @@ con los chipset Riva 128, TNT y GeForce2, también se nos ha informado de que fun
 con otros.
 </para>
 
+<itemizedlist spacing="compact">
+<title>LIMITACIONES</title>
+<listitem><para>
+  Es recomendable usar los controladores binarios de nVidia para X antes de usar el
+  controlador VIDIX, porque algunos de los registros que es necesario inicializar
+  aún no han sido descubiertos, por lo que probablemente falle con el controlador
+  de Código Abierto de XFree86 <filename>nv.o</filename>.
+  </para></listitem>
+<listitem><para>
+  Actualmente solo los codecs que tienen salida en el espacio de color UYVY son los
+  que funcionan junto con este controlador. Desafortunadamente, esto excluye
+  todo decodificador simple de la familia libavcodec. Esto nos deja con los
+  siguientes codecs populares usables: <systemitem>cvid, divxds, xvid, divx4,
+  wmv7, wmv8</systemitem> y algunos otros. Por favor tenga en cuenta que esto
+  es solo algo temporal. La sintaxis de uso es la siguiente:
+  <screen>
+    mplayer -vf formay=uyvy -vc divxds archivodivx3.avi
+  </screen>
+  <para></listitem>
+</itemizedlist>
+
 <para>
-Es recomendable usar los controladores binarios de nVidia para X antes de usar el
-controlador VIDIX, porque algunos de los registros que es necesario inicializar
-aún no han sido descubiertos, por lo que probablemente falle con el controlador
-de Código Abierto de XFree86 <filename>nv.o</filename>.
+  Una característica única del controlador nvidia_vid es la habilidad de mostrar
+  video en <emphasis role="bold">una consola de texto solo, plano y puro</emphasis>
+  - sin framebuffer o X magic ni nada. Para conseguir esto, se ha de usar la
+  salida de video <option>cvidix</option>, como muestra el siguiente ejemplo:
+  <screen>
+    mplayer -vf formay=uyvy -vc divxds -vo cvidix ejemplo.avi
+  </screen>
 </para>
 
 <para>
