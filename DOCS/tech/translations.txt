@@ -58,3 +58,8 @@ clumsy wording, spelling/grammar errors or if you notice that something is
 incomplete, please let us know, we'll fix it. Patches are more than welcome,
 of course. Do not, however, change the translation first, please get your
 update into the English version first.
+
+If you have CVS access and commit a translation update file, use something like
+"synced with 1.XXX" as first line of the commit message so that it is possible
+to tell with a glance at the cvs log or viewcvs if the translation is outdated
+and which revision of the English master file it is equivalent to.
