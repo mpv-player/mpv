@@ -701,7 +701,7 @@ void XA_YUV221111_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned 
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 #endif
 
-if(imagex==image->width && imagey==image->height){
+if(i_x==image->width && i_y==image->height){
 //    printf("Direct render!!!\n");
     image->planes[0]=yuv->Ybuf;
     if(image->out_fmt==IMGFMT_YV12){
@@ -711,11 +711,18 @@ if(imagex==image->width && imagey==image->height){
 	image->planes[1]=yuv->Vbuf;
 	image->planes[2]=yuv->Ubuf;
     }
-    image->stride[0]=imagex; // yuv->y_w
-    image->stride[1]=image->stride[2]=imagex/2; // yuv->uv_w
+    image->stride[0]=i_x; // yuv->y_w
+    image->stride[1]=image->stride[2]=i_x/2; // yuv->uv_w
 } else {
-    printf("partial YV12 not implemented!!!!!!\n");
-
+    int y;
+//    printf("partial YV12 not implemented!!!!!!\n");
+    for(y=0;y<i_y;y++)
+	memcpy(image->planes[0]+y*image->stride[0],yuv->Ybuf+y*i_x,i_x);
+    i_x>>=1; i_y>>=1;
+    for(y=0;y<i_y;y++){
+	memcpy(image->planes[1]+y*image->stride[1],yuv->Ubuf+y*i_x,i_x);
+	memcpy(image->planes[2]+y*image->stride[2],yuv->Vbuf+y*i_x,i_x);
+    }
 }
     return;
 }
