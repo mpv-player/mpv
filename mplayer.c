@@ -14,6 +14,7 @@
 
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/mman.h>
 
 #include <sys/types.h>
@@ -89,7 +90,7 @@ extern int errno;
 
 #define DEBUG if(0)
 #ifdef HAVE_GUI
- int nogui=1; // new
+ int nogui=1;
 #endif
 int verbose=0;
 
@@ -354,6 +355,9 @@ extern void avi_fixate();
 
 #ifdef HAVE_GUI
  #include "../Gui/mplayer/psignal.h"
+ #define GUI_MSG(x) if ( !nogui ) { mplSendMessage( x ); usleep( 10000 ); }
+#else
+ #define GUI_MSG(x)
 #endif
 
 void exit_player(char* how){
@@ -583,9 +587,7 @@ if(!filename){
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
     printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
-    #ifdef HAVE_GUI
-     if ( !nogui ) { mplSendMessage( mplCodecConfNotFound ); usleep( 10000 ); }
-    #endif
+    GUI_MSG( mplCodecConfNotFound )
     exit(1);
 }
 
@@ -651,18 +653,14 @@ if(vcd_track){
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
 	fprintf(stderr,"Error processing DVD KEY.\n");
-        #ifdef HAVE_GUI
-         if ( !nogui ) { mplSendMessage( mplErrorDVDKeyProcess ); usleep( 10000 ); }
-        #endif
+        GUI_MSG( mplErrorDVDKeyProcess )
 	exit(1);
     }
     printf("DVD command line requested key is stored for descrambling.\n");
   }
   if (dvd_device) {
     if (dvd_auth(dvd_device,f)) {
-        #ifdef HAVE_GUI
-         if ( !nogui ) { mplSendMessage( mplErrorDVDAuth ); usleep( 10000 ); }
-        #endif
+        GUI_MSG( mplErrorDVDAuth )
         exit(0);
       } 
     printf("DVD auth sequence seems to be OK.\n");
@@ -739,9 +737,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   printf("============= Sorry, this file format not recognized/supported ===============\n");
   printf("=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
-  #ifdef HAVE_GUI
-   if ( !nogui ) { mplSendMessage( mplUnknowFileType ); usleep( 10000 ); }
-  #endif
+  GUI_MSG( mplUnknowFileType )
   exit(1);
 }
 //====== File format recognized, set up these for compatibility: =========
@@ -792,9 +788,7 @@ switch(file_format){
       }
       if(v_pos==-1){
         printf("AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
-        #ifdef HAVE_GUI
-         if ( !nogui ) { mplSendMessage( mplErrorAVINI ); usleep( 10000 ); }
-        #endif
+        GUI_MSG( mplErrorAVINI )
         exit(1);
       }
       if(a_pos==-1){
@@ -819,9 +813,7 @@ switch(file_format){
   }
   if(!ds_fill_buffer(d_video)){
     printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
-    #ifdef HAVE_GUI
-     if ( !nogui ) { mplSendMessage( mplAVIErrorMissingVideoStream ); usleep( 10000 ); }
-    #endif
+    GUI_MSG( mplAVIErrorMissingVideoStream )
     exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
@@ -863,9 +855,7 @@ switch(file_format){
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
-    #ifdef HAVE_GUI
-     if ( !nogui ) { mplSendMessage( mplASFErrorMissingVideoStream ); usleep( 10000 ); }
-    #endif
+    GUI_MSG( mplASFErrorMissingVideoStream )
     exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
@@ -934,9 +924,7 @@ switch(file_format){
       if(!i || !skip_video_packet(d_video)){
         if(verbose)  printf("NONE :(\n");
         printf("MPEG: FATAL: EOF while searching for sequence header\n");
-        #ifdef HAVE_GUI
-         if ( !nogui ) { mplSendMessage( mplMPEGErrorSeqHeaderSearch ); usleep( 10000 ); }
-        #endif
+        GUI_MSG( mplMPEGErrorSeqHeaderSearch )
         exit(1);
       }
    }
@@ -948,40 +936,30 @@ switch(file_format){
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
      printf("Cannot allocate shared memory\n");
-     #ifdef HAVE_GUI
-      if ( !nogui ) { mplSendMessage( mplErrorShMemAlloc ); usleep( 10000 ); }
-     #endif
+     GUI_MSG( mplErrorShMemAlloc )
      exit(0);
    }
    videobuf_len=0;
    if(!read_video_packet(d_video)){ 
      printf("FATAL: Cannot read sequence header!\n");
-     #ifdef HAVE_GUI
-      if ( !nogui ) { mplSendMessage( mplMPEGErrorCannotReadSeqHeader ); usleep( 10000 ); }
-     #endif
+     GUI_MSG( mplMPEGErrorCannotReadSeqHeader )
      exit(1);
    }
    if(header_process_sequence_header (picture, &videobuffer[4])) {
      printf ("bad sequence header!\n"); 
-     #ifdef HAVE_GUI
-      if ( !nogui ) { mplSendMessage( mplMPEGErrorBadSeqHeader ); usleep( 10000 ); }
-     #endif
+     GUI_MSG( mplMPEGErrorBadSeqHeader )
      exit(1);
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
     videobuf_len=0;
     if(!read_video_packet(d_video)){ 
       printf("FATAL: Cannot read sequence header extension!\n");
-      #ifdef HAVE_GUI
-       if ( !nogui ) { mplSendMessage( mplMPEGErrorCannotReadSeqHeaderExt ); usleep( 10000 ); }
-      #endif
+      GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
       exit(1);
     }
     if(header_process_extension (picture, &videobuffer[4])) {
       printf ("bad sequence header extension!\n");  
-      #ifdef HAVE_GUI
-       if ( !nogui ) { mplSendMessage( mplMPEGErrorBadSeqHeaderExt ); usleep( 10000 ); }
-      #endif
+      GUI_MSG( mplMPEGErrorBadSeqHeaderExt )
       exit(1);
     }
    }
@@ -1095,9 +1073,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
-    #ifdef HAVE_GUI
-     if ( !nogui ) { mplSendMessage( mplIncompatibleVideoOutDevice ); usleep( 10000 ); }
-    #endif
+    GUI_MSG( mplIncompatibleVideoOutDevice )
     exit(1);
 }
 sh_video->outfmtidx=i;
@@ -1107,9 +1083,7 @@ if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
 switch(sh_video->codec->driver){
  case 2: {
    if(!init_video_codec(sh_video)) {
-     #ifdef HAVE_GUI
-      if ( !nogui ) { mplSendMessage( mplUnknowError ); usleep( 10000 ); }
-     #endif
+     GUI_MSG( mplUnknowError )
      exit(1);
    }  
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
@@ -1118,9 +1092,7 @@ switch(sh_video->codec->driver){
  case 4: { // Win32/DirectShow
 #ifndef USE_DIRECTSHOW
    printf("MPlayer was compiled WITHOUT directshow support!\n");
-   #ifdef HAVE_GUI
-    if ( !nogui ) { mplSendMessage( mplCompileWithoutDSSupport ); usleep( 10000 ); }
-   #endif
+   GUI_MSG( mplCompileWithoutDSSupport )
    exit(1);
 #else
    sh_video->our_out_buffer=NULL;
@@ -1294,9 +1266,7 @@ if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
                       fullscreen|(vidmode<<1)|(softzoom<<2),
                       title,out_fmt)){
      printf("FATAL: Cannot initialize video driver!\n");
-     #ifdef HAVE_GUI
-      if ( !nogui ) { mplSendMessage( mplCantInitVideoDriver ); usleep( 10000 ); }
-     #endif
+     GUI_MSG( mplCantInitVideoDriver )
      exit(1);
    }
    if(verbose) printf("INFO: Video OUT driver init OK!\n");
