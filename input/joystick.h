@@ -37,5 +37,3 @@ int mp_input_joystick_init(char* dev);
 
 int mp_input_joystick_read(int fd);
 
-void
-mp_input_joystick_close(int fd);

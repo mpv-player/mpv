@@ -76,10 +76,10 @@ static mp_cmd_bind_t key_names[] = {
   { KEY_DOWN, "DOWN" },
   { KEY_UP, "UP" },
 #ifdef HAVE_JOYSTICK
-  { JOY_AXIS1_PLUS, "JOY_UP" },
-  { JOY_AXIS1_MINUS, "JOY_DOWN" },
-  { JOY_AXIS0_PLUS, "JOY_LEFT" },
-  { JOY_AXIS0_MINUS, "JOY_RIGHT" },
+  { JOY_AXIS1_MINUS, "JOY_UP" },
+  { JOY_AXIS1_PLUS, "JOY_DOWN" },
+  { JOY_AXIS0_MINUS, "JOY_LEFT" },
+  { JOY_AXIS0_PLUS, "JOY_RIGHT" },
 
   { JOY_AXIS0_PLUS, "JOY_AXIS0_PLUS" },
   { JOY_AXIS0_MINUS, "JOY_AXIS0_MINUS" },
@@ -817,7 +817,7 @@ mp_input_init(void) {
     if(fd < 0)
       printf("Can't init input joystick\n");
     else
-      mp_input_add_key_fd(fd,1,mp_input_joystick_read,mp_input_joystick_close);
+      mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close);
   }
 #endif
 
