@@ -56,7 +56,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\n Afslutter... (%s)\n"
-#define MSGTR_Exit_frames "Anmoder om et antal billeder bliver afspillet"
 #define MSGTR_Exit_quit "Afslut"
 #define MSGTR_Exit_eof "Slutningen af filen"
 #define MSGTR_Exit_error "Fatal fejl"
@@ -76,19 +75,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Kan ikke åbne dump filen!!!\n"
 #define MSGTR_CoreDumped "kernen dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS ikke specificeret (eller ugyldig) i headeren! Brug -fps !\n"
-#define MSGTR_NoVideoStream "Desværre, filmen kan enten ikke findes eller kan ikke afspilles endnu\n"
 #define MSGTR_TryForceAudioFmtStr "Prøver at tvinge et lyd-codec driverfamilie %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Kan ikke finde lyd codec for driver familien, falder tilbage på en anden driver.\n"
 #define MSGTR_CantFindAudioCodec "Kan ikke finde codec til lydformatet 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prøv at opgradere %s fra etc/codecs.conf\n*** Hvis dette ikke hjælper, så læs filen DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Kunne ikke initialisere lydcodec! -> ingen lyd\n"
 #define MSGTR_TryForceVideoFmtStr "Prøver at tvinge en videocodec driver familie %s ...\n"
-#define MSGTR_CantFindVfmtFallback "Kan ikke finde videocodec for den tvungede driver familie, falder tilbage på en anden driver.\n"
 #define MSGTR_CantFindVideoCodec "Kan ikke finde videocodec til formatet 0x%X !\n"
 #define MSGTR_VOincompCodec "Desværre, den valgte video-driverenhed er ikke kompatibel med dette codec.\n"
-#define MSGTR_CouldntInitVideoCodec "FATAL: Kunne ikke initialisere videocodec :(\n"
-#define MSGTR_EncodeFileExists "Filen eksisterer allerede: %s (overskriv ikke din favorit film (AVI)!)\n"
-#define MSGTR_CantCreateEncodeFile "Kan ikke oprette fil til enkodning\n"
 #define MSGTR_CannotInitVO "FATAL: Kan ikke initialisere videodriveren!\n"
 #define MSGTR_CannotInitAO "Kunne ikke åbne/initialisere lydkortet -> INGEN LYD\n"
 #define MSGTR_StartPlaying "Starter afspilning ...\n"
@@ -202,7 +196,6 @@ static char help_text[]=
 #define MSGTR_DetectedRAWDVfile "Detekterede RAWDV filformat!\n"
 #define MSGTR_DetectedAudiofile "Detekterede lydfil!\n"
 #define MSGTR_NotSystemStream "Ikke MPEG System Stream format... (måske Transport Stream?)\n"
-#define MSGTR_MissingMpegVideo "Manglende MPEG video stream!? Rapporter venligst dette, det kan være en fejl i programmet :(\n"
 #define MSGTR_InvalidMPEGES "Ugyldig MPEG-ES stream??? Rapporter venligst dette, det kunne være en fejl i programmet :(\n"
 #define MSGTR_FormatNotRecognized \
 "============= Desværre, dette fil-format er ikke detekteret eller understøttet ===============\n"\
@@ -227,7 +220,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Komprimeret header (endnu) ikke understøttet!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Advarsel! variablen FOURCC detekteret!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Advarsel! For mange numre!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV format endnu ikke understøttet! *******\n"
 #define MSGTR_FoundAudioStream "==> Fandt lydstream: %d\n"
 #define MSGTR_FoundVideoStream "==> Fandt videostream: %d\n"
 #define MSGTR_DetectedTV "Detekteret TV! ;-)\n"
@@ -249,18 +241,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Kunne ikke loade/initialisere Win32/ACM LYD codec (manglende DLL fil?)\n"
 #define MSGTR_MissingLAVCcodec "Kunne ikke finde codec '%s' i libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer blev kompileret uden directshow support!\n"
-#define MSGTR_NoWfvSupport "Support for win32 codecs slået fra, eller er ikke tilgængelig på ikke-x86 platforme!\n"
-#define MSGTR_NoDivx4Support "MPlayer blev kompileret UDEN DivX4Linux (libdivxdecore.so) understøttelse!\n"
-#define MSGTR_NoLAVCsupport "MPlayer was kompileret UDEN ffmpeg/libavcodec understøttelse!\n"
-#define MSGTR_NoACMSupport "Win32/ACM lyd codec slået fra, eller ikke tilgængelig på ikke-x86 CPU -> ingen lyd tvunget :(\n"
-#define MSGTR_NoDShowAudio "Kompileret uden DirectShow support -> tvunget ingen lyd :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis lyd codec slået fra -> tvunget ingen lyd :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer blev kompileret UDEN XAnim support!\n"
-
-#define MSGTR_MpegPPhint "ADVARSEL! Du anmodede efterprocesseringsfilter for en MPEG 1/2 video,\n" \
-			 "         men MPlayer blev kompileret uden MPEG 1/2 efterprocesseringsfilter understøttelse!\n" \
-			 "         #define MPEG12_POSTPROC i config.h, og rekompiler libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF under søgning efter sekvensheader\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Kunne ikke læse sekvensheader!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: Kunne ikke læse sekvensheaderudvidelse!\n"
@@ -269,10 +249,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Kunne ikke allokere delt ram\n"
 #define MSGTR_CantAllocAudioBuf "Kunne ikke allokere lyd buffer\n"
-#define MSGTR_NoMemForDecodedImage "ikke nok ram til at dekode billed buffer (%ld bytes)\n"
 
-#define MSGTR_AC3notvalid "AC3 stream invalid.\n"
-#define MSGTR_AC3only48k "Kun 48000 Hz stream understøttet.\n"
 #define MSGTR_UnknownAudio "Ukendt/manglende lyd format, slår over til ingen lyd\n"
 
 #define MSGTR_UsingExternalPP "[PP] Benytter ekstern efterprocesseringsfilter, max q = %d\n"
@@ -294,7 +271,6 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Sætter LIRC understøttelse op...\n"
 #define MSGTR_LIRCdisabled "Du vil ikke være i stand til at bruge din fjernbetjening\n"
 #define MSGTR_LIRCopenfailed "Ingen lirc understøttelse fundet!\n"
-#define MSGTR_LIRCsocketerr "Der er noget galt med LIRC socket: %s\n"
 #define MSGTR_LIRCcfgerr "Kunne ikke læse LIRC konfigurationsfil %s !\n"
 
 // vf.c
@@ -321,7 +297,6 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Vælg..."
 #define MSGTR_AudioFileSelect "Vælg ekstern lydkanal ..."
 #define MSGTR_FontSelect "Vælg font ..."
-#define MSGTR_MessageBox "Meddelelseskasse"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Vælg udseende"
@@ -347,7 +322,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Desværre, ikke nok ram til at vise bufferen."
 #define MSGTR_NEMFMR "Desværre, ikke nok ram til at vise menuen."
-#define MSGTR_NEMFMM "Desværre, ikke nok ram til at vise hovedvindue shape mask."
 #define MSGTR_IDFGCVD "Desværre, kunne ikke finde gui kompabitel video driver."
 #define MSGTR_NEEDLAVCFAME "For at afspille ikke-mpeg filer med dit DXR3/H+ skal du kode filmen igen.\nVenligst aktiver lavc eller fame i DXR3/H+ configboxen."
 
@@ -442,7 +416,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "Koefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Lydforsinkelse"
 #define MSGTR_PREFERENCES_Audio "Lyd"
-#define MSGTR_PREFERENCES_VideoEqu "Anvend video equalizer"
 #define MSGTR_PREFERENCES_DoubleBuffer "Anvend double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Anvend 'direct rendering'"
 #define MSGTR_PREFERENCES_FrameDrop "Anvend billed-skip"

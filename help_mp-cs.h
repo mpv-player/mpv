@@ -58,7 +58,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nKonèím... (%s)\n"
-#define MSGTR_Exit_frames "Po¾adovaný poèet snímkù pøehrán"
 #define MSGTR_Exit_quit "Konec"
 #define MSGTR_Exit_eof "Konec souboru"
 #define MSGTR_Exit_error "Záva¾ná chyba"
@@ -78,19 +77,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump!!!\n"
 #define MSGTR_CoreDumped "jádro vypsáno :)\n"
 #define MSGTR_FPSnotspecified "V hlavièce souboru není udáno (nebo je ¹patné) FPS! Pou¾ijte volbu -fps !\n"
-#define MSGTR_NoVideoStream "Bohu¾el, ¾ádný videoproud... to se zatím nedá pøehrát.\n"
 #define MSGTR_TryForceAudioFmtStr "Pokou¹ím se vynutit rodinu audiokodeku %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nemohu nalézt audio kodek pro po¾adovanou rodinu, pou¾iji ostatní.\n"
 #define MSGTR_CantFindAudioCodec "Nemohu nalézt kodek pro audio formát 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokuste se upgradovat %s z etc/codecs.conf\n*** Pokud problém pøetrvá, pak si pøeètìte DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nelze inicializovat audio kodek! -> beze zvuku\n"
 #define MSGTR_TryForceVideoFmtStr "Poku¹ím se vynutit rodinu videokodeku %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Nemohu nalézt video kodek pro po¾adovanou rodinu, pou¾iji ostatní.\n"
 #define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro video formát 0x%X !\n"
 #define MSGTR_VOincompCodec "Bohu¾el, vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
-#define MSGTR_CouldntInitVideoCodec "Kritická chyba: Nemohu inicializovat videokodek :(\n"
-#define MSGTR_EncodeFileExists "Soubor ji¾ existuje: %s (nepøepi¹te si svùj oblíbený AVI soubor!)\n"
-#define MSGTR_CantCreateEncodeFile "Nemohu vytvoøit soubor\n" // toto doopravit - need to be corrected
 #define MSGTR_CannotInitVO "Kritická chyba: Nemohu inicializovat video driver!\n"
 #define MSGTR_CannotInitAO "nemohu otevøít/inicializovat audio driver -> TICHO\n"
 #define MSGTR_StartPlaying "Zaèínám pøehrávat...\n"
@@ -208,7 +202,6 @@ static char help_text[]=
 #define MSGTR_DetectedRAWDVfile "Detekován RAWDV formát souboru!\n"
 #define MSGTR_DetectedAudiofile "Detekován audio soubor!\n"
 #define MSGTR_NotSystemStream "Toto není proud ve formátu MPEG System... (mo¾ná Transportní proud?)\n"
-#define MSGTR_MissingMpegVideo "Chybìjící MPEG video proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
 #define MSGTR_InvalidMPEGES "Neplatný MPEG-ES proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
 #define MSGTR_FormatNotRecognized "======== Bohu¾el, formát tohoto souboru nebyl rozpoznán/není podporován =======\n"\
                                  "= Pokud je soubor typu AVI, ASF nebo obsahuje MPEG proud, kontaktujte autora! =\n"
@@ -233,7 +226,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nejsou (je¹tì) podporovány!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Upozornìní! promìnná FOURCC detekována!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Upozornìní! Pøíli¹ mnoho stop!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV formát není je¹tì podporován !!! *******\n"
 #define MSGTR_FoundAudioStream "==> Nalezen audio proud: %d\n"
 #define MSGTR_FoundVideoStream "==> Nalezen video proud: %d\n"
 #define MSGTR_DetectedTV "Detekována TV! ;-)\n"
@@ -255,18 +247,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Nemohu naèíst/inicializovat Win32/ACM AUDIO kodek (chybìjící soubor DLL?)\n"
 #define MSGTR_MissingLAVCcodec "Nemohu najít kodek '%s' v libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer byl pøelo¾en BEZ podpory directshow!\n"
-#define MSGTR_NoWfvSupport "Podpora pro kodeky win32 neaktivní nebo nedostupná mimo platformy x86!\n"
-#define MSGTR_NoDivx4Support "MPlayer byl pøelo¾en BEZ podpory DivX4Linux (libdivxdecore.so)!\n"
-#define MSGTR_NoLAVCsupport "MPlayer byl pøelo¾en BEZ podpory ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Win32/ACM audio kodek neaktivní nebo nedostupný mimo platformy x86 -> vynuceno beze zvuku :(\n"
-#define MSGTR_NoDShowAudio "Pøelo¾eno BEZ podpory DirectShow -> vynuceno beze zvuku :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis audio kodek neaktivní -> vynuceno beze zvuku :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer byl pøelo¾en BEZ podpory XAnim!\n"
-
-#define MSGTR_MpegPPhint "Upozornìní! Po¾adujete video postprocesing pro MPEG 1/2, ale MPlayer byl\n" \
-			 "         pøelo¾en bez podpory posprocesingu MPEG 1/2!\n" \
-			 "         #define MPEG12_POSTPROC v config.h a pøelo¾te znovu libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: Kritická chyba: EOF - konec souboru v prùbìhu vyhledávání hlavièky sekvence\n"
 #define MSGTR_CannotReadMpegSequHdr "Kritická chyba: Nelze pøeèíst hlavièku sekvence!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "Kritická chyba: Nelze pøeèíst roz¹íøení hlavièky sekvence!\n"
@@ -275,10 +255,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Nemohu alokovat sdílenou pamì»\n"
 #define MSGTR_CantAllocAudioBuf "Nemohu alokovat pamì» pro výstupní audio buffer\n"
-#define MSGTR_NoMemForDecodedImage "nedostatek pamìti pro buffer pro dekódování obrazu (%ld bytù)\n"
 
-#define MSGTR_AC3notvalid "Neplatný AC3 proud.\n"
-#define MSGTR_AC3only48k "Pouze proudy o frekvenci 48000 Hz podporovány.\n"
 #define MSGTR_UnknownAudio "Neznámý/chybìjící audio formát -> beze zvuku\n"
 
 #define MSGTR_UsingExternalPP "[PP] Pou¾ívám externí filtr pro postprocessing , max q = %d\n"
@@ -300,7 +277,6 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Nastavuji podporu lirc ...\n"
 #define MSGTR_LIRCdisabled "Nebudete moci pou¾ívat dálkový ovladaè.\n"
 #define MSGTR_LIRCopenfailed "Selhal pokus o otevøení podpory LIRC!\n"
-#define MSGTR_LIRCsocketerr "Nìjaká chyba se soketem lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Selhalo ètení konfiguraèního souboru LIRC %s !\n"
 
 // vf.c
@@ -324,7 +300,6 @@ static char help_text[]=
 #define MSGTR_About "O aplikaci"
 #define MSGTR_FileSelect "Výbìr souboru ..."
 #define MSGTR_SubtitleSelect "Vybrat titulky ..."
-#define MSGTR_MessageBox "Zpráva"
 #define MSGTR_PlayList "Soubory pro pøehrání"
 #define MSGTR_Equalizer "Ekvalizér"
 #define MSGTR_SkinBrowser "Prohlí¾eè témat"
@@ -353,7 +328,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Bohu¾el, nedostatek pamìti pro buffer pro kreslení."
 #define MSGTR_NEMFMR "Bohu¾el, nedostatek pamìti pro vytváøení menu."
-#define MSGTR_NEMFMM "Bohu¾el, nedostatek pamìti pro masku hlavního okna."
 #define MSGTR_IDFGCVD "Bohu¾el, nebyl nalezen video ovladaè kompatibilní s GUI."
 #define MSGTR_NEEDLAVCFAME "Bohu¾el, není mo¾no pøehrávat jiné soubory ne¾ mpeg s kartou DXR3/H+ bez pøekódování.\nProsím, aktivujte lavc nebo fame v konfiguraci DXR3/H+."
 
@@ -448,7 +422,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "Koeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Zpo¾dìní zvuku"
 #define MSGTR_PREFERENCES_Audio "Zvuk"
-#define MSGTR_PREFERENCES_VideoEqu "Aktivovat video ekvalizér"
 #define MSGTR_PREFERENCES_DoubleBuffer "Aktivovat double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Aktivovat direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Aktivovat zahazování snímkù"

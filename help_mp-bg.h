@@ -66,7 +66,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nИзлизам... (%s)\n"
-#define MSGTR_Exit_frames "Изисканият брой кадри бяха пуснати"
 #define MSGTR_Exit_quit "Край"
 #define MSGTR_Exit_eof "Край на файла"
 #define MSGTR_Exit_error "Фатална грешка"
@@ -86,21 +85,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "dump: Не мога да създам файл за извличане!!\n"
 #define MSGTR_CoreDumped "dump: Данните извлечени :)\n"
 #define MSGTR_FPSnotspecified "FPS (Кадри В Секунда) е с неизвестна или невалидна стойност! Използвайте опция -fps !\n"
-#define MSGTR_NoVideoStream "Съжалявам, но тук няма видео... не мога да го пусна (засега)\n"
 #define MSGTR_TryForceAudioFmtStr "Опитвам да наложа аудио декодер от указаната фамилия %s ...\n"
-// #define MSGTR_TryForceAudioFmt "Опитвам да наложа аудио декодер от указаната фамилия %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Не мога да намеря аудио декодер от указаната фамилия, връщам се на другите.\n"
 #define MSGTR_CantFindAudioCodec "Не мога да намеря декодер за аудио формат 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Опитай да обновиш %s с etc/codecs.conf\n*** Ако все още не работи прочети DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не успях да пусна аудио декодера! -> изключвам звука\n"
 #define MSGTR_TryForceVideoFmtStr "Опитвам да използвам видео декодер от фамилия %s ...\n"
-// #define MSGTR_TryForceVideoFmt "Опитвам да използвам видео декодер от фамилия #%d ...\n"
-#define MSGTR_CantFindVfmtFallback "Не мога да намеря видео декодер от указаната фамилия, връщам се на другите драйвери.\n"
 #define MSGTR_CantFindVideoCodec "Не мога да намеря декодер който да работи с този видео драйвер и видео тип 0x%X !\n"
 #define MSGTR_VOincompCodec "Съжалявам, избраният видео драйвер е несъвместим с този декодер.\n"
-#define MSGTR_CouldntInitVideoCodec "ФАТАЛНО: Не успях да пусна видео декодера :(\n"
-#define MSGTR_EncodeFileExists "Файлът вече съществува: %s (да не си затриете любимото филмче!)\n"
- #define MSGTR_CantCreateEncodeFile "Не мога да създам файл с резултата\n"
 #define MSGTR_CannotInitVO "ФАТАЛНО: Не мога да пусна видео драйвера!\n"
 #define MSGTR_CannotInitAO "не мога да отворя/пусна аудио устройство -> ИЗКЛЮЧВАМ ЗВУКА\n"
 #define MSGTR_StartPlaying "Start playing...\n"
@@ -221,7 +213,6 @@ static char help_text[]=
 #define MSGTR_DetectedRAWDVfile "Засечен файлов формат RAWDV !\n"
 #define MSGTR_DetectedAudiofile "Засечен аудио файл!\n"
 #define MSGTR_NotSystemStream "Форматът не е MPEG System Stream ... (може би е Transport Stream ?)\n"
-#define MSGTR_MissingMpegVideo "Липсва MPEG видео поток!? Свържете се с автора, може да е бъг :(\n"
 #define MSGTR_InvalidMPEGES "Невалиден MPEG-ES поток??? Свържете се с автора, може да е бъг :(\n"
 #define MSGTR_FormatNotRecognized \
 "============= Съжалявам, този файлов формат не е разпознат/поддържан ===============\n"\
@@ -247,7 +238,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers (засега) на се поддържат!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Внимание! Засечен променлив FOURCC код!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Внимание! Твърде много пътечки!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV засега не се поддържа!!!!!!! *******\n"
 #define MSGTR_FoundAudioStream "==> Намерен аудио поток: %d\n"
 #define MSGTR_FoundVideoStream "==> Намерен видео поток: %d\n"
  #define MSGTR_DetectedTV "Намерен е TV! ;-)\n"
@@ -269,19 +259,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Не мога да заредя/пусна Win32/ACM AUDIO декодер (май липсва DLL библиотеката?)\n"
 #define MSGTR_MissingLAVCcodec "Не мога да намеря декодер '%s' в библиотека libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer е компилиран БЕЗ поддръжка на DirectShow!\n"
-#define MSGTR_NoWfvSupport "Поддръжката на Win32/VFW декодери е изключена, и такава не съществува за платформи различни от\n Intel x86!\n"
-#define MSGTR_NoDivx4Support "MPlayer е компилиран БЕЗ поддръжка на DivX4Linux (libdivxdecore.so) !\n"
-#define MSGTR_NoLAVCsupport "MPlayer е компилиран БЕЗ поддръжка на ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Поддръжката на Win32/ACM аудио декодери е изключена, или не съществува на не-Intel x86-> изключвам звука :(\n"
-#define MSGTR_NoDShowAudio "MPlayer е компилиран без поддръжка на DirectShow Audio -> изключвам звука :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis аудио декодера е изключен -> изключвам звука :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer е компилиран БЕЗ поддръжка на XAnim!\n"
-
-#define MSGTR_MpegPPhint "Внимание! Вие искате допълнителна обработка на картината (postprocessing) за\n" \
-                         "MPEG 1/2 видео,но MPlayer е компилиран без поддръжка на MPEG 1/2 postprocessing!\n" \
-			 "вмъкни    #define MPEG12_POSTPROC в config.h, и прекомпилирай libmpeg2!\n"
-//не превеждам sequence header за да може да се прати валиден bugreport
 #define MSGTR_MpegNoSequHdr "MPEG: ФАТАЛНО: EOF (Край_На_Файла) докато търсех sequence header\n"
 #define MSGTR_CannotReadMpegSequHdr "MPEG: ФАТАЛНО: Не мога да прочета sequence header!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "MPEG: ФАТАЛНО: Не мога да прочета sequence header extension!\n"
@@ -292,8 +269,6 @@ static char help_text[]=
 #define MSGTR_CantAllocAudioBuf "Не мога да заделя аудио буфер\n"
 #define MSGTR_NoMemForDecodedImage "Няма достатъчно памет за буфера на декодираното изображение (%ld байта)\n"
 
-#define MSGTR_AC3notvalid "AC3 потокът е невалиден.\n"
-#define MSGTR_AC3only48k "Поддържат се само 48000 Hz потоци.\n"
 #define MSGTR_UnknownAudio "Непознат/липсващ аудио формат -> изключвам звука\n"
 
  #define MSGTR_UsingExternalPP "[PP] Използвам собствен postprocessing филтър, максимално качество q = %d\n"
@@ -315,7 +290,6 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Установяване на LIRC поддръжка...\n"
 #define MSGTR_LIRCdisabled "Вие няма да можете да използвате вашето дистанционно управление\n"
 #define MSGTR_LIRCopenfailed "Провал при пускането на LIRC поддръжката!\n"
-#define MSGTR_LIRCsocketerr "Нещо не е наред с LIRC socket: %s\n"
 #define MSGTR_LIRCcfgerr "Провал при четене конфигурацията на LIRC от %s !\n"
 
 // vf.c 
@@ -342,7 +316,6 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Избор ..."
 #define MSGTR_AudioFileSelect "Външен аудио файл ..."
 #define MSGTR_FontSelect "Шрифт ..."
-#define MSGTR_MessageBox "Съобщение"
  #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Еквилайзер"
 #define MSGTR_SkinBrowser "Избор на Кожи"
@@ -368,7 +341,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Съжалявам, няма достатъчно памет за draw buffer."
 #define MSGTR_NEMFMR "Съжалявам, няма достатъчно памет за menu rendering."
-#define MSGTR_NEMFMM "Съжалявам, няма достатъчно памет за main window shape mask."
 #define MSGTR_IDFGCVD "Съжалявам, не мога да намеря видео драйвер съвместим с това GUI."
 #define MSGTR_NEEDLAVCFAME "Съжалявам, не можете да пуснете файлове които не са MPEG на \nвашето DXR3/H+ устройство без да прекодирате видеото.\nМоля включете LAVC или FAME в конфигурацията на DXR3/H+ драйвера."
 
@@ -463,7 +435,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "Коефициент:"
 #define MSGTR_PREFERENCES_AudioDelay "Закъснение:"
 #define MSGTR_PREFERENCES_Audio "Аудио"
-#define MSGTR_PREFERENCES_VideoEqu "Включи видео еквилайзер"
 #define MSGTR_PREFERENCES_DoubleBuffer "Включи двойно буфериране"
 #define MSGTR_PREFERENCES_DirectRender "Включи директно чертане"
 #define MSGTR_PREFERENCES_FrameDrop "Включи пропускане на кадри"
