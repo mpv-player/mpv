@@ -133,14 +133,16 @@ lavdopts: (decoder options)
 
 ver	error resilience
 	-1 needed for some very broken, encoders which completly ignore the
-           standards (one M4S2 asf sample know to need this)
-	0 (default)
+           standards (one M4S2 asf sample know to need this) (default)
+	0 
 	1 more aggressive error detection, lavc might think that some correct
           streams contain errors
 
-bug	manual workaround encoder bugs
+bug	manual workaround encoder bugs (cant be easily detected automatically)
 	0 (default)
-	1 (workaround for some old lavc generated msmpeg4v3 files)
+	1 for msmpeg4v3	workaround for some old lavc generated msmpeg4v3 files
+	1 for mpeg4	workaround some opendivx? files 
+			see http://heroinewarrior.com for some samples
 
 gray	grayscale only decoding (a bit faster than with color ...)
 
