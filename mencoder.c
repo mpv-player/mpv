@@ -206,6 +206,18 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, in
 #include "spudec.h"
 #endif
 
+void parse_cfgfiles( m_config_t* conf )
+{
+  char *conffile;
+  if ((conffile = get_path("mencoder")) == NULL) {
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
+  } else {
+    if (m_config_parse_config_file(conf, conffile) < 0)
+      exit(1);
+    free(conffile);
+  }
+}
+
 //---------------------------------------------------------------------------
 
 // mini dummy libvo:
@@ -399,6 +411,8 @@ divx4_param.rc_reaction_ratio  = 20;
   playtree = play_tree_new();
   mconfig = m_config_new(playtree);
   m_config_register_options(mconfig,mencoder_opts);
+  // TODO : add something to let modules register their options
+  parse_cfgfiles(mconfig);
 
   if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
   playtree = play_tree_cleanup(playtree);
