@@ -2,4 +2,3 @@
 ./gen.py > osd.t1a &&
 t1asm --pfb osd.t1a osd.pfb &&
 ftview 80 osd.pfb &> /dev/null &
-#../subfont iso-8859-2 25 osd.pfb

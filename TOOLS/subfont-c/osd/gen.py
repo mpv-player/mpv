@@ -388,7 +388,7 @@ end readonly def
 /PaintType 0 def
 /StrokeWidth 0 def
 /FontMatrix [0.001 0 0 0.001 0 0] def
-/FontBBox {0 -10 1000 800} readonly def
+/FontBBox {0 -10 1000 810} readonly def
 /Encoding 256 array"""
 
 print string.join(encoding, '\n')
@@ -407,12 +407,11 @@ dup /Private 15 dict dup begin
 /ND{noaccess def}executeonly def
 /NP{noaccess put}executeonly def
 /ForceBold false def
-/BlueValues [ -15 0 717 734 693 708 630 649 593 611 658 679 780 800 ] def
-/OtherBlues [ -112 -93 -200 -178 -45 -26 -134 -116 -71 -51 ] def
-/StdHW [ 7 ] def
-/StdVW [ 8 ] def
-/StemSnapH [ 4 7 10 13 18 22 27 30 33 38 61 65 ] def
-/StemSnapV [ 5 8 11 15 18 21 25 30 33 36 52 64 ] def
+/BlueValues [ -10 0 800 810 640 650 720 730 ] def
+/StdHW [ 65 ] def
+/StdVW [ 65 ] def
+/StemSnapH [ 65 800 ] def
+/StemSnapV [ 65 150 ] def
 /MinFeature {16 16} def
 /password 5839 def
 /Subrs 1 array
