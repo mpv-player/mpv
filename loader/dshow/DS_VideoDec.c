@@ -1,9 +1,9 @@
 #include "guids.h"
 #include "interfaces.h"
+#include "libwin32.h"
 
 #include "DS_VideoDecoder.h"
 #include <wine/winerror.h>
-#include <libwin32.h>
 //#include <cpuinfo.h>
 
 #include <unistd.h>
@@ -33,8 +33,13 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
     CodecInfo ci;
     ci.dll=dllname;
     ci.guid=*guid;
-    
-    DS_VideoDecoder* dec=new DS_VideoDecoder(ci, *format, flip);
+
+//    try {
+	DS_VideoDecoder* dec=new DS_VideoDecoder(ci, *format, flip);
+//    } catch (FatalError &e) {
+//	_handle=NULL;
+//	return -1;
+//    }
     
     _d_ptr=d_ptr;
     _handle=(void*)dec;
@@ -56,13 +61,15 @@ extern "C" void DS_VideoDecoder_Restart(){
 }
 
 extern "C" void DS_VideoDecoder_Close(){
+    DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
+    delete dec;
 }
 
 extern "C" int DS_VideoDecoder_DecodeFrame(char* src, int size, int is_keyframe, int render){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
     CImage image;
     image.ptr=*_d_ptr;
-    return dec->DecodeInternal((void*)src,(size_t)size,is_keyframe,&image);
+    return dec->Decode((void*)src,(size_t)size,is_keyframe,&image);
 }
 
 extern "C" int DS_VideoDecoder_SetDestFmt(int bits, int csp){
