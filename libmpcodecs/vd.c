@@ -44,6 +44,7 @@ extern vd_functions_t mpcodecs_vd_nuv;
 extern vd_functions_t mpcodecs_vd_mpng;
 extern vd_functions_t mpcodecs_vd_ijpg;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
+extern vd_functions_t mpcodecs_vd_huffyuv;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -84,6 +85,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_ijpg,
 #endif
         &mpcodecs_vd_libmpeg2,
+        &mpcodecs_vd_huffyuv,
 	NULL
 };
 

@@ -3,7 +3,7 @@ include ../config.mak
 
 LIBNAME = libmpcodecs.a
 
-SRCS=dec_video.c vd.c vd_null.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c
+SRCS=dec_video.c vd.c vd_null.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c vd_huffyuv.c
 
 ifeq ($(PNG),yes)
 SRCS += vd_mpng.c
