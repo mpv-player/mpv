@@ -3197,124 +3197,6 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .PD 1
 .
 .TP
-.B \-af <filtre1[=paramètre1:paramètre2:...],filtre2,...>
-Active un liste de filtres audio séparés par une virgule, accompagnés de leurs
-options.
-Voir aussi la section des filtres audio de la documentation.
-br
-I NOTE\ :
-Voir \-af help pour la liste complète des filtres audio disponibles.
-.br
-Les filtres disponibles sont:
-.RSs
-.IPs resample[=srate[:sloppy][:type]]
-Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
-Il ne permet que le format 16 bit little endian.
-Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
-.IPs lavcresample[=srate[:longueur[:linéaire[:count[:cutoff]]]]]
-Change le taux d'échantillonnage du flux audio en un entier srate en Hz.
-Ne gère que le format 16-bit little-endian.
-Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
-.RSss
-srate: le taux d'échantillonnage de sortie
-.br
-longueur: longueur du filtre par rapport au taux d'échantillonnage le plus
-faible (par défaut\ : 16)
-.br
-linéaire: si à 1 alors les filtres seront interpolés linéairement entre les
-entrées polyphase
-.br
-count: le log2 du nombre d'entrées polyphase
-(..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
-.br
-cutoff: fréquence de coupure (0.0-1.0) (par défaut\ : initialisé en fonction
-de la longueur du filtre)
-.REss
-.IPs sweep[=speed]
-balayage sinus
-.IPs hrtf
-.br
-Convertit un son multicanaux vers 2 canaux pour un casque stéréo, tout en
-préservant la spatialité du son.
-.IPs channels[=nch]
-Change le nombre de canaux à nch canaux de sortie.
-Si le nombre de canaux de sortie est plus grand que le nombre de canaux
-d'entrée des canaux vides sont insérés (excepté pour le mixage de mono vers
-stéréo, où le canal audio est répété sur chacun des canaux de sortie).
-Si le nombre de canaux de sortie est plus petit que le nombre de canaux
-d'entrée les canaux en trop seront tronqués.
-.IPs format[=bps:f]
-Sélectionne le nombre d'octets par échantillon et le format utilisé pour la
-sortie depuis la couche filtre.
-L'option bps est un entier et s'exprime en Octets par échantillon.
-Le format f est une chaine contenant un mix concaténé de:
-.br
-alaw, mulaw ou imaadpcm
-.br
-float ou int (resp.\& flottant ou entier)
-.br
-unsigned ou signed (resp.\& non signé ou signé)
-.br
-le ou be (little- ou big-endian)
-.br
-.IPs volume[=v:sc]
-Selectionne le niveau du volume de sortie.
-Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule fois
-pour chaque flux audio.
-.RSss
-v: Défini le gain désiré en dB pour tous les canaux du flux,
-de -200dB à +60dB (où -200dB coupe le son complètement
-et +40dB équivaut à un gain de 1000).
-.br
-sc: Active le découpage logiciel.
-.REss
-.IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
-Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:audio.html
-pour les détails.
-.RSss
-n: nombre de canaux d'entrée (1\-6)
-.br
-lij: Combien du canal j est mixé dans le canal de sortie i.
-.REss
-.IPs sub[=fc:ch]
-Ajoute le canal du caisson de basse.
-.RSss
-fc: Fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz)
-(par défaut\ : 60Hz).
-.br
-ca: numéro de canal pour le sous-canal
-.REss
-.IPs surround[=d]
-Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
-fichiers à deux canaux.
-.RSss
-d: Décalage en ms pour les hauts-parleurs arrière (0ms à 1000ms)
-(par défaut\ : 15ms).
-.REss
-.IPs delay[=ch1:ch2:...]
-Retarde la sortie du son.
-Définit le décalage séparément pour chaque canal en millisecondes (nombre
-flottant entre 0 et 1000).
-.IPs export[=fichier_mmappé[:nsamples]]
-Exporte le signal entrant vers un autre processus en utilisant le mappage
-mémoire (nmap()).
-.RSss
-fichier_nmappé: fichier où mapper les données
-(par défaut\ : ~/.mplayer/\:mplayer-af_export)
-.br
-nsamples: nombre d'échantillons par canal (par défaut\ : 512)
-.REss
-.IPs extrastereo[=mul]
-Augmente la différence entre les canaux de gauche et de droite pour qu'à
-la lecture on ait un effet "live".
-.RSss
-mul: coefficient de différence (par défaut\ : 2.5)
-.REss
-.IPs volnorm
-Maximalise le volume sans introduire de distortions sonores.
-.RE
-.
-.TP
 .B \-af-adv <force=(0\-3):list=(filtres)> (voir aussi \-af)
 Définit les options avancées de filtrage audio\ :
 .RSs
@@ -3391,7 +3273,7 @@ Les options disponibles sont:
 .RE
 .RSs
 .IPs bug=<valeur>
-Contourne manuellement les bogues des encodeurs\ :
+Contourne manuellement les bogues des encodeurs.
 .RSss
 0: rien
 .br
@@ -3419,7 +3301,7 @@ d'autodétection)
 1024 (mpeg4): bogue de remplissage des bords (autodétecté par fourcc/\:version)
 .REss
 .IPs debug=<valeur>
-débogage:
+Affiche des informations de débogage.
 .RSss
 .br
 0: désactivé
@@ -3451,7 +3333,7 @@ débogage:
 0x1000: bogues
 .REss
 .IPs ec=<valeur>
-cacher les erreurs\ :
+Définit la stratégie de dissimulation des erreurs.
 .RSss
 1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
 .br
@@ -3460,7 +3342,7 @@ cacher les erreurs\ :
 3: toutes (par défaut)
 .REss
 .IPs er=<valeur>
-résilience aux erreurs\ :
+Définit la stratégie de résilience aux erreurs.
 .RSss
 .br
 0: désactivé
@@ -3511,7 +3393,7 @@ Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs en haut de l'image.
 .IPs vismv=<valeur>
-vismv:
+Visualise les vecteurs de mouvement.
 .RSss
 .br
 0: désactivé
@@ -3758,6 +3640,177 @@ Peut être utilisé pour forcer le zoom avec \-vf scale.
 .I NOTE:
 \-vf scale ignorera les options \-x / \-y / \-xy / \-fs / \-aspect sans
 \-zoom.
+.
+.
+.SH "FILTRES AUDIO"
+Les filtres audio vous permettent de modifier le flux audio et ses propriétés.
+La syntaxe est\ :
+.
+.TP
+.B \-af <filtre1[=paramètre1:paramètre2:...],filtre2,...>
+Active un liste de filtres audio séparés par une virgule, accompagnés de leurs
+options.
+Voir aussi la section des filtres audio de la documentation.
+.PP
+I NOTE\ :
+Pour obtenir une liste complète des filtres audio disponibles, voir \-af help.
+.PP
+Les filtres disponibles sont:
+.
+.TP
+.B resample[=srate[:sloppy][:type]]
+Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
+Il ne permet que le format 16 bit little endian.
+Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
+.
+.TP
+.B lavcresample[=srate[:longueur[:linéaire[:count[:cutoff]]]]]
+Change le taux d'échantillonnage du flux audio en un entier srate en Hz.
+Ne gère que le format 16-bit little-endian.
+Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
+.PD 0
+.RSs
+.IPs srate
+le taux d'échantillonnage de sortie
+.IPs longueur
+longueur du filtre par rapport au taux d'échantillonnage le plus faible
+(par défaut\ : 16)
+.IPs linéaire
+si à 1 alors les filtres seront interpolés linéairement entre les entrées
+polyphase
+.IPs count
+le log2 du nombre d'entrées polyphase
+(..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
+.IPs cutoff
+fréquence de coupure (0.0-1.0) (par défaut\ : initialisé en fonction de la
+longueur du filtre)
+.RE
+.PD 1
+.
+.TP
+.B sweep[=speed]
+balayage sinus
+.
+.TP
+.B hrtf\ \ \ 
+Convertit un son multicanaux vers 2 canaux pour un casque stéréo, tout en
+préservant la spatialité du son.
+.
+.TP
+.B channels[=nch]
+Change le nombre de canaux à nch canaux de sortie.
+Si le nombre de canaux de sortie est plus grand que le nombre de canaux
+d'entrée des canaux vides sont insérés (excepté pour le mixage de mono vers
+stéréo, où le canal audio est répété sur chacun des canaux de sortie).
+Si le nombre de canaux de sortie est plus petit que le nombre de canaux
+d'entrée les canaux en trop seront tronqués.
+.
+.TP
+.B format[=bps:f]
+Sélectionne le nombre d'octets par échantillon et le format utilisé pour la
+sortie depuis la couche filtre.
+L'option bps est un entier et s'exprime en Octets par échantillon.
+Le format f est une chaine contenant un mix concaténé de:
+.br
+alaw, mulaw ou imaadpcm
+.br
+float ou int (resp.\& flottant ou entier)
+.br
+unsigned ou signed (resp.\& non signé ou signé)
+.br
+le ou be (little- ou big-endian)
+.br
+.
+.TP
+.B volume[=v:sc]
+Selectionne le niveau du volume de sortie.
+Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule fois
+pour chaque flux audio.
+.PD 0
+.RSs
+.IPs v
+Défini le gain désiré en dB pour tous les canaux du flux,
+de -200dB à +60dB (où -200dB coupe le son complètement
+et +40dB équivaut à un gain de 1000).
+.IPs sc
+Active le découpage logiciel.
+.RE
+.PD 1
+.
+.TP
+.B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:audio.html
+pour les détails.
+.PD 0
+.RSs
+.IPs n
+nombre de canaux d'entrée (1\-6)
+.IPs lij
+Combien du canal j est mixé dans le canal de sortie i.
+.RE
+.PD 1
+.
+.TP
+.B sub[=fc:ch]
+Ajoute le canal du caisson de basse.
+.PD 0
+.RSs
+.IPs fc
+fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz)
+(par défaut\ : 60Hz).
+.IPs ca
+numéro de canal pour le sous-canal
+.RE
+.PD 1
+.
+.TP
+.REss
+.B surround[=d]
+Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
+fichiers à deux canaux.
+.PD 0
+.RSs
+.IPs d
+décalage en ms pour les hauts-parleurs arrière (0ms à 1000ms)
+(par défaut\ : 15ms).
+.RE
+.PD 1
+.
+.TP
+.B delay[=ch1:ch2:...]
+Retarde la sortie du son.
+Définit le décalage séparément pour chaque canal en millisecondes (nombre
+flottant entre 0 et 1000).
+.
+.TP
+.B export[=fichier_mmappé[:nsamples]]
+Exporte le signal entrant vers un autre processus en utilisant le mappage
+mémoire (nmap()).
+.PD 0
+.RSs
+.IPs fichier_nmappé
+fichier où mapper les données (par défaut\ : ~/.mplayer/\:mplayer-af_export)
+.IPs nsamples
+nombre d'échantillons par canal (par défaut\ : 512)
+.RE
+.PD 1
+.
+.TP
+.B extrastereo[=mul]
+Augmente la différence entre les canaux de gauche et de droite pour qu'à
+la lecture on ait un effet "live".
+.PD 0
+.RSs
+.IPs mul\ \ 
+coefficient de différence (par défaut\ : 2.5)
+.RE
+.PD 1
+.
+.TP
+.B volnorm
+Maximalise le volume sans introduire de distortions sonores.
+.RE
+.
 .
 .
 .SH "FILTRES VIDÉO"
