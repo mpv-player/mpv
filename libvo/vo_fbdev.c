@@ -37,6 +37,8 @@ static uint8_t *frame_buffer;
 static int fb_bpp;
 struct fb_fix_screeninfo fb_fix_info;
 struct fb_var_screeninfo fb_var_info;
+static uint32_t fb_xres_virtual;
+static uint32_t fb_yres_virtual;
 
 static int in_width;
 static int in_height;
@@ -119,6 +121,8 @@ static int fb_init(void)
 	}
 
 	/* disable scrolling */
+	fb_xres_virtual = fb_var_info.xres_virtual;
+	fb_yres_virtual = fb_var_info.yres_virtual;
 	fb_var_info.xres_virtual = fb_var_info.xres;
 	fb_var_info.yres_virtual = fb_var_info.yres;
 
@@ -310,12 +314,10 @@ static void check_events(void)
 {
 }
 
-static void flip_page(void)
+static void put_frame(void)
 {
 	int i, out_offset = 0, in_offset = 0;
 
-	vo_draw_text(in_width, in_height, draw_alpha);
-	check_events();
 	for (i = 0; i < in_height; i++) {
 		memcpy(frame_buffer + out_offset, next_frame + in_offset,
 				in_width * (fb_bpp / 8));
@@ -324,11 +326,24 @@ static void flip_page(void)
 	}
 }
 
+static void flip_page(void)
+{
+	vo_draw_text(in_width, in_height, draw_alpha);
+	check_events();
+	put_frame();
+}
+
 static void uninit(void)
 {
+	printf("vo_fbdev: uninit\n");
+	fb_var_info.xres_virtual = fb_xres_virtual;
+	fb_var_info.yres_virtual = fb_yres_virtual;
+	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info))
+		printf("vo_fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
+	memset(next_frame, '\0', in_height * in_width * (fb_bpp / 8));
+	put_frame();
 	if (vt_active >= 0)
 		ioctl(vt_fd, VT_ACTIVATE, vt_active);
-	printf("vo_fbdev: uninit\n");
 	free(next_frame);
 	munmap(frame_buffer, fb_size);
 }
