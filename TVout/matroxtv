@@ -41,11 +41,13 @@ case "$ABC" in
 	;;
 
 	2)
+	con2fb /dev/fb1 /dev/tty3  # Strange, this eliminates green bars
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 3
 	matroxset 1
 	# 640x512
 	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	con2fb /dev/fb0 /dev/tty3  # Ok, now we can take it back
 	;;
 
 
