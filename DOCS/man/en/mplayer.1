@@ -2544,7 +2544,7 @@ This driver is highly hardware specific.
 .IPs <subdevice>
 Explicitly choose the Blinkenlights subdevice driver to use.
 It's something like arcade:host=localhost:2323 or
-hdl:file=name1,file=name2. 
+hdl:file=name1,file=name2.
 You must specify a subdevice.
 .RE
 .PD 1
@@ -2777,7 +2777,7 @@ Allows specifying the output filename (default: ./md5).
 .PD 1
 .
 .TP
-.B md5sum\ \ \ \ 
+.B md5sum\ 
 Calculate the MD5 sum of each frame and write them to a file.
 Supports RGB24 and YV12 colorspaces.
 Useful for debugging.
@@ -2874,7 +2874,7 @@ Must be equal to or larger than 1 (default: 1000).
 Output each frame into a PNM file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
-See also 
+Also see
 .BR pnm (5),
 .BR ppm (5)
 and
@@ -3739,8 +3739,9 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 .TP
 .B pp[=filter1[:option1[:option2...]]/\:[-]filter2...] (also see \-pphelp)
 Enables the specified chain of postprocessing subfilters.
-Subfilters must be separated by '/' and can be disabled by prepending
-a '\-'. A subfilter's scope can be determined by appending a ':' followed
+Subfilters must be separated by '/' and can be disabled by
+prepending a '\-'.
+A subfilter's scope can be determined by appending a ':' followed
 by 'a', 'c' or 'y' (default: c):
 .PD 0
 .RSs
