@@ -3,7 +3,7 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS=getch2.c timer-lx.c timer.c shmem.c
+SRCS=getch2.c timer-lx.c shmem.c # timer.c
 OBJS=$(SRCS:.c=.o)
 
 ifeq ($(TARGET_ARCH_X86),yes)
