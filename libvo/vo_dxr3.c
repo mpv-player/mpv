@@ -459,8 +459,6 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
-	if (mp1e_context)
-		rte_context_delete(mp1e_context);
 	if (picture_data[0])
 		free(picture_data[0]);
 	if (fd_video)
