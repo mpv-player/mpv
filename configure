@@ -1022,6 +1022,9 @@ do
         _3dnowex=no
         ;;
   --disable-mmx)
+        # without mmx 3Dnow! and stuff is also not possible
+        _3dnow=no
+        _3dnowex=no
         _mmx=no
 	_mmx2=no
         ;;
@@ -1832,9 +1835,9 @@ $_streamingdef
 $_mlib     // available only on solaris
 $_3dnowm   // only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
 $_3dnowexm // only define if you have 3DNOWEX (AMD Athlon, etc.)
-$_mmx      // only define if you have MMX
-$_mmx2     // only define if you have MMX2
-$_ssem     // only define if you have SSE (Intel Pentium III or Celeron II)
+$_mmx      // only define if you have MMX (newer x86 chips, not P54C/PPro)
+$_mmx2     // only define if you have MMX2 (Athlon/PIII/4/CelII)
+$_ssem     // only define if you have SSE (Intel Pentium III/4 or Celeron II)
 
 /* libvo options */
 #define SCREEN_SIZE_X $_x
