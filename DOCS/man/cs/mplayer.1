@@ -1,4 +1,4 @@
-.\" synced with 1.859
+.\" synced with 1.864
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -387,7 +387,7 @@ vf=eq2=1.0:-0.8
 Rovnì¾ mù¾ete napsat konfiguraèní soubory k jednotlivým filmùm.
 Pokud chcete mít konfiguraèní soubor pro film s názvem 'film.avi', vytvoøte
 soubor s názvem 'film.avi.conf' s volbami pro tento film a umístìte jej do
-~/.mplayer nebo do adresáøe s filmem.
+~/.mplayer/ nebo do adresáøe s filmem.
 .
 .
 .
@@ -718,18 +718,18 @@ kompresním rozsahu.
 .B \-aid <ID> (viz také volbu \-alang)
 Vybere audio kanál (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127,
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
-MPlayer vypí¹e dostupná ID pokud bì¾í v upovídaném (\-v) re¾imu.
+MPlayer vypí¹e dostupná audio ID pokud bì¾í v upovídaném (\-v) re¾imu.
 Pøi pøehrávání MPEG-TS proudu, pou¾ije MPlayer/\:Mencoder první program
 (pokud je) se zvoleným audio proudem.
 .
 .TP
 .B \-alang <kód\ jazyka> (viz také volbu \-aid)
-Pøehraje audio proud jeho¾ kód jazyka odpovídá zadanému.
+Nastaví seznam jazykù zvuku k pou¾ití podle priority.
 Rùzné nosné formáty souborù pou¾ívají rùzné kódy jazyka.
 DVD pou¾ívají dvoupísmenné kódy jazyka podle ISO 639-1, Matroska a NUT
 pou¾ívají trojpísmenné kódy podle ISO 639-2, zatímco OGM pou¾ívá volnou formu
 identifikace.
-Chcete-li seznam dostupných jazykù, pou¾ijte volbu \-v a prohlédnìte si výstup.
+MPlayer vypí¹e dostupné jazyky pokud bì¾í v upovídaném (\-v) re¾imu.
 .sp 1
 .I PØÍKLAD:
 .PD 0
@@ -771,8 +771,8 @@ Zvlá¹tì vhodné pro pomalá média.
 .
 .TP
 .B \-cache-min <procento>
-Pøehrávání zaène jakmile je vyrovnávací pamì» naplnìna více ne¾ je zde nastavený
-práh.
+Pøehrávání zaène jakmile byla vyrovnávací pamì» naplnìna z více <procent> ne¾
+je zde nastavený práh.
 .
 .TP
 .B \-cache-prefill <procento> (zatím neimplementováno)
@@ -1416,19 +1416,25 @@ Povolí zobrazení titulku v dobì kdy je je¹tì zobrazen pøedchozí titulek
 .
 .TP
 .B \-sid <ID> (viz také volbu \-slang)
-Zobrazuje DVD titulky v jazyce urèeném pomocí <ID> (0\-31).
-MPlayer vypí¹e dostupné jazyky titulkù je-li spu¹tìn v upovídaném (\-v) re¾imu.
+Zobrazuje datový proud titulkù urèený pomocí <ID> (0\-31).
+MPlayer vypí¹e dostupná ID titulkù pokud je spu¹tìn v upovídaném (\-v) re¾imu.
 .
 .TP
 .B \-slang <kód\ jazyka[,kód\ jazyka,...]> (viz té¾ volbu \-sid)
-Nastavuje seznam jazykù DVD titulkù k pou¾ití podle priority.
-MPlayer vypí¹e dostupné jazyky titulkù je-li spu¹tìn v upovídaném (\-v) re¾imu.
+Nastavuje seznam jazykù titulkù k pou¾ití podle priority.
+Rùzné nosné formáty pou¾ívají odli¹né kódy jazyka.
+DVD pou¾ívají dvoupísmenný kód podle ISO 639-1, Matroska pou¾ívají tøípísmenný
+kód jazyka podle ISO 639-2, zatímco OGM pou¾ívají volnou formu identifikace.
+MPlayer vypí¹e dostupné jazyky titulkù pokud je spu¹tìn v upovídaném (\-v) re¾imu.
 .sp 1
 .I PØÍKLAD:
 .PD 0
 .RSs
 .IPs "\-slang cs,en"
-Zvolí èeské a pou¾ije anglické, pokud èeské nejsou k dispozici.
+Zvolí èeskou titulkovou stopu na DVD, ale vrátí se zpìt k anglické, pokud èeská
+není k dispozici.
+.IPs "mplayer \-slang jpn example.nut"
+Pøehraje NUT soubor s Japonskými titulky.
 .RE
 .PD 1
 .
@@ -1891,7 +1897,7 @@ Neprodukuje ¾ádný zvuk, rychlost pøehrávání videa je v¹ak zachována.
 Pro výkonnostní testy pou¾ijte \-nosound.
 .
 .TP
-.B pcm
+.B pcm\ \ \ \ 
 Zvukové rozhraní pro zápis surového PCM/\:wave proudu.
 .PD 0
 .RSs
@@ -3068,9 +3074,8 @@ Nejdøíve zkou¹í Win32 kodeky.
 .
 .TP
 .B \-aspect <pomìr\ stran> (viz také volbu \-zoom)
-Pøepí¹e zji¹tìný pomìr stran videa.
-Pomìr stran je automaticky zji¹tìn u MPEG souborù, ale u mnoha AVI
-souborù nelze automaticky zjistit.
+Pøepí¹e zji¹tìný pomìr stran videa v pøípadech, kdy je informace o pomìru
+stran v pøehrávaném souboru nesprávná, nebo chybí.
 .sp 1
 .I PØÍKLAD:
 .PD 0
@@ -4221,7 +4226,7 @@ relativní rozdíl mezi sousedními pixely, druhá (výchozí 0.15) udává jak velká
 .
 .TP
 .B lavcdeint (ZASTARALÉ)
-filtr deinterlace (odstraòovaè prokladu) z libavcodec, stejné jako \-vf pp=fd
+filtr deinterlace (odstraòovaè prokladu) z FFmpeg, stejné jako \-vf pp=fd
 .
 .TP
 .B kerndeint[=práh[:map[:poøadí[:ostøit[:dvoucest]]]]]
@@ -7378,7 +7383,7 @@ s titulky vyhledávat v tomto poøadí:
 .\" Pøíklady
 .\" --------------------------------------------------------------------------
 .
-.SH PØÍKLADY
+.SH PØÍKLADY POU®ITÍ MPLAYERU
 .
 .TP
 .B Rychlý start pøehrávání DVD:
@@ -7443,6 +7448,12 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
+.B Pøehrávání ¹estikanálového AAC souboru, máte-li jen dva reproduktory:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+.
+.SH PØÍKLADY POU®ITÍ MENCODERU
+.
+.TP
 .B Enkódovat DVD titul #2, pouze vybrané kapitoly:
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
@@ -7476,10 +7487,6 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Enkódování z roury:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
-.
-.TP
-.B Pøehrávání 6-kanálového AAC souboru jen se dvìma reproduktory:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .
 .\" --------------------------------------------------------------------------
