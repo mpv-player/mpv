@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.27  2001/06/22 19:51:25  atmosfear
+ * Fixed pointer->integer cast warning.
+ *
  * Revision 1.26  2001/06/18 16:38:06  acki2
  * - just modified an error message
  *
@@ -1064,7 +1067,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vo_dga_dbf_current = 0;
 
 
- if(!vo_doublebuffering) vo_dga_dbf_mem_offset = NULL;
+ if(!vo_doublebuffering) vo_dga_dbf_mem_offset = 0;
   
   // if(format ==IMGFMT_YV12 )
   //vo_dga_dbf_mem_offset = 0;
