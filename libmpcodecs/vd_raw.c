@@ -88,7 +88,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	if(sh->format==0 || sh->format==3) mpi->stride[0]=(mpi->stride[0]+3)&(~3);
 	if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	    // export palette:
-	    mpi->planes[1]=sh->bih ? (((unsigned char*)&sh->bih)+40) : NULL;
+	    mpi->planes[1]=sh->bih ? (unsigned char*)(sh->bih+1) : NULL;
+#if 0
+	    printf("Exporting palette: %p !!\n",mpi->planes[1]);
+	    {	unsigned char* p=mpi->planes[1];
+		int i;
+		for(i=0;i<64;i++) printf("%3d: %02X %02X %02X (%02X)\n",i,p[4*i],p[4*i+1],p[4*i+2],p[4*i+3]);
+	    }
+#endif
 	}
 	frame_size=mpi->stride[0]*mpi->h;
 	if(mpi->bpp<8) frame_size=frame_size*mpi->bpp/8;
