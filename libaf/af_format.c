@@ -110,6 +110,10 @@ char* af_fmt2str(int format, char* str, int size)
 {
   int i=0;
 
+  if (size < 1)
+    return NULL;
+  size--; // reserve one for terminating 0
+
   // Endianess
   if(AF_FORMAT_LE == (format & AF_FORMAT_END_MASK))
     i+=snprintf(str,size-i,"little endian ");
@@ -147,6 +151,7 @@ char* af_fmt2str(int format, char* str, int size)
       i+=snprintf(&str[i],size-i,"int ");
     }
   }
+  str[i] = 0; // make sure it is 0 terminated.
   return str;
 }
 
