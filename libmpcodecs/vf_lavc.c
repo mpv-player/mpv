@@ -42,6 +42,22 @@ static int config(struct vf_instance_s* vf,
 
     lavc_venc_context.width = width;
     lavc_venc_context.height = height;
+    
+    if(!lavc_venc_context.frame_rate){
+	// guess FPS:
+	switch(height){
+	case 240:
+	case 480:
+	    lavc_venc_context.frame_rate=29.97*FRAME_RATE_BASE; // NTSC
+	    break;
+	case 576:
+	case 288:
+	default:
+	    lavc_venc_context.frame_rate=25*FRAME_RATE_BASE; // PAL
+	    break;
+//	    lavc_venc_context.frame_rate=vo_fps*FRAME_RATE_BASE; // same as src
+	}
+    }
 
     if(vf->priv->outbuf) free(vf->priv->outbuf);
 
@@ -106,6 +122,9 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
+    int p_quality=0;
+    float p_fps=0;
+    
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
@@ -125,12 +144,19 @@ static int open(vf_instance_t *vf, char* args){
     }
 
     // TODO: parse args ->
-    lavc_venc_context.bit_rate = 8000000;
-    lavc_venc_context.frame_rate = 25 * FRAME_RATE_BASE;
+    if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
+
+    if(p_quality<32){
+	// fixed qscale
+	lavc_venc_context.flags = CODEC_FLAG_QSCALE;
+	lavc_venc_context.quality = (p_quality<1) ? 1 : p_quality;
+    } else {
+	// fixed bitrate (in kbits)
+	lavc_venc_context.bit_rate = 1000*p_quality;
+    }
+    lavc_venc_context.frame_rate = (p_fps<1.0) ? 0 : (p_fps * FRAME_RATE_BASE);
     lavc_venc_context.qmin= 1;
     lavc_venc_context.gop_size = 0; // I-only
-    lavc_venc_context.flags = CODEC_FLAG_QSCALE;
-    lavc_venc_context.quality = 1;
 
     return 1;
 }
