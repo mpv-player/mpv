@@ -968,12 +968,20 @@ current_module = NULL;
 
 #ifdef HAVE_MENU
  if(use_menu) {
-   if(!menu_cfg) menu_cfg = get_path("menu.conf");
-   if(menu_init(menu_cfg))
-     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited\n");
+   if(menu_cfg && menu_init(menu_cfg))
+     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", menu_cfg);
    else {
-     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu init failed\n");
-     use_menu = 0;
+     menu_cfg = get_path("menu.conf");
+     if(menu_init(menu_cfg))
+       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", menu_cfg);
+     else {
+       if(menu_init(CONFDIR"/menu.conf"))
+         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", CONFDIR"/menu.conf");
+       else {
+         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu init failed\n");
+         use_menu = 0;
+       }
+     }
    }
  }
 #endif
