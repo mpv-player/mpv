@@ -1,4 +1,4 @@
-.\" synced with 1.739
+.\" synced with 1.741
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2895,9 +2895,7 @@ wspó³czynnik wyg³adzania (domy¶lnie: 0)
 .IPs quality=<0\-100>
 wspó³czynnik jako¶ci (domy¶lnie: 75)
 .IPs outdir=<nazwa\ katalogu>
-Okre¶la katalog, w którym bêd± zapisywane pliki JPEG.
-Je¿eli nie podano ¿adnej warto¶ci, wszystkie pliki bêd± zapisane
-w bie¿±cym katalogu.
+Okre¶la katalog, w którym bêd± zapisywane pliki JPEG (domy¶lnie: ./).
 .IPs subdirs=<warto¶æ>
 Je¶li podane, MPlayer stworzy poszeregowane podkatalogi z okre¶lnonym prefiksem.
 Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
@@ -6808,14 +6806,16 @@ Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
 .
 .TP
 .B iframe=<warto¶æ>
-Czêstotliwo¶æ wystêpowania klatek I (domy¶lnie: 60)
-Zazwyczaj zwiêkszaj±c jej warto¶æ podnosisz jako¶æ filmu.
+Ustawia maksymaln± przerwê miêdzy klatkami I.
+Wiêksze warto¶ci oszczêdzaj± bity, a tym samym poprawiaj± jako¶æ,
+odbywa siê to jednak kosztem precyzji przy przeszukiwaniu (domy¶lnie: 60).
 .
 .TP
-.B frameref=<warto¶æ>
+.B frameref=<1\-15>
 Ilo¶æ poprzednich klatek wykorzystanych do przewidywania w klatkach P
 (domy¶lnie: 1).
-Mo¿e to wywo³aæ niewielkie zmiany w bitrate i PSNR.
+Ma to do¶æ znaczny wp³yw na Anime, ale przy materia³ach z "¿ywymi"
+aktorami i scenami nie ma wiekszego wp³ywu.
 Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
 .
 .TP
@@ -6911,7 +6911,7 @@ rozmiar bufora kontroli tempa (domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
 Ustawia pocz±tkowego bufora kontroli tempa (domy¶lnie: 1/4 rc_buffer_size)
 .
 .TP
-.B rc_sens=<0\-100>
+.B rc_sens=<0\-100> (tylko CBR)
 czu³o¶æ kontroli tempa (domy¶lnie: 4)
 .
 .TP
