@@ -1290,14 +1290,14 @@ case VCODEC_FRAMENO:
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,start,in_size,
-      skip_flag>0 && vf_next_control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE);
+      skip_flag>0 && ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE);
     if(!blit_frame){
       badframes++;
       if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
-	    if (!encode_duplicates || vf_next_control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	    if (!encode_duplicates || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
 	      muxer_write_chunk(mux_v,0,0);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
@@ -1315,7 +1315,7 @@ if(skip_flag<0){
 	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
-	if (!encode_duplicates || vf_next_control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	if (!encode_duplicates || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
 	    muxer_write_chunk(mux_v,0,0);
 	++skip_flag;
     }
