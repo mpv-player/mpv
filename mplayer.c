@@ -998,6 +998,8 @@ if(stream_dump_type){
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
+    if( (file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_ASF)
+	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
   }
   fclose(f);
