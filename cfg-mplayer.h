@@ -137,7 +137,7 @@ struct config conf[]={
 	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000},
 	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
-	{"abs", &ao_buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
 
 	{"alsa", "Option -alsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",

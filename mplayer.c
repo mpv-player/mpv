@@ -1228,7 +1228,7 @@ while(sh_audio){
   unsigned int t;
   int playsize;
   
-  ao_pts=sh_audio->timer*90000.0;
+  ao_data.pts=sh_audio->timer*90000.0;
   playsize=audio_out->get_space();
   
   if(!playsize) break; // buffer is full, do not block here!!!
@@ -1324,10 +1324,10 @@ if(1)
     if(drop_frame){
 
       if(sh_audio && !d_audio->eof){
-          int delay=audio_out->get_delay();
-          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%d\n",delay);
+	  float delay=audio_out->get_delay();
+          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
           time_frame=sh_video->timer;
-          time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
+          time_frame-=sh_audio->timer-delay;
 	  if(time_frame>-2*frame_time) {
 	    drop_frame=0; // stop dropping frames
 	    mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstop frame drop %.2f\n", time_frame);
@@ -1348,15 +1348,16 @@ if(1)
       time_frame-=GetRelativeTime(); // reset timer
 
       if(sh_audio && !d_audio->eof){
-          int delay=audio_out->get_delay();
-          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%d\n",delay);
+	  float delay=audio_out->get_delay();
+	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
 
 if(!dapsync){
 
 	      /* Arpi's AV-sync */
 
           time_frame=sh_video->timer;
-          time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
+          time_frame-=sh_audio->timer-delay;
+
           // we are out of time... drop next frame!
 	  if(time_frame<-2*frame_time){
 	      static int drop_message=0;
@@ -1508,8 +1509,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
     float v_pts=0;
 
     // unplayed bytes in our and soundcard/dma buffer:
-    int delay_bytes=audio_out->get_delay()+sh_audio->a_buffer_len;
-    float delay=(float)delay_bytes/(float)sh_audio->o_bps;
+    float delay=audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
 
     if(pts_from_bps){
 #if 1
