@@ -40,6 +40,7 @@ avi_priv_t* priv=demuxer->priv;
 
 //---- AVI header:
 priv->idx_size=0;
+priv->audio_streams=0;
 while(1){
   int id=stream_read_dword_le(demuxer->stream);
   int chunksize,size2;
@@ -141,6 +142,7 @@ while(1){
 	}
         chunksize=0;
         if(verbose>=1) print_wave_header(sh_audio->wf);
+	++priv->audio_streams;
 //        if(demuxer->audio->id==-1) demuxer->audio->id=stream_id;
       }
       break;

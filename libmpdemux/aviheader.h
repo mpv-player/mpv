@@ -95,6 +95,7 @@ typedef struct {
   int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
   // interleaved PTS stuff:
   int skip_video_frames;
+  int audio_streams;
   float avi_audio_pts;
   float avi_video_pts;
   float pts_correction;

@@ -456,7 +456,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(d_audio->id!=-2){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI: Searching for audio stream (id:%d)\n",d_audio->id);
-    if(!ds_fill_buffer(d_audio)){
+    if(!priv->audio_streams || !ds_fill_buffer(d_audio)){
       mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI: " MSGTR_MissingAudioStream);
       sh_audio=NULL;
     } else {
