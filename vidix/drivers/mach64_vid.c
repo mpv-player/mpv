@@ -769,6 +769,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 			  ((mach64_grkey.ckey.blue &0xFF))
 			| ((mach64_grkey.ckey.green&0xFF)<<8)
 			| ((mach64_grkey.ckey.red  &0xFF)<<16);
+		break;
 	default:
 		besr.ckey_on=0;
 		besr.graphics_key_msk=0;
