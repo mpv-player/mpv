@@ -1585,24 +1585,26 @@ be done by the subdevice method, e.g.: <option>-vo directfb:2</option>
 <sect4 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Please read the <link linkend="directfb">main DirectFB</link> section or general
-informations.
-</para>
-
-<para>This video output driver will enable CRTC2 (on the second head) on the
-Matrox G400/G450/G550 card, displaying video <emphasis role="bold">independently</emphasis>
-of the first head.
+Please read the <link linkend="directfb">main DirectFB</link> section for general
+information.
 </para>
 
 <para>
-Instructions on how to make it work can be found in the
-<ulink url="../../tech/directfb.txt">tech</ulink> section
-or directly on Ville Syrjala's
-<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">home page</ulink>.
+This video output driver will enable CRTC2 (on the second head) on Matrox
+G400/G450/G550 cards, displaying video
+<emphasis role="bold">independent</emphasis> of the first head.
+</para>
+
+<para>
+Ville Syrjala's has a 
+<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
+and a 
+<ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">HOWTO</ulink>
+on his homepage that explain how to make DirectFB TV output run on Matrox cards.
 </para>
 
 <note><para>
-the first DirectFB version with which we could kick this working was
+the first DirectFB version with which we could get this working was
 0.9.17 (it's buggy, needs that <systemitem>surfacemanager</systemitem> patch from
 the URL above). Anyway, porting of the CRTC2 code to <emphasis role="bold">mga_vid</emphasis>
 is underway.
