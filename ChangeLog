@@ -2,6 +2,9 @@ mplayer (1.0)
 
   pre4: "New Year Release"
   
+    Security:
+    * HTTP parser remote heap overflow vulnerability fixed
+
     DOCS:
     * new Copyright file covers files from other projects and their licenses
     * new DOCS/tech/translations.txt explains how to properly translate MPlayer
@@ -99,6 +102,11 @@ mplayer (1.0)
     * fix some command line handling corruptions
     * Swedish and Polish yes/no options in config files
     * support binding F11 and F12 keys
+
+  pre3try2: security fix release
+
+    Security:
+    * HTTP parser remote heap overflow vulnerability fixed
 
 
   pre3: "The Real Counter"
