@@ -59,6 +59,9 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
     static AVPicture lavc_picture;
     int avcodec_inited=0;
 #endif
+#ifdef FF_POSTPROCESS
+    unsigned int lavc_pp=0;
+#endif
 
 #ifndef NEW_DECORE
 #include "opendivx/decore.h"
@@ -110,6 +113,10 @@ int get_video_quality_max(sh_video_t *sh_video){
   case VFM_MPEG:
       return GET_PP_QUALITY_MAX;
 #endif
+#ifdef FF_POSTPROCESS
+  case VFM_FFMPEG:
+      return GET_PP_QUALITY_MAX;
+#endif
   case VFM_DIVX4:
   case VFM_ODIVX:
 #ifdef NEW_DECORE
@@ -142,6 +149,12 @@ void set_video_quality(sh_video_t *sh_video,int quality){
    picture->pp_options=getPpModeForQuality(quality);
   }
   break;
+#endif
+#ifdef FF_POSTPROCESS
+  case VFM_FFMPEG:
+    if(quality<0 || quality>GET_PP_QUALITY_MAX) quality=GET_PP_QUALITY_MAX;
+    lavc_pp=getPpModeForQuality(quality);
+    break;
 #endif
   case VFM_DIVX4:
   case VFM_ODIVX: {
@@ -345,7 +358,9 @@ switch(sh_video->codec->driver){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
-   
+#ifdef FF_POSTPROCESS
+   lavc_pp=divx_quality;
+#endif
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
    break;
 #endif
@@ -501,11 +516,29 @@ if(verbose>1){
 	if(!drop_frame && got_picture){
 //	if(!drop_frame){
 	  if(planar){
-	    planes=lavc_picture.data;
-	    stride=lavc_picture.linesize;
-	    //stride[1]=stride[2]=0;
-	    //stride[0]/=2;
-            blit_frame=2;
+#ifdef FF_POSTPROCESS
+	    if(lavc_pp){
+		// postprocess
+		if(!sh_video->our_out_buffer)
+		    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*3/2);
+    		stride[0]=sh_video->disp_w;
+    		stride[1]=stride[2]=sh_video->disp_w/2;
+    		planes[0]=sh_video->our_out_buffer;
+    		planes[2]=planes[0]+sh_video->disp_w*sh_video->disp_h;
+    		planes[1]=planes[2]+sh_video->disp_w*sh_video->disp_h/4;
+		postprocess(lavc_picture.data,lavc_picture.linesize[0],
+			    planes,sh_video->disp_w,
+			    sh_video->disp_w,sh_video->disp_h,
+			    &quant_store[0][0],MBC+1,lavc_pp);
+	    } else
+#endif
+	    {
+		planes=lavc_picture.data;
+		stride=lavc_picture.linesize;
+		//stride[1]=stride[2]=0;
+		//stride[0]/=2;
+	    }
+    	    blit_frame=2;
 	  } else {
 	    int y;
 	    // temporary hack - FIXME

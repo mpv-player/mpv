@@ -2382,6 +2382,9 @@ $_cssdef
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC
 
+/* Define this to enable image postprocessing in libavcodec (requires FAST cpu!) */
+#define FF_POSTPROCESS
+
 #define HAVE_ODIVX_POSTPROCESS
 
 /* Win32 DLL support */
