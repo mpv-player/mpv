@@ -1439,6 +1439,26 @@ respectively) option to <application>MEncoder</application>.
 </para></answer>
 </qandaentry>
 
+<qandaentry>
+<question><para>
+How do I encode only sound from a music video?
+</para></question>
+<answer><para>
+It's not possible directly, but you can try this (note the
+<emphasis role="bold">&amp;</emphasis> at the end of
+<command>mplayer</command> command):
+<screen>
+    mkfifo encode
+    mplayer -ao pcm -aofile encode dvd://1 &amp;
+    lame <replaceable>your_opts</replaceable> encode music.mp3
+    rm encode
+</screen>
+This allows you to use any encoder, not only <application>LAME</application>,
+just replace <command>lame</command> with your favorite audio encoder in the
+above command.
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
