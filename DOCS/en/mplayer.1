@@ -1426,25 +1426,21 @@ Warning: may cause OSD/\:SUB corruption!
 .TP
 .B \-dxr2 <option1:option2:...>
 This option is used to control the dxr2 driver.
-Note: The lavc filter is now auto inserted if you try to play a non MPEG1/2
-format so all formats supported by MPlayer should play out of the box (if
-you have the CPU power needed to encode on the fly).
-The overlay chipset used on the dxr2 is of pretty bad quality but the default
-settings should work for everybody.
-The OSD may be usable with the overlay (not on TV) by drawing it in the
-colorkey.
-With the default colorkey settings you may get variable results, usually you
-will see the colorkey around the characters or some other funny effect.
-But if you properly adjust the colorkey settings you should be able to get
-acceptable results.
-.
+
 .RSs
 .IPs ar-mode=<value>
 aspect ratio mode (0 = normal, 1 = pan scan, 2 = letterbox (default))
-.IPs iec958\-encoded/\:decoded
+.IPs iec958\-encoded
 iec958 output mode
+.IPs iec958\-decoded
+set iec958 output mode to decoded (default)
+.IPs macrovision=<value>
+macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
 .IPs mute
 mute sound output
+.IPs unmute
+unmute sound output
 .IPs ucode=<value>
 path to the microcode
 .RE
@@ -1454,47 +1450,60 @@ path to the microcode
 .RE
 .RSs
 .IPs 75ire
-enable 7.5 IRE
+enable 7.5 IRE output mode
+.IPs no75ire
+disable 7.5 IRE output mode (default)
 .IPs bw\ \ \ 
 b/\:w TV output
 .IPs color
-color TV output
+color TV output (default)
 .IPs interlaced
-interlaced TV output
-.IPs macrovision=<value>
-macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
+interlaced TV output (default)
+.IPs nointerlaced
+disable interlaced TV output
 .IPs norm=<value>
 TV norm (ntsc (default), pal,pal60,palm,paln,palnc)
-.IPs square/\:ccir601\-pixel
-TV pixel mode
+.IPs square\-pixel
+set pixel mode to square
+.IPs ccir601\-pixel
+set pixel mode to ccir601
 .RE
 .RS
 
 .I Overlay
 .RE
 .RSs
-.IPs cr-[left|right|top|bot]=<\-20\-20>
-adjust the overlay cropping
-.IPs ck-[rgb]min=<0\-255>
-minimum value for the color key
-.IPs ck-[rgb]max=<0\-255>
-maximum value for the color key
-.IPs ck-[rgb]=<0\-255>
-color key values
+.IPs cr-left=<0\-500>
+set the left cropping value (default: 50)
+.IPs cr-right=<0\-500>
+set the right cropping value (default: 300)
+.IPs cr-top=<0\-500>
+set the top cropping value (default: 0)
+.IPs cr-bottom=<0\-500>
+set the bottom cropping value (default: 0)
+.IPs ck-[r|g|b]=<0\-255>
+set the r(ed), g(reen) or b(lue) gain of the overlay color-key
+.IPs ck-[r|g|b]min=<0\-255>
+minimum value for the respective color key
+.IPs ck-[r|g|b]max=<0\-255>
+maximum value for the respective color key
 .IPs ignore\-cache
-do not use the VGA cache
+ignore cached overlay settings
+.IPs update\-cache
+update cached overlay settings
 .IPs ol-osd
-enable the osd hack on the overlay
-.IPs ol[hwxy]\-cor=<value>
-adjust the overlay size and position in case it doesn't match the window
-perfectly
+enable overlay onscreen display
+.IPs nool-osd
+disable overlay onscreen display (default)
+.IPs ol[h|w|x|y]\-cor=<-20\-20>
+adjust the overlay size (h,w) and position (x,y) in case it doesn't match the
+window perfectly (default: 0)
 .IPs overlay
-enable the overlay
+activate overlay (default)
+.IPs nooverlay
+activate TVout
 .IPs overlay-ratio=<1\-2500>
 tune the overlay (default 1000)
-.IPs update\-cache
-recreate the VGA cache
 .RE
 .
 .TP
