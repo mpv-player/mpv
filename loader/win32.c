@@ -1188,8 +1188,9 @@ struct critsecs_list_t
     struct CRITSECT *cs_unix;
 };
 
-#undef CRITSECS_NEWTYPE
-//#define CRITSECS_NEWTYPE 1
+/* 'NEWTYPE' is working with VIVO and 3ivX dll (no more segfaults) -- alex */
+//#undef CRITSECS_NEWTYPE
+#define CRITSECS_NEWTYPE 1
 
 #ifdef CRITSECS_NEWTYPE
 #define CRITSECS_LIST_MAX 20
@@ -1250,7 +1251,7 @@ void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	printf("InitializeCriticalSection(%p) - no more space in list\n", c);
 	return;
     }
-    printf("got unused space at %d\n", i);
+//    printf("got unused space at %d\n", i);
     cs = expmalloc(sizeof(struct CRITSECT));
     if (!cs)
     {
@@ -2156,7 +2157,9 @@ int WINAPI expLoadLibraryA(char* name)
     dbgprintf("Entering LoadLibraryA(%s)\n", name);
     // PIMJ and VIVO audio are loading  kernel32.dll
     if (strcasecmp(name, "kernel32.dll") == 0 || strcasecmp(name, "kernel32") == 0)
-	return MODULE_HANDLE_kernel32;
+//	return MODULE_HANDLE_kernel32;
+	return ERROR_SUCCESS; /* yeah, we have also the kernel32 calls */
+			      /* exported -> do not return failed! */
 
     result=LoadLibraryA(name);
     dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
@@ -2680,7 +2683,8 @@ int WINAPI expGetProcessVersion(int pid)
 }
 int WINAPI expGetCurrentThread(void)
 {
-    dbgprintf("GetCurrentThread()\n");
+#warning FIXME!
+    dbgprintf("GetCurrentThread() => %x\n", 0xcfcf9898);
     return 0xcfcf9898;
 }
 int WINAPI expGetOEMCP(void)
@@ -3207,12 +3211,12 @@ void WINAPI expInitCommonControls(void)
     return;
 }
 
+/* alex: implement this call! needed for 3ivx */
 HRESULT WINAPI expCoCreateFreeThreadedMarshaler(void *pUnkOuter, void **ppUnkInner)
 {
     printf("CoCreateFreeThreadedMarshaler(%p, %p) called!\n",
 	pUnkOuter, ppUnkInner);
-    return E_FAIL;
-//    return S_OK;
+    return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
 
