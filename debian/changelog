@@ -1,3 +1,9 @@
+mplayer (0.90-4) unstable; urgency=low
+
+  * Fix package building by adding BINDIR.
+
+ -- Diego Biurrun <diego@biurrun.de>  Wed,  4 Sep 2002 00:49:03 +0200
+
 mplayer (0.90-3) unstable; urgency=low
 
   * Remove configuration files on purge.
@@ -140,7 +146,3 @@ mplayer (0.11pre-1) unstable; urgency=low
   * Initial release.
 
  -- * TeLeNiEkO * <telenieko@telenieko.com>  Mon, 26 Feb 2001 12:24:04 +0100
-
-Local variables:
-mode: debian-changelog
-End:
