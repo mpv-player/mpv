@@ -40,7 +40,7 @@ static unsigned int find_best(struct vf_instance_s* vf, unsigned int fmt){
     else return 0;
     while(*p){
 	ret=vf->next->query_format(vf->next,*p);
-	mp_msg(MSGT_VFILTER,MSGL_V,"[%s] query(%s) -> %d\n",vf->info->name,vo_format_name(*p),ret&3);
+	mp_msg(MSGT_VFILTER,MSGL_DBG2,"[%s] query(%s) -> %d\n",vf->info->name,vo_format_name(*p),ret&3);
 	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){ best=*p; break;} // no conversion -> bingo!
 	if(ret&VFCAP_CSP_SUPPORTED && !best) best=*p; // best with conversion
 	++p;
@@ -52,6 +52,7 @@ static unsigned int find_best(struct vf_instance_s* vf, unsigned int fmt){
 
 struct vf_priv_s {
     unsigned int fmt;
+    int pal_msg;
 };
 
 static int config(struct vf_instance_s* vf,
@@ -78,7 +79,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
     if (!mpi->planes[1])
     {
-	mp_msg(MSGT_VFILTER,MSGL_V,"[%s] no palette given, assuming builtin grayscale one\n",vf->info->name);
+	if(!vf->priv->pal_msg){
+	    mp_msg(MSGT_VFILTER,MSGL_V,"[%s] no palette given, assuming builtin grayscale one\n",vf->info->name);
+	    vf->priv->pal_msg=1;
+	}
 	mpi->planes[1] = (unsigned char*)gray_pal;
     }
 

@@ -66,7 +66,7 @@ static unsigned int find_best_out(vf_instance_t *vf){
     // find the best outfmt:
     while(*p){
 	int ret=vf_next_query_format(vf,*p);
-	mp_msg(MSGT_VFILTER,MSGL_V,"scale: query(%s) -> %d\n",vo_format_name(*p),ret&3);
+	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(*p),ret&3);
 	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){ best=*p; break;} // no conversion -> bingo!
 	if(ret&VFCAP_CSP_SUPPORTED && !best) best=*p; // best with conversion
 	++p;
