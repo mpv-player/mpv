@@ -75,6 +75,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
             return (-1);
         }
 
+        mga_vid_config.colkey_on=0;
+
 	mga_vid_config.src_width = width;
 	mga_vid_config.src_height= height;
 	mga_vid_config.dest_width = d_width;
