@@ -181,19 +181,13 @@
       </LI>
       <LI><A HREF="encoding.html">2.4 Encoding with MEncoder</A>
         <UL>
-          <LI><A HREF="encoding.html#compilation">2.4.1 Compilation</A></LI>
-          <LI><A HREF="encoding.html#features">2.4.2 MEncoder Features</A>
-            <UL>
-              <LI><A HREF="encoding.html#2pass">2.4.2.1 Encoding 2 or 3-pass DivX4</A></LI>
-              <LI><A HREF="encoding.html#rescaling">2.4.2.2 Rescaling movies</A></LI>
-              <LI><A HREF="encoding.html#copying">2.4.2.3 Stream copying</A></LI>
-              <LI><A HREF="encoding.html#fixing">2.4.2.4 Fixing AVIs with broken index</A></LI>
-              <LI><A HREF="encoding.html#libavcodec">2.4.2.5 Encoding with the libavcodec codec family</A></LI>
-              <LI><A HREF="encoding.html#image_files">2.4.2.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
-              <LI><A HREF="encoding.html#vobsub">2.4.2.7 Extracting DVD subtitles to Vobsub file</A></LI>
-            </UL>
-          </LI>
-          <LI><A HREF="encoding.html#options">2.4.3 Available options</A></LI>
+          <LI><A HREF="encoding.html#2pass">2.4.1 Encoding 2 or 3-pass DivX4</A></LI>
+          <LI><A HREF="encoding.html#rescaling">2.4.2 Rescaling movies</A></LI>
+          <LI><A HREF="encoding.html#copying">2.4.3 Stream copying</A></LI>
+          <LI><A HREF="encoding.html#fixing">2.4.4 Fixing AVIs with broken index</A></LI>
+          <LI><A HREF="encoding.html#libavcodec">2.4.5 Encoding with the libavcodec codec family</A></LI>
+          <LI><A HREF="encoding.html#image_files">2.4.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
+          <LI><A HREF="encoding.html#vobsub">2.4.7 Extracting DVD subtitles to a Vobsub file</A></LI>
         </UL>
       </LI>
       <LI><A HREF="#tv">2.5 TV input</A>
@@ -332,8 +326,6 @@
   (Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen
   display (OSD)?</P>
 
-<P>MPlayer is under GPL v2 license.</P>
-
 <P>The player is rock solid playing damaged MPEG files (useful for some VCDs),
   and it plays bad AVI files which are unplayable with the famous
   windows media player. Even AVI files without index chunk are playable, and
@@ -341,6 +333,49 @@
   permanently with MEncoder, thus enabling seeking!
   As you see, stability and quality are the most important things,
   but the speed is also amazing.</P>
+
+<P>MEncoder (MPlayer's Movie Encoder) is a simple movie encoder,
+  designed to encode MPlayer-playable movies
+  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) to other
+  MPlayer-playable formats (see below). It can encode with various codecs, like
+  <B>DivX4</B> (1 or 2 passes), libavcodec,
+  <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> audio. Also has powerful plugin system
+  for video manipulation.</P>
+
+<H4>MEncoder features</H4>
+
+<UL>
+  <LI>encoding from the wide range of fileformats and decoders of MPlayer</LI>
+  <LI>encoding to all the codecs of ffmpeg's
+    <A HREF="codecs.html#libavcodec">libavcodec</A></LI>
+  <LI>video encoding from <B>V4L compatible TV tuners</B></LI>
+  <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
+  <LI>creating files from external audio stream</LI>
+  <LI>1, 2 or 3 pass encoding</LI>
+  <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE:</B> VBR MP3 audio doesn't
+    always play nicely on Windows players! On the other hand, currently
+    MEncoder's CBR encoding is totally broken on Win32 players :)</LI>
+  <LI>PCM audio</LI>
+  <LI>stream copying</LI>
+  <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
+  <LI>FPS correction with <CODE>-ofps</CODE> option (useful when encoding
+    29.97fps VOB to 24fps AVI)</LI>
+  <LI>using our very powerful plugin system (crop, expand, flip, postprocess,
+    rotate, scale, rgb/yuv conversion)</LI>
+  <LI>can encode DVD/VOBsub <B>AND</B> text subtitles into the output file</LI>
+  <LI>can rip DVD subtitles to Vobsub format</LI>
+</UL>
+
+<H4>Planned features</H4>
+
+<UL>
+  <LI>even wider variety of available en/decoding formats/codecs
+    (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
+  <LI>audio encoding from v4l (DONE for FreeBSD ?)</LI>
+</UL>
+
+<P>MPlayer and MEncoder can be distributed under the terms of the GNU General
+  Public License Version 2.</P>
 
 
 <H2><A NAME="history">1.1 History</A></H2>
