@@ -16,7 +16,6 @@
 #include "config.h"
 #include "version.h"
 
-#include "stream.h"
 #include "vobsub.h"
 #include "libvo/video_out.h"
 #include "spudec.h"
@@ -77,7 +76,7 @@ getline (char **lineptr, size_t *n, FILE *stream)
  **********************************************************************/
 
 typedef struct {
-    stream_t *stream;
+    FILE *stream;
     unsigned int pts;
     int aid;
     unsigned char *packet;
@@ -91,20 +90,15 @@ mpeg_open(const char *filename)
     mpeg_t *res = malloc(sizeof(mpeg_t));
     int err = res == NULL;
     if (!err) {
-	int fd;
 	res->pts = 0;
 	res->aid = -1;
 	res->packet = NULL;
 	res->packet_size = 0;
 	res->packet_reserve = 0;
-	fd = open(filename, O_RDONLY);
-	err = fd < 0;
-	if (!err) {
-	    res->stream = new_stream(fd, STREAMTYPE_FILE);
-	    err = res->stream == NULL;
-	    if (err)
-		close(fd);
-	}
+	res->stream = fopen(filename, "r");
+	err = res->stream == NULL;
+	if (err)
+	    perror("fopen Vobsub file failed");
 	if (err)
 	    free(res);
     }
@@ -114,25 +108,23 @@ mpeg_open(const char *filename)
 static void
 mpeg_free(mpeg_t *mpeg)
 {
-    int fd;
     if (mpeg->packet)
 	free(mpeg->packet);
-    fd = mpeg->stream->fd;
-    free_stream(mpeg->stream);
-    close(fd);
+    if (mpeg->stream)
+	fclose(mpeg->stream);
     free(mpeg);
 }
 
 static int
 mpeg_eof(mpeg_t *mpeg)
 {
-    return stream_eof(mpeg->stream);
+    return feof(mpeg->stream);
 }
 
 static off_t
 mpeg_tell(mpeg_t *mpeg)
 {
-    return stream_tell(mpeg->stream);
+    return ftell(mpeg->stream);
 }
 
 static int
@@ -146,10 +138,10 @@ mpeg_run(mpeg_t *mpeg)
 
     mpeg->aid = -1;
     mpeg->packet_size = 0;
-    if (stream_read(mpeg->stream, buf, 4) != 4)
+    if (fread(buf, 4, 1, mpeg->stream) != 1)
 	return -1;
     while (memcmp(buf, wanted, sizeof(wanted)) != 0) {
-	c = stream_read_char(mpeg->stream);
+	c = getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	memmove(buf, buf + 1, 3);
@@ -159,7 +151,7 @@ mpeg_run(mpeg_t *mpeg)
     case 0xb9:			/* System End Code */
 	break;
     case 0xba:			/* Packet start code */
-	c = stream_read_char(mpeg->stream);
+	c = getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	if ((c & 0xc0) == 0x40)
@@ -171,28 +163,28 @@ mpeg_run(mpeg_t *mpeg)
 	    return -1;
 	}
 	if (version == 4) {
-	    if (!stream_skip(mpeg->stream, 9))
+	    if (fseek(mpeg->stream, 9, SEEK_CUR))
 		return -1;
 	}
 	else if (version == 2) {
-	    if (!stream_skip(mpeg->stream, 7))
+	    if (fseek(mpeg->stream, 7, SEEK_CUR))
 		return -1;
 	}
 	else
 	    abort();
 	break;
     case 0xbd:			/* packet */
-	if (stream_read(mpeg->stream, buf, 2) != 2)
+	if (fread(buf, 2, 1, mpeg->stream) != 1)
 	    return -1;
 	len = buf[0] << 8 | buf[1];
 	idx = mpeg_tell(mpeg);
-	c = stream_read_char(mpeg->stream);
+	c = getc(mpeg->stream);
 	if (c < 0)
 	    return -1;
 	if ((c & 0xC0) == 0x40) { /* skip STD scale & size */
-	    if (stream_read_char(mpeg->stream) < 0)
+	    if (getc(mpeg->stream) < 0)
 		return -1;
-	    c = stream_read_char(mpeg->stream);
+	    c = getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	}
@@ -206,11 +198,11 @@ mpeg_run(mpeg_t *mpeg)
 	}
 	else if ((c & 0xc0) == 0x80) { /* System-2 (.VOB) stream */
 	    unsigned int pts_flags, hdrlen, dataidx;
-	    c = stream_read_char(mpeg->stream);
+	    c = getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	    pts_flags = c;
-	    c = stream_read_char(mpeg->stream);
+	    c = getc(mpeg->stream);
 	    if (c < 0)
 		return -1;
 	    hdrlen = c;
@@ -221,7 +213,7 @@ mpeg_run(mpeg_t *mpeg)
 		return -1;
 	    }
 	    if ((pts_flags & 0xc0) == 0x80) {
-		if (stream_read(mpeg->stream, buf, 5) != 5)
+		if (fread(buf, 5, 1, mpeg->stream) != 1)
 		    return -1;
 		if (!(((buf[0] & 0xf0) == 0x20) && (buf[0] & 1) && (buf[2] & 1) &&  (buf[4] & 1))) {
 		    mp_msg(MSGT_VOBSUB,MSGL_ERR, "vobsub PTS error: 0x%02x %02x%02x %02x%02x \n",
@@ -236,8 +228,8 @@ mpeg_run(mpeg_t *mpeg)
 		/* what's this? */
 		/* abort(); */
 	    }
-	    stream_seek(mpeg->stream, dataidx);
-	    mpeg->aid = stream_read_char(mpeg->stream);
+	    fseek(mpeg->stream, dataidx, SEEK_SET);
+	    mpeg->aid = getc(mpeg->stream);
 	    if (mpeg->aid < 0) {
 		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Bogus aid %d\n", mpeg->aid);
 		return -1;
@@ -256,8 +248,8 @@ mpeg_run(mpeg_t *mpeg)
 		mpeg->packet_size = 0;
 		return -1;
 	    }
-	    if ((unsigned int)stream_read(mpeg->stream, mpeg->packet, mpeg->packet_size) != mpeg->packet_size) {
-		mp_msg(MSGT_VOBSUB,MSGL_ERR,"stream_read failure");
+	    if (fread(mpeg->packet, mpeg->packet_size, 1, mpeg->stream) != 1) {
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"fread failure");
 		mpeg->packet_size = 0;
 		return -1;
 	    }
@@ -265,19 +257,19 @@ mpeg_run(mpeg_t *mpeg)
 	}
 	break;
     case 0xbe:			/* Padding */
-	if (stream_read(mpeg->stream, buf, 2) != 2)
+	if (fread(buf, 2, 1, mpeg->stream) != 1)
 	    return -1;
 	len = buf[0] << 8 | buf[1];
-	if (len > 0 && !stream_skip(mpeg->stream, len))
+	if (len > 0 && fseek(mpeg->stream, len, SEEK_CUR))
 	    return -1;
 	break;
     default:
 	if (0xc0 <= buf[3] && buf[3] < 0xf0) {
 	    /* MPEG audio or video */
-	    if (stream_read(mpeg->stream, buf, 2) != 2)
+	    if (fread(buf, 2, 1, mpeg->stream) != 1)
 		return -1;
 	    len = buf[0] << 8 | buf[1];
-	    if (len > 0 && !stream_skip(mpeg->stream, len))
+	    if (len > 0 && fseek(mpeg->stream, len, SEEK_CUR))
 		return -1;
 		
 	}
