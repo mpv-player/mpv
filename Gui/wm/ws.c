@@ -285,8 +285,8 @@ if(mDisplay){
      wsConvFunc=BGR8880_to_BGR555_c;
      break;
   }
- XSetIOErrorHandler( wsIOErrorHandler );
- XSetErrorHandler( wsErrorHandler );
+// XSetIOErrorHandler( wsIOErrorHandler );
+// XSetErrorHandler( wsErrorHandler );
 }
 
 // ----------------------------------------------------------------------------------------------
