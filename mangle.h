@@ -9,7 +9,7 @@
 
 /* Feel free to add more to the list, eg. a.out IMO */
 #if defined(__CYGWIN__) || defined(__OS2__) || \
-   (defined(__OpenBSD__) && !defined(ELF))
+   (defined(__OpenBSD__) && !defined(__ELF__))
 #define MANGLE(a) "_" #a
 #else
 #define MANGLE(a) #a
