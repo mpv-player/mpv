@@ -712,18 +712,30 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 		streaming_ctrl_free( stream->streaming_ctrl );
 		stream->streaming_ctrl = NULL;
 	} else if( stream->streaming_ctrl->buffering) {
-		int ret;
+		int cache_size = 0; 
+		int ret, val;
 		ret = m_config_is_option_set(mconfig,"cache");
 		if(ret < 0) {
-		  printf("Unable to know if cache size option was set\n");
+			printf("Unable to know if cache size option was set\n");
 		} else if(!ret) {
-		  // buffer in KBytes, *5 because the prefill is 20% of the buffer.
-		  if(m_config_set_int(mconfig,"cache",(stream->streaming_ctrl->prebuffer_size/1024)*5))
-		    printf("Cache size set to %d KBytes\n",(stream->streaming_ctrl->prebuffer_size/1024)*5);
-		  else
-		    printf("Unable to set the cache size option\n");
-		} else
-		  printf("Cache size alredy set\n");
+			// cache option not set, will use the our computed value.
+			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
+			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
+			if( m_config_set_int( mconfig, "cache", val )<0 ) { 
+				printf("Unable to set the cache size option\n");
+			} else {
+				cache_size = val;
+			}
+		} else {
+			// cache option set, will use the given one.
+			val = m_config_get_int( mconfig, "cache", NULL );
+			if( val<0 ) {
+				printf("Unable to retrieve the cache option value\n");
+			} else {
+				cache_size = val;
+			}
+		}
+		printf("Cache size set to %d KBytes\n", cache_size );
 	}
 	return ret;
 }
