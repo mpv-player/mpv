@@ -1,4 +1,13 @@
 
+/*
+ * Get path to config dir/file.
+ *
+ * Return Values:
+ *   Returns the pointer to the ALLOCATED buffer containing the
+ *   zero terminated path string. This buffer has to be FREED
+ *   by the caller.
+ *
+ */
 char *get_path(char *filename){
 	char *homedir;
 	char *buff;
