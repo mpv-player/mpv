@@ -1295,13 +1295,12 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
         Then enter into the <CODE>TVout/</CODE> directory in the <B>MPlayer</B>
         source, and execute <CODE>./modules</CODE> as root. Your text-mode console
         will enter into framebuffer mode (no way back!).</LI>
-      <LI>Next, run the <CODE>./matroxtv</CODE> script. This will present you
+      <LI>Next, EDIT and run the <CODE>./matroxtv</CODE> script. This will present you
         to a very simple menu. Press <B>2</B> and <B>ENTER</B>. Now you should
-	have the same picture on your monitor, and TV. The <B>3.</B> option
-        will turn on independent display, but then you <B>can't use X</B>! If
-	the TV (PAL) picture has some weird stripes on it, the script wasn't able to
-	set the resolution correctly (to 640x512 by default). Use other menu
-	items randomly and it'll be OK :)</LI>
+	have the same picture on your monitor, and TV. If
+	the TV (PAL by default) picture has some weird stripes on it, the script wasn't able to
+	set the resolution correctly (to 640x512 by default). Try other
+	resolutions from the menu and/or experiment with fbset.</LI>
     </OL>
 
     <P>Yoh. Next task is to make the cursor on tty1 (or whatever) to disappear,
