@@ -60,7 +60,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
     
-    if(s->fast){
+    if(s->fast && (((af_data_t*)arg)->format != (AF_FORMAT_F | AF_FORMAT_NE))){
       af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
       af->data->bps    = 2;
     }
@@ -83,7 +83,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
   case AF_CONTROL_POST_CREATE:	
-    s->fast = ((af_cfg_t*)arg)->force  == AF_INIT_SLOW ? 1 : 0;
+    s->fast = (((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == 
+      AF_INIT_FLOAT ? 1 : 0;
     return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
     memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));

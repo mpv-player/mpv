@@ -34,9 +34,15 @@
 #include "af_resample.h"
 
 // Filtering types
-#define TYPE_LIN   0	// Linear interpolation
-#define TYPE_INT   1   	// 16 bit integer 
-#define TYPE_FLOAT 2	// 32 bit floating point
+#define RSMP_LIN   	(0<<0)	// Linear interpolation
+#define RSMP_INT   	(1<<0)  // 16 bit integer 
+#define RSMP_FLOAT	(2<<0)	// 32 bit floating point
+#define RSMP_MASK	(3<<0)
+
+// Defines for sloppy or exact resampling
+#define FREQ_SLOPPY 	(0<<2)
+#define FREQ_EXACT  	(1<<2)
+#define FREQ_MASK	(1<<2)
 
 // Accuracy for linear interpolation
 #define STEPACCURACY 32
@@ -53,8 +59,7 @@ typedef struct af_resample_s
   uint32_t	up;	// Up sampling factor 
   uint64_t	step;	// Step size for linear interpolation
   uint64_t	pt;	// Pointer remainder for linear interpolation
-  int		sloppy;	// Enable sloppy resampling to reduce memory usage
-  int		type;	// Filter type 
+  int		setup;	// Setup parameters cmdline or through postcreate
 } af_resample_t;
 
 // Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
@@ -120,6 +125,55 @@ static int linint(af_data_t* c,af_data_t* l, af_resample_t* s)
   return len;
 }
 
+/* Determine resampling type and format */
+static int set_types(struct af_instance_s* af, af_data_t* data)
+{
+  af_resample_t* s = af->setup;
+  int rv = AF_OK;
+  float rd = 0;
+
+  // Make sure this filter isn't redundant 
+  if((af->data->rate == data->rate) || (af->data->rate == 0))
+    return AF_DETACH;
+
+  /* If sloppy and small resampling difference (2%) */
+  rd = abs((float)af->data->rate - (float)data->rate)/(float)data->rate;
+  if((((s->setup & FREQ_MASK) == FREQ_SLOPPY) && (rd < 0.02) && 
+      (data->format != (AF_FORMAT_NE | AF_FORMAT_F))) || 
+     ((s->setup & RSMP_MASK) == RSMP_LIN)){
+    s->setup = (s->setup & ~RSMP_MASK) | RSMP_LIN;
+    af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
+    af->data->bps    = 2;
+    af_msg(AF_MSG_VERBOSE,"[resample] Using linear interpolation. \n");
+  }
+  else{
+    /* If the input format is float or if float is explicitly selected
+       use float, otherwise use int */
+    if((data->format == (AF_FORMAT_NE | AF_FORMAT_F)) || 
+       ((s->setup & RSMP_MASK) == RSMP_FLOAT)){
+      s->setup = (s->setup & ~RSMP_MASK) | RSMP_FLOAT;
+      af->data->format = AF_FORMAT_NE | AF_FORMAT_F;
+      af->data->bps    = 4;
+    }
+    else{
+      s->setup = (s->setup & ~RSMP_MASK) | RSMP_INT;
+      af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
+      af->data->bps    = 2;
+    }
+    af_msg(AF_MSG_VERBOSE,"[resample] Using %s processing and %s frequecy"
+	   " conversion.\n",
+	   ((s->setup & RSMP_MASK) == RSMP_FLOAT)?"floating point":"integer",
+	   ((s->setup & FREQ_MASK) == FREQ_SLOPPY)?"inexact":"exact");
+  }
+
+  if(af->data->format != data->format || af->data->bps != data->bps)
+    rv = AF_FALSE;
+  data->format = af->data->format;
+  data->bps = af->data->bps;
+  af->data->nch = data->nch;
+  return rv;
+}
+
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
@@ -129,62 +183,34 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af_data_t* 	   n   = (af_data_t*)arg; // New configureation
     int            i,d = 0;
     int 	   rv  = AF_OK;
-    size_t 	   tsz = (s->type==TYPE_INT) ? sizeof(int16_t) : sizeof(float);
 
-    // Make sure this filter isn't redundant 
-    if((af->data->rate == n->rate) || (af->data->rate == 0))
+    // Free space for circular bufers
+    if(s->xq){
+      for(i=1;i<af->data->nch;i++)
+	if(s->xq[i])
+	  free(s->xq[i]);
+      free(s->xq);
+    }
+
+    if(AF_DETACH == (rv = set_types(af,n)))
       return AF_DETACH;
-
+    
     // If linear interpolation 
-    if(s->type == TYPE_LIN){
+    if((s->setup & RSMP_MASK) == RSMP_LIN){
       s->pt=0LL;
       s->step=((uint64_t)n->rate<<STEPACCURACY)/(uint64_t)af->data->rate+1LL;
-      af_msg(AF_MSG_VERBOSE,"[resample] Linear interpolation step: 0x%016X.\n",
+      af_msg(AF_MSG_DEBUG0,"[resample] Linear interpolation step: 0x%016X.\n",
 	     s->step);
       af->mul.n = af->data->rate;
       af->mul.d = n->rate;
+      return AF_OK;
     }
-
-    // Create space for circular bufers (if nesessary)
-    if((af->data->nch != n->nch) && (s->type != TYPE_LIN)){
-      // First free the old ones
-      if(s->xq){
-	for(i=1;i<af->data->nch;i++)
-	  if(s->xq[i])
-	    free(s->xq[i]);
-	free(s->xq);
-      }
-      // ... then create new
-      s->xq = malloc(n->nch*sizeof(void*));
-      for(i=0;i<n->nch;i++)
-	s->xq[i] = malloc(2*L*tsz);
-      s->xi = 0;
-    }
-
-    // Set parameters
-    af->data->nch    = n->nch;
-    if(s->type == TYPE_INT || s->type == TYPE_LIN){
-      af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
-      af->data->bps    = 2;
-    }
-    else{
-      af->data->format = AF_FORMAT_NE | AF_FORMAT_F;
-      af->data->bps    = 4;
-    }
-    if(af->data->format != n->format || af->data->bps != n->bps)
-      rv = AF_FALSE;
-    n->format = af->data->format;
-    n->bps = af->data->bps;
-
-    // If linear interpolation is used the setup is done.
-    if(s->type == TYPE_LIN)
-      return rv;
 
     // Calculate up and down sampling factors
     d=gcd(af->data->rate,n->rate);
 
     // If sloppy resampling is enabled limit the upsampling factor
-    if(s->sloppy && (af->data->rate/d > 5000)){
+    if(((s->setup & FREQ_MASK) == FREQ_SLOPPY) && (af->data->rate/d > 5000)){
       int up=af->data->rate/2;
       int dn=n->rate/2;
       int m=2;
@@ -194,6 +220,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       }
       d*=m;
     }
+
+    // Create space for circular bufers
+    s->xq = malloc(n->nch*sizeof(void*));
+    for(i=0;i<n->nch;i++)
+      s->xq[i] = malloc(2*L*af->data->bps);
+    s->xi = 0;
 
     // Check if the the design needs to be redone
     if(s->up != af->data->rate/d || s->dn != n->rate/d){
@@ -210,7 +242,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       w = malloc(sizeof(float) * s->up *L);
       if(NULL != s->w)
 	free(s->w);
-      s->w = malloc(L*s->up*tsz);
+      s->w = malloc(L*s->up*af->data->bps);
 
       // Design prototype filter type using Kaiser window with beta = 10
       if(NULL == w || NULL == s->w || 
@@ -222,7 +254,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       wt=w;
       for(j=0;j<L;j++){//Columns
 	for(i=0;i<s->up;i++){//Rows
-	  if(s->type == TYPE_INT){
+	  if((s->setup & RSMP_MASK) == RSMP_INT){
 	    float t=(float)s->up*32767.0*(*wt);
 	    ((int16_t*)s->w)[i*L+j] = (int16_t)((t>=0.0)?(t+0.5):(t-0.5));
 	  }
@@ -245,15 +277,16 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     af_resample_t* s   = (af_resample_t*)af->setup; 
     int rate=0;
-    int lin=0;
-    sscanf((char*)arg,"%i:%i:%i", &rate, &(s->sloppy), &lin);
-    if(lin)
-      s->type = TYPE_LIN;
+    int type=RSMP_INT;
+    int sloppy=1;
+    sscanf((char*)arg,"%i:%i:%i", &rate, &type, &sloppy);
+    s->setup = (sloppy?FREQ_SLOPPY:FREQ_EXACT) | 
+      (clamp(type,RSMP_LIN,RSMP_FLOAT));
     return af->control(af,AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET, &rate);
   }
   case AF_CONTROL_POST_CREATE:	
-    ((af_resample_t*)af->setup)->type = 
-      ((af_cfg_t*)arg)->force  == AF_INIT_SLOW ? TYPE_INT : TYPE_FLOAT;
+    if((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT)
+      ((af_resample_t*)af->setup)->setup |= RSMP_FLOAT;
     return AF_OK;
   case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET: 
     // Reinit must be called after this function has been called
@@ -293,8 +326,8 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     return NULL;
 
   // Run resampling
-  switch(s->type){
-  case(TYPE_INT):
+  switch(s->setup & RSMP_MASK){
+  case(RSMP_INT):
 # define FORMAT_I 1
     if(s->up>s->dn){
 #     define UP
@@ -307,7 +340,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 #     undef DN
     }
     break;
-  case(TYPE_FLOAT):
+  case(RSMP_FLOAT):
 # undef FORMAT_I
 # define FORMAT_F 1
     if(s->up>s->dn){
@@ -321,7 +354,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 #     undef DN
     }
     break;
-  case(TYPE_LIN):
+  case(RSMP_LIN):
     len = linint(c, l, s);
     break;
   }
@@ -345,6 +378,7 @@ static int open(af_instance_t* af){
   af->setup=calloc(1,sizeof(af_resample_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;
+  ((af_resample_t*)af->setup)->setup = RSMP_INT | FREQ_SLOPPY;
   return AF_OK;
 }
 

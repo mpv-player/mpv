@@ -69,6 +69,10 @@ extern int* af_cpu_speed;
 #define AF_INIT_FORCE	  	0x00000003
 #define AF_INIT_TYPE_MASK 	0x00000003
 
+#define AF_INIT_INT		0x00000000
+#define AF_INIT_FLOAT		0x00000010
+#define AF_INIT_FORMAT_MASK	0x00000010
+
 // Default init type 
 #ifndef AF_INIT_TYPE
 #if defined(HAVE_SSE) || defined(HAVE_3DNOW)
