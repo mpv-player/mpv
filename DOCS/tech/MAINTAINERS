@@ -130,7 +130,7 @@ libao2 drivers:
     * ao_dxr2.c - None
     * ao_esd.c - None
     * ao_mpegpes.c - None
-    * ao_nas.c - None
+    * ao_nas.c - Tobias Diedrich
     * ao_null.c - None
     * ao_oss.c - None
     * ao_pcm.c - None
