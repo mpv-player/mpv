@@ -99,7 +99,7 @@ static int load_syms_linux(char *path) {
 		void *handle;
 
 		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
-		rv_handle = handle = dlopen (path, RTLD_LAZY);
+		handle = dlopen (path, RTLD_LAZY);
 		if (!handle) {
 			mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error: %s\n",dlerror());
 			return 0;
@@ -115,11 +115,14 @@ static int load_syms_linux(char *path) {
        rvyuv_free &&
        rvyuv_hive_message &&
        rvyuv_init &&
-       rvyuv_transform) return 1;
+       rvyuv_transform)
+    {
+	rv_handle = handle;
+	return 1;
+    }
 
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
-    dlclose(rv_handle);
-    rv_handle = NULL;
+    dlclose(handle);
     return 0;
 }
 
@@ -133,10 +136,9 @@ int WINAPI FreeLibrary(void *handle);
 static int load_syms_windows(char *path) {
     void *handle;
 
-
     mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening win32 dll '%s'\n", path);
     Setup_LDT_Keeper();
-    rv_handle = handle = LoadLibraryA(path);
+    handle = LoadLibraryA(path);
     mp_msg(MSGT_DECVIDEO,MSGL_V,"win32 real codec handle=%p  \n",handle);
     if (!handle) {
 	mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error loading dll\n");
@@ -148,18 +150,19 @@ static int load_syms_windows(char *path) {
     wrvyuv_hive_message = GetProcAddress(handle, "RV20toYUV420HiveMessage");
     wrvyuv_init = GetProcAddress(handle, "RV20toYUV420Init");
     wrvyuv_transform = GetProcAddress(handle, "RV20toYUV420Transform");
-    
-    dll_type = 1;
-    
+
     if(wrvyuv_custom_message &&
        wrvyuv_free &&
        wrvyuv_hive_message &&
        wrvyuv_init &&
-       wrvyuv_transform) return 1;
-
+       wrvyuv_transform)
+    {
+	dll_type = 1;
+	rv_handle = handle;
+	return 1;
+    }
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
-    FreeLibrary(rv_handle);
-    rv_handle = NULL;
+    FreeLibrary(handle);
     return 0; // error
 }
 #endif
@@ -199,8 +202,7 @@ static int init(sh_video_t *sh){
 #endif
 	{
 		mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
-		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"You need to copy the contents from the RealPlayer codecs directory\n");
-		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"into " REALCODEC_PATH "/ !\n");
+		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Read the RealVideo section of the DOCS!\n");
 		return 0;
 	}
 	// only I420 supported
