@@ -111,8 +111,8 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
           
 //					return -1;
         }
-        //if(verbose>=3)
-        printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
+        if(verbose)
+          printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
         if(ash.cbSrcLengthUsed>=sh_audio->a_in_buffer_len){
           sh_audio->a_in_buffer_len=0;
         } else {
