@@ -1,3 +1,9 @@
+mplayer (0.90pre8-0) unstable; urgency=low
+
+  * new release, fix version, we are not at 0.90, we're still at preX
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Thu, 19 Sep 2002 09:50:43 +0200
+
 mplayer (0.90-4) unstable; urgency=low
 
   * Fix package building by adding BINDIR.
