@@ -45,9 +45,9 @@ int downmix_init (int input, int flags, sample_t * level,
 		  sample_t clev, sample_t slev);
 int downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
 		   sample_t clev, sample_t slev);
-void downmix (sample_t * samples, int acmod, int output, sample_t bias,
+extern void (*downmix) (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev);
-void upmix (sample_t * samples, int acmod, int output);
+extern void (*upmix) (sample_t * samples, int acmod, int output);
 
 void imdct_init (uint32_t mm_accel);
 extern void (* imdct_256) (sample_t * data, sample_t * delay, sample_t bias);

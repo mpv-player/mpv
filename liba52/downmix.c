@@ -24,6 +24,7 @@
  */
 
 #include "config.h"
+#include "../cpudetect.h"
 
 #include <string.h>
 #include <inttypes.h>
@@ -33,6 +34,20 @@
 
 #define CONVERT(acmod,output) (((output) << 3) + (acmod))
 
+//#undef HAVE_SSE
+//#undef HAVE_MMX
+
+void (*downmix)(sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev)= NULL;
+void (*upmix)(sample_t * samples, int acmod, int output)= NULL;
+
+static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev);
+static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev);
+static void upmix_MMX (sample_t * samples, int acmod, int output);
+static void upmix_C (sample_t * samples, int acmod, int output);
+      
 int downmix_init (int input, int flags, sample_t * level,
 		  sample_t clev, sample_t slev)
 {
@@ -61,6 +76,13 @@ int downmix_init (int input, int flags, sample_t * level,
 	 A52_DOLBY,	A52_DOLBY,	A52_DOLBY,	A52_DOLBY}
     };
     int output;
+
+    upmix= upmix_C;
+    downmix= downmix_C;
+#ifdef ARCH_X86    
+    if(gCpuCaps.hasMMX) upmix= upmix_MMX;
+    if(gCpuCaps.hasSSE) downmix= downmix_SSE;
+#endif
 
     output = flags & A52_CHANNEL_MASK;
     if (output > A52_DOLBY)
@@ -305,115 +327,34 @@ static void mix2to1 (sample_t * dest, sample_t * src, sample_t bias)
 {
     int i;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %2, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps (%0, %%esi), %%xmm0	\n\t" 
-	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
-	"addps (%1, %%esi), %%xmm0	\n\t" 
-	"addps 16(%1, %%esi), %%xmm1	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t"
-	"addps %%xmm7, %%xmm1		\n\t"
-	"movaps %%xmm0, (%1, %%esi)	\n\t"
-	"movaps %%xmm1, 16(%1, %%esi)	\n\t"
-	"addl $32, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (src+256), "r" (dest+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	dest[i] += src[i] + bias;
-#endif
 }
 
 static void mix3to1 (sample_t * samples, sample_t bias)
 {
     int i;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps (%0, %%esi), %%xmm0	\n\t" 
-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
-	"addps %%xmm7, %%xmm1		\n\t"
-	"addps %%xmm1, %%xmm0		\n\t"
-	"movaps %%xmm0, (%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	samples[i] += samples[i + 256] + samples[i + 512] + bias;
-#endif
 }
 
 static void mix4to1 (sample_t * samples, sample_t bias)
 {
     int i;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps (%0, %%esi), %%xmm0	\n\t" 
-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
-	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t"
-	"addps %%xmm1, %%xmm0		\n\t"
-	"movaps %%xmm0, (%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	samples[i] += (samples[i + 256] + samples[i + 512] +
 		       samples[i + 768] + bias);
-#endif
 }
 
 static void mix5to1 (sample_t * samples, sample_t bias)
 {
     int i;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps (%0, %%esi), %%xmm0	\n\t" 
-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
-	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t"
-	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
-	"addps %%xmm1, %%xmm0		\n\t"
-	"movaps %%xmm0, (%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	samples[i] += (samples[i + 256] + samples[i + 512] +
 		       samples[i + 768] + samples[i + 1024] + bias);
-#endif
 }
 
 static void mix3to2 (sample_t * samples, sample_t bias)
@@ -421,32 +362,11 @@ static void mix3to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t" //common
-	"movaps (%0, %%esi), %%xmm1	\n\t" 
-	"movaps 2048(%0, %%esi), %%xmm2	\n\t"
-	"addps %%xmm0, %%xmm1		\n\t"
-	"addps %%xmm0, %%xmm2		\n\t"
-	"movaps %%xmm1, (%0, %%esi)	\n\t"
-	"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	samples[i] += common;
 	samples[i + 256] = samples[i + 512] + common;
     }
-#endif
 }
 
 static void mix21to2 (sample_t * left, sample_t * right, sample_t bias)
@@ -454,32 +374,11 @@ static void mix21to2 (sample_t * left, sample_t * right, sample_t bias)
     int i;
     sample_t common;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %2, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps 1024(%1, %%esi), %%xmm0	\n\t" 
-		"addps %%xmm7, %%xmm0		\n\t" //common
-		"movaps (%0, %%esi), %%xmm1	\n\t" 
-		"movaps (%1, %%esi), %%xmm2	\n\t"
-		"addps %%xmm0, %%xmm1		\n\t"
-		"addps %%xmm0, %%xmm2		\n\t"
-		"movaps %%xmm1, (%0, %%esi)	\n\t"
-		"movaps %%xmm2, (%1, %%esi)	\n\t"
-		"addl $16, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (left+256), "r" (right+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = right[i + 256] + bias;
 	left[i] += common;
 	right[i] += common;
     }
-#endif
 }
 
 static void mix21toS (sample_t * samples, sample_t bias)
@@ -487,33 +386,11 @@ static void mix21toS (sample_t * samples, sample_t bias)
     int i;
     sample_t surround;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %1, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  // surround
-		"movaps (%0, %%esi), %%xmm1	\n\t" 
-		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
-		"addps %%xmm7, %%xmm1		\n\t"
-		"addps %%xmm7, %%xmm2		\n\t"
-		"subps %%xmm0, %%xmm1		\n\t"
-		"addps %%xmm0, %%xmm2		\n\t"
-		"movaps %%xmm1, (%0, %%esi)	\n\t"
-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
-		"addl $16, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	surround = samples[i + 512];
 	samples[i] += bias - surround;
 	samples[i + 256] += bias + surround;
     }
-#endif
 }
 
 static void mix31to2 (sample_t * samples, sample_t bias)
@@ -521,33 +398,11 @@ static void mix31to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %1, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
-		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
-		"addps %%xmm7, %%xmm0		\n\t" // common
-		"movaps (%0, %%esi), %%xmm1	\n\t" 
-		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
-		"addps %%xmm0, %%xmm1		\n\t"
-		"addps %%xmm0, %%xmm2		\n\t"
-		"movaps %%xmm1, (%0, %%esi)	\n\t"
-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
-		"addl $16, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + samples[i + 768] + bias;
 	samples[i] += common;
 	samples[i + 256] = samples[i + 512] + common;
     }
-#endif
 }
 
 static void mix31toS (sample_t * samples, sample_t bias)
@@ -555,36 +410,12 @@ static void mix31toS (sample_t * samples, sample_t bias)
     int i;
     sample_t common, surround;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %1, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
-		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
-		"addps %%xmm7, %%xmm0		\n\t" // common
-		"movaps (%0, %%esi), %%xmm1	\n\t" 
-		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
-		"addps %%xmm0, %%xmm1		\n\t"
-		"addps %%xmm0, %%xmm2		\n\t"
-		"subps %%xmm3, %%xmm1		\n\t"
-		"addps %%xmm3, %%xmm2		\n\t"
-		"movaps %%xmm1, (%0, %%esi)	\n\t"
-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
-		"addl $16, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	surround = samples[i + 768];
 	samples[i] += common - surround;
 	samples[i + 256] = samples[i + 512] + common + surround;
     }
-#endif
 }
 
 static void mix22toS (sample_t * samples, sample_t bias)
@@ -592,34 +423,11 @@ static void mix22toS (sample_t * samples, sample_t bias)
     int i;
     sample_t surround;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %1, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
-		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
-		"movaps (%0, %%esi), %%xmm1	\n\t" 
-		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
-		"addps %%xmm7, %%xmm1		\n\t"
-		"addps %%xmm7, %%xmm2		\n\t"
-		"subps %%xmm0, %%xmm1		\n\t"
-		"addps %%xmm0, %%xmm2		\n\t"
-		"movaps %%xmm1, (%0, %%esi)	\n\t"
-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
-		"addl $16, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	surround = samples[i + 512] + samples[i + 768];
 	samples[i] += bias - surround;
 	samples[i + 256] += bias + surround;
     }
-#endif
 }
 
 static void mix32to2 (sample_t * samples, sample_t bias)
@@ -627,33 +435,11 @@ static void mix32to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t" // common
-	"movaps %%xmm0, %%xmm1		\n\t" // common
-	"addps (%0, %%esi), %%xmm0	\n\t" 
-	"addps 2048(%0, %%esi), %%xmm1	\n\t" 
-	"addps 3072(%0, %%esi), %%xmm0	\n\t" 
-	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
-	"movaps %%xmm0, (%0, %%esi)	\n\t"
-	"movaps %%xmm1, 1024(%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	samples[i] += common + samples[i + 768];
 	samples[i + 256] = common + samples[i + 512] + samples[i + 1024];
     }
-#endif
 }
 
 static void mix32toS (sample_t * samples, sample_t bias)
@@ -661,93 +447,30 @@ static void mix32toS (sample_t * samples, sample_t bias)
     int i;
     sample_t common, surround;
 
-#ifdef HAVE_SSE
-	asm volatile(
-	"movlps %1, %%xmm7		\n\t"
-	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-	"movl $-1024, %%esi		\n\t"
-	"1:				\n\t"
-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
-	"movaps 3072(%0, %%esi), %%xmm2	\n\t" 
-	"addps %%xmm7, %%xmm0		\n\t" // common
-	"addps 4096(%0, %%esi), %%xmm2	\n\t" // surround	
-	"movaps (%0, %%esi), %%xmm1	\n\t" 
-	"movaps 2048(%0, %%esi), %%xmm3	\n\t" 
-	"subps %%xmm2, %%xmm1		\n\t"	
-	"addps %%xmm2, %%xmm3		\n\t"	
-	"addps %%xmm0, %%xmm1		\n\t"	
-	"addps %%xmm0, %%xmm3		\n\t"	
-	"movaps %%xmm1, (%0, %%esi)	\n\t"
-	"movaps %%xmm3, 1024(%0, %%esi)	\n\t"
-	"addl $16, %%esi		\n\t"
-	" jnz 1b			\n\t"
-	:: "r" (samples+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	surround = samples[i + 768] + samples[i + 1024];
 	samples[i] += common - surround;
 	samples[i + 256] = samples[i + 512] + common + surround;
     }
-#endif
 }
 
 static void move2to1 (sample_t * src, sample_t * dest, sample_t bias)
 {
     int i;
 
-#ifdef HAVE_SSE
-	asm volatile(
-		"movlps %2, %%xmm7		\n\t"
-		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
-		"movl $-1024, %%esi		\n\t"
-		"1:				\n\t"
-		"movaps (%0, %%esi), %%xmm0	\n\t"  
-		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
-		"addps 1024(%0, %%esi), %%xmm0	\n\t"
-		"addps 1040(%0, %%esi), %%xmm1	\n\t"
-		"addps %%xmm7, %%xmm0		\n\t"
-		"addps %%xmm7, %%xmm1		\n\t"
-		"movaps %%xmm0, (%1, %%esi)	\n\t"
-		"movaps %%xmm1, 16(%1, %%esi)	\n\t"
-		"addl $32, %%esi		\n\t"
-		" jnz 1b			\n\t"
-	:: "r" (src+256), "r" (dest+256), "m" (bias)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	dest[i] = src[i] + src[i + 256] + bias;
-#endif
 }
 
 static void zero (sample_t * samples)
 {
     int i;
-#ifdef HAVE_MMX
-	asm volatile(
-		"movl $-1024, %%esi		\n\t"
-		"pxor %%mm0, %%mm0		\n\t"
-		"1:				\n\t"
-		"movq %%mm0, (%0, %%esi)	\n\t"
-		"movq %%mm0, 8(%0, %%esi)	\n\t"
-		"movq %%mm0, 16(%0, %%esi)	\n\t"
-		"movq %%mm0, 24(%0, %%esi)	\n\t"
-		"addl $32, %%esi		\n\t"
-		" jnz 1b			\n\t"
-		"emms"
-	:: "r" (samples+256)
-	: "%esi"
-	);
-#else
     for (i = 0; i < 256; i++)
 	samples[i] = 0;
-#endif
 }
 
-void downmix (sample_t * samples, int acmod, int output, sample_t bias,
+static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
@@ -888,7 +611,7 @@ void downmix (sample_t * samples, int acmod, int output, sample_t bias,
     }
 }
 
-void upmix (sample_t * samples, int acmod, int output)
+static void upmix_C (sample_t * samples, int acmod, int output)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
 
@@ -953,3 +676,526 @@ void upmix (sample_t * samples, int acmod, int output)
 	goto mix_31to21;
     }
 }
+
+#ifdef ARCH_X86
+static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
+{
+	asm volatile(
+	"movlps %2, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
+	"addps (%1, %%esi), %%xmm0	\n\t" 
+	"addps 16(%1, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps %%xmm7, %%xmm1		\n\t"
+	"movaps %%xmm0, (%1, %%esi)	\n\t"
+	"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+	"addl $32, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix3to1_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+	"addps %%xmm7, %%xmm1		\n\t"
+	"addps %%xmm1, %%xmm0		\n\t"
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix4to1_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps %%xmm1, %%xmm0		\n\t"
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix5to1_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm1, %%xmm0		\n\t"
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix3to2_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t" //common
+	"movaps (%0, %%esi), %%xmm1	\n\t" 
+	"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+	"addps %%xmm0, %%xmm1		\n\t"
+	"addps %%xmm0, %%xmm2		\n\t"
+	"movaps %%xmm1, (%0, %%esi)	\n\t"
+	"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
+{
+	asm volatile(
+		"movlps %2, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 1024(%1, %%esi), %%xmm0	\n\t" 
+		"addps %%xmm7, %%xmm0		\n\t" //common
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps (%1, %%esi), %%xmm2	\n\t"
+		"addps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, (%1, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (left+256), "r" (right+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix21toS_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  // surround
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm7, %%xmm1		\n\t"
+		"addps %%xmm7, %%xmm2		\n\t"
+		"subps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix31to2_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
+		"addps %%xmm7, %%xmm0		\n\t" // common
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix31toS_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
+		"addps %%xmm7, %%xmm0		\n\t" // common
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"subps %%xmm3, %%xmm1		\n\t"
+		"addps %%xmm3, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix22toS_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
+		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm7, %%xmm1		\n\t"
+		"addps %%xmm7, %%xmm2		\n\t"
+		"subps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix32to2_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t" // common
+	"movaps %%xmm0, %%xmm1		\n\t" // common
+	"addps (%0, %%esi), %%xmm0	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm1	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm0	\n\t" 
+	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"movaps %%xmm1, 1024(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void mix32toS_SSE (sample_t * samples, sample_t bias)
+{
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+	"movaps 3072(%0, %%esi), %%xmm2	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t" // common
+	"addps 4096(%0, %%esi), %%xmm2	\n\t" // surround	
+	"movaps (%0, %%esi), %%xmm1	\n\t" 
+	"movaps 2048(%0, %%esi), %%xmm3	\n\t" 
+	"subps %%xmm2, %%xmm1		\n\t"	
+	"addps %%xmm2, %%xmm3		\n\t"	
+	"addps %%xmm0, %%xmm1		\n\t"	
+	"addps %%xmm0, %%xmm3		\n\t"	
+	"movaps %%xmm1, (%0, %%esi)	\n\t"
+	"movaps %%xmm3, 1024(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
+{
+	asm volatile(
+		"movlps %2, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps (%0, %%esi), %%xmm0	\n\t"  
+		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
+		"addps 1024(%0, %%esi), %%xmm0	\n\t"
+		"addps 1040(%0, %%esi), %%xmm1	\n\t"
+		"addps %%xmm7, %%xmm0		\n\t"
+		"addps %%xmm7, %%xmm1		\n\t"
+		"movaps %%xmm0, (%1, %%esi)	\n\t"
+		"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+		"addl $32, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+}
+
+static void zero_MMX(sample_t * samples)
+{
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"pxor %%mm0, %%mm0		\n\t"
+		"1:				\n\t"
+		"movq %%mm0, (%0, %%esi)	\n\t"
+		"movq %%mm0, 8(%0, %%esi)	\n\t"
+		"movq %%mm0, 16(%0, %%esi)	\n\t"
+		"movq %%mm0, 24(%0, %%esi)	\n\t"
+		"addl $32, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms"
+	:: "r" (samples+256)
+	: "%esi"
+	);
+}
+
+
+static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
+	      sample_t clev, sample_t slev)
+{
+    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
+
+    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
+	memcpy (samples, samples + 256, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_CHANNEL, A52_MONO):
+    case CONVERT (A52_STEREO, A52_MONO):
+    mix_2to1_SSE:
+	mix2to1_SSE (samples, samples + 256, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_MONO):
+	if (slev == 0)
+	    goto mix_2to1_SSE;
+    case CONVERT (A52_3F, A52_MONO):
+    mix_3to1_SSE:
+	mix3to1_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_MONO):
+	if (slev == 0)
+	    goto mix_3to1_SSE;
+    case CONVERT (A52_2F2R, A52_MONO):
+	if (slev == 0)
+	    goto mix_2to1_SSE;
+	mix4to1_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_MONO):
+	if (slev == 0)
+	    goto mix_3to1_SSE;
+	mix5to1_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_MONO, A52_DOLBY):
+	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F, A52_STEREO):
+    case CONVERT (A52_3F, A52_DOLBY):
+    mix_3to2_SSE:
+	mix3to2_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_STEREO):
+	if (slev == 0)
+	    break;
+	mix21to2_SSE (samples, samples + 256, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_DOLBY):
+	mix21toS_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_STEREO):
+	if (slev == 0)
+	    goto mix_3to2_SSE;
+	mix31to2_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_DOLBY):
+	mix31toS_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_2F2R, A52_STEREO):
+	if (slev == 0)
+	    break;
+	mix2to1_SSE (samples, samples + 512, bias);
+	mix2to1_SSE (samples + 256, samples + 768, bias);
+	break;
+
+    case CONVERT (A52_2F2R, A52_DOLBY):
+	mix22toS_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_STEREO):
+	if (slev == 0)
+	    goto mix_3to2_SSE;
+	mix32to2_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_DOLBY):
+	mix32toS_SSE (samples, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_3F):
+	if (slev == 0)
+	    break;
+	mix21to2_SSE (samples, samples + 512, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F):
+	if (slev == 0)
+	    break;
+	mix2to1_SSE (samples, samples + 768, bias);
+	mix2to1_SSE (samples + 512, samples + 1024, bias);
+	break;
+
+    case CONVERT (A52_3F1R, A52_2F1R):
+	mix3to2_SSE (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_2F2R, A52_2F1R):
+	mix2to1_SSE (samples + 512, samples + 768, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_2F1R):
+	mix3to2_SSE (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
+	move2to1_SSE (samples + 768, samples + 512, bias);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F1R):
+	mix2to1_SSE (samples + 768, samples + 1024, bias);
+	break;
+
+    case CONVERT (A52_2F1R, A52_2F2R):
+	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F1R, A52_2F2R):
+	mix3to2_SSE (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F2R, A52_2F2R):
+	mix3to2_SSE (samples, bias);
+	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
+	memcpy (samples + 768, samples + 1024, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F1R, A52_3F2R):
+	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
+	break;
+    }
+}
+
+static void upmix_MMX (sample_t * samples, int acmod, int output)
+{
+    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
+
+    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
+	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
+	break;
+
+    case CONVERT (A52_3F2R, A52_MONO):
+	zero_MMX (samples + 1024);
+    case CONVERT (A52_3F1R, A52_MONO):
+    case CONVERT (A52_2F2R, A52_MONO):
+	zero_MMX (samples + 768);
+    case CONVERT (A52_3F, A52_MONO):
+    case CONVERT (A52_2F1R, A52_MONO):
+	zero_MMX (samples + 512);
+    case CONVERT (A52_CHANNEL, A52_MONO):
+    case CONVERT (A52_STEREO, A52_MONO):
+	zero_MMX (samples + 256);
+	break;
+
+    case CONVERT (A52_3F2R, A52_STEREO):
+    case CONVERT (A52_3F2R, A52_DOLBY):
+	zero_MMX (samples + 1024);
+    case CONVERT (A52_3F1R, A52_STEREO):
+    case CONVERT (A52_3F1R, A52_DOLBY):
+	zero_MMX (samples + 768);
+    case CONVERT (A52_3F, A52_STEREO):
+    case CONVERT (A52_3F, A52_DOLBY):
+    mix_3to2_MMX:
+	memcpy (samples + 512, samples + 256, 256 * sizeof (sample_t));
+	zero_MMX (samples + 256);
+	break;
+
+    case CONVERT (A52_2F2R, A52_STEREO):
+    case CONVERT (A52_2F2R, A52_DOLBY):
+	zero_MMX (samples + 768);
+    case CONVERT (A52_2F1R, A52_STEREO):
+    case CONVERT (A52_2F1R, A52_DOLBY):
+	zero_MMX (samples + 512);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F):
+	zero_MMX (samples + 1024);
+    case CONVERT (A52_3F1R, A52_3F):
+    case CONVERT (A52_2F2R, A52_2F1R):
+	zero_MMX (samples + 768);
+	break;
+
+    case CONVERT (A52_3F2R, A52_3F1R):
+	zero_MMX (samples + 1024);
+	break;
+
+    case CONVERT (A52_3F2R, A52_2F1R):
+	zero_MMX (samples + 1024);
+    case CONVERT (A52_3F1R, A52_2F1R):
+    mix_31to21_MMX:
+	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
+	goto mix_3to2_MMX;
+
+    case CONVERT (A52_3F2R, A52_2F2R):
+	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
+	goto mix_31to21_MMX;
+    }
+}
+#endif //ARCH_X86
