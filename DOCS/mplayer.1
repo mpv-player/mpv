@@ -20,7 +20,7 @@ mencoder \- Movie Encoder for Linux
 .RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]
 .br
 .B mplayer
-.RB [dvd|vcd|tv]://[title]\ [options]
+.RB [dvd|vcd|cdda|tv]://[title]\ [options]
 .br
 .B mplayer
 .RB [mms|http|http_proxy|rtp]://URL[:port]\ [options]
@@ -97,6 +97,30 @@ Override default CDROM drive name /dev/cdrom
 .B \-cache <kbytes>
 This option specifies how much memory (in kbytes) to use when precaching a file/URL.
 Especially useful on slow media (default is \-nocache).
+.TP
+.B \-cdda <options>
+This option can be used to tune the CD Audio reading feature of MPlayer.
+Available options are:
+
+    speed=n           set CD spin speed
+    paranoia=n        set paranoia level (0-2)
+    generic-dev=/dev/ use specified generic scsi
+                      device
+    sector-size=n       
+    overlap=n         force minimum overlap search
+                      during verification to <n>
+                      sectors.
+    toc-bias          Assume that the beginning
+                      offset of track 1 as reported
+                      in the TOC will be addressed
+                      as LBA 0.  Necessary for some
+                      Toshiba drives to
+                      get track boundaries correct.
+    toc-offset=n      Add <n> sectors to the values
+                      reported when addressing
+                      tracks. May be negative.
+    (no)skip          (never) accept any less than
+                      perfect data reconstruction.
 .TP
 .B \-chapter <chapter\ id>[-<end chapter id>]
 Specify which chapter to start playing at. Optionally specify which chapter to
@@ -696,7 +720,7 @@ It has effect only with libmpeg2 and libavcodec codecs.
 .B \-panscan <range>
 Enables Pan & Scan functionality, i.e. in order to display a 16:9 movie
 on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
-which fits the screen. This function works only with xv, xmga and vidix
+which fits the screen. This function works only with xv, (x)mga and vidix
 drivers.
 
 The range varies between 0.0 and 1.0 and controls how much of the image is
