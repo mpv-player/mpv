@@ -6,7 +6,7 @@ extern int verbose; // defined in mplayer.c
 
 // verbosity elevel:
 
-// stuff from level MSGL_FATAL-MSGL_HINT should be translated.
+// stuff from level MSGL_FATAL-MSGL_STATUS should be translated.
 
 #define MSGL_FATAL 0  // will exit/abort
 #define MSGL_ERR 1    // continues
