@@ -104,7 +104,7 @@ static int init(sh_video_t *sh){
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
        MJPG fourcc :( */
-    if ((sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
+    if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
 	(sh->format == mmioFOURCC('A','V','R','n') ||
 	sh->format == mmioFOURCC('M','J','P','G')))
     {
