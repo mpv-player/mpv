@@ -1,7 +1,7 @@
 /*
  * vf_eq2.c
  *
- * Extended software equalizer (brightness, contrast, gamma)
+ * LUT-based software equalizer (brightness, contrast, gamma)
  *
  * Hampa Hug <hhug@student.ethz.ch>
  *
@@ -228,7 +228,7 @@ int open (vf_instance_t *vf, char *args)
 }
 
 vf_info_t vf_info_eq2 = {
-  "extended software equalizer",
+  "LUT-based software equalizer",
   "eq2",
   "Hampa Hug",
   "",
