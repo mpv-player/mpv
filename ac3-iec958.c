@@ -83,23 +83,23 @@ struct syncframe {
   } bsi;
 }; 
 
-void ac3_iec958_build_burst(int length, int data_type, int big_endian, unsigned char * data, unsigned char * out)
+int ac3_iec958_build_burst(int length, int data_type, int big_endian, unsigned char * data, unsigned char * out)
 {
-	const char sync[4] = { 0x72, 0xF8, 0x1F, 0x4E };
+	const char sync[6] = { 0x72, 0xF8, 0x1F, 0x4E, 0x00, 0x00 };
 
-	memcpy(out, sync, 4);
+	memcpy(out, sync, 6);
 	if (length)
 		out[4] = data_type; /* & 0x1F; */
 	else
 		out[4] = 0;
-	out[5] = 0x00;
-	out[6] = (length*8) & 0xFF;
-	out[7] = ((length*8) >> 8) & 0xFF;
+	out[6] = (length << 3) & 0xFF;
+	out[7] = (length >> 5) & 0xFF;
 	if (big_endian)
 		swab(data, out + 8, length);
 	else
-		memcpy(data, out + 8, length);
+		memcpy(out + 8, data, length);
 	memset(out + 8 + length, 0, 6144 - 8 - length);
+	return 6144;
 }
 
 int ac3_iec958_parse_syncinfo(unsigned char *buf, int size, struct hwac3info *ai, int *skipped)

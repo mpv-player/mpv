@@ -273,6 +273,7 @@ case AFM_HWAC3:
   // Dolby AC3 audio:
   sh_audio->audio_out_minsize=4*256*6;
   sh_audio->sample_format = AFMT_AC3;
+  sh_audio->channels=1;
   break;
 case AFM_GSM:
   // MS-GSM audio codec:
@@ -425,27 +426,32 @@ case AFM_A52: {
   break;
 }
 case AFM_HWAC3: {
-  unsigned char *buffer;		    
-  struct hwac3info ai;
-  int len, skipped;
-  len = ds_get_packet(sh_audio->ds, &buffer); // maybe 1 packet is not enough,
-    // at least for mpeg, PS packets contain about max. 2000 bytes of data.
-  if(ac3_iec958_parse_syncinfo(buffer, len, &ai, &skipped) < 0) {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_AC3notvalid);
-      driver = 0;
-      break;
+  // Dolby AC3 passthrough:
+  int accel=0; // should contain mmx/sse/etc flags
+  a52_samples=a52_init (accel);
+  if (a52_samples == NULL) {
+       mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
+       driver=0;break;
   }
-  if(ai.samplerate != 48000) {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AC3only48k);
-      driver = 0;
-      break;
+  sh_audio->a_in_buffer_size=3840;
+  sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+  sh_audio->a_in_buffer_len=0;
+  if(a52_fillbuff(sh_audio)<0) {
+       mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
+       driver=0;break;
   }
-  sh_audio->samplerate=ai.samplerate;
-  sh_audio->samplesize=ai.framesize;
+  
+  //sh_audio->samplerate=ai.samplerate;   // SET by a52_fillbuff()
+  //sh_audio->samplesize=ai.framesize;
+  //sh_audio->i_bps=ai.bitrate*(1000/8);  // SET by a52_fillbuff()
+  //sh_audio->ac3_frame=malloc(6144);
+  //sh_audio->o_bps=sh_audio->i_bps;  // XXX FIXME!!! XXX
+
+  // o_bps is calculated from samplesize*channels*samplerate
+  // a single ac3 frame is always translated to 6144 byte packet. (zero padding)
   sh_audio->channels=1;
-  sh_audio->i_bps=ai.bitrate*(1000/8);
-  sh_audio->ac3_frame=malloc(6144);
-  sh_audio->o_bps=sh_audio->i_bps;  // XXX FIXME!!! XXX
+  sh_audio->samplesize=4;   // 1*4*(6*256) = 6144 (very TRICKY!)
+
   break;
 }
 case AFM_ALAW: {
@@ -1000,10 +1006,11 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	break;
       }
       case AFM_HWAC3: // AC3 through SPDIF
-	if(demux_read_data(sh_audio->ds,sh_audio->ac3_frame, 6144) != 6144) 
-	    break; //EOF 
-	ac3_iec958_build_burst(1536, 0x1F, 1, buf, sh_audio->ac3_frame);
-	len = 6144;
+        if(!sh_audio->a_in_buffer_len)
+	    if((len=a52_fillbuff(sh_audio))<0) break; //EOF
+	sh_audio->a_in_buffer_len=0;
+	len = ac3_iec958_build_burst(len, 0x01, 1, sh_audio->a_in_buffer, buf);
+	// len = 6144 = 4*(6*256)
 	break;
 #ifdef USE_WIN32DLL
       case AFM_ACM:
@@ -1122,6 +1129,7 @@ void skip_audio_frame(sh_audio_t *sh_audio){
               switch(sh_audio->codec->driver){
                 case AFM_MPEG: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
                 case AFM_AC3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+		case AFM_HWAC3:
                 case AFM_A52: a52_fillbuff(sh_audio);break; // skip AC3 frame
 		case AFM_ACM:
 		case AFM_DSHOW: {
