@@ -3531,6 +3531,7 @@ cc_check `esd-config --libs` `esd-config --cflags` && ( "$TMPO" >> "$TMPLOG" 2>&
 
   fi
 fi
+echores "$_esd"
 
 if test "$_esd" = yes ; then
   _def_esd='#define USE_ESD 1'
@@ -3538,11 +3539,19 @@ if test "$_esd" = yes ; then
   _aomodules="esd $_aomodules"
   _ld_esd=`esd-config --libs`
   _inc_esd=`esd-config --cflags`
+
+  echocheck "esd_get_latency()"
+  cat > $TMPC << EOF
+#include <esd.h>
+int main(void) { return esd_get_latency(0); }
+EOF
+  cc_check `esd-config --libs` `esd-config --cflags` && _esd_latency=yes && _def_esd_latency='#define HAVE_ESD_LATENCY'
+  echores "$_esd_latency"
 else
+  _def_esd='#undef USE_ESD'
+  _def_esd_latency='#undef HAVE_ESD_LATENCY'
   _noaomodules="esd $_noaomodules"
 fi
-echores "$_esd"
-
 
 echocheck "ALSA audio"
 if test "$_alsa" != no ; then
@@ -5609,6 +5618,7 @@ $_def_alsa5
 $_def_alsa9
 $_def_arts
 $_def_esd
+$_def_esd_latency
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio

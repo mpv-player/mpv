@@ -51,7 +51,6 @@
 #define	ESD_CLIENT_NAME	"MPlayer"
 #define	ESD_MAX_DELAY	(1.0f)	/* max amount of data buffered in esd (#sec) */
 
-
 static ao_info_t info =
 {
     "EsounD audio output",
@@ -69,7 +68,7 @@ static int esd_latency;
 static int esd_bytes_per_sample;
 static unsigned long esd_samples_written;
 static struct timeval esd_play_start;
-
+extern float audio_delay;
 
 /*
  * to set/get/query special features/parameters
@@ -146,25 +145,36 @@ static int init(int rate_hz, int channels, int format, int flags)
     esd_format_t esd_fmt;
     int bytes_per_sample;
     int fl;
+    char *server = ao_subdevice;  /* NULL for localhost */
+    float lag_seconds, lag_net, lag_serv;
+    struct timeval proto_start, proto_end;
 
     if (esd_fd < 0) {
-	esd_fd = esd_open_sound(NULL);
+	esd_fd = esd_open_sound(server);
 	if (esd_fd < 0) {
-	    mp_msg(MSGT_AO, MSGL_ERR, "AO: [esd] esd_open_sound failed: %s\n",
+	    mp_msg(MSGT_AO, MSGL_ERR, 
+		   "AO: [esd] esd_open_sound failed: %s\n",
 		   strerror(errno));
 	    return 0;
 	}
 
+	/* get server info, and measure network latency */
+	gettimeofday(&proto_start, NULL);
 	esd_svinfo = esd_get_server_info(esd_fd);
-     /*
+	if(server) {
+	    gettimeofday(&proto_end, NULL);
+	    lag_net  = (proto_end.tv_sec  - proto_start.tv_sec) +
+		(proto_end.tv_usec - proto_start.tv_usec) / 1000000.0;
+	    lag_net /= 2.0; /* round trip -> one way */
+	} else
+	    lag_net = 0.0;  /* no network lag */
+
+	/*
 	if (esd_svinfo) {
 	    mp_msg(MSGT_AO, MSGL_INFO, "AO: [esd] server info:\n");
 	    esd_print_server_info(esd_svinfo);
 	}
-      */
-
-	esd_latency = esd_get_latency(esd_fd);
-	/* mp_msg(MSGT_AO, MSGL_INFO, "AO: [esd] latency: %d\n", esd_latency); */
+	*/
     }
 
     esd_fmt = ESD_STREAM | ESD_PLAY;
@@ -178,7 +188,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 #endif
     ao_data.samplerate = rate_hz;
 
-    
     /* EsounD can play mono or stereo */
     switch (channels) {
     case 1:
@@ -205,8 +214,29 @@ static int init(int rate_hz, int channels, int format, int flags)
 	break;
     }
 
+    /* modify audio_delay depending on esd_latency
+     * latency is number of samples @ 44.1khz stereo 16 bit
+     * adjust according to rate_hz & bytes_per_sample
+     */
+#ifdef HAVE_ESD_LATENCY
+    esd_latency = esd_get_latency(esd_fd);
+#else
+    esd_latency = ((channels == 1 ? 2 : 1) * ESD_DEFAULT_RATE * 
+		   (ESD_BUF_SIZE + 64 * (4.0f / bytes_per_sample))
+		   ) / rate_hz;  
+    esd_latency += ESD_BUF_SIZE * 2; 
+#endif
+    if(esd_latency > 0) {
+	lag_serv = (esd_latency * 4.0f) / (bytes_per_sample * rate_hz);
+	lag_seconds = lag_net + lag_serv;
+	audio_delay += lag_seconds;
+	mp_msg(MSGT_AO, MSGL_INFO,
+	       "AO: [esd] latency: [server: %0.2fs, net: %0.2fs] "
+	       "(adjust %0.2fs)\n", lag_serv, lag_net, lag_seconds);
+    }
+    
     esd_play_fd = esd_play_stream_fallback(esd_fmt, rate_hz,
-					   NULL, ESD_CLIENT_NAME);
+					   server, ESD_CLIENT_NAME);
     if (esd_play_fd < 0) {
 	mp_msg(MSGT_AO, MSGL_ERR,
 	       "AO: [esd] failed to open esd playback stream: %s\n",
