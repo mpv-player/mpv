@@ -60,7 +60,7 @@ that your patch will be included.
     Do not compress your patch unless it is larger than 80k or if you know
     that your mailer messes up (reformats) text attachments. It only makes
     handling the patch more difficult. If you have to compress your patch,
-    use bzip2 or gzip to compress it, not another non-standard format.
+    use either bzip2, gzip or zip to compress it, not a different format.
     You have to subscribe to mplayer-dev-eng since we blocked postings from
     non-subscribers after spam problems and because patches get reviewed by
     the developers on the list. We want you to be available for discussing
@@ -68,17 +68,22 @@ that your patch will be included.
     Don't worry, mplayer-dev-eng is not high traffic and you can subscribe
     but unset the "Mail delivery" option so that you can post without getting
     any mails.
-    Try to avoid uploading the patch to a web or FTP site, send it directly
-    to the mailing list. The fewer steps it takes us to get at the patch the
-    higher the likelihood for it to get reviewed and applied. If your patch
-    is so big you cannot send it by mail, try splitting it into pieces.
+    Do not upload the patch to a web or FTP site, send it directly to the
+    mailing list. The fewer steps it takes us to get at the patch the higher
+    the likelihood for it to get reviewed and applied. If your patch is so
+    big you cannot send it by mail, try splitting it into smaller pieces.
 
  9. Give us a few days to react. We try to review patches as fast as possible,
     but unfortunately we are constantly overloaded with work, be it MPlayer-
     related or from our day to day lives. If your patch seems to be ignored,
-    please resend it and mention that you got ignored. We are interested in
-    your work and will eventually either accept it or reject it with an
-    explanation of what we disliked about your patch.
+    send a reminder asking for opinions as a reply to the original patch and
+    mention that you got ignored. We are interested in your work and will
+    eventually either accept it or reject it with an explanation of what we
+    disliked about your patch. We will often ask you to make changes to your
+    patch to make it acceptable. Implement them if you want to see your patch
+    applied and send the update to the mailing list. Remember that updates and
+    reminders must be sent as replies to the original patch to preserve proper
+    mail threading.
 
 10. Do not immediately ask for CVS write access. If you have contributed one or
     more nice, acceptable patches and they need maintaining or you want to
@@ -88,5 +93,13 @@ that your patch will be included.
 
 12. If you make a nontrivial contribution and wish to be mentioned in the
     AUTHORS file, include that in your patch.
+
+13. Do not use printf for console output, use our own mp_msg functions instead.
+    For the output to be translated (which includes all messages of level
+    MSGL_HINT and below), put the strings in help/help_mp-en.h. If you change
+    strings, remove the occurrences of these strings from the translations.
+    There may be (compilation) trouble if outdated translations remain in place
+    and translators will pick up changes more easily if they see a new message
+    that has to be translated.
 
 Thank you!
