@@ -20,6 +20,7 @@ extern int tv_param_height;
 extern int tv_param_input;
 extern char *tv_param_outfmt;
 extern float tv_param_fps;
+extern int tv_param_noaudio;
 
 typedef struct tvi_info_s
 {
