@@ -283,7 +283,7 @@ while(1){
 	case mmioFOURCC('M', 'P', 'G', '4'):
 	case mmioFOURCC('m', 'p', 'g', '4'):
 	case mmioFOURCC('D', 'I', 'V', '1'):
-          idxfix_divx=3; // we can fix keyframes only for divx coded files!
+          idxfix_divx=3; // set index recovery mpeg4 flavour: msmpeg4v1
 	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for M$ mpg4v1 video\n");
 	  break;
         case mmioFOURCC('D', 'I', 'V', '3'):
@@ -300,16 +300,16 @@ while(1){
 	case mmioFOURCC('m', 'p', '4', '2'):
 	case mmioFOURCC('D', 'I', 'V', '2'):
         case mmioFOURCC('A', 'P', '4', '1'):
-          idxfix_divx=1; // we can fix keyframes only for divx coded files!
-	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 3 video\n");
+          idxfix_divx=1; // set index recovery mpeg4 flavour: msmpeg4v3
+	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX3 video\n");
 	  break;
         case mmioFOURCC('D', 'I', 'V', 'X'):
         case mmioFOURCC('d', 'i', 'v', 'x'):
         case mmioFOURCC('D', 'X', '5', '0'):
         case mmioFOURCC('X', 'V', 'I', 'D'):
         case mmioFOURCC('x', 'v', 'i', 'd'):
-          idxfix_divx=2; // we can fix keyframes only for divx coded files!
-	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 4 video\n");
+          idxfix_divx=2; // set index recovery mpeg4 flavour: generic mpeg4
+	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for MPEG4 video\n");
 	  break;
         }
       } else
