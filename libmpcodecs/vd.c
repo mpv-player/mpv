@@ -104,7 +104,7 @@ int vo_flags=0;
 static vo_tune_info_t vtune;
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
-    int i;
+    int i,j;
     unsigned int out_fmt=0;
     int screen_size_x=0;//SCREEN_SIZE_X;
     int screen_size_y=0;//SCREEN_SIZE_Y;
@@ -115,27 +115,30 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 
     if(!video_out) return 1; // temp hack
 
-    // check if libvo and codec has common outfmt:
+    // check if libvo and codec has common outfmt (no conversion):
+    j=-1;
     for(i=0;i<CODECS_MAX_OUTFMT;i++){
 	out_fmt=sh->codec->outfmt[i];
 	if(out_fmt==(signed int)0xFFFFFFFF) continue;
 	vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
-	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
+	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),vo_flags,i);
 	// TODO: check (query) if codec really support this outfmt...
-	if(vo_flags) break;
+	if(vo_flags&2){j=i; break;}
+	if(vo_flags && j<0) j=i;
     }
-    if(i>=CODECS_MAX_OUTFMT){
+    if(j<0){
 	// TODO: no match - we should use conversion...
 	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
 	return 0;	// failed
     }
-    sh->outfmtidx=i;
+    out_fmt=sh->codec->outfmt[j];
+    sh->outfmtidx=j;
 
     // autodetect flipping
     if(flip==-1){
 	flip=0;
-	if(sh->codec->outflags[i]&CODECS_FLAG_FLIP)
-	    if(!(sh->codec->outflags[i]&CODECS_FLAG_NOFLIP))
+	if(sh->codec->outflags[j]&CODECS_FLAG_FLIP)
+	    if(!(sh->codec->outflags[j]&CODECS_FLAG_NOFLIP))
 		flip=1;
     }
 
