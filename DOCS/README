@@ -1,8 +1,20 @@
-MoviePlayer v0.12 "IdegCounter" (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
+MPlayer v0.17-pre "IdegCounter" (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
 =============================== * See the file AUTHORS for the complete list *
+http://mplayer.sourceforge.net
 
 About:
 ~~~~~~
+MPlayer is a movie player for LINUX. It plays most mpeg, avi and asf files,
+supported by many native and win32 DLL codecs. You can watch VCD, DVD and
+even DivX movies too. The another big feature of mplayer is the wide range
+of supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, but you can use SDL (and this way all drivers of SDL) and some 
+lowlevel card-specific drivers (for Matrox/3dfx/SiS) too! Most of them
+supports software or hardware scaling, so you can enjoy movies in fullscreen.
+And what about the nice big antialiased shaded subtitles (.sub files) and OSD?
+
+History:
+~~~~~~~~
 Yes. Yet another movie player for linux.
 What is the special with this? It works, at least for me :)
 I've tried lots of players under linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
@@ -11,16 +23,28 @@ special files or with audio/video sync. Most of them is unable to play
 both mpeg1, mpeg2 and avi (DivX) files. Many players have image quality
 or speed problems too. So I've decided to write/modify one...
 
-Short history:
-- mpg12play v0.1 has born, using libmpeg3 from www.heroinewarrior.com
-- mpg12play 2nd generation (v0.5-), using dvdview by Dirk Farin
-- mpg12play 3nd generation (v0.9-), using libmpeg2 (mpeg2dec) by Aaron Holtzman
-- MPlayer has born, containing mpg12play 0.90pre5 and a new simple avi player
-- MPlayer 0.10, mpeg and avi player in a single binary
-- MPlayer 0.11: added .asf file support, and OpenDivX en/decoding
-- MPlayer 0.12 "IdegCounter"
-  The release version of the 0.11 development code. Far too many enhancements
-  to fit here (A'rpi?). Try it, and be amazed.
+- mpg12play v0.1-v0.3:
+  The first try, hacked together in a half hour!
+  I've used libmpeg3 from www.heroinewarrior.com up to the version 0.3,
+  but there were image quality and speed problems with it.
+- mpg12play v0.5-v0.87:
+  Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
+  but it was slow and was written in C++ (I hate C++!!!)
+- mpg12play v0.9-v0.95pre5:
+  Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
+  It's great, optimized very fast C code with perfect image quality and
+  100% mpeg standard conformance.
+- MPlayer v0.3-v0.9:
+  It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
+  player 'avip' based on avifile's Win32 DLL loader.
+- MPlayer v0.10:
+  The mpeg and avi player in a single binary!
+- MPlayer v0.11:
+  Added .asf file support, and OpenDivX (see www.projectmayo.com) en/decoding.
+- MPlayer v0.17 "The IdegCounter"
+  The release version of the 0.11pre after 4 months of heavy development!
+  Try it, and be amazed! Thousands of new features added... and of course
+  old code was improved too, bugs removed etc.
 
 As you see, I didn't write any codecs, just some players. But I spent
 a lot of time finding the best way to parse bad damaged input files
@@ -32,52 +56,63 @@ As you see, stability and quality are the most important things for me,
 speed has lower priority, but is still very important.
 
 What about the GUI?
+~~~~~~~~~~~~~~~~~~~
 I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
 So the player has only keyboard control from the controlling console/xterm now.
 But there is a GUI development for the player, coordinated by Pontscho/Fresh!
 It's still under development, but it will be merged and released soon.
 BTW he needs some nice skins, if you are a good graphician, contact him!!!
 
-Win32 codecs?
-Yes, we are using Win32 (Video for Windows, DirectShow) codecs for AVI/ASF
-decoding. They must be installed to the /usr/lib/win32/ directory, with all
-lower case. You can grab the codecs package from our homepage, or can be found
-in your C:\WINDOWS\SYSTEM\ dir, see codecs.conf for filenames.
-
 Supported input formats:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 - VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file
-- MPEG 1/2 System Stream (PS/VOB) and Elementary Stream (ES) file formats
+- DVD, directly from your DVD disk, using optional libcss for decryption
+- MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file formats
 - RIFF AVI file format
 - ASF 1.0 file format
-- (De)crypted VOB files from DVD (experimental!)
 
 Supported audio & video codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-See DOCS/CODECS for complete list.
+*** See DOCS/CODECS for the complete list! ***
+
+The most important video codecs:
+- mpeg1 (VCD) and mpeg2 (DVD) video
+- DivX, OpenDivX and other MPEG4 variants
+- Windows Media Video 7 (WMV1) used in .wmv files
+- Intel Indeo codecs (3.1,3.2,4.1,5.0)
+- MJPEG, ASV2 and other hardware formats
+
+The most important audio codecs:
+- mpeg layer 2, and layer 3 (MP3) audio
+- AC3 dolby audio
+- alaw, msgsm, pcm and other simple old audio formats
 
 Supported video output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+General:
+- x11:	X11 with SHM extension
+- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
+- gl:	OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
+- dga:	X11 DGA extension
+- fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
+- fbdev:Output to general framebuffers
+- svga: Output to SVGAlib
+- sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
+        even support Xvideo, thus hardware rendering)
+
+Card specific:
 - mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
 - xmga:	Matrox G200/G400 overlay (mga_vid) in X11 window
 	(Xv emulation on X 3.3.x !)
 - syncfb: Matrox G400 YUV support on framebuffer (not tested, maybe broken)
-- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-- x11:	X11 with SHM extension
-- gl:	OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
-- dga:	X11 DGA extension
-- fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
-- sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
-        even support Xvideo, thus hardware rendering)
-	(NOT supported by us! Don't submit SDL bugreports!)
-- fbdev:Output to general framebuffers
-- svga: Output to SVGAlib
-- png:  PNG file output (use -z switch to set compression)
-- null:	Null output (for speed tests/benchmarking)
 - 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
-- odivx:OpenDivX AVI File writer
-- pgm:	PGM file output (for testing purposes)
+
+Special:
+- png:  PNG files output (use -z switch to set compression)
+- pgm:	PGM files output (for testing purposes)
 - md5:	MD5sum output (for mpeg conformance tests)
+- odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
+- null:	Null output (for speed tests/benchmarking)
 
 NOTE: check DOCS/VIDEOCARDS !
 
@@ -87,21 +122,21 @@ Supported audio output devices:
 - ALSA driver with OSS emulation (NOT recommended, causes annoying delays)
 - ESD with the esddsp utility (not tested, not recommended, see ALSA)
 
-NOTE: check DOCS/SOUNDCARDS !
+NOTE: check DOCS/SOUNDCARDS for details!
 
 Speed:
 ~~~~~~
-Most of time-critical parts are optimized for MMX/SSE/3DNow!.
+Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!.
 You can improve rendering speed by setting up MTRR registers, see doc in MTRR.
-Some benchmark results can be found in the doc file SPEED.
+Some *old* benchmark results can be found in the doc file SPEED.
 
 Usage:
 ~~~~~~
   mplayer [options] [-vo driver] [path/]filename
 
   Options:
-    see  mplayer -h for options
-    see  mplayer -vo help for available output drivers
+    see  `mplayer -h'  for options
+    see  `mplayer -vo help'  for list of available output drivers
 
   Keys:
     <-  or  ->      seek backward/forward 10 seconds
@@ -128,8 +163,7 @@ Usage:
 License:                                                                     
 ~~~~~~~~
 Since MPlayer incorporates a lot of code from other projects, this isn't
-decided yet.
-We're going for GPL (will be pretty hard, though).
+decided yet. We're going for GPL (will be pretty hard, though).
 
 TV output:
 ~~~~~~~~~~
@@ -149,28 +183,30 @@ First please read all the docs in this package, most of the problems are
 described somewhere. At least read the Troubleshooting section!
 We don't like answering questions which are already answered in this
 readme or other docs.
-You should try the latest test (pre) release version too, maybe your bug
+You should try the latest development version (from CVS) too, maybe your bug
 is already fixed, but the new version hasn't been released.
 If you couldn't solve the problem, then send a quality bugreport
 via E-Mail to the MPlayer-users list : mplayer-users@lists.sourceforge.net
 
-*NEVER* send attached AVIs, MPEGs, or any big files to this list!!!
-Upload them to ftp://thot.banki.hu/incoming , and inform the list about
-your upload.
+*NEVER* send attached AVIs, MPEGs, or any big files to this list or private!!!
+Upload them to ftp://thot.banki.hu/incoming/MPlayer/ , and inform the list
+about your upload.
 
 Please include these:
 - your kernel version number ('uname -a')
 - linux distribution and glibc version  (example: Slackware 7.1 + glibc 2.1.3)
 - gcc and binutils version ('gcc -v' and 'as --version')
 - your X11 version         (example: X 4.0.2 + DRI snapshot2001jan12)
-- video card vendor/model  (example: Matrox G400 MAX AGP)
+- video card vendor/model  (example: Matrox G400 DH MAX AGP)
+- sound card model+driver  (example: Creative SBLive! with OSS (kernel) )
 - CPU vendor and type      (example: Intel Celeron2-566 at 850MHz)
 
 Also include the required logs (as attachment, may be compressed zip/gz/bz2)
 depending the problem type (see bellow at Troubleshooting section).
+Do not send level-0 logs, always use the mplayer option '-v' when making log:
 
-To log output to a file, use the &> shell operator. For example:
   ./configure &>configure.log
+  make &>make.log
   mplayer -v test.avi &>play.log
 
 If we ask you for the file, then you have two choices:
