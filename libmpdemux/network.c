@@ -207,7 +207,7 @@ connect2Server(char *host, int port) {
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
-		return -2;
+		return -3;
 	      }
 	      count++;
 	      FD_ZERO( &set );
