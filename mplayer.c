@@ -559,10 +559,10 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
     mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
 //    printf("Exit.\n");
-//    exit(0);  // From unknown reason a hangup occurs here :((((((
-    kill(getpid(),SIGTERM);
-    usleep(20000);
-    kill(getpid(),SIGKILL);
+    exit(0);  // From unknown reason a hangup occurs here :((((((
+//    kill(getpid(),SIGTERM);
+//    usleep(20000);
+//    kill(getpid(),SIGKILL);
   }
 }
 
@@ -1330,6 +1330,7 @@ if(!use_stdin && !slave_mode){
 InitTimer();
 
 total_time_usage_start=GetTimer();
+audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 
 while(!eof){
 //    unsigned int aq_total_time=GetTimer();
