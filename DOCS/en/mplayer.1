@@ -752,8 +752,9 @@ seeks to 1\ hour 10\ min
 .TP
 .B \-tv <option1:option2:...>
 This option tunes various properties of tv-capture module. For
-watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' as
-a movie URL.
+watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' 
+or even 'tv://<channel_name> (see option channels for channel_name below)
+as a movie URL.
 
 .I NOTE:
 .br
@@ -804,7 +805,7 @@ tv_set_channel and tv_last_channel will then be usable using a remote (see lirc)
 Not compatible with frequency parameter.
 Warning: The channel number will then be the position in the 'channels' list,
 beginning with 1.
-Example: use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+Example: use tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2, tv_set_channel TV1, etc.
 .IPs [brightness|contrast|hue|saturation]=<\-100\-100>
 set the color equalizer on the video card.
 .IPs audiorate=<value>
