@@ -120,18 +120,16 @@ resize(void){
     screen_y = (aa_scrheight(c) - screen_h) / 2;
     
     if(sws) freeSwsContext(sws);
-    // Use YV12 while Y8/Y800 isn't avaible as sws output :-(
     sws = getSwsContextFromCmdLine(src_width,src_height,image_format,
-				   image_width,image_height,IMGFMT_YV12);
+				   image_width,image_height,IMGFMT_Y8);
 
     image[0] = aa_image(c) + image_y * image_width + image_x;
     image[1] = NULL;
-    // Allocate the V plan for YV12
-    image[2] = realloc(image[2], image_width * image_height / 4);
+    image[2] = NULL;
 
     image_stride[0] = image_width;
     image_stride[1] = 0; 
-    image_stride[2] = image_width / 2;
+    image_stride[2] = 0;
 
     showosdmessage=0;
 
@@ -528,7 +526,6 @@ uninit(void) {
     }
 #endif
     aa_close(c);
-    if(image[2]) free(image[2]);
 }
 
 #ifdef USE_OSD
