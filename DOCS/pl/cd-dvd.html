@@ -1,328 +1,254 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
 <HTML>
-  <HEAD>
-    <TITLE>CD, DVD, VCD - MPlayer - Odtwarzacz Filmów dla
-    Linuksa</TITLE>
-    <LINK rel="stylesheet" type="text/css" href="../default.css">
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=iso-8859-2">
-  </HEAD>
 
-  <BODY>
-    <H2><A name="drives">4.1 Napędy CD/DVD</A></H2>
+<HEAD>
+  <TITLE>CD, DVD, VCD - MPlayer - Odtwarzacz Filmów dla Linuksa</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
+</HEAD>
 
-    <P>Urywek z dokumentacji Linuksa:</P>
+<BODY>
 
-    <P>Nowoczesne napędy CD-ROM mogą osiągać bardzo wysokie
-    prędkości głowicy, ale niektóre napędy CD-ROM potrafią działać
-    ze zmniejszoną prędkością. Jest kilka powodów, które
-    mogą spowodować, że rozważysz zmianę prędkości napędu
-    CD-ROM:</P>
 
-    <UL>
-      <LI>Raportowano o błędach odczytu przy wysokich prędkościach,
-      zwłaszcza ze źle wytłoczonymi CD-ROMami. Zmniejszenie
-      prędkości może zapobiec utracie danych w tych
-      sytuacjach.</LI>
+<H2><A NAME="drives">4.1 Napędy CD/DVD</A></H2>
 
-      <LI>Wiele napędów CD-ROM jest irytująco głośnych, mniejsza
-      prędkość może zmniejszyć hałas.</LI>
-    </UL>
+<P>uryweg z dokumentacji Linuksa:</P>
 
-    <P>Możesz zmniejszyć prędkość napędu CD-ROM IDE programem
-    <CODE>hdparm</CODE> lub programem o nazwie <CODE>setcd</CODE>.
-    Działa to miej więcej tak:</P>
+<P>Nowoczesne napędy CD-ROM mogą osiągać bardzo wysokie prędkości głowicy, jeszcze niektóre napędy CD-ROM
+  są w stanie działać przy zmniejszonej prędkości. Jest kilka powodów, które mogą spowodować, że
+  rozważysz zmianę prędkości napędu CD-ROM:</P>
 
-    <P>    <CODE>hdparm -E [prędkość] [napęd cdrom]</CODE></P>
+<UL>
+  <LI>Raportowano o błędach odczytu przy wysokich prędkościach, zwłaszcz
+    ze źle wytłoczonymi CD-ROMami. Zmniejszenie prędkości może zapobiec utracie danych
+    w tych sytuacjach.</LI>
+  <LI>Wiele napędów CD-ROM jest irytująco głośnych, mniejsza prędkość może zmniejszyć hałas.</LI>
+</UL>
 
-    <P>    <CODE>setcd -x [prędkość] [napęd cdrom]</CODE></P>
+<P>Możesz zmniejszyć prędkość napędu CD-ROM IDE programem <CODE>hdparm</CODE>
+  lub programem o nazwie <CODE>setcd</CODE>. Działa to  miej więcej tak:</P>
 
-    <P>Możesz ponad to spróbować</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -E [prędkość] [napęd cdrom]</CODE></P>
 
-    <P>    <CODE>echo current_speed:4 &gt; /proc/ide/[napęd
-    cdrom]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [prędkość] [napęd cdrom]</CODE></P>
 
-    <P>ale będziesz uprawnień roota. Poniższa komenda także może
-    pomóc:</P>
+<P>Możez ponad to spróbować</P>
 
-    <P>    <CODE>echo file_readahead:2000000 &gt; /proc/ide/[napęd
-    cdrom]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 &gt; /proc/ide/[napęd cdrom]/settings</CODE></P>
 
-    <P>Ustawi to pobranie wstępne odczytu pliku na 2MB, co pomaga z
-    porysowanymi CD-ROMami. Jeżeli ustawisz zbyt wysoką wartość,
-    napęd będzie ciągle zwiększał i zmniejszał obroty, co
-    radykalnie zmniejszy wydajność. Zalecane jest byś ponad to
-    wyregulował twój napęd CD-ROM programem
-    <CODE>hdparm</CODE>:</P>
+<P>ale będziesz uprawnień roota. Poniższa komenda także może pomóc:</P>
 
-    <P>    <CODE>hdparm -d1 -a8 -u1 (napęd cdrom)</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[napęd cdrom]/settings</CODE></P>
 
-    <P>Włączy to DMA, read-ahead, i odmaskowanie IRQ (przeczytaj
-    stronę man dla <CODE>hdparm</CODE> po szczegółowe
-    wyjaśnienie).</P>
+<P>Ustawi to pobranie wstępne odczytu pliku na 2MB, co pomaga z porysowanymi CD-ROMami.
+  Jeżeli ustawisz zbyt wysoką wartość, napęd będzie ciągle zwiększał i zmniejszał obroty, co
+  radykalnie zmniejszy wydajność.
+  Zalecane jest byś ponad to wyregulował twój napęd CD-ROM programem
+  <CODE>hdparm</CODE>:</P>
 
-    <P>Prosimy o odwołanie sie do "<CODE>/proc/ide/[napęd
-    cdrom]/settings</CODE>" by lepiej dostroić twój CD-ROM.</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (napęd cdrom)</CODE></P>
 
-    <P>Napędy SCSI nie mają jednolitego sposobu ustawiania ich
-    parametrów (Znasz jakiś? Powiedz nam!) Jest narzędzie, które
-    działa z <A href="http://das.ist.org/~georg/">napędami Plextor
-    SCSI drives</A>.</P>
+<P>Włązcy to DMA, read-ahead, i odmaskowanie IRQ (przeczytaj stronę man dla
+  <CODE>hdparm</CODE> po szczegółowe wyjaśnienie).</P>
 
-    <P>FreeBSD:</P>
+<P>Prosimy o odwołanie sie do "<CODE>/proc/ide/[napęd cdrom]/settings</CODE>" by
+  lepiej dostroić twój CD-ROM.</P>
 
-    <P>    Prędkość: <CODE>cdcontrol [-f urządzenie] speed
-    [prędkość]</CODE></P>
+<P>Napędy SCSI nie mają jednolitego sposobu ustawiania ich parametrów (Znasz jakiś?
+  Powiedz nam!) Jest narzędzie, które działa z
+  <A HREF="http://das.ist.org/~georg/">napędami Plextor SCSI drives</A>.</P>
 
-    <P>    DMA: <CODE>sysctl hw.ata.atapi_dma=1</CODE></P>
+<P>FreeBSD:</P>
 
-    <H2><A name="dvd">4.2 Odtwarzanie DVD</A></H2>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;Prędkość: <CODE>cdcontrol [-f urządzenie] speed [prędkość]</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;DMA: <CODE>sysctl hw.ata.atapi_dma=1</CODE></P>
 
-    <P>Po kompletną listę dostępnych opcji, prosimy o przeczytanie
-    manula.</P>
 
-    <H4>Wsparcie nowego-stylu DVD (mpdvdkit2)</H4>
+<H2><A NAME="dvd">4.2 Odtwarzanie DVD</A></H2>
 
-    <P>MPlayer używa <CODE>libdvdread</CODE> i
-    <CODE>libdvdcss</CODE> do deszyfrowania i odtwarzania DVD. Te
-    dwie biblioteki są zawarte w podkatalogu
-    <CODE>libmpdvdkit2/</CODE> w drzewie kodu źródłowego MPlayera,
-    nie musisz instalować ich osobno. Zdecydowaliśmy się na takie
-    rozwiązanie ponieważ musieliśmy naprawić błąd w
-    <CODE>libdvdread</CODE> i nałożych nakładkę która dodawała do
-    <CODE>libdvdcss</CODE> <B>obsługę buforowania (cache)
-    skrakowanych kluczy CSS</B>. Dało to duży przyrost prędkości,
-    ponieważ klucze nie muszą być krakowane za każdym razem przed
-    odtwarzaniem.</P>
+<P>Po kompletną listę dostępnych opcji, prosimy o przeczytanie manula.</P>
 
-    <P>MPlayer może również używać systemowych bibliotek
-    <CODE>libdvdread</CODE> i <CODE>libdvdcss</CODE> , ale to
-    rozwiązanie <B>nie</B> jest polecane, ponieważ może to
-    powodować błędy, niekompatybilność bibliotek i wolniejszą
-    prędkość.</P>
+<H4>Wsparcie nowego-stylu DVD (mpdvdkit2)</H4>
 
-    <H4>wsparcie dla DVD Navigation (dvdnav)</H4>
+<P>MPlayer używa <CODE>libdvdread</CODE> i <CODE>libdvdcss</CODE> do
+  deszyfrowania i odtwarzania DVD. Te dwie biblioteki są zawarte w podkatalogu
+  <CODE>libmpdvdkit2/</CODE> w drzewie kodu źródłowego MPlayera, nie musisz
+  instalować ich osobno. Zdecydowaliśmy się na takie rozwiązanie ponieważ
+  musieliśmy naprawić błąd w <CODE>libdvdread</CODE> i nałożych nakładkę która
+  dodawałą do <CODE>libdvdcss</CODE> <B>obługę buforowania (cache) skrakowanych kluczy CSS</B>.
+  Dało to duży przyrost sprędkości, ponieważ klucze nie muszą być krakowane za
+  każdym razem przed odtwarzaniem.</P>
 
-    <P>Wsparcie dla DVD navigation (menu na płycie DVD, z wyborem
-    scen, napisów itp.; przyp.tłum.). przez <CODE>dvdnav</CODE>
-    zaczęło działać, ale nigdy nie zostało poprawnie zakończone i
-    aktualnie nie jest rozwijane. Kto wie, może jeszcze zostanie
-    ukończone.</P>
+<P>MPlayer może również używać systemowych bibliotek <CODE>libdvdread</CODE> i 
+  <CODE>libdvdcss</CODE> , ale to rozwiązanie <B>nie</B> jest polecane,
+  ponieważ może to powodować błędy, niekompatybilność bibliotek i wolniejszą prędkość.</P>
 
-    <H4>Wsparcie dla starego-stylu DVD - OPCJONALNIE</H4>
+<H4>wsparcie dla DVD Navigation (dvdnav)</H4>
 
-    <P>Przydatne jeżeli chcesz odtworzyć zakodowane VOBy z
-    <B>twardego dysku</B>. W tym celu skompiluj i zainstaluj
-    <B>libcss</B> 0.0.1 (nie nowszy) (Jeżeli MPlayer nie wykryję
-    go, użyj opcji <CODE>-csslib /ścieżka/do/libcss.so</CODE>). By
-    go użyć, musisz być rootem, używać MPlayera z suid root lub
-    kazać MPlayerowi użyć programu wrapera z suid-root o nazwie
-    fibmap_mplayer.</P>
+<P>Wsparcie dla DVD navigation (menu na płycie DVD, z wyborem scen, napisów itp.; przyp.tłum.).
+  przez <CODE>dvdnav</CODE> zaczęło działać, ale nigdy nie zostało poprawnie zakończone
+  i aktualnie nie jest rozwijane. Kto wie, może jeszcze zostanie ukończone.</P>
 
-    <H4>Struktura DVD</H4>
+<H4>Wsparcie dla starego-stylu DVD - OPCJONALNIE</H4>
 
-    <P>Dyski DVD mają po 2048 bajtów na sektor z ECC/CRC. Mają
-    zazwyczaj system plików UDF na pojedyńczej ścieżce,
-    zawierającej różne pliki (małe pliki .IFO i .BUK i duże (1GB)
-    pliki .VOB). To są prawdziwe pliki które możesz
-    kopiować/odtwarzać z zamontowanego systemu plików na
-    niezaszyfrowanym DVD.</P>
+<P>Przydatne jeżeli chcesz odtworzyć zakodowane VOBy z <B>twardego dysku</B>. W tym celu
+  skompiluj i zainstaluj <B>libcss</B> 0.0.1 (nie  nowszy) (Jeżeli MPlayer nie
+  wykryję go, użyj opcji <CODE>-csslib /ścieżka/do/libcss.so</CODE>). By go użyć,
+  musisz być rootem, używać MPlayera z suid root lub kazać MPlayerowi użyć
+  programu wrapera z suid-root o nazwie fibmap_mplayer.</P>
 
-    <P>Pliki .IFO zawierają informacje nawigacyjne filmu
-    (rozdziały/tytułu/kąty kamery, tablice języków, itd.) i są
-    wymagane do odczytu i interpretacji zawartości .VOB (filmu).
-    Pliki .BUK są ich kopiami zapasowymi. Wszędzie wykorzystują
-    <B>sektory</B>, więc musiał użyć adresowania sektorów raw na
-    dysku by użyć nawigacji DVD lub zdeszyfrować zawartość.</P>
+<H4>Struktura DVD</H4>
 
-    <P>Całe wsparcie dla starego-stylu DVD jest przez
-    <CODE>libcss</CODE>, zatem potrzebuje zamontowanego systemu
-    plików DVD i dostępu dla raw opartego na sektorach do
-    urządzenia. Na nieszczęście musisz być (w Linuksie) rootem by
-    pobrać adres sektora pliku. Masz następujące rozwiązania:</P>
+<P>Dyski DVD mają po 2048 bajtów na sektor z ECC/CRC. Mają zazwyczaj system plików UDF
+  na pojedyńczej ścieżce, zawierającej różne pliki (małe pliki .IFO i .BUK
+  i duże (1GB) pliki .VOB). To są prawdziwe pliki które możesz kopiować/odtwarzać
+  z zamontowanego systemu plików na niezaszyfrowanym DVD.</P>
 
-    <UL>
-      <LI>Bycie rootem lub użycie MPlayera z suid-root.</LI>
+<P>Pliki .IFO zawierają informacje nawigacyjne filmu (rozdziały/tytułu/kąty
+  kamery, tablice języków, itd.) i są wymagane do odczytu i interpretacji zawartości .VOB
+  (filmu). Pliki .BUK są ich kopiami zapasowymi. Wszędzie wykorzystują <B>sektory</B>,
+  więc musiał użyć adresowania sektorów raw na dysku by użyć nawigacji DVD lub zdeszyfrować zawartość.</P>
 
-      <LI>Kazać MPlayerowi użyć programu wrapera z suid-root o
-      nazwie fibmap_mplayer by mieć dostęp do DVD (używane tylko w
-      odtwarzaniu DVD w starym-stylu DVD z
-      <CODE>libcss</CODE>).</LI>
+<P>Całe wsparcie dla starego-stylu DVD jest przez <CODE>libcss</CODE>, zatem potrzebuje
+  zamontowanego systemu plików DVD i dostępu dla raw opartego na sektorach do urządzenia.
+  Na nieszczęście musisz być (w Linuksie) rootem by pobrać adres sektora pliku. Masz
+  następujące rozwiązania:</P>
 
-      <LI>W ogóle nie używaj sterownika systemu plików kernela i
-      reimplementacji tego w przestrzeni użytkownika.
-      <CODE>libdvdread</CODE> 0.9.x i <CODE>libmpdvdkit</CODE>
-      robią to (wsparcie nowego-stylu DVD). System plików UDF
-      kernela nie jest potrzebny, ponieważ biblioteki te mają już
-      własny wbudowany sterownik systemu plików UDF. Ponad to DVD
-      nie muszą być montowane, ponieważ tylko dostęp raw oparty na
-      sektorach jest użyty.</LI>
-    </UL>
+<UL>
+  <LI>Bycie rootem lub użycie MPlayera z suid-root.</LI>
+  <LI>Kazać MPlayerowi użyć programu wrapera z suid-root o nazwie fibmap_mplayer
+    by mieć dostęp do DVD (używane tylko w odtwarzaniu DVD w starym-stylu DVD z <CODE>libcss</CODE>).</LI>
+  <LI>W ogóle nie używaj sterownika systemu plików kernela i reimpetacji tego w przestrzeni
+    użytkownika. <CODE>libdvdread</CODE> 0.9.x i <CODE>libmpdvdkit</CODE> robią to (wsparcie
+    nowego-stylu DVD). System plików UDF kernela nie jest potrzebny, ponieważ
+    biblioteki te mają już własny wbudowany sterownik systemu plików UDF. Ponad to
+    DVD nie muszą być montowane, ponieważ tylko dostęp raw oparty na sektorach jest użyty.</LI>
+</UL>
 
-    <P>Czasami <CODE>/dev/dvd</CODE> nie możę być odczytany przez
-    użytkowników, więc autorzy <CODE>libdvdread</CODE>
-    zaimpletowali emulację która przesyła adresy sektorów do
-    nazwplików+przesunięć, by zemulować dostęp raw na zamontowanym
-    systemie plików lub nawet na dysku twardym.</P>
+<P>Czasami <CODE>/dev/dvd</CODE> nie możę być odczytany przez użytkownikóws, więc autorzy
+  <CODE>libdvdread</CODE> zaimpletowali emulację która przesyła adresy sektorów do
+  nazwplików+przesunięć, by zemulować dostęp raw na zamontowanym systemie plików
+  lub nawet na dysku twardym.</P>
 
-    <P><CODE>libdvdread</CODE> akceptuje nawet punkty montowania
-    (ang. mountpoint) zamiast nazwy urządzenia dla dostępu raw i
-    sprawdza <CODE>/proc/mounts</CODE> by pobrać nazwę urządzenia.
-    Zrobione to zostało dla Solarisa, gdzie nazwy urządzeń są
-    dynamicznie przydzielane.</P>
+<P><CODE>libdvdread</CODE> akceptuje nawet pukty mantowania (ang. mountpoint) zamiast
+  nazwy urządzenia dla dostępy raw i sprawdza <CODE>/proc/mounts</CODE> by pobrać nazwę urządzenia.
+  Zrobione to zostało dla Solarisa, gdzie nazwy urządzeń są dynamicznie przydzielane.</P>
 
-    <P>Domyślnym urządzeniem DVD jest <CODE>/dev/dvd</CODE>. jeżeli
-    ustawiłeś inne, stwórz link symboliczny, lyb podaj poprawne
-    urządzenie w linii komend opcją <CODE>-dvd-device</CODE>.</P>
+<P>Domyślnym urządzeniem DVD jest <CODE>/dev/dvd</CODE>. jeżeli ustawiłeś inne,
+  stwórz link symboliczny, lyb podaj poprawne urządzenie w linii komend opcją
+  <CODE>-dvd-device</CODE>.</P>
 
-    <H4>Autentyfikacja DVD</H4>
+<H4>Autentyfikacja DVD</H4>
 
-    <P>Wsparcia dla autentyfikacji i metod deszyfrowania
-    nowego-stylu DVD są ukończone, używają poprawionej biblioteki
-    <CODE>libdvdcss</CODE> (patrz wyżej). Metoda może być określona
-    poprzez zmienną systemową <CODE>DVDCSS_METHOD</CODE>, która
-    może być ustawiona na <CODE>key (klucz)</CODE>, <CODE>disk
-    (dysk)</CODE> lub <CODE>title (tytuł)</CODE>.</P>
+<P>Wspacia dla autentyfikacji i metod deszyfrowania nowego-stylu DVD są ukończone,
+  używają poprawionej biblioteki <CODE>libdvdcss</CODE> (patrz wyżej). Metoda może być
+  określona poprzez zmienną systemową <CODE>DVDCSS_METHOD</CODE>, która może być ustawiona na
+  <CODE>key (klucz)</CODE>, <CODE>disk (dysk)</CODE> lub <CODE>title (tytuł)</CODE>.</P>
 
-    <P>Jeżeli nic nie jest określone, biblioteka próbuje poniższych
-    metod (domyślnie: key, title request):</P>
+<P>Jeżeli nic nie jest określone, biblioteka próbuje poniższych metod
+  (domyślnie: key, title request):</P>
 
-    <OL>
-      <LI><B>bus key:</B> Ten klucz jest negocjowany podczas
-      autentyfikacji (długi mix ioctl'i wymiany różnych kluczy,
-      oprogramowanie kryptograficzne) i używa go do deszyfracji
-      kluczy tytułu i dysku zanim wyśle je przez niechronioną
-      magistralę (bus) (by zapobiec podsłuchiwaniu). Klucz
-      magistrali jest wymagany do pobrania i predeszyfracji
-      zaszyfrowanego klucza dysku.</LI>
+<OL>
+  <LI><B>bus key:</B> Ten klucz jest negocjowany podczas autentyfikacji (długi mix
+    ioctl'i wymiany różnych kluczy, oprogramowanie kryptograficzne) i używa go do deszyfracji
+    kluczy tytułu i dysku zanim wyśle je przez niechronioną magistralę (bus)
+    (by zapobiec podsłuchiwaniu). Klucz magistrali jest wymagany do pobrania i predeszyfracji
+    zaszyfrowanego klucza dysku.</LI>
+  <LI><B>cached key:</B> MPlayer szuka aktualnie skrakowanych kluczy tytułów
+    które są zapisane w katalogu <CODE>~/.mplayer/DVDKeys</CODE> (szybkie ;).</LI>
+  <LI><B>key:</B> Jeżeli nie są dostępne zbuforowane klucze, MPlayer próbuje deszyfrować
+    klucz dysku grupą kluczy dołączonych do odtwarzacza.</LI>
+  <LI><B>disk:</B> Jeżeli metoda klucza zawiedzie (np. nie ma doączony kluczy do odtwarzacza),
+    MPlayer skrakuje klucz dysku używając algorytmu brute force.
+    Ten proces intensywnie wykorzystuje CPU i wymaga 64 MB pamięci (16M 32Bit
+    wpisów tablicy mieszającej (org. hash table)) by zapisać tymczasowe dane. Ta metoda powinna
+    zawsze działać (wolno).</LI>
+  <LI><B>title request:</B> Z kluczem dysku MPlayer wymaga zaszyfrowanych kluczy
+    tytułów, które są wewnątrz <I>ukrytych sektorów</I> używających <CODE>ioctl()</CODE>.
+    Kod regionu (dla USA, Japoni, Europy inny, kwestia zabezpieczeń; przyp. tłum.) urządzeń RPC-2 jest sprawdzany w tym
+    kroku i może się nie powieść w takich urządzeniach. Jeżeli się powiedzie, klucz tytułu
+    zostanie zdeszyfrowany z magistralą (bus) i kluczem dysku.</LI>
+  <LI><B>title:</B> Ta metoda zostanie użyta, jeżeli metoda "title request" (patrz wyżej) zawiedzie
+    i nie polega na wymianie klucza z napędem DVD. Używa ataku kryptograficznego
+    by bezpośrednio odgadnąć klucz tytułu (poprzez odnajdywanie powtarzających się wzorców w
+    zaszyfrowanej zawartości VOB i odgadywaniu, że tekst jawny odpowiadający pierwszym
+    zaszyfrowanym bajtom jest kontunuacją wzorca).
+    Ta metoda jest również znana jako "known plaintext attack" (atak znanym tekstem jawnym) lub "DeCSSPlus".
+    W wielu przypadkach ta metoda zawodzi, ponieważ nie ma wystarczającej ilości zaszyfrowanych
+    informacji na dysku, by sporządzić statystyki ataku lub dlatego, że klucz zmienia się
+    wewnątrz tytułu. Ta metoda jest jedynym rozwiązaniem by zdeszyfrować DVD zapisane na
+    dysku twardym lub z DVD z błędnym kodem regionu w napędach RPC2 (wolny).</LI>
+</OL>
 
-      <LI><B>cached key:</B> MPlayer szuka aktualnie skrakowanych
-      kluczy tytułów które są zapisane w katalogu
-      <CODE>~/.mplayer/DVDKeys</CODE> (szybkie ;).</LI>
+<P>Napędy DVD RPC-1 chronią ustawienia regionu tylko programowo. Napędu RPC-2
+  mają sprzętową ochronę która pozwala tylko na 5 zmian. Możliwe, że będziesz
+  potrzebował/będzie zalecany upgrade firmware'u do RPC-1, jeżli masz napęd DVD RPC-2.
+  Upgrade'y firmware'u można znaleść tej
+  <A HREF="http://www.firmware-flash.com">stronie firmware'owej</A>. Jeżeli nie ma tam
+  upgrade'u firmware'u dostępnego dla twojego urządzenia, użyj
+  <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">narzędzia regionset
+  </A> by ustawić kod regionu twojego napędu DVD (pod Linuksem).
+  <B>Ostrzeżenie:</B> Możesz zmienić region tylko 5 razy.</P>
 
-      <LI><B>key:</B> Jeżeli nie są dostępne zbuforowane klucze,
-      MPlayer próbuje deszyfrować klucz dysku grupą kluczy
-      dołączonych do odtwarzacza.</LI>
 
-      <LI><B>disk:</B> Jeżeli metoda klucza zawiedzie (np. nie ma
-      doączony kluczy do odtwarzacza), MPlayer skrakuje klucz dysku
-      używając algorytmu brute force. Ten proces intensywnie
-      wykorzystuje CPU i wymaga 64 MB pamięci (16M 32Bit wpisów
-      tablicy mieszającej (org. hash table)) by zapisać tymczasowe
-      dane. Ta metoda powinna zawsze działać (wolno).</LI>
+<H2><A NAME="vcd">4.3 Odtwarzanie VCD</A></H2>
 
-      <LI><B>title request:</B> Z kluczem dysku MPlayer wymaga
-      zaszyfrowanych kluczy tytułów, które są wewnątrz <I>ukrytych
-      sektorów</I> używających <CODE>ioctl()</CODE>. Kod regionu
-      (dla USA, Japoni, Europy inny, kwestia zabezpieczeń; przyp.
-      tłum.) urządzeń RPC-2 jest sprawdzany w tym kroku i może się
-      nie powieść w takich urządzeniach. Jeżeli się powiedzie,
-      klucz tytułu zostanie zdeszyfrowany z magistralą (bus) i
-      kluczem dysku.</LI>
+<P>Po kompletną listę dostępnych opcji, prosimy o przeczytanie manuala.
+  Składnia dla standardowego Video CD (VCD) jest następująca:</P>
 
-      <LI><B>title:</B> Ta metoda zostanie użyta, jeżeli metoda
-      "title request" (patrz wyżej) zawiedzie i nie polega na
-      wymianie klucza z napędem DVD. Używa ataku kryptograficznego
-      by bezpośrednio odgadnąć klucz tytułu (poprzez odnajdywanie
-      powtarzających się wzorców w zaszyfrowanej zawartości VOB i
-      odgadywaniu, że tekst jawny odpowiadający pierwszym
-      zaszyfrowanym bajtom jest kontunuacją wzorca). Ta metoda jest
-      również znana jako "known plaintext attack" (atak znanym
-      tekstem jawnym) lub "DeCSSPlus". W wielu przypadkach ta
-      metoda zawodzi, ponieważ nie ma wystarczającej ilości
-      zaszyfrowanych informacji na dysku, by sporządzić statystyki
-      ataku lub dlatego, że klucz zmienia się wewnątrz tytułu. Ta
-      metoda jest jedynym rozwiązaniem by zdeszyfrować DVD zapisane
-      na dysku twardym lub z DVD z błędnym kodem regionu w napędach
-      RPC2 (wolny).</LI>
-    </OL>
+<P><CODE>mplayer -vcd &lt;ścieżka&gt; [-cdrom-device &lt;uządzenie&gt;]</CODE></P>
 
-    <P>Napędy DVD RPC-1 chronią ustawienia regionu tylko
-    programowo. Napędu RPC-2 mają sprzętową ochronę która pozwala
-    tylko na 5 zmian. Możliwe, że będziesz potrzebował/będzie
-    zalecany upgrade firmware'u do RPC-1, jeżli masz napęd DVD
-    RPC-2. Upgrade'y firmware'u można znaleść tej <A href=
-    "http://www.firmware-flash.com">stronie firmware'owej</A>.
-    Jeżeli nie ma tam upgrade'u firmware'u dostępnego dla twojego
-    urządzenia, użyj <A href=
-    "http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">narzędzia
-    regionset</A> by ustawić kod regionu twojego napędu DVD (pod
-    Linuksem). <B>Ostrzeżenie:</B> Możesz zmienić region tylko 5
-    razy.</P>
+<P>Przykład: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
 
-    <H2><A name="vcd">4.3 Odtwarzanie VCDk</A></H2>
+<P>Domyślnym użądzeniem VCD jest <CODE>/dev/cdrom</CODE>. Jeżeli twoje ustawienia są inne,
+  stwórz link symboliczny lub podaj poprawne urządzenie w lini komend opcją
+  <CODE>-cdrom-device</CODE>.</P>
 
-    <P>Po kompletną listę dostępnych opcji, prosimy o przeczytanie
-    manuala. Składnia dla standardowego Video CD (VCD) jest
-    następująca:</P>
+<P><B>Informacja:</B> Najnowsze napędy Plextora i niektóre CD-ROMy SCSI Toshiba
+  mają straszną osiągi w czytaniu VCDików. Jest tak, ponieważ CDROMREADRAW ioctl
+  nie jest w pełni zaimpletowany dla tych napędów. Jeżli masz jakąś wiedzę na temat
+  programowania SCSI, prosimu <A HREF="../tech/patches.txt">pomóż nam</A> wprowadzić
+  ogólne wsparcie dla SCSI VCD.</P>
 
-    <P><CODE>mplayer -vcd &lt;ścieżka&gt; [-cdrom-device
-    &lt;uządzenie&gt;]</CODE></P>
+  <P>Tymczasem możesz wydobyć dane z VCDików programem
+  <A HREF="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</A>
+  i odtworzyć wynikowy plik MPlayerem.</P>
 
-    <P>przykład: <CODE>mplayer -vcd 2 -cdrom-device
-    /dev/hdc</CODE></P>
+<H4>Struktura VCD</H4>
 
-    <P>Domyślnym użądzeniem VCD jest <CODE>/dev/cdrom</CODE>.
-    Jeżeli twoje ustawienia są inne, stwórz link symboliczny lub
-    podaj poprawne urządzenie w lini komend opcją
-    <CODE>-cdrom-device</CODE>.</P>
+<P>Dyski VCD składają się z jednej lub więcej ścieżek:</P>
 
-    <P><B>Informacja:</B> Najnowsze napędy Plextora i niektóre
-    CD-ROMy SCSI Toshiba mają straszną osiągi w czytaniu VCDików.
-    Jest tak, ponieważ CDROMREADRAW ioctl nie jest w pełni
-    zaimpletowany dla tych napędów. Jeżli masz jakąś wiedzę na
-    temat programowania SCSI, prosimy <A href=
-    "../tech/patches.txt">pomóż nam</A> wprowadzić ogólne wsparcie dla
-    SCSI VCD.</P>
+<UL>
+  <LI>Pierwsza ścieżka jest małą ścieżką danych 2048 bajtów/sektor z systemem plików iso9660,
+    zazwyczaj zawierającą odtwarzacz VDC dla Windowsa i może inne informacje
+    (zdjęcia, tekst, itp).</LI>
+  <LI>Druga i inne ścieżki są to MPEGi raw, 2324 bajtów/sektor (film),
+    zawierające jeden pakiet danych MPEG PS na sektor zamiast systemu plików.
+    Podobnie do ścieżek audio CD, te ścieżki <B>nie mogą być zamontowane</B> (Montowałeś kiedykolwiek
+    audio CD, by je odtworzyć?). Ponieważ większość filmów jest w tej śieżce,
+    powinieneś najpierw spróbować <CODE>-vcd 2</CODE>.</LI>
+  <LI>Istnieją dyski VCD bez pierwszej ścieżki (pojedyńcza ścieżka i całkowity
+    brak systemu plików). Nadal można je odtworzyć, ale nie mogą być zamontowane.</LI>
+</UL>
 
-    <H4>Struktura VCD</H4>
+<H4>O plikach .DAT:</H4>
 
-    <P>Dyski VCD składają się z jednej lub więcej ścieżek:</P>
+<P>Widoczny plik ~600 MB na pierwszej ścieżce w zamontowanym VCD nie jest prawdziwym
+  plikiem! Jest on więc przekierowaniem ISO z własną nazwą, stworzonym by pozwolić Windowsom
+  przechwycenie tych ścieżek (Windowsy w ogóle nie pozwalają na dostęp raw urządzenia).
+  Pod Linuksem nie możesz kopiować lub odtwarzać tych plików (zawierają śmieci). Pod
+  Windowsami jest to możliwe, ponieważ ich sterownik iso9660 emuluje odczyt raw
+  ścieżek w tym pliku. By odtworzyć pliki .DAT potrzebujesz sterownika kernela który
+  możesz znaleść w wersji linuksowej PowerDVD. Zawiera on zmodyfikowany sterownik systemu
+  plików iso9660 (<CODE>vcdfs/isofs-2.4.X.o</CODE>), który ma dostępną emulację
+  ścierzek raw bezpośrednio do ukrytych plików .DAT. Jeżeli zamontujesz dysku używając
+  tego sterownika, możesz kopiować i nawet odtwarzać pliki .DAT MPlayerem. Ale to
+  <B>nie zadziała</B> ze standardowym sterownikiem iso9660 kernela Linuksa!
+  Użyj zamiast tego opcji <CODE>-vcd</CODE>. Alternatywami dla kopiowania VCD są:
+  nowy sterownik kernela <A HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A>
+  (nie jest częścią oficjalnedo kernela) który pokazuje <I>sesje</I> CD
+  jako pliki obrazów i <A HREF="http://cdrdao.sourceforge.net/">cdrdao</A>, aplikacja
+  do grabowania/kopiowania CD metodą bit-by-bit.</P>
 
-    <UL>
-      <LI>Pierwsza ścieżka jest małą ścieżką danych 2048
-      bajtów/sektor z systemem plików iso9660, zazwyczaj
-      zawierającą odtwarzacz VDC dla Windowsa i może inne
-      informacje (zdjęcia, tekst, itp).</LI>
-
-      <LI>Druga i inne ścieżki są to MPEGi raw, 2324 bajtów/sektor
-      (film), zawierające jeden pakiet danych MPEG PS na sektor
-      zamiast systemu plików. Podobnie do ścieżek audio CD, te
-      ścieżki <B>nie mogą być zamontowane</B> (Montowałeś
-      kiedykolwiek audio CD, by je odtworzyć?). Ponieważ większość
-      filmów jest w tej ścieżce, powinieneś najpierw spróbować
-      <CODE>-vcd 2</CODE>.</LI>
-
-      <LI>Istnieją dyski VCD bez pierwszej ścieżki (pojedyńcza
-      ścieżka i całkowity brak systemu plików). Nadal można je
-      odtworzyć, ale nie mogą być zamontowane.</LI>
-    </UL>
-
-    <H4>O plikach .DAT:</H4>
-
-    <P>Widoczny plik ~600 MB na pierwszej ścieżce w zamontowanym
-    VCD nie jest prawdziwym plikiem! Jest on więc przekierowaniem
-    ISO z własną nazwą, stworzonym by pozwolić Windowsom
-    przechwycenie tych ścieżek (Windowsy w ogóle nie pozwalają na
-    dostęp raw urządzenia). Pod Linuksem nie możesz kopiować lub
-    odtwarzać tych plików (zawierają śmieci). Pod Windowsami jest
-    to możliwe, ponieważ ich sterownik iso9660 emuluje odczyt raw
-    ścieżek w tym pliku. By odtworzyć pliki .DAT potrzebujesz
-    sterownika kernela który możesz znaleść w wersji linuksowej
-    PowerDVD. Zawiera on zmodyfikowany sterownik systemu plików
-    iso9660 (<CODE>vcdfs/isofs-2.4.X.o</CODE>), który ma dostępną
-    emulację ścieżek raw bezpośrednio do ukrytych plików .DAT.
-    Jeżeli zamontujesz dysku używając tego sterownika, możesz
-    kopiować i nawet odtwarzać pliki .DAT MPlayerem. Ale to <B>nie
-    zadziała</B> ze standardowym sterownikiem iso9660 kernela
-    Linuksa! Użyj zamiast tego opcji <CODE>-vcd</CODE>.
-    Alternatywami dla kopiowania VCD są: nowy sterownik kernela <A
-    href="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> (nie
-    jest częścią oficjalnego kernela) który pokazuje <I>sesje</I>
-    CD jako pliki obrazów i <A href=
-    "http://cdrdao.sourceforge.net/">cdrdao</A>, aplikacja do
-    grabowania/kopiowania CD metodą bit-by-bit.</P>
-  </BODY>
+</BODY>
 </HTML>
-
