@@ -1162,6 +1162,7 @@ static int timeout_save=0;
 void wsScreenSaverOn( Display *mDisplay )
 {
  int nothing;
+#ifdef HAVE_XDPMS
  if ( dpms_disabled )
   {
    if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
@@ -1178,7 +1179,7 @@ void wsScreenSaverOn( Display *mDisplay )
        }
     }
   }
-
+#endif
  if ( timeout_save )
   {
    int dummy, interval, prefer_blank, allow_exp;
@@ -1191,7 +1192,7 @@ void wsScreenSaverOn( Display *mDisplay )
 void wsScreenSaverOff( Display * mDisplay )
 {
  int interval,prefer_blank,allow_exp,nothing;
-
+#ifdef HAVE_XDPMS
  if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
   {
    BOOL onoff;
@@ -1206,6 +1207,7 @@ void wsScreenSaverOff( Display * mDisplay )
       fprintf( stderr,"stat: %d.\n",stat );
    }
   }
+#endif
  XGetScreenSaver( mDisplay,&timeout_save,&interval,&prefer_blank,&allow_exp );
  if ( timeout_save ) XSetScreenSaver( mDisplay,0,interval,prefer_blank,allow_exp ); // turning off screensaver
 }
