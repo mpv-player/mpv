@@ -1020,28 +1020,48 @@ current_module="init_video_codec";
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
 if(video_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+{ /* local vars */
+short bestprio=-1;
+struct codecs_st *bestcodec=NULL;
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
-  if(!sh_video->codec){
+  if(!sh_video->codec/* && bestprio==-1*/){
     if(video_family!=-1) {
-      sh_video->codec=NULL; /* re-search */
+      //sh_video->codec=NULL; /* re-search */
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CantFindVfmtFallback);
       video_family=-1;
       continue;      
     }
+		if(bestprio==-1 || !video_codec) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
-  }
-  // is next line needed anymore? - atmos ::
-  if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
-  else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
-  else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
+    }
+  } else {
+    // is next line needed anymore? - atmos ::
+    if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
+    else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
+    else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
+	  else if(video_family==-1 && !video_codec && sh_video->codec->priority) {
+	    if(sh_video->codec->priority > bestprio) {
+        //printf("\n\n!!! setting bestprio from %d to %d for %s!!!\n\n", bestprio, sh_video->codec->priority, sh_video->codec->name);
+        bestprio=sh_video->codec->priority;
+        bestcodec=sh_video->codec;
+      }
+      continue;
+    }
+  } /* sh_video->codec */
   break;
 }
+if(bestprio!=-1) {
+  //printf("chose codec %s by priority.\n", bestcodec->name);
+  sh_video->codec=bestcodec;
+}
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+} /* end local vars */
+
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
 //    int ret;
