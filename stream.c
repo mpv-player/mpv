@@ -132,10 +132,12 @@ if(newpos==0 || newpos!=s->pos){
 }
 
   stream_fill_buffer(s);
-  if(pos>=0 && pos<s->buf_len){
+  if(pos>=0 && pos<=s->buf_len){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
+  
+//  if(pos==s->buf_len) printf("XXX Seek to last byte of file -> EOF\n");
   
 #ifdef _LARGEFILE_SOURCE
   mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
