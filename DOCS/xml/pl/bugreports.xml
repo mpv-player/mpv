@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.10 -->
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
 <para>
@@ -85,8 +85,12 @@ odpowiemy na Twoje zgłoszenie.
 <para>
 Zapisz się na listę mplayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-i wyślij swoje zgłoszenie błędu na:
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+i wyślij swoje zgłoszenie błędu na
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/> gdzie będzie można je omówić.
+</para>
+<para>
+Jeżeli wolisz, możesz zamiast tego skorzystać z naszej nowej
+<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zgłaszania błędów-przyp.tłum.)
 </para>
 <para>
 Językiem obowiązującym na tej liście jest
