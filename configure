@@ -4270,8 +4270,10 @@ echores "$_menu"
 echocheck "QTX codecs"
 if test "$_qtx_codecs" = yes ; then
     _def_qtx_codecs='#define USE_QTX_CODECS 1'
+    _codecmodules="qtx $_codecmodules"
 else
     _def_qtx_codecs='#undef USE_QTX_CODECS'
+    _nocodecmodules="qtx $_nocodecmodules"
 fi
 echores "$_qtx_codecs"
 
