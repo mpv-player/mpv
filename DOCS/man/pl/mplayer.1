@@ -1,4 +1,4 @@
-.\" synced with 1.883
+.\" synced with 1.897
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-01-13" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2005-01-13" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -850,7 +850,7 @@ liczbê kana³ów.
 .br
 .I INFORMACJA:
 Opcja ta jest honorowana przez kodeki (tylko AC3), filtry (surround)
-i sterowniki ao (przynajmniej OSS).
+i sterowniki wy¶cia audio (przynajmniej OSS).
 .sp 1
 Dostêpne s± opcje:
 .sp 1
@@ -1121,10 +1121,14 @@ pocz±tku.
 .
 .TP
 .B \-srate <Hz>
-Wybiera podan± czêstotliwo¶æ próbkowania wyj¶cia,
-przepróbkowywuj±c je¶li jest to niezbêdne.
+Wybiera czêstotliwo¶æ próbkowania, któr± bêdzie wykorzystana przez
+kartê d¼wiêkow± (oczywi¶cie karty maj± te¿ swoje ograniczenia).
+Je¿eli czêstotliwo¶æ próbkowania Twojej karty jest inna ni¿ w obecnie
+przetwarzanym strumieniu, do wartwy d¼wiêkowej zastosowany zostanie filtr zmieniaj±cy
+czêstotliwo¶æ próbkowania, aby zniwelowaæ ró¿nicê.
 Opcja \-af-adv steruje typem przepróbkowywania.
 Domy¶lne jest szybkie przepróbkowywanie, które mo¿e zniekszta³ciæ d¼wiêk.
+.br
 MEncoder przekazuje tê warto¶æ do LAME przy przepróbkowywaniu.
 .
 .TP
@@ -1702,39 +1706,11 @@ Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna liczba rzeczywista).
 .
 .TP
-.B \-format <0\-8192>
-Wybiera format u¿ywany przez wyj¶cie warstwy filtruj±cej
-(zgodnie z definicjami w libao2/\:afmt.h):
-.PD 0
-.RSs
-.IPs "   1"
-Mu-Law
-.IPs "   2"
-A-Law
-.IPs "   4"
-Ima-ADPCM
-.IPs "   8"
-8-bit bez znaku
-.IPs "  16"
-16-bit (little-endian) ze znakiem
-.IPs "  32"
-16-bit (big-endian) ze znakiem
-.IPs "  64"
-8-bit ze znakiem
-.IPs " 128"
-16-bit (little-endian) bez znaku
-.IPs " 256"
-16-bit (big-endian) bez znaku
-.IPs " 512"
-MPEG (2) Audio
-.IPs 1024
-AC3
-.IPs 4096
-32-bit (little-endian) ze znakiem
-.IPs 8192
-32-bit (big-endian) ze znakiem
-.RE
-.PD 1
+.B \-format <format> (zobacz równie¿ filtr d¼wiêkowy "format")
+Wybiera format próbki u¿ywany przez wyj¶ciu warstwy filtrów d¼wiêkowych
+na kartê d¼wiêkow±.
+Warto¶ci, które mo¿e przyj±æ <format> s± wymienione poni¿ej w opisie
+filtry d¼wiêkowego "format".
 .
 .TP
 .B \-mixer <urz±dzenie>
@@ -3075,7 +3051,7 @@ Pomija kodek MP3 FFmpeg.
 .B \-af-adv <force=(0\-3):list=(filters)> (sprawd¼ te¿ opcjê \-af)
 Podaje zaawansowane opcje filtrów audio:
 .RSs
-.IPs force=<0\-3>
+.IPs force=<0\-7>
 Wymusza jeden z trybów wstawiania filtrów audio:
 .RSss
 0: ca³kowicie automatyczne wstawianie filtrów (domy¶lnie)
@@ -3084,7 +3060,26 @@ Wymusza jeden z trybów wstawiania filtrów audio:
 .br
 2: Optymalizuje pod wzglêdem szybko¶ci.
 .br
-3: Wy³±cza automatyczne wstawianie filtrów.
+3: Nie korzysta z automatycznego wstawiania filtórw i optymalizacji.
+.I Uwaga:
+MPlayer mo¿e siê wykrzaczyæ siê podczas dzia³ania, je¶li bêdzie
+ustawiony bêdzie ten parametr.
+.br
+4: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+w przypadku parametru 0, ale u¿ywa przetwarzania zmiennoprzecinkowego,
+je¶li jest to tylko mo¿liwe.
+.br
+5: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+w przypadku parametru 1, ale u¿ywa przetwarzania zmiennoprzecinkowego,
+je¶li jest to tylko mo¿liwe.
+.br
+6: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+w przypadku parametru 2, ale u¿ywa przetwarzania zmiennoprzecinkowego,
+je¶li jest to tylko mo¿liwe.
+.br
+7: Nie korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+w przypadku parametru 3, ale u¿ywa przetwarzania zmiennoprzecinkowego,
+je¶li jest to tylko mo¿liwe.
 .REss
 .IPs list=<filtry>
 Tak samo jak \-af.
@@ -3527,15 +3522,59 @@ Aby uzyskaæ pe³n± listê dostêpnych filtrów audio, skorzystaj z \-af help.
 Dostêpne s± filtry:
 .
 .TP
-.B resample[=czprób[:sloppy][:type]]
-Zmienia czêstotliwo¶æ próbkowania strumienia audio na podan± w Hz liczbê.
-Obs³uguje tylko format 16-bit little-endian.
+.B resample[=czprób[:sloppy][:typ]]
+Zmienia czêstotliwo¶æ próbkowania strumienia audio.
+Mo¿e byæ przydatny, je¶li masz kartê o sta³ej sta³ej, ustalonej
+czêstotliwo¶ci próbkowania lub je¶li posiadasz wy³±cznie star± kartê,
+która obs³u¿y max 44.1kHz.
+Filtr ten jest automatycznie w³±czany, je¶li zajdzie taka potrzebamienia czêstotliwo¶æ próbkowania strumienia audio na podan± w Hz liczbê.
+.br
+.I INFORMACJA:
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
+.PD 0
+.RSs
+.IPs <czprób>
+Wyj¶ciowa czêstotliwo¶æ próbkowania w Hz przyjmuje warto¶ci z zakresu
+od 8000 do 192000. Je¿eli czêstotliwo¶æ wej¶ciowa i wyj¶ciowa s± takie
+same albo je¿eli ten parametr jest pominiêty, filtr jest automatycznie wy³±czany.
+Wysoka czêstotliwo¶æ przewa¿nie zwiêksza jako¶æ d¼wiêku, szczególnie
+je¿eli filtr jest u¿yty wraz z innymi.
+.IPs <sloppy>
+Pozwala (1) lub nie pozwala (0), aby czêstotliwo¶æ wyj¶ciowa ró¿ni³a siê w
+nieznacznym stopniu od warto¶ci podanej przez parametr <czprób> (domy¶lnie: 1).
+Opcja ta mo¿e zostaæ u¿yta je¿eli pocz±tek odtwarzania jest bardzo wolny
+.IPs <typ>
+Okre¶la metodê wykorzystywan± przy zmianie próbkowania.
+.RSss
+0: interpolacja liniowa (szybka, ale niska jako¶æ podczas zwiêkszania czêstotliwo¶ci
+próbkowania)
+.br
+1: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ ca³kowitoliczbowych 
+(filterbank and integer processing)
+.br
+2: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ zmiennoprzecinkowych 
+(filterbank and integer processing) (najwolniejsze, ale daj±ce najlepsz± jako¶æ)
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer -af resample=44100:0:0"
+Ustawi czêstotliwo¶æ wyj¶ciow± filtru na 44100Hz, korzystaj±c
+z dok³adnego skalowania i interpolacji liniowej.
+.RE
+.PD 1
 .
 .TP
 .B lavcresample[=czprób[:d³ug[:lin[:liczba[:obcinanie]]]]]
-Zmienia czêstotliwo¶æ próbkowania strumienia audio na podan± w Hz liczbê.
-Obs³uguje tylko format 16-bit little-endian.
+Zmienia czêstotliwo¶æ próbkowania strumienia audio na ca³kowit± liczbê <czprób> wyra¿on±
+w Hz. Obs³uguje tylko format 16-bit little-endian.
+.br
+.I INFORMACJA:
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
 .PD 0
 .RSs
@@ -3567,17 +3606,91 @@ Konwertuje wielokana³owe audio do dwóch kana³ów przeznaczonych dla s³uchawek,
 zachowuj±c przestrzenno¶æ d¼wiêku.
 .
 .TP
-.B channels[=il]
-Zmienia ilo¶æ kana³ów wyj¶cia na <il>.
-Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿ liczba kana³ów wej¶ciowych,
-wstawiane s± puste kana³y (poza miksowaniem z mono na stereo, wtedy kana³ mono
-jest powtarzany w obu kana³ach wyj¶ciowych).
-Je¶li liczba kana³ów wyj¶ciowych jest mniejsza ni¿ liczba kana³ów wej¶ciowych
-to dodatkowe kana³y s± obcinane.
+.B equalizer=[g1:g2:g3:...:g10]
+10 oktawowy korektor graficzny zaimplementowany przy pomocy 10 filtrów pasmowych IIR.
+Oznacza to, ¿e dzia³a bez wzglêdu na format odtwarzanego d¼wiêku.
+¦rodkowe czêstotliwo¶ci dla tych 10 pasm to:
+.sp 1
+.PD 0
+.RS
+.IPs "Nr czêstotliwo¶æ"
+.IPs "0    31.25 Hz"
+.IPs "1    62.50 Hz"
+.IPs "2   125.00 Hz"
+.IPs "3   250.00 Hz"
+.IPs "4   500.00 Hz"
+.IPs "5    1.00 kHz"
+.IPs "6    2.00 kHz"
+.IPs "7    4.00 kHz"
+.IPs "8    8.00 kHz"
+.IPs "9   16.00 kHz"
+.RE
+.PD 1
+.sp 1
+.RS
+Je¿eli czêstotliwo¶æ próbkowania odtwarzanego d¼wiêku jest ni¿sza ni¿
+¶rodkowa czêstotliwo¶æ dla odpowiedniego pasma, to jest ono wy³±czane.
+Znanym b³êdem jest to, ¿e w³a¶ciwo¶ci dla najwy¿szego pasma nie s± ca³kowicie
+symetryczne, je¿eli czêstotliwo¶æ próbki jest zbli¿ona do czêstotliwo¶ci
+¶rodkowej danego pasma. Mo¿na obej¶æ ten problem zwiêkszaj±c jej
+czêstotliwo¶æ, zanim ta dotrze do filtru korektora.
+.RE
+.PD 0
+.RSs
+.IPs <g1>:<g2>:<g3>:...:<g10>
+Liczby rzeczywiste okre¶laj±ce przyrost w dB dla ka¿dego pasma czêstotliwo¶ci
+(-12\-12).
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
+Wzmocni d¼wiêk w wy¿szych i ni¿szych zakresach czêstotliwo¶ci, wyciszaj±c
+go jednocze¶nie oko³o 1kHz.
+.RE
+.PD 1
 .
 .TP
-.B format[=format]
-Zmienia aktualny format próbek.
+.B channels=lkan[:nr:od1:do1:od2:do2:od3:do3:...]
+Dodaje, usuwa, kopiuje lub przekierowuje kana³y.
+Je¿eli podana jest tylko opcja <lkan>, filtr u¿ywa domy¶lnego przekierowywania,
+które dzia³a nastêpuj±co: Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿
+wej¶ciowych, tworzone s± puste kana³y (w przypadku miksowania z mono do stereo,
+kana³ mono jest powtarzany w obu kana³ach wyj¶ciowych). Je¿eli liczba kana³ów
+wyj¶ciowych jest mniejsza ni¿ wej¶ciowych, nadmiarowe kana³y s± usuwane.
+.PD 0
+.RSs
+.IPs <lkan>
+liczba wyj¶ciowych kana³ów (1\-6)
+.IPs <nr>\ 
+liczba dróg przekierowania (1\-6)
+.IPs <od1:do1:od2:do2:od3:do3:...>
+Pary liczb z zakreu od 0 do 5, które okre¶laj±, gdzie przekierowaæ konkretny
+kana³.
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+Zmieni lizbê kana³ów na 4 i ustawi 4 drogi przekierowania, które zamieni±
+kana³ 0 z 1, a 2 i 3 pozostawi± niezmienione.
+Zauwa¿, ¿e je¿eli odtwarzany by³ zbiór zawieraj±cy 2 kana³y, kana³y 2 i 3
+bêd± puste, ale 0 i 1 zostan± zamienione.
+.IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+Zmieni liczbê kana³ów na 6 i ustawi 4 drogi przeierowania, które
+skopiuj± kana³ 0 do 0 i 3, a kana³y 4 i 5 bêd± zawiera³y ciszê.
+.RE
+.PD 1
+.
+.TP
+.B format[=format] (zobacz równie¿ \-format)
+Konwertuje format próbki.
+Uruchamiany automatycznie, je¿eli jest on potrzebny przez kartê d¼wiêkow± lub
+inny filtr.
 .PD 0
 .RSs
 .IPs <format>
@@ -3587,75 +3700,201 @@ bez znaku), 'b' oznacza ilo¶æ bitów na próbkê (16, 24 lub 32) a 'e' oznacza
 który bajt jest wysoki ('le' oznacza little-endian, 'be' big-endian a 'ne'
 format w³a¶ciwy dla komputera).
 Prawid³owymi warto¶ciami (miêdzy innymi) s±: 's16le', 'u32be' i 'u24ne'.
-Wyj±tkami od tej regu³y s±:  u8, s8, floatle, floatbe, floatne, mulaw, alaw,
-mpeg2, ac3 i imaadpcm.
+Wyj±tkami od tej regu³y bêd±cymi ci±gle poprawnymi formatami s±:  u8, s8, floatle,
+floatbe, floatne, mulaw, alaw, mpeg2, ac3 i imaadpcm.
 .RE
 .PD 1
 .
 .TP
-.B volume[=v:sc]
-Wybiera g³o¶no¶æ wyj¶cia.
-Ten filtr mo¿e byæ w³±czony tylko raz na ka¿dy strumieñ audio.
+.B volume[=v[:sc]
+Implementuje programow± regulacjê g³o¶no¶ci.
+U¿ywaj go ostro¿nie, gdy¿ mo¿e obni¿yæ stosunek sygna³u do szumu.
+W wiêkszo¶ci wypadków najlepszym rozwi±zaniem jest ustawienie miksera PCM na
+maksymaln± warto¶æ, wy³±czenie filtru i regulacja g³o¶no¶ci poziomem g³o¶no¶ci
+ogólnej miksera. Je¿eli Twoja karta ma cyfrowy mikser PCM zamiast analogowego i
+zauwa¿ysz przek³amania, u¿yj miksera MASTER. Je¿eli do komputera pod³±czony jest
+zewnêtrzny wzmacniacz (co zazwyczaj ma miejsce), poziom ha³asu mo¿e zostaæ
+zredukowany poprzez dostrojenie g³ównego poziomu g³o¶no¶ci (master level) i
+pokrêt³a g³o¶no¶ci, dopóki syczenie w tle nie ustanie.
+.br
+Ten filtr ma drug± w³a¶ciwo¶æ: Mierzy ogólny, maksymalny poziom d¼wiêku i wypisuje
+go po zakoñczeniu MPlayera. Oszacowana g³o¶no¶æ mo¿e byæ u¿yta do ustawienia poziomu
+d¼wiêku w MEncoderze tak, ¿eby maksymalny zasiêg dynamiczny by³ mo¿liwy do osi±gniêcia.
+.br
+.I INFORMACJA:
+Filtr mo¿e zostaæ u¿yty tylko jeden raz przy przetwarzaniu ka¿dego strumiania
+audio.
 .PD 0
 .RSs
 .IPs <v>\ \ 
 Ustawia wzmocnienie w dB dla wszystkich kana³ów w strumieniu od
-warto¶ci -200dB do +60dB (gdzie -200dB oznacza ca³kowite wyciszenie
-a +60dB 1000-krotne wzmocnienie).
+warto¶ci -200dB do +60dB, gdzie -200dB oznacza ca³kowite wyciszenie
+a +60dB 1000-krotne wzmocnienie (domy¶lnie: 0).
 .IPs <sc>\ 
 W³±cza miêkkie obcinanie (soft-clipping).
+W³±cza (1) lub wy³±cza (2) soft-clipping (miêkkie obcinanie).
+Soft-clipping mo¿e sprawiæ, ¿e d¼wiêk stanie siê ³±godniejszy, je¿eli
+zastosowano wysokie poziomy g³o¶no¶ci.
+Uaktywnij tê opcjê, je¿eli moc g³o¶ników jest zbyt niska.
+.br
+.I UWAGA:
+Metoda ta powoduje przek³amania i powinna byæ u¿yta tylko w ostateczno¶ci.
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer -af volume=10.1:0 media.avi"
+Wzmocni g³o¶no¶æ o 10.1dB i zastosuje hard-clippin (twarde obcinanie), je¿eli
+poziom jest zbyt wysoki.
 .RE
 .PD 1
 .
 .TP
-.B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
-Dowolnie miksuje kana³y, szczegó³y w DOCS/\:HTML/\:pl/\:audio.html
-Przyk³ad jak zmiksowaæ 6-kana³owy plik do dwóch kana³ów przy pomocy
-tego filtru mo¿esz znale¼æ w przyk³adach pod koniec tej strony podrêcznika
-systemowego man.
+.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+Dowolnie miksuje kana³y.
+Najpro¶ciej t³umacz±c jest to po³±czenie programowej regulacji
+g³o¶no¶ci i filtru kana³ów, który mo¿e zostaæ wykorzystany do
+zmiksowania wielu kana³ów do tylko kilku, np. \& d¼wiêku w trybie
+stereo do mono lub zmiany "szeroko¶ci" centralnego g³o¶nika w
+systemie d¼wiêku przestrzennego.
+Filtr jest trudny w u¿yciu i bêdzie wymaga³ zastosowania ¿mudnej metody prób i
+b³êdów, zanim zostanie osi±gniêty oczekiwany rezultat. Liczba parametrów filtru
+zale¿y od liczby kana³ów.
+Przyk³ad jak zmiksowaæ 6-kana³owy d¼wiêk do 2 kana³ów z wykorzystaniem
+tego filtru znajduje siê w czê¶ci przyk³adów blisko koñca.
+
 .PD 0
 .RSs
 .IPs <n>\ \ 
 liczba kana³ów wej¶ciowych (1\-6)
 .IPs <lij>
-Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
+Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i (0\-1).
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
+Zmiksuje d¼wiêk ze stereo do modo.
+.IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+Da 3 kana³y wyj¶ciowe, pozostawiaj±c 0 i 1 bez zmian oraz miksuj±æ 0 i 1
+do 2 kana³u (który mo¿e naprzyk³ad zostaæ wys³any do subwoofera).
 .RE
 .PD 1
 .
 .TP
-.B sub[=fc:ch]
-Dodaje kana³ subwoofera.
+.B sub[=fc:kan]
+Dodaje kana³ subwoofera do strumienia d¼wiêkowego.
+Dane audio u¿yte do stworzenia tego kana³u s± ¶redni± d¼wiêku w 0 i 1 kanale.
+D¼wiêk wynikowy zostanie poddany dzia³aniu dolnoprzepustowego filtru Butterwortha
+czwartego rzêdu z domy¶ln± czêstotliwo¶ci± graniczn±
+na poziomie 60Hz i dodany do oddzielnego kana³u w strumieniu audio.
+.br
+.I Uwaga
+Wy³±cz ten filtr, je¿eli odtwarzasz DVD z d¼wiêkiem w systemie Dolby Digital 5.1,
+w przeciwnym wypadku, jego dzia³anie zak³óci d¼wiêk subwoofera. 
 .PD 0
 .RSs
 .IPs <fc>\ 
-Czêstotliwo¶æ graniczna filtra dolnoprzepustowego (20Hz do 300Hz)
+Czêstotliwo¶æ graniczna filtru dolnoprzepustowego wyra¿ona w Hz(20Hz do 300Hz)
 (domy¶lnie: 60Hz).
-.IPs <ch>\ 
-numer kana³u subwoofera
+Dla uzyskania najlepszego rezultatu, spróbuj ustawiæ j± na jak najni¿sz±. Wzbogaci
+to do¶wiadczenia p³yn±ce z u¿ywania d¼wiêku stereo i w systemie przestrzennym.
+.IPs <kan>\ 
+Okre¶la numer kana³u, do którego zostanie wys³any d¼wiêk subwoofera.
+Mo¿e przyjmowaæ warto¶ci z zakresu od 0 do 5 (domy¶lnie: 5). Zauwa¿, ¿e
+liczb± kana³ów zwiêkszy siê do <kan>, je¿eli zajdzie taka potrzeba.
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer -af sub=100:4 -channels 5 media.avi"
+Doda kana³ subwoofera z ustawion± czêstotliwo¶ci± graniczn± na 100Hz
+do 4 kana³u wyj¶ciowego.
 .RE
 .PD 1
 .
 .TP
 .B surround[=opo¼nienie]
-Dekoder macierzowo zakodowanego d¼wiêku przestrzennego, dzia³a na wiêkszo¶ci
-zbiorów 2 kana³owych.
+Dekoder macierzowo zakodowanego d¼wiêku przestrzennego takiego jak Dolby Surround.
+Wiele plików zawieraj±cych 2 kana³y audio, w rzeczywisto¶ci zawiera d¼wiêk
+przestrzenny zakodowany w tym systemie. Aby u¿yæ tego filtru potrzebujesz karty z
+obs³ug± przynajmniej 4 kana³ów.
 .PD 0
 .RSs
 .IPs <opó¼nienie>
-opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 20ms).
+Ustawia opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 20ms).
+Powinno byæ ustawione tak, ¿e: je¶li d1 to odleg³o¶æ od pozycji s³uchacza do
+przednich g³o¶ników a d2 to odleg³o¶æ od tylnych g³o¶ników, to opó¼nienie d
+powinno byæ ustawione na 15ms, je¿eli d1 <= d2 i 15 + 5*(d1-d2) je¿eli d1 > d2.
+Domy¶lna warto¶æ dla d to 20ms.
+.RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer \-af surround=15 \-channels 4 media.avi"
+Doda d¼wiêk przestrzenny dekoduj±c d¼wiêk dla tylnych g³o¶ników z opó¼nieniem 15ms.
 .RE
 .PD 1
 .
 .TP
-.B delay[=ch1:ch2:...]
-Opó¼nia wyj¶cie audio.
-Podaje opó¼nienia osobno dla ka¿dego kana³u w milisekundach (liczba
-rzeczywista miêdzy 0 a 1000).
+.B delay[=kan1:kan2:...]
+Opó¼nia d¼wiêk wys³any do g³o¶ników, tak ¿eby dotar³ on z ró¿nych kana³ów
+jednocze¶nie. Jest to u¿yteczne, je¿eli masz wiêcej ni¿ 2 g³o¶niki.
+.PD 0
+.RSs
+.IPs kan1,kan2,...
+Opó¼nienie w ms, które ma byæ zastosowane do ka¿dego kana³u
+(liczba rzeczywsita z zakresu od 0 do 1000).
+.RE
+.PD 1
+.sp 1
+.RS
+Aby obliczyæ opó¼nienie dla poszczególnych kana³ów, wykonaj nastêpuje czynno¶ci:
+.IP 1. 3
+Oblicz odleg³o¶æ od g³o¶ników do pozycji s³uchacza (w metrach), da Ci to warto¶ci
+od s1 do s5 (dla systemu 5.1). Nie ma sensu braæ pod uwagê subwoofera
+(i tak nie us³yszysz ró¿nicy).
+.IP 2. 3
+Odejmij odleg³o¶æ od s1 do s5 od odleg³o¶ci maksymalnej
+tzn. s[i] = max(s) - s[i]; i = 1...5.
+.IP 3.
+Calculate the required delays in ms as d[i] = 1000*s[i]/342; i = 1...5.
+.RE
+.PD 0
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer \-af delay=10.5:10.5:0:0:7:0 media.avi"
+Opó¼ni d¼wiêk w przednim-lewym i prawym g³o¶niku o 10.5ms, dwa
+tylne kana³y i subwoofer o 0ms, a centralny o 7ms.
+.RE
+.PD 1
 .
 .TP
 .B export[=mmapowany_zbiór[:npróbek]]
 Eksportuje przychodz±cy sygna³ do innych procesów u¿ywaj±c mapowania pamiêci
 (mmap()).
+Zmapowane obszary zawieraj± nag³ówek: 
+.sp 1
+.nf
+int lkan                      /*liczba kana³ów*/
+int rozm                     /*rozmiar bufora*/
+unsigned long long licznik   /*U¿ywany do zachowania synchronizacji,
+                               aktualizowany za ka¿dym razem kiedy
+                               eksportowane s± nowe dane.*/
+.fi
+.sp 1
+Reszta to 16-bitowe dane (bez przeplotu).
 .PD 0
 .RSs
 .IPs <mmapowany_zbiór>
@@ -3664,16 +3903,28 @@ Zbiór, na który nale¿y mapowaæ dane
 .IPs <npróbek>
 ilo¶æ próbek na kana³ (domy¶lnie: 512)
 .RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.RSs
+.IPs "mplayer \-af export=/tmp/mplayer-af_export:1024 media.avi"
+Wyeksportuje 1024 próbek na kana³ do "/tmp/mplayer-af_export".
+.RE
+.
 .PD 1
 .
 .TP
-.B extrastereo[=mul]
-Zwiêksza ró¿nicê miêdzy lewym a prawym kana³em,
-aby dodaæ efekt "przekazu na ¿ywo" do odtwarzania.
+.B extrastereo[=wsp]
+Zwiêksza zwiêksza (liniowo) ró¿nicê miêdzy lewym a prawym kana³em
+dodaj±c efekt "przekazu na ¿ywo" do odtwarzania.
 .PD 0
 .RSs
-.IPs <mul>
-wspó³czynnik ró¿nicy (domy¶lnie: 2.5)
+.IPs <wsp>
+Okre¶la wspó³czynnik ró¿nicy wyra¿ony liczb± rzeczywist± (domy¶lnie: 2.5).
+Je¶li podasz mu warto¶æ 0.0, d¼wiêk bêdzie odtwarzany w trybie mono
+(¶rednia z dwóch kana³ów). Je¶li natomiast ustawisz go na 1.0, d¼wiêk pozostamie
+niezmieniony, a je¶li na -1.0, lewy kana³ z prawym zostan± zamienione.
 .RE
 .PD 1
 .
@@ -3735,7 +3986,7 @@ od lewego górnego rogu wiêkszego obrazu.
 .I INFORMACJA:
 Mo¿esz pobraæ listê dostêpnych filtrów video poprzez \-vf help.
 .sp 1
-Filtry s± zorganizowane w listy.
+Filtry obrazu s± zorganizowane w listy.
 Jest kilka poleceñ zarz±dzaj±cych list± filtrów.
 .
 .TP
@@ -4339,7 +4590,7 @@ Mo¿e byæ tak¿e u¿yte jako prymitywne usuwanie przeplotu jasno¶ci przy bardzo
 niskim zu¿yciu procesora.
 .PD 0
 .RSs
-.IPs <f>\ 
+.IPs <f>\ \ 
 Domy¶lnie, halfpack pobiera ¶rednie z pary linii, kiedy zmniejsza próbkowanie.
 Dowolna warto¶æ inna ni¿ 0 lub 1 daje domy¶lne (u¶redniaj±ce) zachowanie.
 .RSss
@@ -5667,11 +5918,13 @@ MPEG-1 video
 MPEG-2 video
 .IPs huffyuv
 HuffYUV
+.IPs ffvhuff (zobacz równie¿: vstrict)
+niestandardowy, mniejszy o 20% HuffYUV wykorzystuj±cy YV12
 .IPs asv1\ 
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1\ 
+.IPs ffv1 (zobacz równie¿: vstrict)
 bezstratny kodek video FFmpeg
 .RE
 .PD 1
@@ -6182,8 +6435,7 @@ wy³±czona (domy¶lnie)
 Zalecane tylko w przypadku, je¿eli chcesz przekazaæ wyj¶cie do referencyjnego
 dekodera MPEG-4.
 .IPs -1
-Pozwala na niestandardowe kodowanie YV12 HuffYUV (o 20% mniejsze pliki,
-ale nie mog± byæ odtwarzane przez oficjalny kodek HuffYUV).
+Pozwala na korzystanie z niestandardowych kodeków (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -6489,6 +6741,18 @@ kodowanie arytmetyczne (CABAC)
 model ma³ego kontekstu
 .IPs 1
 model du¿ego kontekstu
+.RE
+.PD 1
+.sp 1
+.RS
+(dla ffvhuff)
+.RE
+.PD 0
+.RSs
+.IPs 0
+z góry ustalone tablice huffman'a (wbudowane lub z drugiego przebiegu)
+.IPs 1
+adaptacyjne tablice huffman'a
 .RE
 .PD 1
 .
@@ -7422,7 +7686,19 @@ Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
 .
 .TP
 .B bframes=<0\-16>
-liczba kolejnych klatek B pomiêdzy ramkami I i P (domy¶lnie: 0)
+maksymalna liczba kolejnych klatek B pomiêdzy ramkami I i P (domy¶lnie: 0)
+.
+.TP
+.B (no)b_adapt
+Automatycznie decyduje o wykorzystaniu klatek typu B i ich ewentualnej liczbie,
+ograniczonej dopuszczalnym maksimum okre¶lonym przez parametr powy¿ej
+(domy¶lnie: w³±czone).
+Je¿eli opcja ta jest wy³±czona, u¿yta jest maksymalna liczba klatek B.
+.
+.TP
+.B b_bias=<-100\-100>
+Kontroluje decycje podejmowane przez b_adapt.
+Wy¿szczy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B. (domy¶lnie: 0)
 .
 .TP
 .B (no)deblock
@@ -7661,47 +7937,52 @@ log=3.
 Muxer MPEG mo¿e generowaæ 5 typów strumieni, ka¿dy z nich z sensownymi
 domy¶lnymi parametrami które u¿ytkownik mo¿e zmieniæ.
 Ogólnie, przy generowaniu zbiorów mpeg zalecane jest wy³±czenie kodu
-przeskakiwania ramek mencoder'a (patrz \-noskip, \-mc, harddup, softskip).
+przeskakiwania ramek MEncodera (patrz \-noskip, \-mc, jak równie¿ filtry
+obrazu harddup i softskip).
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-format strumienia (domy¶lnie: mpeg2).
+format strumienia (domy¶lnie: mpeg2)
 .
 .TP
 .B size=<do 65535>
-wielko¶æ pakietu w bajtach, nie zmieniaj je¶li dok³adnie nie wiesz co robisz
+Wielko¶æ pakietu w bajtach, nie zmieniaj, je¶li nie jeste¶ pewien tego co robisz
 (domy¶lnie: 2048).
 .
 .TP
 .B muxrate=<liczba>
-Nominalne tempo muxowania w KBit/s u¿ywane w nag³ówkach pakietów
-(domy¶lnie: 1800 kb/s).
-Bêdzie zaktualizowane w przypadku format=mpeg1 lub mpeg2.
+nominalne tempo muxowania w KBit/s u¿ywane w nag³ówkach pakietów
+(domy¶lnie: 1800 kb/s)
+Bêdzie zaktualizowane, je¶li to konieczne, w przypadku "format=mpeg1" lub "mpeg2".
 .
 .TP
 .B tsaf\ \ \ 
-ustawia, je¶li to mo¿liwe, znaczniki czasu w ka¿dej ramce.
+Ustawia, je¶li to mo¿liwe, znaczniki czasu w ka¿dej ramce.
+.
+.TP
+.B reorder
+W³±cza kod przestawiania ramek, który przechowuje ramki w kolejno¶ci
+dekodowania (a nie wy¶wietlania) (domy¶lnie: wy³±czone).
+U¿ywaj tylko, je¶li uwa¿asz, ¿e klatki w oryginalnym strumieniu by³y
+b³êdnie zapisane.
+Dzia³a tylko z filmami MPEG-1/2.
 .
 .TP
 .B noreorder
-wy³±cza kod przestawiania ramek, który przechowuje ramki w kolejno¶ci
-dekodowania (a nie wy¶wietlania) (domy¶lnie: wy³±czone).
-U¿ywaj tylko je¶li uwa¿asz ¿e kod przestawiania jest b³êdny i dzia³a
-nieprawid³owo.
+Wy³±cza wspomniany wy¿ej kod przestawiania ramek.
 .
 .TP
 .B init_vpts=<100\-700>
-pocz±tkowe pts video, w milisekundach (domy¶lnie: 200).
+pocz±tkowe pts video, w milisekundach (domy¶lnie: 200)
 .
 .TP
 .B init_apts=<100\-700>
-pocz±tkowe pts audio, w milisekundach (domy¶lnie: 200).
+pocz±tkowe pts audio, w milisekundach (domy¶lnie: 200)
 .
 .TP
-.B init_adelay=<-32760\--1>
-Pocz±tkowy czas oczekiwania na audio = opó¼nienie video, w milisekundach
-(domy¶lnie: 0).
-U¿ywaj, je¶li chcesz opó¼niæ video wzglêdem audio.
+.B vdelay=<-32760\--1>
+pocz±tkowy czas opó¼nienia obrazu w w milisekundach (domy¶lnie: 0)
+U¿ywaj, je¶li chcesz opó¼niæ obraz wzglêdem d¼wiêku.
 .
 .TP
 .B drop\ \ \ 
@@ -7710,23 +7991,23 @@ audio.
 .
 .TP
 .B vwidth, vheight=<1,4095>
-Ustawia wysoko¶æ i szeroko¶æ filmu gdy jest to mpeg1/2.
+Ustawia wysoko¶æ i szeroko¶æ filmu gdy jest to MPEG-1/2.
 .
 .TP
 .B vpswidth, vpsheight=<1,4095>
-Ustawia wysoko¶æ i szeroko¶æ trybu panoramicznego filmu gdy jest to mpeg2.
+Ustawia wysoko¶æ i szeroko¶æ trybu panoramicznego filmu gdy jest to MPEG-2.
 .
 .TP
 .B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
-Ustawia proporcje filmu mpeg1/2.
+Ustawia proporcje filmu MPEG-1/2.
 .
 .TP
 .B vbitrate=<liczba>
-Ustawia bitrate video w KBit/s dla filmów mpeg1/2.
+Ustawia bitrate video w kbit/s dla filmów MPEG-1/2.
 .
 .TP
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
-Ustawia ilo¶æ klatek na sekundê dla filmów mpeg1/2.
+Ustawia ilo¶æ klatek na sekundê dla filmów MPEG-1/2.
 .
 .
 .\" --------------------------------------------------------------------------
