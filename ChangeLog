@@ -52,6 +52,7 @@ mplayer (0.90)
     * support for 1/4/8bpp raw video (requires -vop palette / -vop 1bpp)
     * support for quicktime alaw/agsm audio codecs, 3IV2, 3VID video codecs
     * swscale now can output in YUY2 format, upscaled (default) or unscaled (-sws 0)
+    * Vidix with LinuxPPC support (mach64 is confirmed to work)
     
     Libavcodec:
     * RV10 codec cleanup (2nd level demuxer moved to demuxer layer)
