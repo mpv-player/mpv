@@ -292,7 +292,7 @@ static int open(vf_instance_t *vf, char* args){
     &vf->priv->exp_x,
     &vf->priv->exp_y,
     &vf->priv->osd);
-    printf("Expand: %d x %d, %d ; %d  (-1=autodetect) osd: %d\n",
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d  (-1=autodetect) osd: %d\n",
     vf->priv->exp_w,
     vf->priv->exp_h,
     vf->priv->exp_x,

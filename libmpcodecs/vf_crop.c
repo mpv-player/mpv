@@ -101,7 +101,7 @@ static int open(vf_instance_t *vf, char* args){
     &vf->priv->crop_h,
     &vf->priv->crop_x,
     &vf->priv->crop_y);
-    printf("Crop: %d x %d, %d ; %d\n",
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "Crop: %d x %d, %d ; %d\n",
     vf->priv->crop_w,
     vf->priv->crop_h,
     vf->priv->crop_x,
