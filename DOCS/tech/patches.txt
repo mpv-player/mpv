@@ -59,5 +59,7 @@ outdated patches.
 9. Do not immediately ask for CVS write access. If you contributed one or more
    nice, acceptable patches and they need maintaining or you want to be an
    MPlayer developer, you'll get CVS write access.
+
+10. For consistency reasons all option names must use '-' instead of '_'.
    
 Thank you!
