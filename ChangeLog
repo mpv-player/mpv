@@ -1,5 +1,29 @@
 MPlayer (1.0)
 
+  pre7: ""
+
+    Ports:
+    * DirectX video output fixed on Windows95
+
+    Drivers:
+    * fixed ontop event for some window managers
+    * audio output layer cleanup
+
+    Decoders:
+    * TWinVQ decoder via binary DLL
+
+    Demuxers:
+    * vqf demuxer
+
+    Streaming:
+    * stream selection and bandwidth support for mms over http
+    * fallback to http if connection refused on pnm://
+
+    Filters:
+    * big cleanup of audio filter layer
+    * faster af_format for most common cases
+
+
   pre6: "X-mas present" December 23, 2004
 
     DOCS:
