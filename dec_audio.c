@@ -63,6 +63,55 @@ typedef struct ov_struct_st {
     extern int avcodec_inited;
 #endif
 
+
+
+#ifdef USE_LIBMAD
+#include <mad.h>
+static struct mad_stream mad_stream;
+static struct mad_frame  mad_frame;
+static struct mad_synth  mad_synth;
+
+
+// ensure buffer is filled with some data
+static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int length)
+{
+  if(sh_audio->a_in_buffer_len < length) {
+    int len = demux_read_data(sh_audio->ds, sh_audio->a_in_buffer+sh_audio->a_in_buffer_len, length-sh_audio->a_in_buffer_len);
+    sh_audio->a_in_buffer_len += len;
+  }
+}
+
+static void mad_postprocess_buffer(sh_audio_t* sh_audio, struct mad_stream* ms)
+{
+  int delta = (unsigned char*)ms->next_frame - (unsigned char *)sh_audio->a_in_buffer;
+  if(delta != 0) {
+    sh_audio->a_in_buffer_len -= delta;
+    memcpy(sh_audio->a_in_buffer, ms->next_frame, sh_audio->a_in_buffer_len);
+  }
+}
+
+
+static inline
+signed short mad_scale(mad_fixed_t sample)
+{
+  /* round */
+  sample += (1L << (MAD_F_FRACBITS - 16));
+
+  /* clip */
+  if (sample >= MAD_F_ONE)
+    sample = MAD_F_ONE - 1;
+  else if (sample < -MAD_F_ONE)
+    sample = -MAD_F_ONE;
+
+  /* quantize */
+  return sample >> (MAD_F_FRACBITS + 1 - 16);
+}
+#endif
+
+
+
+
+
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
 
@@ -190,6 +239,17 @@ case AFM_FFMPEG:
   // FFmpeg Audio:
   sh_audio->audio_out_minsize=AVCODEC_MAX_AUDIO_FRAME_SIZE;
   break;
+#endif
+
+#ifdef USE_LIBMAD
+ case AFM_MAD:
+   printf(__FILE__ ":%d:mad: setting minimum outputsize\n", __LINE__);
+   sh_audio->audio_out_minsize=4608;
+   if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
+   sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
+   sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+   sh_audio->a_in_buffer_len=0;
+   break;
 #endif
 }
 
@@ -488,6 +548,37 @@ case AFM_VORBIS: {
   break;
 }
 #endif
+
+#ifdef USE_LIBMAD
+ case AFM_MAD:
+   {
+     printf(__FILE__ ":%d:mad: initialising\n", __LINE__);
+     mad_frame_init(&mad_frame);
+     mad_stream_init(&mad_stream);
+
+     printf(__FILE__ ":%d:mad: preparing buffer\n", __LINE__);
+     mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
+     mad_stream_buffer(&mad_stream, (unsigned char*)(sh_audio->a_in_buffer), sh_audio->a_in_buffer_len);
+     mad_stream_sync(&mad_stream);
+     mad_synth_init(&mad_synth);
+
+     if(mad_frame_decode(&mad_frame, &mad_stream) == 0)
+       {
+	 printf(__FILE__ ":%d:mad: post processing buffer\n", __LINE__);
+	 mad_postprocess_buffer(sh_audio, &mad_stream);
+       }
+     else
+       {
+	 printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
+       }
+     
+     sh_audio->channels=2; // hack
+     sh_audio->samplerate=mad_frame.header.sfreq;
+     sh_audio->i_bps=mad_frame.header.bitrate;
+     printf(__FILE__ ":%d:mad: continuing\n", __LINE__);
+     break;
+   }
+#endif
 }
 
 if(!sh_audio->channels || !sh_audio->samplerate){
@@ -741,6 +832,42 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         break;
       }
 #endif
+
+#ifdef USE_LIBMAD
+    case AFM_MAD:
+      {
+	mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
+	mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
+	if(mad_frame_decode(&mad_frame, &mad_stream) == 0)
+	  {
+	    mad_synth_frame(&mad_synth, &mad_frame);
+	    mad_postprocess_buffer(sh_audio, &mad_stream);
+	    
+	    /* and fill buffer */
+	    
+	    {
+	      int i;
+	      int end_size = mad_synth.pcm.length;
+	      signed short* samples = (signed short*)buf;
+	      if(end_size > maxlen/4)
+		end_size=maxlen/4;
+	      
+	      for(i=0; i<mad_synth.pcm.length; ++i) {
+		*samples++ = mad_scale(mad_synth.pcm.samples[0][i]);
+		*samples++ = mad_scale(mad_synth.pcm.samples[0][i]);
+		//		*buf++ = mad_scale(mad_synth.pcm.sampAles[1][i]);
+	      }
+	      len = end_size*4;
+	    }
+	  }
+	else
+	  {
+	    printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
+	  }
+	
+	break;
+      }
+#endif
     }
     return len;
 }
@@ -770,8 +897,16 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 	case AFM_HWAC3:
           sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
           break;
+
+#ifdef USE_LIBMAD
+	case AFM_MAD:
+	  mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
+	  mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
+	  mad_stream_sync(&mad_stream);
+	  mad_postprocess_buffer(sh_audio, &mad_stream);
+	  break;
         }
-	
+#endif	
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio){
@@ -796,6 +931,18 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 		    demux_read_data(sh_audio->ds,NULL,skip);
 		    break;
 		}
+#ifdef USE_LIBMAD
+	      case AFM_MAD:
+		{
+		  mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
+		  mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
+		  mad_stream_skip(&mad_stream, 2);
+		  mad_stream_sync(&mad_stream);
+		  mad_postprocess_buffer(sh_audio, &mad_stream);
+		  break;
+		}
+#endif
+
                 default: ds_fill_buffer(sh_audio->ds);  // skip PCM frame
               }
 }

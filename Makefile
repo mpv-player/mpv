@@ -18,8 +18,8 @@ BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
 SRCS = xacodec.c cpudetect.c postproc/swscale.c postproc/postprocess.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c xa/rle8.c lirc_mp.c cfgparser.c mixer.c spudec.c
 OBJS = $(SRCS:.c=.o)
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) $(MADLIB_INC) # -Wall
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 
 PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb

@@ -29,6 +29,7 @@
 #define AFM_HWAC3 9
 #define AFM_VORBIS 10
 #define AFM_FFMPEG 11
+#define AFM_MAD 12
 
 #define VFM_MPEG 1
 #define VFM_VFW 2

@@ -209,6 +209,7 @@ static short get_driver(char *s,int audioflag)
 		"hwac3",
 		"libvorbis",
 		"ffmpeg",
+		"libmad",
 		NULL
 	};
 	static char *videodrv[] = {
