@@ -296,8 +296,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //	hint.width=d_width;
 //	hint.height=d_height;
 //    }else{
-//	hint.width=width;
-//	hint.height=height;
+	hint.width=width;
+	hint.height=height;
 //    }
  
 #ifdef HAVE_XF86VM

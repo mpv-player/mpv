@@ -786,6 +786,8 @@ return 0;
 static void uninit(void) 
 {
  int i;
+#if 0
+
  if(!mDisplay) return;
  saver_on(mDisplay); // screen saver back on
  if(vo_config_count) for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
@@ -793,11 +795,24 @@ static void uninit(void)
  vo_vm_close(mDisplay);
 #endif
  if(vo_config_count) vo_x11_uninit(mDisplay, vo_window);
+
+#else
+
+ if ( !vo_config_count ) return;
+ saver_on(mDisplay); // screen saver back on
+ for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
+#ifdef HAVE_XF86VM
+ vo_vm_close(mDisplay);
+#endif
+ vo_x11_uninit(mDisplay, vo_window);
+
+#endif
 }
 
 static uint32_t preinit(const char *arg)
 {
     XvPortID xv_p;
+    
     if(arg) 
     {
 	mp_msg(MSGT_VO,MSGL_ERR,"vo_xv: Unknown subdevice: %s\n",arg);

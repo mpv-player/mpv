@@ -195,6 +195,9 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  unsigned long          xswamask;
 
+ if ( X_already_started ) return -1;
+ if (!vo_init()) return -1;
+
  width+=width&1;
 
  switch(format)
@@ -221,10 +224,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    default:          printf("mga: invalid output format %0X\n",format); return (-1);
   }
 
- if ( X_already_started ) return -1;
-
- if (!vo_init()) return -1;
-
  aspect_save_orig(width,height);
  aspect_save_prescale(d_width,d_height);
  aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -234,9 +233,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  wndX=0; wndY=0;
  vo_dwidth=d_width; vo_dheight=d_height;
  vo_mouse_autohide=1;
-// vo_fs=fullscreen&1;
-// if ( vo_fs )
-//  { vo_old_width=d_width; vo_old_height=d_height; }
 
  switch ( vo_depthonscreen )
   {
@@ -249,7 +245,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
   inited=1;
 
- aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
+  aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
 
 #ifdef HAVE_NEW_GUI
   if(use_gui)
@@ -257,14 +253,9 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
   else
 #endif
   {
-   if ( vo_fs )
-    {
-//     vo_dwidth=vo_screenwidth;
-//     vo_dheight=vo_screenheight;
 #ifdef X11_FULLSCREEN
-     aspect(&dwidth,&dheight,A_ZOOM);
+   if ( fullscreen&1 ) aspect(&dwidth,&dheight,A_ZOOM);
 #endif
-    }
 
    XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
    mDepth=attribs.depth;
@@ -282,7 +273,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
       XUnmapWindow( mDisplay,vo_window );
       XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xWAttribs);
     } else 
-   vo_window=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+   vo_window=XCreateWindow( mDisplay,mRootWin,
      wndX,wndY,
      vo_dwidth,vo_dheight,
      xWAttribs.border_pixel,

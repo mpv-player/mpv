@@ -358,9 +358,11 @@ int vo_init( void )
 
 void vo_uninit( void )
 {
- printf("vo: uninit ...\n" );
  if( !vo_depthonscreen ) return;
+ printf("vo: uninit ...\n" );
+ XSetErrorHandler(NULL);
  XCloseDisplay( mDisplay );
+ vo_depthonscreen = 0;
 }
 
 #include "../linux/keycodes.h"
@@ -509,7 +511,6 @@ XSizeHints vo_hint;
 
 int vo_x11_uninit(Display *display, Window window)
 {
-    XSetErrorHandler(NULL);
     vo_showcursor( display,window );
 
 #ifdef HAVE_NEW_GUI
@@ -518,9 +519,11 @@ int vo_x11_uninit(Display *display, Window window)
 #endif
     {
 	/* and -wid is set */
-	if (!(WinID > 0))
-	    XDestroyWindow(display, window);
-	vo_depthonscreen = 0;
+	if (WinID < 0)
+	 {
+	  XUnmapWindow( display,window );
+	  XDestroyWindow(display, window);
+	 }
 	vo_fs=0;
     }
     return(1);
@@ -724,11 +727,8 @@ void vo_x11_fullscreen( void )
 
  switch ( vo_wm_type )
   {
-//   case vo_wm_WMakerStyle:
-//          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
-	  break;
    case vo_wm_Unknown:
-//          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
+	  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
 	  XUnmapWindow( mDisplay,vo_window );
 	  break;
    case vo_wm_IceWM:

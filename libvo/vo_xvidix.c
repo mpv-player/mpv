@@ -437,6 +437,7 @@ static void uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
+
     if (arg)
         vidix_name = strdup(arg);
     else

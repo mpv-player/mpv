@@ -355,6 +355,9 @@ void exit_player(char* how){
 
   uninit_player(INITED_ALL);
 #ifdef X11_FULLSCREEN
+#ifdef HAVE_NEW_GUI
+  if ( !use_gui )
+#endif
   vo_uninit();	// close the X11 connection (if any opened)
 #endif
 
