@@ -75,8 +75,8 @@ Supported input formats:
 
 Supported audio & video codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*** See DOCS/codecs.conf for the complete list, or check ***
-***    http://mplayer.sourceforge.net/DOCS/codecs.html   ***
+*** See http://mplayer.sourceforge.net/DOCS/codecs.html ***
+***               for the complete list                 ***
 
 The most important video codecs:
 - mpeg1 (VCD) and mpeg2 (DVD) video
@@ -92,7 +92,7 @@ The most important audio codecs:
 - alaw, msgsm, pcm and other simple old audio formats
 
 If you have a codec not listed here, and not supported yet, just
-read DOCS/codecs.conf and CODECS to get info about its status or about
+read DOCS/CODECS to get info about its status or about
 how to help us adding support for it!
 
 Supported video output devices:
