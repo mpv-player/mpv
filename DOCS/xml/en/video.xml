@@ -387,9 +387,9 @@ access to be able to write directly video memory. If you want to run it as
 user, then install <application>MPlayer</application> SUID root:
 
 <screen>
-chown root /usr/local/bin/mplayer
-chmod 750 /usr/local/bin/mplayer
-chmod +s /usr/local/bin/mplayer
+chown root <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod 750 <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod +s <replaceable>/usr/local/bin/mplayer</replaceable>
 </screen>
 
 Now it works as a simple user, too.
@@ -817,7 +817,9 @@ The FBdev output takes some additional parameters above the others:
 
 <para>
 If you want to change to a specific mode, then use
-<screen>mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>filename</replaceable></screen>
+<screen>
+mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>filename</replaceable>
+</screen>
 </para>
 
 <itemizedlist>
@@ -1387,9 +1389,9 @@ recognizes the following options: <option>-fs -zoom -x -y -double</option>.
 Also you can specify VIDIX's driver directly as third subargument in
 command line:
 
-<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double file.avi</screen>
+<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>file.avi</replaceable></screen>
 or
-<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 file.avi</screen>
+<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>file.avi</replaceable></screen>
 
 But it's dangerous, and you shouldn't do that. In this case given driver
 will be forced and result is unpredictable (it may
@@ -1516,7 +1518,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   wmv7, wmv8</systemitem> and some others. Please note that this is only
   a temporal inconvenience. The usage syntax is as follows:
   <screen>
-    mplayer -vf format=uyvy -vc divxds divx3file.avi
+    mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable>
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1527,7 +1529,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   framebuffer or X magic whatsoever. For this purpose, we'll have to use the
   <option>cvidix</option> video output, as the following example shows:
   <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix example.avi
+    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable>
   </screen>
 </para>
 
@@ -1638,15 +1640,17 @@ Hardware decoding (playing standard MPEG1/2 files) can be done with this command
 </para>
 </formalpara>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes file.mpg|vob</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable></screen>
+</para>
 
 <para>
 Software decoding or transcoding different formats to MPEG1 can be achieved using
 a command like this:
 </para>
 <para><screen>
-mplayer -ao mpegpes -vo mpegpes yourfile.ext
-mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
+mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>
 </screen></para>
 
 <para>
@@ -1666,18 +1670,24 @@ you can use the <option>expand=w:h</option> filter to add black bands. To view a
 640x384 DivX, try:
 </para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>file.avi</replaceable>
+</screen>
+</para>
 
 <para>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 file.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>file.avi</replaceable>
+</screen>
+</para>
 
 <para>If speed does not improve, try vertical downscaling, too:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 file.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>file.avi</replaceable>
+</screen>
+</para>
 
 <para>
 For OSD and subtitles use the OSD feature of the expand filter. So, instead of
@@ -2015,7 +2025,9 @@ fullscreen on your DC10+. There are three main possibilities, you may scale
 the movie to a width of 768, 384 or 192. For performance and quality reasons,
 I would choose to scale the movie to 384x204 using the fast bilinear software
 scaler. The commandline is
-<screen>mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi</screen>
+<screen>
+mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
+</screen>
 </para>
 
 <para>
@@ -2023,12 +2035,16 @@ Cropping can be done by the <option>crop</option> filter and by this
 driver itself. Suppose that a movie is too wide for display on your Buz and
 that you want to use <option>-zrcrop</option> to make the movie less wide,
 then you would issue the following command
-<screen>mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi</screen>
+<screen>
+mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
+</screen>
 </para>
 
 <para>
 if you want to use the <option>crop</option> filter, you would do
-<screen>mplayer -vo zr -vf crop=720:320:80:0 benhur.avi</screen>
+<screen>
+mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
+</screen>
 </para>
 
 <para>
@@ -2042,7 +2058,8 @@ that the left beamer should have JPEG frames at quality 10, then you would
 issue the following command
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
+	  <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 

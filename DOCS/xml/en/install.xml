@@ -592,10 +592,12 @@ The command line options differ slightly for the different formats:
 <para>
 VobSub subtitles consist of a big (some megabytes) <filename>.SUB</filename> file,
 and optional <filename>.IDX</filename> and/or <filename>.IFO</filename>
-files.  If you have files like <filename>sample.sub</filename>,
-<filename>sample.ifo</filename> (optional), <filename>sample.idx</filename> -
-you have to pass <application>MPlayer</application> the
-<option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> options
+files.  If you have files like
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (optional),
+<filename><replaceable>sample.idx</replaceable></filename> - you have to pass
+<application>MPlayer</application> the <option>-vobsub sample
+[-vobsubid <replaceable>id</replaceable>]</option> options
 (full path optional). The <option>-vobsubid</option> option is like
 <option>-sid</option> for DVDs, you can choose between subtitle tracks
 (languages) with it. In case that <option>-vobsubid</option> is omitted,
@@ -611,8 +613,9 @@ there will be no subtitles.
 <para>
 The other formats consist of a single text file containing timing,
 placement and text information. Usage: If you have a file like
-<filename>sample.txt</filename>, you have to pass the option <option>-sub
-sample.txt</option> (full path optional).
+<filename><replaceable>sample.txt</replaceable></filename>,
+you have to pass the option <option>-sub
+<replaceable>sample.txt</replaceable></option> (full path optional).
 </para>
 </formalpara>
 
@@ -687,7 +690,7 @@ So you see, the main goal was to <emphasis role="bold">make subtitle
 editing/timing/joining/cutting easy</emphasis>. And, if you - say - get an
 SSA subtitle but it's badly timed/delayed to your version of the movie, you
 simply do a
-<screen>mplayer dummy.avi -sub source.ssa -dumpmpsub</screen>
+<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
 A <filename>dump.mpsub</filename> file will be created in the
 current directory, which will contain the source subtitle's text, but in
 <emphasis role="bold">MPsub</emphasis> format. Then you can freely add/subtract
@@ -741,7 +744,8 @@ OSD/SUB feature. There are many ways to get it:
   <systemitem class="library">fontconfig</systemitem> font name
   and defaults to the sans-serif font. To get a list of fonts known to 
   <systemitem class="library">fontconfig</systemitem>,
-  use <command>fc-list</command>. Example: <option>-font 'Bitstream Vera Sans'</option>
+  use <command>fc-list</command>. Example: <option>-font
+  <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
   Download ready-to-use font packages from <application>MPlayer</application>
@@ -794,7 +798,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Then rename or symlink
 one of the extracted directories to <filename class="directory">font</filename>,
 for example:
 
-<screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
 
 Now you have to see a timer at the upper left corner of the movie (switch
 it off with the <keycap>o</keycap> key).
@@ -866,7 +870,7 @@ the Preferences menu is currently UNIMPLEMENTED!
   </simpara></listitem>
 <listitem><para>
   start <application>MPlayer</application> by the following example:
-  <screen>$ mplayer -menu file.avi</screen>
+  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   push any menu key you defined
