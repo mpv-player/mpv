@@ -19,6 +19,9 @@
 
 #include "libvo/video_out.h"
 
+#include "dec_audio.h"
+#include "dec_video.h"
+
 #include <encore2.h>
 
 #include "get_path.c"
@@ -99,12 +102,6 @@ static uint32_t draw_frame(uint8_t *src[]){
 vo_functions_t video_out;
 
 //---------------
-
-extern stream_t* open_stream(char* filename,int vcd_track,int* file_format);
-
-extern int video_read_properties(sh_video_t *sh_video);
-extern int init_video(sh_video_t *sh_video);
-extern int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
 
 static int eof=0;
 
@@ -251,6 +248,8 @@ mux_v->h.dwSampleSize=0; // VBR
 mux_v->h.dwScale=10000;
 mux_v->h.dwRate=mux_v->h.dwScale*sh_video->fps;
 
+mux_v->codec=VCODEC_DIVX4; // 0=streamcopy
+
 switch(mux_v->codec){
 case 0:
     mux_v->bih=sh_video->bih;
@@ -306,22 +305,15 @@ while(!eof){
     int blit_frame=0;
     float a_pts=0;
     float v_pts=0;
+    unsigned char* start=NULL;
+    int in_size;
 
-    //--------------------  Decode a frame: -----------------------
-    {   unsigned char* start=NULL;
-	int in_size;
 	// get it!
 //	current_module="video_read_frame";
         in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
 	if(in_size<0){ eof=1; break; }
-	if(in_size>max_framesize) max_framesize=in_size; // stats
-	// decode:
-//	current_module="decode_video";
-//	printf("Decode! %p  %d  \n",start,in_size);
-	blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
-    }
-    //------------------------ frame decoded. --------------------
-    
+//	if(in_size>max_framesize) max_framesize=in_size; // stats
+
     sh_video->timer+=frame_time;
 
     if(pts_from_bps){
@@ -349,10 +341,20 @@ while(!eof){
         );
         fflush(stdout);
 
-    if(!blit_frame) continue;
+//    if(!blit_frame) continue;
 
 switch(mux_v->codec){
+case 0:
+    mux_v->buffer=start;
+    aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    break;
 case VCODEC_DIVX4:
+    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    if(!blit_frame){
+	// empty.
+	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	break;
+    }
     enc_frame.image=vo_image_ptr;
     enc_frame.bitstream=mux_v->buffer;
     enc_frame.length=mux_v->buffer_size;
@@ -369,12 +371,9 @@ case VCODEC_DIVX4:
     enc_frame.quant=0;
     enc_frame.intra=0;
     enc_frame.mvs=NULL;
-
 //    printf("encoding...\n");
     encore(enc_handle,ENC_OPT_ENCODE,&enc_frame,&enc_result);
-    
 //    printf("  len=%d  key:%d  qualt:%d  \n",enc_frame.length,enc_result.is_key_frame,enc_result.quantizer);
-
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
 }
