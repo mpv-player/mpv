@@ -72,7 +72,7 @@ mencoder \- Codificador de películas para  Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
 [usuario:passwd@]\fIURL\fP[:puerto] [opciones]
 .br
 .in
@@ -109,12 +109,6 @@ mencoder \- Codificador de películas para  Linux
 .B mplayer
 'in +\n[.k]u
 .I cue://fichero[:pista]
-[opciones]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I dvdnav://[dispositivo]
 [opciones]
 .br
 .in
@@ -346,19 +340,6 @@ selecciona canal previo/\:siguiente
 cambia la norma
 .IPs u\ \ \ \ 
 cambia la lista de canales
-.RE
-.PD 1
-.
-.TP
-.B control de entrada de DVDNAV
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-navega hacia arriba/\:abajo/\:izquierda/\:derecha
-.IPs M\ \ \ \ 
-salta al menú principal
-.IPs S\ \ \ \ 
-seleccionar
 .RE
 .PD 1
 
@@ -877,9 +858,6 @@ no acepta paquetes UDP entrantes (vea http://www.live.com/mplayer/).
 Se posiciona en el byte indicado.
 Útil para reproducir desde imágenes de CDROM / ficheros .VOB con cosas al
 principio.
-.TP
-.B \-skipopening
-Se salta la apertura de DVD (dvdnav solamente).
 .TP
 .B \-srate <Hz>
 Fuerza la razón de reproducción de audio dada, cambiando la velocidad del
