@@ -46,7 +46,7 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
 
-  stream_enable_cache(stream,2048*1024);
+  stream_enable_cache(stream,2048*1024,0,0);
 
   demuxer=demux_open(stream,file_format,-1,-1,-1);
   if(!demuxer){

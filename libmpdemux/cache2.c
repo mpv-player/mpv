@@ -8,6 +8,7 @@
 
 #define READ_USLEEP_TIME 10000
 #define FILL_USLEEP_TIME 50000
+#define PREFILL_USLEEP_TIME 200000
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@ typedef struct {
   int sector_size; // size of a single sector (2048/2324)
   int back_size;   // we should keep back_size amount of old bytes for backward seek
   int fill_limit;  // we should fill buffer only if space>=fill_limit
+  int prefill;	   // we should fill min prefill bytes if cache gets empty
   // filler's pointers:
   int eof;
   off_t min_filepos; // buffer contain only a part of the file, from min-max pos
@@ -183,6 +185,7 @@ cache_vars_t* cache_init(int size,int sector){
   s->buffer=shmem_alloc(s->buffer_size);
   s->fill_limit=8*sector;
   s->back_size=size/2;
+  s->prefill=size/20; // default: 5%
   return s;
 }
 
@@ -191,15 +194,31 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
-void stream_enable_cache(stream_t *s,int size){
-  int ss=(s->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
-  s->cache_data=cache_init(size,ss);
-  ((cache_vars_t*)s->cache_data)->stream=s; // callback
-  if((s->cache_pid=fork())) return; // parent exits
+void stream_enable_cache(stream_t *stream,int size,float prefill_init,float prefill){
+  int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
+  int min=prefill_init*size;
+  cache_vars_t* s=cache_init(size,ss);
+  stream->cache_data=s;
+  s->stream=stream; // callback
+  s->prefill=size*prefill;
+  
+  if((stream->cache_pid=fork())){
+    // wait until cache is filled at least prefill_init %
+    while(s->read_filepos<s->min_filepos || s->max_filepos-s->read_filepos<min){
+	mp_msg(MSGT_CACHE,MSGL_STATUS,"\rCache fill: %5.2f%% (%d bytes)    ",
+	    (float)(s->max_filepos-s->read_filepos)/(float)(s->buffer_size),
+	    s->max_filepos-s->read_filepos
+	);
+	if(s->eof) break; // file is smaller than prefill size
+	usleep(PREFILL_USLEEP_TIME);
+    }
+    return; // parent exits
+  }
+  
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   while(1){
-    if(!cache_fill(s->cache_data)){
+    if(!cache_fill(s)){
 	 usleep(FILL_USLEEP_TIME); // idle
     }
 //	 cache_stats(s->cache_data);
