@@ -70,7 +70,6 @@ static MatrixRecord matrix;
 static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
-extern int WinID;;
 extern int vo_ontop;
 extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
