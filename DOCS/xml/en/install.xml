@@ -205,7 +205,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   and encoding. Features:
   <itemizedlist>
   <listitem><simpara>
-    1 pass or 2 pass encoding with
+    one pass or two pass encoding with
     <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
@@ -223,7 +223,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   DivX4Linux. Features:
   <itemizedlist>
   <listitem><simpara>
-    1 pass or 2 pass encoding with
+    one pass or two pass encoding with
     <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>

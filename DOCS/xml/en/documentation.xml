@@ -95,7 +95,7 @@ Encoder) is a simple movie encoder, designed to encode
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 to other <application>MPlayer</application>-playable formats (see below). It
 can encode with various codecs, like <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
-(1 or 2 passes), <systemitem class="library">libavcodec</systemitem>,
+(one or two passes), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audio.
 </para>
