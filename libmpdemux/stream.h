@@ -195,7 +195,6 @@ extern int dvd_title;
 extern int dvd_chapter;
 extern int dvd_last_chapter;
 extern int dvd_angle;
-extern int dvd_nav;
 int dvd_parse_chapter_range(struct config*, const char*);
 //#endif
 

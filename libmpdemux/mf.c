@@ -18,7 +18,6 @@
 
 #include "mf.h"
 
-int    mf_support = 0;
 int    mf_w = 0; //352; // let codecs to detect it
 int    mf_h = 0; //288;
 float  mf_fps = 25.0;

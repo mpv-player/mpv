@@ -92,7 +92,6 @@ extern int cache_fill_status;
 #define cache_fill_status 0
 #endif
 
-int vcd_track=0;
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
@@ -422,7 +421,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
-  if(!filename && !vcd_track && !dvd_title && !tv_param_on && !dvbin_param_on){
+  if(!filename){
 	printf(MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
   }
@@ -448,7 +447,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
   vo_init_osd();
 
-  stream=open_stream(filename,vcd_track,&file_format);
+  stream=open_stream(filename,0,&file_format);
 
   if(!stream){
 	printf(MSGTR_CannotOpenFile_Device);
@@ -899,7 +898,7 @@ if (out_file_format == MUXER_TYPE_MPEG)
 	}
 	}
 
-if(tv_param_on == 1) 
+if(file_format == DEMUXER_TYPE_TV) 
 	{
 	fprintf(stderr,"Forcing audio preload to 0, max pts correction to 0\n");
 	audio_preload = 0.0;
@@ -1114,7 +1113,7 @@ videorate+=(GetTimerMS() - ptimer_start);
 
 if(skip_flag<0){
     // duplicate frame
-	if(!tv_param_on && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
+	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
 	muxer_write_chunk(mux_v,0,0);
@@ -1123,7 +1122,7 @@ if(skip_flag<0){
 } else
 if(skip_flag>0){
     // skip frame
-	if(!tv_param_on && !verbose) printf(MSGTR_SkipFrame);
+	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_SkipFrame);
 	skippedframes++;
     --skip_flag;
 }

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -32,14 +33,15 @@ static URL_t* url;
 
 int dvbin_param_on=0;
 
+/// We keep these 2 for the gui atm, but they will be removed.
 int dvd_title=0;
+int vcd_track=0;
+
 int dvd_chapter=1;
 int dvd_last_chapter=0;
 int dvd_angle=1;
 char* dvd_device=NULL;
 char* cdrom_device=NULL;
-char* cue_file_name=NULL;
-int dvd_nav=0;                  /* use libdvdnav? */
 
 #ifdef USE_DVDNAV
 #include "dvdnav_stream.h"
@@ -131,30 +133,44 @@ static void smb_auth_fn(const char *server, const char *share,
 
 // Open a new stream  (stdin/file/vcd/url)
 
-stream_t* open_stream(char* filename,int vcd_track,int* file_format){
+stream_t* open_stream(char* filename,int _remove_me_,int* file_format){
 stream_t* stream=NULL;
 int f=-1;
 off_t len;
 #ifdef __FreeBSD__
 int bsize = VCD_SECTOR_SIZE;
 #endif
+*file_format = DEMUXER_TYPE_UNKNOWN;
+if(!filename) {
+   mp_msg(MSGT_OPEN,MSGL_ERR,"NULL filename, report this bug\n");
+   return NULL;
+}
 
 #ifdef HAVE_CDDA
-if(filename && strncmp("cdda://",filename,7) == 0)
+if(filename && strncmp("cdda://",filename,7) == 0) {
+  *file_format = DEMUXER_TYPE_RAWAUDIO;
   return open_cdda(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
+}
 #ifdef STREAMING
-if(filename && strncmp("cddb://",filename,7) == 0)
+if(filename && strncmp("cddb://",filename,7) == 0) {
+  *file_format = DEMUXER_TYPE_RAWAUDIO;
   return cddb_open(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
+}
 #endif
 #endif
 
 //============ Open VideoCD track ==============
 #ifdef HAVE_VCD
-if(vcd_track && !cue_file_name){
+if(strncmp("vcd://",filename,6) == 0){
   int ret,ret2;
   if(!cdrom_device) cdrom_device=strdup(DEFAULT_CDROM_DEVICE);
   f=open(cdrom_device,O_RDONLY);
   if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,cdrom_device);return NULL; }
+  vcd_track = filename[6] == '\0' ? 1 : strtol(filename+6,NULL,0);
+  if(vcd_track < 1){ 
+    mp_msg(MSGT_OPEN,MSGL_ERR,"Invalid vcd track %s\n",filename+6);
+    return NULL;
+  }
   vcd_read_toc(f);
   ret2=vcd_get_track_end(f,vcd_track);
   if(ret2<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (get)\n");return NULL;}
@@ -175,10 +191,22 @@ if(vcd_track && !cue_file_name){
 
 
 // for opening of vcds in bincue files
-if(vcd_track && cue_file_name){
+if(strncmp("cue://",filename,6) == 0){
   int ret,ret2;
-  if ((f = cue_read_cue (cue_file_name)) == -1) return NULL;
-
+  char* p = filename + 6;
+  vcd_track = 1;
+  p = strchr(p,':');
+  if(p && p[1] != '\0') {
+    vcd_track = strtol(p+1,NULL,0);
+    if(vcd_track < 1){ 
+      mp_msg(MSGT_OPEN,MSGL_ERR,"Invalid cue track %s\n",p+1);
+      return NULL;
+    }
+    p[0] = '\0';
+  }
+  f = cue_read_cue (filename + 6);
+  if(p && p[1] != '\0') p[0] = ':';
+  if (f == -1) return NULL;
   cue_vcd_read_toc();
   ret2=cue_vcd_get_track_end(vcd_track);
   ret=cue_vcd_seek_to_track(vcd_track);
@@ -195,19 +223,20 @@ if(vcd_track && cue_file_name){
 
 //============ Open DVD title ==============
 #ifdef USE_DVDNAV
-if(dvd_nav){
+if(strncmp("dvdnav://",filename,9) == 0){
     dvdnav_priv_t *dvdnav_priv;
     int event,len,tmplen=0;
-
+    char* name = (filename[9] == '\0') ? NULL : filename + 9;
+    
     stream=new_stream(-1,STREAMTYPE_DVDNAV);
     if (!stream) {
         mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_Exit_error);
         return NULL;
     }
 
-    if(!filename) filename=DEFAULT_DVD_DEVICE;
-    if (!(dvdnav_priv=new_dvdnav_stream(filename))) {
-	mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename);
+    if(!name) name=DEFAULT_DVD_DEVICE;
+    if (!(dvdnav_priv=new_dvdnav_stream(name))) {
+	mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,name);
         return NULL;
     }
 
@@ -216,7 +245,7 @@ if(dvd_nav){
 }
 #endif
 #ifdef USE_DVDREAD
-if(dvd_title){
+if(strncmp("dvd://",filename,6) == 0){
 //  int ret,ret2;
     dvd_priv_t *d;
     int ttn,pgc_id,pgn;
@@ -225,6 +254,7 @@ if(dvd_title){
     ifo_handle_t *vmg_file;
     tt_srpt_t *tt_srpt;
     ifo_handle_t *vts_file;
+    dvd_title = filename[6] == '\0' ? 1 : strtol(filename + 6,NULL,0);
     /**
      * Open the disc.
      */
@@ -487,7 +517,7 @@ if(dvd_title){
 #endif
 
 #ifdef HAS_DVBIN_SUPPORT
-if(dvbin_param_on == 1)
+if(strncmp("dvbin://",filename,8) == 0)
 {
 	stream = new_stream(-1, STREAMTYPE_DVB);
 	if (!stream)
@@ -503,15 +533,22 @@ if(dvbin_param_on == 1)
 
 
 //============ Check for TV-input or multi-file input ====
-  if( (mf_support == 1)
+  if( (strncmp("mf://",filename,5) == 0)
 #ifdef USE_TV
-   || (tv_param_on == 1)
+   || (strncmp("tv://",filename,5) == 0)
 #endif
   ){
     /* create stream */
     stream = new_stream(-1, STREAMTYPE_DUMMY);
     if (!stream) return(NULL);
-    stream->url=filename?strdup(filename):NULL;
+    if(strncmp("mf://",filename,5) == 0) {
+      *file_format =  DEMUXER_TYPE_MF;
+     } else {
+      *file_format =  DEMUXER_TYPE_TV;
+      if(filename[5] != '\0')
+	tv_param_channel = strdup(filename + 5);
+    }
+    stream->url= filename[5] != '\0' ? strdup(filename + 5) : NULL;
     return(stream);
   }
   
