@@ -1619,7 +1619,7 @@ for ac_option do
   --as=*)
 	;;
   *)
-	echo "Unknow parameter: $ac_option"
+	echo "Unknown parameter: $ac_option"
 	;;
  esac
 done
