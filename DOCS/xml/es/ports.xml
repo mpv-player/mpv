@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -335,8 +335,8 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
 
-<para>Para DVDs también funciona, establezca el dispositivo de DVD correctamente a
-  donde esté su dispositivo de CD-ROM:</para>
+<para>Para DVDs también funciona, ajuste <option>-dvd-device</option> para la letra
+  de unidad de su DVD-ROM:</para>
 
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
 
@@ -360,7 +360,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <filename class="directory">/mingw/include/</filename>.</para>
 
 <para>VCDs y DVDs funcionan casi como en Cygwin (ajustando la letra de la unidad de su
-  CD-ROM):</para>
+  CD-ROM/DVD-ROM):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
 

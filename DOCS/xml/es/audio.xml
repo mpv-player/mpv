@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision$ -->
+<!-- synced with 1.6 -->
 <sect2 id="audio-dev">
 <title>Dispositivos de salida de audio</title>
 <sect3 id="sync">
@@ -286,12 +286,17 @@ Estos también tienen soporte para varios sistemas no-Linux.
   <row>
     <entry>C-Media cards (¿cuáles?)</entry>
     <entry>no OK (silbido) (?)</entry>
+    <entry>Tarjetas C-Media (CMI8338/8738)</entry>
     <entry>OK</entry>
     <entry></entry>
     <entry></entry>
+    <entry>OK SP/DIF funciona con ALSA 0.9.x</entry>
     <entry>?</entry>
     <entry></entry>
     <entry></entry>
+    <entry>44</entry>
+    <entry>estéreo</entry>
+    <entry>1</entry>
   </row>
 
   <row>
