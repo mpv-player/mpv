@@ -74,6 +74,10 @@ static void resize(int x, int y)
     if ((window_x != drwcX) || (window_y != drwcY) ||
 	(window_width != drwWidth) || (window_height != drwHeight))
     {
+	window_x = drwcX;
+	window_y = drwcY;
+	window_width = drwWidth;
+	window_height = drwHeight;
 	/* FIXME: implement runtime resize/move if possible, this way is very ugly! */
 	vidix_term();
 	vidix_preinit(vidix_name, &video_out_xvidix);
@@ -89,11 +93,6 @@ static void resize(int x, int y)
 	    y = window_height;
 	}
     }
-    
-    window_x = drwcX;
-    window_y = drwcY;
-    window_width = drwWidth;
-    window_height = drwHeight;
     
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	window_x, window_y, window_width, window_height);
