@@ -78,3 +78,15 @@ inline int af_test_output(struct af_instance_s* af, af_data_t* out)
   }
   return AF_OK;
 }
+
+/* Soft clipping, the sound of a dream, thanks to Jon Wattes
+   post to Musicdsp.org */
+inline float af_softclip(float a)
+{
+    if (a >= M_PI/2)
+	return 1.0;
+    else if (a <= -M_PI/2)
+	return -1.0;
+    else
+	return sin(a);
+}
