@@ -192,6 +192,7 @@ int demux_open_ra(demuxer_t* demuxer)
 	}
 
 	if (ra_priv->version == 3) {
+	    if(ra_priv->hdr_size + 8 > stream_tell(demuxer->stream)) {
 		stream_skip(demuxer->stream, 1);
 		i = stream_read_char(demuxer->stream);
 		sh->format = stream_read_dword_le(demuxer->stream);
@@ -200,12 +201,14 @@ int demux_open_ra(demuxer_t* demuxer)
 				"MPlayer developers\n", i);
 			stream_skip(demuxer->stream, i - 4);
 		}
-//		stream_skip(demuxer->stream, 3);
 
 		if (sh->format != FOURCC_LPCJ) {
 			mp_msg(MSGT_DEMUX,MSGL_WARN,"[RealAudio] Version 3 with FourCC %8x, please report to "
 				"MPlayer developers\n", sh->format);
 		}
+	    } else
+		// If a stream does not have fourcc, let's assume it's 14.4
+		sh->format = FOURCC_LPCJ;
 
 		sh->channels = 1;
 		sh->samplesize = 16;
