@@ -1303,9 +1303,17 @@ if(stream_dump_type==5){
   }
   while(!stream->eof){
       len=stream_read(stream,buf,4096);
-      if(len>0) fwrite(buf,len,1,f);
+      if(len>0) {
+        if(fwrite(buf,len,1,f) != 1) {
+          mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
+          exit_player(MSGTR_Exit_error);
+        }
+      }
   }
-  fclose(f);
+  if(fclose(f)) {
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
+    exit_player(MSGTR_Exit_error);
+  }
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
   exit_player_with_rc(MSGTR_Exit_eof, 0);
 }
