@@ -110,20 +110,21 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	printf( "VO: [dxr3] Unable to set playmode!\n" );
     
     img_format = format;
-    v_width = width;
-    v_height = height;
+    v_width = scr_width;
+    v_height = scr_height;
 
     /* Calculate screen res */    
-    aspect_save_orig(v_width,v_height);
-    aspect_save_prescale(scr_width,scr_height);
-    aspect_save_screenres(702,575); /* Reference values from DVD spec (711,483) (702,575) */
-    aspect(&s_width,&s_height,A_NOZOOM);
-    s_width = (scr_width+15)/16; s_width*=16;
-    s_height = (scr_height+15)/16; s_height*=16;
+    /*aspect_save_orig(v_width,v_height);
+    aspect_save_prescale(width,height);
+    aspect_save_screenres(702,575);*/ /* Reference values from DVD spec (711,483) (702,575) */
+    /*aspect(&s_width,&s_height,A_ZOOM);*/
+    s_width = (v_width+15)/16; s_width*=16;
+    s_height = (v_height+15)/16; s_height*=16;
     
     /* Try to figure out whether to use ws output or not */
-    tmp1 = abs(height - ((s_width/4)*3));
-    tmp2 = abs(height - ((s_width/16)*9));
+    tmp1 = abs(height - ((width/4)*3));
+    tmp2 = abs(height - (int)(width/2.35));
+    printf( "%d:%d\n",s_width,s_height);
     if(tmp1 < tmp2)
     {
 	tmp1 = EM8300_ASPECTRATIO_4_3;
