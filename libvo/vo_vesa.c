@@ -493,7 +493,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   screen_size = video_mode_info.XResolution*video_mode_info.YResolution*((video_mode_info.BitsPerPixel+7)/8);
   if(screen_size%64) screen_size=((screen_size/64)*64)+64;
   total = vsize / screen_size;
-  if(verbose) printf("vo_vesa: Can use %u video buffers\n",total);
+  if(verbose) printf("vo_vesa: Can use up to %u video buffers\n",total);
   i = 0;
   offset = 0;
   total = min(total,nbuffs);
