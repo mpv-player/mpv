@@ -543,15 +543,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
   } else
       free_demuxer(demuxer);
 }
-//=============== Try to open as audio file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_AUDIO,audio_id,video_id,dvdsub_id);
-  if(demux_audio_open(demuxer)){
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected audio file\n");
-    file_format=DEMUXER_TYPE_AUDIO;
-  } else
-    free_demuxer(demuxer);
-}
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
@@ -624,6 +615,15 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
      mp_msg( MSGT_DEMUXER,MSGL_INFO,"[demuxer] mf support.\n" );
     }
   }
+}
+//=============== Try to open as audio file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_AUDIO,audio_id,video_id,dvdsub_id);
+  if(demux_audio_open(demuxer)){
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected audio file\n");
+    file_format=DEMUXER_TYPE_AUDIO;
+  } else
+    free_demuxer(demuxer);
 }
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
