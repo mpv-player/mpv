@@ -32,10 +32,38 @@ switch(d_video->demuxer->file_format){
     sh_video->format=sh_video->bih->biCompression;
     sh_video->disp_w=sh_video->bih->biWidth;
     sh_video->disp_h=abs(sh_video->bih->biHeight);
+
+#if 1
+    /* hack to support decoding of mpeg1 chunks in AVI's with libmpeg2 -- 2002 alex */
+    if ((sh_video->format == 0x10000001) ||
+	(sh_video->format == 0x10000002) ||
+	(sh_video->format == mmioFOURCC('m','p','g','1')) ||
+	(sh_video->format == mmioFOURCC('M','P','G','1')) ||
+	(sh_video->format == mmioFOURCC('m','p','g','2')) ||
+	(sh_video->format == mmioFOURCC('M','P','G','2')) ||
+	(sh_video->format == mmioFOURCC('m','p','e','g')) ||
+	(sh_video->format == mmioFOURCC('m','p','e','g')))
+    {
+	int saved_pos, saved_type;
+
+	/* demuxer pos saving is required for libavcodec mpeg decoder as it's
+	   reading the mpeg header self! */
+	
+	saved_pos = d_video->buffer_pos;
+	saved_type = d_video->demuxer->file_format;
+
+	d_video->demuxer->file_format = DEMUXER_TYPE_MPEG_ES;
+	video_read_properties(sh_video);
+	d_video->demuxer->file_format = saved_type;
+	d_video->buffer_pos = saved_pos;
+//	goto mpeg_header_parser;
+    }
+#endif
   break;
  }
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
+//mpeg_header_parser:
    // Find sequence_header first:
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence header... ");fflush(stdout);
