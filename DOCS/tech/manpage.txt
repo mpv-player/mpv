@@ -155,6 +155,7 @@ General:
 
 Option descriptions:
 
+    - Options should be in alphabetical order.
     - Option and/or suboption parameters should be short, descriptive and put
       in angular brackets (e.g. \-vo <driver>).
     - If the option has a parameter in a certain range, specify it right after
@@ -170,6 +171,9 @@ Option descriptions:
     - Put examples and notes at the end of the description (before suboptions).
     - The end of the suboptions _always_ has to be followed by a paragraph
       (BUG).
+    - For flag options just document the non-default one of -XXX and -noXXX, if
+      the option is not a flag, describe both, one below the other (this is an
+      exception to the alphabetical order).
 
 
 Macro definitions (see beginning of man page):
