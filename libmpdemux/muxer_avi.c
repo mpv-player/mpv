@@ -195,6 +195,13 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
     struct avi_stream_info *vsi = muxer->def_v->priv;
     int paddedlen = len + (len&1);
 
+    if (s->type == MUXER_TYPE_VIDEO && !s->h.dwSuggestedBufferSize) {
+	off_t pos=ftell(muxer->file);
+	fseek(muxer->file, 0, SEEK_SET);
+	avifile_write_header(muxer);
+	fseek(muxer->file, pos, SEEK_SET);
+    }
+
     rifflen = muxer->file_end - vsi->riffofs[vsi->riffofspos] - 8;
     if (vsi->riffofspos == 0) {
 	rifflen += 8+muxer->idx_pos*sizeof(AVIINDEXENTRY);
