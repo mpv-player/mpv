@@ -179,6 +179,8 @@ more.
 .B gmplayer
 is MPlayer with a graphical user interface.
 It has the same options as MPlayer.
+.PP
+.B Also see the HTML documentation!
 .
 .
 .\" --------------------------------------------------------------------------
@@ -186,8 +188,6 @@ It has the same options as MPlayer.
 .\" --------------------------------------------------------------------------
 .
 .SH "KEYBOARD CONTROL"
-.I NOTE:
-.br
 MPlayer has a fully configurable, command driven, control layer
 which allow you to control MPlayer using keyboard, mouse, joystick
 or remote control (using lirc).
@@ -306,9 +306,7 @@ change channel list
 .\" Options
 .\" --------------------------------------------------------------------------
 .
-.SH "GENERAL NOTES"
-.B Also see the HTML documentation!
-.PP
+.SH "USAGE"
 Every 'flag' option has a 'noflag' counterpart, e.g.\& the opposite of the
 \-fs option is \-nofs.
 .PP
@@ -349,6 +347,39 @@ You can also write file-specific configuration files.
 If you wish to have a configuration file for a file called 'movie.avi', create a file
 named 'movie.avi.conf' with the file-specific options in it and put it in
 ~/.mplayer or in the same directory as the file.
+.
+.
+.SH "GENERAL OPTIONS"
+.TP
+.B \-codecs-file <filename>
+Use the specified file instead of system wide installed or builtin codecs.conf.
+See also \-afm, \-ac, \-vfm and \-vc.
+.TP
+.B \-include <configuration\ file>
+Specify configuration file to be parsed after the default ones.
+.TP
+.B \-quiet \ \ 
+With this option the status line (i.e. A:   0.7 V:   0.6 A-V:  0.068 ...)
+will not be displayed.
+Particularly useful on slow terminals or broken ones that do not properly
+handle carriage return (i.e. \\r).
+.TP
+.B \-v, \-verbose
+Increment verbose level (more \-v means more verbosity).
+.
+.PD 0
+.RSs
+.IPs 0
+only some informal output (default)
+.IPs 1
+some basic debug infos, avi header, function values (init debug)
+.IPs 2
+print avi indexes, chunk inputs, more debug infos (player debug)
+.IPs 3
+prints everything related to input parsers (parser debug)
+.RE
+.PD 1
+.
 .
 .
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
@@ -514,12 +545,6 @@ Play files according to a playlist (1 file per row or Winamp or ASX format).
 .I NOTE:
 This option is considered an entry so options found after it will apply
 only to the elements of this playlist.
-.TP
-.B \-quiet \ \ 
-With this option the status line (i.e. A:   0.7 V:   0.6 A-V:  0.068 ...)
-will not be displayed.
-Particularly useful on slow terminals or broken ones that do not properly
-handle carriage return (i.e. \\r).
 .TP
 .B \-really-quiet
 Display even less output and status messages.
@@ -2077,10 +2102,6 @@ It's autodetected on MPEG files, but can't be autodetected on most AVI files.
 .RE
 .PD 1
 .
-.TP
-.B \-codecs-file <filename>
-Use the specified file instead of system wide installed or builtin codecs.conf.
-See also \-afm, \-ac, \-vfm and \-vc.
 .TP
 .B \-flip \ 
 Flip image upside-down.
@@ -3693,9 +3714,6 @@ will have the output file contain 'div3' as video fourcc.
 .PD 1
 .
 .TP
-.B \-include <configuration\ file>
-Specify configuration file to be parsed after the default ones.
-.TP
 .B \-info <option1:option2:...> (AVI only)
 Specify the info header of the resulting AVI file.
 .br
@@ -3801,23 +3819,6 @@ to the given file instead of the default divx2pass.log.
 .B \-skiplimit <value>
 Maximum skippable frames after non-skipped one
 (\-noskiplimit for unlimited number).
-.TP
-.B \-v, \-verbose
-Increment verbose level (more \-v means more verbosity).
-.
-.PD 0
-.RSs
-.IPs 0
-only some informal output (default)
-.IPs 1
-some basic debug infos, avi header, function values (init debug)
-.IPs 2
-print avi indexes, chunk inputs, more debug infos (player debug)
-.IPs 3
-prints everything related to input parsers (parser debug)
-.RE
-.PD 1
-.
 .TP
 .B \-vobsubout <basename>
 Specify the basename for the output .idx and .sub files.
