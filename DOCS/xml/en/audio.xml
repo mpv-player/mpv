@@ -42,7 +42,7 @@
   native Win32 driver
   </entry></row>
 <row><entry>dsound</entry><entry>
-  Directx DirectSound driver
+  DirectX DirectSound driver
   </entry></row>
 <row><entry>arts</entry><entry>
   native ARTS driver (mostly for KDE users)
