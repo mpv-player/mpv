@@ -924,7 +924,7 @@ void window_ontop()
 		else
 		{
 			ShowMenuBar();
-			ShowfCursor();
+			ShowCursor();
 		}
 	}
 
