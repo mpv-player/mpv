@@ -13,9 +13,13 @@ extern int    gtkAONorm;
 extern int    gtkAOFakeSurround;
 extern int    gtkAOExtraStereo;
 extern float  gtkAOExtraStereoMul;
+#ifdef USE_OSS_AUDIO
 extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSDevice;
+#endif
+#ifdef HAVE_DXR3
 extern char * gtkDXR3Device;
+#endif
 
 extern int    gtkCacheOn;
 extern int    gtkCacheSize;

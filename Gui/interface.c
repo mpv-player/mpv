@@ -163,8 +163,10 @@ void guiInit( void )
  guiIntfStruct.StreamType=-1;
 
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
+#ifdef USE_OSS_AUDIO
  if ( !gtkAOOSSMixer ) gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
  if ( !gtkAOOSSDevice ) gtkAOOSSDevice=strdup( PATH_DEV_DSP );
+#endif
 #ifdef HAVE_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
@@ -691,6 +693,7 @@ int guiGetEvent( int type,char * arg )
 	  gset( &ao_plugin_cfg.plugin_list,"extrastereo" );
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
+#ifdef USE_OSS_AUDIO
 	mixer_device=gstrdup( gtkAOOSSMixer );
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) && gtkAOOSSDevice )
 	 {

@@ -19,11 +19,13 @@ typedef struct {
 } ai_alsa_t;
 #endif
 
+#ifdef USE_OSS_AUDIO
 typedef struct {
     char *device;
 
     int audio_fd;
 } ai_oss_t;
+#endif
 
 typedef struct 
 {
@@ -44,7 +46,9 @@ typedef struct
 #ifdef HAVE_ALSA9
     ai_alsa_t alsa;
 #endif
+#ifdef USE_OSS_AUDIO
     ai_oss_t oss;
+#endif
 } audio_in_t;
 
 int audio_in_init(audio_in_t *ai, int type);
@@ -62,8 +66,10 @@ int ai_alsa_init(audio_in_t *ai);
 int ai_alsa_xrun(audio_in_t *ai);
 #endif
 
+#ifdef USE_OSS_AUDIO
 int ai_oss_set_samplerate(audio_in_t *ai);
 int ai_oss_set_channels(audio_in_t *ai);
 int ai_oss_init(audio_in_t *ai);
+#endif
 
 #endif /* _audio_in_h */

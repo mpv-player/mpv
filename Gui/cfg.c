@@ -36,8 +36,10 @@ int    gtkAONorm = 0;
 int    gtkAOSurround = 0;
 int    gtkAOExtraStereo = 0;
 float  gtkAOExtraStereoMul = 1.0;
+#ifdef USE_OSS_AUDIO
 char * gtkAOOSSMixer;
 char * gtkAOOSSDevice;
+#endif
 
 int    gtkCacheOn = 0;
 int    gtkCacheSize = 2048;
@@ -96,8 +98,10 @@ static config_t gui_opts[] =
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo",&gtkAOExtraStereo,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo_coefficient",&gtkAOExtraStereoMul,CONF_TYPE_FLOAT,CONF_RANGE,-10,10,NULL },
+#ifdef USE_OSS_AUDIO
  { "ao_oss_mixer",&gtkAOOSSMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
+#endif
  
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
