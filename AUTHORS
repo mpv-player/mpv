@@ -293,6 +293,9 @@ Guyomarch, Rémi (rguyom) <rguyom@pobox.com>
 Hammelmann, Jürgen <juergen.hammelmann@gmx.de>
     * TOOLS/mencvcd author
 
+Hertel, Christopher R. <crh@ubiqx.mn.org>
+    * md5sum code used by vo_md5sum. part of uCIFS library.
+
 Hess, Andreas <jaska@gmx.net>
     * upgrading libdvdcss in libmpdvdkit2
     * various small bug fixes
