@@ -151,8 +151,8 @@ too (without using the avifile library).
 .PP
 Another great feature of MPlayer is the wide range of supported output
 drivers.
-It works with X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, but you
-can also use GGI, SDL (and this way all their drivers), VESA (on every VESA
+It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, Quartz, 
+but you can also use GGI, SDL (and all their drivers), VESA (on every VESA
 compatible card, even without X11), some low level card-specific drivers (for
 Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
 Siemens DVB, DXR2 and DXR3/\:Hollywood+.
@@ -3551,6 +3551,9 @@ Turns off hardware acceleration.
 Try this option if you have display problems.
 .RE
 .PD 1
+.TP
+.B quartz (Mac OS X only)
+Mac OS X Quartz output driver.
 .TP
 .B fbdev (Linux only)
 Uses the kernel framebuffer to output video.
