@@ -157,6 +157,9 @@ extern void demux_close_ra(demuxer_t* demuxer);
 extern void demux_close_ty(demuxer_t* demuxer);
 extern void demux_close_lavf(demuxer_t* demuxer);
 extern void demux_close_vqf(demuxer_t* demuxer);
+#ifdef USE_WIN32DLL
+extern void demux_close_avs(demuxer_t* demuxer);
+#endif
 
 
 #ifdef USE_TV
@@ -247,6 +250,10 @@ void free_demuxer(demuxer_t *demuxer){
 #ifdef USE_LIBAVFORMAT
     case DEMUXER_TYPE_LAVF:
       demux_close_lavf(demuxer); break;
+#endif
+#ifdef USE_WIN32DLL
+    case DEMUXER_TYPE_AVS:
+      demux_close_avs(demuxer); break;
 #endif
     }
     // free streams:
@@ -339,6 +346,9 @@ extern int demux_smjpeg_fill_buffer(demuxer_t* demux);
 extern int demux_lmlm4_fill_buffer(demuxer_t* demux);
 extern int demux_mkv_fill_buffer(demuxer_t *d);
 extern int demux_lavf_fill_buffer(demuxer_t *d);
+#ifdef USE_WIN32DLL
+extern int demux_avs_fill_buffer(demuxer_t *d);
+#endif
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -397,6 +407,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_VQF: return demux_vqf_fill_buffer(demux);
 #ifdef USE_LIBAVFORMAT
      case DEMUXER_TYPE_LAVF: return demux_lavf_fill_buffer(demux);
+#endif
+#ifdef USE_WIN32DLL
+    case DEMUXER_TYPE_AVS: return demux_avs_fill_buffer(demux);
 #endif
   }
   return 0;
@@ -609,6 +622,10 @@ int demux_open_rawdv(demuxer_t* demuxer);
 extern int rawdv_check_file(demuxer_t *demuxer);
 #endif
 
+#ifdef USE_WIN32DLL
+int avs_check_file(demuxer_t *demuxer, const char *filename);
+#endif
+
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
 extern int y4m_check_file(demuxer_t *demuxer);
@@ -646,6 +663,9 @@ extern int demux_mkv_open(demuxer_t *demuxer);
 #endif
 extern int lavf_check_file(demuxer_t *demuxer);
 extern int demux_open_lavf(demuxer_t* demuxer);
+#ifdef USE_WIN32DLL
+extern int demux_open_avs(demuxer_t* demuxer);
+#endif
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 #ifdef STREAMING_LIVE_DOT_COM
@@ -836,7 +856,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN && filename && extension_parsing==1){
   file_format=demuxer_type_by_filename(filename);
   if(file_format!=DEMUXER_TYPE_UNKNOWN){
     // we like recursion :)
-    demuxer=demux_open_stream(stream,file_format,audio_id,video_id,dvdsub_id,NULL);
+    demuxer=demux_open_stream(stream,file_format,audio_id,video_id,dvdsub_id,filename);
     if(demuxer) return demuxer; // done!
     file_format=DEMUXER_TYPE_UNKNOWN; // continue fuzzy guessing...
     mp_msg(MSGT_DEMUXER,MSGL_V,"demuxer: continue fuzzy content-based format guessing...\n");
@@ -928,6 +948,19 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   if(demux_ogg_open(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"Ogg");
       file_format=DEMUXER_TYPE_OGG;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+#endif
+#ifdef USE_WIN32DLL
+//=============== Try to open as Avisynth file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVS){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_AVS,audio_id,video_id,dvdsub_id);
+  if (avs_check_file(demuxer, filename)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"AVS");
+      file_format=DEMUXER_TYPE_AVS;
   } else {
       free_demuxer(demuxer);
       demuxer = NULL;
@@ -1386,6 +1419,12 @@ switch(file_format){
   break;
  }
 #endif
+#ifdef USE_WIN32DLL
+  case DEMUXER_TYPE_AVS: {
+  if (!demux_open_avs(demuxer)) return NULL;
+  break;
+ }
+#endif
 } // switch(file_format)
 pts_from_bps=0; // !!!
 if ((sh_video=demuxer->video->sh) && sh_video->bih)
@@ -1487,6 +1526,9 @@ int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_pva(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_ts(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_lavf(demuxer_t *demuxer,float rel_seek_secs,int flags);
+#ifdef USE_WIN32DLL
+int demux_seek_avs(demuxer_t *demuxer,float rel_seek_secs,int flags);
+#endif
 
 #ifdef HAVE_LIBDV095
 int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
@@ -1604,6 +1646,10 @@ switch(demuxer->file_format){
  #endif
  case DEMUXER_TYPE_VQF:
       demux_seek_vqf(demuxer,rel_seek_secs,flags); break;
+ #ifdef USE_WIN32DLL
+ case DEMUXER_TYPE_AVS:
+      demux_seek_avs(demuxer,rel_seek_secs,flags); break;
+ #endif
 
 } // switch(demuxer->file_format)
 
@@ -1671,6 +1717,9 @@ extern int demux_ogg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_real_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg);
+#ifdef USE_WIN32DLL
+extern int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg);
+#endif
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1709,7 +1758,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 #endif
         case DEMUXER_TYPE_MOV:
    	    return demux_mov_control(demuxer, cmd, arg);
-
+#ifdef USE_WIN32DLL
+        case DEMUXER_TYPE_AVS:
+   	    return demux_avs_control(demuxer, cmd, arg);
+#endif 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }

@@ -51,6 +51,9 @@ static struct {
         { "vqf", DEMUXER_TYPE_XMMS },
         { "nsv", DEMUXER_TYPE_NSV },
         { "nsa", DEMUXER_TYPE_NSV },
+#ifdef USE_WIN32DLL
+        { "avs", DEMUXER_TYPE_AVS },
+#endif
 	{ "nut", DEMUXER_TYPE_LAVF }
 };
 

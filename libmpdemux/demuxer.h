@@ -45,11 +45,12 @@
 #define DEMUXER_TYPE_LAVF 35
 #define DEMUXER_TYPE_NSV 36
 #define DEMUXER_TYPE_VQF 37
+#define DEMUXER_TYPE_AVS 38
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 37
+#define DEMUXER_TYPE_MAX 38
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code

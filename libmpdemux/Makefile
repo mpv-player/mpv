@@ -21,6 +21,10 @@ SRCS += dvbin.c
 SRCS += dvb_tune.c
 endif
 
+ifneq ($(W32_LIB),)
+SRCS += demux_avs.c
+endif
+
 ifeq ($(MATROSKA),yes)
 SRCS += demux_mkv.c ebml.c
 endif
