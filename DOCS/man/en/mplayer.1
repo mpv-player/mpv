@@ -3839,6 +3839,13 @@ Same as mbd=1, kept for compatibility reasons.
 Allow 4 motion vectors per macroblock (slightly better quality).
 (default: disabled)
 .TP
+.B obmc\ \ \ 
+overlapped block motion compensation (H263+)
+.TP
+.B loop\ \ \ 
+loop filter (H263+)
+note, this is broken
+.TP
 .B keyint=<0\-300>
 maximum interval between keyframes in frames.
 Keyframes are needed for seeking as seeking is only possible to a keyframe but
@@ -4151,6 +4158,9 @@ disabled (default)
 good choice
 .RE
 .TP
+.B ss\ \ \ \ \ 
+slice structured mode for H263+
+.TP
 .B gray\ \ \ 
 grayscale only encoding (faster) (default: disabled)
 .TP
@@ -4256,6 +4266,16 @@ average.
 .TP
 .B ildct\ \ 
 use interlaced dct
+.TP
+.B top=<-1\-1>\ \ \ 
+.RSs
+.IPs -1
+automatic
+.IPs 0
+bottom field first
+.IPs 1
+top field first
+.RE
 .TP
 .B format=<value>
 .RSs
@@ -4470,6 +4490,9 @@ use MPEG quantizers instead of H.263.
 ac prediction (=advanced intra prediction for H.263+)
 .I NOTE:
 vqmin should be 8 or larger for AIC H263+.
+.TP
+.B aiv\ \ \ \ 
+alternatice inter vlc for H.263+
 .TP
 .B umv\ \ \ \ 
 unlimited MVs (H.263+ only)
