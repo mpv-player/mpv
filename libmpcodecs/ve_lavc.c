@@ -120,6 +120,7 @@ static int lavc_param_pre_dia_size= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
+static int lavc_param_bit_exact = 0;
 static int lavc_param_aic= 0;
 static int lavc_param_aiv= 0;
 static int lavc_param_umv= 0;
@@ -230,6 +231,7 @@ m_option_t lavcopts_conf[]={
 #ifdef FF_CMP_VSAD
         {"ildctcmp", &lavc_param_ildct_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 #endif
+        {"bit_exact", &lavc_param_bit_exact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
         {"predia", &lavc_param_pre_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
         {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
@@ -560,6 +562,7 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4648
     lavc_venc_context->flags|= lavc_param_trell;
 #endif 
+    lavc_venc_context->flags|= lavc_param_bit_exact;
     lavc_venc_context->flags|= lavc_param_aic;
     lavc_venc_context->flags|= lavc_param_aiv;
     lavc_venc_context->flags|= lavc_param_umv;
