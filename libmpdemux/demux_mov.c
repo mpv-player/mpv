@@ -885,8 +885,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		if(!sh->disp_w && !sh->disp_h) {
 		  sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
 		  sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
-		}  
-
+		} else if(sh->disp_w!=(trak->tkdata[77]|(trak->tkdata[76]<<8))){
+		  // codec and display width differ... use display one for aspect
+		  sh->aspect=trak->tkdata[77]|(trak->tkdata[76]<<8);
+		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		}
+		
 		if(depth&(~15)) printf("*** depht = 0x%X\n",depth);
 
 		// palettized?
