@@ -1,39 +1,10 @@
-// $Revision$
-// Translated files should be sent to the mplayer-dev-eng mailing list or
-// to the help messages maintainer, see DOCS/tech/MAINTAINERS.
-
-// The header of the translated file should contain credits and contact
-// information. Before major releases we will notify all translators to update
-// their files. 
-
+// FIXME: This needs to be redone properly.
 // Partially sync'ed with help_mp-en.h $Revision$
-// This is a retranslation of the file by Bogdan Butnaru <bogdanb@fastmail.fm>.
-// I did however use the previous translation by Codre Adrian 
-// <codreadrian@softhome.net> (address bounces)
-// The translation is partial: I did not translate most low-level errors, 
-// things you have to know programming to get, because if you understand it 
-// you almost certainly know English. Also, asking for help is easier that 
-// way (an error message in Romanian, or a Romanian to English translation 
-// by a neophyte is probably useless for a non-romanian programmer).
-
-// I think messaages are 80-column wrapped, but I can't check this with
-// MPlayer right now.
-
-// I added '//' comments wherever I need more info: 
-//   ** '// lang' where english files where cited in the original version
-//		(as in DOCS/HTML/en/bugreports.html). If there are romanian versions
-//		of such files, please replace the URLs.
-//   ** '// dunno' where I wasn't sure of the message's meaning; please send me
-//		an explanation of where the message appears and why.
-//   ** '//!' are notes for myself or other translators; I used these whenever 
-//   		I couldn't find a satisfying romanian translation. I think the 
-//		translation of many technical words is counterproductive: those who
-//		actually understand the technical meaning know the english word;
-//		translating would confuse them and won't make things any clearer
-//		for someone unfamiliar to it. So I didn't translate things like
-//		framebuffer or colorspace, nor compile-related errors and such. 
-//		You should ignore this mark, but other translators might use
-//		them.
+// This is a retranslation of the file by Bogdan Butnaru <bogdanb@fastmail.fm>,
+// based on the previous translation by Codre Adrian
+// <codreadrian@softhome.net> (address bounces).
+// The translation is partial and should be completed eventually, also it
+// should be checked that messages are 80-column wrapped
 //
 // ========================= MPlayer help ===========================
 
@@ -100,16 +71,12 @@ static char help_text[]=
 	"Încearcã '-vo help' pentru o listã cu driveri video disponibili.\n"
 #define MSGTR_InvalidAOdriver "Numele driverului de ieºire audio e greºit: %s\n"
 	"Foloseºte '-ao help' pentru lista cu driveri audio disponibili.\n"
-#define MSGTR_CopyCodecsConf "(Copy/link etc/codecs.conf from the MPlayer sources to ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Folosesc 'codecs.conf' built-in.\n"
 #define MSGTR_CantLoadFont "Nu pot încãrca fontul: %s\n"
 #define MSGTR_CantLoadSub "Nu pot încãrca subtitrarea: %s\n"
 #define MSGTR_ErrorDVDkey "Eroare la prelucrarea cheii DVD.\n"
 #define MSGTR_CmdlineDVDkey "Cheia DVD cerutã e folositã pentru decodare.\n"
 #define MSGTR_DVDauthOk "Secvenþa de autenticare DVD pare sã fie în regulã.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Selected stream missing!\n"
-#define MSGTR_CantOpenDumpfile "Cannot open dump file.\n"
-#define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS (nr. de cadre pe secundã) nu e specificat în header sau e greºit; foloseºte opþiunea '-fps'.\n"
 #define MSGTR_TryForceAudioFmtStr "Forþez familia de codec audio %s...\n"
 #define MSGTR_CantFindAfmtFallback "Nu gãsesc un codec audio pentru familia de drivere forþatã, încerc alte drivere.\n"
@@ -124,18 +91,18 @@ static char help_text[]=
 #define MSGTR_StartPlaying "Rulez...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
-"     *****************************************************\n"\  
+"     *****************************************************\n"\
 "     **** Sistemul tãu e prea LENT pentru acest film! ****\n"\
 "     *****************************************************\n\n"\
 "Posibile motive, probleme, rezolvãri:\n"\
 "- Cel mai des întâlnit caz: drivere _audio_ defecte\n"\
-"  - Încearcã '-ao sdl' sau foloseºte ALSA 0.5 / emularea OSS pentru ALSA 0.9.\n"\ 
-"  - Experimenteazã cu diferite valori pentru '-autosync', începând cu 30.\n"\ 
+"  - Încearcã '-ao sdl' sau foloseºte ALSA 0.5 / emularea OSS pentru ALSA 0.9.\n"\
+"  - Experimenteazã cu diferite valori pentru '-autosync', începând cu 30.\n"\
 "- Ieºire video lentã\n"\
 "  - Încearcã alt driver '-vo' ('-vo help' pentru o listã) sau \n"\
 "    încearcã '-framedrop'.\n"\
 "- Procesor lent\n"\
-"  - Nu rula filme DVD/DivX mari pe un procesor lent! Încearcã -hardframedrop.\n"\ 
+"  - Nu rula filme DVD/DivX mari pe un procesor lent! Încearcã -hardframedrop.\n"\
 "- Fiºier stricat\n"\
 "  - Încearcã diferite combinaþii de '-nobps', '-ni', '-forceidx' sau '-mc 0'.\n"\
 "- Surse lente (NFS/SMB, DVD, VCD etc.)\n"\
@@ -150,21 +117,17 @@ static char help_text[]=
 #define MSGTR_Playing "Rulez %s.\n"
 #define MSGTR_NoSound "Audio: fãrã sunet\n"
 #define MSGTR_FPSforced "FPS forþat la %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compiled with Runtime CPU Detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection.\n"
-#define MSGTR_CompiledWithCPUExtensions "Compiled for x86 CPU with extensions:"
 #define MSGTR_AvailableVideoOutputPlugins "Plugin-uri de ieºire video disponibile:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Plugin-uri de ieºire video disponibile:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Plugin-uri de ieºire audio disponibile:\n"
 #define MSGTR_AvailableAudioCodecs "Codec-uri audio disponibile:\n"
 #define MSGTR_AvailableVideoCodecs "Codec-uri video disponibile:\n"
-#define MSGTR_AvailableAudioFm "\nAvailable (compiled-in) audio codec families/drivers:\n"
-#define MSGTR_AvailableVideoFm "\nAvailable (compiled-in) video codec families/drivers:\n"
 #define MSGTR_AvailableFsType "Moduri fullscreen disponibile:\n"
 #define MSGTR_UsingRTCTiming "Using Linux hardware RTC timing (%ldHz).\n"
 #define MSGTR_CannotReadVideoProperties "Video: Nu pot citi proprietãþile.\n"
 #define MSGTR_NoStreamFound "Nu am gãsit nici un canal.\n"
 #define MSGTR_InitializingAudioCodec "Iniþializez codecul audio...\n"
-#define MSGTR_ErrorInitializingVODevice 
+#define MSGTR_ErrorInitializingVODevice
 "Eroare la activarea ieºirii video (-vo) aleasã.\n"
 #define MSGTR_ForcedVideoCodec "Codec video forþat: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forþat: %s\n"
@@ -174,19 +137,6 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Nu pot iniþializa filtrele video (-vf) sau ieºirea video (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUZÃ  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nNu pot sã încarc playlistul %s.\n"
-#define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
-"  It may be a bug in our new runtime CPU-detection code...\n"\
-"  Please read DOCS/HTML/en/bugreports.html.\n"
-#define MSGTR_Exit_SIGILL \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
-"  It usually happens when you run it on a CPU different than the one it was\n"\
-"  compiled/optimized for.\n"\
-"  Verify this!\n"
-#define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
-"  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. Details in DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer a murit. Nu ar trebui sã se întâmple asta.\n"\
 "  S-ar putea sã fie un bug în sursa MPlayer _sau_ în driverele tale _sau_ în\n"\
@@ -276,9 +226,7 @@ static char help_text[]=
 #define MSGTR_ConnToServer "Conectat la serverul: %s\n"
 #define MSGTR_FileNotFound "Nu gãsesc fiºierul: '%s'\n"
 
-#define MSGTR_SMBInitError "Cannot init the libsmbclient library: %d\n"
 #define MSGTR_SMBFileNotFound "Nu pot deschide de pe LAN: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
 
 #define MSGTR_CantOpenDVD "Nu pot deschide DVD-ul: %s\n"
 #define MSGTR_DVDwait "Citesc structura discului, te rog aºteaptã...\n"
@@ -293,32 +241,18 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD deschis OK.\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
-#define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"
-#define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_TooManyVideoInBuffer "\nToo many video packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_MaybeNI "Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
-                      "For AVI files, try to force non-interleaved mode with the -ni option.\n"
-#define MSGTR_SwitchToNi "\nBadly interleaved AVI file detected - switching to -ni mode...\n"
-#define MSGTR_Detected_XXX_FileFormat "%s file format detected.\n"
-#define MSGTR_DetectedAudiofile "Audio file detected.\n"
-#define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
 #define MSGTR_FormatNotRecognized \
 "====== Scuze, formatul acestui fiºier nu e cunoscut/suportat =======\n"\
 "=== Dacã fiºierul este AVI, ASF sau MPEG, te rog anunþã autorul! ===\n"
-// dunno - 'please contact the author!' -- is this supposed to be the
-// author of the clip, or that of mplayer?
 
 #define MSGTR_MissingVideoStream "Nu am gãsit canal video.\n"
 #define MSGTR_MissingAudioStream "Nu am gãsit canal audio -> rulez fãrã sunet.\n"
-#define MSGTR_MissingVideoStreamBug "Canal video lipsã!? Intreabã autorul, ar putea fi un bug :(\n" // dunno - The same question as above
+#define MSGTR_MissingVideoStreamBug "Canal video lipsã!? Intreabã autorul, ar putea fi un bug :(\n"
 
 #define MSGTR_DoesntContainSelectedStream "demux: Fiºierul nu conþine canalul video sau audio ales.\n"
 
 #define MSGTR_NI_Forced "Forþat"
 #define MSGTR_NI_Detected "Detectat"
-#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file format.\n"
 
 #define MSGTR_UsingNINI "Folosesc formatul AVI NON-INTERLEAVED (incorect).\n"
 #define MSGTR_CouldntDetFNo "Nu pot determina numãrul de cadre (pentru seek absolut).\n"
@@ -340,7 +274,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Nu am reuºit sã deschid demultiplexorul audio: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Nu am reuºit sã deschid demultiplexorul subtitrãrii: %s\n"
 #define MSGTR_TVInputNotSeekable "Nu se poate derula TV! (Derularea probabil va schimba canalul ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n" // dunno
 #define MSGTR_ClipInfo "Info despre clip:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: am detectat conþinut NTSC la 30fps, schimb framerate-ul.\n"
@@ -354,26 +287,11 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Nu pot încãrca codecul audio Win32/ACM (lipseºte un DLL?).\n"
 #define MSGTR_MissingLAVCcodec "Nu gãsesc codecul '%s' în libavcodec...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF while searching for sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdr "FATAL: Cannot read sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Cannot read sequence header extension.\n"
-#define MSGTR_BadMpegSequHdr "MPEG: bad sequence header\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: bad sequence header extension\n"
-
-#define MSGTR_ShMemAllocFail "Cannot allocate shared memory.\n"
-#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer.\n"
-
-#define MSGTR_UnknownAudio "Unknown/missing audio format -> no sound\n"
-
 #define MSGTR_UsingExternalPP "[PP] Folosesc filtru de postprocesare extern, q max = %d.\n"
 #define MSGTR_UsingCodecPP "[PP] Folosesc postprocesarea codecului, q max = %d.\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Atributul video '%s' nu e suportat de vo & vd alese.\n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n"
 #define MSGTR_OpeningVideoDecoder "Deschid decodorul video: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Deschid decodorul audio: [%s] %s\n"
-#define MSGTR_UninitVideoStr "uninit video: %s\n"
-#define MSGTR_UninitAudioStr "uninit audio: %s\n"
 #define MSGTR_VDecoderInitFailed "VDecoder init eºuat :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder init eºuat :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit eºuat :(\n"
@@ -390,14 +308,8 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Nu gãsesc filtrul video '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Nu pot deschide filtrul video '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Deschid filtrul video: "
-#define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: Codec did not set sh->disp_w and sh->disp_h, trying workaround.\n"
-#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Could not find matching colorspace - retrying with -vf scale...\n"
-#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
-#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -417,7 +329,7 @@ static char help_text[]=
 #define MSGTR_Preferences "Preferinþe"
 #define MSGTR_OSSPreferences "Configurare driver OSS"
 #define MSGTR_SDLPreferences "Configurare driver SDL"
-#define MSGTR_NoMediaOpened "Nu e deschis nici un fiºier." 
+#define MSGTR_NoMediaOpened "Nu e deschis nici un fiºier."
 #define MSGTR_VCDTrack "Pista VCD %d"
 #define MSGTR_NoChapter "Nici un capitol"
 #define MSGTR_Chapter "Capitol %d"
@@ -431,39 +343,14 @@ static char help_text[]=
 #define MSGTR_Clear "Sterge tot"
 #define MSGTR_Config "Configurare"
 #define MSGTR_ConfigDriver "Configurare driver"
-#define MSGTR_Browse "Browse" //!
 
 // --- error messages ---
-#define MSGTR_NEMDB "Scuze, nu e memorie suficientã pentru draw buffer." //!
 #define MSGTR_NEMFMR "Scuze, nu am memorie destulã pentru afiºarea meniului."
 #define MSGTR_IDFGCVD "Scuze, nu am gãsit un driver video compatibil cu GUI."
 #define MSGTR_NEEDLAVCFAME "Scuze, nu poþi afiºa fiºiere ne-MPEG cu dispozitivul DXR3/H+ fãrã recodare.\n"\
 "Activeazã 'lavc' sau 'fame' în cãsuþa de configurare pentru DXR3/H+."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" not found (%s)"
-#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] warning in skin config file on line %d: this subsection not supported by this widget (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported (%s).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "file not found (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "BMP read error (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "TGA read error (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "PNG read error (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA not supported (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enough memory\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Too many fonts declared.\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "Font file not found.\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "Font image file not found.\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "unknown parameter (%s)\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enough memory\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin not found (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skin configfile read error (%s)\n"
-#define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Despre MPlayer"
@@ -483,7 +370,7 @@ static char help_text[]=
 #define MSGTR_MENU_PrevStream "Pista precedentã"
 #define MSGTR_MENU_Size "Dimensiune"
 #define MSGTR_MENU_NormalSize "Dimensiune normalã"
-#define MSGTR_MENU_DoubleSize "Dimensiune dublã" 
+#define MSGTR_MENU_DoubleSize "Dimensiune dublã"
 #define MSGTR_MENU_FullScreen "Întreg ecranul"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
@@ -541,7 +428,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "Codecuri & demuxer"
 #define MSGTR_PREFERENCES_Misc "Altele"
 
-#define MSGTR_PREFERENCES_None "Nimic" // dunno - what's this for?
+#define MSGTR_PREFERENCES_None "Nimic"
 #define MSGTR_PREFERENCES_AvailableDrivers "Drivere disponibile:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nu reda sunetul"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizeazã sunetul"
@@ -549,12 +436,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Activeazã extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Decalaj audio"
-#define MSGTR_PREFERENCES_DoubleBuffer "Activeazã double buffering" 
+#define MSGTR_PREFERENCES_DoubleBuffer "Activeazã double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Activeazã direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Activeazã sãritul cadrelor"
 #define MSGTR_PREFERENCES_HFrameDrop "Activeazã sãritul dur de cadre (PERICULOS)"
 #define MSGTR_PREFERENCES_Flip "Inverseazã imaginea sus/jos"
-#define MSGTR_PREFERENCES_Panscan "Panscan: " // dunno - I don't know what this is, but it probably shouldn't be translated
 #define MSGTR_PREFERENCES_OSDTimer "Ceas ºi indicatori"
 #define MSGTR_PREFERENCES_OSDProgress "Doar bara de derulare"
 #define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Ceas, procent ºi timp total"
@@ -566,15 +452,14 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Subtitrare Unicode"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Converteºte subtitrarea datã la formatul MPlayer"
 #define MSGTR_PREFERENCES_SUB_SRT "Converteºte subtitrarea la formatul time based SubViewer (SRT)"
-#define MSGTR_PREFERENCES_SUB_Overlap "Alege suprapunerea subtitrarilor" // dunno - what's this?
+#define MSGTR_PREFERENCES_SUB_Overlap "Alege suprapunerea subtitrarilor"
 #define MSGTR_PREFERENCES_Font "Font:"
-#define MSGTR_PREFERENCES_FontFactor "Font factor:" // dunno - what exactly is this?
 #define MSGTR_PREFERENCES_PostProcess "Activeazã postprocesarea"
 #define MSGTR_PREFERENCES_AutoQuality "Calitate auto: "
 #define MSGTR_PREFERENCES_NI "Foloseºte parser AVI non-interleaved"
 #define MSGTR_PREFERENCES_IDX "Reconstruieºte tabela de index, dacã e nevoie"
-#define MSGTR_PREFERENCES_VideoCodecFamily "Familia codecului video:" 
-#define MSGTR_PREFERENCES_AudioCodecFamily "Familia codecului audio:" 
+#define MSGTR_PREFERENCES_VideoCodecFamily "Familia codecului video:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Familia codecului audio:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "Nivelul OSD"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Subtitrare"
 #define MSGTR_PREFERENCES_FRAME_Font "Font"
@@ -592,14 +477,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 
 /* lang
-* I translated these, but I'm not sure it's such a good idea; only the central 
-* european charsets are relevant to romanian; if you need something else you
-* are probably not interested in it's romanian name.
-*/
 #define MSGTR_PREFERENCES_FontEncoding2 "Limbi vest-europene (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "Limbi vest-europene cu Euro (ISO-8859-15)" 
-#define MSGTR_PREFERENCES_FontEncoding4 "Limbi central-europene sau slavice (ISO-8859-2)" 
-#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, galicã, maltezã, turcã (ISO-8859-3)" 
+#define MSGTR_PREFERENCES_FontEncoding3 "Limbi vest-europene cu Euro (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Limbi central-europene sau slavice (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, galicã, maltezã, turcã (ISO-8859-3)"
 #define MSGTR_PREFERENCES_FontEncoding6 "Vechiul charset baltic (ISO-8859-4)"
 #define MSGTR_PREFERENCES_FontEncoding7 "Chrilic (ISO-8859-5)"
 #define MSGTR_PREFERENCES_FontEncoding8 "Arabã (ISO-8859-6)"
@@ -622,8 +503,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontPropHeight "Proporþional cu înãlþimea filmului"
 #define MSGTR_PREFERENCES_FontPropDiagonal "Proportional cu diagonala filmului"
 #define MSGTR_PREFERENCES_FontEncoding "Codare:"
-#define MSGTR_PREFERENCES_FontBlur "Blur:" //!
-#define MSGTR_PREFERENCES_FontOutLine "Outline:" //!
 #define MSGTR_PREFERENCES_FontTextScale "Scara textului:"
 #define MSGTR_PREFERENCES_FontOSDScale "Scara OSD:"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
@@ -631,7 +510,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_LoadFullscreen "Porneºte fullscreen"
 #define MSGTR_PREFERENCES_SaveWinPos "Salveazã poziþia ferestrei"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Opreºte XScreenSaver"
-#define MSGTR_PREFERENCES_PlayBar "Activeazã playbar" // dunno - What is the playbar? 
+#define MSGTR_PREFERENCES_PlayBar "Activeazã playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync pornit/oprit"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM:"
