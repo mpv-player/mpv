@@ -1,4 +1,4 @@
-.\" synced with 1.742
+.\" synced with 1.754
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2899,13 +2899,11 @@ wspó³czynnik wyg³adzania (domy¶lnie: 0)
 wspó³czynnik jako¶ci (domy¶lnie: 75)
 .IPs outdir=<nazwa\ katalogu>
 Okre¶la katalog, w którym bêd± zapisywane pliki JPEG (domy¶lnie: ./).
-.IPs subdirs=<warto¶æ>
-Je¶li podane, MPlayer stworzy ponumerowane podkatalogi z okre¶lnonym prefiksem.
-Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
-pliki JPEG bêd± zapisane do tego samego katalogu.
-.IPs maxfiles=<warto¶æ>
-Maksymalna ilo¶æ zapisanych w podkatalogach plików JPEG (je¿eli podana
-jest opcja subdirs).
+.IPs subdirs=<prefiks>
+Tworzy ponumerowane podkatalogi z okre¶lonym prefiksem, gdzie zachowa
+pliki zamiast zapisywaæ je bie¿±cego katalogu.
+.IPs maxfiles=<warto¶æ> (tylko z subdirs)
+Maksymalna liczba plików zapisywanych do ka¿dego podkatalogu.
 Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
 .RE
 .PD 1
@@ -2936,7 +2934,7 @@ Okre¶la katalog, w którym bêd± zachowane pliki PNM (domy¶lnie: ./).
 Tworzy ponumerowane podkatalogi z okre¶lonym prefiksem, gdzie zachowa
 pliki zamiast zapisywaæ je bie¿±cego katalogu.
 .IPs maxfiles=<warto¶æ> (tylko z subdirs)
-Maksymalna ilo¶æ plików PNM jakie bêd± zachowane w ka¿dym podkatalogu.
+Maksymalna liczba plików zapisywanych do ka¿dego podkatalogu.
 Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .RE
 .PD 1
@@ -3376,11 +3374,11 @@ Dostêpne s± typy:
 .PD 0
 .RSs
 .IPs 0
-szybki, dwuliniowy (domy¶lnie)
+szybki, dwuliniowy
 .IPs 1
 dwuliniowy
 .IPs 2
-dwukubiczny (dobra jako¶æ)
+dwukubiczny (dobra jako¶æ) (domy¶lnie)
 .IPs 3
 eksperymentalny
 .IPs 4
@@ -6853,10 +6851,20 @@ Ustawia u¿yty bitrate w kbit/\:sekunda (domy¶lnie: wy³±czone).
 Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
 .
 .TP
-.B iframe=<warto¶æ>
+.B keyint=<warto¶æ>
 Ustawia maksymaln± przerwê miêdzy klatkami I.
 Wiêksze warto¶ci oszczêdzaj± bity, a tym samym poprawiaj± jako¶æ,
-odbywa siê to jednak kosztem precyzji przy przeszukiwaniu (domy¶lnie: 60).
+odbywa siê to jednak kosztem precyzji przy przeszukiwaniu (domy¶lnie: 250).
+.
+.TP
+.B idrint=<warto¶æ>
+Ka¿de <warto¶æ> klatek I jest klatkami IDR (domy¶lnie: 2).
+W H.264 klatki I niekoniecznie przeskakuj± zamkniêty GOP, poniewa¿ jest
+dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych 
+j± klatek ni¿ tylko jedna (sprawd¼ te¿ opcjê frameref).
+Dlatego te¿ niekoniecznie da siê przewijaæ do klatek I.
+Ramki IDR ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki
+poprzedzaj±cej klatkê IDR.
 .
 .TP
 .B frameref=<1\-15>
@@ -6867,21 +6875,11 @@ aktorami i scenami nie ma wiekszego wp³ywu.
 Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
 .
 .TP
-.B idrframe=<warto¶æ>
-Ka¿de <warto¶æ> klatek I jest klatkami IDR (domy¶lnie: 2).
-W H.264 klatki I niekoniecznie przeskakuj± zamkniêty GOP, poniewa¿ jest
-dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych 
-j± klatek ni¿ tylko jedna (sprawd¼ te¿ opcjê frameref).
-Dlatego te¿ niekoniecznie da siê przewijaæ do klatek I.
-Ramki IDR ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki
-poprzedzaj±cej klatkê IDR.
+.B bframes=<0\-16>
+liczba kolejnych klatek B pomiêdzy klatkami I i P (domy¶lnie: 0)
 .
 .TP
-.B bframe=<warto¶æ>
-liczba klatek B pomiêdzy klatkami I i P (domy¶lnie: 0)
-.
-.TP
-.B deblock=<0|1>
+.B deblock | nodeblock
 Wykorzystuje filtr odblokowywuj±cy (deblock) (domy¶lnie: w³±czony).
 Jako, ¿e zabiera ma³o czasu procesora w porównaniu ze wzrostem jako¶ci,
 jaki daje, nie jest zalecane wy³±czanie go.
@@ -6906,10 +6904,10 @@ Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
-.B cabac\ \ \ 
+.B cabac | nocabac 
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
-Spowalnia kodowania ale oszczêdza okolo 10-15% bitów.
-Powiniene¶ go w³±czyæ, chyba ¿e zale¿y ci na szybko¶ci.
+Spowalnia kodowanie i dekodowanie, ale oszczêdza okolo 10-15% bitów.
+Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y ci na szybko¶ci.
 .
 .TP
 .B cabacidc=<warto¶æ>
@@ -6929,7 +6927,7 @@ ale nie ma bezpo¶rednego wp³ywu na zniekszta³cenie.
 .REss
 .
 .TP
-.B qp_constant=<2\-51>
+.B qp_constant=<1\-51>
 Okre¶la, który kwantyzator zostanie u¿yty, 20\-40 to u¿yteczny zakres
 (domy¶lnie: 26).
 Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
@@ -6940,11 +6938,11 @@ oko³o 10.
 Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
 .
 .TP
-.B qp_min=<2\-51> (tylko CBR)
+.B qp_min=<1\-51> (CBR lub tryb dwuprzej¶ciowy)
 Minimalny kwantyzator, 15\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
-.B qp_max=<2\-51>  (tylko CBR)
+.B qp_max=<1\-51>  (tylko CBR)
 maksymalny kwantyzator (domy¶lnie: 51)
 .
 .TP
@@ -6993,7 +6991,7 @@ Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
-.B fullinter
+.B fullinter | nofullinter
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
 (i16x16, i4x4, p16x16-4x4)
 Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
@@ -7001,22 +6999,6 @@ okre¶lony obszar obrazu, np.\& bardzo dore rezultaty dla Anime, które zazwyczaj
 zawieraj± du¿e obszary tego samego koloru (domy¶lnie: i16x16, i2x4, p16x16-8x8).
 Zale¿nie od materia³u ¼ród³owego, parametr ten mo¿e zwiêkszyæ lub
 zmniejszyæ jako¶æ, u¿ywaj go z ostro¿no¶ci±.
-.
-.TP
-.B log=<-1\-3>
-Okre¶la ilo¶æ informacji drukowanych na ekranie.
-.RSs
--1: ¿adne
-.br
- 0: Wy¶wietla tylko b³êdy.
-.br
- 1: ostrze¿enia
-.br
- 2: PSNR, czas kodowania i inne statystyki analiz po skoñczonym kodowaniu
- (domy¶lne)
-.br
- 3: PSNR, QP, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
-.REss
 .
 .TP
 .B subq=<0\-5>
@@ -7039,8 +7021,24 @@ Mo¿e znacznie poprawiæ jako¶æ.
 .REss
 .
 .TP
-.B psnr\ \ \ 
-Drukuje statystyki stosunku sygna³u do szumu.
+.B log=<-1\-3>
+Okre¶la ilo¶æ informacji drukowanych na ekranie.
+.RSs
+-1: ¿adne
+.br
+ 0: Wy¶wietla tylko b³êdy.
+.br
+ 1: ostrze¿enia
+.br
+ 2: PSNR, czas kodowania i inne statystyki analiz po skoñczonym kodowaniu
+ (domy¶lne)
+.br
+ 3: PSNR, QP, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
+.REss
+.
+.TP
+.B psnr | nopsnr 
+Drukuje statystyki stosunku sygna³u do szumu (domy¶lnie: wy³±czone).
 .
 .
 .\" --------------------------------------------------------------------------
