@@ -1244,8 +1244,8 @@ struct critsecs_list_t
 };
 
 /* 'NEWTYPE' is working with VIVO, 3ivX and QTX dll (no more segfaults) -- alex */
-//#undef CRITSECS_NEWTYPE
-#define CRITSECS_NEWTYPE 1
+#undef CRITSECS_NEWTYPE
+//#define CRITSECS_NEWTYPE 1
 
 #ifdef CRITSECS_NEWTYPE
 /* increased due to ucod needs more than 32 entries */
