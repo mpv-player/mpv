@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.15 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -24,7 +24,7 @@ nem fogja lejátszani, mert MPEG1-es videót és MP2-es audiót várnak (az
 <emphasis role="bold">AVI</emphasis>-val ellentétben az <emphasis role="bold">MPG</emphasis>
 nem rendelkezik a megfelelő mezőkkel a videó és audió folyamainak leírásához).
 Vagy tehetsz MPEG1 videót is AVI fájlba.
-Az <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> és a
+Az <ulink url="http://ffmpeg.org/">FFmpeg</ulink> és a
 <link linkend="mencoder"><application>MEncoder</application></link> tud készíteni ilyen fájlokat.
 </para>
 
@@ -83,10 +83,10 @@ a fejlécben ilyenkor ez a mező 4:3 arányra van állítva, ezért játszódnak le
 
 <para>
 A Microsoft tervezte, az <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-egy széles körben elterjedt, többcélú formátum, melyet jelenleg leginkább DivX és DivX4
-videóknál használnak. Rengeteg ismert hátránya és hiányossága van (például stream-elésben).
-Támogat egy videó folyamot 0-99 audió folyammal, max 2 GB-ig, de van egy
-<emphasis role="bold">OpenDML</emphasis> kiterjesztés, amivel ennél nagyobb
+egy széles körben elterjedt, többcélú formátum, melyet jelenleg leginkább MPEG4 (DivX
+és DivX4) videóknál használnak. Rengeteg ismert hátránya és hiányossága van (például
+stream-elésben). Támogat egy videó folyamot 0-99 audió folyammal, max 2 GB-ig, de
+van egy <emphasis role="bold">OpenDML</emphasis> kiterjesztés, amivel ennél nagyobb
 fájlok is kezelhetőek. A Microsoft már nem javasolja a használatát, és az
 ASF/WMV használatára buzdít. Nem mintha ez bárkit is érdekelne.
 </para>
@@ -136,7 +136,7 @@ fájlokhoz:
 <listitem><simpara>
   <emphasis role="bold">bps-alapú:</emphasis> A videó/audió folyam bitrátán/mintavételi
   rátáján alapul. Ezt a módszert használja a legtöbb lejátszó, beleértve az
-  <ulink url="http://avifile.sourceforge.net">avifile</ulink>t és a
+  <ulink url="http://avifile.sf.net">avifile</ulink>t és a
   <application>Windows Media Player</application>-t. A sérült fejlécű vagy VBR
   audióval, de nem VBR-kész kódolóval készített fájlok A/V deszinkronizációhoz
   vezetnek ezzel a módszerrel (legtöbbször pörgetésnél).
@@ -272,7 +272,7 @@ működik.
 <sect3 id="yuv4mpeg">
 <title>yuv4mpeg fájlok</title>
 <para>
-A <ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+A <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 egy az <ulink url="http://mjpeg.sf.net">mjpegtools programok</ulink>
 által használt fájlformátum. Grab-belheted, készíthetsz, szűrheted vagy
 kódolhatod az ilyen formátumú videókat ezekkel az eszközökkel.
