@@ -3276,8 +3276,8 @@ if(rel_seek_secs || abs_seek_pos){
       } else
 #ifdef USE_SUB
       if (osd_show_sub_changed) {
-          tmp = subdata->filename;
 	  char *tmp2;
+          tmp = subdata->filename;
 	  if (tmp2 = strrchr(tmp, '/')) {
 	      tmp = tmp2+1;
 	  }
