@@ -1554,7 +1554,7 @@ if(sh_video) {
         add_subtitles (NULL, sh_video->fps, 1);
   }
   if (set_of_sub_size > 0)  {
-      osd_show_sub_changed = sh_video->fps;
+      //osd_show_sub_changed = sh_video->fps;
       subdata = set_of_subtitles[set_of_sub_pos=0];
   
       if(stream_dump_type==3) list_sub_file(subdata);
