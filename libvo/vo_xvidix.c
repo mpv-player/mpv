@@ -220,11 +220,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	case IMGFMT_YV12:
 	    image_depth = 12;
 	    break;
+	case IMGFMT_UYVY:
 	case IMGFMT_YUY2:
 	    image_depth = 16;
 	    break;
 	default:
-	    mp_msg(MSGT_VO, MSGL_FATAL, "Unknown image format: %s",
+	    mp_msg(MSGT_VO, MSGL_FATAL, "Unknown image format: %s\n",
 		vo_format_name(format));
 	    return(-1);
     }
@@ -438,30 +439,9 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
     vidix_term();
+
     saver_on(mDisplay); /* screen saver back on */
-#ifdef HAVE_NEW_GUI
-    /* destroy window only if it's not controlled by GUI */
-    if (vo_window == None)
-#endif
-    {
-	if (!(WinID > 0)) /* don't destory window if -wid specified */
-	{
-	    XDestroyWindow(mDisplay, mWindow);
-	    XCloseDisplay(mDisplay);
-	}
-    }
-}
-
-/* i think this is obsoleted.... -- alex */
-static void Terminate_Display_Process(void) 
-{
-    getchar();	/* wait for enter to remove window */
-    vidix_term();
-    XDestroyWindow(mDisplay, mWindow);
-    XCloseDisplay(mDisplay);
-    X_already_started = 0;
-
-    return;
+    vo_x11_uninit(mDisplay, mWindow);
 }
 
 static uint32_t preinit(const char *arg)
