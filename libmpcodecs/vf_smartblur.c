@@ -25,10 +25,6 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
-#ifdef USE_SETLOCALE
-#include <locale.h>
-#endif
-
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -235,9 +231,6 @@ static int open(vf_instance_t *vf, char* args){
 
 	if(args==NULL) return 0;
 	
-#ifdef USE_SETLOCALE
-    setlocale( LC_NUMERIC, "C" );
-#endif
 	e=sscanf(args, "%f:%f:%d:%f:%f:%d",
 		&vf->priv->luma.radius,
 		&vf->priv->luma.strength,
@@ -246,9 +239,6 @@ static int open(vf_instance_t *vf, char* args){
 		&vf->priv->chroma.strength,
 		&vf->priv->chroma.threshold
 		);
-#ifdef USE_SETLOCALE
-    setlocale( LC_NUMERIC, "" );
-#endif
 
 	vf->priv->luma.quality = vf->priv->chroma.quality= 3.0;
 	

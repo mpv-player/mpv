@@ -27,10 +27,6 @@
 #include "../mp_msg.h"
 #include "../cpudetect.h"
 
-#ifdef USE_SETLOCALE
-#include <locale.h>
-#endif
-
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -267,13 +263,7 @@ static void parse( FilterParam *fp, char* args ) {
 
     // parse amount
     pos = strchr( pos+1, ':' );
-#ifdef USE_SETLOCALE
-    setlocale( LC_NUMERIC, "C" );
-#endif
     fp->amount = ( pos && pos+1<max ) ? atof( pos+1 ) : 0;
-#ifdef USE_SETLOCALE
-    setlocale( LC_NUMERIC, "" );
-#endif
 }
 
 //===========================================================================//

@@ -8,10 +8,6 @@
 #include "config.h"
 #include "ad_internal.h"
 
-#ifdef USE_SETLOCALE
-#include <locale.h>
-#endif
-
 #ifdef HAVE_OGGVORBIS
 
 static ad_info_t info = 
@@ -50,13 +46,7 @@ static int read_vorbis_comment( char* ptr, char* comment, char* format, ... ) {
 
   va_start( va, format );
   clen = strlen( comment );
-#ifdef USE_SETLOCALE
-  setlocale( LC_NUMERIC, "C" );
-#endif
   ret = strncasecmp( ptr, comment, clen) == 0 ? vsscanf( ptr+clen, format, va ) : 0;
-#ifdef USE_SETLOCALE
-  setlocale( LC_NUMERIC, "" );
-#endif
   va_end( va );
 
   return ret;

@@ -108,7 +108,6 @@ int mp_msg_test(int mod, int lev);
 
 #ifdef USE_I18N
 #include <libintl.h>
-#include <locale.h>
 #define mp_gettext(String) gettext(String)
 #else
 #define mp_gettext(String) String

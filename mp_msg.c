@@ -36,7 +36,6 @@ void mp_msg_init(){
     fprintf(stdout, "Original domain: %s\n", textdomain(NULL));
     fprintf(stdout, "Original dirname: %s\n", bindtextdomain(textdomain(NULL),NULL));
 #endif
-    setlocale(LC_ALL, ""); /* set from the environment variables */
     bindtextdomain("mplayer", PREFIX"/share/locale");
     textdomain("mplayer");
 #ifdef MP_DEBUG

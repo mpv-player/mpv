@@ -23,10 +23,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#ifdef USE_SETLOCALE
-#include <locale.h>
-#endif
-
 #define LUT16
 
 /* Per channel parameters */
@@ -481,15 +477,9 @@ int open (vf_instance_t *vf, char *args)
     par[5] = 1.0;
     par[6] = 1.0;
     par[7] = 1.0;
-#ifdef USE_SETLOCALE
-    setlocale (LC_NUMERIC, "C");
-#endif
     sscanf (args, "%lf:%lf:%lf:%lf:%lf:%lf:%lf:%lf",
       par, par + 1, par + 2, par + 3, par + 4, par + 5, par + 6, par + 7
     );
-#ifdef USE_SETLOCALE
-    setlocale (LC_NUMERIC, "");
-#endif
 
     eq2->rgamma = par[4];
     eq2->ggamma = par[5];

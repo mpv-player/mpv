@@ -1382,7 +1382,6 @@ _shm=auto
 _linux_devfs=no
 _i18n=auto
 _dynamic_plugins=no
-_setlocale=auto
 _crash_debug=auto
 _sighandler=yes
 _libdv=auto
@@ -1428,8 +1427,6 @@ for ac_option do
   --disable-i18n)	_i18n=no	;;
   --enable-dynamic-plugins) _dynamic_plugins=yes ;;
   --disable-dynamic-plugins) _dynamic_plugins=no ;;
-  --enable-setlocale)   _setlocale=yes  ;;
-  --disable-setlocale)  _setlocale=no   ;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
@@ -2177,26 +2174,6 @@ if test -z "$_i18n_libs" ; then
 else
   echores "$_i18n (using $_i18n_libs)"
 fi
-
-
-# Checking for setlocale() ...
-# CSAK EGY MARADHAT - A HEGYLAKO
-# Nemnem. a TV Maci !
-echocheck "setlocale()"
-if test "$_setlocale" = auto ; then
-  cat > $TMPC <<EOF
-#include <locale.h>
-int main(void) { setlocale( LC_ALL,"" ); return 0; }
-EOF
-  _setlocale=no
-  cc_check && _setlocale=yes
-fi
-if test "$_setlocale" = yes ; then
-  _def_setlocale='#define USE_SETLOCALE 1'
-else
-  _def_setlocale='#undef USE_SETLOCALE'
-fi
-echores "$_setlocale"
 
 
 echocheck "iconv"
@@ -6833,9 +6810,6 @@ $_def_i18n
 #ifndef MAP_FAILED
 # define MAP_FAILED     ((void *) -1)
 #endif
-
-/* use setlocale() function */
-$_def_setlocale
 
 /* Runtime CPU detection */
 $_def_runtime_cpudetection

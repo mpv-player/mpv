@@ -10,10 +10,6 @@
 #include "../m_config.h"
 #include "../m_option.h"
 
-#ifdef USE_SETLOCALE
-#include <locale.h>
-#endif
-
 #include "../../libvo/video_out.h"
 
 #include "cfg.h"
@@ -208,10 +204,6 @@ int cfg_read( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
 
-#ifdef USE_SETLOCALE
- setlocale( LC_ALL,"C" );
-#endif
-
 // -- read configuration
  mp_msg( MSGT_GPLAYER,MSGL_V,"[cfg] reading config file: %s\n",cfg );
  gui_conf=m_config_new();
@@ -272,10 +264,6 @@ int cfg_read( void )
   }
  free( cfg );
 
-#ifdef USE_SETLOCALE
- setlocale( LC_ALL,"" );
-#endif
-
  return 0;
 }
 
@@ -284,10 +272,6 @@ int cfg_write( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
  int    i;
-
-#ifdef USE_SETLOCALE
- setlocale( LC_ALL,"C" );
-#endif
 
 // -- save configuration 
  if ( (f=fopen( cfg,"wt+" )) )
@@ -347,10 +331,6 @@ int cfg_write( void )
    fclose( f );
   }
  free( cfg );
-
-#ifdef USE_SETLOCALE
- setlocale( LC_ALL,"" );
-#endif
 
  return 0;
 }
