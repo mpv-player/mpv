@@ -67,6 +67,7 @@ static uint32_t image_format;
 static uint32_t image_depth;
 
 /* Window parameters */
+static uint32_t window_x, window_y;
 static uint32_t window_width, window_height;
 
 /* used by XGetGeometry & XTranslateCoordinates for moving/resizing window */
@@ -135,9 +136,12 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 #endif
 
     /* set new values in VIDIX */
-    if (force_update || (vo_dx != drwcX) || (vo_dy != drwcY) ||
+    if (force_update || (window_x != drwcX) || (window_y != drwcY) ||
 	(window_width != drwWidth) || (window_height != drwHeight))
     {
+    	// do a backup of window coordinates
+	window_x = drwcX;
+	window_y = drwcY;
 	vo_dx = drwcX;
 	vo_dy = drwcY;
 	window_width = drwWidth;
