@@ -20,7 +20,7 @@ static vd_info_t info =
 {
     "TGA Images decoder",
     "mtga",
-    "Tilman Sauerbeck",
+    "Tilman Sauerbeck, A'rpi",
     "Tilman Sauerbeck",
     "only 24bpp and 32bpp RGB targa files support so far"
 };
@@ -63,20 +63,13 @@ static int last_c = -1;
 static int control(sh_video_t *sh, int cmd, void *arg, ...)
 {
     TGAInfo	*info = (TGAInfo *) sh->context;
-
-
     switch (cmd)
     {
 	case VDCTRL_QUERY_FORMAT:
-	    if ((*((int *) arg) == IMGFMT_BGR32 && info->bpp == 32) || (*((int *) arg) == IMGFMT_BGR24 && info->bpp == 24))
-		return CONTROL_TRUE;
-	    else
-		return CONTROL_FALSE;
-	    break;
-	default:
-	    return CONTROL_UNKNOWN;
-	    break;
+	    if (*((int *) arg) == out_fmt) return CONTROL_TRUE;
+	    return CONTROL_FALSE;
     }
+    return CONTROL_UNKNOWN;
 }
 
 /* init driver */
@@ -84,7 +77,6 @@ static int init(sh_video_t *sh)
 {
     sh->context = (TGAInfo *) calloc(1, sizeof(TGAInfo));
     last_w = -1;
-
 
     return 1;
 }
@@ -94,89 +86,85 @@ static int init(sh_video_t *sh)
 static void uninit(sh_video_t *sh)
 {
     TGAInfo	*info = sh->context;
-   
-
     free(info);
-
-
     return;
 }
 
 
 /* decode a runlength-encoded tga */
-static void decode_rle_tga(TGAInfo *info, unsigned char *data, mp_image_t **mpi)
+static void decode_rle_tga(TGAInfo *info, unsigned char *data, mp_image_t *mpi)
 {
-    short	    i, num_bytes = info->bpp / 8;
+    int	    row, col, replen, i, num_bytes = info->bpp / 8;
     unsigned char   repetitions, packet_header, *final;
-    unsigned short  row, col;
 
-    
     /* see line 207 to see why this loop is set up like this */
     for (row = info->start_row; (!info->origin && row) || (info->origin && row < info->height); row += info->increment)
     {
-	final = (*mpi)->planes[0] + (*mpi)->stride[0] * row;
+	final = mpi->planes[0] + mpi->stride[0] * row;
 	
 	for (col = 0; col < info->width; col += repetitions)
 	{
 	    packet_header = *data++;
-	    repetitions = 1 + (packet_header & 0x7f);
+	    repetitions = (1 + (packet_header & 0x7f));
+	    replen = repetitions * num_bytes;
 	    
 	    if (packet_header & 0x80) /* runlength encoded packet */
 	    {
 		memcpy(final, data, num_bytes);
-
-		for (i = num_bytes; i < repetitions; i *= 2)
-		    memcpy(&final[i], final, i);
 		
-		for (; i < repetitions * num_bytes; i += 3)
-		    memcpy(&final[i], final, num_bytes);
+		// Note: this will be slow when DR to vram!
+		i=num_bytes;
+		while(2*i<=replen){
+		    memcpy(final+i,final,i);
+		    i*=2;
+		}
+		memcpy(final+i,final,replen-i);
+		data += num_bytes;
 	    }
 	    else /* raw packet */
-		memcpy(final, data, repetitions * num_bytes);
-
-	    data += (packet_header & 0x80) ? num_bytes : repetitions * num_bytes;
-	    final += repetitions * num_bytes;
+	    {
+		memcpy(final, data, replen);
+		data += replen;
+	    }
+	    
+	    final += replen;
 	}
     }
-    
     
     return;
 }
 
 
-static void decode_uncompressed_tga(TGAInfo *info, unsigned char *data, mp_image_t **mpi)
+static void decode_uncompressed_tga(TGAInfo *info, unsigned char *data, mp_image_t *mpi)
 {
-    unsigned short  row;
     unsigned char   *final;
-    short	    num_bytes = info->bpp / 8;
-
+    int	    row, num_bytes = info->bpp / 8;
    
     /* see line 207 to see why this loop is set up like this */
     for (row = info->start_row; (!info->origin && row) || (info->origin && row < info->height); row += info->increment)
     {
-	final = (*mpi)->planes[0] + (*mpi)->stride[0] * row;
+	final = mpi->planes[0] + mpi->stride[0] * row;
 	memcpy(final, data, info->width * num_bytes);
 	data += info->width * num_bytes;
     }
-
 
     return;
 }
 
 
-static short read_tga_header(unsigned char *buf, TGAInfo **info)
+static short read_tga_header(unsigned char *buf, TGAInfo *info)
 {
-    (*info)->id_len = buf[0];
+    info->id_len = buf[0];
     
-    (*info)->img_type = buf[2];
+    info->img_type = buf[2];
 
     /* targa data is always stored in little endian byte order */
-    (*info)->width = le2me_16(*(unsigned short *) &buf[12]);
-    (*info)->height = le2me_16(*(unsigned short *) &buf[14]);
+    info->width = le2me_16(*(unsigned short *) &buf[12]);
+    info->height = le2me_16(*(unsigned short *) &buf[14]);
 
-    (*info)->bpp = buf[16];
+    info->bpp = buf[16];
     
-    (*info)->origin = (buf[17] & 0x20) >> 5;
+    info->origin = (buf[17] & 0x20) >> 5;
 
     /* FIXME check for valid targa data */
     
@@ -195,7 +183,7 @@ static mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
     if (len <= 0)
 	return NULL; /* skip frame */
 
-    read_tga_header(data, &info); /* read information about the file */
+    read_tga_header(data, info); /* read information about the file */
     
     if (info->bpp == 24)
 	out_fmt = IMGFMT_BGR24;
@@ -203,7 +191,7 @@ static mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
 	out_fmt = IMGFMT_BGR32;
     else
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Unsupported TGA type!\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Unsupported TGA type! depth=%d\n",info->bpp);
 	return NULL;
     }
     
@@ -236,12 +224,11 @@ static mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
   
     /* finally decode the image */
     if (info->img_type == TGA_UNCOMP_TRUECOLOR)
-	decode_uncompressed_tga(info, data, &mpi);
+	decode_uncompressed_tga(info, data, mpi);
     else if (info->img_type == TGA_RLE_TRUECOLOR)
-	decode_rle_tga(info, data, &mpi);
-    else
-	mpi = NULL;
-
+	decode_rle_tga(info, data, mpi);
+//    else
+//	mpi = NULL;
 
     return mpi;
 }
