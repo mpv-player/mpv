@@ -240,7 +240,12 @@ static int config(struct vf_instance_s* vf,
     else
 	lavc_venc_context->bit_rate = 800000; /* default */
     lavc_venc_context->bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
-    lavc_venc_context->frame_rate = (float)mux_v->h.dwRate/mux_v->h.dwScale * FRAME_RATE_BASE;
+#if LIBAVCODEC_BUILD >= 4662
+    lavc_venc_context->frame_rate      = mux_v->h.dwRate;
+    lavc_venc_context->frame_rate_base = mux_v->h.dwScale;
+#else
+    lavc_venc_context->frame_rate      = mux_v->h.dwRate*FRAME_RATE_BASE/mux_v->h.dwScale;
+#endif
     lavc_venc_context->qmin= lavc_param_vqmin;
     lavc_venc_context->qmax= lavc_param_vqmax;
 #if LIBAVCODEC_BUILD >= 4646
