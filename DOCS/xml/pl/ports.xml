@@ -364,7 +364,7 @@ wolna. U¿ywaj SDL.
 
 <para>Rozpakuj pliki nag³ówkowe DirectX do <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>VCD i DVD dzia³aj± prawie tak jak w Cygwinie (dopasuj literê dysku do Twojego  
+<para>VCD i DVD dzia³aj± prawie tak, jak w Cygwinie (dopasuj literê dysku do Twojego  
    CD-ROMu/DVD-ROMu):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
