@@ -79,12 +79,12 @@ url_new(const char* url) {
 	}
 	pos1 = ptr1-escfilename;
 	Curl->protocol = (char*)malloc(pos1+1);
-	strncpy(Curl->protocol, escfilename, pos1);
 	if( Curl->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 		url_free(Curl);
 		return NULL;
 	}
+	strncpy(Curl->protocol, escfilename, pos1);
 	Curl->protocol[pos1] = '\0';
 
 	// jump the "://"
