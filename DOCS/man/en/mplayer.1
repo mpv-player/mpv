@@ -2917,6 +2917,80 @@ during 30 fps progressive sequences or stills, it will output more
 than 24 fps, meaning you'll have trouble if you use it with mencoder
 \-ofps 23.976.
 .TP
+.B filmdint[=options]
+Inverse telecine filter, similar to the pullup filter above.
+It is designed to handle any pulldown pattern, including mixed soft and
+hard telecine and limited support for movies that are slowed down or sped
+up from their original framerate for TV.
+Only the luma plane is used to find the frame breaks.
+If a field has no match, it is deinterlaced with simple linear
+approximation.
+If the source is MPEG-2, libmpeg2 must be used for decoding (not
+ffmpeg2!), and this must be the first filter to allow access to the
+field-flags set by the MPEG-2 decoder.
+Depending on the source mpeg, you may be fine ignoring this advice, as
+long as you do not see lots of "Bottom-first field" warnings.
+With no options it does normal inverse telecine, and should be used
+together with mencoder \-fps 29.97 \-ofps 23.976.
+When this filter is used with mplayer, it will result in an uneven
+framerate during playback, but it is still generally better than using
+pp=lb or no deinterlacing at all.
+Multiple options can be specified separated by /.
+.RSs
+.IPs crop=w:h:x:y
+Just like the crop filter, but faster, and works on mixed hard and soft
+telecined content as well as when y is not a multiple of 4.
+If x or y would require cropping fractional pixels from the chroma
+planes, the crop area is extended.
+This usually means that x and y must be even.
+.IPs io=ifps:ofps
+For each ifps input frames the filter will output ofps frames.
+The ratio of ifps/ofps should match the \-fps/\-ofps ratio.
+This could be used to filter movies that are broadcast on TV at a frame
+rate different from their original frame rate.
+.IPs luma_only=n
+If n is nonzero, the chroma plane is copied unchanged.
+This is useful for YV12 sampled TV, which discards one of the chroma
+fields.
+.IPs mmx2=n
+On x86, if n=1, use MMX2 optimized functions, if n=2, use 3DNow!
+optimized functions, othewise, use plain C.
+If this option is not specified, MMX2 and 3DNow! are auto-detected, use
+this option to override auto-detection.
+.IPs fast=n
+The larger n will speed up the filter at the expense of accuracy.
+The default value is n=3.
+If n is odd, a frame immediately following a frame marked with the
+REPEAT_FIRST_FIELD mpeg flag is assumed to be progressive, thus filter
+will not spend any time on soft-telecined MPEG-2 content.
+This is the only effect of this flag if MMX2 or 3DNow! is available.
+Without MMX2 and 3DNow, if n=0 or 1, the same calculations will be used
+as with MMX2.
+If n=2 or 3, the number of luma levels used to find the frame breaks is
+reduced from 256 to 128, which results in a faster filter without losing
+much accuracy.
+If n=4 or 5, a faster, but much less accurate metrics will be used to
+find the frame breaks, which is more likely to misdetect high vertical
+detail as interlaced content.
+.IPs verbose=n
+If n is nonzero, print the detailed metrics for each frame.
+Useful for debugging.
+.IPs dint_thres=n
+Deinterlace threshold.
+Used during de-interlacing of unmatched frames.
+Larger value means less deinterlacing, use n=256 to completely turn off
+deinterlacing.
+Default is n=8.
+.IPs comb_thres=n
+Threshold for comparing a top and bottom fields.
+Defaults to 128.
+.IPs diff_thres=n
+Threshold to detect temporal change of a field.
+Default is 128.
+.IPs sad_thres=n
+Sum of Absolute Difference threshold, default is 64.
+.RE
+.TP
 .B softpulldown
 This filter works only correct with MEncoder and acts on the MPEG2 flags
 used for soft 3:2 pulldown (soft telecine).
