@@ -84,7 +84,7 @@ void guiInit( void )
  gtkAOOSSDevice=strdup( PATH_DEV_DSP );
  cfg_read();
  appInit( (void*)mDisplay );
- if ( plCurrent ) mplSetFileName( plCurrent->path,plCurrent->name );
+ if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name );
 #if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();
 #endif
@@ -315,7 +315,7 @@ void guiGetEvent( int type,char * arg )
 #endif
 	break;
    case guiSetDefaults:
-	if ( filename && gstrcmp( filename,guiIntfStruct.Filename ) )
+	if ( filename && !guiIntfStruct.Filename )
 	 {
 	  gtkSet( gtkDelPl,0,NULL ); guiIntfStruct.StreamType=STREAMTYPE_FILE;
 	  guiSetFilename( guiIntfStruct.Filename,filename );

@@ -97,8 +97,8 @@ void mplEnd( void )
    guiSetDF( guiIntfStruct.Filename,next->path,next->name );
    guiIntfStruct.StreamType=STREAMTYPE_FILE;
    guiIntfStruct.FilenameChanged=1;
-   if ( guiIntfStruct.AudioFile ) free( guiIntfStruct.AudioFile );
-   guiIntfStruct.AudioFile=NULL;
+   gfree( (void **)&guiIntfStruct.AudioFile );
+   gfree( (void **)&guiIntfStruct.Subtitlename );
   } 
   else
     {
