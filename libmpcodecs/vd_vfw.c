@@ -52,9 +52,10 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     unsigned int out_fmt;
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
     if(!init_vfw_video_codec(sh,(sh->codec->driver==VFM_VFWEX))) return 0;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
+    return 1;
 }
 
 // uninit driver
