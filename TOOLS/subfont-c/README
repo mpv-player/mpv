@@ -24,26 +24,47 @@ and user-supplied encodings (also multibyte) through custom encoding files.
 I prepared also Type 1 font `osd.pfb' for OSD characters based on bitmaps
 created by chass.
 
-Subfont was tested with Korean fonts from truetype-fonts-ko-2.0-1k.noarch.rpm
-I found on http://rpmfind.net/ and euc-kr encoding.  Custom encoding file
-for euc-kr was generated from charmap I found in /usr/share/i18n/charmaps/EUC-KR.gz
-(glibc package).  This should work with -unicode switch for mplayer
-(though it is not Unicode encoding).
-It took about 10 seconds to render over 8000 characters on P3 @ 600MHz.
 
+Encodings:
+~~~~~~~~~~
+You can get any encoding and any charset.
+1. If you want 8-bit charset, which is known to libc, encoded either in 8-bit
+   or Unicode (like ISO-8859-*, KOI8-*):
+   
+   Find correct encoding name using `iconv --list' (on RedHat) and use it.
+   For latin2 subtitles I would write:
+   ./subfont iso-8859-2 24 verdana.ttf
+   and for UTF-8 subtitles with latin2 charset:
+   ./subfont --unicode iso-8859-2 24 verdana.ttf
 
-Custom encodings:
-~~~~~~~~~~~~~~~~~
-For each character you want to render write the line consisting of:
- hexadecimal Unicode character code,
- followed by whitespace,
- followed by hexadecimal number representing your encoding,
- followed by new line character.
+2. If you want encoding not known to libc or non 8-bit (like EUC-KR):
 
-Example: to render a single letter `aogonek' (Unicode 0x0105) and encode
-it using iso-8859-2 encoding (0xB1), your custom encoding file will consist
-of a sigle line:
-0105 B1
+   Create file describing your charset:
+
+   For each character you want to render write the line consisting of:
+       hexadecimal Unicode character code
+       followed by whitespace
+       followed by hexadecimal number representing your encoding
+       followed by new line character
+   or (for UTF-8 subtitles):
+       hexadecimal Unicode character code
+       followed by new line character.
+
+   Example:
+       To render a single letter `aogonek' (Unicode 0x0105) and encode
+       it using iso-8859-2 encoding (0xB1), your custom encoding file will consist
+       of a sigle line:
+       0105 B1
+
+       or to get unicode font.desc, write only:
+       0105
+
+   Subfont was tested with Korean fonts from truetype-fonts-ko-2.0-1k.noarch.rpm
+   I found on http://rpmfind.net/ and euc-kr encoding.  Custom encoding file
+   for euc-kr was generated from charmap I found in /usr/share/i18n/charmaps/EUC-KR.gz
+   (glibc package).  Simple script for this you will find in encodings directory.
+   This should work with -unicode switch for mplayer (though this is not Unicode).
+   It took about 10 seconds to render over 8000 characters on P3 @ 600MHz.
 
 
 New font.desc format (proposal):
@@ -79,7 +100,7 @@ Notes:
   + Starting x position of each character and the bitmap width is aligned
 to multiple of 8 (required by mplayer).
 
-  + Currently subfont won't work on big-endian systems.
+  + Currently subfont won't work on big-endian systems. I need help.
 
   + My development platform is RedHat 7.1.  FreeType versions tested are
 2.0.1 through 2.0.4.
