@@ -3764,7 +3764,7 @@ else
   _nocodecmodules="libavcodec $_nocodecmodules"
 fi
 
-echocheck "libdv-0.9.5 (for mencoder)"
+echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
   _libdv=no
   cat > $TMPC <<EOF
@@ -3776,8 +3776,10 @@ fi
 if test "$_libdv" = yes ; then
   _def_libdv='#define HAVE_LIBDV095 1'
   _ld_libdv="-ldv"
+  _inputmodules="libdv $_codecmodules"
 else
   _def_libdv='#undef HAVE_LIBDV095'
+  _noinputmodules="libdv $_nocodecmodules"
 fi
 echores "$_libdv"
 
