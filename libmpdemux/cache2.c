@@ -113,11 +113,16 @@ int cache_fill(cache_vars_t* s){
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
       mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%X  \n",read);
-      s->offset= // FIXME!?
-      s->min_filepos=s->max_filepos=read; // drop cache content :(
-      if(s->stream->eof) stream_reset(s->stream);
-      stream_seek(s->stream,read);
-      mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%X  \n",(int)stream_tell(s->stream));
+      // streaming: drop cache contents only if seeking backward or too much fwd:
+      if(s->stream->type!=STREAMTYPE_STREAM ||
+          read<s->min_filepos || read>=s->max_filepos+s->buffer_size)
+      {
+        s->offset= // FIXME!?
+        s->min_filepos=s->max_filepos=read; // drop cache content :(
+        if(s->stream->eof) stream_reset(s->stream);
+        stream_seek(s->stream,read);
+        mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%X  \n",(int)stream_tell(s->stream));
+      }
   }
   
   // calc number of back-bytes:
