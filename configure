@@ -140,6 +140,7 @@ Optional features:
   --disable-vidix        disable VIDIX stuff [enable]
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
+  --enable-i18n          GNU internationalisation [disable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -792,6 +793,7 @@ _vo2=no
 _language=en
 _shm=auto
 _linux_devfs=no
+_i18n=no
 
 for ac_option do
   case "$ac_option" in
@@ -810,6 +812,8 @@ for ac_option do
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
+  --enable-i18n)	_i18n=yes	;;
+  --disable-i18n)	_i18n=no	;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
@@ -1153,6 +1157,38 @@ else
 fi
 
 
+# Checking for localization ...
+# CSAK EGY MARADHAT - A HEGYLAKO
+echocheck "i18n"
+if test "$_i18n" = auto ; then
+  cat > $TMPC <<EOF
+#include <libintl.h>
+int main(void) { gettext("test"); return 0; }
+EOF
+  _i18n=no
+  cc_check && _i18n=yes
+fi
+if test "$_i18n" = yes ; then
+  _def_i18n='#define USE_I18N 1'
+  LINGUAS='en' # force help_mp-en.h
+else
+  _def_i18n='#undef USE_I18N'
+fi
+echores "$_i18n"
+
+
+echocheck "language"
+test -z "$LINGUAS" && LINGUAS="en"
+if test -f "help_mp-${LINGUAS}.h" ; then
+  echores "using ${LINGUAS}"
+else
+  echores "${LINGUAS} not found, using en"
+  LINGUAS="en"
+fi
+_mp_help="help_mp-${LINGUAS}.h"
+test -f help_mp-${LINGUAS}.h || die "help_mp-${LINGUAS}.h not found"
+
+
 echocheck "kstat"
 cat > $TMPC << EOF
 #include <kstat.h>
@@ -1237,6 +1273,7 @@ else
   _streaming=no
 fi
 
+
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
 #include <inttypes.h>
@@ -1248,7 +1285,7 @@ if test "$_inttypes" = yes ; then
   # nothing to do
   :
 else
-  die "cannot find header inttypes.h (see in DOC/faq.html)"
+  die "cannot find header inttypes.h (see in DOCS/faq.html)"
 fi
 echores "$_inttypes"
 
@@ -1470,81 +1507,10 @@ else
 fi
 echores "$_shm"
 
+
 # XXX: FIXME, add runtime checking
 echocheck "linux devfs"
 echores "$_linux_devfs"
-
-echocheck "3dfx"
-if test "$_3dfx" = yes ; then
-  _def_3dfx='#define HAVE_3DFX 1'
-  _vosrc="$_vosrc vo_3dfx.c"
-  _vomodules="3dfx $_vomodules"
-else
-  _def_3dfx='#undef HAVE_3DFX'
-  _novomodules="3dfx $_novomodules"
-fi
-echores "$_3dfx"
-
-
-echocheck "tdfxfb"
-if test "$_tdfxfb" = yes ; then
-  _def_tdfxfb='#define HAVE_TDFXFB 1'
-  _vosrc="$_vosrc vo_tdfxfb.c"
-  _vomodules="tdfxfb $_vomodules"
-else
-  _def_tdfxfb='#undef HAVE_TDFXFB'
-  _novomodules="tdfxfb $_novomodules"
-fi
-echores "$_tdfxfb"
-
-
-echocheck "DirectFB"
-if test "$_directfb" = auto ; then
-  _directfb=no
-  cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { IDirectFB *foo; return 0; }
-EOF
-  linux && test -c /dev/fb0 && cc_check -ldirectfb && _directfb=yes
-fi
-if test "$_directfb" = yes ; then
-  _def_directfb='#define HAVE_DIRECTFB 1'
-  _vosrc="$_vosrc vo_directfb.c"
-  _vomodules="directfb $_vomodules"
-  _ld_directfb='-ldirectfb'
-else
-  _def_directfb='#undef HAVE_DIRECTFB'
-  _novomodules="directfb $_novomodules"
-fi
-echores "$_directfb"
-
-if test "$_directfb" = yes; then
-echocheck "DirectFB >= 0.9.9"
-  _directfb099=no
-  cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { IDirectFBEventBuffer *foo; return 0; }
-EOF
-  cc_check -ldirectfb && _directfb099=yes
-if test "$_directfb099" = yes ; then
-  _def_directfb099='#define HAVE_DIRECTFB099 1'
-else
-  _def_directfb099='#undef HAVE_DIRECTFB099'
-fi
-echores "$_directfb099"
-fi
-
-# Checking for localization ...
-echocheck "language"
-test -z "$LINGUAS" && LINGUAS="en"
-if test -f "help_mp-${LINGUAS}.h" ; then
-  echores "using ${LINGUAS}"
-else
-  echores "${LINGUAS} not found, using en"
-  LINGUAS="en"
-fi
-_mp_help="help_mp-${LINGUAS}.h"
-test -f help_mp-${LINGUAS}.h || die "help_mp-${LINGUAS}.h not found"
 
 
 echocheck "vsscanf()"
@@ -1606,6 +1572,66 @@ _ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
 # VIDEO #
 #########
 
+
+echocheck "3dfx"
+if test "$_3dfx" = yes ; then
+  _def_3dfx='#define HAVE_3DFX 1'
+  _vosrc="$_vosrc vo_3dfx.c"
+  _vomodules="3dfx $_vomodules"
+else
+  _def_3dfx='#undef HAVE_3DFX'
+  _novomodules="3dfx $_novomodules"
+fi
+echores "$_3dfx"
+
+
+echocheck "tdfxfb"
+if test "$_tdfxfb" = yes ; then
+  _def_tdfxfb='#define HAVE_TDFXFB 1'
+  _vosrc="$_vosrc vo_tdfxfb.c"
+  _vomodules="tdfxfb $_vomodules"
+else
+  _def_tdfxfb='#undef HAVE_TDFXFB'
+  _novomodules="tdfxfb $_novomodules"
+fi
+echores "$_tdfxfb"
+
+
+echocheck "DirectFB"
+if test "$_directfb" = auto ; then
+  _directfb=no
+  cat > $TMPC <<EOF
+#include <directfb.h>
+int main(void) { IDirectFB *foo; return 0; }
+EOF
+  linux && test -c /dev/fb0 && cc_check -ldirectfb && _directfb=yes
+fi
+if test "$_directfb" = yes ; then
+  _def_directfb='#define HAVE_DIRECTFB 1'
+  _vosrc="$_vosrc vo_directfb.c"
+  _vomodules="directfb $_vomodules"
+  _ld_directfb='-ldirectfb'
+else
+  _def_directfb='#undef HAVE_DIRECTFB'
+  _novomodules="directfb $_novomodules"
+fi
+echores "$_directfb"
+
+if test "$_directfb" = yes; then
+echocheck "DirectFB >= 0.9.9"
+  _directfb099=no
+  cat > $TMPC <<EOF
+#include <directfb.h>
+int main(void) { IDirectFBEventBuffer *foo; return 0; }
+EOF
+  cc_check -ldirectfb && _directfb099=yes
+if test "$_directfb099" = yes ; then
+  _def_directfb099='#define HAVE_DIRECTFB099 1'
+else
+  _def_directfb099='#undef HAVE_DIRECTFB099'
+fi
+echores "$_directfb099"
+fi
 echocheck "X11"
 if test "$_x11" = auto || test "$_x11" = yes ; then
   cat > $TMPC <<EOF
@@ -2868,6 +2894,7 @@ if test "$_tv_bsdbt848" = yes ; then
   _inputmodules="tv-bsdbt848 $_inputmodules"
 else
   _def_tv_bsdbt848='#undef HAVE_TV_BSDBT848'
+  _noinputmodules="tv-bsdbt848 $_noinputmodules"
 fi
 echores "$_tv_bsdbt848"
 
@@ -2995,7 +3022,6 @@ EOF
   _def_gui='#define HAVE_NEW_GUI 1'
   _ld_gui='$(GTKLIB) $(GLIBLIB)'
 
-  echo
   echo "Creating Gui/config.mak"
   cat > Gui/config.mak << EOF
 # -------- Generated by configure -----------
@@ -3241,6 +3267,9 @@ echo "Creating config.h"
 cat > config.h << EOF
 /* -------- This file has been automatically generated by configure ---------
    Note: Any changes in it will be lost when you run configure again. */
+
+/* use GNU internationalisation */
+$_def_i18n
 
 #define USR_PREFIX "$_prefix"
 
