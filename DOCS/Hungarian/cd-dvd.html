@@ -117,11 +117,27 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD fejezet kiválasztása (alap: elsõ fejezettõl kezdve)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;szög_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kamera szög kiválasztása (alap: 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-alang &lt;ország kód&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  A megadott <CODE>országkód</CODE> mondja meg az <B>MPlayer</B>-nek hogy
+  milyen nyelvû audiosávokat játsszon le.  A lehetséges nyelvek listája a
+  <CODE>-v</CODE> opció hozzáadásával kérhetõ le, és olvasd el a kimenetet. Íme
+  egy példa:<BR>
+  &nbsp;&nbsp;<CODE>-alang hu,us</CODE> - elõször magyar hangot próbál
+  lejátszani, de ha nem talál akkor angolt.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-slang &lt;ország kód&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  DVD feliratok megjelenítésének bekapcsolása. A megadott <CODE>országkód</CODE>
+  mondja meg az <B>MPlayer</B>-nek hogy milyen felirato(ka)t keressen.
+  A lehetséges nyelvek listája a <CODE>-v</CODE> opció hozzáadásával
+  kérhetõ le, és olvasd el a kimenetet. Íme egy példa:<BR>
+  &nbsp;&nbsp;<CODE>-slang hu,us</CODE> - elõször magyar feliratokat próbál
+  megjeleníteni, és ha nem talál akkor angolt.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;felirat_id&gt;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD feliratok megjelenítésének bekapcsolása.
-  A megadott <CODE>felirat_id</CODE> egy adott nyelvet jelent.<BR>
-  A lehetséges nyelvek listája a <CODE>-v</CODE> opció hozzáadásával/használatával
-  kérhetõ le, olvasd el a kimenetet.</TD><TR>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  A megadott <CODE>id</CODE>-vel rendelkezõ feliratot (nyelvet) jeleníti meg.
+  Hasznos például hibás DVD-nél ahol az országkód nem a megfelelõ feliratot
+  jelenti.</TD><TR>
 </TABLE>
 
 <P>Az egység alapbeállítás szerint <CODE>/dev/dvd</CODE>, ezt a config.h-ban

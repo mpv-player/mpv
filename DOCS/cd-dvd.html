@@ -127,10 +127,28 @@ machine.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter (default: play from chapter 1)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects camera angle (default: 1)</TD><TR>
-<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Turns DVD subtitle displaying (of the given subtitle_id or language) on (default: no)<BR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-alang &lt;country code&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
   For the list of available languages, add <CODE>-v</CODE> option after
-  your DVD options, and browse the output.</TD><TR>
+  your DVD options, and browse the output.<BR>
+  For example :<BR>
+  &nbsp;&nbsp;<CODE>-alang hu,us</CODE> - first tries to find hungarian
+  audio, and if not found, decode english audio.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-slang &lt;country code&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
+  which language(s) to prefer.
+  For the list of available languages, add <CODE>-v</CODE> option after
+  your DVD options, and browse the output.<BR>
+  For example :<BR>
+  &nbsp;&nbsp;<CODE>-slang hu,us</CODE> - first tries to display hungarian
+  subtitles, and if not found, display english subtitles.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
+  0-31). Useful for example with badly mastered DVDs where country code
+  selects the wrong channel.
 </TABLE>
 
 <P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
