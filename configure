@@ -74,6 +74,7 @@ params:
         --enable-sse            build with sse support [autodetect]
         --enable-gl             build with OpenGL render support [autodetect]
         --enable-dga            build with DGA support [autodetect]
+        --enable-svga           build with SVGAlib support [autodetect]
         --enable-sdl            build with SDL render support [def.: disabled!]
         --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
                                 is available]
@@ -168,6 +169,7 @@ _mpg123=no
 _xmga=no
 _dga=no
 _dga2=no
+_svga=no
 _fbdev=no
 _lirc=no
 
@@ -359,6 +361,7 @@ fi
 
 $_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
 $_cc $TMPC -o $TMPO $_x11libdir/ -lXxf86vm &> /dev/null && _vm=yes
+$_cc $TMPC -o $TMPO -lvga -lvgagl &> /dev/null && _svga=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
@@ -454,6 +457,9 @@ do
   --enable-xmga)
         _xmga=yes
         ;;	
+  --enable-svga)
+        _svga=yes
+        ;;
   --enable-dga)
         _dga=yes
         ;;
@@ -526,6 +532,9 @@ do
   --disable-mlib)
 	_mlib=no
 	;;
+  --disable-svga)
+	_svga=no
+	;;
   --disable-dga)
 	_dga=no
 	;;
@@ -576,6 +585,7 @@ echo "Checking for X11 ... $_x11"
 echo "Checking for DGA ... $_dga"
 echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
+echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
 # write conf files.
 
@@ -597,6 +607,10 @@ fi
 
 if [ $_dga = yes ]; then
   _dgalib='-lXxf86dga'
+fi
+
+if [ $_svga = yes ]; then
+  _svgalib='-lvga -lvgagl'
 fi
 
 if [ $_vm = yes ]; then
@@ -638,7 +652,7 @@ CC=$_cc
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib
+X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
@@ -738,6 +752,13 @@ if [ $_3dfx = yes ]; then
  _vosrc=$_vosrc' vo_3dfx.c'
 else
  _3dfx='#undef HAVE_3DFX'
+fi
+
+if [ $_svga = yes ]; then
+ _svga='#define HAVE_SVGALIB'
+ _vosrc=$_vosrc' vo_svga.c'
+else
+ _svga='#undef HAVE_SVGALIB'
 fi
 
 if [ $_dga = yes ]; then
@@ -840,6 +861,7 @@ $_3dfx
 $_mga
 $_syncfb
 $_fbdev
+$_svga
 
 #if defined(HAVE_GL)||defined(HAVE_X11)||defined(HAVE_XV)
 #define X11_FULLSCREEN
