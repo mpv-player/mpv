@@ -11,7 +11,8 @@ using namespace std;
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);
 extern "C" char* def_path;
 
-extern "C" int STDCALL LoadLibraryA(const char*);
+extern "C" int STDCALL expLoadLibraryA(const char*);
+//extern "C" int WINAPI expLoadLibraryA(char* name);
 extern "C" STDCALL void* GetProcAddress(int, const char*);
 extern "C" int STDCALL FreeLibrary(int);
 
@@ -26,17 +27,18 @@ DS_Filter::DS_Filter()
 {
 }
 
-void DS_Filter::Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt)
+void DS_Filter::Create(char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt)
 {
 
     Setup_LDT_Keeper();
 
     try
     {
-	string _fullname=def_path;
-	_fullname+="/";
-	_fullname+=dllname;
-	m_iHandle= LoadLibraryA(_fullname.c_str());
+//	string _fullname=def_path;
+//	_fullname+="/";
+//	_fullname+=dllname;
+//	m_iHandle= LoadLibraryA(_fullname.c_str());
+	m_iHandle= expLoadLibraryA(dllname);
 	if(!m_iHandle)throw FATAL("Could not open DLL");
         GETCLASS func=(GETCLASS)GetProcAddress(m_iHandle, "DllGetClassObject");
 	if(!func)throw FATAL("Illegal or corrupt DLL");

@@ -16,7 +16,7 @@ protected:
 public:
     DS_Filter();
     virtual ~DS_Filter();
-    void Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
+    void Create(char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
     void Start();
     void Stop();
     int m_iHandle;
