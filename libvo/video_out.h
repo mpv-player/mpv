@@ -208,6 +208,7 @@ extern int vo_old_width;
 extern int vo_old_height;
 
 extern int vo_doublebuffering;
+extern int vo_directrendering;
 extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
