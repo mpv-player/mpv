@@ -794,11 +794,6 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   gl_set_antialias(0);
   gl_set_bilinear(1);
   
-  drawTextureDisplay ();
-
-  free (ImageData);
-  ImageData = NULL;
-
   mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\trgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
   	image_bpp, image_bytes, image_mode==MODE_BGR, 
         gl_bitmap_format_s, gl_bitmap_type_s,
@@ -808,6 +803,11 @@ static int initGl(uint32_t d_width, uint32_t d_height)
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
+
+  drawTextureDisplay ();
+
+  free (ImageData);
+  ImageData = NULL;
 
   return 0;
 }
