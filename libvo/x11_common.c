@@ -55,7 +55,7 @@
 #define WIN_LAYER_ABOVE_DOCK             10
  
 int fs_layer=WIN_LAYER_ABOVE_DOCK;
-int orig_layer;
+int orig_layer=0;
 
 int stop_xscreensaver=0;
 
