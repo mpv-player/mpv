@@ -76,7 +76,7 @@ static uint32_t in_width, in_height, in_format, in_depth, in_voodoo_format,
 	vid_voodoo_format, *vidpage, *hidpage, *inpage, vidpageoffset,
 	hidpageoffset, inpageoffset, *memBase0 = NULL, *memBase1 = NULL, r_width, r_height;
 static volatile voodoo_io_reg *reg_IO;
-static voodoo_2d_reg *reg_2d;
+static volatile voodoo_2d_reg *reg_2d;
 static voodoo_yuv_reg *reg_YUV;
 static struct YUV_plane *YUV;
 static void (*alpha_func)(), (*alpha_func_double)();
@@ -349,10 +349,6 @@ static void flip_page(void)
 {
 	voodoo_2d_reg regs = *reg_2d;		/* Copy the regs */
 	int i = 0;
-	/* This has to be done of else setting dstSize doesn't work  */
-	/* Must be a gcc 3.0+ bug */
-	int tempvidheight = vidheight; 
-	int tempvidwidth = vidwidth;
 
 	if(vo_doublebuffering) {
 		/* Flip to an offscreen buffer for rendering */
@@ -377,7 +373,6 @@ static void flip_page(void)
 	reg_2d->dstBaseAddr = vidpageoffset;
 	reg_2d->dstXY = XYREG(vidx, vidy);
 	reg_2d->dstFormat = vid_voodoo_format;
-	/* The XYREG macro doesn't seem to work for this line so build the register contents very explicitly */
 	reg_2d->dstSize = XYREG(vidwidth, vidheight);
 	reg_2d->command = S2S_STRECH_BLT | S2S_IMMED | S2S_ROP;
 
