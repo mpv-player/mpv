@@ -284,9 +284,10 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
     }
   } else {
     // Continue current fragment
-    if (spu->packet_size < spu->packet_offset + len)
+    if (spu->packet_size < spu->packet_offset + len){
       fprintf(stderr,"invalid fragment\n");
-    else {
+      spu->packet_size = spu->packet_offset = 0;
+    } else {
       memcpy(spu->packet + spu->packet_offset, packet, len);
       spu->packet_offset += len;
     }
@@ -295,6 +296,13 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
     spudec_decode(spu);
     spu->packet_offset = 0;
   }
+}
+
+void spudec_reset(void *this)	// called after seek
+{
+  spudec_handle_t *spu = (spudec_handle_t*)this;
+  spu->now_pts = -1;
+  spu->packet_size = spu->packet_offset = 0;
 }
 
 void spudec_heartbeat(void *this, int pts100)

@@ -2115,6 +2115,10 @@ if(rel_seek_secs || abs_seek_pos){
       drop_frame_cnt=0;
       too_slow_frame_cnt=0;
       too_fast_frame_cnt=0;
+
+#ifdef USE_DVDREAD
+      if(vo_spudec) spudec_reset(vo_spudec);
+#endif
   }
   rel_seek_secs=0;
   abs_seek_pos=0;
