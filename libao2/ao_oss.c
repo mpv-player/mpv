@@ -116,6 +116,11 @@ static int init(int rate,int channels,int format,int flags){
   if(format != AFMT_U8 && format != AFMT_S8)
     ao_data.bps*=2;
 
+  if(format == AFMT_AC3) {
+    ao_data.samplerate=rate;
+    ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+  }
+  
   ao_data.format=format;
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
   if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) {
